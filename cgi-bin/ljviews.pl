@@ -1138,11 +1138,13 @@ sub create_view_lastn
             ! $logprops{$itemid}->{'opt_nocomments'}
             ) 
         {
-            my $readurl = "$journalbase/$ditemid.html";
-            my $posturl = "$journalbase/$ditemid.html?mode=reply";
-            if ($replycount && $remote && $remote->{'opt_nctalklinks'}) {
-                $readurl .= "?nc=$replycount";
-            }
+
+            my $nc;
+            $nc = "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
+
+            my $permalink = "$journalbase/$ditemid.html";
+            my $posturl = LJ::Talk::talkargs($permalink, "mode=reply");
+            my $readurl = LJ::Talk::talkargs($permalink, $nc);
 
             my $dispreadlink = $replycount || 
                 ($logprops{$itemid}->{'hasscreened'} &&
@@ -1498,6 +1500,10 @@ sub create_view_friends
 
     # load the text of the entries
     my $logtext = LJ::get_logtext2multi(\%idsbycluster);
+
+    # load 'opt_stylemine' prop for $remote.  don't need to load opt_nctalklinks
+    # because that was already faked in LJ::make_journal previously
+    LJ::load_user_props($remote, { 'cache' => 1 }, "opt_stylemine");
   
     my %friends_events = ();
     my $events = \$friends_events{'events'};
@@ -1631,13 +1637,19 @@ sub create_view_friends
                  ($remote->{'user'} eq $friend
                   || LJ::check_rel($friendid, $remote, 'A')));
 
-            my ($readurl, $posturl);
             my $journalbase = LJ::journal_base($friends{$friendid});
 
-            $posturl = "$journalbase/$ditemid.html?mode=reply";
-            $readurl = "$journalbase/$ditemid.html";
-            $readurl .= "?nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
-            
+            my $nc = "";
+            $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
+
+            my $stylemine = "";
+            $stylemine .= "style=mine" if $remote && $remote->{'opt_stylemine'} &&
+                                          $remote->{'userid'} != $friendid;
+
+            my $permalink = "$journalbase/$ditemid.html";
+            my $readurl = LJ::Talk::talkargs($permalink, $nc, $stylemine);
+            my $posturl = LJ::Talk::talkargs($permalink, "mode=reply", $stylemine);
+
             $friends_event{'talklinks'} = LJ::fill_var_props($vars, 'FRIENDS_TALK_LINKS', {
                 'itemid' => $ditemid,
                 'itemargs' => $itemargs,
@@ -2169,11 +2181,13 @@ sub create_view_day
             ! $logprops{$itemid}->{'opt_nocomments'}
             ) 
         {
-            my $posturl = "$journalbase/$ditemid.html?mode=reply";
-            my $readurl = "$journalbase/$ditemid.html";
-            if ($replycount && $remote && $remote->{'opt_nctalklinks'}) {
-                $readurl .= "?nc=$replycount";
-            }
+            my $nc;
+            $nc = "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
+
+            my $permalink = "$journalbase/$ditemid.html";
+            my $posturl = LJ::Talk::talkargs($permalink, "mode=reply");
+            my $readurl = LJ::Talk::talkargs($permalink, $nc);
+
             my $dispreadlink = $replycount || 
                 ($logprops{$itemid}->{'hasscreened'} &&
                  ($remote->{'user'} eq $user

@@ -65,7 +65,7 @@ sub FriendsPage
         return 1;
     }
 
-    LJ::load_user_props($remote, "opt_nctalklinks");
+    LJ::load_user_props($remote, { "cache" => 1 }, "opt_nctalklinks", "opt_stylemine");
 
     ## never have spiders index friends pages (change too much, and some 
     ## people might not want to be indexed)
@@ -264,11 +264,14 @@ sub FriendsPage
         my $nc = "";
         $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
 
+        my $stylemine = "";
+        $stylemine .= "style=mine" if $remote && $remote->{'opt_stylemine'} &&
+                                      $remote->{'userid'} != $friendid;
+
         my $journalbase = LJ::journal_base($friends{$friendid});
         my $permalink = "$journalbase/$ditemid.html";
-        my $readurl = $permalink;
-        $readurl .= "?$nc" if $nc;
-        my $posturl = $permalink . "?mode=reply";
+        my $readurl = LJ::Talk::talkargs($permalink, $nc, $stylemine);
+        my $posturl = LJ::Talk::talkargs($permalink, "mode=reply", $stylemine);
 
         my $comments = CommentInfo({
             'read_url' => $readurl,

@@ -505,7 +505,7 @@ function ReplyPage::print_body ()
     print "<p>$.replyto.text</p>";
 
 
-    "<a href='$.entry.permalink_url'>Read Comments</a>";
+    "<a href='$.entry.comments.read_url'>Read Comments</a>";
     """</td></tr>""";
     """<tr><td colspan="2"><p align="center"><img src="$*imguri/hr.gif" width="345" height="23" alt='' /></p>""";
     "</td></tr></table>\n";

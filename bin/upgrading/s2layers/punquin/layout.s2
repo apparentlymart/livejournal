@@ -633,7 +633,7 @@ function ReplyPage::print_body() {
     print $.replyto.text; "<br />";
 
     "</td></tr></table>";
-    "<p align='right' class='comments'><a href='$.entry.permalink_url'>Read Comments</a></p>";
+    "<p align='right' class='comments'><a href='$.entry.comments.read_url'>Read Comments</a></p>";
     "<h2 class='date'>Reply</h2>";
     "<hr class='seperator' />";
     $.form->print();

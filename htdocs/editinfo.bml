@@ -37,7 +37,7 @@ body<=
                         "howhear", "opt_bdaymail", "opt_hidefriendofs",
                         "sidx_bdate", "sidx_loc", "mailencoding", "opt_nctalklinks",
                         "opt_whoscreened", "journaltitle", "journalsubtitle", 
-                        "friendspagetitle", "opt_weblogscom",
+                        "friendspagetitle", "opt_weblogscom", "opt_stylemine",
                         );
 
     # to store values before they undergo normalisation
@@ -303,7 +303,6 @@ body<=
         $ret .= "<td>" .  LJ::html_text({ 'name' => 'friendspagetitle', 'value' => $u->{'friendspagetitle'}, 'size' => '30', 'maxlength' => '80' }) . "</td></tr>\n";
         $ret .= "<tr><td colspan='2'>$ML{'.settings.friendspage.title.optional'}</td></tr>\n";
         $ret .= "</table>\n\n";
-
         
         ### privacy options
         $ret .= "<?h2 $ML{'.settings.privacy.header'} h2?><?p $ML{'.settings.privacy.about'} p?>\n";
@@ -437,6 +436,13 @@ body<=
                                      'selected' => $u->{'opt_nctalklinks'} });
             $ret .= "</td><td><b><label for='opt_nctalklinks'>$ML{'.numcomments.header'}</label></b></td></tr>\n";
             $ret .= "<tr><td>&nbsp;</td><td>$ML{'.numcomments.about'}</td></tr>\n";
+
+            # stylemine
+            $ret .= "<tr valign='middle'><td>";
+            $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_stylemine', 'id' => 'opt_stylemine',
+                                     'value' => 1, 'selected' => $u->{'opt_stylemine'} });
+            $ret .= "</td><td><b><label for='opt_stylemine'>$ML{'.stylemine.header'}</label></b></td></tr>\n";
+            $ret .= "<tr><td>&nbsp;</td><td>$ML{'.stylemine.about'}</td></tr>\n";
 
             # opt_gettalkemail
             $ret .= "<tr valign='middle'><td>";
@@ -676,6 +682,7 @@ body<=
             $POST{'friendspagetitle'} = LJ::text_trim($POST{'friendspagetitle'}, 0, 80) if $POST{'friendspagetitle'};
 
             # opts
+            $POST{'opt_stylemine'} = $POST{'opt_stylemine'} ? 1 : 0;
             $POST{'opt_blockrobots'} = $POST{'opt_blockrobots'} ? 1 : 0;
             $POST{'opt_bdaymail'} = $POST{'opt_bdaymail'} ? 1 : 0;
             $POST{'opt_hidefriendofs'} = $POST{'opt_hidefriendofs'} ? 1 : 0;
@@ -719,6 +726,7 @@ body<=
                           "opt_bdaymail", "opt_hidefriendofs",
                           "sidx_bdate", "sidx_loc", "mailencoding", "opt_nctalklinks",
                           "opt_whoscreened", "journaltitle", "journalsubtitle", "friendspagetitle",
+                          "opt_stylemine",
                           );
 
             # weblogs.com requires a special cap

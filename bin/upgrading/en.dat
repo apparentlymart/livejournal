@@ -973,6 +973,10 @@ read our <a href="/legal/privacy.bml">privacy policy</a>.
 
 /editinfo.bml.state.us=US States
 
+/editinfo.bml.stylemine.about=Check this option to view comment pages in your journal style when following links from your friends page.
+
+/editinfo.bml.stylemine.header=View comment pages in your journal style?
+
 /editinfo.bml.success.header=Success!
 
 /editinfo.bml.success.message=Your information and <a href="/users/[[user]]/">journal</a> settings and <a href="/userinfo.bml?user=[[user]]">profile</a> have been updated.

@@ -636,7 +636,7 @@ function ReplyPage::print_body ()
 
     "<p>$.replyto.text</p>";
 
-    "<div class='Comment'><a href='$.entry.permalink_url'>Read Comments</a></div>";
+    "<div class='Comment'><a href='$.entry.comments.read_url'>Read Comments</a></div>";
     "</div>";
     print "<h2>Reply:</h2>";
     $.form->print();

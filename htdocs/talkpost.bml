@@ -14,13 +14,12 @@ body<=
     my $pics = LJ::Talk::get_subjecticons();
 
     my $r = Apache->request;
+    $r->notes("codepath" => "bml.talkpost");
 
     my $uri = BML::get_uri();
     my $itemid;
-    my $new_url;
 
     if ($uri =~ m!/(\d+)\.html$!) {
-        $new_url = 1;
         $itemid = $1;
         $FORM{'itemid'} = $itemid unless $FORM{'replyto'};
         $FORM{'journal'} = $r->notes("_journal");
@@ -28,13 +27,12 @@ body<=
     }
 
     my $init = LJ::Talk::init(\%FORM);
+    return "<?h1 $ML{'Error'} h1?><?p $init->{'error'} p?>" if $init->{'error'}; 
+
     my $u = $init->{'journalu'};
+    return $ML{'talk.error.nojournal'} unless $u;
 
     $r->notes("journalid" => $u->{'userid'});
-    $r->notes("codepath" => "bml.talkpost");
-
-    return "<?h1 $ML{'Error'} h1?><?p $init->{'error'} p?>" if $init->{'error'}; 
-    return $ML{'talk.error.nojournal'} unless $u;
     return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
 
     my $dbcs = LJ::get_cluster_set($u);
@@ -95,6 +93,8 @@ body<=
 
     my $itemid = $init->{'itemid'};
 
+    my $stylemine = $init->{'style'} eq "mine" ? "style=mine" : "";
+
     ## load the journal item
     my $item = LJ::Talk::get_journal_item($u, $itemid);
 
@@ -110,6 +110,7 @@ body<=
     my $props = $item->{'props'};
 
     my $ditemid = $init->{'ditemid'};
+    my $talkurl = LJ::journal_base($u) . "/$ditemid.html";
 
     $parpost ||= $item;  # if there's no parent post, remote is reply to top-level item
 
@@ -281,10 +282,7 @@ body<=
     $ret .= "<br clear='all' /><hr size='2' align='center' />";	
     
     my $jarg = "journal=$u->{'user'}&amp;";
-    my $readurl = "/talkread.bml?${jarg}itemid=$ditemid";
-    if ($new_url) {
-        $readurl = "$ditemid.html";
-    }
+    my $readurl = LJ::Talk::talkargs($talkurl, $stylemine);
 
     $ret .= "<p align='center' class='lesstop'><b>(<a href=\"$readurl\">$ML{'talk.commentsread'}</a>)</b></p>";
     

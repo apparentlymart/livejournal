@@ -49,6 +49,15 @@ sub get_subjecticons
     return \%subjecticon;
 }
 
+# Returns talkurl with GET args added
+sub talkargs {
+    my $talkurl = shift;
+    my $args = join("&", grep {$_} @_);
+    my $sep;
+    $sep = ($talkurl =~ /\?/ ? "&" : "?") if $args;
+    return "$talkurl$sep$args";
+}
+
 # Returns HTML to display an image, given the image id as an argument.
 sub show_image
 {
@@ -139,10 +148,12 @@ sub init
 
     # defaults, to be changed later:
     $init->{'itemid'} = $form->{'itemid'}+0;
-    $init->{'clustered'} = 0;
-    $init->{'replyto'} = $form->{'replyto'}+0;
     $init->{'ditemid'} = $init->{'itemid'};
     $init->{'thread'} = $form->{'thread'}+0;
+    $init->{'dthread'} = $init->{'thread'};
+    $init->{'clustered'} = 0;
+    $init->{'replyto'} = $form->{'replyto'}+0;
+    $init->{'style'} = $form->{'style'} ? "mine" : undef;
     
     if ($journal) {
         # they specified a journal argument, which indicates new style.
@@ -200,12 +211,13 @@ sub get_journal_item
 {
     shift @_ while ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
     my ($u, $itemid) = @_;
+    return unless $u && $itemid;
 
     my $uid = $u->{'userid'}+0;
     $itemid += 0;
 
     my $s2datefmt = "%Y %m %d %H %i %s %w"; # yyyy mm dd hh mm ss day_of_week
-    my $sql = "SELECT journalid, posterid, eventtime, security, allowmask, anum, ".
+    my $sql = "SELECT journalid, posterid, eventtime, security, allowmask, anum, replycount, ".
         "DATE_FORMAT(eventtime, '${s2datefmt}') AS 'alldatepart', ".
         "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(logtime) AS 'secondsold' ".
         "FROM log2 WHERE journalid=$uid AND jitemid=$itemid";
@@ -816,12 +828,6 @@ sub ecphash {
     return "ecph-" . Digest::MD5::md5_hex($itemid . $talkid . $password);
 }
 
-sub talkargs {
-    my ($talkurl, $args) = @_;
-    my $sep = ($talkurl =~ /\?/) ? "&" : "?";
-    return "$talkurl$sep$args";
-}
-
 sub format_text_mail {
     my ($targetu, $parent, $comment, $talkurl, $item) = @_;
     my $dtalkid = $comment->{talkid}*256 + $item->{anum};
@@ -863,11 +869,11 @@ sub format_text_mail {
     my $opts = "";
     $opts .= "Options:\n\n";
     $opts .= "  - View the discussion:\n";
-    $opts .= "    " . talkargs($talkurl, "thread=$dtalkid") . "\n";
+    $opts .= "    " . LJ::Talk::talkargs($talkurl, "thread=$dtalkid") . "\n";
     $opts .= "  - View all comments on the entry:\n";
     $opts .= "    $talkurl\n";
     $opts .= "  - Reply to the comment:\n";
-    $opts .= "    " . talkargs($talkurl, "replyto=$dtalkid") . "\n";
+    $opts .= "    " . LJ::Talk::talkargs($talkurl, "replyto=$dtalkid") . "\n";
     if ($comment->{state} eq 'S') {
         $opts .= "  - Unscreen the comment:\n";
         $opts .= "    $LJ::SITEROOT/talkscreen.bml?mode=unscreen&journal=$item->{journalu}{user}&talkid=$dtalkid\n";
@@ -887,7 +893,7 @@ sub format_html_mail {
     my ($targetu, $parent, $comment, $encoding, $talkurl, $item) = @_;
     my $ditemid =    $item->{itemid}*256 + $item->{anum};
     my $dtalkid = $comment->{talkid}*256 + $item->{anum};
-    my $threadurl = talkargs($talkurl, "thread=$dtalkid");
+    my $threadurl = LJ::Talk::talkargs($talkurl, "thread=$dtalkid");
 
     my $who = "Somebody";
     if ($comment->{u}{name}) {
@@ -960,7 +966,7 @@ sub format_html_mail {
     $html .= "<p>From here, you can:\n";
     $html .= "<ul><li><a href=\"$threadurl\">View the thread</a> starting from this comment</li>\n";
     $html .= "<li><a href=\"$talkurl\">View all comments</a> to this entry</li>\n";
-    $html .= "<li><a href=\"" . talkargs($talkurl, "replyto=$dtalkid") . "\">Reply</a> at the webpage</li>\n";
+    $html .= "<li><a href=\"" . LJ::Talk::talkargs($talkurl, "replyto=$dtalkid") . "\">Reply</a> at the webpage</li>\n";
     if ($comment->{state} eq 'S') {
         $html .= "<li><a href=\"$LJ::SITEROOT/talkscreen.bml?mode=unscreen&journal=$item->{journalu}{user}&talkid=$dtalkid\">Unscreen the comment</a></li>";
     }
@@ -1020,7 +1026,7 @@ sub mail_comments {
     my $ditemid = $itemid*256 + $item->{anum};
     my $dtalkid = $comment->{talkid}*256 + $item->{anum};
     my $talkurl = LJ::journal_base($journalu) . "/$ditemid.html";
-    my $threadurl = talkargs($talkurl, "thread=$dtalkid");
+    my $threadurl = LJ::Talk::talkargs($talkurl, "thread=$dtalkid");
 
     # check to see if parent post is from a registered livejournal user, and 
     # mail them the response

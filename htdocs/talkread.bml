@@ -26,18 +26,17 @@ body<=
  }
 
  my $r = Apache->request;
+ $r->notes("codepath" => "bml.talkread");
 
-my $uri = BML::get_uri();
-my $itemid;
-my $new_url;
+ my $uri = BML::get_uri();
+ my $itemid;
 
-if ($uri =~ m!/(\d+)\.html$!) {
-    $new_url = 1;
-    $itemid = $1;
-    $GET{'itemid'} = $itemid;
-    $GET{'journal'} = $r->notes("_journal");
-    BML::set_language_scope("/talkread.bml");
-}
+ if ($uri =~ m!/(\d+)\.html$!) {
+     $itemid = $1;
+     $GET{'itemid'} = $itemid;
+     $GET{'journal'} = $r->notes("_journal");
+     BML::set_language_scope("/talkread.bml");
+ }
 
  # pre-load common strings for little speed and less typing later
  # (we're doing this *after* set_language_scope is called, because
@@ -54,7 +53,10 @@ if ($uri =~ m!/(\d+)\.html$!) {
  foreach (keys %T) { $T{$_} = $ML{$T{$_}}; }
 
  my $init = LJ::Talk::init(\%GET);
+ return "<?h1 $ML{'Error'} h1?><?p $init->{'error'} p?>" if $init->{'error'}; 
+
  my $u = $init->{'journalu'};
+ return $ML{'talk.error.nojournal'} unless $u;
 
  LJ::load_user_props($u, "opt_blockrobots") if $u->{'statusvis'} eq 'V';
  if ($u->{'statusvis'} ne 'V' || $u->{'opt_blockrobots'}) {
@@ -62,13 +64,12 @@ if ($uri =~ m!/(\d+)\.html$!) {
  }
 
  $r->notes("journalid" => $u->{'userid'});
- $r->notes("codepath" => "bml.talkread");
-
- return "<?h1 $ML{'Error'} h1?><?p $init->{'error'} p?>" if $init->{'error'}; 
- return $ML{'talk.error.nojournal'} unless $u;
 
  my $thread = $init->{'thread'};
+ my $dthread = $init->{'dthread'};
  $itemid = $init->{'itemid'}+0;
+
+ my $stylemine = $init->{'style'} eq "mine" ? "style=mine" : "";
 
  my $item = LJ::Talk::get_journal_item($u, $itemid);
 
@@ -87,20 +88,13 @@ if ($uri =~ m!/(\d+)\.html$!) {
 
  my $talkurl = LJ::journal_base($u) . "/$ditemid.html";
 
- my $talkargs = sub {
-     my $args = shift;
-     my $sep = ($talkurl =~ /\?/) ? "&" : "?";
-     return "$talkurl$sep$args";
- };
-
  my $ret = "";
 
  # redirect if account was renamed
  if ($u->{'journaltype'} eq "R") {
      LJ::load_user_props($u, "renamedto");
      if ($u->{'renamedto'} ne "") {
-         my $id = $GET{'itemid'}+0;
-         return BML::redirect(LJ::journal_base($u) . "/$id.html");
+         return BML::redirect($talkurl);
      }
  }
 
@@ -254,7 +248,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
 
  my %user;
  my $opts = {
-     'thread' => $init->{'thread'},
+     'thread' => $thread,
      'page' => $GET{'page'},
      'view' => $GET{'view'},
      'userpicref' => \%userpics,
@@ -364,7 +358,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
                  $ret .= BML::ml('.fromip', {'ip'=>$post->{'props'}->{'poster_ip'}});
              }
              
-             $ret .= " <font size='-1'>(<a href='" . $talkargs->("thread=$dtid#t$dtid") . "'>$T{'link'}</a>)</font> ";
+             $ret .= " <font size='-1'>(<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dtid#t$dtid") . "'>$T{'link'}</a>)</font> ";
              
              if (LJ::Talk::can_delete($remote, $u, $up, $userpost)) {
                  $ret .= "<a href='/delcomment.bml?${jargent}id=$dtid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
@@ -392,15 +386,15 @@ if ($uri =~ m!/(\d+)\.html$!) {
              $ret .= $post->{'body'};
 
              $ret .= "<p style='margin: 0.7em 0 0.2em 0'><font size='-2'>";
-             my $replyurl = $talkargs->("replyto=$dtid");
+             my $replyurl = LJ::Talk::talkargs("replyto=$dtid", $stylemine);
              $ret .= "(<a href='$replyurl'>$T{'replythis'}</a>) ";
              
              if ($post->{'parenttalkid'} != 0) {
                  my $dpid = $post->{'parenttalkid'} * 256 + $init->{'anum'};
-                 $ret .= "(<a href='" . $talkargs->("thread=$dpid") . "'>$T{'parent'}</a>) ";
+                 $ret .= "(<a href='" . LJ::Talk::talkargs("thread=$dpid", $stylemine) . "'>$T{'parent'}</a>) ";
              }
              if ($post->{'children'} && @{$post->{'children'}}) {
-                 my $url = $talkargs->("thread=$dtid");
+                 my $url = LJ::Talk::talkargs("thread=$dtid", $stylemine);
                  $ret .= "(<a href='$url'>$T{'thread'}</a>)";
              }
              $ret .= "</font></p>";
@@ -410,7 +404,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
 
              $ret .= "<a name='t$dtid'></a><table><tr>";
              $ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
-             $ret .= "<td><a href='" . $talkargs->("thread=$dtid") . "'>" . LJ::ehtml($post->{'subject'} || $T{'nosubject'}) . "</a> - $user, <i>$post->{'datepost'}</i></td></tr></table>\n";
+             $ret .= "<td><a href='" . LJ::Talk::talkargs("thread=$dtid", $stylemine) . "'>" . LJ::ehtml($post->{'subject'} || $T{'nosubject'}) . "</a> - $user, <i>$post->{'datepost'}</i></td></tr></table>\n";
          }
      }
      
@@ -425,13 +419,12 @@ if ($uri =~ m!/(\d+)\.html$!) {
  {
      $ret .= "$navcrap" if $navcrap;
      my $readlink;
-     if ($GET{'thread'} && $pages == 1) {
-         my $readurl = LJ::journal_base($u) . "/$ditemid.html";
+     if ($dthread && $pages == 1) {
+         my $readurl = LJ::Talk::talkargs($talkurl, $stylemine);
          $readlink = "(<a href='$readurl'>$T{'readcomments'}</a>) - ";
      }
 
-     my $posturl = "$LJ::SITEROOT/talkpost.bml?${jargent}itemid=$ditemid";
-     $posturl = "$ditemid.html?mode=reply" if $new_url;
+     my $posturl = LJ::Talk::talkargs($talkurl, "mode=reply", $stylemine);
 
      $ret .= "<p align='center' class='lesstop'><b>$readlink(<a href='$posturl'>$T{'postcomments'}</a>)</b></p>";
 

@@ -849,7 +849,7 @@ function ReplyPage::print_body () {
 
     print $.replyto.text;
 
-    """<div class="talklinks" clear="all"><a href='$.entry.permalink_url'>Read Comments</a></div>""";
+    """<div class="talklinks" clear="all"><a href='$.entry.comments.read_url'>Read Comments</a></div>""";
 
     "</div>";
 

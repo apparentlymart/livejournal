@@ -619,7 +619,6 @@ sub journal_content
         'getargs' => \%GET,
 	'vhost' => $RQ{'vhost'},
         'pathextra' => $RQ{'pathextra'},
-        's2id' => $GET{'s2id'},
         'header' => {
             'If-Modified-Since' => $r->header_in("If-Modified-Since"),
         },

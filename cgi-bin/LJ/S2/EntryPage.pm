@@ -27,8 +27,7 @@ sub EntryPage
 
     my $itemid = $entry->{'itemid'};
     my $ditemid = $entry->{'itemid'} * 256 + $entry->{'anum'};
-    my $jbase = LJ::journal_base($u);
-    my $permalink = "$jbase/$ditemid.html";
+    my $permalink = LJ::journal_base($u) . "/$ditemid.html";
 
     if ($u->{'journaltype'} eq "R" && $u->{'renamedto'} ne "") {
         $opts->{'redir'} = LJ::journal_base($u->{'renamedto'}, $opts->{'vhost'}) .
@@ -89,10 +88,13 @@ sub EntryPage
                                          $pic->{'width'}, $pic->{'height'});
             }
 
+            my $stylemine = $get->{'style'} eq "mine" ? "style=mine" : "";
+            my $reply_url = LJ::Talk::talkargs($permalink, "replyto=$dtalkid", $stylemine);
+
             my $par_url;
             if ($com->{'parenttalkid'}) {
                 my $dparent = ($com->{'parenttalkid'} << 8) + $entry->{'anum'};
-                $par_url = "$jbase/$ditemid.html?thread=$dparent";
+                $par_url = LJ::Talk::talkargs($permalink, "thread=$dparent", $stylemine);
             }
 
             my $poster;
@@ -116,7 +118,7 @@ sub EntryPage
                     'picture_keyword' => $com->{'props'}->{'picture_keyword'},
                 },
                 'permalink_url' => "$permalink?thread=$dtalkid#t$dtalkid",
-                'reply_url' => "$permalink?replyto=$dtalkid",
+                'reply_url' => $reply_url,
                 'poster' => $poster,
                 'replies' => [],
                 'subject' => LJ::ehtml($com->{'subject'}),
@@ -152,7 +154,9 @@ sub EntryPage
                 push @$link_keyseq, 'screen_comment';
             }
 
-            $s2com->{'thread_url'} = "$permalink?thread=$dtalkid" if @{$com->{'children'}};
+            if (@{$com->{'children'}}) {
+                $s2com->{'thread_url'} = LJ::Talk::talkargs($permalink, "thread=$dtalkid", $stylemine);
+            }                    
 
             # add the poster_ip metadata if remote user has 
             # access to see it.
@@ -227,6 +231,8 @@ sub EntryPage_entry
     my $nc = "";
     $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
 
+    my $stylemine = $get->{'style'} eq "mine" ? "style=mine" : "";
+
     my $userlite_journal = UserLite($u);
     my $userlite_poster = $userlite_journal;
     my $pu = $u;
@@ -237,11 +243,9 @@ sub EntryPage_entry
 
     my $userpic = Image_userpic($pu, 0, $entry->{'props'}->{'picture_keyword'});
 
-    my $jbase = LJ::journal_base($u);
-    my $permalink = "$jbase/$ditemid.html";
-    my $readurl = $permalink;
-    $readurl .= "?$nc" if $nc;
-    my $posturl = $permalink . "?mode=reply";
+    my $permalink = LJ::journal_base($u) . "/$ditemid.html";
+    my $readurl = LJ::Talk::talkargs($permalink, $nc, $stylemine);
+    my $posturl = LJ::Talk::talkargs($permalink, "mode=reply", $stylemine);
 
     my $comments = CommentInfo({
         'read_url' => $readurl,

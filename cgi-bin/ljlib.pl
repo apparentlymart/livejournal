@@ -3809,9 +3809,21 @@ sub make_journal
     my $stylesys = 1;
     if ($styleid == -1) {
         # force s2 style id
-        if ($opts->{'s2id'} && LJ::get_cap($u, "s2styles")) {
+        if ($geta->{'s2id'} && LJ::get_cap($u, "s2styles")) {
             $stylesys = 2;
-            $styleid = $opts->{'s2id'};
+            $styleid = $geta->{'s2id'};
+        } elsif ($geta->{'style'} eq 'mine') {
+
+            # get remote props and decide what style remote uses
+            LJ::load_user_props($remote, { 'cache' => 1 }, "stylesys", "s2_style");
+            if ($remote->{'stylesys'} == 2 && $remote->{'s2_style'}) {
+                $stylesys = 2;
+                $styleid = $remote->{'s2_style'};
+            } else {
+                $stylesys = 1;
+                $styleid = $u->{$s1prop};
+            }
+
         } elsif ($view eq "res" && $opts->{'pathextra'} =~ m!^/(\d+)/!) {
             # resource URLs have the styleid in it
             $stylesys = 2;
