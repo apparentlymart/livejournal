@@ -496,7 +496,7 @@ sub mail_response_to_user
     
     my $miniauth = mini_auth($sp);
     $body .= "\n\nTo read all the comments or add more, go here:\n";
-    $body .= LJ::make_text_link("$LJ::SITEROOT/support/see_request.bml?id=$spid&amp;auth=$miniauth", $email);
+    $body .= LJ::make_text_link("$LJ::SITEROOT/support/see_request.bml?id=$spid&auth=$miniauth", $email);
     
     $body .= "\n";
     
