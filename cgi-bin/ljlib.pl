@@ -970,7 +970,7 @@ sub make_cookie
 # info: See the [dbtable[statushistory]] table.
 # returns: boolean; 1 on success, 0 on failure
 # args: dbarg?, userid, adminid, shtype, notes?
-# des-userid: The user getting acted on.
+# des-userid: The user being acted on.
 # des-adminid: The site admin doing the action.
 # des-shtype: The status history type code.
 # des-notes: Optional notes associated with this action.
@@ -980,8 +980,11 @@ sub statushistory_add
     &nodb;
     my $dbh = LJ::get_db_writer();
     
-    my $userid = shift;  $userid += 0;
-    my $actid  = shift;  $actid  += 0;
+    my $userid = shift;
+    $userid = LJ::want_userid($userid) + 0;
+
+    my $actid  = shift;
+    $actid = LJ::want_userid($actid) + 0;
 
     my $qshtype = $dbh->quote(shift);
     my $qnotes  = $dbh->quote(shift);
@@ -3195,7 +3198,7 @@ sub activate_userpics
     my $dbh = LJ::get_db_writer();    
 
     # if a userid was given, get a real $u object
-    $u = LJ::load_userid($dbh, $u, 1) unless ref $u eq "HASH";
+    $u = LJ::load_userid($u, 1) unless ref $u eq "HASH";
 
     # should have a $u object now
     return unless ref $u eq 'HASH';
