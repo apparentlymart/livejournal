@@ -184,11 +184,25 @@ sub clean
 
                 my $hash  = $token->[2];
                 my $attrs = $token->[3]; # attribute names, in original order
-                
+
                 $slashclose = 1 if delete $hash->{'/'};
 
                 foreach (@attrstrip) {
                     delete $hash->{$_};
+                }
+
+                if ($tag eq "form") {
+                    my $action = $hash->{'action'};
+                    my $deny = 0;
+                    if ($action =~ m!^https?://?([^/]+)!) {
+                        my $host = $1;
+                        $deny = 1 if
+                            $host =~ /[%\@]/ ||
+                            $LJ::FORM_DOMAIN_BANNED{$host};
+                    } else {
+                        $deny = 1;
+                    }
+                    delete $hash->{'action'} if $deny;
                 }
 
                 foreach my $attr (keys %$hash)
