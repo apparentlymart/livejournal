@@ -734,8 +734,10 @@ sub editevent
     ## update sync table (before we actually do it!  in case updates
     ## partially fail below)
     if ($clustered) {
+	my $synctype = "update";
+	if ($req->{'event'} !~ /\S/) { $synctype = "del"; }
 	$dbcm->do("REPLACE INTO syncupdates2 (userid, atime, nodetype, nodeid, atype) ".
-		  "VALUES ($ownerid, NOW(), 'L', $qitemid, 'update')");
+		  "VALUES ($ownerid, NOW(), 'L', $qitemid, '$synctype')");
     } else {
 	$dbh->do("REPLACE INTO syncupdates (userid, atime, nodetype, nodeid, atype) ".
 		 "VALUES ($ownerid, NOW(), 'L', $qitemid, 'update')");

@@ -602,7 +602,7 @@ CREATE TABLE syncupdates2 (
   atime DATETIME NOT NULL,
   nodetype CHAR(1) NOT NULL,
   nodeid MEDIUMINT UNSIGNED NOT NULL,
-  atype ENUM('create','update') NOT NULL DEFAULT 'create',
+  atype ENUM('create','update','del') NOT NULL DEFAULT 'create',
   PRIMARY KEY  (userid,nodetype,nodeid),
   KEY (userid,atime)
 ) 
