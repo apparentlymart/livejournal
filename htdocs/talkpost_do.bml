@@ -297,27 +297,49 @@ body<=
      $ret .= "<?h1 $ML{'.preview.title'} h1?><?p $ML{'.preview'} p?><?hr?>";
 
      my $event = $FORM{'body'};
+     my $spellcheck_html;
+     if ($LJ::SPELLER && $FORM{'do_spellcheck'}) {
+	     my $s = new LJ::SpellCheck { 'spellcommand' => $LJ::SPELLER,
+                 'color' => '<?hotcolor?>', };
+	     $spellcheck_html = $s->check_html(\$event);
+     }
      LJ::CleanHTML::clean_comment(\$event, $FORM{'prop_opt_preformatted'});
 
-     $ret .= "$ML{'.preview.subject'} $cleansubject<hr>\n";
-     $ret .= $event;
+     $ret .= "$ML{'.preview.subject'} " . LJ::eall($cleansubject) . "<hr>\n";
+     if ($spellcheck_html) {
+         $ret .= "<b>$ML{'.spellchecked'}</b><br />";
+         $ret .= $spellcheck_html;
+         $ret .= "<p>";
+     } else {
+         $ret .= $event;
+     }
 
      $ret .= "<hr />";
      $ret .= "<form method='post'>\n";
+     $ret .= "<input name='subject' size='50' maxlength='100' value='" . LJ::ehtml($FORM{'subject'}) . "'><p>";
+     $ret .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' style='width: 99%'>";
+     $ret .= LJ::ehtml($FORM{'body'});
+     $ret .= "</textarea>";
      # change mode:
      delete $FORM{'submitpreview'}; $FORM{'submitpost'} = 1;
      if ($cookie_auth) {
          $FORM{'usertype'} = "cookieuser";
          delete $FORM{'userpost'};
      }
+     delete $FORM{'do_spellcheck'};
      foreach (keys %FORM) {
-         $ret .= "<input type='hidden' name=\"$_\" value=\"" . LJ::ehtml($FORM{$_}) . "\">\n";
+         $ret .= "<input type='hidden' name=\"$_\" value=\"" . LJ::ehtml($FORM{$_}) . "\">\n"
+		unless $_ eq 'body' || $_ eq 'subject';
      }
 
-     $ret .= "<input type='submit' value='$ML{'.preview.submit'}'>\n";
+     $ret .= "<br /><input type='submit' value='$ML{'.preview.submit'}'>\n";
+     $ret .= "<input type='submit' name='submitpreview' value='$ML{'talk.btn.preview'}'>\n";
+     if ($LJ::SPELLER) {
+        $ret .= "<input type='checkbox' name='do_spellcheck' value='1' id='spellcheck'> <label for='spellcheck'>$ML{'talk.spellcheck'}</label>";
+     }
      $ret .= "</form>";
      return $ret;
- }
+}
 
  ## insertion
 
@@ -864,6 +886,7 @@ _code?>
 
 <=body
 page?><?_c <LJDEP>
+lib: LJ::SpellCheck
 link: htdocs/lostinfo.bml, htdocs/userinfo.bml, htdocs/talkread.bml, htdocs/editinfo.bml
 post: htdocs/talkpost_do.bml
 </LJDEP> _c?>

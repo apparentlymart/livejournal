@@ -151,7 +151,6 @@ body<=
 
  LJ::expand_embedded($dbs, $ditemid, $remote, \$event);
  $event = BML::ebml(LJ::CleanHTML::clean_event(\$event, $preformatted));
-
  $ret .= "<p>";
  $ret .= "<table><tr valign='middle'>";
  my $picid;
@@ -443,7 +442,10 @@ body<=
  $ret .= "<br /><input type='submit' name='submitpost' value='$ML{'.opt.submit'}'>\n";
 
  ## preview stuff
- $ret .= "<input type='submit' name='submitpreview' value='$ML{'.opt.preview'}'>\n";
+ $ret .= "<input type='submit' name='submitpreview' value='$ML{'talk.btn.preview'}'>\n";
+ if ($LJ::SPELLER) {
+     $ret .= "<input type='checkbox' name='do_spellcheck' value='1' id='spellcheck'> <label for='spellcheck'>$ML{'talk.spellcheck'}</label>";
+ }
 
  if ($u->{'opt_logcommentips'} eq "A") {
      $ret .= "<br />$ML{'.logyourip'}";
