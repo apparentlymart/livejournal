@@ -362,20 +362,20 @@ BODY<=
      $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_showtopicstuff $checked></TD><TD><B>Show Topic Stuff</B></TD></TR>\n";
      $ret .= "<TR><TD>&nbsp;</TD><TD>If you check this, other users will be able to easily add your journal entries to the hierarchial <A HREF=\"/topics/\">topic directory</A>.</TD></TR>\n";
 
+     $ret .= "</table>\n";
+
      if ($LJ::UNICODE) {
-         $ret .= "<tr valign=middle><td width=50 align=right><input type=checkbox name=dummy_checkbox checked disabled></td><td><b>Encoding options</b></td></tr>";
+         $ret .= "(=H2 Encoding Options H2=)(=P Don't worry about this stuff.  In general, only international users that write in several different languages will need to change anything here.  P=)<table>\n";
          LJ::load_codes($dbs, { "encname" => \%LJ::CACHE_ENCNAMES } )
              unless %LJ::CACHE_ENCNAMES;
-         $ret .= "<tr><td>&nbsp;</td><td><p><b>Auto-translate older entries from: </b>";
+         $ret .= "<tr><td width='50'>&nbsp;</td><td><p><b>Auto-translate older entries from: </b>";
          $ret .= LJ::html_select({'name'=>'oldenc', 'selected'=>$u->{'oldenc'}}, %LJ::CACHE_ENCNAMES);
          $ret .= "</p><p>Use this option to tell LiveJournal which encoding to to assume for your entries and comments entered before the site was converted to Unicode. If you write in English, choose \"Western European\" here.</p></td></tr>";
          $ret .= "<tr><td>&nbsp;</td><td><p><b>Translate email notifications into: </b>";
          $ret .= LJ::html_select({'name'=>'mailencoding', 'selected'=>$u->{'mailencoding'}}, %LJ::CACHE_ENCNAMES);
          $ret .= "</p><p>In case you chose to receive message board replies by email, and your email client doesn't handle Unicode (UTF-8) messages very well, use this option to specify a different encoding into which LiveJournal will automatically translate the text of comments sent to you.</p></td></tr>";
-
+         $ret .= "</table>\n";
      }
-
-     $ret .= "</TABLE>\n";
 
      ####### let them un-ban users if they've banned users
      my @banned = ();
