@@ -2865,7 +2865,7 @@ sub load_user_props
         }
     }
 
-    foreach my $table (qw{userproplite2 userpropblob userprop}) {
+    foreach my $table (qw{userproplite userproplite2 userpropblob userprop}) {
         next unless exists $loadfrom{$table};
         my $db;
         if ($use_master) {
