@@ -169,7 +169,11 @@ sub clean
 
                     $hash->{$attr} =~ s/[\t\n]//g;
                     # IE sucks:
-                    if ($hash->{$attr} =~ /(j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t|a\s*b\s*o\s*u\s*t)\s*:/i) { delete $hash->{$attr}; }
+                    if ($hash->{$attr} =~ /(j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t|
+                                            v\s*b\s*s\s*c\s*r\s*i\s*p\s*t|
+                                            a\s*b\s*o\s*u\s*t)\s*:/ix) { 
+                        delete $hash->{$attr}; 
+                    }
                     if ($s1var) {
                         if ($attr =~ /%%/) {
                             delete $hash->{$attr};
@@ -304,8 +308,9 @@ sub clean
             my $urlcount = 0;
 
             if ($opencount{'style'}) {
-                # remove anything that might run javascript code
+                # remove anything that might run javascript/vbscript code
                 $token->[1] =~ s/j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t\s*://g;
+                $token->[1] =~ s/v\s*b\s*s\s*c\s*r\s*i\s*p\s*t\s*://g;
                 $token->[1] =~ s/a\s*b\s*o\s*u\s*t\s*://g;
                 $token->[1] =~ s/expression//g;
                 $token->[1] =~ s/<!--/[COMS]/g;
@@ -552,6 +557,7 @@ sub s1_attribute_clean {
     $a =~ s/>/&gt;/g;
 
     # IE sucks:
-    if ($a =~ /(j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t|a\s*b\s*o\s*u\s*t)\s*:/i) { return ""; }
+    if ($a =~ /((?:(?:v\s*b)|(?:j\s*a\s*v\s*a))\s*s\s*c\s*r\s*i\s*p\s*t|
+                a\s*b\s*o\s*u\s*t)\s*:/ix) { return ""; }
     return $a;
 }
