@@ -93,6 +93,12 @@ sub execute
         return 0;
     }
 
+    # No console for suspended users
+    if ($remote && $remote->{'statusvis'} eq 'S') {
+        push @$outlist, [ "error", "Suspended users cannot use the console." ];
+        return 0;
+    }
+
     if ($cmd->{'def'}) { require "$ENV{'LJHOME'}/cgi-bin/$cmd->{'def'}"; }
 
     unless (ref $cmd->{'handler'} eq "CODE") {
