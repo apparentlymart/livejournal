@@ -497,7 +497,7 @@ $maint{'build_randomuserset'} = sub
     $dbh->do("REPLACE INTO randomuserset (userid) " .
              "SELECT uu.userid FROM userusage uu, user u " .
              "WHERE u.userid=uu.userid AND u.allow_infoshow='Y' " .
-             "AND uu.timeupdate > DATE_SUB(NOW(), INTERVAL 1 DAY) LIMIT 5000");
+             "AND uu.timeupdate > DATE_SUB(NOW(), INTERVAL 1 DAY) ORDER BY RAND() LIMIT 5000");
     my $num = $dbh->selectrow_array("SELECT MAX(rid) FROM randomuserset");
     $dbh->do("REPLACE INTO stats (statcat, statkey, statval) " .
              "VALUES ('userinfo', 'randomcount', $num)");
