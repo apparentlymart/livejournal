@@ -1812,7 +1812,6 @@ sub load_mood_theme
     while (my ($id, $pic, $w, $h) = $sth->fetchrow_array) {
         $LJ::CACHE_MOOD_THEME{$themeid}->{$id} = { 'pic' => $pic, 'w' => $w, 'h' => $h };
     }
-    $sth->finish;
 }
 
 # <LJFUNC>
@@ -2259,7 +2258,6 @@ sub is_friend
                             "userid=$uaid AND friendid=$ubid");
     $sth->execute;
     my ($is_friend) = $sth->fetchrow_array;
-    $sth->finish;
     return $is_friend;
 }
 
@@ -2295,7 +2293,6 @@ sub is_banned
                             "userid=$jid AND banneduserid=$uid");
     $sth->execute;
     my $is_banned = $sth->fetchrow_array;
-    $sth->finish;
     return $is_banned;
 }
 
@@ -3134,7 +3131,6 @@ sub load_style_fast
             $sth = $dbr->prepare("SELECT formatdata, type, opt_cache FROM style WHERE styleid=$styleid");
             $sth->execute;
             ($data, $type, $cache) = $sth->fetchrow_array;
-            $sth->finish;
             last if ($data);
         }
         if ($cache eq "Y") {
@@ -3266,7 +3262,6 @@ sub make_journal
         my $sth = $dbr->prepare("SELECT override FROM overrides WHERE user=$quser");
         $sth->execute;
         ($overrides) = $sth->fetchrow_array;
-        $sth->finish;
     }
 
     # populate the variable hash
@@ -3870,12 +3865,14 @@ sub load_user
     my $dbarg = shift;
     my $user = shift;
 
+    $user = LJ::canonical_username($user);
+    return undef unless length $user;
+
     my $dbs = LJ::make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
     my $sth;
 
-    $user = LJ::canonical_username($user);
     my $quser = $dbr->quote($user);
     my $u = $dbr->selectrow_hashref("SELECT * FROM user WHERE user=$quser");
 
@@ -3895,7 +3892,6 @@ sub load_user
                 $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
                 $sth->execute;
                 $u = $sth->fetchrow_hashref;
-                $sth->finish;
                 return $u;
             } else {
                 return undef;
@@ -3907,7 +3903,6 @@ sub load_user
         $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
         $sth->execute;
         $u = $sth->fetchrow_hashref;
-        $sth->finish;
     }
 
     return $u;
@@ -4131,7 +4126,6 @@ sub query_buffer_flush
         $count++;
         $max = $id;
     }
-    $sth->finish;
 
     $dbh->do("DELETE FROM querybuffer WHERE tablename=$qtable");
     if ($dbh->err) { $dbh->do("UNLOCK TABLES"); die $dbh->errstr; }
