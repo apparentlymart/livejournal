@@ -3931,6 +3931,54 @@ sub load_userpics
 }
 
 # <LJFUNC>
+# name: LJ::modify_caps
+# des: Given a list of caps to add and caps to remove, updates a user's caps
+# args: uuid, cap_add, cap_del
+# arg-cap_add: arrayref of bit numbers to turn on
+# arg-cap_del: arrayref of bit numbers to turn off
+# returns: updated u object, retrieved from $dbh, then 'caps' key modified
+#          otherwise, returns 0 unless all  hooks run properly
+# </LJFUNC>
+sub modify_caps {
+    my ($argu, $cap_add, $cap_del) = @_;
+    my $userid = LJ::want_userid($argu);
+    return unless $userid;
+
+    $cap_add ||= [];
+    $cap_del ||= [];
+
+    # get a u object directly from the db
+    my $u = LJ::load_userid($userid, "force");
+
+    my @run_hooks = ();
+
+    # add caps that need to be added
+    my $cap_new = int($u->{'caps'});
+    foreach my $bit (@$cap_add) {
+        $cap_new |= (1 << $bit);
+    }
+
+    # remove caps that need to be removed
+    foreach my $bit (@$cap_del) {
+        $cap_new = $cap_new & ~(1 << $bit);
+    }
+
+    # run hooks for modified bits
+    $u->{'caps'} = $cap_new;
+    foreach my $bit (@$cap_add, @$cap_del) {
+
+        # return 0 if any hook doesn't return true
+        return 0 unless
+            LJ::run_hook("capbit_${bit}_off", $u);
+    }
+
+    # update user row
+    LJ::update_user($u, { 'caps' => $cap_new });
+
+    return $u;
+}
+
+# <LJFUNC>
 # name: LJ::activate_userpics
 # des: Sets/unsets userpics as inactive based on account caps
 # args: u
