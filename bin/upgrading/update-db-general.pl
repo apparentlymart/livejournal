@@ -2366,6 +2366,11 @@ register_alter(sub {
                 "itid MEDIUMINT UNSIGNED NOT NULL DEFAULT 0");
     }
 
+    unless (column_type("syndicated", "oldest_ourdate")) {
+        do_alter("syndicated",
+		 "ALTER TABLE syndicated ADD oldest_ourdate DATETIME AFTER lastnew");
+    }
+
 });
 
 1; # return true

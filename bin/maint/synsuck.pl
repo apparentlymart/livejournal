@@ -346,9 +346,13 @@ $maint{'synsuck'} = sub
         # entry, it's possible for the oldest item that was previously
         # gone to reappear, and we want to protect against that a
         # little.
-        $dbh->do("DELETE FROM synitem WHERE userid=? AND ".
-                 "dateadd < ? - INTERVAL 14 DAY LIMIT 1000",
-                 undef, $userid, $mindate);
+        if ($LJ::SYNITEM_CLEAN) {
+            $dbh->do("DELETE FROM synitem WHERE userid=? AND ".
+                     "dateadd < ? - INTERVAL 14 DAY LIMIT 1000",
+                     undef, $userid, $mindate);
+        }
+        $dbh->do("UPDATE syndicated SET oldest_ourdate=? WHERE userid=?",
+                 undef, $mindate, $userid);
 
         # bail out if errors, and try again shortly
         if ($errorflag) {
