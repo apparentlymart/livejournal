@@ -522,7 +522,7 @@ sub trans
             $r->push_handlers(PerlHandler => \&Apache::LiveJournal::Interface::FotoBilder::handler);
             return OK;
         }
-        if ($int =~ /flat|xmlrpc|blogger|atom(?:api)?/) {
+        if ($int =~ /^flat|xmlrpc|blogger|atom(?:api)?$/) {
             $RQ{'interface'} = $int;
             $RQ{'is_ssl'} = $is_ssl;
             $r->push_handlers(PerlHandler => \&interface_content);
@@ -1201,7 +1201,7 @@ sub db_logger
             $LJ::CACHE_DINSERTD_SOCK{$hostport} ||=
             IO::Socket::INET->new(PeerAddr => $hostport,
                                   Proto    => 'tcp',
-                                  Timeout  => 1,
+                                  Timeout  => 2,
                                   );
 
         if ($sock) {
@@ -1372,18 +1372,11 @@ sub db_logger
     }
 
     if (@dinsertd_socks) {
-        $var->{_table} = $table;
-        my $string = "INSERT " . Storable::freeze($var) . "\r\n";
-        my $len = "\x01" . substr(pack("N", length($string) - 2), 1, 3);
-        $string = $len . $string;
-
+        my $string = "INSERT $table " . join("&", map { LJ::eurl($_) . "=" . LJ::eurl($var->{$_}) } keys %$var) . "\r\n";
         foreach my $rec (@dinsertd_socks) {
             my $sock = $rec->[1];
             print $sock $string;
-            my $rin;
-            my $res;
-            vec($rin, fileno($sock), 1) = 1;
-            $res = <$sock> if select($rin, undef, undef, 0.3);
+            my $res = <$sock>;
             delete $LJ::CACHE_DINSERTD_SOCK{$rec->[0]} unless $res =~ /^OK\b/;
         }
     }

@@ -335,7 +335,9 @@ sub create_view_atom
             . "</modified>";
         
         # link to the AtomAPI version of this feed
-        $ret .= "<link rel='service.feed' type='application/x.atom+xml' title='$journalinfo->{title}' href='$api/feed' />";
+        $ret .= "<link rel='service.feed' type='application/x.atom+xml' title='";
+        $ret .= LJ::ehtml($journalinfo->{title});
+        $ret .= "' href='$api/feed' />";
 
         if ($opts->{'apilinks'}) {
             $ret .= "<link rel='service.post' type='application/x.atom+xml' title='Create a new post' href='$api/post' />";
