@@ -840,10 +840,11 @@ _code?>
                 'from' => $LJ::ADMIN_EMAIL,
                 'charset' => 'utf-8',
                 'subject' => $ML{'.newemail.subject'},
-                'body' => BML::ml('.newemail.body',
-                                  { 'sitename' => $LJ::SITENAME,
-                                    'sitelink' => $LJ::SITEROOT,
-                                    'conflink' => "$LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}" }),
+                'body' => BML::ml('.newemail.body2',
+                                  { username => $u->{user},
+                                    sitename => $LJ::SITENAME,
+                                    sitelink => $LJ::SITEROOT,
+                                    conflink => "$LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}" }),
             });
         }
 

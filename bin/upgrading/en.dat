@@ -1028,8 +1028,8 @@ so your email address won't be found by email-collecting robots.
 
 /editinfo.bml.name.title=Name
 
-/editinfo.bml.newemail.body<<
-You have just changed your [[sitename]] email address.  To validate the change, please go to this address:
+/editinfo.bml.newemail.body2<<
+You have just changed the email address for your [[sitename]] account "[[username]]".  To validate the change, please go to this address:
 
 [[conflink]]
 

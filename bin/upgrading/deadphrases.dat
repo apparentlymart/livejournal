@@ -25,6 +25,7 @@ general /create.bml.proceed.text
 
 general /editinfo.bml.allowshocontact.email.if_domainaddy
 general /editinfo.bml.allowshowcontact.email.reason
+general /editinfo.bml.newemail.body
 general /editinfo.bml.settings.about
 general /editinfo.bml.showsubjicons.about
 general /editinfo.bml.showsubjicons.header
