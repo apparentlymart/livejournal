@@ -5634,7 +5634,7 @@ sub can_add_syndicated
 
 sub set_logprop
 {
-    my ($u, $jitemid, $hashref) = @_;  # hashref
+    my ($u, $jitemid, $hashref, $logprops) = @_;  # hashref to set, hashref of what was done
     my $dbcm = LJ::get_cluster_master($u);
 
     $jitemid += 0;
@@ -5649,6 +5649,7 @@ sub set_logprop
         if ($v) {
             $ins_values .= "," if $ins_values;
             $ins_values .= "($uid, $jitemid, $prop->{'id'}, " . $dbcm->quote($v) . ")";
+            $logprops->{$k} = $v;
         } else {
             $del_ids .= "," if $del_ids;
             $del_ids .= $prop->{'id'};

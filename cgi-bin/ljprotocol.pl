@@ -895,7 +895,13 @@ sub postevent
             next unless $req->{'props'}->{$pname};
             $propset->{$pname} = $req->{'props'}->{$pname};
         }
-        LJ::set_logprop($uowner, $itemid, $propset) if %$propset;
+        my %logprops;
+        LJ::set_logprop($uowner, $itemid, $propset, \%logprops) if %$propset;
+
+        # if set_logprop modified props above, we can set the memcache key
+        # to be the hashref of modified props, since this is a new post
+        LJ::MemCache::set([$uowner->{'userid'}, "logprop:$uowner->{'userid'}:$itemid"],
+                          \%logprops) if %logprops;
     }
 
     $dbh->do("UPDATE userusage SET timeupdate=NOW(), lastitemid=$itemid ".
