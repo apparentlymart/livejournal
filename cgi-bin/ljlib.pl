@@ -2846,7 +2846,7 @@ sub get_remote
     $sess = LJ::MemCache::get($memkey);
     # try master
     unless ($sess) {
-        $sess_db = LJ::get_cluster_master($u, 1);
+        $sess_db = LJ::get_cluster_master($u);
         $get_sess->();
         LJ::MemCache::set($memkey, $sess) if $sess;
     }
@@ -2868,7 +2868,7 @@ sub get_remote
     
     if ($sess_length && 
         $sess->{'timeexpire'} - $now < $sess_length/2) {
-        my $udbh = LJ::get_cluster_master($u, 1);
+        my $udbh = LJ::get_cluster_master($u);
         if ($udbh) {
             my $future = $now + $sess_length;
             $udbh->do("UPDATE sessions SET timeexpire=$future WHERE ".
@@ -3572,16 +3572,21 @@ sub make_journal
 
     # load the user-related S1 data  (overrides and colors)
     my $s1uc = {};
+    my $s1uc_memkey = [$u->{'userid'}, "s1uc:$u->{'userid'}"];
     if ($u->{'useoverrides'} eq "Y" || $u->{'themeid'} == 0) {
-        my $dbcr = LJ::get_cluster_reader($u, 1);
-        $s1uc = $dbcr->selectrow_hashref("SELECT * FROM s1usercache WHERE userid=?",
-                                         undef, $u->{'userid'});
+        $s1uc = LJ::MemCache::get($s1uc_memkey);
+        unless ($s1uc) {
+            my $dbcr = @LJ::MEMCACHE_SERVERS ? LJ::get_cluster_master($u) : LJ::get_cluster_reader($u);
+            $s1uc = $dbcr->selectrow_hashref("SELECT * FROM s1usercache WHERE userid=?",
+                                             undef, $u->{'userid'});
+            LJ::MemCache::set($s1uc_memkey, $s1uc) if $s1uc;
+        }
     }
 
     # we should have our cache row!  we'll update it in a second.
     my $dbcm;
     if (! $s1uc) {
-        $dbcm ||= LJ::get_cluster_master($u, 1);
+        $dbcm ||= LJ::get_cluster_master($u);
         $dbcm->do("INSERT IGNORE INTO s1usercache (userid) VALUES (?)", undef, $u->{'userid'});
         $s1uc = {};
     }
@@ -3592,7 +3597,7 @@ sub make_journal
     # is the overrides cache old or missing?
     if ($u->{'useoverrides'} eq "Y" && (! $s1uc->{'override_stor'} ||
                                         $s1uc->{'override_cleanver'} < $LJ::S1::CLEANER_VERSION)) {
-        $dbcm ||= LJ::get_cluster_master($u, 1);
+        $dbcm ||= LJ::get_cluster_master($u);
         my $dbh = LJ::get_db_writer();
         my $overrides = $dbh->selectrow_array("SELECT override FROM overrides WHERE user=?",
                                               undef, $u->{'user'});
@@ -3613,17 +3618,18 @@ sub make_journal
     # save the updates
     if (%update) {
         my $set;
-        my $dbh = LJ::get_db_writer();
+        $dbcm ||= LJ::get_cluster_master($u);
         foreach my $k (keys %update) {
             $s1uc->{$k} = $update{$k};
             $set .= ", " if $set;
-            $set .= "$k=" . $dbh->quote($update{$k});
+            $set .= "$k=" . $dbcm->quote($update{$k});
         }
-        $dbcm ||= LJ::get_cluster_master($u, 1);
         my $rv = $dbcm->do("UPDATE s1usercache SET $set WHERE userid=?", undef, $u->{'userid'});
         if ($rv && $update{'color_stor'}) {
+            my $dbh = LJ::get_db_writer();
             $dbh->do("DELETE FROM themecustom WHERE user=?", undef, $u->{'user'});
         }
+        LJ::MemCache::set($s1uc_memkey, $s1uc);
     }
 
     # load the style
@@ -3784,20 +3790,15 @@ sub get_db_writer {
 # name: LJ::get_cluster_reader
 # class: db
 # des: Returns a cluster slave for a user, or cluster master if no slaves exist.
-# args: uarg, or_global?
+# args: uarg
 # des-uarg: Either a userid scalar or a user object.
-# des-or_global: If user is unclustered, return normal reader.
 # returns: DB handle.  Or undef if all dbs are unavailable.
 # </LJFUNC>
 sub get_cluster_reader
 {
     my $arg = shift;
-    my $or_global = shift;
     my $id = ref $arg eq "HASH" ? $arg->{'clusterid'} : $arg;
     my @roles = ("cluster${id}slave", "cluster${id}");
-    if ($or_global && $id == 0) {
-        @roles = ("slave", "master");
-    }
     return LJ::get_dbh(@roles);
 }
 
@@ -3805,20 +3806,15 @@ sub get_cluster_reader
 # name: LJ::get_cluster_master
 # class: db
 # des: Returns a cluster master for a given user.
-# args: uarg, or_global?
+# args: uarg
 # des-uarg: Either a userid scalar or a user object.
-# des-or_global: If user is unclustered, return normal reader.
 # returns: DB handle.  Or undef if master is unavailable.
 # </LJFUNC>
 sub get_cluster_master
 {
     my $arg = shift;
-    my $or_global = shift;
     my $id = ref $arg eq "HASH" ? $arg->{'clusterid'} : $arg;
     my $role = "cluster${id}";
-    if ($or_global && $id == 0) {
-        $role = "master";
-    }
     return LJ::get_dbh($role);
 }
 
@@ -5869,7 +5865,7 @@ sub rate_log
     my $rateperiod = LJ::get_cap($u, "rateperiod-$ratename");
     return 1 unless $rateperiod;
 
-    my $dbu = LJ::get_cluster_master($u, 1);
+    my $dbu = LJ::get_cluster_master($u);
     return 0 unless $dbu;
     
     my $rp = LJ::get_prop("rate", $ratename);
@@ -5885,7 +5881,7 @@ sub rate_log
     # check rate.  (okay per period)
     my $opp = LJ::get_cap($u, "rateallowed-$ratename");
     return 1 unless $opp;
-    my $udbr = LJ::get_cluster_reader($u, 1);
+    my $udbr = LJ::get_cluster_reader($u);
     my $ip = $udbr->quote($opts->{'limit_by_ip'} || "0.0.0.0");
     my $sum = $udbr->selectrow_array("SELECT COUNT(quantity) FROM ratelog WHERE ".
                                      "userid=$u->{'userid'} AND rlid=$rp->{'id'} ".
@@ -5927,7 +5923,7 @@ sub login_ip_banned
 
     my $udbr;
     my $rateperiod = LJ::get_cap($u, "rateperiod-failed_login");
-    if ($rateperiod && ($udbr = LJ::get_cluster_reader($u, 1))) {
+    if ($rateperiod && ($udbr = LJ::get_cluster_reader($u))) {
         my $bantime = $udbr->selectrow_array("SELECT time FROM loginstall WHERE ".
                                              "userid=$u->{'userid'} AND ip=INET_ATON(?)",
                                              undef, $ip);
@@ -5949,7 +5945,7 @@ sub handle_bad_login
     # until it's banned for a period of time.
     my $udbh;
     if (! LJ::rate_log($u, "failed_login", 1, { 'limit_by_ip' => $ip }) &&
-        ($udbh = LJ::get_cluster_master($u, 1)))
+        ($udbh = LJ::get_cluster_master($u)))
     {
         $udbh->do("REPLACE INTO loginstall (userid, ip, time) VALUES ".
                   "(?,INET_ATON(?),UNIX_TIMESTAMP())", undef, $u->{'userid'}, $ip);
@@ -6002,7 +5998,7 @@ sub rand_chars
 sub generate_session
 {
     my ($u, $opts) = @_;
-    my $udbh = LJ::get_cluster_master($u, 1);
+    my $udbh = LJ::get_cluster_master($u);
     my $sess = {};
     $opts->{'exptype'} = "short" unless $opts->{'exptype'} eq "long";
     $sess->{'auth'} = LJ::rand_chars(10);
@@ -6066,7 +6062,7 @@ sub kill_session
     my $u = shift;
     return 0 unless $u;
     return 0 unless exists $u->{'_session'};
-    my $udbh = LJ::get_cluster_master($u, 1);
+    my $udbh = LJ::get_cluster_master($u);
     LJ::kill_sessions($udbh, $u->{'userid'}, $u->{'_session'}->{'sessid'});
     delete $BML::COOKIE{'ljsession'};
     return 1;

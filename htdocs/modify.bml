@@ -297,6 +297,7 @@ body<=
                 $dbcm->do("INSERT IGNORE INTO s1usercache (userid) VALUES (?)", undef, $u->{'userid'});
                 $dbcm->do("UPDATE s1usercache SET color_stor=? WHERE userid=?", undef, 
                           Storable::freeze(\%cols), $u->{'userid'});
+                LJ::MemCache::delete([$u->{'userid'}, "s1uc:$u->{'userid'}"]);
 
                 $dbh->do("DELETE FROM themecustom WHERE user=?", undef, $u->{'user'})
                     if $dbh->selectrow_array("SELECT user FROM themecustom ".
@@ -383,6 +384,7 @@ body<=
                 my $dbcm = LJ::get_cluster_master($u, 1);
                 $dbcm->do("UPDATE s1usercache SET override_stor=NULL WHERE userid=?",
                           undef, $u->{'userid'});
+                LJ::MemCache::delete([$u->{'userid'}, "s1uc:$u->{'userid'}"]);
                 return $dberr->($dbcm->errstr) if $dbcm->err;
             }
         }
