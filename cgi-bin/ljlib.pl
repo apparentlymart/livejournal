@@ -2876,6 +2876,13 @@ sub get_posts
     my $rawposts = get_posts_raw($opts, @_);
 
     # fix up posts as needed for display, following directions given in opts.
+
+
+    # XXX this function is incomplete.  it should also HTML clean, etc.
+    # XXX we need to load users when we have unknown8bit data, but that
+    # XXX means we have to load users.
+    
+
     while (my ($id, $rp) = each %$rawposts) {
         if ($LJ::UNICODE && $rp->{props}{unknown8bit}) {
             #LJ::item_toutf8($u, \$rp->{text}[0], \$rp->{text}[1], $rp->{props});
