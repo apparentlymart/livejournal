@@ -75,7 +75,7 @@ sub YearMonth {
     my ($month, $year) = ($calmon->{'month'}, $calmon->{'year'});
     $calmon->{'_type'} = 'YearMonth';
     $calmon->{'weeks'} = [];
-    $calmon->{'url'} = "$LJ::SITEROOT/view/?type=month&user=$p->{'journal'}->{'username'}&y=$year&m=$month";
+    $calmon->{'url'} = sprintf("$p->{'_u'}->{'_journalbase'}/$year/%02d/", $month);
 
     my $count = LJ::S2::get_journal_day_counts($p);
     my $has_entries = $count->{$year} && $count->{$year}->{$month} ? 1 : 0;
@@ -150,7 +150,7 @@ sub YearDay {
         'num_entries' => $count
     };
     if ($count) {
-        $d->{'url'} = sprintf("$u->{'_journalbase'}/day/$year/%02d/%02d",
+        $d->{'url'} = sprintf("$u->{'_journalbase'}/$year/%02d/%02d/",
                               $month, $day);
     }
     return $d;
