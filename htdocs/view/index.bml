@@ -28,8 +28,6 @@ $r->notes("codepath" => "bml.view.index");
      return;
  }
  
- my $dbr = LJ::get_db_reader();
-
  my $u = LJ::load_user($user);
  unless ($u) {
      $title = "Error";
@@ -92,7 +90,7 @@ $r->notes("codepath" => "bml.view.index");
      if ($remote->{'userid'} == $u->{'userid'} || $viewall) {
          $secwhere = "";   # see everything
      } elsif ($remote->{'journaltype'} eq 'P') {
-         my $gmask = $dbr->selectrow_array("SELECT groupmask FROM friends WHERE userid=$u->{'userid'} AND friendid=$remote->{'userid'}");
+         my $gmask = LJ::get_groupmask($u, $remote);
          $secwhere = "AND (l.security='public' OR (l.security='usemask' AND l.allowmask & $gmask))"
              if $gmask;
      }
