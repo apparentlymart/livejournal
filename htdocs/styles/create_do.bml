@@ -59,17 +59,7 @@ BODY<=
 
  }
 
- if (@errors)
- {
-     my $ret = "";
-     $ret .= "(=BADCONTENT=)\n<UL>\n";		
-     foreach (@errors)
-     {
-         $ret .= "<LI>$_\n";
-     }
-     $ret .= "</UL>\n";
-     return $ret;
- }
+ return LJ::bad_input(@errors) if @errors;
 
  my $ret = "";
 

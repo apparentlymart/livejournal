@@ -32,17 +32,7 @@ BODY<=
 
  if (! LJ::valid_password($u->{'password'}, \%FORM)) { push @errors, "Invalid password."; }
  
- if (@errors)
- {
-     my $ret = "";
-     $ret .= "(=BADCONTENT=)\n<UL>\n";		
-     foreach (@errors)
-     {
-         $ret .= "<LI>$_\n";
-     }
-     $ret .= "</UL>\n";
-     return $ret;
- }
+ return LJ::bad_input(@errors) if @errors;
 
  my @style_opts = (
 		   { 'code' => "is_public",

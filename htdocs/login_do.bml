@@ -25,18 +25,7 @@
      push @errors, "Invalid password."; 
  }
  
- if (@errors)
- {
-     my $ret = "";
-     $ret .= "(=BADCONTENT=)\n<UL>\n";		
-     foreach (@errors)
-     {
-         $ret .= "<LI>$_\n";
-     }
-     $ret .= "</UL>\n";
-     $body = $ret;
-     return "";
- }
+ return LJ::bad_input(@errors) if @errors;
  
  my $etime = 0;
  if ($FORM{'expire'} eq "never") { $etime = time()+60*60*24*60; }

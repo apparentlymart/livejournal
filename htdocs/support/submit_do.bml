@@ -49,16 +49,8 @@ BODY<=
  $req{'spcatid'} = $FORM{'spcatid'};
 
  my $spid = LJ::Support::file_request($dbh, \@errors, \%req);
- if (@errors)
- {
-     my $ret = "";
-     $ret .= "(=BADCONTENT=)\n<ul>\n";
-     foreach (@errors)  {
-	 $ret .= "<li>$_\n";
-     }
-     $ret .= "</ul>\n";
-     return $ret;
- }
+
+ return LJ::bad_input(@errors) if @errors;
  
  $url = "$LJ::SITEROOT/support/see_request.bml?id=$spid";
  

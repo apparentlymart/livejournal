@@ -31,14 +31,7 @@
      my $email = $FORM{'toemail'};
      my @errors;
      &check_email($email, \@errors);
-     if (@errors) {
-	 $body = "(=BADCONTENT=)\n<UL>\n";		
-	 foreach (@errors) {
-	     $body .= "<LI>$_\n";
-	 }
-	 $body .= "</UL>\n";
-	 return "";
-     }
+     return LJ::bad_input(@errors) if @errors;
 
      LJ::send_mail({
 	 'to' => $FORM{'toemail'},

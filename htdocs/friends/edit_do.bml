@@ -92,17 +92,7 @@ d.close();
 
  if (scalar(@errors)==0 && ! LJ::valid_password($u->{'password'}, \%FORM)) { push @errors, "Incorrect password."; }
 
- if (@errors)
- {
-     my $ret = "";
-     $ret .= "(=BADCONTENT=)\n<UL>\n";		
-     foreach (@errors)
-     {
-         $ret .= "<LI>$_\n";
-     }
-     $ret .= "</UL>\n";
-     return $ret;
- }
+ return LJ::bad_input(@errors) if @errors;
 
  my $mode = $FORM{'mode'} || "modify";
 

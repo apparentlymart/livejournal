@@ -79,16 +79,8 @@ BODY<=
 		    'message' => $message, },
 		  \@errors);
 
-     if (@errors) {
-	 my $ret = "";
-	 $ret .= "(=BADCONTENT=)\n<UL>\n";		
-	 foreach (@errors)
-	 {
-	     $ret .= "<LI>$_\n";
-	 }
-	 $ret .= "</UL>\n";
-	 return $ret;
-     }
+     return LJ::bad_input(@errors) if @errors;
+
      $ret .= "(=H1 Success H1=)(=P Your text message was sent. P=)";
      &add_footer();
      return $ret;

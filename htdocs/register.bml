@@ -48,19 +48,7 @@ BODY<=
      push @errors, "You cannot go to this page directly, you must have a registration URL to complete this registration.";
  }
  
- 
- if (@errors)
- {
-     $ret = "";
-     $ret .= "(=BADCONTENT=)\n<UL>\n";		
-     foreach (@errors)
-     {
-         $ret .= "<LI>$_\n";
-     }
-     $ret .= "</UL>\n";
-     return $ret;
- }
- 
+ return LJ::bad_input(@errors) if @errors;
 
  $dbh->do("UPDATE user SET status='A' WHERE userid=$u->{'userid'}");
 

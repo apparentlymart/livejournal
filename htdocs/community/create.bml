@@ -46,15 +46,7 @@
 	 push @errors, "Maintainer account and community account cannot be the same.";
      }
 
-     if (@errors) {
-	 $title = "Errors";
-	 $body = "(=BADCONTENT=)<UL>";
-	 foreach (@errors) {
-	     $body .= "<LI>$_";
-	 }
-	 $body .= "</UL>";
-	 return "";
-     }
+     return LJ::bad_input(@errors) if @errors;
 
      my $qmembership = $dbh->quote($FORM{'membership'} eq "open" ? "open" : "closed");
      my $qpostlevel = $dbh->quote($FORM{'postlevel'} eq "members" ? "members" : "select");
