@@ -287,7 +287,7 @@ sub clean
                  ! $opencount{'lj-raw'};
             
             if ($auto_format && ! $opencount{'a'}) {
-                $token->[1] =~ s!http://\S+?(?=[\.\:\,\;\)\!\?\"\']*?(\s|$))!$url{++$urlcount}=$&;"\{url$urlcount\}";!egi;
+                $token->[1] =~ s!https?://\S+[a-zA-Z0-9_/&=\-]!$url{++$urlcount}=$&;"\{url$urlcount\}";!egi;
             }
             if ($wordlength) {
                 # this treats normal characters and &entities; as single characters

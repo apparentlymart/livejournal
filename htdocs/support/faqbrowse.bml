@@ -62,7 +62,7 @@ body<=
      $a =~ s/\n( +)/"\n" . "&nbsp;&nbsp;"x length($1)/eg;
      $a =~ s/\n/<BR>/g;
      
-     $a =~ s!(&quot;|&#39;)?(http://\S+?)(?=[\.\:\,\;\)\!\?\"\']*?(\s|$))!$1 ? $& : "<a href=\"$2\">$2</a>"!eg;
+     $a =~ s!(&quot;|&#39;)?(https?://\S+[a-zA-Z0-9_/&=\-])!$1 ? $& : "<a href=\"$2\">$2</a>"!eg;
 
      $ret .= "<?h1 $q h1?><blockquote>$a</blockquote>";
 
