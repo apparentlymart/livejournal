@@ -2,84 +2,95 @@
 title=>Customize
 body<=
 <?_code
+{
+    use strict;
+    use vars qw(%GET %POST %FORM);
 
- return LJ::server_down_html() if $LJ::SERVER_DOWN;
+    return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
+    my $dbs = LJ::get_dbs();
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+    my $sth;
 
- unless ($dbh && $dbr) {
-     return "Database temporarily unavailable.";
- }
+    return "Database temporarily unavailable." unless $dbh && $dbr;
+    
+    my $ret;
+    my $remote = LJ::get_remote($dbs);
 
- my $ret;
- my $remote = LJ::get_remote($dbs);
- my $mode = $FORM{'mode'} || ($remote && $FORM{'authas'} ne "(other)" ? "modify" : "loginform");
+    unless ($remote) {
+        return "<?h1 Login Required h1?><?p Before you customize your journal, you must first <a href='/login.bml?ret=1'>login</a>. p?>";
+    }
 
- my ($u, $user, $err);
- my $user = LJ::get_effective_user($dbs, {
-     'form' => \%FORM,
-     'out_u' => \$u,
-     'remote' => $remote,
-     'out_err' => \$err,
- });
- $u = LJ::load_user($dbs, $user) unless $u;
- my $userid = $u->{'userid'};
+    my @journals = ($remote->{'user'});
+    push @journals, LJ::get_shared_journals($dbs, $remote);
 
- my $dbcs = LJ::get_cluster_set($u);
- my $dbch = $dbcs->{'dbh'};
- my $dbcr = $dbcs->{'reader'};
-
- return $LJ::MSG_READONLY_USER if LJ::get_cap($remote, "readonly");
- return LJ::bad_input($err) if $err;
- $u ||= LJ::load_user($dbs, $user);
- return LJ::bad_input("Invalid username") unless $u;
- my $hpassword = LJ::hash_password($u->{'password'});
-
- if ($remote) {
-     $ret .= "<form method='get'>";
-     $ret .= "<?h1 Switch Journal h1?><?p Work with journal: ";
-     $ret .= LJ::make_shared_select($dbs, $remote, \%FORM, { 'notother' => 1 });
-     $ret .= " <input type='submit' value='Switch'> p?></form>";
- }
-
- my $sth;
-
- # load their existing settings
- my %style;
- $sth = $dbcr->prepare("SELECT type, s2lid FROM s2style");
- $sth->execute;
- while (my ($type, $s2lid) = $sth->fetchrow_array) {
-     $style{$type} = $s2lid;
- }
-
- my @layouts;
+    my $journal = $GET{'journal'} || $remote->{'user'};
+    unless (grep { $_ eq $journal } @journals) {  return BML::redirect("/customize/");  }
 
 
- # new user.  find them their core layer.
- unless ($style{'core'}) {
-     
- }
+    my $u = $remote;
+    $u = LJ::load_user($dbs, $journal) unless $journal eq $remote->{'user'};
+    my $userid = $u->{'userid'};
+    
+    my $dbcs = LJ::get_cluster_set($u);
+    my $dbch = $dbcs->{'dbh'};
+    my $dbcr = $dbcs->{'reader'};
+    
+    return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
+    
+    if (@journals > 1) {
+        $ret .= "<form method='get'>";
+        $ret .= "<?h1 Customize Journal h1?><?p Work with journal: ";
+        $ret .= LJ::html_select({
+            'name' => 'journal',
+            'selected' => $journal,
+        }, map { $_, $_ } @journals);
+        $ret .= " <input type='submit' value='Switch'> p?></form>";
+    }
+    
+    LJ::load_user_props($dbs, $u, "stylesys", "s2_style");
+    $u->{'stylesys'} ||= 1;
 
- $ret .= "<form method='post'>";
- $ret .= "<?h1 Step 1: Layout h1?><?p Pick your layout.  Because language and theme selection depends on your layout, changing this setting discards all other edits you may have made. p?>";
- $ret .= "<blockquote>";
- $ret .= "Layout: ";
- $ret .= LJ::html_select({ 'name' => 'layoutid' },
-                         5, "Happy Foofoo Land");
- $ret .= " <input type='submit' name='save:layout' value='Switch Layout'>";
- $ret .= "</blockquote>";
+    if ($POST{'action:stylesys'}) {
+        my $num = $POST{'stylesys'} == 2 ? 2 : 1;
+        LJ::set_userprop($dbh, $u, "stylesys", $num);
+        return BML::redirect("/customize/?journal=$u->{'user'}");
+    }
 
- unless ($style{'layout'}) {
-     $ret .= "</form>";
-     return $ret;
- }
+    # choose style system
+    $ret .= "<form method='post'>";
+    $ret .= "<?h1 Choose style system h1?><?p Do you want to use the old style system, or the new one? p?>";
+    $ret .= "<blockquote>";
+    $ret .= LJ::html_select({ 'name' => 'stylesys', 'selected' => $u->{'stylesys'} },
+                            1, "Old system (S1)",
+                            2, "New system (S2)");
+    $ret .= " <input type='submit' name='action:stylesys' value='Change'>";
+    $ret .= "</blockquote>";
 
- $ret .= "<?h1 Step 2: Theme h1?>";
+    # no more options if they're using S1.
+    if ($u->{'stylesys'} == 1) {
+        $ret .= "<?h1 Using S1 h1?><?p The old style system is configured through the <a href='/modify.bml'>Modify Journal</a> page. p?>";
+        $ret .= "</form>";
+        return $ret;
+    }
+    
+    # choose language
 
- return $ret;
 
+    # choose layout
+    $ret .= "<?h1 Step 1: Layout h1?><?p Pick your layout.  Because theme selection and custom modifications depend on your layout, changing this setting discards all other edits you may have made. p?>";
+    $ret .= "<blockquote>";
+    $ret .= LJ::html_select({ 'name' => 'layoutid' },
+                            5, "Happy Foofoo Land");
+    $ret .= " <input type='submit' name='save:layout' value='Change'> (<a href=\"preview.bml?show=layouts\">previews</a>)";
+    $ret .= "</blockquote>";
+    
+    $ret .= "<?h1 Step 2: Theme h1?>";
+    
+    return $ret;
+
+}
 _code?>
 <=body
 page?>
