@@ -1142,20 +1142,19 @@ sub editevent
         return fail($err,501,$dbcm->errstr) if $dbcm->err;
     }
 
+    LJ::MemCache::set([$ownerid,"logtext:$clusterid:$ownerid:$itemid"],
+                      [ $req->{'subject'}, $event ]);
+
     if (Digest::MD5::md5_hex($event) ne $oldevent->{'md5event'} ||
         $req->{'subject'} ne $oldevent->{'subject'})
     {
         $dbcm->do("UPDATE logtext2 SET subject=?, event=? ".
                   "WHERE journalid=$ownerid AND jitemid=$itemid", undef,
                   $req->{'subject'}, $event);
-
-        LJ::MemCache::set([$ownerid,"logtext:$clusterid:$ownerid:$itemid"],
-                          [ $req->{'subject'}, $event ]);
+        return fail($err,501,$dbcm->errstr) if $dbcm->err;
 
         # update disk usage
         LJ::dudata_set($dbcm, $ownerid, 'L', $itemid, $bytes);
-
-        return fail($err,501,$dbcm->errstr) if $dbcm->err;
     }
 
     # up the revision number
