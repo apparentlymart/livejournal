@@ -52,6 +52,7 @@ sub make_journal
 
     $u->{'_s2styleid'} = $styleid + 0;
     $con_opts->{'u'} = $u;
+    $con_opts->{'style_u'} = $opts->{'style_u'};
     my $ctx = s2_context($r, $styleid, $con_opts);
     unless ($ctx) {
         $opts->{'handler_return'} = Apache::Constants::OK();
@@ -511,6 +512,7 @@ sub s2_context
     my $opts = shift || {};
 
     my $u = $opts->{u};
+    my $style_u = $opts->{style_u} || $u;
 
     # but it doesn't matter if we're using the minimal style ...
     my %style;
@@ -529,7 +531,7 @@ sub s2_context
 
     # fall back to the standard call to get a user's styles
     unless (%style) {
-        %style = $u ? get_style($styleid, { 'u' => $u }) : get_style($styleid);
+        %style = $u ? get_style($styleid, { 'u' => $style_u }) : get_style($styleid);
     }
 
     my @layers;

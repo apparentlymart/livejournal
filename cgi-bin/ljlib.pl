@@ -5217,9 +5217,11 @@ sub make_journal
                 # get remote props and decide what style remote uses
                 LJ::load_user_props($remote, "stylesys", "s2_style");
 
-                # remote using s2
+                # remote using s2; make sure we pass down the $remote object as the style_u to
+                # indicate that they should use $remote to load the style instead of the regular $u
                 if ($remote->{'stylesys'} == 2 && $remote->{'s2_style'}) {
                     $opts->{'checkremote'} = 1;
+                    $opts->{'style_u'} = $remote;
                     return (2, $remote->{'s2_style'});
                 }
 
