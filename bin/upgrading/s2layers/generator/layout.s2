@@ -192,7 +192,7 @@ function Page::print ()
         $website = """<tr><td class="meta">[</td>
 <td class="meta" align="right"><b>website</b></td>
 <td class="meta" align="center">|</td>
-<td class="meta"><a href="$.journal.website_url">$website_name</a></td>
+<td class="meta" align="left"><a href="$.journal.website_url">$website_name</a></td>
 <td class="meta">]</td></tr>""";
     }
 
@@ -222,7 +222,7 @@ summary="">
 border="0"
 summary="">
 <tr class="caption">
-<td class="caption"><b>$title</b></td>
+<td class="caption" align="left"><b>$title</b></td>
 <td class="index" align="right">[$links]</td>
 </tr></table>
 <table width="100%" cellpadding="3" cellspacing="0"
@@ -250,14 +250,14 @@ $website
 <td class="meta">[</td>
 <td class="meta" align="right"><b>userinfo</b></td>
 <td class="meta" align="center">|</td>
-<td class="meta"><a href="$.view_url{"userinfo"}">$sitename_lc userinfo</a></td>
+<td class="meta" align="left"><a href="$.view_url{"userinfo"}">$sitename_lc userinfo</a></td>
 <td class="meta">]</td>
 </tr>
 <tr>
 <td class="meta">[</td>
 <td class="meta" align="right"><b>archive</b></td>
 <td class="meta" align="center">|</td>
-<td class="meta"><a href="$.view_url{"archive"}">journal archive</a></td>
+<td class="meta" align="left"><a href="$.view_url{"archive"}">journal archive</a></td>
 <td class="meta">]</td>
 </tr>
 </table>
