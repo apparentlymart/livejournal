@@ -59,8 +59,7 @@
   RewriteRule ^(.+) %{HTTP_HOST}$1  [C]
   RewriteRule ^([a-z0-9_\-]+)\.ljsite\.com(.+)  /users/$1$2  [L,PT,NS]
 
-  RewriteCond %{HTTP_HOST} ^(www\.)?ljsite\.com(:[0-9]+)?$ [NC]
-  RewriteRule ^/confirm/([a-z0-9]+\.[a-z0-9]+) http://www.ljsite.com/register.bml?$1 [L,R]
+  RewriteRule ^/confirm/([a-z0-9]+\.[a-z0-9]+) http://%{HTTP_HOST}/register.bml?$1 [L,R]
 
   # if they send any Host header with letters (an IP address or blank
   # is okay) then it has to be www.ljsite.com or ljsite.com
