@@ -343,7 +343,7 @@ sub load_style
 
 sub get_s1style_writer {
     my $u = shift;
-    return undef unless ref $u eq 'HASH';
+    return undef unless LJ::isu($u);
 
     # special case system, its styles live on
     # the global master's s1style table alone
@@ -356,7 +356,7 @@ sub get_s1style_writer {
 
 sub get_s1style_reader {
     my $u = shift;
-    return undef unless ref $u eq 'HASH';
+    return undef unless LJ::isu($u);
 
     # special case system, its styles live on
     # the global master's s1style table alone
@@ -370,7 +370,7 @@ sub get_s1style_reader {
 # takes either $u object or userid
 sub get_user_styles {
     my $u = shift;
-    $u = ref $u eq 'HASH' ? $u : LJ::load_user($u);
+    $u = LJ::isu($u) ? $u : LJ::load_user($u);
     return undef unless $u;
 
     my %styles;
@@ -453,7 +453,7 @@ sub check_dup_style {
     my ($u, $type, $styledes) = @_;
     return unless $type && $styledes;
 
-    $u = ref $u eq 'HASH' ? $u : LJ::load_user($u);
+    $u = LJ::isu($u) ? $u : LJ::load_user($u);
 
     # new clustered table
     if ($u && $u->{'dversion'} >= 5) {
@@ -498,7 +498,7 @@ sub get_style_userid {
 
 sub create_style {
     my ($u, $opts) = @_;
-    return unless ref $u eq 'HASH' && ref $opts eq 'HASH';
+    return unless LJ::isu($u) && ref $opts eq 'HASH';
 
     my $styleid = LJ::alloc_global_counter('S');
 
@@ -622,7 +622,7 @@ sub delete_style {
 
 sub get_overrides {
     my $u = shift;
-    return unless ref $u eq 'HASH';
+    return unless LJ::isu($u);
 
     # try memcache
     my $memkey = [$u->{'userid'}, "s1overr:$u->{'userid'}"];
@@ -648,7 +648,7 @@ sub get_overrides {
 
 sub clear_overrides {
     my $u = shift;
-    return unless ref $u eq 'HASH';
+    return unless LJ::isu($u);
 
     my $overr;
     my $db;
@@ -678,7 +678,7 @@ sub clear_overrides {
 
 sub save_overrides {
     my ($u, $overr) = @_;
-    return unless ref $u eq 'HASH' && $overr;
+    return unless LJ::isu($u) && $overr;
 
     my $dbcm = LJ::get_cluster_master($u);
 
