@@ -1660,7 +1660,7 @@ CREATE TABLE commenturls (
    timecreate int unsigned NOT NULL,
    url varchar(255) NOT NULL,
    INDEX (timecreate)
-);
+)
 EOC
 
 post_create("comminterests",
