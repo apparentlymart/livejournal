@@ -20,8 +20,8 @@
  my $dbcr;
 
  my $MAX_FRIENDS_SHOW = 500;
- my $MAX_FRIENDOF_SHOW_SOFT = 150;
- my $MAX_FRIENDOF_SHOW_HARD = 5000;
+ my $MAX_FRIENDOF_SHOW = 150;
+ my $MAX_FRIENDOF_LOAD = 5000;
         
  my $remote = LJ::get_remote($dbr);
  if ($FORM{'user'} eq "" && !$remote) {
@@ -193,20 +193,31 @@
      }
  }
 
- my @friendsof;
+ my (@friend_of, @member_of);
+
  if ($friendsof{'load'}) {
-     my $limit = $FORM{'mode'} eq 'full' ? $MAX_FRIENDOF_SHOW_HARD : ($MAX_FRIENDOF_SHOW_SOFT + 1);
+     my $limit = $MAX_FRIENDOF_LOAD + 1;
      my $sth = $dbr->prepare("SELECT u.userid, u.user, u.journaltype ".
                              "FROM friends f, user u WHERE f.userid=u.userid AND f.friendid=? ".
                              "AND u.statusvis='V' LIMIT $limit");
      $sth->execute($u->{'userid'});
-     push @friendsof, $_ while $_ = $sth->fetchrow_hashref;
-     @friendsof = sort { $a->{'user'} cmp $b->{'user'} } @friendsof;
-     $friendsof{'count'} = scalar @friendsof;
+     while ($_ = $sth->fetchrow_hashref) {
+         if ($_->{'journaltype'} eq 'P') {
+             push @friend_of, $_;
+         } else {
+             push @member_of, $_;  # 'S' or 'C' (shared or community)
+         }
+     }
+
+     @friend_of = sort { $a->{'user'} cmp $b->{'user'} } @friend_of;
+     @member_of = sort { $a->{'user'} cmp $b->{'user'} } @member_of;
+     $friendsof{'count'} = scalar @friend_of;
+     $friendsof{'count_m'} = scalar @member_of;
      $friendsof{'loaded'} = 1;
-     if ($friendsof{'count'} > $MAX_FRIENDOF_SHOW_SOFT && $FORM{'mode'} ne 'full') {
-         # note: not entirely accurate (includes suspended/deleted users) but close enough:
-         $friendsof{'count'} = $dbr->selectrow_array("SELECT COUNT(*) FROM friends WHERE friendid=$u->{'userid'}");
+     if ($friendsof{'count'} + $friendsof{'count_m'} > $MAX_FRIENDOF_LOAD) {
+         # data is incomplete, count separately
+         $friendsof{'count'} = $dbr->selectrow_array("SELECT COUNT(*) FROM friends f, user u WHERE f.friendid=$u->{'userid'} AND f.userid=u.userid AND u.journaltype='P' AND u.statusvis='V'");
+         $friendsof{'count_m'} = $dbr->selectrow_array("SELECT COUNT(*) FROM friends f, user u WHERE f.friendid=$u->{'userid'} AND f.userid=u.userid AND u.journaltype<>'P' AND u.statusvis='V'");
          $friendsof{'clipped'} = 1;
      }
  }
@@ -555,16 +566,7 @@
  ##
  unless ($synd) {
      if ($friendsof{'loaded'} && $friendsof{'display'}) {
-         my @friend_of;
-         my @member_of;
          my $label;
-         foreach my $f (@friendsof) {
-             if ($f->{'journaltype'} eq "C") {
-                 push @member_of, $f;
-             } else {
-                 push @friend_of, $f;
-             }
-         }
          if (@friend_of) {
              $label = $com ? $ML{'.friendof.comm'} : $ML{'.friendof.user'};
              $body .= "<tr><td align='right' valign='top'><b style='white-space: nowrap;'>$label</b>";
@@ -578,7 +580,7 @@
                  my $frlink = "<a href=\"/userinfo.bml?user=$_->{'user'}\">$_->{'user'}</a>";
                  $frlink = "<b>$frlink</b>" if $remote_friendid{$_->{'userid'}};
                  $body .= "$frlink, ";
-                 if (++$count == $MAX_FRIENDOF_SHOW_SOFT && $FORM{'mode'} ne "full") {
+                 if (++$count == $MAX_FRIENDOF_SHOW && $FORM{'mode'} ne "full") {
                      $friendsof{'clipped'} = 1;
                      last;
                  }
@@ -591,7 +593,7 @@
          if (@member_of) {
              $label = $ML{'.label.memberof'};
              $body .= "<tr><td align='right' valign='top'><b style='white-space: nowrap;'>$label:</b></td><td colspan='2'>";
-             $body .= "<b>" . scalar(@member_of) . ":</b> ";
+             $body .= "<b>" . $friendsof{'count_m'} . ":</b> ";
              foreach (@member_of) {
                  my $frlink = "<a href='/userinfo.bml?user=$_->{'user'}'>$_->{'user'}</a>";
                  $frlink = "<b>$frlink</b>" if $remote_friendid{$_->{'userid'}};
