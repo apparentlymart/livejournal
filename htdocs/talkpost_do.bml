@@ -49,15 +49,10 @@ body<=
         return LJ::Talk::Post::make_preview($talkurl, $cookie_auth, \%POST);
     }
 
-    # check anonymous rate limits
-    my $do_captcha =
-        $LJ::HUMAN_CHECK{anonpost} &&
-        ! LJ::Talk::Post::check_rate($remote,
-                                     $POST{'usertype'} eq 'anonymous');
-
     ## init.  this handles all the error-checking, as well.
     my @errors;
-    my $init = LJ::Talk::Post::init(\%POST, $remote, $do_captcha, \@errors);
+    my $need_captcha = 0;
+    my $init = LJ::Talk::Post::init(\%POST, $remote, \$need_captcha, \@errors);
 
     # Report errors in a friendly manner by regenerating the field.
     # Required for challenge/response login, since we also need to regenerate an auth token.
@@ -77,7 +72,7 @@ body<=
                                     'parpost'    => $parpost,
                                     'replyto'    => $POST{replyto},
                                     'ditemid'    => $POST{itemid},
-                                    'do_captcha' => $do_captcha,
+                                    'do_captcha' => $need_captcha,
                                     'errors'     => \@errors,
                                     'form'       => \%POST });
     }

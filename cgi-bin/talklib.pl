@@ -1017,8 +1017,11 @@ sub talkform {
     $ret .= "<tr valign='top'><td align='right'>$BML::ML{'.opt.message'}</td><td colspan='4' style='width: 90%'>";
     $ret .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' id='commenttext' style='width: 100%'>$form->{body}</textarea>";
 
-    # Display captcha challenge if anon and over rate limits.
-    if ($form->{'usertype'} eq "anonymous" && $opts->{do_captcha} && $LJ::HUMAN_CHECK{anonpost}) {
+    # Display captcha challenge if over rate limits.
+    if ($opts->{do_captcha} &&
+       ($form->{'usertype'} eq "anonymous" && $LJ::HUMAN_CHECK{'anonpost'} ||
+        $form->{'usertype'} eq "user"      && $LJ::HUMAN_CHECK{'authpost'})) {
+
         my ($wants_audio, $captcha_sess, $captcha_chal);
         $wants_audio = 1 if $LJ::HUMAN_CHECK{anonpost} && lc($form->{answer}) eq 'audio';
 
@@ -1781,7 +1784,7 @@ sub enter_comment {
 my $SC = '/talkpost_do.bml';
 
 sub init {
-    my ($form, $remote, $do_captcha, $errret) = @_;
+    my ($form, $remote, $need_captcha, $errret) = @_;
     my $sth;
 
     my $err = sub {
@@ -1961,18 +1964,6 @@ sub init {
         }
     }
 
-    # anti-spam captcha check
-    if ($form->{'usertype'} eq "anonymous" && $do_captcha) {
-        return $err->("Please confirm you are a human below.") unless $form->{answer};
-        return if lc($form->{answer}) eq 'audio';
-        my ($capid, $anum) = LJ::Captcha::session_check_code($form->{captcha_chal},
-                                                             $form->{answer},
-                                                             $journalu->{clusterid});
-        return $err->("Incorrect response to spam robot challenge.") unless $capid && $anum;
-        my $sysu = LJ::load_user('system');
-        LJ::Captcha::expire($capid, $anum, $sysu->{userid});
-    }
-    
     # check that user can even view this post, which is required
     # to reply to it
     ####  Check security before viewing this post
@@ -2118,6 +2109,23 @@ sub init {
     $init->{parent} = $parent;
     $init->{comment} = $comment;
 
+    # anti-spam captcha check
+    if (ref $need_captcha eq 'SCALAR') {
+        $$need_captcha =
+            ($LJ::HUMAN_CHECK{anonpost} || $LJ::HUMAN_CHECK{authpost}) &&
+            ! LJ::Talk::Post::check_rate($comment->{'u'});
+        if ($$need_captcha) {
+            return $err->("Please confirm you are a human below.") unless $form->{answer};
+            return if lc($form->{answer}) eq 'audio';
+            my ($capid, $anum) = LJ::Captcha::session_check_code($form->{captcha_chal},
+                    $form->{answer},
+                    $journalu->{clusterid});
+            return $err->("Incorrect response to spam robot challenge.") unless $capid && $anum;
+            my $expire_u = $comment->{'u'} || LJ::load_user('system');
+            LJ::Captcha::expire($capid, $anum, $expire_u->{userid});
+        }
+    }
+
     return undef if @$errret;
     return $init;
 }
@@ -2253,7 +2261,7 @@ sub make_preview {
 
 # more anti-spammer rate limiting.  returns 1 if rate is okay, 0 if too fast.
 sub check_rate {
-    my ($remote, $anon) = @_;
+    my $remote = shift;
 
     # we require memcache to do rate limiting efficiently
     return 1 unless @LJ::MEMCACHE_SERVERS;
@@ -2265,12 +2273,12 @@ sub check_rate {
     # registered human (or human-impersonating robot)
     push @watch, ["talklog:$remote->{userid}", $LJ::RATE_COMMENT_AUTH ||
                   [ [200,3600], [20,60] ],
-                  ] if $remote && !$anon;
+                  ] if $remote;
 
     # anonymous (robot or human)
     push @watch, ["talklog:$ip", $LJ::RATE_COMMENT_ANON ||
                   [ [300,3600], [200,1800], [150,900], [15,60] ]
-                  ] if $anon;  # remote doesn't matter
+                  ] if !$remote;
 
     my $too_fast = 0;
 
