@@ -127,6 +127,49 @@ if (-e "$LJ::HOME/cgi-bin/console-local.pl") {
     do "$LJ::HOME/cgi-bin/console-local.pl";
 }
 
+# Convenience methods for returning from handlers
+my $success = sub {
+    my ($out, $msg) = @_;
+    push @$out, [ "", $msg ];
+    return 1;
+};
+my $fail = sub {
+    my ($out, $msg) = @_;
+    push @$out, [ "error", $msg ];
+    return 0;
+};
+my $usage = sub {
+    my ($out, $cmdname) = @_;
+    return $fail->($out, "usage: $cmdname $cmd{$cmdname}{argsummary}");
+};
+
+$cmd{'gencodes'} = {
+    des => 'Generate invite codes.',
+    privs => [qw(gencodes)],
+    argsummary => '<username> <quantity>',
+    args => [
+             username => "User to be given the codes",
+	     quantity => "Number of codes to generate",
+	    ],
+    handler => sub {
+        my ($dbh, $remote, $args, $out) = @_;
+
+        my $myname   = shift @$args;
+        my $username = shift @$args        or return $usage->($out, $myname);
+        my $quantity = int(shift @$args)   or return $usage->($out, $myname);
+        not @$args                         or return $usage->($out, $myname);
+
+        $remote->{'priv'}->{'gencodes'}
+            or return $fail->($out, "You don't have privileges needed to run this command.");
+
+        my $userid = LJ::get_userid($dbh, $username)
+            or return $fail->($out, "Invalid user $username");
+        my $generated = LJ::acct_code_generate($dbh, $userid, $quantity)
+            or return $fail->($out, "Failed to generate codes: $dbh->errstr");
+
+        return $success->($out, "$quantity codes requested for $username, generated $generated.");
+    },
+};
 
 $cmd{'foreach_entry'} = {
     'handler' => \&foreach_entry,
@@ -139,7 +182,6 @@ $cmd{'foreach_entry'} = {
                'action' => "One action to be performed on the matching journal entries.  Action can be 'list', 'delete', 'security=public', 'security=private', or 'security=friends'.  It's recommended that you run this command first with the 'list' action, to test that your conditions are matching the journal entries that you really want to delete or change.",
                ],
     };
-
 
 $cmd{'moodtheme_create'} = {
     'def' => 'conmoodtheme.pl',

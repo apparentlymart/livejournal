@@ -1663,27 +1663,37 @@ sub acid_decode
 
 # <LJFUNC>
 # name: LJ::acct_code_generate
-# des: Creates an invitation code from an optional userid
+# des: Creates invitation code(s) from an optional userid
 #      for use by anybody.
-# returns: Account/Invite code.
-# args: dbarg, userid?
+# returns: Code generated (if quantity 1),
+#          number of codes generated (if quantity>1),
+#          or undef on failure.
+# args: dbarg, userid?, quantity?
 # des-userid: Userid to make the invitation code from,
 #             else the code will be from userid 0 (system)
+# des-quantity: Number of codes to generate (default 1)
 # </LJFUNC>
 sub acct_code_generate
 {
     my $dbarg = shift;
-    my $userid = shift;
+    my $userid = int(shift);
+    my $quantity = shift || 1;
 
     my $dbs = LJ::make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
-    my $auth = LJ::make_auth_code(5);
-    $userid = int($userid);
-    $dbh->do("INSERT INTO acctcode (acid, userid, rcptid, auth) ".
-             "VALUES (NULL, $userid, 0, \"$auth\")");
-    my $acid = $dbh->{'mysql_insertid'};
-    return undef unless $acid;
-    return acct_code_encode($acid, $auth);
+
+    my @authcodes = map {LJ::make_auth_code(5)} 1..$quantity;
+    my @values = map {"(NULL, $userid, 0, '$_')"} @authcodes;
+    my $sql = "INSERT INTO acctcode (acid, userid, rcptid, auth) "
+            . "VALUES " . join(",", @values);
+    my $num_rows = $dbh->do($sql) or return undef;
+
+    if ($quantity == 1) {
+	my $acid = $dbh->{'mysql_insertid'} or return undef;
+	return acct_code_encode($acid, $authcodes[0]);
+    } else {
+        return $num_rows;
+    }
 }
 
 # <LJFUNC>
