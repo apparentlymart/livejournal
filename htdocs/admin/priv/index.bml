@@ -202,7 +202,7 @@
      }
      $ret .= "</table>";
 
-     if (LJ::check_priv($remote, 'admin', '*')) {
+     if (LJ::check_priv($remote, 'admin')) {
          $ret .= "<p>Grant <b>$user</b> privilege:<div style='margin-left: 20px;'>\n";
          $ret .= "<select name='grantpriv'><option value='' selected='1'></option>";
          foreach my $priv (@privs) {
