@@ -172,13 +172,16 @@
  $body .= BML::ml(".body.list_categories", { 'user' => $user });
 
  if ($filter eq "all") {
-     $sth = $dbr->prepare("SELECT k.keyword, COUNT(*) AS 'count' FROM memorable m, memkeyword mk, keywords k WHERE mk.memid=m.memid AND mk.kwid=k.kwid AND m.userid=$userid $secwhere GROUP BY k.keyword ORDER BY k.keyword");
+     $sth = $dbr->prepare("SELECT k.keyword, COUNT(*) AS 'count' FROM memorable m, memkeyword mk, keywords k WHERE mk.memid=m.memid AND mk.kwid=k.kwid AND m.userid=$userid $secwhere GROUP BY k.keyword");
  } else {
      my $op = $filter eq "own" ? "=" : "<>";
-     $sth = $dbr->prepare("SELECT k.keyword, COUNT(*) AS 'count' FROM memorable m, memkeyword mk, keywords k WHERE mk.memid=m.memid AND mk.kwid=k.kwid AND m.userid=$userid $secwhere AND m.journalid $op $userid GROUP BY k.keyword ORDER BY k.keyword");     
+     $sth = $dbr->prepare("SELECT k.keyword, COUNT(*) AS 'count' FROM memorable m, memkeyword mk, keywords k WHERE mk.memid=m.memid AND mk.kwid=k.kwid AND m.userid=$userid $secwhere AND m.journalid $op $userid GROUP BY k.keyword");
  }
  $sth->execute;
- 
+ my @sortedrows;
+ push @sortedrows, $_ while $_ = $sth->fetchrow_hashref;
+ @sortedrows = sort { $a->{'keyword'} cmp $b->{'keyword'} } @sortedrows;
+
  $body .= "<form method='get' action='memories.bml'>";
  $body .= "<input type='hidden' name='user' value=\"$user\" />";
  $body .= "$ML{'.form.filter'} <select name=\"filter\">";
@@ -189,23 +192,18 @@
  $body .= "</select> <input type='submit' value=\"$ML{'.form.switch'}\">";
  $body .= "</form>";
 
- my $rows = 0;
- while (my $row = $sth->fetchrow_hashref)
- {
-     $rows++;
-     if ($rows==1) {
-         $body .= "<ul>";
-     }
-     my $noun = $row->{'count'}==1 ? $ML{'.entry'} : $ML{'.entries'};
-     my $ue_keyword = LJ::eurl($row->{'keyword'});
-     my $keyword = $row->{'keyword'};
-     LJ::text_out(\$keyword);
-     if ($keyword eq "*") { $keyword = $ML{'.uncategorized'}; }
-     $body .= "<li><b><a href=\"/tools/memories.bml?user=$user&amp;keyword=$ue_keyword&amp;filter=$filter\">$keyword</a></b>: $row->{'count'} $noun\n";
- }
- unless ($rows) {
+ unless (@sortedrows) {
      $body .= "<?h1 $ML{'.error.noentries.title'} h1?><?p $ML{'.error.noentries.body'} p?>";
  } else {
+     $body .= "<ul>";
+     foreach my $row (@sortedrows) {
+         my $noun = $row->{'count'}==1 ? $ML{'.entry'} : $ML{'.entries'};
+         my $ue_keyword = LJ::eurl($row->{'keyword'});
+         my $keyword = $row->{'keyword'};
+         LJ::text_out(\$keyword);
+         if ($keyword eq "*") { $keyword = $ML{'.uncategorized'}; }
+         $body .= "<li><b><a href=\"/tools/memories.bml?user=$user&amp;keyword=$ue_keyword&amp;filter=$filter\">$keyword</a></b>: $row->{'count'} $noun\n";
+     }
      $body .= "</ul>";
  }
  return;
