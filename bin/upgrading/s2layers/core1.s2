@@ -55,7 +55,7 @@ class Color
   var readonly int b "Blue value, 0-255.";
   var  string as_string "HTML hex encoded: #rrggbb";
   function builtin Color(string s) : Color "Constructor for color class.  Lets you make a Color object from a string of form #rrggbb";
-  function builtin set_hsv (int h, int s, int v) "Set the HSV value for a color class.";
+  function builtin set_hsl (int h, int s, int v) "Set the HSL value for a color class.";
 
   function builtin red(int r) "Set the red value. (0-255)";
   function builtin green(int g) "Set the green value. (0-255)";
@@ -66,15 +66,15 @@ class Color
 
   function builtin hue(int h) "Set the hue value. (0-255)";
   function builtin saturation(int s) "Set the saturation value. (0-255)";
-  function builtin value(int v) "Set the HSV value parameter. (0-255)";
+  function builtin lightness(int v) "Set the lightness value. (0-255)";
   function builtin hue() : int "Get the hue value. (0-255)";
   function builtin saturation() : int "Get the saturation value. (0-255)";
-  function builtin value() : int "Get the HSV value parameter. (0-255)";
+  function builtin lightness() : int "Get the lightness value. (0-255)";
 
-  function builtin brighter() : Color "Make color brighter, by 5%.";
-  function builtin brighter(int p) : Color "Make color brighter, by percent given.";
-  function builtin darker() : Color "Make color darker, by 5%.";
-  function builtin darker(int p) : Color "Make color darker, by percent given.";
+  function builtin lighter() : Color "Make color brighter, by increasing lightness by 30.";
+  function builtin lighter(int amt) : Color "Make color lighter, by amount given.";
+  function builtin darker() : Color "Make color darker, by descreasing lightness by 30.";
+  function builtin darker(int amt) : Color "Make color darker, by amount given.";
   function builtin inverse() : Color "Invert color.";
   function builtin average(Color other) : Color "Returns color averaged with \$other color.";
 }

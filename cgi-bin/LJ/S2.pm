@@ -9,6 +9,7 @@ use S2::Compiler;
 use Storable;
 use Apache::Constants ();
 use HTMLCleaner;
+use POSIX ();
 
 use LJ::S2::RecentPage;
 use LJ::S2::YearPage;
@@ -16,6 +17,7 @@ use LJ::S2::DayPage;
 use LJ::S2::FriendsPage;
 use LJ::S2::MonthPage;
 use LJ::S2::EntryPage;
+use LJ::Color;
 
 package LJ::S2;
 
@@ -1129,6 +1131,7 @@ sub UserLite
     return $o;
 }
 
+
 ###############
 
 package S2::Builtin::LJ;
@@ -1143,144 +1146,6 @@ sub AUTOLOAD {
     }
     die "No such builtin: $AUTOLOAD";
 }
-
-sub int__zeropad
-{
-    my ($ctx, $this, $digits) = @_;
-    $digits += 0;
-    sprintf("%0${digits}d", $this);
-}
-
-sub string__substr
-{
-    my ($ctx, $this, $start, $length) = @_;
-    use utf8;
-    return substr($this, $start, $length);
-}
-
-sub string__length
-{
-    use utf8;
-    my ($ctx, $this) = @_;
-    return length($this);
-}
-
-sub string__lower
-{
-    use utf8;
-    my ($ctx, $this) = @_;
-    return lc($this);
-}
-
-sub string__upper
-{
-    use utf8;
-    my ($ctx, $this) = @_;
-    return uc($this);
-}
-
-sub string__upperfirst
-{
-    use utf8;
-    my ($ctx, $this) = @_;
-    return ucfirst($this);
-}
-
-sub string__starts_with
-{
-    use utf8;
-    my ($ctx, $this, $str) = @_;
-    return $this =~ /^\Q$str\E/;
-}
-
-sub string__ends_with
-{
-    use utf8;
-    my ($ctx, $this, $str) = @_;
-    return $this =~ /\Q$str\E$/;
-}
-
-sub string__contains
-{
-    use utf8;
-    my ($ctx, $this, $str) = @_;
-    return $this =~ /\Q$str\E/;
-}
-
-sub string__repeat
-{
-    use utf8;
-    my ($ctx, $this, $num) = @_;
-    $num += 0;
-    my $size = length($this) * $num;
-    return "[too large]" if $size > 5000;
-    return $this x $num;
-}
-
-
-sub Color__Color
-{
-    my ($s) = @_;
-    my $this = { '_type' => 'Color' };
-    $this->{'r'} = hex(substr($s, 1, 2));
-    $this->{'g'} = hex(substr($s, 3, 2));
-    $this->{'b'} = hex(substr($s, 5, 2));
-    Color__make_string($this);
-    return $this;
-}
-
-
-sub Color__make_string
-{
-    my ($this) = @_;
-    $this->{'as_string'} = sprintf("\#%02x%02x%02x",
-				  $this->{'r'},
-				  $this->{'g'},
-				  $this->{'b'});
-}
-
-sub Color__red {
-    my ($ctx, $this, $v) = @_;
-    if ($v) { $this->{'r'} = $v; Color__make_string($this); }
-    $this->{'r'};
-}
-
-sub Color__green {
-    my ($ctx, $this, $v) = @_;
-    if ($v) { $this->{'g'} = $v; Color__make_string($this); }
-    $this->{'g'};
-}
-
-sub Color__blue {
-    my ($ctx, $this, $v) = @_;
-    if ($v) { $this->{'b'} = $v; Color__make_string($this); }
-    $this->{'b'};
-}
-
-sub Color__inverse {
-    my ($ctx, $this) = @_;
-    my $new = {
-        '_type' => 'Color',
-        'r' => 255 - $this->{'r'},
-        'g' => 255 - $this->{'g'},
-        'b' => 255 - $this->{'b'},
-    };
-    Color__make_string($new);
-    return $new;
-}
-
-sub Color__average {
-    my ($ctx, $this, $other) = @_;
-    my $new = {
-        '_type' => 'Color',
-        'r' => int(($this->{'r'} + $other->{'r'}) / 2),
-        'g' => int(($this->{'g'} + $other->{'g'}) / 2),
-        'b' => int(($this->{'b'} + $other->{'b'}) / 2),
-    };
-    Color__make_string($new);
-    return $new;
-}
-
 
 sub ehtml
 {
@@ -1376,7 +1241,192 @@ sub zeropad
     $digits += 0;
     return sprintf("%0${digits}d", $num);
 }
+*int__zeropad = \&zeropad;
 
+sub Color__update_hsl
+{
+    my ($this, $force) = @_;
+    return if $this->{'_hslset'}++;
+    ($this->{'_h'}, $this->{'_s'}, $this->{'_l'}) =
+        LJ::Color::rgb_to_hsl($this->{'r'}, $this->{'g'}, $this->{'b'});
+    $this->{$_} = int($this->{$_} * 255 + 0.5) foreach qw(_h _s _l);
+}
+
+sub Color__update_rgb
+{
+    my ($this) = @_;
+
+    ($this->{'r'}, $this->{'g'}, $this->{'b'}) = 
+        LJ::Color::hsl_to_rgb( map { $this->{$_} / 255 } qw(_h _s _l) );
+    Color__make_string($this);
+}
+
+sub Color__make_string
+{
+    my ($this) = @_;
+    $this->{'as_string'} = sprintf("\#%02x%02x%02x",
+				  $this->{'r'},
+				  $this->{'g'},
+				  $this->{'b'});
+}
+
+# public functions
+sub Color__Color
+{
+    my ($s) = @_;
+    $s =~ s/^\#//;
+    return if $s =~ /[^a-fA-F0-9]/ || length($s) != 6;
+
+    my $this = { '_type' => 'Color' };
+    $this->{'r'} = hex(substr($s, 0, 2));
+    $this->{'g'} = hex(substr($s, 2, 2));
+    $this->{'b'} = hex(substr($s, 4, 2));
+    $this->{$_} = $this->{$_} % 256 foreach qw(r g b);
+
+    Color__make_string($this);
+    return $this;
+}
+
+sub Color__set_hsl
+{
+    my ($this, $h, $s, $l) = @_;
+    $this->{'_h'} = $h % 256;
+    $this->{'_s'} = $s % 256;
+    $this->{'_l'} = $l % 256;
+    $this->{'_hslset'} = 1;
+    Color__update_rgb($this);
+}
+
+sub Color__red {
+    my ($ctx, $this, $r) = @_;
+    if ($r) { 
+        $this->{'r'} = $r % 256;
+        delete $this->{'_hslset'};
+        Color__make_string($this); 
+    }
+    $this->{'r'};
+}
+
+sub Color__green {
+    my ($ctx, $this, $g) = @_;
+    if ($g) {
+        $this->{'g'} = $g % 256;
+        delete $this->{'_hslset'};
+        Color__make_string($this);
+    }
+    $this->{'g'};
+}
+
+sub Color__blue {
+    my ($ctx, $this, $b) = @_;
+    if ($b) {
+        $this->{'b'} = $b % 256;
+        delete $this->{'_hslset'};
+        Color__make_string($this);
+    }
+    $this->{'b'};
+}
+
+sub Color__hue {
+    my ($ctx, $this, $h) = @_;
+
+    if ($h) {
+        $this->{'_h'} = $h % 256;
+        $this->{'_hslset'} = 1;
+        Color__update_rgb($this);
+    } elsif (! $this->{'_hslset'}) {
+        Color__update_hsl($this);
+    }
+    $this->{'_h'};
+}
+
+sub Color__saturation {
+    my ($ctx, $this, $s) = @_;
+    if ($s) { 
+        $this->{'_s'} = $s % 256;
+        $this->{'_hslset'} = 1;
+        Color__update_rgb($this);
+    } elsif (! $this->{'_hslset'}) {
+        Color__update_hsl($this);
+    }
+    $this->{'_s'};
+}
+
+sub Color__lightness {
+    my ($ctx, $this, $l) = @_;
+
+    if ($l) {
+        $this->{'_l'} = $l % 256;
+        $this->{'_hslset'} = 1;
+        Color__update_rgb($this);
+    } elsif (! $this->{'_hslset'}) {
+        Color__update_hsl($this);
+    }
+
+    $this->{'_l'};
+}
+
+sub Color__inverse {
+    my ($ctx, $this) = @_;
+    my $new = {
+        '_type' => 'Color',
+        'r' => 255 - $this->{'r'},
+        'g' => 255 - $this->{'g'},
+        'b' => 255 - $this->{'b'},
+    };
+    Color__make_string($new);
+    return $new;
+}
+
+sub Color__average {
+    my ($ctx, $this, $other) = @_;
+    my $new = {
+        '_type' => 'Color',
+        'r' => int(($this->{'r'} + $other->{'r'}) / 2 + .5),
+        'g' => int(($this->{'g'} + $other->{'g'}) / 2 + .5),
+        'b' => int(($this->{'b'} + $other->{'b'}) / 2 + .5),
+    };
+    Color__make_string($new);
+    return $new;
+}
+
+sub Color__lighter {
+    my ($ctx, $this, $amt) = @_;
+    $amt = defined $amt ? $amt : 30;
+
+    Color__update_hsl($this);
+
+    my $new = {
+        '_type' => 'Color',
+        '_hslset' => 1,
+        '_h' => $this->{'_h'},
+        '_s' => $this->{'_s'},
+        '_l' => ($this->{'_l'} + $amt > 255 ? 255 : $this->{'_l'} + $amt),
+    };
+
+    Color__update_rgb($new);
+    return $new;
+}
+
+sub Color__darker {
+    my ($ctx, $this, $amt) = @_;
+    $amt = defined $amt ? $amt : 30;
+
+    Color__update_hsl($this);
+
+    my $new = {
+        '_type' => 'Color',
+        '_hslset' => 1,
+        '_h' => $this->{'_h'},
+        '_s' => $this->{'_s'},
+        '_l' => ($this->{'_l'} - $amt < 0 ? 0 : $this->{'_l'} - $amt),
+    };
+
+    Color__update_rgb($new);
+    return $new;
+}
+
+# class 'date'
 sub Date__day_of_week
 {
     my ($ctx, $dt) = @_;
@@ -1528,6 +1578,73 @@ sub ItemRange__url_of
     my ($ctx, $this, $n) = @_;
     return "" unless ref $this->{'_url_of'} eq "CODE";
     return $this->{'_url_of'}->($n+0);
+}
+
+
+sub string__substr
+{
+    my ($ctx, $this, $start, $length) = @_;
+    use utf8;
+    return substr($this, $start, $length);
+}
+
+sub string__length
+{
+    use utf8;
+    my ($ctx, $this) = @_;
+    return length($this);
+}
+
+sub string__lower
+{
+    use utf8;
+    my ($ctx, $this) = @_;
+    return lc($this);
+}
+
+sub string__upper
+{
+    use utf8;
+    my ($ctx, $this) = @_;
+    return uc($this);
+}
+
+sub string__upperfirst
+{
+    use utf8;
+    my ($ctx, $this) = @_;
+    return ucfirst($this);
+}
+
+sub string__starts_with
+{
+    use utf8;
+    my ($ctx, $this, $str) = @_;
+    return $this =~ /^\Q$str\E/;
+}
+
+sub string__ends_with
+{
+    use utf8;
+    my ($ctx, $this, $str) = @_;
+    return $this =~ /\Q$str\E$/;
+}
+
+sub string__contains
+{
+    use utf8;
+    my ($ctx, $this, $str) = @_;
+    return $this =~ /\Q$str\E/;
+}
+
+sub string__repeat
+{
+    use utf8;
+    my ($ctx, $this, $num) = @_;
+    $num += 0;
+    my $size = length($this) * $num;
+    return "[too large]" if $size > 5000;
+    return $this x $num;
 }
 
 1;
