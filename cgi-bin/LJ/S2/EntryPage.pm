@@ -25,7 +25,7 @@ sub EntryPage
         $viewall = LJ::check_priv($remote, 'canview', '*');
         $viewsome = $viewall || LJ::check_priv($remote, 'canview', 'suspended');
     }
-    
+
     my ($entry, $s2entry) = EntryPage_entry($u, $remote, $opts);
     return if $opts->{'suspendeduser'};
     return if $opts->{'handler_return'};
@@ -89,7 +89,7 @@ sub EntryPage
 
             # local time in mysql format to gmtime
             my $datetime = DateTime_unix(LJ::mysqldate_to_time($com->{'datepost'}));
-            
+
             my $subject_icon = undef;
             if (my $si = $com->{'props'}->{'subjecticon'}) {
                 my $pic = $pics->{$si};
@@ -148,6 +148,7 @@ sub EntryPage
                 'frozen' => $com->{'state'} eq "F" ? 1 : 0,
                 'link_keyseq' => [ 'delete_comment' ],
                 'anchor' => "t$dtalkid",
+                'dom_id' => "ljcmt$dtalkid",
             };
 
             # don't show info from suspended users
@@ -185,6 +186,39 @@ sub EntryPage
     };
     $p->{'comments'} = [];
     $convert_comments->($convert_comments, $p->{'comments'}, \@comments, 1);
+
+    # prepare the javascript data structure to put in the top of the page
+    # if the remote user is a manager of the comments
+    my $do_commentmanage_js = $p->{'multiform_on'};
+    if ($LJ::DISABLED{'commentmanage'}) {
+        if (ref $LJ::DISABLED{'commentmanage'} eq "CODE") {
+            $do_commentmanage_js = $LJ::DISABLED{'commentmanage'}->($remote);
+        } else {
+            $do_commentmanage_js = 0;
+        }
+    }
+
+    if ($do_commentmanage_js) {
+        my $js = "<script>\n// don't crawl this.  read http://www.livejournal.com/developer/exporting.bml\n";
+        $js .= "var LJ_cmtinfo = {\n";
+        $js .= "\tjournal: '$u->{user}',\n";
+        my $recurse = sub {
+            my ($self, $array) = @_;
+            foreach my $i (@$array) {
+                my $has_threads = scalar @{$i->{'replies'}};
+                my $poster = $i->{'poster'} ? $i->{'poster'}{'username'} : "";
+                my $child_ids = join(',', map { $_->{'talkid'} } @{$i->{'replies'}});
+                $js .= "\t$i->{'talkid'}: { rc: [$child_ids], u: '$poster' },\n";
+                $self->($self, $i->{'replies'}) if $has_threads;
+            }
+        };
+        $recurse->($recurse, $p->{'comments'});
+        chop $js; chop $js;  # remove final ",\n".  stupid javascript.
+        $js .= "\n};\n</script>\n";
+        $p->{'head_content'} .= $js;
+        $p->{'head_content'} .= "<script src='$LJ::SITEROOT/js/commentmanage.js'></script>\n";
+    }
+
 
     $p->{'viewing_thread'} = $get->{'thread'} ? 1 : 0;
 

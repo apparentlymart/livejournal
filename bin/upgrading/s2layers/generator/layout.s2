@@ -183,7 +183,9 @@ color: $*stronger_text;
 }
 .comments {
 font-size: 8pt;
-}""";
+}
+
+""";
 }
 
 function Page::lay_top_userpic () {
@@ -727,6 +729,16 @@ function EntryPage::print_body () {
         """<tr align='left'><td colspan="2" bgcolor="$*entry_back">""";
 
         $.comment_pages->print();
+
+        set_handler("unscreen_comment_#", [
+                                           [ "style_bgcolor", "cmtbar#", "$*comment_bar_one_bgcolor", ],
+                                           [ "style_color", "cmtbar#", "$*comment_bar_one_fgcolor", ],
+                                           ]);
+        set_handler("screen_comment_#", [
+                                         [ "style_bgcolor", "cmtbar#", "$*comment_bar_screened_bgcolor", ],
+                                         [ "style_color", "cmtbar#", "$*comment_bar_screened_fgcolor", ],
+                                         ]);
+
         $this->print_comments($.comments);
         $.comment_pages->print();
         """</td></tr></table></td></tr></table><p>""";
@@ -764,7 +776,7 @@ function EntryPage::print_comment (Comment c) {
     if (defined $c.subject_icon) {
         $sub_icon = $c.subject_icon->as_string();
     }
-    "<a name='$c.anchor'></a><div style='background-color: $background; color: $color; margin-top: 10px; width: 100%;'>";
+    "<a name='$c.anchor'></a><div id='cmtbar$c.talkid' style='background-color: $background; color: $color; margin-top: 10px; width: 100%;'>";
     "<table cellpadding='2' cellspacing='0' summary='0' style='width: 100%'><tr valign='top'>";
     if (defined $c.userpic and $*comment_userpic_style != "off") { 
         var int w = $c.userpic.width;
@@ -810,11 +822,15 @@ function EntryPage::print_comment (Comment c) {
     print "</table></td></tr></table></div>";
     print "<div style='margin-left: 5px'>$c.text</div>";
     print "<div style='margin-top: 3px; font-size: smaller'>";
-    if ($c.frozen) { 
+
+    "<span class='commentlinks'>";
+    if ($c.frozen) {
         "(Replies frozen) ";
     } else {
         "(<a href='$c.reply_url'>Reply to this</a>) ";
     }
+    "</span>";
+
     if ($c.parent_url != "") { "(<a href='$c.parent_url'>Parent</a>) "; }
     if ($c.thread_url != "") { "(<a href='$c.thread_url'>Thread</a>) "; }
     "</div>";

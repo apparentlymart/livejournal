@@ -1677,7 +1677,7 @@ sub etags {
 # sanitize URLs
 sub clean_url {
     my ($ctx, $text) = @_;
-    unless ($text =~ m!^https?://[^'"\\]*$!) {
+    unless ($text =~ m!^https?://[^\'\"\\]*$!) {
         $text = "";
     }
     return $text;
@@ -1776,6 +1776,62 @@ sub weekdays
     return [ 1..7 ];  # FIXME: make this conditionally monday first: [ 2..7, 1 ]
 }
 
+sub set_handler
+{
+    my ($ctx, $hook, $stmts) = @_;
+    my $p = $LJ::S2::CURR_PAGE;
+    return unless $hook =~ /^\w+\#?$/;
+    $hook =~ s/\#$/ARG/;
+
+    $S2::pout->("<script> function userhook_$hook () {\n");
+    foreach my $st (@$stmts) {
+        my ($cmd, @args) = @$st;
+
+        my $get_domexp = sub {
+            my $domid = shift @args;
+            my $domexp = "";
+            while ($domid ne "") {
+                $domexp .= " + " if $domexp;
+                if ($domid =~ s/^(\w+)//) {
+                    $domexp .= "\"$1\"";
+                } elsif ($domid =~ s/^\#//) {
+                    $domexp .= "arguments[0]";
+                } else {
+                    return undef;
+                }
+            }
+            return $domexp;
+        };
+
+        my $get_color = sub {
+            my $color = shift @args;
+            return undef unless
+                $color =~ /^\#[0-9a-f]{3,3}$/ ||
+                $color =~ /^\#[0-9a-f]{6,6}$/ ||
+                $color =~ /^\w+$/ ||
+                $color =~ /^rgb(\d+,\d+,\d+)$/;
+            return $color;
+        };
+
+        #$S2::pout->("  // $cmd: @args\n");
+        if ($cmd eq "style_bgcolor" || $cmd eq "style_color") {
+            my $domexp = $get_domexp->();
+            my $color = $get_color->();
+            if ($domexp && $color) {
+                $S2::pout->("setStyle($domexp, 'background', '$color');\n") if $cmd eq "style_bgcolor";
+                $S2::pout->("setStyle($domexp, 'color', '$color');\n") if $cmd eq "style_color";
+            }
+        } elsif ($cmd eq "set_class") {
+            my $domexp = $get_domexp->();
+            my $class = shift @args;
+            if ($domexp && $class =~ /^\w+$/) {
+                $S2::pout->("setAttr($domexp, 'class', '$class');\n");
+            }
+        }
+    }
+    $S2::pout->("} </script>\n");
+}
+
 sub zeropad
 {
     my ($ctx, $num, $digits) = @_;
@@ -1784,6 +1840,7 @@ sub zeropad
     return sprintf("%0${digits}d", $num);
 }
 *int__zeropad = \&zeropad;
+
 
 sub Color__update_hsl
 {

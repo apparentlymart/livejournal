@@ -261,19 +261,20 @@ function Page::print ()
     """;
 }
 
-function print_box (string{} colors, string metapic, string{} meta, string content, string footer) {
+function print_box (string{} colors, string metapic, string{} meta, string content, string footer, string domid) {
     var string bgcolor = $colors{"bgcolor"};
     var string fgcolor = $colors{"fgcolor"};
+    if ($domid != "") { $domid = "id='$domid'"; }
 
     var string style = "background-color: $bgcolor; color: $fgcolor";
-    "<div align='right'><table border='0' width='95%' cellpadding='5' cellspacing='1' style='$style'>";
+    "<div align='right'><table $domid border='0' width='95%' cellpadding='5' cellspacing='1' style='$style'>";
     "<tr><td><table border='0' width='100%'><tr>";
 
     if ($metapic) {
         "<td width='100' valign='top' align='center'>$metapic</td>";
     }
 
-    "<td valign='top'><table border='0' style='$style'>";
+    "<td valign='top'><table border='0'>";
 
     foreach var string k ($meta) {
         var string key = $k;
@@ -397,7 +398,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     }
 
     # Print
-    print_box($colors, $metapic, $meta, $content, $footer);
+    print_box($colors, $metapic, $meta, $content, $footer, "");
 }
 
 function Page::print_entry (Entry e) 
@@ -568,6 +569,15 @@ function MonthPage::print_body {
 }
 
 function EntryPage::print_body () {
+        set_handler("unscreen_comment_#", [
+                                           [ "style_bgcolor", "cmtbar#", "$*comment_bar_one_bgcolor", ],
+                                           [ "style_color", "cmtbar#", "$*comment_bar_one_fgcolor", ],
+                                           ]);
+        set_handler("screen_comment_#", [
+                                         [ "style_bgcolor", "cmtbar#", "$*comment_bar_screened_bgcolor", ],
+                                         [ "style_color", "cmtbar#", "$*comment_bar_screened_fgcolor", ],
+                                         ]);
+
     print_entry($this, $.entry, null Color, null Color, $.viewing_thread);
     if ($.entry.comments.enabled and $.comment_pages.total_subitems > 0)
     {
@@ -656,7 +666,7 @@ function EntryPage::print_comment (Comment c) {
         $link = $c->get_link($k); $footer = "$footer $link";
     }
     println "<a name='$c.anchor'></a>";
-    print_box($colors, $metapic, $meta, $c.text, $footer);
+    print_box($colors, $metapic, $meta, $c.text, $footer, "cmtbar$c.talkid");
 }
 
 function ReplyPage::print_body () {
@@ -684,7 +694,7 @@ function ReplyPage::print_body () {
     $meta{"Time:"} = $.replyto.time->time_format();
 
     print_box({ "bgcolor" => "$*accent_bgcolor", "fgcolor" => "$*accent_fgcolor" },
-              $metapic, $meta, $.replyto.text, "");
+              $metapic, $meta, $.replyto.text, "", "");
 
     print_header("Reply:");
 

@@ -240,6 +240,8 @@ class EntryLite
 
     var readonly string{} metadata "Post metadata. Keys: 'music', 'mood'";
 
+    var readonly string dom_id "The DOM 'id' attribute you should put on your outer-most element";
+
     var readonly string permalink_url "A URL at which this specific entry can be viewed, for linking purposes.";
     var int depth "Visual depth of entry.  Top-level journal entries are always depth zero.  Comments have a depth greater than or equal to one, depending on where the thread is rooted at.";
 
@@ -677,6 +679,7 @@ function builtin palimg_tint(string filename, Color bright, Color dark) : string
 function builtin palimg_gradient(string filename, PalItem start, PalItem end) : string
     "Return a URL to the specified filename (relative to the palimg root) with its palette table made into a gradient.  All palette entries between the inclusive indexes of \$start and \$end will fade from the colors in \$start and \$end.  The palette indexes for the start and end can be between 0 and 255.";
 
+function builtin set_handler(string eventname, string[][] commands);
 
 ##[ properties ]
 
@@ -1526,7 +1529,7 @@ function Page::print_entry_poster(Entry e) {
 }
 function Page::print_entry(Entry e) {
     ## For most styles, this will be overridden by FriendsPage::print_entry and such.
-    """<div class="entry" id="entry$e.itemid">\n""";
+    """<div class="entry" id="$e.dom_id">\n""";
     "<h3>$e.security_icon $e.subject</h3>\n";
     if ($.view == "friends" or $e.poster.username != $e.journal.username) {
         "<div>"; $this->print_entry_poster($e); "</div>";
@@ -1540,7 +1543,7 @@ function Page::print_entry(Entry e) {
 }
 function FriendsPage::print_entry(Entry e) {
     ## For most styles, this will be overridden by FriendsPage::print_entry and such.
-    """<div class="entry" id="entry$e.itemid">\n""";
+    """<div class="entry" id="$e.dom_id">\n""";
     var Color bg;
     var Color fg;
     $bg = $.friends{$e.journal.username}.bgcolor;
@@ -1823,7 +1826,7 @@ function EntryPage::print_comments (Comment[] cs) {
     if (size $cs == 0) { return; }
     foreach var Comment c ($cs) {
         var int indent = ($c.depth - 1) * 25;
-        "<div style='margin-left: ${indent}px; margin-top: 5px'>\n";
+        "<div id='$c.dom_id' style='margin-left: ${indent}px; margin-top: 5px'>\n";
         if ($c.full) {
             $this->print_comment($c);
         } else {
@@ -1929,7 +1932,7 @@ function ItemRange::print() {
 function EntryPage::print_body 
 {
     var Entry e = $.entry;
-    """<div class="entry" id="entry$e.itemid">\n""";
+    """<div class="entry" id="$e.dom_id">\n""";
 
     "<table><tr valign='middle'>";
     if (defined $e.userpic) { 

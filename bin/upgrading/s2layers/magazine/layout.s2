@@ -530,8 +530,18 @@ function DayPage::print_body ()
     }
 }
 
-function EntryPage::print_body () 
+function EntryPage::print_body ()
 {
+        set_handler("unscreen_comment_#", [
+                                           [ "style_bgcolor", "cmtbar#", "$*comment_bar_one_bgcolor", ],
+                                           [ "style_color", "cmtbar#", "$*comment_bar_one_fgcolor", ],
+                                           ]);
+        set_handler("screen_comment_#", [
+                                         [ "style_bgcolor", "cmtbar#", "$*comment_bar_screened_bgcolor", ],
+                                         [ "style_color", "cmtbar#", "$*comment_bar_screened_fgcolor", ],
+                                         ]);
+
+
     print_entry($this, $.entry, null Color, null Color, $.viewing_thread);
     if ($.entry.comments.enabled and $.comment_pages.total_subitems > 0)
     {
@@ -568,7 +578,7 @@ function EntryPage::print_comment (Comment c) {
     if (defined $c.subject_icon) {
         $sub_icon = $c.subject_icon->as_string();
     }
-    "<a name='$c.anchor'></a><div style='background-color: $background; color: $color; margin-top: 10px; width: 100%'>";
+    "<a name='$c.anchor'></a><div id='cmtbar$c.talkid' style='background-color: $background; color: $color; margin-top: 10px; width: 100%'>";
     "<table cellpadding='2' cellspacing='0' summary='0' style='width: 100%'><tr valign='top'>";
     if (defined $c.userpic and $*comment_userpic_style != "off") { 
         var int w = $c.userpic.width;
