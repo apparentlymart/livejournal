@@ -253,7 +253,7 @@ body<=
                     the future, the images posted in your journal will still
                     work correctly.  p?>
                     <?emailex
-                    $to
+                    $to_pin
                     $from
                     $subject
                     <b>lj-gallery:</b> vacation photos<br />
@@ -271,7 +271,7 @@ body<=
                     on the images themselves - not the journal entry. p?>
                     <p? Valid options are "private", "regusers", or "friends". p?>
                     <?emailex
-                    $to
+                    $to_pin
                     $from
                     $subject
                     <b>lj-imgsecurity:</b> private<br />
@@ -286,7 +286,7 @@ body<=
                     header.  p?>
                     <?p Valid sizes are "100x100", "320x240", and "640x480". p?>
                     <?emailex
-                    $to
+                    $to_pin
                     $from
                     $subject
                     <b>lj-imgsize:</b> 640x480<br />
@@ -311,7 +311,7 @@ body<=
                     </span>
                     <br /><br />
                     <?emailex
-                    $to
+                    $to_pin
                     $from
                     $subject
                     <b>lj-imglayout:</b> horizontal<br />
@@ -328,7 +328,7 @@ body<=
                     "titles" changes the cut caption to the title of the filename, 
                     one cut per image. "( emo.jpg ) ( pict002.jpg ) ( me_and_bob.jpg )" p?>
                     <?emailex
-                    $to
+                    $to_pin
                     $from
                     $subject
                     <b>lj-imgcut:</b> titles<br />
