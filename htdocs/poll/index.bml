@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  $title = "Poll";
  $body = "";
@@ -10,7 +10,7 @@
      s/\0/,/g;
  }
  unless (LJ::text_in(\%FORM)) {
-     $body = "(=BADINPUT=)";
+     $body = "<?badinput?>";
      return;
  }
 
@@ -65,7 +65,7 @@
          return;
      }
      $title = "Submitted!";
-     $body .= "(=H1 Thanks.... H1=)(=P Your poll answers have been submitted. P=)";
+     $body .= "<?h1 Thanks.... h1?><?p Your poll answers have been submitted. p?>";
      return;
  }
 
@@ -79,11 +79,11 @@
 
  return;
 
-_CODE=)(=PAGE
-TITLE=>(=_CODE return $title; _CODE=)
-BODY=>(=_CODE return $body; _CODE=)
-PAGE=)(=_C <LJDEP>
+_code?><?page
+TITLE=><?_code return $title; _code?>
+BODY=><?_code return $body; _code?>
+page?><?_c <LJDEP>
 lib: cgi-bin/ljlib.pl, cgi-bin/cleanhtml.pl
 link: htdocs/poll/index.bml, htdocs/talkread.bml, htdocs/support/faqbrowse.bml, htdocs/poll/create.bml
-</LJDEP> _C=)
+</LJDEP> _c?>
 

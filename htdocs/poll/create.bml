@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  # Brad Whitaker <lj user=whitaker>
 
@@ -278,7 +278,7 @@
     }
 
     # basic info -- name, whovote, whoview
-    $ret .= "<p>(=H1 Basic Poll Info H1=)<hr size=\"2\" width=\"60%\" align=\"left\">\n";
+    $ret .= "<p><?h1 Basic Poll Info h1?><hr size=\"2\" width=\"60%\" align=\"left\">\n";
 
     $ret .= "<p>Who can view this poll?<br><select name=\"whoview\">\n";
     foreach ( qw(all friends none) ) {
@@ -307,7 +307,7 @@
 
         $ret .= "<p><table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" width=\"600\"><tr>\n";
         $ret .= "<td align=\"left\" colspan=\"2\">\n";
-        $ret .= "(=H1 Question #" . ($x + 1) . " - " . $TYPENAME{$elem->{'type'}} . " H1=)<br><br>\n";
+        $ret .= "<?h1 Question #" . ($x + 1) . " - " . $TYPENAME{$elem->{'type'}} . " h1?><br><br>\n";
         $ret .= "</td></tr>\n";
 
         $ret .= "<tr><td align=\"left\" width=\"15%\">\n";
@@ -342,7 +342,7 @@
                 $ret .= "<br><input type=\"text\" name=\"pq_$x\_opt_$y\" value=\"" . LJ::ehtml(@{$elem->{'opt'}}[$y]) . "\" maxlength=\"$RULES{'items'}{'maxlength'}\" size=\"20\">\n";
                 $ret .= "<br><font size=\"1\"><b>[" . $errors->[$x]->{$y}->{'items'} . "]</b></font>\n" if ($errors->[$x]->{$y}->{"items"});
             }
-            $ret .= ($elem->{'opts'} < $RULES{'items'}{'max'}) ? "<br><input type=\"submit\" name=\"request:$x:do\" value=\"More >>\">\n" : "<br>(=DE [Option limit reached] DE=)\n";
+            $ret .= ($elem->{'opts'} < $RULES{'items'}{'max'}) ? "<br><input type=\"submit\" name=\"request:$x:do\" value=\"More >>\">\n" : "<br><?de [Option limit reached] de?>\n";
         } elsif ($elem->{'type'} eq 'text') {
             foreach ( qw(size maxlength) ) {
                 $ret .= "" . ucfirst($_) . ": <input type=\"text\" name=\"pq_$x\_$_\" value=\"";
@@ -381,7 +381,7 @@
         $ret .= "<tr><td align=\"middle\"><hr size=\"1\"></td></tr>\n";
         $ret .= "<tr><td align=\"middle\">";
         if ($after >= $RULES{"elements"}{"max"}) {
-                $ret .= "(=DE [Element limit reached] DE=)\n";
+                $ret .= "<?de [Element limit reached] de?>\n";
         } else {
                 $ret .= "Insert Question: <select name=\"insert:$after\">\n";
                 foreach (qw(-- radio check drop text scale)) {
@@ -450,21 +450,21 @@ sub make_code {
  #######################################################
 
  # display page to the user
- $body .= "(=H1 Welcome to the poll creator! H1=)\n";
- $body .= "(=P For additional information about polls, please see the <a href=\"$LJ::SITEROOT/support/faqbrowse.bml?faqid=69\">FAQ</a>. P=)\n\n";
+ $body .= "<?h1 Welcome to the poll creator! h1?>\n";
+ $body .= "<?p For additional information about polls, please see the <a href=\"$LJ::SITEROOT/support/faqbrowse.bml?faqid=69\">FAQ</a>. p?>\n\n";
 
  # load poll hash from %FORM and get action and error info
  my ($poll, $action, $errors, $error_count) = &build_poll(\%FORM);
 
  if ($FORM{'generate'} && $$error_count == 0) {
-     $body .= "(=P Below is the poll code that you need to insert into your journal entry.  Just copy and paste all of the text in the box below into your LiveJournal entry and your poll will appear. P=)\n\n";
+     $body .= "<?p Below is the poll code that you need to insert into your journal entry.  Just copy and paste all of the text in the box below into your LiveJournal entry and your poll will appear. p?>\n\n";
  }
 
  # authenticate - but bypass db hit if we think they're already in.
  unless ($FORM{'count'}) {
      my $remote = LJ::get_remote_noauth();
      unless ($remote) {
-        $body = "(=H1 Error H1=)(=P You must be <a href=\"/login.bml?ret=1\">logged in</a> to use the poll creator. P=)";
+        $body = "<?h1 Error h1?><?p You must be <a href=\"/login.bml?ret=1\">logged in</a> to use the poll creator. p?>";
         return '';
      }
      
@@ -472,7 +472,7 @@ sub make_code {
      my $u = LJ::load_user($dbh, $remote->{'user'});
 
      unless (LJ::get_cap($u, "makepoll")) {
-        $body = "(=H1 Sorry H1=)(=P Your account type does not permit you to use the poll creation feature. P=)";
+        $body = "<?h1 Sorry h1?><?p Your account type does not permit you to use the poll creation feature. p?>";
         return '';
      }
  }
@@ -494,14 +494,14 @@ sub make_code {
  # close off the CODE block
  return;
 
- _CODE=)
-(=PAGE 
-TITLE=>(=_CODE return $title; _CODE=)
-BODY=>(=_CODE return $body; _CODE=) 
-PAGE=)(=_C <LJDEP>
+ _code?>
+<?page 
+TITLE=><?_code return $title; _code?>
+BODY=><?_code return $body; _code?> 
+page?><?_c <LJDEP>
 lib: LJ::img
 link: htdocs/support/faqbrowse.bml, htdocs/login.bml
 img: img::btn_up, img::btn_down, img::btn_del
 post: htdocs/poll/create.bml
-</LJDEP> _C=)
+</LJDEP> _c?>
 
