@@ -36,7 +36,7 @@ BODY<=
  # add protocol version if we have Unicode support.
  # it'll thus automatically be used in all get_request() calls.
 
- $FORM{'ver'} = $PROTOCOL_VER;
+ $FORM{'ver'} = $LJ::PROTOCOL_VER;
 
  #### determine their mode
 

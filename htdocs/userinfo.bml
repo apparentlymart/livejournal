@@ -427,8 +427,8 @@
      foreach (sort keys %interests) {
          $intcount++;
          next if ($intcount > 150);
+         LJ::text_out(\$_);
          my $eint = LJ::eurl($_);
-         LJ::text_out(\$eint);
          if ($interests{$_}->{'intcount'} > 1) {
              if ($interests{$_}->{'common'}) {
                  $body .= "<B><A HREF=\"/interests.bml?int=$eint\">$_</A></B>, ";
