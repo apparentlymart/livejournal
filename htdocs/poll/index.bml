@@ -79,6 +79,12 @@
             return;
         }
 
+        unless (LJ::check_form_auth()) {
+            $title = $ML{'Error'};
+            $body  = $ML{'error.invalidform'};
+            return;
+        }
+
         my $error;
         LJ::Poll::submit($remote, \%FORM, \$error);
         if ($error) {

@@ -623,6 +623,7 @@ sub show_poll
         }
 
         $ret .= "<form action='$LJ::SITEROOT/poll/?id=$pollid' method='post'>";
+        $ret .= LJ::form_auth();
         $ret .= LJ::html_hidden('pollid', $pollid);
     }
 
