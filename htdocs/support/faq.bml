@@ -30,7 +30,7 @@ P=)
          "ml_text t, ml_latest l, ml_items i WHERE ".
          "t.dmid=$mld->{'dmid'} AND l.dmid=$mld->{'dmid'} AND i.dmid=$mld->{'dmid'} AND ".
          "l.lnid=$mll->{'lnid'} AND l.itid=i.itid AND i.itcode=CONCAT('cat.', fc.faqcat) ".
-         "AND i.itid=t.itid AND fc.faqcat<>'int-abuse'";
+         "AND l.txtid=t.txtid AND fc.faqcat<>'int-abuse'";
      $sth = $dbr->prepare($sql);
  } else {
      $sth = $dbr->prepare("SELECT faqcat, faqcatname, catorder FROM faqcat ".
