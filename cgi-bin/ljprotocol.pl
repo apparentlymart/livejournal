@@ -116,7 +116,7 @@ sub login
     ## non-Unicode installations can't handle versions >=1
 
     return fail($err,207, "This installation does not support Unicode clients")
-        if $ver>=1 and not $LJ::UNICODE;    
+        if $ver>=1 and not $LJ::UNICODE;
 
     ## return a message to the client to be displayed (optional)
     login_message($dbs, $req, $res, $flags);
@@ -127,8 +127,8 @@ sub login
 
     ## return their friend groups
     $res->{'friendgroups'} = list_friendgroups($dbs, $u);
-    if ($ver >=1 ) {
-        foreach (@{$res->{'friendgroups'}}) { 
+    if ($ver >= 1) {
+        foreach (@{$res->{'friendgroups'}}) {
             LJ::text_out(\$_->{'name'});
         }
     }
@@ -1928,6 +1928,7 @@ sub authenticate
                                 "clusterid, dversion, ".
                                 "track, oldenc FROM user WHERE user=$quser");
         $sth->execute;
+        return fail($err,501,$dbr->errstr) if $dbr->err;
         $u = $sth->fetchrow_hashref;
     }
 
