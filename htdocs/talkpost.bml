@@ -281,7 +281,7 @@ BODY<=
  # from registered user or anonymous?
  
  if ($u->{'opt_whocanreply'} eq "all") {
-     $ret .= "<TR VALIGN=MIDDLE><TD ALIGN=RIGHT>From:</TD><TD ALIGN=MIDDLE><INPUT TYPE=\"radio\" NAME=\"usertype\" VALUE=\"anonymous\"></TD><TD ALIGN=LEFT><B>Anonymous</B></TD></TR>\n";
+     $ret .= "<TR VALIGN=MIDDLE><TD ALIGN=RIGHT>From:</TD><TD ALIGN=MIDDLE><INPUT TYPE=\"radio\" NAME=\"usertype\" VALUE=\"anonymous\" id='talkpostfromanon'></TD><TD ALIGN=LEFT><B><label for='talkpostfromanon'>Anonymous</label></B></TD></TR>\n";
  } elsif ($u->{'opt_whocanreply'} eq "reg") {
      $ret .= "<TR VALIGN=MIDDLE><TD ALIGN=RIGHT>From:</TD><TD ALIGN=MIDDLE>(  )</TD><TD ALIGN=LEFT COLSPAN=3><FONT COLOR=#C0C0C0><B>Anonymous</B></FONT> - this user has disabled anonymous posting.</TD></TR>\n";
  } else {
@@ -290,13 +290,13 @@ BODY<=
 
  my $checked = "CHECKED";
  if ($remote) {
-     $ret .= "<TR VALIGN=MIDDLE><TD ALIGN=RIGHT>&nbsp;</TD><TD ALIGN=MIDDLE><INPUT TYPE=\"radio\" NAME=\"usertype\" VALUE=\"cookieuser\" $checked></TD><TD ALIGN=LEFT><B>Logged in user:</B> <I>$remote->{'user'}</I>\n";
+     $ret .= "<tr valign='middle'><td align='right'>&nbsp;</td><td align='middle'><input type='radio' name='usertype' value='cookieuser' id='talkpostfromremote' $checked></td><td align='left'><label for='talkpostfromremote'><b>Logged in user:</b> <i>$remote->{'user'}</i></label>\n";
      $ret .= "<INPUT TYPE=HIDDEN NAME=cookieuser VALUE=\"$remote->{'user'}\">\n";
      $ret .= "</TD></TR>\n";
      $checked = "";
  }
 
- $ret .= "<TR VALIGN=MIDDLE><TD>&nbsp;</TD><TD ALIGN=MIDDLE><INPUT TYPE=\"radio\" NAME=\"usertype\" VALUE=\"user\" $checked></TD><TD  ALIGN=LEFT><B>LiveJournal user (<A HREF=\"/create.bml\">create account</A>)</B></TD></TR>\n";
+ $ret .= "<TR VALIGN=MIDDLE><TD>&nbsp;</TD><TD ALIGN=MIDDLE><INPUT TYPE=\"radio\" NAME=\"usertype\" VALUE=\"user\" id='talkpostfromlj' $checked></TD><TD  ALIGN=LEFT><B><label for='talkpostfromlj'>LiveJournal user</label> (<A HREF=\"/create.bml\">create account</A>)</B></TD></TR>\n";
  $ret .= "<TR VALIGN=MIDDLE><TD>&nbsp;</TD><TD>&nbsp;</TD><TD> <TABLE><TR VALIGN=MIDDLE ALIGN=LEFT><TD>Username: <INPUT CLASS=textbox NAME=userpost SIZE=13 MAXLENGTH=18></TD><TD>&nbsp;Password:</TD><TD><INPUT CLASS=textbox NAME=password TYPE=password MAXLENGTH=30 SIZE=13></TD></TR></TABLE> </TD></TR>\n";
  
  $basesubject = "";
