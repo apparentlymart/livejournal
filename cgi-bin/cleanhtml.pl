@@ -192,12 +192,12 @@ sub clean
                 }
 
                 if ($tag eq "form") {
-                    my $action = $hash->{'action'};
+                    my $action = lc($hash->{'action'});
                     my $deny = 0;
                     if ($action =~ m!^https?://?([^/]+)!) {
                         my $host = $1;
                         $deny = 1 if
-                            $host =~ /[%\@]/ ||
+                            $host =~ /[%\@\s]/ ||
                             $LJ::FORM_DOMAIN_BANNED{$host};
                     } else {
                         $deny = 1;
