@@ -1319,8 +1319,9 @@ sub time_to_http {
 #       and ljpoll.pl need to do that too, but they aren't run as BML.
 # args: user, opts?
 # des-user: Username to link to.
-# des-opts: Optional hashref to control output.  Currently only recognized key
-#           is 'full' which when true causes a link to the mode=full userinfo.
+# des-opts: Optional hashref to control output.  Key 'full' when true causes
+#           a link to the mode=full userinfo.   Key 'type' when 'C' makes
+#           a community link, not a user link.
 # returns: HTML with a little head image & bold text link.
 # </LJFUNC>
 sub ljuser
@@ -1328,7 +1329,11 @@ sub ljuser
     my $user = shift;
     my $opts = shift;
     my $andfull = $opts->{'full'} ? "&amp;mode=full" : "";
-    return "<a href=\"$LJ::SITEROOT/userinfo.bml?user=$user$andfull\"><img src=\"$LJ::IMGPREFIX/userinfo.gif\" width=\"17\" height=\"17\" align=\"absmiddle\" border=\"0\"></a><b><a href=\"$LJ::SITEROOT/users/$user/\">$user</a></b>";
+    if ($opts->{'type'} eq "C") {
+        return "<a href=\"$LJ::SITEROOT/userinfo.bml?user=$user$andfull\"><img src=\"$LJ::IMGPREFIX/community.gif\" width=\"16\" height=\"16\" align=\"absmiddle\" border=\"0\"></a><b><a href=\"$LJ::SITEROOT/community/$user/\">$user</a></b>";
+    } else {
+        return "<a href=\"$LJ::SITEROOT/userinfo.bml?user=$user$andfull\"><img src=\"$LJ::IMGPREFIX/userinfo.gif\" width=\"17\" height=\"17\" align=\"absmiddle\" border=\"0\"></a><b><a href=\"$LJ::SITEROOT/users/$user/\">$user</a></b>";
+    }
 }
 
 # <LJFUNC>

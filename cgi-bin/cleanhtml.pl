@@ -118,10 +118,12 @@ sub clean
             elsif ($tag eq "lj") 
             {
                 my $attr = $token->[2];
-                if ($attr->{'user'}) {
-                    my $user = LJ::canonical_username($attr->{'user'});
+                if ($attr->{'user'} || $attr->{'comm'}) {
+                    my $user = LJ::canonical_username($attr->{'user'} || $attr->{'comm'});
                     if ($user) {
-                        $newdata .= LJ::ljuser($user);
+                        $newdata .= LJ::ljuser($user, { 
+                            'type' => $attr->{'user'} ? "" : "C"
+                            });
                     } else {
                         $newdata .= "<b>[Bad username in LJ tag]</b>";
                     }
