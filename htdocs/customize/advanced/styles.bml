@@ -206,8 +206,9 @@
             }
 
             # save in database
-            LJ::S2::set_style_layers($u, $style->{'styleid'}, 
-                                     map { $_, $eff_layer{$_} } qw(core i18nc layout i18n theme user));
+            my @layers = ( 'core' => $core );
+            push @layers, map { $_, $eff_layer{$_} } qw(i18nc layout i18n theme user);
+            LJ::S2::set_style_layers($u, $style->{'styleid'}, @layers);
 
             # redirect if they clicked the bottom button
             return BML::redirect("styles.bml$getextra") if $POST{'action:savechanges'};
