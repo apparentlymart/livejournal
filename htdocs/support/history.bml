@@ -1,0 +1,76 @@
+<?page
+title=>Support Request History.
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET);
+    
+    my $remote = LJ::get_remote();
+    return "<?needlogin?>" unless $remote;
+
+    # supporthelp anywhere lets them in
+    return "You are not authorized to view this page."
+        unless LJ::check_priv($remote, 'supporthelp');
+
+    my $dbr = LJ::get_db_reader();
+    return "Failed to get database handle."
+        unless $dbr;
+
+    my $reqlist;
+    if ($GET{user}) {
+        # get requests by a user, regardless of email (only gets user requests)
+        my $userid = LJ::get_userid(LJ::trim($GET{user}));
+        return "Invalid user to search on." unless $userid;
+        $reqlist = $dbr->selectall_arrayref('SELECT spid, subject, state, spcatid, requserid, timecreate, reqemail ' .
+                                            'FROM support WHERE reqtype = \'user\' AND requserid = ?',
+                                            undef, $userid);
+    } elsif ($GET{email}) {
+        # try by email, note that this gets requests opened by users and anonymous
+        # requests, so we can view them all
+        my $email = LJ::trim($GET{email});
+        return "Invalid email to search on." unless $email =~ /^.+\@.+$/;
+        $reqlist = $dbr->selectall_arrayref('SELECT spid, subject, state, spcatid, requserid, timecreate, reqemail ' .
+                                            'FROM support WHERE reqemail = ?',
+                                            undef, $email);
+    }
+
+    return "No results found." unless $reqlist && @$reqlist;
+
+    my %reqs;
+    my @userids;
+    foreach my $row (@$reqlist) {
+        $reqs{$row->[0]} = {
+            spid => $row->[0],
+            subject => LJ::ehtml($row->[1]),
+            state => $row->[2],
+            spcatid => $row->[3],
+            requserid => $row->[4],
+            timecreate => LJ::mysql_time($row->[5]),
+            reqemail => LJ::ehtml($row->[6]),
+        };
+        push @userids, $row->[4] if $row->[4];
+    }
+    my $us = LJ::load_userids(@userids) if @userids;
+
+    # get categories
+    my $cats = LJ::Support::load_cats();
+
+    my $ret;
+    $ret .= '<table width="80%"><tr><th>Summary</th><th>State</th><th>Category</th><th>Opened By</th><th>Time Opened</th></tr>';
+    foreach my $id (sort { $a <=> $b } keys %reqs) {
+        # print out this request row
+        $ret .= '<tr>';
+        $ret .= "<td><a href=\"see_request.bml?id=$reqs{$id}->{spid}\">$reqs{$id}->{subject}</a></td>\n";
+        $ret .= "<td>$reqs{$id}->{state}</td>\n";
+        $ret .= "<td>$cats->{$reqs{$id}->{spcatid}}{catname}</td>\n<td>";
+        $ret .= $reqs{$id}->{requserid} ? LJ::ljuser($us->{$reqs{$id}->{requserid}}) : $reqs{$id}->{reqemail};
+        $ret .= "</td>\n<td>$reqs{$id}->{timecreate}</td>\n";
+        $ret .= '</tr>';
+    }
+    $ret .= '</table>';
+    
+}
+_code?>
+<=body
+page?>

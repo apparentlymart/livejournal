@@ -126,8 +126,6 @@ body<=
         $winner = $sth->fetchrow_hashref;
     }
 
-    my $owner_mode = 0;
- 
     # load category this request is in
     my $problemarea = $sp->{_cat}->{'catname'};
     my $catkey = $sp->{_cat}->{'catkey'};
@@ -136,10 +134,9 @@ body<=
         return "<?h1 Error h1?><?p You don't have the necessary privilege to view this request. p?>";
     }
 
-    if (LJ::Support::can_close($sp, $remote, $auth)) {
-        $owner_mode = 1;
-    }
-
+    my $owner_mode = LJ::Support::can_close($sp, $remote, $auth) ? 1 : 0;
+    my $helper_mode = LJ::Support::can_help($sp, $remote) ? 1 : 0;
+    
     # fix up the subject if needed
     eval {
         if ($sp->{'subject'} =~ /^=\?(utf-8)?/i) {
@@ -177,7 +174,18 @@ body<=
         if ($sp->{_cat}->{'public_read'}) {
             $visemail =~ s/^.+\@/********\@/; 
         }
-        $ret .= LJ::ehtml($sp->{'reqname'}) . " ($visemail)";
+        my $ename = LJ::ehtml($sp->{reqname});
+        $ename ||= $u->{user} if $sp->{reqtype} eq 'user';
+        if ($helper_mode) {
+            # supporthelp can link to previous requests
+            $ret .= $sp->{reqtype} eq 'user' ? 
+                    "<a href=\"history.bml?user=$u->{user}\">$ename</a>" :
+                    "$ename";                    
+            $ret .= " (<a href=\"history.bml?email=" . LJ::eurl($email) . "\">$email</a>)";
+        } else {
+            # default view
+            $ret .= "$ename ($visemail)";
+        }
     }
     $ret .= "</td></tr>\n";
 
@@ -515,7 +523,7 @@ body<=
                                 LJ::Support::sorted_cats($cats));
         $ret .= "</td>";
 
-        if (@screened && LJ::Support::can_help($sp, $remote)) {
+        if (@screened && $helper_mode) {
             $ret .= "<td>Approve Screened Response:<br />";
             $ret .= LJ::html_select({ 'name' => 'approveans' },
                                     ('', ''),

@@ -481,7 +481,9 @@ CREATE TABLE support (
   timetouched int(10) unsigned default NULL,
   timeclosed int(10) unsigned default NULL,
   PRIMARY KEY  (spid),
-  KEY (state)
+  INDEX (state),
+  INDEX (requserid),
+  INDEX (reqemail)
 )
 EOC
 
@@ -2106,6 +2108,9 @@ register_alter(sub {
         do_alter("userblob", "ALTER TABLE userblob MODIFY length INT UNSIGNED");
     }
 
+    unless (index_name("support", "INDEX:requserid")) {
+        do_alter("support", "ALTER IGNORE TABLE support ADD INDEX (requserid), ADD INDEX (reqemail)");
+    }
 
 });
 
