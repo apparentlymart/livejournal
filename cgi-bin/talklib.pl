@@ -149,6 +149,7 @@ sub init
 		$ju = LJ::load_userid($dbs, $newinfo->[0]);
 		$init->{'clustered'} = 1;
 		$init->{'itemid'} = $newinfo->[1];
+		$init->{'oldurl'} = 1;
 	    } else {
 		my $jid = LJ::dbs_selectrow_array($dbs, "SELECT ownerid FROM log WHERE itemid=$itemid");
 		return { 'error' => "No such entry" } unless $jid;
@@ -160,6 +161,7 @@ sub init
 	    if ($newinfo) {
 		$ju = LJ::load_userid($dbs, $newinfo->[0]);
 		$init->{'replyto'} = $newinfo->[1];
+		$init->{'oldurl'} = 1;
 	    } else {
 		# guess it's on cluster 0, so find out what journal.
 		my $jid = LJ::dbs_selectrow_array($dbs, "SELECT journalid FROM talk WHERE talkid=$replyto");
