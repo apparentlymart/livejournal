@@ -32,12 +32,12 @@ body<=
      LJ::load_codes($dbs, { state => \%state, country => \%country  });
      $ret = "";
      $ret .= "<?h1 Browse Journals by US State h1?><?p Click a US state below to read journals from that state, or click a country name below the map to read journals from that country. p?>\n";
-     $ret .= "<FORM NAME=\"stateForm\"><P><CENTER>";
-     $ret .= "<SCRIPT Language=\"JavaScript\"><!--\n document.write('<INPUT NAME=s TYPE=TEXT SIZE=30><BR>'); \n// --></SCRIPT>\n";
+     $ret .= "<form action='get' name=\"stateForm\"><p align='center'>";
+     $ret .= "<script language=\"JavaScript\" type='text/javascript'><!--\n document.write('<input name=\"s\" type=\"text\" size=\"30\"><br />'); \n// --></script>\n";
 
-     $ret .= "<SCRIPT LANGUAGE=\"JavaScript\"><!--\nfunction updateStatus (text) { self.status = text; document.stateForm.s.value=text; return true; } \n// --></SCRIPT>\n";
+     $ret .= "<script language=\"JavaScript\" type='text/javascript'><!--\nfunction updateStatus (text) { self.status = text; document.stateForm.s.value=text; return true; } \n// --></script>\n";
 
-     $ret .= "<IMG SRC=\"$LJ::IMGPREFIX/us_map.gif\" WIDTH=489 HEIGHT=315 BORDER=0 USEMAP=\"#state_test\" ISMAP></CENTER></FORM><MAP NAME=state_test>\n";
+     $ret .= "<img alt='US Map' src=\"$LJ::IMGPREFIX/us_map.gif\" width='489' height='315' border='0' usemap=\"#state_test\" ismap='ismap' /></p></form><map name='state_test' id='state_test'>\n";
 
      $sth = $dbr->prepare("SELECT statcat, statkey, statval FROM stats WHERE statcat IN ('country', 'stateus')");
      $sth->execute;
@@ -111,32 +111,31 @@ body<=
      while (my ($coords, $state) = splice(@shapes, 0, 2))
      {
          next unless ($count{'stateus'}->{$state});
-         my $shape = "POLY";
+         my $shape = "poly";
          if ($coords =~ /^[^,]+,[^,]+,[^,]+,[^,]+$/) { $shape = "RECTANGLE"; }
-         $ret .= "<AREA SHAPE=$shape COORDS=\"$coords\" HREF=\"/directory.bml?loc_cn=US&loc_st=$state&opt_sort=ut\" onMouseOver=\"updateStatus('";
+         $ret .= "<area shape='$shape' alt='$state' coords=\"$coords\" href=\"/directory.bml?loc_cn=US&amp;loc_st=$state&amp;opt_sort=ut\" onmouseover=\"updateStatus('";
          $ret .= BML::eall($state{$state});
          $ret .= " - ";
          $ret .= ($count{'stateus'}->{$state}+0);
          $s = $count{'stateus'}->{$state} != 1 ? "s" : "";
-         $ret .= " Journal$s'); return true;\" onMouseOut=\"updateStatus(''); return true;\">\n";
+         $ret .= " Journal$s'); return true;\" onmouseout=\"updateStatus(''); return true;\" />\n";
      }
 
-     $ret .= "</MAP>\n";
+     $ret .= "</map>\n";
 
      # by country
-     $ret .= "<?h1 Browse Journals by Country h1?><?p Select a country to read journals from that country...";
-     $ret .= "<ul><table cellpadding=5><tr valign=top><td>";
+       $ret .= "<?h1 Browse Journals by Country h1?><?p Select a country to read journals from that country... p?>";
+     $ret .= "<table style='margin-left: 20px' cellpadding='5'><tr valign='top'><td align='left'><ul>";
      my $total = scalar(keys %{$count{'country'}});
      my $count = 0;
      my $col = 0;
      foreach (sort { $country{$a} cmp $country{$b} } keys %{$count{'country'}})
      {
          $count++;
-         $ret .= "<LI><A HREF=\"/directory.bml?loc_cn=$_&opt_sort=ut\">$country{$_}</A> <I>($count{'country'}->{$_})</I>\n";
-         if ($col==0 && $count > ($total/2)) { $ret .= "</td><td>"; $col = 1; }
+         $ret .= "<li><a href=\"/directory.bml?loc_cn=$_&amp;opt_sort=ut\">$country{$_}</a> <i>($count{'country'}->{$_})</i></li>\n";
+         if ($col==0 && $count > ($total/2)) { $ret .= "</ul></td><td align='left'><ul>"; $col = 1; }
      }
-     $ret .= "</tr></table></ul>\n";
-     $ret .= " p?>\n";
+     $ret .= "</ul></td></tr></table>\n";
      return $ret;
  }
 
@@ -158,8 +157,8 @@ body<=
  if ($info{'searching'}) {
      my ($uri, $args) = (BML::get_uri(), BML::get_query_string());
      $uri .= '?' . $args if $args;
-     $head .= "<meta http-equiv='Refresh' content='3;URL=$LJ::SITEROOT$uri'>\n";
-     return "<center><b>Searching<img src='$LJ::IMGPREFIX/searchingdots.gif' width='18' height='12'></b><p>".
+     $head .= "<meta http-equiv='Refresh' content='3;URL=$LJ::SITEROOT$uri' />\n";
+     return "<center><b>Searching<img src='$LJ::IMGPREFIX/searchingdots.gif' alt='...' width='18' height='12' /></b><p>".
          "Hundreds of trained monkeys are currently running about finding your search results.  Please stand by.</center>";
  }
 
@@ -245,7 +244,7 @@ body<=
  {
      my $showloc = $FORM{'opt_sort'} eq "loc" ? 1 : 0;
      my %last = ();
-     $ret .= "<UL>\n";
+     $ret .= "<ul>\n";
      foreach my $rec (@matches) 
      {
          if ($showloc) {
@@ -265,18 +264,18 @@ body<=
              }
          }
 
-         $ret .= "<A HREF=\"/userinfo.bml?user=$rec->{'user'}\">";
+         $ret .= "<a href=\"/userinfo.bml?user=$rec->{'user'}\">";
          if ($rec->{'journaltype'} eq "C") {
-             $ret .= "<IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/community.gif\" WIDTH=16 HEIGHT=16 ALIGN=ABSMIDDLE>";
+             $ret .= "<img border='0' src=\"$LJ::IMGPREFIX/community.gif\" width='16' height='16' align='absmiddle'>";
          } else {
-             $ret .= "<IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE>";
+             $ret .= "<img border='0' src=\"$LJ::IMGPREFIX/userinfo.gif\" width='17' height='17' align='absmiddle'>";
          }
-         $ret .= "</A> ";
-         $ret .= "<A HREF=\"/users/$rec->{'user'}/\">$rec->{'user'}</A> - <B>$rec->{'name'}</B>, <FONT SIZE=-1 FACE=\"Arial\"><I>Updated ";
+         $ret .= "</a> ";
+         $ret .= "<a href=\"/users/$rec->{'user'}/\">$rec->{'user'}</A> - <b>$rec->{'name'}</b>, <font size='-1' face=\"Arial\"><i>Updated ";
          $ret .= LJ::ago_text($rec->{'secondsold'});
-         $ret .= "</I></FONT><BR>\n";
+         $ret .= "</i></font><br />\n";
      }
-     $ret .= "</UL>\n";
+     $ret .= "</ul>\n";
  }
 
  if ($FORM{'opt_format'} eq "com") 
@@ -376,7 +375,7 @@ _code?>
 
 <=body
 head<=
-<meta name="robots" content="noindex,nofollow">
+<meta name="robots" content="noindex,nofollow" />
 <?_code return $head; _code?>
 <=head
 page?>
