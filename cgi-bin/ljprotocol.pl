@@ -663,6 +663,7 @@ sub postevent
     
     my $res = {};
     $res->{'itemid'} = $itemid;  # by request of mart
+    $res->{'anum'} = $anum if $clustered;
     return $res;
 }
 
@@ -702,7 +703,7 @@ sub editevent
 	$oldevent = $dbcm->selectrow_hashref
 	    ("SELECT l.journalid AS 'ownerid', l.posterid, l.eventtime, l.logtime, ".
 	     "l.compressed, l.security, l.allowmask, l.year, l.month, l.day, lt.subject, ".
-	     "MD5(lt.event) AS 'md5event', l.rlogtime FROM log2 l, logtext2 lt ".
+	     "MD5(lt.event) AS 'md5event', l.rlogtime, l.anum FROM log2 l, logtext2 lt ".
 	     "WHERE l.journalid=$ownerid AND lt.journalid=$ownerid ".
 	     "AND l.jitemid=$qitemid AND lt.jitemid=$qitemid");
     } else {
@@ -957,8 +958,8 @@ sub editevent
   
     return fail($err,501,$dbcm->errstr) if $dbcm->err;
 
-    # just return something.
     my $res = { 'itemid' => $qitemid };
+    $res->{'anum'} = $oldevent->{'anum'} if defined $oldevent->{'anum'};
     return $res;
 }
 
@@ -2237,6 +2238,7 @@ sub postevent
 
     $res->{'success'} = "OK";
     $res->{'itemid'} = $rs->{'itemid'};
+    $res->{'anum'} = $rs->{'anum'} if defined $rs->{'anum'};
     return 1;
 }
 
@@ -2258,6 +2260,7 @@ sub editevent
 
     $res->{'success'} = "OK";
     $res->{'itemid'} = $rs->{'itemid'};
+    $res->{'anum'} = $rs->{'anum'} if defined $rs->{'anum'};
     return 1;
 }
 

@@ -88,7 +88,8 @@ sub link_bar
 			    $remote->{'user'} eq $up->{'user'} || 
 			    LJ::check_priv($dbs, $remote, "sharedjournal", $u->{'user'})))
     {
-	push @linkele, $mlink->("/editjournal_do.bml?${jargent}itemid=$itemid", "editentry");
+	my $ritemid = $u->{'clusterid'} ? int($itemid / 256) : $itemid;
+	push @linkele, $mlink->("/editjournal_do.bml?${jargent}itemid=$ritemid", "editentry");
     }
     
     if ($u->{'opt_showtopicstuff'} ne "N" && ! $LJ::DISABLED{'topicdir'}) {

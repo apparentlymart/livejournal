@@ -331,8 +331,9 @@ BODY<=
 	     my $itemid = $FORM{'itemid'}+0;
 	     my $journal = LJ::canonical_username($FORM{'usejournal'} || $FORM{'user'});
 	     my $jargent = $FORM{'clustered'} ? "journal=$journal&amp;" : "";
+	     my $ditemid = $FORM{'clustered'} ? ($itemid * 256 + $res{'anum'}) : $itemid;
 	     return "(=H1 Success H1=)(=P Journal entry was modified.  You may view it ".
-		 "<a href=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$itemid\">here</a>. P=)";
+		 "<a href=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid\">here</a>. P=)";
 	 }
 	 else
 	 {
