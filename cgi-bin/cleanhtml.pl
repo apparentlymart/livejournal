@@ -594,3 +594,26 @@ sub s1_attribute_clean {
                 a\s*b\s*o\s*u\s*t)\s*:/ix) { return ""; }
     return $a;
 }
+
+sub clean_url {
+    my $url = shift;
+    return unless $url;
+    
+    # see what protocol they want, default to http
+    my $pref = "http";
+    $pref = $1 if  $url =~ /^(https?|ftp):/;
+
+    # strip out the protocol section
+    $url =~ s!^.*?:/*!!;
+
+    # strip leading and trailing spaces
+    $url =~ s/^\s*//;
+    $url =~ s/\s*$//;
+
+    return unless $url;
+
+    # rebuild safe url
+    $url = "$pref://$url";
+
+    return $url;
+}
