@@ -877,7 +877,15 @@ sub db_logger
     my $r = shift;
     my $rl = $r->last;
 
-    my $uri = $r->uri;
+    # the cleanup handler runs after all subrequests
+    # we only want to do logging once, so we set a flag
+    # saying we've logged and below when we reference
+    # data, we always get it from $r->last so it will be
+    # the actual page served, ignoring internal redirects
+    return if $rl->notes("did_log");
+    $rl->notes("did_log" => 1);
+
+    my $uri = $rl->uri;
     my $ctype = $rl->content_type;
 
     return if $ctype =~ m!^image/! and $LJ::DONT_LOG_IMAGES;
@@ -918,7 +926,7 @@ sub db_logger
 
     my $var = {
         'server' => $LJ::SERVER_NAME,
-        'addr' => $r->connection->remote_ip,
+        'addr' => $rl->connection->remote_ip,
         'ljuser' => $rl->notes('ljuser'),
         'journalid' => $rl->notes('journalid'),
         'codepath' => $rl->notes('codepath'),
@@ -926,15 +934,15 @@ sub db_logger
         'langpref' => $rl->notes('langpref'),
         'clientver' => $rl->notes('clientver'),
         'uniq' => $rl->notes('uniq'),
-        'method' => $r->method,
+        'method' => $rl->method,
         'uri' => $uri,
-        'args' => scalar $r->args,
+        'args' => scalar $rl->args,
         'status' => $rl->status,
         'ctype' => $ctype,
         'bytes' => $rl->bytes_sent,
-        'browser' => $r->header_in("User-Agent"),
-        'secs' => $now - $r->request_time(),
-        'ref' => $r->header_in("Referer"),
+        'browser' => $rl->header_in("User-Agent"),
+        'secs' => $now - $rl->request_time(),
+        'ref' => $rl->header_in("Referer"),
     };
 
     my $delayed = $LJ::IMMEDIATE_LOGGING ? "" : "DELAYED";
