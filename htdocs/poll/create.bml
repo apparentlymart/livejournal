@@ -53,6 +53,59 @@
                   "scale" => $ML{'.type.scale'},
                   );
 
+
+    #######################################################
+    #
+    # Generate page for the user
+    #
+
+    # variables to pass around
+    my %action;
+    my %poll;
+    my @errors;
+    my $error_count = 0;
+    
+    # authenticate - but bypass db hit if we think they're already in.
+    my $remote = LJ::get_remote();
+    unless ($remote) {
+        $body = "<?needlogin?>";
+        return;
+    }
+
+    unless (LJ::get_cap($remote, "makepoll")) {
+        $body = "<?h1 $ML{'Sorry'} h1?><?p $ML{'.error.accttype'} p?>";
+        return;
+    }
+
+    # should we pregenerate something?
+    my $pgid = $FORM{pregen}+0;
+    LJ::run_hook('pregenerate_poll', $pgid, \%poll) if $pgid;
+
+    # show them the startup screen
+    if (LJ::did_post() && ! $FORM{'start_over'}) {
+
+        # load poll hash from %FORM and get action and error info
+        build_poll(\%FORM, \%poll, \%action, \@errors, \$error_count);
+
+        # perform actions on %poll
+        do_actions(\%poll, \%action, \@errors, \$error_count);
+
+        # generate poll preview for them
+        if (($FORM{'see_preview'} || $FORM{'see_code'}) && $error_count == 0) {
+            $body .= make_preview(\%FORM, \%poll);
+            return;
+        }
+    }
+
+    # show pregenerate options
+    $body .= LJ::run_hook('poll_pregeneration_html', $remote) unless LJ::did_post();
+
+    # show start page
+    $body .= make_form(\%poll, \@errors, \$error_count);
+
+    return;
+
+
     #######################################################
     #
     # Function definitions
@@ -244,7 +297,6 @@
         # all arguments are refs, nothing to return
         return;
     }
-    
 
     # apply action notes from %action hash to our %poll object
     sub do_actions {
@@ -640,58 +692,6 @@
 
         return LJ::html_hidden(@elements);
     }
-
-    #######################################################
-    #
-    # Generate page for the user
-    #
-
-    # variables to pass around
-    my %action;
-    my %poll;
-    my @errors;
-    my $error_count = 0;
-    
-    # authenticate - but bypass db hit if we think they're already in.
-    my $remote = LJ::get_remote();
-    unless ($remote) {
-        $body = "<?needlogin?>";
-        return;
-    }
-    
-    unless (LJ::get_cap($remote, "makepoll")) {
-        $body = "<?h1 $ML{'Sorry'} h1?><?p $ML{'.error.accttype'} p?>";
-        return;
-    }
-
-    # should we pregenerate something?
-    my $pgid = $FORM{pregen}+0;
-    LJ::run_hook('pregenerate_poll', $pgid, \%poll) if $pgid;
-
-    # show them the startup screen
-    if (LJ::did_post() && ! $FORM{'start_over'}) {
-
-        # load poll hash from %FORM and get action and error info
-        build_poll(\%FORM, \%poll, \%action, \@errors, \$error_count);
-
-        # perform actions on %poll
-        do_actions(\%poll, \%action, \@errors, \$error_count);
-
-        # generate poll preview for them
-        if (($FORM{'see_preview'} || $FORM{'see_code'}) && $error_count == 0) {
-            $body .= make_preview(\%FORM, \%poll);
-            return;
-        }
-    }
-
-    # show pregenerate options
-    $body .= LJ::run_hook('poll_pregeneration_html', $remote) unless LJ::did_post();
-
-    # show start page
-    $body .= make_form(\%poll, \@errors, \$error_count);
-
-    return;
-
 }
  _code?><?page 
 title=><?_code return $title; _code?>
