@@ -7166,7 +7166,7 @@ sub get_remote_ip
     eval {
         $ip = Apache->request->connection->remote_ip;
     };
-    return $ip || $ENV{'FAKE_IP'} || $ENV{'REMOTE_ADDR'};
+    return $ip || $ENV{'FAKE_IP'};
 }
 
 sub login_ip_banned
