@@ -69,7 +69,7 @@ $LJ::PROTOCOL_VER = ($LJ::UNICODE ? "1" : "0");
 #    0: unclustered  (unsupported)
 #    1: clustered, not pics (unsupported)
 #    2: clustered
-#    3: weekuserusage populated
+#    3: weekuserusage populated  (Note: this table's now gone)
 #    4: userproplite2 clustered, and cldversion on userproplist table
 #    5: overrides clustered, and style clustered
 $LJ::MAX_DVERSION = 5;

@@ -8,6 +8,8 @@ use strict;
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
+die "This script is no longer useful.\n";
+
 my $dbh = LJ::get_db_writer();
 
 my $todo = $dbh->selectrow_array("SELECT COUNT(*) FROM user WHERE dversion=2");

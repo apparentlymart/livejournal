@@ -487,7 +487,7 @@ if ($opt_pop)
 
     # convert users from dversion2 (no weekuserusage)
     if (my $d2 = $dbh->selectrow_array("SELECT userid FROM user WHERE dversion=2 LIMIT 1")) {
-        system("$ENV{'LJHOME'}/bin/upgrading/pop-weekuu.pl");
+        $dbh->do("UPDATE user SET dversion=3 WHERE dversion=2");
     }
 
     # convert users from dversion3 (unclustered props)

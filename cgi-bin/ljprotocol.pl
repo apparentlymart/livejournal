@@ -951,18 +951,7 @@ sub postevent
         }
     }
 
-    # update weekuserusage table, which keeps track of user activity
-    # for a given week.
-    {
-        my ($weeknum, $uafter, $ubefore) = LJ::weekuu_parts($now);
-        my $rv = $dbh->do("UPDATE weekuserusage SET ubefore=? WHERE ".
-                          "wknum=? AND userid=?", undef, $ubefore, $weeknum, $ownerid);
-        $dbh->do("INSERT IGNORE INTO weekuserusage (wknum, userid, ubefore, uafter) ".
-                 "VALUES (?,?,?,?)", undef, 
-                 $weeknum, $ownerid, $ubefore, $uafter) unless $rv > 0;
-    }
-
-     # notify weblogs.com of post if necessary
+    # notify weblogs.com of post if necessary
     if ($u->{'opt_weblogscom'} && LJ::get_cap($u, "weblogscom") &&
         $security eq "public" && ! $req->{'props'}->{'opt_backdated'})
     {
