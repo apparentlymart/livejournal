@@ -45,11 +45,17 @@ property Color weak_text {
     des = "Text color for the bar below entries";
     s1color = "weak_text";
 }
-property Color comment_bar_one {
-    des = "Background color for alternating comment bars";
+property Color comment_bar_one_bgcolor {
+    des = "Alternating background color for comment bars (one)";
 }
-property Color comment_bar_two {
-    des = "Background color for alternating comment bars";
+property Color comment_bar_two_fgcolor {
+    des = "Text color on alternating comment bars (one)";
+}
+property Color comment_bar_two_bgcolor {
+    des = "Alternating background color for comment bars (two)";
+}
+property Color comment_bar_one_fgcolor {
+    des = "Text color on alternating comment bars (two)";
 }
 property int box_width { 
     des = "Box width (pixels)";
@@ -75,8 +81,10 @@ set stronger_back = "#000000";
 set stronger_text = "#ffffff";
 set weak_back = "#aaaaaa";
 set weak_text = "#000000";
-set comment_bar_one = "#aaaaaa";
-set comment_bar_two = "#dddddd";
+set comment_bar_one_bgcolor = "#aaaaaa";
+set comment_bar_one_fgcolor = "#000000";
+set comment_bar_two_bgcolor = "#dddddd";
+set comment_bar_two_fgcolor = "#000000";
 
 set comment_userpic_style = "small";
 
@@ -566,14 +574,21 @@ function EntryPage::print_body () {
 }
 
 function EntryPage::print_comment (Comment c) {
-    var Color barc = $c.depth % 2 ? $*comment_bar_one : $*comment_bar_two;
+    var Color background; var Color color;
+    if ($c.depth % 2) {
+        $background = $*comment_bar_one_bgcolor;
+        $color = $*comment_bar_one_fgcolor;
+    } else {
+        $background = $*comment_bar_two_bgcolor;
+        $color = $*comment_bar_two_fgcolor;
+    }
     var string poster = defined $c.poster ? $c.poster->as_string() : "<i>(Anonymous)</i>";
     var string sub_icon;
     var int width = $*box_width - 50 - (($c.depth - 1) * 25);
     if (defined $c.subject_icon) {
         $sub_icon = $c.subject_icon->as_string();
     }
-    "<div style='background: $barc; margin-top: 10px;'>";
+    "<div style='background-color: $background; color: $color; margin-top: 10px;'>";
     "<table cellpadding='2' cellspacing='0' summary='0' style='width: ${width}px'><tr valign='top'>";
     var int td = 3;
     if (defined $c.userpic and $*comment_userpic_style != "off") { 
@@ -646,6 +661,7 @@ function print_theme_preview () {
 <tr align='left'>
 <td colspan="2" bgcolor="$*entry_back" style='color: $*entry_text'>
 Preview text, preview text, etc, etc..... words, words and more words.
+
 </td></tr>
 
 <tr bgcolor="$*weak_back"><td align='left' class='style: font-size: 8pt'>

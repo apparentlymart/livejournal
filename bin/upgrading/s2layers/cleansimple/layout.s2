@@ -676,14 +676,21 @@ function EntryPage::print_body () {
 
 # Clean style. Hate to clutter it up with this:
 function EntryPage::print_comment (Comment c) {
-    var Color barc = $c.depth % 2 ? $*comment_bar_one_bgcolor : $*comment_bar_two_bgcolor;
+    var Color background; var Color color;
+    if ($c.depth % 2) {
+        $background = $*comment_bar_one_bgcolor;
+        $color = $*comment_bar_one_fgcolor;
+    } else {
+        $background = $*comment_bar_two_bgcolor;
+        $color = $*comment_bar_two_fgcolor;
+    }
     var string poster = defined $c.poster ? $c.poster->as_string() : "<i>(Anonymous)</i>";
     var string sub_icon;
     var int width = 100 - 4 - (($c.depth - 1) * 2);
     if (defined $c.subject_icon) {
         $sub_icon = $c.subject_icon->as_string();
     }
-    "<div style='background: $barc; margin-top: 10px;'>";
+    "<div style='background-color: $background; color: $color; margin-top: 10px;'>";
     "<table cellpadding='2' cellspacing='0' summary='0' style='width: auto'><tr valign='top'>";
     var int td = 3;
     if (defined $c.userpic and $*comment_userpic_style != "off") { 
