@@ -23,7 +23,10 @@ body<=
  }
 
  # columns of our table, excluding username
- my @attribs = ('member', 'post', 'moderate', 'admin');
+ my @attribs = ('member', 'post', 'admin');
+
+ # when moderation is done, we can replace the above with:
+ #my @attribs = ('member', 'post', 'moderate', 'admin');
 
  my $mode = $POST{'mode'} || "";
 
