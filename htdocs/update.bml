@@ -296,9 +296,9 @@
         }
     }
 
-    $$body .= "<form method='post' action='update.bml$getextra' id='updateForm' name='updateForm'>";
+    $$body .= "<div style='width: 100%'><form method='post' action='update.bml$getextra' id='updateForm' name='updateForm'>";
     $$body .= LJ::entry_form($entry, \$$head, \$onload, $errors);
-    $$body .= "</form>";
+    $$body .= "</form></div>";
 
     $$bodyopts .= "onload=\"$onload\" onresize=\"shift_contents();\" ";
     return;

@@ -161,7 +161,7 @@ body<=
             # start edit form
             my $ret; my $js;
             
-            $ret .= "<form method='post' action='editjournal.bml$getextra' id='updateForm' name='updateForm'>";
+            $ret .= "<div style='width: 100%'><form method='post' action='editjournal.bml$getextra' id='updateForm' name='updateForm'>";
             $ret .= LJ::html_hidden('itemid', $ditemid,'mode','edit') . "\n";
 
             my $entry = {
@@ -189,7 +189,7 @@ body<=
 
             $ret .= "</pre>";
             $ret .= LJ::entry_form($entry, \$$head, \$onload);
-            $ret .= "</form>";
+            $ret .= "</form></div>";
 
             $$bodyopts .= "onload=\"$onload\" onresize=\"shift_contents();\" ";
             
