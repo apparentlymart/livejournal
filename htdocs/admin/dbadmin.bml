@@ -61,12 +61,16 @@
          next unless defined $weights{$sid};
          next unless defined $weights{$sid}->{$role};
          my $val = $FORM{$k}+0;
-         next if $val == $weights{$sid}->{$role}->{$what};
-         
+         my $old = $weights{$sid}->{$role}->{$what};
+         next if $val == $old;
+
          $dbh->do("UPDATE dbweights SET $what=$val WHERE ".
                   "dbid=$sid AND role='$role'");
          $weights{$sid}->{$role}->{$what} = $val;
-         $curr_changed = 1 if $what eq "curr";
+         if ($what eq "curr") {
+             $curr_changed = 1;
+             $roletweight{$role} += $val - $old;
+         }
      }
 
      if ($curr_changed) {
