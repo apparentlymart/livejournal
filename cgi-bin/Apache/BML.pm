@@ -1133,23 +1133,46 @@ sub get_language_default
 
 sub set_language
 {
-    $Apache::BML::cur_req->{'lang'} = $_[0];
-    Apache->request->notes('langpref' => $_[0]);
+    my ($lang) = @_;
+    my $req = $Apache::BML::cur_req;
+    $req->{'lang'} = $lang;
+    my $r = Apache->request;
+    $r->notes('langpref' => $lang);
+    my $getter = $Apache::BML::ML_GETTER;
+
+    no strict 'refs';
+    if ($lang eq "debug") {
+        *{"BML::ml"} = sub {
+            return $_[0];
+        };
+        *{"BML::ML::FETCH"} = sub {
+            return $_[1];
+        };
+    } elsif ($getter) {
+        *{"BML::ml"} = sub {
+            my ($code, $vars) = @_;
+            $code = $r->parsed_uri()->path() . $code
+                if $code =~ /^\./;
+            my $data = $getter->($lang, $code);
+            return $data unless $vars;
+            $data =~ s/\[\[(.+?)\]\]/$vars->{$1}/g;
+            return $data;
+        };
+        *{"BML::ML::FETCH"} = sub {
+            my $code = $_[1];
+            $code = $r->parsed_uri()->path() . $code
+                if $code =~ /^\./;
+            return $getter->($lang, $code);
+        };
+    };
+    
 }
 
 # multi-lang string
-# note: duplicated code for performance in BML::ML below!
+# note: sub is changed when BML::set_language is called
 sub ml
 {
-    my ($code, $vars) = @_;
-    return $code if $Apache::BML::cur_req->{'lang'} eq 'debug';
-    return "[ml_getter not defined]" unless $Apache::BML::ML_GETTER;
-    $code = $Apache::BML::cur_req->{'r'}->parsed_uri()->path() . $code
-        if $code =~ /^\./;
-    my $data = $Apache::BML::ML_GETTER->($Apache::BML::cur_req->{'lang'}, $code);
-    return $data unless $vars;
-    $data =~ s/\[\[(.+?)\]\]/$vars->{$1}/g;
-    return $data;
+    return "[ml_getter not defined]";
 }
 
 sub eurl
@@ -1331,14 +1354,9 @@ sub TIEHASH {
     return $self;
 }
 
-# note: duplicated code for performance in BML::ml() above!
+# note: sub is changed when BML::set_language is called.
 sub FETCH {
-    my ($t, $code) = @_;
-    return $code if $Apache::BML::cur_req->{'lang'} eq 'debug';
-    return "[ml_getter not defined]" unless $Apache::BML::ML_GETTER;
-    $code = $Apache::BML::cur_req->{'r'}->parsed_uri()->path() . $code
-        if $code =~ /^\./;
-    return $Apache::BML::ML_GETTER->($Apache::BML::cur_req->{'lang'}, $code);
+    return "[ml_getter not defined]";
 }
 
 # do nothing
