@@ -94,6 +94,13 @@ foreach my $skey (keys %$slaves)
 {
     my $s = $slaves->{$skey};
     printf "%-20s", $skey;
+
+    if ($s->{'dead'}) {
+	print "dead, skipping.\n";
+	push @errors, "$skey is dead.";
+	next;
+    }
+
     my $dbh = DBI->connect("DBI:mysql:mysql:$s->{'ip'}",
 			   $s->{'user'}, $s->{'pass'});
     unless ($dbh) {
