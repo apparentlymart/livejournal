@@ -115,4 +115,6 @@ BODY<=
 _CODE=)
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+post: htdocs/styles/edit_do.bml
+</LJDEP> _C=)

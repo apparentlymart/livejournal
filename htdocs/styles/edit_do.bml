@@ -320,4 +320,8 @@ if ($FORM{'mode'} eq "savechanges")
 _CODE=)
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+link: htdocs/styles/edit.bml, htdocs/developer/views.bml, htdocs/customview.cgi
+file: htdocs/vars.dat
+post: htdocs/styles/edit_do.bml
+</LJDEP> _C=)

@@ -121,4 +121,6 @@ _CODE=)
 PAGE=)(=_C <LJDEP>
 lib: LJ::TextMessage
 link: htdocs/login.bml, htdocs/support/faqbrowse.bml
+form: htdocs/tools/textmessage.bml
+post: htdocs/tools/textmessage.bml
 </LJDEP> _C=)

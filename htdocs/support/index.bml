@@ -43,4 +43,7 @@ Got some extra time on your hands?  Help out a LiveJournal user that has an open
 
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+link: htdocs/support/faq.bml, htdocs/support/submit.bml, htdocs/support/help.bml
+link: htdocs/support/highscores.bml, htdocs/support/changenotify.bml
+</LJDEP> _C=)

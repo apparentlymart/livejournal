@@ -42,4 +42,6 @@
 
  return $ret; 
 
-_CODE=)
+_CODE=)(=_C <LJDEP>
+link: htdocs/styles/browse/styleinfo.bml, htdocs/customview.cgi
+</LJDEP> _C=)

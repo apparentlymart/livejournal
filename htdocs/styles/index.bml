@@ -33,4 +33,8 @@ the Style Browser will let you browse through public styles
 created by other users.</li>
 </ul>
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+link: htdocs/developer/embedding.bml, htdocs/developer/styles.bml
+link: htdocs/developer/index.bml, htdocs/paidaccounts/index.bml
+link: htdocs/modify.bml, htdocs/styles/create.bml, htdocs/styles/edit.bml
+</LJDEP> _C=)

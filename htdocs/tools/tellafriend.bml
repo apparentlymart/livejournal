@@ -117,6 +117,7 @@ _CODE=)(=PAGE
 TITLE=>(=_CODE return $title; _CODE=)
 BODY=>(=_CODE return $body; _CODE=)
 PAGE=)(=_C <LJDEP>
-ib: cgi-bin/emailcheck.pl
-link: htdocs/login.bml, htdocs/lostinfo.bml, htdocs/users
+lib: cgi-bin/emailcheck.pl
+link: htdocs/login.bml, htdocs/lostinfo.bml, htdocs/users, htdocs/talkread.bml
+form: htdocs/tools/tellafriend.bml
 </LJDEP> _C=)

@@ -87,4 +87,7 @@ When done, press <INPUT TYPE=SUBMIT VALUE="Submit">.
 Back to the <A HREF="./">support area</A>.
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+link: htdocs/support/faq.bml, htdocs/support/index.bml
+post: htdocs/support/submit_do.bml
+</LJDEP> _C=)

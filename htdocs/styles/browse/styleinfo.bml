@@ -40,4 +40,6 @@
 
  return $ret; 
 
-_CODE=)
+_CODE=)(=_C <LJDEP>
+link: htdocs/userinfo.bml
+</LJDEP> _C=)

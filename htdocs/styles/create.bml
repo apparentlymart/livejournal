@@ -61,4 +61,8 @@ STANDOUT=)
 </FORM>
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+link: htdocs/developer/embedding.bml, htdocs/developer/views.bml
+link: htdocs/paidaccounts/index.bml
+post: htdocs/styles/create_do.bml
+</LJDEP> _C=)

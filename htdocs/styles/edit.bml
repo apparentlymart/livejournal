@@ -22,4 +22,7 @@ STANDOUT=)
 </form>
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+link: htdocs/styles/create.bml, htdocs/developer/styles.bml
+post: htdocs/styles/edit_do.bml
+</LJDEP> _C=)

@@ -287,5 +287,8 @@
 _CODE=)(=PAGE
 TITLE=>(=_CODE return $title; _CODE=)
 BODY=>(=_CODE return $body; _CODE=)<p>(=STANDOUT <B>Note:</B> The to-do list system is in beta.  We're well aware it has a lot of work needed, and it definitely needs to be documented-- especially the security related things. STANDOUT=)
-PAGE=)
-
+PAGE=)(=_C <LJDEP>
+form: htdocs/todo/index.bml
+post: htdocs/todo/index.bml
+link: htdocs/todo/index.bml, htdocs/todo/item.bml
+</LJDEP> _C=)

@@ -110,4 +110,7 @@ Back to the <A HREF="help.bml">list of open requests</A>.<BR>
 Back to the <A HREF="./">support area</A>.
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+link: htdocs/login.bml, htdocs/support/see_request.bml, htdocs/support/help.bml
+link: htdocs/support/index.bml
+</LJDEP> _C=)

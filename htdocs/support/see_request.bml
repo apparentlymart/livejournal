@@ -356,4 +356,10 @@ Back to the <A HREF="./">support area</A>.
 
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+link: htdocs/support/faqbrowse.bml, htdocs/styles/browse/styleinfo.bml
+link: htdocs/support/help.bml, htdocs/support/act.bml, htdocs/login.bml
+link: htdocs/guide/support.bml, htdocs/support/faq.bml, htdocs/support/index.bml
+img: htdocs/userpic
+post: htdocs/support/append_request.bml
+</LJDEP> _C=)

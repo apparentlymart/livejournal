@@ -121,4 +121,5 @@ BODY<=
 <=BODY
 PAGE=)(=_C <LJDEP>
 link: htdocs/tools/memories.bml, htdocs/tools/memadd.bml, htdocs/talkread.bml
+form: htdocs/tools/memories.bml
 </LJDEP> _C=)
