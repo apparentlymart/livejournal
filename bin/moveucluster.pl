@@ -148,20 +148,7 @@ sub multiMove {
                 next ITER;
             } elsif ($line =~ /^OK JOB (\d+):(\d+):(\d+)\s+([\d.]+)(?:\s*([\w ]+))?$/) {
                 my ($uid, $srcid, $dstid, $locktime) = ($1, $2, $3, $4);
-                my $opts = parseOpts( $5 );
-
-                # Nasty horrible shit, but without this you either have to make
-                # the options package-scoped and selectively override with
-                # local() or require that each job spec set all options. Such is
-                # the price of drinking the global-variable Kool-Aid.
-                $opts->{del} = $opt_del unless defined $opts->{del};
-                $opts->{destdel} = $opt_destdel unless defined $opts->{destdel};
-                $opts->{verbose} = $opt_verbose unless defined $opts->{verbose};
-                $opts->{movemaster} = $opt_movemaster unless defined $opts->{movemaster};
-                $opts->{prelocked} = $opt_prelocked unless defined $opts->{prelocked};
-                $opts->{expungedel} = $opt_expungedel unless defined $opts->{expungedel};
-                $opts->{ignorebit} = $opt_ignorebit unless defined $opts->{ignorebit};
-                $opts->{verify} = $opt_verify unless defined $opts->{verify};
+                my $opts = parseOpts($5);
 
                 my $u = $dbh->selectrow_hashref("SELECT * FROM user WHERE userid=?",
                                                 undef, $uid);
@@ -214,11 +201,17 @@ sub multiMove {
 
 ### Parse options from job specs into a hashref
 sub parseOpts {
-    my $raw = shift or return {};
-
+    my $raw = shift || "";
     my $opts = {};
+
     while ( $raw =~ m{\s*(\w+)=(\w+)}g ) {
         $opts->{ $1 } = $2;
+    }
+
+    foreach my $opt (qw(del destdel movemaster prelocked
+                        expungedel ignorebit verify)) {
+        next if defined $opts->{$opt};
+        $opts->{$opt} = eval "\$opt_$opt";
     }
 
     return $opts;
@@ -244,7 +237,8 @@ sub singleMove {
 
     my $u = $dbh->selectrow_hashref("SELECT * FROM user WHERE user=?", undef, $user);
 
-    my $rv = eval { moveUser($dbh, $u, $dclust); };
+    my $opts = parseOpts("");  # gets command-line opts
+    my $rv = eval { moveUser($dbh, $u, $dclust, $opts); };
 
     if ($rv) {
         print "Moved '$user' to cluster $dclust.\n";
