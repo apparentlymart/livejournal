@@ -752,9 +752,9 @@ sub show_poll
                 for (my $at=$from; $at<=$to; $at+=$by) {
                     $ret .= "<td style='text-align: center;'>";
                     $ret .= LJ::html_check({ 'type' => 'radio', 'name' => "pollq-$qid",
-                                             'value' => $at, 'id' => "pollq-${qid}-$at",
+                                             'value' => $at, 'id' => "pollq-$pollid-$qid-$at",
                                              'selected' => (defined $preval{$qid} && $at == $preval{$qid}) });
-                    $ret .= "<br /><label for='pollq-${qid}-$at'>$at</label></td>";
+                    $ret .= "<br /><label for='pollq-$pollid-$qid-$at'>$at</label></td>";
                 }
 
                 $ret .= "</tr></table>\n";
@@ -795,9 +795,9 @@ sub show_poll
                 # displaying a radio or checkbox
                 if ($do_form) {
                     $ret .= LJ::html_check({ 'type' => $q->{'type'}, 'name' => "pollq-$qid",
-                                             'value' => $itid, 'id' => "pollq-$qid-$itid",
+                                             'value' => $itid, 'id' => "pollq-$pollid-$qid-$itid",
                                              'selected' => ($preval{$qid} =~ /\b$itid\b/) });
-                    $ret .= " <label for='pollq-${qid}-$itid'>$item</label><br />";
+                    $ret .= " <label for='pollq-$pollid-$qid-$itid'>$item</label><br />";
                     next;
                 }
 
