@@ -862,7 +862,8 @@ sub Entry
 
     my $p = $arg->{'props'};
     if ($p->{'current_music'}) {
-        $e->{'metadata'}->{'music'} = LJ::ehtml($p->{'current_music'});
+        $e->{'metadata'}->{'music'} = $p->{'current_music'};
+        LJ::CleanHTML::clean_subject(\$e->{'metadata'}->{'music'});
     }
     if (my $mid = $p->{'current_moodid'}) {
         my $theme = defined $arg->{'moodthemeid'} ? $arg->{'moodthemeid'} : $u->{'moodthemeid'};
@@ -874,7 +875,8 @@ sub Entry
             if defined $LJ::CACHE_MOODS{$mid};
     }
     if ($p->{'current_mood'}) {
-        $e->{'metadata'}->{'mood'} = LJ::ehtml($p->{'current_mood'});
+        $e->{'metadata'}->{'mood'} = $p->{'current_mood'};
+        LJ::CleanHTML::clean_subject(\$e->{'metadata'}->{'mood'});
     }
 
     return $e;
