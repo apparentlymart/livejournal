@@ -212,7 +212,7 @@ sub suspend
 
         LJ::Con::fb_push( $u );
 
-        push @$out, [ "info", "User ${cmd}ed." ];
+        push @$out, [ "info", "User '$username' ${cmd}ed." ];
     }
 
     return 1;
