@@ -1,7 +1,13 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
 (=_CODE
-#line 2
  use strict;
  use vars qw(%FORM);
+
+ BML::set_content_type("text/html; charset=utf-8");
  
  my $lang = $FORM{'lang'};
  my $l = LJ::Lang::get_lang($lang);
@@ -284,3 +290,5 @@
  }
 
 _CODE=)
+</body>
+</html>
