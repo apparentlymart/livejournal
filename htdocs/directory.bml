@@ -147,9 +147,9 @@ BODY<=
  $info{'allwhat'} ||= "users";
 
  if ($FORM{'s_com'}) {
-     $ret .= "<A HREF=\"/community/search.bml\">&lt;&lt; New Query</A><P>\n";     
+     $ret .= "<a href=\"/community/search.bml\">&lt;&lt; New Query</a><p>\n";     
  } else {
-     $ret .= "<A HREF=\"/directorysearch.bml\">&lt;&lt; New Query</A><P>\n";
+     $ret .= "<a href=\"/directorysearch.bml\">&lt;&lt; New Query</a><p>\n";
  }
  unless (@{$info{'english'}}) {
      push @{$info{'english'}}, "wish to be listed in the public directory";
