@@ -725,6 +725,23 @@ sub get_friend_itemids { return LJ::get_friend_itemids($dbh, @_); }
 
 package LJ;
 
+# returns true if user B is a friend of user A (or if A == B)
+sub is_friend
+{
+    my $dbh = shift;
+    my $ua = shift;
+    my $ub = shift;
+    return 0 unless ($ua->{'userid'});
+    return 0 unless ($ub->{'userid'});
+    return 1 if ($ua->{'userid'} == $ub->{'userid'});
+
+    my $sth = $dbh->prepare("SELECT COUNT(*) FROM friends WHERE userid=$ua->{'userid'} AND friendid=$ub->{'userid'}");
+    $sth->execute;
+    my ($is_friend) = $sth->fetchrow_array;
+    $sth->finish;
+    return $is_friend;
+}
+
 # args: ($dbs, @itemids)
 # return: hashref with keys being itemids, values being [ $subject, $text ]
 sub get_logtext
