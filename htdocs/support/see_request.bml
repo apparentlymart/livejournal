@@ -31,8 +31,6 @@ BODY<=
  my $owner_mode = 0;
  my $remote = LJ::get_remote($dbh) || {};
  
- $remote->{'_support'}->{'foo_s1'} = "s1";
-
  LJ::Support::init_remote($dbh, $remote, \%FORM);
  
  # load category this request is in
@@ -229,7 +227,7 @@ BODY<=
  $ret .= "<TABLE BORDER=0>\n";
  
  $ret .= "<TR VALIGN=MIDDLE><TD ALIGN=RIGHT>From:</TD><td>";
- if ($remote->{'userid'}) {
+ if ($remote && $remote->{'userid'}) {
      $ret .= "(=LJUSER $remote->{'user'} LJUSER=)";
  } else {
      $ret .= "(not logged in)";
