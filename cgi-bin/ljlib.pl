@@ -3161,7 +3161,7 @@ sub make_journal
     my $eff_view = $LJ::viewinfo{$view}->{'styleof'} || $view;
     my $s1prop = "s1_${eff_view}_style";
 
-    my @needed_props = ("stylesys", "s2_style", "url", "urlname", $s1prop,
+    my @needed_props = ("stylesys", "s2_style", "url", "urlname", $s1prop, "opt_nctalklinks",
                         "renamedto",  "opt_blockrobots", "renamedto", "opt_usesharedpic");
 
     # preload props the view creation code will need later (combine two selects)
@@ -3170,6 +3170,13 @@ sub make_journal
     }
 
     LJ::load_user_props($dbs, $u, @needed_props);
+
+    # if the remote is the user to be viewed, make sure the $remote
+    # hashref has the value of $u's opt_nctalklinks (though with
+    # LJ::load_user caching, this may be assigning between the same
+    # underlying hashref)
+    $remote->{'opt_nctalklinks'} = $u->{'opt_nctalklinks'} if
+        ($remote && $remote->{'userid'} == $u->{'userid'});
 
     my $stylesys = 1;
     if ($styleid == -1) {

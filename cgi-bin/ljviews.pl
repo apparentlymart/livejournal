@@ -301,7 +301,6 @@ sub create_view_lastn
     }
 
     foreach ("name", "url", "urlname") { LJ::text_out(\$u->{$_}); }
-    LJ::load_user_props($dbs, $remote, "opt_nctalklinks");
 
     my %FORM = ();
     LJ::decode_url_string($opts->{'args'}, \%FORM);
@@ -701,7 +700,6 @@ sub create_view_friends
     }
 
     foreach ("name", "url", "urlname") { LJ::text_out(\$u->{$_}); }
-    LJ::load_user_props($dbs, $remote, "opt_nctalklinks");
 
     my %friends_page = ();
     $friends_page{'name'} = LJ::ehtml($u->{'name'});
@@ -1374,7 +1372,6 @@ sub create_view_day
     }
 
     foreach ("name", "url", "urlname") { LJ::text_out(\$u->{$_}); }
-    LJ::load_user_props($dbs, $remote, "opt_nctalklinks");
 
     my %day_page = ();
     $day_page{'username'} = $user;
