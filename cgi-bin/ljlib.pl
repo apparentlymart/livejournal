@@ -371,7 +371,8 @@ sub get_recent_items
 
     if ($clusterid) {
         my $source = $opts->{'clustersource'} eq "slave" ? "slave" : "";
-        $logdb = LJ::get_dbh("cluster${clusterid}$source");
+        $logdb = LJ::get_dbh("cluster${clusterid}$source",
+                             "cluster$clusterid");  # might have no slave
     }
 
     # community/friend views need to post by log time, not event time
