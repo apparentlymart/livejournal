@@ -1,28 +1,28 @@
-(=PAGE
+<?page
 TITLE=>Edit Style
 
 BODY<=
 
-(=H1 Edit a Style H1=)
-(=P
+<?h1 Edit a Style h1?>
+<?p
 After you <a href="/styles/create.bml"><b>create a style</b></a>, you can edit it here.  To read more about the style system, go <a href="/developer/styles.bml">here</a>.
-P=)
+p?>
 
 <form action="edit_do.bml" method="post">
 
-(=STANDOUT
+<?standout
 <table>
-(=_CODE
+<?_code
  return LJ::auth_fields(\%FORM);
- _CODE=)
+ _code?>
 <tr><td></td><td align="center"><input type="submit" value="Proceed..."></td></tr>
 </table>
-STANDOUT=)
+standout?>
 
 </form>
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 link: htdocs/styles/create.bml, htdocs/developer/styles.bml
 post: htdocs/styles/edit_do.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

@@ -1,8 +1,8 @@
-(=PAGE
+<?page
 TITLE=>Create Style
 BODY<=
 
-(=_CODE
+<?_code
 
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
@@ -82,13 +82,13 @@ BODY<=
      }
      else
      {
-         $ret .= "(=H1 Error H1=)(=P You already have a style of this type named <B>$des</B>.  If you really want to create a new style of type <B>$view</B>, then go modify your old $view style, change its name, and then come back here to create a new style of this type.";
+         $ret .= "<?h1 Error h1?><?p You already have a style of this type named <B>$des</B>.  If you really want to create a new style of type <B>$view</B>, then go modify your old $view style, change its name, and then come back here to create a new style of this type.";
          $ret .= "<CENTER><FORM METHOD=POST ACTION=\"/styles/edit_do.bml\">\n";
          $ret .= "<INPUT TYPE=HIDDEN NAME=user VALUE=\"$user\">\n";
          $ret .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"$hpassword\">\n";
          $ret .= "<INPUT TYPE=HIDDEN NAME=mode VALUE=\"editstyle\">\n";
          $ret .= "<INPUT TYPE=HIDDEN NAME=styleid VALUE=\"$oldid\">\n";
-         $ret .= "<INPUT TYPE=SUBMIT VALUE=\"Edit Style\"></FORM></CENTER> P=)";
+         $ret .= "<INPUT TYPE=SUBMIT VALUE=\"Edit Style\"></FORM></CENTER> p?>";
          return $ret;
          
      }
@@ -102,19 +102,19 @@ BODY<=
      $new_id = $sth->{'mysql_insertid'};
  }
 
- $ret .= "(=H1 Success H1=)(=P Your style has been created and has been temporarily named <B>$des</B>.  You can begin editing it by pressing the button below.... \n";
+ $ret .= "<?h1 Success h1?><?p Your style has been created and has been temporarily named <B>$des</B>.  You can begin editing it by pressing the button below.... \n";
  $ret .= "<CENTER><FORM METHOD=POST ACTION=\"/styles/edit_do.bml\">\n";
  $ret .= "<INPUT TYPE=HIDDEN NAME=user VALUE=\"$user\">\n";
  $ret .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"$hpassword\">\n";
  $ret .= "<INPUT TYPE=HIDDEN NAME=mode VALUE=\"editstyle\">\n";
  $ret .= "<INPUT TYPE=HIDDEN NAME=styleid VALUE=\"$new_id\">\n";
- $ret .= "<INPUT TYPE=SUBMIT VALUE=\"Edit Style\"></FORM></CENTER> P=)";
+ $ret .= "<INPUT TYPE=SUBMIT VALUE=\"Edit Style\"></FORM></CENTER> p?>";
 
  return $ret;
 
-_CODE=)
+_code?>
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 post: htdocs/styles/edit_do.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

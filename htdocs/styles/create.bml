@@ -1,29 +1,29 @@
-(=PAGE
+<?page
 TITLE=>Create Style
 BODY<=
 
-(=H1 Create a Style H1=)
-(=P
+<?h1 Create a Style h1?>
+<?p
 From here you can create a new personal-style, useful if you're going to either <A HREF="/developer/embedding.bml">embed LiveJournal in your homepage</A> or you want to make a public style that everybody can use and you need to work on it here first, rather than in your overrides section.  Note that only users with <A HREF="/paidaccounts/">paid accounts</A> can create their own styles.
- P=)
+ p?>
     
 <FORM ACTION="/styles/create_do.bml" METHOD="POST">
 
-(=STANDOUT
+<?standout
 <TABLE>
-(=_CODE
+<?_code
  return LJ::auth_fields(\%FORM);
- _CODE=)
+ _code?>
 </TR>
 </TABLE>
-STANDOUT=)
+standout?>
 
-(=H1 Select Style Type H1=)
-(=P
+<?h1 Select Style Type h1?>
+<?p
 A style only affects one <A HREF="/developer/views.bml">view type</A>.  If you want to create a matching set of styles for your journal, you have to create your style for each view type.
-P=)
+p?>
 
-(=_CODE
+<?_code
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -52,17 +52,17 @@ P=)
  
  return $ret;
 
-_CODE=)
+_code?>
 
-(=STANDOUT
+<?standout
 <INPUT TYPE="SUBMIT" VALUE="Create">
-STANDOUT=)
+standout?>
 
 </FORM>
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 link: htdocs/developer/embedding.bml, htdocs/developer/views.bml
 link: htdocs/paidaccounts/index.bml
 post: htdocs/styles/create_do.bml
-</LJDEP> _C=)
+</LJDEP> _c?>
