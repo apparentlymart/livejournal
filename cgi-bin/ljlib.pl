@@ -188,10 +188,14 @@ sub use_diff_db {
 sub get_blob_domainid
 {
     my $name = shift;
-    return 1 if $name eq "userpic";
+    my $id = {
+        "userpic" => 1,
+        "phonepost" => 2,
+    }->{$name};
     # FIXME: add hook support, so sites can't define their own
     # general code gets priority on numbers, say, 1-200, so verify
     # hook returns a number 201-255
+    return $id if $id;
     die "Unknown blob domain: $name";
 }
 
