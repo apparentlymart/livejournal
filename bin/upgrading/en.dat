@@ -1670,7 +1670,9 @@ You may wish to go back and try again, selecting fewer interests to add.
 
 /login.bml.login.text1=To login to [[sitename]], enter your username and password below.  <b>New Users:</b> To create an account, <a href='/create.bml'>go here</a>.
 
-/login.bml.login.text2=You may also specify when your login expires.  By default your login will expire when you close your browser, which is best on public computers.  However, if you're the only user of your computer and nobody else has access to it, you may choose to remain logged in forever.
+/login.bml.login.text2=By default your login will expire when you close your browser, which is best on public computers.  However, if you're the only user of your computer and nobody else has access to it, you may choose to remain logged in forever.
+
+/login.bml.login.text3=[[username]], you are now logged in to [[sitename]].
 
 /login.bml.login.username=Username:
 

@@ -175,8 +175,12 @@
         }
     }
 
-    $body .= "<?h1 $ML{'.login.head'} h1?>";
-    $body .= "<?p " . BML::ml(".login.text1", {'sitename' => $LJ::SITENAME}) . " p?>\n";
+    if ($remote) {
+        $body .= "<?p " . BML::ml(".login.text3", {'sitename' => $LJ::SITENAME,
+                                                   'username' => LJ::ljuser($remote)}) . " p?>\n";
+    } else {
+        $body .= "<?p " . BML::ml(".login.text1", {'sitename' => $LJ::SITENAME}) . " p?>\n";
+    }
     $body .= "<?p $ML{'.login.text2'} p?>\n";
         
     $body .= "<form action='login.bml' method='post'>\n";
