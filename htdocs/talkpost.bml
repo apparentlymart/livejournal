@@ -9,8 +9,6 @@ body<=
     
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
     
-    my $dbr = LJ::get_db_reader();
-    my ($sth, $sql);
     my $errtxt;
 
     my $pics = LJ::Talk::get_subjecticons();
@@ -43,12 +41,12 @@ body<=
     my $dbcm = $dbcs->{'dbh'};
     my $dbcr = $dbcs->{'reader'};
 
-    return $ML{'error.nodb'} unless $dbcr && $dbr;
+    return $ML{'error.nodb'} unless $dbcr;
     return $LJ::MSG_READONLY_USER if $LJ::CLUSTER_DOWN{0} || ! $dbcm;
 
     # redirect if account was renamed
     if ($u->{'journaltype'} eq "R") {
-        LJ::load_user_props($dbr, $u, "renamedto");
+        LJ::load_user_props($u, "renamedto");
           if ($u->{'renamedto'} ne "") {
               my $id = $FORM{'itemid'}+0;
               return BML::redirect("$LJ::SITEROOT/talkpost.bml?journal=$u->{'renamedto'}&itemid=$id");
@@ -65,7 +63,7 @@ body<=
     {
         my $qparentid = $init->{'replyto'};
 
-        $sql = "SELECT t.posterid, t.nodetype, t.nodeid AS 'itemid', ".
+        my $sql = "SELECT t.posterid, t.nodetype, t.nodeid AS 'itemid', ".
             "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(t.datepost) AS 'secondsold', ".
             "t.state, l.anum FROM talk2 t, log2 l WHERE l.journalid=$u->{'userid'} AND ".
             "l.jitemid=t.nodeid AND t.journalid=$u->{'userid'} AND t.jtalkid=$qparentid";
@@ -85,7 +83,7 @@ body<=
         
         ### load the talk properties
         
-        LJ::load_talk_props2($dbcr, $u->{'userid'}, [ $init->{'replyto'} ], {$init->{'replyto'} => $parpost}); 
+        LJ::load_talk_props2($u->{'userid'}, [ $init->{'replyto'} ], {$init->{'replyto'} => $parpost}); 
 
         if($LJ::UNICODE && $parpost->{'unknown8bit'}) {
             LJ::item_toutf8($u, \$parpost->{'subject'}, \$parpost->{'body'}, {});
@@ -116,16 +114,15 @@ body<=
     $parpost ||= $item;  # if there's no parent post, remote is reply to top-level item
 
     my ($up, $ur);  # $up = user posted journal item; $ur = user remote is replying to
-    LJ::load_userids_multiple([
-                                     $item->{'posterid'} => \$up,
-                                     $parpost->{'posterid'} => \$ur,
-                                     ], [ $u ]);
+    LJ::load_userids_multiple([ $item->{'posterid'} => \$up,
+                                $parpost->{'posterid'} => \$ur, ],
+                              [ $u ]);
 
     my $remote = LJ::get_remote();
 
     my @user_props = ("opt_notalkicons", "opt_logcommentips", "opt_whoscreened");
     push @user_props, "opt_blockrobots" if $u->{'statusvis'} eq 'V';
-    LJ::load_user_props($dbr, $u, @user_props);
+    LJ::load_user_props($u, @user_props);
     if ($u->{'statusvis'} ne 'V' || $u->{'opt_blockrobots'}) {
         $head = LJ::robot_meta_tags();
     }
@@ -141,7 +138,7 @@ body<=
     # checked screened post
     return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.noreply_screened'} p?>"
         if $parpost->{'state'} eq "S" 
-        and not LJ::Talk::can_unscreen($dbr, $remote, $u, $up, $ur->{'user'});
+           && (! $ur || ! LJ::Talk::can_unscreen($remote, $u, $up, $ur->{'user'}));
 
     return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.noreply_deleted'} p?>"
         if $parpost->{'state'} eq "D";
@@ -167,40 +164,39 @@ body<=
 
     my %userpics;
     if ($picid) {
-        LJ::load_userpics($dbr, \%userpics, [ $picid ]);
-          my $alt = $ur->{'name'};
-          if ($pickw) {
-              $alt .= ": $pickw";
-          }
-          $alt = LJ::ehtml($alt);
-          $ret .= "<td><img src='$LJ::USERPIC_ROOT/$picid/$ur->{'userid'}' width='$userpics{$picid}->{'width'}' ".
-              "height='$userpics{$picid}->{'height'}' align='absmiddle' ".
-              "hspace='3' title='$alt' alt='' /></td>";
-      }
+        LJ::load_userpics(\%userpics, [ $picid ]);
+
+        # not auto-vivifying $ur here because $picid is based
+        # on $ur existing in the first place
+        my $alt = $ur->{'name'};
+        $alt .= ": $pickw" if $pickw;
+        $alt = LJ::ehtml($alt);
+        $ret .= "<td><img src='$LJ::USERPIC_ROOT/$picid/$ur->{'userid'}' width='$userpics{$picid}->{'width'}' ".
+                "height='$userpics{$picid}->{'height'}' align='absmiddle' ".
+                "hspace='3' title='$alt' alt='' /></td>";
+    }
 
     $ret .= "<td>";
 
     # who-wrote-where
     {
-        my $if_user = ($ur && $ur->{'user'} ne "");
-        my $if_comm = (! $init->{'replyto'} && $up->{'userid'} != $u->{'userid'});
-        my $mlitem = "talk." . ($if_user ? "somebodywrote" : "anonwrote") 
-            . ($if_comm ? "_comm" : "");
-        my %params;
-        %params = ('realname' => BML::eall($ur->{'name'}),
-                   'userlink' => LJ::ljuser($ur->{'user'}),
-                   )
-            if $if_user;
-        $params{'commlink'} = "<?ljcomm $u->{'user'} ljcomm?>"
-            if $if_comm;
-        if ($if_user || $if_comm) {
-            $ret .= BML::ml($mlitem, \%params);
+        my $is_shared = $u->{'journaltype'} eq 'C' || $u->{'journaltype'} eq 'S';
+        my $suffix = $is_shared ? "_comm" : "";
+
+        # user logged in
+        if ($ur) {
+            $ret .= BML::ml("talk.somebodywrote$suffix",
+                            { 'realname' => LJ::ehtml($ur->{'name'}),
+                              'userlink' => LJ::ljuser($ur),
+                              'commlink' => LJ::ljuser($u) });
+
+        # user anonymous
         } else {
-            $ret .= BML::ml($mlitem);
+            $ret .= BML::ml("talk.anonwrote$suffix",
+                            { 'commlink' => LJ::ljuser($u) });
         }
     }
-    
-    
+
     unless ($init->{'replyto'}) {
         my $etime = $item->{'eventtime'};
         $etime =~ s!(\d\d\d\d)-(\d\d)-(\d\d)!LJ::date_to_view_links($u, $&)!e;
@@ -269,11 +265,11 @@ body<=
         my $cleansubject = $parpost->{'subject'};
         if ($init->{'replyto'}) {
             # comments can't have HTML in subjects at all
-            $cleansubject = BML::eall($cleansubject);
+            $cleansubject = LJ::ehtml($cleansubject);
         } else {
             # but journal entries can have some
             LJ::CleanHTML::clean_subject(\$cleansubject);
-              BML::ebml(\$cleansubject);
+            BML::ebml(\$cleansubject);
           }
         $ret .= "<font face=\"Arial,Helvetica\" size='+1'><i><b>$cleansubject</b></i></font><br />\n";
     }

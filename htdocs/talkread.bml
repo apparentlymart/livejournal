@@ -15,10 +15,6 @@ body<=
 
  return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
- my $dbr = LJ::get_db_reader();
- my ($sth, $sql);
- my $errtxt;
-
  my $pics = LJ::Talk::get_subjecticons();
 
  ## workaround mail client bug when don't understand quoted-printable.
@@ -74,10 +70,6 @@ if ($uri =~ m!/(\d+)\.html$!) {
  my $thread = $init->{'thread'};
  $itemid = $init->{'itemid'}+0;
 
- my $dbcs = LJ::get_cluster_set($u);
- my $dbcm = $dbcs->{'dbh'};
- my $dbcr = $dbcs->{'reader'};
-
  my $item = LJ::Talk::get_journal_item($u, $itemid);
 
  if ($init->{'oldurl'} && $item) {
@@ -131,6 +123,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
  my $remote = LJ::get_remote();
 
  ####  Check security before viewing this post
+ my $errtxt;
  return $errtxt unless LJ::Talk::check_viewable($remote, $item, \%GET, \$errtxt);
 
  my $showmultiform = $remote &&
@@ -176,13 +169,14 @@ if ($uri =~ m!/(\d+)\.html$!) {
  }
 
  $ret .= "<td>";
- if ($up->{'user'} eq $u->{'user'}) {
-     $ret .= BML::ml("talk.somebodywrote", { 'realname' => BML::eall($up->{'name'}),
-                                             'userlink' => LJ::ljuser($up->{'user'}) });
+ my $is_shared = $u->{'journaltype'} eq 'C' || $u->{'journaltype'} eq 'S';
+ if ($is_shared) {
+     $ret .= BML::ml("talk.somebodywrote_comm", { 'realname' => LJ::ehtml($up->{'name'}),
+                                                  'userlink' => LJ::ljuser($up),
+                                                  'commlink' => LJ::ljuser($u) });
  } else {
-     $ret .= BML::ml("talk.somebodywrote_comm", { 'realname' => BML::eall($up->{'name'}),
-                                                  'userlink' => LJ::ljuser($up->{'user'}),
-                                                  'commlink' => "<?ljcomm $u->{'user'} ljcomm?>" });
+     $ret .= BML::ml("talk.somebodywrote", { 'realname' => LJ::ehtml($up->{'name'}),
+                                             'userlink' => LJ::ljuser($up) });
  }
 
  my $etime = $item->{'eventtime'};
@@ -359,7 +353,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
                  $ret .= " width='$w' title='$alt' alt='' height='$h' />";
              }
 
-             my $cleansubject = LJ::eall($post->{'subject'});
+             my $cleansubject = LJ::ehtml($post->{'subject'});
              $ret .= "<font size='+1' face='Arial,Helvetica'><b>$cleansubject</b></font> $icon";
              $ret .= "<br />$user\n";
              $ret .= "<br />$datepost\n";
@@ -416,7 +410,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
 
              $ret .= "<a name='t$dtid'></a><table><tr>";
              $ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
-             $ret .= "<td><a href='" . $talkargs->("thread=$dtid") . "'>" . BML::eall($post->{'subject'} || $T{'nosubject'}) . "</a> - $user, <i>$post->{'datepost'}</i></td></tr></table>\n";
+             $ret .= "<td><a href='" . $talkargs->("thread=$dtid") . "'>" . LJ::ehtml($post->{'subject'} || $T{'nosubject'}) . "</a> - $user, <i>$post->{'datepost'}</i></td></tr></table>\n";
          }
      }
      
