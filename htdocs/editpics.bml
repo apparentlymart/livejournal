@@ -125,16 +125,37 @@
                         'image/png' => 'png',
                     }->{$ctype{$picid}};
 
+                    my $deleted = 0;
+
                     # try and delete from either the blob server or database,
                     # and only after deleting the image do we delete the metadata.
                     if ($LJ::USERPIC_BLOBSERVER &&
                         LJ::Blob::delete($u, "userpic", $fmt, $picid)) {
                         $dbh->do("DELETE FROM userpic WHERE picid=$picid");
-                            
+                        $deleted = 1;
                     } elsif ($dbcm->do("DELETE FROM userpicblob2 WHERE ".
                                        "userid=? AND picid=?", undef,
                                        $u->{userid}, $picid) > 0) {
                         $dbh->do("DELETE FROM userpic WHERE picid=$picid");
+                        $deleted = 1;
+                    }
+                    
+                    # if we didn't end up deleting, it's either because of 
+                    # some transient error, or maybe there was nothing to delete
+                    # for some bizarre reason, in which case we should verify
+                    # that and make sure they can delete their metadata
+                    if (! $deleted) {
+                        my $present;
+                        if ($LJ::USERPIC_BLOBSERVER) {
+                            my $blob = LJ::Blob::get($u, "userpic", $fmt, $picid);
+                            $present = length($blob) ? 1 : 0;
+                        }
+                        $present ||= $dbcm->selectrow_array("SELECT COUNT(*) FROM userpicblob2 WHERE ".
+                                                            "userid=? AND picid=?", undef, $u->{'userid'},
+                                                            $picid);
+                        if (! int($present)) {
+                            $dbh->do("DELETE FROM userpic WHERE picid=$picid");
+                        }
                     }
                 }
                 
@@ -282,19 +303,24 @@
 
                 $picid = $dbh->{'mysql_insertid'};
                 
+                my $clean_err = sub {
+                    $dbh->do("DELETE FROM userpic WHERE picid=?", undef, $picid) if $picid;
+                    return $err->(@_);
+                };
+
                 ### insert the blob
                 if ($LJ::USERPIC_BLOBSERVER) {
                     my $et;
                     my $fmt = lc($filetype);
                     my $rv = LJ::Blob::put($u, "userpic", $fmt, $picid, $POST{'userpic'}, \$et);
-                    return $err->($et) unless $rv;
+                    return $clean_err->("Error saving to media server: $et") unless $rv;
                 } else {
                     my $dbcm = LJ::get_cluster_master($u);
                     return $err->($ML{'error.nodb'}) unless $dbcm;
                     $dbcm->do("INSERT INTO userpicblob2 (userid, picid, imagedata) " .
                               "VALUES (?, ?, ?)",
                               undef, $u->{'userid'}, $picid, $POST{'userpic'});
-                    return $err->($dbcm->errstr) if $dbcm->err;
+                    return $clean_err->($dbcm->errstr) if $dbcm->err;
                 }
             }
                 
