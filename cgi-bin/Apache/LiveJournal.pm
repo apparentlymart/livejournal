@@ -372,23 +372,27 @@ sub trans
     # normal (non-domain) journal view
     if ($uri =~ m!
         ^/(users\/|community\/|\~)  # users/community/tilde
-        (\w{1,15})                  # mandatory username
+        ([^/]*)                     # potential username
         (.*)?                       # rest
         !x)
     {
         my ($part1, $user, $rest) = ($1, $2, $3);
-        unless (length $rest) {
-            # FIXME: redirect to add slash
-            # but for now, let it work:
-            $rest = "/" unless length $rest;
-        }
+
+        # get what the username should be
+        my $cuser = LJ::canonical_username($user);
+        return DECLINED unless length($cuser);
+
+        my $srest = $rest || '/';
+        
+        # redirect to canonical username and/or add slash if needed
+        return redir($r, "http://$host$hostport/$part1$cuser$srest$args_wq")
+            if $cuser ne $user or not $rest;
         
         my $vhost = { 'users/' => '', 'community/' => 'community',
                       '~' => 'tilde' }->{$part1};
-
+        
         my $view = $determine_view->($user, $vhost, $rest);
         return $view if defined $view;
-        return DECLINED;
     }
 
     # protocol support
