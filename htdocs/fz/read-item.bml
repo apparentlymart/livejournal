@@ -9,7 +9,6 @@ _INFO=)<HTML>
  my ($sth, $ret);
 
  require 'cleanhtml.pl';
- &load_subjecticon;
 
  my $ret = "";
 
@@ -79,7 +78,6 @@ _INFO=)<HTML>
  $ret .= "$extra says...</B>";
 
  my $etime = $item->{'eventtime'};
- $etime =~ s!(\d\d\d\d)-(\d\d)-(\d\d)!<A HREF="/users/$u->{'user'}/day?year=$1&month=$2&day=$3">$&</A>!;
  $ret .= "<BR><FONT SIZE=-1>@ $etime</FONT>";
 
  $ret .= "</TD></TR></TABLE>";
@@ -92,7 +90,7 @@ _INFO=)<HTML>
 
  $ret .= "<CENTER><B><A HREF=\"/talkpost.bml?itemid=$FORM{'itemid'}\">(Post a new comment)</A></B></CENTER>";
 
- 
+# TODO: Run the HTML cleaner over the subject and avoid this... 
 &strip_bad_code(\$ret);
 return $ret;
 

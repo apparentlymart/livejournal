@@ -42,7 +42,7 @@ while (my $cm = $sth->fetchrow_hashref)
    push @{$com{'root'}->{'replies'}}, $key;
 }
 
-$sth = $dbh->prepare("SELECT userpost AS 'poster', parenttalkid, talkid, itemid, datepost AS 'sortby', subject, LEFT(body, $TRUNC_SUBJECT) AS 'altsubject', datepost AS 'datetime' FROM talkpost WHERE itemid IN ($itemid_in)");
+$sth = $dbh->prepare("SELECT ta.posterid AS 'poster', ta.parenttalkid, ta.talkid, ta.nodeid, ta.datepost AS 'sortby', tx.subject, LEFT(tx.body, $TRUNC_SUBJECT) AS 'altsubject', ta.datepost AS 'datetime' FROM talk AS ta, talktext AS tx WHERE ta.nodeid IN ($itemid_in) AND ta.talkid=tx.talkid");
 $sth->execute;
 if ($dbh->err) { die $dbh->errstr; }
 while (my $cm = $sth->fetchrow_hashref)

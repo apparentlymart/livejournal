@@ -8,15 +8,16 @@ _INFO=)
  my ($sth, $ret);
 
  require 'cleanhtml.pl';
- &load_subjecticon;
+# &load_subjecticon;
 
  my $talkid = $FORM{'talkid'}+0;
  unless ($talkid) {
      return "(=H1 Error H1=)(=P No talkid given. P=)";
  }
 
- my $sth = $dbh->prepare("SELECT itemid, userpost, datepost, parenttalkid, subject, body, state FROM talkpost WHERE talkid=$talkid");
+ my $sth = $dbh->prepare("SELECT d.nodeid as itemid, u.user as userpost, d.datepost, d.parenttalkid, t.subject, t.body, d.state FROM talk as d, talktext as t LEFT JOIN user u ON u.userid=d.posterid WHERE d.talkid=$talkid AND d.talkid=t.talkid");
  $sth->execute;
+if ($dbh->err) { die $dbh->errstr; }
  my $ti = $sth->fetchrow_hashref;
  unless ($ti) {
      return "(=H1 Error H1=)(=P No such comment. P=)";
@@ -25,6 +26,7 @@ _INFO=)
  my $qitemid = $ti->{'itemid'}+0;
  $sth = $dbh->prepare("SELECT l.ownerid, l.posterid, lt.event, lt.subject, l.eventtime, l.security, l.allowmask, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(l.logtime) AS 'secondsold' FROM log l, logtext lt WHERE l.itemid=lt.itemid AND l.itemid=$qitemid");
  $sth->execute;
+if ($dbh->err) { die $dbh->errstr; }
  my $item = $sth->fetchrow_hashref;
  unless ($item) {
      return "(=H1 Error H1=)(=P No such entry. P=)";
@@ -84,7 +86,6 @@ _INFO=)
      if ($userpost) {
 	 $user = "<B><A HREF=\"/users/$userpost/\">$userpost</A></B> <A HREF=\"/userinfo.bml?user=$userpost\"><IMG BORDER=0 SRC=\"/img/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE></A>";
      }
-     my $icon = &show_image($ti->{'subjecticon'});
      $ret .= "<P><TABLE WIDTH=100%><TR>";
      $ret .= "<TD ROWSPAN=2><IMG SRC=\"/img/dot.gif\" HEIGHT=1 WIDTH=" . ($opts->{'depth'} * 25) . "></TD>";
      $ret .= "<TD BGCOLOR=#C0C0FF WIDTH=100%>";
@@ -98,7 +99,7 @@ _INFO=)
      }
      
      
-     $ret .= "<FONT SIZE=+1 FACE=\"Arial,Helvetica\"><B>" . &ehtml($ti->{'subject'} || "(no subject)") . "</B></FONT> $icon";
+     $ret .= "<FONT SIZE=+1 FACE=\"Arial,Helvetica\"><B>" . &ehtml($ti->{'subject'} || "(no subject)") . "</B></FONT>";
      $ret .= "<BR>$user";
      
      if ($BMLClient::COOKIE{"ljuser"}) {
@@ -114,7 +115,7 @@ _INFO=)
      
      ## escape BML block codes.  so (=TAG ... TAG=) turns into (&#0061; ... TAG=)
      $ti->{'body'} =~ s/\(=/\(&#0061;/g;
-     &LJ::CleanHTML::clean_event(\$ti->{'body'});	
+     &LJ::CleanHTML::clean_comment(\$ti->{'body'});	
      $ret .= $ti->{'body'};
      
      $ret .= "<P><FONT SIZE=-2><A HREF=\"/talkpost.bml?replyto=$talkid\">(Reply to this)</A></FONT>";
