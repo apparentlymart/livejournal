@@ -1259,8 +1259,8 @@ register_tablecreate("dbinfo", <<'EOC');
 CREATE TABLE dbinfo (
   dbid    TINYINT UNSIGNED NOT NULL,
   name    VARCHAR(25),
-  fdsn      VARCHAR(50),
-  rootfdsn  VARCHAR(50),
+  fdsn      VARCHAR(255),
+  rootfdsn  VARCHAR(255),
   masterid  TINYINT UNSIGNED NOT NULL,
   PRIMARY KEY (dbid),
   UNIQUE (name)
