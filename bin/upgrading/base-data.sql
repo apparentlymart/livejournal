@@ -749,11 +749,6 @@ REPLACE INTO schemacols VALUES ('themecoltypes', 'sortorder', 'An integer specif
 REPLACE INTO schemacols VALUES ('themedata', 'color', 'The #rrggbb color (or one of the constants)');
 REPLACE INTO schemacols VALUES ('themedata', 'coltype', 'The color code, references [dbtable[themecoltypes]].');
 REPLACE INTO schemacols VALUES ('themedata', 'themeid', 'Unique ID, references [dbtable[themelist]] table.');
-REPLACE INTO schemacols VALUES ('tracking', 'actdes', 'Activity code');
-REPLACE INTO schemacols VALUES ('tracking', 'acttime', 'Time of activity');
-REPLACE INTO schemacols VALUES ('tracking', 'associd', 'Activity id (depends on code)');
-REPLACE INTO schemacols VALUES ('tracking', 'ip', 'IP address they were coming from');
-REPLACE INTO schemacols VALUES ('tracking', 'userid', '[dbtable[user]]-userid');
 REPLACE INTO schemacols VALUES ('user', 'track', 'If the police or a court has contact us to track a user, we turn this on and activities are logged to the [dbtable[tracking]] table.');
 REPLACE INTO schemacols VALUES ('userproplist', 'datatype', 'Either "char" for text data, "num" for an integer, or "bool" for a 1/0 value.');
 REPLACE INTO schemacols VALUES ('userproplist', 'des', 'Description of the meta-data, for use by developers (humans?)');
@@ -822,7 +817,6 @@ REPLACE INTO schematables VALUES ('talkproplist', '1', 'replace', NULL, 'List of
 REPLACE INTO schematables VALUES ('themecoltypes', '1', 'replace', NULL, 'The types of color codes there can be.  Part of the style system, version 1.');
 REPLACE INTO schematables VALUES ('themedata', '0', 'replace', NULL, 'Lists the system colors themes available to users.');
 REPLACE INTO schematables VALUES ('themelist', '1', 'replace', NULL, 'Different color schemes.  Hopefully this will die when the new style system replaces the current one.');
-REPLACE INTO schematables VALUES ('tracking', '0', 'off', NULL, 'We\'ve had police and other authorities have us track some users with criminal activities going on.  This table records those actions, when the user\'s tracking attribute is turned on in the [dbtable[user]] table.');
 REPLACE INTO schematables VALUES ('user', '0', 'off', NULL, '');
 REPLACE INTO schematables VALUES ('userproplist', '1', 'replace', NULL, 'List of possible meta-data on users.');
 REPLACE INTO schematables VALUES ('userusage', '0', 'off', NULL, 'Keep track of when [dbtable[user]]s did certain things.');
