@@ -71,6 +71,16 @@
           </para></listitem>
       </varlistentry>
 
+      <varlistentry>
+        <term><literal role="variable">$LJ::COPPA_CHECK</literal></term>
+        <listitem><para>
+            Optional.  If set, create.bml shows a checkbox, asking
+            users if they're under 13 years old and won't let them
+            create a journal if they check it.  Stupid feature?  Yes.
+            Stupid US Government?  Yes.
+          </para></listitem>
+      </varlistentry>
+
     </variablelist>
     <variablelist>
       <title>Database Related</title>
@@ -97,6 +107,7 @@
 
 
     </variablelist>
+
     <variablelist>
       <title>System Tools</title>
 
@@ -147,6 +158,23 @@
 
     </variablelist>
 
-  </section>
+    <variablelist>
+      <title>Development/Debugging Options</title>
 
+      <varlistentry>
+        <term><literal role="variable">$LJ::ALLOW_CLUSTER_SELECT</literal></term>
+        <listitem><para>
+            When set to "1", create.bml shows a drop-down list of
+            clusters (from <literal>@LJ::CLUSTERS</literal>) along
+            with the old "cluster 0" which used the old db schema and
+            the user creating an account can choose where they go.
+            In reality, there's no use for this, it's only useful when
+            working on the code.
+        </para></listitem>
+      </varlistentry>
+
+    </variablelist>
+
+
+  </section>
 </section>

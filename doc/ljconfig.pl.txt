@@ -67,23 +67,16 @@
     $USER_VHOSTS = 1;
     $USER_DOMAIN = $DOMAIN;
   
-    $INTRANET = 0;         # if true, turn off AOL warning, legalese, COPPA stuff, etc
-    $EVERYONE_PAID = 0;    # if true, all new accounts get paid feature access
-    $EVERYONE_VALID = 0;   # if true, new accounts don't need to be validated
-
     # initial friends for new accounts.
     # leave undefined if you don't want to use it.
     # @INITIAL_FRIENDS = qw(news);
 
+    # news site support. if set, that journal loads on the main page.
+    #$FRONTPAGE_JOURNAL = "news";
+
     # performance/load related settings.  turn this on if you want to batch all updates
     # to the database every 10 seconds.  only necessary with high-load sites.
     $BUFFER_QUERIES = 0;
-
-    # running statistics service.  this will automatically ban people who hit
-    # the site too fast, along with collecting useful user statistics.
-    # $LJ::STATSERV should be set to the IP address of your stats server.
-    $LJ::STATSERV = "";
-    $LJ::STATSERV_PORT = 6200;
 
     # Do paid users get email addresses?  username@$USER_DOMAIN ?
     # (requires additional mail system configuration)

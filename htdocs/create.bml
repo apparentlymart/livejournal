@@ -321,7 +321,7 @@ body<=
      $ret .= $error_msg->('password', '<br>', '');
      $ret .= " standout?>";
 
-     unless ($LJ::INTRANET)
+     if ($LJ::COPPA_CHECK)
      {
          $ret .= "<?h2 $ML{'.aolnotice.head'} h2?><?p ".BML::ml(".aolnotice.text", {'sitename' => $LJ::SITENAME}) ." p?>";
 

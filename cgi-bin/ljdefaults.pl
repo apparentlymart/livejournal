@@ -17,9 +17,6 @@
     $SITEROOT ||= "http://www.$DOMAIN:8011";
     $IMGPREFIX ||= "$SITEROOT/img";    
 
-    # where the directory is at (in old installations it could be at /directory.sbml)
-    $DIRURI = "/directory.bml";
-
     # path to sendmail and any necessary options
     $SENDMAIL ||= "/usr/sbin/sendmail -t";
 
