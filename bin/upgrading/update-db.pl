@@ -328,20 +328,28 @@ if ($opt_pop)
             die $dbh->errstr if $dbh->err;            
         };
 
-        foreach my $file ("s2layers.dat", "s2layers-local.dat")
+        my @layerfiles = ("s2layers.dat");
+        while (@layerfiles)
         {
+            my $file = shift @layerfiles;
             next unless -e $file;
             open (SL, $file) or die;
+            print "SOURCE: $file\n";
             while (<SL>)
             {
                 s/\#.*//; s/^\s+//; s/\s+$//;
                 next unless /\S/;
                 my ($base, $type, $parent) = split;
+
+                if ($type eq "INCLUDE") {
+                    push @layerfiles, $base;
+                    next;
+                }
                 
                 if ($type ne "core" && ! defined $layer{$parent}) {
                     die "'$base' references unknown parent '$parent'\n";
                 }
-                
+
                 # is the referenced $base file really an aggregation of
                 # many smaller layers?  (likely themes, which tend to be small)
                 my $multi = ($type =~ s/\+$//);
