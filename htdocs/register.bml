@@ -8,14 +8,23 @@ body<=
 <?_code
 
  use strict;
- use vars qw(%POST);
+ use vars qw(%POST %GET);
 
  my $ret;
  my $qs = BML::get_query_string();
 
+ my $show_validate = sub {
+    my $user = shift;
+    return "<?p " . BML::ml('.ask.body', {'email'=>$user->{'email'}, 'user'=>LJ::ljuser($user)}) . " p?>" .
+           "<form action='register.bml' method='post'>" .
+           LJ::html_hidden('authas', $user->{'user'}) .
+           LJ::html_submit("action:send", "$ML{'.ask.button'}") .
+           "</form>";
+ };
  if ($POST{'action:send'}) {
      my $remote = LJ::get_remote();
-     my $u = LJ::load_user($remote->{'user'});
+     my $u =  LJ::get_authas_user($POST{'authas'});
+     return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidauth'} p?>" unless $u;
      my $aa = {};
      $aa = LJ::register_authaction($u->{'userid'},
                                   "validateemail", $u->{'email'});
@@ -52,13 +61,35 @@ body<=
  } else {
      my $remote = LJ::get_remote();
      return LJ::bad_input("You must be logged in to view this page.") unless $remote;
-     my $ru = LJ::load_user($remote->{'user'});
-     return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.alreadyvalidated'} p?>" if ($ru->{'status'} eq "A");
+     my @authas = LJ::get_authas_list($remote);
+     my @list;
+     foreach (@authas) {
+         my $user = LJ::load_user($_);
+         push @list, $_;
+         if ($user->{'status'} eq "A") {
+             push @list, $_;
+         }  else {
+             push @list, BML::ml('.asterisk.name', {'journal'=>$_});
+         }
+     }
      $ret .= "<?h1 $ML{'.ask.header'} h1?>";
-     $ret .= "<?p " . BML::ml('.ask.body',{'email'=>$ru->{'email'}}) . " p?>";
-     $ret .= "<form action='register.bml' method='post'>";
-     $ret .= LJ::html_submit("action:send", "$ML{'.ask.button'}");
-     $ret .= "</form>";
+     $ret .= "<form method='get' action='register.bml'>\n";
+     $ret .= 'Select user:' . " ";
+     $ret .= LJ::html_select({ 'name' => 'authas' }, @list) . " ";
+     $ret .= LJ::html_submit(undef, 'Validate');
+     $ret .= ' ' . $ML{'.asterisk.comment'};
+     $ret .= "</form>\n\n";
+     if ($GET{'authas'}) {
+         my $user =  LJ::get_authas_user($GET{'authas'});
+         return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidauth'} p?>" unless $user;
+         if ($user->{'status'} eq "A") {
+             $ret .= "<?p " . BML::ml('.error.useralreadyvalidated', {'user'=>LJ::ljuser($user)}) . " p?>";
+         } else {
+             $ret .= $show_validate->($user);
+         }
+     } else {
+         $ret .= $show_validate->($remote) unless $remote->{'status'} eq "A";
+     }
  }
 
  return $ret;

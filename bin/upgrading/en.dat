@@ -2091,6 +2091,12 @@ is required. To save yourself some time, you can <a href="/login.bml?ret=1">log 
 
 /register.bml.ask.header=Validate Email
 
+/register.bml.asterisk.comment=(Please note that accounts marked with an * have not yet been validated)
+
+/register.bml.asterisk.name=* [[journal]]
+
+/register.bml.asterisk.name|notes=This string is used to create an option in the "Word as user" drop down list to allow a user to view all of their journals. The * signifies that the acount, specified by [[jounral]], is not validated yet.
+
 /register.bml.email.body<<
 This is the validation email as you have requested.
 To complete validating your account, please visit this URL:
@@ -2106,7 +2112,7 @@ Sincerely,
 
 /register.bml.email.subject=Validate Email
 
-/register.bml.error.alreadyvalidated=Your email address has already been validated.
+/register.bml.error.useralreadyvalidated=The email address for [[user]] has already been validated.
 
 /register.bml.error.invalidcode=Invalid validation code.
 

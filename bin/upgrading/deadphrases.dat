@@ -135,6 +135,8 @@ general /userinfo.bml.posthere
 general /userinfo.bml.rpmembership.body
 general /userinfo.bml.syn.lastnew
 
+general /register.bml.error.alreadyvalidated
+
 general /tools/memories.bml.entry
 general /tools/memories.bml.entries
 
