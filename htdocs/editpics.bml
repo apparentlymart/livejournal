@@ -28,14 +28,11 @@
         unless $u;
 
     # extra arguments for get requests
-    my $getextra;
-    if ($authas ne $remote->{'user'}) {
-        $getextra = "?authas=$authas";
-    }
+    my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
 
     my $returl = LJ::CleanHTML::canonical_url($POST{'ret'});
     my $picurl = LJ::CleanHTML::canonical_url($POST{'urlpic'});
-    my $fotobilder = index($returl, $LJ::FB_DOMAIN) >= 0 &&
+    my $fotobilder = index($returl, $LJ::FB_SITEROOT) == 0 &&
                      $picurl =~ m!^$LJ::FB_SITEROOT/~?$remote->{'user'}/pic/!;
 
     if ($fotobilder &&
