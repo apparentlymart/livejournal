@@ -776,7 +776,7 @@ sub get_recent_items
 #       common thing to do.
 # args: dbarg, uuserid, propname, value
 # des-uuserid: The userid of the user or a user hashref.
-# des-propname: The name of the property.
+# des-propname: The name of the property.  Or a hashref of propname keys and corresponding values.
 # des-value: The value to set to the property.  If undefined or the
 #            empty string, then property is deleted.
 # </LJFUNC>
@@ -787,14 +787,30 @@ sub set_userprop
     my $dbh = $dbs->{'dbh'};
     $userid = $userid->{'userid'} if ref $userid eq "HASH";
 
-    my $p = LJ::get_prop("user", $propname) or return 0;
+    my $hash = ref $propname eq "HASH" ? $propname : { $propname => $value };
 
-    my $table = $p->{'indexed'} ? "userprop" : "userproplite";
-    if (defined $value && $value ne "") {
-        $dbh->do("REPLACE INTO $table (userid, upropid, value) ".
-                 "VALUES ($userid, $p->{'id'}, ?)", undef, $value);
-    } else {
-        $dbh->do("DELETE FROM $table WHERE userid=$userid AND upropid=$p->{'id'}");
+    my %action;  # $table -> {"replace"|"delete"} -> [ "($userid, $propid, $qvalue)" | propid ]
+
+    foreach $propname (keys %$hash) {
+        my $p = LJ::get_prop("user", $propname) or next;
+        my $table = $p->{'indexed'} ? "userprop" : "userproplite";
+        $value = $hash->{$propname};
+        if (defined $value && $value ne "") {
+            push @{$action{$table}->{"replace"}}, "($userid, $p->{'id'}, " . $dbh->quote($value) . ")";
+        } else {
+            push @{$action{$table}->{"delete"}}, $p->{'id'};
+        }
+    }
+
+    foreach my $table (keys %action) {
+        if (my $list = $action{$table}->{"replace"}) {
+            $list = join(',', @$list);
+            $dbh->do("REPLACE INTO $table (userid, upropid, value) VALUES $list");
+        }
+        if (my $list = $action{$table}->{"delete"}) {
+            $list = join(',', @$list);
+            $dbh->do("DELETE FROM $table WHERE userid=$userid AND upropid IN ($list)");
+        }
     }
 }
 

@@ -561,8 +561,17 @@ sub postevent
                                 $req->{'min'});
     my $qeventtime = $dbh->quote($eventtime);
 
+    # load userprops all at once
+    my @poster_props = qw(newesteventtime dupsig_post);
+    my @owner_props = qw(newpost_minsecurity);
+    LJ::load_user_props($dbs, $u, @poster_props, @owner_props);
+    if ($uowner->{'userid'} == $u->{'userid'}) {
+        $uowner->{$_} = $u->{$_} foreach (@owner_props);
+    } else {
+        LJ::load_user_props($dbs, $uowner, @owner_props);
+    }
+
     # are they trying to post back in time?
-    LJ::load_user_props($dbs, $u, "newesteventtime");
     if ($posterid == $ownerid && $u->{'newesteventtime'} && 
         $eventtime lt $u->{'newesteventtime'} &&!$req->{'props'}->{'opt_backdated'}) {
         return fail($err, 153, "Your most recent journal entry is dated $u->{'newesteventtime'}, but you're trying to post one at $eventtime without the backdate option turned on.  Please check your computer's clock.  Or, if you really mean to post in the past, use the backdate option.");
@@ -581,7 +590,6 @@ sub postevent
 
     ## if newpost_minsecurity is set, new entries have to be 
     ## a minimum security level
-    LJ::load_user_props($dbs, $uowner, "newpost_minsecurity");
     $security = "private" 
         if $uowner->{'newpost_minsecurity'} eq "private";
     ($security, $qallowmask) = ("usemask", 1)
@@ -664,7 +672,6 @@ sub postevent
             $res_done = 1;   # tell caller to bail out
             return;
         }
-        LJ::load_user_props($dbs, $u, "dupsig_post");
         my @parts = split(/:/, $u->{'dupsig_post'});
         if ($parts[0] eq $dupsig) {
             # duplicate!  let's make the client think this was just the
@@ -707,8 +714,19 @@ sub postevent
     my $itemid = $dbcm->{'mysql_insertid'};
     return $fail->($err,501,"No itemid could be generated.") unless $itemid;
 
-    # keep track of itemid/anum for later potential duplicates
-    LJ::set_userprop($dbs, $u, "dupsig_post", "$dupsig:$itemid:$anum");
+    # set userprops.  FIXME: this should be moved to user clusters
+    {
+        my %set_userprop;
+        
+        # keep track of itemid/anum for later potential duplicates
+        $set_userprop{"dupsig_post"} = "$dupsig:$itemid:$anum";
+
+        # record the eventtime of the last update (for own journals only)
+        $set_userprop{"newesteventtime"} = $eventtime
+            if $posterid == $ownerid and not $req->{'props'}->{'opt_backdated'};
+
+        LJ::set_userprop($dbs, $u, \%set_userprop);
+    }
 
     # end duplicate locking section
     $release->();
@@ -734,10 +752,6 @@ sub postevent
             LJ::record_meme($dbs, $url, $posterid, $ditemid, $ownerid);
         }
     }
-
-    # record the eventtime of the last update (for own journals only)
-    LJ::set_userprop($dbs, $posterid, 'newesteventtime', $eventtime)
-        if $posterid == $ownerid and not $req->{'props'}->{'opt_backdated'};
 
     # record journal's disk usage
     my $bytes = length($event) + length($req->{'subject'});
@@ -795,8 +809,8 @@ sub postevent
     # update user update table (on which friends views rely)
     # NOTE: as of Mar-25-2003, we don't actually use this yet.  we might
     # use it in the future though, for faster ?skip=0 friends views.
-    # but see below.
-    {
+    # for now, we'll keep it disabled to lessen writes
+    if (0) {
         my @bits;
         if ($security eq "public") {
             push @bits, 31;  # 31 means public
