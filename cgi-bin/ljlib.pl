@@ -504,7 +504,7 @@ sub get_friend_group {
         if ($opt->{'name'}) {
             foreach (@$fg) {
                 return LJ::MemCache::array_to_hash("fgrp", [$memver, @$_])
-                    if $_->[2] eq $opt->{'name'};
+                    if lc($_->[2]) eq lc($opt->{'name'});
             }
             return undef;
         }
@@ -748,13 +748,16 @@ sub get_friend_items
         return unless $friends && $friends_u;
 
         # load u objects for all the given
-        LJ::load_userids_multiple([ map { $_, \$friends_u->{$_} } keys %$friends ], [$remote]);
+        LJ::load_userids_multiple([ map { $_, \$friends_u->{$_} } keys %$friends ], [$remote],
+                                  $memcache_only);
 
         # delete u objects based on 'showtypes'
-        if ($opts->{'showtypes'}) {
-            foreach my $fid (keys %$friends_u) {
-                next if $opts->{'showtypes'} =~ /$friends_u->{$fid}->{'journaltype'}/i;
-
+        foreach my $fid (keys %$friends_u) {
+            my $fu = $friends_u->{$fid};
+            if ($fu->{'statusvis'} ne "V" ||
+                ($opts->{'showtypes'} && 
+                 index(uc($opts->{'showtypes'}), $fu->{journaltype}) == -1))
+            {
                 delete $friends_u->{$fid};
                 delete $friends->{$fid};
             }
@@ -786,11 +789,10 @@ sub get_friend_items
 
         # now push a properly formatted @friends_buffer row
         foreach my $fid (keys %$timeupdate) {
-            next unless $friends_u{$fid};
+            my $fu = $friends_u{$fid};
             my $rupdate = $LJ::EndOfTime - $timeupdate->{$fid};
-            my $clusterid = $friends_u{$fid}->{'clusterid'};
-
-            push @friends_buffer, [ $fid, $rupdate, $clusterid, $friends->{$fid}, $friends_u{$fid} ];
+            my $clusterid = $fu->{'clusterid'};
+            push @friends_buffer, [ $fid, $rupdate, $clusterid, $friends->{$fid}, $fu ];
         }
 
         @friends_buffer = sort { $a->[1] <=> $b->[1] } @friends_buffer;
