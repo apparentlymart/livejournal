@@ -3468,6 +3468,7 @@ sub ehtml
     my $a = $_[0];
     $a =~ s/\&/&amp;/g;
     $a =~ s/\"/&quot;/g;
+    $a =~ s/\'/&\#39;/g;
     $a =~ s/</&lt;/g;
     $a =~ s/>/&gt;/g;
     return $a;	
