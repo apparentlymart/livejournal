@@ -103,14 +103,24 @@
     $ret .= LJ::html_submit('submit', 'Compile') . "\n";
     $ret .= "</p></form>\n";
 
-    my $title;
-    my $layerinfo = {};
+    # load layer info
+    my $layinf = {};
+    LJ::S2::load_layer_info($layinf, [ $id ]);
 
-    LJ::S2::load_layer_info($layerinfo, [ $id ]);
-    $title = LJ::ehtml($layerinfo->{$id}->{'name'});
+    # find a title to display on this page
+    my $type = $layinf->{$id}->{'type'};
+    my $name = $layinf->{$id}->{'name'};
 
+    # find name of parent layer if this is a child layer
+    if (! $name && $type =~ /^(user|theme|i18n)$/) {
+        my $par = $lay->{'b2lid'} + 0;
+        LJ::S2::load_layer_info($layinf, [$par]);
+        $name =  $layinf->{$par}->{'name'};
+    }
+    
     # Only use the layer name if there is one and it's more than just whitespace
-    $title = length $title && $title =~ /[^\s]/ ? "$title [$id]" : "Layer $id";
+    my $title = "[$type] ";
+    $title .= $name && $name =~ /[^\s]/ ? "$name [\#$id]" : "Layer \#$id";
 
     return "<title>$title - Edit</title>\n" . $ret;
 }
