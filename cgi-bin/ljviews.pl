@@ -1,8 +1,8 @@
 #!/usr/bin/perl
 
-require '/home/lj/cgi-bin/ljconfig.pl';
-require '/home/lj/cgi-bin/ljlang.pl';
-require '/home/lj/cgi-bin/cleanhtml.pl';
+require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
+require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
 
 # the creator for the 'lastn' view:
 sub create_view_lastn

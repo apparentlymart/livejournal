@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 #
 
-require '/home/lj/cgi-bin/ljconfig.pl';
+require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 
 use strict;
 use HTML::TokeParser;

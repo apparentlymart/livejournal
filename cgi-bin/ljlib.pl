@@ -7,9 +7,9 @@ use Digest::MD5 qw(md5_hex);
 # CONSTANTS
 #
 
-require '/home/lj/cgi-bin/ljconfig.pl';
-require '/home/lj/cgi-bin/ljlang.pl';
-require '/home/lj/cgi-bin/ljpoll.pl';
+require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
 
 @LJ::views = qw(lastn friends calendar day);
 %LJ::viewinfo = (
@@ -1010,7 +1010,7 @@ sub strip_bad_code
 #sub strip_bad_code
 #{
 #    my $data = shift;
-#    require '/home/lj/cgi-bin/cleanhtml.pl';
+#    require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
 #    &LJ::CleanHTML::clean($data, {
 #	'mode' => 'allow',
 #	'keepcomments' => 1,

@@ -3,7 +3,7 @@
 
 package ljtopic;
 
-require '/home/lj/cgi-bin/ljconfig.pl';
+require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 
 sub no_prefix
 {

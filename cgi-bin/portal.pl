@@ -1,9 +1,9 @@
 #!/usr/bin/perl
 #
 
-require '/home/lj/cgi-bin/ljconfig.pl';
-require '/home/lj/cgi-bin/ljlang.pl';
-require '/home/lj/cgi-bin/ljprotocol.pl';
+require $ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
+require $ENV{'LJHOME'}/cgi-bin/ljlang.pl";
+require $ENV{'LJHOME'}/cgi-bin/ljprotocol.pl";
 
 use strict;
 

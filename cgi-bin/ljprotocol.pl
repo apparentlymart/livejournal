@@ -1,8 +1,8 @@
 #!/usr/bin/perl
 #
 
-require '/home/lj/cgi-bin/ljpoll.pl';
-require '/home/lj/cgi-bin/ljconfig.pl';
+require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 
 package LJ;
 

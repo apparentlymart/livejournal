@@ -33,17 +33,18 @@ $SIG{'TERM'} = sub {
 };
 
  REQUEST:
-    while((($SERVING=0) || 1) &&    # heh.  set serving to 0 (since so many ways to get here), but be true.
-          $CONTINUE &&            # didn't get a quit signal earlier.
-          ++$REQ_COUNT <= $REQ_MAX && FCGI::accept() >= 0)
+    while((($SERVING=0) || 1) &&      # set serving to 0
+          $CONTINUE &&                # stop if got signal earlier
+          ++$REQ_COUNT <= $REQ_MAX && # go until time to restart
+	FCGI::accept() >= 0)
 {
     $SERVING = 1;
     &connect_db;
 
     my $req_path = $ENV{'REQUEST_URI'};
 
-    ### AT&T's webdot server only accepts URLs without question marks in them, so we
-    ### make them here now.  great place, eh?
+    ### AT&T's webdot server only accepts URLs without question marks
+    ### in them, so we make them here now.  great place, eh?
     if ($req_path =~ m!^/friends/graph/(\w+)\.dot$!) 
     {
 	print "Status: 200 OK\n";
@@ -65,8 +66,8 @@ $SIG{'TERM'} = sub {
 	print "Content-type: text/html\n\n";
 	print "This page is now available <A HREF=\"$new\">here</A>.";
 
-	open (FLOG, ">>/home/lj/logs/404.log");
-	print FLOG join("\t", "warning", $req_path, $ENV{'HTTP_REFERER'}), "\n";
+	open (FLOG, ">>$ENV{'LJHOME'}/logs/404.log");
+	print FLOG join("\t", "warning", $req_path, $ENV{'HTTP_REFERER'}),"\n";
 	close FLOG;
 
 	next REQUEST;
@@ -76,7 +77,8 @@ $SIG{'TERM'} = sub {
     print "Cache-Control: private, proxy-revalidate\n";
     print "Status: 404 Not Found\n";
     print "\n";
-    print "<H1>Not Found</H1>The requested URL ", &ehtml($ENV{'REQUEST_URI'}), " was not found on this server.\n";
+    print "<H1>Not Found</H1>The requested URL ", &ehtml($ENV{'REQUEST_URI'}),
+          " was not found on this server.\n";
     next REQUEST;
 }
 
