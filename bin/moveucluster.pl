@@ -151,7 +151,7 @@ if ($sclust == 0)
               #                                   'remain' => [], 'loaded' => { id => 1 } }
     $bufread = sub
     {
-        my ($hq, $itemid) = @_;
+        my ($amt, $hq, $itemid) = @_;
         if (not defined $bfd{$hq}->{'loaded'}->{$itemid})
         {
             if (not exists $bfd{$hq}->{'remain'}) {
@@ -159,7 +159,7 @@ if ($sclust == 0)
             }
 
             my @todo;
-            for (1..20) {
+            for (1..$amt) {
                 next unless @{$bfd{$hq}->{'remain'}};
                 my $id = shift @{$bfd{$hq}->{'remain'}};
                 push @todo, $id;
@@ -315,8 +315,8 @@ sub movefrom0_logitem
 {
     my $itemid = shift;
 
-    my $item = $bufread->("SELECT * FROM log", $itemid);
-    my $itemtext = $bufread->("SELECT itemid, subject, event FROM logtext", $itemid);
+    my $item = $bufread->(100, "SELECT * FROM log", $itemid);
+    my $itemtext = $bufread->(50, "SELECT itemid, subject, event FROM logtext", $itemid);
     return 1 unless $item && $itemtext;   # however that could happen.
 
     # we need to allocate a new jitemid (journal-specific itemid) for this item now.
@@ -367,7 +367,7 @@ sub movefrom0_logitem
     }
 
     # copy its logprop over:
-    while (my $lp = $bufread->("SELECT itemid, propid, value FROM logprop", $itemid)) {
+    while (my $lp = $bufread->(50, "SELECT itemid, propid, value FROM logprop", $itemid)) {
         next unless $lp->{'value'};
         $replace_into->("logprop2", "(journalid, jitemid, propid, value)", 50,
                         $userid, $jitemid, $lp->{'propid'}, $lp->{'value'});
