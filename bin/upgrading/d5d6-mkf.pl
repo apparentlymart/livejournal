@@ -130,7 +130,7 @@ my $move_user = sub {
 
         # insert data into cluster master
         my $bind = join(",", @bind);
-        $dbcm->do("REPLACE INTO $table ($cols) VALUES $bind", undef, @vars);
+        $u->do("REPLACE INTO $table ($cols) VALUES $bind", undef, @vars);
         die "error in flush $table: " . $dbcm->errstr . "\n" if $dbcm->err;
 
         # reset values
@@ -139,8 +139,8 @@ my $move_user = sub {
     };
 
     # step 1.5: see if the user has any data already? clear it if so.
-    my $counter = $u->selectrow_array("SELECT max FROM counter WHERE journalid = ? AND area = 'R'",
-                                      undef, $u->{userid});
+    my $counter = $dbcm->selectrow_array("SELECT max FROM counter WHERE journalid = ? AND area = 'R'",
+                                         undef, $u->{userid});
     $counter += 0;
     if ($counter > 0) {
         # yep, so we need to delete stuff, real data first
