@@ -184,6 +184,11 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
         foreach var string k ($e.metadata) {
             var string key = $k;
             var string val = $e.metadata{$k};
+            if ($k == "mood") {
+                $key = $*text_meta_mood;
+            } elseif ($k == "music") {
+                $key = $*text_meta_music;
+            }
             if ($k == "mood" and defined $e.mood_icon) {
                 var Image i = $e.mood_icon;
                 $val = "<img src='$i.url' width='$i.width' height='$i.height' align='absmiddle' alt='[mood icon]' /> $val";
