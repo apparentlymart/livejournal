@@ -1313,10 +1313,22 @@ sub get_url
 {
     my ($ctx, $obj, $view) = @_;
     my $dir = "users";
-    if (ref $obj eq "HASH" && $obj->{'journal_type'} eq "C") {
-        $dir = "community";
+    my $journal_type;
+    my $user;
+
+    # now get data from one of two paths, depending on if we were given a UserLite
+    # object or a string for the username
+    if (ref $obj eq 'HASH') {
+        $journal_type = $obj->{journal_type};
+        $user = $obj->{username};
+    } else {
+        my $u = LJ::load_user($obj);
+        $journal_type = $u ? $u->{journaltype} : 'P';
+        $user = $u ? $u->{user} : $obj;
     }
-    my $user = ref $obj ? $obj->{'username'} : $obj;
+
+    # construct URL to return
+    $dir = 'community' if $journal_type eq 'C';
     $view = "info" if $view eq "userinfo";
     $view = "calendar" if $view eq "archive";
     $view = "" if $view eq "recent";
