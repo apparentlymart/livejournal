@@ -532,6 +532,15 @@ sub postevent
         return fail($err, 153, "Your most recent journal entry is dated $u->{'newesteventtime'}, but you're trying to post one at $eventtime without the backdate option turned on.  Please check your computer's clock.  Or, if you really mean to post in the past, use the backdate option.");
     }
 
+    ## if newpost_minsecurity is set, new entries have to be 
+    ## a minimum security level
+    LJ::load_user_props($dbs, $uowner, "newpost_minsecurity");
+    $req->{'security'} = "private" 
+        if $uowner->{'newpost_minsecurity'} eq "private";
+    ($req->{'security'}, $req->{'allowmask'}) = ("usemask", 1)
+        if $uowner->{'newpost_minsecurity'} eq "friends" 
+        and $req->{'security'} eq "public";
+
     my $qsubject = $dbh->quote($req->{'subject'});
     my $qallowmask = $req->{'allowmask'}+0;
     my $qsecurity = "public";
@@ -543,7 +552,7 @@ sub postevent
         $uselogsec = 1;
     }
     $qsecurity = $dbh->quote($qsecurity);
-
+    
     ### make sure user can't post with "custom security" on shared journals
     return fail($err,102)
         if ($req->{'security'} eq "usemask" &&

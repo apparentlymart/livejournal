@@ -1581,6 +1581,18 @@ sub register_setter
     $LJ::SETTER{$key} = $subref;
 }
 
+register_setter("newpost_minsecurity", sub {
+    my ($dba, $u, $remote, $key, $value, $err) = @_;
+    my $dbs = LJ::make_dbs_from_arg($dba);
+    unless ($value =~ /^(public|friends|private)$/) {
+        $$err = "Illegal value.  Must be 'public', 'friends', or 'private'";
+        return 0;
+    }
+    $value = "" if $value eq "public";
+    LJ::set_userprop($dba, $u->{'userid'}, "newpost_minsecurity", $value);
+    return 1;
+});
+
 # <LJFUNC>
 # name: LJ::make_auth_code
 # des: Makes a random string of characters of a given length.

@@ -1101,3 +1101,5 @@ INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope
 UPDATE userproplist SET des='Yahoo ID',prettyname='Yahoo ID',indexed='1',scope='general',datatype='char' WHERE name='yahoo';
 INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('zip', '1', 'ZIP code', 'char', '5 digit zip code (if in US)', 'general');
 UPDATE userproplist SET des='5 digit zip code (if in US)',prettyname='ZIP code',indexed='1',scope='general',datatype='char' WHERE name='zip';
+INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('newpost_minsecurity', '0', 'Minimal Security', 'char', 'Minimal security for new events; values are: public, private or friends', 'general');
+UPDATE userproplist SET des='Minimal security for new events; values are: public, private or friends',prettyname='Minimal Security',indexed='0',scope='general',datatype='char' WHERE name='newpost_minsecurity';
