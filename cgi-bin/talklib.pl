@@ -193,13 +193,14 @@ sub get_journal_item
     $itemid += 0;
 
     my $s2datefmt = "%Y %m %d %H %i %s %w"; # yyyy mm dd hh mm ss day_of_week
-    my $sql = "SELECT journalid AS 'ownerid', posterid, eventtime, security, allowmask, anum, ".
+    my $sql = "SELECT journalid, posterid, eventtime, security, allowmask, anum, ".
         "DATE_FORMAT(eventtime, '${s2datefmt}') AS 'alldatepart', ".
         "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(logtime) AS 'secondsold' ".
         "FROM log2 WHERE journalid=$uid AND jitemid=$itemid";
     my $item = LJ::dbs_selectrow_hashref($dbcs, $sql);
     return undef unless $item;
-    $item->{'itemid'} = $itemid;
+    $item->{'itemid'} = $item->{'jitemid'} = $itemid;   # support old & new keys
+    $item->{'ownerid'} = $item->{'journalid'};          # support old & news keys
 
     my $lt = LJ::get_logtext2($u, $itemid);
     my $v = $lt->{$itemid};
