@@ -18,6 +18,8 @@ BODY<=
  my $just_last = 0;
  my $jump_to_item = 0;
 
+ my $clustered = 0;
+
  #### determine their mode
 
  if ($FORM{'mode'} eq "" && $FORM{'itemid'}) 
@@ -36,11 +38,21 @@ BODY<=
      $hpassword = LJ::hash_password($password);
      
      my $itemid = $FORM{'itemid'}+0;
-     $sth = $dbr->prepare("SELECT ownerid, posterid FROM log WHERE itemid=$itemid");
-     $sth->execute;
-     my ($ownerid, $posterid) = $sth->fetchrow_array;
-     if ($ownerid != $posterid) {
-	 my $owner = LJ::get_username($dbs, $ownerid);
+     my $owner = $FORM{'journal'};
+
+     if ($owner) {
+	 $clustered = 1;
+     } else {
+	 # cluster 0
+	 $sth = $dbr->prepare("SELECT ownerid, posterid FROM log WHERE itemid=$itemid");
+	 $sth->execute;
+	 my ($ownerid, $posterid) = $sth->fetchrow_array;
+	 if ($ownerid != $posterid) {
+	     $owner = LJ::get_username($dbs, $ownerid);
+	 }
+     }
+     
+     if ($owner && $owner ne $user) {
 	 $FORM{'usejournal'} = $owner;
      }
 
@@ -183,6 +195,7 @@ BODY<=
 	 $ret .= "<INPUT TYPE=HIDDEN NAME=\"user\" VALUE=\"$user\">\n";
 	 $ret .= "<INPUT TYPE=HIDDEN NAME=\"hpassword\" VALUE=\"$hpassword\">\n";
 	 $ret .= "<INPUT TYPE=HIDDEN NAME=\"itemid\" VALUE=\"$res{'events_1_itemid'}\">\n";
+	 $ret .= "<input type='hidden' name='clustered' value='$clustered'>\n";  # for link later
 	 if ($FORM{'usejournal'}) {
 	     $ret .= "<INPUT TYPE=HIDDEN NAME=\"usejournal\" VALUE=\"$FORM{'usejournal'}\">\n";
 	 }
@@ -316,7 +329,10 @@ BODY<=
 	 if ($res{'success'} eq "OK")
 	 {
 	     my $itemid = $FORM{'itemid'}+0;
-	     return "(=H1 Success H1=)(=P Journal entry was modified.  You may view it <a href=\"$LJ::SITEROOT/talkread.bml?itemid=$itemid\">here</a>. P=)";
+	     my $journal = LJ::canonical_username($FORM{'usejournal'} || $FORM{'user'});
+	     my $jargent = $FORM{'clustered'} ? "journal=$journal&amp;" : "";
+	     return "(=H1 Success H1=)(=P Journal entry was modified.  You may view it ".
+		 "<a href=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$itemid\">here</a>. P=)";
 	 }
 	 else
 	 {
