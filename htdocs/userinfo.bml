@@ -542,7 +542,10 @@
          $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B><nobr>$label:</nobr></B></TD><TD COLSPAN=2>";
          $body .= "<B>" . scalar(@member_of) . ":</B> ";
          foreach (@member_of) {
-             $body .= "<A HREF=\"/userinfo.bml?user=$_\">$_</A>, ";
+             my $frlink = "<a href=\"/userinfo.bml?user=$_\">$_</a>";
+             $frlink = "<b>$frlink</b>"
+                 if $remote_friend{$_} && $remote->{'userid'} != $u->{'userid'};
+             $body .= "$frlink, ";
          }
          chop $body; chop $body;
          $body .= "</TD></TR>\n";
