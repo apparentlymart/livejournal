@@ -557,9 +557,15 @@ RTE
             # Convert the rich text editor output back to parsable lj tags.
             my $event = $POST{event};
             if ($richtext) {
-                $event =~ s/&lt;(\/)?lj-cut(.*?)(?: \/)?&gt;/<$1lj-cut$2>/ig;
-                $event =~ s/&lt;lj user=['"]?(\w{1,15})['"]?\s?\/?&gt;/<lj user="$1" \/>/ig; # manually typed tags
-                $event =~ s/<span class="?ljuser"?.*?userinfo\.bml\?user=(.+?)".*?<\/b><\/a>(?:<\/span>)?/<lj user="$1" \/>/ig;
+                # check for blank entry
+                (my $event_tmp = $event) =~ s!(?:<br>|<P>(?:&nbsp;|\s)+</P>|&nbsp;)\s*?!!gm;
+                if ($event_tmp =~ /\w/) { # ok, we still have content
+                    $event =~ s/&lt;(\/)?lj-cut(.*?)(?: \/)?&gt;/<$1lj-cut$2>/ig;
+                    $event =~ s/&lt;lj user=['"]?(\w{1,15})['"]?\s?\/?&gt;/<lj user="$1" \/>/ig; # manually typed tags
+                    $event =~ s/<span class="?ljuser"?.*?userinfo\.bml\?user=(.+?)".*?<\/b><\/a>(?:<\/span>)?/<lj user="$1" \/>/ig;
+                } else { # RTE blanks (just <br>, newlines, &nbsp; - no real content)
+                    $event = undef; # force protocol error
+                }
             }
             $req{'event'} = $event;
 
