@@ -6,7 +6,7 @@
  
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'dbr'};
+ my $dbr = $dbs->{'reader'};
 
  my $user = LJ::canonical_username($FORM{'user'});
  my $remote = LJ::get_remote_noauth();	
