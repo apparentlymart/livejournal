@@ -3314,8 +3314,15 @@ sub get_dbh
     if ($role ne "master" && $LJ::DBWEIGHTS_FROM_DB &&
 	! $LJ::DBINFO{'_fromdb'}) 
     {
+	# this might be enough to do it, if master isn't loaded:
 	$LJ::NEED_DBWEIGHTS = 1;
-	LJ::get_dbh("master");
+	my $dbh = LJ::get_dbh("master");
+
+	# or, if we already had a master cached, we have to 
+	# load it by hand:
+	unless ($LJ::DBINFO{'_fromdb'}) {
+	    _reload_weights($dbh);
+	}
     }
 
     # otherwise, see if we have a role -> full DSN mapping already
