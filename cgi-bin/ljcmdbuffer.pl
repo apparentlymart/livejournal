@@ -35,7 +35,7 @@ package LJ::Cmdbuffer;
      dirty => {
          once_per_user => 1,
          kill_mem_size => 50_000, # bytes
-         kill_job_ct   => 50,     # calls to LJ::Cmdbuffer::flush
+         kill_job_ct   => 250,    # calls to LJ::Cmdbuffer::flush
          run => \&LJ::Cmdbuffer::_dirty,
      },
      
