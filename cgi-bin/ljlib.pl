@@ -4369,6 +4369,10 @@ sub load_userpics
         }
     }
 
+    # following path is only for old style d6 userpics... don't load any if we don't
+    # have any to load
+    return unless @load_list_d6;
+
     my $dbr = LJ::get_db_writer();
     my $picid_in = join(',', map { $_->[1] } @load_list_d6);
     my $sth = $dbr->prepare("SELECT userid, picid, width, height, contenttype, state, ".
