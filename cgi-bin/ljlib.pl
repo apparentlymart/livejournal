@@ -3027,7 +3027,7 @@ sub send_mail
     $msg->attr("content-type.charset" => $opt->{'charset'})
         if $opt->{'charset'};
 
-    return $msg->send;
+    return eval { $msg->send; 1; }
 }
 
 # <LJFUNC>
