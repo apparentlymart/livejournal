@@ -4,7 +4,9 @@
 use strict;
 $| = 1;
 
-require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+use lib "$ENV{'LJHOME'}/cgi-bin/";
+require "ljlib.pl";
+use LJ::Blob;
 
 use constant DEBUG => 0;  # turn on for debugging (mostly db handle crap)
 
@@ -104,23 +106,69 @@ my $move_user = sub {
     my ($dbh, $dbcm) = $get_db_handles->($u->{clusterid});
     die "Unable to get database handles" unless $dbh && $dbcm;
 
+    # step 0.5: delete all the bogus userblob rows for this user
+    # This is due to the auto_increment for the blobid overflowing
+    # and thus all entries recieving an id of max id for a mediumint.
+    # This is lame.
+    my $domainid = LJ::get_blob_domainid('userpic');
+    $dbcm->do("DELETE FROM userblob WHERE journalid=$u->{userid} AND domain=$domainid AND blobid>=16777216");
+
     # step 1: get all user pictures and move those.  safe to just grab with no limit
     # since users can only have a limited number of them
     my $rows = $dbh->selectall_arrayref('SELECT picid, userid, contenttype, width, height, state, picdate, md5base64 ' .
-                                        'FROM userpic WHERE userid = ?', undef, $u->{userid});
+                                        'FROM userpic WHERE userid = ?', undef, $u->{userid}) || [];
+
     if (@$rows) {
         # got some rows, create an update statement
-        my (@bind, @vars);
+        my (@bind, @vars, @blobids, @blobbind, @picinfo);
         foreach my $row (@$rows) {
+            my $picid = $row->[0];
             push @bind, "(?, ?, ?, ?, ?, ?, ?, ?)";
-            if (@$row[2] eq 'image/gif') { @$row[2] = 'G'; }
-            elsif (@$row[2] eq 'image/jpeg') { @$row[2] = 'J'; }
-            elsif (@$row[2] eq 'image/png') { @$row[2] = 'P'; }
-            push @vars, $_ foreach @$row;
+
+            $row->[2] = {'image/gif' => 'G',
+                         'image/jpeg' => 'J',
+                         'image/png' => 'P'}->{$row->[2]};
+            push @vars, @$row;
+
+            # [picid, fmt]
+            my $fmt = {'G' => 'gif',
+                       'J' => 'jpg',
+                       'P' => 'png'}->{$row->[2]};
+            push @picinfo, [$picid, $fmt];
+
+            # picids
+            push @blobids, $picid;
+            push @blobbind, "?";
         }
+
         my $bind = join ',', @bind;
         $dbcm->do("REPLACE INTO userpic2 (picid, userid, fmt, width, height, state, picdate, md5base64) " .
                   "VALUES $bind", undef, @vars);
+
+
+        # step 1.5: insert missing rows into the userblob table
+        my $blobbind = join ',', @blobbind;
+        my $blobrows = $dbcm->selectall_hashref("SELECT blobid FROM userblob WHERE journalid=$u->{userid} AND domain=$domainid " .
+                                                "AND blobid IN ($blobbind)", 'blobid', undef, @blobids) || {};
+
+        my (@insertbind, @insertvars);
+        foreach my $pic (@picinfo) {
+            my ($picid, $fmt) = @$pic;
+            unless ($blobrows->{$picid}) {
+                push @insertbind, "(?, ?, ?, ?)";
+
+                my $blob = LJ::Blob::get($u, "userpic", $fmt, $picid);
+                my $length = length($blob);
+                $blob = undef;
+
+                push @insertvars, $u->{'userid'}, $domainid, $picid, $length;
+            }
+        }
+        if (@insertbind) {
+            my $insertbind = join ',', @insertbind;
+            $dbcm->do("INSERT INTO userblob (journalid, domain, blobid, length) " .
+                      "VALUES $insertbind", undef, @insertvars);
+        }
     }
 
     # general purpose flusher for use below

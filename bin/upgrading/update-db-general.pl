@@ -2260,6 +2260,11 @@ register_alter(sub {
                  "ADD location enum('blob','disk','mogile') default NULL AFTER flags");
     }
 
+    if (column_type("userblob", "blobid") =~ /mediumint/) {
+        do_alter("userpic2", "ALTER TABLE userblob MODIFY blobid INT UNSIGNED NOT NULL");
+    }
+
+
 });
 
 1; # return true
