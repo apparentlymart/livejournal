@@ -308,4 +308,72 @@ sub can_view_screened {
     return LJ::Talk::can_delete(@_);
 }
 
+sub screen_comment {
+    # NOTE: assumes that the comment is indeed not screened
+    # this should be checked before calling screen_comment()
+
+    my ($dbs, $dbcs, $u, $itemid, $talkid) = @_;
+    my $dbcm = $dbcs->{'dbh'};
+    my $dbcr = $dbcs->{'reader'};
+    my $clustered = $u->{'clusterid'};
+    my $userid = $u->{'userid'};
+    LJ::load_props($dbs, "log");
+    my $prop = LJ::get_prop("log", "hasscreened");
+
+    my $hasscreened;
+    if ($clustered) {
+        $hasscreened = $dbcr->selectrow_array("SELECT COUNT(*) FROM talk2 " .
+                                              "WHERE journalid=$userid AND nodeid=$itemid AND nodetype='L' AND state='S'");
+        $dbcm->do("UPDATE talk2 SET state='S' WHERE journalid=$userid AND jtalkid=$talkid");
+        $dbcm->do("UPDATE log2 SET replycount=replycount-1 WHERE journalid=$userid AND jitemid=$itemid");
+        $dbcm->do("REPLACE INTO logprop2 (journalid, jitemid, propid, value) VALUES ($userid, $itemid, $prop->{'id'}, '1')")
+            unless $hasscreened;
+    } else {
+        $hasscreened = $dbcr->selectrow_array("SELECT COUNT(*) FROM talk WHERE ".
+                                              "nodeid=$itemid AND nodetype='L' AND state='S'");
+        $dbcm->do("UPDATE talk SET state='S' WHERE talkid=$talkid");
+        $dbcm->do("UPDATE log SET replycount=replycount-1 WHERE itemid=$itemid");
+        $dbcm->do("INSERT INTO logprop (itemid, propid, value) VALUES ($itemid, $prop->{'id'}, '1')")
+            unless $hasscreened;
+    }
+
+    return;
+}
+
+sub unscreen_comment {
+    # NOTE: assumes that the comment is indeed screened
+    # this should be checked before calling unscreen_comment()
+
+    my ($dbs, $dbcs, $u, $itemid, $talkid) = @_;
+    my $dbcm = $dbcs->{'dbh'};
+    my $dbcr = $dbcs->{'reader'};
+    my $clustered = $u->{'clusterid'};
+    my $userid = $u->{'userid'};
+    LJ::load_props($dbs, "log");
+    my $prop = LJ::get_prop("log", "hasscreened");
+
+    my $hasscreened;
+    if ($clustered) {
+        $hasscreened = $dbcr->selectrow_array("SELECT COUNT(*) FROM talk2 " .
+                                              "WHERE journalid=$userid AND nodeid=$itemid AND nodetype='L' AND state='S'");
+        $dbcm->do("UPDATE talk2 SET state='A' WHERE journalid=$userid AND jtalkid=$talkid");
+        $dbcm->do("UPDATE log2 SET replycount=replycount+1 WHERE journalid=$userid AND jitemid=$itemid");
+        $dbcm->do("DELETE FROM logprop2 WHERE journalid=$userid AND jitemid=$itemid AND propid=$prop->{'id'}")
+            if $hasscreened == 1;
+
+    } else {
+        $hasscreened = $dbcr->selectrow_array("SELECT COUNT(*) FROM talk WHERE ".
+                                              "nodeid=$itemid AND nodetype='L' AND state='S'");
+        $dbcm->do("UPDATE talk SET state='A' WHERE talkid=$talkid");
+        $dbcm->do("UPDATE log SET replycount=replycount+1 WHERE itemid=$itemid");
+        $dbcm->do("DELETE FROM logprop WHERE itemid=$itemid AND propid=$prop->{'id'}")
+            if $hasscreened == 1;
+    }
+
+    return;
+}
+
+
+    
+
 1;

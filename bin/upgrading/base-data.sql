@@ -427,6 +427,8 @@ INSERT IGNORE INTO logproplist (name, prettyname, sortorder, datatype, des, scop
 UPDATE logproplist SET des='A keyword that should align to a defined picture',sortorder='30',scope='general',datatype='char',prettyname='Picture Keyword' WHERE name='picture_keyword';
 INSERT IGNORE INTO logproplist (name, prettyname, sortorder, datatype, des, scope) VALUES ('unknown8bit', 'Unknown 8-bit text', '99', 'bool', 'True if text has 8-bit data that\'s not in UTF-8', 'general');
 UPDATE logproplist SET des='True if text has 8-bit data that\'s not in UTF-8',sortorder='99',scope='general',datatype='bool',prettyname='Unknown 8-bit text' WHERE name='unknown8bit';
+INSERT IGNORE INTO logproplist (name, prettyname, sortorder, datatype, des, scope) VALUES ('hasscreened', 'Has screened replies', '99', 'bool', 'True if comments to this item include screened comments', 'general');
+UPDATE logproplist SET des='True if comments to this item include screened comments',sortorder='99',scope='general',datatype='bool',prettyname='Has screened replies' WHERE name='hasscreened';
 REPLACE INTO moods VALUES ('1', 'aggravated', '2');
 REPLACE INTO moods VALUES ('10', 'discontent', '25');
 REPLACE INTO moods VALUES ('100', 'rushed', '28');

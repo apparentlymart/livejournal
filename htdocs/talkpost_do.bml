@@ -343,12 +343,7 @@ body<=
  # unscreen the parent comment if needed
  my $unscreened = 0;
  if ($parpost->{'state'} eq 'S') {
-     if ($clustered) {
-         $dbcm->do("UPDATE talk2 SET state='A' " .
-                   "WHERE journalid=$u->{'userid'} AND jtalkid=$qpartid");
-     } else {
-         $dbh->do("UPDATE talk SET state='A' WHERE talkid=$qpartid");
-     }
+     LJ::Talk::unscreen_comment($dbs, $dbcs, $u, $itemid, $qpartid);
      $unscreened = 1;
  }
  
@@ -485,11 +480,24 @@ body<=
      }
      
      # update the "replycount" summary field of the log table
-     if ($clustered) {
-         $dbcm->do("UPDATE log2 SET replycount=replycount+1 WHERE ".
-                   "journalid=$u->{'userid'} AND jitemid=$itemid");
-     } else {
-         LJ::query_buffer_add($dbh, "log", "UPDATE log SET replycount=replycount+1 WHERE itemid=$itemid");	
+     if ($state eq 'A') {
+         if ($clustered) {
+             $dbcm->do("UPDATE log2 SET replycount=replycount+1 WHERE ".
+                       "journalid=$u->{'userid'} AND jitemid=$itemid");
+         } else {
+             LJ::query_buffer_add($dbh, "log", "UPDATE log SET replycount=replycount+1 WHERE itemid=$itemid");	
+         }
+     }
+
+     # update the "hasscreened" property of the log item if needed
+     if ($state eq 'S') {
+         LJ::load_props($dbs, "log");
+         my $prop = LJ::get_prop("log", "hasscreened");
+         if ($clustered) {
+             $dbcm->do("REPLACE INTO logprop2 (journalid, jitemid, propid, value) VALUES ($u->{'userid'}, $itemid, $prop->{'id'}, '1')");
+         } else {
+             $dbcm->do("INSERT INTO logprop (itemid, propid, value) VALUES ($itemid, $prop->{'id'}, '1')");
+         }
      }
 
      # log the event

@@ -211,13 +211,18 @@ sub create_view_lastn
             $itemargs .= "&nc=$replycount" if $replycount && $remote &&
                          $remote->{'opt_nctalklinks'};
             my $readurl = "$LJ::SITEROOT/talkread.bml?$itemargs";
+            my $dispreadlink = $replycount || 
+                ($logprops{$itemid}->{'hasscreened'} &&
+                 ($remote->{'user'} eq $user
+                  || LJ::check_priv($dbs, $remote, "sharedjournal", $user)));
+
             $lastn_event{'talklinks'} = LJ::fill_var_props($vars, 'LASTN_TALK_LINKS', {
                 'itemid' => $ditemid,
                 'itemargs' => $itemargs,
                 'urlpost' => "$LJ::SITEROOT/talkpost.bml?$itemargs",
                 'urlread' => $readurl,
                 'messagecount' => $replycount,
-                'readlink' => $replycount ? LJ::fill_var_props($vars, 'LASTN_TALK_READLINK', {
+                'readlink' => $dispreadlink ? LJ::fill_var_props($vars, 'LASTN_TALK_READLINK', {
                     'urlread' => $readurl,
                     'messagecount' => $replycount,
                     'mc-plural-s' => $replycount == 1 ? "" : "s",
@@ -713,6 +718,11 @@ sub create_view_friends
         {
             $itemargs .= "&nc=$replycount" if $replycount && $remote &&
                           $remote->{'opt_nctalklinks'};
+            my $dispreadlink = $replycount || 
+                ($logprops{$datakey}->{'hasscreened'} &&
+                 ($remote->{'user'} eq $friend
+                  || LJ::check_priv($dbs, $remote, "sharedjournal", $friend)));
+
             my $readurl = "$LJ::SITEROOT/talkread.bml?$itemargs";
             $friends_event{'talklinks'} = LJ::fill_var_props($vars, 'FRIENDS_TALK_LINKS', {
                 'itemid' => $ditemid,
@@ -720,7 +730,7 @@ sub create_view_friends
                 'urlpost' => "$LJ::SITEROOT/talkpost.bml?$itemargs",
                 'urlread' => $readurl,
                 'messagecount' => $replycount,
-                'readlink' => $replycount ? LJ::fill_var_props($vars, 'FRIENDS_TALK_READLINK', {
+                'readlink' => $dispreadlink ? LJ::fill_var_props($vars, 'FRIENDS_TALK_READLINK', {
                     'urlread' => $readurl,
                     'messagecount' => $replycount,
                     'mc-plural-s' => $replycount == 1 ? "" : "s",
@@ -1252,13 +1262,17 @@ sub create_view_day
             $itemargs .= "&nc=$replycount" if $replycount && $remote &&
                          $remote->{'opt_nctalklinks'};
             my $readurl = "$LJ::SITEROOT/talkread.bml?$itemargs";
+            my $dispreadlink = $replycount || 
+                ($logprops{$itemid}->{'hasscreened'} &&
+                 ($remote->{'user'} eq $user
+                  || LJ::check_priv($dbs, $remote, "sharedjournal", $user)));
             $day_event{'talklinks'} = LJ::fill_var_props($vars, 'DAY_TALK_LINKS', {
                 'itemid' => $ditemid,
                 'itemargs' => $itemargs,
                 'urlpost' => "$LJ::SITEROOT/talkpost.bml?$itemargs",
                 'urlread' => $readurl,
                 'messagecount' => $replycount,
-                'readlink' => $replycount ? LJ::fill_var_props($vars, 'DAY_TALK_READLINK', {
+                'readlink' => $dispreadlink ? LJ::fill_var_props($vars, 'DAY_TALK_READLINK', {
                     'urlread' => $readurl,
                     'messagecount' => $replycount,
                     'mc-plural-s' => $replycount == 1 ? "" : "s",

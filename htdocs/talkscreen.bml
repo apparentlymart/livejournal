@@ -24,14 +24,16 @@ body<=
  # we need to find out: $u, $up (poster of the entry this is a comment to),
  # userpost (username of this comment's author). Then we can check permissions.
 
- my ($clustered, $dbcm) = (0, $dbh);
+ my ($clustered, $dbcs) = (0, $dbs);
  my $u;
  if ($FORM{'journal'}) {
      $u = LJ::load_user($dbs, $FORM{'journal'});
      return "<?h1 $ML{'Error'} h1?><?p $ML{'.talk.error.bogusargs'} p?>" unless $u;
      $clustered = 1;
-     $dbcm = LJ::get_cluster_master($u);
+     $dbcs = LJ::get_cluster_set($u);
  }
+
+ my $dbcm = $dbcs->{'dbh'};
 
  my $post;
  if ($clustered) {
@@ -44,12 +46,15 @@ body<=
                                    "parenttalkid, journalid, posterid FROM talk ".
                                    "WHERE talkid=$qtalkid");
  }
+
  unless ($post) {
      return "<?h1 $ML{'Error'} h1?><?p $ML{'talk.error.nocomment'} p?>";
  }
  if ($post->{'state'} eq "D") {
      return "<?h1 $ML{'Error'} h1?><?p $ML{'talk.error.comm_deleted'} p?>";
  }
+
+ my $state = $post->{'state'};
 
  $u ||= LJ::load_userid($dbs, $post->{'journalid'});
  return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
@@ -88,10 +93,8 @@ body<=
          $ret .= "</form>\n";
          return $ret;
      }
-     if ($clustered) {
-         $dbcm->do("UPDATE talk2 SET state='S' WHERE journalid=$u->{'userid'} AND jtalkid=$qtalkid");
-     } else {
-         $dbh->do("UPDATE talk SET state='S' WHERE talkid=$qtalkid");
+     if ($state ne 'S') {
+         LJ::Talk::screen_comment($dbs, $dbcs, $u, $qitemid, $qtalkid);
      }
      return "<?h1 $ML{'.screened.title'} h1?><?p $ML{'.screened.body'} p?>";
  }
@@ -111,10 +114,8 @@ body<=
          $ret .= "</form>\n";
          return $ret;
      }
-     if ($clustered) {
-         $dbcm->do("UPDATE talk2 SET state='A' WHERE journalid=$u->{'userid'} AND jtalkid=$qtalkid");
-     } else {
-         $dbh->do("UPDATE talk SET state='A' WHERE talkid=$qtalkid");
+     if ($state ne 'A') {
+         LJ::Talk::unscreen_comment($dbs, $dbcs, $u, $qitemid, $qtalkid);
      }
      return "<?h1 $ML{'.unscreened.title'} h1?><?p $ML{'.unscreened.body'} p?>";
  }

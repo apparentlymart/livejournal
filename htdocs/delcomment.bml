@@ -20,14 +20,15 @@ body<=
 
  my $qid = $FORM{'id'}+0;
 
- my ($clustered, $dbcm) = (0, $dbh);
+ my ($clustered, $dbcs) = (0, $dbs);
  my $u;
  if ($FORM{'journal'}) {
      $u = LJ::load_user($dbs, $FORM{'journal'});
      return "<?h1 Error h1?><?p Bogus journal arg p?>" unless $u;
      $clustered = 1;
-     $dbcm = LJ::get_cluster_master($u);
+     $dbcs = LJ::get_cluster_set($u);
  }
+ my $dbcm = $dbcs->{'dbh'};
 
  unless ($dbcm) {
      return "<?h1 Maintenance h1?><?p Database currently unavailable.  Most likely, maintenance is being performed. p?>";
@@ -109,6 +110,12 @@ body<=
      $ret .= "</FORM>\n";
      return $ret;
  }
+
+ # if it's screened, unscreen it first to properly adjust
+ # replycount and the hasscreened logprop
+
+ LJ::Talk::unscreen_comment($dbs, $dbcs, $u, $tp->{'itemid'}, $qid)
+     if $tp->{'state'} eq 'S';
 
  if ($clustered) {
      my $jid = $u->{'userid'};
