@@ -175,6 +175,9 @@ body<=
         LJ::update_user($u, { defaultpicid => $picid });
     }
 
+    my $memkey = [$u->{'userid'},"upicinf:$u->{'userid'}"];
+    LJ::MemCache::delete($memkey);
+
     return "<?h1 $ML{'.success.header'} h1?>\n" .
            "<?p " . BML::ml('.success.preview', { 'editlink' => "$LJ::SITEROOT/editpics.bml?authas=$authas" }) . " p?>\n\n" .
            "<div align='center' style='margin-top: 20px;'><img src='$LJ::USERPIC_ROOT/$picid/$u->{'userid'}' width='$sx' height='$sy' alt='userpic'></div>\n\n" .

@@ -3146,29 +3146,37 @@ sub get_userpic_info
     my $userid = want_userid($uuid);
     return $LJ::CACHE_USERPIC_INFO{$userid} if $LJ::CACHE_USERPIC_INFO{$userid};
     
-    # TODO: insert memcache stuff
+    my $memkey = [$userid,"upicinf:$userid"];
+    my $info = LJ::MemCache::get($memkey);
+    
+    unless ($info) {
+        $info = {
+            'pic' => {},
+            'kw' => {},
+        };
+        
+        my $db = @LJ::MEMCACHE_SERVERS ? LJ::get_db_writer() : LJ::get_db_reader();
+        my $sth = $db->prepare("SELECT picid, width, height, state, userid ".
+                               "FROM userpic WHERE userid=?");
+        $sth->execute($userid);
+        while ($_ = $sth->fetchrow_hashref) {
+            $info->{'pic'}->{$_->{'picid'}} = $_;
+        }
+        
+        $sth = $db->prepare("SELECT k.keyword, m.picid FROM userpicmap m, keywords k ".
+                            "WHERE m.userid=? AND m.kwid=k.kwid");
+        $sth->execute($userid);
+        while (my ($kw, $id) = $sth->fetchrow_array) {
+            next unless $info->{'pic'}->{$id};
+            next if $kw =~ /[\n\r\0]/;  # used to be a bug that allowed these to get in.
+            $info->{'kw'}->{$kw} = $info->{'pic'}->{$id};
+        }
 
-    my $info = {
-        'pic' => {},
-        'kw' => {},
-    };
-
-    my $dbr = LJ::get_db_reader();
-    my $sth = $dbr->prepare("SELECT picid, width, height, state, userid ".
-                            "FROM userpic WHERE userid=?");
-    $sth->execute($userid);
-    while ($_ = $sth->fetchrow_hashref) {
-        $info->{'pic'}->{$_->{'picid'}} = $_;
-        $LJ::CACHE_USERPIC_SIZE{$_->{'picid'}} = [ $_->{'width'}, $_->{'height'}, $_->{'userid'} ];
+        LJ::MemCache::add($memkey, $info);
     }
 
-    $sth = $dbr->prepare("SELECT k.keyword, m.picid FROM userpicmap m, keywords k ".
-                         "WHERE m.userid=? AND m.kwid=k.kwid");
-    $sth->execute($userid);
-    while (my ($kw, $id) = $sth->fetchrow_array) {
-        next unless $info->{'pic'}->{$id};
-        next if $kw =~ /[\n\r\0]/;  # used to be a bug that allowed these to get in.
-        $info->{'kw'}->{$kw} = $info->{'pic'}->{$id};
+    foreach (values %{$info->{'pic'}}) {
+        $LJ::CACHE_USERPIC_SIZE{$_->{'picid'}} = [ $_->{'width'}, $_->{'height'}, $_->{'userid'} ];
     }
     
     return $LJ::CACHE_USERPIC_INFO{$userid} = $info;

@@ -134,6 +134,9 @@
          LJ::update_user($u, { defaultpicid => $new_default }) unless $state eq 'I';
      }
 
+     my $memkey = [$u->{'userid'},"upicinf:$u->{'userid'}"];
+     LJ::MemCache::delete($memkey);
+
      # errors occurred during processing?
      return $err->(@errors) if @errors;
 
