@@ -17,6 +17,8 @@
 package LJ::Cache;
 
 use strict;
+use fields qw(items size tail head bytes maxsize maxbytes);
+
 use vars qw($VERSION);
 use constant PREVKEY => 0;
 use constant VALUE => 1;
@@ -29,15 +31,16 @@ $VERSION = '1.0';
 
 sub new {
     my ($class, $args) = @_;
-    my $self = {};
-    bless $self, ref $class || $class;
+    my $self = fields::new($class);
     
     $self->init($args);
     return $self;
 }
 
 sub walk_items {
-    my ($self, $code) = @_;
+    my LJ::Cache $self = shift;
+    my $code = shift;
+
     my $iter = $self->{'head'};
     while ($iter) {
         my $it = $self->{'items'}->{$iter};
@@ -47,7 +50,8 @@ sub walk_items {
 }
 
 sub init {
-    my ($self, $args) = @_;
+    my LJ::Cache $self = shift;
+    my $args = shift;
 
     $self->{'head'} = 0;
     $self->{'tail'} = 0;
@@ -59,17 +63,17 @@ sub init {
 }
 
 sub get_item_count {
-    my $self = shift;
+    my LJ::Cache $self = shift;
     $self->{'size'};
 }
 
 sub get_byte_count {
-    my $self = shift;
+    my LJ::Cache $self = shift;
     $self->{'bytes'};
 }
 
 sub get_max_age {
-    my $self = shift;
+    my LJ::Cache $self = shift;
     return undef unless $self->{'tail'};
     return $self->{'items'}->{$self->{'tail'}}->[INSTIME];
 }
@@ -129,7 +133,7 @@ sub validate_list
 
 sub drop_tail
 {
-    my $self = shift;
+    my LJ::Cache $self = shift;
 
     ## who's going to die?
     my $to_die = $self->{'tail'};
@@ -152,7 +156,8 @@ sub drop_tail
 }
 
 sub print_list {
-    my ($self) = @_;
+    my LJ::Cache $self = shift;
+
     print "Size: $self->{'size'} (max: $self->{'maxsize'})\n";
 
     my $count = 1;
@@ -166,7 +171,8 @@ sub print_list {
 }
 
 sub get {
-    my ($self, $key, $out_flags) = @_;
+    my LJ::Cache $self = shift;
+    my ($key, $out_flags) = @_;
 
     if (exists $self->{'items'}->{$key}) 
     {
@@ -203,7 +209,8 @@ sub get {
 
 # bytes is optional
 sub set {
-    my ($self, $key, $value, $bytes, $flags) = @_;
+    my LJ::Cache $self = shift;
+    my ($key, $value, $bytes, $flags) = @_;
     
     $self->drop_tail() while ($self->{'maxsize'} && 
                               $self->{'size'} >= $self->{'maxsize'} &&
