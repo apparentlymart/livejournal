@@ -348,7 +348,9 @@ sub clean
             }
         }
     }
-
+    
+    # extra-paranoid check
+    $newdata =~ s/<script//ig;
 
     $$data = $newdata;
 }
