@@ -22,9 +22,13 @@ use LWP::UserAgent ();
 use Storable;
 use Image::Size ();
 use Apache::SendStats;
+use Time::HiRes ();
 
 # Try to load GTop library
 BEGIN { $LJ::HAVE_GTOP = eval "use GTop (); 1;" }
+
+# Try to load DBI::Profile
+BEGIN { $LJ::HAVE_DBI_PROFILE = eval "use DBI::Profile (); 1;" }
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";

@@ -20,7 +20,7 @@ my %modules = (
                "MIME::Lite" => { 'deb' => 'libmime-lite-perl', },
                "MIME::Words" => { 'deb' => 'libmime-perl', },
                "Compress::Zlib" => { 'deb' => 'libcompress-zlib-perl', },
-               "Net::SMTP" => { 
+               "Net::SMTP" => {
                    'deb' => 'libnet-perl',
                    'opt' => "Alternative to piping into sendmail to send mail.",
                },
@@ -31,17 +31,17 @@ my %modules = (
                "LWP::Simple" => { 'deb' => 'libwww-perl', },
                "LWP::UserAgent" => { 'deb' => 'libwww-perl', },
                "GD" => { 'deb' => 'libgd-perl' },
-               "GD::Graph" => { 
-                   'deb' => 'libgd-graph-perl', 
+               "GD::Graph" => {
+                   'deb' => 'libgd-graph-perl',
                    'opt' => 'Required to make graphs for the statistics page.',
                },
                "Mail::Address" => { 'deb' => 'libmailtools-perl', },
-               "Proc::ProcessTable" => { 
-                   'deb' => 'libproc-process-perl', 
+               "Proc::ProcessTable" => {
+                   'deb' => 'libproc-process-perl',
                    'opt' => "Better reliability for starting daemons necessary for high-traffic installations.",
                },
-               "SOAP::Lite" => { 
-                   'deb' => 'libsoap-lite-perl', 
+               "SOAP::Lite" => {
+                   'deb' => 'libsoap-lite-perl',
                    'opt' => 'Required for XML-RPC support.',
                },
                "Unicode::MapUTF8" => { 'deb' => 'libunicode-maputf8-perl', },
@@ -52,10 +52,11 @@ my %modules = (
                    'deb' => 'libxml-rss-perl',
                    'opt' => 'Required for retrieving RSS off of other sites (syndication).',
                },
-               "String::CRC32" => { 
+               "String::CRC32" => {
                    'deb' => 'libstring-crc32-perl',
                    'opt' => 'Required for palette-altering of PNG files.  Only necessary if you plan to make your own S2 styles that use PNGs, not GIFs.',
                },
+               "Time::HiRes" => { 'deb' => 'libtime-hires-perl' },
                );
 
 my @debs;

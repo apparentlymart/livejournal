@@ -24,6 +24,7 @@ use LJ::MemCache;
 use Time::Local ();
 use Storable ();
 use Compress::Zlib ();
+use IO::Socket::INET qw{};
 use SafeAgent;
 
 do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
@@ -152,6 +153,13 @@ use constant CMAX_INTEREST => 50;
 ## see LJ::clear_caches and LJ::handle_caches
 $LJ::CLEAR_CACHES = 0;
 
+# DB Reporting UDP socket object
+$LJ::ReportSock = undef;
+
+# DB Reporting handle collection. ( host => $dbh )
+%LJ::DB_REPORT_HANDLES = ();
+
+
 ## if this library is used in a BML page, we don't want to destroy BML's
 ## HUP signal handler.
 if ($SIG{'HUP'}) {
@@ -235,8 +243,8 @@ sub get_dbh {
             eval {
                 $tracker =
                     $LJ::REQ_DBIX_TRACKER{$canl_role} ||=
-                    DBIx::StateTracker->new(sub { $LJ::DBIRole->get_dbh({unshared=>1},
-                                                                        $canl_role) });
+                    DBIx::StateTracker->new(sub { LJ::get_dbirole_dbh({unshared=>1},
+                                                                      $canl_role) });
             };
             if ($tracker) {
                 my $keeper = DBIx::StateKeeper->new($tracker, $dbname);
@@ -245,11 +253,37 @@ sub get_dbh {
             }
             next ROLE;
         }
-        my $db = $LJ::DBIRole->get_dbh($role);
+        my $db = LJ::get_dbirole_dbh($role);
         return $db if $db;
     }
     return undef;
 }
+
+
+# <LJFUNC>
+# name: LJ::get_dbirole_dbh
+# class: db
+# des: Internal function for get_dbh(). Uses the DBIRole to fetch a dbh, with
+#      hooks into db stats-generation if that's turned on.
+# info:
+# args: opts, role
+# des-opts: A hashref of options.
+# des-role: The database role.
+# returns: A dbh.
+# </LJFUNC>
+sub get_dbirole_dbh {
+    my $dbh = $LJ::DBIRole->get_dbh( @_ ) or return undef;
+
+    if ( $LJ::DB_LOG_HOST && $LJ::HAVE_DBI_PROFILE ) {
+        $LJ::DB_REPORT_HANDLES{ $dbh->{Name} } = $dbh;
+
+        # :TODO: Explain magic number
+        $dbh->{Profile} ||= "2/DBI::Profile";
+    }
+
+    return $dbh;
+}
+
 
 # <LJFUNC>
 # name: LJ::get_newids
@@ -3798,7 +3832,7 @@ sub start_request
             $LJ::IMGPREFIX_BAK = $LJ::IMGPREFIX;
             $LJ::STATPREFIX_BAK = $LJ::STATPREFIX;
             $LJ::DBIRole->set_sources(\%LJ::DBINFO);
-            LJ::MemCache::trigger_bucket_reconstruct();
+            LJ::MemCache::reload_conf();
             if ($modtime > $now - 60) {
                 # show to stderr current reloads.  won't show
                 # reloads happening from new apache children
@@ -6467,6 +6501,39 @@ sub memcache_kill {
 
     return LJ::MemCache::delete([$userid, "$type:$userid"]);
 }
+
+
+# <LJFUNC>
+# name: LJ::blocking_report
+# des: Log a report on the total amount of time used in a slow operation to a
+#      remote host via UDP.
+# args: host, time, notes, type
+# des-host: The DB host the operation used.
+# des-type: The type of service the operation was talking to (e.g., 'database',
+#           'memcache', etc.)
+# des-time: The amount of time (in floating-point seconds) the operation took.
+# des-notes: A short description of the operation.
+# </LJFUNC>
+sub blocking_report {
+    my ( $host, $type, $time, $notes ) = @_;
+
+    if ( $LJ::DB_LOG_HOST ) {
+        unless ( $LJ::ReportSock ) {
+            my ( $host, $port ) = split /:/, $LJ::DB_LOG_HOST, 2;
+            return unless $host && $port;
+
+            $LJ::ReportSock = new IO::Socket::INET (
+                PeerPort => $port,
+                Proto    => 'udp',
+                PeerAddr => $host
+               ) or return;
+        }
+
+        my $msg = join( ':', $host, $type, $time, $notes );
+        $LJ::ReportSock->send( $msg );
+    }
+}
+
 
 # all reads/writes to talk2 must be done inside a lock, so there's
 # no race conditions between reading from db and putting in memcache.
