@@ -294,7 +294,7 @@ body<=
                                  'parpost'  => $parpost,
                                  'replyto'  => $init->{replyto},
                                  'ditemid'  => $ditemid,
-                                 'form'     => $FORM });
+                                 'form'     => \%FORM });
     BML::noparse();
     return $ret;
 }
