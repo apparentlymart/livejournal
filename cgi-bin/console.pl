@@ -671,7 +671,7 @@ $cmd{'syn_merge'} = {
     'args' => [
                'from_user' => "Syndicated account to merge into another.",
                'to_user'   => "Syndicated account to merge 'from_user' into.",
-               'url'       => "Optional.  Url to use for 'to_user' once merge is complete.",
+               'url'       => "Optional.  Url to use for 'to_user' once merge is complete. If none is specified, the 'to_user' URL will be used.",
                ],
     };
 
