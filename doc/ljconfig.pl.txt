@@ -301,7 +301,7 @@
     # default capability limits, used only when no other
     # class-specific limit below matches.
     %CAP_DEF = (
-            'maxfriends' => 5,
+            'maxfriends' => 500,
             'userpics' => 1,
             'checkfriends_interval' => 60,
             'checkfriends' => 1,
