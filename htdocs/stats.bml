@@ -157,6 +157,7 @@ if (@ages) {
  }
  foreach my $cn (sort { $stat{'clientname'}->{$b} <=> $stat{'clientname'}->{$a} } keys %{$stat{'clientname'}})
  {
+     next unless $stat{'clientname'}->{$cn} >= 50;
      $ret .= "<tr valign='top'><td><font size='+1'><b>$stat{'clientname'}->{$cn}</b></font></td>".
          "<td><b>" . LJ::ehtml($cn) . "</b><br />\n";
      $ret .= "<font size='-1'>\n";
