@@ -1,8 +1,8 @@
-(=PAGE
+<?page
 TITLE=>Support Requests
 BODY<=
 
-(=_CODE
+<?_code
  
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -38,17 +38,17 @@ BODY<=
 
  if ($FORM{'state'} eq "closed")
  {
-     $ret .= "(=H1 Recently Closed Support Requests H1=)(=P Below are all support requests that have been recently closed.  To return to the open requests, <a href=\"./help.bml?cat=$filtercat\">click here</a>. P=)";
+     $ret .= "<?h1 Recently Closed Support Requests h1?><?p Below are all support requests that have been recently closed.  To return to the open requests, <a href=\"./help.bml?cat=$filtercat\">click here</a>. p?>";
      
      $sth = $dbr->prepare("SELECT s.* FROM support s WHERE s.state='closed' AND s.timeclosed>UNIX_TIMESTAMP()-(3600*24) $filterwhere ORDER BY timecreate DESC");
 
  }
  elsif ($FORM{'state'} eq "youreplied") 
  {
-     $ret .= "(=H1 Requests you replied to H1=)(=P This shows all open requests you've replied to. P=)";
+     $ret .= "<?h1 Requests you replied to h1?><?p This shows all open requests you've replied to. p?>";
 
      unless ($remote) {
-         return "(=H1 Error H1=)(=P You must be logged in to filter on requests that you've replied to. P=)";
+         return "<?h1 Error h1?><?p You must be logged in to filter on requests that you've replied to. p?>";
      }
      
      $sth = $dbr->prepare("SELECT DISTINCT s.* FROM support s, supportlog sl WHERE s.spid=sl.spid AND s.state='open' AND sl.userid=$remote->{'userid'} $filterwhere GROUP BY s.spid ORDER BY timecreate DESC");
@@ -56,13 +56,13 @@ BODY<=
  }
  else 
  {
-     $ret .= "(=H1 Open Support Requests H1=)(=P Below are all support requests that are open (they just came in and haven't been touched yet) or answered (either awaiting to be closed by the person needing help, or the person requested they still need help).  The <a href=\"./help.bml?state=closed&amp;cat=$filtercat\">closed reports</a> are also available.  If you help somebody out and they confirm you helped them, you get the number of points indicated in the status column.  These points will show up on your userinfo page. P=)";
+     $ret .= "<?h1 Open Support Requests h1?><?p Below are all support requests that are open (they just came in and haven't been touched yet) or answered (either awaiting to be closed by the person needing help, or the person requested they still need help).  The <a href=\"./help.bml?state=closed&amp;cat=$filtercat\">closed reports</a> are also available.  If you help somebody out and they confirm you helped them, you get the number of points indicated in the status column.  These points will show up on your userinfo page. p?>";
  
      $sth = $dbr->prepare("SELECT COUNT(*) FROM support WHERE state='open'");
      $sth->execute;
      my ($count) = $sth->fetchrow_array;
      unless ($count) {
-         return "(=H1 No support requests! H1=)(=P The support queue is currently empty.  :-) P=)";
+         return "<?h1 No support requests! h1?><?p The support queue is currently empty.  :-) p?>";
      }
      $sth = $dbr->prepare("SELECT s.* FROM support s WHERE s.state='open' $filterwhere ORDER BY timecreate DESC");
  }
@@ -159,14 +159,14 @@ BODY<=
 
  return $ret;
 
-_CODE=)
+_code?>
 
-(=HR=)
+<?hr?>
 Back to the <A HREF="./">support area</A>.
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 link: htdocs/support/help.bml, htdocs/support/see_request.bml
 link: htdocs/support/index.bml
 form: htdocs/support/help.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

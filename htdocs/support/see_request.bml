@@ -1,8 +1,8 @@
-(=PAGE
-TITLE=>Request #(=_CODE return ($FORM{'id'}+0); _CODE=)
+<?page
+TITLE=>Request #<?_code return ($FORM{'id'}+0); _code?>
 BODY<=
         
-(=_CODE
+<?_code
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -13,7 +13,7 @@ BODY<=
  my $spid = $FORM{'id'}+0;
  my $auth = $FORM{'auth'};
  my $sp = LJ::Support::load_request($dbh, $spid);
- unless ($sp) { return "(=H1 Error H1=)(=P Unknown support number. P=)"; }
+ unless ($sp) { return "<?h1 Error h1?><?p Unknown support number. p?>"; }
 
  my $cats = LJ::Support::load_cats($dbh);
 
@@ -46,7 +46,7 @@ BODY<=
  my $catkey = $sp->{_cat}->{'catkey'};
 
  unless (LJ::Support::can_read($dbh, $sp, $remote, $auth)) {
-     return "(=H1 Error H1=)(=P You don't have <b>supportread</b> priv on topic <b>$catkey</b>. P=)";
+     return "<?h1 Error h1?><?p You don't have <b>supportread</b> priv on topic <b>$catkey</b>. p?>";
  }
 
  if (LJ::Support::can_close($dbh, $sp, $remote, $auth)) {
@@ -84,7 +84,7 @@ BODY<=
 
  $ret .= "<TR VALIGN=TOP><TD ALIGN=RIGHT><B>LiveJournal:</B></TD><TD>";
  if ($u->{'userid'}) {
-     $ret .= "username: (=LJUSERF $u->{'user'} LJUSERF=)";
+     $ret .= "username: <?ljuserf $u->{'user'} ljuserf?>";
      $ret .= "<BR>styles: ";
      foreach my $view (@LJ::views) {
          my $styid = $u->{"s1_${view}_style"};
@@ -232,14 +232,14 @@ BODY<=
 
  if ($ans_type{'answer'} || $ans_type{'screened'})
  {
-     $ret .= "(=STANDOUT <B>Important Notes:</B>";
+     $ret .= "<?standout <B>Important Notes:</B>";
      $ret .= "<ul>";
      $ret .= "<li>Before answering somebody's question, read the <b><a href=\"/doc/find?guide=support\">support guide</a></b>.";
      $ret .= "<li>Do <b>NOT</b> answer people if you're not sure of your answer.  Don't answer if your solution is just a guess.  Only answer if you really know what you're talking about ... guessing only makes other people in the support area think you might be right and spread the misinformation further, until it's accepted as truth.";
      if ($LJ::LJDOTCOM) {
-         $ret .= "<li>Never recommend asking someone else, or somewhere else.  That qualifies as not knowing the answer.  If a support request is open for a day or two, one of the support leaders will find out the answer and reply, and likely post about it in (=LJUSER lj_support LJUSER=) so all the support people will know the answer in the future.";
+         $ret .= "<li>Never recommend asking someone else, or somewhere else.  That qualifies as not knowing the answer.  If a support request is open for a day or two, one of the support leaders will find out the answer and reply, and likely post about it in <?ljuser lj_support ljuser?> so all the support people will know the answer in the future.";
      }
-     $ret .= "</ul>Thanks! STANDOUT=)";
+     $ret .= "</ul>Thanks! standout?>";
  }
  
  $ret .= "<BR><FORM METHOD=POST ACTION=append_request.bml>";
@@ -250,7 +250,7 @@ BODY<=
  
  $ret .= "<TR VALIGN=MIDDLE><TD ALIGN=RIGHT>From:</TD><td>";
  if ($remote && $remote->{'userid'}) {
-     $ret .= "(=LJUSER $remote->{'user'} LJUSER=)";
+     $ret .= "<?ljuser $remote->{'user'} ljuser?>";
  } else {
      $ret .= "(not logged in)";
  }
@@ -342,14 +342,14 @@ BODY<=
      $ret .= "</td></tr>";
      if (LJ::Support::can_help($dbh, $sp, $remote)) {
          $ret .= "<tr><td>Touch request:</td><td>";
-         $ret .= '<input type="checkbox" name="touch" /> (=DE (Use this to re-open the request.) DE=)';
+         $ret .= '<input type="checkbox" name="touch" /> <?de (Use this to re-open the request.) de?>';
          $ret .= "</td></tr>";
      }
  }
 
  # textarea for their message body
  $ret .= "<TR VALIGN=TOP><TD ALIGN=RIGHT>Message:</TD><TD COLSPAN=2><TEXTAREA ROWS=10 COLS=50 WRAP=VIRTUAL NAME=\"body\"></TEXTAREA><BR>";
- $ret .= "(=DE No HTML allowed, so don't worry about about escaping &lt; and &gt;<BR>URLs are automatically link-ified, so just reference those. DE=)<BR>";
+ $ret .= "<?de No HTML allowed, so don't worry about about escaping &lt; and &gt;<BR>URLs are automatically link-ified, so just reference those. de?><BR>";
  $ret .= "<INPUT TYPE=SUBMIT NAME=submitpost VALUE=\"Post Comment/Solution\">\n";
  $ret .= "</TD></TR></TABLE>";
 
@@ -362,18 +362,18 @@ BODY<=
      return "<a href=\"$url\">$url</a>";
  }
  
-_CODE=)
-(=HR=)
+_code?>
+<?hr?>
 Back to the <A HREF="help.bml">list of open requests</A>.<BR>
 Back to the <A HREF="./">support area</A>.
 
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 link: htdocs/support/faqbrowse.bml, htdocs/styles/browse/styleinfo.bml
 link: htdocs/support/help.bml, htdocs/support/act.bml, htdocs/login.bml
 link: htdocs/guide/support.bml, htdocs/support/faq.bml, htdocs/support/index.bml
 link: htdocs/allpics.bml
 img: htdocs/userpic
 post: htdocs/support/append_request.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

@@ -1,8 +1,8 @@
-(=PAGE
-TITLE=>(=_ML .title _ML=)
+<?page
+TITLE=><?_ml .title _ml?>
 BODY<=
 
-(=_CODE
+<?_code
 
  my $curlang = BML::get_language();
  my $deflang = BML::get_language_default();
@@ -64,22 +64,22 @@ BODY<=
      
      $a =~ s!(&quot;|&#39;)?(http://[a-z0-9A-Z_\-\.\/\?\%\+\=\&\;]+)!$1 ? "$1$2" : "<a href=\"$2\">$2</a>"!eg;
 
-     $ret .= "(=H1 $q H1=)<blockquote>$a</blockquote>";
+     $ret .= "<?h1 $q h1?><blockquote>$a</blockquote>";
 
      if ($lastmodwho) {
-         $ret .= "<p align=\"right\"><b>(=_ML .lastupdated _ML=)</b><br />$lastmodwho, $lastmodtime</p>";
+         $ret .= "<p align=\"right\"><b><?_ml .lastupdated _ml?></b><br />$lastmodwho, $lastmodtime</p>";
      }
  }
 
  return $ret;
 
-_CODE=)
+_code?>
 
-(=HR=)
-(=_ML .backfaq _ML=)
-<br />(=_ML .backsupport _ML=)
+<?hr?>
+<?_ml .backfaq _ml?>
+<br /><?_ml .backsupport _ml?>
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 link: htdocs/support/index.bml, htdocs/support/faq.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

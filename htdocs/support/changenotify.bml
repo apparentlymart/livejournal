@@ -1,10 +1,10 @@
-(=_INFO
+<?_info
 NOCACHE=>1
-_INFO=)(=PAGE
+_info?><?page
 TITLE=>Change Notifications
 BODY<=
 
-(=_CODE
+<?_code
 
  my @errors = ();
  my $user = lc($FORM{'user'});
@@ -21,7 +21,7 @@ BODY<=
      push @errors, "You must first <a href=\"/login.bml?ret=1\">login</a>.";
  }
  if ($mode eq "save" && ! LJ::did_post) {
-     push @errors, "(=REQUIREPOST=)";
+     push @errors, "<?requirepost?>";
  }
  return LJ::bad_input(@errors) if @errors;
  
@@ -35,7 +35,7 @@ BODY<=
      $ret .= "<form method='post'>\n";
      $ret .= "<input type='hidden' name='mode' value='save'>\n";
 
-     $ret .= "(=H1 Change Notification Settings H1=)(=P Here you may select what categories of support requests you'd like to be notified about.  Choices are <B>off</B> (the default), <B>new</B> (you'll get notifications when a new support request in that category is posted) or <B>all</B> (you'll get notifications and then a copy of each comment/solution posted). P=)";
+     $ret .= "<?h1 Change Notification Settings h1?><?p Here you may select what categories of support requests you'd like to be notified about.  Choices are <B>off</B> (the default), <B>new</B> (you'll get notifications when a new support request in that category is posted) or <B>all</B> (you'll get notifications and then a copy of each comment/solution posted). p?>";
 
      my %notify;
      $sth = $dbh->prepare("SELECT spcatid, level FROM supportnotify WHERE userid=$remote->{'userid'}");
@@ -68,8 +68,8 @@ BODY<=
 
 
      ### ending submit block
-     $ret .= "(=H1 Done? H1=)(=P When done, press the \"Save Changes\" button below... P=)\n";
-     $ret .= "(=STANDOUT <INPUT TYPE=SUBMIT VALUE=\"Save Changes\"> STANDOUT=)\n";
+     $ret .= "<?h1 Done? h1?><?p When done, press the \"Save Changes\" button below... p?>\n";
+     $ret .= "<?standout <INPUT TYPE=SUBMIT VALUE=\"Save Changes\"> standout?>\n";
      $ret .= "</FORM>\n";
 
      return $ret;
@@ -94,15 +94,15 @@ BODY<=
      }     
      if ($sql) { $dbh->do($sql); }
      
-     return "(=H1 Success H1=)(=P Your notification settings have been updated. P=)";
+     return "<?h1 Success h1?><?p Your notification settings have been updated. p?>";
  }
 
  return "Unknown mode."
 
-_CODE=)
+_code?>
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 link: htdocs/login.bml
 post: htdocs/support/changenotify.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

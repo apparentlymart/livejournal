@@ -1,10 +1,10 @@
-(=PAGE
+<?page
 TITLE=>High Scores
 BODY<=
 
 The following people have helped other users in the support area:
 
-(=_CODE
+<?_code
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -84,17 +84,17 @@ The following people have helped other users in the support area:
          }
          $privcol = "<td align=\"center\">$data</td>";
      }
-     $ret .= "<tr><td align=\"right\">$rank.</td><td>$change</td>$privcol<td>(=LJUSER $_->{'user'} LJUSER=) - $name</td><td><b>$_->{'points'} point$s</b></td></tr>\n";
+     $ret .= "<tr><td align=\"right\">$rank.</td><td>$change</td>$privcol<td><?ljuser $_->{'user'} ljuser?> - $name</td><td><b>$_->{'points'} point$s</b></td></tr>\n";
  }
  $ret .= "</table></p>";
  $ret .= "<p><b>$total</b> total supporting users.</p>";
  return $ret;
 
-_CODE=)
-(=HR=)
+_code?>
+<?hr?>
 Back to the <A HREF="./">support area</A>.
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 link: htdocs/admin/priv/index.bml, htdocs/support/index.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

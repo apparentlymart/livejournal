@@ -1,8 +1,8 @@
-(=PAGE
+<?page
 TITLE=>Submit Request
 BODY<=
 
-(=_CODE
+<?_code
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -10,7 +10,7 @@ BODY<=
 
  my @errors = ();
 
- unless (LJ::did_post()) { push @errors, "(=REQUIREPOST=)"; }
+ unless (LJ::did_post()) { push @errors, "<?requirepost?>"; }
 
  my $u;
  my $user;
@@ -61,12 +61,12 @@ BODY<=
  
  return "Your LiveJournal support request has been filed and will be answered as soon as possible.  Your request tracking number is <B>$spid</B>.  You can track its progress here: <UL><A HREF=\"$url\">$url</A></UL>";    
 
-_CODE=)
+_code?>
 
-(=HR=)
+<?hr?>
 Back to the <A HREF="./">support area</A>.
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 link: htdocs/support/see_request.bml, htdocs/support/index.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

@@ -1,8 +1,8 @@
-(=PAGE
+<?page
 TITLE=>Append Request
 BODY<=
 
-(=_CODE
+<?_code
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -10,10 +10,10 @@ BODY<=
 
  my $spid = $FORM{'spid'}+0;
  my $sp = LJ::Support::load_request($dbh, $spid);
- unless ($sp) { return "(=H1 Error H1=)(=P Unknown support request. P=)"; }
+ unless ($sp) { return "<?h1 Error h1?><?p Unknown support request. p?>"; }
 
  if ($sp->{'state'} eq "closed") {
-     return "(=H1 Closed H1=)(=P This support request has since been closed. P=)";
+     return "<?h1 Closed h1?><?p This support request has since been closed. p?>";
  }
 
  my $u;
@@ -33,7 +33,7 @@ BODY<=
  my $catkey = $scat->{'catkey'};
  
  unless ($FORM{'spid'}) { return LJ::bad_input("need spid"); }
- unless (LJ::did_post) { return LJ::bad_input("(=REQUIREPOST=)"); }
+ unless (LJ::did_post) { return LJ::bad_input("<?requirepost?>"); }
 
  ### insert record
  my $faqid = $FORM{'faqid'}+0;
@@ -114,15 +114,15 @@ BODY<=
  LJ::Support::mail_response_to_user($dbh, $sp, $splid);
 
  my $auth_arg = $FORM{'auth'} ? "&auth=$FORM{'auth'}" : "";
- return "(=H1 Logged H1=)(=P Your comment/solution <a href=\"see_request.bml?id=$spid$auth_arg\">has been recorded</a>.  Thanks.  P=)";
+ return "<?h1 Logged h1?><?p Your comment/solution <a href=\"see_request.bml?id=$spid$auth_arg\">has been recorded</a>.  Thanks.  p?>";
 
-_CODE=)
-(=HR=)
+_code?>
+<?hr?>
 Back to the <A HREF="help.bml">list of open requests</A>.<BR>
 Back to the <A HREF="./">support area</A>.
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 link: htdocs/login.bml, htdocs/support/see_request.bml, htdocs/support/help.bml
 link: htdocs/support/index.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

@@ -1,27 +1,27 @@
-(=PAGE
+<?page
 TITLE=>LiveJournal Support
 BODY<=
 
-(=H1 Welcome! H1=)
-(=P
+<?h1 Welcome! h1?>
+<?p
 Welcome to the LiveJournal community support center.  Listed below are some of the most frequent questions people ask.  If you don't find what you're looking for, you can submit a support request below.
-P=)
+p?>
 
-(=_INCLUDE
+<?_include
 BML=>1
 CODE=>0
 FILE=>support-currentproblems
-_INCLUDE=)
+_include?>
 
-(=HR=)
+<?hr?>
 
-(=_INCLUDE
+<?_include
 BML=>0
 CODE=>0
 FILE=>support-links
-_INCLUDE=)
+_include?>
 
-(=H1 Support Areas H1=)(=P Here are the three major things you can do here in the support area. P=)
+<?h1 Support Areas h1?><?p Here are the three major things you can do here in the support area. p?>
 
 <UL>
 <LI><FONT SIZE=+1><B><A HREF="faq.bml">Read the Frequently Asked Questions</A></B></FONT><BR>
@@ -43,7 +43,7 @@ Got some extra time on your hands?  Help out a LiveJournal user that has an open
 
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 link: htdocs/support/faq.bml, htdocs/support/submit.bml, htdocs/support/help.bml
 link: htdocs/support/highscores.bml, htdocs/support/changenotify.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

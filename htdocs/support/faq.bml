@@ -1,13 +1,13 @@
-(=PAGE
+<?page
 TITLE=>FAQ
 BODY<=
 
-(=H1 Frequently Asked Questions H1=)
-(=P
+<?h1 Frequently Asked Questions h1?>
+<?p
 Below are some frequently asked questions, and answers, too!  Oh boy.  Try to read this before you ask a new question.  If you know something we should add to this, let us know.
-P=)
+p?>
 
-(=_CODE
+<?_code
 
  my $curlang = BML::get_language();
  my $deflang = BML::get_language_default();
@@ -61,11 +61,11 @@ P=)
  foreach my $faqcat (sort { $faqcat{$a}->{'catorder'} <=> 
                                 $faqcat{$b}->{'catorder'} } keys %faqcat)
  {
-     $ret .= "(=H2 ";
+     $ret .= "<?h2 ";
      $ret .= LJ::ehtml($faqcat{$faqcat}->{'faqcatname'});
      $ret .= " (<a href=\"faqbrowse.bml?faqcat=$faqcat\">";
      $ret .= "view all";
-     $ret .= "</a>) H2=)\n";
+     $ret .= "</a>) h2?>\n";
      $ret .= "<UL>\n";
      foreach my $faqid (sort { $faqq{$a}->{'sortorder'} <=> $faqq{$b}->{'sortorder'} } grep { $faqq{$_}->{'faqcat'} eq $faqcat } keys %faqq)
      {
@@ -81,12 +81,12 @@ P=)
 
 return $ret;
 
-_CODE=)
+_code?>
 
-(=HR=)
+<?hr?>
 Back to <A HREF="./">the support area</A>.
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 link: htdocs/support/faqbrowse.bml, htdocs/support/index.bml
-</LJDEP> _C=)
+</LJDEP> _c?>
