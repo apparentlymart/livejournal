@@ -83,10 +83,11 @@ body<=
         # if an old validated email address, then yes.
         } elsif (lc($email) ne lc($u->{'email'})) {
 
-            my $dbr = LJ::get_db_reader();
-
+            # use the master here, to make sure the results really match
+            # the master and what they see on the old email management page
+            my $dbh = LJ::get_db_writer();
             return LJ::bad_input($ML{'/lostinfo_do.bml.error1.text'})
-                unless $dbr->selectrow_array("SELECT COUNT(*) FROM infohistory ".
+                unless $dbh->selectrow_array("SELECT COUNT(*) FROM infohistory ".
                                              "WHERE userid=? AND what='email' ".
                                              "AND oldvalue=? AND other='A'",
                                              undef, $u->{'userid'}, $email);
