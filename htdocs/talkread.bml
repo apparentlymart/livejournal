@@ -238,7 +238,8 @@ BODY<=
  my %posts;
  my %children;
  
- $sth = $dbh->prepare("SELECT t.talkid, t.posterid, u.user AS 'userpost', t.datepost, t.parenttalkid, tt.subject, t.state FROM talk t, talktext tt LEFT JOIN user u ON u.userid=t.posterid WHERE t.nodetype='L' AND t.nodeid=$qitemid AND t.talkid=tt.talkid ORDER BY t.talkid");
+ # TODO: FIXME: shouldn't use master here... but tricky not to.
+ $sth = $dbh->prepare("SELECT t.talkid, t.posterid, u.user AS 'userpost', t.datepost, t.parenttalkid, tt.subject, t.state FROM talk t, talktext tt LEFT JOIN useridmap u ON u.userid=t.posterid WHERE t.nodetype='L' AND t.nodeid=$qitemid AND t.talkid=tt.talkid ORDER BY t.talkid");
  $sth->execute;
  my $post_count = 0;
  while (my $post = $sth->fetchrow_hashref) {
@@ -269,12 +270,7 @@ BODY<=
  my $itemfirst = $PAGE_SIZE * ($page-1) + 1;
  my $itemlast = $page==$pages ? $top_replies : ($PAGE_SIZE * $page);
 
-# $ret .= "<p>page=$page, pages=$pages, itemfirst=$itemfirst, itemlast=$itemlast\n";
-# $ret .= "<p>top_replies = " . scalar(@top_replies) . " = (@top_replies)\n";
-
  @top_replies = @top_replies[$itemfirst-1 .. $itemlast-1];
-
-# $ret .= "<p>top_replies = " . scalar(@top_replies) . " = (@top_replies)\n";
 
  foreach (@top_replies) {  delete $posts{$_}->{'_hide'} }
 
@@ -298,8 +294,6 @@ BODY<=
      $ret .= "No replies";
  }
  my $talkid_in = join(",", @posts_to_load);
-
-# $ret .= "<P>talkid_in = " . scalar(@posts_to_load) . " = ($talkid_in)\n";
 
  ### loads more of some of the posts, uses slaves if possible.
  my $posts_loaded = LJ::get_talktext($dbs, @posts_to_load);
