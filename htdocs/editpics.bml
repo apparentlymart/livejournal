@@ -1,16 +1,20 @@
 <?_code
 
  use strict;
- use vars qw(%FORM $title $body $su @errors);
+ use vars qw(%GET %POST $title $body @errors);
 
  $title = "Edit User Pictures";
  $body = "";
- $su = "";           # switch user bar
  @errors = ();
+
+ my $err = sub {
+    $title = "Error";
+    $body = LJ::bad_input(@_);
+    return;
+ };
  
- unless (LJ::text_in(\%FORM)) {
-     $body = "<?badinput?>";
-     return;
+ unless (LJ::text_in(\%POST)) {
+     return $err->("Invalid UTF-8 Input");
  }
 
  my $dbs = LJ::get_dbs();
@@ -18,40 +22,14 @@
  my $dbr = $dbs->{'reader'};
  my $sth;
 
- my $u;
  my $remote = LJ::get_remote($dbs);
- my $err;
- my $user = LJ::get_effective_user($dbs, {
-     'remote' => $remote,
-     'form' => \%FORM,
-     'out_err' => \$err,
-     'out_u' => \$u,
- });
-
- if ($err) {
-     $title = "Error";
-     $body = LJ::bad_input($err);
-     return;
- }
+ return $err->("You must be logged in to edit your pictures.")
+    unless $remote;
  
- unless ($user) {
-     
-     $body .= "<?h1 Authenticate h1?><?p Enter the username and password of the journal you want to modify the user pictures for. p?>";
-     
-     $body .= "<form method='post' action='editpics.bml'>";
-     $body .= "<?standout <table>\n";
-     $body .= LJ::auth_fields_2($dbs, \%FORM);
-     $body .= "<tr><td></td><td><input type='submit' value='Proceed...'></td></tr>";
-     $body .= "</table> standout?>\n";
-     $body .= "</form>";
-     return;
- }
-
- my $authlink;
- $authlink = "?authas=$FORM{'authas'}" if ($FORM{'authas'} && $FORM{'authas'} ne "(remote)");
- $authlink ||= "?user=$user" if ($FORM{'user'});
-
- $u = LJ::load_user($dbs, $user) unless $u;
+ my $authas = $GET{'authas'} || $remote->{'user'};
+ my $u = LJ::get_authas_user($authas);
+ return $err->("You could not be authenticated as the specified user.")
+    unless $u;
 
  # update this user's activated pics
  LJ::activate_userpics($u);
@@ -63,15 +41,11 @@
  }
 
  my $dbb = LJ::get_cluster_master($u);
- unless ($dbb) {
-     $title = "Error",
-     $body = "Database temporarily unavailable.";
-     return;
- }
+ return $err->("Database temporarily unavailable.") unless $dbb;
  
  ### save mode
 
- if ($FORM{'mode'} eq "save") 
+ if ($POST{'mode'} eq "save") 
  {
      my %exist_kwids;
      $sth = $dbr->prepare("SELECT kwid, picid FROM userpicmap WHERE userid=?");
@@ -94,7 +68,7 @@
      while (my $pic = $sth->fetchrow_hashref)
      {
          # delete this pic
-         if ($FORM{"delete_$pic->{'picid'}"}) {
+         if ($POST{"delete_$pic->{'picid'}"}) {
              push @delete, $pic->{'picid'};
              next;
          }
@@ -106,7 +80,7 @@
          }
 
          # we're going to modify keywords on active pictures
-         my @keywords = split(/\s*,\s*/, $FORM{"kw_$pic->{'picid'}"});
+         my @keywords = split(/\s*,\s*/, $POST{"kw_$pic->{'picid'}"});
          @keywords = grep { s/^\s+//; s/\s+$//; $_; } @keywords;
          foreach my $kw (@keywords) {
              my $kwid = LJ::get_keyword_id($dbs, $kw);
@@ -151,8 +125,8 @@
          $dbh->do($sql);
      }
 
-     my $new_default = $FORM{'defaultpic'}+0;
-     if ($FORM{"delete_$FORM{'defaultpic'}"}) { $new_default = 0; } # deleting your default
+     my $new_default = $POST{'defaultpic'}+0;
+     if ($POST{"delete_$POST{'defaultpic'}"}) { $new_default = 0; } # deleting your default
      if ($new_default != $u->{'defaultpicid'}) {
 
          # see if they are trying to make an inactive userpic their default
@@ -164,20 +138,22 @@
              unless $state eq 'I';
      }
 
-     $body .= "<?h1 Saved h1?><?p Your new picture keywords and defaults have been saved.  You can view them <a href=\"/allpics.bml?user=$u->{'user'}\">here</a>. p?>";
+     # errors occurred during processing?
+     return $err->(@errors) if @errors;
 
-     if (@errors) {
-         $body .= "<?p Some errors occured, though, processing your request: <UL>";
-         foreach (@errors) { $body .= "<LI>$_"; }
-         $body .= "</UL> p?>";
-     }
-     
+     # no errors
+     $body .= "<?h1 Saved h1?><?p Your new picture keywords and defaults have been saved.  You can view them <a href=\"/allpics.bml?user=$authas\">here</a>. p?>";
+
      return;
  }
 
  # show the form to let people edit
-
  $title = "Edit User Pictures";
+
+ # authas switcher form
+ $body .= "<form class='postheading' method='get' action='editpics.bml'>\n";
+ $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
+ $body .= "</form>\n\n";
 
  my %keywords = ();
  $sth = $dbr->prepare("SELECT m.picid, k.keyword FROM userpicmap m, keywords k WHERE m.userid=$u->{'userid'} AND m.kwid=k.kwid");
@@ -197,26 +173,10 @@
 
      if ($piccount++ == 0) {
 
-         $body .= "<?h1 Current Pictures h1?><?p Here are the pictures you've uploaded in the past.  You can assign keywords to them so you can use them by keyword later, select which one to use as your default, or delete old ones.  To upload a new one, <a href='/uploadpic.bml$authlink'>go here</a>. p?>";
+         $body .= "<?h1 Current Pictures h1?><?p Here are the pictures you've uploaded in the past.  You can assign keywords to them so you can use them by keyword later, select which one to use as your default, or delete old ones.  To upload a new one, <a href='/uploadpic.bml?authas=$authas'>go here</a>. p?>";
 
-         if ($remote) {
-             $body .= "<form method='post'>";
-             $body .= "<?h1 Switch Journal h1?><?p Work with journal: ";
-             $body .= LJ::make_shared_select($dbs, $remote, \%FORM);
-             $body .= " <input type='submit' value='Switch'> p?></form>";
-         }
-
-         $body .= "<form method='post'>";
+         $body .= "<form method='post' action='editpics.bml?authas=$authas'>";
          $body .= "<input type='hidden' name='mode' value='save'>";
-         if ($FORM{'user'}) {
-             $body .= "<input type='hidden' name='user' value='$user'>\n";
-             my $hpass = LJ::hash_password($u->{'password'});
-             $body .= "<input type='hidden' name='hpassword' value='$hpass'>\n";
-         } else {
-             $body .= "<input type='hidden' name='authas' value='$FORM{'authas'}'>\n";
-         }
-
-
          $body .= "<ul><table cellpadding='5' border='0' cellspacing='1'>";
              
      }
@@ -260,11 +220,11 @@
                                'raw' => "id='nodefpic'",
                            });
      $body .= "</td><td>&nbsp;</td></tr>\n";
-     $body .= "<TR><TD></TD><TD>&nbsp;<P><INPUT TYPE=SUBMIT VALUE=\"Save Settings\"></TD></TR>\n";
-     $body .= "</TABLE>";
-     $body .= "</FORM>";
+     $body .= "<tr><td></td><td>&nbsp;<p>" . LJ::html_submit(undef, "Save Settings") . "</td></tr>\n";
+     $body .= "</table>";
+     $body .= "</form>";
  } else {
-     $body = "<?h1 No Pictures h1?><?p You have no pictures uploaded.  To upload one, go <A HREF='/uploadpic.bml$authlink'>here</A>. p?>";
+     $body .= "<?h1 No Pictures h1?><?p You have no pictures uploaded.  To upload one, go <a href='/uploadpic.bml?authas=$authas'>here</A>. p?>";
  }
  
  return;
@@ -272,7 +232,6 @@
 _code?><?page
 title=><?_code return $title; _code?>
 body=><?_code return $body; _code?>
-switchuser=><?_code return $su; _code?>
 page?><?_c <LJDEP>
 link: htdocs/login.bml, htdocs/allpics.bml, htdocs/uploadpic.bml
 post: htdocs/editpics.bml

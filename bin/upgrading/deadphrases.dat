@@ -35,4 +35,7 @@ general /community/settings.bml.manage
 
 general /community/search.bml.contasmember
 
+general /allpics.bml.edit
+general /allpics.bml.nopics.text
+
 

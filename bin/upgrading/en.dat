@@ -3,13 +3,13 @@
 
 /allpics.bml.default=<u>Default</u>
 
-/allpics.bml.edit=You may be interested in <a href='/editpics.bml'>editing your picture keywords</a> or <a href='/uploadpic.bml'>uploading a new picture</a>.
+/allpics.bml.edit2=You may be interested in <a href='[[editlink]]'>editing your picture keywords</a> or <a href='[[uploadlink]]'>uploading a new picture</a>.
 
 /allpics.bml.error.noparam=You need to specify a user parameter.
 
 /allpics.bml.keywords=Keywords:
 
-/allpics.bml.nopics.text=You have no pictures uploaded. To upload one, go <a href='/uploadpic.bml'>here</a>.
+/allpics.bml.nopics.text2=You have no pictures uploaded. To upload one, go <a href='[[link]]'>here</a>.
 
 /allpics.bml.nopics.text.other=This user has not uploaded any user pictures.
 

@@ -1,16 +1,20 @@
 <?_code
 
+ use strict;
+ use vars qw(%GET $title $body $head);
+
  $title = "";
  $body = "";
- @errors = ();
+ $head = "";
  
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
+ my $sth;
 
- my $user = LJ::canonical_username($FORM{'user'});
+ my $user = LJ::canonical_username($GET{'user'});
  my $remote = LJ::get_remote();
- my $u = $user ne "" ? LJ::load_user($dbs, $user) : $remote;
+ my $u = ! $user || $remote && $remote->{'user'} eq $user ? $remote : LJ::load_user($dbs, $user);
  
  $title = $ML{'.title'};
 
@@ -29,24 +33,25 @@
  if ($u->{'statusvis'} eq "S") {
      $title = $ML{'error.suspended.title'};
      $body = "<?h1 $ML{'error.suspended.name'} h1?><?p " .
-             BML::ml('error.suspended.text', {'user'=>"<?ljuser $user ljuser?>"}) . 
-            " p?>";
+             BML::ml('error.suspended.text', { 'user' => LJ::ljuser($user) }) . " p?>";
      return;
  }
  if ($u->{'statusvis'} eq "D") {
      $title = $ML{'error.deleted.title'};
      $body = "<?h1 $ML{'error.deleted.name'} h1?><?p " .
-             BML::ml('error.deleted.text', {'user'=>"<?ljuser $user ljuser?>"}) . 
+             BML::ml('error.deleted.text', { 'user' => LJ::ljuser($user) }) . 
             " p?>";
      return;
  }
  if ($u->{'statusvis'} eq "X") {
      $title = $ML{'error.purged.title'};
      $body = "<?h1 $ML{'error.purged.name'} h1?><?p " .
-             BML::ml('error.purged.text', {'user'=>"<?ljuser $user ljuser?>"}) . 
+             BML::ml('error.purged.text', { 'user' => LJ::ljuser($user) }) . 
             " p?>";
      return;
  }
+
+ my $can_manage = LJ::can_manage($remote, $u->{'userid'});
 
  #### show pictures
 
@@ -66,14 +71,13 @@
  while (my $pic = $sth->fetchrow_hashref)
  {
      if ($piccount++ == 0) {
-         my $edit = '';
-         if ($remote && $remote->{'user'} eq $u->{'user'}) {
-             $edit = ' ' . $ML{'.edit'};
-         }
          $body .= "<?h1 $ML{'.current'} h1?><?p ";
-         $body .= BML::ml('.pics', {'user'=> LJ::ljuser($user)});
-         $body .= "$edit p?>";
-         $body .= "<div style='margin-left: 50px;'><table cellpadding='5' border='0' cellspacing='1'>";
+         $body .= BML::ml('.pics2', {'user'=> LJ::ljuser($user)});
+         if ($can_manage) {
+             $body .= ' ' . BML::ml('.edit2', { 'editlink' => "$LJ::SITEROOT/editpics.bml?authas=$user",
+                                              'uploadlink' => "$LJ::SITEROOT/uploadpic.bml?authas=$user" });
+         }
+         $body .= " p?><div style='margin-left: 50px;'><table cellpadding='5' border='0' cellspacing='1'>";
              
      }
 
@@ -88,8 +92,7 @@
          $body .= "$ML{'.default'}<br />";
      }
 
-     if ($remote && $remote->{'userid'} == $u->{'userid'} && 
-         $pic->{'state'} eq 'I') {
+     if ($can_manage && $pic->{'state'} eq 'I') {
          $body .= "<i>[$ML{'userpic.inactive'}]</i>&nbsp;" . LJ::help_icon('userpic_inactive') . "<br />";
      }
 
@@ -98,15 +101,16 @@
      }
 
      $body .= "</td>";
-     $body .= "</tr>\n";     
+     $body .= "</tr>\n";
 
  }
 
  if ($piccount) {
      $body .= "</table></div>";
  } else {
-     if ($remote && $remote->{'user'} eq $u->{'user'}) {
-         $body = "<?h1 $ML{'.nopics.title'} h1?><?p $ML{'.nopics.text'} p?>";
+     if ($can_manage) {
+         $body = "<?h1 $ML{'.nopics.title'} h1?><?p ";
+         $body .= BML::ml('.nopics.text2', { 'link' => "$LJ::SITEROOT/uploadpic.bml?authas=$user" }) . " p?>";
      } else {
          $body = "<?h1 $ML{'.nopics.title'} h1?><?p $ML{'.nopics.text.other'} p?>";
      }
