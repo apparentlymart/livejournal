@@ -1276,7 +1276,7 @@ sub set_userprop
     foreach $propname (keys %$hash) {
         my $p = LJ::get_prop("user", $propname) or next;
         my $table = $p->{'indexed'} ? "userprop" : "userproplite";
-        if ($p->{is_blob}) {
+        if ($p->{datatype} eq 'blobchar') {
             $table = 'userpropblob';
         }
         elsif ($p->{'cldversion'} && $u->{'dversion'} >= $p->{'cldversion'}) {
@@ -2649,7 +2649,7 @@ sub load_user_props
             }
             push @needwrite, [ $p->{'id'}, $_ ];
             my $source = $p->{'indexed'} ? "userprop" : "userproplite";
-            if ($p->{is_blob}) {
+            if ($p->{datatype} eq 'blobchar') {
                 $source = "userpropblob"; # clustered blob
             }
             elsif ($p->{'cldversion'} && $u->{'dversion'} >= $p->{'cldversion'}) {
