@@ -673,16 +673,20 @@ package LJ;
 
 sub load_codes
 {
-    my $dbh = shift;
+    my $dbarg = shift;
     my $req = shift;
+
+    my $dbs = make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
 
     foreach my $type (keys %{$req})
     {
 	unless ($LJ::CACHE_CODES{$type})
 	{
 	    $LJ::CACHE_CODES{$type} = [];
-	    my $qtype = $dbh->quote($type);
-	    my $sth = $dbh->prepare("SELECT code, item FROM codes WHERE type=$qtype ORDER BY sortorder");
+	    my $qtype = $dbr->quote($type);
+	    my $sth = $dbr->prepare("SELECT code, item FROM codes WHERE type=$qtype ORDER BY sortorder");
 	    $sth->execute;
 	    while (my ($code, $item) = $sth->fetchrow_array)
 	    {
@@ -733,13 +737,17 @@ sub get_limit
 
 sub load_user_props
 {
-    my $dbh = shift;
+    my $dbarg = shift;
+
+    my $dbs = make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
 
     ## user reference
     my ($uref, @props) = @_;
     my $uid = $uref->{'userid'}+0;
     unless ($uid) {
-	$uid = LJ::get_userid($dbh, $uref->{'user'});
+	$uid = LJ::get_userid($dbarg, $uref->{'user'});
     }
     
     my $propname_where;
@@ -759,7 +767,7 @@ sub load_user_props
     foreach my $table (qw(userprop userproplite))
     {
 	$sql = "SELECT upl.name, up.value FROM $table up, userproplist upl WHERE up.userid=$uid AND up.upropid=upl.upropid $propname_where";
-	$sth = $dbh->prepare($sql);
+	$sth = $dbr->prepare($sql);
 	$sth->execute;
 	while ($_ = $sth->fetchrow_hashref) {
 	    $uref->{$_->{'name'}} = $_->{'value'};
@@ -824,17 +832,21 @@ sub auth_okay
 # function only ensures that it's a valid username.
 sub create_account
 {
-    my $dbh = shift;
+    my $dbarg = shift;
     my $o = shift;
 
+    my $dbs = make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+    
     my $user = LJ::canonical_username($o->{'user'});
     unless ($user)  {
 	return 0;
     }
     
-    my $quser = $dbh->quote($user);
-    my $qpassword = $dbh->quote($o->{'password'});
-    my $qname = $dbh->quote($o->{'name'});
+    my $quser = $dbr->quote($user);
+    my $qpassword = $dbr->quote($o->{'password'});
+    my $qname = $dbr->quote($o->{'name'});
 
     my $sth = $dbh->prepare("INSERT INTO user (user, name, password) VALUES ($quser, $qname, $qpassword)");
     $sth->execute;
@@ -849,14 +861,19 @@ sub create_account
 # returns true if user B is a friend of user A (or if A == B)
 sub is_friend
 {
-    my $dbh = shift;
+    my $dbarg = shift;
     my $ua = shift;
     my $ub = shift;
+    
+    my $dbs = make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+		
     return 0 unless ($ua->{'userid'});
     return 0 unless ($ub->{'userid'});
     return 1 if ($ua->{'userid'} == $ub->{'userid'});
 
-    my $sth = $dbh->prepare("SELECT COUNT(*) FROM friends WHERE userid=$ua->{'userid'} AND friendid=$ub->{'userid'}");
+    my $sth = $dbr->prepare("SELECT COUNT(*) FROM friends WHERE userid=$ua->{'userid'} AND friendid=$ub->{'userid'}");
     $sth->execute;
     my ($is_friend) = $sth->fetchrow_array;
     $sth->finish;
@@ -975,11 +992,13 @@ sub make_text_link
 ## optional argument is arrayref to push errors
 sub get_remote
 {
-    my $dbh = shift;
+    my $dbarg = shift;	
     my $errors = shift;
     my $cgi = shift;   # optional CGI.pm reference
 
-  LJ::debug("get_remote");
+    my $dbs = make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
 
     ### are they logged in?
     my $remuser = $cgi ? $cgi->cookie('ljuser') : $BMLClient::COOKIE{"ljuser"};
@@ -991,8 +1010,6 @@ sub get_remote
     return undef unless ($hpass =~ /^$remuser:(.+)/);
     my $remhpass = $1;
 
-  LJ::debug("get_remote: remuser=$remuser");
-    
     ### do they exist?
     my $userid = get_userid($dbh, $remuser);
     $userid += 0;
@@ -1001,7 +1018,7 @@ sub get_remote
     ### is their password correct?
     my $correctpass;
     unless (ref $LJ::AUTH_CHECK eq "CODE") {
-	my $sth = $dbh->prepare("SELECT password FROM ".
+	my $sth = $dbr->prepare("SELECT password FROM ".
 				"user WHERE userid=$userid");
 	$sth->execute;
 	($correctpass) = $sth->fetchrow_array;
@@ -1068,7 +1085,12 @@ sub handle_caches
 ### hashref, arrayref
 sub load_userpics
 {
-    my ($dbh, $upics, $idlist) = @_;
+    my ($dbarg, $upics, $idlist) = @_;
+
+    my $dbs = make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+
     my @load_list;
     foreach my $id (@{$idlist}) 
     {
@@ -1081,7 +1103,7 @@ sub load_userpics
     }
     return unless (@load_list);
     my $picid_in = join(",", @load_list);
-    my $sth = $dbh->prepare("SELECT picid, width, height FROM userpic WHERE picid IN ($picid_in)");
+    my $sth = $dbr->prepare("SELECT picid, width, height FROM userpic WHERE picid IN ($picid_in)");
     $sth->execute;
     while ($_ = $sth->fetchrow_hashref) {
 	my $id = $_->{'picid'};
@@ -1197,15 +1219,20 @@ sub strip_bad_code
 sub load_user_theme
 {
     # hashref, hashref
-    my ($dbh, $user, $u, $vars) = @_;
+    my ($dbarg, $user, $u, $vars) = @_;
+
+    my $dbs = make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+		
     my $sth;
     my $quser = $dbh->quote($user);
 
     if ($u->{'themeid'} == 0) {
-	$sth = $dbh->prepare("SELECT coltype, color FROM themecustom WHERE user=$quser");
+	$sth = $dbr->prepare("SELECT coltype, color FROM themecustom WHERE user=$quser");
     } else {
 	my $qtid = $dbh->quote($u->{'themeid'});
-	$sth = $dbh->prepare("SELECT coltype, color FROM themedata WHERE themeid=$qtid");
+	$sth = $dbr->prepare("SELECT coltype, color FROM themedata WHERE themeid=$qtid");
     }
     $sth->execute;
     $vars->{"color-$_->{'coltype'}"} = $_->{'color'} while ($_ = $sth->fetchrow_hashref);
@@ -1258,7 +1285,12 @@ sub load_style_fast
     ### typeref -- optional pointer where to store style type (undef for none)
     ### nocache -- flag to say don't cache
 
-    my ($dbh, $styleid, $dataref, $typeref, $nocache) = @_;
+    my ($dbarg, $styleid, $dataref, $typeref, $nocache) = @_;
+
+    my $dbs = make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+    
     $styleid += 0;
     my $now = time();
     
@@ -1272,10 +1304,20 @@ sub load_style_fast
     }
     else
     {
-	my $sth = $dbh->prepare("SELECT formatdata, type, opt_cache FROM style WHERE styleid=$styleid");
-	$sth->execute;
-	my ($data, $type, $cache) = $sth->fetchrow_array;
-	$sth->finish;
+	my @h = ($dbh);
+	if ($dbs->{'has_slave'}) {
+	    unshift @h, $dbr;
+	}
+	my ($data, $type, $cache);
+	my $sth;
+	foreach my $db (@h) 
+	{
+	    $sth = $dbr->prepare("SELECT formatdata, type, opt_cache FROM style WHERE styleid=$styleid");
+	    $sth->execute;
+	    ($data, $type, $cache) = $sth->fetchrow_array;
+	    $sth->finish;
+	    last if ($data);
+	}
 	if ($cache eq "Y") {
 	    $LJ::CACHE_STYLE{$styleid} = { 'lastpull' => $now,
 				       'data' => $data,
@@ -1288,12 +1330,12 @@ sub load_style_fast
     }
 }
 
-# $db_arg can be either a $dbh (master) or a $dbs (db set, master & slave hashref)
+# $dbarg can be either a $dbh (master) or a $dbs (db set, master & slave hashref)
 sub make_journal
 {
-    my ($db_arg, $user, $view, $remote, $opts) = @_;
+    my ($dbarg, $user, $view, $remote, $opts) = @_;
 
-    my $dbs = LJ::make_dbs_from_arg($db_arg);
+    my $dbs = LJ::make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
 
@@ -1360,7 +1402,7 @@ sub make_journal
     my $overrides = "";
     if ($opts->{'nooverride'}==0 && $u->{'useoverrides'} eq "Y")
     {
-        my $sth = $dbh->prepare("SELECT override FROM overrides WHERE user=$quser");
+        my $sth = $dbr->prepare("SELECT override FROM overrides WHERE user=$quser");
         $sth->execute;
         ($overrides) = $sth->fetchrow_array;
 	$sth->finish;
@@ -1574,12 +1616,12 @@ sub make_dbs
 # to make it into a dbset with no slave.
 sub make_dbs_from_arg
 {
-    my $db_arg = shift;
+    my $dbarg = shift;
     my $dbs;
-    if (ref($db_arg) eq "HASH") {
-	$dbs = $db_arg;
+    if (ref($dbarg) eq "HASH") {
+	$dbs = $dbarg;
     } else {
-	$dbs = LJ::make_dbs($db_arg, undef);
+	$dbs = LJ::make_dbs($dbarg, undef);
     }
     return $dbs;    
 }
@@ -1611,14 +1653,18 @@ sub item_link
 
 sub make_graphviz_dot_file
 {
-    my $dbh = shift;
+    my $dbarg = shift;
     my $user = shift;
 
-    my $quser = $dbh->quote($user);
+    my $dbs = make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+
+    my $quser = $dbr->quote($user);
     my $sth;
     my $ret;
  
-    $sth = $dbh->prepare("SELECT u.*, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(uu.timeupdate) AS 'secondsold' FROM user u, userusage uu WHERE u.userid=uu.userid AND u.user=$quser");
+    $sth = $dbr->prepare("SELECT u.*, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(uu.timeupdate) AS 'secondsold' FROM user u, userusage uu WHERE u.userid=uu.userid AND u.user=$quser");
     $sth->execute;
     my $u = $sth->fetchrow_hashref;
     
@@ -1632,7 +1678,7 @@ sub make_graphviz_dot_file
     $ret .= "  \"$user\" [color=yellow, style=filled]\n";
     
     my @friends = ();
-    $sth = $dbh->prepare("SELECT friendid FROM friends WHERE userid=$u->{'userid'} AND userid<>friendid");
+    $sth = $dbr->prepare("SELECT friendid FROM friends WHERE userid=$u->{'userid'} AND userid<>friendid");
     $sth->execute;
     while ($_ = $sth->fetchrow_hashref) {
 	push @friends, $_->{'friendid'};
@@ -1640,7 +1686,7 @@ sub make_graphviz_dot_file
     
     my $friendsin = join(", ", map { $dbh->quote($_); } ($u->{'userid'}, @friends));
     my $sql = "SELECT uu.user, uf.user AS 'friend' FROM friends f, user uu, user uf WHERE f.userid=uu.userid AND f.friendid=uf.userid AND f.userid<>f.friendid AND uu.statusvis='V' AND uf.statusvis='V' AND (f.friendid=$u->{'userid'} OR (f.userid IN ($friendsin) AND f.friendid IN ($friendsin)))";
-    $sth = $dbh->prepare($sql);
+    $sth = $dbr->prepare($sql);
     $sth->execute;
     while ($_ = $sth->fetchrow_hashref) {
 	$ret .= "  \"$_->{'user'}\"->\"$_->{'friend'}\"\n";
@@ -1653,11 +1699,18 @@ sub make_graphviz_dot_file
 
 sub expand_embedded
 {
-    my $dbh = shift;
+    my $dbarg = shift;
     my $itemid = shift;
     my $remote = shift;
     my $eventref = shift;
 
+    my $dbs = make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+    
+    # TODO: This should send $dbs instead of $dbh when that function
+    # is converted. In addition, when that occurs the make_dbs_from_arg
+    # code above can be removed.
     &LJ::Poll::show_polls($dbh, $itemid, $remote, $eventref);
 }
 
@@ -1688,13 +1741,13 @@ sub escapeall
     return $a;
 }
 
-# $db_arg can be either a $dbh (master) or a $dbs (db set, master & slave hashref)
+# $dbarg can be either a $dbh (master) or a $dbs (db set, master & slave hashref)
 sub load_user
 {
-    my $db_arg = shift;
+    my $dbarg = shift;
     my $user = shift;
 
-    my $dbs = LJ::make_dbs_from_arg($db_arg);
+    my $dbs = LJ::make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
 
@@ -1717,6 +1770,8 @@ sub load_user
 		'password' => "",
 	    }))
 	    {
+		# NOTE: this should pull from the master, since it was _just_
+		# created and the elsif below won't catch.
 		$sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
 		$sth->execute;
 		$u = $sth->fetchrow_hashref;
@@ -1740,10 +1795,15 @@ sub load_user
 
 sub load_userid
 {
-    my $dbh = shift;
+    my $dbarg = shift;
     my $userid = shift;
-    my $quserid = $dbh->quote($userid);
-    my $sth = $dbh->prepare("SELECT * FROM user WHERE userid=$quserid");
+
+    my $dbs = make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+		
+    my $quserid = $dbr->quote($userid);
+    my $sth = $dbr->prepare("SELECT * FROM user WHERE userid=$quserid");
     $sth->execute;
     my $u = $sth->fetchrow_hashref;
     $sth->finish;
@@ -1753,8 +1813,13 @@ sub load_userid
 sub load_moods
 {
     return if ($LJ::CACHED_MOODS);
-    my $dbh = shift;
-    my $sth = $dbh->prepare("SELECT moodid, mood, parentmood FROM moods");
+    my $dbarg = shift;
+
+    my $dbs = make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+
+    my $sth = $dbr->prepare("SELECT moodid, mood, parentmood FROM moods");
     $sth->execute;
     while (my ($id, $mood, $parent) = $sth->fetchrow_array) {
 	$LJ::CACHE_MOODS{$id} = { 'name' => $mood, 'parent' => $parent };
@@ -1765,7 +1830,11 @@ sub load_moods
 
 sub query_buffer_add
 {
-    my ($dbh, $table, $query) = @_;
+    my ($dbarg, $table, $query) = @_;
+
+    my $dbs = make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
     
     if ($LJ::BUFFER_QUERIES) 
     {
@@ -1785,7 +1854,12 @@ sub query_buffer_add
 
 sub query_buffer_flush
 {
-    my ($dbh, $table) = @_;
+    my ($dbarg, $table) = @_;
+
+    my $dbs = make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+
     return -1 unless ($table);
     return -1 if ($table =~ /[^\w]/);
     
@@ -1794,6 +1868,11 @@ sub query_buffer_flush
     my $count = 0;
     my $max = 0;
     my $qtable = $dbh->quote($table);
+
+    # We want to leave this pointed to the master to ensure we are
+    # getting the most recent data!  (also, querybuffer doesn't even
+    # replicate to slaves in the recommended configuration... it's
+    # pointless to do so)
     my $sth = $dbh->prepare("SELECT qbid, query FROM querybuffer WHERE tablename=$qtable ORDER BY qbid");
     if ($dbh->err) { $dbh->do("UNLOCK TABLES"); die $dbh->errstr; }
     $sth->execute;
@@ -1833,19 +1912,23 @@ sub journal_base
 # inside the user record ($u->{_privs}->{$priv}->{$arg} = 1)
 sub load_user_privs
 {
-    my $dbh = shift;
+    my $dbarg = shift;
     my $remote = shift;
     my @privs = @_;
 
+    my $dbs = make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+    
     return unless ($remote and @privs);
 
     # return if we've already loaded these privs for this user.
-    @privs = map { $dbh->quote($_) } 
+    @privs = map { $dbr->quote($_) } 
              grep { ! $remote->{'_privloaded'}->{$_}++ } @privs;
     
     return unless (@privs);
 
-    my $sth = $dbh->prepare("SELECT pl.privcode, pm.arg ".
+    my $sth = $dbr->prepare("SELECT pl.privcode, pm.arg ".
 			    "FROM priv_map pm, priv_list pl ".
 			    "WHERE pm.prlid=pl.prlid AND ".
 			    "pl.privcode IN (" . join(',',@privs) . ") ".
@@ -1863,12 +1946,16 @@ sub load_user_privs
 # also, $dbh can be undef, in which case privs must be pre-loaded
 sub check_priv
 {
-    my ($dbh, $remote, $priv, $arg) = @_;
+    my ($dbarg, $remote, $priv, $arg) = @_;
     return 0 unless ($remote);
 
+    my $dbs = make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+    
     if (! $remote->{'_privloaded'}->{$priv}) {
-	if ($dbh) {
-	    load_user_privs($dbh, $remote, $priv);
+	if ($dbr) {
+	    load_user_privs($dbr, $remote, $priv);
 	} else {
 	    return 0;
 	}
@@ -1886,17 +1973,21 @@ sub check_priv
 # DEPRECATED.  should use load_user_privs + check_priv
 sub remote_has_priv
 {
-    my $dbh = shift;
+    my $dbarg = shift;
     my $remote = shift;
     my $privcode = shift;     # required.  priv code to check for.
     my $ref = shift;  # optional, arrayref or hashref to populate
+
+    my $dbs = make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
 
     return 0 unless ($remote);
 
     ### authentication done.  time to authorize...
 
     my $qprivcode = $dbh->quote($privcode);
-    my $sth = $dbh->prepare("SELECT pm.arg FROM priv_map pm, priv_list pl WHERE pm.prlid=pl.prlid AND pl.privcode=$qprivcode AND pm.userid=$remote->{'userid'}");
+    my $sth = $dbr->prepare("SELECT pm.arg FROM priv_map pm, priv_list pl WHERE pm.prlid=pl.prlid AND pl.privcode=$qprivcode AND pm.userid=$remote->{'userid'}");
     $sth->execute;
     
     my $match = 0;
@@ -1913,15 +2004,20 @@ sub remote_has_priv
 ## get a userid from a username (returns 0 if invalid user)
 sub get_userid
 {
-    my $dbh = shift;
+    my $dbarg = shift;
     my $user = shift;
+		
+    my $dbs = make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+    
     $user = canonical_username($user);
 
     my $userid;
     if ($LJ::CACHE_USERID{$user}) { return $LJ::CACHE_USERID{$user}; }
 
-    my $quser = $dbh->quote($user);
-    my $sth = $dbh->prepare("SELECT userid FROM useridmap WHERE user=$quser");
+    my $quser = $dbr->quote($user);
+    my $sth = $dbr->prepare("SELECT userid FROM useridmap WHERE user=$quser");
     $sth->execute;
     ($userid) = $sth->fetchrow_array;
     if ($userid) { $LJ::CACHE_USERID{$user} = $userid; }
@@ -1930,6 +2026,8 @@ sub get_userid
     # auth mechanism
     if (! $userid && ref $LJ::AUTH_EXISTS eq "CODE")
     {
+	# TODO: eventual $dbs conversion (even though create_account will ALWAYS
+	# use the master)
 	$userid = LJ::create_account($dbh, { 'user' => $user,
 					     'name' => $user,
 					     'password' => '', });
@@ -1939,10 +2037,10 @@ sub get_userid
 }
 
 ## get a username from a userid (returns undef if invalid user)
-# $db_arg can be either a $dbh (master) or a $dbs (db set, master & slave hashref)
+# $dbarg can be either a $dbh (master) or a $dbs (db set, master & slave hashref)
 sub get_username
 {
-    my $db_arg = shift;
+    my $dbarg = shift;
     my $userid = shift;
     my $user;
     $userid += 0;
@@ -1950,7 +2048,7 @@ sub get_username
     # Checked the cache first. 
     if ($LJ::CACHE_USERNAME{$userid}) { return $LJ::CACHE_USERNAME{$userid}; }
 
-    my $dbs = LJ::make_dbs_from_arg($db_arg);
+    my $dbs = LJ::make_dbs_from_arg($dbarg);
     my $dbr = $dbs->{'reader'};
 
     my $sth = $dbr->prepare("SELECT user FROM useridmap WHERE userid=$userid");
@@ -1970,10 +2068,15 @@ sub get_username
 
 sub get_itemid_near
 {
-    my $dbh = shift;
+    my $dbarg = shift;
     my $ownerid = shift;
     my $date = shift;
     my $after_before = shift;
+		
+    my $dbs = LJ::make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+    
     return 0 unless ($date =~ /^(\d{4})-(\d{2})-\d{2} \d{2}:\d{2}:\d{2}$/);
     my ($year, $month) = ($1, $2);
 
@@ -1993,7 +2096,7 @@ sub get_itemid_near
     while ($item==0 && $tries<2) 
     {
 	my $sql = "SELECT $func(itemid) FROM log WHERE ownerid=$ownerid AND year=$year AND month=$month AND eventtime $op $qeventtime";
-	my $sth = $dbh->prepare($sql);
+	my $sth = $dbr->prepare($sql);
 	$sth->execute;
 	($item) = $sth->fetchrow_array;
 
@@ -2026,11 +2129,18 @@ sub mysql_time
 
 sub get_keyword_id
 {
-    my $dbh = shift;
+    my $dbarg = shift;
     my $kw = shift;
     unless ($kw =~ /\S/) { return 0; }
+
+    my $dbs = LJ::make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+		
     my $qkw = $dbh->quote($kw);
 
+    # Making this a $dbr could cause problems due to the insertion of
+    # data based on the results of this query. Leave as a $dbh.
     my $sth = $dbh->prepare("SELECT kwid FROM keywords WHERE keyword=$qkw");
     $sth->execute;
     my ($kwid) = $sth->fetchrow_array;
@@ -2068,6 +2178,8 @@ sub valid_password
 
 sub delete_user
 {
+		# TODO: Is this function even being called?
+		# It doesn't look like it does anything useful
     my $dbh = shift;
     my $user = shift;
     my $quser = $dbh->quote($user);
@@ -2084,12 +2196,12 @@ sub hash_password
     return Digest::MD5::md5_hex($_[0]);
 }
 
-# $db_arg can be either a $dbh (master) or a $dbs (db set, master & slave hashref)
+# $dbarg can be either a $dbh (master) or a $dbs (db set, master & slave hashref)
 sub can_use_journal
 {
-    my ($db_arg, $posterid, $reqownername, $res) = @_;
+    my ($dbarg, $posterid, $reqownername, $res) = @_;
 
-    my $dbs = LJ::make_dbs_from_arg($db_arg);
+    my $dbs = LJ::make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
 
@@ -2131,10 +2243,10 @@ sub can_use_journal
 ## get the friends id
 sub get_friend_itemids
 {
-    my $db_arg = shift;
+    my $dbarg = shift;
     my $opts = shift;
 
-    my $dbs = LJ::make_dbs_from_arg($db_arg);
+    my $dbs = LJ::make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
 
@@ -2156,7 +2268,7 @@ sub get_friend_itemids
     my %usermask;
     if ($remoteid) 
     {
-	$sth = $dbh->prepare("SELECT ff.userid, ff.groupmask FROM friends fu, friends ff WHERE fu.userid=$userid AND fu.friendid=ff.userid AND ff.friendid=$remoteid");
+	$sth = $dbr->prepare("SELECT ff.userid, ff.groupmask FROM friends fu, friends ff WHERE fu.userid=$userid AND fu.friendid=ff.userid AND ff.friendid=$remoteid");
 	$sth->execute;
 	while (my ($friendid, $mask) = $sth->fetchrow_array) { 
 	    $usermask{$friendid} = $mask; 
@@ -2171,7 +2283,7 @@ sub get_friend_itemids
 	}
     }
 
-    $sth = $dbh->prepare("SELECT u.userid, uu.timeupdate FROM friends f, userusage uu, user u WHERE f.userid=$userid AND f.friendid=uu.userid AND f.friendid=u.userid $filtersql AND u.statusvis='V'");
+    $sth = $dbr->prepare("SELECT u.userid, uu.timeupdate FROM friends f, userusage uu, user u WHERE f.userid=$userid AND f.friendid=uu.userid AND f.friendid=u.userid $filtersql AND u.statusvis='V'");
     $sth->execute;
 
     my @friends = ();
@@ -2255,10 +2367,10 @@ sub get_friend_itemids
 ## for either the lastn or friends view
 sub get_recent_itemids
 {
-    my $db_arg = shift;
+    my $dbarg = shift;
     my ($opts) = shift;
 
-    my $dbs = LJ::make_dbs_from_arg($db_arg);
+    my $dbs = LJ::make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
 
@@ -2274,6 +2386,8 @@ sub get_recent_itemids
     if ($view eq "lastn") { $max_hints = $LJ::MAX_HINTS_LASTN; }
     if ($view eq "friends") { 
 	# THIS IS DEAD CODE!  this is never called with friends anymore.
+	# TODO: Bring out your dead!! Should we put it in the wheel barrow 
+	# and cart it off then?
 	$max_hints = $LJ::MAX_HINTS_FRIENDS; 
 	$sort_key = "logtime";
     }
@@ -2415,12 +2529,17 @@ LIMIT $max_hints
 
 sub load_log_props
 {
-    my ($dbh, $listref, $hashref) = @_;
+    my ($dbarg, $listref, $hashref) = @_;
+
+    my $dbs = make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+
     my $itemin = join(", ", map { $_+0; } @{$listref});
     unless ($itemin) { return ; }
     unless (ref $hashref eq "HASH") { return; }
     
-    my $sth = $dbh->prepare("SELECT p.itemid, l.name, p.value FROM logprop p, logproplist l WHERE p.propid=l.propid AND p.itemid IN ($itemin)");
+    my $sth = $dbr->prepare("SELECT p.itemid, l.name, p.value FROM logprop p, logproplist l WHERE p.propid=l.propid AND p.itemid IN ($itemin)");
     $sth->execute;
     while ($_ = $sth->fetchrow_hashref) {
 	$hashref->{$_->{'itemid'}}->{$_->{'name'}} = $_->{'value'};
@@ -2430,12 +2549,16 @@ sub load_log_props
 
 sub load_talk_props
 {
-    my ($dbh, $listref, $hashref) = @_;
+    my ($dbarg, $listref, $hashref) = @_;
     my $itemin = join(", ", map { $_+0; } @{$listref});
     unless ($itemin) { return ; }
     unless (ref $hashref eq "HASH") { return; }
     
-    my $sth = $dbh->prepare("SELECT tp.talkid, tpl.name, tp.value FROM talkproplist tpl, talkprop tp WHERE tp.tpropid=tpl.tpropid AND tp.talkid IN ($itemin)");
+    my $dbs = make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+    
+    my $sth = $dbr->prepare("SELECT tp.talkid, tpl.name, tp.value FROM talkproplist tpl, talkprop tp WHERE tp.tpropid=tpl.tpropid AND tp.talkid IN ($itemin)");
     $sth->execute;
     while (my ($id, $name, $val) = $sth->fetchrow_array) {
 	$hashref->{$id}->{$name} = $val;
@@ -2521,8 +2644,13 @@ sub populate_web_menu {
 #
 sub delete_item
 {
-    my ($dbh, $ownerid, $itemid, $quick) = @_;
+    my ($dbarg, $ownerid, $itemid, $quick) = @_;
     my $sth;
+		
+    my $dbs = make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+    
     $ownerid += 0;
     $itemid += 0;
 
@@ -2547,7 +2675,6 @@ sub delete_item
 	$dbh->do("DELETE FROM talktext WHERE talkid IN ($in)");
 	$dbh->do("DELETE FROM talkprop WHERE talkid IN ($in)");
     }
-    
 }
 
 1;
