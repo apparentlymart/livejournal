@@ -25,10 +25,10 @@
      my $count = 0;
      while (my ($user, $itemid, $subject) = $sth->fetchrow_array)
      {
-	 $body .= "<tr align='left'><td>(=LJUSER $user LJUSER=)</td>";
-	 my $esub = LJ::ehtml($subject) || "(no subject)";
-	 $body .= "<td><a href='$LJ::SITEROOT/talkread.bml?itemid=$itemid'>$esub</a></td>";
-	 $body .= "</tr>";
+         $body .= "<tr align='left'><td>(=LJUSER $user LJUSER=)</td>";
+         my $esub = LJ::ehtml($subject) || "(no subject)";
+         $body .= "<td><a href='$LJ::SITEROOT/talkread.bml?itemid=$itemid'>$esub</a></td>";
+         $body .= "</tr>";
          $count++;
      }
 
@@ -45,7 +45,7 @@
          push @pagers, "<a href='meme.bml?url=$eurl&amp;skip=$newskip'>Next 500</a> &gt;&gt;";
      }
      if (@pagers) {
-	 $body .= "<p>[&nbsp;" . join("&nbsp;|&nbsp;", @pagers) . "&nbsp;]</p>";
+         $body .= "<p>[&nbsp;" . join("&nbsp;|&nbsp;", @pagers) . "&nbsp;]</p>";
      }
 
      $body .= "(=HR=)&lt;&lt; <a href='meme.bml'>Back to Meme Listing</a>";
