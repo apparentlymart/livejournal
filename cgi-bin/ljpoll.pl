@@ -77,7 +77,7 @@ sub parse
             
             if ($tag eq "lj-poll") {
                 if ($popen) {
-                    $$error = "You cannot nest lj-poll tags.  Did you forget to close one?";
+                    $$error = BML::ml('poll.error.nested', { 'tag' => 'lj-poll' });
                     return 0;
                 }
 
@@ -92,14 +92,14 @@ sub parse
                 if ($popts{'whovote'} ne "all" && 
                     $popts{'whovote'} ne "friends")
                 {
-                    $$error = "whovote must be 'all' or 'friends'";
+                    $$error = $BML::ML{'poll.error.whovote'};
                     return 0;
                 }
                 if ($popts{'whoview'} ne "all" && 
                     $popts{'whoview'} ne "friends" &&
                     $popts{'whoview'} ne "none")
                 {
-                    $$error = "whoview must be 'all', 'friends', or 'none'";
+                    $$error = $BML::ML{'poll.error.whoview'};
                     return 0;
                 }
             }
@@ -109,11 +109,11 @@ sub parse
             elsif ($tag eq "lj-pq") 
             {
                 if ($qopen) {
-                    $$error = "You cannot nest lj-pq tags.  Did you forget to close one?";
+                    $$error = BML::ml('poll.error.nested', { 'tag' => 'lj-pq' });
                     return 0;
                 }
                 if (! $popen) {
-                    $$error = "All lj-pq tags must be nested inside an enclosing lj-poll tag.";
+                    $$error = $BML::ML{'poll.error.missingljpoll'};
                     return 0;
                 }
                 $qopen = 1;
@@ -130,7 +130,7 @@ sub parse
                         {
                             $size = $opts->{'size'}+0;
                         } else {
-                            $$error = "Size attribute on lj-pq text tags must be an integer from 1-100";
+                            $$error = $BML::ML{'poll.error.badsize'};
                             return 0;
                         }
                     }
@@ -140,7 +140,7 @@ sub parse
                         {
                             $max = $opts->{'maxlength'}+0;
                         } else {
-                            $$error = "Maxlength attribute on lj-pq text tags must be an integer from 1-255";
+                            $$error = $BML::ML{'poll.error.badmaxlength'};
                             return 0;
                         }
                     }
@@ -163,15 +163,15 @@ sub parse
                         $by = int($opts->{'by'});
                     }
                     if ($by < 1) {
-                        $$error = "Scale increment must be at least 1.";
+                        $$error = $BML::ML{'poll.error.scaleincrement'};
                         return 0;
                     }
                     if ($from >= $to) {
-                        $$error = "Scale 'from' value must be less than 'to' value.";
+                        $$error = $BML::ML{'poll.error.scalelessto'};
                         return 0;
                     }
                     if ((($to-$from)/$by) > 20) {
-                        $$error = "Your scale exceeds the limit of 20 selections (to-from)/by > 20";
+                        $$error = $BML::ML{'poll.error.scaletoobig'};
                         return 0;
                     }
                     $qopts{'opts'} = "$from/$to/$by";
@@ -185,7 +185,7 @@ sub parse
                     $qopts{'type'} ne "scale" &&
                     $qopts{'type'} ne "text")
                 {
-                    $$error = "Unknown type on lj-pq tag";
+                    $$error = $BML::ML{'poll.error.unknownpqtype'};
                     return 0;
                 }
                 
@@ -197,16 +197,16 @@ sub parse
             elsif ($tag eq "lj-pi")
             {
                 if ($iopen) {
-                    $$error = "You cannot nest lj-pi tags.  Did you forget to close one?";
+                    $$error = BML::ml('poll.error.nested', { 'tag' => 'lj-pi' });
                     return 0;
                 }
                 if (! $qopen) {
-                    $$error = "All lj-pi tags must be nested inside an enclosing lj-pq tag.";
+                    $$error = $BML::ML{'poll.error.missingljpq'};
                     return 0;
                 }
                 if ($qopts{'type'} eq "text")
                 {
-                    $$error = "lj-pq tags of type 'text' cannot have poll items in them";
+                    $$error = $BML::ML{'poll.error.noitemstext'};
                     return 0;
                 }
                 
@@ -233,13 +233,13 @@ sub parse
 
             if ($tag eq "lj-poll") {
                 unless ($popen) {
-                    $$error = "Cannot close an lj-poll tag that's not open";
+                    $$error = BML::ml('poll.error.tagnotopen', { 'tag' => 'lj-poll' });
                     return 0;
                 }
                 $popen = 0;
 
                 unless (@{$popts{'questions'}}) {
-                    $$error = "You must have at least one question in a poll.";
+                    $$error = $BML::ML{'poll.error.noquestions'};
                     return 0;
                 }
                 
@@ -255,7 +255,7 @@ sub parse
 
             elsif ($tag eq "lj-pq") {
                 unless ($qopen) {
-                    $$error = "Cannot close an lj-pq tag that's not open";
+                    $$error = BML::ml('poll.error.tagnotopen', { 'tag' => 'lj-pq' });
                     return 0;
                 }
 
@@ -263,7 +263,7 @@ sub parse
                         $qopts{'type'} eq "text" || 
                         @{$qopts{'items'}}) 
                 {
-                    $$error = "You must have at least one item in a non-text poll question.";
+                    $$error = $BML::ML{'poll.error.noitems'};
                     return 0;
                 }
 
@@ -272,7 +272,7 @@ sub parse
                 my $len = length($qopts{'qtext'});
                 if (! $len)
                 {
-                    $$error = "Need text inside an lj-pq tag to say what the question is about.";
+                    $$error = $BML::ML{'poll.error.notext'};
                     return 0;
                 }
 
@@ -285,7 +285,7 @@ sub parse
 
             elsif ($tag eq "lj-pi") {
                 unless ($iopen) {
-                    $$error = "Cannot close an lj-pi tag that's not open";
+                    $$error = BML::ml('poll.error.tagnotopen', { 'tag' => 'lj-pi' });
                     return 0;
                 }
 
@@ -294,7 +294,7 @@ sub parse
                 my $len = length($iopts{'item'});
                 if ($len > 255 || $len < 1)
                 {
-                    $$error = "Text inside an lj-pi tag must be between 1 and 255 characters.  Yours is $len";
+                    $$error = BML::ml('poll.error.pitoolong', { 'len' => $len, });
                     return 0;
                 }
 
@@ -341,9 +341,9 @@ sub parse
 
     } 
 
-    if ($popen) { $$error = "Unlocked lj-poll tag."; return 0; }
-    if ($qopen) { $$error = "Unlocked lj-pq tag."; return 0; }
-    if ($iopen) { $$error = "Unlocked lj-pi tag."; return 0; }
+    if ($popen) { $$error = BML::ml('poll.error.unlockedtag', { 'tag' => 'lj-poll' }); return 0; }
+    if ($qopen) { $$error = BML::ml('poll.error.unlockedtag', { 'tag' => 'lj-pq' }); return 0; }
+    if ($iopen) { $$error = BML::ml('poll.error.unlockedtag', { 'tag' => 'lj-pi' }); return 0; }
 
     $$postref = $newdata;
     return @polls;
@@ -358,14 +358,13 @@ sub preview {
     my $ret = '';
     
     $ret .= "<form action='#'>\n";
-    $ret .= "<b>Poll \#xxxx</b>";
+    $ret .= "<b>" . BML::ml('poll.pollnum', { 'num' => 'xxxx' }) . "</b>";
     if ($poll->{'name'}) {
         LJ::Poll::clean_poll(\$poll->{'name'});
         $ret .= " <i>$poll->{'name'}</i>";
     }
-    $ret .= "\n";
-    
-    $ret .= "<br />Open to: <b>$poll->{'whovote'}</b>, results viewable to: <b>$poll->{'whoview'}</b>";
+    $ret .= "<br />\n";
+    $ret .= BML::ml('poll.security', { 'whovote' => $BML::ML{'poll.security.'.$poll->{whovote}}, 'whoview' => $BML::ML{'poll.security.'.$poll->{whoview}}, });
     
     # iterate through all questions
     foreach my $q (@{$poll->{'questions'}}) {
@@ -430,7 +429,7 @@ sub preview {
         
     }
     
-    $ret .= LJ::html_submit('', 'Submit Poll', { 'disabled' => 1 }) . "\n";
+    $ret .= LJ::html_submit('', $BML::ML{'poll.submit'}, { 'disabled' => 1 }) . "\n";
     $ret .= "</form>";
     
     return $ret; 
@@ -458,7 +457,7 @@ sub register
         $sth->execute($itemid, $popts{'journalid'}, $popts{'posterid'},
                       $popts{'whovote'}, $popts{'whoview'}, $popts{'name'});
         if ($dbh->err) {
-            $$error = "Database error: " . $dbh->errstr;
+            $$error = BML::ml('poll.dberror', { errmsg => $dbh->errstr });
             return 0;
         }
         my $pollid = $dbh->{'mysql_insertid'};
@@ -474,7 +473,7 @@ sub register
                                  "VALUES (?, ?, ?, ?, ?, ?)");
             $sth->execute($pollid, $qnum, $qnum, $q->{'type'}, $q->{'opts'}, $q->{'qtext'});
             if ($dbh->err) {
-                $$error = "Database error inserting questions: " . $dbh->errstr;
+                $$error = BML::ml('poll.dberror.questions', { errmsg => $dbh->errstr });
                 return 0;
             }
             
@@ -487,7 +486,7 @@ sub register
                 $dbh->do("INSERT INTO pollitem (pollid, pollqid, pollitid, sortorder, item) " . 
                          "VALUES (?, ?, ?, ?, ?)", undef, $pollid, $qnum, $inum, $inum, $it->{'item'});
                 if ($dbh->err) {
-                    $$error = "Database error inserting items: " . $dbh->errstr;
+                    $$error = BML::ml('poll.dberror.items', { errmsg => $dbh->errstr });
                     return 0;
                 }
             }
@@ -524,8 +523,8 @@ sub show_poll
     $pollid += 0;
     
     my $po = $dbr->selectrow_hashref("SELECT * FROM poll WHERE pollid=?", undef, $pollid);
-    return "<b>[Error: poll #$pollid not found]</b>" unless $po;
-    return "<b>[Error: this poll is not attached to this journal entry]</b>"
+    return "<b>[" . BML::ml('poll.error.pollnotfound', { 'num' => $pollid }) . "]</b>" unless $po;
+    return "<b>[$BML::ML{'poll.error.noentry'}]</b>"
         if $itemid && $po->{'itemid'} != $itemid;
 
     my ($can_vote, $can_view) = find_security($po, $remote);
@@ -560,7 +559,7 @@ sub show_poll
     ### view answers to a particular question in a poll
     if ($mode eq "ans") 
     {
-        return "<b>[Error: you don't have access to view these poll results]</b>"
+        return "<b>[$BML::ML{'poll.error.cantview'}]</b>"
             unless $can_view;
 
         # get the question from @qs, which we loaded earlier
@@ -568,7 +567,7 @@ sub show_poll
         foreach (@qs) {
             $q = $_ if $_->{pollqid} == $opts->{qid};
         }
-        return "<b>[Error: this poll question doesn't exist.]</b>"
+        return "<b>[$BML::ML{'poll.error.questionnotfound'}]</b>"
             unless $q;
 
         # get the item information from %its, also loaded earlier
@@ -607,14 +606,14 @@ sub show_poll
 
         # temporary
         if (@res == $LIMIT) {
-            $ret .= "<p>[... truncated]</p>";
+            $ret .= "<p>[$BML::ML{'poll.error.truncated'}]</p>";
         }
         
         return $ret;
     }
 
     # Users cannot vote unless they are logged in
-    return "<?p In order to participate in a poll you must first <a href=\"$LJ::SITEROOT/login.bml?ret=1\">login</a>. p?>"
+    return "<?needlogin?>"
         if $mode eq 'enter' && !$remote;
 
     my $do_form = $mode eq 'enter' && $can_vote;
@@ -631,12 +630,14 @@ sub show_poll
         $ret .= LJ::html_hidden('pollid', $pollid);
     }
 
-    $ret .= "<b><a href='$LJ::SITEROOT/poll/?id=$pollid'>Poll \#$pollid:</a></b> ";
+    $ret .= "<b><a href='$LJ::SITEROOT/poll/?id=$pollid'>" . BML::ml('poll.pollnum', { 'num' => $pollid }) . "</a></b> ";
     if ($po->{'name'}) {
         LJ::Poll::clean_poll(\$po->{'name'});
         $ret .= "<i>$po->{'name'}</i>";
     }
-    $ret .= "<br />Open to: <b>$po->{'whovote'}</b>, results viewable to: <b>$po->{'whoview'}</b>";
+    $ret .= "<br />\n";
+    $ret .= BML::ml('poll.security', { 'whovote' => $BML::ML{'poll.security.'.$po->{whovote}}, 
+                                       'whoview' => $BML::ML{'poll.security.'.$po->{whoview}} }); 
     my $text = LJ::run_hook('extra_poll_description', $po, \@qs);
     $ret .= "<br />$text" if $text;
 
@@ -691,7 +692,7 @@ sub show_poll
         if ($mode eq "results")
         {
             ### to see individual's answers
-            $ret .= "<a href='$LJ::SITEROOT/poll/?id=$pollid&amp;qid=$qid&amp;mode=ans'>View Answers</a><br />";
+            $ret .= "<a href='$LJ::SITEROOT/poll/?id=$pollid&amp;qid=$qid&amp;mode=ans'>$BML::ML{'poll.viewanswers'}</a><br />";
 
             ### but, if this is a non-text item, and we're showing results, need to load the answers:
             if ($q->{'type'} ne "text") {
@@ -780,7 +781,8 @@ sub show_poll
             if ($q->{'type'} eq "scale") { # implies ! do_form
                 my $stddev = sprintf("%.2f", $valstddev);
                 my $mean = sprintf("%.2f", $valmean);
-                $ret .= "<b>Mean:</b> $mean <b>Median:</b> $valmedian <b>Std. Dev:</b> $stddev<br />";
+                $ret .= BML::ml('poll.scaleanswers', { 'mean' => $mean, 'median' => $valmedian, 'stddev' => $stddev });
+                $ret .= "<br />\n";
                 $do_table = 1;
                 $ret .= "<table>";
             }
@@ -829,7 +831,7 @@ sub show_poll
     }
     
     if ($do_form) {
-        $ret .= LJ::html_submit('poll-submit', "Submit Poll") . "</form>\n";;
+        $ret .= LJ::html_submit('poll-submit', $BML::ML{'poll.submit'}) . "</form>\n";;
     }
     
     return $ret;
@@ -895,7 +897,7 @@ sub submit
     my $dbh = LJ::get_db_writer();
 
     unless ($remote) {
-        $$error = "You must be <a href='$LJ::SITEROOT/login.bml?ret=1'>logged in</a> to vote in a poll.";
+        $$error = $BML::ML{'error.noremote'}; # instead of <?needremote?>, because errors are displayed in LJ::bad_input()
         return 0;
     }
 
@@ -903,14 +905,14 @@ sub submit
     my $po = $dbh->selectrow_hashref("SELECT itemid, whovote, journalid, posterid, whoview, whovote, name ".
                                      "FROM poll WHERE pollid=?", undef, $pollid);
     unless ($po) {
-        $$error = "pollid parameter is missing.";
+        $$error = $BML::ML{'poll.error.nopollid'};
         return 0;	
     }
     
     my ($can_vote, undef) = find_security($po, $remote);
 
     unless ($can_vote) {
-        $$error = "Sorry, you don't have permission to vote in this particular poll.";
+        $$error = $BML::ML{'poll.error.cantvote'};
         return 0;
     }
 

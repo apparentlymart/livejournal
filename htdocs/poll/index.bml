@@ -3,7 +3,7 @@
     use strict;
     use vars qw(%FORM $title $body);
 
-    $title = "Poll";
+    $title = $ML{'.title'};
     $body = "";
 
     # answers to checkbox questions are null-separated sequences
@@ -22,8 +22,7 @@
     my $pollid = ($FORM{'id'} || $FORM{'pollid'})+0;
 
     unless ($pollid) {
-        $title = "Polls";
-        $body .= "This is the address to participate in a poll.  You've stumbled onto an address which does nothing right now.  If you'd like, you can <a href=\"create.bml\">create a new poll</a>.";
+        $body .= $ML{'.gotocreate'};
         return;
     }
 
@@ -31,8 +30,8 @@
     my $po = $dbr->selectrow_hashref("SELECT itemid, whovote, journalid, posterid, whoview, whovote, name ".
                                      "FROM poll WHERE pollid=?", undef, $pollid);
     unless ($po) {
-        $title = "Error";
-        $body = "Poll not found.";
+        $title = $ML{'Error'};
+        $body = $ML{'.pollnotfound'};
         return;
     }
 
@@ -40,7 +39,7 @@
     my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&amp;" : "";
 
     my $mode = "";
-    foreach my $m ([ "enter", "Fill out Poll" ], [ "results" , "View Poll Results" ]) {
+    foreach my $m ([ "enter", $ML{'.filloutpoll'} ], [ "results" , $ML{'.viewresults'} ]) {
         if ($FORM{'mode'} eq $m->[0]) {
             $mode = $FORM{'mode'};
             $body .= "<b>[ $m->[1] ]</b> ";
@@ -57,16 +56,16 @@
                                        undef, $u->{'userid'}, $itemid, $anum);
     $log->{'ownerid'} = $log->{'journalid'};
     unless ($log) {
-        $body = "Owning post deleted, so poll no longer accessible.";
+        $body = $ML{'.error.postdeleted'};
         return;
     }
 
     unless (LJ::can_view($remote, $log)) {
-        $body = "Sorry, you're not permitted to see this poll.";
+        $body = $ML{'.error.cantview'};
         return;
     }
 
-    $body .= "<a href='" . LJ::item_link($u, $itemid, $anum) . "'>[ Discuss Results ]</a> ";
+    $body .= "<a href='" . LJ::item_link($u, $itemid, $anum) . "'>[ $ML{'.discuss'} ]</a> ";
  
     if ($FORM{'mode'} eq "ans") { $mode = "ans"; } # also allowed, but not shown
 
@@ -77,12 +76,12 @@
         my $error;
         LJ::Poll::submit($remote, \%FORM, \$error);
         if ($error) {
-            $title = "Error";
+            $title = $ML{'Error'};
             $body .= $error;
             return;
         }
-        $title = "Submitted!";
-        $body .= "<?h1 Thanks.... h1?><?p Your poll answers have been submitted. p?>";
+        $title = $ML{'.submitted.title'};
+        $body .= "<?h1 $ML{'.submitted.head'} h1?><?p $ML{'.submitted.text'} p?>";
         return;
     }
 

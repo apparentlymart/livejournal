@@ -2226,6 +2226,100 @@ If you want to do a different type of search, check out the <a href='/directorys
 
 /multisearch.bml.region.head=Search by Region
 
+/poll/create.bml.button.editpoll=Edit Poll
+
+/poll/create.bml.button.insert=Insert
+
+/poll/create.bml.button.postpoll=Post Poll
+
+/poll/create.bml.button.preview=Preview Poll
+
+/poll/create.bml.button.seecode=See Code
+
+/poll/create.bml.button.startover=Start Over
+
+/poll/create.bml.elements.limitreached=Element limit reached
+
+/poll/create.bml.error.accttype=Your account type does not permit you to use the poll creation feature.
+
+/poll/create.bml.error.allitemsblank=All items cannot be blank.
+
+/poll/create.bml.error.notext=You need text explaining your question
+
+/poll/create.bml.error.parsing=Error parsing poll:
+
+/poll/create.bml.error.pqmaxlengthinvalid=Maxlength attribute on lj-pq text tags must be an integer from [[min]] to [[max]].
+
+/poll/create.bml.error.pqsizeinvalid=Size attribute on lj-pq text tags must be an integer from [[min]] to [[max]].
+
+/poll/create.bml.error.scalemaxlessmin=Scale 'from' value must be less than 'to' value.
+
+/poll/create.bml.error.scalemininvalid=Scale increment must be at least [[min]].
+
+/poll/create.bml.error.scaletoobig=Limit of [[max]] selections (to-from)/by > 20
+
+/poll/create.bml.error.texttoolong=The text of your option is too long and has been truncated.
+
+/poll/create.bml.haserrors=You have one or more errors with your poll.  Please scroll down for more details.
+
+/poll/create.bml.insertquestion=Insert question here:
+
+/poll/create.bml.options=Options:
+
+/poll/create.bml.options.limitreached=Option limit reached
+
+/poll/create.bml.pollname=Poll Name: <i>(opt.)</i>
+
+/poll/create.bml.preview.desc=Below is a preview of your poll.  This is exactly how it will look once it is placed on your journal.  Use the buttons below to go back and make changes or post this poll to your journal.
+
+/poll/create.bml.preview.options=Options
+
+/poll/create.bml.properties=Poll Properties
+
+/poll/create.bml.question=Question:
+
+/poll/create.bml.questionnum=Question #[[num]]
+
+/poll/create.bml.questions=Poll Questions
+
+/poll/create.bml.title=Poll Creator
+
+/poll/create.bml.type.check=Check Boxes
+
+/poll/create.bml.type.drop=Drop-down box
+
+/poll/create.bml.type.radio=Radio Buttons
+
+/poll/create.bml.type.scale=Scale
+
+/poll/create.bml.type.text=Text entry
+
+/poll/create.bml.whoview=Who can view this poll?
+
+/poll/create.bml.whovote=Who can vote in this poll?
+
+/poll/index.bml.discuss=Discuss Results
+
+/poll/index.bml.error.cantview=Sorry, you're not permitted to see this poll.
+
+/poll/index.bml.error.postdeleted=Owning post deleted, so poll no longer accessible.
+
+/poll/index.bml.filloutpoll=Fill out Poll
+
+/poll/index.bml.gotocreate=This is the address to participate in a poll.  You've stumbled onto an address which does nothing right now.  If you'd like, you can <a href='create.bml'>create a new poll</a>.
+
+/poll/index.bml.pollnotfound=Poll not found.
+
+/poll/index.bml.submitted.head=Thanks
+
+/poll/index.bml.submitted.text=Your poll answers have been submitted.
+
+/poll/index.bml.submitted.title=Submitted!
+
+/poll/index.bml.title=Poll
+
+/poll/index.bml.viewresults=View Poll Results
+
 /pubkey.bml.error.notconfigured=This site is not configured with PGP support.
 
 /pubkey.bml.error.nousername=No username specified.
@@ -3705,6 +3799,78 @@ lynx.nav.update=Update Journal
 Password=Password
 
 password.max30=Passwords may not be longer than 30 characters.
+
+poll.dberror=Database error: [[errmsg]]
+
+poll.dberror.items=Database error inserting items: [[errmsg]]
+
+poll.dberror.questions=Database error inserting questions: [[errmsg]]
+
+poll.error.badmaxlength=Maxlength attribute on lj-pq text tags must be an integer from 1-255.
+
+poll.error.badsize=Size attribute on lj-pq text tags must be an integer from 1-100.
+
+poll.error.cantview=Error: you don't have access to view these poll results.
+
+poll.error.cantvote=Sorry, you don't have permission to vote in this particular poll.
+
+poll.error.missingljpoll=All lj-pq tags must be nested inside an enclosing lj-poll tag.
+
+poll.error.missingljpq=All lj-pi tags must be nested inside an enclosing lj-pq tag.
+
+poll.error.nested=You cannot nest [[tag]] tags.  Did you forget to close one?
+
+poll.error.noentry=Error: this poll is not attached to this journal entry
+
+poll.error.noitems=You must have at least one item in a non-text poll question.
+
+poll.error.noitemstext=lj-pq tags of type 'text' cannot have poll items in them.
+
+poll.error.nopollid=pollid parameter is missing.
+
+poll.error.noquestions=You must have at least one question in a poll.
+
+poll.error.notext=Need text inside an lj-pq tag to say what the question is about.
+
+poll.error.pitoolong=Text inside an lj-pi tag must be between 1 and 255 characters.  Yours is [[len]].
+
+poll.error.pollnotfound=Error: poll #[[num]] not found
+
+poll.error.questionnotfound=Error: this poll question doesn't exist.
+
+poll.error.scalefromlessto=Scale 'from' value must be less than 'to' value.
+
+poll.error.scaleincrement=Scale increment must be at least 1.
+
+poll.error.scaletoobig=Your scale exceeds the limit of 20 selections (to-from)/by > 20.
+
+poll.error.tagnotopen=You cannot close an [[tag]] tag that's not open.
+
+poll.error.truncated=... truncated
+
+poll.error.unknownpqtype=Unknown type on lj-pq tag.
+
+poll.error.unlockedtag=Unlocked [[tag]] tag.
+
+poll.error.whoview=whoview must be 'all', 'friends', or 'none'.
+
+poll.error.whovote=whovote must be 'all' or 'friends'.
+
+poll.pollnum=Poll #[[num]]
+
+poll.scaleanswers=<b>Mean:</b> [[mean]] <b>Median:</b> [[median]] <b>Std. Dev</b> [[stddev]]
+
+poll.security=Open to: <b>[[whovote]]</b>, results viewable to: <b>[[whoview]]</b>
+
+poll.security.all=All
+
+poll.security.friends=Friends
+
+poll.security.none=None
+
+poll.submit=Submit Poll
+
+poll.viewanswers=View Answers
 
 portal.bdays.count.des=By default, the 5 friends with the soonest birthdays are shown.
 

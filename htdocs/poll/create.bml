@@ -4,7 +4,7 @@
     use vars qw(%FORM %RULES %TYPENAME $title $body);
 
     # init title and body variables
-    $title = 'Poll Creator';
+    $title = $ML{'.title'};
     $body = '';
 
     # some rules used for error checking
@@ -46,11 +46,11 @@
               );
 
     # type name mappings
-    %TYPENAME = ( "radio" => "Radio Buttons",
-                  "check" => "Check Boxes",
-                  "drop" => "Drop-down box",
-                  "text" => "Text entry",
-                  "scale" => "Scale",
+    %TYPENAME = ( "radio" => $ML{'.type.radio'},
+                  "check" => $ML{'.type.check'},
+                  "drop" => $ML{'.type.drop'},
+                  "text" => $ML{'.type.text'},
+                  "scale" => $ML{'.type.scale'},
                   );
 
     #######################################################
@@ -145,7 +145,7 @@
 
                     if (! $val) {
                         $tmphash{$atr} = $val;
-                        $errors->[$q]->{$atr} = "You need text explaining your question";
+                        $errors->[$q]->{$atr} = $ML{'.error.notext'};
                         $$error_count++;
 
                     } elsif (length($val) > $RULES{$atr}->{'maxlength'}) {
@@ -168,7 +168,7 @@
                     $tmphash{$atr} = int($val);
 
                     if ($tmphash{$atr} > $RULES{$atr}->{'max'} || $tmphash{$atr} < $RULES{$atr}->{'min'}) {
-                        $errors->[$q]->{$atr} = "Size attribute on lj-pq text tags must be an integer from $RULES{$atr}->{'min'}\-$RULES{$atr}->{'max'}";
+                        $errors->[$q]->{$atr} = BML::ml('.error.pqsizeinvalid', { 'min' => $RULES{$atr}->{'min'}, 'max' => $RULES{$atr}->{'max'} });
                         $$error_count++;
                     }
 
@@ -180,7 +180,7 @@
                     $tmphash{$atr} = int($val);
 
                     if ($tmphash{$atr} > $RULES{$atr}->{'max'} || $tmphash{$atr} < $RULES{$atr}->{'min'}) {
-                        $errors->[$q]->{$atr} = "Maxlength attribute on lj-pq text tags must be an integer from $RULES{'maxlength'}->{'min'}-$RULES{'maxlength'}->{'max'}";
+                        $errors->[$q]->{$atr} = BML::ml('.error.pqmaxlengthinvalid', { 'min' => $RULES{'maxlength'}->{'min'}, 'max' => $RULES{'maxlength'}->{'max'} });
                         $$error_count++;
                     }
 
@@ -194,17 +194,17 @@
                     $tmphash{'by'} = int($form->{"pq_${q}_by"}) >= 1 ? int($form->{"pq_${q}_by"}) : 1;
                         
                     if ($tmphash{'by'} < $RULES{'by'}->{'min'}) {
-                        $errors->[$q]->{'by'} = "Scale increment must be at least $RULES{'by'}->{'min'}";
+                        $errors->[$q]->{'by'} = BML::ml('.error.scalemininvalid', { 'min' => $RULES{'by'}->{'min'} });
                         $$error_count++;
                     }
 
                     if ($tmphash{'from'} >= $tmphash{'to'}) {
-                        $errors->[$q]->{'from'} = "Scale 'from' value must be less than 'to' value.";
+                        $errors->[$q]->{'from'} = $ML{'.error.scalemaxlessmin'};
                         $$error_count++;
                     }
 
                     if ((($tmphash{'to'}-$tmphash{'from'})/$tmphash{'by'}) > $RULES{'scale'}->{'maxitems'}) {
-                        $errors->[$q]->{'to'} = "Limit of $RULES{'scale'}->{'maxitems'} selections (to-from)/by > 20";
+                        $errors->[$q]->{'to'} = BML::ml('.error.scaletoobig', { 'max' => $RULES{'scale'}->{'maxitems'} });
                         $$error_count++;
                     }
 
@@ -221,7 +221,7 @@
 
                 if (length($form->{"pq_${q}_opt_$o"}) > $RULES{'items'}->{'maxlength'}) {
                     $tmparray[$o] = substr($form->{"pq_${q}_opt_$o"}, 0, $RULES{'items'}->{'maxlength'});
-                    $errors->[$q]->{$o}->{'items'} = "The text of your option is too long and has been truncated.";
+                    $errors->[$q]->{$o}->{'items'} = $ML{'.error.texttoobig'};
                     $$error_count++;
                 } else {
                     # no change necessary
@@ -233,7 +233,7 @@
         
             # too few options specified?
             if ($num_opts < $RULES{'items'}->{'min'} && $tmphash{'type'} =~ /^(drop|check|radio)$/) {
-                $errors->[$q]->{'items'} = "All items cannot be blank.";
+                $errors->[$q]->{'items'} = $ML{'.error.allitemsblank'};
                 $$error_count++;
             }
         
@@ -331,31 +331,31 @@
         $ret .= LJ::html_hidden('count', $poll->{'count'});
         
         if ($$error_count > 0) {
-            $ret .= "<div style='margin: 10px 0 20px 40px'><b>You have one or more errors with your poll.  Please scroll down for more details.</b></div>\n";
+            $ret .= "<div style='margin: 10px 0 20px 40px'><b>$ML{'.haserrors'}</b></div>\n";
         }
         
         ### Poll Properties -- name, whovote, whoview
 
-        $ret .= "<?h1 Poll Properties h1?>\n";
+        $ret .= "<?h1 $ML{'.properties'} h1?>\n";
         
         $ret .= "<div style='margin-left: 40px; margin-bottom: 20px'>\n";
-        $ret .= "<p>Who can view this poll?<br /><select name='whoview'>\n";
+        $ret .= "<p>$ML{'.whoview'}<br /><select name='whoview'>\n";
         foreach ( qw(all friends none) ) {
             $ret .= "<option value='$_'";
             $ret .= " selected='selected'" if $poll->{'whoview'} eq $_;
-            $ret .= ">" . ucfirst($_) . "</option>\n";
+            $ret .= ">" . $ML{'poll.security.'.$_} . "</option>\n";
         }
         $ret .= "</select></p>\n";
     
-        $ret .= "<p>Who can vote in this poll?<br /><select name='whovote'>\n";
+        $ret .= "<p>$ML{'.whovote'}<br /><select name='whovote'>\n";
         foreach ( qw(all friends) ) {
             $ret .= "<option value='$_'";
             $ret .= " selected='selected'" if $poll->{'whovote'} eq $_;
-            $ret .= ">" . ucfirst($_) . "\n";
+            $ret .= ">" . $ML{'poll.security.'.$_} . "\n";
         }
         $ret .= "</select></p>\n";
   
-        $ret .= "Poll Name: <i>(opt.)</i><br />";
+        $ret .= "$ML{'.pollname'}<br />";
         $ret .= LJ::html_text({ 'name' => 'name', 'size' => '50', 
                                 'maxlength' => $RULES{'pollname'}->{'maxlength'},
                                 'value' => $poll->{'name'} }) . "\n"; 
@@ -364,7 +364,7 @@
 
         ### Poll Questions
 
-        $ret .= "<?h1 Poll Questions h1?>\n";
+        $ret .= "<?h1 $ML{'.questions'} h1?>\n";
 
         # if they have no elements, we need to manually give them an insert option
         $ret .= insert_element(0, $poll);
@@ -373,7 +373,7 @@
         for (my $q = 0; $q < $poll->{'count'}; $q++) {
             my $elem = $poll->{'pq'}->[$q];
             
-            $ret .= "<?h2 Question #" . ($q + 1) . " - $TYPENAME{$elem->{'type'}} h2?>\n";
+            $ret .= "<?h2 " . BML::ml('.questionnum', { 'num' => ($q + 1) }) . " - $TYPENAME{$elem->{'type'}} h2?>\n";
             
             $ret .= "<table border='0' cellspacing='0' cellpadding='0' width='90%'>\n";
             $ret .= "<tr><td align='left' width='15%'>\n";
@@ -421,7 +421,7 @@
                 }
                 $ret .= $elem->{'opts'} < $RULES{'items'}->{'max'} 
                     ? "<br />" . LJ::html_submit("request:$q:do", undef, { 'raw' => " value='More &gt;&gt;'" }) . "\n"
-                    : "<br /><?de [Option limit reached] de?>\n";
+                    : "<br /><?de [$ML{'.options.limitreached'}] de?>\n";
 
             # text type
             } elsif ($elem->{'type'} eq 'text') {
@@ -457,9 +457,9 @@
         if ($poll->{'count'} > 0) {
             $ret .= "<?h1 When you're done ... h1?>\n";
             $ret .= "<div style='margin: 20px 0 20px 40px'>\n";
-            $ret .= LJ::html_submit('start_over', undef, { 'raw' => "value='&larr; Start Over'" }) . "\n";
-            $ret .= LJ::html_submit('see_code', undef, { 'raw' => "value='See Code &rarr;'" }) . "\n";
-            $ret .= LJ::html_submit('see_preview', undef, { 'raw' => "value='Preview Poll &rarr;'" }) . "\n";
+            $ret .= LJ::html_submit('start_over', undef, { 'raw' => "value='&larr; $ML{'.button.startover'}'" }) . "\n";
+            $ret .= LJ::html_submit('see_code', undef, { 'raw' => "value='$ML{'.button.seecode'} &rarr;'" }) . "\n";
+            $ret .= LJ::html_submit('see_preview', undef, { 'raw' => "value='$ML{'.button.preview'} &rarr;'" }) . "\n";
             $ret .= "</div>\n";
         }
         
@@ -478,14 +478,14 @@
             
         $ret .= "<div style='margin-top: 20px; margin-bottom: 20px'><?standout ";
         if ($after >= $RULES{"elements"}->{"max"}) {
-            $ret .= "<?de [Element limit reached] de?>\n";
+            $ret .= "<?de [$ML{'.elements.limitreached'}] de?>\n";
         } else {
-            $ret .= "Insert question here: <select name='insert:$after'>\n";
+            $ret .= "$ML{'.insertquestion'} <select name='insert:$after'>\n";
             foreach (qw(-- radio check drop text scale)) {
                 $ret .= "<option value='$_'>$TYPENAME{$_}</option>\n";
             }
             $ret .= "</select>\n";
-            $ret .= LJ::html_submit("insert:$after:do", 'Insert') . "\n";
+            $ret .= LJ::html_submit("insert:$after:do", $ML{'.button.insert'}) . "\n";
         }
         $ret .= " standout?></div>\n";
         
@@ -506,23 +506,23 @@
         # so we can feed it into LJ::Poll::preview()
         my $err;
         my $stdpoll = (LJ::Poll::parse(\$code, \$err, {}))[0];
-        return "<b>[Error parsing poll: $err]</b>\n" if $err;
+        return "<b>[$ML{'.error.parsing'} $err]</b>\n" if $err;
 
         # display poll preview
-        $ret .= "<?h1 Options h1?>\n";
-        $ret .= "<?p Below is a preview of your poll.  This is exactly how it will look once it is placed on your journal.  Use the buttons below to go back and make changes or post this poll to your journal. p?>\n\n";
+        $ret .= "<?h1 $ML{'.preview.options'} h1?>\n";
+        $ret .= "<?p $ML{'.preview.desc'} p?>\n\n";
 
         $ret .= "<div align='center'>\n";
 
         # edit poll
         $ret .= "<form method='post' action='create.bml' style='display: inline'>\n";
         $ret .= poll_hidden($poll);
-        $ret .= LJ::html_submit('edit_poll', undef, { 'raw' => "value='&larr; Edit Poll'" }) . "\n";
+        $ret .= LJ::html_submit('edit_poll', undef, { 'raw' => "value='&larr; $ML{'.button.editpoll'}'" }) . "\n";
 
         # need one more button, depending on which page they're currently on
         my ($name, $val) = $form->{'see_code'} 
-                ? ("see_preview", "Preview Poll")
-                : ("see_code", "See Code");
+                ? ("see_preview", $ML{'.button.preview'})
+                : ("see_code", $ML{'.button.seecode'});
 
         $ret .= LJ::html_submit($name, $val) . "\n";
         $ret .= "</form>\n";
@@ -531,7 +531,7 @@
         $ret .= "<form method='post' action='$LJ::SITEROOT/update.bml' style='display: inline'>\n";
         my $code = make_code($poll);
         $ret .= LJ::html_hidden('mode', 'full', 'event', $code) . "\n";
-        $ret .= LJ::html_submit('showform', undef, { 'raw' => "value='Post Poll &rarr;'" }) . "\n";
+        $ret .= LJ::html_submit('showform', undef, { 'raw' => "value='$ML{'.button.postpoll'} &rarr;'" }) . "\n";
         $ret .= "</form>\n";
 
         # preview code or ... preview
@@ -655,12 +655,12 @@
     # authenticate - but bypass db hit if we think they're already in.
     my $remote = LJ::get_remote();
     unless ($remote) {
-        $body = "<?h1 Error h1?><?p You must be <a href='/login.bml?ret=1'>logged in</a> to use the poll creator. p?>";
+        $body = "<?needlogin?>";
         return;
     }
     
     unless (LJ::get_cap($remote, "makepoll")) {
-        $body = "<?h1 Sorry h1?><?p Your account type does not permit you to use the poll creation feature. p?>";
+        $body = "<?h1 $ML{'Sorry'} h1?><?p $ML{'.error.accttype'} p?>";
         return;
     }
 
