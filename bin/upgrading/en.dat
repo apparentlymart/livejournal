@@ -3151,6 +3151,10 @@ Please either clear the user textbox or select the relevant posting mode and try
 
 /talkread.bml.anonuser=<i>(Anonymous)</i>
 
+/talkread.bml.button.post=Post Comment
+
+/talkread.bml.button.more=More Options...
+
 /talkread.bml.confirm.action=Are you sure you wish to delete the selected comments?
 
 /talkread.bml.deletedpost=<b>(Deleted post)</b>
@@ -3162,6 +3166,8 @@ Please either clear the user textbox or select the relevant posting mode and try
 /talkread.bml.noreplies=No replies
 
 /talkread.bml.nosubject=(no subject)
+
+/talkread.bml.posted=Comment Posted Sucessfully
 
 /talkread.bml.replysuspended=<b>(Reply from suspended user)</b>
 

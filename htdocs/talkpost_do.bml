@@ -100,6 +100,10 @@ body<=
     ## insertion
     my $wasscreened = ($parent->{state} eq 'S');
     my $err;
+
+    $comment->{'subject'} =~ s/^Re:\s*//i;
+    $comment->{'subject'} = "Re: $comment->{'subject'}" if $comment->{'subject'};
+
     unless (LJ::Talk::Post::post_comment($entryu, $journalu,
                                          $comment, $parent, $item, \$err)) {
         return $err;
@@ -114,6 +118,14 @@ body<=
 
     my $mlcode;
     if ($comment->{state} eq 'A') {
+        if ($POST{'qr'}) {
+            # Set memcache key for highlighting post
+            my $memkey = [$remote->{'userid'}, "lastcomm:$remote->{'userid'}"];
+            LJ::MemCache::set($memkey, "$journalu->{'userid'}:$dtalkid", time()+10);
+
+            return BML::redirect($commentlink);
+        }
+
         $mlcode = '.success.message';
     } else {
         # otherwise, it's a screened comment.
