@@ -1492,7 +1492,7 @@ DAY_EVENT_PROTECTED<=
 <div class="entry" id="entry%%itemid%%">
 <div class="entrytext">
 <span class="entryheading">
-<span class="timestamp">%%datetime%%</span>: <img src="%%cons:img%%/icon_protected.gif" width=16 height=16 vspace=0 hspace=0 alt="[Protected]"> %%subject%%</span>
+<span class="timestamp">%%datetime%%</span>: <img src="%%cons:img%%/icon_protected.gif" width="14" height="15" vspace=0 hspace=0 alt="[Protected]"> %%subject%%</span>
 %%event%%
 %%currents%%</div>
 %%talklinks%%
@@ -3237,7 +3237,7 @@ FRIENDS_EVENT_PROTECTED<=
 <div class="entrytext">
 <span class="entryheading">
 %%altposter%%
-<span style="color: %%fgcolor%%; background: %%bgcolor%%; padding-left: 0.5em; padding-right: 0.5em;"><a href="%%cons:siteroot%%/userinfo.bml?user=%%user%%" style="color: %%fgcolor%%; background: %%bgcolor%%;">%%user%%</a></span> @ <span class="timestamp">%%datetime%%</span>: <img src="%%cons:img%%/icon_protected.gif" width=16 height=16 vspace=0 hspace=0 alt="[Protected]"> %%subject%%</span>
+<span style="color: %%fgcolor%%; background: %%bgcolor%%; padding-left: 0.5em; padding-right: 0.5em;"><a href="%%cons:siteroot%%/userinfo.bml?user=%%user%%" style="color: %%fgcolor%%; background: %%bgcolor%%;">%%user%%</a></span> @ <span class="timestamp">%%datetime%%</span>: <img src="%%cons:img%%/icon_protected.gif" width="14" height="15" vspace=0 hspace=0 alt="[Protected]"> %%subject%%</span>
 %%friendpic%%%%event%%
 %%currents%%</div>
 %%talklinks%%
@@ -5389,7 +5389,7 @@ LASTN_EVENT_PROTECTED<=
 <div class="entry" id="entry%%itemid%%">
 <div class="entrytext">
 <span class="entryheading">
-%%altposter%%<span class="timestamp">%%datetime%%</span>: <img src="%%cons:img%%/icon_protected.gif" width=16 height=16 vspace=0 hspace=0 alt="[Protected]"> %%subject%%</span>
+%%altposter%%<span class="timestamp">%%datetime%%</span>: <img src="%%cons:img%%/icon_protected.gif" width="14" height="15" vspace=0 hspace=0 alt="[Protected]"> %%subject%%</span>
 %%event%%
 %%currents%%</div>
 %%talklinks%%
