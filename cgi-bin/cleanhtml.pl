@@ -682,7 +682,7 @@ my @comment_close = qw(
     h1 h2 h3 h4 h5 h6 div blockquote address pre center
     ul ol li dl dt dd
     table tr td th tbody tfoot thead colgroup caption
-    marquee area map form textarea
+    marquee area map form textarea blink
 );
 my @comment_all = (@comment_close, "img", "br", "hr", "p", "col");
 
