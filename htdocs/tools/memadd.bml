@@ -91,12 +91,6 @@
  my $log = LJ::get_log2_row($ju, $itemid);
  my $subject = LJ::get_logtext2($ju, $itemid)->{$log->{jitemid}}[0];
 
- if ($oldstyle) {
-     # ditemid was an old-style itemid, so we update it to the new style.
-     $anum = $log->{anum};
-     $ditemid = $itemid<<8 + $anum;
- }
-
  # if the entry is pre-UTF-8 conversion, the
  # subject may need conversion into UTF-8
  if ($LJ::UNICODE) {
@@ -112,7 +106,13 @@
  }
 
  # check to see if it already is memorable (thus we're editing, not adding);
- my $memory = LJ::Memories::get_by_ditemid($memoryu, $jid, $ditemid);
+ my $memory = LJ::Memories::get_by_ditemid($memoryu, $oldstyle ? 0 : $jid, $ditemid);
+
+ if ($oldstyle) {
+     # ditemid was an old-style itemid, so we update it to the new style.
+     $anum = $log->{anum};
+     $ditemid = $itemid<<8 + $anum;
+ }
 
  # get keywords user has used
  my $exist_kw = LJ::Memories::get_keywords($memoryu);
@@ -296,7 +296,7 @@
          if defined $memory;
      LJ::Memories::create($memoryu, { 
                               journalid => $jid,
-                              ditemid => $dbitemid,
+                              ditemid => $itemid,
                               des => $des,
                               security => $sec,
                           }, \@kwid);
@@ -305,7 +305,7 @@
      $title = $ML{'.title.added'};
      $body = "<?h1 $ML{'.body.added.header'} h1?><?p ";
 
-     my $backlink = LJ::item_link($GET{'journal'}, $itemid, $anum);
+     my $backlink = LJ::item_link($ju->{user}, $itemid, $anum);
      $body .= BML::ml('.body.added.body2', {'aopts' => "href='$backlink'"});
      $body .= " p?>";
 

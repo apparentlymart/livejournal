@@ -310,6 +310,11 @@ sub _memory_getter {
         $opts->{byditemid} += 0;
         $opts->{journalid} += 0;
         $selwhere = "AND journalid = $opts->{journalid} AND $selitemid = $opts->{byditemid}";
+    } elsif ($opts->{byditemid}) {
+        # get memory, OLD STYLE so journalid is 0
+        my $selitemid = $u->{dversion} > 5 ? "ditemid" : "jitemid";
+        $opts->{byditemid} += 0;
+        $selwhere = "AND journalid = 0 AND $selitemid = $opts->{byditemid}";
     }
 
     # load up memories into hashref
@@ -373,7 +378,8 @@ sub get_by_ditemid {
     my ($u, $jid, $ditemid) = @_;
     $jid += 0;
     $ditemid += 0;
-    return undef unless $jid && $ditemid; # _memory_getter checks $u
+    return undef unless $ditemid; # _memory_getter checks $u and $jid isn't necessary
+                                  # because this might be an old-style memory
 
     # pass to getter with appropriate options
     my $memhash = LJ::Memories::_memory_getter($u, { byditemid => $ditemid, journalid => $jid });
