@@ -1,0 +1,149 @@
+<?page
+title=>Recent Comments
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST);
+    my $ret;
+
+    my $remote = LJ::get_remote();
+    return LJ::bad_input($ML{'error.noremote'})
+        unless $remote;
+
+    my $authas = $GET{'authas'} || $remote->{'user'};
+    my $u = LJ::get_authas_user($authas);
+    return LJ::bad_input($ML{'error.invalidauth'})
+        unless $u;
+
+    my $user = $u->{'user'};
+
+    my $dbcr = LJ::get_cluster_reader($u);
+    return "Error: can't get DB for user" unless $dbcr;
+
+    my $count = LJ::get_cap($u, "tools_recent_comments_display");
+    $ret .= "<?p " . BML::ml('/tools/recent_comments.bml.maxnotshown', 
+                             { 'current' => $count, 'max' => $LJ::TOOLS_RECENT_COMMENTS_MAX }). 
+                                 " p?>" unless $count == $LJ::TOOLS_RECENT_COMMENTS_MAX;
+
+    # authas switcher form
+    $ret .= "<form method='get' action='/tools/recent_comments.bml'>\n";
+    $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
+    $ret .= "</form>\n\n";
+
+    eval {
+    my @recv;
+    my %need_userid;
+    my %logrow;  # jid-nodeid -> $logrow
+
+    my $now = time();
+    my $sth;
+
+    my $max = $dbcr->selectrow_array("SELECT MAX(jtalkid) FROM talk2 WHERE journalid=?",
+				     undef, $u->{userid});
+    $sth = $dbcr->prepare("SELECT jtalkid, nodetype, nodeid, parenttalkid, ".
+			  "       posterid, datepost, state ".
+			  "FROM talk2 ".
+			  "WHERE journalid=? AND jtalkid > ?");
+    $sth->execute($u->{userid}, $max - $count);
+    die $dbcr->errstr if $dbcr->err;
+
+    my @ids;
+    while (my $r = $sth->fetchrow_hashref) {
+	$need_userid{$r->{posterid}} = 1 if $r->{posterid};
+	push @recv, $r;
+        push @ids, $r->{jtalkid};
+    }
+
+    $ret .= "<?h1 Latest Received h1?>";
+    $ret .= "<?p " . (@ids ? "Last $count comments posted in " : "No comments have been posted in ") . LJ::ljuser($u) . " p?>";
+
+    @recv = sort { $b->{datepost} cmp $a->{datepost} } @recv;
+    my $us = LJ::load_userids(keys %need_userid);
+
+    my $comment_text = LJ::get_talktext2($u, @ids);
+    
+    my $root = LJ::journal_base($u);
+    $ret .= "<table style='width: 100%' cellpadding='5' cellspacing='0'>";
+    foreach my $r ( @recv) {
+	next unless $r->{nodetype} eq "L";
+
+	my $bgcolor = "transparent"; my $state;
+	if ($r->{state} eq "S") {
+            $bgcolor = BML::fill_template("screenedbarcolor");
+            $state = "Screened";
+	} elsif ($r->{state} eq "D") {
+            $state = "Deleted";
+	} elsif ($r->{state} eq "F") {
+            $state = "Frozen";
+        }
+
+	my $pu = $us->{$r->{posterid}};
+
+
+        $ret .= "<tr valign='top'><td style='width: 150px; line-height: 1.5em; border-top: 1px solid #999; background-color: $bgcolor'>";
+	$ret .= ($pu ? LJ::ljuser($pu) : "Anonymous") . "<br />";
+        $ret .= LJ::ago_text(time() - LJ::mysqldate_to_time($r->{datepost})) . "<br />";
+        $ret .= $state if $state ne "";
+
+        $ret .= "</td><td style='text-align: left; border-top: 1px solid #999; border-left: 1px solid #999'>";
+
+        my $comment = $comment_text->{$r->{jtalkid}}[1];
+        LJ::CleanHTML::clean_comment(\$comment, $r->{preformat});
+        $ret .= "$comment<br /><br />";
+
+        my $lrow = $logrow{"$u->{userid} $r->{nodeid}"} ||= LJ::get_log2_row($u, $r->{'nodeid'});
+        my $talkid = ($r->{'jtalkid'} << 8) + $lrow->{'anum'};
+
+        my $ditemid = "$root/$lrow->{ditemid}.html";
+        my $talkurl = "$root/$lrow->{ditemid}.html?thread=$talkid\#t$talkid";
+
+        $ret .= "(<a href='$talkurl'>$ML{'talk.commentpermlink'}</a>) " unless $r->{state} eq "D";
+
+        my $stylemine = 0;
+        my $replyurl = LJ::Talk::talkargs($ditemid, "replyto=$talkid", $stylemine);
+        if ($r->{'state'} eq 'F') {
+            $ret .= "($ML{'talk.frozen'}) ";
+        } elsif ($r->{'state'} eq "D") {
+            $ret .= "$ML{'/talkread.bml.deletedpost'}";
+        } else {
+            $ret .= "(<a href='$replyurl'>$ML{'talk.replytothis'}</a>) ";
+        }
+
+        $ret .= "</td></tr>";
+
+    }
+    $ret .= "</table>";
+
+    if ($u->{journaltype} eq "P") {
+        $ret .= "<?h1 Latest Posted h1?><?p Last $count comments " . LJ::ljuser($u) . " has posted. p?>";
+
+        $sth = $dbcr->prepare("SELECT posttime, journalid, nodetype, nodeid, jtalkid, publicitem ".
+                              "FROM talkleft ".
+                              "WHERE userid=?  ORDER BY posttime DESC LIMIT $count");
+        $sth->execute($u->{'userid'});
+        my %jcount;  # jid -> ct
+        $ret .= "<table style='width: 50%'>";
+        while (my $r = $sth->fetchrow_hashref) {
+            $jcount{$r->{'journalid'}}++;
+            next unless $r->{'nodetype'} eq "L";  # log2 comment
+            
+            my $ju = LJ::load_userid($r->{'journalid'});
+            my $lrow = $logrow{"$ju->{userid} $r->{nodeid}"} ||= LJ::get_log2_row($ju, $r->{'nodeid'});
+            my $talkid = ($r->{'jtalkid'} << 8) + $lrow->{'anum'};
+            
+            my $hr_ago = LJ::ago_text(time() - $r->{'posttime'});
+            
+            my $url = "$LJ::SITEROOT/users/$ju->{user}/$lrow->{ditemid}.html?thread=$talkid\#t$talkid";
+            $ret .= "<tr><td>$hr_ago</td><td>" . LJ::ljuser($ju->{user}) . "</td><td><a href='$url'>$ML{'talk.commentpermlink'}</a></td></tr>\n";
+        }
+        $ret .= "</table>";
+    }
+    };
+    
+    return $@ || $ret;
+
+}
+_code?>
+<=body
+page?>

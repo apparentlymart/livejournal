@@ -3462,6 +3462,8 @@ This could be because: <ol>
 
 /tools/memories.bml.uncategorized=Uncategorized
 
+/tools/recent_comments.bml.maxnotshown=Your account is only permitted to see the latest [[current]] entries, not the full limit of [[max]].
+
 /update.bml.altpost=Journal to post in:
 
 /update.bml.btn.preview=Preview

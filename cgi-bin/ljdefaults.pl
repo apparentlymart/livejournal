@@ -123,6 +123,7 @@
                       'maxcomments' => 5000,
                       'rateperiod-lostinfo' => 24*60, # 24 hours
                       'rateallowed-lostinfo' => 3,
+                      'tools_recent_comments_display' => 50,
                       );
         foreach my $k (keys %defcap) {
             next if (defined $LJ::CAP_DEF{$k});
@@ -173,6 +174,9 @@
 
     # block size is used in stats generation code that gets n rows from the db at a time
     $STATS_BLOCK_SIZE ||= 10_000;
+
+    # Maximum number of comments to display on Recent Comments page
+    $TOOLS_RECENT_COMMENTS_MAX = 50;
 }
 
 # no dependencies.
