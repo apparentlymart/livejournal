@@ -457,6 +457,8 @@ sub append_request
     my @to_notify;
     while (my ($email, $userid, $user) = $sth->fetchrow_array) {
         next if $re->{'posterid'} == $userid;
+        next if ($re->{'type'} eq "screened" &&
+                 ! can_read_screened($dbh, $sp, LJ::make_remote($user, $userid)));
         next if ($re->{'type'} eq "internal" &&
                  ! can_read_internal($dbh, $sp, LJ::make_remote($user, $userid)));
         push @to_notify, $email;
