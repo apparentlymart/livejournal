@@ -4,7 +4,7 @@
 package Apache::LiveJournal;
 
 use strict;
-use Apache::Constants qw(:common REDIRECT HTTP_NOT_MODIFIED HTTP_MOVED_PERMANENTLY);
+use Apache::Constants qw(:common REDIRECT HTTP_NOT_MODIFIED HTTP_MOVED_PERMANENTLY M_TRACE);
 use Apache::File ();
 use lib "$ENV{'LJHOME'}/cgi-bin";
 use Apache::LiveJournal::PalImg;
@@ -132,6 +132,10 @@ sub trans
     my $args_wq = $args ? "?$args" : "";
     my $host = $r->header_in("Host");
     my $hostport = ($host =~ s/:\d+$//) ? $& : "";
+
+    # disable TRACE (so scripts on non-LJ domains can't invoke
+    # a trace to get the LJ cookies in the echo)
+    return FORBIDDEN if $r->method_number == M_TRACE;
 
     # let foo.com still work, but redirect to www.foo.com
     if ($LJ::DOMAIN_WEB && $r->method eq "GET" &&
