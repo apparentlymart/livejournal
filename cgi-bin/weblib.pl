@@ -898,6 +898,13 @@ sub entry_form {
     my $remote = $opts->{'remote'};
     my ($moodlist, $moodpics, $userpics);
 
+    # usejournal has no point if you're trying to use the account you're logged in as,
+    # so disregard it so we can assume that if it exists, we're trying to post to an
+    # account that isn't us
+    if ($remote && $opts->{usejournal} && $remote->{user} eq $opts->{usejournal}) {
+        delete $opts->{usejournal};
+    }
+
     my $tabnum = 1;
     my $tabindex = sub { return $tabnum++; };
     $opts->{'event'} = LJ::durl($opts->{'event'}) if $opts->{'mode'} eq "edit";
