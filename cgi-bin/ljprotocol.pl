@@ -1391,7 +1391,7 @@ sub authenticate
 	my $dbr = $dbs->{'reader'};
 	my $quser = $dbr->quote($username);
 	my $sth = $dbr->prepare("SELECT user, userid, journaltype, name, ".
-				"password, status, statusvis, ".
+				"password, status, statusvis, caps, ".
 				"track FROM user WHERE user=$quser");
 	$sth->execute;
 	$u = $sth->fetchrow_hashref;
