@@ -4471,7 +4471,7 @@ sub cmd_buffer_flush
         $where .= " AND journalid=" . $dbh->quote($userid);
     }
 
-    my $LIMIT = 30;
+    my $LIMIT = 50;
 
     while ($loop &&
            ($clist = $db->selectcol_arrayref("SELECT cbid FROM cmdbuffer ".
@@ -4481,7 +4481,9 @@ sub cmd_buffer_flush
         foreach my $cbid (@$clist) {
             my $got_lock = $db->selectrow_array("SELECT GET_LOCK('cbid-$cbid',10)");
             return 0 unless $got_lock;
-            # FIXME: why don't we just load the whole row above?
+            # sadly, we have to do another query here to verify the job hasn't been
+            # done by another thread.  (otherwise we could've done it above, instead
+            # of just getting the id)
             my $c = $db->selectrow_hashref("SELECT * FROM cmdbuffer WHERE cbid=$cbid");
             next unless $c;
 
