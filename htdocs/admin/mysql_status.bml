@@ -5,7 +5,7 @@
 
  my $remote = LJ::get_remote($dbh);
  return"<b>Error:</b> You don't have access to administer databases."
- unless (LJ::check_priv($dbh, $remote, "dbadmin", "mysqlstatus"));
+ unless (LJ::check_priv($dbh, $remote, "siteadmin", "mysqlstatus"));
 
  if ($format eq "text") {
      BML::set_content_type("text/plain");

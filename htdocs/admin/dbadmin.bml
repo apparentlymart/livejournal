@@ -17,9 +17,9 @@
  my $remote = LJ::get_remote($dbs);
 
  return"<b>Error:</b> You don't have access to administer databases."
- unless (LJ::check_priv($dbs, $remote, "dbadmin"));
+ unless (LJ::check_priv($dbs, $remote, "siteadmin", "dbweightview"));
 
- my $can_save = LJ::check_priv($dbs, $remote, "dbadmin", "change");
+ my $can_save = LJ::check_priv($dbs, $remote, "siteadmin", "dbweightchange");
 
  my $view = $FORM{'view'} eq "role" ? "role" : "host";
 
