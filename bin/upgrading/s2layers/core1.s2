@@ -217,7 +217,6 @@ class EntryLite
     var readonly string{} metadata "Post metadata. Keys: 'music', 'mood'";
 
     var readonly string permalink_url "A URL at which this specific entry can be viewed, for linking purposes.";
-   
 }
 
 class Entry extends EntryLite
@@ -548,7 +547,7 @@ function builtin set_content_type(string text)
 "Set the HTTP Content-type response header (for example, if outputting XML). Must be called before printing any data.";
 
 function builtin get_plural_phrase(int n, string prop) : string
-"Picks the phrase with the proper plural form from those in the property \$prop, passing \$n to [func[lang_map_plural(int)]] to get the proper form for the current language, and then substituting the # character with \$n.  Also, returned string is HTML-escaped.";
+"Picks the phrase with the proper plural form from those in the property \$prop, passing \$n to [function[lang_map_plural(int)]] to get the proper form for the current language, and then substituting the # character with \$n.  Also, returned string is HTML-escaped.";
 
 function builtin weekdays() : int[] 
 "Integers representing the days of the week. This will start on Monday (2) or Sunday (1) depending on the property setting for start-of-week and go to Sunday (1) or Saturday (7)";
