@@ -72,7 +72,7 @@ If your client supports picture keywords and you want to receive that list, send
 }
 { getpickwurls
 .des
-If your client supports picture keywords and can also display the pictures somehow, send something for this key, like "1", and you'll receieve the list of picture keyword URLs that correspond to the picture keywords.  You must send getpickws for this option to even matter.
+If your client supports picture keywords and can also display the pictures somehow, send something for this key, like "1", and you'll receieve the list of picture keyword URLs that correspond to the picture keywords as well as the URL for the default picture.  You must send getpickws for this option to even matter.
 }
 .response
 { name
@@ -150,6 +150,10 @@ The number of picture URLs being returned, if you sent the 'getpickwurls' key.  
 { pickwurl_<i>n</i>
 .des
 The URL of the <i>n</i>th picture.  It corresponds with the <i>n</i>th picture keyword returned in the other list.  Note that the content behind these URLs can <u>never</u> change, so if your client downloads these to display, just cache them locally and never hit the servers again to re-download them or to even check if they've been modified.
+}
+{ defaultpicurl
+.des
+The URL of the default picture (if you sent the 'getpickwurls' key). Note that the content behind this URL can never change, so you can cache it locally; also note that the default picture might have no keyword associated with it.
 }
 { fastserver
 .des

@@ -164,6 +164,9 @@ sub login
         my $pickws = list_pickws($dbs, $u);
         $res->{'pickws'} = [ map { $_->[0] } @$pickws ];
         if ($req->{'getpickwurls'}) {
+            if ($u->{'defaultpicid'}) {
+                 $res->{'defaultpicurl'} = "$LJ::USERPIC_ROOT/$u->{'defaultpicid'}/$u->{'userid'}";
+            }
             $res->{'pickwurls'} = [ map {
                 "$LJ::USERPIC_ROOT/$_->[1]/$u->{'userid'}"
             } @$pickws ];
@@ -172,6 +175,7 @@ sub login
             # validate all text
             foreach(@{$res->{'pickws'}}) { LJ::text_out(\$_); }
             foreach(@{$res->{'pickwurls'}}) { LJ::text_out(\$_); }
+            LJ::text_out(\$res->{'defaultpicurl'});
         }
     }
 
@@ -2098,7 +2102,7 @@ sub authenticate
         my $other = $LJ::UNICODE ? ", oldenc" : "";
         my $sth = $dbr->prepare("SELECT user, userid, journaltype, name, ".
                                 "password, status, statusvis, caps, ".
-                                "clusterid, dversion ".
+                                "clusterid, dversion, defaultpicid ".
                                 "$other FROM user WHERE user=$quser");
         $sth->execute;
         return fail($err,501,$dbr->errstr) if $dbr->err;
@@ -2275,6 +2279,7 @@ sub login
         if defined $req->{"getpickws"};
     $flatten->("pickwurl", $rs->{'pickwurls'})
         if defined $req->{"getpickwurls"};
+    $res->{'defaultpicurl'} = $rs->{'defaultpicurl'} if $rs->{'defaultpicurl'};
 
     ### report new moods that this client hasn't heard of, if they care
     if (defined $req->{"getmoods"}) {

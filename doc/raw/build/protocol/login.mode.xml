@@ -26,7 +26,7 @@ If your client supports picture keywords and you want to receive that list, send
 </des></scalar></key>
 
 <key name="getpickwurls" count="opt"><scalar><des>
-If your client supports picture keywords and can also display the pictures somehow, send something for this key, like "1", and you'll receieve the list of picture keyword URLs that correspond to the picture keywords.  You must send getpickws for this option to even matter.
+If your client supports picture keywords and can also display the pictures somehow, send something for this key, like "1", and you'll receieve the list of picture keyword URLs that correspond to the picture keywords as well as the URL for the default picture.  You must send getpickws for this option to even matter.
 </des></scalar></key>
 
 </struct></arguments>
@@ -110,6 +110,10 @@ The picture URL.
 </des></scalar></list>
 </key>
       
+<key name="defaultpicurl" count="opt"><scalar><des>
+The URL of the default picture (if you sent the 'getpickwurls' key). Note that the content behind this URL can never change, so you can cache it locally; also note that the default picture might have no keyword associated with it.
+</des></scalar></key>
+
 <key name="fastserver" count="opt"><scalar><des>
 LiveJournal sites may have priority servers for paying customers.  If this key is both present and set to value "1", then the client has permission to set the "ljfastserver" cookie in subsequent requests.  The HTTP request header to send is "Cookie: ljfastserver=1".  If you send this header without getting permission from the login mode, your requests will fail.  That is, you'll trick the load balancer into directing your request towards the priority servers, but the server you end up hitting won't be happy that you're trying to scam faster access and will deny your request.
 </des></scalar></key>
