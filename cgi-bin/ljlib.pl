@@ -3208,13 +3208,10 @@ sub make_journal
         unless $LJ::viewinfo{$view}->{'nostyle'};
 
     # load the overrides
-    my $overrides = "";
-    if ($opts->{'nooverride'}==0 && $u->{'useoverrides'} eq "Y")
-    {
+    my $overrides;
+    if ($opts->{'nooverride'}==0 && $u->{'useoverrides'} eq "Y") {
         my $db = LJ::get_dbh("s1styles") || $dbr;
-        my $sth = $db->prepare("SELECT override FROM overrides WHERE user=$quser");
-        $sth->execute;
-        ($overrides) = $sth->fetchrow_array;
+        $overrides = $db->selectrow_array("SELECT override FROM overrides WHERE user=$quser");
     }
 
     # populate the variable hash

@@ -1336,7 +1336,7 @@ sub getevents
         my @ids = sort { $item{$a} cmp $item{$b} } keys %item;
         if (@ids > $limit) { @ids = @ids[0..$limit-1]; }
         
-        my $in = join(',', @ids);
+        my $in = join(',', @ids) || "0";
         $where = "AND jitemid IN ($in)";
     }
     elsif ($req->{'selecttype'} eq "multiple")
