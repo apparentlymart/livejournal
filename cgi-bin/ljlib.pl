@@ -343,16 +343,17 @@ sub get_log2_row
 # get 2 weeks worth of recent items, in rlogtime order,
 # using memcache
 # accepts $u or ($jid, $clusterid) + $notafter - max value for rlogtime
+# $update is the timeupdate for this user, as far as the caller knows,
+# in UNIX time.
 # returns hash keyed by $jitemid, fields:
 # posterid, eventtime, rlogtime,
 # security, allowmask, journalid, jitemid, anum.
 
 sub get_log2_recent_log
 {
-    my ($u, $cid, $rupdate, $notafter) = @_;
+    my ($u, $cid, $update, $notafter) = @_;
     my $jid = LJ::want_userid($u);
     $cid ||= $u->{'clusterid'} if ref $u;
-    my $update = $LJ::EndOfTime - $rupdate;
 
     my $DATAVER = "2"; # 1 char
 
@@ -366,7 +367,7 @@ sub get_log2_recent_log
     my $rows_decode = sub {
         return 0
             unless $rows && substr($rows, 0, 1) eq $DATAVER;
-        my $tu = unpack("N", substr($rows, 1, 5));
+        my $tu = unpack("N", substr($rows, 1, 4));
 
         # if update time we got from upstream is newer than recorded
         # here, this data is unreliable
@@ -486,7 +487,7 @@ sub get_log2_recent_user
     my $ret = [];
 
     my $log = LJ::get_log2_recent_log($opts->{'userid'}, $opts->{'clusterid'},
-              $opts->{'rupdate'}, $opts->{'notafter'});
+              $opts->{'update'}, $opts->{'notafter'});
 
     my $left = $opts->{'itemshow'};
     my $notafter = $opts->{'notafter'};
@@ -1061,7 +1062,7 @@ sub get_friend_items
             'mask' => $gmask_from->{$friendid},
             'notafter' => $lastmax,
             'dateformat' => $opts->{'dateformat'},
-            'rupdate' => $fr->[1],
+            'update' => $LJ::EndOfTime - $fr->[1], # reverse back to normal
         });
         
         # stamp each with clusterid if from cluster, so ljviews and other
