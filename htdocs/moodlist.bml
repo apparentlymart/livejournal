@@ -85,7 +85,7 @@ body<=
         } elsif ( defined $GET{mode} && $GET{mode} == 'tree') {
 
             if ($GET{'ownerid'}) {
-                $ret .= "<div style='margin-bottom:15px; font-weight:bold'>";
+                $ret .= "<div style='margin-bottom:15px; font-weight:bold' align='center'>";
                 $ret .= LJ::ehtml(@user_themes[0]->{name}) . ' - ';
                 $ret .= LJ::ljuser(LJ::get_username($GET{'ownerid'}));
                 $ret .= "</div></td></tr>";
@@ -93,12 +93,13 @@ body<=
                 my @opts = ((map {$_->{moodthemeid}, $_->{name}} @themes),
                    (@user_themes ? (0, "---") : ()),
                             (map {$_->{moodthemeid}, $_->{name}} @user_themes));
-                $ret .= "<div style='margin-bottom:15px'><form action='moodlist.bml' method='GET'>";
+                $ret .= "<div style='margin-bottom:15px; margin-top:30px' align='center'><form action='moodlist.bml' method='GET'>";
                 $ret .= LJ::html_select({'name' => "moodtheme", 'selected' => "$GET{moodtheme}"},
                                         @opts);
                 $ret .= "&nbsp;<input type='submit' value='View' />";
                 $ret .= LJ::html_hidden('mode' => 'tree');
-                $ret .= "</form></div>\n";
+                $ret .= "</form>";
+                $ret .= "<a href='/moodlist.bml?moodtheme=$theme->{moodthemeid}'>View this theme in a table layout.</a></div>";
             }
             $ret .= "<ul>\n";
 
@@ -177,7 +178,7 @@ body<=
 
             $ret .= "<td align='center'>";
             $ret .= BML::ml('Actionlink', {
-                'link' => "View: <a href='/moodlist.bml?moodtheme=$theme->{moodthemeid}'>All</a> | <a href='/moodlist.bml?moodtheme=$theme->{moodthemeid}&mode=tree'>Tree</a>"
+                'link' => "<a href='/moodlist.bml?moodtheme=$theme->{moodthemeid}'>View&nbsp;All</a>"
             });
             $ret .= "</td>";
         }
@@ -203,7 +204,8 @@ body<=
            $ret .= "<div style='margin-bottom:15px'><form action='moodlist.bml' method='GET'>";
            $ret .= LJ::html_select({'name' => "moodtheme", 'selected' => "$themeid"},
                                    @opts);
-           $ret .= "&nbsp;<input type='submit' value='View' /></form></div></td></tr>";
+           $ret .= "&nbsp;<input type='submit' value='View' /></form>";
+           $ret .= "<a href='/moodlist.bml?moodtheme=$themeid&mode=tree'>View this theme in a hierarchal tree layout.</a></div></td></tr>";
        }
 
        # Output all the moods
