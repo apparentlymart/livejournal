@@ -54,7 +54,7 @@ END_TOP
             while (defined($cmd = shift @cmds)) {
                 my $realcmd = "stats" . ($cmd ? " $cmd" : "");
                 $log .= "<b>$realcmd</b>\n";
-                foreach (LJ::MemCache::run_command($sock, "$realcmd\r\n")) {
+                foreach (Cache::Memcached::run_command($sock, "$realcmd\r\n")) {
                     last if $_ eq "END\r\n";
                     $log .= $_;
                     next if $cmd eq "maps";
