@@ -15,22 +15,24 @@ BODY<=
  $id = $FORM{'id'} + 0;
  $ret = "";
  
- &connect_db;
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
 
- my $remote = &get_remote();
+ my $remote = LJ::get_remote($dbs);
  my %ac_edit;
  my %ac_add;
- &remote_has_priv($remote, "faqadd", \%ac_add);
+ LJ::remote_has_priv($dbs, $remote, "faqadd", \%ac_add);
 
  if ($id)
  {
-     &remote_has_priv($remote, "faqedit", \%ac_edit);
+     LJ::remote_has_priv($dbs, $remote, "faqedit", \%ac_edit);
      my $sth = $dbh->prepare("SELECT question, answer, faqcat, sortorder FROM faq WHERE faqid=$id");
      $sth->execute;
      ($question, $answer, $faqcat, $sortorder) = $sth->fetchrow_array;
      
-     $q = &BMLUtil::ehtml($question);
-     $a = &BMLUtil::ehtml($answer);
+     $q = BMLUtil::ehtml($question);
+     $a = BMLUtil::ehtml($answer);
 
      unless ($ac_edit{'all'} || $ac_edit{$faqcat}) {
 	 if (%ac_edit) {
@@ -64,7 +66,7 @@ BODY<=
 	 next unless ($ac_add{'all'} || $ac_add{$fc});
      }
      $selected = ($fc eq $faqcat) ? " SELECTED" : "";
-     $ret .= "<OPTION VALUE=\"$fc\"$selected>" . &BMLUtil::ehtml($fcname) . "\n";
+     $ret .= "<OPTION VALUE=\"$fc\"$selected>" . BMLUtil::ehtml($fcname) . "\n";
  }
  
  $ret .= "</SELECT>";

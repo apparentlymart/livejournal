@@ -5,17 +5,20 @@ BODY<=
 (=_CODE
  
  use strict;
- require 'ljlib.pl';
- &connect_db();
+
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+
  my ($ret);
 
- my $remote = &get_remote(); 
+ my $remote = LJ::get_remote($dbs);
 
- if (&remote_has_priv($remote, "topicaddtopic")) {
+ if (LJ::remote_has_priv($remote, "topicaddtopic")) {
      $ret .= "<P><A HREF=\"screentop.bml\"><B>Screen Topic Submissions</B></A> that are awaiting approval into a category.";
  }
 
- if (&remote_has_priv($remote, "topicscreencat")) {
+ if (LJ::remote_has_priv($remote, "topicscreencat")) {
      $ret .= "<P><A HREF=\"screen.html\"><B>Screen Entry Submissions</B></A> that are awaiting approval into a topic.";
  }
 

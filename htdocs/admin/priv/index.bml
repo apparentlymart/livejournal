@@ -1,16 +1,19 @@
 (=_CODE
 
  use strict;
- use vars qw(%FORM $dbh);
+ use vars qw(%FORM);
 
- &connect_db();
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+
  my ($sth, $ret);
  my $mode = $FORM{'mode'};
 
- my $remote = &get_remote();
+ my $remote = LJ::get_remote($dbs);
  my %access = ();
  if ($remote) {
-     &remote_has_priv($remote, "admin", \%access);
+     LJ::remote_has_priv($dbs, $remote, "admin", \%access);
  }
 
  my @privs;
@@ -82,7 +85,7 @@
 	     }
 	 }
 	 if ($FORM{'grantuser'}) {
-	     my $userid = &get_userid($FORM{'grantuser'});
+	     my $userid = LJ::get_userid($dbs, $FORM{'grantuser'});
 	     my $privid = $FORM{'priv'}+0;
 	     my $qarg = $dbh->quote($FORM{'arg'});
 	     my $privcode = $priv{$privid}->{'privcode'};
@@ -115,10 +118,10 @@
      $user = $FORM{'user'};
      $userid = $FORM{'userid'};
      if (! $userid) {
-	 $userid = &get_userid($user);	 
+	 $userid = LJ::get_userid($dbs, $user);	 
      }
      if (! $user) {
-	 $user = &get_username($userid);
+	 $user = LJ::get_username($dbs, $userid);
      }
 
      $ret .= "<H1><A HREF=\"./\">&lt;&lt;</A> view user \"$user\"</H1>";

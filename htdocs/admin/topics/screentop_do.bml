@@ -1,12 +1,14 @@
 (=_CODE
 
- require 'ljlib.pl';
- &connect_db();
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+
  my ($ret, $sth);
 
- my $remote = &get_remote();
+ my $remote = LJ::get_remote($dbs);
 
- unless (&remote_has_priv($remote, "topicaddtopic")) {
+ unless (LJ::remote_has_priv($dbs, $remote, "topicaddtopic")) {
      return "You don't have access to do this, or you're not logged in.";
  }
 

@@ -3,13 +3,14 @@
  $title = "Schema Browser";
  $body = "";
 
- require 'ljlib.pl';
- &connect_db();
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
 
- my $remote = &get_remote();
+ my $remote = LJ::get_remote($dbs);
 
  my $can_doc = 0;
- if (&remote_has_priv($remote, "schemadoc")) { $can_doc = 1; }
+ if (LJ::remote_has_priv($dbs, $remote, "schemadoc")) { $can_doc = 1; }
 
  sub magic_links
  {
@@ -91,9 +92,9 @@
 	 my $key = $row->{'Key'};
 	 my $null = $row->{'Null'};
 	 my $def = $row->{'Default'};
-	 my $des = &BML::eall($coldes{$name});
+	 my $des = BML::eall($coldes{$name});
 
-	 &magic_links(\$des);
+	 magic_links(\$des);
 
 	 $type =~ s/int\(\d+\)/int/g;
 
@@ -167,7 +168,7 @@
      $body .= "<input type=hidden name=table value=\"$table\">\n";
      $body .= "<input type=hidden name=mode value=\"docsave\">\n";
      $body .= "<p><b>Description:</b><br><textarea name=\"table-des\" rows=10 cols=40 wrap=soft>";
-     $body .= &BML::eall($tabledes) . "</textarea>";
+     $body .= BML::eall($tabledes) . "</textarea>";
 
      $sth = $dbh->prepare("DESCRIBE $table");
      $sth->execute;
@@ -185,7 +186,7 @@
 	 $body .= "<tr valign=top>";
 	 $body .= "<td><b>$name</b></td>";
 	 $body .= "<td>$type</td>";
-	 $body .= "<td><input name=\"col-$name\" size=60 maxlength=255 value=\"" . &BML::eall($coldes{$name}) . "\"></td>";
+	 $body .= "<td><input name=\"col-$name\" size=60 maxlength=255 value=\"" . BML::eall($coldes{$name}) . "\"></td>";
 	 $body .= "</tr>\n";
      }
      $body .= "</table>\n";
