@@ -2137,6 +2137,7 @@ sub init {
         ($screening eq 'F' && !($up && LJ::is_friend($journalu, $up)))) {
         $state = 'S';
     }
+    $state = 'A' if LJ::Talk::can_unscreen($up, $journalu, $init->{entryu}, $init->{entryu}{user});
 
     my $parent = {
         state     => $parpost->{state},
