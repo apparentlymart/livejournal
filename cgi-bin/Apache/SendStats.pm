@@ -20,9 +20,10 @@ sub handler
 
     my $cleanup = ($r && $r->current_callback() eq "PerlCleanupHandler");
 
-    my $free = free_servers();
+    my ($free, $active) = count_servers();
 
     $free += $cleanup;
+    $active -= $cleanup if $active;
     if ($LJ::FREECHILDREN_BCAST && 
         $LJ::FREECHILDREN_BCAST =~ /^(\S+):(\d+)$/) {
         my $bcast = $1;
@@ -33,7 +34,8 @@ sub handler
             $sock->sockopt(SO_BROADCAST, 1);
             my $ipaddr = inet_aton($bcast);
             my $portaddr = sockaddr_in($port, $ipaddr);
-            my $res = $sock->send("free_servers=$free\n", 0, $portaddr);
+            my $message = "bcast_ver=1\nfree=$free\nactive=$active\n";
+            my $res = $sock->send($message, 0, $portaddr);
             $r->log_error("SendStats: couldn't broadcast") 
                 unless $res;
         }
@@ -79,19 +81,28 @@ static int hard_limit = 512; /* array size on debian */
  */
 
 
-int free_servers() {
-    int i, count;
+void count_servers() {
+    int i, count_free, count_active;
     short_score *ss;
     parent_score *ps;
+    Inline_Stack_Vars;
 
     ss = (short_score *)ap_scoreboard_image;
     ps = (parent_score *) ((unsigned char *)ap_scoreboard_image + sizeof(short_score)*hard_limit);
 
-    count = 0;
-    for (i=0; i<hard_limit; i++)
+    count_free = 0; count_active = 0;
+    for (i=0; i<hard_limit; i++) {
         if(ss[i].status == 2)  /* READY */
-            count++;
-    return count;
+            count_free++;
+        if(ss[i].status > 2)   /* busy doing something */
+            count_active++;
+    }
+    Inline_Stack_Reset;
+    Inline_Stack_Push(newSViv(count_active));
+    Inline_Stack_Push(newSViv(count_free));
+    Inline_Stack_Done;
+  
+    return;
 }
 
 
