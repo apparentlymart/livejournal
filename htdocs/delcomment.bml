@@ -20,6 +20,10 @@ body<=
     return LJ::bad_input($ML{'error.nojournal'})
         unless $u;
 
+    # can't delete if you're suspended
+    return LJ::bad_input($ML{'.error.suspended'})
+        if $remote->{statusvis} eq 'S';
+
     return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
 
     my $dbcr = LJ::get_cluster_def_reader($u);
