@@ -130,7 +130,7 @@ my $lastconn;
     }
 
     my $qid = $FORM{'id'} + 0;
-    my $pic = $cache->get($qid);
+    my $pic = $cache->get($qid) if $cache;
 
     my $cache_file;
     my $on_disk;
