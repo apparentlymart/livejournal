@@ -126,17 +126,6 @@ sub clean
 
 		if ($tag eq "img") 
 		{
-		    # prevent people from making images pointing to URLs
-		    # on the site where a GET action could be bad. (anywhere
-		    # but the images directory).  also, force absolute URLs.
-		    if (($hash->{'src'} !~ m!^http://!) ||
-			(($hash->{'src'} =~ m!^http://$LJ::DOMAIN_RE/!) &&
-			 ($hash->{'src'} !~ m!^http://$LJ::DOMAIN_RE/img/!) &&
-			 ($hash->{'src'} !~ m!^http://$LJ::DOMAIN_RE/userpic/!)))
-		    {
-			$hash->{'src'} = "about:";
-		    }
-		    
 		    my $img_bad = 0;
 		    if ($opts->{'maximgwidth'} &&
 			(! defined $hash->{'width'} ||
