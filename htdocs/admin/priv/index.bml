@@ -234,8 +234,9 @@
      if ($FORM{'viewarg'}) {
          $viewarg = " AND pm.arg=" . $dbh->quote($FORM{'viewarg'});
      }
-	 
-     $ret .= "<h1><a href=\"./\">&lt;&lt;</a> view priv \"$priv{$priv}->{'privcode'} $FORM{'viewarg'}\"</h1>\n";
+
+     my $privname = join(' ', grep { $_ } $priv{$priv}->{'privcode'}, $FORM{'viewarg'});	 
+     $ret .= "<h1><a href=\"./\">&lt;&lt;</a> view priv \"$privname\"</h1>\n";
      $ret .= "<p><b>Privilege Name:</b> $priv{$priv}->{'privname'}";
      my ($des, $args) = split(/arg=/, $priv{$priv}->{'des'});
      $ret .= "<br /><b>Description:</b> $des" if $des;
@@ -291,7 +292,7 @@
      }
 
      if ($showgrant) {
-         $ret .= "<p>Grant <b>$priv{$priv}->{'privcode'} $FORM{'viewarg'}</b> privilege to:<ul>";
+         $ret .= "<p>Grant <b>$privname</b> privilege to:<ul>";
          $ret .= "User: <input name='grantuser' size='15' maxlength='15' /> ";
          $ret .= "Arg: <input name='arg' size='10' maxlength='40' value='$FORM{'viewarg'}'/></ul>\n";
      } else {
