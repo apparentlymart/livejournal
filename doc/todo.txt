@@ -30,6 +30,8 @@
 | Todo |
 +------+
 
+* 'viewall' priv for abuse people to view any post when explicit
+  (and audited) viewall arg is set (on a talk*.bml or a view)
 * rewrite the account expiration logic
 * "unpay" console command
 * consolidate db_check*.pl into one tool with getopt, move db info
