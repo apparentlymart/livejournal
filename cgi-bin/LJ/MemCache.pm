@@ -6,7 +6,17 @@ use MemCachedClient;
 
 package LJ::MemCache;
 
-my $memc;
+%LJ::MEMCACHE_ARRAYFMT = (
+                          'user' =>
+                          [qw[1 userid user caps clusterid dversion email password status statusvis statusvisdate
+                              name bdate themeid moodthemeid opt_forcemoodtheme allow_infoshow allow_contactshow
+                              allow_getljnews opt_showtalklinks opt_whocanreply opt_gettalkemail opt_htmlemail
+                              opt_mangleemail useoverrides defaultpicid has_bio txtmsg_status is_system
+                              journaltype lang oldenc]],
+                          );
+
+
+my $memc;  # memcache object
 
 sub init {
     $memc = new MemCachedClient;
@@ -29,5 +39,30 @@ sub set       { $memc->set(@_);       }
 sub get       { $memc->get(@_);       }
 sub get_multi { $memc->get_multi(@_); }
 
+sub array_to_hash {
+    my ($fmtname, $ar) = @_;
+    my $fmt = $LJ::MEMCACHE_ARRAYFMT{$fmtname};
+    return undef unless $fmt;
+    return undef unless $ar && ref $ar eq "ARRAY" && $ar->[0] == $fmt->[0];
+    my $hash = {};
+    my $ct = scalar(@$fmt);
+    for (my $i=1; $i<$ct; $i++) {
+        $hash->{$fmt->[$i]} = $ar->[$i];
+    }
+    return $hash;
+}
+
+sub hash_to_array {
+    my ($fmtname, $hash) = @_;
+    my $fmt = $LJ::MEMCACHE_ARRAYFMT{$fmtname};
+    return undef unless $fmt;
+    return undef unless $hash && ref $hash eq "HASH";
+    my $ar = [$fmt->[0]];
+    my $ct = scalar(@$fmt);
+    for (my $i=1; $i<$ct; $i++) {
+        $ar->[$i] = $hash->{$fmt->[$i]};
+    }
+    return $ar;
+}
 
 1;

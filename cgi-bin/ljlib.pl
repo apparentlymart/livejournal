@@ -4141,26 +4141,13 @@ sub load_user
     return $u;
 }
 
-%LJ::MEMCACHE_ARRAYFMT = ('user' => 
-                          [qw[1 userid user caps clusterid dversion email password status statusvis statusvisdate
-                              name bdate themeid moodthemeid opt_forcemoodtheme allow_infoshow allow_contactshow
-                              allow_getljnews opt_showtalklinks opt_whocanreply opt_gettalkemail opt_htmlemail
-                              opt_mangleemail useoverrides defaultpicid has_bio txtmsg_status is_system
-                              journaltype lang oldenc]]);
-
 sub memcache_get_u
 {
     my @keys = @_;
-    my $fmt = $LJ::MEMCACHE_ARRAYFMT{'user'};
     my @ret;
     foreach my $ar (values %{LJ::MemCache::get_multi(@keys) || {}}) {
-        next unless $ar && ref $ar eq "ARRAY" && $ar->[0] == $fmt->[0];
-        my $u = {};
-        my $ct = scalar(@$fmt);
-        for (my $i=1; $i<$ct; $i++) {
-            $u->{$fmt->[$i]} = $ar->[$i];
-        }
-        push @ret, $u;
+        my $u = LJ::MemCache::array_to_hash("user", $ar);
+        push @ret, $u if $u;
     }
     return wantarray ? @ret : $ret[0];
 }
@@ -4170,12 +4157,8 @@ sub memcache_set_u
     my $u = shift;
     return unless $u;
     my $expire = time() + 1800;
-    my $fmt = $LJ::MEMCACHE_ARRAYFMT{'user'};
-    my $ar = [$fmt->[0]];
-    my $ct = scalar(@$fmt);
-    for (my $i=1; $i<$ct; $i++) {
-        $ar->[$i] = $u->{$fmt->[$i]};
-    }
+    my $ar = LJ::MemCache::hash_to_array("user", $u);
+    return unless $ar;
     LJ::MemCache::set([$u->{'userid'}, "userid:$u->{'userid'}"], $ar, $expire);
     LJ::MemCache::set("user:$u->{'user'}", $ar, $expire);
 }
