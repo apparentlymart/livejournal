@@ -311,7 +311,7 @@ body<=
         }
         LJ::CleanHTML::clean_comment(\$event, $FORM{'prop_opt_preformatted'});
 
-        $ret .= "$ML{'.preview.subject'} " . LJ::eall($cleansubject) . "<hr>\n";
+        $ret .= "$ML{'.preview.subject'} " . LJ::eall($cleansubject) . "<hr />\n";
         if ($spellcheck_html) {
             $ret .= "<b>$ML{'.spellchecked'}</b><br />";
             $ret .= $spellcheck_html;
