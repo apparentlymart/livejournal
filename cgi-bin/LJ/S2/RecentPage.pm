@@ -18,7 +18,7 @@ sub RecentPage
         return;
     }
 
-    LJ::load_user_props($remote, "opt_nctalklinks");
+    LJ::load_user_props($remote, "opt_nctalklinks", "opt_ljcut_disable_lastn");
 
     my $get = $opts->{'getargs'};
 
@@ -125,7 +125,8 @@ sub RecentPage
 
         my $ditemid = $itemid * 256 + $item->{'anum'};
         LJ::CleanHTML::clean_event(\$text, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
-                                              'cuturl' => LJ::item_link($u, $itemid, $item->{'anum'}), });
+                                              'cuturl' => LJ::item_link($u, $itemid, $item->{'anum'}),
+					      'ljcut_disable' => $remote->{"opt_ljcut_disable_lastn"}, });
         LJ::expand_embedded($u, $ditemid, $remote, \$text);
 
         my $nc = "";

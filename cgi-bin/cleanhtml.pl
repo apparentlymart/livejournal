@@ -23,6 +23,7 @@ use URI ();
 #        'maximgheight' => 100,
 #        'keepcomments' => 1,
 #        'cuturl' => 'http://www.domain.com/full_item_view.ext',
+#        'ljcut_disable' => 1, # stops the cleaner from using the lj-cut tag
 #        'cleancss' => 1
 #     });
 
@@ -74,6 +75,7 @@ sub clean
     my $keepcomments = $opts->{'keepcomments'};
     my $mode = $opts->{'mode'};
     my $cut = $opts->{'cuturl'} || $opts->{'cutpreview'};
+    my $ljcut_disable = $opts->{'ljcut_disable'};
     my $s1var = $opts->{'s1var'};
 
     my %action = ();
@@ -149,7 +151,7 @@ sub clean
                 $p->unget_token($token);
                 $p->get_tag("/$tag");
             } 
-            elsif ($tag eq "lj-cut") 
+            elsif ($tag eq "lj-cut" && !$ljcut_disable) 
             {
                 my $attr = $token->[2];
                 $cutcount++;
@@ -715,6 +717,7 @@ sub clean_event
         'cleancss' => 1,
         'maximgwidth' => $opts->{'maximgwidth'},
         'maximgheight' => $opts->{'maximgheight'},
+	'ljcut_disable' => $opts->{'ljcut_disable'},
     });
 }
 

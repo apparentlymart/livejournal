@@ -2231,6 +2231,25 @@ register_setter("maximagesize", sub {
     return 1;
 });
 
+register_setter("opt_ljcut_disable_lastn", sub {
+    my ($dba, $u, $remote, $key, $value, $err) = @_;
+    unless ($value =~ /^(0|1)$/) {
+    	$$err = "Illegal value. Must be '0' or '1'";
+	return 0;
+    }
+    LJ:set_userprop($u, "opt_ljcut_disable_lastn",$value);
+    return 1;
+});
+
+register_setter("opt_ljcut_disable_friends", sub {
+    my ($dba, $u, $remote, $key, $value, $err) = @_;
+    unless ($value =~ /^(0|1)$/) {
+    	$$err = "Illegal value. Must be '0' or '1'";
+	return 0;
+    }
+    LJ:set_userprop($u, "opt_ljcut_disable_friends",$value);
+    return 1;
+});
 
 # <LJFUNC>
 # name: LJ::make_auth_code

@@ -983,6 +983,8 @@ sub create_view_lastn
         return 1;
     }
 
+    LJ::load_user_props($remote, "opt_ljcut_disable_lastn");
+
     my %lastn_page = ();
     $lastn_page{'name'} = LJ::ehtml($u->{'name'});
     $lastn_page{'name-\'s'} = ($u->{'name'} =~ /s$/i) ? "'" : "'s";
@@ -1170,7 +1172,8 @@ sub create_view_lastn
         $lastn_event{'itemargs'} = $itemargs;
 
         LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
-                                               'cuturl' => LJ::item_link($u, $itemid, $item->{'anum'}), });
+                                               'cuturl' => LJ::item_link($u, $itemid, $item->{'anum'}),
+					       'ljcut_disable' => $remote->{'opt_ljcut_disable_lastn'}, });
         LJ::expand_embedded($u, $ditemid, $remote, \$event);
         $lastn_event{'event'} = $event;
 
@@ -1534,7 +1537,7 @@ sub create_view_friends
 
     # load 'opt_stylemine' prop for $remote.  don't need to load opt_nctalklinks
     # because that was already faked in LJ::make_journal previously
-    LJ::load_user_props($remote, "opt_stylemine", "opt_imagelinks");
+    LJ::load_user_props($remote, "opt_stylemine", "opt_imagelinks", "opt_ljcut_disable_friends");
 
     # load options for image links
     my ($maximgwidth, $maximgheight) = (undef, undef);
@@ -1623,7 +1626,8 @@ sub create_view_friends
         LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$datakey}->{'opt_preformatted'},
                                               'cuturl' => LJ::item_link($friends{$friendid}, $itemid, $item->{'anum'}, $stylemine), 
                                               'maximgwidth' => $maximgwidth,
-                                              'maximgheight' => $maximgheight, });
+                                              'maximgheight' => $maximgheight, 
+					      'ljcut_disable' => $remote->{'opt_ljcut_disable_friends'}, });
         LJ::expand_embedded($friends{$friendid}, $ditemid, $remote, \$event);
         $friends_event{'event'} = $event;
         
