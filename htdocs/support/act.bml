@@ -52,7 +52,7 @@ BODY<=
 	     if ($userid != $sp->{'requserid'}) {
 		 my $cats = LJ::Support::load_cats($dbh, $sp->{'spcatid'});
 		 my $secold = $timelogged - $sp->{'timecreate'};
-		 my $points = LJ::Support::calc_points($cats->{$sp->{'spcatid'}}, $secold);
+		 my $points = LJ::Support::calc_points($sp, $secold);
 		 $dbh->do("INSERT INTO supportpoints (spid, userid, points) VALUES ($spid, $userid, $points)");
 	     }
 	 }
