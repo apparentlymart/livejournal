@@ -90,7 +90,7 @@ body<=
                  my $cats = LJ::Support::load_cats($sp->{'spcatid'});
                  my $secold = $timelogged - $sp->{'timecreate'};
                  my $points = LJ::Support::calc_points($sp, $secold);
-                 $dbh->do("INSERT INTO supportpoints (spid, userid, points) VALUES ($spid, $userid, $points)");
+                 LJ::Support::set_points($spid, $userid, $points);
              }
          }
          $dbh->do("UPDATE support SET state='closed', timeclosed=UNIX_TIMESTAMP() WHERE spid=$spid");

@@ -580,6 +580,26 @@ sub append_request
     return $splid;    
 }
 
+# userid may be undef/0 in the setting to zero case
+sub set_points
+{
+    my ($spid, $userid, $points) = @_;
+    
+    my $dbh = LJ::get_db_writer();
+    if ($points) {
+        $dbh->do("REPLACE INTO supportpoints (spid, userid, points) ".
+                 "VALUES (?,?,?)", undef, $spid, $userid, $points);
+    } else {
+        $userid ||= $dbh->selectrow_array("SELECT userid FROM supportpoints WHERE spid=?",
+                                          undef, $spid);
+        $dbh->do("DELETE FROM supportpoints WHERE spid=?", undef, $spid);
+    }
+    
+    $dbh->do("REPLACE INTO supportpointsum (userid, totpoints, lastupdate) ".
+             "SELECT userid, SUM(points), UNIX_TIMESTAMP() FROM supportpoints ".
+             "WHERE userid=? GROUP BY 1", undef, $userid) if $userid;
+}
+
 sub touch_request
 {
     my ($spid) = @_;
@@ -592,10 +612,7 @@ sub touch_request
 	     undef, $spid)
       or return 0;
 
-    $dbh->do("DELETE FROM supportpoints".
-             " WHERE spid=?",
-	     undef, $spid)
-      or return 0;
+    set_points($spid, undef, 0);
 
     return 1;
 }

@@ -18,7 +18,7 @@ The following people have helped other users in the support area:
  
  my %helper;
  if ($admin) {
-     # if remote user has power to assign 'supporthelp' priv, then find out
+     # if remote user has power to assign 'supporthelp' priv, then find out who
      # already has it so we can make links later on people without it
      $sth = $dbr->prepare("SELECT DISTINCT pm.userid FROM priv_map pm, priv_list pl ".
                           "WHERE pm.prlid=pl.prlid AND pl.privcode='supporthelp'");
@@ -40,10 +40,12 @@ The following people have helped other users in the support area:
      }
  }
 
- $sth = $dbr->prepare("SELECT u.userid, u.user, u.name, SUM(sp.points) AS 'points' ".
-                      "FROM user u, supportpoints sp WHERE u.userid=sp.userid ".
-                      "GROUP BY 1, 2, 3 ORDER BY 4 DESC");
+ $sth = $dbr->prepare("SELECT u.userid, u.user, u.name, sp.totpoints AS 'points' ".
+                      "FROM user u, supportpointsum sp WHERE u.userid=sp.userid");
  $sth->execute;
+ my @rows;
+ push @rows, $_ while $_ = $sth->fetchrow_hashref;
+ @rows = sort { $b->{points} <=> $a->{points} } @rows;
 
  my $ret;
  $ret .= "<p><table>";
@@ -51,7 +53,7 @@ The following people have helped other users in the support area:
  my $lastpoints = 0;
  my $buildup = 0;
  my $total = 0;
- while ($_ = $sth->fetchrow_hashref) 
+ foreach (@rows)
  {
      $total++;
      my $userid = $_->{'userid'};

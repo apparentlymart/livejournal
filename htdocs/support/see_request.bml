@@ -96,7 +96,8 @@ body<=
     my $winner;  # who closed it?
     if ($sp->{'state'} eq "closed") {
         my $dbr = LJ::get_db_reader();
-        $sth = $dbr->prepare("SELECT u.user, sp.points FROM user u, supportpoints sp WHERE u.userid=sp.userid AND sp.spid=?");
+        $sth = $dbr->prepare("SELECT u.user, sp.points FROM useridmap u, supportpoints sp ".
+                             "WHERE u.userid=sp.userid AND sp.spid=?");
         $sth->execute($spid);
         $winner = $sth->fetchrow_hashref;
     }

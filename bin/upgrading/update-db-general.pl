@@ -538,6 +538,22 @@ CREATE TABLE supportpoints (
 ) 
 EOC
 
+register_tablecreate("supportpointsum", <<'EOC');
+CREATE TABLE supportpointsum (
+  userid INT UNSIGNED NOT NULL DEFAULT '0',
+  totpoints MEDIUMINT UNSIGNED DEFAULT 0,
+  lastupdate  INT UNSIGNED NOT NULL,
+  INDEX (totpoints, lastupdate),
+  INDEX (lastupdate)
+) 
+EOC
+
+post_create("supportpointsum",
+            "sqltry" => "INSERT IGNORE INTO supportpointsum (userid, totpoints, lastupdate) " .
+            "SELECT userid, SUM(points), 0 FROM supportpoints GROUP BY userid",
+            );
+
+
 register_tablecreate("talkproplist", <<'EOC');
 CREATE TABLE talkproplist (
   tpropid smallint(5) unsigned NOT NULL auto_increment,
