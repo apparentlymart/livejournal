@@ -167,6 +167,17 @@ sub can_append
     return 0;
 }
 
+# can they read internal comments?  if they're a helper or have
+# extended supportread (with a plus sign at the end of the category key)
+sub can_read_internal
+{
+    my ($dbh, $sp, $remote) = @_;    
+    if (can_help($dbh, $sp, $remote)) { return 1; }
+    my $catkey = $sp->{_cat}->{'catkey'};
+    if (LJ::check_priv($dbh, $remote, "supportread", $catkey."+")) { return 1; }
+    return 0;
+}
+
 sub can_help
 {
     my ($dbh, $sp, $remote) = @_;
