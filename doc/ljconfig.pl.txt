@@ -438,6 +438,15 @@
     #    "abuse\@$DOMAIN" => "bounce-abuse",
     #);
 
+    # Support diagnostics can be helpful if you are trying to track down a
+    # bug that has been occurring.  You can turn on and off various tracking
+    # features here.  Just uncomment any/all of the following lines.  The
+    # gathered information will be appended to requests that the user opens
+    # through the web interface.
+    %SUPPORT_DIAGNOSTICS = (
+    #    'track_useragent' => 1,
+    );
+
 }
 
 1;  # return true

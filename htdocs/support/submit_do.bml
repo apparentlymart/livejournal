@@ -58,6 +58,13 @@ body<=
     $req{'spcatid'} = $POST{'spcatid'};
     $req{'uniq'} = $r->notes('uniq');
 
+    # insert diagnostic information
+    if ($LJ::SUPPORT_DIAGNOSTICS{'track_useragent'}) {
+        $req{'body'} = $POST{'message'} . "\n";
+        $req{'body'} .= "-------------------------------------------\n";
+        $req{'body'} .= "Diagnostics: $ENV{'HTTP_USER_AGENT'}";
+    }
+
     return LJ::bad_input(@errors) if @errors;
     my $spid = LJ::Support::file_request(\@errors, \%req);
     return LJ::bad_input(@errors) if @errors;
