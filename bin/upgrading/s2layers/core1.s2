@@ -81,14 +81,8 @@ class Date
     function builtin day_of_week() : int
     "Returns the day of the week this date falls on, from Sunday=1 to Saturday=7";
 
-    function date_short() : string 
-    "Returns date in short format";
-
-    function date_long() : string 
-    "Returns date in long format";
-
-    function builtin time_basic () : string 
-    "Basic date format: yyyymmdd";
+    function builtin date_format (string fmt) : string
+    "Returns date formatted as indicated by \$fmt.  One of: short, med, long, med_day, long_day.  Or a custom format.  Default is 'short'.  TODO: document %% vars.";
 }
 
 class DateTime extends Date
@@ -97,23 +91,11 @@ class DateTime extends Date
     var int min "Minute; 0-59.";
     var int sec "Second; 0-59.";
 
-    function time_short() : string
-    "Returns short format of time";
+    function builtin time_format () : string
+    "Returns time formatted as normal.";
 
-    function time_long() : string
-    "Returns long format of time";
-
-    function datetime_short() : string
-    "Outputs short format of the date and time";
-
-    function datetime_long() : string
-    "Returns long format of the date and time";
-
-    function builtin time_basic () : string 
-    "Basic time format: hhmmss";
- 
-    function builtin datetime_basic () : string 
-    "Basic date/time format: yyyymmddhhmmss";
+    function builtin time_format (string fmt) : string
+    "Returns time formatted as indicated by \$fmt, or normal if blank.";
 }
 
 
@@ -504,6 +486,49 @@ function builtin get_plural_phrase(int n, string prop) : string
 
 ##[ properties ]
 
+property string lang_current {
+        noui = 1;
+        des = "Current language code.  So layouts can change date/time formats more safely if they want.";
+}
+set lang_current = "en";  # core is English.
+
+property string lang_fmt_date_short {
+    noui = 1; 
+    des = "Short date format.  All numeric.";
+}
+set lang_fmt_date_short = "%%m%%/%%d%%/%%yy%%";
+
+property string lang_fmt_date_med {
+    noui = 1; 
+    des = "Medium date format.  Abbreviated month name, no day of the week.";
+}
+set lang_fmt_date_med = "%%mon%%. %%dayord%%, %%yyyy%%";
+
+property string lang_fmt_date_med_day {
+    noui = 1; 
+    des = "Medium date format with day of week.  Abbreviated month name and abbreviated day of the week.";
+}
+set lang_fmt_date_med_day = "%%da%%, %%mon%%. %%dayord%%, %%yyyy%%";
+
+property string lang_fmt_date_long {
+    noui = 1; 
+    des = "Long date format.  With full month name, but no day of the week.";
+}
+set lang_fmt_date_long = "%%month%% %%dayord%%, %%yyyy%%";
+
+property string lang_fmt_date_long_day {
+    noui = 1; 
+    des = "Long date format.  With full month name and full day of the week.";
+}
+set lang_fmt_date_long_day = "%%day%%, %%month%% %%dayord%%, %%yyyy%%";
+
+property string lang_fmt_time {
+    noui = 1; 
+    des = "Time format.";
+}
+set lang_fmt_time = "%%hh%%:%%mm%% %%a%%m";
+
+
 property string[] lang_monthname_long {
     noui = 1;
     des = "Months of the year.  Indexed from 1 (January) to 12 (December).";
@@ -885,42 +910,6 @@ function Friend::print() {
     print $this->as_string();
 }
 
-### Date / Time Methods
-
-function Date::date_short() : string {
-    return $.month->zeropad(2) + "-" + $.day->zeropad(2) + "-" + $.year->zeropad(4);
-}
-function DateTime::time_short() : string {
-    return $.hour->zeropad(2) + ":" + $.min->zeropad(2);
-}
-function DateTime::time_long() : string {
-    var int nicehour;
-    var string dayhalf;
-    if ($.hour > 12) {
-        $nicehour=$.hour - 12;
-        $dayhalf="PM";
-    } else {
-        if ($.hour == 0) {
-            $nicehour=12;
-        } else {
-            $nicehour=$.hour;
-        }
-        $dayhalf="AM";
-    }
-    return $nicehour+":"+$.min->zeropad(2)+$dayhalf;
-}
-function DateTime::datetime_long() : string {
-    return $this->date_long()+", "+$this->time_long();
-}
-function DateTime::datetime_short() : string {
-    return $this->date_short()+" "+$this->time_short();
-}
-function Date::date_long() : string {
-    return $*lang_dayname_long[$this->day_of_week()]+" "+
-           $*lang_monthname_long[$.month]+" "+
-           lang_ordinal($.day)+" "+$.year;
-}
-
 ### Generic Page Functions
 
 function Page::view_title() : string {
@@ -934,7 +923,7 @@ function FriendsPage::view_title() : string {
     }
 }
 function DayPage::view_title : string {
-    return $.viewdate->date_short();
+    return $.viewdate->date_format("long");
 }
 function CalendarPage::view_title() : string {
     return string($.year);
@@ -1059,7 +1048,7 @@ function RecentPage::print_body {
         }
         if ($e.new_day) {
             """<div class="day" id="dayYYYYMMMDD">\n<h2>""";
-            print $e.time->date_long();
+            print $e.time->date_format("long_day");
             "</h2>\n";
         }
         # Print the entry
@@ -1152,7 +1141,7 @@ function CalendarMonthPageDay::print_subjectlist() {
     "<table>\n";
     foreach var Entry e ($.entries) {
         "<tr><td>";
-        $e.time->time_short();
+        print $e.time->date_format("short");
         "</td><td>";
         if ($e.poster.username != $e.journal.username) {
             $e.poster->print();
@@ -1173,7 +1162,7 @@ function CalendarMonthPageDay::print_subjectlist() {
 function DayPage::print_body() {
     if ($.has_entries) {
         "<div class=\"day\" id=\"dayyymmmmmdddd\">\n<h2>";
-        print $.viewdate->date_long();
+        print $.viewdate->date_format("long");
         "</h2>\n";
 
         foreach var Entry e ($.entries) {

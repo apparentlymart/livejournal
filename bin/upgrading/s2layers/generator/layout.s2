@@ -156,6 +156,10 @@ summary="">
 
 function Page::print_entry (Entry e)
 {
+    var string datetime;
+    $datetime = $e.time->date_format("med")+"|<b>" 
+        + $e.time->time_format() + "</b>";
+
     """
 <table width="600" cellpadding="2" cellspacing="0" border="0" summary="" class="entrybox">
 <tr align='left'>
@@ -171,7 +175,7 @@ summary="">
     }
     
     """ $e.subject</td>
-<td align="right" class="index">[%%datetime%%]</td>
+<td align="right" class="index">[$datetime]</td>
 </tr>
 <tr align='left'>
 <td colspan="2" bgcolor="$*page_back">
