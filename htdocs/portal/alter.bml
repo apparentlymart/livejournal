@@ -65,9 +65,10 @@
                                   "loc", $loc);
          $body .= "<p><b>$LJ::Portal::colname{$loc}</b><br>";
          $body .= LJ::html_select({ 'name' => "bname",
-                                                'selected' => '', },
-                                              "", "(Pick Box Type)",
-                                              LJ::Portal::get_box_types($loc));
+                                    'noescape' => 1,
+                                  },
+                                  "", "(Pick Box Type)",
+                                  LJ::Portal::get_box_types($loc));
          $body .= " <input type=submit value=\"Proceed --&gt;\"></form>";
      }
      $body .= "</ul> p?>";

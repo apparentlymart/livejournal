@@ -281,19 +281,23 @@ sub make_box_modify_form
         my $key = $opt->{'key'};
         if ($opt->{'type'} eq "select") {
             $ret .= LJ::html_select({ 'name' => "arg_$key",
-                                       'selected' => $curargs->{$key}, },
+                                       'selected' => $curargs->{$key},
+                                       'noescape' => 1,
+                                     },
                                      @{$opt->{'values'}});
         }
         if ($opt->{'type'} eq "check") {
             $ret .= LJ::html_check({ 'name' => "arg_$key",
                                       'selected' => $curargs->{$key}, 
-                                      'value' => 1 });
+                                      'value' => 1,
+                                   });
         }
         if ($opt->{'type'} eq "text") {
             $ret .= LJ::html_text({ 'name' => "arg_$key",
-                                     'maxlength' => $opt->{'maxlength'}, 
-                                     'size' => $opt->{'size'}, 
-                                     'value' => $curargs->{$key} });
+                                    'maxlength' => $opt->{'maxlength'}, 
+                                    'size' => $opt->{'size'}, 
+                                    'value' => $curargs->{$key},
+                                  });
         }
         if ($opt->{'des'}) {
             $ret .= "<br />$opt->{'des'}";

@@ -85,18 +85,20 @@ sub html_select
     my $opts = shift;
     my @items = @_;
     my $disabled = $opts->{'disabled'} ? " disabled='disabled'" : "";
+    my $ehtml = $opts->{'noescape'} ? 0 : 1;
     my $ret;
     $ret .= "<select";
     if ($opts->{'raw'}) { $ret .= " $opts->{'raw'}"; }
-    foreach (grep { ! /^(raw|disabled|selected)$/ } keys %$opts) {
-        $ret .= " $_=\"" . ehtml($opts->{$_}) . "\"";
+    foreach (grep { ! /^(raw|disabled|selected|noescape)$/ } keys %$opts) {
+        $ret .= " $_=\"" . ($ehtml ? ehtml($opts->{$_}) : $opts->{$_}) . "\"";
     }
     $ret .= "$disabled>";
     my $did_sel = 0;
     while (my ($value, $text) = splice(@items, 0, 2)) {
         my $sel = "";
         if ($value eq $opts->{'selected'} && ! $did_sel++) { $sel = " selected='selected'"; }
-        $ret .= "<option value=\"" . ehtml($value) . "\"$sel>" . ehtml($text) . "</option>";
+        $ret .= "<option value=\"" . ($ehtml ? ehtml($value) : $value) . "\"$sel>" .
+                 ($ehtml ? ehtml($text) : $text) . "</option>";
     }
     $ret .= "</select>";
     return $ret;
@@ -116,6 +118,7 @@ sub html_check
     my $opts = shift;
 
     my $disabled = $opts->{'disabled'} ? " disabled='disabled'" : "";
+    my $ehtml = $opts->{'noescape'} ? 0 : 1;
     my $ret;
     if ($opts->{'type'} eq "radio") {
         $ret .= "<input type='radio'";
@@ -124,8 +127,8 @@ sub html_check
     }
     if ($opts->{'selected'}) { $ret .= " checked='checked'"; }
     if ($opts->{'raw'}) { $ret .= " $opts->{'raw'}"; }
-    foreach (grep { ! /^(disabled|type|selected|raw)$/ } keys %$opts) {
-        $ret .= " $_=\"" . ehtml($opts->{$_}) . "\"";
+    foreach (grep { ! /^(disabled|type|selected|raw|noescape)$/ } keys %$opts) {
+        $ret .= " $_=\"" . ($ehtml ? ehtml($opts->{$_}) : $opts->{$_}) . "\"";
     }
     $ret .= "$disabled />";
     return $ret;
@@ -145,10 +148,11 @@ sub html_text
     my $opts = shift;
 
     my $disabled = $opts->{'disabled'} ? " disabled='disabled'" : "";
+    my $ehtml = $opts->{'noescape'} ? 0 : 1;
     my $ret;
     $ret .= "<input type=\"text\"";
-    foreach (grep { ! /^(disabled|raw)$/ } keys %$opts) {
-        $ret .= " $_=\"" . ehtml($opts->{$_}) . "\"";
+    foreach (grep { ! /^(disabled|raw|noescape)$/ } keys %$opts) {
+        $ret .= " $_=\"" . ($ehtml ? ehtml($opts->{$_}) : $opts->{$_}) . "\"";
     }
     if ($opts->{'raw'}) { $ret .= " $opts->{'raw'}"; }
     $ret .= "$disabled />";
@@ -169,13 +173,14 @@ sub html_textarea
     my $opts = shift;
 
     my $disabled = $opts->{'disabled'} ? " disabled='disabled'" : "";
+    my $ehtml = $opts->{'noescape'} ? 0 : 1;
     my $ret;
     $ret .= "<textarea";
-    foreach (grep { ! /^(disabled|raw|value)$/ } keys %$opts) {
-        $ret .= " $_=\"" . ehtml($opts->{$_}) . "\"";
+    foreach (grep { ! /^(disabled|raw|value|noescape)$/ } keys %$opts) {
+        $ret .= " $_=\"" . ($ehtml ? ehtml($opts->{$_}) : $opts->{$_}) . "\"";
     }
     if ($opts->{'raw'}) { $ret .= " $opts->{'raw'}"; }
-    $ret .= "$disabled>" . ehtml($opts->{'value'}) . "</textarea>";
+    $ret .= "$disabled>" . ($ehtml ? ehtml($opts->{'value'}) : $opts->{'value'}) . "</textarea>";
     return $ret;
 }
 
@@ -206,7 +211,9 @@ sub html_color
 
     $ret .= html_text({ 'size' => 8, 'maxlength' => 7, 'name' => $htmlname, 'id' => $htmlname,
                             'onchange' => "setBGColor(findel('${htmlname}_disp'),${htmlname}.value);",
-                            'disabled' => $opts->{'disabled'}, 'value' => $opts->{'default'} });
+                            'disabled' => $opts->{'disabled'}, 'value' => $opts->{'default'},
+                            'noescape' => 1,
+                      });
 
     $ret .= "<script language=\"JavaScript\"><!--\n".
             "document.write('<button ".
@@ -255,15 +262,19 @@ sub html_submit
 {
     my ($name, $val, $opts) = @_;
     my $eopts;
+    my $raw;
     if ($opts && ref $opts eq 'HASH') {
-        $eopts .= " $_=\"" . ehtml($opts->{$_}) . "\"" foreach grep { $_ ne 'raw' } keys %$opts;
+        $raw = " $opts->{'raw'}" if $opts->{'raw'};
+        my $ehtml = $opts->{'noescape'} ? 0 : 1;
+        foreach (grep { ! /^(raw|noescape)$/ } keys %$opts) {
+            $eopts .= " $_=\"" . ($ehtml ? ehtml($opts->{$_}) : $opts->{$_}) . "\""
+        }
     }
     my $ret = "<input type='submit'";
     # allow override of these in 'raw'
-    $ret .= " name=\"" . ehtml($name) . "\"" if $name;
-    $ret .= " value=\"" . ehtml($val) . "\"" if defined $val;
-    $ret .= " $opts->{'raw'}" if $opts->{'raw'};
-    $ret .= "$eopts />";
+    $ret .= " name=\"" . ($ehtml ? ehtml($name) : $name) . "\"" if $name;
+    $ret .= " value=\"" . ($ehtml ? ehtml($val) : $val) . "\"" if defined $val;
+    $ret .= "$raw$eopts />";
     return $ret;
 }
 
