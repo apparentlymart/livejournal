@@ -48,7 +48,7 @@
      $body .= '<form method="post" action="leave.bml">';
      $body .= "<input type=\"hidden\" name=\"cuserid\" value=\"$ci->{'userid'}\" />";
      $body .= '<input type="hidden" name="confirm" value="1" /><center>';
-     $body .= '<input type="submit" value='.$ML{'.button.leave'}.' /></center></form> p?>';
+     $body .= '<input type="submit" value="'.$ML{'.button.leave'}.'" /></center></form> p?>';
      return;
  }
 
