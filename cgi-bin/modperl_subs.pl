@@ -21,6 +21,7 @@ use LWP::UserAgent ();
 use Storable;
 use Time::HiRes ();
 use Image::Size ();
+use POSIX ();
 
 use LJ::SpellCheck;
 use LJ::TextMessage;

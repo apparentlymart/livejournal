@@ -618,9 +618,25 @@ if ($u->{'journaltitle'}) {
  {
      if (LJ::get_cap($u, 'fb_account') && LJ::get_cap($u, 'fb_can_upload') && $u->{'fb_num_pubpics'}+0 > 0) {
          my $span = ($narrow_left-- >= 0) ? 1 : 2;
-         my $count = BML::ml('.fbpictures', {'count' => $u->{'fb_num_pubpics'}+0});
 
-         $body .= "<tr><td align='right' valign='top'><b>$ML{'.label.fbpictures'}</b></td><td colspan='$span'><a href='$LJ::FB_SITEROOT/$user/'>$count</a></td></tr>\n";
+         # what we display is an estimate.  to eliminate confusion on the user end, we'll display the
+         # estimate in a way that makes it clear it's not an exact number. rules are:
+         #
+         #    * < 10    == "under 10"
+         #    * 10..999 == "at least 150" (rounded down to nearest 10)
+         #    * 1000+   == "at least 1500" (rounded down to nearest 100)
+         #
+         my $ct = $u->{fb_num_pubpics};
+         if ($ct < 10) {
+             $ct = 10;
+         } else {
+             my $order = $ct < 100 ? 10 : 100;
+             my $base = POSIX::floor($ct / $order);
+             $ct = $base * $order;
+         }
+         my $ct_str = BML::ml('.fbpictures.' . ($ct == 10 ? 'less than' : 'over'), { count => $ct });
+
+         $body .= "<tr><td align='right' valign='top'><b>$ML{'.label.fbpictures'}</b></td><td colspan='$span'><a href='$LJ::FB_SITEROOT/$user/'>$ct_str</a></td></tr>\n";
      }
  }
 

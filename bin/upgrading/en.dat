@@ -3620,7 +3620,9 @@ This could be because: <ol>
 
 /userinfo.bml.error.notloggedin=If you wish to view your own user profile, you need to <a href='/login.bml?ret=1'>login</a>.
 
-/userinfo.bml.fbpictures=[[count]] public
+/userinfo.bml.fbpictures.lessthan=less than [[count]] public
+
+/userinfo.bml.fbpictures.over=over [[count]] public
 
 /userinfo.bml.friendof.comm=Watched by:
 
