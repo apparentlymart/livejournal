@@ -5,6 +5,7 @@
     no strict 'refs';
     use vars qw(%GET);
     use Data::Dumper;
+    use Time::HiRes ();
 
     my $u = LJ::get_remote();
     return "You must be logged in to view this tool." unless $u;
@@ -43,6 +44,8 @@ END_TOP
 	LJ::MemCache::forget_dead_hosts();
 	my $sock = Cache::Memcached::sock_to_host($host);
 
+        my $t1 = Time::HiRes::time();
+
 	my $log;
 	my %stat;
 	my @cmds = ("", "malloc", "items", "slabs");
@@ -61,6 +64,8 @@ END_TOP
                 }
             }
         }
+
+        my $t2 = Time::HiRes::time();
 
 	my $cpu = 0;
 	foreach my $key (qw(rusage_user rusage_system)) {
@@ -91,6 +96,7 @@ END_TOP
 		my $cpu = sprintf("%0.6f", $nh->[2] - $ph->[2]);
 		$ret .= sprintf(" [%0.02f%% {$new_whatev} $cpu]", $new_rate * 100);
 	    }
+            $ret .= sprintf(" %0.02f", $t2-$t1);
 	    $ret .= "</td>";
 	    my $gb_used = ($stat{'malloc'}{'mmapped_space'} + $stat{'malloc'}{'arena_size'}) / (1024*1024*1024);
 	    my $gb_max = $stat{''}{'limit_maxbytes'} / (1024*1024*1024);
