@@ -105,6 +105,7 @@ sub EntryPage
                 'full' => $com->{'_loaded'} ? 1 : 0,
                 'depth' => $depth,
                 'parent_url' => $par_url,
+                'screened' => $com->{'state'} eq "S" ? 1 : 0,
             };
 
             # don't show info from suspended users
@@ -126,7 +127,7 @@ sub EntryPage
             $s2com->{'metadata'}->{'poster_ip'} = $com->{'props'}->{'poster_ip'} if 
                 ($com->{'props'}->{'poster_ip'} && $remote &&
                  ($remote->{'userid'} == $entry->{'posterid'} ||
-                  LJ::check_rel($dbr, $u, $remote, 'A')));
+                  LJ::check_rel($u, $remote, 'A')));
             
             push @$destlist, $s2com;
 
@@ -207,7 +208,7 @@ sub EntryPage_entry
         'enabled' => ($u->{'opt_showtalklinks'} eq "Y" && ! 
                       $entry->{'props'}->{'opt_nocomments'}) ? 1 : 0,
         'screened' => ($entry->{'props'}->{'hasscreened'} && 
-                       ($remote->{'user'} eq $u->{'user'}|| LJ::check_rel($dbr, $u, $remote, 'A'))) ? 1 : 0,
+                       ($remote->{'user'} eq $u->{'user'}|| LJ::check_rel($u, $remote, 'A'))) ? 1 : 0,
     });
 
     # format it

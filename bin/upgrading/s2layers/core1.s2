@@ -229,6 +229,8 @@ class EntryLite
 
     var readonly string permalink_url "A URL at which this specific entry can be viewed, for linking purposes.";
     var int depth "Visual depth of entry.  Top-level journal entries are always depth zero.  Comments have a depth greater than or equal to one, depending on where the thread is rooted at.";
+
+    function builtin get_link (string key) : Link;
 }
 
 class Entry extends EntryLite
@@ -242,8 +244,6 @@ class Entry extends EntryLite
 
     var bool new_day "Is this entry on a different day to the previous one?";
     var bool end_day "Is this the last entry of a day?";
-
-    function get_link (string key) : Link;
 
     var int itemid "Server stored ID number for this entry";
 
@@ -262,6 +262,7 @@ class Comment extends EntryLite
     var readonly string parent_url "URL to parent comment, or blank if a top-level comment.";
     var readonly string reply_url "URL to reply to this comment.";
     var readonly string thread_url "URL to view threaded rooted at this comment, or blank if comment has no children.";
+    var readonly bool screened "True if comment is in screened state.";
 }
 
 ### Userinfo
@@ -1483,7 +1484,7 @@ function Link::print_button() [fixed] {
 function Link::as_string() [fixed] : string {
     if ($.url == "") { return ""; }
     var string ealt = ehtml($.caption);
-    return """<a href="$.url"><img border='0' width="$.icon.width" height="$.icon.height" alt="$ealt" url="$.icon.url" /></a>""";
+    return """<a href="$.url"><img border='0' width="$.icon.width" height="$.icon.height" alt="$ealt" src="$.icon.url" /></a>""";
 }
 
 # Redirector

@@ -344,7 +344,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
          $ret .= "<p><a name='t$dtid'></a><table><tr>";
          $ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
          $ret .= "<td>$ML{'.replysuspended'}";
-         if (LJ::Talk::can_delete($dbr, $remote, $u, $up, $userpost)) {
+         if (LJ::Talk::can_delete($remote, $u, $up, $userpost)) {
              $ret .= " <a href='/delcomment.bml?${jargent}id=$dtid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
          }
          $ret .= "</td></tr></table>\n";
@@ -375,24 +375,24 @@ if ($uri =~ m!/(\d+)\.html$!) {
              $ret .= "<br />$datepost\n";
              if ($post->{'props'}->{'poster_ip'} && $remote &&
                  ($remote->{'user'} eq $up->{'user'} ||
-                  LJ::check_rel($dbr, $u, $remote, 'A')))
+                  LJ::check_rel($u, $remote, 'A')))
              {
                  $ret .= BML::ml('.fromip', {'ip'=>$post->{'props'}->{'poster_ip'}});
              }
              
              $ret .= " <font size='-1'>(<a href='" . $talkargs->("thread=$dtid#t$dtid") . "'>$T{'link'}</a>)</font> ";
              
-             if (LJ::Talk::can_delete($dbr, $remote, $u, $up, $userpost)) {
+             if (LJ::Talk::can_delete($remote, $u, $up, $userpost)) {
                  $ret .= "<a href='/delcomment.bml?${jargent}id=$dtid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
              }
              
              if ($post->{'state'} eq 'A' && 
-                 LJ::Talk::can_screen($dbr, $remote, $u, $up, $userpost)) {
+                 LJ::Talk::can_screen($remote, $u, $up, $userpost)) {
                  $ret .= "<a href='/talkscreen.bml?mode=screen&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_scr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
              }
              
              if ($post->{'state'} eq 'S' && 
-                 LJ::Talk::can_unscreen($dbr, $remote, $u, $up, $userpost)) {
+                 LJ::Talk::can_unscreen($remote, $u, $up, $userpost)) {
                  $ret .= "<a href='/talkscreen.bml?mode=unscreen&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_unscr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
              }
 

@@ -266,11 +266,11 @@ sub check_viewable
 
 sub can_delete {
     shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db"; 
-    my ($remote, $u, $up, $userpost) = @_;
+    my ($remote, $u, $up, $userpost) = @_; # remote, journal, posting user, commenting user
     return 0 unless $remote;
     return 1 if $remote->{'user'} eq $userpost ||
                 $remote->{'user'} eq $u->{'user'} ||
-                $remote->{'user'} eq $up->{'user'} ||
+                $remote->{'user'} eq (ref $up ? $up->{'user'} : $up) ||
                 LJ::check_rel($u, $remote, 'A');
     return 0;
 }
@@ -280,7 +280,7 @@ sub can_screen {
     my ($remote, $u, $up, $userpost) = @_;
     return 0 unless $remote;
     return 1 if $remote->{'user'} eq $u->{'user'} ||
-                $remote->{'user'} eq $up->{'user'} ||
+                $remote->{'user'} eq (ref $up ? $up->{'user'} : $up) ||
                 LJ::check_rel($u, $remote, 'A');
     return 0;
 }

@@ -623,6 +623,10 @@ function EntryPage::print_comment (Comment c) {
     print "<tr valign='top'><td colspan='$td' style='width: 95%'>";
     if (defined $c.subject_icon or $c.subject != "") { "<h3>$c.subject_icon $c.subject</h3>"; }
     if ($c.metadata{"poster_ip"}) { print " (IP Address: " + $c.metadata{"poster_ip"} + ")"; }
+    var Link lnk;
+    $lnk = $c->get_link("delete_comment"); " $lnk";
+    $lnk = $c->get_link("screen_comment"); " $lnk";
+    $lnk = $c->get_link("unscreen_comment"); " $lnk";
     print "</td></tr></table></div>";
     print "<div style='margin-left: 5px'>$c.text</div>";
     print "<div style='margin-top: 3px; font-size: smaller'>(<a href='$c.reply_url'>Reply to this</a>) ";

@@ -262,8 +262,8 @@ sub get_style
     my $have_style = 0;
 
     if ($verify && $styleid) {
-        my $dbs = LJ::get_dbs();
-        my $style = LJ::dbs_selectrow_hashref($dbs, "SELECT * FROM s2styles WHERE styleid=$styleid");
+        my $dbr = LJ::get_db_reader();
+        my $style = $dbr->selectrow_hashref("SELECT * FROM s2styles WHERE styleid=$styleid");
         if (! $style && $u) {
             delete $u->{'s2_style'};
             $styleid = 0;
@@ -1562,6 +1562,60 @@ sub DateTime__time_format
     return $$c->($this);
 }
 
+sub EntryLite__get_link
+{
+    my ($ctx, $this, $key) = @_;
+    return undef;
+}
+
+sub Entry__get_link
+{
+    my ($ctx, $this, $key) = @_;
+    return undef;
+}
+
+sub Comment__get_link
+{
+    my ($ctx, $this, $key) = @_;
+    
+    if ($key eq "delete_comment" || $key eq "unscreen_comment" || $key eq "screen_comment") {
+        my $page = get_page();
+        my $u = $page->{'_u'};
+        my $post_user = $page->{'entry'} ? $page->{'entry'}->{'poster'}->{'username'} : undef;
+        my $com_user = $this->{'poster'} ? $this->{'poster'}->{'username'} : undef;
+        my $remote = LJ::get_remote();
+        if ($key eq "delete_comment") {
+            return undef unless LJ::Talk::can_delete($remote, $u, $post_user, $com_user);
+            return {
+                '_type' => "Link",
+                'url' => "$LJ::SITEROOT/delcomment.bml?journal=$u->{'user'}&amp;id=$this->{'talkid'}",
+                'caption' => "Delete",  # FIXME: get from context property
+                'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_del.gif", 22, 20),
+            };
+        }
+        if ($key eq "screen_comment") {
+            return undef if $this->{'screened'};
+            return undef unless LJ::Talk::can_screen($remote, $u, $post_user, $com_user);
+            return {
+                '_type' => "Link",
+                'url' => "$LJ::SITEROOT/talkscreen.bml?mode=screen&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
+                'caption' => "Screen",  # FIXME: get from context property
+                'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_scr.gif", 22, 20),
+            };
+        }
+        if ($key eq "unscreen_comment") {
+            return undef unless $this->{'screened'};
+            return undef unless LJ::Talk::can_unscreen($remote, $u, $post_user, $com_user);
+            return {
+                '_type' => "Link",
+                'url' => "$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
+                'caption' => "Unscreen",  # FIXME: get from context property
+                'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_unscr.gif", 22, 20),
+            };
+        }
+    }
+}
+    
 sub Entry__plain_subject
 {
     my ($ctx, $this) = @_;
