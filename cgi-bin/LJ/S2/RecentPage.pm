@@ -18,6 +18,7 @@ sub RecentPage
         $dbcr = LJ::get_cluster_reader($u);
     }
     my $user = $u->{'user'};
+    my $journalbase = LJ::journal_base($user, $opts->{'vhost'});
 
     if ($u->{'journaltype'} eq "R" && $u->{'renamedto'} ne "") {
         $opts->{'redir'} = LJ::journal_base($u->{'renamedto'}, $opts->{'vhost'});
@@ -150,14 +151,25 @@ sub RecentPage
                                               'cuturl' => LJ::item_link($u, $itemid, $item->{'anum'}), });
         LJ::expand_embedded($dbs, $ditemid, $remote, \$text);
 
-        my $nc;
-        $nc .= "&nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
+        my $nc = "";
+        $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
 
-        my $permalink = "$LJ::SITEROOT/talkread.bml?$itemargs";
-        my $readurl = "$permalink$nc";
+        my ($permalink, $readurl, $posturl);
+        if ($u->{'clusterid'}) {
+            $permalink = "$journalbase/$ditemid.html";
+            $readurl = $permalink . "?$nc"
+                if $nc;
+            $posturl = $permalink . "?mode=reply";
+        } else {
+            $permalink = "$LJ::SITEROOT/talkread.bml?itemargs";
+            $readurl = $permalink . "&amp;$nc"
+                if $nc;
+            $posturl = "$LJ::SITEROOT/talkpost.bml?itemargs";
+        }
+
         my $comments = CommentInfo({
             'read_url' => $readurl,
-            'post_url' => "$LJ::SITEROOT/talkpost.bml?$itemargs",
+            'post_url' => $posturl,
             'count' => $replycount,
             'enabled' => ($u->{'opt_showtalklinks'} eq "Y" && ! $logprops{$itemid}->{'opt_nocomments'}) ? 1 : 0,
             'screened' => ($logprops{$itemid}->{'hasscreened'} && ($remote->{'user'} eq $u->{'user'}|| LJ::check_rel($dbs, $u, $remote, 'A'))) ? 1 : 0,
