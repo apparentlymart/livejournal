@@ -1,0 +1,37 @@
+(=_CODE
+
+ &connect_db();
+ my $remote = &get_remote();
+ 
+ $title = $LJ::SITENAME;
+ $body = "";
+ $head = "";
+ $bodyopts = "";
+
+ #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+ &LJ::Portal::construct_page({ 'dbh' => $dbh,
+			       'form' => \%FORM,
+			       'remote' => $remote,
+			       'head' => \$head,
+			       'body' => \$body,
+			       'bodyopts' => \$bodyopts,
+			       'border' => 0,
+			   });
+
+ return "";
+
+_CODE=)(=PAGE
+TITLE=>(=_CODE return $title; _CODE=)
+HEAD<=
+<meta name="description" content="(=SITENAME=) ... is a place where you can share your thoughts with the world using your web browser and it's free.">
+<meta name="keywords" content="diary,journal,online journal,diaries,writing,poems,write,notes,online diary,web diary,written,creative,update,dear diary,words,document,documented, daily, day, glimpse,read,neighborhood,voyeur,ral,live,free,chronicle, chronicles,news,current event,breaking news,palm pilot,web tv,computer,people">
+<meta name="rating" content="General"> 
+<meta name="ROBOTS" content="All">
+(=_CODE
+ return $head;
+_CODE=)
+<=HEAD
+BODYOPTS=>(=_CODE return $bodyopts; _CODE=)
+BODY=>(=_CODE return $body; _CODE=)
+PAGE=)

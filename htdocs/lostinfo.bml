@@ -1,0 +1,34 @@
+(=PAGE
+TITLE=>Lost Information
+BODY<=
+
+<FORM ACTION="lostinfo_do.bml" METHOD="POST">
+
+(=H1 Lose your password? H1=)
+(=P
+If you've lost your password, enter your username and optionally, the email address you'd like the password sent to.  Note that the email address must be one you've used at LiveJournal before and had confirmed at one point.  If you leave the email field blank, it'll be mailed to your current address. 
+P=)
+
+(=STANDOUT
+Enter your username:<BR>
+<INPUT TYPE="TEXT" NAME="user" SIZE="30" MAXLENGTH="70">
+<p>Email address:  (optional)<br>
+<INPUT TYPE="TEXT" NAME="email_p" SIZE="30" MAXLENGTH="70"> <INPUT TYPE="SUBMIT" name="lostpass" VALUE="Proceed">
+STANDOUT=)
+
+(=H1 Lose your username? H1=)
+(=P
+If you've lost your username, enter your email address and we'll send you your username.
+P=)
+
+(=STANDOUT
+Enter your email address:<BR>
+<INPUT TYPE="TEXT" NAME="email_u" SIZE="30" MAXLENGTH="70"> <INPUT TYPE="SUBMIT" name="lostuser" VALUE="Proceed">
+STANDOUT=)
+
+
+
+</FORM>
+
+<=BODY
+PAGE=)

@@ -1,0 +1,100 @@
+(=_CODE
+ 
+ require 'ljlib.pl';
+ $body = "";
+
+ my @errors = ();
+ my $user = lc($FORM{'user'});
+ my $password = $FORM{'password'};
+ my $hpassword = $FORM{'hpassword'} || &hash_password($FORM{'password'});
+
+ &connect_db;
+
+ my $quser = $dbh->quote($user);
+ if (length($user) > 15) { push @errors, "Username is too long, 15 character max"; }
+ unless ($user) { push @errors, "You must <A HREF=\"/login.bml\">enter a username</A>."; }
+ if ($user =~ /[^\w]/) { push @errors, "Username contains invalid characters."; }
+
+ $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
+ $sth->execute;
+ my $u = $sth->fetchrow_hashref;
+ unless ($u) { push @errors, "Unknown user."; }
+
+ if (! &valid_password($u->{'password'}, \%FORM)) { push @errors, "Invalid password."; }
+ 
+ if (@errors)
+ {
+     my $ret = "";
+     $ret .= "(=BADCONTENT=)\n<UL>\n";		
+     foreach (@errors)
+     {
+         $ret .= "<LI>$_\n";
+     }
+     $ret .= "</UL>\n";
+     $body = $ret;
+     return "";
+ }
+ 
+ my $etime = 0;
+ if ($FORM{'expire'} eq "never") { $etime = time()+60*60*24*60; }
+ &BMLClient::set_cookie("ljuser", $user, $etime, $LJ::COOKIE_PATH);
+ &BMLClient::set_cookie("ljhpass", "$user:$hpassword", $etime, $LJ::COOKIE_PATH);
+ &BMLClient::set_cookie("ljuser", $user, $etime, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
+ &BMLClient::set_cookie("ljhpass", "$user:$hpassword", $etime, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
+
+ if ($FORM{'notfast'}) 
+ {
+     my $site_domain = $SITEROOT;
+     $site_domain =~ s,^\w+://,,;
+     $site_domain =~ s,(:\d+)?/.*,,;
+
+     foreach my $dom ($LJ::DOMAIN, $LJ::COOKIE_DOMAIN, $site_domain)
+     {
+	 &BMLClient::set_cookie("ljfastserver", "", undef, $LJ::COOKIE_PATH, $dom);
+     }
+ }
+ elsif ($u->{'paidfeatures'} eq "on" || $u->{'paidfeatures'} eq "paid")
+ {
+     &BMLClient::set_cookie("ljfastserver", "1", $etime, $LJ::COOKIE_PATH);
+     &BMLClient::set_cookie("ljfastserver", "1", $etime, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
+ }
+	
+ $BMLClient::COOKIE{"ljuser"} = $user;
+ $BMLClient::COOKIE{"ljhpass"} = "$user:$hpassword";
+ 
+ if ($FORM{'ref'} =~ /\Q$LJ::DOMAIN\E/ && $FORM{'ref'} !~ m!/logout\.bml$!) {
+     print "Location: $FORM{'ref'}\n\n";
+     $body = ""; 
+     &BML::finish();
+     return "";
+ }
+ 
+ $body = "(=H1 Logged in! H1=)";
+ $body .= "(=P You are now logged in. P=)";
+ my $newexpire = "";
+ my $switchtext = "";
+ if ($FORM{'expire'} eq "never") {
+     $switchtext = "Change expiration mode to SESSION ONLY";
+	    $body .= "(=P Your login will <b>never expire</b>, so if you're at a public internet terminal, a school, library, or other place where people may be using this computer shortly, make sure you log out when you're done!  Or, change your login mode to expire when you close your browser: P=)";
+ } else {
+     $newexpire = "never";
+     $switchtext = "Change expiration mode to NEVER";
+     $body .= "(=P Your login will expire after you close your browser.  If this is your own computer and you're the only user, you may want to set change your login expiration such that it never expires: P=)";
+ }
+ $body .= "<form method=post><input type=hidden name=user value=$user><input type=hidden name=hpassword value=\"$hpassword\"><input type=hidden name=expire value=\"$newexpire\"><center><input type=submit value=\"" . &ehtml($switchtext) . "\"></center></form>";
+ 
+ $body .= "(=H1 Links H1=)(=P In the future this page will have all sorts of links and relevant information, but for now here are a few places you may want to go: P=)";
+ $body .= "<ul>";
+ $body .= "<li>Your <a href=\"/users/$user/friends\">friends page</a>.";
+ $body .= "<li>Your <a href=\"/todo/\">to-do list</a>.";
+ $body .= "<li>...";
+ $body .= "</ul>";
+ 
+ return "";
+ 
+ _CODE=)(=_INFO
+NOCACHE=>1
+_INFO=)(=PAGE
+TITLE=>Login
+BODY=>(=_CODE return $body; _CODE=)
+PAGE=)

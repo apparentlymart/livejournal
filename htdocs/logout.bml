@@ -1,0 +1,41 @@
+(=_CODE
+
+ my @errors = ();
+ my $user = lc($FORM{'user'});
+ my $password = $FORM{'password'};
+ my $hpassword = $FORM{'hpassword'} || &hash_password($FORM{'password'});
+ $body = "";
+
+ if ($BMLClient::COOKIE{'ljuser'}) 
+ {
+     my $site_domain = $SITEROOT;
+     $site_domain =~ s,^\w+://,,;
+     $site_domain =~ s,(:\d+)?/.*,,;
+
+     foreach my $dom ($LJ::DOMAIN, $LJ::COOKIE_DOMAIN, $site_domain)
+     {
+	 &BMLClient::set_cookie("ljuser", "", undef, $LJ::COOKIE_PATH, $dom);
+	 &BMLClient::set_cookie("ljhpass", "", undef, $LJ::COOKIE_PATH, $dom);
+	 &BMLClient::set_cookie("ljfastserver", "", undef, $LJ::COOKIE_PATH, $dom);
+     }
+     delete $BMLClient::COOKIE{'ljhpass'};
+     delete $BMLClient::COOKIE{'ljuser'};
+
+     $body .= "(=H1 Logged out H1=)\n";
+     $body .= "(=P You are now logged out. P=)";
+
+ } else {
+
+     $body .= "(=H1 Already logged out H1=)\n";
+     $body .= "(=P You are already logged out. P=)";
+ }
+ 
+ return "";
+
+_CODE=)
+(=_INFO
+NOCACHE=>1
+_INFO=)(=PAGE
+TITLE=>Logout
+BODY=>(=_CODE return $body; _CODE=)
+PAGE=)

@@ -1,0 +1,108 @@
+(=_INFO
+NOHEADERS=>1
+_INFO=)(=_CODE
+
+	require 'ljlib.pl';
+	
+	my @errors = ();
+	my $user = lc($FORM{'user'});
+	my $hpassword = $FORM{'hpassword'} || &hash_password($FORM{'password'});
+	
+	&connect_db;
+	
+	my $quser = $dbh->quote($user);
+	
+	$sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
+	$sth->execute;
+	unless ($sth->rows) { push @errors, "Invalid username"; }
+
+	my $u = $sth->fetchrow_hashref;
+
+	my $year = $FORM{'year'}+0;
+	my $month = $FORM{'month'}+0;
+
+	if (scalar(@errors)==0 && !&valid_password($u->{'password'}, \%FORM)) { push @errors, "Incorrect password."; }
+	
+	if (@errors)
+	{
+	    print "Content-type: text/html\n\n";
+	    my $ret = "";
+	    $ret .= "(=BADCONTENT=)\n<UL>\n";		
+	    foreach (@errors)
+	    {
+		$ret .= "<LI>$_\n";
+	    }
+	    $ret .= "</UL>\n";
+	    return $ret;
+	}
+
+	##### figure out what fields we're exporting
+
+	my @fields;
+	foreach my $f (qw(itemid eventtime logtime subject event security allowmask)) {
+	    if ($FORM{"field_${f}"}) {
+		push @fields, $f;
+	    }	    
+	}
+
+	#### do file-format specific initialization
+
+	my $format = "";
+	if ($FORM{'format'} eq "csv") {
+	    $format = "csv";
+	    print "Content-type: text/plain\n\n";
+	    $| = 1;
+	    if ($FORM{'header'}) {
+		print join(",",@fields), "\n";
+	    }	    
+	}
+	if ($FORM{'format'} eq "xml") {
+	    $format = "xml";
+	    print "Content-type: text/plain\n\n";
+	    $| = 1;
+	    print "<?xml version=\"1.0\"?>\n";
+	    print "<livejournal>\n";
+	}
+
+	$sth = $dbh->prepare("SELECT l.itemid, l.eventtime, l.logtime, lt.subject, lt.event, l.security, l.allowmask FROM log l, logtext lt WHERE l.itemid=lt.itemid AND l.ownerid=$u->{'userid'} AND l.year=$year AND l.month=$month");
+	$sth->execute;
+	if ($dbh->err) { print $dbh->errstr;  }
+	while ($_ = $sth->fetchrow_hashref) {
+	    my @vals = ();
+	    if ($format eq "xml") {
+		print "<entry>\n";
+	    }
+
+	    foreach my $f (@fields)
+	    {
+		my $v = $_->{$f};
+		if ($format eq "csv") {
+		    if ($v =~ /[\"\n\,]/) {
+			$v =~ s/\"/\"\"/g;
+			$v = "\"$v\"";
+		    }
+		}
+		if ($format eq "xml") {
+		    $v = &exml($v);
+		}
+		push @vals, $v;
+	    }
+	    if ($format eq "csv") {
+		print join(",", @vals), "\n";
+	    }
+	    if ($format eq "xml") {
+		foreach my $f (@fields) {
+		    my $v = shift @vals;
+		    print "<$f>", $v, "</$f>\n";
+		}
+		print "</entry>\n";
+	    }
+	}
+	
+	if ($format eq "xml") {
+	    print "</livejournal>\n";
+	}
+
+	return "";
+
+_CODE=)

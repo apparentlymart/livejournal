@@ -1,0 +1,102 @@
+(=PAGE
+TITLE=>Create Journal
+
+BODY<=
+
+(=H1 Creating a New Journal H1=)
+(=P
+Creating a new LiveJournal is easy, just follow the instructions below!
+P=)
+
+(=HR=)
+
+<FORM ACTION="create_do.bml" METHOD="POST">
+
+(=H2 Username H2=)
+(=P
+Each LiveJournal user must have their own unique username.  Your username is what appears in the address to your journal and what you use to log into the LiveJournal server.  It also shows up when you post comments in other people's journal.
+P=)
+
+(=STANDOUT
+<TABLE>
+<TR><TD ALIGN=CENTER>
+<TABLE><TR><TD>
+Username:<BR>
+<INPUT TYPE="TEXT" NAME="user" SIZE="15" MAXLENGTH="15">
+</TD></TR></TABLE>
+</TD></TR>
+<TR><TD>
+<FONT FACE="Arial,Helvetica" SIZE=-1>&nbsp;<BR>
+<B>Your LiveJournal will be at these addresses:</B><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;(=SITEROOT=)/users/<I>username</I>/<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;(=SITEROOT=)/<I>~username</I>/<BR>
+(=_CODE
+ return "" unless $LJ::USER_VHOSTS;
+ my $ret;
+ unless ($LJ::EVERYONE_PAID) {
+     $ret .= "<B>Or, for paid accounts:</B><BR>";
+ }
+ $ret .= "&nbsp;&nbsp;&nbsp;&nbsp;http://<I>username</I>.$LJ::USER_DOMAIN/<br>";
+ return $ret;
+_CODE=)
+</FONT>
+</TD></TR></TABLE>
+STANDOUT=)
+
+(=H2 Your Name H2=)
+(=P
+What's your name or handle?  This will appear at the top of your journal, and in the user directory should you choose to be listed in it.  You do not have to provide your full name or even your real
+name.
+P=)
+
+(=STANDOUT
+Name:<BR>
+<INPUT TYPE="TEXT" NAME="name" SIZE="40" MAXLENGTH="100">
+STANDOUT=)
+
+(=H2 Your email address H2=)
+(=P
+For verification and security purposes, we need your email address.  It will be never ever, under any circumstances, be sold or given away to spammers.  We hate that more than anything.  Read our <A HREF="/legal/privacy.bml" TARGET=privacy>privacy policy</A> for more information.
+P=)
+
+(=STANDOUT
+Email Address:<BR>
+<INPUT TYPE="TEXT" NAME="email" SIZE="40" MAXLENGTH="50">
+STANDOUT=)
+
+(=H2 Password H2=)
+(=P
+Select a password.
+P=)
+
+(=STANDOUT
+Password:<BR><INPUT TYPE="password" NAME="password1" SIZE="30" MAXLENGTH="30">
+<BR>Re-type password:<BR><INPUT TYPE="password" NAME="password2" SIZE="30" MAXLENGTH="30">
+STANDOUT=)
+
+(=_CODE
+ require 'ljconfig.pl';
+ return "" if ($LJ::INTRANET);
+ return "
+(=H2 Notice to AOL Users H2=)
+(=P If you are an <B>AOL User</B>, make sure you go to <B>Keyword: <I>Mail Controls</I></B> and <B>turn off</B> any of AOL's \"useful\" mail controls.  You must be able to receive mail from the Internet or you will not recieve your confirmation code.  If your parents have this restricted, perhaps you really shouldn't be using (=SITENAME=). P=)
+(=H2 Age H2=)
+(=P Are you under 13 years of age? <blockquote><input type=checkbox value=1 name=under13> Yes, I am under 13 years old. </blockquote>  P=)
+    ";
+ _CODE=)
+
+(=H2 Proceed H2=)
+(=P
+Press the button below and you're on your way to having your very own LiveJournal!
+P=)
+
+(=STANDOUT
+<CENTER>
+<INPUT TYPE="SUBMIT" VALUE="Proceed..."><BR>
+<FONT SIZE=-1>Only press <B>Proceed</B> <I>once</I>!!</FONT>
+</CENTER>
+STANDOUT=)
+
+
+<=BODY
+PAGE=)

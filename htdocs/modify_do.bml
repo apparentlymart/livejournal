@@ -1,0 +1,326 @@
+(=PAGE
+TITLE=>Modify Journal
+BODY<=
+
+(=_CODE
+
+ return &server_down_html() if ($LJ::SERVER_DOWN);
+
+ my @errors = ();
+ my $user = lc($FORM{'user'});
+ my $hpassword = $FORM{'hpassword'} || &hash_password($FORM{'password'});
+
+ &connect_db;
+
+ my $quser = $dbh->quote($user);
+
+ $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
+ $sth->execute;
+ unless ($sth->rows) { push @errors, "Invalid username"; }
+
+ my $u = $sth->fetchrow_hashref;
+ &load_user_props($u, "opt_usesharedpic");
+
+ if (scalar(@errors)==0 && !&valid_password($u->{'password'}, \%FORM)) { push @errors, "Incorrect password."; }
+
+ if (@errors)
+ {
+     my $ret = "";
+     $ret .= "(=BADCONTENT=)\n<UL>\n";		
+     foreach (@errors)
+     {
+         $ret .= "<LI>$_\n";
+     }
+     $ret .= "</UL>\n";
+     return $ret;
+ }
+
+ my %countries;
+ my %states;
+ &load_codes({ "country" => \%countries, "state" => \%states });
+
+ my $mode = $FORM{'mode'} || "modify";
+ my $and;
+
+ if ($mode eq "modify")
+ {
+     my $ret = "";
+     $ret .= "<FORM METHOD=POST>\n";
+     $ret .= "<INPUT TYPE=HIDDEN NAME=mode VALUE=domodify>\n";
+     $ret .= "<INPUT TYPE=HIDDEN NAME=user VALUE=(=_EH $user _EH=)>\n";
+     $ret .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"$hpassword\">\n";
+
+     ### journal style
+     $ret .= "(=H1 Journal Options H1=)(=P From here you can customize the look of your LiveJournal pages.  If you're really curious how everything works, read the <A HREF=\"/developer/\" TARGET=_blank>developer information</A>.  Otherwise, we'll assume you're satisifed with the basic options below: P=)\n";
+
+     ###
+     ### LAYOUT OPTIONS
+     ###
+
+     $and = ($u->{'paidfeatures'} eq "off") ? "  Users with free accounts are only able to select between a small number of default styles.  If you get a <A HREF=\"/paidaccounts/\">paid account</A> you'll be able to use more styles or customize the HTML yourself." : "";
+     $ret .= "(=H2 Page Layout Style H2=)(=P Setting this controls how your journal is laid out on the screen. $and P=)<UL><TABLE><TR BGCOLOR=#D0D0D0><TD></TD><TD>Available Styles</TD></TR>\n";
+     my %styles = ();
+
+     $and = ($u->{'paidfeatures'} eq "off") ? " AND has_ads='Y'" : "";
+     $sth = $dbh->prepare("SELECT styleid, styledes, user, type FROM style WHERE (user='system' AND is_public='Y' $and) OR user=$quser ORDER BY styledes");
+     $sth->execute;
+     push @{$styles{$_->{'type'}}}, $_ while ($_ = $sth->fetchrow_hashref);
+
+     foreach my $view (@LJ::views)
+     {
+         $ret .= "<TR><TD BGCOLOR=#D0D0D0>$LJ::viewinfo{$view}->{'des'}</TD><TD><SELECT NAME=\"${view}_style\">\n";
+         foreach (grep { $_->{'user'} eq "system" } @{$styles{$view}})
+         {
+	   my $selected = $_->{'styleid'}==$u->{"${view}_style"} ? " SELECTED" : "";
+	   $ret .= "<OPTION VALUE=\"$_->{'styleid'}\"$selected>" . &BMLUtil::escapeall($_->{'styledes'}) . "\n";
+         }
+         my $exist_user_style = 0;
+         foreach (grep { $_->{'user'} ne "system" } @{$styles{$view}})
+         {
+	   if (!$exist_user_style)
+	   {
+	       $exist_user_style = 1;
+	       $ret .= "<OPTION VALUE=\"\">--- User styles: ---\n";
+	   }
+	   my $selected = $_->{'styleid'}==$u->{"${view}_style"} ? " SELECTED" : "";
+	   $ret .= "<OPTION VALUE=\"$_->{'styleid'}\"$selected>" . &BMLUtil::escapeall($_->{'styledes'}) . "\n";
+         }
+         $ret .= "</SELECT></TD></TR>\n";
+     }
+     $ret .= "</TABLE></UL>\n";
+
+     ###
+     ### COLOR THEME OPTIONS
+     ###
+     $ret .= "(=H2 Color Theme H2=)(=P Here you can select what color theme will be applied to the layout options you pick above.  Or, if you don't like the provided colors, specify your own!  If you come up with something really sexy looking, let us know and we'll name a theme after it. P=)\n";
+     $ret .= "<UL>\n";
+     $checked = $u->{'themeid'} != 0 ? "CHECKED" : "";
+     $ret .= "<INPUT TYPE=RADIO VALUE=\"default\" NAME=themetype $checked> <B>Default Theme</B>: ";
+     $ret .= "<SELECT NAME=themeid>\n";
+     $sth = $dbh->prepare("SELECT themeid, name FROM themelist ORDER BY name");
+     $sth->execute;
+     while ($_ = $sth->fetchrow_hashref) {
+     $checked = $u->{'themeid'} == $_->{'themeid'} ? "SELECTED" : "";
+	 $ret .= "  <OPTION VALUE=$_->{'themeid'} $checked>$_->{'name'}\n";
+     }
+     $ret .= "</SELECT><BR>\n";
+     $checked = $u->{'themeid'} == 0 ? "CHECKED" : "";
+     $ret .= "<INPUT TYPE=RADIO VALUE=\"custom\" NAME=themetype $checked> <B>Custom Colors</B>:<P>";
+     $ret .= "<CENTER><TABLE BORDER=1 CELLPADDING=2>\n";
+     $ret .= "<TR VALIGN=TOP BGCOLOR=#D0D0D0><TD ALIGN=RIGHT><B>Usage Area</B></TD><TD><B>Color</B><BR><FONT SIZE=-1>(#rrggbb or name)</FONT></TD></TR>\n";
+
+     # get the user's custom colors
+     my %custcolors = ();
+     if ($u->{'themeid'} == 0) {
+	 $sth = $dbh->prepare("SELECT coltype, color FROM themecustom WHERE user=$quser");
+     } else {
+	 my $qthemeid = $dbh->quote($u->{'themeid'});
+	 $sth = $dbh->prepare("SELECT coltype, color FROM themedata WHERE themeid=$qthemeid");
+     }
+     $sth->execute;
+     $custcolors{$_->{'coltype'}} = $_->{'color'} while ($_ = $sth->fetchrow_hashref);
+
+     $sth = $dbh->prepare("SELECT coltype, des FROM themecoltypes ORDER BY sortorder");
+     $sth->execute;
+     while ($_ = $sth->fetchrow_hashref) {
+	 $ret .= "<TR><TD ALIGN=RIGHT>$_->{'des'}</TD><TD><INPUT TYPE=TEXT NAME=\"theme_cust:$_->{'coltype'}\" SIZE=20 MAXLENGTH=30 VALUE=\"" . &ehtml($custcolors{$_->{'coltype'}}) . "\"></TD></TR>\n";
+
+     }
+     $ret .= "</TABLE></CENTER>\n";
+     $ret .= "</UL>\n";
+
+     ###
+     ### MOOD THEME OPTIONS
+     ###
+     $ret .= "(=H2 Mood Icons H2=)(=P When posting journal entries you can also specify your current mood.  Different users have submitted different sets of mood icons that you can use.  Or, select \"None\" if you don't want any pictures besids your moods.  (or, you don't even have to use the Current Mood feature at all.) P=)";
+
+     $sth = $dbh->prepare("SELECT moodthemeid, name FROM moodthemes WHERE is_public='Y'");
+     $sth->execute;
+     my @themes = ({ 'moodthemeid' => 0, 'name' => '(None)' });
+     push @themes, $_ while ($_ = $sth->fetchrow_hashref);
+
+     ### user's private themes
+     {	
+	 my @theme_user;
+	 $sth = $dbh->prepare("SELECT moodthemeid, name FROM moodthemes WHERE ownerid=$u->{'userid'} AND is_public='N'");
+	 $sth->execute;
+	 push @theme_user, $_ while ($_ = $sth->fetchrow_hashref);
+	 if (@theme_user) {
+	     push @themes, { 'moodthemeid' => 0, 'name' => '--- Personal Themes: ---' };
+	     push @themes, @theme_user;
+	 }
+     }
+
+     $ret .= "<UL><B>Select mood icon set: </B> <SELECT NAME=\"moodthemeid\">";
+     foreach my $t (@themes) {
+	 my $sel = $t->{'moodthemeid'} == $u->{'moodthemeid'} ? "SELECTED" : "";
+	 $ret .= "<OPTION $sel VALUE=$t->{'moodthemeid'}>" . &ehtml($t->{'name'}) . "\n";
+     }
+     $ret .= "</SELECT> (<A HREF=\"/moodlist.bml\" TARGET=moods>preview</A>)\n";
+     $checked = $u->{'opt_forcemoodtheme'} eq "Y" ? "CHECKED" : "";
+     $ret .= "<BR><INPUT TYPE=CHECKBOX $checked NAME=opt_forcemoodtheme> Force this mood theme for all friends on your friends page";
+     $ret .= "</UL>";
+     
+     ###
+     ### FRIENDS VIEW OPTIONS
+     ###
+     $ret .= "(=H2 Friends View H2=)(=P Here are options that control how your friends page looks. P=)";
+     $ret .= "<P><TABLE>\n";
+
+     my $checked;
+     $checked = $u->{'opt_usesharedpic'} ? "CHECKED" : "";
+     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_usesharedpic $checked></TD><TD><B>Use shared journal pictures instead of poster's user picture</B></TD></TR>\n";
+     $ret .= "<TR><TD>&nbsp;</TD><TD>This option controls what picture you see on your friends page when a user posts in a shared or community journal.  If you check it, then you'll see the community's icon.  If you leave it unchecked, then you'll see the person that's actually posting's personal user icon.</TD></TR>\n";
+     
+     $ret .= "</TABLE>\n";
+
+     ### ending submit block
+     $ret .= "(=H1 Done? H1=)(=P When done, press the \"Save Changes\" button below... P=)\n";
+     $ret .= "(=STANDOUT <INPUT TYPE=SUBMIT VALUE=\"Save Changes\"> STANDOUT=)\n";
+
+     $ret .= "(=HR=)\n";
+
+     ### overrides
+     # first, load the overrides if they use 'em:
+     my $overrides = "";
+     if ($u->{'useoverrides'} eq "Y")
+     {
+         $sth = $dbh->prepare("SELECT override FROM overrides WHERE user=$quser");
+         $sth->execute;
+         $overrides = $sth->fetchrow_arrayref->[0];
+     }
+
+     $ret .= "(=H1 Style Overrides H1=)(=P You can ignore this section.  This is for tweaking very specific things about your page layout.  See the <A HREF=\"/developer/\" TARGET=_blank>developer section</A> for details.  Also note that overrides are for overriding only one or two things about a style.  If you'd like to override everything, feel free to <A HREF=\"/styles/create.bml\" TARGET=_blank>create your own style</A>. P=)(=P <FONT SIZE=+2><B>THIS IS <U>NOT</U> WHERE YOU TYPE YOUR JOURNAL!!</B></FONT> P=)\n";
+     $ret .= "(=STANDOUT <B>Overrides:</B><BR><TEXTAREA NAME=\"overrides\" COLS=60 ROWS=8 WRAP=OFF>";
+     $ret .= &BMLUtil::escapeall($overrides);
+     $ret .= "</TEXTAREA> STANDOUT=)";
+
+     $ret .= "(=H1 Journal Activation Status H1=)(=P If you want to delete or undelete your journal, this where you do it.  Once you delete your journal you have 30 days to undelete it, just in case you change your mind.  After 30 days, the journal will be permanently deleted and there will be no way to recover it. P=)";
+     my %statvis = ("V" => "Activated", "D" => "Deleted");
+     if ($u->{'statusvis'} eq "S") {
+	 $statvis = ("S" => "Suspended");
+     }
+     $ret .= "<UL>Status: <SELECT NAME=\"statusvis\">";
+     foreach (reverse sort keys %statvis) {
+	 my $sel = $_ eq $u->{'statusvis'} ? " SELECTED" : "";
+	 $ret .= "<OPTION VALUE=\"$_\"$sel>$statvis{$_}\n";
+     }
+     $ret .= "</SELECT></UL>\n";
+     
+     ### ending submit block
+     $ret .= "(=H1 Done? H1=)(=P When done, press the \"Save Changes\" button below... P=)\n";
+     $ret .= "(=STANDOUT <INPUT TYPE=SUBMIT VALUE=\"Save Changes\"> STANDOUT=)\n";
+     $ret .= "</FORM>\n";
+
+     return $ret;
+ }
+
+ if ($mode eq "domodify")
+ {
+     my @errors = ();
+     my $state = "";
+
+     # setup what we're gonna update in the user table:
+     my %update = ();
+
+     # color themes
+     $update{'themeid'} = $FORM{'themetype'} eq "custom" ? 0 : $FORM{'themeid'};
+     $update{'moodthemeid'} = $FORM{'moodthemeid'};
+     $update{'opt_forcemoodtheme'} = $FORM{'opt_forcemoodtheme'} ? "Y" : "N";
+     
+     if ($FORM{'themetype'} eq "custom") {
+	 $dbh->do("DELETE FROM themecustom WHERE user=$quser");
+	 my @coltypes = ();
+	 $sth = $dbh->prepare("SELECT coltype FROM themecoltypes");
+	 $sth->execute;
+	 push @coltypes, $_->{'coltype'} while ($_ = $sth->fetchrow_hashref);
+	 foreach my $ct (@coltypes) {
+	     my $qct = $dbh->quote($ct);
+	     my $qcolor = $dbh->quote($FORM{"theme_cust:$ct"});
+	     $dbh->do("INSERT INTO themecustom (user, coltype, color) VALUES ($quser, $qct, $qcolor)");
+	 }
+     }
+
+     # update 'overrides' table
+     if ($FORM{'overrides'} !~ /\S/) 
+     {
+         $dbh->do("DELETE FROM overrides WHERE user=$quser");
+         $update{'useoverrides'} = "N";
+     }
+     else
+     {
+         my $qoverrides = $dbh->quote($FORM{'overrides'});
+         $dbh->do("REPLACE INTO overrides SET user=$quser, override=$qoverrides");
+         $update{'useoverrides'} = "Y";
+     }
+     if ($dbh->err) { return "(=H1 Error! H1=)(=P A database error occurred: <B>" . $dbh->errstr . "</B> P=)"; }
+
+     # update 'user' table
+     my $sets = "";
+     foreach (keys %update)
+     {
+         $sets .= "$_=" . $dbh->quote($update{$_}) . ",";
+     }
+
+     ### change their visiblilty (deletion) status if they changed it
+     if ($u->{'statusvis'} ne "S" && 
+	 ($u->{'statusvis'} ne $FORM{'statusvis'}) &&
+	 ($FORM{'statusvis'} eq "D" || $FORM{'statusvis'} eq "V"))
+     {
+	 my $qstatvis = $dbh->quote($FORM{'statusvis'});
+	 $sets .= "statusvis=$qstatvis,statusvisdate=NOW(),";
+     }
+
+     # set all the styles
+     {
+	 my @picked = ();
+	 foreach my $view (@LJ::views)
+	 {
+	     my $sid = $FORM{"${view}_style"}+0;
+	     if ($sid) {
+		 $sets .= "${view}_style=$sid,";
+		 push @picked, $sid;
+	     }
+	 }
+	 if ($u->{'paidfeatures'} eq "off") {
+	     # verify they haven't forged the style numbers
+	     my $in = join(",", 0, @picked);
+	     $sth = $dbh->prepare("SELECT COUNT(*) FROM style WHERE ((user='system' AND is_public='Y' AND has_ads='Y') OR user=$quser) AND styleid IN ($in)");
+	     $sth->execute;
+	     if ($dbh->err) { return $dbh->errstr; }
+	     my ($count) = $sth->fetchrow_array;
+	     if ($count != scalar(@picked)) {
+		 my $ret = "(=H1 Error! H1=)(=P One of the styles you've selected is not available.  This is either the result of somebody deleting the style, or you trying to pick one that you don't have access to. P=)";
+		 return $ret;
+	     }
+	 }
+     }
+     chop $sets;
+     my $sql = "UPDATE user SET $sets WHERE user=$quser";
+     $dbh->do($sql);
+     if ($dbh->err) { return "(=H1 Error! H1=)(=P A database error occurred: <B>" . $dbh->errstr . "</B> P=)"; }
+
+     ### change any of the userprops ?
+     {
+	 $FORM{'opt_usesharedpic'} = $FORM{'opt_usesharedpic'} ? "1" : "0";
+	 my @uprops = (
+		       "opt_usesharedpic",
+		       );	
+	 foreach my $uprop (@uprops) {
+	     if ($FORM{$uprop} ne $u->{$uprop}) {
+		 &set_userprop($dbh, $u->{'userid'}, $uprop, $FORM{$uprop});
+	     }
+	 }
+     }
+    
+
+     # tell the user all is well
+     return "(=H1 Success H1=)(=P Your journal settings have been updated.  You can view your journal <A HREF=\"$LJ::SITEROOT/users/$user/\">here</A>. P=)";
+ }
+
+ return "Unknown mode."
+
+_CODE=)
+
+<=BODY
+PAGE=)

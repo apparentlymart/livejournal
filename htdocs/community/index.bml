@@ -1,0 +1,12 @@
+(=PAGE
+TITLE=>Community Center
+BODY<=
+
+(=_INCLUDE
+BML=>1
+CODE=>0
+FILE=>community
+_INCLUDE=)
+
+<=BODY
+PAGE=)

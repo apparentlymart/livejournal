@@ -1,0 +1,63 @@
+(=PAGE
+TITLE=>Export Journal
+
+BODY<=
+
+(=H1 Export Journal H1=)
+(=P
+This feature lets you download your entire journal to a custom format for backup purposes.
+P=)
+
+<FORM ACTION="export_do.bml" METHOD="POST">
+
+(=STANDOUT
+<TABLE>
+(=_CODE
+ require 'ljlib.pl'; 
+ return &auth_fields();
+ _CODE=)
+<TR VALIGN=TOP><TD>Export what:</TD>
+<TD>
+    <SELECT NAME="what">
+    <OPTION VALUE="journal">Journal entries
+    </SELECT>
+</TD></TR>
+
+<TR VALIGN=MIDDLE><TD>Select month:</TD>
+<TD>
+    yyyy: <INPUT NAME="year" SIZE=4 MAXLENGTH=4> - 
+    mm: <INPUT NAME="month" SIZE=2 MAXLENGTH=2>
+</TD></TR>
+
+<TR VALIGN=TOP><TD>Format:</TD>
+<TD>
+    <SELECT NAME="format">
+    <OPTION VALUE="csv">CSV (Comma Separated Values)
+    <OPTION VALUE="xml">XML
+    </SELECT><BR>
+    <INPUT TYPE=CHECKBOX NAME="header" CHECKED> Header<BR>
+</TD></TR>
+<TR><TD COLSPAN=2><HR></TD></TR>
+<TR VALIGN=TOP><TD>Fields:</TD>
+<TD>
+  <INPUT TYPE=CHECKBOX NAME="field_itemid" CHECKED> ID Number<BR>
+  <INPUT TYPE=CHECKBOX NAME="field_eventtime" CHECKED> Event Time (from user's clock)<BR>
+  <INPUT TYPE=CHECKBOX NAME="field_logtime" CHECKED> Log Time (from system's clock)<BR>
+  <INPUT TYPE=CHECKBOX NAME="field_subject" CHECKED> Subject<BR>
+  <INPUT TYPE=CHECKBOX NAME="field_event" CHECKED> <B>Event</B><BR>
+  <INPUT TYPE=CHECKBOX NAME="field_security" CHECKED> Security Level<BR>
+  <INPUT TYPE=CHECKBOX NAME="field_allowmask" CHECKED> Allow Mask<BR>
+</TD></TR>
+
+<TR><TD></TD><TD><INPUT TYPE="SUBMIT" VALUE="Proceed..."></TD></TR>
+</TABLE>
+STANDOUT=)
+
+(=H1 Forget something? H1=)
+(=P
+If you forgot your username or password, <A HREF="lostinfo.bml">recover it here!</A>.
+P=)
+
+
+<=BODY
+PAGE=)

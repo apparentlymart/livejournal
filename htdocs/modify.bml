@@ -1,0 +1,29 @@
+(=PAGE
+TITLE=>Modify Journal
+
+BODY<=
+
+(=H1 Modify Your Journal H1=)
+(=P
+Enter your username and password to modify options that affect the appearance your journal.  If you'd like to add a new journal entry, you want to go <A HREF="update.bml">here</A>.
+P=)
+
+<FORM ACTION="modify_do.bml" METHOD="POST">
+
+(=STANDOUT
+<TABLE>
+(=_CODE
+ return &auth_fields();
+ _CODE=)
+<TR><TD COLSPAN=2 ALIGN=CENTER><INPUT TYPE="SUBMIT" VALUE="Proceed..."></TD></TR>
+</TABLE>
+STANDOUT=)
+
+(=H1 Forget something? H1=)
+(=P
+If you forgot your username or password, <A HREF="lostinfo.bml">recover it here!</A>.
+P=)
+
+
+<=BODY
+PAGE=)

@@ -1,0 +1,64 @@
+(=_INFO
+NOCACHE=>1
+_INFO=)(=_CODE
+
+require 'ljlib.pl';
+my ($sth, $ret);
+my $user = lc($FORM{'user'});
+	
+&BML::set_content_type("text/rdf");
+
+&connect_db();
+my $quser = $dbh->quote($user);
+$sth = $dbh->prepare("SELECT userid, user, name FROM user WHERE user=$quser");
+$sth->execute;
+my $u = $sth->fetchrow_hashref;
+unless ($u) {
+	return "";
+}
+
+ $ret .= <<"RDF_END";
+<RDF:RDF 
+  xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:fz="http://www.zapogee.com/rdf/forumzilla/">  
+  
+  <RDF:Description about="$LJ::SITEROOT/?user=$user"> 
+  <fz:title>${user}'s LiveJournal &amp; Friends</fz:title> 
+  <fz:description resource="$LJ::SITEROOT/fz/forum.bml?user=$user"/> 
+  <fz:slogan>Because you like to think that other people care...</fz:slogan> 
+  <fz:articles> 
+
+  <RDF:Seq> 
+RDF_END
+
+$sth = $dbh->prepare("SELECT u.user FROM user u, friends f WHERE f.userid=$u->{'userid'} AND f.friendid=u.userid ORDER BY u.timeupdate DESC");
+$sth->execute;
+my @users = ($user);
+while ($_ = $sth->fetchrow_hashref) {
+  push @users, $_->{'user'} unless ($_->{'user'} eq $user);
+}
+
+foreach my $friend (@users)
+{
+$ret .= <<"RDF_END";
+  <RDF:li> 
+  <RDF:Description about="$LJ::SITEROOT/fz/userinfo.bml?user=$friend">
+  <fz:title>$friend</fz:title> 
+  <fz:description resource="$LJ::SITEROOT/fz/thread.bml?user=$friend"/>
+  </RDF:Description> 
+  </RDF:li> 
+RDF_END
+
+}
+
+$ret .= <<"RDF_END";
+  </RDF:Seq> 
+  </fz:articles> 
+  
+  </RDF:Description>  
+</RDF:RDF>
+RDF_END
+
+return $ret;
+
+_CODE=)

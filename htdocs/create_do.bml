@@ -1,0 +1,131 @@
+(=PAGE
+TITLE=>Create New Journal
+BODY<=
+
+(=_CODE
+
+ return &server_down_html() if ($LJ::SERVER_DOWN);
+ 
+ my @errors = ();
+ my $user = lc($FORM{'user'});
+ my $name = $FORM{'name'};
+ my $email = &trim(lc($FORM{'email'}));
+ 
+ &connect_db;
+ 
+ my $quser = $dbh->quote($user);
+ my $qemail = $dbh->quote($email);
+ my $qname = $dbh->quote($name);
+ 
+ if (length($user) > 15) { push @errors, "Username is too long, 15 character max"; }
+ unless ($user) { push @errors, "You must enter a username"; }
+ if ($user =~ /[^\w]/) { push @errors, "Username contains invalid characters"; }
+ if ($user =~ /^lj_/) { push @errors, "lj_* usernames are reserved"; }
+ if ($user =~ /^ex_/) { push @errors, "ex_* usernames are reserved"; }
+ if ($user =~ /^comm_news_/) { push @errors, "comm_news_* usernames are reserved"; }
+ 
+ $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
+ $sth->execute;
+ my $second_submit = 0;
+ my $u = {};
+ if ($sth->rows > 0) { 
+     $u = $sth->fetchrow_hashref;
+     if ($user ne "test" && $u->{'password'} eq $FORM{'password1'})
+     {
+         # oh, they double-clicked the submit button or our server was too slow.
+         $second_submit = 1;
+     }
+     else
+     {
+         push @errors, "Username already in use; please select a different one"; 
+     }
+ }
+ 
+ unless ($name) { push @errors, "Please supply your name"; }
+ unless ($email) { push @errors, "You must provide your email address"; }
+ if ($email =~ /\s/) { push @errors, "No spaces allowed in email address.  If you're on AOL, remember that your Internet Email address is your screen name with all spaces removed, followed by <B>\@aol.com</B>"; }
+ 
+ if ($FORM{'password1'} ne $FORM{'password2'}) { push @errors, "Passwords do not match."; }
+ if (! $FORM{'password1'}) { push @errors, "You must enter a password."; }
+
+ if ($FORM{'under13'}) {
+     push @errors, "Sorry, due to COPPA restrictions, you cannot use the LiveJournal service until you're 13 years old.  Please come back then.";
+ }
+ 
+ unless (@errors)
+ {
+     &check_email($email, \@errors);
+ }
+
+ $qpassword = $dbh->quote($FORM{'password1'});
+ 
+ if (@errors)
+ {
+     my $ret = "";
+     $ret .= "(=BADCONTENT=)\n<UL>\n";		
+     foreach (@errors)
+     {
+         $ret .= "<LI>$_\n";
+     }
+     $ret .= "</UL>\n";
+     return $ret;
+ }
+
+ my $userid = $u->{'userid'}+0;
+ unless ($second_submit)
+ {
+     my $paid   = ($LJ::EVERYONE_PAID  ? "on" : "off");
+     my $status = ($LJ::EVERYONE_VALID ? 'A'  : 'N');
+     $dbh->do("INSERT INTO user (user, email, password, status, paidfeatures, name, timecreate, lastn_style, friends_style, calendar_style, day_style) VALUES ($quser, $qemail, $qpassword, '$status', '$paid', $qname, NOW(), 1, 6, 2, 5)");
+     if ($dbh->err)
+     {
+         return "(=H1 Error H1=)(=P There was an error processing your request: <B>" . $dbh->errstr . "</B> P=)";
+     }
+     $userid = $dbh->{'mysql_insertid'};
+ }
+
+ my $aa = {};
+ if ($userid) {
+     $aa = &register_authaction($userid, "validateemail", $email);
+ }
+
+ open (REM, "/home/lj/htdocs/inc/email-welcome") || return "Error: couldn't open email-welcome template";
+ my $etemp;
+ while (<REM>) {
+     $etemp .= $_;
+ }	
+ close REM;
+ unless ($etemp) { return "Error: email-welcome template is empty?"; }
+
+ my %replace = (
+		"email" => $email,
+		"regurl" => "$LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}",
+		"username" => $user,
+		"password" => $FORM{'password1'},
+		"sitename" => $LJ::SITENAME,
+                "siteroot" => $LJ::SITEROOT,
+                "admin_email" => $LJ::ADMIN_EMAIL,
+		);
+ 
+ $etemp =~ s/%%(\w+?)%%/$replace{$1}/ge;
+ 
+ open (MAIL, "|$LJ::SENDMAIL");
+ print MAIL $etemp;
+ close MAIL;
+ 
+ $ret = "(=H1 Success! H1=)(=P Your journal has been created.  Important registration information has been emailed to <FONT FACE=Arial SIZE=+1><B>$email</B></FONT> containing further instructions.  <B>Note: </B>  You have exactly <I>seven days</I> to confirm your journal creation.  If you still haven't gone and set it up after seven days the username of <B>$user</B> will be automaticaly deleted and somebody else may use it. P=)";
+ $ret .= "(=P Your LiveJournal will be available at: P=)(=STANDOUT <FONT SIZE=+1 FACe=Arial><B><A HREF=\"$LJ::SITEROOT/users/$user/\">$LJ::SITEROOT/users/$user/</A></B></FONT> STANDOUT=)";
+ $ret .= "(=P Now, please take the time to fill in some information about yourself.  It's mostly optional, but it lets us get an idea of who's using LiveJournal. P=)";
+ 
+ $ret .= "<CENTER><FORM METHOD=POST ACTION=\"/editinfo_do.bml\">";
+ $ret .= "<INPUT TYPE=HIDDEN NAME=user VALUE=\"$user\">\n";
+ $ret .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"" . &hash_password($FORM{'password1'}) . "\">\n";
+ $ret .= "<INPUT TYPE=SUBMIT VALUE=\"Enter Personal Information ---&gt;\">\n";
+ $ret .= "</FORM></CENTER>\n";
+
+ return $ret;
+
+_CODE=)
+
+<=BODY
+PAGE=)

@@ -1,0 +1,65 @@
+(=_CODE
+
+ $title = "Poll";
+ $body = "";
+
+ &connect_db();
+ my $remote = get_remote();
+
+ my $pollid = ($FORM{'id'} || $FORM{'pollid'})+0;
+ 
+ $sth = $dbh->prepare("SELECT itemid, whovote, journalid, posterid, whoview, whovote, name FROM poll WHERE pollid=$pollid");
+ $sth->execute;
+ my $po = $sth->fetchrow_hashref;
+
+ my $mode = "";
+ foreach my $m ([ "enter", "Fill-out Poll" ], [ "results" , "View Poll Results" ]) {
+     if ($FORM{'mode'} eq $m->[0]) {
+	 $mode = $FORM{'mode'};
+	 $body .= "<b>[ $m->[1] ]</b> ";
+     } else {
+	 $body .= "<a href=\"$LJ::SITEROOT/poll/?id=$pollid&mode=$m->[0]\">[ $m->[1] ]</a> ";
+     }
+ }
+ $body .= "<a href=\"$LJ::SITEROOT/talkread.bml?itemid=$po->{'itemid'}\">[ Discuss Results ]</a> ";
+ 
+ if ($FORM{'mode'} eq "ans") { $mode = "ans"; } # also allowed, but not shown
+
+ $body .= "<hr><p>";
+
+ if (defined $FORM{'poll-submit'})
+ {
+     my $error;
+     &LJ::Poll::submit($dbh, $remote, \%FORM, \$error);
+     if ($error) {
+	 $title = "Error";
+	 $body .= $error;
+	 return "";
+     }
+     $title = "Submitted!";
+     $body .= "(=H1 Thanks.... H1=)(=P Your poll answers have been submitted. P=)";
+     return "";
+ }
+
+ unless ($pollid) {
+     $title = "Polls";
+     $body .= "This is the address to participate in a poll.  You've stumbled onto an address which does nothing right now.  For documentation on how to make a poll in your own journal, <a href=\"/support/faqbrowse.bml?faqid=69\">read this</a>.";
+     return;
+ }
+
+
+ my $opts = { 'mode' => $mode,
+	      'qid' => $FORM{'qid'},
+	      'prefill' => 1,
+	  };
+ ## itemid 0 means no security is done to check that it's not hijacked:
+ $body .= &LJ::Poll::show_poll($dbh, 0, $remote, $pollid, $opts);
+
+ if (0) { &BML::finish(); }
+
+ return "";
+
+_CODE=)(=PAGE
+TITLE=>(=_CODE return $title; _CODE=)
+BODY=>(=_CODE return $body; _CODE=)
+PAGE=)

@@ -1,0 +1,128 @@
+(=_INFO
+NOCACHE=>1
+_INFO=)
+(=_CODE
+
+ require 'ljlib.pl';
+ &connect_db();
+ my ($sth, $ret);
+
+ require 'cleanhtml.pl';
+ &load_subjecticon;
+
+ my $talkid = $FORM{'talkid'}+0;
+ unless ($talkid) {
+     return "(=H1 Error H1=)(=P No talkid given. P=)";
+ }
+
+ my $sth = $dbh->prepare("SELECT itemid, userpost, datepost, parenttalkid, subject, body, state FROM talkpost WHERE talkid=$talkid");
+ $sth->execute;
+ my $ti = $sth->fetchrow_hashref;
+ unless ($ti) {
+     return "(=H1 Error H1=)(=P No such comment. P=)";
+ }
+
+ my $qitemid = $ti->{'itemid'}+0;
+ $sth = $dbh->prepare("SELECT l.ownerid, l.posterid, lt.event, lt.subject, l.eventtime, l.security, l.allowmask, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(l.logtime) AS 'secondsold' FROM log l, logtext lt WHERE l.itemid=lt.itemid AND l.itemid=$qitemid");
+ $sth->execute;
+ my $item = $sth->fetchrow_hashref;
+ unless ($item) {
+     return "(=H1 Error H1=)(=P No such entry. P=)";
+ }
+
+ ### load user who commented
+ my $quserpost = $dbh->quote($ti->{'userpost'});
+ $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quserpost");
+ $sth->execute;
+ my $uc = $sth->fetchrow_hashref; 
+
+ ### load users
+ $sth = $dbh->prepare("SELECT * FROM user WHERE userid IN ($item->{'ownerid'}, $item->{'posterid'})");
+ $sth->execute;
+ my ($u, $up);
+ my $quser;
+ while ($_ = $sth->fetchrow_hashref) {
+     if ($_->{'userid'} == $item->{'ownerid'})  { 
+	 $u  = $_; 
+	 $quser = $dbh->quote($u->{'user'});
+     }
+     if ($_->{'userid'} == $item->{'posterid'}) { $up = $_; }
+ }
+
+ my $remote;
+ if ($item->{'security'} ne "public") 
+ {
+     $remote = &get_remote();
+     
+     if ($item->{'security'} eq "private" && $u->{'user'} ne $remote->{'user'}) {
+	 return "(=H1 Error H1=)(=P You are not authorized to view this private entry. P=)";
+     }
+     
+     if ($item->{'security'} eq "usemask" && $u->{'user'} ne $remote->{'user'}) {
+	 $sth = $dbh->prepare("SELECT groupmask FROM friends WHERE userid=$u->{'userid'} AND friendid=$remote->{'userid'}");
+	 $sth->execute;
+	 my ($gmask) = $sth->fetchrow_array;
+	 my $allowed = (int($gmask) & int($item->{'allowmask'}));
+	 
+	 unless ($allowed) {
+	     return "(=H1 Error H1=)(=P You are not authorized to view this protected entry. P=)";
+	 }
+     }
+ }
+
+ my $newimg = "";
+ my $datepost = "<FONT SIZE=-1>" . substr($ti->{'datepost'}, 0, 16) . "</FONT>";
+ my $userpost = $ti->{'userpost'};
+ my $user = "<I>(Anonymous)</I>";
+
+ if ($ti->{'state'} eq "D") {
+     $ret .= "<P><B>(Deleted post)</B>";
+ } elsif ($userpost && $user{$userpost}->{'statusvis'} eq "S") {
+     $ret .= "<P><B>(Reply from suspended user)</B>";
+ } else {
+
+     if ($userpost) {
+	 $user = "<B><A HREF=\"/users/$userpost/\">$userpost</A></B> <A HREF=\"/userinfo.bml?user=$userpost\"><IMG BORDER=0 SRC=\"/img/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE></A>";
+     }
+     my $icon = &show_image($ti->{'subjecticon'});
+     $ret .= "<P><TABLE WIDTH=100%><TR>";
+     $ret .= "<TD ROWSPAN=2><IMG SRC=\"/img/dot.gif\" HEIGHT=1 WIDTH=" . ($opts->{'depth'} * 25) . "></TD>";
+     $ret .= "<TD BGCOLOR=#C0C0FF WIDTH=100%>";
+     if ($userpost && $uc->{'defaultpicid'}) {
+	 my $picid = $uc->{'defaultpicid'};
+	 my %userpics;
+	 &load_userpics(\%userpics, [ $picid ]);
+	 $ret .= "<IMG ALIGN=LEFT HSPACE=3 SRC=\"/userpic/$picid\"";
+	 $ret .= " WIDTH=$userpics{$picid}->{'width'}";
+	 $ret .= " HEIGHT=$userpics{$picid}->{'height'}>";
+     }
+     
+     
+     $ret .= "<FONT SIZE=+1 FACE=\"Arial,Helvetica\"><B>" . &ehtml($ti->{'subject'} || "(no subject)") . "</B></FONT> $icon";
+     $ret .= "<BR>$user";
+     
+     if ($BMLClient::COOKIE{"ljuser"}) {
+	 if ($BMLClient::COOKIE{"ljuser"} eq $userpost ||
+	     $BMLClient::COOKIE{"ljuser"} eq $u->{'user'})
+	 {
+	     $ret .= "<A HREF=\"/delcomment.bml?id=$id\"><IMG ALIGN=ABSMIDDLE HSPACE=2 VSPACE=2 SRC=\"/img/delcomment.gif\" WIDTH=22 HEIGHT=20 ALT=\"Click to delete\" BORDER=0></A>";
+	 }
+     }
+     
+     $ret .= "</TD></TR>";
+     $ret .= "<TR><TD>\n";
+     
+     ## escape BML block codes.  so (=TAG ... TAG=) turns into (&#0061; ... TAG=)
+     $ti->{'body'} =~ s/\(=/\(&#0061;/g;
+     &LJ::CleanHTML::clean_event(\$ti->{'body'});	
+     $ret .= $ti->{'body'};
+     
+     $ret .= "<P><FONT SIZE=-2><A HREF=\"/talkpost.bml?replyto=$talkid\">(Reply to this)</A></FONT>";
+     $ret .= "</TD></TR></TABLE>\n";  # close colored table
+ }
+ 
+ 
+&strip_bad_code(\$ret);
+return $ret;
+
+_CODE=)

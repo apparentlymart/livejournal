@@ -1,0 +1,174 @@
+(=PAGE
+TITLE=>Interests
+BODY<=
+
+(=_CODE
+
+ &connect_db();
+ my $sth;
+ my $qintid = $FORM{'intid'}+0;
+ my $qinterest = $dbh->quote($FORM{'int'});
+ my $interest;
+
+ if ($FORM{'view'} eq "popular") 
+ {
+     my $ret = "";
+     $ret .= "(=H1 Popular Interests H1=)(=P The following are the most popular interests. P=)";
+ 
+     $sth = $dbh->prepare("SELECT interest, intcount AS 'count' FROM interests WHERE intcount>2 ORDER BY intcount DESC, interest ASC LIMIT 400");
+     $sth->execute;
+     
+     $ret .= "<P><TABLE><TR><TD><B>Interest</B></TD><TD><B>Count</B></TD></TR>\n";
+     while (my ($int, $count) = $sth->fetchrow_array)
+     {
+	 next if ($count == 1);
+	 my $eint = &BMLUtil::eurl($int);
+	 $ret .= "<TR><TD><A HREF=\"/interests.bml?int=$eint\">$int</A></TD><TD>$count</TD></TR>\n";
+     }
+     $ret .= "</TABLE>\n";
+     return $ret;
+ }
+
+ if ($FORM{'mode'} eq "add") 
+ {
+     my $remote = &get_remote();
+     my $ret;
+     unless ($remote) {
+	 $ret .= "(=H1 Error H1=)(=P You have to be logged in to add an interest this way. P=)";
+	 return $ret;
+     }
+     my $qintid = $FORM{'intid'}+0;
+
+     $sth = $dbh->prepare("SELECT COUNT(*) FROM userinterests WHERE userid=$remote->{'userid'}");
+     $sth->execute;
+     my ($count) = $sth->fetchrow_array;
+     if ($count >= 150) {
+	 $ret .= "(=H1 Sorry.. H1=)(=P You already have 150 interests defined. P=)";
+	 return $ret;
+     }
+   
+     $dbh->do("REPLACE INTO userinterests (userid, intid) VALUES ($remote->{'userid'}, $qintid)");
+     
+     $ret .= "(=H1 Added! H1=)(=P The interest has been added to your list. P=)";
+     return $ret;
+ }
+
+ if ($FORM{'mode'} eq "findsim") 
+ {
+     my $ret = "";
+     $ret .= "(=H1 Similar Users H1=)(=P This tool lets you find users with the most similiar interests to a given user.  More fun stuff can be found on the <A HREF=\"/interests.bml\">interests page</A>. P=)";
+     $ret .= "<CENTER><FORM METHOD=GET><INPUT TYPE=HIDDEN NAME=mode VALUE=findsim_do>";
+     $ret .= "User: <INPUT NAME=user> <INPUT TYPE=SUBMIT VALUE=\"Find!\"></FORM></CENTER>";
+     return $ret;
+ }
+
+ if ($FORM{'mode'} eq "findsim_do")
+ {
+     my $ret = "";
+     my $quser = $dbh->quote(lc($FORM{'user'}));
+     $sth = $dbh->prepare("SELECT userid FROM user WHERE user=$quser");
+     $sth->execute;
+     my ($userid) = $sth->fetchrow_array;
+     return "(=H1 Error H1=)(=P Unknown user P=)" unless ($userid);
+
+     $sth = $dbh->prepare("SELECT intid FROM userinterests WHERE userid=$userid");
+     $sth->execute;
+     my @intids = ();
+     push @intids, $_->{'intid'} while ($_ = $sth->fetchrow_hashref);
+
+     return "(=H1 Error H1=)(=P User $FORM{'user'} has no defined interests. P=)" unless (@intids);
+    
+     my $intid_in = join(", ", @intids);
+     $ret .= "(=H1 Similar Users H1=)(=P The following are the most related users to $FORM{'user'}. P=)";
+     $sth = $dbh->prepare("SELECT u.user, COUNT(*) AS 'count' FROM user u, userinterests ui WHERE u.userid=ui.userid AND u.statusvis='V' AND ui.intid IN ($intid_in) GROUP BY 1 ORDER BY 2 DESC, 1 ASC LIMIT 100");
+     $sth->execute;
+     $ret .= "<P><TABLE CELLPADDING=3><TR VALIGN=BOTTOM><TD><B>#</B></TD><TD><B>User</B></TD><TD><B>Similiar<BR>Interests</B></TD><TD><B>Percent Match</B></TD></TR>\n";
+     my $total = @intids;
+     my $count=0;
+     while ($_ = $sth->fetchrow_hashref)
+     {
+	 $count++;
+	 my $percent = sprintf("%.1f", $_->{'count'}*100/$total);
+	 $ret .= "<TR>";
+	 $ret .= "<TD>$count</TD>";
+	 $ret .= "<TD>(=LJUSER $_->{'user'} LJUSER=)</TD>";
+	 $ret .= "<TD>$_->{'count'}</TD><TD>($percent%)</TD></TR>\n";
+     }
+     $ret .= "</TABLE>\n";
+
+     return $ret;
+ }
+
+ if ($FORM{'intid'} || $FORM{'int'}) 
+ {
+     my $where = $FORM{'intid'} ? "intid=$qintid" : "interest=$qinterest";
+     $sth = $dbh->prepare("SELECT interest, intid FROM interests WHERE $where");
+     $sth->execute;
+     ($interest, $intid) = $sth->fetchrow_array;
+     unless ($interest) { return "(=H1 Error H1=)(=P Interest wasn't found. P=)"; }
+     $qintid = $intid+0;
+     
+     my $ret = "";
+     my $remote = &get_remote_noauth();
+
+     ### communities
+
+     my $list;
+     my $count = 0;
+     $sth = $dbh->prepare("SELECT u.user, u.name FROM user u, userinterests ui WHERE u.userid=ui.userid AND ui.intid=$qintid AND u.journaltype='C' ORDER BY u.user");
+     $sth->execute;
+     while ($_ = $sth->fetchrow_hashref) {
+	 $count++;
+	 $list .= "<LI><A HREF=\"/userinfo.bml?user=$_->{'user'}\"><IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/community.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE></A> <A HREF=\"/community/$_->{'user'}/\"><B>$_->{'user'}</B></A> - $_->{'name'}\n";
+     }
+
+     my $s = $count > 1 ? "es" : "";
+     if ($count) {
+	 $ret .= "(=H1 Relevant Communities H1=)(=P The following communities are also interested in <B>\"$interest\"</B>. P=)";
+	 $ret .= "<P><B>$count match$s:</B><UL>";
+	 $ret .= $list;
+	 $ret .= "</UL>";
+     }
+
+     ##### users
+
+     $ret .= "(=H1 Interested users H1=)(=P The following users are also interested in <B>\"$interest\"</B>.  ";
+     if ($remote) {
+	 $ret .= "If you're also interested in this and would like to be added to this list, <A HREF=\"/interests.bml?mode=add&intid=$qintid\">click here</A>.  ";
+     }
+     $ret .= "More fun stuff can be found on the <A HREF=\"/interests.bml\">interests page</A>. P=)";
+
+     my $list;
+     my $count = 0;
+     $list .= "<UL>\n";
+     $sth = $dbh->prepare("SELECT u.user, u.name FROM user u, userinterests ui WHERE u.userid=ui.userid AND ui.intid=$qintid AND u.journaltype='P' ORDER BY u.user");
+     $sth->execute;
+     while ($_ = $sth->fetchrow_hashref) {
+	 $count++;
+	 $list .= "<LI><A HREF=\"/userinfo.bml?user=$_->{'user'}\"><IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE></A> <A HREF=\"/users/$_->{'user'}/\"><B>$_->{'user'}</B></A> - $_->{'name'}\n";
+     }
+     $list .= "</UL>\n";
+
+     my $s = $count > 1 ? "es" : "";
+     $ret .= "<P><B>$count match$s:</B>";
+     $ret .= $list;
+
+     ## end
+     return $ret;
+ }
+
+ my $ret = "";
+ $ret .= "(=H1 Interests H1=)(=P Here are some fun things you can do with interests.... P=)";
+ $ret .= "<FORM METHOD=GET><UL>";
+ $ret .= "<LI><A HREF=\"/interests.bml?view=popular\">View popular interests</A>\n";
+ $ret .= "<LI><A HREF=\"/interests.bml?mode=findsim\">Find similiar people</A> -- see who has the most number of common interests with you\n";
+ $ret .= "<LI>Find people interested in: <INPUT NAME=int SIZE=20><INPUT TYPE=SUBMIT VALUE=\"Find\">\n";
+ $ret .= "</UL></FORM>\n";
+ $ret .= "Don't have any interests listed?  Add some by going to the <A HREF=\"/editinfo.bml\">Edit Personal Info & Settings</A> page.";
+ 
+ return $ret;
+
+_CODE=)
+
+<=BODY
+PAGE=)

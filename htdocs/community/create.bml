@@ -1,0 +1,98 @@
+(=_CODE
+
+ $title = "Create Community";
+ $body = "";
+
+ if ($FORM{'mode'} eq "create") 
+ {
+     &connect_db();
+
+     my $sth;
+     my @errors = ();
+     my $qmuser = $dbh->quote(lc($FORM{'muser'}));
+     my $qcuser = $dbh->quote(lc($FORM{'cuser'}));
+
+     $sth = $dbh->prepare("SELECT userid, user, journaltype, password FROM user WHERE user IN ($qmuser, $qcuser)");
+     $sth->execute;
+     my $mu = {};
+     my $cu = {};
+     while ($_ = $sth->fetchrow_hashref) {
+	 if ($_->{'user'} eq lc($FORM{'muser'})) { $mu = $_; }
+	 if ($_->{'user'} eq lc($FORM{'cuser'})) { $cu = $_; }
+     }
+     
+     unless ($mu->{'user'}) {
+	 push @errors, "Maintainer account not found.";
+     } else {
+	 if ($mu->{'password'} ne $FORM{'mpassword'}) {
+	     push @errors, "Invalid password for maintainer account.";
+	 }
+	 unless ($mu->{'journaltype'} eq "P") {
+	     push @errors, "Maintainer account must be a person, not another shared account.";
+	 }
+     }
+
+     unless ($cu->{'user'}) {
+	 push @errors, "Community account not found.";
+     } else {
+	 if ($cu->{'password'} ne $FORM{'cpassword'}) {
+	     push @errors, "Invalid password for maintainer account.";
+	 }
+     }
+
+     if ($cu->{'userid'} == $mu->{'userid'}) {
+	 push @errors, "Maintainer account and community account cannot be the same.";
+     }
+
+     if (@errors) {
+	 $title = "Errors";
+	 $body = "(=BADCONTENT=)<UL>";
+	 foreach (@errors) {
+	     $body .= "<LI>$_";
+	 }
+	 $body .= "</UL>";
+	 return "";
+     }
+
+     my $qmembership = $dbh->quote($FORM{'membership'} eq "open" ? "open" : "closed");
+     my $qpostlevel = $dbh->quote($FORM{'postlevel'} eq "members" ? "members" : "select");
+
+     $dbh->do("UPDATE user SET journaltype='C' WHERE userid=$cu->{'userid'}");
+     $dbh->do("REPLACE INTO community (userid, ownerid, membership, postlevel) VALUES ($cu->{'userid'}, $mu->{'userid'}, $qmembership, $qpostlevel)");
+     my $qcuser = $dbh->quote($cu->{'user'});
+     $dbh->do("REPLACE INTO priv_map (prmid, userid, prlid, arg) SELECT NULL, $mu->{'userid'}, prlid, $qcuser FROM priv_list WHERE privcode='sharedjournal'");
+
+     $body .= "(=H1 Success H1=)(=P Your community is now setup. P=)";
+     $body .= "(=P Relevant links: <UL><LI><A HREF=\"$LJ::SITEROOT/community/$cu->{'user'}/\">Community website<LI><A HREF=\"/userinfo.bml?user=$cu->{'user'}\">Community info</A><LI><A HREF=\"/admin/console/\">Admin console</A> - to add/remove people that are able to post</UL> P=)";
+
+     return "";
+ }
+
+ $body .= "(=H1 Create Community H1=)(=P From here you can create a community account.  A community is a special type of account that other users can join, and post in.  For example of a community, check out the <A HREF=\"/userinfo.bml?user=seattle_party\">Seattle Party Community</A>. P=)";
+
+ $body .= "<FORM METHOD=POST><input type=hidden name=mode value=create>";
+ $body .= "(=H2 Maintainer Account H2=)(=P This account is the one that runs the community.  This account must be a real person account... not another community account. P=)";
+ $body .= "<UL>Username: <INPUT NAME=\"muser\" SIZE=15 MAXLENGTH=15> Password: <INPUT NAME=\"mpassword\" TYPE=PASSWORD></UL>";
+
+ $body .= "(=H2 Community Account H2=)(=P This is the account that you want to turn into a community.  It must <a href=\"/create.bml\">already be created</a>, but should not already be in use by an individual because after this tons of different people will be able to potentially post in it.  P=)";
+ $body .= "<UL>Username: <INPUT NAME=\"cuser\" SIZE=15 MAXLENGTH=15> Password: <INPUT NAME=\"cpassword\" TYPE=PASSWORD></UL>";
+
+ $body .= "(=H1 Community Options H1=)(=P Choose how your community operates.  You can change these later. P=)";
+ $body .= "(=H2 Membership H2=)(=P Who can join your community? <UL>";
+ $body .= "<INPUT TYPE=radio name=\"membership\" VALUE=\"open\" CHECKED> <B>Open Membership</B><BR>Anybody can join without getting approved.";
+ $body .= "<P><INPUT TYPE=radio name=\"membership\" VALUE=\"closed\"> <B>Closed Membership</B><BR>You have to approve people's requests to join.";
+ $body .= "</UL> P=)";
+
+ $body .= "(=H2 Posting Access H2=)(=P Who can post to this community? <UL>";
+ $body .= "<INPUT TYPE=radio name=\"postlevel\" VALUE=\"members\" CHECKED> <B>All Members</B><BR>Anybody can post immediately, once they're a member.";
+ $body .= "<P><INPUT TYPE=radio name=\"postlevel\" VALUE=\"select\"> <B>Select Members</B><BR>Only some members are able to post, once they've been given access by the maintainer account..";
+ $body .= "</UL> P=)";
+
+ $body .= "<center><input type=submit value=\"Create Community\"></center></form>";
+
+ return "";
+
+_CODE=)(=PAGE
+TITLE=>(=_CODE return $title; _CODE=)
+BODY=>(=_CODE return $body; _CODE=)
+PAGE=)

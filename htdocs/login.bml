@@ -1,0 +1,49 @@
+(=PAGE
+TITLE=>Login
+BODY<=
+
+(=H1 Login H1=)
+(=P
+To login to LiveJournal, enter your username and password below.  <B>New Users:</B> Go <a href="/create.bml">create an account</a>: it's free, simple, causes less cavities than leading brands, and guaranteed to make you more attractive to the opposite sex. P=)
+(=P You may also specify when your login expires.  By default your login will expire when you close your browser, which is best on public computers.  However, if you're the only user of your computer and nobody else has access to it, you may choose to remain logged in forever.
+P=)
+
+<FORM ACTION="login_do.bml" METHOD="POST">
+
+(=STANDOUT
+<TABLE CELLPADDING=3>
+<TR><TD>Username:</TD><TD><INPUT TYPE="TEXT" NAME="user" SIZE="15" MAXLENGTH="15"></TD></TR>
+<TR><TD VALIGN=TOP>Password:</TD><TD><INPUT TYPE="password" NAME="password" SIZE="15" MAXLENGTH="30"><BR><A HREF="/lostinfo.bml"><FONT FACE="Arial,Helvetica" SIZE=1>Forget?</FONT></A></TD></TR>
+<TR VALIGN=TOP><TD>Expiration:</TD><TD>
+<INPUT TYPE="radio" NAME="expire" VALUE="close" CHECKED id="close"> <LABEL FOR="close">When browser closes</LABEL><BR>
+<INPUT TYPE="radio" NAME="expire" VALUE="never" id="never"> <LABEL FOR="never">Never</LABEL>
+(=_CODE
+ if ($FORM{'ret'} && $ENV{'HTTP_REFERER'}) {
+     my $eh_ref = &BMLUtil::ehtml($ENV{'HTTP_REFERER'});
+     return "<INPUT TYPE=hidden NAME=ref VALUE=\"$eh_ref\">\n";
+ }
+ return "";
+_CODE=)
+</TD></TR>
+<TR><TD></TD><TD ALIGN=LEFT><INPUT TYPE="SUBMIT" VALUE="Login...">
+</TD></TR>
+<TR><TD>Other Options:</TD><TD nowrap>
+<input type=checkbox name=notfast> Don't use fast servers (=HELP /support/faqbrowse.bml?faqid=74 HELP=)
+</TD></TR>
+
+</TABLE>
+STANDOUT=)
+</FORM>
+
+(=H1 Why login? H1=)
+(=P
+There are some of the main benefits of logging in:
+<UL>
+<LI>You won't have to enter your username/password anywhere on the site anymore.
+<LI>You'll be able to view "protected" journal entries from your friends that give you access to read them.
+<LI>A lot of features are only visible or accessible when you're logged in.
+</UL>
+P=)
+
+<=BODY
+PAGE=)

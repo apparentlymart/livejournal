@@ -1,0 +1,50 @@
+(=PAGE
+TITLE=>Edit Journal Entries
+
+BODY<=
+
+(=H1 Edit Journal Entries H1=)
+(=P
+Enter your username and password to modify or delete your past journal entries.
+P=)
+
+<FORM ACTION="editjournal_do.bml" METHOD="POST">
+<INPUT TYPE=HIDDEN NAME=metamode VALUE="choose_editrange">
+
+(=STANDOUT
+<TABLE>
+(=_CODE
+ require 'ljlib.pl'; 
+ return &auth_fields();
+ _CODE=)
+<TR VALIGN=TOP><TD>View What Entries:</TD>
+<TD>
+       <INPUT TYPE=RADIO NAME="selecttype" VALUE="last" CHECKED> Most recent entry<BR>
+       <INPUT TYPE=RADIO NAME="selecttype" VALUE="lastn"> <INPUT NAME="howmany" SIZE=3 MAXLENGTH=2 VALUE="20"> most recent entries<BR>
+       <INPUT TYPE=RADIO NAME="selecttype" VALUE="day"> Certain Day: 
+(=_CODE
+
+my $ret="";
+my (undef,undef,undef,$mday,$mon,$year,undef,undef,undef) = localtime(time);
+$year+=1900;
+$mon=sprintf("%02d", $mon+1); $mday=sprintf("%02d", $mday); $min=sprintf("%02d", $min);
+$ret .= "<INPUT NAME=year SIZE=5 MAXLENGTH=4 VALUE=$year>-";
+$ret .= "<INPUT NAME=month SIZE=3 MAXLENGTH=2 VALUE=$mon>-";
+$ret .= "<INPUT NAME=day SIZE=3 MAXLENGTH=2 VALUE=$mday>\n";
+return $ret;
+
+_CODE=)
+
+</TD></TR>
+<TR><TD></TD><TD><INPUT TYPE="SUBMIT" VALUE="Proceed..."></TD></TR>
+</TABLE>
+STANDOUT=)
+
+(=H1 Forget something? H1=)
+(=P
+If you forgot your username or password, <A HREF="lostinfo.bml">recover it here!</A>.
+P=)
+
+
+<=BODY
+PAGE=)

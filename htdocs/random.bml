@@ -1,0 +1,19 @@
+(=_CODE
+
+ &connect_db;
+ 
+ $sth = $dbh->prepare("SELECT userid FROM randomuserset ORDER BY RAND() LIMIT 1");
+ $sth->execute;
+ my ($userid) = $sth->fetchrow_array;
+ 
+ $sth = $dbh->prepare("SELECT user FROM user WHERE userid=$userid");
+ $sth->execute;
+ my ($user) = $sth->fetchrow_array;
+ 
+ print "Location: $LJ::SITEROOT/users/$user/\n\n";
+ 
+ return "";
+
+_CODE=)(=_INFO
+NOHEADERS=>1
+_INFO=)

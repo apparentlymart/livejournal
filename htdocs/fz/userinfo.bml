@@ -1,0 +1,22 @@
+(=_INFO
+NOCACHE=>1
+_INFO=)
+(=_CODE
+
+require 'ljlib.pl';
+my ($sth, $ret);
+my $user = $FORM{'user'};
+
+&connect_db();
+my $quser = $dbh->quote($user);
+$sth = $dbh->prepare("SELECT userid, user, name FROM user WHERE user=$quser");
+$sth->execute;
+my $u = $sth->fetchrow_hashref;
+
+$ret .= "<B>$user</B><BR>$u->{'name'}";
+$ret .= "<P><A HREF=\"/userinfo.bml?user=$user\">userinfo</A>";
+
+return $ret;
+
+_CODE=)
+

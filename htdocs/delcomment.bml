@@ -1,0 +1,92 @@
+(=_INFO
+NOCACHE=>1
+_INFO=)(=PAGE
+TITLE=>Delete Comment
+BODY<=
+
+(=_CODE
+
+ use Fcntl ':flock'; # import LOCK_* constants
+ 
+ require 'ljlib.pl';
+ &connect_db;
+ my $ret = "";
+
+ my $remote = &get_remote();
+
+ unless ($remote) {
+     return "(=H1 Error H1=)(=P You must be logged in to delete a comment. P=)";
+ }
+
+ my $qid = $FORM{'id'}+0;
+ 
+ ### get some info about the comment being deleted ... which journal entry is it about?
+ ### and if it's being deleted, is it authorized to be deleted by this user?
+ $sth = $dbh->prepare("SELECT talkid, nodetype, nodeid AS 'itemid', parenttalkid, journalid, posterid FROM talk WHERE talkid=$qid");
+ $sth->execute;
+ if ($dbh->err) { return "<B>Error:</B>" . $dbh->errstr; }
+ $tp = $sth->fetchrow_hashref;
+ unless ($tp) {
+     return "(=H1 Error H1=)(=P The comment doesn't even exist... P=)";
+ }
+ if ($tp->{'posterid'}) {
+     $tp->{'userpost'} = &LJ::get_username($dbh, $tp->{'posterid'});
+ }
+ if ($tp->{'journalid'} != $remote->{'userid'} &&
+     $tp->{'posterid'} != $remote->{'userid'}) 
+ {
+     return "(=H1 Error H1=)(=P A comment may only be deleted by the journal owner or the one who posted it. (pid=$tp->{'posterid'}; jid=$tp->{'journalid'}; ruid=$remote->{'uid'}) P=)";
+ }
+ 
+ if ($FORM{'confirm'} ne "Y") {
+     $ret .= "(=H1 Delete this comment? H1=)(=P Are you sure you want to delete this comment? P=)";
+     $ret .= "<P><FORM METHOD=POST ACTION=\"delcomment.bml\"><CENTER>\n";
+     $ret .= "<INPUT TYPE=HIDDEN NAME=id VALUE=\"$FORM{'id'}\">\n";
+     $ret .= "<INPUT TYPE=HIDDEN NAME=confirm VALUE=\"Y\">\n";
+     $ret .= "<INPUT TYPE=SUBMIT VALUE=\"Yes, delete it!\">";
+     $ret .= "</CENTER>";
+     if ($tp->{'posterid'} && 
+	 $tp->{'posterid'} != $remote->{'userid'} &&
+	 $remote->{'userid'} == $tp->{'journalid'}) {
+	 $ret .= "<P><INPUT TYPE=CHECKBOX NAME=\"ban\"> And also ban user <B>$tp->{'userpost'}</B> from ever posting again.";
+     }
+     if ($remote->{'userid'} == $tp->{'journalid'}) {
+	 $ret .= "<P><B>Note:</B> From the <A HREF=\"/editinfo.bml\">Edit Personal Info & Settings</A> page you can choose whether to allow <I>all</I>, <I>registered users</I>, or <I>friends only</I> to post.";
+     }
+     $ret .= "</FORM>\n";
+     return $ret;
+ }
+
+ $sth = $dbh->prepare("UPDATE talk SET state='D' WHERE talkid=$qid");
+ $sth->execute;
+ if ($dbh->err) { return "<B>Error:</B>" . $dbh->errstr; }
+ $sth = $dbh->prepare("UPDATE talktext SET subject=NULL, body=NULL WHERE talkid=$qid");
+ $sth->execute;
+ if ($dbh->err) { return "<B>Error:</B>" . $dbh->errstr; }
+ $sth = $dbh->prepare("DELETE FROM talkprop WHERE talkid=$qid");
+ $sth->execute;
+ if ($dbh->err) { return "<B>Error:</B>" . $dbh->errstr; }
+
+ my $qitemid = $tp->{'itemid'}+0;
+ my $mod = $qitemid % 100;
+
+ # update the "replycount" field of the log table
+ &LJ::query_buffer_add($dbh, "log", "UPDATE log SET replycount=replycount-1 WHERE itemid=$qitemid");
+
+ my $and;
+
+ # ban the user, if selected
+ if ($FORM{'ban'}) 
+ {
+     $dbh->do("INSERT INTO ban (userid, banneduserid) VALUES ($remote->{'userid'}, $tp->{'posterid'})");
+     $and .= "Additionally, user <B>$tp->{'userpost'}</B> has been banned from posting anything else in your journal.";
+ }
+
+ $ret .= "(=H1 Deleted H1=)(=P The comment has been deleted. $and P=)";
+ $ret .= $dbh->errstr;
+ return $ret;
+
+_CODE=)
+
+<=BODY
+PAGE=)

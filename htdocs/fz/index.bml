@@ -1,0 +1,26 @@
+(=PAGE
+TITLE=>ForumZilla Support
+BODY<=
+
+(=H1 A whole new way to browse... H1=)
+(=P
+LiveJournal is proud to now support <A HREF="http://www.zapogee.com/forumzilla/">ForumZilla</A>.  You can now browse LiveJournal as if it were your email or a newsgroup, complete with threading.  Very fun!
+P=)
+(=P
+To use ForumZilla you'll first have to be using <A HREF="http://www.mozilla.org/">Mozilla</A>, the browser that's the base of the upcoming Netscape 6.0.  ForumZilla is a program that runs on top of the Mozilla platform, so it'll run on any platform --- Windows, Macintosh, Unix, BeOS, you name it!
+P=)
+(=H1 How to subscribe H1=)
+(=P
+Once you've installed ForumZilla and restarted Mozilla, a "ForumZilla" menu item appears in the Mozilla "Tasks" menu.  In ForumZilla, you can then subscribe to the following forum:
+<UL>
+<TT><B>(=SITEROOT=)/fz/forum.bml?user=</B>your_username</TT>
+</UL>
+Fun, isn't it?  :)
+P=)
+(=P
+If you have any questions or comments, mail <A HREF="mailto:(=ADMIN_EMAIL=)">(=ADMIN_EMAIL=)</A>.
+P=)
+
+
+<=BODY
+PAGE=)

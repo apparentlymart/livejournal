@@ -1,0 +1,54 @@
+(=_CODE
+
+ $title = "Leave Community";
+ $body = "";
+
+ &connect_db();
+ my $sth;
+
+ ### is there a user out there?
+ ###
+ my $remote = &get_remote();
+ unless ($remote) {
+     $body = "(=H1 Sorry.. H1=)(=P To leave a community you must first <A HREF=\"/login.bml?ret=1\">log in</A>. P=)";
+     return "";
+ }
+
+ ### get info about the community
+ ###
+ my $cuserid = $FORM{'cuserid'}+0;
+ $sth = $dbh->prepare("SELECT u.user, u.name, c.ownerid, c.membership, c.postlevel FROM user u, community c WHERE u.userid=c.userid AND c.userid=$cuserid");
+ $sth->execute;
+ my $ci = $sth->fetchrow_hashref();
+
+ ### does this community even exit?
+ ###
+ unless ($ci) {
+     $body .= "(=H1 Error H1=)(=P The specified community ID is not valid, or is not a community. P=)";
+     return "";
+ }
+ 
+ if ($FORM{'confirm'}) 
+ {
+     ### make remote user a friend of the community
+     ###
+     $dbh->do("DELETE FROM friends WHERE userid=$cuserid AND friendid=$remote->{'userid'}");
+     
+     $body .= "(=H1 Success H1=)(=P You are now removed from the <A HREF=\"/userinfo.bml?user=$ci->{'user'}\">$ci->{'name'} Community</A> P=)";
+     
+     $dbh->do("DELETE FROM logaccess WHERE ownerid=$cuserid AND posterid=$remote->{'userid'}");
+     
+ }   
+ else 
+ {
+     $body .= "(=H1 You sure? H1=)(=P Press the button below to leave the \"$ci->{'name'}\" community.";
+     $body .= "<FORM METHOD=POST ACTION=\"leave.bml\"><input type=hidden name=cuserid value=$cuserid><input type=hidden name=confirm value=1><center><input type=submit value=\"Leave Community\"></FORM> P=)";
+     return "";
+ }
+
+ return "";
+
+_CODE=)(=PAGE
+TITLE=>(=_CODE return $title; _CODE=)
+BODY=>(=_CODE return $body; _CODE=)
+PAGE=)

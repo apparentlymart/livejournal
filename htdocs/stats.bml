@@ -1,0 +1,199 @@
+(=PAGE
+TITLE=>Statistics
+BODY<=
+
+(=H1 LiveJournal Statistics H1=)
+(=P
+The following statistics may be interesting for some of you.  Note that for speed, most of this page is only updated every 24 hours.  However, certain parts are live.  Raw data can be picked up <A HREF="stats/">here</A>.
+P=)
+(=HR=)
+
+(=_CODE
+#line 14
+ my $ret = "";
+ &connect_db();
+
+ $now = time();
+ %stat = ();
+
+ $sth = $dbh->prepare("SELECT statcat, statkey, statval FROM stats WHERE statcat IN ('userinfo', 'client', 'age', 'gender', 'account')");
+ $sth->execute;
+ while ($_ = $sth->fetchrow_hashref) {
+     $stat{$_->{'statcat'}}->{$_->{'statkey'}} = $_->{'statval'};
+ }
+
+ $sth = $dbh->prepare("SELECT c.item, s.statval FROM stats s, codes c WHERE c.type='country' AND s.statcat='country' AND s.statkey=c.code ORDER BY s.statval DESC LIMIT 15");
+ $sth->execute;
+ while ($_ = $sth->fetchrow_hashref) {
+     $stat{'country'}->{$_->{'item'}} = $_->{'statval'};
+ }
+
+ $sth = $dbh->prepare("SELECT c.item, s.statval FROM stats s, codes c WHERE c.type='state' AND s.statcat='stateus' AND s.statkey=c.code ORDER BY s.statval DESC LIMIT 15");
+ $sth->execute;
+ while ($_ = $sth->fetchrow_hashref) {
+     $stat{'state'}->{$_->{'item'}} = $_->{'statval'};
+ }
+
+ $total = $stat{'userinfo'}->{'total'}+0;
+ $usedever = $stat{'userinfo'}->{'updated'}+0;
+ $used30 = $stat{'userinfo'}->{'updated_last30'}+0;
+ $used7 = $stat{'userinfo'}->{'updated_last7'}+0;
+ $usedlastday = $stat{'userinfo'}->{'updated_last1'}+0;
+ $allow_getljnews = $stat{'userinfo'}->{'allow_getljnews'}+0;
+ $allow_getpromos = $stat{'userinfo'}->{'allow_getpromos'}+0;
+
+ $ret .= "(=H1 Users H1=)\n";
+ $ret .= "(=P How many users, and how many of those are active? <UL>";
+ $ret .= "<LI><B>Total users: </B> $total\n";
+ $ret .= "<LI><B>Users that have ever updated: </B> $usedever\n";
+ $ret .= "<LI><B>Users updating in last 30 days: </B> $used30\n";
+ $ret .= "<LI><B>Users updating in last 7 days: </B> $used7\n";
+ $ret .= "<LI><B>Users updating in past 24 hours: </B> $usedlastday\n";
+ $ret .= "</UL> P=)\n";
+
+ $ret .= "(=H1 Gender H1=)\n";
+ $ret .= "(=P Are males or females more likely to maintain journals? <UL>";
+ {
+     my $male = $stat{'gender'}->{'M'}+0;
+     my $female = $stat{'gender'}->{'F'}+0;
+     my $tot = $male+$female;
+     $tot ||= 1;
+     $ret .= "<LI><B>Male: </B> $male (" . sprintf("%0.1f", $male*100/$tot) . "%)";
+     $ret .= "<LI><B>Female: </B> $female (" . sprintf("%0.1f", $female*100/$tot) . "%)";
+ }
+ $ret .= "<LI><B>Unspecified: </B> " . ($stat{'gender'}->{'U'}+0);
+ $ret .= "</UL> P=)\n";
+
+ $ret .= "(=H1 Account Types H1=)\n";
+ $ret .= "(=P What type of <A HREF=\"/support/faqbrowse.bml?faqid=38\">account</A> do people have? <UL>";
+ {
+     foreach my $act (qw(off early paid on)) {
+	 my $num = $stat{'account'}->{$act}+0;
+	 $ret .= "<LI><B>$LJ::acct_name{$act}: </B> $num (" . sprintf("%0.1f", $num*100/$stat{'userinfo'}->{'total'}) . "%)";	 
+     }
+ }
+ $ret .= "</UL> P=)\n";
+ 
+ $ret .= "(=H1 Receiving News/Advertising H1=)\n";
+ $ret .= "(=P This information says how many users of the ones with validated email addresses subscribe to the LiveJournal news that we send out, and how many people say they wouldn't mind getting advertisement/promotions sent to them by email. <UL>";
+ $ret .= "<LI><B>Users getting LiveJournal news: </B> $allow_getljnews\n";
+ $ret .= "<LI><B>Users getting promotions by mail: </B> $allow_getpromos\n";
+ $ret .= "</UL> P=)\n";
+
+ $ret .= "(=H1 Recent Updates H1=)\n";
+ $ret .= "(=P The following are the 10 most recently updated journals: <UL>";
+ $sth = $dbh->prepare("SELECT user, name, timeupdate FROM user WHERE user <> 'test' AND timeupdate IS NOT NULL ORDER BY timeupdate DESC LIMIT 10");
+ $sth->execute;
+ while ($_ = $sth->fetchrow_hashref)
+ {
+     $ret .= "<LI><A HREF=\"/users/$_->{'user'}/\">(=_EH $_->{'name'} _EH=)</A>, $_->{'timeupdate'}\n";
+ }
+ $ret .= "</UL> P=)\n";
+
+ $ret .= "(=H1 New Journals H1=)\n";
+ $ret .= "(=P The following are the 10 most recently created journals.  It's very likely these users haven't modified their journals much, and probably haven't wrote much in them yet either... <UL>";
+ $sth = $dbh->prepare("SELECT user, name, timeupdate FROM user WHERE user <> 'test' AND timeupdate IS NOT NULL ORDER BY timecreate DESC LIMIT 10");
+ $sth->execute;
+ while ($_ = $sth->fetchrow_hashref)
+ {
+     $ret .= "<LI><A HREF=\"/users/$_->{'user'}/\">(=_EH $_->{'name'} _EH=)</A>, $_->{'timeupdate'}\n";
+ }
+ $ret .= "</UL> P=)\n";
+
+ $ret .= "(=H1 Demographics H1=)\n";
+ $ret .= "(=P The following are the 15 most popular countries LiveJournal is used in: <UL>";
+ foreach my $key (sort { $stat{'country'}->{$b} <=> $stat{'country'}->{$a} } keys %{$stat{'country'}})
+ {
+     $ret .= "<LI><B>$key</B> - $stat{'country'}->{$key}\n";
+ }
+ $ret .= "</UL>\n";
+ $ret .= "The following are the 15 most popular U.S. states LiveJournal is used in: <UL>";
+ foreach my $key (sort { $stat{'state'}->{$b} <=> $stat{'state'}->{$a} } keys %{$stat{'state'}})
+ {
+     $ret .= "<LI><B>$key</B> - $stat{'state'}->{$key}\n";
+ }
+ $ret .= "</UL> P=)\n";
+
+ # most active users
+# $ret .= "(=H1 Most Active Users H1=)(=P Here are the most active users, both overall, and in the past week: P=)\n";
+# $ret .= "<CENTER><P><TABLE WIDTH=500><TR BGCOLOR=#C0C0FF><TH ALIGN=LEFT>Overall</TH><TH ALIGN=LEFT>Past Week</TH></TR><TR VALIGN=TOP>\n";
+# $ret .= "<TD>\n";
+# foreach my $key (sort { $stat{'active_overall'}->{$b} <=> $stat{'active_overall'}->{$a} } keys %{$stat{'active_overall'}})
+# {
+#     $ret .= "<A HREF=\"/users/$key\">$key</A> - $stat{'active_overall'}->{$key}<BR>\n";
+# }
+
+# $ret .= "</TD><TD>\n";
+# foreach my $key (sort { $stat{'active_week'}->{$b} <=> $stat{'active_week'}->{$a} } keys %{$stat{'active_week'}})
+# {
+#     $ret .= "<A HREF=\"/users/$key\">$key</A> - $stat{'active_week'}->{$key}<BR>\n";
+# }
+# $ret .= "</TD></TR></TABLE></CENTER>\n";
+ 
+ # ages
+ $ret .= "(=H1 Age Distribution H1=)(=P The following shows the age distribution of LiveJournal users: P=)\n";
+
+ my %age = ();
+ my $maxage = 1;
+ foreach my $key (keys %{$stat{'age'}}) {
+     $age{$key} = $stat{'age'}->{$key};
+     if ($stat{'age'}->{$key} > $maxage) { $maxage = $stat{'age'}->{$key}; }
+ }
+ $ret .= "<P><TABLE>\n";
+ my $lastage = 0;
+ foreach my $age (grep { $_ >= 13  && $_ <= 55 } sort { $a <=> $b } sort keys %age)
+ {
+     $width = int(400 * $age{$age}/$maxage);
+     $ret .= "<TR><TD ALIGN=RIGHT><B>$age</B></TD><TD>$age{$age}</TD><TD><IMG SRC=\"/img/bluedot.gif\" HEIGHT=10 WIDTH=$width></TD></TR>\n";
+     $lastage = $_;
+ }
+ $ret .= "</TABLE>\n";
+
+
+ # clients
+ $ret .= "(=H1 Client Usage H1=)(=P How people update their journals (over the last 30 days): P=)\n";
+ $ret .= "<P><TABLE CELLPADDING=3>\n";
+
+ ### sum up clients over different versions
+ foreach my $c (keys %{$stat{'client'}}) {
+     next unless ($c =~ /^(.+?)\//);
+     $stat{'clientname'}->{$1} += $stat{'client'}->{$c};
+ }
+ foreach my $cn (sort { $stat{'clientname'}->{$b} <=> $stat{'clientname'}->{$a} } keys %{$stat{'clientname'}})
+ {
+     $ret .= "<TR VALIGN=TOP><TD><FONT SIZE=+1><B>$stat{'clientname'}->{$cn}</B></FONT></TD><TD><B>$cn</B><BR>\n";
+     $ret .= "<FONT SIZE=-1>\n";
+     foreach my $c (sort grep { /^$cn\// } keys %{$stat{'client'}}) {
+	 my $count = $stat{'client'}->{$c};
+	 $c =~ s/^$cn\///;
+	 $ret .= "$c ($count), ";
+     }
+     chop $ret; chop $ret;  # remove trailing ", "
+     $ret .= "</FONT>\n";
+     $ret .= "</TD></TR>\n";
+ }
+ $ret .= "</TABLE>\n";
+
+ ### graphs!
+
+ $ret .= "(=H1 Pretty Graphs! H1=)(=P These are the most fun, aren't they? P=)";
+ 
+ $ret .= "(=H2 Journal entries -- last 60 days H2=)(=P How often do people post over the last 60 days? P=)";
+ $ret .= "<P><CENTER><IMG SRC=\"stats/postsbyday.png\" WIDTH=520 HEIGHT=350></CENTER>";
+
+ $ret .= "(=H2 Journal entries -- by week, ever H2=)(=P What's the week-to-week trend? P=)";
+ $ret .= "<P><CENTER><IMG SRC=\"stats/postsbyweek.png\" WIDTH=520 HEIGHT=350></CENTER>";
+
+ $ret .= "(=H2 New accounts -- last 60 days H2=)(=P How fast are we growing? P=)";
+ $ret .= "<P><CENTER><IMG SRC=\"stats/newbyday.png\" WIDTH=520 HEIGHT=350></CENTER>";
+
+# $ret .= "(=H2 Paid accounts -- last 60 days H2=)(=P Are we making any money? P=)";
+# $ret .= "<P><CENTER><IMG SRC=\"stats/paidbyday.png\" WIDTH=520 HEIGHT=350></CENTER>";
+ 
+
+ return $ret;
+
+_CODE=)
+
+<=BODY
+PAGE=)

@@ -1,0 +1,81 @@
+(=_INFO
+NOCACHE=>1
+_INFO=)(=PAGE
+TITLE=>Registration
+
+BODY<=
+
+(=_CODE
+
+ &connect_db;
+ my ($sth, $ret);
+
+ my $qs = &get_query_string();
+ my $u;
+
+ #### new way
+ if ($qs =~ /^(\d+)[;\.](.+)$/)
+ {
+     my ($aaid, $auth) = ($1, $2);
+     my $aa = &is_valid_authaction($aaid, $auth);
+     if ($aa) {
+	 $sth = $dbh->prepare("SELECT userid, email, user, status, password FROM user WHERE userid=$aa->{'userid'}");
+	 $sth->execute;
+	 $u = $sth->fetchrow_hashref;
+
+	 push @errors, "User not found." unless ($u);
+	 
+	 # FIXME: the only reason for the $aa->{'arg1'} truth test is to allow existing authcodes out there
+	 # to still work.  that part can be removed 30 days from May-18-2001, along with this comment.
+	 if ($aa->{'arg1'} && $u->{'email'} ne $aa->{'arg1'}) {
+	     push @errors, "This confirmation URL was for a different email address.  You cannot use it to validate your most recently set email address.";
+	 }
+	 
+     } else {
+	 push @errors, "Invalid registration code. ($aaid, $auth)";
+     }
+ }
+
+ #### old way
+ elsif ($qs =~ /^(\w+)=(.+)$/) 
+ {
+     push @errors, "Error. Old-style registrations no longer work.  You shouldn't be getting this message, unless you created a journal months ago and forgot to register";
+ }
+ else {
+     push @errors, "You cannot go to this page directly, you must have a registration URL to complete this registration.";
+ }
+ 
+ 
+ if (@errors)
+ {
+     $ret = "";
+     $ret .= "(=BADCONTENT=)\n<UL>\n";		
+     foreach (@errors)
+     {
+         $ret .= "<LI>$_\n";
+     }
+     $ret .= "</UL>\n";
+     return $ret;
+ }
+ 
+
+ $dbh->do("UPDATE user SET status='A' WHERE userid=$u->{'userid'}");
+
+ if ($u->{'status'} eq "T") {
+     $ret .= "(=H1 Registration Complete H1=)(=P Thanks!  Your new email address has now been verified. P=)";
+ }
+ else 
+ {
+     $ret .= "(=H1 Registration Complete H1=)(=P Thanks!  Your email address has now been verified.  From here, you may be interested in doing the following things: P=)<ul>";
+     $ret .= "<li><a href=\"/login.bml\"><b>Login</b></a> - so you don't have to enter your username and password everywhere";
+     $ret .= "<li><a href=\"/editinfo.bml\"><b>Edit Personal Info</b></a> - fill out your user profile and set various settings";
+     $ret .= "<li><a href=\"/modify.bml\"><b>Modify Journal</b></a> - modify the look of your journal";
+     $ret .= "<li><a href=\"/update.bml\"><b>Update Journal</b></a> - write in your journal!";
+ }
+
+ return $ret;
+
+_CODE=)
+
+<=BODY
+PAGE=)

@@ -1,0 +1,75 @@
+(=_CODE
+
+ $title = "Join Community";
+ $body = "";
+
+ &connect_db();
+ my $sth;
+
+ ### is there a user out there?
+ ###
+ my $remote = &get_remote();
+ unless ($remote) {
+     $body = "(=H1 Sorry.. H1=)(=P To join a community you must first <A HREF=\"/login.bml?ret=1\">log in</A>. P=)";
+     return "";
+ }
+
+ ### get info about the community
+ ###
+ my $cuserid = $FORM{'cuserid'}+0;
+ $sth = $dbh->prepare("SELECT u.user, u.name, c.ownerid, c.membership, c.postlevel FROM user u, community c WHERE u.userid=c.userid AND c.userid=$cuserid");
+ $sth->execute;
+ my $ci = $sth->fetchrow_hashref();
+
+ ### does this community even exit?
+ ###
+ unless ($ci) {
+     $body .= "(=H1 Error H1=)(=P The specified community ID is not valid, or is not a community. P=)";
+     return "";
+ }
+
+ ### can members join this community even?
+ unless ($ci->{'membership'} eq "open") {
+     $body .= "(=H1 Sorry... H1=)(=P This community is closed.  If you're interested in joining it, please contact <A HREF=\"/userinfo.bml?userid=$ci->{'ownerid'}\">its maintainer</A>. P=)";
+     return "";
+ }
+
+ ### make sure a community doesn't join a community (that's confusing or something)
+ $sth = $dbh->prepare("SELECT journaltype FROM user WHERE userid=$remote->{'userid'}");
+ $sth->execute;
+ my $u = $sth->fetchrow_hashref;
+ unless ($u->{'journaltype'} eq "P") {
+     $body .= "(=H1 Error H1=)(=P You're logged in as a shared/community account, not your personal account. P=)";
+     return "";
+ }
+ 
+ if ($FORM{'confirm'}) 
+ {
+     ### make remote user a friend of the community
+     ###
+     $dbh->do("INSERT INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) VALUES ($cuserid, $remote->{'userid'}, '#000000', '#ffffff', 1)");
+     
+     $body .= "(=H1 Success H1=)(=P You are now a member of the <A HREF=\"/userinfo.bml?user=$ci->{'user'}\">$ci->{'name'} Community</A> P=)";
+     
+     ### if community permits it, give remote user access to post in this community
+     if ($ci->{'postlevel'} eq "members") {
+	 $dbh->do("INSERT INTO logaccess (ownerid, posterid) VALUES ($cuserid, $remote->{'userid'})");
+	 $body .= "(=P This community allows posting by all members, so you've now have access to post in it.  If you already have a LiveJournal client open on your computer you'll have to log out and log back in for this journal to show up in your list of journals you can post to. P=)";
+     } else {
+	 $body .= "(=P Although you are now listed as a member, this community only allows posting by authorized users.  Contact <A HREF=\"/userinfo.bml?userid=$ci->{'ownerid'}\">the community maintainer</A> if you desire posting access. P=)";
+     }
+     return "";
+     
+ } else {
+
+     $body .= "(=H1 You sure? H1=)(=P Press the button below to join the \"$ci->{'name'}\" community.";
+     $body .= "<FORM METHOD=POST ACTION=\"join.bml\"><input type=hidden name=cuserid value=$cuserid><input type=hidden name=confirm value=1><center><input type=submit value=\"Join Community\"></FORM> P=)";
+     return "";
+ }
+
+ return "";
+
+_CODE=)(=PAGE
+TITLE=>(=_CODE return $title; _CODE=)
+BODY=>(=_CODE return $body; _CODE=)
+PAGE=)

@@ -1,0 +1,163 @@
+(=_INFO
+LOCALBLOCKS<=
+CRIT<=
+{F}
+<TR BGCOLOR=#D0D0D0>
+<TD><INPUT TYPE=CHECKBOX NAME="%%CODE%%" VALUE=1></TD>
+<TD><B>%%NAME%%</B>
+</TR>
+<TR><TD>&nbsp;</TD><TD>%%FORM%%</TD></TR>
+<=CRIT
+BAR<=
+{F}
+<TR BGCOLOR=#D0D0D0>
+<TD>&nbsp;</TD>
+<TD><B>%%NAME%%</B>
+</TR>
+<TR><TD>&nbsp;</TD><TD>%%FORM%%</TD></TR>
+<=BAR
+<=LOCALBLOCKS
+_INFO=)(=PAGE
+TITLE=>Community Search
+BODY<=
+
+(=H1 Search Communities H1=)
+(=P
+Select the criteria below that you'd like to find communities by.  The results returned are the intersection of all search criteria.  In other words, each checkbox you click means "AND", not "OR".
+P=)
+
+(=HR=)
+
+<CENTER>
+
+<FORM ACTION="/directory.sbml">
+<INPUT TYPE=HIDDEN NAME="s_com" VALUE=1>
+<TABLE CELLPADDING=4 CELLSPACING=0 BORDER=0>
+
+<!--- location --->
+(=CRIT
+NAME=>By Location
+CODE=>s_loc
+FORM<=
+
+<TABLE>
+<TR><TD ALIGN=RIGHT>Country:</TD><TD>
+<SELECT NAME="loc_cn">
+(=_CODE
+
+ &load_codes({ "country" => \%countries });
+ my $ret = "";
+ foreach (sort { $countries{$a} cmp $countries{$b} } keys %countries)
+ {
+     my $sel = $_ eq "US" ? " SELECTED" : "";
+     $ret .= "<OPTION VALUE=\"$_\"$sel>$countries{$_}\n";
+ }
+ return $ret; 
+ 
+_CODE=)
+</SELECT></TD></TR>
+<TR><TD ALIGN=RIGHT>State/Province:</TD><TD><INPUT NAME="loc_st"></TD></TR>
+<TR><TD ALIGN=RIGHT>City:</TD><TD><INPUT NAME="loc_ci"></TD></TR>
+</TABLE>
+
+<=FORM
+CRIT=)
+
+<!---- update time ----->
+(=CRIT
+NAME=>By Journal Update Time
+CODE=>s_ut
+FORM<=
+Updated in last 
+<SELECT NAME="ut_days">
+<OPTION VALUE="">-------
+<OPTION VALUE="1">day
+<OPTION VALUE="7">week
+<OPTION VALUE="30">month
+</SELECT>
+<=FORM
+CRIT=)
+
+<!---- interest ----->
+(=CRIT
+NAME=>By Interest
+CODE=>s_int
+FORM<=
+User likes: <INPUT NAME="int_like" SIZE=30>
+<=FORM
+CRIT=)
+
+<!---- has member ----->
+(=CRIT
+NAME=>Has Member
+CODE=>s_fr
+FORM<=
+Contains user <INPUT NAME="fr_user" SIZE=15 MAXLENGTH=15> as a member.
+<=FORM
+CRIT=)
+
+<!----- other ------>
+(=BAR
+NAME=>Other Criteria
+FORM<=
+<INPUT TYPE=CHECKBOX NAME="s_withpic" VALUE=1> Only communities with pictures
+<=FORM
+BAR=)
+
+<!---- output formatting ----->
+(=BAR
+NAME=>Display Options
+FORM<=
+
+<TABLE>
+<TR>
+<TD ALIGN=RIGHT>
+Output Format:
+</TD><TD>
+<SELECT NAME="opt_format">
+<OPTION VALUE="com" SELECTED>Community View
+<OPTION VALUE="pics">By Picture
+<OPTION VALUE="simple">Simple
+</SELECT>
+</TD></TR>
+
+<TR>
+<TD ALIGN=RIGHT>
+Sorting Method:
+</TD><TD>
+<SELECT NAME="opt_sort">
+<OPTION VALUE="name" SELECTED>Community Name
+<OPTION VALUE="ut">Update Time
+<OPTION VALUE="user">User Name
+</SELECT>
+</TD></TR>
+
+<TR>
+<TD ALIGN=RIGHT>
+Records per page:
+</TD><TD>
+<SELECT NAME="opt_pagesize">
+<OPTION VALUE="25">25
+<OPTION VALUE="50">50
+<OPTION VALUE="100" SELECTED>100
+<OPTION VALUE="200">200
+</SELECT>
+</TD></TR>
+
+</TABLE>
+<=FORM
+BAR=)
+
+<!--- submit --->
+<TR BGCOLOR=#E0E0E0><TD COLSPAN=2 ALIGN=CENTER>
+  <INPUT TYPE=SUBMIT VALUE="Search!">
+  <INPUT TYPE=RESET VALUE="Clear Form">
+</TD></TR>
+
+</TABLE>
+</FORM>
+
+</CENTER>
+
+<=BODY
+PAGE=)
