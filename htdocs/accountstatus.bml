@@ -25,7 +25,7 @@ body<=
     }
 
     # process form submission
-    if (LJ::did_post()) {
+    if (LJ::did_post() && LJ::check_referer('/accountstatus.bml')) {
 
         my $ok = sub {
             return "<?h1 $ML{'.header.success'} h1?>\n<?p " . $_[0] . " p?>";

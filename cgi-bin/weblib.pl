@@ -527,6 +527,27 @@ sub get_crumb
     }
 }
 
+# <LJFUNC>
+# name: LJ::check_referer
+# class: web
+# des: Checks if the user is coming from a given URI.
+# args: uri
+# des-uri: string; the URI we want the user to come from
+# returns: 1 if they're coming from that URI, else undef
+# </LJFUNC>
+sub check_referer {
+    my $uri = shift;
+    $uri ||= '';
+
+    # get referer and check
+    my $referer = BML::get_client_header('Referer');
+    return 1 unless $referer;
+    return 1 if $referer =~ m!^$LJ::SITEROOT$uri!;
+    return 1 if $referer =~ m!^http://$LJ::DOMAIN$uri!;
+    return 1 if $referer =~ m!^http://$LJ::DOMAIN_WEB$uri!;
+    return undef;
+}
+
 # Common challenge/response javascript, needed by both login pages and comment pages alike.
 # Forms that use this should onclick='return sendForm()' in the submit button.
 # Returns true to let the submit continue.
