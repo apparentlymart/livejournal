@@ -505,7 +505,7 @@ _code?>
         $ret .= "</table>\n";
 
         ### unicode options
-        if ($LJ::UNICODE) {
+        if ($LJ::UNICODE && $u->{journaltype} eq 'P') {
             my (%old_encnames, %mail_encnames, %encodings);
             LJ::load_codes({ "encoding" => \%encodings } );
             LJ::load_codes({ "encname" => \%old_encnames } );

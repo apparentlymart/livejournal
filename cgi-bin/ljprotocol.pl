@@ -506,7 +506,9 @@ sub common_event_validation
         LJ::is_ascii(join(' ', values %{$req->{'props'}}) ))
     {
         if ($req->{'ver'} < 1) { # client doesn't support Unicode
-            return fail($err,207,"only pure ASCII text is allowed for old clients; please upgrade your client") if $LJ::UNICODE_REQUIRE;
+            # only people should have unknown8bit entries.
+            return fail($err,207,'Posting in a community with international or special characters require a Unicode-capable LiveJournal client.  Download one at http://www.livejournal.com/download/.')
+                if $flags->{u}{journaltype} ne 'P';
 
             # so rest of site can change chars to ? marks until
             # default user's encoding is set.  (legacy support)
