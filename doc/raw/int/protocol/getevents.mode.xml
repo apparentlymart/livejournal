@@ -51,9 +51,12 @@ For a selecttype of <emphasis>one</emphasis>, the journal entry's unique ItemID 
 Specifies the type of line-endings you're using. Possible values are <emphasis>unix</emphasis> (0x0A (\n)), <emphasis>pc</emphasis> (0x0D0A (\r\n)), or <emphasis>mac</emphasis> (0x0D (\r) ). The default is not-Mac. Internally, LiveJournal stores all text as Unix-formatted text, and it does the conversion by removing all \r characters. If you're sending a multi-line event on Mac, you have to be sure and send a lineendings value of mac  or your line endings will be removed. PC and Unix clients can ignore this setting, or you can send it. It may be used for something more in the future.
 </des></scalar></key>
 
-<key name="usejournal" count="opt"><scalar><des>
+<key name="usejournal" count="opt">
+<des>
 If getting the history of a shared journal, include this key and the username you wish to get the history of. By default, you load the history of "user" as specified above.
-</des></scalar></key>
+</des>
+&useJournal;
+</key>
 
 </struct></arguments>
 

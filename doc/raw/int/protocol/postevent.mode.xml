@@ -48,9 +48,12 @@ Set an arbitrary (but restricted) meta-data property to this log item. See the d
 </des>
 </key>
 
-<key name="usejournal" count="opt"><scalar><des>
+<key name="usejournal" count="opt">
+<des>
 If posting to a shared journal, include this key and the username you wish to post to. By default, you post to the journal of "user" as specified above.
-</des></scalar></key>
+</des>
+&useJournal;
+</key>
 
 </struct></arguments>
 
