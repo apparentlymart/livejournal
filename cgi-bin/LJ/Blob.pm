@@ -12,8 +12,7 @@ my %bc_reader_cache = ();
 # read-write (i.e. HTTP connection to BlobServer, with NetApp NFS mounted)
 sub get_blobclient {
     my $u = shift;
-    my $bcid = $LJ::BLOBINFO{cluster_map}->{$u->{clusterid}} ||
-        $LJ::BLOBINFO{cluster_map}->{_default};
+    my $bcid = $u->{blob_clusterid} or die "No blob_clusterid";
     return $bc_cache{$bcid} ||=
         _bc_from_path($LJ::BLOBINFO{clusters}->{$bcid});
 }
@@ -21,8 +20,7 @@ sub get_blobclient {
 # read-only access.  (i.e. direct HTTP connection to NetApp)
 sub get_blobclient_reader {
     my $u = shift;
-    my $bcid = $LJ::BLOBINFO{cluster_map}->{$u->{clusterid}} ||
-        $LJ::BLOBINFO{cluster_map}->{_default};
+    my $bcid = $u->{blob_clusterid} or die "No blob_clusterid";
  
     return $bc_reader_cache{$bcid} if $bc_reader_cache{$bcid};
 
@@ -42,24 +40,36 @@ sub _bc_from_path {
     return undef;
 }
 
+sub _load_bcid {
+    my $u = shift;
+    die "No user" unless $u;
+    return if $u->{blob_clusterid};
+    LJ::load_user_props($u, "blob_clusterid");
+    return if $u->{blob_clusterid};
+    die "Couldn't find user $u->{user}'s blob_clusterid\n";
+}
+
 # args: u, domain, fmt, bid
 # des-fmt: string file extension ("jpg", "gif", etc)
 # des-bid: numeric blob id for this domain
 # des-domain: string name of domain ("userpic", "phonephost", etc)
 sub get {
     my ($u, $domain, $fmt, $bid) = @_;
-    my $bc = get_blobclient_reader($u);
-    return $bc->get($u->{clusterid}, $u->{userid}, $domain, $fmt, $bid);
+    _load_bcid($u);
+    my $bc = get_blobclient_reader($u->{blob_clusterid});
+    return $bc->get($u->{blob_clusterid}, $u->{userid}, $domain, $fmt, $bid);
 }
 
 sub get_stream {
     my ($u, $domain, $fmt, $bid, $callback) = @_;
+    _load_bcid($u);
     my $bc = get_blobclient_reader($u);
-    return $bc->get($u->{clusterid}, $u->{userid}, $domain, $fmt, $bid, $callback);
+    return $bc->get($u->{blob_clusterid}, $u->{userid}, $domain, $fmt, $bid, $callback);
 }
 
 sub put {
     my ($u, $domain, $fmt, $bid, $data, $errref) = @_;
+    _load_bcid($u);
     my $bc = get_blobclient($u);
 
     my $dbcm = LJ::get_cluster_master($u);
@@ -68,15 +78,16 @@ sub put {
         return 0;
     }
 
-    unless ($bc->put($u->{clusterid}, $u->{userid}, $domain, 
+    unless ($bc->put($u->{blob_clusterid}, $u->{userid}, $domain, 
                      $fmt, $bid, $data, $errref)) {
         return 0;
     }
 
     $dbcm->do("INSERT INTO userblob (journalid, domain, blobid, length) ".
               "VALUES (?, ?, ?, ?)", undef,
-              $u->{userid}, $LJ::BLOBINFO{blobdomain_ids}->{$domain},
+              $u->{userid}, LJ::get_blob_domainid($domain), 
               $bid, length($data));
+    die "Error doing userblob accounting: " . $dbcm->errstr if $dbcm->err;
     return 1;
 }
 

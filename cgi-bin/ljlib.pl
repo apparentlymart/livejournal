@@ -185,6 +185,16 @@ sub use_diff_db {
     $LJ::DBIRole->use_diff_db(@_);
 }
 
+sub get_blob_domainid
+{
+    my $name = shift;
+    return 1 if $name eq "userpic";
+    # FIXME: add hook support, so sites can't define their own
+    # general code gets priority on numbers, say, 1-200, so verify
+    # hook returns a number 201-255
+    die "Unknown blob domain: $name";
+}
+
 # <LJFUNC>
 # name: LJ::get_dbh
 # class: db
