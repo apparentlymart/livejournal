@@ -45,6 +45,12 @@ property Color weak_text {
     des = "Text color for the bar below entries";
     s1color = "weak_text";
 }
+property Color comment_bar_one {
+    des = "Background color for alternating comment bars";
+}
+property Color comment_bar_two {
+    des = "Background color for alternating comment bars";
+}
 property int box_width { 
     des = "Box width (pixels)";
 }
@@ -69,13 +75,45 @@ set stronger_back = "#000000";
 set stronger_text = "#ffffff";
 set weak_back = "#aaaaaa";
 set weak_text = "#000000";
+set comment_bar_one = "#aaaaaa";
+set comment_bar_two = "#dddddd";
+
+set comment_userpic_style = "small";
 
 set box_width = 600;
 
-set view_entry_disabled = true;
+set view_entry_disabled = false;
 
 function print_stylesheet () {
-    " /* Yes, a stylesheet would go here. */\n";
+"""body, td {
+font-family: verdana, sans-serif;
+font-size: 10pt;
+}
+tt, pre {
+font-family: monospace;
+}
+a {
+text-decoration: none;
+}
+a:hover {
+text-decoration: underline;
+}
+.shadowed {
+font-size: 8pt;
+background: $*weak_back;
+}
+.meta {
+font-size: 8pt;
+}
+.index {
+font-size: 8pt;
+}
+.caption, .index {
+color: $*stronger_text;
+}
+.comments {
+font-size: 8pt;
+}""";
 }
 
 function Page::lay_top_userpic () { 
@@ -109,38 +147,8 @@ function Page::print ()
     
 """<!doctype HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html><head>
-<style type="text/css">
-body, td {
-font-family: verdana, sans-serif;
-font-size: 10pt;
-}
-tt, pre {
-font-family: monospace;
-}
-a {
-text-decoration: none;
-}
-a:hover {
-text-decoration: underline;
-}
-.shadowed {
-font-size: 8pt;
-background: $*weak_back;
-}
-.meta {
-font-size: 8pt;
-}
-.index {
-font-size: 8pt;
-}
-.caption, .index {
-color: $*stronger_text;
-}
-.comments {
-font-size: 8pt;
-}
-</style>
 $.head_content
+<link rel='stylesheet' type='text/css' href='$.stylesheet_url' />
 <title>$title</title>
 </head>
 <body bgcolor="$*page_back" text="$*entry_text" link="$*page_link" vlink="$*page_vlink" alink="$*page_alink">
@@ -209,7 +217,7 @@ $website
 """;
 }
 
-function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
+function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_text)
 {
     var string datetime;
     $datetime = $e.time->date_format("med")+"|<b>" 
@@ -253,8 +261,9 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
         "</td></tr></table></td></tr></table>";
     }
 
-    if (size $e.metadata) {
-        """<table cellspacing="0" cellpadding="0" border="0" summary="">""";
+    var string metadata;
+    if ($e.metadata) {
+        $metadata = """<table cellspacing="0" cellpadding="0" border="0" summary="">""";
         foreach var string k ($e.metadata) {
             var string text = $k;
             var string val = $e.metadata{$k};
@@ -267,40 +276,33 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
                 var Image i = $e.mood_icon;
                 $val = "<img src='$i.url' width='$i.width' height='$i.height' align='absmiddle'> $val";
             }
-            """<tr><td class="meta">[</td><td class="meta" align="right"><b>$text</b></td>""";
-            """<td class="meta" align="center">|</td><td class="meta">$val</td><td class="meta">]</td></tr>""";
+            $metadata = """$metadata\n<tr><td class="meta">[</td><td class="meta" align="right"><b>$text</b></td>
+            <td class="meta" align="center">|</td><td class="meta">$val</td><td class="meta">]</td></tr>""";
         }
-        """</table><p>""";
+        $metadata = """$metadata</table><p>""";
     }
-
-"""
-$e.text
-</td>
-</tr>
+    if (not $hide_text) { print $metadata; print $e.text; }
+"""</td></tr>
 <tr bgcolor="$*weak_back"><td align='left' class='comments'>
-<a href="$e.permalink_url">$*text_permalink</a>
-</td><td align='right' class='comments'>
-""";
+<a href="$e.permalink_url">$*text_permalink</a></td>""";
+    if ($p.view != "entry" and $p.view != "reply") {
+        "<td align='right' class='comments'>"; $e.comments->print(); "</td>";
+    } elseif ($e.comments.enabled) {
+        "<td align='right' class='comments'>"; $e.comments->print_postlink(); "</td>";
+    } else {
+        "<td></td>";
+    }
+    """</tr></table></td></tr></table><p>""";
 
-    $e.comments->print();
-
-"""
-</td></tr>
-</table>
-</td>
-</tr>
-</table><p>
-""";
-
-} # print_entry(Page,Entry,Color,Color)
+} # print_entry(Page,Entry,Color,Color,bool)
 
 function Page::print_entry (Entry e) {
-   print_entry($this, $e, null Color, null Color);
+   print_entry($this, $e, null Color, null Color, false);
 }
 
 function FriendsPage::print_entry (Entry e) {
    var Friend f = $.friends{$e.journal.username};
-   print_entry($this, $e, $f.bgcolor, $f.fgcolor);
+   print_entry($this, $e, $f.bgcolor, $f.fgcolor, false);
 }
 
 function RecentPage::print_body ()
@@ -537,6 +539,100 @@ function MonthPage::print_body () {
     "</dl>\n";
     """</td></tr></table>
 </td></tr></table><p>""";
+}
+
+function EntryPage::print_body () {
+
+    print_entry($this, $.entry, null Color, null Color, $.viewing_thread);
+
+    """<table width="$*box_width" cellpadding="2" cellspacing="0" border="0" summary="" class="entrybox">
+<tr align='left'>
+<td bgcolor="$*stronger_back" align="center">
+<table width="100%" cellpadding="5" cellspacing="0" border="0" summary="">
+<tr align='left'>
+<td class="caption" colspan='2'>Comments:</td></tr>""";
+ 
+    """
+<tr align='left'>
+<td colspan="2" bgcolor="$*entry_back">""";
+
+    if ($.comment_pages.total_subitems > 0) {
+        $.comment_pages->print();
+        $this->print_comments($.comments);
+    }
+    """</td></tr></table>
+</td></tr></table><p>""";
+
+}
+
+function EntryPage::print_comment (Comment c) {
+    var Color barc = $c.depth % 2 ? $*comment_bar_one : $*comment_bar_two;
+    var string poster = defined $c.poster ? $c.poster->as_string() : "<i>(Anonymous)</i>";
+    var string sub_icon;
+    var int width = $*box_width - 50 - (($c.depth - 1) * 25);
+    if (defined $c.subject_icon) {
+        $sub_icon = $c.subject_icon->as_string();
+    }
+    "<div style='background: $barc; margin-top: 10px;'>";
+    "<table cellpadding='2' cellspacing='0' summary='0' style='width: ${width}px'><tr valign='top'>";
+    var int td = 3;
+    if (defined $c.userpic and $*comment_userpic_style != "off") { 
+        $td = 4;
+        var int w = $c.userpic.width;
+        var int h = $c.userpic.height;
+        # WARNING: this will later be done by the system (it'll be a
+        # constructional property), so don't copy this hack into your
+        # layout layers or you'll be messed up later.
+        if ($*comment_userpic_style == "small") {
+            $w = $w / 2;
+            $h = $h / 2;
+        }
+        print "<td rowspan='2'><img src='$c.userpic.url' width='$w' height='$h' /></td>";
+    }
+    print "<td align='left'><strong>From:</strong> $poster</td>";
+    print "<td align='left'><strong>Date:</strong> ";
+        print $c.time->date_format("long") + " - " + $c.time->time_format() + "</td>";
+    print "<td align='right'><strong>(<a href='$c.permalink_url'>Link</a>)</strong></td></tr>";
+    print "<tr valign='top'><td colspan='$td' style='width: 95%'>";
+    if (defined $c.subject_icon or $c.subject != "") { "<h3>$c.subject_icon $c.subject</h3>"; }
+    if ($c.metadata{"poster_ip"}) { print " (IP Address: " + $c.metadata{"poster_ip"} + ")"; }
+    print "</td></tr></table></div>";
+    print "<div style='margin-left: 5px'>$c.text</div>";
+    print "<div style='margin-top: 3px; font-size: smaller'>(<a href='$c.reply_url'>Reply to this</a>) ";
+    if ($c.parent_url != "") { "(<a href='$c.parent_url'>Parent</a>) "; }
+    if ($c.thread_url != "") { "(<a href='$c.thread_url'>Thread</a>) "; }
+    "</div>";   
+}
+
+function ReplyPage::print_body () {
+    var string datetime;
+    $datetime = $.replyto.time->date_format("med")+"|<b>" + $.replyto.time->time_format() + "</b>";
+    """<table width="$*box_width" cellpadding="2" cellspacing="0" border="0" summary="" class="entrybox">
+<tr align='left'>
+<td bgcolor="$*stronger_back" align="center">
+<table width="100%" cellpadding="5" cellspacing="0" border="0" summary="">
+<tr align='left'>
+<td class="caption">$.replyto.subject</td>
+<td class="index" align="right">$datetime</td></tr>
+<tr align='left'>
+<td colspan="2" bgcolor="$*entry_back">$.replyto.text</td></tr>
+<tr bgcolor="$*weak_back"><td align='left' class='comments'>
+<a href="$.replyto.permalink_url">$*text_permalink</a></td>
+<td align='right' class='comments'><a href='$.entry.comments.read_url'>Read Comments</a></td>
+</tr></table></td></tr></table><p>""";
+
+    """<table width="$*box_width" cellpadding="2" cellspacing="0" border="0" summary="" class="entrybox">
+<tr align='left'>
+<td bgcolor="$*stronger_back" align="center">
+<table width="100%" cellpadding="5" cellspacing="0" border="0" summary="">
+<tr align='left'>
+<td class="caption" colspan='2'>Reply:</td></tr>
+<tr align='left'>
+<td colspan="2" bgcolor="$*entry_back">""";
+
+    $.form->print();
+    
+    """</td></tr></table></td></tr></table><p>""";
 }
 
 function print_theme_preview () {
