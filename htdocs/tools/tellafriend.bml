@@ -57,6 +57,7 @@
          'toname' => $FORM{'toname'},
          'from' => $u->{'emailpref'},
          'fromname' => $FORM{'fromname'},
+         'charset' => 'utf-8',
          'subject' => $FORM{'subject'},
          'body' => $FORM{'body'},
      });
