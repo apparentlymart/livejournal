@@ -2486,7 +2486,7 @@ sub init {
     $form->{'subject'} = LJ::text_trim($form->{'subject'}, 100, 100);
 
     my $subjecticon = "";
-    if ($form->{'subjecticon'} ne "none" || $form->{'subjecticon'} ne "") {
+    if ($form->{'subjecticon'} ne "none" && $form->{'subjecticon'} ne "") {
         $subjecticon = LJ::trim(lc($form->{'subjecticon'}));
     }
 
