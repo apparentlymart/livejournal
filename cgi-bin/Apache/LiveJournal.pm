@@ -7,10 +7,16 @@ use strict;
 use Apache::Constants qw(:common REDIRECT HTTP_NOT_MODIFIED HTTP_MOVED_PERMANENTLY);
 use Apache::File ();
 use XMLRPC::Transport::HTTP ();
+use lib "$ENV{'LJHOME'}/cgi-bin";
 
-require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
-require "$ENV{'LJHOME'}/cgi-bin/ljviews.pl";
-require "$ENV{'LJHOME'}/cgi-bin/ljprotocol.pl";
+BEGIN {
+    require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+    require "$ENV{'LJHOME'}/cgi-bin/ljviews.pl";
+    require "$ENV{'LJHOME'}/cgi-bin/ljprotocol.pl";
+    if (%LJ::FOTOBILDER_IP) {
+        use Apache::LiveJournal::Interface::FotoBilder;
+    }
+}
 
 my %RQ;       # per-request data
 my %USERPIC;  # conf related to userpics
@@ -225,9 +231,15 @@ sub trans
     }
 
     # protocol support
-    if ($uri =~ m!^/(interface(/flat|/xmlrpc)?)|cgi-bin/log\.cgi!) {
-        $RQ{'interface'} = $1 ? ($2 eq "/flat" ? "flat" : ($2 eq "/xmlrpc" ? "xmlrpc" : "")) : "flat";
+    if ($uri =~ m!^/(?:interface(/flat|/xmlrpc|/fotobilder)?)|cgi-bin/log\.cgi!) {
+        my $int = $1 || "/flat";
         $r->handler("perl-script");
+        if ($int eq "/fotobilder") {
+            return 403 unless $LJ::FOTOBILDER_IP{$r->connection->remote_ip};
+            $r->push_handlers(PerlHandler => \&Apache::LiveJournal::Interface::FotoBilder::handler);
+            return OK;
+        }
+        $RQ{'interface'} = $1 eq "/flat" ? "flat" : "xmlrpc";
         $r->push_handlers(PerlHandler => \&interface_content);
         return OK;
     }

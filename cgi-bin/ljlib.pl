@@ -2724,16 +2724,16 @@ sub get_remote
     my $sessdata;
 
     # do they have any sort of session cookie?
-    return $no_remote->() 
+    return $no_remote->("No session") 
         unless ($sessdata = $cookie->('ljsession'));
 
     my ($authtype, $user, $sessid, $auth) = split(/:/, $sessdata);
 
     # fail unless authtype is 'ws' (more might be added in future)
-    return $no_remote->() unless $authtype eq "ws";
+    return $no_remote->("No ws auth") unless $authtype eq "ws";
 
     my $u = LJ::load_user($dbs, $user);
-    return $no_remote->() unless $u;
+    return $no_remote->("User doesn't exist") unless $u;
 
     my $udbr = LJ::get_cluster_reader($u, 1);
     return undef unless $udbr;  # shouldn't happen.
@@ -2742,10 +2742,13 @@ sub get_remote
         SELECT *, UNIX_TIMESTAMP() AS 'now' FROM sessions 
             WHERE userid=? AND sessid=? AND auth=? 
         }, undef, $u->{'userid'}, $sessid, $auth);
-    return $no_remote->() unless $sess;
-    return $no_remote->() if $sess->{'timeexpire'} < $sess->{'now'};
-    return $no_remote->() if ($sess->{'ipfixed'} && 
-                              $sess->{'ipfixed'} ne LJ::get_remote_ip());
+    return $no_remote->("Session bogus") unless $sess;
+    return $no_remote->("Session old") if $sess->{'timeexpire'} < $sess->{'now'};
+    if ($sess->{'ipfixed'}) {
+        my $remote_ip = $LJ::_XFER_REMOTE_IP || LJ::get_remote_ip();
+        return $no_remote->("Session wrong IP") 
+            if $sess->{'ipfixed'} ne $remote_ip;
+    }
 
     # renew short session
     my $short_session = 60*60*24;
@@ -2906,6 +2909,11 @@ sub start_request
 
     $LJ::CACHE_REMOTE = undef;
     $LJ::CACHED_REMOTE = 0;
+
+    # we use this to fake out get_remote's perception of what
+    # the client's remote IP is, when we transfer cookies between
+    # authentication domains.  see the FotoBilder interface.
+    $LJ::_XFER_REMOTE_IP = undef;
 
     # clear the handle request cache (like normal cache, but verified already for
     # this request to be ->ping'able).
