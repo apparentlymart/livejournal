@@ -1,11 +1,12 @@
 <?_code
 #line 2
  use strict;
- use vars qw($title $body $head %FORM);
+ use vars qw($title $windowtitle $body $head %FORM);
  
  $title = $ML{'.title'};
  $body = "";
- $head = "";	
+ $head = "";
+ $windowtitle = "";
 
  if ($LJ::SERVER_DOWN) {
      $title = $ML{'Sorry'};
@@ -126,6 +127,7 @@
      $u->{'opt_whatemailshow'} = "N";  # don't show email
      $friends{'load'} = $friends{'display'} = 0;
  }
+ $windowtitle = "$u->{'user'} - $title";
 
  $friends{'load'} = $friendsof{'load'} = 0 if $com && $u->{'dont_load_members'};
 
@@ -770,6 +772,7 @@ $body .= "</table>\n";
 return;
 
 _code?><?page
+windowtitle=><?_code return $windowtitle; _code?>
 title=><?_code return $title; _code?>
 body=><?_code return $body; _code?>
 head=><?_code return $head; _code?>
