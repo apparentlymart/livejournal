@@ -1,0 +1,87 @@
+(=_CODE
+
+ $title = "";
+ $body = "";
+ @errors = ();
+ 
+ &connect_db();
+
+ my $user = lc($FORM{'user'});
+ $user =~ s/[^\w]//g;
+
+ my $remote = &get_remote_noauth();	
+
+ unless ($user) {
+     $user = $remote->{'user'};
+ }
+
+ my $quser = $dbh->quote($user);
+
+ $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
+ $sth->execute;
+ my $u = $sth->fetchrow_hashref;
+ unless ($u) {
+     $title = "User Pictures";
+     $body = "(=H1 Error H1=)(=P You need to specify a user parameter. P=)";
+     return "";
+ }
+
+ #### edit mode
+
+ $title = "User Pictures";
+
+ my %keywords = ();
+ $sth = $dbh->prepare("SELECT m.picid, k.keyword FROM userpicmap m, keywords k WHERE m.userid=$u->{'userid'} AND m.kwid=k.kwid");
+ $sth->execute;
+ while (my ($pic, $keyword) = $sth->fetchrow_array) {
+     push @{$keywords{$pic}}, $keyword;
+ }
+ 
+ $sth = $dbh->prepare("SELECT picid, width, height FROM userpic WHERE userid=$u->{'userid'}");
+ $sth->execute;
+ my $piccount = 0;
+
+ while (my $pic = $sth->fetchrow_hashref)
+ {
+     if ($piccount++ == 0) {
+	 my $edit;
+	 if ($remote && $remote->{'user'} eq $u->{'user'}) {
+	     $edit = "You may be interested in <a href=\"/editpics.bml\">editing your picture keywords</a> or <a href=\"/uploadpic.bml\">uploading a new picture</a>.";
+	 }
+	 $body .= "(=H1 Current Pictures H1=)(=P Here are the user pictures for (=LJUSER $user LJUSER=). $edit P=)";
+ 	 $body .= "<UL><TABLE CELLPADDING=5 BORDER=0 CELLSPACING=1>";
+	     
+     }
+     $body .= "<TR VALIGN=MIDDLE>";
+     $body .= "<TD ALIGN=CENTER><IMG SRC=\"/userpic/$pic->{'picid'}\" WIDTH=$pic->{'width'} HEIGHT=$pic->{'height'}></TD>";
+     $body .= "<TD>";
+     if ($u->{'defaultpicid'} == $pic->{'picid'}) {
+	 $body .= "<U>Default</U><BR>";
+     }
+
+     my $eh_keywords = join(", ", sort { lc($a) cmp lc($b) } @{$keywords{$pic->{'picid'}}});
+     $eh_keywords = &ehtml($eh_keywords);
+     if ($eh_keywords) {
+	 $body .= "<B>Keywords:</B> $eh_keywords\n";
+     }
+
+     $body .= "</TD>";
+     $body .= "</TR>\n";     
+
+ }
+
+ if ($piccount) {
+     $body .= "</TABLE>";
+ } else {
+     $body = "(=H1 No Pictures H1=)(=P You have no pictures uploaded.  To upload one, go <A HREF=\"/uploadpic.bml\">here</A>. P=)";
+ }
+ 
+ return "";
+
+_CODE=)(=PAGE
+TITLE=>(=_CODE return $title; _CODE=)
+BODY=>(=_CODE return $body; _CODE=)
+PAGE=)
+
+
+
