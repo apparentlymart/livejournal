@@ -39,6 +39,13 @@ Listen to the given I<PORT> instead of the default 2789.
 Set the default rate limit for any source cluster which has not had its rate set
 to I<INTEGER>. The default rate is 1.
 
+=item -s, --lockscale=INTEGER
+
+Set the lock-scaling factor to I<INTEGER>. The lock scaling factor is used to
+decide how many users to lock per source cluster. The value is a multiple 
+
+:TODO: finish documenting this.
+
 =back
 
 =head1 REQUIRES
@@ -111,6 +118,7 @@ MAIN: {
         %config,                # JobServer configuration
         $port,                  # Port to listen on
         $host,                  # Address to listen on
+        $lockScale,             # Lock scaling factor
        );
 
     # Print the program header and read in command line options
@@ -121,6 +129,7 @@ MAIN: {
         'h|help'          => \$helpFlag,
         'p|port=i'        => \$port,
         'r|defaultrate=i' => \$defaultRate,
+        's|lockscale=i'   => \$lockScale,
        ) or abortWithUsage();
 
     # If the -h flag was given, just show the usage and quit
@@ -132,6 +141,7 @@ MAIN: {
     $config{daemon} = $daemonFlag;
     $config{debugLevel} = $debugLevel;
     $config{defaultRate} = $defaultRate if $defaultRate;
+    $config{lockScale} = $lockScale if $lockScale;
 
     # Create a new daemon object
     $server = new JobServer ( %config );
@@ -192,6 +202,9 @@ BEGIN {
         'dbh',                  # Database handle
        );
 
+    use lib "$ENV{LJHOME}/cgi-bin";
+    require 'ljlib.pl';
+
     use base qw{fields};
 }
 
@@ -199,26 +212,23 @@ BEGIN {
 ### Class globals
 
 # Default configuration
-our ( %DefaultConfig, $FetchClusterIdSql, $DefaultRateLimit );
+our ( %DefaultConfig );
+
 INIT {
 
     # Default server configuration; this is merged with any config args the user
-    # specifies in the call to the constructor.
+    # specifies in the call to the constructor. Most of these correspond with
+    # command-line flags, so see that section of the POD header for more
+    # information.
     %DefaultConfig = (
         port         => 2789,           # Port to listen on
         host         => '0.0.0.0',      # Host to bind to
-        listenqueue  => 5,              # Listen queue depth
+        listenQueue  => 5,              # Listen queue depth
         daemon       => 0,              # Daemonize or not?
         debugLevel   => 0,              # Debugging log level
-        defaultrate  => 1,              # The default src cluster rate
+        defaultRate  => 1,              # The default src cluster rate
+        lockScale    => 3,              # Scaling factor for locking users
        );
-
-    # SQL used to create the source cluster id for users being moved.
-    $FetchClusterIdSql = q{
-        SELECT clusterid
-        FROM clustertrack2
-        WHERE userid = ?
-    };
 
 }
 
@@ -227,9 +237,9 @@ INIT {
 #
 # clients:     Hashref of connected clients, keyed by fdno
 #
-# jobs:        A hash of arrays of arrays:
+# jobs:        A hash of arrays of JobServer::Job objects:
 #              {
-#                <srcclusterid> => [ [<userid>, <destclusterid>], ... ],
+#                <srcclusterid> => [ $job1, $job2, ... ],
 #                ...
 #              }
 #
@@ -237,7 +247,7 @@ INIT {
 #              userid.
 #
 # assignments: A hash of arrays; when a job is assigned to a mover, the
-#              corresponding inner hashref of 'jobs' is moved into this hash,
+#              corresponding JobServer::Job is moved into this hash,
 #              keyed by the fdno of the mover responsible.
 #
 # handlers:    Hash of hashes; this is used to register callbacks for clients that
@@ -311,7 +321,7 @@ sub start {
         Proto       => 'tcp',
         LocalAddr   => $self->{config}{host},
         LocalPort   => $self->{config}{port},
-        Listen      => $self->{config}{listenqueue},
+        Listen      => $self->{config}{listenQueue},
         ReuseAddr   => 1,
         ReusePort   => 1,
         Blocking    => 0
@@ -357,7 +367,7 @@ sub createClient {
     # greeting.
     $client = JobServer::Client->new( $self, $csock );
     $client->watch_read( 1 );
-    $client->write( "READY\r\n" );
+    $client->write( "Ready.\r\n" );
 
     return $self->{clients}{$fd} = $client;
 }
@@ -387,19 +397,22 @@ sub disconnectClient {
     # Remove any event handlers registered for the client
     $self->removeAllHandlers( $fd );
 
-    # Re-queue any job that was assigned to the client
+    # If requeueing is requested, re-queue any job that was assigned to the
+    # client. Otherwise just remove it.
     if ( $requeue && ($retask = delete $self->{assignments}{$fd}) ) {
         $self->logMsg( 'info', "Re-adding job %d:%d to queue", @$retask );
         unshift @{$self->{jobs}}, $retask;
+    } else {
+        delete $self->{assignments}{$fd};
     }
 
     # Remove the client from our list
     delete $self->{clients}{ $fd };
-    return "GOODBYE";
+    return "Goodbye.";
 }
 
 
-### METHOD: addJob( $userid, $destclustid )
+### METHOD: addJobs( @jobs=JobServer::Job )
 ### Add a job to move the user with the given I<userid> to the cluster with the
 ### specified I<destclustid>.
 sub addJobs {
@@ -412,65 +425,67 @@ sub addJobs {
         $clusterid,
         $job,
         $userid,
+        $srcclusterid,
         $dstclusterid,
        );
 
     # Iterate over job specifications
   JOB: for ( my $i = 0; $i <= $#jobs; $i++ ) {
         $job = $jobs[ $i ];
-        ( $userid, $dstclusterid ) = @$job;
 
         # Check to be sure this job isn't already queued or in progress.
         if ( exists $self->{users}{$userid} ) {
-            $self->debugMsg( 2, "Request for duplicate job %d:%d", @$job );
-            $responses[$i] = "DUPLICATE JOB $userid:$dstclusterid";
+            $self->debugMsg( 2, "Request for duplicate job %s", $job->to_string );
+            $responses[$i] = "Duplicate job for userid $userid";
             next JOB;
         }
 
-        # Create the cluster id selection handle if it doesn't already exist,
-        # aborting the current job if we're unable to do so.
-        $sth ||= $self->getClusterIdLookupHandle
-            or $responses[$i] = "ERR: database error: " . $self->{dbh}->errstr;
-        next JOB unless $sth;
+        # Queue the job and point the user index at it.
+        push @{$self->{jobs}{$clusterid}}, $job;
+        $self->{users}{ $userid } = $job;
 
-        # Fetch the source clusterid, append it to the job, and queue it
-        if ( $sth->execute($userid) ) {
-
-            # Fetch clusterid
-            ( $clusterid ) = $sth->fetchrow_array;
-            if ( $sth->err ) {
-                $responses[$i] = "ERR: fetch clusterid failed: " . $sth->errstr;
-                next JOB;
-            }
-
-            # Push the clusterid onto the job, queue it, and point the user
-            # index at the job.
-            push @$job, $clusterid;
-            push @{$self->{jobs}{$clusterid}}, $job;
-            $self->{users}{ $userid } = $job;
-
-            $responses[$i] = "ADDED JOB ". ++$self->{totaljobs};
-        } else {
-            $responses[$i] = "ERR: query failed: " . $sth->errstr;
-        }
+        $responses[$i] = "Added job ". ++$self->{totaljobs};
     }
+
+    $self->prelockSomeUsers;
 
     return @responses;
 }
 
 
-### METHOD: getClusterIdLookupHandle( undef )
-### Prepare a DBI statement handle for looking up the clusterid of a user.
-sub getClusterIdLookupHandle {
+### METHOD: prelockSomeUsers( undef )
+### Mark some of the users in the queues as read-only so the movers don't need
+### to do so before moving. Only marks a portion of each queue so as to not
+### inconvenience users.
+sub prelockSomeUsers {
     my JobServer $self = shift;
 
-    # Prepare the handle and return it
-    $self->debugMsg( 4, "Preparing clusterid lookup handle." );
-    my $sth = $self->{dbh}->prepare( $FetchClusterIdSql )
-        or $self->logMsg( 'error', 'prepare: %s: %s',
-                          $FetchClusterIdSql, $self->{dbh}->errstr );
+    my (
+        $jobcount,              # Number of jobs queued for a cluster
+        $rate,                  # Rate for the cluster in question
+        $target,                # Number of queued jobs we'd like to be locked
+        $lockcount,             # Number of users locked
+        $scale,                 # Lock scaling factor
+        $clients,               # Number of currently-connected clients
+        $jobs,                  # Job queue per cluster
+       );
 
-    return $sth;
+    $scale = $self->{config}{lockScale};
+    $clients = scalar keys %{$self->{clients}};
+
+    # Iterate over all the queues we have by cluster
+  CLUSTER: foreach my $clusterid ( keys %{$self->{jobs}} ) {
+        $rate = $self->{ratelimits}{ $clusterid };
+        $target = $rate * $scale;
+
+        $jobs = $self->{jobs}{ $clusterid };
+      JOB: for ( my $i = 0; $i <= $target; $i++ ) {
+            next JOB if $jobs->[$i]->is_prelocked;
+            $jobs->[$i]->prelock;
+        }
+    }
+
+    return $lockcount;
 }
 
 
@@ -486,22 +501,79 @@ sub getJob {
         $job,                   # Job arrayref
        );
 
-    $fd = fileno( $client->{sock} );
+    $fd = $client->fdno;
 
-    # Check for an unfinished assignment for this client
-    if (( exists $self->{assignments}{ $fd } )) {
-        $job = $self->{assignments}{ $fd };
-        die "You didn't finish job ", join(':', @$job);
+    # Check for another assignment for the client. If it's already been assigned
+    # one, remove that from the assignments table.
+    if ( exists $self->{assignments}{ $fd } ) {
+        $job = delete $self->{assignments}{ $fd };
+        $self->logMsg( 'warn', "Client %d didn't finish job %s",
+                       $fd, join(':', @$job) );
     }
 
-    return $self->findNextJob( $fd );
+    return $self->assignNextJob( $fd );
 }
 
 
-### METHOD: findNextJob( undef )
+### METHOD: stopAllJobs( $client=JobServer::Client )
+### Stop all pending and currently-assigned jobs.
+sub stopAllJobs {
+    my JobServer $self = shift;
+    my $client = shift or croak "No client object";
+
+    $self->stopNewJobs( $client );
+    $self->logMsg( 'notice', "Clearing currently-assigned jobs." );
+    %{$self->{assignments}} = ();
+
+    return "Cleared all jobs.";
+}
+
+
+### METHOD: stopNewJobs( $client=JobServer::Client )
+### Stop assigning pending jobs.
+sub stopNewJobs {
+    my JobServer $self = shift;
+    my $client = shift or croak "No client object";
+
+    $self->logMsg( 'notice', "Clearing pending jobs." );
+    %{$self->{jobs}} = ();
+
+    return "Cleared pending jobs.";
+}
+
+
+### METHOD: requestJobFinish( $client=JobServer::Client, $userid, $srcclusterid, $dstclusterid )
+### Request authorization to finish a given job.
+sub finishJob {
+    my JobServer $self = shift;
+    my ( $client, $userid, $srcclusterid, $dstclusterid ) = @_;
+
+    my (
+        $fdno,                  # The client's fdno
+        $job,                   # The client's currently assigned job
+       );
+
+    $fdno = $client->fdno;
+    $job = $self->{assignments}{$fdno};
+
+    if ( $job->[0] != $userid ) {
+        $self->logMsg( 'warn', "Client %d requested finish for non-assigned job %d:%d:%d",
+                       $fdno, $userid, $srcclusterid, $dstclusterid );
+        return sprintf "Abort: Mismatched userids (%d vs. %d)", $userid, $job->[0];
+    }
+
+    
+
+}
+
+
+
+### METHOD: assignNextJob( $fdno )
 ### Find the next pending job from the queue that would read from a non-busy
-### source cluster, as determined by the rate limits given to the server.
-sub findNextJob {
+### source cluster, as determined by the rate limits given to the server. If one
+### is found, assign it to the client associated with the given file descriptor
+### I<fdno>. Returns the reply to be sent to the client.
+sub assignNextJob {
     my JobServer $self = shift;
     my $fd = shift or return;
 
@@ -593,8 +665,8 @@ sub shutdown {
     $self->{dbh}->disconnect;
 
     # Drop all clients
-    foreach my $client ( @{$self->{clients}} ) {
-        $client->write( "SERVER SHUTDOWN\r\n" );
+    foreach my $client ( values %{$self->{clients}} ) {
+        $client->write( "Server shutdown.\r\n" );
         $self->disconnectClient( $client );
         $client->close;
     }
@@ -611,7 +683,7 @@ sub removeAllHandlers {
 
     my $count = 0;
     foreach my $type ( keys %{$self->{handlers}} ) {
-        my $method = sprintf 'remove%sHandler', uc $type;
+        my $method = sprintf 'remove%sHandler', ucfirst $type;
         $count++ if $self->$method();
     }
 
@@ -636,6 +708,7 @@ sub removeLogHandler {
     my JobServer $self = shift;
     my ( $key ) = @_;
 
+    no warnings 'uninitialized';
     return delete $self->{handlers}{log}{ $key };
 }
 
@@ -657,6 +730,7 @@ sub removeDebugHandler {
     my JobServer $self = shift;
     my ( $key ) = @_;
 
+    no warnings 'uninitialized';
     return delete $self->{handlers}{debug}{ $key };
 }
 
@@ -798,20 +872,26 @@ package JobServer::Client;
 BEGIN {
     use Carp qw{croak confess};
     use base qw{Danga::Socket};
-    use fields qw{server cmd_buf state};
+    use fields qw{server state};
 }
 
 
-our ( %CommandTable, $CommandPattern );
+our ( $Tuple, %CommandTable, $CommandPattern );
 
-# Commands the server understands. Each entry should be paired with a method
-# called cmd_<command_name>. The 'args' element contains a regexp for matching
-# the command's arguments after whitespace-stripping on both sides; any
-# capture-groups will be passed to the method as arguments. Commands which don't
-# match the argument pattern will produce an error message. E.g., if the pattern
-# for 'foo_bar' is /^(\w+)\s+(\d+)$/, then entering the command "foo_bar
-# frobnitz 4" would call: ->cmd_foo_bar( "frobnitz", "4" ).
 INIT {
+
+    # Pattern for matching job-spec tuples of the form:
+    #   <userid>:<srcclusterid>:<dstclusterid>
+    $Tuple = qr{\d+:\d+:\d+};
+
+    # Commands the server understands. Each entry should be paired with a method
+    # called cmd_<command_name>. The 'args' element contains a regexp for
+    # matching the command's arguments after whitespace-stripping on both sides;
+    # any capture-groups will be passed to the method as arguments. Commands
+    # which don't match the argument pattern will produce an error
+    # message. E.g., if the pattern for 'foo_bar' is /^(\w+)\s+(\d+)$/, then
+    # entering the command "foo_bar frobnitz 4" would call:
+    #   ->cmd_foo_bar( "frobnitz", "4" )
     %CommandTable = (
 
         # Form: get_job
@@ -824,7 +904,8 @@ INIT {
         #       add_jobs <userid>:<dstclusterid>, <userid>:<dstclusterid>, ...
         add_jobs  => {
             help => "add one or more new jobs",
-            args => qr{^((?:\d+:\d+\s*,\s*)*\d+:\d+)$},
+            form => "<userid>:<srcclusterid>:<dstclusterid>[, ...]",
+            args => qr{^((?:$Tuple\s*,\s*)*$Tuple)$},
         },
 
         source_counts => {
@@ -834,12 +915,14 @@ INIT {
 
         stop_moves => {
             help   => "stop all moves",
+            form   => "[all]",
             args   => qr{^(all)?$},
         },
 
         is_moving => {
-            help  => "check if a user is being moved",
-            args  => qr{^$},
+            help  => "check to see if a user is being moved",
+            form  => "<userid>",
+            args  => qr{^(\d+)$},
         },
 
         check_instance => {
@@ -854,12 +937,14 @@ INIT {
 
         set_rate => {
             help     => "Set the rate for a given source cluster or for all clusters",
+            form     => "<globalrate> or <srcclusterid>:<rate>",
             args     => qr{^(\d+)(?:[:\s]+(\d+))?$},
         },
 
         finish => {
             help     => "request authorization to complete a move job",
-            args     => qr{^(\d+)[:\s]+(\d+)$},
+            form     => "<userid>:<srcclusterid>:<dstclusterid>",
+            args     => qr{^$Tuple$},
         },
 
         quit     => {
@@ -873,8 +958,9 @@ INIT {
         },
 
         help     => {
-            help => "show this help",
-            args => qr{^$},
+            help => "show list of commands or help for a particular command, if given.",
+            form => "[<command>]",
+            args => qr{^(\w+)?$},
         },
        );
 
@@ -884,7 +970,8 @@ INIT {
 }
 
 
-### Create a new JobServer::Client object for the given I<socket>.
+### (CONSTRUCTOR) METHOD: new( $server=JobServer, $socket=IO::Socket )
+### Create a new JobServer::Client object for the given I<socket> and I<server>.
 sub new {
     my JobServer::Client $self = shift;
     my $server = shift or confess "no server argument";
@@ -894,7 +981,6 @@ sub new {
     $self->SUPER::new( $sock );
 
     $self->{server} = $server;
-    $self->{cmd_buf} = [];      # Queue of pending commands
     $self->{state} = 'new';
 
     return $self;
@@ -922,6 +1008,12 @@ sub event_read {
 sub sock {
     my JobServer::Client $self = shift;
     return $self->{sock};
+}
+
+
+sub fdno {
+    my JobServer::Client $self = shift;
+    return fileno( $self->{sock} );
 }
 
 
@@ -1032,10 +1124,16 @@ sub error {
 sub cmd_get_job {
     my JobServer::Client $self = shift;
 
-    my $job = $self->{server}->getJob( $self )
-        or return "IDLE";
+    $self->{state} = 'getting job';
+    my $job = $self->{server}->getJob( $self );
 
-    return sprintf "JOB: %d:%d", @$job[0..1];
+    if ( $job ) {
+        $self->{state} = sprintf 'got job %d:%d:%d', @$job;
+        return sprintf "Job: %d:%d:%d", @$job;
+    } else {
+        $self->{state} = 'idle (no jobs)';
+        return "Idle";
+    }
 }
 
 
@@ -1047,11 +1145,13 @@ sub cmd_add_jobs {
 
     # Turn the argument into an array of arrays
     my @tuples = map {
-        [ split /:/, $_ ]
+        JobServer::Job->new( $_ )
     } split /\s*,\s*/, $argstring;
 
-
+    $self->{state} = sprintf 'adding %d jobs', scalar @tuples;
     my @responses = $self->{server}->addJobs( @tuples );
+    $self->{state} = 'idle';
+
     return join( "\r\n", @responses );
 }
 
@@ -1060,6 +1160,7 @@ sub cmd_add_jobs {
 ### Command handler for the C<source_counts> command.
 sub cmd_source_counts {
     my JobServer::Client $self = shift;
+    $self->{state} = 'source counts';
     return $self->error( "Unimplemented command." );
 }
 
@@ -1067,13 +1168,22 @@ sub cmd_source_counts {
 ### Command handler for the C<stop_moves> command.
 sub cmd_stop_moves {
     my JobServer::Client $self = shift;
-    return $self->error( "Unimplemented command." );
+    my $allFlag = shift || '';
+
+    $self->{state} = 'stop moves';
+
+    if ( $allFlag ) {
+        return $self->{server}->stopAllJobs( $self );
+    } else {
+        return $self->{server}->stopNewJobs( $self );
+    }
 }
 
 ### METHOD: cmd_is_moving( undef )
 ### Command handler for the C<is_moving> command.
 sub cmd_is_moving {
     my JobServer::Client $self = shift;
+    $self->{state} = 'is moving';
     return $self->error( "Unimplemented command." );
 }
 
@@ -1081,6 +1191,7 @@ sub cmd_is_moving {
 ### Command handler for the C<check_instance> command.
 sub cmd_check_instance {
     my JobServer::Client $self = shift;
+    $self->{state} = 'check instance';
     return $self->error( "Unimplemented command." );
 }
 
@@ -1088,6 +1199,7 @@ sub cmd_check_instance {
 ### Command handler for the C<list_jobs> command.
 sub cmd_list_jobs {
     my JobServer::Client $self = shift;
+    $self->{state} = 'list jobs';
     return $self->error( "Unimplemented command." );
 }
 
@@ -1096,6 +1208,7 @@ sub cmd_list_jobs {
 ### Command handler for the C<set_rate> command.
 sub cmd_set_rate {
     my JobServer::Client $self = shift;
+    $self->{state} = 'set rate';
     return $self->error( "Unimplemented command." );
 }
 
@@ -1104,20 +1217,53 @@ sub cmd_set_rate {
 ### Command handler for the C<finish> command.
 sub cmd_finish {
     my JobServer::Client $self = shift;
+    $self->{state} = 'finish';
+
     return $self->error( "Unimplemented command." );
 }
+
 
 ### METHOD: cmd_help( undef )
 ### Command handler for the C<help> command.
 sub cmd_help {
     my JobServer::Client $self = shift;
-    return $self->error( "Unimplemented command." );
+    my $command = shift || '';
+
+    $self->{state} = 'help';
+
+    # Either show help for a particular command
+    if ( $command && exists $CommandTable{$command} ) {
+        my $cmdinfo = $CommandTable{ $command };
+        $cmdinfo->{form} ||= ''; # Non-existant form means no args
+
+        return join( "\r\n",
+                     "--- $command -----------------------------------",
+                     "",
+                     "  $command $cmdinfo->{form}",
+                     "",
+                     $cmdinfo->{help},
+                     "",
+                    );
+    }
+
+    else {
+        my @cmds = map { "  $_" } sort keys %CommandTable;
+        return join( "\r\n",
+                     "Available commands:",
+                     "",
+                     @cmds,
+                     "",
+                    );
+
+    }
 }
 
 ### METHOD: cmd_quit( undef )
 ### Command handler for the C<quit> command.
 sub cmd_quit {
     my JobServer::Client $self = shift;
+
+    $self->{state} = 'quitting';
 
     my $msg = $self->{server}->disconnectClient( $self, 1 );
     $self->write( "$msg\r\n" );
@@ -1132,14 +1278,145 @@ sub cmd_quit {
 sub cmd_shutdown {
     my JobServer::Client $self = shift;
 
+    $self->{state} = 'shutdown';
+
     my $strself = sprintf( '%s:%d',
                            $self->{sock}->peerhost,
-                           $self->{sock}->peeraddr );
+                           $self->{sock}->peerport );
     my $msg = $self->{server}->shutdown( $strself );
     $self->write( "$msg\r\n" );
     $self->close;
 
     return "";
+}
+
+
+
+
+#####################################################################
+### J O B   C L A S S
+#####################################################################
+package JobServer::Job;
+use strict;
+
+BEGIN {
+    use Carp qw{croak confess};
+
+    use lib "$ENV{LJHOME}/cgi-bin";
+    require 'ljlib.pl';
+
+    use fields (
+        'userid',               # The userid of the user to move
+        'srcclusterid',         # The cluster id of the source cluster
+        'dstclusterid',         # Cluster id of the destination cluster
+        'prelocktime'           # Has the corresponding user already been prelocked?
+       );
+}
+
+
+### Class globals
+our ( $ReadOnlyCapBit, $LockUserSql );
+
+INIT {
+    # Find the readonly cap class, complain if not found
+    $ReadOnlyCapBit = undef;
+
+    # Find the moveinprogress bit from the caps hash
+    foreach my $bit ( keys %LJ::CAP ) {
+        if ( $LJ::CAP{$bit}{_name} eq '_moveinprogress' &&
+             $LJ::CAP{$bit}{readonly} == 1 )
+        {
+            $ReadOnlyCapBit = $bit;
+            last;
+        }
+    }
+
+    # SQL used to create the source cluster id for users being moved.
+    $LockUserSql = q{
+        UPDATE user
+        SET caps = caps | (1<<$ReadOnlyCapBit)
+        WHERE userid = ?
+    };
+
+}
+
+
+### (CONSTRUCTOR) METHOD: new( [$userid, $srcclusterid, $dstclusterid, $prelocked )
+### Create and return a new JobServer::Job object.
+sub new {
+    my JobServer::Job $self = shift;
+
+    $self = fields::new( $self ) unless ref $self;
+
+    # Split instance vars from a string with a colon in the second or later
+    # position
+    if ( index($_[0], ':') > 0 ) {
+        @{$self}{qw{userid srcclusterid dstclusterid}} =
+            split /:/, $$_[0], 3;
+    }
+
+    # Allow list arguments as well
+    else {
+        @{$self}{qw{userid srcclusterid dstclusterid}} = @_;
+    }
+
+    $self->{prelocktime} = 0;
+
+    return $self;
+}
+
+
+### METHOD: userid( [$newuserid] )
+### Get/set the job's userid.
+sub userid {
+    my JobServer::Job $self = shift;
+    $self->{userid} = shift if @_;
+    return $self->{userid};
+}
+
+
+### METHOD: srcclusterid( [$newsrcclusterid] )
+### Get/set the job's srcclusterid.
+sub srcclusterid {
+    my JobServer::Job $self = shift;
+    $self->{srcclusterid} = shift if @_;
+    return $self->{srcclusterid};
+}
+
+
+### METHOD: dstclusterid( [$newdstclusterid] )
+### Get/set the job's dstclusterid.
+sub dstclusterid {
+    my JobServer::Job $self = shift;
+    $self->{dstclusterid} = shift if @_;
+    return $self->{dstclusterid};
+}
+
+
+### METHOD: to_string( undef )
+### Return a scalar containing the stringified representation of the job.
+sub to_string {
+    my JobServer::Job $self = shift;
+    return sprintf '%d:%d:%d', @{$self}{'userid', 'srcclusterid', 'dstclusterid'};
+}
+
+
+### METHOD: prelocktime( [$newprelocktime] )
+### Get/set the epoch time when the user record corresponding to the job's
+### C<userid> was set read-only.
+sub prelocktime {
+    my JobServer::Job $self = shift;
+    $self->{prelocktime} = shift if @_;
+    return $self->{prelocktime};
+}
+
+
+### METHOD: is_prelocked( undef )
+### Returns a true value if the user corresponding to the job has already been
+### marked read-only.
+sub is_prelocked {
+    my JobServer::Job $self = shift;
+    return $self->{prelocktime} != 0;
 }
 
 
