@@ -164,6 +164,21 @@
 
  $u->{'name'} = LJ::ehtml($u->{'name'});
 
+ # who does the remote user list as a friend?
+ my %remote_friend;
+ if ($remote) {
+     my $error;
+     my $rs = LJ::Protocol::do_request($dbs, "getfriends",
+                                       { 'ver' => $LJ::PROTOCOL_VER,
+                                         'username' => $remote->{'user'}, },
+                                       \$error,
+                                       { 'userid' => $remote->{'userid'},
+                                         'noauth' => 1, });
+     foreach my $f (@{$rs->{'friends'}}) {
+         $remote_friend{$f->{'username'}} = 1;
+     }
+ }
+ 
  my $ci;
  if ($com)
  {
@@ -471,13 +486,11 @@
              my $fr = $res_fr{"friend_${i}_user"};
              my $status = $res_fr{"friend_${i}_status"};
              my $frlink = "<a href='/userinfo.bml?user=$fr'>$fr</a>";
-             unless ($status) {
-                 $body .= $frlink;
-             } elsif ($status eq 'deleted' || $status eq 'purged' || $status eq 'suspended') {
-                 $body .= "<strike>$frlink</strike>";
-             } else {
-                 $body .= $frlink;
-             }
+             $frlink = "<strike>$frlink</strike>"
+                 if ($status && ($status eq 'deleted' || $status eq 'purged' || $status eq 'suspended'));
+             $frlink = "<b>$frlink</b>"
+                 if $remote_friend{$fr} and $remote->{'userid'} != $u->{'userid'};
+             $body .= $frlink;
              $body .= ", ";
          }
          chop $body; chop $body;
@@ -512,7 +525,10 @@
          $body .= "<td colspan='2' valign='top'><b>" . scalar(@friend_of) . ":</b> ";
          my $count = 0;
          foreach (@friend_of) {
-             $body .= "<A HREF=\"/userinfo.bml?user=$_\">$_</A>, ";
+             my $frlink = "<a href=\"/userinfo.bml?user=$_\">$_</a>";
+             $frlink = "<b>$frlink</b>"
+                 if $remote_friend{$_};
+             $body .= "$frlink, ";
              if (++$count == 150 && $FORM{'mode'} ne "full") {
                  $body .= "<a href=\"" . LJ::self_link(\%FORM, { 'mode' => 'full' }) . "\">...</a>";
                  last;
