@@ -854,7 +854,8 @@ sub db_logger
         'ref' => $r->header_in("Referer"),
     };
 
-    $dbl->do("INSERT DELAYED INTO $table (" . join(',', keys %$var) . ") ".
+    my $delayed = $LJ::IMMEDIATE_LOGGING ? "" : "DELAYED";
+    $dbl->do("INSERT $delayed INTO $table (" . join(',', keys %$var) . ") ".
              "VALUES (" . join(',', map { $dbl->quote($var->{$_}) } keys %$var) . ")");
 }
 
