@@ -76,13 +76,6 @@
                 push @{$exist_kwids{$picid}}, $kwid;
             }
 
-            # unconditionally delete from userpicmap, we'll rebuild it later
-            if ($u->{'dversion'} > 6) {
-                $dbcm->do("DELETE FROM userpicmap2 WHERE userid=?", undef, $u->{'userid'});
-            } else {
-                $dbh->do("DELETE FROM userpicmap WHERE userid=?", undef, $u->{'userid'});
-            }
-
             my @inactive_picids;
             my @delete;
             my %picid_of_kwid;
@@ -276,6 +269,28 @@
                 }
             }
 
+            # Delete keywords that are no longer being used
+            my @kwid_del;
+
+            foreach my $kwids (values %exist_kwids) {
+                foreach my $kwid (@$kwids) {
+                    if (! $picid_of_kwid{$kwid}) {
+                        push @kwid_del, $kwid+0;
+                    }
+                }
+            }
+
+            if (@kwid_del) {
+                my $kwid_del = join(",", @kwid_del);
+                if ($u->{'dversion'} > 6) {
+                    $dbcm->do("DELETE FROM userpicmap2 WHERE userid=$u->{userid} " .
+                              "AND kwid IN ($kwid_del)");
+                } else {
+                    $dbh->do("DELETE FROM userpicmap WHERE userid=$u->{userid} " .
+                             "AND kwid IN ($kwid_del)");
+                }
+            }
+
             my $new_default = $POST{'defaultpic'}+0;
             if ($POST{"delete_$POST{'defaultpic'}"}) {
                 # deleting your default
@@ -392,7 +407,9 @@
 
                 # insert the meta-data
                 # Make a new global picid
-                $picid = LJ::alloc_global_counter('P');
+                $picid = LJ::alloc_global_counter('P') or
+                    return $err->('Unable to allocate new picture id');
+
                 my $dberr = 0;
                 if ($u->{'dversion'} > 6) {
                     $dbcm->do("INSERT INTO userpic2 (picid, userid, fmt, width, height, " .
