@@ -31,9 +31,11 @@ body<=
     my $scat = $sp->{_cat};
     my $problemarea = $scat->{'catname'};
     my $catkey = $scat->{'catkey'};
+    my $summary = LJ::trim($FORM{'summary'});
  
     return LJ::bad_input($ML{'.invalid.noid'}) unless $FORM{'spid'};
     return LJ::bad_input("<?requirepost?>") unless LJ::did_post();
+    return LJ::bad_input($ML{'.invalid.nosummary'}) unless $summary;
 
     ### links to show on success
     my $auth_arg = $FORM{'auth'} ? "&amp;auth=$FORM{'auth'}" : "";
