@@ -35,14 +35,15 @@ body<=
  }
 
  if ($action eq "touch") {
-     $dbh->do("UPDATE support SET state='open', timetouched=UNIX_TIMESTAMP(), timeclosed=0 WHERE spid=$spid");
-     if ($sp->{'state'} eq "open") {
-         $ret .= "<?h1 Touched h1?><?p Your support request will stay open now. ";
-     } else {
-         $dbh->do("DELETE FROM supportpoints WHERE spid=$spid");
-         $ret .= "<?h1 Touched h1?><?p Your support request has been re-opened now. ";
-     }
-     $ret .= "Please comment back telling us why you've touched this request: p?>";
+     LJ::Support::touch_request($dbh, $spid)
+       or return "<?h1 Error h1?><?p Touch failed. p?>";
+
+     $ret .= ("<?h1 Touched h1?><?p Your support request ".
+              ($sp->{'state'} eq "open" ? "will stay open now."
+                                        : "has been re-opened now.").
+              " Please comment back telling us why you've touched this request:".
+              " p?>");
+
      my $auth = LJ::Support::mini_auth($sp);
 
      $ret .= '<br /><form method="post" action="append_request.bml">';

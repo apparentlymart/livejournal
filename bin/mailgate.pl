@@ -93,27 +93,30 @@ if ($toarg =~ /^(\d+)z(.+)$/)
     my $miniauth = $2;
     my $sp = LJ::Support::load_request($dbh, $spid);
 
-    if (LJ::Support::mini_auth($sp) eq $miniauth) 
-    {
-        # valid.  need to strip out stuff now with authcodes:
-        $body =~ s!http://.+/support/act\.bml\S+![snipped]!g;
-        $body =~ s!\+(\d)+z\w{1,10}\@!\@!g;
-        $body =~ s!&auth=\S+!!g;
+    LJ::Support::mini_auth($sp) eq $miniauth
+        or die "Invalid authentication?";
 
-        ## try to get rid of reply stuff.
-        # Outlook Express:
-        $body =~ s!(\S+.*?)-{4,10} Original Message -{4,10}.+!$1!s;
-        # Pine/Netscape
-        $body =~ s!(\S+.*?)\bOn [^\n]+ wrote:\n.+!$1!s;
-        
-        my $splid = LJ::Support::append_request($dbh, $sp, {
-            'type' => 'comment',
-            'body' => $body,
-            'posterid' => 0,
-        });
-        if ($splid) { exit 0; }
-        die "Error appending request?";
-    }
+    # valid.  need to strip out stuff now with authcodes:
+    $body =~ s!http://.+/support/act\.bml\S+![snipped]!g;
+    $body =~ s!\+(\d)+z\w{1,10}\@!\@!g;
+    $body =~ s!&auth=\S+!!g;
+
+    ## try to get rid of reply stuff.
+    # Outlook Express:
+    $body =~ s!(\S+.*?)-{4,10} Original Message -{4,10}.+!$1!s;
+    # Pine/Netscape
+    $body =~ s!(\S+.*?)\bOn [^\n]+ wrote:\n.+!$1!s;
+
+    # append the comment, re-open the request if necessary
+    my $splid = LJ::Support::append_request($dbh, $sp, {
+        'type' => 'comment',
+        'body' => $body,
+        'posterid' => 0,
+    }) or die "Error appending request?";
+
+    LJ::Support::touch_request($dbh, $spid) if $sp->{state} eq "closed";
+
+    exit 0;
 }
 
 
@@ -125,8 +128,8 @@ my $spid = LJ::Support::file_request($dbh, \@errors, {
     'reqtype' => 'email',
     'reqname' => $name,
     'reqemail' => $from,
-    'body' => $body
-    });
+    'body' => $body,
+});
 
 if (@errors) {
     die "Errors: @errors\n";

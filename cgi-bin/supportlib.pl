@@ -480,6 +480,24 @@ sub append_request
     return $splid;    
 }
 
+sub touch_request
+{
+    my ($dbh, $spid) = @_;
+
+    $dbh->do("UPDATE support".
+             "   SET state='open', timeclosed=0, timetouched=UNIX_TIMESTAMP()".
+             " WHERE spid=?",
+	     undef, $spid)
+      or return 0;
+
+    $dbh->do("DELETE FROM supportpoints".
+             " WHERE spid=?",
+	     undef, $spid)
+      or return 0;
+
+    return 1;
+}
+
 sub mail_response_to_user
 {
     my $dbh = shift;
