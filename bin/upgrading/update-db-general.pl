@@ -62,7 +62,7 @@ CREATE TABLE clients (
 EOC
 
 post_create("clients", 
-	    "sql" => "INSERT INTO clients (client) SELECT DISTINCT client FROM logins",
+	    "sqltry" => "INSERT INTO clients (client) SELECT DISTINCT client FROM logins",
 	    );
 
 register_tablecreate("clientusage", <<'EOC');
@@ -76,7 +76,7 @@ CREATE TABLE clientusage (
 EOC
     
 post_create("clientusage", 
-	    "sql" => "INSERT INTO clientusage SELECT u.userid, c.clientid, l.lastlogin FROM user u, clients c, logins l WHERE u.user=l.user AND l.client=c.client",
+	    "sqltry" => "INSERT INTO clientusage SELECT u.userid, c.clientid, l.lastlogin FROM user u, clients c, logins l WHERE u.user=l.user AND l.client=c.client",
 	    );
 
 register_tablecreate("codes", <<'EOC');

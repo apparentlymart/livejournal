@@ -98,6 +98,19 @@ sub do_sql
     }
 }
 
+sub try_sql
+{
+    my $sql = shift;
+    print "$sql;\n";
+    if ($opt_sql) {
+	print "# Non-critical SQL (upgrading only... it might fail)...\n";
+	$dbh->do($sql);
+	if ($dbh->err) {
+	    print "#  Acceptable failure: " . $dbh->errstr . "\n";
+	}
+    }
+}
+
 sub do_alter
 {
     my ($table, $sql) = @_;
@@ -119,6 +132,10 @@ sub create_table
 	if ($ac eq "sql") { 
 	    print "# post-create SQL\n";
 	    do_sql($args[0]); 
+	}
+	elsif ($ac eq "sqltry") { 
+	    print "# post-create SQL (necessary if upgrading only)\n";
+	    try_sql($args[0]); 
 	}
 	else { print "# don't know how to do \$ac = $ac"; }
     }

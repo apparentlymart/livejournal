@@ -132,7 +132,7 @@ Special:
 Configuring Apache
 ------------------
 You need to add a <VirtualHost> section in Apache's httpd.conf file.
-See INSTALL.vhost.txt for an example that you'll only need to modify
+See INSTALL.apache.txt for an example that you'll only need to modify
 slightly (only the hostname).
 
 
@@ -209,7 +209,7 @@ and it is one of the easiest.
 Assuming you've done everything above, all you have to do is:
 
    $ cd /home/lj
-   $ bin/upgrading/update-db.pl
+   $ bin/upgrading/update-db.pl --runsql
 
 That'll bring your database schema up-to-date and populate it with any
 look-up data it needs.
@@ -233,10 +233,10 @@ your editor explicitly, do:
 [Note: prolonged use of pico can cause insanity.  You are encouraged
        to learn emacs or vi.]
 
-Now, enter the following stuff between below.  Not all of them are
-necessary.  See the comments below.  The LJHOME= line is required.
-See the section above about how the $LJHOME environment variable is
-required everywhere.  This is another place.
+Now, enter the following stuff between the dotted lines below.  Not
+all of it is necessary.  See the comments below.  The LJHOME= line is
+required.  See the section above about how the $LJHOME environment
+variable is required everywhere.  This is another place.
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 LJHOME=/home/lj
@@ -279,7 +279,7 @@ If you haven't restarted Apache, you'll want to do that now:
   # apachectl restart
 
 The last thing you will need to do is create the system user that'll
-be able privileges to do everything:
+have privileges to give privileges to other users.
 
   $ bin/upgrading/make_system.pl
 
