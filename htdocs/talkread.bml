@@ -553,7 +553,7 @@ body<=
                         }
                         $alt = LJ::ehtml($alt);
 
-                        $$ret .= "<img align='left' hspace='3' src='/userpic/$picid/$user{$userpost}->{'userid'}'";
+                        $$ret .= "<img align='left' hspace='3' src='/userpic/$picid/$post->{'posterid'}'";
                         $$ret .= " width='$userpics{$picid}->{'width'}'";
                         $$ret .= " title='$alt' alt=''";
                         $$ret .= " height='$userpics{$picid}->{'height'}' />";
