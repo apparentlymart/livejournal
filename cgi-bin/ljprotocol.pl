@@ -461,6 +461,7 @@ sub postevent
     if (%{$req->{'props'}}) {
 	my $propinsert = "";
 	foreach my $pname (keys %{$req->{'props'}}) {
+	    next unless $req->{'props'}->{$pname};
 	    if ($propinsert) {
 		$propinsert .= ", ";
 	    } else {
