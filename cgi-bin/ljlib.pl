@@ -1194,11 +1194,13 @@ sub comm_member_request {
 
     my $arg = join("&", "targetid=$u->{'userid'}", map { "$_=1" } sort @$attr);
 
-    # check for duplicates
     my $dbh = LJ::get_db_writer();
+
+    # check for duplicates within the same hour (to prevent spamming)
     my $oldaa = $dbh->selectrow_hashref("SELECT aaid, authcode, datecreate FROM authactions " .
                                         "WHERE userid=? AND arg1=? " .
                                         "AND action='comm_invite' AND used='N' " .
+                                        "AND NOW() < datecreate + INTERVAL 1 HOUR " .
                                         "ORDER BY 1 DESC LIMIT 1",
                                         undef, $comm->{'userid'}, $arg);
     return $oldaa if $oldaa;
@@ -1206,6 +1208,11 @@ sub comm_member_request {
     # insert authactions row
     my $aa = LJ::register_authaction($comm->{'userid'}, 'comm_invite', $arg);
     return undef unless $aa;
+
+    # if there are older duplicates, invalidate any existing unused authactions of this type
+    $dbh->do("UPDATE authactions SET used='Y' WHERE userid=? AND aaid<>? AND arg1=? " .
+             "AND action='comm_invite' AND used='N'",
+             undef, $comm->{'userid'}, $aa->{'aaid'}, $arg);
 
     # email recipient user for confirmation
     $attr ||= [];
@@ -1252,10 +1259,12 @@ sub shared_member_request {
     my ($ju, $u) = @_;
     return undef unless ref $ju && ref $u;
 
-    # check for duplicates
     my $dbh = LJ::get_db_writer();
+
+    # check for duplicates
     my $oldaa = $dbh->selectrow_hashref("SELECT aaid, authcode, datecreate FROM authactions " .
                                         "WHERE userid=? AND action='shared_invite' AND used='N' " .
+                                        "AND NOW() < datecreate + INTERVAL 1 HOUR " .
                                         "ORDER BY 1 DESC LIMIT 1",
                                         undef, $ju->{'userid'});
     return $oldaa if $oldaa;
@@ -1263,6 +1272,11 @@ sub shared_member_request {
     # insert authactions row
     my $aa = LJ::register_authaction($ju->{'userid'}, 'shared_invite', "targetid=$u->{'userid'}");
     return undef unless $aa;
+
+    # if there are older duplicates, invalidate any existing unused authactions of this type
+    $dbh->do("UPDATE authactions SET used='Y' WHERE userid=? AND aaid<>? " .
+             "AND action='shared_invite' AND used='N'",
+             undef, $ju->{'userid'}, $aa->{'aaid'});
 
     my $body = "The maintainer of the $ju->{'user'} shared journal has requested that " .
         "you be given posting access.\n\n" .
