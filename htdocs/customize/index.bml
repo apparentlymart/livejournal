@@ -3,7 +3,7 @@ title=>Customize
 body<=
 <?_code
 
- return LJ::server_down_html() if ($LJ::SERVER_DOWN);
+ return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -17,19 +17,6 @@ body<=
  my $remote = LJ::get_remote($dbs);
  my $mode = $FORM{'mode'} || ($remote && $FORM{'authas'} ne "(other)" ? "modify" : "loginform");
 
- if ($mode eq "loginform")
- {
-     $ret .= "<?h1 Customize Journal h1?><?p Enter your username and password to customize your journal.. p?>";
-     $ret .= "<form action='./' method='post'>";
-     $ret .= "<input type='hidden' name='mode' value='modify'>";
-     $ret .= "<?standout <table> ";
-     $ret .= LJ::auth_fields_2($dbs, \%FORM, { 'shared' => 1, 'getother' => 1 });
-     $ret .= "<tr><td colspan='2' align='center'><input type='submit' value='Proceed...'>";
-     $ret .= "</td></tr></table> standout?></form>\n";
-     $ret .= "<?h1 Forget something? h1?><?p If you forgot your username or password, ";
-     $ret .= "<a href='/lostinfo.bml'>recover it here!</a>. p?>";
-     return $ret;
- }
  my ($u, $user, $err);
  my $user = LJ::get_effective_user($dbs, {
      'form' => \%FORM,
@@ -51,9 +38,9 @@ body<=
  my $hpassword = LJ::hash_password($u->{'password'});
 
  if ($remote) {
-     $ret .= "<form method='post'>";
+     $ret .= "<form method='get'>";
      $ret .= "<?h1 Switch Journal h1?><?p Work with journal: ";
-     $ret .= LJ::make_shared_select($dbs, $remote, \%FORM);
+     $ret .= LJ::make_shared_select($dbs, $remote, \%FORM, { 'notother' => 1 });
      $ret .= " <input type='submit' value='Switch'> p?></form>";
  }
 

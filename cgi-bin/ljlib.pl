@@ -980,11 +980,11 @@ sub auth_fields_2
 
     my $sopts = {};
     $sopts->{'notshared'} = 1 unless $opts->{'shared'};
-    $sopts->{'getother'} = $opts->{'getother'};
+    $sopts->{'notother'} = 1;
 
     $ret .= LJ::make_shared_select($dbs, $remote, $form, $sopts);
 
-    if ($sopts->{'getother'}) {
+    if ($opts->{'getother'}) {
         my $alturl = BML::self_link({ 'altlogin' => 1 });
         $ret .= "&nbsp;(<a href='$alturl'>Other</a>)";
     }
@@ -1017,7 +1017,7 @@ sub make_shared_select
             $u2k{$_} = $_;
         }
     }
-    unless ($opts->{'getother'}) {
+    unless ($opts->{'notother'}) {
         push @choices, "(other)", "Other...";
     }
 
