@@ -1576,13 +1576,21 @@ sub get_dbh
 	$key = "master";
     }
 
-    $dbh = DBI->connect("DBI:mysql:livejournal:$LJ::DBINFO{$key}->{'host'}", 
-			$LJ::DBINFO{$key}->{'user'},
-			$LJ::DBINFO{$key}->{'pass'},
-			{
-			    PrintError => 0,
-			});
-			
+    my $dsn = "DBI:mysql";
+    my $db = $LJ::DBINFO{$key};
+    $db->{'dbname'} ||= "livejournal";
+    $dsn .= ":$db->{'dbname'}:";
+    if ($db->{'host'}) {
+	$dsn .= "host=$db->{'host'};";
+    }
+    if ($db->{'sock'}) {
+	$dsn .= "mysql_socket=$db->{'sock'};";
+    }
+
+    $dbh = DBI->connect($dsn, $db->{'user'}, $db->{'pass'}, {
+	PrintError => 0,
+    });
+    
     # save a reference to the database handle for later
     $LJ::DBCACHE{$type} = $dbh;
 
