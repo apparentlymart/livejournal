@@ -70,18 +70,27 @@ my $move_user = sub {
     print $status->($stats{'move'}->{$pass}->{'ct'},
                     $stats{'move'}->{$pass}->{'total'}, "rows", $pass, $user);
 
+    # ignore expunged users
+    if ($u->{'statusvis'} eq "X") {
+	LJ::update_user($u, { 'dversion' => 5 })
+	    or die "error updating dversion";
+	$u->{'dversion'} = 5; # update local copy in memory
+	return 1;
+    }
+
     # get a handle for every user to revalidate our connection?
     my $dbh = $get_db_writer->()
         or die "Can't connect to global  master";
     my $dbslo = $get_db_slow->()
         or die "Can't connect to global slow master";
     my $dbcm = $get_cluster_master->($u->{'clusterid'})
-        or die "Can't connect to cluster master";
+        or die "Can't connect to cluster master ($u->{'clusterid'})";
 
     # be careful, we're moving data
-    $dbh->{'RaiseError'} = 1;
-    $dbslo->{'RaiseError'} = 1;
-    $dbcm->{'RaiseError'} = 1;
+    foreach my $db ($dbh, $dbslo, $dbcm) {
+	$db->do("SET wait_timeout=28800");
+	$db->{'RaiseError'} = 1;
+    }
 
     my @map = (['style' => 's1style',
                 qw(styleid userid styledes type formatdata is_public 
