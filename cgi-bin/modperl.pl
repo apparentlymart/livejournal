@@ -7,6 +7,20 @@ use Apache;
 use Apache::LiveJournal;
 use Apache::CompressClientFixup;
 use Apache::BML;
+BEGIN {
+    require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
+    require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
+    require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
+    require "$ENV{'LJHOME'}/cgi-bin/htmlcontrols.pl";
+    require "$ENV{'LJHOME'}/cgi-bin/imageconf.pl";
+    require "$ENV{'LJHOME'}/cgi-bin/propparse.pl";
+    require "$ENV{'LJHOME'}/cgi-bin/supportlib.pl";
+    require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
+    require "$ENV{'LJHOME'}/cgi-bin/portal.pl";
+    require "$ENV{'LJHOME'}/cgi-bin/talklib.pl";
+    require "$ENV{'LJHOME'}/cgi-bin/ljtodo.pl";
+    require "$ENV{'LJHOME'}/cgi-bin/directorylib.pl";
+}
 
 # auto-load some stuff before fork:
 Storable::thaw(Storable::freeze({}));
