@@ -216,8 +216,9 @@ body<=
     my $dbr = LJ::get_db_reader();
 
     # get community members
-    my $sth = $dbr->prepare("SELECT u.userid, u.user FROM user u, friends f WHERE u.userid=f.friendid AND f.userid=$cid");
-    $sth->execute;
+    my $sth = $dbr->prepare("SELECT u.userid, u.user FROM useridmap u, friends f " .
+                            "WHERE u.userid=f.friendid AND f.userid=?");
+    $sth->execute($cid);
 
     while (my ($id, $user) = $sth->fetchrow_array) {
         $users{$id}->{'userid'} = $id;
