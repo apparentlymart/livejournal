@@ -45,8 +45,7 @@ Danga::Daemon::daemonize(
     \&worker,
     {
         interval   => 10,
-        shedprivs  => 1,
-        user       => 'lj',
+        shedprivs  => 'lj',
 
         listenport => 15000,
         listencode => \&cmd_interface,
