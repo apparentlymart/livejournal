@@ -170,7 +170,6 @@ sub trans
         my $DAY = 3600*24;
         if (! $uniq || $now - $uniq_time > $DAY) {
             $uniq ||= LJ::rand_chars(15);
-            $r->notes("uniq" => $uniq);
 
             # set uniq cookies for all cookie_domains
             my @domains = ref $LJ::COOKIE_DOMAIN ? @$LJ::COOKIE_DOMAIN : ($LJ::COOKIE_DOMAIN);
