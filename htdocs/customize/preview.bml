@@ -8,7 +8,7 @@ body<=
 
     my $ret;
     my $remote = LJ::get_remote();
-    my $journal = LJ::canonical_username($FORM{'journal'});
+    my $journal = LJ::canonical_username($GET{'journal'});
 
     $ret .= "<p>[&lt;&lt; <a href='/customize/?journal=$journal'>Back</a>]</p>";
 
