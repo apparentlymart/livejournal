@@ -120,7 +120,34 @@ sub YearMonth {
         $day_of_week = ($day_of_week + 1) % 7;
     }
     $flush_week->(1); # end of month flag
- 
+
+    ## figure out what months have been posted into
+    my $nowval = $year*12 + $month;
+
+    my $months = [];
+    my $remote = LJ::get_remote();
+    my $days = LJ::get_daycounts($p->{'_u'}, $remote) || [];
+    my $lastmo;
+    foreach my $day (@$days) {
+        my ($oy, $om) = ($day->[0], $day->[1]);
+        my $mo = "$oy-$om";
+        next if $mo eq $lastmo;
+        $lastmo = $mo;
+
+        my $date = Date($oy, $om, 0);
+        my $url = $p->{'_u'}->{'_journalbase'} . sprintf("/%04d/%02d/", $oy, $om);
+        
+        my $val = $oy*12+$om;
+        if ($val < $nowval) {
+            $calmon->{'prev_url'} = $url;
+            $calmon->{'prev_date'} = $date;
+        }
+        if ($val > $nowval && ! $calmon->{'next_date'}) {
+            $calmon->{'next_url'} = $url;
+            $calmon->{'next_date'} = $date;
+        }
+    }
+    
     return $calmon;
 }
 

@@ -487,6 +487,10 @@ class YearMonth
     var int year "The number of the year";
     var YearWeek[] weeks "An array of the weeks of the month (for ease of building a row-per-week calendar)";
     var readonly string url "A url to link to in order to view this month.";
+    var readonly string prev_url "A url to link to in order to view the previous month.";
+    var readonly string next_url "A url to link to in order to view the next month.";
+    var Date prev_date "Date of previous month, with day of zero, or null if none.";
+    var Date next_date "Date of next month, with day of zero, or null if none.";
 
     function builtin month_format () : string
     "Returns month formatted long (February 1980)  // SeeAlso: siteapi.core1.dateformats";
