@@ -99,7 +99,7 @@
             next unless ref $prop;
             next if $prop->{'noui'};
             my $name = $prop->{'name'};
-            next unless $POST{"${name}_action"} eq "override";
+            next unless $POST{"$name:override"};
             next unless LJ::S2::can_use_prop($u, $lyr_layout->{'uniq'}, $name);
             $override{$name} = [ $prop, $POST{"${name}_value"} ];
         }
@@ -171,6 +171,7 @@
         return $gname;
     };
 
+    my $prop_js = "";
     my $output_prop = sub {
         my $name = shift;
         my $prop = $prop{$name};
@@ -199,6 +200,8 @@
         my $existing_display = defined $values{$existing} ? 
             $values{$existing} : $existing;
 
+        $existing_display = LJ::eall($existing_display);
+
         my $override = S2::get_set($layerid, $name);
         my $had_override = defined $override;
         $override = $existing unless defined $override;
@@ -206,14 +209,19 @@
         if (ref $override eq "HASH") { $override = $override->{'as_string'}; }
 
         $body .= "<?h1 " . LJ::eall($prop->{'des'}) . " h1?>";
-        $body .= "<?p ";
-        $body .= LJ::eall($prop->{'note'}) if $prop->{'note'};
-        $body .= " <?help " . $LJ::HELPURL{"s2opt_$name"} . " help?>" if $LJ::HELPURL{"s2opt_$name"};
-        $body .= "<blockquote>";
-        $body .= "<dl><dt>" . LJ::html_check({ 'type' => 'radio', 'name' => "${name}_action",
-                                               'value' => 'keep', 'id' => "${name}_keep",
-                                               'checked' => ! $had_override });
-        $body .= "<label for='${name}_keep'> <b>Keep value: </b></label></dt><dd>";
+        {
+            my $t = "";
+            $t .= LJ::eall($prop->{'note'}) if $prop->{'note'};
+            $t .= "<?help " . $LJ::HELPPURL{"s2opt_$name"} . " help?>" if $LJ::HELPURL{"s2opt_$name"};
+            $body .= "<?p $t p?>" if $t;
+        }
+        $body .= "<div class='inset'>\n";
+        $body .= LJ::html_check({ 'name' => "$name:override", 'id' => "$name:override",
+                                  'selected' => $had_override, 'disabled' => ! $can_use,
+                                  'onchange' => "toggleOverride('$name');" });
+        my $offhelp = ! $can_use ? LJ::help_icon('s2propoff', ' ') : "";
+        $body .= "<label for='$name:override'> Override default</label>$offhelp<br />\n";
+        $body .= "<dl class='hidedt'>\n<dt>Default:</dt>\n<dd id='$name:default_value' style='font-family: monospace'>\n";
         if ($type eq "int" || $type eq "string") {
             if ($existing_display ne "") {
                 $body .= $existing_display;
@@ -226,15 +234,9 @@
         } elsif ($type eq "bool") {
             $body .= $existing_display;
         }
-        $body .= "</dd>";
-        my $offhelp = ! $can_use ? LJ::help_icon('s2propoff', ' ') : "";
-        $body .= "<dt>" . LJ::html_check({ 'type' => 'radio', 'name' => "${name}_action",
-                                           'value' => 'override', 'id' => "${name}_override",
-                                           'selected' => $had_override, 'disabled' => ! $can_use });
-        $body .= "<label for='${name}_override'> <b>Override: </b></label>$offhelp</dt><dd>";
+        $body .= "</dd>\n<dt>Override:</dt>\n<dd id='$name:user_value'>\n";
         if ($prop->{'values'}) {
             $body .= LJ::html_select({ 'name' => "${name}_value",
-                                       'onchange' => "checkOverride('$name');",
                                        'disabled' => ! $can_use,
                                        'selected' => $override },
                                      split(/\|/, $prop->{'values'}));
@@ -242,7 +244,6 @@
             $body .= LJ::html_text({ 'name' => "${name}_value",
                                      'disabled' => ! $can_use,
                                      'value' => $override,
-                                     'onfocus' => "checkOverride('$name');",
                                      'maxlength' => 5,
                                      'size' => 7 });
         } elsif ($type eq "string") {
@@ -261,7 +262,6 @@
                 $body .= LJ::html_text({ 'name' => "${name}_value",
                                      'disabled' => ! $can_use,
                                      'value' => $override,
-                                     'onfocus' => "checkOverride('$name');",
                                      'maxlength' => $maxlength,
                                      'size' => $size });
             }
@@ -269,14 +269,10 @@
             $body .= LJ::html_color({ 'name' => "${name}_value",
                                       'disabled' => ! $can_use,
                                       'default' => $override,
-                                      'onchange' => "checkOverride('$name');",
                                       'des' => $prop->{'des'} });
         }
-        $body .= "</dd></dl>";
-
-        $body .= "</blockquote>";
-        $body .= " p?>";
-        
+        $body .= "</dd></dl>\n</div>\n";
+        $prop_js .= "toggleOverride('$name');\n";
     };
 
     if (@groups) {
@@ -310,6 +306,8 @@
             $output_prop->($pname);
         }
     }
+
+    $body .= "<script type='text/javascript' language='JavaScript'><!--\n$prop_js// --></script>";
     
     $body .= "<?h1 Finished? h1?><?p When done, click the save button below. p?><center>";
     $body .= LJ::html_submit('action:save', "Save");
@@ -341,17 +339,22 @@ head<=
         }
         return false;
     }
-    function checkOverride (name) {
-        if (! name) { return true; }
-        if (! document.getElementById) { return true; }
-        var keep = document.getElementById(name + '_keep');
-        if (! keep) { return true; }
-        var override = document.getElementById(name + '_override');
-        if (! override) { return true; }
+    function toggleOverride (name) {
+        if (!name) return true;
+        if (!document.getElementById) return true;
+        var ocheck = document.getElementById(name + ':override');
+        if (!ocheck) return true;
 
-        keep.checked = false;
-        override.checked = true;
-        return true;
+        var def_vals = document.getElementById(name + ':default_value');
+        if (!def_vals) return true;
+        var usr_vals = document.getElementById(name + ':user_value');
+        if (!usr_vals) return true;
+
+        var disp_def = ocheck.checked ? 'none'  : 'block';
+        var disp_usr = ocheck.checked ? 'block' : 'none';
+
+        def_vals.style.display = disp_def;
+        usr_vals.style.display = disp_usr;
     }
 <?_code return $js; _code?>
 </script>
@@ -397,8 +400,27 @@ head<=
     text-decoration: none;
     color: #ddd;
  } 
-
+ div.inset {
+    margin-left: 2em;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+ }
+ dl.hidedt {
+    margin: 0;
+    padding: 0;
+ }
+ dl.hidedt dt { font-weight: bold; }
+ noscript { display: inline; }
 </style>
+<script type='text/javascript' language='JavaScript'>
+    // Only hide if we do the JS-switchy thing
+    if (document.getElementById)
+        document.write("<style type='text/css'>" +
+                       "dl.hidedt dd { margin: 0; padding: 0; }" +
+                       "dl.hidedt dt { display: none; }" +
+                       "noscript { display: none; }" +
+                       "</style>");
+</script>
 
 <=head
 page?>
