@@ -21,6 +21,7 @@ Apache->httpd_conf(qq{
 </IfModule>
 
 PerlInitHandler +Apache::LiveJournal
+PerlFixupHandler +Apache::CompressClientFixup
 DirectoryIndex index.html index.bml
 });
 

@@ -7,6 +7,7 @@ use strict;
 use Apache::Constants qw(:common REDIRECT HTTP_NOT_MODIFIED HTTP_MOVED_PERMANENTLY);
 use Apache::File ();
 use XMLRPC::Transport::HTTP ();
+use Compress::Zlib ();
 use lib "$ENV{'LJHOME'}/cgi-bin";
 
 BEGIN {
@@ -486,7 +487,23 @@ sub journal_content
 
     $r->content_type($opts->{'contenttype'});
     $r->header_out("Cache-Control", "private, proxy-revalidate");
-    $r->header_out("Content-length", length($html));
+
+    my $do_gzip = $LJ::DO_GZIP;
+    $do_gzip = 0 if $do_gzip && $opts->{'contenttype'} !~ m!^text/html!;
+    $do_gzip = 0 if $do_gzip && $r->header_in("Accept-Encoding") !~ /gzip/;
+    my $length = length($html);
+    $do_gzip = 0 if $length < 500;
+
+    if ($do_gzip) {
+        my $pre_len = $length;
+        $r->notes("bytes_pregzip" => $pre_len);
+        $html = Compress::Zlib::memGzip($html);
+        $length = length($html);
+        $r->header_out('Content-Encoding', 'gzip');
+        $r->header_out('Vary', 'Accept-Encoding');
+    }
+
+    $r->header_out("Content-length", $length);
     $r->send_http_header();
     $r->print($html) unless $r->header_only;
     return OK;
