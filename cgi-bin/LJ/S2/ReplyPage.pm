@@ -78,6 +78,7 @@ sub ReplyPage
         my $comment_userpic;
         if ($parpost->{'posterid'}) {
             $pu = LJ::load_userid($parpost->{'posterid'});
+            return $opts->{handler_return} = 403 if $pu->{statusvis} eq 'S'; # do not show comments by suspended users
             $s2poster = UserLite($pu);
 
             # FIXME: this is a little heavy:
