@@ -64,7 +64,7 @@ body<=
         $ret .= '</div><br />';
 
         $ret .= '<?h2 Removing unwanted text h2?>';
-        $ret .= '<?p All text below two or more dashes or underscores ("--" or "__") will be automatically removed. The red text below won\'t show up in your posting. p?>';
+        $ret .= '<?p All text below two or more dashes or underscores ("--" or "__") on a line by itself will be automatically removed. The red text below won\'t show up in your posting. p?>';
         $ret .= '<div style="margin-left:40px">';
         $ret .= "To: " . $u->{user} . '<b>+' . $pin . '</b>@' . $LJ::EMAIL_POST_DOMAIN . '<br />';
         $ret .= $from . $subject . $body;
