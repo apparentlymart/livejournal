@@ -1097,7 +1097,7 @@ property bool linklist_support {
     des = "Link List Support";
     note = "If you've created a list of links that you would like to include in this layout, change this option to 'yes'.";
 }
-set linklist_support = false;
+set linklist_support = true;
 
 ###[ global function implementations ]
 
