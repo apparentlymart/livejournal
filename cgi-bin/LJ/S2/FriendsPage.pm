@@ -298,12 +298,13 @@ sub FriendsPage
             'journal' => $userlite_journal,
             'poster' => $userlite_poster,
             'comments' => $comments,
-            'new_day' => 0,  # TODO: implement? is ugly on friends pages when timezones bounce around
-            'end_day' => 0,  # TODO: implement? is ugly on friends pages when timezones bounce around
+            'new_day' => 0,  # setup below
+            'end_day' => 0,  # setup below
             'userpic' => undef,
             'permalink_url' => $permalink,
             'moodthemeid' => $moodthemeid,
         });
+        $entry->{'_ymd'} = join('-', map { $entry->{'time'}->{$_} } qw(year month day));
 
         if ($picid) { 
             push @{$objs_of_picid{$picid}}, \$entry->{'userpic'};
@@ -312,6 +313,23 @@ sub FriendsPage
         push @{$p->{'entries'}}, $entry;
         
     } # end while
+
+    # set the new_day and end_day members.
+    if ($eventnum) {
+        for (my $i = 0; $i < $eventnum; $i++) {
+            my $entry = $p->{'entries'}->[$i];
+            $entry->{'new_day'} = 1;
+            my $last = $i;
+            for (my $j = $i+1; $j < $eventnum; $j++) {
+                my $ej = $p->{'entries'}->[$j];
+                if ($ej->{'_ymd'} eq $entry->{'_ymd'}) {
+                    $last = $j;
+                }
+            }
+            $p->{'entries'}->[$last]->{'end_day'} = 1;
+            $i = $last;
+        }
+    }
 
     # load the pictures that were referenced, then retroactively populate
     # the userpic fields of the Entries above
