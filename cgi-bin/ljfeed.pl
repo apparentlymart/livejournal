@@ -340,8 +340,7 @@ sub create_view_atom
         $ret .= "      <name>" . LJ::exml($journalinfo->{u}{name}) . "</name>\n";
         $ret .= "      <email>$journalinfo->{editor}</email>\n" if $journalinfo->{editor};
         $ret .= "    </author>\n";
-        # should rel be fragment?  or some other rel?  should it depend on whether we truncated?
-        $ret .= "    <content type='text/html' mode='escaped' rel='fragment'>$it->{event}</content>\n";
+        $ret .= "    <content type='text/html' mode='escaped'>$it->{event}</content>\n";
         $ret .= "  </entry>\n";
     }
 
