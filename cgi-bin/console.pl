@@ -1111,8 +1111,12 @@ sub syn_editurl
 
     $dbh->do("UPDATE syndicated SET synurl=? WHERE userid=?", undef,
              $newurl, $u->{'userid'});
-
-    push @$out, [ '', "URL for account $user changed to $newurl ." ];
+    if ($dbh->err)
+    {
+        push @$out, [ 'error', "URL for account $user not changed - Duplicate Entry" ];
+    } else {
+        push @$out, [ '', "URL for account $user changed to $newurl ." ];
+    }
     return 1;
 }
 
