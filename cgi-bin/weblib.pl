@@ -1324,8 +1324,9 @@ sub entry_form_decode
     }
 
     $req->{"prop_opt_preformatted"} ||= $POST->{'event_format'} eq "preformatted" ? 1 : 0;
-    $req->{"prop_opt_$POST->{'comment_settings'}"} = 1 if $POST->{'comment_settings'} ne "";
-    $req->{'prop_opt_backdated'} = $POST->{'prop_opt_backdated'} ? 1 : 0;
+    $req->{"prop_opt_nocomments"}   ||= $POST->{'comment_settings'} eq "nocomments" ? 1 : 0;
+    $req->{"prop_opt_noemail"}      ||= $POST->{'comment_settings'} eq "noemail" ? 1 : 0;
+    $req->{'prop_opt_backdated'}      = $POST->{'prop_opt_backdated'} ? 1 : 0;
     
     # Convert the rich text editor output back to parsable lj tags.
     my $event = $POST->{'event'};
