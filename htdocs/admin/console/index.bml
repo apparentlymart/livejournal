@@ -12,6 +12,10 @@
 
  if ($commands) 
  {
+     unless (LJ::did_post()) {
+	 return "<b>Error:</b> requires post.";
+     }
+
      $ret .= "[ <A HREF=\"./\">console</A> | <A HREF=\"reference.bml\">reference</A> ]<P>";
 
      foreach my $cmd (split(/\n/, $commands))
@@ -147,4 +151,8 @@
      return $ret;
  }
 
-_CODE=)
+_CODE=)(=_C <LJDEP>
+lib: cgi-bin/console.pl, cgi-bin/ljlib.pl
+link: htdocs/admin/console/reference.bml
+post: htdocs/admin/console/index.bml
+</LJDEP> _C=)
