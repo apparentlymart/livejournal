@@ -15,6 +15,7 @@ body<=
     my $table = sub { $_[0]->{'journaltype'} eq 'C' ? 'comminterests' : 'userinterests' };
 
     if (!$did_post && $GET{'view'} eq "popular") {
+        return $ML{'.popular.disabled'} if $LJ::DISABLED{'interests-popular'};
         my $ret = "";
         $ret .= "<?h1 $ML{'.popular.head'} h1?><?p $ML{'.popular.text'} p?>";
 
@@ -426,8 +427,11 @@ body<=
     my $ret = "";
     $ret .= "<?h1 $ML{'.interests.head'} h1?><?p $ML{'.interests.text'} p?>";
     $ret .= "<table cellspacing='5' style='margin-top: 10px; margin-left: 30px; margin-bottom: 10px;'>";
-    $ret .= "<tr valign='top'><td colspan='2'>";
-    $ret .= "<a href=\"interests.bml?view=popular\">$ML{'.interests.viewpop'}</a></td></tr>";
+
+    unless ($LJ::DISABLED{'interests-popular'}) {
+        $ret .= "<tr valign='top'><td colspan='2'>";
+        $ret .= "<a href=\"interests.bml?view=popular\">$ML{'.interests.viewpop'}</a></td></tr>";
+    }
 
     my $remote = LJ::get_remote();
 
