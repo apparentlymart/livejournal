@@ -53,7 +53,7 @@
 
             my $len = "short";
             my $etime = 0;  # for cookie
-            my $session_secs = 60*60*24; # for db.
+            my $session_secs = 60*60*24*1.5; # for db.
             if ($POST{'expire'} eq "never") {
                 $len = "long";
                 $session_secs = 60*60*24*60;

@@ -2320,7 +2320,7 @@ sub can_view
     # must be logged in otherwise
     return 0 unless $remote;
 
-    my $userid = int($item->{'ownerid'});
+    my $userid = int($item->{'ownerid'} || $item->{'journalid'});
     my $remoteid = int($remote->{'userid'});
 
     # owners can always see their own.
@@ -2763,12 +2763,16 @@ sub get_remote
     }
 
     # renew short session
-    my $short_session = 60*60*24;
-    if ($sess->{'exptype'} eq "short" && 
-        ($sess->{'timeexpire'} - $sess->{'now'}) < $short_session/2) {
+    my $sess_length = {
+        'short' => 60*60*24*1.5,
+        'long' => 60*60*24*60,
+    }->{$sess->{'exptype'}};
+    
+    if ($sess_length && 
+        $sess->{'timeexpire'} - $sess->{'now'} < $sess_length/2) {
         my $udbh = LJ::get_cluster_master($u, 1);
         if ($udbh) {
-            my $future = $sess->{'now'} + $short_session;
+            my $future = $sess->{'now'} + $sess_length;
             $udbh->do("UPDATE sessions SET timeexpire=$future WHERE ".
                       "userid=$u->{'userid'} AND sessid=$sess->{'sessid'}");
         }
