@@ -85,7 +85,8 @@ exit 1 unless
                "journal=s" => \$opts{usejournal},
                "clean" => \$opts{clean},
                "file=s" => \$opts{file},
-               "password=s" => \$opts{password},);
+               "password=s" => \$opts{password},
+               "md5pass=s" => \$opts{md5password},);
 
 # hit up .jbackup for other options
 if (-e "$ENV{HOME}/.jbackup") {
@@ -117,6 +118,7 @@ jbackup.pl -- journal database generator and formatter
   Authentication options:
     --user=X        Specify the user to use for authentication.
     --password=X    Specify the password to use for the user.
+    --md5pass=X     Alternately, provide the MD5 digest of the password.
     --journal=X     Specify an alternate journal to use.
                     NOTE: You must be maintainer of the journal.
     --server=X      Use a different server.  (Default: www.livejournal.com)
@@ -148,7 +150,7 @@ unless ($opts{user}) {
     $opts{user} = $user;
     die "Need a username" unless $opts{user};
 }
-if (!$opts{password} && $opts{sync}) {
+if (!$opts{password} && !$opts{md5password} && $opts{sync}) {
     print "Password: ";
     ReadMode('noecho');
     my $pass = ReadLine(0);
@@ -806,7 +808,7 @@ sub call_xmlrpc {
     }
     #d("\tcall_xmlrpc: challenge obtained: $chal");
 
-    my $response = md5_hex($chal . md5_hex($opts{password}));
+    my $response = md5_hex($chal . ($opts{md5password} ? $opts{md5password} : md5_hex($opts{password})));
     #d("\tcall_xmlrpc: calling LJ.XMLRPC.$mode");
     my $res = xmlrpc_call_helper($xmlrpc, "LJ.XMLRPC.$mode", {
         'username' => $opts{user},
@@ -827,18 +829,8 @@ sub do_flush {
 sub do_tie {
     # try to open the database for access
     d("do_tie: tying database");
-    my $exists = -e $filename;
-    my $x = tie %bak, 'GDBM_File', $filename, &GDBM_WRCREAT, 0640
-        or die "Could not open/tie $filename\n";
-
-    # now, if it didn't exist, let's untie, chmod it, then retie.  we don't
-    # want our databases to be maliciously used by someone other than the calling user.
-    unless ($exists) {
-        die "do_tie: retying has failed\n" if @_;
-        do_untie();
-        chmod 0600, $filename or die "Unable to chmod: $!\n";
-        return do_tie(1); # so we don't loop infinitely, pass the 1
-    }
+    my $x = tie %bak, 'GDBM_File', $filename, &GDBM_WRCREAT, 0600
+        or die "Could not open/tie $filename: $!\n";
     return $x;
 };
 
