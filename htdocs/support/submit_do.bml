@@ -4,7 +4,10 @@ BODY<=
 
 (=_CODE
 
- &connect_db;
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+
  my @errors = ();
 
  my $u;
@@ -20,12 +23,12 @@ BODY<=
      if ($FORM{'password'} eq "_REMOTE") {
 	 $remote = LJ::get_remote($dbh);
 	 if ($remote && $remote->{'user'} eq $user) {
-	     $u = LJ::load_user($dbh, $remote->{'user'});
+	     $u = LJ::load_user($dbs, $remote->{'user'});
 	     $req{'requserid'} = $remote->{'userid'};
 	 }
      }
      unless ($req{'requserid'}) {
-	 $u = LJ::load_user($dbh, $user);
+	 $u = LJ::load_user($dbs, $user);
 	 if (LJ::valid_password($u->{'password'}, \%FORM)) {
 	     $req{'requserid'} = $u->{'userid'};
 	 }
@@ -36,6 +39,8 @@ BODY<=
  {
      $req{'reqtype'} = "email";
      $req{'reqemail'} = $FORM{'email'};
+     
+     check_email($FORM{'email'}, \@errors);
  }
 
  $req{'reqname'} = $FORM{'reqname'};

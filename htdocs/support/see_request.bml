@@ -20,7 +20,7 @@ BODY<=
 
  my $u = {};
  if ($sp->{'reqtype'} eq "user") {
-     $u = LJ::load_userid($dbh, $sp->{'requserid'});
+     $u = LJ::load_userid($dbs, $sp->{'requserid'});
      $email = $u->{'email'};
  }
 
@@ -48,9 +48,6 @@ BODY<=
      $owner_mode = 1;
  }
 
- my $domain = $email;
- $domain =~ s/^.+\@//; 
-
  my $ret = "";
  $ret .= "<TABLE>\n";
  $ret .= "<TR><TD VALIGN=BOTTOM ALIGN=RIGHT><B>From:</B></TD><TD>";
@@ -60,7 +57,15 @@ BODY<=
      LJ::load_userpics($dbs, \%pic, [ $picid ]);
      $ret .= "<IMG ALIGN=BASELINE SRC=\"/userpic/$picid\" WIDTH=$pic{$picid}->{'width'} HEIGHT=$pic{$picid}->{'height'} ALIGN=ABSMIDDLE HSPACE=3>";
  }
- $ret .= "$sp->{'reqname'} (*******\@$domain)</TD></TR>\n";
+
+ # show requester name + email
+ {
+     my $visemail = $email;
+     if ($sp->{_cat}->{'public_read'}) {
+	 $visemail =~ s/^.+\@/********\@/; 
+     }
+     $ret .= "$sp->{'reqname'} ($visemail)</TD></TR>\n";
+ }
 
  ###
  ### account type
