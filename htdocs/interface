@@ -79,7 +79,7 @@ sub xmlrpc_method {
     if ($error) {
 	die SOAP::Fault
 	    ->faultstring(LJ::Protocol::error_message($error))
-	    ->faultcode($error);
+	    ->faultcode(substr($error, 0, 3));
     }
     return $res;
 }
