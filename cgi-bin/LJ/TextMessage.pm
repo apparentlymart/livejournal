@@ -1674,7 +1674,7 @@ sub send
     elsif ($provider eq "uscc")  # U.S Cellular
     {
         post_webform("http://usc.ztango.com/uscwmss", { 
-            "adresses"	=> $self->{'number'},
+            "addresses" => $self->{'number'},
             "MSG"       => "$msg->{'from'}\n$msg->{'message'}",
          },$errors);
     }
