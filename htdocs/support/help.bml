@@ -51,6 +51,7 @@ body<=
 
  my $total_open;
  my $dbr = LJ::get_db_reader();
+ my $append;
  if ($FORM{'state'} eq "closed")
  {
      $ret .= "<?h1 Recently Closed Support Requests h1?><?p Below are all support requests that have been recently closed.  To return to the open requests, <a href=\"./help.bml?cat=$filtercat\">click here</a>. p?>";
@@ -69,13 +70,8 @@ body<=
  else 
  {
      $ret .= "<?h1 Open Support Requests h1?><?p Below are all support requests that are open (they just came in and haven't been touched yet) or answered (either awaiting to be closed by the person needing help, or the person requested they still need help).  The <a href=\"./help.bml?state=closed&amp;cat=$filtercat\">closed reports</a> are also available.  If you help somebody out and they confirm you helped them, you get the number of points indicated in the status column.  These points will show up on your userinfo page. p?>";
- 
-     my $total_count = $dbr->selectrow_array("SELECT COUNT(*) FROM support s WHERE s.state='open' $filterwhere");
-     unless ($total_count) {
-         return "<?h1 No support requests! h1?><?p The support queue is currently empty.  :-) p?>";
-     }
-     $ret .= "<p>[<b>$total_count</b> total open requests]</p>";
 
+     $append = 1;
      $sth = $dbr->prepare("SELECT s.* FROM support s WHERE s.state='open' $filterwhere");
  }
 
@@ -87,11 +83,14 @@ body<=
 
  my @support_log;
  my %spids_seen;
+ my $rct = 0;
  while (my $sprow = $sth->fetchrow_hashref) {
     next if $spids_seen{$sprow->{'spid'}};
     $spids_seen{$sprow->{'spid'}} = 1;
     push @support_log, $sprow;
+    $rct++;
  }
+ $ret .= "<p>[<b>$rct</b> total open requests]</p>" if ($append);
  @support_log = sort { $b->{timecreate} <=> $a->{timecreate} } @support_log;
 
  # filter line:
