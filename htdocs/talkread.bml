@@ -208,7 +208,8 @@ body<=
      ###
      if ($item->{'subject'}) {
          my $subject = $item->{'subject'};
-       LJ::CleanHTML::clean_subject(\$subject);
+         LJ::CleanHTML::clean_subject(\$subject);
+         BML::ebml(\$subject);
          $ret .= "<font face='Arial,Helvetica' size='+1'><i><b>$subject</b></i></font><br />\n";
      }
 
