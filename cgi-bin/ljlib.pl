@@ -4694,6 +4694,7 @@ sub get_userpic_info
     return undef unless $uuid;
     my $userid = LJ::want_userid($uuid);
     my $u = LJ::want_user($uuid); # This should almost always be in memory already
+    return undef unless $u && $u->{clusterid};
 
     # in the cache, cool, well unless it doesn't have comments or urls
     # and we need them
@@ -4800,6 +4801,7 @@ sub get_userpic_info
         my $sth;
         my $dbcr = LJ::get_cluster_def_reader($u);
         my $db = @LJ::MEMCACHE_SERVERS ? LJ::get_db_writer() : LJ::get_db_reader();
+        return undef unless $dbcr && $db;
 
         if ($u->{'dversion'} > 6) {
             $sth = $dbcr->prepare("SELECT picid, width, height, state, userid, comment, url ".
