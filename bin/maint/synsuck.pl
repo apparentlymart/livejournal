@@ -129,11 +129,12 @@ $maint{'synsuck'} = sub
             $it->{'description'} =~ s/\s+$//;
             
             my @now = localtime();
+            my $htmllink = "<p class='ljsyndicationlink'><a href='$it->{'link'}'>$it->{'link'}</a></p>";
             my $req = {
                 'username' => $user,
                 'ver' => 1,
                 'subject' => $it->{'title'},
-                'event' => "$it->{'link'}\n\n$it->{'description'}",
+                'event' => "$htmllink$it->{'description'}",
                 'year' => $now[5]+1900,
                 'mon' => $now[4]+1,
                 'day' => $now[3],
