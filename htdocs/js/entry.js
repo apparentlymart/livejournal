@@ -179,6 +179,12 @@ function altlogin (e) {
     if (! usejournal_list) return false;
     usejournal_list.style.display = 'none';
 
+    var readonly = document.getElementById('readonly');
+    var userbox = f.user;
+    if (!userbox.value && readonly) {
+        readonly.style.display = 'none';
+    }
+
     var userpic_list = document.getElementById('userpic_list_row');
     if (userpic_list) {
         userpic_list.style.display = 'none';

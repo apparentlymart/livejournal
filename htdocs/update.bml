@@ -29,15 +29,10 @@
 
     # get remote and see if they can post right now
     my $remote = LJ::get_remote();
+
+    # Errors that are unlikely to change between starting
+    # to compose an entry and submitting it.
     if ($remote) {
-        if (LJ::get_cap($remote, "readonly") ||
-            ! LJ::get_cluster_master($remote)) {
-
-            $$title = $ML{'.title.readonly'};
-            $$body = $LJ::MSG_READONLY_USER;
-            return;
-        }
-
         if ($remote->underage) {
             return BML::redirect("$LJ::SITEROOT/agecheck/?s=1");
         }
@@ -188,6 +183,19 @@
             $entry->{$_} = $POST{$_} foreach keys %POST;
         }
 
+        if (LJ::isu($remote) && (!$did_post || $did_spellcheck) && $remote->readonly) {
+            $$body .= "<div id='readonly'><?standout <b>Warning:</b> Your account is currently in ";
+
+            if ($LJ::HELPURL{'readonly'}) {
+                $$body .= "<a href='$LJ::HELPURL{readonly}'>read-only mode</a>";
+            } else {
+                $$body .= "read-only mode";
+            }
+
+            $$body .= ". Due to this maintenance you may be unable to post to your journal at this time. ";
+            $$body .= "standout?><br /></div>";
+        }
+
         $$body .= "<div style='width: 100%'><form method='post' action='update.bml$getextra' id='updateForm' name='updateForm'>";
 
         if ($opts->{require_tos}){ 
@@ -247,92 +255,101 @@
             }
         }
 
-        # do a login action
-        my $login_message;
-        {
-            # build a clientversion string
-            my $clientversion = "Web/2.0.0";
-            $clientversion .= 's' if $did_spellcheck;
-            
-            # build a request object
-            my %req = ( 'mode' => 'login',
-                        'ver' => $LJ::PROTOCOL_VER,
-                        'clientversion' => $clientversion,
-                        'user' => $user,
-                        );
-            
-            my %res;
-            LJ::do_request(\%req, \%res, $flags);
-            
-            # error logging in ?
-            unless ($res{'success'} eq 'OK') {
-                $errors->{'auth'} = $ML{'.error.login'} . " " . LJ::ehtml($res{'errmsg'});
-            }
-            
-            # server login message for user?
-            $login_message = LJ::auto_linkify(LJ::ehtml($res{'message'}))
-                if $res{'message'};
-        }
-        # any messages from the server?
-        if ($login_message) {
-            $$body .= "<?p <strong>$ML{'.loggingin'}</strong> $ML{'.servermsg'} p?><div style='margin-left: 40px'><b>$login_message</b></div>";
-        }
-        my %req = ( 'mode' => 'postevent',
-                    'ver' => $LJ::PROTOCOL_VER,
-                    'user' => $user,
-                    'password' => $POST{'password'},
-                    'usejournal' => $POST{'usejournal'},
-                    );
-        LJ::entry_form_decode(\%req, \%POST);
-        if ($req{'event'} eq "") { 
-            $errors->{'entry'} = "Must provide entry text"; 
-        }
+        my $uj = $POST{'usejournal'} ? LJ::load_user($POST{'usejournal'}) : $u;
+        if ($uj && !$uj->readonly) {
 
-        my %res;
-        LJ::do_request(\%req, \%res, $flags);
-
-        if (!$errors) {
-            # examine response
-            my $update_message;
-            if ($res{'success'} eq "OK" && $res{'message'}) {
-                $update_message = LJ::auto_linkify(LJ::ehtml($res{'message'}));
-            }
+            # do a login action
+            my $login_message;
+            {
+                # build a clientversion string
+                my $clientversion = "Web/2.0.0";
+                $clientversion .= 's' if $did_spellcheck;
             
-            # report results
-            $$body .= "<?p <strong>$ML{'.updating'}</strong> ";
+                # build a request object
+                my %req = ( 'mode' => 'login',
+                            'ver' => $LJ::PROTOCOL_VER,
+                            'clientversion' => $clientversion,
+                            'user' => $user,
+                            );
             
-            if ($res{'success'} ne 'OK') {
-                # update failed?
-                $$body .= "<br /><strong>$ML{'.error.update'}</strong> <ul><li><b>" . LJ::ehtml($res{'errmsg'}) . "</b></li></ul>";
-                $$body .= "<br /> p?>";
-            } else {
-                # short bail if this was posted moderated or some other special case (no itemid but a message)
-                if (!defined $res{itemid} && $res{message}) {
-                    $$body .= "<br />$res{message} p?>";
-                    return;
+                my %res;
+              LJ::do_request(\%req, \%res, $flags);
+            
+                # error logging in ?
+                unless ($res{'success'} eq 'OK') {
+                    $errors->{'auth'} = $ML{'.error.login'} . " " . LJ::ehtml($res{'errmsg'});
                 }
-
-                # update success
-                my $ju;
-                if ($POST{'usejournal'}) {
-                    $ju = LJ::load_user($POST{'usejournal'});  # posting as community
-                } elsif ($user) {
-                    $ju = LJ::load_user($user);                # posting not as user from form
-                } else {
-                    $ju = $remote;                             # posting as remote
-                };
-                $$body .= BML::ml(".update.success", { 'uri' => LJ::journal_base($ju) . "/" });
-                my $juser = $ju->{'user'};
-                my ($itemid, $anum) = ($res{'itemid'}, $res{'anum'});
-                my $itemlink = LJ::item_link($ju, $itemid, $anum);
-                $itemid = $itemid * 256 + $anum;
-                $$body .= " p?><?p $ML{'.success.links'} p?><ul>" .
-                    "<li><a href=\"$itemlink\">$ML{'.success.links.view'}</a></li>" .
-                    "<li><a href=\"/editjournal.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.edit'}</a></li>" . 
-                    "<li><a href=\"/tools/memadd.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.memories'}</a></li>" .
-                    "</ul>";
+            
+                # server login message for user?
+                $login_message = LJ::auto_linkify(LJ::ehtml($res{'message'}))
+                    if $res{'message'};
             }
-            return;
+            # any messages from the server?
+            if ($login_message) {
+                $$body .= "<?p <strong>$ML{'.loggingin'}</strong> $ML{'.servermsg'} p?><div style='margin-left: 40px'><b>$login_message</b></div>";
+            }
+
+            my %req = ( 'mode' => 'postevent',
+                        'ver' => $LJ::PROTOCOL_VER,
+                        'user' => $user,                        'password' => $POST{'password'},
+                        'usejournal' => $POST{'usejournal'},
+                        );
+          LJ::entry_form_decode(\%req, \%POST);
+            if ($req{'event'} eq "") { 
+                $errors->{'entry'} = "Must provide entry text"; 
+            }
+
+            my %res;
+          LJ::do_request(\%req, \%res, $flags);
+
+            if (!$errors) {
+                # examine response
+                my $update_message;
+                if ($res{'success'} eq "OK" && $res{'message'}) {
+                    $update_message = LJ::auto_linkify(LJ::ehtml($res{'message'}));
+                }
+            
+                # report results
+                $$body .= "<?p <strong>$ML{'.updating'}</strong> ";
+            
+                if ($res{'success'} ne 'OK') {
+                    # update failed?
+                    $$body .= "<br /><strong>$ML{'.error.update'}</strong> <ul><li><b>" . LJ::ehtml($res{'errmsg'}) . "</b></li></ul>";
+                    $$body .= "<br /> p?>";
+                } else {
+                    # short bail if this was posted moderated or some other special case (no itemid but a message)
+                    if (!defined $res{itemid} && $res{message}) {
+                        $$body .= "<br />$res{message} p?>";
+                        return;
+                    }
+
+                    # update success
+                    my $ju;
+                    if ($POST{'usejournal'}) {
+                        $ju = LJ::load_user($POST{'usejournal'});  # posting as community
+                    } elsif ($user) {
+                        $ju = LJ::load_user($user);                # posting not as user from form
+                    } else {
+                        $ju = $remote;                             # posting as remote
+                    };
+                    $$body .= BML::ml(".update.success", { 'uri' => LJ::journal_base($ju) . "/" });
+                    my $juser = $ju->{'user'};
+                    my ($itemid, $anum) = ($res{'itemid'}, $res{'anum'});
+                    my $itemlink = LJ::item_link($ju, $itemid, $anum);
+                    $itemid = $itemid * 256 + $anum;
+                    $$body .= " p?><?p $ML{'.success.links'} p?><ul>" .
+                        "<li><a href=\"$itemlink\">$ML{'.success.links.view'}</a></li>" .
+                            "<li><a href=\"/editjournal.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.edit'}</a></li>" . 
+                                "<li><a href=\"/tools/memadd.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.memories'}</a></li>" .
+                                    "</ul>";
+                }
+                return;
+            }
+        } else {
+            # Tell the user they can't post since read only
+            $$body .= "<?standout <strong>$ML{'.error.update'}</strong> ";
+            $$body .= $LJ::MSG_READONLY_USER;
+            $$body .= " standout?><br />";
         }
     }
 
