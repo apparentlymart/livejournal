@@ -126,7 +126,7 @@ sub process {
 
         # check subject for rfc-1521 junk
         if ($subject =~ /^=\?/) {
-            my @subj_data = Unicode::MapUTF8::decode_mimewords($subject);
+            my @subj_data = MIME::Words::decode_mimewords($subject);
             if (@subj_data) {
                 $subject = Unicode::MapUTF8::to_utf8({-string=>$subj_data[0][0],
                                                       -charset=>$subj_data[0][1]});
@@ -136,7 +136,7 @@ sub process {
 
     # Also check subjects of UTF-8 emails for encoded subject lines [support: 220926]
     elsif ($subject =~ /^=\?utf-8/i) {
-        my @subj_data = Unicode::MapUTF8::decode_mimewords( $subject );
+        my @subj_data = MIME::Words::decode_mimewords( $subject );
         $subject = $subj_data[0][0] if @subj_data;
     }
 
@@ -367,3 +367,6 @@ sub upload_images
 
     return;
 }
+
+1;
+
