@@ -723,11 +723,26 @@ sub userpic_content
 
 
 sub get_pic_from_picid {
-    my $picid = shift;
-    my $dbr = LJ::get_db_reader();
+    my $picid = int(shift);
+
     my $query = "SELECT state, userid, contenttype, UNIX_TIMESTAMP(picdate) ".
-        "AS 'lastmod' FROM userpic WHERE picid=$picid";
-    return $dbr->selectrow_hashref( $query );
+                "AS 'lastmod' FROM userpic WHERE picid=$picid";
+    my $rec;
+
+    if (my $dbr = LJ::get_db_reader()) {
+	$rec = $dbr->selectrow_hashref($query);
+	return $rec if $rec;
+    }
+
+    # some users report blank userpics after upload.  probably
+    # a race where it's not in the slaves yet?
+    if (my $dbh = LJ::get_db_writer()) {
+	$rec = $dbh->selectrow_hashref($query);
+	return $rec if $rec;
+    }
+
+    return undef;
+
 }
 
 
