@@ -452,6 +452,7 @@ sub file_request
           'to' => $email,
           'from' => $LJ::BOGUS_EMAIL,
           'fromname' => "$LJ::SITENAME Support",
+          'charset' => 'utf-8',
           'subject' => "Support Request \#$spid",
           'body' => $body  
           });
@@ -480,6 +481,7 @@ sub file_request
         'bcc' => join(", ", @to_notify),
         'from' => $LJ::BOGUS_EMAIL,
         'fromname' => "$LJ::SITENAME Support",
+        'charset' => 'utf-8',
         'subject' => "Support Request \#$spid",
         'body' => $body
         }) if @to_notify;
@@ -570,6 +572,7 @@ sub append_request
         'bcc' => join(", ", @to_notify),
         'from' => $LJ::BOGUS_EMAIL,
         'fromname' => "$LJ::SITENAME Support",
+        'charset' => 'utf-8',
         'subject' => "Re: Support Request \#$spid",
         'body' => $body
         }) if @to_notify;
@@ -683,6 +686,7 @@ sub mail_response_to_user
         'to' => $email,
         'from' => $fromemail,
         'fromname' => "$LJ::SITENAME Support",
+        'charset' => 'utf-8',
         'subject' => "Re: $sp->{'subject'}",
         'body' => $body  
         });
