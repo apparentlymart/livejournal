@@ -2,6 +2,7 @@
 {
 #line 3
     use strict;
+    no strict 'refs';
     use vars qw(%GET);
     use Data::Dumper;
 
@@ -50,8 +51,7 @@ END_TOP
 	while (defined($cmd = shift @cmds)) {
 	    my $realcmd = "stats" . ($cmd ? " $cmd" : "");
 	    $log .= "<b>$realcmd</b>\n";
-	    print $sock "$realcmd\r\n";
-	    while (<$sock>) {
+	    foreach (MemCachedClient::run_command($sock, "$realcmd\r\n")) {
 		last if $_ eq "END\r\n";
 		$log .= $_;
 		next if $cmd eq "maps";
