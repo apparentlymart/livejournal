@@ -30,6 +30,14 @@ sub writer {
     return 0;
 }
 
+# this is for debugging/special uses where you need to instruct
+# a user object on what database handle to use.  returns the
+# handle that you gave it.
+sub set_dbcm {
+    my $u = shift;
+    return $u->{'_dbcm'} = shift;
+}
+
 # get an $sth from the writer
 sub prepare {
     my $u = shift;
