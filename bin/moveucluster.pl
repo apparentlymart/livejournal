@@ -27,6 +27,7 @@ exit 1 unless GetOptions('delete' => \$opt_del, # from source
 my $optv = $opt_verbose;
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljcmdbuffer.pl";
 
 my $dbh = LJ::get_dbh({raw=>1}, "master");
 die "No master db available.\n" unless $dbh;
