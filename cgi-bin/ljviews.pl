@@ -1993,6 +1993,21 @@ sub create_view_rss
         # clean the event
         LJ::CleanHTML::clean_event(\$event, 
                                    { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'} });
+
+        if ($event =~ /<lj-poll-(\d+)>/) {
+            my $pollid = $1;
+            my $name = $dbr->selectrow_array("SELECT name FROM poll WHERE pollid=?",
+                                             undef, $pollid);
+
+            if ($name) {
+                LJ::Poll::clean_poll(\$name);
+            } else {
+                $name = "#$pollid";
+            }
+
+            $event =~ s!<lj-poll-$pollid>!<div><a href="$LJ::SITEROOT/poll/?id=$pollid">View Poll: $name</a></div>!g;
+        }
+
         $event = LJ::exml($event);
 
         my $ditemid = $itemid*256 + $it->{'anum'};
