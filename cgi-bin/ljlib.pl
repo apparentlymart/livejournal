@@ -4350,7 +4350,7 @@ sub load_userpics
         next unless @data && @bindings;
 
         my $sth = $dbcr->prepare("SELECT userid, picid, width, height, fmt, state, ".
-                                 "       FROM_UNIXTIME(picdate) AS 'picdate', location, flags ".
+                                 "       UNIX_TIMESTAMP(picdate) AS 'picdate', location, flags ".
                                  "FROM userpic2 WHERE " . join(' OR ', @bindings));
         $sth->execute(@data);
 
@@ -4372,7 +4372,7 @@ sub load_userpics
     my $dbr = LJ::get_db_writer();
     my $picid_in = join(',', map { $_->[1] } @load_list_d6);
     my $sth = $dbr->prepare("SELECT userid, picid, width, height, contenttype, state, ".
-                            "       FROM_UNIXTIME(picdate) AS 'picdate' ".
+                            "       UNIX_TIMESTAMP(picdate) AS 'picdate' ".
                             "FROM userpic WHERE picid IN ($picid_in)");
     $sth->execute;
     while (my $ur = $sth->fetchrow_hashref) {
