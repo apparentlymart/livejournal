@@ -581,7 +581,8 @@ body<=
          $ret .= LJ::html_hidden("journal", $u->{'user'});
 
          # Do Quick Reply stuff
-         if ($remote) {
+         LJ::load_user_props($remote, "opt_no_quickreply") if $remote;
+         if ($remote && !$remote->{'opt_no_quickreply'}) {
              $ret .= LJ::html_hidden({'name' => 'replyto', 'id' => 'replyto', 'value' => ''},
                                      {'name' => 'parenttalkid', 'id' => 'parenttalkid', 'value' => ''},
                                      {'name' => 'itemid', 'id' => 'itemid', 'value' => $ditemid},
