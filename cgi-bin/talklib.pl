@@ -186,12 +186,20 @@ sub init
     return $init;
 }
 
+# dbs?, dbcs?, $u, $itemid
 sub get_journal_item
 {
-    my ($dbs, $dbcs, $u, $itemid) = @_;
+    my $dbs = ref $_[0] eq "LJ::DBSet" ? shift : LJ::get_dbs();
+    my $dbcs = ref $_[0] eq "LJ::DBSet" ? shift : undef;
+    my ($u, $itemid) = @_;
+    $dbcs ||= LJ::get_cluster_set($u);
+
+    my $uid = $u->{'userid'}+0;
+    $itemid += 0;
+
     my $sql = "SELECT journalid AS 'ownerid', posterid, eventtime, security, allowmask, ".
         "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(logtime) AS 'secondsold', anum ".
-        "FROM log2 WHERE journalid=$u->{'userid'} AND jitemid=$itemid";
+        "FROM log2 WHERE journalid=$uid AND jitemid=$itemid";
     my $item = LJ::dbs_selectrow_hashref($dbcs, $sql);
     return undef unless $item;
     $item->{'itemid'} = $itemid;
