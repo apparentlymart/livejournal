@@ -18,7 +18,6 @@ unless ($bindhost) {
 }
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
-&connect_db();
 
 use Socket;
 use Text::Wrap;
@@ -45,7 +44,7 @@ my $SERVE = 1;
 while ($SERVE)
 {
     accept(CL, FH) || die $!;
-    &connect_db();
+
     my $line = <CL>;
     chomp $line;
     $line =~ s/\0//g;
@@ -63,11 +62,13 @@ You can make queries in the following form:
 	next;
     }
 
+    my $dbr = LJ::get_dbh("slave");
+
     if ($line =~ /^(\w{1,15})$/) {
 	# userinfo!
 	my $user = $1;
-	my $quser = $dbh->quote($user);
-	my $sth = $dbh->prepare("SELECT user, has_bio, paidfeatures, userid, name, email, bdate, allow_infoshow FROM user WHERE user=$quser");
+	my $quser = $dbr->quote($user);
+	my $sth = $dbr->prepare("SELECT user, has_bio, paidfeatures, userid, name, email, bdate, allow_infoshow FROM user WHERE user=$quser");
 	$sth->execute;
 	my $u = $sth->fetchrow_hashref;
 	unless ($u) {
@@ -78,14 +79,17 @@ You can make queries in the following form:
 
 	my $bio;
 	if ($u->{'has_bio'} eq "Y") {
-	    $sth = $dbh->prepare("SELECT bio FROM userbio WHERE userid=$u->{'userid'}");
+	    $sth = $dbr->prepare("SELECT bio FROM userbio WHERE userid=$u->{'userid'}");
 	    $sth->execute;
 	    ($bio) = $sth->fetchrow_array;
 	}
 	delete $u->{'has_bio'};
 
 	if ($u->{'allow_infoshow'} eq "Y") {
-	    &load_user_props($u, "opt_whatemailshow", "country", "state", "city", "zip", "aolim", "icq", "url", "urlname", "gender", "yahoo", "msn");
+  	    LJ::load_user_props($dbr, $u, "opt_whatemailshow",
+				"country", "state", "city", "zip",
+				"aolim", "icq", "url", "urlname",
+				"gender", "yahoo", "msn");
 	} else {
 	    $u->{'opt_whatemailshow'} = "N";
 	}
