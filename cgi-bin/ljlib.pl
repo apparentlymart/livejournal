@@ -2855,16 +2855,52 @@ sub get_dbh
 	undef $LJ::DBCACHE{$type};
     }
 
+    # make the 'ub' upper bound values on the DBINFO for each role
+    # and assume role=slave for slaves that don't define their roles
+    # explictly.
+    unless ($LJ::DBINFO{'_ubs_set'}) 
+    {
+	foreach my $type (qw(slave recenttext log))
+	{
+	    my $total_weight;
+	    for (my $i=1; $i<=$LJ::DBINFO{'slavecount'}; $i++) {
+		$total_weight += $LJ::DBINFO{"slave$i"}->{'role'}->{$type};
+	    }
+	    if ($total_weight) {
+		my $at = 0;
+		for (my $i=1; $i<=$LJ::DBINFO{'slavecount'}; $i++) {
+		    $at += $LJ::DBINFO{"slave$i"}->{'role'}->{$type} / $total_weight;
+		    $LJ::DBINFO{"slave$i"}->{'_ub'}->{$type} = $at;
+		}
+	    } else {
+		if ($type eq "slave") {
+		    # split slave traffic evenly
+		    for (my $i=1; $i<=$LJ::DBINFO{'slavecount'}; $i++) {
+			$LJ::DBINFO{"slave$i"}->{'_ub'}->{'slave'} = $i / $LJ::DBINFO{'slavecount'};
+		    }
+		} else {
+		    # copy role type from slave's version
+		    for (my $i=1; $i<=$LJ::DBINFO{'slavecount'}; $i++) {
+			$LJ::DBINFO{"slave$i"}->{'_ub'}->{$type} =
+			    $LJ::DBINFO{"slave$i"}->{'_ub'}->{'slave'};
+		    }
+		}
+	    }
+	}
+	$LJ::DBINFO{'_ubs_set'} = 1;
+
+    }
+
     # if we don't have a dbh cached already, which one would we try to
     # connect to?
     my $key;
-    if ($type eq "slave") {
+    if ($type ne "master") {
 	my $ct = $LJ::DBINFO{'slavecount'};
 	if ($ct) {
 	    my $rand = rand(1);
 	    my $i = 1;
 	    while (! $key && $i <= $ct) {
-		if ($rand < $LJ::DBINFO{"slave$i"}->{'ub'}) {
+		if ($rand < $LJ::DBINFO{"slave$i"}->{'_ub'}->{$type}) {
 		    $key = "slave$i";
 		} else {
 		    $i++;
@@ -2879,6 +2915,8 @@ sub get_dbh
     } else {
 	$key = "master";
     }
+
+    print "$type = $key\n";
 
     # are we connecting to a slave that might be the master?
     # if so, we don't want to open up two connections.  (wasteful)
