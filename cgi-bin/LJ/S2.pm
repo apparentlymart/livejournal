@@ -1620,7 +1620,60 @@ sub EntryLite__get_link
 sub Entry__get_link
 {
     my ($ctx, $this, $key) = @_;
-    return undef;
+    if ($key eq "navprev" || $key eq "edit_entry" || $key eq "memorify_entry" || $key eq "tellafriend" || $key eq "navnext")
+    {
+        my $page = get_page();
+        my $u = $page->{'_u'};
+        my $journal = $u->{'user'};
+        my $poster = $this->{'poster'}->{'username'};
+        my $remote = LJ::get_remote();
+
+        if ($key eq "edit_entry") {
+            return undef unless (defined $remote && ($remote->{'user'} eq $journal ||
+                                 $remote->{'user'} eq $poster || 
+                                 LJ::check_rel($u, $remote, 'A')));
+            return {
+                '_type' => "Link",
+                'url' => "$LJ::SITEROOT/editjournal_do.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
+                'caption' => "Edit Entry",
+                'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_edit.gif", 22, 20),
+            }
+        }
+        if ($key eq "tellafriend") {
+            return undef if ($LJ::DISABLED{'tellafriend'});
+            return {
+                '_type' => "Link",
+                'url' => "$LJ::SITEROOT/tools/tellafriend.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
+                'caption' => "Tell A Friend",
+                'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_tellfriend.gif", 22, 20),
+            };
+        }
+        if ($key eq "memorify_entry") {
+            return undef if ($LJ::DISABLED{'memories'});
+            return {
+                '_type' => "Link",
+                'url' => "$LJ::SITEROOT/tools/memadd.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
+                'caption' => "Add to Memories",
+                'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_memories.gif", 22, 20),
+            };
+        }
+        if ($key eq "navprev") {
+            return {
+                '_type' => "Link",
+                'url' => "$LJ::SITEROOT/go.bml?journal=$journal&amp;itemid=$this->{'itemid'}&amp;dir=prev",
+                'caption' => "Previous Entry",
+                'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_prev.gif", 22, 20),
+            };
+        }
+        if ($key eq "navnext") {
+            return {
+                '_type' => "Link",
+                'url' => "$LJ::SITEROOT/go.bml?journal=$journal&amp;itemid=$this->{'itemid'}&amp;dir=next",
+                'caption' => "Next Entry",
+                'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_next.gif", 22, 20),
+            };
+        }
+    }
 }
     
 sub Entry__plain_subject
