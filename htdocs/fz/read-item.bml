@@ -4,17 +4,17 @@ _INFO=)<HTML>
 <BODY BGCOLOR=#FFFFFF MARGINHEIGHT=0 MARGINWIDTH=0>
 (=_CODE
 
- require 'ljlib.pl';
- &connect_db();
  my ($sth, $ret);
 
- require 'cleanhtml.pl';
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
 
  my $ret = "";
 
  ### load the log properties
  my %logprops = ();
- &load_log_props([ $FORM{'itemid'} ], \%logprops);
+ LJ::load_log_props($dbs, [ $FORM{'itemid'} ], \%logprops);
 
  my $qitemid = $FORM{'itemid'}+0;
  $sth = $dbh->prepare("SELECT l.ownerid, l.posterid, lt.event, lt.subject, l.eventtime, l.security, l.allowmask, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(l.logtime) AS 'secondsold' FROM log l, logtext lt WHERE l.itemid=lt.itemid AND l.itemid=$qitemid");
@@ -40,7 +40,7 @@ _INFO=)<HTML>
  my $remote;
  if ($item->{'security'} ne "public") 
  {
-     $remote = &get_remote();
+     $remote = LJ::get_remote($dbs);
      
      if ($item->{'security'} eq "private" && $u->{'user'} ne $remote->{'user'}) {
 	 return "(=H1 Error H1=)(=P You are not authorized to view this private entry. P=)";
@@ -60,13 +60,13 @@ _INFO=)<HTML>
 
  $event = $item->{'event'};
  &remap_event_links(\$event, $u->{'baseurl'});
- &LJ::CleanHTML::clean_event(\$event, $logprops{$FORM{'itemid'}}->{'opt_preformatted'});
+ LJ::CleanHTML::clean_event(\$event, $logprops{$FORM{'itemid'}}->{'opt_preformatted'});
 
  $ret .= "<P>";
  $ret .= "<TABLE><TR VALIGN=MIDDLE>";
  if ($up->{'defaultpicid'}) {
      my $picid = $up->{'defaultpicid'};
-     &load_userpics(\%userpics, [ $picid ]);
+     LJ::load_userpics($dbs, \%userpics, [ $picid ]);
      $ret .= "<TD><IMG SRC=\"/userpic/$picid\" WIDTH=$userpics{$picid}->{'width'} HEIGHT=$userpics{$picid}->{'height'} ALIGN=ABSMIDDLE HSPACE=3></TD>";
  }
  my $extra = "";
@@ -90,8 +90,7 @@ _INFO=)<HTML>
 
  $ret .= "<CENTER><B><A HREF=\"/talkpost.bml?itemid=$FORM{'itemid'}\">(Post a new comment)</A></B></CENTER>";
 
-# TODO: Run the HTML cleaner over the subject and avoid this... 
-&strip_bad_code(\$ret);
+LJ::strip_bad_code(\$ret);
 return $ret;
 
 _CODE=)

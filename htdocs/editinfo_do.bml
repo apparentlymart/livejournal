@@ -12,7 +12,7 @@ BODY<=
 
 (=_CODE
 #line 14
- use LJ::TextMessage;
+
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
  my $hpassword = $FORM{'hpassword'} || &hash_password($FORM{'password'});
@@ -59,7 +59,7 @@ BODY<=
 
  my %countries;
  my %states;
- &load_codes({ "country" => \%countries, "state" => \%states });
+ LJ::load_codes($dbs, { "country" => \%countries, "state" => \%states });
 
  my $mode = $FORM{'mode'} || "modify";
 
@@ -77,7 +77,7 @@ BODY<=
      my %htmlu = ();
      foreach my $v (qw(name email url urlname zip city url aolim jabber icq yahoo msn howhear bio))
      {
-         $htmlu{$v} = &BMLUtil::escapeall($u->{$v});
+         $htmlu{$v} = BMLUtil::escapeall($u->{$v});
      }
 
      $ret .= "<P><TABLE WIDTH=100%>\n";
@@ -151,7 +151,7 @@ BODY<=
          my $sel = $_ eq $u->{'state'} ? " SELECTED" : "";
          $ret .= "<OPTION VALUE=\"$_\"$sel>$states{$_}\n";
      }
-     my $otherstate = &BMLUtil::escapeall(defined($states{$u->{'state'}}) ? "" : $u->{'state'});
+     my $otherstate = BMLUtil::escapeall(defined($states{$u->{'state'}}) ? "" : $u->{'state'});
      $ret .= "</SELECT><BR>Or, type other state/province/territory: <INPUT NAME=stateother SIZE=20 MAXLENGTH=50 VALUE=\"$otherstate\"></TD></TR>\n";
 
      # zip
@@ -220,7 +220,7 @@ BODY<=
 
      {
 	 ### Interests
-	 my $eints = &BMLUtil::escapeall(join(", ", sort keys %interests));
+	 my $eints = BMLUtil::escapeall(join(", ", sort keys %interests));
 	 $ret .= "(=H1 Interests H1=)(=P If you want other people to be able to search the directory and find you by interest, list below everything you're interested in, separated by commas.  Short single-word phrases are best.  <B>Rule of thumb:</B> You should be able to put the interest in the sentence \"I like ________\".  When referring to nouns, use the plural form for consistency.  \"I like DVDs\" instead of \"I like DVD\". P=)";
 	 $ret .= "(=P <FONT COLOR=#009000><B>GOOD</B></FONT> Example: <B>biking, snow skiing, computers, dvds, mp3s, cheese, women</B> P=)";
 	 $ret .= "(=P <FONT COLOR=#FF0000><B>BAD</B></FONT> Example: <B>I like lots of bands and watching movies and talking to friends and going to clubs.</B>  That sort of stuff goes in your bio above. P=)";
@@ -233,7 +233,7 @@ BODY<=
      if ($u->{'defaultpicid'})
      {
 	 my $picid = $u->{'defaultpicid'};
-	 &load_userpics(\%userpics, [ $picid ]);	 
+	 LJ::load_userpics($dbs, \%userpics, [ $picid ]);	 
 	 $ret .= "<IMG SRC=\"/userpic/$picid\" WIDTH=$userpics{$picid}->{'width'} HEIGHT=$userpics{$picid}->{'height'}>";
      } else
      {
@@ -314,11 +314,11 @@ BODY<=
      $ret .= "<TR><TD>&nbsp;</TD><TD>Check this if you want people to be able to reply to journal entries you post.  (the journal style you select must also support this)\n";
 
      $ret .= "<P><B>Who can reply to your entries?</B> ";
-     $ret .= &html_select({ 'name' => 'opt_whocanreply', 'selected' => $u->{'opt_whocanreply'}, },
+     $ret .= LJ::html_select({ 'name' => 'opt_whocanreply', 'selected' => $u->{'opt_whocanreply'}, },
 			  "all" => "Anybody", "reg" => "Registered Users", "friends" => "Friends only");
 
      $ret .= "<P><B>Log IP addresses of people replying?</B> ";
-     $ret .= &html_select({ 'name' => 'opt_logcommentips', 'selected' => $u->{'opt_logcommentips'}, },
+     $ret .= LJ::html_select({ 'name' => 'opt_logcommentips', 'selected' => $u->{'opt_logcommentips'}, },
 			  "N" => "No", "S" => "Anonymous posters only", "A" => "Always");
      
      $ret .= "<P><TABLE>\n";

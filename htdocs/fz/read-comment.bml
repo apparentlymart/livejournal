@@ -3,12 +3,11 @@ NOCACHE=>1
 _INFO=)
 (=_CODE
 
- require 'ljlib.pl';
- &connect_db();
- my ($sth, $ret);
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
 
- require 'cleanhtml.pl';
-# &load_subjecticon;
+ my ($sth, $ret);
 
  my $talkid = $FORM{'talkid'}+0;
  unless ($talkid) {
@@ -54,7 +53,7 @@ if ($dbh->err) { die $dbh->errstr; }
  my $remote;
  if ($item->{'security'} ne "public") 
  {
-     $remote = &get_remote();
+     $remote = LJ::get_remote($dbs);
      
      if ($item->{'security'} eq "private" && $u->{'user'} ne $remote->{'user'}) {
 	 return "(=H1 Error H1=)(=P You are not authorized to view this private entry. P=)";
@@ -92,14 +91,14 @@ if ($dbh->err) { die $dbh->errstr; }
      if ($userpost && $uc->{'defaultpicid'}) {
 	 my $picid = $uc->{'defaultpicid'};
 	 my %userpics;
-	 &load_userpics(\%userpics, [ $picid ]);
+	 LJ::load_userpics($dbs, \%userpics, [ $picid ]);
 	 $ret .= "<IMG ALIGN=LEFT HSPACE=3 SRC=\"/userpic/$picid\"";
 	 $ret .= " WIDTH=$userpics{$picid}->{'width'}";
 	 $ret .= " HEIGHT=$userpics{$picid}->{'height'}>";
      }
      
      
-     $ret .= "<FONT SIZE=+1 FACE=\"Arial,Helvetica\"><B>" . &ehtml($ti->{'subject'} || "(no subject)") . "</B></FONT>";
+     $ret .= "<FONT SIZE=+1 FACE=\"Arial,Helvetica\"><B>" . LJ::ehtml($ti->{'subject'} || "(no subject)") . "</B></FONT>";
      $ret .= "<BR>$user";
      
      if ($BMLClient::COOKIE{"ljuser"}) {
@@ -115,7 +114,7 @@ if ($dbh->err) { die $dbh->errstr; }
      
      ## escape BML block codes.  so (=TAG ... TAG=) turns into (&#0061; ... TAG=)
      $ti->{'body'} =~ s/\(=/\(&#0061;/g;
-     &LJ::CleanHTML::clean_comment(\$ti->{'body'});	
+     LJ::CleanHTML::clean_comment(\$ti->{'body'});	
      $ret .= $ti->{'body'};
      
      $ret .= "<P><FONT SIZE=-2><A HREF=\"/talkpost.bml?replyto=$talkid\">(Reply to this)</A></FONT>";
@@ -123,7 +122,7 @@ if ($dbh->err) { die $dbh->errstr; }
  }
  
  
-&strip_bad_code(\$ret);
+LJ::strip_bad_code(\$ret);
 return $ret;
 
 _CODE=)

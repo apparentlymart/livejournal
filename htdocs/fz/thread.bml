@@ -7,18 +7,17 @@ $TRUNC_SUBJECT = 60;
 my ($sth, $ret);
 my $user = $FORM{'user'};
 	
-&BML::set_content_type("text/plain");
-&BML::set_content_type("text/rdf");
+BML::set_content_type("text/rdf");
 
-&connect_db();
-my $quser = $dbh->quote($user);
-$sth = $dbh->prepare("SELECT userid, user, name FROM user WHERE user=$quser");
-$sth->execute;
-my $u = $sth->fetchrow_hashref;
+my $dbs = LJ::get_dbs();
+my $dbh = $dbs->{'dbh'};
+my $dbr = $dbs->{'reader'};
 
-my $remote = &get_remote();
+my $u = LJ::load_user($dbs, $user);
 
-my @itemids = &get_recent_itemids({
+my $remote = LJ::get_remote($dbs);
+
+my @itemids = LJ::get_recent_itemids($dbs, {
 	'view' => 'lastn',
 	'userid' => $u->{'userid'},
 	'itemshow' => 10,
@@ -35,7 +34,7 @@ while (my $cm = $sth->fetchrow_hashref)
 {
    $cm->{'type'} = "top";
    $cm->{'url'} = "$LJ::SITEROOT/fz/read-item.bml?itemid=$cm->{'itemid'}";
-   $cm->{'poster'} = ($u->{'userid'}==$cm->{'posterid'}) ? $user : &LJ::get_username($dbh, $cm->{'posterid'});
+   $cm->{'poster'} = ($u->{'userid'}==$cm->{'posterid'}) ? $user : LJ::get_username($dbs, $cm->{'posterid'});
    my $key = "entry-$cm->{'itemid'}";
    $com{$key} = $cm;
    push @{$com{'root'}->{'replies'}}, $key;
@@ -82,7 +81,7 @@ foreach $key (keys %com)
       if (length($subject)==$TRUNC_SUBJECT) { $subject .= "..."; }
       $subject =~ s/[\n\r].*//;
   }
-  $subject = &exml($subject);
+  $subject = LJ::exml($subject);
   
   $ret .= "    <fz:title>$subject</fz:title>\n";
   $ret .= "    <fz:datetime>$cm->{'datetime'}</fz:datetime>\n";

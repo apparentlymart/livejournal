@@ -1,9 +1,12 @@
 (=_CODE
 
- &connect_db();
- my $remote = &get_remote();
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+
+ my $remote = LJ::get_remote($dbs);
  my $user = $FORM{'user'};
- my $userid = &get_userid($user);
+ my $userid = LJ::get_userid($dbs, $user);
  $body = "";
 
  unless ($remote) 
@@ -29,7 +32,7 @@
      }
      
      my %res = ();
-     &LJ::do_request($dbh, {
+     LJ::do_request($dbh, {
 	 "user" => $remote->{'user'},
 	 "mode" => "editfriends",
 	 "editfriend_add_1_user" => $user,
@@ -80,7 +83,7 @@
 
  # load the colors
  my @color = ();
- &load_codes({ "color" => \@color });
+ LJ::load_codes($dbs, { "color" => \@color });
 
  my $sel = $fr || { 'fgcolor' => '#000000',
 		    'bgcolor' => '#FFFFFF', };
@@ -107,7 +110,7 @@
  foreach (@color) {
      if ($col==0) { $ret .= "<TR>\n"; }
      $col++;
-	 my $ecolor = &BMLUtil::ehtml($_->{'item'});
+	 my $ecolor = BMLUtil::ehtml($_->{'item'});
      $ret .= "<TD bgcolor=$_->{'code'}><IMG SRC=\"/img/dot.gif\" WIDTH=14 HEIGHT=14 TITLE=\"$ecolor\" ALT=\"$ecolor\"></TD>\n";
      if ($col==23) { $ret .= "</TR>\n"; $col==0; }
  }

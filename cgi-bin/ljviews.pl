@@ -843,7 +843,7 @@ sub create_view_calendar
         if ($vars->{'CALENDAR_SORT_MODE'} eq "forward") { @months = reverse @months; }
         foreach $month (@months)
         {
-	  my $daysinmonth = &days_in_month($month, $year);
+	  my $daysinmonth = LJ::days_in_month($month, $year);
 	  
 	  # TODO: wtf is this doing?  picking a random day that it knows day of week from?  ([0] from hash?)
 	  my $firstday = (%{$count{$year}->{$month}})[0];
@@ -1002,7 +1002,7 @@ sub create_view_day
     if ($month < 1 || $month > 12 || int($month) != $month) { push @errors, "Invalid month."; }
     if ($year < 1970 || $year > 2038 || int($year) != $year) { push @errors, "Invalid year: $year"; }
     if ($day < 1 || $day > 31 || int($day) != $day) { push @errors, "Invalid day."; }
-    if (scalar(@errors)==0 && $day > &days_in_month($month, $year)) { push @errors, "That month doesn't have that many days."; }
+    if (scalar(@errors)==0 && $day > LJ::days_in_month($month, $year)) { push @errors, "That month doesn't have that many days."; }
 
     if (@errors)
     {
@@ -1172,14 +1172,14 @@ END_SQL
 	  $pdmonth = 12;
 	  $pdyear--;
         }
-        $pdday = &days_in_month($pdmonth, $pdyear);
+        $pdday = LJ::days_in_month($pdmonth, $pdyear);
     }
 
     # calculate next day
     my $nxyear = $year;
     my $nxmonth = $month;
     my $nxday = $day+1;
-    if ($nxday > &days_in_month($nxmonth, $nxyear))
+    if ($nxday > LJ::days_in_month($nxmonth, $nxyear))
     {
         $nxday = 1;
         if (++$nxmonth > 12) { ++$nxyear; $nxmonth=1; }

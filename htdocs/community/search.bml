@@ -45,7 +45,8 @@ FORM<=
 <SELECT NAME="loc_cn">
 (=_CODE
 
- &load_codes({ "country" => \%countries });
+ my $dbs = LJ::get_dbs();
+ LJ::load_codes($dbs, { "country" => \%countries });
  my $ret = "";
  foreach (sort { $countries{$a} cmp $countries{$b} } keys %countries)
  {

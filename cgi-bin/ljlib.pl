@@ -59,7 +59,7 @@ if ($SIG{'HUP'}) {
     my $oldsig = $SIG{'HUP'};
     $SIG{'HUP'} = sub {
 	&{$oldsig};
-	&LJ::clear_caches;
+        LJ::clear_caches();
     };
 } else {
     $SIG{'HUP'} = \&LJ::clear_caches;    
@@ -82,8 +82,8 @@ sub get_friend_itemids { return LJ::get_friend_itemids($dbh, @_); }
 sub get_recent_itemids { &connect_db(); return LJ::get_recent_itemids($dbh, @_); }
 sub get_remote { &connect_db(); return LJ::get_remote($dbh, @_); }
 sub get_remote_noauth { return LJ::get_remote_noauth(); }
-sub get_userid { return &LJ::get_userid($dbh, @_); }
-sub get_username { return &LJ::get_username($dbh, @_); }
+sub get_userid { return LJ::get_userid($dbh, @_); }
+sub get_username { return LJ::get_username($dbh, @_); }
 sub html_select { return LJ::html_select(@_); }
 sub load_codes {  &connect_db(); LJ::load_codes($dbh, @_); }
 sub load_log_props { &connect_db(); return LJ::load_log_props($dbh, @_); }
@@ -91,7 +91,7 @@ sub load_mood_theme { &connect_db(); return LJ::load_mood_theme($dbh, @_); }
 sub load_moods { &connect_db(); return LJ::load_moods($dbh); }
 sub load_user_props { &connect_db(); LJ::load_user_props($dbh, @_); }
 sub load_user_theme { &connect_db(); return LJ::load_user_theme(@_); }
-sub load_userpics { return &LJ::load_userpics($dbh, @_); }
+sub load_userpics { return LJ::load_userpics($dbh, @_); }
 sub make_journal { connect_db(); return LJ::make_journal($dbh, @_); }
 sub make_text_link { return LJ::make_text_link(@_); }
 sub parse_vars { return LJ::parse_vars(@_); }
@@ -102,7 +102,9 @@ sub strip_bad_code { return LJ::strip_bad_code(@_); }
 
 sub register_authaction
 {
-    &connect_db();
+    my $dbs = LJ::get_dbs();
+    my $dbh = $dbs->{'dbh'};
+
     my $userid = shift;  $userid += 0;
     my $action = $dbh->quote(shift);
     my $arg1 = $dbh->quote(shift);
@@ -131,7 +133,7 @@ sub register_authaction
 sub auth_fields
 {
     my $opts = shift;
-    my $remote = &get_remote_noauth();
+    my $remote = LJ::get_remote_noauth();
     my $ret = "";
     if (!$FORM{'altlogin'} && !$opts->{'user'} && $remote->{'user'}) {
 	my $hpass;
@@ -150,17 +152,17 @@ sub auth_fields
 	$ret .= "<TR><TD>Username:</TD><TD><INPUT TYPE=TEXT NAME=user SIZE=15 MAXLENGTH=15 VALUE=\"";
 	my $user = $opts->{'user'};
 	unless ($user || $ENV{'QUERY_STRING'} =~ /=/) { $user=$ENV{'QUERY_STRING'}; }
-	$ret .= &BMLUtil::escapeall($user) unless ($FORM{'altlogin'});
+	$ret .= BMLUtil::escapeall($user) unless ($FORM{'altlogin'});
 	$ret .= "\"></TD></TR>\n";
 	$ret .= "<TR><TD>Password:</TD><TD>\n";
-	$ret .= "<INPUT TYPE=password NAME=password SIZE=15 MAXLENGTH=30 VALUE=\"" . &ehtml($opts->{'password'}) . "\">";
+	$ret .= "<INPUT TYPE=password NAME=password SIZE=15 MAXLENGTH=30 VALUE=\"" . LJ::ehtml($opts->{'password'}) . "\">";
 	$ret .= "</TD></TR>\n";
     }
     return $ret;
 }
 
 
-sub valid_password { return &LJ::valid_password(@_); }
+sub valid_password { return LJ::valid_password(@_); }
 sub hash_password { return md5_hex($_[0]); }
 
 sub remap_event_links
@@ -557,8 +559,8 @@ sub html_datetime
 					    $5 > 0 ? $5 : "", 
 					    $6 > 0 ? $6 : "");
     }
-    $ret .= &html_select({ 'name' => "${name}_mm", 'selected' => $mm, 'disabled' => $opts->{'disabled'} },
-			 map { $_, &LJ::Lang::month_long($lang, $_) } (0..12));
+    $ret .= LJ::html_select({ 'name' => "${name}_mm", 'selected' => $mm, 'disabled' => $opts->{'disabled'} },
+			 map { $_, LJ::Lang::month_long($lang, $_) } (0..12));
     $ret .= "<INPUT SIZE=2 MAXLENGTH=2 NAME=${name}_dd VALUE=\"$dd\" $disabled>, <INPUT SIZE=4 MAXLENGTH=4 NAME=${name}_yyyy VALUE=\"$yyyy\" $disabled>";
     unless ($opts->{'notime'}) {
 	$ret.= " <INPUT SIZE=2 MAXLENGTH=2 NAME=${name}_hh VALUE=\"$hh\" $disabled>:<INPUT SIZE=2 MAXLENGTH=2 NAME=${name}_nn VALUE=\"$nn\" $disabled>";
@@ -1320,7 +1322,7 @@ sub strip_bad_code
 #{
 #    my $data = shift;
 #    require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
-#    &LJ::CleanHTML::clean($data, {
+#    LJ::CleanHTML::clean($data, {
 #	'mode' => 'allow',
 #	'keepcomments' => 1,
 #    });
@@ -1835,7 +1837,7 @@ sub expand_embedded
     # TODO: This should send $dbs instead of $dbh when that function
     # is converted. In addition, when that occurs the make_dbs_from_arg
     # code above can be removed.
-    &LJ::Poll::show_polls($dbh, $itemid, $remote, $eventref);
+    LJ::Poll::show_polls($dbh, $itemid, $remote, $eventref);
 }
 
 sub make_remote
