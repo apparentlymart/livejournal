@@ -226,7 +226,6 @@ class EntryLite
     var readonly string{} metadata "Post metadata. Keys: 'music', 'mood'";
 
     var readonly string permalink_url "A URL at which this specific entry can be viewed, for linking purposes.";
-   
 }
 
 class Entry extends EntryLite
@@ -985,9 +984,6 @@ function userinfoicon(UserLite user) : Image {
     var Image uimage;
     $uimage.width = 17;
     $uimage.height = 17;
-#    $uimage.alt = "User Information";
-#    $uimage.attributes{"align"} = "absmiddle";
-#    $uimage.attributes{"border"} = "0";
 
     if ($user.journal_type == "C") {
         $uimage->set_url("$*IMGDIR/community.gif");
@@ -1009,10 +1005,9 @@ function UserLite::base_url() : string {
 }
 
 function UserLite::as_string() : string {
-    var Image uiimg;
-    #$uiimg = userinfoicon($this);
-    return "<a href=\"" + get_url($this,"userinfo") + "\"></a><b><a" + htmlattr("title",$.name) + " href=\""+$this->base_url()+"\">$.username</a></b>";
-    #return "<a href=\"" + get_url($this,"userinfo") + "\">" + $uiimg->as_string() + "</a><b><a" + htmlattr("title",$.name) + " href=\""+$this->base_url()+"\">$.username</a></b>";
+    var Image uiimg = userinfoicon($this);
+    var string dir = $.journal_type == "C" ? "community" : "users";
+    return "<span class='ljuser' style='white-space:nowrap;'><a href='$*SITEROOT/userinfo.bml?user=$.username'><img src='$uiimg.url' alt='userinfo' width='$uiimg.width' height='$uiimg.height' style='vertical-align:bottom;border:0;' /></a><a href='$*SITEROOT/$dir/$.username/'><b>$.username</b></a></span>";
 }
 
 function UserLite::print() {
