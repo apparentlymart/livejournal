@@ -125,6 +125,13 @@ sub clean
         {
             my $tag = $token->[1];
 
+            # do some quick checking to see if this is an email address/URL, and if so, just
+            # escape it and ignore it
+            if ($tag =~ m!(?:\@|://)!) {
+                $newdata .= LJ::ehtml("<$tag>");
+                next;
+            }
+
             my $slashclose = 0;   # If set to 1, use XML-style empty tag marker
             # for tags like <name/>, pretend it's <name> and reinsert the slash later
             $slashclose = 1 if ($tag =~ s!/$!!); 
