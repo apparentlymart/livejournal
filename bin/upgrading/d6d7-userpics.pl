@@ -20,7 +20,8 @@ my $BLOCK_UPDATE = 1000;  # users to update at a time if they had no data to mov
 my %opts;
 exit 1 unless
     GetOptions("lock=s" => \$opts{locktype},
-               "user=s" => \$opts{user},);
+               "user=s" => \$opts{user},
+               "total=i" => \$opts{total},);
               
 
 # if no locking, notify them about it
@@ -264,7 +265,7 @@ my $dbh = LJ::get_db_writer(); # just so we can get users...
 die "Could not connect to global master" unless $dbh;
 
 # get user count
-my $total = $dbh->selectrow_array("SELECT COUNT(*) FROM user WHERE dversion = 6");
+my $total = $opts{total} || $dbh->selectrow_array("SELECT COUNT(*) FROM user WHERE dversion = 6");
 $stats{'total_users'} = $total+0;
 
 # print out header and total we're moving
