@@ -1160,10 +1160,25 @@ sub get_recent_items
     $sth = $logdb->prepare($sql);
     $sth->execute;
     if ($logdb->err) { die $logdb->errstr; }
+
+    # keep track of the last alldatepart, and a per-minute buffer
+    my $last_time;
+    my @buf;
+    my $flush = sub {
+        return unless @buf;
+        push @items, sort { $b->{itemid} <=> $a->{itemid} } @buf;
+        @buf = ();
+    };
+
     while (my $li = $sth->fetchrow_hashref) {
-        push @items, $li;
         push @{$opts->{'itemids'}}, $li->{'itemid'};
+
+        $flush->() if $li->{alldatepart} ne $last_time;
+        push @buf, $li;
+        $last_time = $li->{alldatepart};
     }
+    $flush->();
+
     return @items;
 }
 
