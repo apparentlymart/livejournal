@@ -256,7 +256,7 @@
                                      'cols' => $cols });
             } else {
                 my ($length, $maxlength) = ($prop->{'length'} || 30,
-                                            $prop->{'maxlength'} || 60);
+                                            $prop->{'maxlength'} || 255);
                 $body .= LJ::html_text({ 'name' => "${name}_value",
                                      'disabled' => ! $can_use,
                                      'value' => $override,
