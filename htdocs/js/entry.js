@@ -122,9 +122,6 @@ function customboxes (e) {
     f = document.updateForm;
     if (! f) return false;
     
-    var altlogin_username = document.getElementById('altlogin_username');
-    if (! altlogin_username) return false;
-    
     var custom_boxes = document.getElementById('custom_boxes');
     if (! custom_boxes) return false;
     
@@ -132,8 +129,9 @@ function customboxes (e) {
         custom_boxes.style.display = 'none';
         return false;
     }
-    
-    if (altlogin_username.style.display == 'table-row') {
+
+    var altlogin_username = document.getElementById('altlogin_username');    
+    if (altlogin_username != undefined && altlogin_username.style.display == 'table-row') {
         f.security.selectedIndex = 0;
         custom_boxes.style.display = 'none';
         alert("Custom security is only available when posting as the logged in user.");
