@@ -41,9 +41,7 @@ sub contains_new_poll
 sub parse
 {
     &LJ::nodb;
-    my $postref = shift;
-    my $error = shift;
-    my $iteminfo = shift; 
+    my ($postref, $error, $iteminfo) = @_;
 
     $iteminfo->{'posterid'} += 0;
     $iteminfo->{'journalid'} += 0;
@@ -63,6 +61,33 @@ sub parse
 
     my $p = HTML::TokeParser->new($postref);
 
+    # if we're being called from mailgated, then we're not in web context and therefore
+    # do not have any BML::ml functionality.  detect this now and report errors in a 
+    # plaintext, non-translated form to be bounced via email.
+    my $have_bml = eval { BML::ml() } || ! $@;
+
+    my $err = sub {
+        # more than one element, either make a call to BML::ml
+        # or build up a semi-useful error string from it
+        if (@_ > 1) {
+            if ($have_bml) {
+                $$error = BML::ml(@_);
+                return 0;
+            }
+
+            $$error = shift() . ": ";
+            while (my ($k, $v) = each %{$_[0]}) {
+                $$error .= "$k=$v,";
+            }
+            chop $$error;
+            return 0;
+        }
+
+        # single element, either look up in %BML::ML or return verbatim
+        $$error = $have_bml ? $BML::ML{$_[0]} : $_[0];
+        return 0;
+    };
+
     while (my $token = $p->get_token)    
     {
         my $type = $token->[0];
@@ -76,10 +101,8 @@ sub parse
             ######## Begin poll tag
             
             if ($tag eq "lj-poll") {
-                if ($popen) {
-                    $$error = BML::ml('poll.error.nested', { 'tag' => 'lj-poll' });
-                    return 0;
-                }
+                return $err->('poll.error.nested', { 'tag' => 'lj-poll' })
+                    if $popen;
 
                 $popen = 1;
                 %popts = ();
@@ -92,15 +115,13 @@ sub parse
                 if ($popts{'whovote'} ne "all" && 
                     $popts{'whovote'} ne "friends")
                 {
-                    $$error = $BML::ML{'poll.error.whovote'};
-                    return 0;
+                    return $err->('poll.error.whovote');
                 }
                 if ($popts{'whoview'} ne "all" && 
                     $popts{'whoview'} ne "friends" &&
                     $popts{'whoview'} ne "none")
                 {
-                    $$error = $BML::ML{'poll.error.whoview'};
-                    return 0;
+                    return $err->('poll.error.whoview');
                 }
             }
 
@@ -108,14 +129,12 @@ sub parse
             
             elsif ($tag eq "lj-pq") 
             {
-                if ($qopen) {
-                    $$error = BML::ml('poll.error.nested', { 'tag' => 'lj-pq' });
-                    return 0;
-                }
-                if (! $popen) {
-                    $$error = $BML::ML{'poll.error.missingljpoll'};
-                    return 0;
-                }
+                return $err->('poll.error.nested', { 'tag' => 'lj-pq' })
+                    if $qopen;
+
+                return $err->('poll.error.missingljpoll')
+                    unless $popen;
+
                 $qopen = 1;
                 %qopts = ();
                 $qopts{'items'} = [];
@@ -130,8 +149,7 @@ sub parse
                         {
                             $size = $opts->{'size'}+0;
                         } else {
-                            $$error = $BML::ML{'poll.error.badsize'};
-                            return 0;
+                            return $err->('poll.error.badsize');
                         }
                     }
                     if (defined $opts->{'maxlength'}) {
@@ -140,8 +158,7 @@ sub parse
                         {
                             $max = $opts->{'maxlength'}+0;
                         } else {
-                            $$error = $BML::ML{'poll.error.badmaxlength'};
-                            return 0;
+                            return $err->('poll.error.badmaxlength');
                         }
                     }
 
@@ -163,16 +180,13 @@ sub parse
                         $by = int($opts->{'by'});
                     }
                     if ($by < 1) {
-                        $$error = $BML::ML{'poll.error.scaleincrement'};
-                        return 0;
+                        return $err->('poll.error.scaleincrement');
                     }
                     if ($from >= $to) {
-                        $$error = $BML::ML{'poll.error.scalelessto'};
-                        return 0;
+                        return $err->('poll.error.scalelessto');
                     }
                     if ((($to-$from)/$by) > 20) {
-                        $$error = $BML::ML{'poll.error.scaletoobig'};
-                        return 0;
+                        return $err->('poll.error.scaletoobig');
                     }
                     $qopts{'opts'} = "$from/$to/$by";
                 }
@@ -185,8 +199,7 @@ sub parse
                     $qopts{'type'} ne "scale" &&
                     $qopts{'type'} ne "text")
                 {
-                    $$error = $BML::ML{'poll.error.unknownpqtype'};
-                    return 0;
+                    return $err->('poll.error.unknownpqtype');
                 }
                 
                 
@@ -197,17 +210,14 @@ sub parse
             elsif ($tag eq "lj-pi")
             {
                 if ($iopen) {
-                    $$error = BML::ml('poll.error.nested', { 'tag' => 'lj-pi' });
-                    return 0;
+                    return $err->('poll.error.nested', { 'tag' => 'lj-pi' });
                 }
                 if (! $qopen) {
-                    $$error = $BML::ML{'poll.error.missingljpq'};
-                    return 0;
+                    return $err->('poll.error.missingljpq');
                 }
                 if ($qopts{'type'} eq "text")
                 {
-                    $$error = $BML::ML{'poll.error.noitemstext'};
-                    return 0;
+                    return $err->('poll.error.noitemstext');
                 }
                 
                 $iopen = 1;
@@ -232,16 +242,13 @@ sub parse
             ##### end POLL
 
             if ($tag eq "lj-poll") {
-                unless ($popen) {
-                    $$error = BML::ml('poll.error.tagnotopen', { 'tag' => 'lj-poll' });
-                    return 0;
-                }
+                return $err->('poll.error.tagnotopen', { 'tag' => 'lj-poll' })
+                    unless $popen;
+
                 $popen = 0;
 
-                unless (@{$popts{'questions'}}) {
-                    $$error = $BML::ML{'poll.error.noquestions'};
-                    return 0;
-                }
+                return $err->('poll.error.noquestions')
+                    unless @{$popts{'questions'}};
                 
                 $popts{'journalid'} = $iteminfo->{'journalid'};
                 $popts{'posterid'} = $iteminfo->{'posterid'};
@@ -254,27 +261,20 @@ sub parse
             ##### end QUESTION
 
             elsif ($tag eq "lj-pq") {
-                unless ($qopen) {
-                    $$error = BML::ml('poll.error.tagnotopen', { 'tag' => 'lj-pq' });
-                    return 0;
-                }
+                return $err->('poll.error.tagnotopen', { 'tag' => 'lj-pq' })
+                    unless $qopen;
 
                 unless ($qopts{'type'} eq "scale" || 
                         $qopts{'type'} eq "text" || 
                         @{$qopts{'items'}}) 
                 {
-                    $$error = $BML::ML{'poll.error.noitems'};
-                    return 0;
+                    return $err->('poll.error.noitems');
                 }
 
                 $qopts{'qtext'} =~ s/^\s+//;
                 $qopts{'qtext'} =~ s/\s+$//;
-                my $len = length($qopts{'qtext'});
-                if (! $len)
-                {
-                    $$error = $BML::ML{'poll.error.notext'};
-                    return 0;
-                }
+                my $len = length($qopts{'qtext'})
+                    or return $err->('poll.error.notext');
 
                 push @{$popts{'questions'}}, { %qopts };
                 $qopen = 0;
@@ -284,19 +284,15 @@ sub parse
             ##### end ITEM
 
             elsif ($tag eq "lj-pi") {
-                unless ($iopen) {
-                    $$error = BML::ml('poll.error.tagnotopen', { 'tag' => 'lj-pi' });
-                    return 0;
-                }
+                return $err->('poll.error.tagnotopen', { 'tag' => 'lj-pi' })
+                    unless $iopen;
 
                 $iopts{'item'} =~ s/^\s+//;
                 $iopts{'item'} =~ s/\s+$//;
+
                 my $len = length($iopts{'item'});
-                if ($len > 255 || $len < 1)
-                {
-                    $$error = BML::ml('poll.error.pitoolong', { 'len' => $len, });
-                    return 0;
-                }
+                return $err->('poll.error.pitoolong', { 'len' => $len, })
+                    if $len > 255 || $len < 1;
 
                 push @{$qopts{'items'}}, { %iopts };
                 $iopen = 0;
@@ -341,9 +337,9 @@ sub parse
 
     } 
 
-    if ($popen) { $$error = BML::ml('poll.error.unlockedtag', { 'tag' => 'lj-poll' }); return 0; }
-    if ($qopen) { $$error = BML::ml('poll.error.unlockedtag', { 'tag' => 'lj-pq' }); return 0; }
-    if ($iopen) { $$error = BML::ml('poll.error.unlockedtag', { 'tag' => 'lj-pi' }); return 0; }
+    if ($popen) { return $err->('poll.error.unlockedtag', { 'tag' => 'lj-poll' }); }
+    if ($qopen) { return $err->('poll.error.unlockedtag', { 'tag' => 'lj-pq' }); }
+    if ($iopen) { return $err->('poll.error.unlockedtag', { 'tag' => 'lj-pi' }); }
 
     $$postref = $newdata;
     return @polls;
