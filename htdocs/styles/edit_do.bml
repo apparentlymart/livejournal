@@ -23,14 +23,9 @@ body<=
     return LJ::bad_input("Your account type doesn't permit you to modify styles.")
         unless LJ::get_cap($u, "styles");
 
-    # get database handle
-    my $dbh = LJ::get_db_writer();
-    my $sth;
-
     # get a style object
     my $styleid = $POST{'styleid'}+0;
-    my $style = $dbh->selectrow_hashref("SELECT * FROM style WHERE user=? AND styleid=?",
-                                        undef, $u->{'user'}, $styleid);
+    my $style = LJ::S1::get_style($styleid);
     return LJ::bad_input("The requested style does not exist.")
         unless $style;
 
@@ -96,20 +91,10 @@ body<=
 
     # process delete
     if ($mode eq "delete_confirm") {
-        $sth = $dbh->prepare("DELETE FROM style WHERE user=? AND styleid=?");
-        $sth->execute($u->{'user'}, $styleid);
 
-        # delete from stylecache and memcache, too
-        $dbh->do("DELETE FROM s1stylecache WHERE user=? AND styleid=?", undef, $u->{'user'}, $styleid);
-        LJ::MemCache::delete([$styleid,"s1styc:$styleid"]);
-
-        # success
+        LJ::S1::delete_style($styleid);
         return "<?h1 Deleted h1?><?p The style has been deleted. You can view your current list of styles " .
-               "<a href='edit.bml$getextra'>here</a> p?>"
-                   if $sth->rows;
-
-        # fail
-        return LJ::bad_input("The style was attempted to be deleted, but it doesn't seem to exist anymore.  Perhaps you clicked the proceed button twice?");
+               "<a href='edit.bml$getextra'>here</a> p?>";
     }
 
     # editing a style
@@ -290,28 +275,11 @@ body<=
             }
         }
     
-        # build key value pairs to set in style row
-        my $opts = "";
-        foreach (@style_opts) {
-            $opts .= ", $_->{'code'}=";
-            $opts .= $POST{$_->{'code'}} ? "'Y'" : "'N'";
-        }
-
-        # update style row
-        $dbh->do("UPDATE style SET formatdata=?, styledes=?, lastupdate=NOW()$opts " .
-                 "WHERE styleid=?", undef, $formatdata, $POST{'styledes'}, $styleid);
-        return "<?h1 Error h1?><?p There was a database error updating this style: $dbh->errstr p?>"
-            if $dbh->err;
-
-        # update stylecache row
-        $dbh->do("UPDATE s1stylecache SET vars_stor=NULL, vars_cleanver=0 WHERE styleid=?",
-                 undef, $styleid);
-        LJ::MemCache::delete([$styleid,"s1styc:$styleid"]);
-        return "<?h1 Error h1?><?p There was a database error updating this style: $dbh->errstr p?>"
-            if $dbh->err;
-    
-        # get this style's view type
-        my $viewtype = $dbh->selectrow_array("SELECT type FROM style WHERE styleid=?", undef, $styleid);
+        # update style
+        LJ::S1::update_style($styleid, 
+                             { 'formatdata' => $formatdata,
+                               'styledes' => $POST{'styledes'},
+                               map { $_->{'code'} => $POST{$_->{'code'}} ? "Y" : "N" } @style_opts });
 
         # all good
         return "<?h1 Success h1?><?p Style has been updated.  You can view it ".

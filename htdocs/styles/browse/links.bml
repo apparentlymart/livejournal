@@ -1,43 +1,47 @@
 <base target=_top>
 <?_code
+{
+    use strict;
+    use vars qw(%GET);
 
- my $user = LJ::canonical_username($FORM{'user'}) || 'system';
- unless ($user) {
-     return "Enter a username.";
- } 
+    my $user = LJ::canonical_username($GET{'user'});
+    return "Enter a username." unless $user;
 
- my $remote = LJ::get_remote();
- my $dispuser = $remote ? $remote->{'user'} : $user;
+    my $remote = LJ::get_remote();
+    my $dispuser = $remote ? $remote->{'user'} : $user;
 
- my $dbr = LJ::get_db_reader();
- my $sth = $dbr->prepare("SELECT styleid, user, styledes, type, is_embedded, is_colorfree ".
-                         "FROM style WHERE is_public='Y' AND user=? ".
-                         "ORDER BY type DESC,styledes");
- $sth->execute($user);
- unless ($sth->rows) {
-   return "<?ljuser $user ljuser?> has no public styles.";
- }
+    my $styles;
+    if ($user eq 'system') {
+        $styles = LJ::S1::get_public_styles();
+    } else {
+        $styles = LJ::S1::get_user_styles($user);
+    }
+    return LJ::ljuser($user) . " has no public styles."
+        unless $styles;
 
- my $ret = "";
- my $last = "";
- my (undef,undef,undef,$dday,$dmon,$dyear)=localtime(time);
- $dyear+=1900; $dmon++;
- my %extra=();
- $extra{'day'} = "&month=$dmon&day=$dday&year=$dyear";
- 
- $ret.="Styles for <?ljuser $user ljuser?>:<br><br>";
+    my ($dday,$dmon,$dyear) = (localtime(time))[3..5];
+    $dyear+=1900; $dmon++;
+    my %extra = ( 'day' => "&amp;month=$dmon&amp;day=$dday&amp;year=$dyear" );
 
- while ($sty = $sth->fetchrow_hashref) {
-     if ($last ne $LJ::viewinfo{$sty->{'type'}}->{'des'}) {
-         $last = $LJ::viewinfo{$sty->{'type'}}->{'des'};
-         $ret .= "<B>$last</B><BR>\n";
-     }
-     my $view=substr($sty->{'type'},0,1);
-     $ret .= "<nobr>&nbsp;&nbsp;<A TARGET=\"main\" HREF=\"styleinfo.bml?styleid=$sty->{'styleid'}\">-</A> <A TARGET=\"main\" HREF=\"/customview.cgi?styleid=$sty->{'styleid'}&amp;user=$dispuser&amp;nooverride=1$extra{$sty->{'type'}}\">$sty->{'styledes'}</A></nobr><BR>\n";
- }
+    my $ret = "Styles for " . LJ::ljuser($user) . ":<br /><br />";
 
- return $ret; 
+    my $last;
+    foreach my $sty (sort { $a->{'type'} cmp $b->{'type'} || $a->{'styledes'} cmp $b->{'styledes'} }
+                     values %$styles) {
 
+        if ($last ne $LJ::viewinfo{$sty->{'type'}}->{'des'}) {
+            $last = $LJ::viewinfo{$sty->{'type'}}->{'des'};
+            $ret .= "<b>$last</b><br />\n";
+        }
+
+        my $view = substr($sty->{'type'}, 0, 1);
+        $ret .= "<nobr>&nbsp;&nbsp;<a target='main' href='styleinfo.bml?styleid=$sty->{'styleid'}'>-</a> ";
+        $ret .= "<a target='main' href='/customview.cgi?styleid=$sty->{'styleid'}&amp;user=$dispuser&amp;";
+        $ret .= "nooverride=1$extra{$sty->{'type'}}'>$sty->{'styledes'}</a></nobr><br />\n";
+    }
+
+    return $ret; 
+}
 _code?><?_c <LJDEP>
 link: htdocs/styles/browse/styleinfo.bml, htdocs/customview.cgi
 </LJDEP> _c?>

@@ -6,8 +6,9 @@
 
 use strict;
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljviews.pl";
 
-my $dbh = LJ::get_dbh("master");
+my $dbh = LJ::get_db_writer();
 
 sub header_text {
     return <<"HEADER";
@@ -132,14 +133,12 @@ foreach my $k (keys %output) {
 print "Dumping s1styles.dat\n";
 require "$ENV{'LJHOME'}/bin/upgrading/s1style-rw.pl";
 my $ss = {};
-$sth = $dbh->prepare("SELECT user, styledes, type, formatdata, is_embedded, ".
-                     "is_colorfree, lastupdate ".
-                     "FROM style WHERE user='system' AND is_public='Y'");
-$sth->execute;
-while (my $s = $sth->fetchrow_hashref) {
+my $pubstyles = LJ::S1::get_public_styles();
+foreach my $s (values %$pubstyles) {
     my $uniq = "$s->{'type'}/$s->{'styledes'}";
-    $ss->{$uniq}->{$_} = $s->{$_} foreach (keys %$s);
+    $ss->{$uniq}->{$_} = $s->{$_} foreach keys %$s;
 }
+
 s1styles_write($ss);
 
 # and dump mood info

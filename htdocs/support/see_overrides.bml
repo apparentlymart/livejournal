@@ -1,74 +1,58 @@
 <?page
 title=><?_ml .title _ml?>
-
 body<=
-
 <?_code
 {
     use strict;
-    use vars qw(%FORM);
+    use vars qw(%GET);
 
-    my @errors = ();
-    my $user = LJ::canonical_username($FORM{'user'});
-
-    my $dbr = LJ::get_db_reader();
     my $remote = LJ::get_remote();
+    return LJ::bad_input($ML{'error.noremote'})
+        unless $remote;
 
-    my $sth;
-    my $body = "";
-
-    if ($FORM{'user'} && ! $user) {
-        push @errors, BML::ml("error.malformeduser");
-    }
-    if ($user eq "" && $remote) {
-        $user = $remote->{'user'};
-    }
+    my $user = LJ::canonical_username($GET{'user'} || $remote->{'user'});
+    return LJ::bad_input(BML::ml("error.malformeduser"))
+        unless $user;
 
     # check for privs
-    unless (LJ::check_priv($remote, "supportviewscreened") ||
-            LJ::check_priv($remote, "supporthelp") ||
-            $remote->{'user'} eq $user) {
-        push @errors, BML::ml(".error.noprivs");
+    unless ($remote->{'user'} eq $user || 
+            LJ::check_priv($remote, "supportviewscreened") ||
+            LJ::check_priv($remote, "supporthelp")) {
+
+        return LJ::bad_input(BML::ml(".error.noprivs"));
     }
 
     # remote is authenticated, now load $u
-    my $u = LJ::load_user($user);
-    push @errors, $ML{'error.username_notfound'} unless $u;
+    my $u = $remote->{'user'} eq $user ? $remote : LJ::load_user($user);
+    return LJ::bad_input($ML{'error.username_notfound'})
+        unless $u;
 
     # see if they're using s2
     LJ::load_user_props($u, "stylesys");
-    push @errors, BML::ml(".error.nos1", { 'user' => $user }) if $u->{'stylesys'} == 2;
-
-    # return errors if we have them
-    return LJ::bad_input(@errors) if @errors;
+    return LJ::bad_input(BML::ml(".error.nos1", { 'user' => $user }))
+        if $u->{'stylesys'} == 2;
 
     ### no errors
 
     # no overrides?
-    if ($u->{'useoverrides'} ne "Y") {
-        $body .= "<?p " . BML::ml(".nooverrides", {'user' => $user}) . " p?>";
-        return $body;
-    }
+    return "<?p " . BML::ml(".nooverrides", {'user' => $user}) . " p?>"
+        unless $u->{'useoverrides'} eq "Y";
 
     # first, load the overrides if they use 'em:
-    my $overrides = "";
-    $sth = $dbr->prepare("SELECT override FROM overrides WHERE user=?");
-    $sth->execute($user);
-    ($overrides) = $sth->fetchrow_array;
+    my $overrides = LJ::S1::get_overrides($u);
     LJ::text_out(\$overrides);
 
     # textarea
-    $body .= "<?h1 " . BML::ml(".header", {'user' => "$user"}) . " h1?>";
-    $body .= "<br />";
-    $body .= "<form action='#'><textarea style='width: 100%' name='overrides' cols='60' rows='16' wrap='off'>";
-    $body .= BML::eall($overrides);
-    $body .= "</textarea></form>";
+    my $ret;
+    $ret .= "<?h1 " . BML::ml(".header", {'user' => $user}) . " h1?>";
+    $ret .= "<br /><form action='#'>";
+    $ret .= LJ::html_textarea({ 'name' => 'overrides', 'style' => 'width: 100%',
+                                 'cols' => '60', 'rows' => '16', 'wrap' => 'off',
+                                 'value' => $overrides });
+    $ret .= "</form>";
 
-    return $body;
-
+    return $ret;
 }
 _code?>
-
 <=body
-
 page?>

@@ -13,7 +13,7 @@ body<=
 
     my $ret;
     my $authas = $GET{'authas'} || $remote->{'user'};
-    my $getextra = "?authas=$authas" if $authas ne $remote->{'user'};
+    my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : "";
 
     # no authentication needs to be done on this page, it's just a form anyway
 
@@ -31,13 +31,9 @@ body<=
     $ret .= "<?h1 Select Style Type h1?>\n";
     $ret .= "<?p A style only affects one <a href='$LJ::SITEROOT/developer/views.bml'>view type</a>.  If you want to create a matching set of styles for your journal, you have to create your style for each view type. p?>\n";
 
-    # get a database handle
-    my $dbr = LJ::get_db_reader;
-
-    my %styles = ();
-    my $sth = $dbr->prepare("SELECT styleid, styledes, type FROM style WHERE user='system' AND is_public='Y'");
-    $sth->execute;
-    push @{$styles{$_->{'type'}}}, $_ while $_ = $sth->fetchrow_hashref;
+    my $pubstyles = LJ::S1::get_public_styles();
+    my %styles;
+    push @{$styles{$_->{'type'}}}, $_ foreach values %$pubstyles;
  
     foreach my $view (@LJ::views) {
         $ret .= "<p>" . LJ::html_check({ 'type' => 'radio', 'name' => 'type', 'id' => "type-$view", 'value' => $view });

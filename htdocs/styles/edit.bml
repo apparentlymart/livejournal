@@ -17,9 +17,6 @@ body<=
         unless $u;
 
     # authenticated
-    my $dbr = LJ::get_db_reader();
-    my $sth;
-
     my $ret;
 
     # user switcher
@@ -27,7 +24,7 @@ body<=
     $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
     $ret .= "</form>\n\n";
 
-    my $getextra = "?authas=$authas" if $u->{'user'} ne $remote->{'user'};
+    my $getextra = $u->{'user'} ne $remote->{'user'} ? "?authas=$authas" : "";
 
     $ret .= "<?h1 Edit which style? h1?>\n";
     $ret .= "<?p After you <a href='$LJ::SITEROOT/styles/create.bml'><b>create a style</b></a>, you can edit it here. ";
@@ -36,13 +33,14 @@ body<=
     $ret .= "<form method='post' action='edit_do.bml$getextra'>";
     $ret .= "<?standout Pick a style:<br />";
 
-    my @list = ();
-    $sth = $dbr->prepare("SELECT styleid, type, styledes FROM style WHERE user=? ORDER BY type, styledes");
-    $sth->execute($u->{'user'});
-    push @list, ($_->{'styleid'}, "$_->{'type'}($_->{'styleid'}): $_->{'styledes'}") while $_ = $sth->fetchrow_hashref;
+    my $styles = LJ::S1::get_user_styles($u);
+
+    my @list = map { $_->{'styleid'}, "$_->{'type'}($_->{'styleid'}): $_->{'styledes'}" }
+               sort { $a->{'styledes'} cmp $b->{'styledes'} } values %$styles;
+    @list = @list ? @list : ('', 'no styles');
 
     $ret .= LJ::html_select({ 'name' => 'styleid', 'size' => '10', 'style' => 'width: 100%;' },
-                            @list ? @list : ('', 'no styles')) . "<br />\n";
+                            @list) . "<br />\n";
 
     $ret .= "<div style='margin-top: 3px;'>Action: ";
     $ret .= LJ::html_select({ 'name' => 'ide' },

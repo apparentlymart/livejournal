@@ -8,7 +8,8 @@ mark_clustered("useridmap", "userbio", "cmdbuffer", "dudata",
                "userpicblob2", "events",
                "ratelog", "loginstall", "sessions", "sessions_data",
                "fvcache", "s1usercache", "modlog", "modblob", "counter",
-               "userproplite2", "links",
+               "userproplite2", "links", "s1overrides", "s1style",
+               "s1stylecache",
                );
 
 register_tablecreate("adopt", <<'EOC');
@@ -282,7 +283,7 @@ CREATE TABLE noderefs (
 ) 
 EOC
 
-register_tablecreate("overrides", <<'EOC');
+register_tablecreate("overrides", <<'EOC'); # global, old
 CREATE TABLE overrides (
   user varchar(15) NOT NULL default '',
   override text,
@@ -452,7 +453,7 @@ CREATE TABLE style (
 EOC
 
 # cache Storable-frozen pre-cleaned style variables
-register_tablecreate("s1stylecache", <<'EOC');
+register_tablecreate("s1stylecache", <<'EOC'); # clustered
 CREATE TABLE s1stylecache (
    styleid   INT UNSIGNED NOT NULL PRIMARY KEY,
    cleandate     DATETIME,
@@ -464,7 +465,7 @@ CREATE TABLE s1stylecache (
 EOC
 
 # caches Storable-frozen pre-cleaned overrides & colors
-register_tablecreate("s1usercache", <<'EOC');
+register_tablecreate("s1usercache", <<'EOC'); # clustered
 CREATE TABLE s1usercache (
    userid            INT UNSIGNED NOT NULL PRIMARY KEY,
    override_stor     BLOB,
@@ -1538,6 +1539,44 @@ CREATE TABLE supportprop (
   prop varchar(30) NOT NULL,
   value varchar(255) NOT NULL,
   PRIMARY KEY (spid, prop)
+)
+EOC
+
+# s1overrides
+register_tablecreate("s1overrides", <<'EOC'); # clustered
+CREATE TABLE s1overrides (
+  userid int unsigned NOT NULL default '',
+  override text NOT NULL,
+  PRIMARY KEY  (userid)
+) 
+EOC
+
+# s1style
+register_tablecreate("s1style", <<'EOC'); # clustered
+CREATE TABLE s1style (
+  styleid int(11) NOT NULL auto_increment,
+  userid int(11) unsigned NOT NULL,
+  styledes varchar(50) default NULL,
+  type varchar(10) NOT NULL default '',
+  formatdata text,
+  is_public enum('Y','N') NOT NULL default 'N',
+  is_embedded enum('Y','N') NOT NULL default 'N',
+  is_colorfree enum('Y','N') NOT NULL default 'N',
+  opt_cache enum('Y','N') NOT NULL default 'N',
+  has_ads enum('Y','N') NOT NULL default 'N',
+  lastupdate datetime NOT NULL default '0000-00-00 00:00:00',
+  PRIMARY KEY  (styleid),
+  KEY (userid)
+
+)
+EOC
+
+# s1stylemap
+register_tablecreate("s1stylemap", <<'EOC'); # global
+CREATE TABLE s1stylemap (
+   styleid int unsigned NOT NULL,
+   userid int unsigned NOT NULL,
+   PRIMARY KEY (styleid)
 )
 EOC
 

@@ -259,39 +259,65 @@ sub load_style
     &LJ::nodb;
     my ($styleid, $viewref) = @_;
     
+    # first try local cache for this process
     my $cch = $LJ::S1::CACHE_STYLE{$styleid};
     if ($cch && $cch->{'cachetime'} > time() - 300) {
         $$viewref = $cch->{'type'} if ref $viewref eq "SCALAR";
         return $cch->{'style'};
     }
 
+    # try memcache
     my $memkey = [$styleid, "s1styc:$styleid"];
     my $styc = LJ::MemCache::get($memkey);
 
+    # database handle we'll use if we have to rebuild the cache
+    my $db;
+
+    # function to return a given a styleid
+    my $find_db = sub {
+        my $sid = shift;
+
+        # should we work with a global or clustered table?
+        my $userid = LJ::S1::get_style_userid($sid);
+
+        # if the user's style is clustered, need to get a $u
+        my $u = $userid ? LJ::load_userid($userid) : undef;
+
+        # return appropriate db handle
+        if ($u && $u->{'dversion'} >= 5) {    # users' styles are clustered
+            return LJ::S1::get_s1style_writer($u);
+        }
+
+        return @LJ::MEMCACHE_SERVERS ? LJ::get_db_writer() : LJ::get_db_reader();
+    };
+
+    # get database stylecache
     unless ($styc) {
-        my $dbr = @LJ::MEMCACHE_SERVERS ? LJ::get_db_writer() : LJ::get_db_reader();
-        $styc = $dbr->selectrow_hashref("SELECT * FROM s1stylecache WHERE styleid=?",
-                                        undef, $styleid);
+
+        $db = $find_db->($styleid);
+        $styc = $db->selectrow_hashref("SELECT * FROM s1stylecache WHERE styleid=?",
+                                       undef, $styleid);
         LJ::MemCache::set($memkey, $styc, time()+60*30) if $styc;
     }
 
+    # no stylecache in db, built a new one
     if (! $styc || $styc->{'vars_cleanver'} < $LJ::S1::CLEANER_VERSION) {
-        my $dbh = LJ::get_db_writer();
-        my ($type, $data, $opt_cache) = 
-            $dbh->selectrow_array("SELECT type, formatdata, opt_cache FROM style WHERE styleid=?",
-                                  undef, $styleid);
-        return {} unless $type;
+        my $style = LJ::S1::get_style($styleid);
+        return {} unless $style;
+
+        $db ||= $find_db->($styleid);
 
         $styc = {
-            'type' => $type,
-            'opt_cache' => $opt_cache,
-            'vars_stor' => LJ::CleanHTML::clean_s1_style($data),
+            'type' => $style->{'type'},
+            'opt_cache' => $style->{'opt_cache'},
+            'vars_stor' => LJ::CleanHTML::clean_s1_style($style->{'formatdata'}),
             'vars_cleanver' => $LJ::S1::CLEANER_VERSION,
         };
         
-        $dbh->do("REPLACE INTO s1stylecache (styleid, cleandate, type, opt_cache, vars_stor, vars_cleanver) ".
-                 "VALUES (?,NOW(),?,?,?,?)", undef, $styleid, 
-                 map { $styc->{$_} } qw(type opt_cache vars_stor vars_cleanver));
+        # do this query on the db handle we used above
+        $db->do("REPLACE INTO s1stylecache (styleid, cleandate, type, opt_cache, vars_stor, vars_cleanver) ".
+                "VALUES (?,NOW(),?,?,?,?)", undef, $styleid, 
+                map { $styc->{$_} } qw(type opt_cache vars_stor vars_cleanver));
     }
     
     my $ret = Storable::thaw($styc->{'vars_stor'});
@@ -306,6 +332,394 @@ sub load_style
     }
 
     return $ret;
+}
+
+sub get_public_styles {
+
+    # now try memcache
+    my $memkey = "s1pubstyc";
+    my $pubstyc = LJ::MemCache::get($memkey);
+    return $pubstyc if $pubstyc;
+
+    # not cached, build from db
+    my $sysid = LJ::get_userid("system");
+
+    # first try new table
+    my $dbh = LJ::get_db_writer();
+    my $sth = $dbh->prepare("SELECT * FROM s1style WHERE userid=?");
+    $sth->execute($sysid);
+    $pubstyc->{$_->{'styleid'}} = $_ while $_ = $sth->fetchrow_hashref;
+
+    # fall back to old table
+    unless ($pubstyc) {
+        $sth = $dbh->prepare("SELECT * FROM style WHERE user='system' AND is_public='Y'");
+        $sth->execute();
+        $pubstyc->{$_->{'styleid'}} = $_ while $_ = $sth->fetchrow_hashref;
+    }
+    return undef unless $pubstyc;
+
+    # set in memcache
+    my $expire = time() + 60*30; # 30 minutes
+    LJ::MemCache::set($memkey, $pubstyc);
+
+    return $pubstyc;
+}
+
+sub get_s1style_writer {
+    my $u = shift;
+    return undef unless ref $u eq 'HASH';
+
+    # special case system, its styles live on
+    # the global master's s1style table alone
+    if ($u->{'user'} eq 'system') {
+        return LJ::get_db_writer();
+    }
+
+    return LJ::get_cluster_master($u);
+}
+
+sub get_s1style_reader {
+    my $u = shift;
+    return undef unless ref $u eq 'HASH';
+
+    # special case system, its styles live on
+    # the global master's s1style table alone
+    if ($u->{'user'} eq 'system') {
+        return @LJ::MEMCACHE_SERVERS ? LJ::get_db_writer() : LJ::get_db_reader();
+    }
+
+    return @LJ::MEMCACHE_SERVERS ? LJ::get_cluster_master($u) : LJ::get_cluster_reader($u);
+}
+
+# takes either $u object or userid
+sub get_user_styles {
+    my $u = shift;
+    $u = ref $u eq 'HASH' ? $u : LJ::load_user($u);
+    return undef unless $u;
+
+    my %styles;
+
+    # new clustered table
+    my ($db, $sth);
+    if ($u->{'dversion'} >= 5) {
+        $db = LJ::S1::get_s1style_reader($u);
+        $sth = $db->prepare("SELECT * FROM s1style WHERE userid=?");
+        $sth->execute($u->{'userid'});
+
+    # old global table
+    } else {
+        $db = @LJ::MEMCACHE_SERVERS ? LJ::get_db_writer() : LJ::get_db_reader();
+        $sth = $db->prepare("SELECT * FROM style WHERE user=?");
+        $sth->execute($u->{'user'});
+    }
+
+    # build data structure
+    while (my $row = $sth->fetchrow_hashref) {
+
+        # fix up both userid and user values for consistency
+        $row->{'userid'} = $u->{'userid'};
+        $row->{'user'} = $u->{'user'};
+
+        $styles{$row->{'styleid'}} = $row;
+        next unless @LJ::MEMCACHE_SERVERS;
+
+        # now update memcache while we have this data?
+        LJ::MemCache::set([$row->{'styleid'}, "s1style:$row->{'styleid'}"], $row);
+    }
+
+    return \%styles;
+}
+
+sub get_style {
+    my $styleid = shift;
+    return unless $styleid;
+
+    my $memkey = [$styleid, "s1style:$styleid"];
+    my $style = LJ::MemCache::get($memkey);
+    return $style if $style;
+
+    # query global mapping table, returns undef if style isn't clustered
+    my $userid = LJ::S1::get_style_userid($styleid);
+
+    my $u;
+    $u = LJ::load_userid($userid) if $userid;
+
+    # new clustered table
+    if ($u && $u->{'dversion'} >= 5) {
+        my $db = LJ::S1::get_s1style_reader($u);
+        $style = $db->selectrow_hashref("SELECT * FROM s1style WHERE styleid=?", undef, $styleid);
+
+        # fill in user since the caller may expect it
+        $style->{'user'} = $u->{'user'};
+
+    # old global table
+    } else {
+        my $db = @LJ::MEMCACHE_SERVERS ? LJ::get_db_writer() : LJ::get_db_reader();
+        $style = $db->selectrow_hashref("SELECT * FROM style WHERE styleid=?", undef, $styleid);
+
+        # fill in userid since the caller may expect it
+        $style->{'userid'} = LJ::get_userid($style->{'user'});
+    }
+    return unless $style;
+
+    LJ::MemCache::set($memkey, $style);
+
+    return $style;
+}
+
+sub check_dup_style {
+    my ($u, $type, $styledes) = @_;
+    return unless $type && $styledes;
+
+    $u = ref $u eq 'HASH' ? $u : LJ::load_user($u);
+
+    # new clustered table
+    if ($u && $u->{'dversion'} >= 5) {
+        # get writer since this function is to check duplicates.  as such,
+        # the write action we're checking for probably happened recently
+        my $db = LJ::S1::get_s1style_writer($u);
+        return $db->selectrow_hashref("SELECT * FROM s1style WHERE userid=? AND type=? AND styledes=?",
+                                        undef, $u->{'userid'}, $type, $styledes);
+
+    # old global table
+    } else {
+        my $dbh = LJ::get_db_writer();
+        return $dbh->selectrow_hashref("SELECT * FROM style WHERE user=? AND type=? AND styledes=?",
+                                       undef, $u->{'user'}, $type, $styledes);
+    }
+}
+
+# returns undef if style isn't clustered
+sub get_style_userid {
+    my $styleid = shift;
+
+    # check cache
+    my $userid = $LJ::S1::REQ_CACHE_STYLEMAP{$styleid};
+    return $userid if $userid;
+
+    my $memkey = [$styleid, "s1stylemap:$styleid"];
+    my $style = LJ::MemCache::get($memkey);
+    return $style if $style;
+   
+    # fetch from db
+    my $dbr = LJ::get_db_reader();
+    $userid = $dbr->selectrow_array("SELECT userid FROM s1stylemap WHERE styleid=?",
+                                    undef, $styleid);
+    return unless $userid;
+
+    # set cache
+    $LJ::S1::REQ_CACHE_STYLEMAP{$styleid} = $userid;
+    LJ::MemCache::set($memkey, $userid);
+
+    return $userid;
+}
+
+sub create_style {
+    my ($u, $opts) = @_;
+    return unless ref $u eq 'HASH' && ref $opts eq 'HASH';
+
+    my $styleid = LJ::alloc_global_counter('S');
+
+    my (@cols, @bind, @vals);
+    foreach (qw(styledes type formatdata is_public is_embedded is_colorfree opt_cache has_ads)) {
+        next unless $opts->{$_};
+
+        push @cols, $_;
+        push @bind, "?";
+        push @vals, $opts->{$_};
+    }
+    my $cols = join(",", @cols);
+    my $bind = join(",", @bind);
+    return unless @cols;
+
+    my $dbh = LJ::get_db_writer();
+    if ($u->{'dversion'} >= 5) {
+        my $db = LJ::S1::get_s1style_writer($u);
+        $db->do("INSERT INTO s1style (styleid,userid,$cols) VALUES (?,?,$bind)",
+                undef, $styleid, $u->{'userid'}, @vals);
+        my $insertid = $db->{'mysql_insertid'};
+
+        $dbh->do("INSERT INTO s1stylemap (styleid, userid) VALUES (?,?)", undef, $insertid, $u->{'userid'});
+        return $insertid;
+
+    } else {
+        $dbh->do("INSERT INTO style (styleid, user,$cols) VALUES (?,?,$bind)",
+                 undef, $styleid, $u->{'user'}, @vals);
+        return $dbh->{'mysql_insertid'};
+    }
+}
+
+sub update_style {
+    my ($styleid, $opts) = @_;
+    return unless $styleid && ref $opts eq 'HASH';
+
+    # query global mapping table, returns undef if style isn't clustered
+    my $userid = LJ::S1::get_style_userid($styleid);
+
+    my $u;
+    $u = LJ::load_userid($userid) if $userid;
+
+    my @cols = qw(styledes type formatdata is_public is_embedded 
+                  is_colorfree opt_cache has_ads lastupdate);
+
+    # what table to operate on ?
+    my ($db, $table);
+
+    # clustered table
+    if ($u && $u->{'dversion'} >= 5) {
+        $db = LJ::S1::get_s1style_writer($u);
+        $table = "s1style";
+
+    # global table
+    } else {
+        $db = LJ::get_db_writer();
+        $table = "style";
+    }
+
+    my (@sets, @vals);
+    foreach (@cols) {
+        if ($opts->{$_}) {
+            push @sets, "$_=?";
+            push @vals, $opts->{$_};
+        }
+    }
+
+    # update style
+    my $now_lastupdate = $opts->{'lastupdate'} ? ", lastupdate=NOW()" : '';
+    my $rows = $db->do("UPDATE $table SET " . join(", ", @sets) . "$now_lastupdate WHERE styleid=?",
+                       undef, @vals, $styleid);
+
+    # clear out stylecache
+    $db->do("UPDATE s1stylecache SET vars_stor=NULL, vars_cleanver=0 WHERE styleid=?",
+            undef, $styleid);
+    
+    # update memcache keys
+    LJ::MemCache::delete([$styleid, "s1style:$styleid"]);
+    LJ::MemCache::delete([$styleid, "s1styc:$styleid"]);
+
+    return $rows;
+}
+
+sub delete_style {
+    my $styleid = shift;
+    return unless $styleid;
+
+    # query global mapping table, returns undef if style isn't clustered
+    my $userid = LJ::S1::get_style_userid($styleid);
+
+    my $u;
+    $u = LJ::load_userid($userid) if $userid;
+
+    my $dbh = LJ::get_db_writer();
+
+    # new clustered table
+    if ($u && $u->{'dversion'} >= 5) {
+        $dbh->do("DELETE FROM s1stylemap WHERE styleid=?", undef, $styleid);
+
+        my $db = LJ::S1::get_s1style_writer($u);
+        $db->do("DELETE FROM s1style WHERE styleid=?", undef, $styleid);
+        $db->do("DELETE FROM s1stylecache WHERE styleid=?", undef, $styleid);
+
+    # old global table
+    } else {
+        # they won't have an s1stylemap entry
+
+        $dbh->do("DELETE FROM style WHERE styleid=?", undef, $styleid);
+        $dbh->do("DELETE FROM s1stylecache WHERE styleid=?", undef, $styleid);
+    }
+
+    # clear out some memcache space
+    LJ::MemCache::delete([$styleid, "s1style:$styleid"]);
+    LJ::MemCache::delete([$styleid, "s1stylemap:$styleid"]);
+    LJ::MemCache::delete([$styleid, "s1styc:$styleid"]);
+
+    return;
+}
+
+sub get_overrides {
+    my $u = shift;
+    return unless ref $u eq 'HASH';
+
+    # try memcache
+    my $memkey = [$u->{'userid'}, "s1overr:$u->{'userid'}"];
+    my $overr = LJ::MemCache::get($memkey);
+    return $overr if $overr;
+
+    # new clustered table
+    if ($u->{'dversion'} >= 5) {
+        my $db = @LJ::MEMCACHE_SERVERS ? LJ::get_cluster_master($u) : LJ::get_cluster_reader($u);
+        $overr = $db->selectrow_array("SELECT override FROM s1overrides WHERE userid=?", undef, $u->{'userid'});
+
+    # old global table
+    } else {
+        my $dbh = @LJ::MEMCACHE_SERVERS ? LJ::get_db_writer() : LJ::get_db_reader();
+        $overr = $dbh->selectrow_array("SELECT override FROM overrides WHERE user=?", undef, $u->{'user'});
+    }
+
+    # set in memcache
+    LJ::MemCache::set($memkey, $overr);
+
+    return $overr;
+}
+
+sub clear_overrides {
+    my $u = shift;
+    return unless ref $u eq 'HASH';
+
+    my $overr;
+    my $db;
+
+    # new clustered table
+    if ($u->{'dversion'} >= 5) {
+        my $dbcm = LJ::get_cluster_master($u);
+        $overr = $dbcm->do("DELETE FROM s1overrides WHERE userid=?", undef, $u->{'userid'});
+        $db = $dbcm;
+
+    # old global table
+    } else {
+        my $dbh = LJ::get_db_writer();
+        $overr = $dbh->do("DELETE FROM overrides WHERE user=?", undef, $u->{'user'});
+        $db = $dbh;
+    }
+
+    # update s1usercache
+    $db->do("UPDATE s1usercache SET override_stor=NULL WHERE userid=?",
+            undef, $u->{'userid'});
+    LJ::MemCache::delete([$u->{'userid'}, "s1uc:$u->{'userid'}"]);
+    LJ::MemCache::delete([$u->{'userid'}, "s1overr:$u->{'userid'}"]);
+
+    return $overr;
+}
+
+sub save_overrides {
+    my ($u, $overr) = @_;
+    return unless ref $u eq 'HASH' && $overr;
+
+    my $dbcm = LJ::get_cluster_master($u);
+
+    # new clustered table
+    my $insertid;
+    if ($u->{'dversion'} >= 5) {
+        $dbcm->do("REPLACE INTO s1overrides (userid, override) VALUES (?, ?)",
+                 undef, $u->{'userid'}, $overr);
+        $insertid = $dbcm->{'mysql_insertid'};
+
+    # old global table
+    } else {
+        my $dbh = LJ::get_db_writer();
+        $dbh->do("REPLACE INTO overrides (user, override) VALUES (?, ?)",
+                 undef, $u->{'user'}, $overr);
+        $insertid = $dbh->{'mysql_insertid'};
+    }
+
+    # update s1usercache
+    my $overr_clean = LJ::CleanHTML::clean_s1_style($overr);
+    $dbcm->do("UPDATE s1usercache SET override_stor=?, override_cleanver=? WHERE userid=?",
+              undef, Storable::freeze(\$overr_clean), $LJ::S1::CLEANER_VERSION, $u->{'userid'});
+    LJ::MemCache::delete([$u->{'userid'}, "s1uc:$u->{'userid'}"]);
+    LJ::MemCache::delete([$u->{'userid'}, "s1overr:$u->{'userid'}"]);
+
+    return $insertid;
 }
 
 package LJ;

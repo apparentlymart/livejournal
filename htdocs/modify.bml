@@ -112,7 +112,7 @@ body<=
                         $cols{$col->[0]} = $val;
                     }
 
-                    my $dbcm = LJ::get_cluster_master($u, 1);
+                    my $dbcm = LJ::get_cluster_master($u);
                     $dbcm->do("INSERT IGNORE INTO s1usercache (userid) VALUES (?)", undef, $u->{'userid'});
                     $dbcm->do("UPDATE s1usercache SET color_stor=? WHERE userid=?", undef, 
                               Storable::freeze(\%cols), $u->{'userid'});
@@ -125,17 +125,15 @@ body<=
             }
 
             # update 'overrides' table
-            if ($POST{'overrides'} !~ /\S/) 
-            {
-                $dbh->do("DELETE FROM overrides WHERE user=?", undef, $u->{'user'});
+            if ($POST{'overrides'} !~ /\S/) {
+                LJ::S1::clear_overrides($u);
                 $update{'useoverrides'} = "N";
 
             } else {
 
                 my $oldoverrides = "";
                 if ($u->{'useoverrides'} eq "Y") {
-                    $oldoverrides = $dbh->selectrow_array("SELECT override FROM overrides WHERE user=?",
-                                                          undef, $u->{'user'});
+                    $oldoverrides = LJ::S1::get_overrides($u);
                 }
 
                 # This allows users to keep their current illegal overrides,
@@ -174,7 +172,7 @@ body<=
                         }
                     }
                 }
-            
+
                 # make the new override code we'll put in the database
                 my $overr='';
                 foreach (keys %overrides) {
@@ -189,27 +187,15 @@ body<=
             
                 # no value, delete overrides
                 if ($overr !~ /\S/) {
-                    
-                    $dbh->do("DELETE FROM overrides WHERE user=?", undef, $u->{'user'});
+                    LJ::S1::clear_overrides($u);
                     $update{'useoverrides'} = "N";
 
                 # have a value, update overrides
                 } else {
-
-                    $dbh->do("REPLACE INTO overrides SET user=?, override=?",
-                             undef, $u->{'user'}, $overr);
+                    LJ::S1::save_overrides($u, $overr);
                     $update{'useoverrides'} = "Y";
-
-                    my $dbcm = LJ::get_cluster_master($u, 1);
-                    $dbcm->do("UPDATE s1usercache SET override_stor=NULL WHERE userid=?",
-                              undef, $u->{'userid'});
-                    LJ::MemCache::delete([$u->{'userid'}, "s1uc:$u->{'userid'}"]);
-                    return $dberr->($dbcm->errstr) if $dbcm->err;
                 }
             }
-
-            # did an error occurr above?
-            return $dberr->($dbh->errstr) if $dbh->err;
 
             # friends view shared pic option for s1
             $uprop{'opt_usesharedpic'} = $POST{'opt_usesharedpic'} ? "1" : "0";
@@ -225,21 +211,14 @@ body<=
                     }
                 }
 
+                # verify they haven't forged the style numbers
                 unless ($capstyles) {
 
-                    # verify they haven't forged the style numbers
-                    my $in = join(",", 0, @picked);
-                
-                    $sth = $dbr->prepare("SELECT COUNT(*) FROM style WHERE ".
-                                         "((user='system' AND is_public='Y') OR user=?) ".
-                                         "AND styleid IN ($in)");
-                    $sth->execute($u->{'user'});
-                    return $dberr->($dbr->errstr) if $dbr->err;
+                    # just load whole structure since it should be cached
+                    my $pubstyles = LJ::S1::get_public_styles();
 
-                    my ($count) = $sth->fetchrow_array;
-                    if ($count != scalar(@picked)) {
-                        return LJ::bad_input($ML{'.error.stylenotavailable'});
-                    }
+                    return LJ::bad_input($ML{'.error.stylenotavailable'})
+                        unless grep { exists $pubstyles->{$_} } @picked;
                 }
             }
         }
@@ -290,18 +269,17 @@ body<=
         $ret .= "<tr bgcolor='#d0d0d0'><td></td><td>$ML{'.availablestyles.head'}</td></tr>\n";
         my %styles = ();
 
-        $sth = $dbr->prepare("SELECT styleid, styledes, user, type ".
-                             "FROM style WHERE (user='system' AND is_public='Y') ".
-                             "OR user=? ORDER BY styledes");
-        $sth->execute($u->{'user'});
-        push @{$styles{$_->{'type'}}}, $_ while ($_ = $sth->fetchrow_hashref);
+        my $pubstyles = LJ::S1::get_public_styles();
+        foreach (sort { $a->{'styledes'} cmp $b->{'styledes'} } values %$pubstyles) {
+            push @{$styles{$_->{'type'}}}, $_;
+        }
             
         foreach my $view (@LJ::views)
         {
             $ret .= "<tr><td bgcolor='#d0d0d0'>$LJ::viewinfo{$view}->{'des'}</td><td>";
             
             my @list = map { $_->{'styleid'}, $_->{'styledes'} }
-            grep { $_->{'user'} eq 'system' } @{$styles{$view} || []};
+                       grep { exists $pubstyles->{$_->{'styleid'}} } @{$styles{$view} || []};
 
             my $exist_user_style = 0;
             foreach (grep { $_->{'user'} ne "system" } @{$styles{$view} || []}) {
@@ -318,7 +296,7 @@ body<=
             $ret .= "</td></tr>\n";
         }
         $ret .= "</table>\n\n";
-            
+        
         ###
         ### COLOR THEME OPTIONS
         ###
@@ -399,8 +377,7 @@ body<=
         # first, load the overrides if they use 'em:
         my $overrides = "";
         if ($u->{'useoverrides'} eq "Y") {
-            my $dbh = LJ::get_db_writer();
-            $overrides = $dbh->selectrow_array("SELECT override FROM overrides WHERE user=?", undef, $u->{'user'});
+            $overrides = LJ::S1::get_overrides($u);
             LJ::text_out(\$overrides);
         }
 

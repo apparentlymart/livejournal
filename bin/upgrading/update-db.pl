@@ -9,7 +9,8 @@ use File::Path ();
 use File::Basename ();
 use File::Copy ();
 use Image::Size ();
-BEGIN { require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl"; }
+BEGIN { require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+        require "$ENV{'LJHOME'}/cgi-bin/ljviews.pl"; }
 use LJ::S2;
 
 my $opt_sql = 0;
@@ -125,15 +126,15 @@ if ($opt_pop)
     my $made_system;
 
     # system user
-    my $su = LJ::load_user($dbh, "system");
+    my $su = LJ::load_user("system");
     unless ($su) {
         print "System user not found. Creating with random password.\n";
         my $pass = LJ::make_auth_code(10);
-        LJ::create_account($dbh, { 'user' => 'system',
-                                   'name' => 'System Account',
-                                   'password' => $pass })
+        LJ::create_account({ 'user' => 'system',
+                             'name' => 'System Account',
+                             'password' => $pass })
             || die "Failed to create system user.";
-        $su = LJ::load_user($dbh, "system") || die "Failed to load the newly created system user.";
+        $su = LJ::load_user("system") || die "Failed to load the newly created system user.";
         $made_system = 1;
     }
 
@@ -142,39 +143,33 @@ if ($opt_pop)
     require "$ENV{'LJHOME'}/bin/upgrading/s1style-rw.pl";
     my $ss = s1styles_read();
     foreach my $uniq (sort keys %$ss) {
+
         my $s = $ss->{$uniq};
-        my $existing = $dbh->selectrow_array(q{
-            SELECT styleid FROM style WHERE
-                user='system' AND type=? AND styledes=?
-            }, undef, $s->{'type'}, $s->{'styledes'});
+        my $existing = LJ::S1::check_dup_style($su, $s->{'type'}, $s->{'styledes'});
 
         # update
         if ($existing) {
             if ($LJ::DONT_TOUCH_STYLES) {
                 next;
             }
-            my $ros = $dbh->do("UPDATE style SET formatdata=?, is_embedded=?, ".
-                               "is_colorfree=?, lastupdate=? WHERE styleid=$existing",
-                               undef, map { $s->{$_} } qw(formatdata is_embedded is_colorfree lastupdate));
-            die $dbh->errstr if $dbh->err;
-            if ($ros > 0) {
-                $dbh->do("DELETE FROM s1stylecache WHERE styleid=$existing");
+            if ( LJ::S1::update_style($existing->{'styleid'},
+                                      { map { $_, $s->{$_} } qw(formatdata is_embedded is_colorfree) }) ) {
                 print "  $uniq: ";
-                print "updated \#$existing\n";
+                print "updated \#$existing->{'styleid'}\n";
             }
             next;
         }
                 
         # insert new
-        $dbh->do(q{ INSERT INTO style (user, styledes, type, formatdata, 
-                                       is_public, is_embedded, is_colorfree, 
-                                       lastupdate) VALUES ('system',?,?,?,'Y',?,?,?) },
-                 undef, map { $s->{$_} } qw(styledes type formatdata is_embedded
-                                            is_colorfree lastupdate));
-        die $dbh->errstr if $dbh->err;
+        my %opts = ( "is_public" => 'Y', "opt_cache" => 'Y',
+                     map { $_, $s->{$_} } qw(styledes type formatdata is_embedded is_colorfree lastupdate));
+        LJ::S1::create_style($su, \%opts);
         print "  $uniq: ";
         print "added\n";
     }
+
+    # delete s1pubstyc from memcache
+    LJ::MemCache::delete("s1pubstyc");
 
     # S2
     print "Populating public system styles (S2):\n";
@@ -431,13 +426,18 @@ if ($opt_pop)
     }
 
     # convert users from dversion2 (no weekuserusage)
-    if (my $d2 = $dbh->selectrow_array("SELECT userid FROM user WHERE dversion=2")) {
+    if (my $d2 = $dbh->selectrow_array("SELECT userid FROM user WHERE dversion=2 LIMIT 1")) {
         system("$ENV{'LJHOME'}/bin/upgrading/pop-weekuu.pl");
     }
 
     # convert users from dversion3 (unclustered props)
-    if (my $d3 = $dbh->selectrow_array("SELECT userid FROM user WHERE dversion=3")) {
+    if (my $d3 = $dbh->selectrow_array("SELECT userid FROM user WHERE dversion=3 LIMIT 1")) {
         system("$ENV{'LJHOME'}/bin/upgrading/pop-clusterprops.pl", 3);
+    }
+
+    # convert users from dversion4 (unclustered s1styles)
+    if (my $d4 = $dbh->selectrow_array("SELECT userid FROM user WHERE dversion=4 LIMIT 1")) {
+        system("$ENV{'LJHOME'}/bin/upgrading/d4d5convert-global.pl");
     }
 
     print "\nThe system user was created with a random password.\nRun \$LJHOME/bin/upgrading/make_system.pl to change its password and grant the necessary privileges."

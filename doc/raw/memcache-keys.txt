@@ -12,8 +12,13 @@
 
 <picid> userpic.<picid> = [ $w, $h, $uid ]
 
+<uid> s1overr:<uid> == overrides for a given user
 <uid> s1uc:<uid> == s1usercache row hashref
+      s1pubstyc == hashref keyed on styleid with values being rows from s1style table
 <styleid> s1styc:<styleid> == s1stylecache row hashref, 30 minutes
+<styleid> s1style:<styleid> == hashref of s1style row
+<styleid> s1stylemap: <styleid> == userid who owns the given styleid
+
 
 <uid> checkfriends:<uid>:<mask> == scalar maxupdate, expires after refresh interval
 <uid> frgmask:<uid>:<uid_friend>  -- scalar numeric mask, 15 minutes

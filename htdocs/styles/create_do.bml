@@ -31,15 +31,11 @@ body<=
     my $base = "";
     my $baseid = $POST{"base_$view"} || $POST{"basenum_$view"};
 
-    # get a database handle
-    my $dbh = LJ::get_db_writer();
-
     if ($baseid) {
-        my $rec = $dbh->selectrow_hashref("SELECT user, is_public, formatdata FROM style WHERE styleid=? AND type=?",
-                                          undef, $baseid, $view);
+        my $rec = LJ::S1::get_style($baseid);
 
         return LJ::bad_input("The style you're trying to make a new style from ($baseid), does not seem to exist.")
-            unless $rec;
+            unless $rec && $rec->{'type'} eq $view;
 
         return LJ::bad_input("The style you're trying to make a new style from ($baseid) is not public so you cannot copy it.")
             unless $rec->{'is_public'} eq "Y" || $rec->{'user'} eq $u->{'user'};
@@ -56,8 +52,7 @@ body<=
     # let's see if they accidentally double-clicked:
     my $double_clicked = 0;
     my $new_id = 0;
-    my ($oldid, $olddata) = $dbh->selectrow_array("SELECT styleid, formatdata FROM style WHERE user=? AND styledes=? AND type=?",
-                                                  undef, $u->{'user'}, $des, $view);
+    my $oldstyle = LJ::S1::check_dup_style($u, $view, $des);
 
     # closure to show edit form
     my $editform = sub {
@@ -67,35 +62,35 @@ body<=
                LJ::html_submit(undef, "Edit Style") . "</form></div>\n";
     };
 
-    if ($oldid) {
-        if ($olddata eq $base) {
+    if ($oldstyle) {
+        if ($oldstyle->{'formatdata'} eq $base) {
             # the user double-clicked
             $double_clicked = 1;
-            $new_id = $oldid;
+            $new_id = $oldstyle->{'styleid'};
 
         } else {
             $ret .= "<?h1 Error h1?><?p You already have a style of this type named <b>$des</b>.  If you really want to create a new style of type <b>$view</b>, then go modify your old $view style, change its name, and then come back here to create a new style of this type. p?>";
 
-            $ret .= $editform->($oldid);
+            $ret .= $editform->($oldstyle->{'styleid'});
             return $ret;
         }
     }
 
     unless ($double_clicked) {
-        $dbh->do("INSERT INTO style (user, styledes, type, formatdata) VALUES (?, ?, ?, ?)",
-                 undef, $u->{'user'}, $des, $view, $base);
-        $new_id = $dbh->{'mysql_insertid'};
+        $new_id = LJ::S1::create_style($u,
+                                       { 'styledes' => $des,
+                                         'type' => $view,
+                                         'formatdata' => $base });
     }
 
-    $ret .= "<?h1 Success h1?><?p Your style has been created and has been temporarily named <b>$des</b>.  You can begin editing it by pressing the button below.... p?>\n";
+    $ret .= "<?h1 Success h1?><?p Your style has been created and has been temporarily named <b>$des</b>. ";
+    $ret .= "You can begin editing it by pressing the button below.... p?>\n";
 
     $ret .= $editform->($new_id);
 
     return $ret;
-
 }
 _code?>
-
 <=body
 page?><?_c <LJDEP>
 post: htdocs/styles/edit_do.bml
