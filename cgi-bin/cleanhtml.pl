@@ -338,7 +338,8 @@ sub clean
                 $token->[1] =~ s/\[COME\]/-->/g;
             }
 
-            if ($wordlength) {
+            # put <wbr> tags into long words, except inside <pre>.
+            if ($wordlength && !$opencount{'pre'}) {
                 # this treats normal characters and &entities; as single characters
                 # also treats UTF-8 chars as single characters if $LJ::UNICODE
                 my $utf_longchar = '[\xc2-\xdf][\x80-\xbf]|\xe0[\xa0-\xbf][\x80-\xbf]|[\xe1-\xef][\x80-\xbf][\x80-\xbf]|\xf0[\x90-\xbf][\x80-\xbf][\x80-\xbf]|[\xf1-\xf7][\x80-\xbf][\x80-\xbf][\x80-\xbf]';
@@ -349,7 +350,7 @@ sub clean
                     $match = $utf_longchar . '|[^&\s\x80-\xff]|(&\#?\w{1,7};)';
                 }
                 my $onechar = qr/$match/o;
-                $token->[1] =~ s/(($onechar){$wordlength})\B/$1<wbr>/g;
+                $token->[1] =~ s/(($onechar){$wordlength})\B/$1<wbr \/>/g;
             } 
 
             if ($auto_format) {
