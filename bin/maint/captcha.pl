@@ -228,14 +228,13 @@ $maint{clean_captchas} = sub {
         scalar localtime($expiredate), "...\n";
 
     # Find captchas to delete
-    # FIXME: does this query suck?  (wait for live data)
     $sql = q{
         SELECT
             capid, type
         FROM captchas
         WHERE
             userid > 0
-            OR ( issuetime <> 0 AND issuetime < ? )
+            AND ( issuetime <> 0 AND issuetime < ? )
         LIMIT 500
     };
     $dbh = LJ::get_db_writer();
