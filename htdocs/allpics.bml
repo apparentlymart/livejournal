@@ -60,7 +60,9 @@
  
  my $piccount = 0;
 
- foreach my $pic (map { $info->{'pic'}->{$_} } sort { $a <=> $b } keys %{$info->{'pic'}})
+ foreach my $pic ($info->{'pic'}->{$u->{'defaultpicid'}},
+                  map { $info->{'pic'}->{$_} } sort { $a <=> $b }
+                  grep { $_ != $u->{'defaultpicid'}} keys %{$info->{'pic'}})
  {
      if ($piccount++ == 0) {
          $body .= "<?h1 $ML{'.current'} h1?><?p ";
