@@ -141,7 +141,7 @@ sub process {
         # we've got the url to the full sized image.
         # fetch!
         my ($tmpdir, $tempfile);
-        my $tmpdir = File::Temp::tempdir( "ljmailgate_" . 'X' x 20, DIR=> $main::workdir );
+        $tmpdir = File::Temp::tempdir( "ljmailgate_" . 'X' x 20, DIR=> $main::workdir );
         ( undef, $tempfile ) = File::Temp::tempfile(
             'sprintpcs_XXXXX',
             SUFFIX => '.jpg',
