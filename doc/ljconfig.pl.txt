@@ -79,6 +79,12 @@
     # to the database every 10 seconds.  only necessary with high-load sites.
     $BUFFER_QUERIES = 0;
 
+    # running statistics service.  this will automatically ban people who hit
+    # the site too fast, along with collecting useful user statistics.
+    # $LJ::STATSERV should be set to the IP address of your stats server.
+    $LJ::STATSERV = "";
+    $LJ::STATSERV_PORT = 6200;
+
     # Do paid users get email addresses?  username@$USER_DOMAIN ?
     # (requires additional mail system configuration)
     $USER_EMAIL  = 0;
