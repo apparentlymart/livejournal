@@ -192,7 +192,7 @@
 
      {
          my $eh_keywords = join(", ", sort { lc($a) cmp lc($b) } @{$keywords{$pic->{'picid'}}});
-         $eh_keywords = LJ::ehtml($eh_keywords);
+         $eh_keywords = LJ::eall($eh_keywords);
          $body .= "<tr><td align='right'><b><label for='$pid-key'>Keywords:</label></b></td><td> <input id='$pid-key' size='30' name='kw_$pic->{'picid'}' value='$eh_keywords'></td></tr>\n";
      }
 
