@@ -1,7 +1,7 @@
-(=PAGE
+<?page
 TITLE=>Customize
 BODY<=
-(=_CODE
+<?_code
 
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
@@ -19,15 +19,15 @@ BODY<=
 
  if ($mode eq "loginform")
  {
-     $ret .= "(=H1 Customize Journal H1=)(=P Enter your username and password to customize your journal.. P=)";
+     $ret .= "<?h1 Customize Journal h1?><?p Enter your username and password to customize your journal.. p?>";
      $ret .= "<form action='./' method='post'>";
      $ret .= "<input type='hidden' name='mode' value='modify'>";
-     $ret .= "(=STANDOUT <table> ";
+     $ret .= "<?standout <table> ";
      $ret .= LJ::auth_fields_2($dbs, \%FORM, { 'shared' => 1, 'getother' => 1 });
      $ret .= "<tr><td colspan='2' align='center'><input type='submit' value='Proceed...'>";
-     $ret .= "</td></tr></table> STANDOUT=)</form>\n";
-     $ret .= "(=H1 Forget something? H1=)(=P If you forgot your username or password, ";
-     $ret .= "<a href='/lostinfo.bml'>recover it here!</a>. P=)";
+     $ret .= "</td></tr></table> standout?></form>\n";
+     $ret .= "<?h1 Forget something? h1?><?p If you forgot your username or password, ";
+     $ret .= "<a href='/lostinfo.bml'>recover it here!</a>. p?>";
      return $ret;
  }
  my ($u, $user, $err);
@@ -52,9 +52,9 @@ BODY<=
 
  if ($remote) {
      $ret .= "<form method='post'>";
-     $ret .= "(=H1 Switch Journal H1=)(=P Work with journal: ";
+     $ret .= "<?h1 Switch Journal h1?><?p Work with journal: ";
      $ret .= LJ::make_shared_select($dbs, $remote, \%FORM);
-     $ret .= " <input type='submit' value='Switch'> P=)</form>";
+     $ret .= " <input type='submit' value='Switch'> p?></form>";
  }
 
  my $sth;
@@ -76,7 +76,7 @@ BODY<=
  }
 
  $ret .= "<form method='post'>";
- $ret .= "(=H1 Step 1: Layout H1=)(=P Pick your layout.  Because language and theme selection depends on your layout, changing this setting discards all other edits you may have made. P=)";
+ $ret .= "<?h1 Step 1: Layout h1?><?p Pick your layout.  Because language and theme selection depends on your layout, changing this setting discards all other edits you may have made. p?>";
  $ret .= "<blockquote>";
  $ret .= "Layout: ";
  $ret .= LJ::html_select({ 'name' => 'layoutid' },
@@ -89,10 +89,10 @@ BODY<=
      return $ret;
  }
 
- $ret .= "(=H1 Step 2: Theme H1=)";
+ $ret .= "<?h1 Step 2: Theme h1?>";
 
  return $ret;
 
-_CODE=)
+_code?>
 <=BODY
-PAGE=)
+page?>
