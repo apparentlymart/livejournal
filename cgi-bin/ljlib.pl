@@ -26,7 +26,6 @@ use Time::Local ();
 use Storable ();
 use Compress::Zlib ();
 use IO::Socket::INET qw{};
-use DDLockClient ();
 
 do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
@@ -225,7 +224,11 @@ sub get_blob_domainid
 }
 
 sub locker {
-    return $LJ::LOCKER_OBJ ||=
+    return $LJ::LOCKER_OBJ if $LJ::LOCKER_OBJ;
+    eval "use DDLockClient ();";
+    die "Couldn't load locker client: $@" if $@;
+
+    return $LJ::LOCKER_OBJ =
 	new DDLockClient (
 			  servers => [ @LJ::LOCK_SERVERS ],
 			  lockdir => $LJ::LOCKDIR || "$LJ::HOME/locks",
