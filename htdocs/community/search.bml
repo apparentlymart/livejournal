@@ -30,7 +30,7 @@ P=)
 
 <CENTER>
 
-<FORM ACTION="/directory.sbml">
+<FORM ACTION="/directory.bml">
 <INPUT TYPE=HIDDEN NAME="s_com" VALUE=1>
 <TABLE CELLPADDING=4 CELLSPACING=0 BORDER=0>
 
@@ -163,5 +163,5 @@ BAR=)
 <=BODY
 PAGE=)
 (=_C <LJDEP>
-form: htdocs/directory.sbml
+form: htdocs/directory.bml
 </LJDEP> _C=)
