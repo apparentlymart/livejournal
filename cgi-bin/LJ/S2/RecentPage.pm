@@ -10,8 +10,6 @@ sub RecentPage
     $p->{'view'} = "recent";
     $p->{'entries'} = [];
 
-    my $dbcr = LJ::get_cluster_reader($u);
-
     my $user = $u->{'user'};
     my $journalbase = LJ::journal_base($user, $opts->{'vhost'});
 
@@ -73,7 +71,7 @@ sub RecentPage
     ### load the log properties
     my %logprops = ();
     my $logtext;
-    LJ::load_log_props2($dbcr, $u->{'userid'}, \@itemids, \%logprops);
+    LJ::load_log_props2($u->{'userid'}, \@itemids, \%logprops);
     $logtext = LJ::get_logtext2($u, @itemids);
 
     my $lastdate = "";
