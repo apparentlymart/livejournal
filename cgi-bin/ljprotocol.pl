@@ -228,11 +228,11 @@ sub getfriends
     my $res = {};
     if ($req->{'includegroups'}) {
         $res->{'friendgroups'} = list_friendgroups($dbs, $u);
-	if ($req->{'ver'} >= 1) {
-	    foreach (@{$res->{'friendgroups'}}) {
-		LJ::text_out(\$_->{'name'});
-	      }
-	}
+        if ($req->{'ver'} >= 1) {
+            foreach (@{$res->{'friendgroups'}}) {
+                LJ::text_out(\$_->{'name'});
+            }
+        }
     }
     if ($req->{'includefriendof'}) {
         $res->{'friendofs'} = list_friends($dbs, $u, {
