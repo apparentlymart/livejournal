@@ -12,6 +12,11 @@ body<=
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
 
+my $remote = LJ::get_remote($dbs);
+if ($remote && $FORM{'hpassword'} eq "_(remote)") {
+    $FORM{'hpassword'} = LJ::hash_password($remote->{'password'});
+}
+
  my $user = lc($FORM{'user'});
  my $userid = 0;
  my $hpassword = $FORM{'hpassword'} || LJ::hash_password($FORM{'password'});
@@ -19,7 +24,6 @@ body<=
  my $just_last = 0;
  my $jump_to_item = 0;
 
-my $remote = LJ::get_remote($dbs);
 if ($remote && $user eq $remote->{'user'} && 
     $FORM{'password'} eq "" && $FORM{'hpassword'} eq "")
 {
