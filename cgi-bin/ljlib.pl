@@ -2202,11 +2202,16 @@ sub make_journal
     }
 
     if ($styleid == -1) {
-	my $prop = "s1_${view}_style";
-	unless (defined $u->{$prop}) {
-	    LJ::load_user_props($dbs, $u, $prop);
+	if ($u->{"${view}_style"}) {
+	    # NOTE: old schema.  only here to make transition easier.  remove later.
+	    $styleid = $u->{"${view}_style"};
+	} else {
+	    my $prop = "s1_${view}_style";
+	    unless (defined $u->{$prop}) {
+	      LJ::load_user_props($dbs, $u, $prop);
+	    }
+	    $styleid = $u->{$prop};
 	}
-	$styleid = $u->{$prop};
     }
 
     if ($LJ::USER_VHOSTS && $opts->{'vhost'} eq "users" && ! LJ::get_cap($u, "userdomain")) {
