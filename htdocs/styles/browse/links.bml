@@ -1,5 +1,5 @@
 <base target=_top>
-(=_CODE
+<?_code
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -19,7 +19,7 @@
  my $sth = $dbr->prepare("SELECT styleid, user, styledes, type, is_embedded, is_colorfree FROM style WHERE is_public='Y' AND user=$quser ORDER BY type DESC,styledes");
  $sth->execute;
  unless ($sth->rows) {
-   return "(=LJUSER $user LJUSER=) has no public styles.";
+   return "<?ljuser $user ljuser?> has no public styles.";
  }
 
  my $ret = "";
@@ -29,7 +29,7 @@
  my %extra=();
  $extra{'day'} = "&month=$dmon&day=$dday&year=$dyear";
  
- $ret.="Styles for (=LJUSER $user LJUSER=):<br><br>";
+ $ret.="Styles for <?ljuser $user ljuser?>:<br><br>";
 
  while ($sty = $sth->fetchrow_hashref) {
      if ($last ne $LJ::viewinfo{$sty->{'type'}}->{'des'}) {
@@ -42,6 +42,6 @@
 
  return $ret; 
 
-_CODE=)(=_C <LJDEP>
+_code?><?_c <LJDEP>
 link: htdocs/styles/browse/styleinfo.bml, htdocs/customview.cgi
-</LJDEP> _C=)
+</LJDEP> _c?>

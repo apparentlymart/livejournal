@@ -4,6 +4,6 @@ View styles of user:
 <BR>
 
 <INPUT TYPE="SUBMIT" VALUE="Preview">
-</FORM> (=_C <LJDEP>
+</FORM> <?_c <LJDEP>
 form: htdocs/styles/browse/links.bml
-</LJDEP> _C=)
+</LJDEP> _c?>
