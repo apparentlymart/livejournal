@@ -50,7 +50,7 @@ For a selecttype of <emphasis>lastn</emphasis>, you can optionally include this 
 </des></scalar></key>
 
 <key name="itemid" count="opt"><scalar><des>
-For a selecttype of <emphasis>one</emphasis>, the journal entry's unique ItemID for which you want to retrieve. Or, to retrieve the most recent entry, use the value -1.
+For a selecttype of <emphasis>one</emphasis>, the journal entry's unique ItemID for which you want to retrieve. Or, to retrieve the most recent entry, use the value -1. Using -1 has the added effect that the data is retrieved from the master database instead of a replicated slave.  Clients with an "Edit last entry" feature might want to send -1, to make sure the data that comes back up is accurate, in case a slave database is a few seconds behind in replication.
 </des></scalar></key>
 
 <key name="lineendings" count="1"><scalar><des>

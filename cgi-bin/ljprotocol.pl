@@ -132,11 +132,8 @@ sub login
 	$res->{'menus'} = hash_menus($dbs, $u);
     }
 
-    ## FIXME: ljcom specific, use a hook.
-    ## tell paid users they can hit the fast servers later.
-    if ($u->{'caps'} & (8|4)) {   # perm or paid
-	$res->{'fastserver'} = 1;
-    }
+    ## tell some users they can hit the fast servers later.
+    $res->{'fastserver'} = 1 if LJ::get_cap($u, "fastserver");
 
     ## user info
     $res->{'userid'} = $u->{'userid'};
@@ -921,101 +918,92 @@ sub getevents
     my $u = $flags->{'u'};    
     my $uowner = $flags->{'u_owner'} || $u;
 
+    ### shared-journal support
+    my $posterid = $u->{'userid'};
+    my $ownerid = $flags->{'ownerid'};
+
     my $dbr = $dbs->{'reader'};
     my $dbh = $dbs->{'dbh'};
     my $sth;
 
-    my $drop_temp_table = "";
-
-    my $midfields = "lt.event, lt.subject";
-    if ($req->{'prefersubject'}) {
-	$midfields = "IF(LENGTH(lt.subject), lt.subject, lt.event) AS 'event'";
-    }
-    my $fields = "l.itemid, l.eventtime, $midfields, l.security, l.allowmask";
-    my $allfields = "l.itemid, l.eventtime, lt.subject, lt.event, l.security, l.allowmask";
-    
-    ### shared-journal support
-    my $posterid = $u->{'userid'};
-    my $ownerid = $flags->{'ownerid'};
-    
-    ## why'd I introduce this redudant method into the protocol?
-    if ($req->{'selecttype'} eq "one" && $req->{'itemid'} == -1) 
-    {
-	$sth = $dbh->prepare("SELECT lastitemid FROM userusage ".
-			     "WHERE userid=$ownerid");
-	$sth->execute;
-	my ($lastitemid) = $sth->fetchrow_array;		
-	
-	if ($lastitemid) {
-	    ### we know the last one the entered!
-	    # Must be on master, since logtext is not replicated.
-	    $sth = $dbh->prepare("SELECT $fields FROM log l, logtext lt WHERE l.ownerid=$ownerid AND l.itemid=$lastitemid AND lt.itemid=$lastitemid");
-	} else  {
-	    ### do it the slower way
-	    $req->{'selecttype'} = "lastn";
-	    $req->{'howmany'} = 1;
-	    undef $req->{'itemid'};
-	}
+    my ($dbcr, $clustered) = ($dbr, 0);
+    if ($uowner->{'clusterid'}) {
+	$dbcr = LJ::get_cluster_reader($uowner);
+	$clustered = 1;
     }
 
+    # if this is on, we sort things different (logtime vs. posttime)
+    # to avoid timezone issues
+    my $is_community = ($uowner->{'journaltype'} eq "C" ||
+			$uowner->{'journaltype'} eq "S");
+    
+    # in some cases we'll use the master, to ensure there's no
+    # replication delay.  useful cases: getting one item, use master
+    # since user might have just made a typo and realizes it as they
+    # post, or wants to append something they forgot, etc, etc.  in
+    # other cases, slave is pretty sure to have it.
+    my $use_master = 0;
+    
+    # the benefit of this mode over actually doing 'lastn/1' is
+    # the $use_master usage.
+    if ($req->{'selecttype'} eq "one" && $req->{'itemid'} eq "-1") {
+	$req->{'selecttype'} = "lastn";
+	$req->{'howmany'} = 1;
+	undef $req->{'itemid'};
+	$use_master = 1;  # see note above.
+    }
+
+    # build the query to get log rows.  each selecttype branch is
+    # responsible for either populating the following 3 variables
+    # OR just populating $sql
+    my ($orderby, $where, $limit);
+    my $sql;
     if ($req->{'selecttype'} eq "day")
     {
 	return fail($err,203) 
 	    unless ($req->{'year'} =~ /^\d\d\d\d$/ && 
+		    $req->{'month'} =~ /^\d\d?$/ && 
+		    $req->{'day'} =~ /^\d\d?$/ && 
 		    $req->{'month'} >= 1 && $req->{'month'} <= 12 &&
 		    $req->{'day'} >= 1 && $req->{'day'} <= 31);
 	
 	my $qyear = $dbh->quote($req->{'year'});
 	my $qmonth = $dbh->quote($req->{'month'});
 	my $qday = $dbh->quote($req->{'day'});
+	$where = "AND year=$qyear AND month=$qmonth AND day=$qday";
+	$limit = "LIMIT 200";  # FIXME: unhardcode this constant (also in ljviews.pl)
 
-	# MySQL sucks at this query for some reason, but it's fast if you go
-	# to a temporary table and then select and order by on that
-	# (TODO: look into this again.  that comment is like a year old.  :P)
-
-	$dbh->do("SET SQL_LOG_BIN=0");  # don't replicate temp table creation
-	$dbh->do("DROP TABLE IF EXISTS tmp_selecttype_day");
-	$dbh->do("CREATE TEMPORARY TABLE tmp_selecttype_day SELECT $allfields, l.logtime FROM log l, logtext lt WHERE l.itemid=lt.itemid AND l.ownerid=$ownerid AND l.year=$qyear AND l.month=$qmonth AND l.day=$qday");
-	if ($dbh->err) {
-	    $dbh->do("SET SQL_LOG_BIN=1"); 
-	    return fail($err,501,$dbh->errstr);
-	}
-	
-	$fields =~ s/lt\./l\./g;
-	$sth = $dbh->prepare("SELECT $fields FROM tmp_selecttype_day l ORDER BY l.eventtime, l.logtime");
-	$drop_temp_table = "tmp_selecttype_day";
-    }
-    elsif ($req->{'selecttype'} eq "lastn")
+	# see note above about why the sort order is different
+	$orderby = $is_community ? "ORDER BY logtime" : "ORDER BY eventtime";
+    } 
+    elsif ($req->{'selecttype'} eq "lastn") 
     {
-	my $beforedatewhere = "";
 	my $howmany = $req->{'howmany'} || 20;
 	if ($howmany > 50) { $howmany = 50; }
 	$howmany = $howmany + 0;
+	$limit = "LIMIT $howmany";
+	
+	# okay, follow me here... see how we add the revttime predicate
+	# even if no beforedate key is present?  you're probably saying,
+	# that's retarded -- you're saying: "revttime > 0", that's like
+	# saying, "if entry occured at all."  yes yes, but that hints
+	# mysql's braindead optimizer to use the right index. 
+	my $rtime_after = 0;
+	my $rtime_what = $is_community ? "rlogtime" : "revttime";
 	if ($req->{'beforedate'}) {
 	    return fail($err,203,"Invalid beforedate format.")
 		unless ($req->{'beforedate'} =~ 
 			/^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$/);
-	    $beforedatewhere = "AND l.eventtime < " . $dbh->quote($req->{'beforedate'});		
+	    my $qd = $dbh->quote($req->{'beforedate'});
+	    $rtime_after = "$LJ::EndOfTime-UNIX_TIMESTAMP($qd)";
 	}
-
-	my @itemids;
-	my @items = LJ::get_recent_items($dbs, {
-	    'userid' => $ownerid,
-	    'remoteid' => $ownerid,
-	    'itemshow' => $LJ::MAX_HINTS_LASTN,
-	    'itemids' => \@itemids,
-	});
-	
-	my $itemid_in = join(",", 0, @itemids);
-	
-	$sth = $dbh->prepare("SELECT $fields FROM log l, logtext lt WHERE l.itemid=lt.itemid AND l.itemid IN ($itemid_in) $beforedatewhere ORDER BY l.eventtime DESC, l.logtime DESC LIMIT $howmany");
+	$where .= "AND $rtime_what > $rtime_after ";
+	$orderby = "ORDER BY $rtime_what";
     }
-    elsif ($req->{'selecttype'} eq "one")
+    elsif ($req->{'selecttype'} eq "one") 
     {
-	if ($req->{'itemid'} > 0) {
-	    my $qitemid = $req->{'itemid'} + 0;
-	    $sth = $dbh->prepare("SELECT $fields FROM log l, logtext lt WHERE l.itemid=lt.itemid AND l.ownerid=$ownerid AND l.itemid=$qitemid");
-	}
+	my $id = $req->{'itemid'} + 0;
+	$where = $clustered ? "AND jitemid=$id" : "AND itemid=$id";
     }
     elsif ($req->{'selecttype'} eq "syncitems") 
     {
@@ -1027,20 +1015,42 @@ sub getevents
 	}
 	
 	my $LIMIT = 300;
-	$sth = $dbh->prepare("SELECT $fields FROM log l, logtext lt, syncupdates s WHERE s.userid=$ownerid AND s.atime>='$date' AND s.nodetype='L' AND s.nodeid=l.itemid AND s.nodeid=lt.itemid ORDER BY s.atime LIMIT $LIMIT");
+	if ($clustered) {
+	    $sql = "SELECT jitemid, eventtime, security, allowmask ".
+		"FROM log2 l, syncupdates2 s ".
+		"WHERE s.userid=$ownerid AND l.journalid=$ownerid ".
+		"AND s.atime>='$date' AND s.nodetype='L' AND s.nodeid=l.jitemid ".
+		"AND s.nodeid=lt.jitemid ORDER BY s.atime LIMIT $LIMIT";
+	} else {
+	    $sql = "SELECT itemid, eventtime, security, allowmask ".
+		"FROM log l, syncupdates s WHERE s.userid=$ownerid ".
+		"AND s.atime>='$date' AND s.nodetype='L' AND s.nodeid=l.itemid ".
+		"AND s.nodeid=lt.itemid ORDER BY s.atime LIMIT $LIMIT";
+	}
     }
-
-    unless ($sth) {
-	$dbh->do("SET SQL_LOG_BIN=1"); 
+    else 
+    {
 	return fail($err,200,"Invalid selecttype.");
     }
-
-    $sth->execute;
-    if ($dbh->err) {
-	my $errstr = $dbh->errstr;
-	$dbh->do("SET SQL_LOG_BIN=1"); 
-	return fail($err,501,$errstr);
+    
+    # common SQL template:
+    unless ($sql) {
+	if ($clustered) {
+	    $sql = "SELECT jitemid, eventtime, security, allowmask ".
+		   "FROM log2 WHERE journalid=$ownerid $where $orderby $limit";
+	} else {
+	    $sql = "SELECT itemid, eventtime, security, allowmask ".
+	   	   "FROM log WHERE ownerid=$ownerid $where $orderby $limit";
+	}
     }
+
+    # whatever selecttype might have wanted us to use the master db.
+    $dbcr = $clustered ?  LJ::get_cluster_master($uowner) : $dbh
+	if $use_master;
+
+    ## load the log rows
+    ($sth = $dbcr->prepare($sql))->execute;
+    return fail($err,501,$dbcr->errstr) if $dbcr->err;
 
     my $count = 0;
     my @itemids = ();
@@ -1048,62 +1058,74 @@ sub getevents
     my $events = $res->{'events'} = [];
     my %evt_from_itemid;
 
-    while (my $row = $sth->fetchrow_hashref)
+    while (my ($itemid, $eventtime, $sec, $mask) = $sth->fetchrow_array)
     {
 	$count++;
 	my $evt = {};
-	$evt->{'itemid'} = $row->{'itemid'};
-	push @itemids, $row->{'itemid'};
-	$evt_from_itemid{$row->{'itemid'}} = $evt;
+	$evt->{'itemid'} = $itemid;
+	push @itemids, $itemid;
 
-	$evt->{"eventtime"} = $row->{'eventtime'};
-	if ($row->{'security'} ne "public") {
-	    $evt->{'security'} = $row->{'security'};
-	    if ($row->{'security'} eq "usemask") {
-		$evt->{'allowmask'} = $row->{'allowmask'};
-	    }
-	}
-	if ($row->{'subject'} ne "") {
-	    $row->{'subject'} =~ s/[\r\n]/ /g;
-	    $evt->{'subject'} = $row->{'subject'};
-	}
-	if ($req->{'truncate'} >= 4) {
-	    if (length($row->{'event'}) > $req->{'truncate'}) {
-		$row->{'event'} = substr($row->{'event'}, 0, $req->{'truncate'}-3) . "...";
-	    }
-	}
-	
-	my $event = $row->{'event'};
-	$event =~ s/\r//g;
-	if ($req->{'lineendings'} eq "unix") {
-	    # do nothing.
-	} elsif ($req->{'lineendings'} eq "mac") {
-	    $event =~ s/\n/\r/g;
-	} elsif ($req->{'lineendings'} eq "space") {
-	    $event =~ s/\n/ /g;
-	} elsif ($req->{'lineendings'} eq "dots") {
-	    $event =~ s/\n/ ... /g;
-	} else { # "pc"
-	    $event =~ s/\n/\r\n/g;
-	}
-	
-	$evt->{"event"} = $event;
+	$evt_from_itemid{$itemid} = $evt;
 
+	$evt->{"eventtime"} = $eventtime;
+	if ($sec ne "public") {
+	    $evt->{'security'} = $sec;
+	    $evt->{'allowmask'} = $mask if $sec eq "usemask";
+	}
 	push @$events, $evt;
     }
-    $sth->finish;
-    
-    if ($drop_temp_table) {
-	$dbh->do("DROP TABLE IF EXISTS $drop_temp_table");
-	$dbh->do("SET SQL_LOG_BIN=1");  # turn binloggin' back on
+
+    ## load the text
+    my $text;
+    my $gt_opts = {
+	'prefersubjects' => $req->{'prefersubject'} ,
+	'usemaster' => $use_master,
+    };
+    if ($clustered) {
+	$text = LJ::get_logtext2($uowner, $gt_opts, @itemids);
+    } else {
+	$text = LJ::get_logtext($dbs, $gt_opts, @itemids);
     }
-    
+    foreach my $i (@itemids) 
+    {
+	my $t = $text->{$i};
+	my $evt = $evt_from_itemid{$i};
+	if ($t->[0]) {
+	    $t->[0] =~ s/[\r\n]/ /g;
+	    $evt->{'subject'} = $t->[0];
+	}
+
+	# truncate
+	$t->[1] = substr($t->[1], 0, $req->{'truncate'}-3) . "..."
+	    if ($req->{'truncate'} >= 4 && length($t->[1]) > $req->{'truncate'});
+	
+	# line endings
+	$t->[1] =~ s/\r//g;
+	if ($req->{'lineendings'} eq "unix") {
+	    # do nothing.  native format.
+	} elsif ($req->{'lineendings'} eq "mac") {
+	    $t->[1] =~ s/\n/\r/g;
+	} elsif ($req->{'lineendings'} eq "space") {
+	    $t->[1] =~ s/\n/ /g;
+	} elsif ($req->{'lineendings'} eq "dots") {
+	    $t->[1] =~ s/\n/ ... /g;
+	} else { # "pc" -- default
+	    $t->[1] =~ s/\n/\r\n/g;
+	}
+	$evt->{'event'} = $t->[1];
+    }
+
     unless ($req->{'noprops'}) 
     {
 	### do the properties now
 	$count = 0;
 	my %props = ();
-	LJ::load_log_props($dbh, \@itemids, \%props);
+	if ($clustered) {
+	    LJ::load_props($dbs, "log");
+	    LJ::load_log_props2($dbh, $ownerid, \@itemids, \%props);
+	} else {
+	    LJ::load_log_props($dbcr, \@itemids, \%props);
+	}
 	foreach my $itemid (keys %props) {
 	    my $evt = $evt_from_itemid{$itemid};
 	    $evt->{'props'} = {};
@@ -1615,6 +1637,9 @@ sub check_altusage
 {
     my ($dbs, $req, $err, $flags) = @_;
 
+    # see note in ljlib.pl::can_use_journal about why we return
+    # both 'ownerid' and 'u_owner' in $flags
+
     my $alt = $req->{'usejournal'};
     my $u = $flags->{'u'};
     $flags->{'ownerid'} = $u->{'userid'};
@@ -1624,10 +1649,11 @@ sub check_altusage
 
     # complain if the username is invalid
     return fail($err,206) unless LJ::canonical_username($alt);
-   
+
     # allow usage if we're told explicitly that it's okay
     if ($flags->{'usejournal_okay'}) {
-	$flags->{'ownerid'} = LJ::get_userid($dbs, $alt);
+	$flags->{'u_owner'} = LJ::load_user($dbs, $alt);
+	$flags->{'ownerid'} = $flags->{'u_owner'}->{'userid'};
 	return 1 if $flags->{'ownerid'};
 	return fail($err,206);
     }
@@ -1636,11 +1662,7 @@ sub check_altusage
     my $info = {};
     if (LJ::can_use_journal($dbs, $u->{'userid'}, $req->{'usejournal'}, $info)) {
 	$flags->{'ownerid'} = $info->{'ownerid'};
-
-	# and the caller will probably need the ownerid's user record,
-	# to figure out the clusterid & dversion
-	$flags->{'u_owner'} = LJ::load_userid($dbs, $flags->{'ownerid'});
-
+	$flags->{'u_owner'} = $info->{'u_owner'};
 	return 1;
     }
 

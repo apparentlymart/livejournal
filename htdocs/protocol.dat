@@ -395,7 +395,7 @@ For a <TT>selecttype</TT> of <B><TT>lastn</TT></B>, you can optionally include t
 }
 { itemid
 .des
-For a <TT>selecttype</TT> of <B><TT>one</TT></B>, the journal entry's unique ItemID for which you want to retrieve.  Or, to retrieve the most recent entry, use the value <TT>-1</TT>.
+For a <TT>selecttype</TT> of <B><TT>one</TT></B>, the journal entry's unique ItemID for which you want to retrieve.  Or, to retrieve the most recent entry, use the value <TT>-1</TT>.  Using <TT>-1</TT> has the added effect that the data is retrieved from the master database instead of a replicated slave.  Clients with an "Edit last entry" feature might want to send -1, to make sure the data that comes back up is accurate, in case a slave database is a few seconds behind in replication.
 }
 { lineendings
 .des

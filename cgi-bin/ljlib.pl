@@ -2008,13 +2008,18 @@ sub get_talktext
 #      slave database servers for recent items, then the master in 
 #      cases of old items the slaves have already disposed of.  See also:
 #      [func[LJ::get_talktext]].
-# args: dbs, itemid*
-# returns: hashref with keys being itemids, values being [ $subject, $body ]
+# args: dbs, opts?, itemid*
+# des-opts: Optional hashref of special options.  Currently only 'prefersubjects'
+#           key is supported, which returns subjects instead of events when
+#           there's a subject, and the subject always being undef.
 # des-itemid: List of itemids to retrieve the subject & text for.
+# returns: hashref with keys being itemids, values being [ $subject, $body ]
 # </LJFUNC>
 sub get_logtext
 {
     my $dbs = shift;
+
+    my $opts = ref $_[0] ? shift : {};
 
     # return structure.
     my $lt = {};
@@ -2026,7 +2031,7 @@ sub get_logtext
     # always consider hitting the master database, but if a slave is 
     # available, hit that first.
     my @sources = ([$dbs->{'dbh'}, "logtext"]);
-    if ($dbs->{'has_slave'}) { 
+    if ($dbs->{'has_slave'} && ! $opts->{'usemaster'}) { 
 	if ($LJ::USE_RECENT_TABLES) {
 	    my $dbt = LJ::get_dbh("recenttext");
 	    unshift @sources, [ $dbt || $dbs->{'dbr'}, "recent_logtext" ];
@@ -2035,13 +2040,17 @@ sub get_logtext
 	}
     }
 
+    my $snag_what = "subject, event";
+    $snag_what = "NULL, IF(LENGTH(subject), subject, event)"
+	if $opts->{'prefersubjects'};
+
     while (@sources && %need)
     {
 	my $s = shift @sources;
 	my ($db, $table) = ($s->[0], $s->[1]);
 	my $itemid_in = join(", ", keys %need);
 
-	my $sth = $db->prepare("SELECT itemid, subject, event FROM $table ".
+	my $sth = $db->prepare("SELECT itemid, $snag_what FROM $table ".
 			       "WHERE itemid IN ($itemid_in)");
 	$sth->execute;
 	while (my ($id, $subject, $event) = $sth->fetchrow_array) {
@@ -2058,8 +2067,11 @@ sub get_logtext
 #      slave database servers for recent items, then the master in 
 #      cases of old items the slaves have already disposed of.  See also:
 #      [func[LJ::get_talktext2]].
-# args: u, jitemid*
+# args: u, opts?, jitemid*
 # returns: hashref with keys being jitemids, values being [ $subject, $body ]
+# des-opts: Optional hashref of special options.  Currently only 'prefersubjects'
+#           key is supported, which returns subjects instead of events when
+#           there's a subject, and the subject always being undef.
 # des-itemid: List of jitemids to retrieve the subject & text for.
 # </LJFUNC>
 sub get_logtext2
@@ -2068,12 +2080,14 @@ sub get_logtext2
     my $clusterid = $u->{'clusterid'};
     my $journalid = $u->{'userid'}+0;
 
+    my $opts = ref $_[0] ? shift : {};
+
     # return structure.
     my $lt = {};
     return $lt unless $clusterid;
 
     my $dbh = LJ::get_dbh("cluster$clusterid");
-    my $dbr = LJ::get_dbh("cluster${clusterid}slave");
+    my $dbr = $opts->{'usemaster'} ? undef : LJ::get_dbh("cluster${clusterid}slave");
 
     # keep track of itemids we still need to load.
     my %need;
@@ -2085,6 +2099,10 @@ sub get_logtext2
     if ($dbr) { 
 	unshift @sources, [ $dbr, $LJ::USE_RECENT_TABLES ? "recent_logtext2" : "logtext2" ];
     }
+
+    my $snag_what = "subject, event";
+    $snag_what = "NULL, IF(LENGTH(subject), subject, event)"
+	if $opts->{'prefersubjects'};
     
     while (@sources && %need)
     {
@@ -2092,7 +2110,7 @@ sub get_logtext2
 	my ($db, $table) = ($s->[0], $s->[1]);
 	my $jitemid_in = join(", ", keys %need);
 
-	my $sth = $db->prepare("SELECT jitemid, subject, event FROM $table ".
+	my $sth = $db->prepare("SELECT jitemid, $snag_what FROM $table ".
 			       "WHERE journalid=$journalid AND jitemid IN ($jitemid_in)");
 	$sth->execute;
 	while (my ($id, $subject, $event) = $sth->fetchrow_array) {
@@ -3269,14 +3287,11 @@ sub load_user
     my $dbs = LJ::make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
+    my $sth;
 
     $user = LJ::canonical_username($user);
-
     my $quser = $dbr->quote($user);
-    my $sth = $dbr->prepare("SELECT * FROM user WHERE user=$quser");
-    $sth->execute;
-    my $u = $sth->fetchrow_hashref;
-    $sth->finish;
+    my $u = $dbr->selectrow_hashref("SELECT * FROM user WHERE user=$quser");
 
     # if user doesn't exist in the LJ database, it's possible we're using
     # an external authentication source and we should create the account
@@ -3779,34 +3794,26 @@ sub can_use_journal
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
 
-    my $qreqownername = $dbh->quote($reqownername);
     my $qposterid = $posterid+0;
 
-    ## find the journal owner's userid
-    my $sth = $dbr->prepare("SELECT userid FROM useridmap WHERE user=$qreqownername");
-    $sth->execute;
-    my $ownerid = $sth->fetchrow_array;
-    # First, fall back to the master.
-    unless ($ownerid) {
-        if ($dbs->{'has_slave'}) {
-            $sth = $dbh->prepare("SELECT userid FROM useridmap WHERE user=$qreqownername");
-            $sth->execute;
-            $ownerid = $sth->fetchrow_array;
-        }
-        # If it still doesn't exist, it doesn't exist.
-        unless ($ownerid) {
-            $res->{'errmsg'} = "User \"$reqownername\" does not exist.";
-            return 0;
-        }
+    ## find the journal owner's info
+    my $uowner = LJ::load_user($dbs, $reqownername);
+    unless ($uowner) {
+	$res->{'errmsg'} = "Journal \"$reqownername\" does not exist.";
+	return 0;
     }
-    
-    ## check if user has access
-    $sth = $dbh->prepare("SELECT COUNT(*) AS 'count' FROM logaccess WHERE ownerid=$ownerid AND posterid=$qposterid");
+    my $ownerid = $uowner->{'userid'};
 
-    $sth->execute;
-    my $row = $sth->fetchrow_hashref;
-    if ($row && $row->{'count'}==1) {
+    ## check if user has access
+    my $sql = "SELECT COUNT(*) FROM logaccess WHERE ownerid=$ownerid AND posterid=$qposterid";
+    if ($dbr->selectrow_array($sql) || $dbh->selectrow_array($sql)) 
+    {
+	# the 'ownerid' necessity came first, way back when.  but then
+	# with clusters, everything needed to know more, like the
+	# journal's dversion and clusterid, so now it also returns the
+	# user row.
 	$res->{'ownerid'} = $ownerid;
+	$res->{'u_owner'} = $uowner;
 	return 1;
     } else {
 	$res->{'errmsg'} = "You do not have access to post to this journal.";
@@ -4094,7 +4101,7 @@ sub delete_item2
 	'itemid' => $jitemid,
     }) if $quick;
     
-    # FIXME: TODO: make log of this deletion, do the rest of the deletions async
+    # FIXME: TODO: actually delete the rest.
     return 1;
 }
 
