@@ -44,15 +44,23 @@
             if ($POST{'bindip'} eq "yes") {
                 $bindip = BML::get_remote_ip();
             }
+
             my $len = "short";
+            my $etime = 0;  # for cookie
+            my $session_secs = 60*60*24; # for db.
             if ($POST{'expire'} eq "never") {
                 $len = "long";
+                $session_secs = 60*60*24*60;
+                $etime = time()+$session_secs;
             }
             $cursess->{'ipfixed'} = $bindip;
             $cursess->{'exptype'} = $len;
 
+            my $oldcookie = $COOKIE{'ljsession'};
+            $COOKIE{'ljsession'} = [ $oldcookie, $etime ];
+
             my $udbh = LJ::get_cluster_master($remote, 1);
-            $udbh->do("UPDATE sessions SET timeexpire=NOW()+60*60*24*7, ".
+            $udbh->do("UPDATE sessions SET timeexpire=UNIX_TIMESTAMP()+$session_secs, ".
                       "exptype=?, ipfixed=? WHERE " .
                       "userid=? AND sessid=?", undef,
                       $len, $bindip, $remote->{'userid'},
