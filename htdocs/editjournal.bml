@@ -2,43 +2,67 @@
 title=><?_ML .title _ML?>
 
 body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET);
 
-<?h1 <?_ML .title _ML?> h1?> <?p <?_ML .enterlogin _ML?> p?>
+    my $remote = LJ::get_remote();
+    return LJ::bad_input("You must be logged in to use this tool.")
+        unless $remote;
 
-<form action="editjournal_do.bml" method="post">
-<input type="hidden" name="metamode" value="choose_editrange">
+    my $ret;
+    my $authas = $GET{'authas'} || $remote->{'user'};
+
+    # no authentication needs to be done on this page, it's just a form anyway
+
+    # user switcher
+    $ret .= "<form action='editjournal.bml' method='get'>\n";
+    $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
+    $ret .= "</form>\n\n";
+
+
+    $ret .= "<?h1 <?_ML .title _ML?> h1?><?p <?_ML .enterlogin _ML?> p?>\n";
+
+    $ret .= "<form action='editjournal_do.bml?authas=$authas' method='post'>\n";
+
+    $ret .= <<'HTMLBLOCK';
+<input type="hidden" name="metamode" value="choose_editrange" />
 
 <?standout
 <table>
-<?_code
- return LJ::auth_fields(\%FORM);
- _code?>
 <tr valign="top"><td><?_ML .viewwhat _ML?></td>
 <td>
-       <input type="radio" name="selecttype" value="last" checked> <?_ML .recententry _ML?><br />
-       <input type="radio" name="selecttype" value="lastn"> <input name="howmany" size="3" maxlength="2" value="20"> <?_ML .recententries _ML?><br />
-       <input type="radio" name="selecttype" value="day"> <?_ML .certainday _ML?> 
-<?_code
+       <input type="radio" name="selecttype" id="selecttype-last" value="last" checked='checked' />
+       <label for="selecttype-last"><?_ML .recententry _ML?></label><br />
+       <input type="radio" name="selecttype" id="selecttype-lastn" value="lastn" />
+       <input name="howmany" size="3" maxlength="2" value="20" /> <label for="selecttype-lastn"><?_ML .recententries _ML?></label><br />
+       <input type="radio" name="selecttype" id="selecttype-day" value="day" />
+       <label for="selecttype-day"><?_ML .certainday _ML?></label>
+HTMLBLOCK
 
-my $ret="";
-my (undef,undef,undef,$mday,$mon,$year,undef,undef,undef) = localtime(time);
-$year+=1900;
-$mon=sprintf("%02d", $mon+1); $mday=sprintf("%02d", $mday); $min=sprintf("%02d", $min);
-$ret .= "<input name='year' size='5' maxlength='4' value='$year'>-";
-$ret .= "<input name='month' size='3' maxlength='2' value='$mon'>-";
-$ret .= "<input name='day' size='3' maxlength='2' value='$mday'>\n";
-return $ret;
+    my @time = localtime(time);
+    my $mday = sprintf("%02d", $time[3]);
+    my $mon = sprintf("%02d", $time[4] + 1);
+    my $year = $time[5] + 1900;
 
-_code?>
+    $ret .= "<input name='year' size='5' maxlength='4' value='$year' />-";
+    $ret .= "<input name='month' size='3' maxlength='2' value='$mon' />-";
+    $ret .= "<input name='day' size='3' maxlength='2' value='$mday' />\n";
+
+    $ret .= <<'HTMLBLOCK';
 
 </td></tr>
-<tr><td></td><td><input type="submit" value="<?_ML .btn.proceed _ML?>"></td></tr>
+<tr><td></td><td><input type="submit" value="<?_ML .btn.proceed _ML?>" /></td></tr>
 </table>
 standout?>
 </form>
 
 <?h1 <?_ML lostinfo.head _ML?> h1?> <?p <?_ML lostinfo.text _ML?> p?>
+HTMLBLOCK
 
+}
+_code?>
 <=body
 page?><?_c <LJDEP>
 post: htdocs/editjournal_do.bml

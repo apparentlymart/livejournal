@@ -4,31 +4,33 @@ body<=
 
 <?_code
 
+ use strict;
+ use vars qw(%FORM %GET);
+
  my $ret = "";
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
  return "<?badinput?>" unless LJ::text_in(\%FORM);
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
+ my $remote = LJ::get_remote();
+ return LJ::bad_input("You must be logged in to use this tool.")
+     unless $remote;
 
- my $remote = LJ::get_remote($dbs);
- if ($remote && $FORM{'hpassword'} eq "_(remote)") {
-     $FORM{'hpassword'} = LJ::hash_password($remote->{'password'});
- }
+ my $authas = $GET{'authas'} || $GET{'journal'} || $remote->{'user'};
+ my $u = LJ::get_authas_user($authas);
+ return LJ::bad_input("You could not be authenticated as the specified user.")
+     unless $u;
 
- my $user = lc($FORM{'user'});
- my $userid = 0;
- my $hpassword = $FORM{'hpassword'} || LJ::hash_password($FORM{'password'});
+ # needed so it can be passed into LJ::do_request() later
+ $FORM{'user'} = $authas;
+
  my %res;
  my $just_last = 0;
  my $jump_to_item = 0;
 
-if ($remote && $user eq $remote->{'user'} && 
-    $FORM{'password'} eq "" && $FORM{'hpassword'} eq "")
-{
-    $hpassword = $FORM{'hpassword'} = LJ::hash_password($remote->{'password'});
-}
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+ my $ret;
 
  # we always come in with ditemid, translate it here into real itemid,
  # and back into ditemid using anum returned by the protocol whenever
@@ -45,23 +47,11 @@ if ($remote && $user eq $remote->{'user'} &&
  if ($FORM{'mode'} eq "" && $FORM{'itemid'}) 
  {
      $jump_to_item = 1;
-     unless ($remote) {
-         return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.mustlogin'} p?>";
-     }
-     $user = $FORM{'user'} = $remote->{'user'};
-     $userid = $remote->{'userid'};
-
-     my $itemid = $FORM{'itemid'}+0;
-     my $owner = $FORM{'journal'};
-
-     if ($owner && $owner ne $user) {
-         $FORM{'usejournal'} = $owner;
-     }
 
      $FORM{'mode'} = "getevents";
      $FORM{'selecttype'} = "one";
      
-     LJ::do_request(\%FORM, \%res, { "noauth" => 1});     
+     LJ::do_request(\%FORM, \%res, { "noauth" => 1, 'u' => $u});
  }
 
  if ($FORM{'metamode'} eq "choose_editrange") 
@@ -73,17 +63,14 @@ if ($remote && $user eq $remote->{'user'} &&
          $FORM{'howmany'} = 1;
          $just_last = 1;
      }
-     LJ::do_request(\%FORM, \%res);
+     LJ::do_request(\%FORM, \%res, { "noauth" => 1, 'u' => $u } );
  
      if ($res{'success'} eq "OK")
      {
          $ret .= "<?h1 $ML{'.pickentry.head'} h1?><?p $ML{'.pickentry.text'} p?>\n";
-         $ret .= "<form method='post' action='editjournal_do.bml'>\n";
+         $ret .= "<form method='post' action='editjournal_do.bml?authas=$authas'>\n";
          $ret .= "<input type='hidden' name='mode' value='getevents'>\n";
          $ret .= "<input type='hidden' name='selecttype' value='one'>\n";
-         $ret .= "<input type='hidden' name='user' value='$user'>\n";
-         $ret .= "<input type='hidden' name='hpassword' value='$hpassword'>\n"
-             unless $remote && $remote->{'user'} eq $user;
 
          my %props = ();
          for (my $i=1; $i<=$res{'prop_count'}; $i++) {
@@ -97,8 +84,8 @@ if ($remote && $user eq $remote->{'user'} &&
                  $res{"events_${i}_itemid"} * 256 + $res{"events_${i}_anum"} : 
                  $res{"events_${i}_itemid"};
 
-             $ret .= "<hr><input type=radio name='itemid' value='$ditemid'> <b>" .
-                 $res{"events_${i}_eventtime"} . "</b>";
+             $ret .= "<hr><input type=radio name='itemid' id='itemid-$ditemid' value='$ditemid' /> <b>" .
+                 "<label for='itemid-$ditemid'>" . $res{"events_${i}_eventtime"} . "</b>";
 
              if ($res{"events_${i}_subject"}) {
                  $ret .= "; <i>" . BML::ebml($res{"events_${i}_subject"}) . "</i>";
@@ -111,7 +98,8 @@ if ($remote && $user eq $remote->{'user'} &&
              $ret .= $event;
          }
          
-         $ret .= "<?h1 $ML{'.continue.head'} h1?><?p $ML{'.continue.text'} p?><?standout <input type='submit' value='$ML{'.btn.edit'}'> standout?></form>\n";
+         $ret .= "<div style='margin-top: 20px'><?h1 $ML{'.continue.head'} h1?><?p $ML{'.continue.text'} p?></div>\n";
+         $ret .= "<?standout <input type='submit' value='$ML{'.btn.edit'}'> standout?></form>\n";
          
          unless ($just_last) 
          {
@@ -174,14 +162,13 @@ if ($remote && $user eq $remote->{'user'} &&
          $FORM{'allowmask'} = $amask;
      }
 
-     LJ::do_request(\%FORM, \%res);
+     LJ::do_request(\%FORM, \%res, { 'noauth' => 1, 'u' => $u });
  }
  
  if ($res{'success'} eq "OK")
  {
      if ($FORM{'mode'} eq "getevents")
      {
-         $userid = LJ::get_userid($dbs, $user);
          my $count = $res{'events_count'};
          unless ($count) {
              return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.nofind'} p?>";
@@ -189,11 +176,12 @@ if ($remote && $user eq $remote->{'user'} &&
 
          my $gfg;
          $gfg = LJ::Protocol::do_request("getfriendgroups", {
-             'username' => $user,
+             'username' => $u->{'user'},
              'ver' => $LJ::PROTOCOL_VER,
          }, undef, {
              'noauth' => 1,
-         }) unless $FORM{'usejournal'};
+             'u' => $u,
+         });
          
          my %props = ();
          for (my $i=1; $i<=$res{'prop_count'}; $i++) {
@@ -205,15 +193,9 @@ if ($remote && $user eq $remote->{'user'} &&
              $res{'events_1_itemid'};
 
          $ret .= "<?h1 $ML{'.title'} h1?><?p $ML{'.edit.text'} p?>\n";
-         $ret .= "<form method='post' action='editjournal_do.bml'>\n";
+         $ret .= "<form method='post' action='editjournal_do.bml?authas=$authas'>\n";
          $ret .= "<input type='hidden' name='mode' value='editevent'>\n";
-         $ret .= "<input type='hidden' name='user' value='$user'>\n";
-         $ret .= "<input type='hidden' name='hpassword' value='$hpassword'>\n"
-             unless $remote && $remote->{'user'} eq $user;
          $ret .= "<input type='hidden' name='itemid' value='$ditemid'>\n";
-         if ($FORM{'usejournal'}) {
-             $ret .= "<input type='hidden' name='usejournal' value='$FORM{'usejournal'}'>\n";
-         }
 
          my ($year, $mon, $mday, $hour, $min) = split(/\D/, $res{"events_1_eventtime"});
 
@@ -236,7 +218,7 @@ if ($remote && $user eq $remote->{'user'} &&
          $ret .= LJ::eall(LJ::durl($res{"events_1_event"}));
          $ret .= "</textarea></p>\n";
 
-         $ret .= "<p><b>$ML{'label.security.head'}</b>";
+         $ret .= "<p><b>$ML{'label.security.head'}</b> ";
          my @secs = ("public" => $ML{'label.security.public'}, "private" => $ML{'label.security.private'}, 
                      "friends" => $ML{'label.security.friends'});
          
@@ -254,7 +236,7 @@ if ($remote && $user eq $remote->{'user'} &&
          $ret .= LJ::html_select({ 'name' => 'security',
                                    'selected' => $cursec,
                                    'raw' => $raw,
-                               }, @secs);
+                               }, @secs) . " ";
 
          $ret .= LJ::help_icon("security");
 
@@ -301,13 +283,13 @@ if ($remote && $user eq $remote->{'user'} &&
          
          ### picture to use
          {
-             my $sth = $dbr->prepare("SELECT k.keyword FROM userpicmap m, keywords k WHERE m.userid=$userid AND m.kwid=k.kwid");
-             $sth->execute;
+             my $sth = $dbr->prepare("SELECT k.keyword FROM userpicmap m, keywords k WHERE m.userid=? AND m.kwid=k.kwid");
+             $sth->execute($u->{'userid'});
              my @pics;
              push @pics, $_ while ($_ = $sth->fetchrow_array);
 
              if (@pics) {
-                 $ret .= "<p><b>".BML::ml(".picture", {'url' => "$LJ::SITEROOT/allpics.bml?user=$user"}) ."</b> ";
+                 $ret .= "<p><b>".BML::ml(".picture", {'url' => "$LJ::SITEROOT/allpics.bml?user=$u->{'user'}"}) ."</b> ";
                  $ret .= LJ::html_select({ 'name' => 'prop_picture_keyword',
                                            'selected' => $props{'picture_keyword'} },
                                            '', $ML{'.default'},
@@ -319,7 +301,7 @@ if ($remote && $user eq $remote->{'user'} &&
 
          ### current mood
          {
-             $ret .= "<p><b>$ML{'.currmood'}</b><select name='prop_current_moodid'><option value=''>$ML{'.noneother'}";
+             $ret .= "<p><b>$ML{'.currmood'}</b> <select name='prop_current_moodid'><option value=''>$ML{'.noneother'}";
 
              my $match = 0;
              my $sth = $dbr->prepare("SELECT moodid, mood FROM moods ORDER BY mood");
@@ -330,7 +312,7 @@ if ($remote && $user eq $remote->{'user'} &&
                  if ($sel) { $match = 1; }
                  $ret .= "<option value='$_->{'moodid'}'$sel>$_->{'mood'}\n";
              }
-             $ret .= "</select>";
+             $ret .= "</select> ";
              my $other_mood = $match==0 ? $props{'current_mood'} : "";
              $other_mood = LJ::ehtml($other_mood);
              $ret .= "$ML{'.other'} <input name='prop_current_mood' value='$other_mood' size='15' maxlength='30'>";
@@ -352,10 +334,7 @@ if ($remote && $user eq $remote->{'user'} &&
          if ($res{'success'} eq "OK")
          {
              my $itemid = $FORM{'itemid'}+0;
-             my $journal = LJ::canonical_username($FORM{'usejournal'} || $FORM{'user'});
-             my $ditemid = $itemid * 256 + $res{'anum'};
-             my $ju = LJ::load_user($dbs, $journal);
-             my $readurl = LJ::journal_base($ju) . "/$ditemid.html";
+             my $readurl = LJ::item_link($u, $itemid, $res{'anum'});
              if ($FORM{'event'} =~ /\S/) {
                  return "<?h1 $ML{'.success.head'} h1?><?p ".BML::ml(".success.edit", {'url' => $readurl}) ." p?>";
              } else {
