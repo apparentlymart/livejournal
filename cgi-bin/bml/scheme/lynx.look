@@ -2,6 +2,8 @@
 ###       Lynx Scheme - Very simple for text browsers
 ###
 
+_parent=>global.look
+
 h1=>{D}<h1>%%DATA%%</h1>
 h2=>{D}<h2>%%DATA%%</h2>
 

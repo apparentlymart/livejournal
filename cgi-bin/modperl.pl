@@ -7,6 +7,15 @@ use Apache;
 use Apache::LiveJournal;
 use Apache::CompressClientFixup;
 use Apache::BML;
+use LJ::SpellCheck;
+use LJ::TextMessage;
+use Digest::MD5;
+use MIME::Words;
+use Text::Wrap ();
+use LWP::UserAgent ();
+use Storable;
+use Image::Size ();
+
 BEGIN {
     require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
     require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
@@ -24,6 +33,10 @@ BEGIN {
 
 # auto-load some stuff before fork:
 Storable::thaw(Storable::freeze({}));
+foreach my $minifile ("GIF89a", "\x89PNG\x0d\x0a\x1a\x0a", "\xFF\xD8") {
+    Image::Size::imgsize(\$minifile);
+}
+DBI->install_driver("mysql");
 
 # setup httpd.conf things for the user:
 Apache->httpd_conf("DocumentRoot $LJ::HTDOCS")
@@ -38,8 +51,8 @@ Apache->httpd_conf(qq{
   UserDir disabled
 </IfModule>
 
-PerlInitHandler +Apache::LiveJournal
-PerlFixupHandler +Apache::CompressClientFixup
+PerlInitHandler Apache::LiveJournal
+PerlFixupHandler Apache::CompressClientFixup
 DirectoryIndex index.html index.bml
 });
 
@@ -47,11 +60,7 @@ unless ($LJ::SERVER_TOTALLY_DOWN)
 {
     Apache->httpd_conf(qq{
 # BML support:
-PerlSetVar BMLDomain lj-$LJ::DOMAIN
-PerlModule Apache::BML
-<Perl>
-  Apache::BML::load_config("lj-$LJ::DOMAIN", "$LJ::HOME/cgi-bin/bmlp.cfg");
-</Perl>
+PerlSetVar BML_denyconfig "$LJ::BML_DENY_CONFIG"
 <Files ~ "\\.bml\$">
   SetHandler perl-script
   PerlHandler Apache::BML
@@ -66,5 +75,8 @@ ErrorDocument 500 /500-error.html
 
 # set this before we fork
 $LJ::CACHE_CONFIG_MODTIME = (stat("$ENV{'LJHOME'}/cgi-bin/ljconfig.pl"))[9];
+
+package BMLCodeBlock;
+require "$ENV{'LJHOME'}/cgi-bin/emailcheck.pl";
 
 1;

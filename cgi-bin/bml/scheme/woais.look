@@ -1,3 +1,5 @@
+_parent=>global.look
+
 AL=>{P}<I><A HREF="%%DATA1%%">%%DATA2%%</A></I> <IMG SRC="/img/external_link.gif" WIDTH=16 HEIGHT=11 ALIGN=ABSMIDDLE>
 AWAYLINK=>{P}<I><A HREF="%%DATA1%%">%%DATA2%%</A></I> <IMG SRC="/img/external_link.gif" WIDTH=16 HEIGHT=11 ALIGN=ABSMIDDLE>
 

@@ -1,12 +1,4 @@
-#
-# Welcome to GENERIC.LOOK for the WhiteBlue scheme
-#
-# by....
-# 	Brad Fitzpatrick
-# 	bradfitz@bradfitz.com
-#
-
-######################### little stuff
+_parent=>global.look
 
 AL=>{P}<I><A HREF="%%DATA1%%">%%DATA2%%</A></I> <IMG SRC="<?imgprefix?>/external_link.gif" WIDTH=16 HEIGHT=11 ALIGN=ABSMIDDLE>
 AWAYLINK=>{P}<I><A HREF="%%DATA1%%">%%DATA2%%</A></I> <IMG SRC="<?imgprefix?>/external_link.gif" WIDTH=16 HEIGHT=11 ALIGN=ABSMIDDLE>

@@ -1,3 +1,5 @@
+_parent=>../../lj-bml-blocks.pl
+
 SECURITYPRIVATE=>{Ss}<img src="<?imgprefix?>/icon_private.gif" width=16 height=16 align=absmiddle>
 SECURITYPROTECTED=>{Ss}<img src="<?imgprefix?>/icon_protected.gif" width=14 height=15 align=absmiddle>
 LJUSER=>{DRs}<span class='ljuser' style='white-space:nowrap;'><a href='/userinfo.bml?user=%%data%%'><img src='<?imgprefix?>/userinfo.gif' alt='userinfo' width='17' height='17' style='vertical-align:bottom;border:0;' /></a><a href='/users/%%data%%/'><b>%%data%%</b></a></span>
