@@ -9,7 +9,7 @@
                            "AND s.lastnew > DATE_SUB(NOW(), INTERVAL 24 HOUR) ".
                            "ORDER BY s.numreaders DESC LIMIT 1000");
     $sth->execute;
-    while (@_ = $sth->fetchrow_array) {
+    while (@_ = map { s/[\t\n]//g; $_; } $sth->fetchrow_array) {
         $ret .= join("\t", @_) . "\n";
     }
     return $ret;
