@@ -42,9 +42,10 @@ sub error_message
 	     );
 
     my $prefix = "";
+    my $error = $e{$code} || "BUG: Unknown error code!";
     if ($code >= 200) { $prefix = "Client error: "; }
     if ($code >= 500) { $prefix = "Server error: "; }
-    return "$prefix$e{$code}";
+    return "$prefix$error";
 }
 
 # returns result, or undef on failure
@@ -1504,7 +1505,7 @@ sub login
     my $err = 0;
     my $rq = upgrade_request($req);
     
-    my $rs = LJ::Protocol::do_request("login", $rq, \$err, $flags);
+    my $rs = LJ::Protocol::do_request($dbs, "login", $rq, \$err, $flags);
     unless ($rs) {
 	$res->{'success'} = "FAIL";
 	$res->{'errmsg'} = LJ::Protocol::error_message($err);
@@ -1573,7 +1574,7 @@ sub getfriendgroups
     my $err = 0;
     my $rq = upgrade_request($req);
     
-    my $rs = LJ::Protocol::do_request("getfriendgroups", $rq, \$err, $flags);
+    my $rs = LJ::Protocol::do_request($dbs, "getfriendgroups", $rq, \$err, $flags);
     unless ($rs) {
 	$res->{'success'} = "FAIL";
 	$res->{'errmsg'} = LJ::Protocol::error_message($err);
@@ -1593,7 +1594,7 @@ sub getfriends
     my $err = 0;
     my $rq = upgrade_request($req);
     
-    my $rs = LJ::Protocol::do_request("getfriends", $rq, \$err, $flags);
+    my $rs = LJ::Protocol::do_request($dbs, "getfriends", $rq, \$err, $flags);
     unless ($rs) {
 	$res->{'success'} = "FAIL";
 	$res->{'errmsg'} = LJ::Protocol::error_message($err);
@@ -1620,7 +1621,7 @@ sub friendof
     my $err = 0;
     my $rq = upgrade_request($req);
     
-    my $rs = LJ::Protocol::do_request("friendof", $rq, \$err, $flags);
+    my $rs = LJ::Protocol::do_request($dbs, "friendof", $rq, \$err, $flags);
     unless ($rs) {
 	$res->{'success'} = "FAIL";
 	$res->{'errmsg'} = LJ::Protocol::error_message($err);
@@ -1640,7 +1641,7 @@ sub checkfriends
     my $err = 0;
     my $rq = upgrade_request($req);
     
-    my $rs = LJ::Protocol::do_request("checkfriends", $rq, \$err, $flags);
+    my $rs = LJ::Protocol::do_request($dbs, "checkfriends", $rq, \$err, $flags);
     unless ($rs) {
 	$res->{'success'} = "FAIL";
 	$res->{'errmsg'} = LJ::Protocol::error_message($err);
@@ -1662,7 +1663,7 @@ sub getdaycounts
     my $err = 0;
     my $rq = upgrade_request($req);
     
-    my $rs = LJ::Protocol::do_request("getdaycounts", $rq, \$err, $flags);
+    my $rs = LJ::Protocol::do_request($dbs, "getdaycounts", $rq, \$err, $flags);
     unless ($rs) {
 	$res->{'success'} = "FAIL";
 	$res->{'errmsg'} = LJ::Protocol::error_message($err);
@@ -1684,7 +1685,7 @@ sub syncitems
     my $err = 0;
     my $rq = upgrade_request($req);
     
-    my $rs = LJ::Protocol::do_request("syncitems", $rq, \$err, $flags);
+    my $rs = LJ::Protocol::do_request($dbs, "syncitems", $rq, \$err, $flags);
     unless ($rs) {
 	$res->{'success'} = "FAIL";
 	$res->{'errmsg'} = LJ::Protocol::error_message($err);
@@ -1729,7 +1730,7 @@ sub editfriends
 	}
     }
 
-    my $rs = LJ::Protocol::do_request("editfriends", $rq, \$err, $flags);
+    my $rs = LJ::Protocol::do_request($dbs, "editfriends", $rq, \$err, $flags);
     unless ($rs) {
 	$res->{'success'} = "FAIL";
 	$res->{'errmsg'} = LJ::Protocol::error_message($err);
@@ -1785,7 +1786,7 @@ sub editfriendgroups
 	}
     }
 
-    my $rs = LJ::Protocol::do_request("editfriendgroups", $rq, \$err, $flags);
+    my $rs = LJ::Protocol::do_request($dbs, "editfriendgroups", $rq, \$err, $flags);
     unless ($rs) {
 	$res->{'success'} = "FAIL";
 	$res->{'errmsg'} = LJ::Protocol::error_message($err);
@@ -1816,7 +1817,7 @@ sub postevent
     my $rq = upgrade_request($req);
     flatten_props($req, $rq);
 
-    my $rs = LJ::Protocol::do_request("postevent", $rq, \$err, $flags);
+    my $rs = LJ::Protocol::do_request($dbs, "postevent", $rq, \$err, $flags);
     unless ($rs) {
 	$res->{'success'} = "FAIL";
 	$res->{'errmsg'} = LJ::Protocol::error_message($err);
@@ -1837,7 +1838,7 @@ sub editevent
     my $rq = upgrade_request($req);
     flatten_props($req, $rq);
     
-    my $rs = LJ::Protocol::do_request("editevent", $rq, \$err, $flags);
+    my $rs = LJ::Protocol::do_request($dbs, "editevent", $rq, \$err, $flags);
     unless ($rs) {
 	$res->{'success'} = "FAIL";
 	$res->{'errmsg'} = LJ::Protocol::error_message($err);
@@ -1857,7 +1858,7 @@ sub getevents
     my $err = 0;
     my $rq = upgrade_request($req);
     
-    my $rs = LJ::Protocol::do_request("getevents", $rq, \$err, $flags);
+    my $rs = LJ::Protocol::do_request($dbs, "getevents", $rq, \$err, $flags);
     unless ($rs) {
 	$res->{'success'} = "FAIL";
 	$res->{'errmsg'} = LJ::Protocol::error_message($err);
