@@ -5,7 +5,13 @@ body<=
 <?_code
 {
     use strict;
-    use vars qw(%POST %ML);
+    use vars qw(%POST %ML %GET);
+
+    # stupid hack to allow hotmail people to post, since hotmail changes
+    # POST forms to GET.  this isn't a security problem (GET -> POST escalation)
+    # since talklib.pl's LJ::Talk::Post::init checks for $POST{'ecphash'}
+    # and requires it to be correct.  if it's not, the page fails.
+    %POST = %GET if $GET{'ecphash'};
 
     my $req = shift;
     my $r = $req->{'r'};
