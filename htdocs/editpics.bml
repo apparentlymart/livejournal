@@ -188,7 +188,7 @@
      $body .= "</TABLE>";
      $body .= "</FORM>";
  } else {
-     $body = "(=H1 No Pictures H1=)(=P You have no pictures uploaded.  To upload one, go <A HREF=\"/uploadpic.bml\">here</A>. P=)";
+     $body = "(=H1 No Pictures H1=)(=P You have no pictures uploaded.  To upload one, go <A HREF='/uploadpic.bml$authlink'>here</A>. P=)";
  }
  
  return "";

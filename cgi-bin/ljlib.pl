@@ -587,7 +587,7 @@ sub make_shared_select
 	if ($form->{'user'}) {
 	    $sel = $u2k{$form->{'user'}} || "(other)";
 	} else {
-	    $form->{'authas'};	    
+	    $sel = $form->{'authas'};	    
 	}
 	return LJ::html_select({ 
 	    'name' => 'authas', 
