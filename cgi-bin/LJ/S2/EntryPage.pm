@@ -85,7 +85,7 @@ sub EntryPage
 
             my $comment_userpic;
             if (my $pic = $userpic{$com->{'picid'}}) {
-                $comment_userpic = Image("$LJ::SITEROOT/userpic/$com->{'picid'}/$pic->{'userid'}",
+                $comment_userpic = Image("$LJ::USERPIC_ROOT/$com->{'picid'}/$pic->{'userid'}",
                                          $pic->{'width'}, $pic->{'height'});
             }
 
