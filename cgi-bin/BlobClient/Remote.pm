@@ -23,7 +23,7 @@ sub report_blocking_time (&@) {
 
     my $start = [gettimeofday()];
     my $rval = $block->();
-    LJ::blocking_report( "blob_$op", tv_interval($start), $notes );
+    LJ::blocking_report( $host, "blob_$op", tv_interval($start), $notes );
 
     return $rval;
 }
