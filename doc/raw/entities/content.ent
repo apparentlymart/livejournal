@@ -1,4 +1,6 @@
 <!ENTITY % books   SYSTEM "books.ent">
 <!ENTITY % authors SYSTEM "authors.ent">
+<!ENTITY % pregen  SYSTEM "pregen.ent">
 %books;
 %authors;
+%pregen;

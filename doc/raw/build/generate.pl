@@ -22,6 +22,13 @@ unless (-e $ENV{'SGML_CATALOG_FILES'}) {
     die "Catalog files don't exist.  Either set \$LJ::CATALOG_FILES, install docbook-xml (on Debian), or symlink $ENV{'SGML_CATALOG_FILES'} to XML DocBook 4.1's docbook.cat.";
 }
 
+die "Siteroot not set" unless $LJ::SITEROOT;
+open F, "> $home/doc/raw/entities/pregen.ent" or die "Can't open pregen.ent : $!";
+{
+    print F "<!ENTITY siteroot '$LJ::SITEROOT'>\n";
+}
+close F;
+
 if ($opt_getxsl) {
     chdir "$home/doc/raw/build" or die "Where is build dir?";
     unlink "xsl-docbook.tar.gz";
