@@ -47,7 +47,7 @@ foreach my $a (Mail::Address->parse($head->get('To')),
         $to = $address;
         $toarg = $arg;
     }
-    $ignore = 1 if $address eq $LJ::EMAIL_IGNORE;
+    $ignore = 1 if $address eq $LJ::IGNORE_EMAIL;
 }
 unless ($to) {
     $parser->filer->purge;
