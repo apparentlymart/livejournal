@@ -22,10 +22,6 @@ sub generate_visual
 
     my $img = "$LJ::HOME/htdocs/img/captcha";
 
-    my $digest = md5_hex($code);
-    my $srand = hex(substr($digest, 0, 8));
-    srand($srand);
-
     # create a new image and color
     my $im = new GD::Image(($im_width * $length),$im_height);
     my $black = $im->colorAllocate(0,0,0);
