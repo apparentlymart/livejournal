@@ -80,7 +80,10 @@ body<=
  LJ::load_user_props($dbs, $u, "opt_logcommentips", "opt_whoscreened");
 
  if ($FORM{'userpost'} && $FORM{'usertype'} ne "user") {
-     push @errors, $ML{'.error.confused_identity'};
+     unless ($FORM{'usertype'} eq "cookieuser" &&
+             $FORM{'userpost'} eq $FORM{'cookieuser'}) {
+         push @errors, $ML{'.error.confused_identity'};
+     }
  }
 
  my $cookie_auth;
