@@ -285,9 +285,9 @@ body<=
          $ret .= "<td>" . LJ::html_check({ name => "check_$sp->{spid}", id => "check_$sp->{spid}",
                                            onclick => "doClick($sp->{spid});", }) . 
                  "<input type='hidden' name='c$sp->{spid}' id='c$sp->{spid}' value='$barbg' /></td>\n";
+         $js = "onclick='return doClick($sp->{spid});'";
      }
-     $ret .= "<td><b><a href=\"see_request.bml?id=$sp->{'spid'}\" " .
-             "onclick='return doClick($sp->{spid});'>$sp->{'spid'}</a></b></td>";
+     $ret .= "<td><b><a href=\"see_request.bml?id=$sp->{'spid'}\" $js>$sp->{'spid'}</a></b></td>";
      $ret .= "<td><b>$summary</b>$des</td>\n";
      $ret .= "<td>$probarea</td>\n";
      $ret .= "<td nowrap='nowrap'><font size='-1'>$age</font></td>\n";
