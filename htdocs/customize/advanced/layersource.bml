@@ -26,7 +26,7 @@
         $layerinfo->{$id}->{'source_viewable'} : undef;
 
     # authorized to view this layer?
-    my $isadmin = not defined $pub->{$id} &&                       # public styles are pulled from the system 
+    my $isadmin = !defined $pub->{$id} &&                          # public styles are pulled from the system 
                   (LJ::check_priv($remote, 'canview', 'styles') || # account, so we don't want to check privileges
                    LJ::check_priv($remote, 'canview', '*'));       # in case they're private styles
     return $err->("You are not authorized to view this layer.")
