@@ -41,7 +41,7 @@
  my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&amp;" : "";
 
  my $mode = "";
- foreach my $m ([ "enter", "Fill-out Poll" ], [ "results" , "View Poll Results" ]) {
+ foreach my $m ([ "enter", "Fill out Poll" ], [ "results" , "View Poll Results" ]) {
      if ($FORM{'mode'} eq $m->[0]) {
          $mode = $FORM{'mode'};
          $body .= "<b>[ $m->[1] ]</b> ";
