@@ -5172,6 +5172,7 @@ sub ehtml
     $a =~ s/>/&gt;/g;
     return $a;
 }
+*eall = \&ehtml;  # old BML syntax required eall to also escape BML.  not anymore.
 
 # <LJFUNC>
 # name: LJ::ejs
@@ -5186,29 +5187,6 @@ sub ejs
     my $a = $_[0];
     $a =~ s/[\"\'\\]/\\$&/g;
     $a =~ s/\r?\n/\\n/gs;
-    return $a;
-}
-
-
-# <LJFUNC>
-# name: LJ::eall
-# class: text
-# des: Escapes HTML and BML.
-# args: text
-# des-text: Text to escape.
-# returns: Escaped text.
-# </LJFUNC>
-sub eall
-{
-    my $a = shift;
-
-    ### escape HTML
-    $a =~ s/\&/&amp;/g;
-    $a =~ s/\"/&quot;/g;
-    $a =~ s/\'/&\#39;/g;
-    $a =~ s/</&lt;/g;
-    $a =~ s/>/&gt;/g;
-
     return $a;
 }
 
