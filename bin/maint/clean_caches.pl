@@ -6,6 +6,8 @@ $maint{'clean_caches'} = sub
     my $dbh = LJ::get_dbh("master");
     my $sth;
 
+    my $verbose = $LJ::LJMAINT_VERBOSE;
+
     print "-I- Cleaning authactions.\n";
     $dbh->do("DELETE FROM authactions WHERE datecreate < DATE_SUB(NOW(), INTERVAL 30 DAY)");
 
@@ -27,6 +29,52 @@ $maint{'clean_caches'} = sub
         if ($dbh->err) { print $dbh->errstr; }
         print "    deleted ", $sth->rows, "\n";
     } while ($sth->rows && ! $sth->err);
+
+    # move rows from talkleft_xfp to talkleft
+    print "-I- Moving talkleft_xfp.\n";
+
+    my $user_ct = 0;
+    my %cluster_down;
+    $sth = $dbh->prepare("SELECT DISTINCT u.clusterid, u.userid, u.user " .
+                         "FROM user u, talkleft_xfp t " .
+                         "WHERE u.userid=t.userid LIMIT 100");
+    $sth->execute;
+    while (my ($clusterid, $userid, $user) = $sth->fetchrow_array) {
+        next if $cluster_down{$clusterid};
+        
+        my $dbcm = LJ::get_cluster_master($clusterid);
+        unless ($dbcm) {
+            print "    cluster down: $clusterid\n";
+            $cluster_down{$clusterid} = 1;
+            next;
+        }
+
+        # cluster is up, do move
+        my $cols = join(",", qw(userid posttime journalid nodetype
+                                nodeid jtalkid publicitem));
+
+        $sth = $dbh->prepare("SELECT $cols FROM talkleft_xfp WHERE userid=?");
+        $sth->execute($userid);
+        my @insert_vals;
+        while (my @curr_vals = $sth->fetchrow_array) {
+            push @insert_vals, ("(" . 
+                                join(",", map { $dbcm->quote($_) } @curr_vals) .
+                                ")");
+        }
+
+        print "    moving: $user\n" if $verbose;
+        $dbcm->do("INSERT INTO talkleft ($cols) VALUES " . join(",", @insert_vals));
+        if ($dbcm->err) {
+            print "    db error: " . $dbcm->errstr . "\n";
+            next;
+        }
+
+        # no error, delete from _xfp
+        $dbh->do("DELETE FROM talkleft_xfp WHERE userid=?", undef, $userid);
+
+        $user_ct++;
+    }
+    print "    transferred $user_ct\n";
 };
 
 1;
