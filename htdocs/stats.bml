@@ -4,7 +4,7 @@ body<=
 
 <?h1 <?sitename?> Statistics h1?>
 <?p
-The following statistics may be interesting for some of you.  Note that for speed, most of this page is only updated every 24 hours.  However, certain parts are live.  Raw data can be picked up <a href="stats/">here</a>.
+The following statistics may be interesting for some of you.  Note that for speed, most of this page is only updated every 24 hours.  However, certain parts are live.  Raw data can be picked up <a href="stats/stats.txt">here</a>.
 p?>
 <?hr?>
 
