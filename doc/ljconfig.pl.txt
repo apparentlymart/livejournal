@@ -98,27 +98,34 @@
     # database info.  only the master is necessary.  
     # you should probably CHANGE THIS
     %DBINFO = (
-           'master' => {
+           'master' => {  # master must be named 'master'
                'host' => "localhost",
                'port' => 3306,
                'user' => 'lj',
                'pass' => 'ljpass',
+               'role' => {
+                   'cluster1' => 1,
+               },
            },
-           'slavecount' => 0,
            # example of a TCP-based DB connection
-           #'slave1' => {
+           #'somehostname' => {
            #    'host' => "somehost",
            #    'port' => 1234,
            #    'user' => 'username',
            #    'pass' => 'password',
            #},
            # example of a UNIX domain-socket DB connection
-           #'slave2' => {
+           #'otherhost' => {
            #    'sock' => "$LJ::HOME/var/mysqld.sock",
            #    'user' => 'username',
            #    'pass' => 'password',
            #},
            );
+
+    # clusters? (for each @CLUSTERS, need a 'cluster$i' role above)
+    $DEFAULT_CLUSTER = 1; 
+    @CLUSTERS = qw(1);
+    $ALLOW_CLUSTER_SELECT = 0;  # for testing; you don't want this on.
 
     # list of regular expressions matching usernames that people can't have.
     @PROTECTED_USERNAMES = ("^ex_", "^lj_");
