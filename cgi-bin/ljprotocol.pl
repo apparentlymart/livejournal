@@ -580,7 +580,7 @@ sub postevent
     return fail($err,404,$LJ::MSG_NO_POST) unless LJ::get_cap($u, "can_post");
 
     # is the user allowed to post?
-    return fail($err,410) unless LJ::get_cap($u, "disable_can_post");
+    return fail($err,410) if LJ::get_cap($u, "disable_can_post");
 
     # can't post to deleted/suspended community
     return fail($err,307) unless $uowner->{'statusvis'} eq "V";
