@@ -78,6 +78,15 @@
      $body .= "<input type='hidden' name='editfriend_groupmask_$user' value='$mask' />";
  }
 
+ # escape strings for JavaScript
+ my %T = qw(public  .group.public
+            rename  .prompt.rename
+            newname .prompt.newname
+            delete  .confirm.delete
+            max30   .error.max30
+            );
+ foreach (keys %T) { $T{$_} = LJ::ejs($ML{$T{$_}}); }
+
  $body .= <<"END_JS";
 <SCRIPT LANGUAGE="JavaScript"><!--
 
@@ -221,7 +230,7 @@
  function realName (name)
  {
      var rname = name;
-     var index = name.lastIndexOf(" $ML{'.group.public'}");
+     var index = name.lastIndexOf(" $T{'public'}");
      if (index != -1) {
          rname = name.substr(0, index);
      }
@@ -236,13 +245,13 @@
      var item = list.options[selindex];
 
      var newtext = realName(item.text);
-     newtext = prompt("$ML{'.prompt.rename'}", newtext);
+     newtext = prompt("$T{'rename'}", newtext);
      if (newtext==null || newtext == "") { return; }
 
      var gnum = item.value;
      document.fg["efg_set_"+gnum+"_name"].value = newtext;     
      if (document.fg["efg_set_"+gnum+"_public"].value == 1) {
-         newtext = newtext + " $ML{'.group.public'}";
+         newtext = newtext + " $T{'public'}";
      }
      item.text = newtext;
  }
@@ -254,7 +263,7 @@
      if (selindex==-1) { return; }
      var item = list.options[selindex];
 
-     var conf = confirm("$ML{'.confirm.delete'}");
+     var conf = confirm("$T{'delete'}");
      if (!conf) { return; }
 
      // mark it to be deleted later
@@ -289,7 +298,7 @@
      var item = list.options[selindex];
 
      var name = realName(item.text);
-     item.text = name + " $ML{'.group.public'}";
+     item.text = name + " $T{'public'}";
    
      var gnum = item.value;
      document.fg["efg_set_"+gnum+"_public"].value = "1";
@@ -321,11 +330,11 @@
          break;	 
      }
      if (! foundg) {
-         alert("$ML{'.error.max30'}");
+         alert("$T{'max30'}");
          return;
      }
      var gnum = i;
-     var groupname = prompt("$ML{'.prompt.newname'}", "");
+     var groupname = prompt("$T{'newname'}", "");
      if (groupname==null || groupname=="") { return; }
 
      form["efg_set_"+gnum+"_name"].value = groupname;
