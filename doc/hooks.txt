@@ -2,6 +2,13 @@
 
   cleans up a URL into its canonical form.
 
+* emailconfirmed($dbarg, $u)
+
+  after a user has confirmed their email address, this hook is called
+  with a dbs/dbh and a user object.  this is useful to update a
+  database alias table which you also have your mail system using for
+  address lookups.
+
 * login_formopts(\%args)
 
   extra html for login options on login.bml

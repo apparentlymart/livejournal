@@ -1569,8 +1569,7 @@ sub clear_hooks
 # </LJFUNC>
 sub run_hooks
 {
-    my $hookname = shift;
-    my @args = shift;
+    my ($hookname, @args) = @_;
     my @ret;
     foreach my $hook (@{$LJ::HOOKS{$hookname}}) {
         push @ret, [ $hook->(@args) ];
