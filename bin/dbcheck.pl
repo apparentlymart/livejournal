@@ -49,11 +49,6 @@ if ($help) {
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
-unless ($LJ::DBWEIGHTS_FROM_DB) {
-    #die "This tool only works when using \$DBWEIGHTS_FROM_DB (db weights ".
-#	"& info stored in database, not in ljconfig)\n";
-}
-
 my $dbh = LJ::get_dbh("master");
 die "Can't get master db handle\n" unless $dbh;
 
@@ -69,10 +64,6 @@ while ($_ = $sth->fetchrow_hashref) {
     $dbinfo{$_->{'dbid'}} = $_;
     $name2id{$_->{'name'}} = $_->{'dbid'};
     push @{$slaves{$_->{'masterid'}}}, $_->{'dbid'};
-    if ($_->{'masterid'} == 0) { 
-	if ($masterid) { die "Config problem: two master dbs?\n"; }
-	$masterid = $_->{'dbid'}; 
-    }
 }
 
 $sth = $dbh->prepare("SELECT dbid, role, norm, curr FROM dbweights");
@@ -80,6 +71,10 @@ $sth->execute;
 while ($_ = $sth->fetchrow_hashref) {
     next unless defined $dbinfo{$_->{'dbid'}};
     $dbinfo{$_->{'dbid'}}->{'totalweight'} += $_->{'curr'};
+    if ($_->{'role'} eq "master") {
+        if ($masterid) { die "Config problem: two master dbs?\n"; }
+        $masterid = $_->{'dbid'}; 
+    }
 }
 
 die "No master found?" unless $masterid;
