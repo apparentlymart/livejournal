@@ -4,7 +4,6 @@ _INFO=)(=_CODE
 
 $TRUNC_SUBJECT = 60;
 
-require 'ljlib.pl';
 my ($sth, $ret);
 my $user = $FORM{'user'};
 	

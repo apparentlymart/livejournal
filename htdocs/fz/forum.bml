@@ -2,7 +2,6 @@
 NOCACHE=>1
 _INFO=)(=_CODE
 
-require 'ljlib.pl';
 my ($sth, $ret);
 my $user = lc($FORM{'user'});
 	
