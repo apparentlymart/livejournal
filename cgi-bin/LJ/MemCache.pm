@@ -34,6 +34,7 @@ sub reload_conf {
 
     $memc->set_servers(\@LJ::MEMCACHE_SERVERS);
     $memc->set_debug($LJ::MEMCACHE_DEBUG);
+    $memc->set_pref_ip(\%LJ::MEMCACHE_PREF_IP);
     $memc->set_compress_threshold($LJ::MEMCACHE_COMPRESS_THRESHOLD);
     if ($LJ::DB_LOG_HOST) {
         $stat_callback = sub {
