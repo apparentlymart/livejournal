@@ -587,6 +587,14 @@ body<=
                                      {'name' => 'cookieuser', 'id' => 'cookieuser', 'value' => $remote->{'user'}
                                   });
 
+             # rate limiting challenge
+             {
+                 my ($time, $secret) = LJ::get_secret();
+                 my $rchars = LJ::rand_chars(20);
+                 my $chal = $opts->{ditemid} . "-$u->{userid}-$time-$rchars";
+                 my $res = Digest::MD5::md5_hex($secret . $chal);
+                 $ret .= LJ::html_hidden("chrp1", "$chal-$res");
+             }
 
              $ret .= "<div id='qrdiv' name='qrdiv' style='display:none;'>";
              $ret .= "<table style='border: 1px solid black'>";
