@@ -181,8 +181,8 @@ sub handler
         $req->{'blockref'}->{$k} = \$SchemeData{$req->{'scheme'}}->{$k};
     }
 
-    $req->{'lang'} = BML::decide_language();
-    
+    BML::set_language(BML::decide_language());
+
     # print on the HTTP header
     my $html;
     bml_decode($req, \$bmlsource, \$html, { DO_CODE => $req->{'env'}->{'AllowCode'} });
@@ -1066,6 +1066,7 @@ sub get_language_default
 sub set_language
 {
     $Apache::BML::cur_req->{'lang'} = $_[0];
+    Apache->request->notes('langpref' => $_[0]);
 }
 
 # multi-lang string

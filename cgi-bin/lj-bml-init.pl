@@ -22,7 +22,12 @@ BML::register_block("SUPPORT_EMAIL", "S", $LJ::SUPPORT_EMAIL);
     BML::register_block("DL", "DS", $dl);
 }
 
-BML::register_hook("startup", sub { LJ::start_request() });
+BML::register_hook("startup", \&LJ::start_request);
+BML::register_hook("startup", sub { 
+    eval {
+        Apache->request->notes("ljuser" => $BML::COOKIE{'ljuser'});
+    };
+});
 
 if ($LJ::UNICODE) {
     BML::set_default_content_type("text/html; charset=utf-8");

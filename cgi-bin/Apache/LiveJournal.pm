@@ -17,26 +17,25 @@ my %RQ;       # per-request data
 my %USERPIC;  # conf related to userpics
 my %REDIR;
 
+$USERPIC{'cache_dir'} = "$ENV{'LJHOME'}/htdocs/userpics";
+$USERPIC{'use_disk_cache'} = -d $USERPIC{'cache_dir'};
+
+# redirect data.
+open (REDIR, "$ENV{'LJHOME'}/cgi-bin/redirect.dat");
+while (<REDIR>) {
+    next unless (/^(\S+)\s+(\S+)/);
+    my ($src, $dest) = ($1, $2);
+    $REDIR{$src} = $dest;
+}
+close REDIR;
+
 # init handler.
 sub handler
 {
     my $r = shift;
-
     $r->set_handlers(PerlTransHandler => [ \&trans ]);
-    $r->push_handlers(PerlCleanupHandler => sub { %RQ = (); });
-    
-    $USERPIC{'cache_dir'} = "$ENV{'LJHOME'}/htdocs/userpics";
-    $USERPIC{'use_disk_cache'} = -d $USERPIC{'cache_dir'};
-
-    # redirect data.
-    open (REDIR, "$ENV{'LJHOME'}/cgi-bin/redirect.dat");
-    while (<REDIR>) {
-        next unless (/^(\S+)\s+(\S+)/);
-        my ($src, $dest) = ($1, $2);
-        $REDIR{$src} = $dest;
-    }
-    close REDIR;
-
+    $r->set_handlers(PerlCleanupHandler => [ sub { %RQ = () },
+                                             "Apache::LiveJournal::db_logger" ]);
     return OK;
 }
 
@@ -493,6 +492,61 @@ sub interface_content
     }
 
     return OK;
+}
+
+sub db_logger
+{
+    my $r = shift;
+    my $rl = $r->last;
+
+    my $ctype = $rl->content_type;
+    return if $ctype =~ m!^image/! and $LJ::DONT_LOG_IMAGES;
+
+    my $dbl = LJ::get_dbh("logs");
+    return unless $dbl;
+
+    my @now = localtime();
+    my $table = sprintf("access%04d%02d%02d", $now[5]+1900,
+                        $now[4]+1, $now[3]);
+    
+    unless ($LJ::CACHED_LOG_CREATE{$table}) {
+        $dbl->do("CREATE TABLE IF NOT EXISTS $table (".
+                 "whn DATETIME NOT NULL,".
+                 "server VARCHAR(30),".
+                 "addr VARCHAR(15) NOT NULL,".
+                 "ljuser VARCHAR(15),".
+                 "langpref VARCHAR(5),".
+                 "method VARCHAR(10) NOT NULL,".
+                 "vhost VARCHAR(80) NOT NULL,".
+                 "uri VARCHAR(255) NOT NULL,".
+                 "args VARCHAR(255),".
+                 "status SMALLINT UNSIGNED NOT NULL,".
+                 "ctype VARCHAR(30) NOT NULL,".
+                 "bytes MEDIUMINT UNSIGNED NOT NULL,".
+                 "browser VARCHAR(100) NOT NULL,".
+                 "ref VARCHAR(200))");
+        $LJ::CACHED_LOG_CREATE{$table} = 1;
+    }
+
+    my $ua = $r->header_in("User-Agent");
+    my $ref = $r->header_in("Referer");
+
+    my $sql = "INSERT DELAYED INTO $table VALUES (NOW(),?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    my @vals = ($LJ::SERVER_NAME,
+                $r->connection->remote_ip,
+                $rl->notes('ljuser'),
+                $rl->notes('langpref'),
+                $r->method,
+                $r->header_in("Host"),
+                $r->uri,
+                scalar $r->args,
+                $rl->status,
+                $ctype,
+                $rl->bytes_sent,
+                $ua,
+                $ref);
+                
+    $dbl->do($sql, undef, @vals);
 }
 
 package LJ::Protocol;

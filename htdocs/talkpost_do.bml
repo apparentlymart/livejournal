@@ -132,6 +132,7 @@ BODY<=
                  my $hp = $FORM{'hpassword'} || LJ::hash_password($FORM{'password'});
                  my $etime = 0;
                  BML::set_cookie("ljuser", $up->{'user'}, $etime, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
+                 eval { Apache->request->notes('ljuser' => $user); };
                  BML::set_cookie("ljhpass", "$up->{'user'}:$hp", $etime, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
 
                  LJ::load_user_props($dbs, $u, "browselang");
