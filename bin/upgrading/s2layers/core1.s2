@@ -158,11 +158,8 @@ class Link
     function print_button
     "Output this Link as a clickable button using [member[Link.icon]]";
 
-    function print_text
-    "Output this Link as a simple HTML link.";
-
     function as_string() : string
-    "Return the simple HTML link.";
+    "Return the button HTML link.";
 }
 
 class ItemRange
@@ -246,7 +243,7 @@ class Entry extends EntryLite
     var bool new_day "Is this entry on a different day to the previous one?";
     var bool end_day "Is this the last entry of a day?";
 
-    var Link{} links "Hash of links that the server suggests be linked from this entry, eg to edit an entry if a user is viewing their own journal.";
+    function get_link (string key) : Link;
 
     var int itemid "Server stored ID number for this entry";
 
@@ -1463,20 +1460,14 @@ function CommentInfo::print() {
 
 ### Link object functions
 
-function Link::print_button {
-    if ($.url == "") { return; }
-    """<a href="$.url">""";
-    #$.icon.alt="[" + $.caption + "]";
-#    $.icon.attributes{"border"}="0";
-    $.icon->print();
-    "</a>";
-}
-function Link::print_text {
-    if ($.url == "") { return; }
+function Link::print_button() [fixed] {
     print $this->as_string();
 }
-function Link::as_string() : string {
-    return """<a href="$.url">$.caption)</a>""";
+
+function Link::as_string() [fixed] : string {
+    if ($.url == "") { return ""; }
+    var string ealt = ehtml($.caption);
+    return """<a href="$.url"><img border='0' width="$.icon.width" height="$.icon.height" alt="$ealt" url="$.icon.url" /></a>""";
 }
 
 # Redirector
