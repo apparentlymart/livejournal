@@ -31,10 +31,15 @@ chomp $subject;
 # ignore spam/vacation/auto-reply messages
 if ($subject =~ /auto.?(response|reply)/i ||
     $subject =~ /^(Undelive|Mail System Error - |ScanMail Message: |\+\s*SPAM|Norton AntiVirus)/ ||
+    $subject =~ /^(Mail Delivery Problem|Mail delivery failed)/ ||
+    $subject eq "failure notice" ||
     $subject =~ /\[BOUNCED SPAM\]/ ||
     $subject =~ /^Symantec AVF / ||
     $subject =~ /Attachment block message/ ||
-    $subject =~ /Use this patch immediately/) 
+    $subject =~ /Use this patch immediately/ ||
+    $subject =~ /^YOUR PAYPAL\.COM ACCOUNT EXPIRES/ ||
+    $subject =~ /^don't be late! ([\w\-]{1,15})$/ || 
+    $subject =~ /^your account ([\w\-]{1,15})$/) 
 {
     exit 0;
 }
@@ -49,9 +54,7 @@ $body =~ s/\s+$//;
 ### spam
 if ($body =~ /I send you this file in order to have your advice/ ||
     $body =~ /^Content-Type: application\/octet-stream/ ||
-    $body =~ /^(Please see|See) the attached file for details\.?$/ ||
-    ($subject eq "failure notice" && $body =~ /\.(scr|pif)\"/) ||
-    ($subject =~ /^Mail delivery failed/ && $body =~ /\.(scr|pif)\"/))
+    $body =~ /^(Please see|See) the attached file for details\.?$/)
 {
     exit 0;
 }
