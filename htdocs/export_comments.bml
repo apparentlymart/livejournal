@@ -108,7 +108,7 @@
             # get text for this comment
             my $data = $comments{$id};
             my $text = $texts->{$id};
-            my ($subject, $body) = @$text;
+            my ($subject, $body) = @{$text || []};
 
             # only spit out valid UTF8, and make sure it fits in XML, and uncompress it
             LJ::text_uncompress(\$body);
