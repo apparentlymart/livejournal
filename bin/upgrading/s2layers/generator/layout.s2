@@ -214,7 +214,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
         "<font color=\"$fgcolor\">$e.journal.username</font></a>";
         if ($e.poster.username != $e.journal.username) {
             "<br>[<a class=\"index\" href=\"" +
-                $e.poster->base_url() + "<font color=\"$fgcolor\">$e.poster.username</font></a>]";
+                $e.poster->base_url() + "\"><font color=\"$fgcolor\">$e.poster.username</font></a>]";
         }
         "</td></tr></table></td></tr></table>";
     }
