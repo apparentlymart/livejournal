@@ -35,9 +35,6 @@
     # CHANGE THIS.
     $DOMAIN = "ljsite.com"; 
 
-    # regexp to match domains that could load the site.  this default should be fine.
-    $DOMAIN_RE = "(www\.)?\Q$DOMAIN\E(:\\d+)?";
-
     # this is what gets prepended to all URLs 
     $SITEROOT = "http://www.$DOMAIN";
 
