@@ -54,8 +54,6 @@ die "Please define a 'userpics' class in your \%LJ::MOGILEFS_CONFIG\n"
     unless defined $LJ::MOGILEFS_CONFIG{classes}->{userpics};
 die "Unable to find MogileFS object (\%LJ::MOGILEFS_CONFIG not setup?)\n"
     unless $LJ::MogileFS;
-die "You must enable \$LJ::USERPIC_MOGILEFS in ljconfig.pl to use this script\n"
-    unless $LJ::USERPIC_MOGILEFS;
 
 # if picker, set it up
 if ($picker) {

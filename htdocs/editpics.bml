@@ -209,7 +209,7 @@
 
                     # try and delete from either the blob server or database,
                     # and only after deleting the image do we delete the metadata.
-                    if ($LJ::USERPIC_MOGILEFS && $locations{$picid} eq 'mogile') {
+                    if ($locations{$picid} eq 'mogile') {
                         $deleted = 1
                             if $LJ::MogileFS->delete($u->mogfs_userpic_key($picid));
                     } elsif ($LJ::USERPIC_BLOBSERVER &&
@@ -243,7 +243,7 @@
                     # that and make sure they can delete their metadata
                     if (! $deleted) {
                         my $present;
-                        if ($LJ::USERPIC_MOGILEFS && $locations{$picid} eq 'mogile') {
+                        if ($locations{$picid} eq 'mogile') {
                             my $blob = $LJ::MogileFS->get_file_data($u->mogfs_userpic_key($picid));
                             $present = length($blob) ? 1 : 0;
                         } elsif ($LJ::USERPIC_BLOBSERVER) {
