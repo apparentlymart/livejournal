@@ -8,6 +8,8 @@
 {
     package LJ;
 
+    $DEFAULT_STYLE ||= { 'core' => 'core1' };
+
     $HOME = $ENV{'LJHOME'};
     $HTDOCS = "$HOME/htdocs";
     $BIN = "$HOME/bin";

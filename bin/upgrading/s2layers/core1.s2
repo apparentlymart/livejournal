@@ -142,14 +142,6 @@ class Image
      and 'a_attr' which adds attributes to the anchor tag if a link is to be printed.";
 }
 
-class UserPic extends Image
-"Information about userpics"
-{
-    var int picid "Unique id number of this picture";
-    var string keyword 
-    "The keyword which (when associated with an entry or comment) caused this picture to be displayed";
-}
-
 class Link
 "A link or a button"
 {
@@ -211,9 +203,8 @@ class UserLite
 "A 'lite' userinfo structure which only requires a single, simple db query to build"
 {
     var string username "Canonical Username, ex: johnqpub";
-    var int userid "Corresponding userid";
     var string name "User's formatted name, ex: John Q. Public";
-    var string journaltype "Type of account: P (personal), C (community), Y (syndicated), S (shared), etc";
+    var string journal_type "Type of account: P (personal), C (community), Y (syndicated), S (shared), etc";
 
     function base_url () : string "Returns URL of user's journal.";
     function as_string() : string;
@@ -238,7 +229,7 @@ class Entry
 
     var bool new_day "Is this entry on a different day to the previous one?";
     var bool end_day "Is this the last entry of a day?";
-    var UserPic userpic "The userpic selected to relate to this entry";
+    var Image userpic "The userpic selected to relate to this entry";
     var Link{} links "Hash of links that the server suggests be linked from this entry, eg to edit an entry if a user is viewing their own journal.";
     var Link previousentry "A link to the previous entry in this user's journal";
     var Link nextentry "A link to the next entry in this user's journal";
@@ -261,56 +252,9 @@ class Friend extends UserLite
 class User extends UserLite 
 "A more information-rich userinfo structure"
 {
-    var UserPic defaultpic "Information about default userpic";
-    var Date birthday "User's birthdate";
-    var string websiteurl "URL pointer to user's website";
-    var string websitename "'pretty' name of user's website";
-    var string[] emails "Email address(es) of user";
-    var string location "A string representing this user's location as specified in their settings";
-    var bool hasinterests "Does the user have any interests?";
-    var bool hasfriends "Does the user have any friends?";
-    var bool hasfriendof "Does the user have any friendofs? (or are friendofs visible?)";
-    var bool hascommunitymembership "Is the user a member of any communities? (or, does this community have any members?)";
-    var bool hascommunitieswatched "Does the user watch any communities? (or, is this community watched by anyone?)";
-
-    # Do later: gender information
-    # var Gender gender "User's gender"; # Will finally be public information?
-
-    function builtin getinterests() : Interest[]
-    "Returns an array of interests the user has.";
-
-    function builtin getfriends() : Friend{} 
-    "Returns a hash representing this users' friends list.";
-
-    function builtin getfriendof() : Friend{}
-    "Returns a hash representing this users' friendof list.";
-
-    function builtin getcommunitymembership() : Friend{}
-    "Returns a hash of communities this user is a member of";
-
-    function builtin getcommunitieswatched() : Friend{} 
-    "Returns a hash of communities this user lists as a friend";
-
-    function builtin getbio() : string
-    "Returns the users' bio, or nothing if one isn't available.";
-
-    function builtin getcreatetime() : Date
-    "Returns the date and time the account was created";
-
-    function builtin getupdatetime() : Date
-    "Returns the date and time the account was last updated";
-
-    function builtin getuserpickw() : UserPic{}
-    "Information about userpics by keyword (eg: \$pics{'happy'})";
-
-    function builtin getuserpicid() : UserPic{} 
-    "Information about userpics by id (eg: \$pics{'10234'})";
-
-    function builtin getuserprops(string[] names) : string{} 
-    "Load information from userprops into a hash";
-
-    function builtin makelite() : UserLite 
-    "Get a UserLite object representing this user";
+    var Image default_pic "Information about default userpic";
+    var string website_url "URL pointer to user's website";
+    var string website_name "'pretty' name of user's website";
 }
 
 ### Pages
@@ -320,8 +264,8 @@ class Page
 {
     var string view "The view type";
     var User journal "User whose journal is being viewed";
-    var string journaltype "Journal type, ex: 'personal', 'community', 'news'";
-    var string baseurl "The base URL of the journal being viewed.";
+    var string journal_type "Journal type, ex: 'P' (personal), 'C' (community), etc.";
+    var string base_url "The base URL of the journal being viewed.";
     var Link{} views 
     "Links to top-level views where id equals the name of the view being linked to. 
     (if one of views == \$.view, already looking at that view)";
@@ -331,10 +275,7 @@ class Page
     "Extra tags supplied by the server to go in the <head> section of the output HTML document. Layouts 
     should include this in the head section if they are writing HTML.";
  
-    var string lang "The primary language of this journal. Should be used in an HTML 'lang' attribute of the 'html' tag.";
-    var string textdirection "The primary text direction of this journal (rtl or ltr)";
-
-    var string stylesheeturl 
+    var string stylesheet_url 
     "The URL to use in a link element for the server-supported external stylesheet to put stuff in it)";
     
     var string global_title 
@@ -369,9 +310,6 @@ class Page
     function print_entry_poster(Entry e) 
     "Output a line of text which says who posted an entry (just \"user\", or \"user posting in somejournal\")";
 
-    function set_view_text() 
-    "Call for initialisation/translation of view link text. The backend will call this for you before rendering begins.";
-
     function builtin get_this_month() : CalendarPageMonth 
     "Returns information about the current month, so that the page may include a mini-calendar or similar features.";
 
@@ -388,10 +326,10 @@ class RecentPage extends Page
 "Most recent entries page, formally known as the LASTN view in the previous style system"
 {
     var Entry[] entries
-    "Array of entries available to be seen by the viewer of the page";
+    "Array of entries available to be seen by the viewer of the page.";
 
-    var ItemRange range
-    "Indicate what pages of the view are being seen";
+    var int skip
+    "Indicates how many entries are being skipped back.";
 }
 
 class FriendsPage extends RecentPage
@@ -531,9 +469,6 @@ function builtin zeropad (string n, int digits) : string
 function builtin striphtml (string s) : string 
 "Similar to ehtml, but the HTML tags are stripped rather than escaped.";
 
-
-### User management
-
 function builtin viewer_logged_in() : bool
 "Returns true if the user viewing the page is logged in. It's recommended that your page links to the site
 login page if the user isn't logged in.";
@@ -545,25 +480,20 @@ Useful for returning links to manage information, or edit entries.";
 function builtin get_url(string user, string view) : string 
 "Returns a URL to the specified view for the specified user. Views use the same names as elsewhere. (recent, friends, calendar, userinfo)";
 
-function builtin get_url(UserLite user, string view) : string; # Returns a URL to the specified view for the specified user. Views use the same names as elsewhere. (recent, friends, calendar, userinfo)
+function builtin get_url(UserLite user, string view) : string
+"Returns a URL to the specified view for the specified user. Views use the same names as elsewhere. (recent, friends, calendar, userinfo)";
 
-
-# type conversion
 function builtin string(int i) : string
 "Return the given integer as a string";
 
 function builtin int(string s) : int
 "Convert the string to an integer and return";
 
-### Interaction with the HTTP server
-
 function builtin set_content_type(string text)
 "Set the HTTP Content-type response header (for example, if outputting XML). Must be called before printing any data.";
 
-####
-# 
-# Properties
-#
+
+##[ properties ]
 
 property string[] lang_monthname_long {
     noui = 1;
@@ -608,10 +538,6 @@ property string SITENAME {
 property string SITEROOT {
     noui = 1;
     des = "Site URL which can be safely prepended onto paths starting with /";
-}
-property string SITEURL {
-    noui = 1;
-    des = "A full URL for the host site (with trailing slashes where necessary)";
 }
 
 property int page_recent_items {
@@ -754,13 +680,6 @@ property string text_noentries_day {
 }
 set text_noentries_day = "There were no entries on this day.";
 
-property string text_global_title {
-    des = "Journal Title";
-    maxlength = 50;
-    size = 50;
-    note = "Leave this field empty to use a default title.";
-}
-set text_global_title = "";
 
 property string font_base {
     des = "Preferred Font";
@@ -797,13 +716,17 @@ property string text_day_next {
 set text_day_prev = "Previous Day";
 set text_day_next = "Next Day";
 
+##[ global function implementations ]
 
-####
-#
-# Function Definitions
-#
+function prop_init ()
+  "This function is the first thing called and is the place to set properties based on the values of other properties.  It's called before the style system looks at its builtin properties, so if you need to conditionally setup something based on your own custom properties, do it here.  You can't print from this function."
+{
+  # do nothing, just exist.
+}
 
-### General
+function print_stylesheet ()
+  "Prints a stylesheet, the URL of which can be referenced by [member[Page.stylesheet_url]].  This is another S2 entry point, in addition to [member[Page::print()]]." {
+}
 
 function htmlattr(string name, string value) : string 
 "If the value isn't blank, return in HTML attribute format with a leading space.  HTML of name is not escaped."
@@ -909,9 +832,9 @@ function userinfoicon(UserLite user) : Image {
 #    $uimage.attributes{"align"} = "absmiddle";
 #    $uimage.attributes{"border"} = "0";
 
-    if ($user.journaltype == "C") {
+    if ($user.journal_type == "C") {
         $uimage.url = "$*IMGDIR/community.gif";
-    } elseif ($user.journaltype == "N") {
+    } elseif ($user.journal_type == "N") {
         $uimage.url = "$*IMGDIR/newsinfo.gif";
     } else {
         $uimage.url = "$*IMGDIR/userinfo.gif";
@@ -987,7 +910,7 @@ function Page::view_title() : string {
     return lang_viewname($.view);
 }
 function FriendsPage::view_title() : string {
-    if ($.journal.journaltype == "C") {
+    if ($.journal.journal_type == "C") {
         return $*text_view_friends_comm;
     } else {
         return $*text_view_friends;
@@ -1000,13 +923,14 @@ function CalendarPage::view_title() : string {
     return string($.year);
 }
 function Page::title() : string {
+    return $.global_title+" - "+$this->view_title();
     return $.global_title+($.view != "recent" ? " - "+$this->view_title() : "");
 }
 function server_sig() {
-    """Powered by <a href="$*SITEURL">$*SITENAME</a>""";
+    """Powered by <a href="$*SITEROOT/">$*SITENAME</a>""";
 }
 function Page::print() {
-    """<html lang="$.lang" dir="$.textdirection">\n<head>\n<title>""";
+    """<html>\n<head>\n<title>""";
     print $this->title();
     "</title>\n$.head_content";
     if ($*font_base != "" or $*font_fallback != "none") {
@@ -1027,11 +951,13 @@ body, td, th, table, p, div {
         ";\n}\n--></style>\n";
     }
     "</head>\n<body>\n";
-    """<img src="$.journal.defaultpic.url" width="$.journal.defaultpic.width" """;
-    """height="$.journal.defaultpic.height" align="right"><h1>""";
-    print $.global_title;
+    if (defined $.journal.default_pic) {
+        $.journal.default_pic->print();
+    }
+    "<h1>";
+    print $this->title();
     "</h1>\n";
-    $this->set_view_text();
+
     #print_linklist($.views,$.view,$.viewsorder);
     $this->print_body();
     """\n<hr><address>""";
@@ -1052,7 +978,7 @@ function Page::print_body() {
 
 function Page::print_entry_poster(Entry e) {
     $e.poster->print();
-    if ($e.poster.userid != $e.journal.userid) {
+    if ($e.poster.username != $e.journal.username) {
         " posting in ";
         $e.journal->print();
     }
@@ -1116,7 +1042,7 @@ function RecentPage::print_body {
     # Creator for both the Recent and Friends views, since they are similar
     # If someone wants to do the two views differently, they can create
     # FriendsPage::print_body since FriendsPage extends RecentPage.
-    $.range->print();
+
     foreach var Entry e ($.entries) {
         if ($e.end_day) {
             "</div>";
@@ -1129,7 +1055,7 @@ function RecentPage::print_body {
         # Print the entry
         $this->print_entry($e);
     }
-    $.range->print();
+
 }
 
 ### Calendar view
@@ -1218,7 +1144,7 @@ function CalendarMonthPageDay::print_subjectlist() {
         "<tr><td>";
         $e.entrytime->time_short();
         "</td><td>";
-        if ($e.poster.userid != $e.journal.userid) {
+        if ($e.poster.username != $e.journal.username) {
             $e.poster->print();
         }
         "</td><td>";
@@ -1297,6 +1223,7 @@ function Link::print_text {
 function Link::as_string() : string {
     return """<a href="$.url">$.caption)</a>""";
 }
+
 
 
 

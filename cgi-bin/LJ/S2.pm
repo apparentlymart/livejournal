@@ -7,8 +7,40 @@ use S2;
 use S2::Checker;
 use S2::Compiler;
 use Storable;
+use Apache::Constants ();
 
-package LJ;
+package LJ::S2;
+
+sub make_journal
+{
+    my ($u, $styleid, $view, $remote, $opts) = @_;
+
+    my $r = $opts->{'r'};
+    my $ret;
+    $LJ::S2::ret_ref = \$ret;
+
+    my $ctx = s2_context($r, $styleid);
+    unless ($ctx) {
+        $opts->{'handler_return'} = Apache::Constants::OK();
+        return;
+    }
+
+    $ctx->[2]->{'SITEROOT'} = $LJ::SITEROOT;
+    $ctx->[2]->{'SITENAME'} = $LJ::SITENAME;
+    $ctx->[2]->{'IMGDIR'} = $LJ::IMGPREFIX;
+
+    my ($entry, $page);
+    if ($view eq "lastn") {
+        $entry = "RecentPage::print()";
+        $page = RecentPage($u, $remote, $opts);
+    }
+
+    my $run_opts = {
+        'content_type' => 'text/html',
+    };
+    s2_run($r, $ctx, $run_opts, $entry, $page);
+    return $ret;
+}
 
 sub s2_run
 {
@@ -17,7 +49,7 @@ sub s2_run
     my $ctype = $opts->{'content_type'} || "text/html";
     my $cleaner;
     if ($ctype =~ m!^text/html!) {
-        $cleaner = new HTMLCleaner ('output' => sub { $r->print($_[0]); });
+        $cleaner = new HTMLCleaner ('output' => sub { $$LJ::S2::ret_ref .= $_[0]; });
     }
 
     my $send_header = sub {
@@ -27,32 +59,14 @@ sub s2_run
         $r->send_http_header();
     };
     
+    my $out_straight = sub { $$LJ::S2::ret_ref .= $_[0]; };
+    my $out_clean = sub { $cleaner->parse($_[0]); };
+
+    S2::set_output($out_straight);
+    S2::set_output_safe($out_straight);
+
     if ($cleaner) {
-        S2::set_output_safe(sub {
-            $send_header->();
-            $cleaner->parse($_[0]);
-            S2::set_output(sub { $r->print($_[0]); });
-            S2::set_output_safe(sub { $cleaner->parse($_[0]); });
-        });
-        S2::set_output(sub {
-            $send_header->();
-            $r->print($_[0]);
-            S2::set_output(sub { $r->print($_[0]); });
-            S2::set_output_safe(sub { $cleaner->parse($_[0]); });
-        });
-    } else {
-        S2::set_output_safe(sub {
-            $send_header->();
-            $r->print($_[0]);
-            S2::set_output(sub { $r->print($_[0]); });
-            S2::set_output_safe(sub { $r->print($_[0]); });
-        });
-        S2::set_output(sub {
-            $send_header->();
-            $r->print($_[0]);
-            S2::set_output(sub { $r->print($_[0]); });
-            S2::set_output_safe(sub { $r->print($_[0]); });
-        });
+        S2::set_output_safe($out_clean);
     }
           
     $LJ::S2::CURR_PAGE = $page;
@@ -78,7 +92,7 @@ sub get_public_layers
     return $LJ::CACHED_PUBLIC_LAYERS if $LJ::CACHED_PUBLIC_LAYERS;
 
     my $dbr = LJ::get_db_reader();
-    $sysid ||= LJ::get_sysid();
+    $sysid ||= LJ::get_userid($dbr, "system");
 
     my %existing;  # uniq -> id
     my $sth = $dbr->prepare("SELECT i.value, l.s2lid, l.b2lid, l.type FROM s2layers l, s2info i ".
@@ -120,9 +134,10 @@ sub s2_context
     }
 
     unless ($have_style) {
-        my $public = LJ::get_public_layers();
+        my $public = get_public_layers();
         while (my ($layer, $name) = each %$LJ::DEFAULT_STYLE) {
             next unless $name ne "";
+            next unless $public->{$name};
             my $id = $public->{$name}->{'s2lid'};
             $style{$layer} = $id if $id;
         }
@@ -144,7 +159,7 @@ sub s2_context
     }
     unless ($okay) {
         # load the default style instead.
-        if ($have_style) { return LJ::s2_context($r, 0, $opts); }
+        if ($have_style) { return s2_context($r, 0, $opts); }
         
         # were we trying to load the default style?
         $r->content_type("text/html");
@@ -173,6 +188,7 @@ sub s2_context
 
     if ($ctx) {
         S2::set_output(sub {});  # printing suppressed
+        S2::set_output_safe(sub {}); 
         eval { S2::run_code($ctx, "prop_init()"); };
         return $ctx unless $@;
     }
@@ -223,7 +239,7 @@ sub create_style
     
     my $dbh = LJ::get_db_writer();
     my $clone;
-    $clone = LJ::load_style($cloneid) if $cloneid;
+    $clone = load_style($cloneid) if $cloneid;
 
     # can't clone somebody else's style
     return 0 if $clone && $clone->{'userid'} != $u->{'userid'};
@@ -291,8 +307,8 @@ sub delete_user_style
     return 1 unless $styleid;
     my $dbh = LJ::get_db_writer();
 
-    my $style = LJ::load_style($dbh, $styleid);
-    LJ::delete_layer($style->{'layer'}->{'user'});
+    my $style = load_style($dbh, $styleid);
+    delete_layer($style->{'layer'}->{'user'});
 
     foreach my $t (qw(s2styles s2stylelayers)) {
         $dbh->do("DELETE FROM $t WHERE styleid=?", undef, $styleid)
@@ -356,7 +372,7 @@ sub delete_layer
 sub set_style_layers
 {
     my ($u, $styleid, %newlay) = @_;
-    my $udbh = LJ::get_user_db_writer($u);
+    my $udbh = LJ::get_cluster_master($u);
 
     return 0 unless $udbh;
     $udbh->do("REPLACE INTO s2stylelayers (styleid,type,s2lid) VALUES ".
@@ -422,7 +438,7 @@ sub layer_compile
     return 0 unless $lid;
     
     # get checker (cached, or via compiling) for parent layer
-    my $checker = LJ::get_layer_checker($layer);
+    my $checker = get_layer_checker($layer);
     unless ($checker) {
         $$err_ref = "Error compiling parent layer.";
         return undef;
@@ -541,8 +557,113 @@ sub load_layer_info
     return 1;
 }
 
+#######################################
 
-package LJ::S2;
+sub base_url
+{
+    my ($u) = @_;
+    if ($u->{'journaltype'} eq "C") {
+        return "$LJ::SITEROOT/community/$u->{'user'}";
+    }
+    return "$LJ::SITEROOT/users/$u->{'user'}";
+}
 
+sub Null
+{   
+    my $type = shift;
+    return {
+        '_type' => $type,
+        '_isnull' => 1,
+    };
+}
+
+sub Page
+{
+    my ($u) = @_;
+    my $base_url = base_url($u);
+    my $p = {
+        '_type' => 'Page',
+        'view' => '',
+        'journal' => User($u),
+        'journal_type' => $u->{'journaltype'},
+        'base_url' => $base_url,
+        'views' => {
+            'lastn' => "$base_url/",
+            'calendar' => "$base_url/calendar",
+            'friends' => "$base_url/friends",
+        },
+        'views_order' => [ 'lastn', 'calendar', 'friends' ],
+        'stylesheet_url' => "$base_url/res/stylesheet",
+        'global_title' => '',
+    };
+    return $p;
+}
+
+sub RecentPage
+{
+    my ($u, $remote, $opts) = @_;
+
+    my $p = Page($u);
+    $p->{'_type'} = "RecentPage";
+    $p->{'view'} = "recent";
+    $p->{'entries'} = [];
+    $p->{'skip'} = 0;
+    return $p;
+}
+
+sub User
+{
+    my ($u) = @_;
+    my $o = UserLite($u);
+    $o->{'default_pic'} = Image_userpic($u, $u->{'defaultpicid'});
+    $o->{'website_url'} = $u->{'url'};
+    $o->{'website_name'} = LJ::ehtml($u->{'urlname'});
+    return $o;
+}
+
+sub UserLite
+{
+    my ($u) = @_;
+    my $o = {
+        '_type' => 'User',
+        'username' => $u->{'user'},
+        'name' => $u->{'name'},
+        'journal_type' => $u->{'journaltype'},
+    };
+    return $o;
+}
+
+sub Image_userpic
+{
+    my ($u, $picid, $kw) = @_;
+    unless ($u->{'_userpics'}) {
+        my $dbr = LJ::get_db_reader();
+        my $sth = $dbr->prepare("SELECT picid, width, height FROM userpic ".
+                                "WHERE userid=?");
+        $sth->execute($u->{'userid'});
+        while (my ($id, $w, $h) = $sth->fetchrow_array) {
+            $u->{'_userpics'}->{$id} = [ $w, $h ];
+        }
+        $sth = $dbr->prepare("SELECT m.picid, k.keyword FROM userpicmap m, keywords k ".
+                             "WHERE m.userid=? AND m.kwid=k.kwid");
+        $sth->execute($u->{'userid'});
+        while (my ($id, $kw) = $sth->fetchrow_array) {
+            $u->{'_userpics'}->{'kw'}->{$kw} = $id;
+        }
+    }
+
+    if (! defined $picid && defined $kw) {
+        $picid = $u->{'_userpics'}->{'kw'}->{$kw};
+    }
+
+    return Null("Image") unless defined $u->{'_userpics'}->{$picid};
+    my $p = $u->{'_userpics'}->{$picid};
+    return {
+        '_type' => "Image",
+        'url' => "$LJ::SITEROOT/userpic/$picid",
+        'width' => $p->[0],
+        'height' => $p->[1],
+    };
+}
 
 1;

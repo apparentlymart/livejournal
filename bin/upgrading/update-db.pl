@@ -161,7 +161,7 @@ if ($opt_pop)
     
         # find existing re-distributed layers that are in the database
         # and their styleids.
-        my $existing = LJ::get_public_layers($sysid);
+        my $existing = LJ::S2::get_public_layers($sysid);
 
         chdir "$ENV{'LJHOME'}/bin/upgrading" or die;
         my %layer;    # maps redist_uniq -> { 'type', 'parent' (uniq), 'id' (s2lid) }
@@ -229,7 +229,7 @@ if ($opt_pop)
                     'type' => $type,
                 };
                 my $error = "";
-                die $error unless LJ::layer_compile($lay, \$error, { 
+                die $error unless LJ::S2::layer_compile($lay, \$error, { 
                     's2ref' => \$s2source, 
                     'redist_uniq' => $base,
                 });

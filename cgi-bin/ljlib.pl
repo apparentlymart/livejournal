@@ -1599,6 +1599,19 @@ register_setter("newpost_minsecurity", sub {
     return 1;
 });
 
+register_setter("stylesys", sub {
+    my ($dba, $u, $remote, $key, $value, $err) = @_;
+    my $dbs = LJ::make_dbs_from_arg($dba);
+    unless ($value =~ /^[sS]?(1|2)$/) {
+        $$err = "Illegal value.  Must be S1 or S2.";
+        return 0;
+    }
+    $value = $1 + 0;
+    LJ::set_userprop($dba, $u->{'userid'}, "stylesys", $value);
+    return 1;
+});
+
+
 # <LJFUNC>
 # name: LJ::make_auth_code
 # des: Makes a random string of characters of a given length.
@@ -3201,26 +3214,26 @@ sub make_journal
         return "<H1>Error</H1>No such user <B>$user</B>";
     }
 
+    my $eff_view = $LJ::viewinfo{$view}->{'styleof'} || $view;
+    my $s1prop = "s1_${eff_view}_style";
+    LJ::load_user_props($dbs, $u, 
+                        "stylesys", "s2_style", "url", "urlname",
+                        $s1prop);
+
+    my $stylesys = 1;
     if ($styleid == -1) {
-        my $eff_view = $LJ::viewinfo{$view}->{'styleof'} || $view;
-        
-        if ($u->{"${eff_view}_style"}) {
-            # NOTE: old schema.  only here to make transition easier.  remove later.
-            $styleid = $u->{"${eff_view}_style"};
+        if ($u->{'stylesys'} == 2) {
+            $stylesys = 2;
+            $styleid = $u->{'s2_style'};
         } else {
-            my $prop = "s1_${eff_view}_style";
-            unless (defined $u->{$prop}) {
-              LJ::load_user_props($dbs, $u, $prop);
-            }
-            $styleid = $u->{$prop};
+            $styleid = $u->{$s1prop};    
+            LJ::run_hooks("s1_style_select", {
+                'styleid' => \$styleid,
+                'u' => $u,
+                'view' => $view,
+            });
         }
     }
-
-    LJ::run_hooks("s1_style_select", {
-        'styleid' => \$styleid,
-        'u' => $u,
-        'view' => $view,
-    });
     
     my $notice = sub {
         my $msg = shift;
@@ -3252,6 +3265,10 @@ sub make_journal
     return "<h1>Error</h1>Journal has been deleted.  If you are <B>$user</B>, you have a period of 30 days to decide to undelete your journal." if ($u->{'statusvis'} eq "D");
     return "<h1>Error</h1>This journal has been suspended." if ($u->{'statusvis'} eq "S");
     return "<h1>Error</h1>This journal has been deleted and purged." if ($u->{'statusvis'} eq "X");
+
+    if ($stylesys == 2) {
+        return LJ::S2::make_journal($u, $styleid, $view, $remote, $opts);
+    }
 
     my %vars = ();
     # load the base style

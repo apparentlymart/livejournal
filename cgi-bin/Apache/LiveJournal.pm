@@ -429,6 +429,7 @@ sub journal_content
 
     my %headers = ();
     my $opts = {
+        'r' => $r,
 	'headers' => \%headers,
 	'args' => $RQ{'args'},
 	'vhost' => $RQ{'vhost'},
@@ -442,9 +443,8 @@ sub journal_content
     my $html = LJ::make_journal($dbs, $user, $RQ{'mode'},
                                 $remote, $opts);
 
-    if ($opts->{'redir'}) {
-        return redir($r, $opts->{'redir'});
-    }
+    return redir($r, $opts->{'redir'}) if $opts->{'redir'};
+    return $opts->{'handler_return'} if defined $opts->{'handler_return'};
 
     my $status = $opts->{'status'} || "200 OK";
     unless ($opts->{'contenttype'}) {
