@@ -196,7 +196,7 @@ set page_vlink = "#ff0000";
 set page_alink = "#ffffff";
 set page_back = "#ffffff";
 set stronger_back = "#ffffff";
-set stronger_text = "#ffffff";
+set stronger_text = "#ff0000";
 set weak_back = "#ffffff";
 set weak_text = "#ffffff";
 
