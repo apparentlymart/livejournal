@@ -85,8 +85,11 @@ REPLACE INTO codes (code, item, sortorder, type) VALUES ('AN', 'Netherlands Anti
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('AO', 'Angola', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('AQ', 'Antarctica', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('AR', 'Argentina', '0', 'country');
+REPLACE INTO codes (code, item, sortorder, type) VALUES ('AA', 'Armed Forces Americas', '0', 'state');
+REPLACE INTO codes (code, item, sortorder, type) VALUES ('AE', 'Armed Forces Other (AE)', '0', 'state');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('AP', 'Armed Forces Pacific', '0', 'state');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('AR', 'Arkansas', '0', 'state');
+REPLACE INTO codes (code, item, sortorder, type) VALUES ('AS', 'American Samoa', '0', 'state');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('AS', 'American Samoa', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('AT', 'Austria', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('AU', 'Australia', '0', 'country');
@@ -155,6 +158,7 @@ REPLACE INTO codes (code, item, sortorder, type) VALUES ('FI', 'Finland', '0', '
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('FJ', 'Fiji', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('FK', 'Falkland Islands (Malvinas)', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('FL', 'Florida', '0', 'state');
+REPLACE INTO codes (code, item, sortorder, type) VALUES ('FM', 'Federated States of Micronesia', '0', 'state');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('FM', 'Micronesia', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('FO', 'Faroe Islands', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('FR', 'Francais', '1', 'lang');
@@ -234,6 +238,7 @@ REPLACE INTO codes (code, item, sortorder, type) VALUES ('MC', 'Monaco', '0', 'c
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('MD', 'Maryland', '0', 'state');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('MD', 'Moldova', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('ME', 'Maine', '0', 'state');
+REPLACE INTO codes (code, item, sortorder, type) VALUES ('MH', 'Marshall Islands', '0', 'state');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('MG', 'Madagascar', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('MH', 'Marshall Islands', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('MI', 'Michigan', '0', 'state');
@@ -244,6 +249,7 @@ REPLACE INTO codes (code, item, sortorder, type) VALUES ('MN', 'Minnesota', '0',
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('MN', 'Mongolia', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('MO', 'Macau', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('MO', 'Missouri', '0', 'state');
+REPLACE INTO codes (code, item, sortorder, type) VALUES ('MP', 'Northern Mariana Islands', '0', 'state');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('MP', 'Northern Mariana Islands', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('MQ', 'Martinique', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('MR', 'Mauritania', '0', 'country');
