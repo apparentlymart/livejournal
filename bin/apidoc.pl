@@ -9,14 +9,17 @@ use Getopt::Long;
 use Data::Dumper;
 
 my $opt_warn = 0;
+my $opt_file;
 GetOptions(
 	   'warn' => \$opt_warn,
+	   'file=s' => \$opt_file,
 	   );
+
+die "Unknown arguments.\n" if @ARGV;
 
 unless (-d $ENV{'LJHOME'}) {
     die "\$LJHOME not set.\n";
 }
-chdir $ENV{'LJHOME'} or die "Can't cd to $ENV{'LJOME'}\n";
 
 my %common_args = 
     (
@@ -28,7 +31,12 @@ my %common_args =
      );
 
 my %funcs;
-find(qw(cgi-bin));
+if ($opt_file) {
+    check_file($opt_file);
+} else {
+    chdir $ENV{'LJHOME'} or die "Can't cd to $ENV{'LJHOME'}\n";
+    find(qw(cgi-bin));
+}
 
 unless ($opt_warn) {
     print Dumper(\%funcs);
@@ -61,9 +69,9 @@ sub find
 sub check_file 
 {
     $_ = shift;
-    next unless (-f);
-    next if (/\.(gif|jpg|png|class|jar|zip|exe)$/);
-    next if (/~$/);
+    return unless (-f);
+    return if (/\.(gif|jpg|png|class|jar|zip|exe)$/);
+    return if (/~$/);
 
     my $curpackage = "";
 
