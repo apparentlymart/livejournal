@@ -981,12 +981,12 @@ sub Entry
     }
     if (my $mid = $p->{'current_moodid'}) {
         my $theme = defined $arg->{'moodthemeid'} ? $arg->{'moodthemeid'} : $u->{'moodthemeid'};
-        LJ::load_mood_theme(undef, $theme);
         my %pic;
         $e->{'mood_icon'} = Image($pic{'pic'}, $pic{'w'}, $pic{'h'})
             if LJ::get_mood_picture($theme, $mid, \%pic);
-        $e->{'metadata'}->{'mood'} = $LJ::CACHE_MOODS{$mid}->{'name'}
-            if defined $LJ::CACHE_MOODS{$mid};
+        if (my $mood = LJ::mood_name($mid)) {
+            $e->{'metadata'}->{'mood'} = $mood;
+        }
     }
     if ($p->{'current_mood'}) {
         $e->{'metadata'}->{'mood'} = $p->{'current_mood'};

@@ -862,12 +862,11 @@ $box{'update'} =
             
             $$bd .= "<P><B>Current <A HREF=\"/moodlist.bml\">Mood</A>:</B>";
             
-            LJ::load_moods();
             my @sel;
-            foreach my $moodid (sort { $LJ::CACHE_MOODS{$a}->{'name'} cmp  
-                                           $LJ::CACHE_MOODS{$b}->{'name'} } keys %LJ::CACHE_MOODS)
+            my $moods = LJ::get_moods();
+            foreach my $moodid (sort { $moods->{$a}->{'name'} cmp $moods->{$b}->{'name'} } keys %$moods)
             {
-                push @sel, $moodid, $LJ::CACHE_MOODS{$moodid}->{'name'};
+                push @sel, $moodid, $moods->{$moodid}->{'name'};
             }
             
             $$bd .= LJ::html_select({'name' => 'prop_current_moodid',
@@ -1004,7 +1003,7 @@ $box{'randuser'} =
             }
             $$b .= "<?ljuser $r->{'user'} ljuser?>";
             unless ($box->{'args'}->{'hidename'}) {
-                $$b .= "<br>" . LJ::eall($r->{'name'});
+                $$b .= "<br>" . LJ::ehtml($r->{'name'});
             }
 
             if ($size eq "large") {  $$b .= "</td>"; }

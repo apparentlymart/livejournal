@@ -116,12 +116,8 @@ body<=
 
             ### see if an "other" mood they typed in has an equivalent moodid
             if ($POST{'prop_current_mood'}) {
-                LJ::load_moods();
-                foreach (keys %LJ::CACHE_MOODS) {
-                    next unless $LJ::CACHE_MOODS{$_}->{'name'} eq $POST{'prop_current_mood'};
-
-                    $req{'prop_current_moodid'} = $_;
-                    last;
+                if (my $id = LJ::mood_id($POST{'prop_current_mood'})) {
+                    $req{'prop_current_moodid'} = $id;
                 }
             }
             
@@ -301,11 +297,11 @@ body<=
             my @moodlist = ('', $ML{'.noneother'});
             my $sel;
 
-            LJ::load_moods();
-            foreach (sort { $LJ::CACHE_MOODS{$a}->{'name'} cmp $LJ::CACHE_MOODS{$b}->{'name'} } keys %LJ::CACHE_MOODS) {
-                push @moodlist, ($_, $LJ::CACHE_MOODS{$_}->{'name'});
+            my $moods = LJ::get_moods();
+            foreach (sort { $moods->{$a}->{'name'} cmp $moods->{$b}->{'name'} } keys %$moods) {
+                push @moodlist, ($_, $moods->{$_}->{'name'});
 
-                if ($props{'current_mood'} eq $LJ::CACHE_MOODS{$_}->{'name'} ||
+                if ($props{'current_mood'} eq $moods->{$_}->{'name'} ||
                     $props{'current_moodid'} == $_) {
                     $sel = $_;
                 }

@@ -114,15 +114,9 @@
             my $moodid = $POST{'prop_current_moodid'};
             my $moodname = lc($POST{'prop_current_mood'});
 
-            if ($moodname) {
-                LJ::load_moods();
-                while (my ($id, $mood) = each %LJ::CACHE_MOODS) {
-                    next unless $mood->{'name'} eq $moodname;
-
-                    undef $moodname;
-                    $moodid = $id;
-                    last;
-                }
+            if (my $id = LJ::mood_id($moodname)) {
+                $moodid = $id;
+                undef $moodname;
             }
 
             # find security
@@ -436,12 +430,13 @@
         my @moodlist = ('', $ML{'.noneother'});
         my $sel;
 
-        LJ::load_moods();
-        foreach (sort { $LJ::CACHE_MOODS{$a}->{'name'} cmp $LJ::CACHE_MOODS{$b}->{'name'} } keys %LJ::CACHE_MOODS) {
-            push @moodlist, ($_, $LJ::CACHE_MOODS{$_}->{'name'});
+        my $moods = LJ::get_moods();
 
-            if ($POST{'current_mood'} eq $LJ::CACHE_MOODS{$_}->{'name'} ||
-                $POST{'current_moodid'} == $_) {
+        foreach (sort { $moods->{$a}->{'name'} cmp $moods->{$b}->{'name'} } keys %$moods) {
+            push @moodlist, ($_, $moods->{$_}->{'name'});
+
+            if ($POST{'prop_current_mood'} eq $moods->{$_}->{'name'} ||
+                $POST{'prop_current_moodid'} == $_) {
                 $sel = $_;
             }
         }

@@ -1209,6 +1209,8 @@ sub is_valid_authaction
 sub get_mood_picture
 {
     my ($themeid, $moodid, $ref) = @_;
+    LJ::load_mood_theme($themeid) unless $LJ::CACHED_MOOD_THEME{$themeid};
+    LJ::load_moods() unless $LJ::CACHED_MOODS;
     do
     {
         if ($LJ::CACHE_MOOD_THEME{$themeid}->{$moodid}) {
@@ -1228,6 +1230,32 @@ sub get_mood_picture
     return 0;
 }
 
+# mood id to name (or undef)
+sub mood_name
+{
+    my ($moodid) = @_;
+    LJ::load_moods() unless $LJ::CACHED_MOODS;
+    my $m = $LJ::CACHE_MOODS{$moodid};
+    return $m ? $m->{'name'} : undef;
+}
+
+# mood name to id (or undef)
+sub mood_id
+{
+    my ($mood) = @_;
+    return undef unless $mood;
+    LJ::load_moods() unless $LJ::CACHED_MOODS;
+    while (my ($id, $imood) = each %LJ::CACHE_MOODS) {
+        return $id if $mood eq $imood;
+    }
+    return undef;
+}
+
+sub get_moods
+{
+    LJ::load_moods() unless $LJ::CACHED_MOODS;
+    return \%LJ::CACHE_MOODS;
+}
 
 # <LJFUNC>
 # class: time

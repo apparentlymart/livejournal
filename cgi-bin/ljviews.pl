@@ -495,12 +495,11 @@ sub prepare_currents
     }
     if ($val = $args->{'props'}->{$datakey}->{'current_moodid'}) {
         my $theme = $args->{'user'}->{'moodthemeid'};
-        LJ::load_mood_theme($theme);
         my %pic;
-        my $name = defined $LJ::CACHE_MOODS{$val} ? $LJ::CACHE_MOODS{$val}->{'name'} : '';
+        my $name = LJ::mood_name($val);
         if (LJ::get_mood_picture($theme, $val, \%pic)) {
             $currents{'Mood'} = "<img src=\"$pic{'pic'}\" align='absmiddle' width='$pic{'w'}' ".
-                "height='$pic{'h'}' vspace='1' /> $name";
+                "height='$pic{'h'}' vspace='1' alt='' /> $name";
         } else {
             $currents{'Mood'} = $name;
         }
