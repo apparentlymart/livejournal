@@ -14,10 +14,11 @@ $maint{'clean_caches'} = sub
 
     print "-I- Cleaning duplock.\n";
     $dbh->do("DELETE FROM duplock WHERE instime < DATE_SUB(NOW(), INTERVAL 1 HOUR)");
-    
+
     print "-I- Cleaning diresearchres.\n";
-    my $pfx = $LJ::DIR_DB ? "$LJ::DIR_DB." : "";
-    $dbh->do("DELETE FROM ${pfx}dirsearchres2 WHERE dateins < DATE_SUB(NOW(), INTERVAL 30 MINUTE)");
+    # need insert before delete so master logs delete and slaves actually do it
+    $dbh->do("INSERT INTO dirsearchres2 VALUES (MD5(NOW()), DATE_SUB(NOW(), INTERVAL 31 MINUTE), '')");
+    $dbh->do("DELETE FROM dirsearchres2 WHERE dateins < DATE_SUB(NOW(), INTERVAL 30 MINUTE)");
 
     print "-I- Cleaning meme.\n";
     do {
