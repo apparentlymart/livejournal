@@ -10,12 +10,13 @@ my $opt_sql = 0;
 my $opt_drop = 0;
 my $opt_pop = 0;
 my $opt_confirm = "";
-
+my $cluster = 0;   # by default, upgrade master.
 exit 1 unless
 GetOptions("runsql" => \$opt_sql,
 	   "drop" => \$opt_drop,
 	   "populate" => \$opt_pop,
 	   "confirm=s" => \$opt_confirm,
+	   "cluster=i" => \$cluster,
 	   );
 
 
@@ -27,9 +28,9 @@ unless (-d $ENV{'LJHOME'}) {
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
 ## make sure we can connect
-my $dbh = LJ::get_dbh("master");
+my $dbh = $cluster ? LJ::get_cluster_master($cluster) : LJ::get_dbh("master");
 unless ($dbh) {
-    die "Can't connect to the database, so I can't update it.\n";
+    die "Can't connect to the database (clust\#$cluster), so I can't update it.\n";
 }
 
 my $sth;
@@ -40,6 +41,7 @@ my %table_drop;     # $table -> 1
 my %post_create;    # $table -> [ [ $action, $what ]* ]
 my %coltype;        # $table -> { $col -> $type }
 my @alters;
+my %clustered_table; # $table -> 1
 
 ## figure out what tables already exist (but not details of their structure)
 $sth = $dbh->prepare("SHOW TABLES");
@@ -156,6 +158,8 @@ sub try_sql
 sub do_alter
 {
     my ($table, $sql) = @_;
+    return if $cluster && ! defined $clustered_table{$table};
+
     do_sql($sql);
 
     # columns will have changed, so clear cache:
@@ -165,6 +169,8 @@ sub do_alter
 sub create_table
 {
     my $table = shift;
+    return if $cluster && ! defined $clustered_table{$table};
+
     do_sql($table_create{$table});
 
     foreach my $pc (@{$post_create{$table}})
@@ -186,6 +192,8 @@ sub create_table
 sub drop_table
 {
     my $table = shift;
+    return if $cluster && ! defined $clustered_table{$table};
+
     if ($opt_drop) {
 	do_sql("DROP TABLE $table");
     } else {
@@ -204,12 +212,20 @@ sub load_datfile
     require $file or die "Can't run $file\n";
 }
 
+sub mark_clustered
+{
+    foreach (@_) {
+	$clustered_table{$_} = 1;
+    }
+}
+
 sub register_tablecreate
 {
     my ($table, $create) = @_;
-
     # we now know of it
     delete $table_unknown{$table};
+
+    return if $cluster && ! defined $clustered_table{$table};
 
     unless ($table_exists{$table}) {
 	$table_create{$table} = $create;

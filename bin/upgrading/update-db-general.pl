@@ -2,6 +2,11 @@
 # database schema & data info
 #
 
+mark_clustered("useridmap", "userbio", "syncupdates2", "cmdbuffer",
+	       "log2", "logtext2", "logsubject2", "logprop2", "logsec2", "recent_logtext2",
+	       "talk2", "talkprop2", "talktext2", "recent_talktext2", "talkleft",
+	       );
+
 register_tablecreate("adopt", <<'EOC');
 CREATE TABLE adopt (
   adoptid int(10) unsigned NOT NULL auto_increment,
