@@ -322,7 +322,17 @@ my $check = sub
     }
 
     if (@errors) {
-        print STDERR "\nERRORS:\n";
+        if ($opt_err) {
+            my %ignore;
+            open(EX, "$ENV{'HOME'}/.dbcheck.ignore");
+            while (<EX>) {
+                s/\s+$//;
+                $ignore{$_} = 1;
+            }
+            close EX;
+            @errors = grep { ! $ignore{$_} } @errors;
+        }
+        print STDERR "\nERRORS:\n" if @errors;
         foreach (@errors) {
             print STDERR "  * $_\n";
         }
