@@ -15,7 +15,7 @@ specific friend group to view.
 <hr>
 Your friends list is also used for posts with restricted access.<br>
 <ul><li>"Friends-Only" posts are (as you'd expect) viewable only by other users on your friends list.
-<li>On "Custom" posts, you can specify which friend groups can view your post.  (Custom security can only currently be used with the <a href="/download/">Windows client</a>.)
+<li>On "Custom" posts, you can specify which friend groups can view your post.  (Not all <a href="/download/">clients</a> currently support custom security.)
 </ul>
 
 <=body
