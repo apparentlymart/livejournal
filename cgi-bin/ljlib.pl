@@ -7256,7 +7256,7 @@ sub generate_session
               "UNIX_TIMESTAMP()+$expsec,?)", undef,
               $u->{'userid'}, $id, $sess->{'auth'}, $opts->{'exptype'}, $opts->{'ipfixed'});
     return undef if $udbh->err;
-    $sess->{'sessid'} = $udbh->{'mysql_insertid'};
+    $sess->{'sessid'} = $id;
     $sess->{'userid'} = $u->{'userid'};
     $sess->{'ipfixed'} = $opts->{'ipfixed'};
     $sess->{'exptype'} = $opts->{'exptype'};
