@@ -22,7 +22,7 @@ _code?>
     return LJ::bad_input("You could not be authenticated as the specified user.")
         unless $u;
 
-    return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
+    return $LJ::MSG_READONLY_USER if $u->readonly;
 
     # extra arguments for get requests
     my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
@@ -803,14 +803,13 @@ _code?>
 
         # update their bio text
         if (($u->{'bio'} ne $POST{'bio'}) && !defined($POST{'bio_absent'})) {
-            my $dbcm = LJ::get_cluster_master($u);
             if ($has_bio eq "N") {
-                $dbcm->do("DELETE FROM userbio WHERE userid=?", undef, $u->{'userid'});
-                LJ::dudata_set($dbcm, $u->{'userid'}, 'B', 0, 0);
+                $u->do("DELETE FROM userbio WHERE userid=?", undef, $u->{'userid'});
+                $u->dudata_set('B', 0, 0);
             } else {
-                $dbcm->do("REPLACE INTO userbio (userid, bio) VALUES (?, ?)",
-                            undef, $u->{'userid'}, $POST{'bio'});
-                LJ::dudata_set($dbcm, $u->{'userid'}, 'B', 0, length($POST{'bio'}));
+                $u->do("REPLACE INTO userbio (userid, bio) VALUES (?, ?)",
+                       undef, $u->{'userid'}, $POST{'bio'});
+                $u->dudata_set('B', 0, length($POST{'bio'}));
             }
             LJ::MemCache::set([$u->{'userid'}, "bio:$u->{'userid'}"], $POST{'bio'});
         }

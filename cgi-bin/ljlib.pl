@@ -21,6 +21,7 @@ use Digest::MD5 ();
 use Digest::SHA1 ();
 use HTTP::Date ();
 use LJ::MemCache;
+use LJ::User;
 use Time::Local ();
 use Storable ();
 use Compress::Zlib ();
@@ -2065,7 +2066,7 @@ sub ljuser
     my $user = shift;
     my $opts = shift;
 
-    if ($LJ::DYNAMIC_LJUSER && ref $user ne 'HASH' && ! $opts->{'type'}) {
+    if ($LJ::DYNAMIC_LJUSER && ! isu($user) && ! $opts->{'type'}) {
         # Try to automatically pick the user type, but still
         # make something if we can't (user doesn't exist?)
         $user = LJ::load_user($user) || $user;
@@ -2082,7 +2083,7 @@ sub ljuser
         }
     }
 
-    if (ref $user eq 'HASH') {
+    if (isu($user)) {
         $opts->{'type'} = $user->{'journaltype'};
         $opts->{'del'} = $user->{'statusvis'} ne 'V';
         $user = $user->{'user'};
@@ -2243,7 +2244,7 @@ sub get_cap_min
     my $caps = shift;   # capability bitmask (16 bits), or user object
     my $cname = shift;  # capability name
     if (! defined $caps) { $caps = 0; }
-    elsif (ref $caps eq "HASH") { $caps = $caps->{'caps'}; }
+    elsif (isu($caps)) { $caps = $caps->{'caps'}; }
     my $min = undef;
     foreach my $bit (keys %LJ::CAP) {
         next unless ($caps & (1 << $bit));
@@ -2732,7 +2733,7 @@ sub load_user_props
     &nodb;
 
     my $u = shift;
-    return unless ref $u eq "HASH";
+    return unless isu($u);
     return if $u->{'statusvis'} eq "X";
 
     my $opts = ref $_[0] ? shift : {};
@@ -2943,7 +2944,7 @@ sub auth_okay
     my $md5 = shift;
     my $actual = shift;
     my $ip_banned = shift;
-    return 0 unless ref $u eq "HASH";
+    return 0 unless isu($u);
 
     $actual ||= $u->{'password'};
     return 0 if $actual eq "";
@@ -4400,7 +4401,7 @@ sub expunge_userpic {
 # <LJFUNC>
 # name: LJ::activate_userpics
 # des: Sets/unsets userpics as inactive based on account caps
-# args: u
+# args: uuserid
 # returns: nothing
 # </LJFUNC>
 sub activate_userpics
@@ -4412,10 +4413,10 @@ sub activate_userpics
     return undef unless $u;
 
     # if a userid was given, get a real $u object
-    $u = LJ::load_userid($u, "force") unless ref $u eq "HASH";
+    $u = LJ::load_userid($u, "force") unless isu($u);
 
     # should have a $u object now
-    return undef unless ref $u eq 'HASH';
+    return undef unless isu($u);
 
     # can't get a cluster read for expunged users since they are clusterid 0,
     # so just return 1 to the caller from here and act like everything went fine
@@ -5227,7 +5228,7 @@ sub get_db_writer {
 sub get_cluster_reader
 {
     my $arg = shift;
-    my $id = ref $arg eq "HASH" ? $arg->{'clusterid'} : $arg;
+    my $id = isu($arg) ? $arg->{'clusterid'} : $arg;
     my @roles = ("cluster${id}slave", "cluster${id}");
     if (my $ab = $LJ::CLUSTER_PAIR_ACTIVE{$id}) {
         $ab = lc($ab);
@@ -5251,7 +5252,7 @@ sub get_cluster_def_reader
 {
     my @dbh_opts = scalar(@_) == 2 ? (shift @_) : ();
     my $arg = shift;
-    my $id = ref $arg eq "HASH" ? $arg->{'clusterid'} : $arg;
+    my $id = isu($arg) ? $arg->{'clusterid'} : $arg;
     return LJ::get_cluster_reader(@dbh_opts, $id) if
         $LJ::DEF_READER_ACTUALLY_SLAVE{$id};
     return LJ::get_dbh(@dbh_opts, LJ::master_role($id));
@@ -5270,7 +5271,7 @@ sub get_cluster_master
 {
     my @dbh_opts = scalar(@_) == 2 ? (shift @_) : ();
     my $arg = shift;
-    my $id = ref $arg eq "HASH" ? $arg->{'clusterid'} : $arg;
+    my $id = isu($arg) ? $arg->{'clusterid'} : $arg;
     return undef if $LJ::READONLY_CLUSTER{$id};
     return LJ::get_dbh(@dbh_opts, LJ::master_role($id));
 }
@@ -5488,7 +5489,7 @@ sub load_userids_multiple
 
     my $satisfy = sub {
         my $u = shift;
-        next unless ref $u eq "HASH";
+        next unless ref $u eq "LJ::User";
         foreach (@{$need{$u->{'userid'}}}) {
             $$_ = $u;
         }
@@ -5549,6 +5550,7 @@ sub _load_user_raw
             $sth->execute($v);
             my $u = $sth->fetchrow_hashref;
             if ($u) {
+                bless $u, 'LJ::User';
                 $hook->($u);
                 $last = $u;
             }
@@ -5559,6 +5561,7 @@ sub _load_user_raw
         my $sth = $db->prepare("SELECT * FROM user WHERE $key IN ($in)");
         $sth->execute;
         while (my $u = $sth->fetchrow_hashref) {
+            bless $u, 'LJ::User';
             $hook->($u);
             $last = $u;
         }
@@ -5680,7 +5683,10 @@ sub memcache_get_u
     my @ret;
     foreach my $ar (values %{LJ::MemCache::get_multi(@keys) || {}}) {
         my $u = LJ::MemCache::array_to_hash("user", $ar);
-        push @ret, $u if $u;
+        if ($u) {
+            bless $u, 'LJ::User';
+            push @ret, $u;
+        }
     }
     return wantarray ? @ret : $ret[0];
 }
@@ -6202,7 +6208,7 @@ sub cmd_buffer_flush
 sub journal_base
 {
     my ($user, $vhost) = @_;
-    if (ref $user eq "HASH") {
+    if (isu($user)) {
         my $u = $user;
         $user = $u->{'user'};
         unless (defined $vhost) {
@@ -7134,9 +7140,9 @@ sub delete_entry
 
     # delete from clusters
     foreach my $t (qw(logtext2 logprop2 logsec2)) {
-        $dbcm->do("DELETE FROM $t WHERE journalid=$jid AND jitemid=$jitemid");
+        $u->do("DELETE FROM $t WHERE journalid=$jid AND jitemid=$jitemid");
     }
-    LJ::dudata_set($dbcm, $jid, 'L', $jitemid, 0);
+    $u->dudata_set('L', $jitemid, 0);
 
     # delete all comments
     LJ::delete_all_comments($u, 'L', $jitemid);
@@ -7396,32 +7402,6 @@ sub delete_comments {
         $dbcm->do("DELETE FROM talkprop2 WHERE $where");
     }
     return $num;
-}
-
-# <LJFUNC>
-# name: LJ::dudata_set
-# class: logging
-# des: Record or delete disk usage data for a journal
-# args: dbcm, journalid, area, areaid, bytes
-# journalid: Journal userid to record space for.
-# area: One character: "L" for log, "T" for talk, "B" for bio, "P" for pic.
-# areaid: Unique ID within $area, or '0' if area has no ids (like bio)
-# bytes: Number of bytes item takes up.  Or 0 to delete record.
-# returns: 1.
-# </LJFUNC>
-sub dudata_set
-{
-    my ($dbcm, $journalid, $area, $areaid, $bytes) = @_;
-    $bytes += 0; $areaid += 0; $journalid += 0;
-    $area = $dbcm->quote($area);
-    if ($bytes) {
-        $dbcm->do("REPLACE INTO dudata (userid, area, areaid, bytes) ".
-                  "VALUES ($journalid, $area, $areaid, $bytes)");
-    } else {
-        $dbcm->do("DELETE FROM dudata WHERE userid=$journalid AND ".
-                  "area=$area AND areaid=$areaid");
-    }
-    return 1;
 }
 
 # <LJFUNC>
@@ -8990,6 +8970,9 @@ sub isdb { return ref $_[0] && (ref $_[0] eq "DBI::db" ||
                                 ref $_[0] eq "DBIx::StateKeeper" ||
                                 ref $_[0] eq "Apache::DBI::db"); }
 
+# is a user object (at least a hashref)
+sub isu { return ref $_[0] && (ref $_[0] eq "LJ::User" ||
+                               ref $_[0] eq "HASH" && $_[0]->{userid}); }
 
 use vars qw($AUTOLOAD);
 sub AUTOLOAD {
