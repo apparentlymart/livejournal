@@ -3326,6 +3326,18 @@ error.username_notfound=Username not found.
 
 Help=Help
 
+label.screening.all=All comments
+
+label.screening.anonymous=Anonymous only
+
+label.screening.default=Default
+
+label.screening.header=Screened Comments:
+
+label.screening.none=None
+
+label.screening.nonfriends=By non-friends
+
 label.security.custom=Custom...
 
 label.security.friends=Friends

@@ -362,6 +362,15 @@ RTE
         }
         $out .= "\n";
 
+        # custom screening levels for this post
+        $out .= "<p><b>$ML{'label.screening.header'}</b> ";
+        my @levels = ('', $ML{'label.screening.default'}, 'N', $ML{'label.screening.none'},
+                      'R', $ML{'label.screening.anonymous'}, 'F', $ML{'label.screening.nonfriends'},
+                      'A', $ML{'label.screening.all'});
+        $out .= LJ::html_select({ name => 'prop_opt_screening', selected => $POST{'prop_opt_screening'} }, @levels);
+        $out .= LJ::help_icon('screening', ' ');
+        $out .= "\n";
+
         ### opt_ checkboxes
         my $prop_check = sub {
             my $prop = shift;
@@ -540,7 +549,8 @@ RTE
             # copy some things from %POST
             foreach (qw(subject year mon day hour min
                         prop_picture_keyword prop_current_moodid
-                        prop_current_mood prop_current_music)) {
+                        prop_current_mood prop_current_music
+                        prop_opt_screening)) {
                 $req{$_} = $POST{$_};
             }
 

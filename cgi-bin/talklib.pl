@@ -308,6 +308,36 @@ sub can_view_screened {
     return LJ::Talk::can_delete(@_);
 }
 
+# <LJFUNC>
+# name: LJ::Talk::screening_level
+# des: Determines the screening level of a particular post given the relevent information.
+# args: journalu, jitemid
+# des-journalu: User object of the journal the post is in.
+# des-jitemid: Itemid of the post.
+# returns: Single character that indicates the screening level.  Undef means don't screen
+#       anything, 'A' means screen All, 'R' means screen Anonymous (no-remotes), 'F' means
+#       screen non-friends.
+# </LJFUNC>
+sub screening_level {
+    my ($journalu, $jitemid) = @_;
+    die 'LJ::screening_level needs a user object.' unless ref $journalu;
+    $jitemid += 0;
+    die 'LJ::screening_level passed invalid jitemid.' unless $jitemid;
+    
+    # load the logprops for this entry
+    my %props;
+    LJ::load_log_props2($journalu->{userid}, [ $jitemid ], \%props);
+
+    # determine if userprop was overriden
+    my $val = $props{$jitemid}{opt_screening};
+    return if $val eq 'N'; # N means None, so return undef
+    return $val if $val;
+
+    # now return userprop, as it's our last chance
+    LJ::load_user_props($journalu, 'opt_whoscreened');
+    return $journalu->{opt_whoscreened};
+}
+
 sub update_commentalter {
     my ($u, $itemid) = @_;
     LJ::set_logprop($u, $itemid, { 'commentalter' => time() });
@@ -808,6 +838,7 @@ sub talkform {
     
     # from registered user or anonymous?
     $ret .= "<table>\n";
+    my $screening = LJ::Talk::screening_level($journalu, $opts->{ditemid} >> 8);
     if ($journalu->{'opt_whocanreply'} eq "all") {
         $ret .= "<tr valign='center'>";
         $ret .= "<td align='right'>$BML::ML{'.opt.from'}</td>";
@@ -815,11 +846,7 @@ sub talkform {
                 $whocheck->('anonymous') .
                 " /></td>";
         $ret .= "<td align='left'><b><label for='talkpostfromanon'>$BML::ML{'.opt.anonymous'}</label></b>";
-        if ($journalu->{'opt_whoscreened'} eq 'A' ||
-            $journalu->{'opt_whoscreened'} eq 'R' ||
-            $journalu->{'opt_whoscreened'} eq 'F') {
-            $ret .= " " . $BML::ML{'.opt.willscreen'};
-        }
+        $ret .= " " . $BML::ML{'.opt.willscreen'} if $screening;
         $ret .= "</td></tr>\n";
     } elsif ($journalu->{'opt_whocanreply'} eq "reg") {
         $ret .= "<tr valign='middle'>";
@@ -848,9 +875,8 @@ sub talkform {
                      " /></td>";
             $ret .= "<td align='left'><label for='talkpostfromremote'>" . BML::ml(".opt.loggedin", {'username'=>"<i>$remote->{'user'}</i>"}) . "</label>\n";
             $ret .= "<input type='hidden' name='cookieuser' value='$remote->{'user'}' id='cookieuser' />\n";
-            if ($journalu->{'opt_whoscreened'} eq 'A' ||
-                ($journalu->{'opt_whoscreened'} eq 'F' &&
-                 !LJ::is_friend($journalu, $remote))) {
+            if ($screening eq 'A' ||
+                ($screening eq 'F' && !LJ::is_friend($journalu, $remote))) {
                 $ret .= " " . $BML::ML{'.opt.willscreen'};
             }
             $ret .= "</td>";
@@ -864,8 +890,8 @@ sub talkform {
     $ret .= "<td align='center'><input type='radio' name='usertype' value='user' id='talkpostfromlj'" .
             $whocheck->('ljuser') . "/>";
     $ret .= "</td><td align='left'><b><label for='talkpostfromlj'>$BML::ML{'.opt.ljuser'}</label></b> ";
-    $ret .= $BML::ML{'.opt.willscreenfriend'} if $journalu->{'opt_whoscreened'} eq 'F';
-    $ret .= $BML::ML{'.opt.willscreen'} if $journalu->{'opt_whoscreened'} eq 'A';
+    $ret .= $BML::ML{'.opt.willscreenfriend'} if $screening eq 'F';
+    $ret .= $BML::ML{'.opt.willscreen'} if $screening eq 'A';
     $ret .= "</td></tr>\n";
 
     # Username: [    ] Password: [    ]  Login? [ ]
@@ -1729,7 +1755,7 @@ sub init {
     LJ::load_userids_multiple([
                                $item->{'posterid'} => \$init->{entryu},
                                ], [ $journalu ]);
-    LJ::load_user_props($journalu, "opt_logcommentips", "opt_whoscreened");
+    LJ::load_user_props($journalu, "opt_logcommentips");
 
     if ($form->{'userpost'} && $form->{'usertype'} ne "user") {
         unless ($form->{'usertype'} eq "cookieuser" &&
@@ -1991,9 +2017,10 @@ sub init {
 
     # figure out whether to post this comment screened
     my $state = 'A';
-    if ($journalu->{'opt_whoscreened'} eq 'A' ||
-        ($journalu->{'opt_whoscreened'} eq 'R' && ! $up) ||
-        ($journalu->{'opt_whoscreened'} eq 'F' && !($up && LJ::is_friend($journalu, $up)))) {
+    my $screening = LJ::Talk::screening_level($journalu, $ditemid >> 8);
+    if ($screening eq 'A' ||
+        ($screening eq 'R' && ! $up) ||
+        ($screening eq 'F' && !($up && LJ::is_friend($journalu, $up)))) {
         $state = 'S';
     }
 
