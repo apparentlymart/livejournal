@@ -39,7 +39,10 @@ Type: <input name='type' size=15>
 FORM
 }
 
- $sth = $dbr->prepare("SELECT u.user, ua.user, s.shtype, s.shdate, s.notes FROM statushistory s, useridmap u, useridmap ua WHERE $where s.adminid=ua.userid AND s.userid=u.userid");
+ $sth = $dbr->prepare("SELECT u.user, ua.user, s.shtype, s.shdate, s.notes ".
+                      "FROM statushistory s, useridmap u, useridmap ua ".
+                      "WHERE $where s.adminid=ua.userid AND s.userid=u.userid ".
+                      "ORDER BY s.shdate");
  $sth->execute;
  return $dbh->errstr if $dbh->err;
  
