@@ -4106,7 +4106,10 @@ sub start_request
                 # forking off the parent who got the inital config loaded
                 # hours/days ago and then the "updated" config which is
                 # a different hours/days ago.
-                print STDERR "ljconfig.pl reloaded\n";
+                #
+                # only print when we're in web-context
+                print STDERR "ljconfig.pl reloaded\n"
+                    if eval { Apache->request };
             }
         }
         $LJ::CACHE_CONFIG_MODTIME_LASTCHECK = $now;
