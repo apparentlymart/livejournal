@@ -1,5 +1,9 @@
 #!/usr/bin/perl
 #
+# <LJDEP>
+# lib: HTML::TokeParser, cgi-bin/ljconfig.pl, cgi-bin/ljlib.pl
+# link: htdocs/userinfo.bml, htdocs/users
+# </LJDEP>
 
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 
