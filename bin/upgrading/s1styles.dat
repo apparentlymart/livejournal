@@ -5021,7 +5021,7 @@ FRIENDS_NOFRIENDS<=
 </table>
 <p>There are a few reasons why you might not see posts on this friends page:
 <ul>
-<li>%%name%% might not have any friends defined.  If you are %%name%%, you can <a href="%%cons:siteroot%%/friends/edit.bml?%%username%%">edit your LiveJournal friends</a> so they show up here.</li>
+<li>%%name%% might not have any friends defined.  If you are %%name%%, you can <a href="%%cons:siteroot%%/friends/edit.bml?%%username%%">edit your friend list</a> so they show up here.</li>
 <li>%%name%% might have friends defined, but all of their friend's posts might be over two weeks old (according to the times on our servers), and thus wouldn't be displayed here.</li>
 <li>%%name%% might have friends defined that post only protected entries that you can't view, because they haven't defined you as a friend in return.</li>
 </ul>

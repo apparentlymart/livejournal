@@ -142,7 +142,6 @@ if ($opt_pop)
     require "$ENV{'LJHOME'}/bin/upgrading/s1style-rw.pl";
     my $ss = s1styles_read();
     foreach my $uniq (sort keys %$ss) {
-        print "  $uniq: ";
         my $s = $ss->{$uniq};
         my $existing = $dbh->selectrow_array(q{
             SELECT styleid FROM style WHERE
@@ -161,9 +160,8 @@ if ($opt_pop)
             die $dbh->errstr if $dbh->err;
             if ($ros > 0) {
                 $dbh->do("DELETE FROM s1stylecache WHERE styleid=$existing");
+                print "  $uniq: ";
                 print "updated \#$existing\n";
-            } else {
-                print "unchanged\n";
             }
             next;
         }
@@ -175,6 +173,7 @@ if ($opt_pop)
                  undef, map { $s->{$_} } qw(styledes type formatdata is_embedded
                                             is_colorfree lastupdate));
         die $dbh->errstr if $dbh->err;
+        print "  $uniq: ";
         print "added\n";
     }
 
@@ -223,9 +222,6 @@ if ($opt_pop)
             };
             
             my $parid = $layer{$parent}->{'id'};
-            print "$base($id) is $type";
-            if ($parid) { print ", parent = $parent($parid)"; };
-            print "\n";
             
             # see if source changed
             my $md5_source = Digest::MD5::md5_hex($s2source);
@@ -233,6 +229,10 @@ if ($opt_pop)
             
             # skip compilation if source is unchanged and parent wasn't rebuilt.
             return if $md5_source eq $md5_exist && ! $layer{$parent}->{'built'} && ! $opt_forcebuild;
+
+            print "$base($id) is $type";
+            if ($parid) { print ", parent = $parent($parid)"; };
+            print "\n";
             
             # we're going to go ahead and build it.
             $layer{$base}->{'built'} = 1;
