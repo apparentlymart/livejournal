@@ -53,7 +53,7 @@ BODY<=
  my $thread = int($FORM{'thread'}) || 0;
 
  my $item = LJ::Talk::get_journal_item($dbcs, $u, $itemid);
- unless ($item && ($item->{'oldurl'} || $item->{'anum'} == $init->{'anum'})) {
+ unless ($item && ($init->{'oldurl'} || $item->{'anum'} == $init->{'anum'})) {
      return "(=H1 Error H1=)(=P No such entry. P=)";
  }
 
