@@ -480,9 +480,18 @@ body<=
         $ret .= " <b><label for='itemid-$ditemid'>" . $res{"events_${i}_eventtime"} . "</label></b>";
         $ret .= " (Posted by: " . LJ::ljuser($res{"events_${i}_poster"}) . ")" if $usejournal;
 
+        ### security indicator
+        my $sec = ' ';
+        if ($res{"events_${i}_security"} eq "private") {
+            $sec .= BML::fill_template("securityprivate");
+        } elsif ($res{"events_${i}_security"} eq "usemask") {
+            $sec .= BML::fill_template("securityprotected");
+        }
+        $ret .= $sec;
+
         if (my $subj = $res{"events_${i}_subject"}) {
             LJ::CleanHTML::clean_subject_all(\$subj);
-            $ret .= "; <i>" . LJ::ehtml($subj) . "</i>";
+            $ret .= " <i>" . LJ::ehtml($subj) . "</i>";
         }
         $ret .= "<br />\n";
             
