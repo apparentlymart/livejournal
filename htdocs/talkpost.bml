@@ -17,11 +17,9 @@ body<=
     $r->notes("codepath" => "bml.talkpost");
 
     my $uri = BML::get_uri();
-    my $itemid;
 
     if ($uri =~ m!/(\d+)\.html$!) {
-        $itemid = $1;
-        $FORM{'itemid'} = $itemid unless $FORM{'replyto'};
+        $FORM{'itemid'} = $1 unless $FORM{'replyto'};
         $FORM{'journal'} = $r->notes("_journal");
         BML::set_language_scope("/talkpost.bml");
     }
@@ -44,7 +42,7 @@ body<=
         LJ::load_user_props($u, "renamedto");
         if ($u->{'renamedto'} ne "") {
             my $id = $FORM{'itemid'}+0;
-            return BML::redirect("$LJ::SITEROOT/talkpost.bml?journal=$u->{'renamedto'}&itemid=$id");
+            return BML::redirect(LJ::journal_base($u->{'renamedto'}) . "/$id.html?mode=reply");
         }
     }
 
