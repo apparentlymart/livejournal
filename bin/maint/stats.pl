@@ -172,7 +172,7 @@ $maint{'genstats'} = sub
 
     $sth = $dbh->prepare("SELECT statcat, statkey, statval FROM stats ORDER BY 1, 2");
     $sth->execute;
-    open (OUT, ">$BASEDIR/stats/stats.txt");
+    open (OUT, ">$LJ::HTDOCS/stats/stats.txt");
     while (@_ = $sth->fetchrow_array) {
 	print OUT join("\t", @_), "\n";
     }
