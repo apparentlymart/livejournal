@@ -1300,10 +1300,7 @@ function FriendsPage::print_entry(Entry e) {
     $fg = $.friends{$e.journal.username}.fgcolor;
     "<h3>";
     $this->print_entry_poster($e);
-    $e.security_icon->print($e.security);
-    if ($e.subject) {
-        " $e.subject";
-    }
+    "$e.security_icon $e.subject";
     "</h3>\n";
     """<div style="color: """ + $fg + "; background: " + $bg + """ none;">"""; $this->print_entry_poster($e); "</div>";
     """<div class="entrytext">\n$e.text\n</div>\n""";
@@ -1442,7 +1439,7 @@ function MonthDay::print_subjectlist() {
         if ($e.poster.username != $e.journal.username) {
             $e.poster->print(); " ";
         }
-        print $e.security_icon;
+        "$e.security_icon";
         if ($e.subject != "") {
             " <a href=\"$e.permalink_url\">$e.subject</a>";
         } else {
@@ -1637,10 +1634,7 @@ function EntryPage::print_body
     print "<br />@ " + $e.time->date_format("long") + " - " + $e.time->time_format();
     "</td></tr></table>\n";
 
-    "<h2>"; 
-    print $e.security_icon;
-    if ($e.subject) { " $e.subject"; }
-    "</h2>\n";
+    "<h2>$e.security_icon $e.subject</h2>\n"; 
 
     if (not $.viewing_thread) {
         "<div class='entrytext'>\n$e.text\n</div>\n";
