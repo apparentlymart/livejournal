@@ -738,8 +738,8 @@ sub journal_content
 
     } elsif ($opts->{'suspendeduser'}) {
         $status = "403 User suspended";
-        $html = "<h1>Denied</h1>" .
-                "<p>The journal your are trying to view is suspended.</p>";
+        $html = "<h1>Suspended User</h1>" .
+                "<p>The content at this URL is from a suspended user.</p>";
 
         $generate_iejunk = 1;
     }
