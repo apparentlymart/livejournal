@@ -624,8 +624,6 @@ BODY<=
 
      ### update interests
      {
-         my %int_new = ();
-         my %int_del = %interests;
          $FORM{'interests'} =~ s/^\s+//;
          $FORM{'interests'} =~ s/\s+$//;
          $FORM{'interests'} =~ s/\n/,/g;
@@ -634,86 +632,7 @@ BODY<=
          if ($intcount > 150) {
              return LJ::bad_input("Sorry, you listed too many interests.  The limit is 150, but you've listed $intcount.  Any changes you made to your interests were not saved.  Go back and cut down your list, then save again.");
          }
-
-         foreach my $int (@ints)
-         {
-             $int = lc($int);
-             $int =~ s/^i like //;          # *sigh*
-             next unless $int;
-             next if $int =~ / .+ .+ .+ /;  # prevent sentences
-             next if $int =~ /[\<\>]/;
-             next if length($int) > 35;
-             $int_new{$int} = 1 unless $interests{$int};
-             delete $int_del{$int};
-         }
-
-         ### were interests removed?
-         if (%int_del)
-         {
-             ## easy, we know their IDs, so delete them en masse
-             my $intid_in = join(", ", values %int_del);
-             $dbh->do("DELETE FROM userinterests WHERE userid=$u->{'userid'} AND intid IN ($intid_in)");
-             $dbh->do("UPDATE interests SET intcount=intcount-1 WHERE intid IN ($intid_in)");
-         }
-
-         ### do we have new interests to add?
-         if (%int_new)
-         {
-             ## difficult, have to find intids of interests, and create new ints for interests
-             ## that nobody has ever entered before
-
-             my $int_in = join(", ", map { $dbh->quote($_); } keys %int_new);
-             my %int_exist;
-             my @new_intids = ();  ## existing IDs we'll add for this user
-
-             ## find existing IDs
-             $sth = $dbr->prepare("SELECT interest, intid FROM interests WHERE interest IN ($int_in)");
-             $sth->execute;
-             while ($_ = $sth->fetchrow_hashref) {
-                 push @new_intids, $_->{'intid'};     # - we'll add this later.
-                 delete $int_new{$_->{'interest'}};   # - so we don't have to make a new intid for
-                                                      #   this next pass.
-             }
-
-             if (@new_intids) {
-                 my $sql = "";
-                 foreach my $newid (@new_intids) {
-                     if ($sql) { $sql .= ", "; }
-                     else { $sql = "REPLACE INTO userinterests (userid, intid) VALUES "; }
-                     $sql .= "($u->{'userid'}, $newid)";
-                 }
-                 $dbh->do($sql);
-
-                 my $intid_in = join(", ", @new_intids);
-                 $dbh->do("UPDATE interests SET intcount=intcount+1 WHERE intid IN ($intid_in)");
-             }
-         }
-
-         ### do we STILL have interests to add?  (must make new intids)
-         if (%int_new)
-         {
-             foreach my $int (keys %int_new)
-             {
-                 my $intid;
-                 my $qint = $dbh->quote($int);
-
-                 $dbh->do("INSERT INTO interests (intid, intcount, interest) ".
-                          "VALUES (NULL, 1, $qint)");
-                 if ($dbh->err) {
-                     # somebody beat us to creating it.  find its id.
-                     $intid = $dbh->selectrow_array("SELECT intid FROM interests WHERE interest=$qint");
-                     $dbh->do("UPDATE interests SET intcount=intcount+1 WHERE intid=$intid");
-                 } else {
-                     # newly created
-                     $intid = $dbh->{'mysql_insertid'};
-                 }
-                 if ($intid) {
-                     ## now we can actually insert it into the userinterests table:
-                     $dbh->do("INSERT INTO userinterests (userid, intid) ".
-                              "VALUES ($u->{'userid'}, $intid)");
-                 }
-             }
-         }
+         LJ::set_interests($dbs, $u->{'userid'}, \%interests, \@ints);
      }
 
      #### now unban users they selected to be unbanned
@@ -737,12 +656,9 @@ BODY<=
          print MAIL "From: $LJ::ADMIN_EMAIL\n";
          print MAIL "Subject: Email Address Changed\n\n";
          print MAIL "You have just changed your LiveJournal email address.  To validate the change, please go to this address:\n\n";
-         
          print MAIL "     $LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}\n\n";
-         
          print MAIL "Regards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n";
          close MAIL;
-
      }
 
      # tell the user all is well

@@ -5434,6 +5434,7 @@ sub text_convert
 # des-byte_max: maximum allowed length in bytes; if 0, there's no restriction
 # des-char_max: maximum allowed length in chars; if 0, there's no restriction
 # returns: the truncated string.
+# </LJFUNC>
 sub text_trim
 {
     my ($text, $byte_max, $char_max) = @_;
@@ -5466,6 +5467,7 @@ sub text_trim
 # des-text: ref to the item's text
 # des-props: hashref of the item's props
 # returns: nothing.
+# </LJFUNC>
 sub item_toutf8
 {
     my ($dbs, $u, $subject, $text, $props) = @_;
@@ -5489,6 +5491,105 @@ sub item_toutf8
         $convert->(\$props->{$_});
     }
     return;
+}
+
+# <LJFUNC>
+# name: LJ::set_interests
+# des: Change a user's interests
+# args: dbh, userid, old, new
+# arg-old: hashref of old interests (hasing being interest => intid)
+# arg-new: listref of new interests
+# returns: 1
+# </LJFUNC>
+sub set_interests
+{
+    my ($dbarg, $userid, $old, $new) = @_;
+    my $dbs = make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+
+    my %int_new = ();
+    my %int_del = %$old;  # assume deleting everything, unless in @$new
+
+    foreach my $int (@$new)
+    {
+        $int = lc($int);       # FIXME: use utf8?
+        $int =~ s/^i like //;  # *sigh*
+        next unless $int;
+        next if $int =~ / .+ .+ .+ /;  # prevent sentences
+        next if $int =~ /[\<\>]/;
+        next if length($int) > 35;
+        $int_new{$int} = 1 unless $old->{$int};
+        delete $int_del{$int};
+    }
+
+    ### were interests removed?
+    if (%int_del)
+    {
+        ## easy, we know their IDs, so delete them en masse
+        my $intid_in = join(", ", values %int_del);
+        $dbh->do("DELETE FROM userinterests WHERE userid=$userid AND intid IN ($intid_in)");
+        $dbh->do("UPDATE interests SET intcount=intcount-1 WHERE intid IN ($intid_in)");
+    }
+
+    ### do we have new interests to add?
+    if (%int_new)
+    {
+        ## difficult, have to find intids of interests, and create new ints for interests
+        ## that nobody has ever entered before
+        my $int_in = join(", ", map { $dbh->quote($_); } keys %int_new);
+        my %int_exist;
+        my @new_intids = ();  ## existing IDs we'll add for this user
+
+        ## find existing IDs
+        my $sth = $dbr->prepare("SELECT interest, intid FROM interests WHERE interest IN ($int_in)");
+        $sth->execute;
+        while ($_ = $sth->fetchrow_hashref) {
+            push @new_intids, $_->{'intid'};     # - we'll add this later.
+            delete $int_new{$_->{'interest'}};   # - so we don't have to make a new intid for
+                                                 #   this next pass.
+        }
+
+        if (@new_intids) {
+            my $sql = "";
+            foreach my $newid (@new_intids) {
+                if ($sql) { $sql .= ", "; }
+                else { $sql = "REPLACE INTO userinterests (userid, intid) VALUES "; }
+                $sql .= "($userid, $newid)";
+            }
+            $dbh->do($sql);
+
+            my $intid_in = join(", ", @new_intids);
+            $dbh->do("UPDATE interests SET intcount=intcount+1 WHERE intid IN ($intid_in)");
+        }
+    }
+
+    ### do we STILL have interests to add?  (must make new intids)
+    if (%int_new)
+    {
+        foreach my $int (keys %int_new)
+        {
+            my $intid;
+            my $qint = $dbh->quote($int);
+
+            $dbh->do("INSERT INTO interests (intid, intcount, interest) ".
+                     "VALUES (NULL, 1, $qint)");
+            if ($dbh->err) {
+                # somebody beat us to creating it.  find its id.
+                $intid = $dbh->selectrow_array("SELECT intid FROM interests WHERE interest=$qint");
+                $dbh->do("UPDATE interests SET intcount=intcount+1 WHERE intid=$intid");
+            } else {
+                # newly created
+                $intid = $dbh->{'mysql_insertid'};
+            }
+            if ($intid) {
+                ## now we can actually insert it into the userinterests table:
+                $dbh->do("INSERT INTO userinterests (userid, intid) ".
+                         "VALUES ($userid, $intid)");
+            }
+        }
+    }
+    return 1;
 }
 
 1;
