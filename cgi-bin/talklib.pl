@@ -490,15 +490,13 @@ sub get_talk_data
 #      - state ("A"=approved, "S"=screened, "D"=deleted stub)
 #      - userpic number
 #      - picid   (if userpicref AND userref were given)
-#      - _loaded => 1 (if fully loaded, subject & body)
 #      - subject
 #      - body
 #      - props => { propname => value, ... }
 #      - children => [ hashrefs like these ]
-#
-#      also present, but don't rely on:
-#      - _show => {0|1}, if item is to be ideally shown (0 if deleted or screened)
+#      - _loaded => 1 (if fully loaded, subject & body)
 #        unknown items will never be _loaded
+#      - _show => {0|1}, if item is to be ideally shown (0 if deleted or screened)
 sub load_comments
 {
     my ($u, $remote, $nodetype, $nodeid, $opts) = @_;
