@@ -18,7 +18,7 @@ use vars qw($mailspool $workdir $maxloop
             $hostname $busy $stop $locktype);
 $opt = {};
 GetOptions $opt, qw/foreground workdir=s lock=s maxloop=s/;
-$SIG{$_} = \&stop_daemon foreach qw/INT TERM/;
+$SIG{$_} = \&stop_parent foreach qw/INT TERM/;
 
 # mailspool should match the MTA delivery location.
 $mailspool = $LJ::MAILSPOOL || "$ENV{'LJHOME'}/mail";
@@ -47,6 +47,7 @@ if (! $opt->{'foreground'}) {
     die "Couldn't fork.\n" unless defined $pid;
 
     unless ($pid) {
+        $SIG{$_} = \&stop_child foreach qw/INT TERM/;
         close STDIN  && open STDIN, "</dev/null";
         close STDOUT && open STDOUT, "+>&STDIN";
         close STDERR && open STDERR, "+>&STDIN";
@@ -78,10 +79,10 @@ if (! $opt->{'foreground'}) {
                 kill 15, $pid;
                 wait;
 
-                # fork, exec with fill script + original args
-                # only load the worker, no new listener
+                # re-fork a new worker (no listener)
                 my $newpid = fork;
                 unless ($newpid) {
+                    close $s;
                     worker();
                     exit 0;
                 }
@@ -198,11 +199,17 @@ sub worker
     }
 }
 
-sub stop_daemon
+sub stop_parent
 { 
     # signal safe since it's not run when in daemon mode:
     debug("Shutting down...\n");
 
+    kill 15, $pid;
+    waitpid($pid, 0);
+}
+
+sub stop_child
+{
     exit 0 unless $busy;
     $stop = 1;
 }
