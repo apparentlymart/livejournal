@@ -938,7 +938,7 @@ sub editevent
 		$propinsert .= "($qitemid, $p->{'id'}, $qvalue)";
 	    }
 	}
-	if ($propinsert) { $dbh->do($propinsert); }
+	if ($propinsert) { $dbcm->do($propinsert); }
 	if (@props_to_delete) {
 	    my $propid_in = join(", ", @props_to_delete);
 	    if ($clustered) {
