@@ -2794,7 +2794,7 @@ sub start_request
 
     # clear the handle request cache (like normal cache, but verified already for
     # this request to be ->ping'able).
-    DBI::Role::clear_req_cache();
+    $LJ::DBIRole->clear_req_cache();
 
     # need to suck db weights down on every request (we check
     # the serial number of last db weight change on every request
