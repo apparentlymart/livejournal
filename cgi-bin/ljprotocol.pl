@@ -1390,8 +1390,7 @@ sub editfriends
     my %curfriend;
     my $friend_count = 0;
     $sth = $dbh->prepare("SELECT u.user FROM user u, friends f ".
-                         "WHERE u.userid=f.friendid AND f.userid=$userid ".
-                         "AND u.statusvis='V'");
+                         "WHERE u.userid=f.friendid AND f.userid=$userid");
     $sth->execute;
     while (my ($friend) = $sth->fetchrow_array) {
         $curfriend{$friend} = 1;
@@ -1664,7 +1663,7 @@ sub list_friends
 
     my $limit = $limitnum ? "LIMIT $limitnum" : "";
     my $sth = $dbr->prepare("SELECT u.user AS 'friend', u.name, u.journaltype, f.fgcolor, f.bgcolor, f.groupmask ".
-                            "FROM user u, friends f WHERE $where AND u.statusvis='V' ORDER BY u.user $limit");
+                            "FROM user u, friends f WHERE $where ORDER BY u.user $limit");
     $sth->execute;
     my @friends;
     push @friends, $_ while $_ = $sth->fetchrow_hashref;
