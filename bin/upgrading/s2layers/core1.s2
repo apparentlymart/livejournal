@@ -351,6 +351,9 @@ class YearDay
     var int day "Day of month number";
     var Date date "Date of day";
 
+    # http://zilla.livejournal.org/show_bug.cgi?id=504
+    # var bool is_today "True if the day represents the current day.";
+
     var int num_entries "Number of entries made on this day";
     var string url "A URL to view the day, if there are entries, else blank.";
 }
