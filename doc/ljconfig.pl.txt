@@ -183,22 +183,25 @@
     # capability class limits.
     # keys are bit numbers, from 0 .. 15.  values are hashrefs
     # with limit names and values (see doc/capabilities.txt)
+    # NOTE: you don't even need to have different capability classes!
+    #       all users can be the same if you want, just delete all
+    #       this.  the important part then is %CAP_DEF, above.
     %CAP = (
-        ## 0x01 -- new user
-        '0' => { 
+        '0' => {  # 0x01
+	    '_name' => 'new user',
             'userpics' => 1,
         },
-        ## 0x02 -- free user 
-        '1' => {
+        '1' => {  # 0x02
+	    '_name' => 'free user',
             'userpics' => 3,
         },
-        ## 0x04 -- early adopter
-        '2' => {
+        '2' => {  # 0x04
+	    '_name' => 'early adopter',
             'userpics' => 5,
             'styles' => 1,
         },
-        ## 0x08 -- paid user 
-        '3' => {
+        '3' => {  # 0x08
+	    '_name' => 'paid user',
             'styles' => 1,
             'makepoll' => 1,
             'userpics' => 10,
@@ -206,8 +209,8 @@
             'useremail' => 1,
             'textmessaging' => 1,
         },
-        ## 0x10 -- permanent account
-        '4' => {
+        '4' => {  # 0x10
+	    '_name' => 'permanent account',
             'paid' => 1,
             'useremail' => 1,
         },
