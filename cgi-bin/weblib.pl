@@ -302,20 +302,20 @@ sub get_active_crumb
 
 sub get_crumb_path
 {
-    my $thiscrumb = LJ::get_crumb(LJ::get_active_crumb());
-    my @crumbs;
-    push(@$thiscrumb, $LJ::ACTIVE_CRUMB);
-    push(@crumbs, $thiscrumb);
-    my $parent = $thiscrumb->[2];
+    my $cur = LJ::get_active_crumb();
+    my @list;
+    while ($cur) {
+        # get crumb, fix it up, and then put it on the list
+        my $crumb = LJ::get_crumb($cur);
+        last unless $crumb;
+        last if $cur eq $crumb->[2];
+        push @$crumb, $cur;
+        push @list, $crumb;
 
-    while ($parent ne '')
-    {
-        $thiscrumb = LJ::get_crumb($parent);
-        push(@$thiscrumb, $parent);
-        $parent = $thiscrumb->[2];
-        push(@crumbs, $thiscrumb);
+        # now get the next one we're going after
+        $cur = $crumb->[2]; # parent of this crumb
     }
-    return @crumbs;
+    return @list;
 }
 
 sub get_crumb
