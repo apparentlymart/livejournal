@@ -3946,10 +3946,10 @@ sub activate_userpics
 
     # get a database handle for reading/writing
     # need to get this now so we can pass it to load_userid if necessary
-    my $dbh = LJ::get_db_writer();    
+    my $dbh = LJ::get_db_writer();
 
     # if a userid was given, get a real $u object
-    $u = LJ::load_userid($u, 1) unless ref $u eq "HASH";
+    $u = LJ::load_userid($u, "force") unless ref $u eq "HASH";
 
     # should have a $u object now
     return unless ref $u eq 'HASH';
@@ -3997,14 +3997,14 @@ sub activate_userpics
             $count_kw{$value} = $ct;
         }
 
-        my $keywords_in = join(",", map { $dbcr->quote($_) } keys %count_kw);
+        my $keywords_in = join(",", map { $dbh->quote($_) } keys %count_kw);
 
         # map pickws to picids for freq hash below
         my %count_picid = ();
         if ($keywords_in) {
-            my $sth = $dbcr->prepare("SELECT k.keyword, m.picid FROM keywords k, userpicmap m " .
-                                     "WHERE k.keyword IN ($keywords_in) AND k.kwid=m.kwid " . 
-                                     "AND m.userid=?");
+            my $sth = $dbh->prepare("SELECT k.keyword, m.picid FROM keywords k, userpicmap m " .
+                                    "WHERE k.keyword IN ($keywords_in) AND k.kwid=m.kwid " . 
+                                    "AND m.userid=?");
             $sth->execute($userid);
             while (my ($keyword, $picid) = $sth->fetchrow_array) {
                 # keyword => picid
