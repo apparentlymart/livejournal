@@ -1,55 +1,63 @@
+<?page
+title=><?_ml .title _ml?>
+body<=
 <?_code
+{
+    use strict;
 
- use strict;
- use vars qw($title $body);
+    LJ::set_active_crumb('birthdays');
 
- LJ::set_active_crumb('birthdays');
+    my $remote = LJ::get_remote();
+    return "<?needlogin?>" unless $remote;
 
- $title = $ML{'.title'};
- $body = "";
+    my $body = $ML{'.description'};
+    my $lastmon = 0;
 
- my $remote = LJ::get_remote();
- unless ($remote) {
-     $body .= "<?needlogin?>";
-     return;
- }
+    # TAG:fr:bml_birthdays:get_bdays
+    my $dbr = LJ::get_db_reader();
+    my $sth = $dbr->prepare(
+        qq|SELECT u.user, u.name, MONTH(bdate) AS 'month', DAYOFMONTH(bdate) AS 'day'
+           FROM friends f, user u
+           WHERE f.userid = $remote->{'userid'} 
+             AND f.friendid = u.userid
+             AND u.journaltype = 'P'
+             AND u.statusvis = 'V'
+             AND u.allow_infoshow = 'Y'
+             AND MONTH(bdate) != 0
+             AND DAYOFMONTH(bdate) != 0
+           LIMIT 750|);
+    $sth->execute;
 
- $body .= $ML{'.description'};
- my $lastmon = 0;
+    my @bdays;
+    push @bdays, $_ while $_ = $sth->fetchrow_hashref;
+    @bdays = sort {
+        ($a->{'month'} <=> $b->{'month'}) ||
+        ($a->{'day'} <=> $b->{'day'}) ||
+        ($a->{'user'} cmp $b->{'user'})
+    } @bdays;
 
- my $dbr = LJ::get_db_reader();
- # TAG:fr:bml_birthdays:get_bdays
- my $sth = $dbr->prepare("SELECT u.user, u.name, MONTH(bdate) AS 'month', DAYOFMONTH(bdate) AS 'day' FROM friends f, user u WHERE f.userid=$remote->{'userid'} AND f.friendid=u.userid AND u.journaltype='P' AND u.statusvis='V' AND u.allow_infoshow='Y' AND MONTH(bdate) != 0 AND DAYOFMONTH(bdate) != 0 LIMIT 750");
- $sth->execute;
- my @bdays;
- push @bdays, $_ while $_ = $sth->fetchrow_hashref;
- @bdays = sort {
-     ($a->{'month'} <=> $b->{'month'}) ||
-     ($a->{'day'} <=> $b->{'day'}) ||
-     ($a->{'user'} cmp $b->{'user'})
- } @bdays;
+    foreach my $bday (@bdays) {
+        LJ::text_out(\$bday->{'name'});
 
- foreach my $bday (@bdays) {
-     LJ::text_out(\$bday->{'name'});
-     if ($bday->{'month'} != $lastmon) {
-         if ($lastmon) { $body .= "</ul>\n"; }
-         $lastmon = $bday->{'month'};
-         $body .= "<?h1 " . LJ::Lang::month_long($lastmon) . " h1?><ul>\n";
-     }
-     my $day = sprintf("%2s", $bday->{'day'});
-     $day =~ s/ /&nbsp;/;
-     my $name = LJ::ehtml($bday->{'name'});
-     $body .= "<b><tt>$day</tt></b>: " . LJ::ljuser($bday->{'user'}) . " - $name<br />\n";
-     
- }
+        if ($bday->{'month'} != $lastmon) {
+            if ($lastmon) { $body .= "</ul>\n"; }
+            $lastmon = $bday->{'month'};
+            $body .= "<?h1 " . LJ::Lang::month_long($lastmon) . " h1?><ul>\n";
+        }
 
- $body .= "</ul>\n";
+        my $day = sprintf("%2s", $bday->{'day'});
+        $day =~ s/ /&nbsp;/;
 
- return;
+        my $name = LJ::ehtml($bday->{'name'});
+        $body .= "<b><tt>$day</tt></b>: " . LJ::ljuser($bday->{'user'}) . " - $name<br />\n";
+    }
 
-_code?><?page
-title=><?_code return $title; _code?>
-body=><?_code return $body; _code?>
+    $body .= "</ul>\n" if @bdays;
+
+    return $body;
+}
+_code?>
+<=body
 page?><?_c <LJDEP>
 link: htdocs/login.bml
 </LJDEP> _c?>
