@@ -103,6 +103,12 @@ sub make_feed
     }
     $r->set_last_modified($lastmod) if $lastmod;
 
+    # use this $lastmod as the feed's last-modified time
+    # we would've liked to use something like 
+    # LJ::get_timeupdate_multi instead, but that only changes
+    # with new updates and doesn't change on edits.
+    $journalinfo->{'modtime'} = $lastmod;
+
     # regarding $r->set_etag:
     # http://perl.apache.org/docs/general/correct_headers/correct_headers.html#Entity_Tags
     # It is strongly recommended that you do not use this method unless you
@@ -305,6 +311,10 @@ sub create_view_atom
         $ret .= "<title mode='escaped'>$journalinfo->{title}</title>\n";
         $ret .= "<tagline mode='escaped'>$journalinfo->{subtitle}</tagline>\n";
         $ret .= "<link rel='alternate' type='text/html' href='$journalinfo->{link}' />\n";
+
+        # last update
+        $ret .= "<modified>" . LJ::time_to_w3c($journalinfo->{'modtime'}, 'Z')
+            . "</modified>";
         
         # link to the AtomAPI version of this feed
         $ret .= "<link rel='service.feed' type='application/x.atom+xml' title='AtomAPI-enabled feed' href='$api/feed' />";
