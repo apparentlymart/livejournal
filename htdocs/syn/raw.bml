@@ -12,6 +12,7 @@
     while (@_ = map { s/[\t\n]//g; $_; } $sth->fetchrow_array) {
         $ret .= join("\t", @_) . "\n";
     }
+    BML::set_content_type("text/plain; charset=utf-8");
     return $ret;
 }
 _code?>
