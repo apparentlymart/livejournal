@@ -3,23 +3,22 @@
     use strict;
     use vars qw(%POST %GET $title $body);
 
-    my $dbs = LJ::get_dbs();
-    my $dbh = $dbs->{'dbh'};
+    my $dbh = LJ::get_db_writer();
 
-    my $remote = LJ::get_remote($dbs);
+    my $remote = LJ::get_remote();
     return "<?h1 Login Required h1?><?p You must first <a href='/login.bml?ret=1'>login</a>. p?>"
         unless $remote;
 
     my @journals = ($remote->{'user'});
-    push @journals, LJ::get_shared_journals($dbs, $remote);
+    push @journals, LJ::get_shared_journals($remote);
     my $journal = $GET{'journal'} || $remote->{'user'};
     unless (grep { $_ eq $journal } @journals) {  return BML::redirect("/customize/");  }
 
     my $u = $remote;
-    $u = LJ::load_user($dbs, $journal) unless $journal eq $remote->{'user'};
+    $u = LJ::load_user($journal) unless $journal eq $remote->{'user'};
     my $userid = $u->{'userid'};
 
-    LJ::load_user_props($dbs, $u, "stylesys", "s2_style");
+    LJ::load_user_props($u, "stylesys", "s2_style");
 
     $body = "";
     $title = "User Layer";
