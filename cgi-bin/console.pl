@@ -417,41 +417,33 @@ sub finduser
 
     my $crit = $args->[1];
     my $data = $args->[2];
+    my $qd = $dbh->quote($data);
 
-    if ($crit eq "email")
-    {
-	my $qemail = $dbh->quote($data);
-        my $sth = $dbh->prepare("SELECT userid, user, email FROM user ".
-				"WHERE email=$qemail");
-        $sth->execute;
-	if (! $sth->rows) {
-	    push @$out, [ "error", "No matches." ];
-	}
-	while (my $u = $sth->fetchrow_hashref) {        
-            push @$out, [ "info", "User: $u->{'user'} ".
-			  "($u->{'userid'}), email: $u->{'email'}" ];
-	}
-	return 1;
+    my $where;
+    if ($crit eq "email") {
+	$where = "email=$qd";
+    } elsif ($crit eq "userid") {
+	$where = "userid=$qd";
+    } elsif ($crit eq "user") {
+	$where = "user=$qd";
     }
 
-    if ($crit eq "user")
-    {
-	my $quser = $dbh->quote($data);
-	my $sth = $dbh->prepare("SELECT userid, user, email FROM user WHERE user=$quser");
-	$sth->execute;
-	my $u = $sth->fetchrow_hashref;
-	
-	if ($u) {
-	    push @$out, [ "info", "User: $u->{'user'} ($u->{'userid'}), email: $u->{'email'}" ];
-	} else {
-	    push @$out, [ "error", "No matches." ];
-	}
-	
-	return 1;
+    unless ($where) {
+	push @$out, [ "error", "Invalid search criteria.  See reference." ];
+	return 0;
     }
 
-    push @$out, [ "error", "Invalid search criteria.  See reference." ];
-    return 0;
+    my $sth = $dbh->prepare("SELECT userid, user, email, status ".
+			    "FROM user WHERE $where");
+    $sth->execute;
+    if (! $sth->rows) {
+	push @$out, [ "error", "No matches." ];
+    }
+    while (my $u = $sth->fetchrow_hashref) {        
+	push @$out, [ "info", "User: $u->{'user'} ".
+		      "($u->{'userid'}), email: ($u->{'status'}) $u->{'email'}" ];
+    }
+    return 1;
 }
 
 sub foreach_entry
