@@ -19,7 +19,7 @@ body<=
     my $uri = BML::get_uri();
 
     if ($uri =~ m!/(\d+)\.html$!) {
-        $FORM{'itemid'} = $1 unless $FORM{'replyto'};
+        $FORM{'itemid'} = $1 unless $FORM{'replyto'} > 0;
         $FORM{'journal'} = $r->notes("_journal");
         BML::set_language_scope("/talkpost.bml");
     }

@@ -660,7 +660,8 @@ sub create_qr_div {
     LJ::load_user_props($remote, "opt_no_quickreply");
     return undef if $remote->{'opt_no_quickreply'};
 
-    my $basepath = LJ::journal_base($u) . "/$ditemid.html?replyto=";
+    my $stylemineuri = $stylemine ? "style=mine&" : "";
+    my $basepath = LJ::journal_base($u) . "/$ditemid.html?${stylemineuri}replyto=";
     $qrhtml .= LJ::html_hidden({'name' => 'replyto', 'id' => 'replyto', 'value' => ''},
                                {'name' => 'parenttalkid', 'id' => 'parenttalkid', 'value' => ''},
                                {'name' => 'itemid', 'id' => 'itemid', 'value' => $ditemid},
