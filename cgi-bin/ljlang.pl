@@ -90,6 +90,8 @@ my %LN_CODE = ();   # $code -> ^^^^
 my $LAST_ERROR;
 my $TXT_CACHE;      # LJ::Cache for text
 
+sub get_cache_object { return $TXT_CACHE; }
+
 sub last_error
 {
     return $LAST_ERROR;
