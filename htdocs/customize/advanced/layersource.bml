@@ -1,0 +1,44 @@
+<?_code # -*-bml-*-
+{
+    use strict;
+    use vars qw(%GET);
+
+    my %layerinfo;
+    my $pub = LJ::S2::get_public_layers();
+
+    my $dbr = LJ::get_db_reader();
+    my $remote = LJ::get_remote();
+
+    my $id = $GET{'id'};
+    my $lay;
+    unless (defined $pub->{$id}) {
+        $lay = LJ::S2::load_layer($id);
+        unless ($lay && $remote && $lay->{'userid'} == $remote->{'userid'}) {
+            return "Unauthorized or invalid.";
+        }
+    } else {
+        $lay = $pub->{$id};
+    }
+    $id = $lay->{'s2lid'};
+
+    my $s2 = $dbr->selectrow_array("SELECT s2code FROM s2source WHERE s2lid=?",
+                                   undef, $id);
+
+    if ($GET{'fmt'} eq "html") {
+        my $html;
+
+        my $cr = new S2::Compiler;
+        $cr->compile_source({
+            'source' => \$s2,
+            'output' => \$html,
+            'format' => "html",
+            'type' => $pub->{$id}->{'type'},
+        });
+
+        return $html;
+    }
+
+    BML::set_content_type("text/plain");
+    return $s2;
+}
+_code?>
