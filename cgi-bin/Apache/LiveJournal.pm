@@ -15,6 +15,7 @@ require "$ENV{'LJHOME'}/cgi-bin/ljprotocol.pl";
 
 my %RQ;       # per-request data
 my %USERPIC;  # conf related to userpics
+my %REDIR;
 
 # init handler.
 sub handler
@@ -26,6 +27,15 @@ sub handler
     
     $USERPIC{'cache_dir'} = "$ENV{'LJHOME'}/htdocs/userpics";
     $USERPIC{'use_disk_cache'} = -d $USERPIC{'cache_dir'};
+
+    # redirect data.
+    open (REDIR, "$ENV{'LJHOME'}/cgi-bin/redirect.dat");
+    while (<REDIR>) {
+        next unless (/^(\S+)\s+(\S+)/);
+        my ($src, $dest) = ($1, $2);
+        $REDIR{$src} = $dest;
+    }
+    close REDIR;
 
     return OK;
 }
@@ -40,9 +50,10 @@ sub trans
 
     my $redir = sub {
         my $url = shift;
+        my $code;
         $r->content_type("text/html");
         $r->header_out(Location => $url);
-        return REDIRECT;
+        return $code || REDIRECT;
     };
     
     my $journal_view = sub { 
@@ -91,7 +102,7 @@ sub trans
     }
 
     # userpic
-    return trans_userpic($r, $1) if $uri =~ m!^/userpic/(\d+)$!;
+    return userpic_trans($r, $1) if $uri =~ m!^/userpic/(\d+)$!;
 
     # normal (non-domain) journal view
     if ($uri =~ m!
@@ -125,12 +136,19 @@ sub trans
         return OK;
     }
 
+    # redirected resources
+    if ($REDIR{$uri}) {
+        my $new = $REDIR{$uri};
+        if ($r->args) { $new .= "?" . $r->args; }
+        return $redir->($new, HTTP_MOVED_PERMANENTLY);
+    }
+
 
     return FORBIDDEN if $uri =~ m!^/userpics!;
     return DECLINED;
 }
 
-sub trans_userpic
+sub userpic_trans
 {
     my $r = shift;
     my $picid = shift;
@@ -167,11 +185,11 @@ sub trans_userpic
     $r->filename($file);
 
     $r->handler("perl-script");
-    $r->push_handlers(PerlHandler => \&content_userpic);
+    $r->push_handlers(PerlHandler => \&userpic_content);
     return OK;
 }
 
-sub content_userpic
+sub userpic_content
 {
     my $r = shift;
     my $file = $r->filename;
@@ -254,20 +272,6 @@ sub content_userpic
     $send_headers->();
     $r->print($data) unless $r->header_only;
     return OK;
-}
-
-sub content
-{
-    my $r = shift;
-    my $uri = $r->uri;
-    return DECLINED if $uri =~ /dev/;
-    
-    $r->content_type("text/html; charset=utf-8");
-    $r->send_http_header();
-    $r->print("$uri; " . $r->header_in("Host"));
-
-    return OK;
-
 }
 
 sub journal_content
