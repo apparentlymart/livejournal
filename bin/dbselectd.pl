@@ -21,7 +21,7 @@ my $PORT = 5151;
 my $PIDFILE = "$ENV{'LJHOME'}/var/dbselectd.pid";
 
 # temporary:
-my $DBINFO_FILE = "$ENV{'LJHOME'}/var/tempdbinfo.pl";
+my $DBINFO_FILE = "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 my $opt_foreground = 0;
 GetOptions("foreground" => \$opt_foreground);
 
