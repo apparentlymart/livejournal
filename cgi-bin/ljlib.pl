@@ -2979,7 +2979,7 @@ sub load_userpics
 sub send_mail
 {
     my $opt = shift;
-    open (MAIL, "|$LJ::SENDMAIL");
+    open (MAIL, "|$LJ::SENDMAIL") or return 0;
     my $toname;
     if ($opt->{'toname'}) {
         $opt->{'toname'} =~ s/[\n\t\(\)]//g;
@@ -2989,12 +2989,13 @@ sub send_mail
     print MAIL "Cc: $opt->{'cc'}\n" if ($opt->{'cc'});
     print MAIL "Bcc: $opt->{'bcc'}\n" if ($opt->{'bcc'});
     print MAIL "From: $opt->{'from'}";
-    if ($opt->{'fromname'}) {
-        print MAIL " ($opt->{'fromname'})";
-    }
+    print MAIL " ($opt->{'fromname'})" if ($opt->{'fromname'});
+    print MAIL "\nContent-type: text/plain; charset=$opt->{'charset'}"
+        if ($opt->{'charset'});
     print MAIL "\nSubject: $opt->{'subject'}\n\n";
     print MAIL $opt->{'body'};
     close MAIL;
+    return 1;
 }
 
 # <LJFUNC>
