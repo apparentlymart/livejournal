@@ -427,7 +427,8 @@ body<=
      return if ($mark->{$tid});
      $mark->{$tid} = 1;
 
-     my $bgcolor = ($opts->{'depth'} % 2) ? "<?emcolorlite?>" : "<?emcolor?>";
+     my $bgcolor = ($opts->{'depth'} % 2) ? "emcolorlite" : "emcolor";
+     $bgcolor = BML::get_template_def($bgcolor);
      
      # find child messages (replys to $tid)
     my @childs = sort { $postref->{$a}->{'datepost'} cmp $postref->{$b}->{'datepost'} }

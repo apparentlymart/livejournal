@@ -883,6 +883,14 @@ sub modified_time
 
 package BML;
 
+# when CODE blocks need to look-up static values and such
+sub get_template_def
+{
+    my $blockname = shift;
+    my $scheme = $Apache::BML::cur_req->{'scheme'};
+    return $SchemeData{$scheme}->{uc($blockname)};
+}
+
 sub parse_multipart
 {
     my ($dest, $error, $max_size) = @_;
