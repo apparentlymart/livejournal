@@ -15,7 +15,7 @@ body<=
     BML::set_language_scope("/friends/edit_do.bml");
 
     my $remote = LJ::get_remote();
-    return LJ::bad_input("You must be logged in to use this tool.")
+    return LJ::bad_input($ML{'error.noremote'})
         unless $remote;
 
     my $authas = $GET{'authas'} || $remote->{'user'};
