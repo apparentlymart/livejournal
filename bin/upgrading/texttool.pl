@@ -328,9 +328,8 @@ sub poptext
                 unless ($res) {
                     $out->('x', "ERROR: " . LJ::Lang::last_error());
                 }
-
-                %metadata = ();
             }
+            %metadata = ();
         }
         close D;
         $out->("added: $addcount", '-');

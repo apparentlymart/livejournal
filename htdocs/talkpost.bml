@@ -263,7 +263,7 @@ BODY<=
  $ret .= LJ::Talk::topic_links($dbs, $u, $ditemid) unless $init->{'replyto'};
  
  my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&" : "";
- $ret .= "<center><b><a href=\"talkread.bml?${jarg}itemid=$ditemid\">(Read comments)</a></b></center>";
+ $ret .= "<center><b>(<a href=\"talkread.bml?${jarg}itemid=$ditemid\">(=_ML talk.commentsread _ML=)</a>)</b></center>";
  
  # can a comment even be made?
  if ($logprops{$itemid}->{'opt_nocomments'}) {

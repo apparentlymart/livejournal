@@ -403,14 +403,18 @@ BODY<=
  unless ($logprops{$itemid}->{'opt_nocomments'} or $u->{'opt_showtalklinks'} eq "N")
  {
      $ret .= "<p>$navcrap</p>" if $navcrap;
-     $ret .= "<center><b><a href='talkpost.bml?${jargent}itemid=$ditemid'>(Post a new comment)</a></b></center>";
+     my $readlink;
+     if ($FORM{'thread'} && $pages == 1) {
+         $readlink = "(<a href='talkread.bml?${jargent}itemid=$ditemid'>(=_ML talk.commentsread _ML=)</a>) - ";
+     }
+     $ret .= "<center><b>$readlink(<a href='talkpost.bml?${jargent}itemid=$ditemid'>(=_ML talk.commentpost _ML=)</a>)</b></center>";
 
      if ($post_count > 0)
      {
          recurse_post(\%posts, \$ret, $thread, {}, { "newfirst" => 0,
                                                      "children" => \%children,
                                                  });
-         $ret .= "<p><hr /><center><b><a href='talkpost.bml?${jargent}itemid=$ditemid'>(Post a new comment)</a></b></center></p>";
+         $ret .= "<p><hr /><center><b>$readlink(<a href='talkpost.bml?${jargent}itemid=$ditemid'>(=_ML talk.commentpost _ML=)</a></b></center></p>";
      }
 
      if ($navcrap) {
@@ -536,11 +540,11 @@ sub recurse_post
                 $$ret .= $post->{'body'};
 
                 $$ret .= "<p><font size='-2'>";
-                if ($post->{'parenttalkid'} != 0 && $post_count >= $PAGE_SIZE) {
+                if ($post->{'parenttalkid'} != 0) {
                     my $dpid =  $clustered ? ($post->{'parenttalkid'} * 256 + $init->{'anum'}) : $post->{'parenttalkid'};
                     $$ret .= "<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$dpid'>(Parent)</a> ";
                 }
-                if (defined $opts->{'children'}->{$tid} && $post_count >= $PAGE_SIZE) {
+                if (defined $opts->{'children'}->{$tid}) {
                     $$ret .= "<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$dtid'>(Thread)</a> ";
                 }
 
