@@ -69,7 +69,7 @@
              $body .= ' ' . BML::ml('.edit2', { 'editlink' => "$LJ::SITEROOT/editpics.bml?authas=$user",
                                               'uploadlink' => "$LJ::SITEROOT/uploadpic.bml?authas=$user" });
          }
-         $body .= " p?><div style='margin: 50px 0px;'><table cellpadding='5' border='0' cellspacing='1'>";
+         $body .= " p?><div style='margin-left: 50px;'><table cellpadding='5' border='0' cellspacing='1'>";
              
      }
 
