@@ -261,7 +261,7 @@ BODY<=
 	 $ret .= "<p><b>If visible, email address to be displayed:</b><ul>";
 
 	 my $cur = $u->{'opt_whatemailshow'} || "B";
-	 my @vals = ($LJ::USER_EMAIL 
+	 my @vals = ( ($LJ::USER_EMAIL && LJ::get_cap($u, "useremail"))
 		     ? ("B" => "Both (actual + \@$LJ::USER_DOMAIN)",
 			"A" => "Actual address only",
 			"L" => "LiveJournal address only",
