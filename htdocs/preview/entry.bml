@@ -163,6 +163,7 @@
         $u->{'_journalbase'} = LJ::journal_base($u->{'user'});
         
         my $ctx = LJ::S2::s2_context($r, $styleid);
+        $LJ::S2::CURR_CTX = $ctx;
         
         my $p = LJ::S2::Page($u, $opts);
         $p->{'_type'} = "EntryPage";
