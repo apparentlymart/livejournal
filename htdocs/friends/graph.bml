@@ -1,13 +1,17 @@
 (=_INFO
 NOCACHE=>1
-_INFO=)
-(=_CODE
+_INFO=)(=_CODE
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
  
- my $u = LJ::load_user($dbh, $FORM{'user'});
+ if ($ENV{'PATH_INFO'} =~ m!^/(\w+)\.dot(\.txt)?$!) {
+     BML::set_content_type("text/plain");
+     return "# dot file for $1:\n" . LJ::make_graphviz_dot_file($dbs, $1);
+ }
+
+ my $u = LJ::load_user($dbs, $FORM{'user'});
  unless ($u) {
      return "(=H1 Unknown user H1=)(=P No user with that username.  Sorry. P=)";
  }
@@ -17,9 +21,9 @@ _INFO=)
  $ret .= "User: <B>$user</B> (<A HREF=\"/userinfo.bml?user=$user\">user info</A>)<BR><I>If image doesn't load, press reload.</I><P>";
 
  $ret .= "<A HREF=http://www.research.att.com/~north/cgi-bin/webdot.cgi/";
- $ret .= "$LJ::SITEROOT/friends/graph/$user.dot.map>";
+ $ret .= "$LJ::SITEROOT/friends/graph.bml/$user.dot.map>";
  $ret .= "<IMG SRC=http://www.research.att.com/~north/cgi-bin/webdot.cgi/";
- $ret .= "$LJ::SITEROOT/friends/graph/$user.dot.gif ismap border=0>";
+ $ret .= "$LJ::SITEROOT/friends/graph.bml/$user.dot.gif ismap border=0>";
  $ret .= "</A>\n";   
 
  return $ret;
