@@ -123,6 +123,8 @@ foreach my $du (@delusers)
     $runsql->($user, "DELETE FROM ban WHERE banneduserid=$uid");
     $runsql->($user, "DELETE FROM priv_map WHERE userid=$uid");
     $runsql->($user, "DELETE FROM infohistory WHERE userid=$uid");
+    $runsql->($user, "DELETE FROM logaccess WHERE posterid=$uid");
+    $runsql->($user, "DELETE FROM logaccess WHERE ownerid=$uid");
 
     $runsql->($user, "UPDATE user SET statusvis='X', statusvisdate=NOW(), password='' WHERE userid=$uid");
 

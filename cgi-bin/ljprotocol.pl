@@ -48,6 +48,7 @@ sub error_message
              "304" => "Can't delete post in this community journal",
              "305" => "Action forbidden; account is suspended.",
              "306" => "This journal is temporarily in read-only mode.  Try again in a couple minutes.",
+             "307" => "Selected shared journal no longer exists.",
 
              # Server Errors
              "500" => "Internal server error",
@@ -491,6 +492,9 @@ sub postevent
     # check the journal's read-only bit
     return fail($err,306) if LJ::get_cap($uowner, "readonly");
 
+    # can't post to deleted/suspended community
+    return fail($err,307) unless $uowner->{'statusvis'} eq "V";
+    
     #### clean up the event text
     my $event = $req->{'event'};
 
@@ -822,6 +826,9 @@ sub editevent
 
     # check the journal's read-only bit
     return fail($err,306) if LJ::get_cap($uowner, "readonly");
+
+    # can't edit in deleted/suspended community
+    return fail($err,307) unless $uowner->{'statusvis'} eq "V";
 
     my ($dbcm, $dbcr, $clustered) = ($dbh, $dbr, 0);
     if ($uowner->{'clusterid'}) {
@@ -1161,6 +1168,9 @@ sub getevents
         $clustered = 1;
     }
     return fail($err,502) unless $dbcr;
+
+    # can't pull events from deleted/suspended journal
+    return fail($err,307) unless $uowner->{'statusvis'} eq "V";
 
     # if this is on, we sort things different (logtime vs. posttime)
     # to avoid timezone issues
@@ -1895,8 +1905,9 @@ sub list_usejournals
     my $res = [];
 
     my $dbr = $dbs->{'reader'};
-    my $sth = $dbr->prepare("SELECT u.user FROM useridmap u, logaccess la ".
+    my $sth = $dbr->prepare("SELECT u.user FROM user u, logaccess la ".
                             "WHERE la.ownerid=u.userid AND ".
+                            "u.statusvis='V' AND ".
                             "la.posterid=$u->{'userid'} ORDER BY u.user");
     $sth->execute;
     while (my $u = $sth->fetchrow_array) {
