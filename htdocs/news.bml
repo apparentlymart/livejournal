@@ -1,0 +1,25 @@
+(=PAGE
+TITLE=>News
+BODY<=
+
+Welcome to the (=SITENAME=) news page.
+
+The maintainer of this site should update this.
+
+(=_C   <--- that's a comment.  you may want to uncomment this to 
+            embed a journal you keep for news.  you'll need to 
+            make a style, too.  OR... just enter news here in 
+            HTML or BML, but that's kinda ghetto when you have a
+            journal system already.  :)
+
+(=_CODE
+
+ use LWP::Simple;
+ return get("$LJ::SITEROOT/customview.cgi?user=news&styleid=5624");
+
+_CODE=)
+
+_C=)
+
+<=BODY
+PAGE=)
