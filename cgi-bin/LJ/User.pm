@@ -31,9 +31,15 @@ sub writer {
 # get an $sth from the writer
 sub prepare {
     my $u = shift;
-    croak "Database handle unavailable"
-        unless $u->{'_dbcm'} ||= LJ::get_cluster_master($u);
-    return $u->{'_dbcm'}->prepare(@_);
+
+    my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
+        or croak "Database handle unavailable";
+
+    my $rv = $dbcm->prepare(@_);
+    if ($u->{_dberr} = $dbcm->err) {
+        $u->{_dberrstr} = $dbcm->errstr;
+    }
+    return $rv;
 }
 
 # $u->do("UPDATE foo SET key=?", undef, $val);
