@@ -17,12 +17,33 @@ body<=
 
     return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
 
+    my $check_key = sub {
+        my $key = shift;
+
+        # make sure it is a public key, not a private or a signature,
+        # before we bother with other checks
+        my $kt = $1 if $key =~ /-{5}BEGIN PGP (\w+) /;
+        return 0 unless $kt eq 'PUBLIC';
+
+        # pull key data, return if suspicious
+        my $ks = "$kt KEY BLOCK";
+        my $data = $1 if $key =~ /$ks-{5}(.+?)-{5}.+?$ks(?:-)+/s;
+        foreach ($data =~ /(\w+):/mg) {
+            return 0 unless $1 =~ /(Version|Hash|Comment|MessageID|Charset)/i;
+        }
+        $data =~ s/^(\s|\w+:).*//mg;
+        $data =~ s/(?:\r)?\n//sg;
+        return 0 if $data =~ tr/[ \t]// || length $data < 500;
+
+        return 1;
+    };
+
     # Update settings
     if ($POST{userid} == $u->{userid}) {
         my @errors;
         my $key = $POST{key};
         push(@errors, $ML{'.error.invalidkey'})
-            if $key !~ /BEGIN PGP PUBLIC/ && length($key) != 0;
+            if ! $check_key->($key) && length $key != 0;
         return LJ::bad_input(@errors) if @errors;
 
         $key = LJ::trim($key);
