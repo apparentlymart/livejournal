@@ -2710,8 +2710,8 @@ sub load_mood_theme
 
     # check memcache
     my $memkey = [$themeid, "moodthemedata:$themeid"];
-    return if $LJ::CACHE_MOOD_THEME{$themeid} = LJ::MemCache::get($memkey) &&
-        %{$LJ::CACHE_MOOD_THEME{$themeid}};
+    return if $LJ::CACHE_MOOD_THEME{$themeid} = LJ::MemCache::get($memkey) and
+        %{$LJ::CACHE_MOOD_THEME{$themeid} || {}};
 
     # fall back to db
     my $dbh = LJ::get_db_writer()
@@ -2729,7 +2729,7 @@ sub load_mood_theme
 
     # set in memcache
     LJ::MemCache::set($memkey, $LJ::CACHE_MOOD_THEME{$themeid}, 3600)
-        if %{$LJ::CACHE_MOOD_THEME{$themeid}};
+        if %{$LJ::CACHE_MOOD_THEME{$themeid} || {}};
 
     return 1;
 }
