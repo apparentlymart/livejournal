@@ -162,7 +162,7 @@ sub get_friend_items
     };
     
     my $loop = 1;
-    my $lastmax = 0;
+    my $lastmax = $LJ::EndOfTime - time() + 3600*24*14;  # don't load stuff older than 2 weeks 
     my $itemsleft = $getitems;
     my $fr;
     my $must_fill_bares;  # if we ever got a bare response from get_recent_items
