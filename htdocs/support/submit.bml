@@ -1,6 +1,6 @@
 <?page
 title=>Submit Support Request
-BODY<=
+body<=
 
 <?_include
 bml=>1

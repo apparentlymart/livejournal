@@ -2,7 +2,7 @@
 nocache=>1
 _info?><?page
 title=>Read FAQ
-BODY<=
+body<=
 
 <CENTER>
 <A HREF="./"><B>(Back to FAQ Index)</B></A>

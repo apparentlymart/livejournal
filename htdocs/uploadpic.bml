@@ -1,7 +1,7 @@
 <?page
 title=>Upload Picture
 
-BODY<=
+body<=
 
 <?h1 Upload your Picture h1?>
 <?p

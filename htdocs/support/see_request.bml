@@ -1,6 +1,6 @@
 <?page
 title=>Request #<?_code return ($FORM{'id'}+0); _code?>
-BODY<=
+body<=
         
 <?_code
 

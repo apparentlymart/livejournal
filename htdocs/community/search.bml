@@ -1,6 +1,6 @@
 <?_info
-LOCALBLOCKS<=
-CRIT<=
+localblocks<=
+crit<=
 {F}
 <TR BGCOLOR=#D0D0D0>
 <TD><INPUT TYPE=CHECKBOX NAME="%%code%%" VALUE=1></TD>
@@ -8,7 +8,7 @@ CRIT<=
 </TR>
 <TR><TD>&nbsp;</TD><TD>%%form%%</TD></TR>
 <=crit
-BAR<=
+bar<=
 {F}
 <TR BGCOLOR=#D0D0D0>
 <TD>&nbsp;</TD>
@@ -19,7 +19,7 @@ BAR<=
 <=localblocks
 _info?><?page
 title=><?_ml .title _ml?>
-BODY<=
+body<=
 
 <?h1 <?_ml .label.searchcomm _ml?> h1?>
 <?p
@@ -38,7 +38,7 @@ p?>
 <?crit
 name=><?_ml .label.bylocation _ml?>
 code=>s_loc
-FORM<=
+form<=
 
 <TABLE>
 <TR><TD ALIGN=RIGHT><?_ml .label.country _ml?></TD><TD>
@@ -68,7 +68,7 @@ crit?>
 <?crit
 name=><?_ml .label.bytime _ml?>
 code=>s_ut
-FORM<=
+form<=
 <?_ml .label.updated _ml?>
 <SELECT NAME="ut_days">
 <OPTION VALUE="">-------
@@ -83,7 +83,7 @@ crit?>
 <?crit
 name=><?_ml .label.byinterest _ml?>
 code=>s_int
-FORM<=
+form<=
 <?_ml .userlikes _ml?> <INPUT NAME="int_like" SIZE=30>
 <=form
 crit?>
@@ -92,7 +92,7 @@ crit?>
 <?crit
 name=><?_ml .label.hasmember _ml?>
 code=>s_fr
-FORM<=
+form<=
 <?_ml .contasmember _ml?>
 <=form
 crit?>
@@ -100,7 +100,7 @@ crit?>
 <!----- other ------>
 <?bar
 name=><?_ml .label.othercriteria _ml?>
-FORM<=
+form<=
 <INPUT TYPE=CHECKBOX NAME="s_withpic" VALUE=1> <?_ml .checkbox.onlywithpics _ml?>
 <=form
 bar?>
@@ -108,7 +108,7 @@ bar?>
 <!---- output formatting ----->
 <?bar
 name=><?_ml .label.displayoptions _ml?>
-FORM<=
+form<=
 
 <TABLE>
 <TR>

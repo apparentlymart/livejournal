@@ -1,6 +1,6 @@
 <?page
 title=>Create New Journal
-BODY<=
+body<=
 <?_code 
 
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);

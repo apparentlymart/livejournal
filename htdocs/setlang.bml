@@ -15,7 +15,7 @@
 
 _code?><?page
 title=><?_ml .title _ml?>
-BODY<=
+body<=
 
 <?_code
 

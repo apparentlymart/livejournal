@@ -1,6 +1,6 @@
 <?page
 title=>Statistics
-BODY<=
+body<=
 
 <?h1 <?sitename?> Statistics h1?>
 <?p

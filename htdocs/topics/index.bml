@@ -249,7 +249,7 @@ $body .= "How does this all work?  <A HREF=\"/support/faqbrowse.bml?faqid=29\">R
  return;
 _code?><?page
 title=><?_code return $title; _code?>
-BODY<=
+body<=
 <?_code
 
 return $body;

@@ -1,6 +1,6 @@
 <?_code $head = ""; _code?><?page
 title=>Search Results
-BODY<=
+body<=
 
 <?_code
 
@@ -354,7 +354,7 @@ BODY<=
 _code?>
 
 <=body
-HEAD<=
+head<=
 <meta name="robots" content="noindex,nofollow">
 <?_code return $head; _code?>
 <=head

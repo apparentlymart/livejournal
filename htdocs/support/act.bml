@@ -19,7 +19,7 @@
  
 _code?><?page
 title=><?_code return $title; _code?>
-BODY<=
+body<=
 <?_code
 
  if ($title eq "Error") { 

@@ -2,7 +2,7 @@
 nocache=>1
 _info?><?page
 title=><?_code return $FORM{'id'} ? "Edit FAQ Item #$FORM{'id'}" : "Add to FAQ"; _code?>
-BODY<=
+body<=
 
 <CENTER>
 <A HREF="./"><B>(Back to FAQ Index)</B></A>

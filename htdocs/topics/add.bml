@@ -1,6 +1,6 @@
 <?page
 title=>Add to Topic
-BODY<=
+body<=
 <?_code
 
  return "The topic directory is currently down until it is revised to use the new database format.";

@@ -24,7 +24,7 @@
 
 _code?><?page
 title=><?_code return $title; _code?>
-HEAD<=
+head<=
 <?_c TODO: configurable meta tags could go here? _c?>
 <?_code
  return $head;

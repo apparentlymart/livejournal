@@ -1,6 +1,6 @@
 <?page
 title=>Send a Text Message
-BODY<=
+body<=
 <?_code
 
  my $dbs = LJ::get_dbs();

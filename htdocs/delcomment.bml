@@ -2,7 +2,7 @@
 nocache=>1
 _info?><?page
 title=>Delete Comment
-BODY<=
+body<=
 
 <?_code
 

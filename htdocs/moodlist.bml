@@ -1,6 +1,6 @@
 <?page
 title=>LiveJournal Moods
-BODY<=
+body<=
 
 <?h1 Moods h1?>
 <?p

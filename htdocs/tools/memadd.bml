@@ -275,7 +275,7 @@
  return;
 _code?><?page
 title=><?_code return $title; _code?>
-BODY<=
+body<=
 <?_code
  return $body;
 _code?>

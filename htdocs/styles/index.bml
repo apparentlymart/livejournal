@@ -1,6 +1,6 @@
 <?page
 title=>Custom Styles
-BODY<=
+body<=
 
 <?h1 Making your journal purty... h1?>
 <?p This section of the site allows you to create, edit and delete

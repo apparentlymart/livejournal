@@ -1,6 +1,6 @@
 <?page
 title=>Add Topic
-BODY<=
+body<=
 <?_code
 
  my $dbs = LJ::get_dbs();

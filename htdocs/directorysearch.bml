@@ -1,12 +1,12 @@
 <?_info
-LOCALBLOCKS<=
-CRIT<=
+localblocks<=
+crit<=
 {FpRs}<tr bgcolor='<?emcolor?>'>
 <td align='left' colspan='2'><b>%%name%%</b>
 </tr>
 <tr align='left'><td>&nbsp;</td><td>%%form%%</td></tr>
 <=crit
-BAR<=
+bar<=
 {FpRs}<tr bgcolor='<?emcolor?>' align='left'>
 <td>&nbsp;</td>
 <td><b>%%name%%</b></td>
@@ -16,7 +16,7 @@ BAR<=
 <=localblocks
 _info?><?page
 title=>Directory Search
-BODY<=
+body<=
 
 <?h1 Search Directory h1?>
 <?p
@@ -37,7 +37,7 @@ _code?>
 <?crit
 name=>By Location
 code=>s_loc
-FORM<=
+form<=
 
 <table>
 <tr><td align='right'>Country:</td><td align='left'>
@@ -62,7 +62,7 @@ crit?>
 <?crit
 name=>By Journal Update Time
 code=>s_ut
-FORM<=
+form<=
 Updated in last 
 <select name="ut_days">
 <option value="">-------</option>
@@ -77,7 +77,7 @@ crit?>
 <?crit
 name=>By Age
 code=>s_age
-FORM<=
+form<=
 Between 
 <INPUT NAME="age_min" SIZE=3 MAXLENGTH=3> and 
 <INPUT NAME="age_max" SIZE=3 MAXLENGTH=3> years old.
@@ -89,7 +89,7 @@ crit?>
 <?crit
 name=>By Gender
 code=>s_gen
-FORM<=
+form<=
 User is: <SELECT NAME="gen_sel">
 <OPTION VALUE="" SELECTED>
 <OPTION VALUE="M">Male
@@ -103,7 +103,7 @@ _c?>
 <?crit
 name=>By Interest
 code=>s_int
-FORM<=
+form<=
 User likes: <INPUT NAME="int_like" SIZE=30>
 <=form
 crit?>
@@ -112,7 +112,7 @@ crit?>
 <?crit
 name=>Has Friend
 code=>s_fr
-FORM<=
+form<=
 User lists <INPUT NAME="fr_user" SIZE=15 MAXLENGTH=15> as a friend.
 <=form
 crit?>
@@ -121,7 +121,7 @@ crit?>
 <?crit
 name=>Friend of
 code=>s_fro
-FORM<=
+form<=
 <INPUT NAME="fro_user" SIZE=15 MAXLENGTH=15> lists user as a friend.
 crit?>
 
@@ -130,7 +130,7 @@ crit?>
 <?crit
 name=>Client Usage
 code=>s_client
-FORM<=
+form<=
 Has used update client named: <INPUT NAME="client_match" SIZE=20>
 crit?>
 _c?>
@@ -139,7 +139,7 @@ _c?>
 <!----- other ------>
 <?bar
 name=>Other Criteria
-FORM<=
+form<=
 <INPUT TYPE=CHECKBOX NAME="s_withpic" VALUE=1> Only users with pictures
 <=form
 bar?>
@@ -148,7 +148,7 @@ _c?>
 <!---- output formatting ----->
 <?bar
 name=>Display Options
-FORM<=
+form<=
 
 <TABLE>
 <TR>

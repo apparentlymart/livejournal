@@ -1,6 +1,6 @@
 <?page
 title=>LiveJournal Support
-BODY<=
+body<=
 
 <?h1 Welcome! h1?>
 <?p
