@@ -41,6 +41,7 @@ require "$ENV{'LJHOME'}/cgi-bin/emailcheck.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljmemories.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljmail.pl";
 require "$ENV{'LJHOME'}/cgi-bin/sysban.pl";
+require "$ENV{'LJHOME'}/cgi-bin/synlib.pl";
 
 # preload site-local libraries, if present:
 require "$ENV{'LJHOME'}/cgi-bin/modperl_subs-local.pl"

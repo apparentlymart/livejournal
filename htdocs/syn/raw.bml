@@ -2,16 +2,15 @@
 {
     my $ret;
     my $db = LJ::get_db_reader();
-    
-    my $sth = $db->prepare("SELECT u.user, u.name, s.synurl, s.numreaders ".
-                           "FROM syndicated s, user u ".
-                           "WHERE s.userid=u.userid AND s.numreaders > 0 ".
-                           "AND s.lastnew > DATE_SUB(NOW(), INTERVAL 24 HOUR) ".
-                           "ORDER BY s.numreaders DESC LIMIT 1000");
-    $sth->execute;
-    while (@_ = map { s/[\t\n]//g; $_; } $sth->fetchrow_array) {
-        $ret .= join("\t", @_) . "\n";
+
+    my $popsyn = LJ::Syn::get_popular_feeds();
+
+    foreach (@$popsyn) {
+        my ($user, $name, $userid, $url, $count) = @$_;
+        $name =~ s/[\t\n]//g; $url =~ s/[\t\n]//g;
+        $ret .= join("\t", $user, $name, $url, $count) . "\n";
     }
+    
     BML::set_content_type("text/plain; charset=utf-8");
     return $ret;
 }

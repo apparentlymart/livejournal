@@ -141,40 +141,17 @@ body<=
         }
     }
 
-    # get 100 most popular feeds from memcache
-    my $popsyn = LJ::MemCache::get("popsyn");
-
-    # nothing in memcache, build an object from db
-    # then populate memcache
-    unless ($popsyn) {
-        $popsyn = [];
-
-        my $sth = $dbh->prepare("SELECT userid, synurl, numreaders FROM syndicated " .
-                                "ORDER BY numreaders DESC LIMIT 100");
-        $sth->execute();
-        while (my @row = $sth->fetchrow_array) {
-            push @$popsyn, [ @row ];
-        }
-
-        # load u objects so we can get usernames
-        my %users;
-        LJ::load_userids_multiple([ map { $_, \$users{$_} } map { $_->[0] } @$popsyn ], [$u]);
-        unshift @$_, $users{$_->[0]}->{'user'} foreach @$popsyn;
-
-        # format is: [ user, userid, synurl, numreaders ]
-
-        # set in memcache
-        my $expire = time() + 3600; # 1 hour
-        LJ::MemCache::set("popsyn", $popsyn, $expire);        
-    }
+    # get most popular feeds from memcache
+    my $popsyn = LJ::Syn::get_popular_feeds();
 
     # load user's friends so we can strip feeds they already watch
     my $friends = LJ::get_friends($u) || {};
 
     # populate @pop and add users they've chosen to add
     my @pop;
-    foreach (@$popsyn) {
-        my ($user, $suserid, $url, $count) = @$_;
+    for (0 .. 99) {
+        next if not defined @$popsyn[$_];
+        my ($user, $name, $suserid, $url, $count) = @{ @$popsyn[$_] };
 
         my $suser = LJ::load_userid($suserid);
         # skip suspended/deleted accounts, already watched feeds

@@ -6,16 +6,14 @@ body<=
  use vars qw(%GET);
 
  my $ret;
- my $db = LJ::get_db_reader();
-    
- my $sth = $db->prepare("SELECT u.user, u.name, s.synurl, s.numreaders ".
-                        "FROM syndicated s, user u ".
-                        "WHERE s.userid=u.userid AND s.numreaders > 0 ".
-                        "AND s.lastnew > DATE_SUB(NOW(), INTERVAL 24 HOUR) ".
-                        "ORDER BY s.numreaders DESC LIMIT 1000");
- $sth->execute;
+
+ my $popsyn = LJ::Syn::get_popular_feeds();
+
  my @data;
- push @data, $_ while $_ = $sth->fetchrow_hashref;
+ foreach (@$popsyn) { 
+     my ($user, $name, $userid, $url, $count) = @$_;
+     push @data, { 'user' => $user, 'name' => $name, 'numreaders' => $count, 'synurl' => $url };
+ }
 
  # Query already defaults to "numreaders" sort
  if ($GET{'sort'} eq "username") {
