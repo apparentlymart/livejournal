@@ -877,7 +877,7 @@ function settime(f) {
         }
 
         now = new Date();
-        // javascript getYear method is really fucked up:
+        // javascript getYear method is really brain-dead:
         f.year.value = now.getYear() < 1900 ? now.getYear() + 1900 : now.getYear();
         f.mon.value = twodigit(now.getMonth()+1);
         f.day.value = twodigit(now.getDate());
