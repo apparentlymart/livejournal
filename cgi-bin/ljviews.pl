@@ -524,11 +524,7 @@ sub create_view_lastn
     my ($dbs, $ret, $u, $vars, $remote, $opts) = @_;
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
-    my $dbcr;
-
-    if ($u->{'clusterid'}) {
-        $dbcr = LJ::get_cluster_reader($u);
-    }
+    my $dbcr = LJ::get_cluster_reader($u);
 
     my $user = $u->{'user'};
 
@@ -643,14 +639,9 @@ sub create_view_lastn
     ### load the log properties
     my %logprops = ();
     my $logtext;
-    if ($u->{'clusterid'}) {
-        LJ::load_props($dbs, "log");
-        LJ::load_log_props2($dbcr, $u->{'userid'}, \@itemids, \%logprops);
-        $logtext = LJ::get_logtext2($u, @itemids);
-    } else {
-        LJ::load_log_props($dbs, \@itemids, \%logprops);
-        $logtext = LJ::get_logtext($dbs, @itemids);
-    }
+    LJ::load_props($dbs, "log");
+    LJ::load_log_props2($dbcr, $u->{'userid'}, \@itemids, \%logprops);
+    $logtext = LJ::get_logtext2($u, @itemids);
     LJ::load_moods($dbs);
 
     my $lastday = -1;
@@ -710,8 +701,8 @@ sub create_view_lastn
             });
         }
 
-        my $ditemid = $u->{'clusterid'} ? ($itemid * 256 + $item->{'anum'}) : $itemid;
-        my $itemargs = $u->{'clusterid'} ? "journal=$user&amp;itemid=$ditemid" : "itemid=$ditemid";
+        my $ditemid = $itemid * 256 + $item->{'anum'};
+        my $itemargs = "journal=$user&amp;itemid=$ditemid";
         $lastn_event{'itemargs'} = $itemargs;
 
         LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
@@ -723,18 +714,10 @@ sub create_view_lastn
             ! $logprops{$itemid}->{'opt_nocomments'}
             ) 
         {
-            my ($readurl, $posturl);
-            if ($u->{'clusterid'}) {
-                $readurl = "$journalbase/$ditemid.html";
-                $posturl = "$journalbase/$ditemid.html?mode=reply";
-                if ($replycount && $remote && $remote->{'opt_nctalklinks'}) {
-                    $readurl .= "?nc=$replycount";
-                }
-            } else {
-                $itemargs .= "&amp;nc=$replycount" if $replycount && $remote &&
-                    $remote->{'opt_nctalklinks'};
-                $readurl = "$LJ::SITEROOT/talkread.bml?$itemargs";
-                $posturl = "$LJ::SITEROOT/talkpost.bml?$itemargs";
+            my $readurl = "$journalbase/$ditemid.html";
+            my $posturl = "$journalbase/$ditemid.html?mode=reply";
+            if ($replycount && $remote && $remote->{'opt_nctalklinks'}) {
+                $readurl .= "?nc=$replycount";
             }
 
             my $dispreadlink = $replycount || 
@@ -1121,8 +1104,7 @@ sub create_view_friends
 
         my $clusterid = $item->{'clusterid'}+0;
         
-        my $datakey = "0 $itemid";   # no cluster
-        $datakey = "$friendid $itemid" if $clusterid;
+        my $datakey = "$friendid $itemid";
             
         my $subject = $logtext->{$datakey}->[0];
         my $event = $logtext->{$datakey}->[1];
@@ -1172,8 +1154,8 @@ sub create_view_friends
             });
         }
 
-        my $ditemid = $clusterid ? ($itemid * 256 + $item->{'anum'}) : $itemid;
-        my $itemargs = $clusterid ? "journal=$friend&amp;itemid=$ditemid" : "itemid=$ditemid";
+        my $ditemid = $itemid * 256 + $item->{'anum'};
+        my $itemargs = "journal=$friend&amp;itemid=$ditemid";
         $friends_event{'itemargs'} = $itemargs;
 
         LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$datakey}->{'opt_preformatted'},
@@ -1250,15 +1232,9 @@ sub create_view_friends
             my ($readurl, $posturl);
             my $journalbase = LJ::journal_base($friends{$friendid});
 
-            if ($clusterid) {
-                $posturl = "$journalbase/$ditemid.html?mode=reply";
-                $readurl = "$journalbase/$ditemid.html";
-                $readurl .= "?nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
-            } else {
-                $itemargs .= "&amp;nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
-                $posturl = "$LJ::SITEROOT/talkpost.bml?$itemargs",
-                $readurl = "$LJ::SITEROOT/talkread.bml?$itemargs";
-            }
+            $posturl = "$journalbase/$ditemid.html?mode=reply";
+            $readurl = "$journalbase/$ditemid.html";
+            $readurl .= "?nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
             
             $friends_event{'talklinks'} = LJ::fill_var_props($vars, 'FRIENDS_TALK_LINKS', {
                 'itemid' => $ditemid,
@@ -1438,15 +1414,8 @@ sub create_view_calendar
     my $quserid = $dbr->quote($u->{'userid'});
     my $maxyear = 0;
 
-    my ($db, $sql);
-    
-    if ($u->{'clusterid'}) {
-        $db = LJ::get_cluster_reader($u);
-        $sql = "SELECT year, month, day, DAYOFWEEK(CONCAT(year, \"-\", month, \"-\", day)) AS 'dayweek', COUNT(*) AS 'count' FROM log2 WHERE journalid=$quserid GROUP BY year, month, day, dayweek";
-    } else {
-        $db = $dbr;
-        $sql = "SELECT year, month, day, DAYOFWEEK(CONCAT(year, \"-\", month, \"-\", day)) AS 'dayweek', COUNT(*) AS 'count' FROM log WHERE ownerid=$quserid GROUP BY year, month, day, dayweek";
-    }
+    my $db = LJ::get_cluster_reader($u);
+    my $sql = "SELECT year, month, day, DAYOFWEEK(CONCAT(year, \"-\", month, \"-\", day)) AS 'dayweek', COUNT(*) AS 'count' FROM log2 WHERE journalid=$quserid GROUP BY year, month, day, dayweek";
 
     unless ($db) {
         $opts->{'errcode'} = "nodb";
@@ -1708,23 +1677,15 @@ sub create_view_day
         }
     }
 
-    my $logdb;
-    if ($u->{'clusterid'}) { 
-        $logdb = LJ::get_cluster_reader($u);
-        unless ($logdb) {
-            $opts->{'errcode'} = "nodb";
-            $$ret = "";
-            return 0;
-        }
-        $sth = $logdb->prepare("SELECT jitemid FROM log2 WHERE journalid=$u->{'userid'} ".
-                               "AND year=$year AND month=$month AND day=$day $secwhere ".
-                               "ORDER BY eventtime LIMIT 200");
-    } else {
-        $logdb = $dbr;
-        $sth = $logdb->prepare("SELECT itemid FROM log WHERE ownerid=$u->{'userid'} ".
-                               "AND year=$year AND month=$month AND day=$day $secwhere ".
-                               "ORDER BY eventtime LIMIT 200");
+    my $logdb = LJ::get_cluster_reader($u);
+    unless ($logdb) {
+        $opts->{'errcode'} = "nodb";
+        $$ret = "";
+        return 0;
     }
+    $sth = $logdb->prepare("SELECT jitemid FROM log2 WHERE journalid=$u->{'userid'} ".
+                           "AND year=$year AND month=$month AND day=$day $secwhere ".
+                           "ORDER BY eventtime LIMIT 200");
     $sth->execute;
     if ($logdb->err) {
         $$ret .= $logdb->errstr;
@@ -1737,23 +1698,13 @@ sub create_view_day
 
     ### load the log properties
     my %logprops = ();
-    my $logtext;
-    if ($u->{'clusterid'}) {
-        LJ::load_props($dbs, "log");
-        LJ::load_log_props2($logdb, $u->{'userid'}, \@itemids, \%logprops);
-        $logtext = LJ::get_logtext2($u, @itemids);
-    } else {
-        LJ::load_log_props($dbs, \@itemids, \%logprops);
-        $logtext = LJ::get_logtext($dbs, @itemids);
-    }
+    LJ::load_props($dbs, "log");
+    LJ::load_log_props2($logdb, $u->{'userid'}, \@itemids, \%logprops);
+    my $logtext = LJ::get_logtext2($u, @itemids);
     LJ::load_moods($dbs);
 
     # load the log items
-    if ($u->{'clusterid'}) {
-        $sth = $logdb->prepare("SELECT jitemid, security, replycount, DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H\") AS 'alldatepart', anum FROM log2 WHERE journalid=$u->{'userid'} AND jitemid IN ($itemid_in) ORDER BY eventtime $optDESC, logtime $optDESC");
-    } else {
-        $sth = $dbr->prepare("SELECT itemid, security, replycount, DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H\") AS 'alldatepart' FROM log WHERE itemid IN ($itemid_in) ORDER BY eventtime $optDESC, logtime $optDESC");
-    }
+    $sth = $logdb->prepare("SELECT jitemid, security, replycount, DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H\") AS 'alldatepart', anum FROM log2 WHERE journalid=$u->{'userid'} AND jitemid IN ($itemid_in) ORDER BY eventtime $optDESC, logtime $optDESC");
     $sth->execute;
 
     my $events = "";
@@ -1787,8 +1738,8 @@ sub create_view_day
             });
         }
 
-        my $ditemid = $u->{'clusterid'} ? ($itemid*256 + $anum) : $itemid;
-        my $itemargs = $u->{'clusterid'} ? "journal=$user&amp;itemid=$ditemid" : "itemid=$ditemid";
+        my $ditemid = $itemid*256 + $anum;
+        my $itemargs = "journal=$user&amp;itemid=$ditemid";
         $day_event{'itemargs'} = $itemargs;
 
         LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
@@ -1800,18 +1751,10 @@ sub create_view_day
             ! $logprops{$itemid}->{'opt_nocomments'}
             ) 
         {
-            my ($readurl, $posturl);
-            if ($u->{'clusterid'}) {
-                $posturl = "$journalbase/$ditemid.html?mode=reply";
-                $readurl = "$journalbase/$ditemid.html";
-                if ($replycount && $remote && $remote->{'opt_nctalklinks'}) {
-                    $readurl .= "?nc=$replycount";
-                }
-            } else {
-                $posturl = "$LJ::SITEROOT/talkpost.bml?$itemargs";
-                $readurl = "$LJ::SITEROOT/talkread.bml?$itemargs";
-                $itemargs .= "&amp;nc=$replycount" if $replycount && $remote &&
-                    $remote->{'opt_nctalklinks'};
+            my $posturl = "$journalbase/$ditemid.html?mode=reply";
+            my $readurl = "$journalbase/$ditemid.html";
+            if ($replycount && $remote && $remote->{'opt_nctalklinks'}) {
+                $readurl .= "?nc=$replycount";
             }
             my $dispreadlink = $replycount || 
                 ($logprops{$itemid}->{'hasscreened'} &&
