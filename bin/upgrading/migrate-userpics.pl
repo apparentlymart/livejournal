@@ -15,11 +15,12 @@ use IPC::Open3;
 # aren't in mogile right now, and put them there
 
 # determine 
-my ($picker, $one, $ignoreempty, $dryrun);
+my ($picker, $one, $ignoreempty, $dryrun, $user);
 my $rv = GetOptions("picker=s"     => \$picker,
                     "ignore-empty" => \$ignoreempty,
                     "one"          => \$one,
-                    "dry-run"      => \$dryrun);
+                    "dry-run"      => \$dryrun,
+                    "user=s"       => \$user);
 unless ($rv) {
     die <<ERRMSG;
 This script supports the following command line arguments:
@@ -27,6 +28,9 @@ This script supports the following command line arguments:
     --picker=/path/to/picker
         Instruct us to use the picker program to get userids.
 
+    --user=username
+        Only move this particular user.  Not useable with --picker.
+        
     --one
         Only move one user.  (But it moves all their pictures.)
         This is used for testing.
@@ -42,6 +46,8 @@ This script supports the following command line arguments:
         makes it so that we just warn instead.
 ERRMSG
 }
+die "Options --user and --picker cannot be combined.\n"
+    if $picker && $user;
 
 # make sure ljconfig is setup right (or so we hope)
 die "Please define a 'userpics' class in your \%LJ::MOGILEFS_CONFIG\n"
@@ -83,6 +89,12 @@ if ($picker) {
     print "Closing picker...\n";
     print $p_out "done\n";
     waitpid $p_pid, 0;
+} elsif ($user) {
+    # move a single user
+    my $u = LJ::load_user($user);
+    die "No such user: $user\n" unless $u;
+    handle_userid($u->{userid});
+    
 } else {
     # now iterate over the clusters to pick
     foreach my $cid (sort { $a <=> $b } @LJ::CLUSTERS) {
@@ -125,7 +137,7 @@ sub handle_userid {
 
     # get all their photos that aren't in mogile already
     my $picids = $dbcm->selectall_arrayref
-        ("SELECT picid, fmt FROM userpic2 WHERE userid = ? OR location <> 'mogile' OR location IS NULL",
+        ("SELECT picid, fmt FROM userpic2 WHERE userid = ? AND (location <> 'mogile' OR location IS NULL)",
          undef, $u->{userid});
     return unless @$picids;
 
@@ -139,7 +151,7 @@ sub handle_userid {
         # get length
         my $len = length($data);
         if ($ignoreempty && !$len) {
-            print "\tWarning: empty userpic.\n\n";
+            print "\twarning: empty userpic.\n\n";
             next;
         }
         die "Error: data from blob empty ($u->{user}, 'userpic', $format, $picid)\n"
