@@ -2748,7 +2748,7 @@ sub check_rate {
         # of the other 'spammer-centric' limits.
         push @watch,
           [
-            "talklog:$journalu->{u}",
+            "talklog:$journalu->{userid}",
             $LJ::RATE_COMMENT_ANON ||
                 [ [ 300, 3600 ], [ 200, 1800 ], [ 150, 900 ], [ 15, 60 ] ]
           ];
