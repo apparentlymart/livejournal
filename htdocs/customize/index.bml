@@ -205,10 +205,15 @@ body<=
     }
 
     # choose layout
-    my @layouts = map { $_, $pub->{$_}->{'name'} }
-                 sort { $pub->{$a}->{'name'} cmp $pub->{$b}->{'name'} }
-                 grep { /^\d+$/ && $pub->{$_}->{'type'} eq "layout" &&
-                        LJ::S2::can_use_layer($u, $pub->{$_}->{'uniq'}) } keys %$pub;
+    my @layouts = map  { $_, $pub->{$_}->{'name'} } 
+                  sort { $pub->{$a}->{'name'} cmp $pub->{$b}->{'name'} }
+                  grep { my $tmp = $_;
+                         $tmp =~ /^\d+$/ && 
+                         $pub->{$tmp}->{'type'} eq "layout" &&
+                         LJ::S2::can_use_layer($u, $pub->{$tmp}->{'uniq'}) &&
+                         ($_ = $tmp)
+                       } keys %$pub;
+
     # add user ones
     {
         my @user = map { $_, $userlay->{$_}->{'name'} ? $userlay->{$_}->{'name'} : "\#$_" } 
