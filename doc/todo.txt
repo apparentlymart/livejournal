@@ -101,17 +101,18 @@ FUTURE / LOW PRIORITY:
 
 HIGH PRIORITY:
 
-* rewrite the account expiration logic
-* "unpay" console command
 * ljcom: automate username changes (payments and renaming)
   - use a '^do:' table in qbuffferd
 * directory.
 * S2.
 * rate limiting
-* add hooks to verify people aren't faking their paid user cookie
 
 MISC:
 
+* db-based fileedit (livejournal) uses syncweb.pl (ljcom) to update,
+  and each slave connects to master db once a minute to check for
+  new stuff.  make a new livejournal daemon which does controls
+  all periodic stuff like this with one persistent db connection?
 * BML::500_on_die option: make BML send a 500 server error on any
   _CODE block failure
 * Syndicating channels:

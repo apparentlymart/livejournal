@@ -10,12 +10,57 @@
  my $DEF_COL = 80;
 
  my $remote = LJ::get_remote($dbs);
- my %files = ();
+
+ my %files = ();  # keys: files remote user has access to, value: 1
  my $INC_DIR = "$LJ::HTDOCS/inc";
 
  unless (LJ::remote_has_priv($dbs, $remote, "fileedit", \%files)) {
      return "You don't have access to edit any files, or you're not logged in.";
  }
+
+ my $valid_filename = sub 
+ {
+     my $filename = shift;
+     return ($filename =~ /^[a-zA-Z0-9-\_]{1,80}$/);
+ };
+
+ my $save_file = sub 
+ {
+     my ($filename, $content) = @_;
+     return 0 unless $valid_filename->($filename);
+
+     if ($LJ::FILEEDIT_VIA_DB) {
+	 my $qname = $dbh->quote($filename);
+	 my $qcontent = $dbh->quote($content);
+	 $dbh->do("REPLACE INTO includetext (incname, inctext, updatetime) ".
+		  "VALUES ($qname, $qcontent, UNIX_TIMESTAMP())");
+	 return 0 if $dbh->err;
+	 return 1;
+     }
+
+     open (FILE, ">$INC_DIR/$file") or return 0;
+     print FILE $content;
+     close FILE;
+     return 1;
+ };
+
+ my $load_file = sub
+ {
+     my ($filename) = @_;
+     return undef unless $valid_filename->($filename);
+
+     my $contents;
+     if ($LJ::FILEEDIT_VIA_DB) {
+	 my $qname = $dbh->quote($filename);
+	 $contents = $dbh->selectrow_array("SELECT inctext FROM includetext WHERE incname=$qname");
+	 return $contents if defined $contents;
+     }
+
+     open (FILE, "$INC_DIR/$filename") or return undef;
+     while (<FILE>) { $contents .= $_; }
+     close FILE;
+     return $contents;
+ };
 
  if ($files{'all'}) 
  {
@@ -32,8 +77,8 @@
  {
      my @del;
      foreach my $k (keys %files) {
-	 next if ($k =~ /^[a-zA-Z0-9-\_]{1,80}$/);
-	 push @del, $k;
+	 push @del, $k
+	     unless $valid_filename->($k);
      }
      foreach my $k (@del) { delete $files{$k}; }
  }
@@ -66,11 +111,11 @@
  if ($mode eq "edit") 
  {
      $ret .= "<B>Editing:</B> <tt>$file</tt><P>";
-     my $contents;
-     open (FILE, "$INC_DIR/$file") or return "<B>Error:</B> Couldn't open file";
-     while (<FILE>) { $contents .= $_; }
-     close FILE;
-     
+     my $contents = $load_file->($file);
+
+     return "<B>Error:</B> Couldn't open file" 
+	 unless defined $contents;
+
      my $r = ($FORM{'r'}+0) || $DEF_ROW;
      my $c = ($FORM{'c'}+0) || $DEF_COL;
      my $wrap = $FORM{'w'} ? "SOFT" : "OFF";
@@ -92,10 +137,11 @@
      }
 
      $ret .= "<B>Saving:</B> <tt>$file</tt><p>";
-     open (FILE, ">$INC_DIR/$file") or return "<B>Error:</B> Couldn't open $file";
-     print FILE $FORM{'contents'};
-     close FILE;
-     $ret .= "saved.";
+     if ($save_file->($file, $FORM{'contents'})) {
+	 $ret .= "saved.";
+     } else {
+	 $ret .= "<b>Error saving</b>";
+     }
      return $ret;
  }
 

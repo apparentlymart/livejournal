@@ -1033,6 +1033,15 @@ CREATE TABLE statushistory (
 )
 EOC
 
+register_tablecreate("includetext", <<'EOC');
+CREATE TABLE includetext (
+  incname  VARCHAR(80) NOT NULL PRIMARY KEY,
+  inctext  TEXT,
+  updatetime   INT UNSIGNED NOT NULL,
+  INDEX (updatetime)
+)
+EOC
+
 ### changes
 
 register_alter(sub {
