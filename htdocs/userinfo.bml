@@ -518,7 +518,7 @@
      $friends{'display'} = 0 if $friends{'count'} > 500;
      if ($friends{'count'}) {
          if (!$friends{'loaded'} || !$friends{'display'}) {
-             $body .= "<b>" . $friends{'display'} . ":</b> ";
+             $body .= "<b>" . $friends{'count'} . ":</b> ";
              $body .= "<a href='/directory.bml?s_fro=1&amp;fro_user=$u->{'user'}'>" . BML::ml('.label.viewlabel',{'label'=>$label}) . "</a>.";
          } else {
              $body .= "<b>" . $res_fr{'friend_count'} . ":</b> ";
