@@ -7755,7 +7755,7 @@ sub is_open_proxy
 # then it is loaded from memcache/DB, else it falls back to disk.
 sub load_include {
     my $file = shift;
-    return unless $file;
+    return unless $file && $file =~ /^[a-zA-Z0-9-_\.]{1,255}$/;
 
     # okay, edit from where?
     if ($LJ::FILEEDIT_VIA_DB || $LJ::FILEEDIT_VIA_DB{$file}) {
