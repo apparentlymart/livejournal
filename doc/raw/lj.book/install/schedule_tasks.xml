@@ -28,7 +28,6 @@
 MAILTO=youremail@wherever.com
 
 # Essential:
-* * * * * /home/lj/bin/ljmaint.pl db_batchdelete >/dev/null
 * */12 * * * /home/lj/bin/ljmaint.pl clean_caches >/dev/null
 
 # Optional, if you want birthday mail, and the random user feature:
@@ -36,8 +35,12 @@ MAILTO=youremail@wherever.com
 5 1 * * * /home/lj/bin/ljmaint.pl bdaymail build_randomuserset >/dev/null
 
 # If you want statistics:
-30 1 * * * /home/lj/bin/ljmaint.pl genstats genstatspics >/dev/null
+30 1 * * * /home/lj/bin/ljmaint.pl genstats genstatspics genstats_size >/dev/null
 5 2 * * 0 /home/lj/bin/ljmaint.pl genstats_weekly > /dev/null
+
+# Various tasks
+30 * * * * /home/lj/bin/ljmaint.pl synsuck > /dev/null
+5 2 * * 0 /home/lj/bin/ljmaint.pl memeclean > /dev/null
 
 # If you're running a high-load site with $LJ::BUFFER_QUERIES on,
 # there's another one to install:
