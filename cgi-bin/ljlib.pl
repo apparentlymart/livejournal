@@ -582,6 +582,115 @@ sub get_query_string
 
 package LJ;
 
+sub run_hooks
+{
+    my $hookname = shift;
+    my @args = shift;
+    foreach my $hook (@{$LJ::HOOKS{$hookname}}) {
+	$hook->(@args);
+    }
+}
+
+sub register_hook
+{
+    my $hookname = shift;
+    my $subref = shift;
+    push @{$LJ::HOOKS{$hookname}}, $subref;
+}
+
+sub acid_encode
+{
+    my $num = shift;
+    my $acid = "";
+    my $digits = "abcdefghjkmnpqrstvwxyz23456789";
+    while ($num) {
+	my $dig = $num % 30;
+	$acid = substr($digits, $dig, 1) . $acid;
+	$num = ($num - $dig) / 30;
+    }
+    return ("a"x(7-length($acid)) . $acid);
+}
+
+sub acid_decode
+{
+    my $acid = shift;
+    $acid = lc($acid);
+    my %val;
+    my $digits = "abcdefghjkmnpqrstvwxyz23456789";
+    for (0..30) { $val{substr($digits,$_,1)} = $_; }
+    my $num = 0;
+    my $place = 0;
+    while ($acid) {
+	return 0 unless ($acid =~ s/[$digits]$//o);
+	$num += $val{$&} * (30 ** $place++);	
+    }
+    return $num;    
+}
+
+sub acct_code_generate
+{
+    my $dbarg = shift;
+    my $userid = shift;
+
+    my $dbs = LJ::make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $digits = "abcdefghjkmnpqrstvwxyz23456789";
+    my $auth = "";
+    for (1..5) { $auth .= substr($digits, int(rand(30)), 1); }
+    $userid = int($userid);
+    $dbh->do("INSERT INTO acctcode (acid, userid, rcptid, auth) ".
+	     "VALUES (NULL, $userid, 0, \"$auth\")");
+    my $acid = $dbh->{'mysql_insertid'};
+    return undef unless $acid;
+    return acct_code_encode($acid, $auth);
+}
+
+sub acct_code_encode
+{
+    my $acid = shift;
+    my $auth = shift;
+    return lc($auth) . acid_encode($acid);
+}
+
+sub acct_code_decode
+{
+    my $code = shift;
+    return (acid_decode(substr($code, 5, 7)), lc(substr($code, 0, 5)));
+}
+
+sub acct_code_check
+{
+    my $dbarg = shift;
+    my $code = shift;
+    my $err = shift;     # optional; scalar ref
+    my $userid = shift;  # optional; acceptable userid (double-click proof)
+    
+    my $dbs = LJ::make_dbs_from_arg($dbarg);
+    my $dbr = $dbs->{'reader'};
+    
+    unless (length($code) == 12) {
+	$$err = "Malformed code; not 12 characters.";
+	return 0;	 
+    }
+    
+    my ($acid, $auth) = acct_code_decode($code);
+    my $sth = $dbr->prepare("SELECT userid, rcptid, auth FROM acctcode WHERE acid=$acid");
+    $sth->execute;
+    my $ac = $sth->fetchrow_hashref;
+    
+    unless ($ac && $ac->{'auth'} eq $auth) {
+	$$err = "Invalid account code.";
+	return 0;
+    }
+    
+    if ($ac->{'rcptid'} && $ac->{'rcptid'} != $userid) {
+	$$err = "This code has already been used.";
+	return 0;
+    }
+    
+    return 1;
+}
+
 sub load_mood_theme
 {
     my $dbarg = shift;

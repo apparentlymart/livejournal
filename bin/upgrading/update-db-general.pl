@@ -1024,6 +1024,18 @@ post_create("userusage",
 	    "sqltry" => "ALTER TABLE user DROP timecreate, DROP timeupdate, DROP timecheck, DROP lastitemid",
 	    );
 
+register_tablecreate("acctcode", <<'EOC');
+CREATE TABLE acctcode
+(
+  acid    INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  userid  INT UNSIGNED NOT NULL,
+  rcptid  INT UNSIGNED NOT NULL DEFAULT 0,
+  auth    CHAR(5) NOT NULL,
+  INDEX (userid),
+  INDEX (rcptid)
+)
+EOC
+
 ### changes
 
 register_alter(sub {

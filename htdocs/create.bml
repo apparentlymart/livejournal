@@ -10,32 +10,88 @@ BODY<=
  # with no mode, decide which screen the user sees first, based
  # on whether or not this LJ installation lets in free users
  if ($mode eq "") {
-     $mode = $LJ::USE_ACCT_CODES ? "entercode" : "getinfo"; 
- } else {
-     unless (LJ::did_post()) {
-	 return "<b>Error:</b> POST required.";
+     $mode = $LJ::USE_ACCT_CODES ? 
+	 ($FORM{'code'} ? "codesubmit" : "entercode")
+	     : "getinfo"; 
+ }
+ 
+ my ($dbs, $dbh, $dbr);
+
+ my $connect_db = sub {
+     $dbs = LJ::get_dbs();
+     $dbh = $dbs->{'dbh'};
+     $dbr = $dbs->{'reader'};
+ };
+
+ my %errors;
+ my $error_msg = sub {
+     my $key = shift;
+     my $pre = shift;
+     my $post = shift;
+     my $msg = $errors{$key};
+     return "" unless $msg;
+     return "$pre(=INERR $msg INERR=)$post";
+ };
+ 
+ # validate a code they've entered and throw them back to entercode
+ # mode if it's invalid
+ if ($LJ::USE_ACCT_CODES && ($mode eq "codesubmit" || $mode eq "submit"))
+ {
+     my $code = $FORM{'code'};
+     $connect_db->();
+     my $error;
+     my $userid = 0;  # acceptable userid for double-click protection
+     if ($mode eq "submit") {
+	 my $u = LJ::load_user($dbs, $FORM{'user'});
+	 $userid = $u->{'userid'};
      }
+     $errors{'code'} = $error
+	 unless (LJ::acct_code_check($dbs, $code, \$error, $userid));
+     if (%errors) {
+	 $mode = "entercode";
+     } elsif ($mode eq "codesubmit") {
+	 $mode = "getinfo";
+     } 
  }
 
  # MODE: entercode - enter an account code to proceed making an account
- if ($mode eq "entercode" && $LJ::USE_ACCT_CODES)
+ if ($LJ::USE_ACCT_CODES && $mode eq "entercode")
  {
-     
+     my $ret;
+     my $v;
+
+     $ret .= "<form method=\"post\" action=\"create.bml\">\n";
+     $ret .= "<input type=\"hidden\" name=\"mode\" value=\"codesubmit\">\n";
+
+     $ret .= "(=H1 Welcome H1=)(=P To create a new account, enter an account creation code: P=)";
+
+     $v = LJ::ehtml($FORM{'code'});
+     $ret .= "(=STANDOUT Code: <input type=\"text\" name=\"code\" value=\"$v\" size=\"13\" maxlength=\"12\"> <input type=\"submit\" value=\"Proceed...\">";
+     $ret .= $error_msg->('code', '<br>');     
+     $ret .= " STANDOUT=)";
+     $ret .= "</form>\n";
+
+     open (REM, "$LJ::HOME/htdocs/inc/account-codes");
+     while (<REM>) {
+	 $ret .= $_;
+     }	
+     close REM;
+
+     return $ret;
  }
  
  # MODE: submit - try to create an account.  might change mode
  #       if there are errors, we'll populate %errors and 
  #       return to "getinfo" mode below
- my %errors;
  if ($mode eq "submit") 
  {
+     return "<b>Error:</b> POST required." unless LJ::did_post();
+     
      my $user = LJ::canonical_username($FORM{'user'});
      my $name = $FORM{'name'};
      my $email = &trim(lc($FORM{'email'}));
-     
-     my $dbs = LJ::get_dbs();
-     my $dbh = $dbs->{'dbh'};
-     my $dbr = $dbs->{'reader'};
+
+     $connect_db->();
      
      my $quser = $dbh->quote($user);
      my $qemail = $dbh->quote($email);
@@ -111,8 +167,22 @@ BODY<=
 	     return "(=H1 Error H1=)(=P There was an error processing your request: <B>" . $dbh->errstr . "</B> P=)";
 	 }
 	 $userid = $dbh->{'mysql_insertid'};
-	 $dbh->do("INSERT INTO useridmap (userid, user) VALUES ($userid, $quser)");
-	 $dbh->do("INSERT INTO userusage (userid, timecreate) VALUES ($userid, NOW())");
+	 $dbh->do("REPLACE INTO useridmap (userid, user) VALUES ($userid, $quser)");
+	 $dbh->do("REPLACE INTO userusage (userid, timecreate) VALUES ($userid, NOW())");
+
+	 # if we're using account codes on this site, mark the code as used
+	 if ($LJ::USE_ACCT_CODES) {
+	     my ($acid, $auth) = LJ::acct_code_decode($FORM{'code'});
+	     $dbh->do("UPDATE acctcode SET rcptid=$userid WHERE acid=$acid");
+	     if ($dbh->err) { return $dbh->errstr; }
+	 }
+
+         LJ::run_hooks("post_create", {
+	     'dbs' => $dbs,
+	     'userid' => $userid,
+	     'user' => $user,
+	     'code' => $FORM{'code'},
+	 });
      }
      
      my $aa = {};
@@ -165,19 +235,10 @@ BODY<=
      my $ret;
      my $v;
 
-     my $error_msg = sub {
-	 my $key = shift;
-	 my $pre = shift;
-	 my $post = shift;
-	 my $msg = $errors{$key};
-	 return "" unless $msg;
-	 return "$pre<font color=\"#ff0000\"><b>$msg</b></font>$post";
-     };
-
      $ret .= "(=H1 Creating a New Journal H1=)(=P Creating a new LiveJournal is easy, just follow the instructions below! P=)(=HR=)";
-     $ret .= "<form action=\"create.bml\" method=\"post\">";
-     $ret .= "<input type=\"hidden\" name=\"mode\" value=\"submit\">";
-     
+     $ret .= "<form action=\"create.bml\" method=\"post\">\n";
+     $ret .= "<input type=\"hidden\" name=\"mode\" value=\"submit\">\n";
+     $ret .= "<input type=\"hidden\" name=\"code\" value=\"" . LJ::ehtml($FORM{'code'}) . "\">\n";     
 
      $ret .= "(=H2 Username H2=)";
      $ret .= "(=P Each $LJ::SITENAME user must have their own unique username.  Your username is what appears in the address to your journal and what you use to log into the $LJ::SITENAME server.  It also shows up when you post comments in other people's journal. P=)";
@@ -230,6 +291,7 @@ BODY<=
      $ret .= "(=STANDOUT <center><input type=\"submit\" value=\"Proceed...\"><br />";
      $ret .= "<font size=\"-1\">Only press <b>Proceed</b> <i>once</i>!!</font>";
      $ret .= "</center> STANDOUT=)";
+     $ret .= "</form>";
 
      return $ret;
  }

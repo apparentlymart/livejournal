@@ -4,6 +4,7 @@ LJUSER=>{DSs}<a href="/userinfo.bml?user=%%DATA%%"><img src="(=IMGPREFIX=)/useri
 LJCOMM=>{DSs}<a href="/userinfo.bml?user=%%DATA%%"><img src="(=IMGPREFIX=)/community.gif" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE border=0></a><b><a href="/users/%%DATA%%/">%%DATA%%</a></b>
 LJUSERF=>{DSs}<a href="/userinfo.bml?user=%%DATA%%&amp;mode=full"><img src="(=IMGPREFIX=)/userinfo.gif" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE border=0></a><b><a href="/users/%%DATA%%/">%%DATA%%</a></b>
 HELP=>{DS}(<a href="%%DATA%%"><i>help</i></a>)
+INERR=>{DS}<font color="#ff0000"><b>%%DATA%%</b></font>
 
 REQUIREPOST<=
 {S}As a security precaution, the page you're viewing requires a POST request, 
