@@ -4664,7 +4664,7 @@ sub activate_userpics
         # ($LJ::EndOfTime - UnixTime)
         my $jitemid = $dbcr->selectrow_array("SELECT jitemid FROM log2 USE INDEX (rlogtime) " .
                                              "WHERE journalid=? AND rlogtime > ? LIMIT 1",
-                                             undef, $userid, $LJ::EndOfTime - time() - 86400*60);
+                                             undef, $userid, $LJ::EndOfTime - time() + 86400*60);
 
         # query all pickws in logprop2 with jitemid > that value
         my %count_kw = ();
