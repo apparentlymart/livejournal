@@ -335,7 +335,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         $*show_entry_userpic == true or
         $e.journal.username != $e.poster.username)
     {
-        var string userpic = defined $e.userpic ? "<img src='$e.userpic.url' style=border: 0' />" : "";
+        var string userpic = defined $e.userpic ? "<img src='$e.userpic.url' style='border: 0' />" : "";
         var string url = $e.journal->base_url() + "/";
         $metapic = "<div style='background-color: $bgcolor'>";
         $metapic = "$metapic <a href='$url'>$userpic</a>";
