@@ -34,7 +34,6 @@
     BML::suppress_content();
 
     # print top
-    $r->notes( codepath => "bml.exportcomments" );
     $r->content_type("text/xml; charset=utf-8");
     $r->send_http_header();
     $r->print("<?xml version=\"1.0\" encoding='utf-8'?>\n<livejournal>\n");
