@@ -3093,7 +3093,6 @@ sub auth_okay
     return 0 unless isu($u);
 
     $actual ||= $u->{'password'};
-    return 0 if $actual eq "";
 
     my $user = $u->{'user'};
 
@@ -3112,6 +3111,16 @@ sub auth_okay
         return 0;
     };
 
+    # setup this auth checker for LDAP
+    if ($LJ::LDAP_HOST && ! $LJ::AUTH_CHECK) {
+        require LJ::LDAP;
+        $LJ::AUTH_CHECK = sub {
+            my ($user, $try, $type) = @_;
+            die unless $type eq "clear";
+            return LJ::LDAP::is_good_ldap($user, $try);
+        };
+    }
+
     ## custom authorization:
     if (ref $LJ::AUTH_CHECK eq "CODE") {
         my $type = $md5 ? "md5" : "clear";
@@ -3121,7 +3130,7 @@ sub auth_okay
     }
 
     ## LJ default authorization:
-    return $bad_login->() unless $actual;
+    return 0 unless $actual;
     return 1 if ($md5 && lc($md5) eq LJ::hash_password($actual));
     return 1 if ($clear eq $actual);
     return $bad_login->();
@@ -3367,7 +3376,7 @@ sub challenge_check_login
 #      htdocs/create.bml can use it, rather than doing the work itself.
 # returns: integer of userid created, or 0 on failure.
 # args: dbarg?, opts
-# des-opts: hashref containing keys 'user', 'name', and 'password'
+# des-opts: hashref containing keys 'user', 'name', 'password', 'email'
 # </LJFUNC>
 sub create_account
 {
@@ -3387,9 +3396,9 @@ sub create_account
     # new non-clustered accounts aren't supported anymore
     return 0 unless $cluster;
 
-    $dbh->do("INSERT INTO user (user, name, password, clusterid, dversion, caps) ".
-             "VALUES ($quser, ?, ?, ?, $LJ::MAX_DVERSION, ?)", undef,
-             $o->{'name'}, $o->{'password'}, $cluster, $caps);
+    $dbh->do("INSERT INTO user (user, name, password, clusterid, dversion, caps, email) ".
+             "VALUES ($quser, ?, ?, ?, $LJ::MAX_DVERSION, ?, ?)", undef,
+             $o->{'name'}, $o->{'password'}, $cluster, $caps, $o->{'email'});
     return 0 if $dbh->err;
 
     my $userid = $dbh->{'mysql_insertid'};
@@ -5913,15 +5922,27 @@ sub load_user
     $u = $get_user->(scalar @LJ::MEMCACHE_SERVERS);
     return $u if $u;
 
+    # setup LDAP handler if this is the first time
+    if ($LJ::LDAP_HOST && ! $LJ::AUTH_EXISTS) {
+        require LJ::LDAP;
+        $LJ::AUTH_EXISTS = sub {
+            my $user = shift;
+            my $rec = LJ::LDAP::load_ldap_user($user);
+            return $rec ? $rec : undef;
+        };
+    }
+
     # if user doesn't exist in the LJ database, it's possible we're using
     # an external authentication source and we should create the account
     # implicitly.
-    if (ref $LJ::AUTH_EXISTS eq "CODE" &&
-        $LJ::AUTH_EXISTS->($user))
+    my $lu;
+    if (ref $LJ::AUTH_EXISTS eq "CODE" && ($lu = $LJ::AUTH_EXISTS->($user)))
     {
+        my $name = ref $lu eq "HASH" ? ($lu->{'nick'} || $lu->{name} || $user) : $user;
         if (LJ::create_account({
             'user' => $user,
-            'name' => $user,
+            'name' => $name,
+            'email' => ref $lu eq "HASH" ? $lu->{email} : "",
             'password' => "",
         }))
         {

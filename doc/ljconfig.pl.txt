@@ -570,6 +570,14 @@
     # actually migrated everything.
     $S2COMPILED_MIGRATION_DONE = 1;
 
+    # optional LDAP support
+    # required:
+    #    $LJ::LDAP_HOST = "ldap.sixapart.com";  # anything that the Net::LDAP constructor takes
+    #    $LJ::LDAP_BASE = "ou=People,dc=sixapart,dc=com";
+    # optional:
+    #    $LJ::LDAP_UID = "uid";  # field containing the username.  defaults to "uid".
+
+
 }
 
 1;  # return true
