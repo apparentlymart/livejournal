@@ -206,16 +206,8 @@ body<=
                                     { 'disabled' => $disabled_save });
             $ret .= '<br /><br />';
 
-            # carry post edits
-            foreach (qw(year mon day hour min
-                        prop_picture_keyword prop_current_moodid
-                        prop_current_mood prop_current_music
-                        prop_opt_screening)) {
-                $res{$_} = $POST{$_};
-            }
             $res{'events_1_event'} = $POST{'event'};
             $res{'events_1_subject'} = $POST{'subject'};
-
         }
 
         $ret .= "<?h1 $ML{'.title'} h1?>\n";
