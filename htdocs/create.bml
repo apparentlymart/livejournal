@@ -128,9 +128,17 @@ body<=
 
          $errors{'username'} = "$ML{'.error.username.reserved'}";
      }
-     # sadly enough:  (can't read english?  or AOL users?)
+
+     # see if they're confused and entered a valid account code
+     # for their username (happens often)
      if ($LJ::USE_ACCT_CODES && $user =~ /^.....a[ab].....$/) {
-         $errors{'username'} = "$ML{'.error.username.iscode'}";
+         # see if the acctcode is valid and unused
+         my ($acid, $auth) = LJ::acct_code_decode($user);
+         my $is_valid = $dbh->selectrow_array("SELECT COUNT(*) FROM acctcode ".
+                                              "WHERE acid=? AND rcptid=0",
+                                              undef, $acid);
+         $errors{'username'} = "$ML{'.error.username.iscode'}"
+             if $is_valid;
      }
      
      my $u = LJ::load_user($dbs, $user);
