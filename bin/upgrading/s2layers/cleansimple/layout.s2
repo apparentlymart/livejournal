@@ -519,10 +519,10 @@ function RecentPage::print_body ()
     }
 }
 
-function CalendarPage::print_year_links ()
+function ArchiveYearPage::print_year_links ()
 {
     """<p>""";
-    foreach var CalendarPageYear y ($.years) {
+    foreach var ArchiveYearYear y ($.years) {
         if ($y.displayed) {
             """<span class="active">$y.year</span>""";
         } else {
@@ -534,7 +534,7 @@ function CalendarPage::print_year_links ()
 
 }
 
-function CalendarPage::print_month (CalendarPageMonth m)
+function ArchiveYearPage::print_month (ArchiveYearMonth m)
 { 
     if (not $m.has_entries) { return; }
     """<center><table border="0" cellpadding="4" cellspacing="0" style="margin-top: 10px; margin-bottom: 10px;">""";
@@ -545,22 +545,22 @@ function CalendarPage::print_month (CalendarPageMonth m)
     """<tr align="center" bgcolor="$*navbar_bgcolor">""";
 
     foreach var int d ($.weekdays) {
-        """<td><font color="$*navbar_fgcolor">"""; $*lang_dayname_short[$d]; "</td>\n";
+        """<td><font color="$*navbar_fgcolor">"""; print $*lang_dayname_short[$d]; "</td>\n";
     }
 
     "</tr>";
 
-    foreach var CalendarPageWeek w ($m.weeks) {
+    foreach var ArchiveYearWeek w ($m.weeks) {
         $w->print();
     }
 
     "</table></center>";
 }
 
-function CalendarPageWeek::print () {
+function ArchiveYearWeek::print () {
     "<tr>";
     if ($.pre_empty) { "<td colspan='$.pre_empty'>&nbsp;</td>"; }
-    foreach var CalendarPageDay d ($.days) {
+    foreach var ArchiveYearDay d ($.days) {
         """<td valign="top"><b><font size="-1">$d.day</font></b>""";
         if ($d.num_entries) {
             """<center><a href="$d.url">$d.num_entries</a></center>""";
