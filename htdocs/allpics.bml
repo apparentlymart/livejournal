@@ -58,7 +58,7 @@
      }
 
      my $eh_keywords = join(", ", sort { lc($a) cmp lc($b) } @{$keywords{$pic->{'picid'}}});
-     $eh_keywords = LJ::ehtml($eh_keywords);
+     $eh_keywords = LJ::eall($eh_keywords);
      if ($eh_keywords) {
          $body .= "<B>Keywords:</B> $eh_keywords\n";
      }
