@@ -400,18 +400,23 @@ sub clean
 
             if ($opencount{'style'}) {
                 # remove anything that might run javascript/vbscript code
-                $token->[1] =~ s/j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t\s*://g;
-                $token->[1] =~ s/v\s*b\s*s\s*c\s*r\s*i\s*p\s*t\s*://g;
-                $token->[1] =~ s/a\s*b\s*o\s*u\s*t\s*://g;
-                $token->[1] =~ s/expression//g;
+                # (Note: Ghetto.  Need to use CSS.pm to build full tree, analyze, redump)
+                my $reduced = lc($token->[1]);
+                $reduced =~ s/\s+//g;
+                $reduced =~ s/\\//g;
+                $reduced =~ s/&\#(\d+);?/chr($1)/eg;
+                $reduced =~ s/&\#x(\w+);?/chr(hex($1))/eg;
+                $token->[1] = "/* potential scripting */"
+                    if $reduced =~ /javascript|vbscript|expression/;
+
                 $token->[1] =~ s/<!--/[COMS]/g;
                 $token->[1] =~ s/-->/[COME]/g;
             }
-            my $auto_format = $addbreaks && 
+            my $auto_format = $addbreaks &&
                 ($opencount{'table'} <= ($opencount{'td'} + $opencount{'th'})) &&
                  ! $opencount{'pre'} &&
                  ! $opencount{'lj-raw'};
-            
+
             if ($auto_format && ! $opencount{'a'} && ! $opencount{'textarea'}) {
                 my $match = sub {
                     my $str = shift;
