@@ -11,6 +11,7 @@ my $opt_fix = 0;
 my $opt_start = 0;
 my $opt_stop = 0;
 my $opt_err = 0;
+my $opt_all = 0;
 my @opt_run;
 exit 1 unless GetOptions('help' => \$help,
                          'flushhosts' => \$opt_fh,
@@ -19,6 +20,7 @@ exit 1 unless GetOptions('help' => \$help,
                          'fix' => \$opt_fix,
                          'run=s' => \@opt_run,
                          'onlyerrors' => \$opt_err,
+                         'all' => \$opt_all,
                          );
 
 unless (-d $ENV{'LJHOME'}) { 
@@ -27,6 +29,7 @@ unless (-d $ENV{'LJHOME'}) {
 
 if ($help) {
     die ("Usage: dbcheck.pl [opts] [[cmd] args...]\n" .
+         "    --all           Check all hosts, even those with no weight assigned.\n" .
          "    --help          Get this help\n" .
          "    --flushhosts    Send 'FLUSH HOSTS' to each db as root.\n".
          "    --fix           Fix (once) common problems.\n".
@@ -173,7 +176,7 @@ my $check = sub
 
 	$pr->(sprintf("    %-20s", $skey));
 
-	unless ($s->{'totalweight'}) {
+	unless ($s->{'totalweight'} || $opt_all) {
 	    $pr->("dead, skipping.\n");
 	    push @errors, "$s->{'name'} is dead.";
 	    next;
