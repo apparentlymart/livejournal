@@ -236,7 +236,7 @@ sub process {
         # insert image links into post body
         $body .= "<lj-cut text='$icount " .
                   (($icount == 1) ? 'image' : 'images') . "'>"
-                  if $lj_headers{'imgcut'} eq lc('totals');
+                  if lc($lj_headers{'imgcut'}) eq 'totals';
         $body .= "<span style='white-space: nowrap;'>" if $lj_headers{'imglayout'} =~ /^horiz/i;
         foreach my $img (keys %$fb_upload) {
             my $i = $fb_upload->{$img};
@@ -246,13 +246,14 @@ sub process {
             undef $size if $i->{width}  <= $width || 
                            $i->{height} <= $height;
 
-            $body .= "<lj-cut text='$img'>" if $lj_headers{'imgcut'} eq lc('titles');
-            $body .= "<a href='$i->{'url'}/'>";
-            $body .= "<img src='$i->{'url'}$size' alt='$img' border='0'></a>";
+            $img =~ s/"//g;
+            $body .= "<lj-cut text=\"$img\">" if lc($lj_headers{'imgcut'}) eq 'titles';
+            $body .= "<a href=\"$i->{'url'}/\">";
+            $body .= "<img src=\"$i->{'url'}$size\" alt=\"$img\" border=\"0\"></a>";
             $body .= ($lj_headers{'imglayout'} =~ /^horiz/i) ? '&nbsp;' : '<br />';
-            $body .= "</lj-cut> " if $lj_headers{'imgcut'} eq lc('titles');
+            $body .= "</lj-cut> " if lc($lj_headers{'imgcut'}) eq 'titles';
         }
-        $body .= "</lj-cut>\n" if $lj_headers{'imgcut'} eq lc('totals');
+        $body .= "</lj-cut>\n" if lc($lj_headers{'imgcut'}) eq 'totals';
         $body .= "</span>" if $lj_headers{'imglayout'} =~ /^horiz/i;
     }
 
