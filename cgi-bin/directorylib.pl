@@ -246,6 +246,7 @@ sub do_search
     my $page = $req->{'page'} || 1;
     my $skip = ($page-1)*$pagesize;
     my $pages = int($count / $pagesize) + (($count % $pagesize) ? 1 : 0);
+    $pages ||= 1;
     if ($page > $pages) { $page = $pages; }
     $info->{'pages'} = $pages;
     $info->{'page'} = $page;

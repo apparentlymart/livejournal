@@ -389,7 +389,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && $POST{answer} =~ m{audio}i
      $ret .= "<ol>";
 
      ### username
-     $v = LJ::ehtml($FORM{'user'});
+     $v = LJ::ehtml($POST{'user'});
      $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.username.box.head'}</div>";
      $ret .= $error_msg->('username', '<p class="formitemFlag">', '</p>');
      $ret .= "<div class='formitemDesc'>" . BML::ml(".username.text", {'sitename' => $LJ::SITENAME}) . "</div>";
@@ -398,7 +398,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && $POST{answer} =~ m{audio}i
      $ret .= "</div></li>";
 
      ### email address
-     $v = LJ::ehtml($FORM{'email'});
+     $v = LJ::ehtml($POST{'email'});
      $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.email.input.head'}</div>";
      $ret .= $error_msg->('email', '<p class="formitemFlag">', '</p>');
      $ret .= "<div class='formitemDesc'>$ML{'.email.text'}</div>";
