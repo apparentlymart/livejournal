@@ -100,7 +100,7 @@ if ($toarg =~ /^(\d+)z(.+)$/)
 # make a new post.
 my @errors;
 my $spid = LJ::Support::file_request($dbh, \@errors, {
-    'spcatid' => $email2cat->{$to}->{'spcatid'},
+    'supportcat' => $email2cat->{$to},
     'subject' => $subject,
     'reqtype' => 'email',
     'reqname' => $name,

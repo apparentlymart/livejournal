@@ -225,6 +225,7 @@ sub file_request
     unless ($o->{'body'}) {
 	push @$errors, "You did not enter a support request.";
     }
+    my $scat = $o->{'supportcat'};
 
     if (@$errors) { return 0; }
     
@@ -235,7 +236,7 @@ sub file_request
     my $qrequserid = $o->{'requserid'}+0;
     my $qreqname = $dbh->quote($o->{'reqname'});
     my $qreqemail = $dbh->quote($o->{'reqemail'});
-    my $qspcatid = $o->{'spcatid'}+0;
+    my $qspcatid = ($scat->{'spcatid'} || $o->{'spcatid'})+0;
 
     # make the authcode
     my $authcode = LJ::make_auth_code(15);
@@ -295,14 +296,16 @@ sub file_request
     $body .= "\n\nIf you figure out the problem before somebody gets back to you, please cancel your request by clicking this:\n\n  ";
     $body .= LJ::make_text_link("$LJ::SITEROOT/support/act.bml?close;$spid;$authcode", $email);
    
-    
-    LJ::send_mail({ 
-	'to' => $email,
-	'from' => $LJ::BOGUS_EMAIL,
-	'fromname' => 'LiveJournal Support',
-	'subject' => "Support Request \#$spid",
-	'body' => $body  
-	});
+    unless ($scat->{'no_autoreply'})
+    {
+      LJ::send_mail({ 
+	  'to' => $email,
+	  'from' => $LJ::BOGUS_EMAIL,
+	  'fromname' => 'LiveJournal Support',
+	  'subject' => "Support Request \#$spid",
+	  'body' => $body  
+	  });
+    }
     
     ########## send notifications
     
@@ -441,7 +444,11 @@ sub mail_response_to_user
     $body .= "\n\n" . "="x70 . "\n";
     $body .= "Did this answer your question?  If so, please CLOSE THIS SUPPORT REQUEST\n";
     $body .= "so we can help other people by going here:\n";
-    $body .= LJ::make_text_link("$LJ::SITEROOT/support/act.bml?close;$spid;$sp->{'authcode'};$splid", $email);
+    if ($type eq "answer") {
+	$body .= LJ::make_text_link("$LJ::SITEROOT/support/act.bml?close;$spid;$sp->{'authcode'};$splid", $email);
+    } else {
+	$body .= LJ::make_text_link("$LJ::SITEROOT/support/act.bml?close;$spid;$sp->{'authcode'}", $email);
+    }
     
     if ($type eq "answer")
     {
