@@ -43,7 +43,7 @@ BML::register_hook("codeerror", sub {
         return "Sorry, database temporarily unavailable.";
     }
     return "<b>[Error: $msg]</b>";
-});
+}) unless $LJ::IS_DEV_SERVER;
 
 if ($LJ::UNICODE) {
     BML::set_default_content_type("text/html; charset=utf-8");
