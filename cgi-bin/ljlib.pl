@@ -873,8 +873,9 @@ sub get_friend_items
 
     # given a hash of friends rows, strip out rows with invalid journaltype
     my $filter_journaltypes = sub {
-        my ($friends, $friends_u, $memcache_only) = @_;
+        my ($friends, $friends_u, $memcache_only, $valid_types) = @_;
         return unless $friends && $friends_u;
+        $valid_types ||= uc($opts->{'showtypes'});
 
         # load u objects for all the given
         LJ::load_userids_multiple([ map { $_, \$friends_u->{$_} } keys %$friends ], [$remote],
@@ -884,8 +885,7 @@ sub get_friend_items
         foreach my $fid (keys %$friends_u) {
             my $fu = $friends_u->{$fid};
             if ($fu->{'statusvis'} ne "V" ||
-                ($opts->{'showtypes'} &&
-                 index(uc($opts->{'showtypes'}), $fu->{journaltype}) == -1))
+                $valid_types && index(uc($valid_types), $fu->{journaltype}) == -1)
             {
                 delete $friends_u->{$fid};
                 delete $friends->{$fid};
@@ -964,7 +964,7 @@ sub get_friend_items
         }
 
         # strip out invalid friend journaltypes
-        $filter_journaltypes->($friends, \%friends_u, "memcache_only");
+        $filter_journaltypes->($friends, \%friends_u, "memcache_only", "P");
 
         # get update times for all the friendids
         my $f_tu = LJ::get_timeupdate_multi({'memcache_only' => 1}, keys %$friends);
@@ -1029,7 +1029,7 @@ sub get_friend_items
         my $sth = $dbr->prepare(qq{
             SELECT f.friendid, f.groupmask, $LJ::EndOfTime-UNIX_TIMESTAMP(uu.timeupdate),
             u.journaltype FROM friends f, userusage uu, user u
-            WHERE f.userid=? AND f.friendid=uu.userid AND u.userid=f.friendid
+            WHERE f.userid=? AND f.friendid=uu.userid AND u.userid=f.friendid AND u.journaltype='P'
         });
         $sth->execute($userid);
         while (my ($id, $mask, $time, $jt) = $sth->fetchrow_array) {
