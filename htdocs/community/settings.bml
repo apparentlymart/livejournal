@@ -100,8 +100,9 @@ body<=
         LJ::set_userprop($cu, 'nonmember_posting', $nonmembers);
         LJ::set_userprop($cu, 'moderated', $moderated);
 
-        my $nummod = $dbh->selectrow_array("SELECT COUNT(*) FROM reluser WHERE userid=$cu->{'userid'} AND type='M'");
-        LJ::set_rel($cu->{'userid'}, $remote->{'userid'}, 'M') unless $nummod;
+        unless (LJ::load_rel_user($cu->{'userid'}, 'M')->[0]) {
+          LJ::set_rel($cu->{'userid'}, $remote->{'userid'}, 'M');
+        }
 
         $ret .= "<?h1 $ML{'.success'} h1?>";
         if ($mode eq 'create') {
