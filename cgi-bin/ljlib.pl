@@ -1678,6 +1678,8 @@ sub get_userid
 {
     my $dbh = shift;
     my $user = shift;
+    $user = canonical_username($user);
+
     my $userid;
     if ($CACHE_USERID{$user}) { return $CACHE_USERID{$user}; }
 
