@@ -21,10 +21,14 @@ body<=
 
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
+    # Set the title to be for an error, it will be changed later
+    # upon sucess
+    $title = $ML{'Error'};
+
     # normally require POST.  if an ecphash is specified, we'll let
     # them through since they're coming from a comment page and
     # validate the hash later.
-    return "Comment not posted: POST required, or missing parameter." unless LJ::did_post() || $POST{'ecphash'};
+    return LJ::bad_input("Comment not posted: POST required, or missing parameter.") unless LJ::did_post() || $POST{'ecphash'};
 
     # as an exception, we do NOT call LJ::text_in() to check for bad
     # input, since it may be not in UTF-8 in replies coming from mail
@@ -32,12 +36,12 @@ body<=
 
     my $remote_ip = LJ::get_remote_ip();
     if ($POST{'usertype'} eq "anonymous" && LJ::is_open_proxy($remote_ip)) {
-        return "Your IP address ($remote_ip) is detected as an open proxy (a common source of spam) so comment access is denied.  If you do not believe you're accessing the net through an open proxy, please contact your ISP or this site's tech support to help resolve the problem.";
+        return LJ::bad_input("Your IP address ($remote_ip) is detected as an open proxy (a common source of spam) so comment access is denied.  If you do not believe you're accessing the net through an open proxy, please contact your ISP or this site's tech support to help resolve the problem.");
     }
 
     my $remote = LJ::get_remote();
     my $journalu = LJ::load_user($POST{journal});
-    return 'Unknown journal.  Please go back and try again.' unless $journalu;
+    return LJ::bad_input('Unknown journal.  Please go back and try again.') unless $journalu;
 
     ## preview
     # ignore errors for previewing
@@ -48,8 +52,6 @@ body<=
         $title = $ML{'.title.preview'};
         return LJ::Talk::Post::make_preview($talkurl, $cookie_auth, \%POST);
     }
-
-    $title = $ML{'.title'};
 
     ## init.  this handles all the error-checking, as well.
     my @errors;
@@ -62,7 +64,7 @@ body<=
     if (! $init) {
         my ($sth, $parpost);
         my $dbcr = LJ::get_cluster_def_reader($journalu);
-        return 'No database connection present.  Please go back and try again.' unless $dbcr;
+        return LJ::bad_input('No database connection present.  Please go back and try again.') unless $dbcr;
 
         $sth = $dbcr->prepare("SELECT posterid, state FROM talk2 ".
                               "WHERE journalid=? AND jtalkid=?");
@@ -90,11 +92,11 @@ body<=
     my $item     = $init->{item};
 
     # check max comments
-    return "Sorry, this entry already has the maximum number of comments allowed."
+    return LJ::bad_input("Sorry, this entry already has the maximum number of comments allowed.")
         if LJ::Talk::Post::over_maxcomments($journalu, $item->{'jitemid'});
 
     # no replying to frozen comments
-    return $ML{'/talkpost.bml.error.noreply_frozen'} 
+    return LJ::bad_input($ML{'/talkpost.bml.error.noreply_frozen'})
         if $parent->{state} eq 'F';
 
     ## insertion
@@ -102,7 +104,7 @@ body<=
     my $err;
     unless (LJ::Talk::Post::post_comment($entryu, $journalu,
                                          $comment, $parent, $item, \$err)) {
-        return $err;
+        return LJ::bad_input($err);
     }
 
     # Yeah, we're done.
@@ -153,6 +155,8 @@ body<=
         $ret .= "<?p $ML{'.success.loggedin'} p?>";
     }
 
+    # Sucessful!
+    $title = $ML{'.title'};
     return $ret;
 }
 _code?>
