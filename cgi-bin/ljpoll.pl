@@ -808,6 +808,14 @@ sub find_security
 	$sec{'vote'} = 1;
     }
 
+    if (LJ::is_banned($dbh, $remote, $po->{'journalid'})) {
+	$sec{'vote'} = 0;
+    }
+    
+    if (LJ::is_banned($dbh, $remote, $po->{'posterid'})) {
+	$sec{'vote'} = 0;
+    }
+    
     return ($sec{'vote'}, $sec{'view'});
 }
 
@@ -834,11 +842,6 @@ sub submit
     }
     
     my ($can_vote, undef) = find_security($dbh, $po, $remote);
-
-    if (LJ::is_banned($dbh, $remote, $po)) {
-	$$error = "You can't vote because you're banned from this journal.";
-	return 0;
-    }
 
     unless ($can_vote) {
 	$$error = "Sorry, you don't have permission to vote in this particular poll.";
