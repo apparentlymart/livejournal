@@ -23,24 +23,22 @@ use Unicode::MapUTF8 ();
 use LJ::S2;
 use Time::Local ();
 
-# determine how we're going to send mail
-BEGIN {
-    do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
-    do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
-
-    $LJ::OPTMOD_NETSMTP = eval "use Net::SMTP (); 1;";
-    if ($LJ::SMTP_SERVER) {
-        die "Net::SMTP not installed\n" unless $LJ::OPTMOD_NETSMTP;
-        MIME::Lite->send('smtp', $LJ::SMTP_SERVER, Timeout => 10);
-    } else {
-        MIME::Lite->send('sendmail', $LJ::SENDMAIL);
-    }
-}
+do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
+do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
 require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
 require "$ENV{'LJHOME'}/cgi-bin/htmlcontrols.pl";
+
+# determine how we're going to send mail
+$LJ::OPTMOD_NETSMTP = eval "use Net::SMTP (); 1;";
+if ($LJ::SMTP_SERVER) {
+    die "Net::SMTP not installed\n" unless $LJ::OPTMOD_NETSMTP;
+    MIME::Lite->send('smtp', $LJ::SMTP_SERVER, Timeout => 10);
+} else {
+    MIME::Lite->send('sendmail', $LJ::SENDMAIL);
+}
 
 $LJ::DBIRole = new DBI::Role {
     'sources' => \%LJ::DBINFO,
