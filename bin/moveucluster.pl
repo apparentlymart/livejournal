@@ -338,6 +338,7 @@ sub moveUser {
 
     # see hack below
     my $prop_icon = LJ::get_prop("talk", "subjecticon");
+    my %rows_skipped;  #  $tablename -> $skipped_rows_count
 
     # find readonly cap class, complain if not found
     my $readonly_bit = undef;
@@ -621,10 +622,12 @@ sub moveUser {
             # there was an old bug where we'd populate in the database
             # the choice of "none" for comment subject icon, instead of
             # just storing nothing.  this hack prevents migrating those.
-            return if
-                $table  eq "talkprop2" &&
+            if ($table  eq "talkprop2" &&
                 $r->[2] == $prop_icon->{id} &&
-                $r->[3] eq "none";
+                $r->[3] eq "none") {
+                $rows_skipped{"talkprop2"}++;
+                return;
+            }
 
             # now that we know it has something to delete (many tables are empty for users)
             unless ($pushed_delete++) {
@@ -724,7 +727,7 @@ sub moveUser {
                 }
                 my $count = scalar keys %pre;
                 die "Rows not moved for uid=$userid, table=$table.  unmoved count = $count"
-                    if $count;
+                    if $count && $count != $rows_skipped{$table};
             }
         }
 
