@@ -1,0 +1,69 @@
+(=PAGE
+TITLE=>Translation Area
+BODY<=
+
+(=_CODE
+
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+ my $sth;
+
+ $sth = $dbr->prepare("SELECT lnid, lncode, lnname, lastupdate FROM ml_langs");
+ $sth->execute;
+ my %lang;
+ $lang{$_->{'lnid'}} = $_ while $_ = $sth->fetchrow_hashref;
+ 
+ $sth = $dbr->prepare("SELECT lnid, staleness > 1, COUNT(*) FROM ml_latest GROUP by 1, 2");
+ $sth->execute;
+ while (my ($lnid, $stale, $ct) = $sth->fetchrow_array) {
+     next unless exists $lang{$lnid};
+     $lang{$lnid}->{'_total'} += $ct;
+     $lang{$lnid}->{'_good'} += (1-$stale) * $ct;
+     $lang{$lnid}->{'percent'} = 100 * ($lang{$lnid}->{'_good'}||1) / $lang{$lnid}->{'_total'};
+ }
+
+ my $sortcol = exists $lang{'1'}->{$FORM{'s'}} ? $FORM{'s'} : "lnname";
+ my @cols = (['lncode','Code'],
+             ['lnname','Language Name', sub {
+                 my $r = shift;
+                 "<td><a href='edit.bml?lang=$r->{'lncode'}'>$r->{'lnname'}</a></td>";
+             }],
+             ['percent','% Done', sub {
+                 my $r = shift;
+                 "<td align='right'>" .
+                 sprintf("%.02f%%", $r->{'percent'}) . "<br />" .
+                 "<font size='-1'>$r->{'_good'}/$r->{'_total'}</font>" .
+                 "</td>";
+             }, sub { $b->{'percent'} <=> $a->{'percent'} ||
+                      $b->{'_total'} <=> $a->{'_total'} }],
+             ['lastupdate','Last Update',undef,
+              sub { $b->{'lastupdate'} cmp $a->{'lastupdate'} }]);
+ my $ret;
+ my $sorter = sub { $a->{$sortcol} cmp $b->{$sortcol} };
+ $ret .= "<table border='1' cellspacing='1' cellpadding='3'><tr>";
+ foreach (@cols) {
+     if ($sortcol eq $_->[0]) {
+         $ret .= "<td><b>$_->[1]</b></td>";
+     } else {
+         $ret .= "<td><b><a href=\"./?s=$_->[0]\">$_->[1]</a></b></td>";
+     }
+     if ($_->[0] eq $sortcol && $_->[3]) { $sorter = $_->[3]; }
+ }
+ $ret .= "</tr>\n";
+
+ foreach my $r (sort $sorter values %lang) {
+     $ret .= "<tr>";
+     foreach (@cols) {
+         $ret .= $_->[2] ? $_->[2]->($r) : "<td>$r->{$_->[0]}</td>";
+     }
+     $ret .= "</tr>\n";
+ }
+
+ $ret .= "</table>\n";
+ return $ret;
+
+_CODE=)
+
+<=BODY
+PAGE=)

@@ -1,0 +1,24 @@
+(=_CODE
+
+ my $lang = $FORM{'lang'};
+ my $l = LJ::Lang::get_lang($lang);
+ return "<b>Invalid language</b>" unless $l;
+
+ my $dbs = LJ::get_dbs;
+ my $dbr = $dbs->{'reader'};
+ my $sth;
+ 
+ my $what = ">= 1";
+ if ($FORM{'stale'} =~ /^(\d+)(\+?)$/) {
+     $what = ($2 ? ">=" : "=") . $1;
+ }
+ 
+ my $ret;
+ $sth = $dbr->prepare("SELECT i.dmid, i.itcode, l.staleness FROM ml_items i, ml_latest l WHERE l.lnid=$l->{'lnid'} AND l.staleness $what AND l.dmid=i.dmid AND l.itid=i.itid");
+ $sth->execute;
+ while (my ($dmid, $itcode, $st) = $sth->fetchrow_array) {
+     $ret .= "$dmid:$itcode ($st)<br />\n";
+ }
+ return $ret;
+
+_CODE=)

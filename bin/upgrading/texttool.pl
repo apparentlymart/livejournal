@@ -136,19 +136,57 @@ unless ($dbh) {
     die "Can't connect to the database.\n";
 }
 
+my @good = qw(popstruct poptext dumptext newitems wipedb makeusable);
+
 popstruct() if $mode eq "popstruct";
 poptext() if $mode eq "poptext";
 dumptext() if $mode eq "dumptext";
-popstruct() if $mode eq "dump";
 newitems() if $mode eq "newitems";
 wipedb() if $mode eq "wipedb";
-help();
+makeusable() if $mode eq "makeusable";
+help() unless grep { $mode eq $_ } @good;
+exit 0;
+
+sub makeusable
+{
+    my $rec = sub {
+        my ($lang, $rec) = @_;
+        my $l = $lang_code{$lang};
+        die "Bogus language: $lang\n" unless $l;
+        my @children = grep { $_->{'parentlnid'} == $l->{'lnid'} } values %lang_code;
+        foreach my $cl (@children) {
+            print "$l->{'lncode'} -- $cl->{'lncode'}\n";
+
+            my %need;
+            $sth = $dbh->prepare("SELECT dmid, itid, txtid FROM ml_latest WHERE lnid=$l->{'lnid'}");
+            $sth->execute;
+            while (my ($dmid, $itid, $txtid) = $sth->fetchrow_array) {
+                $need{"$dmid:$itid"} = $txtid;
+            }
+            $sth = $dbh->prepare("SELECT dmid, itid, txtid FROM ml_latest WHERE lnid=$cl->{'lnid'}");
+            $sth->execute;
+            while (my ($dmid, $itid, $txtid) = $sth->fetchrow_array) {
+                delete $need{"$dmid:$itid"};
+            }
+            while (my $k = each %need) {
+                my ($dmid, $itid) = split(/:/, $k);
+                my $txtid = $need{$k};
+                my $stale = $cl->{'parenttype'} eq "diff" ? 3 : 0;
+                $dbh->do("INSERT INTO ml_latest (lnid, dmid, itid, txtid, chgtime, staleness) VALUES ".
+                         "($cl->{'lnid'}, $dmid, $itid, $txtid, NOW(), $stale)");
+                die $dbh->errstr if $dbh->err;
+            }
+            $rec->($cl->{'lncode'}, $rec);
+        }
+    };
+    $rec->("en", $rec);
+    
+}
 
 sub wipedb
 {
     $dbh->do("DELETE FROM ml_$_")
         foreach (qw(domains items langdomains langs latest text));
-    exit 0;                 
 }
 
 sub popstruct
@@ -157,14 +195,14 @@ sub popstruct
         print "Inserting language: $l->{'lnname'}\n";
         $dbh->do("INSERT INTO ml_langs (lnid, lncode, lnname, parenttype, parentlnid) ".
                  "VALUES (" . join(",", map { $dbh->quote($l->{$_}) } qw(lnid lncode lnname parenttype parentlnid)) . ")");
-        die "Error: " . $dbh->errstr if $dbh->err;
+        print "  already existed.\n" if $dbh->err;
     }
 
     foreach my $d (values %dom_id) {
         print "Inserting domain: $d->{'type'}\[$d->{'args'}\]\n";
         $dbh->do("INSERT INTO ml_domains (dmid, type, args) ".
                  "VALUES (" . join(",", map { $dbh->quote($d->{$_}) } qw(dmid type args)) . ")");
-        die "Error: " . $dbh->errstr if $dbh->err;
+        print "  already existed.\n" if $dbh->err;
     }
 
     print "Inserting language domains ...\n";
@@ -174,7 +212,6 @@ sub popstruct
     }
 
     print "All done.\n";
-    exit 0;
 }
 
 sub poptext
@@ -217,7 +254,6 @@ sub poptext
         }
         close D;
     }
-    exit 0;
 }
 
 sub dumptext
@@ -304,7 +340,7 @@ sub newitems
     my %e_general;  # code -> 1
     print "Checking which general items already exist in database...\n";
     my $sth = $dbh->prepare("SELECT i.itcode FROM ml_items i, ml_latest l WHERE ".
-                            "l.dmid=1 AND l.lnid=1 AND i.dmid=1 AND i.itid=l.itid");
+                            "l.dmid=1 AND l.lnid=1 AND i.dmid=1 AND i.itid=l.itid ");
     $sth->execute;
     while (my $it = $sth->fetchrow_array) { $e_general{$it} = 1; }
     printf("  %d found\n", scalar keys %e_general);
@@ -324,7 +360,7 @@ sub newitems
 
         my %e_local;
         $sth = $dbh->prepare("SELECT i.itcode FROM ml_items i, ml_latest l WHERE ".
-                             "l.dmid=1 AND l.lnid=$ll->{'lnid'} AND i.dmid=1 AND i.itid=l.itid");
+                             "l.dmid=1 AND l.lnid=$ll->{'lnid'} AND i.dmid=1 AND i.itid=l.itid ");
         $sth->execute;
         while (my $it = $sth->fetchrow_array) { $e_local{$it} = 1; }
         printf("  %d found\n", scalar keys %e_local);
@@ -339,6 +375,4 @@ sub newitems
     
     #use Data::Dumper;
     #print Dumper(\%items);
-
-    exit 0;
 }

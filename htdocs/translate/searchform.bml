@@ -1,0 +1,38 @@
+<html>
+<head><title>Search Form</title>
+</head>
+<body marginwidth='0' marginheight='0'>
+<form target='res' action='search.bml' method='get'>
+<input type='hidden' name='lang' value='(=_CODE $FORM{'lang'} _CODE=)'>
+
+[<a href="./" target='_top'>&lt;-- Back</a>]
+(=_CODE
+ my $lang = $FORM{'lang'};
+ my $l = LJ::Lang::get_lang($lang);
+ BML::finish() unless $l;
+ return "<b>" . ($l ? $l->{'lnname'} : "Invalid language") . "</b>";
+_CODE=)
+
+<p>By Severity: (<a href='help-severity.bml' target='main'>help</a>)<br /><select name='stale'>
+<option value="0">0</option>
+<option value="0+">0+</option>
+<option value="1">1</option>
+<option value="1+" selected='selected'>1+</option>
+<option value="2">2</option>
+<option value="2+">2+</option>
+<option value="3">3</option>
+</select><input type='submit' name='search:sev' value='Search'/>
+</p>
+
+<p>Text search: <select name='whattext'>
+<option value='src'>Source Lang</option>
+<option value='dest'>Dest Lang</option></select>
+<br /><input size='20' name='txt' />
+<input type='submit' name='search:txt' value='Search'/>
+</p>
+
+</form>
+
+
+</body>
+</html>

@@ -104,12 +104,25 @@ sub set_error
     return 0;
 }
 
-sub get_dmid
+sub get_lang
+{
+    my $code = shift;
+    load_lang_struct() unless $LS_CACHED;
+    return $LN_CODE{$code};
+}
+
+sub get_lang_id
+{
+    my $id = shift;
+    load_lang_struct() unless $LS_CACHED;
+    return $LN_ID{$id};
+}
+
+sub get_dom
 {
     my $dmcode = shift;
     load_lang_struct() unless $LS_CACHED;
-    my $d = $DM_UNIQ{$dmcode};
-    return $d ? $d->{'dmid'} : undef;
+    return $DM_UNIQ{$dmcode};
 }
 
 sub load_lang_struct
@@ -210,6 +223,25 @@ sub set_text
     $dbh->do("REPLACE INTO ml_latest (lnid, dmid, itid, txtid, chgtime, staleness) ".
              "VALUES ($lnid, $dmid, $itid, $txtid, NOW(), 0)");
     return set_error("Error inserting ml_latest: ".$dbh->err) if $dbh->err;
+
+    # set descendants to use this mapping
+    if ($opts->{'childenlatest'}) {
+        my $vals;
+        my $rec = sub {
+            my $l = shift;
+            my $rec = shift;
+            foreach my $cid (@{$l->{'children'}}) {
+                my $clid = $LN_ID{$cid};
+                my $stale = $clid->{'parenttype'} eq "diff" ? 3 : 0;
+                $vals .= "," if $vals;
+                $vals .= "($cid, $dmid, $itid, $txtid, NOW(), $stale)";
+                $rec->($clid, $rec);
+            }
+        };
+        $rec->($l, $rec);
+        $dbh->do("INSERT IGNORE INTO ml_latest (lnid, dmid, itid, txtid, chgtime, staleness) ".
+                 "VALUES $vals") if $vals;
+    }
     
     # Todo: stale-ify child languages one layer down if severity
     return 1;
