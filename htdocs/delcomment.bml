@@ -55,7 +55,7 @@ body<=
     }
 
     my $can_manage = LJ::can_manage($remote, $u);
-    my $can_ban = $can_manage && $remote->{'user'} ne $u->{'user'};
+    my $can_ban = $can_manage && $remote->{'userid'} != $tp->{'posterid'};
 
 
     ### perform actions
