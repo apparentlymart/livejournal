@@ -1,0 +1,12 @@
+#-*-s2-*- ;; -*- coding: utf-8 -*-
+
+layerinfo "type" = "i18nc";
+layerinfo "redist_uniq" = "i18nc/ja1";
+layerinfo "name" = "Japanese";
+
+# One form (the number is inflected)
+function lang_map_plural (int n) : int {
+    return 0;
+)
+
+

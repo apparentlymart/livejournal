@@ -8,6 +8,7 @@ use S2::Checker;
 use S2::Compiler;
 use Storable;
 use Apache::Constants ();
+use HTMLCleaner;
 
 package LJ::S2;
 
@@ -27,9 +28,9 @@ sub make_journal
     
     $opts->{'ctx'} = $ctx;
 
-    $ctx->[2]->{'SITEROOT'} = $LJ::SITEROOT;
-    $ctx->[2]->{'SITENAME'} = $LJ::SITENAME;
-    $ctx->[2]->{'IMGDIR'} = $LJ::IMGPREFIX;
+    $ctx->[S2::PROPS]->{'SITEROOT'} = $LJ::SITEROOT;
+    $ctx->[S2::PROPS]->{'SITENAME'} = $LJ::SITENAME;
+    $ctx->[S2::PROPS]->{'IMGDIR'} = $LJ::IMGPREFIX;
     foreach ("name", "url", "urlname") { LJ::text_out(\$u->{$_}); }
 
     my ($entry, $page);
@@ -73,6 +74,8 @@ sub s2_run
     }
           
     $LJ::S2::CURR_PAGE = $page;
+    $LJ::S2::RES_MADE = 0;  # standard resources (Image objects) made yet
+
     eval {
         S2::run_code($ctx, $entry, $page);
     };
@@ -466,6 +469,7 @@ sub layer_compile
             'output' => \$compiled,
             'layerid' => $lid,
             'untrusted' => $untrusted,
+            'builtinPackage' => "S2::Builtin::LJ",
         });
     };
     if ($@) { $$err_ref = "Compile error: $@"; return undef; }
@@ -607,8 +611,10 @@ sub Entry
         # do nothing.
     } elsif ($arg->{'security'} eq "usemask") {
         $e->{'security'} = "protected";
+        $e->{'securityicon'} = Image_std("security-protected");
     } elsif ($arg->{'security'} eq "private") {
         $e->{'security'} = "private";
+        $e->{'securityicon'} = Image_std("security-private");
     }
 
     return $e;
@@ -874,6 +880,29 @@ sub RecentPage
     return $p;
 }
 
+sub Image
+{
+    my ($url, $w, $h) = @_;
+    return {
+        '_type' => 'Image',
+        'url' => $url,
+        'width' => $w,
+        'height' => $h,
+    };
+}
+
+sub Image_std
+{
+    my $name = shift;
+    unless ($LJ::S2::RES_MADE++) {
+        $LJ::S2::RES_CACHE = {
+            'security-protected' => Image("$LJ::IMGPREFIX/icon_protected.gif", 14, 15),
+            'security-private' => Image("$LJ::IMGPREFIX/icon_private.gif", 16, 16),
+        };
+    }
+    return $LJ::S2::RES_CACHE->{$name};
+}
+
 sub Image_userpic
 {
     my ($u, $picid, $kw) = @_;
@@ -932,8 +961,42 @@ sub UserLite
 
 ###############
 
-package S2::Builtin;
+package S2::Builtin::LJ;
 use strict;
+
+sub AUTOLOAD { 
+    no strict;
+    if ($AUTOLOAD =~ /::(\w+)$/) {
+        my $real = \&{"S2::Builtin::$1"};
+        *{$AUTOLOAD} = $real;
+        return $real->(@_);
+    }
+    die "No such builtin: $AUTOLOAD";
+}
+
+sub ehtml
+{
+    my ($ctx, $text) = @_;
+    return LJ::ehtml($text);
+}
+
+sub get_page
+{
+    return $LJ::S2::CURR_PAGE;
+}
+
+sub get_plural_phrase
+{
+    my ($ctx, $n, $prop) = @_;
+    my $form = S2::run_function($ctx, "lang_map_plural(int)", $n);
+    my $a = $ctx->[S2::PROPS]->{"_plurals_$prop"};
+    unless (ref $a eq "ARRAY") {
+        $a = $ctx->[S2::PROPS]->{"_plurals_$prop"} = [ split(m!\s*//\s*!, $ctx->[S2::PROPS]->{$prop}) ];
+    }
+    my $text = $a->[$form];
+    $text =~ s/\#/$n/;
+    return LJ::ehtml($text);
+}
 
 sub get_url
 {
@@ -942,6 +1005,20 @@ sub get_url
     $view = "info" if $view eq "userinfo";
     $view = "" if $view eq "recent";
     return "$LJ::SITEROOT/$user/$view";
+}
+
+sub rand
+{
+    my ($ctx, $aa, $bb) = @_;
+    my ($low, $high);
+    if (ref $aa eq "ARRAY") {
+        ($low, $high) = (0, @$aa - 1);
+    } elsif (! defined $bb) {
+        ($low, $high) = (1, $aa);
+    } else {
+        ($low, $high) = ($aa, $bb);
+    }
+    return int(rand($high - $low + 1)) + $low;
 }
 
 sub Date__day_of_week

@@ -1,0 +1,13 @@
+#-*-s2-*- ;; -*- coding: utf-8 -*-
+
+layerinfo "type" = "i18nc";
+layerinfo "redist_uniq" = "i18nc/fr1";
+layerinfo "name" = "French";
+
+function lang_map_plural (int n) : int {
+    if (n > 1) return 1; # plural
+    return 0;            # singular
+
+)
+
+
