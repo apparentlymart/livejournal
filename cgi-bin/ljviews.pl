@@ -49,7 +49,7 @@ sub create_view_lastn
 	    });
     }
 
-    if ($u->{'url'} =~ m!^http://!) {
+    if ($u->{'url'} =~ m!^https?://!) {
 	$lastn_page{'website'} =
 	    LJ::fill_var_props($vars, 'LASTN_WEBSITE', {
 		"url" => LJ::ehtml($u->{'url'}),
@@ -394,7 +394,7 @@ sub create_view_friends
     $friends_page{'head'} .= 
 	$vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'FRIENDS_HEAD'};
 
-    if ($u->{'url'} =~ m!^http://!) {
+    if ($u->{'url'} =~ m!^https?://!) {
 	$friends_page{'website'} =
 	    LJ::fill_var_props($vars, 'FRIENDS_WEBSITE', {
 		"url" => LJ::ehtml($u->{'url'}),
@@ -786,7 +786,7 @@ sub create_view_calendar
     
     $calendar_page{'months'} = "";
 
-    if ($u->{'url'} =~ m!^http://!) {
+    if ($u->{'url'} =~ m!^https?://!) {
 	$calendar_page{'website'} =
 	    LJ::fill_var_props($vars, 'CALENDAR_WEBSITE', {
 		"url" => LJ::ehtml($u->{'url'}),
@@ -987,7 +987,7 @@ sub create_view_day
     $day_page{'name'} = LJ::ehtml($u->{'name'});
     $day_page{'name-\'s'} = ($u->{'name'} =~ /s$/i) ? "'" : "'s";
 
-    if ($u->{'url'} =~ m!^http://!) {
+    if ($u->{'url'} =~ m!^https?://!) {
 	$day_page{'website'} =
 	    LJ::fill_var_props($vars, 'DAY_WEBSITE', {
 		"url" => LJ::ehtml($u->{'url'}),

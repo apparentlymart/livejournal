@@ -443,7 +443,7 @@ BODY<=
      }
      
      if ($FORM{'url'}) {
-	 unless ($FORM{'url'} =~ /^http:\/\//) {
+	 unless ($FORM{'url'} =~ /^https?:\/\//) {
 	     $FORM{'url'} =~ s/^http\W*//;
 	     $FORM{'url'} = "http://$FORM{'url'}";
 	 }

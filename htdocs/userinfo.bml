@@ -239,7 +239,7 @@
  if ($u->{'url'}) {
      my $url = LJ::ehtml($u->{'url'});
      my $span = ($narrow_left-- >= 0) ? 1 : 2;
-     unless ($url =~ /^http:\/\//) {
+     unless ($url =~ /^https?:\/\//) {
 	 $url =~ s/^http\W*//;
 	 $url = "http://$url";
      }
