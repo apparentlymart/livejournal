@@ -14,25 +14,17 @@
           
         my @errors = ();
         
-        my $dbs = LJ::get_dbs();
-        my $dbh = $dbs->{'dbh'};
-        my $dbr = $dbs->{'reader'};
-
-        my $quser = $dbr->quote($u->{'user'});
-        
         my $year = $FORM{'year'}+0;
         my $month = $FORM{'month'}+0;
 
-        my $dbcs = $dbs;
-        $dbcs = LJ::get_cluster_set($u) if $u->{'clusterid'};
-        my $dbcr = $dbcs->{'reader'};
+        my $dbcr = LJ::get_cluster_reader($u);
         push @errors, "Database temporarily unavailable.  Try again later." unless $dbcr;
 
         my $encoding;
 
         if ($FORM{'encid'}) {
             my %encodings;
-            LJ::load_codes($dbs, { "encoding" => \%encodings } );
+            LJ::load_codes({ "encoding" => \%encodings } );
             $encoding = $encodings{$FORM{'encid'}};
         }
 
@@ -92,13 +84,8 @@
         $opts->{'notranslation'} = 1
             if $FORM{'notranslation'};
 
-        if ($u->{'clusterid'}) {
-            $sth = $dbcr->prepare("SELECT jitemid, anum, eventtime, logtime, security, allowmask FROM log2 ".
-                                  "WHERE journalid=$u->{'userid'} AND year=$year AND month=$month");
-        } else {
-            $sth = $dbcr->prepare("SELECT itemid, eventtime, logtime, security, allowmask FROM log ".
-                                  "WHERE ownerid=$u->{'userid'} AND year=$year AND month=$month");
-        }
+        $sth = $dbcr->prepare("SELECT jitemid, anum, eventtime, logtime, security, allowmask FROM log2 ".
+                              "WHERE journalid=$u->{'userid'} AND year=$year AND month=$month");
         $sth->execute;
         if ($dbcr->err) { $r->print($dbcr->errstr); return; }
         my @buffer;
@@ -107,12 +94,12 @@
             $_->{'itemid'} = $_->{'jitemid'} * 256 + $_->{'anum'} if $_->{'jitemid'};
             push @buffer, $_;
             if (@buffer == 20) {
-                load_and_dump_buffer($dbs, $dbcs, $u, \@buffer, $opts);
+                load_and_dump_buffer($u, \@buffer, $opts);
                 @buffer = ();
             }
             
         }
-        load_and_dump_buffer($dbs, $dbcs, $u, \@buffer, $opts);
+        load_and_dump_buffer($u, \@buffer, $opts);
 
         if ($opts->{'format'} eq "xml") {
             $r->print("</livejournal>\n");
@@ -121,19 +108,13 @@
 
         sub load_and_dump_buffer
         {
-            my ($dbs, $dbcs, $u, $buf, $opts) = @_;
+            my ($u, $buf, $opts) = @_;
             my $lt;
             my %props;
             my @ids = map { $_->{'ritemid'} } @{$buf};
 
-            if ($u->{'clusterid'}) {
-                $lt = LJ::get_logtext2($u, @ids);
-                LJ::load_props($dbs, "log");
-                LJ::load_log_props2($dbcs->{'reader'}, $u->{'userid'}, \@ids, \%props);
-            } else {
-                $lt = LJ::get_logtext($dbs, @ids);
-                LJ::load_log_props($dbs, \@ids, \%props);
-            }
+            $lt = LJ::get_logtext2($u, @ids);
+            LJ::load_log_props2($dbcr, $u->{'userid'}, \@ids, \%props);
 
             foreach my $e (@{$buf}) {
                 $e->{'subject'} = $lt->{$e->{'ritemid'}}->[0];
@@ -144,10 +125,10 @@
                 # convert to UTF-8 if necessary
                 if ($LJ::UNICODE && $eprops->{'unknown8bit'} && !$opts->{'notranslation'}) {
                     my $error;
-                    $e->{'subject'} = LJ::text_convert($dbs, $e->{'subject'}, $u, \$error);
-                    $e->{'event'} = LJ::text_convert($dbs, $e->{'event'}, $u, \$error);
+                    $e->{'subject'} = LJ::text_convert($e->{'subject'}, $u, \$error);
+                    $e->{'event'} = LJ::text_convert($e->{'event'}, $u, \$error);
                     foreach (keys %{$eprops}) {
-                        $eprops->{$_} = LJ::text_convert($dbs, $eprops->{$_}, $u, \$error);
+                        $eprops->{$_} = LJ::text_convert($eprops->{$_}, $u, \$error);
                     }
                 }
 
@@ -155,7 +136,7 @@
                     $e->{'current_music'} = $eprops->{'current_music'};
                     $e->{'current_mood'} = $eprops->{'current_mood'};
                     if ($eprops->{'current_moodid'}) {
-                        LJ::load_moods($dbs);
+                        LJ::load_moods();
                         my $mood = ($LJ::CACHE_MOODS{$eprops->{'current_moodid'}})->{'name'}
                             if defined $LJ::CACHE_MOODS{$eprops->{'current_moodid'}};
                         $e->{'current_mood'} = $mood if $mood;
