@@ -280,6 +280,8 @@ sub clean
                 $token->[1] =~ s/j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t\s*://g;
                 $token->[1] =~ s/a\s*b\s*o\s*u\s*t\s*://g;
                 $token->[1] =~ s/expression//g;
+                $token->[1] =~ s/<!--/[COMS]/g;
+                $token->[1] =~ s/-->/[COME]/g;
             }
             my $auto_format = $addbreaks && 
                 ($opencount{'table'} <= ($opencount{'td'} + $opencount{'th'})) &&
@@ -289,6 +291,17 @@ sub clean
             if ($auto_format && ! $opencount{'a'}) {
                 $token->[1] =~ s!https?://\S+[a-zA-Z0-9_/&=\-]!$url{++$urlcount}=$&;"\{url$urlcount\}";!egi;
             }
+
+            # escape tags in text tokens.  shouldn't belong here!
+            # especially because the parser returns things it's
+            # confused about (broken, ill-formed HTML) as text.
+            $token->[1] =~ s/</&lt;/g;
+            $token->[1] =~ s/>/&gt;/g;
+            if ($opencount{'style'}) {
+                $token->[1] =~ s/\[COMS\]/<!--/g;
+                $token->[1] =~ s/\[COME\]/-->/g;
+            }
+
             if ($wordlength) {
                 # this treats normal characters and &entities; as single characters
                 # also treats UTF-8 chars as single characters if $LJ::UNICODE
@@ -301,21 +314,13 @@ sub clean
                 }
                 $token->[1] =~ s/(($match){$wordlength})\B/$1<wbr>/go;
             } 
+
             if ($auto_format) {
                 $token->[1] =~ s/(\r)?\n/<br>/g;
                 if (! $opencount{'a'}) {
                     $token->[1] =~ s/\{url(\d+)\}/<a href=\"$url{$1}\">$url{$1}<\/a>/g;
                 }
             }
-            
-            ## the HTML tokenizer returns half-broken comments as text, so
-            ## want to make sure we delete any comment starts we see until
-            ## the end, since they could both be used to comment out the 
-            ## remainder of the page and also to sneak in back HTML/scripting
-
-            ## However, we should keep these when $keepcomments is 1 so we don't
-            ## remove CSS when being called from LJ::strip_bad_code.
-            $token->[1] =~ s/<!--.*//s unless ($keepcomments);
 
             $newdata .= $token->[1];
         } 
