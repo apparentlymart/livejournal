@@ -483,10 +483,10 @@ $cmd{'getemail'} = {
 $cmd{'get_maintainer'} = {
     'def' => 'consuspend.pl',
     'privs' => [qw(finduser)],
-    'des' => "Finds out the current maintainer(s) of a community",
-    'argsummary' => '<community name>',
+    'des' => "Finds out the current maintainer(s) of a community or the communities that a user maintains.  If you pass a community as the argument, the maintainer(s) will be listed.  Otherwise, if you pass a user account, the account(s) they maintain will be listed.",
+    'argsummary' => '<community or user name>',
     'args' => [
-               'community name' => "The username of the community you want to lookup.",
+               'community or user name' => "The username of the account you want to lookup.",
                ],
     };
     
