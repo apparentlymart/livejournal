@@ -81,7 +81,7 @@ body<=
      return "<?h1 Error h1?><?p You must be logged in to filter on requests that you've replied to. p?>"
         unless $remote;
      $ret .= "<?h1 Requests you replied to h1?><?p This shows all open requests you've replied to. p?>";
- } elsif ($state eq 'open')  {
+ } else {
      $ret .= "<?h1 Open Support Requests h1?><?p Below are all support requests that are open " .
              "(they just came in and haven't been touched yet) or answered (either awaiting to be " .
              "closed by the person needing help, or the person requested they still need help).  " .
