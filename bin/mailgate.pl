@@ -8,11 +8,6 @@ use strict;
 use MIME::Parser;
 use Mail::Address;
 
-require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
-require "$ENV{'LJHOME'}/cgi-bin/supportlib.pl";
-
-my $email2cat = LJ::Support::load_email_to_cat_map();
-
 my $parser = new MIME::Parser;
 $parser->output_dir("/tmp");
 
@@ -30,36 +25,19 @@ $head->unfold;
 my $subject = $head->get('Subject');
 chomp $subject;
 
-my $to;
-my $toarg;
-my $ignore = 0;
-foreach my $a (Mail::Address->parse($head->get('To')),
-             Mail::Address->parse($head->get('Cc')))
+# ignore spam/vacation/auto-reply messages
+if ($subject =~ /auto.?(response|reply)/i ||
+    $subject =~ /^(Undelive|Mail System Error - |ScanMail Message: |\+\s*SPAM|Norton AntiVirus)/ ||
+    $subject =~ /\[BOUNCED SPAM\]/ ||
+    $subject =~ /^Symantec AVF / ||
+    $subject =~ /Attachment block message/ ||
+    $subject =~ /Use this patch immediately/) 
 {
-    my $address = $a->address;
-    my $arg;
-    if ($address =~ /^(.+)\+(.*)\@(.+)$/) {
-        ($address, $arg) = ("$1\@$3", $2);
-    }
-    if (defined $email2cat->{$address}) {
-        $to = $address;
-        $toarg = $arg;
-    }
-    $ignore = 1 if $address eq $LJ::IGNORE_EMAIL;
-    $ignore = 1 if $address eq $LJ::BOGUS_EMAIL;
-}
-unless ($to) {
-    $parser->filer->purge;
-    exit 0 if $ignore;
-    die "Not deliverable to support system (no match To:)\n";
-}
-
-# ignore vacation/auto-reply messages
-if ($subject =~ /auto.?(response|reply)/i) {
     $parser->filer->purge;
     exit 0;
 }
 
+# stop more spam, based on body text checks
 my $tent = get_text_entity($entity);
 unless ($tent) {
     $parser->filer->purge;
@@ -73,18 +51,59 @@ $body =~ s/\s+$//;
 if ($body =~ /I send you this file in order to have your advice/ ||
     $body =~ /^Content-Type: application\/octet-stream/ ||
     $body =~ /^(Please see|See) the attached file for details\.?$/ ||
-    $subject =~ /^(Undelive|Mail System Error - |ScanMail Message: |\+\s*SPAM|Norton AntiVirus)/ ||
     ($subject eq "failure notice" && $body =~ /\.(scr|pif)\"/) ||
-    ($subject =~ /^Mail delivery failed/ && $body =~ /\.(scr|pif)\"/) ||
-    $subject =~ /\[BOUNCED SPAM\]/ ||
-    $subject =~ /^Symantec AVF / ||
-    $subject =~ /Attachment block message/ ||
-    $subject =~ /Use this patch immediately/
-    )
+    ($subject =~ /^Mail delivery failed/ && $body =~ /\.(scr|pif)\"/))
 {
     $parser->filer->purge;
     exit 0;
 }
+
+# at this point we need ljlib (we delayed this so spam/junk is quicker to process)
+require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+
+# see if it's a post-by-email
+my @to = Mail::Address->parse($head->get('To'));
+if (@to == 1 && $to[0]->address =~ /^(\S+?)\@\Q$LJ::EMAIL_POST_DOMAIN\E$/i) {
+    my $user = $1;
+    # FIXME: verify auth (extra from $user/$subject/$body), require ljprotocol.pl, do post.
+    # unresolved:  where to temporarily store messages before they're approved?
+    # perhaps the modblob table?  perhaps a column it can be used to determine
+    # whethere it's a moderated community post vs. an un-acked phone post.
+    $parser->filer->purge;
+    exit 0;
+}
+
+# From this point on we know it's a support request of some type,
+# so load the support library.
+require "$ENV{'LJHOME'}/cgi-bin/supportlib.pl";
+
+my $email2cat = LJ::Support::load_email_to_cat_map();
+
+my $to;
+my $toarg;
+my $ignore = 0;
+foreach my $a (@to,
+               Mail::Address->parse($head->get('Cc')))
+{
+    my $address = $a->address;
+    my $arg;
+    if ($address =~ /^(.+)\+(.*)\@(.+)$/) {
+        ($address, $arg) = ("$1\@$3", $2);
+    }
+    if (defined $email2cat->{$address}) {
+        $to = $address;
+        $toarg = $arg;
+    }
+    $ignore = 1 if $address eq $LJ::IGNORE_EMAIL;
+    $ignore = 1 if $address eq $LJ::BOGUS_EMAIL;
+}
+
+unless ($to) {
+    $parser->filer->purge;
+    exit 0 if $ignore;
+    die "Not deliverable to support system (no match To:)\n";
+}
+
 
 my $adf = (Mail::Address->parse($head->get('From')))[0];
 my $name = $adf->name;
