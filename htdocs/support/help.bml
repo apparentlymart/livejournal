@@ -13,7 +13,7 @@ BODY<=
  my $cats = LJ::Support::load_cats($dbh);
 
  my $filtercat = $FORM{'cat'};
- $filtercat = "" unless ($filtercat =~ /^\w+$/);
+ $filtercat = "" unless ($filtercat =~ /^[\w\-]+$/);
  my $filterwhere;
 
  if ($filtercat eq "_nonpublic") {
