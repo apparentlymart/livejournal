@@ -793,9 +793,11 @@ sub postevent
                 my $ct;
                 foreach my $to (@$emails) {
                     last if ++$ct > 20;  # don't send more than 20 emails.
-                    my $body = ("There has been a new submission into the community '$uowner->{'user'}' \n".
-                                "which you moderate.  To accept or reject the submission, please go \n".
-                                "to this address:\n\n" .
+                    my $body = ("There has been a new submission into the community '$uowner->{'user'}'\n".
+                                "which you moderate.\n\n".
+                                "      User: $u->{'user'}\n".
+                                "   Subject: $req->{'subject'}\n\n".
+                                "To accept or reject the submission, please go to this address:\n\n" .
                                 "   $LJ::SITEROOT/community/moderate.bml?comm=$uowner->{'user'}\n\n".
                                 "Regards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n");
                     LJ::send_mail({
