@@ -471,6 +471,11 @@ sub box_end
     }
 }
 
+# Load site-specific boxes
+if (-e "$LJ::HOME/cgi-bin/portal-local.pl") {
+    require "$LJ::HOME/cgi-bin/portal-local.pl";
+}
+
 ############################################################################
 
 $box{'login'} =
@@ -503,33 +508,6 @@ $box{'login'} =
 };
 
 ############################################################################
-
-$box{'newtolj'} =
-{
-    'name' => "Site Links",
-    'small' => 1,
-    'large' => 0,
-    'handler' => sub {
-        my ($dbs, $remote, $opts, $box) = @_;
-        my $b = $opts->{'body'};
-
-        box_start($b, $box, { 'title' => "About $LJ::SITENAME",
-                              'align' => "left",
-                              'url' => '/site/about.bml', });
-
-        $$b .= "New to $LJ::SITENAME?";
-        my @links = ("What is $LJ::SITENAME?", "/site/about.bml",
-                     "Create an account!", "/create.bml");
-        while (@links) {
-            my $link = shift @links;
-            my $url = shift @links;
-            $$b .= "<li><a href=\"$url\"><b>$link</b></a>\n";
-        }
-
-        box_end($b, $box);
-        $$b .= "</form>\n";
-    },
-};
 
 ############################################################################
 
@@ -730,97 +708,6 @@ $box{'lastnview'} =
 
 ############################################################################
 
-$box{'goat'} =
-{
-    'name' => 'Site Mascot',
-    'small' => 1,
-    'large' => 0,
-    'opts' => [ { 'key' => 'misbehaved',
-                  'name' => 'Mishaved Goat',
-                  'des' => "You really wanted to leave this unchecked.  Goats that aren't housetrained are nothing but trouble.",
-                  'type' => 'check',
-                  'value' => 1,
-                  'default' => 0, },
-                { 'key' => 'goattext',
-                  'name' => 'Goat Text',
-                  'des' => "What do you want your goat to say?  The only true thing goats can say is 'Baaaaah', but you can pretend your goat can say something else if you really want.",
-                  'type' => 'text',
-                  'default' => "Baaaaah",
-                  'size' => 40,
-                  'maxlength' => 40, },
-                ],
-    'handler' => sub {
-        my ($dbs, $remote, $opts, $box) = @_;
-        my $b = $opts->{'body'};
-        my $bo = $opts->{'bodyopts'};
-        my $h = $opts->{'head'};
-        my $pic;
-
-        if ($opts->{'form'}->{'frank'} eq "urinate" || $box->{'args'}->{'misbehaved'}) {
-            $pic = "pee";
-        } else {
-            $pic = "hover";
-        }
-
-        box_start($b, $box, { 'title' => "Frank",
-                              'align' => "center",
-                              'url' => "/site/goat.bml", });
-
-        my $imgname = "frankani" . $box->{'uniq'};
-        my $goattext = $box->{'args'}->{'goattext'} || "Baaaah";
-
-        $$b .= <<"GOAT_STUFF";
-<A onMouseOut="MM_swapImgRestore()" onMouseOver="MM_swapImage('$imgname','','$LJ::IMGPREFIX/goat-$pic.gif',1)" HREF="/site/goat.bml"><IMG NAME="$imgname" SRC="$LJ::IMGPREFIX/goat-normal.gif" WIDTH=110 HEIGHT=101 HSPACE=2 VSPACE=2 BORDER=0 ALT="Frank, the LiveJournal mascot goat."></A><BR>
-<!--
-<A HREF="/site/goat.bml"><IMG SRC="$LJ::IMGPREFIX/goat-irish.gif" WIDTH=110 HEIGHT=101 HSPACE=2 VSPACE=2 BORDER=0 ALT="Frank, the LiveJournal mascot goat."></A> 
--->
-<B><I>"$goattext"</I> says Frank.
-GOAT_STUFF
-    
-    box_end($b, $box);
-
-        $opts->{'onload'}->{"MM_preloadImages('$LJ::IMGPREFIX/goat-$pic.gif');"} = 1;
-
-        unless ($opts->{'did'}->{'image_javascript'}) 
-        {
-            $opts->{'did'}->{'image_javascript'} = 1;
-
-        $$h .= <<'JAVASCRIPT';
-<script language="JavaScript">
-<!--
-function MM_swapImgRestore() { //v3.0
-  var i,x,a=document.MM_sr; for(i=0;a&&i<a.length&&(x=a[i])&&x.oSrc;i++) x.src=x.oSrc;
-}
-
-function MM_preloadImages() { //v3.0
-  var d=document; if(d.images){ if(!d.MM_p) d.MM_p=new Array();
-    var i,j=d.MM_p.length,a=MM_preloadImages.arguments; for(i=0; i<a.length; i++)
-    if (a[i].indexOf("#")!=0){ d.MM_p[j]=new Image; d.MM_p[j++].src=a[i];}}
-}
-
-function MM_findObj(n, d) { //v3.0
-  var p,i,x;  if(!d) d=document; if((p=n.indexOf("?"))>0&&parent.frames.length) {
-    d=parent.frames[n.substring(p+1)].document; n=n.substring(0,p);}
-  if(!(x=d[n])&&d.all) x=d.all[n]; for (i=0;!x&&i<d.forms.length;i++) x=d.forms[i][n];
-  for(i=0;!x&&d.layers&&i<d.layers.length;i++) x=MM_findObj(n,d.layers[i].document); return x;
-}
-
-function MM_swapImage() { //v3.0
-  var i,j=0,x,a=MM_swapImage.arguments; document.MM_sr=new Array; for(i=0;i<(a.length-2);i+=3)
-   if ((x=MM_findObj(a[i]))!=null){document.MM_sr[j++]=x; if(!x.oSrc) x.oSrc=x.src; x.src=a[i+2];}
-}
-//-->
-</script>
-JAVASCRIPT
-
-        }  # end unless
-
-
-    },  # end handler
-    
-};
-
-############################################################################
 
 $box{'update'} =
 {
@@ -1101,6 +988,80 @@ $box{'randuser'} =
         }
         if ($size eq "large") {  $$b .= "</tr></table>"; }
 
+        box_end($b, $box);
+    }
+};
+
+$box{'popfaq'} =
+{
+    'name' => "10 Most Viewed FAQs",
+    'small' => 1,
+    'large' => 0,
+    'handler' => sub {
+        my ($dbs, $remote, $opts, $box) = @_;
+        my $b = $opts->{'body'};
+
+        box_start($b, $box, { 'title' => "10 Most Viewed FAQs",
+                              'align' => "left",
+                              'url' => '/support/faqpop.bml', });
+        my $dbr = $dbs->{'reader'};
+
+        my $sth = $dbr->prepare("SELECT f.faqid, f.question, s.statval AS 'uses' ".
+                      "FROM faq f, stats s WHERE f.faqcat<>'int-abuse' AND s.statcat='popfaq' ".
+                                "AND s.statkey=f.faqid ORDER BY s.statval DESC LIMIT 10");
+        $sth->execute;
+
+        $$b .= "<ul>";
+        while (my $f = $sth->fetchrow_hashref)
+        {
+            my $q = LJ::ehtml($f->{'question'});
+            $q =~ s/^\s+//; $q =~ s/\s+$//;
+            $q =~ s/\n/<BR>/g;
+            $$b .= "<li><a href=\"/support/faqbrowse.bml?faqid=$f->{'faqid'}\">$q</a> <i>($f->{'uses'})</i></li>\n";
+        }
+        $$b .= "</ul>\n";
+        box_end($b, $box);
+    },
+};
+
+############################################################################
+
+$box{'memories'} =
+{
+    'name' => "Memorable Posts",
+    'small' => 1,
+    'large' => 0,
+    'handler' => sub {
+        my ($dbs, $remote, $opts, $box) = @_;
+        my $dbr = $dbs->{'reader'};
+        my $b = $opts->{'body'};
+
+        box_start($b, $box, { 'title' => "Memorable Posts",
+                              'url' => '/tools/memories.bml', });
+
+        my $userid = $remote->{'userid'};
+        my $sth = $dbr->prepare("SELECT k.keyword, COUNT(*) AS 'count' FROM memorable m, memkeyword mk, keywords k ".
+                                "WHERE mk.memid=m.memid AND mk.kwid=k.kwid AND m.userid=$userid ".
+                                "GROUP BY k.keyword ORDER BY k.keyword");
+        $sth->execute;
+        my $rows = 0;
+        while (my $row = $sth->fetchrow_hashref)
+        {
+            $$b .= "<ul>" if ++$rows == 1;
+            my $noun = $row->{'count'} == 1 ? "entry" : "entries";
+            my $ue_keyword = LJ::eurl($row->{'keyword'});
+            my $keyword = $row->{'keyword'};
+            LJ::text_out(\$keyword);
+            if ($keyword eq "*") { $keyword = "<?_ml /tools/memories.bml.uncategorized _ml?>"; }
+            $$b .= "<li><b><a href=\"/tools/memories.bml?user=$remote->{'user'}&amp;keyword=$ue_keyword&amp;filter=all\">";
+            $$b .= "$keyword</a></b>: $row->{'count'} $noun</li>\n";
+        }
+        unless ($rows) {
+            $$b .= "<?h1 <?_ml /tools/memories.bml.error.noentries.title _ml?> h1?>";
+            $$b .= "<?p <?_ml /tools/memories.bml.error.noentries.body _ml?> p?>";
+        } else {
+            $$b .= "</ul>";
+        }
         box_end($b, $box);
     }
 };

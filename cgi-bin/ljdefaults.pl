@@ -33,18 +33,18 @@
                                      [ 'update', 'mode=full'],
                                      ],
                          'right' => [ 
-                                      [ 'goat', '', ],
                                       [ 'stats', '', ],
                                       [ 'bdays', '', ],
+                                      [ 'popfaq', '', ],
                                       ] };
     $PORTAL_LOGGED_OUT ||= {'main' => [ 
                                       [ 'update', 'mode='],
                                       ],
                           'right' => [ 
-                                       [ 'newtolj', '', ],
                                        [ 'login', '', ],
                                        [ 'stats', '', ],
                                        [ 'randuser', '', ],
+                                       [ 'popfaq', '', ],
                                        ],
                           'moz' => [
                                     [ 'login', '', ],
