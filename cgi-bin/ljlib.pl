@@ -855,7 +855,12 @@ sub get_friend_items
         $filter_journaltypes->($friends, \%friends_u);
 
         # get update times for all the friendids
-        my $timeupdate = LJ::get_timeupdate_multi(keys %$friends);
+        my $tu_opts = {};
+        my $fcount = scalar keys %$friends;
+        if ($LJ::SLOPPY_FRIENDS_THRESHOLD && $fcount > $LJ::SLOPPY_FRIENDS_THRESHOLD) {
+            $tu_opts->{memcache_only} = 1;
+        }
+        my $timeupdate = LJ::get_timeupdate_multi($tu_opts, keys %$friends);
 
         # now push a properly formatted @friends_buffer row
         foreach my $fid (keys %$timeupdate) {
