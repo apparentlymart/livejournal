@@ -1306,12 +1306,16 @@ sub enter_comment {
             $table = "talkleft_xfp";
         }
         my $pub  = $item->{'security'} eq "public" ? 1 : 0;
-        $db->do("INSERT INTO $table (userid, posttime, journalid, nodetype, ".
-                "nodeid, jtalkid, publicitem) VALUES (?, UNIX_TIMESTAMP(), ".
-                "?, 'L', ?, ?, ?)", undef,
-                $posterid, $journalu->{userid}, $itemid, $jtalkid, $pub);
-
-        LJ::MemCache::incr([$posterid, "talkleftct:$posterid"]);
+        if ($db) {
+            $db->do("INSERT INTO $table (userid, posttime, journalid, nodetype, ".
+                    "nodeid, jtalkid, publicitem) VALUES (?, UNIX_TIMESTAMP(), ".
+                    "?, 'L', ?, ?, ?)", undef,
+                    $posterid, $journalu->{userid}, $itemid, $jtalkid, $pub);
+            
+            LJ::MemCache::incr([$posterid, "talkleftct:$posterid"]);
+        } else {
+            # both primary and backup talkleft hosts down.  can't do much now.
+        }
     }
 
     $dbcm->do("INSERT INTO talktext2 (journalid, jtalkid, subject, body) ".
