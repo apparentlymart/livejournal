@@ -148,14 +148,13 @@ sub set_quota
     my $u = LJ::load_userid($POST->{'uid'});
     return {} unless $u && defined $POST->{'used'};
 
-    my $dbcm = LJ::get_cluster_master($u);
-    return {} unless $dbcm;
+    return {} unless $u->writer;
 
     my $used = $POST->{'used'} << 10;  # Kb -> bytes
-    my $result = $dbcm->do('REPLACE INTO userblob SET ' .
-                           'domain=?, length=?, journalid=?, blobid=0',
-                           undef, LJ::get_blob_domainid('fotobilder'),
-                           $used, $u->{'userid'});
+    my $result = $u->do('REPLACE INTO userblob SET ' .
+                        'domain=?, length=?, journalid=?, blobid=0',
+                        undef, LJ::get_blob_domainid('fotobilder'),
+                        $used, $u->{'userid'});
 
     LJ::set_userprop($u, "fb_num_pubpics", $POST->{'pub_pics'});
 

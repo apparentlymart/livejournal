@@ -457,9 +457,9 @@
             $bio = $dbcm->selectrow_array("SELECT bio FROM userbio WHERE userid=$userid");
             unless (LJ::is_utf8($bio)) {
                 convert(\$bio, $encid);
-                $dbcm->do("UPDATE userbio SET bio=? WHERE userid=$userid", undef, $bio);
-                if ($dbcm->err) {
-                    return 0, "Database error: " . $dbcm->errstr;
+                $u->do("UPDATE userbio SET bio=? WHERE userid=$userid", undef, $bio);
+                if ($u->err) {
+                    return 0, "Database error: " . $u->errstr;
                 }
                 LJ::MemCache::delete([$userid, "bio:$userid"]);
                 $message .= "<?p Converted the bio. p?>";
@@ -686,8 +686,8 @@
 
             # not an API because this is the only place this happens, and it's very rare
             if ($u->{dversion} > 5) {
-                $dbcm->do("UPDATE memkeyword2 SET kwid = ? WHERE userid = ? kwid = ?",
-                          undef, $newid, $u->{userid}, $kwds{$keyword});
+                $u->do("UPDATE memkeyword2 SET kwid = ? WHERE userid = ? kwid = ?",
+                       undef, $newid, $u->{userid}, $kwds{$keyword});
             } else {
                 $dbh->do("UPDATE memkeyword SET kwid=$newid WHERE kwid=$kwds{$keyword}");
             }

@@ -360,10 +360,10 @@ $maint{'synsuck'} = sub
                 }
                 if ($bio ne $des && $bio !~ /\[LJ:KEEP\]/) {
                     if ($des) {
-                        $udbh->do("REPLACE INTO userbio (userid, bio) VALUES (?,?)", undef,
-                                  $su->{'userid'}, $des);
+                        $su->do("REPLACE INTO userbio (userid, bio) VALUES (?,?)", undef,
+                                $su->{'userid'}, $des);
                     } else {
-                        $udbh->do("DELETE FROM userbio WHERE userid=?", undef, $su->{'userid'});
+                        $su->do("DELETE FROM userbio WHERE userid=?", undef, $su->{'userid'});
                     }
                     LJ::update_user($su, { has_bio => ($des ? "Y" : "N") });
                     LJ::MemCache::delete([$su->{'userid'}, "bio:$su->{'userid'}"]);

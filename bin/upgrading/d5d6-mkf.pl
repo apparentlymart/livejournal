@@ -102,7 +102,7 @@ my $move_user = sub {
 
     # get a handle for every user to revalidate our connection?
     my ($dbh, $dbcm) = $get_db_handles->($u->{clusterid});
-    die "Unable to get database handles" unless $dbh && $dbcm;
+    die "Unable to get database handles" unless $dbh && $dbcm && $u->writer;
 
     # step 1: get all friend groups and move those.  safe to just grab with no limit because
     # there are limits to how many friend groups you can have (30).
@@ -116,8 +116,8 @@ my $move_user = sub {
             push @vars, $_ foreach @$row;
         }
         my $bind = join ',', @bind;
-        $dbcm->do("REPLACE INTO friendgroup2 (userid, groupnum, groupname, sortorder, is_public) " .
-                  "VALUES $bind", undef, @vars);
+        $u->do("REPLACE INTO friendgroup2 (userid, groupnum, groupname, sortorder, is_public) " .
+               "VALUES $bind", undef, @vars);
     }
 
     # general purpose flusher for use below
@@ -137,17 +137,17 @@ my $move_user = sub {
     };
 
     # step 1.5: see if the user has any data already? clear it if so.
-    my $counter = $dbcm->selectrow_array("SELECT max FROM counter WHERE journalid = ? AND area = 'R'",
-                                         undef, $u->{userid});
+    my $counter = $u->selectrow_array("SELECT max FROM counter WHERE journalid = ? AND area = 'R'",
+                                      undef, $u->{userid});
     $counter += 0;
     if ($counter > 0) {
         # yep, so we need to delete stuff, real data first
         foreach my $table (qw(memorable2 memkeyword2 userkeywords)) {
-            $dbcm->do("DELETE FROM $table WHERE userid = ?", undef, $u->{userid});
+            $u->do("DELETE FROM $table WHERE userid = ?", undef, $u->{userid});
         }
 
         # delete counters used (including memcache of such)
-        $dbcm->do("DELETE FROM counter WHERE journalid = ? AND area IN ('R', 'K')", undef, $u->{userid});
+        $u->do("DELETE FROM counter WHERE journalid = ? AND area IN ('R', 'K')", undef, $u->{userid});
         LJ::MemCache::delete([$u->{userid}, "auc:$u->{userid}:R"]);
         LJ::MemCache::delete([$u->{userid}, "auc:$u->{userid}:K"]);
     }

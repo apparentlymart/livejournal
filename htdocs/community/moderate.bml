@@ -47,8 +47,8 @@ body<=
         }
 
         my $poster = LJ::load_userid($entry->{'posterid'});
-        $dbcm->do("DELETE FROM modlog WHERE journalid=$c->{'userid'} AND modid=$modid");
-        $dbcm->do("DELETE FROM modblob WHERE journalid=$c->{'userid'} AND modid=$modid");
+        $c->do("DELETE FROM modlog WHERE journalid=$c->{'userid'} AND modid=$modid");
+        $c->do("DELETE FROM modblob WHERE journalid=$c->{'userid'} AND modid=$modid");
         
         my ($success, $do_mail) = (0, 0);
         my $why_mail;

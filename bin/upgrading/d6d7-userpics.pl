@@ -104,14 +104,14 @@ my $move_user = sub {
 
     # get a handle for every user to revalidate our connection?
     my ($dbh, $dbcm) = $get_db_handles->($u->{clusterid});
-    die "Unable to get database handles" unless $dbh && $dbcm;
+    die "Unable to get database handles" unless $dbh && $dbcm && $u->writer;
 
     # step 0.5: delete all the bogus userblob rows for this user
     # This is due to the auto_increment for the blobid overflowing
     # and thus all entries recieving an id of max id for a mediumint.
     # This is lame.
     my $domainid = LJ::get_blob_domainid('userpic');
-    $dbcm->do("DELETE FROM userblob WHERE journalid=$u->{userid} AND domain=$domainid AND blobid>=16777216");
+    $u->do("DELETE FROM userblob WHERE journalid=$u->{userid} AND domain=$domainid AND blobid>=16777216");
 
     # step 1: get all user pictures and move those.  safe to just grab with no limit
     # since users can only have a limited number of them
@@ -142,8 +142,8 @@ my $move_user = sub {
         }
 
         my $bind = join ',', @bind;
-        $dbcm->do("REPLACE INTO userpic2 (picid, userid, fmt, width, height, state, picdate, md5base64) " .
-                  "VALUES $bind", undef, @vars);
+        $u->do("REPLACE INTO userpic2 (picid, userid, fmt, width, height, state, picdate, md5base64) " .
+               "VALUES $bind", undef, @vars);
 
 
         # step 1.5: insert missing rows into the userblob table
@@ -166,8 +166,8 @@ my $move_user = sub {
         }
         if (@insertbind) {
             my $insertbind = join ',', @insertbind;
-            $dbcm->do("INSERT INTO userblob (journalid, domain, blobid, length) " .
-                      "VALUES $insertbind", undef, @insertvars);
+            $u->do("INSERT INTO userblob (journalid, domain, blobid, length) " .
+                   "VALUES $insertbind", undef, @insertvars);
         }
     }
 
