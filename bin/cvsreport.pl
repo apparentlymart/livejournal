@@ -5,6 +5,12 @@ unless (-d $ENV{'LJHOME'}) {
     die "$LJHOME not set.\n";
 }
 
+if ($ARGV[0] eq "-h" || $ARGV[0] eq "--help") {
+    die "Usage: cvsreport.pl [--sync]\n";
+}
+
+my $sync = $ARGV[0] eq "--sync";
+
 my $maind = $ENV{'LJHOME'};
 my $cvs = "$maind/cvs/livejournal";
 my $cvslocal = "$maind/cvs/local";
@@ -20,7 +26,30 @@ scan_cvs();
 
 foreach my $file (sort keys %status)
 {
-    printf "%-20s %s\n", $status{$file}, $file;
+    my $status = $status{$file};
+    if ($sync && $status eq "main -> ??") { next; }
+    printf "%-20s %s\n", $status, $file;
+    if ($sync) {
+	if ($status eq "main <- cvs") {
+	    unless (copy("$cvs/$file", "$maind/$file")) { print "   Error: $!\n"; }
+	} elsif ($status eq "main <- local") {
+	    unless (copy("$cvslocal/$file", "$maind/$file")) { print "   Error: $!\n"; }
+	} elsif ($status eq "main -> local") {
+	    unless (copy("$maind/$file", "$cvslocal/$file")) { print "   Error: $!\n"; }
+	} elsif ($status eq "main -> cvs") {
+	    unless (copy("$maind/$file", "$cvs/$file")) { print "   Error: $!\n"; }
+	} else {
+	    print "   unknown sync action.\n";
+	}
+    }
+}
+
+# was using perl's File::Copy, but I want to preserve the file time.
+sub copy
+{
+    my ($src, $dest) = @_;
+    my $ret = system("cp", "-p", $src, $dest);
+    return ($ret == 0);
 }
 
 sub scan_cvs
@@ -94,7 +123,7 @@ sub scan_main
 		    }
 		} elsif (! $ltime && $ctime > $mtime) {
 		    $status = "main <- cvs";
-		} elsif ($ltime && $ltime > $ctime) {
+		} elsif ($ltime && $ltime > $mtime) {
 		    $status = "main <- local";
 		}
 
