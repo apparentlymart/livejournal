@@ -197,43 +197,12 @@ CREATE TABLE keywords (
 ) 
 EOC
 
-register_tablecreate("log", <<'EOC');
-CREATE TABLE log (
-  ownerid int(10) unsigned NOT NULL default '0',
-  posterid int(10) unsigned NOT NULL default '0',
-  eventtime datetime default NULL,
-  logtime datetime default NULL,
-  itemid int(10) unsigned NOT NULL auto_increment,
-  compressed char(1) NOT NULL default 'N',
-  security enum('public','private','usemask') NOT NULL default 'public',
-  allowmask int(10) unsigned NOT NULL default '0',
-  replycount smallint(5) unsigned default NULL,
-  year smallint(6) NOT NULL default '0',
-  month tinyint(4) NOT NULL default '0',
-  day tinyint(4) NOT NULL default '0',
-  PRIMARY KEY  (itemid),
-  KEY (year,month,day),
-  KEY (ownerid,year,month,day),
-  KEY (eventtime),
-  KEY (logtime)
-)  
-EOC
-
 register_tablecreate("logaccess", <<'EOC');
 CREATE TABLE logaccess (
   ownerid int(10) unsigned NOT NULL default '0',
   posterid int(10) unsigned NOT NULL default '0',
   KEY (posterid),
   PRIMARY KEY  (ownerid,posterid)
-) 
-EOC
-
-register_tablecreate("logprop", <<'EOC');
-CREATE TABLE logprop (
-  itemid int(10) unsigned NOT NULL default '0',
-  propid tinyint(3) unsigned NOT NULL default '0',
-  value varchar(255) default NULL,
-  PRIMARY KEY  (itemid,propid)
 ) 
 EOC
 
@@ -247,24 +216,6 @@ CREATE TABLE logproplist (
   des varchar(255) default NULL,
   PRIMARY KEY  (propid),
   UNIQUE KEY name (name)
-) 
-EOC
-
-register_tablecreate("logsec", <<'EOC');
-CREATE TABLE logsec (
-  ownerid int(10) unsigned NOT NULL default '0',
-  itemid int(10) unsigned NOT NULL default '0',
-  allowmask int(10) unsigned NOT NULL default '0',
-  PRIMARY KEY  (ownerid,itemid)
-) 
-EOC
-
-register_tablecreate("logtext", <<'EOC');
-CREATE TABLE logtext (
-  itemid int(10) unsigned NOT NULL default '0',
-  subject varchar(255) default NULL,
-  event text,
-  PRIMARY KEY  (itemid)
 ) 
 EOC
 
@@ -605,32 +556,6 @@ CREATE TABLE supportpoints (
 ) 
 EOC
 
-register_tablecreate("talk", <<'EOC');
-CREATE TABLE talk (
-  talkid int(10) unsigned NOT NULL auto_increment,
-  nodetype char(1) NOT NULL default '',
-  nodeid int(10) unsigned NOT NULL default '0',
-  parenttalkid int(10) unsigned NOT NULL default '0',
-  journalid int(10) unsigned NOT NULL default '0',
-  posterid int(10) unsigned NOT NULL default '0',
-  datepost datetime NOT NULL default '0000-00-00 00:00:00',
-  state char(1) default 'A',
-  PRIMARY KEY  (talkid),
-  KEY (nodetype,nodeid),
-  KEY (journalid,state,nodetype),
-  KEY (posterid,nodetype)
-) 
-EOC
-
-register_tablecreate("talkprop", <<'EOC');
-CREATE TABLE talkprop (
-  talkid int(10) unsigned NOT NULL default '0',
-  tpropid tinyint(3) unsigned NOT NULL default '0',
-  value varchar(255) default NULL,
-  PRIMARY KEY  (talkid,tpropid)
-) 
-EOC
-
 register_tablecreate("talkproplist", <<'EOC');
 CREATE TABLE talkproplist (
   tpropid smallint(5) unsigned NOT NULL auto_increment,
@@ -640,15 +565,6 @@ CREATE TABLE talkproplist (
   des varchar(255) default NULL,
   PRIMARY KEY  (tpropid),
   UNIQUE KEY name (name)
-) 
-EOC
-
-register_tablecreate("talktext", <<'EOC');
-CREATE TABLE talktext (
-  talkid int(10) unsigned NOT NULL default '0',
-  subject varchar(100) default NULL,
-  body text,
-  PRIMARY KEY  (talkid)
 ) 
 EOC
 
@@ -808,14 +724,6 @@ CREATE TABLE userpic (
 ) 
 EOC
 
-register_tablecreate("userpicblob", <<'EOC');
-CREATE TABLE userpicblob (
-  picid int(10) unsigned NOT NULL auto_increment,
-  imagedata blob,
-  PRIMARY KEY  (picid)
-) 
-EOC
-
 register_tablecreate("userpicblob2", <<'EOC');
 CREATE TABLE userpicblob2 (
   userid int unsigned not null,
@@ -892,24 +800,6 @@ CREATE TABLE zips (
 EOC
 
 ################# above was a snapshot.  now, changes:
-
-register_tablecreate("recent_logtext", <<'EOC');
-CREATE TABLE recent_logtext (
-  itemid int(10) unsigned NOT NULL default '0',
-  subject varchar(255) default NULL,
-  event text,
-  PRIMARY KEY  (itemid)
-)  
-EOC
-
-register_tablecreate("recent_talktext", <<'EOC');
-CREATE TABLE recent_talktext (
-  talkid int(10) unsigned NOT NULL default '0',
-  subject varchar(100) default NULL,
-  body text,
-  PRIMARY KEY  (talkid)
-)  
-EOC
 
 register_tablecreate("log2", <<'EOC');
 CREATE TABLE log2 (
