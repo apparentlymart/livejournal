@@ -16,11 +16,7 @@ cleansimple/en          i18n            cleansimple/layout
 
 generator/layout        layout          core1
 generator/en            i18n            generator/layout
-generator/mintchoc      theme           generator/layout
-generator/purple        theme           generator/layout
-generator/ocean         theme           generator/layout
-generator/harvest       theme           generator/layout
-generator/jeweled       theme           generator/layout
+generator/themes        theme+          generator/layout
 
 magazine/layout         layout          core1
 magazine/en             i18n            magazine/layout
@@ -32,11 +28,7 @@ notepad/en              i18n            notepad/layout
 punquin/layout          layout          core1
 punquin/en              i18n            punquin/layout
 punquin/bw              theme           punquin/layout
-punquin/autumn          theme           punquin/layout
-punquin/greyslate       theme           punquin/layout
-punquin/minimal         theme           punquin/layout
-punquin/jewel           theme           punquin/layout
-punquin/bold            theme           punquin/layout
+punquin/themes          theme+          punquin/layout
 
 tabularindent/layout    layout          core1
 tabularindent/en        i18n            tabularindent/layout

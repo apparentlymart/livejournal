@@ -180,9 +180,98 @@ if ($opt_pop)
         my $existing = LJ::S2::get_public_layers($sysid);
 
         my %known_id;
-
         chdir "$ENV{'LJHOME'}/bin/upgrading" or die;
         my %layer;    # maps redist_uniq -> { 'type', 'parent' (uniq), 'id' (s2lid) }
+
+        my $compile = sub {
+            my ($base, $type, $parent, $s2source) = @_;
+            return unless $s2source =~ /\S/;
+
+            my $id = $existing->{$base} ? $existing->{$base}->{'s2lid'} : 0;
+            unless ($id) {
+                my $parentid = 0;
+                $parentid = $layer{$parent}->{'id'} unless $type eq "core";
+                # allocate a new one.
+                $dbh->do("INSERT INTO s2layers (s2lid, b2lid, userid, type) ".
+                         "VALUES (NULL, $parentid, $sysid, ?)", undef, $type);
+                die $dbh->errstr if $dbh->err;
+                $id = $dbh->{'mysql_insertid'};
+                if ($id) {
+                    $dbh->do("INSERT INTO s2info (s2lid, infokey, value) VALUES (?,'redist_uniq',?)",
+                             undef, $id, $base);
+                }
+            }
+            die "Can't generate ID for '$base'" unless $id;
+            
+            # remember it so we don't delete it later.
+            $known_id{$id} = 1;
+            
+            $layer{$base} = {
+                'type' => $type,
+                'parent' => $parent,
+                'id' => $id,
+            };
+            
+            my $parid = $layer{$parent}->{'id'};
+            print "$base($id) is $type";
+            if ($parid) { print ", parent = $parent($parid)"; };
+            print "\n";
+            
+            # see if source changed
+            my $md5_source = Digest::MD5::md5_hex($s2source);
+            my $md5_exist = $dbh->selectrow_array("SELECT MD5(s2code) FROM s2source WHERE s2lid=?", undef, $id);
+            
+            # skip compilation if source is unchanged and parent wasn't rebuilt.
+            return if $md5_source eq $md5_exist && ! $layer{$parent}->{'built'} && ! $opt_forcebuild;
+            
+            # we're going to go ahead and build it.
+            $layer{$base}->{'built'} = 1;
+            
+            # compile!
+            my $lay = {
+                's2lid' => $id,
+                'userid' => $sysid,
+                'b2lid' => $parid,
+                'type' => $type,
+            };
+            my $error = "";
+            my $compiled;
+            my $info;
+            die $error unless LJ::S2::layer_compile($lay, \$error, { 
+                's2ref' => \$s2source, 
+                'redist_uniq' => $base,
+                'compiledref' => \$compiled,
+                'layerinfo' => \$info,
+            });
+            
+            if ($info->{'previews'}) {
+                my @pvs = split(/\s*\,\s*/, $info->{'previews'});
+                foreach my $pv (@pvs) {
+                    my $from = "$LD/$pv";
+                    next unless -e $from;
+                    my $dir = File::Basename::dirname($pv);
+                    File::Path::mkpath("$LJ::HOME/htdocs/img/s2preview/$dir");
+                    my $target = "$LJ::HOME/htdocs/img/s2preview/$pv";
+                    File::Copy::copy($from, $target);
+                    my ($w, $h) = Image::Size::imgsize($target);
+                    $pv = "$pv|$w|$h";
+                }
+                $dbh->do("REPLACE INTO s2info (s2lid, infokey, value) VALUES (?,?,?)",
+                         undef, $id, '_previews', join(",", @pvs));
+            }
+            
+            if ($opt_compiletodisk) {
+                open (CO, ">$LD/$base.pl") or die;
+                print CO $compiled;
+                close CO;
+            }
+            
+            # put raw S2 in database.
+            $dbh->do("REPLACE INTO s2source (s2lid, s2code) ".
+                     "VALUES ($id, ?)", undef, $s2source);
+            die $dbh->errstr if $dbh->err;            
+        };
+
         foreach my $file ("s2layers.dat", "s2layers-local.dat")
         {
             next unless -e $file;
@@ -197,95 +286,33 @@ if ($opt_pop)
                     die "'$base' references unknown parent '$parent'\n";
                 }
                 
+                # is the referenced $base file really an aggregation of
+                # many smaller layers?  (likely themes, which tend to be small)
+                my $multi = ($type =~ s/\+$//);
+    
                 my $s2source;
                 open (L, "$LD/$base.s2") or die "Can't open file: $base.s2\n";
-                while (<L>) { $s2source .= $_; }
+
+                unless ($multi) {
+                    while (<L>) { $s2source .= $_; }
+                    $compile->($base, $type, $parent, $s2source);
+                } else {
+                    my $curname;
+                    while (<L>) {
+                        if (/^\#NEWLAYER:\s*(\S+)/) {
+                            my $newname = $1;
+                            $compile->($curname, $type, $parent, $s2source);
+                            $curname = $newname;
+                            $s2source = "";
+                        } elsif (/^\#NEWLAYER/) { 
+                            die "Badly formatted \#NEWLAYER line"; 
+                        } else {
+                            $s2source .= $_; 
+                        }
+                    }
+                    $compile->($curname, $type, $parent, $s2source);
+                }
                 close L;
-                
-                my $id = $existing->{$base} ? $existing->{$base}->{'s2lid'} : 0;
-                unless ($id) {
-                    my $parentid = 0;
-                    $parentid = $layer{$parent}->{'id'} unless $type eq "core";
-                    # allocate a new one.
-                    $dbh->do("INSERT INTO s2layers (s2lid, b2lid, userid, type) ".
-                             "VALUES (NULL, $parentid, $sysid, ?)", undef, $type);
-                    die $dbh->errstr if $dbh->err;
-                    $id = $dbh->{'mysql_insertid'};
-                    if ($id) {
-                        $dbh->do("INSERT INTO s2info (s2lid, infokey, value) VALUES (?,'redist_uniq',?)",
-                                 undef, $id, $base);
-                    }
-                }
-                die "Can't generate ID for '$base'" unless $id;
-
-                # remember it so we don't delete it later.
-                $known_id{$id} = 1;
-
-                $layer{$base} = {
-                    'type' => $type,
-                    'parent' => $parent,
-                    'id' => $id,
-                };
-                
-                my $parid = $layer{$parent}->{'id'};
-                print "$base($id) is $type";
-                if ($parid) { print ", parent = $parent($parid)"; };
-                print "\n";
-                
-                # see if source changed
-                my $md5_source = Digest::MD5::md5_hex($s2source);
-                my $md5_exist = $dbh->selectrow_array("SELECT MD5(s2code) FROM s2source WHERE s2lid=?", undef, $id);
-                
-                # skip compilation if source is unchanged and parent wasn't rebuilt.
-                next if $md5_source eq $md5_exist && ! $layer{$parent}->{'built'} && ! $opt_forcebuild;
-
-                # we're going to go ahead and build it.
-                $layer{$base}->{'built'} = 1;
-
-                # compile!
-                my $lay = {
-                    's2lid' => $id,
-                    'userid' => $sysid,
-                    'b2lid' => $parid,
-                    'type' => $type,
-                };
-                my $error = "";
-                my $compiled;
-                my $info;
-                die $error unless LJ::S2::layer_compile($lay, \$error, { 
-                    's2ref' => \$s2source, 
-                    'redist_uniq' => $base,
-                    'compiledref' => \$compiled,
-                    'layerinfo' => \$info,
-                });
-
-                if ($info->{'previews'}) {
-                    my @pvs = split(/\s*\,\s*/, $info->{'previews'});
-                    foreach my $pv (@pvs) {
-                        my $from = "$LD/$pv";
-                        next unless -e $from;
-                        my $dir = File::Basename::dirname($pv);
-                        File::Path::mkpath("$LJ::HOME/htdocs/img/s2preview/$dir");
-                        my $target = "$LJ::HOME/htdocs/img/s2preview/$pv";
-                        File::Copy::copy($from, $target);
-                        my ($w, $h) = Image::Size::imgsize($target);
-                        $pv = "$pv|$w|$h";
-                    }
-                    $dbh->do("REPLACE INTO s2info (s2lid, infokey, value) VALUES (?,?,?)",
-                             undef, $id, '_previews', join(",", @pvs));
-                }
-
-                if ($opt_compiletodisk) {
-                    open (CO, ">$LD/$base.pl") or die;
-                    print CO $compiled;
-                    close CO;
-                }
-
-                # put raw S2 in database.
-                $dbh->do("REPLACE INTO s2source (s2lid, s2code) ".
-                         "VALUES ($id, ?)", undef, $s2source);
-                die $dbh->errstr if $dbh->err;            
-                
             }
             close SL;
         }

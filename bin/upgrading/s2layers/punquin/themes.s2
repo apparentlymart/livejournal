@@ -1,0 +1,79 @@
+#NEWLAYER: punquin/autumn
+layerinfo type = theme;
+layerinfo name = "Autumn";
+layerinfo redist_uniq = "punquin/autumn";
+layerinfo author = "pumpsnail";
+
+set body_bgcolor = "#660033";
+set main_bgcolor = "#990022";
+set main_fgcolor = "#ffffff";
+set subject_color = "#ffffff";
+set title_color = "#ffffff";
+set border_color = "#fcc303";
+set link_color = "#cc6600";
+set vlink_color = "#cc99cc";
+set alink_color = "#ffcc33";
+
+#NEWLAYER: punquin/greyslate
+layerinfo type = theme;
+layerinfo name = "Grey Slate Rain";
+layerinfo redist_uniq = "punquin/greyslate";
+
+set body_bgcolor = "#67698f";
+set main_bgcolor = "#ffffff";
+set main_fgcolor = "#000000";
+set subject_color = "#000000";
+set title_color = "#336699";
+set border_color = "#dddddd";
+set link_color = "#8e80f8";
+set vlink_color = "#c780f8";
+set alink_color = "#f880dd";
+
+#NEWLAYER: punquin/minimal
+layerinfo type = theme;
+layerinfo name = "Minimalist";
+layerinfo redist_uniq = "punquin/minimal";
+
+set body_bgcolor = "#ffffff";
+set main_bgcolor = "#ffffff";
+set main_fgcolor = "#333333";
+set subject_color = "#333333";
+set title_color = "#333333";
+set border_color = "#aaaaaa";
+set link_color = "#8e80f8";
+set vlink_color = "#c780f8";
+set alink_color = "#f880dd";
+
+
+#NEWLAYER: punquin/jewel
+layerinfo type = theme;
+layerinfo name = "Jewel Toned";
+layerinfo redist_uniq = "punquin/jewel";
+
+set body_bgcolor = "#950875";
+set main_bgcolor = "#f3a8e2";
+set main_fgcolor = "#000000";
+set subject_color = "#c00000";
+set title_color = "#336699";
+set border_color = "#dddddd";
+set link_color = "#000050";
+set vlink_color = "#500050";
+set alink_color = "#ff00c0";
+
+
+#NEWLAYER: punquin/bold
+layerinfo type = theme;
+layerinfo name = "Bold";
+layerinfo redist_uniq = "punquin/bold";
+
+set body_bgcolor = "#2501da";
+set main_bgcolor = "#ffffff";
+set main_fgcolor = "#000000";
+set subject_color = "#c00453";
+set title_color = "#f50930";
+set border_color = "#000000";
+set link_color = "#5f5cd5";
+set vlink_color = "#2a2ab2";
+set alink_color = "#4a92eb";
+
+
