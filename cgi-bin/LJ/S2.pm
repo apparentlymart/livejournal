@@ -215,14 +215,9 @@ sub get_public_layers
 sub get_layers_of_user
 {
     my ($u, $is_system) = @_;
-    my $userid;
-    if (ref $u eq "HASH") {
-        $userid = $u->{'userid'}+0;
-    } else {
-        $userid = $u + 0;
-        undef $u;
-    }
+    my $userid = LJ::want_userid($u);
     return undef unless $userid;
+    undef $u unless LJ::isu($u);
 
     return $u->{'_s2layers'} if $u && $u->{'_s2layers'};
 

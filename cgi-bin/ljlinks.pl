@@ -22,7 +22,7 @@ package LJ::Links;
 sub load_linkobj
 {
     my ($u, $use_master) = @_;
-    return unless ref $u eq 'HASH';
+    return unless LJ::isu($u);
 
     # check memcache for linkobj
     my $memkey = [$u->{'userid'}, "linkobj:$u->{'userid'}"];
@@ -67,7 +67,7 @@ sub load_linkobj
 sub save_linkobj
 {
     my ($u, $linkobj) = @_;
-    return unless LJ::isu($u) &&  $linkobj eq 'ARRAY' && $u->writer;
+    return undef unless LJ::isu($u) && ref $linkobj eq 'ARRAY' && $u->writer;
 
     # delete old links, we'll rebuild them shortly
     $u->do("DELETE FROM links WHERE journalid=?", undef, $u->{'userid'});
@@ -102,7 +102,7 @@ sub save_linkobj
 sub make_linkobj_from_form
 {
     my ($u, $post) = @_;
-    return unless ref $u eq 'HASH' && ref $post eq 'HASH';
+    return unless LJ::isu($u) && ref $post eq 'HASH';
 
     my $linkobj = [];
 
@@ -150,7 +150,7 @@ sub make_linkobj_from_form
 sub make_modify_form
 {
     my ($u, $linkobj, $post) = @_;
-    return unless ref $u eq 'HASH' && ref $linkobj eq 'ARRAY' && ref $post eq 'HASH';
+    return unless LJ::isu($u) && ref $linkobj eq 'ARRAY' && ref $post eq 'HASH';
 
     # TODO: parentnum column is not implemented yet
     #   -- it should link to the ordernum of the parent link
