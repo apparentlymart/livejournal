@@ -169,30 +169,24 @@ class Link
     "Return the simple HTML link.";
 }
 
-class RangeInfo
-"Information regarding the selected range"
+class ItemRange
+"Represents a range of items which optionally contain items."
 {
-    var bool all_subitems_displayed
-    "True if the subitems in this range represent the entire set. In this case, all of the URL members are blank.";
+  var bool all_subitems_displayed "True if the subitems in this range represent the entire set. In this case, all of the URL members are blank.";
+  var int num_subitems_displayed "The number of subitems in this range.";
+  var int total "The total number of items that are navigable to.";
+  var int current "The currently-active item.";
+  var int from_subitem "The index of the first subitem in this range.";
+  var int to_subitem "The index of the last subitem in this range.";
+  var int total_subitems "The number of subitems.";
+  var string url_next "URL for the 'next' link.  Blank if there isn't a next URL."; 
+  var string url_prev "URL for the 'previous' link.  Blank if there isn't a previous URL.";
+  var string url_first "URL for the 'first' link.  Blank if already on the first page.";
+  var string url_last "URL for the 'last' link.  Blank if already on the last page.";
+  function builtin url_of(int n) : string "Returns the URL to use to link to the nth item";
 
-    var int current "The currently-active item.";
-    var int from_subitem "The index of the first subitem in this range.";
-    var int num_subitems_displayed "The number of subitems in this range.";
-    var int to_subitem "The index of the last subitem in this range.";
-    var int total "The total number of items that are navigable to.";
-    var int total_subitems "The number of subitems.";
-    var string url_first "URL for the 'first' link. Blank if already on the first page.";
-    var string url_last "URL for the 'last' link. Blank if already on the last page.";
-    var string url_next "URL for the 'next' link. Blank if there isn't a next URL.";
-    var string url_prev "URL for the 'previous' link. Blank if there isn't a previous URL.";
-
-    function builtin url_of(int n) : string 
-    "Returns the URL to use to link to the nth item";
-
-    function print();
-
-    function print(string labeltext) 
-    "Prints the item range links with the given \$labeltext";
+  function print () "Prints the item range links";
+  function print(string labeltext) "Prints the item range links with the given \$labeltext";
 }
 
 ### LJ Specific Classes
@@ -239,31 +233,23 @@ class Entry
     var UserLite poster "Author of the journal entry";
     var UserLite journal "Journal the entry has been posted to";
 
-    var string{} metadata "Meta-data to post.";
+    var string{} metadata "Post metadata.";
     var CommentInfo commentinfo "Comment information on this entry";
 
     var bool new_day "Is this entry on a different day to the previous one?";
     var bool end_day "Is this the last entry of a day?";
     var UserPic userpic "The userpic selected to relate to this entry";
-    var Link{} links "An array of links that the server suggests be linked from this entry, eg to edit an entry if a user is viewing their own journal.";
+    var Link{} links "Hash of links that the server suggests be linked from this entry, eg to edit an entry if a user is viewing their own journal.";
     var Link previousentry "A link to the previous entry in this user's journal";
     var Link nextentry "A link to the next entry in this user's journal";
     var int itemid "Server stored ID number for this entry";
     var string uniqueid "An alphanumeric ID for the entry which is guaranteed to be globally unique (probably username-12354)";
-    var Link permalink "A URL at which this specific entry can be viewed, for linking purposes.";
+    var string permalink_url "A URL at which this specific entry can be viewed, for linking purposes.";
 
     function print_metadata ();
 }
 
-class Properties
-"A collection of properties for a particular 'thing' (user, entry, comment, whatever)"
-{
-    var string key "An identifier for whatever this is the properties for.";
-    var string{} item "A hash of property values, indexed by their names (eg, \$someprops.item{'url'}, or \$up{'frank'}.item{'urlname'})";
-}
-
 ### Userinfo
-
 
 class Friend extends UserLite 
 "Represents a friends or friendof list"
@@ -279,14 +265,13 @@ class User extends UserLite
     var Date birthday "User's birthdate";
     var string websiteurl "URL pointer to user's website";
     var string websitename "'pretty' name of user's website";
-    var string[] emails "Email address of user";
+    var string[] emails "Email address(es) of user";
     var string location "A string representing this user's location as specified in their settings";
     var bool hasinterests "Does the user have any interests?";
     var bool hasfriends "Does the user have any friends?";
     var bool hasfriendof "Does the user have any friendofs? (or are friendofs visible?)";
     var bool hascommunitymembership "Is the user a member of any communities? (or, does this community have any members?)";
     var bool hascommunitieswatched "Does the user watch any communities? (or, is this community watched by anyone?)";
-    var int caps "The user's 'capability class' settings, which should be used with lang_accountname to get an account type";
 
     # Do later: gender information
     # var Gender gender "User's gender"; # Will finally be public information?
@@ -369,9 +354,6 @@ class Page
     "Return a relevant combination of [member[global_title]] and [method[Page::view_title()]]. Should be
     overridden in layout layers.";
     
-    function print_head 
-    "Print extra data into the head section of the output. Should be overridden in the user layer.";
-    
     function print_body 
     "Call from [method[Page::print()]] to render parts of the view that are specific to the view, eg print
     the recent set of journal entries, recent friends entries, or rows of user information";
@@ -408,7 +390,7 @@ class RecentPage extends Page
     var Entry[] entries
     "Array of entries available to be seen by the viewer of the page";
 
-    var RangeInfo range
+    var ItemRange range
     "Indicate what pages of the view are being seen";
 }
 
@@ -438,16 +420,13 @@ class CalendarPageYear
     var int year "Number of the year, eg 2001.";
     var string url "URL to link to for this year.";
     var bool displayed "If this is the year currently being displayed, this will be true.";
-    function print_link() "Print a link (or just text, if displayed=true) to this year.";
 }
 
 class CalendarPageDay 
 "Information on how to link to a day in the calendar"
 {
-    var int number "Day of month number";
-    var Date date "A timeless date value which can be formatted";
-    var bool exists 
-    "If this day does not exist (ie, it's before or after the month) this will be false and all other values will be blank";
+    var int day "Day of month number";
+    var Date date "Date of day";
 
     var int num_entries "Number of entries made on this day";
     var string url "A URL to link to to view the day.";
@@ -473,8 +452,8 @@ class CalendarPageWeek
 class CalendarPageMonth 
 "A month on from the calendar page (compare [class[CalendarMonthPage]])"
 {
-    var bool hasentries "If this is false, you probably don't want to display this month.";
-    var int number "The number of the month";
+    var bool has_entries "If this is false, you probably don't want to display this month.";
+    var int month "The number of the month";
     var int year "The number of the year";
     var CalendarPageWeek[] weeks "An array of the weeks of the month (for ease of building a row-per-week calendar)";
     var string url "A url to link to in order to view this month.";
@@ -562,9 +541,6 @@ login page if the user isn't logged in.";
 function builtin viewer_is_owner() : bool
 "Returns true if the user viewing the page is both logged in, and is the owner of the content in question.
 Useful for returning links to manage information, or edit entries.";
-
-function builtin get_account_name(int caps) : string
-"Get a natural language account name for the given capabilities specifier. (Should be able to know language from backend)";
 
 function builtin get_url(string user, string view) : string 
 "Returns a URL to the specified view for the specified user. Views use the same names as elsewhere. (recent, friends, calendar, userinfo)";
@@ -1033,7 +1009,6 @@ function Page::print() {
     """<html lang="$.lang" dir="$.textdirection">\n<head>\n<title>""";
     print $this->title();
     "</title>\n$.head_content";
-    $this->print_head();
     if ($*font_base != "" or $*font_fallback != "none") {
 
 """<style type="text/css">
@@ -1073,11 +1048,6 @@ function Page::print_viewspecific_info() {
 
 function Page::print_body() {
     """<p>Error: There is no body renderer for viewtype <tt>$.view</tt> defined.</p>""";
-}
-
-function Page::print_head() {
-    # Override me. I resemble GLOBAL_HEAD!
-    return;
 }
 
 function Page::print_entry_poster(Entry e) {
@@ -1182,7 +1152,7 @@ function CalendarPage::print_year_links() {
     """</ul>\n""";
 }
 function CalendarPage::print_month(CalendarPageMonth m) {
-    if (not $m.hasentries) { return; }
+    if (not $m.has_entries) { return; }
     """<table style="margin-left: 25%; margin-right: 25%; margin-top: 1em; margin-bottom: 1em;
        border-collapse: collapse; border: 1px solid;" border="1">\n
        <tr><th colspan="7" style="text-align: center; border: 1px solid;">""";
@@ -1200,7 +1170,7 @@ function CalendarPage::print_month(CalendarPageMonth m) {
     "</table>";
 }
 function CalendarPageMonth::name() : string {
-    var string monthtitle = $*lang_monthname_long[$.number]+" $.year";
+    var string monthtitle = $*lang_monthname_long[$.month]+" $.year";
     return $monthtitle->upperfirst();
 }
 function CalendarPageWeek::print() {
@@ -1216,11 +1186,8 @@ function CalendarPageWeek::print() {
    }
 }
 function CalendarPageDay::print_forcalendar() {
-    if (not $.exists) {  # Is the day before or after the month?
-        return;
-    }
     """<td style="border: 1px solid;">\n""";
-    """<div style="text-align: right;">$.number</div>\n""";
+    """<div style="text-align: right;">$.day</div>\n""";
     if ($.num_entries > 0) {
         """<div style="text-align: center;"><a href="$.url">$.num_entries</a></div>\n""";
     }
@@ -1242,7 +1209,7 @@ function CalendarMonthPage::print_body {
     "</dl>\n";
 }
 function CalendarMonthPageDay::print_label() {
-    print lang_ordinal($.number);
+    print lang_ordinal($.day);
 }
 
 function CalendarMonthPageDay::print_subjectlist() {
@@ -1256,9 +1223,9 @@ function CalendarMonthPageDay::print_subjectlist() {
         }
         "</td><td>";
         if ($e.subject != "") {
-            "<a href=\"$e.permalink.url\">"+striphtml($e.subject)+"</a>";
+            "<a href=\"$e.permalink_url\">"+striphtml($e.subject)+"</a>";
         } else {
-            "<a href=\"$e.permalink.url\" style=\"font-style: italic;\">($*text_nosubject)</a>";
+            "<a href=\"$e.permalink_url\" style=\"font-style: italic;\">($*text_nosubject)</a>";
         }
         "</td></tr>\n";
     }
