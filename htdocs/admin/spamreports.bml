@@ -176,7 +176,10 @@
         my $res = $dbr->selectall_arrayref('SELECT reporttime, journalid, subject, body, ip, posttime, report_type ' .
                                            "FROM spamreports WHERE state=? AND $by=? ORDER BY reporttime DESC LIMIT 1000",
                                             undef, $state, $what);
-        return $error->('No reports found.', $body) unless $res && @$res;
+        unless ($res && @$res) {
+            $body .= "No reports found.";
+            return undef;
+        }
         $body .= '<table>';
         foreach (@$res) {
             my $u2 = LJ::load_userid($_->[1]);
