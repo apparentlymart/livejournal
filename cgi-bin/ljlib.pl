@@ -246,57 +246,6 @@ sub get_newids
                                    $_[0], $_[1]);
 }
 
-# <LJFUNC>
-# class: db
-# name: LJ::dbs_selectrow_array
-# des: Like DBI's selectrow_array, but working on a $dbs preferring the slave.
-# info: Given a dbset and a query, will try to query the slave first.
-#       Falls back to master if not in slave yet.  See also
-#       [func[LJ::dbs_selectrow_hashref]].
-# returns: In scalar context, the first column selected.  In list context,
-#          the entire row.
-# args: dbs, query
-# des-query: The select query to run.
-# </LJFUNC>
-sub dbs_selectrow_array
-{
-    my $dbs = shift;
-    my $query = shift;
-
-    my @dbl = ($dbs->{'dbh'});
-    if ($dbs->{'has_slave'}) { unshift @dbl, $dbs->{'dbr'}; }
-    foreach my $db (@dbl) {
-        my $ans = $db->selectrow_arrayref($query);
-        return wantarray() ? @$ans : $ans->[0] if defined $ans;
-    }
-    return undef;
-}
-
-# <LJFUNC>
-# class: db
-# name: LJ::dbs_selectrow_hashref
-# des: Like DBI's selectrow_hashref, but working on a $dbs preferring the slave.
-# info: Given a dbset and a query, will try to query the slave first.
-#       Falls back to master if not in slave yet.  See also
-#       [func[LJ::dbs_selectrow_array]].
-# returns: Hashref, or undef if no row found in either slave or master.
-# args: dbs, query
-# des-query: The select query to run.
-# </LJFUNC>
-sub dbs_selectrow_hashref
-{
-    my $dbs = shift;
-    my $query = shift;
-
-    my @dbl = ($dbs->{'dbh'});
-    if ($dbs->{'has_slave'}) { unshift @dbl, $dbs->{'dbr'}; }
-    foreach my $db (@dbl) {
-        my $ans = $db->selectrow_hashref($query);
-        return $ans if defined $ans;
-    }
-    return undef;
-}
-
 sub get_groupmask
 {
     my ($journal, $remote) = @_;
@@ -1142,7 +1091,7 @@ sub ago_text
 # name: LJ::get_shared_journals
 # des: Gets an array of shared journals a user has access to.
 # returns: An array of shared journals.
-# args: dbs?, u
+# args: u
 # </LJFUNC>
 sub get_shared_journals
 {
@@ -6513,7 +6462,7 @@ sub text_trim
 # des: convert one item's subject, text and props to UTF8.
 #      item can be an entry or a comment (in which cases props can be
 #      left empty, since there are no 8bit talkprops).
-# args: dbs?, u, subject, text, props
+# args: u, subject, text, props
 # des-u: user hashref of the journal's owner
 # des-subject: ref to the item's subject
 # des-text: ref to the item's text
