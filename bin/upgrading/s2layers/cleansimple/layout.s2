@@ -405,7 +405,7 @@ function Page::print_linklist() {
                 if ($section_open) {
                     println "</ul></li>";
                 }
-                println """<li><span style="font-weight: italic;">$l.title</span>\n<ul>""";
+                println """<li><span style="font-style: italic;">$l.title</span>\n<ul>""";
                 $section_open = true;
             } else {
                 println """<li><a href="$l.url">$l.title</a></li>""";
