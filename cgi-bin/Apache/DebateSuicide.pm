@@ -44,7 +44,8 @@ sub handler
 
     my $self = $stats{$$};
     my $using_k = $sum_uniq >> 10;
-    my $death_at = $ENV{'MAX_LJ_MEM_USE'} || $LJ::SUICIDE_AT;
+    my $death_at = $ENV{'MAX_LJ_MEM_USE'} || $LJ::SUICIDE_AT{$LJ::SERVER_NAME} ||
+        ($LJ::SUICIDE_AT > 1 ? $LJ::SUICIDE_AT : 1000);
     my $death_at_k = $death_at << 10;
 
     if ($sum_uniq > $death_at << 20) {
