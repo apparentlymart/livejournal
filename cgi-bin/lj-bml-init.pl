@@ -58,6 +58,7 @@ use LJ::TextMessage;
 use LJ::TagGenerator ':html4';
 use Digest::MD5 qw(md5_hex); # TODO: don't import
 use MIME::Words;
+use Text::Wrap ();
 use LWP::UserAgent ();
 use Storable;
 use Image::Size ();

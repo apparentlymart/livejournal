@@ -16,11 +16,8 @@ use lib "$ENV{'LJHOME'}/cgi-bin";
 use DBI;
 use DBI::Role;
 use Digest::MD5 ();
-use Text::Wrap ();
 use MIME::Lite ();
 use HTTP::Date ();
-use Unicode::MapUTF8 ();
-use LJ::S2;
 use LJ::MemCache;
 use Time::Local ();
 use Storable ();
@@ -93,20 +90,6 @@ use constant BMAX_EVENT   => 65535;
 use constant CMAX_EVENT   => 65535;
 use constant BMAX_INTEREST => 100;
 use constant CMAX_INTEREST => 50;
-
-# declare some charset aliases
-# we need this at least for cases when the only name supported
-# by MapUTF8.pm isn't recognized by browsers
-# note: newer versions of MapUTF8 know these
-{
-    my %alias = ( 'windows-1251' => 'cp1251',
-		  'windows-1252' => 'cp1252',
-		  'windows-1253' => 'cp1253', );
-    foreach (keys %alias) {
-	next if Unicode::MapUTF8::utf8_supported_charset($_);
-	Unicode::MapUTF8::utf8_charset_alias($_, $alias{$_});
-    }
-}
 
 # declare views (calls into ljviews.pl)
 @LJ::views = qw(lastn friends calendar day);
