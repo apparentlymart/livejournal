@@ -2,14 +2,7 @@
   <bookinfo>
     <title>LiveJournal Programming</title>
     <subtitle>Goathacking For a Better World</subtitle>
-    <abstract>
-      <para>
-        This book covers all topics LiveJournal Programming!
-        <note><simpara>
-          This book is in an EARLY BETA phase. This is by no means complete, and the reader must agree to its initial craziness ;-)
-        </simpara></note>
-      </para>
-    </abstract>
+    <abstract><para>This book covers all topics LiveJournal Programming!</para></abstract>
     &copyright;
     &legalnotice;
   </bookinfo>

@@ -1,77 +1,53 @@
 <chapter id="lj.install.general_setup">
   <title>General Setup</title>
-  <section id="ljhome_var">
-  <title>$LJHOME Environment Variable</title>
-  <para>
-    Be aware that nearly all LiveJournal code depends on the <envar>$LJHOME</envar>
-    environment variable being set to the top-level directory that LiveJournal is installed at.
-  </para>
-  <para>
-    <xref linkend="lj.install.apache_setup" /> has the necessary directives to make
-    sure the web code always has $LJHOME set, but if you're running LJ maintenance
-    commands from a terminal, you'll need to make sure <envar>$LJHOME</envar> is set
-    for yourself.
-  </para>
-  <para>
-    For example, we'll assume that you've installed LiveJournal on an operating system
-    using the Bourne Shell: The easiest way to set <envar>$LJHOME</envar> is to put
-    the following in your <filename>~/.bash_profile</filename>:
-  </para>
-  <example>
-    <title>Bash: Setting <envar>$LJHOME</envar></title>
+  <!-- A departure from the name scheme, but its an easier reference -->
+  <section id="lj.install.ljhome">
+    <title>$LJHOME Environment Variable</title>
     <para>
+      Be aware that nearly all LiveJournal code depends on the <envar>$LJHOME</envar>
+      environment variable being set to the top-level directory that LiveJournal is installed at.
+    </para>
+    <para>
+      <xref linkend="lj.install.apache_setup" /> has the necessary directives to make
+      sure the web code always has $LJHOME set, but if you're running LJ maintenance
+      commands from a terminal, you'll need to make sure <envar>$LJHOME</envar> is set
+      for yourself.
+    </para>
+    <para>
+      For example, we'll assume that you've installed LiveJournal on an operating system
+      using the Bourne Shell: The easiest way to set <envar>$LJHOME</envar> is to put
+      the following in your <filename>~/.bash_profile</filename>:
+    </para>
+    <informalexample>
 <screen><literal>LJHOME=/home/lj; export LJHOME</literal></screen>
-    </para>
-    <para>
-      To test that it's set:
-    </para>
-    <para>
+
+      <para>
+        To test that it's set:
+      </para>
+
 <screen><prompt>$</prompt> <userinput>. ~/.bash_profile</userinput>
 <prompt>$</prompt> <userinput>echo $LJHOME</userinput></screen>
-    </para>
-    <para>
-      If the above was successful, it should print out <literal>/home/lj</literal>
-      (or whatever the value of <envar>$LJHOME</envar> may be).
-    </para>
-  </example>
-  <note>
-    <title>Other shells</title>
-    <para>
-      If you use another shell interface, you might be able to see what it reads on
-      start-up by looking for the file: <filename>~/.profile</filename>. Please
-      refer to the documentation provided with your shell, which can usually be
-      found by typing:
-      <screen><prompt>$</prompt> <userinput>help</userinput></screen>
-    </para>
-  </note>
-  <note>
-    <title>Windows Environment Variables</title>
-    <para>
-      Defining a environment variable varies on the different Windows OS systems
-      <footnote id="win32_env_vars"><para>For more information, please consult 
-      <citetitle pubwork="article"><ulink url="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vccore98/HTML/_core_using_environment_variables.asp">Set Environment Variables</ulink></citetitle>
-      </para></footnote>:
-      <procedure><title>Windows 95/98/ME</title>
-        <step><para>Add an environment variable titled LJHOME to the
-          <filename>autoexec.bat</filename> file, and define the variable with your 
-          install directory, such as <computeroutput>LJHOME=C:\lj</computeroutput>
-        </para></step>
-        <step><para>Restart Windows for the change to take effect.</para></step>
-      </procedure>
-      <procedure><title>Windows NT/2000/XP</title>
-        <step><para>On the Start menu, point to Settings, then click Control Panel.</para></step>
-        <step><para>In the Control Panel, double click System.</para></step>
-        <step><para>In the System Properties dialog box, click the Environment tab, and specify an 
-          environment variable named LJHOME, with the value of your install directory
-          (<quote><filename>C:\lj</filename></quote> or something similar).
-        </para></step>
-        <step><para>Exit the development environment and restart it for the changed environment variable to take effect.</para></step> 
-      </procedure>
-    </para>
-  </note>
+
+      <para>
+        If the above was successful, it should print out <literal>/home/lj</literal>
+        (or whatever the value of <envar>$LJHOME</envar> may be).
+      </para>
+    </informalexample>
+    <note>
+      <title>Other shells</title>
+      <para>
+        If you use another shell interface, you might be able to see what it reads on
+        start-up by looking for the file: <filename>~/.profile</filename>. Please
+        refer to the documentation provided with your shell, which can usually be
+        found by typing:
+      </para>
+
+<screen><prompt>$</prompt> <userinput>help</userinput></screen>
+
+    </note>
   </section>
   <section id="lj.install.install_files">
-  <title>Installing the files</title>
+    <title>Installing the files</title>
     <para>
       The typical directory to install LiveJournal is
       <filename>/home/lj</filename>, but it is not a requirement at
@@ -88,12 +64,14 @@
         where your LiveJournal installation will reside. This needs to be the same
         directory that the environment variable <envar>$LJHOME</envar> is set to,
         otherwise your installation will not work properly. Consult 
-        <xref linkend="ljhome_var" /> for more information on setting <envar>$LJHOME</envar>.
+        <xref linkend="lj.install.ljhome" /> for more information on setting <envar>$LJHOME</envar>.
       </para>
-      <example><title>Creating the <envar>$LJHOME</envar> directory:</title><para>
+
+<example><title>Creating the <envar>$LJHOME</envar> directory:</title>
 <screen><prompt>#</prompt> <userinput>mkdir <replaceable>/home/lj</replaceable></userinput>
 <prompt>#</prompt> <userinput>chown <replaceable>lj.lj /home/lj</replaceable></userinput></screen>
-      </para></example>
+</example>
+
     </formalpara>
     <note>
       <title>Using Tarballs</title>
@@ -142,3 +120,9 @@
     </note>
   </section>
 </chapter>
+<!--
+Local Variables:
+mode:sgml
+sgml-parent-document: ("index.xml" "part" "chapter")
+End:
+-->

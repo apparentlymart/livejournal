@@ -93,10 +93,16 @@ PerlRequire  /home/lj/cgi-bin/modperl.pl
       This will work by itself (assuming mod_perl statically linked),
       or you can just tack on parts to your existing config.
     </para>
-      <para><filename>/home/lj</filename> is only an example directory. You'll want to use the same directory used in <xref linkend="ljhome_var" />.</para>
+      <para><filename>/home/lj</filename> is only an example directory. You'll want to use the same directory used in <xref linkend="lj.install.ljhome" />.</para>
     <para>
       If you'd like, you can put those last three lines in a VirtualHost block.
     </para>
     </note>
   </section>
 </chapter>
+<!--
+Local Variables:
+mode:sgml
+sgml-parent-document: ("index.xml" "part" "chapter")
+End:
+-->

@@ -25,6 +25,12 @@
 
 <xsl:param name="navig.showtitles">1</xsl:param>
 
+<xsl:param name="html.cleanup" select="1"/>
+
+<xsl:param name="refentry.generate.title" select="1"/>
+
+<xsl:param name="refentry.generate.name" select="0"/>
+
 <xsl:template name="anchor">
   <xsl:param name="node" select="."/>
   <xsl:param name="conditional" select="1"/>

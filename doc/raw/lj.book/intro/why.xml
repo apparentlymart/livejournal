@@ -1,7 +1,4 @@
 <chapter id="lj.intro.why_use">
-  <chapterinfo>
-    <title>Why Use LiveJournal?</title>
-  </chapterinfo>
   <title>Why Use LiveJournal?</title>
   <para>
     LiveJournal is an open source software project, with many uses
@@ -74,3 +71,9 @@
     </itemizedlist>
   </para>
 </chapter>
+<!--
+Local Variables:
+mode:sgml
+sgml-parent-document: ("index.xml" "part" "chapter")
+End:
+-->

@@ -19,3 +19,9 @@
   &lj.features.index;
   &appx.gfdl;
 </book>
+<!--
+Local Variables:
+mode:sgml
+sgml-parent-document: ("../index.xml" "set" "book")
+End:
+-->

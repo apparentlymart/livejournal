@@ -1,4 +1,4 @@
-  <part id="ljp.csp.protocol" status="prelim">
+<part id="ljp.csp.protocol" status="prelim">
   <title>Client/Server Protocol</title>
   <partintro>
     <para>
@@ -20,4 +20,11 @@
   &ljp.csp.xml-rpc.index;
   &ljp.csp.versions;
   &ljp.csp.proplist;
-  </part>
+  &ljp.csp.appx.faq;
+</part>
+<!--
+Local Variables:
+mode:sgml
+sgml-parent-document: ("../index.xml" "book" "part")
+End:
+-->

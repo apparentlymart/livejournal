@@ -5,7 +5,7 @@
 
  my %special = (
      'logprops' => '<xref linkend="ljp.csp.proplist" />',
-     'ljhome' => '<link linkend="ljhome_var"><envar>$ENV{\'LJHOME\'}</envar></link>',
+     'ljhome' => '<envar><link linkend="lj.install.ljhome">\$LJHOME</link></envar>',
      'helpurls' => '<xref linkend="lj.install.ljconfig.helpurls" />',
      'disabled' => '<xref linkend="lj.install.ljconfig.disabled" />',
  );

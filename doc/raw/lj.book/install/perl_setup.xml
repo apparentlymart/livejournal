@@ -1,6 +1,6 @@
 <chapter id="lj.install.perl_setup">
   <title>Installing and Setting up Perl</title>
-  <section id="perl_install">
+  <section id="lj.install.perl_setup.install">
     <title>Installing Perl</title>
     <para>
       Perl offers distrobutions for many operating aystems, including Win32 and 
@@ -37,103 +37,71 @@
       on your machine in order to work. Please read the author-provided README files for each
       module before proceeding further.  
     </para></note>
-    <para>
-      If you are unfamilar with installing modules, the simplest method is to enter
-      the following command from a root shell prompt:
-    </para>
-    <para>
-      <screen><prompt>#</prompt> <userinput>perl -MCPAN -e shell</userinput></screen>
-    </para>
+    <formalpara><title>Debian Install</title><para>
+      If you're using Debian this should get every required module:
+    </para></formalpara>
+
+<screen><prompt>#</prompt> <userinput>apt-get install libdbi-perl libdbd-mysql-perl libdigest-md5-perl \
+libimage-size-perl libmime-lite-perl libmime-perl \
+libmime-base64-perl liburi-perl libhtml-tagset-perl \
+libhtml-parser-perl libwww-perl libmailtools-perl \
+libunicode-maputf8-perl libstorable-perl</userinput></screen>
+
+    <para>For the optional modules just run:</para>
+
+<screen><prompt>#</prompt> <userinput>apt-get install libcompress-zlib-perl libnet-perl \
+libgd-graph-perl libproc-process-perl libsoap-lite-perl \
+libxml-rss-perl libstring-crc32-perl</userinput></screen>
+        
+    <formalpara><title>Using CPAN</title><para>
+      Otherwise you'll want to use CPAN to install the modules by performing the following steps:
+    </para></formalpara>
+
+    <para>From the root prompt on your server, invoke the CPAN shell:</para>
+
+<screen><prompt>#</prompt> <userinput>perl -MCPAN -e shell</userinput></screen>
+
     <para>
       Once the Perl interpreter has loaded (and been configured), you can install
       modules by issuing the command <literal>install <replaceable>MODULENAME</replaceable></literal>.
     </para>
-    <para>
-      The first thing you should do is upgrade your CPAN:
-    </para>
-    <para>
-      <screen><prompt>cpan></prompt> <userinput>install Bundle::CPAN</userinput></screen>
-    </para>
-    <para>
-      Once it's done, type:
-    </para>
-    <para>
+    <para>The first thing you should do is upgrade your CPAN:</para>
+
+<screen><prompt>cpan></prompt> <userinput>install Bundle::CPAN</userinput></screen>
+
+    <para>Once it's done, type:</para>
+
       <screen><prompt>cpan></prompt> <userinput>reload cpan</userinput></screen>
-    </para>
-    <para>
-      Now, install the following modules:
-    </para>
+
+    <para>Now, install the following modules:</para>
     <itemizedlist>
+      <title>Required</title>
       <listitem><simpara>DBD::mysql</simpara></listitem>
       <listitem><simpara>DBI</simpara></listitem>
       <listitem><simpara>Digest::MD5</simpara></listitem>
       <listitem><simpara>Image::Size</simpara></listitem>
       <listitem><simpara>MIME::Lite</simpara></listitem>
-      <listitem><simpara>Compress::Zlib</simpara></listitem>
+      <listitem><simpara>MIME::Words</simpara></listitem>
       <listitem><simpara>MIME::Base64</simpara></listitem>
       <listitem><simpara>URI::URL</simpara></listitem>
       <listitem><simpara>HTML::Tagset</simpara></listitem>
       <listitem><simpara>HTML::Parser</simpara></listitem>
       <listitem><simpara>LWP::Simple</simpara></listitem>
       <listitem><simpara>LWP::UserAgent</simpara></listitem>
-      <listitem><simpara>GD</simpara></listitem>
-      <listitem><simpara>GD::Graph</simpara></listitem>
-      <listitem><simpara>GD::Text</simpara></listitem>
-      <listitem><simpara>Bundle::Mysql</simpara></listitem>
       <listitem><simpara>Mail::Address</simpara></listitem>
+      <listitem><simpara>Unicode::MapUTF8</simpara></listitem>
+      <listitem><simpara>Storable</simpara></listitem>
+    </itemizedlist>
+    <itemizedlist>
+      <title>Optional</title>
+      <listitem><simpara>Compress::Zlib</simpara></listitem>
+      <listitem><simpara>Net::SMTP</simpara></listitem>
+      <listitem><simpara>GD::Graph</simpara></listitem>
       <listitem><simpara>Proc::ProcessTable</simpara></listitem>
       <listitem><simpara>SOAP::Lite</simpara></listitem>
-      <listitem><simpara>Unicode::MapUTF8</simpara></listitem>
+      <listitem><simpara>XML::RSS</simpara></listitem>
+      <listitem><simpara>String::CRC32</simpara></listitem>
     </itemizedlist>
-    <formalpara><title>Debian Install</title><para>
-      If you're using Debian this should get everything:
-    </para></formalpara>
-    <para>
-  <screen><prompt>#</prompt> <userinput>apt-get install libwww-perl libmime-perl libmime-lite-perl \
-  libsoap-lite-perl libgd-perl liburi-perl \
-  libimage-size-perl libdbd-mysql-perl libdbi-perl \
-  libnet-perl libdigest-md5-perl libgd-graph-perl \
-  libgd-text-perl libcompress-zlib-perl \
-  libunicode-maputf8-perl libproc-process-perl libapache-mod-perl</userinput></screen>
-    </para>
-    <formalpara><title>Windows Install</title>
-      <para>
-        If using ActiveState's Win32 Perl installation, we recommend using 
-        Perl Package Manager
-        <footnote id="ppm.faq"><para>
-          Consult <citetitle pubwork="article"><ulink url="http://aspn.activestate.com/ASPN/Products/ActivePerl-5.6/faq/ActivePerl-faq2.html">
-          The <abbrev>PPM</abbrev> <abbrev>FAQ</abbrev></ulink></citetitle>
-        </para></footnote> to install the following modules:
-        <itemizedlist>
-          <listitem><simpara>libwww-perl</simpara></listitem>
-          <listitem><simpara>DBD::mysql</simpara></listitem>
-          <listitem><simpara>DBI</simpara></listitem>
-          <listitem><simpara>Digest::MD5</simpara></listitem>
-          <listitem><simpara>Image::Size</simpara></listitem>
-          <listitem><simpara>MIME::Lite</simpara></listitem>
-          <listitem><simpara>MIME::Base64</simpara></listitem>
-          <listitem><simpara>HTML::Tagset</simpara></listitem>
-          <listitem><simpara>HTML::Parser</simpara></listitem>
-          <listitem><simpara>GD</simpara></listitem>
-          <listitem><simpara>GDGraph</simpara></listitem>
-          <listitem><simpara>GDTextUtil</simpara></listitem>
-          <listitem><simpara>MailTools</simpara></listitem>
-          <listitem><simpara>SOAP::Lite</simpara></listitem>
-          <listitem><simpara>Unicode::String</simpara></listitem>
-          <listitem><simpara>Unicode::Map</simpara></listitem>
-        </itemizedlist>
-      </para>
-      <para>
-        The following packages are currently <emphasis role="bold">Not</emphasis> available through PPM. 
-        You will need to have a make utility and a C++ compiler:
-        <itemizedlist>
-          <listitem><simpara>Compress::Zlib</simpara></listitem>
-          <listitem><simpara>Jcode</simpara></listitem>
-          <listitem><simpara>Unicode::Map8</simpara></listitem>
-          <listitem><simpara>Unicode::MapUTF8</simpara></listitem>
-        </itemizedlist>
-      </para>
-    </formalpara>
     <note>
       <para>
         There used to be a few custom <filename>LJ::</filename> modules that
@@ -147,11 +115,17 @@
     <important><para>
       To ensure that you have installed the necessary modules, be sure to
       run the included tool: <filename><envar>$LJHOME</envar>/bin/checkconfig.pl</filename>. 
-      If <filename>checkconfig.pl</filename> doesn't detect all of the
+      If <application>checkconfig.pl</application> doesn't detect all of the
       required modules, it will tell you which ones you are missing. Note that this tool will
       fail after checking for modules, because it will also check for a database connection, which
       hasn't been set up yet. This will be fixed later when we add options to 
-      <filename>checkconfig.pl</filename> to detect for specific sections of installation.
+      <application>checkconfig.pl</application> to detect for specific sections of installation.
     </para></important>
   </section>
 </chapter>
+<!--
+Local Variables:
+mode:sgml
+sgml-parent-document: ("index.xml" "part" "chapter")
+End:
+-->

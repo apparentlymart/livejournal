@@ -1,7 +1,4 @@
 <chapter id="lj.install.finishing">
-  <chapterinfo>
-    <title>Finishing Up</title>
-  </chapterinfo>
   <title>Finishing Up</title>
   <para>
     You should now just about have a working LiveJournal installation. 
@@ -17,31 +14,39 @@
   </formalpara>
   <formalpara>
     <title>Start things up</title>
-    <para>
-      If you haven't restarted Apache, you'll want to do that now:
-      <screen><prompt>#</prompt> <userinput>apachectl stop</userinput>
-<prompt>#</prompt> <userinput>apachectl start</userinput>
-</screen>
-      Note that doing a "graceful" or "restart" is not guaranteed to work.  The LiveJournal code doesn't implement any mod_perl restart handlers, and weird things have been reported to happen using <userinput>apachectl restart</userinput>.
+    <para>If you haven't restarted Apache, you'll want to do that now:</para>
+
+<screen><prompt>#</prompt> <userinput>apachectl stop</userinput>
+<prompt>#</prompt> <userinput>apachectl start</userinput></screen>
+    
+    <para>Note that doing a "graceful" or "restart" is not guaranteed to work.  The LiveJournal code
+      doesn't implement any mod_perl restart handlers, and weird things have been reported to happen
+      using <userinput>apachectl restart</userinput>.
     </para>
   </formalpara>
   <formalpara>
-  <title>The system user</title>
-  <para>
-    To administrate your site properly, you will need to create the system user that'll have privileges to give privileges to other users:
-    <screen><prompt>$</prompt> <userinput>$LJHOME/bin/upgrading/make_system.pl</userinput></screen>
-  </para>
-  <para>
-    It'll prompt you for the password to use for the system account and then sets it all up.
-  </para>
-  <para>
-    You now have the ability to login to your LJ site as user "system" with the password you set and then grant priviledges from the admin section to other users:
-  </para>
-  <para>
-    http://your-lj-server/admin/priv/
-  </para>
+    <title>The system user</title>
+    <para>
+      To administrate your site properly, you will need to create the system user that'll have
+      privileges to give privileges to other users:
+    </para>
+
+<screen><prompt>$</prompt> <userinput>$LJHOME/bin/upgrading/make_system.pl</userinput></screen>
+
+    <para>It'll prompt you for the password to use for the system account and then sets it all up.</para>
+    <para>You now have the ability to login to your LJ site as user <quote>system</quote> with the password
+      you set and then grant priviledges from the admin section to other users:
+    </para>
+    <para>http://your-lj-server/admin/priv/</para>
   </formalpara>
   <para>
-    If you have any questions, join the <ulink url="http://www.livejournal.com/users/lj_everywhere/info">"lj_everywhere"</ulink> community on LiveJournal.com and post your questions.  We'd love to help you out.
+    If you have any questions, join the <ulink url="http://www.livejournal.com/users/lj_everywhere/info">"lj_everywhere"</ulink>
+    community on LiveJournal.com and post your questions.  We'd love to help you out.
   </para>
 </chapter>
+<!--
+Local Variables:
+mode:sgml
+sgml-parent-document: ("index.xml" "part" "chapter")
+End:
+-->

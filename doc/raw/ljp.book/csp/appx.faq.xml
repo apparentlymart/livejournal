@@ -1,0 +1,32 @@
+<appendix id="ljp.csp.faq">
+  <title>Frequently Asked Questions</title>
+  <qandaset>
+    <qandaentry id="ljp.csp.faq.urlitemid">
+      <question><simpara>How do I calculate the protocol itemid to get the <quote>URL</quote> itemid?</simpara></question>
+      <answer><simpara>For protocol methods that return an <varname>itemid</varname>, there is also another variable returned called <varname>anum</varname>.
+        To calculate the public URL itemid, use the following formula: <inlineequation>(itemid * 256) + anum</inlineequation>.
+      </simpara></answer>
+    </qandaentry>
+    <qandaentry id="ljp.csp.faq.datalimits">
+      <question><simpara>What are the limitations on post and user information data?</simpara></question>
+      <answer><para>To help calculate portions of your client, here are the upper limits of client affected data:
+        <itemizedlist>
+          <listitem><simpara>Posts: 65,535 bytes</simpara></listitem>
+          <listitem><simpara>Entry Properties (Currents): 255 bytes or 100 characters</simpara></listitem>
+          <listitem><simpara>Entry Subjects: 255 bytes or 100 characters</simpara></listitem>
+          <listitem><simpara>User Picture Keywords: 40 characters</simpara></listitem>
+          <listitem><simpara>Usernames: 15 characters</simpara></listitem>
+          <listitem><simpara>Name: 50 characters</simpara></listitem>
+          <listitem><simpara>Webpage URL: 255 bytes</simpara></listitem>
+          <listitem><simpara>Webpage Name: 255 bytes</simpara></listitem>
+        </itemizedlist>
+      </para></answer>
+    </qandaentry>
+  </qandaset>
+</appendix>
+<!--
+Local Variables:
+mode:sgml
+sgml-parent-document: ("index.xml" "part" "appendix")
+End:
+-->
