@@ -326,7 +326,10 @@ sub clean
             }
         }
         elsif ($type eq "PI") {
-            $newdata .= "<?$token->[1]>";
+            my $tok = $token->[1];
+            $tok =~ s/</&lt;/g;
+            $tok =~ s/>/&gt;/g;
+            $newdata .= "<?$tok>";
         }
         else {
             $newdata .= "<!-- OTHER: " . $type . "-->\n";
