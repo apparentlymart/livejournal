@@ -2610,11 +2610,12 @@ sub img
     my $i = $LJ::Img::img{$ic};
     if ($type eq "") {
         return "<img src=\"$LJ::IMGPREFIX$i->{'src'}\" width=\"$i->{'width'}\" ".
-            "height=\"$i->{'height'}\" alt=\"$i->{'alt'}\" border='0'$attrs />";
+            "height=\"$i->{'height'}\" alt=\"$i->{'alt'}\" title=\"$i->{'alt'}\" ".
+            "border='0'$attrs />";
     }
     if ($type eq "input") {
         return "<input type=\"image\" src=\"$LJ::IMGPREFIX$i->{'src'}\" ".
-            "width=\"$i->{'width'}\" height=\"$i->{'height'}\" ".
+            "width=\"$i->{'width'}\" height=\"$i->{'height'}\" title=\"$i->{'alt'}\" ".
             "alt=\"$i->{'alt'}\" border='0'$attrs />";
     }
     return "<b>XXX</b>";
