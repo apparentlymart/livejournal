@@ -102,7 +102,7 @@ sub trans
         return $journal_view->(undef);
     }
 
-    if ($LJ::OTHER_VHOSTS && $host ne $LJ::DOMAIN
+    if ($LJ::OTHER_VHOSTS && $host && $host ne $LJ::DOMAIN
         && $host ne $LJ::DOMAIN_WEB)
     {
         my $dbr = LJ::get_dbh("slave", "master");
