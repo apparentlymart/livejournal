@@ -8,8 +8,6 @@ AWAITING MERGE:
 
 SYSADMIN THINGS:
 
-* bugzilla
-
 * netsaint improvements
 
 SHERM:
@@ -26,11 +24,7 @@ AVVA:
 
 -- username renames
 
--- screened comments
-
 -- moderated communities
-
--- releases
 
 DOCUMENTATION: (JPROULX)
 
