@@ -41,8 +41,7 @@ bind (FH, $sin) || die $!;
 
 listen(FH, 10);
 
-my $SERVE = 1;
-while ($SERVE)
+while (LJ::start_request())
 {
     accept(CL, FH) || die $!;
 
@@ -63,7 +62,7 @@ You can make queries in the following form:
 	next;
     }
 
-    my $dbr = LJ::get_dbh("slave");
+    my $dbr = LJ::get_dbh("slave", "master");
 
     if ($line =~ /^(\w{1,15})$/) {
 	# userinfo!

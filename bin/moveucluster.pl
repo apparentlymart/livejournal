@@ -23,8 +23,10 @@ die "Non-existent user $user.\n" unless $u;
 
 die "Can't move back to legacy cluster 0\n" unless $dclust;
 
-my $dbch = LJ::get_dbh("cluster$dclust!");
+my $dbch = LJ::get_dbh("cluster$dclust");
 die "Undefined or down cluster \#$dclust\n" unless $dbch;
+
+my $separate_cluster = LJ::use_diff_db("master", "cluster$dclust");
 
 $dbh->{'RaiseError'} = 1;
 $dbch->{'RaiseError'} = 1;
@@ -85,17 +87,20 @@ my $stmsg = sub {
     print $msg;
 };
 
-# check main tables on destination cluster for pre-existing data.  note that we
-# don't check *text or *prop, etc... as those don't impact display of data, they
-# only waste space.  but nothing should be there anyway, only if something's really
-# fucked, so this'll catch that case and prevent possible screwup:
-#die "Data in destination cluster's 'log2'\n" if
-#    $dbch->selectrow_array("SELECT COUNT(*) FROM log2 WHERE journalid=$userid");
-#die "Data in destination cluster's 'talk2'\n" if
-#    $dbch->selectrow_array("SELECT COUNT(*) FROM talk2 WHERE journalid=$userid");
 
 if ($sclust == 0) 
 {
+    # do bio stuff
+    {
+	my $bio = $dbh->selectrow_array("SELECT bio FROM userbio WHERE userid=$userid");
+	my $bytes = length($bio);
+	$dbch->do("REPLACE INTO dudata (userid, area, areaid, bytes) VALUES ($userid, 'B', 0, $bytes)");
+	if ($separate_cluster) {
+	    $bio = $dbh->quote($bio);
+	    $dbch->do("REPLACE INTO userbio (userid, bio) VALUES ($userid, $bio)");
+	}
+    }
+
     my @itemids = reverse @{$dbh->selectcol_arrayref("SELECT itemid FROM log ".
 						     "WHERE ownerid=$u->{'userid'} ".
 						     "ORDER BY ownerid, rlogtime")};
@@ -104,7 +109,7 @@ if ($sclust == 0)
     my $done = 0;
     my $stime = time();
     print "Total: $todo\n";
-   
+
     # moving time, journal item at a time, and everything recursively under it
     foreach my $itemid (@itemids) {
 	eval {
@@ -134,6 +139,11 @@ if ($sclust == 0)
 	my $totaltime = $elapsed * (1 / $percent);
 	my $timeremain = int($totaltime - $elapsed);
 	$stmsg->(sprintf "$user: delete $done/$todo (%.2f%%) +${elapsed}s -${timeremain}s\n", 100*$percent);
+    }
+
+    # delete bio from source, if necessary
+    if ($separate_cluster) {
+	$dbh->do("DELETE FROM userbio WHERE userid=$userid");
     }
 
     $dbh->do("UPDATE user SET clusterid=$dclust WHERE userid=$userid");

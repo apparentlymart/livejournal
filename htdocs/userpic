@@ -14,7 +14,7 @@ use vars qw($dbh $dro);
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
 $dbh = LJ::get_dbh("master");
-if ($LJ::DBINFO{'slavecount'}) { $dro = LJ::get_dbh("slave"); }
+$dro = LJ::get_dbh("slave");
 
 sub make_dir
 {
@@ -157,7 +157,7 @@ my $lastconn;
 	## every 10 seconds, revalidate/reconnect our db connections
 	if (($now - $lastconn) > 10) {
 	    $dbh = LJ::get_dbh("master");
-	    if ($LJ::DBINFO{'slavecount'}) { $dro = LJ::get_dbh("slave"); }
+	    $dro = LJ::get_dbh("slave"); 
 	    $lastconn = $now;
 	}
 

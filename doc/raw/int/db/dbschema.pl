@@ -5,7 +5,7 @@ use strict;
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
-my $dbr = LJ::get_dbh("slave");
+my $dbr = LJ::get_dbh("slave", "master");
 my $sth;
 
 sub magic_links
