@@ -22,11 +22,7 @@ body<=
     return $ret;
  }
 
- # columns of our table, excluding username
- my @attribs = ('member', 'post', 'admin');
-
- # when moderation is done, we can replace the above with:
- #my @attribs = ('member', 'post', 'moderate', 'admin');
+ my @allattribs = ('member', 'post', 'moderate', 'preapprove', 'admin');
 
  my $mode = $POST{'mode'} || "";
 
@@ -34,6 +30,7 @@ body<=
     my $cid = $POST{'cid'};
     my $cname = LJ::get_username($dbs, $cid);
     my @userids = split(',', $POST{'ids'});
+    my @saveattribs = split(',', $POST{'attribs'});
     unless ($cid) {
        $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'.error.nocomm'} p?>";
        return $ret;
@@ -45,14 +42,14 @@ body<=
 
     my %add = ();
     my %delete = ();
-    foreach (@attribs, 'moderate') {
+    foreach (@allattribs) {
        $add{$_} = {};
        $delete{$_} = {};
     }
 
     foreach my $id (@userids) {
        $id = $id + 0;      
-       foreach (@attribs) {
+       foreach (@saveattribs) {
            if ($POST{"edit_${id}_$_"}) {
                $add{$_}->{$id} = 1;
            } else {
@@ -86,6 +83,10 @@ body<=
        $in = join(',', keys %{$delete{'moderate'}}); 
        $dbh->do("DELETE FROM reluser WHERE userid=$cid AND type='M' AND targetid IN ($in)");
     }
+    if (%{$delete{'preapprove'}}) {
+       $in = join(',', keys %{$delete{'preapprove'}}); 
+       $dbh->do("DELETE FROM reluser WHERE userid=$cid AND type='N' AND targetid IN ($in)");
+    }
 
     # perform additions
     if (%{$add{'member'}}) {
@@ -102,6 +103,10 @@ body<=
     }
     if (%{$add{'moderate'}}) {
        $in = join(',', map { "($cid, $_, 'M')" } keys %{$add{'moderate'}});
+       $dbh->do("REPLACE INTO reluser (userid,targetid,type) VALUES $in");
+    }
+    if (%{$add{'preapprove'}}) {
+       $in = join(',', map { "($cid, $_, 'N')" } keys %{$add{'preapprove'}});
        $dbh->do("REPLACE INTO reluser (userid,targetid,type) VALUES $in");
     }
 
@@ -131,6 +136,13 @@ body<=
     return $ret;
  }
 
+ # columns of our table, excluding username
+ my @attribs = ('member', 'post');
+ LJ::load_user_props($dbs, $c, 'moderated');
+ push @attribs, ('moderate', 'preapprove')
+     if $c->{'moderated'};
+ push @attribs, 'admin';
+
  # now get lists of: members, admins, able to post, moderators
  my $cid = $c->{'userid'};
  my %users = ();
@@ -144,13 +156,13 @@ body<=
     $users{$id}->{'member'} = 1;
  }
 
- my $sth = $dbr->prepare("SELECT r.targetid, r.type, u.user FROM reluser r, user u WHERE r.targetid = u.userid AND r.userid=$cid AND r.type IN ('A','P','M')");
+ my $sth = $dbr->prepare("SELECT r.targetid, r.type, u.user FROM reluser r, user u WHERE r.targetid = u.userid AND r.userid=$cid AND r.type IN ('A','P','M','N')");
  $sth->execute;
 
  while (my ($id, $type, $user) = $sth->fetchrow_array) {
     $users{$id}->{'userid'} = $id;
     $users{$id}->{'name'} = $user;
-    my $key = {'A'=>'admin','P'=>'post','M'=>'moderate'}->{$type};
+    my $key = {'A'=>'admin','P'=>'post','M'=>'moderate','N'=>'preapprove'}->{$type};
     $users{$id}->{$key} = 1;
  }
 
@@ -162,6 +174,7 @@ body<=
  $cmp = sub {$b->{'admin'} <=> $a->{'admin'}} if $method eq 'admin';
  $cmp = sub {$b->{'post'} <=> $a->{'post'}} if $method eq 'post';
  $cmp = sub {$b->{'moderate'} <=> $a->{'moderate'}} if $method eq 'moderate';
+ $cmp = sub {$b->{'preapprove'} <=> $a->{'preapprove'}} if $method eq 'preapprove';
 
  my @users = sort $cmp (values %users);
 
@@ -179,7 +192,7 @@ body<=
  my $sortlink = BML::get_uri() . "?comm=$cname&sort=";
  $ret .= "<br /><center><table border='2' cellpadding='5'><tr>" .
  	"<td><a href='${sortlink}name'>$ML{'.key.name'}</a></td>";
- $ret .= "<td><a href='${sortlink}$_'>".$ML{".key.$_"}."</a></td>" for (@attribs);
+ $ret .= "<td><a href='${sortlink}$_'><b>".$ML{".key.$_"}."</b></a></td>" for (@attribs);
  $ret .= "</tr>";
 
  foreach(@users) {
@@ -194,6 +207,7 @@ body<=
  $ret .= "</table>";
  $ret .= "<input type='hidden' name='cid' value='$cid'>";
  $ret .= LJ::html_hidden('ids', join(',', map { $_->{'userid'}} @users));
+ $ret .= LJ::html_hidden('attribs', join(',', @attribs));
  $ret .= "<input type='hidden' name='mode' value='save'>";
  $ret .= "<p><input type='submit' value='$ML{'.update'}'></p>";
  $ret .= "</form>";

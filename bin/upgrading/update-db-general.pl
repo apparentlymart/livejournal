@@ -7,7 +7,7 @@ mark_clustered("useridmap", "userbio", "cmdbuffer", "dudata",
                "talk2", "talkprop2", "talktext2", "talkleft",
                "userpicblob2", "events",
                "ratelog", "loginstall", "sessions", "sessions_data",
-               "fvcache", "s1usercache",
+               "fvcache", "s1usercache", "modlog", "modblob",
                );
 
 register_tablecreate("adopt", <<'EOC');
@@ -1388,6 +1388,7 @@ EOC
 # 'B' means targetid is banned in userid
 # 'P' means targetid can post to userid
 # 'M' means targetid can moderate the community userid
+# 'N' means targetid is preapproved to post to community userid w/o moderation
 # new types to be added here
 
 register_tablecreate("reluser", <<'EOC');
@@ -1439,6 +1440,29 @@ CREATE TABLE clustermove (
    timestart INT UNSIGNED,
    timedone  INT UNSIGNED,
    sdeleted  ENUM('1','0')
+)
+EOC
+
+# moderated community post summary info
+register_tablecreate("modlog", <<'EOC');
+CREATE TABLE modlog (
+  journalid  INT UNSIGNED NOT NULL,
+  modid      MEDIUMINT UNSIGNED NOT NULL auto_increment,
+  PRIMARY KEY (journalid, modid),
+  posterid   INT UNSIGNED NOT NULL,
+  subject    CHAR(30),
+  logtime    DATETIME,
+  KEY (journalid, logtime)
+)
+EOC
+
+# moderated community post Storable object (all props/options)
+register_tablecreate("modblob", <<'EOC');
+CREATE TABLE modtext (
+  journalid  INT UNSIGNED NOT NULL,
+  modid      INT UNSIGNED NOT NULL,
+  PRIMARY KEY (journalid, modid),
+  request_stor    MEDIUMBLOB
 )
 EOC
 

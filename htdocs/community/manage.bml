@@ -21,35 +21,53 @@ body<=
  }
 
  $ret .= "<?h1 $ML{'.commlist.header'} h1?><?p $ML{'.commlist.text'} p?>";
- $ret .= "<ul>";
+ $ret .= "<div style='margin: 15px 0 15px 40px'>";
 
+ my %show;
+
+ # what communities does remote 
  my $cids = LJ::load_rel_target($dbs, $remote, 'A');
+ my %admin;
+ if ($cids) { foreach (@$cids) { $admin{$_} = $show{$_} = 1; } }
 
- if ($cids && @$cids) {
-    my $in = join(',', @$cids);
+ # keep track of what communities remote moderates
+ my $mods = LJ::load_rel_target($dbs, $remote, 'M');
+ my %mods; 
+ if ($mods) { foreach (@$mods) { $mods{$_} = $show{$_} = 1; } }
+
+ if (%show) {
+    my $in = join(',', keys %show);
     my %names = ();
  
-    my $sth = $dbr->prepare("SELECT u.user, u.name FROM user u, community c ".
+    my $sth = $dbr->prepare("SELECT u.userid, u.user, u.name FROM user u, community c ".
                             "WHERE u.userid IN ($in) AND u.userid=c.userid ".
                             "AND u.statusvis='V'");
     $sth->execute;
-    while (my ($user, $name) = $sth->fetchrow_array) {
-       $names{$user} = $name;
+    while (my ($uid, $user, $name) = $sth->fetchrow_array) {
+        $names{$uid} = [ $user, $name ];
     }
+
     $ret .= "<table cellpadding='5'><tr><td>$ML{'.commlist.username'}</td>" .
        "<td>$ML{'.commlist.title'}</td><td>$ML{'.commlist.actions'}</td></tr>";
-    foreach (sort keys %names) {
-       $ret .= "<tr><td><?ljcomm $_ ljcomm?></td><td>" . LJ::eall($names{$_}) . 
-          "</td><td>" . BML::ml('.commlist.actsettings',{'link'=>"/community/settings.bml?comm=$_"}) .
-          "&nbsp;&nbsp;&nbsp;" . BML::ml('.commlist.actmembers',{'link'=>"/community/members.bml?comm=$_"}) .
-          "</td></tr>";
+    foreach my $id (sort { $names{$a}->[1] cmp $names{$b}->[1] } keys %names) {
+        my $user = $names{$id}->[0];
+        my $name = $names{$id}->[1];
+        $ret .= "<tr><td><?ljcomm $user ljcomm?></td><td>" . LJ::eall($name) . "</td><td>";
+        if ($admin{$id}) {
+            $ret .= BML::ml('.commlist.actsettings',{'link'=>"/community/settings.bml?comm=$user"}) . "&nbsp;&nbsp;";
+            $ret .= BML::ml('.commlist.actmembers',{'link'=>"/community/members.bml?comm=$user"}) . "&nbsp;&nbsp;";
+        }
+        if ($mods{$id}) {
+            $ret .= "<b>[<a href='/community/moderate.bml?comm=$user'>$ML{'.commlist.actmoderate'}</a>]</b>&nbsp;&nbsp;";
+        }
+        $ret .= "</td></tr>";
     }
     $ret .= "</table>";
  } else {
     $ret .= "$ML{'.commlist.none'}";
  }
 
- $ret .= "</ul>";
+ $ret .= "</div>";
 
  $ret .= "<?h1 $ML{'.create.header'} h1?>";
  $ret .= "<?p " . BML::ml('.create.text', {'link'=>'/community/settings.bml?mode=create'}) . " p?>";

@@ -136,6 +136,12 @@ if ($remote && ! LJ::get_cap($remote, "can_post")) {
      $FORM{'mode'} = "postevent";
      delete $FORM{'clientversion'};
      LJ::do_request($dbs, \%FORM, \%res, $flags);
+
+     my $updmessage = "";
+     if ($res{'success'} eq "OK" && $res{'message'}) {
+         $updmessage = LJ::eall($res{'message'});
+         $updmessage =~ s!(&quot;|&\#39;)?(https?://\S+[a-zA-Z0-9_/&=\-])!$1 ? $& : "<a href=\"$2\">$2</a>"!eg;
+     }
      
      $$body .= "<?h1 $ML{'.updating'} h1?>\n";
      if ($res{'success'} eq "OK") {
@@ -156,6 +162,9 @@ if ($remote && ! LJ::get_cap($remote, "can_post")) {
          if ($message) {
              $$body .= "<?h1 $ML{'.loggingin'} h1?>\n";
              $$body .= "<?p $ML{'.servermsg'} p?><div style='margin-left: 40px'><b>$message</b></div>";
+         }
+         if ($updmessage) {
+             $$body .= "<?p $ML{'.updmsg'} p?><div style='margin-left: 40px'><b>$updmessage</b></div>";
          }
      } else {
          $$body .= "<?p $ML{'.error.update'} <UL><LI><B><?_eh $res{'errmsg'} _eh?></B></UL> p?>";
