@@ -1,508 +1,696 @@
 <?_code
+{
+    use strict;
+    use vars qw(%FORM %RULES %TYPENAME $title $body);
 
- # Brad Whitaker <lj user=whitaker>
+    # init title and body variables
+    $title = 'Poll Creator';
+    $body = '';
 
- # init title and body variables
- $title = "Poll Creator";
- $body = "";
+    # some rules used for error checking
+    %RULES = (
+              "elements" => {
+                  "max" => 15,			 # maximum total number of elements allowed
+              },
+              "items" => {
+                  "min" => 1,			 # minimum number of options
+                  "start" => 5,			 # number of items shown at start
+                  "max" => 15,			 # max number of options
+                  "maxlength" =>  500,		 # max length of an option's textual value, min is implicitly 0
+                  "more" => 5,			 # number of items to add when requesting more
+              },
+              "question" => {
+                  "maxlength" => 1000,		 # maximum length of question allowed
+              },
+              "pollname" => {
+                  "maxlength" => 1000,           # maximum length of poll name allowed
+              },
+              "text" => {
+                  "size" => 30,			 # default size of a text element
+                  "maxlength" => 50,		 # default maxlength of a text element
+              },
+              "size" => {
+                  "min" => 1,			 # minimum allowed size value for a text element
+                  "max" => 100,			 # maximum allowed size value for a text element
+              },
+              "maxlength" => {
+                  "min" => 1,			 # minimum allowed maxlength value for a text element
+                  "max" => 255,			 # maximum allowed maxlength value for a text element
+              },
+              "scale" => {
+                  "from" => 1,			 # default from value for a scale
+                  "to" => 10,			 # default to value for a scale
+                  "by" => 1,			 # default by value for a scale
+                  "maxitems" => 20,		 # maximum number of items allowed in a scale
+              },
+              );
 
- # some rules used for error checking
- # these values are pulled out of my ass.  suggestions?
- %RULES = (
-           "elements" => {
-               "max" => 15,			 # maximum total number of elements allowed
-           },
-           "items" => {
-               "min" => 1,			 # minimum number of options
-               "start" => 5,			 # number of items shown at start
-               "max" => 15,			 # max number of options
-               "maxlength" =>  500,		 # max length of an option's textual value, min is implicitly 0
-               "more" => 5			 # number of items to add when requesting more
-           },
-           "question" => {
-               "maxlength" => 10000		 # maximum length of question allowed
-           },
-           "text" => {
-               "size" => 30,			 # default size of a text element
-               "maxlength" => 50		 # default maxlength of a text element
-           },
-           "size" => {
-               "min" => 1,			 # minimum allowed size value for a text element
-               "max" => 100			 # maximum allowed size value for a text element
-           },
-           "maxlength" => {
-               "min" => 1,			 # minimum allowed maxlength value for a text element
-               "max" => 255			 # maximum allowed maxlength value for a text element
-           },
-           "scale" => {
-               "from" => 1,			 # default from value for a scale
-               "to" => 10,			 # default to value for a scale
-               "by" => 1,			 # default by value for a scale
-               "maxitems" => 20			 # maximum number of items allowed in a scale
-           }
- );
+    # type name mappings
+    %TYPENAME = ( "radio" => "Radio Buttons",
+                  "check" => "Check Boxes",
+                  "drop" => "Drop-down box",
+                  "text" => "Text entry",
+                  "scale" => "Scale",
+                  );
 
- %TYPENAME = ( "radio" => "Radio Buttons",
-               "check" => "Check Boxes",
-               "drop" => "Drop-down box",
-               "text" => "Text entry",
-               "scale" => "Scale" );
+    #######################################################
+    #
+    # Function definitions
+    #
 
- # take a default data hash and merge _ separated %FORM keys into it
- sub build_poll {
-    my $formref = shift;
-
-    my %errors;
-    my $error_count = 0;
-
-    # initialize the hash
-    my %poll = (
-                "name" => "",
-                "count" => "0",
-                "whoview" => "all",
-                "whovote" => "all",
-                "pq" => [],
+    # builds a %poll object
+    sub build_poll 
+    {
+        my ($form, $poll, $action, $errors, $error_count) = @_;
+        
+        # initialize the hash
+        %$poll = (
+            "name" => "",
+            "count" => "0",
+            "whoview" => "all",
+            "whovote" => "all",
+            "pq" => [],
         );
+        
+        # make sure they don't plug in an outrageous count
+        $form->{'count'} = 0 if $form->{'count'} < 0;
+        $form->{'count'} = $RULES{'elements'}->{'max'} 
+            if $form->{'count'} > $RULES{'elements'}->{'max'};
 
-    # this seems kinda unnecessary, but I want it for consistency.
-    foreach (qw(count name whoview whovote)) {
-        $poll{$_} = $formref->{$_} if ($formref->{$_});
-    }
-
-    # make sure they don't plug in an outrageous count
-    $poll{'count'} = ($poll{'count'} > $RULES{'elements'}{'max'}) ? $RULES{'elements'}{'max'} : $poll{'count'};
-
-    # go through the count to build our hash
-    for ( my $x = 0; $x <= $poll{'count'}; $x++ ) {
-        # find our action type, if any
-        foreach (qw(move delete insert request)) {
-
-                # images stick an .x and .y on inputs
-                my $do = ($formref->{"$_:$x:do.x"}) ? "$_:$x:do.x" : "$_:$x:do";
-
-                # catches everything but move
-                if ($formref->{$do} ne '') {
-                    # catches deletes, requests, etc
-                    if (lc($formref->{$do}) ne 'insert')  {
-                        $action{'type'} = $_;
-                        $action{'item'} = $x;
-                        $action{'val'} = lc($formref->{$do});
-                    # catches inserts
-                    } elsif ($formref->{"$_:$x"} =~ /^(radio|check|drop|text|scale)$/)  {
-                        $action{'type'} = $_;
-                        $action{'item'} = $x;
-                        $action{'val'} = lc($formref->{"$_:$x"});
-                    }
-                # catches moves
-                } elsif ($formref->{"$_:$x:up.x"} =~ /\d+/ || $formref->{"$_:$x:dn.x"} =~ /\d+/) {
-                        $action{'type'} = $_;
-                        $action{'item'} = $x;
-                        $action{'val'} = 'up' if ($formref->{"$_:$x:up.x"} ne '');
-                        $action{'val'} = 'dn' if ($formref->{"$_:$x:dn.x"} ne '');
-                }
-
+        # form properties
+        foreach (qw(count name whoview whovote)) {
+            $poll->{$_} = $form->{$_} if $form->{$_};
         }
+                
+        # go through the count to build our hash
+        for ( my $q = 0; $q <= $poll->{'count'}; $q++ ) {
+ 
+            # sanify 'opts' form elements at this level 
+            # so we don't have to do it later
+            my $opts = "pq_${q}_opts";
+            $form->{$opts} = 0 if $form->{$opts} && $form->{$opts} < 0;
+            $form->{$opts} = $RULES{'items'}->{'max'} 
+                if $form->{$opts} > $RULES{'items'}->{'max'};
 
-        # temp hash and array.. seems ghetto to me that I have to do this
-        my (%h, @a);
-        my $chkd_scale = 0;
+            # if there is an action, note it in our %action hash
+            foreach my $act (qw(move delete insert request)) {
+                
+                # images stick an .x and .y on inputs
+                my $do = $form->{"$act:$q:do.x"} ? "$act:$q:do.x" : "$act:$q:do";
+                
+                # catches everything but move
+                if ($form->{$do}) {
 
-        foreach (qw(question type opts size maxlength from to by)) {
-            if (defined $formref->{"pq_$x\_$_"}) {
-                my $val = $formref->{"pq_$x\_$_"};
+                    # catches deletes, requests, etc
+                    if (lc($form->{$do}) ne 'insert')  {
+                        $action->{'type'} = $act;
+                        $action->{'item'} = $q;
+                        $action->{'val'} = lc($form->{$do});
 
-                # invalid type?
-                if ($_ eq 'type' && $val !~ /^(radio|check|drop|text|scale)$/) {
-                        next;  # ignore it
+                    # catches inserts
+                    } elsif ($form->{"$act:$q"} =~ /^(radio|check|drop|text|scale)$/)  {
+                        $action->{'type'} = $act;
+                        $action->{'item'} = $q;
+                        $action->{'val'} = lc($form->{"$act:$q"});
+                    }
+
+                    next;
                 }
 
+                # catches moves
+                if ($form->{"$act:$q:up.x"} =~ /\d+/ || $form->{"$act:$q:dn.x"} =~ /\d+/) {
+                    $action->{'type'} = $act;
+                    $action->{'item'} = $q;
+                    $action->{'val'} = 'up' if $form->{"$act:$q:up.x"};
+                    $action->{'val'} = 'dn' if $form->{"$act:$q:dn.x"};
+
+                    next;
+                }
+                
+            }
+            
+            # temp hash and array
+            my (%tmphash, @tmparray);
+            
+            # validate question attributes
+            foreach my $atr (qw(type question opts size maxlength from to by)) {
+                my $val = $form->{"pq_${q}_$atr"};
+                next unless defined $val;
+
+                # ignore invalid types?
+                next if $atr eq 'type' && $val !~ /^(radio|check|drop|text|scale)$/;
+                    
                 # question too long/nonexistant
-                if ($_ eq 'question' && $val eq '') {
-                        $h{$_} = $val;
-                        $errors[$x]->{'question'} = "You need text explaining what your question is about";
-                        $error_count++;
-                } elsif ($_ eq 'question' && length($val) > $RULES{'question'}{'maxlength'}) {
-                        $h{$_} = substr($val, 0, $RULES{'question'}{'maxlength'});
+                if ($atr eq 'question') {
+
+                    if (! $val) {
+                        $tmphash{$atr} = $val;
+                        $errors->[$q]->{$atr} = "You need text explaining your question";
+                        $$error_count++;
+
+                    } elsif (length($val) > $RULES{$atr}->{'maxlength'}) {
+                        $tmphash{$atr} = substr($val, 0, $RULES{$atr}->{'maxlength'});
+                    } else {
+                        $tmphash{$atr} = $val;
+                    }
+
+                    next;
                 }
 
                 # opts too long?
-                elsif ($_ eq 'opts') {
-                        $h{$_} = int($val);
-                        if ($h{$_} > $RULES{'items'}{'max'}) {
-                                $h{$_} = $RULES{'items'}{'max'}; # don't bother with notification
-                        }
+                if ($atr eq 'opts') {
+                    $tmphash{$atr} = int($val);
+                    next;
+                }
                 
                 # size too short/long?
-                } elsif ($_ eq 'size') {
-                        $h{$_} = int($val);
-                        if ($h{$_} > $RULES{'size'}{'max'} || $h{$_} < $RULES{'size'}{'min'}) {
-                                $errors[$x]->{'size'} = "Size attribute on lj-pq text tags must be an integer from $RULES{'size'}{'min'}\-$RULES{'size'}{'max'}";
-                                $error_count++;
-                        }
+                if ($atr eq 'size') {
+                    $tmphash{$atr} = int($val);
+
+                    if ($tmphash{$atr} > $RULES{$atr}->{'max'} || $tmphash{$atr} < $RULES{$atr}->{'min'}) {
+                        $errors->[$q]->{$atr} = "Size attribute on lj-pq text tags must be an integer from $RULES{$atr}->{'min'}\-$RULES{$atr}->{'max'}";
+                        $$error_count++;
+                    }
+
+                    next;
+                }
 
                 # maxlength too short/long?
-                } elsif ($_ eq 'maxlength') {
-                        $h{$_} = int($val);
-                        if ($h{$_} > $RULES{'maxlength'}{'max'} || $h{$_} < $RULES{'maxlength'}{'min'}) {
-                                $errors[$x]->{'maxlength'} = "Maxlength attribute on lj-pq text tags must be an integer from $RULES{'maxlength'}{'min'}-$RULES{'maxlength'}{'max'}";
-                                $error_count++;
-                        }
+                if ($atr eq 'maxlength') {
+                    $tmphash{$atr} = int($val);
+
+                    if ($tmphash{$atr} > $RULES{$atr}->{'max'} || $tmphash{$atr} < $RULES{$atr}->{'min'}) {
+                        $errors->[$q]->{$atr} = "Maxlength attribute on lj-pq text tags must be an integer from $RULES{'maxlength'}->{'min'}-$RULES{'maxlength'}->{'max'}";
+                        $$error_count++;
+                    }
+
+                    next;
+                }
 
                 # from/to/by -- scale
-                } elsif ($_ eq 'from' || $_ eq 'by' || $_ eq 'to' && $chkd_scale == 0) {
-                        $chkd_scale = 1;
+                if ($atr eq 'from') {
+                    $tmphash{'to'} = int($form->{"pq_${q}_to"}) || 0;
+                    $tmphash{'from'} = int($form->{"pq_${q}_from"}) || 0;
+                    $tmphash{'by'} = int($form->{"pq_${q}_by"}) >= 1 ? int($form->{"pq_${q}_by"}) : 1;
                         
-                        $h{'to'} = int($formref->{"pq_$x\_to"});
-                        $h{'from'} = int($formref->{"pq_$x\_from"});
-                        $h{'by'} = (int($formref->{"pq_$x\_by"}) >= 1) ? int($formref->{"pq_$x\_by"}) : 1;
+                    if ($tmphash{'by'} < $RULES{'by'}->{'min'}) {
+                        $errors->[$q]->{'by'} = "Scale increment must be at least $RULES{'by'}->{'min'}";
+                        $$error_count++;
+                    }
 
-                        if ($h{'by'} < $RULES{'by'}{'min'}) {
-                                $errors[$x]->{'by'} = "Scale increment must be at least $RULES{'by'}{'min'}";
-                                $error_count++;
-                        }
-                        if ($h{'from'} >= $h{'to'}) {
-                                $errors[$x]->{'from'} = "Scale 'from' value must be less than 'to' value.";
-                                $error_count++;
-                        }
-                        if ((($h{'to'}-$h{'from'})/$h{'by'}) > $RULES{'scale'}{'maxitems'}) {
-                                $errors[$x]->{'scale'} = "Limit of $RULES{'scale'}{'maxitems'} selections (to-from)/by > 20";
-                                $error_count++;
-                        }
+                    if ($tmphash{'from'} >= $tmphash{'to'}) {
+                        $errors->[$q]->{'from'} = "Scale 'from' value must be less than 'to' value.";
+                        $$error_count++;
+                    }
 
+                    if ((($tmphash{'to'}-$tmphash{'from'})/$tmphash{'by'}) > $RULES{'scale'}->{'maxitems'}) {
+                        $errors->[$q]->{'to'} = "Limit of $RULES{'scale'}->{'maxitems'} selections (to-from)/by > 20";
+                        $$error_count++;
+                    }
+
+                    next;
+                }
+                        
                 # otherwise, let it by.
-                } else {
-                        $h{$_} = $val;
-                }
+                $tmphash{$atr} = $val;
             }
-        }
+            
+            my $num_opts = 0;
+            for (my $o = 0; $o < $tmphash{'opts'}; $o++) {
+                next unless $form->{"pq_${q}_opt_$o"};
 
-        my $num_opts = 0;
-        for ($y = 0; $y < $h{'opts'}; $y++) {
-            if ($formref->{"pq_$x\_opt_$y"} ne '') {
-                if (length($formref->{"pq_$x\_opt_$y"}) > $RULES{'items'}{'maxlength'}) {
-                        $a[$y] = substr($formref->{"pq_$x\_opt_$y"}, 0, $RULES{'items'}{'maxlength'});
-                        $errors[$x]->{$y}->{'items'} = "The text of your option is too long and has been truncated.";
-                        $error_count++;
+                if (length($form->{"pq_${q}_opt_$o"}) > $RULES{'items'}->{'maxlength'}) {
+                    $tmparray[$o] = substr($form->{"pq_${q}_opt_$o"}, 0, $RULES{'items'}->{'maxlength'});
+                    $errors->[$q]->{$o}->{'items'} = "The text of your option is too long and has been truncated.";
+                    $$error_count++;
                 } else {
-                           $a[$y] = $formref->{"pq_$x\_opt_$y"};
+                    # no change necessary
+                    $tmparray[$o] = $form->{"pq_${q}_opt_$o"};
                 }
+
                 $num_opts++;
-            } else {
-                $a[$y] = '';
             }
-        }
-        if ($num_opts < $RULES{'items'}{'min'} && $h{'type'} =~ /^(drop|check|radio)$/) {
-                $errors[$x]->{'items'} = "All items cannot be blank.";
-                $error_count++;
-        }
-
-        $h{'opt'} = \@a;
-        @{$poll{'pq'}}[$x] = \%h;
-
-    }
-
-    return (\%poll, \%action, \@errors, \$error_count);
- }
-
- # go through form keys and perform action specified my action:order:do commands
- sub do_actions {
-    my ($poll, $action, $errors) = @_;
-
-    if ($action->{'type'} eq "move") {
-
-         sub swap {
-           return (@_[1], @_[0]);
-        }
-
-        my $adj;
-
-        # move up
-        if ($action->{'val'} eq 'up' && ($action->{'item'} - 1) >= 0) {
-                $adj = $action->{'item'} - 1;
-        # move down
-        } elsif ($action->{'val'} eq 'dn' && ($action->{'item'} + 1) <= $poll->{'count'}) {
-                $adj = $action->{'item'} + 1;
-        }
-
-        # actually do the swapping
-        ($poll->{'pq'}->[$adj], $poll->{'pq'}->[$action->{'item'}]) = &swap($poll->{'pq'}->[$adj], $poll->{'pq'}->[$action->{'item'}]);
-
-        # make sure that if two poll items get swapped, we don't leave their errors behind
-        ($errors->[$adj], $errors->[$action->{'item'}]) = &swap($errors->[$adj], $errors->[$action->{'item'}]);
-
-    # delete
-    } elsif ($action->{'type'} eq "delete") {
-        splice(@{$poll->{"pq"}}, $action->{'item'}, 1);
-        splice(@{$errors}, $action->{'item'}, 1);
-        $poll->{'count'}--;
-
-    # request more options
-    } elsif ($action->{'type'} eq "request") {
-        # do request shit
-        @{$poll->{"pq"}}[$action->{'item'}]->{'opts'} += $RULES{'items'}{'more'};
-        @{$poll->{'pq'}}[$action->{'item'}]->{'opts'} = $RULES{'items'}{'max'} if (@{$poll->{'pq'}}[$action->{'item'}]->{'opts'} > $RULES{'items'}{'max'});
-
-    # insert
-    } elsif ($action->{'type'} eq "insert") {       
-
-        $poll->{'count'}++;
-
-        splice (
-                            @{$poll->{'pq'}},
-                            $action->{'item'}, 
-                            0,
-                            { 
-                                "question" => "", 
-                                "type" => $action->{"val"}, 
-                                "opts" => ($action->{"val"} =~ /^(radio|drop|check)$/) ? $RULES{'items'}{'start'} : 0,
-                                "opt" => []
-                            }
-               );
-
-        # need to be sure to increment the %errors hash when we insert.  we do when we move.
-        splice ( @{$errors}, $action->{'item'}, 0, '' );
-    }
-
-    return ($poll, $errors);
- }
-
- # return html to display the creation form
- sub make_form {
-    my ($poll, $errors, $error_count) = @_;
-
-    $ret .= "<form method=\"post\" action='create.bml'>\n";
-    $ret .= "<input type=\"hidden\" name=\"count\" value=\"" . $poll->{'count'} . "\">\n";
-
-    if ($$error_count > 0) {
-        $ret .= "<blockquote><b>You have one or more errors with your poll.  Please scroll down for more details.</b></blockquote>\n";
-    }
-
-    # basic info -- name, whovote, whoview
-    $ret .= "<p><?h1 Basic Poll Info h1?><hr size=\"2\" width=\"60%\" align=\"left\">\n";
-
-    $ret .= "<p>Who can view this poll?<br><select name=\"whoview\">\n";
-    foreach ( qw(all friends none) ) {
-        $ret .= "<option value=\"$_\"";
-        $ret .= " selected='1'" if ($poll->{'whoview'} eq $_);
-        $ret .= ">" . ucfirst($_) . "\n";
-    }
-    $ret .= "</select>\n\n";
-    
-    $ret .= "<p>Who can vote in this poll?<br><select name=\"whovote\">\n";
-    foreach ( qw(all friends) ) {
-        $ret .= "<option value=\"$_\"";
-        $ret .= " selected='1'" if ($poll->{'whovote'} eq $_);
-        $ret .= ">" . ucfirst($_) . "\n";
-    }
-    $ret .= "</select>\n\n";
-
-    $ret .= "<p>Poll Name: <i>(opt.)</i><br><input type=\"text\" name=\"name\" value=\"" . LJ::ehtml($poll->{"name"}) . "\">\n<p>"; 
-
-    # if they have no elements, we need to manually give them an insert option
-    $ret .= &insert_element(0, $poll);
-
-    # go through our elements in order
-    for ($x = 0; $x < $poll->{'count'}; $x++) {
-        my $elem = @{$poll->{'pq'}}[$x];
-
-        $ret .= "<p><table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" width=\"600\"><tr>\n";
-        $ret .= "<td align=\"left\" colspan=\"2\">\n";
-        $ret .= "<?h1 Question #" . ($x + 1) . " - " . $TYPENAME{$elem->{'type'}} . " h1?><br><br>\n";
-        $ret .= "</td></tr>\n";
-
-        $ret .= "<tr><td align=\"left\" width=\"15%\">\n";
-
-        # can't move the first element up
-        if ($x > 0) {
-            $ret .= LJ::img("btn_up", "input", "move:$x:up");
-        }
-
-        # delete button
-        $ret .= "<br>" . LJ::img("btn_del", "input", "delete:$x:do");
-
-        # can't move the last element down
-        if ($x < ($poll->{'count'} - 1)) {
-            $ret .= "<br>" . LJ::img("btn_down", "input", "move:$x:dn");
-        }
-
-        $ret .= "</td>\n";
-        $ret .= "<td align=\"left\" valign=\"top\">\n";
-
-        # question text and hidden fields
-        $ret .= "<input type=\"hidden\" name=\"pq_$x\_type\" value=\"$elem->{'type'}\">\n";
-        $ret .= "<input type=\"hidden\" name=\"pq_$x\_opts\" value=\"$elem->{'opts'}\">\n";
-        $ret .= "<p><p>Question:<br><input type=\"text\" size=\"30\" name=\"pq_$x\_question\" value=\"" . LJ::ehtml($elem->{"question"}) . "\">\n";
-        $ret .= "<br><font size=\"1\"><b>[" . $errors->[$x]->{'question'} ."]</b></font>\n" if ($errors->[$x]->{'question'});
-
-        $ret .= "<blockquote>\n";
-        if ($elem->{'type'} =~ /^(radio|check|drop)$/) {
-            # spit out "items" -- choices for drop-down, radio, etc questions
-            $ret .= "<br>Options:\n";
-            for ($y = 0; $y < $elem->{'opts'}; $y++) {
-                $ret .= "<br><input type=\"text\" name=\"pq_$x\_opt_$y\" value=\"" . LJ::ehtml(@{$elem->{'opt'}}[$y]) . "\" maxlength=\"$RULES{'items'}{'maxlength'}\" size=\"20\">\n";
-                $ret .= "<br><font size=\"1\"><b>[" . $errors->[$x]->{$y}->{'items'} . "]</b></font>\n" if ($errors->[$x]->{$y}->{"items"});
-            }
-            $ret .= ($elem->{'opts'} < $RULES{'items'}{'max'}) ? "<br><input type=\"submit\" name=\"request:$x:do\" value=\"More >>\">\n" : "<br><?de [Option limit reached] de?>\n";
-        } elsif ($elem->{'type'} eq 'text') {
-            foreach ( qw(size maxlength) ) {
-                $ret .= "" . ucfirst($_) . ": <input type=\"text\" name=\"pq_$x\_$_\" value=\"";
-                $ret .= LJ::ehtml($elem->{$_} || $RULES{'text'}{$_});
-                $ret .= "\" size=\"3\" maxlength=\"3\">\n";
-            }
-            foreach ( qw(size maxlength) ) {
-                $ret .= "<br><font size=\"1\"><b>[" . $errors->[$x]->{$_} . "]</b></font>\n" if ($errors->[$x]->{$_});
-            }
-        } elsif ($elem->{'type'} eq 'scale') {
-            foreach ( qw(from to by) ) {
-                $ret .= " " . ucfirst($_) . ": <input type=\"text\" name=\"pq_$x\_$_\" value=\"";
-                my $relem = defined $elem->{$_} ? $elem->{$_} : $RULES{'scale'}{$_};
-                $ret .= LJ::ehtml($relem);
-                $ret .= "\" size=\"3\" maxlength=\"9\">\n";
-            }
-            foreach ( qw(from by scale) ) {
-                $ret .= "<br><font size=\"1\"><b>[" . $errors->[$x]->{$_} . "]</b></font>\n" if ($errors->[$x]->{$_});
-            }
-        }
-            $ret .= "<br><font size=\"1\"><b>[" . $errors->[$x]->{'items'} . "]</b></font>\n" if ($errors->[$x]->{'items'});
         
-        $ret .= "</blockquote>\n</td></tr>\n</table>";
+            # too few options specified?
+            if ($num_opts < $RULES{'items'}->{'min'} && $tmphash{'type'} =~ /^(drop|check|radio)$/) {
+                $errors->[$q]->{'items'} = "All items cannot be blank.";
+                $$error_count++;
+            }
+        
+            $tmphash{'opt'} = \@tmparray;
+            $poll->{'pq'}->[$q] = \%tmphash;
+        }
+        
+        # all arguments are refs, nothing to return
+        return;
+    }
+    
 
-        # add a new element unless they're already at the max
-        $ret .= &insert_element($x + 1, $poll);
+    # apply action notes from %action hash to our %poll object
+    sub do_actions {
+        my ($poll, $action, $errors, $error_count) = @_;
+        
+        if ($action->{'type'} eq "move") {
+            
+            my $adj;
+            
+            # move up
+            if ($action->{'val'} eq 'up' && ($action->{'item'} - 1) >= 0) {
+                $adj = $action->{'item'} - 1;
 
+            # move down
+            } elsif ($action->{'val'} eq 'dn' && ($action->{'item'} + 1) <= $poll->{'count'}) {
+                $adj = $action->{'item'} + 1;
+            }
+            
+            # actually do the swapping
+            ($poll->{'pq'}->[$adj], $poll->{'pq'}->[$action->{'item'}]) 
+                = swap($poll->{'pq'}->[$adj], $poll->{'pq'}->[$action->{'item'}]);
+            
+            # make sure that if two poll items get swapped, we don't leave their errors behind
+            ($errors->[$adj], $errors->[$action->{'item'}]) 
+                = swap($errors->[$adj], $errors->[$action->{'item'}]);
+            
+        # delete
+        } elsif ($action->{'type'} eq "delete") {
+
+            # delete from poll and decrement question count
+            splice(@{$poll->{"pq"}}, $action->{'item'}, 1);
+            $poll->{'count'}--;
+
+            # delete from errors and decrement error count if necessary
+            $$error_count-- if $errors->[$action->{'item'}];
+            splice(@{$errors}, $action->{'item'}, 1);
+            
+        # request more options
+        } elsif ($action->{'type'} eq "request") {
+            # do request shit
+            $poll->{"pq"}->[$action->{'item'}]->{'opts'} += $RULES{'items'}->{'more'};
+            $poll->{'pq'}->[$action->{'item'}]->{'opts'} = $RULES{'items'}->{'max'} 
+                if @{$poll->{'pq'}}[$action->{'item'}]->{'opts'} > $RULES{'items'}->{'max'};
+            
+        # insert
+        } elsif ($action->{'type'} eq "insert") {
+            
+            $poll->{'count'}++;
+
+            splice (
+                    @{$poll->{'pq'}},
+                    $action->{'item'}, 
+                    0,
+                    { 
+                        "question" => '', 
+                        "type" => $action->{"val"}, 
+                        "opts" => ($action->{"val"} =~ /^(radio|drop|check)$/) ? $RULES{'items'}->{'start'} : 0,
+                        "opt" => [],
+                    }
+                    );
+
+            # need to be sure to increment the %errors hash when we insert.  we do when we move.
+            splice ( @{$errors}, $action->{'item'}, 0 );
+        }
+
+        return;
     }
 
-    # select box to insert element... get reused, so it's in a sub
-    sub insert_element {
+    sub swap
+    {
+        return (@_[1], @_[0]);
+    }
+
+    # generate edit form to be displayed to user
+    sub make_form 
+    {
+        my ($poll, $errors, $error_count) = @_;
+        
+        my $ret;
+
+        ### Form Header
+
+        $ret .= "<form method='post' action='create.bml'>\n";
+        $ret .= LJ::html_hidden('count', $poll->{'count'});
+        
+        if ($$error_count > 0) {
+            $ret .= "<div style='margin: 10px 0 20px 40px'><b>You have one or more errors with your poll.  Please scroll down for more details.</b></div\n";
+        }
+        
+        ### Poll Properties -- name, whovote, whoview
+
+        $ret .= "<?h1 Poll Properties h1?>\n";
+        
+        $ret .= "<div style='margin-left: 40px; margin-bottom: 20px'>\n";
+        $ret .= "<p>Who can view this poll?<br /><select name='whoview'>\n";
+        foreach ( qw(all friends none) ) {
+            $ret .= "<option value='$_'";
+            $ret .= " selected='selected'" if $poll->{'whoview'} eq $_;
+            $ret .= ">" . ucfirst($_) . "</option>\n";
+        }
+        $ret .= "</select></p>\n";
+    
+        $ret .= "<p>Who can vote in this poll?<br /><select name='whovote'>\n";
+        foreach ( qw(all friends) ) {
+            $ret .= "<option value='$_'";
+            $ret .= " selected='selected'" if $poll->{'whovote'} eq $_;
+            $ret .= ">" . ucfirst($_) . "\n";
+        }
+        $ret .= "</select></p>\n";
+  
+        $ret .= "Poll Name: <i>(opt.)</i><br /><input type='text' name='name' size='50' maxlength='$RULES{'pollname'}->{'maxlength'}' value='" . LJ::ehtml($poll->{'name'}) . "' />\n"; 
+        
+        $ret .= "</div>\n\n";
+
+        ### Poll Questions
+
+        $ret .= "<?h1 Poll Questions h1?>\n";
+
+        # if they have no elements, we need to manually give them an insert option
+        $ret .= insert_element(0, $poll);
+        
+        # go through our elements in order
+        for (my $q = 0; $q < $poll->{'count'}; $q++) {
+            my $elem = $poll->{'pq'}->[$q];
+            
+            $ret .= "<table border='0' cellspacing='0' cellpadding='0' width='90%'><tr>\n";
+            $ret .= "<td align='left' colspan='2'>\n";
+            $ret .= "<?h2 Question #" . ($q + 1) . " - $TYPENAME{$elem->{'type'}} h2?>\n";
+            $ret .= "</td></tr>\n";
+            
+            $ret .= "<tr><td align='left' width='15%'>\n";
+            
+            # can't move the first element up
+            if ($q > 0) {
+                $ret .= LJ::img('btn_up', 'input', "move:$q:up");
+            }
+
+            # delete button
+            $ret .= "<br />" . LJ::img('btn_del', 'input', "delete:$q:do");
+            
+            # can't move the last element down
+            if ($q < ($poll->{'count'} - 1)) {
+                $ret .= "<br />" . LJ::img('btn_down', 'input', "move:$q:dn");
+            }
+            
+            $ret .= "</td>\n";
+            $ret .= "<td align='left' valign='top'>\n";
+            
+            # question text and hidden fields
+            $ret .= LJ::html_hidden("pq_${q}_type", $elem->{'type'});
+            $ret .= LJ::html_hidden("pq_${q}_opts", $elem->{'opts'});
+            $ret .= "<br />Question:<br /><input type='text' name='pq_${q}_question' size='50' maxlength='$RULES{'question'}->{'maxlength'}' value='" . LJ::ehtml($elem->{"question"}) . "' />\n";
+            $ret .= "<br /><font size='1'><b>[" . $errors->[$q]->{'question'} ."]</b></font>\n" if $errors->[$q]->{'question'};
+            
+            $ret .= "<div style='margin: 10px 0 10px 40px'>\n";
+
+            # spit out opts -- choices for drop-down, radio, etc questions
+            if ($elem->{'type'} =~ /^(radio|check|drop)$/) {
+                $ret .= "Options:\n";
+                for (my $o = 0; $o < $elem->{'opts'}; $o++) {
+                    $ret .= "<br />";
+
+                    $ret .= "<input type='radio' name='dummy_$q' /> " if $elem->{'type'} eq 'radio';
+                    $ret .= "<input type='checkbox' /> " if $elem->{'type'} eq 'check';
+
+                    $ret .= "<input type='text' name='pq_${q}_opt_$o' size='35' maxlength='$RULES{'items'}->{'maxlength'}' value='" . LJ::ehtml($elem->{'opt'}->[$o]) . "' />\n";
+                    $ret .= "<br /><font size='1'><b>[" . $errors->[$q]->{$o}->{'items'} . "]</b></font>\n" if $errors->[$q]->{$o}->{"items"};
+                }
+                $ret .= $elem->{'opts'} < $RULES{'items'}->{'max'} 
+                    ? "<br /><input type='submit' name='request:$q:do' value='More &gt;&gt;' />\n" 
+                    : "<br /><?de [Option limit reached] de?>\n";
+
+            # text type
+            } elsif ($elem->{'type'} eq 'text') {
+                foreach my $atr ( qw(size maxlength) ) {
+                    $ret .= ucfirst($atr) . ": <input type='text' name='pq_${q}_$atr' value='";
+                    $ret .= LJ::ehtml($elem->{$atr} || $RULES{'text'}->{$atr});
+                    $ret .= "' size='3' maxlength='3' />\n";
+                    $ret .= "<br /><font size='1'><b>[$errors->[$q]->{$atr}]</b></font>\n"
+                        if $errors->[$q]->{$atr};
+                }
+
+            # scale type
+            } elsif ($elem->{'type'} eq 'scale') {
+                foreach my $atr ( qw(from to by) ) {
+                    $ret .= ' ' . ucfirst($atr) . ": <input type='text' name='pq_${q}_$atr' value='";
+                    $ret .= LJ::ehtml(defined $elem->{$atr} ? $elem->{$atr} : $RULES{'scale'}->{$atr});
+                    $ret .= "' size='3' maxlength='9' />\n";
+                    $ret .= "<br /><font size='1'><b>[$errors->[$q]->{$atr}]</b></font>\n"
+                        if $errors->[$q]->{$atr};
+                }
+            }
+
+            $ret .= "<br /><font size='1'><b>[$errors->[$q]->{'items'}]</b></font>\n"
+                if $errors->[$q]->{'items'};
+            
+            $ret .= "</div>\n</td></tr>\n</table>\n\n";
+            
+            # add a new element unless they're already at the max
+            $ret .= insert_element($q + 1, $poll);
+            
+        }
+        
+        if ($poll->{'count'} > 0) {
+            $ret .= "<?h1 When you're done ... h1?>\n";
+            $ret .= "<div style='margin: 20px 0 20px 40px'>\n";
+            $ret .= "<input type='submit' name='start_over' value='&larr; Start Over'>\n";
+            $ret .= "<input type='submit' name='see_code' value='See Code &rarr;'>\n";
+            $ret .= "<input type='submit' name='see_preview' value='Preview Poll &rarr;'>\n";
+            $ret .= "</div>\n";
+        }
+        
+        $ret .= "</form>\n";
+        
+        return $ret;
+    }
+
+    # select box to insert element... used by make_form above
+    sub insert_element 
+    {
         my $after = shift;
         my $poll = shift;
-        my $ret = "";
 
-        $ret .= "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" width=\"60%\">\n";
-        $ret .= "<tr><td align=\"middle\"><hr size=\"1\"></td></tr>\n";
-        $ret .= "<tr><td align=\"middle\">";
-        if ($after >= $RULES{"elements"}{"max"}) {
-                $ret .= "<?de [Element limit reached] de?>\n";
+        my $ret;
+            
+        $ret .= "<div style='margin-top: 20px; margin-bottom: 20px'><?standout ";
+        if ($after >= $RULES{"elements"}->{"max"}) {
+            $ret .= "<?de [Element limit reached] de?>\n";
         } else {
-                $ret .= "Insert Question: <select name=\"insert:$after\">\n";
-                foreach (qw(-- radio check drop text scale)) {
-                    $ret .= "<option value=\"$_\">" . $TYPENAME{$_} . "\n";
-                }
-                $ret .= "</select>\n";
-                $ret .= "<input type=\"submit\" name=\"insert:$after:do\" value=\"Insert\">\n";
+            $ret .= "Insert question here: <select name='insert:$after'>\n";
+            foreach (qw(-- radio check drop text scale)) {
+                $ret .= "<option value='$_'>$TYPENAME{$_}</option>\n";
+            }
+            $ret .= "</select>\n";
+            $ret .= "<input type='submit' name='insert:$after:do' value='Insert' />\n";
         }
-        $ret .= "</tr></tr>\n<tr><td align=\"middle\"><hr size=\"1\"></td></tr>\n</table>\n";
+        $ret .= " standout?></div>\n";
+        
+        return $ret;
+    }
+
+    # preview page so the users can view a preview and decide
+    # if they want to continue or go back for revision
+    sub make_preview {
+        my ($form, $poll) = @_;
+
+        my $ret;
+
+        # generate code for preview
+        my $code .= make_code($poll);
+
+        # parse code into standard poll hashref
+        # so we can feed it into LJ::Poll::preview()
+        my $err;
+        my $stdpoll = (LJ::Poll::parse({}, \$code, \$err, {}))[0];
+        return "<b>[Error parsing poll: $$err]</b>\n" if $err;
+
+        # display poll preview
+        $ret .= "<?h1 Options h1?>\n";
+        $ret .= "<?p Below is a preview of your poll.  This is exactly how it will look once it is placed on your journal.  Use the buttons below to go back and make changes or post this poll to your journal. p?>\n\n";
+
+        $ret .= "<div align='center'>\n";
+
+        # edit poll
+        $ret .= "<form method='post' action='create.bml' style='display: inline'>\n";
+        $ret .= poll_hidden($poll);
+        $ret .= "<input type='submit' name='edit_poll' value='&larr; Edit Poll'>\n";
+
+        # need one more button, depending on which page they're currently on
+        my ($name, $val) = $form->{'see_code'} 
+                ? ("see_preview", "Preview Poll")
+                : ("see_code", "See Code");
+
+        $ret .= LJ::html_submit($name, $val) . "\n";
+        $ret .= "</form>\n";
+
+        # submit button / form
+        $ret .= "<form method='post' action='$LJ::SITEROOT/update.bml' style='display: inline'>\n";
+        $ret .= LJ::html_hidden('mode', 'full');
+        my $code = make_code($poll);
+        $ret .= LJ::html_hidden('event', $code) . "\n";
+        $ret .= "<input type='submit' name='from_pollcreator' value='Post Poll &rarr;'>\n";
+        $ret .= "</form>\n";
+
+        # preview code or ... preview
+        $ret .= "</div><div style='margin: 20px 0 20px 40px'>\n";
+
+        # viewing code, show preview button
+        if ($form->{'see_code'}) {
+            $ret .= "<form action='#'><div style='margin: 20px 0 20px 40px'>\n";
+            $ret .= "<textarea style='width: 90%' rows='16' cols='60'>";
+            $ret .= LJ::ehtml($code);
+            $ret .= "</textarea></form>\n";
+
+        # seeing preview, show code button
+        } elsif ($form->{'see_preview'}) {
+            # this has its own form open / close
+            $ret .= LJ::Poll::preview($stdpoll);
+        }
+
+        $ret .= "</div>\n";
+
+
+        return $ret;
+    }
+    
+    # create poll code given a %poll object
+    sub make_code 
+    {
+        my $poll = shift;
+
+        my $ret;
+        
+        # start out the tag
+        $ret .= "<lj-poll name='" . LJ::ehtml($poll->{'name'}) . "' whovote='" . LJ::ehtml($poll->{'whovote'}) . "' whoview='" . LJ::ehtml($poll->{'whoview'}) . "'>\n";
+        
+        # go through and make <lj-pq> tags
+        for (my $q = 0; $q < $poll->{'count'}; $q++) { 
+            my $elem = $poll->{'pq'}->[$q];
+            $ret .= "<lj-pq type='$elem->{'type'}'";
+            
+            # fill in attributes
+            if ($elem->{'type'} eq 'text') {
+                foreach ( qw(size maxlength) ) {
+                    $ret .= " $_='" . LJ::ehtml($elem->{$_}) . "'";
+                }
+            } elsif ($elem->{'type'} eq 'scale') {
+                foreach ( qw(from to by) ) {
+                    $ret .= " $_='" . LJ::ehtml($elem->{$_}) . "'";
+                }
+            }
+            $ret .= ">\n";
+            $ret .= $elem->{'question'} . "\n" if $elem->{'question'};
+            
+            if ($elem->{'type'} =~ /^(radio|drop|check)$/) {
+                # make <lj-pi> tags
+                for (my $o = 0; $o < $elem->{'opts'}; $o++) {
+                    $ret .= "<lj-pi>$elem->{'opt'}->[$o]</lj-pi>\n" if $elem->{'opt'}->[$o] ne '';
+                }
+            }
+            $ret .= "</lj-pq>\n";
+        }
+        
+        # close off the poll
+        $ret .= "</lj-poll>";
+        
+        # escape html on this because it'll currently be sent to user so they can copy/paste
+        return $ret;
+    }
+
+    # generates html for the hidden elements necessary to maintain
+    # the state of the given poll
+    sub poll_hidden
+    {
+        my $poll = shift;
+
+        my $ret;
+
+        foreach my $k (keys %$poll) {
+
+            # poll attributes
+            unless (ref $poll->{$k} eq 'ARRAY') {
+                $ret .= LJ::html_hidden($k, $poll->{$k});
+                next;
+            }
+
+            # poll questions
+            my $q_idx = 0;
+            foreach my $q (@{$poll->{$k}}) {
+
+                # question attributes
+                foreach my $atr (keys %$q) {
+                    unless (ref $q->{$atr} eq 'ARRAY') {
+                        $ret .= LJ::html_hidden("${k}_${q_idx}_$atr", $q->{$atr});
+                        next;
+                    }
+
+                    # radio/text/drop options
+                    my $opt_idx = 0;
+                    foreach my $o (@{$q->{$atr}}) {
+                        $ret .= LJ::html_hidden("${k}_${q_idx}_${atr}_$opt_idx", $o);
+                        $opt_idx++;
+                    }
+
+                }
+                        
+                $q_idx++;
+            }
+        }
 
         return $ret;
     }
 
-    if ($poll->{'count'} > 0) {
-       $ret .= "<p><input type=\"submit\" name=\"generate\" value=\"Generate Code!\">\n";
+    #######################################################
+    #
+    # Generate page for the user
+    #
+
+    # variables to pass around
+    my %action;
+    my %poll;
+    my @errors;
+    my $error_count = 0;
+    
+    # authenticate - but bypass db hit if we think they're already in.
+    my $remote = LJ::get_remote();
+    unless ($remote) {
+        $body = "<?h1 Error h1?><?p You must be <a href='/login.bml?ret=1'>logged in</a> to use the poll creator. p?>";
+        return;
     }
-
-    $ret .= "</form>\n";
-
-    return $ret;
- }
-
-# go through the %order hash and create the lj-poll crap
-sub make_code {
-    my $poll = shift;
-    my $ret = "";
-
-    # start out the tag
-    $ret .= "<lj-poll name=\"" . LJ::ehtml($poll->{"name"}) . "\" whovote=\"" . LJ::ehtml($poll->{"whovote"}) . "\" whoview=\"" . LJ::ehtml($poll->{"whoview"}) . "\">\n";
-
-    # go through and make <lj-pq> tags
-    for ($x = 0; $x < $poll->{'count'}; $x++) { 
-                my $elem = @{$poll->{'pq'}}[$x];
-                $ret .= "<lj-pq type=\"$elem->{'type'}\"";
-
-                # fill in attributes
-                if ($elem->{'type'} eq 'text') {
-                    foreach ( qw(size maxlength) ) {
-                        $ret .= " $_=\"" . LJ::ehtml($elem->{$_}) . "\"";
-                    }
-                } elsif ($elem->{'type'} eq 'scale') {
-                    foreach ( qw(from to by) ) {
-                        $ret .= " $_=\"" . LJ::ehtml($elem->{$_}) . "\"";
-                    }
-                }
-                $ret .= ">\n";
-                $ret .= $elem->{'question'} . "\n" if ($elem->{'question'});
-
-                if ($elem->{'type'} =~ /^(radio|drop|check)$/) {
-                    # make <lj-pi> tags
-                    for ($y = 0; $y < $elem->{'opts'}; $y++) {
-                       $ret .= "<lj-pi>" . @{$elem->{'opt'}}[$y] . "</lj-pi>\n" if (@{$elem->{'opt'}}[$y] ne '');
-                    }
-                }
-                $ret .= "</lj-pq>\n";
-    }
-
-    # close off the poll
-    $ret .= "</lj-poll>";
-
-    # escape html on this because it'll currently be sent to user so they can copy/paste
-    return LJ::ehtml($ret);
- }
-
-
- #######################################################
-
- # display page to the user
- $body .= "<?h1 Welcome to the poll creator! h1?>\n";
- $body .= "<?p For additional information about polls, please see the <a href=\"$LJ::SITEROOT/support/faqbrowse.bml?faqid=69\">FAQ</a>. p?>\n\n";
-
- # load poll hash from %FORM and get action and error info
- my ($poll, $action, $errors, $error_count) = &build_poll(\%FORM);
-
- if ($FORM{'generate'} && $$error_count == 0) {
-     $body .= "<?p Below is the poll code that you need to insert into your journal entry.  Just copy and paste all of the text in the box below into your LiveJournal entry and your poll will appear. p?>\n\n";
- }
-
- # authenticate - but bypass db hit if we think they're already in.
- unless ($FORM{'count'}) {
-     my $remote = LJ::get_remote_noauth();
-     unless ($remote) {
-        $body = "<?h1 Error h1?><?p You must be <a href=\"/login.bml?ret=1\">logged in</a> to use the poll creator. p?>";
-        return '';
-     }
-     
-     my $dbh = LJ::get_dbh("master");
-     my $u = LJ::load_user($dbh, $remote->{'user'});
-
-     unless (LJ::get_cap($u, "makepoll")) {
+    
+    unless (LJ::get_cap($remote, "makepoll")) {
         $body = "<?h1 Sorry h1?><?p Your account type does not permit you to use the poll creation feature. p?>";
-        return '';
-     }
- }
+        return;
+    }
 
- # generate code for them
- if ($FORM{"generate"} && $$error_count == 0) {
-    $body .= "<blockquote><form><textarea rows=\"15\" cols=\"45\" wrap=\"none\">\n" . &make_code($poll) . "\n</textarea></form></blockquote>\n";
+    # show them the startup screen
+    if (LJ::did_post() && ! $FORM{'start_over'}) {
 
- # show modify page
- } else {
+        # load poll hash from %FORM and get action and error info
+        build_poll(\%FORM, \%poll, \%action, \@errors, \$error_count);
 
-    # perform actions on %poll
-    ($poll, $errors) = &do_actions($poll, $action, $errors);
+        # perform actions on %poll
+        do_actions(\%poll, \%action, \@errors, \$error_count);
 
-    # display form
-    $body .= &make_form($poll, $errors, $error_count);
- }
+        # generate poll preview for them
+        if (($FORM{'see_preview'} || $FORM{'see_code'}) && $error_count == 0) {
+            $body .= make_preview(\%FORM, \%poll);
+            return;
+        }
+    }
 
- # close off the CODE block
- return;
+    # show start page
+    $body .= make_form(\%poll, \@errors, \$error_count);
 
- _code?>
-<?page 
+    return;
+
+}
+ _code?><?page 
 title=><?_code return $title; _code?>
 body=><?_code return $body; _code?> 
-page?><?_c <LJDEP>
-lib: LJ::img
+page?><?_c
+<LJDEP>
+lib: LJ::img, cgi-bin/htmlcontrols.pl, cgi-bin/ljpoll.pl
 link: htdocs/support/faqbrowse.bml, htdocs/login.bml
 img: img::btn_up, img::btn_down, img::btn_del
-post: htdocs/poll/create.bml
-</LJDEP> _c?>
-
+post: htdocs/poll/create.bml, htdocs/update.bml
+</LJDEP>
+_c?>
