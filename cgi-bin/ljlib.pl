@@ -2764,6 +2764,10 @@ sub get_remote
     $LJ::CACHED_REMOTE = 1;
     $LJ::CACHE_REMOTE = $u;
 
+    eval {
+        Apache->request->notes("ljuser" => $u->{'user'});
+    };
+
     return $u;
 }
 
@@ -3090,6 +3094,8 @@ sub make_journal
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
 
+    my $r = $opts->{'r'};  # mod_perl $r, or undef
+
     if ($LJ::SERVER_DOWN) {
         if ($opts->{'vhost'} eq "customview") {
             return "<!-- LJ down for maintenance -->";
@@ -3118,8 +3124,7 @@ sub make_journal
         $u = LJ::load_user($dbs, $user);
     }
 
-    unless ($u)
-    {
+    unless ($u) {
         $opts->{'baduser'} = 1;
         return "<H1>Error</H1>No such user <B>$user</B>";
     }
@@ -3148,6 +3153,10 @@ sub make_journal
                 'view' => $view,
             });
         }
+    }
+
+    if ($r) {
+        $r->notes('journalid' => $u->{'userid'});
     }
     
     my $notice = sub {
@@ -3185,8 +3194,11 @@ sub make_journal
     $opts->{'view'} = $view;
 
     if ($stylesys == 2 && $view ne 'rss') {
+        $r->notes('codepath' => "s2.$view") if $r;
         return LJ::S2::make_journal($u, $styleid, $view, $remote, $opts);
     }
+
+    $r->notes('codepath' => "s1.$view") if $r;
 
     my %vars = ();
     # load the base style

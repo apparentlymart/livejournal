@@ -28,10 +28,13 @@ BML::set_config("/", "CookieDomain" => $LJ::COOKIE_DOMAIN);
 BML::set_config("/", "CookiePath"   => $LJ::COOKIE_PATH);
 
 BML::register_hook("startup", sub {
-    LJ::start_request();  # FIXME: not necessary since always done in trans handler?  test.
-    eval {
-        Apache->request->notes("ljuser" => $BML::COOKIE{'ljuser'});
-    };
+    my $r = Apache->request;
+    my $uri = "bml" . $r->uri;
+    unless ($uri =~ s/\.bml$//) {
+        $uri .= ".index";
+    }
+    $uri =~ s!/!.!g;
+    $r->notes("codepath" => $uri);
 });
 
 BML::register_hook("codeerror", sub {

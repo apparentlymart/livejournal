@@ -607,6 +607,7 @@ sub customview_content
 				   "styleid" => $styleid,
                                    "saycharset" => $charset,
                                    "args" => scalar $r->args,
+                                   "r" => $r,
 			       })
 		|| "<b>[$LJ::SITENAME: Bad username, styleid, or style definition]</b>");
     
@@ -702,48 +703,56 @@ sub db_logger
     my $dbl = LJ::get_dbh("logs");
     return unless $dbl;
 
-    my @now = localtime();
-    my $table = sprintf("access%04d%02d%02d", $now[5]+1900,
-                        $now[4]+1, $now[3]);
+    $ctype =~ s/;.*//;  # strip charset
+
+    my $now = time();
+    my @now = localtime($now);
+    my $table = sprintf("access%04d%02d%02d%02d", $now[5]+1900,
+                        $now[4]+1, $now[3], $now[2]);
     
     unless ($LJ::CACHED_LOG_CREATE{"$dbl-$table"}) {
         $dbl->do("CREATE TABLE IF NOT EXISTS $table (".
-                 "whn DATETIME NOT NULL,".
+                 "whn TIMESTAMP(14) NOT NULL,".
                  "server VARCHAR(30),".
                  "addr VARCHAR(15) NOT NULL,".
                  "ljuser VARCHAR(15),".
+                 "journalid INT UNSIGNED,". # userid of what's being looked at
+                 "codepath VARCHAR(80),".  # protocol.getevents / s[12].friends / bml.update / bml.friends.index
+                 "anonsess INT UNSIGNED,". 
                  "langpref VARCHAR(5),".
                  "method VARCHAR(10) NOT NULL,".
-                 "vhost VARCHAR(80) NOT NULL,".
                  "uri VARCHAR(255) NOT NULL,".
                  "args VARCHAR(255),".
                  "status SMALLINT UNSIGNED NOT NULL,".
-                 "ctype VARCHAR(30) NOT NULL,".
+                 "ctype VARCHAR(30),".
                  "bytes MEDIUMINT UNSIGNED NOT NULL,".
-                 "browser VARCHAR(100) NOT NULL,".
+                 "browser VARCHAR(100),".
+                 "secs TINYINT UNSIGNED,".
                  "ref VARCHAR(200))");
         $LJ::CACHED_LOG_CREATE{"$dbl-$table"} = 1;
     }
 
-    my $ua = $r->header_in("User-Agent");
-    my $ref = $r->header_in("Referer");
+    my $var = {
+        'server' => $LJ::SERVER_NAME,
+        'addr' => $r->connection->remote_ip,
+        'ljuser' => $rl->notes('ljuser'),
+        'journalid' => $rl->notes('journalid'),
+        'codepath' => $rl->notes('codepath'),
+        'anonsess' => $rl->notes('anonsess'),
+        'langpref' => $rl->notes('langpref'),
+        'method' => $r->method,
+        'uri' => $uri,
+        'args' => scalar $r->args,
+        'status' => $rl->status,
+        'ctype' => $ctype,
+        'bytes' => $rl->bytes_sent,
+        'browser' => $r->header_in("User-Agent"),
+        'secs' => $now - $r->request_time(),
+        'ref' => $r->header_in("Referer"),
+    };
 
-    my $sql = "INSERT DELAYED INTO $table VALUES (NOW(),?,?,?,?,?,?,?,?,?,?,?,?,?)";
-    my @vals = ($LJ::SERVER_NAME,
-                $r->connection->remote_ip,
-                $rl->notes('ljuser'),
-                $rl->notes('langpref'),
-                $r->method,
-                $r->header_in("Host"),
-                $uri,
-                scalar $r->args,
-                $rl->status,
-                $ctype,
-                $rl->bytes_sent,
-                $ua,
-                $ref);
-                
-    $dbl->do($sql, undef, @vals);
+    $dbl->do("INSERT DELAYED INTO $table (" . join(',', keys %$var) . ") ".
+             "VALUES (" . join(',', map { $dbl->quote($var->{$_}) } keys %$var) . ")");
 }
 
 package LJ::Protocol;

@@ -29,6 +29,9 @@ body<=
  my $init = LJ::Talk::init($dbs, \%FORM);
  my $u = $init->{'journalu'};
 
+ my $r = Apache->request;
+ $r->notes("journalid" => $u->{'userid'});
+
  return "<?h1 $ML{'Error'} h1?><?p $init->{'error'} p?>" if $init->{'error'}; 
  return $ML{'talk.error.nojournal'} unless $u;
  return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");

@@ -104,6 +104,9 @@ sub do_request
     $flags ||= {};
     my @args = ($dbs, $req, $err, $flags);
 
+    my $r = Apache->request;
+    $r->notes("codepath" => "protocol.$method") unless $r->notes("codepath");
+
     if ($method eq "login")            { return login(@args);            }
     if ($method eq "getfriendgroups")  { return getfriendgroups(@args);  }
     if ($method eq "getfriends")       { return getfriends(@args);       }
@@ -118,6 +121,7 @@ sub do_request
     if ($method eq "editfriendgroups") { return editfriendgroups(@args); }
     if ($method eq "consolecommand")   { return consolecommand(@args);   }
 
+    Apache->request->notes("codepath" => "");
     return fail($err,201);
 }
 
@@ -2127,10 +2131,13 @@ sub check_altusage
     # complain if the username is invalid
     return fail($err,206) unless LJ::canonical_username($alt);
 
+    my $r = Apache->request;
+
     # allow usage if we're told explicitly that it's okay
     if ($flags->{'usejournal_okay'}) {
         $flags->{'u_owner'} = LJ::load_user($dbs, $alt);
         $flags->{'ownerid'} = $flags->{'u_owner'}->{'userid'};
+        $r->notes("journalid" => $flags->{'ownerid'}) unless $r->notes("journalid");
         return 1 if $flags->{'ownerid'};
         return fail($err,206);
     }
@@ -2140,6 +2147,7 @@ sub check_altusage
     my $canuse = LJ::can_use_journal($dbs, $u->{'userid'}, $req->{'usejournal'}, $info);
     $flags->{'ownerid'} = $info->{'ownerid'};
     $flags->{'u_owner'} = $info->{'u_owner'};
+    $r->notes("journalid" => $flags->{'ownerid'}) unless $r->notes("journalid");
 
     return 1 if $canuse || $flags->{'ignorecanuse'};
 
@@ -2185,6 +2193,11 @@ sub authenticate
         return fail($err,402) if $ip_banned;
         return fail($err,101);
     }
+    
+    my $r = Apache->request;
+    $r->notes("ljuser" => $u->{'user'}) unless $r->notes("ljuser");
+    $r->notes("journalid" => $u->{'userid'}) unless $r->notes("journalid");
+
     # remember the user record for later.
     $flags->{'u'} = $u;
     return 1;
