@@ -2352,7 +2352,7 @@ sub init {
     if (ref $need_captcha eq 'SCALAR') {
         $$need_captcha =
             ($LJ::HUMAN_CHECK{anonpost} || $LJ::HUMAN_CHECK{authpost}) &&
-            ! LJ::Talk::Post::check_rate($comment->{'u'});
+            ! LJ::Talk::Post::check_rate($comment->{'u'}, $journalu);
         if ($$need_captcha) {
             return $err->("Please confirm you are a human below.") unless $form->{answer};
             return if lc($form->{answer}) eq 'audio';
@@ -2511,7 +2511,7 @@ sub over_maxcomments {
 
 # more anti-spammer rate limiting.  returns 1 if rate is okay, 0 if too fast.
 sub check_rate {
-    my $remote = shift;
+    my ($remote, $journalu) = @_;
 
     # we require memcache to do rate limiting efficiently
     return 1 unless @LJ::MEMCACHE_SERVERS;
@@ -2557,6 +2557,16 @@ sub check_rate {
             my $events = scalar grep { $_ > $now-$period } @times;
             if ($events > $allowed) {
                 
+                my $ruser = (exists $remote->{'user'}) ? $remote->{'user'} : 'Not logged in';
+                my $nowtime = localtime($now);
+                my $body = <<EOM;
+Talk spam from $key:
+    $events comments > $allowed allowed / $period secs
+    Remote user: $ruser
+    Remote IP:   $ip
+    Time caught: $nowtime
+    Posting to:  $journalu->{'user'}
+EOM
                 if ($LJ::DEBUG_TALK_RATE && 
                     LJ::MemCache::add("warn:$key", 1, 600)) {
                     LJ::send_mail({
@@ -2565,7 +2575,7 @@ sub check_rate {
                         'fromname' => $LJ::SITENAME,
                         'charset' => 'utf-8',
                         'subject' => "talk spam: $key",
-                        'body' => "talk spam from $key:\n\n    $events comments > $allowed allowed / $period secs",
+                        'body' => $body,
                     });
                 }
 
