@@ -51,10 +51,33 @@ body<=
     
     LJ::load_user_props($dbs, $u, "stylesys", "s2_style");
     $u->{'stylesys'} ||= 1;
+    my $pub = LJ::S2::get_public_layers();
+    my $userlay = {};   # TODO: add API call to fetch these
+    my %style = LJ::S2::get_style($u->{'s2_style'});
 
-    if ($POST{'action:stylesys'}) {
+    if ($POST{'save:stylesys'}) {
         my $num = $POST{'stylesys'} == 2 ? 2 : 1;
         LJ::set_userprop($dbh, $u, "stylesys", $num);
+        return BML::redirect("/customize/?journal=$u->{'user'}");
+    }
+
+    if ($POST{'save:layout'}) {
+        my $layid = $POST{'layoutid'};
+        return BML::redirect("/customize/?journal=$u->{'user'}") if $layid == $style{'layout'};
+        my $lay = $pub->{$layid} || $userlay->{$layid};
+        return "Error: not your layout" unless $lay;
+        my $coreid = $lay->{'b2lid'} or return "No core parent?";
+        LJ::S2::delete_layer($style{'user'});
+        $style{'user'} = $style{'theme'} = $style{'i18nc'} = $style{'i18n'} = 0;
+        $style{'layout'} = $layid;
+        $style{'core'} = $coreid;
+
+        unless ($u->{'s2_style'}) {
+            $u->{'s2_style'} = LJ::S2::create_style($u, "wizard");
+            LJ::set_userprop($dbh, $u, "s2_style", $u->{'s2_style'});
+        }
+
+        LJ::S2::set_style_layers($u, $u->{'s2_style'}, %style);
         return BML::redirect("/customize/?journal=$u->{'user'}");
     }
 
@@ -65,7 +88,7 @@ body<=
     $ret .= LJ::html_select({ 'name' => 'stylesys', 'selected' => $u->{'stylesys'} },
                             1, "Old system (S1)",
                             2, "New system (S2)");
-    $ret .= " <input type='submit' name='action:stylesys' value='Change'>";
+    $ret .= " <input type='submit' name='save:stylesys' value='Change'>";
     $ret .= "</blockquote>";
 
     # no more options if they're using S1.
@@ -74,19 +97,27 @@ body<=
         $ret .= "</form>";
         return $ret;
     }
-    
-    # choose language
-
 
     # choose layout
+    my @layouts = map { $_, LJ::ehtml($pub->{$_}->{'name'}) }
+                  grep { /^\d+$/ && $pub->{$_}->{'type'} eq "layout" } keys %$pub;
     $ret .= "<?h1 Step 1: Layout h1?><?p Pick your layout.  Because theme selection and custom modifications depend on your layout, changing this setting discards all other edits you may have made. p?>";
     $ret .= "<blockquote>";
-    $ret .= LJ::html_select({ 'name' => 'layoutid' },
-                            5, "Happy Foofoo Land");
+    $ret .= LJ::html_select({ 'name' => 'layoutid',
+                              'selected' => $style{'layout'},  },
+                            @layouts);
     $ret .= " <input type='submit' name='save:layout' value='Change'> (<a href=\"preview.bml?show=layouts\">previews</a>)";
     $ret .= "</blockquote>";
+
+    # pick other stuff
+    $ret .= "<?h1 Step 2: Customize Layout h1?>";
+    $ret .= "<?p The following settings are layout-dependent. p?>";
+
+    $ret .= "<?h2 Language h2?><?p The following languages are fully or partially supported by this layout. p?>";
+    $ret .= "<?h2 Theme h2?><?p Choose from the following optional themes for this layout. p?>";
     
-    $ret .= "<?h1 Step 2: Theme h1?>";
+    #use Data::Dumper;
+    #$ret .= "<pre>" . Dumper($pub) . "</pre>";
     
     return $ret;
 

@@ -138,21 +138,36 @@ sub get_public_layers
 
     my $dbr = LJ::get_db_reader();
     $sysid ||= LJ::get_userid($dbr, "system");
-
+    
     my %existing;  # uniq -> id
-    my $sth = $dbr->prepare("SELECT i.value, l.s2lid, l.b2lid, l.type FROM s2layers l, s2info i ".
-                            "WHERE l.userid=$sysid AND l.s2lid=i.s2lid AND i.infokey='redist_uniq'");
+    my $sth = $dbr->prepare("SELECT i.infokey, i.value, l.s2lid, l.b2lid, l.type ".
+                            "FROM s2layers l, s2info i ".
+                            "WHERE l.userid=$sysid AND l.s2lid=i.s2lid AND i.infokey IN ('redist_uniq', 'name')");
     $sth->execute;
     die $dbr->errstr if $dbr->err;
-    while (my ($uniq, $id, $bid, $type) = $sth->fetchrow_array) {
-        $existing{$uniq} = $existing{$id} = {
-            's2lid' => $id,
-            'b2lid' => $bid,
-            'type' => $type,
-            'uniq' => $uniq,
-        };
-        next unless $bid;
-        push @{$existing{$bid}->{'children'}}, $id;
+    while (my ($key, $val, $id, $bid, $type) = $sth->fetchrow_array) {
+        $existing{$id}->{'b2lid'} = $bid;
+        $existing{$id}->{'s2lid'} = $id;
+        $existing{$id}->{'type'} = $type;
+        if ($key eq "redist_uniq") {
+            $existing{$id}->{'uniq'} = $val;
+            $existing{$val} = $existing{$id};
+        } elsif ($key eq "name") {
+            $existing{$id}->{'name'} = $val;
+        }
+    }
+
+    # setup children keys
+    foreach (keys %existing) {
+        next unless /^\d+$/;
+        next unless $existing{$_}->{'b2lid'};
+        my $bid = $existing{$_}->{'b2lid'};
+        unless ($existing{$bid}) {
+            delete $existing{$existing{$_}->{'uniq'}};
+            delete $existing{$_};
+            next;
+        }
+        push @{$existing{$bid}->{'children'}}, $_;
     }
 
     return \%existing if $LJ::LESS_CACHING;
@@ -160,17 +175,15 @@ sub get_public_layers
     return $LJ::CACHED_PUBLIC_LAYERS;
 }
 
-sub s2_context
+sub get_style
 {
-    my $r = shift;
     my $styleid = shift;
-    my $opts = shift;
-
-    my $dbr = LJ::get_db_reader();
 
     my %style;
     my $have_style = 0;
+
     if ($styleid) {
+        my $dbr = LJ::get_db_reader();
         my $sth = $dbr->prepare("SELECT type, s2lid FROM s2stylelayers ".
                                 "WHERE styleid=?");
         $sth->execute($styleid);
@@ -188,6 +201,19 @@ sub s2_context
         }
     }
 
+    return %style;
+}
+
+sub s2_context
+{
+    my $r = shift;
+    my $styleid = shift;
+    my $opts = shift;
+
+    my $dbr = LJ::get_db_reader();
+
+    my %style = get_style($styleid);
+
     my @layers;
     foreach (qw(core i18nc layout i18n theme user)) {
         push @layers, $style{$_} if $style{$_};
@@ -203,8 +229,8 @@ sub s2_context
         $okay = 0 unless S2::layer_loaded($style{$_});
     }
     unless ($okay) {
-        # load the default style instead.
-        if ($have_style) { return s2_context($r, 0, $opts); }
+        # load the default style instead, if we just tried to load a real one and failed
+        if ($styleid) { return s2_context($r, 0, $opts); }
         
         # were we trying to load the default style?
         $r->content_type("text/html");
@@ -359,7 +385,6 @@ sub delete_user_style
         $dbh->do("DELETE FROM $t WHERE styleid=?", undef, $styleid)
     }
 
-    # TODO: update any of their galleries using it, perhaps.
     return 1;
 }
 
@@ -417,14 +442,14 @@ sub delete_layer
 sub set_style_layers
 {
     my ($u, $styleid, %newlay) = @_;
-    my $udbh = LJ::get_cluster_master($u);
+    my $dbh = LJ::get_db_writer();
 
-    return 0 unless $udbh;
-    $udbh->do("REPLACE INTO s2stylelayers (styleid,type,s2lid) VALUES ".
-              join(",", map { sprintf("(%d,%s,%d)", $styleid,
-                                      $udbh->quote($_), $newlay{$_}) }
-                   keys %newlay));
-    return 0 if $udbh->err;
+    return 0 unless $dbh;
+    $dbh->do("REPLACE INTO s2stylelayers (styleid,type,s2lid) VALUES ".
+             join(",", map { sprintf("(%d,%s,%d)", $styleid,
+                                     $dbh->quote($_), $newlay{$_}) }
+                  keys %newlay));
+    return 0 if $dbh->err;
     return 1;
 }
 
