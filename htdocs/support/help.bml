@@ -255,9 +255,9 @@ body<=
      # fix up the message if we have one
      my $temp = LJ::text_trim($sp->{message}, 0, 100); # 100 character max
      if ($temp ne $sp->{message}) {
-         $sp->{message} = "$temp ...";
+         $sp->{message} = LJ::ehtml($temp) . " ...";
      } else {
-         $sp->{message} .= " <b>&#x00b6;</b>";
+         $sp->{message} = LJ::ehtml($sp->{message}) . " <b>&#x00b6;</b>";
      }
      my $des = $abstracts ? "<br /><i>$sp->{message}</i>" : '';
 
