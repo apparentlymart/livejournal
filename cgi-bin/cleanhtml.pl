@@ -121,12 +121,12 @@ sub clean
         if ($type eq "S")     # start tag
         {
             my $tag = $token->[1];
-            return $total_fail->() if $tag =~ /[\"\'=]/;
 
             my $slashclose = 0;   # If set to 1, use XML-style empty tag marker
-            
             # for tags like <name/>, pretend it's <name> and reinsert the slash later
             $slashclose = 1 if ($tag =~ s!/$!!); 
+
+            return $total_fail->() unless $tag =~ /^\w([\w\-:_]*\w)?$/;
 
             # for incorrect tags like <name/attrib=val> (note the lack of a space) 
             # delete everything after 'name' to prevent a security loophole which happens
