@@ -25,7 +25,7 @@ body<=
     return $ret;
  }
 
- my @allattribs = ('member', 'post', 'moderate', 'preapprove', 'admin');
+ my @allattribs = ('member', 'post', 'preapprove', 'moderate', 'admin');
 
  my $mode = $POST{'mode'} || "";
 
@@ -142,7 +142,7 @@ body<=
  # columns of our table, excluding username
  my @attribs = ('member', 'post');
  LJ::load_user_props($dbs, $c, 'moderated');
- push @attribs, ('moderate', 'preapprove')
+ push @attribs, ('preapprove', 'moderate')
      if $c->{'moderated'};
  push @attribs, 'admin';
 
