@@ -429,8 +429,7 @@ sub get_talk_data
         $dbcm->do("LOCK TABLES log2 WRITE, talk2 READ");
         my $ct = $dbcm->selectrow_array("SELECT COUNT(*) FROM talk2 WHERE ".
                                         "journalid=? AND nodetype='L' AND nodeid=? ".
-                                        "AND state='A'", undef, $u->{'userid'},
-                                        $nodeid);
+                                        "AND state='A'", undef, $u->{'userid'}, $nodeid);
         $dbcm->do("UPDATE log2 SET replycount=? WHERE journalid=? AND jitemid=?",
                   undef, int($ct), $u->{'userid'}, $nodeid);
         print STDERR "Fixing replycount for $u->{'userid'}/$nodeid from $rp_count to $ct\n"
@@ -774,6 +773,11 @@ sub talkform {
 
     # once we clean out talkpost.bml, this will need to be changed.
     BML::set_language_scope('/talkpost.bml');
+
+    # check max comments
+    my $jitemid = $opts->{'ditemid'} >> 8;
+    return "Sorry, this entry already has the maximum number of comments allowed."
+        if LJ::Talk::Post::over_maxcomments($journalu, $jitemid);
 
     if ($parpost->{'state'} eq "S") {
         $ret .= "<div class='ljwarnscreened'>$BML::ML{'.warnscreened'}</div>";
@@ -1168,6 +1172,26 @@ sub mark_comment_as_spam {
              undef, $ip, $journalu->{userid}, $posterid, $subject, $body);
     return 0 if $dbh->err;
     return 1;
+}
+
+# get a comment count for a journal entry.
+sub get_replycount {
+    my ($ju, $jitemid) = @_;
+    $jitemid += 0;
+    return undef unless $ju && $jitemid;
+
+    my $memkey = [$ju->{'userid'}, "rp:$ju->{'userid'}:$jitemid"];
+    my $count = LJ::MemCache::get($memkey);
+    return $count if $count;
+
+    my $dbcm = LJ::get_cluster_master($ju);
+    return unless $dbcm;
+
+    $count = $dbcm->selectrow_array("SELECT replycount FROM log2 WHERE " .
+                                    "journalid=? AND jitemid=?", undef,
+                                    $ju->{'userid'}, $jitemid);
+    LJ::MemCache::add($memkey, $count);
+    return $count;
 }
 
 package LJ::Talk::Post;
@@ -2257,6 +2281,18 @@ sub make_preview {
 
     $ret .= "</form></div>";
     return $ret;
+}
+
+# given a journalu and jitemid, return 1 if the entry
+# is over the maximum comments allowed.
+sub over_maxcomments {
+    my ($journalu, $jitemid) = @_;
+    $journalu = LJ::want_user($journalu);
+    $jitemid += 0;
+    return 0 unless $journalu && $jitemid;
+
+    my $count = LJ::Talk::get_replycount($journalu, $jitemid);
+    return ($count >= LJ::get_cap($journalu, 'maxcomments')) ? 1 : 0;
 }
 
 # more anti-spammer rate limiting.  returns 1 if rate is okay, 0 if too fast.

@@ -85,6 +85,10 @@ body<=
     my $comment  = $init->{comment};
     my $item     = $init->{item};
 
+    # check max comments
+    return "Sorry, this entry already has the maximum number of comments allowed."
+        if LJ::Talk::Post::over_maxcomments($journalu, $item->{'jitemid'});
+
     ## insertion
     my $wasscreened = ($parent->{state} eq 'S');
     my $err;

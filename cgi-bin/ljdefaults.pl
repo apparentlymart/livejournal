@@ -119,6 +119,7 @@
                       'weblogscom' => 0,
                       'hide_email_after' => 0,
                       'userlinks' => 5,
+                      'maxcomments' => 5000,
                       );
         foreach my $k (keys %defcap) {
             next if (defined $LJ::CAP_DEF{$k});
