@@ -21,17 +21,26 @@ my $memc;  # memcache object
 
 sub init {
     $memc = new Cache::Memcached;
-    trigger_bucket_reconstruct();
+    reload_conf();
 }
 
 sub client_stats {
     return $memc->{'stats'} || {};
 }
 
-sub trigger_bucket_reconstruct {
+sub reload_conf {
     $memc->set_servers(\@LJ::MEMCACHE_SERVERS);
     $memc->set_debug($LJ::MEMCACHE_DEBUG);
     $memc->set_compress_threshold($LJ::MEMCACHE_COMPRESS_THRESHOLD);
+    if ($LJ::DB_LOG_HOST) {
+        my $stat_callback = sub {
+            my ($stime, $etime, $host, $action) = @_;
+            LJ::blocking_report($host, 'memcache', $etime - $stime, "memcache: $action");
+        };
+    } else {
+        $stat_callback = undef;
+    }
+    $memc->set_stat_callback($stat_callback);
     $memc->set_readonly(1) if $ENV{LJ_MEMC_READONLY};
     return $memc;
 }
