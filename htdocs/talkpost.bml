@@ -233,6 +233,17 @@ BODY<=
      }
      $ret .= "</table><p>\n";
  }
+
+ ### security indicator
+ my $sec = "";
+ if ($parpost->{'security'} eq "private") {
+     $sec = "(=SECURITYPRIVATE=)";
+ } elsif ($parpost->{'security'} eq "usemask") {
+     $sec = "(=SECURITYPROTECTED=)";
+ }
+
+ $sec .= "<br />\n" unless $sec eq "" or $parpost->{'subject'};
+ $ret .= $sec;
  
  ###
  if ($parpost->{'subject'}) {

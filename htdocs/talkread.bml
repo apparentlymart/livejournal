@@ -162,6 +162,17 @@ BODY<=
          $ret .= "</table><p>\n";
      }
 
+     ### security indicator
+     my $sec = "";
+     if ($item->{'security'} eq "private") {
+         $sec = "(=SECURITYPRIVATE=)";
+     } elsif ($item->{'security'} eq "usemask") {
+         $sec = "(=SECURITYPROTECTED=)";
+     }
+
+     $sec .= "<br />\n" unless $sec eq "" or $item->{'subject'};
+     $ret .= $sec;
+
      ###
      if ($item->{'subject'}) {
          my $subject = $item->{'subject'};
