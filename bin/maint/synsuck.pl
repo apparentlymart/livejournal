@@ -24,9 +24,9 @@ $maint{'synsuck'} = sub
     while (my ($user, $userid, $synurl, $lastmod, $etag) = $sth->fetchrow_array)
     {
         my $delay = sub {
-            my $hours = shift;
+            my $minutes = shift;
             $dbh->do("UPDATE syndicated SET checknext=DATE_ADD(NOW(), ".
-                     "INTERVAL $hours DAY) WHERE userid=$userid");
+                     "INTERVAL $minutes MINUTE) WHERE userid=$userid");
         };
 
         print "Synsuck: $user ($synurl)\n";
@@ -42,12 +42,12 @@ $maint{'synsuck'} = sub
             if (length($content) > 1024*150) { $too_big = 1; return; }
             $content .= $_[0];
         }, 4096);
-        if ($too_big) { $delay->(24); next; }
+        if ($too_big) { $delay->(24*60); next; }
 
         # check if not modified
         if ($res->status_line() =~ /^304/) {
             print "  not modified.\n";
-            $delay->(6);
+            $delay->(6*60);
             next;
         }
 
@@ -55,7 +55,7 @@ $maint{'synsuck'} = sub
         $rss->parse($content);
 
         # lame check to see if parse failed:
-        unless (ref $rss->{'items'} eq "ARRAY") { $delay->(24); next; }
+        unless (ref $rss->{'items'} eq "ARRAY") { $delay->(24*60); next; }
 
         my @items = reverse @{$rss->{'items'}};
 
@@ -64,6 +64,7 @@ $maint{'synsuck'} = sub
         
         # post these items
         my $newcount = 0;
+        my $errorflag = 0;
         foreach my $it (@items) {
             my $dig = LJ::md5_struct($it)->b64digest;
             next if $dbh->selectrow_array("SELECT COUNT(*) FROM synitem WHERE ".
@@ -98,7 +99,14 @@ $maint{'synsuck'} = sub
                          undef, $userid, $dig);
             } else {
                 print "  Error: $err\n";
+                $errorflag = 1;
             }
+        }
+
+        # bail out if errors, and try again shortly
+        if ($errorflag) {
+            $delay->(30);
+            next;
         }
 
         my $r_lastmod = LJ::http_to_time($res->header('Last-Modified'));
