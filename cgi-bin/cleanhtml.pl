@@ -125,7 +125,13 @@ sub clean
                 my $attr = $token->[2];
                 if ($attr->{'user'} || $attr->{'comm'}) {
                     my $user = LJ::canonical_username($attr->{'user'} || $attr->{'comm'});
-                    if ($user) {
+                    if ($s1var) {
+                        if ($attr->{'user'} =~ /^\%\%([\w\-\']+)\%\%$/) {
+                            $newdata .= "%%ljuser:$1%%";
+                        } elsif ($attr->{'comm'} =~ /^\%\%([\w\-\']+)\%\%$/) {
+                            $newdata .= "%%ljcomm:$1%%";
+                        }
+                    } elsif ($user) {
                         if ($opts->{'textonly'}) {
                             $newdata .= $user;
                         } else {

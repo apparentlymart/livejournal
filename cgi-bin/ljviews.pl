@@ -10,7 +10,7 @@ package LJ::S1;
 
 # updated everytime new S1 style cleaning rules are added,
 # so cached cleaned versions are invalidated.
-$LJ::S1::CLEANER_VERSION = 2;
+$LJ::S1::CLEANER_VERSION = 3;
 
 # PROPERTY Flags:
 
@@ -391,6 +391,12 @@ sub fvp_transform
         }
         elsif ($trans eq "xe") {
             $ret = LJ::exml($ret);
+        }
+        elsif ($trans eq "ljuser") {
+            $ret = LJ::ljuser(LJ::canonical_username($ret));
+        }
+        elsif ($trans eq "ljcomm") {
+            $ret = LJ::ljuser(LJ::canonical_username($ret), {'type'=>'C'});
         }
 
     }
