@@ -30,6 +30,8 @@ my %common_args =
      'hookname' => 'Name of hook. See doc/hooks.txt.',
      'u' => 'A hashref of a row from the user table, sometimes called a "user object".  Although only initially a row from the user table, gets a lot of tacked onto it from various other LJ API functions.',
      'remote' => 'Hashref of remote user containing \'user\' and \'userid\' keys if obtained from [func[LJ::get_remote]] or just \'user\' if untrusted and obtained from [func[LJ::get_remote_noauth]].',
+     'dbcm' => 'Cluster master database handle',
+     'dbh' => 'Master database handle.',
      );
 
 my %funcs;

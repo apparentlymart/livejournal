@@ -1873,7 +1873,8 @@ sub load_user_props
 
     foreach my $table (qw(userprop userproplite))
     {
-	$sql = "SELECT upl.name, up.value FROM $table up, userproplist upl WHERE up.userid=$uid AND up.upropid=upl.upropid $propname_where";
+	$sql = "SELECT upl.name, up.value FROM $table up, userproplist upl ".
+	    "WHERE up.userid=$uid AND up.upropid=upl.upropid $propname_where";
 	$sth = $dbr->prepare($sql);
 	$sth->execute;
 	while ($_ = $sth->fetchrow_hashref) {
@@ -4125,12 +4126,17 @@ sub query_buffer_flush
 
 # <LJFUNC>
 # name: LJ::journal_base
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# des: Returns URL of a user's journal.
+# info: The tricky thing is that users with underscores in their usernames
+#       can't have some_user.site.com as a hostname, so that's changed into
+#       some-user.site.com.
+# args: user, vhost?
+# des-user: Username of user whose URL to make.
+# des-vhost: What type of URL.  Acceptable options are "users", to make a 
+#            http://user.site.com/ URL; "tilde" to make http://site.com/~user/;
+#            "community" for http://site.com/community/user; or the default
+#            will be http://site.com/users/user
+# returns: scalar; a URL.
 # </LJFUNC>
 sub journal_base
 {
@@ -4190,50 +4196,53 @@ sub load_user_privs
     }
 }
 
-# arg is optional.  if arg not present, checks if remote has
-# any privs at all of that type.
-# also, $dbh can be undef, in which case privs must be pre-loaded
 # <LJFUNC>
 # name: LJ::check_priv
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# des: Check to see if a user has a certain privilege.
+# info: Usually this is used to check the privs of a $remote user.
+#       See [func[LJ::get_remote]].  As such, a $u argument of undef
+#       is okay to pass: 0 will be returned, as an unknown user can't
+#       have any rights.
+# args: dbarg, u, priv, arg?
+# des-priv: Priv name to check for (see [dbtable[priv_list]])
+# des-arg: Optional argument.  If defined, function only returns true
+#          when $remote has a priv of type $priv also with arg $arg, not
+#          just any priv of type $priv, which is the behavior without
+#          an $arg
+# returns: boolean; true if user has privilege
 # </LJFUNC>
 sub check_priv
 {
-    my ($dbarg, $remote, $priv, $arg) = @_;
-    return 0 unless ($remote);
+    my ($dbarg, $u, $priv, $arg) = @_;
+    return 0 unless $u;
 
     my $dbs = make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
     
-    if (! $remote->{'_privloaded'}->{$priv}) {
+    if (! $u->{'_privloaded'}->{$priv}) {
 	if ($dbr) {
-	    load_user_privs($dbr, $remote, $priv);
+	    load_user_privs($dbr, $u, $priv);
 	} else {
 	    return 0;
 	}
     }
 
     if (defined $arg) {
-	return (defined $remote->{'_priv'}->{$priv} &&
-		defined $remote->{'_priv'}->{$priv}->{$arg});
+	return (defined $u->{'_priv'}->{$priv} &&
+		defined $u->{'_priv'}->{$priv}->{$arg});
     } else {
-	return (defined $remote->{'_priv'}->{$priv});
+	return (defined $u->{'_priv'}->{$priv});
     }
 }
 
-# check to see if the given remote user has a certain privledge
-# DEPRECATED.  should use load_user_privs + check_priv
+# 
+# 
 # <LJFUNC>
 # name: LJ::remote_has_priv
 # class: 
-# des: 
-# info: 
+# des: Check to see if the given remote user has a certain priviledge
+# info: DEPRECATED.  should use load_user_privs + check_priv
 # args: 
 # des-: 
 # returns: 
@@ -4427,8 +4436,8 @@ sub get_itemid_before { return get_itemid_near(@_, "before"); }
 
 # <LJFUNC>
 # name: LJ::mysql_time
-# class: 
 # des: 
+# class: time
 # info: 
 # args: 
 # des-: 
@@ -4847,6 +4856,7 @@ sub exml
 
 # <LJFUNC>
 # name: LJ::ehtml
+# class: text
 # des: Escapes a value before it can be put in HTML.
 # args: string
 # des-string: string to be escaped
@@ -4865,6 +4875,7 @@ sub ehtml
 
 # <LJFUNC>
 # name: LJ::days_in_month
+# class: time
 # des: Figures out the number of days in a month.
 # args: month, year
 # des-month: Month
@@ -4891,17 +4902,21 @@ sub days_in_month
     return ((31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)[$month-1]);
 }
 
-####
-### delete an itemid.  if $quick is specified, that means items are being deleted en-masse
-##  and the batch deleter will take care of some of the stuff, so this doesn't have to
-#
 # <LJFUNC>
 # name: LJ::delete_item
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
+# des: Deletes a journal item from a user's journal that resides in the old schema (cluster0).
+# info: This function is deprecated, just as the old schema is deprecated.  In a 
+#       few months this function will be removed.  The new equivalent to this 
+#       function is [func[LJ::delete_item2]].
+# args: dbarg, journalid, itemid, quick?, deleter?
+# des-journalid: Userid of journal to delete item from.
+# des-itemid: Itemid of item to delete.
+# des-quick: Optional flag to make the delete be a little quicker when many deletes
+#            are occuring.  It just doesn't update lastitemid in [dbtable[userusage]].
+# des-deleter: Optional code reference to run to handle a deletion.  Mass-delete
+#              tools can use this to batch deletes in table locks for speed.  Arguments
+#              to this coderef are ($tablename, $col, @ids).  The default implementation
+#              is: "DELETE FROM $table WHERE $col IN (@ids)"
 # returns: 
 # </LJFUNC>
 sub delete_item
@@ -4945,8 +4960,6 @@ sub delete_item
 # name: LJ::delete_item2
 # des: Deletes a user's journal item from a cluster.
 # args: dbh, dbcm, journalid, jitemid, quick?, anum?
-# des-dbh: Master database handle.
-# des-dbcm: Cluster master db to delete item from.
 # des-journalid: Journal ID item is in.
 # des-jitemid: Journal itemid of item to delete.
 # des-quick: Optional boolean.  If set, only [dbtable[log2]] table
@@ -4955,7 +4968,7 @@ sub delete_item
 # des-anum: The log item's anum, which'll be needed to delete lazily
 #           some data in tables which includes the anum, but the
 #           log row will already be gone so we'll need to store it for later.
-# returns: boolean; 1 on sucess, 0 on failure.
+# returns: boolean; 1 on success, 0 on failure.
 # </LJFUNC>
 sub delete_item2
 {
@@ -4998,12 +5011,18 @@ sub delete_item2
 
 # <LJFUNC>
 # name: LJ::delete_talkitem
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# des: Deletes a comment and associated metadata.
+# info: The tables talk2, talkprop2, talktext2, and recent_talktext2 are all 
+#       deleted from, immediately. Unlike [func[LJ::delete_item2]], there is
+#       no $quick flag to queue the delete for later, nor is one really
+#       necessary, since deleting from 4 tables won't be too slow.
+# args: dbcm, journalid, jtalkid
+# des-journalid: Journalid (userid from [dbtable[user]] to delete comment from).
+#                The journal must reside on the $dbcm you provide.
+# des-jtalkid: The jtalkid of the comment.
+# returns: boolean; 1 on success, 0 on failure.# des-dbh: Master database handle.
+# des-dbcm: Cluster master db to delete item from.
+
 # </LJFUNC>
 sub delete_talkitem
 {
@@ -5011,6 +5030,7 @@ sub delete_talkitem
     $jid += 0; $jtalkid += 0;
     foreach my $t (qw(talk2 talkprop2 talktext2 recent_talktext2)) {
 	$dbcm->do("DELETE FROM $t WHERE journalid=$jid AND jtalkid=$jtalkid");
+	return 0 if $dbcm->err;
     }
     return 1;
 }
