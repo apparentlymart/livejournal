@@ -658,12 +658,12 @@ function Page::print_linklist() {
 }
 
 function print_stylesheet() {
-    var string background_image = $*page_background_image ? "url($*page_background_image); }" : "";
+
     """
 body {
     background-color: $*page_background_color;
 """;
-    if ($*page_background_image != "") {
+    if (clean_url($*page_background_image) != "") {
         """
     background-image: url("$*page_background_image");
     background-repeat: $*page_background_repeat;
