@@ -3,10 +3,6 @@
 use strict;
 use Getopt::Long;
 
-my $clusterid = shift;
-die "Usage: blobify_userpics.pl <clusterid>\n"
-    unless $clusterid;
-
 # load libraries now
 use lib "$ENV{'LJHOME'}/cgi-bin";
 use LJ::Blob;
@@ -17,6 +13,10 @@ my $opt_fast;
 exit 1 unless
     GetOptions("fast" => \$opt_fast,
                );
+
+my $clusterid = shift;
+die "Usage: blobify_userpics.pl <clusterid>\n"
+    unless $clusterid;
 
 my $db = LJ::get_cluster_master($clusterid);
 die "Invalid/down cluster: $clusterid\n" unless $db;
