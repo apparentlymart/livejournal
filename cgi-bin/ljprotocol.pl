@@ -629,8 +629,11 @@ sub postevent
     return fail($err,307) unless $uowner->{'statusvis'} eq "V";
 
     # post content too large
-    return fail($err,409) if bytes::length($req->{'event'}) >= LJ::BMAX_EVENT; 
-    
+    # NOTE: requires $req->{event} be binary data, but we've already
+    # removed the utf-8 flag in the XML-RPC path, and it never gets
+    # set in the "flat" protocol path.
+    return fail($err,409) if length($req->{'event'}) >= LJ::BMAX_EVENT;
+
     my $time_was_faked = 0;
     my $offset = 0;  # assume gmt at first.
 
