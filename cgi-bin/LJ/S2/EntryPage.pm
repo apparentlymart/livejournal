@@ -159,6 +159,13 @@ sub EntryPage
             };
 
             $s2com->{'thread_url'} = "$permalink?thread=$dtalkid" if @{$com->{'children'}};
+
+            # add the poster_ip metadata if remote user has 
+            # access to see it.
+            $s2com->{'metadata'}->{'poster_ip'} = $com->{'props'}->{'poster_ip'} if 
+                ($com->{'props'}->{'poster_ip'} && $remote &&
+                 ($remote->{'userid'} == $pu->{'userid'} ||
+                  LJ::check_rel($dbs, $u, $remote, 'A')));
             
             push @$destlist, $s2com;
 
