@@ -95,7 +95,7 @@
  ### load user props.  some don't apply to communities
  {
      my @props = qw(opt_whatemailshow opt_blockrobots country state city zip renamedto
-                    url urlname opt_hidefriendofs dont_load_members);
+                    url urlname opt_hidefriendofs dont_load_members no_mail_alias);
      unless ($com || $synd) { push @props, qw(aolim icq yahoo msn gender jabber); }
      if ($synd) { push @props, qw(rssparseerror); }
      LJ::load_user_props($dbr, $u, @props);
@@ -413,7 +413,7 @@
               @emails = ();
           }
           if ($LJ::USER_EMAIL && LJ::get_cap($u, "useremail")) {
-              unless ($u->{'opt_whatemailshow'} eq "A") {
+              unless ($u->{'opt_whatemailshow'} eq "A" || $u->{'no_mail_alias'}) {
                   push @emails, "$u->{'user'}\@$LJ::USER_DOMAIN";
               }
           } 
