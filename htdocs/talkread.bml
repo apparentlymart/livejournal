@@ -329,7 +329,8 @@ if ($uri =~ m!/(\d+)\.html$!) {
  }
  my $post_count = 0;
  while (my $post = $sth->fetchrow_hashref) {
-     $post_count++ unless ($post->{'state'} eq "D");
+     $post_count++ unless $post->{'state'} eq "D" ||
+         ($post->{'state'} eq "S" && !LJ::Talk::can_view_screened($dbs, $remote, $u, $up, $post->{'userpost'}));
      $posts{$post->{'talkid'}} = $post;
      push @{$children{$post->{'parenttalkid'}}}, $post->{'talkid'};
  }
@@ -452,7 +453,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
      if ($_->{'state'} eq "D") {
          $_->{'subject'} = $T{'deleted'};
      }
-     elsif ($_->{'state'} eq "A" || $_->{'state'} eq "S") {
+     elsif ($_->{'state'} eq "A" || ($_->{'state'} eq "S" && LJ::Talk::can_view_screened($dbs, $remote, $u, $up, $_->{'userpost'}))) {
          # if the message isn't deleted, flag its parent(s) as
          # having children to recurse into later.
          my $par = $_->{'parenttalkid'};
