@@ -117,7 +117,7 @@ body<=
 
  # See if we should inject QuickReply javascript
  LJ::load_user_props($remote, "opt_no_quickreply");
- 
+
  if (($remote && !$remote->{'opt_no_quickreply'}) && !$nocomments) {
      $$head .= $LJ::COMMON_CODE{'quickreply'};
      $$bodyopts .= 'onload="restore_entry();" onunload="save_entry();"';
@@ -311,6 +311,8 @@ body<=
 
  # Quick reply variables.  Not always set.
  my ($last_talkid, $last_jid) = LJ::get_lastcomment();
+ my %LJ_cmtinfo;  # data structure to give to javascript for commentmanage
+ $LJ_cmtinfo{'journal'} = $u->{user};
 
  my $recurse_post = sub
  {
@@ -320,6 +322,8 @@ body<=
 
      my $tid = $post->{'talkid'};
      my $dtid = $tid * 256 + $init->{'anum'};
+     my $LJci = $LJ_cmtinfo{$dtid} = { rc => [], u => '' };
+
      my $datepost = "<font size='-1'>" . substr($post->{'datepost'}, 0, 16) . "</font>";
 
      my $bgcolor = ($opts->{'depth'} % 2) ? "emcolorlite" : "emcolor";
@@ -331,6 +335,8 @@ body<=
      }
 
      my $pu = $post->{'posterid'} ? $user{$post->{'posterid'}} : undef;
+     $LJci->{u} = $pu->{user} if $pu;
+
      my $userpost = $post->{'userpost'};
      my $user;
      if ($post->{'props'}->{'deleted_poster'}) {
@@ -370,9 +376,9 @@ body<=
          my $icon = LJ::Talk::show_image($pics, $post->{'props'}->{'subjecticon'});
 
          if ($post->{'_loaded'}) {
-             $ret .= "<a name='t$dtid'></a><table width='100%' class='talk-comment'><tr>";
+             $ret .= "<a name='t$dtid'></a><table id='ljcmt$dtid' width='100%' class='talk-comment'><tr>";
              $ret .= "<td rowspan='2'><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
-             $ret .= "<td bgcolor='$bgcolor' width='100%'>";
+             $ret .= "<td id='cmtbar$dtid' bgcolor='$bgcolor' width='100%'>";
              if (my $picid = $post->{'picid'}) {
                  my $alt = $pu->{'name'};
                  if ($post->{'props'}->{'picture_keyword'}) {
@@ -475,12 +481,13 @@ body<=
              $ret .= "</td></tr></table>\n";
          }
      }
-     
+
      if ($post->{'children'}) {
          foreach my $childpost (@{$post->{'children'}}) {
+             push @{$LJci->{rc}}, $childpost->{talkid} * 256 + $init->{'anum'};
              $self_sub->($self_sub, $childpost, { "depth" => $opts->{'depth'} + 1});
          }
-     } 
+     }
  };
 
  unless ($nocomments)
@@ -525,6 +532,15 @@ body<=
      if (@comments > 0)
      {
          $recurse_post->($recurse_post, $_, { "depth" => 0 }) foreach (@comments);
+
+         $$head .= "<script src=\"$LJ::SITEROOT/js/commentmanage.js\"></script>\n";
+         my $js_screen_color = "\"" . LJ::ejs(BML::get_template_def("screenedbarcolor") || BML::get_template_def("emcolor")) . "\"";
+         my $js_normal_color = "\"" . LJ::ejs(BML::get_template_def("emcolor")) . "\"";
+         $$head .= "<script>var LJ_cmtinfo = " . LJ::js_dumper(\%LJ_cmtinfo) . ";\n" .
+             "function userhook_screen_comment_ARG (dIid) { setStyle('cmtbar'+dIid, 'background', $js_screen_color); }\n".
+             "function userhook_unscreen_comment_ARG (dIid) { setStyle('cmtbar'+dIid, 'background', $js_normal_color); }\n".
+             "var LJVAR; if (!LJVAR) LJVAR = new Object(); LJVAR.imgprefix = \"$LJ::IMGPREFIX\";\n".
+             "</script>\n";
 
          $ret .= "<hr /><p class='lesstop' align='center'><b>$readlink";
          $ret .= "(" . LJ::make_qr_link('bottom', '', $T{'postcomments'}, $posturl) . "</a>)" if $remote;

@@ -1443,6 +1443,26 @@ sub no_access_error {
     }
 }
 
+# Data::Dumper for JavaScript
+sub js_dumper {
+    my $obj = shift;
+    if (ref $obj eq "HASH") {
+        my $ret = "{";
+        foreach my $k (keys %$obj) {
+            $ret .= "$k: " . js_dumper($obj->{$k}) . ",";
+        }
+        chop $ret;
+        $ret .= "}";
+        return $ret;
+    } elsif (ref $obj eq "ARRAY") {
+        my $ret = "[" . join(", ", map { js_dumper($_) } @$obj) . "]";
+        return $ret;
+    } else {
+        return $obj if $obj =~ /^\d+/;
+        return "\"" . LJ::ejs($obj) . "\"";
+    }
+}
+
 # Common challenge/response javascript, needed by both login pages and comment pages alike.
 # Forms that use this should onclick='return sendForm()' in the submit button.
 # Returns true to let the submit continue.
