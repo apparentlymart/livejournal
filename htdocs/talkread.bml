@@ -592,7 +592,7 @@ body<=
          # Do Quick Reply stuff
          LJ::load_user_props($remote, "opt_no_quickreply") if $remote;
          if ($remote && !$remote->{'opt_no_quickreply'}) {
-             my $basepath = LJ::journal_base($u) . "/$ditemid.html?replyto=";;
+             my $basepath = LJ::journal_base($u) . "/$ditemid.html?replyto=";
              $ret .= LJ::html_hidden({'name' => 'replyto', 'id' => 'replyto', 'value' => ''},
                                      {'name' => 'parenttalkid', 'id' => 'parenttalkid', 'value' => ''},
                                      {'name' => 'itemid', 'id' => 'itemid', 'value' => $ditemid},
@@ -602,6 +602,7 @@ body<=
                                      {'name' => 'cookieuser', 'id' => 'cookieuser', 'value' => $remote->{'user'}},
                                      {'name' => 'dtid', 'id' => 'dtid', 'value' => ''},
                                      {'name' => 'basepath', 'id' => 'basepath', 'value' => $basepath},
+                                     {'name' => 'stylemine', 'id' => 'stylemine', 'value' => $GET{'style'} eq 'mine' ? 1 : 0},
                                   );
 
              # rate limiting challenge

@@ -108,7 +108,11 @@ body<=
 
     # Yeah, we're done.
     my $dtalkid = $comment->{talkid}*256 + $item->{anum};
-    my $commentlink = LJ::Talk::talkargs($talkurl, "view=$dtalkid") . "#t$dtalkid";
+
+    # Allow style=mine for QR redirects
+    my $stylemine = $POST{'stylemine'} ? 'style=mine' : '';
+
+    my $commentlink = LJ::Talk::talkargs($talkurl, "view=$dtalkid", $stylemine) . "#t$dtalkid";
 
     my $ret = "";
     $ret .= "<?h1 $ML{'.success.title'} h1?>";
