@@ -145,14 +145,14 @@ BODY<=
          $sth->execute;
          while (my $uid = $sth->fetchrow_array) {
              next if $uid == $u->{'userid'};
-             $pt_weight{$uid} += (1 / $intcount{$int});
+             $pt_weight{$uid} += (1 / log($intcount{$int}));
              $pt_count{$uid}++;
          }
      }
 
      my %magic;  # balanced points
      foreach (keys %pt_count) {
-         $magic{$_} = $pt_weight{$_}*20 + $pt_count{$_};
+         $magic{$_} = $pt_weight{$_}*10 + $pt_count{$_};
      }
      
      my @matches = sort { $magic{$b} <=> $magic{$a} } keys %magic;
