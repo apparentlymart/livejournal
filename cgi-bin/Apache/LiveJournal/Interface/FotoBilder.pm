@@ -103,7 +103,7 @@ sub can_upload
 sub set_quota
 {
     my ($r, $POST) = @_;
-    my $u = LJ::load_user($POST->{'user'});
+    my $u = LJ::load_userid($POST->{'uid'});
     return OK unless $u && defined $POST->{'used'};
 
     my $used = $POST->{'used'} << 10;  # Kb -> bytes
