@@ -91,13 +91,29 @@ sub put {
     return 1;
 }
 
+sub delete {
+    my ($u, $domain, $fmt, $bid) = @_;
+    _load_bcid($u);
+    my $bc = get_blobclient($u);
+
+    my $dbcm = LJ::get_cluster_master($u) or return 0;
+
+    my $bdid = LJ::get_blob_domainid($domain);
+    return 0 unless $bc->delete($u->{blob_clusterid}, $u->{userid}, $domain, 
+                                $fmt, $bid);
+
+    $dbcm->do("DELETE FROM userblob WHERE journalid=? AND domain=? AND blobid=?",
+              undef, $u->{userid}, $bdid, $bid);
+    die "Error doing userblob accounting: " . $dbcm->errstr if $dbcm->err;
+    return 1;
+}
+
 sub get_disk_usage {
     my ($u, $domain) = shift;
     my $dbcr = LJ::get_cluster_reader($u);
-    return $dbcr->selectrow_array(
-                    "SELECT SUM(length) FROM userblob ".
-                    "WHERE journalid=? AND domain=?", undef,
-                    $u->{userid}, $LJ::BLOBINFO{blobdomain_ids}->{$domain});
+    return $dbcr->selectrow_array("SELECT SUM(length) FROM userblob ".
+                                  "WHERE journalid=? AND domain=?", undef,
+                                  $u->{userid}, LJ::get_blob_domainid($domain));
 }
 
 1;

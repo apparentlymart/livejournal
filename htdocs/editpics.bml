@@ -63,9 +63,10 @@
             my @inactive_picids;
             my @delete;
             my %picid_of_kwid;
+            my %ctype;  # picid -> contenttype, for delete mode
 
             # select all of their userpics and iterate through them
-            $sth = $dbh->prepare("SELECT picid, width, height, state " .
+            $sth = $dbh->prepare("SELECT picid, width, height, state, contenttype " .
                                  "FROM userpic WHERE userid=?");
             $sth->execute($u->{'userid'});
             while (my $pic = $sth->fetchrow_hashref)
@@ -73,6 +74,7 @@
                 # delete this pic
                 if ($POST{"delete_$pic->{'picid'}"}) {
                     push @delete, $pic->{'picid'};
+                    $ctype{$pic->{picid}} = $pic->{contenttype};
                     next;
                 }
                 
@@ -112,14 +114,29 @@
             if (@delete) {
                 my $id_in = join(", ", map { $dbh->quote($_) } @delete);
                 
-                # delete metadata from global
-                $dbh->do("DELETE FROM userpic WHERE picid IN ($id_in)");
-                
                 # delete data from user cluster
                 my $dbcm = LJ::get_cluster_master($u);
                 return $err->($ML{'error.nodb'}) unless $dbcm;
-                $dbcm->do("DELETE FROM userpicblob2 WHERE userid=? ".
-                          "AND picid IN ($id_in)", undef, $u->{'userid'});
+
+                foreach my $picid (@delete) {
+                    my $fmt = {
+                        'image/gif' => 'gif',
+                        'image/jpeg' => 'jpg',
+                        'image/png' => 'png',
+                    }->{$ctype{$picid}};
+
+                    # try and delete from either the blob server or database,
+                    # and only after deleting the image do we delete the metadata.
+                    if ($LJ::USERPIC_BLOBSERVER &&
+                        LJ::Blob::delete($u, "userpic", $fmt, $picid)) {
+                        $dbh->do("DELETE FROM userpic WHERE picid=$picid");
+                            
+                    } elsif ($dbcm->do("DELETE FROM userpicblob2 WHERE ".
+                                       "userid=? AND picid=?", undef,
+                                       $u->{userid}, $picid) > 0) {
+                        $dbh->do("DELETE FROM userpic WHERE picid=$picid");
+                    }
+                }
                 
                 # if any of the userpics they want to delete are active, then we want to 
                 # re-run LJ::activate_userpics() - turns out it's faster to not check to 
@@ -266,12 +283,19 @@
                 $picid = $dbh->{'mysql_insertid'};
                 
                 ### insert the blob
-                my $dbcm = LJ::get_cluster_master($u);
-                return $err->($ML{'error.nodb'}) unless $dbcm;
-                $dbcm->do("INSERT INTO userpicblob2 (userid, picid, imagedata) " .
-                          "VALUES (?, ?, ?)",
-                          undef, $u->{'userid'}, $picid, $POST{'userpic'});
-                return $err->($dbcm->errstr) if $dbcm->err;
+                if ($LJ::USERPIC_BLOBSERVER) {
+                    my $et;
+                    my $fmt = lc($filetype);
+                    my $rv = LJ::Blob::put($u, "userpic", $fmt, $picid, $POST{'userpic'}, \$et);
+                    return $err->($et) unless $rv;
+                } else {
+                    my $dbcm = LJ::get_cluster_master($u);
+                    return $err->($ML{'error.nodb'}) unless $dbcm;
+                    $dbcm->do("INSERT INTO userpicblob2 (userid, picid, imagedata) " .
+                              "VALUES (?, ?, ?)",
+                              undef, $u->{'userid'}, $picid, $POST{'userpic'});
+                    return $err->($dbcm->errstr) if $dbcm->err;
+                }
             }
                 
             # make it their default pic?

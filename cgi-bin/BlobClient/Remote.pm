@@ -65,6 +65,15 @@ sub put {
     return 1;
 }
 
+sub delete {
+    my ($self, $cid, $uid, $domain, $fmt, $bid) = @_;
+    my $path = make_path(@_);
+    my $req = HTTP::Request->new(DELETE => $path);
+    my $res = $self->{ua}->request($req);
+    return 0 unless $res->is_success;
+    return 1;
+}
+
 sub is_dead {
     my $self = shift;
     delete $self->{deaduntil} if $self->{deaduntil} <= time();

@@ -70,6 +70,16 @@ sub put {
     return 1;
 }
 
+sub delete {
+    my ($self, $cid, $uid, $fmt, $domain, $bid) = @_;
+
+    my $filename = make_path(@_);
+
+    return 0 unless -e $filename;
+    return unlink($filename);
+    # FIXME: rmdir up the tree
+}
+
 sub make_path { my $self = shift; return $self->SUPER::make_path(@_); }
 
 1;
