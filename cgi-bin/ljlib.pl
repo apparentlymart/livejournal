@@ -28,6 +28,7 @@ do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljfeed.pl";
 require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
 require "$ENV{'LJHOME'}/cgi-bin/htmlcontrols.pl";
 
@@ -120,11 +121,13 @@ use constant CMAX_INTEREST => 50;
                      "des" => "Friends of Friends View",
                      "styleof" => "friends",
                  },
-                 "rss" => {
-                     "creator" => \&LJ::S1::create_view_rss,
-                     "des" => "RSS View (XML)",
-                     "nostyle" => 1,
+                 "data" => {
+                     "creator" => \&LJ::Feed::create_view,
+                     "des" => "Data View (RSS, etc.)",
                      "owner_props" => ["opt_whatemailshow", "no_mail_alias"],
+                 },
+                 "rss" => {  # this is now provided by the "data" view.
+                     "des" => "RSS View (XML)",
                  },
                  "res" => {
                      "des" => "S2-specific resources (stylesheet)",
@@ -1447,6 +1450,22 @@ sub time_to_cookie {
 
     return sprintf("$day[$wday], %02d-$month[$mon]-%04d %02d:%02d:%02d GMT", 
                    $mday, $year, $hour, $min, $sec);
+}
+
+# http://www.w3.org/TR/NOTE-datetime
+# http://www.w3.org/TR/xmlschema-2/#dateTime
+sub time_to_w3c {
+    my ($time, $ofs) = @_;
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime($time);
+
+    $mon++;
+    $year += 1900;
+
+    $ofs =~ s/([\-+]\d\d)(\d\d)/$1:$2/;
+    $ofs = 'Z' if $ofs =~ /0000$/;
+    return sprintf("%04d-%02d-%02dT%02d:%02d:%02d$ofs",
+                   $year, $mon, $mday,
+                   $hour, $min, $sec);
 }
 
 # <LJFUNC>
@@ -3630,7 +3649,7 @@ sub make_journal
     }
 
     unless ($geta->{'viewall'} && LJ::check_priv($remote, "viewall") ||
-            $opts->{'pathextra'} =~  m!/(\d+)/stylesheet$!) { # don't check style sheets
+            $opts->{'pathextra'} =~ m#/(\d+)/stylesheet$#) { # don't check style sheets
         return "<h1>Error</h1>Journal has been deleted.  If you are <b>$user</b>, you have a period of 30 days to decide to undelete your journal." if ($u->{'statusvis'} eq "D");
         return "<h1>Error</h1>This journal has been suspended." if ($u->{'statusvis'} eq "S");
     }
@@ -3641,7 +3660,11 @@ sub make_journal
     # what charset we put in the HTML
     $opts->{'saycharset'} ||= "utf-8";
 
-    if ($stylesys == 2 && $view ne 'rss') {
+    if ($view eq 'data') {
+        return LJ::Feed::make_feed($r, $u, $remote, $opts);
+    }
+
+    if ($stylesys == 2) {
         $r->notes('codepath' => "s2.$view") if $r;
         return LJ::S2::make_journal($u, $styleid, $view, $remote, $opts);
     }

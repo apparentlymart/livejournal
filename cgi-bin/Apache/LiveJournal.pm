@@ -251,13 +251,13 @@ sub trans
         my $mode = undef;
         my $pe;
 
-        if ($uuri =~ m!^/(\d+)\.html$!) {
+        if ($uuri =~ m#^/(\d+)\.html$#) {
             if ($GET{'mode'} eq "reply" || $GET{'replyto'}) {
                 $mode = "reply";
             } else {
                 $mode = "entry";
             }
-        } elsif ($uuri =~ m!^/(\d\d\d\d)(?:/(\d\d)(?:/(\d\d))?)?(/?)$!) {
+        } elsif ($uuri =~ m#^/(\d\d\d\d)(?:/(\d\d)(?:/(\d\d))?)?(/?)$#) {
             my ($year, $mon, $day, $slash) = ($1, $2, $3, $4);
             unless ($slash) {
                 return redir($r, "http://$host$hostport$uri/");
@@ -288,6 +288,10 @@ sub trans
                 my $newuri = $uri;
                 $newuri =~ s!$mode/(\d\d\d\d)!$1!;
                 return redir($r, "http://$host$hostport$newuri");
+            }
+            if ($mode eq 'rss') {
+                # code 301: moved permanently, update your links.
+                return redir($r, LJ::journal_base($user) . "/data/rss", 301);
             }
 
         } elsif (($vhost eq "users" || $vhost =~ /^other:/) &&
