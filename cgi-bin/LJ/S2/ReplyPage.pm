@@ -21,7 +21,21 @@ sub ReplyPage
 
     $p->{'entry'} = $s2entry;
 
+    $p->{'form'} = {
+        '_type' => "ReplyForm",
+        '_remote' => $remote,
+        '_u' => $u,
+    };
+
     return $p;
+}
+
+package S2::Builtin::LJ;
+
+sub ReplyForm__print
+{
+    my ($ctx, $form) = @_;
+    $S2::pout->("<form>Reply here: (incomplete)<br /><textarea rows='10' cols='40'></textarea></form>");
 }
 
 1;
