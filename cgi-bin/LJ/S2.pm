@@ -1289,7 +1289,7 @@ sub etags {
 # sanitize URLs
 sub clean_url {
     my ($ctx, $text) = @_;
-    unless ($text =~ m!^https?://!) {
+    unless ($text =~ m!^https?://[^'"\\]*$!) {
         $text = "";
     }
     return $text;
