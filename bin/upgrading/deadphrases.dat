@@ -1,6 +1,9 @@
 # one day, write a tool to remove these during populate.  
 # for now, we'll keep track here.
 
+general uploadpic.error.toolarge
+general /uploadpic_do.bml.error.urlerror
+
 general /userinfo.bml.label.viewlabel
 general /userinfo.bml.syn.lastnew
 general /editinfo.bml.allowshowcontact.email.reason
