@@ -1337,6 +1337,8 @@ sub format_html_mail {
             my %pics;
             LJ::load_userpics(\%pics, [ $comment->{u}{'defaultpicid'} ]);
             $comment->{pic} = $pics{$picid};
+            # load_userpics doesn't return picid, but we rely on it above
+            $comment->{pic}{'picid'} = $picid;
         }
         if ($comment->{pic}) {
             $pichtml = "<img src=\"$LJ::USERPIC_ROOT/$picid/$comment->{pic}{'userid'}\" align='absmiddle' ".
