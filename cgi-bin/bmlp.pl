@@ -1078,6 +1078,11 @@ sub trim
 
 package BML;
 
+sub set_cookie
+{
+    return BMLClient::set_cookie(@_);
+}
+
 sub register_language
 {
     my ($isocode, $langcode) = @_;

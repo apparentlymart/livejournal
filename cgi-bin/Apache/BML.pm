@@ -78,7 +78,7 @@ sub handler
 
     # setup cookies
     *BMLCodeBlock::COOKIE = *BML::COOKIE;
-    %BMLCodeBlock::COOKIE = ();
+    %BML::COOKIE = ();
     foreach (split(/;\s+/, $r->header_in("Cookie"))) {
         next unless ($_ =~ /(.*)=(.*)/);
         $BML::COOKIE{BML::durl($1)} = BML::durl($2);
@@ -1076,6 +1076,12 @@ sub set_cookie
 
     my $ho = $Apache::BML::cur_req->{'r'}->headers_out;
     $ho->add("Set-Cookie" => $cookie);
+
+    if (defined $expires) {
+        $BML::COOKIE{$name} = $value;
+    } else {
+        delete $BML::COOKIE{$name};
+    }
 }
 
 # deprecated:

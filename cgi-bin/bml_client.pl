@@ -126,6 +126,12 @@ sub set_cookie
     print "; path=$path" if $path;
     print "; domain=$domain" if $domain;
     print "\n";
+
+    if (defined $expires) {
+        $BMLClient::COOKIE{$name} = $value;
+    } else {
+        delete $BMLClient::COOKIE{$name};
+    }
 }
 
 package main;
