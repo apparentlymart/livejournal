@@ -667,6 +667,38 @@ on your layout, changing this setting discards all other edits you may have made
 
 /customize/index.bml.title=Customize Journal
 
+/delcomment.bml.changeoptions<<
+<strong>Note:</strong> From the [[link]] page, you can choose
+whether to allow <em>all</em>, <em>registered users</em>, or
+<em>friends only</em> to post comments.
+.
+
+/delcomment.bml.confirm.banuser=Ban [[user]] from commenting in your journal
+
+/delcomment.bml.confirm.body=Are you sure you want to delete this comment?
+
+/delcomment.bml.confirm.head=Delete this comment?
+
+/delcomment.bml.confirm.submit=Delete Comment
+
+/delcomment.bml.error.alreadydeleted=The specified comment has already been deleted.
+
+/delcomment.bml.error.cantdelete=A comment may only be deleted by its author or the journal owner.
+
+/delcomment.bml.error.cantdelete.comm=A comment may only be deleted by its author, the author of the journal entry, or a community maintainer.
+
+/delcomment.bml.error.invalidtype=Invalid comment type.  This page only handles comments on journal entries.
+
+/delcomment.bml.error.nocomment=The specified comment does not exist.
+
+/delcomment.bml.success.andban=The comment has been deleted, and user [[user]] has been banned from commenting in your journal.
+
+/delcomment.bml.success.head=Deleted
+
+/delcomment.bml.success.noban=The comment has been deleted.
+
+/delcomment.bml.title=Delete Comment
+
 /directory.bml.error.accounttype<<
 Sorry, your account type doesn't permit usage of the
 directory, or you aren't currently <a href='/login.bml'>logged in</a>.  If your account type permits
