@@ -26,7 +26,7 @@ body<=
      my $post = shift;
      my $msg = $errors{$key};
      return unless $msg;
-     return "$pre<?inerr $msg inerr?>$post";
+     return "$pre $msg $post";
  };
  
  # validate a code they've entered and throw them back to entercode
@@ -84,19 +84,16 @@ body<=
      return "<b>$ML{'Error'}</b>: $ML{'.error.postrequired'}" unless LJ::did_post();
      
      my $user = LJ::canonical_username($FORM{'user'});
-     my $name = $FORM{'name'};
-     $name =~ s/[\n\r]//g;
      my $email = LJ::trim(lc($FORM{'email'}));
 
      # reject this email?
      return LJ::sysban_block(0, "Create user blocked based on email",
-                             { 'new_user' => $user, 'email' => $email, 'name' => $name })
+                             { 'new_user' => $user, 'email' => $email, 'name' => $user })
          if LJ::sysban_check('email', $email);
 
      my $dbh = LJ::get_db_writer();
      my $quser = $dbh->quote($user);
      my $qemail = $dbh->quote($email);
-     my $qname = $dbh->quote($name);
      
      if (length($user) > 15) { 
          $errors{'username'} = "$ML{'error.usernamelong'}";
@@ -153,10 +150,6 @@ body<=
          }
      }
  
-     unless ($name) { 
-         $errors{'name'} = "$ML{'.error.username.blank'}"; 
-     }
-
      $FORM{'password1'} = LJ::trim($FORM{'password1'});
      $FORM{'password2'} = LJ::trim($FORM{'password2'});
 
@@ -164,7 +157,7 @@ body<=
          $errors{'password'} = "$ML{'.error.password.nomatch'}"; 
      } else {
          my @checkpass = LJ::run_hooks("bad_password", 
-                                       { 'user' => $user, 'name' => $name, 
+                                       { 'user' => $user, 'name' => $user, 
                                          'email' => $email, 'password' => $FORM{'password1'} });
          if (@checkpass && $checkpass[0]->[0]) {
              $errors{'password'} = "Bad password: $checkpass[0]->[0]";
@@ -215,7 +208,7 @@ body<=
          my $caps   = int($LJ::NEWUSER_CAPS);
          my $status = ($LJ::EVERYONE_VALID ? 'A'  : 'N');
          $dbh->do("INSERT INTO user (user, email, password, status, caps, name, clusterid, dversion) ".
-                  "VALUES ($quser, $qemail, $qpassword, '$status', $caps, $qname, $qclusterid, $LJ::MAX_DVERSION)");
+                  "VALUES ($quser, $qemail, $qpassword, '$status', $caps, $quser, $qclusterid, $LJ::MAX_DVERSION)");
          if ($dbh->err) {
              return "<?h1 $ML{'Error'} h1?><?p $ML{'error.procrequest'} <b>" . $dbh->errstr . "</b> p?>";
          }
@@ -311,97 +304,95 @@ body<=
      my $ret;
      my $v;
 
-     $ret .= "<?h1 $ML{'.create.head'} h1?><?p $ML{'.create.text'} p?><?hr?>";
+     $ret .= "<?p $ML{'.create.text'} p?>";
      $ret .= "<form action=\"create.bml\" method=\"post\">\n";
      $ret .= "<input type=\"hidden\" name=\"mode\" value=\"submit\">\n";
      $ret .= "<input type=\"hidden\" name=\"code\" value=\"" . LJ::ehtml($FORM{'code'}) . "\">\n";     
 
-     $ret .= "<?h2 $ML{'.username.head'} h2?>";
-     $ret .= "<?p ".BML::ml(".username.text", {'sitename' => $LJ::SITENAME}) ." p?>";
-     
-     $v = LJ::ehtml($FORM{'user'});
-     $ret .= "<?standout <table width='260'><tr><td align='center'>";
-     $ret .= "<table><tr><td>$ML{'.username.box.head'}<br />";
-     $ret .= "<input value='$v' type='text' name='user' size='15' maxlength='15' />";
-     $ret .= "</td></tr></table></td></tr><tr><td>";
-     $ret .= $error_msg->('username', '', '<br />');
-     $ret .= "<font face='Arial,Helvetica' size='-1'>$ML{'.username.charsallowed'}<br /><br />";
-     $ret .= "<b>$ML{'.username.ljaddress'}</b><br />";
-     $ret .= "&nbsp;&nbsp;&nbsp;&nbsp;<?siteroot?>/users/<i>$ML{'.username.username'}</i>/<br />";
-     $ret .= "&nbsp;&nbsp;&nbsp;&nbsp;<?siteroot?>/<i>~$ML{'.username.username'}</i>/<br />";
-     if ($LJ::USER_VHOSTS) {
-         unless ($LJ::EVERYONE_PAID) {
-             $ret .= "<b>$ML{'.username.forpaidaccts'}</b><br />";
-         }
-         $ret .= "&nbsp;&nbsp;&nbsp;&nbsp;http://<i>$ML{'.username.username'}</i>.$LJ::USER_DOMAIN/<br />";
-     }
-     $ret .= "</font></td></tr>";
-     $ret .= "</table> standout?>";
+     $ret .= "<ol>";
 
-     #### name
-     $v = LJ::ehtml($FORM{'name'});
-     $ret .= "<?h2 $ML{'.name.head'} h2?><?p $ML{'.name.text'} p?><?standout $ML{'.name.input.head'}<br /><input value=\"$v\" type=\"text\" name=\"name\" size=\"40\" maxlength=\"100\">";
-     $ret .= $error_msg->('name', '<br>', '');
-     $ret .= " standout?>";
-     
-     $ret .= "<?h2 $ML{'.email.head'} h2?><?p $ML{'.email.text'} p?>";
+     ### username
+     $v = LJ::ehtml($FORM{'user'});
+     $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.username.box.head'}</div>";
+     $ret .= $error_msg->('username', '<p class="formitemFlag">', '</p>');
+     $ret .= "<div class='formitemDesc'>" . BML::ml(".username.text", {'sitename' => $LJ::SITENAME}) . "</div>";
+     $ret .= LJ::html_text({'name' => 'user', 'size' => 15, 'maxlength' => 15, 'value' => $v,});
+     $ret .= "<div class='formitemNote'>$ML{'.username.charsallowed'}<br /><br /></div>";
+     $ret .= "</div></li>";
 
      ### email address
-     $v = LJ::ehtml($FORM{'email'});     
-     $ret .= "<?standout <table width=\"250\"><tr><td valign=\"top\" align=\"left\">$ML{'.email.input.head'}<br /><input value=\"$v\" type=\"text\" name=\"email\" size=\"40\" maxlength=\"50\">";
-     $ret .= $error_msg->('email', '<br>', '');
-     $ret .= "</td></tr></table> standout?>";
+     $v = LJ::ehtml($FORM{'email'});
+     $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.email.input.head'}</div>";
+     $ret .= $error_msg->('email', '<p class="formitemFlag">', '</p>');
+     $ret .= "<div class='formitemDesc'>$ML{'.email.text'}</div>";
+     $ret .= LJ::html_text({'name' => 'email', 'size' => 40, 'maxlength' => 50, 'value' => $v,});
+     $ret .= "<div class='formitemNote'>$ML{'.email.note'}</div>";
+     $ret .= "</div></li>";
 
-     $ret .= "<?h2 $ML{'.password.head'} h2?><?p $ML{'.password.text'} p?>";
-
-     ### password
-     $ret .= "<?standout $ML{'.password.input.head1'}<br /><input type=\"password\" name=\"password1\" size=\"30\" maxlength=\"31\"><br />$ML{'.password.input.head2'}<br /><input type=\"password\" name=\"password2\" size=\"30\" maxlength=\"31\">";
-     $ret .= $error_msg->('password', '<br>', '');
-     $ret .= " standout?>";
+     $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.password.input.head1'}</div>";
+     $ret .= $error_msg->('password', '<p class="formitemFlag">', '</p>');
+     $ret .= "<div class='formitemDesc'>$ML{'.password.text'}</div>";
+     $ret .= LJ::html_text({'name' => 'password1', 'size' => 30, 'maxlength' => 31, 'type' => "password",});
+     $ret .= "<div class='formitemNote'>$ML{'.password.input.head2'}</div>";
+     $ret .= LJ::html_text({'name' => 'password2', 'size' => 30, 'maxlength' => 31, 'type' => "password",});
+     $ret .= "</div></li>";
 
      if (@LJ::INITIAL_OPTIONAL_FRIENDS) {
-         $ret .= "<?h2 $ML{'.initialfriends.heading'} h2?><?p $ML{'.initialfriends'} p?><?standout ";
+         $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.initialfriends.heading'}</div>";
+         $ret .= "<div class='formitemDesc'>$ML{'.initialfriends'}</div>";
+         $ret .= "<div class='formitemNote'>";
          foreach my $friend (@LJ::INITIAL_OPTIONAL_FRIENDS) {
              $ret .= LJ::did_post() && !$FORM{"initial_optional_friend_$friend"} ? 
                      LJ::html_check({'name' => "initial_optional_friend_$friend", 'value' => 1, }) :
                      LJ::html_check({'name' => "initial_optional_friend_$friend", 'value' => 1, 'checked' => "checked", });
              $ret .= LJ::ljuser($friend) . " " . $ML{".initial.friend.$friend"} . "<br />";
          }
-         $ret .= " standout?>";
+         $ret .= "</div></div></li>";
      }
      if ($LJ::COPPA_CHECK)
      {
-         $ret .= "<?h2 $ML{'.aolnotice.head'} h2?><?p ".BML::ml(".aolnotice.text", {'sitename' => $LJ::SITENAME}) ." p?>";
-
          if ($LJ::COPPA_CHECK eq "over") {
-             $ret .= "<?h2 $ML{'.age.head'} h2?><?p $ML{'.age.check2.question'} <blockquote><input type=\"checkbox\" value=\"1\" name=\"over13\" /> $ML{'.age.check2.yes'}</blockquote>  p?>";
+             $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.age.head'}</div>";
+             $ret .= "<div class='formitemDesc'>$ML{'.age.check2.question'}</div>";
+             $ret .= "<div class='formitemNote'>";
+             $ret .= "<input type=\"checkbox\" value=\"1\" name=\"over13\" /> $ML{'.age.check2.yes'}";
          } else {
-             $ret .= "<?h2 $ML{'.age.head'} h2?><?p $ML{'.age.check.question'} <blockquote><input type=\"checkbox\" value=\"1\" name=\"under13\" /> $ML{'.age.check.yes'}</blockquote>  p?>";
+             $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.age.head'}</div>";
+             $ret .= "<div class='formitemDesc'>$ML{'.age.check.question'}</div>";
+             $ret .= "<div class='formitemNote'>";
+             $ret .= "<input type=\"checkbox\" value=\"1\" name=\"under13\" /> $ML{'.age.check.yes'}";
          }
+         $ret .= "</div></div></li>";
      }
 
      if ($LJ::TOS_CHECK)
      {
-         $ret .= "<?h2 $ML{'.tos.heading'} h2?><?p $ML{'.tos.p1'} p?>";
-         $ret .= $error_msg->('agree_tos', '<p>', '</p>');
+         $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.tos.heading'}</div>";
+         $ret .= "<div class='formitemDesc'>$ML{'.tos.p1'}</div>";
+         $ret .= $error_msg->('agree_tos', '<p class="formitemFlag">', '</p>');
          my $checked = $POST{'agree_tos'} ? "checked='checked'" : "";
-         $ret .= "<center><iframe width='600' height='300' src='/legal/tos-mini.bml' style='border: 1px solid gray;'></iframe><p><input type='checkbox' name='agree_tos' value='1' $checked /><b>$ML{'.tos.haveread'}</b></p></center>";
+         $ret .= "<iframe width='600' height='300' src='/legal/tos-mini.bml' style='border: 1px solid gray;'></iframe>";
+         $ret .= "<div class='formitemNote'><input type='checkbox' name='agree_tos' value='1' $checked /> $ML{'.tos.haveread'}";
+         $ret .= "</div></div></li>";
      }
 
      if ($LJ::ALLOW_CLUSTER_SELECT) {
-         $ret .= "<?h2 $ML{'.clusterselect.head'} h2?><?p $ML{'.clusterselect.text'} p?>";
-         $ret .= "<?standout $ML{'.clusterselect.cluster'}<br />";
+         $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.clusterselect.head'}</div>";
+         $ret .= "<div class='formitemDesc'>$ML{'.clusterselect.text'}</div>";
          $ret .= LJ::html_select({ 'name' => 'cluster_id' },
                                  "0", "$BML{'.clusterselect.nocluster'}", 
                                  map { $_, BML::ml(".clusterselect.clusternum", {'number' => $_}) } @LJ::CLUSTERS);
-         $ret .= " standout?>"; 
+
+         $ret .= "<div class='formitemNote'>$ML{'.clusterselect.cluster'}</div>";
+         $ret .= "</div></li>";
      }
 
-     $ret .= "<?h2 $ML{'.proceed.head'} h2?><?p $ML{'.proceed.text'} p?>";
+     $ret .= "</ol><?hr?><p class='formitemFlag'><b>$ML{'.aolnotice.head'}</b><br />".BML::ml(".aolnotice.text", {'sitename' => $LJ::SITENAME}) ."</p>";
 
-     $ret .= "<?standout <center><input type=\"submit\" value=\"$ML{'.proceed.btn.proceed'}\"><br />";
-     $ret .= "<font size=\"-1\">$ML{'.proceed.warning'}</font>";
-     $ret .= "</center> standout?>";
+     $ret .= "<div class='formitemName'>$ML{'.proceed.head'}</div>";
+     $ret .= "<div class='formitemDesc'>$ML{'.proceed.text'}</div>";
+     $ret .= "<input type=\"submit\" value=\"$ML{'.proceed.btn.proceed'}\"><br />";
+     $ret .= "<div class='formitemNote'>$ML{'.proceed.warning'}</div>";
      $ret .= "</form>";
 
      return $ret;
@@ -412,6 +403,46 @@ body<=
 _code?>
 
 <=body
+head<=
+<style media='screen' type='text/css'>
+.formitem {
+    color: #343434;
+    font-size: 1em;
+}
+
+.formnumber {
+    font-weight: bold;
+    margin-top: 1.8em;
+    font-size: .9em;
+}
+
+.formitemName {
+    font-weight: bold;
+    font-size: .9em;
+    margin-top: 1.8em;
+}
+
+.formitemDesc {
+    margin-top: .4em;
+    margin-bottom: .4em;
+  color: #505050;
+}
+
+.formitemNote {
+  color: #F37B37;
+    font-size: .9em;
+    margin-top: .4em;
+    margin-bottom: .4em;
+}
+
+.formitemFlag {
+  color: #CE0000;
+    font-size: .9em;
+    margin-top: .4em;
+    margin-bottom: .4em;
+}
+</style>
+<=head
 page?><?_c <LJDEP>
 link: htdocs/legal/privacy.bml
 post: htdocs/create.bml, htdocs/editinfo.bml
