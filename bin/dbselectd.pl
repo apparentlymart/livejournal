@@ -21,6 +21,7 @@ my $PORT = 5151;
 my $PIDFILE = "$ENV{'LJHOME'}/var/dbselectd.pid";
 
 # temporary:
+%LJ::DBINFO = ();
 %LJ::DBINFO = (
 	       'master' => {
 		   'host' => '10.0.0.2',
@@ -61,21 +62,19 @@ my $pid;
 # Buffers.
 my %inbuffer = ();
 my %outbuffer = ();
-my %ready = ();
-
+my %cmd = ();
+my %clientinfo = ();
 
 sub handle 
 {
+    my $select = shift;
     my $client = shift;
-    my $request = $ready{$client};
+    my $cmd = shift;
+    my $c = ($clientinfo{$client} ||= {});
+    
+    $c->{'sum'} += int($cmd);
+    $outbuffer{$client} = "clients=$client, sum=$c->{'sum'}\n";
 
-    # Do the magic handling stuff!
-    # Nice candy shell around the whole thing :)
-    # Put the results into %outbuffer, like so.
-    $outbuffer{$client} = "Test data!\n";
-
-    # Remove the request.
-    delete $ready{$client};
 }
 
 # Server crap is below.
@@ -102,6 +101,10 @@ if ($opt_foreground) {
     print "Running in foreground...\n";
     $pid = $$;
     write_pid($pid);
+    $SIG{'INT'} = sub {
+        unlink($PIDFILE);
+        exit 1;
+    };
 } else {
     print "Forking off and initializing...\n";
     if ($pid = fork) {
@@ -112,16 +115,30 @@ if ($opt_foreground) {
     }
 }
 
+sub killpid_die
+{
+    my $msg = shift;
+    unlink $PIDFILE;
+    die $msg;
+}
+
 # Connection stuff.
-my $server = IO::Socket::INET->new(LocalPort => $PORT, Listen => 10) or die "Can't make server socket: $@\n";
+my $server = IO::Socket::INET->new(
+				   "LocalPort" => $PORT, 
+				   "Listen" => 10,
+				   "ReuseAddr" => 1,
+				   "Reuse" => 1,
+				   ) or killpid_die "Can't make server socket: $@\n";
 
 nonblock($server);
+$server->sockopt(SO_REUSEADDR, 1);
 my $select = IO::Select->new($server);
 
 print "Looping.\n";
 
 # Main loop-de-loop.
-while(1) {
+while(1) 
+{
   my $client;
   my $rv;
   my $data;
@@ -144,9 +161,7 @@ while(1) {
         unless (defined($rv) && length($data)) {
             # If a socket says you can read, but there's nothing there, it's
             # actually dead. Clean it up.
-            delete $inbuffer{$client};
-            delete $outbuffer{$client};
-            delete $ready{$client};
+	    cleanup($client);
 
             $select->remove($client);
             close($client);
@@ -156,20 +171,23 @@ while(1) {
         $inbuffer{$client} .= $data;
         # Check to see if there's a newline at the end. If it is, the
         # command is finished. There's only one command line, so I won't
-        # bother making %ready a hash with array references to request
+        # bother making %cmd a hash with array references to request
         # lines. Although this might be needed in the future.
-        if ($inbuffer{$client} =~ /\n$/) {
-            $ready{$client} = chomp($inbuffer{$client});
+        if ($inbuffer{$client} =~ s/^.*\n//) {
+            $cmd{$client} = $&;
             delete $inbuffer{$client};
         }
     }
 
   }
 
-  # Deal with ready stuff.
-  foreach $client (keys %ready) {
-      handle($client);
+  # Deal with cmd stuff.
+  foreach $client (keys %cmd) {
+      my $cmd = $cmd{$client};
+      $cmd =~ s/[\n\r]+$//;
+      handle($select, $client, $cmd);
   }
+  %cmd = ();
 
   # Flush de boofers.
   foreach $client ($select->can_write(1)) {
@@ -188,9 +206,7 @@ while(1) {
       } else {
           # Ahh, something broke. If it was going to block, the above would
           # catch it. Close up...
-          delete $inbuffer{$client};
-          delete $outbuffer{$client};
-          delete $ready{$client};
+	  cleanup($client);
 
           $select->remove($client);
           close($client);
@@ -210,4 +226,14 @@ sub nonblock {
     fcntl($socket, F_SETFL, $flags | O_NONBLOCK) or return 0;
 
     return 1;
+}
+
+sub cleanup
+{
+    my $client = shift;
+
+    delete $inbuffer{$client};
+    delete $outbuffer{$client};
+    delete $cmd{$client};
+    delete $clientinfo{$client};
 }
