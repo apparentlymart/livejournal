@@ -41,7 +41,7 @@ unless (-d $ENV{'LJHOME'}) {
 my $maind = $ENV{'LJHOME'};
 my $cvs = "$maind/cvs/livejournal";
 my $cvslocal = "$maind/cvs/local";
-my @toplevel = qw(htdocs cgi-bin bin doc src);
+my @toplevel = qw(htdocs cgi-bin bin doc sites src);
 
 my %status = ();   # $relfile -> $status
 
