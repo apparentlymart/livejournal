@@ -82,7 +82,12 @@ sub make_journal
                     map { "<li>$_</li>" } @{$opts->{'errors'}},
                     "</ul>");
     }
-    
+
+    # unload layers that aren't public
+    my $pub = get_public_layers();
+    my @unload = grep { ! $pub->{$_} } @{$ctx->[S2::LAYERLIST]};
+    S2::unregister_layer($_) foreach (@unload);
+
     return $ret;
 }
 
