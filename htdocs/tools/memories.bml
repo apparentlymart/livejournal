@@ -106,7 +106,7 @@
      }
  }
 
- my $kwmap = LJ::Memories::get_keywords($u);
+ my $kwmap = LJ::Memories::get_keywords($authasu);
 
  if ($GET{'keyword'}) 
  {
