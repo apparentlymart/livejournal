@@ -22,18 +22,29 @@ sub blogger_deserialize {
 
 sub blogger_serialize {
     my $event = shift;
+    my $header;
     my $content;
     if ($event->{'subject'}) {
-        $content .= "<title>$event->{'subject'}</title>";
+        $header .= "<title>$event->{'subject'}</title>";
     }
     if ($event->{'props'}->{'current_mood'}) {
-        $content .= "lj-mood: $event->{'props'}->{'current_mood'}\n";
+        $header .= "lj-mood: $event->{'props'}->{'current_mood'}\n";
     }
     if ($event->{'props'}->{'current_music'}) {
-        $content .= "lj-music: $event->{'props'}->{'current_music'}\n";
+        $header .= "lj-music: $event->{'props'}->{'current_music'}\n";
     }
+    $content .= "$header\n" if $header;
     $content .= $event->{'event'};
     return $content;
+}
+
+# ISO 8601 (many formats available)
+# "yyyy-mm-dd hh:mm:ss" => "yyyymmddThh:mm:ss"  (literal T)
+sub mysql_date_to_iso {
+    my $dt = shift;
+    $dt =~ s/ /T/;
+    $dt =~ s/\-//g;
+    return $dt;
 }
 
 package Apache::LiveJournal::Interface::Blogger;
@@ -162,7 +173,7 @@ sub getRecentPosts {
         'content' => LJ::Util::blogger_serialize($_),
         'userID' => $_->{'poster'} || $journal,
         'postId' => "$journal:$_->{'itemid'}",
-        'dateCreated' => $_->{'eventtime'}, 
+        'dateCreated' => LJ::Util::mysql_date_to_iso($_->{'eventtime'}),
     } } @{$res->{'events'}} ];
 }
 
@@ -197,7 +208,7 @@ sub getPost {
         'content' => LJ::Util::blogger_serialize($_),
         'userID' => $_->{'poster'} || $journal,
         'postId' => "$journal:$_->{'itemid'}",
-        'dateCreated' => $_->{'eventtime'}, 
+        'dateCreated' => LJ::Util::mysql_date_to_iso($_->{'eventtime'}),
     } } $res->{'events'}->[0];
 }
 
