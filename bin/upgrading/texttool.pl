@@ -204,13 +204,13 @@ sub makeusable
 
 sub copyfaq
 {
-    my $domid = $dom_code{'faq'} ? $dom_code{'faq'}->{'dmid'} : 0;
-    return unless $domid && $opt_local_lang;
+    my $faqd = LJ::Lang::get_dom("faq");
+    my $ll = LJ::Lang::get_root_lang($faqd);
+    unless ($ll) { return; }
+
+    my $domid = $faqd->{'dmid'};
 
     $out->("Copying FAQ...", '+');
-    my $ll = $lang_code{$opt_local_lang};
-    $out->('x', "Bogus --local-lang argument") unless $ll;
-    $out->('x', "Local-lang '$ll->{'lncode'}' parent isn't 'en'") unless $ll->{'parentlnid'} == 1;
 
     my %existing;
     $sth = $dbh->prepare("SELECT i.itcode FROM ml_items, ml_latest WHERE l.lnid=$ll->{'lnid'} AND dmid=$domid AND l.itid=i.itid AND i.dmid=$domid");
@@ -310,6 +310,8 @@ sub poptext
                 $metadata{$1} = $text;
                 next;
             }
+
+            next unless $code ne "";
 
             my $qcode = $dbh->quote($code);
             my $exists = $dbh->selectrow_array("SELECT COUNT(*) FROM ml_latest l, ml_items i ".
