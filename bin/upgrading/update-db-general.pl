@@ -816,6 +816,14 @@ CREATE TABLE userpropblob (
 )
 EOC
 
+register_tablecreate("backupdirty", <<'EOC');
+CREATE TABLE backupdirty (
+    userid INT(10) unsigned NOT NULL default '0',
+    marktime INT(10) unsigned NOT NULL default '0',
+    PRIMARY KEY (userid)
+)
+EOC
+
 register_tablecreate("zip", <<'EOC');
 CREATE TABLE zip (
   zip varchar(5) NOT NULL default '',
