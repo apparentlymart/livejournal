@@ -35,6 +35,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
  my $u = $init->{'journalu'};
 
  $r->notes("journalid" => $u->{'userid'});
+ $r->notes("codepath" => "bml.talkpost");
 
  return "<?h1 $ML{'Error'} h1?><?p $init->{'error'} p?>" if $init->{'error'}; 
  return $ML{'talk.error.nojournal'} unless $u;
