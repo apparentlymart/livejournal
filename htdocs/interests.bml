@@ -339,14 +339,16 @@ body<=
 
         my $list;
         my $count = 0;
-        $sth = $dbr->prepare("SELECT u.user, u.name, u.journaltype FROM user u, userinterests ui
+        unless ($LJ::DISABLED{'interests-community'}) {
+            $sth = $dbr->prepare("SELECT u.user, u.name, u.journaltype FROM user u, userinterests ui
                               WHERE u.userid=ui.userid AND ui.intid=? AND u.journaltype='C'
                               AND u.statusvis='V' ORDER BY u.user LIMIT 1000");
-        $sth->execute($intid);
-        while ($_ = $sth->fetchrow_hashref) {
-            $count++;
-            LJ::text_out(\$_->{'name'});
-            $list .= "<li>" . LJ::ljuser($_) . " - " . LJ::ehtml($_->{'name'}) . "</ul>";
+            $sth->execute($intid);
+            while ($_ = $sth->fetchrow_hashref) {
+                $count++;
+                LJ::text_out(\$_->{'name'});
+                $list .= "<li>" . LJ::ljuser($_) . " - " . LJ::ehtml($_->{'name'}) . "</ul>";
+            }
         }
 
         my $matchcount;
@@ -376,12 +378,18 @@ body<=
 
         $sth = $dbr->prepare("SELECT u.user, u.name FROM user u, userinterests ui
                               WHERE u.userid=ui.userid AND ui.intid=? AND u.journaltype<>'C'
-                              AND u.statusvis='V' ORDER BY u.user LIMIT 1000");
+                              AND u.statusvis='V' LIMIT 1000");
         $sth->execute($intid);
+        my @ul;
         while (my ($iuser, $iname) = $sth->fetchrow_array) {
+            push @ul, [ $iuser, $iname ];
+        }
+        @ul = sort { $a->[0] cmp $b->[0] } @ul;
+        
+        foreach (@ul) {
             $count++;
-            LJ::text_out(\$iname);
-            $list .= "<li>" . LJ::ljuser($iuser) . " - " . LJ::ehtml($iname) . "</li>";
+            LJ::text_out(\$_->[1]);
+            $list .= "<li>" . LJ::ljuser($_->[0]) . " - " . LJ::ehtml($_->[1]) . "</li>";
         }
 
         $matchcount = BML::ml($count == 1 ? ".match" : ".matches", { 'count' => $count });
