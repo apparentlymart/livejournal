@@ -351,7 +351,7 @@ $maint{'genstats_size'} = sub {
     LJ::Stats::register_stat
         ({ 'type' => "clustered",
            'jobname' => "size-accounts",
-           'statnam' => "size",
+           'statname' => "size",
            'handler' =>
                sub {
                    my $db = shift;

@@ -141,22 +141,20 @@ sub LJ::Stats::get_db {
     my $cid = shift;
 
     # global handles
-    {
-        my $mini_getter = sub {
-            my @roles = $LJ::STATS_FORCE_SLOW ? ("slow") : @_;
-            my $db = LJ::get_dbh({raw=>1}, @roles);
-            return $db if $db;
+    if ($type eq "dbr") {
+        my @roles = $LJ::STATS_FORCE_SLOW ? ("slow") : ("slave", "master");
+        my $db = LJ::get_dbh({raw=>1}, @roles);
+        return $db if $db;
             
-            # don't fall back to slave/master if STATS_FORCE_SLOW is on
-            die "ERROR: Could not get handle for slow database role\n"
-                if $LJ::STATS_FORCE_SLOW;
-        };
+        # don't fall back to slave/master if STATS_FORCE_SLOW is on
+        die "ERROR: Could not get handle for slow database role\n"
+            if $LJ::STATS_FORCE_SLOW;
 
-        return $mini_getter->("slave", "master")
-            if $type eq "dbr";
-        return $mini_getter->("master")
-            if $type eq "dbh";
+        return undef;
     }
+
+    return LJ::get_dbh({raw=>1}, 'master')
+        if $type eq "dbh";
 
     # cluster handles
     return undef unless $cid > 0;
