@@ -29,7 +29,7 @@ require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
 require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
 
-$LJ::USERPIC_ROOT ||= "/userpic";
+$LJ::USERPIC_ROOT ||= "$LJ::SITEROOT/userpic";
 
 $LJ::DBIRole = new DBI::Role {
     'sources' => \%LJ::DBINFO,

@@ -328,7 +328,7 @@ sub create_view_lastn
         LJ::load_userpics($dbs, \%userpics, [ $picid ]);
         $lastn_page{'userpic'} = 
             LJ::fill_var_props($vars, 'LASTN_USERPIC', {
-                "src" => "$LJ::SITEROOT/userpic/$picid/$u->{'userid'}",
+                "src" => "$LJ::USERPIC_ROOT/$picid/$u->{'userid'}",
                 "width" => $userpics{$picid}->{'width'},
                 "height" => $userpics{$picid}->{'height'},
             });
@@ -554,7 +554,7 @@ sub create_view_lastn
                 my $pic = {};
                 LJ::load_userpics($dbs, $pic, [ $picid ]);
                 $lastn_altposter{'pic'} = LJ::fill_var_props($vars, 'LASTN_ALTPOSTER_PIC', {
-                    "src" => "$LJ::SITEROOT/userpic/$picid/$picuserid",
+                    "src" => "$LJ::USERPIC_ROOT/$picid/$picuserid",
                     "width" => $pic->{$picid}->{'width'},
                     "height" => $pic->{$picid}->{'height'},
                 });
@@ -966,7 +966,7 @@ sub create_view_friends
             if ($picid) {
                 $friends_event{'friendpic'} = 
                     LJ::fill_var_props($vars, 'FRIENDS_FRIENDPIC', {
-                        "src" => "$LJ::SITEROOT/userpic/$picid/$picuserid",
+                        "src" => "$LJ::USERPIC_ROOT/$picid/$picuserid",
                         "width" => $userpics{$picid}->{'width'},
                         "height" => $userpics{$picid}->{'height'},
                     });

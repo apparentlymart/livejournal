@@ -71,7 +71,7 @@ $user = $u->{'user'};
              
      }
      $body .= "<tr valign='middle'>";
-     $body .= "<td align='center'><img src='/userpic/$pic->{'picid'}/$u->{'userid'}' width='$pic->{'width'}' height='$pic->{'height'}'></td>";
+     $body .= "<td align='center'><img src='$LJ::USERPIC_ROOT/$pic->{'picid'}/$u->{'userid'}' width='$pic->{'width'}' height='$pic->{'height'}'></td>";
      $body .= "<td>";
      if ($u->{'defaultpicid'} == $pic->{'picid'}) {
          $body .= "$ML{'.default'}<br />";
