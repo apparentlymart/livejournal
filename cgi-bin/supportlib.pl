@@ -180,8 +180,9 @@ sub can_append
 # extended supportread (with a plus sign at the end of the category key)
 sub can_read_internal
 {
-    my ($sp, $remote) = @_;    
+    my ($sp, $remote) = @_;
     if (can_help($sp, $remote)) { return 1; }
+    return 0 unless can_read_cat($sp->{_cat}, $remote);
     if (LJ::check_priv($remote, "supportviewinternal", "")) { return 1; }
     my $catkey = $sp->{_cat}->{'catkey'};
     if (LJ::check_priv($remote, "supportread", $catkey."+")) { return 1; }
@@ -193,6 +194,7 @@ sub can_make_internal
 {
     my ($sp, $remote) = @_;
     if (can_help($sp, $remote)) { return 1; }
+    return 0 unless can_read_cat($sp->{_cat}, $remote);
     if (LJ::check_priv($remote, "supportmakeinternal", "")) { return 1; }
     if (LJ::check_priv($remote, "supportmakeinternal", $sp->{_cat}->{'catkey'})) { 
         return 1; 
@@ -204,6 +206,7 @@ sub can_read_screened
 {
     my ($sp, $remote) = @_;
     if (can_help($sp, $remote)) { return 1; }
+    return 0 unless can_read_cat($sp->{_cat}, $remote);
     if (LJ::check_priv($remote, "supportviewscreened", "")) { return 1; }
     if (LJ::check_priv($remote, "supportviewscreened", $sp->{_cat}->{'catkey'})) {
         return 1;
@@ -215,6 +218,7 @@ sub can_perform_actions
 {
     my ($sp, $remote) = @_;
     if (can_help($sp, $remote)) { return 1; }
+    return 0 unless can_read_cat($sp->{_cat}, $remote);
     if (LJ::check_priv($remote, "supportmovetouch", "")) { return 1; }
     if (LJ::check_priv($remote, "supportmovetouch", $sp->{_cat}->{'catkey'})) {
         return 1;
