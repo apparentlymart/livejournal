@@ -1,4 +1,7 @@
 <?_code
+#line 2
+ use strict;
+ use vars qw($title $body $head %FORM);
  
  $title = $ML{'.title'};
  $body = "";
@@ -14,6 +17,8 @@
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
  my $dbcr;
+
+ my $MAX_FRIENDS_SHOW = 500;
         
  my $remote = LJ::get_remote($dbr);
  if ($FORM{'user'} eq "" && !$remote) {
@@ -41,8 +46,6 @@
      $user = $remote->{'user'};
  }
 
- my $quser = $dbr->quote($user);
-
  my $userid = $FORM{'userid'};
  my $u;
  $userid += 0;
@@ -51,11 +54,11 @@
      return $error->($ML{'.label.reqfinduser'})
          if ($userid && ! LJ::check_priv($dbs, $remote, "finduser"));
 
-     my $where = $userid ? "userid=$userid" : "user=$quser";
-     $sth = $dbr->prepare("SELECT userid, user, statusvis, caps, has_bio, name, defaultpicid, txtmsg_status, allow_infoshow, bdate, allow_contactshow, opt_mangleemail, email, journaltype, dversion, clusterid FROM user WHERE $where");
-     $sth->execute;
-     if ($dbr->err) { return $error->($dbr->errstr); }
-     $u = $sth->fetchrow_hashref;
+     if ($userid) {
+         $u = LJ::load_userid($dbs, $userid);
+     } else {
+         $u = LJ::load_user($dbs, $user);
+     }
 
      $user = $u->{'user'} if $u;
      $userid = $u->{'userid'}+0 if $u;
@@ -141,7 +144,6 @@
  }
 
  $user = $u->{'user'};
- $quser = $dbr->quote($user);
  $userid = $u->{'userid'};
 
  if ($u->{'has_bio'} eq "Y") {
@@ -160,55 +162,58 @@
      $interests{$_->{'interest'}} = $_;
  }
 
+ my %remote_interest;
  if ($remote && $remote->{'userid'} != $userid) {
-     $sth = $dbr->prepare("SELECT i.interest FROM interests i, userinterests ui WHERE i.intid=ui.intid AND ui.userid=$remote->{'userid'}");
+     $sth = $dbr->prepare("SELECT intid FROM userinterests WHERE userid=$remote->{'userid'}");
      $sth->execute;
-     while (my ($int) = $sth->fetchrow_array) {
-         if (defined $interests{$int}) {
-             $interests{$int}->{'common'} = 1;
-         }
-     }
+     $remote_interest{$_} = 1 while $_ = $sth->fetchrow_array;
  }
 
- my %res_fr;
  if ($u->{'opt_hidefriendofs'} && ! $remote_isowner) {
      $friendsof{'load'} = 0;
  }
 
- if ($friends{'load'} || $friendsof{'load'}) {
-     LJ::do_request($dbr, 
-                    { 'mode' => 'getfriends',
-                      'ver' => $LJ::PROTOCOL_VER,
-                      'includefriendof' => $friendsof{'load'},
-                      'user' => $u->{'user'}, }, 
-                    \%res_fr,
-                    { 'userid' => $u->{'userid'},
-                      'noauth' => 1,
-                  }); 
-     ($friends{'loaded'}, $friends{'count'}) = (1, $res_fr{'friend_count'})
-         if $friends{'load'};
-     ($friendsof{'loaded'}, $friendsof{'count'}) = (1, $res_fr{'friendof_count'})
-         if $friendsof{'load'};
- } else {
-     $friends{'count'} = $dbr->selectrow_array("SELECT COUNT(*) FROM friends WHERE userid=$u->{'userid'}");
-     $friendsof{'count'} = $dbr->selectrow_array("SELECT COUNT(*) FROM friends WHERE friendid=$u->{'userid'}");
- };
+ my @friends;
+ if ($friends{'load'}) {
+     my $limit = $MAX_FRIENDS_SHOW + 1;
+     my $sth = $dbr->prepare("SELECT u.userid, u.user, u.journaltype, u.statusvis ".
+                             "FROM friends f, user u WHERE u.userid=f.friendid AND f.userid=? ".
+                             "LIMIT $limit");
+     $sth->execute($u->{'userid'});
+     push @friends, $_ while $_ = $sth->fetchrow_hashref;
+     @friends = sort { $a->{'user'} cmp $b->{'user'} } @friends;
+     $friends{'count'} = scalar @friends;
+     $friends{'loaded'} = 1;
+     if ($friends{'count'} > $MAX_FRIENDS_SHOW) {
+         $friends{'count'} = $dbr->selectrow_array("SELECT COUNT(*) FROM friends WHERE friendid=$u->{'userid'}");
+     }
+ }
+
+ my @friendsof;
+ if ($friendsof{'load'}) {
+     my $limit = $MAX_FRIENDS_SHOW + 1;
+     my $sth = $dbr->prepare("SELECT u.userid, u.user, u.journaltype ".
+                             "FROM friends f, user u WHERE f.userid=u.userid AND f.friendid=? ".
+                             "AND u.statusvis='V' LIMIT $limit");
+     $sth->execute($u->{'userid'});
+     push @friendsof, $_ while $_ = $sth->fetchrow_hashref;
+     @friendsof = sort { $a->{'user'} cmp $b->{'user'} } @friendsof;
+     $friendsof{'count'} = scalar @friendsof;
+     $friendsof{'loaded'} = 1;
+     if ($friendsof{'count'} > $MAX_FRIENDS_SHOW) {
+         # note: not entirely accurate (includes suspended/deleted users) but close enough:
+         $friendsof{'count'} = $dbr->selectrow_array("SELECT COUNT(*) FROM friends WHERE userid=$u->{'userid'}");
+     }
+ }
 
  $u->{'name'} = LJ::ehtml($u->{'name'});
 
  # who does the remote user list as a friend?
- my %remote_friend;
- if ($remote && $friends{'loaded'}) {
-     my $error;
-     my $rs = LJ::Protocol::do_request($dbs, "getfriends",
-                                       { 'ver' => $LJ::PROTOCOL_VER,
-                                         'username' => $remote->{'user'}, },
-                                       \$error,
-                                       { 'userid' => $remote->{'userid'},
-                                         'noauth' => 1, });
-     foreach my $f (@{$rs->{'friends'}}) {
-         $remote_friend{$f->{'username'}} = 1;
-     }
+ my %remote_friendid;
+ if ($remote && $friends{'loaded'} && $remote->{'userid'} != $u->{'userid'}) {
+     my $sth = $dbr->prepare("SELECT friendid FROM friends WHERE userid=? LIMIT $MAX_FRIENDS_SHOW");
+     $sth->execute($remote->{'userid'});
+     $remote_friendid{$_} = 1 while $_ = $sth->fetchrow_array;
  }
  
  if ($com) {
@@ -220,18 +225,6 @@
      $body .= "<?h1 $ML{'.syndinfo.name'} h1?><?p " . BML::ml('.syndinfo.body',{'addtofriends'=>"$LJ::SITEROOT/friends/add.bml?user=$u->{'user'}"}) . " p?>";
  } else {
      $body .= "<?h1 $ML{'.userinfo.name'} h1?><?p " . BML::ml('.userinfo.body',{'username'=>$u->{'name'},'siteroot'=>$LJ::SITEROOT}) . " p?>";
- }
-
- my $add_friend = 0;
- if ($remote->{'user'} && $remote->{'user'} ne $user) {
-     $add_friend = 1;
-     if ($res_fr{'friendof_count'}) {
-         for (my $i=1; $i<=$res_fr{'friendof_count'}; $i++) {
-             if ($remote->{'user'} eq $res_fr{"friendof_${i}_user"}) {
-                 $add_friend = 0;
-             }
-         }
-     }
  }
 
  $body .= "<p align='center'>";
@@ -394,7 +387,7 @@
   if ( ! $synd && ($u->{'allow_contactshow'} eq "Y" ||
       ($u->{'allow_contactshow'} eq "F" && $remote_isfriend)))
   {
-      $mangleaddress = sub {
+      my $mangleaddress = sub {
           my $email = shift;
           my $mret = "<table cellpadding='0' cellspacing='0'><tr><td>";
           for (my $i = 0; $i < length($email); $i++) {
@@ -477,9 +470,7 @@
 
  ### memories
  {
-     $sth = $dbr->prepare("SELECT COUNT(*) FROM memorable WHERE userid=$userid");
-     $sth->execute;
-     my ($memcount) = $sth->fetchrow_array;
+     my $memcount = $dbr->selectrow_array("SELECT COUNT(*) FROM memorable WHERE userid=$userid");
      if ($memcount) {
          my $span = ($narrow_left-- > 0) ? 1 : 2;
          my $noun_name = $memcount == 1 ? '.memories.entry' : '.memories.entries';
@@ -499,7 +490,7 @@
          LJ::text_out(\$_);
          my $eint = LJ::eurl($_);
          if ($interests{$_}->{'intcount'} > 1) {
-             if ($interests{$_}->{'common'}) {
+             if ($remote_interest{$interests{$_}->{'intid'}}) {
                  $intlist .= "<b><a href='/interests.bml?int=$eint'>$_</a></b>, ";
              } else {
                  $intlist .= "<a href='/interests.bml?int=$eint'>$_</a>, ";
@@ -527,21 +518,18 @@
      my $span = ($narrow_left-- >= 0) ? 1 : 2;
      $body .= "<tr><td align='right' valign='top'><b><a href='$LJ::SITEROOT/$dir/$user/friends'>$label</a>:</b></td><td colspan='$span'>";
 
-     $friends{'display'} = 0 if $friends{'count'} > 500;
+     $friends{'display'} = 0 if $friends{'count'} > $MAX_FRIENDS_SHOW;
      if ($friends{'count'}) {
          if (!$friends{'loaded'} || !$friends{'display'}) {
              $body .= "<b>" . $friends{'count'} . ":</b> ";
              $body .= "<a href='/directory.bml?s_fro=1&amp;fro_user=$u->{'user'}'> " . ($com ? $ML{'.label.viewmembers'} : $ML{'.label.viewfriends'}) .  " </a>.";
          } else {
-             $body .= "<b>" . $res_fr{'friend_count'} . ":</b> ";
-             for (my $i=1; $i<=$res_fr{'friend_count'}; $i++) {
-                 my $fr = $res_fr{"friend_${i}_user"};
-                 my $status = $res_fr{"friend_${i}_status"};
-                 my $frlink = "<a href='/userinfo.bml?user=$fr'>$fr</a>";
-                 $frlink = "<strike>$frlink</strike>"
-                     if ($status && ($status eq 'deleted' || $status eq 'purged' || $status eq 'suspended'));
-                 $frlink = "<b>$frlink</b>"
-                     if $remote_friend{$fr} and $remote->{'userid'} != $u->{'userid'};
+             $body .= "<b>" . $friends{'count'} . ":</b> ";
+             foreach my $f (@friends) {
+                 my $status = $f->{'statusvis'};
+                 my $frlink = "<a href='/userinfo.bml?user=$f->{'user'}'>$f->{'user'}</a>";
+                 $frlink = "<strike>$frlink</strike>" if $status =~ /[DXS]/;
+                 $frlink = "<b>$frlink</b>" if $remote_friendid{$f->{'userid'}};
                  $body .= $frlink;
                  $body .= ", ";
              }
@@ -561,12 +549,11 @@
          my @friend_of;
          my @member_of;
          my $label;
-         for (my $i=1; $i<=$res_fr{'friendof_count'}; $i++) {
-             my $fr = $res_fr{"friendof_${i}_user"};
-             if ($res_fr{"friendof_${i}_type"} eq "community") {
-                 push @member_of, $fr;
+         foreach my $f (@friendsof) {
+             if ($f->{'journaltype'} eq "C") {
+                 push @member_of, $f;
              } else {
-                 push @friend_of, $fr;
+                 push @friend_of, $f;
              }
          }
          if (@friend_of) {
@@ -578,14 +565,13 @@
              $body .= "</td>";
              $body .= "<td colspan='2' valign='top'><b>" . scalar(@friend_of) . ":</b> ";
              my $count = 0;
-                 foreach (@friend_of) {
-                 my $frlink = "<a href=\"/userinfo.bml?user=$_\">$_</a>";
-                 $frlink = "<b>$frlink</b>"
-                     if $remote_friend{$_};
+             foreach (@friend_of) {
+                 my $frlink = "<a href=\"/userinfo.bml?user=$_->{'user'}\">$_->{'user'}</a>";
+                 $frlink = "<b>$frlink</b>" if $remote_friendid{$_->{'userid'}};
                  $body .= "$frlink, ";
                  if (++$count == 150 && $FORM{'mode'} ne "full") {
                      $body .= "<a href='" . BML::self_link({ 'mode' => 'full' }) . "'>...</a>";
-                    last;
+                     last;
                  }
              }
              chop $body; chop $body;
@@ -596,9 +582,8 @@
              $body .= "<tr><td align='right' valign='top'><b><nobr>$label:</nobr></b></td><td colspan='2'>";
              $body .= "<b>" . scalar(@member_of) . ":</b> ";
              foreach (@member_of) {
-                 my $frlink = "<a href='/userinfo.bml?user=$_'>$_</a>";
-                 $frlink = "<b>$frlink</b>"
-                     if $remote_friend{$_} && $remote->{'userid'} != $u->{'userid'};
+                 my $frlink = "<a href='/userinfo.bml?user=$_->{'user'}'>$_->{'user'}</a>";
+                 $frlink = "<b>$frlink</b>" if $remote_friendid{$_->{'userid'}};
                  $body .= "$frlink, ";
              }
              chop $body; chop $body;
@@ -706,12 +691,9 @@
          &comma($count) . "</td></tr>";
  }
  
- $sth = $dbr->prepare("SELECT SUM(points) AS 'points' FROM supportpoints WHERE userid=$userid");
- $sth->execute;
- $row = $sth->fetchrow_hashref;
- $row->{'points'} += 0;
- if ($row->{'points'}) {
-     $body .= "<tr><td align='right' nowrap><b><a href='/support/'>$ML{'.label.supportpoints'}</a>:</b></td><td colspan='2'>" . &comma($row->{'points'}) . "</td></tr>";
+ my $points = $sth->selectrow_array("SELECT SUM(points) AS 'points' FROM supportpoints WHERE userid=$userid");
+ if ($points) {
+     $body .= "<tr><td align='right' nowrap><b><a href='/support/'>$ML{'.label.supportpoints'}</a>:</b></td><td colspan='2'>" . &comma($points) . "</td></tr>";
  }
  
  sub comma {
