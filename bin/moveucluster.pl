@@ -15,14 +15,15 @@ exit 1 unless GetOptions('delete' => \$opt_del,
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
 my $dbh = LJ::get_dbh("master");
-my $dbr = $dbh;
+die "No master db available.\n" unless $dbh;
 
+my $dbr = $dbh;
 if ($opt_useslow) {
     $dbr = LJ::get_dbh("slow");
     unless ($dbr) { die "Can't get slow db from which to read.\n"; }
 }
 
-my $user = shift @ARGV;
+my $user = LJ::canonical_username(shift @ARGV);
 my $dclust = shift @ARGV;
 
 sub usage {
@@ -31,6 +32,9 @@ sub usage {
 
 usage() unless defined $user;
 usage() unless defined $dclust;
+
+die "Failed to get move lock.\n"
+    unless ($dbh->selectrow_array("SELECT GET_LOCK('moveucluster-$user', 10)"));
 
 my $u = LJ::load_user($dbh, $user);
 die "Non-existent user $user.\n" unless $u;
@@ -81,12 +85,15 @@ print "Moving '$u->{'user'}' from cluster $sclust to $dclust:\n";
 
 # set readonly cap bit on user
 $dbh->do("UPDATE user SET caps=caps|(1<<$readonly_bit) WHERE userid=$userid");
+$dbh->do("SELECT RELEASE_LOCK('moveucluster-$user')");
 
 # wait a bit for writes to stop if journal is somewhat active (last week update)
 my $secidle = $dbh->selectrow_array("SELECT UNIX_TIMESTAMP()-UNIX_TIMESTAMP(timeupdate) ".
                                     "FROM userusage WHERE userid=$userid");
-sleep(3) unless $secidle > 86400*7;
-sleep(2) unless $secidle > 86400;
+if ($secidle) {
+    sleep(2) unless $secidle > 86400*7;
+    sleep(1) unless $secidle > 86400;
+}
 
 # make sure slow is caught up:
 if ($opt_useslow) 
@@ -155,6 +162,41 @@ my $replace_into = sub {
     if (scalar @{$bufrows{$dbandtable}} > $max) {
         $flush_buffer->($dbandtable);
     }
+};
+
+# assume never tried to move this user before.  however, we find crap
+# in the oldids table, we'll revert to slow alloc_id functionality,
+# where we do a round-trip to $dbh for everything and see if every id
+# has been remapped already.  otherwise we do it in perl and batch
+# updates to the oldids table, which is the common/fast case.
+my $first_move = 1;
+if ($dbh->selectrow_array("SELECT oldid FROM oldids WHERE userid=$userid LIMIT 1")) {
+    $first_move = 0;
+}
+print "first move: $first_move\n";
+my %alloc_data;
+my $alloc_id = sub {
+    my ($area, $orig) = @_;
+
+    # fast version
+    if ($first_move) {
+        my $id = ++$alloc_data{$area};
+        $replace_into->($dbh, "oldids", "(area, oldid, userid, newid)", 250,
+                        $area, $orig, $userid, $id);
+        print "Fast! $id\n";
+        return $id;
+    }
+
+    # slow version
+    $dbh->{'RaiseError'} = 0;
+    $dbh->do("INSERT INTO oldids (area, oldid, userid, newid) ".
+             "VALUES ('$area', $orig, $userid, NULL)");
+    if ($dbh->err) {
+        $dbh->{'RaiseError'} = 1;
+        return $dbh->selectrow_array("SELECT newid FROM oldids WHERE area='$area' AND oldid=$orig");
+    }
+    $dbh->{'RaiseError'} = 1;
+    return $dbh->{'mysql_insertid'};
 };
 
 my $bufread;
@@ -319,15 +361,7 @@ sub movefrom0_logitem
     return 1 unless $item && $itemtext;   # however that could happen.
 
     # we need to allocate a new jitemid (journal-specific itemid) for this item now.
-    $dbh->{'RaiseError'} = 0;
-    $dbh->do("INSERT INTO oldids (area, oldid, userid, newid) ".
-             "VALUES ('L', $itemid, $userid, NULL)");
-    my $jitemid = 0;
-    if ($dbh->err) {
-        $jitemid = $dbh->selectrow_array("SELECT newid FROM oldids WHERE area='L' AND oldid=$itemid");
-    } else {
-        $jitemid = $dbh->{'mysql_insertid'};
-    }
+    my $jitemid = $alloc_id->('L', $itemid);
     unless ($jitemid) {
         die "ERROR: could not allocate a new jitemid\n";
     }
@@ -402,15 +436,7 @@ sub movefrom0_talkitem
     return unless defined $newtalkids->{$item->{'parenttalkid'}};
 
     # we need to allocate a new jitemid (journal-specific itemid) for this item now.
-    $dbh->{'RaiseError'} = 0;
-    $dbh->do("INSERT INTO oldids (area, oldid, userid, newid) ".
-             "VALUES ('T', $talkid, $userid, NULL)");
-    my $jtalkid = 0;
-    if ($dbh->err) {
-        $jtalkid = $dbh->selectrow_array("SELECT newid FROM oldids WHERE area='T' AND oldid=$talkid");
-    } else {
-        $jtalkid = $dbh->{'mysql_insertid'};
-    }
+    my $jtalkid = $alloc_id->('T', $talkid);
     unless ($jtalkid) {
         die "ERROR: could not allocate a new jtalkid\n";
     }
