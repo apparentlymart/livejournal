@@ -1578,8 +1578,12 @@ sub create_view_friends
         my $itemargs = "journal=$friend&amp;itemid=$ditemid";
         $friends_event{'itemargs'} = $itemargs;
 
+        my $stylemine = "";
+        $stylemine .= "style=mine" if $remote && $remote->{'opt_stylemine'} &&
+                                      $remote->{'userid'} != $friendid;
+
         LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$datakey}->{'opt_preformatted'},
-                                               'cuturl' => LJ::item_link($friends{$friendid}, $itemid, $item->{'anum'}), });
+                                              'cuturl' => LJ::item_link($friends{$friendid}, $itemid, $item->{'anum'}, $stylemine) });
         LJ::expand_embedded($ditemid, $remote, \$event);
         $friends_event{'event'} = $event;
         
@@ -1641,10 +1645,6 @@ sub create_view_friends
 
             my $nc = "";
             $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
-
-            my $stylemine = "";
-            $stylemine .= "style=mine" if $remote && $remote->{'opt_stylemine'} &&
-                                          $remote->{'userid'} != $friendid;
 
             my $permalink = "$journalbase/$ditemid.html";
             my $readurl = LJ::Talk::talkargs($permalink, $nc, $stylemine);

@@ -232,8 +232,12 @@ sub FriendsPage
 
         my $ditemid = $itemid * 256 + $item->{'anum'};
 
+        my $stylemine = "";
+        $stylemine .= "style=mine" if $remote && $remote->{'opt_stylemine'} &&
+                                      $remote->{'userid'} != $friendid;
+
         LJ::CleanHTML::clean_event(\$text, { 'preformatted' => $logprops{$datakey}->{'opt_preformatted'},
-                                               'cuturl' => LJ::item_link($friends{$friendid}, $itemid, $item->{'anum'}), });
+                                             'cuturl' => LJ::item_link($friends{$friendid}, $itemid, $item->{'anum'}, $stylemine) });
         LJ::expand_embedded($ditemid, $remote, \$text);
 
         my $userlite_poster = $get_lite->($posterid);
@@ -263,10 +267,6 @@ sub FriendsPage
 
         my $nc = "";
         $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
-
-        my $stylemine = "";
-        $stylemine .= "style=mine" if $remote && $remote->{'opt_stylemine'} &&
-                                      $remote->{'userid'} != $friendid;
 
         my $journalbase = LJ::journal_base($friends{$friendid});
         my $permalink = "$journalbase/$ditemid.html";

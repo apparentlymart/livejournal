@@ -4353,9 +4353,10 @@ sub date_to_view_links
 # </LJFUNC>
 sub item_link
 {
-    my ($u, $itemid, $anum) = @_;
+    my ($u, $itemid, $anum, @args) = @_;
     my $ditemid = $itemid*256 + $anum;
-    return LJ::journal_base($u) . "/$ditemid.html";
+    my $args = @args ? "?" . join("&amp;", @args) : "";
+    return LJ::journal_base($u) . "/$ditemid.html$args";
 }
 
 # <LJFUNC>
