@@ -4,7 +4,7 @@ LJUSER=>{DRs}<a href="/userinfo.bml?user=%%DATA%%"><img src="(=IMGPREFIX=)/useri
 LJCOMM=>{DRs}<a href="/userinfo.bml?user=%%DATA%%"><img src="(=IMGPREFIX=)/community.gif" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE border=0></a><b><a href="/users/%%DATA%%/">%%DATA%%</a></b>
 LJUSERF=>{DRs}<a href="/userinfo.bml?user=%%DATA%%&amp;mode=full"><img src="(=IMGPREFIX=)/userinfo.gif" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE border=0></a><b><a href="/users/%%DATA%%/">%%DATA%%</a></b>
 HELP=>{DR}(<a href="%%DATA%%"><i>help</i></a>)
-INERR=>{DS}<font color="#ff0000"><b>%%DATA%%</b></font>
+INERR=>{DRp}<font color="#ff0000"><b>%%DATA%%</b></font>
 
 NEEDLOGIN<=
 (=H1 Login Required H1=)
