@@ -540,6 +540,19 @@ sub recurse_post
                 $$ret .= "</td></tr></table>\n";  # close colored table
             } else {
                 # link to message
+
+                # convert the subject to UTF-8 if needed
+                if ($LJ::UNICODE && ! LJ::is_utf8($post->{'subject'})) {
+                    my $error;
+                    my $subj = LJ::text_convert($dbs, $post->{'subject'}, 
+                                                $u, \$error);
+                    if ($error) {
+                        LJ::text_out(\$post->{'subject'});
+                    } else {
+                        $post->{'subject'} = $subj;
+                    }
+                }
+
                 $$ret .= "<a name='t$dtid'></a><table><tr>";
                 $$ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
                 $$ret .= "<td><a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$dtid'>" . BML::eall($post->{'subject'} || "(no subject)") . "</a> - $user, <i>$post->{'datepost'}</i></td></tr></table>\n";
