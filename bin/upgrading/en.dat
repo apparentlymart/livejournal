@@ -309,6 +309,8 @@ all on your profile page.
 
 /editinfo.bml.allowshowcontact.email.no_show=Don't show email address
 
+/editinfo.bml.allowshowcontact.email.show=Show email address
+
 /editinfo.bml.allowshowcontact.email.withdomainaddr<<
 With the option above, you may also choose to hide your email address
 (while still showing other contact information), only show your site email address,
@@ -319,8 +321,6 @@ only show your real address, or show them both.
 With the option above, you may also choose to hide your email address
 (while still showing other contact information).
 .
-
-/editinfo.bml.allowshowcontact.email.show=Show email address
 
 /editinfo.bml.allowshowcontact.title=Show your contact information on your profile page?
 
@@ -927,6 +927,12 @@ already have an account you can <a href="/create.bml">create one</a> to track yo
 
 /interests.bml.users.text=The following users are also interested in <b>[[interest]]</b>.
 
+/login.bml.bindip.label=Bind to IP address:
+
+/login.bml.bindip.no=No (works with all ISPs)
+
+/login.bml.bindip.yes=Yes (safer)
+
 /login.bml.error.mustenterusername=You must <a href='/login.bml'>enter a username</a>.
 
 /login.bml.expire.btn.neverexpire=Change expiration mode to NEVER
@@ -949,15 +955,9 @@ already have an account you can <a href="/create.bml">create one</a> to track yo
 
 /login.bml.loggedin.text=You are now logged in.
 
-/login.bml.login.btn.login=Login...
-
-/login.bml.bindip.label=Bind to IP address:
-
-/login.bml.bindip.yes=Yes (safer)
-
-/login.bml.bindip.no=No (works with all ISPs)
-
 /login.bml.login.btn.changeopts=Change Options
+
+/login.bml.login.btn.login=Login...
 
 /login.bml.login.expiration=Expiration:
 
@@ -1261,6 +1261,8 @@ that area. p?>
 
 /talkpost.bml.opt.preview=Preview
 
+/talkpost.bml.opt.spellcheck=Spell check entry before posting
+
 /talkpost.bml.opt.subject=Subject:
 
 /talkpost.bml.opt.submit=Post Comment
@@ -1316,6 +1318,10 @@ that area. p?>
 /talkpost_do.bml.error.suspended=Your journal has been suspended.  You can't post messages.
 
 /talkpost_do.bml.error.testacct=Test accounts can only be used in test account journals.
+
+/talkpost_do.bml.opt.preview=Preview
+
+/talkpost_do.bml.opt.spellcheck=Spell check entry before posting
 
 /talkpost_do.bml.preview=Below is how your post will look.  Press your browser's back button to make changes. Or, submit it.
 
@@ -1673,6 +1679,8 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /userinfo.bml.label.syndicatedfrom=Syndicated from:
 
+/userinfo.bml.label.syndicatedstatus=Syndication Status:
+
 /userinfo.bml.label.textmessage=<nobr>Text<br>Message</nobr>:
 
 /userinfo.bml.label.todo=To-Do List
@@ -1705,11 +1713,9 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /userinfo.bml.sendmessage.body=<a href="[[link]]">Send <b>[[user]]</b> a text message</a><br />on his/her cellphone/pager.
 
-/userinfo.bml.label.syndicatedstatus=Syndication Status:
+/userinfo.bml.syn.last.never=Never
 
 /userinfo.bml.syn.lastcheck=Last checked:
-
-/userinfo.bml.syn.last.never=Never
 
 /userinfo.bml.syn.nextcheck=Next check:
 

@@ -351,12 +351,17 @@ body<=
  if ($remote) {
      $ret .= "<tr valign='middle'>";
      $ret .= "<td align='right'>&nbsp;</td>";
-     $ret .= "<td align='middle'><input type='radio' name='usertype' value='cookieuser' id='talkpostfromremote' $checked></td>";
-     $ret .= "<td align='left'><label for='talkpostfromremote'>" . BML::ml(".opt.loggedin", {'username'=>"<i>$remote->{'user'}</i>"}) . "</label>\n";
-     $ret .= "<input type='hidden' name='cookieuser' value='$remote->{'user'}'>\n";
-     $ret .= "</td>";
+     if (LJ::is_banned($dbs, $remote, $u)) {
+         $ret .= "<td align='middle'>( )</td>";
+         $ret .= "<td align='left'><font color='#c0c0c0'>" . BML::ml(".opt.loggedin", {'username'=>"<i>$remote->{'user'}</i>"}) . "</font>" . BML::ml(".opt.bannedfrom", {'journal'=>$u->{'user'}}) . "</td>";
+     } else {
+         $ret .= "<td align='middle'><input type='radio' name='usertype' value='cookieuser' id='talkpostfromremote' $checked></td>";
+         $ret .= "<td align='left'><label for='talkpostfromremote'>" . BML::ml(".opt.loggedin", {'username'=>"<i>$remote->{'user'}</i>"}) . "</label>\n";
+         $ret .= "<input type='hidden' name='cookieuser' value='$remote->{'user'}'>\n";
+         $ret .= "</td>";
+         $checked = "";
+     }
      $ret .= "</tr>\n";
-     $checked = "";
  }
 
  # ( ) LiveJournal user:
