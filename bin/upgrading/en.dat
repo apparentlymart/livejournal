@@ -478,11 +478,7 @@ p?>
 
 /create.bml.age.head=Age
 
-/create.bml.aolnotice.head=Notice to AOL Users
-
-/create.bml.aolnotice.text=If you are an <b>AOL User</b>, make sure you go to <b>Keyword: <i>Mail Controls</i></b> and <b>turn off</b> any of AOL's "useful" mail controls.  You must be able to receive mail from the Internet or you will not receive your confirmation code.  If your parents have this restricted, perhaps you really shouldn't be using [[sitename]].
-
-/create.bml.btn.proceed=Proceed...
+/create.bml.btn.create=Create Journal
 
 /create.bml.clusterselect.cluster=Cluster:
 
@@ -502,7 +498,7 @@ p?>
 
 /create.bml.email.input.head=Email Address:
 
-/create.bml.email.text=For verification and security purposes, we need your email address.  It will never ever, under any circumstances, be sold or given away to spammers.  We hate that more than anything.  Read our <a href="/legal/privacy.bml" TARGET="privacy">privacy policy</a> for more information.
+/create.bml.email.text=For verification and security purposes, we need your email address.  It will never ever, under any circumstances, be sold or given away to spammers.  We hate that more than anything.  Read our <a href="/legal/privacy.bml" target="privacy">privacy policy</a> for more information.
 
 /create.bml.error.coppa.under13=Sorry, due to COPPA restrictions, you cannot use the service until you're 13 years old.  Please come back on your 13th birthday.
 
@@ -547,14 +543,6 @@ p?>
 /create.bml.password.input.head2=Re-type password:
 
 /create.bml.password.text=Select a password.
-
-/create.bml.proceed.btn.proceed=Proceed...
-
-/create.bml.proceed.head=Proceed
-
-/create.bml.proceed.text=Press the button below and you're on your way to having your very own LiveJournal!
-
-/create.bml.proceed.warning=Only press <b>Proceed</b> <i>once</i>!!
 
 /create.bml.success.btn.enterinfo=Enter Personal Information
 
@@ -1735,12 +1723,6 @@ You may wish to go back and try again, selecting fewer interests to add.
 /lostinfo.bml.enter_username=Enter your username:
 
 /lostinfo.bml.error.no_email=You must enter an email address in order to recover your username.
-
-/lostinfo.bml.error.purged=Cannot retrieve password for a deleted account once it has been purged.
-
-/lostinfo.bml.error.renamed=Cannot retrieve password for a renamed account.
-
-/lostinfo.bml.error.sysbanned=Your account is not allowed to e-mail passwords.
 
 /lostinfo.bml.lostpassword.text=If you've lost your password, enter your username and optionally, the email address you'd like the password sent to.  Note that the email address must be one you've used at LiveJournal before and had confirmed at one point.  If you leave the email field blank, it'll be mailed to your current address.
 

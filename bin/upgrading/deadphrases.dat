@@ -18,6 +18,11 @@ general /community/search.bml.contasmember
 
 general /community/settings.bml.manage
 
+general /create.bml.aolnotice.head
+general /create.bml.aolnotice.text
+general /create.bml.proceed.head
+general /create.bml.proceed.text
+
 general /editinfo.bml.allowshocontact.email.if_domainaddy
 general /editinfo.bml.allowshowcontact.email.reason
 general /editinfo.bml.settings.about

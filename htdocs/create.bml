@@ -317,7 +317,7 @@ body<=
      $ret .= $error_msg->('username', '<p class="formitemFlag">', '</p>');
      $ret .= "<div class='formitemDesc'>" . BML::ml(".username.text", {'sitename' => $LJ::SITENAME}) . "</div>";
      $ret .= LJ::html_text({'name' => 'user', 'size' => 15, 'maxlength' => 15, 'value' => $v,});
-     $ret .= "<div class='formitemNote'>$ML{'.username.charsallowed'}<br /><br /></div>";
+     $ret .= "<div class='formitemNote'>$ML{'.username.charsallowed'}</div>";
      $ret .= "</div></li>";
 
      ### email address
@@ -333,34 +333,37 @@ body<=
      $ret .= $error_msg->('password', '<p class="formitemFlag">', '</p>');
      $ret .= "<div class='formitemDesc'>$ML{'.password.text'}</div>";
      $ret .= LJ::html_text({'name' => 'password1', 'size' => 30, 'maxlength' => 31, 'type' => "password",});
-     $ret .= "<div class='formitemNote'>$ML{'.password.input.head2'}</div>";
+     $ret .= "<div class='formitemDesc'>$ML{'.password.input.head2'}</div>";
      $ret .= LJ::html_text({'name' => 'password2', 'size' => 30, 'maxlength' => 31, 'type' => "password",});
      $ret .= "</div></li>";
 
      if (@LJ::INITIAL_OPTIONAL_FRIENDS) {
          $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.initialfriends.heading'}</div>";
          $ret .= "<div class='formitemDesc'>$ML{'.initialfriends'}</div>";
-         $ret .= "<div class='formitemNote'>";
+         $ret .= "<div>";
          foreach my $friend (@LJ::INITIAL_OPTIONAL_FRIENDS) {
-             $ret .= LJ::did_post() && !$POST{"initial_optional_friend_$friend"} ? 
-                     LJ::html_check({'name' => "initial_optional_friend_$friend", 'value' => 1, }) :
-                     LJ::html_check({'name' => "initial_optional_friend_$friend", 'value' => 1, 'checked' => "checked", });
-             $ret .= LJ::ljuser($friend) . " " . $ML{".initial.friend.$friend"} . "<br />";
+             my @checked = LJ::did_post() && !$POST{"initial_optional_friend_$friend"} ? ('checked' => 'checked') : ();
+             $ret .= LJ::html_check({'name' => "initial_optional_friend_$friend", 
+                                     'value' => 1, 
+                                     @checked,
+                                     'id' => "optfriend_$friend",
+                                 });
+             $ret .= "<label for='optfriend_$friend'>" .
+                 LJ::ljuser($friend) . " " . $ML{".initial.friend.$friend"} . 
+                 "</label><br />";
          }
          $ret .= "</div></div></li>";
      }
      if ($LJ::COPPA_CHECK)
      {
-         if ($LJ::COPPA_CHECK eq "over") {
-             $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.age.head'}</div>";
-             $ret .= "<div class='formitemDesc'>$ML{'.age.check2.question'}</div>";
-             $ret .= "<div class='formitemNote'>";
-             $ret .= "<input type=\"checkbox\" value=\"1\" name=\"over13\" /> $ML{'.age.check2.yes'}";
-         } else {
+         if ($LJ::COPPA_CHECK eq "under") {
              $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.age.head'}</div>";
              $ret .= "<div class='formitemDesc'>$ML{'.age.check.question'}</div>";
-             $ret .= "<div class='formitemNote'>";
-             $ret .= "<input type=\"checkbox\" value=\"1\" name=\"under13\" /> $ML{'.age.check.yes'}";
+             $ret .= "<div><input type=\"checkbox\" value=\"1\" name=\"under13\" id='under13' /> <label for='under13'>$ML{'.age.check.yes'}</label>";
+         } elsif ($LJ::COPPA_CHECK) {
+             $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.age.head'}</div>";
+             $ret .= "<div class='formitemDesc'>$ML{'.age.check2.question'}</div>";
+             $ret .= "<div><input type=\"checkbox\" value=\"1\" name=\"over13\" id='over13' /> <label for='over13'>$ML{'.age.check2.yes'}</label>";
          }
          $ret .= "</div></div></li>";
      }
@@ -372,7 +375,8 @@ body<=
          $ret .= $error_msg->('agree_tos', '<p class="formitemFlag">', '</p>');
          my $checked = $POST{'agree_tos'} ? "checked='checked'" : "";
          $ret .= "<iframe width='600' height='300' src='/legal/tos-mini.bml' style='border: 1px solid gray;'></iframe>";
-         $ret .= "<div class='formitemNote'><input type='checkbox' name='agree_tos' value='1' $checked /> $ML{'.tos.haveread'}";
+         $ret .= "<div><input type='checkbox' name='agree_tos' id='agree_tos' value='1' $checked /> ";
+         $ret .= "<label for='agree_tos'>$ML{'.tos.haveread'}</label>";
          $ret .= "</div></div></li>";
      }
 
@@ -387,12 +391,18 @@ body<=
          $ret .= "</div></li>";
      }
 
-     $ret .= "</ol><?hr?><p class='formitemFlag'><b>$ML{'.aolnotice.head'}</b><br />".BML::ml(".aolnotice.text", {'sitename' => $LJ::SITENAME}) ."</p>";
+     if ($LJ::HUMAN_CHECK{create}) {
+         $ret .= "<li><div class='formitem'><div class='formitemName'>Prove that you're a human</div>";
+         $ret .= "<div class='formitemDesc'>Type the letters and numbers you see below, to prove that you're not a spam robot.  If you can't read the text, type \"AUDIO\" and take a sound test instead.</div>";
+         $ret .= "<img src='/captcha/image.bml' width='175' height='35' />";
+         $ret .= "</div></li>";
+     }
 
-     $ret .= "<div class='formitemName'>$ML{'.proceed.head'}</div>";
-     $ret .= "<div class='formitemDesc'>$ML{'.proceed.text'}</div>";
-     $ret .= "<input type=\"submit\" value=\"$ML{'.proceed.btn.proceed'}\"><br />";
-     $ret .= "<div class='formitemNote'>$ML{'.proceed.warning'}</div>";
+     $ret .= "</ol>";
+
+     $ret .= "<div style='width:600; text-align: center'>";
+     $ret .= "<input type=\"submit\" value=\"$ML{'.btn.create'}\">";
+     $ret .= "</div>";
      $ret .= "</form>";
 
      return $ret;

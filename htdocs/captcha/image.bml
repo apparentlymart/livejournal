@@ -1,0 +1,21 @@
+<?_code
+{
+    my $png;
+
+    my $code = "";
+    my $digits = "abcdefghkmnpqrstuvwzyz23456789";
+    my $len = length($digits);
+    for (1..7) {
+        $code .= substr($digits, int(rand($len)), 1);
+    }
+
+    eval { $png = LJ::Captcha::generate_visual($code); };
+    if ($png) {
+        BML::set_content_type("image/png");
+        return BML::noparse($png);
+    } else {
+        return "Error: $@";
+    }
+           
+}
+_code?>

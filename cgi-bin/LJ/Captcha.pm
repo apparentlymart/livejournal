@@ -41,12 +41,12 @@ sub generate_visual
     }
 	
     # distort the code graphic
-    for(my $i=0; $i<($length*($im_width)*($im_height)/14+200); $i++)
+    for(my $i=0; $i<($length*$im_width*$im_height/14+150); $i++)
     {
-        my $a = (int(rand ($length*($im_width)))+0);
-        my $b = (int(rand $im_height)+0);
-        my $c = (int(rand ($length*($im_width)))+0);
-        my $d = (int(rand $im_height)+0);
+        my $a = int(rand($length*$im_width));
+        my $b = int(rand($im_height));
+        my $c = int(rand($length*$im_width));
+        my $d = int(rand($im_height));
         my $index = $im->getPixel($a,$b);
         if ($i < (($length*($im_width)*($im_height)/14+200)/100))
         {
