@@ -214,6 +214,12 @@
                 $$body .= "<br /><strong>$ML{'.error.update'}</strong> <ul><li><b>" . LJ::ehtml($res{'errmsg'}) . "</b></li></ul>";
                 $$body .= "<br /> p?>";
             } else {
+                # short bail if this was posted moderated or some other special case (no itemid but a message)
+                if (!defined $res{itemid} && $res{message}) {
+                    $$body .= "<br />$res{message} p?>";
+                    return;
+                }
+
                 # update success
                 my $ju;
                 if ($POST{'usejournal'}) {
@@ -226,7 +232,7 @@
                 $$body .= BML::ml(".update.success", { 'uri' => LJ::journal_base($ju) . "/" });
                 my $juser = $ju->{'user'};
                 my ($itemid, $anum) = ($res{'itemid'}, $res{'anum'});
-                my $itemlink = LJ::item_link($juser, $itemid, $anum);
+                my $itemlink = LJ::item_link($ju, $itemid, $anum);
                 $itemid = $itemid * 256 + $anum;
                 $$body .= " p?><?p $ML{'.success.links'} p?><ul>" .
                     "<li><a href=\"$itemlink\">$ML{'.success.links.view'}</a></li>" .
