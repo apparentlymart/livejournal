@@ -66,15 +66,20 @@ body<=
  my $qitemid = $post->{'itemid'}+0;
 
  # $posterid is the userid of the author of the entry, not the comment
- my $posterid;
+ my ($posterid, $anum);
  if ($clustered) {
-     $posterid = $dbcm->selectrow_array("SELECT posterid FROM log2 WHERE ".
-                                        "journalid=$u->{'userid'} AND jitemid=$qitemid");
+     ($posterid, $anum) = 
+         $dbcm->selectrow_array("SELECT posterid, anum FROM log2 WHERE ".
+                                "journalid=$u->{'userid'} AND jitemid=$qitemid");
  } else {
      $posterid = $dbh->selectrow_array("SELECT posterid FROM log WHERE itemid=$qitemid");
  }
  my $up = LJ::load_userid($dbs, $posterid);
 
+ my $ditemid = $qitemid*256 + $anum;
+
+ my $jargent = $clustered ? "journal=$u->{'user'}&amp;" : "";
+ my $commentlink = "talkread.bml?${jargent}itemid=$ditemid&amp;showscreened=1&amp;view=$FORM{'talkid'}#t$FORM{'talkid'}";
  my $can_screen = LJ::Talk::can_screen($dbs, $remote, $u, $up, $post->{'userpost'});
  my $can_unscreen = LJ::Talk::can_unscreen($dbs, $remote, $u, $up, $post->{'userpost'});
 
@@ -96,7 +101,7 @@ body<=
      if ($state ne 'S') {
          LJ::Talk::screen_comment($dbs, $dbcs, $u, $qitemid, $qtalkid);
      }
-     return "<?h1 $ML{'.screened.title'} h1?><?p $ML{'.screened.body'} p?>";
+     return "<?h1 $ML{'.screened.title'} h1?><?p " . BML::ml('.screened.body', {'link'=>$commentlink}) . " p?>";
  }
 
  if ($mode eq 'unscreen') {
@@ -117,7 +122,7 @@ body<=
      if ($state ne 'A') {
          LJ::Talk::unscreen_comment($dbs, $dbcs, $u, $qitemid, $qtalkid);
      }
-     return "<?h1 $ML{'.unscreened.title'} h1?><?p $ML{'.unscreened.body'} p?>";
+     return "<?h1 $ML{'.unscreened.title'} h1?><?p " . BML::ml('.unscreened.body', {'link'=>$commentlink}) . " p?>";
  }
 
  return "<?h1 $ML{'Error'} h1?><?p $ML{'error.unknownmode'} p?>";

@@ -1446,7 +1446,7 @@ that area. p?>
 
 /talkscreen.bml.screen.sure.title=Screen this comment?
 
-/talkscreen.bml.screened.body=The comment has been screened.
+/talkscreen.bml.screened.body=The comment has been screened. You can view it <a href="[[link]]">here</a>.
 
 /talkscreen.bml.screened.title=Success
 
@@ -1458,7 +1458,7 @@ that area. p?>
 
 /talkscreen.bml.unscreen.sure.title=Unscreen this comment?
 
-/talkscreen.bml.unscreened.body=The comment has been unscreened.
+/talkscreen.bml.unscreened.body=The comment has been unscreened. You can view it <a href="[[link]]">here</a>.
 
 /talkscreen.bml.unscreened.title=Success
 
