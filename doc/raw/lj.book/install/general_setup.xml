@@ -12,18 +12,14 @@
     For example, we'll assume that you've installed LiveJournal on an operating system using the Bourne Shell: The easiest way to set <literal>$LJHOME</literal> is to put the following in your <filename>~/.bash_profile</filename>:
   </para>
   <para>
-    <screen>
-      <literal>LJHOME=/home/lj; export LJHOME</literal>
-    </screen>
+    <screen><literal>LJHOME=/home/lj; export LJHOME</literal></screen>
   </para>
   <para>
     To test that it's set:
   </para>
   <para>
-    <screen>
-      <prompt>$</prompt> <userinput>. ~/.bash_profile</userinput>
-      <prompt>$</prompt> <userinput>echo $LJHOME</userinput>
-    </screen>
+    <screen><prompt>$</prompt> <userinput>. ~/.bash_profile</userinput>
+<prompt>$</prompt> <userinput>echo $LJHOME</userinput></screen>
   </para>
   <para>
     If the above was successful, it should print out <literal>/home/lj</literal> (or whatever the value of <literal>$LJHOME</literal> may be).
@@ -32,8 +28,7 @@
     <title>Other shells</title>
     <para>
       If you use another shell interface, you might be able to see what it reads on start-up by looking for the file: <filename>~/.profile</filename>. Please refer to the documentation provided with your shell, which can usually be found by typing:
-      <screen>
-        <prompt>$</prompt> <userinput>help</userinput>
+      <screen><prompt>$</prompt> <userinput>help</userinput>
       </screen>
     </para>
   </note>
@@ -66,10 +61,8 @@
       Before you install LiveJournal, you should create the directory where your LiveJournal installation will reside:
       </para>
       <para>
-        <screen>
-          <prompt>#</prompt> <userinput>mkdir <replaceable>/home/lj</replaceable></userinput>
-          <prompt>#</prompt> <userinput>chown <replaceable>lj.lj /home/lj</replaceable></userinput>
-        </screen>
+        <screen><prompt>#</prompt> <userinput>mkdir <replaceable>/home/lj</replaceable></userinput>
+<prompt>#</prompt> <userinput>chown <replaceable>lj.lj /home/lj</replaceable></userinput></screen>
       </para>
     </note>
     <formalpara>
@@ -82,12 +75,10 @@
           The tarball creates a directory ("LiveJournal-YYYYMMDD"), so you'll either want to untar at <filename>/home/</filename> and then rename that directory to be lj, or do something like:
         </para>
         <para>
-          <screen>
-            <prompt>$</prompt> <userinput>cd <replaceable>/home/lj</replaceable></userinput>
-            <prompt>$</prompt> <userinput>tar zxvf LiveJournal-<replaceable>YYYYMMDD</replaceable>.tar.gz</userinput>
-            <prompt>$</prompt> <userinput>mv LiveJournal-<replaceable>YYYYMMDD</replaceable>/* .</userinput>
-            <prompt>$</prompt> <userinput>rm -r LiveJournal-<replaceable>YYYYMMDD</replaceable></userinput>
-          </screen>
+          <screen><prompt>$</prompt> <userinput>cd <replaceable>/home/lj</replaceable></userinput>
+<prompt>$</prompt> <userinput>tar zxvf LiveJournal-<replaceable>YYYYMMDD</replaceable>.tar.gz</userinput>
+<prompt>$</prompt> <userinput>mv LiveJournal-<replaceable>YYYYMMDD</replaceable>/* .</userinput>
+<prompt>$</prompt> <userinput>rm -r LiveJournal-<replaceable>YYYYMMDD</replaceable></userinput></screen>
         </para>
       </note>
     </formalpara>
@@ -95,11 +86,9 @@
       <title>Installing from CVS</title>
       <para>
         If you have CVS installed, you can anonymously checkout the LiveJournal repository by issuing the following commands:
-        <screen>
-          <prompt>$</prompt> <userinput>cd <replaceable>/home/lj</replaceable></userinput>
-          <prompt>$</prompt> <userinput>touch CVSPASS</userinput>
-          <prompt>$</prompt> <userinput>cvs -d:pserver:anonymous@danga.com:/home/cvslj co livejournal</userinput>
-        </screen>
+        <screen><prompt>$</prompt> <userinput>cd <replaceable>/home/lj</replaceable></userinput>
+<prompt>$</prompt> <userinput>touch CVSPASS</userinput>
+<prompt>$</prompt> <userinput>cvs -d:pserver:anonymous@danga.com:/home/cvslj co livejournal</userinput></screen>
       </para>
       <para>
         Installing straight from CVS gives you the latest version possible that LiveJournal offers.
