@@ -15,9 +15,8 @@
  my $u;
  my $remote = LJ::get_remote($dbs);
 
- my $quser = $dbh->quote($FORM{'user'});
  if ($FORM{'user'}) {
-     $u = LJ::load_user($dbs, $user);
+     $u = LJ::load_user($dbs, $FORM{'user'});
  }
 
  my $mode;
@@ -34,7 +33,7 @@
 	 return "";
      }
      
-     $u = LJ::load_userid($dbs, $it->{'journalid'})
+     $u = LJ::load_userid($dbs, $it->{'journalid'});
 
      if ($it->{'security'} eq "private") {
 	 unless ($remote && $remote->{'userid'} == $it->{'journalid'}) {
