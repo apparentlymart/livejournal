@@ -3154,7 +3154,7 @@ sub _get_posts_raw_wrapper {
 # des-opts: An optional hashref of options:
 #            - memcache_only:  Don't fall back on the database.
 #            - text_only:  Retrieve only text, no props (used to support old API).
-#            - props_only:  Retrieve only props, no text (used to support old API).
+#            - prop_only:  Retrieve only props, no text (used to support old API).
 # des-id: An arrayref of [ clusterid, ownerid, itemid ].
 # </LJFUNC>
 sub get_posts_raw
@@ -3667,21 +3667,36 @@ sub start_request
     return 1;
 }
 
+
+# <LJFUNC>
+# name: LJ::end_request
+# des: Clears cached DB handles/trackers/keepers (if $LJ::DISCONNECT_DBS is
+#      true) and disconnects MemCache handles (if $LJ::DISCONNECT_MEMCACHE is
+#      true).
+# </LJFUNC>
 sub end_request
 {
-    if ($LJ::DISCONNECT_DBS) {
-        # clear cached handles
-        $LJ::DBIRole->disconnect_all();
-
-        # and cached trackers/keepers to partitioned dbs
-        while (my ($role, $tk) = each %LJ::REQ_DBIX_TRACKER) {
-            $tk->disconnect if $tk;
-        }
-        %LJ::REQ_DBIX_TRACKER = ();
-        %LJ::REQ_DBIX_KEEPER = ();
-    }
+    LJ::disconnect_dbs() if $LJ::DISCONNECT_DBS;
     LJ::MemCache::disconnect_all() if $LJ::DISCONNECT_MEMCACHE;
 }
+
+
+# <LJFUNC>
+# name: LJ::disconnect_dbs
+# des: Clear cached DB handles and trackers/keepers to partitioned DBs.
+# </LJFUNC>
+sub disconnect_dbs {
+    # clear cached handles
+    $LJ::DBIRole->disconnect_all();
+
+    # and cached trackers/keepers to partitioned dbs
+    while (my ($role, $tk) = each %LJ::REQ_DBIX_TRACKER) {
+        $tk->disconnect if $tk;
+    }
+    %LJ::REQ_DBIX_TRACKER = ();
+    %LJ::REQ_DBIX_KEEPER = ();
+}
+
 
 # <LJFUNC>
 # name: LJ::sysban_check
