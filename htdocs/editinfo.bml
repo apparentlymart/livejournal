@@ -58,15 +58,12 @@ _code?>
     LJ::text_out(\$u->{'bio'}, "force");
 
     # load interests
-    my $uitable = $u->{'journaltype'} eq 'C' ? 'comminterests' : 'userinterests';
-    $sth = $dbr->prepare("SELECT i.interest, i.intid FROM interests i, $uitable ui " .
-                         "WHERE i.intid=ui.intid AND ui.userid=?");
-    $sth->execute($u->{'userid'});
+    my $uints = LJ::get_interests($u, { forceids => 1 });
     my %interests = ();
-    while ($_ = $sth->fetchrow_hashref) {
-        $interests{$_->{'interest'}} = $_->{'intid'};
+    foreach (@$uints) {
+        $interests{$_->[1]} = $_->[0];  # $interests{name} = intid
     }
-    
+
     # load state and country codes
     my %countries;
     my %states;

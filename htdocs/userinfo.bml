@@ -166,21 +166,14 @@
  $u->{'bio'} = LJ::get_bio($u);
  LJ::text_out(\$u->{'bio'});
 
- my $u_uitable = $u->{'journaltype'} eq 'C' ? 'comminterests' : 'userinterests';
- $sth = $dbr->prepare("SELECT i.interest, i.intcount, i.intid FROM interests i, $u_uitable ui " .
-                      "WHERE i.intid=ui.intid AND ui.userid=?");
- $sth->execute($u->{'userid'});
- my %interests = ();
- while ($_ = $sth->fetchrow_hashref) {
-     $interests{$_->{'interest'}} = $_;
- }
+ # arrayref of interests rows:  [ intid, intname, intcount ]
+ my $intu = LJ::get_interests($u);
 
  my %remote_interest;
  if ($remote && $remote->{'userid'} != $userid) {
-     my $r_uitable = $remote->{'journaltype'} eq 'C' ? 'comminterests' : 'userinterests';
-     $sth = $dbr->prepare("SELECT intid FROM $r_uitable WHERE userid=?");
-     $sth->execute($remote->{'userid'});
-     $remote_interest{$_} = 1 while $_ = $sth->fetchrow_array;
+     if (my $rint = LJ::get_interests($remote, { justids => 1 })) {
+         $remote_interest{$_} = 1 foreach @$rint;
+     }
  }
 
  if ($u->{'opt_hidefriendofs'} && ! $remote_isowner) {
@@ -246,9 +239,8 @@
      if ($remote->{'userid'} == $u->{'userid'}) {
          foreach (@friends) { $remote_friendid{$_->{'userid'}} = 1; }
      } else {
-         my $sth = $dbr->prepare("SELECT friendid FROM friends WHERE userid=? LIMIT $MAX_FRIENDS_SHOW");
-         $sth->execute($remote->{'userid'});
-         $remote_friendid{$_} = 1 while $_ = $sth->fetchrow_array;
+         my $frs = LJ::get_friends($remote) || {};
+         $remote_friendid{$_} = 1 while $_ = each %$frs;
      }
  }
 
@@ -590,25 +582,24 @@ if ($u->{'journaltitle'}) {
          $body .= "<tr><td align='right' valign='top'><b>$ML{'.label.memories'}</b></td><td colspan='$span'><a href='/tools/memories.bml?user=$user'>$count</a></td></tr>\n";
      }
  }
-     
- if (%interests) {
+
+ if (@$intu) {
      my $span = ($narrow_left-- > 0) ? 1 : 2;
      $body .= "<tr><td align='right' valign='top'><b><a href='/interests.bml'>$ML{'.label.interests'}</a>:</b></td><td colspan='$span'>";
      my $intcount = 0;
      my $intlist = "";
-     foreach (sort keys %interests) {
-         $intcount++;
-         next if ($intcount > 150);
-         LJ::text_out(\$_);
-         my $eint = LJ::eurl($_);
-         if ($interests{$_}->{'intcount'} > 1) {
-             if ($remote_interest{$interests{$_}->{'intid'}}) {
-                 $intlist .= "<b><a href='/interests.bml?int=$eint'>$_</a></b>, ";
+     foreach my $int (@$intu) {
+         next if $intcount++ > 150;
+         LJ::text_out(\$int->[1]); # 1==interest
+         my $eint = LJ::eurl($int->[1]);
+         if ($int->[2] > 1) {  # 2==intcount
+             if ($remote_interest{$int->[0]}) {  # 0==intid
+                 $intlist .= "<b><a href='/interests.bml?int=$eint'>$int->[1]</a></b>, ";
              } else {
-                 $intlist .= "<a href='/interests.bml?int=$eint'>$_</a>, ";
+                 $intlist .= "<a href='/interests.bml?int=$eint'>$int->[1]</a>, ";
              }
          } else {
-             $intlist .= "$_, ";
+             $intlist .= "$int->[1], ";
          }
      }
      chop $intlist; chop $intlist;  # remove trailing ", "

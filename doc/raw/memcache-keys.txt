@@ -50,9 +50,12 @@ sysban:uniq == hashref of uniq => unix expiration time
 
 <uid> upicinf:<uid> == packed data, userpic keywords
 
-      rate_eperr:<email_address> == rate limiting errors sent via email for email gateway
-      rate:tracked:<userid> == cluster tracking on login, posts, and comments
+rate_eperr:<email_address> == rate limiting errors sent via email for email gateway
+rate:tracked:<userid> == cluster tracking on login, posts, and comments
 
 ml.<lang>.<dmid>.<code>
 
 includefile:<name> == text of BML include file
+
+<intid> introw:<intid> -- arrayref of [ $intid, $interest, $intcount ]
+<uid>   intids:<uid>   -- arrayref of intids for this userid

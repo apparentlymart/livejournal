@@ -14,6 +14,8 @@ body<=
 
     my $did_post = LJ::did_post();
 
+    my $remote = LJ::get_remote();
+
     my $table = sub { $_[0]->{'journaltype'} eq 'C' ? 'comminterests' : 'userinterests' };
 
     if (!$did_post && $GET{'view'} eq "popular") {
@@ -44,7 +46,6 @@ body<=
 
         my $intid = $did_post ? $POST{'intid'}+0 : $GET{'intid'}+0;
 
-        my $remote = LJ::get_remote();
         my $ret;
         unless ($remote) {
             $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'.error.add.mustlogin'} p?>";
@@ -70,9 +71,8 @@ body<=
             return $ret;
         }
 
-        my $uitable = $table->($remote);
-        my $count = $dbr->selectrow_array("SELECT COUNT(*) FROM $uitable WHERE userid=?",
-                                          undef, $remote->{'userid'});
+        my $rints = LJ::get_interests($remote);
+        my $count = scalar(@$rints);
 
         if ($count >= 150) {
             $ret .= "<?h1 $ML{'.add.toomany.head'} h1?><?p " .BML::ml(".add.toomany.text", {'maxinterests' => "150"}) ." p?>";
@@ -80,8 +80,10 @@ body<=
         }
 
         my $dbh = LJ::get_db_writer();
+        my $uitable = $table->($remote);
         $dbh->do("INSERT INTO $uitable (userid, intid) VALUES (?, ?)",
                  undef, $remote->{'userid'}, $intid);
+        LJ::memcache_kill($remote, "intids");
         unless ($dbh->err) {
             $dbh->do("UPDATE interests SET intcount=intcount+1 WHERE intid=?", undef, $intid);
         }
@@ -98,7 +100,6 @@ body<=
     if (!$did_post && $GET{'mode'} eq "findsim_do") {
         return $ML{'error.tempdisabled'} if $LJ::DISABLED{'interests-findsim'};
 
-        my $remote = LJ::get_remote();
         return $ML{'.findsim_do.account.notallowed'} unless LJ::get_cap($remote, "findsim");
 
         my $ret = "";
@@ -172,7 +173,6 @@ body<=
 
     if (!$did_post && $GET{'mode'} eq "enmasse")
     {
-        my $remote = LJ::get_remote();
         return LJ::bad_input($ML{'.error.enmasse.mustlogin'}) unless $remote;
 
         my $authas = $GET{'authas'} || $remote->{'user'};
@@ -186,17 +186,12 @@ body<=
         my $username = $u->{'user'};
         my $fromu = LJ::load_user($GET{'fromuser'} || $username);
 
-        my %fromint;
         my %uint;
 
-        my $f_uitable = $table->($fromu);
-
-        my $dbr = LJ::get_db_reader();
-        my $sth = $dbr->prepare("SELECT i.interest, i.intid FROM interests i, $f_uitable ui ".
-                                "WHERE i.intid=ui.intid AND ui.userid=?");
-        $sth->execute($fromu->{'userid'});
-        while ($_ = $sth->fetchrow_hashref) {
-            $fromint{$_->{'interest'}} = $_->{'intid'} + 0;
+        my %fromint;
+        my $fints = LJ::get_interests($fromu);
+        foreach (@$fints) {
+            $fromint{$_->[1]} = $_->[0]+0;
         }
 
         return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.nointerests'} p?>" unless %fromint;
@@ -212,13 +207,12 @@ body<=
             $ret .= $ML{'.enmasse.body.you'};
         } else {
             my $in = join (",", map { $fromint{$_} } keys %fromint);
-            my $u_uitable = $table->($u);
-            my $sth = $dbr->prepare("SELECT i.interest, i.intid FROM interests i, $u_uitable ui ".
-                                    "WHERE i.intid=ui.intid AND ui.userid=? AND i.intid IN ($in)");
-            $sth->execute($u->{'userid'});
-            while ($_ = $sth->fetchrow_hashref) {
-                $uint{$_->{'interest'}} = $_->{'intid'};
+
+            my $uints = LJ::get_interests($u);
+            foreach (@$uints) {
+                $uint{$_->[1]} = $_->[0];
             }
+
             if ($altauthas) {
                 $ret .= BML::ml('.enmasse.body.other_authas', { 'user' => LJ::ljuser($fromu),
                                                                 'target' => LJ::ljuser($u) });
@@ -265,22 +259,19 @@ body<=
     }
 
     if ($did_post && $POST{'mode'} eq "enmasse_do") {
-        my $remote = LJ::get_remote();
         return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.enmasse.mustlogin'} p?>" unless $remote;
 
         my $authas = $GET{'authas'} || $remote->{'user'};
         my $u = LJ::get_authas_user($authas);
         return LJ::bad_input($ML{'.error.noauth'}) unless $u;
 
+        my $uitable = $table->($u);
         my %uint;
         my $intcount = 0;
-        my $dbr = LJ::get_db_reader();
-        my $uitable = $table->($u);
-        my $sth = $dbr->prepare("SELECT i.interest, i.intid FROM interests i, $uitable ui ".
-                                "WHERE i.intid=ui.intid AND ui.userid=?");
-        $sth->execute($u->{'userid'});
-        while ($_ = $sth->fetchrow_hashref) {
-            $uint{$_->{'intid'}} = $_->{'interest'};
+
+        my $uints = LJ::get_interests($u);
+        foreach (@$uints) {
+            $uint{$_->[0]} = $_->[1];  # uint{intid} = interest
             $intcount++;
         }
 
@@ -306,7 +297,6 @@ body<=
                 $toomany = 1;
             } else {
                 my $dbh = LJ::get_db_writer();
-
                 my $sqlp = "(?,?)" . (",(?,?)" x (scalar(@toadd) - 1));
                 my @bindvars = map { ($u->{'userid'}, $_) } @toadd;
                 $dbh->do("REPLACE INTO $uitable (userid, intid) VALUES $sqlp", undef, @bindvars);
@@ -332,7 +322,7 @@ body<=
             $ret .= $added   ? $ML{'.results.added'}
                   : $toomany ? BML::ml('.results.toomany', {'intcount' => 150})
                   : $ML{'.results.nothing'};
-        }  
+        }
 
         $ret .= " p?><?p " . BML::ml('.results.message', { 'url' => '/userinfo.bml?user=' . $u->{'user'} });
         $ret .= " " . BML::ml('.results.goback',
@@ -340,6 +330,7 @@ body<=
                                  'user' => LJ::ljuser($POST{'fromuser'}),
                                }) if ($POST{'fromuser'} ne "" && $POST{'fromuser'} ne $u->{'user'});
         $ret .= " p?>";
+        LJ::memcache_kill($remote, "intids");
         return $ret;
     }
 
@@ -358,7 +349,6 @@ body<=
         $intid += 0;
 
         my $ret = "";
-        my $remote = LJ::get_remote();
 
         ### hook
         LJ::run_hooks("interests_bml", {
@@ -433,8 +423,6 @@ body<=
         $ret .= "<tr valign='top'><td colspan='2'>";
         $ret .= "<a href=\"interests.bml?view=popular\">$ML{'.interests.viewpop'}</a></td></tr>";
     }
-
-    my $remote = LJ::get_remote();
 
     $ret .= "<tr valign='top'><td align='left'>$ML{'.interested.in'}</td>";
     $ret .= "<td><form method='get' action='interests.bml'>";
