@@ -24,9 +24,6 @@ body<=
  if ($GET{'sort'} eq "feeddesc") {
      @data = sort { $a->{'name'} cmp $b->{'name'} } @data;
  }
- if ($GET{'sort'} eq "numreaders") {
-     @data = sort { $b->{'numreaders'} cmp $a->{'numreaders'} } @data;
- }
 
  return "<?p $ML{'.error.nofeeds'} p?>" unless @data;
 
