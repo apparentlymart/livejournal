@@ -1,5 +1,4 @@
 # -*-s2-*-
-#
 
 layerinfo type = "layout";
 layerinfo name = "Generator";
@@ -331,6 +330,7 @@ function CalendarPage::print_year_links ()
 
 function CalendarPage::print_month (CalendarPageMonth m)
 {       
+    if (not $m.has_entries) { return; }
     """<table cellpadding="2" cellspacing="0" border="0" summary="">
 <tr><td bgcolor="$*stronger_back" align="center">
 <table cellpadding="5" cellspacing="0" border="0" summary="">
@@ -357,5 +357,21 @@ function CalendarPage::print_month (CalendarPageMonth m)
     }
 
     """</table></td></tr></table></td></tr></table><p>""";
-
 }
+
+function CalendarPageWeek::print () {
+    "<tr valign='top'>";
+    if ($.pre_empty) { "<td colspan='$.pre_empty'></td>"; }
+    foreach var CalendarPageDay d ($.days) {
+        """<td><div class="meta">$d.day</div>""";
+        if ($d.num_entries) {
+            """<div align="center"><a href="$d.url">$d.num_entries</a></div>""";
+        } else {
+            "&nbsp;";
+        }
+        "</td>";
+    }
+    if ($.post_empty) { "<td colspan='$.post_empty'></td>"; }
+    "</tr>";
+}
+

@@ -353,13 +353,7 @@ class CalendarPageDay
     var Date date "Date of day";
 
     var int num_entries "Number of entries made on this day";
-    var string url "A URL to link to to view the day.";
-
-    function print_label
-    "Print this number as it will appear in the calendar";
-
-    function print_forcalendar
-    "Print out a table cell (or something similar) to represent this day.";
+    var string url "A URL to view the day, if there are entries, else blank.";
 }
 
 class CalendarPageWeek 
@@ -1135,20 +1129,19 @@ function CalendarPageWeek::print() {
       """<td class="emptyday" colspan="$.pre_empty">&nbsp;</td>\n""";
    }
    foreach var CalendarPageDay d ($.days) {
-      $d->print_forcalendar();
+       """<td style="border: 1px solid;">\n""";
+       """<div style="text-align: right;">$d.day</div>\n""";
+       if ($d.num_entries > 0) {
+           """<div style="text-align: center;"><a href="$d.url">$d.num_entries</a></div>\n""";
+       }
+       """</td>\n""";
    }
    if ($.post_empty > 0) {
       """<td colspan="$.post_empty">&nbsp;</td>\n""";
    }
+   "</tr>";
 }
-function CalendarPageDay::print_forcalendar() {
-    """<td style="border: 1px solid;">\n""";
-    """<div style="text-align: right;">$.day</div>\n""";
-    if ($.num_entries > 0) {
-        """<div style="text-align: center;"><a href="$.url">$.num_entries</a></div>\n""";
-    }
-    """</td>\n""";
-}
+
 function CalendarMonthPage::print_body {
     "<div class=\"monthnav\">";
     $.prev->print_button();
@@ -1157,15 +1150,12 @@ function CalendarMonthPage::print_body {
     "</div>\n<dl>";
     foreach var CalendarMonthPageDay d ($.month.days) {
         "<dt><a href=\"$d.url\">";
-        $d->print_label();
+        print lang_ordinal($d.day);
         "</a></dt>\n<dd>";
         $d->print_subjectlist();
         "</dd>\n";
     }
     "</dl>\n";
-}
-function CalendarMonthPageDay::print_label() {
-    print lang_ordinal($.day);
 }
 
 function CalendarMonthPageDay::print_subjectlist() {

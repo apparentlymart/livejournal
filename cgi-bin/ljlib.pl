@@ -22,6 +22,7 @@ use HTTP::Date ();
 use IO::Socket ();
 use Unicode::MapUTF8 ();
 use LJ::S2;
+use Time::Local ();
 
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
@@ -4812,6 +4813,13 @@ sub days_in_month
         }
     }
     return ((31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)[$month-1]);
+}
+
+sub day_of_week
+{
+    my ($year, $month, $day) = @_;
+    my $time = Time::Local::timelocal(0,0,0,$day,$month-1,$year);
+    return (localtime($time))[6];
 }
 
 # <LJFUNC>
