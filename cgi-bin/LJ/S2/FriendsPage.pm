@@ -153,6 +153,7 @@ sub FriendsPage
         'common_filter' => $common_filter,
         'owners' => \%owners,
         'idsbycluster' => \%idsbycluster,
+        'showtypes' => $FORM{'show'},
         'friendsoffriends' => $opts->{'view'} eq "friendsfriends",
         'dateformat' => 'S2',
     });

@@ -1059,6 +1059,7 @@ sub create_view_friends
         'common_filter' => $common_filter,
         'owners' => \%owners,
         'idsbycluster' => \%idsbycluster,
+        'showtypes' => $FORM{'show'},
         'friendsoffriends' => $opts->{'view'} eq "friendsfriends",
     });
 

@@ -453,11 +453,19 @@ sub get_friend_items
         # if we just finished a batch.
         if ($total_loaded % $buffer_unit == 0)
         {
+            my $extra;
+            if ($opts->{'showtypes'}) {
+                my @in;
+                if ($opts->{'showtypes'} =~ /P/) { push @in, "'P'"; }
+                if ($opts->{'showtypes'} =~ /Y/) { push @in, "'Y'"; }
+                if ($opts->{'showtypes'} =~ /C/) { push @in, "'C','S','N'"; }
+                $extra = "AND u.journaltype IN (".join (',', @in).")" if @in;
+            }
             my $timeafter = $cache_max_update ? "AND uu.timeupdate > '$cache_max_update' " : "";
             my $sth = $dbr->prepare("SELECT u.userid, $LJ::EndOfTime-UNIX_TIMESTAMP(uu.timeupdate), u.clusterid, uu.timeupdate ".
                                     "FROM friends f, userusage uu, user u ".
-                                    "WHERE f.userid=$userid AND f.friendid=uu.userid AND f.friendid=u.userid $filtersql ".
-                                    "AND u.statusvis='V' ".
+                                    "WHERE f.userid=$userid AND f.friendid=uu.userid ".
+                                    "AND f.friendid=u.userid $filtersql AND u.statusvis='V' $extra ".
                                     "AND uu.timeupdate IS NOT NULL ".
                                     $timeafter .
                                     "ORDER BY 2 LIMIT $total_loaded, $buffer_unit");
@@ -494,7 +502,6 @@ sub get_friend_items
             while (my ($id, $mask, $time, $jt) = $sth->fetchrow_array) {
                 $f{$id} = { 'userid' => $id, 'timeupdate' => $time, 'jt' => $jt,
                             'relevant' => ($filter && !($mask & $filter)) ? 0 : 1 , };
-
             }
             
             # load some friends of friends (most 20 queries)
@@ -504,11 +511,20 @@ sub get_friend_items
             {
                 next unless $f{$fid}->{'jt'} eq "P" and $f{$fid}->{'relevant'};
                 last if ++$fct > 20;
+                my $extra;
+                if ($opts->{'showtypes'}) {
+                    my @in;
+                    if ($opts->{'showtypes'} =~ /P/) { push @in, "'P'"; }
+                    if ($opts->{'showtypes'} =~ /Y/) { push @in, "'Y'"; }
+                    if ($opts->{'showtypes'} =~ /C/) { push @in, "'C','S','N'"; }
+                    $extra = "AND u.journaltype IN (".join (',', @in).")" if @in;
+                }
+                Apache->request->log_error("extra: $extra  showtypes: $opts->{'showtypes'}");
                 my $sth = $dbh->prepare(qq{
                     SELECT u.userid, $LJ::EndOfTime-UNIX_TIMESTAMP(uu.timeupdate), u.clusterid 
                     FROM friends f, userusage uu, user u WHERE f.userid=$fid AND
-                         f.friendid=uu.userid AND f.friendid=u.userid AND u.statusvis='V' AND 
-                         uu.timeupdate IS NOT NULL ORDER BY 2 LIMIT 100
+                         f.friendid=uu.userid AND f.friendid=u.userid AND u.statusvis='V' $extra
+                         AND uu.timeupdate IS NOT NULL ORDER BY 2 LIMIT 100
                 });
                 $sth->execute;
                 while (my ($id, $time, $c) = $sth->fetchrow_array) {
