@@ -80,6 +80,7 @@ sub check_file
 	    $contlen = 0;
 	    if ($f->{'name'}) {
 		$funcs{$f->{'name'}} = $f;
+		treeify($f);
 	    }
 	    next;
 	}
@@ -88,7 +89,6 @@ sub check_file
 	# same indenting.
 	if ($prefix && $contlen) {
 	    my $cont = $prefix . " "x$contlen;
-	    print "cont $f->{'name'}:$curkey? [$cont]\n";
 	    if ($l =~ /^\Q$cont\E(.+)/) {
 		my $v = $1;
 		$v =~ s/^\s+//;
@@ -111,4 +111,28 @@ sub check_file
     }
     close (F);
 
+}
+
+sub treeify
+{
+    my $f = shift;
+    my $args = $f->{'args'};
+    $f->{'args'} = [];
+
+    $args =~ s/\s+//g;
+    foreach my $arg (split(/\,/, $args))
+    {
+	my $opt = 0;
+	if ($arg =~ s/\?$//) { $opt = 1; }
+	my $list = 0;
+	if ($arg =~ s/\*$//) { $list = 1; }
+	my $a = { 'name' => $arg };
+	if ($opt) { $a->{'optional'} = 1; }
+	if ($list) { $a->{'list'} = 1; }
+	$a->{'des'} = $f->{"des-$arg"};
+	delete $f->{"des-$arg"};
+	push @{$f->{'args'}}, $a;
+    }
+    
+      
 }
