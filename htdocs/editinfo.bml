@@ -325,12 +325,11 @@ body<=
              my $sel = $key eq $cur ? "SELECTED" : "";
              $ret .= "<OPTION VALUE=\"$key\" $sel>$des";
          }
-         $ret .= "</SELECT>";
+         $ret .= "</SELECT></ul>";
          
-         $ret .= "</ul>$ML{'.allowshowcontact.email.reason'}";
          $ret .= ($LJ::USER_EMAIL
-                  ? "," . BML::ml(".allowshocontact.email.if_domainaddy", { 'siteroot' => $LJ::SITEROOT, })
-                  : ".");
+                  ? $ML{'.allowshowcontact.email.withdomainaddr'}
+                  : $ML{'.allowshowcontact.email.withoutdomainaddr'});
      }
 
      $ret .= "</TD></TR>\n";

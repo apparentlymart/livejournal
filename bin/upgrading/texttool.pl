@@ -337,6 +337,7 @@ sub poptext
             } elsif ($line =~ /^(\S+?)\<\<\s*$/) {
                 ($code, $text) = ($1, "");
                 while (<D>) {
+                    $lnum++;
                     last if $_ eq ".\n";
                     s/^\.//;
                     $text .= $_;
