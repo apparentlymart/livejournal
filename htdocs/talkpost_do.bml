@@ -794,13 +794,19 @@ body<=
     my $commentlink = $talkargs->("view=$dtalkid#t$dtalkid");
 
     $ret .= "<?h1 $ML{'.success.title'} h1?>";
+
+    my $mlcode;
     if ($state eq 'A') {
-        $ret .= "<?p " . BML::ml('.success.message', {'link'=>$commentlink}) . " p?>";
-    } elsif ($state eq 'S' && $u->{'journaltype'} eq 'C') {
-        $ret .= "<?p " . BML::ml('.success.screened.comm', {'link'=>$commentlink}) . " p?>";
+        $mlcode = '.success.message';
+    } elsif ($u->{'journaltype'} eq 'C') {
+        $mlcode = $FORM{'usertype'} eq 'anonymous' ? '.success.screened.comm.anon'
+                                                   : '.success.screened.comm';
     } else {
-        $ret .= "<?p " . BML::ml('.success.screened.user', {'link'=>$commentlink}) . " p?>";
+        $mlcode = $FORM{'usertype'} eq 'anonymous' ? '.success.screened.user.anon'
+                                                   : '.success.screened.user';
     }
+
+    $ret .= "<?p " . BML::ml($mlcode, { 'link' => $commentlink }) . " p?>";
 
     if ($unscreened) {
         $ret .= "<?p $ML{'.success.unscreened'} p?>";

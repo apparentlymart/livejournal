@@ -1801,7 +1801,11 @@ Please either clear the user textbox or select the relevant posting mode and try
 
 /talkpost_do.bml.success.screened.comm=Your comment has been added.  According to this community's settings, it was marked as screened, and will be visible only to you and the community maintainers until they choose to unscreen it. You can view your comment <a href="[[link]]">here</a>.
 
+/talkpost_do.bml.success.screened.comm.anon=Your anonymous comment has been added.  According to this community's settings, it was marked as screened, and will be visible only to the community maintainers until they choose to unscreen it.  You can go back to the comment thread <a href="[[link]]">here</a>.
+
 /talkpost_do.bml.success.screened.user=Your comment has been added.  According to this journal's settings, it was marked as screened, and will be visible only to you and the journal's owner until the owner chooses to unscreen it. You can view your comment <a href="[[link]]">here</a>.
+
+/talkpost_do.bml.success.screened.user.anon=Your anonymous comment has been added.  According to this journal's settings, it was marked as screened, and will be visible only to the journal's owner until the owner chooses to unscreen it. You can go back to the comment thread <a href="[[link]]">here</a>.
 
 /talkpost_do.bml.success.title=Success
 
