@@ -326,8 +326,8 @@
                 if ($POST{$do}) {
 
                     # catches deletes, requests, etc
-                    if (lc($POST{$do}) ne 'insert')  {
-                        $do_action->($act, $q, lc($POST{$do}));
+                    if ($act ne 'insert')  {
+                        $do_action->($act, $q, $act);
                         next;
                     }
 
