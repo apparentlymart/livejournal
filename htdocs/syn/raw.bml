@@ -1,0 +1,17 @@
+<?_code
+{
+    my $ret;
+    my $db = LJ::get_db_reader();
+    
+    my $sth = $db->prepare("SELECT u.user, u.name, s.synurl, s.numreaders ".
+                           "FROM syndicated s, user u ".
+                           "WHERE s.userid=u.userid AND s.numreaders > 0 ".
+                           "AND s.lastnew > DATE_SUB(NOW(), INTERVAL 24 HOUR) ".
+                           "ORDER BY s.numreaders DESC LIMIT 1000");
+    $sth->execute;
+    while (@_ = $sth->fetchrow_array) {
+        $ret .= join("\t", @_) . "\n";
+    }
+    return $ret;
+}
+_code?>
