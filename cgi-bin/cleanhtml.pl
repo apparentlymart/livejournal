@@ -393,7 +393,7 @@ sub clean
 
             # put <wbr> tags into long words, except inside <pre>.
             if ($wordlength && !$opencount{'pre'}) {
-                $token->[1] =~ s/((?:$onechar){$wordlength})\B/$1<wbr \/>/g;
+                $token->[1] =~ s/\S{$wordlength,}/break_word($&,$wordlength)/eg;                
             } 
 
             if ($auto_format) {
@@ -541,7 +541,7 @@ sub clean_event
 
     # fast path:  no markup or URLs to linkify
     if ($$ref !~ /\<|\>|http/ && ! $opts->{preformatted}) {
-        $$ref =~ s/((?:$onechar){40})\B/$1<wbr \/>/g;
+        $$ref =~ s/\S{40,}/break_word($&,40)/eg;
         $$ref =~ s/\r?\n/<br \/>/g;
         return;
     }
@@ -572,7 +572,7 @@ sub clean_comment
 
     # fast path:  no markup or URLs to linkify
     if ($$ref !~ /\<|\>|http/ && ! $preformatted) {
-        $$ref =~ s/((?:$onechar){40})\B/$1<wbr \/>/g;
+        $$ref =~ s/\S{40,}/break_word($&,40)/eg;
         $$ref =~ s/\r?\n/<br \/>/g;
         return;
     }
@@ -656,3 +656,11 @@ sub canonical_url {
 
     return $url;
 }
+
+sub break_word {
+    my ($word, $at) = @_;
+    $word =~ s/((?:$onechar){$at})\B/$1<wbr \/>/g;
+    return $word;
+}
+
+1;
