@@ -270,7 +270,7 @@ sub do_search
     # need to get community info
     if ($req->{'opt_format'} eq "com") {
         my $in = join(',', @ids);
-        my $sth = $dbr->prepare("SELECT c.userid, c.membership, c.postlevel ".
+        my $sth = $dbr->prepare("SELECT userid, membership, postlevel ".
                                 "FROM community ".
                                 "WHERE userid IN ($in)");
         $sth->execute;
