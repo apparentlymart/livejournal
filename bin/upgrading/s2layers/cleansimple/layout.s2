@@ -531,6 +531,7 @@ function FriendsPage::print_entry (Entry e) {
 
 function CommentInfo::print ()
 {
+    if (not $.enabled) { return; }
     """<div class="talklinks" clear="all">""";
     if ($.count > 0 or $.screened) {
         $this->print_readlink();

@@ -290,6 +290,7 @@ function FriendsPage::print_body {
 
 function CommentInfo::print()
 {
+    if (not $.enabled) { return; }
     "<tr><td bgcolor='$*accent_bgcolor'><font color='$*accent_fgcolor'>";
     "<nobr>comments: ";
     if ($.count > 0 or $.screened) {

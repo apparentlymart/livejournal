@@ -312,6 +312,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
 
 function CommentInfo::print()
 {
+    if (not $.enabled) { return; }
     "<div class='Comment'>(";
     if ($.count > 0 or $.screened) {
         $this->print_readlink(); "&nbsp;|&nbsp;";

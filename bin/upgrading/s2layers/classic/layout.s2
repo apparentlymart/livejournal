@@ -367,6 +367,7 @@ function FriendsPage::lay_nav_blurb ()
 
 function CommentInfo::print ()
 {
+    if (not $.enabled) { return; }
     "<p class='comments'>(";
     if ($.count > 0 or $.screened) {
         $this->print_readlink();

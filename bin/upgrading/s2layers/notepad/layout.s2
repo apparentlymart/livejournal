@@ -211,7 +211,8 @@ function RecentPage::lay_bottom_navigation ()
 }
 
 function CommentInfo::print()
-{
+{   
+    if (not $.enabled) { return; }
     "<p>";
      if ($.count > 0 or $.screened)
      {
