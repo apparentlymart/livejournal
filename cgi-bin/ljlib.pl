@@ -3591,7 +3591,7 @@ sub make_journal
     my $stylesys = 1;
     if ($styleid == -1) {
         # force s2 style id
-        if ($opts->{'s2id'}) {
+        if ($opts->{'s2id'} && LJ::get_cap($u, "s2styles")) {
             $stylesys = 2;
             $styleid = $opts->{'s2id'};
         } elsif ($view eq "res" && $opts->{'pathextra'} =~ m!^/(\d+)/!) {
