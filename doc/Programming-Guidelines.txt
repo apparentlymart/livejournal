@@ -1,0 +1,58 @@
+LiveJournal programming/style guidelines.
+
+[ NOW ]
+
+  -- security: all GET/POST form values go into %FORM into BML, but
+     check LJ::did_post() on critical actions.  GET requests can be
+     easily spoofed, or hidden in images, etc.
+
+  -- always use the LJ:: functions that take an explicit database
+     handle.  don't use the old main:: functions that use the global
+     $dbh.
+
+  -- check your db index usage... mysql's "EXPLAIN" is your friend.
+
+  -- don't write temporary files to disk... all LJ code should be able
+     to run on a cluster of web servers with no session persistence
+
+  -- lines longer than 80 characters are okay, but not great.
+
+  -- preferred way to break up a long SQL query:
+
+       $sth = $dbh->prepare("SELECT cola, colb, colc, cold FROM foo ".
+                            "WHERE colb<>cola AND colc=22");
+
+  -- note on variable naming:
+
+          $sth      statement handle
+          $dbh      one database handle (usually the master)
+          $dbs      set of database handles [master(, slave)]
+          $dbr      read-only slave db handle (used for selects)
+          $dbarg    argument that can take a $dbh/r or $dbs
+          $remote   hashref of remote user, based on cookies.
+                    will contain 'userid' and 'user' params, 
+                    unless faster get_remote_noauth was used,
+                    in which case only 'user' will be present.
+          $u        a user 'object' (a hashref)
+
+
+  -- all files should have <LJDEP> edge dependency somewhere, usually
+     at the bottom.
+
+
+[ FUTURE - low priority now, higher later ]
+
+  -- all HTML should be XHTML compliant... lower case tags, <BR> -> <br />
+
+  -- use of multiple files to do one function is deprecated.  there
+     should no longer be "foo.bml" and "foo_do.bml" like there used
+     to.  that's ugly.
+
+  -- tab is a formatting command, not a character.  (TODO: add note
+     about save hooks for emacs & vi) there should be spaces (0x20) in
+     the files, not 0x09
+
+
+
+
+
