@@ -18,9 +18,9 @@ $maint{'synsuck'} = sub
     my $ua =  LWP::UserAgent->new("timeout" => 10);
 
     $sth = $dbh->prepare("SELECT u.user, s.userid, s.synurl, s.lastmod, s.etag, s.numreaders ".
-                         "FROM useridmap u, syndicated s ".
+                         "FROM user u, syndicated s ".
                          "WHERE u.userid=s.userid AND ".
-                         "s.checknext < NOW() ORDER BY s.checknext");
+                         "u.statusvis='V' AND s.checknext < NOW() ORDER BY s.checknext");
     $sth->execute;
     while (my ($user, $userid, $synurl, $lastmod, $etag, $readers) = $sth->fetchrow_array)
     {
