@@ -129,8 +129,6 @@ body<=
  $picid = $dbh->selectrow_array("SELECT picid FROM userpic WHERE userid=$userid AND ".
                                 "contenttype=$qcontenttype AND md5base64=$qbase64");
 
- my $isclust = $u->{'dversion'} >= 2 ? 1 : 0;
- 
  ### if picture isn't a duplicate, insert it
  if ($picid == 0) 
  {
@@ -145,16 +143,11 @@ body<=
      ### insert the blob
      my $dbb = $dbh;
      
-     if ($isclust) {
-         $dbb = LJ::get_cluster_master($u);
-         return "<b>Error:</b> Database temporarily down for maintenance.  Try again in a few minutes." unless $dbb;
-         $dbb->do("INSERT INTO userpicblob2 (userid, picid, imagedata) ".
-                  "VALUES ($userid, $picid, ?)", undef, $FORM{'userpic'});
-     } else {
-         $dbb->do("INSERT INTO userpicblob (picid, imagedata) VALUES ($picid, ?)", 
-                  undef, $FORM{'userpic'});
-     }
-     if ($dbb->err) { return "<B>Error: </B> " . $dbb->errstr; }
+     $dbb = LJ::get_cluster_master($u);
+     return "<b>Error:</b> Database temporarily down for maintenance.  Try again in a few minutes." unless $dbb;
+     $dbb->do("INSERT INTO userpicblob2 (userid, picid, imagedata) ".
+              "VALUES ($userid, $picid, ?)", undef, $FORM{'userpic'});
+     if ($dbb->err) { return "<b>Error: </b> " . $dbb->errstr; }
  }
  
  if ($FORM{'make_default'}) {
