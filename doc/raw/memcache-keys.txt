@@ -30,6 +30,7 @@
 <styleid> s1style:<styleid> == hashref of s1style row
 <styleid> s1stylemap: <styleid> == userid who owns the given styleid
 
+<styleid> s2sl:<styleid> == hashref of s2stylelayers { type => s2lid }
 
 <uid> checkfriends:<uid>:<mask> == scalar maxupdate, expires after refresh interval
 <uid> frgmask:<uid>:<uid_friend>  -- scalar numeric mask, 15 minutes

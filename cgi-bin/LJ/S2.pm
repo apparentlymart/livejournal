@@ -278,11 +278,8 @@ sub get_style
     }
     
     if ($styleid) {
-        my $dbr = LJ::get_db_reader();
-        my $sth = $dbr->prepare("SELECT type, s2lid FROM s2stylelayers ".
-                                "WHERE styleid=?");
-        $sth->execute($styleid);
-        while (my ($t, $id) = $sth->fetchrow_array) { $style{$t} = $id; }
+        my $stylay = LJ::S2::get_style_layers($styleid);
+        while (my ($t, $id) = each %$stylay) { $style{$t} = $id; }
         $have_style = scalar %style;
     }
 
@@ -495,13 +492,8 @@ sub load_style
                                        undef, $id);
     return undef unless $style;
 
-    $style->{'layer'} = {};
-    my $sth = $db->prepare("SELECT type, s2lid FROM s2stylelayers ".
-                           "WHERE styleid=?");
-    $sth->execute($id);
-    while (my ($type, $s2lid) = $sth->fetchrow_array) {
-        $style->{'layer'}->{$type} = $s2lid;
-    }
+    $style->{'layer'} = LJ::S2::get_style_layers($id) || {};
+
     return $style;
 }
 
@@ -534,6 +526,33 @@ sub delete_layer
     return 1;
 }
 
+sub get_style_layers
+{
+    my ($styleid, $force) = @_;
+    return undef unless $styleid;
+
+    # check memcache unless $force
+    my $stylay = undef;
+    my $memkey = [$styleid, "s2sl:$styleid"];
+    $stylay = LJ::MemCache::get($memkey) unless $force;
+    return $stylay if $stylay;
+
+    my $db = LJ::get_db_writer();
+    my $sth = $db->prepare("SELECT type, s2lid FROM s2stylelayers " .
+                           "WHERE styleid=?");
+    $sth->execute($styleid);
+    $stylay = {};
+    while (my ($type, $s2lid) = $sth->fetchrow_array) {
+        $stylay->{$type} = $s2lid;
+    }
+    return undef unless %$stylay;
+
+    # set in memcache
+    LJ::MemCache::set($memkey, $stylay);
+    
+    return $stylay;
+}
+
 sub set_style_layers
 {
     my ($u, $styleid, %newlay) = @_;
@@ -547,6 +566,10 @@ sub set_style_layers
     return 0 if $dbh->err;
     $dbh->do("UPDATE s2styles SET modtime=UNIX_TIMESTAMP() WHERE styleid=?",
              undef, $styleid);
+
+    # delete memcache key
+    LJ::MemCache::delete([$styleid, "s2sl:$styleid"]);
+
     return 1;
 }
 
