@@ -340,8 +340,6 @@ BODY<=
      $basesubject =~ s/^Re:\s*//i;
      if ($basesubject) {
 	 $basesubject = "Re: $basesubject";
-	 # double-escape it for including in the input value below.
-	 $basesubject = LJ::ehtml($basesubject);
 	 $basesubject = LJ::ehtml($basesubject);
      }
  }

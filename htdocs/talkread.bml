@@ -454,8 +454,7 @@ sub recurse_post
 		    }
 		}
 		
-		my $cleansubject = $post->{'subject'};
-		LJ::CleanHTML::clean_subject(\$cleansubject);
+		my $cleansubject = LJ::ehtml($post->{'subject'});
 
 		$$ret .= "<font size='+1' face='Arial,Helvetica'><b>$cleansubject</b></font> $icon";
 		$$ret .= "<br />$user\n";
