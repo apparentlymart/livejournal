@@ -108,7 +108,13 @@ body<=
             $ret .= "(S1) ";
             foreach my $view (@LJ::views) {
                 my $styid = $u->{"s1_${view}_style"};
-                $ret .= "$view: <a href='$LJ::SITEROOT/styles/browse/styleinfo.bml?styleid=$styid'>$styid</a> ";
+                my $viewuri = $view eq "lastn" ? "/users/$u->{'user'}/" : "/users/$u->{'user'}/$view";
+                if ($view eq "day") {
+                    my (undef,undef,undef,$dday,$dmon,$dyear) = localtime(time); $dyear+=1900; $dmon++;
+                    $dmon = $dmon <= 9 ? "0$dmon" : $dmon; $dday = $dday <= 9 ? "0$dday" : $dday;
+                    $viewuri = "/users/$u->{'user'}/$dyear/$dmon/$dday/";
+                }
+                $ret .= "<a href='$viewuri'>$view</a>: <a href='$LJ::SITEROOT/styles/browse/styleinfo.bml?styleid=$styid'>$styid</a> ";
             }
             if ($u->{'useoverrides'} eq 'Y') {
                 $ret .= "<br />overrides: <a href='see_overrides.bml?user=$u->{'user'}'>view</a> ";
@@ -158,8 +164,9 @@ body<=
         $state .= LJ::ljuser($wuser, { 'full' => 1 }) . ")";
     }
     $ret .= "<tr><td align='right'><b>Status:</b></td><td>$state";
-    if ($sp->{'state'} eq "open" && $owner_mode) {
-        $ret .= ", <a href='act.bml?close;$sp->{'spid'};$sp->{'authcode'}'><b>close without credit</b></a>";
+    if ($owner_mode) {
+        $ret .= $sp->{'state'} eq "open" ? ", <a href='act.bml?close;$sp->{'spid'};$sp->{'authcode'}'><b>close without credit</b></a>" : "";
+        $ret .= $sp->{'state'} eq "closed" ? ", <a href='act.bml?touch;$sp->{'spid'};$sp->{'authcode'}'><b>reopen this request</b></a>" : "";
     }
     $ret .= "</td></tr>\n";
     $ret .= "<tr><td align='right'><b>Summary:</b></td><td><span style='font-size: 1.1em'><b>" . LJ::ehtml($sp->{'subject'}) . "</b></span></td></tr>\n";
@@ -392,6 +399,8 @@ body<=
                                     ('', ''),
                                     map { $_->{'splid'}, "\#$_->{'splid'} ($userinfo{$_->{'userid'}}->{'user'})" }
                                     @screened);
+            $ret .= LJ::html_select({ 'name' => 'approveas' },
+                                    ("answer" => "as answer", "comment" => "as comment",));
         }
         $ret .= "</td></tr></table>\n";
 

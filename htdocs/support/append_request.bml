@@ -110,8 +110,12 @@ body<=
      my $splid = $FORM{'approveans'}+0;
      my $res = LJ::Support::load_response($dbh, $splid);
      if ($res->{'spid'} == $spid && $res->{'type'} eq "screened") {
-         $dbh->do("UPDATE supportlog SET type='answer' WHERE splid=$splid");
-         $status .= "(Approving answer \#$splid)\n\n";
+         return LJ::bad_input('Invalid type to approve screened entry as.')
+            if (($FORM{'approveas'} ne 'answer') && ($FORM{'approveas'} ne 'comment'));
+         # approve
+         my $qtype = $dbh->quote($FORM{'approveas'});
+         $dbh->do("UPDATE supportlog SET type=$qtype WHERE splid=$splid");
+         $status .= "(Approving $FORM{'approveas'} \#$splid)\n\n";
          LJ::Support::mail_response_to_user($dbh, $sp, $splid);
      } else {
          return LJ::bad_input("Invalid screened entry to approve.");
