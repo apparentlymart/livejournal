@@ -140,13 +140,11 @@ head<=
 <=head
 
 body<=
-<?p This page allows users to create and edit their custom mood themes. p?>
 
 <?_code
+{
     use strict;
     use vars qw(%POST %GET);
-
-    my $ret;
 
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
@@ -162,6 +160,9 @@ body<=
     # Populated with all the moods later in editform
     my %lists;
 
+    my $ret;
+    my $self_uri = "/manage/moodthemes.bml";
+    $self_uri .= "?authas=$authas" if $authas ne $remote->{'user'};
 
     #### Closure Definitions ####
     my $make_tree;
@@ -187,13 +188,24 @@ body<=
 
             $ret .= "<table>";
             if ($mood->{'parent'}) {
-                $ret .= "<tr><td colspan='2'>Inherit from " . LJ::mood_name($mood->{'parent'}) . ": <input type='checkbox' name='$mood->{'id'}inherit' id='$mood->{'id'}inherit' onChange='enable($mood->{'id'}, $mood->{'parent'})' ";
-                $ret .= $inherited ? "checked='checked' />" : " />";
+                $ret .= "<tr><td colspan='2'><label for='$mood->{id}inherit'>Inherit from ";
+                $ret .= LJ::mood_name($mood->{'parent'}) . "</label>";
+                $ret .= ": " . LJ::html_check({ type => 'check', name => "$mood->{id}inherit",
+                                                id => "$mood->{id}inherit",
+                                                onchange => "enable($mood->{id}, $mood->{parent})",
+                                                checked  => $inherited });
                 $ret .= "</td></tr>\n";
             }
-            $ret .= "<tr><td>URL: </td><td><input type='text' name='$mood->{'id'}' id='$mood->{'id'}' value='$pic{'pic'}' size='75' onChange='update_children($mood->{'id'})' /></td></tr>\n";
-            $ret .= "<tr><td>Width: </td><td><input type='text' name='$mood->{'id'}w' id='$mood->{'id'}w' value='$pic{'w'}' size='4' /> Height: <input type='text' name='$mood->{'id'}h' id='$mood->{'id'}h' value='$pic{'h'}' size='4' /><br /><br /></td></tr>\n";
-            $ret .= "<input type='hidden' name='$mood->{'id'}parent' id='$mood->{'id'}parent' value='$mood->{'parent'}' />";
+            $ret .= "<tr><td>URL: </td><td>";
+            $ret .= LJ::html_text({ name => $mood->{id}, id => $mood->{id}, value => $pic{pic},
+                                    size => 75, onchange => "update_children($mood->{id})" });
+            $ret .= "</td></tr>\n";
+            $ret .= "<tr><td>Width: </td><td>";
+            $ret .= LJ::html_text({ name => "$mood->{id}w", id => "$mood->{id}w", value => $pic{w}, size => 4 });
+            $ret .= " Height: " . LJ::html_text({ name => "$mood->{id}h", id => "$mood->{id}h",
+                                                  value => $pic{h}, size => 4 });
+            $ret .= "<br /><br /></td></tr>\n";
+            $ret .= LJ::html_hidden({ name => "$mood->{id}parent", id => "$mood->{id}parent", value => $mood->{parent} });
             $ret .= "</table>\n";
 
             $make_tree->($mood->{'id'}, $tid, 0);
@@ -226,7 +238,7 @@ body<=
         # Make sure they can even edit this theme and fill in the $info variable for later use
         if ($POST{'isnew'} != 1) {
             my $dbr = LJ::get_db_reader();
-            my $sth = $dbr->prepare("SELECT name, des FROM moodthemes WHERE moodthemeid=? AND ownerid=?");
+            my $sth = $dbr->prepare("SELECT name FROM moodthemes WHERE moodthemeid=? AND ownerid=?");
             $sth->execute($POST{'themeid'}, $u->{'userid'});
             $info = $sth->fetchrow_hashref;
             return LJ::bad_input("You do not have permission to edit this theme.")
@@ -237,38 +249,36 @@ body<=
         if ($POST{'edit'} == 1 || $POST{'isnew'} == 1) {
             # Insert the new theme name and description into the db and grab its new themeid
             if ($POST{'isnew'} == 1) {
-                return LJ::bad_input("You must specify a name and description for this theme.")
-                    unless LJ::trim($POST{'name'}) && LJ::trim($POST{'desc'});
+                return LJ::bad_input("You must specify a name for this theme.")
+                    unless LJ::trim($POST{'name'});
                 my $dbh = LJ::get_db_writer();
-                $dbh->do("INSERT INTO moodthemes (ownerid, name, des, is_public) VALUES (?, ?, ?, 'N')", undef, $u->{'userid'}, $POST{'name'}, $POST{'desc'});
+                $dbh->do("INSERT INTO moodthemes (ownerid, name, is_public) VALUES (?, ?, 'N')", undef, $u->{'userid'}, $POST{'name'});
                 $themeid = $dbh->{'mysql_insertid'};
                 $info->{'name'} = $POST{'name'};
-                $info->{'des'} = $POST{'desc'};
             }
 
             $ret .= "<?hr?>\n";
             $ret .= "<?h2 Editing Theme $info->{name} h2?>\n";
 
-            # User switcher
-            my $uri = "/manage/moodthemes.bml";
-            $uri .= "?authas=$authas" if $authas ne $remote->{'user'};
-
             # Make the form
-            $ret .= "<?p <form action='$uri' method='POST' id='editform' name='editform'>\n";
-            $ret .= "<b>Theme Name:</b> <input type='text' name='name' value=\"$info->{name}\" />&nbsp;&nbsp;&nbsp;<b>Description:</b> <input type='text' name='desc' value=\"$info->{des}\" /><br /><br />\n";
-            $ret .= "<input type='hidden' name='themeid' value='$themeid' />\n";
+            $ret .= "<?p <form action='$self_uri' method='post' id='editform' name='editform'>\n";
+            $ret .= "<b>Theme Name:</b> ";
+            $ret .= LJ::html_text({ name => 'name', value => $info->{name}, size => 50, maxlength => 255 });
+            $ret .= "<br /><br />\n";
+            $ret .= LJ::html_hidden('themeid' => $themeid) . "\n";
 
             # Actually make the editor form
             $editform->($themeid);
 
-            $ret .= "<input type='submit' name='save' value='Save Changes' /></form> p?>\n";
+            $ret .= LJ::html_submit('save' => "Save Changes") . "</form> p?>\n";
+
         } else  { # Save their changes
             my $themeid = $POST{'themeid'};
             my $dbh = LJ::get_db_writer();
 
             # Update the name or description if needed
-            if ($info->{'name'} ne $POST{'name'} || $info->{'des'} ne $POST{'desc'}) {
-                $dbh->do("UPDATE moodthemes SET name=?, des=? WHERE moodthemeid=?", undef, $POST{'name'}, $POST{'desc'}, $POST{'themeid'});
+            if ($info->{'name'} ne $POST{'name'}) {
+                $dbh->do("UPDATE moodthemes SET name=? WHERE moodthemeid=?", undef, $POST{'name'}, $POST{'themeid'});
             }
 
             # The fun part of figuring out what needs to be changed in the db
@@ -315,14 +325,15 @@ body<=
         $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
         $ret .= "</form>\n\n";
 
-        $ret .= "<?p Go to the <a href='$LJ::SITEROOT/modify.bml'>Modify Journal page</a> to set your default mood theme. p?>";
+        # form to allow users to create new mood themes
+        $ret .= "<?h1 Create a New Theme h1?>\n";
+        $ret .= "<form action='$self_uri' method='post' id='editform' name='editform' style='margin-left: 30px;'>\n";
+        $ret .= LJ::html_hidden('isnew' => 1) . "\n";
+        $ret .= "<?p <b>Name:</b> " . LJ::html_text({ name => 'name', size => 30, maxlength => 50 });
+        $ret .= LJ::html_submit('create' => "Create") . " p?></form>\n";
 
         # Make up the form to choose to edit a theme or create a new one
-        $ret .= "<table width='100%'><tr><td align='center'>\n";
         $ret .= "<?h1 Your Mood Themes h1?>\n";
-        $ret .= "</td><td align='center'>\n";
-        $ret .= "<?h1 Create a New Theme h1?>\n";
-        $ret .= "</td></tr><tr><td align='center'>\n";
 
         # Get data to figure out if they have any themes already
         my $dbr = LJ::get_db_reader();
@@ -333,29 +344,19 @@ body<=
 
         if (@user_themes) { # The have some custom themes already defined
             my @opts = map {$_->{moodthemeid}, $_->{name}} @user_themes;
-            my $uri = "/manage/moodthemes.bml";
-            $uri .= "?authas=$authas" if $authas ne $remote->{'user'};
-            $ret .= "<form action='$uri' method='POST' id='selectform' name='selectform'>\n";
-            $ret .= LJ::html_select({'name' => 'themeid'}, @opts);
-            $ret .= "&nbsp;&nbsp;<input type='hidden' name='edit' value='1' /><input type='submit' name='editbut' value='Edit' /></form>\n";
+            $ret .= "<form action='$self_uri' method='post' id='selectform' name='selectform' style='margin-left: 30px;'>\n";
+            $ret .= LJ::html_hidden('edit' => 1) . " ";
+            $ret .= "<?p " . LJ::html_select({'name' => 'themeid'}, @opts) . " ";
+            $ret .= LJ::html_submit('editbut' => "Edit") . " p?></form>\n";
         } else {
             $ret .= "<?p You have not yet made any custom mood themes. p?>\n";
         }
 
-        $ret .= "</td><td align='center'>\n";
-        my $uri = "/manage/moodthemes.bml";
-        $uri .= "?authas=$authas" if $authas ne $remote->{'user'};
-        $ret .= "<form action='$uri' method='POST' id='editform' name='editform'>\n";
-        $ret .= "<?p Theme Name: <input type='text' name='name' length='30' />&nbsp;&nbsp;&nbsp;&nbsp;";
-        $ret .= "Description: <input type='text' name='desc' length='50' />\n";
-        $ret .= "<input type='hidden' name='isnew' value='1' />\n";
-        $ret .= "<input type='submit' name='create' value='Create Theme' /></form> p?>\n";
-        $ret .= "</td></tr>\n";
-        $ret .= "</table>\n";
+        $ret .= "<?p Go to the <a href='$LJ::SITEROOT/modify.bml'>Modify Journal page</a> to set your default mood theme. p?>";
     }
 
     return $ret;
-
+}
 _code?>
 <=body
 bodyopts=> onload="pageload();"
