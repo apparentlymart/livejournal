@@ -256,8 +256,8 @@ sub LJ::Stats::num_blocks {
 
 # get low/high ids for a BETWEEN query based on page number
 sub LJ::Stats::get_block_bounds {
-    my $block = shift;
-    return (0, $LJ::Stats::BLOCK_SIZE) unless $block;
+    my ($block, $offset) = @_;
+    return ($offset+0, $offset+$LJ::Stats::BLOCK_SIZE) unless $block;
 
     # calculate min, then add one to not overlap previous max,
     # unless there was no previous max so we set to 0 so we don't
@@ -265,7 +265,7 @@ sub LJ::Stats::get_block_bounds {
     my $min = ($block-1)*$LJ::STATS_BLOCK_SIZE + 1;
     $min = $min == 1 ? 0 : $min;
 
-    return ($min, $block*$LJ::STATS_BLOCK_SIZE);
+    return ($offset+$min, $offset+$block*$LJ::STATS_BLOCK_SIZE);
 }
 
 sub LJ::Stats::block_status_line {
