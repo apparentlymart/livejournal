@@ -2367,9 +2367,8 @@ sub init {
         }
     }
 
-    unless ($form->{'body'} =~ /\S/) {
-        $bmlerr->("$SC.error.blankmessage");
-    }
+    $bmlerr->("$SC.error.posttoolarge") if (bytes::length($form->{'body'}) / 1024) >= 64;
+    $bmlerr->("$SC.error.blankmessage") unless $form->{'body'} =~ /\S/;
 
     # in case this post comes directly from the user's mail client, it
     # may have an encoding field for us.
