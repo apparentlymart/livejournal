@@ -51,7 +51,9 @@ This script supports the following command line arguments:
 
     --ignore-empty
         Normally if we encounter a 0 byte userpic we die.  This
-        makes it so that we just warn instead.
+        makes it so that we just warn instead.  Also, if the MD5
+        source from the blobserver is empty, we also just warn and
+        continue instead of dying.
 
     --verbose
         Be very chatty.
@@ -175,6 +177,11 @@ sub handle_userid {
 
         # verify the md5 of this picture with what's in the database
         my $blobmd5 = Digest::MD5::md5_base64($data);
+        if ($ignoreempty && ($md5 ne $blobmd5)) {
+            print "\twarning: md5 mismatch; database=$md5, blobserver=$blobmd5\n\n"
+                if $verbose;
+            next;
+        }
         die "\tError: data from blobserver md5 mismatch: database=$md5, blobserver=$blobmd5\n"
             unless $md5 eq $blobmd5;
         print "\tverified md5; database=$md5, blobserver=$blobmd5\n"
