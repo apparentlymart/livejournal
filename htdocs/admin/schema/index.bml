@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  $title = "Schema Browser";
  $body = "";
@@ -27,7 +27,7 @@
          $table{$name} = { 'public' => $public, 'des' => $des };
      }
 
-     $body .= "(=H1 Tables H1=)(=P Click a table for more information. P=)<p><table cellpadding=4><tr bgcolor=(=EMCOLOR=)><td><b>Table</b></td><td><b>Description</b></td></tr>\n";
+     $body .= "<?h1 Tables h1?><?p Click a table for more information. p?><p><table cellpadding=4><tr bgcolor=<?emcolor?>><td><b>Table</b></td><td><b>Description</b></td></tr>\n";
      $sth = $dbh->prepare("SHOW TABLES");
      $sth->execute;
      while (my ($table) = $sth->fetchrow_array) {
@@ -60,7 +60,7 @@
      if ($can_doc) {
          $body .= " | <a href=\"./?mode=doc&amp;table=$table\">Edit Documentation</a>";
      }
-     $body .= "(=H1 Table: $table H1=)(=P ";
+     $body .= "<?h1 Table: $table h1?><?p ";
 
      
      if ($tabledes) {
@@ -69,7 +69,7 @@
      } else {
          $body .= "Below are the columns and descriptions for the <b>$table</b> table.";
      }
-     $body .= " P=)<p>\n";
+     $body .= " p?><p>\n";
 
      my %coldes;
      $sth = $dbh->prepare("SELECT colname, des FROM schemacols WHERE tablename=$qtable");
@@ -78,7 +78,7 @@
 
      $sth = $dbh->prepare("DESCRIBE $table");
      $sth->execute;
-     $body .= "<table cellpadding=3><tr bgcolor=(=EMCOLOR=)>";
+     $body .= "<table cellpadding=3><tr bgcolor=<?emcolor?>>";
      $body .= "<td><b>Key?</b></td>";
      $body .= "<td><b>Column</b></td>";
      $body .= "<td><b>Type</b></td>";
@@ -118,7 +118,7 @@
 
      my $MAX_ROWS = 100;
 
-     $body .= "<a href=\"./\">&lt;&lt; Tables</a><br><a href=\"./?mode=viewtable&amp;table=$table\">&lt;&lt; Table: $table</a>(=H1 Data: $table H1=)(=P Below are the rows in the <b>$table</b> table.  If the table has more than $MAX_ROWS records, only the top $MAX_ROWS are shown.  P=)<p>\n";
+     $body .= "<a href=\"./\">&lt;&lt; Tables</a><br><a href=\"./?mode=viewtable&amp;table=$table\">&lt;&lt; Table: $table</a><?h1 Data: $table h1?><?p Below are the rows in the <b>$table</b> table.  If the table has more than $MAX_ROWS records, only the top $MAX_ROWS are shown.  p?><p>\n";
 
      $sth = $dbh->prepare("SELECT tablename, public_browsable, des FROM schematables WHERE tablename='$table'");
      $sth->execute;
@@ -127,7 +127,7 @@
 
      $sth = $dbh->prepare("SELECT * FROM $table LIMIT $MAX_ROWS");
      $sth->execute;
-     $body .= "<table cellpadding=3><tr bgcolor=(=EMCOLOR=)>";
+     $body .= "<table cellpadding=3><tr bgcolor=<?emcolor?>>";
      foreach my $col (@{$sth->{'NAME'}}) {
          $body .= "<td><b>$col</b></td>\n";
      }
@@ -151,7 +151,7 @@
      my $table = $FORM{'table'};
      if ($table !~ /^\w+$/) { $body = "Invalid table name!\n"; return; }
 
-     $body .= "<a href=\"./\">&lt;&lt; Tables</a>(=H1 Document Table: $table H1=)";
+     $body .= "<a href=\"./\">&lt;&lt; Tables</a><?h1 Document Table: $table h1?>";
 
      my $qtable = $dbh->quote($table);
      my $sth;
@@ -173,7 +173,7 @@
 
      $sth = $dbh->prepare("DESCRIBE $table");
      $sth->execute;
-     $body .= "<p><table cellpadding=3><tr bgcolor=(=EMCOLOR=)>";
+     $body .= "<p><table cellpadding=3><tr bgcolor=<?emcolor?>>";
      $body .= "<td><b>Column</b></td>";
      $body .= "<td><b>Type</b></td>";
      $body .= "<td><b>Description</b></td>";
@@ -202,7 +202,7 @@
      my $table = $FORM{'table'};
      if ($table !~ /^\w+$/) { $body = "Invalid table name!\n"; return; }
 
-     $body .= "<a href=\"./\">&lt;&lt; Tables</a>(=H1 Document Table: $table H1=)";
+     $body .= "<a href=\"./\">&lt;&lt; Tables</a><?h1 Document Table: $table h1?>";
 
      my $qtable = $dbh->quote($table);
      my $sth;
@@ -255,7 +255,7 @@
          if ($dbh->err) { $body .= "[3] ($sql)<p>" . $dbh->errstr; return; }
      }
 
-     $body .= "(=H1 Success H1=)(=P Documentation saved. <a href=\"./?mode=viewtable&amp;table=$table\">View</a>. P=)";
+     $body .= "<?h1 Success h1?><?p Documentation saved. <a href=\"./?mode=viewtable&amp;table=$table\">View</a>. p?>";
 
      return;	 
  }
@@ -263,10 +263,10 @@
 
  return;
 
-_CODE=)(=PAGE
-TITLE=>(=_CODE return $title; _CODE=)
-BODY=>(=_CODE return $body; _CODE=)
-PAGE=)(=_C <LJDEP>
+_code?><?page
+TITLE=><?_code return $title; _code?>
+BODY=><?_code return $body; _code?>
+page?><?_c <LJDEP>
 link: htdocs/admin/scheme/index.bml
-</LJDEP> _C=)
+</LJDEP> _c?>
 
