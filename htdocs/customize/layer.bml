@@ -205,14 +205,14 @@
 
         if (ref $override eq "HASH") { $override = $override->{'as_string'}; }
 
-        my ($checked, $disabled);
-
         $body .= "<?h1 $prop->{'des'} h1?>";
         $body .= "<?p ";
         $body .= LJ::eall($prop->{'note'}) if $prop->{'note'};
         $body .= "<blockquote>";
-        $checked = $had_override ? "" : "checked='checked'";
-        $body .= "<dl><dt><input type='radio' name='${name}_action' value='keep' id='${name}_keep' $checked><label for='${name}_keep'> <b>Keep value: </b></label></dt><dd>";
+        $body .= "<dl><dt>" . LJ::html_check({ 'type' => 'radio', 'name' => "${name}_action",
+                                               'value' => 'keep', 'id' => "${name}_keep",
+                                               'checked' => ! $had_override });
+        $body .= "<label for='${name}_keep'> <b>Keep value: </b></label></dt><dd>";
         if ($type eq "int" || $type eq "string") {
             if ($existing_display ne "") {
                 $body .= $existing_display;
@@ -226,12 +226,14 @@
             $body .= $existing_display;
         }
         $body .= "</dd>";
-        $checked = $had_override ? "checked='checked'" : "";
-        $disabled = $can_use ? "" : "disabled='disabled'";
         my $offhelp = ! $can_use ? LJ::help_icon('s2propoff', ' ') : "";
-        $body .= "<dt><input type='radio' name='${name}_action' value='override' id='${name}_override' $checked $disabled><label for='${name}_override'> <b>Override: </b></label>$offhelp</dt><dd>";
+        $body .= "<dt>" . LJ::html_check({ 'type' => 'radio', 'name' => "${name}_action",
+                                           'value' => 'override', 'id' => "${name}_override",
+                                           'selected' => $had_override, 'disabled' => ! $can_use });
+        $body .= "<label for='${name}_override'> <b>Override: </b></label>$offhelp</dt><dd>";
         if ($prop->{'values'}) {
             $body .= LJ::html_select({ 'name' => "${name}_value",
+                                       'onchange' => "checkOverride('$name');",
                                        'disabled' => ! $can_use,
                                        'selected' => $override },
                                      split(/\|/, $prop->{'values'}));
@@ -245,12 +247,14 @@
             $body .= LJ::html_text({ 'name' => "${name}_value",
                                      'disabled' => ! $can_use,
                                      'value' => $override,
+                                     'onchange' => "checkOverride('$name');",
                                      'maxlength' => $maxlength,
                                      'size' => $length });
         } elsif ($type eq "Color") {
             $body .= LJ::html_color({ 'name' => "${name}_value",
                                       'disabled' => ! $can_use,
                                       'default' => $override,
+                                      'onchange' => "checkOverride('$name');",
                                       'des' => $prop->{'des'} });
         }
         $body .= "</dd></dl>";
@@ -267,7 +271,7 @@
             my $name = $group_name->($gname);
             $num++;
             my $class = $num == 1 ? "propgrouptabsel" : "propgrouptab";
-            $js .= "propgroups[$num] = \"$gname\";\n";
+            $js .= "    propgroups[$num] = \"$gname\";\n";
             $body .= "<span class='$class' id='pgroup_tab_$gname'><a href='#pgroup$gname' onclick=\"return showPropGroup('$gname')\">$name</a></span>\n";
         }
         $body .= "</div>";
@@ -321,6 +325,18 @@ head<=
             }
         }
         return false;
+    }
+    function checkOverride (name) {
+        if (! name) { return true; }
+        if (! document.getElementById) { return true; }
+        var keep = document.getElementById(name + '_keep');
+        if (! keep) { return true; }
+        var override = document.getElementById(name + '_override');
+        if (! override) { return true; }
+
+        keep.checked = false;
+        override.checked = true;
+        return true;
     }
 <?_code return $js; _code?>
 </script>

@@ -1,6 +1,8 @@
 #!/usr/bin/perl
 #
 
+use strict;
+
 # <WCMFUNC>
 # name: html_datetime
 # class: component
@@ -230,14 +232,18 @@ sub html_color
             "\n--></script>\n";
 
     $ret .= html_text({ 'size' => 8, 'maxlength' => 7, 'name' => $htmlname, 'id' => $htmlname,
-                            'onchange' => "setBGColor(findel('${htmlname}_disp'),${htmlname}.value);",
-                            'disabled' => $opts->{'disabled'}, 'value' => $opts->{'default'},
-                            'noescape' => 1,
+                        'onchange' => "setBGColor(findel('${htmlname}_disp'),${htmlname}.value); " .
+                                      $opts->{'onchange'},
+                        'disabled' => $opts->{'disabled'}, 'value' => $opts->{'default'},
+                        'noescape' => 1, 'raw' => $opts->{'raw'},
                       });
 
+    my $disabled = $opts->{'disabled'} ? "disabled=\'disabled\'" : '';
     $ret .= "<script language=\"JavaScript\"><!--\n".
             "document.write('<button ".
-            "onclick=\"spawnPicker(findel(\\'${htmlname}\\'),findel(\\'${htmlname}_disp\\'),\\'$des\\'); ".
+            "onclick=\"spawnPicker(findel(\\'${htmlname}\\')," .
+            "findel(\\'${htmlname}_disp\\'),\\'$des\\'); " .
+            LJ::ejs($opts->{'onchange'}) .
             " return false;\"$disabled>Choose...</button>'); ".
             "\n--></script>\n";
 
@@ -284,12 +290,13 @@ sub html_submit
     my ($eopts, $disabled, $raw);
     my $type = 'submit';
 
+    my $ehtml;
     if ($opts && ref $opts eq 'HASH') {
         $disabled = " disabled='disabled'" if $opts->{'disabled'};
         $raw = " $opts->{'raw'}" if $opts->{'raw'};
         $type = 'reset' if $opts->{'type'} eq 'reset';
 
-        my $ehtml = $opts->{'noescape'} ? 0 : 1;
+        $ehtml = $opts->{'noescape'} ? 0 : 1;
         foreach (grep { ! /^(raw|disabled|noescape|type)$/ } keys %$opts) {
             $eopts .= " $_=\"" . ($ehtml ? ehtml($opts->{$_}) : $opts->{$_}) . "\""
         }
