@@ -23,6 +23,7 @@ general /editinfo.bml.allowshowcontact.email.reason
 general /editinfo.bml.settings.about
 general /editinfo.bml.showsubjicons.about
 general /editinfo.bml.showsubjicons.header
+general /editinfo.bml.tm.about
 general /editinfo.bml.topicdir.about
 general /editinfo.bml.topicdir.header
 

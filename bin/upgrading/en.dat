@@ -560,6 +560,16 @@ Not all robots respect the rules.
 
 /editinfo.bml.blockrobots.header=Block Robots/Spiders from indexing your journal
 
+/editinfo.bml.chat.aolim.title=AOL IM
+
+/editinfo.bml.chat.icquin.title=ICQ UIN
+
+/editinfo.bml.chat.jabber.title=Jabber
+
+/editinfo.bml.chat.msnusername.title=MSN Username
+
+/editinfo.bml.chat.yahooid.title=Yahoo! ID
+
 /editinfo.bml.city.title=City
 
 /editinfo.bml.country.choose=Pick a country
@@ -578,12 +588,18 @@ Not all robots respect the rules.
 
 /editinfo.bml.encoding.header=Encoding Options
 
+/editinfo.bml.error.day.notinmonth=Invalid day for that month.
+
+/editinfo.bml.error.day.outofrange=Invalid birthday day.  Enter a day from 1-31.
+
 /editinfo.bml.error.email.lj_domain<<
 You cannot enter an @[[domain]] email address.  
 Enter your real address in that field.  
 If you're a paid user, your [[user]]@[[domain]] address will forward to your real address.  
 To choose which email address (or both) is displayed publicly, see the option below the "Show your Contact Information" option.
 .
+
+/editinfo.bml.error.email.none=You must provide your email address
 
 /editinfo.bml.error.email.no_space<<
 No spaces are allowed in an email address.  
@@ -631,12 +647,20 @@ We only collect zip code information about people in the US.
 Please go back and remove the zip code or select United States as your country.
 .
 
+/editinfo.bml.error.month.outofrange=Invalid birthday month.  Enter a month from 1-12.  (Jan-Dec)
+
+/editinfo.bml.error.noname=Your name is a required field.  At least provide your first name, or a nickname or handle.
+
 /editinfo.bml.error.tm.require.number=If you're going to use text messaging, you must enter your phone number.
 
 /editinfo.bml.error.tm.require_provider<<
 If you're going to use text messaging, you must select your service provider.  
 If yours is not listed, please contact us with information about how your service's text messaging feature works so we can add support for it.
 .
+
+/editinfo.bml.error.year.notenoughdigits=Invalid birthday year.  Enter a 4-digit year.
+
+/editinfo.bml.error.year.outofrange=Invalid birthday year.
 
 /editinfo.bml.finished.about=When done, press the "Save Changes" button below:
 
@@ -706,6 +730,18 @@ so your email address won't be found by email-collecting robots.
 
 /editinfo.bml.name.title=Name
 
+/editinfo.bml.newemail.body<<
+You have just changed your [[sitename]] email address.  To validate the change, please go to this address:
+
+[[conflink]]
+
+Regards,
+[[sitename]] Team
+[[sitelink]]
+.
+
+/editinfo.bml.newemail.subject=Email Address Changed
+
 /editinfo.bml.numcomments.about=Check this if you want to append the comment count to URLs to make your browser possibly display the links in a different color.
 
 /editinfo.bml.numcomments.header=Add &amp;nc=xx to comment URLs
@@ -751,7 +787,21 @@ read our <a href="/legal/privacy.bml">privacy policy</a>.
 
 /editinfo.bml.security.visibility.regusers=Registered Users
 
+/editinfo.bml.settings.friendspage.title=Friends Page Title:
+
+/editinfo.bml.settings.friendspage.title.optional=<i>Optionally</i>, enter a title for your friends view pages. (no HTML)
+
 /editinfo.bml.settings.header=LiveJournal Options
+
+/editinfo.bml.settings.journal.subtitle=Journal Subtitle:
+
+/editinfo.bml.settings.journal.subtitle.optional=<i>Optionally</i>, enter a title and subtitle for your journal. (no HTML).
+
+/editinfo.bml.settings.journal.title=Journal Title:
+
+/editinfo.bml.settings.privacy.about=Select below your personal privacy options and preferences.
+
+/editinfo.bml.settings.privacy.header=Privacy Options
 
 /editinfo.bml.state.other=Or, type other state/province/territory
 
@@ -770,8 +820,6 @@ read our <a href="/legal/privacy.bml">privacy policy</a>.
 /editinfo.bml.switch.workwith=Work with journal:
 
 /editinfo.bml.title=Edit Personal Information
-
-/editinfo.bml.tm.about=<a href="/support/faqbrowse.bml?faqid=30">about this feature</a>
 
 /editinfo.bml.tm.details=<a href="/tools/textmessage.bml?mode=details">details</a>
 
@@ -806,6 +854,10 @@ throughout the LiveJournal site and in your journal and in your friends' journal
 /editinfo.bml.userpic.header=Your Picture
 
 /editinfo.bml.userpic.none=no image uploaded
+
+/editinfo.bml.weblogscom.about=Select this option if you would like to have Weblogs.com list your journal when you post new public entries.
+
+/editinfo.bml.weblogscom.header=Notify Weblogs.com of updates
 
 /editinfo.bml.webpagename.title=Webpage Name
 

@@ -289,23 +289,23 @@ body<=
          LJ::set_userprop($dbh, $nu, "legal_tosagree", join(', ', time(), $rev));
      }
 
-     LJ::make_login_session($nu) unless $remote;
+     # TODO: do something smarter here
+     LJ::make_login_session($nu);
 
      $ret = "<?h1 $ML{'.success.head'} h1?><?p ".BML::ml(".success.text1", {'email' => $email, 'username' => $user}) ." p?>";
-     $ret .= "<?p $ML{'.success.text2'} p?><?standout <font size='+1' face='arial'><b><a href=\"$LJ::SITEROOT/users/$user/\">$LJ::SITEROOT/users/$user/</a></b></font> standout?>";
-     $ret .= "<?p $ML{'.success.text3'} p?>";
+     my $uri = LJ::journal_base($u);
+     $ret .= "<?p $ML{'.success.text2'} p?>\n";
+     $ret .= "<?standout <font size='+1' face='arial'><b><a href='$uri'>$uri</a></b></font> standout?>\n";
+     $ret .= "<?p $ML{'.success.text3'} p?>\n";
      
-     $ret .= "<center><form method='post' action=\"/editinfo.bml\">";
-     $ret .= "<INPUT TYPE=HIDDEN NAME=user VALUE=\"$user\">\n";
-     $ret .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"" . LJ::hash_password($FORM{'password1'}) . "\">\n";
-     $ret .= "<INPUT TYPE=SUBMIT VALUE=\"$ML{'.success.btn.enterinfo'} ---&gt;\">\n";
-     $ret .= "</FORM></CENTER>\n";
+     $ret .= "<form method='get' action='editinfo.bml?authas=$user'>";
+     $ret .= "<p align='center'>" . LJ::html_submit(undef, "$ML{'.success.btn.enterinfo'} &rarr;") . "</p>";
+     $ret .= "</form>\n";
      
      return $ret;
     
  }
 
- SUBMITERRORS:
  if ($mode eq "getinfo" || %errors)
  {
      my $ret;
