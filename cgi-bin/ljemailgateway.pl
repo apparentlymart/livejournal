@@ -380,6 +380,8 @@ sub get_entity
 # Verifies an email pgp signature as being valid.
 # Returns codes so we can use the pre-existing err subref,
 # without passing everything all over the place.
+#
+# note that gpg interaction requires gpg version 1.2.4 or better.
 sub check_sig {
     my ($u, $entity, $gpg_err) = @_;
 
