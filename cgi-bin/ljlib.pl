@@ -3167,7 +3167,7 @@ sub make_journal
     if ($opts->{'vhost'} =~ /^other:/ && ! LJ::get_cap($u, "userdomain")) {
         return $notice->("This user's account type doesn't permit domain aliasing.");
     }
-    if ($opts->{'vhost'} eq "customview" && ! LJ::get_cap($u, "userdomain")) {
+    if ($opts->{'vhost'} eq "customview" && ! LJ::get_cap($u, "styles")) {
         return $notice->("This user's account type is not permitted to create and embed styles.");
     }
     if ($opts->{'vhost'} eq "community" && $u->{'journaltype'} ne "C") {
