@@ -29,6 +29,10 @@ BODY<=
 
  my @q = ("en");
  @q = @LJ::LANGS if @LJ::LANGS;
+
+ $ret .= "<table cellpadding='10'><tr valign='top' align='left'><td>";
+ my $ct = 0;
+ my $switch = @q / 2;
  
  foreach my $code (@q) {
      my $l = LJ::Lang::get_lang($code);
@@ -39,7 +43,13 @@ BODY<=
      $ret .= "<p><input type='radio' $checked name='lang' value='$code' id='sel$code'> <label for='sel$code'>$namenative";
      $ret .= " ($namethislang)" if $namethislang ne $namenative;
      $ret .= "</label></p>\n";
+     
+     if ($switch && ++$ct >= $switch) {
+         $ret .= "</td><td>"; $switch = 0;
+     }
  }
+
+ $ret .= "</td></tr></table>";
  
  $ret .= "<p><input type='submit' value='(=_ML .switch _ML=)'></p></form>";
  return $ret;
