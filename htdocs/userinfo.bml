@@ -36,7 +36,7 @@
 
  unless ($u) {
      $title = "Error";
-     $body = "(=H1 Unknown user H1=)(=P There doth not exist a user with the username <B>$user</B>.  Sorry. P=)";
+     $body = "(=H1 Unknown user H1=)(=P There does not exist a user with the username <B>$user</B>.  Sorry. P=)";
      return "";
  }
 
