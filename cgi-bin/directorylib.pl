@@ -334,6 +334,13 @@ sub search_int
 
 ######## HAS FRIEND ##############
 
+sub validate_fr
+{
+    my ($req, $errors) = @_;
+    return 0 unless $req->{'fr_user'} =~ /\S/;
+    return 1;
+}
+
 sub search_fr
 {
     my ($dbr, $req, $info) = @_;
@@ -357,6 +364,13 @@ sub search_fr
 
 
 ######## FRIEND OF ##############
+
+sub validate_fro
+{
+    my ($req, $errors) = @_;
+    return 0 unless $req->{'fro_user'} =~ /\S/;
+    return 1;
+}
 
 sub search_fro
 {

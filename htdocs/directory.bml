@@ -103,8 +103,7 @@ BODY<=
                  "385,133,374,148,383,156,401,133,385,133,385,133", "WV", 
                  "126,73,122,111,174,120,178,80,126,73,126,73", "WY", 
                  );
-     
-     
+
      while (my ($coords, $state) = splice(@shapes, 0, 2))
      {
          next unless ($count{'stateus'}->{$state});
@@ -116,7 +115,6 @@ BODY<=
          $ret .= ($count{'stateus'}->{$state}+0);
          $s = $count{'stateus'}->{$state} != 1 ? "s" : "";
          $ret .= " Journal$s'); return true;\" onMouseOut=\"updateStatus(''); return true;\">\n";
-         
      }
 
      $ret .= "</MAP>\n";
@@ -136,12 +134,11 @@ BODY<=
      $ret .= "</tr></table></ul>\n";
      $ret .= " P=)\n";
      return $ret;
-     
  }
 
  my $remote = LJ::get_remote($dbs);
 
- unless (LJ::check_priv($dbs, $remote, "betatest", "journal")) {
+ unless (LJ::check_priv($dbs, $remote, "betatest", "directory")) {
      return "The directory is currently unavailable.";
  }
 
@@ -151,14 +148,14 @@ BODY<=
  $info{'allwhat'} ||= "users";
 
  if ($FORM{'s_com'}) {
-     $ret .= "<a href=\"/community/search.bml\">&lt;&lt; New Query</a><p>\n";     
+     $ret .= "<a href=\"/community/search.bml\">&lt;&lt; New Query</a><p>\n";
  } else {
      $ret .= "<a href=\"/directorysearch.bml\">&lt;&lt; New Query</a><p>\n";
  }
  unless (@{$info{'english'}}) {
      push @{$info{'english'}}, "wish to be listed in the public directory";
  }
- 
+
  $ret .= "Below are all $info{'allwhat'} that ";
 
  ### remove consequtive "are"s
