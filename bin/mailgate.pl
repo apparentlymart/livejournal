@@ -159,16 +159,11 @@ if ($toarg =~ /^(\d+)z(.+)$/)
 # that this will only bounce initial comments; if a user replies to an email
 # from a request that's open, it'll be accepted above.
 my $file = $LJ::DENY_REQUEST_FROM_EMAIL{$to};
-my $full = "$ENV{'LJHOME'}/$file";
-if ($file && -e $full) {
-    # okay, open file to bounce with
-    open FILE, "<$full";
-    my $lines = join("", <FILE>);
-    close FILE;
-
+my $content = LJ::load_include($file);
+if ($file && $content) {
     # construct mail to send to user
     my $email = <<EMAIL_END;
-$lines
+$content
 
 Your original message:
 

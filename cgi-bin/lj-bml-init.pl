@@ -42,22 +42,10 @@ BML::register_hook("ml_getter", \&LJ::Lang::get_text);
 
 # include file handling
 BML::register_hook('include_getter', sub {
+    # simply call LJ::load_include, as it does all the work of hitting up
+    # memcache/db for us and falling back to disk if necessary...
     my ($file, $source) = @_;
-    return 0 unless $LJ::FILEEDIT_VIA_DB || $LJ::FILEEDIT_VIA_DB{$file};
-
-    # we handle, so first if memcache...
-    my $val = LJ::MemCache::get("includefile:$file");
-
-    # straight database hit
-    unless ($val) {
-        my $dbh = LJ::get_db_writer();
-        $val = $dbh->selectrow_array("SELECT inctext FROM includetext ".
-                                     "WHERE incname=?", undef, $file);
-        LJ::MemCache::set("includefile:$file", $val, time() + 3600);
-    }
-
-    # return the value and that we handled this
-    $$source = $val;    
+    $$source = LJ::load_include($file);
     return 1;
 });
 

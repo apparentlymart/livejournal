@@ -430,9 +430,12 @@
     # address is specified below, any user who emails it out of the blue will
     # be sent back a copy of the specified file along with their email.  Users
     # will still be allowed to respond to emails from the support system, but
-    # they can't open a request by emailing the address.
+    # they can't open a request by emailing the address.  The value part of
+    # the hash is the name of an include file.  It will be loaded out of
+    # LJHOME/htdocs/inc.  See %FILEEDIT_VIA_DB for how to make it read
+    # from memcache/DB.
     #%DENY_REQUEST_FROM_EMAIL = (
-    #    "abuse\@$DOMAIN" => "htdocs/inc/bounce-abuse",
+    #    "abuse\@$DOMAIN" => "bounce-abuse",
     #);
 
 }

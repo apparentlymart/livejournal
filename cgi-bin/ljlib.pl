@@ -7749,6 +7749,41 @@ sub is_open_proxy
     }
 }
 
+# loads an include file, given the bare name of the file.
+#   ($filename)
+# returns the text of the file.  if the file is specified in %LJ::FILEEDIT_VIA_DB
+# then it is loaded from memcache/DB, else it falls back to disk.
+sub load_include {
+    my $file = shift;
+    return unless $file;
+
+    # okay, edit from where?
+    if ($LJ::FILEEDIT_VIA_DB || $LJ::FILEEDIT_VIA_DB{$file}) {
+        # we handle, so first if memcache...
+        my $val = LJ::MemCache::get("includefile:$file");
+        return $val if $val;
+   
+        # straight database hit
+        my $dbh = LJ::get_db_writer();
+        $val = $dbh->selectrow_array("SELECT inctext FROM includetext ".
+                                     "WHERE incname=?", undef, $file);
+        LJ::MemCache::set("includefile:$file", $val, time() + 3600);
+        return $val;
+    }
+
+    # hit it up from the file, if it exists
+    my $filename = "$ENV{'LJHOME'}/htdocs/inc/$file";
+    return unless -e $filename;
+
+    # get it and return it
+    my $val;
+    open (INCFILE, $filename)
+        or return "Could not open include file: $file.";
+    { local $/ = undef; $val = <INCFILE>; }
+    close INCFILE;
+    return $val;
+}
+
 sub last_error_code
 {
     return $LJ::last_error;
