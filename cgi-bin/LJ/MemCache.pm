@@ -30,6 +30,7 @@ sub client_stats {
 sub trigger_bucket_reconstruct {
     $memc->set_servers(\@LJ::MEMCACHE_SERVERS);
     $memc->set_debug($LJ::MEMCACHE_DEBUG);
+    $memc->set_compress_threshold($LJ::MEMCACHE_COMPRESS_THRESHOLD);
     return $memc;
 }
 
