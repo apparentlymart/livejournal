@@ -30,7 +30,8 @@ $maint{'synsuck'} = sub
             map { $urow->{$_} } qw(user userid synurl lastmod etag numreaders);
 
         my $ua = LWP::UserAgent->new("timeout" => 10);
-        $ua->agent("$LJ::SITENAME ($LJ::ADMIN_EMAIL; for $LJ::SITEROOT/users/$user/; $readers readers)");
+        my $reader_info = $readers ? "; $readers readers" : "";
+        $ua->agent("$LJ::SITENAME ($LJ::ADMIN_EMAIL; for $LJ::SITEROOT/users/$user/" . $reader_info);
 
         my $delay = sub {
             my $minutes = shift;
