@@ -4393,6 +4393,7 @@ sub make_journal
 
                 # remote using s2
                 if ($remote->{'stylesys'} == 2 && $remote->{'s2_style'}) {
+                    $opts->{'checkremote'} = 1;
                     return (2, $remote->{'s2_style'});
                 }
 

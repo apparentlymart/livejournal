@@ -66,7 +66,8 @@ sub make_journal
     }
 
     # make sure capability supports it
-    if (($view eq "entry" || $view eq "reply") && ! LJ::get_cap($u, "s2view$view")) {
+    if (($view eq "entry" || $view eq "reply") &&
+        ! LJ::get_cap(($opts->{'checkremote'} ? $remote : $u), "s2view$view")) {
         ${$opts->{'handle_with_bml_ref'}} = 1;
         return;
     }
