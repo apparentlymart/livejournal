@@ -348,6 +348,16 @@ if ($opt_pop)
         close (BD);
     }
 
+    # clean out schema documentation for old/unknown tables
+    foreach my $tbl (qw(schemacols schematables)) {
+        my $sth = $dbh->prepare("SELECT DISTINCT tablename FROM $tbl");
+        $sth->execute;
+        while (my $doctbl = $sth->fetchrow_array) {
+            next if $table_create{$doctbl};
+            $dbh->do("DELETE FROM $tbl WHERE tablename=?", undef, $doctbl);
+        }
+    }
+
     print "\nThe system user was created with a random password.\nRun \$LJHOME/bin/upgrading/make_system.pl to change its password and grant the necessary privileges."
         if $made_system;
     print "\nRemember to also run:\n  bin/upgrading/texttool.pl load\n\n";
