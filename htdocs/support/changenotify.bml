@@ -1,33 +1,114 @@
 (=_INFO
 NOCACHE=>1
 _INFO=)(=PAGE
-TITLE=>Notification Settings
-
+TITLE=>Change Notifications
 BODY<=
 
-(=H1 Change Notification Settings H1=)
-(=P
-Log in here and select which support topics you'd like to be notified about.
-P=)
-
-<FORM ACTION="changenotify_do.bml" METHOD="POST">
-
-(=STANDOUT
-<TABLE>
 (=_CODE
- require 'ljlib.pl'; 
- return &auth_fields();
- _CODE=)
-<TR><TD COLSPAN=2 ALIGN=CENTER>
-<INPUT TYPE="SUBMIT" VALUE="Proceed...">
-</TD></TR>
-</TABLE>
-STANDOUT=)
 
-(=H1 Forget something? H1=)
-(=P
-If you forgot your username or password, <A HREF="/lostinfo.bml">recover it here!</A>.
-P=)
+ my @errors = ();
+ my $user = lc($FORM{'user'});
+ my $hpassword = $FORM{'hpassword'} || &hash_password($FORM{'password'});
+
+ &connect_db;
+ my $quser = $dbh->quote($user);
+
+ my $remote = LJ::get_remote($dbh);
+ my $mode = $FORM{'mode'} || "modify";
+
+ unless ($remote) {
+     push @errors, "You must first <a href=\"/login.bml?ret=1\">login</a>.";
+ }
+ if ($mode eq "save" && ! LJ::did_post) {
+     push @errors, "(=REQUIREPOST=)";
+ }
+ if (@errors)
+ {
+     my $ret = "";
+     $ret .= "(=BADCONTENT=)\n<UL>\n";		
+     foreach (@errors)
+     {
+         $ret .= "<LI>$_\n";
+     }
+     $ret .= "</UL>\n";
+     return $ret;
+ }
+ 
+ LJ::Support::init_remote($dbh, $remote);
+ my $cats = LJ::Support::load_cats($dbh);
+ my @filter_cats = LJ::Support::filter_cats($remote, $cats);
+
+ if ($mode eq "modify")
+ {
+     my $ret = "";
+     $ret .= "<form method=post>\n";
+     $ret .= "<input type=hidden name=mode value=save>\n";
+
+     $ret .= "(=H1 Change Notification Settings H1=)(=P Here you may select what categories of support requests you'd like to be notified about.  Choices are <B>off</B> (the default), <B>new</B> (you'll get notifications when a new support request in that category is posted) or <B>all</B> (you'll get notifications and then a copy of each comment/solution posted). P=)";
+
+     my %notify;
+     $sth = $dbh->prepare("SELECT spcatid, level FROM supportnotify WHERE userid=$remote->{'userid'}");
+     $sth->execute;
+     while (my ($spcatid, $level) = $sth->fetchrow_array) {
+	 ## if user used to be able to read a category, subscribed, then lost
+	 ## privs, this ensures any future save will turn off things they 
+	 ## don't have access to:
+	 if (LJ::Support::can_read_cat($dbh, $cats->{$spcatid}, $remote)) {
+	     $notify{$spcatid} = $level;
+	 }
+     }
+
+     my %valname = ("" => "Off.",
+		    "new" => "New only.",
+		    "all" => "All",
+		    );
+
+     $ret .= "<UL>\n";
+     foreach my $cat (@filter_cats) {
+	 $ret .= "<P><SELECT NAME=\"spcatid_$cat->{'spcatid'}\">";
+	 foreach my $val ("", "new", "all") {
+	     my $sel = "";
+	     if ($notify{$cat->{'spcatid'}} eq $val) { $sel = " SELECTED"; }
+	     $ret .= "<OPTION VALUE=\"$val\"$sel>$valname{$val}\n";
+	 }
+	 $ret .= "</SELECT> $cat->{'catname'}\n";
+     }
+     $ret .= "</UL>\n";
+
+
+     ### ending submit block
+     $ret .= "(=H1 Done? H1=)(=P When done, press the \"Save Changes\" button below... P=)\n";
+     $ret .= "(=STANDOUT <INPUT TYPE=SUBMIT VALUE=\"Save Changes\"> STANDOUT=)\n";
+     $ret .= "</FORM>\n";
+
+     return $ret;
+ }
+
+ if ($mode eq "save")
+ {
+     $dbh->do("DELETE FROM supportnotify WHERE userid=$remote->{'userid'}");
+     my $sql;
+
+     foreach my $cat (@filter_cats)
+     {
+	 my $id = $cat->{'spcatid'};
+	 my $setting = $FORM{"spcatid_$id"};
+	 if ($setting eq "all" || 
+	     $setting eq "new") 
+	 {
+	     if ($sql) { $sql .= ", "; }
+	     else { $sql .= "REPLACE INTO supportnotify (spcatid, userid, level) VALUES "; }
+	     $sql .= "($id, $remote->{'userid'}, '$setting')";
+	 }
+     }     
+     if ($sql) { $dbh->do($sql); }
+     
+     return "(=H1 Success H1=)(=P Your notification settings have been updated. P=)";
+ }
+
+ return "Unknown mode."
+
+_CODE=)
 
 <=BODY
 PAGE=)

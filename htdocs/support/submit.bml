@@ -4,7 +4,6 @@ BODY<=
 
 (=_CODE
  use Digest::MD5 qw(md5_hex);
- require 'ljlib.pl';
  &connect_db();
  return "";
 _CODE=)
@@ -28,19 +27,14 @@ _INCLUDE=)
  my %eh;
  if ($remote) {
      my $userid = $remote->{'userid'}+0;
-     $sth = $dbh->prepare("SELECT * FROM user WHERE userid=$userid");
-     $sth->execute;
-     $u = $sth->fetchrow_hashref;
+     $u = LJ::load_user($dbh, $remote->{'user'});
 
      foreach (qw(user name)) {
 	 $eh{$_} = &ehtml($u->{$_});
      }
 
-     $eh{'password'} = $u->{'password'};
+     $eh{'password'} = "_REMOTE";
  }
-
- 
-
 
  $ret .= <<"END";
 <P><B>Your name:</B><BR>
@@ -66,7 +60,8 @@ Select what in particular you're having a problem with:
 <UL><SELECT NAME="spcatid">
 (=_CODE
  my $ret = "";
- my $sth = $dbh->prepare("SELECT spcatid, catname FROM supportcat ORDER BY sortorder");
+ my $sth = $dbh->prepare("SELECT spcatid, catname FROM supportcat ".
+			 "WHERE is_selectable='1' ORDER BY sortorder");
  $sth->execute;
  while ($_ = $sth->fetchrow_hashref) {
      $ret .= "<OPTION VALUE=$_->{'spcatid'}>$_->{'catname'}\n";

@@ -4,142 +4,113 @@ BODY<=
 
 (=_CODE
 
- require 'ljlib.pl';
  &connect_db();
 
  my $spid = $FORM{'spid'}+0;
- $sth = $dbh->prepare("SELECT * FROM support WHERE spid=$spid");
- $sth->execute;
- my $sp = $sth->fetchrow_hashref;
- unless ($sp) { return "(=H1 Error H1=)(=P Unknown support number. P=)"; }
+ my $sp = LJ::Support::load_request($dbh, $spid);
+ unless ($sp) { return "(=H1 Error H1=)(=P Unknown support request. P=)"; }
 
  if ($sp->{'state'} eq "closed") {
      return "(=H1 Closed H1=)(=P This support request has since been closed. P=)";
  }
 
- my $u = {};
+ my $u;
  if ($sp->{'reqtype'} eq "user") {
-     $sth = $dbh->prepare("SELECT * FROM user WHERE userid=$sp->{'requserid'}");
-     $sth->execute;
-     $u = $sth->fetchrow_hashref;
-     $email = $u->{'email'};
+     $u = LJ::load_userid($dbh, $sp->{'requserid'});
  }
 
- my $remote = &get_remote();
+ my $remote = LJ::get_remote($dbh);
 	
- unless ($remote)
- {
-     $ret .= "You must <a href=\"/login.bml\">login</a> to help people out.";
-     return $ret;
- }
-	
- unless (&LJ::remote_has_priv($dbh, $remote, "supporthelp") || 
-	 ($remote->{'userid'} == $sp->{'requserid'}))
- {
-     $ret .= "Sorry, you do not have access to answer people's support requests.";
-     return $ret;
+ unless ($remote) {
+     return done_error("You must <a href=\"/login.bml\">login</a> to help people out.");
+ } else {
+     LJ::Support::init_remote($dbh, $remote);
  }
 
- my $up = LJ::load_user($dbh, $remote->{'user'});
+ my $scat = $sp->{_cat};
+ my $problemarea = $scat->{'catname'};
+ my $catkey = $scat->{'catkey'};
  
- unless ($FORM{'body'} =~ /\S/ || $FORM{'faqid'}) {
-     push @errors, "Your message was blank.  Please type at least something in the message field.";
+ unless ($FORM{'spid'}) { return done_error("need spid"); }
+ unless (LJ::did_post) { return done_error("(=REQUIREPOST=)"); }
+
+ ### insert record
+ my $faqid = $FORM{'faqid'}+0;
+ 
+ my %answer_types = LJ::Support::get_answer_types($dbh, $sp, $remote);
+
+ my $type = $FORM{'replytype'};
+ unless (defined $answer_types{$type}) {
+     return done_error("Invalid reply type.");
  }
 
- unless ($FORM{'spid'}) { push @errors, "need spid"; }
-
- if (@errors)
+ ## can we do the action we want?
+ if ($FORM{'approveans'} && 
+     ($type ne "internal" || ! LJ::Support::can_help($dbh, $sp, $remote)))
  {
+     return done_error("To approve an answer, you must select \"Internal Comment ".
+		       "/ Action\" and optionally explain why you're approving it.");
+ }
+
+ if ($FORM{'changecat'} &&
+     ($type ne "internal" || ! LJ::Support::can_help($dbh, $sp, $remote)))
+ {
+     return done_error("To change a request's category, you must select \"Internal Comment ".
+		       "/ Action\" and explain why you're changing it.");
+ }
+
+
+ unless ($FORM{'body'} =~ /\S/ || $FORM{'faqid'}) {
+     return done_error("Your message was blank.  Please type at least something in the message field.");
+ }
+
+ ## change category
+ if ($FORM{'changecat'}) {
+     my $newcat = $FORM{'changecat'}+0;
+     my $cats = LJ::Support::load_cats($dbh, $newcat);
+     if ($cats->{$newcat}) {
+	 $dbh->do("UPDATE support SET spcatid=$newcat WHERE spid=$spid");
+	 $FORM{'body'} = "Changing from $catkey => $cats->{$newcat}->{'catkey'}\n\n$FORM{'body'}";
+     } else {
+	 return done_error("That category doesn't seem to exist.");
+     }
+ }
+
+ ## approving a screened entry
+ if ($FORM{'approveans'}) {
+     my $splid = $FORM{'approveans'}+0;
+     my $res = LJ::Support::load_response($dbh, $splid);
+     if ($res->{'spid'} == $spid && $res->{'type'} eq "screened") {
+	 $dbh->do("UPDATE supportlog SET type='answer' WHERE splid=$splid");
+	 $FORM{'body'} = "(Approving answer \#$splid)\n\n$FORM{'body'}";
+         LJ::Support::mail_response_to_user($dbh, $sp, $splid);
+     } else {
+	 return done_error("Invalid screened entry to approve.");
+     }
+ }
+
+ my $splid = LJ::Support::append_request($dbh, $sp, {
+     'body' => $FORM{'body'},
+     'posterid' => $remote->{'userid'},
+     'type' => $type,
+     'faqid' => $faqid,
+ });
+
+ 
+ LJ::Support::mail_response_to_user($dbh, $sp, $splid);
+
+ return "(=H1 Logged H1=)(=P Your comment/solution <a href=\"see_request.bml?id=$spid\">has been recorded</a>.  Thanks.  P=)";
+
+ sub done_error
+ {
+     my $error = shift;
      my $ret = "";
      $ret .= "(=BADCONTENT=)\n<UL>\n";		
-     foreach (@errors)
-     {
-         $ret .= "<LI>$_\n";
-     }
+     $ret .= "<LI>$error\n";
      $ret .= "</UL>\n";
      return $ret;
  }
 
- my $faqid = $FORM{'faqid'}+0;
- my $type = $faqid ? "faqref" : "custom";
- my $userid = $up->{'userid'};
- my $message = $FORM{'body'};
- $message =~ s/^\s+//;
- $message =~ s/\s+$//;
- my $qmessage = $dbh->quote($message);
-
- my $sql = "INSERT INTO supportlog (splid, spid, timelogged, type, faqid, userid, message) VALUES (NULL, $spid, UNIX_TIMESTAMP(), '$type', $faqid, $userid, $qmessage)";
- $dbh->do($sql);
-
- my $splid = $dbh->{'mysql_insertid'};
-
- my $email = $sp->{'reqtype'} eq "email" ? $sp->{'reqemail'} : $u->{'email'};
- 
- my $body = "";
- $body .= "Below is an answer to your support question regarding \"$sp->{'subject'}\".\n";
- $body .= "="x70 . "\n\n";
- if ($faqid) {
-     my $faqname = "";
-     my $sth = $dbh->prepare("SELECT question FROM faq WHERE faqid=$faqid");
-     $sth->execute;
-     ($faqname) = $sth->fetchrow_array;
-     if ($faqname) {
-	 $body .= "FAQ QUESTION: " . $faqname . "\n";
-	 $body .= &make_text_link("$LJ::SITEROOT/support/faqbrowse.bml?faqid=$faqid", $email);
-	 $body .= "\n\n";
-     }
-     
- }
- $body .= $message;
- $body .= "\n\n" . "="x70 . "\n";
- $body .= "Did this answer your question?  If so, please CLOSE THIS SUPPORT REQUEST\n";
- $body .= "so we can help other people by going here:\n";
- $body .= &make_text_link("$LJ::SITEROOT/support/act.bml?close;$spid;$sp->{'authcode'};$splid", $email);
-
- $body .= "\n\nIf this wasn't helpful, you need to go to the following address to prevent\n";
- $body .= "this request from being closed in 7 days.  Click here:\n";
- $body .= &make_text_link("$LJ::SITEROOT/support/act.bml?touch;$spid;$sp->{'authcode'}", $email);
-
- $body .= "\n\nTo read all the comments or add more, go here:\n";
- $body .= &make_text_link("$LJ::SITEROOT/support/see_request.bml?id=$spid", $email);
-
- $body .= "\n";
-
- &send_mail({ 
-     'to' => $email,
-     'from' => $LJ::BOGUS_EMAIL,
-     'fromname' => 'LiveJournal Support',
-     'subject' => "Re: Support Request \#$spid",
-     'body' => $body  
-     });
-
- ########## send notifications
-
- my $url = "$LJ::SITEROOT/support/see_request.bml?id=$spid";
-
- my $qspcatid = $sp->{'spcatid'}+0;
- $sth = $dbh->prepare("SELECT u.email FROM supportnotify sn, user u WHERE sn.userid=u.userid AND sn.spcatid=$qspcatid AND sn.level IN ('all')");
- $sth->execute;
- my @to_notify;
- while ($_ = $sth->fetchrow_hashref) {
-     push @to_notify, $_->{'email'};
- }
-
- $body = "A follow-up to the request regarding \"$sp->{'subject'}\" has been submitted.  You can track its progress or add information here:\n\n  ";
- $body .= &make_text_link($url, $_->{'email'});
- $body .= "\n\n" . "="x70 . "\n\n";
- $body .= $message;
-
- &send_mail({ 
-     'bcc' => join(", ", @to_notify),
-     'from' => $LJ::BOGUS_EMAIL,
-     'fromname' => 'LiveJournal Support',
-     'subject' => "Re: Support Request \#$spid",
-     'body' => $body
-     });
-
- 
- return "(=H1 Logged H1=)(=P Your comment/solution has been recorded.  Thanks.  P=)";
 
 _CODE=)
 (=HR=)

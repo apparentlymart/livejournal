@@ -1,7 +1,5 @@
 (=_CODE
  
- require 'ljlib.pl';
- require 'supportlib.pl';
  &connect_db();
  my $cmd = &get_query_string();
  if ($cmd =~ /^(\w+);(\d+);(\w{15})(?:;(\d+))?$/) {
@@ -25,9 +23,7 @@ BODY<=
      return "(=H1 Error H1=)(=P Improper arguments. P=)";
  }
 
- my $sth = $dbh->prepare("SELECT * FROM support WHERE spid=$spid");
- $sth->execute;
- $sp = $sth->fetchrow_hashref;
+ my $sp = LJ::Support::load_request($dbh, $spid);
 
  if ($sp->{'authcode'} ne $authcode) {
      return "(=H1 Error H1=)(=P Invalid authcode. P=)";
@@ -54,15 +50,14 @@ BODY<=
 
 	     ## can't credit yourself.
 	     if ($userid != $sp->{'requserid'}) {
-		 my %cats;
-		 &ljsupport::load_spcats($dbh, \%cats, $sp->{'spcatid'});
+		 my $cats = LJ::Support::load_cats($dbh, $sp->{'spcatid'});
 		 my $secold = $timelogged - $sp->{'timecreate'};
-		 my $points = ljsupport::calc_points($cats{$sp->{'spcatid'}}->{'basepoints'}, $secold);
+		 my $points = LJ::Support::calc_points($cats->{$sp->{'spcatid'}}, $secold);
 		 $dbh->do("INSERT INTO supportpoints (spid, userid, points) VALUES ($spid, $userid, $points)");
 	     }
 	 }
      }
-     return "(=H1 Closed H1=)(=P Your support request has been closed. P=)";
+     return "(=H1 Closed H1=)(=P The support request has been closed. P=)";
  }
 
  return "";

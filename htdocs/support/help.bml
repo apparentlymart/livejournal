@@ -3,45 +3,87 @@ TITLE=>Support Requests
 BODY<=
 
 (=_CODE
- require 'ljlib.pl';
- require 'supportlib.pl';
+
  &connect_db();
  my ($ret, $sth);
 
- my %cats;
- ljsupport::load_spcats($dbh, \%cats, 0);
+ my $remote = LJ::get_remote($dbh);
+ LJ::Support::init_remote($dbh, $remote);
+
+ my $cats = LJ::Support::load_cats($dbh);
+
+ my $filtercat = $FORM{'cat'};
+ $filtecat = "" unless ($filtercat =~ /^\w+$/);
+ my $filterwhere;
+
+ if ($filtercat eq "_nonpublic") {
+     $filterwhere = " AND s.spcatid IN (0";
+     foreach my $cat (values %$cats) {
+	 if (! $cat->{'public_read'} && LJ::Support::can_read_cat($dbh, $cat, $remote)) {
+	     $filterwhere .= ", $cat->{'spcatid'}";
+	 }
+     }
+     $filterwhere .= ")";
+ } else {
+     my $fcat = LJ::Support::get_cat_by_key($cats, $filtercat);
+     if (LJ::Support::can_read_cat($dbh, $fcat, $remote)) {
+	 $filterwhere = " AND s.spcatid=$fcat->{'spcatid'}";
+     } else {
+	 $filtercat = "";
+     }
+ }
 
  if ($FORM{'state'} eq "closed")
  {
-     $ret .= "(=H1 Recently Closed Support Requests H1=)(=P Below are all support requests that have been recently closed.  To return to the open requests, <a href=\"./help.bml\">click here</a>. P=)";
+     $ret .= "(=H1 Recently Closed Support Requests H1=)(=P Below are all support requests that have been recently closed.  To return to the open requests, <a href=\"./help.bml?cat=$filtercat\">click here</a>. P=)";
      
-     $sth = $dbh->prepare("SELECT s.* FROM support s WHERE s.state='closed' AND s.timeclosed>UNIX_TIMESTAMP()-(3600*24) ORDER BY timecreate DESC");
+     $sth = $dbh->prepare("SELECT s.* FROM support s WHERE s.state='closed' AND s.timeclosed>UNIX_TIMESTAMP()-(3600*24) $filterwhere ORDER BY timecreate DESC");
 
  }
  else 
  {
-     $ret .= "(=H1 Open Support Requests H1=)(=P Below are all support requests that are open (they just came in and haven't been touched yet) or answered (either awaiting to be closed by the person needing help, or the person requested they still need help).  The <a href=\"./help.bml?state=closed\">closed reports</a> are also available.  If you help somebody out and they confirm you helped them, you get the number of points indicated in the status column.  These points will show up on your userinfo page. P=)";
+     $ret .= "(=H1 Open Support Requests H1=)(=P Below are all support requests that are open (they just came in and haven't been touched yet) or answered (either awaiting to be closed by the person needing help, or the person requested they still need help).  The <a href=\"./help.bml?state=closed&cat=$filtercat\">closed reports</a> are also available.  If you help somebody out and they confirm you helped them, you get the number of points indicated in the status column.  These points will show up on your userinfo page. P=)";
  
-     $sth =	 $dbh->prepare("SELECT COUNT(*) FROM support WHERE state='open'");
+     $sth = $dbh->prepare("SELECT COUNT(*) FROM support WHERE state='open'");
      $sth->execute;
      my ($count) = $sth->fetchrow_array;
      unless ($count) {
 	 return "(=H1 No support requests! H1=)(=P The support queue is currently empty.  :-) P=)";
      }
-     $sth = $dbh->prepare("SELECT s.*, MAX(sl.timelogged) AS 'timelogged' FROM support s, supportlog sl WHERE s.spid=sl.spid AND s.state='open' GROUP BY s.spid ORDER BY timecreate DESC");
+     $sth = $dbh->prepare("SELECT s.*, MAX(sl.timelogged) AS 'timelogged' FROM support s, supportlog sl WHERE s.spid=sl.spid AND s.state='open' AND sl.type IN ('req','answer') $filterwhere GROUP BY s.spid ORDER BY timecreate DESC");
  }
  $sth->execute;
 
- $ret .= "<p><TABLE CELLPADDING=4 CELLSPACING=1 BORDER=1 BGCOLOR=#FFFFFF><TR BGCOLOR=#D0D0D0>\n";
- $ret .= "<TD><B>ID#</B></TD>\n";
- $ret .= "<TD><B>Summary</B></TD>\n";
- $ret .= "<TD><B>Problem Area</B></TD>\n";
- $ret .= "<TD><B>Posted</B></TD>\n";
- $ret .= "<TD><B>Status</B></TD>\n";
- $ret .= "</TR>";
+
+ $ret .= "<form method=get>Show only requests of type: <select name=cat>";
+ $ret .= "<option value=\"\">(All)</option>";
+ my @filter_cats = LJ::Support::filter_cats($remote, $cats);
+ if (LJ::check_priv($dbh, $remote, "supportread")) {
+     unshift @filter_cats, { 'catkey' => '_nonpublic',
+			     'catname' => '(Non-Public)' };
+ }
+ foreach my $cat (@filter_cats)
+ {
+     my $sel = $filtercat eq $cat->{'catkey'} ? " SELECTED" : "";
+     $ret .= "<option value=\"$cat->{'catkey'}\"$sel>$cat->{'catname'}</option>";
+ }
+ $ret .= "</select>\n";
+ $ret .= "<input type=hidden name=state value=\"" . ($FORM{'state'} eq "closed" ? "closed" : "") . "\">";
+ $ret .= "<input type=submit value=\"Filter\"></form>";
+
+ $ret .= "<p><table cellpadding=4 cellspacing=1 border=1 bgcolor=#ffffff><tr bgcolor=#d0d0d0>\n";
+ $ret .= "<td><b>ID#</b></td>\n";
+ $ret .= "<td><b>Summary</b></td>\n";
+ $ret .= "<td><b>Problem Area</b></td>\n";
+ $ret .= "<td><b>Posted</b></td>\n";
+ $ret .= "<td><b>Status</b></td>\n";
+ $ret .= "</tr>";
 
  while ($sp = $sth->fetchrow_hashref)
  {
+     LJ::Support::fill_request_with_cat($sp, $cats);
+     next unless (LJ::Support::can_read($dbh, $sp, $remote));
+
      my $status = "open";
      my $barbg = "BGCOLOR=#D0EED0";
      if ($sp->{'timeclosed'}) { 
@@ -60,8 +102,8 @@ BODY<=
      my $summary = &BMLUtil::ehtml($sp->{'subject'});
      my $secold = time() - $sp->{'timecreate'};
      my $age = &ago_text($secold);
-     my $probarea = $cats{$sp->{'spcatid'}}->{'catname'};
-     my $points = ljsupport::calc_points($cats{$sp->{'spcatid'}}->{'basepoints'}, $secold);
+     my $probarea = $sp->{_cat}->{'catname'};
+     my $points = LJ::Support::calc_points($sp, $secold);
 
      unless ($status eq "closed") {
 	 $status .= "<BR>($points point";
@@ -69,16 +111,16 @@ BODY<=
 	 $status .= ")";
      }
 
-     $ret .= "<TR VALIGN=TOP $barbg>\n";
-     $ret .= "<TD><B><A HREF=\"see_request.bml?id=$sp->{'spid'}\">$sp->{'spid'}</A></B></TD>\n";
-     $ret .= "<TD><B>$summary</B></TD>\n";
-     $ret .= "<TD>$probarea</TD>\n";
-     $ret .= "<TD NOWRAP><FONT SIZE=-1>$age</FONT></TD>\n";
-     $ret .= "<TD NOWRAP><FONT SIZE=-1>$status</FONT></TD>\n";
-     $ret .= "</TR>";
+     $ret .= "<tr valign=top $barbg>\n";
+     $ret .= "<td><b><a href=\"see_request.bml?id=$sp->{'spid'}\">$sp->{'spid'}</a></b></td>\n";
+     $ret .= "<td><b>$summary</b></td>\n";
+     $ret .= "<td>$probarea</td>\n";
+     $ret .= "<td nowrap><font size=-1>$age</font></td>\n";
+     $ret .= "<td nowrap><font size=-1>$status</font></td>\n";
+     $ret .= "</tr>";
 
  }
- $ret .= "</TABLE>\n";
+ $ret .= "</table>\n";
 
  return $ret;
 

@@ -26,5 +26,6 @@ require 'ljprotocol.pl';
 require 'cleanhtml.pl';
 require 'emailcheck.pl';
 require 'portal.pl';
+require 'supportlib.pl';
 
 1;

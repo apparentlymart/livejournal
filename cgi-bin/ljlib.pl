@@ -61,16 +61,6 @@ sub send_mail
     &LJ::send_mail($opt);
 }
 
-## for stupid AOL mail client, wraps a plain-text URL in an anchor tag since AOL
-## incorrectly renders regular text as HTML.  fucking AOL.  die.
-sub make_text_link
-{
-    my ($url, $email) = @_;
-    if ($email =~ /\@aol.com$/i) {
-	return "<A HREF=\"$url\">$url</A>";
-    }
-    return $url;
-}
 
 sub is_valid_authaction
 {
@@ -81,58 +71,9 @@ sub is_valid_authaction
     return $sth->fetchrow_hashref;
 }
 
-## authenticates the user at the remote end and returns a hashref containing:
-##    user, userid
-## or returns undef if no logged-in remote or errors.
-## optional argument is arrayref to push errors
-sub get_remote
-{
-    my $errors = shift;
-    my $cgi = shift;   # optional CGI.pm reference
-
-    ### are they logged in?
-    my $remuser = $cgi ? $cgi->cookie('ljuser') : $BMLClient::COOKIE{"ljuser"};
-    return undef unless ($remuser);
-
-    my $hpass = $cgi ? $cgi->cookie('ljhpass') : $BMLClient::COOKIE{"ljhpass"};
-
-    ### does their login password match their login?
-    return undef unless ($hpass =~ /^$remuser:(.+)/);
-    my $remhpass = $1;
-
-    &connect_db();
-
-    ### do they exist?
-    my $userid = &get_userid($remuser);
-    $userid += 0;
-    return undef unless ($userid);
-
-    ### is their password correct?
-    my $password;
-    my $sth = $dbh->prepare("SELECT password FROM user WHERE userid=$userid");
-    $sth->execute;
-    ($password) = $sth->fetchrow_array;
-    return undef unless (&valid_password($password, { 'hpassword' => $remhpass }));
-
-    return { 'user' => $remuser,
-	     'userid' => $userid, };
-}
-
-# this is like get_remote, but it only returns who they say they are,
-# not who they really are.  so if they're faking out their cookies,
-# they'll fake this out.  but this is fast.
-#
-sub get_remote_noauth
-{
-    ### are they logged in?
-    my $remuser = $BMLClient::COOKIE{"ljuser"};
-    return undef unless ($remuser =~ /^\w{1,15}$/);
-
-    ### does their login password match their login?
-    return undef unless ($BMLClient::COOKIE{"ljhpass"} =~ /^$remuser:(.+)/);
-    return { 'user' => $remuser, };
-}
-
+#  DEPRECATED.  use LJ:: versions.
+sub get_remote { &connect_db(); return LJ::get_remote($dbh, @_); }
+sub get_remote_noauth { return LJ::get_remote_noauth(); }
 sub remote_has_priv { return &LJ::remote_has_priv($dbh, @_); }
 
 sub register_authaction
@@ -666,14 +607,6 @@ sub get_form_data
     }
 }
 
-### WTF is this?
-sub modify_time
-{
-    my $id = $_[0];
-    return if ($id =~ /[^a-z0-9\-\_]/);
-    return (stat("$DATADIR/bin/$id.mod"))[9];
-}
-
 sub bullet_errors
 {
     my ($errorref) = @_;
@@ -896,7 +829,89 @@ sub load_user_theme
     return &LJ::load_user_theme(@_);
 }
 
+sub make_text_link { return LJ::make_text_link(@_); }
+
 package LJ;
+
+sub get_logtext
+{
+    
+}
+
+sub make_auth_code
+{
+    my $length = shift;
+    my $vchars = "abcdefghijklmnopqrstuvwxyz0123456789";
+    srand();
+    my $authcode = "";
+    for (1..$length) {
+	$authcode .= substr($vchars, int(rand()*36), 1);
+    }
+    return $authcode;
+}
+
+## for stupid AOL mail client, wraps a plain-text URL in an anchor tag since AOL
+## incorrectly renders regular text as HTML.  fucking AOL.  die.
+sub make_text_link
+{
+    my ($url, $email) = @_;
+    if ($email =~ /\@aol.com$/i) {
+	return "<A HREF=\"$url\">$url</A>";
+    }
+    return $url;
+}
+
+## authenticates the user at the remote end and returns a hashref containing:
+##    user, userid
+## or returns undef if no logged-in remote or errors.
+## optional argument is arrayref to push errors
+sub get_remote
+{
+    my $dbh = shift;
+    my $errors = shift;
+    my $cgi = shift;   # optional CGI.pm reference
+
+    ### are they logged in?
+    my $remuser = $cgi ? $cgi->cookie('ljuser') : $BMLClient::COOKIE{"ljuser"};
+    return undef unless ($remuser);
+
+    my $hpass = $cgi ? $cgi->cookie('ljhpass') : $BMLClient::COOKIE{"ljhpass"};
+
+    ### does their login password match their login?
+    return undef unless ($hpass =~ /^$remuser:(.+)/);
+    my $remhpass = $1;
+
+    ### do they exist?
+    my $userid = get_userid($dbh, $remuser);
+    $userid += 0;
+    return undef unless ($userid);
+
+    ### is their password correct?
+    my $password;
+    my $sth = $dbh->prepare("SELECT password FROM user WHERE userid=$userid");
+    $sth->execute;
+    ($password) = $sth->fetchrow_array;
+    return undef unless (valid_password($password, { 'hpassword' => $remhpass }));
+
+    return { 'user' => $remuser,
+	     'userid' => $userid, };
+}
+
+# this is like get_remote, but it only returns who they say they are,
+# not who they really are.  so if they're faking out their cookies,
+# they'll fake this out.  but this is fast.
+#
+sub get_remote_noauth
+{
+    ### are they logged in?
+    my $remuser = $BMLClient::COOKIE{"ljuser"};
+    return undef unless ($remuser =~ /^\w{1,15}$/);
+
+    ### does their login password match their login?
+    return undef unless ($BMLClient::COOKIE{"ljhpass"} =~ /^$remuser:(.+)/);
+    return { 'user' => $remuser, };
+}
+
 
 sub did_post
 {
@@ -1501,6 +1516,18 @@ sub load_user
     return $u;
 }
 
+sub load_userid
+{
+    my $dbh = shift;
+    my $userid = shift;
+    my $quserid = $dbh->quote($userid);
+    my $sth = $dbh->prepare("SELECT * FROM user WHERE userid=$quserid");
+    $sth->execute;
+    my $u = $sth->fetchrow_hashref;
+    $sth->finish;
+    return $u;
+}
+
 sub load_moods
 {
     return if ($LJ::CACHED_MOODS);
@@ -1580,7 +1607,61 @@ sub journal_base
     }
 }
 
+# loads all of the given privs for a given user into a hashref
+# inside the user record ($u->{_privs}->{$priv}->{$arg} = 1)
+sub load_user_privs
+{
+    my $dbh = shift;
+    my $remote = shift;
+    my @privs = @_;
+
+    return unless ($remote and @privs);
+
+    # return if we've already loaded these privs for this user.
+    @privs = map { $dbh->quote($_) } 
+             grep { ! $remote->{'_privloaded'}->{$_}++ } @privs;
+    
+    return unless (@privs);
+
+    my $sth = $dbh->prepare("SELECT pl.privcode, pm.arg ".
+			    "FROM priv_map pm, priv_list pl ".
+			    "WHERE pm.prlid=pl.prlid AND ".
+			    "pl.privcode IN (" . join(',',@privs) . ") ".
+			    "AND pm.userid=$remote->{'userid'}");
+    $sth->execute;
+    while (my ($priv, $arg) = $sth->fetchrow_array)
+    {
+	unless (defined $arg) { $arg = ""; }  # NULL -> ""
+	$remote->{'_priv'}->{$priv}->{$arg} = 1;
+    }
+}
+
+# arg is optional.  if arg not present, checks if remote has
+# any privs at all of that type.
+# also, $dbh can be undef, in which case privs must be pre-loaded
+sub check_priv
+{
+    my ($dbh, $remote, $priv, $arg) = @_;
+    return 0 unless ($remote);
+
+    if (! $remote->{'_privloaded'}->{$priv}) {
+	if ($dbh) {
+	    load_user_privs($dbh, $remote, $priv);
+	} else {
+	    return 0;
+	}
+    }
+
+    if (defined $arg) {
+	return (defined $remote->{'_priv'}->{$priv} &&
+		defined $remote->{'_priv'}->{$priv}->{$arg});
+    } else {
+	return (defined $remote->{'_priv'}->{$priv});
+    }
+}
+
 # check to see if the given remote user has a certain privledge
+# DEPRECATED.  should use load_user_privs + check_priv
 sub remote_has_priv
 {
     my $dbh = shift;
@@ -1599,10 +1680,10 @@ sub remote_has_priv
     my $match = 0;
     if (ref $ref eq "ARRAY") { @$ref = (); }
     if (ref $ref eq "HASH") { %$ref = (); }
-    while ($_ = $sth->fetchrow_hashref) {
+    while (my ($arg) = $sth->fetchrow_array) {
 	$match++;
-	if (ref $ref eq "ARRAY") { push @$ref, $_->{'arg'}; }
-	if (ref $ref eq "HASH") { $ref->{$_->{'arg'}} = 1; }
+	if (ref $ref eq "ARRAY") { push @$ref, $arg; }
+	if (ref $ref eq "HASH") { $ref->{$arg} = 1; }
     }
     return $match;
 }
