@@ -34,7 +34,7 @@ BODY<=
 		  "country", "state", "city", "zip",
 		  "icq", "aolim", "yahoo", "msn", "url", "urlname", "gender", "jabber",
 		  "opt_blockrobots", "opt_notalkicons",
-		  "opt_logcommentips", "howhear"
+		  "opt_logcommentips", "howhear", "opt_bdaymail"
 		  );
 
  if ($u->{'has_bio'}) {
@@ -301,6 +301,10 @@ BODY<=
      $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=allow_getljnews $checked></TD><TD><B>Send me LiveJournal news.</B></TD></TR>\n";
      $ret .= "<TR><TD>&nbsp;</TD><TD>If you want to know when we add some cool new feature to LiveJournal, check this box.  The emails you get will be pretty rare, no more than once or twice a month usually.  Your email address will not be visible to other users, and you can turn this off at anytime.</TD></TR>\n";
 
+     $checked = $u->{'opt_bdaymail'} ? "CHECKED" : "";
+     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_bdaymail $checked></TD><TD><B>Send me birthday reminders.</B></TD></TR>\n";
+     $ret .= "<TR><TD>&nbsp;</TD><TD>If you want to get email reminding you of birthdays for your friends on LiveJournal, click this box.</TD></TR>\n";
+
 #     $checked = $u->{'allow_getpromos'} eq "Y" ? "CHECKED" : "";
 #     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=allow_getpromos $checked></TD><TD><B>Send me special promotions.</B></TD></TR>\n";
 #     $ret .= "<TR><TD>&nbsp;</TD><TD>To tell you the truth, we don't really have any special promotions in mind.  But one day if we ever need to make money to support this site, we'd probably have to sell out to marketing people and they'd want to know who wants to receive offers over email.  So check this if you like getting promotional mail; if not, don't.</TD></TR>\n";
@@ -502,7 +506,8 @@ BODY<=
      {
 	 $FORM{'opt_showtopicstuff'} = $FORM{'opt_showtopicstuff'} ? "Y" : "N";
 	 $FORM{'opt_blockrobots'} = $FORM{'opt_blockrobots'} ? 1 : 0;
-	 $FORM{'opt_notalkicons'} = $FORM{'opt_talkicons'} ? 0 : 1;
+	 $FORM{'opt_bdaymail'} = $FORM{'opt_bdaymail'} ? 1 : 0;
+	 $FORM{'opt_notalkicons'} = $FORM{'opt_talkicons'} ? 0 : 1;   # (negated)
 	 if ($FORM{'opt_logcommentips'} ne "N" && 
 	     $FORM{'opt_logcommentips'} ne "S" && 
 	     $FORM{'opt_logcommentips'} ne "A") { $FORM{'opt_logcommentips'} = "N"; }
@@ -513,7 +518,7 @@ BODY<=
 		       "country", "state", "city", "zip",
 		       "icq", "aolim", "yahoo", "msn", "url", "urlname", "gender", "jabber",
 		       "opt_blockrobots", "opt_notalkicons",
-		       "opt_logcommentips",
+		       "opt_logcommentips", "opt_bdaymail"
 		       );	
 
 	 # this is only done once, then never appears again.
