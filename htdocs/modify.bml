@@ -406,7 +406,7 @@ body<=
         }
         chop $sets;
 
-        $dbh->do("UPDATE user SET $sets WHERE user=?", undef, $u->{'user'});
+        $dbh->do("UPDATE user SET $sets WHERE userid=?", undef, $u->{'userid'});
         return $dberr->($dbh->{'errstr'}) if $dbh->err;
 
         # what userprops we'll be setting.
