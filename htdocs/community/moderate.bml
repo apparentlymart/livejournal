@@ -8,12 +8,8 @@ body<=
     use vars qw(%GET %POST);
     return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
-    my $dbs = LJ::get_dbs();
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-
     my $ret;
-    my $remote = LJ::get_remote($dbs);
+    my $remote = LJ::get_remote();
 
     unless ($remote) {
         $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'error.noremote'} p?>";
@@ -27,7 +23,7 @@ body<=
         my $cid = $POST{'cid'};
         my $modid = $POST{'modid'};
         
-        my $c = LJ::load_userid($dbs, $cid);
+        my $c = LJ::load_userid($cid);
         unless ($c) {
             $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'.error.notfound'} p?>";
             return $ret;
@@ -35,7 +31,7 @@ body<=
         my $dbcr = LJ::get_cluster_reader($c);
         my $dbcm = LJ::get_cluster_master($c);
         
-        unless (LJ::check_rel($dbs, $c, $remote, 'M')) {
+        unless (LJ::check_rel($c, $remote, 'M')) {
             $ret .= "<?h1 $ML{'Error'} h1?><?p " . 
                 BML::ml('.error.noaccess', {'comm'=>"<?ljcomm $c->{'user'} ljcomm?>"}) . " p?>";
             return $ret;
@@ -50,7 +46,7 @@ body<=
             return $ret;
         }
 
-        my $poster = LJ::load_userid($dbs, $entry->{'posterid'});
+        my $poster = LJ::load_userid($entry->{'posterid'});
         $dbcm->do("DELETE FROM modlog WHERE journalid=$c->{'userid'} AND modid=$modid");
         $dbcm->do("DELETE FROM modblob WHERE journalid=$c->{'userid'} AND modid=$modid");
         
@@ -76,7 +72,7 @@ body<=
                     if $poster->{'status'} eq "A";
             }
             if ($POST{'preapprove'}) {
-                LJ::set_rel($dbs, $c, $poster, 'N');
+                LJ::set_rel($c, $poster, 'N');
                   $ret .= "<?h1 $ML{'.posted.appheader'} h1?><?p " .
                       BML::ml('.posted.apptext', {'user'=>"<?ljuser $poster->{'user'} ljuser?>"}) . " p?>";
             }
@@ -157,14 +153,14 @@ body<=
     my $modid = $saved_modid || ($mode eq 'action' ? $POST{'modid'} : $GET{'modid'});
     $modid += 0;
     
-    my $c = LJ::load_user($dbs, $comm);
+    my $c = LJ::load_user($comm);
     unless ($c) {
         $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'.error.notfound'} p?>";
         return $ret;
     }
     my $dbcr = LJ::get_cluster_reader($c);
     
-    unless (LJ::check_rel($dbs, $c, $remote, 'M')) {
+    unless (LJ::check_rel($c, $remote, 'M')) {
         $ret .= "<?h1 $ML{'Error'} h1?><?p " . 
             BML::ml('.error.noaccess', {'comm'=>"<?ljcomm $comm ljcomm?>"}) . " p?>";
         return $ret;
@@ -180,7 +176,7 @@ body<=
             return $ret;
         }
         my $req = Storable::thaw($frreq);
-        my $poster = LJ::load_userid($dbs, $posterid);
+        my $poster = LJ::load_userid($posterid);
         $ret .= "<?h1 $ML{'.approve.header'} h1?><?p $ML{'.approve.text'} p?>";
         $ret .= "<p><form method='post' action='/community/moderate.bml'><center>";
         $ret .= "<input type='hidden' name='mode' value='approve_do'>";
@@ -205,7 +201,7 @@ body<=
             return $ret;
         }
         my $req = Storable::thaw($frreq);
-        my $poster = LJ::load_userid($dbs, $posterid);
+        my $poster = LJ::load_userid($posterid);
         $ret .= "<?h1 $ML{'.reject.header'} h1?><?p $ML{'.reject.text'} p?>";
         $ret .= "<p><form method='post' action='/community/moderate.bml'><center>";
         $ret .= "<input type='hidden' name='mode' value='reject_do'>";
@@ -242,7 +238,7 @@ body<=
                 "<td><b>$ML{'.brlist.actions'}</b></td></tr>";
             
             my %users;
-            LJ::load_userids_multiple($dbs, [ map { $_->{'posterid'}, \$users{$_->{'posterid'}} } @entries ]);
+            LJ::load_userids_multiple([ map { $_->{'posterid'}, \$users{$_->{'posterid'}} } @entries ]);
             foreach (sort { $a->{'logtime'} lt $b->{'logtime'} } @entries) {
                 my $link = "/community/moderate.bml?comm=$comm&amp;modid=" . $_->{'modid'};
                 my $subject = $_->{'subject'} ? LJ::eall($_->{'subject'}) : "<i>[No Subject]</i>";
@@ -286,10 +282,10 @@ body<=
                             $req->{'min'});
         my $subject = $req->{'subject'};
         my $props = $req->{'props'};
-        my $up = LJ::load_user($dbs, LJ::canonical_username($req->{'username'}));
+        my $up = LJ::load_user($req->{'username'});
         my $posterid = $up->{'userid'};
         my $error;
-        my @polls = LJ::Poll::parse($dbs, \$event, \$error, {
+        my @polls = LJ::Poll::parse(\$event, \$error, {
             'journalid' => $c->{'userid'},
             'posterid' => $posterid,
         });
@@ -316,6 +312,7 @@ body<=
         
         my $picid;
         if ($props->{'picture_keyword'}) {
+            my $dbr = LJ::get_db_reader();
             my $qkw = $dbr->quote($props->{'picture_keyword'});
             $picid = $dbr->selectrow_array("SELECT m.picid FROM userpicmap m, keywords k ".
                                            "WHERE m.userid=$up->{'userid'} ".
@@ -325,7 +322,7 @@ body<=
         
         my %userpics;
         if ($picid) {
-            LJ::load_userpics($dbs, \%userpics, [ $picid ]);
+            LJ::load_userpics(\%userpics, [ $picid ]);
               my $alt = $up->{'name'};
               if ($props->{'picture_keyword'}) {
                   $alt .= ": $props->{'picture_keyword'}";
@@ -358,13 +355,13 @@ body<=
 
         my %current;
         if ($props->{'current_mood'} || $props->{'current_moodid'}) {
-            LJ::load_moods($dbs);
+            LJ::load_moods();
               $current{'Mood'} = $props->{'current_mood'};
               LJ::CleanHTML::clean_subject(\$current{'Mood'});
               my $mid = $props->{'current_moodid'};
               if ($mid) {
                   my $theme = $up->{'moodthemeid'};
-                  LJ::load_mood_theme($dbs, $theme);
+                  LJ::load_mood_theme($theme);
                   my %pic;
                   my $name = defined $LJ::CACHE_MOODS{$mid} ? $LJ::CACHE_MOODS{$mid}->{'name'} : '';
                   if (LJ::get_mood_picture($theme, $mid, \%pic)) {
