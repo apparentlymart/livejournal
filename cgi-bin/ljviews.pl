@@ -500,7 +500,11 @@ sub create_style {
     my ($u, $opts) = @_;
     return unless LJ::isu($u) && ref $opts eq 'HASH';
 
+    my $dbh = LJ::get_db_writer();
+    return undef unless $dbh;
+
     my $styleid = LJ::alloc_global_counter('S');
+    return undef unless $styleid;
 
     my (@cols, @bind, @vals);
     foreach (qw(styledes type formatdata is_public is_embedded is_colorfree opt_cache has_ads)) {
@@ -514,7 +518,6 @@ sub create_style {
     my $bind = join(",", @bind);
     return unless @cols;
 
-    my $dbh = LJ::get_db_writer();
     if ($u->{'dversion'} >= 5) {
         my $db = LJ::S1::get_s1style_writer($u);
         $db->do("INSERT INTO s1style (styleid,userid,$cols) VALUES (?,?,$bind)",

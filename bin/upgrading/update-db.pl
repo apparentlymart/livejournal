@@ -214,7 +214,8 @@ if ($opt_pop)
         # insert new
         my %opts = ( "is_public" => 'Y', "opt_cache" => 'Y',
                      map { $_, $s->{$_} } qw(styledes type formatdata is_embedded is_colorfree lastupdate));
-        LJ::S1::create_style($su, \%opts);
+        LJ::S1::create_style($su, \%opts)
+            or die "Error: unable to create style!  Database potentially unavailable?";
         print "  $uniq: ";
         print "added\n";
     }

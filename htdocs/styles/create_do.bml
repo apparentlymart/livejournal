@@ -84,6 +84,8 @@ body<=
                                        { 'styledes' => $des,
                                          'type' => $view,
                                          'formatdata' => $base });
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.nodb'} p?>"
+            unless defined $new_id;            
     }
 
     $ret .= "<?h1 $ML{'.success.head'} h1?><?p " . BML::ml('.success.text',{ 'des' => $des, }) . " p?>\n";
