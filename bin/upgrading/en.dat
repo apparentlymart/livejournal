@@ -2830,6 +2830,8 @@ This could be because: <ol>
 
 /tools/memories.bml.form.switch=Switch
 
+/tools/memories.bml.login=In order to view your own memories, please <a href="[[url]]">log in</a>.
+
 /tools/memories.bml.plur_entry=[[num]] [[?num|entry|entries]]
 
 /tools/memories.bml.sort.description=Description

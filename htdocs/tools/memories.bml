@@ -12,11 +12,37 @@
  $head = "";
  $body = "";
 
+ # Find out if a 'user' argument is specified in the URL.
  my $user = LJ::canonical_username($GET{'user'});
  if ($GET{'user'} && ! $user) {
      $body = $ML{'error.malformeduser'};
      return;
  }
+
+ # Find out if an 'authas' argument is specified in the URL.
+ # If not, try to authenticate as 'user'. If still no success, use $remote.
+ my $authasu = LJ::get_authas_user($GET{'authas'} || $user);
+ my $authasarg;
+ my $authasarge;
+ if ($authasu) {
+     $body .= "<form method='get' action='memories.bml'>\n";
+     $body .= LJ::make_authas_select($remote, { 'authas' => $authasu->{user} }) . "\n";
+     $body .= LJ::html_hidden(keyword => $GET{keyword}) if $GET{keyword};
+     $body .= "</form>\n\n";
+
+     $user ||= $authasu->{user};
+     $authasarg = "&authas=$authasu->{user}";
+     $authasarge = "&amp;authas=$authasu->{user}";
+ } else {
+     $authasu = $remote;
+ }
+
+ # Now, whose memories page do we actually want to see?
+ # - if 'user' is specified, we want to see theirs
+ #   (in this case, $user has already been set to that)
+ # - if no 'user', but 'authas' is specified, we want to see authas's
+ #   (in this case, $user has been set to $authasu->{user} above
+ # - if neither is specified, we want to see remote's:
 
  if ($user eq "" && defined $remote) {
      $user = $remote->{'user'};
@@ -24,15 +50,20 @@
 
  my $u = LJ::load_user($user);
  unless ($u) {
+     # There is no 'authas' OR $remote.
+     # If there's a 'user', that user doesn't exist.
+     # Otherwise, complain about the absence of 'user' / suggest logging in.
      $title = $ML{'Error'};
-     $body = $ML{'error.username_notfound'};
+     $body = $user eq "" ? BML::ml('.login', { 'url' => "/login.bml?ret=1" })
+                         : $ML{'error.username_notfound'};
      return;
  }
+
  my $userid = $u->{'userid'};
 
  if ($u->{'journaltype'} eq "R") {
     LJ::load_user_props($u, "renamedto");
-    return BML::redirect("/tools/memories.bml?user=$u->{'renamedto'}");
+    return BML::redirect("/tools/memories.bml?user=$u->{'renamedto'}$authasarg");
  }
 
  LJ::load_user_props($u, "opt_blockrobots") if $u->{'statusvis'} eq 'V';
@@ -56,19 +87,6 @@
      $title = $ML{'error.purged.title'};
      $body = "<?h1 $ML{'error.purged.name'} h1?><?p $ML{'error.purged.text'} p?>";
      return;
- }
-
- my $authasu = LJ::get_authas_user($GET{'authas'} || $user);
- my $authasarg;
- if ($authasu) {
-     $body .= "<form method='get' action='memories.bml'>\n";
-     $body .= LJ::make_authas_select($remote, { 'authas' => $authasu->{user} }) . "\n";
-     $body .= LJ::html_hidden(keyword => $GET{keyword}) if $GET{keyword};
-     $body .= "</form>\n\n";
-
-     $user = $authasu->{user};
-     $userid = $authasu->{userid};
-     $authasarg = "authas=$authasu->{user}&";
  }
 
  my %filters = ("all" => $ML{'.filter.all'},
@@ -104,8 +122,7 @@
      }
  }
 
- my $kwuser = $authasu || $u;
- my $kwmap = LJ::Memories::get_keywords($kwuser);
+ my $kwmap = LJ::Memories::get_keywords($u);
 
  if ($GET{'keyword'}) 
  {
@@ -128,7 +145,7 @@
      }
      $body .= "</select> <input type='submit' value='$ML{'.form.switch'}' />";
      $body .= "</form>\n";
-     $body .= "<a href=\"/tools/memories.bml?${authasarg}user=$user\">&lt;&lt; $ML{'.back'}</a>";
+     $body .= "<a href=\"/tools/memories.bml?user=$user$authasarge\">&lt;&lt; $ML{'.back'}</a>";
 
      my $extrawhere = "";
      if ($filter eq "own" || $filter eq "other") {
@@ -163,10 +180,10 @@
              my $itemid = int($mem->{'jitemid'} / 256);
              my $anum = $mem->{'jitemid'} % 256;
              $entrylink = LJ::item_link($mem->{user}, $itemid, $anum);
-             $editlink = "/tools/memadd.bml?${authasarg}journal=$mem->{user}&amp;itemid=$mem->{jitemid}";
+             $editlink = "/tools/memadd.bml?journal=$mem->{user}&amp;itemid=$mem->{jitemid}$authasarge";
          } else {
              $entrylink = "/talkread.bml?itemid=$mem->{jitemid}";
-             $editlink = "/tools/memadd.bml?${authasarg}itemid=$mem->{jitemid}";
+             $editlink = "/tools/memadd.bml?itemid=$mem->{jitemid}$authasarge";
          }
 
          my $edit = "";
