@@ -102,6 +102,12 @@
         # call a load to get comment text
         my $texts = LJ::get_talktext2($u, @ids);
 
+        # get props if we need to
+        my $props = {};
+        if ($GET{'props'}) {
+            LJ::load_talk_props2($u->{userid}, \@ids, $props);
+        }
+
         # now start spitting out data
         $r->print("<comments>\n");
         foreach my $id (@ids) {
@@ -132,7 +138,13 @@
                 $ret .= ">\n";
                 $ret .= "<subject>$subject</subject>\n" if $subject;
                 $ret .= "<body>$body</body>\n" if $body;
-                $ret .= "<date>$date</date>\n</comment>\n";
+                $ret .= "<date>$date</date>\n";
+                foreach my $propkey (keys %{$props->{$id} || {}}) {
+                    $ret .= "<property name='$propkey'>";
+                    $ret .= LJ::exml($props->{$id}->{$propkey});
+                    $ret .= "</property>\n";
+                }
+                $ret .= "</comment>\n";
             }
             $r->print($ret);
         }
