@@ -64,10 +64,7 @@ body<=
  }
  elsif ($FORM{'src'} eq "url") 
  {
-     #my ($type, $size, $age) = head($FORM{'urlpic'});
-     #$ret .= "(type=$type, size=$size, age=$age)";
-     #return $ret;
-
+     $FORM{'userpic'} = "";
      my $ua = new LWP::UserAgent;
      my $size = 0;
      my $req = HTTP::Request->new('GET', $FORM{'urlpic'});
