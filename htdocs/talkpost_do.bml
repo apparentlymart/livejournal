@@ -548,11 +548,7 @@ body<=
               }
             
             if ($paruserid) {
-                my $qparuserid = $dbr->quote($paruserid);
-                $sth = $dbr->prepare("SELECT user, email, opt_htmlemail, password, status, ".
-                                     "opt_gettalkemail FROM user WHERE userid=$qparuserid");
-                $sth->execute;
-                my $paru = $sth->fetchrow_hashref;
+                my $paru = LJ::load_userid($paruserid);
                 LJ::load_user_props($dbs, $paru, 'mailencoding');
                 LJ::load_codes($dbs, { "encoding" => \%LJ::CACHE_ENCODINGS } )
                     unless %LJ::CACHE_ENCODINGS;
