@@ -51,18 +51,21 @@ function print_stylesheet () {
     " /// stylesheeet!!!\n";
 }
 
-function Page::print () 
-{
-    var string title = $this->title();
-
-    var string userpic;
+function Page::lay_top_userpic () { 
     var Image up_img = $.journal.default_pic;
-    if ($.view == "recent" and defined $up_img) {
-        $userpic = """<td><table cellpadding="2" bgcolor="$*page_back" cellspacing="0" border="0" summary="">
+    if (defined $up_img) {
+        """<td><table cellpadding="2" bgcolor="$*page_back" cellspacing="0" border="0" summary="">
 <tr><td bgcolor="$*stronger_back" align="center"><img border="0" src="$up_img.url" height="$up_img.height" width="$up_img.width" alt=""></td></tr>
 </table></td>
 """;
     }
+}
+function FriendsPage::lay_top_userpic () { }
+
+function Page::print () 
+{
+    var string title = $this->title();
+
     var string website;
     if ($.journal.website_url != "") {
         $website = """<tr><td class="meta">[</td>
@@ -135,9 +138,10 @@ summary="">
 cellpadding="0"
 border="0"
 summary="" style="margin-left: auto; margin-right: auto;">
-<tr>
-$userpic
-<td>
+<tr>""";
+    $this->lay_top_userpic();
+
+"""<td>
 <div align="center"><b>$.journal.name</b></div><p>
 <table cellspacing="0"
 cellpadding="0"
