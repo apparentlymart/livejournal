@@ -11,16 +11,11 @@ require "ljprotocol.pl";
 require "parsefeed.pl";
 require "cleanhtml.pl";
 
-$maintinfo{'synsuck'}{opts}{no_locking} = 1;
+$maintinfo{'synsuck'}{opts}{locking} = "per_host";
 $maint{'synsuck'} = sub
 {
     my $maxcount = shift || 0;
     my $verbose = $LJ::LJMAINT_VERBOSE;
-
-    # let this job only run once per machine
-    my $hlock;
-    return 0 unless
-        $hlock = LJ::locker()->trylock("maint-synsuck-$LJ::SERVER_NAME");
 
     my %child_jobs; # child pid => [ userid, lock ]
 

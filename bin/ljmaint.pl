@@ -6,7 +6,7 @@
 # </LJDEP>
 
 use strict;
-use vars qw(%maint $VERBOSE);
+use vars qw(%maint %maintinfo $VERBOSE);
 
 unless (-d $ENV{'LJHOME'}) {
     die "\$LJHOME not set.\n";
@@ -14,7 +14,6 @@ unless (-d $ENV{'LJHOME'}) {
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
-my %maintinfo;
 my $MAINT = "$LJ::HOME/bin/maint";
 
 load_tasks();
@@ -92,16 +91,20 @@ sub run_task
         return;
     }
 
+    require "$MAINT/$maintinfo{$task}->{'source'}";
     my $opts = $maintinfo{$task}{opts} || {};
     my $lock = undef;
+    my $lockname = "mainttask-$task";
+    if ($opts->{'locking'} eq "per_host") {
+        $lockname .= "-$LJ::SERVER_NAME";
+    }
     unless ($opts->{no_locking} ||
-	    ($lock = LJ::locker()->trylock("mainttask-$task"))
-	    ) {
+	    ($lock = LJ::locker()->trylock($lockname))
+            ) {
         print "Task '$task' already running ($DDLockClient::Error).  Quitting.\n" if $VERBOSE >= 1;
 	exit 0;
     }
 
-    require "$MAINT/$maintinfo{$task}->{'source'}";
     $LJ::LJMAINT_VERBOSE = $VERBOSE;
     eval {
 	$maint{$task}->(@args);
