@@ -7502,16 +7502,16 @@ sub alloc_global_counter
 sub mark_user_active {
     my ($u, $type) = @_;  # not currently using type
     my $uid = $u->{userid};
-    return 0 unless $uid;
+    return 0 unless $uid && $u->{clusterid};
 
     # Update the clustertrack table, but not if we've done it for this
     # user the past 5 hours.
     if (LJ::MemCache::add("rate:tracked:$uid", 1, 3600*5)) {
-        my $dbh = LJ::get_db_writer();
-        return 0 unless $dbh;
-        $dbh->do("REPLACE INTO clustertrack SET ".
-                 "userid=?, timeactive=NOW(), clusterid=?", undef,
-                 $uid, $u->{clusterid}) or return 0;
+        my $dbcm = LJ::get_cluster_master($u);
+        return 0 unless $dbcm;
+        $dbcm->do("REPLACE INTO clustertrack2 SET ".
+                 "userid=?, timeactive=?, clusterid=?", undef,
+                 $uid, time(), $u->{clusterid}) or return 0;
     }
     return 1;
 }

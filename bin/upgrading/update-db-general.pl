@@ -10,6 +10,7 @@ mark_clustered("useridmap", "userbio", "cmdbuffer", "dudata",
                "s1usercache", "modlog", "modblob", "counter",
                "userproplite2", "links", "s1overrides", "s1style",
                "s1stylecache", "userblob", "userpropblob",
+               "clustertrack2",
                );
 
 register_tablecreate("adopt", <<'EOC');
@@ -1637,12 +1638,12 @@ post_create("comminterests",
             );
 
 # tracking where users are active
-register_tablecreate("clustertrack", <<'EOC'); # global
-CREATE TABLE clustertrack (
+register_tablecreate("clustertrack2", <<'EOC'); # clustered
+CREATE TABLE clustertrack2 (
     userid INT UNSIGNED NOT NULL,
     PRIMARY KEY (userid),
-    timeactive DATE NOT NULL,
-    clusterid TINYINT UNSIGNED,
+    timeactive INT UNSIGNED NOT NULL,
+    clusterid SMALLINT UNSIGNED,
     INDEX (timeactive, clusterid)
 )
 EOC
