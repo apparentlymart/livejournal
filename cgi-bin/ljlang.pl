@@ -269,20 +269,11 @@ sub set_text
     return 1;
 }
 
-sub load_user_lang
-{
-    my ($u) = @_;
-    return if $u->{'lang'};
-
-    LJ::load_user_props($u, "browselang") unless $u->{'browselang'};
-    $u->{'lang'} ||= $u->{'browselang'} || $LJ::DEFAULT_LANG || 'en';
-}
-
 sub get_text
 {
     my ($lang, $code, $dmid, $vars) = @_;
     $dmid = int($dmid || 1);
-
+    $lang ||= $LJ::DEFAULT_LANGUAGE || "en";
     load_lang_struct() unless $LS_CACHED;
     my $cache_key = "ml.${lang}.${dmid}.${code}";
     

@@ -13,9 +13,9 @@ package LJ::Protocol;
 sub translate
 {
     my ($u, $msg, $vars) = @_;
-    LJ::Lang::load_user_lang($u);
 
-    return LJ::Lang::get_text($u->{'lang'}, "protocol.$msg", undef, $vars);
+    LJ::load_user_props($u, "browselang") unless $u->{'browselang'};
+    return LJ::Lang::get_text($u->{'browselang'}, "protocol.$msg", undef, $vars);
 }
 
 sub error_message
