@@ -899,7 +899,7 @@ sub postevent
 
      # notify weblogs.com of post if necessary
     if ($u->{'opt_weblogscom'} && LJ::get_cap($u, "weblogscom") &&
-        ! $req->{'props'}->{'opt_backdated'})
+        $security eq "public" && ! $req->{'props'}->{'opt_backdated'})
     {
         LJ::cmd_buffer_add($dbcm, $u->{'userid'}, 'weblogscom', {
             'user' => $u->{'user'}, 
