@@ -319,7 +319,17 @@ sub trans
         $1 ne "www") 
     {
         my $user = $1;
-        my $mode;
+
+        # see if the "user" is really functional code
+        # currently, the only type is "userpics"
+        if (my $func = $LJ::SUBDOMAIN_FUNCTION{$user}) {
+            my $code = {
+                'userpics' => \&userpic_trans,
+            };
+            return $code->{$func}->($r) if $code->{$func};
+            return 404;  # bogus ljconfig
+        }
+
         my $view = $determine_view->($user, "users", $uri);
         return $view if defined $view;
         return 404;
@@ -346,7 +356,7 @@ sub trans
     }
 
     # userpic
-    return userpic_trans($r, $1, $2) if $uri =~ m!^/userpic/(\d+)(?:/(\d+))?$!;
+    return userpic_trans($r) if $uri =~ m!^/userpic/!;
 
     # front page journal
     if ($LJ::FRONTPAGE_JOURNAL) {
@@ -430,8 +440,8 @@ sub trans
 sub userpic_trans
 {
     my $r = shift;
-    my $picid = shift;
-    my $userid = shift(@_) + 0;
+    return 404 unless $r->uri =~ m!^/(?:userpic/)?(\d+)/(\d+)$!;
+    my ($picid, $userid) = ($1, $2);
 
     # we can safely do this without checking since we never re-use
     # picture IDs and don't let the contents get modified
@@ -441,40 +451,31 @@ sub userpic_trans
     $RQ{'picid'} = $picid;
     $RQ{'pic-userid'} = $userid;
 
-    my $file_extra;
-    if ($userid) {
-        $file_extra = "-$userid";
-    } else {
-        # userpics without the trailing /<userid> need to be coming
-        # from the proper domain
-        my $ref = $r->header_in("Referer");
-        return 404 if $ref && $ref !~ m!^http://(\w+\.)?\Q$LJ::DOMAIN\E/!i;
-    }
-
-    my @dirs_make;
-    my $file;
-    if ($picid =~ /^\d*(\d\d)(\d\d\d)$/) {
-        push @dirs_make, ("$USERPIC{'cache_dir'}/$2",
-                          "$USERPIC{'cache_dir'}/$2/$1");
-        $file = "$USERPIC{'cache_dir'}/$2/$1/$picid$file_extra";
-    } else {
-        my $mod = sprintf("%03d", $picid % 1000);
-        push @dirs_make, "$USERPIC{'cache_dir'}/$mod";
-        $file = "$USERPIC{'cache_dir'}/$mod/p$picid$file_extra";
-    }
-
     if ($USERPIC{'use_disk_cache'}) {
+        my @dirs_make;
+        my $file;
+
+        if ($picid =~ /^\d*(\d\d)(\d\d\d)$/) {
+            push @dirs_make, ("$USERPIC{'cache_dir'}/$2",
+                              "$USERPIC{'cache_dir'}/$2/$1");
+            $file = "$USERPIC{'cache_dir'}/$2/$1/$picid-$userid";
+        } else {
+            my $mod = sprintf("%03d", $picid % 1000);
+            push @dirs_make, "$USERPIC{'cache_dir'}/$mod";
+            $file = "$USERPIC{'cache_dir'}/$mod/p$picid-$userid";
+        }
+        
         foreach (@dirs_make) {
             next if -d $_;
             mkdir $_, 0777;
         }
-    }
 
-    # set both, so we can compared later if they're the same,
-    # and thus know if directories were created (if not,
-    # apache will give us a pathinfo)
-    $RQ{'userpicfile'} = $file;
-    $r->filename($file);
+        # set both, so we can compared later if they're the same,
+        # and thus know if directories were created (if not,
+        # apache will give us a pathinfo)
+        $RQ{'userpicfile'} = $file;
+        $r->filename($file);
+    }
 
     $r->handler("perl-script");
     $r->push_handlers(PerlHandler => \&userpic_content);
