@@ -47,11 +47,12 @@ if ($help) {
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
 unless ($LJ::DBWEIGHTS_FROM_DB) {
-    die "This tool only works when using \$DBWEIGHTS_FROM_DB (db weights ".
-	"& info stored in database, not in ljconfig)\n";
+    #die "This tool only works when using \$DBWEIGHTS_FROM_DB (db weights ".
+#	"& info stored in database, not in ljconfig)\n";
 }
 
 my $dbh = LJ::get_dbh("master");
+die "Can't get master db handle\n" unless $dbh;
 
 my %dbinfo;  # dbid -> hashref
 my %slaves;  # dbid -> arrayref<dbid>
@@ -132,6 +133,7 @@ my $check = sub
     my $chkref = shift;
 
     my $d = $dbinfo{$id};
+    return if $d->{name} =~ /\-\d+$/;
 
     $pr->("$d->{'name'}:\n");
     my $db = $LJ::DBIRole->get_dbh_conn($d->{'rootfdsn'});
@@ -170,6 +172,7 @@ my $check = sub
     {
 	my $s = $dbinfo{$sid};
 	my $skey = $s->{'name'};
+	next if $s->{'name'} =~ /\-\d+$/;
 
 	if (defined $slaves{$sid}) {
 	    push @$chkref, $sid;
@@ -201,6 +204,8 @@ my $check = sub
 	    print "\n";
 	}
 	
+	my $ver = $dbsl->selectrow_array("SELECT VERSION()");
+	
 	my $sth;
 	my $stalled = 0;
 	my $ccount = 0;
@@ -219,7 +224,48 @@ my $check = sub
 	$sth = $dbsl->prepare("SHOW SLAVE STATUS");
 	$sth->execute;
 	my $sl = $sth->fetchrow_hashref;
-	$sth->finish;
+
+	# MySQL 4.0 support
+	unless (defined $sl->{'Slave_Running'}) {
+	    $sl->{'Slave_Running'} = $sl->{'Slave_SQL_Running'};
+	    $sl->{'Log_File'} = $sl->{'Relay_Master_Log_File'} || $sl->{'Master_Log_File'};
+	    $sl->{'Pos'} = $sl->{'Exec_master_log_pos'};
+	}
+
+	if ($opt_fix && $sl->{'Slave_Running'} eq "No" &&
+	    $sl->{'Last_error'} =~ /Duplicate entry '(\d+)-(\d+)' for key 1' on query 'INSERT INTO log2/)
+	{
+	    my ($uid, $itid) = ($1, $2);
+	    $dbsl->do("DELETE FROM log2 WHERE journalid=? AND jitemid=?", undef, $uid, $itid);
+	    $dbsl->do("SET SQL_SLAVE_SKIP_COUNTER=1");
+	    $dbsl->do("SLAVE START");
+	    push @errors, "Slave restarted by deleting log2 row ($uid-$itid): $skey";
+	    $recheck = 1;
+	}
+
+	if ($opt_fix && $sl->{'Slave_Running'} eq "No" &&
+	    $sl->{'Last_error'} =~ /Duplicate entry '(\d+)-(\d+)' for key 1' on query '(INSERT|REPLACE) INTO talk2/)
+	{
+	    my ($uid, $itid) = ($1, $2);
+	    open (LG, ">>$ENV{'LJHOME'}/var/talk2-errors.log") or die;
+	    print LG "$skey: $uid-$itid\n";
+	    close LG;
+	    $dbsl->do("DELETE FROM talk2 WHERE journalid=? AND jtalkid=?", undef, $uid, $itid);
+	    $dbsl->do("SLAVE START");
+	    push @errors, "Slave restarted by deleting talk2 row ($uid-$itid): $skey";
+	    $recheck = 1;
+	}
+
+	if ($opt_fix && $sl->{'Slave_Running'} eq "No" &&
+	    $sl->{'Last_error'} =~ /Duplicate entry '(\d+)-(\d+)' for key 1' on query 'INSERT INTO sessions/)
+	{
+	    my ($uid, $sessid) = ($1, $2);
+	    $dbsl->do("DELETE FROM sessions WHERE userid=? AND sessid=?", undef, $uid, $sessid);
+	    $dbsl->do("SET SQL_SLAVE_SKIP_COUNTER=1");
+	    $dbsl->do("SLAVE START");
+	    push @errors, "Slave restarted by deleting session row ($uid-$sessid): $skey";
+	    $recheck = 1;
+	}
 
 	if ($opt_fix && $sl->{'Slave_Running'} eq "No" &&
 	    (
@@ -238,9 +284,9 @@ my $check = sub
 	if ($opt_fix && $sl->{'Slave_Running'} eq "Yes" && $stalled)
 	{
 	    my $new = $sl->{'Pos'} - 22;
-	    push @errors, "Moving back from $sl->{'Pos'} to $new";
-	    $dbsl->do("CHANGE MASTER TO MASTER_LOG_POS=$new");
-	    $recheck = 1;
+	    #push @errors, "Moving back from $sl->{'Pos'} to $new";
+	    #$dbsl->do("CHANGE MASTER TO MASTER_LOG_POS=$new");
+	    #$recheck = 1;
 	}
     
 	unless ($sl->{'Slave_Running'} eq "Yes") {
@@ -261,7 +307,7 @@ my $check = sub
 	    push @errors, "No log file for: $skey";
 	}
 
-	$pr->(sprintf ("is in %s at %10d [%10d] c=%d\n", $s->{'logfile'}, 
+	$pr->(sprintf ("is in %s at %10d [%10d] c=%d v=$ver\n", $s->{'logfile'}, 
 		       $s->{'pos'}, $s->{'pos'} - $masterpos,
 		       $ccount));
 
