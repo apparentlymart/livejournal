@@ -194,12 +194,8 @@ sub FriendsPage
             next if $friends{$item->{'posterid'}};
             push @posterids, $item->{'posterid'};
         }
-        if (@posterids) {
-            my $in = join(',',@posterids);
-            $sth = $dbr->prepare("SELECT * FROM user WHERE userid IN ($in)");
-            $sth->execute;
-            $posters{$_->{'userid'}} = $_ while $_ = $sth->fetchrow_hashref;
-        }
+        LJ::load_userids_multiple($dbs, [ map { $_ => \$posters{$_} } @posterids ])
+            if @posterids;
     }
 
     my %objs_of_picid;
@@ -238,7 +234,6 @@ sub FriendsPage
 
         my ($friend, $poster);
         $friend = $poster = $friends{$friendid}->{'user'};
-        $poster = LJ::get_username($dbs, $posterid) if $friendid != $posterid;
 
         $eventnum++;
         LJ::CleanHTML::clean_subject(\$subject) if $subject;
