@@ -2552,7 +2552,7 @@ sub load_user_props
         foreach (@props) {
             next if exists $u->{$_};
             my $p = LJ::get_prop("user", $_);
-            next unless $p;
+            die "Invalid userprop $_ passed to LJ::load_user_props." unless $p;
             if (defined $mem->{"uprop:$uid:$p->{'id'}"}) {
                 $u->{$_} = $mem->{"uprop:$uid:$p->{'id'}"};
                 next;
