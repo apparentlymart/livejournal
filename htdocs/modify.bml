@@ -27,14 +27,13 @@ body<=
 
     ### user is now authenticated ###
 
-    my $dbs = LJ::get_dbs();
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+    my $dbh;
+    my $dbr = LJ::get_db_reader();
     my $sth;
 
     my $capstyles = LJ::get_cap($u, "styles");
     
-    LJ::load_user_props($dbs, $u, "opt_usesharedpic",
+    LJ::load_user_props($u, "opt_usesharedpic",
                         "s1_lastn_style", "s1_calendar_style",
                         "s1_day_style", "s1_friends_style",
                         "stylesys",
@@ -220,6 +219,7 @@ body<=
             # first, load the overrides if they use 'em:
             my $overrides = "";
             if ($u->{'useoverrides'} eq "Y") {
+                $dbh ||= LJ::get_db_writer();
                 $overrides = $dbh->selectrow_array("SELECT override FROM overrides WHERE user=?", undef, $u->{'user'});
                 LJ::text_out(\$overrides);
             }
@@ -262,6 +262,8 @@ body<=
         my $dberr = sub {
             return "<?h1 $ML{'error'} h1?><?p $ML{'error.dberror'} <b>@_[0]</b> p?>";
         };
+
+        $dbh ||= LJ::get_db_writer();
 
         # setup what we're gonna update in the user table:
         my %update = ();

@@ -40,8 +40,7 @@ ins {
     }
     my $lnids = join(",", @lnids);
 
-    my $dbs = LJ::get_dbs;
-    my $dbr = $dbs->{'reader'};
+    my $dbr = LJ::get_db_reader();
     my ($sth, $ret);
 
     my $sth = $dbr->prepare("select * from ml_text where dmid=$dmid and itid=$itid and lnid in ($lnids) ORDER BY txtid");

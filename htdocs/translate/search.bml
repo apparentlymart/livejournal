@@ -4,8 +4,7 @@
     my $l = LJ::Lang::get_lang($lang);
     return "<b>Invalid language</b>" unless $l;
 
-    my $dbs = LJ::get_dbs;
-    my $dbr = $dbs->{'reader'};
+    my $dbr = LJ::get_db_reader();
     my $sth;
  
     my $sql;
@@ -21,10 +20,10 @@
     
     if ($FORM{'search'} eq 'txt') 
     {
-        my $remote = LJ::get_remote($dbs);
+        my $remote = LJ::get_remote();
         return "This search type is restricted to $l->{'lnname'} translators." unless
-            (LJ::check_priv($dbs, $remote, "translate", "*") ||
-             LJ::check_priv($dbs, $remote, "translate", $l->{'lncode'}));
+            (LJ::check_priv($remote, "translate", "*") ||
+             LJ::check_priv($remote, "translate", $l->{'lncode'}));
 
         my $qtext = $dbr->quote($FORM{'searchtext'});
         my $dmid = $FORM{'searchdomain'}+0;

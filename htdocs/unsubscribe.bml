@@ -4,10 +4,6 @@ body<=
 
 <?_code
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
-
  my $aaid = $FORM{'aaid'};
  my $auth = $FORM{'auth'};
 
@@ -15,7 +11,7 @@ body<=
      return "<?h1 Error h1?><?p How did you get to this page?  You should only get here via a link in a newsletter. p?><?p Another way to unsubscribe from the newsletter is to visit the <a href=\"/editinfo.bml\">edit info</a> page and change the setting there. p?>";
  }
 
- if (($aa = LJ::is_valid_authaction($dbs, $aaid, $auth))
+ if (($aa = LJ::is_valid_authaction($aaid, $auth))
      && $aa->{'action'} eq "nonews"
    ) 
  {

@@ -3,9 +3,7 @@
  $title = "Meme Tracker";
  $body = "";
  
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
+ my $dbr = LJ::get_db_reader();
  my $sth;
 
  if ($FORM{'url'}) {

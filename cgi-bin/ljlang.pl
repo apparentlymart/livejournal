@@ -181,33 +181,30 @@ sub load_lang_struct
 
 sub get_itemid
 {
-    my ($dbarg, $dmid, $itcode, $opts) = @_;
+    &LJ::nodb;
+    my ($dmid, $itcode, $opts) = @_;
     load_lang_struct() unless $LS_CACHED;
 
-    my $dbs = LJ::make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-
+    my $dbr = LJ::get_db_reader();
     $dmid += 0;
-    my $qcode = $dbh->quote($itcode);
-    my $itid = $dbr->selectrow_array("SELECT itid FROM ml_items WHERE dmid=$dmid AND itcode=$qcode");
+    my $itid = $dbr->selectrow_array("SELECT itid FROM ml_items WHERE dmid=$dmid AND itcode=?", undef, $itcode);
     return $itid if defined $itid;
-    my $qnotes = $dbh->quote($opts->{'notes'});
-    $dbh->do("INSERT INTO ml_items (dmid, itid, itcode, notes) VALUES ($dmid, NULL, $qcode, $qnotes)");
+
+    my $dbh = LJ::get_db_writer();
+    $dbh->do("INSERT INTO ml_items (dmid, itid, itcode, notes) ".
+             "VALUES ($dmid, NULL, ?, ?)", undef, $itcode, $opts->{'notes'});
     if ($dbh->err) {
-        return $dbh->selectrow_array("SELECT itid FROM ml_items WHERE dmid=$dmid AND itcode=$qcode");
+        return $dbh->selectrow_array("SELECT itid FROM ml_items WHERE dmid=$dmid AND itcode=?",
+                                     undef, $itcode);
     }
     return $dbh->{'mysql_insertid'};
 }
 
 sub set_text
 {
-    my ($dbarg, $dmid, $lncode, $itcode, $text, $opts) = @_;
+    &LJ::nodb;
+    my ($dmid, $lncode, $itcode, $text, $opts) = @_;
     load_lang_struct() unless $LS_CACHED;
-
-    my $dbs = LJ::make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
 
     my $l = $LN_CODE{$lncode} or return set_error("Language not defined.");
     my $lnid = $l->{'lnid'};
@@ -219,9 +216,10 @@ sub set_text
     return set_error("Bogus lang for that domain") 
         unless exists $DM_ID{$dmid}->{'langs'}->{$lnid};
 
-    my $itid = get_itemid($dbs, $dmid, $itcode, { 'notes' => $opts->{'notes'}});
+    my $itid = get_itemid($dmid, $itcode, { 'notes' => $opts->{'notes'}});
     return set_error("Couldn't allocate itid.") unless $itid;
 
+    my $dbh = LJ::get_db_writer();
     my $txtid = 0;
     if (defined $text) {
         my $userid = $opts->{'userid'} + 0;

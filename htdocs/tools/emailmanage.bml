@@ -4,12 +4,10 @@ body<=
 
 <?_code
 {
-    my $dbs = LJ::get_dbs();
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+    my $dbh = LJ::get_db_writer();
     
     my $ret;
-    my $remote = LJ::get_remote($dbs);
+    my $remote = LJ::get_remote($dbh);
     
     unless ($remote) {
         return "<?h1 Login Required h1?><?p You must first <a href='/login.bml?ret=1'>login</a> before using this tool. p?>";

@@ -14,16 +14,15 @@
  return "<b>Invalid language</b>" unless $l;
  my $lp = $l->{'parentlnid'} ? LJ::Lang::get_lang_id($l->{'parentlnid'}) : undef;
 
- my $dbs = LJ::get_dbs;
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
+ my $dbr = LJ::get_db_reader();
+ my $dbh;
  my ($sth, $ret);
 
- my $remote = LJ::get_remote($dbs);
- my $can_edit = (LJ::check_priv($dbs, $remote, "translate", "*") ||
-                 LJ::check_priv($dbs, $remote, "translate", $l->{'lncode'}));
- my $can_delete = LJ::check_priv($dbs, $remote, "translate", "[itemdelete]");
- my $can_rename = LJ::check_priv($dbs, $remote, "translate", "[itemrename]");
+ my $remote = LJ::get_remote();
+ my $can_edit = (LJ::check_priv($remote, "translate", "*") ||
+                 LJ::check_priv($remote, "translate", $l->{'lncode'}));
+ my $can_delete = LJ::check_priv($remote, "translate", "[itemdelete]");
+ my $can_rename = LJ::check_priv($remote, "translate", "[itemrename]");
 
  my $mode = {
      '' => 'view', 
@@ -223,6 +222,7 @@
              next;
          }
          
+         $dbh ||= LJ::get_db_writer();
          my $lat = $dbh->selectrow_hashref("SELECT * FROM ml_latest WHERE lnid=$l->{'lnid'} AND dmid=$dom AND itid=$itid");
          unless ($lat) {
              push @errors, "No existing mapping for $itcode";
@@ -285,7 +285,7 @@
          # set userid of writer
          $opts->{'userid'} = $remote->{'userid'};
 
-         my $res = LJ::Lang::set_text($dbs, $dom, $l->{'lncode'}, $itcode, $text, $opts);
+         my $res = LJ::Lang::set_text($dom, $l->{'lncode'}, $itcode, $text, $opts);
          unless ($res) { 
              push @errors, LJ::Lang::last_error();
          } else {
@@ -294,6 +294,7 @@
          }
      }
 
+     $dbh ||= LJ::get_db_writer();
      $dbh->do("UPDATE ml_langs SET lastupdate=NOW() WHERE lnid=$l->{'lnid'}") if $saved;
 
      if (@errors) {

@@ -4,9 +4,7 @@ body<=
 
 <?_code
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
+ my $dbr = LJ::get_db_reader();
  my $sth;
 
  $sth = $dbr->prepare("SELECT lnid, lncode, lnname, lastupdate FROM ml_langs");

@@ -1,27 +1,24 @@
 <?_code
-#line 2
+
  $title = "";
  $body = "";
 
  use strict;
  use vars qw($title $body %FORM);
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
+ # FIXME: this doesn't use dbr or memcache at all.
+ my $dbh = LJ::get_db_writer();
  my $sth;
 
  my %permission;
- my $remote = LJ::get_remote($dbs);
+ my $remote = LJ::get_remote();
 
  my $user = lc($FORM{'user'});
  if (! $user && $remote) { $user = $remote->{'user'}; }
  my $u = undef;
 
  if ($user && $FORM{'mode'} ne "pickuser") {
-     my $quser = $dbh->quote($user);
-     $sth = $dbh->prepare("SELECT userid, user FROM user WHERE user=$quser");
-     $sth->execute;
-     $u = $sth->fetchrow_hashref;
+     $u = LJ::load_user($user);
      unless ($u) {
          $body .= "<?h1 Error h1?><?p <B>Unknown user: </B> " . LJ::ehtml($user) . " p?>\n";
      }
