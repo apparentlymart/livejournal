@@ -87,7 +87,7 @@
      $body .= "<input type='hidden' name='cuserid' value='$ci->{'userid'}' />";
      $body .= "<input type='hidden' name='confirm' value='1' /><center>";
      $body .= "<input type='checkbox' name='addfriend' checked>".BML::ml('.label.addtofriends',{'maintainer'=>$ecname});
-     $body .= "<br><input type='submit' value=$ML{'.button.join'} /></center></form> p?>";
+     $body .= "<br><input type='submit' value=\"$ML{'.button.join'}\" /></center></form> p?>";
      return;
  }
 
