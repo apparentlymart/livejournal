@@ -5,15 +5,26 @@
 
     LJ::set_active_crumb('yourstyles');
 
+    my $remote;
+
+    # authas switcher form
+    my $authasform = sub {
+        $body .= "<form method='get' action='styles.bml'>\n";
+        $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
+        $body .= "</form>\n\n";
+    };
+
     # used for error messages
     my $err = sub {
         $title = "Error";
-        $body = shift;
+        $body = '';
+        $authasform->() if $remote;
+        $body .= "<?p $_[0] p?>";
         return;        
     };
 
     # authenticate user
-    my $remote = LJ::get_remote();
+    $remote = LJ::get_remote();
     return $err->('You must be logged in to view your styles.') 
         unless $remote;
 
@@ -22,7 +33,9 @@
     return $err->('You could not be authenticated as the specified user.')
         unless $u;
 
-    return $err->('Your account type does not permit you to modify S2 styles')
+    return $err->($remote->{user} eq $u->{user} ?
+            'Your account type does not allow advanced customization.' :
+            'The selected user\'s account type does not allow advanced customization.' )
         unless LJ::get_cap($u, 's2styles');
 
     # extra arguments for get requests
@@ -241,10 +254,7 @@
         # set up page header
         $title = "Your Styles";
 
-        # authas switcher form
-        $body .= "<form method='get' action='styles.bml'>\n";
-        $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
-        $body .= "</form>\n\n";
+        $authasform->();
 
         $body .= "<div><?h1 Your Styles h1?></div>\n";
 

@@ -5,10 +5,21 @@
 
     LJ::set_active_crumb('yourlayers');
 
-    # for error reporting
+    my $remote;
+
+    # authas switcher form
+    my $authasform = sub {
+        $body .= "<form method='get' action='styles.bml'>\n";
+        $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
+        $body .= "</form>\n\n";
+    };
+
+    # used for error messages
     my $err = sub {
         $title = "Error";
-        $body = shift;
+        $body = '';
+        $authasform->() if $remote;
+        $body .= "<?p $_[0] p?>";
         return;        
     };
 
@@ -19,7 +30,7 @@
     $POST{'parid'} ||= $POST{'parid_hidden'};
 
     # authenticate user
-    my $remote = LJ::get_remote();
+    $remote = LJ::get_remote();
     return $err->('You must be logged in to view your layers.') 
         unless $remote;
 
@@ -43,7 +54,10 @@
     my $ulay = LJ::S2::get_layers_of_user($u);
 
     my $has_priv = LJ::get_cap($u, 's2styles');
-    return $err->("Your account type doesn't permit creating layers.") unless $has_priv;
+    return $err->($remote->{user} eq $u->{user} ?
+            'Your account type does not allow advanced customization.' :
+            'The selected user\'s account type does not allow advanced customization.' )
+        unless $has_priv;
 
     # start of output
     $title = "Your Layers";
@@ -139,9 +153,7 @@
 
     # authas switcher form
     unless ($noactions) {
-        $body .= "<form method='get' action='layers.bml'>\n";
-        $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
-        $body .= "</form>\n\n";
+        $authasform->();
     }
 
     # show list of layers
