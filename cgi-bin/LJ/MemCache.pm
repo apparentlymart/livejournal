@@ -27,6 +27,11 @@ sub trigger_bucket_reconstruct {
     $buckets = 0;
 }
 
+sub forget_dead_hosts
+{
+    %host_dead = ();
+}
+
 sub sock_to_host # (host)
 {
     my $host = shift;
