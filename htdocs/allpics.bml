@@ -116,7 +116,7 @@
 
         my ($apre, $apost);
         if ($pic->{'url'}) {
-            $apre = "<a href='$pic->{'url'}'>";
+            $apre = "<a href='" . LJ::ehtml($pic->{'url'}) . "'>";
             $apost = "</a>";
         }
 
