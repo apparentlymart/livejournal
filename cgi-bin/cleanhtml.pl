@@ -303,7 +303,10 @@ sub clean
             # especially because the parser returns things it's
             # confused about (broken, ill-formed HTML) as text.
             $token->[1] =~ s/</&lt;/g;
-            $token->[1] =~ s/>/&gt;/g;
+            unless ($opencount{'style'}) {
+                # don't escape this, because that breaks a CSS construct
+                $token->[1] =~ s/>/&gt;/g;
+            }
             if ($opencount{'style'}) {
                 $token->[1] =~ s/\[COMS\]/<!--/g;
                 $token->[1] =~ s/\[COME\]/-->/g;
@@ -347,11 +350,6 @@ sub clean
             $newdata .= "<!-- OTHER: " . $type . "-->\n";
         }
     } # end while
-
-#    if ($opts->{'addbreaks'}) {
-#	$newdata =~ s/^( {1,10})/"&nbsp;&nbsp;"x length($1)/eg;
-#	$newdata =~ s/\n( {1,10})/"\n" . "&nbsp;&nbsp;"x length($1)/eg;
-#    }
 
     if (ref $opts->{'autoclose'} eq "ARRAY") {
         foreach my $tag (@{$opts->{'autoclose'}}) {
