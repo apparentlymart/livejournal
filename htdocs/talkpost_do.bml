@@ -4,10 +4,13 @@ BODY<=
 
 (=_CODE
 
- $Text::Wrap::columns = 76;
+ foreach my $re (@LJ::TALKSPAM) {
+     return "" if ($FORM{'body'} =~ /$re/);
+ }
 
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
+ $Text::Wrap::columns = 76;
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
