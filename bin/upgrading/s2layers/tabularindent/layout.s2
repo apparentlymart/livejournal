@@ -208,9 +208,13 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
     {
         var string userpic = defined $e.userpic ? "<img src='$e.userpic.url' />" : "";
         "<td width='100' valign='top' bgcolor='$bgcolor' align='center'>";
-        "<a href='"; print $e.journal->base_url(); "'>$userpic</a>";
-        if ($e.journal.username != $e.poster.username) { "<br /><font color='$fgcolor'>[$e.poster.username]</font>"; } 
-        if ($p.view == "friends") { "<br /><font color='$fgcolor'>$e.journal.username</font>"; }
+        var string url = $e.journal->base_url() + "/";
+        "<a href='$url'>$userpic</a>";
+        if ($e.journal.username != $e.poster.username) { 
+            var string purl = $e.poster->base_url() + "/";
+            "<br /><font color='$fgcolor'>[<a href='$purl'>$e.poster.username</a>]</font>"; 
+        } 
+        if ($p.view == "friends") { "<br /><font color='$fgcolor'><a href='$url'>$e.journal.username</a></font>"; }
         "</td>";
     }
     "<td valign='top'><table border='0'>";
