@@ -111,10 +111,19 @@
         $scheme = $LJ::SCHEMES[0]->{'scheme'} unless $scheme;
 
         if (@thumb_schemes) {
-            $body .= "<div width='100%'>";
+            my $ct = 0;
+            my $cols = 3;
+            my $width = int(100 / $cols +.5) . "%";
+            my $switch = @thumb_schemes / $cols;
+
+            $body .= "<table border='0' width='100%' cellpadding='2'>";
+            $body .= "<tr valign='top' align='left'>";
             foreach my $sh (@thumb_schemes) {
+                if ($ct == 0) {
+                    $body .= "<td width='$width' align='left' valign='top'>";
+                }
                 my $th = $sh->{'thumb'};
-                $body .= "&nbsp;<input type='image' ";
+                $body .= "<div style='float: left'><?h2 $sh->{'title'} h2?> <input type='image' ";
                 $body .= "name='action:setscheme:$sh->{'scheme'}' ";
                 $body .= "src='$LJ::IMGPREFIX/$th->[0]'";
                 $body .= " width='$th->[1]'" if $th->[1];
@@ -125,11 +134,14 @@
                 } else {
                     $body .= "style='border: solid 1px black;' ";
                 }
-            
-                $body .= " alt='$sh->{'title'}' title='$sh->{'title'}'/>";
-                $body .= " $sh->{'title'}";
+                my $alt = BML::ml('.scheme.preview', {'title' => $sh->{'title'},});
+                $body .= " alt='$alt' title='$sh->{'title'}'/></div>";
+                if (++$ct >= $switch) {
+                    $body .= "</td>";
+                    $ct = 0;
+                }
             }
-            $body .= "</div>";
+            $body .= "</tr></table>";
         }
 
         if (@text_schemes) {

@@ -1911,6 +1911,8 @@ is required. To save yourself some time, you can <a href="/login.bml?ret=1">log 
 
 /manage/siteopts.bml.head.scheme=Select Your Preferred Scheme
 
+/manage/siteopts.bml.scheme.preview=[Preview of [[title]] scheme]
+
 /manage/siteopts.bml.title=Browse Preferences
 
 /modify.bml.title=Modify Journal
