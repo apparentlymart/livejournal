@@ -2346,8 +2346,6 @@ sub check_rate {
                   [ [300,3600], [200,1800], [150,900], [15,60] ]
                   ] if !$remote;
 
-    my $too_fast = 0;
-
   WATCH:
     foreach my $watch (@watch) {
         my ($key, $rates) = ($watch->[0], $watch->[1]);
@@ -2374,7 +2372,6 @@ sub check_rate {
             my ($allowed, $period) = ($rate->[0], $rate->[1]);
             my $events = scalar grep { $_ > $now-$period } @times;
             if ($events > $allowed) {
-                $too_fast = 1;
                 
                 if ($LJ::DEBUG_TALK_RATE && 
                     LJ::MemCache::add("warn:$key", 1, 600)) {
