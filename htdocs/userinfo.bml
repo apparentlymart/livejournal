@@ -692,7 +692,6 @@ if ($u->{'journaltitle'}) {
                  $frlink = "<b>$frlink</b>" if $remote_friendid{$_->{'userid'}};
                  $body .= "$frlink, ";
                  if (++$count == $MAX_FRIENDOF_SHOW && $GET{'mode'} ne "full") {
-                     $friendsof{'clipped'} = 1;
                      last;
                  }
              }
