@@ -22,6 +22,17 @@
   arg keys:
     u
     form
+
+* post_changepassword(\%args)
+
+  action to take after changing password, before HTML is sent to 
+  to client (possible to print HTTP headers directly)
+
+  arg keys:
+    u
+    dbs
+    newpassword
+    oldpassword
   
 * post_create(\%args)
 

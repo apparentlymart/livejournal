@@ -221,7 +221,7 @@ BODY<=
      
      $ret .= "<CENTER><FORM METHOD=POST ACTION=\"/editinfo_do.bml\">";
      $ret .= "<INPUT TYPE=HIDDEN NAME=user VALUE=\"$user\">\n";
-     $ret .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"" . &hash_password($FORM{'password1'}) . "\">\n";
+     $ret .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"" . LJ::hash_password($FORM{'password1'}) . "\">\n";
      $ret .= "<INPUT TYPE=SUBMIT VALUE=\"Enter Personal Information ---&gt;\">\n";
      $ret .= "</FORM></CENTER>\n";
      
