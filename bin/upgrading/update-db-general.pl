@@ -1534,8 +1534,8 @@ register_alter(sub {
     if (column_type("user", "oldenc") eq "") {
         do_alter("user", "ALTER TABLE user ".
                  "ADD oldenc TINYINT DEFAULT 0 NOT NULL, ".
-                 "MODIFY name CHAR(80) NOT NULL"
-                 );
+                 "MODIFY name CHAR(80) NOT NULL, ".
+                 "DROP allow_getpromos");
     }
 
     # widen columns to accomodate larger Unicode names
