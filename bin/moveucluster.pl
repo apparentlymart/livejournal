@@ -4,6 +4,11 @@
 #
 
 use strict;
+use Getopt::Long;
+
+my $opt_del = 0;
+exit 1 unless GetOptions('delete' => \$opt_del);
+
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
 my $dbh = LJ::get_dbh("master");
@@ -133,21 +138,24 @@ if ($sclust == 0)
     $dbh->do("UPDATE userusage SET lastitemid=0 WHERE userid=$userid");
 
     # if everything's good (nothing's died yet), then delete all from source
-    $done = 0;
-    $stime = time();
-    foreach my $itemid (@itemids) {
-	deletefrom0_logitem($itemid);
-	$done++;
-	my $percent = $done/$todo;
-	my $elapsed = time() - $stime;
-	my $totaltime = $elapsed * (1 / $percent);
-	my $timeremain = int($totaltime - $elapsed);
-	$stmsg->(sprintf "$user: delete $done/$todo (%.2f%%) +${elapsed}s -${timeremain}s\n", 100*$percent);
-    }
-
-    # delete bio from source, if necessary
-    if ($separate_cluster) {
-	$dbh->do("DELETE FROM userbio WHERE userid=$userid");
+    if ($opt_del)
+    {
+	$done = 0;
+	$stime = time();
+	foreach my $itemid (@itemids) {
+	    deletefrom0_logitem($itemid);
+	    $done++;
+	    my $percent = $done/$todo;
+	    my $elapsed = time() - $stime;
+	    my $totaltime = $elapsed * (1 / $percent);
+	    my $timeremain = int($totaltime - $elapsed);
+	    $stmsg->(sprintf "$user: delete $done/$todo (%.2f%%) +${elapsed}s -${timeremain}s\n", 100*$percent);
+	}
+	
+	# delete bio from source, if necessary
+	if ($separate_cluster) {
+	    $dbh->do("DELETE FROM userbio WHERE userid=$userid");
+	}
     }
 
     # unset read-only bit (marks the move is complete, also, and not aborted mid-delete)
