@@ -433,7 +433,7 @@ my @comment_close = qw(
     table tr td th tbody tfoot thead colgroup caption
     marquee area map 
 );
-my @comment_all = (@comment_close, "img", "li", "br", "dd", "dt", "hr", "p", "col");
+my @comment_all = (@comment_close, "img", "br", "hr", "p", "col");
 
 sub clean_event
 {
