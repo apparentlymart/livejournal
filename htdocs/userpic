@@ -30,7 +30,6 @@ foreach my $d ("$ENV{'LJHOME'}/temp",
 }
 my $CACHE_DIR = "$ENV{'LJHOME'}/temp/userpic";
 
-
 my $hits = 0;
 my $misses = 0;
 my $ifmodsince = 0;    # if we just said "No" to "If-Modified-Since" HTTP header
@@ -42,13 +41,14 @@ my $lastconn;
  REQUEST:
     while(FCGI::accept() >= 0) 
 {
-    my $now = time();
+    if ($ENV{'HTTP_IF_MODIFIED_SINCE'}) {
+	# we can safely do this without checking since we never re-use
+	# picture IDs and don't let the contents get modified
 
-    ## every 10 seconds, revalidate/reconnect our db connections
-    if (($now - $lastconn) > 10) {
-	$dbh = LJ::get_dbh("master");
-	if ($LJ::DBINFO{'slavecount'}) { $dro = LJ::get_dbh("slave"); }
-	$lastconn = $now;
+	$ifmodsince++;
+
+	print "Status: 304 Not Modified\n\n";
+	next REQUEST;
     }
 
     %FORM = ();
@@ -101,7 +101,6 @@ my $lastconn;
 	    my $item = $node->[1];
 	    push @items, { 'id' => $iter, 
 			   'time' => $item->{'time'},
-#			   'user' => $item->{'user'},
 		       };
 	    $iter = $node->[2];
 	}
@@ -113,8 +112,7 @@ my $lastconn;
 	foreach my $it (@items) {
 	    if ($count++ == $show) { last; }
 	    my $age = $now - $it->{'time'};
-#	    print "<A HREF=\"/userpic/$it->{'id'}\">$it->{'user'}</A> ($age), ";
-	    print "<A HREF=\"/userpic/$it->{'id'}\">$it->{'id'}</A> ($age), ";
+	    print "<a href=\"/userpic/$it->{'id'}\">$it->{'id'}</a> ($age), ";
 	}
 
 	next REQUEST;
@@ -123,18 +121,8 @@ my $lastconn;
     unless ($FORM{'id'} =~ /^\d+$/) {
 	print "Status: 404 Not Found\n";
 	print "Content-type: text/html\n\n";
-	print "<H1>Not Found</H1>The requested image was not found.";
+	print "<h1>Not Found</h1>The requested image was not found.";
 	print "\n";
-	next REQUEST;
-    }
-
-    if ($ENV{'HTTP_IF_MODIFIED_SINCE'}) {
-	# we can safely do this without checking since we never re-use
-	# picture IDs and don't let the contents get modified
-
-	$ifmodsince++;
-
-	print "Status: 304 Not Modified\n\n";
 	next REQUEST;
     }
 
@@ -148,6 +136,15 @@ my $lastconn;
     if (! defined $pic || ! $on_disk)
     {
 	$misses++;
+
+	my $now = time();
+	## every 10 seconds, revalidate/reconnect our db connections
+	if (($now - $lastconn) > 10) {
+	    $dbh = LJ::get_dbh("master");
+	    if ($LJ::DBINFO{'slavecount'}) { $dro = LJ::get_dbh("slave"); }
+	    $lastconn = $now;
+	}
+
 	my $query = "SELECT p.state, p.contenttype, pb.imagedata, UNIX_TIMESTAMP(p.picdate) AS 'lastmod' FROM userpic p, userpicblob pb WHERE p.picid=pb.picid AND p.picid=$qid";
 	
 	if ($on_disk) {
@@ -220,8 +217,8 @@ my $lastconn;
 	print "Content-type: $pic->{'contenttype'}\n";
 	print "Content-length: $pic->{'length'}\n";
 	print "Cache-Control: no-transform\n";
-	print "Expires: ", &http_date(time()+3000000), "\n"; # in 3-4 months
-	print "Last-Modified: ", &http_date($pic->{'lastmod'}), "\n";
+	print "Expires: ", LJ::time_to_http(time()+3000000), "\n"; # in 3-4 months
+	print "Last-Modified: ", LJ::time_to_http($pic->{'lastmod'}), "\n";
 	print "\n";
 	unless ($ENV{'REQUEST_METHOD'} eq "HEAD") {
 	    print $pic->{'imagedata'};
@@ -230,35 +227,15 @@ my $lastconn;
     } else {
 	print "Status: 404 Not Found\n";
 	print "Content-type: text/html\n\n";
-	print "<H1>Not Found</H1>The requested image was not found.";
+	print "<h1>Not Found</h1>The requested image was not found.";
 	print "\n";
     }
 }
 
-sub http_date
-{
-    my ($unixtime) = @_;
-    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime($unixtime);
-    $year+=1900;
-    my @day = qw{Sun Mon Tue Wed Thu Fri Sat};
-    my @month = qw{Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec};
-
-    my $ret = "";
-    $ret .= sprintf("$day[$wday], %02d $month[$mon] %04d %02d:%02d:%02d GMT", 
-		    $mday, $year, $hour, $min, $sec);
-
-    return $ret;
-}
-
 sub get_form_data 
 {
-    my $buffer;
     my $hashref = shift;
-    if ($ENV{'REQUEST_METHOD'} eq 'POST') {
-#	read(STDIN, $buffer, $ENV{'CONTENT_LENGTH'});
-    } else {
-	$buffer = $ENV{'QUERY_STRING'};
-    }
+    my $buffer = $ENV{'QUERY_STRING'};
     
     # Split the name-value pairs
     my $pair;
