@@ -4923,7 +4923,7 @@ sub delete_item2
 # <LJFUNC>
 # name: LJ::delete_talkitem
 # des: Deletes a comment and associated metadata.
-# info: The tables [dbtable[talk2]], [dbtabke[talkprop2]], [dbtable[talktext2]],
+# info: The tables [dbtable[talk2]], [dbtable[talkprop2]], [dbtable[talktext2]],
 #       and [dbtable[dudata]] are all
 #       deleted from, immediately. Unlike [func[LJ::delete_item2]], there is
 #       no $quick flag to queue the delete for later, nor is one really
