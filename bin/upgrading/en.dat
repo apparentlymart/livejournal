@@ -110,6 +110,8 @@ Regards,
 
 /changepassword.bml.proceed.instructions=Press the button below and your password will be changed. You will receive an email as well, noting the password change.
 
+/changepassword.bml.relogin=In addition, you have been logged out from all your existing sessions. You should <a [[aopts]]>log in again</a> before continuing.
+
 /changepassword.bml.success.text=Your password has been changed and email has been sent to you with a reminder message.
 
 /changepassword.bml.title=Change Password
