@@ -155,6 +155,9 @@ my %ljconfig =
                 'desc' => "Message to send to users if their account becomes readonly during maintenance.",
                 'example' => "This journal is in read-only mode right now while database maintenance is being performed. Try again in a few minutes.",
             },
+            'compress_text' => {
+                'desc' => "Boolean setting that compresses log and comment text in the database, to save disk space.",
+            }
         },
  
         'syndication' => {
