@@ -7791,12 +7791,12 @@ sub get_public_styles {
     $pubstyc->{$_->{'styleid'}} = $_ while $_ = $sth->fetchrow_hashref;
 
     # fall back to old table
-    unless ($pubstyc) {
+    unless (%$pubstyc) {
         $sth = $dbh->prepare("SELECT * FROM style WHERE user='system' AND is_public='Y'");
         $sth->execute();
         $pubstyc->{$_->{'styleid'}} = $_ while $_ = $sth->fetchrow_hashref;
     }
-    return undef unless $pubstyc;
+    return undef unless %$pubstyc;
 
     # set in memcache
     my $expire = time() + 60*30; # 30 minutes
