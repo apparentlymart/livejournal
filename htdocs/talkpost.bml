@@ -299,9 +299,13 @@ BODY<=
      $basesubject = $parpost->{'subject'};
      $basesubject =~ s/^Re:\s*//i;
      if ($basesubject) {
-	 $basesubject = &ehtml("Re: $basesubject");
+	 $basesubject = "Re: $basesubject";
+	 # double-escape it for including in the input value below.
+	 $basesubject = &ehtml($basesubject);
+	 $basesubject = &ehtml($basesubject);
      }
  }
+
  # subject
  $ret .= "<TR VALIGN=TOP><TD ALIGN=RIGHT>Subject:</TD><TD COLSPAN=4><INPUT CLASS=textbox TYPE=TEXT SIZE=50 MAXLENGTH=100 NAME=\"subject\" VALUE=\"$basesubject\"><BR>(=DE No HTML allowed in subject DE=)</TD></TR>\n";
 
