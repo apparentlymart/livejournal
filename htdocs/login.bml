@@ -53,7 +53,7 @@
         if ($remote) {
             $body .= "<tr><td>$ML{'.login.username'}</td><td><b>$remote->{'user'}</b> <input type='submit' name='action:logout' value='$ML{'.logout.btn'}' /></td></tr>\n";
         } else {
-            $body .= "<tr><td>$ML{'.login.username'}</td><td><input type='text' value='$user' name='user' size='15' maxlength='15' / style='<?loginboxstyle?>'></td></tr>\n";
+            $body .= "<tr><td>$ML{'.login.username'}</td><td><input type='text' value='$user' name='user' size='15' maxlength='15' style='<?loginboxstyle?>' /></td></tr>\n";
             $body .= "<tr><td valign='top'>$ML{'.login.password'}</td><td><input type='password' name='password' id='xc_password' size='15' maxlength='30' />";
             $body .= "<br /><a href='/lostinfo.bml'><font size='1'>$ML{'.login.forget'}</font></a></td></tr>\n";
             if (@errors) {
