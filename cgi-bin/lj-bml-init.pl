@@ -28,5 +28,6 @@ require 'ljprotocol.pl';
 require 'cleanhtml.pl';
 require 'emailcheck.pl';
 require 'portal.pl';
+require 'imageconf.pl';
 
 1;
