@@ -363,11 +363,17 @@ body<=
          }
      }
 
-     if ($u->{'journaldomain'} ne $FORM{'journaldomain'}) {
+     if (exists $FORM{'journaldomain'} && 
+         $u->{'journaldomain'} ne $FORM{'journaldomain'}) 
+     {
          $FORM{'journaldomain'} =~ s!^(http://)?(www\.)?!!;
          my $dom = lc($FORM{'journaldomain'});
          my $qdom = $dbh->quote($dom);
-         $dbh->do("INSERT INTO domains VALUES ($qdom, $u->{'userid'})");
+         if ($dom) {
+             $dbh->do("INSERT INTO domains VALUES ($qdom, $u->{'userid'})");
+         } else {
+             $dbh->do("DELETE FROM domains WHERE userid=$u->{'userid'}");
+         }
          if ($dbh->err) {
              my $otherid = $dbh->selectrow_array("SELECT userid FROM domains WHERE domain=$qdom");
              return "<?h1 $ML{'error'} h1?><?p $ML{'.error.dupdomainalias'} p?>"
