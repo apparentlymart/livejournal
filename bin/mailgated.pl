@@ -45,18 +45,20 @@ if (! $opt->{'foreground'}) {
 
     $pid = fork;
     die "Couldn't fork.\n" unless defined $pid;
+    print "mailgate started with pid: $pid\n" if $pid;
+
+    $SIG{$_} = \&stop_child foreach qw/INT TERM/;
+    close STDOUT && open STDOUT, ">/dev/null";
+    close STDIN  && open STDIN,  "+>&STDOUT"; 
+    close STDERR && open STDERR, "+>&STDOUT";
 
     unless ($pid) {
-        $SIG{$_} = \&stop_child foreach qw/INT TERM/;
-        close STDIN  && open STDIN, "</dev/null";
-        close STDOUT && open STDOUT, "+>&STDIN";
-        close STDERR && open STDERR, "+>&STDIN";
+        $0 = 'mailgated - worker';
         worker();
         exit 0;
     }
 
-    print "mailgate started with pid: $pid\n";
-
+    $0 = 'mailgated - listener';
     $s = IO::Socket::INET->new(
             Type      => SOCK_STREAM,
             ReuseAddr => 1,
@@ -83,6 +85,7 @@ if (! $opt->{'foreground'}) {
                 my $newpid = fork;
                 unless ($newpid) {
                     close $s;
+                    $0 = 'mailgated - worker';
                     worker();
                     exit 0;
                 }
@@ -93,7 +96,7 @@ if (! $opt->{'foreground'}) {
                 print $c "ok\n";
             }
 
-            if (/stop/) {
+            if (/(?:stop|quit)/) {
                 kill 15, $pid;
                 print $c "ok\n";
                 exit 0;
@@ -138,7 +141,7 @@ sub worker
     require "$ENV{'LJHOME'}/cgi-bin/sysban.pl";
     $| = 1;
 
-    while (1) {
+    while (! $stop) {
         debug("Starting loop:");
 
         $busy = 1;
@@ -183,11 +186,14 @@ sub worker
                     $lock = LJ::locker()->trylock("mailgated-$_");
                     next unless $lock;
                 }
-                process($_);
+                eval { process($_); };
+                if ($@) {
+                    debug("\t\t$@");
+                    set_pcount($_);
+                }
             } else {
                 set_pcount($_);
             }
-            exit 0 if $stop;
         }
 
         $busy = 0;
@@ -201,11 +207,15 @@ sub worker
 
 sub stop_parent
 { 
-    # signal safe since it's not run when in daemon mode:
     debug("Shutting down...\n");
 
-    kill 15, $pid;
-    waitpid($pid, 0);
+    if ($pid) { # only used in foreground
+        kill 15, $pid;
+        waitpid($pid, 0);
+    }
+
+    exit 0 unless $busy;
+    $stop = 1;
 }
 
 sub stop_child
@@ -381,6 +391,8 @@ sub process
     return dequeue("Not deliverable to support system (no match To:)") unless $to;
 
     my $adf = (Mail::Address->parse($head->get('From')))[0];
+    return dequeue("Bogus From: header") unless $adf;
+
     my $name = $adf->name;
     my $from = $adf->address;
     $subject ||= "(No Subject)";

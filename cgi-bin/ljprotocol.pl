@@ -2405,7 +2405,7 @@ sub new_entry_cleanup_hack {
 
     # delete comments
     my $ids = LJ::Talk::get_talk_data($u, 'L', $jitemid);
-    return unless %$ids;
+    return unless ref $ids eq 'HASH' && %$ids;
     my $list = join ',', map { $_+0 } keys %$ids;
     $dbcm->do("DELETE FROM talk2 WHERE journalid=$ownerid AND jtalkid IN ($list)");
     $dbcm->do("DELETE FROM talktext2 WHERE journalid=$ownerid AND jtalkid IN ($list)");

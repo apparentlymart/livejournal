@@ -40,6 +40,7 @@ sub process {
 
     # Pick what address to send potential errors to.
     my @froms = Mail::Address->parse($head->get('From:'));
+    return unless @froms;
     my $from = $froms[0]->address;
     my $addrlist = LJ::Emailpost::get_allowed_senders($u);
     my $err_addr;
