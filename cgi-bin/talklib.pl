@@ -833,35 +833,34 @@ sub format_text_mail {
         $who = "$comment->{u}{name} ($comment->{u}{user})";
     }
 
-    my $intro;
+    my $text = "";
     if ($myjournal) {
         if ($parent->{ispost}) {
-            $intro = "$who replied to your $LJ::SITENAMESHORT post in which you said:";
+            $text .= "$who replied to your $LJ::SITENAMESHORT post in which you said:";
         } else {
-            $intro = "$who replied to another comment somebody left in your $LJ::SITENAMESHORT post.  ";
-            $intro .= "The comment they replied to was:";
+            $text .= "$who replied to another comment somebody left in your $LJ::SITENAMESHORT post.  ";
+            $text .= "The comment they replied to was:";
         }
     } else {
-        $intro .= "$who replied to your $LJ::SITENAMESHORT comment in which you said:";
+        $text .= "$who replied to your $LJ::SITENAMESHORT comment in which you said:";
     }
-    my $text = "";
-    $text .= Text::Wrap::wrap("", "", $intro) . "\n\n";
-    $text .= indent($parent->{body}, ">");
-    $text .= "\n\nTheir reply was:\n\n";
+    $text .= "\n\n";
+    $text .= indent($parent->{body}, ">") . "\n\n";
+    $text .= "Their reply was:\n\n";
     if ($comment->{subject}) {
-        # this needs to be one string so indent handles it properly.
-        $text .= indent("Subject: $comment->{subject}\n\n$comment->{body}");
-    } else {
-        $text .= indent("$comment->{body}");
+        $text .= Text::Wrap::wrap("  Subject: ",
+                                  "           ",
+                                  $comment->{subject}) . "\n\n";
     }
+    $text .= indent($comment->{body});
     $text .= "\n\n";
 
     if ($comment->{state} eq 'S') {
-        $text .= Text::Wrap::wrap("", "", "This comment was screened.  You must respond to it ".
-                                          "or unscreen it before others can see it.") . "\n\n";
+        $text .= "This comment was screened.  You must respond to it ".
+                 "or unscreen it before others can see it.\n\n";
     }
 
-    $text .= "From here, you can:\n";
+    $text .= "Options:\n";
     $text .= " - View the discussion:\n";
     $text .= "   " . talkargs($talkurl, "thread=$dtalkid") . "\n";
     $text .= " - View all comments on the entry:\n";
@@ -875,8 +874,8 @@ sub format_text_mail {
     $text .= " - Delete the comment:\n";
     $text .= "   $LJ::SITEROOT/delcomment.bml?journal=$item->{journalu}{user}&talkid=$dtalkid\n";
     $text .= "\n-- $LJ::SITENAME\n\n";
-    $text .= Text::Wrap::wrap("", "", "(If you'd prefer to not get these updates, go to $LJ::SITEROOT/editinfo.bml and turn off the relevant options.)");
-    return $text;
+    $text .= "(If you'd prefer to not get these updates, go to $LJ::SITEROOT/editinfo.bml and turn off the relevant options.)";
+    return Text::Wrap::wrap("", "", $text);
 }
 
 sub format_html_mail {
