@@ -747,21 +747,19 @@ if ($u->{'journaltitle'}) {
 ### shared journal access
 ###
 {
-    my $posthere = $dbr->selectcol_arrayref("SELECT u.user FROM reluser r, user u ".
-                                            "WHERE u.userid=r.targetid AND r.userid=$u->{'userid'} ".
-                                            "AND r.type='P' AND u.statusvis='V'");
-    my $canpost = $dbr->selectcol_arrayref("SELECT u.user FROM reluser r, user u ".
-                                           "WHERE u.userid=r.userid AND r.targetid=$u->{'userid'} ".
-                                           "AND r.type='P' AND u.statusvis='V'");
+    my $where = "u.userid=r.userid AND r.targetid=?";
+    if ($com || $u->{'journaltype'} eq 'S') {
+        $where = "u.userid=r.targetid AND r.userid=?";
+    }
 
-    if (@$posthere || @$canpost) {
-        $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.shared'}</b></td><td colspan='2'>";
-        foreach (sort @$canpost) {
-            $body .= BML::ml('.canpost',{'user'=>$u->{'user'}, 'comm'=>"<a href='userinfo.bml?user=$_'><b>$_</b></a>"}) . "<br />\n";
-        }
-        foreach (sort @$posthere) {
-            $body .= BML::ml('.posthere',{'user'=>"<a href='userinfo.bml?user=$_'><b>$_</b></a>",'comm'=>$u->{'user'}}) . "<br />\n";
-        }
+    my $accesslist = $dbr->selectcol_arrayref("SELECT u.user FROM reluser r, user u " .
+                                              "WHERE  $where " .
+                                              "AND r.type='P' AND u.statusvis='V'",
+                                              undef, $u->{'userid'});
+
+    if (my $count = @$accesslist) {
+        $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.shared'}</b></td><td colspan='2'><b>$count</b>: ";
+        $body .= join(", ", map { "<a href='userinfo.bml?user=$_'>$_</a>" } sort @$accesslist);
         $body .= "</td></tr>";
     }
 }

@@ -61,6 +61,7 @@ general /uploadpic.bml.success.text
 general /uploadpic_do.bml.error.urlerror
 general uploadpic.error.toolarge
 
+general /userinfo.bml.canpost
 general /userinfo.bml.closedmembership.body
 general /userinfo.bml.label.viewlabel
 general /userinfo.bml.openmembership.body

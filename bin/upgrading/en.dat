@@ -2171,8 +2171,6 @@ This could be because: <ol>
 
 /userinfo.bml.body.leave= You may <a href="/community/leave.bml?comm=[[commname]]">leave the community</a> at any time.
 
-/userinfo.bml.canpost=[[user]] can post to [[comm]]
-
 /userinfo.bml.comminfo.body=Below is information about the "[[commname]]" community on LiveJournal.
 
 /userinfo.bml.comminfo.name=Community Information
