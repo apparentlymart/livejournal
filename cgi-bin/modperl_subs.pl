@@ -15,6 +15,7 @@ use Apache::CompressClientFixup;
 use Apache::BML;
 use LJ::SpellCheck;
 use LJ::TextMessage;
+use LJ::Blob;
 use LJ::Captcha;
 use Digest::MD5;
 use MIME::Words;
@@ -39,6 +40,10 @@ require "$ENV{'LJHOME'}/cgi-bin/ljemailgateway.pl";
 require "$ENV{'LJHOME'}/cgi-bin/emailcheck.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljmemories.pl";
 
+# preload site-local libraries, if present:
+require "$ENV{'LJHOME'}/cgi-bin/modperl_subs-local.pl"
+    if -e "$ENV{'LJHOME'}/cgi-bin/modperl_subs-local.pl";
+
 sub setup_start {
 
     # auto-load some stuff before fork:
@@ -50,6 +55,8 @@ sub setup_start {
 
     # set this before we fork
     $LJ::CACHE_CONFIG_MODTIME = (stat("$ENV{'LJHOME'}/cgi-bin/ljconfig.pl"))[9];
+
+    eval { setup_start_local(); };
 }
 
 sub setup_restart {
