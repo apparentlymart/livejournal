@@ -174,6 +174,7 @@ REPLACE INTO codes VALUES ('country', 'PL', 'Poland', '0');
 REPLACE INTO codes VALUES ('country', 'PM', 'St. Pierre and Miquelon', '0');
 REPLACE INTO codes VALUES ('country', 'PN', 'Pitcairn', '0');
 REPLACE INTO codes VALUES ('country', 'PR', 'Puerto Rico', '0');
+REPLACE INTO codes VALUES ('country', 'PS', 'Palestine', '0');
 REPLACE INTO codes VALUES ('country', 'PT', 'Portugal', '0');
 REPLACE INTO codes VALUES ('country', 'PW', 'Palau', '0');
 REPLACE INTO codes VALUES ('country', 'PY', 'Paraguay', '0');
