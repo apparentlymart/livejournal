@@ -310,46 +310,57 @@ sub EndTag {
             my $content;
             $item->{'contents'} ||= [];
             unless (scalar(@{$item->{'contents'}}) >= 1) {
-                # this item had no <content>, ignore it (don't push into @items)
-                undef $item;
-                last TAGS;
-            }
-
-            if (scalar(@{$item->{'contents'}}) == 1) {
-                # only one <content> section
-                $content = $item->{'contents'}->[0]; 
-            } else {
-                # several <content> section, must choose the best one
-                foreach (@{$item->{'contents'}}) {
-                    if ($_->[0] eq "application/xhtml+xml") { # best match
-                        $content = $_;
-                        last; # don't bother to look at others
-                    }
-                    if ($_->[0] =~ m!html!) { # some kind of html/xhtml/html+xml, etc.
-                        # choose this unless we've already chosen some html
-                        $content = $_
-                            unless $content->[0] =~ m!html!;
-                        next;
-                    }
-                    if ($_->[0] eq "text/plain") {
-                        # choose this unless we have some html already
-                        $content = $_
-                            unless $content->[0] =~ m!html!;
-                        next;
-                    }
+                # this item had no <content>
+                # maybe it has <summary>? if so, use <summary>
+                # TODO: type= or encoding issues here? perhaps unite
+                # handling of <summary> with that of <content>?
+                if ($item->{'_atom_summary'}) {
+                    $item->{'text'} = $item->{'_atom_summary'};
+                    delete $item->{'contents'};
+                } else {
+                    # nothing to display, so ignore this entry
+                    undef $item;
+                    last TAGS;
                 }
-                # if we didn't choose anything, pick the first one
-                $content =  $item->{'contents'}->[0]
-                    unless $content;
             }
 
-            # we ignore the 'mode' attribute of <content>. If it's "xml", we've
-            # stringified it by accumulation; if it's "escaped", our parser
-            # unescaped it
-            # TODO: handle mode=base64?
+            unless ($item->{'text'}) { # unless we already have text
+                if (scalar(@{$item->{'contents'}}) == 1) {
+                    # only one <content> section
+                    $content = $item->{'contents'}->[0]; 
+                } else {
+                    # several <content> section, must choose the best one
+                    foreach (@{$item->{'contents'}}) {
+                        if ($_->[0] eq "application/xhtml+xml") { # best match
+                            $content = $_;
+                            last; # don't bother to look at others
+                        }
+                        if ($_->[0] =~ m!html!) { # some kind of html/xhtml/html+xml, etc.
+                            # choose this unless we've already chosen some html
+                            $content = $_
+                                unless $content->[0] =~ m!html!;
+                            next;
+                        }
+                        if ($_->[0] eq "text/plain") {
+                            # choose this unless we have some html already
+                            $content = $_
+                                unless $content->[0] =~ m!html!;
+                            next;
+                        }
+                    }
+                    # if we didn't choose anything, pick the first one
+                    $content =  $item->{'contents'}->[0]
+                        unless $content;
+                }
 
-            $item->{'text'} = $content->[1];
-            delete $item->{'contents'};
+                # we ignore the 'mode' attribute of <content>. If it's "xml", we've
+                # stringified it by accumulation; if it's "escaped", our parser
+                # unescaped it
+                # TODO: handle mode=base64?
+
+                $item->{'text'} = $content->[1];
+                delete $item->{'contents'};
+            }
 
             # generate time
             my $w3time = $item->{'_atom_modified'} || $item->{'_atom_created'};
