@@ -296,7 +296,7 @@ sub clean
                  ! $opencount{'lj-raw'};
             
             if ($auto_format && ! $opencount{'a'}) {
-                $token->[1] =~ s!https?://[^\s\'\"]+[a-zA-Z0-9_/&=\-]!$url{++$urlcount}=$&;"\{url$urlcount\}";!egi;
+                $token->[1] =~ s!https?://[^\s\'\"]+[a-zA-Z0-9_/&=\-]!$url{++$urlcount}=$&;"&url$urlcount;";!egi;
             }
 
             # escape tags in text tokens.  shouldn't belong here!
@@ -325,7 +325,7 @@ sub clean
             if ($auto_format) {
                 $token->[1] =~ s/(\r)?\n/<br>/g;
                 if (! $opencount{'a'}) {
-                    $token->[1] =~ s/\{url(\d+)\}/<a href=\"$url{$1}\">$url{$1}<\/a>/g;
+                    $token->[1] =~ s/&url(\d+);/<a href=\"$url{$1}\">$url{$1}<\/a>/g;
                 }
             }
 
