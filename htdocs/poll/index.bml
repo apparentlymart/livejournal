@@ -73,6 +73,12 @@
 
     if (defined $FORM{'poll-submit'})
     {
+        unless (LJ::did_post()) {
+            $title = $ML{'Error'};
+            $body  = $ML{'bml.requirepost'};
+            return;
+        }
+
         my $error;
         LJ::Poll::submit($remote, \%FORM, \$error);
         if ($error) {
