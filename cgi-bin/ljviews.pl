@@ -1531,7 +1531,7 @@ sub create_view_friends
 
     # load the pictures for the user
     my %userpics;
-    my @picids = map { [$_, $friends{$_}->{'defaultpicid'}] } keys %friends;
+    my @picids = map { [$friends{$_}, $friends{$_}->{'defaultpicid'}] } keys %friends;
     LJ::load_userpics(\%userpics, [ @picids, map { [ $_, $_->{'defaultpicid'} ] } values %aposter ]);
 
     # load the text of the entries
