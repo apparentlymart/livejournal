@@ -123,8 +123,9 @@ $ret .= "</form></ul>";
  return $ret;
 
  sub add_footer
- {
-     $ret .= "<P><HR><FONT SIZE=-1>How does this feature work?  <A HREF=\"/support/faqbrowse.bml?faqid=30\">Read this</A>.<BR><B>Disclaimer:</B> The reliability of text messaging should not be trusted in dealing with emergencies.</FONT>";
+{
+    my $howwork = $LJ::HELP_URL{'textmessaging_about'} ? "How does this feature work?  <a href=\"$LJ::HELP_URL{'textmessaging_about'}\">Read this</a>.<br />" : "";
+     $ret .= "<p><hr /><font size='-1'>$howwork<B>Disclaimer:</B> The reliability of text messaging should not be trusted in dealing with emergencies.</font>";
  }
 
 _code?>
