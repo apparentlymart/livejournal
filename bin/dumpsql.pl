@@ -145,7 +145,7 @@ s1styles_write($ss);
 # and dump mood info
 print "Dumping moods.dat\n";
 open (F, ">$ENV{'LJHOME'}/bin/upgrading/moods.dat") or die;
-$sth = $dbh->prepare("SELECT moodid, mood, parentmood FROM moods");
+$sth = $dbh->prepare("SELECT moodid, mood, parentmood FROM moods ORDER BY moodid");
 $sth->execute;
 while (@_ = $sth->fetchrow_array) {
     print F "MOOD @_\n";
@@ -156,7 +156,8 @@ $sth->execute;
 while (my ($id, $name, $des) = $sth->fetchrow_array) {
     $name =~ s/://;
     print F "MOODTHEME $name : $des\n";
-    my $std = $dbh->prepare("SELECT moodid, picurl, width, height FROM moodthemedata WHERE moodthemeid=$id");
+    my $std = $dbh->prepare("SELECT moodid, picurl, width, height FROM moodthemedata ".
+                            "WHERE moodthemeid=$id ORDER BY moodid");
     $std->execute;
     while (@_ = $std->fetchrow_array) {
 	print F "@_\n";
