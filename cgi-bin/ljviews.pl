@@ -884,7 +884,7 @@ sub create_view_calendar
 
     # but the new form is purtier:  */calendar/2001
     unless ($dispyear) {
-        if ($opts->{'args'} =~ m!^/(\d\d\d\d)/?\b!) {
+        if ($opts->{'pathextra'} =~ m!^/(\d\d\d\d)/?\b!) {
             $dispyear = $1;
         }
     }
@@ -1083,7 +1083,7 @@ sub create_view_day
     my $year = $FORM{'year'};
     my @errors = ();
 
-    if ($opts->{'args'} =~ m!^/(\d\d\d\d)/(\d\d)/(\d\d)\b!) {
+    if ($opts->{'pathextra'} =~ m!^/(\d\d\d\d)/(\d\d)/(\d\d)\b!) {
         ($month, $day, $year) = ($2, $3, $1);
     }
 
