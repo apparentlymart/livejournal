@@ -146,6 +146,9 @@ BODY<=
      }
  }
 
+ ## dump the log entry, unless we're browsing a thread.
+ unless ($thread)
+ {
      my %current;
      if ($logprops{$itemid}->{'current_mood'} || $logprops{$itemid}->{'current_moodid'}) {
 	 LJ::load_moods($dbs);
@@ -186,7 +189,7 @@ BODY<=
 
      $ret .= $event;
      $ret .= "</UL>";
-
+ }
 
 
  $ret .= "<BR CLEAR=ALL><HR WIDTH=100% SIZE=2 ALIGN=CENTER>";
