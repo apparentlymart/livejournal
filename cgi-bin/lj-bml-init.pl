@@ -78,13 +78,7 @@ require "$ENV{'LJHOME'}/cgi-bin/directorylib.pl";
 # register BML multi-language hook
 BML::register_ml_getter(\&LJ::Lang::get_text);
 
-# open a db connection to force DBI to autoload its driver code before
-# apache forks
-{
-    my ($dsn, $user, $pass) = split(/\|/, $LJ::DBIRole->make_dbh_fdsn($LJ::DBINFO{'master'}));
-    my $dbh = DBI->connect($dsn, $user, $pass);
-    my $num = $dbh->selectrow_array("SELECT COUNT(*) FROM stats");
-    $dbh->disconnect;
-}
+# force DBI to autoload its driver code before apache forks
+DBI->install_driver("mysql");
 
 1;
