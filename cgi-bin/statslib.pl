@@ -169,7 +169,7 @@ sub LJ::Stats::get_db {
 # save a given stat to the 'stats' table in the db
 sub LJ::Stats::save_stat {
     my ($cat, $statkey, $val) = @_;
-    return undef unless $cat && $statkey;
+    return undef unless $cat && $statkey && $val;
 
     # replace/insert stats row
     my $dbh = LJ::Stats::get_db("dbh");
@@ -232,6 +232,7 @@ sub LJ::Stats::save_sum {
                             "WHERE statname=? GROUP BY 1");
     $sth->execute($statname);
     while (my ($arg, $count) = $sth->fetchrow_array) {
+        next unless $count;
         LJ::Stats::save_stat($statname, $arg, $count);
     }
 
