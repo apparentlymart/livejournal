@@ -1,29 +1,26 @@
-var layout_mode = "wide";
+var layout_mode = "thin";
 var sc_old_border_style;
-var column_two_rows = new Array();
 var shift_init = "true";
 
 function shift_contents() {
-    if (! document.getElementById) return false;
-    var infobox = document.getElementById('infobox');
-    var column_one = document.getElementById('column_one_td');
-    var column_two = document.getElementById('column_two_td');
-    var column_one_table = document.getElementById('column_one_table');
+    if (! document.getElementById) { return false; }
+    var infobox = document.getElementById("infobox");
+    var column_one = document.getElementById("column_one_td");
+    var column_two = document.getElementById("column_two_td");
+    var column_one_table = document.getElementById("column_one_table");
     var column_two_table = document.getElementById("column_two_table");
 
+    var shifting_rows = new Array();
+
     if (shift_init == "true") {
-        column_two_rows[0] = document.getElementById('backdate_row');
-        column_two_rows[1] = document.getElementById('comment_settings_row');
-        column_two_rows[2] = document.getElementById('comment_screen_settings_row');
-        if (document.getElementById('userpic_list_row') != null) {
-            column_two_rows[3] = document.getElementById('userpic_list_row');
-        }
         shift_init = "false";
+        bsMacIE5Fix = document.createElement("tr");
+        bsMacIE5Fix.style.display = "none";
     }
 
     var width;
     if (self.innerWidth) {       
-	width = self.innerWidth;
+        width = self.innerWidth;
     } else if (document.documentElement && document.documentElement.clientWidth) {
 	width = document.documentElement.clientWidth;
     } else if (document.body) {
@@ -31,28 +28,38 @@ function shift_contents() {
     }
 
     if (width < 1000) {
-        if (layout_mode == "thin") { return; }
+        if (layout_mode == "thin" && shift_init == "true") { return true; }
+
         layout_mode = "thin";
         sc_old_border_style = column_one.style.borderRight;
         column_one.style.borderRight = "0";
         column_two.style.display = "none";
-        
+
         infobox.style.display = "none";
-        for (var i = 0;  i < column_two_rows.length; i++) {
-            column_one_table.lastChild.appendChild(column_two_rows[i]);        
+        column_two_table.lastChild.appendChild(bsMacIE5Fix);
+
+        column_one_table.lastChild.appendChild(document.getElementById("backdate_row"));
+        column_one_table.lastChild.appendChild(document.getElementById("comment_settings_row"));
+        column_one_table.lastChild.appendChild(document.getElementById("comment_screen_settings_row"));
+        if (document.getElementById("userpic_list_row")) {
+            column_one_table.lastChild.appendChild(document.getElementById("userpic_list_row"));
         }
     } else {
-        if (layout_mode == "wide") { return; }
+        if (layout_mode == "wide") { return false; }
         layout_mode = "wide";
         column_one.style.borderRight = sc_old_border_style;
         column_two.style.display = "block";
         
         infobox.style.display = "block";
-        for (var i = 0;  i < column_two_rows.length; i++) {
-            column_two_table.lastChild.appendChild(column_two_rows[i]);
+        column_one_table.lastChild.appendChild(bsMacIE5Fix);
+
+        column_two_table.lastChild.appendChild(document.getElementById("backdate_row"));
+        column_two_table.lastChild.appendChild(document.getElementById("comment_settings_row"));
+        column_two_table.lastChild.appendChild(document.getElementById("comment_screen_settings_row"));
+        if (document.getElementById("userpic_list_row")) {
+            column_two_table.lastChild.appendChild(document.getElementById("userpic_list_row"));
         }
     }
-    return;
 }
 
 function enable_rte () {
