@@ -1,0 +1,59 @@
+(=_CODE
+
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+
+ my $remote = LJ::get_remote($dbs);
+ unless (LJ::check_priv($dbs, $remote, "historyview")) {
+     return "Sorry, you don't have access to view this page.";
+ }
+
+ my $where;
+ if ($FORM{'user'} ne "") {
+     my $userid = LJ::get_userid($dbs, $FORM{'user'});
+     unless ($userid) { return "unknown user"; }
+     $where .= "s.userid=$userid AND ";
+ }
+
+ if ($FORM{'admin'} ne "") {
+     my $userid = LJ::get_userid($dbs, $FORM{'admin'});
+     unless ($userid) { return "unknown admin"; }
+     $where .= "s.adminid=$userid AND ";
+ }
+
+ if ($FORM{'type'} ne "") {
+     my $qt = $dbh->quote($FORM{'type'});
+     $where .= "s.shtype=$qt AND ";
+ }
+
+ unless ($where) {
+     return <<'FORM';
+Fill in 1-3 fields:<br>
+<form method=get>
+User: <input name='user' size=15> 
+Admin: <input name='admin' size=15> 
+Type: <input name='type' size=15>
+<input type=submit value='Search'>
+</form>
+FORM
+}
+
+ $sth = $dbr->prepare("SELECT u.user, ua.user, s.shtype, s.shdate, s.notes FROM statushistory s, useridmap u, useridmap ua WHERE $where s.adminid=ua.userid AND s.userid=u.userid");
+ $sth->execute;
+ return $dbh->errstr if $dbh->err;
+ 
+ my $ret;
+ $ret .= "<table border=1 cellpadding=2>";
+ $ret .= "<tr>";
+ $ret .= join('', map { "<th>$_</th>" } qw(userid admin shtype shdate notes));
+ $ret .= "</tr>";
+ while (my @r = $sth->fetchrow_array) {
+     $ret .= "<tr>";
+     $ret .= join('', map { "<td>$_</td>" } @r);
+     $ret .= "</tr>";
+ }
+ $ret .= "</table>";
+ return $ret;
+
+_CODE=)

@@ -339,6 +339,33 @@ sub register_authaction
     }
 }
 
+# <LJFUNC>
+# name: LJ::statushistory_add
+# des: Adds a row to a user's statushistory
+# returns: boolean; 1 on success, 0 on failure
+# args: dbarg, userid, adminid, shtype, notes
+# des-userid: The user getting acted on.
+# des-adminid: The site admin doing the action.
+# des-shtype: The status history type code.
+# des-notes: Optional notes associated with this action.
+# </LJFUNC>
+sub statushistory_add
+{
+    my $dbarg = shift;
+    my $dbs = LJ::make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+
+    my $userid = shift;  $userid += 0;
+    my $actid  = shift;  $actid  += 0;
+
+    my $qshtype = $dbh->quote(shift);
+    my $qnotes  = $dbh->quote(shift);
+    
+    $dbh->do("INSERT INTO statushistory (userid, adminid, shtype, notes) ".
+	     "VALUES ($userid, $actid, $qshtype, $qnotes)");
+    return $dbh->err ? 0 : 1;
+}
+
 sub make_link
 {
     my $url = shift;

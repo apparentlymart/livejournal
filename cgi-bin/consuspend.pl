@@ -4,6 +4,7 @@
 package LJ::Con;
 
 $cmd{'suspend'}->{'handler'} = \&suspend;
+$cmd{'unsuspend'}->{'handler'} = \&suspend;
 $cmd{'getemail'}->{'handler'} = \&getemail;
 
 sub suspend
@@ -11,37 +12,37 @@ sub suspend
     my ($dbh, $remote, $args, $out) = @_;
     my $error = 0;
 
-    unless (scalar(@$args) == 2 || scalar(@$args) == 3) {
+    unless (scalar(@$args) == 3) {
 	$error = 1;
-	push @$out, [ "error", "This command takes exactly 1 or 2 arguments.  Consult the reference." ];
+	push @$out, [ "error", "This command takes exactly 2 arguments.  Consult the reference." ];
     }
     
     return 0 if ($error);
 
-    my ($user, $off) = ($args->[1], $args->[2]);
-    my $userid = &LJ::get_userid($dbh, $user);
-
-    unless ($off eq "" || $off eq "off") {
+    my $cmd = $args->[0];
+    my ($user, $reason) = ($args->[1], $args->[2]);
+    my $userid = LJ::get_userid($dbh, $user);
+    if ($cmd eq "suspend" && $reason eq "off") {
 	$error = 1;
-	push @$out, [ "error", "Final parameter must either be blank, or 'off'" ];
+	push @$out, [ "error", "The second argument to the 'suspend' command is no longer 'off' to unsuspend.  Use the 'unsuspend' command instead." ];
     }
     unless ($userid) {
 	$error = 1;
 	push @$out, [ "error", "Invalid user \"$user\"" ];
     }
-    
     unless ($remote->{'priv'}->{'suspend'}) {
 	$error = 1;
-	push @$out, [ "error", "You don't have access to suspend users." ];
+	push @$out, [ "error", "You don't have access to $cmd users." ];
     }
     
-    return 0 if ($error);    
+    return 0 if ($error);
     
-    my $status = $off ? "V" : "S";
+    my $status = ($cmd eq "unsuspend") ? "V" : "S";
     $dbh->do("UPDATE user SET statusvis='$status', statusvisdate=NOW() WHERE userid=$userid AND statusvis<>'$status'");
 
-    my $verb = $off ? "unsuspended" : "suspended";
-    push @$out, [ "info", "User \"$user\" $verb" ];
+    LJ::statushistory_add($dbh, $userid, $remote->{'userid'}, $cmd, $reason);
+
+    push @$out, [ "info", "User ${cmd}ed." ];
 
     return 1;
 }

@@ -222,14 +222,25 @@ $cmd{'community'} = {
 	       ],
     };
 
+$cmd{'unsuspend'} = {
+    'def' => 'consuspend.pl',
+    'privs' => [qw(suspend)],
+    'des' => 'Suspend a user\'s account.',
+    'argsummary' => '<user> <reason>',
+    'args' => [
+	       'user' => "The username of the person to suspend.",
+	       'reason' => "Why you're suspending the account.",
+	       ],
+    };
+
 $cmd{'suspend'} = {
     'def' => 'consuspend.pl',
     'privs' => [qw(suspend)],
-    'des' => 'Suspend or unsuspend a user\'s account.',
-    'argsummary' => '<user> ["off"]',
+    'des' => 'Unsuspend a user\'s account.',
+    'argsummary' => '<user> <reason>',
     'args' => [
-	       'user' => "The username of the person to suspend or unsuspend.",
-	       'off' => "If you add the word 'off' after the username, you unsuspend that user's account",
+	       'user' => "The username of the person to unsuspend.",
+	       'reason' => "Why you're unsuspending the account.",
 	       ],
     };
 

@@ -64,9 +64,18 @@
 	 foreach my $key (keys %FORM) {
 	     if ($key =~ /^revoke:(\d+):(\d+)$/) {
 		 my $prmid = $1;
-		 my $del_userid = $2;
-		 $dbh->do("DELETE FROM priv_map WHERE prmid=$prmid AND userid=$del_userid");
-		 $ret .= "Privilege removed.<BR>\n";
+		 my $del_userid1 = $2;
+		 my $sth = $dbh->prepare("SELECT userid, prlid, arg FROM priv_map WHERE prmid=$prmid");
+		 $sth->execute;
+		 my ($del_userid2, $prlid, $arg) = $sth->fetchrow_array;
+		 if ($del_userid1 && $del_userid1 == $del_userid2) 
+		 {
+		     $dbh->do("DELETE FROM priv_map WHERE prmid=$prmid");
+		     my $privcode = $priv{$prlid}->{'privcode'};
+		     LJ::statushistory_add($dbh, $userid, $remote->{'userid'}, "privdel", 
+					   "Denying: \"$privcode\" with arg \"$arg\"");
+		     $ret .= "Privilege removed.<BR>\n";
+		 }
 	     }
 	 }
 	 if ($FORM{'grantpriv'}) {
@@ -76,6 +85,7 @@
 		 if ($access{'all'} || $access{$privcode}) {
 		     my $qarg = $dbh->quote($FORM{'arg'});
 		     $dbh->do("INSERT INTO priv_map (prmid, userid, prlid, arg) VALUES (NULL, $userid, $qpriv, $qarg)");
+		     LJ::statushistory_add($dbh, $userid, $remote->{'userid'}, "privadd", "Granting: \"$privcode\" with arg \"$FORM{'arg'}\"");
 		     $ret .= "Privilege <B>$privcode</B> granted.<BR>\n";
 		 } else {
 		     $ret .= "You no longer have access to grant <B>$privcode</B>.<BR>\n";

@@ -1027,6 +1027,20 @@ CREATE TABLE meme (
 )
 EOC
 
+register_tablecreate("statushistory", <<'EOC');
+CREATE TABLE statushistory (
+  userid    INT UNSIGNED NOT NULL,
+  adminid   INT UNSIGNED NOT NULL,
+  shtype    VARCHAR(20) NOT NULL,
+  shdate    TIMESTAMP NOT NULL,
+  notes     TEXT,
+  INDEX (userid, shdate),
+  INDEX (adminid, shdate),
+  INDEX (adminid, shtype, shdate),
+  INDEX (shtype, shdate)
+)
+EOC
+
 ### changes
 
 register_alter(sub {
