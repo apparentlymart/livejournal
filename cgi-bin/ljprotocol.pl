@@ -2063,19 +2063,22 @@ sub list_pickws
     my $u = shift;
 
     my $dbr = $dbs->{'reader'};
-    my $res = [];
+    my @res;
 
     my $sth = $dbr->prepare("SELECT k.keyword, m.picid, p.state " .
                             "FROM userpicmap m, keywords k, userpic p ".
-                            "WHERE m.userid=? AND m.kwid=k.kwid AND m.picid=p.picid ".
-                            "ORDER BY k.keyword");
+                            "WHERE m.userid=? AND m.kwid=k.kwid AND m.picid=p.picid");
     $sth->execute($u->{'userid'});
     while (my ($kw, $id, $state) = $sth->fetchrow_array) {
         next if $state eq 'I';
         $kw =~ s/[\n\r\0]//g;  # used to be a bug that allowed these characters to get in.
-        push @$res, [ $kw, $id ];
+        push @res, [ $kw, $id ];
     }
-    return $res;
+
+    # FIXME: should be a utf-8 sort:
+    @res = sort { $a->[0] cmp $b->[0] } @res;
+
+    return \@res;
 }
 
 sub list_moods
