@@ -8,7 +8,7 @@ code=>0
 file=>support-currentproblems
 _include?>
 
-<p>From here you can ask a question about LiveJournal.  Make sure you've already checked the <A HREF="faq.bml"><B>Frequently Asked Questions</B></A>.
+<p>From here you can ask a question about <?_code return $LJ::SITENAMESHORT; _code?>.  Make sure you've already checked the <A HREF="faq.bml"><B>Frequently Asked Questions</B></A>.
 
 <FORM METHOD=POST ACTION="submit_do.bml">
 
@@ -37,7 +37,7 @@ _include?>
 <P><B>Your name:</B><BR>
 <INPUT NAME="reqname" SIZE=40 MAXLENGTH=50 VALUE=\"$eh{'name'}\">
 
-<P><B>Are you a LiveJournal user?</B><BR>
+<P><B>Are you a $LJ::SITENAMESHORT user?</B><BR>
 <TABLE>
 <TR VALIGN=TOP>
 <TD ROWSPAN=2><INPUT TYPE="radio" NAME="reqtype" VALUE="user" CHECKED></TD><TD>Yes.</TD></TR>
@@ -74,7 +74,7 @@ Enter a descriptive one-line summary of the problem you're having.  A good examp
 </UL>
 
 <P><B>Problem</B><BR>
-And finally, enter your support request.  If you want an intelligent fast answer, please <B>provide as much detail as possible</B>.  The only rule is do <B>NOT GIVE OUT YOUR PASSWORD</B> because many people could read this request, not just LiveJournal staff.
+And finally, enter your support request.  If you want an intelligent fast answer, please <B>provide as much detail as possible</B>.  The only rule is do <B>NOT GIVE OUT YOUR PASSWORD</B> because many people could read this request, not just <?_code return $LJ::SITENAMESHORT; _code?> staff.
 <UL>
 <TEXTAREA NAME="message" ROWS=20 COLS=50 WRAP=SOFT></TEXTAREA>
 </UL>
