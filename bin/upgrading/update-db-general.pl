@@ -788,6 +788,7 @@ register_tablecreate("user", <<'EOC');
 CREATE TABLE user (
   userid int(10) unsigned NOT NULL auto_increment,
   user char(15) default NULL,
+  caps SMALLINT UNSIGNED NOT NULL DEFAULT 0,
   email char(50) default NULL,
   password char(30) default NULL,
   status char(1) NOT NULL default 'N',
@@ -1113,10 +1114,10 @@ register_alter(sub {
 	do_alter("user",
 		 "ALTER TABLE user ADD ".
 		 "caps SMALLINT UNSIGNED NOT NULL DEFAULT 0 AFTER user");
-	do_sql("UPDATE user SET caps=16 WHERE paidfeatures='on'");
-	do_sql("UPDATE user SET caps=8  WHERE paidfeatures='paid'");
-	do_sql("UPDATE user SET caps=4  WHERE paidfeatures='early'");
-	do_sql("UPDATE user SET caps=2  WHERE paidfeatures='off'");
+	try_sql("UPDATE user SET caps=16 WHERE paidfeatures='on'");
+	try_sql("UPDATE user SET caps=8  WHERE paidfeatures='paid'");
+	try_sql("UPDATE user SET caps=4  WHERE paidfeatures='early'");
+	try_sql("UPDATE user SET caps=2  WHERE paidfeatures='off'");
     }
 
     # axe this column (and its two related ones) if it exists.
