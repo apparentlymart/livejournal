@@ -28,7 +28,7 @@
 
  {
      my $where = $userid ? "userid=$userid" : "user=$quser";
-     $sth = $dbh->prepare("SELECT userid, user, statusvis, paidfeatures, has_bio, name, defaultpicid, txtmsg_status, allow_infoshow, bdate, allow_contactshow, opt_mangleemail, email, paiduntil, timecreate, timeupdate, journaltype, statusvis, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(timeupdate) AS 'secondsold' FROM user WHERE $where");
+     $sth = $dbh->prepare("SELECT userid, user, statusvis, paidfeatures, has_bio, name, defaultpicid, txtmsg_status, allow_infoshow, bdate, allow_contactshow, opt_mangleemail, email, paiduntil, timecreate, timeupdate, journaltype, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(timeupdate) AS 'secondsold' FROM user WHERE $where");
      $sth->execute;
      if ($dbh->err) { return $dbh->errstr; }
  }
