@@ -435,8 +435,16 @@ sub providers
 
 sub provider_info
 {
-    my $provider = shift;
+    my $provider = remap(shift);
     return { %{$providers{$provider}} };
+}
+
+sub remap {
+    my $provider = shift;
+    return "o2mmail" if $provider eq "btcellnet";
+    return "tmobile" if $provider eq "one2one";
+    return "voicestream" if $provider eq "voicestream2";
+    return $provider;
 }
 
 sub new {
@@ -452,7 +460,7 @@ sub init {
     my $self = shift;
     my $args = shift;
     $self->{'sendmail'} = $args->{'mailcommand'} || $SENDMAIL;
-    $self->{'provider'} = $args->{'provider'};
+    $self->{'provider'} = remap($args->{'provider'});
     $self->{'number'} = $args->{'number'};
 }
  
