@@ -344,8 +344,10 @@ sub common_event_validation
 	my $p = LJ::get_prop("log", $pname);
 
 	# does the property even exist?
-	return fail($err,205,"Unknown property")
-	    unless $p;
+	unless ($p) {
+	    $pname =~ s/[^\w]//g;
+	    return fail($err,205,$pname);
+	}
 
 	# don't validate its type if it's 0 or undef (deleting)
 	next unless ($req->{'props'}->{$pname}); 
