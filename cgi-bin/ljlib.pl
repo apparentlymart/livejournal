@@ -395,7 +395,7 @@ sub get_recent_items
     if ($clusterid) {
 	$sql = ("SELECT jitemid AS 'itemid', posterid, security, replycount, $extra_sql ".
 		"DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i ".
-		"%l %h %k %H\") AS 'alldatepart' ".
+		"%l %h %k %H\") AS 'alldatepart', anum ".
 		"FROM log2 WHERE journalid=$userid AND $sort_key <= $notafter $secwhere ".
 		"ORDER BY journalid, $sort_key ".
 		"LIMIT $skip,$itemshow");

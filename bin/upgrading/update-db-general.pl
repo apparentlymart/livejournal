@@ -971,6 +971,7 @@ CREATE TABLE log2 (
   eventtime datetime default NULL,
   logtime datetime default NULL,
   compressed char(1) NOT NULL default 'N',
+  anum TINYINT UNSIGNED NOT NULL,
   security enum('public','private','usemask') NOT NULL default 'public',
   allowmask int(10) unsigned NOT NULL default '0',
   replycount smallint(5) unsigned default NULL,

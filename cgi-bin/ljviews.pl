@@ -201,12 +201,12 @@ sub create_view_lastn
 	    ) 
 	{
 	    my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&amp;" : "";
-	    
+	    my $ditemid = $u->{'clusterid'} ? ($itemid * 256 + $item->{'anum'}) : $itemid;
 	    $lastn_event{'talklinks'} = LJ::fill_var_props($vars, 'LASTN_TALK_LINKS', {
-		'itemid' => $itemid,
-		'urlpost' => "$LJ::SITEROOT/talkpost.bml?${jarg}itemid=$itemid",
+		'itemid' => $ditemid,
+		'urlpost' => "$LJ::SITEROOT/talkpost.bml?${jarg}itemid=$ditemid",
 		'readlink' => $replycount ? LJ::fill_var_props($vars, 'LASTN_TALK_READLINK', {
-		    'urlread' => "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$itemid&amp;nc=$replycount",
+		    'urlread' => "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid&amp;nc=$replycount",
 		    'messagecount' => $replycount,
 		    'mc-plural-s' => $replycount == 1 ? "" : "s",
 		    'mc-plural-es' => $replycount == 1 ? "" : "es",
@@ -699,12 +699,13 @@ sub create_view_friends
 	    ! $logprops{$datakey}->{'opt_nocomments'}
 	    ) {
 	    my $jarg = $clusterid ? "journal=$friend&amp;" : "";
+	    my $ditemid = $clusterid ? ($itemid * 256 + $item->{'anum'}) : $itemid;
 
 	    $friends_event{'talklinks'} = LJ::fill_var_props($vars, 'FRIENDS_TALK_LINKS', {
-		'itemid' => $itemid,
-		'urlpost' => "$LJ::SITEROOT/talkpost.bml?${jarg}itemid=$itemid",
+		'itemid' => $ditemid,
+		'urlpost' => "$LJ::SITEROOT/talkpost.bml?${jarg}itemid=$ditemid",
 		'readlink' => $replycount ? LJ::fill_var_props($vars, 'FRIENDS_TALK_READLINK', {
-		    'urlread' => "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$itemid&amp;nc=$replycount",
+		    'urlread' => "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid&amp;nc=$replycount",
 		    'messagecount' => $replycount,
 		    'mc-plural-s' => $replycount==1 ? "" : "s",
 		    'mc-plural-es' => $replycount == 1 ? "" : "es",
@@ -1145,14 +1146,14 @@ sub create_view_day
 
     # load the log items
     if ($u->{'clusterid'}) {
-	$sth = $logdb->prepare("SELECT jitemid, security, replycount, DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H\") AS 'alldatepart' FROM log2 WHERE journalid=$u->{'userid'} AND jitemid IN ($itemid_in) ORDER BY eventtime $optDESC, logtime $optDESC");
+	$sth = $logdb->prepare("SELECT jitemid, security, replycount, DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H\") AS 'alldatepart', anum FROM log2 WHERE journalid=$u->{'userid'} AND jitemid IN ($itemid_in) ORDER BY eventtime $optDESC, logtime $optDESC");
     } else {
 	$sth = $dbr->prepare("SELECT itemid, security, replycount, DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H\") AS 'alldatepart' FROM log WHERE itemid IN ($itemid_in) ORDER BY eventtime $optDESC, logtime $optDESC");
     }
     $sth->execute;
 
     my $events = "";
-    while (my ($itemid, $security, $replycount, $alldatepart) = $sth->fetchrow_array)
+    while (my ($itemid, $security, $replycount, $alldatepart, $anum) = $sth->fetchrow_array)
     {
 	my $subject = $logtext->{$itemid}->[0];
 	my $event = $logtext->{$itemid}->[1];
@@ -1209,12 +1210,13 @@ sub create_view_day
 	    ! $logprops{$itemid}->{'opt_nocomments'}
 	    ) {
 	    my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&amp;" : "";
+	    my $ditemid = $u->{'clusterid'} ? ($itemid*256 + $anum) : $itemid;
 
 	    $day_event{'talklinks'} = LJ::fill_var_props($vars, 'DAY_TALK_LINKS', {
-		'itemid' => $itemid,
-		'urlpost' => "$LJ::SITEROOT/talkpost.bml?${jarg}itemid=$itemid",
+		'itemid' => $ditemid,
+		'urlpost' => "$LJ::SITEROOT/talkpost.bml?${jarg}itemid=$ditemid",
 		'readlink' => $replycount ? LJ::fill_var_props($vars, 'DAY_TALK_READLINK', {
-		    'urlread' => "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$itemid&amp;nc=$replycount",
+		    'urlread' => "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid&amp;nc=$replycount",
 		    'messagecount' => $replycount,
 		    'mc-plural-s' => $replycount==1 ? "" : "s",
 		    'mc-plural-es' => $replycount == 1 ? "" : "es",

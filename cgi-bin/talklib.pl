@@ -120,11 +120,18 @@ sub init
     $init->{'itemid'} = $form->{'itemid'}+0;
     $init->{'clustered'} = 0;
     $init->{'replyto'} = $form->{'replyto'}+0;
+    $init->{'ditemid'} = $init->{'itemid'};
     
     if ($journal) {
 	# they specified a journal argument, which indicates new style.
 	$ju = LJ::load_user($dbs, $journal);
 	$init->{'clustered'} = 1;
+	foreach (qw(itemid replyto)) {
+	    next unless $init->{$_};
+	    $init->{'anum'} = $init->{$_} % 256;
+	    $init->{$_} = int($init->{$_} / 256);
+	    last;
+	}
     } else {
 	# perhaps it's an old URL for a user that's since been clustered.
 	# look up the itemid and see what user it belongs to.
@@ -193,7 +200,7 @@ sub get_journal_item
     my $sql;
     if ($clustered) {
 	$sql = "SELECT journalid AS 'ownerid', posterid, eventtime, security, allowmask, ".
-	    "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(logtime) AS 'secondsold' ".
+	    "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(logtime) AS 'secondsold', anum ".
 	    "FROM log2 WHERE journalid=$u->{'userid'} AND jitemid=$itemid";
     } else {
 	$sql = "SELECT ownerid, posterid, eventtime, security, allowmask, ".

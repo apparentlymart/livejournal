@@ -47,12 +47,15 @@ BODY<=
  my $ret = "";
 
  my $itemid = $init->{'itemid'}+0;
+ my $ditemid = $init->{'ditemid'}+0;
  my $page = int($FORM{'page'}) || 1;
  my $thread = int($FORM{'thread'}) || 0;
 
  my $item = LJ::Talk::get_journal_item($dbcs, $u, $itemid);
- return "(=H1 Error H1=)(=P No such entry. (itemid = $itemid) P=)" unless $item;
- 
+ unless ($item && $item->{'anum'} == $init->{'anum'}) {
+     return "(=H1 Error H1=)(=P No such entry. P=)";
+ }
+
  ### load the log properties
  my %logprops = ();
  if ($clustered) {
@@ -116,7 +119,7 @@ BODY<=
 
  ## standout bar
  $ret .= LJ::Talk::link_bar($dbs, { 'u' => $u, 'up' => $up, 'headref' => \$head,
-				    'remote' => $remote, 'itemid' => $itemid, });
+				    'remote' => $remote, 'itemid' => $ditemid, });
 
  ## dump the log entry, unless we're browsing a thread.
  unless ($thread)
@@ -314,6 +317,10 @@ BODY<=
 	 push @pics_to_load, $_->{'defaultpicid'} if $_->{'defaultpicid'};
      }
      LJ::load_userpics($dbs, \%userpics, [ @pics_to_load ]);     
+
+     use Data::Dumper;
+#     return "<pre>" . Dumper([ \%users_to_load, \%userpics, \@pics_to_load ]) . "</pre>";
+
  }
  
  ########## make the navcrap
@@ -342,14 +349,14 @@ BODY<=
  }
 
  unless ($logprops{$itemid}->{'opt_nocomments'} or $u->{'opt_showtalklinks'} eq "N") {
-     $ret .= "<center><b><a href='talkpost.bml?${jargent}itemid=$itemid'>(Post a new comment)</a></b></center>";
+     $ret .= "<center><b><a href='talkpost.bml?${jargent}itemid=$ditemid'>(Post a new comment)</a></b></center>";
 
      if ($post_count > 0) 
      {
 	 recurse_post(\%posts, \$ret, $thread, {}, { "newfirst" => 0, 
 						     "children" => \%children,  
 						 });
-	 $ret .= "<p><hr /><center><b><a href='talkpost.bml?${jargent}itemid=$itemid'>(Post a new comment)</a></b></center></p>";
+	 $ret .= "<p><hr /><center><b><a href='talkpost.bml?${jargent}itemid=$ditemid'>(Post a new comment)</a></b></center></p>";
      }
 	 
      if ($navcrap) {
@@ -450,7 +457,8 @@ sub recurse_post
 		if ($post->{'poster_ip'} && $remote && $remote->{'user'} eq $up->{'user'}) {
 		    $$ret .= "(from $post->{'poster_ip'})";
 		}
-		$$ret .= " <font size='-1'>(<a href='$SELF?${jargent}itemid=$itemid&amp;thread=$tid#t$tid'>link</a>)</font> ";
+
+		$$ret .= " <font size='-1'>(<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$tid#t$tid'>link</a>)</font> ";
 		
 		if ($remote && ($remote->{'user'} eq $userpost ||
 				$remote->{'user'} eq $u->{'user'} ||
@@ -475,7 +483,9 @@ sub recurse_post
 		if (defined $opts->{'children'}->{$tid} && $post_count >= $PAGE_SIZE) {
 		    $$ret .= "<a href='$SELF?${jargent}itemid=$itemid&amp;thread=$tid'>(Thread)</a> ";
 		}
-		$$ret .= "<a href='/talkpost.bml?${jargent}replyto=$tid'>(Reply to this)</a></font>";
+		
+		my $dtid = $clustered ? ($tid * 256 + $init->{'anum'}) : $tid;
+		$$ret .= "<a href='/talkpost.bml?${jargent}replyto=$dtid'>(Reply to this)</a></font>";
 		$$ret .= "</td></tr></table>\n";  # close colored table
 	    } else {
 		# link to message

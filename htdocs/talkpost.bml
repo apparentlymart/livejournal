@@ -87,6 +87,7 @@ BODY<=
  }
 
  my $itemid = $init->{'itemid'};
+ my $ditemid = $init->{'ditemid'};
 
  ### load the log properties
  my %logprops;
@@ -107,7 +108,9 @@ BODY<=
 
  ## load the journal item
  my $item = LJ::Talk::get_journal_item($dbcs, $u, $itemid);
- return "(=H1 Error H1=)(=P No such entry. (itemid = $itemid) P=)" unless $item;
+ unless ($item && $item->{'anum'} == $init->{'anum'}) {
+     return "(=H1 Error H1=)(=P No such entry. P=)";
+ }
 
  $parpost ||= $item;  # if there's no parent post, remote is reply to top-level item
 
@@ -171,11 +174,11 @@ BODY<=
  } else {
      $ret .= "Someone wrote,";
  }
- if ($init->{'replyto'} eq "" && $up != $u) {
+ if (! $init->{'replyto'} && $up->{'userid'} != $u->{'userid'}) {
      $ret .= " in (=LJCOMM $u->{'user'} LJCOMM=),";
  }
 
- if ($init->{'replyto'} eq "") {
+ unless ($init->{'replyto'}) {
      my $etime = $item->{'eventtime'};
      $etime =~ s!(\d\d\d\d)-(\d\d)-(\d\d)!LJ::date_to_view_links($u, $&)!e;
      $ret .= "<br /><font size='-1'>@ $etime</font>";
@@ -214,7 +217,7 @@ BODY<=
  $ret .= "<UL>";
  
  ### currents
- if ($init->{'replyto'} eq "" && %current) 
+ if (! $init->{'replyto'} && %current) 
  {
      $ret .= "<table border=0>\n";
      foreach (sort keys %current) {
@@ -239,7 +242,7 @@ BODY<=
  $ret .= LJ::Talk::topic_links($dbs, $u, $itemid) unless $init->{'replyto'};
  
  my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&" : "";
- $ret .= "<center><b><a href=\"talkread.bml?${jarg}itemid=$itemid\">(Read comments)</a></b></center>";
+ $ret .= "<center><b><a href=\"talkread.bml?${jarg}itemid=$ditemid\">(Read comments)</a></b></center>";
  
  # can a comment even be made?
  if ($logprops{$itemid}->{'opt_nocomments'}) {
@@ -259,7 +262,7 @@ BODY<=
  # hidden values
  my $parent = int($init->{'replyto'}+0);
  $ret .= "<input type='hidden' name='parenttalkid' value='$parent'>\n";
- $ret .= "<input type='hidden' name='itemid' value='$itemid'>\n";
+ $ret .= "<input type='hidden' name='itemid' value='$ditemid'>\n";
  if ($clustered) {
      $ret .= "<input type='hidden' name='journal' value='$u->{'user'}'>\n";
  }

@@ -468,19 +468,25 @@ sub postevent
     }
 
     my $dbcm = $dbh;
-    my ($table, $ownercol) = ("log", "ownerid");
     my $clustered = 0;
+    my $anum  = int(rand(256));
+
     if ($uowner->{'clusterid'}) {
 	$dbcm = LJ::get_cluster_master($uowner);
-	($table, $ownercol) = ("log2", "journalid");
 	$clustered = 1;
-    }
 
-    $dbcm->do("INSERT INTO $table ($ownercol, posterid, eventtime, logtime, security, ".
-	      "allowmask, replycount, year, month, day, revttime, rlogtime) ".
-	      "VALUES ($qownerid, $qposterid, $qeventtime, NOW(), $qsecurity, $qallowmask, ".
-	      "0, $req->{'year'}, $req->{'mon'}, $req->{'day'}, $LJ::EndOfTime-".
-	      "UNIX_TIMESTAMP($qeventtime), $rlogtime)");
+	$dbcm->do("INSERT INTO log2 (journalid, posterid, eventtime, logtime, security, ".
+		  "allowmask, replycount, year, month, day, revttime, rlogtime, anum) ".
+		  "VALUES ($qownerid, $qposterid, $qeventtime, NOW(), $qsecurity, $qallowmask, ".
+		  "0, $req->{'year'}, $req->{'mon'}, $req->{'day'}, $LJ::EndOfTime-".
+		  "UNIX_TIMESTAMP($qeventtime), $rlogtime, $anum)");
+    } else {
+	$dbcm->do("INSERT INTO log (ownerid, posterid, eventtime, logtime, security, ".
+		  "allowmask, replycount, year, month, day, revttime, rlogtime) ".
+		  "VALUES ($qownerid, $qposterid, $qeventtime, NOW(), $qsecurity, $qallowmask, ".
+		  "0, $req->{'year'}, $req->{'mon'}, $req->{'day'}, $LJ::EndOfTime-".
+		  "UNIX_TIMESTAMP($qeventtime), $rlogtime)");
+    }
     return fail($err,501,$dbcm->errstr) if $dbcm->err;
 
     my $itemid = $dbcm->{'mysql_insertid'};

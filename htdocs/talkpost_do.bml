@@ -46,8 +46,11 @@ BODY<=
 
  # start quoting shit to insert
  my $itemid = $init->{'itemid'}+0;
+ my $ditemid = $init->{'ditemid'}+0;
  my $item = LJ::Talk::get_journal_item($dbcs, $u, $itemid);
- return "(=H1 Error H1=)(=P No such entry. (itemid = $itemid) P=)" unless $item;
+ unless ($item && $item->{'anum'} == $init->{'anum'}) {
+     return "(=H1 Error H1=)(=P No such entry. P=)";
+ }
 
  my %logprops;
  if ($clustered) {
@@ -454,7 +457,7 @@ BODY<=
                  $text .= "\n\nTheir reply was:\n\n";
                  $text .= &indent("Subject: $cleansubject\n\n$FORM{'body'}");
                  $text .= "\n\nYou can view the discussion and reply here:\n\n";
-                 $text .= "     $LJ::SITEROOT/talkread.bml?${jarg}itemid=$itemid\n\n";
+                 $text .= "     $LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid\n\n";
                  $text .= "-- $LJ::SITENAME\n\n";
                  $msg->attach('Type' => 'TEXT',
                               'Data' => $text,
@@ -463,7 +466,7 @@ BODY<=
 
                  my $html = "";
                  $html .= "<BODY BGCOLOR=#EFEFFF TEXT=#000000 LINK=#0000FF VLINK=#A000C0>";
-                 $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$itemid\">your LiveJournal comment</A> in which you said:</TD></TR></TABLE>\n\n";
+                 $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid\">your LiveJournal comment</A> in which you said:</TD></TR></TABLE>\n\n";
                  LJ::CleanHTML::clean_comment(\$parbody);
                  $html .= &blockquote($parbody);
                  
@@ -531,7 +534,7 @@ BODY<=
          $text .= "\n\nTheir reply was:\n\n";
          $text .= &indent("Subject: $textsubject\n\n$FORM{'body'}");
          $text .= "\n\nYou can view the discussion and reply here:\n\n";
-         $text .= "     $LJ::SITEROOT/talkread.bml?${jarg}itemid=$itemid\n\n";
+         $text .= "     $LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid\n\n";
          $text .= "-- $LJ::SITENAME\n\n";
          $text .= "(if you'd prefer to not get these updates, go to $LJ::SITEROOT/editinfo.bml and turn off the relevant options)\n";
          $msg->attach('Type' => 'TEXT',
@@ -542,12 +545,12 @@ BODY<=
          my $html = "";
          $html .= "<BODY BGCOLOR=#EFEFFF TEXT=#000000 LINK=#0000FF VLINK=#A000C0>";
          if ($parentcomment)  {
-             $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to another comment somebody left in <A HREF=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$itemid\">your LiveJournal post</A>.  The comment they replied to was:</TD></TR></TABLE>\n";
+             $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to another comment somebody left in <A HREF=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid\">your LiveJournal post</A>.  The comment they replied to was:</TD></TR></TABLE>\n";
              my $cleancom = $parentcomment;
              LJ::CleanHTML::clean_comment(\$cleancom);
              $html .= &blockquote($cleancom);
          } else {
-             $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$itemid\">your LiveJournal post</A> in which you said:</TD></TR></TABLE>\n";
+             $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid\">your LiveJournal post</A> in which you said:</TD></TR></TABLE>\n";
              my $clean = $item->{'event'};
              LJ::CleanHTML::clean_event(\$clean);
              $html .= &blockquote($clean);
@@ -600,7 +603,7 @@ BODY<=
  }
  
  # Yeah, we're done.
- my $commentlink = "<a href='talkread.bml?${jargent}itemid=$itemid&amp;view=$insertid#t$insertid'>here</a>";
+ my $commentlink = "<a href='talkread.bml?${jargent}itemid=$ditemid&amp;view=$insertid#t$insertid'>here</a>";
  $ret .= "(=H1 Success H1=)(=P Your comment has been added.  You can view it $commentlink. P=)";
 
  if ($didlogin) {

@@ -202,9 +202,10 @@ sub movefrom0_logitem
     }
     $dbh->{'RaiseError'} = 1;
     $item->{'jitemid'} = $jitemid;
-    
+    $item->{'anum'} = int(rand(256));
+
     # copy item over:
-    $dbch->do("REPLACE INTO log2 (journalid, jitemid, posterid, eventtime, logtime, compressed, security, allowmask, replycount, year, month, day, rlogtime, revttime) VALUES (" . join(",", map { $dbh->quote($item->{$_}) } qw(ownerid jitemid posterid eventtime logtime compressed security allowmask replycount year month day rlogtime revttime)) . ")");
+    $dbch->do("REPLACE INTO log2 (journalid, jitemid, posterid, eventtime, logtime, compressed, security, allowmask, replycount, year, month, day, rlogtime, revttime, anum) VALUES (" . join(",", map { $dbh->quote($item->{$_}) } qw(ownerid jitemid posterid eventtime logtime compressed security allowmask replycount year month day rlogtime revttime anum)) . ")");
 
     $dbch->do("REPLACE INTO logtext2 (journalid, jitemid, subject, event) VALUES (" . join(",", $userid, $jitemid, map { $dbh->quote($itemtext->{$_}) } qw(subject event)) . ")");
 
@@ -327,9 +328,13 @@ sub movefrom0_talkitem
     # note that poster commented here
     if ($item->{'posterid'}) {
 	my $pub = $logitem->{'security'} eq "public" ? 1 : 0;
-	$dbh->do("INSERT INTO talkleft_xfp (userid, posttime, journalid, nodetype, ".
-		 "nodeid, jtalkid, publicitem) VALUES ($item->{'posterid'}, ".
-		 "UNIX_TIMESTAMP('$item->{'datepost'}'), $userid, 'L', $jitemid, $jtalkid, $pub)");
+	my ($db, $table) = ($dbh, "talkleft_xfp");
+	if ($userid == $item->{'posterid'}) {
+	    ($db, $table) = ($dbch, "talkleft");
+	}
+	$db->do("INSERT INTO $table (userid, posttime, journalid, nodetype, ".
+		"nodeid, jtalkid, publicitem) VALUES ($item->{'posterid'}, ".
+		"UNIX_TIMESTAMP('$item->{'datepost'}'), $userid, 'L', $jitemid, $jtalkid, $pub)");
     }
 }
     
