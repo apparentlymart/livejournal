@@ -637,6 +637,10 @@ sub postevent
     # can't post to deleted/suspended community
     return fail($err,307) unless $uowner->{'statusvis'} eq "V";
 
+    # must have a validated email address to post to a community
+    return fail($err, 155, "You must have an authenticated email address in order to post to another account")
+        unless LJ::u_equals($u, $uowner) || $u->{'status'} eq 'A';
+
     # post content too large
     # NOTE: requires $req->{event} be binary data, but we've already
     # removed the utf-8 flag in the XML-RPC path, and it never gets
@@ -820,8 +824,6 @@ sub postevent
             $req->{'_moderate'}->{'authcode'} = LJ::make_auth_code(15);
             my $fr = $dbcm->quote(Storable::freeze($req));
             return fail($err, 409) if length($fr) > 200_000;
-
-            return fail($err, 155, "You must have an authenticated email address in order to post to moderated communities") unless $u->{'status'} eq 'A';
 
             # store
             my $modid = LJ::alloc_user_counter($uowner, "M");
