@@ -2942,6 +2942,7 @@ sub start_request
     %LJ::REQ_CACHE_USER_ID = ();    # users by id
     $LJ::CACHE_REMOTE = undef;
     $LJ::CACHED_REMOTE = 0;
+    %LJ::REQ_CACHE_REL = ();  # relations from LJ::check_rel()
 
     # we use this to fake out get_remote's perception of what
     # the client's remote IP is, when we transfer cookies between
@@ -5750,12 +5751,16 @@ sub check_rel
     return undef unless $type and $userid and $targetid;
     $userid = LJ::want_userid($userid); 
     $targetid = LJ::want_userid($targetid);
+
+    my $key = "$userid-$targetid-$type";
+    return $LJ::REQ_CACHE_REL{$key} if defined $LJ::REQ_CACHE_REL{$key};
+
     my $dbh = $dbs->{'dbh'};
     my $qtype = $dbh->quote($type);
 
     my $sql = "SELECT COUNT(*) FROM reluser WHERE userid=$userid AND type=$qtype AND targetid=$targetid";
     my $res = LJ::dbs_selectrow_array($dbs, $sql);
-    return $res ? 1 : 0;
+    return $LJ::REQ_CACHE_REL{$key} = ($res ? 1 : 0);
 }
 
 # <LJFUNC>
