@@ -91,7 +91,7 @@
     push @layers, [ $layer->{'type'} => $layer->{'s2lid'} ];
 
     my @layerids = grep { $_ } map { $_->[1] } @layers;
-    S2::load_layers_from_db($dbh, @layerids);
+    LJ::S2::load_layers(@layerids);
     
     my %layerinfo;
 

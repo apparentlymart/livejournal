@@ -1227,11 +1227,27 @@ CREATE TABLE s2checker
 )
 EOC
 
-register_tablecreate("s2compiled", <<'EOC'); # global
+# the original global s2compiled table.  see comment below for new version.
+register_tablecreate("s2compiled", <<'EOC'); # global (compdata is not gzipped)
 CREATE TABLE s2compiled
 (
    s2lid INT UNSIGNED NOT NULL,
    PRIMARY KEY (s2lid),
+   comptime INT UNSIGNED NOT NULL,
+   compdata MEDIUMBLOB
+)
+EOC
+
+# s2compiled2 is only for user S2 layers (not system) and is lazily
+# migrated.  new saves go here.  loads try this table first (unless
+# system) and if miss, then try the s2compiled table on the global.
+register_tablecreate("s2compiled2", <<'EOC'); # clustered (compdata is gzipped)
+CREATE TABLE s2compiled2
+(
+   userid INT UNSIGNED NOT NULL,
+   s2lid INT UNSIGNED NOT NULL,
+   PRIMARY KEY (userid, s2lid),
+
    comptime INT UNSIGNED NOT NULL,
    compdata MEDIUMBLOB
 )

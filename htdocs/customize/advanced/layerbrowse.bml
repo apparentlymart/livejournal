@@ -109,8 +109,8 @@
         unless defined $pub->{$id} || $srcview == 1 ||
                LJ::can_manage($remote, $layer->{'userid'}) ||
                $isadmin;
-    
-    my $rv = S2::load_layers_from_db($dbr, $id);
+
+    LJ::S2::load_layers($id);
     my $s2info = S2::get_layer_all($id);
     my $class = $s2info->{'class'} || {};
 

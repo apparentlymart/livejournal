@@ -196,7 +196,130 @@ sub s2_run
         return 0;
     }
     $cleaner->eof if $cleaner;  # flush any remaining text/tag not yet spit out
-    return 1;    
+    return 1;
+}
+
+# returns hashref { lid => $u }; undef on error
+sub get_layer_owners {
+    my @lids = map { $_ + 0 } @_;
+    return {} unless @lids;
+
+    my $ret = {}; # lid => uid/$u
+    my %need = ( map { $_ => 1 } @lids ); # layerid => 1
+
+    # see what we can get out of memcache first
+    my @keys;
+    push @keys, [ $_, "s2lo:$_" ] foreach @lids;
+    my $memc = LJ::MemCache::get_multi(@keys);
+    foreach my $lid (@lids) {
+        if (my $uid = $memc->{"s2lo:$lid"}) {
+            delete $need{$lid};
+            $ret->{$lid} = $uid;
+        }
+    }
+
+    # if we still need any from the database, get them now
+    if (%need) {
+        my $dbh = LJ::get_db_writer();
+        my $in = join(',', keys %need);
+        my $res = $dbh->selectall_arrayref("SELECT s2lid, userid FROM s2layers WHERE s2lid IN ($in)");
+        die "Database error in LJ::S2::get_layer_owners: " . $dbh->errstr . "\n" if $dbh->err;
+
+        foreach my $row (@$res) {
+            # save info and add to memcache
+            $ret->{$row->[0]} = $row->[1];
+            LJ::MemCache::add([ $row->[0], "s2lo:$row->[0]" ], $row->[1]);
+        }
+    }
+
+    # now load these users; they're likely process cached anyway, so it should
+    # be pretty fast
+    my $us = LJ::load_userids(values %$ret);
+    foreach my $lid (keys %$ret) {
+        $ret->{$lid} = $us->{$ret->{$lid}}
+    }
+    return $ret;
+}
+
+# returns max comptime of all lids requested to be loaded
+sub load_layers {
+    my @lids = map { $_ + 0 } @_;
+    return 0 unless @lids;
+
+    my @need;
+    my $maxtime = 0;  # to be returned
+
+    my %bycluster; # cluster => [ lid, lid, ... ]
+    my $us = LJ::S2::get_layer_owners(@lids);
+    my $sysid = LJ::get_userid('system');
+    foreach my $lid (@lids) {
+        next unless $us->{$lid};
+        if ($us->{$lid}->{userid} == $sysid) {
+            push @{$bycluster{0} ||= []}, $lid;
+        } else {
+            push @{$bycluster{$us->{$lid}->{clusterid}} ||= []}, $lid;
+        }
+    }
+
+    # big loop by cluster
+    foreach my $cid (keys %bycluster) {
+        # if we're talking about cluster 0, the global, pass it off to the old
+        # function which already knows how to handle that
+        unless ($cid) {
+            my $dbh = LJ::get_db_writer();
+            S2::load_layers_from_db($dbh, @{$bycluster{$cid}});
+            next;
+        }
+
+        my $db = LJ::get_cluster_master($cid);
+        die "Unable to obtain handle to cluster $cid for LJ::S2::load_layers\n"
+            unless $db;
+
+        # create SQL to load the layers we want
+        my @to_load;
+        foreach my $lid (@{$bycluster{$cid}}) {
+            my $loaded = S2::layer_loaded($lid);
+            if ($loaded) {
+                $maxtime = $loaded if $loaded > $maxtime;
+                push @to_load, "(userid=$us->{$lid}->{userid} AND s2lid=$lid AND comptime>$loaded)";
+            } else {
+                push @to_load, "(userid=$us->{$lid}->{userid} AND s2lid=$lid)";
+            }
+        }
+
+        # run the query, get the data, uncompress, and get the layer loaded
+        my $where = join(' OR ', @to_load);
+        my $sth = $db->prepare("SELECT s2lid, compdata, comptime FROM s2compiled2 WHERE $where");
+        $sth->execute;
+        while (my ($id, $comp, $comptime) = $sth->fetchrow_array) {
+            LJ::text_uncompress(\$comp);
+            S2::load_layer($id, $comp, $comptime);
+            $maxtime = $comptime if $comptime > $maxtime;
+        }
+    }
+
+    # now we have to go through everything again and verify they're all loaded and
+    # otherwise do a fallback to the global
+    my @to_load;
+    foreach my $lid (@lids) {
+        next if S2::layer_loaded($lid);
+        push @to_load, $lid;
+    }
+    return $maxtime unless @to_load;
+
+    # get the dbh and start loading these
+    my $dbh = LJ::get_db_writer();
+    die "Failure getting master database handle in LJ::S2::load_layers\n"
+        unless $dbh;
+
+    my $where = join(' OR ', map { "s2lid=$_" } @to_load);
+    my $sth = $dbh->prepare("SELECT s2lid, compdata, comptime FROM s2compiled WHERE $where");
+    $sth->execute;
+    while (my ($id, $comp, $comptime) = $sth->fetchrow_array) {
+        S2::load_layer($id, $comp, $comptime);
+        $maxtime = $comptime if $comptime > $maxtime;
+    }
+    return $maxtime;
 }
 
 # find existing re-distributed layers that are in the database
@@ -375,7 +498,7 @@ sub s2_context
     # compare s2styles.modtime with s2compiled.comptime to see if memcache
     # version is accurate or not.
     my $dbr = LJ::S2::get_s2_reader();
-    my $modtime = S2::load_layers_from_db($dbr, @layers);
+    my $modtime = LJ::S2::load_layers(@layers);
 
     # check that all critical layers loaded okay from the database, otherwise
     # fall back to default style.  if i18n/theme/user were deleted, just proceed.
@@ -830,8 +953,18 @@ sub layer_compile
         $s2ref = \$s2;
     }
 
-    my $untrusted = ! $LJ::S2_TRUSTED{$layer->{'userid'}} &&
-                    $layer->{'userid'} != LJ::get_userid("system");
+    my $is_system = $layer->{'userid'} == LJ::get_userid("system");
+    my $untrusted = ! $LJ::S2_TRUSTED{$layer->{'userid'}} && ! $is_system;
+
+    # system writes go to global.  otherwise to user clusters.
+    my $dbcm;
+    if ($is_system) {
+        $dbcm = $dbh;
+    } else {
+        my $u = LJ::load_userid($layer->{'userid'});
+        $dbcm = $u;
+    }
+    return 0 unless $dbcm;
 
     my $compiled;
     my $cplr = S2::Compiler->new({ 'checker' => $checker });
@@ -892,8 +1025,15 @@ sub layer_compile
     }
     
     # put compiled into database, with its ID number
-    $dbh->do("REPLACE INTO s2compiled (s2lid, comptime, compdata) ".
-             "VALUES (?, UNIX_TIMESTAMP(), ?)", undef, $lid, $compiled) or die;
+    if ($is_system) {
+        $dbh->do("REPLACE INTO s2compiled (s2lid, comptime, compdata) ".
+                 "VALUES (?, UNIX_TIMESTAMP(), ?)", undef, $lid, $compiled) or die;
+    } else {
+        my $gzipped = LJ::text_compress($compiled);
+        $dbcm->do("REPLACE INTO s2compiled2 (userid, s2lid, comptime, compdata) ".
+                  "VALUES (?, ?, UNIX_TIMESTAMP(), ?)", undef,
+                  $layer->{'userid'}, $lid, $gzipped) or die;
+    }
 
     # caller might want the compiled source
     if (ref $opts->{'compiledref'} eq "SCALAR") {
@@ -1088,6 +1228,7 @@ sub get_journal_day_counts
     
     return $s2page->{'_day_counts'} = $counts;
 }
+
 
 ## S2 object constructors
 
