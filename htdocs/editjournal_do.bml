@@ -211,7 +211,12 @@ BODY<=
 	 $ret .= "<p><b>Security Level:</b>";
 	 my @secs = ("public" => "Public", "private" => "Private", 
 		     "friends" => "Friends");
-	 push @secs, ("custom", "Custom...") if ($gfg && @{$gfg->{'friendgroups'}});
+	 
+	 my $raw;
+	 if ($gfg && @{$gfg->{'friendgroups'}}) {
+	     push @secs, ("custom", "Custom...");
+	     $raw = "onChange=\"document.getElementById('custom_boxes').style.display = (this.selectedIndex == 3) ? 'block' : 'none';\"";
+	 }
 	 
 	 my $curmask = $res{'events_1_allowmask'};
 	 my $cursec = $res{'events_1_security'};
@@ -220,7 +225,7 @@ BODY<=
 	 }
 	 $ret .= LJ::html_select({ 'name' => 'security',
 				   'selected' => $cursec,
-				   'raw' => "onChange=\"document.getElementById('custom_boxes').style.display = (this.selectedIndex == 3) ? 'block' : 'none';\"",
+				   'raw' => $raw,
 			       }, @secs);
 
 	 $ret .= LJ::help_icon("security");

@@ -140,13 +140,7 @@
      }
      $body .= "<INPUT TYPE=HIDDEN NAME=oldmode VALUE=$mode>";
      $body .= "<TABLE><TR><TD><TABLE>";
-     {
-	 my $opts = {};
-	 if ($remote && $FORM{'user'} ne $remote->{'user'}) {
-	     $opts = { 'user' => $FORM{'user'}, 'password' => $FORM{'password'}};
-	 }
-	 $body .= LJ::auth_fields(\%FORM, $opts);
-     }
+     $body .= LJ::auth_fields(\%FORM);
      $body .= "</TABLE></TD><TD>";
 
      $body .= "<TABLE CELLSPACING=0 CELLPADDING=0>";
@@ -229,12 +223,15 @@
 	 my @secs = ("public", "Public",
 		     "private", "Private",
 		     "friends", "Friends");
+
+	 my $raw;
 	 if (@{$res->{'friendgroups'}}) {
 	     push @secs, ("custom", "Custom...");
+	     $raw = "onChange=\"document.getElementById('custom_boxes').style.display = (this.selectedIndex == 3) ? 'block' : 'none';\"";
 	 }
 	 $body .= LJ::html_select({ 'name' => 'security', 
 				    'selected' => $FORM{'security'}, 
-				    'raw' => "onChange=\"document.getElementById('custom_boxes').style.display = (this.selectedIndex == 3) ? 'block' : 'none';\"",
+				    'raw' => $raw,
 				}, @secs);
 	 $body .= LJ::help_icon("security", " ");
 	 if (@{$res->{'friendgroups'}}) {
