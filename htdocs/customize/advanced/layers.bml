@@ -17,11 +17,10 @@
     $POST{'parid'} ||= $POST{'parid_hidden'};
 
     # get database handles
-    my $dbs = LJ::get_dbs();
-    my $dbr = $dbs->{'reader'};
+    my $dbr = LJ::get_db_reader();
 
     # authenticate user
-    my $remote = LJ::get_remote($dbs);
+    my $remote = LJ::get_remote();
     return $err->('You must be logged in to view your layers.') 
         unless $remote;
 

@@ -24,9 +24,8 @@
         $id = $pub->{$GET{'id'}}->{'s2lid'};
     }
 
-    my $dbs = LJ::get_dbs();
-    my $dbr = $dbs->{'reader'};
-    my $remote = LJ::get_remote($dbs);
+    my $dbr = LJ::get_db_reader();
+    my $remote = LJ::get_remote();
 
     # show the public layers
     unless ($id) {
@@ -116,7 +115,7 @@
     if (defined $pub->{$id}) {
         $body .= BML::ml('backlink', { 'link' => 'layerbrowse.bml', 'text' => 'Public Layers' }) . "\n";
     } else {
-        my $user = LJ::get_username($dbs, $layer->{'userid'});
+        my $user = LJ::get_username($layer->{'userid'});
         $body .= BML::ml('backlink', { 'link' => "layers.bml?authas=$user", 'text' => 'Your Layers' }) . "\n";
         $body .= BML::ml('actionlink', { 'link' => "<a href='layeredit.bml?id=$id'>Edit Layer</a>" }) . "\n";
     }

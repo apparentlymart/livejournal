@@ -27,8 +27,7 @@
     # if we have this we're assumed to be in 'edit' mode
     my $id = $GET{'id'}+0;
 
-    my $dbs = LJ::get_dbs();
-    my $dbh = $dbs->{'dbh'};
+    my $dbh = LJ::get_db_writer();
     my ($core, $layout);      # scalars
     my ($pub, $ulay, $style); # hashrefs
 
@@ -57,8 +56,8 @@
         if ($POST{'action:usestyle'}) {
 
             # save to db and update user object
-            LJ::set_userprop($dbs, $u, "stylesys", '2');
-            LJ::set_userprop($dbs, $u, "s2_style", $id);
+            LJ::set_userprop($u, "stylesys", '2');
+            LJ::set_userprop($u, "s2_style", $id);
             return BML::redirect("styles.bml?authas=$authas");
         }
 
@@ -177,7 +176,7 @@
         }
 
         # load style currently in use
-        LJ::load_user_props($dbs, $u, 's2_style');
+        LJ::load_user_props($u, 's2_style');
 
         # set up page header
         $title = "Your Styles";
