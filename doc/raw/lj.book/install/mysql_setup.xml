@@ -1,5 +1,14 @@
 <chapter id="lj.install.mysql_setup">
-  <title>MySQL Setup</title>
+  <title>MySQL</title>
+  <abstract><para>
+    There are a few simple reasons why we chose MySQL when picking a database backend for LiveJournal:
+    It's <ulink url="http://www.mysql.com/information/benchmarks-old.html">fast</ulink>,
+    <ulink url="http://www.mysql.com/doc/en/Using_the_MySQL_software_for_free_under_GPL.html">free</ulink>,
+    <ulink url="http://www.mysql.com/doc/en/Stability.html">stable</ulink>,
+    <ulink url="http://www.mysql.com/doc/en/Privilege_system.html">secure</ulink>, and well supported
+    by a large community of users. In this chapter we'll deal with installing and setting up MySQL on
+    your server, then we'll show you how to populate your installation with the required base data.
+  </para></abstract>
   <section id="lj.install.mysql_setup.install">
     <title>Install MySQL</title>
     <para>
@@ -15,6 +24,9 @@
       most offer a simple installation program that guides you through
       setup.
     </para>
+    <tip><title>Debian</title>
+      <simpara>The MySQL server package for Debian is <filename>mysql-server</filename>.</simpara>
+    </tip>
   </section>
   <section id="lj.install.mysql_setup.create_db">
     <title>Create the LiveJournal Database</title>

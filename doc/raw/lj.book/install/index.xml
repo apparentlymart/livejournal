@@ -3,7 +3,9 @@
   <partintro>
     <para>
       The following chapters cover the basics of installing LiveJournal, and is geared towards LiveJournal being
-      installed on any operating system that resembles unix.
+      installed on any operating system that resembles unix. Throughout this part we'll include installation tips
+      for users of <ulink url="http://www.debian.org/">Debian GNU/Linux</ulink>, because this is our operating system
+      of choice.
     </para>
     <para>
       We do assume that you are familiar, at least somewhat, with the technologies covered in this manual, because

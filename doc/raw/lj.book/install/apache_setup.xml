@@ -1,64 +1,73 @@
 <chapter id="lj.install.apache_setup">
-  <chapterinfo>
-    <title>Apache Configuration</title>
-  </chapterinfo>
-  <title>Apache Configuration</title>
-  <formalpara>
-    <title>mod_perl</title>
-    <para>
-      LiveJournal in the past has been server API agnostic, working on
-      either FastCGI or mod_perl, but we've dropped FastCGI support.
-      There's really no need.  So, you'll need mod_perl ... it's
-      everywhere and well supported, and you might already have it on
-      your machine. If not, you can read up on the installation docs at
-      <ulink url="http://perl.apache.org/docs/1.0/guide/install.html" />
-    </para>
-    <caution><para>
-      We've found that more people have success when mod_perl is statically
-      linked, rather than using a <abbrev>DSO</abbrev>.
-      <footnote><simpara>
-      Consult <citetitle pubwork="article">
-      <ulink url="http://perl.apache.org/docs/1.0/guide/install.html#When_DSO_can_be_Used">
-      mod_perl Installation User Guide: When <abbrev>DSO</abbrev> Can Be Used</ulink></citetitle>
-      for more information. 
-      </simpara></footnote>
-      In Debian, the package that provides mod_perl and Apache together is
-      <literal>apache-perl</literal>.
-    </para></caution>
-  </formalpara>
-  <formalpara>
-    <title>Apache suEXEC Support</title>
-    <para>
-      If you want the LiveJournal code to run as a user other than
-      what your webserver runs as, then you'll need suEXEC<footnote
-      id="suEXEC"><para><ulink
-      url="http://httpd.apache.org/docs/suexec.html">Official Apache
-      suEXEC documentation</ulink></para></footnote> support in
-      Apache.  You're free to figure that out yourself.  We'll assume
-      your webserver is running as user <literal>lj</literal>, though it doesn't have
-      to run as any certain user to work.
-    </para>
-    <para>
-      In fact, the LiveJournal code never writes to disk, so as long
-      as it can write to the database (which is essential, obviously),
-      you can run the code as any user, including
-      <literal>nobody</literal> or <literal>www-data</literal>, both
-      of which are common in out-of-the-box configurations.
-    </para>
-  </formalpara>
-  <formalpara>
-    <title>Virtual Hosts</title>
-    <para>
-      You can run the LiveJournal code inside or outside of a
-      <literal>&lt;VirtualHost&gt;</literal> section in Apache's
-      <literal>httpd.conf</literal> file.  However, make note that you
-      can't (yet) have two VirtualHosts running parallel copies of the
-      code.  In the future we'll fix that, but for now if you really
-      need two installations on the same machine, you'll need to run
-      two sets of Apache processes, listening on different ports.
-    </para>
-  </formalpara>
-
+  <title>Apache</title>
+  <abstract>
+    <simpara>Apache is the most popular HTTP server software used today, and it's completely free.
+    We use Apache for our projects because there is simply no equivalent. In this chapter we'll
+    briefly explain how to setup and configure an Apache installation.</simpara>
+  </abstract>
+  <section id="lj.install.apache_setup.install">
+    <title>Installation</title>
+    <section id="lj.install.apache_setup.install.mod_perl">
+      <title>mod_perl</title>
+      <para>
+        LiveJournal in the past has been server API agnostic, working on
+        either FastCGI or mod_perl, but we've dropped FastCGI support, as
+        there's really no need to maintain it anymore. LiveJournal now solely
+        requires mod_perl; seeing as how it's everywhere and well supported,
+        and you might already have it on your machine. If not, you can read up
+        on the official installation docs located at
+        <ulink url="http://perl.apache.org/docs/1.0/guide/install.html" />
+      </para>
+      <caution><para>
+        We've found that more people have success when mod_perl is statically
+        linked, rather than using a <abbrev>DSO</abbrev>.
+        <footnote><simpara>
+          Consult <citetitle pubwork="article">
+          <ulink url="http://perl.apache.org/docs/1.0/guide/install.html#When_DSO_can_be_Used">
+          mod_perl Installation User Guide: When <abbrev>DSO</abbrev> Can Be Used</ulink></citetitle>
+          for more information. 
+        </simpara></footnote>
+      </para></caution>
+      <tip><title>Debian</title>
+        <simpara>Typically, if you already have a working apache installation in Debian
+          and would like to install mod_perl support, then installing the package
+          <filename>libapache-mod-perl</filename> should suit your needs. Otherwise,
+          you should install the package <filename>apache-perl</filename>.
+      </simpara></tip>
+    </section>
+    <section id="lj.install.apache_setup.install.suexec">
+      <title>Apache suEXEC Support</title>
+      <para>
+        If you want the LiveJournal code to run as a user other than
+        what your webserver runs as, then you'll need suEXEC<footnote id="suEXEC">
+          <simpara><ulink url="http://httpd.apache.org/docs/suexec.html">Official
+          Apache suEXEC documentation</ulink></simpara></footnote> support in
+        Apache.  You're free to figure that out yourself.  We'll assume
+        your webserver is running as user <systemitem class="username">lj</systemitem>,
+        though it doesn't have to run as any certain user to work.
+      </para>
+      <para>
+        In fact, the LiveJournal code never writes to disk, so as long
+        as it can write to the database (which is essential, obviously),
+        you can run the code as any user, including
+        <systemitem class="username">nobody</systemitem> or
+        <systemitem class="username">www-data</systemitem>, both
+        of which are common in out-of-the-box configurations.
+      </para>
+    </section>
+    <section id="lj.install.apache_setup.install.vhosts">
+      <title>Virtual Hosts</title>
+      <para>
+        You can run the LiveJournal code inside or outside of a
+        <literal>&lt;VirtualHost&gt;</literal> section in Apache's
+        <literal>httpd.conf</literal> file.  However, make note that you
+        can't (yet) have two VirtualHosts running parallel copies of the
+        code.  In the future we'll fix that, but for now if you really
+        need two installations on the same machine, you'll need to run
+        two sets of Apache processes, listening on different ports.
+      </para>
+    </section>
+  </section>
   <section id="lj.install.apache_setup.example">
     <title>Example <literal>httpd.conf</literal></title>
     <programlisting><![CDATA[ServerType standalone

@@ -22,6 +22,9 @@
       </varlistentry>
     </variablelist>
   </para></formalpara>
+  <warning><title>Apache 2 &amp; mod_perl 2</title>
+    <simpara>At this time, LiveJournal has not been ported to &amp; will not work with Apache 2 &amp; mod_perl 2.</simpara>
+  </warning>
   <formalpara><title>Perl Module Dependencies</title>
     A complete list of modules need to run a LiveJournal installation can be found at <xref linkend="lj.install.perl_setup.modules" />.
     Some modules such as GD and Compress::Zlib require certain system libraries to be pre-installed

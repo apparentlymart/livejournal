@@ -1,31 +1,61 @@
 <chapter id="lj.customize.hooks">
   <title>Setting Site-Specific Hooks</title>
-  <para>
-    The LiveJournal code provides a number of hooks, which you can use to
-    alter or extend the functionality of the code, tailored for your own site.
-    You're free to implement as few or as many as you want.
-    <note><para>
-      If there's a hook you want but don't see, let us know and we'll be more
-      than happy to add it in.
-    </para></note>
-  </para>
-  <section id="lj.customize.hooks.intro">
-    <title>Introduction</title>
+  <abstract>
+    <para>
+      The LiveJournal code provides a number of hooks, which you can use to
+      alter or extend the functionality of the code, tailored for your own site.
+      You're free to implement as few or as many as you want.
+      <tip><para>
+        If there's a hook you want but don't see, email us at <email>dev@livejournal.com</email>
+        or file an issue in our
+        <ulink url="http://zilla.livejournal.org">Bug and Project Tracking System</ulink>
+        and we'll be more than happy to add it in.
+      </para></tip>
+    </para>
     <para>
       One of the reasons for implementing hooks on LiveJournal came from a 
       need to make distinctions between account status types, without leaving
       a lot of kludge in the code base, and without having to write extensive
       code libraries in the ljcom <abbrev>CVS</abbrev> repository.
     </para>
-  </section>
+    <para>
+      Hooks are code references, subroutines that perform functions or return information
+      based on objects passed to the subroutine. Some programming knowledge is necessary
+      to write your own hooks.
+    </para>
+  </abstract>
   <section id="lj.customize.hooks.setup">
     <title>Writing Hooks</title>
     <para>
-      Hooks are written in <filename>cgi-bin/ljconfig.pl</filename>, by using the 
-      sub <function>LJ::register_hook()</function>.
+      Hooks are written either in your <filename>cgi-bin/ljconfig.pl</filename> file, or in a seperate
+      site-specific library file. Hooks are defined by the function <function>LJ::register_hook()</function>,
+      which takes two arguments: the name of the hook, and the hook's perl coderef.
+    </para>
+    <para>
+      Most hook coderefs are passed a single hash of various objects as their argument, though there are a few
+      exceptions. Consult <xref linkend="lj.customize.hooks.ref" /> for more information.
     </para>
     <example>
-      <title>Writing a hook for <literal></literal></title><para></para>
+      <title>Sample hook: userinfo_html_by_user</title>
+      <simpara>
+        To give you an idea of how a hook is set up, a smaller hook is sampled below:
+      </simpara>
+      <programlisting><![CDATA[LJ::register_hook("userinfo_html_by_user", sub {
+    my $o = shift;
+    my $r = $o->{'ret'};
+    my $u = $o->{'u'};
+    return unless (LJ::get_cap($u, "normal"));
+    $$r .= "<img src='$LJ::IMGPREFIX/talk/sm08_star.gif' width='20' height='18' alt='&#8902;' style='vertical-align: middle; border: 0;' />";
+        });]]></programlisting>
+      <simpara>
+        <varname>$o</varname> is the argument hash that is passed to the hook's subroutine,
+        and consists of the scalar reference member <varname>$o->{'r'}</varname> and the user object
+        member <varname>$o->{'u'}</varname>. The subroutine then checks to see if the user
+        is part of the capability class <quote>normal</quote>, and if so it will pass the
+        <abbrev>HTML</abbrev> image directive as the scalar reference. Now when someone loads
+        a user information page for a <quote>normal</quote> user, a small star will appear
+        next to their username and userid.
+      </simpara>
     </example>
   </section>
   <section id="lj.customize.hooks.ref">

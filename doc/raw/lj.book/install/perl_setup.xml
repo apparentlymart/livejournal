@@ -1,5 +1,11 @@
 <chapter id="lj.install.perl_setup">
-  <title>Installing and Setting up Perl</title>
+  <title>Perl</title>
+  <abstract>
+    <simpara>The Perl motto is <quote>There is more than one way to do it</quote> and the three principles for any
+    programmer are Laziness, Impatience, &amp; Hubris, according to the Perl manual. On top of that, Perl is
+    well suited for any purpose, and. Why not use Perl? Anyways, in this chapter we'll briefly cover a Perl installation,
+    and then we'll show you which Perl modules are required for a working LiveJournal installation.</simpara>
+  </abstract>
   <section id="lj.install.perl_setup.install">
     <title>Installing Perl</title>
     <para>
@@ -24,6 +30,10 @@
         Obtaining and Learning about Perl (perlfaq2)</ulink></citetitle>
       </para></footnote>
     </para>
+    <tip><title>Debian</title>
+      <simpara>If you're using Debian, Perl should already be installed. If not, the required package is
+        simply <filename>perl</filename></simpara>
+    </tip>
   </section>
   <section id="lj.install.perl_setup.modules">
     <title>Installing Perl Modules</title>
