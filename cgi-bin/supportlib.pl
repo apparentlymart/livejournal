@@ -151,7 +151,7 @@ sub can_close
     my ($dbh, $sp, $remote) = @_;
     if (is_poster($sp, $remote)) { return 1; }
     if ($sp->{_cat}->{'public_read'}) {
-	if (LJ::check_priv($dbh, $remote, "supportclose")) { return 1; }
+	if (LJ::check_priv($dbh, $remote, "supportclose", "")) { return 1; }
     }
     my $catkey = $sp->{_cat}->{'catkey'};
     if (LJ::check_priv($dbh, $remote, "supportclose", $catkey)) { return 1; }
