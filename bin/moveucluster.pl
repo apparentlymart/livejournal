@@ -146,8 +146,22 @@ sub multiMove {
             if ($line =~ /^OK IDLE/) {
                 sleep 5;
                 next ITER;
-            } elsif ($line =~ /^OK JOB (\d+):(\d+):(\d+)/) {
-                my ($uid, $srcid, $dstid) = ($1, $2, $3);
+            } elsif ($line =~ /^OK JOB (\d+):(\d+):(\d+)\s+([\d.]+)(?:\s*([\w ]+))?$/) {
+                my ($uid, $srcid, $dstid, $locktime) = ($1, $2, $3, $4);
+                my $opts = parseOpts( $5 );
+
+                # Nasty horrible shit, but without this you either have to make
+                # the options package-scoped and selectively override with
+                # local() or require that each job spec set all options. Such is
+                # the price of drinking the global-variable Kool-Aid.
+                $opts->{del} = $opt_del unless defined $opts->{del};
+                $opts->{destdel} = $opt_destdel unless defined $opts->{destdel};
+                $opts->{verbose} = $opt_verbose unless defined $opts->{verbose};
+                $opts->{movemaster} = $opt_movemaster unless defined $opts->{movemaster};
+                $opts->{prelocked} = $opt_prelocked unless defined $opts->{prelocked};
+                $opts->{expungedel} = $opt_expungedel unless defined $opts->{expungedel};
+                $opts->{ignorebit} = $opt_ignorebit unless defined $opts->{ignorebit};
+                $opts->{verify} = $opt_verify unless defined $opts->{verify};
 
                 my $u = $dbh->selectrow_hashref("SELECT * FROM user WHERE userid=?",
                                                 undef, $uid);
@@ -163,7 +177,14 @@ sub multiMove {
                     return $res =~ /^OK/ ? 1 : 0;
                 };
 
-                my $rv = eval { moveUser($dbh, $u, $dstid, $verify); };
+                # If the user is supposed to be prelocked, but the lock didn't
+                # happen more than 3 seconds ago, wait until it has time to
+                # "settle" and then move the user
+                if ( $opts->{prelocked} && $locktime < 3 ) {
+                    sleep 3 - $locktime;
+                }
+
+                my $rv = eval { moveUser($dbh, $u, $dstid, $verify, $opts); };
                 if ($rv) {
                     print "moveUser($u->{user}/$u->{userid}) = 1\n";
                 } else {
@@ -190,6 +211,19 @@ sub multiMove {
 
     }
 }
+
+### Parse options from job specs into a hashref
+sub parseOpts {
+    my $raw = shift or return {};
+
+    my $opts = {};
+    while ( $raw =~ m{\s*(\w+)=(\w+)}g ) {
+        $opts->{ $1 } = $2;
+    }
+
+    return $opts;
+}
+
 
 sub singleMove {
     my $user = shift @ARGV;
@@ -225,7 +259,7 @@ sub singleMove {
 }
 
 sub moveUser {
-    my ($dbh, $u, $dclust, $verify_code) = @_;
+    my ($dbh, $u, $dclust, $verify_code, $opts) = @_;
     die "Non-existent db.\n" unless $dbh;
     die "Non-existent user.\n" unless $u && $u->{userid};
     my $user = $u->{user};
@@ -256,7 +290,7 @@ sub moveUser {
 
     # we don't support "cluster 0" (the really old format)
     die "This mover tool doesn't support moving from cluster 0.\n" unless $sclust;
-    die "Can't move back to legacy cluster 0\n" unless $dclust || $opt_expungedel;
+    die "Can't move back to legacy cluster 0\n" unless $dclust || $opts->{expungedel};
 
     my $is_movemaster;
 
@@ -264,7 +298,7 @@ sub moveUser {
     $dboa = LJ::get_cluster_master({raw=>1}, $u);
     die "Can't get source cluster handle.\n" unless $dboa;
 
-    if ($opt_movemaster) {
+    if ($opts->{movemaster}) {
         $dbo = LJ::get_dbh({raw=>1}, "cluster$u->{clusterid}movemaster");
         if ($dbo) {
             $dbo->{'RaiseError'} = 1;
@@ -307,18 +341,18 @@ sub moveUser {
     }
 
     # make sure a move isn't already in progress
-    if ($opt_prelocked) {
+    if ($opts->{prelocked}) {
         unless (($u->{'caps'}+0) & (1 << $readonly_bit)) {
             die "User '$user' should have been prelocked.\n";
         }
     } else {
         if (($u->{'caps'}+0) & (1 << $readonly_bit)) {
             die "User '$user' is already in the process of being moved? (cap bit $readonly_bit set)\n"
-                unless $opt_ignorebit;
+                unless $opts->{ignorebit};
         }
     }
 
-    if ($opt_expungedel && $u->{'statusvis'} eq "D" &&
+    if ($opts->{expungedel} && $u->{'statusvis'} eq "D" &&
         LJ::mysqldate_to_time($u->{'statusvisdate'}) < time() - 86400*31) {
 
         print "Expunging user '$u->{'user'}'\n";
@@ -330,7 +364,7 @@ sub moveUser {
                                    raw => "caps=caps&~(1<<$readonly_bit), statusvisdate=NOW()" });
 
         # now delete all content from user cluster for this user
-        if ($opt_del) {
+        if ($opts->{del}) {
             print "Deleting expungeable user data...\n" if $optv;
 
             # figure out if they have any S1 styles
@@ -358,7 +392,7 @@ sub moveUser {
     # if we get to this point we have to enforce that there's a destination cluster, because
     # apparently the user failed the expunge test
     if (!defined $dclust || !defined $dbch) {
-        die "User is not eligible for expunging.\n" if $opt_expungedel;
+        die "User is not eligible for expunging.\n" if $opts->{expungedel};
     }
 
     print "Moving '$u->{'user'}' from cluster $sclust to $dclust\n" if $optv >= 1;
@@ -369,14 +403,14 @@ sub moveUser {
     my $cmid = $dbh->{'mysql_insertid'};
 
     # set readonly cap bit on user
-    unless ($opt_prelocked ||
+    unless ($opts->{prelocked} ||
             LJ::update_user($userid, { raw => "caps=caps|(1<<$readonly_bit)" }))
     {
         die "Failed to set readonly bit on user: $user\n";
     }
     $dbh->do("SELECT RELEASE_LOCK('moveucluster-$user')");
 
-    unless ($opt_prelocked) {
+    unless ($opts->{prelocked}) {
         # wait a bit for writes to stop if journal is somewhat active (last week update)
         my $secidle = $dbh->selectrow_array("SELECT UNIX_TIMESTAMP()-UNIX_TIMESTAMP(timeupdate) ".
                                             "FROM userusage WHERE userid=$userid");
@@ -474,7 +508,7 @@ sub moveUser {
         $dbch->do("HANDLER $table CLOSE");
         next unless $is_there;
 
-        if ($opt_destdel) {
+        if ($opts->{destdel}) {
             foreach my $table (@tables) {
                 # these are ephemeral or handled elsewhere
                 next if $skip_table{$table};
@@ -606,7 +640,7 @@ sub moveUser {
         }
 
         my $verifykey = $ti->{verifykey};
-        if ($opt_verify && $verifykey) {
+        if ($opts->{verify} && $verifykey) {
             if ($table eq "dudata" || $table eq "ratelog") {
                 print "# Verifying $table on size\n";
                 my $pre = $dbo->selectrow_array("SELECT COUNT(*) FROM $table WHERE $idxcol=$userid");
@@ -657,7 +691,7 @@ sub moveUser {
     }
 
     # delete from source cluster
-    if ($opt_del) {
+    if ($opts->{del}) {
         print "Deleting from source cluster...\n" if $optv;
         foreach my $td (@to_delete) {
             my ($table, $pri) = @$td;
@@ -680,7 +714,7 @@ sub moveUser {
     }
 
     $dbh->do("UPDATE clustermove SET sdeleted=?, timedone=UNIX_TIMESTAMP() ".
-             "WHERE cmid=?", undef, $opt_del ? 1 : 0, $cmid);
+             "WHERE cmid=?", undef, $opts->{del} ? 1 : 0, $cmid);
 
     return 1;
 }
