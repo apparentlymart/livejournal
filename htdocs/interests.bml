@@ -145,7 +145,7 @@ BODY<=
          $sth->execute;
          while (my $uid = $sth->fetchrow_array) {
              next if $uid == $u->{'userid'};
-             $pt_weight{$uid} += (1 / log($intcount{$int}));
+             $pt_weight{$uid} += (1 / log($intcount{$int}+1));
              $pt_count{$uid}++;
          }
      }
