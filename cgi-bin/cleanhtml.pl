@@ -12,12 +12,12 @@ use HTML::TokeParser ();
 use URI ();
 
 #     LJ::CleanHTML::clean(\$u->{'bio'}, { 
-#	 'wordlength' => 100, # maximum length of an unbroken "word"
-#	 'addbreaks' => 1,    # insert <br/> after newlines where appropriate
-#	 'tablecheck' => 1,   # make sure they aren't closing </td> that weren't opened.
-#	 'eat' => [qw(head title style layer iframe)],
-#	 'mode' => 'allow',
-#	 'deny' => [qw(marquee)],
+#        'wordlength' => 100, # maximum length of an unbroken "word"
+#        'addbreaks' => 1,    # insert <br/> after newlines where appropriate
+#        'tablecheck' => 1,   # make sure they aren't closing </td> that weren't opened.
+#        'eat' => [qw(head title style layer iframe)],
+#        'mode' => 'allow',
+#        'deny' => [qw(marquee)],
 #        'remove' => [qw()],
 #        'maximgwidth' => 100,
 #        'maximgheight' => 100,
@@ -334,10 +334,10 @@ sub clean
 
                     if ($allow && ! $remove{$tag})
                     {
-			if ($opts->{'tablecheck'}) {
-			    if (($tag eq 'td' || $tag eq 'th') && ! $opencount{'tr'}) { $allow = 0; }
-			    elsif ($tag eq 'tr' && ! $opencount{'table'}) { $allow = 0; }
-			}
+                        if ($opts->{'tablecheck'}) {
+                            if (($tag eq 'td' || $tag eq 'th') && ! $opencount{'tr'}) { $allow = 0; }
+                            elsif ($tag eq 'tr' && ! $opencount{'table'}) { $allow = 0; }
+                        }
 
                         if ($allow) { $newdata .= "<$tag"; }
                         else { $newdata .= "&lt;$tag"; }
@@ -363,9 +363,9 @@ sub clean
                             $opencount{$tag}--;
                         }
                         if ($allow) { 
-			    $newdata .= ">"; 
-			    $opencount{$tag}++;
-			}
+                            $newdata .= ">"; 
+                            $opencount{$tag}++;
+                        }
                         else { $newdata .= "&gt;"; }
                     }
                 }
@@ -717,7 +717,7 @@ sub clean_event
         'cleancss' => 1,
         'maximgwidth' => $opts->{'maximgwidth'},
         'maximgheight' => $opts->{'maximgheight'},
-	'ljcut_disable' => $opts->{'ljcut_disable'},
+        'ljcut_disable' => $opts->{'ljcut_disable'},
     });
 }
 
