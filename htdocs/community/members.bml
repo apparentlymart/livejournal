@@ -73,6 +73,7 @@ body<=
         my @to_add;
         my @add_errors;
         foreach my $num (1..5) {
+            $POST{"add_$num"} = LJ::trim($POST{"add_$num"});
             next unless $POST{"add_$num"} =~ /^\w+$/;
 
             my $target = LJ::load_user($POST{"add_$num"});
