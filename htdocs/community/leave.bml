@@ -19,13 +19,15 @@
     my $cu = $FORM{comm} ? 
              LJ::load_user($FORM{comm}) : # they gave us the comm name
              LJ::load_userid($cuserid);   # they gave us the comm id
-    my $ecname = LJ::ehtml($cu->{'name'});
 
     # does this community even exist?
     unless ($cu) {
         $body .= "<?h1 $ML{'Error'} h1?><?p $ML{'.label.infoerror'} p?>";
         return;
     }
+
+    # used in both paths below
+    my $ecname = LJ::ehtml($cu->{'name'});
 
     if ($FORM{confirm}) {
         # remove user from community's friends list
