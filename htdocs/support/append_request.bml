@@ -84,6 +84,7 @@ body<=
      $status .= "(Inserting request into queue)\n\n";
  }
  if ($FORM{'untouch'}) {
+     my $dbh = LJ::get_db_writer();
      $dbh->do("UPDATE support SET timelasthelp=UNIX_TIMESTAMP() WHERE spid=$spid");
      $status .= "(Removing request from queue)\n\n";
  }
