@@ -1,5 +1,43 @@
 <?page
 title=><?_ml .title _ml?>
+head<=
+  <style type="text/css">
+  
+ 
+        .tablecontent {  
+                border-top: 1px solid #dfdfdf; 
+                border-bottom: 1px solid #dfdfdf;
+                padding-top: 5px;
+                padding-bottom: 5px;
+                text-align: center;
+                width: 8%;
+        }
+        
+        .tablelabel {  
+                border-top: 1px solid #dfdfdf; 
+                border-bottom: 1px solid #dfdfdf;
+                padding-top: 5px;
+                padding-bottom: 5px;
+                width: 20%;
+                font-size: .9em;
+        }
+        
+        .tablehead {
+                border-bottom: 1px solid #dfdfdf;
+                padding-top: 5px;
+                padding-bottom: 5px;
+                font-weight: bold;
+                white-space: nowrap;
+                text-align: center;
+        }
+        
+        .tablebottom {
+                border-top: 1px solid #dfdfdf;
+                padding-top: 5px;
+                white-space: nowrap;
+        }
+ </style>
+<=head
 body<=
 <?_code 
 
@@ -285,6 +323,19 @@ body<=
      # create a community.  /community/create.bml should handle that.
      LJ::make_login_session($nu);
 
+     # local sites may want to override what happens at this point
+     my $redirect;
+     my $stop_output;
+     LJ::run_hooks("create.bml_postsession", {
+         post => \%POST,
+         u => $nu,
+         redirect => \$redirect,
+         ret => \$ret,
+         stop_output => \$stop_output,
+     });
+     return BML::redirect($redirect) if $redirect;
+     return $ret if $stop_output;
+     
      $ret = "<?h1 $ML{'.success.head'} h1?><?p ".BML::ml(".success.text1", {'email' => $email, 'username' => $user}) ." p?>";
      my $uri = LJ::journal_base($nu);
      $ret .= "<?p $ML{'.success.text2'} p?>\n";
@@ -368,6 +419,11 @@ body<=
          $ret .= "</div></div></li>";
      }
 
+     LJ::run_hooks("create.bml_opts", {
+         post => \%POST,
+         ret => \$ret,
+     });
+         
      if ($LJ::TOS_CHECK)
      {
          $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.tos.heading'}</div>";
