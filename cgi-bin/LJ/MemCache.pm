@@ -108,6 +108,7 @@ sub _set {
     return 0 unless $sock;
     my $flags = 0;
     $key = ref $key eq "ARRAY" ? $key->[1] : $key;
+    my $raw_val = $val;
     if (ref $val) {
         $val = Storable::freeze($val);
         $flags |= 1;
@@ -118,7 +119,11 @@ sub _set {
     $sock->print($cmd);
     $sock->flush;
     my $line = <$sock>;
-    return 1 if $line eq "STORED\r\n";
+    if ($line eq "STORED\r\n") {
+        print STDERR "MemCache: $cmdname $key = $raw_val\n" if $LJ::MEMCACHE_DEBUG;
+        return 1;
+    }
+    return 0;
 }
 
 sub get {
@@ -145,6 +150,11 @@ sub get_multi {
     }
     foreach my $sock (@socks) {
         _load_items($sock, \%val, @{$sock_keys{$sock}});
+    }
+    if ($LJ::MEMCACHE_DEBUG) {
+        while (my ($k, $v) = each %val) {
+            print STDERR "MemCache: got $k = $v\n";
+        }
     }
     return \%val;
 }

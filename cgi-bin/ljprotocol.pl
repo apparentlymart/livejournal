@@ -516,6 +516,7 @@ sub postevent
     my $u = $flags->{'u'};
     my $ownerid = $flags->{'ownerid'}+0;
     my $uowner = $flags->{'u_owner'} || $u;
+    my $clusterid = $uowner->{'clusterid'};
 
     my $dbh = LJ::get_db_writer();
 
@@ -586,7 +587,6 @@ sub postevent
         return fail($err, 153, "Your most recent journal entry is dated $u->{'newesteventtime'}, but you're trying to post one at $eventtime without the backdate option turned on.  Please check your computer's clock.  Or, if you really mean to post in the past, use the backdate option.");
     }
 
-    my $qsubject = $dbh->quote($req->{'subject'});
     my $qallowmask = $req->{'allowmask'}+0;
     my $security = "public";
     my $uselogsec = 0;
@@ -820,12 +820,14 @@ sub postevent
     LJ::dudata_set($dbcm, $ownerid, 'L', $itemid, $bytes);
 
     $dbcm->do("REPLACE INTO logtext2 (journalid, jitemid, subject, event) ".
-              "VALUES ($ownerid, $itemid, $qsubject, ?)", undef, $event);
+              "VALUES ($ownerid, $itemid, ?, ?)", undef, $req->{'subject'}, $event);
     if ($dbcm->err) {
         my $msg = $dbcm->errstr;
         LJ::delete_item2($dbcm, $ownerid, $itemid);   # roll-back
         return fail($err,501,"logtext:$msg");
     }
+    LJ::MemCache::set([$ownerid,"logtext:$clusterid:$ownerid:$itemid"],
+                      [ $req->{'subject'}, $event ]);
 
     # keep track of custom security stuff in other table.
     if ($uselogsec) {
@@ -840,29 +842,16 @@ sub postevent
 
     # meta-data
     if (%{$req->{'props'}}) {
-        my $propinsert = "";
+        my $propset = {};
         foreach my $pname (keys %{$req->{'props'}}) {
             next unless $req->{'props'}->{$pname};
             next if $pname eq "revnum" || $pname eq "revtime";
-            if ($propinsert) {
-                $propinsert .= ", ";
-            } else {
-                $propinsert = "REPLACE INTO logprop2 (journalid, jitemid, propid, value) VALUES ";
-            }
             my $p = LJ::get_prop("log", $pname);
-            if ($p) {
-                my $qvalue = $dbh->quote($req->{'props'}->{$pname});
-                $propinsert .= "($ownerid, $itemid, $p->{'id'}, $qvalue)";
-            }
+            next unless $p;
+            next unless $req->{'props'}->{$pname};
+            $propset->{$pname} = $req->{'props'}->{$pname};
         }
-        if ($propinsert) {
-            $dbcm->do($propinsert);
-            if ($dbcm->err) {
-                my $msg = $dbh->errstr;
-                LJ::delete_item2($dbcm, $ownerid, $itemid);   # roll-back
-                return fail($err,501,"logprop2:$msg");
-            }
-        }
+        LJ::set_logprop($uowner, $itemid, $propset) if %$propset;
     }
 
     $dbh->do("UPDATE userusage SET timeupdate=NOW(), lastitemid=$itemid ".
@@ -950,7 +939,7 @@ sub editevent
     my $qallowmask = $req->{'allowmask'}+0;
     my $sth;
 
-    my $qitemid = $req->{'itemid'}+0;
+    my $itemid = $req->{'itemid'}+0;
 
     # check the journal's read-only bit
     return fail($err,306) if LJ::get_cap($uowner, "readonly");
@@ -975,7 +964,7 @@ sub editevent
          "l.compressed, l.security, l.allowmask, l.year, l.month, l.day, lt.subject, ".
          "MD5(lt.event) AS 'md5event', l.rlogtime, l.anum FROM log2 l, logtext2 lt ".
          "WHERE l.journalid=$ownerid AND lt.journalid=$ownerid ".
-         "AND l.jitemid=$qitemid AND lt.jitemid=$qitemid");
+         "AND l.jitemid=$itemid AND lt.jitemid=$itemid");
     
     # a few times, logtext2 has been empty, with log2 existing,
     # and then the post is undeletable since the join matches
@@ -986,7 +975,7 @@ sub editevent
         $oldevent = $dbcm->selectrow_hashref
             ("SELECT l.journalid AS 'ownerid', l.posterid, l.eventtime, l.logtime, ".
              "l.compressed, l.security, l.allowmask, l.year, l.month, l.day, ".
-             "l.rlogtime, l.anum FROM log2 l WHERE l.journalid=$ownerid AND l.jitemid=$qitemid");
+             "l.rlogtime, l.anum FROM log2 l WHERE l.journalid=$ownerid AND l.jitemid=$itemid");
     }
 
     # kill seconds in eventtime, since we don't use it, then we can use 'eq' and such
@@ -1034,7 +1023,7 @@ sub editevent
         # what they just deleted.  (or something... probably rare.)
         LJ::set_userprop($u, "dupsig_post", undef);
         
-        my $res = { 'itemid' => $qitemid,
+        my $res = { 'itemid' => $itemid,
                     'anum' => $oldevent->{'anum'} };
         return $res;
     }
@@ -1051,13 +1040,13 @@ sub editevent
     ### load existing meta-data
     my %curprops;
 
-    LJ::load_log_props2($dbcm, $ownerid, [ $qitemid ], \%curprops);
+    LJ::load_log_props2($dbcm, $ownerid, [ $itemid ], \%curprops);
 
     ## handle meta-data (properties)
     my %props_byname = ();
     foreach my $key (keys %{$req->{'props'}}) {
         ## changing to something else?
-        if ($curprops{$qitemid}->{$key} ne $req->{'props'}->{$key}) {
+        if ($curprops{$itemid}->{$key} ne $req->{'props'}->{$key}) {
             $props_byname{$key} = $req->{'props'}->{$key};
         }
     }
@@ -1109,18 +1098,18 @@ sub editevent
         $dbcm->do("UPDATE log2 SET eventtime=$qeventtime, revttime=$LJ::EndOfTime-".
                   "UNIX_TIMESTAMP($qeventtime), year=$qyear, month=$qmonth, day=$qday, ".
                   "security=$qsecurity, allowmask=$qallowmask WHERE journalid=$ownerid ".
-                  "AND jitemid=$qitemid");
+                  "AND jitemid=$itemid");
     }
 
     if ($security ne $oldevent->{'security'} ||
         $qallowmask != $oldevent->{'allowmask'})
     {
         if ($security eq "public" || $security eq "private") {
-            $dbcm->do("DELETE FROM logsec2 WHERE journalid=$ownerid AND jitemid=$qitemid");
+            $dbcm->do("DELETE FROM logsec2 WHERE journalid=$ownerid AND jitemid=$itemid");
         } else {
             my $qsecurity = $dbh->quote($security);
             $dbcm->do("REPLACE INTO logsec2 (journalid, jitemid, allowmask) ".
-                      "VALUES ($ownerid, $qitemid, $qallowmask)");
+                      "VALUES ($ownerid, $itemid, $qallowmask)");
         }
         return fail($err,501,$dbcm->errstr) if $dbcm->err;
     }
@@ -1129,48 +1118,31 @@ sub editevent
         $req->{'subject'} ne $oldevent->{'subject'})
     {
         $dbcm->do("UPDATE logtext2 SET subject=?, event=? ".
-                  "WHERE journalid=$ownerid AND jitemid=$qitemid", undef,
+                  "WHERE journalid=$ownerid AND jitemid=$itemid", undef,
                   $req->{'subject'}, $event);
 
-        LJ::MemCache::replace([$ownerid,"logtext:$clusterid:$ownerid:$qitemid"],
-                              [ $req->{'subject'}, $event ]);
+        LJ::MemCache::set([$ownerid,"logtext:$clusterid:$ownerid:$itemid"],
+                          [ $req->{'subject'}, $event ]);
 
         # update disk usage
-        LJ::dudata_set($dbcm, $ownerid, 'L', $qitemid, $bytes);
+        LJ::dudata_set($dbcm, $ownerid, 'L', $itemid, $bytes);
 
         return fail($err,501,$dbcm->errstr) if $dbcm->err;
     }
 
     # up the revision number
-    $req->{'props'}->{'revnum'} = ($curprops{$qitemid}->{'revnum'} || 0) + 1;
+    $req->{'props'}->{'revnum'} = ($curprops{$itemid}->{'revnum'} || 0) + 1;
     $req->{'props'}->{'revtime'} = time();
 
     # handle the props
     {
-        my $propinsert = "";
-        my @props_to_delete;
+        my $propset = {};
         foreach my $pname (keys %{$req->{'props'}}) {
             my $p = LJ::get_prop("log", $pname);
             next unless $p;
-            my $val = $req->{'props'}->{$pname};
-            unless ($val) {
-                push @props_to_delete, $p->{'id'};
-                next;
-            }
-            if ($propinsert) {
-                $propinsert .= ", ";
-            } else {
-                $propinsert = "REPLACE INTO logprop2 (journalid, jitemid, propid, value) VALUES ";
-            }
-            my $qvalue = $dbh->quote($val);
-            $propinsert .= "($ownerid, $qitemid, $p->{'id'}, $qvalue)";
+            $propset->{$pname} = $req->{'props'}->{$pname};
         }
-        if ($propinsert) { $dbcm->do($propinsert); }
-        if (@props_to_delete) {
-            my $propid_in = join(", ", @props_to_delete);
-            $dbcm->do("DELETE FROM logprop2 WHERE journalid=$ownerid AND ".
-                      "jitemid=$qitemid AND propid IN ($propid_in)");
-        }
+        LJ::set_logprop($uowner, $itemid, $propset);
     }
 
     # deal with backdated changes.  if the entry's rlogtime is
@@ -1180,17 +1152,17 @@ sub editevent
     if ($req->{'props'}->{'opt_backdated'} eq "1" &&
         $oldevent->{'rlogtime'} != $LJ::EndOfTime) {
         $dbcm->do("UPDATE log2 SET rlogtime=$LJ::EndOfTime WHERE ".
-                  "journalid=$ownerid AND jitemid=$qitemid");
+                  "journalid=$ownerid AND jitemid=$itemid");
     }
     if ($req->{'props'}->{'opt_backdated'} eq "0" &&
         $oldevent->{'rlogtime'} == $LJ::EndOfTime) {
         $dbcm->do("UPDATE log2 SET rlogtime=$LJ::EndOfTime-UNIX_TIMESTAMP(logtime) ".
-                  "WHERE journalid=$ownerid AND jitemid=$qitemid");
+                  "WHERE journalid=$ownerid AND jitemid=$itemid");
     }
 
     return fail($err,501,$dbcm->errstr) if $dbcm->err;
 
-    my $res = { 'itemid' => $qitemid };
+    my $res = { 'itemid' => $itemid };
     $res->{'anum'} = $oldevent->{'anum'} if defined $oldevent->{'anum'};
     return $res;
 }

@@ -295,15 +295,7 @@ sub can_view_screened {
 
 sub update_commentalter {
     my ($u, $itemid) = @_;
-    my $dbcm = LJ::get_cluster_master($u);
-    return 0 unless $dbcm;
-    my $prop = LJ::get_prop("log", "commentalter");
-
-    $itemid = $itemid + 0;
-
-    $dbcm->do("REPLACE INTO logprop2 (journalid, jitemid, propid, value) ".
-              "VALUES (?, ?, ?, UNIX_TIMESTAMP())", undef, 
-              $u->{'userid'}, $itemid, $prop->{'id'});
+    LJ::set_logprop($u, $itemid, { 'commentalter' => time() });
 }
 
 sub screen_comment {
@@ -315,7 +307,6 @@ sub screen_comment {
     return unless $in;
 
     my $userid = $u->{'userid'} + 0;
-    my $prop = LJ::get_prop("log", "hasscreened");
 
     my $updated = $dbcm->do("UPDATE talk2 SET state='S' ".
                             "WHERE journalid=$userid AND jtalkid IN ($in) ".
@@ -323,7 +314,7 @@ sub screen_comment {
                             "AND state NOT IN ('S','D')");
     if ($updated > 0) {
         $dbcm->do("UPDATE log2 SET replycount=replycount-$updated WHERE journalid=$userid AND jitemid=$itemid");
-        $dbcm->do("REPLACE INTO logprop2 (journalid, jitemid, propid, value) VALUES ($userid, $itemid, $prop->{'id'}, '1')");
+        LJ::set_logprop($u, $itemid, { 'hasscreened' => 1 });
     }
 
     LJ::Talk::update_commentalter($u, $itemid);
@@ -350,8 +341,7 @@ sub unscreen_comment {
         
         my $hasscreened = $dbcm->selectrow_array("SELECT COUNT(*) FROM talk2 " .
                                                  "WHERE journalid=$userid AND nodeid=$itemid AND nodetype='L' AND state='S'");
-        $dbcm->do("DELETE FROM logprop2 WHERE journalid=$userid AND jitemid=$itemid AND propid=$prop->{'id'}")
-            unless $hasscreened;
+        LJ::set_logprop($u, $itemid, { 'hasscreened' => 0 }) unless $hasscreened;
     }
 
     LJ::Talk::update_commentalter($u, $itemid);

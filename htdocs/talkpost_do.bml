@@ -426,6 +426,10 @@ body<=
                   "VALUES ($u->{'userid'}, $jtalkid, $qsubject, $qbody)");
         die $dbcm->errstr if $dbcm->err;
 
+        my $memkey = "$u->{'clusterid'}:$u->{'userid'}:$jtalkid";
+        LJ::MemCache::set([$u->{'userid'},"talksubject:$memkey"], $FORM{'subject'});
+        LJ::MemCache::set([$u->{'userid'},"talkbody:$memkey"], $FORM{'body'});
+
         # dudata
         my $bytes = length($FORM{'subject'}) + length($FORM{'body'});
         # we used to do a LJ::dudata_set(..) on 'T' here, but decided
@@ -462,9 +466,11 @@ body<=
         LJ::load_props($dbs, "talk");
         if (%talkprop) {
             my $values;
+            my $hash = {};
             foreach (keys %talkprop) {
                 my $p = LJ::get_prop("talk", $_);
                 next unless $p;
+                $hash->{$_} = $talkprop{$_};
                 my $tpropid = $p->{'tpropid'};
                 my $qv = $dbh->quote($talkprop{$_});
                 $values .= "($u->{'userid'}, $jtalkid, $tpropid, $qv),";
@@ -475,6 +481,7 @@ body<=
                           "VALUES $values");
                 die $dbcm->errstr if $dbcm->err;
             }
+            LJ::MemCache::set([$u->{'userid'}, "talkprop:$u->{'userid'}:$jtalkid"], $hash);
         }
         
         # update the "replycount" summary field of the log table
@@ -485,9 +492,7 @@ body<=
 
         # update the "hasscreened" property of the log item if needed
         if ($state eq 'S') {
-            LJ::load_props($dbs, "log");
-            my $prop = LJ::get_prop("log", "hasscreened");
-            $dbcm->do("REPLACE INTO logprop2 (journalid, jitemid, propid, value) VALUES ($u->{'userid'}, $itemid, $prop->{'id'}, '1')");
+            LJ::set_logprop($u, $itemid, { 'hasscreened' => 1 });
         }
         
         # update the comment alter property

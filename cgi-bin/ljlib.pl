@@ -3134,7 +3134,7 @@ sub load_userpics
     return unless @load_list;
 
     if (@LJ::MEMCACHE_SERVERS) {
-        my @mem_keys = grep { [$_,"userpic.$_"] } @load_list;
+        my @mem_keys = map { [$_,"userpic.$_"] } @load_list;
         my $mem = LJ::MemCache::get_multi(@mem_keys) || {};
         while (my ($k, $v) = each %$mem) {
             next unless $v && $k =~ /(\d+)/;
@@ -4806,29 +4806,87 @@ sub can_add_syndicated
     return 1;
 }
 
+sub set_logprop
+{
+    my ($u, $jitemid, $hashref) = @_;  # hashref
+    my $dbcm = LJ::get_cluster_master($u);
+
+    $jitemid += 0;
+    my $uid = $u->{'userid'} + 0;
+    my $kill_mem = 0;
+    my $del_ids;
+    my $ins_values;
+    while (my ($k, $v) = each %{$hashref||{}}) {
+        my $prop = LJ::get_prop("log", $k);
+        next unless $prop;
+        $kill_mem = 1 unless $prop eq "commentalter";
+        if ($v) {
+            $ins_values .= "," if $ins_values;
+            $ins_values .= "($uid, $jitemid, $prop->{'id'}, " . $dbcm->quote($v) . ")";
+        } else {
+            $del_ids .= "," if $del_ids;
+            $del_ids .= $prop->{'id'};
+        }
+    }
+    
+    $dbcm->do("REPLACE INTO logprop2 (journalid, jitemid, propid, value) ".
+              "VALUES $ins_values") if $ins_values;
+    $dbcm->do("DELETE FROM logprop2 WHERE journalid=? AND jitemid=? ".
+              "AND propid IN ($del_ids)", undef, $u->{'userid'}, $jitemid) if $del_ids;
+
+    LJ::MemCache::delete([$uid,"logprop:$uid:$jitemid"]) if $kill_mem;
+}
+
 # <LJFUNC>
 # name: LJ::load_log_props2
 # class:
 # des:
 # info:
-# args:
+# args: db?, uuserid, listref, hashref
 # des-:
 # returns:
 # </LJFUNC>
 sub load_log_props2
 {
-    my ($db, $journalid, $listref, $hashref) = @_;
+    my $db = (ref $_[0] eq "DBI::db") ? shift @_ : undef;
 
-    my $jitemin = join(", ", map { $_+0; } @$listref);
-    return unless $jitemin;
+    my ($uuserid, $listref, $hashref) = @_;
+    my $userid = want_userid($uuserid);
     return unless ref $hashref eq "HASH";
-    LJ::load_props("log");
+    
+    my %need;
+    my @memkeys;
+    foreach my $id (@$listref) {
+        $id += 0;
+        $need{$id} = 1;
+        push @memkeys, [$userid,"logprop:$userid:$id"];
+    }
+    return unless %need;
 
+    my $mem = LJ::MemCache::get_multi(@memkeys) || {};
+    while (my ($k, $v) = each %$mem) {
+        next unless $k =~ /(\d+):(\d+)/ && ref $v eq "HASH";
+        delete $need{$2};
+        $hashref->{$2} = $v;
+    }
+    return unless %need;
+
+    unless ($db) {
+        my $u = LJ::load_userid($userid);
+        $db = @LJ::MEMCACHE_SERVERS ? LJ::get_cluster_master($u) :  LJ::get_cluster_reader($u);
+        return unless $db;
+    }
+
+    LJ::load_props("log");
+    my $in = join(",", keys %need);
     my $sth = $db->prepare("SELECT jitemid, propid, value FROM logprop2 ".
-                           "WHERE journalid=$journalid AND jitemid IN ($jitemin)");
-    $sth->execute;
+                           "WHERE journalid=? AND jitemid IN ($in)");
+    $sth->execute($userid);
     while (my ($jitemid, $propid, $value) = $sth->fetchrow_array) {
         $hashref->{$jitemid}->{$LJ::CACHE_PROPID{'log'}->{$propid}->{'name'}} = $value;
+    }
+    foreach my $id (keys %need) {
+        LJ::MemCache::set([$userid,"logprop:$userid:$id"], $hashref->{$id} || {});
     }
 }
 
@@ -4850,16 +4908,36 @@ sub load_log_props2multi
     return unless ref $idsbyc eq "HASH";
     LJ::load_props("log");
 
+    my @memkeys;
     foreach my $c (keys %$idsbyc) {
-        my $fattyin = join(" OR ", map {
-            "(journalid=" . ($_->[0]+0) . " AND jitemid=" . ($_->[1]+0) . ")"
-            } @{$idsbyc->{$c}});
-        my $db = LJ::get_cluster_reader($c);
+        foreach my $pair (@{$idsbyc->{$c}}) {
+            push @memkeys, [$pair->[0],"logprop:$pair->[0]:$pair->[1]"];
+        }
+    }
+    my $mem = LJ::MemCache::get_multi(@memkeys) || {};
+    while (my ($k, $v) = each %$mem) {
+        next unless $k =~ /(\d+):(\d+)/ && ref $v eq "HASH";
+        $hashref->{"$1 $2"} = $v;
+    }
+
+    foreach my $c (keys %$idsbyc) {
+        my @need;
+        foreach (@{$idsbyc->{$c}}) {
+            next if $hashref->{"$_->[0] $_->[1]"};
+            push @need, $_;
+        }
+        next unless @need;
+        my $in = join(" OR ", map { "(journalid=" . ($_->[0]+0) . " AND jitemid=" . ($_->[1]+0) . ")" } @need);
+        my $db = @LJ::MEMCACHE_SERVERS ? LJ::get_cluster_master($c) : LJ::get_cluster_reader($c);
         $sth = $db->prepare("SELECT journalid, jitemid, propid, value ".
-                            "FROM logprop2 WHERE $fattyin");
+                            "FROM logprop2 WHERE $in");
         $sth->execute;
         while (my ($jid, $jitemid, $propid, $value) = $sth->fetchrow_array) {
             $hashref->{"$jid $jitemid"}->{$LJ::CACHE_PROPID{'log'}->{$propid}->{'name'}} = $value;
+        }
+        foreach my $pair (@need) {
+            LJ::MemCache::set([$pair->[0], "logprop:$pair->[0]:$pair->[1]"],
+                              $hashref->{"$pair->[0] $pair->[1]"} || {});
         }
     }
 }
@@ -4875,21 +4953,47 @@ sub load_log_props2multi
 # </LJFUNC>
 sub load_talk_props2
 {
-    my ($db, $journalid, $listref, $hashref) = @_;
+    my $db = (ref $_[0] eq "DBI::db") ? shift @_ : undef;
+    my ($uuserid, $listref, $hashref) = @_;
 
-    my $in = join(", ", map { $_+0; } @$listref);
-    return unless $in;
+    my $userid = want_userid($uuserid);
+    return unless ref $hashref eq "HASH";
+
+    my %need;
+    my @memkeys;
+    foreach my $id (@$listref) {
+        $id += 0;
+        $need{$id} = 1;
+        push @memkeys, [$userid,"talkprop:$userid:$id"];
+    }
+    return unless %need;
+
+    my $mem = LJ::MemCache::get_multi(@memkeys) || {};
+    while (my ($k, $v) = each %$mem) {
+        next unless $k =~ /(\d+):(\d+)/ && ref $v eq "HASH";
+        delete $need{$2};
+        $hashref->{$2} = $v;
+    }
+    return unless %need;
+
+    unless ($db) {
+        my $u = LJ::load_userid($userid);
+        $db = @LJ::MEMCACHE_SERVERS ? LJ::get_cluster_master($u) :  LJ::get_cluster_reader($u);
+        return unless $db;
+    }
 
     LJ::load_props("talk");
-    die "Last param not hash" unless ref $hashref eq "HASH";
-
+    my $in = join(',', keys %need);
     my $sth = $db->prepare("SELECT jtalkid, tpropid, value FROM talkprop2 ".
-                           "WHERE journalid=$journalid AND jtalkid IN ($in)");
-    $sth->execute;
+                           "WHERE journalid=? AND jtalkid IN ($in)");
+    $sth->execute($userid);
     while (my ($jtalkid, $propid, $value) = $sth->fetchrow_array) {
         my $p = $LJ::CACHE_PROPID{'talk'}->{$propid};
         next unless $p;
         $hashref->{$jtalkid}->{$p->{'name'}} = $value;
+    }
+    foreach my $id (keys %need) {
+        LJ::MemCache::set([$userid,"talkprop:$userid:$id"], $hashref->{$id} || {});
     }
 }
 
