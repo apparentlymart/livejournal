@@ -16,8 +16,6 @@
     } else {
         $styles = LJ::S1::get_user_styles($user);
     }
-    return LJ::ljuser($user) . " has no public styles."
-        unless $styles;
 
     my ($dday,$dmon,$dyear) = (localtime(time))[3..5];
     $dyear+=1900; $dmon++;
@@ -26,20 +24,23 @@
     my $ret = "Styles for " . LJ::ljuser($user) . ":<br /><br />";
 
     my $last;
+  STY:
     foreach my $sty (sort { $a->{'type'} cmp $b->{'type'} || $a->{'styledes'} cmp $b->{'styledes'} }
                      values %$styles) {
+
+        next STY unless $sty->{'is_public'} eq "Y";
 
         if ($last ne $LJ::viewinfo{$sty->{'type'}}->{'des'}) {
             $last = $LJ::viewinfo{$sty->{'type'}}->{'des'};
             $ret .= "<b>$last</b><br />\n";
         }
 
-        my $view = substr($sty->{'type'}, 0, 1);
-        $ret .= "<nobr>&nbsp;&nbsp;<a target='main' href='styleinfo.bml?styleid=$sty->{'styleid'}'>-</a> ";
+        $ret .= "<nobr>&nbsp;&nbsp;[<a target='main' href='styleinfo.bml?styleid=$sty->{'styleid'}'>info</a>] ";
         $ret .= "<a target='main' href='/customview.cgi?styleid=$sty->{'styleid'}&amp;user=$dispuser&amp;";
         $ret .= "nooverride=1$extra{$sty->{'type'}}'>$sty->{'styledes'}</a></nobr><br />\n";
     }
 
+    $ret .= ".";
     return $ret; 
 }
 _code?><?_c <LJDEP>
