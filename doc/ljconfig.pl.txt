@@ -66,18 +66,28 @@
     $USER_VHOSTS = 1;
     $USER_DOMAIN = $DOMAIN;
   
+    # schemes available to users.
+    # schemes will be displayed according to their order in the array,
+    # but the first item in the array is the default scheme
+    # 'title' is the printed name, while 'scheme' is the scheme name.
+    #@LJ::SCHEMES = (
+    #                { scheme => 'lynx', title => 'Lynx',
+    #                  thumb  => [ 'schemethumb/lynx.png', 200, 166 ]},
+    #                { scheme => 'bluewhite', title => 'Blue White' },
+    #               );
+
     # initial friends for new accounts.
     # leave undefined if you don't want to use it.
-    # @INITIAL_FRIENDS = qw(news);
+    #@INITIAL_FRIENDS = qw(news);
 
     # news site support. if set, that journal loads on the main page.
     #$FRONTPAGE_JOURNAL = "news";
 
-    # Do paid users get email addresses?  username@$USER_DOMAIN ?
+    # do paid users get email addresses?  username@$USER_DOMAIN ?
     # (requires additional mail system configuration)
     $USER_EMAIL  = 0;
 
-    ## Directory optimizations
+    # directory optimizations
     $DIR_DB = "";   # by default, hit the main database (bad for big sites!)
 
     # DB role to use when connecting to directory DB   
@@ -93,6 +103,9 @@
                'pass' => 'ljpass',
                'role' => {
                    'cluster1' => 1,
+
+                   # optionally, apache write its access logs to a mysql database
+                   #logs => 1,
                },
            },
            # example of a TCP-based DB connection
@@ -110,14 +123,17 @@
            #},
            );
 
-    # List of all clusters - each one needs a 'cluster$i' role in %DBINFO
+    # if database logging is enabled above, should we log images or just page requests?
+    #$DONT_LOG_IMAGES = 1;
+
+    # list of all clusters - each one needs a 'cluster$i' role in %DBINFO
     @CLUSTERS = (1);    # eg: (1, 2, 3) (for scalability)
 
-    # Which cluster(s) get new users?
-    # If it's an arrayref, choose one of the listed clusters at random.
+    # which cluster(s) get new users?
+    # if it's an arrayref, choose one of the listed clusters at random.
     $DEFAULT_CLUSTER = 1;
 
-    # Can users choose which cluster they're assigned to?  Leave this off.
+    # can users choose which cluster they're assigned to?  leave this off.
     $ALLOW_CLUSTER_SELECT = 0; 
 
     # list of regular expressions matching usernames that people can't have.
@@ -132,6 +148,20 @@
 
     $MAX_HINTS_LASTN = 100;
     $MAX_SCROLLBACK_LASTN = 400;
+
+    # should users be given unique identifiers?  helpful for dealing with abuse.
+    #$UNIQ_COOKIES = 1;
+
+    # which users' s2 layers should always run trusted un-cleaned?
+    #%S2_TRUSTED = ( '2' => 'whitaker' ); # userid => username
+
+    # on a larger installation, it's useful to have multiple qbufferd.pl processes,
+    # one for each command type.  this is optional.
+    #@LJ::QBUFFERD_ISOLATE = ('weblogscom', 'ljcom_newpost');
+
+    # MemCache information
+    #@LJ::MEMCACHE_SERVERS = ('hostname:port');
+    #$LJ::MEMCACHE_COMPRESS_THRESHOLD = 1_000; # bytes
 
     # Only turn this on if you are using MySQL replication between
     # multiple databases and have one or more slaves set to not
