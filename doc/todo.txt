@@ -46,6 +46,13 @@ ANYBODY:
 | bradfitz |
 +----------+
 
+misc:
+developers/doc link wrong
+new talk view mode
+topics / named entries (url space control)
+logaccess bypass
+talkleft_xfp investigation
+
 * clustering:
    -- console
    -- after user's moved, update their memories:
