@@ -113,7 +113,7 @@ body<=
      LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
                            "viewall", "entry: $u->{'user'}, itemid: $item->{'itemid'}, statusvis: $u->{'statusvis'}");
 
- # check for deleted/suspended
+ # check for deleted/suspended/security
  } else {
 
      # check suspended
@@ -123,11 +123,11 @@ body<=
      # check deleted
      return "<?h1 $ML{'talk.error.deleted.title'} h1?><?p $ML{'talk.error.deleted'} p?>"
          if ($u->{'statusvis'} eq "D");
- }
 
- ####  Check security before viewing this post
- my $errtxt;
- return $errtxt unless LJ::Talk::check_viewable($remote, $item, \%GET, \$errtxt);
+     ####  Check security before viewing this post
+     my $errtxt;
+     return $errtxt unless LJ::Talk::check_viewable($remote, $item, \%GET, \$errtxt);
+ }
 
  my $showmultiform = $remote &&
     ($remote->{'user'} eq $u->{'user'} ||
