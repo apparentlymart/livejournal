@@ -1754,7 +1754,7 @@ sub Page__get_latest_month
 sub palimg_modify
 {
     my ($ctx, $filename, $items) = @_;
-    return undef unless $filename =~ /^\w[\w\/]*\.(gif|png)$/;
+    return undef unless $filename =~ /^\w[\w\/\-]*\.(gif|png)$/;
     my $url = "$LJ::SITEROOT/palimg/$filename";
     return $url unless $items && @$items;
     return undef if @$items > 7;
@@ -1774,7 +1774,7 @@ sub palimg_modify
 sub palimg_tint
 {
     my ($ctx, $filename, $bcol, $dcol) = @_;  # bright color, dark color [opt]
-    return undef unless $filename =~ /^\w[\w\/]*\.(gif|png)$/;
+    return undef unless $filename =~ /^\w[\w\/\-]*\.(gif|png)$/;
     my $url = "$LJ::SITEROOT/palimg/$filename";
     $url .= "/pt";
     foreach my $col ($bcol, $dcol) {
@@ -1788,7 +1788,7 @@ sub palimg_tint
 sub palimg_gradient
 {
     my ($ctx, $filename, $start, $end) = @_;
-    return undef unless $filename =~ /^\w[\w\/]*\.(gif|png)$/;
+    return undef unless $filename =~ /^\w[\w\/\-]*\.(gif|png)$/;
     my $url = "$LJ::SITEROOT/palimg/$filename";
     $url .= "/pg";
     foreach my $pi ($start, $end) {
