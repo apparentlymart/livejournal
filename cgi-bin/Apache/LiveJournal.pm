@@ -50,6 +50,8 @@ sub trans
 {
     my $r = shift;
     my $uri = $r->uri;
+    my $args = $r->args;
+    my $args_wq = $args ? "?$args" : "";
     my $host = $r->header_in("Host");
     my $hostport = ($host =~ s/:\d+$//) ? $& : "";
 
@@ -58,7 +60,7 @@ sub trans
         $host eq $LJ::DOMAIN && $LJ::DOMAIN_WEB ne $LJ::DOMAIN) 
     {
         my $url = "$LJ::SITEROOT$uri";
-        $url .= "?" . $r->args if $r->args;
+        $url .= "?" . $args if $args;
         return redir($r, $url);
     }
 
@@ -68,16 +70,16 @@ sub trans
         my $opts = shift;
         $opts ||= {};
 
-        if ($opts->{'user'} ne lc($opts->{'user'})) {
-            my $url = LJ::journal_base(lc($opts->{'user'}), $opts->{'vhost'}) .
-                "/$opts->{'mode'}$opts->{'args'}";
-            return redir($r, $url);
-        }
-
         $opts->{'user'} = LJ::canonical_username($opts->{'user'});
 
         if ($opts->{'mode'} eq "info") {
             return redir($r, "$LJ::SITEROOT/userinfo.bml?user=$opts->{'user'}");
+        }
+
+        if ($opts->{'user'} ne lc($opts->{'user'})) {
+            my $url = LJ::journal_base(lc($opts->{'user'}), $opts->{'vhost'}) .
+                "/$opts->{'mode'}$opts->{'pathextra'}$args_wq";
+            return redir($r, $url);
         }
 
         %RQ = %$opts;
@@ -94,9 +96,10 @@ sub trans
         my $user = $1;
         return $journal_view->({'vhost' => 'users',
                                 'mode' => $1,
-                                'args' => $2,
+                                'pathextra' => $2,
+                                'args' => $args,
                                 'user' => $user, })
-            if $uri =~ m!/(\w+)?([^\?]*)!;
+            if $uri =~ m!/(\w+)?(.*)!;
         return $journal_view->(undef);
     }
 
@@ -115,9 +118,10 @@ sub trans
         });
         return $journal_view->({'vhost' => "other:$host$hostport",
                                 'mode' => $1,
-                                'args' => $2,
+                                'pathextra' => $2,
+                                'args' => $args,
                                 'user' => $user, })
-            if $user && $uri =~ m!/(\w+)?([^\?]*)!;
+            if $user && $uri =~ m!/(\w+)(.*)!;
         return $journal_view->(undef);
     }
 
@@ -129,16 +133,18 @@ sub trans
         ^/(users\/|community\/|\~)  # users/community/tilde
         (\w{1,15})                  # mandatory username
         (?:/(\w+)?)?                # optional /<viewname>
-        ([^\?]*)                    # extra args
+        (.*)?                       # path extra: /FriendGroup, for example
         !x && ($3 eq "" || defined $LJ::viewinfo{$3}))
     {
+        my ($part1, $user, $mode, $pe) = ($1, $2, $3, $4);
         my $vhost = { 'users/' => '', 'community/' => 'community',
-                      '~' => 'tilde' }->{$1};
+                      '~' => 'tilde' }->{$part1};
         return DECLINED if $vhost eq "community" && $uri =~ m!\.bml|\.html$!;
         return $journal_view->({'vhost' => $vhost,
-                                'mode' => $3,
-                                'args' => $4,
-                                'user' => $2, });
+                                'mode' => $mode,
+                                'args' => $args,
+                                'pathextra' => $pe,
+                                'user' => $user, });
     }
 
     # protocol support
@@ -335,6 +341,7 @@ sub journal_content
 	'headers' => \%headers,
 	'args' => $RQ{'args'},
 	'vhost' => $RQ{'vhost'},
+        'pathextra' => $RQ{'pathextra'},
 	'env' => \%ENV,
     };
 
@@ -484,7 +491,7 @@ sub interface_content
 
     my %out = ();
     my %FORM = ();
-    LJ::get_form_data(\%FORM);
+    LJ::decode_url_string(scalar($r->content), \%FORM);
 
     LJ::do_request($dbs, \%FORM, \%out);
 

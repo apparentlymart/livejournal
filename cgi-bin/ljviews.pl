@@ -30,7 +30,7 @@ sub create_view_lastn
     LJ::load_user_props($dbs, $remote, "opt_nctalklinks");
 
     my %FORM = ();
-    LJ::get_form_data(\%FORM);
+    LJ::decode_url_string($opts->{'args'}, \%FORM);
 
     if ($opts->{'args'}) {
         $opts->{'badargs'} = 1;
@@ -403,7 +403,7 @@ sub create_view_friends
     $$ret = "";
 
     my %FORM = ();
-    LJ::get_form_data(\%FORM);
+    LJ::decode_url_string($opts->{'args'}, \%FORM);
 
     if ($FORM{'mode'} eq "live") {
         $$ret .= "<html><head><title>${user}'s friends: live!</title></head>\n";
@@ -466,10 +466,9 @@ sub create_view_friends
         $filter = $FORM{'filter'}; 
     } else {
         my $group;
-        if ($opts->{'args'}) {
-            $group = $opts->{'args'};
+        if ($opts->{'pathextra'}) {
+            $group = $opts->{'pathextra'};
             $group =~ s!^/!!;
-            $group =~ s!\?.*!!;
             if ($group) { $group = LJ::durl($group); }
         }
         $group ||= "Default View";
@@ -820,7 +819,7 @@ sub create_view_calendar
     foreach ("name", "url", "urlname") { LJ::text_out(\$u->{$_}); }
 
     my %FORM = ();
-    LJ::get_form_data(\%FORM);
+    LJ::decode_url_string($opts->{'args'}, \%FORM);
 
     my %calendar_page = ();
     $calendar_page{'name'} = LJ::ehtml($u->{'name'});
@@ -1077,7 +1076,8 @@ sub create_view_day
         if ($remote && $remote->{'journaltype'} eq "P");
 
     my %FORM = ();
-    LJ::get_form_data(\%FORM);
+    LJ::decode_url_string($opts->{'args'}, \%FORM);
+
     my $month = $FORM{'month'};
     my $day = $FORM{'day'};
     my $year = $FORM{'year'};

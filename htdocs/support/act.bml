@@ -4,7 +4,7 @@
  $dbh = $dbs->{'dbh'};
  $dbr = $dbs->{'reader'};
 
- my $cmd = LJ::get_query_string();
+ my $cmd = BML::get_query_string();
  if ($cmd =~ /^(\w+);(\d+);(\w{15})(?:;(\d+))?$/) {
      ($action, $spid, $authcode, $splid) = ($1, $2, $3, $4);
  }

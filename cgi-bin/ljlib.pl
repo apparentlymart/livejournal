@@ -860,8 +860,8 @@ sub auth_fields
             $hpass = $1;
         }
 
-        my $alturl = $ENV{'REQUEST_URI'};
-        $alturl .= ($alturl =~ /\?/) ? "&amp;" : "?";
+        my $alturl = BML::get_uri() . '?' . BML::get_query_string();
+        $alturl .= "&amp;" unless $alturl =~ /\?$/;
         $alturl .= "altlogin=1";
 
         $ret .= "<tr align='left'><td colspan='2' align='left'>You are currently logged in as <b>$luser</b>.";
@@ -873,7 +873,8 @@ sub auth_fields
     } else {
         $ret .= "<tr align='left'><td>Username:</td><td align='left'><input type='text' name='user' size='15' maxlength='15' value='";
         my $user = $form->{'user'};
-        unless ($user || $ENV{'QUERY_STRING'} =~ /=/) { $user=$ENV{'QUERY_STRING'}; }
+        my $query_string = BML::get_query_string();
+        unless ($user || $query_string =~ /=/) { $user=$query_string; }
         $ret .= BML::eall($user) unless ($form->{'altlogin'});
         $ret .= "' /></td></tr>\n";
         $ret .= "<tr><td>Password:</td><td align='left'>\n";
@@ -910,7 +911,8 @@ sub auth_fields_2
     {
         $ret .= "<tr><td align='right'><u>U</u>sername:</td><td align='left'><input type=\"text\" name='user' size='15' maxlength='15' accesskey='u' value=\"";
         my $user = $form->{'user'};
-        unless ($user || $ENV{'QUERY_STRING'} =~ /=/) { $user=$ENV{'QUERY_STRING'}; }
+        my $query_string = BML::get_query_string();
+        unless ($user || $query_string =~ /=/) { $user=$query_string; }
         $ret .= BML::eall($user) unless ($form->{'altlogin'});
         $ret .= "\" /></td></tr>\n";
         $ret .= "<tr><td align='right'><u>P</u>assword:</td><td align='left'>\n";
@@ -1104,49 +1106,6 @@ sub self_link
     }
     chop $link;
     return $link;
-}
-
-# <LJFUNC>
-# class: web
-# name: LJ::get_query_string
-# des: Returns the query string, which can be in a number of spots
-#      depending on the webserver & configuration, sadly.
-# returns: String; query string.
-# </LJFUNC>
-sub get_query_string
-{
-    my $q = $ENV{'QUERY_STRING'} || $ENV{'REDIRECT_QUERY_STRING'};
-    if ($q eq "" && $ENV{'REQUEST_URI'} =~ /\?(.+)/) {
-        $q = $1;
-    }
-    return $q;
-}
-
-# <LJFUNC>
-# class: web
-# name: LJ::get_form_data
-# des: Loads a hashref with form data from a GET or POST request.
-# args: hashref, type?
-# des-hashref: Hashref to populate with form data.
-# des-type: If "GET", will ignore POST data.
-# </LJFUNC>
-sub get_form_data
-{
-    my $hashref = shift;
-    my $type = shift;
-    my $buffer;
-
-    if ($ENV{'REQUEST_METHOD'} eq 'POST' && $type ne "GET") {
-        read(STDIN, $buffer, $ENV{'CONTENT_LENGTH'});
-    } else {
-        $buffer = $ENV{'QUERY_STRING'} || $ENV{'REDIRECT_QUERY_STRING'};
-        if ($buffer eq "" && $ENV{'REQUEST_URI'} =~ /\?(.+)/) {
-            $buffer = $1;
-        }
-    }
-
-    # Split the name-value pairs
-    LJ::decode_url_string($buffer, $hashref);
 }
 
 # <LJFUNC>
@@ -2761,7 +2720,7 @@ sub get_remote_noauth
 # </LJFUNC>
 sub did_post
 {
-    return ($ENV{'REQUEST_METHOD'} eq "POST");
+    return (BML::get_method() eq "POST");
 }
 
 # <LJFUNC>

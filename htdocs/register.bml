@@ -13,7 +13,7 @@ body<=
 
  my ($sth, $ret);
 
- my $qs = LJ::get_query_string();
+ my $qs = BML::get_query_string();
  my $u;
 
  #### new way
