@@ -178,7 +178,7 @@ body<=
 
         my $suser = LJ::load_userid($suserid);
         # skip suspended/deleted accounts, already watched feeds
-        next if ($friends->{$suserid} || ($suser->{'statusvis'} ne "V"));
+        next if $friends->{$suserid} || $suser->{'statusvis'} ne "V";
 
         my $cost = LJ::syn_cost($count + 1);
         if ($POST{'action:add'} && $POST{"add_$user"}) {
