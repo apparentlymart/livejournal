@@ -134,9 +134,13 @@ sub clean
                 if ($attr->{'user'} || $attr->{'comm'}) {
                     my $user = LJ::canonical_username($attr->{'user'} || $attr->{'comm'});
                     if ($user) {
-                        $newdata .= LJ::ljuser($user, { 
-                            'type' => $attr->{'user'} ? "" : "C"
-                            });
+                        if ($opts->{'textonly'}) {
+                            $newdata .= $user;
+                        } else {
+                            $newdata .= LJ::ljuser($user, { 
+                                'type' => $attr->{'user'} ? "" : "C"
+                                });
+                        }
                     } else {
                         $newdata .= "<b>[Bad username in LJ tag]</b>";
                     }
@@ -387,6 +391,7 @@ sub clean_subject_all
         'addbreaks' => 0,
         'eat' => $subjectall_eat,
         'mode' => 'deny',
+        'textonly' => 1,
     });
 }
 
