@@ -345,9 +345,9 @@ sub get_recent_items
     my $extra_sql;
     if ($opts->{'friendsview'}) {
 	if ($clusterid) {
-	    $extra_sql .= "ownerid, rlogtime, ";
-	} else {
 	    $extra_sql .= "journalid AS 'ownerid', rlogtime, ";
+	} else {
+	    $extra_sql .= "ownerid, rlogtime, ";
 	}
     }
 
