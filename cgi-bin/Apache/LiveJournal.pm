@@ -519,7 +519,7 @@ sub journal_content
     if ($RQ{'mode'} eq "robots_txt")
     {
         my $u = LJ::load_user($RQ{'user'});
-        LJ::load_user_props(undef, $u, "opt_blockrobots");
+        LJ::load_user_props($u, "opt_blockrobots");
         $r->content_type("text/plain");
         $r->send_http_header();
         $r->print("User-Agent: *\n");
