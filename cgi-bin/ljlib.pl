@@ -4338,7 +4338,7 @@ sub make_journal
     # is reply/month/entry/res and that means it *has* to be S2--S1 defaults to a
     # BML page to handle those, but we don't want to attempt to load a userprop
     # because now load_user_props dies if you try to load something invalid
-    push @needed_props, $s1prop unless $eff_view =~ /(?:reply|month|entry|res)/;
+    push @needed_props, $s1prop unless $eff_view =~ /(?:reply|month|entry|res|data)/;
 
     # preload props the view creation code will need later (combine two selects)
     if (ref $LJ::viewinfo{$eff_view}->{'owner_props'} eq "ARRAY") {
