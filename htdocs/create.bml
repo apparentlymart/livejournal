@@ -41,7 +41,8 @@ head<=
 body<=
 <?_code 
 
- LJ::set_active_crumb('createjournal');
+ my $crumb = $LJ::IS_SSL ? 'securecreatejournal' : 'createjournal';
+ LJ::set_active_crumb($crumb);
 
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
