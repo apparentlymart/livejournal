@@ -105,7 +105,7 @@
  }
 
  if ($u->{'opt_blockrobots'}) {
-     $head .= "<meta name=\"robots\" content=\"noindex\">\n";
+     $head .= "<meta name=\"robots\" content=\"noindex\" />\n";
  }
 
  if ($u->{'journaltype'} eq "R" && $u->{'renamedto'}) {
@@ -236,15 +236,15 @@
      my @linkele;
     
      my $label = $com ? $ML{'.monitor.comm'} : $ML{'.monitor.user'};
-     push @linkele, "<a href='/friends/add.bml?user=$user'><img src='$LJ::IMGPREFIX/btn_addfriend.gif' width='22' height='20' alt='$label' title='$label' align='absmiddle' border='0'></a>";
+     push @linkele, "<a href='/friends/add.bml?user=$user'><img src='$LJ::IMGPREFIX/btn_addfriend.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>";
 
      $label = $ML{'.label.todo'};
-     push @linkele, "<a href='/todo/?user=$user'><img src='$LJ::IMGPREFIX/btn_todo.gif' width='22' height='20' alt='$label' title='$label' align='absmiddle' border='0'></a>";
+     push @linkele, "<a href='/todo/?user=$user'><img src='$LJ::IMGPREFIX/btn_todo.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>";
 
      $label = $ML{'.label.memories'};
-     push @linkele, "<a href='/tools/memories.bml?user=$user'><img src='$LJ::IMGPREFIX/btn_memories.gif' width='22' height='20' alt='$label' title='$label' align='absmiddle' border='0'></a>";
+     push @linkele, "<a href='/tools/memories.bml?user=$user'><img src='$LJ::IMGPREFIX/btn_memories.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>";
 
-     push @linkele, "<a href='/tools/tellafriend.bml?user=$u->{'user'}'><img align='absmiddle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_tellfriend.gif' width='22' height='20' alt='$ML{'.tellafriend'}' title='$ML{'.tellafriend'}' border='0'></a>";
+     push @linkele, "<a href='/tools/tellafriend.bml?user=$u->{'user'}'><img align='middle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_tellfriend.gif' width='22' height='20' alt='$ML{'.tellafriend'}' title='$ML{'.tellafriend'}' border='0' /></a>";
 
      if (@linkele) {
          $body .="<?standout ";
@@ -273,7 +273,7 @@
      my $picid = $u->{'defaultpicid'};
      my %pic;
      LJ::load_userpics($dbr, \%pic, [ $picid ]);
-     $body .= "<a href='/allpics.bml?user=$user'><img src='$LJ::USERPIC_ROOT/$picid/$userid' width='$pic{$picid}->{'width'}' height='$pic{$picid}->{'height'}' vspace='3' border='0'></a>";
+     $body .= "<a href='/allpics.bml?user=$user'><img src='$LJ::USERPIC_ROOT/$picid/$userid' width='$pic{$picid}->{'width'}' height='$pic{$picid}->{'height'}' vspace='3' border='0' alt='$user' /></a>";
  } else {
      $body .= "&nbsp;";
  }
@@ -294,7 +294,7 @@
          $link=$u->{'name'};
      }
      my $icon="<a href='" . LJ::ehtml($synd->{'synurl'}) . "'>".
-              "<img src='$LJ::IMGPREFIX/xml.gif' width='36' height='14' align='absmiddle' border='0'></a>";
+              "<img src='$LJ::IMGPREFIX/xml.gif' width='36' height='14' align='middle' border='0' /></a>";
      $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.syndicatedfrom'}</b></td>\n".
               "<td>$link $icon</td></tr>\n";
 
@@ -352,7 +352,7 @@
 
           if ($u->{'country'}) {
               $country = $LJ::DISABLED{'directory'} ? $countries{$u->{'country'}} :
-                  "<a href='/directory.bml?opt_sort=ut&s_loc=1&loc_cn=$u->{'country'}'>".
+                  "<a href='/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=$u->{'country'}'>".
                       $countries{$u->{'country'}} . "</a>";
 
               my $estate;
@@ -361,21 +361,22 @@
                   if ($u->{'country'} eq "US") { $state = $states{$state}; }
                   $estate = LJ::eurl($state);
                   $state = $LJ::DISABLED{'directory'} ? $state :
-                      "<a href='/directory.bml?opt_sort=ut&s_loc=1&loc_cn=".
-                          "$u->{'country'}&loc_st=$estate'>$state</a>";
+                      "<a href='/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=".
+                          "$u->{'country'}&amp;loc_st=$estate'>$state</a>";
               }
 
               if ($u->{'city'}) {
                   my $ecity = LJ::eurl($u->{'city'});
                   $city = LJ::ehtml($u->{'city'});
                   unless ($LJ::DISABLED{'directory'}) {
-                      $city = "<a href='/directory.bml?opt_sort=ut&s_loc=1&loc_cn=".
-                          "$u->{'country'}&loc_st=$estate&loc_ci=$ecity'>$city</a>";
+                      $city = "<a href='/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=".
+                          "$u->{'country'}&amp;loc_st=$estate&amp;loc_ci=$ecity'>$city</a>";
                   }
               }
           }
 
-          $body .= join(", ", grep { $_ } ($city, $state, $country))
+          $body .= join(", ", grep { $_ } ($city, $state, $country));
+          $body .= "</td></tr>";
       }
 
       if ($u->{'bdate'} && !$com && $u->{'bdate'} ne "0000-00-00") {
@@ -429,24 +430,24 @@
           my $qim = $u->{'aolim'};
           $qim =~ s/ /+/g;
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
-          $body .= "<tr><td align='right'><b><nobr>$ML{'.label.aolim'}</nobr></b></td><td colspan='$span'>$u->{'aolim'} (<b><a href='aim:addbuddy?screenname=$qim'>$ML{'.label.addbuddy'}</a>, <a href='aim:goim?screenname=$qim&amp;message=Hello+there!.+How+are+you?'>$ML{'.label.sendmessage'}</a></b>)</td></tr>\n";
+          $body .= "<tr><td align='right'><b style='white-space: nowrap;'>$ML{'.label.aolim'}</b></td><td colspan='$span'>$u->{'aolim'} (<b><a href='aim:addbuddy?screenname=$qim'>$ML{'.label.addbuddy'}</a>, <a href='aim:goim?screenname=$qim&amp;message=Hello+there!.+How+are+you?'>$ML{'.label.sendmessage'}</a></b>)</td></tr>\n";
       }
       if ($u->{'icq'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
-          $body .= "<tr><td align='right'><b><nobr>$ML{'.label.icquin'}</nobr></b></td><td colspan='$span'><img src='http://web.icq.com/whitepages/online?icq=$u->{'icq'}&amp;img=5' height='18' width='18'> $u->{'icq'} (<b><a href='http://wwp.icq.com/scripts/search.dll?to=$u->{'icq'}'>$ML{'.label.adduser'}</a>, <a href='http://wwp.icq.com/scripts/contact.dll?msgto=$u->{'icq'}'>$ML{'.label.sendmessage'}</a></b>) </td></tr>\n";
+          $body .= "<tr><td align='right'><b>$ML{'.label.icquin'}</b></td><td colspan='$span'><img src='http://web.icq.com/whitepages/online?icq=$u->{'icq'}&amp;img=5' height='18' width='18' /> $u->{'icq'} (<b><a href='http://wwp.icq.com/scripts/search.dll?to=$u->{'icq'}'>$ML{'.label.adduser'}</a>, <a href='http://wwp.icq.com/scripts/contact.dll?msgto=$u->{'icq'}'>$ML{'.label.sendmessage'}</a></b>) </td></tr>\n";
       }
       if ($u->{'yahoo'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
-          $body .= "<tr><td align='right'><b><nobr>$ML{'.label.yahooid'}</nobr></b></td><td colspan='$span'><img src='http://opi.yahoo.com/online?u=$u->{'yahoo'}&m=g&t=0' width='12' height='12' /> <a href='http://profiles.yahoo.com/$u->{'yahoo'}'>$u->{'yahoo'}</a> (<b><a href='http://edit.yahoo.com/config/set_buddygrp?.src=&amp;.cmd=a&amp;.bg=Friends&amp;.bdl=$u->{'yahoo'}'>$ML{'.label.adduser'}</a>, <a href='http://edit.yahoo.com/config/send_webmesg?.target=$u->{'yahoo'}'>$ML{'.label.sendmessage'}</a></b>) </td></tr>\n";
+          $body .= "<tr><td align='right'><b style='white-space: nowrap;'>$ML{'.label.yahooid'}</b></td><td colspan='$span'><img src='http://opi.yahoo.com/online?u=$u->{'yahoo'}&m=g&t=0' width='12' height='12' /> <a href='http://profiles.yahoo.com/$u->{'yahoo'}'>$u->{'yahoo'}</a> (<b><a href='http://edit.yahoo.com/config/set_buddygrp?.src=&amp;.cmd=a&amp;.bg=Friends&amp;.bdl=$u->{'yahoo'}'>$ML{'.label.adduser'}</a>, <a href='http://edit.yahoo.com/config/send_webmesg?.target=$u->{'yahoo'}'>$ML{'.label.sendmessage'}</a></b>) </td></tr>\n";
       }
       if ($u->{'msn'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
           my $msnname = ($u->{'opt_mangleemail'} eq "Y") ? $mangleaddress->($u->{'msn'}) : $u->{'msn'};
-          $body .= "<tr><td align='right'><b><nobr>$ML{'.label.msnusername'}</nobr></b></td><td colspan='$span'>$msnname</td></tr>\n";
+          $body .= "<tr><td align='right'><b>$ML{'.label.msnusername'}</b></td><td colspan='$span'>$msnname</td></tr>\n";
       }
       if ($u->{'jabber'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
-          $body .= "<tr><td align='right'><b><nobr>$ML{'.label.jabber'}</nobr></b></td><td colspan='$span'>$u->{'jabber'}</td></tr>\n";
+          $body .= "<tr><td align='right'><b>$ML{'.label.jabber'}</b></td><td colspan='$span'>$u->{'jabber'}</td></tr>\n";
       }
   }
 
@@ -561,7 +562,7 @@
          }
          if (@friend_of) {
              $label = $com ? $ML{'.friendof.comm'} : $ML{'.friendof.user'};
-             $body .= "<tr><td align='right' valign='top'><b><nobr>$label</nobr></b>";
+             $body .= "<tr><td align='right' valign='top'><b style='white-space: nowrap;'>$label</b>";
              if ($u->{'opt_hidefriendofs'}) {
                  $body  .= "<br /><i>$ML{'.friendof.hidden'}</i>";
              }
@@ -582,7 +583,7 @@
          };
          if (@member_of) {
              $label = $ML{'.label.memberof'};
-             $body .= "<tr><td align='right' valign='top'><b><nobr>$label:</nobr></b></td><td colspan='2'>";
+             $body .= "<tr><td align='right' valign='top'><b style='white-space: nowrap;'>$label:</b></td><td colspan='2'>";
              $body .= "<b>" . scalar(@member_of) . ":</b> ";
              foreach (@member_of) {
                  my $frlink = "<a href='/userinfo.bml?user=$_->{'user'}'>$_->{'user'}</a>";
@@ -594,7 +595,7 @@
          };
      }
  } else {  # Syndication journals are special
-     $body .= "<tr><td align='right' valign='top'><b><nobr>$ML{'.friendof.syndreadcount'}:</nobr></b></td>";
+     $body .= "<tr><td align='right' valign='top'><b style='white-space: nowrap;'>$ML{'.friendof.syndreadcount'}:</b></td>";
      $body .= "<td colspan='2'><i>$friendsof{'count'}</i></td></tr>\n";
  }
 
@@ -604,16 +605,16 @@
      'u' => $u,
      'remote' => $remote,
  })) {
-     $body .= "<tr><td align='right' valign='top'><b><nobr>";
+     $body .= "<tr><td align='right' valign='top'><b style='white-space: nowrap;'>";
      $body .= $row->[0];
-     $body .=":</nobr></b></td><td colspan='2'>";
+     $body .=":</b></td><td colspan='2'>";
      $body .= $row->[1];
      $body .= "</td></tr>\n";
  }
  
  unless ($synd || $FORM{'mode'} eq "full") {  # Synd accts are always full, but their full ends early (see below)
      $body .= "</table>\n";
-     $body .= "<p><center><i><a href='/userinfo.bml?user=$u->{'user'}&amp;mode=full'>$ML{'.label.moredetails'}</a></i></center>";
+     $body .= "<p align='center'><i><a href='/userinfo.bml?user=$u->{'user'}&amp;mode=full'>$ML{'.label.moredetails'}</a></i></p>";
      return;
  }
  
@@ -621,8 +622,8 @@
  ##
  ## interesting times
  ##
- $body .= "<tr><td align='right' nowrap><b>$ML{'.label.datecreated'}</b></td><td colspan='2'>$u->{'timecreate'}</td></tr>";
- $body .= "<tr><td align='right' nowrap><b>$ML{'.label.dateupdated'}</b></td><td colspan='2'>";
+ $body .= "<tr><td align='right' nowrap='nowrap'><b>$ML{'.label.datecreated'}</b></td><td colspan='2'>$u->{'timecreate'}</td></tr>";
+ $body .= "<tr><td align='right' nowrap='nowrap'><b>$ML{'.label.dateupdated'}</b></td><td colspan='2'>";
  if ($u->{'timeupdate'}) {
      $body .= "$u->{'timeupdate'}, <i>";
      my $secondsold = $u->{'secondsold'};
@@ -690,7 +691,7 @@
      } else {
          $count = $dbr->selectrow_array("SELECT COUNT(*) FROM log WHERE ownerid=$userid"); 
      }
-     $body .= "<tr><td align='right' nowrap='1'><b>$ML{'.label.journalentrs'}</b></td><td colspan='2'>" .
+     $body .= "<tr><td align='right' nowrap='nowrap'><b>$ML{'.label.journalentrs'}</b></td><td colspan='2'>" .
          &comma($count) . "</td></tr>";
  }
  
@@ -747,10 +748,10 @@
     if (@$posthere || @$canpost) {
         $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.shared'}</b></td><td colspan='2'>";
         foreach (sort @$canpost) {
-            $body .= BML::ml('.canpost',{'user'=>$u->{'user'}, 'comm'=>"<a href='userinfo.bml?user=$_'><b>$_</b></a>"}) . "<br>\n";
+            $body .= BML::ml('.canpost',{'user'=>$u->{'user'}, 'comm'=>"<a href='userinfo.bml?user=$_'><b>$_</b></a>"}) . "<br />\n";
         }
         foreach (sort @$posthere) {
-            $body .= BML::ml('.posthere',{'user'=>"<a href='userinfo.bml?user=$_'><b>$_</b></a>",'comm'=>$u->{'user'}}) . "<br>\n";
+            $body .= BML::ml('.posthere',{'user'=>"<a href='userinfo.bml?user=$_'><b>$_</b></a>",'comm'=>$u->{'user'}}) . "<br />\n";
         }
         $body .= "</td></tr>";
     }
