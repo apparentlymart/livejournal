@@ -84,6 +84,7 @@
                       'styles' => 1,
                       's2styles' => 1,
                       's2stylesmax' => 10,
+                      's2layersmax' => 50,
                       'textmessage' => 1,
                       'todomax' => 100,
                       'todosec' => 1,

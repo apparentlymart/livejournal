@@ -16,17 +16,22 @@
         return;        
     };
 
-    my $pub = LJ::S2::get_public_layers();
-
     my $id;
     if ($POST{'id'} =~ /^\d+$/) {
         $id = $POST{'id'};
     }
 
+    # this catches core_hidden if it's set
+    $POST{'parid'} ||= $POST{'parid_hidden'};
+
     my $dbr = LJ::get_db_reader();
     my $remote = LJ::get_remote();
     return $err->('You must be logged in to view your layers.') 
         unless $remote;
+
+    # load user and public layers
+    my $pub = LJ::S2::get_public_layers();
+    my $ulay = LJ::S2::get_layers_of_user($remote);
 
     my $has_priv = LJ::get_cap($remote, 's2styles');
 
@@ -35,21 +40,24 @@
     # create
     if ($POST{'action:create'}) {
         return $err->("Account type doesn't permit creating styles") unless $has_priv;
+        return $err->("You have reached your maximum number of allowed layers") 
+            if keys %$ulay >= LJ::get_cap($remote, 's2layersmax');
+
         my $err_badparid = "No/bogus parent layer ID given (for layouts and core languages, use core parent ID; for themes and layout languages, use layout ID)";
         my $type = $POST{'type'} or return $err->("No layer type selected.");
         my $parid = $POST{'parid'}+0 or return $err->($err_badparid);
-        return $err->("Invalid layer type") unless $type =~ /^layout|theme|i18nc?$/;
-        my $parent_type = ($type eq "theme" || $type eq "i18n") ? "layout" : "core";
+        return $err->("Invalid layer type") unless $type =~ /^layout|theme|user|i18nc?$/;
+        my $parent_type = ($type eq "theme" || $type eq "i18n" || $type eq "user") ? "layout" : "core";
         
+        # parent ID is public layer
         if ($pub->{$parid}) {
-            # parent ID is public, but of the wrong type
+            # of the wrong type
             return $err->($err_badparid) if $pub->{$parid}->{'type'} ne $parent_type;
+
+        # parent ID is user layer, or completely invalid
         } else {
-            my $parlay = LJ::S2::load_layer($dbr, $parid);
             return $err->($err_badparid) if 
-                ! $parlay ||
-                $parlay->{'userid'} != $remote->{'userid'} ||
-                $parlay->{'type'} != $parent_type;
+                ! $ulay->{$parid} || $ulay->{$parid}->{'type'} != $parent_type;
         }
 
         my $id = LJ::S2::create_layer($remote, $parid, $type);
@@ -101,8 +109,6 @@
     }
 
     # show list of layers
-    my $ulay = LJ::S2::get_layers_of_user($remote);
-    
     $body .= "<?h1 Your Layers h1?>";
     if (%$ulay) {
         $body .= "<table style='margin-bottom: 10px' cellpadding='3' border='1' class='postheading'>";
@@ -150,13 +156,18 @@
                                         "layout" => "Layout",
                                         "i18nc" => "Language",
                                         );
-    $body .= " Core Version: " . LJ::html_select({ 'name' => 'parid' }, 
-                                                 map { $_, $pub->{$_}->{'majorversion'} }
-                                                 sort { $pub->{$a}->{'name'} cmp $pub->{$b}->{'name'} ||
-                                                        $a <=> $b }
-                                                 grep { $pub->{$_}->{'b2lid'} == 0 &&
-                                                        $pub->{$_}->{'type'} eq 'core' && /^\d+$/}
-                                                 keys %$pub) . "\n";
+
+    my @corelayers = map { $_, $pub->{$_}->{'majorversion'} }
+                     sort { $pub->{$b}->{'majorversion'} <=> $pub->{$a}->{'majorversion'} }
+                     grep { $pub->{$_}->{'b2lid'} == 0 && $pub->{$_}->{'type'} eq 'core' && /^\d+$/}
+                     keys %$pub;
+    $body .= " Core Version: " . LJ::html_select({ 'name' => 'parid', 
+                                                   'disabled' => @corelayers > 2 ? 0: 1 },
+                                                 @corelayers ) . "\n";
+
+    # store value in hidden to later be copied to 'parid' if necessary
+    # defaults to $corelayers[0] which should be the highest numbered core
+    $body .= LJ::html_hidden("parid_hidden", $POST{'parid'} || $corelayers[0]);
     $body .= LJ::html_submit("action:create", "Create");
     $body .= "</form>\n\n";
 
@@ -178,6 +189,7 @@
         push @layouts, ('', '---');
         push @layouts, map { $_, "$ulay->{$_}->{'name'} (#$_)" } 
                        sort { $ulay->{$a}->{'name'} cmp $ulay->{$b}->{'name'} || $a <=> $b}
+                       grep { $ulay->{$_}->{'type'} eq 'layout' } 
                        keys %$ulay;
     }
 
