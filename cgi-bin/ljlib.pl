@@ -4930,6 +4930,15 @@ sub update_user
     return 1;
 }
 
+# simple interface to LJ::load_userids_multiple.  takes userids,
+# returns hashref with keys ids, values $u refs.
+sub load_userids
+{
+    my %u;
+    LJ::load_userids_multiple([ map { $_ => \$u{$_} } @_ ]);
+    return \%u;
+}
+
 # <LJFUNC>
 # name: LJ::load_userids_multiple
 # des: Loads a number of users at once, efficiently.
