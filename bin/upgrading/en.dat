@@ -1809,6 +1809,20 @@ lostinfo.text=If you forgot your username or password, <a href="lostinfo.bml">re
 
 Password=Password
 
+protocol.bad_password=Your password is too easy to guess.  It's recommended that you change it, otherwise you risk having your journal hijacked.  Visit [[siteroot]]/changepassword.bml to change your password.
+
+protocol.hello_test=Hello Test Account!
+
+protocol.mail_bouncing=You are currently using a bad email address.  All mail we try to send you is bouncing.  We require a valid email address for continued use.  Visit the support area for more information.
+
+protocol.must_revalidate=You need to validate your new email address.  Your old one was good, but since you've changed it, you need to re-validate the new one.  Visit [[siteroot]]/support for more information.
+
+protocol.not_validated=You are currently not validated.  You may continue to use [[sitename]], but please validate your email address for continued use.  See the instructions that were mailed to you when you created your journal, or see [[siteroot]]/support/ for more information.
+
+protocol.old_win32_client=There are significantly newer Windows LiveJournal clients available, and we recommend that you upgrade.  Visit [[siteroot]]/download/ to download a newer client.
+
+protocol.readonly=Your account is temporarily in read-only mode.  Some operations will fail for a few minutes.
+
 Sorry|notes=typically used to announce that the requested action can't be done.
 Sorry=Sorry
 

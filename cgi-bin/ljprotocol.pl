@@ -10,6 +10,14 @@ require "$ENV{'LJHOME'}/cgi-bin/console.pl";
 #### New interface (meta handler) ... other handlers should call into this.
 package LJ::Protocol;
 
+sub translate
+{
+    my ($u, $msg, $vars) = @_;
+    LJ::Lang::load_user_lang($u);
+
+    return LJ::Lang::get_text($u->{'lang'}, "protocol.$msg", undef, $vars);
+}
+
 sub error_message
 {
     my $code = shift;
@@ -1873,35 +1881,27 @@ sub consolecommand
 sub login_message
 {
     my ($dbs, $req, $res, $flags) = @_;
-
     my $u = $flags->{'u'};
 
-    if ($u eq "test") {
-        $res->{'message'} = "Hello Test Account!";
-    }
-    if ($req->{'clientversion'} =~ /^Win32-MFC\/(1.2.[0123456])$/ ||
-        $req->{'clientversion'} =~ /^Win32-MFC\/(1.3.[01234])\b/)
-    {
-        $res->{'message'} = "There's a significantly newer version of LiveJournal for Windows available.";
-    }
-    unless ($LJ::EVERYONE_VALID)
-    {
-        if ($u->{'status'} eq "N") { $res->{'message'} = "You are currently not validated.  You may continue to use $LJ::SITENAME, but please validate your email address for continued use.  See the instructions that were mailed to you when you created your journal, or see $LJ::SITEROOT/support/ for more information."; }
-        if ($u->{'status'} eq "T") { $res->{'message'} = "You need to validate your new email address.  Your old one was good, but since you've changed it, you need to re-validate the new one.  Visit the support area for more information."; }
-    }
-    
+    my $msg = sub {
+        my $code = shift;
+        my $args = shift || {};
+        $args->{'sitename'} = $LJ::SITENAME;
+        $args->{'siteroot'} = $LJ::SITEROOT;
+        $res->{'message'} = translate($u, $code, $args);
+    };
+
+    return $msg->("readonly")          if LJ::get_cap($u, "readonly");
+    return $msg->("not_validated")     if ($u->{'status'} eq "N" and not $LJ::EVERYONE_VALID);
+    return $msg->("must_revalidate")   if ($u->{'status'} eq "T" and not $LJ::EVERYONE_VALID);
+    return $msg->("mail_bouncing")     if $u->{'status'} eq "B";
+
     my @checkpass = LJ::run_hooks("bad_password", $u->{'password'});
-    if (@checkpass && $checkpass[0]->[0]) {
-        $res->{'message'} = "Your password is too easy to guess.  It's recommended that you change it, otherwise you risk having your journal hijacked.  Visit $LJ::SITEROOT/changepassword.bml";
-    }
-
-    if ($u->{'status'} eq "B") { $res->{'message'} = "You are currently using a bad email address.  All mail we try to send you is bouncing.  We require a valid email address for continued use.  Visit the support area for more information."; }
+    return $msg->("bad_password")      if (@checkpass and $checkpass[0]->[0]);
     
-
-    if (LJ::get_cap($u, "readonly")) {
-        $res->{'message'} = "Your account is temporarily in read-only mode.  Some operations will fail for a few minutes.";
-    }
-
+    return $msg->("old_win32_client")  if $req->{'clientversion'} =~ /^Win32-MFC\/(1.2.[0123456])$/;
+    return $msg->("old_win32_client")  if $req->{'clientversion'} =~ /^Win32-MFC\/(1.3.[01234])\b/;
+    return $msg->("hello_test")        if $u->{'user'} eq "test";
 }
 
 sub list_friendgroups
