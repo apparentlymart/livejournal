@@ -14,7 +14,13 @@
  my $remote = LJ::get_remote($dbs);
 
  my $pollid = ($FORM{'id'} || $FORM{'pollid'})+0;
- 
+
+ unless ($pollid) {
+     $title = "Polls";
+     $body .= "This is the address to participate in a poll.  You've stumbled onto an address which does nothing right now.  For documentation on how to make a poll in your own journal, <a href=\"/support/faqbrowse.bml?faqid=69\">read this</a>.";
+     return;
+ }
+
  $sth = $dbr->prepare("SELECT itemid, whovote, journalid, posterid, whoview, whovote, name FROM poll WHERE pollid=$pollid");
  $sth->execute;
  my $po = $sth->fetchrow_hashref;
@@ -54,12 +60,6 @@
      }
      $title = "Submitted!";
      $body .= "(=H1 Thanks.... H1=)(=P Your poll answers have been submitted. P=)";
-     return;
- }
-
- unless ($pollid) {
-     $title = "Polls";
-     $body .= "This is the address to participate in a poll.  You've stumbled onto an address which does nothing right now.  For documentation on how to make a poll in your own journal, <a href=\"/support/faqbrowse.bml?faqid=69\">read this</a>.";
      return;
  }
 
