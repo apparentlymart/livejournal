@@ -3483,7 +3483,7 @@ sub _reload_weights
 			    "WHERE i.dbid=w.dbid");
     $sth->execute;
     
-    my %dbinfo = ('_fromdb' => 1);
+    my %dbinfo;
     while (my $r = $sth->fetchrow_hashref) {
 	my $name = $r->{'masterid'} ? $r->{'name'} : "master";
 	$dbinfo{$name}->{'_fdsn'} = $r->{'fdsn'};
@@ -3511,6 +3511,7 @@ sub _reload_weights
 
     # copy new config.  good to go!
     %LJ::DBINFO = %dbinfo;
+    $LJ::DBINFO{'_fromdb'} = 1;
     1;
 }
 
