@@ -1414,6 +1414,7 @@ CREATE TABLE ml_latest
    dmid     TINYINT UNSIGNED NOT NULL,
    itid     SMALLINT UNSIGNED NOT NULL,
    PRIMARY KEY (lnid, dmid, itid),
+   txtid    INT UNSIGNED NOT NULL,
    chgtime  DATETIME NOT NULL,
    staleness  TINYINT UNSIGNED DEFAULT 0 NOT NULL, # better than ENUM('0','1','2');
    INDEX (lnid, staleness),

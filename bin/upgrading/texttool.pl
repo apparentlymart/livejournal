@@ -198,6 +198,7 @@ sub poptext
                     s/^\.//;
                     $text .= $_;
                 }
+                chomp $text;  # remove file new-line (we added it)
             } elsif ($line =~ /\S/) {
                 die "$lang.dat:$lnum: Bogus format.\n";
             }
@@ -234,8 +235,14 @@ sub dumptext
                                 "t.lnid=$l->{'lnid'} ".
                                 "ORDER BY i.itcode");
         $sth->execute;
+        die $dbh->errstr if $dbh->err;
         while (my ($itcode, $text) = $sth->fetchrow_array) {
-            print "$itcode: $text\n";
+            if ($text =~ /\n/) {
+                $text =~ s/\n\./\n\.\./g;
+                print D "$itcode<<\n$text\n.\n\n";
+            } else {
+                print D "$itcode=$text\n\n";
+            }
         }
         close D;
     }
@@ -291,35 +298,6 @@ sub newitems
            scalar keys %{$items{'general'}},
            scalar keys %{$items{'local'}});
 
-    my $register_code = sub 
-    {
-        my $it = shift;
-        my $qcode = $dbh->quote($it);
-        $dbh->do("INSERT INTO ml_items (dmid, itid, itcode) ".
-                 "VALUES (1, NULL, $qcode)");
-        my $itid;
-        if ($dbh->err) {
-            $itid = $dbh->selectrow_array("SELECT itid FROM ml_items WHERE ".
-                                          "dmid=1 AND itcode=$qcode");
-        } else {
-            $itid = $dbh->{'mysql_insertid'};
-        }
-        unless ($itid) { die "Couldn't register code: $it\n"; }
-        return $itid;
-    };
-
-    my $set_text = sub 
-    {
-        my ($itid, $lnid, $text) = @_;
-        my $qbogustext = $dbh->quote($text);
-        $dbh->do("INSERT INTO ml_text (dmid, txtid, lnid, itid, text, userid) VALUES ".
-                 "(1, NULL, $lnid, $itid, $qbogustext, 0)");
-        my $txtid = $dbh->{'mysql_insertid'};
-        unless ($txtid) { die "Couldn't register bogus text: $text\n"; }
-        $dbh->do("INSERT INTO ml_latest (lnid, dmid, itid, chgtime, txtid, version) VALUES ".
-                 "($lnid, 1, $itid, '0000-00-00', $txtid, 0)");
-    };
-
     # [ General ]
     my %e_general;  # code -> 1
     print "Checking which general items already exist in database...\n";
@@ -330,9 +308,9 @@ sub newitems
     printf("  %d found\n", scalar keys %e_general);
     foreach my $it (keys %{$items{'general'}}) {
         next if exists $e_general{$it};
-        my $itid = $register_code->($it);
-        print "Added general: $it ($itid)\n";
-        $set_text->($itid, 1, "[no text: $it]");
+        print "Adding general: $it ...";
+        print LJ::Lang::set_text($dbh, 1, "en", $it, "[no text: $it]");
+        print "\n";
     }
 
     if ($opt_local_lang) {
@@ -351,9 +329,9 @@ sub newitems
         foreach my $it (keys %{$items{'local'}}) {
             next if exists $e_general{$it};
             next if exists $e_local{$it};
-            my $itid = $register_code->($it);
-            print "Added local: $it ($itid)\n";
-            $set_text->($itid, $ll->{'lnid'}, "[no text: $it]");
+            print "Adding local: $it ...";
+            print LJ::Lang::set_text($dbh, 1, $ll->{'lncode'}, $it, "[no text: $it]");
+            print "\n";
         }
     }
     

@@ -185,8 +185,8 @@ sub set_text
     return 0 if $dbh->err;
     $txtid = $dbh->{'mysql_insertid'};
 
-    $dbh->do("REPLACE INTO ml_latest (lnid, dmid, itid, chgtime, staleness) ".
-             "VALUES ($lnid, $dmid, $itid, NOW(), 0)");
+    $dbh->do("REPLACE INTO ml_latest (lnid, dmid, itid, txtid, chgtime, staleness) ".
+             "VALUES ($lnid, $dmid, $itid, $txtid, NOW(), 0)");
     return 0 if $dbh->err;
     
     # Todo: stale-ify child languages one layer down if severity
