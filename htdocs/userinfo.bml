@@ -92,7 +92,8 @@
  {
      my @props = qw(opt_whatemailshow opt_blockrobots country state city zip renamedto
                     url urlname opt_hidefriendofs dont_load_members);
-     unless ($com) { push @props, qw(aolim icq yahoo msn gender jabber); }
+     unless ($com || $synd) { push @props, qw(aolim icq yahoo msn gender jabber); }
+     if ($synd) { push @props, qw(rssparseerror); }
      LJ::load_user_props($dbr, $u, @props);
  }
 
@@ -310,6 +311,10 @@ if ($u->{'journaltype'} eq "R" && $u->{'renamedto'}) {
          'nonew' => "",  # no status line necessary
      }->{$synd->{'laststatus'}};
      $body .= " ($status)" if $status;
+
+     if ($synd->{'laststatus'} eq "parseerror") {
+        $body .= "<br />$ML{'.syn.parseerror'} $u->{'rssparseerror'}";
+     }
 
      $body .= "<br />$ML{'.syn.nextcheck'} $synd->{'checknext'}";
      $body .= "</td></tr>\n";

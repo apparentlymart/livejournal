@@ -992,6 +992,8 @@ INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope
 UPDATE userproplist SET datatype='char',des='N: none, A: actual, L: livejournal, B: both',indexed='1',prettyname='Which email address to display',scope='general' WHERE name='opt_whatemailshow';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'Screen new comments: A=All, N=None, F=from non-Friends, R=from non-users', '0', 'opt_whoscreened', 'Screening comments', 'general');
 UPDATE userproplist SET datatype='char',des='Screen new comments: A=All, N=None, F=from non-Friends, R=from non-users',indexed='0',prettyname='Screening comments',scope='general' WHERE name='opt_whoscreened';
+INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'Records the error message when RSS parsing fails', '0', 'rssparseerror', 'Syndication Parse Error', 'general');
+UPDATE userproplist SET datatype='char',des='Records the error message when RSS parsing fails',indexed='0',prettyname='Syndication Parse Error',scope='general' WHERE name='rssparseerror';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'Username of other journal to redirect to, if u.statusvis=="R"', '1', 'renamedto', 'Redirect to other account', 'general');
 UPDATE userproplist SET datatype='char',des='Username of other journal to redirect to, if u.statusvis=="R"',indexed='1',prettyname='Redirect to other account',scope='general' WHERE name='renamedto';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('num', 'The style ID# of the S1 style for the calendar view.', '0', 's1_calendar_style', 'Calendar View StyleID', 'general');

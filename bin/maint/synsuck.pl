@@ -91,6 +91,10 @@ $maint{'synsuck'} = sub
             # parse error!
             print "Parse error!\n";
             $delay->(3*60, "parseerror");
+            my $err = $@;
+            $err =~ s! at /.*!!;
+            $err =~ s/^\n//; # cleanup of newline at the beggining of the line
+            LJ::set_userprop($dbs, $userid, "rssparseerror", $err);
             next;
         }
 

@@ -1946,6 +1946,8 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /userinfo.bml.syn.nextcheck=Next check:
 
+/userinfo.bml.syn.parseerror=Error Messsage:
+
 /userinfo.bml.syndinfo.body<<
 If you would like articles from the syndicated site to appear on your friends page,
 you can <a href="[[addtofriends]]">add this journal to your friends list</a>.
