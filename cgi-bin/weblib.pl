@@ -994,7 +994,7 @@ RTE
     ### Options Column 1
     {
         $out .= "<td style='border-right: 1px dashed #999; text-align: center; width: 50%' id='column_one_td'>";
-        $out .= "<table style='text-align: left; display: inline' id='column_one_table'>";
+        $out .= "<table style='text-align: left' id='column_one_table'>";
 
         # Security
         {
@@ -1115,7 +1115,7 @@ MOODS
     ### Options Column 2
     {
         $out .= "<td style='text-align: center' id='column_two_td'>";
-        $out .= "<table style='text-align: left; display: inline' id='column_two_table'>";
+        $out .= "<table style='text-align: left;' id='column_two_table'>";
         
         # Backdate Entry
         $out .= "<tr id='backdate_row'><th><label for='prop_opt_backdated'>Entry is backdated:</label></th><td>";
@@ -1245,7 +1245,7 @@ USERPICS
         my $preview = "var f=this.form; var action=f.action; f.action='/preview/entry.bml'; f.target='preview'; ";
         $preview   .= "window.open('','preview','width=760,height=600,resizable=yes,status=yes,toolbar=no,location=no,menubar=no,scrollbars=yes'); ";
         $preview   .= "f.submit(); f.action=action; f.target='_self'; return false; ";
-        $preview    = LJ::ejs(LJ::html_submit('action:preview','Preview', { 'onclick' => $preview, 
+        $preview    = LJ::ejs(LJ::html_submit('action:preview','Preview', { 'onclick' => $preview,
                                                                             'tabindex' => $tabindex->() }));
         $out .= <<PREVIEW;
 <script type="text/javascript" language="JavaScript">
