@@ -71,11 +71,12 @@ class Color
   function builtin saturation() : int "Get the saturation value. (0-255)";
   function builtin lightness() : int "Get the lightness value. (0-255)";
 
-  function builtin lighter() : Color "Make color brighter, by increasing lightness by 30.";
-  function builtin lighter(int amt) : Color "Make color lighter, by amount given.";
-  function builtin darker() : Color "Make color darker, by descreasing lightness by 30.";
-  function builtin darker(int amt) : Color "Make color darker, by amount given.";
-  function builtin inverse() : Color "Invert color.";
+  function builtin clone() : Color "Returns identical color.";
+  function builtin lighter() : Color "Returns a new color with lightness increased by 30.";
+  function builtin lighter(int amt) : Color "Returns a new color with lightness increased by amount given.";
+  function builtin darker() : Color "Returns a new color with lightness decreased by 30.";
+  function builtin darker(int amt) : Color "Returns a new color with lightness decreased by amount given.";
+  function builtin inverse() : Color "Returns inverse of color.";
   function builtin average(Color other) : Color "Returns color averaged with \$other color.";
 }
 
@@ -257,8 +258,9 @@ class Comment extends EntryLite
     var int talkid "Server stored ID number for this comment.";
     var Comment[] replies "Comments replying to this comment.";
     var bool full "True if all information is available for this comment.  False if only the subject, poster, and date are available.  (collapsed threads)";
-    var Comment parent "Reference to parent comment, or undef if a top-level comment.";
+    var readonly string parent_url "URL to parent comment, or blank if a top-level comment.";
     var readonly string reply_url "URL to reply to this comment.";
+    var readonly string thread_url "URL to view threaded rooted at this comment, or blank if comment has no children.";
 }
 
 ### Userinfo
@@ -881,6 +883,16 @@ property bool view_entry_disabled {
 }
 set view_entry_disabled = false;
 
+property Color color_comment_bar {
+   des = "Color of comment bar header";
+}
+set color_comment_bar = "#d0d0ff";
+
+property string comment_userpic_style {
+   des = "Userpic display style for comments";
+   values = "|Full|small|Small|off|Off";  
+}
+set comment_userpic_style = "";
 
 ##[ global function implementations ]
 
@@ -1396,7 +1408,6 @@ function Redirector::end_form ()
     "</form>";
 }
 
-property Color bar_color;
 
 function EntryPage::print_comments (Comment[] cs) {
     if (size $cs == 0) { return; }
@@ -1414,18 +1425,31 @@ function EntryPage::print_comments (Comment[] cs) {
 }
 
 function EntryPage::print_comment (Comment c) {
-    var Color barc = $c.depth % 2 ? $*bar_color : $*bar_color->lighter(20);
+    var Color barlight = $*color_comment_bar->clone();
+    $barlight->lightness(($barlight->lightness() + 255) / 2);
+    var Color barc = $c.depth % 2 ? $*color_comment_bar : $barlight;
     var string poster = defined $c.poster ? $c.poster->as_string() : "<i>(Anonymous)</i>";
     var string sub_icon;
     if (defined $c.subject_icon) {
         $sub_icon = $c.subject_icon->as_string();
     }
     "<div style='background: $barc; margin-top: 10px;'>";
-    if (defined $c.userpic) { print "<img src='$c.userpic.url' width='" + ($c.userpic.width/2) + "' height='" + 
-                                  ($c.userpic.height/2) + "' />"; }
+    if (defined $c.userpic and $*comment_userpic_style != "off") { 
+        var int w = $c.userpic.width;
+        var int h = $c.userpic.height;
+        if ($*comment_userpic_style == "small") {
+            $w = $w / 2;
+            $h = $h / 2;
+        }
+        print "<img src='$c.userpic.url' width='$w' height='$h' />";
+    }
     
     print "$poster: <b>$c.subject</b> $sub_icon (<a href='$c.permalink_url'>Link</a>)</div>";
-    "$c.text";
+    "$c.text <div style='margin-top: 3px; font-size: smaller'>(<a href='$c.reply_url'>Reply to this</a>) ";
+    if ($c.parent_url != "") { "(<a href='$c.parent_url'>Parent</a>) "; }
+    if ($c.thread_url != "") { "(<a href='$c.thread_url'>Thread</a>) "; }
+    "</div>";
+    
 }
 
 function EntryPage::print_comment_partial (Comment c) {
@@ -1436,7 +1460,7 @@ function EntryPage::print_comment_partial (Comment c) {
 
 function ItemRange::print() {
     if ($.all_subitems_displayed) { return; }
-    print "<table align='center' border='1' cellpadding='3'><tr><td><b>" +
+    print "<table align='center' border='1' cellpadding='3'><tr><td align='center'><b>" +
         ehtml(lang_page_of_pages($.current, $.total)) + "</b><br />";
     foreach var int i (1..$.total) {
         if ($i == $.current) { "<b>[$i]</b> "; }

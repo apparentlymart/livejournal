@@ -1294,6 +1294,12 @@ sub Color__Color
     return $this;
 }
 
+sub Color__clone
+{
+    my ($ctx, $this) = @_;
+    return { %$this };
+}
+
 sub Color__set_hsl
 {
     my ($this, $h, $s, $l) = @_;

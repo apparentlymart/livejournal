@@ -3119,6 +3119,7 @@ sub make_journal
     my $dbr = $dbs->{'reader'};
 
     my $r = $opts->{'r'};  # mod_perl $r, or undef
+    my $geta = $opts->{'getargs'};
 
     if ($LJ::SERVER_DOWN) {
         if ($opts->{'vhost'} eq "customview") {
@@ -3204,6 +3205,12 @@ sub make_journal
 
     # signal to LiveJournal.pm that we can't handle this
     if ($stylesys == 1 && ($view eq "item" || $view eq "month")) {
+        ${$opts->{'handle_with_bml_ref'}} = 1;
+        return;
+    }
+    # S2 can't yet handle ReplyPage
+    if ($stylesys == 2 && $view eq "item" && ($geta->{'mode'} eq "reply" ||
+                                              $geta->{'replyto'})) {
         ${$opts->{'handle_with_bml_ref'}} = 1;
         return;
     }

@@ -55,7 +55,8 @@ sub EntryPage
 
     my $userpic = Image_userpic($pu, 0, $entry->{'props'}->{'picture_keyword'});
 
-    my $permalink = LJ::journal_base($u) . "/$ditemid.html";
+    my $jbase = LJ::journal_base($u);
+    my $permalink = "$jbase/$ditemid.html";
     my $readurl = $permalink;
     $readurl .= "?$nc" if $nc;
     my $posturl = $permalink . "?mode=reply";
@@ -106,7 +107,7 @@ sub EntryPage
 
     my $pics = LJ::Talk::get_subjecticons()->{'pic'};  # hashref of imgname => { w, h, img }
     my $convert_comments = sub {
-        my ($self, $destlist, $srclist, $parent, $depth) = @_;
+        my ($self, $destlist, $srclist, $depth) = @_;
 
         foreach my $com (@$srclist) {
             my $dtalkid = $com->{'talkid'} * 256 + $entry->{'anum'};
@@ -129,6 +130,12 @@ sub EntryPage
                                          $pic->{'width'}, $pic->{'height'});
             }
 
+            my $par_url;
+            if ($com->{'parenttalkid'}) {
+                my $dparent = ($com->{'parenttalkid'} << 8) + $entry->{'anum'};
+                $par_url = "$jbase/$ditemid.html?thread=$dparent";
+            }
+
             my $s2com = {
                 '_type' => 'Comment',
                 'journal' => $userlite_journal,
@@ -146,17 +153,17 @@ sub EntryPage
                 'userpic' => $comment_userpic,
                 'time' => $datetime,
                 'full' => $com->{'_loaded'} ? 1 : 0,
-                'parent' => $parent,
                 'depth' => $depth,
+                'parent_url' => $par_url,
             };
             
             push @$destlist, $s2com;
 
-            $self->($self, $s2com->{'replies'}, $com->{'children'}, $s2com, $depth+1);
+            $self->($self, $s2com->{'replies'}, $com->{'children'}, $depth+1);
         }
     };
     $p->{'comments'} = [];
-    $convert_comments->($convert_comments, $p->{'comments'}, \@comments, undef, 1);
+    $convert_comments->($convert_comments, $p->{'comments'}, \@comments, 1);
 
     $p->{'comment_pages'} = ItemRange({
         'all_subitems_displayed' => ($copts->{'out_pages'} == 1),
