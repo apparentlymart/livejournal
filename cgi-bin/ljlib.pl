@@ -4806,6 +4806,9 @@ sub make_journal
     # to be more like LJ::S2::make_journal.
     $r->notes('codepath' => "s1.$view") if $r;
 
+    # For embedded polls
+    BML::set_language($LJ::LANGS[0] || 'en', \&LJ::Lang::get_text);
+
     # load the user-related S1 data  (overrides and colors)
     my $s1uc = {};
     my $s1uc_memkey = [$u->{'userid'}, "s1uc:$u->{'userid'}"];
