@@ -206,6 +206,13 @@
      $friendsof{'display'} = $viewall;
  }
 
+ # Add metadata links to <head>
+ my $digest = Digest::SHA1::sha1_hex('mailto:' . $u->{'email'});
+ $head .= "<link rel='alternate' type='application/rss+xml' title='RSS' href='$LJ::SITEROOT/$dir/$user/data/rss' />\n";
+ $head .= "<link rel='alternate' type='application/atom+xml' title='Atom' href='$LJ::SITEROOT/$dir/$user/data/atom' />\n";
+ $head .= "<link rel='alternate' type='application/rdf+xml' title='FOAF' href='$LJ::SITEROOT/$dir/$user/data/foaf' />\n";
+ $head .= "<meta name=\"foaf:maker\" content=\"foaf:mbox_sha1sum '$digest'\" />\n";
+
  my @friends;
  my $fr_res;
  my %fr;
