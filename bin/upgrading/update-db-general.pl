@@ -1684,6 +1684,17 @@ CREATE TABLE clustermove_inprogress (
 )
 EOC
 
+# track open HTTP proxies
+register_tablecreate("openproxy", <<'EOC');
+CREATE TABLE openproxy (
+    addr        VARCHAR(15) NOT NULL,
+    status      ENUM('proxy', 'clear'),
+    asof        INT UNSIGNED NOT NULL,
+    src         VARCHAR(80),
+    PRIMARY KEY (addr)
+)
+EOC
+
 # NOTE: new table declarations go here
 
 

@@ -7677,6 +7677,48 @@ sub make_login_session
     return 1;
 }
 
+sub is_open_proxy
+{
+    my $ip = shift;
+    eval { $ip ||= Apache->request; };
+    return 0 unless $ip;
+    if (ref $ip) { $ip = $ip->connection->remote_ip; }
+
+    my $dbr = LJ::get_db_reader();
+    my $stat = $dbr->selectrow_hashref("SELECT status, asof FROM openproxy WHERE addr=?",
+                                       undef, $ip);
+
+    # open proxies are considered open forever, unless cleaned by another site-local mechanism
+    return 1 if $stat && $stat->{'status'} eq "proxy";
+
+    # only cache 'clear' hosts for a day
+    $stat = undef if $stat && $stat->{'status'} eq "clear" && $stat->{'asof'} < time()-86400;
+
+    # no RBL defined?
+    return 0 unless @LJ::RBL_LIST;
+
+    my $src = undef;
+    my $rev = join('.', reverse split(/\./, $ip));
+    foreach my $rbl (@LJ::RBL_LIST) {
+        my @res = gethostbyname("$rev.$rbl");
+        if ($res[4]) {
+            $src = $rbl;
+            last;
+        }
+    }
+
+    my $dbh = LJ::get_db_writer();
+    if ($src) {
+        $dbh->do("REPLACE INTO openproxy (addr, status, asof, src) VALUES (?,?,?,?)", undef,
+                 $ip, "proxy", time(), $src);
+        return 1;
+    } else {
+        $dbh->do("INSERT IGNORE INTO openproxy (addr, status, asof, src) VALUES (?,?,?,?)", undef,
+                 $ip, "clear", time(), $src);
+        return 0;
+    }
+}
+
 sub last_error_code
 {
     return $LJ::last_error;
