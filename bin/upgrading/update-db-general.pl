@@ -77,8 +77,7 @@ CREATE TABLE codes (
   code varchar(7) NOT NULL default '',
   item varchar(80) default NULL,
   sortorder smallint(6) NOT NULL default '0',
-  PRIMARY KEY  (type,code),
-  KEY (type)
+  PRIMARY KEY  (type,code)
 ) PACK_KEYS=1
 EOC
 
