@@ -194,6 +194,9 @@ my %ljconfig =
                 'desc' => "While [ljconfig[server_down]] is set true, this message will be displayed for anyone trying to access the LiveJournal installation.",
                 'example' => '$SITENAME is down right now while we upgrade. It should be up in a few minutes.',
             },
+            'is_dev_server' => {
+                'desc' => "Enable this option to signify that the server running the LiveJournal software is being used as a development server.",
+            },
         },
 
         'email_addresses' => {
@@ -239,7 +242,7 @@ my %ljconfig =
             },
             'default_style' => {
                 'desc' => "A hash that defines the default S2 layers to use for accounts.",
-                'default' => "{ 
+                'default' => "{
      'core' => 'core1',
      'layout' => 'generator/layout',
      'i18n' => 'generator/en',
@@ -248,6 +251,16 @@ my %ljconfig =
             'allow_pics_over_quota' => {
                 'desc' => "By default, when a user's account expires, their least often used userpics will get marked ".
                           "as inactive and will not be available for use. Turning this boolean setting true will circumvent this behavior.",
+            },
+            'userprop_def' => {
+                'desc' => "This option defines the userproperties that users should have by default.",
+                'type' => "hash",
+                'example' => '%USERPROP_DEF = (
+    "s1_lastn_style" => 29,
+    "s1_friends_style" => 20,
+    "s1_calendar_style" => 2,
+    "s1_day_style" => 11,
+);',
             },
         },
         'misc' => {
@@ -318,6 +331,9 @@ my %ljconfig =
                 'type' => "hash",
                 'example' => "( '2' => 'whitaker', '3' => 'test', );",
             },
+	    'dynamic_ljuser' => {
+                 'desc' => "Boolean variable that defines whether the user-types of users is looked up when [func[LJ::ljuser]] is called. This is not recommended unless the site is using memcached.",
+            },
         },
 
         'portal' => {
@@ -357,6 +373,29 @@ my %ljconfig =
              [ 'login', '', ],
              ],
 };",
+            },
+        },
+        'blob' => {
+            'name' => "Blob Server",
+            'blobinfo' => {
+                'desc' => "Hash that contains the details for a number of blob servers. The format of the paramater is 'cluster' => 'director'. The webserver user also needs to be able to the directory given as the directory. If you wish to use Captcha Image and Audio Generation for Human Checks, then this is a necessary paramater",
+                'type' => "hash",
+                'example' => '%BLOBINFO = (
+    "clusters" => {
+        "1" => "/path/to/some/directory/",
+    },
+);'
+            },
+            'userpric_blobserver' => {
+                'desc' => "If set to true, userpics are store as a file on the server rather than in the database. This depends on a Blob Server being setup in the [ljconfig[blobinfo]] section",
+            },
+        },
+        'captcha' => {
+            'name' => "Human Checks",
+            'human_check' => {
+                'desc' => 'This option enables human checks at various places throughout the site. Enabling this requires a "Blob Server" setup (for details of setting one up, refer to the [ljconfig[blobinfo]] section of the document.) Currently, the only option is "create"',
+                'type' => "hash",
+                'example' => "('create' => 1);",
             },
         },
     },
