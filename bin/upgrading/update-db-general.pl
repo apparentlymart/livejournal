@@ -1160,10 +1160,27 @@ register_alter(sub {
 		 "ALTER TABLE user DROP lastn_style, DROP calendar_style, DROP search_style, DROP searchres_style, DROP day_style, DROP friends_style");
     }
 
+    # add scope columns to proplist tables
+    if (column_type("userproplist", "scope") eq "") {
+	do_alter("userproplist",
+		 "ALTER TABLE userproplist ADD scope ENUM('general', 'local') ".
+		 "DEFAULT 'general' NOT NULL");
+    }
+
+    if (column_type("logproplist", "scope") eq "") {
+	do_alter("logproplist",
+		 "ALTER TABLE logproplist ADD scope ENUM('general', 'local') ".
+		 "DEFAULT 'general' NOT NULL");
+    }
+
+    if (column_type("talkproplist", "scope") eq "") {
+	do_alter("talkproplist",
+		 "ALTER TABLE talkproplist ADD scope ENUM('general', 'local') ".
+		 "DEFAULT 'general' NOT NULL");
+    }
+   
 });
 
 
 1; # return true;
-
-
 
