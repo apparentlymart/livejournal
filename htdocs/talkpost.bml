@@ -275,28 +275,52 @@ BODY<=
  $ret .= "<INPUT TYPE=HIDDEN NAME=\"itemid\" VALUE=\"$itemid\">\n";
  $ret .= "<INPUT TYPE=HIDDEN NAME=\"debug\" VALUE=\"$DEBUG\">\n";
 
- $ret .= "<TABLE>\n";
+ $ret .= "<table>\n";
         
  # from registered user or anonymous?
  
  if ($u->{'opt_whocanreply'} eq "all") {
-     $ret .= "<TR VALIGN=MIDDLE><TD ALIGN=RIGHT>From:</TD><TD ALIGN=MIDDLE><INPUT TYPE=\"radio\" NAME=\"usertype\" VALUE=\"anonymous\" id='talkpostfromanon'></TD><TD ALIGN=LEFT><B><label for='talkpostfromanon'>Anonymous</label></B></TD></TR>\n";
+     $ret .= "<tr valign='middle'>";
+     $ret .= "<td align='right'>From:</td>";
+     $ret .= "<td align='middle'><input type='radio' name='usertype' value='anonymous' id='talkpostfromanon'></td>";
+     $ret .= "<td align='left'><b><label for='talkpostfromanon'>Anonymous</label></b></td>";
+     $ret .= "</tr>\n";
  } elsif ($u->{'opt_whocanreply'} eq "reg") {
-     $ret .= "<TR VALIGN=MIDDLE><TD ALIGN=RIGHT>From:</TD><TD ALIGN=MIDDLE>(  )</TD><TD ALIGN=LEFT COLSPAN=3><FONT COLOR=#C0C0C0><B>Anonymous</B></FONT> - this user has disabled anonymous posting.</TD></TR>\n";
+     $ret .= "<tr valign='middle'>";
+     $ret .= "<td align='right'>From:</td><td align='middle'>(  )</td>";
+     $ret .= "<td align='left' colspan=3><font color='#c0c0c0'><b>Anonymous</b></font> - this user has disabled anonymous posting.</td>";
+     $ret .= "</tr>\n";
  } else {
-     $ret .= "<TR VALIGN=MIDDLE><TD ALIGN=RIGHT>From:</TD><TD ALIGN=MIDDLE>(  )</TD><TD ALIGN=LEFT COLSPAN=3><FONT COLOR=#C0C0C0><B>Anonymous</B></FONT> - this user has disabled anonymous and non-friend posting.  You may post here if <B>$u->{'user'}</B> lists you as a friend.</TD></TR>\n";
+     $ret .= "<tr valign='middle'>";
+     $ret .= "<td align='right'>From:</td>";
+     $ret .= "<td align='middle'>(  )</td>";
+     $ret .= "<td align='left' colspan='3'><font color='#c0c0c0'><b>Anonymous</b></font> - this user has disabled anonymous and non-friend posting.  You may post here if <b>$u->{'user'}</b> lists you as a friend.</td>";
+     $ret .= "</tr>\n";
  }
 
- my $checked = "CHECKED";
+ my $checked = "checked='1'";
  if ($remote) {
-     $ret .= "<tr valign='middle'><td align='right'>&nbsp;</td><td align='middle'><input type='radio' name='usertype' value='cookieuser' id='talkpostfromremote' $checked></td><td align='left'><label for='talkpostfromremote'><b>Logged in user:</b> <i>$remote->{'user'}</i></label>\n";
-     $ret .= "<INPUT TYPE=HIDDEN NAME=cookieuser VALUE=\"$remote->{'user'}\">\n";
-     $ret .= "</TD></TR>\n";
+     $ret .= "<tr valign='middle'>";
+     $ret .= "<td align='right'>&nbsp;</td>";
+     $ret .= "<td align='middle'><input type='radio' name='usertype' value='cookieuser' id='talkpostfromremote' $checked></td>";
+     $ret .= "<td align='left'><label for='talkpostfromremote'><b>Logged in user:</b> <i>$remote->{'user'}</i></label>\n";
+     $ret .= "<input type='hidden' name='cookieuser' value='$remote->{'user'}'>\n";
+     $ret .= "</td>";
+     $ret .= "</tr>\n";
      $checked = "";
  }
 
- $ret .= "<TR VALIGN=MIDDLE><TD>&nbsp;</TD><TD ALIGN=MIDDLE><INPUT TYPE=\"radio\" NAME=\"usertype\" VALUE=\"user\" id='talkpostfromlj' $checked></TD><TD  ALIGN=LEFT><B><label for='talkpostfromlj'>LiveJournal user</label> (<A HREF=\"/create.bml\">create account</A>)</B></TD></TR>\n";
- $ret .= "<TR VALIGN=MIDDLE><TD>&nbsp;</TD><TD>&nbsp;</TD><TD> <TABLE><TR VALIGN=MIDDLE ALIGN=LEFT><TD>Username: <INPUT CLASS=textbox NAME=userpost SIZE=13 MAXLENGTH=18></TD><TD>&nbsp;Password:</TD><TD><INPUT CLASS=textbox NAME=password TYPE=password MAXLENGTH=30 SIZE=13></TD><TD> <LABEL for='logincheck'>login?</LABEL> <INPUT TYPE='checkbox' NAME='do_login' ID='logincheck'></TD></TR></TABLE> </TD></TR>\n";
+ # ( ) LiveJournal user:
+ $ret .= "<tr valign=middle>";
+ $ret .= "<td>&nbsp;</td>";
+ $ret .= "<td align=middle><input type=\"radio\" name=\"usertype\" value=\"user\" id='talkpostfromlj' $checked></td>";
+ $ret .= "<td align=left><b><label for='talkpostfromlj'>LiveJournal user:</label></b>";
+ $ret .= "</tr>\n";
+
+ # Username: [    ] Password: [    ]  Login? [ ]
+ $ret .= "<tr valign='middle' align='left'><td></td><td></td><td>";
+ $ret .= "Username:&nbsp;<input class='textbox' name='userpost' size='13' maxlength='18' id='username'> ";
+ $ret .= "Password:&nbsp;<input class='textbox' name='password' type='password' maxlength='30' size='13'> <label for='logincheck'>Login?&nbsp;</label><input type='checkbox' name='do_login' id='logincheck'></td></tr>\n";
  
  $basesubject = "";
  if ($FORM{'replyto'}) {
@@ -390,15 +414,15 @@ BODY<=
  }
 
 
- $ret .= "<BR>(=DE Paragraphs will be automatically formatted by default.  <B>Allowed HTML</B>: ";
+ $ret .= "<br />(=DE Paragraphs will be automatically formatted by default.<br />  <b>Allowed HTML</b>: ";
  foreach (sort &LJ::CleanHTML::get_okay_comment_tags()) {
      $ret .= "&lt;$_&gt; ";
  }
  $ret .= "DE=)";
 
 
- $ret .= "</TD></TR></TABLE>\n";
- $ret .= "</FORM>\n";
+ $ret .= "</td></tr></table>\n";
+ $ret .= "</form>\n";
  
  LJ::strip_bad_code(\$ret);
  return $ret;
