@@ -48,7 +48,7 @@ $maint{'genstats'} = sub
         }
     }
 
-    if ($do{'usage'})
+    if (0 && $do{'usage'})  # FIXME: log2 query below is unindexed => deathly slow
     {
         print "-I- Getting usage by day in last month...\n";
         $sth = $dbr->prepare("SELECT UNIX_TIMESTAMP(), DATE_FORMAT(NOW(), '%Y-%m-%d')");
