@@ -1,6 +1,8 @@
 Style: calendar/Clean and Simple
+is_public: Y
 is_embedded: N
 is_colorfree: Y
+opt_cache: N
 lastupdate: 2003-04-15 21:47:15
 
 CALENDAR_YEAR_DISPLAYED<=
@@ -250,8 +252,10 @@ CALENDAR_WEEK<=
 .
 
 Style: calendar/Default Calendar
+is_public: Y
 is_embedded: N
 is_colorfree: Y
+opt_cache: N
 lastupdate: 2003-04-15 21:49:24
 
 CALENDAR_YEAR_DISPLAYED=>[ %%yyyy%% ]
@@ -343,8 +347,10 @@ CALENDAR_WEEK<=
 .
 
 Style: calendar/Disjointed
+is_public: Y
 is_embedded: N
 is_colorfree: Y
+opt_cache: N
 lastupdate: 2003-04-15 21:50:18
 
 CALENDAR_YEAR_DISPLAYED=><div>&gt;&gt;&nbsp;%%yyyy%%</a>
@@ -570,8 +576,10 @@ CALENDAR_WEEK<=
 .
 
 Style: calendar/Generator
+is_public: Y
 is_embedded: N
 is_colorfree: Y
+opt_cache: N
 lastupdate: 2003-04-15 21:52:06
 
 CALENDAR_YEAR_DISPLAYED=><b>%%yyyy%%</b>&nbsp;
@@ -781,8 +789,10 @@ CALENDAR_WEEK<=
 .
 
 Style: calendar/Magazine
+is_public: Y
 is_embedded: N
 is_colorfree: Y
+opt_cache: N
 lastupdate: 2003-04-15 21:52:41
 
 CALENDAR_YEAR_DISPLAYED=> (<span class="Active">%%yyyy%%</span>)
@@ -875,8 +885,10 @@ CALENDAR_WEEK<=
 .
 
 Style: calendar/Notepad
+is_public: Y
 is_embedded: N
 is_colorfree: N
+opt_cache: N
 lastupdate: 2003-04-15 21:55:24
 
 CALENDAR_YEAR_DISPLAYED=>
@@ -991,8 +1003,10 @@ CALENDAR_WEEK<=
 .
 
 Style: calendar/Punquin Elegant w/ Sidebar
+is_public: Y
 is_embedded: N
 is_colorfree: Y
+opt_cache: N
 lastupdate: 2003-04-15 21:56:16
 
 CALENDAR_YEAR_DISPLAYED=>&gt; %%yyyy%%<BR>
@@ -1118,8 +1132,10 @@ CALENDAR_WEEK<=
 .
 
 Style: calendar/Refried Paper
+is_public: Y
 is_embedded: N
 is_colorfree: N
+opt_cache: N
 lastupdate: 2003-04-15 21:57:33
 
 CALENDAR_YEAR_DISPLAYED=>%%yyyy%%<BR>
@@ -1329,8 +1345,10 @@ CALENDAR_WEEK<=
 .
 
 Style: calendar/Tabular Indent
+is_public: Y
 is_embedded: N
 is_colorfree: Y
+opt_cache: N
 lastupdate: 2003-04-15 21:58:21
 
 CALENDAR_YEAR_DISPLAYED=> %%yyyy%%
@@ -1443,8 +1461,10 @@ CALENDAR_WEEK<=
 .
 
 Style: day/Clean and Simple
+is_public: Y
 is_embedded: N
 is_colorfree: Y
+opt_cache: N
 lastupdate: 2003-04-15 21:59:25
 
 DAY_TALK_LINKS=><div class="talklinks" clear="all">%%readlink%% <a href="%%urlpost%%">Comment on this</a></div>
@@ -1712,8 +1732,10 @@ clear: right;
 .
 
 Style: day/Default Day View
+is_public: Y
 is_embedded: N
 is_colorfree: Y
+opt_cache: N
 lastupdate: 2003-04-15 22:01:26
 
 DAY_TALK_LINKS<=
@@ -1827,8 +1849,10 @@ DAY_PAGE<=
 .
 
 Style: day/Disjointed
+is_public: Y
 is_embedded: N
 is_colorfree: Y
+opt_cache: N
 lastupdate: 2003-04-15 22:02:12
 
 DAY_TALK_LINKS=>%%readlink%%<a href="%%urlpost%%">Post</a>
@@ -2120,8 +2144,10 @@ color:%%color:stronger_text%%;
 .
 
 Style: day/Generator
+is_public: Y
 is_embedded: N
 is_colorfree: Y
+opt_cache: N
 lastupdate: 2003-04-15 22:02:47
 
 DAY_TALK_LINKS<=
@@ -2395,8 +2421,10 @@ summary="">
 .
 
 Style: day/Magazine
+is_public: Y
 is_embedded: N
 is_colorfree: Y
+opt_cache: N
 lastupdate: 2003-04-15 22:03:36
 
 DAY_TALK_LINKS=>   <div class="Comment">(%%readlink%%<a href="%%urlpost%%">comment&nbsp;on&nbsp;this</a>)</div>
@@ -2498,8 +2526,10 @@ DAY_PAGE<=
 .
 
 Style: day/Notepad
+is_public: Y
 is_embedded: N
 is_colorfree: N
+opt_cache: N
 lastupdate: 2003-04-15 22:04:36
 
 DAY_TALK_LINKS=><P>%%readlink%%<A HREF="%%urlpost%%">Make Notes</A></P>
@@ -2610,8 +2640,10 @@ DAY_PAGE<=
 .
 
 Style: day/Punquin Elegant w/ Sidebar
+is_public: Y
 is_embedded: N
 is_colorfree: Y
+opt_cache: N
 lastupdate: 2003-04-15 22:05:28
 
 DAY_TALK_LINKS=><P ALIGN="RIGHT"><FONT FACE="Verdana,Arial,Helvetica" SIZE=1>(%%readlink%%<A HREF="%%urlpost%%">comment on this</A>)</FONT></P>
@@ -2769,8 +2801,10 @@ A:active { color: %%color:page_alink%% ; }
 .
 
 Style: day/Refried Paper
+is_public: Y
 is_embedded: N
 is_colorfree: N
+opt_cache: N
 lastupdate: 2003-04-15 22:06:15
 
 DAY_TALK_LINKS=>%%readlink%%<a href="%%urlpost%%">post a comment</a>
@@ -3005,8 +3039,10 @@ p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-heigh
 .
 
 Style: day/Tabular Indent
+is_public: Y
 is_embedded: N
 is_colorfree: Y
+opt_cache: N
 lastupdate: 2003-04-15 22:07:06
 
 DAY_TALK_LINKS<=
@@ -3186,8 +3222,10 @@ DAY_PAGE<=
 .
 
 Style: friends/Clean and Simple
+is_public: Y
 is_embedded: N
 is_colorfree: Y
+opt_cache: N
 lastupdate: 2003-04-15 22:15:03
 
 FRIENDS_RANGE_HISTORY=>You are viewing %%numitems%% entries, %%skip%% into the past.
@@ -3490,8 +3528,10 @@ FRIENDS_SUBJECT=> <span class="subject">%%subject%%</span><br>
 .
 
 Style: friends/Default Friends View
+is_public: Y
 is_embedded: N
 is_colorfree: Y
+opt_cache: N
 lastupdate: 2003-04-15 22:18:38
 
 FRIENDS_RANGE_HISTORY=>Below are <B>%%numitems%%</B> friends' journal entries, after skipping by the <B>%%skip%%</B> most recent ones.
@@ -3644,8 +3684,10 @@ FRIENDS_SUBJECT=><FONT COLOR="%%color:page_text_em%%" FACE="Arial"><I><B>%%subje
 .
 
 Style: friends/Disjointed
+is_public: Y
 is_embedded: N
 is_colorfree: Y
+opt_cache: N
 lastupdate: 2003-04-15 22:20:03
 
 FRIENDS_RANGE_HISTORY=>
@@ -3967,8 +4009,10 @@ FRIENDS_SUBJECT=>%%subject%%
 .
 
 Style: friends/Generator
+is_public: Y
 is_embedded: N
 is_colorfree: Y
+opt_cache: N
 lastupdate: 2003-04-15 22:20:36
 
 FRIENDS_RANGE_HISTORY=>%%skip%% entries back
@@ -4336,8 +4380,10 @@ FRIENDS_SUBJECT=>%%subject%%
 .
 
 Style: friends/Magazine
+is_public: Y
 is_embedded: N
 is_colorfree: Y
+opt_cache: N
 lastupdate: 2003-04-15 22:21:10
 
 FRIENDS_RANGE_HISTORY=>(<span class="Active"><a href="./friends">Latest&nbsp;friends</a> - %%skip%%</span>)
@@ -4471,8 +4517,10 @@ FRIENDS_SUBJECT=> - <em>%%subject%%</em>
 .
 
 Style: friends/Notepad
+is_public: Y
 is_embedded: N
 is_colorfree: N
+opt_cache: N
 lastupdate: 2003-04-15 22:21:51
 
 FRIENDS_RANGE_HISTORY=>
@@ -4616,8 +4664,10 @@ FRIENDS_SUBJECT=> <FONT COLOR="red">%%subject%%</FONT>
 .
 
 Style: friends/Punquin Elegant w/ Sidebar
+is_public: Y
 is_embedded: N
 is_colorfree: Y
+opt_cache: N
 lastupdate: 2003-04-15 22:22:27
 
 FRIENDS_RANGE_HISTORY=>below are <B>%%numitems%%</B> friends' journal entries, after skipping by the <B>%%skip%%</B> most recent ones
@@ -4819,8 +4869,10 @@ FRIENDS_SUBJECT=><BR><FONT COLOR="%%color:page_text_em%%" FACE="Arial"><I><B>%%s
 .
 
 Style: friends/Refried Paper
+is_public: Y
 is_embedded: N
 is_colorfree: N
+opt_cache: N
 lastupdate: 2003-04-15 22:23:20
 
 FRIENDS_RANGE_HISTORY=>%%skip%% entries back
@@ -5084,8 +5136,10 @@ FRIENDS_SUBJECT=>%%subject%%
 .
 
 Style: friends/Tabular Indent
+is_public: Y
 is_embedded: N
 is_colorfree: Y
+opt_cache: N
 lastupdate: 2003-04-15 22:24:33
 
 FRIENDS_RANGE_HISTORY=>You're looking at %%numitems%% entries, after skipping %%skip%% newer ones.
@@ -5325,8 +5379,10 @@ FRIENDS_SUBJECT=><TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Subject
 .
 
 Style: lastn/Clean and Simple
+is_public: Y
 is_embedded: N
 is_colorfree: Y
+opt_cache: N
 lastupdate: 2003-04-15 22:25:28
 
 LASTN_EVENT_PROTECTED<=
@@ -5630,8 +5686,10 @@ LASTN_WEBSITE=><li><a href="%%url%%">%%name%%</a></li>
 .
 
 Style: lastn/Default LiveJournal
+is_public: Y
 is_embedded: N
 is_colorfree: Y
+opt_cache: N
 lastupdate: 2003-04-15 22:26:17
 
 LASTN_EVENT_PROTECTED<=
@@ -5756,8 +5814,10 @@ LASTN_WEBSITE<=
 .
 
 Style: lastn/Disjointed
+is_public: Y
 is_embedded: N
 is_colorfree: Y
+opt_cache: N
 lastupdate: 2003-04-15 22:27:25
 
 LASTN_EVENT_PROTECTED<=
@@ -6061,8 +6121,10 @@ LASTN_WEBSITE=><br><a class="links" href="%%url%%">%%name%%</a>
 .
 
 Style: lastn/Generator
+is_public: Y
 is_embedded: N
 is_colorfree: Y
+opt_cache: N
 lastupdate: 2003-04-15 22:28:35
 
 LASTN_EVENT_PROTECTED<=
@@ -6386,8 +6448,10 @@ LASTN_WEBSITE<=
 .
 
 Style: lastn/Magazine
+is_public: Y
 is_embedded: N
 is_colorfree: Y
+opt_cache: N
 lastupdate: 2003-04-15 22:29:06
 
 LASTN_EVENT_PROTECTED<=
@@ -6517,8 +6581,10 @@ LASTN_WEBSITE=>(<a href="%%url%%">%%name%%</a>)
 .
 
 Style: lastn/Notepad
+is_public: Y
 is_embedded: N
 is_colorfree: N
+opt_cache: N
 lastupdate: 2003-04-15 22:29:50
 
 LASTN_EVENT_PROTECTED<=
@@ -6660,8 +6726,10 @@ LASTN_WEBSITE=><A HREF="%%url%%">&gt; %%name%%</A><BR>
 .
 
 Style: lastn/Punquin Elegant w/ Sidebar
+is_public: Y
 is_embedded: N
 is_colorfree: Y
+opt_cache: N
 lastupdate: 2003-04-15 22:30:29
 
 LASTN_EVENT_PROTECTED<=
@@ -6853,8 +6921,10 @@ LASTN_WEBSITE=><A HREF="%%url%%">&gt; %%name%%</A><BR>
 .
 
 Style: lastn/Refried Paper
+is_public: Y
 is_embedded: N
 is_colorfree: N
+opt_cache: N
 lastupdate: 2003-04-15 22:31:12
 
 LASTN_EVENT_PROTECTED<=
@@ -7106,8 +7176,10 @@ LASTN_WEBSITE<=
 .
 
 Style: lastn/Tabular Indent
+is_public: Y
 is_embedded: N
 is_colorfree: Y
+opt_cache: N
 lastupdate: 2003-04-15 22:31:48
 
 LASTN_EVENT_PROTECTED<=
@@ -7308,8 +7380,10 @@ LASTN_WEBSITE=><TR><TD>View:</TD><TD><A HREF="%%url%%">Website (%%name%%)</A>.</
 .
 
 Style: lastn/Webley Boxes on White
+is_public: Y
 is_embedded: N
 is_colorfree: N
+opt_cache: N
 lastupdate: 2003-04-15 22:32:25
 
 LASTN_EVENT_PROTECTED=>
