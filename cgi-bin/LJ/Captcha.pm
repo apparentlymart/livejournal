@@ -329,8 +329,6 @@ sub expire {
     $dbh = LJ::get_db_writer();
     $dbh->do( $sql, undef, $userid, $capid, $anum ) or return undef;
 
-    print STDERR "expire: $capid $anum -> $userid\n";
-
     return 1;
 }
 
