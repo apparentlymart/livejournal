@@ -167,6 +167,112 @@
 
 /community/search.bml.userlikes=User likes:
 
+/create.bml.age.check.question=Are you under 13 years of age?
+
+/create.bml.age.check.yes=Yes, I am under 13 years old.
+
+/create.bml.age.head=Age
+
+/create.bml.aolnotice.head=Notice to AOL Users
+
+/create.bml.aolnotice.text=If you are an <b>AOL User</b>, make sure you go to <b>Keyword: <i>Mail Controls</i></b> and <b>turn off</b> any of AOL's "useful" mail controls.  You must be able to receive mail from the Internet or you will not recieve your confirmation code.  If your parents have this restricted, perhaps you really shouldn't be using [[sitename]].
+
+/create.bml.btn.proceed=Proceed...
+
+/create.bml.clusterselect.cluster=Cluster:
+
+/create.bml.clusterselect.clusternum=Cluster [[number]]
+
+/create.bml.clusterselect.head=Cluster Selection
+
+/create.bml.clusterselect.nocluster=No Cluster
+
+/create.bml.clusterselect.text=Please select the cluster you want to create this account on. <b>Note:</b>  This is a debugging/test option only.  In production, users won't pick this, or know anything about it.
+
+/create.bml.create.head=Creating a New Journal
+
+/create.bml.create.text=Creating a new LiveJournal is easy, just follow the instructions below!
+
+/create.bml.email.head=Your email address
+
+/create.bml.email.input.head=Email Address:
+
+/create.bml.email.text=For verification and security purposes, we need your email address.  It will never ever, under any any circumstances, be sold or given away to spammers.  We hate that more than anything.  Read our <a href="/legal/privacy.bml" TARGET="privacy">privacy policy</a> for more information.
+
+/create.bml.error.coppa.under13=Sorry, due to COPPA restrictions, you cannot use the LiveJournal service until you're 13 years old.  Please come back on your 13th birthday.
+
+/create.bml.error.email.blank=You must provide your email address.
+
+/create.bml.error.email.nospaces=No spaces allowed in email address.  If you're on AOL, remember that your Internet Email address is your screen name with all spaces removed, followed by <b>\@aol.com</b>
+
+/create.bml.error.password.asciionly=You can only use ASCII symbols in the password.
+
+/create.bml.error.password.blank=You must enter a password.
+
+/create.bml.error.password.nomatch=Passwords do not match.
+
+/create.bml.error.postrequired=POST required.
+
+/create.bml.error.username.blank=Please supply a name or handle/alias.
+
+/create.bml.error.username.inuse=Username already in use; please select a different one.
+
+/create.bml.error.username.iscode=Username appears to be an invite code, not a username.
+
+/create.bml.error.username.mustenter=You must enter a username.
+
+/create.bml.error.username.reserved=Sorry, that is a reserved username.
+
+/create.bml.name.head=Your Name
+
+/create.bml.name.input.head=Name:
+
+/create.bml.name.text=What's your name or handle?  This will appear at the top of your journal, and in the user directory should you choose to be listed in it.  You do not have to provide your full name or even your real name.
+
+/create.bml.password.head=Password
+
+/create.bml.password.input.head1=Password:
+
+/create.bml.password.input.head2=Re-type password:
+
+/create.bml.password.text=Select a password.
+
+/create.bml.proceed.btn.proceed=Proceed...
+
+/create.bml.proceed.head=Proceed
+
+/create.bml.proceed.text=Press the button below and you're on your way to having your very own LiveJournal!
+
+/create.bml.proceed.warning=Only press <b>Proceed</b> <i>once</i>!!
+
+/create.bml.success.btn.enterinfo=Enter Personal Information
+
+/create.bml.success.head=Success!
+
+/create.bml.success.text1=Your journal has been created.  Important registration information has been emailed to <FONT FACE=Arial SIZE=+1><B>[[email]]</B></FONT> containing further instructions.  <B>Note: </B>  You have exactly <I>seven days</I> to confirm your journal creation.  If you still haven't gone and set it up after seven days the username of <B>[[username]]</B> will be automatically deleted and somebody else may use it.
+
+/create.bml.success.text2=Your LiveJournal will be available at:
+
+/create.bml.success.text3=Now, please take the time to fill in some information about yourself.  It's mostly optional, but it lets us get an idea of who's using LiveJournal.
+
+/create.bml.title=Create New Journal
+
+/create.bml.useacctcodes.entercode=To create a new account, enter an account creation code:
+
+/create.bml.useacctcodes.welcome=Welcome
+
+/create.bml.username.box.head=Username:
+
+/create.bml.username.forpaidaccts=Or, for paid accounts:
+
+/create.bml.username.head=Username
+
+/create.bml.username.ljaddress=Your journal will be at these addresses:
+
+/create.bml.username.text=Each [[sitename]] user must have their own unique username.  Your username is what appears in the address to your journal and what you use to log into the [[sitename]] server.  It also shows up when you post comments in other people's journal.
+
+/create.bml.username.username=username
+
 /editinfo.bml.allowshocontact.email.if_domainaddy<<
 only show your livejournal email address 
 (<a href="[[siteroot]]/paidaccounts/">paid accounts</a> only), or to show them both.
@@ -544,6 +650,168 @@ already have an account you can <a href="/create.bml">create one</a> to track yo
 
 /friends/index.bml.title=Friends Tools
 
+/interests.bml.add.added.head=Added!
+
+/interests.bml.add.added.text=The interest has been added to your list.
+
+/interests.bml.add.btn.text=Add [interest]]
+
+/interests.bml.add.confirm.head=Confirm
+
+/interests.bml.add.confirm.text=To add <b>[[interest]]</b> as an interest, click the button below.
+
+/interests.bml.add.toomany.head=Sorry...
+
+/interests.bml.add.toomany.text=You already have [[maxinterests]] interests defined.
+
+/interests.bml.addint=If you're also interested in this and would like to be added to this list, <a href="/interests.bml?mode=add&amp;intid=[[qintid]]">click here</A>.
+
+/interests.bml.communities.head=Relevant Communities
+
+/interests.bml.communities.text=The following communities are also interested in <b>"[[interest]]"</b>.
+
+/interests.bml.count=Count
+
+/interests.bml.error.add.mustlogin=You have to be logged in to add an interest this way. 
+
+/interests.bml.error.findsim_do.intnotfound=Interest wasn't found.
+
+/interests.bml.findsim.account.notallowed=However, your account type doesn't let you use this tool.
+
+/interests.bml.findsim.account.notloggedin=You're also not <a href='/login.bml?ret=1'>logged in</a>, so your account type can't be determined.
+
+/interests.bml.findsim.btn.find=Find!
+
+/interests.bml.findsim.head=Similar Users
+
+/interests.bml.findsim.searchwait=<b>Please note:</b> Search will take several seconds.  Be patient.
+
+/interests.bml.findsim.simtouser=Similar to User:
+
+/interests.bml.findsim.text=This tool lets you find users with the most similar interests to a given user.  More fun stuff can be found on the <A HREF="/interests.bml">interests page</A>.
+
+/interests.bml.findsim_do.account.notallowed=Sorry, your account type doesn't let you use this tool.
+
+/interests.bml.findsim_do.magic=Magic<br />Index
+
+/interests.bml.findsim_do.magic.head=Magic Index?
+
+/interests.bml.findsim_do.magic.text=Each matching user gets computed a magic index, which is a weighting of two factors:  the raw number of like interests, and some extra points for sharing uncommon interests.
+
+/interests.bml.findsim_do.nomatch.head=No Matches
+
+/interests.bml.findsim_do.nomatch.text=No users are similar to [[user]].
+
+/interests.bml.findsim_do.notdefined=User [[user]] has no defined interests.
+
+/interests.bml.findsim_do.similar.head=Similar Users
+
+/interests.bml.findsim_do.similar.text=The following are the most related users to [[user]]
+
+/interests.bml.interest=Interest
+
+/interests.bml.interested.btn.find=Find
+
+/interests.bml.interested.in=Find people interested in:
+
+/interests.bml.interests.findsim1=Find similar people
+
+/interests.bml.interests.findsim2=see who has the most number of common interests with you
+
+/interests.bml.interests.head=Interests
+
+/interests.bml.interests.text=Here are some fun things you can do with interests...
+
+/interests.bml.interests.viewpop=View popular interests
+
+/interests.bml.match=[[count]] match:
+
+/interests.bml.matches=[[count]] matches:
+
+/interests.bml.morestuff=More fun stuff can be found on the <A HREF="/interests.bml">interests page</A>.
+
+/interests.bml.nointerests.text=Don't have any interests listed?  Add some by going to the <A HREF="/editinfo.bml">Edit Personal Info & Settings</A> page.
+
+/interests.bml.popular.head=Popular Interests
+
+/interests.bml.popular.text=The following are the most popular interests.
+
+/interests.bml.title=Interests
+
+/interests.bml.toomany.body=There are [[intcount]] people and/or communities listing this as an interest.  A list will not be shown.
+
+/interests.bml.toomany.head=Many matches
+
+/interests.bml.users.head=Interested users
+
+/interests.bml.users.text=The following users are also interested in <b>[[interest]]</b>.
+
+/login.bml.error.mustenterusername=You must <a href='/login.bml'>enter a username</a>.
+
+/login.bml.expire.btn.neverexpire=Change expiration mode to NEVER
+
+/login.bml.expire.btn.sessiononly=Change expiration mode to SESSION ONLY
+
+/login.bml.expire.neverexpire.text=Your login will <b>never expire</b>, so if you're at a public internet terminal, a school, library, or other place where people may be using this computer shortly, make sure you log out when you're done!  Or, change your login mode to expire when you close your browser:
+
+/login.bml.expire.sessiononly.text=Your login will expire after you close your browser.  If this is your own computer and you're the only user, you may want to set change your login expiration such that it never expires:
+
+/login.bml.links.head=Links
+
+/login.bml.links.link1=Your <a href='/users/[[username]]/friends'>friends page</a>.
+
+/login.bml.links.link2=Your <a href='/todo/'>to-do list</a>.
+
+/login.bml.links.text=In the future this page will have all sorts of links and relevant information, but for now here are a few places you may want to go:
+
+/login.bml.loggedin.head=Logged in!
+
+/login.bml.loggedin.text=You are now logged in.
+
+/login.bml.login.btn.login=Login...
+
+/login.bml.login.expiration=Expiration:
+
+/login.bml.login.forget=Forget?
+
+/login.bml.login.head=Login
+
+/login.bml.login.never=Never
+
+/login.bml.login.otheropts=Other Options:
+
+/login.bml.login.password=Password:
+
+/login.bml.login.text1=To login to [[sitename]], enter your username and password below.  <b>New Users:</b> To create an account, <a href='/create.bml'>go here</a>.
+
+/login.bml.login.text2=You may also specify when your login expires.  By default your login will expire when you close your browser, which is best on public computers.  However, if you're the only user of your computer and nobody else has access to it, you may choose to remain logged in forever.
+
+/login.bml.login.username=Username:
+
+/login.bml.login.whenbrowsercloses=When browser closes
+
+/login.bml.title=Login
+
+/login.bml.whylogin.benefit1=You won't have to enter your username/password anywhere on the site anymore.
+
+/login.bml.whylogin.benefit2=You'll be able to view "protected" journal entries from your friends that give you access to read them.
+
+/login.bml.whylogin.benefit3=A lot of features are only visible or accessible when you're logged in.
+
+/login.bml.whylogin.head=Why Login?
+
+/login.bml.whylogin.text=Here are some of the main benefits of logging in:
+
+/logout.bml.already.head=Already logged out
+
+/logout.bml.already.text=You are already logged out.
+
+/logout.bml.loggedout.head=Logged out
+
+/logout.bml.loggedout.text=You are now logged out.
+
+/logout.bml.title=Logout
+
 /lostinfo.bml.btn.proceed=Proceed
 
 /lostinfo.bml.enter_email=Enter your email address:
@@ -575,6 +843,114 @@ already have an account you can <a href="/create.bml">create one</a> to track yo
 /lostinfo_do.bml.username_mailed.text=Success.  Your username has been mailed.
 
 /lostinfo_do.bml.username_mailed.title=Username mailed!
+
+/modify.bml.btn.proceed=Proceed...
+
+/modify.bml.lostinfo.head=Forget something?
+
+/modify.bml.lostinfo.text=If you forgot your username or password, <a href="lostinfo.bml">recover it here!</a>.
+
+/modify.bml.modify.head=Modify Your Journal
+
+/modify.bml.modify.text=Enter your username and password to modify options that affect the appearance your journal. If you'd like to add a new journal entry, you want to go <A HREF="/update.bml">here</A>.
+
+/modify.bml.title=Modify Journal
+
+/modify_do.bml.availablestyles.head=Available Styles
+
+/modify_do.bml.availablestyles.userstyles=User Styles:
+
+/modify_do.bml.colortheme.about=Here you can select what color theme will be applied to the layout options you pick above.  Or, if you don't like the provided colors, specify your own!  If you come up with something really sexy looking, let us know and we'll name a theme after it.
+
+/modify_do.bml.colortheme.area.head=Usage Area
+
+/modify_do.bml.colortheme.color.head1=Color
+
+/modify_do.bml.colortheme.color.head2=(#rrggbb or name)
+
+/modify_do.bml.colortheme.customcolors=Custom Colors
+
+/modify_do.bml.colortheme.defaulttheme=Default Theme
+
+/modify_do.bml.colortheme.head=Color Theme
+
+/modify_do.bml.domainalias.about=If you have a domain name already registered (or which you're planning on registering) and would like it to automatically load your LiveJournal, enter it here:
+
+/modify_do.bml.domainalias.domainname=Domain name:
+
+/modify_do.bml.domainalias.example=Example: <i>my-journal.com</i>
+
+/modify_do.bml.domainalias.head=Domain Aliasing
+
+/modify_do.bml.domainalias.helptext=For this to work, you'll need to arrange to have your domain name's DNS point to the same IP address of [[sitename]].
+
+/modify_do.bml.done.btn.savechanges=Save Changes
+
+/modify_do.bml.done.head=Done?
+
+/modify_do.bml.done.text=When done, press the "Save Changes" button below...
+
+/modify_do.bml.error.dupdomainalias=Another user has already registered themselves as using your selected domain alias.
+
+/modify_do.bml.error.stylenotavailable=One of the styles you've selected is not available.  This is either the result of somebody deleting the style, or you trying to pick one that you don't have access to.
+
+/modify_do.bml.friends.about=Here are options that control how your friends page looks.
+
+/modify_do.bml.friends.head=Friends View
+
+/modify_do.bml.friends.opt.usesharedpic.about=This option controls what picture you see on your friends page when a user posts in a shared or community journal.  If you check it, then you'll see the community's icon.  If you leave it unchecked, then you'll see the person that's actually posting's personal user icon.
+
+/modify_do.bml.friends.opt.usesharedpic.head=Use shared journal pictures instead of poster's user picture
+
+/modify_do.bml.journaloptions.about=From here you can customize the look of your LiveJournal pages.  If you're really curious how everything works, read the <A HREF="/developer/" TARGET=_blank>developer information</A>.  Otherwise, we'll assume you're satisifed with the basic options below:
+
+/modify_do.bml.journaloptions.head=Journal Options
+
+/modify_do.bml.journalstatus.about=If you want to delete or undelete your journal, this is where you do it.  Once you delete your journal you have 30 days to undelete it, just in case you change your mind.  After 30 days, the journal will be permanently deleted and there will be no way to recover it.
+
+/modify_do.bml.journalstatus.head=Journal Activation Status
+
+/modify_do.bml.journalstatus.select.activated=Activated
+
+/modify_do.bml.journalstatus.select.deleted=Deleted
+
+/modify_do.bml.journalstatus.select.head=Status:
+
+/modify_do.bml.journalstatus.select.suspended=Suspended
+
+/modify_do.bml.moodicons.about=When posting journal entries you can also specify your current mood.  Different users have submitted different sets of mood icons that you can use.  Or, select "None" if you don't want any pictures besids your moods.  (or, you don't even have to use the Current Mood feature at all.)
+
+/modify_do.bml.moodicons.head=Mood Icons
+
+/modify_do.bml.moodicons.opt.forcefriends.about=Force this mood theme for all friends on your friends page
+
+/modify_do.bml.moodicons.personal=Personal Themes:
+
+/modify_do.bml.moodicons.preview=preview
+
+/modify_do.bml.moodicons.select=Select mood icon set:
+
+/modify_do.bml.overrides.about=You can ignore this section.  This is for tweaking very specific things about your page layout.  See the <A HREF="/developer/" TARGET=_blank>developer section</A> for details.  Also note that overrides are for overriding only one or two things about a style.  If you'd like to override everything, you need to <A HREF="/styles/create.bml" TARGET=_blank>create your own style</A>.
+
+/modify_do.bml.overrides.box.head=Overrides:
+
+/modify_do.bml.overrides.head=Style Overrides
+
+/modify_do.bml.overrides.note=Please note that not all style variables can be overridden. See the <a href="/developer/varlist.bml">documentation</a> for more details.
+
+/modify_do.bml.overrides.warning=THIS IS <U>NOT</U> WHERE YOU TYPE YOUR JOURNAL!!
+
+/modify_do.bml.pagelayoutstyle.about=Setting this controls how your journal is laid out on the screen.
+
+/modify_do.bml.pagelayoutstyle.head=Page Layout Style
+
+/modify_do.bml.pagelayoutstyle.warning=Your account type only permits you to select between a small number of default styles.
+
+/modify_do.bml.success.head=Success
+
+/modify_do.bml.success.text=Your journal settings have been updated.  You can view your journal <A HREF="[[url]]">here</A>.
+
+/modify_do.bml.title=Modify Journal
 
 /setlang.bml.select=Select your preferred language:
 
@@ -843,6 +1219,8 @@ Email=Email
 Error|notes=typically used inside an h1 tag to announce an error.
 Error=Error
 
+error.badpassword=Incorrect Password.
+
 error.dberror=A database error occurred:
 
 error.nobutton=No button pressed?
@@ -855,7 +1233,15 @@ error.noentry=No such journal entry.
 
 error.nojournal=Unknown Journal
 
+error.procrequest=There was an error processing your request:
+
+error.tempdisabled=This is disabled temporarily.
+
 error.unknownmode=Unknown mode.
+
+error.usernameinvalid=Username contains invalid characters.
+
+error.usernamelong=Username is too long, 15 character max.   
 
 error.username_notfound=Username not found.
 

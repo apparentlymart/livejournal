@@ -1,10 +1,10 @@
 <?page
-title=>Modify Journal
+title=><?_ml .title _ml?>
 body<=
 
-<?h1 Modify Your Journal h1?>
+<?h1 <?_ml .modify.head _ml?> h1?>
 <?p
-Enter your username and password to modify options that affect the appearance your journal.  If you'd like to add a new journal entry, you want to go <a href="update.bml">here</a>.
+<?_ml .modify.text _ml?>
 p?>
 
 <form action="modify_do.bml" method="post">
@@ -14,13 +14,13 @@ p?>
 <?_code
  return LJ::auth_fields(\%FORM);
  _code?>
-<tr><td colspan='2' align='center'><input type="submit" value="Proceed..."></td></tr>
+<tr><td colspan='2' align='center'><input type="submit" value="<?_ml .btn.proceed _ml?>"></td></tr>
 </table>
 standout?>
 
-<?h1 Forget something? h1?>
+<?h1 <?_ml .lostinfo.head _ml?> h1?>
 <?p
-If you forgot your username or password, <a href="lostinfo.bml">recover it here!</a>.
+<?_ml .lostinfo.text _ml?>
 p?>
 
 <=body

@@ -1,5 +1,5 @@
 <?page
-title=>Modify Journal
+title=><?_ml .title _ml?>
 body<=
 
 <?_code
@@ -18,7 +18,7 @@ body<=
  my $quser = $dbh->quote($user);
  
  my $u = LJ::load_user($dbs, $user);
- unless ($u) { push @errors, "Invalid username"; }
+ unless ($u) { push @errors, $ML{'error.username_notfound'}; }
  my $capstyles = LJ::get_cap($u, "styles");
 
  LJ::load_user_props($dbs, $u, "opt_usesharedpic",
@@ -27,7 +27,7 @@ body<=
                      "journaldomain",
                      );
 
- if (scalar(@errors)==0 && ! LJ::auth_okay($u, $FORM{'password'}, $FORM{'hpassword'})) { push @errors, "Incorrect password."; }
+ if (scalar(@errors)==0 && ! LJ::auth_okay($u, $FORM{'password'}, $FORM{'hpassword'})) { push @errors, "$ML{'error.badpassword'}"; }
 
  return LJ::bad_input(@errors) if @errors;
 
@@ -47,14 +47,14 @@ body<=
      $ret .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"$hpassword\">\n";
 
      ### journal style
-     $ret .= "<?h1 Journal Options h1?><?p From here you can customize the look of your LiveJournal pages.  If you're really curious how everything works, read the <A HREF=\"/developer/\" TARGET=_blank>developer information</A>.  Otherwise, we'll assume you're satisifed with the basic options below: p?>\n";
+     $ret .= "<?h1 $ML{'.journaloptions.head'} h1?><?p $ML{'.journaloptions.about'} p?>\n";
 
      ###
      ### LAYOUT OPTIONS
      ###
 
-     $and = $capstyles ? "" : "  Your account type only permits you to select between a small number of default styles. ";
-     $ret .= "<?h2 Page Layout Style h2?><?p Setting this controls how your journal is laid out on the screen. $and p?><UL><TABLE><TR BGCOLOR=#D0D0D0><TD></TD><TD>Available Styles</TD></TR>\n";
+     $and = $capstyles ? "" : "<?_ml .pagelayoutstyle.warning _ml?>";
+     $ret .= "<?h2 $ML{'.pagelayoutstyle.head'} h2?><?p $ML{'.pagelayoutstyle.about'}  $and p?><UL><TABLE><TR BGCOLOR=#D0D0D0><TD></TD><TD>$ML{'.availablestyles.head'}</TD></TR>\n";
      my %styles = ();
 
      $sth = $dbr->prepare("SELECT styleid, styledes, user, type ".
@@ -77,7 +77,7 @@ body<=
              if (!$exist_user_style)
              {
                  $exist_user_style = 1;
-                 $ret .= "<OPTION VALUE=\"\">--- User styles: ---\n";
+                 $ret .= "<OPTION VALUE=\"\">--- $ML{'.availablestyles.userstyles'} ---\n";
              }
              my $selected = $_->{'styleid'}==$u->{"s1_${view}_style"} ? " SELECTED" : "";
              $ret .= "<OPTION VALUE=\"$_->{'styleid'}\"$selected>" . BML::eall($_->{'styledes'}) . "\n";
@@ -89,10 +89,10 @@ body<=
      ###
      ### COLOR THEME OPTIONS
      ###
-     $ret .= "<?h2 Color Theme h2?><?p Here you can select what color theme will be applied to the layout options you pick above.  Or, if you don't like the provided colors, specify your own!  If you come up with something really sexy looking, let us know and we'll name a theme after it. p?>\n";
+     $ret .= "<?h2 $ML{'.colortheme.head'} h2?><?p $ML{'.colortheme.about'} p?>\n";
      $ret .= "<UL>\n";
      $checked = $u->{'themeid'} != 0 ? "CHECKED" : "";
-     $ret .= "<INPUT TYPE=RADIO VALUE=\"default\" NAME=themetype $checked> <B>Default Theme</B>: ";
+     $ret .= "<INPUT TYPE=RADIO VALUE=\"default\" NAME=themetype $checked> <B>$ML{'.colortheme.defaulttheme'}</B>: ";
      $ret .= "<SELECT NAME=themeid>\n";
      $sth = $dbr->prepare("SELECT themeid, name FROM themelist ORDER BY name");
      $sth->execute;
@@ -102,9 +102,9 @@ body<=
      }
      $ret .= "</SELECT><BR>\n";
      $checked = $u->{'themeid'} == 0 ? "CHECKED" : "";
-     $ret .= "<INPUT TYPE=RADIO VALUE=\"custom\" NAME=themetype $checked> <B>Custom Colors</B>:<P>";
+     $ret .= "<INPUT TYPE=RADIO VALUE=\"custom\" NAME=themetype $checked> <B>$ML{'.colortheme.customcolors'}</B>:<P>";
      $ret .= "<CENTER><TABLE BORDER=1 CELLPADDING=2>\n";
-     $ret .= "<TR VALIGN=TOP BGCOLOR=#D0D0D0><TD ALIGN=RIGHT><B>Usage Area</B></TD><TD><B>Color</B><BR><FONT SIZE=-1>(#rrggbb or name)</FONT></TD></TR>\n";
+     $ret .= "<TR VALIGN=TOP BGCOLOR=#D0D0D0><TD ALIGN=RIGHT><B>$ML{'.colortheme.area.head'}</B></TD><TD><B>$ML{'.colortheme.color.head1'}</B><BR><FONT SIZE=-1>$ML{'.colortheme.color.head2'}</FONT></TD></TR>\n";
 
      # get the user's custom colors
      my %custcolors = ();
@@ -129,7 +129,7 @@ body<=
      ###
      ### MOOD THEME OPTIONS
      ###
-     $ret .= "<?h2 Mood Icons h2?><?p When posting journal entries you can also specify your current mood.  Different users have submitted different sets of mood icons that you can use.  Or, select \"None\" if you don't want any pictures besids your moods.  (or, you don't even have to use the Current Mood feature at all.) p?>";
+     $ret .= "<?h2 $ML{'.moodicons.head'} h2?><?p $ML{'.moodicons.about'} p?>";
 
      $sth = $dbr->prepare("SELECT moodthemeid, name FROM moodthemes WHERE is_public='Y'");
      $sth->execute;
@@ -143,46 +143,46 @@ body<=
          $sth->execute;
          push @theme_user, $_ while ($_ = $sth->fetchrow_hashref);
          if (@theme_user) {
-             push @themes, { 'moodthemeid' => 0, 'name' => '--- Personal Themes: ---' };
+             push @themes, { 'moodthemeid' => 0, 'name' => '--- <?_ml .moodicons.personal _ml?> ---' };
              push @themes, @theme_user;
          }
      }
 
-     $ret .= "<UL><B>Select mood icon set: </B> <SELECT NAME=\"moodthemeid\">";
+     $ret .= "<UL><B>$ML{'.moodicons.select'} </B> <SELECT NAME=\"moodthemeid\">";
      foreach my $t (@themes) {
          my $sel = $t->{'moodthemeid'} == $u->{'moodthemeid'} ? "SELECTED" : "";
          $ret .= "<OPTION $sel VALUE=$t->{'moodthemeid'}>" . LJ::ehtml($t->{'name'}) . "\n";
      }
-     $ret .= "</SELECT> (<A HREF=\"/moodlist.bml\" TARGET=moods>preview</A>)\n";
+     $ret .= "</SELECT> (<A HREF=\"/moodlist.bml\" TARGET=moods>$ML{'.moodicons.preview'}</A>)\n";
      $checked = $u->{'opt_forcemoodtheme'} eq "Y" ? "CHECKED" : "";
-     $ret .= "<BR><INPUT TYPE=CHECKBOX $checked NAME=opt_forcemoodtheme> Force this mood theme for all friends on your friends page";
+     $ret .= "<BR><INPUT TYPE=CHECKBOX $checked NAME=opt_forcemoodtheme> $ML{'.moodicons.opt.forcefriends.about'}";
      $ret .= "</UL>";
      
      ###
      ### FRIENDS VIEW OPTIONS
      ###
-     $ret .= "<?h2 Friends View h2?><?p Here are options that control how your friends page looks. p?>";
+     $ret .= "<?h2 $ML{'.friends.head'} h2?><?p $ML{'.friends.about'} p?>";
      $ret .= "<P><TABLE>\n";
 
      my $checked;
      $checked = $u->{'opt_usesharedpic'} ? "CHECKED" : "";
-     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_usesharedpic $checked></TD><TD><B>Use shared journal pictures instead of poster's user picture</B></TD></TR>\n";
-     $ret .= "<TR><TD>&nbsp;</TD><TD>This option controls what picture you see on your friends page when a user posts in a shared or community journal.  If you check it, then you'll see the community's icon.  If you leave it unchecked, then you'll see the person that's actually posting's personal user icon.</TD></TR>\n";
+     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_usesharedpic $checked></TD><TD><B>$ML{'.friends.opt.usesharedpic.head'}</B></TD></TR>\n";
+     $ret .= "<TR><TD>&nbsp;</TD><TD>$ML{'.friends.opt.usesharedpic.about'}</TD></TR>\n";
      
      $ret .= "</TABLE>\n";
 
      # Journal domain stuff
      if ($LJ::OTHER_VHOSTS && LJ::get_cap($u, "userdomain")) {
-         $ret .= "<?h2 Domain Aliasing h2?><?p If you have a domain name already registered (or which you're planning on registering) and would like it to automatically load your LiveJournal, enter it here: ";
-         $ret .= "<blockquote>Domain name: <input name='journaldomain' size='30' maxlength='80' value='";
+         $ret .= "<?h2 $ML{'.domainalias.head'} h2?><?p $ML{'.domainalias.about'} ";
+         $ret .= "<blockquote>$ML{'.domainalias.domainname'} <input name='journaldomain' size='30' maxlength='80' value='";
          $ret .= LJ::ehtml($u->{'journaldomain'});
-         $ret .= "'><br />Example: <i>my-journal.com</i></blockquote>";
-         $ret .= "For this to work, you'll need to arrange to have your domain name's DNS point to the same IP address of $LJ::SITENAME. p?>";
+         $ret .= "'><br />$ML{'.domainalias.example'}</blockquote>";
+         $ret .= BML::ml(".domainalias.helptext", {'sitename' => $LJ::SITENAME})." p?>";
      }
 
      ### ending submit block
-     $ret .= "<?h1 Done? h1?><?p When done, press the \"Save Changes\" button below... p?>\n";
-     $ret .= "<?standout <INPUT TYPE=SUBMIT VALUE=\"Save Changes\"> standout?>\n";
+     $ret .= "<?h1 $ML{'.done.head'} h1?><?p $ML{'.done.text'} p?>\n";
+     $ret .= "<?standout <INPUT TYPE=SUBMIT VALUE=\"$ML{'.done.btn.savechanges'}\"> standout?>\n";
 
      $ret .= "<?hr?>\n";
 
@@ -197,18 +197,18 @@ body<=
          LJ::text_out(\$overrides);
      }
 
-     $ret .= "<?h1 Style Overrides h1?><?p You can ignore this section.  This is for tweaking very specific things about your page layout.  See the <A HREF=\"/developer/\" TARGET=_blank>developer section</A> for details.  Also note that overrides are for overriding only one or two things about a style.  If you'd like to override everything, you need to <A HREF=\"/styles/create.bml\" TARGET=_blank>create your own style</A>. p?><?p <FONT SIZE=+1><B>THIS IS <U>NOT</U> WHERE YOU TYPE YOUR JOURNAL!!</B></FONT> p?>\n";
-     $ret .= "<?p Please note that not all style variables can be overridden. See the <a href=\"/developer/varlist.bml\">documentation</a> for more details. p?>\n";
-     $ret .= "<?standout <B>Overrides:</B><BR><TEXTAREA NAME=\"overrides\" COLS=60 ROWS=8 WRAP=OFF>";
+     $ret .= "<?h1 $ML{'.overrides.head'} h1?><?p $ML{'.overrides.about'} p?><?p <FONT SIZE=+1><B>$ML{'.overrides.warning'}</B></FONT> p?>\n";
+     $ret .= "<?p $ML{'.overrides.note'} p?>\n";
+     $ret .= "<?standout <B>$ML{'.overrides.box.head'}</B><BR><TEXTAREA NAME=\"overrides\" COLS=60 ROWS=8 WRAP=OFF>";
      $ret .= BML::eall($overrides);
      $ret .= "</TEXTAREA> standout?>";
 
-     $ret .= "<?h1 Journal Activation Status h1?><?p If you want to delete or undelete your journal, this where you do it.  Once you delete your journal you have 30 days to undelete it, just in case you change your mind.  After 30 days, the journal will be permanently deleted and there will be no way to recover it. p?>";
-     my %statvis = ("V" => "Activated", "D" => "Deleted");
+     $ret .= "<?h1 $ML{'.journalstatus.head'} h1?><?p $ML{'.journalstatus.about'} p?>";
+     my %statvis = ("V" => "$ML{'.journalstatus.select.activated'}", "D" => "$ML{'.journalstatus.select.deleted'}");
      if ($u->{'statusvis'} eq "S") {
-         $statvis = ("S" => "Suspended");
+         $statvis = ("S" => "$ML{'.journalstatus.select.suspended'}");
      }
-     $ret .= "<UL>Status: <SELECT NAME=\"statusvis\">";
+     $ret .= "<UL>$ML{'.journalstatus.select.head'} <SELECT NAME=\"statusvis\">";
      foreach (reverse sort keys %statvis) {
          my $sel = $_ eq $u->{'statusvis'} ? " SELECTED" : "";
          $ret .= "<OPTION VALUE=\"$_\"$sel>$statvis{$_}\n";
@@ -216,8 +216,8 @@ body<=
      $ret .= "</SELECT></UL>\n";
      
      ### ending submit block
-     $ret .= "<?h1 Done? h1?><?p When done, press the \"Save Changes\" button below... p?>\n";
-     $ret .= "<?standout <INPUT TYPE=SUBMIT VALUE=\"Save Changes\"> standout?>\n";
+     $ret .= "<?h1 $ML{'.done.head'} h1?><?p $ML{'.done.text'} p?>\n";
+     $ret .= "<?standout <INPUT TYPE=SUBMIT VALUE=\"$ML{'.done.btn.savechanges'}\"> standout?>\n";
      $ret .= "</FORM>\n";
 
      return $ret;
@@ -309,7 +309,7 @@ body<=
      }
 
      if ($dbh->err) { 
-         return "<?h1 Error! h1?><?p A database error occurred: <B>" . $dbh->errstr . "</B> p?>"; 
+         return "<?h1 $ML{'error'} h1?><?p $ML{'error.dberror'} <B>" . $dbh->errstr . "</B> p?>"; 
      }
 
      # update 'user' table
@@ -329,7 +329,7 @@ body<=
      chop $sets;
      my $sql = "UPDATE user SET $sets WHERE user=$quser";
      $dbh->do($sql);
-     if ($dbh->err) { return "<?h1 Error! h1?><?p A database error occurred: <B>" . $dbh->errstr . "</B> p?>"; }
+     if ($dbh->err) { return "<?h1 $ML{'error'} h1?><?p $ML{'error.dberror'} <B>" . $dbh->errstr . "</B> p?>"; }
 
      # what userprops we'll be setting.
      my %uprop;
@@ -357,7 +357,7 @@ body<=
              if ($dbr->err) { return $dbr->errstr; }
              my ($count) = $sth->fetchrow_array;
              if ($count != scalar(@picked)) {
-                 my $ret = "<?h1 Error! h1?><?p One of the styles you've selected is not available.  This is either the result of somebody deleting the style, or you trying to pick one that you don't have access to. p?>";
+                 my $ret = "<?h1 $ML{'error'} h1?><?p $ML{'.error.stylenotavailable'} p?>";
                  return $ret;
              }
          }
@@ -370,7 +370,7 @@ body<=
          $dbh->do("INSERT INTO domains VALUES ($qdom, $u->{'userid'})");
          if ($dbh->err) {
              my $otherid = $dbh->selectrow_array("SELECT userid FROM domains WHERE domain=$qdom");
-             return "<?h1 Error h1?><?p Another user has already registered themselves as using your selected domain alias. p?>"
+             return "<?h1 $ML{'error'} h1?><?p $ML{'.error.dupdomainalias'} p?>"
                  if $otherid != $u->{'userid'};
          }
          if ($u->{'journaldomain'}) {
@@ -386,10 +386,10 @@ body<=
      }
 
      # tell the user all is well
-     return "<?h1 Success h1?><?p Your journal settings have been updated.  You can view your journal <A HREF=\"$LJ::SITEROOT/users/$user/\">here</A>. p?>";
+     return "<?h1 $ML{'.success.head'} h1?><?p ".BML::ml(".success.text", {'url' => "$LJ::SITEROOT/users/$user/"})." p?>";
  }
 
- return "Unknown mode."
+ return "$ML{'error.unknownmode'}";
 
 _code?>
 

@@ -12,33 +12,30 @@
  my $dbr = $dbs->{'reader'};
  
  if ($FORM{'mode'} ne "login") {
-   $body .= "<?h1 Login h1?>\n";
-   $body .= "<?p\n";
-   $body .= "To login to <?sitename?>, enter your username and password below.  <b>New Users:</b> To create an account, <a href='/create.bml'>go here</a>. \n";
-   $body .= "p?>\n";
-   $body .= "<?p You may also specify when your login expires.  By default your login will expire when you close your browser, which is best on public computers.  However, if you're the only user of your computer and nobody else has access to it, you may choose to remain logged in forever.\n";
-   $body .= "p?>\n";
+   $body .= "<?h1 $ML{'.login.head'} h1?>";
+   $body .= "<?p\n" .BML::ml(".login.text1", {'sitename' => $LJ::SITENAME}) ."p?>\n";
+   $body .= "<?p\n $ML{'.login.text2'} p?>\n";
 
    $body .= "<form action='login.bml' method='post'>\n";
    $body .= "<input type='hidden' name='mode' value='login'>\n";
    $body .= "<?standout\n";
    $body .= "<table cellpadding='3'>\n";
-   $body .= "<tr><td>Username:</td><td><input type='text' name='user' size='15' maxlength='15'></td></tr>\n";
-   $body .= "<tr><td valign='top'>Password:</td><td><input type='password' name='password' size='15' maxlength='30'><br /><a href='/lostinfo.bml'><font face='Arial,Helvetica' size='1'>Forget?</font></a></td></tr>\n";
-   $body .= "<tr valign='top'><td>Expiration:</td><td>\n";
-   $body .= "<input type='radio' name='expire' value='close' checked id='close'> <label for='close'>When browser closes</label><br />\n";
-   $body .= "<input type='radio' name='expire' value='never' id='never'> <label for='never'>Never</label>\n";
+   $body .= "<tr><td>$ML{'.login.username'}</td><td><input type='text' name='user' size='15' maxlength='15'></td></tr>\n";
+   $body .= "<tr><td valign='top'>$ML{'.login.password'}</td><td><input type='password' name='password' size='15' maxlength='30'><br /><a href='/lostinfo.bml'><font face='Arial,Helvetica' size='1'>$ML{'.login.forget'}</font></a></td></tr>\n";
+   $body .= "<tr valign='top'><td>$ML{'.login.expiration'}</td><td>\n";
+   $body .= "<input type='radio' name='expire' value='close' checked id='close'> <label for='close'>$ML{'.login.whenbrowsercloses'}</label><br />\n";
+   $body .= "<input type='radio' name='expire' value='never' id='never'> <label for='never'>$ML{'.login.never'}</label>\n";
    my $referer = BML::get_client_header('Referer');
    if ($FORM{'ret'} && $referer) {
        my $eh_ref = LJ::ehtml($referer);
        $body .= "<input type='hidden' NAME='ref' value='$eh_ref'>\n";
    }
    $body .= "</td></tr>\n";
-   $body .= "<tr><td></td><td align='left'><input type='submit' value='Login...'>\n";
+   $body .= "<tr><td></td><td align='left'><input type='submit' value='$ML{'.login.btn.login'}'>\n";
    $body .= "</td></tr>\n";
    
    if (LJ::are_hooks("login_formopts")) {
-     $body .= "<tr><td>Other Options:</td><td nowrap>\n";
+     $body .= "<tr><td>$ML{'.login.otheropts'}</td><td nowrap>\n";
      LJ::run_hooks("login_formopts", { 'ret' => \$body });
      $body .= "</td></tr>\n";
    }
@@ -46,13 +43,13 @@
    $body .= "standout?>\n";
    $body .= "</form>\n";
 
-   $body .= "<?h1 Why login? h1?>\n";
+   $body .= "<?h1 $ML{'.whylogin.head'} h1?>\n";
    $body .= "<?p\n";
-   $body .= "There are some of the main benefits of logging in:\n";
+   $body .= "$ML{'.whylogin.text'}\n";
    $body .= "<ul>\n";
-   $body .= "<li>You won't have to enter your username/password anywhere on the site anymore.</li>\n";
-   $body .= "<li>You'll be able to view \"protected\" journal entries from your friends that give you access to read them.</li>\n";
-   $body .= "<li>A lot of features are only visible or accessible when you're logged in.</li>\n";
+   $body .= "<li>$ML{'.whylogin.benefit1'}</li>\n";
+   $body .= "<li>$ML{'.whylogin.benefit2'}</li>\n";
+   $body .= "<li>$ML{'.whylogin.benefit3'}</li>\n";
    $body .= "</ul>\n";
    $body .= "p?>\n";
    return;
@@ -61,15 +58,15 @@
  unless (LJ::did_post()) { push @errors, "<?requirepost?>"; }
  
  my $quser = $dbh->quote($user);
- if (length($FORM{'user'}) > 15) { push @errors, "Username is too long, 15 character max"; }
- unless ($FORM{'user'}) { push @errors, "You must <a href='/login.bml'>enter a username</a>."; }
- if ($user =~ /[^\w]/) { push @errors, "Username contains invalid characters."; }   
+ if (length($FORM{'user'}) > 15) { push @errors, "$ML{'error.usernamelong'}"; }
+ unless ($FORM{'user'}) { push @errors, "$ML{'.error.mustenterusername'}"; }
+ if ($user =~ /[^\w]/) { push @errors, "$ML{'error.usernameinvalid'}"; }   
 
  my $u = LJ::load_user($dbs, $FORM{'user'});
- unless ($u) { push @errors, "Unknown user."; }
+ unless ($u) { push @errors, "$ML{'error.username_notfound'}"; }
 
  unless (LJ::auth_okay($u, $password, $hpassword)) {
-     push @errors, "Invalid password."; 
+     push @errors, "$ML{'error.badpassword'}"; 
  }
  
  if (@errors) {
@@ -102,25 +99,25 @@
  {
      return BML::redirect("$FORM{'ref'}");
  }
- 
- $body = "<?h1 Logged in! h1?>";
- $body .= "<?p You are now logged in. p?>";
+
+ $body = "<?h1 $ML{'.loggedin.head'} h1?>";
+ $body .= "<?p $ML{'.loggedin.text'} p?>";
  my $newexpire = "";
  my $switchtext = "";
  if ($FORM{'expire'} eq "never") {
-     $switchtext = "Change expiration mode to SESSION ONLY";
-     $body .= "<?p Your login will <b>never expire</b>, so if you're at a public internet terminal, a school, library, or other place where people may be using this computer shortly, make sure you log out when you're done!  Or, change your login mode to expire when you close your browser: p?>";
+     $switchtext = $ML{'.expire.btn.sessiononly'};
+     $body .= "<?p $ML{'.expire.neverexpire.text'} p?>";
  } else {
      $newexpire = "never";
-     $switchtext = "Change expiration mode to NEVER";
-     $body .= "<?p Your login will expire after you close your browser.  If this is your own computer and you're the only user, you may want to set change your login expiration such that it never expires: p?>";
+     $switchtext = $ML{'.expire.btn.neverexpire'};
+     $body .= "<?p $ML{'.expire.sessiononly.text'} p?>";
  }
  $body .= "<form method=post><input type=hidden name=mode value=login><input type=hidden name=user value=$user><input type=hidden name=hpassword value='$hpassword'><input type=hidden name=expire value='$newexpire'><center><input type=submit value='" . LJ::ehtml($switchtext) . "'></center></form>";
  
- $body .= "<?h1 Links h1?><?p In the future this page will have all sorts of links and relevant information, but for now here are a few places you may want to go: p?>";
+ $body .= "<?h1 $ML{'.links.head'} h1?><?p $ML{'.links.text'} p?>";
  $body .= "<ul>";
- $body .= "<li>Your <a href='/users/$user/friends'>friends page</a>.";
- $body .= "<li>Your <a href='/todo/'>to-do list</a>.";
+ $body .= "<li>" .BML::ml(".links.link1", {'username' => $user});
+ $body .= "<li>$ML{'.links.link2'}";
  $body .= "<li>...";
  $body .= "</ul>";
  
@@ -129,7 +126,7 @@
  _code?><?_info
 nocache=>1
 _info?><?page
-title=>Login
+title=><?_ml .title _ml?>
 body=><?_code return $body; _code?>
 page?><?_c <LJDEP>
 hook: post_login login_formopts

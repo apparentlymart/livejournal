@@ -1,5 +1,5 @@
 <?page
-title=>Interests
+title=><?_ml .title _ml?>
 body<=
 
 <?_code
@@ -18,13 +18,13 @@ body<=
  if ($FORM{'view'} eq "popular") 
  {
      my $ret = "";
-     $ret .= "<?h1 Popular Interests h1?><?p The following are the most popular interests. p?>";
+     $ret .= "<?h1 $ML{'.popular.head'} h1?><?p $ML{'.popular.text'} p?>";
  
      $sth = $dbr->prepare("SELECT statkey, statval FROM stats WHERE ".
                           "statcat='pop_interests' ORDER BY statval DESC, statkey ASC");
      $sth->execute;
      
-     $ret .= "<P><TABLE><TR><TD><B>Interest</B></TD><TD><B>Count</B></TD></TR>\n";
+     $ret .= "<P><TABLE><TR><TD><B>$ML{'.interest'}</B></TD><TD><B>$ML{'.count'}</B></TD></TR>\n";
      while (my ($int, $count) = $sth->fetchrow_array)
      {
          next if ($count == 1);
@@ -41,7 +41,7 @@ body<=
      my $remote = LJ::get_remote($dbs);
      my $ret;
      unless ($remote) {
-         $ret .= "<?h1 Error h1?><?p You have to be logged in to add an interest this way. p?>";
+         $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'.error.add.mustlogin'} p?>";
          return $ret;
      }
      my $qintid = $FORM{'intid'}+0;
@@ -56,12 +56,12 @@ body<=
          my ($int) = $sth->fetchrow_array;
          LJ::text_out(\$int);
 
-         $ret .= "<?h1 Confirm h1?>";
-         $ret .= "<?p To add <b>$int</b> as an interest, click the button below. ";
+         $ret .= "<?h1 $ML{'.add.confirm.head'} h1?>";
+         $ret .= "<?p " .BML::ml(".add.confirm.text", {'interest' => $int});
          $ret .= "<form method=post action=\"/interests.bml\">";
          $ret .= "<input type=hidden name=mode value=add>";
          $ret .= "<input type=hidden name=intid value=$qintid>";
-         $ret .= "<center><input type=submit value=\"Add $int\"></center>";
+         $ret .= "<center><input type=submit value=\"" .BML::ml(".add.btn.text", {'interest' => $int}) ."\"></center>";
          $ret .= "</form> p?>";
          return $ret;	 
      }
@@ -69,8 +69,9 @@ body<=
      $sth = $dbr->prepare("SELECT COUNT(*) FROM userinterests WHERE userid=$remote->{'userid'}");
      $sth->execute;
      my ($count) = $sth->fetchrow_array;
+
      if ($count >= 150) {
-         $ret .= "<?h1 Sorry.. h1?><?p You already have 150 interests defined. p?>";
+         $ret .= "<?h1 $ML{'.add.toomany.head'} h1?><?p " .BML::ml(".add.toomany.text", {'maxinterests' => "150"}) ." p?>";
          return $ret;
      }
    
@@ -79,28 +80,28 @@ body<=
          $dbh->do("UPDATE interests SET intcount=intcount+1 WHERE intid=$qintid");
      }
      
-     $ret .= "<?h1 Added! h1?><?p The interest has been added to your list. p?>";
+     $ret .= "<?h1 $ML{'.add.added.head'} h1?><?p $ML{'.add.added.text'} p?>";
      return $ret;
  }
 
  if ($FORM{'mode'} eq "findsim") 
  {
      if ($LJ::DISABLED{'interests-findsim'}) {
-         return "This is disabled temporarily.";
+         return $ML{'error.tempdisabled'};
      }
 
      my $ret = "";
-     $ret .= "<?h1 Similar Users h1?><?p This tool lets you find users with the most similar interests to a given user.  More fun stuff can be found on the <A HREF=\"/interests.bml\">interests page</A>. p?>";
+     $ret .= "<?h1 $ML{'.findsim.head'} h1?><?p $ML{'.findsim.text'} p?>";
      
      my $remote = LJ::get_remote($dbs);
      LJ::load_remote($dbs, $remote);
      if (LJ::get_cap($remote, "findsim")) {
          $ret .= "<center><form method='get'><input type='hidden' name='mode' value='findsim_do' />";
-         $ret .= "Similar to User: <input name='user' value='$remote->{'user'}' /> <input type='submit' value=\"Find!\" /></form><b>Please note:</b> Search will take several seconds.  Be patient.</center>";
+         $ret .= "$ML{'.findsim.simtouser'} <input name='user' value='$remote->{'user'}' /> <input type='submit' value=\"$ML{'.findsim.btn.find'}\" /></form>$ML{'.findsim.searchwait'}</center>";
      } else {
-         $ret .= "<?p However, your account type doesn't let you use this tool. p?>";
+         $ret .= "<?p $ML{'.findsim.account.notallowed'} p?>";
          unless ($remote) {
-             $ret .= "<?p You're also not <a href='/login.bml?ret=1'>logged in</a>, so your account type can't be determined. p?>";
+             $ret .= "<?p $ML{'.findsim.account.notloggedin'} p?>";
          }
      }
      return $ret;
@@ -109,18 +110,18 @@ body<=
  if ($FORM{'mode'} eq "findsim_do")
  {
      if ($LJ::DISABLED{'interests-findsim'}) {
-         return "This is disabled temporarily.";
+         return $ML{'error.tempdisabled'};
      }
 
      my $remote = LJ::get_remote($dbs);
      LJ::load_remote($dbs, $remote);
      unless (LJ::get_cap($remote, "findsim")) {
-         return "Sorry, your account type doesn't let you use this tool.";
+         return $ML{'.findsim_do.account.notallowed'};
      }
 
      my $ret = "";
      my $u = LJ::load_user($dbs, $FORM{'user'});
-     return "<?h1 Error h1?><?p Unknown user p?>" unless $u;
+     return "<?h1 $ML{'Error'} h1?><?p $ML{'error.username_notfound'} p?>" unless $u;
 
      my @ints;
      my %intcount;
@@ -131,7 +132,7 @@ body<=
          push @ints, $intid;
          $intcount{$intid} = $count || 1;
      }
-     return "<?h1 Error h1?><?p User <?ljuser $u->{'user'} ljuser?> has no defined interests. p?>" 
+     return "<?h1 $ML{'Error'} h1?><?p " .BML::ml(".findsim_do.notdefined", {'user' => "<?ljuser $u->{'user'} ljuser?>"}) ." p?>" 
          unless @ints;
 
      my %pt_count;
@@ -164,12 +165,12 @@ body<=
      }
 
      unless (@matches) {
-         return "<?h1 No Matches h1?><?p No users are similar to <?ljuser $u->{'user'} ljuser?>. p?>";
+         return "<?h1 $ML{'.findsim_do.nomatch.head'} h1?><?p " .BML::ml(".findsim_do.nomatch.text", {'user' => "<?ljuser $u->{'user'} ljuser?>"}) .". p?>";
      }
 
-     $ret .= "<?h1 Similar Users h1?><?p The following are the most related users to <?ljuser $u->{'user'} ljuser?> p?>";
+     $ret .= "<?h1 $ML{'.findsim_do.similar.head'} h1?><?p " .BML::ml(".findsim_do.similar.text", {'user' => "<?ljuser $u->{'user'} ljuser?>"}) .". p?>";
 
-     $ret .= "<p><table cellpadding='3'><tr valign='bottom'><td><b>#</b></td><td width='250'><b>User</b></td><td><b>Magic<br />Index</b></td></tr>\n";
+     $ret .= "<p><table cellpadding='3'><tr valign='bottom'><td><b>#</b></td><td width='250'><b>$ML{'User'}</b></td><td><b>$ML{'.findsim_do.magic'}</b></td></tr>\n";
      my $count;
      foreach my $uid (@matches) 
      {
@@ -182,7 +183,7 @@ body<=
      }
      $ret .= "</table></p>\n";
 
-     $ret .= "<?h1 Magic Index? h1?><?p Each matching user gets computed a magic index, which is a weighting of two factors:  the raw number of like interests, and some extra points for sharing uncommon interests. p?>";
+     $ret .= "<?h1 $ML{'.findsim_do.magic.head'} h1?><?p $ML{'.findsim_do.magic.text'} p?>";
      return $ret;
  }
 
@@ -193,14 +194,15 @@ body<=
      $sth = $dbr->prepare("SELECT interest, intid, intcount FROM interests WHERE $where");
      $sth->execute;
      ($interest, $intid, $intcount) = $sth->fetchrow_array;
-     unless ($interest) { return "<?h1 Error h1?><?p Interest wasn't found. p?>"; }
+     unless ($interest) { return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.findsim_do.intnotfound'} p?>"; }
      $qintid = $intid+0;
-     
-     if ($intcount > 2000) {
-         # hack, yes.  saves the database, though.
-         return "<?h1 Many matches h1?><?p There are $intcount people and/or communities listing this as an interest.  A list won't be shown. p?>";
-     }
 
+     if ($intcount > 2000) {
+         # temporary hack.  saves the database, though.
+         # FIXME: make this redirect to a directory.bml text-results search, which knows how to do it efficiently.
+         return "<?h1 $ML{'.toomany.head'} h1?><?p $ML{'.toomany.body'} p?>";
+     }
+     
      my $ret = "";
      my $remote = LJ::get_remote_noauth();
 
@@ -217,21 +219,24 @@ body<=
          $list .= "<li><?ljcomm $_->{'user'} ljcomm?> - $name\n";
      }
 
-     my $s = $count > 1 ? "es" : "";
+     my $matchcount;
      if ($count) {
-         $ret .= "<?h1 Relevant Communities h1?><?p The following communities are also interested in <b>\"$interest\"</b>. p?>";
-         $ret .= "<p><b>$count match$s:</b><ul>";
+         $matchcount = BML::ml($count == 1 ? ".match" : ".matches", {'count' => $count });
+         $ret .= "<?h1 $ML{'.communities.head'} h1?><?p " .BML::ml(".communities.text", {'interest' => $interest}) ." p?>";
+         $ret .= "<p><b>$matchcount</b><ul>";
          $ret .= $list;
          $ret .= "</ul></p>";
      }
 
+
+
      ##### users
 
-     $ret .= "<?h1 Interested users h1?><?p The following users are also interested in <b>\"$interest\"</b>.  ";
+     $ret .= "<?h1 $ML{'.users.head'} h1?><?p " .BML::ml(".users.text", {'interest' => $interest}) ."  ";
      if ($remote) {
-         $ret .= "If you're also interested in this and would like to be added to this list, <a href=\"/interests.bml?mode=add&amp;intid=$qintid\">click here</A>.  ";
+         $ret .= BML::ml(".addint", {'qintid' => $qintid}) ."  ";
      }
-     $ret .= "More fun stuff can be found on the <A HREF=\"/interests.bml\">interests page</A>. p?>";
+     $ret .= "$ML{'.morestuff'} p?>";
 
      my $list;
      my $count = 0;
@@ -247,8 +252,8 @@ body<=
      }
      $list .= "</ul>\n";
 
-     my $s = $count > 1 ? "es" : "";
-     $ret .= "<p><b>$count match$s:</b></p>";
+     $matchcount = BML::ml($count == 1 ? ".match" : ".matches", {'count' => $count });
+     $ret .= "<p><b>$matchcount</b>";
      $ret .= $list;
 
      ## end
@@ -256,13 +261,13 @@ body<=
  }
 
  my $ret = "";
- $ret .= "<?h1 Interests h1?><?p Here are some fun things you can do with interests.... p?>";
+ $ret .= "<?h1 $ML{'.interests.head'} h1?><?p $ML{'.interests.text'} p?>";
  $ret .= "<FORM METHOD=GET><UL>";
- $ret .= "<LI><A HREF=\"/interests.bml?view=popular\">View popular interests</A>\n";
- $ret .= "<LI><A HREF=\"/interests.bml?mode=findsim\">Find similar people</A> -- see who has the most number of common interests with you\n" unless ($LJ::DISABLED{'interests-findsim'});
- $ret .= "<LI>Find people interested in: <INPUT NAME=int SIZE=20><INPUT TYPE=SUBMIT VALUE=\"Find\">\n";
+ $ret .= "<LI><A HREF=\"/interests.bml?view=popular\">$ML{'.interests.viewpop'}</A>\n";
+ $ret .= "<LI><A HREF=\"/interests.bml?mode=findsim\">$ML{'.interests.findsim1'}</A> -- $ML{'.interests.findsim2'}\n" unless ($LJ::DISABLED{'interests-findsim'});
+ $ret .= "<LI>$ML{'.interested.in'} <INPUT NAME=int SIZE=20><INPUT TYPE=SUBMIT VALUE=\"$ML{'.interested.btn.find'}\">\n";
  $ret .= "</UL></FORM>\n";
- $ret .= "Don't have any interests listed?  Add some by going to the <A HREF=\"/editinfo.bml\">Edit Personal Info & Settings</A> page.";
+ $ret .= $ML{'.nointerests.text'};
  
  return $ret;
 

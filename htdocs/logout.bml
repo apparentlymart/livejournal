@@ -18,13 +18,13 @@
          delete $COOKIE{$_};
      }
      BML::set_language(BML::decide_language());
-     $body .= "<?h1 Logged out h1?>\n";
-     $body .= "<?p You are now logged out. p?>";
+     $body .= "<?h1 $ML{'.loggedout.head'} h1?>\n";
+     $body .= "<?p $ML{'.loggedout.text'} p?>";
 
  } else {
 
-     $body .= "<?h1 Already logged out h1?>\n";
-     $body .= "<?p You are already logged out. p?>";
+     $body .= "<?h1 $ML{'.already.head'} h1?>\n";
+     $body .= "<?p $ML{'.already.text'} p?>";
  }
  
  return;
@@ -33,7 +33,7 @@ _code?>
 <?_info
 nocache=>1
 _info?><?page
-title=>Logout
+title=><?_ml .title _ml?>
 body=><?_code return $body; _code?>
 page?><?_c <LJDEP>
 </LJDEP> _c?>
