@@ -1458,7 +1458,7 @@ EOC
 
 # moderated community post Storable object (all props/options)
 register_tablecreate("modblob", <<'EOC');
-CREATE TABLE modtext (
+CREATE TABLE modblob (
   journalid  INT UNSIGNED NOT NULL,
   modid      INT UNSIGNED NOT NULL,
   PRIMARY KEY (journalid, modid),
