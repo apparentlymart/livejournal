@@ -3026,12 +3026,16 @@ sub auth_digest {
 # Create a challenge token for secure logins
 sub challenge_generate
 {
-    my $goodfor = shift || 60;
+    my ($goodfor, $attr) = @_;
+
+    $goodfor ||= 60;
+    $attr ||= LJ::rand_chars(20);
+
     my ($stime, $secret) = LJ::get_secret();
 
     # challenge version, secret time, secret age, time in secs token is good for, random chars.
     my $s_age = time() - $stime;
-    my $chalbare = "c0:$stime:$s_age:$goodfor:" . LJ::rand_chars(20);
+    my $chalbare = "c0:$stime:$s_age:$goodfor:$attr";
     my $chalsig = Digest::MD5::md5_hex($chalbare . $secret);
     my $chal = "$chalbare:$chalsig";
 
@@ -3051,6 +3055,8 @@ sub get_challenge_attributes
 # 'expired'=1/0 whether the challenge expired, provided it's valid
 # 'count'=N number of times we've seen this challenge, including this one,
 #           provided it's valid and not expired
+# $opts also supports in parameters:
+#   'dont_check_count' => if true, won't return a count field
 # the return value is 1 if 'valid' and not 'expired' and 'count'==1
 sub challenge_check {
     my ($chal, $opts) = @_;
@@ -3070,7 +3076,7 @@ sub challenge_check {
         unless (not $valid) or time() - ($stime + $s_age) < $goodfor;
 
     # Check for token dups
-    if ($valid && !$expired) {
+    if ($valid && !$expired && !$opts->{dont_check_count}) {
         if (@LJ::MEMCACHE_SERVERS) {
             $count = LJ::MemCache::incr("chaltoken:$chal", 1);
             unless ($count) {
@@ -3106,7 +3112,7 @@ sub challenge_check {
         $opts->{'count'} = $count;
     }
 
-    return ($valid && !$expired && ($count==1));
+    return ($valid && !$expired && ($count==1 || $opts->{dont_check_count}));
 }
 
 

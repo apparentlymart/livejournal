@@ -550,6 +550,33 @@ sub check_referer {
     return undef;
 }
 
+sub form_auth {
+    my $remote = LJ::get_remote()    or return "";
+    my $sess = $remote->{'_session'} or return "";
+    my $auth = join('-',
+                    LJ::rand_chars(10),
+                    $remote->{userid},
+                    $sess->{auth});
+    return LJ::html_hidden("lj_form_auth", LJ::challenge_generate(86400, $auth));
+}
+
+sub check_form_auth {
+    my $remote = LJ::get_remote()    or return 0;
+    my $sess = $remote->{'_session'} or return 0;
+    my $formauth = $BMLCodeBlock::POST{'lj_form_auth'} or return 0;
+
+    # check the attributes are as they should be
+    my $attr = LJ::get_challenge_attributes($formauth);
+    my ($randchars, $userid, $sessauth) = split(/\-/, $attr);
+    return 0 unless $userid == $remote->{userid} &&
+        $sessauth eq $sess->{auth};
+
+    # check the signature is good and not expired
+    my $opts = { dont_check_count => 1 };  # in/out
+    LJ::challenge_check($formauth, $opts);
+    return $opts->{valid} && ! $opts->{expired};
+}
+
 # Common challenge/response javascript, needed by both login pages and comment pages alike.
 # Forms that use this should onclick='return sendForm()' in the submit button.
 # Returns true to let the submit continue.
