@@ -3127,9 +3127,18 @@ sub make_journal
         return LJ::server_down_html();
     }
 
+    # S1 style hashref.  won't be loaded now necessarily, 
+    # only if via customview.
+    my $style;
+
     my ($styleid);
     if ($opts->{'styleid'}) {  # s1 styleid
         $styleid = $opts->{'styleid'}+0;
+
+        # if we have an explicit styleid, we have to load
+        # it early so we can learn its type, so we can
+        # know which uprops to load for its owner
+        $style = LJ::S1::load_style($dbs, $styleid, \$view);
     } else {
         $view ||= "lastn";    # default view when none specified explicitly in URLs
         if ($LJ::viewinfo{$view} || $view eq "month" || $view eq "item")  {
@@ -3303,7 +3312,7 @@ sub make_journal
 
     # load the style
     my $viewref = $view eq "" ? \$view : undef;
-    my $style = $LJ::viewinfo{$view}->{'nostyle'} ? {} :
+    $style ||= $LJ::viewinfo{$view}->{'nostyle'} ? {} :
         LJ::S1::load_style($dbs, $styleid, $viewref);
 
     my %vars = ();
