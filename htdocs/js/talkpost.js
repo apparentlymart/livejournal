@@ -10,10 +10,11 @@ if (document.getElementById) {
     var sel_pickw = document.getElementById("prop_picture_keyword");
     var commenttext = document.getElementById("commenttext");
 
-    var username = document.getElementById("username");
-    var password = document.getElementById("password");
-    
     var form = document.getElementById("postform");
+
+    var username = form.userpost;
+    var password = form.password;
+
     var remotef = document.getElementById("cookieuser");
     var remote;
     if (remotef) {
