@@ -12,8 +12,9 @@ body<=
  my $remote = LJ::get_remote();
  LJ::Support::init_remote($remote);
 
- return $ML{'.interim'} if ((!$remote || $remote && !$remote->{'_priv'}) && 
-    $r->header_in("Referer") eq "$LJ::SITEROOT/support/");
+ return $ML{'.interim'} if
+    (!$remote || !$remote->{'_priv'}) && 
+    $r->header_in("Referer") eq "$LJ::SITEROOT/support/";
 
  my $cats = LJ::Support::load_cats();
 
