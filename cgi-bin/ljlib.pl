@@ -2648,11 +2648,9 @@ sub load_user_props
         my $pubsty = LJ::S1::get_public_styles();
         foreach (values %$pubsty) {
             my $k = "s1_$_->{'type'}_style";
-            next unless $LJ::USERPROP_DEF{$k} =~ m#^$_->{'type'}/(.+)$#;
+            next unless $LJ::USERPROP_DEF{$k} eq "$_->{'type'}/$_->{'styledes'}";
 
-            if ($_->{'styledes'} eq $1) {
-                $LJ::USERPROP_DEF{$k} = $_->{'styleid'};
-            }
+            $LJ::USERPROP_DEF{$k} = $_->{'styleid'};
         }
 
 	$LJ::CACHED_S1IDMAP = 1;
@@ -4335,6 +4333,13 @@ sub make_journal
     }
 
     LJ::load_user_props($u, @needed_props);
+
+    # FIXME: remove this after all affected accounts have been fixed
+    # see http://zilla.livejournal.org/1443 for details
+    if ($u->{$s1prop} !~ /^\d+$/) {
+        $u->{$s1prop} = $LJ::USERPROP_DEF{$s1prop};
+        LJ::set_userprop($u, $s1prop, $u->{$s1prop});
+    }
 
     # if the remote is the user to be viewed, make sure the $remote
     # hashref has the value of $u's opt_nctalklinks (though with
