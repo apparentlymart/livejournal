@@ -107,6 +107,7 @@ sub link_bar
     
     ## >>> Next
     push @linkele, $mlink->("/go.bml?${jargent}itemid=$itemid&amp;dir=next", "next_entry");
+    $$headref .= "<link href='/go.bml?${jargent}itemid=$itemid&amp;dir=next' rel='Next'>\n";
     
     if (@linkele) {
         $ret .= BML::fill_template("standout", {
