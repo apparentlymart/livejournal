@@ -43,6 +43,7 @@ sub error_message
 	     "303" => "Can't edit post in community journal",
 	     "304" => "Can't delete post in this community journal",
 	     "305" => "Action forbidden; account is suspended.",
+	     "306" => "This journal is temporarily in read-only mode.  Try again later.",
 	     
 	     # Server Errors
 	     "500" => "Internal server error",
@@ -381,6 +382,9 @@ sub postevent
 
     # suspended users can't post
     return fail($err,305) if ($u->{'statusvis'} eq "S");
+
+    # check the journal's read-only bit
+    return fail($err,306) if LJ::get_cap($uowner, "readonly");    
 
     #### clean up the event text        
     my $event = $req->{'event'};
