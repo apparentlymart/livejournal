@@ -4310,6 +4310,9 @@ sub load_userpics
     my %db_load;
     my @load_list_d6;
     foreach my $row (@load_list) {
+        # ignore users on clusterid 0
+        next unless $row->[0]->{clusterid};
+        
         if ($row->[0]->{'dversion'} > 6) {
             push @{$db_load{$row->[0]->{'clusterid'}}}, $row;
         } else {
@@ -4319,11 +4322,18 @@ sub load_userpics
 
     foreach my $cid (keys %db_load) {
         my $dbcr = LJ::get_cluster_def_reader($cid);
+        unless ($dbcr) {
+            print STDERR "Error: LJ::load_userpics unable to get handle; cid = $cid\n";
+            next;
+        }
+
         my (@bindings, @data);
         foreach my $row (@{$db_load{$cid}}) {
             push @bindings, "(userid=? AND picid=?)";
             push @data, ($row->[0]->{userid}, $row->[1]);
         }
+        next unless @data && @bindings;
+        
         my $sth = $dbcr->prepare("SELECT userid, picid, width, height FROM userpic2 WHERE " . join(' OR ', @bindings));
         $sth->execute(@data);
 
