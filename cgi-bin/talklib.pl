@@ -962,6 +962,10 @@ sub talkform {
     # once we clean out talkpost.bml, this will need to be changed.
     BML::set_language_scope('/talkpost.bml');
 
+    # make sure journal isn't locked
+    return "Sorry, this journal is locked and comments cannot be posted to it at this time."
+        if $journalu->{statusvis} eq 'L';
+
     # check max comments
     my $jitemid = $opts->{'ditemid'} >> 8;
     return "Sorry, this entry already has the maximum number of comments allowed."
@@ -2104,6 +2108,8 @@ sub init {
     my $journalu = $init->{'journalu'};
     return $bmlerr->('talk.error.nojournal') unless $journalu;
     return $err->($LJ::MSG_READONLY_USER) if LJ::get_cap($journalu, "readonly");
+
+    return $err->("Account is locked, unable to post comment.") if $journalu->{statusvis} eq 'L';
 
     my $r = Apache->request;
     $r->notes("journalid" => $journalu->{'userid'});

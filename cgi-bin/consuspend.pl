@@ -13,6 +13,44 @@ $cmd{'getemail'}->{'handler'} = \&getemail;
 $cmd{'get_maintainer'}->{'handler'} = \&get_maintainer;
 $cmd{'finduser'}->{'handler'} = \&finduser;
 $cmd{'infohistory'}->{'handler'} = \&infohistory;
+$cmd{'change_journal_status'}->{'handler'} = \&change_journal_status;
+
+sub change_journal_status {
+    my ($dbh, $remote, $args, $out) = @_;
+
+    my $err = sub { push @$out, [ "error", shift ]; 0; };
+    my $info = sub { push @$out, [ "info", shift ]; 1; };
+
+    return $err->("This command takes two arguments.  Consult the reference for details.")
+        unless scalar(@$args) == 3;
+    return $err->("You don't have the necessary privilege (siteadmin:users) to change account status.")
+        unless LJ::check_priv($remote, 'siteadmin', 'users') || LJ::check_priv($remote, 'siteadmin', '*');
+
+    my $u = LJ::load_user($args->[1]);
+    return $err->("Invalid user.")
+        unless $u;
+
+    # figure out the new status
+    my $status = $args->[2];
+    my $opts = {
+        #name  =>   [ 'status-to', 'valid-statuses-from', 'error-message-if-from-fails', 'success-message' ]
+        normal =>   [ 'V', 'ML', 'The user must be in memorial or locked status first.', 'User status set back to normal.' ],
+        memorial => [ 'M', 'V', 'The user must be in normal status first.', 'User account set as memorial.' ],
+        locked =>   [ 'L', 'V', 'The user must be in normal status first.', 'User account has been locked.' ],
+    }->{$status};
+
+    # make sure we got a valid $opts arrayref
+    return $err->("Invalid status.  Consult the reference for more information.")
+        unless defined $opts && ref $opts eq 'ARRAY';
+
+    # verify user's from-statusvis is okay (it's contained in $opts->[1])
+    return $err->($opts->[2]) unless $opts->[1] =~ /$u->{statusvis}/;
+
+    # okay, so we need to update the user now and update statushistory
+    LJ::statushistory_add($u->{userid}, $remote->{userid}, "journal_status", "Changed status to $status from $u->{statusvis}.");
+    LJ::update_user($u->{'userid'}, { statusvis => $opts->[0], raw => 'statusvisdate=NOW()' });
+    return $info->($opts->[3]);
+}
 
 sub expunge_userpic {
     my ($dbh, $remote, $args, $out) = @_;

@@ -82,6 +82,8 @@ sub error_message
              "305" => "Action forbidden; account is suspended.",
              "306" => "This journal is temporarily in read-only mode.  Try again in a couple minutes.",
              "307" => "Selected journal no longer exists.",
+             "308" => "Account is locked and cannot be used.",
+             "309" => "Account is marked as a memorial.",
 
              # Limit errors
              "402" => "Your IP address is temporarily banned for exceeding the login failure rate.",
@@ -164,6 +166,9 @@ sub login
 
     return fail($err,207, "This installation does not support Unicode clients")
         if $ver>=1 and not $LJ::UNICODE;
+
+    # do not let locked people log in
+    return fail($err, 308) if $u->{statusvis} eq 'L';
 
     ## return a message to the client to be displayed (optional)
     login_message($req, $res, $flags);
@@ -599,6 +604,12 @@ sub postevent
     # suspended users can't post
     return fail($err,305) if ($u->{'statusvis'} eq "S");
 
+    # memorials can't post
+    return fail($err,309) if $u->{statusvis} eq 'M';
+
+    # locked accounts can't post
+    return fail($err,308) if $u->{statusvis} eq 'L';
+    
     # check the journal's read-only bit
     return fail($err,306) if LJ::get_cap($uowner, "readonly");
 
@@ -1597,6 +1608,9 @@ sub editfriends
 
     return fail($err,306) unless $dbh;
 
+    # do not let locked people do this
+    return fail($err, 308) if $u->{statusvis} eq 'L';
+
     my $res = {};
 
     ## first, figure out who the current friends are to save us work later
@@ -1739,6 +1753,9 @@ sub editfriendgroups
     my $sth;
 
     return fail($err,306) unless $db;
+
+    # do not let locked people do this
+    return fail($err, 308) if $u->{statusvis} eq 'L';
 
     my $res = {};
 
@@ -1931,6 +1948,9 @@ sub sessiongenerate {
         ipfixed => $boundip,
     };
 
+    # do not let locked people do this
+    return fail($err, 308) if $u->{statusvis} eq 'L';
+
     my $sess = $u->generate_session($sess_opts);
 
     # return our hash
@@ -2091,6 +2111,9 @@ sub consolecommand
     # logging in isn't necessary, but most console commands do require it
     my $remote = undef;
     $remote = $flags->{'u'} if authenticate($req, $err, $flags);
+
+    # do not let locked people do this
+    return fail($err, 308) if $remote->{statusvis} eq 'L';
 
     my $res = {};
     my $cmdout = $res->{'results'} = [];

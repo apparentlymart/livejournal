@@ -3886,6 +3886,9 @@ sub get_remote
 
     my $u = LJ::load_user($user);
     return $no_remote->("User doesn't exist") unless $u;
+    
+    # locked accounts can't be logged in
+    return $no_remote->("User account is locked.") if $u->{statusvis} eq 'L';
 
     my $sess_db;
     my $sess;

@@ -683,6 +683,17 @@ $cmd{'find_user_cluster'} = {
                ],
     };
 
+$cmd{'change_journal_status'} = {
+    'def' => 'consuspend.pl',
+    'privs' => [qw(siteadmin)],
+    'des' => "Change the status of an account.",
+    'argsummary' => '<account> <status>',
+    'args' => [
+               'account' => "The account to update.",
+               'status' => "One of 'normal', 'memorial', 'locked'.  Memorial accounts allow new comments to entries, locked accounts do not allow further comments.  Entries are blocked either way.",
+               ],
+    };
+
 sub conhelp 
 {
     my ($dbh, $remote, $args, $out) = @_;
