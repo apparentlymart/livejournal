@@ -2261,7 +2261,7 @@ register_alter(sub {
     }
 
     if (column_type("userblob", "blobid") =~ /mediumint/) {
-        do_alter("userpic2", "ALTER TABLE userblob MODIFY blobid INT UNSIGNED NOT NULL");
+        do_alter("userblob", "ALTER TABLE userblob MODIFY blobid INT UNSIGNED NOT NULL");
     }
 
 
