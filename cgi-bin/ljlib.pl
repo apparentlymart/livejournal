@@ -576,6 +576,12 @@ sub get_friend_items
         }
     }
 
+    # save the cache, if it changed.
+    if ($could_cache && $cache_new_update ne $cache_max_update) {
+        LJ::set_cached_friend_items($opts->{'u'}, $cache_new_update,
+                                    \@items, \$fvcache->[1]);
+    }
+
     # remove skipped ones
     splice(@items, 0, $skip) if $skip;
 
@@ -595,11 +601,6 @@ sub get_friend_items
             }
         }
     }
-
-    if ($could_cache && $cache_new_update ne $cache_max_update) {
-        LJ::set_cached_friend_items($opts->{'u'}, $cache_new_update,
-                                    \@items, \$fvcache->[1]);
-      }
 
     return @items;
 }
