@@ -370,7 +370,7 @@ sub movefrom0_talkitem
     my $logitem = shift;
     my $treader = shift;
 
-    my $item = $treader->(100, "SELECT * FROM talk", $talkid);
+    my $item = $treader->(100, "SELECT *, UNIX_TIMESTAMP(datepost) AS 'datepostunix' FROM talk", $talkid);
     my $itemtext = $treader->(50, "SELECT talkid, subject, body FROM talktext", $talkid);
     return 1 unless $item && $itemtext;   # however that could happen.
 
@@ -426,13 +426,16 @@ sub movefrom0_talkitem
     # note that poster commented here
     if ($item->{'posterid'}) {
         my $pub = $logitem->{'security'} eq "public" ? 1 : 0;
-        my ($db, $table) = ($dbh, "talkleft_xfp");
         if ($userid == $item->{'posterid'}) {
-            ($db, $table) = ($dbch, "talkleft");
+            $replace_into->("talkleft", "(userid, posttime, journalid, nodetype, ".
+                            "nodeid, jtalkid, publicitem)", 50,
+                            $userid, $item->{'datepostunix'}, $userid,
+                            'L', $jitemid, $jtalkid, $pub);
+        } else {
+            $dbh->do("INSERT INTO talkleft_xfp (userid, posttime, journalid, nodetype, ".
+                     "nodeid, jtalkid, publicitem) VALUES ($item->{'posterid'}, ".
+                     "UNIX_TIMESTAMP('$item->{'datepost'}'), $userid, 'L', $jitemid, $jtalkid, '$pub')");
         }
-        $db->do("INSERT INTO $table (userid, posttime, journalid, nodetype, ".
-                "nodeid, jtalkid, publicitem) VALUES ($item->{'posterid'}, ".
-                "UNIX_TIMESTAMP('$item->{'datepost'}'), $userid, 'L', $jitemid, $jtalkid, '$pub')");
     }
 }
 
