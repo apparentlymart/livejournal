@@ -3,14 +3,15 @@
  $title = "";
  $body = "";
 
- require 'ljtodo.pl';
- &connect_db();
-
  use strict;
- use vars qw($dbh $title $body %FORM);
+ use vars qw($title $body %FORM);
+
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
  my $sth;
+
  my %permission;
- my $remote = &get_remote();
+ my $remote = LJ::get_remote($dbs);
 
  my $user = lc($FORM{'user'});
  if (! $user && $remote) { $user = $remote->{'user'}; }
@@ -22,7 +23,7 @@
      $sth->execute;
      $u = $sth->fetchrow_hashref;
      unless ($u) {
-	 $body .= "(=H1 Error H1=)(=P <B>Unknown user: </B> " . &ehtml($user) . " P=)\n";
+	 $body .= "(=H1 Error H1=)(=P <B>Unknown user: </B> " . LJ::ehtml($user) . " P=)\n";
      }
  }
 
@@ -110,13 +111,13 @@
  {
      my $cat = $keyword{$kwid}->{'keyword'};
      if ($FORM{'cat'} eq $cat) {
-	 $body .= "<b>" . &ehtml($cat) . " ($keyword{$kwid}->{'count'})</b>, ";
+	 $body .= "<b>" . LJ::ehtml($cat) . " ($keyword{$kwid}->{'count'})</b>, ";
      } else {
-	 $body .= "<b><a href=\"" . &self_link({ 'user' => $u->{'user'}, 'cat' => $cat }) . "\">" . &ehtml($cat) . "</a></b> ($keyword{$kwid}->{'count'}), ";
+	 $body .= "<b><a href=\"" . LJ::self_link(\%FORM, { 'user' => $u->{'user'}, 'cat' => $cat }) . "\">" . LJ::ehtml($cat) . "</a></b> ($keyword{$kwid}->{'count'}), ";
      }
  }
  if ($FORM{'cat'}) {
-     $body .= "<b><a href=\"" . &self_link({ 'user' => $u->{'user'}, 'cat' => '' }) . "\">(Show All)</a></b>, "
+     $body .= "<b><a href=\"" . LJ::self_link(\%FORM, { 'user' => $u->{'user'}, 'cat' => '' }) . "\">(Show All)</a></b>, "
  }
 
  if (keys %keyword) {
@@ -208,7 +209,7 @@
 	 } elsif ($col->[1] eq $FORM{'sort'}) {
 	     $body .= "<td bgcolor=(=EMCOLOR=)><b>$col->[0]</b></td>";
 	 } else {
-	     $body .= "<td><a href=\"" . &self_link({ 'user' => $u->{'user'}, 'sort' => $col->[1] }) . "\"><b>$col->[0]</b></a></td>";
+	     $body .= "<td><a href=\"" . LJ::self_link(\%FORM, { 'user' => $u->{'user'}, 'sort' => $col->[1] }) . "\"><b>$col->[0]</b></a></td>";
 	 }
      }
  }
@@ -221,7 +222,7 @@
      my @vals;
 
      ## status
-     $val = $it->{'progress'} . "%<BR>" . &ehtml($it->{'statusline'});
+     $val = $it->{'progress'} . "%<BR>" . LJ::ehtml($it->{'statusline'});
      push @vals, $val;
 
      ## priority
@@ -236,7 +237,7 @@
      push @vals, $val;
 
      ## item
-     $val = "<a href=\"item.bml?id=$it->{'todoid'}\"><B>" . &ehtml($it->{'subject'}) . "</B></A><BR><FONT SIZE=-1>" . &ehtml($it->{'des'}) . "</FONT>";
+     $val = "<a href=\"item.bml?id=$it->{'todoid'}\"><B>" . LJ::ehtml($it->{'subject'}) . "</B></A><BR><FONT SIZE=-1>" . LJ::ehtml($it->{'des'}) . "</FONT>";
      push @vals, $val;
 
      ## due

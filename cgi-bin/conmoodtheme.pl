@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 #
 
-package ljcon;
+package LJ::Con;
 
 $cmd{'moodtheme_create'}->{'handler'} = \&moodtheme_create;
 $cmd{'moodtheme_public'}->{'handler'} = \&moodtheme_public;

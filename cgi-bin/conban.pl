@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 #
 
-package ljcon;
+package LJ::Con;
 
 $cmd{'ban_set'}->{'handler'} = \&ban_set;
 $cmd{'ban_unset'}->{'handler'} = \&ban_unset;

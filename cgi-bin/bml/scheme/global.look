@@ -6,6 +6,14 @@ LJUSERF=>{DSs}<a href="/userinfo.bml?user=%%DATA%%&amp;mode=full"><img src="(=IM
 HELP=>{DS}(<a href="%%DATA%%"><i>help</i></a>)
 INERR=>{DS}<font color="#ff0000"><b>%%DATA%%</b></font>
 
+NEEDLOGIN<=
+{S}(=H1 Login Required H1=)
+(=P
+To view this page you must first <a href="/login.bml?ret=1">go login</a>.
+P=)
+<=NEEDLOGIN
+
+
 REQUIREPOST<=
 {S}As a security precaution, the page you're viewing requires a POST request, 
 not a GET.  If you're trying to submit this form legitimately, please 

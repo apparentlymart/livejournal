@@ -6,7 +6,7 @@
 # lib: cgi-bin/consuspend.pl, cgi-bin/confaq.pl
 # </LJDEP>
 
-package ljcon;
+package LJ::Con;
 
 sub execute
 {
@@ -607,9 +607,6 @@ sub friend
 	return 1;
     }
 
-    
-    
-    
     push @$out, [ "error", "Invalid command.  See reference." ];
     return 0;
 }

@@ -25,7 +25,7 @@ BODY<=
      while (my ($int, $count) = $sth->fetchrow_array)
      {
 	 next if ($count == 1);
-	 my $eint = &BMLUtil::eurl($int);
+	 my $eint = LJ::eurl($int);
 	 $ret .= "<TR><TD><A HREF=\"/interests.bml?int=$eint\">$int</A></TD><TD>$count</TD></TR>\n";
      }
      $ret .= "</TABLE>\n";
@@ -34,7 +34,7 @@ BODY<=
 
  if ($FORM{'mode'} eq "add") 
  {
-     my $remote = &get_remote();
+     my $remote = LJ::get_remote($dbs);
      my $ret;
      unless ($remote) {
 	 $ret .= "(=H1 Error H1=)(=P You have to be logged in to add an interest this way. P=)";

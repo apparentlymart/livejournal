@@ -57,6 +57,7 @@
   arg keys:
     dbs
     u
+    remote
 
 * name_caps($caps)
 * name_caps_short($caps)

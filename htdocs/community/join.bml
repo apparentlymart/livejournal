@@ -2,13 +2,14 @@
 
  $title = "Join Community";
  $body = "";
-
- &connect_db();
+ 
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
  my $sth;
 
  ### is there a user out there?
  ###
- my $remote = &get_remote();
+ my $remote = LJ::get_remote($dbh);
  unless ($remote) {
      $body = "(=H1 Sorry.. H1=)(=P To join a community you must first <A HREF=\"/login.bml?ret=1\">log in</A>. P=)";
      return "";

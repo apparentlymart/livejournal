@@ -21,8 +21,15 @@
  my %states = ();
  LJ::load_codes($dbr, { "country" => \%countries, "state" => \%states });
 
- my $user = lc($FORM{'user'});
- $user =~ s/[^\w]//g;
+ my $user = LJ::canonical_username($FORM{'user'});
+ if ($FORM{'user'} && ! $user) {
+     $body = "Malformed username.";
+     return;
+ }
+ if ($user eq "" && $remote) {
+     $user = $remote->{'user'};
+ }
+
  my $quser = $dbr->quote($user);
 
  my $userid = $FORM{'userid'};
@@ -450,7 +457,7 @@
 	 foreach (@friend_of) {
 	     $body .= "<A HREF=\"/userinfo.bml?user=$_\">$_</A>, ";
 	     if (++$count == 150 && $FORM{'mode'} ne "full") {
-		 $body .= "<a href=\"" . &self_link({ 'mode' => 'full' }) . "\">...</a>";
+		 $body .= "<a href=\"" . LJ::self_link(\%FORM, { 'mode' => 'full' }) . "\">...</a>";
 		 last;
 	     }
 	 }
@@ -473,6 +480,7 @@
  foreach my $row (LJ::run_hooks("userinfo_rows", {
      'dbs' => $dbs,
      'u' => $u,
+     'remote' => $remote,
  })) {
      $body .= "<tr><td align=\"right\" valign=\"top\"><b><nobr>";
      $body .= $row->[0];

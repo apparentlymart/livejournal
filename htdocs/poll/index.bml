@@ -3,8 +3,10 @@
  $title = "Poll";
  $body = "";
 
- &connect_db();
- my $remote = get_remote();
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+ my $remote = LJ::get_remote($dbs);
 
  my $pollid = ($FORM{'id'} || $FORM{'pollid'})+0;
  
@@ -53,11 +55,9 @@
 	      'prefill' => 1,
 	  };
  ## itemid 0 means no security is done to check that it's not hijacked:
- $body .= &LJ::Poll::show_poll($dbh, 0, $remote, $pollid, $opts);
+ $body .= LJ::Poll::show_poll($dbh, 0, $remote, $pollid, $opts);
 
- if (0) { &BML::finish(); }
-
- return "";
+ return;
 
 _CODE=)(=PAGE
 TITLE=>(=_CODE return $title; _CODE=)

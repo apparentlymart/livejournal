@@ -13,29 +13,24 @@
 	 next if ($bit < 1 || $bit > 30);
 	 $filter |= (1 << $bit);
      }
-     my $extra;
-#     if ($filter) {
-	 $extra = "?filter=$filter";
-#     }
-     
+     my $extra = "?filter=$filter";
+
      print "Location: $LJ::SITEROOT/users/$user/friends${extra}\n\n";
-     &BML::finish();
-     return "";
+     BML::finish();
+     return;
  }
 
- &connect_db();
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ 
+ my $remote = LJ::get_remote($dbs);
 
- my $remote = &get_remote();
-
- unless ($remote) {
-     $body .= "(=H1 Login required H1=)(=P Before using the friends filter, you must first <A HREF=\"/login.bml?ret=1\">login</A>. P=)";
-     return "";
- }
+ unless ($remote) { $body .= "(=NEEDLOGIN=)"; return; }
 
  my %res;
- &LJ::do_request($dbh, { 'mode' => 'getfriendgroups',
-			 'user' => $remote->{'user'}, },
-		 \%res, { 'noauth' => 1, 'userid' => $remote->{'userid'} });
+ LJ::do_request($dbs, { 'mode' => 'getfriendgroups',
+			'user' => $remote->{'user'}, },
+		\%res, { 'noauth' => 1, 'userid' => $remote->{'userid'} });
  
  
  unless ($res{'frgrp_maxnum'}) {
@@ -58,8 +53,8 @@
  
  foreach my $g (sort { $group{$a}->{'sortorder'} <=> $group{$b}->{'sortorder'} } keys %group)
  {
-     my $url = "$LJ::SITEROOT/users/$remote->{'user'}/friends/" . &eurl($group{$g}->{'name'});
-     $body .= "<INPUT TYPE=CHECKBOX VALUE=1 NAME=\"bit_$g\"> <a href=\"$url\">" . &ehtml($group{$g}->{'name'}) . "</a><br>\n";
+     my $url = "$LJ::SITEROOT/users/$remote->{'user'}/friends/" . LJ::eurl($group{$g}->{'name'});
+     $body .= "<INPUT TYPE=CHECKBOX VALUE=1 NAME=\"bit_$g\"> <a href=\"$url\">" . LJ::ehtml($group{$g}->{'name'}) . "</a><br>\n";
  }
 
  $body .= "<P><input type=submit value=\"View!\"> <input type=reset value=\"Clear\"></ul>If you want to edit your friends groups, <A HREF=\"editgroups.bml\">go here</A>.";

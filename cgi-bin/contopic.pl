@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 #
 
-package ljcon;
+package LJ::Con;
 
 $cmd{'tp_topedit'}->{'handler'} = \&tp_topedit;
 $cmd{'tp_topcreate'}->{'handler'} = \&tp_topcreate;

@@ -1,14 +1,16 @@
 (=_CODE
 
  use strict;
- use vars qw($dbh %FORM %cmd);
- require 'console.pl';
+ use vars qw(%FORM %cmd);
 
  my ($ret, $sth);
- &connect_db();
+
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
 
  my $commands = $FORM{'commands'};
- my $remote = &get_remote();
+ my $remote = LJ::get_remote($dbs);
 
  if ($commands) 
  {
@@ -103,7 +105,7 @@
 	     my @output;
 	     my $rv;
 	     
-	     $rv = &ljcon::execute($dbh, $remote, \@args, \@output);
+	     $rv = LJ::Con::execute($dbh, $remote, \@args, \@output);
 
 	     unless ($rv) { $ret .= "<P><B><FONT COLOR=#FF0000>Failed!</FONT></B>"; }
 	     if (@output) {

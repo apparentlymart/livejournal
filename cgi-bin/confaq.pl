@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 #
 
-package ljcon;
+package LJ::Con;
 
 $cmd{'faqcat'}->{'handler'} = \&faqcat;
 

@@ -2,12 +2,6 @@
 TITLE=>Submit Support Request
 BODY<=
 
-(=_CODE
- use Digest::MD5 qw(md5_hex);
- &connect_db();
- return "";
-_CODE=)
-
 (=_INCLUDE
 BML=>1
 CODE=>0
@@ -20,14 +14,17 @@ _INCLUDE=)
 
 (=_CODE
 
- my $remote = &get_remote();
+ $dbs = LJ::get_dbs();
+ $dbh = $dbs->{'dbh'};
+ 
+ my $remote = LJ::get_remote($dbs);
  my $ret;
 
  my $u;
  my %eh;
  if ($remote) {
      my $userid = $remote->{'userid'}+0;
-     $u = LJ::load_user($dbh, $remote->{'user'});
+     $u = LJ::load_userid($dbs, $userid);
 
      foreach (qw(user name)) {
 	 $eh{$_} = &ehtml($u->{$_});

@@ -3,14 +3,11 @@
  $title = "";
  $body = "";
 
- &connect_db();
- my $remote = &get_remote();
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $remote = LJ::get_remote($dbs);
  
- unless ($remote) {
-     $title = "Not Logged in";
-     $body .= "To edit your boxes on the homepage you must first <a href=\"/login.bml?ret=1\">login</a>.";
-     return "";     
- }
+ unless ($remote) { $body = "(=NEEDLOGIN=)"; return; }
 
  my $op = $FORM{'op'};
  my $t = $FORM{'t'};
@@ -21,28 +18,28 @@
  
  if ($op eq "x")
  {
-     &LJ::Portal::delete_box($portopts, $loc, $pos, $bname);
-     &LJ::Portal::save_portopts($dbh, $remote, $portopts);
+     LJ::Portal::delete_box($portopts, $loc, $pos, $bname);
+     LJ::Portal::save_portopts($dbh, $remote, $portopts);
      if ($loc eq "moz") {
 	 print "Location: $LJ::SITEROOT/portal/moz.bml\n\n";
      } else {
 	 print "Location: $LJ::SITEROOT$LJ::PORTAL_URI\n\n";
      }
-     &BML::finish();
-     return "";
+     BML::finish();
+     return;
  }
 
  if ($op eq "u" || $op eq "d")
  {
-     &LJ::Portal::move_box($portopts, $loc, $pos, $bname, $op);
-     &LJ::Portal::save_portopts($dbh, $remote, $portopts);
+     LJ::Portal::move_box($portopts, $loc, $pos, $bname, $op);
+     LJ::Portal::save_portopts($dbh, $remote, $portopts);
      if ($loc eq "moz") {
 	 print "Location: $LJ::SITEROOT/portal/moz.bml\n\n";
      } else {
 	 print "Location: $LJ::SITEROOT$LJ::PORTAL_URI\n\n";
      }
-     &BML::finish();
-     return "";
+     BML::finish();
+     return;
  }
 
  if ($op eq "a")
@@ -55,7 +52,7 @@
      $body .= "(=H1 Change Box Settings H1=)";
      $body .= "(=P Change the settings for the box you just clicked:<ul>\n";
      {
-	 my $modform = &LJ::Portal::make_box_modify_form($portopts, $loc, $pos);
+	 my $modform = LJ::Portal::make_box_modify_form($portopts, $loc, $pos);
 	 if ($modform) {
 	     $body .= $modform;
 	 } else {
@@ -71,14 +68,14 @@
 	 $body .= "<input type=hidden name=op value=addnew>";
 	 $body .= "<input type=hidden name=loc value=$loc>";
      	 $body .= "<p><b>$LJ::Portal::colname{$loc}</b><br>";
-	 $body .= &LJ::html_select({ 'name' => "bname",
+	 $body .= LJ::html_select({ 'name' => "bname",
 						'selected' => '', },
 					      "", "(Pick Box Type)",
-					      &LJ::Portal::get_box_types($loc));
+					      LJ::Portal::get_box_types($loc));
 	 $body .= " <input type=submit value=\"Proceed --&gt;\"></form>";
      }
      $body .= "</ul> P=)";
-     return "";
+     return;
  }
 
  if ($op eq "addnew") 
@@ -86,15 +83,15 @@
      my $bname = $FORM{'bname'};
      my $loc = $FORM{'loc'};
 
-     my $pos = &LJ::Portal::create_new_box($portopts, $bname, $loc);
-     &LJ::Portal::save_portopts($dbh, $remote, $portopts);
+     my $pos = LJ::Portal::create_new_box($portopts, $bname, $loc);
+     LJ::Portal::save_portopts($dbh, $remote, $portopts);
      
-     my $modform =  &LJ::Portal::make_box_modify_form($portopts, $loc, $pos);
+     my $modform =  LJ::Portal::make_box_modify_form($portopts, $loc, $pos);
      if ($modform) 
      {
 	 $title = "Configure Box";
 	 $body .= $modform;
-	 return "";
+	 return;
      } 
      else
      {
@@ -102,8 +99,8 @@
 	     $op = "mozadd";
 	 } else {
 	     print "Location: $LJ::SITEROOT$LJ::PORTAL_URI\n\n";
-	     &BML::finish();
-	     return "";
+	     BML::finish();
+	     return;
 	 }
      }
  }
@@ -115,8 +112,8 @@
 	 $op = "mozadd";
      } else {
 	 print "Location: $LJ::SITEROOT$LJ::PORTAL_URI\n\n";
-	 &BML::finish();
-	 return "";
+	 BML::finish();
+	 return;
      }
  }
 
@@ -130,10 +127,10 @@
      $body .= "<a href=\"javascript:sidebar.addPanel('$LJ::SITENAME','$LJ::SITEROOT/portal/moz.bml','')\"><b>&lt;--- Add $LJ::SITENAME Mozilla Sidebar</b></a>";
      $body .= "</ul>";
      $body .= "If you just added a new box to the sidebar or changed a setting and the $LJ::SITENAME sidebar is already open, hit the reload link in the sidebar.";
-     return "";
+     return;
  }
 
- return "";
+ return;
 
 _CODE=)(=PAGE
 TITLE=>(=_CODE return $title; _CODE=)

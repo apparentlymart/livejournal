@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 #
 
-package ljcon;
+package LJ::Con;
 
 $cmd{'shared'}->{'handler'} = \&shared;
 $cmd{'community'}->{'handler'} = \&community;

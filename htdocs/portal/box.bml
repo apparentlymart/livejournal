@@ -1,7 +1,8 @@
 (=_CODE
 
- &connect_db();
- my $remote = &get_remote();
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $remote = LJ::get_remote($dbs);
 
  $title = "Mozilla sidebar";
  $body = "";
@@ -15,7 +16,7 @@
 	      'remote' => $remote,
 	  };
  
- &LJ::Portal::make_mozilla_box($dbh, $remote, \%FORM, $opts);
+ LJ::Portal::make_mozilla_box($dbh, $remote, \%FORM, $opts);
 
  return "<html><head>$head<title>$title</title><body marginwidth=0 marginheight=0 $bodyopts><base target=_content>$body</body></html>";
 

@@ -58,26 +58,17 @@ if ($SIG{'HUP'}) {
 
 
 #  DEPRECATED.  use LJ:: versions.
-sub can_use_journal { &connect_db(); return LJ::can_use_journal($dbh, @_); }
 sub connect_db { 
     my $c = join(",",caller);
     LJ::debug("$0: connect_db called from [$c]");
     $dbh = ($BMLPersist::dbh = LJ::get_dbh("master")); 
 }
-sub days_in_month { return LJ::days_in_month(@_); }
-sub get_friend_itemids { return LJ::get_friend_itemids($dbh, @_); }
-sub get_recent_itemids { &connect_db(); return LJ::get_recent_itemids($dbh, @_); }
-sub get_remote { &connect_db(); return LJ::get_remote($dbh, @_); }
-sub get_remote_noauth { return LJ::get_remote_noauth(); }
-sub get_userid { return LJ::get_userid($dbh, @_); }
-sub get_username { return LJ::get_username($dbh, @_); }
 sub hash_password { return md5_hex($_[0]); }
 sub html_select { return LJ::html_select(@_); }
 sub load_codes {  &connect_db(); LJ::load_codes($dbh, @_); }
 sub load_log_props { &connect_db(); return LJ::load_log_props($dbh, @_); }
 sub load_mood_theme { &connect_db(); return LJ::load_mood_theme($dbh, @_); }
 sub load_moods { &connect_db(); return LJ::load_moods($dbh); }
-sub load_user_props { &connect_db(); LJ::load_user_props($dbh, @_); }
 sub load_user_theme { &connect_db(); return LJ::load_user_theme(@_); }
 sub load_userpics { return LJ::load_userpics($dbh, @_); }
 sub make_journal { connect_db(); return LJ::make_journal($dbh, @_); }
@@ -299,24 +290,6 @@ sub age
 
 
 
-sub self_link
-{
-    my $newvars = shift;
-    my $link = $ENV{'REQUEST_URI'};
-    $link =~ s/\?.+//;
-    $link .= "?";
-    foreach (keys %$newvars) {
-	if (! exists $FORM{$_}) { $FORM{$_} = ""; }
-    }
-    foreach (sort keys %FORM) {
-	if (defined $newvars->{$_} && ! $newvars->{$_}) { next; }
-	my $val = $newvars->{$_} || $FORM{$_};
-	next unless $val;
-	$link .= LJ::eurl($_) . "=" . LJ::eurl($val) . "&";
-    }
-    chop $link;
-    return $link;
-}
 
 sub make_link
 {
@@ -391,6 +364,26 @@ sub html_datetime
 }
 
 package LJ;
+
+sub self_link
+{
+    my $form = shift;
+    my $newvars = shift;
+    my $link = $ENV{'REQUEST_URI'};
+    $link =~ s/\?.+//;
+    $link .= "?";
+    foreach (keys %$newvars) {
+	if (! exists $form->{$_}) { $form->{$_} = ""; }
+    }
+    foreach (sort keys %$form) {
+	if (defined $newvars->{$_} && ! $newvars->{$_}) { next; }
+	my $val = $newvars->{$_} || $form->{$_};
+	next unless $val;
+	$link .= LJ::eurl($_) . "=" . LJ::eurl($val) . "&";
+    }
+    chop $link;
+    return $link;
+}
 
 # <LJFUNC>
 # name: LJ::get_query_string
@@ -1591,7 +1584,7 @@ sub get_remote
     my $remhpass = $1;
 
     ### do they exist?
-    my $userid = get_userid($dbh, $remuser);
+    my $userid = LJ::get_userid($dbh, $remuser);
     $userid += 0;
     return undef unless ($userid);
 

@@ -13,16 +13,15 @@
 (=_CODE
 
  use strict;
- use vars qw($dbh %FORM %cmd);
- require 'console.pl';
+ use vars qw(%cmd);
 
  my ($ret, $sth);
 
  $ret .= "<dl>";
- foreach my $cmdname (sort keys %ljcon::cmd) 
+ foreach my $cmdname (sort keys %LJ::Con::cmd) 
  {
-     my $cmd = $ljcon::cmd{$cmdname};
-     my $args = &ehtml($cmd->{'argsummary'});
+     my $cmd = $LJ::Con::cmd{$cmdname};
+     my $args = LJ::ehtml($cmd->{'argsummary'});
      $ret .= "<dt><p><table width=100% cellpadding=2><tr><td bgcolor=#d0d0d0><tt><b>$cmdname</b> $args</tt></td></tr></table>";
      $ret .= "<dd><p>$cmd->{'des'}";
      if ($cmd->{'args'}) {
