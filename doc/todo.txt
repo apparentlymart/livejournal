@@ -30,6 +30,8 @@
 | Todo |
 +------+
 
+* make BML evaluate full block properties in order defined
+  in file, not order used in template.
 * consolidate db_check*.pl into one tool with getopt, move db info
   into config file.
 * LJ::get_friend_items: if 10,000 friends, we load all into memory
