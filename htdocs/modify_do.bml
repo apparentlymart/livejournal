@@ -191,7 +191,8 @@ BODY<=
          $overrides = $sth->fetchrow_arrayref->[0];
      }
 
-     $ret .= "(=H1 Style Overrides H1=)(=P You can ignore this section.  This is for tweaking very specific things about your page layout.  See the <A HREF=\"/developer/\" TARGET=_blank>developer section</A> for details.  Also note that overrides are for overriding only one or two things about a style.  If you'd like to override everything, feel free to <A HREF=\"/styles/create.bml\" TARGET=_blank>create your own style</A>. P=)(=P <FONT SIZE=+2><B>THIS IS <U>NOT</U> WHERE YOU TYPE YOUR JOURNAL!!</B></FONT> P=)\n";
+     $ret .= "(=H1 Style Overrides H1=)(=P You can ignore this section.  This is for tweaking very specific things about your page layout.  See the <A HREF=\"/developer/\" TARGET=_blank>developer section</A> for details.  Also note that overrides are for overriding only one or two things about a style.  If you'd like to override everything, you need to <A HREF=\"/styles/create.bml\" TARGET=_blank>create your own style</A>. P=)(=P <FONT SIZE=+1><B>THIS IS <U>NOT</U> WHERE YOU TYPE YOUR JOURNAL!!</B></FONT> P=)\n";
+     $ret .= "(=P Please note that not all style variables can be overridden. See the <a href=\"/developer/varlist.bml\">documentation</a> for more details. P=)\n";
      $ret .= "(=STANDOUT <B>Overrides:</B><BR><TEXTAREA NAME=\"overrides\" COLS=60 ROWS=8 WRAP=OFF>";
      $ret .= &BMLUtil::escapeall($overrides);
      $ret .= "</TEXTAREA> STANDOUT=)";
@@ -250,11 +251,62 @@ BODY<=
      }
      else
      {
-         my $qoverrides = $dbh->quote($FORM{'overrides'});
-         $dbh->do("REPLACE INTO overrides SET user=$quser, override=$qoverrides");
-         $update{'useoverrides'} = "Y";
+	 my $oldoverrides = "";
+	 if ($u->{'useoverrides'} eq "Y") {
+	     $sth = $dbh->prepare("SELECT override FROM overrides WHERE user=$quser");
+	     $sth->execute;
+	     ($oldoverrides) = $sth->fetchrow_array;
+	 }
+
+	 # This allows users to keep their current illegal overrides,
+	 # but they may not create new ones nor edit the ones they already have.
+	 # They may only delete or keep illegal overrides.
+	 my %overrides = ();
+	 my %newoverrides = ();
+	 &LJ::parse_vars(\$oldoverrides,\%overrides);
+	 &LJ::parse_vars(\$FORM{'overrides'},\%newoverrides);
+	 
+	 # load all the properties to see which ones are overridable
+	 require 'propparse.pl';
+	 my @vars;
+	 load_objects_from_file("$LJ::HTDOCS/vars.dat", \@vars);
+	 foreach my $v (@vars) {
+	     my $ov = $v->{'props'}->{'override'}; 
+	     if ($ov eq "yes" || $ov eq "only") {
+		 my $name = $v->{'name'};
+		 $ret .= "<B>$name</B><br>";
+		 if (defined $newoverrides{$name}) {
+		     $overrides{$name} = $newoverrides{$name};
+		 }
+	     }
+
+	 }
+	 
+	 # make the new override code we'll put in the database
+	 my $overr='';
+	 foreach (keys %overrides) {
+	     if ($newoverrides{$_}) {
+		 if ($overrides{$_} =~ /\n/) {
+		     $overr .= "$_<=\n".$overrides{$_}."\n<=$_\n\n";
+		 } else {
+		     $overr .= "$_=>".$overrides{$_}."\n\n";
+		 }
+	     }
+	 }
+	 
+	 if ($overr !~ /\S/) {
+	     $dbh->do("DELETE FROM overrides WHERE user=$quser");
+	     $update{'useoverrides'} = "N";
+	 } else {
+	     my $qoverrides = $dbh->quote($overr);
+	     $dbh->do("REPLACE INTO overrides SET user=$quser, override=$qoverrides");
+	     $update{'useoverrides'} = "Y";
+	 }
      }
-     if ($dbh->err) { return "(=H1 Error! H1=)(=P A database error occurred: <B>" . $dbh->errstr . "</B> P=)"; }
+
+     if ($dbh->err) { 
+	 return "(=H1 Error! H1=)(=P A database error occurred: <B>" . $dbh->errstr . "</B> P=)"; 
+     }
 
      # update 'user' table
      my $sets = "";

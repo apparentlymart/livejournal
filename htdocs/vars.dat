@@ -1,6 +1,8 @@
 { LASTN_WEBSITE
 .scope
 lastn
+.override
+yes
 .editrows
 4
 .type
@@ -21,6 +23,8 @@ The name of the user's website, or "my website" if they haven't specified it.
 { DAY_WEBSITE
 .scope
 day
+.override
+yes
 .editrows
 4
 .type
@@ -41,6 +45,8 @@ The name of the user's website, or "my website" if they haven't specified it.
 { CALENDAR_WEBSITE
 .scope
 calendar
+.override
+yes
 .editrows
 4
 .type
@@ -61,6 +67,8 @@ The name of the user's website, or "my website" if they haven't specified it.
 { FRIENDS_WEBSITE
 .scope
 friends
+.override
+yes
 .editrows
 4
 .type
@@ -85,6 +93,8 @@ friends
 4
 .type
 HTML
+.override
+no
 .des
 The HTML to make the link to the previous (more recent) page of the friends view... going forward in time.
 .props
@@ -103,6 +113,8 @@ The URL of the page.  (the HREF of your A tag)
 friends
 .editrows
 4
+.override
+no
 .type
 HTML
 .des
@@ -134,6 +146,8 @@ The HTML shown if both the skip backward and skip forward elements are displayed
 friends
 .editrows
 2
+.override
+no
 .type
 HTML
 .des
@@ -170,6 +184,8 @@ The number of items that were skipped to get to this point in the history.
 lastn
 .editrows
 3
+.override
+no
 .type
 HTML
 .des
@@ -199,6 +215,8 @@ this property is equal to [var[LASTN_SKIP_SPACER]].
 lastn
 .editrows
 4
+.override
+no
 .type
 HTML
 .des
@@ -250,6 +268,8 @@ The HTML shown if both the skip backward and skip forward elements are displayed
 lastn
 .editrows
 2
+.override
+no
 .type
 HTML
 .des
@@ -266,6 +286,8 @@ The number of items being displayed.
 lastn
 .editrows
 2
+.override
+no
 .type
 HTML
 .des
@@ -288,6 +310,8 @@ lastn
 LASTN_EVENT, LASTN_NEW_DAY, LASTN_END_DAY, LASTN_OPT_ITEMS, LASTN_USERPIC, LASTN_RANGE_MOSTRECENT, LASTN_RANGE_HISTORY, LASTN_SKIP_LINKS, LASTN_WEBSITE
 .editrows
 30
+.override
+no
 .des
 The HTML for the most recent journal entries page (lastn mode) that's sent to the browser.  Customize this as you'd like your page to look.
 .type
@@ -2088,6 +2112,8 @@ views of your journal, like to the calendar view.
 { LASTN_TALK_LINKS
 .scope
 lastn
+.override
+yes
 .deps
 LASTN_TALK_READLINK
 .type
@@ -2112,6 +2138,8 @@ A unique integer that represents this journal entry.  You probably won't ever ha
 { LASTN_TALK_READLINK
 .scope
 lastn
+.override
+yes
 .type
 HTML
 .des
@@ -2142,6 +2170,8 @@ This property is "ies" if messagecount is not equal to 1, else it is "y", so you
 { DAY_TALK_LINKS
 .scope
 day
+.override
+yes
 .deps
 DAY_TALK_READLINK
 .type
@@ -2166,6 +2196,8 @@ A unique integer that represents this journal entry.  You probably won't ever ha
 { DAY_TALK_READLINK
 .scope
 day
+.override
+yes
 .type
 HTML
 .des
@@ -2196,6 +2228,8 @@ This property is "ies" if messagecount is not equal to 1, else it is "y", so you
 { FRIENDS_TALK_LINKS
 .scope
 friends
+.override
+yes
 .deps
 FRIENDS_TALK_READLINK
 .type
@@ -2220,6 +2254,8 @@ A unique integer that represents this journal entry.  You probably won't ever ha
 { FRIENDS_TALK_READLINK
 .scope
 friends
+.override
+yes
 .type
 HTML
 .des
