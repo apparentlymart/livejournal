@@ -372,6 +372,15 @@
         'i18n' => 'generator/en',
     };
 
+    ### /admin/fileedit setup
+    # If you are using the files in htdocs/inc and are frequently editing
+    # those, you may wish to put all of these files into the database.
+    # You can instruct BML to treat all <?_include?> statements as being
+    # pulled from memcached (failover to the database) by uncommenting:
+    # $FILEEDIT_VIA_DB = 1;
+    # Alternately, you can specify that only particular files should be
+    # kept in memcache and the database by doing:
+    # %FILEEDIT_VIA_DB = ( 'support_links' => 1, );
 
     ### S2 Style Options
 

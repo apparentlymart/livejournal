@@ -40,5 +40,25 @@ if ($LJ::UNICODE) {
 # register BML multi-language hook
 BML::register_hook("ml_getter", \&LJ::Lang::get_text);
 
+# include file handling
+BML::register_hook('include_getter', sub {
+    my ($file, $source) = @_;
+    return 0 unless $LJ::FILEEDIT_VIA_DB || $LJ::FILEEDIT_VIA_DB{$file};
+
+    # we handle, so first if memcache...
+    my $val = LJ::MemCache::get("includefile:$file");
+
+    # straight database hit
+    unless ($val) {
+        my $dbh = LJ::get_db_writer();
+        $val = $dbh->selectrow_array("SELECT inctext FROM includetext ".
+                                     "WHERE incname=?", undef, $file);
+        LJ::MemCache::set("includefile:$file", $val);
+    }
+
+    # return the value and that we handled this
+    $$source = $val;    
+    return 1;
+});
 
 1;
