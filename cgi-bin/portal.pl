@@ -671,12 +671,7 @@ $box{'lastnview'} =
         }
 
         my $u = LJ::load_user($dbs, $user);
-        my $dbcr;
-        my $clustered = 0;
-        if ($u->{'clusterid'}) {
-            $dbcr = LJ::get_cluster_reader($u);
-            $clustered = 1;
-        }
+        my $dbcr = LJ::get_cluster_reader($u);
             
         box_start($bd, $box, { 'title' => "$u->{'name'}",
                               'url' => "$LJ::SITEROOT/users/$user" });
@@ -705,6 +700,7 @@ $box{'lastnview'} =
             return;
         }
 
+        my %logprops = ();
         my %opts;
         my $text;
         $opts{'usemaster'} = 0;
@@ -714,14 +710,13 @@ $box{'lastnview'} =
             $opts{'prefersubject'} = 1;
         }
         
-        if ($clustered) {
-            $text = LJ::get_logtext2($u, $opts, @itemids);
-        } else {
-            $text = LJ::get_logtext($dbs, $opts, @itemids);
-        }
+        $text = LJ::get_logtext2($u, $opts, @itemids);
         
         my %posteru = ();  # map posterids to u objects
         LJ::load_userids_multiple($dbs, [map { $_->{'posterid'}, \$posteru{$_->{'posterid'}} } @items], [$u]);
+        # Loads the log table into cache, in the unlikely event that it is not already in cache
+        LJ::load_props($dbs, "log");
+        LJ::load_log_props2($dbcr, $u->{'userid'}, \@itemids, \%logprops);
         
         foreach my $i (@items) {
             next if $posteru{$i->{'posterid'}}->{'statusvis'} eq 'S';
@@ -729,10 +724,13 @@ $box{'lastnview'} =
             my $itemid = $i->{'itemid'};
             my $event = $text->{$itemid}->[1];
             my $subject = $text->{$itemid}->[0];
+            LJ::CleanHTML::clean_subject(\$subject) if ($subject);
             $subject ||= "(no subject)";
-            my $ditemid = $u->{'clusterid'} ? ($itemid * 256 + $i->{'anum'}) : $itemid;
-            my $itemargs = $u->{'clusterid'} ? "journal=$user&amp;itemid=$ditemid" : "itemid=$ditemid";
-            my $linkurl = "<a href=\"/talkread.bml?$itemargs\"><b>(Link)</b></a>";
+
+            LJ::CleanHTML::clean_event(\$event, 
+                { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'} }) if ($event);
+            
+            my $linkurl = "<a href=\"/talkread.bml?journal=$user&amp;item=" . ($itemid * 256 + $i->{'anum'}) . "\"><b>(Link)</b></a>";
             if ($box->{'args'}->{'showtext'}) {
                 $$bd .= "<b>$subject</b> $linkurl<br />";
                 $$bd .= "$event<br />";
