@@ -20,6 +20,7 @@ use vars qw($mailspool $workdir $maxloop
 $opt = {};
 GetOptions $opt, qw/foreground workdir=s lock=s maxloop=s/;
 $SIG{$_} = \&stop_parent foreach qw/INT TERM/;
+$SIG{CHLD} = 'IGNORE';
 
 # mailspool should match the MTA delivery location.
 $mailspool = $LJ::MAILSPOOL || "$ENV{'LJHOME'}/mail";
@@ -34,7 +35,6 @@ $maxloop = $opt->{'maxloop'} || 100;
 
 # sanity checks
 die "Invalid mailspool: $mailspool\n" unless -d "$mailspool/new";
-$mailspool .= '/new';
 die "Don't run me as root!\n" unless $<;
 die "Unable to read mailspool: $mailspool\n" unless -r $mailspool;
 
@@ -42,20 +42,21 @@ die "Unable to read mailspool: $mailspool\n" unless -r $mailspool;
 # without the debugging to STDERR.
 if (! $opt->{'foreground'}) {
     fork && exit 0;
+
     POSIX::setsid() || die "Unable to become session leader: $!\n";
     umask 0;
     chdir('/');
 
     $pid = fork;
     die "Couldn't fork.\n" unless defined $pid;
-    print "mailgate started with pid: $pid\n" if $pid;
+    print "mailgate started with pid: $$\n" if $pid;
 
-    $SIG{$_} = \&stop_child foreach qw/INT TERM/;
     close STDOUT && open STDOUT, ">/dev/null";
     close STDIN  && open STDIN,  "+>&STDOUT"; 
     close STDERR && open STDERR, "+>&STDOUT";
 
     unless ($pid) {
+        $SIG{$_} = \&stop_child foreach qw/INT TERM/;
         $0 = 'mailgated - worker';
         worker();
         exit 0;
@@ -72,6 +73,11 @@ if (! $opt->{'foreground'}) {
         kill 9, $pid;
         die "Unable to start listener: $!\n";
     }
+
+    open(PID, ">$mailspool/tmp/mailgated.pid") || die "Unable to write pidfile: $!\n";
+    print PID $$, "\n";
+    close PID;
+
     while ($c = $s->accept()) {
         while (<$c>) {
             # remote commands
@@ -88,6 +94,7 @@ if (! $opt->{'foreground'}) {
                 my $newpid = fork;
                 unless ($newpid) {
                     close $s;
+                    $SIG{$_} = \&stop_child foreach qw/INT TERM/;
                     $0 = 'mailgated - worker';
                     worker();
                     exit 0;
@@ -145,19 +152,20 @@ if (! $opt->{'foreground'}) {
 
 sub worker
 {
-    eval qw{
-        use MIME::Parser;
-        use Mail::Address;
-        use Unicode::MapUTF8 ();
-        use File::Temp ();
-        use File::Path ();
-    };
+
+    use MIME::Parser;
+    use Mail::Address;
+    use Unicode::MapUTF8 ();
+    use File::Temp ();
+    use File::Path ();
+
     require "$ENV{'LJHOME'}/cgi-bin/ljemailgateway.pl";
     require "$ENV{'LJHOME'}/cgi-bin/supportlib.pl";
     require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
     require "$ENV{'LJHOME'}/cgi-bin/sysban.pl";
     $| = 1;
 
+    $mailspool .= '/new';
     while (! $stop) {
         debug("Starting loop:");
 

@@ -8,8 +8,6 @@ BEGIN {
     if ($LJ::USE_PGP) {
         eval 'use GnuPG::Interface';
         die "Could not load GnuPG::Interface." if $@;
-        eval 'use Mail::GnuPG';
-        die "Could not load Mail::GnuPG." if $@;
     }
 }
 
@@ -153,7 +151,7 @@ sub process {
         my $gpgcode = LJ::Emailpost::check_sig($u, $entity, \$gpgerr);
         unless ($gpgcode eq 'good') {
             my $errstr = $gpg_errcodes{$gpgcode};
-            $errstr .= "\nGnuPG error: $gpgerr\n" if $gpgerr;
+            $errstr .= "\nGnuPG error output:\n$gpgerr\n" if $gpgerr;
             return $err->($errstr, { sendmail => 1 });
         }
     }
@@ -359,7 +357,7 @@ sub get_entity
                 my $filename = $alte_head->recommended_filename;
                 push @entities, $alte if $filename =~ /\.(?:gif|png|tiff?|jpe?g)$/;
             }
-            push @entities, $alte if $alte->mime_type =~ /^$type\// &&
+            push @entities, $alte if $alte->mime_type =~ /^$type/ &&
                                      $type ne 'all';
 
             # Recursively search through nested MIME for various pieces
@@ -391,35 +389,92 @@ sub check_sig {
 
     # Create work directory.
     my $tmpdir = File::Temp::tempdir("ljmailgate_" . 'X' x 20, DIR=>$main::workdir);
-    return 'bad_tmpdir' unless chdir($tmpdir);
+    return 'bad_tmpdir' unless -e $tmpdir;
+
+    my ($in, $out, $err, $status,
+        $gpg_handles, $gpg, $gpg_pid, $ret);
+
+    my $check = sub {
+        my %rets =
+            (
+             'NODATA 1'     => 1,   # no key or no signed data
+             'NODATA 2'     => 2,   # no signed content
+             'NODATA 3'     => 3,   # error checking sig (crc)
+             'IMPORT_RES 0' => 4,   # error importing key (crc)
+             'BADSIG'       => 5,   # good crc, bad sig
+             'GOODSIG'      => 6,   # all is well
+            );
+        while (my $gline = <$status>) {
+            foreach (keys %rets) {
+                next unless $gline =~ /($_)/;
+                return $rets{$1};
+            }
+        }
+        return 0;
+    };
+
+    my $gpg_cleanup = sub {
+        close $in;
+        close $out;
+        waitpid $gpg_pid, 0;
+        undef foreach $gpg, $gpg_handles;
+    };
+
+    my $gpg_pipe = sub {
+        $_ = IO::Handle->new() foreach $in, $out, $err, $status;
+        $gpg_handles = GnuPG::Handles->new( stdin  => $in,  stdout=> $out,
+                                            stderr => $err, status=> $status );
+        $gpg = GnuPG::Interface->new();
+        $gpg->options->hash_init( armor=>1, homedir=>$tmpdir );
+        $gpg->options->meta_interactive( 0 );
+    };
 
     # Pull in user's key, add to keyring.
-    my ($in, $out, $err, $gpg_handles, $gpg, $gpg_pid);
-    $_ = IO::Handle->new() foreach $in, $out, $err;
-    $gpg_handles = GnuPG::Handles->new( stdin=>$in, stdout=>$out, stderr=>$err );
-    $gpg = GnuPG::Interface->new();
-    $gpg->options->hash_init( armor=>1, homedir=>$tmpdir );
+    $gpg_pipe->();
     $gpg_pid = $gpg->import_keys( handles=>$gpg_handles );
     print $in $key;
-    close $in; close $out;
-    waitpid $gpg_pid, 0;
-    return 'invalid_key' if $? >> 8;  # invalid pgp key
-
-    # Don't need this stuff anymore.
-    undef foreach $gpg, $gpg_handles;
-
-    my ($gpg_email, $ret);
-    $gpg_email = new Mail::GnuPG( keydir=>$tmpdir );
-    eval { $ret = ($gpg_email->verify($entity))[0]; };
-    if ($@) {
-        $$gpg_err = $@;
-        $$gpg_err =~ s/ at.*?GnuPG.*$//;
+    $gpg_cleanup->();
+    $ret = $check->();
+    if ($ret && $ret == 1 || $ret == 4) {
+        $$gpg_err .= "    $_" while (<$err>);
+        return 'invalid_key';
     }
-    if (defined($ret)) {
-        $ret == 0 ? return 'good' : return 'bad';
-    } else {
-        return 'not_signed';
+
+    my ($txt, $txt_f, $txt_e, $sig_e);
+    $txt_e = (get_entity($entity))[0];
+    $txt = $txt_e->as_string() if $txt_e;
+    if ($entity->effective_type() eq 'multipart/signed') {
+        # attached signature
+        $sig_e = (get_entity($entity, { type => 'application/pgp-signature' }))[0];
+        my $txt_fh;
+        ($txt_fh, $txt_f) =
+            File::Temp::tempfile('plaintext_XXXXXXXX', DIR => $tmpdir);
+        print $txt_fh $txt;
+        close $txt_fh;
+    } # otherwise, it's clearsigned
+
+    # Validate message.
+    # txt_e->bodyhandle->path() is clearsigned message in its entirety.
+    # txt_f is the ascii text that was signed (in the event of sig-as-attachment),
+    #     with MIME headers attached.
+    $gpg_pipe->();
+    $gpg_pid =
+        $gpg->wrap_call( handles => $gpg_handles,
+                         commands => [qw( --trust-model always --verify )],
+                         command_args => $sig_e ? 
+                             [$sig_e->bodyhandle->path(), $txt_f] :
+                             $txt_e->bodyhandle->path()
+                    );
+    $gpg_cleanup->();
+    $ret = $check->();
+    if ($ret && $ret != 6) {
+        $$gpg_err .= "    $_" while (<$err>);
+        return 'bad' if $ret =~ /[35]/;
+        return 'not_signed' if $ret =~ /[12]/;
     }
+
+    return 'good' if $ret == 6;
+    return undef;
 }
 
 # Upload images to a Fotobilder installation.
