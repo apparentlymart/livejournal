@@ -295,7 +295,7 @@ sub get_text
         unless (defined $text) {
             $mem_good = 0;
             my $l = $LN_CODE{$lang} or return "?lang?";
-            my $dbr = LJ::get_dbh("slave", "master");
+            my $dbr = LJ::get_db_reader();
             $text = $dbr->selectrow_array("SELECT t.text".
                                           "  FROM ml_text t, ml_latest l, ml_items i".
                                           " WHERE t.dmid=$dmid AND t.txtid=l.txtid".
