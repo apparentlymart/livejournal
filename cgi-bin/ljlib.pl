@@ -786,10 +786,10 @@ sub auth_fields
 	my $user = $form->{'user'};
 	unless ($user || $ENV{'QUERY_STRING'} =~ /=/) { $user=$ENV{'QUERY_STRING'}; }
 	$ret .= BMLUtil::escapeall($user) unless ($form->{'altlogin'});
-	$ret .= "'></td></tr>\n";
+	$ret .= "' /></td></tr>\n";
 	$ret .= "<tr><td>Password:</td><td align='left'>\n";
 	my $epass = LJ::ehtml($form->{'password'});
-	$ret .= "<input type='password' name='password' size='15' maxlength='30' value='$epass'>";
+	$ret .= "<input type='password' name='password' size='15' maxlength='30' value='$epass' />";
 	$ret .= "</td></tr>\n";
     }
     return $ret;
@@ -823,9 +823,10 @@ sub auth_fields_2
 	my $user = $form->{'user'};
 	unless ($user || $ENV{'QUERY_STRING'} =~ /=/) { $user=$ENV{'QUERY_STRING'}; }
 	$ret .= BMLUtil::escapeall($user) unless ($form->{'altlogin'});
-	$ret .= "\"></td></tr>\n";
+	$ret .= "\" /></td></tr>\n";
 	$ret .= "<tr><td align='right'><u>P</u>assword:</td><td align='left'>\n";
-	$ret .= "<input type='password' name='password' size='15' maxlength='30' accesskey='p' value=\"" . LJ::ehtml($opts->{'password'}) . "\">";
+	$ret .= "<input type='password' name='password' size='15' maxlength='30' accesskey='p' value=\"" . 
+	    LJ::ehtml($opts->{'password'}) . "\" />";
 	$ret .= "</td></tr>\n";
 	return $ret;
     }
@@ -1670,6 +1671,14 @@ sub acct_code_check
 	return 0;
     }
     
+    # is the journal this code came from suspended?
+    my $statusvis = LJ::dbs_selectrow_array($dbs, "SELECT statusvis FROM user ".
+					    "WHERE userid=$ac->{'userid'}");
+    if ($statusvis eq "S") {
+	$$err = "Code belongs to a suspended account.";
+	return 0;
+    }
+
     return 1;
 }
 
