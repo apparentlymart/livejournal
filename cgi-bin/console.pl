@@ -512,11 +512,12 @@ $cmd{'get_maintainer'} = {
 $cmd{'change_journal_type'} = {
     'privs' => [qw(changejournaltype)],
     'handler' => \&change_journal_type,
-    'des' => "Change a journal's type from community to either person (regular), or a shared journal.",
-    'argsummary' => '<journal> <type>',
+    'des' => "Change a journal's type.",
+    'argsummary' => '<journal> <type> [owner]',
     'args' => [
                'journal' => "The username of the journal that type is changing.",
-               'type' => "Either 'person' or 'shared'",
+               'type' => "Either 'person', 'shared', or 'community'.",
+               'owner' => "If converting from a person to a community, specify the person to be made maintainer in owner.  If going the other way from community/shared to a person, specify the account to adopt the email address and password of.",
                ],
     };
 
@@ -769,46 +770,238 @@ sub change_journal_type
 
     my $user = $args->[1];
     my $type = $args->[2];
+    my $owner = $args->[3];
 
-    return $err->("Type argument must be 'person' or 'shared'")
-        unless $type eq "person" || $type eq "shared";
+    return $err->("Type argument must be 'person', 'shared', or 'community'.")
+        unless $type =~ /^(?:person|shared|community)$/;
 
     my $u = LJ::load_user($user);
     return $err->("User doesn't exist.")
         unless $u;
 
-    return $err->("$remote->{'user'}, you are not authorized to use this command.")
-        unless $remote->{'priv'}->{'changejournaltype'} ||
-               LJ::can_manage($remote, $u);
+    return $err->("Account cannot be converted while not active.")
+        unless $u->{statusvis} eq 'V';
 
-    return $err->("$u->{'user'} is not a community, so can't change type.")
-        unless $u->{'journaltype'} eq "C";
+    return $err->("An account must be a community, shared account, or personal journal to be eligible for conversion.")
+        unless $u->{journaltype} =~ /[PCS]/;
 
-    $dbh->do("DELETE FROM community WHERE userid=?", undef, $u->{'userid'});
+    return $err->("This command cannot be used on an account you are logged in as.")
+        if LJ::u_equals($remote, $u);
 
-    # TAG:FR:console:change_journal_type:getfriendofs
-    # if we're changing a non-person account to a person account,
-    # we need to ditch all its friend-ofs so that old users befriending
-    # that account (in order to watch it), don't give the account maintainer
-    # access to read the old reader's friends-only posts.  (which they'd now
-    # be able to do, since journaltype=='P'.
-    my $ids = $dbh->selectcol_arrayref("SELECT userid FROM friends WHERE friendid=?",
-                                       undef, $u->{'userid'});
-    # TAG:FR:console:change_journal_type:deletefriendofs
-    $dbh->do("DELETE FROM friends WHERE friendid=?", undef, $u->{'userid'});
-    LJ::memcache_kill($_, "friends") foreach @$ids;
-    
-    if ($type eq "person") {
-        LJ::update_user($u, { journaltype => 'P' });
-        LJ::clear_rel($u->{'userid'}, '*', 'P'); # post
-        LJ::clear_rel($u->{'userid'}, '*', 'A'); # admin
-        LJ::clear_rel($u->{'userid'}, '*', 'M'); # moderate
+    # get any owner specified
+    my $ou = $owner ? LJ::load_user($owner) : undef;
+    return $err->("Owner must be a personal journal.")
+        if $ou && $ou->{journaltype} ne 'P';
+    return $err->("Owner must be an active account.")
+        if $ou && $ou->{statusvis} ne 'V';
 
-    } elsif ($type eq "shared") {
-        LJ::update_user($u, { journaltype => 'S' });
+    # logic for determining if action is by a manager or a site admin:
+    #   byadmin: has changejournaltype priv, and they specified a new owner/parent
+    #   bymanager: LJ::can_manage is true and byadmin is false
+    my ($byadmin, $bymanager);
+    if ($ou) {
+        # specified an owner, verify priv
+        $byadmin = LJ::check_priv($remote, 'changejournaltype', '');
+        return $err->("You cannot specify a new owner for $u->{user} unless you have the changejournaltype privilege.")
+            unless $byadmin;
+    } else {
+        # make sure they're a manager
+        $bymanager = LJ::can_manage($remote, $u);
+        return $err->("You must be a maintainer of $u->{user} to convert it.")
+            unless $bymanager;
+
+        # set $ou to $remote, because it's used in some situations when we have a manager but no admin
+        # and we want to verify that the users can't reparent
+        $ou = $remote;
     }
 
-    return $inf->("User: $u->{'user'} converted.");
+    # setup actions hashref with subs to do things.  this doesn't do anything yet.  it is called by
+    # the various transformations down below.
+    my %actions = (
+        # must not have entries by other users in the account
+        other_entry_check => sub {
+            my $dbcr = LJ::get_cluster_def_reader($u);
+            my $count = $dbcr->selectrow_array('SELECT COUNT(*) FROM log2 WHERE journalid = ? AND posterid <> journalid',
+                                               undef, $u->{userid});
+            return $err->("Account contains $count entries posted by other users and cannot be converted.")
+                if $count;           
+            return 1;
+        },
+
+        # no entries by this user in the account
+        self_entry_check => sub {
+            my $dbcr = LJ::get_cluster_def_reader($u);
+            my $count = $dbcr->selectrow_array('SELECT COUNT(*) FROM log2 WHERE journalid = ? AND posterid = journalid',
+                                               undef, $u->{userid});
+            return $err->("Account contains $count entries posted by account itself and cannot be converted.")
+                if $count;
+            return 1;
+        },
+
+        # clear out or set relations
+        update_rels => sub {
+            if (scalar(@_) > 0) {
+                # user passed edges to set
+                LJ::set_rel_multi(@_);
+            } else {
+                # clear, they passed a scalar of some sort
+                # clear unmoderated, moderator, admin, and posting access edges
+                LJ::clear_rel($u->{userid}, '*', $_) foreach qw(N M A P);
+            }
+        },
+
+        # update/delete community row
+        update_commrow => sub {
+            my $arg = shift(@_)+0;
+            if ($arg) {
+                $dbh->do("INSERT INTO community VALUES (?, 'open', 'members')", undef, $u->{userid});
+            } else {
+                $dbh->do("DELETE FROM community WHERE userid = ?", undef, $u->{userid});
+            }
+        },
+
+        # delete all friendships from other people TO this account
+        clear_friends => sub {
+            # if we're changing a non-person account to a person account,
+            # we need to ditch all its friend-ofs so that old users befriending
+            # that account (in order to watch it), don't give the account maintainer
+            # access to read the old reader's friends-only posts.  (which they'd now
+            # be able to do, since journaltype=='P'.)
+
+            # TAG:FR:console:change_journal_type:getfriendofs
+            my $ids = $dbh->selectcol_arrayref("SELECT userid FROM friends WHERE friendid=?",
+                                               undef, $u->{userid});
+            # TAG:FR:console:change_journal_type:deletefriendofs
+            $dbh->do("DELETE FROM friends WHERE friendid=?", undef, $u->{userid});
+            LJ::memcache_kill($_, "friends") foreach @$ids;
+        },
+
+        # change some basic user info
+        update_user => sub {
+            my ($journaltype, $password, $adoptemail) = @_;
+            return $err->('Invalid journaltype sent to update_user.')
+                unless $journaltype =~ /[PCS]/;
+            $password = '' unless defined $password;
+            $adoptemail += 0;
+            my %extra = ();
+
+            if ($adoptemail) {
+                # get email address and setup a validation nag
+                my $email = $ou->{email};
+                my $aa = LJ::register_authaction($u->{userid}, "validateemail", $email);
+
+                # setup extra stuff so we set it in the user table
+                $extra{email} = $email;
+                $extra{status} = 'T';
+
+                # create email to send to user
+                my $body = "Your email address for $LJ::SITENAME for the $u->{user} account has been reset.  To validate ";
+                $body .= "the change, please go to this address:\n\n";
+                $body .= "     $LJ::SITEROOT/confirm/$aa->{aaid}.$aa->{authcode}\n\n";
+                $body .= "Regards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n";
+
+                # send email
+                LJ::send_mail({
+                    to => $email,
+                    from => $LJ::ADMIN_EMAIL,
+                    subject => "Email Address Reset",
+                    body => $body,
+                    wrap => 1,
+                }) or $err->('Confirmation email could not be sent.');
+
+                # now clear old email address from their infohistory to prevent account hijacking and such
+                $dbh->do("UPDATE infohistory SET what='emailreset' WHERE userid=? AND what='email'", undef, $u->{userid})
+                    or $err->("Error updating infohistory for emailreset: " . $dbh->errstr);
+            }
+            
+            # now update the user table and kill memcache
+            LJ::update_user($u, { journaltype => $journaltype,
+                                  password => $password,
+                                  %extra });
+        },
+    );
+
+    # these are the actual transformations that define the logic behind changing journal types.
+    # want to go TO a community
+    my @todo;
+    if ($type eq 'community') {
+        # what are they coming FROM?
+        return unless $actions{self_entry_check}->();
+        if ($u->{journaltype} eq 'P') {
+            # person -> comm, admins only
+            return $err->("Not authorized.  Please verify you have the changejournaltype privilege and you specified an owner/parent.")
+                unless $byadmin;
+
+            # setup actions to be taken
+            @todo = ([ 'update_commrow', 1 ],
+                     [ 'update_rels', 
+                         [ $u->{userid}, $ou->{userid}, 'A' ],
+                         [ $u->{userid}, $ou->{userid}, 'P' ], # make $ou a maintainer of $u, and have posting access
+                     ],
+                     [ 'clear_friends' ],
+                     [ 'update_user', 'C', '', 1 ]);
+
+        } elsif ($u->{journaltype} eq 'S') {
+            # shared -> comm, allowed by anybody
+            @todo = ([ 'update_commrow', 1 ],
+                     [ 'update_user', 'C', '', $byadmin ? 1 : 0 ]);
+        }
+
+    # or to a shared journal
+    } elsif ($type eq 'shared') {
+        # from?
+        if ($u->{journaltype} eq 'P') {
+            # person -> shared, admins only
+            return $err->("Not authorized.  Please verify you have the changejournaltype privilege and you specified an owner/parent.")
+                unless $byadmin;
+
+            # actions to take
+            @todo = ([ 'update_rels', 
+                         [ $u->{userid}, $ou->{userid}, 'A' ],
+                         [ $u->{userid}, $ou->{userid}, 'P' ], # make $ou a maintainer of $u, and have posting access
+                     ],
+                     [ 'clear_friends' ],
+                     [ 'update_user', 'S', $ou->{password}, 1 ]);
+
+        } elsif ($u->{journaltype} eq 'C') {
+            # comm -> shared, anybody can do
+            @todo = ([ 'update_commrow', 0 ],
+                     [ 'update_user', 'S', $ou->{password}, $byadmin ? 1 : 0 ]);
+        }
+
+    # or finally perhaps to a person
+    } elsif ($type eq 'person') {
+        # all conversions to a person must go through these checks
+        return $err->("Not authorized.  Please verify you have the changejournaltype privilege and you specified an owner/parent.")
+            unless $byadmin;
+        return unless $actions{other_entry_check}->();
+
+        # doesn't matter what they're coming from, as long as they're coming from something valid
+        if ($u->{journaltype} =~ /[CS]/) {
+            @todo = ([ 'update_rels', 0 ],
+                     [ 'clear_friends' ],
+                     [ 'update_commrow', 0 ],
+                     [ 'update_user', 'P', $ou->{password}, 1 ]);
+        }
+    }
+
+    # register this action in statushistory
+    LJ::statushistory_add($u->{userid}, $remote->{userid}, "change_journal_type", "account '$u->{user}' converted to $type" .
+                                                          ($ou ? " (owner/parent is '$ou->{user}')" : '(no owner/parent)'));
+    
+    # now run the requested actions
+    foreach my $row (@todo) {
+        my $which = ref $row ? shift(@{$row || []}) : $row;
+        if (ref $actions{$which} eq 'CODE') {
+            # call subref, passing arguments left in $row
+            $actions{$which}->(@{$row || []});
+        } else {
+            $err->("Requested action $which not found.  Please notify site administrators of this error.");
+        }
+    }
+    
+    # done
+    return $inf->("User: $u->{user} converted to a $type account.");
 }
 
 sub foreach_entry
