@@ -20,6 +20,11 @@
     my $remote = LJ::get_remote();
     my $cursess = $remote ? $remote->{'_session'} : undef;
 
+    if (LJ::get_cap($remote, "readonly")) {
+        $body = LJ::bad_input("The database is temporarily in read-only mode, so creating new login sessions is temporarily down.  Please try again later.");
+        return;
+    }
+
     if (LJ::did_post()) {
 
         my $do_change = $POST{'action:change'};
@@ -83,6 +88,10 @@
 
             my $u = LJ::load_user($user);
             unless ($u) { push @errors, "$ML{'error.username_notfound'}"; }
+            if (LJ::get_cap($u, "readonly")) {
+                $body = LJ::bad_input("The database is temporarily in read-only mode, so creating new login sessions is temporarily down.  Please try again later.");
+                return;
+            }
             
             my $banned = 0;
         

@@ -2052,8 +2052,9 @@ sub get_cap
     # allow a way for admins to force-set the read-only cap
     # to lower writes on a cluster.
     if ($cname eq "readonly" && $u &&
-        $LJ::READONLY_CLUSTER{$u->{clusterid}} &&
-        ! LJ::get_cap($u, "avoid_readonly")) {
+        ($LJ::READONLY_CLUSTER{$u->{clusterid}} ||
+         $LJ::READONLY_CLUSTER_ADVISORY{$u->{clusterid}} &&
+         ! LJ::get_cap($u, "avoid_readonly"))) {
         return 1;
     }
 
