@@ -4,6 +4,9 @@
 package LJ;
 use strict;
 
+# load the bread crumb hash
+require "$ENV{'LJHOME'}/cgi-bin/crumbs.pl";
+
 # <LJFUNC>
 # name: LJ::img
 # des: Returns an HTML &lt;img&gt; or &lt;input&gt; tag to an named image
@@ -278,6 +281,51 @@ sub make_cookie
     $cookie .= "; domain=$domain" if $domain;
     push(@cookies, $cookie);
     return @cookies;
+}
+
+sub set_active_crumb
+{
+    $LJ::ACTIVE_CRUMB = shift;
+    return undef;
+}
+
+sub get_parent_crumb
+{
+    my $thiscrumb = LJ::get_crumb(LJ::get_active_crumb());
+    return LJ::get_crumb($thiscrumb->[2]);
+}
+
+sub get_active_crumb
+{
+    return $LJ::ACTIVE_CRUMB;
+}
+
+sub get_crumb_path
+{
+    my $thiscrumb = LJ::get_crumb(LJ::get_active_crumb());
+    my @crumbs;
+    push(@$thiscrumb, $LJ::ACTIVE_CRUMB);
+    push(@crumbs, $thiscrumb);
+    my $parent = $thiscrumb->[2];
+
+    while ($parent ne '')
+    {
+        $thiscrumb = LJ::get_crumb($parent);
+        push(@$thiscrumb, $parent);
+        $parent = $thiscrumb->[2];
+        push(@crumbs, $thiscrumb);
+    }
+    return @crumbs;
+}
+
+sub get_crumb
+{
+    my $crumbkey = shift;
+    if (defined $LJ::CRUMBS_LOCAL{$crumbkey}) {
+        return $LJ::CRUMBS_LOCAL{$crumbkey};
+    } else {
+        return $LJ::CRUMBS{$crumbkey};
+    }
 }
 
 # Common challenge/response javascript, needed by both login pages and comment pages alike.

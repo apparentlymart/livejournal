@@ -257,3 +257,20 @@ PAGE<=
 </html>
 <=PAGE
 
+BREADCRUMBS<=
+{Fp}<?_code
+    # where are we
+    my @crumbs = LJ::get_crumb_path();
+    my @ret;
+    my $count = 0;
+    foreach my $crumb (@crumbs) {
+        # put crumbs together
+        unshift @ret, $count++ == 0 ?
+           "<b>$ML{'crumb.'.$crumb->[3]}</b>" :
+           $crumb->[1] ne '' ?
+               "<a href=\"$crumb->[1]\">$ML{'crumb.'.$crumb->[3]}</a>" :
+               "$ML{'crumb.'.$crumb->[3]}";
+    }
+    return "<div id='ljbreadcrumbs'>".join(" : ", @ret)."</div>";
+_code?>
+<=BREADCRUMBS

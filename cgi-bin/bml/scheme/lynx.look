@@ -14,6 +14,16 @@ page<=
 <link rel="home" title="<?_ml lynx.nav.home _ml?>" href="/" />
 <link rel="contents" title="<?_ml lynx.nav.sitemap _ml?>" href="/site/" />
 <link rel="help" title="<?_ml lynx.nav.help _ml?>" href="/support/" />
+<?_code
+    use strict;
+    my $crumb_up;
+    if(LJ::get_active_crumb() ne '')
+    {
+        my $parentcrumb = LJ::get_parent_crumb();
+        $crumb_up = "<link rel='up' title='$parentcrumb->[0]' href='$parentcrumb->[1]' />";
+    }
+    return $crumb_up;
+_code?>
 <title><?_code {
     my $elhash = $_[2];
     return $elhash->{'WINDOWTITLE'} || $elhash->{'TITLE'};
@@ -33,6 +43,7 @@ page<=
         return "<a href='/users/$u->{'user'}/'>$ML{'lynx.nav.recent'}</a> | <a href='/users/$u->{'user'}/friends/'>$ML{'lynx.nav.friends'}</a> | ";
    }
 _code?><a href='/login.bml'><?_ml lynx.nav.login _ml?></a>/<a href='/logout.bml'><?_ml lynx.nav.logout _ml?></a> | <a href='/manage/siteopts.bml'><?_ml lynx.nav.siteopts _ml?></a> | <a href='/site/'><?_ml lynx.nav.sitemap _ml?></a> ]</p>
+<?breadcrumbs?>
 </body>
 </html>
 <=page

@@ -39,10 +39,12 @@ Where 'command' is one of:
                --override (-v) specifies existing values should be overwritten
                                for all languages.  (for developer use only)
     copyfaq    If site is translating FAQ, copy FAQ data into trans area
+    loadcrumbs Load crumbs from ljcrumbs.pl and ljcrumbs-local.pl.
     makeusable Setup internal indexes necessary after loading text
   dumptext     Dump lang text based on text[-local].dat information
   check        Check validity of text[-local].dat files
-  wipedb       Remove all language/text data from database.
+  wipedb       Remove all language/text data from database, including crumbs.
+  wipecrumbs   Remove all crumbs from the database, leaving other text alone.
   newitems     Search files in htdocs, cgi-bin, & bin and insert
                necessary text item codes in database.
   remove       takes two extra arguments: domain name and code, and removes
@@ -61,6 +63,7 @@ unless (-d $ENV{'LJHOME'}) {
 }
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
+require "$ENV{'LJHOME'}/cgi-bin/weblib.pl";
 
 my %dom_id;     # number -> {}
 my %dom_code;   # name   -> {}
@@ -166,15 +169,18 @@ my $out = sub {
     }
 };
 
-my @good = qw(load popstruct poptext dumptext newitems wipedb makeusable copyfaq remove);
+my @good = qw(load popstruct poptext dumptext newitems wipedb makeusable copyfaq remove
+              wipecrumbs loadcrumbs);
 
 popstruct() if $mode eq "popstruct" or $mode eq "load";
 poptext(@ARGV) if $mode eq "poptext" or $mode eq "load";
 copyfaq() if $mode eq "copyfaq" or $mode eq "load";
+loadcrumbs() if $mode eq "loadcrumbs" or $mode eq "load";
 makeusable() if $mode eq "makeusable" or $mode eq "load";
 dumptext(@ARGV) if $mode eq "dumptext";
 newitems() if $mode eq "newitems";
 wipedb() if $mode eq "wipedb";
+wipecrumbs() if $mode eq "wipecrumbs";
 remove(@ARGV) if $mode eq "remove" and scalar(@ARGV) == 2;
 help() unless grep { $mode eq $_ } @good;
 exit 0;
@@ -265,6 +271,61 @@ sub wipedb
         $dbh->do("DELETE FROM ml_$_");
     }
     $out->("-", "done.");
+}
+
+sub wipecrumbs
+{
+    $out->('Wiping DB of all crumbs...', '+');
+    
+    # step 1: get all items that are crumbs. [from ml_items]
+    my $genid = $dom_code{'general'}->{'dmid'};
+    my @crumbs;
+    my $sth = $dbh->prepare("SELECT itcode FROM ml_items 
+                             WHERE dmid = $genid AND itcode LIKE 'crumb.\%'");
+    $sth->execute;
+    while (my ($itcode) = $sth->fetchrow_array) {
+        # push onto list
+        push @crumbs, $itcode;
+    }
+
+    # step 2: remove the items that have these unique dmid/itids
+    foreach my $code (@crumbs) {
+        $out->("deleting $code");
+        remove("general", $code);
+    }
+
+    # done
+    $out->('-', 'done.');
+}
+
+sub loadcrumbs
+{
+    $out->('Loading all crumbs into DB...', '+');
+
+    # get domain id of 'general' and language id of 'en'
+    my $genid = $dom_code{'general'}->{'dmid'};
+    my $loclang = $LJ::LANGS[0] || 'en';
+
+    # list of crumbs
+    my @crumbs;
+    foreach (keys %LJ::CRUMBS_LOCAL) { push @crumbs, $_; }
+    foreach (keys %LJ::CRUMBS) { push @crumbs, $_; }
+
+    # begin iterating, order doesn't matter...
+    foreach my $crumbkey (@crumbs) {
+        $out->("inserting crumb.$crumbkey");
+        my $crumb = LJ::get_crumb($crumbkey);
+        my $local = $LJ::CRUMBS_LOCAL{$crumbkey} ? 1 : 0;
+        
+        # see if it exists
+        my $itid = $dbh->selectrow_array("SELECT itid FROM ml_items
+                                          WHERE dmid = $genid AND itcode = 'crumb.$crumbkey'")+0;
+        LJ::Lang::set_text($genid, $local ? $loclang : 'en', "crumb.$crumbkey", $crumb->[0])
+            unless $itid;
+    }
+
+    # done
+    $out->('-', 'done.');
 }
 
 sub popstruct
