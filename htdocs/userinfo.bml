@@ -707,7 +707,7 @@
 $body .= "</table>\n";
 
 # removed until we run graphviz locally
-# $body .= "<P><a href=\"/friends/graph.bml?user=$user\"><b>Graph of friends</b></a>";
+# $body .= "<p><a href=\"/friends/graph.bml?user=$user\"><b>Graph of friends</b></a></p>";
 
 return;
 
