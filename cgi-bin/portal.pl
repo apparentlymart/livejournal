@@ -480,7 +480,7 @@ if (-e "$LJ::HOME/cgi-bin/portal-local.pl") {
 
 $box{'login'} =
 {
-    'name' => 'Login Box',
+    'name' => '<?_ml portal.login.portalname _ml?>',
     'small' => 1,
     'large' => 0,
     'handler' => sub {
@@ -513,7 +513,7 @@ $box{'login'} =
 
 $box{'stats'} =
 {
-    'name' => 'Site Statistics',
+    'name' => '<?_ml portal.stats.portalname _ml?>',
     'small' => 1,
     'large' => 0,
     'handler' => sub {
@@ -524,7 +524,7 @@ $box{'stats'} =
         my @stats;
         my ($k, $v);
 
-        box_start($b, $box, { 'title' => "Statistics",
+        box_start($b, $box, { 'title' => BML::ml('portal.stats.portaltitle'),
                               'url' => '/stats.bml' });
 
         my %stat;
@@ -534,9 +534,9 @@ $box{'stats'} =
             $stat{$k} = $v;
         }
 
-        push @stats, "Total users", $stat{'totusers'};
-        push @stats, "Journal entries yesterday", $stat{'postyester'};
-        
+        push @stats, BML::ml('portal.stats.totalusers'), $stat{'totusers'};
+        push @stats, BML::ml('portal.stats.journalentyest'), $stat{'postyester'};
+
         $$b .= "<table>";
         while (@stats) {
             $k = shift @stats;
@@ -554,12 +554,12 @@ $box{'stats'} =
 
 $box{'bdays'} =
 {
-    'name' => "Birthdays",
+    'name' => '<?_ml portal.bdays.portalname _ml?>',
     'small' => 1,
     'large' => 0,
     'opts' => [ { 'key' => 'count',
-                  'name' => 'Birthdays to Display',
-                  'des' => 'By default, the 5 friends with the soonest birthdays are shown.',
+                  'name' => '<?_ml portal.bdays.count.name _ml?>',
+                  'des' => '<?_ml portal.bdays.count.des _ml?>',
                   'type' => 'text',
                   'maxlength' => 3,
                   'size' => 3,		      
@@ -571,7 +571,7 @@ $box{'bdays'} =
         my $bd = $opts->{'body'};
         my $sth;
 
-        box_start($bd, $box, { 'title' => "Birthdays",
+        box_start($bd, $box, { 'title' => BML::ml('portal.bdays.portaltitle'),
                               'url' => '/birthdays.bml' });
 
         $sth = $dbr->prepare("SELECT u.user, u.name, MONTH(bdate) AS 'month', DAYOFMONTH(bdate) AS 'day' FROM friends f, user u WHERE f.userid=$remote->{'userid'} AND f.friendid=u.userid AND u.journaltype='P' AND u.statusvis='V' AND u.allow_infoshow='Y' AND MONTH(bdate) != 0 AND DAYOFMONTH(bdate) != 0");
@@ -629,30 +629,29 @@ $box{'bdays'} =
 
 $box{'lastnview'} =
 {
-    'name' => "Recent Entry View",
+    'name' => '<?_ml portal.recent.portalname _ml?>',
     'small' => 1,
     'large' => 1,
     'opts' => [ { 'key' => 'journal',
-                  'name' => 'Journal',
-                  'des' => 'What journal do you want to see the recent items from?',
+                  'name' => '<?_ml portal.recent.journal.name _ml?>',
+                  'des' => '<?_ml portal.recent.journal.description _ml?>',
                   'type' => 'text',
                   'maxlength' => 15,
                   'size' => 15,		      
                   'default' => '' },
                 { 'key' => 'items',
-                  'name' => 'Items to display',
-                  'des' => 'By default, only the most interest entry is shown.',
+                  'name' => '<?_ml portal.recent.items.name _ml?>',
+                  'des' => '<?_ml portal.recent.items.description _ml?>',
                   'type' => 'text',
                   'maxlength' => 2,
                   'size' => 2,		      
                   'default' => 1 },
-                { 'key' => 'mode',
-                  'name' => 'Include text',
+                { 'key' => 'showtext',
+                  'name' => '<?_ml portal.recent.showtext.name _ml?>',
+                  'des' => '<?_ml portal.recent.showtext.description _ml?>',
                   'type' => 'check',
                   'value' => 1,
-                  'default' => 0,
-                  'des' => 'By default only subjects will be shown.', },
-                
+                  'default' => 0 },
                 ],
     'handler' => sub {
         my ($dbs, $remote, $opts, $box) = @_;
@@ -665,41 +664,76 @@ $box{'lastnview'} =
 
         unless ($user)
         {
-            box_start($bd, $box, { 'title' => "Recent Entry Box", });
-            $$bd .= "You have to configure this box.  Click the plus symbol to setup the journal you'd like to watch here.";
+            box_start($bd, $box,{'title' => BML::ml('portal.recent.portaltitle') ,});
+            $$bd .= BML::ml('portal.recent.error.notsetup');
             box_end($bd, $box);
             return;
         }
 
         my $u = LJ::load_user($dbs, $user);
-
+        my $dbcr;
+        my $clustered = 0;
+        if ($u->{'clusterid'}) {
+            $dbcr = LJ::get_cluster_reader($u);
+            $clustered = 1;
+        }
+            
         box_start($bd, $box, { 'title' => "$u->{'name'}",
                               'url' => "$LJ::SITEROOT/users/$user" });
 
-        my @itemids;
-        my @items = LJ::get_recent_items($dbs, {
-            'userid' => $u->{'userid'},
-            'skip' => 0,
-            'itemshow' => $items,
-            'itemids' => \@itemids,
-            'order' => 	($u->{'journaltype'} eq "C") ? "logtime" : "",
-        });
-
-        unless (@itemids) {
-            $$bd .= "No entries.";
+        unless ($u->{'statusvis'} eq "V") {
+            $$bd .= BML::ml('portal.recent.error.userstatus');
             box_end($bd, $box);
             return;
         }
 
-        # FIXME: need an LJ::get_logsubject?
-        if ($box->{'args'}->{'showtext'}) {
-        } else {
+        my @itemids;
+        my @items = LJ::get_recent_items($dbs, {
+            'clustersource' => 'slave', 
+            'clusterid' => $u->{'clusterid'},
+            'remote' => $remote,
+            'userid' => $u->{'userid'},
+            'skip' => 0,
+            'itemshow' => $items,
+            'itemids' => \@itemids,
+            'order' => ($u->{'journaltype'} eq "C") ? "logtime" : "",
+        });
+
+        unless(@itemids) {
+            $$bd .= BML::ml('portal.recent.error.noentries');
+            box_end($bd, $box);
+            return;
         }
 
-        foreach my $item (@items)
-        {
-            my $subject = "(subject)"; # FIXME; see above
-            $$bd .= "<a href=\"/talkread.bml?itemid=$item->{'itemid'}\">$subject</a>, ";
+        my %opts;
+        my $text;
+        $opts{'usemaster'} = 0;
+        if ($box->{'args'}->{'showtext'}) {
+            $opts{'prefersubject'} = 0;
+        } else {
+            $opts{'prefersubject'} = 1;
+        }
+        
+        if ($clustered) {
+            $text = LJ::get_logtext2($u, $opts, @itemids);
+        } else {
+            $text = LJ::get_logtext($dbs, $opts, @itemids);
+        }
+                            
+        foreach my $i (@items) {
+            my $itemid = $i->{'itemid'};
+            my $event = $text->{$itemid}->[1];
+            my $subject = $text->{$itemid}->[0];
+            $subject ||= "(no subject)";
+            my $ditemid = $u->{'clusterid'} ? ($itemid * 256 + $i->{'anum'}) : $itemid;
+            my $itemargs = $u->{'clusterid'} ? "journal=$user&amp;itemid=$ditemid" : "itemid=$ditemid";
+            my $linkurl = "<a href=\"/talkread.bml?$itemargs\"><b>(Link)</b></a>";
+            if ($box->{'args'}->{'showtext'}) {
+                $$bd .= "<b>$subject</b> $linkurl<br />";
+                $$bd .= "$event<br />";
+            } else {
+                $$bd .= "$subject $linkurl<br />";
+            }
         }
         
         box_end($bd, $box);
@@ -711,15 +745,15 @@ $box{'lastnview'} =
 
 $box{'update'} =
 {
-    'name' => 'Journal Update',
+    'name' => '<?_ml portal.update.portalname _ml?>',
     'small' => 0,
     'large' => 1,
     'opts' => [ { 'key' => 'mode',
-                  'name' => 'Mode',
+                  'name' => '<?_ml portal.update.mode.name _ml?>',
                   'type' => 'select',
-                  'des' => 'Full mode gives you a ton of extra posting options ... including posting in communities and setting your current mood, music, and picture.  Simple mode is nicer if you hardly use those features and would prefer not to see it all.',
-                  'values' => [ "", "Simple",
-                                "full", "Full" ],
+                  'des' => '<?_ml portal.update.mode.des _ml?>',
+                  'values' => [ "", '<?_ml portal.update.mode.simple _ml?>',
+                                "full", '<?_ml portal.update.mode.full _ml?>' ],
                   'default' => "" },
                 ],
     'handler' => sub 
@@ -730,7 +764,7 @@ $box{'update'} =
 
         $opts->{'onload'}->{"settime(document.updateForm$box->{'uniq'});"} = 1;
         
-        box_start($bd, $box, {'title' => "Update Your Journal",
+        box_start($bd, $box, {'title' => BML::ml('portal.update.portalname'),
                              'url' => "$LJ::SITEROOT/update.bml",
                          });
 
@@ -900,22 +934,22 @@ box_end($bd, $box);
 ## go horizontally or vertically.
 $box{'randuser'} =
 {
-    'name' => 'Random User',
+    'name' => '<?_ml portal.randuser.portalname _ml?>',
     'small' => 1,
     'large' => 1,
     'opts' => [ { 'key' => 'hidepic',
-                  'name' => 'Hide User Picture',
+                  'name' => '<?_ml portal.randuser.hidepic.name _ml?>',
                   'type' => 'check',
-                  'des' => "By default, the random user picture is shown, if available.  Check this to remove it.",
+                  'des' => '<?_ml portal.randuser.hidepic.des _ml?>',
                   'default' => 0 },
                 { 'key' => 'hidename',
-                  'name' => 'Hide Name',
+                  'name' => '<?_ml portal.randuser.hidename.name _ml?>',
                   'type' => 'check',
-                  'des' => "By default, the random user name is shown.  Check this to remove it.",
+                  'des' => '<?_ml portal.randuser.hidename.des _ml?>',
                   'default' => 0 },
                 { 'key' => 'count',
-                  'name' => 'Number of random users to show',
-                  'des' => "By default, 1 random user is shown, but you can have up to 10 vertically in the narrow columns, or 5 horizontally in a wide column",
+                  'name' => '<?_ml portal.randuser.count.name _ml?>',
+                  'des' => "<?_ml portal.randuser.count.des _ml?>",
                   'type' => 'text',
                   'maxlength' => 2,
                   'size' => 2,
@@ -942,15 +976,16 @@ $box{'randuser'} =
         }
 
         unless ($count) {
-            box_start($b, $box, {'title' => "Random User",
+            box_start($b, $box, {'title' => BML::ml('portal.randuser.portaltitle'),
                                  'align' => "center",
                              });
-            $$b .= "Table randomuserset is empty.";
+            $$b .= BML::ml('portal.randuser.error.tableempty');
             box_end($b, $box);
             return;
         }
 
-        box_start($b, $box, {'title' => "Random User" . (keys %ruserid > 1 ? "s" : ""),
+        box_start($b, $box, {
+            'title' => (keys %ruserid > 1 ? BML::ml('portal.randuser.portaltitleplural') : BML::ml('portal.randuser.portaltitle')),
                              'align' => "center",
                          });
 
@@ -994,14 +1029,14 @@ $box{'randuser'} =
 
 $box{'popfaq'} =
 {
-    'name' => "10 Most Viewed FAQs",
+    'name' => '<?_ml portal.popfaq.portalname _ml?>',
     'small' => 1,
     'large' => 0,
     'handler' => sub {
         my ($dbs, $remote, $opts, $box) = @_;
         my $b = $opts->{'body'};
 
-        box_start($b, $box, { 'title' => "10 Most Viewed FAQs",
+        box_start($b, $box, { 'title' => BML::ml('portal.popfaq.portaltitle'),
                               'align' => "left",
                               'url' => '/support/faqpop.bml', });
         my $dbr = $dbs->{'reader'};
@@ -1028,7 +1063,7 @@ $box{'popfaq'} =
 
 $box{'memories'} =
 {
-    'name' => "Memorable Posts",
+    'name' => '<?_ml portal.memories.portalname _ml?>',
     'small' => 1,
     'large' => 0,
     'handler' => sub {
@@ -1036,7 +1071,7 @@ $box{'memories'} =
         my $dbr = $dbs->{'reader'};
         my $b = $opts->{'body'};
 
-        box_start($b, $box, { 'title' => "Memorable Posts",
+        box_start($b, $box, { 'title' => BML::ml('portal.memories.portaltitle'),
                               'url' => '/tools/memories.bml', });
 
         my $userid = $remote->{'userid'};
@@ -1048,11 +1083,11 @@ $box{'memories'} =
         while (my $row = $sth->fetchrow_hashref)
         {
             $$b .= "<ul>" if ++$rows == 1;
-            my $noun = $row->{'count'} == 1 ? "entry" : "entries";
+            my $noun = $row->{'count'} == 1 ? BML::ml('portal.memories.entrynoun') : BML::ml('portal.memories.entriesnoun');
             my $ue_keyword = LJ::eurl($row->{'keyword'});
             my $keyword = $row->{'keyword'};
             LJ::text_out(\$keyword);
-            if ($keyword eq "*") { $keyword = "<?_ml /tools/memories.bml.uncategorized _ml?>"; }
+            if ($keyword eq "*") { $keyword = BML::ml('/tools/memories.bml.uncategorized'); }
             $$b .= "<li><b><a href=\"/tools/memories.bml?user=$remote->{'user'}&amp;keyword=$ue_keyword&amp;filter=all\">";
             $$b .= "$keyword</a></b>: $row->{'count'} $noun</li>\n";
         }
