@@ -174,8 +174,7 @@ body<=
         if ($sp->{_cat}->{'public_read'}) {
             $visemail =~ s/^.+\@/********\@/; 
         }
-        my $ename = LJ::ehtml($sp->{reqname});
-        $ename ||= $u->{user} if $sp->{reqtype} eq 'user';
+        my $ename = $sp->{'reqtype'} eq 'user' ? LJ::ljuser($u) : LJ::ehtml($sp->{reqname});
         if ($helper_mode) {
             # supporthelp can link to previous requests
             $ret .= $sp->{reqtype} eq 'user' ? 
