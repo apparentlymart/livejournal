@@ -7,9 +7,11 @@ use strict;
 use Getopt::Long;
 
 my $opt_del = 0;
+my $opt_destdel = 0;
 my $opt_useslow = 0;
 my $opt_slowalloc = 0;
 exit 1 unless GetOptions('delete' => \$opt_del,
+                         'destdelete' => \$opt_destdel,
                          'useslow' => \$opt_useslow, # use slow db role for read
                          'slowalloc' => \$opt_slowalloc, # see note below
                          );
@@ -57,9 +59,12 @@ if ($sclust == $dclust) {
     die "User '$user' is already on cluster $dclust\n";
 }
 
+# original cluster db handle.
+my $dbo;
 if ($sclust) {
-    # TODO: intra-cluster moving we can deal with later.
-    die "Moving between clusters isn't yet supported; only from cluster 0 to somewhere else.\n";
+    $dbo = LJ::get_cluster_master($u);
+    die "Can't get source cluster handle.\n" unless $dbo;
+    $dbo->{'RaiseError'} = 1;
 }
 
 my $userid = $u->{'userid'};
@@ -79,9 +84,8 @@ unless (defined $readonly_bit) {
 
 # make sure a move isn't already in progress
 if (($u->{'caps'}+0) & (1 << $readonly_bit)) {
-    die "User '$user' is already in the process of being moved?\n";
+    die "User '$user' is already in the process of being moved? (cap bit $readonly_bit set)\n";
 }
-
 
 print "Moving '$u->{'user'}' from cluster $sclust to $dclust:\n";
 
@@ -335,6 +339,224 @@ if ($sclust == 0)
         $dbh->do("UPDATE user SET dversion=$dversion, clusterid=$dclust, caps=caps&~(1<<$readonly_bit) ".
                  "WHERE userid=$userid");
     }
+
+} 
+elsif ($sclust > 0) 
+{
+    print "Moving away from cluster $sclust ...\n";
+    while (my $cmd = $dbo->selectrow_array("SELECT cmd FROM cmdbuffer WHERE journalid=$userid")) {
+        print "Flushing cmdbuffer for cmd: $cmd\n";
+        LJ::cmd_buffer_flush($dbh, $dbo, $cmd, $userid)
+    }
+
+    my $pri_key = {
+        # flush this first:
+        'cmdbuffer' => 'journalid',
+
+        # this is populated as we do log/talk
+        'dudata' => 'userid',
+
+        # manual
+        'fvcache' => 'userid',
+        'loginstall' => 'userid',
+        'ratelog' => 'userid',
+        'sessions' => 'userid',
+        'sessions_data' => 'userid',
+        'userbio' => 'userid',
+        'userpicblob2' => 'userid',
+
+        # log
+        'log2' => 'journalid',
+        'logsec2' => 'journalid',
+
+        'logprop2' => 'journalid',
+
+        'logtext2' => 'journalid',
+        'logsubject2' => 'journalid',
+
+        # talk
+        'talk2' => 'journalid',
+        'talkprop2' => 'journalid',
+        'talktext2' => 'journalid',
+
+        # no primary key... move up by posttime
+        'talkleft' => 'userid',
+    };
+
+    my @existing_data;
+    print "Checking for existing data on target cluster...\n";
+    foreach my $table (sort keys %$pri_key) {
+        my $pri = $pri_key->{$table};
+        my $is_there = $dbch->selectrow_array("SELECT $pri FROM $table WHERE $pri=$userid LIMIT 1");
+        next unless $is_there;
+        if ($opt_destdel) {
+            while ($dbch->do("DELETE FROM $table WHERE $pri=$userid LIMIT 500") > 0) {
+                print "  deleted from $table\n";
+            }
+        } else {
+            push @existing_data, $table;
+        }
+    }
+    if (@existing_data) {
+        die "  Existing data in tables: @existing_data\n";
+    }
+
+    my %pendreplace;  # "logprop2:(col,col)" => { 'values' => [ [a, b, c], [d, e, f] ],
+                      #                           'bytes' => 3043, 'recs' => 35 }
+    my $flush = sub {
+        my $dest = shift;
+        return 1 unless $pendreplace{$dest};
+        my ($table, $cols) = split(/:/, $dest);
+        my $vals;
+        foreach my $v (@{$pendreplace{$dest}->{'values'}}) {
+            $vals .= "," if $vals;
+            $vals .= "(" . join(',', map { $dbch->quote($_) } @$v) . ")";
+        }
+        print "  flushing write to $table\n";
+        $dbch->do("REPLACE INTO $table $cols VALUES $vals");
+        delete $pendreplace{$dest};
+        return 1;
+    };
+
+    my $write = sub {
+        my $dest = shift;
+        my @values = @_;
+        my $new_bytes = 0; foreach (@values) { $new_bytes += length($_); }
+        push @{$pendreplace{$dest}->{'values'}}, \@values;
+        $pendreplace{$dest}->{'bytes'} += $new_bytes;
+        $pendreplace{$dest}->{'recs'}++;
+        if ($pendreplace{$dest}->{'bytes'} > 1024*10 ||
+            $pendreplace{$dest}->{'recs'} > 200) { $flush->($dest); }
+    };
+
+    # manual moving
+    foreach my $table (qw(fvcache loginstall ratelog sessions 
+                          sessions_data userbio userpicblob2)) {
+        print "  moving $table ...\n";
+        my @cols;
+        my $sth = $dbo->prepare("DESCRIBE $table");
+        $sth->execute;
+        while ($_ = $sth->fetchrow_hashref) { push @cols, $_->{'Field'}; }
+        my $cols = join(',', @cols);
+        my $dest = "$table:($cols)";
+        my $pri = $pri_key->{$table};
+        $sth = $dbo->prepare("SELECT $cols FROM $table WHERE $pri=$userid");
+        $sth->execute;
+        while (my @vals = $sth->fetchrow_array) {
+            $write->($dest, @vals);
+        }
+    }
+
+    # size of bio
+    my $bio_size = $dbch->selectrow_array("SELECT LENGTH(bio) FROM userbio WHERE userid=$userid");
+    $write->("dudata:(userid,area,areaid,bytes)", $userid, 'B', 0, $bio_size) if $bio_size;
+
+    # journal items
+    {
+        my $maxjitem = $dbo->selectrow_array("SELECT MAX(jitemid) FROM log2 WHERE journalid=$userid");
+        my $load_amt = 1000;
+        my ($lo, $hi) = (1, $load_amt);
+        my $sth;
+        my $cols = "security,allowmask,journalid,jitemid,posterid,eventtime,logtime,compressed,anum,replycount,year,month,day,rlogtime,revttime"; # order matters.  see indexes below
+        while ($lo <= $maxjitem) {
+            print "  log ($lo - $hi, of $maxjitem)\n";
+
+            # log2/logsec2
+            $sth = $dbo->prepare("SELECT $cols FROM log2 ".
+                                 "WHERE journalid=$userid AND jitemid BETWEEN $lo AND $hi");
+            $sth->execute;
+            while (my @vals = $sth->fetchrow_array) {
+                $write->("log2:($cols)", @vals);
+
+                if ($vals[0] eq "usemask") {
+                    $write->("logsec2:(journalid,jitemid,allowmask)",
+                             $userid, $vals[3], $vals[1]);
+                }
+            }
+
+            # logprop2
+            $sth = $dbo->prepare("SELECT journalid,jitemid,propid,value ".
+                                 "FROM logprop2 WHERE journalid=$userid AND jitemid BETWEEN $lo AND $hi");
+            $sth->execute;
+            while (my @vals = $sth->fetchrow_array) {
+                $write->("logprop2:(journalid,jitemid,propid,value)", @vals);
+            }
+
+            # logtext2/logsubject2
+            $sth = $dbo->prepare("SELECT journalid,jitemid,subject,event ".
+                                 "FROM logtext2 WHERE journalid=$userid AND jitemid BETWEEN $lo AND $hi");
+            $sth->execute;
+            while (my @vals = $sth->fetchrow_array) {
+                $write->("logtext2:(journalid,jitemid,subject,event)", @vals);
+                my $size = length($vals[2]) + length($vals[3]);
+                pop @vals;  # get rid of event
+                $write->("logsubject2:(journalid,jitemid,subject)", @vals);
+                $write->("dudata:(userid,area,areaid,bytes)", $userid, 'L', $vals[1], $size);
+            }
+
+            $hi += $load_amt; $lo += $load_amt;
+        }
+    }
+
+    # comments
+    {
+        my $maxtalkid = $dbo->selectrow_array("SELECT MAX(jtalkid) FROM talk2 WHERE journalid=$userid");
+        my $load_amt = 1000;
+        my ($lo, $hi) = (1, $load_amt);
+        my $sth;
+        
+        my %cols = ('talk2' => 'journalid,jtalkid,nodetype,nodeid,parenttalkid,posterid,datepost,state',
+                    'talkprop2' => 'journalid,jtalkid,tpropid,value',
+                    'talktext2' => 'journalid,jtalkid,subject,body');
+        while ($lo <= $maxtalkid) {
+            print "  talk ($lo - $hi, of $maxtalkid)\n";
+            foreach my $table (keys %cols) {
+                my $do_dudata = $table eq "talktext2";
+                $sth = $dbo->prepare("SELECT $cols{$table} FROM $table ".
+                                     "WHERE journalid=$userid AND jtalkid BETWEEN $lo AND $hi");
+                $sth->execute;
+                while (my @vals = $sth->fetchrow_array) {
+                    $write->("$table:($cols{$table})", @vals);
+                    if ($do_dudata) {
+                        my $size = length($vals[2]) + length($vals[3]);
+                        $write->("dudata:(userid,area,areaid,bytes)", $userid, 'T', $vals[1], $size);
+                    }
+                }
+            }
+            
+            $hi += $load_amt; $lo += $load_amt;
+        }
+    }
+
+    # talkleft table.  
+    {
+        # no primary key... delete all of target first.
+        while ($dbch->do("DELETE FROM talkleft WHERE userid=$userid LIMIT 500") > 0) {
+            print "  deleted from talkleft\n";
+        }
+
+        my $last_max = 0;
+        my $cols = "userid,posttime,journalid,nodetype,nodeid,jtalkid,publicitem";
+        while (defined $last_max) {
+            print "  talkleft: $last_max\n";
+            my $sth = $dbo->prepare("SELECT $cols FROM talkleft WHERE userid=$userid ".
+                                    "AND posttime > $last_max ORDER BY posttime LIMIT 1000");
+            $sth->execute;
+            undef $last_max;
+            while (my @vals = $sth->fetchrow_array) {
+                $write->("talkleft:($cols)", @vals);
+                $last_max = $vals[1];
+            }
+        }
+    }
+
+    # flush remaining items
+    foreach (keys %pendreplace) { $flush->($_); }
+
+    # unset readonly and move to new cluster in one update
+    $dbh->do("UPDATE user SET clusterid=$dclust, caps=caps&~(1<<$readonly_bit) ".
+             "WHERE userid=$userid");
+    
 }
 
 sub deletefrom0_logitem
