@@ -11,15 +11,17 @@
 
      my $sth;
      my @errors = ();
-     my $qmuser = $dbh->quote(lc($FORM{'muser'}));
-     my $qcuser = $dbh->quote(lc($FORM{'cuser'}));
+     my $muser = LJ::canonical_username($FORM{'muser'});
+     my $cuser = LJ::canonical_username($FORM{'cuser'});
+     my $qmuser = $dbh->quote($muser);
+     my $qcuser = $dbh->quote($cuser);
 
      $sth = $dbh->prepare("SELECT userid, user, journaltype, password FROM user WHERE user IN ($qmuser, $qcuser)");
      $sth->execute;
      my ($mu, $cu);
      while ($_ = $sth->fetchrow_hashref) {
-         if ($_->{'user'} eq lc($FORM{'muser'})) { $mu = $_; }
-         if ($_->{'user'} eq lc($FORM{'cuser'})) { $cu = $_; }
+         if ($_->{'user'} eq $muser) { $mu = $_; }
+         if ($_->{'user'} eq $cuser) { $cu = $_; }
      }
      
      unless ($mu) {
