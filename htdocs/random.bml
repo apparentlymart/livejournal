@@ -1,21 +1,18 @@
 <?_code
-
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
-
- my $max = $dbr->selectrow_array("SELECT statval FROM stats WHERE statcat='userinfo' AND statkey='randomcount'");
- if ($max) {
-     my $rand = int(rand($max))+1;
-     my $user = $dbr->selectrow_array("SELECT u.user FROM randomuserset r, useridmap u WHERE r.userid=u.userid AND r.rid=$rand");
-     if ($user) {
-         return BML::redirect("$LJ::SITEROOT/users/$user/");
-     }
- }
-
- # something went wrong, redirect them back to top of site... *shrug*
- return BML::redirect("$LJ::SITEROOT/");
-
+{
+    my $dbr = LJ::get_db_reader();
+    my $max = $dbr->selectrow_array("SELECT statval FROM stats ".
+                                    "WHERE statcat='userinfo' AND statkey='randomcount'");
+    if ($max) {
+        my $rand = int(rand($max))+1;
+        my $user = $dbr->selectrow_array("SELECT u.user FROM randomuserset r, useridmap u ".
+                                         "WHERE r.userid=u.userid AND r.rid=$rand");
+        return BML::redirect("$LJ::SITEROOT/users/$user/") if $user;
+    }
+    
+    # something went wrong, redirect them back to top of site... *shrug*
+    return BML::redirect("$LJ::SITEROOT/");
+}
 _code?><?_info
 noheaders=>1
 _info?><?_c <LJDEP>

@@ -1,12 +1,8 @@
 <?_code
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
-
- my $remote = LJ::get_remote($dbs);
+ my $remote = LJ::get_remote();
  my $user = $FORM{'user'};
- my $userid = LJ::get_userid($dbs, $user);
+ my $userid = LJ::get_userid($user);
  $body = "";
 
  unless ($remote) 
@@ -84,6 +80,7 @@
  }
 
  # check to see if user is already a friend.
+ my $dbr = LJ::get_db_reader();
  $sth = $dbr->prepare("SELECT * FROM friends WHERE userid=$remote->{'userid'} AND friendid=$userid");
  $sth->execute;
  my $fr = $sth->fetchrow_hashref;
@@ -142,7 +139,7 @@
  $ret .= "<P><CENTER><TABLE CELLPADDING=4><TR><TD><B>$ML{'.colors.fg'}</B></TD><TD><B>$ML{'.colors.bg'}</B></TD></TR>\n";
 
  my @color = ();
- LJ::load_codes($dbs, { "color" => \@color });
+ LJ::load_codes({ "color" => \@color });
 
  my $sel = $fr || { 'fgcolor' => hex '000000',
                     'bgcolor' => hex 'FFFFFF', };
