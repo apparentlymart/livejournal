@@ -21,6 +21,7 @@ sub handler
         'makechals'     => \&makechals,
         'set_quota'     => \&set_quota,
         'user_exists'   => \&user_exists,
+        'get_auth_challenge' => \&get_auth_challenge,
     };
 
     return BAD_REQUEST unless ref $interface->{$cmd} eq 'CODE';
@@ -116,6 +117,13 @@ sub set_quota
                            $used, $u->{'userid'});
 
     $r->print("status: " . ($result ? 1 : 0) . "\n");
+    return OK;
+}
+
+sub get_auth_challenge
+{
+    my ($r, %POST) = @_;
+    $r->print("chal: " . LJ::challenge_generate($POST{'goodfor'}) . "\n");
     return OK;
 }
 
