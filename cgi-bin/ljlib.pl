@@ -4116,7 +4116,7 @@ sub start_request
 
     # clear per-request caches
     LJ::unset_remote();               # clear cached remote
-    LJ::set_active_crumb('');         # clear active crumb
+    $LJ::ACTIVE_CRUMB = '';           # clear active crumb
     %LJ::CACHE_USERPIC_SIZE = ();     # picid -> [width, height, userid]
     %LJ::CACHE_USERPIC_INFO = ();     # uid -> { ... }
     %LJ::REQ_CACHE_USER_NAME = ();    # users by name
