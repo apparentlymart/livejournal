@@ -160,13 +160,37 @@ sub content_userpic
     my ($pic, $data, $lastmod);
     my $need_cache;
 
+    my $mime = "image/jpeg";
+    my $set_mime = sub {
+        my $data = shift;
+        if ($data =~ /^GIF/) { $mime = "image/gif"; }
+        elsif ($data =~ /^\x89PNG/) { $mime = "image/png"; }
+    };
+    my $size;
+
+    my $send_headers = sub {
+        $r->content_type($mime);
+        $r->header_out("Content-length", $size);
+        $r->header_out("Expires", LJ::time_to_http(time()+3000000));
+        $r->header_out("Cache-Control", "no-transform");
+        $r->header_out("Last-Modified", LJ::time_to_http($lastmod));
+        $r->send_http_header();
+    };
+
     # try to get it from disk if in disk-cache mode
     if ($disk_cache) {
         if (-s $r->finfo) {
             $lastmod = (stat _)[9];
+            $size = -s _;
             my $fh = Apache::File->new($file);
-            $data = join('', <$fh>);
-            close $fh;
+            my $magic;
+            read($fh, $magic, 4);
+            $set_mime->($magic);
+            $send_headers->();
+            $r->print($magic);
+            $r->send_fd($fh);
+            $fh->close();
+            return OK;
         } else {
             $need_cache = 1;
         }
@@ -200,18 +224,10 @@ sub content_userpic
         close F;
     }
 
-    my $mime = "image/jpeg";
-    if ($data =~ /^GIF/) { $mime eq "image/gif"; }
-    elsif ($data =~ /\211PNG/) { $mime eq "image/png"; }
-    
-    $r->content_type($mime);
-    $r->header_out("Content-length", length($data));
-    $r->header_out("Expires", LJ::time_to_http(time()+3000000));
-    $r->header_out("Cache-Control", "no-transform");
-    $r->header_out("Last-Modified", LJ::time_to_http($lastmod));
-    $r->send_http_header();
+    $set_mime->($data);
+    $size = length($data);
+    $send_headers->();
     $r->print($data);
-
     return OK;
 }
 
