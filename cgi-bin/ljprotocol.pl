@@ -109,8 +109,6 @@ sub error_message
 
 sub do_request
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
-    
     # get the request and response hash refs
     my ($method, $req, $err, $flags) = @_;
 
@@ -2213,8 +2211,6 @@ package LJ;
 
 sub do_request
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
-
     # get the request and response hash refs
     my ($req, $res, $flags) = @_;
 

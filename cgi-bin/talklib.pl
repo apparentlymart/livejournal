@@ -212,10 +212,9 @@ sub init
     return $init;
 }
 
-# dbs?, dbcs?, $u, $itemid
+# $u, $itemid
 sub get_journal_item
 {
-    shift @_ while ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
     my ($u, $itemid) = @_;
     return unless $u && $itemid;
 
@@ -258,7 +257,6 @@ sub get_journal_item
 
 sub check_viewable
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db"; 
     my ($remote, $item, $form, $errref) = @_;
     # note $form no longer used
     
@@ -277,7 +275,6 @@ sub check_viewable
 }
 
 sub can_delete {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db"; 
     my ($remote, $u, $up, $userpost) = @_; # remote, journal, posting user, commenting user
     return 0 unless $remote;
     return 1 if $remote->{'user'} eq $userpost ||
@@ -288,7 +285,6 @@ sub can_delete {
 }
 
 sub can_screen {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db"; 
     my ($remote, $u, $up, $userpost) = @_;
     return 0 unless $remote;
     return 1 if $remote->{'user'} eq $u->{'user'} ||
