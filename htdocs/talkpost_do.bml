@@ -73,6 +73,7 @@ BODY<=
 
  my $userpost = lc($FORM{'userpost'});
  my $up;
+ my $didlogin = 0;	# true if user logged in while commenting
 
  if ($FORM{'usertype'} eq "user") {
      if ($FORM{'userpost'}) {
@@ -95,6 +96,26 @@ BODY<=
              {
                  push @errors, "Incorrect password given for the LiveJournal username you specified.  You can recover your password <A HREF=\"/lostinfo.bml\">here</A> if you've forgotten it.";
              }
+
+             # if the user chooses to log in, do so (patch by: lucretio)
+             if ($FORM{'do_login'} && ! @errors) {
+                 my $hp = $FORM{'hpassword'} || LJ::hash_password($FORM{'password'});
+                 my $etime = 0;
+                 BMLClient::set_cookie("ljuser", $up->{'user'}, $etime, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
+                 BMLClient::set_cookie("ljhpass", "$up->{'user'}:$hp", $etime, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
+
+                 LJ::run_hooks("post_login", {
+                     "u" => $up,
+                     "form" => \%FORM,
+                     "expiretime" => $etime,
+                 });
+
+                 $BMLClient::COOKIE{"ljuser"} = $up->{'user'};
+                 $BMLClient::COOKIE{"ljhpass"} = "$up->{'user'}:$hp";
+
+                 $didlogin = 1;
+             }
+
          } else {
              push @errors, "The LiveJournal username you specified does not exist.  You can recover your username <A HREF=\"/lostinfo.bml\">here</A> if you've forgotten it, or you may post as \"Anonymous\" instead.";
          }
@@ -476,6 +497,10 @@ BODY<=
  # Yeah, we're done.
  my $commentlink = "<a href='talkread.bml?itemid=$itemid&amp;view=$insertid#t$insertid'>here</a>";
  $ret .= "(=H1 Success H1=)(=P Your comment has been added.  You can view it $commentlink. P=)";
+
+ if ($didlogin) {
+     $ret .= "(=P You are now logged in. P=)";
+ }
 
  if ($DEBUG) {
      $ret .= "<p>$debug</p>";
