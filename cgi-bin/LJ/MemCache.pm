@@ -47,8 +47,7 @@ sub get_sock # (key)
 {
     return undef unless @LJ::MEMCACHE_SERVERS;
     my $key = shift;
-    $key = ref $key eq "ARRAY" ? $key->[0] : $key;
-    my $hv = hashfunc($key);
+    my $hv = ref $key eq "ARRAY" ? int($key->[0]) : hashfunc($key);
 
     unless (@buckets) {
         foreach my $v (@LJ::MEMCACHE_SERVERS) {
@@ -78,32 +77,48 @@ sub disconnect_all
 }
 
 sub delete {
-    my $key = shift;
-    set($key, "", 1);  # no value, and expires at the beginning of time
-    # FIXME: ideally this should send the cache server a real "delete" command
-    # so the server can ignore sets for 'n' seconds thereafter, to mitigate
-    # race conditions
-}
-
-sub set {
     return 0 unless @LJ::MEMCACHE_SERVERS;
-    my ($key, $val, $exptime) = @_;
+    my $key = shift;
     my $sock = get_sock($key);
     return 0 unless $sock;
-    my $flags;
     $key = ref $key eq "ARRAY" ? $key->[1] : $key;
-    if (ref $val) {
-        $val = Storable::freeze($val);
-        $flags .= "S";
-    }
-    my $len = length($val);
-    $exptime = int($exptime)+0;
-    $flags ||= "-";
-    my $cmd = "set $key $flags $exptime $len $val\n";
+    my $cmd = "delete $key\r\n";
     $sock->print($cmd);
     $sock->flush;
     my $line = <$sock>;
-    return 1 if $line eq "STORED\n";
+    return 1 if $line eq "DELETED\r\n";
+}
+
+sub add {
+    _set("add", @_);
+}
+
+sub replace {
+    _set("replace", @_);
+}
+
+sub set {
+    _set("set", @_);
+}
+
+sub _set {
+    return 0 unless @LJ::MEMCACHE_SERVERS;
+    my ($cmdname, $key, $val, $exptime) = @_;
+    my $sock = get_sock($key);
+    return 0 unless $sock;
+    my $flags = 0;
+    $key = ref $key eq "ARRAY" ? $key->[1] : $key;
+    if (ref $val) {
+        $val = Storable::freeze($val);
+        $flags |= 1;
+    }
+    my $len = length($val);
+    $exptime = int($exptime)+0;
+    my $cmd = "$cmdname $key $flags $exptime $len\r\n$val\r\n";
+    $sock->print($cmd);
+    $sock->flush;
+    my $line = <$sock>;
+    return 1 if $line eq "STORED\r\n";
 }
 
 sub get {
@@ -142,28 +157,22 @@ sub _load_items
     my %flags;
     my %val;
 
-    my $cmd = "get @_\n";
+    my $cmd = "get @_\r\n";
     $sock->print($cmd);
     $sock->flush;
   ITEM:
     while (1) {
         my $line = $sock->getline;
-        if ($line =~ /^VALUE (\S+) (\S+) (\d+) (.*)/s) {
-            my ($rk, $flags, $len, $data) = ($1, $2, $3, $4);
-            my $this_len = length($data);
-            $flags{$rk} = $flags unless $flags eq "-";
-            if ($this_len == $len + 1) {
-                chop $data;
-                $val{$rk} = $data;
-                next ITEM;
-            }
-            my $bytes_read = $this_len;
-            my $buf = $data;
-            while ($line = $sock->getline, $line ne "") {
+        if ($line =~ /^VALUE (\S+) (\d+) (\d+)\r\n$/s) {
+            my ($rk, $flags, $len) = ($1, $2, $3);
+            $flags{$rk} = $flags if $flags;
+            my $bytes_read = 0;
+            my $buf;
+            while (defined($line = $sock->getline)) {
                 $bytes_read += length($line);
                 $buf .= $line;
-                if ($bytes_read == $len + 1) {
-                    chop $buf;
+                if ($bytes_read == $len + 2) {
+                    chop $buf; chop $buf;  # kill \r\n
                     $val{$rk} = $buf;
                     next ITEM;
                 }
@@ -174,10 +183,10 @@ sub _load_items
             }
             next ITEM;
         }
-        if ($line eq "END\n") {
+        if ($line eq "END\r\n") {
             foreach (@_) {
                 next unless $val{$_};
-                $val{$_} = Storable::thaw($val{$_}) if $flags{$_} =~ /S/;
+                $val{$_} = Storable::thaw($val{$_}) if $flags{$_} & 1;
                 $outref->{$_} = $val{$_};
             }
             return 1;

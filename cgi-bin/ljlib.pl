@@ -2569,7 +2569,7 @@ sub get_logtext2
         while (my ($id, $subject, $event) = $sth->fetchrow_array) {
             my $val = [ $subject, $event ];
             $lt->{$id} = $val;
-            LJ::MemCache::set([$journalid,"logtext:$clusterid:$journalid:$id"], $val);
+            LJ::MemCache::add([$journalid,"logtext:$clusterid:$journalid:$id"], $val);
             delete $need{$id};
         }
     }
@@ -2608,7 +2608,6 @@ sub get_talktext2
     # pass 1 (slave) and pass 2 (master)
     foreach my $pass (1, 2) {
         next unless %need;
-        Apache->log_error("ljlib, pass: $pass");
         my $db = $pass == 1 ? LJ::get_cluster_reader($clusterid) :
             LJ::get_cluster_master($clusterid);
         next unless $db;
@@ -2688,7 +2687,7 @@ sub get_logtext2multi
                 delete $need{$c}->{"$jid $jitemid"};
                 my $val = [ $subject, $event ];
                 $lt->{"$jid $jitemid"} = $val;
-                LJ::MemCache::set([$jid,"logtext:$c:$jid:$jitemid"], $val);
+                LJ::MemCache::add([$jid,"logtext:$c:$jid:$jitemid"], $val);
             }
         }
     }
@@ -2937,6 +2936,7 @@ sub start_request
     $LJ::CACHED_REMOTE = 0;
     %LJ::REQ_CACHE_REL = ();  # relations from LJ::check_rel()
     %LJ::REQ_CACHE_DBS = ();  # clusterid -> LJ::DBSet
+    %LJ::CACHE_USERPIC_SIZE = ();
 
     # we use this to fake out get_remote's perception of what
     # the client's remote IP is, when we transfer cookies between
@@ -3107,6 +3107,21 @@ sub load_userpics
         }
     }
     return unless @load_list;
+
+    if (@LJ::MEMCACHE_SERVERS) {
+        my @mem_keys = grep { [$_,"userpic.$_"] } @load_list;
+        my $mem = LJ::MemCache::get_multi(@mem_keys) || {};
+        while (my ($k, $v) = each %$mem) {
+            next unless $v && $k =~ /(\d+)/;
+            my $id = $1;
+            $upics->{$id}->{'width'} = $v->[0];
+            $upics->{$id}->{'height'} = $v->[1];
+            $upics->{$id}->{'userid'} = $v->[2];
+        }
+        @load_list = grep { ! $upics->{$_} } @load_list;
+        return unless @load_list;
+    }
+
     my $picid_in = join(",", @load_list);
     my $sth = $dbr->prepare("SELECT userid, picid, width, height FROM userpic WHERE picid IN ($picid_in)");
     $sth->execute;
@@ -3114,7 +3129,9 @@ sub load_userpics
         my $id = $_->{'picid'};
         undef $_->{'picid'};
         $upics->{$id} = $_;
-        $LJ::CACHE_USERPIC_SIZE{$id} = [ $_->{'width'}, $_->{'height'}, $_->{'userid'} ];
+        my $val = [ $_->{'width'}, $_->{'height'}, $_->{'userid'} ];
+        $LJ::CACHE_USERPIC_SIZE{$id} = $val;
+        LJ::MemCache::set([$id,"userpic.$id"], $val);
     }
 }
 

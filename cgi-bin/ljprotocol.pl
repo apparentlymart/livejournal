@@ -1075,9 +1075,8 @@ sub editevent
     } else {
         $event =~ s/\r//g;
     }
-    my $qevent = $dbh->quote($event);
+
     my $bytes = length($event) + length($req->{'subject'});
-    $event = "";
 
     my $eventtime = sprintf("%04d-%02d-%02d %02d:%02d",
                             map { $req->{$_} } qw(year mon day hour min));
@@ -1129,12 +1128,12 @@ sub editevent
     if (Digest::MD5::md5_hex($event) ne $oldevent->{'md5event'} ||
         $req->{'subject'} ne $oldevent->{'subject'})
     {
-        my $qsubject = $dbh->quote($req->{'subject'});
+        $dbcm->do("UPDATE logtext2 SET subject=?, event=? ".
+                  "WHERE journalid=$ownerid AND jitemid=$qitemid", undef,
+                  $req->{'subject'}, $event);
 
-        $dbcm->do("UPDATE logtext2 SET event=$qevent, subject=$qsubject ".
-                  "WHERE journalid=$ownerid AND jitemid=$qitemid");
-
-        LJ::MemCache::delete([$ownerid,"logtext:$clusterid:$ownerid:$qitemid"]);
+        LJ::MemCache::replace([$ownerid,"logtext:$clusterid:$ownerid:$qitemid"],
+                              [ $req->{'subject'}, $event ]);
 
         # update disk usage
         LJ::dudata_set($dbcm, $ownerid, 'L', $qitemid, $bytes);
