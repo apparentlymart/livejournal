@@ -3534,6 +3534,10 @@ sub get_userpic_info
             LJ::MemCache::delete($memkey);
         } else {
             my (undef, $picstr, $kwstr) = @$minfo;
+            $info = {
+                'pic' => {},
+                'kw' => {},
+            };
             while (length $picstr >= 7) {
                 my $pic = { userid => $userid };
                 ($pic->{picid},
