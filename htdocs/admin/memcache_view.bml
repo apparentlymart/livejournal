@@ -33,7 +33,7 @@
  # is a number".
 
  my %MEMC_HASHKEYS = (
-     'user:' => 0,
+     'uidof:' => 0,
      'talksubject:' => 3,
      'talkbody:' => 3,
      'logtext:' => 3,

@@ -1,5 +1,5 @@
-      user:<usernam> == $u, 30 min
 <uid> userid:<uid>   == $u, 30 min
+      uidof:<user>   == userid
 <uid> uprop:<uid>:<propid> == scalar, 30 minutes
 <uid> sess:<uid>:<sessid> == sessions row hashref
 <uid> bio:<uid> == user bio text

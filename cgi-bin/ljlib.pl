@@ -5125,9 +5125,7 @@ sub update_user
         return 0 if $dbh->err;
     }
     if (@LJ::MEMCACHE_SERVERS) {
-        _load_user_raw($dbh, "userid", \@uid, sub {
-            LJ::memcache_set_u($_[0]);
-        });
+        LJ::memcache_kill($_, "userid") foreach @uid;
     }
     return 1;
 }
@@ -5300,8 +5298,11 @@ sub load_user
     return $u if $u;
 
     # check memcache
-    $u = LJ::memcache_get_u("user:$user");
-    return $set_req_cache->($u) if $u;
+    {
+        my $uid = LJ::MemCache::get("uidof:$user");
+        $u = LJ::memcache_get_u([$uid, "userid:$uid"]);
+        return $set_req_cache->($u) if $u;
+    }
 
     # try to load from master if using memcache, otherwise from slave
     $u = $get_user->(scalar @LJ::MEMCACHE_SERVERS);
@@ -5377,7 +5378,7 @@ sub memcache_set_u
     my $ar = LJ::MemCache::hash_to_array("user", $u);
     return unless $ar;
     LJ::MemCache::set([$u->{'userid'}, "userid:$u->{'userid'}"], $ar, $expire);
-    LJ::MemCache::set("user:$u->{'user'}", $ar, $expire);
+    LJ::MemCache::set("uidof:$u->{user}", $u->{userid});
 }
 
 # <LJFUNC>
@@ -5987,9 +5988,11 @@ sub get_userid
 
     if ($LJ::CACHE_USERID{$user}) { return $LJ::CACHE_USERID{$user}; }
 
+    my $userid = LJ::MemCache::get("uidof:$user");
+    return $userid if $userid;
+
     my $dbr = LJ::get_db_reader();
-    my $userid = $dbr->selectrow_array("SELECT userid FROM useridmap WHERE user=?", undef, $user);
-    if ($userid) { $LJ::CACHE_USERID{$user} = $userid; }
+    $userid = $dbr->selectrow_array("SELECT userid FROM useridmap WHERE user=?", undef, $user);
 
     # implictly create an account if we're using an external
     # auth mechanism
@@ -5998,6 +6001,11 @@ sub get_userid
         $userid = LJ::create_account({ 'user' => $user,
                                        'name' => $user,
                                        'password' => '', });
+    }
+
+    if ($userid) {
+        $LJ::CACHE_USERID{$user} = $userid;
+        LJ::MemCache::set("uidof:$user", $userid);
     }
 
     return ($userid+0);
