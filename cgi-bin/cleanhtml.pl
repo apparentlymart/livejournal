@@ -354,11 +354,9 @@ sub clean
                     $hash->{src} = canonical_url($hash->{src});
 
                     if ($img_bad) {
-                        # don't allow bad src links to break out of our href
-                        $hash->{src} =~ s/(['"])/uc sprintf("%%%02x", ord($1))/eg;
-
-                        $newdata .= "<a class=\"ljimgplaceholder\" href=\"$hash->{'src'}\">" .
-                                    LJ::img('placeholder') . '</a>';
+                        $newdata .= "<a class=\"ljimgplaceholder\" href=\"" .
+                            LJ::ehtml($hash->{'src'}) . "\">" .
+                            LJ::img('placeholder') . '</a>';
                         $alt_output = 1;
                     }
                 }
