@@ -261,12 +261,13 @@ sub html_hidden
 sub html_submit
 {
     my ($name, $val, $opts) = @_;
-    my $eopts;
-    my $raw;
+    my ($eopts, $disabled, $raw);
     if ($opts && ref $opts eq 'HASH') {
+        $disabled = " disabled='disabled'" if $opts->{'disabled'};
         $raw = " $opts->{'raw'}" if $opts->{'raw'};
+
         my $ehtml = $opts->{'noescape'} ? 0 : 1;
-        foreach (grep { ! /^(raw|noescape)$/ } keys %$opts) {
+        foreach (grep { ! /^(raw|disabled|noescape)$/ } keys %$opts) {
             $eopts .= " $_=\"" . ($ehtml ? ehtml($opts->{$_}) : $opts->{$_}) . "\""
         }
     }
@@ -274,7 +275,7 @@ sub html_submit
     # allow override of these in 'raw'
     $ret .= " name=\"" . ($ehtml ? ehtml($name) : $name) . "\"" if $name;
     $ret .= " value=\"" . ($ehtml ? ehtml($val) : $val) . "\"" if defined $val;
-    $ret .= "$raw$eopts />";
+    $ret .= "$eopts$raw$disabled />";
     return $ret;
 }
 
