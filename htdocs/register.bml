@@ -7,12 +7,9 @@ body<=
 
 <?_code
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
-
- my ($sth, $ret);
-
+ use strict;
+ my @errors;
+ my $ret;
  my $qs = BML::get_query_string();
  my $u;
 
@@ -20,9 +17,9 @@ body<=
  if ($qs =~ /^(\d+)[;\.](.+)$/)
  {
      my ($aaid, $auth) = ($1, $2);
-     my $aa = LJ::is_valid_authaction($dbs, $aaid, $auth);
+     my $aa = LJ::is_valid_authaction($aaid, $auth);
      if ($aa) {
-         $u = LJ::load_userid($dbs, $aa->{'userid'});
+         $u = LJ::load_userid($aa->{'userid'});
          push @errors, "User not found." unless $u;
          
          # FIXME: the only reason for the $aa->{'arg1'} truth test is to allow existing authcodes out there
@@ -48,7 +45,7 @@ body<=
  return LJ::bad_input(@errors) if @errors;
 
  LJ::update_user($u, { status => 'A' });
- LJ::run_hooks("emailconfirmed", $dbs, $u);
+ LJ::run_hooks("emailconfirmed", $u);
 
  if ($u->{'status'} eq "T") {
      $ret .= "<?h1 Registration Complete h1?><?p Thanks!  Your new email address has now been verified. p?>";

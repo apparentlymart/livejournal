@@ -3,11 +3,8 @@ title=>Send a Text Message
 body<=
 <?_code
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
-
- my ($sth, $ret);
+ use strict;
+ my $ret;
 
  my $user = $FORM{'user'};
 
@@ -30,10 +27,11 @@ body<=
      return $ret;
  }
 
- my $u = LJ::load_user($dbs, $user);
+ my $u = LJ::load_user($user);
  my $tminfo;
 
  if ($u->{'txtmsg_status'} eq "on") {
+     my $dbr = LJ::get_db_reader();
      $tminfo = $dbr->selectrow_hashref("SELECT provider, number, security ".
                                        "FROM txtmsg WHERE userid=$u->{'userid'}")
  }
@@ -54,7 +52,7 @@ body<=
 
  my $remote;
  if ($tminfo->{'security'} ne "all") {
-     $remote = LJ::get_remote($dbs);
+     $remote = LJ::get_remote();
      my $andbefriend;
      if ($tminfo->{'security'} eq "friends") {
          $andbefriend = " and be listed as their friend";
@@ -66,7 +64,7 @@ body<=
      }
 
      if ($tminfo->{'security'} eq "friends" && $u->{'userid'} != $remote->{'userid'}) {
-         unless (LJ::is_friend($dbs, $u->{'userid'}, $remote->{'userid'})) {
+         unless (LJ::is_friend($u->{'userid'}, $remote->{'userid'})) {
              $ret .= "<?h1 Unauthorized h1?><?p User <B>$u->{'user'}</B> has selected \"friends only\" as the security level required to send text messages to them.  p?>";
              &add_footer();
              return $ret;
