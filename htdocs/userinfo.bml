@@ -217,7 +217,7 @@
      my @ids;
      my $sth = $dbr->prepare("SELECT userid FROM friends WHERE friendid=? LIMIT $limit");
      $sth->execute($u->{'userid'});
-     push @ids, $_ while $_ = $sth->fetchrow_array;
+     push @ids, $_ while defined ($_ = $sth->fetchrow_array);
      $friendsof{'clipped'} = @ids > $MAX_FRIENDOF_LOAD;
 
      my %u;
