@@ -7,8 +7,6 @@ body<=
 <?_code
 
  my @errors = ();
- my $user = lc($FORM{'user'});
- my $hpassword = $FORM{'hpassword'} || LJ::hash_password($FORM{'password'});
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
