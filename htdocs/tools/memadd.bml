@@ -184,50 +184,43 @@
 
      $body .= $ML{'.add_previous'};
 
-     my $getextra = "?";
-     $getextra .= "authas=$authas&" if $authas ne $remote->{'user'};
+     my $getextra = "?itemid=$dbitemid";
+     $getextra .= "&amp;authas=$authas" if $authas ne $remote->{'user'};
      # we still need to pass the dbitemid and not the itemid to ourself.
-     $getextra .= "journal=$journal&" unless $oldstyle;
-     $getextra .= "itemid=$dbitemid&";
-     chop $getextra;
+     $getextra .= "&amp;journal=$journal" unless $oldstyle;
+
      $body .= "<form method='post' action='memadd.bml$getextra'>";
      $body .= LJ::html_hidden(mode => "save");
 
-     $body .= "<TABLE cellpadding=4>";
+     $body .= "<table cellpadding='4'>";
+     $body .= "<tr><th align='right' valign='top'>$ML{'.description'}</th><td>";
+     $body .= LJ::html_text({name => 'des', value => $des, maxlength => LJ::CMAX_MEMORY, size => 40});
+     $body .= "<br /><small>$ML{'.description.text'}</small></td></tr>";
 
-     $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B>$ML{'.description'}</B></TD><TD><input name=des value=\"$des\" maxlength=@{[ LJ::CMAX_MEMORY ]} size=40><BR><FONT SIZE=-1>$ML{'.description.text'}</FONT></TD></TR>\n";
-     
-     $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B>$ML{'.keywords'}</B></TD><TD><input name=keywords maxlength=@{[ LJ::CMAX_KEYWORD ]} size=40><BR><FONT SIZE=-1>$ML{'.keywords.text'}  ";
+     $body .= "<tr><th align='right' valign='top'>$ML{'.keywords'}</th><td>";
+     $body .= LJ::html_text({name => 'keywords', maxlength => LJ::CMAX_KEYWORD, size => 40});
+     $body .= "<br /><small>$ML{'.keywords.text'}</small><br />";
 
      if (@all_keywords) {
          my $size = scalar(@all_keywords);
-         if ($size > 15) { $size = 15; }
-         $body .= "$ML{'.keywords.select'}<ul><select name='oldkeywords' multiple size='$size'>";
-         foreach my $kw (@all_keywords) {
-             my $sel = $selected_keyword{$kw} ? " selected" : "";
-             LJ::text_out(\$kw);
-             my $ekw = LJ::ehtml($kw);
-             $body .= "<option$sel>$ekw</option>\n";
-         }
-         $body .= "</select></ul>$ML{'.multiple_selections'}";
+         $size = 15 if $size > 15;
+         $body .= "<small>$ML{'.keywords.select'}</small><div style='margin-left: 30px;'>";
+         $body .= LJ::html_select( { name => 'oldkeywords', size => $size, multiple => 1 },
+                                   [ keys %selected_keyword ],
+                                   map { (LJ::ehtml($_), LJ::ehtml($_)) } @all_keywords);
+         $body .= "</div><small>$ML{'.multiple_selections'}</small>";
      } else {
-         $body .= "$ML{'.keywords.example'}</FONT>";
+         $body .= "<small>$ML{'.keywords.example'}</small>";
      }
 
-
-     $body .= "</TD></TR>\n";
-     $body .= "<tr><td align='right' valign='top'><b>$ML{'.security'}</b></td><td><select name=security>";
-     foreach my $sec ("public", "friends", "private") {
-         my $sel = (defined $memory && $memory->{'security'} eq $sec) ? "SELECTED" : "";
-         $body .= "<OPTION VALUE=\"$sec\" $sel>$secopts{$sec}\n";
-     }
-     $body .= "</SELECT>\n";
-     $body .= "<BR><FONT SIZE=-1>$ML{'.whocansee'}</FONT></TD></TR>\n";
-     $body .= "<TR><TD></TD><TD><INPUT type=submit value=\"$ML{'.form.submit'}\"> ";
-     if (defined $memory) { $body .= "<INPUT type=reset value=\"$ML{'.form.reset'}\">"; }
-     $body .= "</td></tr>";
-     $body .= "</TABLE>";
-     $body .= "</form>";
+     $body .= "</td></tr>\n";
+     $body .= "<tr><th align='right' valign='top'>$ML{'.security'}</th><td>";
+     $body .= LJ::html_select({name => 'security', selected => defined $memory ? $memory->{'security'} : undef},
+                              map { ($_, $secopts{$_}) } qw(public friends private));
+     $body .= "<br /><small>$ML{'.whocansee'}</small></td></tr><tr><th></th><td>";
+     $body .= LJ::html_submit(undef, $ML{'.form.submit'});
+     $body .= LJ::html_submit(undef, $ML{'.form.reset'}, {type => 'reset'}) if defined $memory;
+     $body .= "</td></tr></table></form>";
 
      return;
  }
@@ -330,14 +323,14 @@
  $body = $ML{'error.unknownmode'};
 
  return;
-_code?><?page
-title=><?_code return $title; _code?>
-body<=
-<?_code
- return $body;
 _code?>
-<=body
-page?><?_c <LJDEP>
+
+<?page
+title=><?_code return $title; _code?>
+body=> <?_code return $body;  _code?>
+page?>
+
+<?_c <LJDEP>
 link: htdocs/login.bml
 post: htdocs/tools/memadd.bml
 </LJDEP> _c?>
