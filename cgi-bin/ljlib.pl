@@ -334,9 +334,7 @@ sub set_cached_friend_items
         $new .= $sec;
     }
 
-    my $write_tolerance = 0;  # this could be increased if frequent writes cause too much pain.
-
-    if ($uncached > $write_tolerance) {
+    if ($uncached > $LJ::FV_CACHE_WRITE_AFTER) {
         my $udbh = LJ::get_cluster_master($u);
         $udbh->do("REPLACE INTO fvcache (userid, maxupdate, items) VALUES (?,?,?)", undef,
                   $u->{'userid'}, $moddate, $new);
