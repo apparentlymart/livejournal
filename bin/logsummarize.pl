@@ -60,6 +60,9 @@ foreach my $table (@need_summary)
 	if ($row_ct % 10000 == 0) { 
 	    printf "  $row_ct/$row_total (%%%.02f)\n", 100*$row_ct/$row_total;
 	}
+	
+	next if ($r->[F_URI] =~ m!^/userpic!);
+
 
 	$st{'count'}->{'total'}++;
 	$st{'count'}->{'bytes'} += $r->[F_BYTES];
@@ -67,9 +70,17 @@ foreach my $table (@need_summary)
 	$st{'http_status'}->{$r->[F_STATUS]}++;
 	$st{'browser'}->{$r->[F_BROWSER]}++;
 	$st{'host'}->{$r->[F_VHOST]}++;
+
+	if ($r->[F_URI] =~ s!^/users/\w+/?!/users/*/!) {
+	    $r->[F_URI] =~ s!day/\d\d\d\d/\d\d/\d\d!day!;
+	    $r->[F_URI] =~ s!calendar/\d\d\d\d!calendar!;
+	}
+
 	if ($r->[F_VHOST] =~ /^(www\.)livejournal\.com$/) {
 	    $st{'uri'}->{$r->[F_URI]}++;
 	} else {
+	    $r->[F_URI] =~ s!day/\d\d\d\d/\d\d/\d\d!day!;
+	    $r->[F_URI] =~ s!calendar/\d\d\d\d!calendar!;
 	    $st{'uri'}->{"user:" . $r->[F_URI]}++;
 	}
 
@@ -86,6 +97,7 @@ foreach my $table (@need_summary)
     print "  Writing stats file.\n";
     open (S, "| gzip -c > $ENV{'LJHOME'}/var/stats-$tabledate.gz") or die "Can't open stats file";
     foreach my $cat (sort keys %st) {
+	print "Writing cat: $cat\n";
 	foreach my $k (sort { $st{$cat}->{$b} <=> $st{$cat}->{$a} } keys %{$st{$cat}}) {
 	    print S "$cat\t$k\t$st{$cat}->{$k}\n"
 		or die "Failed writing to stats-$tabledate.gz.  Device full?\n";
