@@ -121,33 +121,39 @@ sub YearMonth {
     }
     $flush_week->(1); # end of month flag
 
-    ## figure out what months have been posted into
-    my $nowval = $year*12 + $month;
+    my $nowval = $year * 12 + $month;
 
-    my $months = [];
-    my $remote = LJ::get_remote();
-    my $days = LJ::get_daycounts($p->{'_u'}, $remote) || [];
-    my $lastmo;
-    foreach my $day (@$days) {
-        my ($oy, $om) = ($day->[0], $day->[1]);
-        my $mo = "$oy-$om";
-        next if $mo eq $lastmo;
-        $lastmo = $mo;
-
-        my $date = Date($oy, $om, 0);
-        my $url = $p->{'_u'}->{'_journalbase'} . sprintf("/%04d/%02d/", $oy, $om);
-        
-        my $val = $oy*12+$om;
-        if ($val < $nowval) {
-            $calmon->{'prev_url'} = $url;
-            $calmon->{'prev_date'} = $date;
-        }
-        if ($val > $nowval && ! $calmon->{'next_date'}) {
-            $calmon->{'next_url'} = $url;
-            $calmon->{'next_date'} = $date;
+    # determine the most recent month with posts that is older than
+    # the current time $month/$year.  gives calendars the ability to
+    # provide smart next/previous links.
+    my $maxbefore;
+    while (my ($iy, $h) = each %$count) {
+        next if $iy > $year;
+        while (my $im = each %$h) {
+            next if $im >= $month;
+            my $val = $iy * 12 + $im;
+            if ($val < $nowval && $val > $maxbefore) {
+                $maxbefore = $val;
+                $calmon->{'prev_url'} = $p->{'_u'}->{'_journalbase'} . sprintf("/%04d/%02d/", $iy, $im);
+                $calmon->{'prev_date'} = Date($iy, $im, 0);
+            }
         }
     }
-    
+
+    # same, except inverse: next month after current time with posts
+    my $minafter;
+    while (my ($iy, $h) = each %$count) {
+        next if $iy < $year;
+        while (my $im = each %$h) {
+            next if $im <= $month;
+            my $val = $iy * 12 + $im;
+            if ($val > $nowval && (!$minafter || $val < $minafter)) {
+                $minafter = $val;
+                $calmon->{'next_url'} = $p->{'_u'}->{'_journalbase'} . sprintf("/%04d/%02d/", $iy, $im);
+                $calmon->{'next_date'} = Date($iy, $im, 0);
+            }
+        }
+    }
     return $calmon;
 }
 
