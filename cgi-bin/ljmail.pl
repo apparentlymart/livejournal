@@ -126,6 +126,61 @@ sub send_mail
 
 }
 
+package MIME::Lite;
+
+# A version of MIME::Lite::send_by_smtp that speaks proper SMTP
+#   -- Brad
+sub send_by_smtp {
+    my ($self, @args) = @_;
+
+    ### We need the "From:" and "To:" headers to pass to the SMTP mailer:
+    my $hdr  = $self->fields();
+    my $from = $self->get('From');
+    my $to   = $self->get('To');
+
+    # <DANGA>
+    # extract just the email from the From field, if there is one.
+    # A null sender <> is permitted.
+    # A bug report has been sent upstream.  This is an interim fix.
+    if ($from) {
+        $from = (Mail::Address->parse($from))[0]->address
+            or Carp::croak "send_by_smtp: invalud 'From:' address\n";
+    }
+    # </DANGA>
+
+    ### Sanity check:
+    defined($to) or Carp::croak "send_by_smtp: missing 'To:' address\n";
+
+    # <DANGA>
+    ### Get the destinations as a simple array of addresses:
+    my @to_all = map { $_->address } Mail::Address->parse($to);
+    if ($AUTO_CC) {
+	foreach my $field (qw(Cc Bcc)) {
+	    my $value = $self->get($field);
+            next unless defined $value;
+	    push @to_all, map { $_->address } Mail::Address->parse($value);
+	}
+    }
+    # </DANGA>
+
+    ### Create SMTP client:
+    require Net::SMTP;
+    my $smtp = MIME::Lite::SMTP->new(@args)
+        or Carp::croak("Failed to connect to mail server: $!\n");
+    $smtp->mail($from)
+        or Carp::croak("SMTP MAIL command failed: $!\n".$smtp->message."\n");
+    $smtp->to(@to_all)
+        or Carp::croak("SMTP RCPT command failed: $!\n".$smtp->message."\n");
+    $smtp->data()
+        or Carp::croak("SMTP DATA command failed: $!\n".$smtp->message."\n");
+
+    ### MIME::Lite can print() to anything with a print() method:
+    $self->print_for_smtp($smtp);
+    $smtp->dataend();
+    $smtp->quit;
+    1;
+}
+
 
 
 1;
