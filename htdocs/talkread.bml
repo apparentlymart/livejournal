@@ -74,6 +74,12 @@ body<=
             subject.value = '';
         }
 
+        var submit = document.getElementById('submitpost');
+        submit.disabled = true;
+
+        var submitmore = document.getElementById('submitmoreopts');
+        submitmore.disabled = true;
+
         var multi_form = document.getElementById('multiform');
         multi_form.submit();
    }
@@ -615,7 +621,9 @@ body<=
              $ret .= "<br />";
 
              $ret .= LJ::html_submit('submitpost', $ML{'.button.post'},
-                                     { "raw" => "onclick='if (checkLength()) {submitform();}'"});
+                                     { "id" => "submitpost",
+                                       "raw" => "onclick='if (checkLength()) {submitform();}'"
+                                       });
 
              $ret .= "&nbsp;" . LJ::html_submit('submitmoreopts', $ML{'.button.more'},
                                                 { "id" => "submitmoreopts",
