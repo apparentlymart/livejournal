@@ -51,13 +51,15 @@ sub MonthPage
 
     my $secwhere = "AND l.security='public'";
     my $viewall = 0;
+    my $viewsome = 0;
     if ($remote) {
 
         # do they have the viewall priv?
         if ($get->{'viewall'} && LJ::check_priv($remote, "viewall")) {
             LJ::statushistory_add($u->{'userid'}, $remote->{'userid'},
                                   "viewall", "month: $user, statusvis: $u->{'statusvis'}");
-            $viewall = 1;
+            $viewall = LJ::check_priv($remote, 'viewall', '');
+            $viewsome = $viewall || LJ::check_priv($remote, 'viewall', 'suspended');
         }
 
         if ($remote->{'userid'} == $u->{'userid'} || $viewall) {
@@ -110,7 +112,7 @@ sub MonthPage
 
         # don't show posts from suspended users
         next unless $pu{$posterid};
-        next ENTRY if $pu{$posterid}->{'statusvis'} eq 'S' && ! $viewall;
+        next ENTRY if $pu{$posterid}->{'statusvis'} eq 'S' && !$viewsome;
 
 	if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
             my $text;

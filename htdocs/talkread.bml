@@ -111,14 +111,18 @@ body<=
 
  my $remote = LJ::get_remote();
 
- # do they have the viewall priv?
- if ($GET{'viewall'} && LJ::check_priv($remote, "viewall")) {
+ # set viewall/viewsome
+ my $viewall = 0;
+ my $viewsome = 0;
+ if ($GET{viewall} && LJ::check_priv($remote, 'viewall')) {
      LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
                            "viewall", "entry: $u->{'user'}, itemid: $item->{'itemid'}, statusvis: $u->{'statusvis'}");
+     $viewall = LJ::check_priv($remote, 'viewall', '');
+     $viewsome = $viewall || LJ::check_priv($remote, 'viewall', 'suspended');
+ }
 
  # check for deleted/suspended/security
- } else {
-
+ unless ($viewsome) {
      # check suspended
      return "<?h1 $ML{'talk.error.suspended.title'} h1?><?p $ML{'talk.error.suspended'} p?>"
          if ($u->{'statusvis'} eq "S" || $up->{'statusvis'} eq "S");
@@ -126,7 +130,9 @@ body<=
      # check deleted
      return "<?h1 $ML{'talk.error.deleted.title'} h1?><?p $ML{'talk.error.deleted'} p?>"
          if ($u->{'statusvis'} eq "D");
+ }
 
+ unless ($viewall) {
      ####  Check security before viewing this post
      my $errtxt;
      return $errtxt unless LJ::Talk::check_viewable($remote, $item, \%GET, \$errtxt);

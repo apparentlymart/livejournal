@@ -236,17 +236,21 @@ sub EntryPage_entry
     }
 
     # do they have the viewall priv?
+    my $viewall = 0;
+    my $viewsome = 0;
     if ($get->{'viewall'} && LJ::check_priv($remote, "viewall")) {
         LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
                               "viewall", "entry: $u->{'user'}, itemid: $itemid, statusvis: $u->{'statusvis'}");
-
-        # do nothing, let them pass
+        $viewall = LJ::check_priv($remote, 'viewall', '');
+        $viewsome = $viewall || LJ::check_priv($remote, 'viewall', 'suspended');
+    }
 
     # check using normal rules
-    } elsif (! LJ::can_view($remote, $entry)) {
+    unless (LJ::can_view($remote, $entry) || $viewall) {
         $opts->{'handler_return'} = 403;
         return;
-    } elsif ($pu && $pu->{'statusvis'} eq 'S') {
+    }
+    if (($pu && $pu->{'statusvis'} eq 'S') && !$viewsome) {
         $opts->{'suspendeduser'} = 1;
         return;
     }

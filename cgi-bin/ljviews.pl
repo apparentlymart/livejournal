@@ -1042,10 +1042,12 @@ sub create_view_lastn
 
     # do they have the viewall priv?
     my $viewall = 0;
+    my $viewsome = 0;
     if ($get->{'viewall'} && LJ::check_priv($remote, "viewall")) {
         LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
                               "viewall", "lastn: $user, statusvis: $u->{'statusvis'}");
-        $viewall = 1;
+        $viewall = LJ::check_priv($remote, 'viewall', '');
+        $viewsome = $viewall || LJ::check_priv($remote, 'viewall', 'suspended');
     }
 
     ## load the itemids
@@ -1119,7 +1121,7 @@ sub create_view_lastn
             map { $item->{$_} } qw(posterid itemid security alldatepart);
 
         my $pu = $posteru{$posterid};
-        next ENTRY if $pu && $pu->{'statusvis'} eq 'S' && ! $viewall;
+        next ENTRY if $pu && $pu->{'statusvis'} eq 'S' && !$viewsome;
 
         my $replycount = $logprops{$itemid}->{'replycount'};
         my $subject = $logtext->{$itemid}->[0];
@@ -2133,13 +2135,15 @@ sub create_view_day
 
     my $secwhere = "AND security='public'";
     my $viewall = 0;
+    my $viewsome = 0;
     if ($remote) {
 
         # do they have the viewall priv?
         if ($get->{'viewall'} && LJ::check_priv($remote, "viewall")) {
             LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
                                   "viewall", "day: $user, statusvis: $u->{'statusvis'}");
-            $viewall = 1;
+            $viewall = LJ::check_priv($remote, 'viewall', '');
+            $viewsome = $viewall || LJ::check_priv($remote, 'viewall', 'suspended');
         }
 
         if ($remote->{'userid'} == $u->{'userid'} || $viewall) {
@@ -2178,7 +2182,7 @@ sub create_view_day
         my ($itemid, $posterid, $security, $alldatepart, $anum) = 
             map { $item->{$_} } qw(itemid posterid security alldatepart anum);
 
-        next ENTRY if $posteru{$posterid} && $posteru{$posterid}->{'statusvis'} eq 'S' && ! $viewall;
+        next ENTRY if $posteru{$posterid} && $posteru{$posterid}->{'statusvis'} eq 'S' && !$viewsome;
 
         my $replycount = $logprops{$itemid}->{'replycount'};
         my $subject = $logtext->{$itemid}->[0];

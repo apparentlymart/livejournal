@@ -51,13 +51,15 @@ sub DayPage
     
     my $secwhere = "AND security='public'";
     my $viewall = 0;
+    my $viewsome = 0; # see public posts from suspended users
     if ($remote) {
 
         # do they have the viewall priv?
         if ($get->{'viewall'} && LJ::check_priv($remote, "viewall")) {
             LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
                                   "viewall", "day: $user, statusvis: $u->{'statusvis'}");
-            $viewall = 1;
+            $viewall = LJ::check_priv($remote, 'viewall', '');
+            $viewsome = $viewall || LJ::check_priv($remote, 'viewall', 'suspended');
         }
 
         if ($remote->{'userid'} == $u->{'userid'} || $viewall) {
@@ -121,7 +123,7 @@ sub DayPage
         }
 
         # don't show posts from suspended users
-        next ENTRY if $apu{$posterid} && $apu{$posterid}->{'statusvis'} eq 'S' && ! $viewall;
+        next ENTRY if $apu{$posterid} && $apu{$posterid}->{'statusvis'} eq 'S' && ! $viewsome;
 
 	if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
 	    LJ::item_toutf8($u, \$subject, \$text, $logprops{$itemid});
