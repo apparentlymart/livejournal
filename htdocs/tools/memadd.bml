@@ -46,6 +46,7 @@
      while (my ($kw) = $sth->fetchrow_array) {
 	 push @all_keywords, $kw;
      }
+     @all_keywords = sort @all_keywords;
 
      if (defined $memory) {
 	 $title = "Edit Memorable Entry";
