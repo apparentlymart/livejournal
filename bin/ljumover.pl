@@ -757,6 +757,7 @@ sub start {
         $count,
         $scale,
         $maxThreads,
+        $oldMax,
         $chunksize,
         @users,
         @queue,
@@ -768,7 +769,7 @@ sub start {
        );
 
     $maxUsers = $self->max || 1e+33;
-    $maxThreads = $self->{maxThreads};
+    $maxThreads = $oldMax = $self->{maxThreads};
     $chunksize = $self->chunksize;
     $chunksize = $maxUsers if $maxUsers < $chunksize;
     $count = 0;
@@ -781,6 +782,20 @@ sub start {
             # Re-read the thread config each time
             $maxThreads = $self->getMaxThreads( $maxThreads );
             $self->debugMsg( "User loop: max threads: $maxThreads" );
+
+            # Advise the use if the thread count changes.
+            if ( $maxThreads != $oldMax ) {
+                $self->message( "Set thread count to %d (was %d)", $maxThreads, $oldMax );
+                $oldMax = $maxThreads;
+            }
+
+            # No need to do any of the rest if there's no threads to run 'em.
+            unless ( $maxThreads ) {
+                $self->message( "Idling (threads = 0)." );
+                $self->reapChildren;
+                sleep 10;
+                next USER;
+            }
 
             # Fetch users if the buffer isn't already populated
             unless ( @users ) {
@@ -846,9 +861,10 @@ sub start {
                                 $thread->dest, $count );
                 $pid = $thread->run;
                 $self->{activeThreads}{ $pid } = $thread;
-
                 $self->reapChildren;
             }
+
+            $self->reapChildren;
         }
 
     if ( $self->{_haltFlag} ) { $self->message( ">>> Halted by signal <<<" ) }
@@ -1079,10 +1095,11 @@ sub getMaxThreads {
         $self->{moverWorkersMtime} ||= (stat _)[9];
         my $mtime = $self->{moverWorkersMtime};
 
-        if ( !$maxThreads || (stat _)[9] > $mtime ) {
+        if ( !defined $maxThreads || (stat _)[9] > $mtime ) {
             $self->{moverWorkersMtime} = (stat _)[9];
-            $self->message( "(Re)-reading $MoverWorkersFile: %s",
-                            scalar localtime($mtime) );
+            $self->message( "(Re)-reading $MoverWorkersFile:\n\t%s < %s",
+                            scalar localtime($mtime),
+                            scalar localtime($self->{moverWorkersMtime}) );
 
             # Read the process limit from a file, or default to unlimited
             if ( open my $ifh, $MoverWorkersFile ) {
@@ -1219,7 +1236,7 @@ sub run {
         LJ::disconnect_dbs();
 
         if ( $self->testingMode ) {
-            my $seconds = int(rand 3) + 3;
+            my $seconds = int(rand 20) + 3;
             printf STDERR "Child %d sleeping %d seconds to simulate move.\n",
                 $$, $seconds;
             sleep $seconds;
