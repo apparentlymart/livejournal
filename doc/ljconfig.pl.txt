@@ -263,8 +263,11 @@
     $ALLOW_CLUSTER_SELECT = 0;
 
     # which cluster(s) get new users?
-    # if it's an arrayref, choose one of the listed clusters at random.
-    $DEFAULT_CLUSTER = 1;
+    # if it's an arrayref, choose one of the listed clusters at random.  you can weight
+    # new users by repeating cluster numbers, e.g. [ 1, 1, 1, 2 ] puts 75% of people on
+    # cluster 1, 25% of people on cluster 2.  clusters are checked for validity before
+    # being used.
+    $DEFAULT_CLUSTER = [ 1 ];
 
     # which cluster should syndication accounts live on?
     $SYND_CLUSTER = 1;
