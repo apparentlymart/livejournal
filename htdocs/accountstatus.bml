@@ -14,7 +14,7 @@ body<=
 
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);
-    return LJ::bad_input("You could not be authenticated as the specified user.")
+    return LJ::bad_input($ML{'error.invalidauth'})
         unless $u;
 
     # visibility status name mappings
@@ -28,7 +28,7 @@ body<=
     if (LJ::did_post()) {
 
         my $ok = sub {
-            return "<?h1 Success h1?>\n<?p " . $_[0] . " p?>";
+            return "<?h1 $ML{'.header.success'} h1?>\n<?p " . $_[0] . " p?>";
         };
 
         my $dberr = sub {
@@ -36,16 +36,15 @@ body<=
         };
 
         # are they suspended?
-        return LJ::bad_input("Cannot change journal status from suspended.")
+        return LJ::bad_input($ML{'.error.nochange.suspend'})
             if $u->{'statusvis'} eq 'S';
 
         # invalid statusvis
-        return LJ::bad_input("Invalid status type")
+        return LJ::bad_input($ML{'.error.invalid'})
             unless $POST{'statusvis'} eq 'D' || $POST{'statusvis'} eq 'V';
 
         # no need to change?
-        return $ok->("Your journal status has been left as <b>" .
-                     $statusvis{$POST{'statusvis'}} . "</b>.")
+        return $ok->(BML::ml('.message.nochange', {'statusvis' => $statusvis{$POST{'statusvis'}} }))
             if $u->{'statusvis'} eq $POST{'statusvis'};
 
         # do update
@@ -53,12 +52,11 @@ body<=
                                         'raw' => 'statusvisdate=NOW()' });
 
         # error updating?
-        return $dberr->("There has been a database error processing your request.")
+        return $dberr->($ML{'.error.db'})
             unless $res;
 
         # success
-        return $ok->("Your journal status has been successfully changed to " .
-                     "<b>" . $statusvis{$POST{'statusvis'}} . "</b>.");
+        return $ok->(BML::ml('.message.success', {'statusvis' => $statusvis{$POST{'statusvis'}} }));
 
     }
 
@@ -80,7 +78,7 @@ body<=
                               map { $_, $statusvis{$_} }
                               reverse sort keys %statusvis) . "\n";
 
-    $ret .= LJ::html_submit(undef, "Change Status", 
+    $ret .= LJ::html_submit(undef, $ML{'.btn.status'}, 
                             { 'disabled' => $u->{'statusvis'} eq 'S' }) . "\n";
     $ret .= "</div>\n</form>\n";
 
