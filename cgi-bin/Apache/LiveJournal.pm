@@ -51,7 +51,7 @@ sub trans
 
     my $redir = sub {
         my $url = shift;
-        my $code;
+        my $code = shift;
         $r->content_type("text/html");
         $r->header_out(Location => $url);
         return $code || REDIRECT;
@@ -447,10 +447,10 @@ sub interface_content
     my $args = $r->args;
 
     if ($RQ{'interface'} eq "xmlrpc") {
-        my $server = XMLRPC::Transport::HTTP::CGI
+        my $server = XMLRPC::Transport::HTTP::Apache
             -> on_action(sub { die "Access denied\n" if $_[2] =~ /:|\'/ })
             -> dispatch_to('LJ::XMLRPC')
-            -> handle;
+            -> handle($r);
         return OK;
     }
 
