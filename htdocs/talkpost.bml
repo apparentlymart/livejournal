@@ -129,7 +129,8 @@ body<=
 
     # check suspended
     return "<?h1 $ML{'talk.error.suspended.title'} h1?><?p $ML{'talk.error.suspended'} p?>"
-        if ($u->{'statusvis'} eq "S" || $up->{'statusvis'} eq "S" || $ur->{'statusvis'} eq "S");
+        if $u->{'statusvis'} eq "S" || $up->{'statusvis'} eq "S" || 
+           $ur && $ur->{'statusvis'} eq "S";
 
     # check deleted
     return "<?h1 $ML{'talk.error.deleted.title'} h1?><?p $ML{'talk.error.deleted'} p?>"
@@ -138,7 +139,7 @@ body<=
     # checked screened post
     return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.noreply_screened'} p?>"
         if $parpost->{'state'} eq "S" 
-           && (! $ur || ! LJ::Talk::can_unscreen($remote, $u, $up, $ur->{'user'}));
+           && ! LJ::Talk::can_unscreen($remote, $u, $up, ($ur ? $ur->{'user'} : undef));
 
     return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.noreply_deleted'} p?>"
         if $parpost->{'state'} eq "D";
