@@ -45,7 +45,7 @@
 
         # core lid
         $POST{'core'} ||= $POST{'core_hidden'};
-        $core = $POST{'core'} || $style->{'layer'}->{'core'};
+        $core = defined $POST{'core'} ? $POST{'core'} : $style->{'layer'}->{'core'};
         unless ($core) { # default to highest numbered core
             map { $core = $_ if $pub->{$_}->{'type'} eq 'core' && /^\d+$/ && 
                                 $pub->{$_}->{'majorversion'} > $pub->{$core}->{'majorversion'} } keys %$pub;
@@ -56,7 +56,7 @@
 
 
         # layout lid
-        $layout = $POST{'layout'} || $style->{'layer'}->{'layout'};
+        $layout = defined $POST{'layout'} ? $POST{'layout'} : $style->{'layer'}->{'layout'};
 
         # if we're changing core, clear everything
         if ($POST{'core'} && $POST{'core'} != $style->{'layer'}->{'core'}) {
@@ -164,7 +164,7 @@
     $body .= "<table class='postheading' style='margin-bottom: 10px'>\n";
     $body .= "<tr><td>Name: </td><td>";
     $body .= LJ::html_text({ 'name' => 'stylename', 'size' => '30', 'maxlength' => '255', 
-                             'value' => $POST{'stylename'} || $style->{'name'} });
+                             'value' => defined $POST{'stylename'} ? $POST{'stylename'} : $style->{'name'} });
     $body .= " " . LJ::html_submit('action:create', 'Create') unless $id;
     $body .= "</td></tr>\n";
     $body .= "</table>\n";
@@ -184,7 +184,7 @@
             my $dis = scalar(@opts) > 2 ? 0 : 1;
             
             return [ LJ::html_select({ 'name' => $type, 
-                                       'selected' => $POST{$type} || $style->{'layer'}->{$type},
+                                       'selected' => defined $POST{$type} ? $POST{$type} : $style->{'layer'}->{$type},
                                        'disabled' => $dis }, @opts), { 'disabled' => $dis, } ];
         };
 
