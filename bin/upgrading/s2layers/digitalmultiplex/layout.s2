@@ -237,6 +237,11 @@ propgroup sidebar {
         des = "Text to be added to the sidebar";
         note = "Appears in the sidebar 'Blurb'";
     }
+    property bool sidebar_disable_recent_summary {
+        des = "Disable 'Page Summary' on Recent Entries and Friends view";
+        note = "This is only a temporary measure, available until we find a way to enforce a specific sidebar width.";
+    }
+    set sidebar_disable_recent_summary = false;
     property string sidebar_position_one {
         note = "Set to 'Nothing' to hide box";
         des = "First Sidebar Box";
@@ -465,7 +470,7 @@ function print_heading_bar(string left, string right)
 }
 function print_entry_short (Page p, Entry e, Color bgcolor, Color fgcolor) {
     var string subject = $e.subject ? $e.subject : "(No Subject)";
-    println """<table class="short_entry" width="100%">""";
+    println """<a name="entry_$e.itemid"></a><table class="short_entry" width="100%">""";
     println """<tr><th align="left"><a href="$e.permalink_url">&raquo; $subject</a></th></tr>""";
     println """<tr><td width="100%" align="left">$e.text<br><span class="short_entry_meta">""";
     println $e.time->date_format("med") + " @ " + $e.time->time_format();
@@ -492,7 +497,7 @@ function print_entry_full (Page p, Entry e, Color bgcolor, Color fgcolor, bool h
     }
     print_heading_bar("$prev $subject", "$time $next");
 
-    println """<table cellspacing="0" cellpadding="0" class="full_entry"><tr><td valign="top">""";
+    println """<a name="entry_$e.itemid"></a><table cellspacing="0" cellpadding="0" class="full_entry"><tr><td valign="top">""";
 
     if (($p.view == "friends" or
         $e.poster.username != $e.journal.username or
@@ -622,8 +627,9 @@ p, td, blockquote {
     font-size: 1.0em; 
     line-height: 1.2em; 
 }
-pre, code, kbd {
-    font-size: 1.2em; 
+pre, code, kbd, tt {
+    font-size: 1.1em; 
+    font-family: monospace;
 }
 
 a {
@@ -861,11 +867,13 @@ function RecentPage::print_body ()
 
 function RecentPage::lay_sidebar_view_summary() : string {
     var string return;
-    foreach var Entry e ($.entries) {
-        if ($e.subject != "") { 
-            $return = $return + """<tr><td>$*text_sidebar_link_separator$e.security_icon<a href="$e.permalink_url">$e.subject</a></td></tr>""";
-        } else {
-            $return = $return + """<tr><td>$*text_sidebar_link_separator$e.security_icon<a href="$e.permalink_url"><em>$*text_nosubject</em></a></td></tr>""";
+    if (not $*sidebar_disable_recent_summary) {
+        foreach var Entry e ($.entries) {
+            if ($e.subject != "") { 
+                $return = $return + """<tr><td>$*text_sidebar_link_separator [<a href="#entry_$e.itemid">#</a>] <a href="$e.permalink_url">$e.subject</a> $e.security_icon</td></tr>""";
+            } else {
+                $return = $return + """<tr><td>$*text_sidebar_link_separator [<a href="#entry_$e.itemid">#</a>] <a href="$e.permalink_url"><em>$*text_nosubject</em></a> $e.security_icon</td></tr>""";
+            }
         }
     }
     return $return;
@@ -894,9 +902,9 @@ function EntryPage::lay_sidebar_view_summary() : string {
     foreach var Comment c ($.comments) {
         if ($c.depth == 1) {
             if ($c.subject != "") { 
-                $return = $return + """<tr><td>$*text_sidebar_link_separator<a href="$c.permalink_url">$c.subject</a></td></tr>""";
+                $return = $return + """<tr><td>$*text_sidebar_link_separator [<a href="#$c.anchor">#</a>] <a href="$c.permalink_url">$c.subject</a></td></tr>""";
             } else {
-                $return = $return + """<tr><td>$*text_sidebar_link_separator<a href="$c.permalink_url"><em>$*text_nosubject</em></a></td></tr>""";
+                $return = $return + """<tr><td>$*text_sidebar_link_separator [<a href="#$c.anchor">#</a>] <a href="$c.permalink_url"><em>$*text_nosubject</em></a></td></tr>""";
             }
         }
     }
@@ -1087,7 +1095,7 @@ function YearPage::lay_sidebar_view_summary() : string {
     var string return;
     foreach var YearMonth m ($.months) {
         if ($m.has_entries) {
-            $return = $return + """<tr><td>$*text_sidebar_link_separator<a href="#$m.year$m.month">""" + $m->month_format() + "</a></td></tr>";
+            $return = $return + """<tr><td>$*text_sidebar_link_separator [<a href="#$m.year$m.month">#</a>] <a href="$m.url">""" + $m->month_format() + "</a></td></tr>";
         }
     }
     return $return;
@@ -1153,7 +1161,7 @@ function YearWeek::print ()
 function MonthPage::lay_sidebar_view_navigation() : string {
     var string return;
     if ($.prev_url != "") { $return = """<tr><td>$*text_sidebar_link_separator<a href="$.prev_url">Previous Month</a></td></tr>"""; }
-    if ($.next_url != "") { $return = """$return<tr><td>text_sidebar_link_separator<a href="$.next_url">Next Month</a></td></tr>"""; }
+    if ($.next_url != "") { $return = """$return<tr><td>$*text_sidebar_link_separator<a href="$.next_url">Next Month</a></td></tr>"""; }
     return $return;
 }
 function MonthPage::print_body {
@@ -1197,9 +1205,9 @@ function DayPage::lay_sidebar_view_summary() : string {
     if ($.has_entries) {
         foreach var Entry e ($.entries) {
             if ($e.subject != "") { 
-                $return = $return + """<tr><td>$*text_sidebar_link_separator$e.security_icon<a href="$e.permalink_url">$e.subject</a></td></tr>""";
+                $return = $return + """<tr><td>$*text_sidebar_link_separator [<a href="#entry_$e.itemid">#</a>] <a href="$e.permalink_url">$e.subject</a> $e.security_icon</td></tr>""";
             } else {
-                $return = $return + """<tr><td>$*text_sidebar_link_separator$e.security_icon<a href="$e.permalink_url"><em>$*text_nosubject</em></a></td></tr>""";
+                $return = $return + """<tr><td>$*text_sidebar_link_separator [<a href="#entry_$e.itemid">#</a>] <a href="$e.permalink_url"><em>$*text_nosubject</em></a> $e.security_icon </td></tr>""";
             }
         }
     }
