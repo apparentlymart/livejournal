@@ -4006,34 +4006,47 @@ sub modify_caps {
 
     $cap_add ||= [];
     $cap_del ||= [];
+    my %cap_add_mod = ();
+    my %cap_del_mod = ();
 
     # get a u object directly from the db
     my $u = LJ::load_userid($userid, "force");
 
-    my @run_hooks = ();
+    # add new caps
+    my $newcaps = int($u->{'caps'});
+    foreach (@$cap_add) {
+        my $cap = 1 << $_;
 
-    # add caps that need to be added
-    my $cap_new = int($u->{'caps'});
-    foreach my $bit (@$cap_add) {
-        $cap_new |= (1 << $bit);
+        # about to turn bit on, is currently off?
+        $cap_add_mod{$_} = 1 unless $newcaps & $cap;
+        $newcaps |= $cap;
     }
 
-    # remove caps that need to be removed
-    foreach my $bit (@$cap_del) {
-        $cap_new = $cap_new & ~(1 << $bit);
+    # remove deleted caps
+    foreach (@$cap_del) {
+        my $cap = 1 << $_;
+
+        # about to turn bit off, is it currently on?
+        $cap_del_mod{$_} = 1 if $newcaps & $cap;
+        $newcaps &= ~$cap;
     }
 
     # run hooks for modified bits
-    $u->{'caps'} = $cap_new;
-    foreach my $bit (@$cap_add, @$cap_del) {
+    my $res = LJ::run_hook("modify_caps", 
+                           { 'u' => $u, 
+                             'newcaps' => $newcaps,
+                             'oldcaps' => $u->{'caps'},
+                             'cap_on_req'  => { map { $_ => 1 } @$cap_add },
+                             'cap_off_req' => { map { $_ => 1 } @$cap_del },
+                             'cap_on_mod'  => \%cap_add_mod,
+                             'cap_off_mod' => \%cap_del_mod,
+                           });
 
-        # return 0 if any hook doesn't return true
-        my $res = LJ::run_hook("capbit_${bit}_off", $u);
-        return 0 if defined $res && ! $res;
-    }
+    # hook should return a status code
+    return 0 if defined $res && ! $res;
 
     # update user row
-    LJ::update_user($u, { 'caps' => $cap_new });
+    LJ::update_user($u, { 'caps' => $newcaps });
 
     return $u;
 }
