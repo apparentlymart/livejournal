@@ -4026,25 +4026,31 @@ sub get_remote
         'short' => 60*60*24*1.5,
         'long' => 60*60*24*60,
         'once' => 0, # do not renew these
-    }->{$sess->{'exptype'}};
+    }->{$sess->{exptype}};
 
-    if ($sess_length &&
-        $sess->{'timeexpire'} - $now < $sess_length/2) {
-        my $future = $now + $sess_length;
+    # only long cookies should be given an expiration time
+    # other should get 0 (when browser closes)
+    my $cookie_length = $sess->{exptype} eq 'long' ? $sess_length : 0;
 
-        if ($u->writer &&
-            $u->do("UPDATE sessions SET timeexpire=? ".
-                   "WHERE userid=? AND sessid=?",
-                   undef, $future, $u->{userid}, $sess->{sessid})) {
+    # if there is a new session length to be set and the user's db writer is available,
+    # go ahead and set the new session expiration in the database. then only update the
+    # cookies if the database operation is successful
+    if ($sess_length && $sess->{'timeexpire'} - $now < $sess_length/2 &&
+        $u->writer && $u->do("UPDATE sessions SET timeexpire=? WHERE userid=? AND sessid=?",
+                             undef, $now + $sess_length, $u->{userid}, $sess->{sessid}))
+    {
 
-            LJ::MemCache::delete($memkey);
+        # delete old, now-bogus memcache data
+        LJ::MemCache::delete($memkey);
 
-            # Update their ljsession cookie as well
+        # update their ljsession cookie unless it's a session-length cookie
+        if ($cookie_length) {
+
             eval {
                 my @domains = ref $LJ::COOKIE_DOMAIN ? @$LJ::COOKIE_DOMAIN : ($LJ::COOKIE_DOMAIN);
                 foreach my $dom (@domains) {
                     my $cookiestr = 'ljsession=' . $cookie->('ljsession');
-                    $cookiestr .= '; expires=' . LJ::time_to_cookie($future);
+                    $cookiestr .= '; expires=' . LJ::time_to_cookie($now + $cookie_length);
                     $cookiestr .= $dom ? "; domain=$dom" : '';
                     $cookiestr .= '; path=/; HttpOnly';
 
