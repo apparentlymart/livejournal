@@ -195,6 +195,13 @@ sub make_feed
 
         my $ditemid = $itemid*256 + $it->{'anum'};
 
+        my $mood;
+        if ($logprops{$itemid}->{'current_mood'}) {
+            $mood = LJ::exml($logprops{$itemid}->{'current_mood'});
+        } elsif ($logprops{$itemid}->{'current_moodid'}) {
+            $mood = LJ::exml(LJ::mood_name($logprops{$itemid}->{'current_moodid'}+0));
+        }
+
         my $createtime = $LJ::EndOfTime - $it->{rlogtime};
         my $cleanitem = {
             itemid     => $itemid,
@@ -206,7 +213,7 @@ sub make_feed
             modtime    => $logprops{$itemid}->{revtime} || $createtime,
             comments   => ($logprops{$itemid}->{'opt_nocomments'} == 0),
             music      => LJ::exml($logprops{$itemid}->{'current_music'}),
-            mood       => LJ::exml(LJ::mood_name($logprops{$itemid}->{'current_moodid'}+0)),
+            mood       => $mood,
         };
         push @cleanitems, $cleanitem;
     }
