@@ -4,6 +4,7 @@ layerinfo "type" = "i18nc";
 layerinfo "redist_uniq" = "i18nc/fr1";
 layerinfo "name" = "French";
 layerinfo "langcode" = "fr";
+set lang_current = "fr";
 
 function lang_map_plural (int n) : int {
     if ($n > 1) { return 1; } # plural

@@ -4,6 +4,7 @@ layerinfo "type" = "i18nc";
 layerinfo "redist_uniq" = "i18nc/ja1";
 layerinfo "name" = "Japanese";
 layerinfo "langcode" = "ja";
+set lang_current = "ja";
 
 # One form (the number is inflected)
 function lang_map_plural (int n) : int {
