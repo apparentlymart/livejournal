@@ -277,6 +277,21 @@ sub _get_cache
     return $TXT_CACHE;
 }
 
+sub get_text
+{
+    my ($lang, $dmid, $code) = @_;
+    load_lang_struct() unless $LS_CACHED;
+    my $l = $LN_CODE{$lang};
+    return unless $l;
+    $dmid += 0;
+
+    my $dbr = LJ::get_dbh("slave", "master");
+    my $text = $dbr->selectrow_array("SELECT t.text FROM ml_text t, ml_latest l, ml_items i WHERE t.dmid=$dmid ".
+                                     "AND t.txtid=l.txtid AND l.dmid=$dmid AND l.lnid=$l->{'lnid'} AND l.itid=i.itid ".
+                                     "AND i.dmid=$dmid AND i.itcode=" . $dbr->quote($code));
+    return $text;
+}
+
 sub get_text_bml 
 {
     my ($lang, $code) = @_;

@@ -1204,6 +1204,11 @@ sub get_language
     return $main::REQ_LANG;
 }
 
+sub get_language_default
+{
+    return $main::BMLEnv{'DefaultLanguage'} || "en";
+}
+
 sub set_language
 {
     $main::REQ_LANG = $_[0];

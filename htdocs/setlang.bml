@@ -3,7 +3,7 @@
  return unless $FORM{'lang'};
  my $l = LJ::Lang::get_lang($FORM{'lang'});
  return unless $l;
- BMLClient::set_cookie("langpref", $l->{'lncode'}, 0);
+ BMLClient::set_cookie("langpref", $l->{'lncode'} . "/" . time(), 0);
  BML::set_language($l->{'lncode'});
  return;
 
@@ -14,29 +14,28 @@ BODY<=
 (=_CODE
 
  if ($FORM{'lang'}) {
-
      my $l = LJ::Lang::get_lang($FORM{'lang'});
      unless ($l) {
 	 return "Undefined language. ($FORM{'lang'})";
      }
-     return "Set to $l->{'lnname'}";
-
- } 
- else
- {
-     $ret .= "Select language: <form method='post'>";
-
-     my @q = ("en_LJ", "English",
-	      "de", "German");
-
-     while (@q) {
-	 my ($code, $name) = splice(@q, 0, 2);
-	 $ret .= "<p><input type=radio name=lang value=$code> $name</p>\n";
-     }
-
-     $ret .= "<p><input type=submit value='Switch'></p></form>";
-     return $ret;
  }
+
+ my $curr = BML::get_language();
+ my $ret;
+ $ret .= "(=_ML .select _ML=)<form method='post'>";
+
+ my @q = ("en_LJ", "English",
+          "de", "German");
+ 
+ while (@q) {
+     my ($code, $name) = splice(@q, 0, 2);
+     my $checked = $code eq $curr ? "checked='checked'" : "";
+     $ret .= "<p><input type=radio $checked name=lang value=$code> $name</p>\n";
+ }
+ 
+ $ret .= "<p><input type=submit value='(=_ML .switch _ML=)'></p></form>";
+ return $ret;
+
 
 _CODE=)
 

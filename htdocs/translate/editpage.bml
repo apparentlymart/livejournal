@@ -128,11 +128,11 @@
              $ret .= "<dd>$t</dd>";
          }
 
-         my $curtext;
-         if ($lat->{'staleness'} < 3) {
+         my $curtext = LJ::ehtml($ml_text{"$lat->{'dmid'}-$lat->{'txtid'}"}->{'text'});
+         if ($curtext =~ /\n/) { $use_textarea = 1; }
+         if ($lat->{'staleness'} >= 3) {
              # if wrong language, why populate it with stuff they'll just have to delete?
-             $curtext = LJ::ehtml($ml_text{"$lat->{'dmid'}-$lat->{'txtid'}"}->{'text'});
-             if ($curtext =~ /\n/) { $use_textarea = 1; }
+             $curtext = "";
          }
          
          $ret .= "<dt><b>$l->{'lnname'}</b>:</b></dt><dd>";
@@ -157,9 +157,9 @@
              $ret .= "<br />";
          }
          if ($use_textarea) {
-             $ret .= "<textarea name='newtext_$ict' id='newtext_$ict' $disabled wrap='soft' rows='10' cols='40'>$curtext</textarea>";
+             $ret .= "<textarea name='newtext_$ict' id='newtext_$ict' $disabled wrap='soft' rows='10' cols='60'>$curtext</textarea>";
          } else {
-             $ret .= "<input name='newtext_$ict' id='newtext_$ict' $disabled size='40' value='$curtext'/>";
+             $ret .= "<input name='newtext_$ict' id='newtext_$ict' $disabled size='60' value='$curtext'/>";
          }
          $ret .= "</dd>\n";
          $ret .= "</dl>";

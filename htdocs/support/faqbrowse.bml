@@ -1,8 +1,18 @@
 (=PAGE
-TITLE=>FAQ Question
+TITLE=>(=_ML .title _ML=)
 BODY<=
 
 (=_CODE
+
+ my $curlang = BML::get_language();
+ my $deflang = BML::get_language_default();
+ my $altlang = $curlang ne $deflang;
+ my ($mll, $mld);
+ if ($altlang) {
+     $mll = LJ::Lang::get_lang($curlang);
+     $mld = LJ::Lang::get_dom("faq");
+     $altlang = 0 unless $mll && $mld;
+ }
 
  my $id = $FORM{'faqid'} + 0;
  my $ret = "";
@@ -17,16 +27,22 @@ BODY<=
  if ($FORM{'faqcat'}) {
      $where = "faqcat=" . $dbh->quote($FORM{'faqcat'});
  }
- 
- my $sth = $dbr->prepare("SELECT question, answer, lastmoduserid, ".
+ my $sth = $dbr->prepare("SELECT faqid, question, answer, lastmoduserid, ".
                          "DATE_FORMAT(lastmodtime, '%Y-%m-%d'), ".
                          "UNIX_TIMESTAMP(lastmodtime) FROM faq ".
                          "WHERE $where ORDER BY sortorder");
  $sth->execute;
- my ($question, $answer, $unixmodtime, $lastmoduserid, $lastmodtime);
- while (($question, $answer, $lastmoduserid, $lastmodtime, $unixmodtime) =
-        $sth->fetchrow_array)
+ if ($dbh->err) { return "<p>$sql</p><p>" . $dbh->errstr . "</p>"; }
+
+ while (my ($faqid, $question, $answer, $lastmoduserid, 
+            $lastmodtime, $unixmodtime) = $sth->fetchrow_array)
  {
+     # it'd be better to load them in a batch, but this works for now:
+     if ($altlang) {
+         $question = LJ::Lang::get_text($curlang, $mld->{'dmid'}, "$faqid.1question");
+         $answer = LJ::Lang::get_text($curlang, $mld->{'dmid'}, "$faqid.2answer");
+     }
+
      my $q = "";
      my $a = "";
      my $lastmodwho;
@@ -51,7 +67,7 @@ BODY<=
      $ret .= "(=H1 $q H1=)<blockquote>$a</blockquote>";
 
      if ($lastmodwho) {
-         $ret .= "<p align=\"right\"><b>Last Updated:</b><br />$lastmodwho, $lastmodtime</p>";
+         $ret .= "<p align=\"right\"><b>(=_ML .lastupdated _ML=)</b><br />$lastmodwho, $lastmodtime</p>";
      }
  }
 
@@ -60,8 +76,8 @@ BODY<=
 _CODE=)
 
 (=HR=)
-Back to <a href="faq.bml">the FAQ</a>.
-<br />Back to <a href="./">the support area</a>.
+(=_ML .backfaq _ML=)
+<br />(=_ML .backsupport _ML=)
 
 <=BODY
 PAGE=)(=_C <LJDEP>

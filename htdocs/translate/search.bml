@@ -36,7 +36,7 @@
  };
  while (my ($dmid, $itid, $itcode) = $sth->fetchrow_array) {
      push @page, [ $dmid, $itid, $itcode ];
-     $addlink->() if @page >= 2;
+     $addlink->() if @page >= 10;
  }
  $addlink->();
  

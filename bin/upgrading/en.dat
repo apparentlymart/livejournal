@@ -1,1 +1,17 @@
+;; -*- coding: utf-8 -*-
 /friends/index.bml.title=Friends Tools
+
+/setlang.bml.select=Select your preferred language:
+
+/setlang.bml.switch=Switch
+
+/setlang.bml.title=Set Language
+
+/support/faqbrowse.bml.backfaq=Back to <a href="faq.bml">the FAQ</a>.
+
+/support/faqbrowse.bml.backsupport=Back to <a href="./">the support area</a>.
+
+/support/faqbrowse.bml.lastupdated=Last Updated:
+
+/support/faqbrowse.bml.title=FAQ Question
+
