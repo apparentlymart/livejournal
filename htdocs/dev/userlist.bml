@@ -7,57 +7,60 @@ body<=
     use vars qw(%GET);
     return "Not a dev server." unless $LJ::IS_DEV_SERVER;
 
+    my $pagesize = 250;
+
+    $GET{'page'} ||= 1;
+    my $page = $GET{'page'} - 1;
+    my $offset = $page * $pagesize;
     my $ret = "";
     my $dbr = LJ::get_db_reader();
     my %ss;
-    my $h = $dbr->prepare("SELECT userid,user,journaltype,statusvis FROM user LIMIT 500");
+    my $orderby = $GET{'sort'} eq 'user' ? "user" :
+                  $GET{'sort'} eq 'jt' ? "journaltype,user" :
+                  $GET{'sort'} eq 'sv' ? "statusvis,user" : "userid";
+    my $pagesizeplus1 = $pagesize + 1;
+    my $h = $dbr->prepare("SELECT userid,user,journaltype,statusvis FROM user ORDER BY $orderby LIMIT $offset,$pagesizeplus1");
     $h->execute;
+    my @userids;
     while (my $row = $h->fetchrow_hashref) {
         $ss{$row->{'userid'}} = $row;
+        push @userids, $row->{'userid'};
     }
-    $h = $dbr->prepare("SELECT * FROM reluser");
+    my $islastpage = 1;
+    if (scalar(@userids) > $pagesize) {
+        pop @userids;
+        $islastpage = 0;
+    }
+    my $inclause = join (",", @userids);
+    $h = $dbr->prepare("SELECT * FROM reluser WHERE userid IN ($inclause)");
     $h->execute;
     while (my $row = $h->fetchrow_hashref) {
         push @{$ss{$row->{'userid'}}->{'reluser'}}, $row;
     }
 
     # sort bar
-    $ret .= "<?p <strong>Sort by:</strong> [<a href='userlist.bml'> Nothing
-	    </a>|<a href='userlist.bml?sort=id'> User ID
-	    </a>|<a href='userlist.bml?sort=user'> Username
-	    </a>|<a href='userlist.bml?sort=jt'> Journal Type
-	    </a>|<a href='userlist.bml?sort=sv'> Status Vis
-	    </a>|<a href='userlist.bml?sort=re'> Number of reluser edges
-	    </a>] <br /><br /> p?>";
+    my $pagearg = $GET{'page'} > 1 ? "&amp;page=$GET{'page'}" : "";
+    my $pagearg2 = $GET{'page'} > 1 ? "?page=$GET{'page'}" : "";
+    $ret .= "<?p <strong>Sort by:</strong> [<a href='userlist.bml$pagearg2'> User ID
+        </a>|<a href='userlist.bml?sort=user$pagearg'> Username
+        </a>|<a href='userlist.bml?sort=jt$pagearg'> Journal Type
+        </a>|<a href='userlist.bml?sort=sv$pagearg'> Status Vis
+        </a>] p?>";
 
-    my @keyorder;
-    if ($GET{'sort'} eq 'id') {
-        @keyorder = sort { $a <=> $b } keys %ss;
-    } elsif ($GET{'sort'} eq 'user') {
-        @keyorder = sort { $ss{$a}->{'user'} cmp $ss{$b}->{'user'} } keys %ss;
-    } elsif ($GET{'sort'} eq 'jt') {
-        @keyorder = sort { $ss{$a}->{'journaltype'} cmp $ss{$b}->{'journaltype'}
-                           || $ss{$a}->{'user'} cmp $ss{$b}->{'user'} } keys %ss;
-    } elsif ($GET{'sort'} eq 'sv') {
-        @keyorder = sort { $ss{$a}->{'statusvis'} cmp $ss{$b}->{'statusvis'}
-                           || $ss{$a}->{'user'} cmp $ss{$b}->{'user'} } keys %ss;
-    } elsif ($GET{'sort'} eq 're') {
-        my $g = sub {
-            my $r = shift;
-            return 0 unless $r;
-            return scalar(@$r);
-        };
-        @keyorder = sort { $g->($ss{$a}->{'reluser'}) <=>
-			       $g->($ss{$b}->{'reluser'}) } keys %ss;
-    } else {
-        @keyorder = keys %ss;
-    }
+    # page bar
+    my $next = $page + 2;
+    $pagearg = $page > 1 ? "&amp;page=$page" : "";
+    $ret .= "<?p [" if $page || !$islastpage;
+    $ret .= "<a href='userlist.bml?sort=$GET{'sort'}$pagearg'> Previous Page </a>" if $page;
+    $ret .= "|" if $page && !$islastpage;
+    $ret .= "<a href='userlist.bml?sort=$GET{'sort'}&amp;page=$next'> Next Page </a>" if !$islastpage;
+    $ret .= "] p?>" if $page || !$islastpage;
 
-    $ret .= "<table width='100%' border='1'>
-	    <tr valign='bottom'><td><b>User ID</b></td><td><b>Username</b></td>
-	    <td><b>T/S</b></td><td><b>Reluser Edges</b></td></tr>";
+    $ret .= "<br /><br /> <table width='100%' border='1'>
+        <tr valign='bottom'><td><b>User ID</b></td><td><b>Username</b></td>
+        <td><b>T/S</b></td><td><b>Reluser Edges</b></td></tr>";
 
-    foreach my $userid (@keyorder) {
+    foreach my $userid (@userids) {
         my $hr = $ss{$userid};
         $ret .= "<tr><td><b>$userid</b></td><td>";
         $ret .= LJ::ljuser($hr->{'user'}, {type=> $hr->{'journaltype'}});
@@ -69,7 +72,7 @@ body<=
                 $ret .= "; " if $c;
                 $ret .= "<b>$t->{'type'}</b>/";
                 $ret .= LJ::ljuser($ss{$t->{'targetid'}}->{'user'}, {type=>
-                                                                         $ss{$t->{'targetid'}}->{'journaltype'}});
+                                   $ss{$t->{'targetid'}}->{'journaltype'}});
                 $c = 1;
             }
         }
