@@ -136,10 +136,12 @@ sub get_id
 }
 
 
-### get_visual_data( $capid, $anum )
+### get_visual_data( $capid, $anum, $want_paths )
+# if want_paths is true, this function may return an arrayref containing
+# one or more paths (disk or HTTP) to the resource
 sub get_visual_data
 {
-    my ( $capid, $anum ) = @_;
+    my ( $capid, $anum, $want_paths ) = @_;
     $capid = int($capid);
 
     my (
@@ -165,7 +167,13 @@ sub get_visual_data
 
     if ($location eq 'mogile') {
         die "MogileFS object not loaded.\n" unless $LJ::MogileFS;
-        $data = ${$LJ::MogileFS->get_file_data("captcha:$capid")};
+        if ($want_paths) {
+            # return path(s) to the content if they want
+            my @paths = $LJ::MogileFS->get_paths("captcha:$capid");
+            return \@paths;
+        } else {
+            $data = ${$LJ::MogileFS->get_file_data("captcha:$capid")};
+        }
     } else {
         $u = LJ::load_user( "system" )
             or die "Couldn't load the system user.";
@@ -177,10 +185,12 @@ sub get_visual_data
 }
 
 
-### get_audio_data( $capid, $anum )
+### get_audio_data( $capid, $anum, $want_paths )
+# if want_paths is true, this function may return an arrayref containing
+# one or more paths (disk or HTTP) to the resource
 sub get_audio_data
 {
-    my ( $capid, $anum ) = @_;
+    my ( $capid, $anum, $want_paths ) = @_;
     $capid = int($capid);
 
     my (
@@ -206,7 +216,13 @@ sub get_audio_data
 
     if ($location eq 'mogile') {
         die "MogileFS object not loaded.\n" unless $LJ::MogileFS;
-        $data = ${$LJ::MogileFS->get_file_data("captcha:$capid")};
+        if ($want_paths) {
+            # return path(s) to the content if they want
+            my @paths = $LJ::MogileFS->get_paths("captcha:$capid");
+            return \@paths;
+        } else {
+            $data = ${$LJ::MogileFS->get_file_data("captcha:$capid")};
+        }
     } else {
         $u = LJ::load_user( "system" )
             or die "Couldn't load the system user.";
