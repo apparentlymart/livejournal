@@ -287,7 +287,7 @@ class Page
     function print_entry_poster(Entry e) 
     "Output a line of text which says who posted an entry (just \"user\", or \"user posting in somejournal\")";
 
-    function builtin get_this_month() : ArchiveYearPageMonth
+    function builtin get_this_month() : ArchiveYearMonth
     "Returns information about the current month, so that the page may include a mini-calendar or similar features.";
 
 }
@@ -801,10 +801,6 @@ function htmlattr(string name, string value) : string
 }
 function htmlattr(string name, int value) : string {
     return htmlattr($name, string($value));
-}
-
-function external_stylesheet() {
-    "/* No Stylesheet Defined */\n";
 }
 
 ### Language
