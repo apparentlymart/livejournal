@@ -267,8 +267,14 @@ body<=
  ###
  if ($parpost->{'subject'}) {
      my $cleansubject = $parpost->{'subject'};
-     LJ::CleanHTML::clean_subject(\$cleansubject);
-     $cleansubject = BML::eall($cleansubject);
+     if ($init->{'replyto'}) {
+         # comments can't have HTML in subjects at all
+         $cleansubject = BML::eall($cleansubject);
+     } else {
+         # but journal entries can have some
+         LJ::CleanHTML::clean_subject(\$cleansubject);
+         BML::ebml(\$cleansubject);
+     }
      $ret .= "<FONT FACE=\"Arial,Helvetica\" size=+1><I><B>$cleansubject</B></I></FONT><BR />\n";
  }
  
