@@ -1438,14 +1438,14 @@ sub getevents
             foreach (grep { $_ < $now - 60*60 } keys %reqs) { delete $reqs{$_}; }
             my $count = grep { $_ eq $date } values %reqs;
             $reqs{$now} = $date;
-            LJ::set_userprop($u, $pname, 
-                             join('/', map { $_, $reqs{$_} }
-                                  sort { $b <=> $a } keys %reqs));
             if ($count >= 2) {
                 # 2 prior, plus this one = 3 repeated requests for same synctime.
                 # their client is busted.  (doesn't understand syncitems semantics)
                 return fail($err,406);
             }
+            LJ::set_userprop($u, $pname, 
+                             join('/', map { $_, $reqs{$_} }
+                                  sort { $b <=> $a } keys %reqs));
         }
         
         my %item;
