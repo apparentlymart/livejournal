@@ -10,7 +10,7 @@ $maint{'genstats'} = sub
 
     unless (@which) { @which = qw(usage users countries 
 				  states gender clients
-                                  pop_interests meme); }
+                                  pop_interests meme pop_faq); }
     my %do = map { $_, 1, } @which;
     
     my $dbs = LJ::get_dbs();
@@ -29,6 +29,16 @@ $maint{'genstats'} = sub
     my ($nowtime, $time, $nowdate);
 
     my %to_pop;
+
+    if ($do{'pop_faq'}) {
+	$sth = $dbr->prepare("SELECT faqid, COUNT(*) FROM faquses WHERE ".
+			     "faqid<>0 GROUP BY 1 ORDER BY 2 DESC LIMIT 50");
+	$sth->execute;
+	my $d = $to_pop{'popfaq'} = {};
+	while (my ($id, $count) = $sth->fetchrow_array) {
+	    $d->{$id} = $count;
+	}
+    }
 
     if ($do{'meme'}) {
 	$sth = $dbr->prepare("SELECT url, count(*) FROM meme GROUP BY 1 ORDER BY 2 DESC LIMIT 100");

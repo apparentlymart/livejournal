@@ -9,6 +9,9 @@ $maint{'clean_caches'} = sub
     print "-I- Cleaning authactions.\n";
     $dbh->do("DELETE FROM authactions WHERE datecreate < DATE_SUB(NOW(), INTERVAL 30 DAY)");
 
+    print "-I- Cleaning faquses.\n";
+    $dbh->do("DELETE FROM faquses WHERE dateview < DATE_SUB(NOW(), INTERVAL 7 DAY)");
+
     print "-I- Cleaning duplock.\n";
     $dbh->do("DELETE FROM duplock WHERE instime < DATE_SUB(NOW(), INTERVAL 1 HOUR)");
     

@@ -1,0 +1,40 @@
+(=PAGE
+TITLE=>Popular FAQs
+BODY<=
+
+(=H1 Popular Frequently Asked Questions H1=)
+(=P
+The following is a list of what questions people have been interested in during the past week, followed by the number of people that have read the answers:
+P=)
+
+(=_CODE
+
+ my $dbs = LJ::get_dbs();
+ my $dbr = $dbs->{'reader'};
+
+ $sth = $dbr->prepare("SELECT f.faqid, f.question, s.statval AS 'uses'".
+		      "FROM faq f, stats s WHERE f.faqcat<>'int-abuse' AND s.statcat='popfaq' ".
+		      "AND s.statkey=f.faqid ORDER BY s.statval DESC LIMIT 50");
+ $sth->execute;
+
+ $ret .= "<ul>";
+ while (my $f = $sth->fetchrow_hashref)
+ {
+     my $q = LJ::ehtml($f->{'question'});
+     $q =~ s/^\s+//; $q =~ s/\s+$//;
+     $q =~ s/\n/<BR>/g;
+     $ret .= "<li><a href=\"faqbrowse.bml?faqid=$f->{'faqid'}\">$q</a> <i>($f->{'uses'})</i></li>\n";
+ }
+ $ret .= "</ul>\n";
+
+ return $ret;
+
+_CODE=)
+
+(=HR=)
+Back to <a href="./">the support area</a>.
+
+<=BODY
+PAGE=)(=_C <LJDEP>
+link: htdocs/support/faqbrowse.bml, htdocs/support/index.bml
+</LJDEP> _C=)
