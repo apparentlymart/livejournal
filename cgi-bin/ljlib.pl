@@ -1189,10 +1189,7 @@ sub make_authas_select {
 # </LJFUNC>
 sub comm_member_request {
     my ($comm, $u, $attr) = @_;
-
-    $comm = ref $comm ? $comm : LJ::load_user($comm);
-    $u = ref $u ? $u : LJ::load_user($u);
-    return undef unless $comm && $u;
+    return undef unless ref $comm && ref $u;
 
     # insert authactions row
     $attr ||= [];
