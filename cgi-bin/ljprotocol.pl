@@ -360,8 +360,13 @@ sub checkfriends
     my $memkey = [$u->{'userid'},"checkfriends:$u->{userid}:$mask"];
     my $update = LJ::MemCache::get($memkey);
     unless ($update) {
+        my $fr = LJ::get_friends($u, $mask);
+        unless ($fr && %$fr) {
+            $res->{'new'} = 0;
+            $res->{'lastupdate'} = $lastupdate;
+            return $res;
+        }
         if (@LJ::MEMCACHE_SERVERS) {
-            my $fr = LJ::get_friends($u, $mask);
             my $tu = LJ::get_timeupdate_multi({ memcache_only => 1 }, keys %$fr);
             my $max = 0;
             while ($_ = each %$tu) {
@@ -377,10 +382,12 @@ sub checkfriends
                 $res->{'lastupdate'} = $lastupdate;
                 return $res;
             }
-            my $sql = "SELECT MAX(u.timeupdate) FROM userusage u, friends f ".
-                "WHERE u.userid=f.friendid AND f.userid=$u->{'userid'}";
-            $sql .= " AND f.groupmask & $mask > 0" if $mask;
-            $update = $dbr->selectrow_array($sql);
+            my $list = join(", ", map { int($_) } keys %$fr);
+            if ($list) {
+              my $sql = "SELECT MAX(timeupdate) FROM userusage ".
+                  "WHERE userid IN ($list)";
+              $update = $dbr->selectrow_array($sql);
+            } 
         }
         LJ::MemCache::set($memkey,$update,time()+$interval) if $update;
     }
