@@ -238,6 +238,10 @@
     # if database logging is enabled above, should we log images or just page requests?
     #$DONT_LOG_IMAGES = 1;
 
+    # Turn on memory/cpu usage statistics generation for database logs (requires the
+    # GTop module to be installed)
+    #$LOG_GTOP = 1;
+
     # directory optimizations
     $DIR_DB_HOST = "master";  # DB role to use when connecting to directory DB
     $DIR_DB = "";             # by default, hit the main database (bad for big sites!)

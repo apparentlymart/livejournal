@@ -29,6 +29,7 @@ BEGIN {
 my %RQ;       # per-request data
 my %USERPIC;  # conf related to userpics
 my %REDIR;
+my $GTop;     # GTop object (created if $LJ::LOG_GTOP is true)
 
 $USERPIC{'cache_dir'} = "$ENV{'LJHOME'}/htdocs/userpics";
 $USERPIC{'use_disk_cache'} = -d $USERPIC{'cache_dir'};
@@ -148,6 +149,14 @@ sub trans
     # disable TRACE (so scripts on non-LJ domains can't invoke
     # a trace to get the LJ cookies in the echo)
     return FORBIDDEN if $r->method_number == M_TRACE;
+
+    # If the configuration says to log statistics and GTop is available, mark
+    # values before the request runs so it can be turned into a delta later
+    if ( $LJ::LOG_GTOP && $LJ::HAVE_GTOP ) {
+        $GTop ||= new GTop;
+        $r->pnotes( 'gtop_cpu' => $GTop->cpu );
+        $r->pnotes( 'gtop_mem' => $GTop->proc_mem($$) );
+    }
 
     LJ::start_request();
     LJ::procnotify_check();
@@ -1047,7 +1056,14 @@ sub db_logger
                  "browser VARCHAR(100),".
                  "clientver VARCHAR(100),".
                  "secs TINYINT UNSIGNED,".
-                 "ref VARCHAR(200))");
+                 "ref VARCHAR(200),".
+                 "pid SMALLINT UNSIGNED,".
+                 "cpu_user MEDIUMINT UNSIGNED,".
+                 "cpu_sys MEDIUMINT UNSIGNED,".
+                 "cpu_total MEDIUMINT UNSIGNED,".
+                 "mem_vsize INT,".
+                 "mem_share INT,".
+                 "mem_rss INT)");
     }
 
     my $var = {
@@ -1070,6 +1086,31 @@ sub db_logger
         'secs' => $now - $r->request_time(),
         'ref' => $r->header_in("Referer"),
     };
+
+    # If the configuration says to log statistics and GTop is available, then
+    # add those data to the log
+    # The GTop object is only created once per child:
+    #   Benchmark: timing 10000 iterations of Cached GTop, New Every Time...
+    #   Cached GTop: 2.06161 wallclock secs ( 1.06 usr +  0.97 sys =  2.03 CPU) @ 4926.11/s (n=10000)
+    #   New Every Time: 2.17439 wallclock secs ( 1.18 usr +  0.94 sys =  2.12 CPU) @ 4716.98/s (n=10000)
+  STATS: if ( $LJ::LOG_GTOP && $LJ::HAVE_GTOP ) {
+        $GTop ||= new GTop or last STATS;
+
+        my $startcpu = $r->pnotes( 'gtop_cpu' ) or last STATS;
+        my $endcpu = $GTop->cpu                 or last STATS;
+        my $startmem = $r->pnotes( 'gtop_mem' ) or last STATS;
+        my $endmem = $GTop->proc_mem( $$ )      or last STATS;
+
+        @$var{qw{pid cpu_user cpu_sys cpu_total mem_vsize mem_share mem_rss}} = (
+            $$,
+            $endcpu->user - $startcpu->user,
+            $endcpu->sys - $startcpu->sys,
+            $endcpu->total - $startcpu->total,
+            $endmem->vsize - $startmem->vsize,
+            $endmem->share - $startmem->share,
+            $endmem->rss - $startmem->rss,
+           );
+    }
 
     my $delayed = $LJ::IMMEDIATE_LOGGING ? "" : "DELAYED";
     $dbl->do("INSERT $delayed INTO $table (" . join(',', keys %$var) . ") ".

@@ -23,6 +23,9 @@ use Storable;
 use Image::Size ();
 use Apache::SendStats;
 
+# Try to load GTop library
+BEGIN { $LJ::HAVE_GTOP = eval "use GTop (); 1;" }
+
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
 require "$ENV{'LJHOME'}/cgi-bin/htmlcontrols.pl";
