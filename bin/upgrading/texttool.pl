@@ -11,11 +11,13 @@ my $opt_help = 0;
 my $opt_local_lang;
 my $opt_extra;
 my $opt_only;
+my $opt_override;
 exit 1 unless
 GetOptions(
            "help" => \$opt_help,
            "local-lang=s" => \$opt_local_lang,
            "extra=s" => \$opt_extra,
+           "override|v" => \$opt_override,
            "only=s" => \$opt_only,
            );
 
@@ -31,7 +33,9 @@ Where 'command' is one of:
   load         Runs the following four commands in order:
     popstruct  Populate lang data from text[-local].dat into db
     poptext    Populate text from en.dat, etc into database.
-               --extra specifies an alternative input file
+               --extra=<file> specifies an alternative input file
+               --override (-v) specifies existing values should be overwritten
+                               for all languages.  (for developer use only)
     copyfaq    If site is translating FAQ, copy FAQ data into trans area
     makeusable Setup internal indexes necessary after loading text
   dumptext     Dump lang text based on text[-local].dat information
@@ -319,6 +323,9 @@ sub poptext
         my %metadata;
         while (my $line = <D>) {
             $lnum++;
+            my $del;
+            my $action_line;
+
             if ($line =~ /^==(LANG|BML):\s*(\S+)/) {
                 $out->('x', "Bogus directives in non-extra file.")
                     if $source ne "[extra]";
@@ -334,6 +341,10 @@ sub poptext
                 }
             } elsif ($line =~ /^(\S+?)=(.*)/) {
                 ($code, $text) = ($1, $2);
+                $action_line = 1;
+            } elsif ($line =~ /^\!\s*(\S+)/) {
+                $del = $code;
+                $action_line = 1;
             } elsif ($line =~ /^(\S+?)\<\<\s*$/) {
                 ($code, $text) = ($1, "");
                 while (<D>) {
@@ -343,6 +354,7 @@ sub poptext
                     $text .= $_;
                 }
                 chomp $text;  # remove file new-line (we added it)
+                $action_line = 1;
             } elsif ($line =~ /^[\#\;]/) {
                 # comment line
                 next;
@@ -361,10 +373,11 @@ sub poptext
                 next;
             }
 
-            next unless $code ne "";
+            next unless $action_line;
 
             $out->('x', 'No language defined!') unless $l;
 
+            # load existing items for target language
             unless (exists $existing_item{$l->{'lnid'}}) {
                 $existing_item{$l->{'lnid'}} = {};
                 my $sth = $dbh->prepare(qq{
@@ -377,12 +390,26 @@ sub poptext
                     while $_ = $sth->fetchrow_array;
             }
 
+            # do deletes
+            if (defined $del) {
+                remove("general", $del);
+                delete $existing_item{$l->{'lnid'}}->{$del};
+                next;
+            }
+
+            # if override is set (development option) then delete
+            if ($opt_override && $existing_item{$l->{'lnid'}}->{$code}) {
+                remove("general", $code);
+                delete $existing_item{$l->{'lnid'}}->{$code};
+            }
+
             unless ($existing_item{$l->{'lnid'}}->{$code}) {
                 $addcount++;
                 my $staleness = $metadata{'staleness'}+0;
                 my $res = LJ::Lang::set_text($dbh, 1, $l->{'lncode'}, $code, $text,
                                              { 'staleness' => $staleness,
                                                'notes' => $metadata{'notes'}, });
+                $out->("set: $code");
                 unless ($res) {
                     $out->('x', "ERROR: " . LJ::Lang::last_error());
                 }
