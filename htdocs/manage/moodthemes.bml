@@ -7,7 +7,7 @@ head<=
 
     // Since JavaScript is dumb, we must get the page URL and save it here, to compare
     // against later when we're seeing if we actually loaded an image or not...
-    var page_url = '<?_code return "$LJ::SITEROOT/manage/moodthemes.bml"; _code?>';
+    var page_url = document.URL;
 
     // Designed to update the fields for the image just changed as well as
     // well as all those that inherit from it.
@@ -157,12 +157,13 @@ body<=
     return "Sorry, your account type does not allow creation of custom mood themes."
         unless LJ::get_cap($u, "moodthemecreate");
 
+    my $self_uri = "/manage/moodthemes.bml";
+    $self_uri .= "?authas=$authas" if $authas ne $remote->{'user'};
+
     # Populated with all the moods later in editform
     my %lists;
 
     my $ret;
-    my $self_uri = "/manage/moodthemes.bml";
-    $self_uri .= "?authas=$authas" if $authas ne $remote->{'user'};
 
     #### Closure Definitions ####
     my $make_tree;
@@ -235,18 +236,35 @@ body<=
         my $themeid = $POST{'themeid'};
         my $info;
 
-        # Make sure they can even edit this theme and fill in the $info variable for later use
-        if ($POST{'isnew'} != 1) {
+        # Figure out if they are editing a theme and which one they are
+        foreach (split(",", $POST{'themeids'})) {
+            $themeid = $_ if $POST{"edit:$_"};
+        }
+        unless ($themeid) { # They decided to actually use a custom theme
+            my $use_theme;
+            foreach (split(",", $POST{'themeids'})) {
+                $use_theme = $_ if $POST{"use:$_"};
+            }
+
+            my %update;
+            $update{'moodthemeid'} = $use_theme;
+            foreach (keys %update) {
+                delete $update{$_} if $u->{$_} eq $update{$_};
+            }
+            LJ::update_user($u, \%update);
+            return BML::redirect($self_uri);
+        }
+        elsif ($POST{'isnew'} != 1) { # Make sure they can even edit this theme and fill in the $info variable for later use
             my $dbr = LJ::get_db_reader();
             my $sth = $dbr->prepare("SELECT name FROM moodthemes WHERE moodthemeid=? AND ownerid=?");
-            $sth->execute($POST{'themeid'}, $u->{'userid'});
+            $sth->execute($themeid, $u->{'userid'});
             $info = $sth->fetchrow_hashref;
             return LJ::bad_input("You do not have permission to edit this theme.")
                 unless defined $info;
         }
 
         # We are either making changes to an existing theme or showing the edit form for a new theme
-        if ($POST{'edit'} == 1 || $POST{'isnew'} == 1) {
+        if ($themeid && $POST{'edit'} == 1 || $POST{'isnew'} == 1) {
             # Insert the new theme name and description into the db and grab its new themeid
             if ($POST{'isnew'} == 1) {
                 return LJ::bad_input("You must specify a name for this theme.")
@@ -272,8 +290,7 @@ body<=
 
             $ret .= LJ::html_submit('save' => "Save Changes") . "</form> p?>\n";
 
-        } else  { # Save their changes
-            my $themeid = $POST{'themeid'};
+        } elsif ($themeid)  { # Save their changes
             my $dbh = LJ::get_db_writer();
 
             # Update the name or description if needed
@@ -312,10 +329,11 @@ body<=
             LJ::MemCache::delete([$themeid, "moodthemedata:$themeid"]);
 
            $ret .= "<br />Changes have been successfully saved.<br /><br />\n";
+           return BML::redirect($self_uri);
         }
 
         $ret .= BML::ml('Backlink', {
-            'link' => '/manage/moodthemes.bml',
+            'link' => $self_uri,
             'text' => 'Return To Editor',
         });
     } else { # Show the first form to select user, which one to edit, or create a new one
@@ -343,16 +361,46 @@ body<=
         push @user_themes, $_ while $_ = $sth->fetchrow_hashref;
 
         if (@user_themes) { # The have some custom themes already defined
-            my @opts = map {$_->{moodthemeid}, $_->{name}} @user_themes;
             $ret .= "<form action='$self_uri' method='post' id='selectform' name='selectform' style='margin-left: 30px;'>\n";
-            $ret .= LJ::html_hidden('edit' => 1) . " ";
-            $ret .= "<?p " . LJ::html_select({'name' => 'themeid'}, @opts) . " ";
-            $ret .= LJ::html_submit('editbut' => "Edit") . " p?></form>\n";
+            $ret .= LJ::html_hidden('edit' => 1,
+                                    'themeids' => join(",", map { $_->{moodthemeid} } @user_themes));
+            $ret .= "<table>";
+            $ret .= "<tr><th></th><th>Happy</th><th>Sad</th><th>Angry</th><th></th></tr>";
+            foreach my $theme (@user_themes) {
+                my $name = $theme->{'name'};
+                my $tid = $theme->{'moodthemeid'};
+
+                my $use_dis = 0;
+                if ($tid == $u->{'moodthemeid'}) {
+                    $ret .= "<tr><td><b>$name</b></td>";
+                    $use_dis = 1;
+                } else {
+                    $ret .= "<tr><td>$name</td>";
+                }
+
+                my @head_moods = (15, 25, 2); # happy, sad, angry
+                foreach my $moodid (@head_moods) {
+                    my %pic = ();
+                    LJ::get_mood_picture($tid, $moodid, \%pic);
+                    $ret .= "<td>";
+                    if (%pic) {
+                        $ret .= "<img align='absmiddle' src=\"$pic{'pic'}\" width='$pic{'w'}' height='$pic{'h'}' hspace='2' vspace='2' />";
+                    } else {
+                        $ret .= "<i>[no image]</i>";
+                    }
+                    $ret .= "</td>";
+                }
+
+                $ret .= "<td>" . LJ::html_submit("edit:$tid" => "Edit") . " " . LJ::html_submit("use:$tid", "Use", {'disabled' => $use_dis}) . "</td>";
+                $ret .= "</tr>";
+            }
+            $ret .= "</table>";
+            $ret .= "</form>\n";
         } else {
             $ret .= "<?p You have not yet made any custom mood themes. p?>\n";
         }
 
-        $ret .= "<?p Go to the <a href='$LJ::SITEROOT/modify.bml'>Modify Journal page</a> to set your default mood theme. p?>";
+        $ret .= "<?p Select a public mood theme as your default at the  <a href='$LJ::SITEROOT/modify.bml'>Modify Journal page</a>. p?>";
     }
 
     return $ret;
