@@ -132,9 +132,13 @@
  }
 
  my %res_fr;
+ my $incfriendof = 1;
+ if ($u->{'opt_hidefriendofs'}) {
+     $incfriendof = 0; 
+ }
  &LJ::do_request($dbr, 
 		 { 'mode' => 'getfriends',
-		   'includefriendof' => '1',
+		   'includefriendof' => $incfriendof,
 		   'user' => $u->{'user'}, }, 
 		 \%res_fr,
 		 { 'userid' => $u->{'userid'},
