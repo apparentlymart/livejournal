@@ -13,7 +13,7 @@ sub clean_poll
     my $ref = shift;
 
     my $poll_eat = [qw[head title style layer iframe applet object]];
-    my $poll_allow = [qw[a b i u]];
+    my $poll_allow = [qw[a b i u img]];
     my $poll_remove = [qw[bgsound embed object caption link font]];
     
     LJ::CleanHTML::clean($ref, {
