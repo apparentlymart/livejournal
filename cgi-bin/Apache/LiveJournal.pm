@@ -354,31 +354,43 @@ sub trans
                                 'user' => $user });
     };
 
+    # flag if we hit a domain that was configured as a "normal" domain
+    # which shouldn't be inspected for its domain name.  (for use with
+    # Akamai and other CDN networks...)
+    my $skip_domain_checks = 0;
+
     # user domains
     if ($LJ::USER_VHOSTS &&
         $host =~ /^([\w\-]{1,15})\.\Q$LJ::USER_DOMAIN\E$/ &&
-        $1 ne "www" && $LJ::SUBDOMAIN_FUNCTION{$1} ne "normal")
+        $1 ne "www")
     {
         my $user = $1;
 
         # see if the "user" is really functional code
-        # currently, the only type is "userpics"
-        if (my $func = $LJ::SUBDOMAIN_FUNCTION{$user}) {
+        my $func = $LJ::SUBDOMAIN_FUNCTION{$user};
+
+        if ($func eq "normal") {
+            # site admin wants this domain to be ignored and treated as if it
+            # were "www", so set this flag so the custom "OTHER_VHOSTS" check
+            # below fails.
+            $skip_domain_checks = 1;
+        } elsif ($func) {
             my $code = {
                 'userpics' => \&userpic_trans,
                 'files' => \&files_trans,
             };
             return $code->{$func}->($r) if $code->{$func};
             return 404;  # bogus ljconfig
+        } else {
+            my $view = $determine_view->($user, "users", $uri);
+            return $view if defined $view;
+            return 404;
         }
-
-        my $view = $determine_view->($user, "users", $uri);
-        return $view if defined $view;
-        return 404;
     }
 
     # custom used-specified domains
-    if ($LJ::OTHER_VHOSTS && $host ne $LJ::DOMAIN_WEB &&
+    if ($LJ::OTHER_VHOSTS && !$skip_domain_checks &&
+        $host ne $LJ::DOMAIN_WEB &&
         $host ne $LJ::DOMAIN && $host =~ /\./ &&
         $host =~ /[^\d\.]/)
     {
