@@ -365,11 +365,17 @@ p?>
 
 /community/members.bml.settings=[<a href='[[link]]'>Settings</a>]
 
+/community/members.bml.success.added=added: [[list]]
+
+/community/members.bml.success.deleted=removed: [[list]]
+
 /community/members.bml.success.header=Success
 
 /community/members.bml.success.invited=The following users have been successfully invited to this community with the listed privileges:
 
-/community/members.bml.success.message=Your changes have been successfully saved.
+/community/members.bml.success.message2=The following changes have been made:
+
+/community/members.bml.success.nochanges=No changes have been made.
 
 /community/members.bml.success.return=<a href='[[link]]'>Return to the list</a>
 

@@ -44,12 +44,30 @@ body<=
     }
 
     my @allattribs = ('member', 'post', 'preapprove', 'moderate', 'admin');
+    my %attrshort = ( X => 'member', P => 'post', N => 'preapprove', M => 'moderate', A => 'admin');
+    my %attrshort_r = ( map { $attrshort{$_} => $_ } keys %attrshort ); # reversed
 
     # saving a form submission
     if ($POST{'action:update'}) {
 
         my @userids = split(',', $POST{'ids'});
         my @saveattribs = split(',', $POST{'attribs'});
+
+        # now we need to create our 'was' list
+        my %was; # ( userid => { attrib => 1; } )
+        my %users; # ( userid => username )
+        foreach my $row (split ';', $POST{was}) { # UID:UNAME:MNPX;UID:UNAME:MX;UID:UNAME:AM
+            # if this row matches...
+            if ($row =~ /^(\d+):(\w+):(\w+)$/) {
+                my ($uid, $name, $attrs) = ($1, $2, $3);
+                $uid += 0;
+                next unless $uid && $name && $attrs;
+
+                # split attrs and setup
+                $was{$uid}->{$attrshort{$_}} = 1 foreach split '', $attrs;
+                $users{$uid} = $name;
+            }
+        }
 
         # invite new users
         my @to_add;
@@ -148,13 +166,21 @@ body<=
 
         # users already in community
         my $maints = 0;
+        my (%addr, %delr); # store additions and removals sorted by userid
         foreach my $id (@userids) {
             $id = $id + 0;
+            my $str;
             foreach (@allattribs) {
                 if ($POST{"edit_${id}_$_"}) {
-                    $add{$_}->{$id} = 1 unless $POST{"w_${id}_$_"};
+                    unless ($was{$id}->{$_}) {
+                        $add{$_}->{$id} = 1;
+                        $addr{$id}->{$_} = 1;
+                    }     
                 } else {
-                    $delete{$_}->{$id} = 1 if $POST{"w_${id}_$_"};
+                    if ($was{$id}->{$_}) {
+                        $delete{$_}->{$id} = 1;
+                        $delr{$id}->{$_} = 1;
+                    }                    
                 }
             }
             $maints++ if $POST{"edit_${id}_admin"};
@@ -190,7 +216,7 @@ body<=
         my @msgs;
         if (%{$add{'member'}}) {
             foreach my $id (keys %{$add{'member'}}) {
-                next if $POST{"w_member_$id"};
+                next if $was{$id}->{'member'};
                 my $u = LJ::load_userid($id);
                 if (LJ::u_equals($u, $remote)) {
                     # you're allowed to add yourself as member
@@ -211,9 +237,24 @@ body<=
                            (map { [$cid, $_, 'N'] } keys %{$add{preapprove} || {}}),
                            );
 
-        $ret .= "<?h1 $ML{'.success.header'} h1?><?p $ML{'.success.message'} p?>";
+        # create some other messages
+        my %done; # keep track of who we've done
+        foreach my $id (keys %addr, keys %delr) {
+            next if $done{$id}++;
+
+            my ($str, @astr, @dstr);
+            push @astr, $ML{"/manage/invites.bml.label.$_"}
+                foreach keys %{$addr{$id} || {}};
+            push @dstr, $ML{"/manage/invites.bml.label.$_"}
+                foreach keys %{$delr{$id} || {}};
+            $str .= "<li>" . BML::ml('.success.added', { list => join(', ', @astr) }) . "</li>\n" if @astr;
+            $str .= "<li>" . BML::ml('.success.deleted', { list => join(', ', @dstr) }) . "</li>\n" if @dstr;
+            push @msgs, LJ::ljuser($users{$id}, { type => 'P' }) . ":<ul>$str</ul>" if $str;
+        }
+
+        $ret .= "<?h1 $ML{'.success.header'} h1?>";
         if (@msgs) {
-            $ret .= "<ul>";
+            $ret .= "<?p $ML{'.success.message2'} p?>\n<ul>";
             $ret .= "<li>$_</li>\n" foreach @msgs;
             $ret .= "</ul>";
         }
@@ -227,6 +268,7 @@ body<=
             }
             $ret .= "</ul>";
         }
+        $ret .= "<?p $ML{'.success.nochanges'} p?>" unless @msgs || @invited;
         $ret .= "<?p " . BML::ml(".success.return", { 'link' => BML::get_uri() . "?comm=$cname" }) . " p?>";
 
         return $ret;
@@ -339,16 +381,19 @@ body<=
 
     # rows for existing users
     my $rc = 0;
+    my @wstrs;
     foreach(@users) {
         my $rstyle = ($rc++ & 1) ? "<?altcolor1?>" : "<?altcolor2?>";
         $ret .= "<tr style='background-color: $rstyle;'><td>" . LJ::ljuser($_->{'name'}) . "</td>";
+        my $wstr;
         foreach my $key (@attribs) {
             $ret .= "<td align='center'>";
             $ret .= LJ::html_check({ 'name' => "edit_$_->{'userid'}_$key",
                                      'selected' => $_->{$key} });
-            $ret .= LJ::html_hidden("w_$_->{userid}_$key", 1) if $_->{$key};
+            $wstr .= $attrshort_r{$key} if $_->{$key};
             $ret .= "</td>";
         }
+        push @wstrs, "$_->{userid}:$_->{name}:$wstr" if $wstr;
         $ret .= "</tr>\n";
     }
 
@@ -374,7 +419,8 @@ body<=
     # some hidden values
     $ret .= "</table>";
     $ret .= LJ::html_hidden('ids', join(',', map { $_->{'userid'}} @users),
-                            'attribs', join(',', @attribs)) . "\n";
+                            'attribs', join(',', @attribs),
+                            'was', join(';', @wstrs)) . "\n";
 
     $ret .= "<p>" . LJ::html_submit('action:update', $ML{'.update'}) . "</p>\n";
     $ret .= "</form></div>\n\n";
