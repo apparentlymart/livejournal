@@ -67,6 +67,9 @@ sub clean
     my $data = shift;
     my $opts = shift;
     my $newdata;
+
+    # remove the auth portion of any see_request.bml links
+    $$data =~ s/(see_request\.bml.+?)auth=\w+/$1/ig;
  
     my $p = HTML::TokeParser->new($data);
 
