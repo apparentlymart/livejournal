@@ -383,6 +383,7 @@ sub get_friend_items
 
     my $max_age = $LJ::MAX_FRIENDS_VIEW_AGE || 3600*24*14;  # 2 week default.
     my $lastmax = $LJ::EndOfTime - time() + $max_age;
+    my $lastmax_cutoff = 0; # if nonzero, never search for entries with rlogtime higher than this (set when cache in use)
 
     # sanity check:
     $skip = 0 if ($skip < 0);
@@ -419,7 +420,7 @@ sub get_friend_items
                 push @items, LJ::get_cached_friend_items($opts->{'u'}, \$fvcache->[1], $getitems, $gmask_from, {
                     'dateformat' => $opts->{'dateformat'}, 
                 });
-                $lastmax = $items[0]->{'rlogtime'} - 1 if @items;
+                $lastmax_cutoff = $lastmax = $items[0]->{'rlogtime'} - 1 if @items;
             }
         }
     }
@@ -567,6 +568,7 @@ sub get_friend_items
         if (@items == $getitems)
         {
             $lastmax = $items[-1]->{'rlogtime'};
+            $lastmax = $lastmax_cutoff if $lastmax_cutoff && $lastmax > $lastmax_cutoff;
 
             # stop looping if we know the next friend's newest entry
             # is greater (older) than the oldest one we've already
