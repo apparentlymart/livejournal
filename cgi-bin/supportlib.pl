@@ -272,7 +272,6 @@ sub file_request
     unless ($reqbody) {
         push @$errors, "You did not enter a support request.";
     }
-    my $scat = $o->{'supportcat'};
 
     if (@$errors) { return 0; }
     
@@ -283,7 +282,12 @@ sub file_request
     my $qrequserid = $o->{'requserid'}+0;
     my $qreqname = $dbh->quote($o->{'reqname'});
     my $qreqemail = $dbh->quote($o->{'reqemail'});
-    my $qspcatid = ($scat->{'spcatid'} || $o->{'spcatid'})+0;
+    my $qspcatid = $o->{'spcatid'}+0;
+
+    my $scat = $dbh->selectrow_hashref(qq{
+        SELECT spcatid, catname, no_autoreply 
+        FROM supportcat WHERE spcatid=$qspcatid
+    });
 
     # make the authcode
     my $authcode = LJ::make_auth_code(15);
@@ -339,10 +343,9 @@ sub file_request
     $url = "$LJ::SITEROOT/support/see_request.bml?id=$spid";
     $urlauth = "$url&auth=$miniauth";
 
-    $body = "Your LiveJournal support request regarding \"$o->{'subject'}\" has been filed and will be answered as soon as possible.  Your request tracking number is $spid.\n\n";
+    $body = "Your $LJ::SITENAME support request regarding \"$o->{'subject'}\" has been filed and will be answered as soon as possible.  Your request tracking number is $spid.\n\n";
     $body .= "You can track your request's progress or add information here:\n\n  ";
     $body .= LJ::make_text_link($urlauth, $email);
-    
     $body .= "\n\nIf you figure out the problem before somebody gets back to you, please cancel your request by clicking this:\n\n  ";
     $body .= LJ::make_text_link("$LJ::SITEROOT/support/act.bml?close;$spid;$authcode", $email);
    
@@ -351,7 +354,7 @@ sub file_request
       LJ::send_mail({ 
           'to' => $email,
           'from' => $LJ::BOGUS_EMAIL,
-          'fromname' => 'LiveJournal Support',
+          'fromname' => "$LJ::SITENAME Support",
           'subject' => "Support Request \#$spid",
           'body' => $body  
           });
@@ -365,15 +368,22 @@ sub file_request
     while ($_ = $sth->fetchrow_hashref) {
         push @to_notify, $_->{'email'};
     }
-    $body = "A LiveJournal support request regarding \"$o->{'subject'}\" has been submitted.  You can track its progress or add information here:\n\n  ";
-    $body .= LJ::make_text_link($url, $_->{'email'});
+    
+    $body = "A $LJ::SITENAME support request has been submitted regarding the following:\n\n";
+    $body .= "Category: $scat->{'catname'}\n";
+    $body .= "Subject:  $o->{'subject'}\n\n";
+    $body .= "You can track its progress or add information here:\n\n";
+    # Since we're only sending one mass-addressed e-mail here, we shouldn't use make_text_link (which applies to only one address)
+    $body .= $url;
+    $body .= "\n\nIf you do not wish to receive notifications of incoming support requests, you may may change your notification settings here:\n\n";
+    $body .= "$LJ::SITEROOT/support/changenotify.bml";
     $body .= "\n\n" . "="x70 . "\n\n";
     $body .= $o->{'body'};
-    
+        
     LJ::send_mail({ 
         'bcc' => join(", ", @to_notify),
         'from' => $LJ::BOGUS_EMAIL,
-        'fromname' => 'LiveJournal Support',
+        'fromname' => "$LJ::SITENAME Support",
         'subject' => "Support Request \#$spid",
         'body' => $body
         });
@@ -429,14 +439,15 @@ sub append_request
     $body = "A follow-up to the request regarding \"$sp->{'subject'}\" has ";
     $body .= "been submitted.  You can track its progress or add ";
     $body .= "information here:\n\n  ";
-    $body .= LJ::make_text_link($url, $_->{'email'});
+    # Since we're only sending one mass-addressed e-mail here, we shouldn't use make_text_link (which applies to only one address)
+    $body .= $url;
     $body .= "\n\n" . "="x70 . "\n\n";
     $body .= $message;
     
     LJ::send_mail({ 
         'bcc' => join(", ", @to_notify),
         'from' => $LJ::BOGUS_EMAIL,
-        'fromname' => 'LiveJournal Support',
+        'fromname' => "$LJ::SITENAME Support",
         'subject' => "Re: Support Request \#$spid",
         'body' => $body
         });
@@ -537,7 +548,7 @@ sub mail_response_to_user
     LJ::send_mail({ 
         'to' => $email,
         'from' => $fromemail,
-        'fromname' => 'LiveJournal Support',
+        'fromname' => "$LJ::SITENAME Support",
         'subject' => "Re: $sp->{'subject'}",
         'body' => $body  
         });
