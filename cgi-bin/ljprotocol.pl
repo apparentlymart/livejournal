@@ -2261,7 +2261,7 @@ sub authenticate
                                              \$ip_banned);
         }
         if ($auth_meth eq "cookie") {
-            return unless $r->header_in("X-LJ-Auth") eq "cookie";
+            return unless $r && $r->header_in("X-LJ-Auth") eq "cookie";
             my $remote = LJ::get_remote();
             return $remote && $remote->{'user'} eq $username ? 1 : 0;
         }
