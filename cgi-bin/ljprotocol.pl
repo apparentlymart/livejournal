@@ -772,7 +772,8 @@ sub editevent
         } else {
 	    LJ::delete_item($dbh, $ownerid, $req->{'itemid'});	    
 	}
-	my $res = { 'itemid' => $qitemid };
+	my $res = { 'itemid' => $qitemid,
+		    'anum' => $oldevent->{'anum'} };
 	return $res;
     }
 
@@ -1088,7 +1089,7 @@ sub getevents
 	
 	my $LIMIT = 300;
 	if ($clustered) {
-	    $sql = "SELECT jitemid, eventtime, security, allowmask ".
+	    $sql = "SELECT jitemid, eventtime, security, allowmask, anum ".
 		"FROM log2 l, syncupdates2 s ".
 		"WHERE s.userid=$ownerid AND l.journalid=$ownerid ".
 		"AND s.atime>='$date' AND s.nodetype='L' AND s.nodeid=l.jitemid ".
@@ -1108,7 +1109,7 @@ sub getevents
     # common SQL template:
     unless ($sql) {
 	if ($clustered) {
-	    $sql = "SELECT jitemid, eventtime, security, allowmask ".
+	    $sql = "SELECT jitemid, eventtime, security, allowmask, anum ".
 		   "FROM log2 WHERE journalid=$ownerid $where $orderby $limit";
 	} else {
 	    $sql = "SELECT itemid, eventtime, security, allowmask ".
@@ -1130,7 +1131,7 @@ sub getevents
     my $events = $res->{'events'} = [];
     my %evt_from_itemid;
 
-    while (my ($itemid, $eventtime, $sec, $mask) = $sth->fetchrow_array)
+    while (my ($itemid, $eventtime, $sec, $mask, $anum) = $sth->fetchrow_array)
     {
 	$count++;
 	my $evt = {};
@@ -1144,6 +1145,7 @@ sub getevents
 	    $evt->{'security'} = $sec;
 	    $evt->{'allowmask'} = $mask if $sec eq "usemask";
 	}
+	$evt->{'anum'} = $anum if $clustered;
 	push @$events, $evt;
     }
 
@@ -2301,7 +2303,7 @@ sub getevents
     my $pct = 0;
     foreach my $evt (@{$rs->{'events'}}) {
 	$ect++;
-	foreach my $f (qw(itemid eventtime security allowmask subject)) {
+	foreach my $f (qw(itemid eventtime security allowmask subject anum)) {
 	    if (defined $evt->{$f}) {
 		$res->{"events_${ect}_$f"} = $evt->{$f};
 	    }
