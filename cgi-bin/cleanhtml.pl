@@ -167,7 +167,7 @@ sub clean
 			else { $newdata .= "&lt;$tag"; }
 			my $slashclose = delete $hash->{'/'};
 			foreach (keys %$hash) {
-			    $newdata .= " $_=\"$hash->{$_}\"";
+			    $newdata .= " $_=\"" . LJ::ehtml($hash->{$_}) . "\"";
 			}
 			if ($slashclose) {
 			    $newdata .= " /";

@@ -2627,7 +2627,7 @@ sub strip_bad_code
 		$newdata .= "<" . $tag;
 		my $slashclose = delete $hash->{'/'};
 		foreach (keys %$hash) {
-		    $newdata .= " $_=\"$hash->{$_}\"";
+		    $newdata .= " $_=\"" . LJ::ehtml($hash->{$_}) . "\"";
 		}
 		$newdata .= " /" if $slashclose;
 		$newdata .= ">";
