@@ -1921,12 +1921,7 @@ sub ljuser
 # </LJFUNC>
 sub get_urls
 {
-    my $text = shift;
-    my @urls;
-    while ($text =~ s!http://[^\s\"\'\<\>]+!!) {
-        push @urls, $&;
-    }
-    return @urls;
+    return ($_[0] =~ m!http://[^\s\"\'\<\>]+!g);
 }
 
 # <LJFUNC>
