@@ -211,17 +211,19 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
         """<td valign=top align="middle" bgcolor="$bgcolor" width=100>
         <font face="verdana,arial,helvetica" size="2" color="$fgcolor">""";
         if ($p.view == "friends") { 
-            "<a href='"; $e.journal->base_url(); "'><b>$e.journal.username</b></a><br />";
+            """<a href='""" + $e.journal->base_url() + """'><b>$e.journal.username</b></a><br />""";
         }
         if ($e.poster.username != $e.journal.username) {
             if ($p.view == "friends") { 
-                "[<a href='"; $e.poster->base_url(); "'><font color='$fgcolor'>$e.poster.username</font></a>]<br />";
+                """[<a href='""" + $e.poster->base_url() + """'><font color='$fgcolor'>$e.poster.username</font></a>]<br />""";
             } else {
-                "<a href='"; $e.poster->base_url(); "'><font color='$fgcolor'><b>$e.poster.username</b></font></a><br />";
+                """<a href='""" +  $e.poster->base_url() + """'><font color='$fgcolor'><b>$e.poster.username</b></font></a><br />""";
             }
         }
         if (defined $e.userpic) {
-            if (($*show_recent_userpic == false) and ($p.view != "friends")) { }
+            if (($*show_recent_userpic == false) and 
+	        ($p.view != "friends") and
+		($p.journal_type != "C") ) { }
             else { """<img border="0" src="$e.userpic.url" width="$e.userpic.width" height="$e.userpic.height" alt="" />""";
             }
         }
