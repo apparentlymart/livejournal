@@ -134,7 +134,6 @@ sub get_friend_items
 	    'skip' => 0,
 	    'gmask_from' => $gmask_from,
 	    'friendsview' => 1,
-	    'itemids' => $opts->{'itemids'},
 	});
 
 	$opts->{'owners'}->{$friendid} = 1;
@@ -159,6 +158,13 @@ sub get_friend_items
 
     # remove skipped ones
     splice(@items, 0, $skip) if $skip;
+
+    # return the itemids for them if they wanted them
+    if (ref $opts->{'itemids'} eq "ARRAY") {
+	foreach (@items) {
+	    push @{$opts->{'itemids'}}, $_->{'itemid'};
+	}
+    }
     
     return @items;
 }
