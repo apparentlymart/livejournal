@@ -159,6 +159,8 @@ $cmd{'gencodes'} = {
         my $quantity = int(shift @$args)   or return $usage->($out, $myname);
         not @$args                         or return $usage->($out, $myname);
 
+        $remote or $fail->($out, "Not logged in.");
+            
         $remote->{'priv'}->{'gencodes'}
             or return $fail->($out, "You don't have privileges needed to run this command.");
 
@@ -167,6 +169,8 @@ $cmd{'gencodes'} = {
         my $generated = LJ::acct_code_generate($dbh, $userid, $quantity)
             or return $fail->($out, "Failed to generate codes: $dbh->errstr");
 
+        LJ::statushistory_add($dbh, $userid, $remote->{'userid'}, "gencodes", "$generated created");
+        
         return $success->($out, "$quantity codes requested for $username, generated $generated.");
     },
 };
