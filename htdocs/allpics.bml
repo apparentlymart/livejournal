@@ -25,7 +25,7 @@
     # allow anybody with any version of viewall to see userpics for non-V statusvis users
     if ($GET{viewall} && LJ::check_priv($remote, 'viewall')) {
         LJ::statushistory_add($u->{'userid'}, $remote->{'userid'},
-                              "viewall", "userinfo: $u->{'user'}, statusvis: $u->{'statusvis'}");
+                              "viewall", "allpics: $u->{'user'}, statusvis: $u->{'statusvis'}");
     } else {
         if ($u->{'statusvis'} eq "S") {
             $title = $ML{'error.suspended.title'};
