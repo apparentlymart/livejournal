@@ -9,7 +9,7 @@
 
     # for error reporting
     my $err = sub {
-        return "<h2>Error</h2>" . shift;
+        return "<title>Error</title>\n<h2>Error</h2>" . shift;
     };
 
     # we need a valid id
@@ -103,6 +103,15 @@
     $ret .= LJ::html_submit('submit', 'Compile') . "\n";
     $ret .= "</p></form>\n";
 
-    return $ret;
+    my $title;
+    my $layerinfo = {};
+
+    LJ::S2::load_layer_info($layerinfo, [ $id ]);
+    $title = LJ::ehtml($layerinfo->{$id}->{'name'});
+
+    # Only use the layer name if there is one and it's more than just whitespace
+    $title = length $title && $title =~ /[^\s]/ ? "$title [$id]" : "Layer $id";
+
+    return "<title>$title - Edit</title>\n" . $ret;
 }
 _code?>
