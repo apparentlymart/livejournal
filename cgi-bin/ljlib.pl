@@ -224,22 +224,31 @@ sub get_dbh {
     }
 
     my $mapping;
+  ROLE:
     foreach my $role (@_) {
         if (($mapping = $LJ::WRAPPED_DB_ROLE{$role}) && ! $opts->{raw}) {
             return $LJ::REQ_DBIX_KEEPER{$role} if $LJ::REQ_DBIX_KEEPER{$role};
             my ($canl_role, $dbname) = @$mapping;
-            my $tracker = 
-                $LJ::REQ_DBIX_TRACKER{$canl_role} ||=
-                DBIx::StateTracker->new(sub { $LJ::DBIRole->get_dbh({unshared=>1},$canl_role) });
+            my $tracker;
+            # DBIx::StateTracker::new will die if it can't connect to the database,
+            # so it's wrapper in an eval
+            eval {
+                $tracker = 
+                    $LJ::REQ_DBIX_TRACKER{$canl_role} ||=
+                    DBIx::StateTracker->new(sub { $LJ::DBIRole->get_dbh({unshared=>1},
+                                                                        $canl_role) });
+            };
             if ($tracker) {
                 my $keeper = DBIx::StateKeeper->new($tracker, $dbname);
                 $LJ::REQ_DBIX_KEEPER{$role} = $keeper;
                 return $keeper;
             }
+            next ROLE;
         }
         my $db = $LJ::DBIRole->get_dbh($role);
         return $db if $db;
     }
+    return undef;
 }
 
 # <LJFUNC>
@@ -381,6 +390,12 @@ sub get_log2_recent_log
         if $rows_decode->();
 
     my $db = LJ::get_cluster_master($cid);
+    my $used_slave = 0;
+    unless ($db) {
+        $db = LJ::get_cluster_reader($cid); 
+        $used_slave = 1;
+        return undef unless $db;
+    }
 
     my $lock = $db->selectrow_array("SELECT GET_LOCK(?,10)", undef, $lockkey);
     return undef unless $lock;
@@ -430,7 +445,7 @@ sub get_log2_recent_log
     }
 
     $rows = $DATAVER . $rows;
-    LJ::MemCache::set($memkey, $rows);
+    LJ::MemCache::set($memkey, $rows) unless $used_slave;
 
     $db->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
     return $ret;
