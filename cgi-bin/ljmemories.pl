@@ -120,7 +120,7 @@ sub delete_by_id {
 
     # setup
     my ($db, $table) = $u->{dversion} > 5 ?
-                       (LJ::get_cluster_master($u), '2') :
+                       ($u, '2') :
                        (LJ::get_db_writer(), '');
 
     # if dversion 5, verify the ids
@@ -245,7 +245,7 @@ sub update_memory {
 
     # get database handle
     my ($db, $table) = $u->{dversion} > 5 ?
-                       (LJ::get_cluster_master($u), '2') :
+                       ($u, '2') :
                        (LJ::get_db_writer(), '');
     return undef unless $db;
 
