@@ -749,7 +749,14 @@ sub can_use_prop
     return 1 if LJ::get_cap($u, "s2everything");
     my $pol = get_policy();
     my $can = 0;
-    foreach my $lay ('*', $uniq) {
+    my @layers = ('*');
+    my $pub = get_public_layers();
+    if ($pub->{$uniq} && $pub->{$uniq}->{'type'} eq "layout") {
+        my $cid = $pub->{$uniq}->{'b2lid'};
+        push @layers, $pub->{$cid}->{'uniq'} if $pub->{$cid};
+    }
+    push @layers, $uniq;
+    foreach my $lay (@layers) {
         foreach my $it ('props', 'prop') {
             if ($it eq "props" && defined $pol->{$lay}->{'props'}) {
                 $can = $pol->{$lay}->{'props'};

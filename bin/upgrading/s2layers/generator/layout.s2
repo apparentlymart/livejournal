@@ -38,9 +38,14 @@ set weak_back = "#aaaaaa";
 property Color weak_text { des = "Text color for the bar below entries"; }
 set weak_text = "#000000";
 
+property int box_width { des = "Box width (pixels)"; }
+set box_width = 600;
+
+property use page_recent_items;
 property use text_post_comment;
 property use text_read_comments;
 
+property use page_friends_items;
 property use text_post_comment_friends;
 property use text_read_comments_friends;
 
@@ -115,7 +120,7 @@ $.head_content
 </head>
 <body bgcolor="$*page_back" text="$*entry_text" link="$*page_link" vlink="$*page_vlink" alink="$*page_alink">
 <div align="center">
-<table width="600" cellpadding="2" cellspacing="0"
+<table width="$*box_width" cellpadding="2" cellspacing="0"
 border="0"
 summary="">
 <tr><td bgcolor="$*stronger_back" align="center">
@@ -186,7 +191,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
         + $e.time->time_format() + "</b>";
 
     """
-<table width="600" cellpadding="2" cellspacing="0" border="0" summary="" class="entrybox">
+<table width="$*box_width" cellpadding="2" cellspacing="0" border="0" summary="" class="entrybox">
 <tr align='left'>
 <td bgcolor="$*stronger_back" align="center">
 <table width="100%" cellpadding="5" cellspacing="0" border="0" summary="">

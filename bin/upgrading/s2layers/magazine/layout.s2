@@ -49,6 +49,13 @@ set vlink_color = "#500050";
 property Color alink_color { des = "Text color of active links"; }
 set alink_color = "#ff00c0";
 
+property use page_recent_items;
+property use text_post_comment;
+property use text_read_comments;
+
+property use page_friends_items;
+property use text_post_comment_friends;
+property use text_read_comments_friends;
 
 
 function Page::lay_skip_navigation() {}

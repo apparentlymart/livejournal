@@ -177,7 +177,8 @@
         $body .= "</dd>";
         $checked = $had_override ? "checked='checked'" : "";
         $disabled = $can_use ? "" : "disabled='disabled'";
-        $body .= "<dt><input type='radio' name='${name}_action' value='override' id='${name}_override' $checked $disabled><label for='${name}_override'> <b>Override: </b></label></dt><dd>";
+        my $offhelp = ! $can_use ? LJ::help_icon('s2propoff', ' ') : "";
+        $body .= "<dt><input type='radio' name='${name}_action' value='override' id='${name}_override' $checked $disabled><label for='${name}_override'> <b>Override: </b></label>$offhelp</dt><dd>";
         if ($prop->{'values'}) {
             $body .= LJ::html_select({ 'name' => "${name}_value",
                                        'disabled' => ! $can_use,

@@ -8,7 +8,7 @@ layerinfo previews = "punquin/punquin.jpg";
 property bool show_recent_userpic { des = "Show the userpic on the recent entries page?"; }
 set show_recent_userpic = false;
 
-property Color body_bgcolor { des = "Main background color"; }
+property Color body_bgcolor { des = "Page background color"; }
 set body_bgcolor = "#6666cc";
 
 property Color main_bgcolor { des = "Background of text areas"; }
@@ -34,6 +34,14 @@ set vlink_color = "#500050";
 
 property Color alink_color { des = "Active link color"; }
 set alink_color = "#ff00c0";
+
+property use page_recent_items;
+property use text_post_comment;
+property use text_read_comments;
+
+property use page_friends_items;
+property use text_post_comment_friends;
+property use text_read_comments_friends;
 
 set page_recent_items = 20;
 set page_friends_items = 20;
