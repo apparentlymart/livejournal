@@ -72,7 +72,7 @@ sub ban_set_unset
     my $j;
 
     unless ($remote->{'journaltype'} eq "P") {
-        push @$out, [ "error", "Only people can ban other users, not communities (you're not logged in as a person account." ],
+        push @$out, [ "error", "Only people can ban other users, not communities (you're not logged in as a person account)." ],
         return 0;
     }
 
@@ -115,6 +115,15 @@ sub ban_set_unset
 
     my $qbanid = $banid+0;
     my $quserid = $j->{'userid'}+0;
+
+    # exceeded ban limit?
+    if ($args->[0] eq 'ban_set') {
+        my $banlist = LJ::load_rel_user($quserid, 'B') || [];
+        if (scalar(@$banlist) >= ($LJ::MAX_BANS || 5000)) {
+            push @$out, [ "error", "You have reached the maximum number of bans.  Unban someone and try again." ];
+            return 0;
+        }
+    }
 
     if ($args->[0] eq "ban_set") {
         LJ::set_rel($quserid, $qbanid, 'B');

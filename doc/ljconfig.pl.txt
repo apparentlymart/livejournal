@@ -454,6 +454,9 @@
     #    'track_useragent' => 1,
     );
 
+    # If you want to change the limit on how many bans a user can make, uncomment
+    # the following line.  Default is 5000.
+    #$MAX_BANS = 5000;
 }
 
 1;  # return true
