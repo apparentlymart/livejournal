@@ -661,6 +661,16 @@ $cmd{'allow_open_proxy'} = {
                ],
     };
 
+$cmd{'find_user_cluster'} = {
+    'handler' => \&find_user_cluster,
+    'privs' => [qw(supportviewinternal supporthelp)],
+    'des' => "Finds the cluster that the given user's journal is on.",
+    'argsummary' => '<user>',
+    'args' => [
+               'user' => "The user to locate.",
+               ],
+    };
+
 sub conhelp 
 {
     my ($dbh, $remote, $args, $out) = @_;
@@ -1160,6 +1170,25 @@ sub allow_open_proxy
 
     my $period = $forever ? "forever" : "for the next 24 hours";
     push @$out, [ '', "$ip cleared $period." ];
+    return 1;
+}
+
+sub find_user_cluster
+{
+    my ($dbh, $remote, $args, $out) = @_;
+    my $err = sub { push @$out, ["error", $_[0] ]; 0; };
+
+    return $err->('This command requires an argument.') unless @$args == 2;
+
+    return $err->('You are not authorized to use this command.')
+        unless $remote && ($remote->{priv}->{supportviewinternal} || $remote->{priv}->{supporthelp}) ;
+
+    my $u = LJ::load_user($args->[1]);
+    return $err->('Unable to load given user.') unless $u;
+
+    my $cluster = LJ::get_cluster_description($u->{clusterid}, 0);
+    push @$out, [ '', "$u->{user} is on the $cluster cluster." ];
+
     return 1;
 }
 
