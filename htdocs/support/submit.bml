@@ -38,7 +38,8 @@ _include?>
 <TABLE>
 <TR VALIGN=TOP>
 <TD ROWSPAN=2><INPUT TYPE="radio" NAME="reqtype" VALUE="user" CHECKED></TD><TD>Yes.</TD></TR>
-<TR><TD>Username: <INPUT NAME="user" SIZE=15 MAXLENGTH=15 VALUE=\"$eh{'user'}\">  Password: <INPUT TYPE=password NAME="password" SIZE=15 VALUE=\"$eh{'password'}\"></TD></TR>
+<TR><TD>Username: <INPUT NAME="user" SIZE=15 MAXLENGTH=15 VALUE=\"$eh{'user'}\">  Password: <INPUT TYPE=password NAME="password" SIZE=15 VALUE=\"$eh{'password'}\"><br />
+<?de (Replies to your request will be sent to the e-mail address associated with your $LJ::SITENAMESHORT account) de?></TD></TR>
 <TR VALIGN=TOP>
 <TD ROWSPAN=2><INPUT TYPE="radio" NAME="reqtype" VALUE="email"></TD><TD>No.</TD></TR>
 <TR><TD>Your email address: <INPUT NAME="email" SIZE=30 MAXLENGTH=70> (not shown to the public)
