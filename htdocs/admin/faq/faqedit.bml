@@ -27,7 +27,8 @@ body<=
      LJ::remote_has_priv($remote, "faqedit", \%ac_edit);
      my $sth = $dbh->prepare("SELECT question, answer, faqcat, sortorder FROM faq WHERE faqid=$id");
      $sth->execute;
-     ($question, $answer, $faqcat, $sortorder) = $sth->fetchrow_array;
+     ($question, $answer, $faqcat, $sortorder) = $sth->fetchrow_array or
+         return "<b>Error:</b> FAQ #$id does not exist.";
      
      $q = LJ::ehtml($question);
      $a = LJ::ehtml($answer);
