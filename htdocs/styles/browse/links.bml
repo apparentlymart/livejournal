@@ -9,6 +9,7 @@
  my $remote = LJ::get_remote();
  my $dispuser = $remote ? $remote->{'user'} : $user;
 
+ my $dbr = LJ::get_db_reader();
  my $sth = $dbr->prepare("SELECT styleid, user, styledes, type, is_embedded, is_colorfree ".
                          "FROM style WHERE is_public='Y' AND user=? ".
                          "ORDER BY type DESC,styledes");
