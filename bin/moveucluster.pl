@@ -14,6 +14,7 @@ my $opt_verbose = 1;
 my $opt_movemaster = 0;
 my $opt_prelocked = 0;
 my $opt_expungedel = 0;
+my $opt_ignorebit = 0;
 exit 1 unless GetOptions('delete' => \$opt_del,
                          'destdelete' => \$opt_destdel,
                          'useslow' => \$opt_useslow, # use slow db role for read
@@ -22,6 +23,7 @@ exit 1 unless GetOptions('delete' => \$opt_del,
 			 'movemaster|mm' => \$opt_movemaster,
                          'prelocked' => \$opt_prelocked,
 			 'expungedel' => \$opt_expungedel,
+			 'ignorebit' => \$opt_ignorebit,
                          );
 my $optv = $opt_verbose;
 
@@ -40,6 +42,13 @@ if ($opt_useslow) {
 my $user = LJ::canonical_username(shift @ARGV);
 my $dclust = shift @ARGV;
 
+# tables which are dumbly copied by sucking all into memory first.
+# use smarter mover code for anything that shouldn't all go into memory.
+# also, to use this you have to define the primary keys below
+my @manual_move = qw(loginstall ratelog sessions userproplite2
+                     sessions_data userbio userpicblob2 userpropblob
+                     s1usercache modlog modblob counter
+                     s1style s1overrides links userblob clustertrack2);
 sub usage {
     die "Usage:\n  movecluster.pl <user> <destination cluster #>\n";
 }
@@ -69,6 +78,10 @@ my $sclust = $u->{'clusterid'};
 
 if ($sclust == $dclust) {
     die "User '$user' is already on cluster $dclust\n";
+}
+
+if ($sclust) {
+    verify_movable_tables();
 }
 
 # original cluster db handle.
@@ -101,10 +114,11 @@ unless (defined $readonly_bit) {
 if ($opt_prelocked) {
     unless (($u->{'caps'}+0) & (1 << $readonly_bit)) {
         die "User '$user' should have been prelocked.\n";
-    }   
+    }
 } else {
     if (($u->{'caps'}+0) & (1 << $readonly_bit)) {
-        die "User '$user' is already in the process of being moved? (cap bit $readonly_bit set)\n";
+        die "User '$user' is already in the process of being moved? (cap bit $readonly_bit set)\n"
+            unless $opt_ignorebit;
     }
 }
 
@@ -418,14 +432,13 @@ elsif ($sclust > 0)
         'modblob' => 'journalid',
         'counter' => 'journalid',
         'userblob' => 'journalid',
+        'userpropblob' => 'userid',
         'clustertrack2' => 'userid',
 
         # log
         'log2' => 'journalid',
         'logsec2' => 'journalid',
-
         'logprop2' => 'journalid',
-
         'logtext2' => 'journalid',
 
         # talk
@@ -503,12 +516,9 @@ elsif ($sclust > 0)
 
     my @styleids = ();
 
-    # manual moving
-    foreach my $table (qw(loginstall ratelog sessions userproplite2
-                          sessions_data userbio userpicblob2
-                          s1usercache modlog modblob counter
-                          s1style s1overrides links userblob clustertrack2), @local_tables) {
-	next if $table =~ /^mod/ && $u->{journaltype} eq "P";
+    # manual moving (dumb copies)
+    foreach my $table (@manual_move, @local_tables) {
+	next if ($table eq "modlog" || $table eq "modblob") && $u->{journaltype} eq "P";
         print "  moving $table ...\n" if $optv > 1;
         my @cols;
         my $sth = $dbo->prepare("DESCRIBE $table");
@@ -829,5 +839,41 @@ sub make_buffer_reader
     };
 }
 
-1; # return true;
+# this function needs to die loudly if moveucluster.pl is unable to move
+# any type of table that exists on this installation
+sub verify_movable_tables {
+    my %table;  # tablename -> unhandled flag
 
+    # first, assume everything's unhandled
+    foreach my $t (@LJ::USER_TABLES, @LJ::USER_TABLES_LOCAL) {
+        $table{$t} = 1;
+    }
+
+    # now, clear things we know how to move
+    foreach my $t (qw(cmdbuffer dudata log2 logsec2 logprop2 logtext2
+                      talk2 talkprop2 talktext2 talkleft
+                      ), @manual_move) {
+        delete $table{$t};
+    }
+
+    # local stuff
+    my $local_tables = LJ::run_hook("moveucluster_local_tables");
+    if ($local_tables) {
+        while (my ($tab, $key) = each %$local_tables) {
+            delete $table{$tab};
+        }
+    }
+
+    # things we list as active tables but don't use yet
+    delete $table{"events"};
+
+    # things we don't move because it doesn't really matter
+    delete $table{"s1stylecache"};
+
+    if (%table) {
+        die "ERROR.  Won't try to move user, because this mover script can't move all live tables for this user.  List of tables without mover code available: \n -- " . join("\n -- ", sort keys %table), "\n";
+    }
+
+}
+
+1; # return true;
