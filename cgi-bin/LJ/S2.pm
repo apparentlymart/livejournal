@@ -248,7 +248,7 @@ sub load_layers {
 
     # figure out what is process cached...that goes to DB always
     # if it's not in process cache, hit memcache first
-    my %need_db;   # lid => compiled at time
+    my @from_db;   # lid, lid, lid, ...
     my @need_memc; # lid, lid, lid, ...
 
     # initial sweep, anything loaded for less than 60 seconds is golden
@@ -269,16 +269,17 @@ sub load_layers {
         if (my $row = $memc->{"s2c:$lid"}) {
             # load the layer from memcache; memcache data should always be correct
             my ($updtime, $data) = @$row;
-            $maxtime = $updtime if $updtime > $maxtime;
-            S2::load_layer($lid, $data, $updtime);
+            if ($data) {
+                $maxtime = $updtime if $updtime > $maxtime;
+                S2::load_layer($lid, $data, $updtime);
+            }
         } else {
             # make it exist, but mark it 0
-            $need_db{$lid} = 0;
+            push @from_db, $lid;
         }
     }
 
     # it's possible we don't need to hit the database for anything
-    my @from_db = keys %need_db;
     return $maxtime unless @from_db;
 
     # figure out who owns what we need
@@ -311,20 +312,11 @@ sub load_layers {
             unless $db;
 
         # create SQL to load the layers we want
-        my @to_load;
-        foreach my $lid (@{$bycluster{$cid}}) {
-            if (my $loaded = $need_db{$lid}) {
-                $maxtime = $loaded if $loaded > $maxtime;
-                push @to_load, "(userid=$us->{$lid}->{userid} AND s2lid=$lid AND comptime>$loaded)";
-            } else {
-                push @to_load, "(userid=$us->{$lid}->{userid} AND s2lid=$lid)";
-            }
-        }
-
-        # run the query, get the data, uncompress, and get the layer loaded
-        my $where = join(' OR ', @to_load);
+        my $where = join(' OR ', map { "(userid=$us->{$_}->{userid} AND s2lid=$_)" } @{$bycluster{$cid}});
         my $sth = $db->prepare("SELECT s2lid, compdata, comptime FROM s2compiled2 WHERE $where");
         $sth->execute;
+
+        # iterate over data, memcaching as we go
         while (my ($id, $comp, $comptime) = $sth->fetchrow_array) {
             LJ::text_uncompress(\$comp);
             LJ::MemCache::set([ $id, "s2c:$id" ], [ $comptime, $comp ])
@@ -339,6 +331,22 @@ sub load_layers {
     my @to_load;
     foreach my $lid (@from_db) {
         next if S2::layer_loaded($lid);
+
+        unless ($us->{$lid}) {
+            print STDERR "Style $lid has no available owner.\n";
+            next;
+        }
+
+        if ($us->{$lid}->{userid} == $sysid) {
+            print STDERR "Style $lid is owned by system but failed load from global.\n";
+            next;
+        }
+
+        if ($LJ::S2COMPILED_MIGRATION_DONE) {
+            LJ::MemCache::set([ $lid, "s2c:$lid" ], [ time(), 0 ]);
+            next;
+        }
+
         push @to_load, $lid;
     }
     return $maxtime unless @to_load;
