@@ -142,4 +142,27 @@ while (my $s = $sth->fetchrow_hashref) {
 }
 s1styles_write($ss);
 
+# and dump mood info
+print "Dumping moods.dat\n";
+open (F, ">$ENV{'LJHOME'}/bin/upgrading/moods.dat") or die;
+$sth = $dbh->prepare("SELECT moodid, mood, parentmood FROM moods");
+$sth->execute;
+while (@_ = $sth->fetchrow_array) {
+    print F "MOOD @_\n";
+}
+
+$sth = $dbh->prepare("SELECT moodthemeid, name, des FROM moodthemes WHERE is_public='Y' ORDER BY name");
+$sth->execute;
+while (my ($id, $name, $des) = $sth->fetchrow_array) {
+    $name =~ s/://;
+    print F "MOODTHEME $name : $des\n";
+    my $std = $dbh->prepare("SELECT moodid, picurl, width, height FROM moodthemedata WHERE moodthemeid=$id");
+    $std->execute;
+    while (@_ = $std->fetchrow_array) {
+	print F "@_\n";
+    }
+}
+close F;
+
+
 print "Done.\n";
