@@ -6,6 +6,8 @@
 
 /accountstatus.bml.error.invalid=Invalid status type
 
+/accountstatus.bml.error.nochange.expunged=This account has been purged from the system.
+
 /accountstatus.bml.error.nochange.suspend|notes=You can't change a journal to be unsuspended. This message is for users who attempt to do so.
 /accountstatus.bml.error.nochange.suspend=Cannot change journal status from suspended.
 
@@ -1434,11 +1436,11 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /friends/add.bml.confirm.header=Add <b>[[user]]</b> as a friend?
 
-/friends/add.bml.confirm.text=To add <b>[[user]]</b> to your friends list, click the button below.
-
 /friends/add.bml.confirm.syn.header=Add syndicated feed <b>[[user]]</b> as a friend?
 
 /friends/add.bml.confirm.syn.title=Add Syndicated Feed
+
+/friends/add.bml.confirm.text=To add <b>[[user]]</b> to your friends list, click the button below.
 
 /friends/add.bml.confirm.title=Add Friend
 

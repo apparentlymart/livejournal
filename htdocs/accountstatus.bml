@@ -39,6 +39,10 @@ body<=
         return LJ::bad_input($ML{'.error.nochange.suspend'})
             if $u->{'statusvis'} eq 'S';
 
+        # are they expunged?
+        return LJ::bad_input($ML{'.error.nochange.expunged'})
+            if $u->{'statusvis'} eq 'X';
+
         # invalid statusvis
         return LJ::bad_input($ML{'.error.invalid'})
             unless $POST{'statusvis'} eq 'D' || $POST{'statusvis'} eq 'V';
