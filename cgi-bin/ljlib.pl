@@ -3247,7 +3247,7 @@ sub can_view
     my $item = shift;
 
     # public is okay
-    return 1 if ($item->{'security'} eq "public");
+    return 1 if $item->{'security'} eq "public";
 
     # must be logged in otherwise
     return 0 unless $remote;
@@ -3265,16 +3265,12 @@ sub can_view
     # assume it's something new and return 0
     return 0 unless ($item->{'security'} eq "usemask");
 
-    # usemask
-    my $dbr = LJ::get_db_reader();
-
     # if it's usemask, we have to refuse non-personal journals,
     # so we have to load the user
     return 0 unless $remote->{'journaltype'} eq 'P';
 
     # TAG:FR:ljlib:can_view  (turn off bit 0 for just watching?  hmm.)
-    my $gmask = $dbr->selectrow_array("SELECT groupmask FROM friends WHERE ".
-                                      "userid=$userid AND friendid=$remoteid");
+    my $gmask = LJ::get_groupmask($userid, $remoteid);
     my $allowed = (int($gmask) & int($item->{'allowmask'}));
     return $allowed ? 1 : 0;  # no need to return matching mask
 }
