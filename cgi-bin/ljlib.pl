@@ -1040,7 +1040,8 @@ sub acct_code_check
 	$$err = "Malformed code; not 12 characters.";
 	return 0;	 
     }
-    
+
+    # FIXME: fall back to master (if slave's behind?)
     my ($acid, $auth) = acct_code_decode($code);
     my $sth = $dbr->prepare("SELECT userid, rcptid, auth FROM acctcode WHERE acid=$acid");
     $sth->execute;
