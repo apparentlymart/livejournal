@@ -35,13 +35,16 @@ my $move_user = sub {
     $stats{'move'}->{$pass}->{'user_ct'}++;
 
     # get a handle for every user to revalidate our connection?
-    my $dbh = LJ::get_dbh("slow", "master")
-        or die "Can't connect to global master";
+    my $dbh = LJ::get_db_writer()
+        or die "Can't connect to global  master";
+    my $dbslo = LJ::get_dbh("slow", "master")
+        or die "Can't connect to global slow master";
     my $dbcm = LJ::get_cluster_master($u)
         or die "Can't connect to cluster master";
 
     # be careful, we're moving data
     $dbh->{'RaiseError'} = 1;
+    $dbslo->{'RaiseError'} = 1;
     $dbcm->{'RaiseError'} = 1;
 
     my @map = (['style' => 's1style',
@@ -109,16 +112,16 @@ my $move_user = sub {
         };
 
         # s1stylecache is the only table keyed on styleid, not user
-        my $where = "user=" . $dbh->quote($u->{'user'});
+        my $where = "user=" . $dbslo->quote($u->{'user'});
         if ($src_table eq "s1stylecache") {
-            my $ids = $dbh->selectcol_arrayref("SELECT styleid FROM style WHERE user=?",
-                                               undef, $u->{'user'});
-            my $ids_in = join(",", map { $dbh->quote($_) } @$ids);
+            my $ids = $dbslo->selectcol_arrayref("SELECT styleid FROM style WHERE user=?",
+                                                 undef, $u->{'user'});
+            my $ids_in = join(",", map { $dbslo->quote($_) } @$ids);
             $where = "styleid IN ($ids_in)";
         }
 
         # select from source table and build data for insert
-        my $sth = $dbh->prepare("SELECT * FROM $src_table WHERE $where");
+        my $sth = $dbslo->prepare("SELECT * FROM $src_table WHERE $where");
         $sth->execute();
         while (my $row = $sth->fetchrow_hashref) {
 
@@ -175,11 +178,14 @@ my $header = sub {
            ("#" x $size) . "\n\n";
 };
 
-my $dbh = LJ::get_dbh("slow", "master");
+my $dbh = LJ::get_db_writer();
 die "Could not connect to global master" unless $dbh;
 $dbh->{'RaiseError'} = 1;
+my $dbslo = LJ::get_dbh("slow", "master");
+die "Could not connect to global slow master" unless $dbslo;
+$dbslo->{'RaiseError'} = 1;
 
-my $ts = $dbh->selectrow_hashref("SHOW TABLE STATUS LIKE 'overrides'");
+my $ts = $dbslo->selectrow_hashref("SHOW TABLE STATUS LIKE 'overrides'");
 if ($ts->{'Type'} eq 'ISAM') {
     die "This script isn't efficient with ISAM tables.  Please convert to MyISAM with:\n" .
         "   mysql> ALTER TABLE overrides TYPE=MyISAM;\n\n" .
@@ -199,7 +205,7 @@ foreach my $p (1..2) {
     # there will be overlaps in this when users have both styles and 
     # overrides, but we'll fix those up as we go
     foreach (qw(style overrides)) {
-        $stats{'move'}->{$pass}->{'total'} += $dbh->selectrow_array("SELECT COUNT(*) FROM $_");
+        $stats{'move'}->{$pass}->{'total'} += $dbslo->selectrow_array("SELECT COUNT(*) FROM $_");
     }
 
     # 2 passes, so we catch people with styles & overrides,
@@ -213,8 +219,8 @@ foreach my $p (1..2) {
         do {
 
             # get blocks of $BLOCK_MOVE users at a time
-            my $sth = $dbh->prepare("SELECT user FROM $table WHERE user>? " .
-                                    "ORDER BY user LIMIT $BLOCK_MOVE");
+            my $sth = $dbslo->prepare("SELECT user FROM $table WHERE user>? " .
+                                      "ORDER BY user LIMIT $BLOCK_MOVE");
             $sth->execute($lastuser);
             $ct = 0;
             while (my $user = $sth->fetchrow_array) {
@@ -236,14 +242,14 @@ foreach my $p (1..2) {
 
 print $header->("Updating remaining users");
 
-$stats{'update'}->{'total'} = $dbh->selectrow_array("SELECT COUNT(*) FROM user WHERE dversion=4");
+$stats{'update'}->{'total'} = $dbslo->selectrow_array("SELECT COUNT(*) FROM user WHERE dversion=4");
 print "Converting $stats{'update'}->{'total'} users\n";
 
 # now update dversions for users who had no data to move
 if ($stats{'update'}->{'total'}) {
 
     my $get_users = sub {
-        my $sth = $dbh->prepare("SELECT userid, user FROM user " .
+        my $sth = $dbslo->prepare("SELECT userid, user FROM user " .
                                 "WHERE dversion=4 LIMIT $BLOCK_UPDATE");
         $sth->execute();
         my @rows; # [ userid, user ]
