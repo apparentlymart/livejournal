@@ -403,14 +403,14 @@ sub check_sig {
     print $in $key;
     close $in; close $out;
     waitpid $gpg_pid, 0;
-    return 'invalid_key' if int($? / 256);  # invalid pgp key
+    return 'invalid_key' if $? >> 8;  # invalid pgp key
 
     # Don't need this stuff anymore.
     undef foreach $gpg, $gpg_handles;
 
     my ($gpg_email, $ret);
     $gpg_email = new Mail::GnuPG( keydir=>$tmpdir );
-    eval { $ret = $gpg_email->verify($entity); };
+    eval { $ret = ($gpg_email->verify($entity))[0]; };
     if ($@) {
         $$gpg_err = $@;
         $$gpg_err =~ s/ at.*?GnuPG.*$//;
