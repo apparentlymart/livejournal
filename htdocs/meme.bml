@@ -26,7 +26,8 @@
      while (my ($user, $itemid, $subject) = $sth->fetchrow_array)
      {
          $body .= "<tr align='left'><td>(=LJUSER $user LJUSER=)</td>";
-         my $esub = LJ::ehtml($subject) || "(no subject)";
+         LJ::CleanHTML::clean_subject_all(\$subject);
+         my $esub = LJ::escapeall($subject) || "(no subject)";
          $body .= "<td><a href='$LJ::SITEROOT/talkread.bml?itemid=$itemid'>$esub</a></td>";
          $body .= "</tr>";
          $count++;
@@ -77,4 +78,5 @@ TITLE=>(=_CODE return $title; _CODE=)
 BODY=>(=_CODE return $body; _CODE=)
 PAGE=)(=_C <LJDEP>
 link: htdocs/talkread.bml, htdocs/meme.bml
+lib: cgi-bin/cleanhtml.pl
 </LJDEP> _C=)
