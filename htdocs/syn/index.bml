@@ -60,7 +60,7 @@ body<=
             }
         }
         if ($url ne "") {
-            return $error->("Invalid URL p?>") unless
+            return $error->("Invalid URL.") unless
                 $url =~ m!^http://(.+?)/!;
             my $hostname = $1;
             return $error->("You can't add RSS feeds from $LJ::DOMAIN.")
