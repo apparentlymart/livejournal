@@ -1071,9 +1071,9 @@ sub db_logger
                  "secs TINYINT UNSIGNED,".
                  "ref VARCHAR(200),".
                  "pid SMALLINT UNSIGNED,".
-                 "cpu_user MEDIUMINT UNSIGNED,".
-                 "cpu_sys MEDIUMINT UNSIGNED,".
-                 "cpu_total MEDIUMINT UNSIGNED,".
+                 "cpu_user FLOAT UNSIGNED,".
+                 "cpu_sys FLOAT UNSIGNED,".
+                 "cpu_total FLOAT UNSIGNED,".
                  "mem_vsize INT,".
                  "mem_share INT,".
                  "mem_rss INT) DELAY_KEY_WRITE = 1");
