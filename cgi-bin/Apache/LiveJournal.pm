@@ -31,6 +31,13 @@ my %USERPIC;  # conf related to userpics
 my %REDIR;
 my $GTop;     # GTop object (created if $LJ::LOG_GTOP is true)
 
+# Mapping of MIME types to image types understood by the blob functions.
+my %MimeTypeMap = (
+    'image/gif' => 'gif',
+    'image/jpeg' => 'jpg',
+    'image/png' => 'png',
+);
+
 $USERPIC{'cache_dir'} = "$ENV{'LJHOME'}/htdocs/userpics";
 $USERPIC{'use_disk_cache'} = -d $USERPIC{'cache_dir'};
 $USERPIC{'symlink'} = eval { symlink('',''); 1; };
@@ -607,6 +614,40 @@ sub userpic_content
         $r->send_http_header();
     };
 
+    # Handle reproxyable requests
+    if ( exists $LJ::PERLBAL_ROOT{userpics} &&
+         $r->header_in('X-Proxy-Capabilities') &&
+         $r->header_in('X-Proxy-Capabilities') =~ m{\breproxy-file\b}i )
+    {
+        my (
+            $root,
+            $u,
+            $fmt,
+            $path,
+           );
+
+        # Get the blobroot and load the pic hash
+        $root = $LJ::PERLBAL_ROOT{userpics};
+        $pic = get_pic_from_picid( $picid ) or return NOT_FOUND;
+        return NOT_FOUND if $pic->{'userid'} != $userid;
+
+        # Load the associated user object and make sure they're allowed to see
+        # the pic.
+        $u = LJ::load_userid( $userid );
+        return NOT_FOUND unless $u && $u->{'statusvis'} ne "X";
+
+        # Now ask the blob lib for the path to send to the reproxy
+        $fmt = $MimeTypeMap{ $pic->{contenttype} };
+        $path = LJ::Blob::get_rel_path( $root, $u, "userpic", $fmt, $picid );
+
+        # Set the headers and finish the request
+        $mime = $pic->{contenttype};
+        $r->header_out( 'X-REPROXY-FILE', $path );
+        $send_headers->();
+
+        return OK;
+    }
+
     # try to get it from disk if in disk-cache mode
     if ($disk_cache) {
         if (-s $r->finfo) {
@@ -628,11 +669,7 @@ sub userpic_content
 
     # else, get it from db.
     unless ($data) {
-        my $dbr = LJ::get_db_reader();
-        my $query = "SELECT state, userid, contenttype, UNIX_TIMESTAMP(picdate) ".
-            "AS 'lastmod' FROM userpic WHERE picid=$picid";
-        $pic = $dbr->selectrow_hashref($query);
-        return NOT_FOUND unless $pic;
+        $pic = get_pic_from_picid( $picid ) or return NOT_FOUND;
         return NOT_FOUND if $pic->{'userid'} != $userid;
         my $u = LJ::load_userid($userid);
         return NOT_FOUND unless $u && $u->{'statusvis'} ne "X";
@@ -640,12 +677,7 @@ sub userpic_content
         $lastmod = $pic->{'lastmod'};
 
         if ($LJ::USERPIC_BLOBSERVER) {
-            my $fmt = {
-                'image/gif' => 'gif',
-                'image/jpeg' => 'jpg',
-                'image/png' => 'png',
-            }->{$pic->{contenttype}};
-
+            my $fmt = $MimeTypeMap{ $pic->{contenttype} };
             $data = LJ::Blob::get($u, "userpic", $fmt, $picid);
         }
 
@@ -685,6 +717,17 @@ sub userpic_content
     $r->print($data) unless $r->header_only;
     return OK;
 }
+
+
+sub get_pic_from_picid {
+    my $picid = shift;
+    my $dbr = LJ::get_db_reader();
+    my $query = "SELECT state, userid, contenttype, UNIX_TIMESTAMP(picdate) ".
+        "AS 'lastmod' FROM userpic WHERE picid=$picid";
+    return $dbr->selectrow_hashref( $query );
+}
+
+
 
 sub files_trans
 {
