@@ -151,7 +151,7 @@ sub can_close
 
 sub can_append
 {
-    my ($dbh, $sp, $remote, $auth) = @_;    
+    my ($dbh, $sp, $remote, $auth) = @_;
     if (is_poster($sp, $remote, $auth)) { return 1; }
     return 0 unless $remote;
     if ($sp->{_cat}->{'allow_screened'}) { return 1; }
@@ -413,7 +413,7 @@ sub file_request
         'fromname' => "$LJ::SITENAME Support",
         'subject' => "Support Request \#$spid",
         'body' => $body
-        });
+        }) if @to_notify;
     
     return $spid;
 }
@@ -478,7 +478,7 @@ sub append_request
         'fromname' => "$LJ::SITENAME Support",
         'subject' => "Re: Support Request \#$spid",
         'body' => $body
-        });
+        }) if @to_notify;
     
     return $splid;    
 }
