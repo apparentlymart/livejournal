@@ -790,8 +790,11 @@ sub getevents
 	my $qmonth = $dbh->quote($req->{'month'});
 	my $qday = $dbh->quote($req->{'day'});
 
-	### MySQL sucks at this query for some reason, but it's fast if you go
-	### to a temporary table and then select and order by on that
+	# MySQL sucks at this query for some reason, but it's fast if you go
+	# to a temporary table and then select and order by on that
+	# (TODO: look into this again.  that comment is like a year old.  :P)
+
+	$dbh->do("SET SQL_LOG_BIN=0");  # don't replicate temp table creation
 	$dbh->do("DROP TABLE IF EXISTS tmp_selecttype_day");
 	$dbh->do("CREATE TEMPORARY TABLE tmp_selecttype_day SELECT $allfields, l.logtime FROM log l, logtext lt WHERE l.itemid=lt.itemid AND l.ownerid=$ownerid AND l.year=$qyear AND l.month=$qmonth AND l.day=$qday");
 	return fail($err,501,$dbh->errstr) if $dbh->err;
@@ -813,7 +816,6 @@ sub getevents
 	    $beforedatewhere = "AND l.eventtime < " . $dbh->quote($req->{'beforedate'});		
 	}
 
-	# FIXME: this isn't ideal, but whatever.
 	my @itemids;
 	my @items = LJ::get_recent_items($dbs, {
 	    'userid' => $ownerid,
@@ -905,6 +907,7 @@ sub getevents
     
     if ($drop_temp_table) {
 	$dbh->do("DROP TABLE IF EXISTS $drop_temp_table");
+	$dbh->do("SET SQL_LOG_BIN=1");  # turn binloggin' back on
     }
     
     unless ($req->{'noprops'}) 
