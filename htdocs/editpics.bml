@@ -4,19 +4,17 @@
  $body = "";
  @errors = ();
  
- &connect_db();
+ my $dbh = LJ::get_dbh("master");
+ my $remote = LJ::get_remote($dbh);
 
- my $remote = &get_remote();
  unless (defined $remote) {
      $title = "Error";
      $body = "(=H1 Error H1=)(=P You must be <a href=\"/login.bml?ret=1\">logged in</a> to edit your pictures. P=)";
      return "";
  }
- my $quser = $dbh->quote($remote->{'user'});
 
- $sth = $dbh->prepare("SELECT * FROM user WHERE userid=$remote->{'userid'}");
- $sth->execute;
- my $u = $sth->fetchrow_hashref;
+ my $u = LJ::load_userid($dbh, $remote->{'userid'});
+
  
  ### save mode
 
@@ -66,10 +64,11 @@
      my $new_default = $FORM{'defaultpic'}+0;
      if ($FORM{"delete_$FORM{'defaultpic'}"}) { $new_default = 0; } # deleting your default
      if ($new_default != $u->{'defaultpicid'}) {
-	 $dbh->do("UPDATE user SET defaultpicid=$new_default WHERE user=$quser");
+	 $dbh->do("UPDATE user SET defaultpicid=$new_default WHERE userid=$u->{'userid'}");
      }
 
-     $body .= "(=H1 Saved H1=)(=P Your new picture keywords and defaults have been saved. P=)";
+     $body .= "(=H1 Saved H1=)(=P Your new picture keywords and defaults have been saved.  You can view them <a href=\"/allpics.bml?user=$u->{'user'}\">here</a>. P=)";
+
      if (@errors) {
 	 $body .= "(=P Some errors occured, though, processing your request: <UL>";
 	 foreach (@errors) { $body .= "<LI>$_"; }
@@ -130,6 +129,12 @@
  }
 
  if ($piccount) {
+     $body .= "<tr><td></td><td align=left>&nbsp;<b>No Default Picture</b>&nbsp;";
+     $body .= LJ::html_check({ 'name' => 'defaultpic', 
+			       'value' => 0,
+			       'type' => 'radio',
+			       'selected' => ! $u->{'defaultpicid'}, });
+     $body .= "</td><td>&nbsp;</td></tr>\n";
      $body .= "<TR><TD></TD><TD>&nbsp;<P><INPUT TYPE=SUBMIT VALUE=\"Save Settings\"></TD></TR>\n";
      $body .= "</TABLE>";
      $body .= "</FORM>";
