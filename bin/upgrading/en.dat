@@ -253,6 +253,8 @@
 
 /community/settings.bml.error.badpassword=Invalid community password
 
+/community/settings.bml.error.hasentries=This account already has entries and cannot be converted.
+
 /community/settings.bml.error.maintainertype=Maintainer account must be a person, not another shared account.
 
 /community/settings.bml.error.noaccess=Only community maintainers are able to edit community settings. You are not a maintainer of community [[comm]].

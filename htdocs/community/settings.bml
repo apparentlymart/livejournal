@@ -62,6 +62,22 @@ body<=
          $errors{'password'} = $ML{'.error.badpassword'};
      }
 
+     # disallow changing the journal type if the journal has entries
+     if (!%errors && !LJ::check_priv($dbh, $remote, "changejournaltype", ""))
+     {
+         my $count;
+         my $userid=$cu->{'userid'}+0;
+         
+         if ($cu->{'clusterid'}) {
+             my $dbcr = LJ::get_cluster_reader($cu);
+             $count = $dbcr->selectrow_array("SELECT COUNT(*) FROM log2 WHERE journalid=$userid AND posterid=journalid");
+         } else {
+             $count = $dbr->selectrow_array("SELECT COUNT(*) FROM log WHERE ownerid=$userid AND posterid=ownerid");
+         }
+         
+         $errors{'username'} = $ML{'.error.hasentries'} if $count;
+     }
+  
      # if we found errors, we'll redisplay the form below.  otherwise,
      # proceed.
      unless (%errors) {
