@@ -176,5 +176,3 @@ general /community/members.bml.key.name
 general /community/members.bml.success.addusers
 
 general /userinfo.bml.label.totalfriends
-
-general /syn/index.bml.add
