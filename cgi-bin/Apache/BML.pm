@@ -15,9 +15,12 @@ use vars qw($cur_req);    # current request hash
 use vars qw($ML_GETTER);  # normally undef
 use vars qw(%HOOK);
 use vars qw(%Lang);       # iso639-2 2-letter lang code -> BML lang code
-use vars qw(%FileModTime %FileBlockData %FileBlockFlags);
-use vars qw(%CodeBlockMade);
 use vars qw(%CodeBlockOpts);
+use vars qw(%FileModTime %FileBlockData %FileBlockFlags);
+
+my (%CodeBlockMade);
+my (%SchemeData, %SchemeFlags); # scheme -> key -> scalars (data has {s} blocks expanded)
+my (%SchemeRefs);               # scheme -> key -> refs to %SchemeData scalars, OR scalars (from LOCALBLOCKS)
 
 # load BML Config
 {
@@ -114,6 +117,18 @@ sub handler
         }
     }
 
+    if ($HOOK{'startup'}) {
+        eval {
+            $HOOK{'startup'}->();
+        };
+        return report_error($r, "<b>Error running startup hook:</b><br />\n$@")
+            if $@;
+    }
+
+    # global template file
+    load_look($req, "", "global");
+    
+    # decide which scheme template file to use
     my $ideal_scheme = "";
     if ($r->header_in("User-Agent") =~ /^Lynx\//) {
         $ideal_scheme = "lynx";
@@ -125,30 +140,46 @@ sub handler
         $ideal_scheme ||
         $req->{'env'}->{'DefaultScheme'};
 
-    if ($req->{'env'}->{'VarInitScript'}) 
-    {
-        my $file = "VARINIT";
+    # to finish deciding, we have to load it to see if it exists:
+    unless (load_look($req, $req->{'scheme'}, "generic")) {
+        $req->{'scheme'} = $req->{'env'}->{'DefaultScheme'};
+        load_look($req, $req->{'scheme'}, "generic");
+    }
+
+    # now we have to combine both of these (along with the VARINIT)
+    # and then expand all the static stuff
+    unless (exists $SchemeData{$req->{'scheme'}}) {
+        my @files;
+        push @files, "VARINIT" if $req->{'env'}->{'VarInitScript'};
+        push @files, "$req->{'env'}->{'LookRoot'}/global.look";
+        push @files, "$req->{'env'}->{'LookRoot'}/$req->{'scheme'}/generic.look";
+
+        my $sd = $SchemeData{$req->{'scheme'}} = {};
+        my $sf = $SchemeFlags{$req->{'scheme'}} = {};
+
         my @expandconstants;
-        foreach my $k (keys %{$FileBlockData{$file}}) {
-            $req->{'blockdata'}->{$k} = $FileBlockData{$file}->{$k};
-            $req->{'blockflags'}->{$k} = $FileBlockFlags{$file}->{$k};
-            if ($req->{'blockflags'}->{$k} =~ /s/) { push @expandconstants, $k; }
+        foreach my $file (@files) {
+            foreach my $k (keys %{$FileBlockData{$file}}) {
+                $sd->{$k} = $FileBlockData{$file}->{$k};
+                $sf->{$k} = $FileBlockFlags{$file}->{$k};
+            }
         }
-        foreach my $k (@expandconstants) {
-            $req->{'blockdata'}->{$k} =~ s/\(=([A-Z0-9\_]+?)=\)/$req->{'blockdata'}->{$1}/g;
+        foreach my $k (keys %$sd) {
+            next unless $sf->{$k} =~ /s/;
+            $sd->{$k} =~ s/\(=([A-Z0-9\_]+?)=\)/$sd->{$1}/g;
         }
     }
 
-    if ($HOOK{'startup'}) {
-        eval {
-            $HOOK{'startup'}->();
-        };
-        return report_error($r, "<b>Error running startup hook:</b><br />\n$@")
-            if $@;
+    # now, this request needs a copy of (well, references to) the
+    # data above.  can't use that directly, since it might
+    # change using _INFO LOCALBLOCKS to declare new file-local blocks
+    $req->{'blockflags'} = {
+        '_INFO' => 'F', '_INCLUDE' => 'F',
+    };
+    foreach my $k (keys %{$SchemeData{$req->{'scheme'}}}) {
+        $req->{'blockflags'}->{$k} = $SchemeFlags{$req->{'scheme'}}->{$k};
+        $req->{'blockref'}->{$k} = \$SchemeData{$req->{'scheme'}}->{$k};
     }
-    
-    load_look($req, "", "global");
-    load_look($req, $req->{'scheme'}, "generic");
 
     $req->{'lang'} = BML::decide_language();
     
@@ -321,10 +352,10 @@ sub bml_block
     my $realtype = $type;
     my $previous_block = $req->{'BlockStack'}->[-1];
 
-    if (defined $req->{'blockdata'}->{"$type/FOLLOW_${previous_block}"}) {
+    if (exists $req->{'blockref'}->{"$type/FOLLOW_${previous_block}"}) {
         $realtype = "$type/FOLLOW_${previous_block}";
     }
-    
+
     my $blockflags = $req->{'blockflags'}->{$realtype};
 
     # trim off space from both sides of text data
@@ -383,7 +414,7 @@ sub bml_block
     # load in the properties defined in the data
     my %element = ();
     my @elements = ();
-    if ($blockflags =~ /F/ || $type eq "_INFO" || $type eq "_INCLUDE")
+    if ($blockflags =~ /F/)
     {
         load_elements(\%element, $data, { 'declorder' => \@elements });
     } 
@@ -438,12 +469,12 @@ sub bml_block
             }
             my @expandconstants;
             foreach my $k (keys %localblock) {
-                $req->{'blockdata'}->{$k} = $localblock{$k};
+                $req->{'blockref'}->{$k} = \$localblock{$k};
                 $req->{'blockflags'}->{$k} = $localflags{$k};
                 if ($localflags{$k} =~ /s/) { push @expandconstants, $k; }
             }
             foreach my $k (@expandconstants) {
-                $req->{'blockdata'}->{$k} =~ s/\(=([A-Z0-9\_]+?)=\)/$req->{'blockdata'}->{$1}/g;
+                $localblock{$k} =~ s/\(=([A-Z0-9\_]+?)=\)/${$req->{'blockref'}->{$1}}/g;
             }
         }
         return "";
@@ -512,10 +543,10 @@ sub bml_block
     # traditional BML Block decoding ... properties of data get inserted
     # into the look definition; then get BMLitized again
     return inline_error("Undefined custom element '$type'")
-        unless defined $req->{'blockdata'}->{$realtype};
+        unless defined $req->{'blockref'}->{$realtype};
 
     my $preparsed = ($blockflags =~ /p/);
-        
+
     if ($preparsed) {
         ## does block request pre-parsing of elements?
         ## this is required for blocks with _CODE and AllowCode set to 0
@@ -525,14 +556,16 @@ sub bml_block
             $element{$k} = $decoded;
         }
     }
-
-    my $template = $req->{'blockdata'}->{$realtype};
-
+    
     # template has no variables or BML tags:
-    return $template if $blockflags =~ /S/;
+    return ${$req->{'blockref'}->{$realtype}} if $blockflags =~ /S/;
 
-    my $expanded = $template;
-    $expanded = parsein($expanded, \%element) unless $preparsed;
+    my $expanded;
+    if ($preparsed) {
+        $expanded = ${$req->{'blockref'}->{$realtype}};
+    } else {
+        $expanded = parsein(${$req->{'blockref'}->{$realtype}}, \%element);
+    }
 
     # {R} flag wants variable interpolation, but no expansion:
     unless ($blockflags =~ /R/)
@@ -702,7 +735,7 @@ sub load_look
 {
     my ($req, $scheme, $file) = @_;
     return 0 if $scheme =~ /[^a-zA-Z0-9_\-]/;
-    return 0 if $file =~ /[^a-zA-Z0-9_\-]/;
+    return 0 if $file =~ /[^a-zA-Z0-9_\-]/ or length($file) > 40;
     
     my $root = $req->{'env'}->{'LookRoot'};
     $file = $scheme ? "$root/$scheme/$file.look" : "$root/$file.look";
@@ -718,15 +751,12 @@ sub load_look
     note_mod_time($req, $modtime);
     if ($modtime > $FileModTime{$file}) 
     {
-        my $look;
+        $FileBlockData{$file} = {};
+
         open (LOOK, $file);
-        while (<LOOK>) {
-            $look .= $_;
-        }
+        load_elements($FileBlockData{$file}, sub { scalar <LOOK> });
         close LOOK;
             
-        $FileBlockData{$file} = {};
-        load_elements($FileBlockData{$file}, $look);  
         $FileModTime{$file} = $modtime;
 
         # look for template types
@@ -737,18 +767,6 @@ sub load_look
         }
     } 
     
-    my @expandconstants;
-    foreach my $k (keys %{$FileBlockData{$file}}) {
-        $req->{'blockdata'}->{$k} = $FileBlockData{$file}->{$k};
-        $req->{'blockflags'}->{$k} = $FileBlockFlags{$file}->{$k};
-        if ($FileBlockFlags{$file}->{$k} =~ /s/) { 
-            push @expandconstants, $k; 
-        }
-    }
-    foreach my $k (@expandconstants) {
-        $req->{'blockdata'}->{$k} =~ s/\(=([A-Z0-9\_]+?)=\)/$req->{'blockdata'}->{$1}/g;
-    }
-    
     return 1;
 }
 
@@ -757,13 +775,20 @@ sub load_elements
 {
     my ($hashref, $data, $opts) = @_;
     my $ol = $opts->{'declorder'};
-    my @data = split(/\n/, $data);
+    my $getter;
+    if (ref $data eq "CODE") {
+        $getter = $data;
+    } else {
+        my @data = split(/\n/, $data);
+        $getter = sub { shift @data; }
+    }
+
     my $curitem = "";
     my $depth;
     
-    foreach (@data)
+    while (defined ($_ = $getter->()))
     {
-        $_ .= "\n";
+        chomp;
         if ($curitem eq "" && /^([A-Z0-9\_\/]+)=>(.*)/)
         {
             $hashref->{$1} = $2;
@@ -784,7 +809,7 @@ sub load_elements
                 {
                     $depth++;
                 }
-                $hashref->{$curitem} .= $_;
+                $hashref->{$curitem} .= $_ . "\n";
             }
         }
         elsif ($curitem && /^<=$curitem\s*$/)
@@ -796,12 +821,12 @@ sub load_elements
             } 
             else
             {
-                $hashref->{$curitem} .= $_;
+                $hashref->{$curitem} .= $_ . "\n";
             }
         }
         else
         {
-            $hashref->{$curitem} .= $_ if $curitem;
+            $hashref->{$curitem} .= $_ . "\n" if $curitem;
         }
     }
 }

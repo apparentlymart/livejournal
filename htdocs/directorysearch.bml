@@ -1,15 +1,13 @@
 (=_INFO
 LOCALBLOCKS<=
 CRIT<=
-{F}
-<tr bgcolor='(=EMCOLOR=)'>
+{FpRs}<tr bgcolor='(=EMCOLOR=)'>
 <td align='left' colspan='2'><b>%%NAME%%</b>
 </tr>
 <tr align='left'><td>&nbsp;</td><td>%%FORM%%</td></tr>
 <=CRIT
 BAR<=
-{F}
-<tr bgcolor='(=EMCOLOR=)' align='left'>
+{FpRs}<tr bgcolor='(=EMCOLOR=)' align='left'>
 <td>&nbsp;</td>
 <td><b>%%NAME%%</b></td>
 </tr>
