@@ -301,12 +301,10 @@ body<=
  # can a comment even be made?
  if ($logprops{$itemid}->{'opt_nocomments'}) {
      $ret .= "<?h1 $ML{'Sorry'} h1?><?p $ML{'.error.nocommentspost'} p?>";
-     LJ::strip_bad_code(\$ret);
      return $ret;
  }
  if ($u->{'opt_showtalklinks'} eq "N") {
      $ret .= "<?h1 $ML{'Sorry'} h1?><?p $ML{'.error.nocommentsjournal'} p?>";
-     LJ::strip_bad_code(\$ret);
      return $ret;
  }
  unless (LJ::get_cap($u, "get_comments") ||
@@ -314,7 +312,6 @@ body<=
      $ret .= "<?h1 $ML{'Sorry'} h1?><?p ";
      $ret .= $LJ::MSG_NO_COMMENT || "Sorry, you cannot leave comments at this time.";
      $ret .= " p?>";
-     LJ::strip_bad_code(\$ret);
      return $ret;
  }
 
@@ -489,8 +486,7 @@ body<=
 
  $ret .= "</td></tr></table>\n";
  $ret .= "</form>\n";
- 
- LJ::strip_bad_code(\$ret);
+
  return $ret;
 
 _code?>
