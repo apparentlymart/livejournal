@@ -18,6 +18,8 @@
 <uid> log2lt:<uid> == packed data: array of recent log2 entries in rlogtime order, last 2 weeks by default
 <uid> rp:<uid>:<jitemid> == scalar, the replycount value 
 
+<uid> memkwid:<uid> == hashref of 'memories' keyword ids to keywords.
+
 <uid> dayct:<uid> == arrayref of arrayrefs (see LJ::get_daycounts)
 
 <picid> userpic.<picid> = [ $w, $h, $uid ]

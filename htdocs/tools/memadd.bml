@@ -83,6 +83,7 @@
 
  my $dbcr = LJ::get_cluster_reader($ju);
 
+# FIXME: Should use get_log2_row and get_logtext2 API
  my $log = $dbcr->selectrow_hashref("SELECT l.journalid AS 'ownerid', l.posterid, l.eventtime, ls.subject, l.security, l.allowmask, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(l.logtime) AS 'secondsold', l.anum FROM log2 l, logtext2 ls WHERE ls.journalid=$jid AND l.journalid=$jid AND ls.jitemid=l.jitemid AND l.jitemid=$itemid");
 
  if ($oldstyle) {
@@ -110,29 +111,28 @@
                       "userid=? AND journalid=? AND jitemid=?");
  $sth->execute($memoryu->{userid}, $oldstyle ? 0 : $jid, $dbitemid);
  my $memory = $sth->fetchrow_hashref;
- 
+
+ my $exist_kw = LJ::Memories::get_keywords($ju);
+ unless ($exist_kw) {
+     $body = "Error fetching existing keywords.";
+     return;
+ }
+
  if ($POST{'mode'} eq "") 
  {
      my ($des, $keywords);
 
      my @all_keywords;
      my %selected_keyword;
-     $sth = $dbr->prepare("SELECT DISTINCT k.keyword ".
-                          "FROM keywords k, memkeyword mk, memorable m ".
-                          "WHERE k.kwid=mk.kwid AND mk.memid=m.memid AND m.userid=?");
-     $sth->execute($memoryu->{userid});
-     while (my ($kw) = $sth->fetchrow_array) {
-         push @all_keywords, $kw;
-     }
-     @all_keywords = sort @all_keywords;
+     @all_keywords = sort values %$exist_kw;
 
      if (defined $memory) {
          $title = $ML{'.title.edit_memory'};
          $des = $memory->{'des'};
-         $sth = $dbr->prepare("SELECT k.keyword FROM keywords k, memkeyword mk ".
-                              "WHERE mk.kwid=k.kwid AND mk.memid=?");
+         $sth = $dbr->prepare("SELECT kwid FROM memkeyword WHERE memid=?");
          $sth->execute($memory->{memid});
-         while (my ($kw) = $sth->fetchrow_array) {
+         while (my $kwid = $sth->fetchrow_array) {
+             my $kw = $exist_kw->{$kwid};
              next if ($kw eq "*");
              if ($keywords) { $keywords .= ", "; }
              $keywords .= $kw;
@@ -143,6 +143,7 @@
              my $dbh = LJ::get_db_writer();
              $dbh->do("DELETE FROM memorable WHERE memid=$memory->{'memid'}");
              $dbh->do("DELETE FROM memkeyword WHERE memid=$memory->{'memid'}");
+             LJ::Memories::updated_keywords($ju);
              $title = $ML{'Error'};
              $body = $ML{'.error.entry_deleted'};
              return;
@@ -239,6 +240,7 @@
          if (defined $memory) {
              $dbh->do("DELETE FROM memorable WHERE memid=$memory->{'memid'}");
              $dbh->do("DELETE FROM memkeyword WHERE memid=$memory->{'memid'}");
+             LJ::Memories::updated_keywords($ju);
              $title = $ML{'.title.deleted'};
              $body = "<?h1 $ML{'.error.deleted.title'} h1?><?p " . 
                      BML::ml(".error.deleted.body", { 'desc' => $memory->{'des'} }) .
@@ -271,6 +273,7 @@
      push @keywords, "*" unless (@keywords);
      my @kwid;
 
+     my $needflush = 0;
      foreach my $kw (@keywords) {
          if (length($kw) > 40) {
              $title = $ML{'Error'};
@@ -280,6 +283,7 @@
          }
 
          my $kwid = LJ::get_keyword_id($kw);
+         $needflush = 1 unless defined $exist_kw->{$kwid};
          push @kwid, $kwid;
      }
 
@@ -293,14 +297,9 @@
      my $sec = $POST{'security'};
 
      ## this is easiest... just delete it, then add it again.
+     my $memid;
      if (defined $memory) {
          $dbh->do("DELETE FROM memkeyword WHERE memid=$memory->{'memid'}");
-     }
-
-     my $memid;
-
-     if (defined $memory) 
-     {
          $memid = $memory->{'memid'};
          $sth = $dbh->prepare("UPDATE memorable SET des=?, security=? WHERE memid=?");
          $sth->execute($des, $sec, $memid);
@@ -318,6 +317,8 @@
          $sql .= join(",", map { "($memid,$_)" } @kwid);
          $dbh->do($sql);
      }
+
+     LJ::Memories::updated_keywords($ju) if $needflush;
 
      $title = $ML{'.title.added'};
      $body = "<?h1 $ML{'.body.added.header'} h1?><?p $ML{'.body.added.body'} p?>";

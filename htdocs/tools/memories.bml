@@ -106,9 +106,10 @@
      }
  }
 
+ my $kwmap = LJ::Memories::get_keywords($u);
+
  if ($GET{'keyword'}) 
  {
-     my $qkw = $dbr->quote($GET{'keyword'});
      if ($GET{'keyword'} eq "*") {
          $title = $ML{'.title.memorable'};
          $body .= "<?h1 $ML{'.title.memorable'} h1?><?p " . BML::ml(".body.memorable", { 'user' => $user }) . " p?>";
@@ -135,13 +136,17 @@
          my $op = $filter eq "own" ? "=" : "<>";
          $extrawhere = "AND m.journalid $op $userid";
      }
-     
+
+     my $key_id;
+     foreach (keys %$kwmap) {
+         $key_id = $_ if $kwmap->{$_} eq $GET{keyword};
+     }
      $sth = $dbr->prepare("SELECT m.memid, u.user, m.journalid, m.jitemid, m.des, m.security ".
-                          "FROM memorable m, memkeyword mk, keywords k ".
+                          "FROM memorable m, memkeyword mk ".
                           "LEFT JOIN useridmap u ON m.journalid=u.userid ".
-                          "WHERE k.keyword=$qkw AND mk.memid=m.memid AND mk.kwid=k.kwid ".
+                          "WHERE mk.memid=m.memid AND mk.kwid=? ".
                           "AND m.userid=$userid $secwhere $extrawhere");
-     $sth->execute;
+     $sth->execute($key_id);
 
      my @memories;
      while (my $mem = $sth->fetchrow_hashref) {
@@ -184,14 +189,23 @@
  $body .= BML::ml(".body.list_categories", { 'user' => $user });
 
  if ($filter eq "all") {
-     $sth = $dbr->prepare("SELECT k.keyword, COUNT(*) AS 'count' FROM memorable m, memkeyword mk, keywords k WHERE mk.memid=m.memid AND mk.kwid=k.kwid AND m.userid=$userid $secwhere GROUP BY k.keyword");
+     $sth = $dbr->prepare("SELECT mk.kwid, COUNT(*) AS 'count' " .
+                          "FROM memorable m, memkeyword mk " .
+                          "WHERE mk.memid=m.memid AND m.userid=$userid $secwhere " .
+                          "GROUP BY mk.kwid");
+
  } else {
      my $op = $filter eq "own" ? "=" : "<>";
-     $sth = $dbr->prepare("SELECT k.keyword, COUNT(*) AS 'count' FROM memorable m, memkeyword mk, keywords k WHERE mk.memid=m.memid AND mk.kwid=k.kwid AND m.userid=$userid $secwhere AND m.journalid $op $userid GROUP BY k.keyword");
+     $sth = $dbr->prepare("SELECT mk.kwid, COUNT(*) AS 'count' " .
+                          "FROM memorable m, memkeyword mk " .
+                          "WHERE mk.memid=m.memid AND m.userid=$userid $secwhere " .
+                          "AND m.journalid $op $userid GROUP BY mk.kwid");
  }
  $sth->execute;
  my @sortedrows;
- push @sortedrows, $_ while $_ = $sth->fetchrow_hashref;
+ while (my ($id,$c) = $sth->fetchrow_array) {
+    push @sortedrows, { 'keyword' => $kwmap->{$id}, 'count' => $c };
+ }
  @sortedrows = sort { $a->{'keyword'} cmp $b->{'keyword'} } @sortedrows;
 
  $body .= "<form method='get' action='memories.bml'>";
