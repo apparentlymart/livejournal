@@ -74,6 +74,7 @@ sub s1styles_write
         }
         
         my $formatdata = $s->{'formatdata'};
+        $formatdata =~ s/\r//g;               # die, DOS line endings!
         $formatdata =~ s/\n\./\n\.\./g;
         print F "\n$formatdata\n.\n\n";
     }
