@@ -88,6 +88,7 @@ body<=
                     'name' => $acct,
                     'password' => '',
                     'caps' => $LJ::SYND_CAPS,
+                    'cluster' => $LJ::SYND_CLUSTER,
                 });
                 return "<?h1 Username in use h1?><?p That account name is already in use. p?>"
                     unless $id;

@@ -2193,7 +2193,7 @@ sub create_account
     }
 
     my $quser = $dbr->quote($user);
-    my $cluster = LJ::new_account_cluster();
+    my $cluster = defined $o->{'cluster'} ? $o->{'cluster'} : LJ::new_account_cluster();
     my $caps = $o->{'caps'} || $LJ::NEWUSER_CAPS;
 
     $dbh->do("INSERT INTO user (user, name, password, clusterid, dversion, caps) ".
