@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  use strict;
  use vars qw($title $body %FORM);
@@ -29,7 +29,7 @@
      $it = $sth->fetchrow_hashref;
      unless ($it) {
          $title = "Not found";
-         $body = "(=H1 Not found H1=)(=P The requested to-do item was not found. P=)";
+         $body = "<?h1 Not found h1?><?p The requested to-do item was not found. p?>";
          return;
      }
      
@@ -38,14 +38,14 @@
      if ($it->{'security'} eq "private") {
          unless ($remote && $remote->{'userid'} == $it->{'journalid'}) {
              $title = "Sorry...";
-             $body = "(=H1 Security H1=)(=P The requested to-do item is private and can only be viewed by the owner. P=)";
+             $body = "<?h1 Security h1?><?p The requested to-do item is private and can only be viewed by the owner. p?>";
              return;
          }
      }
      if ($it->{'security'} eq "friends") {
          unless (LJ::is_friend($dbs, $u, $remote)) {
              $title = "Sorry...";
-             $body = "(=H1 Security H1=)(=P The requested to-do item marked 'friends only' by the owner. P=)";
+             $body = "<?h1 Security h1?><?p The requested to-do item marked 'friends only' by the owner. p?>";
              return;
          }
      }
@@ -69,7 +69,7 @@
 
      unless ($FORM{'subject'} =~ /\S+/) {
          $title = "Error";
-         $body = "(=H1 Need a subject! H1=)(=P You can't have a to-do item without a subject.  That's the one mandatory field. P=)";
+         $body = "<?h1 Need a subject! h1?><?p You can't have a to-do item without a subject.  That's the one mandatory field. p?>";
          return;
      }
 
@@ -83,7 +83,7 @@
      if ($todoid) {
          unless ($permission{'edit'}) {
              $title = "Error";
-             $body = "(=H1 Permission Denied H1=)(=P You don't have permission to edit a to-do item in this journal. P=)";
+             $body = "<?h1 Permission Denied h1?><?p You don't have permission to edit a to-do item in this journal. p?>";
              return;
          }
 
@@ -92,12 +92,12 @@
          if ($dbh->err) { $title = "Error"; $body = $dbh->errstr; return; }
          
          $title = "Modified";
-         $body = "(=H1 Success H1=)(=P The todo item was modified.  You can view it <a href=\"item.bml?id=$todoid\">here</a> or view the <a href=\"./?user=$u->{'user'}\">updated list</a>. P=)";
+         $body = "<?h1 Success h1?><?p The todo item was modified.  You can view it <a href=\"item.bml?id=$todoid\">here</a> or view the <a href=\"./?user=$u->{'user'}\">updated list</a>. p?>";
 
      } else {
          unless ($permission{'add'}) {
              $title = "Error";
-             $body .= "(=H1 Permission Denied H1=)(=P You don't have permission to add a to-do item to this journal. P=)";
+             $body .= "<?h1 Permission Denied h1?><?p You don't have permission to add a to-do item to this journal. p?>";
              return;
          }
          
@@ -109,7 +109,7 @@
              if ($LJ::HELPURL{'accounttype'}) {
                  $atype = "<a href=\"$LJ::HELPURL{'accounttype'}\">$atype</a>";
              }
-             $body .= "(=H1 Too many items... H1=)(=P Your $atype is limited to $max_items to-do items at a time.  P=)";
+             $body .= "<?h1 Too many items... h1?><?p Your $atype is limited to $max_items to-do items at a time.  p?>";
              return;
          }
 
@@ -119,7 +119,7 @@
          $todoid = $sth->{'mysql_insertid'};
 
          $title = "Added";
-         $body = "(=H1 Success H1=)(=P The todo item was added.  You can view it <a href=\"item.bml?id=$todoid\">here</a> or view the <a href=\"./?user=$u->{'user'}\">updated list</a>. P=)";
+         $body = "<?h1 Success h1?><?p The todo item was added.  You can view it <a href=\"item.bml?id=$todoid\">here</a> or view the <a href=\"./?user=$u->{'user'}\">updated list</a>. p?>";
      }
 
      if ($it->{'_cats'} ne $FORM{'categories'}) 
@@ -128,7 +128,7 @@
          my @keywords = split(/\s*,\s*/, $FORM{'categories'});
          if (scalar(@keywords) > 10) { 
              $title = "Error";
-             $body = "(=H1 Error H1=)(=P Only 10 categories are allowed per to-do item. P=)";
+             $body = "<?h1 Error h1?><?p Only 10 categories are allowed per to-do item. p?>";
              return;
          }
          @keywords = grep { s/^\s+//; s/\s+$//; $_; } @keywords;
@@ -137,7 +137,7 @@
          foreach my $kw (@keywords) {
              if (length($kw) > 20) {
                  $title = "Error";
-                 $body = "(=H1 Error H1=)(=P This category exceeds the maximum allowed size: \"$kw\" P=)";
+                 $body = "<?h1 Error h1?><?p This category exceeds the maximum allowed size: \"$kw\" p?>";
                  return;
              }
              
@@ -181,7 +181,7 @@
          if ($LJ::HELPURL{'accounttype'}) {
              $atype = "<a href=\"$LJ::HELPURL{'accounttype'}\">$atype</a>";
          }
-         $body .= "(=H1 Too many items... H1=)(=P Your $atype is limited to $max_items to-do items at a time. P=)";
+         $body .= "<?h1 Too many items... h1?><?p Your $atype is limited to $max_items to-do items at a time. p?>";
          return;
      }
 
@@ -198,9 +198,9 @@
  
  $body .= "<a href=\"./?user=$u->{'user'}\">&lt;&lt; Back to To-Do List</a>";
  if ($FORM{'mode'} eq "add") {
-     $body .= "(=H1 Add To-Do Item... H1=)(=P All you need to fill out is the subject.  Everything else is optional.  P=)";
+     $body .= "<?h1 Add To-Do Item... h1?><?p All you need to fill out is the subject.  Everything else is optional.  p?>";
  } else {
-     $body .= "(=H1 To-Do Item \#$it->{'todoid'} H1=)";
+     $body .= "<?h1 To-Do Item \#$it->{'todoid'} h1?>";
      if ($permission{'edit'}) {
          $title = "Edit To-Do Item";
      } else {
@@ -241,7 +241,7 @@
  ## categories
  $body .= "<tr valign=top><td><b>Categories:</b></td><td>";
  $hval = LJ::ehtml($it->{'_cats'});
- $body .= "<input type=text name=categories value=\"$hval\" size=60 maxlength=80 $disabled><br>(=DE Up to 10 comma separated categories DE=)";
+ $body .= "<input type=text name=categories value=\"$hval\" size=60 maxlength=80 $disabled><br><?de Up to 10 comma separated categories de?>";
  $body .= "</td></tr>";
 
  ## categories
@@ -263,7 +263,7 @@
 
  ## poster
  if (($u->{'journaltype'} eq "C" || $it->{'posteruser'} != $u->{'user'}) && $it->{'posteruser'}) {
-     $body .= "<tr><td><b>Poster:</b></td><td>(=LJUSER $it->{'posteruser'} LJUSER=)</td></tr>\n";
+     $body .= "<tr><td><b>Poster:</b></td><td><?ljuser $it->{'posteruser'} ljuser?></td></tr>\n";
  }
 
  ## submit buttton
@@ -289,10 +289,10 @@
 
  return;
 
-_CODE=)(=PAGE
-TITLE=>(=_CODE return $title; _CODE=)
-BODY=>(=_CODE return $body; _CODE=)<p>(=STANDOUT <B>Note:</B> The to-do list system is in beta.  We're well aware it has a lot of work needed, and it definitely needs to be documented-- especially the security related things. STANDOUT=)
-PAGE=)(=_C <LJDEP>
+_code?><?page
+TITLE=><?_code return $title; _code?>
+BODY=><?_code return $body; _code?><p><?standout <B>Note:</B> The to-do list system is in beta.  We're well aware it has a lot of work needed, and it definitely needs to be documented-- especially the security related things. standout?>
+page?><?_c <LJDEP>
 link: htdocs/todo/index.bml, htdocs/todo/item.bml
 post: htdocs/todo/item.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

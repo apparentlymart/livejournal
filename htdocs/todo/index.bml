@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 #line 2
  $title = "";
  $body = "";
@@ -23,7 +23,7 @@
      $sth->execute;
      $u = $sth->fetchrow_hashref;
      unless ($u) {
-         $body .= "(=H1 Error H1=)(=P <B>Unknown user: </B> " . LJ::ehtml($user) . " P=)\n";
+         $body .= "<?h1 Error h1?><?p <B>Unknown user: </B> " . LJ::ehtml($user) . " p?>\n";
      }
  }
 
@@ -37,7 +37,7 @@
  LJ::Todo::get_permissions($dbh, \%permission, { 'user' => $u, 'remote' => $remote });
 
  $title = "To-Do List: $user";
- $body .= "(=DE To view another user's to-do list, <a href=\"./?mode=pickuser\">go here</a>.  DE=)";
+ $body .= "<?de To view another user's to-do list, <a href=\"./?mode=pickuser\">go here</a>.  de?>";
 
  ####
  ### security stuff
@@ -86,7 +86,7 @@
  if (@delete) {
      unless ($permission{'delete'}) {
          $title = "Error";
-         $body = "(=H1 Security H1=)(=P You're not allowed to delete these to-do items. P=)";
+         $body = "<?h1 Security h1?><?p You're not allowed to delete these to-do items. p?>";
          return;
      }
 
@@ -99,13 +99,13 @@
      $title = "Deleted";
      $body = "";
      $body .= "<a href=\"./?user=$u->{'user'}\">&lt;&lt; To-Do List</a>";
-     $body .= "(=H1 Items Deleted H1=)(=P The items checked have been deleted. P=)";
+     $body .= "<?h1 Items Deleted h1?><?p The items checked have been deleted. p?>";
      return;
  }
 
  $body .= "<FORM METHOD=GET>";
  $body .= "<INPUT TYPE=HIDDEN NAME=user VALUE=$FORM{'user'}>\n" if ($FORM{'user'});
- $body .= "(=H1 Filter Items H1=)(=P ";
+ $body .= "<?h1 Filter Items h1?><?p ";
  foreach my $kwid (sort { lc($keyword{$a}->{'keyword'}) cmp lc($keyword{$b}->{'keyword'}) } 
                    keys %keyword)
  {
@@ -125,10 +125,10 @@
  } else {
      $body .= "No categories to filter on.";
  }
- $body .= " P=)";
+ $body .= " p?>";
 
  unless (@tdids) {
-     $body .= "(=H1 No entries H1=)(=P Either this user has no to-do items, they're all private, or your filter criteria has returned zero matches. P=)";
+     $body .= "<?h1 No entries h1?><?p Either this user has no to-do items, they're all private, or your filter criteria has returned zero matches. p?>";
  }
 
  ###
@@ -142,11 +142,11 @@
      
      if (@actions) 
      {
-         $body .= "(=H1 Actions H1=)(=P ";
+         $body .= "<?h1 Actions h1?><?p ";
          foreach (@actions) {
              $body .= "[ <a href=\"$_->[0]\">$_->[1]</a> ]";
          }
-         $body .= " P=)";
+         $body .= " p?>";
      }
  }
 
@@ -195,7 +195,7 @@
 
  
  $body .= "<FORM METHOD=POST><P><TABLE BORDER=1 CELLPADDING=4 CELLSPACING=1>\n";
- $body .= "<TR BGCOLOR=(=EMCOLORLITE=) ALIGN=LEFT VALIGN=BOTTOM>\n";
+ $body .= "<TR BGCOLOR=<?emcolorlite?> ALIGN=LEFT VALIGN=BOTTOM>\n";
  $body .= "<TD><B>&nbsp;</B></TD>\n" if ($permission{'delete'});
  {
      my @cols = (["Status", "status"],
@@ -207,7 +207,7 @@
          if ($col->[1] eq "") {
              $body .= "<td><b>$col->[0]</b></td>";
          } elsif ($col->[1] eq $FORM{'sort'}) {
-             $body .= "<td bgcolor=(=EMCOLOR=)><b>$col->[0]</b></td>";
+             $body .= "<td bgcolor=<?emcolor?>><b>$col->[0]</b></td>";
          } else {
              $body .= "<td><a href=\"" . LJ::self_link(\%FORM, { 'user' => $u->{'user'}, 'sort' => $col->[1] }) . "\"><b>$col->[0]</b></a></td>";
          }
@@ -284,11 +284,11 @@
 
  return;
 
-_CODE=)(=PAGE
-TITLE=>(=_CODE return $title; _CODE=)
-BODY=>(=_CODE return $body; _CODE=)<p>(=STANDOUT <B>Note:</B> The to-do list system is in beta.  We're well aware it has a lot of work needed, and it definitely needs to be documented-- especially the security related things. STANDOUT=)
-PAGE=)(=_C <LJDEP>
+_code?><?page
+TITLE=><?_code return $title; _code?>
+BODY=><?_code return $body; _code?><p><?standout <B>Note:</B> The to-do list system is in beta.  We're well aware it has a lot of work needed, and it definitely needs to be documented-- especially the security related things. standout?>
+page?><?_c <LJDEP>
 form: htdocs/todo/index.bml
 post: htdocs/todo/index.bml
 link: htdocs/todo/index.bml, htdocs/todo/item.bml
-</LJDEP> _C=)
+</LJDEP> _c?>
