@@ -2652,63 +2652,237 @@ sub get_talktext2
 sub get_logtext2multi
 {
     &nodb;
-    my $idsbyc = shift;
+    return _get_posts_raw_wrapper(shift, "text");
+}
+
+# this function is used to translate the old get_logtext2multi and load_log_props2multi
+# functions into using the new get_posts_raw.  eventually, the above functions should
+# be taken out of the rest of the code, at which point this function can also die.
+sub _get_posts_raw_wrapper {
+    # args:
+    #   { cid => [ [jid, jitemid]+ ] }
+    #   "text" or "props"
+    #   optional hashref to put return value in.  (see get_logtext2multi docs)
+    # returns: that hashref.
+    my ($idsbyc, $type, $ret) = @_;
+
+    my $opts = {};
+    if ($type eq 'text') {
+        $opts->{text_only} = 1;
+    } elsif ($type eq 'prop') {
+        $opts->{prop_only} = 1;
+    } else {
+        return undef;
+    }
+
+    my @postids;
+    while (my ($cid, $ids) = each %$idsbyc) {
+        foreach my $pair (@$ids) {
+            push @postids, [ $cid, $pair->[0], $pair->[1] ];
+        }
+    }
+    my $rawposts = LJ::get_posts_raw($opts, @postids);
+    
+    # translate colon-separated (new) to space-separated (old) keys.
+    $ret ||= {};
+    while (my ($id, $data) = each %{$rawposts->{$type}}) {
+        $id =~ s/:/ /;
+        $ret->{$id} = $data;
+    }
+    return $ret;
+}
+
+# <LJFUNC>
+# name: LJ::get_posts_raw
+# des: Gets raw post data (text and props) efficiently from clusters.
+# info: Fetches posts from clusters, trying memcache and slaves first if available.
+# returns: hashref with keys being "jid:jitemid", values being hashrefs of
+#          { "text" => [ $subject, $body ], "props" => { ... } }.
+# args: opts?, id+
+# des-opts: An optional hashref of options:
+#            - memcache_only:  Don't fall back on the database.
+#            - text_only:  Retrieve only text, no props (used to support old API).
+#            - props_only:  Retrieve only props, no text (used to support old API).
+# des-id: An arrayref of [ clusterid, ownerid, itemid ].
+# </LJFUNC>
+sub get_posts_raw
+{
+    my $opts = ref $_[0] eq "HASH" ? shift : {};
+    my $ret = {};
     my $sth;
 
-    # return structure.
-    my $lt = {};
+    LJ::load_props('log') unless $opts->{text_only};
 
-    # keep track of itemids we still need to load per cluster
-    my %need;
+    # throughout this function, the concept of an "id"
+    # is the key to identify a single post.
+    # it is of the form "$jid:$jitemid".
+
+    # build up a list for each cluster of what we want to get,
+    # as well as a list of all the keys we want from memcache.
+    my %cids;      # cid => 1
+    my $needtext;  # text needed:  $cid => $id => 1
+    my $needprop;  # props needed: $cid => $id => 1
     my @mem_keys;
-    foreach my $c (keys %$idsbyc) {
-        foreach (@{$idsbyc->{$c}}) {
-            if ($c) {
-                $need{$c}->{"$_->[0] $_->[1]"} = 1;
-                push @mem_keys, [$_->[0],"logtext:$c:$_->[0]:$_->[1]"];
-            }
+
+    # if we're loading entries for a friends page,
+    # silently failing to load a cluster is acceptable.
+    # but for a single user, we want to die loudly so they don't think
+    # we just lost their journal.
+    my $single_user;
+
+    # because the memcache keys for logprop don't contain
+    # which cluster they're in, we also need a map to get the
+    # cid back from the jid so we can insert into the needfoo hashes.
+    # the alternative is to not key the needfoo hashes on cluster,
+    # but that means we need to grep out each cluster's jids when
+    # we do per-cluster queries on the databases.
+    my %cidsbyjid;
+    foreach my $post (@_) {
+        my ($cid, $jid, $jitemid) = @{$post};
+        my $id = "$jid:$jitemid";
+        if (not defined $single_user) {
+            $single_user = $jid;
+        } elsif ($single_user and $jid != $single_user) {
+            # multiple users
+            $single_user = 0;
+        }
+        $cids{$cid} = 1;
+        $cidsbyjid{$jid} = $cid;
+        unless ($opts->{prop_only}) {
+            $needtext->{$cid}{$id} = 1;
+            push @mem_keys, [$jid,"logtext:$cid:$id"];
+        }
+        unless ($opts->{text_only}) {
+            $needprop->{$cid}{$id} = 1;
+            push @mem_keys, [$jid,"logprop:$id"];
         }
     }
 
-    # pass 0: memory, avoiding databases
+    # first, check memcache.
     my $mem = LJ::MemCache::get_multi(@mem_keys) || {};
     while (my ($k, $v) = each %$mem) {
         next unless $v;
-        $k =~ /:(\d+):(\d+):(\d+)/;
-        delete $need{$1}->{"$2 $3"};
-        $lt->{"$2 $3"} = $v;
-    }
-
-    # pass 1: slave (trying recent), pass 2: master
-    foreach my $pass (1, 2)
-    {
-        foreach my $c (keys %need)
-        {
-            next unless keys %{$need{$c}};
-            my $table = "logtext2";
-            my $db = $pass == 1 ? LJ::get_dbh("cluster${c}slave") :
-                LJ::get_dbh("cluster${c}");
-            next unless $db;
-
-            my $fattyin;
-            foreach (keys %{$need{$c}}) {
-                $fattyin .= " OR " if $fattyin;
-                my ($a, $b) = split(/ /, $_);
-                $fattyin .= "(journalid=$a AND jitemid=$b)";
-            }
-
-            $sth = $db->prepare("SELECT journalid, jitemid, subject, event ".
-                                "FROM $table WHERE $fattyin");
-            $sth->execute;
-            while (my ($jid, $jitemid, $subject, $event) = $sth->fetchrow_array) {
-                delete $need{$c}->{"$jid $jitemid"};
-                my $val = [ $subject, $event ];
-                $lt->{"$jid $jitemid"} = $val;
-                LJ::MemCache::add([$jid,"logtext:$c:$jid:$jitemid"], $val);
-            }
+        next unless $k =~ /(\w+):(?:\d+:)?(\d+):(\d+)/;
+        my ($type, $jid, $jitemid) = ($1, $2, $3);
+        my $cid = $cidsbyjid{$jid};
+        my $id = "$jid:$jitemid";
+        if ($type eq "logtext") {
+            delete $needtext->{$cid}{$id};
+            $ret->{text}{$id} = $v;
+        } elsif ($type eq "logprop" && ref $v eq "HASH") {
+            delete $needprop->{$cid}{$id};
+            $ret->{prop}{$id} = $v;
         }
     }
-    return $lt;
+    
+    # we may be done already.
+    return $ret if $opts->{memcache_only};
+    return $ret unless values %$needtext or values %$needprop;
+
+    # otherwise, hit the database.
+    foreach my $cid (keys %cids) {
+        # for each cluster, get the text/props we need from it.
+        my $cneedtext = $needtext->{$cid} || {};
+        my $cneedprop = $needprop->{$cid} || {};
+
+        next unless %$cneedtext or %$cneedprop;
+
+        my $make_in = sub {
+            my @in;
+            foreach my $id (@_) {
+                my ($jid, $jitemid) = map { $_ + 0 } split(/:/, $id);
+                push @in, "(journalid=$jid AND jitemid=$jitemid)";
+            }
+            return join(" OR ", @in);
+        };
+
+        # now load from each cluster.
+        my $fetchtext = sub {
+            my $db = shift;
+            return unless %$cneedtext;
+            my $in = $make_in->(keys %$cneedtext);
+            $sth = $db->prepare("SELECT journalid, jitemid, subject, event ".
+                                "FROM logtext2 WHERE $in");
+            $sth->execute;
+            while (my ($jid, $jitemid, $subject, $event) = $sth->fetchrow_array) {
+                my $id = "$jid:$jitemid";
+                my $val = [ $subject, $event ];
+                $ret->{text}{$id} = $val;
+                LJ::MemCache::add([$jid,"logtext:$cid:$id"], $val);
+                delete $cneedtext->{$id};
+            }
+        };
+
+        my $fetchprop = sub {
+            my $db = shift;
+            return unless %$cneedprop;
+            my $in = $make_in->(keys %$cneedprop);
+            $sth = $db->prepare("SELECT journalid, jitemid, propid, value ".
+                                "FROM logprop2 WHERE $in");
+            $sth->execute;
+            my %gotid;
+            while (my ($jid, $jitemid, $propid, $value) = $sth->fetchrow_array) {
+                my $id = "$jid:$jitemid";
+                my $propname = $LJ::CACHE_PROPID{'log'}->{$propid}{name};
+                $ret->{prop}{$id}{$propname} = $value;
+                $gotid{$id} = 1;
+            }
+            foreach my $id (keys %gotid) {
+                my ($jid, $jitemid) = map { $_ + 0 } split(/:/, $id);
+                LJ::MemCache::add([$jid, "logprop:$id"], $ret->{prop}{$id});
+                delete $cneedprop->{$id};
+            }
+        };
+
+        my $dberr = sub {
+            die "Couldn't connect to database" if $single_user;
+            next;
+        };
+
+        # run the fetch functions on the proper databases, with fallbacks if necessary.
+        my ($dbcm, $dbcr);
+        if (@LJ::MEMCACHE_SERVERS or $opts->{use_master}) {
+            $dbcm ||= LJ::get_cluster_master($cid) or $dberr->();
+            $fetchtext->($dbcm) if %$cneedtext;
+            $fetchprop->($dbcm) if %$cneedprop;
+        } else {
+            $dbcr ||= LJ::get_cluster_reader($cid);
+            if ($dbcr) {
+                $fetchtext->($dbcr) if %$cneedtext;
+                $fetchprop->($dbcr) if %$cneedprop;
+            }
+            # if we still need some data, switch to the master.
+            if (%$cneedtext or %$cneedprop) {
+                $dbcm ||= LJ::get_cluster_master($cid) or $dberr->();
+                $fetchtext->($dbcm);
+                $fetchprop->($dbcm);
+            }
+        }
+
+        # and finally, if there were no errors,
+        # insert into memcache the absence of props
+        # for all posts that didn't have any props.
+        foreach my $id (keys %$cneedprop) {
+            my ($jid, $jitemid) = map { $_ + 0 } split(/:/, $id);
+            LJ::MemCache::set([$jid, "logprop:$id"], {});
+        }
+    }
+    return $ret;
+}
+
+sub get_posts
+{
+    my $opts = ref $_[0] eq "HASH" ? shift : {};
+    my $rawposts = get_posts_raw($opts, @_);
+
+    # fix up posts as needed for display, following directions given in opts.
+    while (my ($id, $rp) = each %$rawposts) {
+        if ($LJ::UNICODE && $rp->{props}{unknown8bit}) {
+            #LJ::item_toutf8($u, \$rp->{text}[0], \$rp->{text}[1], $rp->{props});
+        }
+    }
+
+    return $rawposts;
 }
 
 # <LJFUNC>
@@ -5148,45 +5322,8 @@ sub load_log_props2
 sub load_log_props2multi
 {
     &nodb;    
-    # ids by cluster (hashref),  output hashref (keys = "$ownerid $jitemid")
-    my ($idsbyc, $hashref) = @_;
-    my $sth;
-    return unless ref $idsbyc eq "HASH";
-    LJ::load_props("log");
-
-    my @memkeys;
-    foreach my $c (keys %$idsbyc) {
-        foreach my $pair (@{$idsbyc->{$c}}) {
-            push @memkeys, [$pair->[0],"logprop:$pair->[0]:$pair->[1]"];
-        }
-    }
-    my $mem = LJ::MemCache::get_multi(@memkeys) || {};
-    while (my ($k, $v) = each %$mem) {
-        next unless $k =~ /(\d+):(\d+)/ && ref $v eq "HASH";
-        $hashref->{"$1 $2"} = $v;
-    }
-
-    foreach my $c (keys %$idsbyc) {
-        my @need;
-        foreach (@{$idsbyc->{$c}}) {
-            next if $hashref->{"$_->[0] $_->[1]"};
-            push @need, $_;
-        }
-        next unless @need;
-        my $in = join(" OR ", map { "(journalid=" . ($_->[0]+0) . " AND jitemid=" . ($_->[1]+0) . ")" } @need);
-        my $db = @LJ::MEMCACHE_SERVERS ? LJ::get_cluster_master($c) : LJ::get_cluster_reader($c);
-        next unless $db;  # FIXME: do something better?
-        $sth = $db->prepare("SELECT journalid, jitemid, propid, value ".
-                            "FROM logprop2 WHERE $in");
-        $sth->execute;
-        while (my ($jid, $jitemid, $propid, $value) = $sth->fetchrow_array) {
-            $hashref->{"$jid $jitemid"}->{$LJ::CACHE_PROPID{'log'}->{$propid}->{'name'}} = $value;
-        }
-        foreach my $pair (@need) {
-            LJ::MemCache::set([$pair->[0], "logprop:$pair->[0]:$pair->[1]"],
-                              $hashref->{"$pair->[0] $pair->[1]"} || {});
-        }
-    }
+    my ($ids, $props) = @_;
+    _get_posts_raw_wrapper($ids, "prop", $props);
 }
 
 # <LJFUNC>
