@@ -1151,7 +1151,14 @@ sub talkform {
                      BML::eall($form->{userpost}) : "";
     $ret .= "$BML::ML{'Username'}:&nbsp;<input class='textbox' name='userpost' size='13' maxlength='15' id='username' value='$ljuser_def' />";
     $ret .= "$BML::ML{'Password'}:&nbsp;<input class='textbox' name='password' type='password' maxlength='30' size='13' id='password' /> <label for='logincheck'>$BML::ML{'.loginq'}&nbsp;</label><input type='checkbox' name='do_login' id='logincheck' /></td></tr>\n";
-    
+
+    # Link to create an account
+    if (!$remote) {
+        $ret .= "<tr valign='middle' align='left'><td colspan='2'></td><td><font size='1'>";
+        $ret .= BML::ml('.noaccount', {'aopts' => "href='$LJ::SITEROOT/create.bml'"});
+        $ret .= "</font></td></tr>\n";
+    }
+
     my $basesubject = $form->{subject} || "";
     if ($opts->{replyto} && !$basesubject && $parpost->{'subject'}) {
         $basesubject = $parpost->{'subject'};
