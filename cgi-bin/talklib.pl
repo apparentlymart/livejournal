@@ -1325,7 +1325,13 @@ sub enter_comment {
     # add to poster's talkleft table, or the xfer place
     if ($posterid) {
         my $table;
-        my $db = LJ::get_cluster_master($comment->{u});
+        my $db;
+
+        # failure to get a handle here is nonfatal, so catch it
+        eval {
+            $db = LJ::get_cluster_master($comment->{u});
+        }; 
+
         if ($db) {
             # remote's cluster is writable
             $table = "talkleft";
