@@ -59,6 +59,13 @@ sub underage {
         $u->underage_status($status || 'Y');
     }
 
+    # now fire off any hooks that are available
+    LJ::run_hooks('set_underage', {
+        u => $u,
+        on => $on,
+        status => $u->underage_status,
+    });
+
     # return what we set it to
     return $on;
 }
