@@ -410,6 +410,9 @@ sub process
         if ($address =~ /^(.+)\+(.*)\@(.+)$/) {
             ($address, $arg) = ("$1\@$3", $2);
         }
+        if (defined $LJ::ALIAS_TO_SUPPORTCAT{$address}) {
+            $address = $LJ::ALIAS_TO_SUPPORTCAT{$address};
+        }
         if (defined $email2cat->{$address}) {
             $to = $address;
             $toarg = $arg;
