@@ -84,32 +84,22 @@
      my $ditemid = $itemid;
      my $uj;
 
-     if ($journal) {
-         $itemid = int($itemid / 256);
+     $itemid = int($itemid / 256);
          
-         $uj = LJ::load_user($dbs, $journal);
-         return $err->("Unknown journal") unless $uj;
-         my $db = LJ::get_cluster_reader($uj);
-         
-         $sth = $dbr->prepare("SELECT l.posterid, ls.subject ".
-                              "FROM log2 l, logtext2 ls ".
-                              "WHERE l.journalid=$uj->{'userid'} AND ls.journalid=$uj->{'userid'} ".
-                              "AND l.jitemid=$itemid AND ls.jitemid=$itemid");	 
-     } else {
-         $sth = $dbr->prepare("SELECT l.posterid, ls.subject ".
-                              "FROM log l, logtext ls ".
-                              "WHERE l.itemid=$itemid AND ls.itemid=$itemid");
-         
-     }
-
-     $sth->execute;
-     my ($posterid, $subject) = $sth->fetchrow_array;
-
+     $uj = LJ::load_user($dbs, $journal);
+     return $err->("Unknown journal") unless $uj;
+     my $db = LJ::get_cluster_reader($uj);
+     
+     my ($posterid, $subject) = $dbr->selectrow_array("SELECT l.posterid, ls.subject ".
+                                                      "FROM log2 l, logtext2 ls ".
+                                                      "WHERE l.journalid=? AND ls.journalid=l.journalid ".
+                                                      "AND l.jitemid=? AND ls.jitemid=l.jitemid",
+                                                      undef, $uj->{'userid'}, $itemid);
      my $up;
      LJ::load_userids_multiple($dbs, [ $posterid => \$up ], [ $uj, $u ]);
 
-     my $jarg = $uj ? "journal=$uj->{'user'}&" : "";
-     my $url = "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid";
+     my $base = LJ::journal_base($uj);
+     my $url = "$base/$ditemid.html";
 
      if ($up->{'user'} eq $u->{'user'}) {
          $msg .= "Hey,\n\nCheck out this journal entry of mine:\n\n";
