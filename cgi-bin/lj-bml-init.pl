@@ -66,7 +66,8 @@ BML::register_ml_getter(\&LJ::Lang::get_text_bml);
 # open a db connection to force DBI to autoload its driver code before
 # apache forks
 {
-    my $dbh = DBI->connect(LJ::_make_dbh_fdsn($LJ::DBINFO{'master'}));
+    my ($dsn, $user, $pass) = split(/\|/, LJ::_make_dbh_fdsn($LJ::DBINFO{'master'}));
+    my $dbh = DBI->connect($dsn, $user, $pass);
     my $num = $dbh->selectrow_array("SELECT COUNT(*) FROM stats");
     $dbh->disconnect;
 }
