@@ -12,6 +12,7 @@ Here you can upload a miniature picture that will be used to represent you throu
 <li>File format must be either PNG, GIF or JPG</li>
 </ul>
 
+<form action="uploadpic_do.bml" method="post" enctype="multipart/form-data">
 <?standout
 <table>
 <?_code
@@ -19,13 +20,14 @@ Here you can upload a miniature picture that will be used to represent you throu
  return LJ::auth_fields_2($dbs, \%FORM, { 'shared' => 1, 'getother' => 1 });
  _code?>
 </table>
-<form action="uploadpic_do.bml" method="post" enctype="multipart/form-data"><table>
+<table>
 <tr><td><input type='radio' name='src' value='file' checked='checked' id='radio_file' accesskey='f' /> <label for='radio_file'>From <u>F</u>ile:</label></td><td align="left"><input type="file" name="userpic" /></td></tr>
 <tr><td><input type='radio' name="src" value="url" id='radio_url' accesskey='r' /> <label for='radio_url'>From U<u>R</u>L:</label></td><td align="left"><input name="urlpic" size="40" /></td></tr>
 <tr><td></td><td align="left"><input type="checkbox" name="make_default" checked='checked' value='1' id='make_default' accesskey='d' /> <label for='make_default'>Make this your <u>d</u>efault picture</label></td></tr>
 <tr><td></td><td><input type="submit" value="Proceed..." /></td></tr>
-</table></form>
+</table>
 standout?>
+</form>
 
 <=body
 page?><?_c <LJDEP>
