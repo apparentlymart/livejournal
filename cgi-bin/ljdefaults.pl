@@ -169,6 +169,9 @@
     # maximum FOAF friends to return (so the server doesn't get overloaded)
     $MAX_FOAF_FRIENDS ||= 1000;
 
+    # maximum number of friendofs to load/memcache (affects userinfo.bml display)
+    $MAX_FRIENDOF_LOAD ||= 5000;
+
     # whether to proactively delete any comments associated with an entry when we assign
     # a new jitemid (see the big comment above LJ::Protocol::new_entry_cleanup_hack)
     $NEW_ENTRY_CLEANUP_HACK ||= 0;

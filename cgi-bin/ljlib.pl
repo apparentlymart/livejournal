@@ -812,16 +812,17 @@ sub fill_groups_xmlrpc {
 # <LJFUNC>
 # name: LJ::get_friends
 # des: Returns friends rows for a given user.
-# args: uuserid, mask?, memcache_only?
+# args: uuserid, mask?, memcache_only?, force?
 # des-uuserid: a userid or u object
 # des-mask: a security mask to filter on
 # des-memcache_only: flag, set to only return data from memcache
+# des-force: flag, set to ignore memcache and always hit db
 # returns: hashref; keys = friend userids
 #                   values = hashrefs of 'friends' columns and their values
 # </LJFUNC>
 sub get_friends {
     # TAG:FR:ljlib:get_friends
-    my ($uuid, $mask, $memcache_only) = @_;
+    my ($uuid, $mask, $memcache_only, $force) = @_;
     my $userid = LJ::want_userid($uuid);
     return undef unless $userid;
     return undef if $LJ::FORCE_EMPTY_FRIENDS{$userid};
@@ -836,36 +837,39 @@ sub get_friends {
 
     # first, check memcache
     my $memkey = [$userid, "friends:$userid"];
-    my $memfriends = LJ::MemCache::get($memkey);
-    if ($memfriends) {
-        my %friends; # rows to be returned
 
-        # first byte of object is data version
-        # only version 1 is meaningful right now
-        my $memver = substr($memfriends, 0, 1, '');
-        return undef unless $memver == $ver;
+    unless ($force) {
+        my $memfriends = LJ::MemCache::get($memkey);
+        if ($memfriends) {
+            my %friends; # rows to be returned
 
-        # get each $packlen-byte row
-        while (length($memfriends) >= $packlen) {
-            my @row = unpack($packfmt, substr($memfriends, 0, $packlen, ''));
+            # first byte of object is data version
+            # only version 1 is meaningful right now
+            my $memver = substr($memfriends, 0, 1, '');
+            return undef unless $memver == $ver;
 
-            # don't add into %friends hash if groupmask doesn't match
-            next if $mask && ! ($row[3]+0 & $mask+0);
+            # get each $packlen-byte row
+            while (length($memfriends) >= $packlen) {
+                my @row = unpack($packfmt, substr($memfriends, 0, $packlen, ''));
 
-            # add "#" to beginning of colors
-            $row[$_] = "\#$row[$_]" foreach 1..2;
+                # don't add into %friends hash if groupmask doesn't match
+                next if $mask && ! ($row[3]+0 & $mask+0);
 
-            # turn unpacked row into hashref
-            my $fid = $row[0];
-            my $idx = 1;
-            foreach my $col (@cols[1..$#cols]) {
-                $friends{$fid}->{$col} = $row[$idx];
-                $idx++;
+                # add "#" to beginning of colors
+                $row[$_] = "\#$row[$_]" foreach 1..2;
+
+                # turn unpacked row into hashref
+                my $fid = $row[0];
+                my $idx = 1;
+                foreach my $col (@cols[1..$#cols]) {
+                    $friends{$fid}->{$col} = $row[$idx];
+                    $idx++;
+                }
             }
-        }
 
-        # got from memcache, return
-        return \%friends;
+            # got from memcache, return
+            return \%friends;
+        }
     }
     return {} if $memcache_only; # no friends
 
@@ -904,6 +908,42 @@ sub get_friends {
     LJ::MemCache::add($memkey, $mempack);
 
     return \%friends;
+}
+
+# <LJFUNC>
+# name: LJ::get_friendofs
+# des: Returns userids of friendofs for a given user.
+# args: uuserid, opts?
+# des-opts: options hash, keys: 'force' => don't check memcache
+# returns: userid for friendofs
+# </LJFUNC>
+sub get_friendofs {
+    # TAG:FR:ljlib:get_friends
+    my ($uuid, $opts) = @_;
+    my $userid = LJ::want_userid($uuid);
+    return undef unless $userid;
+
+    # first, check memcache
+    my $memkey = [$userid, "friendofs:$userid"];
+
+    unless ($opts->{force}) {
+        my $memfriendofs = LJ::MemCache::get($memkey);
+        return @$memfriendofs if $memfriendofs;
+    }
+
+    # nothing from memcache, select all rows from the
+    # database and insert those into memcache
+
+    my $dbh = LJ::get_db_writer();
+    my $limit = $LJ::MAX_FRIENDOF_LOAD + 1;
+    my $friendofs = $dbh->selectcol_arrayref
+        ("SELECT userid FROM friends WHERE friendid=? LIMIT $limit",
+         undef, $userid) || [];
+    die $dbh->errstr if $dbh->err;
+
+    LJ::MemCache::add($memkey, $friendofs);
+
+    return @$friendofs;
 }
 
 # <LJFUNC>
@@ -7349,7 +7389,7 @@ sub blocking_report {
 }
 
 # <LJFUNC>
-# name: LJ::friends_do
+# name: LJ::_friends_do
 # des: Runs given sql, then deletes the given userid's friends from memcache
 # args: uuserid, sql, args
 # des-uuserid: a userid or u object
@@ -7357,7 +7397,7 @@ sub blocking_report {
 # des-args: a list of arguments to pass use via: $dbh->do($sql, undef, @args)
 # returns: results of $dbh->do()
 # </LJFUNC>
-sub friends_do {
+sub _friends_do {
     my ($uuid, $sql, @args) = @_;
     my $uid = want_userid($uuid);
     return undef unless $uid && $sql;
@@ -7485,19 +7525,21 @@ sub color_todb
 # <LJFUNC>
 # name: LJ::add_friend
 # des: Simple interface to add a friend edge.
-# args: userida, useridb, opts?
-# des-userida: Userid of source user (befriender)
-# des-useridb: Userid of target user (befriendee)
-# des-opts: hashref; 'defaultview' key means add $useridb to $userida's Default View friends group
+# args: uuid, to_add, opts?
+# des-to_add: a single uuid or an arrayref of uuids to add (befriendees)
+# des-opts: hashref; 'defaultview' key means add target uuids to $uuid's Default View friends group
 # returns: boolean; 1 on success (or already friend), 0 on failure (bogus args)
 # </LJFUNC>
 sub add_friend
 {
     &nodb;
-    my ($ida, $idb, $opts) = @_;
+    my ($userid, $to_add, $opts) = @_;
 
-    $ida += 0; $idb += 0;
-    return 0 unless $ida and $idb;
+    $userid = LJ::want_userid($userid);
+    return 0 unless $userid;
+
+    my @add_ids = ref $to_add eq 'ARRAY' ? map { LJ::want_userid($_) } @$to_add : ( LJ::want_userid($to_add) );
+    return 0 unless @add_ids;
 
     my $dbh = LJ::get_db_writer();
 
@@ -7507,34 +7549,52 @@ sub add_friend
     my $groupmask = 1;
     if ($opts->{'defaultview'}) {
         # TAG:FR:ljlib:add_friend_getdefviewmask
-        my $group = LJ::get_friend_group($ida, { name => 'Default View' });
+        my $group = LJ::get_friend_group($userid, { name => 'Default View' });
         my $grp = $group ? $group->{groupnum}+0 : 0;
         $groupmask |= (1 << $grp) if $grp;
     }
 
     # TAG:FR:ljlib:add_friend
-    LJ::friends_do($ida,
-                   "INSERT INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) " .
-                   "VALUES (?,?,?,?,?)", $ida, $idb, $black, $white, $groupmask);
+    my $bind = join(",", map { "(?,?,?,?,?)" } @add_ids);
+    my @vals = map { $userid, $_, $black, $white, $groupmask } @add_ids;
 
-    return 1;
-}
+    my $res = LJ::_friends_do
+        ($userid, "INSERT INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) VALUES $bind", @vals);
 
-# <LJFUNC>
-# name: LJ::delete_friend_edge
-# args: userid, friendid
-# </LJFUNC>
-sub delete_friend_edge
-{
-    my ($userid, $friendid) = @_;
-    return undef unless $userid && $friendid;
-
-    my $res = LJ::friends_do($userid, "DELETE FROM friends WHERE userid=? AND friendid=?",
-                   $userid, $friendid);
-    LJ::MemCache::delete([$userid, "frgmask:$userid:$friendid"]);
+    # delete friend-of memcache keys for anyone who was added
+    LJ::memcache_kill($_, 'friendofs') foreach @add_ids;
 
     return $res;
 }
+
+# <LJFUNC>
+# name: LJ::remove_friend
+# args: uuid, to_del
+# des-to_del: a single uuid or an arrayref of uuids to remove
+# </LJFUNC>
+sub remove_friend
+{
+    my ($userid, $to_del) = @_;
+
+    $userid = LJ::want_userid($userid);
+    return undef unless $userid;
+
+    my @del_ids = ref $to_del eq 'ARRAY' ? map { LJ::want_userid($_) } @$to_del : ( LJ::want_userid($to_del) );
+    return 0 unless @del_ids;
+
+    my $bind = join(",", map { "?" } @del_ids);
+    my $res = LJ::_friends_do($userid, "DELETE FROM friends WHERE userid=? AND friendid IN ($bind)",
+                              $userid, @del_ids);
+
+    # delete friend-of memcache keys for anyone who was removed
+    foreach my $fid (@del_ids) {
+        LJ::MemCache::delete([ $userid, "frgmask:$userid:$fid" ]);
+        LJ::memcache_kill($fid, 'friendofs');
+    }
+
+    return $res;
+}
+*delete_friend_edge = \&LJ::remove_friend;
 
 # <LJFUNC>
 # name: LJ::event_register

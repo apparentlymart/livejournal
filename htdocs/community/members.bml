@@ -200,9 +200,8 @@ body<=
    
         # delete members
         if (%{$delete{'member'}}) {
-            my $in = join(',', keys %{$delete{'member'}});
             # TAG:FR:bml_comm_members:del_members
-            LJ::friends_do($cid, "DELETE FROM friends WHERE userid=? AND friendid IN ($in)", $cid);
+            LJ::remove_friend($cid, [ keys %{$delete{'member'}} ]);
         }
 
         # delete other rel edges

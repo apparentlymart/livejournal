@@ -34,8 +34,7 @@ body<=
 
         # add to community
         if ($arg->{'member'}) {
-            LJ::friends_do($aa, "REPLACE INTO friends (userid, friendid) VALUES (?, ?)",
-                           $aa->{'userid'}, $targetid);
+            LJ::add_friend($aa->{userid}, $targetid);
         }
 
         # set up rels with this community

@@ -1645,7 +1645,7 @@ sub editfriends
 
         my $friendid = LJ::get_userid($deluser);
         # TAG:FR:protocol:editfriends2_del
-        LJ::delete_friend_edge($userid, $friendid);
+        LJ::remove_friend($userid, $friendid);
         $friend_count--;
     }
 
@@ -1734,10 +1734,9 @@ sub editfriends
             unless ($dbh->err) {
                 my $memkey = [$userid,"frgmask:$userid:$friendid"];
                 LJ::MemCache::set($memkey, $gmask+0, time()+60*15);
-                LJ::mark_dirty($userid, "friends");
+                LJ::memcache_kill($friendid, 'friendofs');
             }
             return $fail->(501,$dbh->errstr) if $dbh->err;
-
         }
     }
 

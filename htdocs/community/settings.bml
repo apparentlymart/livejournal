@@ -98,7 +98,8 @@ body<=
            LJ::set_rel($cu, $remote, 'A');
 
            # delete existing friends
-           LJ::friends_do($cid, "DELETE FROM friends WHERE userid=?", $cid);
+           my $friends = LJ::get_friends($cid, undef, undef, 'force') || {};
+           LJ::remove_friend($cid, [ keys %$friends ]);
 
         } else {
            $dbh->do("UPDATE community SET membership=$qmembership, postlevel=$qpostlevel WHERE userid=$cid");
