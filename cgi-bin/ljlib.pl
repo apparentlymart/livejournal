@@ -3912,7 +3912,7 @@ sub load_userpics
 sub modify_caps {
     my ($argu, $cap_add, $cap_del, $res) = @_;
     my $userid = LJ::want_userid($argu);
-    return unless $userid;
+    return undef unless $userid;
 
     $cap_add ||= [];
     $cap_del ||= [];
@@ -3964,7 +3964,7 @@ sub modify_caps {
                           });
 
         # hook should return a status code
-        return 0 unless defined $res;
+        return undef unless defined $res;
     }
 
     # update user row
