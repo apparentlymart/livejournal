@@ -6516,18 +6516,23 @@ sub get_keyword_id
     my $kwid;
     if ($u && $u->{dversion} > 5) {
         # new style userkeywords -- but only if the user has the right dversion
-        my $dbcm = LJ::get_cluster_master($u);
-        return undef unless $dbcm;
-
-        $kwid = $dbcm->selectrow_array('SELECT kwid FROM userkeywords WHERE userid = ? AND keyword = ?',
-                                       undef, $u->{userid}, $kw) + 0;
+        $kwid = $u->selectrow_array('SELECT kwid FROM userkeywords WHERE userid = ? AND keyword = ?',
+                                    undef, $u->{userid}, $kw) + 0;
         unless ($kwid) {
             # create a new keyword
             $kwid = LJ::alloc_user_counter($u, 'K');
             return undef unless $kwid;
-            $u->do("INSERT INTO userkeywords (userid, kwid, keyword) VALUES (?, ?, ?)",
-                   undef, $u->{userid}, $kwid, $kw);
+
+            # attempt to insert the keyword
+            my $rv = $u->do("INSERT IGNORE INTO userkeywords (userid, kwid, keyword) VALUES (?, ?, ?)",
+                            undef, $u->{userid}, $kwid, $kw) + 0;
             return undef if $u->err;
+
+            # at this point, if $rv is 0, the keyword is already there so try again
+            unless ($rv) {
+                $kwid = $u->selectrow_array('SELECT kwid FROM userkeywords WHERE userid = ? AND keyword = ?',
+                                            undef, $u->{userid}, $kw) + 0;
+            }
         }
     } else {
         # old style global
