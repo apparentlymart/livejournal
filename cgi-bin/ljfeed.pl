@@ -270,12 +270,12 @@ sub create_view_atom
 
     # header
     $ret .= "<?xml version='1.0' encoding='$opts->{'saycharset'}' ?>\n";
-    $ret .= "<feed version='0.2' xmlns='http://purl.org/atom/ns#'>\n";
+    $ret .= "<feed version='0.3' xmlns='http://purl.org/atom/ns#'>\n";
 
     # attributes
     $ret .= "<title>$journalinfo->{title}</title>\n";
     $ret .= "<tagline>$journalinfo->{subtitle}</tagline>\n";
-    $ret .= "<link>$journalinfo->{link}</link>\n";
+    $ret .= "<link rel='alternate' type='text/html' href='$journalinfo->{link}' />\n";
 
     # output individual item blocks
 
@@ -287,7 +287,7 @@ sub create_view_atom
         $ret .= "  <entry>\n";
         $ret .= "    <title>$it->{subject}</title>\n"; # include empty tag if we don't have a subject.
         $ret .= "    <id>urn:lj:$LJ::DOMAIN:atom1:$journalinfo->{u}{user}:$ditemid</id>\n";
-        $ret .= "    <link>$journalinfo->{link}$ditemid.html</link>\n";
+        $ret .= "    <link rel='alternate' type='text/html' href='$journalinfo->{link}$ditemid.html' />\n";
         $ret .= "    <created>" . LJ::time_to_w3c($it->{createtime}, 'Z') . "</created>\n"
              if $it->{createtime} != $it->{modtime};
 
@@ -298,7 +298,6 @@ sub create_view_atom
         $ret .= "    <modified>" . LJ::time_to_w3c($it->{modtime}, 'Z') . "</modified>\n";
         $ret .= "    <author>\n";
         $ret .= "      <name>" . LJ::exml($journalinfo->{u}{name}) . "</name>\n";
-        $ret .= "      <weblog>$journalinfo->{link}</weblog>\n";
         $ret .= "      <email>$journalinfo->{editor}</email>\n" if $journalinfo->{editor};
         $ret .= "    </author>\n";
         # should rel be fragment?  or some other rel?  should it depend on whether we truncated?
