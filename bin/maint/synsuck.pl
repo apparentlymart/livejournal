@@ -283,7 +283,7 @@ $maint{'synsuck'} = sub
         
         # update reader count while we're changing things, but not
         # if feed is stale (minimize DB work for inactive things)
-        if ($newcount) {
+        if ($newcount || ! defined $readers) {
             $readers = $dbh->selectrow_array("SELECT COUNT(*) FROM friends WHERE ".
                                              "friendid=?", undef, $userid);
             # if readers are gone, don't check for a whole day
