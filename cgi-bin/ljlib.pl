@@ -277,6 +277,10 @@ sub get_dbh {
     my $mapping;
   ROLE:
     foreach my $role (@_) {
+	# let site admin turn off global master write access during
+	# maintenance
+	return undef if $LJ::DISABLE_MASTER && $role eq "master";
+
         if (($mapping = $LJ::WRAPPED_DB_ROLE{$role}) && ! $opts->{raw}) {
 	    if (my $keeper = $LJ::REQ_DBIX_KEEPER{$role}) {
 		return $keeper->set_database() ? $keeper : undef;
