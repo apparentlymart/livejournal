@@ -34,6 +34,7 @@ chomp $subject;
 
 my $to;
 my $toarg;
+my $ignore = 0;
 foreach my $a (Mail::Address->parse($head->get('To')),
              Mail::Address->parse($head->get('Cc')))
 {
@@ -46,9 +47,11 @@ foreach my $a (Mail::Address->parse($head->get('To')),
         $to = $address;
         $toarg = $arg;
     }
+    $ignore = 1 if $address eq $LJ::EMAIL_IGNORE;
 }
 unless ($to) {
     $parser->filer->purge;
+    exit 0 if $ignore;
     die "Not deliverable to support system (no match To:)\n";
 }
 
