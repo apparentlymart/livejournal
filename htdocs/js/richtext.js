@@ -183,6 +183,8 @@ function AddLJTag(rte, type) {
                 // tack onto the existing text
                 cw.document.body.innerHTML += make_ljuser(res);
                 return;
+            } else {
+                return;
             }
         }
 
