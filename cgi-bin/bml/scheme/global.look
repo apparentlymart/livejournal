@@ -46,7 +46,6 @@ ENTRYFORMCSS<=
 }
 #EntryForm #Options {
     margin-left: 0; margin-right: 0; padding: 0;
-    margin-bottom: 10px;
     background-color: #dfdfdf;
     border: 1px outset #000;
 }
@@ -82,7 +81,7 @@ ENTRYFORMCSS<=
 #EntryForm #UserpicPreviewImage {
     border: 1px solid #000;
 }
-#EntryForm
+#EntryForm {
     width: 100%;
 }
 </style>
