@@ -529,7 +529,7 @@ sub db_logger
     my $table = sprintf("access%04d%02d%02d", $now[5]+1900,
                         $now[4]+1, $now[3]);
     
-    unless ($LJ::CACHED_LOG_CREATE{$table}) {
+    unless ($LJ::CACHED_LOG_CREATE{"$dbl-$table"}) {
         $dbl->do("CREATE TABLE IF NOT EXISTS $table (".
                  "whn DATETIME NOT NULL,".
                  "server VARCHAR(30),".
@@ -545,7 +545,7 @@ sub db_logger
                  "bytes MEDIUMINT UNSIGNED NOT NULL,".
                  "browser VARCHAR(100) NOT NULL,".
                  "ref VARCHAR(200))");
-        $LJ::CACHED_LOG_CREATE{$table} = 1;
+        $LJ::CACHED_LOG_CREATE{"$dbl-$table"} = 1;
     }
 
     my $ua = $r->header_in("User-Agent");
