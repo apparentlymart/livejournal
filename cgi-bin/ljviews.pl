@@ -7,7 +7,8 @@ require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
 # the creator for the 'lastn' view:
 sub create_view_lastn
 {
-    my ($ret, $u, $vars, $remote, $opts) = @_;
+    my ($dbs, $ret, $u, $vars, $remote, $opts) = @_;
+    my $dbh = $dbs->{'dbh'};
     
     my $user = $u->{'user'};
 
@@ -74,7 +75,7 @@ sub create_view_lastn
     if ($skip > $maxskip) { $skip = $maxskip; }
 
     ## load the itemids
-    my @itemids = &get_recent_itemids({
+    my @itemids = LJ::get_recent_itemids($dbs, {
 	'view' => 'lastn',
 	'userid' => $u->{'userid'},
 	'remoteid' => $remote->{'userid'},
@@ -82,10 +83,10 @@ sub create_view_lastn
 	'skip' => $skip,
     });
     
-    my $order_by = "l.eventtime DESC, l.logtime DESC";
+    my $order_by = "eventtime DESC, logtime DESC";
     if ($u->{'journaltype'} eq "C") {
 	## communties sort by time posted
-	$order_by = "l.logtime DESC, l.eventtime DESC";
+	$order_by = "logtime DESC, eventtime DESC";
     }
 
     ### load the log properties
@@ -93,9 +94,11 @@ sub create_view_lastn
     &load_log_props(\@itemids, \%logprops);
     &load_moods();
 
+    my $logtext = LJ::get_logtext($dbs, @itemids);
+
     # load the log items
     my $itemid_in = join(", ", map { $_+0; } @itemids);
-    $sth = $dbh->prepare("SELECT l.posterid, l.itemid, l.security, lt.subject, lt.event, DATE_FORMAT(l.eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H\") AS 'alldatepart', replycount FROM log l, logtext lt WHERE l.itemid=lt.itemid AND l.itemid IN ($itemid_in) ORDER BY $order_by");
+    $sth = $dbh->prepare("SELECT posterid, itemid, security, DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H\") AS 'alldatepart', replycount FROM log WHERE itemid IN ($itemid_in) ORDER BY $order_by");
     $sth->execute;
 
     my $lastday = -1;
@@ -105,8 +108,11 @@ sub create_view_lastn
 
     my %altposter_picid = ();  # map ALT_POSTER userids to defaultpicids
 
-    while (my ($posterid, $itemid, $security, $subject, $event, $alldatepart, $replycount) = $sth->fetchrow_array)
+    while (my ($posterid, $itemid, $security, $alldatepart, $replycount) = $sth->fetchrow_array)
     {
+	my $subject = $logtext->{$itemid}->[0];
+	my $event = $logtext->{$itemid}->[1];
+
         my @dateparts = split(/ /, $alldatepart);
         my %lastn_date_format = (
 			   'dayshort' => $dateparts[0],
@@ -317,7 +323,9 @@ sub create_view_lastn
 # the creator for the 'friends' view:
 sub create_view_friends
 {
-    my ($ret, $u, $vars, $remote, $opts) = @_;
+    my ($dbs, $ret, $u, $vars, $remote, $opts) = @_;
+    my $dbh = $dbs->{'dbh'};
+
     my $user = $u->{'user'};
 
     my $REFRESH_TIME = 20;
@@ -402,7 +410,7 @@ sub create_view_friends
     if ($FORM{'mode'} eq "livecond") 
     {
 	## load the itemids
-	my @itemids = &get_friend_itemids({
+	my @itemids = LJ::get_friend_itemids($dbs, {
 	    'view' => 'friends',
 	    'userid' => $u->{'userid'},
 	    'remoteid' => $remote->{'userid'},
@@ -431,7 +439,7 @@ sub create_view_friends
     }
     
     ## load the itemids
-    my @itemids = &get_friend_itemids({
+    my @itemids = LJ::get_friend_itemids($dbs, {
         'view' => 'friends',
         'userid' => $u->{'userid'},
         'remoteid' => $remote->{'userid'},
@@ -475,10 +483,13 @@ sub create_view_friends
     my %userpics;
     my @picids = map { $friends{$_}->{'defaultpicid'} } keys %friends;
     &load_userpics(\%userpics, [ @picids ]);
+
+    # load the text of the entries
+    my $logtext = LJ::get_logtext($dbs, @itemids);
   
     # load the log items
     my $itemid_in = join(", ", map { $_+0; } @itemids);
-    $sth = $dbh->prepare("SELECT l.itemid, l.security, lt.subject, l.ownerid, l.posterid, lt.event, DATE_FORMAT(l.eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H\") AS 'alldatepart', l.replycount FROM log l, logtext lt WHERE l.itemid=lt.itemid AND l.itemid IN ($itemid_in) ORDER BY l.logtime DESC");
+    $sth = $dbh->prepare("SELECT itemid, security, ownerid, posterid, DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H\") AS 'alldatepart', replycount FROM log WHERE itemid IN ($itemid_in) ORDER BY logtime DESC");
     $sth->execute;
 
     ## suck it all into memory to free the db.
@@ -497,11 +508,14 @@ sub create_view_friends
     while (@log_rows)
     {
 	my $logrow = shift @log_rows;
-	my ($itemid, $security, $subject, $friendid, $posterid, $event, $alldatepart, $replycount) = @{$logrow};
+	my ($itemid, $security, $friendid, $posterid, $alldatepart, $replycount) = @{$logrow};
 	
+	my $subject = $logtext->{$itemid}->[0];
+	my $event = $logtext->{$itemid}->[1];
+
 	my ($friend, $poster);
-	$friend = &LJ::get_username($dbh, $friendid);
-	$poster = &LJ::get_username($dbh, $posterid);
+	$friend = LJ::get_username($dbh, $friendid);
+	$poster = LJ::get_username($dbh, $posterid);
 	
 	$eventnum++;
 	my @dateparts = split(/ /, $alldatepart);
@@ -725,7 +739,8 @@ sub create_view_friends
 # the creator for the 'calendar' view:
 sub create_view_calendar
 {
-    my ($ret, $u, $vars, $remote, $opts) = @_;
+    my ($dbs, $ret, $u, $vars, $remote, $opts) = @_;
+    my $dbh = $dbs->{'dbh'};
     
     my $user = $u->{'user'};
     &load_user_props($u, "opt_blockrobots", "url", "urlname");
@@ -928,7 +943,8 @@ sub create_view_calendar
 # the creator for the 'day' view:
 sub create_view_day
 {
-    my ($ret, $u, $vars, $remote, $opts) = @_;
+    my ($dbs, $ret, $u, $vars, $remote, $opts) = @_;
+    my $dbh = $dbs->{'dbh'};
 
     my $user = $u->{'user'};
 

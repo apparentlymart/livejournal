@@ -275,13 +275,13 @@ sub get_mood_picture
 
 sub server_down_html
 {
-    return &LJ::server_down_html();
+    return LJ::server_down_html();
 }
 
 sub make_journal
 {
-    &connect_db();
-    return &LJ::make_journal($dbh, @_);
+    connect_db();
+    return LJ::make_journal($dbh, @_);
 }
 
 sub load_codes
@@ -340,121 +340,6 @@ sub ago_text
 	$unit = "second";
     }
     return "$num $unit" . ($num==1?"":"s") . " ago";
-}
-
-## get the friends id
-sub get_friend_itemids
-{
-    my $opts = shift;
-
-    my $userid = $opts->{'userid'}+0;
-    my $remoteid = $opts->{'remoteid'}+0;
-    my @items = ();
-    my $itemshow = $opts->{'itemshow'}+0;
-    my $skip = $opts->{'skip'}+0;
-    my $getitems = $itemshow+$skip;
-    my $owners_ref = (ref $opts->{'owners'} eq "HASH") ? $opts->{'owners'} : {};
-    my $filter = $opts->{'filter'}+0;
-
-    # sanity check:
-    $skip = 0 if ($skip < 0);
-
-    ### what do your friends think of remote viewer?  what security level?
-    my %usermask;
-    if ($remoteid) 
-    {
-	$sth = $dbh->prepare("SELECT ff.userid, ff.groupmask FROM friends fu, friends ff WHERE fu.userid=$userid AND fu.friendid=ff.userid AND ff.friendid=$remoteid");
-	$sth->execute;
-	while (my ($friendid, $mask) = $sth->fetchrow_array) { 
-	    $usermask{$friendid} = $mask; 
-	}
-    }
-
-    my $filtersql;
-    if ($filter) {
-	if ($remoteid == $userid) {
-	    $filtersql = "AND f.groupmask & $filter";
-	}
-    }
-
-    $sth = $dbh->prepare("SELECT u.userid, u.timeupdate FROM friends f, user u WHERE f.userid=$userid AND f.friendid=u.userid $filtersql AND u.statusvis='V'");
-    $sth->execute;
-
-    my @friends = ();
-    while (my ($userid, $update) = $sth->fetchrow_array) {
-	push @friends, [ $userid, $update ];
-    }
-    @friends = sort { $b->[1] cmp $a->[1] } @friends;
-
-    my $loop = 1;
-    my $queries = 0;
-    my $oldest = "";
-    while ($loop)
-    {
-	my @ids = ();
-	while (scalar(@ids) < 20 && @friends) {
-	    my $f = shift @friends;
-	    if ($oldest && $f->[1] lt $oldest) { last; }
-	    push @ids, $f->[0];
-	}
-	last unless (@ids);
-	my $in = join(',', @ids);
-	
-	my $sql;
-	if ($remoteid) {
-	    $sql = "SELECT l.ownerid, h.itemid, l.logtime, l.security, l.allowmask FROM hintlastnview h, log l WHERE h.userid IN ($in) AND h.itemid=l.itemid";
-	} else {
-	    $sql = "SELECT l.ownerid, h.itemid, l.logtime FROM hintlastnview h, log l WHERE h.userid IN ($in) AND h.itemid=l.itemid AND l.security='public'";
-	}
-	if ($oldest) { $sql .= " AND l.logtime > '$oldest'";  }
-
-	# this causes MySQL to do use a temporary table and do an extra pass also (use file sort).  so, we'll do it in memory here.  yay.
-	# $sql .= " ORDER BY l.logtime DESC";
-	
-	$sth = $dbh->prepare($sql);
-	$sth->execute;
-
-	my $rows = $sth->rows;
-	if ($rows == 0) { last; }
-
-	## see comment above.  this is our "ORDER BY l.logtime DESC".  pathetic, huh?
-	my @hintrows;	
-	while (my ($owner, $itemid, $logtime, $sec, $allowmask) = $sth->fetchrow_array) 
-	{
-	    push @hintrows, [ $owner, $itemid, $logtime, $sec, $allowmask ];
-	}
-	$sth->finish;
-	@hintrows = sort { $b->[2] cmp $a->[2] } @hintrows;
-	
-	my $count;
-	while (@hintrows)
-	{
-	    my $rec = shift @hintrows;
-	    my ($owner, $itemid, $logtime, $sec, $allowmask) = @{$rec};
-
-	    if ($sec eq "private" && $owner != $remoteid) { next; }
-	    if ($sec eq "usemask" && $owner != $remoteid && ! (($usermask{$owner}+0) & ($allowmask+0))) { next; }
-	    push @items, [ $itemid, $logtime, $owner ];
-	    $count++;
-	    if ($count >= $getitems) { last; }
-	}
-	@items = sort { $b->[1] cmp $a->[1] } @items;
-	my $size = scalar(@items);
-	if ($size < $getitems) { next; }
-	@items = @items[0..($getitems-1)];
-	$oldest = $items[$getitems-1]->[1] if (@items);
-    }
-
-    my $size = scalar(@items);
-
-    my @ret;
-    my $max = $skip+$itemshow;
-    if ($size < $max) { $max = $size; }
-    foreach my $it (@items[$skip..($max-1)]) {
-	push @ret, $it->[0];
-	$owners_ref->{$it->[2]} = 1;
-    }
-    return @ret;
 }
 
 
@@ -830,12 +715,49 @@ sub load_user_theme
 }
 
 sub make_text_link { return LJ::make_text_link(@_); }
+sub get_friend_itemids { return LJ::get_friend_itemids($dbh, @_); }
 
 package LJ;
 
+# args: ($dbs, @itemids)
+# return: hashref with keys being itemids, values being [ $subject, $text ]
 sub get_logtext
 {
-    
+    my $dbs = shift;
+
+    # return structure.
+    my $lt = {};
+
+    # keep track of itemids we still need to load.
+    my %need;
+    foreach (@_) { $need{$_+0} = 1; }
+
+    # always consider hitting the master database, but if a slave is 
+    # available, hit that first.
+    my @sources = ([$dbs->{'dbh'}, "logtext"]);
+    if ($dbs->{'has_slave'}) { 
+	if ($LJ::USE_RECENT_TABLES) {
+	    unshift @sources, [ $dbs->{'dbr'}, "recent_logtext" ];
+	} else {
+	    unshift @sources, [ $dbs->{'dbr'}, "logtext" ];
+	}
+    }
+
+    while (@sources && %need)
+    {
+	my $s = shift @sources;
+	my ($db, $table) = ($s->[0], $s->[1]);
+	my $itemid_in = join(", ", keys %need);
+
+	my $sth = $db->prepare("SELECT itemid, subject, event FROM $table ".
+			       "WHERE itemid IN ($itemid_in)");
+	$sth->execute;
+	while (my ($id, $subject, $event) = $sth->fetchrow_array) {
+	    $lt->{$id} = [ $subject, $event ];
+	    delete $need{$id};
+	}
+    }
+    return $lt;
 }
 
 sub make_auth_code
@@ -1171,9 +1093,13 @@ sub load_style_fast
     }
 }
 
+# $db_arg can be either a $dbh (master) or a $dbs (db set, master & slave hashref)
 sub make_journal
 {
-    my ($dbh, $user, $view, $remote, $opts) = @_;
+    my ($db_arg, $user, $view, $remote, $opts) = @_;
+
+    my $dbs = LJ::make_dbs_from_arg($db_arg);
+    my $dbh = $dbs->{'dbh'};
 
     if ($LJ::SERVER_DOWN) {
 	if ($opts->{'vhost'} eq "customview") {
@@ -1262,7 +1188,7 @@ sub make_journal
     my $ret = "";
 
     # call the view creator w/ the buffer to fill and the construction variables
-    &{$LJ::viewinfo{$view}->{'creator'}}(\$ret, $u, \%vars, $remote, $opts);
+    &{$LJ::viewinfo{$view}->{'creator'}}($dbs, \$ret, $u, \%vars, $remote, $opts);
 
     # remove bad stuff
     unless ($opts->{'trusted_html'}) {
@@ -1357,10 +1283,24 @@ sub decode_url_string
 # called by nearly all the other functions
 sub get_dbh
 {
-    my $type = shift;  # 'master' or 'slave'
+    my $type = shift;  # 'master', 'slave', or 'slave!'. (the latter won't fall back to master)
     my $dbh;
 
+    # with an exclamation mark, the caller only wants a slave, never
+    # the master.  presumably, the caller already has a master handle
+    # and only wants a slave for a performance gain and having two
+    # masters would not only be silly, but slower, if it tries to use
+    # both of them.
+
+    if ($type eq "slave!") {
+	if (! $LJ::DBINFO{'slavecount'}) {
+	    return undef;
+	}
+	$type = "slave";
+    }
+
     ## already have a dbh of this type open?
+
     if (ref $LJ::DBCACHE{$type}) {
         $dbh = $LJ::DBCACHE{$type};
 
@@ -1374,6 +1314,7 @@ sub get_dbh
     }
 
     ### if we don't have a dbh cached already, which one would we try to connect to?
+
     my $key;
     if ($type eq "slave") {
 	my $ct = $LJ::DBINFO{'slavecount'};
@@ -1398,6 +1339,44 @@ sub get_dbh
 
     return $dbh;
 }
+
+# takes nothing, returns db set (dbset = master and perhaps a slave)
+# gets master and slave by connecting.
+sub get_dbs
+{
+    my $dbh = LJ::get_dbh("master");
+    my $dbr = LJ::get_dbh("slave!");
+    return make_dbs($dbh, $dbr);
+}
+
+# take a master handle and optionally a slave handle and turns it
+# into a dbs
+sub make_dbs
+{
+    my ($dbh, $dbr) = @_;
+    my $dbs = {};
+    $dbs->{'dbh'} = $dbh;
+    $dbs->{'dbr'} = $dbr;
+    $dbs->{'has_slave'} = defined $dbr ? 1 : 0;
+    $dbs->{'reader'} = defined $dbr ? $dbr : $dbh;
+    return $dbs;
+}
+
+# converts a single argument to a dbs.  the argument is either a 
+# dbset already, or it's a master handle, in which case we need
+# to make it into a dbset with no slave.
+sub make_dbs_from_arg
+{
+    my $db_arg = shift;
+    my $dbs;
+    if (ref($db_arg) eq "HASH") {
+	$dbs = $db_arg;
+    } else {
+	$dbs = LJ::make_dbs($db_arg, undef);
+    }
+    return $dbs;    
+}
+
  
 ## turns a date (yyyy-mm-dd) into links to year calendar, month view, and day view, given
 ## also a user object (hashref)
@@ -1865,12 +1844,136 @@ sub can_use_journal
     }
 }
 
+## get the friends id
+sub get_friend_itemids
+{
+    my $db_arg = shift;
+    my $opts = shift;
+
+    my $dbs = LJ::make_dbs_from_arg($db_arg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+
+    my $userid = $opts->{'userid'}+0;
+    my $remoteid = $opts->{'remoteid'}+0;
+    my @items = ();
+    my $itemshow = $opts->{'itemshow'}+0;
+    my $skip = $opts->{'skip'}+0;
+    my $getitems = $itemshow+$skip;
+    my $owners_ref = (ref $opts->{'owners'} eq "HASH") ? $opts->{'owners'} : {};
+    my $filter = $opts->{'filter'}+0;
+
+    # sanity check:
+    $skip = 0 if ($skip < 0);
+
+    ### what do your friends think of remote viewer?  what security level?
+    my %usermask;
+    if ($remoteid) 
+    {
+	$sth = $dbh->prepare("SELECT ff.userid, ff.groupmask FROM friends fu, friends ff WHERE fu.userid=$userid AND fu.friendid=ff.userid AND ff.friendid=$remoteid");
+	$sth->execute;
+	while (my ($friendid, $mask) = $sth->fetchrow_array) { 
+	    $usermask{$friendid} = $mask; 
+	}
+    }
+
+    my $filtersql;
+    if ($filter) {
+	if ($remoteid == $userid) {
+	    $filtersql = "AND f.groupmask & $filter";
+	}
+    }
+
+    $sth = $dbh->prepare("SELECT u.userid, u.timeupdate FROM friends f, user u WHERE f.userid=$userid AND f.friendid=u.userid $filtersql AND u.statusvis='V'");
+    $sth->execute;
+
+    my @friends = ();
+    while (my ($userid, $update) = $sth->fetchrow_array) {
+	push @friends, [ $userid, $update ];
+    }
+    @friends = sort { $b->[1] cmp $a->[1] } @friends;
+
+    my $loop = 1;
+    my $queries = 0;
+    my $oldest = "";
+    while ($loop)
+    {
+	my @ids = ();
+	while (scalar(@ids) < 20 && @friends) {
+	    my $f = shift @friends;
+	    if ($oldest && $f->[1] lt $oldest) { last; }
+	    push @ids, $f->[0];
+	}
+	last unless (@ids);
+	my $in = join(',', @ids);
+	
+	my $sql;
+	if ($remoteid) {
+	    $sql = "SELECT l.ownerid, h.itemid, l.logtime, l.security, l.allowmask FROM hintlastnview h, log l WHERE h.userid IN ($in) AND h.itemid=l.itemid";
+	} else {
+	    $sql = "SELECT l.ownerid, h.itemid, l.logtime FROM hintlastnview h, log l WHERE h.userid IN ($in) AND h.itemid=l.itemid AND l.security='public'";
+	}
+	if ($oldest) { $sql .= " AND l.logtime > '$oldest'";  }
+
+	# this causes MySQL to do use a temporary table and do an extra pass also (use file sort).  so, we'll do it in memory here.  yay.
+	# $sql .= " ORDER BY l.logtime DESC";
+	
+	$sth = $dbr->prepare($sql);
+	$sth->execute;
+
+	my $rows = $sth->rows;
+	if ($rows == 0) { last; }
+
+	## see comment above.  this is our "ORDER BY l.logtime DESC".  pathetic, huh?
+	my @hintrows;	
+	while (my ($owner, $itemid, $logtime, $sec, $allowmask) = $sth->fetchrow_array) 
+	{
+	    push @hintrows, [ $owner, $itemid, $logtime, $sec, $allowmask ];
+	}
+	$sth->finish;
+	@hintrows = sort { $b->[2] cmp $a->[2] } @hintrows;
+	
+	my $count;
+	while (@hintrows)
+	{
+	    my $rec = shift @hintrows;
+	    my ($owner, $itemid, $logtime, $sec, $allowmask) = @{$rec};
+
+	    if ($sec eq "private" && $owner != $remoteid) { next; }
+	    if ($sec eq "usemask" && $owner != $remoteid && ! (($usermask{$owner}+0) & ($allowmask+0))) { next; }
+	    push @items, [ $itemid, $logtime, $owner ];
+	    $count++;
+	    if ($count >= $getitems) { last; }
+	}
+	@items = sort { $b->[1] cmp $a->[1] } @items;
+	my $size = scalar(@items);
+	if ($size < $getitems) { next; }
+	@items = @items[0..($getitems-1)];
+	$oldest = $items[$getitems-1]->[1] if (@items);
+    }
+
+    my $size = scalar(@items);
+
+    my @ret;
+    my $max = $skip+$itemshow;
+    if ($size < $max) { $max = $size; }
+    foreach my $it (@items[$skip..($max-1)]) {
+	push @ret, $it->[0];
+	$owners_ref->{$it->[2]} = 1;
+    }
+    return @ret;
+}
+
 ## internal function to most efficiently retrieve the last 'n' items
 ## for either the lastn or friends view
 sub get_recent_itemids
 {
-    my $dbh = shift;
+    my $db_arg = shift;
     my ($opts) = shift;
+
+    my $dbs = LJ::make_dbs_from_arg($db_arg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
 
     my @itemids = ();
     my $userid = $opts->{'userid'}+0;
@@ -1897,7 +2000,7 @@ sub get_recent_itemids
     
     ### get all the known hints, right off the bat.
 
-    $sth = $dbh->prepare("SELECT hintid, itemid FROM hint${view}view WHERE userid=$userid");
+    $sth = $dbr->prepare("SELECT hintid, itemid FROM hint${view}view WHERE userid=$userid");
     $sth->execute;
     my %iteminf;
     my $numhints = 0;
@@ -1933,7 +2036,7 @@ sub get_recent_itemids
 	    }
 	}
 
-	$sth = $dbh->prepare("SELECT itemid, security, allowmask, $sort_key FROM log WHERE itemid IN ($itemid_in)");
+	$sth = $dbr->prepare("SELECT itemid, security, allowmask, $sort_key FROM log WHERE itemid IN ($itemid_in)");
 	$sth->execute;
 	while (my $li = $sth->fetchrow_hashref) 
 	{
@@ -2001,7 +2104,7 @@ LIMIT $max_hints
 	## for new journals that don't yet have $max_hints entries in them
 
 	$opts->{'dont_add_hints'} = 1;
-	return &get_recent_itemids($dbh, $opts);
+	return get_recent_itemids($dbs, $opts);
     }
 
     ### remove the ones we're skipping
