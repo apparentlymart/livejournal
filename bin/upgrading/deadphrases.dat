@@ -14,3 +14,7 @@ general /community/join.bml.label.closedcomm
 general /community/join.bml.label.authpost
 
 general /talkread.bml.pageofpages
+
+general /editinfo.bml.topicdir.header
+general /editinfo.bml.topicdir.about
+

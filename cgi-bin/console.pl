@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 #
 # <LJDEP>
-# lib: cgi-bin/conmoodtheme.pl, cgi-bin/contopic.pl
+# lib: cgi-bin/conmoodtheme.pl
 # lib: cgi-bin/conban.pl. cgi-bin/conshared.pl
 # lib: cgi-bin/consuspend.pl, cgi-bin/confaq.pl
 # lib: cgi-bin/console-local.pl, Text::Wrap
@@ -378,66 +378,6 @@ $cmd{'moodtheme_list'} = {
     'args' => ['themeid' => 'Optional mood theme ID.  If given, you view the data for that theme, otherwise you see just a list of the available mood themes',
                ],
 };
-
-$cmd{'tp_catedit'} = {
-    'def' => 'contopic.pl',
-    'privs' => [qw(topicmanager)],
-    'des' => "Edit various settings of an existing topic directory category, given the category ID.",
-    'argsummary' => '<catid> <property> <value>',
-    'args' => [
-               'catid' => 'Category ID number',
-               'property' => 'Property of the category to edit.  Can be one of <TT><B>name</B></TT> to set the name of the topic, <TT><B>parent</B></TT> to set what category ID that this category belongs under, <TT><B>status</B></TT> to set the category status (to one of <TT>{on, off}</TT>), or <TT><B>sort</B></TT> (to one of <TT>{alpha, date}</TT>)',
-               'value' => "The value you're setting the property to.",
-               ],
-    };
-
-$cmd{'tp_catcreate'} = {
-    'def' => 'contopic.pl',
-    'privs' => [qw(topicmanager)],
-    'des' => "Creates a new topic directory category, in which you can later put topics",
-    'argsummary' => '<parent> <name> [sort]',
-    'args' => [
-               'parent' => 'Category ID number of the category in which this new category should fall under.',
-               'name' => "The name of this new category",
-               'sort' => "Optional parameter which be one of <TT>{alpha, date}</TT> to specify if topics within this category should be sorted by the time they were created (as should be the case for news-related categories) or in alphabetical order (like for Movie Reviews).  Default is alphabetical.",
-               ],
-    };
-
-$cmd{'tp_topedit'} = {
-    'def' => 'contopic.pl',
-    'privs' => [qw(topicmanager)],
-    'des' => "Edit various settings of an existing topic directory topic, given the topic ID.",
-    'argsummary' => '<topid> <property> <value>',
-    'args' => [
-               'topid' => 'Topic ID number',
-               'property' => 'Property of the topic to edit.  Can be one of <TT><B>name</B></TT> to set the name of the topic, <TT><B>catid</B></TT> to set what category the topic belongs in, <TT><B>des</B></TT> to set the topic description, or <TT><B>status</B></TT> to set the topic status (to one of <TT>{new, on, off, deny}</TT>)',
-               'value' => "The value you're setting the property to.",
-               ],
-    };
-
-$cmd{'tp_topcreate'} = {
-    'def' => 'contopic.pl',
-    'privs' => [qw(topicmanager)],
-    'des' => "Creates a new topic category.  Returns the newly created topic ID number.  The topic's status will be 'on'.  If you want to turn it off temporarily while you populate it, use <TT>tp_topedit</TT> to set its status to off.",
-    'argsummary' => '<catid> <name> [des]',
-    'args' => [
-               'catid' => 'The category ID to put this new topic in.',
-               'name' => "The name for the new category.",
-               'des' => "A description of the topic",
-               ],
-    };
-
-$cmd{'tp_itemedit'} = {
-    'def' => 'contopic.pl',
-    'privs' => [qw(topicmanager)],
-    'des' => "Sets an item's status in a topic.  If the item doesn't exist in the topic already, it is added with the status given.",
-    'argsummary' => '<topid> <itemid> <status>',
-    'args' => [
-               'topid' => 'The topic ID the journal entry is in (or will be in).',
-               'itemid' => "The journal entry item ID.",
-               'status' => "The new status of itemid in topid.  Can be one of 'on', 'off', 'new', or 'deny'.",
-               ],
-    };
 
 $cmd{'ban_set'} = {
     'def' => 'conban.pl',

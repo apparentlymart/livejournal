@@ -231,8 +231,6 @@ body<=
 
 
  $ret .= "<br clear='all' /><hr width='100%' size='2' align='center' />";
- ### is this in a topic?
- $ret .= LJ::Talk::topic_links($dbs, $u, $ditemid) unless $FORM{'replyto'};
 
  my %users_to_load;
  my @posts_to_load;
@@ -419,19 +417,17 @@ body<=
  }
 
  my %userpics = ();
+ delete $users_to_load{0};
  if (%users_to_load) {
      my @pics_to_load;
-     my $userid_in = join(", ", keys %users_to_load);
-     $sth = $dbr->prepare("SELECT user, statusvis, email, name, defaultpicid FROM user ".
-                          "WHERE userid IN ($userid_in)");
-     $sth->execute;
 
-     while ($_ = $sth->fetchrow_hashref) {
+     my %temp;
+     LJ::load_userids_multiple($dbs, [ map { $_, $temp{$_} } keys %users_to_load ]);;
+     foreach (values %temp) {
          $user{$_->{'user'}} = $_;
          push @pics_to_load, $_->{'defaultpicid'} if $_->{'defaultpicid'};
      }
      LJ::load_userpics($dbs, \%userpics, [ @pics_to_load ]);
-
  }
 
  ########## make the navcrap

@@ -72,7 +72,6 @@ require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
 require "$ENV{'LJHOME'}/cgi-bin/emailcheck.pl";
 require "$ENV{'LJHOME'}/cgi-bin/portal.pl";
 require "$ENV{'LJHOME'}/cgi-bin/talklib.pl";
-require "$ENV{'LJHOME'}/cgi-bin/topiclib.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljtodo.pl";
 require "$ENV{'LJHOME'}/cgi-bin/directorylib.pl";
 

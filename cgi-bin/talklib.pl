@@ -2,8 +2,8 @@
 #
 # <LJDEP>
 # link: htdocs/userinfo.bml, htdocs/go.bml, htdocs/tools/memadd.bml, htdocs/editjournal.bml
-# link: htdocs/topics/additem.bml, htdocs/tools/tellafriend.bml
-# img: htdocs/img/btn_prev.gif, htdocs/img/memadd.gif, htdocs/img/btn_edit.gif, htdocs/img/topic_add.gif
+# link: htdocs/tools/tellafriend.bml
+# img: htdocs/img/btn_prev.gif, htdocs/img/memadd.gif, htdocs/img/btn_edit.gif
 # img: htdocs/img/btn_next.gif, htdocs/img/btn_tellafriend.gif
 # </LJDEP>
 
@@ -97,10 +97,6 @@ sub link_bar
         push @linkele, $mlink->("/editjournal_do.bml?${jargent}itemid=$itemid", "editentry");
     }
     
-    if ($u->{'opt_showtopicstuff'} ne "N" && ! $LJ::DISABLED{'topicdir'}) {
-        push @linkele, $mlink->("/topics/additem.bml?${jargent}itemid=$itemid", "topicadd");
-    }
-    
     unless ($LJ::DISABLED{'tellafriend'}) {
         push @linkele, $mlink->("/tools/tellafriend.bml?${jargent}itemid=$itemid", "tellfriend");
     }
@@ -188,36 +184,6 @@ sub init
 
     $init->{'journalu'} = $ju;
     return $init;
-}
-
-sub topic_links
-{
-    my ($dbs, $u, $itemid) = @_;
-    my $ret;
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-
-    my $jid = $u->{'clusterid'} ? $u->{'userid'} : 0;
-
-    my $in_topic = 0;
-    my $sth = $dbr->prepare("SELECT tptopid, status FROM topic_map WHERE ".
-                            "journalid=$jid AND jitemid=$itemid");
-    $sth->execute;
-    while (my ($tptopid, $status) = $sth->fetchrow_array)
-    {
-        next unless $status eq "on";
-        unless ($in_topic) {
-            $in_topic = 1;
-            $ret .= "<b><?_ml talk.readsimilar _ml?></b><br />";
-        }
-        
-        # TODO: LJ::Topic doesn't yet support $dbs/$dbarg
-        my @hier = LJ::Topic::get_hierarchy($dbh, { 'topid' => $tptopid });
-        $ret .= "<b>";
-        $ret .= join(" : ", map { "<a href=\"$_->{'url'}\">$_->{'name'}</a>"; } @hier);
-        $ret .= "</b><br />";
-    }
-    return $ret;
 }
 
 sub get_journal_item

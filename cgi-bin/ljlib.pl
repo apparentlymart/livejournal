@@ -112,6 +112,7 @@ use constant CMAX_INTEREST => 50;
                  "friends" => {
                      "creator" => \&LJ::S1::create_view_friends,
                      "des" => "Friends View",
+                     "owner_props" => ["opt_usesharedpic"],
                  },
                  "friendsfriends" => {
                      "creator" => \&LJ::S1::create_view_friends,
@@ -2917,8 +2918,10 @@ sub start_request
 {
     handle_caches();
     # TODO: check process growth size
-    # TODO: auto-restat and reload ljconfig.pl if changed.
 
+    # clear per-request caches
+    %LJ::REQ_CACHE_USER_NAME = ();  # users by name
+    %LJ::REQ_CACHE_USER_ID = ();    # users by id
     $LJ::CACHE_REMOTE = undef;
     $LJ::CACHED_REMOTE = 0;
 
@@ -3143,14 +3146,16 @@ sub make_journal
 
     my $eff_view = $LJ::viewinfo{$view}->{'styleof'} || $view;
     my $s1prop = "s1_${eff_view}_style";
-    LJ::load_user_props($dbs, $u, 
-                        # not indexed:
-                        "stylesys", "s2_style", "url", "urlname",
-                        $s1prop,
-                        # indexed:
-                        "opt_blockrobots", "renamedto", "opt_usesharedpic",
-                        );
 
+    my @needed_props = ("stylesys", "s2_style", "url", "urlname", $s1prop,
+                        "renamedto",  "opt_blockrobots", "renamedto", "opt_usesharedpic");
+
+    # preload props the view creation code will need later (combine two selects)
+    if (ref $LJ::viewinfo{$eff_view}->{'owner_props'} eq "ARRAY") {
+        push @needed_props, @{$LJ::viewinfo{$eff_view}->{'owner_props'}};
+    }
+
+    LJ::load_user_props($dbs, $u, @needed_props);
 
     my $stylesys = 1;
     if ($styleid == -1) {
@@ -3636,6 +3641,10 @@ sub load_userids_multiple
         my $id = shift @$map;
         my $ref = shift @$map;
         push @{$need{$id}}, $ref;
+
+        if ($LJ::REQ_CACHE_USER_ID{$id}) {
+            push @{$have}, $LJ::REQ_CACHE_USER_ID{$id};
+        }
     }
 
     my $satisfy = sub {
@@ -3644,6 +3653,8 @@ sub load_userids_multiple
         foreach (@{$need{$u->{'userid'}}}) {
             $$_ = $u;
         }
+        $LJ::REQ_CACHE_USER_NAME{$u->{'user'}} = $u;
+        $LJ::REQ_CACHE_USER_ID{$u->{'userid'}} = $u;
         delete $need{$u->{'userid'}};
     };
 
@@ -3664,17 +3675,20 @@ sub load_userids_multiple
 # name: LJ::load_user
 # des: Loads a user record given a username.
 # info: From the [dbarg[user]] table.
-# args: dbarg, user
+# args: dbarg, user, force?
 # des-user: Username of user to load.
+# des-force: if set to true, won't return cached user object
 # returns: Hashref with keys being columns of [dbtable[user]] table.
 # </LJFUNC>
 sub load_user
 {
-    my $dbarg = shift;
-    my $user = shift;
+    my ($dbarg, $user, $force) = @_;
 
     $user = LJ::canonical_username($user);
     return undef unless length $user;
+    
+    return $LJ::REQ_CACHE_USER_NAME{$user} if
+        $LJ::REQ_CACHE_USER_NAME{$user} && ! $force;
 
     my $dbs = LJ::make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
@@ -3713,6 +3727,8 @@ sub load_user
         $u = $sth->fetchrow_hashref;
     }
 
+    $LJ::REQ_CACHE_USER_NAME{$u->{'user'}} = $u if $u;
+    $LJ::REQ_CACHE_USER_ID{$u->{'userid'}} = $u if $u;
     return $u;
 }
 
@@ -3720,22 +3736,28 @@ sub load_user
 # name: LJ::load_userid
 # des: Loads a user record given a userid.
 # info: From the [dbarg[user]] table.
-# args: dbarg, userid
+# args: dbarg, userid, force?
 # des-userid: Userid of user to load.
+# des-force: If set to true, won't return cached user object.
 # returns: Hashref with keys being columns of [dbtable[user]] table.
 # </LJFUNC>
 sub load_userid
 {
-    my $dbarg = shift;
-    my $userid = shift;
+    my ($dbarg, $userid, $force) = @_;
     return undef unless $userid;
+    
+    return $LJ::REQ_CACHE_USER_ID{$userid} if
+        $LJ::REQ_CACHE_USER_ID{$userid} && ! $force;
 
     my $dbs = make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
 
     my $quserid = $dbr->quote($userid);
-    return LJ::dbs_selectrow_hashref($dbs, "SELECT * FROM user WHERE userid=$quserid");
+    my $u = LJ::dbs_selectrow_hashref($dbs, "SELECT * FROM user WHERE userid=$quserid");
+    $LJ::REQ_CACHE_USER_NAME{$u->{'user'}} = $u if $u;
+    $LJ::REQ_CACHE_USER_ID{$u->{'userid'}} = $u if $u;
+    return $u;
 }
 
 # <LJFUNC>
@@ -4895,7 +4917,7 @@ sub delete_item2
 
     # delete stuff from meta cluster
     my $aitemid = $jitemid * 256 + $anum;
-    foreach my $t (qw(memorable topic_map)) {
+    foreach my $t (qw(memorable)) {
         $dbh->do("DELETE FROM $t WHERE journalid=$jid AND jitemid=$aitemid");
     }
 

@@ -68,13 +68,6 @@ $img{'editentry'} = {
     'alt' => 'Edit Entry',
 };
 
-$img{'topicadd'} = { 
-    'src' => '/topic_add.gif',
-    'width' => 22,
-    'height' => 20,
-    'alt' => 'Add to Topic Directory',
-};
-
 $img{'tellfriend'} = { 
     'src' => '/btn_tellfriend.gif',
     'width' => 22,

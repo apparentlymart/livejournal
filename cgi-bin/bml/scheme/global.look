@@ -93,11 +93,6 @@ LOAD_PAGE_INFO<=
                               { 'name' => 'Search',	
 				'uri' => '/directorysearch.bml', }  
 	              ], },
-	     { 'name' => 'Find Entries',
-	       'children' => [
-       			      { 'name' => 'By Topic',
-				'uri' => '/topics/', },
-        	      ], },
 	     { 'name' => 'Edit ...',
 	       'children' => [
 			      { 'name' => 'Personal Info &',

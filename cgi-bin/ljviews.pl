@@ -294,8 +294,6 @@ sub create_view_lastn
 
     my $user = $u->{'user'};
 
-    LJ::load_user_props($dbs, $u, "opt_blockrobots", "url", "urlname", "renamedto");
-
     if ($u->{'journaltype'} eq "R" && $u->{'renamedto'} ne "") {
         $opts->{'redir'} = LJ::journal_base($u->{'renamedto'}, $opts->{'vhost'});
         return 1;
@@ -695,8 +693,6 @@ sub create_view_friends
         $$ret .= "</frameset></html>\n";
         return 1;
     }
-
-    LJ::load_user_props($dbs, $u, "opt_usesharedpic", "url", "urlname", "renamedto");
 
     if ($u->{'journaltype'} eq "R" && $u->{'renamedto'} ne "") {
         $opts->{'redir'} = LJ::journal_base($u->{'renamedto'}, $opts->{'vhost'}) . "/friends";
@@ -1136,7 +1132,6 @@ sub create_view_calendar
     my $dbr = $dbs->{'reader'};
     
     my $user = $u->{'user'};
-    LJ::load_user_props($dbs, $u, "opt_blockrobots", "url", "urlname", "renamedto");
 
     if ($u->{'journaltype'} eq "R" && $u->{'renamedto'} ne "") {
         $opts->{'redir'} = LJ::journal_base($u->{'renamedto'}, $opts->{'vhost'}) .
@@ -1370,8 +1365,6 @@ sub create_view_day
     my $sth;
 
     my $user = $u->{'user'};
-
-    LJ::load_user_props($dbs, $u, "opt_blockrobots", "url", "urlname", "renamedto");
 
     if ($u->{'journaltype'} eq "R" && $u->{'renamedto'} ne "") {
         $opts->{'redir'} = LJ::journal_base($u->{'renamedto'}, $opts->{'vhost'}) .
@@ -1658,7 +1651,6 @@ sub create_view_rss
     }
 
     my $user = $u->{'user'};
-    LJ::load_user_props($dbs, $u, "opt_blockrobots", "url", "urlname");
     foreach ("name", "url", "urlname") { LJ::text_out(\$u->{$_}); }
 
     ## load the itemids

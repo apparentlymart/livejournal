@@ -46,7 +46,7 @@ body<=
  my $hpassword = LJ::hash_password($u->{'password'});
 
  LJ::load_user_props($dbr, $u, "opt_whatemailshow",
-                     "opt_showtopicstuff", "country", "state", "city",
+                     "country", "state", "city",
                      "zip", "icq", "aolim", "yahoo", "msn", "url",
                      "urlname", "gender", "jabber", "opt_blockrobots",
                      "opt_notalkicons", "opt_logcommentips",
@@ -385,10 +385,6 @@ body<=
 
      $ret .= "</TABLE></TD></TR>\n";
 
-     $checked = $u->{'opt_showtopicstuff'} ne "N" ? "CHECKED" : "";
-     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_showtopicstuff $checked></TD><TD><B>$ML{'.topicdir.header'}</B></TD></TR>\n";
-     $ret .= "<TR><TD>&nbsp;</TD><TD>$ML{'.topicdir.about'}</TD></TR>\n";
-
      $ret .= "</table>\n";
 
      if ($LJ::UNICODE) {
@@ -580,7 +576,6 @@ body<=
 
      ### change any of the userprops ?
      {
-         $FORM{'opt_showtopicstuff'} = $FORM{'opt_showtopicstuff'} ? "Y" : "N";
          $FORM{'opt_blockrobots'} = $FORM{'opt_blockrobots'} ? 1 : 0;
          $FORM{'opt_bdaymail'} = $FORM{'opt_bdaymail'} ? 1 : 0;
          $FORM{'opt_hidefriendofs'} = $FORM{'opt_hidefriendofs'} ? 1 : 0;
@@ -616,7 +611,7 @@ body<=
          }
 
          my @uprops = (
-                       "opt_whatemailshow", "opt_showtopicstuff",
+                       "opt_whatemailshow", 
                        "country", "state", "city", "zip", "icq",
                        "aolim", "yahoo", "msn", "url", "urlname",
                        "gender", "jabber", "opt_blockrobots",
@@ -721,7 +716,7 @@ _code?>
 page?><?_c <LJDEP>
 lib: LJ::TextMessage, cgi-bin/ljlib.pl, cgi-bin/ljlang.pl
 link: htdocs/legal/privacy.bml, htdocs/support/faqbrowse.bml, htdocs/tools/textmessage.bml, htdocs/uploadpic.bml
-link: htdocs/paidaccounts/index.bml, htdocs/topics/index.bml, htdocs/users, htdocs/userinfo.bml
+link: htdocs/paidaccounts/index.bml, htdocs/users, htdocs/userinfo.bml
 post: htdocs/editinfo.bml
 img: htdocs/userpic
 </LJDEP> _c?>
