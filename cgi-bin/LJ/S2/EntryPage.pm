@@ -74,6 +74,7 @@ sub EntryPage
     # format it
     LJ::CleanHTML::clean_subject(\$entry->{'subject'});
     LJ::CleanHTML::clean_event(\$entry->{'event'}, $entry->{'props'}->{'opt_preformatted'});
+    LJ::expand_embedded($dbs, $ditemid, $remote, \$entry->{'event'});
 
     my $s2entry = Entry($u, {
         'subject' => $entry->{'subject'},
