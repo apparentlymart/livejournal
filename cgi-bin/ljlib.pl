@@ -1941,8 +1941,8 @@ sub get_urls
 # </LJFUNC>
 sub record_meme
 {
-    &nodb;
     my ($url, $posterid, $itemid, $jid) = @_;
+    return if $LJ::DISABLED{'meme'};
 
     $url =~ s!/$!!;  # strip / at end
     LJ::run_hooks("canonicalize_url", \$url);
