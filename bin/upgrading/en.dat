@@ -2181,6 +2181,94 @@ that area. p?>
 
 /support/see_overrides.bml.title=User Overrides
 
+/syn/index.bml.account=Account:
+
+/syn/index.bml.accounttype.notallowed=Your account type doesn't allow befriending syndicated accounts.
+
+/syn/index.bml.add=Add Feed
+
+/syn/index.bml.add.other.text=Add a feed to your friends list.  Enter either the account name, the feed URL, or both, if you're creating a new feed.
+
+/syn/index.bml.add.other.title=Add Other Feed
+
+/syn/index.bml.add.pop.text=The following are some popular feeds you're not currently watching:
+
+/syn/index.bml.add.pop.title=Add Popular Feed
+
+/syn/index.bml.add.selected=Add Selected
+
+/syn/index.bml.back=Back
+
+/syn/index.bml.error.unknown=Unknown Error
+
+/syn/index.bml.feed.url=Feed URL:
+
+/syn/index.bml.invalid.accountname=Invalid account name.
+
+/syn/index.bml.invalid.address=IP addresses not allowed
+
+/syn/index.bml.invalid.cantadd=You can't add RSS feeds from this site.
+
+/syn/index.bml.invalid.inuse.text=That account name is already in use.
+
+/syn/index.bml.invalid.inuse.title=Username in use
+
+/syn/index.bml.invalid.needname.text=To add a syndicated account that doesn't exist, go back and give it an account name.
+
+/syn/index.bml.invalid.needname.title=Need an account name 
+
+/syn/index.bml.invalid.needurl=You must enter either a syndicated account's username or URL to add a new feed.
+
+/syn/index.bml.invalid.notexist=No syndicated account exists with that username.
+
+/syn/index.bml.invalid.overquota=Adding this feed would put you over your syndication account quota.
+
+/syn/index.bml.invalid.overquota.text=Creating this RSS feed would put you over your syndication quota.
+
+/syn/index.bml.invalid.overquota.title=Over quota
+
+/syn/index.bml.invalid.overquota.username=Watching [[user]] would put you over your syndication account quota.
+
+/syn/index.bml.invalid.port=Non-standard port number not allowed
+
+/syn/index.bml.invalid.reserved=This account name is reserved. Please choose a different account name.
+
+/syn/index.bml.invalid.submission=Invalid form submission
+
+/syn/index.bml.invalid.url=The URL you have typed is invalid. Please make sure you have typed the URL correctly and try again.
+
+/syn/index.bml.loginrequired.text=To manage your syndicated accounts, first <a href=\"/login.bml?ret=1\">login</a>.
+
+/syn/index.bml.loginrequired.title=Login Required
+
+/syn/index.bml.notused=(won't be used if feed exists)
+
+/syn/index.bml.promo.text=After you've created a syndicated account, share it with others! The more people there are watching a syndicated account, the more points are freed up to read and create syndicated accounts.
+
+/syn/index.bml.quota.numbers=You are using <b>[[used]]</b> of your allowed <b>[[total]]</b> points.
+
+/syn/index.bml.quota.text=All users have a quota for how many feeds they can befriend, based on account type.  Befriending a syndicated account costs a variable amount, depending on the popularity of the feed.  Popular feeds cost less, as the expense of the system maintaining the feed is shared by all the watchers.   If you're the sole watcher of a feed, it costs 1 point.  If there are 5 people, it costs a half point.  At 25 people, one third of a point, and so on.
+
+/syn/index.bml.quota.your=Your quota
+
+/syn/index.bml.remove=Remove Selected
+
+/syn/index.bml.table.account=Account
+
+/syn/index.bml.table.cost=Point Cost
+
+/syn/index.bml.table.feed=Feed
+
+/syn/index.bml.table.watchers=Watchers
+
+/syn/index.bml.title=Syndication
+
+/syn/index.bml.user.nomatch=User posting doesn't match user that filled out the form.
+
+/syn/index.bml.using.text=Here you can add syndicated feeds (RSS) from other sites to your friends list, removing the need to check a dozen sites every day.
+
+/syn/index.bml.using.title=Using [[sitename]] for syndication
+
 /talkmulti.bml.deleted.body=The comments have been deleted. You can view the rest of the thread <a href="[[link]]">here</a>.
 
 /talkmulti.bml.deleted.title=Comments deleted

@@ -1,5 +1,5 @@
 <?page
-title=>Syndication
+title=><?_ml .title _ml?>
 body<=
 
 <?_code 
@@ -11,17 +11,17 @@ body<=
     my $u = LJ::get_remote();
 
     unless ($u) {
-        return "<?h1 Login Required h1?><?p To manage your syndicated accounts, first <a href=\"/login.bml?ret=1\">login</a>. p?>";
+        return "<?h1 $ML{'.loginrequired.title'} h1?><?p $ML{'.loginrequired.text'} p?>";
     }
-    return "Suspended account" if $u->{'statusvis'} eq "S";
+    return "<?h1 $ML{'error.suspended.title'} h1?><?p $ML{'error.suspended.text'} p?>" if $u->{'statusvis'} eq "S";
 
     my $quota = LJ::get_cap($u, "synd_quota");
     unless ($quota) {
-        return "<?h1 Sorry h1?><?p Your account type doesn't allow befriending syndicated accounts. p?>";
+        return "<?h1 $ML{'Sorry'} h1?><?p $ML{'.accountype.notallowed'} p?>";
     }
 
     if (LJ::did_post() && $POST{'userid'} != $u->{'userid'}) {
-        return "<?h1 Invalid form submission h1?><?p User posting doesn't match user that filled out the form. p?>";
+        return "<?h1 $ML{'.invalid.submission'} h1?><?p $ML{'.user.nomatch'}p?>";
     }
 
     my $sth = $dbh->prepare("SELECT s.userid, us.user, s.synurl, COUNT(*) ".
@@ -46,7 +46,8 @@ body<=
     }
 
     my $error = sub {
-        return "<?h1 $ML{'Error'} h1?><?p $_[0] p?>";
+        return "<?h1 $ML{'Error'} h1?><?p $_[0] p?><?p " .
+                BML::ml('Backlink', {'link' => '/syn/', 'text' => $ML{'.back'}}) . " p?>";
     };
     
     # add custom feed
@@ -55,22 +56,22 @@ body<=
         my $url = $POST{'synurl'};
 
         if ($acct ne "") {
-            return $error->("Invalid account name.")
+            return $error->($ML{'.invalid.accountname'})
                 unless $acct =~ /^\w{3,15}$/;
             foreach my $re ("^system\$", @LJ::PROTECTED_USERNAMES) {
                 next unless ($acct =~ /$re/);
-                return $error->("Reserved account name.");
+                return $error->($ML{'.invalid.reserved'});
             }
         }
         if ($url ne "") {
-            return $error->("Invalid URL.") unless
-                $url =~ m!^http://(.+?)/!;
+            return $error->($ML{'.invalid.url'})
+                unless $url =~ m!^http://(.+?)/!;
             my $hostname = $1;
-            return $error->("You can't add RSS feeds from $LJ::DOMAIN.")
+            return $error->($ML{'.invalid.cantadd'})
                 if $hostname =~ /\Q$LJ::DOMAIN\E/i;
-            return $error->("Non-standard port number not allowed")
+            return $error->($ML{'.invalid.port'})
                 if $hostname =~ /:/;
-            return $error->("IP addresses not allowed")
+            return $error->($ML{'.invalid.address'})
                 unless $hostname =~ /\.[a-z]/i;
         }
 
@@ -81,10 +82,10 @@ body<=
                                           undef, $url);
             
             unless ($su) {
-                return "<?h1 Over quota h1?><?p Creating this RSS feed would put you over your syndication quota. p?>"
+                return "<?h1 $ML{'.invalid.overquota.title'} h1?><?p $ML{'.invalid.overquota.text'} p?>"
                     if $used+1 > $quota;
                 
-                return "<?h1 Need an account name h1?><?p To add a syndicated account that doesn't exist, go back and give it an account name. p?>"
+                return "<?h1 $ML{'.invalid.needname.title'} h1?><?p $ML{'.invalid.needname.text'} p?>"
                     unless $acct;
                 
                 # MAYBE: see if it actually points to a valid syndication file
@@ -97,7 +98,7 @@ body<=
                     'caps' => $LJ::SYND_CAPS,
                     'cluster' => $LJ::SYND_CLUSTER,
                 });
-                return "<?h1 Username in use h1?><?p That account name is already in use. p?>"
+                return "<?h1 $ML{'.invalid.inuse.title'}h1?><?p $ML{'.invalid.inuse.text'} p?>"
                     unless $id;
 
                 LJ::update_user($id, { journaltype => 'Y' });
@@ -115,13 +116,13 @@ body<=
                                           "WHERE u.userid=s.userid AND u.user=?",
                                           undef, $acct);
             unless ($su) {
-                return $error->("No syndicated account exists with that username.");
+                return $error->($ML{'.invalid.notexist'});
             }
         } else {
-            return $error->("You must enter either a syndicated account's username or URL to add a new feed.");
+            return $error->($ML{'.invalid.needurl'});
         }
         
-        unless ($su) { return "unknown error."; }
+        return $error->($ML{'.error.unknown'}) unless $su;
         unless ($cost{$su->{'user'}}) 
         {
             my $count = $dbh->selectrow_array("SELECT COUNT(*) FROM friends WHERE friendid=?", undef,
@@ -129,7 +130,8 @@ body<=
             $count = $count + 1;
             my $cost = LJ::syn_cost($count);
             if ($used + $cost > $quota) {
-                return "<?h1 Sorry h1?><?p Adding this feed would put you over your syndication account quota. p?><?p [&lt;&lt; <a href='/syn/'>Back</a>] p?>";
+                return "<?h1 $ML{'Sorry'} h1?><?p $ML{'.invalid.overquota'} p?><?p " .
+                        BML::ml('Backlink', {'link' => '/syn/', 'text' => $ML{'.back'}}) . " p?>";
             }
             LJ::add_friend($u->{'userid'}, $su->{'userid'}, { 'defaultview' => 1 });
             $count{$su->{'user'}} = $count;
@@ -186,9 +188,8 @@ body<=
                 $syn{$user} = $url;
                 $used += $cost;
             } else {
-                return "<?h1 Sorry h1?><?p Watching " . LJ::ljuser($user) . 
-                       " would put you over your syndication account quota. p?>" .
-                       "<?p [&lt;&lt; <a href='/syn/'>Back</a>] p?>";
+                return "<?h1 $ML{'Sorry'} h1?><?p " . BML::ml ('.invalid.overquota.username', {'user' => LJ::ljuser($user)}) . " p?><?p " .
+                        BML::ml('Backlink', {'link' => '/syn/', 'text' => $ML{'.back'}}) . " p?>";
             }
         } else {
             push @pop, [ $user, $url, $count ];
@@ -197,30 +198,25 @@ body<=
     }
 
     # intro paragraph
-    my $ret = <<EOB;
-<?h1 Using <?sitename?> for syndication h1?>
-<?p
-Here you can add syndicated feeds (RSS) from other sites to your friends list, removing the need to check a dozen sites every day.
-p?>
-<?p
-All users have a quota for how many feeds they can befriend, based on account type.  Befriending a syndicated account costs a variable amount, depending on the popularity of the feed.  Popular feeds cost less, as the expense of the system maintaining the feed is shared by all the watchers.   If you're the sole watcher of a feed, it costs 1 unit.  If there are 5 people, it costs a half unit.  At 25 people, one third of a unit, and so on...
-p?>
-EOB
-#' 
+    my $title = BML::ml('.using.title', {'sitename' => $LJ::SITENAME});
+    my $ret = "<?h1 $title h1?><?p $ML{'.using.text'} p?>" .
+              "<?p $ML{'.quota.text'} p?><?p $ML{'.promo.text'} p?>";
 
-    $ret .= sprintf("<?h1 Your quota h1?><?p You're using <b>%0.03f</b> " .
-                    "of your allowed <b>%.03f</b> units. p?>", $used, $quota);
+    $used = sprintf("%0.03f", $used);
+    $quota = sprintf("%0.03f", $quota);
+    $ret .= "<?h1 $ML{'.quota.your'} h1?><?p " . BML::ml('.quota.numbers', {'used' => $used, 'total' => $quota}) . " p?>";
 
     $ret .= "<form method='post' action='./'>"; 
     $ret .= LJ::html_hidden("userid", $u->{'userid'});
 
     if ($used) {
         $ret .= "<p><table cellpadding='3' style='margin-bottom: 10px;'>";
-        $ret .= "<tr><td></td><td><b>Account</b></td><td><b>Feed</b></td><td><b>Watchers</b></td><td><b>Unit Cost</b></td></tr>\n";
+        $ret .= "<tr><td></td><td><b>$ML{'.table.account'}</b></td><td><b>$ML{'.table.feed'}</b></td>";
+        $ret .= "<td align='right'><b>$ML{'.table.watchers'}</b></td><td align='right'><b>$ML{'.table.cost'}</b></td></tr>\n";
         foreach my $user (sort { $count{$a} <=> $count{$b} } keys %count) {
             $ret .= "<tr>";
-            $ret .= "<td><input type='checkbox' value='1' name='defriend_$user'></td>";
-            $ret .= "<td>" . LJ::ljuser($user)  . "</td>";
+            $ret .= "<td><input type='checkbox' value='1' name='defriend_$user' /></td>";
+            $ret .= "<td>" . LJ::ljuser($user) . "</td>";
             $ret .= "<td><a href=\"$syn{$user}\">$syn{$user}</a></td>";
             $ret .= "<td align='right'>$count{$user}</td><td align='right'>";
             $ret .= sprintf("%.03f", $cost{$user});
@@ -228,21 +224,22 @@ EOB
             $ret .= "</tr>";
         }
         $ret .= "<tr><td align='left' colspan='4'>";
-        $ret .= "<input type='submit' name='action:remove' value='Remove Selected'>";
+        $ret .= "<input type='submit' name='action:remove' value='" . LJ::ehtml($ML{'.remove'}) . "' />";
         $ret .= "</td></tr>";
         $ret .= "</table>";
     }
 
     if (@pop) {
-        $ret .= "<?h1 Add Popular Feed h1?><?p The following are some popular feeds you're not currently watching: p?>";
+        $ret .= "<?h1 $ML{'.add.pop.title'} h1?><?p $ML{'.add.pop.text'} p?>";
         $ret .= "<p><table cellpadding='3' style='margin-bottom: 10px;'>";
-        $ret .= "<tr><td></td><td><b>Account</b></td><td><b>Feed</b></td><td><b>Watchers</b></td><td><b>Unit Cost</b></td></tr>\n";
+        $ret .= "<tr><td></td><td><b>$ML{'.table.account'}</b></td><td><b>$ML{'.table.feed'}</b></td>";
+        $ret .= "<td><b>$ML{'.table.watchers'}</b></td><td><b>$ML{'.table.cost'}</b></td></tr>";
         foreach (@pop) {
             my ($user, $url, $count) = @$_;
             my $cost = LJ::syn_cost($count + 1);  # plus one because we're including ourselves, friendof-to-be
             $ret .= "<tr>";
-            $ret .= "<td><input type='checkbox' value='1' name='add_$user'></td>";
-            $ret .= "<td>" . LJ::ljuser($user)  . "</td>";
+            $ret .= "<td><input type='checkbox' value='1' name='add_$user' /></td>";
+            $ret .= "<td>" . LJ::ljuser($user) . "</td>";
             $ret .= "<td><a href=\"$url\">$url</a></td>";
             $ret .= "<td align='right'>$count</td><td align='right'>";
             $ret .= sprintf("%.03f", $cost);
@@ -250,15 +247,15 @@ EOB
             $ret .= "</tr>";
         }
         $ret .= "<tr><td align='left' colspan='4'>";
-        $ret .= "<input type='submit' name='action:add' value='Add Selected'>";        
+        $ret .= "<input type='submit' name='action:add' value='" . LJ::ehtml($ML{'.add'}) . "'>";        
         $ret .= "</td></tr>";
         $ret .= "</table>";
     }
 
-    $ret .= "<?h1 Add Other Feed h1?><?p Add a feed to your friends list.  Enter either the account name, the feed URL, or both, if you're creating a new feed.    p?>";
-    $ret .= "<blockquote>Account: <input size='15' maxlength='15' name='acct'> <i>(won't be used if feed exists)</i>";
-    $ret .= "<p>Feed URL: <input size='40' maxlength='255' name='synurl'>";
-    $ret .= "<p><input name='action:addcustom' type='submit' value='Add Feed'></blockquote>";
+    $ret .= "<?h1 $ML{'.add.other.title'} h1?><?p $ML{'.add.other.text'} p?>";
+    $ret .= "<blockquote>$ML{'.account'} <input size='15' maxlength='15' name='acct' /> <i>$ML{'.notused'}</i>";
+    $ret .= "<p>$ML{'.feed.url'} <input size='40' maxlength='255' name='synurl' />";
+    $ret .= "<p><input name='action:addcustom' type='submit' value='" . LJ::ehtml($ML{'.add'}) . "' /></blockquote>";
 
     $ret .= "</form>";
 
