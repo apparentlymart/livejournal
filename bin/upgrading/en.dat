@@ -245,6 +245,8 @@ p?>
 
 /community/manage.bml.commlist.moderation=Awaiting Moderation
 
+/community/manage.bml.commlist.moderation.num=[<a href='[[link]]'>[[num]] in queue</a>]
+
 /community/manage.bml.commlist.none=<i>You are not managing any communities.</i>
 
 /community/manage.bml.commlist.text=Here are the communities that you manage or co-manage:

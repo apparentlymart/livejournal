@@ -51,7 +51,7 @@ body<=
             my $sql = "SELECT COUNT(*) FROM modlog WHERE journalid=$uid";
             $modcount{$uid} = $names{$uid}[2] = $udbr->selectrow_array($sql) || 0;
         }
-        if ($membership eq 'closed') {
+        if ($membership eq 'moderated') {
             my $ids = LJ::get_pending_members($uid) || [];
             $pending{$uid} = scalar @$ids;
         }
@@ -84,14 +84,14 @@ body<=
     if ($GET{'sortby'} eq 'mod') {
         $ret .= "<th>$ML{'.commlist.moderation'}</th>";
         @snames = sort { $names{$b}->[2] <=> $names{$a}->[2] } keys %names;
-    } elsif (defined $mods) {
+    } elsif (@$mods) {
         $ret .= "<th><a href='".BML::self_link({'sortby' => 'mod'}) . "'>$ML{'.commlist.moderation'}</a></th>";
     }
 
     foreach my $id (@snames) {
         my $user = $names{$id}->[0];
         my $name = $names{$id}->[1];
-        $ret .= "<tr><td><?ljcomm $user ljcomm?></td><td>" . LJ::eall($name) . "</td><td>";
+        $ret .= "<tr><td><?ljcomm $user ljcomm?></td><td>" . LJ::eall($name) . "</td><td nowrap='nowrap'>";
         if ($admin{$id}) {
             $ret .= BML::ml('Actionlink', {
                 'link'=>"<a href='/editinfo.bml?authas=$user'>$ML{'.commlist.actinfo'}</a>"}) . "&nbsp;&nbsp;";
@@ -105,7 +105,8 @@ body<=
         $ret .= "</td><td align='center'>";
         if ($mods{$id}) {
             my $num = $modcount{$id} || "0"; # relying on this to be <b>-wrapped
-            $ret .= "<a href='/community/moderate.bml?comm=$user'>$num</a>";
+            $ret .= BML::ml('.commlist.moderation.num', { num => $num,
+                            link => "/community/moderate.bml?comm=$user" });
         }
         $ret .= "</td></tr>";
     }
