@@ -284,6 +284,14 @@ sub get_recent_items
     return @items;
 }
 
+# <LJFUNC>
+# name: LJ::set_userprop
+# des: Sets a userprop by name for a user.
+# args: userid, propname, value
+# des-userid: The userid of the user.
+# des-propname: The name of the property.
+# des-value: The value to set to the property.
+# </LJFUNC>
 sub set_userprop
 {
     my ($dbarg, $userid, $propname, $value) = @_;
@@ -366,6 +374,14 @@ sub statushistory_add
     return $dbh->err ? 0 : 1;
 }
 
+# <LJFUNC>
+# name: LJ::make_link
+# des: Takes a group of key=value pairs to append to a url
+# returns: The finished url
+# args: url, vars
+# des-url: A string with the url to append to.
+# des-vars: A hash of the key=value pairs to append with.
+# </LJFUNC>
 sub make_link
 {
     my $url = shift;
@@ -379,6 +395,14 @@ sub make_link
     return $url;
 }
 
+# <LJFUNC>
+# name: LJ::ago_text
+# des: Turns a number of seconds into the largest possible unit of
+#      time. "2 weeks", "4 days", or "20 hours".
+# returns: A string with the number of largest units found
+# args: secondsold
+# des-secondsold: The number of seconds from now something was made.
+# </LJFUNC>
 sub ago_text
 {
     my $secondsold = shift;
@@ -404,6 +428,17 @@ sub ago_text
     return "$num $unit" . ($num==1?"":"s") . " ago";
 }
 
+# <LJFUNC>
+# name: LJ::auth_fields
+# des: Returns a form for either submitting username/password to a script or
+#      entering a new username/password.
+# returns: The built form
+# args: form, opts
+# des-form: The hash of form information, which is used to determine whether to
+#           get the current login info and display a concise form, or to display
+#           a login form.
+# des-opts: An optional hash table with further information (current password.)
+# </LJFUNC>
 sub auth_fields
 {
     my $form = shift;
@@ -436,6 +471,16 @@ sub auth_fields
     return $ret;
 }
 
+# <LJFUNC>
+# name: LJ::self_link
+# des: Takes the URI of the current page, and adds the current form data
+#      to the url, then adds any additional data to the url.
+# returns: The full url
+# args: form, newvars
+# des-form: A hash of the form information from the page.
+# des-newvars: A hash of information to add to the link which is not in
+#              the form hash.
+# </LJFUNC>
 sub self_link
 {
     my $form = shift;
