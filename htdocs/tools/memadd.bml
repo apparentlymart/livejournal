@@ -112,7 +112,7 @@
  $sth->execute($memoryu->{userid}, $oldstyle ? 0 : $jid, $dbitemid);
  my $memory = $sth->fetchrow_hashref;
 
- my $exist_kw = LJ::Memories::get_keywords($ju);
+ my $exist_kw = LJ::Memories::get_keywords($memoryu);
  unless ($exist_kw) {
      $body = "Error fetching existing keywords.";
      return;
@@ -143,7 +143,7 @@
              my $dbh = LJ::get_db_writer();
              $dbh->do("DELETE FROM memorable WHERE memid=$memory->{'memid'}");
              $dbh->do("DELETE FROM memkeyword WHERE memid=$memory->{'memid'}");
-             LJ::Memories::updated_keywords($ju);
+             LJ::Memories::updated_keywords($memoryu);
              $title = $ML{'Error'};
              $body = $ML{'.error.entry_deleted'};
              return;
@@ -240,7 +240,7 @@
          if (defined $memory) {
              $dbh->do("DELETE FROM memorable WHERE memid=$memory->{'memid'}");
              $dbh->do("DELETE FROM memkeyword WHERE memid=$memory->{'memid'}");
-             LJ::Memories::updated_keywords($ju);
+             LJ::Memories::updated_keywords($memoryu);
              $title = $ML{'.title.deleted'};
              $body = "<?h1 $ML{'.error.deleted.title'} h1?><?p " . 
                      BML::ml(".error.deleted.body", { 'desc' => $memory->{'des'} }) .
@@ -318,7 +318,7 @@
          $dbh->do($sql);
      }
 
-     LJ::Memories::updated_keywords($ju) if $needflush;
+     LJ::Memories::updated_keywords($memoryu) if $needflush;
 
      $title = $ML{'.title.added'};
      $body = "<?h1 $ML{'.body.added.header'} h1?><?p $ML{'.body.added.body'} p?>";
