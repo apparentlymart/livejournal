@@ -509,86 +509,14 @@
      my @ints;
      my $changed = 0;
      foreach(keys %interests) {
-         next if LJ::is_utf8($_);
-         convert(\$_, $encid);
-         $changed = 1;
+         unless (LJ::is_utf8($_)) {
+             convert(\$_, $encid);
+             $changed = 1;
+         }
          push @ints, $_;
      }
      if ($changed) {
-         my %int_new;
-         my %int_del = %interests;
-         foreach my $int (@ints)
-         {
-             $int = lc($int);  # grr, only works for English
-             # skip the checks that are in editinfo.bml
-             unless ($interests{$int}) { $int_new{$int} = 1; }
-             delete $int_del{$int};
-         }
-             
-         if (%int_del) 
-         {
-             my $intid_in = join(", ", values %int_del);
-             $dbh->do("DELETE FROM userinterests WHERE userid=$u->{'userid'} AND intid IN ($intid_in)");
-             $dbh->do("UPDATE interests SET intcount=intcount-1 WHERE intid IN ($intid_in)");
-         }
-
-         if (%int_new) 
-         {
-             my $int_in = join(", ", map { $dbh->quote($_); } keys %int_new);
-             my %int_exist;
-             my @new_intids = ();  ## existing IDs we'll add for this user
-
-             ## find existing IDs
-             $sth = $dbr->prepare("SELECT interest, intid FROM interests WHERE interest IN ($int_in)");
-             $sth->execute;
-             while ($_ = $sth->fetchrow_hashref) {
-                 push @new_intids, $_->{'intid'};     # - we'll add this later.
-                 delete $int_new{$_->{'interest'}};   # - so we don't have to make a new intid for
-                                                      #   this next pass.
-             }
-             
-             if (@new_intids) {
-                 my $sql = "";
-                 foreach my $newid (@new_intids) {
-                     if ($sql) { $sql .= ", "; }
-                     else { $sql = "REPLACE INTO userinterests (userid, intid) VALUES "; }
-                     $sql .= "($u->{'userid'}, $newid)";
-                 }
-                 $dbh->do($sql);
-
-                 my $intid_in = join(", ", @new_intids);
-                 $dbh->do("UPDATE interests SET intcount=intcount+1 WHERE intid IN ($intid_in)");
-             }
-         }
-
-         ### do we STILL have interests to add?  (must make new intids)
-         if (%int_new) 
-         {
-             foreach my $int (keys %int_new) 
-             {
-                 my $intid;
-
-                 $dbh->do("LOCK TABLES interests WRITE");
-                 my $qint = $dbh->quote($int);
-
-                 # let's double-check that some other connection didn't insert it since we last checked
-                 $sth = $dbh->prepare("SELECT intid FROM interests WHERE interest=$qint");
-                 $sth->execute;
-                 ($intid) = $sth->fetchrow_array;
-
-                 # more than likely it's still missing, so we have to make it:
-                 unless ($intid)
-                 {
-                     $sth = $dbh->prepare("INSERT INTO interests (intid, intcount, interest) VALUES (NULL, 1, $qint)");
-                     $sth->execute;
-                     $intid = $dbh->{'mysql_insertid'};
-                 }
-                 $dbh->do("UNLOCK TABLES");
-
-                 ## now we can actually insert it into the userinterests table:
-                 $dbh->do("INSERT INTO userinterests (userid, intid) VALUES ($u->{'userid'}, $intid)");
-             }
-         }
+         LJ::set_interests($dbs, $u->{'userid'}, \%interests, \@ints);
      }
 
      $message = "Converted interests" if $changed;
@@ -789,7 +717,11 @@
  sub convert {
      my ($rtext, $encid) = @_;
      if ($encid && !LJ::is_utf8($$rtext)) {
-         $$rtext = Unicode::MapUTF8::to_utf8({-string=>$$rtext, -charset=>$LJ::CACHE_ENCODINGS{$encid}});
+         my $enc = $LJ::CACHE_ENCODINGS{$encid};
+         unless (lc($enc) eq "utf-8") {
+             $$rtext = Unicode::MapUTF8::to_utf8({-string=>$$rtext, -charset=>$enc});
+         }
+         LJ::text_out($rtext);
      }
  }
 
