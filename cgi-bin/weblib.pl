@@ -542,9 +542,9 @@ sub check_referer {
     # get referer and check
     my $referer = BML::get_client_header('Referer');
     return 1 unless $referer;
-    return 1 if $referer =~ m!^$LJ::SITEROOT$uri!;
-    return 1 if $referer =~ m!^http://$LJ::DOMAIN$uri!;
-    return 1 if $referer =~ m!^http://$LJ::DOMAIN_WEB$uri!;
+    return 1 if $LJ::SITEROOT   && $referer =~ m!^$LJ::SITEROOT$uri!;
+    return 1 if $LJ::DOMAIN     && $referer =~ m!^http://$LJ::DOMAIN$uri!;
+    return 1 if $LJ::DOMAIN_WEB && $referer =~ m!^http://$LJ::DOMAIN_WEB$uri!;
     return undef;
 }
 
