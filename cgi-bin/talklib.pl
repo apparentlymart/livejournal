@@ -310,6 +310,23 @@ sub can_view_screened {
     return LJ::Talk::can_delete(@_);
 }
 
+sub update_commentalter {
+    my ($dbs, $dbcs, $u, $itemid) = @_;
+    my $dbcm = $dbcs->{'dbh'};
+    my $clustered = $u->{'clusterid'};
+    my $userid = $u->{'userid'};
+    LJ::load_props($dbs, "log");
+    my $prop = LJ::get_prop("log", "commentalter");
+
+    $itemid = $itemid + 0;
+
+    if ($clustered) {
+        $dbcm->do("REPLACE INTO logprop2 (journalid, jitemid, propid, value) VALUES (?, ?, ?, UNIX_TIMESTAMP())", undef, $userid, $itemid, $prop->{'id'});
+    } else {
+        $dbcm->do("REPLACE INTO logprop (itemid, propid, value) VALUES (?, ?, UNIX_TIMESTAMP())", undef, $itemid, $prop->{'id'});
+    }
+}
+
 sub screen_comment {
     # NOTE: assumes that the comment is indeed not screened
     # this should be checked before calling screen_comment()
@@ -339,6 +356,7 @@ sub screen_comment {
             unless $hasscreened;
     }
 
+    LJ::Talk::update_commentalter($dbs, $dbcs, $u, $itemid);
     return;
 }
 
@@ -372,6 +390,7 @@ sub unscreen_comment {
             if $hasscreened == 1;
     }
 
+    LJ::Talk::update_commentalter($dbs, $dbcs, $u, $itemid);
     return;
 }
 

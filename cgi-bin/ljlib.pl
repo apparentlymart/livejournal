@@ -5436,6 +5436,19 @@ sub generate_session
     return $sess;
 }
 
+sub kill_all_sessions
+{
+    my $u = shift;
+    return 0 unless $u;
+    my $udbs = LJ::get_cluster_set($u);
+    my $udbh = $udbs->{'dbh'};
+    my $udbr = $udbs->{'reader'};
+
+    my $sessions = $udbr->selectcol_arrayref("SELECT sessid FROM sessions WHERE ".
+					     "userid=$u->{'userid'}");
+    LJ::kill_sessions($udbh, $u->{'userid'}, @$sessions) if @$sessions;
+}
+
 sub kill_sessions
 {
     my ($udbh, $userid, @sessids) = @_;

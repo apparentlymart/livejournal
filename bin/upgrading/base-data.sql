@@ -432,6 +432,10 @@ INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorde
 UPDATE logproplist SET datatype='char',des='A keyword that should align to a defined picture',prettyname='Picture Keyword',scope='general',sortorder='30' WHERE name='picture_keyword';
 INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('bool', 'True if text has 8-bit data that\'s not in UTF-8', 'unknown8bit', 'Unknown 8-bit text', 'general', '99');
 UPDATE logproplist SET datatype='bool',des='True if text has 8-bit data that\'s not in UTF-8',prettyname='Unknown 8-bit text',scope='general',sortorder='99' WHERE name='unknown8bit';
+INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('num', 'Number of times this post has been edited.', 'revnum', 'Revision number', 'general', '99');
+UPDATE logproplist SET datatype='num',des='Number of times this post has been edited.',prettyname='Revision number',scope='general',sortorder='99' WHERE name='revnum';
+INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('num', 'Unix time of the last change to number of comments to this post.', 'commentalter', 'Comments altered', 'general', '99');
+UPDATE logproplist SET datatype='num',des='Unix time of the last change to number of comments to this post.',prettyname='Comments altered',scope='general',sortorder='99' WHERE name='commentalter';
 INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES ('View paid accounts that are soon about to expire.', '1', 'accountsexpiring', 'Accounts - Expiring', 'general');
 UPDATE priv_list SET des='View paid accounts that are soon about to expire.',is_public='1',privname='Accounts - Expiring',scope='general' WHERE privcode='accountsexpiring';
 INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES ('Allows a user to grant or revoke privileges to/from other users. arg=Unique privcode that the user has access to grant/deny for, or "all" for all privileges.', '0', 'admin', 'Administer priviledges', 'general');

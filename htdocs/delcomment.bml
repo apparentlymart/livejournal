@@ -133,6 +133,8 @@ body<=
      }
  }
 
+ LJ::Talk::update_commentalter($dbs, $dbcs, $u, $qitemid);
+
  # ban the user, if selected
  my $and;
  if ($FORM{'ban'})

@@ -791,7 +791,7 @@ sub postevent
                 }
             }
             my $p = LJ::get_prop("log", $pname);
-            if ($p) {
+            if ($p && $pname ne "revnum") {
                 my $qvalue = $dbh->quote($req->{'props'}->{$pname});
                 if ($clustered) {
                     $propinsert .= "($ownerid, $itemid, $p->{'id'}, $qvalue)";
@@ -1113,7 +1113,11 @@ sub editevent
         return fail($err,501,$dbcm->errstr) if $dbcm->err;
     }
 
-    if (%{$req->{'props'}}) {
+    # up the revision number
+    $req->{'props'}->{'revnum'} = ($curprops{$qitemid}->{'revnum'} || 0) + 1;
+
+    # handle the props
+    {
         my $propinsert = "";
         my @props_to_delete;
         foreach my $pname (keys %{$req->{'props'}}) {

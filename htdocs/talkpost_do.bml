@@ -522,6 +522,9 @@ body<=
          }
      }
 
+     # update the comment alter property
+     LJ::Talk::update_commentalter($dbs, $dbcs, $u, $itemid);   
+
      # log the event
      if ($clustered) {
          LJ::event_register($dbs, $dbcm, "R", $u->{'userid'}, $ditemid);
