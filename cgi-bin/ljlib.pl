@@ -4121,6 +4121,45 @@ sub modify_caps {
 }
 
 # <LJFUNC>
+# name: LJ::expunge_userpic
+# des: Expunges a userpic so that the system will no longer deliver this userpic.  If
+#   your site has off-site caching or something similar, you can also define a hook
+#   "expunge_userpic" which will be called with a picid and userid when a pic is
+#   expunged.
+# args: picid
+# des-picid: Id of the picture to expunge.
+# returns: undef on error, or the userid of the picture owner on success.
+# </LJFUNC>
+sub expunge_userpic {
+    # take in a picid and expunge it from the system so that it can no longer be used
+    my $picid = shift;
+    $picid += 0;
+    return undef unless $picid;
+
+    # get the pic information
+    my $dbr = LJ::get_db_reader();
+    return undef unless $dbr;
+    my ($userid, $state) = $dbr->selectrow_array('SELECT userid, state FROM userpic WHERE picid = ?',
+                                                 undef, $picid);
+    return undef unless $userid;
+    return $userid if $state eq 'X'; # already expunged
+
+    # now mark it
+    my $dbh = LJ::get_db_writer();
+    return undef unless $dbh;
+    $dbh->do("UPDATE userpic SET state='X' WHERE picid = ?", undef, $picid);
+    return LJ::error($dbh) if $dbh->err;
+    $dbh->do("DELETE FROM userpicmap WHERE picid = ?", undef, $picid);
+
+    # now clear the user's memcache picture info
+    LJ::MemCache::delete([$userid, "upicinf:$userid"]);
+
+    # call the hook and get out of here
+    LJ::run_hooks('expunge_userpic', $picid, $userid);
+    return $userid;
+}
+
+# <LJFUNC>
 # name: LJ::activate_userpics
 # des: Sets/unsets userpics as inactive based on account caps
 # args: u
@@ -4163,6 +4202,7 @@ sub activate_userpics
     my $sth = $dbh->prepare("SELECT picid, state FROM userpic WHERE userid=?");
     $sth->execute($userid);
     while (my ($picid, $state) = $sth->fetchrow_array) {
+        next if $state eq 'X'; # expunged, means userpic has been removed from site by admins
         if ($state eq 'I') {
             push @inactive, $picid;
         } else {
@@ -4306,6 +4346,7 @@ sub get_userpic_info
         $sth->execute($userid);
         my @pics;
         while (my $pic = $sth->fetchrow_hashref) {
+            next if $pic->{state} eq 'X'; # no expunged pics in list
             push @pics, $pic;
             $info->{'pic'}->{$pic->{'picid'}} = $pic;
         }

@@ -634,7 +634,7 @@ sub userpic_content
         # Load the associated user object and make sure they're allowed to see
         # the pic.
         $u = LJ::load_userid( $userid );
-        return NOT_FOUND unless $u && $u->{'statusvis'} ne "X";
+        return NOT_FOUND unless $u && $u->{'statusvis'} !~ /[XS]/ && $pic->{state} ne 'X';
 
         # Now ask the blob lib for the path to send to the reproxy
         $fmt = $MimeTypeMap{ $pic->{contenttype} };
@@ -672,7 +672,7 @@ sub userpic_content
         $pic = get_pic_from_picid( $picid ) or return NOT_FOUND;
         return NOT_FOUND if $pic->{'userid'} != $userid;
         my $u = LJ::load_userid($userid);
-        return NOT_FOUND unless $u && $u->{'statusvis'} ne "X";
+        return NOT_FOUND unless $u && $u->{'statusvis'} !~ /[XS]/ && $pic->{state} ne 'X';
 
         $lastmod = $pic->{'lastmod'};
 

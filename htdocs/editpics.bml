@@ -45,7 +45,7 @@
     
     # Put $count and $max in larger scope so they can be used in output 
     my $count = $dbh->selectrow_array("SELECT COUNT(*) FROM userpic " .
-                                      "WHERE userid=?", undef, $u->{'userid'});
+                                      "WHERE userid=? AND state <> 'X'", undef, $u->{'userid'});
     my $max = LJ::get_cap($u, "userpics");
 
     ### save mode
@@ -78,6 +78,9 @@
             $sth->execute($u->{'userid'});
             while (my $pic = $sth->fetchrow_hashref)
             {
+                # ignore anything expunged
+                next if $pic->{state} eq 'X';
+                
                 # delete this pic
                 if ($POST{"delete_$pic->{'picid'}"}) {
                     push @delete, $pic->{'picid'};

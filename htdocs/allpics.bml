@@ -81,7 +81,8 @@
     my $defaultpicid = $u ? $u->{'defaultpicid'} : undef;
     push @pics, $info->{'pic'}->{$u->{'defaultpicid'}} if $defaultpicid;
     push @pics, map { $info->{'pic'}->{$_} } sort { $a <=> $b }
-                grep { $_ != $defaultpicid && ($info->{'pic'}->{$_}->{'state'} eq 'N' || $can_manage) }
+                grep { $_ != $defaultpicid && ($info->{'pic'}->{$_}->{'state'} eq 'N' || $can_manage) &&
+                       $info->{'pic'}->{$_}->{'state'} ne 'X' }
                 keys %{$info->{'pic'}};
 
     foreach my $pic (@pics) {

@@ -6,12 +6,43 @@ package LJ::Con;
 use strict;
 use vars qw(%cmd);
 
+$cmd{'expunge_userpic'}->{'handler'} = \&expunge_userpic;
 $cmd{'suspend'}->{'handler'} = \&suspend;
 $cmd{'unsuspend'}->{'handler'} = \&suspend;
 $cmd{'getemail'}->{'handler'} = \&getemail;
 $cmd{'get_maintainer'}->{'handler'} = \&get_maintainer;
 $cmd{'finduser'}->{'handler'} = \&finduser;
 $cmd{'infohistory'}->{'handler'} = \&infohistory;
+
+sub expunge_userpic {
+    my ($dbh, $remote, $args, $out) = @_;
+
+    unless (scalar(@$args) == 2) {
+        push @$out, [ "error", "This command takes exactly one argument.  Consult the reference." ];
+        return 0;
+    }
+
+    my $picid = $args->[1]+0;
+
+    unless (LJ::check_priv($remote, 'siteadmin', 'userpics') || LJ::check_priv($remote, 'siteadmin', '*')) {
+        push @$out, [ "error", "You don't have access to expunge user picture icons." ];
+        return 0;
+    }
+
+    # the actual expunging happens in ljlib
+    my $rval = LJ::expunge_userpic($picid);
+    my $u = LJ::load_userid($rval+0);
+    unless ($rval && $u) {
+        push @$out, [ "error", "Error expunging user picture icon." ];
+        return 0;
+    }
+
+    # but make sure to log it
+    LJ::statushistory_add($u->{userid}, $remote->{userid}, 'expunge_userpic', "expunged userpic; id=$picid");
+    push @$out, [ "info", "User picture icon $picid for $u->{user} expunged." ];
+
+    return 1;
+}
 
 sub suspend
 {
