@@ -325,7 +325,6 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
          "email" => $email,
          "regurl" => "$LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}",
          "username" => $user,
-         "password" => $POST{'password1'},
          "sitename" => $LJ::SITENAME,
          "siteroot" => $LJ::SITEROOT,
          "admin_email" => $LJ::ADMIN_EMAIL,
