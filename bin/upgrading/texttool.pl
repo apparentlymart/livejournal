@@ -17,15 +17,17 @@ GetOptions(
 
 my $mode = shift @ARGV;
 
-help() if $opt_help or not defined $mode;
+help() if $opt_help or not defined $mode or @ARGV;
 
 sub help
 {
-    die "Usage: texttool.pl <command>
+    die "Usage: texttool.pl <commands>
 
 Where 'command' is one of:
-  popstruct    Populate lang data from text[-local].dat into db
-  poptext      Populate text from en.dat, etc into database
+  load         Runs the following three commands in order:
+    popstruct  Populate lang data from text[-local].dat into db
+    poptext    Populate text from en.dat, etc into database
+    makeusable Setup internal indexes necessary after loading text
   dumptext     Dump lang text based on text[-local].dat information
   check        Check validity of text[-local].dat files
   wipedb       Remove all language/text data from database.
@@ -136,26 +138,40 @@ unless ($dbh) {
     die "Can't connect to the database.\n";
 }
 
-my @good = qw(popstruct poptext dumptext newitems wipedb makeusable);
+# indenter
+my $idlev = 0;
+my $out = sub {
+    my @args = @_;
+    while (@args) {
+        my $a = shift @args;
+        if ($a eq "+") { $idlev++; }
+        elsif ($a eq "-") { $idlev--; }
+        elsif ($a eq "x") { $a = shift @args; die "  "x$idlev . $a . "\n"; }
+        else { print "  "x$idlev, $a, "\n"; }
+    }
+};
 
-popstruct() if $mode eq "popstruct";
-poptext() if $mode eq "poptext";
+my @good = qw(load popstruct poptext dumptext newitems wipedb makeusable);
+
+popstruct() if $mode eq "popstruct" or $mode eq "load";
+poptext() if $mode eq "poptext" or $mode eq "load";
+makeusable() if $mode eq "makeusable" or $mode eq "load";
 dumptext() if $mode eq "dumptext";
 newitems() if $mode eq "newitems";
 wipedb() if $mode eq "wipedb";
-makeusable() if $mode eq "makeusable";
 help() unless grep { $mode eq $_ } @good;
 exit 0;
 
 sub makeusable
 {
+    $out->("Making usable...", '+');
     my $rec = sub {
         my ($lang, $rec) = @_;
         my $l = $lang_code{$lang};
-        die "Bogus language: $lang\n" unless $l;
+        $out->("x", "Bogus language: $lang") unless $l;
         my @children = grep { $_->{'parentlnid'} == $l->{'lnid'} } values %lang_code;
         foreach my $cl (@children) {
-            print "$l->{'lncode'} -- $cl->{'lncode'}\n";
+            $out->("$l->{'lncode'} -- $cl->{'lncode'}");
 
             my %need;
             $sth = $dbh->prepare("SELECT dmid, itid, txtid FROM ml_latest WHERE lnid=$l->{'lnid'}");
@@ -180,50 +196,55 @@ sub makeusable
         }
     };
     $rec->("en", $rec);
-    
+    $out->("-", "done.");
 }
 
 sub wipedb
 {
-    $dbh->do("DELETE FROM ml_$_")
-        foreach (qw(domains items langdomains langs latest text));
+    $out->("Wiping DB...", '+');
+    foreach (qw(domains items langdomains langs latest text)) {
+        $out->("deleting from $_");
+        $dbh->do("DELETE FROM ml_$_");
+    }
+    $out->("-", "done.");
 }
 
 sub popstruct
 {
+    $out->("Populating structure...", '+');
     foreach my $l (values %lang_id) {
-        print "Inserting language: $l->{'lnname'}\n";
+        $out->("Inserting language: $l->{'lnname'}");
         $dbh->do("INSERT INTO ml_langs (lnid, lncode, lnname, parenttype, parentlnid) ".
                  "VALUES (" . join(",", map { $dbh->quote($l->{$_}) } qw(lnid lncode lnname parenttype parentlnid)) . ")");
-        print "  already existed.\n" if $dbh->err;
     }
 
     foreach my $d (values %dom_id) {
-        print "Inserting domain: $d->{'type'}\[$d->{'args'}\]\n";
+        $out->("Inserting domain: $d->{'type'}\[$d->{'args'}\]");
         $dbh->do("INSERT INTO ml_domains (dmid, type, args) ".
                  "VALUES (" . join(",", map { $dbh->quote($d->{$_}) } qw(dmid type args)) . ")");
-        print "  already existed.\n" if $dbh->err;
     }
 
-    print "Inserting language domains ...\n";
+    $out->("Inserting language domains ...");
     foreach my $ld (@lang_domains) {
         $dbh->do("INSERT IGNORE INTO ml_langdomains (lnid, dmid, dmmaster) VALUES ".
                  "(" . join(",", map { $dbh->quote($ld->{$_}) } qw(lnid dmid dmmaster)) . ")");
     }
-
-    print "All done.\n";
+    $out->("-", "done.");
 }
 
 sub poptext
 {
+    $out->("Populating text...", '+');
     foreach my $lang (keys %lang_code)
     {
-        print "$lang\n";
+        $out->("$lang", '+');
         my $l = $lang_code{$lang};
         open (D, "$ENV{'LJHOME'}/bin/upgrading/${lang}.dat")
-            or die "Can't find $lang.dat\n";
+            or $out->('x', "Can't find $lang.dat");
+        my $addcount = 0;
         my $lnum = 0;
         my ($code, $text);
+        my %metadata;
         while (my $line = <D>) {
             $lnum++;
             if ($line =~ /^(\S+?)=(.*)/) {
@@ -236,8 +257,16 @@ sub poptext
                     $text .= $_;
                 }
                 chomp $text;  # remove file new-line (we added it)
+            } elsif ($line =~ /^[\#\;]/) {
+                # comment line
+                next;
             } elsif ($line =~ /\S/) {
-                die "$lang.dat:$lnum: Bogus format.\n";
+                $out->('x', "$lang.dat:$lnum: Bogus format.");
+            }
+
+            if ($code =~ /\|(.+)/) {
+                $metadata{$1} = $text;
+                next;
             }
 
             my $qcode = $dbh->quote($code);
@@ -245,26 +274,35 @@ sub poptext
                                                "WHERE l.dmid=1 AND i.dmid AND i.itcode=$qcode AND ".
                                                "i.itid=l.itid AND l.lnid=$l->{'lnid'}");
             if (! $exists) {
-                print " adding: $code\n";
-                my $res = LJ::Lang::set_text($dbh, 1, $lang, $code, $text);
+                $addcount++;
+                my $staleness = $metadata{'staleness'}+0;
+                my $res = LJ::Lang::set_text($dbh, 1, $lang, $code, $text,
+                                             { 'staleness' => $staleness,
+                                               'notes' => $metadata{'notes'}, });
                 unless ($res) {
-                    die "  ERROR: " . LJ::Lang::last_error() . "\n";
+                    $out->('x', "ERROR: " . LJ::Lang::last_error());
                 }
+
+                %metadata = ();
             }
         }
         close D;
+        $out->("added: $addcount", '-');
     }
+    $out->("-", "done.");
 }
 
 sub dumptext
 {
+    $out->('Dumping text...', '+');
     foreach my $lang (keys %lang_code)
     {
-        print "$lang\n";
+        $out->("$lang");
         my $l = $lang_code{$lang};
         open (D, ">$ENV{'LJHOME'}/bin/upgrading/${lang}.dat")
-            or die "Can't open $lang.dat\n";
-        my $sth = $dbh->prepare("SELECT i.itcode, t.text FROM ".
+            or $out->('x', "Can't open $lang.dat");
+        print D ";; -*- coding: utf-8 -*-\n";
+        my $sth = $dbh->prepare("SELECT i.itcode, t.text, l.staleness, i.notes FROM ".
                                 "ml_items i, ml_latest l, ml_text t ".
                                 "WHERE l.lnid=$l->{'lnid'} AND l.dmid=1 ".
                                 "AND i.dmid=1 AND l.itid=i.itid AND ".
@@ -274,32 +312,42 @@ sub dumptext
                                 "ORDER BY i.itcode");
         $sth->execute;
         die $dbh->errstr if $dbh->err;
-        while (my ($itcode, $text) = $sth->fetchrow_array) {
-            if ($text =~ /\n/) {
-                $text =~ s/\n\./\n\.\./g;
-                print D "$itcode<<\n$text\n.\n\n";
+        my $writeline = sub {
+            my ($k, $v) = @_;
+            if ($v =~ /\n/) {
+                $v =~ s/\n\./\n\.\./g;
+                print D "$k<<\n$v\n.\n";
             } else {
-                print D "$itcode=$text\n\n";
+                print D "$k=$v\n";
             }
+        };
+        while (my ($itcode, $text, $staleness, $notes) = $sth->fetchrow_array) {
+            $writeline->("$itcode|staleness", $staleness)
+                if $staleness;
+            $writeline->("$itcode|notes", $notes)
+                if $notes =~ /\S/;
+            $writeline->($itcode, $text);
+            print D "\n";
         }
         close D;
     }
-    exit 1;
+    $out->('-', 'done.');
 }
 
 sub newitems
 {
+    $out->("Searching for referenced text codes...", '+');
     my $top = $ENV{'LJHOME'};
     my @files;
     push @files, qw(htdocs cgi-bin bin);
     my %items;  # $scope -> $key -> 1;
-    print "Searching htdocs/cgi-bin/bin for referenced text codes...\n";
     while (@files)
     {
         my $file = shift @files;
         my $ffile = "$top/$file";
         next unless -e $ffile;
         if (-d $ffile) {
+            $out->("dir: $file");
             opendir (MD, $ffile) or die "Can't open $file";
             while (my $f = readdir(MD)) {
                 next if $f eq "." || $f eq ".." || 
@@ -332,23 +380,22 @@ sub newitems
         }
     }
 
-    printf("  %d general and %d local found.\n",
-           scalar keys %{$items{'general'}},
-           scalar keys %{$items{'local'}});
+    $out->(sprintf("%d general and %d local found.",
+                   scalar keys %{$items{'general'}},
+                   scalar keys %{$items{'local'}}));
 
     # [ General ]
     my %e_general;  # code -> 1
-    print "Checking which general items already exist in database...\n";
+    $out->("Checking which general items already exist in database...");
     my $sth = $dbh->prepare("SELECT i.itcode FROM ml_items i, ml_latest l WHERE ".
                             "l.dmid=1 AND l.lnid=1 AND i.dmid=1 AND i.itid=l.itid ");
     $sth->execute;
     while (my $it = $sth->fetchrow_array) { $e_general{$it} = 1; }
-    printf("  %d found\n", scalar keys %e_general);
+    $out->(sprintf("%d found", scalar keys %e_general));
     foreach my $it (keys %{$items{'general'}}) {
         next if exists $e_general{$it};
-        print "Adding general: $it ...";
-        print LJ::Lang::set_text($dbh, 1, "en", $it, "[no text: $it]");
-        print "\n";
+        my $res = LJ::Lang::set_text($dbh, 1, "en", $it, "[no text: $it]");
+        $out->("Adding general: $it ... $res");
     }
 
     if ($opt_local_lang) {
@@ -356,23 +403,20 @@ sub newitems
         die "Bogus --local-lang argument\n" unless $ll;
         die "Local-lang '$ll->{'lncode'}' parent isn't 'en'\n"
             unless $ll->{'parentlnid'} == 1;
-        print "Checking which local items already exist in database...\n";
+        $out->("Checking which local items already exist in database...");
 
         my %e_local;
         $sth = $dbh->prepare("SELECT i.itcode FROM ml_items i, ml_latest l WHERE ".
                              "l.dmid=1 AND l.lnid=$ll->{'lnid'} AND i.dmid=1 AND i.itid=l.itid ");
         $sth->execute;
         while (my $it = $sth->fetchrow_array) { $e_local{$it} = 1; }
-        printf("  %d found\n", scalar keys %e_local);
+        $out->(sprintf("%d found\n", scalar keys %e_local));
         foreach my $it (keys %{$items{'local'}}) {
             next if exists $e_general{$it};
             next if exists $e_local{$it};
-            print "Adding local: $it ...";
-            print LJ::Lang::set_text($dbh, 1, $ll->{'lncode'}, $it, "[no text: $it]");
-            print "\n";
+            my $res = LJ::Lang::set_text($dbh, 1, $ll->{'lncode'}, $it, "[no text: $it]");
+            $out->("Adding local: $it ... $res");
         }
     }
-    
-    #use Data::Dumper;
-    #print Dumper(\%items);
+    $out->('-', 'done.');
 }

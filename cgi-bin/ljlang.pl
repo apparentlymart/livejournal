@@ -177,7 +177,7 @@ sub load_lang_struct
 
 sub get_itemid
 {
-    my ($dbarg, $dmid, $itcode, $create) = @_;
+    my ($dbarg, $dmid, $itcode, $opts) = @_;
     load_lang_struct() unless $LS_CACHED;
 
     my $dbs = LJ::make_dbs_from_arg($dbarg);
@@ -188,7 +188,8 @@ sub get_itemid
     my $qcode = $dbh->quote($itcode);
     my $itid = $dbr->selectrow_array("SELECT itid FROM ml_items WHERE dmid=$dmid AND itcode=$qcode");
     return $itid if defined $itid;
-    $dbh->do("INSERT INTO ml_items (dmid, itid, itcode) VALUES ($dmid, NULL, $qcode)");
+    my $qnotes = $dbh->quote($opts->{'notes'});
+    $dbh->do("INSERT INTO ml_items (dmid, itid, itcode, notes) VALUES ($dmid, NULL, $qcode, $qnotes)");
     if ($dbh->err) {
         return $dbh->selectrow_array("SELECT itid FROM ml_items WHERE dmid=$dmid AND itcode=$qcode");
     }
@@ -214,7 +215,7 @@ sub set_text
     return set_error("Bogus lang for that domain") 
         unless exists $DM_ID{$dmid}->{'langs'}->{$lnid};
 
-    my $itid = get_itemid($dbs, $dmid, $itcode, 1);
+    my $itid = get_itemid($dbs, $dmid, $itcode, { 'notes' => $opts->{'notes'}});
     return set_error("Couldn't allocate itid.") unless $itid;
 
     my $txtid;
@@ -228,8 +229,9 @@ sub set_text
     return set_error("Error inserting ml_text: ".$dbh->err) if $dbh->err;
     $txtid = $dbh->{'mysql_insertid'};
 
+    my $staleness = $opts->{'staleness'}+0;
     $dbh->do("REPLACE INTO ml_latest (lnid, dmid, itid, txtid, chgtime, staleness) ".
-             "VALUES ($lnid, $dmid, $itid, $txtid, NOW(), 0)");
+             "VALUES ($lnid, $dmid, $itid, $txtid, NOW(), $staleness)");
     return set_error("Error inserting ml_latest: ".$dbh->err) if $dbh->err;
 
     # set descendants to use this mapping
