@@ -282,11 +282,11 @@
 	 $body .= " Other: <INPUT NAME=\"prop_current_mood\" SIZE=15 MAXLENGTH=30 VALUE=\"" . LJ::ehtml($FORM{'prop_current_mood'}) . "\">";
 	 $body .= "<P><B>Current Music:</B> <INPUT NAME=\"prop_current_music\" SIZE=40 MAXLENGTH=60 VALUE=\"" . LJ::ehtml($FORM{'prop_current_music'}) . "\">";
 	 $body  .= "</TD></TR><TR><TD ALIGN=CENTER><INPUT TYPE=SUBMIT VALUE=\"Update Journal\">";
-	 
      }
      else 
      {
 	 $body .= "<TR><TD>&nbsp;<P>You're looking at the simple page.  For more options, <A HREF=\"$SELF?mode=full\">click here</A>.</TD></TR>\n";
+	 $body .= "<link href='$SELF?mode=full' rel='Alternate' title='Full Update Page'>\n";
      }
      
      $body .= "</TD></TR></TABLE></UL></FORM>";
