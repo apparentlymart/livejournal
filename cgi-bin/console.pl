@@ -609,6 +609,17 @@ $cmd{'reset_email'} = {
                ],
     };
 
+$cmd{'reset_password'} = {
+    'des' => 'Resets the password for a given account',
+    'privs' => [qw(reset_password)],
+    'handler' => \&reset_password,
+    'argsummary' => '<username> <reason>',
+    'args' => [
+               'username' => "The account to reset the email address for.",
+               'reason' => "Reason for the password reset.",
+               ],
+    };
+
 $cmd{'syn_editurl'} = {
     'handler' => \&syn_editurl,
     'privs' => [qw(syn_edit)],
@@ -1039,6 +1050,51 @@ sub syn_editurl
     } else {
         push @$out, [ '', "URL for account $user changed to $newurl ." ];
     }
+    return 1;
+}
+
+sub reset_password
+{
+    my ($dbh, $remote, $args, $out) = @_;
+    my $err = sub { push @$out, [ "error", $_[0] ]; 0; };
+    my $inf = sub { push @$out, [ "info",  $_[0] ]; 1; };
+
+    return $err->("This command takes exactly 2 arguments") unless @$args == 3;
+
+    return $err->("$remote->{'user'}, you are not authorized to use this command.")
+        unless ($remote->{'priv'}->{'reset_password'});
+
+    my $user = $args->[1];
+    my $u = LJ::load_user($user);
+
+    return $err->("Invalid user $user") unless ($u);
+
+    my $newpass = LJ::rand_chars(8);
+    my $oldpass = $dbh->quote(Digest::MD5::md5_hex($u->{'password'} . "change"));
+    $dbh->do("INSERT INTO infohistory (userid, what, oldvalue, timechange) VALUES ($u->{'userid'}, 'passwordreset', $oldpass, NOW())");
+    return $err->("Failed to insert old password into information history table") if $dbh->err;
+
+    LJ::update_user($u, { password => $newpass, })
+        or return $err->("Failed to update user table");
+
+    LJ::kill_all_sessions($u);
+
+    my $body = "The password for your $LJ::SITENAME account '$u->{'user'}' has been reset to:\n\n";
+    $body .= "     $newpass\n\n";
+    $body .= "Please change it immediately by going to: $LJ::SITEROOT/changepassword.bml\n\n";
+    $body .= "Regards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n";
+
+    LJ::send_mail({
+        'to' => $u->{'email'},
+        'from' => $LJ::ADMIN_EMAIL,
+        'subject' => "Password Reset",
+        'body' => $body,
+    }) or $inf->("Notification email could not be sent.");
+
+    my $reason = $args->[2];
+    LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, "reset_password", $reason);
+
+    push @$out, [ '', "Password reset." ];
     return 1;
 }
 
