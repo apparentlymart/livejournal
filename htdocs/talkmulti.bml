@@ -91,7 +91,6 @@
 
     } elsif ($mode eq "screen") {
         LJ::Talk::screen_comment($dbs, $dbcs, $u, $itemid, @talkids);
-        $commentlink .= "&amp;showscreened=1";
         $body = "<?h1 $ML{'.screened.title'} h1?><?p " . BML::ml('.screened.body', {'link'=>$commentlink}) . " p?>";
         return;
     }
