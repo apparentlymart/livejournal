@@ -2730,7 +2730,7 @@ sub get_remote
     my $short_session = 60*60*24;
     if ($sess->{'exptype'} eq "short" && 
         ($sess->{'timeexpire'} - $sess->{'now'}) < $short_session/2) {
-        my $udbh = FB::get_cluster_master($u, 1);
+        my $udbh = LJ::get_cluster_master($u, 1);
         if ($udbh) {
             my $future = $sess->{'now'} + $short_session;
             $udbh->do("UPDATE sessions SET timeexpire=$future WHERE ".
