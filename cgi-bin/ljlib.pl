@@ -4328,30 +4328,26 @@ sub journal_base
 # </LJFUNC>
 sub load_user_privs
 {
-    my $dbarg = shift;
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
     my $remote = shift;
     my @privs = @_;
-
-    my $dbs = make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-
-    return unless ($remote and @privs);
+    return unless $remote and @privs;
 
     # return if we've already loaded these privs for this user.
-    @privs = map { $dbr->quote($_) }
-             grep { ! $remote->{'_privloaded'}->{$_}++ } @privs;
+    @privs = grep { ! $remote->{'_privloaded'}->{$_} } @privs;
+    return unless @privs;
 
-    return unless (@privs);
-
+    my $dbr = LJ::get_db_reader();
+    return unless $dbr;
+    foreach (@privs) { $remote->{'_privloaded'}->{$_}++; }
+    @privs = map { $dbr->quote($_) } @privs;
     my $sth = $dbr->prepare("SELECT pl.privcode, pm.arg ".
                             "FROM priv_map pm, priv_list pl ".
                             "WHERE pm.prlid=pl.prlid AND ".
                             "pl.privcode IN (" . join(',',@privs) . ") ".
                             "AND pm.userid=$remote->{'userid'}");
     $sth->execute;
-    while (my ($priv, $arg) = $sth->fetchrow_array)
-    {
+    while (my ($priv, $arg) = $sth->fetchrow_array) {
         unless (defined $arg) { $arg = ""; }  # NULL -> ""
         $remote->{'_priv'}->{$priv}->{$arg} = 1;
     }
@@ -4364,7 +4360,7 @@ sub load_user_privs
 #       See [func[LJ::get_remote]].  As such, a $u argument of undef
 #       is okay to pass: 0 will be returned, as an unknown user can't
 #       have any rights.
-# args: dbarg, u, priv, arg?
+# args: dbarg?, u, priv, arg?
 # des-priv: Priv name to check for (see [dbtable[priv_list]])
 # des-arg: Optional argument.  If defined, function only returns true
 #          when $remote has a priv of type $priv also with arg $arg, not
@@ -4374,19 +4370,12 @@ sub load_user_privs
 # </LJFUNC>
 sub check_priv
 {
-    my ($dbarg, $u, $priv, $arg) = @_;
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    my ($u, $priv, $arg) = @_;
     return 0 unless $u;
 
-    my $dbs = make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-
     if (! $u->{'_privloaded'}->{$priv}) {
-        if ($dbr) {
-            load_user_privs($dbr, $u, $priv);
-        } else {
-            return 0;
-        }
+	LJ::load_user_privs($u, $priv);
     }
 
     if (defined $arg) {
