@@ -1000,7 +1000,7 @@ sub auth_fields
         if ($opts->{'user'}) {
             $hpass = $form->{'hpassword'} || LJ::hash_password($form->{'password'});
         } elsif ($remote) {
-            $ret .= "<input type='hidden' name='remoteuser' value='$remote->{'user'}'>\n";
+            $ret .= "<input type='hidden' name='remoteuser' value='$remote->{'user'}' />\n";
             # this is merely to assist old code that only sends hpassword to auth_okay:
             $hpass = "_(remote)";
         }
@@ -1010,8 +1010,8 @@ sub auth_fields
         $ret .= "<tr align='left'><td colspan='2' align='left'>You are currently logged in as <b>$luser</b>.";
         $ret .= "<br />If this is not you, <a href='$alturl'>click here</a>.\n"
             unless $opts->{'noalt'};
-        $ret .= "<input type='hidden' name='user' value='$luser'>\n";
-        $ret .= "<input type='hidden' name='hpassword' value='$hpass'><br />&nbsp;\n";
+        $ret .= "<input type='hidden' name='user' value='$luser' />\n";
+        $ret .= "<input type='hidden' name='hpassword' value='$hpass' /><br />&nbsp;\n";
         $ret .= "</td></tr>\n";
     } else {
         $ret .= "<tr align='left'><td>Username:</td><td align='left'><input type='text' name='user' size='15' maxlength='15' value='";
@@ -1979,12 +1979,12 @@ sub img
     my $i = $LJ::Img::img{$ic};
     if ($type eq "") {
         return "<img src=\"$LJ::IMGPREFIX$i->{'src'}\" width=\"$i->{'width'}\" ".
-            "height=\"$i->{'height'}\" alt=\"$i->{'alt'}\" border='0'$attrs>";
+            "height=\"$i->{'height'}\" alt=\"$i->{'alt'}\" border='0'$attrs />";
     }
     if ($type eq "input") {
         return "<input type=\"image\" src=\"$LJ::IMGPREFIX$i->{'src'}\" ".
             "width=\"$i->{'width'}\" height=\"$i->{'height'}\" ".
-            "alt=\"$i->{'alt'}\" border='0'$attrs>";
+            "alt=\"$i->{'alt'}\" border='0'$attrs />";
     }
     return "<b>XXX</b>";
 }

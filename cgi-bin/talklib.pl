@@ -58,7 +58,7 @@ sub show_image
     my $p = $pics->{'pic'}->{$id};
     my $pfx = "$LJ::IMGPREFIX/talk";
     return "<img src=\"$LJ::IMGPREFIX/talk/$p->{'img'}\" border='0' ".
-        "width='$p->{'w'}' height='$p->{'h'}' valign='middle'>";
+        "width='$p->{'w'}' height='$p->{'h'}' valign='middle' />";
 }
 
 sub link_bar
@@ -83,7 +83,7 @@ sub link_bar
 
     # << Previous
     push @linkele, $mlink->("/go.bml?${jargent}itemid=$itemid&amp;dir=prev", "prev_entry");
-    $$headref .= "<link href='/go.bml?${jargent}itemid=$itemid&amp;dir=prev' rel='Previous'>\n";
+    $$headref .= "<link href='/go.bml?${jargent}itemid=$itemid&amp;dir=prev' rel='Previous' />\n";
     
     # memories
     unless ($LJ::DISABLED{'memories'}) {
@@ -103,7 +103,7 @@ sub link_bar
     
     ## >>> Next
     push @linkele, $mlink->("/go.bml?${jargent}itemid=$itemid&amp;dir=next", "next_entry");
-    $$headref .= "<link href='/go.bml?${jargent}itemid=$itemid&amp;dir=next' rel='Next'>\n";
+    $$headref .= "<link href='/go.bml?${jargent}itemid=$itemid&amp;dir=next' rel='Next' />\n";
     
     if (@linkele) {
         $ret .= BML::fill_template("standout", {
