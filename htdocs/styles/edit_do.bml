@@ -129,10 +129,8 @@ BODY<=
 
      my $extravars = "";
      if ($sty->{'type'} eq "day") {
-	 $sth = $dbh->prepare("SELECT year, month, day FROM log l, user u WHERE u.lastitemid=l.itemid AND u.user=$quser");
-	 $sth->execute;
-	 my ($yr, $mo, $da) = $sth->fetchrow_array;
-	 if ($yr) { $extravars .= "&year=$yr&month=$mo&day=$da"; }
+	 # FIXME: find day of last user's post, and add args to extraargs
+	 # (was done, but broken after number of changes)
      }
      if ($sty->{'opt_cache'} eq "Y") { $extravars .= "&nocache=1"; }
      $ret .= " <A TARGET=preview HREF=\"/customview.cgi?username=$user&amp;styleid=$sty->{'styleid'}$extravars\">[Preview Current Style]</A> (must save below to see your changes, keep this window open and reload it whenever you save)";
