@@ -514,8 +514,7 @@ BODY<=
                  }
 
                  if ($headersubject) {
-                     $headersubject = encode_mimewords($headersubject,
-                                          ('Charset'=>$encoding));
+                     $headersubject = MIME::Words::encode_mimeword($headersubject, 'B', $encoding);
                  }
 
                  my $fromname = $up->{'user'} ? "$up->{'user'} - LJ Comment" : "LiveJournal Comment";
@@ -622,8 +621,7 @@ BODY<=
          }
 
          if ($headersubject) {
-             $headersubject = encode_mimewords($headersubject,
-                                  ('Charset'=>$encoding));
+             $headersubject = MIME::Words::encode_mimeword($headersubject, 'B', $encoding);
          }
 
 
