@@ -205,7 +205,6 @@
          $ret .= "<p>Grant <b>$user</b> privilege:<div style='margin-left: 20px;'>\n";
          $ret .= "<select name='grantpriv'><option value='' selected='1'></option>";
          foreach my $priv (@privs) {
-             next unless (remote_can_grant($priv->{'privcode'}));
              $ret .= "<option value='$priv->{'prlid'}'>$priv->{'privcode'}</option>";
          }
          $ret .= "</select>\n";
