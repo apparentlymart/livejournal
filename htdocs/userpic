@@ -1,6 +1,8 @@
 #!/usr/bin/perl
 #
 
+my $CACHE_SIZE = 10_000;
+
 BEGIN {
     unshift @INC, "$ENV{'LJHOME'}/cgi-bin";
 }
@@ -14,7 +16,20 @@ require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 $dbh = LJ::get_dbh("master");
 if ($LJ::DBINFO{'slavecount'}) { $dro = LJ::get_dbh("slave"); }
 
-my $cache = new LJ::Cache { 'maxsize' => 4000 };
+my $cache = new LJ::Cache { 'maxsize' => $CACHE_SIZE };
+
+sub make_dir
+{
+    my $d = shift;
+    return if (-d $d);
+    mkdir $d, 0777;
+}
+foreach my $d ("$ENV{'LJHOME'}/temp",
+	       "$ENV{'LJHOME'}/temp/userpic") {
+    make_dir($d);
+}
+my $CACHE_DIR = "$ENV{'LJHOME'}/temp/userpic";
+
 
 my $hits = 0;
 my $misses = 0;
@@ -125,10 +140,14 @@ my $lastconn;
 
     my $qid = $FORM{'id'} + 0;
     my $pic = $cache->get($qid);
-    if (! defined $pic)
+    my $modnum = $qid % 1000;
+    my $cache_file = "$CACHE_DIR/$modnum/$qid";
+    my @s = stat($cache_file);
+    my $on_disk = $s[7];
+
+    if (! defined $pic || ! $on_disk)
     {
 	$misses++;
-#	my $query = "SELECT u.user, p.state, p.contenttype, pb.imagedata, UNIX_TIMESTAMP(p.picdate) AS 'lastmod' FROM user u, userpic p, userpicblob pb WHERE u.userid=p.userid AND p.picid=pb.picid AND p.picid=$qid";
 	my $query = "SELECT p.state, p.contenttype, pb.imagedata, UNIX_TIMESTAMP(p.picdate) AS 'lastmod' FROM userpic p, userpicblob pb WHERE p.picid=pb.picid AND p.picid=$qid";
 
 	## try the slave database dirst, we available.
@@ -149,13 +168,33 @@ my $lastconn;
 	    if ($dbh->err) { print "Content-type: text/plain\n\n" . $dbh->errstr;  }
 	    $pic = $sth->fetchrow_hashref;
 	    $sth->finish;
-	    if (defined $pic) { $from{'master'}++; }
+	    if (defined $pic) { 
+		$from{'master'}++; 
+	    } else {
+		print "Content-type: text/html\n\nNo userpic by that id.\n"; 
+		next REQUEST;
+	    }
 	}
 
 	if ($pic->{'state'} eq "B") { $pic->{'imagedata'} = "x"; }
 	$pic->{'length'} = length($pic->{'imagedata'});
 	$pic->{'time'} = time();
-	
+
+	# store the picture on disk, not in memory
+	if ($on_disk) {
+	    # touch it if modify time is older than a day, to keep it in
+	    # disk cache for tomorrow.
+	    if ($s[9] < time()-86400) {  
+		open (ID, ">>$cache_file");
+		close ID;
+	    }
+	} else {
+	    make_dir("$CACHE_DIR/$modnum");
+	    open (ID, ">$cache_file");
+	    binmode (ID);  # poor windows users
+	    print ID $pic->{'imagedata'};
+	    close ID;
+	}
 	$cache->set($qid, $pic);
     } else {
 	$hits++;
@@ -170,9 +209,15 @@ my $lastconn;
 	print "Last-Modified: ", &http_date($pic->{'lastmod'}), "\n";
 	print "\n";
 	unless ($ENV{'REQUEST_METHOD'} eq "HEAD") {
-	    print $pic->{'imagedata'};
+	    if ($pic->{'imagedata'}) {
+		print $pic->{'imagedata'};
+	    } else {
+		open (ID, $cache_file);
+		while (<ID>) { print; }
+		close ID;
+	    }
 	}
-	
+	delete $pic->{'imagedata'}; 
     } else {
 	print "Status: 404 Not Found\n";
 	print "Content-type: text/html\n\n";
