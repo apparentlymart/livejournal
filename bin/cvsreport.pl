@@ -50,16 +50,38 @@ foreach my $file (@files)
     $status ||= "-"x20;
     printf "%-20s %s\n", $status, $file;
     if ($sync) {
+	my ($sdir, $ddir);
 	if ($status eq "main <- cvs") {
-	    unless (copy("$cvs/$file", "$maind/$file")) { print "   Error: $!\n"; }
+	    ($sdir, $ddir) = ($cvs, $maind);
 	} elsif ($status eq "main <- local") {
-	    unless (copy("$cvslocal/$file", "$maind/$file")) { print "   Error: $!\n"; }
+	    ($sdir, $ddir) = ($cvslocal, $maind);
 	} elsif ($status eq "main -> local") {
-	    unless (copy("$maind/$file", "$cvslocal/$file")) { print "   Error: $!\n"; }
+	    ($sdir, $ddir) = ($maind, $cvslocal);
 	} elsif ($status eq "main -> cvs") {
-	    unless (copy("$maind/$file", "$cvs/$file")) { print "   Error: $!\n"; }
+	    ($sdir, $ddir) = ($maind, $cvs);
 	} 
+	if ($sdir && $ddir) {
+	    unless (install($sdir, $ddir, $file)) { print "   Error: $!\n"; }
+	}
     }
+}
+
+sub install
+{
+    my ($sdir, $ddir, $relfile) = @_;
+    
+    # check for directory existence
+    my @dirs = split(m!/!, $relfile);
+    pop @dirs;  # pop the file part.
+    for (my $i=0; $i<scalar(@dirs); $i++) {
+	my $sd = join("/", @dirs[0..$i]);
+	my $fullsd = "$ddir/$sd";
+	unless (-d $fullsd) {
+	    mkdir $fullsd, 0755;
+	}
+    }
+
+    return copy("$sdir/$relfile", "$ddir/$relfile");
 }
 
 # was using perl's File::Copy, but I want to preserve the file time.
