@@ -353,7 +353,6 @@ sub create_view_friends
     my $dbr = $dbs->{'reader'};
     my $sth;
     my $user = $u->{'user'};
-    my $env = $opts->{'env'};
 
     # fill in all remote details if present (caps, especially)
     $remote = LJ::load_userid($dbs, $remote->{'userid'}) if $remote;
@@ -387,8 +386,8 @@ sub create_view_friends
 
     # see if they have a previously cached copy of this page they
     # might be able to still use.
-    if ($env->{'header'}->{'If-Modified-Since'}) {
-        my $theirtime = LJ::http_to_time($env->{'header'}->{'If-Modified-Since'});
+    if ($opts->{'header'}->{'If-Modified-Since'}) {
+        my $theirtime = LJ::http_to_time($opts->{'header'}->{'If-Modified-Since'});
 
         # send back a 304 Not Modified if they say they've reloaded this 
         # document in the last $newinterval seconds:
