@@ -37,6 +37,11 @@ PerlModule Apache::BML
   SetHandler perl-script
   PerlHandler Apache::BML
 </Files>
+
+# User-friendly error messages
+ErrorDocument 404 /404.html
+ErrorDocument 500 /500.html
+
 });
 }
 
