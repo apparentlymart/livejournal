@@ -24,28 +24,17 @@ body<=
  # we need to find out: $u, $up (poster of the entry this is a comment to),
  # userpost (username of this comment's author). Then we can check permissions.
 
- my ($clustered, $dbcs) = (0, $dbs);
- my $u;
- if ($FORM{'journal'}) {
-     $u = LJ::load_user($dbs, $FORM{'journal'});
-     return "<?h1 $ML{'Error'} h1?><?p $ML{'.talk.error.bogusargs'} p?>" unless $u;
-     $clustered = 1;
-     $dbcs = LJ::get_cluster_set($u);
- }
+ my $u = LJ::load_user($dbs, $FORM{'journal'});
+ return "<?h1 $ML{'Error'} h1?><?p $ML{'.talk.error.bogusargs'} p?>" unless $u;
+ my $dbcs = LJ::get_cluster_set($u);
 
  my $dbcm = $dbcs->{'dbh'};
 
  my $post;
- if ($clustered) {
-     $qtalkid = int($qtalkid / 256);  # get rid of anum
-     $post = $dbcm->selectrow_hashref("SELECT jtalkid AS 'talkid', nodetype, state, nodeid AS 'itemid', ".
-                                    "parenttalkid, journalid, posterid FROM talk2 ".
-                                    "WHERE journalid=$u->{'userid'} AND jtalkid=$qtalkid");
- } else {
-     $post = $dbh->selectrow_hashref("SELECT talkid, nodetype, state, nodeid AS 'itemid', ".
-                                   "parenttalkid, journalid, posterid FROM talk ".
-                                   "WHERE talkid=$qtalkid");
- }
+ $qtalkid = int($qtalkid / 256);  # get rid of anum
+ $post = $dbcm->selectrow_hashref("SELECT jtalkid AS 'talkid', nodetype, state, nodeid AS 'itemid', ".
+                                  "parenttalkid, journalid, posterid FROM talk2 ".
+                                  "WHERE journalid=$u->{'userid'} AND jtalkid=$qtalkid");
 
  unless ($post) {
      return "<?h1 $ML{'Error'} h1?><?p $ML{'talk.error.nocomment'} p?>";
@@ -66,19 +55,14 @@ body<=
  my $qitemid = $post->{'itemid'}+0;
 
  # $posterid is the userid of the author of the entry, not the comment
- my ($posterid, $anum);
- if ($clustered) {
-     ($posterid, $anum) = 
-         $dbcm->selectrow_array("SELECT posterid, anum FROM log2 WHERE ".
-                                "journalid=$u->{'userid'} AND jitemid=$qitemid");
- } else {
-     $posterid = $dbh->selectrow_array("SELECT posterid FROM log WHERE itemid=$qitemid");
- }
+ my ($posterid, $anum) = 
+    $dbcm->selectrow_array("SELECT posterid, anum FROM log2 WHERE ".
+                           "journalid=$u->{'userid'} AND jitemid=$qitemid");
  my $up = LJ::load_userid($dbs, $posterid);
 
  my $ditemid = $qitemid*256 + $anum;
 
- my $jargent = $clustered ? "journal=$u->{'user'}&amp;" : "";
+ my $jargent = "journal=$u->{'user'}&amp;";
  my $commentlink = "talkread.bml?${jargent}itemid=$ditemid&amp;showscreened=1&amp;view=$FORM{'talkid'}#t$FORM{'talkid'}";
  my $can_screen = LJ::Talk::can_screen($dbs, $remote, $u, $up, $post->{'userpost'});
  my $can_unscreen = LJ::Talk::can_unscreen($dbs, $remote, $u, $up, $post->{'userpost'});
@@ -91,7 +75,7 @@ body<=
          $ret .= "<p><form method='POST' action='talkscreen.bml'><center>\n";
          $ret .= "<input type='hidden' name='mode' value='screen'>\n";
          $ret .= "<input type='hidden' name='talkid' value='$FORM{'talkid'}'>\n";
-         $ret .= "<input type='hidden' name='journal' value='$u->{'user'}'>\n" if $clustered;
+         $ret .= "<input type='hidden' name='journal' value='$u->{'user'}'>\n";
          $ret .= "<input type='hidden' name='confirm' value='Y'>\n";
          $ret .= "<input type='submit' value='$ML{'.screen.doit'}'>";
          $ret .= "</center>";
@@ -112,7 +96,7 @@ body<=
          $ret .= "<p><form method='POST' action='talkscreen.bml'><center>\n";
          $ret .= "<input type='hidden' name='mode' value='unscreen'>\n";
          $ret .= "<input type='hidden' name='talkid' value='$FORM{'talkid'}'>\n";
-         $ret .= "<input type='hidden' name='journal' value='$u->{'user'}'>\n" if $clustered;
+         $ret .= "<input type='hidden' name='journal' value='$u->{'user'}'>\n";
          $ret .= "<input type='hidden' name='confirm' value='Y'>\n";
          $ret .= "<input type='submit' value='$ML{'.unscreen.doit'}'>";
          $ret .= "</center>";

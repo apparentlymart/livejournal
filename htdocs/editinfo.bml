@@ -62,10 +62,7 @@ body<=
  foreach (values %$u) { LJ::text_out(\$_); }
 
  my $quser = $dbr->quote($user);
-
- my $dbcs = $dbs;
- my $clustered = $u->{'clusterid'};
- $dbcs = LJ::get_cluster_set($u) if $clustered; 
+ my $dbcs = LJ::get_cluster_set($u);
 
  if ($u->{'has_bio'}) {
      $u->{'bio'} = LJ::dbs_selectrow_array($dbcs, "SELECT bio FROM userbio ".
@@ -639,11 +636,11 @@ body<=
          my $db_bio = $dbcs->{'dbh'};
          if ($has_bio eq "N") {
              $db_bio->do("DELETE FROM userbio WHERE userid=$u->{'userid'}");
-             LJ::dudata_set($db_bio, $u->{'userid'}, 'B', 0, 0) if $clustered;
+             LJ::dudata_set($db_bio, $u->{'userid'}, 'B', 0, 0);
          } else {
              my $qbio = $dbh->quote($FORM{'bio'});
              $db_bio->do("REPLACE INTO userbio (userid, bio) VALUES ($u->{'userid'}, $qbio)");
-             LJ::dudata_set($db_bio, $u->{'userid'}, 'B', 0, length($FORM{'bio'})) if $clustered;
+             LJ::dudata_set($db_bio, $u->{'userid'}, 'B', 0, length($FORM{'bio'}));
          }
      }
 

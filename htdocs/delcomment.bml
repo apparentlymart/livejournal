@@ -19,17 +19,10 @@ body<=
  }
 
  my $qid = $FORM{'id'}+0;
-
- my ($clustered, $dbcs) = (0, $dbs);
- my $u;
- if ($FORM{'journal'}) {
-     $u = LJ::load_user($dbs, $FORM{'journal'});
-     return "<?h1 Error h1?><?p Bogus journal arg p?>" unless $u;
-     $clustered = 1;
-     $dbcs = LJ::get_cluster_set($u);
- }
+ my $u = LJ::load_user($dbs, $FORM{'journal'});
+ return "<?h1 Error h1?><?p Bogus journal arg p?>" unless $u;
+ my $dbcs = LJ::get_cluster_set($u);
  my $dbcm = $dbcs->{'dbh'};
-
  unless ($dbcm) {
      return "<?h1 Maintenance h1?><?p Database currently unavailable.  Most likely, maintenance is being performed. p?>";
  }
@@ -37,16 +30,11 @@ body<=
  ### get some info about the comment being deleted ... which journal entry is it about?
  ### and if it's being deleted, is it authorized to be deleted by this user?
  my $tp;
- if ($clustered) {
-     $qid = int($qid / 256);  # public ID (with anum) for consistency
-     $tp = $dbcm->selectrow_hashref("SELECT jtalkid AS 'talkid', nodetype, state, nodeid AS 'itemid', ".
-                                    "parenttalkid, journalid, posterid FROM talk2 ".
-                                    "WHERE journalid=$u->{'userid'} AND jtalkid=$qid");
- } else {
-     $tp = $dbh->selectrow_hashref("SELECT talkid, nodetype, state, nodeid AS 'itemid', ".
-                                   "parenttalkid, journalid, posterid FROM talk ".
-                                   "WHERE talkid=$qid");
- }
+ $qid = int($qid / 256);  # public ID (with anum) for consistency
+ $tp = $dbcm->selectrow_hashref("SELECT jtalkid AS 'talkid', nodetype, state, nodeid AS 'itemid', ".
+                                "parenttalkid, journalid, posterid FROM talk2 ".
+                                "WHERE journalid=$u->{'userid'} AND jtalkid=$qid");
+
  unless ($tp) {
      return "<?h1 Error h1?><?p The comment doesn't even exist... p?>";
  }
@@ -75,12 +63,8 @@ body<=
  # $tp->{'journlaid'} would have been the community id)
  if (! $can_delete && $tp->{'nodetype'} eq "L") {
      my $posterid;
-     if ($clustered) {
-         $posterid = $dbcm->selectrow_array("SELECT posterid FROM log2 WHERE ".
-                                            "journalid=$u->{'userid'} AND jitemid=$qitemid");
-     } else {
-         $posterid = $dbh->selectrow_array("SELECT posterid FROM log WHERE itemid=$qitemid");
-     }
+     $posterid = $dbcm->selectrow_array("SELECT posterid FROM log2 WHERE ".
+                                        "journalid=$u->{'userid'} AND jitemid=$qitemid");
      $can_delete = 1 if ($posterid == $remote->{'userid'});
  }
 
@@ -92,7 +76,7 @@ body<=
      $ret .= "<?h1 Delete this comment? h1?><?p Are you sure you want to delete this comment? p?>";
      $ret .= "<P><FORM METHOD=POST ACTION=\"delcomment.bml\"><CENTER>\n";
      $ret .= "<INPUT TYPE=HIDDEN NAME=id VALUE=\"$FORM{'id'}\">\n";
-     $ret .= "<input type='hidden' name='journal' value='$u->{'user'}'>\n" if $clustered;
+     $ret .= "<input type='hidden' name='journal' value='$u->{'user'}'>\n";
      $ret .= "<INPUT TYPE=HIDDEN NAME=confirm VALUE=\"Y\">\n";
      $ret .= "<INPUT TYPE=SUBMIT VALUE=\"Yes, delete it!\">";
      $ret .= "</CENTER>";
@@ -114,20 +98,11 @@ body<=
  LJ::Talk::unscreen_comment($dbs, $dbcs, $u, $tp->{'itemid'}, $qid)
      if $tp->{'state'} eq 'S';
 
- if ($clustered) {
-     my $jid = $u->{'userid'};
-     LJ::delete_talkitem($dbcm, $jid, $qid, "LIGHT");
-     if ($tp->{'nodetype'} eq "L") {
-         $dbcm->do("UPDATE log2 SET replycount=replycount-1 WHERE ".
-                   "journalid=$jid AND jitemid=$tp->{'itemid'}");
-     }
- } else {
-     $dbh->do("UPDATE talk SET state='D' WHERE talkid=$qid");
-     $dbh->do("UPDATE talktext SET subject=NULL, body=NULL WHERE talkid=$qid");
-     $dbh->do("DELETE FROM talkprop WHERE talkid=$qid");
-     if ($tp->{'nodetype'} eq "L") {
-         LJ::query_buffer_add($dbh, "log", "UPDATE log SET replycount=replycount-1 WHERE itemid=$qitemid");
-     }
+ my $jid = $u->{'userid'};
+ LJ::delete_talkitem($dbcm, $jid, $qid, "LIGHT");
+ if ($tp->{'nodetype'} eq "L") {
+     $dbcm->do("UPDATE log2 SET replycount=replycount-1 WHERE ".
+               "journalid=$jid AND jitemid=$tp->{'itemid'}");
  }
 
  LJ::Talk::update_commentalter($dbs, $dbcs, $u, $qitemid);

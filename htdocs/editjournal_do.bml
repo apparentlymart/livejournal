@@ -12,10 +12,10 @@ body<=
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
 
-my $remote = LJ::get_remote($dbs);
-if ($remote && $FORM{'hpassword'} eq "_(remote)") {
-    $FORM{'hpassword'} = LJ::hash_password($remote->{'password'});
-}
+ my $remote = LJ::get_remote($dbs);
+ if ($remote && $FORM{'hpassword'} eq "_(remote)") {
+     $FORM{'hpassword'} = LJ::hash_password($remote->{'password'});
+ }
 
  my $user = lc($FORM{'user'});
  my $userid = 0;
@@ -30,19 +30,10 @@ if ($remote && $user eq $remote->{'user'} &&
     $hpassword = $FORM{'hpassword'} = LJ::hash_password($remote->{'password'});
 }
 
- my $clustered = 0;
- if (defined $FORM{'clustered'}) {
-     $clustered = $FORM{'clustered'};
- } else {
-     $clustered = 1 if $FORM{'journal'};
- }
-
- # in clustered mode, we always come in with ditemid, translate it here
- # into real itemid, and back into ditemid using anum returned by the
- # protocol whenever we make a form to refer to ourselves.  --avva
- if ($clustered && $FORM{'itemid'}) {
-     $FORM{'itemid'} = int($FORM{'itemid'} / 256);
- }
+ # we always come in with ditemid, translate it here into real itemid,
+ # and back into ditemid using anum returned by the protocol whenever
+ # we make a form to refer to ourselves.  --avva
+ $FORM{'itemid'} = int($FORM{'itemid'} / 256) if $FORM{'itemid'};
 
  # add protocol version if we have Unicode support.
  # it'll thus automatically be used in all get_request() calls.
@@ -63,16 +54,6 @@ if ($remote && $user eq $remote->{'user'} &&
      my $itemid = $FORM{'itemid'}+0;
      my $owner = $FORM{'journal'};
 
-     unless ($clustered) {
-         # cluster 0
-         $sth = $dbr->prepare("SELECT ownerid, posterid FROM log WHERE itemid=$itemid");
-         $sth->execute;
-         my ($ownerid, $posterid) = $sth->fetchrow_array;
-         if ($ownerid != $posterid) {
-             $owner = LJ::get_username($dbs, $ownerid);
-         }
-     }
-     
      if ($owner && $owner ne $user) {
          $FORM{'usejournal'} = $owner;
      }
@@ -103,9 +84,6 @@ if ($remote && $user eq $remote->{'user'} &&
          $ret .= "<input type='hidden' name='user' value='$user'>\n";
          $ret .= "<input type='hidden' name='hpassword' value='$hpassword'>\n"
              unless $remote && $remote->{'user'} eq $user;
-
-         $clustered = 1 if defined $res{"events_1_anum"};
-         $ret .= "<input type='hidden' name='clustered' value='$clustered'>\n";	 
 
          my %props = ();
          for (my $i=1; $i<=$res{'prop_count'}; $i++) {
@@ -233,7 +211,6 @@ if ($remote && $user eq $remote->{'user'} &&
          $ret .= "<input type='hidden' name='hpassword' value='$hpassword'>\n"
              unless $remote && $remote->{'user'} eq $user;
          $ret .= "<input type='hidden' name='itemid' value='$ditemid'>\n";
-         $ret .= "<input type='hidden' name='clustered' value='$clustered'>\n";  # for link later
          if ($FORM{'usejournal'}) {
              $ret .= "<input type='hidden' name='usejournal' value='$FORM{'usejournal'}'>\n";
          }
@@ -375,10 +352,9 @@ if ($remote && $user eq $remote->{'user'} &&
          {
              my $itemid = $FORM{'itemid'}+0;
              my $journal = LJ::canonical_username($FORM{'usejournal'} || $FORM{'user'});
-             my $ditemid = defined $res{'anum'} ? ($itemid * 256 + $res{'anum'}) : $itemid;
+             my $ditemid = $itemid * 256 + $res{'anum'};
              my $ju = LJ::load_user($dbs, $journal);
-             my $readurl = defined $res{'anum'} ?  LJ::journal_base($ju) . "/$ditemid.html" : 
-                 "$LJ::SITEROOT/talkread.bml?itemid=$ditemid";
+             my $readurl = LJ::journal_base($ju) . "/$ditemid.html";
              if ($FORM{'event'} =~ /\S/) {
                  return "<?h1 $ML{'.success.head'} h1?><?p ".BML::ml(".success.edit", {'url' => $readurl}) ." p?>";
              } else {

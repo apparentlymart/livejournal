@@ -135,15 +135,11 @@
 
      if (@delete) {
          my $id_in = join(", ", @delete);
+         # delete metadata from global
          $dbh->do("DELETE FROM userpic WHERE picid IN ($id_in)");
-         if ($dbb) {
-             # clustered blobs
-             $dbb->do("DELETE FROM userpicblob2 WHERE userid=$u->{'userid'} ".
-                      "AND picid IN ($id_in)");
-         } else {
-             # non-clustered blobs
-             $dbh->do("DELETE FROM userpicblob WHERE picid IN ($id_in)");
-         }
+         # delete data from user cluster
+         $dbb->do("DELETE FROM userpicblob2 WHERE userid=$u->{'userid'} ".
+                  "AND picid IN ($id_in)");
 
          # if any of the userpics they want to delete are active, then we want to 
          # re-run LJ::activate_userpics() - turns out it's faster to not check to 
