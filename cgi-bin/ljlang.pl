@@ -237,6 +237,7 @@ sub set_text
     $dbh->do("REPLACE INTO ml_latest (lnid, dmid, itid, txtid, chgtime, staleness) ".
              "VALUES ($lnid, $dmid, $itid, $txtid, NOW(), $staleness)");
     return set_error("Error inserting ml_latest: ".$dbh->errstr) if $dbh->err;
+    LJ::MemCache::set("ml.${lncode}.${dmid}.${itcode}", $text);
 
     {
         my $vals;
@@ -253,6 +254,7 @@ sub set_text
                 }
                 $langids .= "," if $langids;
                 $langids .= $cid+0;
+                LJ::MemCache::delete("ml.$clid->{'lncode'}.${dmid}.${itcode}");
                 $rec->($clid, $rec);
             }
         };
