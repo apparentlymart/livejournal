@@ -14,7 +14,8 @@
      my $qskip = $skip+0;
      my $qurl = $dbh->quote($url);
      my $eurl = LJ::ehtml($url);
-     
+     my $uurl = LJ::eurl($url);
+
      $body .= "(=H1 Who linked this? H1=)(=P The following journal entries link to:<blockquote><a href='$eurl'><b>$eurl</b></a></blockquote>P=)";
 
      $body .= "<table>";
@@ -38,12 +39,12 @@
      my @pagers;
      if ($skip > 0) {
          my $newskip = $skip - 500;
-         push @pagers, "&lt;&lt; <a href='meme.bml?url=$eurl&amp;skip=$newskip'>Previous 500</a>";
+         push @pagers, "&lt;&lt; <a href='meme.bml?url=$uurl&amp;skip=$newskip'>Previous 500</a>";
      }
      if ($count == 500) {
          my $newskip = 500;
          if ($skip) { $newskip = $skip + 500; }
-         push @pagers, "<a href='meme.bml?url=$eurl&amp;skip=$newskip'>Next 500</a> &gt;&gt;";
+         push @pagers, "<a href='meme.bml?url=$uurl&amp;skip=$newskip'>Next 500</a> &gt;&gt;";
      }
      if (@pagers) {
          $body .= "<p>[&nbsp;" . join("&nbsp;|&nbsp;", @pagers) . "&nbsp;]</p>";
