@@ -1,5 +1,9 @@
 <?_code
 
+ # since we take an action on a GET request, we need to set the etag
+ # to nothing, so browsers and BML won't work together to cache it
+ BML::set_etag(undef); 
+
  my @errors = ();
  my $user = lc($FORM{'user'});
  my $password = $FORM{'password'};

@@ -200,10 +200,18 @@ sub handler
     }
 
     # see if we can save some bandwidth (though we already killed a bunch of CPU)
-    my $etag = '"' . Digest::MD5::md5_hex($html) . '"';
+    my $etag;
+    if (exists $req->{'etag'}) {
+        $etag = $req->{'etag'} if defined $req->{'etag'};
+    } else {
+        $etag = Digest::MD5::md5_hex($html);
+    }
+    $etag = '"' . $etag . '"' if defined $etag;
+    
     my $ifnonematch = $r->header_in("If-None-Match");
-    return HTTP_NOT_MODIFIED if defined $ifnonematch && $etag eq $ifnonematch;
-
+    return HTTP_NOT_MODIFIED if
+        defined $ifnonematch && defined $etag && $etag eq $ifnonematch;
+    
     # insert all client (per-user, cookie-set) variables
     if ($req->{'env'}->{'UseBmlSession'}) {
         $html =~ s/%%c\!(\w+)%%/BML::ehtml(BML::get_var($1))/eg;
@@ -241,7 +249,7 @@ sub handler
         $r->header_out("Last-Modified", $modtime_http)
             if $req->{'env'}->{'Static'};
         $r->header_out("Cache-Control", "private, proxy-revalidate");
-        $r->header_out("ETag", $etag);
+        $r->header_out("ETag", $etag) if defined $etag;
 
 	$r->send_http_header();
     }
@@ -882,6 +890,12 @@ sub modified_time
 
 
 package BML;
+
+sub set_etag
+{
+    my $etag = shift;
+    $Apache::BML::cur_req->{'etag'} = $etag;
+}
 
 # when CODE blocks need to look-up static values and such
 sub get_template_def
