@@ -1562,8 +1562,8 @@ sub set_userprop
 
     # if we had any multihomed props, set them here
     if (%multihomed) {
-        my ($dbh, $dbcm) = (LJ::get_db_writer(), LJ::get_cluster_master($u));
-        return 0 unless $dbh && $dbcm;
+        my $dbh = LJ::get_db_writer();
+        return 0 unless $dbh && $u->writer;
         while (my ($propid, $pvalue) = each %multihomed) {
             if (defined $pvalue && $pvalue) {
                 # replace data into master
@@ -1580,9 +1580,9 @@ sub set_userprop
 
             # put data in cluster
             $pvalue ||= '';
-            $dbcm->do("REPLACE INTO userproplite2 VALUES (?, ?, ?)",
-                      undef, $userid, $propid, $pvalue);
-            return 0 if $dbcm->err;
+            $u->do("REPLACE INTO userproplite2 VALUES (?, ?, ?)",
+                   undef, $userid, $propid, $pvalue);
+            return 0 if $u->err;
 
             # set memcache
             LJ::MemCache::set([$userid,"uprop:$userid:$propid"], $pvalue, $expire);
@@ -2853,20 +2853,19 @@ sub load_user_props
     # this usually happens the first time a multihomed prop is hit.  this
     # code will propogate that prop down to the cluster.
     if (%multihomed) {
-        my $dbcm = LJ::get_cluster_master($u);
 
         # verify that we got the database handle before we try propogating data
-        if ($dbcm) {
+        if ($u->writer) {
             my @values;
             foreach my $id (keys %multihomed) {
                 my $pname = $LJ::CACHE_PROPID{user}{$id}{name};
                 if (defined $u->{$pname} && $u->{$pname}) {
-                    push @values, "($uid, $id, " . $dbcm->quote($u->{$pname}) . ")";
+                    push @values, "($uid, $id, " . $u->quote($u->{$pname}) . ")";
                 } else {
                     push @values, "($uid, $id, '')";
                 }
             }
-            $dbcm->do("REPLACE INTO userproplite2 VALUES " . join ',', @values);
+            $u->do("REPLACE INTO userproplite2 VALUES " . join ',', @values);
         }
     }
 
@@ -4390,7 +4389,7 @@ sub expunge_userpic {
 
     if ($u->{'dversion'} > 6) {
         my $dbcm = LJ::get_cluster_master($u);
-        return undef unless $dbcm;
+        return undef unless $dbcm && $u->writer;
 
         $state = $dbcm->selectrow_array('SELECT state FROM userpic2 WHERE userid = ? AND picid = ?',
                                         undef, $u->{'userid'}, $picid);
@@ -4398,9 +4397,9 @@ sub expunge_userpic {
         return $u->{'userid'} if $state eq 'X'; # already expunged
 
         # else now mark it
-        $dbcm->do("UPDATE userpic2 SET state='X' WHERE userid = ? AND picid = ?", undef, $u->{'userid'}, $picid);
+        $u->do("UPDATE userpic2 SET state='X' WHERE userid = ? AND picid = ?", undef, $u->{'userid'}, $picid);
         return LJ::error($dbcm) if $dbcm->err;
-        $dbcm->do("DELETE FROM userpicmap2 WHERE userid = ? AND picid = ?", undef, $u->{'userid'}, $picid);
+        $u->do("DELETE FROM userpicmap2 WHERE userid = ? AND picid = ?", undef, $u->{'userid'}, $picid);
     } else {
         my $dbr = LJ::get_db_reader();
         return undef unless $dbr;
@@ -4438,7 +4437,7 @@ sub activate_userpics
     return 1 if $LJ::ALLOW_PICS_OVER_QUOTA;
 
     my $u = shift;
-    return undef unless $u;
+    return undef unless LJ::isu($u);
 
     # if a userid was given, get a real $u object
     $u = LJ::load_userid($u, "force") unless isu($u);
@@ -4531,9 +4530,8 @@ sub activate_userpics
         @ban = splice(@ban, 0, $to_ban) if @ban > $to_ban;
         my $ban_in = join(",", map { $dbh->quote($_) } @ban);
         if ($u->{'dversion'} > 6) {
-            my $dbcm = LJ::get_cluster_master($u);
-            $dbcm->do("UPDATE userpic2 SET state='I' WHERE userid=? AND picid IN ($ban_in)",
-                     undef, $userid) if $ban_in;
+            $u->do("UPDATE userpic2 SET state='I' WHERE userid=? AND picid IN ($ban_in)",
+                   undef, $userid) if $ban_in;
         } else {
             $dbh->do("UPDATE userpic SET state='I' WHERE userid=? AND picid IN ($ban_in)",
                      undef, $userid) if $ban_in;
@@ -4553,9 +4551,8 @@ sub activate_userpics
         my $activate_in = join(",", map { $dbh->quote($_) } @activate_picids);
         if ($activate_in) {
             if ($u->{'dversion'} > 6) {
-                my $dbcm = LJ::get_cluster_master($u);
-                $dbcm->do("UPDATE userpic2 SET state='N' WHERE userid=? AND picid IN ($activate_in)",
-                          undef, $userid);
+                $u->do("UPDATE userpic2 SET state='N' WHERE userid=? AND picid IN ($activate_in)",
+                       undef, $userid);
             } else {
                 $dbh->do("UPDATE userpic SET state='N' WHERE userid=? AND picid IN ($activate_in)",
                          undef, $userid);
@@ -5142,8 +5139,7 @@ sub make_journal
     # we should have our cache row!  we'll update it in a second.
     my $dbcm;
     if (! $s1uc) {
-        $dbcm ||= LJ::get_cluster_master($u);
-        $dbcm->do("INSERT IGNORE INTO s1usercache (userid) VALUES (?)", undef, $u->{'userid'});
+        $u->do("INSERT IGNORE INTO s1usercache (userid) VALUES (?)", undef, $u->{'userid'});
         $s1uc = {};
     }
 
@@ -5173,13 +5169,12 @@ sub make_journal
     # save the updates
     if (%update) {
         my $set;
-        $dbcm ||= LJ::get_cluster_master($u);
         foreach my $k (keys %update) {
             $s1uc->{$k} = $update{$k};
             $set .= ", " if $set;
-            $set .= "$k=" . $dbcm->quote($update{$k});
+            $set .= "$k=" . $u->quote($update{$k});
         }
-        my $rv = $dbcm->do("UPDATE s1usercache SET $set WHERE userid=?", undef, $u->{'userid'});
+        my $rv = $u->do("UPDATE s1usercache SET $set WHERE userid=?", undef, $u->{'userid'});
         if ($rv && $update{'color_stor'}) {
             $dbh ||= LJ::get_db_writer();
             $dbh->do("DELETE FROM themecustom WHERE user=?", undef, $u->{'user'});
@@ -6720,9 +6715,9 @@ sub get_keyword_id
             # create a new keyword
             $kwid = LJ::alloc_user_counter($u, 'K');
             return undef unless $kwid;
-            $dbcm->do("INSERT INTO userkeywords (userid, kwid, keyword) VALUES (?, ?, ?)",
-                      undef, $u->{userid}, $kwid, $kw);
-            return undef if $dbcm->err;
+            $u->do("INSERT INTO userkeywords (userid, kwid, keyword) VALUES (?, ?, ?)",
+                   undef, $u->{userid}, $kwid, $kw);
+            return undef if $u->err;
         }
     } else {
         # old style global
@@ -6845,7 +6840,6 @@ sub can_use_journal
 sub set_logprop
 {
     my ($u, $jitemid, $hashref, $logprops) = @_;  # hashref to set, hashref of what was done
-    my $dbcm = LJ::get_cluster_master($u);
 
     $jitemid += 0;
     my $uid = $u->{'userid'} + 0;
@@ -6858,7 +6852,7 @@ sub set_logprop
         $kill_mem = 1 unless $prop eq "commentalter";
         if ($v) {
             $ins_values .= "," if $ins_values;
-            $ins_values .= "($uid, $jitemid, $prop->{'id'}, " . $dbcm->quote($v) . ")";
+            $ins_values .= "($uid, $jitemid, $prop->{'id'}, " . $u->quote($v) . ")";
             $logprops->{$k} = $v;
         } else {
             $del_ids .= "," if $del_ids;
@@ -6866,10 +6860,10 @@ sub set_logprop
         }
     }
 
-    $dbcm->do("REPLACE INTO logprop2 (journalid, jitemid, propid, value) ".
-              "VALUES $ins_values") if $ins_values;
-    $dbcm->do("DELETE FROM logprop2 WHERE journalid=? AND jitemid=? ".
-              "AND propid IN ($del_ids)", undef, $u->{'userid'}, $jitemid) if $del_ids;
+    $u->do("REPLACE INTO logprop2 (journalid, jitemid, propid, value) ".
+           "VALUES $ins_values") if $ins_values;
+    $u->do("DELETE FROM logprop2 WHERE journalid=? AND jitemid=? ".
+           "AND propid IN ($del_ids)", undef, $u->{'userid'}, $jitemid) if $del_ids;
 
     LJ::MemCache::delete([$uid,"logprop:$uid:$jitemid"]) if $kill_mem;
 }
@@ -7254,7 +7248,7 @@ sub delete_all_comments {
     my ($u, $nodetype, $nodeid) = @_;
 
     my $dbcm = LJ::get_cluster_master($u);
-    return 0 unless $dbcm;
+    return 0 unless $dbcm && $u->writer;
 
     # delete comments
     my ($t, $loop) = (undef, 1);
@@ -7269,8 +7263,8 @@ sub delete_all_comments {
         my $in = join(',', map { $_+0 } @$t);
         return 1 unless $in;
         foreach my $table (qw(talkprop2 talktext2 talk2)) {
-            $dbcm->do("DELETE FROM $table WHERE journalid=? AND jtalkid IN ($in)",
-                      undef, $u->{'userid'});
+            $u->do("DELETE FROM $table WHERE journalid=? AND jtalkid IN ($in)",
+                   undef, $u->{'userid'});
         }
         # decrement memcache
         LJ::MemCache::decr([$u->{'userid'}, "talk2ct:$u->{'userid'}"], scalar(@$t));
@@ -7475,21 +7469,20 @@ sub replycount_do {
 sub delete_comments {
     my ($u, $nodetype, $nodeid, @talkids) = @_;
 
-    my $dbcm = LJ::get_cluster_master($u);
-    return 0 unless $dbcm;
+    return 0 unless $u->writer;
 
     my $jid = $u->{'userid'}+0;
     my $in = join(',', map { $_+0 } @talkids);
     return 1 unless $in;
     my $where = "WHERE journalid=$jid AND jtalkid IN ($in)";
 
-    my $num = LJ::talk2_do($dbcm, $jid, $nodetype, $nodeid, undef,
+    my $num = LJ::talk2_do($u, $jid, $nodetype, $nodeid, undef,
                            "UPDATE talk2 SET state='D' $where");
     $num = 0 if $num == -1;
 
     if ($num > 0) {
-        $dbcm->do("UPDATE talktext2 SET subject=NULL, body=NULL $where");
-        $dbcm->do("DELETE FROM talkprop2 WHERE $where");
+        $u->do("UPDATE talktext2 SET subject=NULL, body=NULL $where");
+        $u->do("DELETE FROM talkprop2 WHERE $where");
     }
     return $num;
 }
@@ -8606,13 +8599,12 @@ sub clear_rel
 
     if ($typeid) {
         # clustered reluser2 table
-        my $dbcm = LJ::get_cluster_master($u)
-            or return undef;
+        return undef unless $u->writer;
 
-        $dbcm->do("DELETE FROM reluser2 WHERE " . ($userid ne '*' ? "userid=$userid AND " : "") .
-                  ($targetid ne '*' ? "targetid=$targetid AND " : "") . "type=$typeid");
+        $u->do("DELETE FROM reluser2 WHERE " . ($userid ne '*' ? "userid=$userid AND " : "") .
+               ($targetid ne '*' ? "targetid=$targetid AND " : "") . "type=$typeid");
 
-        return undef if $dbcm->err;
+        return undef if $u->err;
     } else {
         # non-clustered global reluser table
         my $dbh = LJ::get_db_writer()
@@ -8665,8 +8657,8 @@ sub alloc_user_counter
     # as a sanity check to record/check latest number handed out.
     my $memmax = int(LJ::MemCache::get($memkey) || 0);
 
-    my $rs = $dbcm->do("UPDATE counter SET max=LAST_INSERT_ID(GREATEST(max,$memmax)+1) ".
-                       "WHERE journalid=? AND area=?", undef, $uid, $dom);
+    my $rs = $u->do("UPDATE counter SET max=LAST_INSERT_ID(GREATEST(max,$memmax)+1) ".
+                    "WHERE journalid=? AND area=?", undef, $uid, $dom);
     if ($rs > 0) {
         $newmax = $dbcm->selectrow_array("SELECT LAST_INSERT_ID()");
         LJ::MemCache::set($memkey, $newmax);
@@ -8699,8 +8691,8 @@ sub alloc_user_counter
                                          undef, $uid);
     }
     $newmax += 0;
-    $dbcm->do("INSERT IGNORE INTO counter (journalid, area, max) VALUES (?,?,?)",
-                undef, $uid, $dom, $newmax) or return undef;
+    $u->do("INSERT IGNORE INTO counter (journalid, area, max) VALUES (?,?,?)",
+           undef, $uid, $dom, $newmax) or return undef;
 
     # The 2nd invocation of the alloc_user_counter sub should do the
     # intended incrementing.
@@ -8758,11 +8750,11 @@ sub mark_user_active {
     # we don't do the optimization and just always log the activity info
     if (@LJ::MEMCACHE_SERVERS == 0 ||
         LJ::MemCache::add("rate:tracked:$uid", 1, 3600)) {
-        my $dbcm = LJ::get_cluster_master($u);
-        return 0 unless $dbcm;
-        $dbcm->do("REPLACE INTO clustertrack2 SET ".
-                 "userid=?, timeactive=?, clusterid=?", undef,
-                 $uid, time(), $u->{clusterid}) or return 0;
+
+        return 0 unless $u->writer;
+        $u->do("REPLACE INTO clustertrack2 SET ".
+               "userid=?, timeactive=?, clusterid=?", undef,
+               $uid, time(), $u->{clusterid}) or return 0;
     }
     return 1;
 }

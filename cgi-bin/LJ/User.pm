@@ -59,6 +59,9 @@ sub do {
     if ($u->{_dberr} = $dbcm->err) {
         $u->{_dberrstr} = $dbcm->errstr;
     }
+
+    $u->{_mysql_insertid} = $dbcm->{'mysql_insertid'} if $dbcm->{'mysql_insertid'};
+
     return $rv;
 }
 
@@ -70,6 +73,22 @@ sub err {
 sub errstr {
     my $u = shift;
     return $u->{_dberrstr};
+}
+
+sub quote {
+    my $u = shift;
+    my $text = shift;
+
+    my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
+        or croak "Database handle unavailable";
+
+    return $dbcm->quote($text);
+}
+
+sub mysql_insertid {
+    my $u = shift;
+
+    return $u->{_mysql_insertid};
 }
 
 # <LJFUNC>

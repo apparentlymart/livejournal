@@ -575,7 +575,7 @@ sub unscreen_comment {
 sub get_talk_data
 {
     my ($u, $nodetype, $nodeid) = @_;
-    return undef unless $u && $u->{'userid'};
+    return undef unless LJ::isu($u);
     return undef unless $nodetype =~ /^\w$/;
     return undef unless $nodeid =~ /^\d+$/;
 
@@ -604,8 +604,8 @@ sub get_talk_data
         my $ct = $dbcm->selectrow_array("SELECT COUNT(*) FROM talk2 WHERE ".
                                         "journalid=? AND nodetype='L' AND nodeid=? ".
                                         "AND state IN ('A','F')", undef, $u->{'userid'}, $nodeid);
-        $dbcm->do("UPDATE log2 SET replycount=? WHERE journalid=? AND jitemid=?",
-                  undef, int($ct), $u->{'userid'}, $nodeid);
+        $u->do("UPDATE log2 SET replycount=? WHERE journalid=? AND jitemid=?",
+               undef, int($ct), $u->{'userid'}, $nodeid);
         print STDERR "Fixing replycount for $u->{'userid'}/$nodeid from $rp_count to $ct\n"
             if $LJ::DEBUG{'replycount_fix'};
         $dbcm->do("UNLOCK TABLES");
@@ -1325,12 +1325,11 @@ sub record_anon_comment_ip {
     my ($journalu, $jtalkid, $ip) = @_;
     $journalu = LJ::want_user($journalu);
     $jtalkid += 0;
-    return 0 unless $journalu && $jtalkid && $ip;
-    
-    my $dbcm = LJ::get_cluster_master($journalu);
-    $dbcm->do("INSERT INTO tempanonips (reporttime, journalid, jtalkid, ip) VALUES (UNIX_TIMESTAMP(),?,?,?)",
-              undef, $journalu->{userid}, $jtalkid, $ip);
-    return 0 if $dbcm->err;
+    return 0 unless LJ::isu($journalu) && $jtalkid && $ip;
+
+    $journalu->do("INSERT INTO tempanonips (reporttime, journalid, jtalkid, ip) VALUES (UNIX_TIMESTAMP(),?,?,?)",
+                  undef, $journalu->{userid}, $jtalkid, $ip);
+    return 0 if $journalu->err;
     return 1;
 }
 
@@ -2012,11 +2011,11 @@ sub enter_comment {
         }
     }
 
-    $dbcm->do("INSERT INTO talktext2 (journalid, jtalkid, subject, body) ".
-              "VALUES (?, ?, ?, ?)", undef,
-              $journalu->{userid}, $jtalkid, $comment->{subject}, 
-              LJ::text_compress($comment->{body}));
-    die $dbcm->errstr if $dbcm->err;
+    $journalu->do("INSERT INTO talktext2 (journalid, jtalkid, subject, body) ".
+                  "VALUES (?, ?, ?, ?)", undef,
+                  $journalu->{userid}, $jtalkid, $comment->{subject}, 
+                  LJ::text_compress($comment->{body}));
+    die $journalu->errstr if $journalu->err;
 
     my $memkey = "$journalu->{'clusterid'}:$journalu->{'userid'}:$jtalkid";
     LJ::MemCache::set([$journalu->{'userid'},"talksubject:$memkey"], $comment->{subject});
@@ -2058,14 +2057,14 @@ sub enter_comment {
             next unless $p;
             $hash->{$_} = $talkprop{$_};
             my $tpropid = $p->{'tpropid'};
-            my $qv = $dbcm->quote($talkprop{$_});
+            my $qv = $journalu->quote($talkprop{$_});
             $values .= "($journalu->{'userid'}, $jtalkid, $tpropid, $qv),";
         }
         if ($values) {
             chop $values;
-            $dbcm->do("INSERT INTO talkprop2 (journalid, jtalkid, tpropid, value) ".
+            $journalu->do("INSERT INTO talkprop2 (journalid, jtalkid, tpropid, value) ".
                       "VALUES $values");
-            die $dbcm->errstr if $dbcm->err;
+            die $journalu->errstr if $journalu->err;
         }
         LJ::MemCache::set([$journalu->{'userid'}, "talkprop:$journalu->{'userid'}:$jtalkid"], $hash);
     }

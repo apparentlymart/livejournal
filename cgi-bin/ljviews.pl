@@ -655,9 +655,8 @@ sub clear_overrides {
 
     # new clustered table
     if ($u->{'dversion'} >= 5) {
-        my $dbcm = LJ::get_cluster_master($u);
-        $overr = $dbcm->do("DELETE FROM s1overrides WHERE userid=?", undef, $u->{'userid'});
-        $db = $dbcm;
+        $overr = $u->do("DELETE FROM s1overrides WHERE userid=?", undef, $u->{'userid'});
+        $db = $u;
 
     # old global table
     } else {
@@ -680,14 +679,12 @@ sub save_overrides {
     my ($u, $overr) = @_;
     return unless LJ::isu($u) && $overr;
 
-    my $dbcm = LJ::get_cluster_master($u);
-
     # new clustered table
     my $insertid;
     if ($u->{'dversion'} >= 5) {
-        $dbcm->do("REPLACE INTO s1overrides (userid, override) VALUES (?, ?)",
-                 undef, $u->{'userid'}, $overr);
-        $insertid = $dbcm->{'mysql_insertid'};
+        $u->do("REPLACE INTO s1overrides (userid, override) VALUES (?, ?)",
+               undef, $u->{'userid'}, $overr);
+        $insertid = $u->mysql_insertid;
 
     # old global table
     } else {
@@ -699,8 +696,8 @@ sub save_overrides {
 
     # update s1usercache
     my $override_stor = LJ::CleanHTML::clean_s1_style($overr);
-    $dbcm->do("UPDATE s1usercache SET override_stor=?, override_cleanver=? WHERE userid=?",
-              undef, $override_stor, $LJ::S1::CLEANER_VERSION, $u->{'userid'});
+    $u->do("UPDATE s1usercache SET override_stor=?, override_cleanver=? WHERE userid=?",
+           undef, $override_stor, $LJ::S1::CLEANER_VERSION, $u->{'userid'});
 
     LJ::MemCache::delete([$u->{'userid'}, "s1uc:$u->{'userid'}"]);
     LJ::MemCache::delete([$u->{'userid'}, "s1overr:$u->{'userid'}"]);
