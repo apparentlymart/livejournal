@@ -705,50 +705,6 @@ CREATE TABLE todokeyword (
 ) 
 EOC
 
-register_tablecreate("topic_cats", <<'EOC');
-CREATE TABLE topic_cats (
-  tpcatid smallint(5) unsigned NOT NULL auto_increment,
-  parent smallint(5) unsigned NOT NULL default '0',
-  catname varchar(80) default NULL,
-  status enum('on','off') NOT NULL default 'off',
-  topicsort enum('alpha','date') NOT NULL default 'alpha',
-  PRIMARY KEY  (tpcatid),
-  KEY (parent)
-) 
-EOC
-
-register_tablecreate("topic_list", <<'EOC');
-CREATE TABLE topic_list (
-  tptopid mediumint(8) unsigned NOT NULL auto_increment,
-  tpcatid smallint(5) unsigned NOT NULL default '0',
-  topname varchar(80) NOT NULL default '',
-  des varchar(255) default NULL,
-  timeenter int(10) unsigned NOT NULL default '0',
-  timeexpire int(10) unsigned default NULL,
-  status enum('new','on','off','deny') NOT NULL default 'new',
-  PRIMARY KEY  (tptopid),
-  KEY (tpcatid),
-  KEY (status)
-) 
-EOC
-
-register_tablecreate("topic_map", <<'EOC');
-CREATE TABLE topic_map (
-  tpmapid int(10) unsigned NOT NULL auto_increment,
-  tptopid mediumint(8) unsigned NOT NULL default '0',
-  itemid int(10) unsigned NOT NULL default '0',
-  status enum('new','on','off','deny') NOT NULL default 'new',
-  screendate datetime NOT NULL default '0000-00-00 00:00:00',
-  screenuserid int(10) unsigned NOT NULL default '0',
-  PRIMARY KEY  (tpmapid),
-  KEY (tptopid),
-  KEY (status),
-  UNIQUE KEY tptopid_2 (tptopid,itemid),
-  KEY (screendate),
-  KEY (itemid)
-) 
-EOC
-
 register_tablecreate("txtmsg", <<'EOC');
 CREATE TABLE txtmsg (
   userid int(10) unsigned NOT NULL default '0',
@@ -1773,15 +1729,6 @@ register_alter(sub {
     if (column_type("meme", "journalid") eq "") {
         do_alter("meme",
                  "ALTER TABLE meme ADD journalid INT UNSIGNED NOT NULL AFTER ts");
-    }
-
-    if (column_type("topic_map", "jitemid") eq "") {
-        do_alter("topic_map",
-                 "ALTER TABLE topic_map DROP INDEX tptopid_2, DROP INDEX itemid, ".
-                 "ADD journalid INT UNSIGNED NOT NULL AFTER tptopid, ".
-                 "CHANGE itemid jitemid INT UNSIGNED NOT NULL, ".
-                 "ADD UNIQUE tptopid_2 (tptopid, journalid, jitemid), ".
-                 "ADD KEY jitem (journalid, jitemid)");
     }
 
     if (column_type("memorable", "jitemid") eq "") {
