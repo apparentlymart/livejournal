@@ -1064,6 +1064,7 @@ sub layer_compile
     if ($layer->{'type'} eq "core" || $layer->{'type'} eq "layout") {
         $checker->cleanForFreeze();
         my $chk_frz = Storable::freeze($checker);
+        LJ::text_compress(\$chk_frz);
         $dbh->do("REPLACE INTO s2checker (s2lid, checker) VALUES (?,?)", undef,
                  $lid, $chk_frz) or die;
     }
@@ -1133,6 +1134,7 @@ sub get_layer_checker
     my $get_cached = sub {
         my $frz = $dbh->selectrow_array("SELECT checker FROM s2checker WHERE s2lid=?", 
                                         undef, $parid) or return undef;
+        LJ::text_uncompress(\$frz);
         return Storable::thaw($frz); # can be undef, on failure
     };
 
