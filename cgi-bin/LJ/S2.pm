@@ -412,8 +412,8 @@ sub create_style
     # can't create name-less style
     return 0 unless $name =~ /\S/;
 
-    $dbh->do("INSERT INTO s2styles (userid, name) VALUES (?,?)", undef,
-             $u->{'userid'}, $name);
+    $dbh->do("INSERT INTO s2styles (userid, name, modtime) VALUES (?,?, UNIX_TIMESTAMP())",
+             undef, $u->{'userid'}, $name);
     my $styleid = $dbh->{'mysql_insertid'};
     return 0 unless $styleid;
 
@@ -445,7 +445,7 @@ sub load_user_styles
     my %styles;
     my $load_using = sub {
         my $db = shift;
-        my $sth = $db->prepare("SELECT styleid, name FROM s2styles WHERE userid=?");
+        my $sth = $db->prepare("SELECT styleid, name, modtime FROM s2styles WHERE userid=?");
         $sth->execute($u->{'userid'});
         while (my ($id, $name) = $sth->fetchrow_array) {
             $styles{$id} = $name;
@@ -460,7 +460,7 @@ sub load_user_styles
     $load_using->($dbh);
     return \%styles if %styles;
 
-    $dbh->do("INSERT INTO s2styles (userid, name) VALUES (?,?)", undef,
+    $dbh->do("INSERT INTO s2styles (userid, name, modtime) VALUES (?,?, UNIX_TIMESTAMP())", undef,
              $u->{'userid'}, $u->{'user'});
     my $styleid = $dbh->{'mysql_insertid'};
     return { $styleid => $u->{'user'} };
@@ -489,7 +489,7 @@ sub load_style
     return undef unless $id;
 
     $db ||= LJ::get_db_reader();
-    my $style = $db->selectrow_hashref("SELECT styleid, userid, name ".
+    my $style = $db->selectrow_hashref("SELECT styleid, userid, name, modtime ".
                                        "FROM s2styles WHERE styleid=?",
                                        undef, $id);
     return undef unless $style;
@@ -544,6 +544,8 @@ sub set_style_layers
                                      $dbh->quote($_), $newlay{$_}) }
                   keys %newlay));
     return 0 if $dbh->err;
+    $dbh->do("UPDATE s2styles SET modtime=UNIX_TIMESTAMP() WHERE styleid=?",
+             undef, $styleid);
     return 1;
 }
 
@@ -1038,8 +1040,10 @@ sub Page
         $args{$k} = $v;
     }
 
-    # used to prevent caching of stylesheets
+    # get MAX(modtime of style layers)
     my $stylemodtime = S2::get_style_modtime($opts->{'ctx'});
+    my $style = load_style($u->{'s2_style'});
+    $stylemodtime = $style->{'modtime'} if $style->{'modtime'} > $stylemodtime;
 
     my $p = {
         '_type' => 'Page',

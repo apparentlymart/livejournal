@@ -1166,6 +1166,7 @@ CREATE TABLE s2styles
    PRIMARY KEY (styleid),
    userid  INT UNSIGNED NOT NULL,
    name    VARCHAR(255),
+   modtime INT UNSIGNED NOT NULL,
    INDEX (userid)
 )
 EOC
@@ -1817,6 +1818,11 @@ register_alter(sub {
                  "ALTER TABLE authactions " .
                  "ADD used enum('Y', 'N') DEFAULT 'N' AFTER arg1, " .
                  "ADD INDEX(userid), ADD INDEX(datecreate)");
+    }
+
+    unless (column_type("s2styles", "modtime")) {
+        do_alter("s2styles",
+                 "ALTER TABLE s2styles ADD modtime INT UNSIGNED NOT NULL AFTER name");
     }
 
 });
