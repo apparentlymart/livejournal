@@ -634,7 +634,8 @@ sub layer_compile
         $s2ref = \$s2;
     }
 
-    my $untrusted = $layer->{'userid'} != LJ::get_userid($dbh, "system");
+    my $untrusted = ! $LJ::S2_TRUSTED{$layer->{'userid'}} &&
+                    $layer->{'userid'} != LJ::get_userid("system");
 
     my $compiled;
     my $cplr = S2::Compiler->new({ 'checker' => $checker });
