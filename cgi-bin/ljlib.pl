@@ -110,6 +110,9 @@ use constant CMAX_INTEREST => 50;
                      "des" => "RSS View (XML)",
                      "nostyle" => 1,
                  },
+                 "res" => {
+                     "des" => "S2-specific resources (stylesheet)",
+                 },
                  "info" => {
                      # just a redirect to userinfo.bml for now.
                      # in S2, will be a real view.

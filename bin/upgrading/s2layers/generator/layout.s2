@@ -47,6 +47,9 @@ set weak_text = "#000000";
 set text_post_comment = "post comment";
 set text_post_comment_friends = "post comment";
 
+function print_stylesheet () {
+    " /// stylesheeet!!!\n";
+}
 
 function Page::print () 
 {

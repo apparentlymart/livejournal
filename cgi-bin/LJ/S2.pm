@@ -25,6 +25,24 @@ sub make_journal
     my $ret;
     $LJ::S2::ret_ref = \$ret;
 
+    my ($entry, $page);
+
+    my $run_opts = {
+        'content_type' => 'text/html',
+    };
+
+    if ($view eq "res") {
+        if ($opts->{'pathextra'} =~ m!/(\d+)/stylesheet$!) {
+            $styleid = $1;
+            $entry = "print_stylesheet()";
+            $run_opts->{'content_type'} = 'text/css';
+        } else {
+            $opts->{'handler_return'} = 404;
+            return;
+        }
+    }
+
+    $u->{'_s2styleid'} = $styleid + 0;
     my $ctx = s2_context($r, $styleid);
     unless ($ctx) {
         $opts->{'handler_return'} = Apache::Constants::OK();
@@ -40,7 +58,6 @@ sub make_journal
 
     $u->{'_journalbase'} = LJ::journal_base($u->{'user'}, $opts->{'vhost'});
 
-    my ($entry, $page);
     if ($view eq "lastn") {
         $entry = "RecentPage::print()";
         $page = RecentPage($u, $remote, $opts);
@@ -55,9 +72,6 @@ sub make_journal
         $page = FriendsPage($u, $remote, $opts);
     }
 
-    my $run_opts = {
-        'content_type' => 'text/html',
-    };
     s2_run($r, $ctx, $run_opts, $entry, $page);
     
     if (ref $opts->{'errors'} eq "ARRAY" && @{$opts->{'errors'}}) {
@@ -87,14 +101,15 @@ sub s2_run
         $r->send_http_header();
     };
     
-    my $out_straight = sub { $$LJ::S2::ret_ref .= $_[0]; };
-    my $out_clean = sub { $cleaner->parse($_[0]); };
-
-    S2::set_output($out_straight);
-    S2::set_output_safe($out_straight);
-
-    if ($cleaner) {
-        S2::set_output_safe($out_clean);
+    if ($entry eq "prop_init()") {
+        S2::set_output(sub {});
+        S2::set_output_safe(sub {});
+    } else {
+        my $out_straight = sub { $$LJ::S2::ret_ref .= $_[0]; };
+        my $out_clean = sub { $cleaner->parse($_[0]); };
+        S2::set_output($out_straight);
+        S2::set_output_safe($out_straight);
+        S2::set_output_safe($out_clean) if $cleaner;
     }
           
     $LJ::S2::CURR_PAGE = $page;
@@ -694,6 +709,7 @@ sub Null
 sub Page
 {
     my ($u) = @_;
+    my $styleid = $u->{'_s2styleid'} + 0;
     my $base_url = $u->{'_journalbase'};
     my $p = {
         '_type' => 'Page',
@@ -701,6 +717,7 @@ sub Page
         'journal' => User($u),
         'journal_type' => $u->{'journaltype'},
         'base_url' => $base_url,
+        'stylesheet_url' => "$base_url/res/$styleid/stylesheet",
         'view_url' => {
             'lastn' => "$base_url/",
             'userinfo' => "$LJ::SITEROOT/userinfo.bml?user=$u->{'user'}",

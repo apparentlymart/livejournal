@@ -306,7 +306,6 @@ sub FriendsPage
     my %userpics;
     LJ::load_userpics($dbs, \%userpics, [ keys %objs_of_picid ]);
     foreach my $picid (keys %userpics) {
-        Apache->request->log_error("make pic $picid");
         my $up = Image("$LJ::SITEROOT/userpic/$picid",
                        $userpics{$picid}->{'width'},
                        $userpics{$picid}->{'height'});
