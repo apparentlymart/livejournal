@@ -109,10 +109,6 @@ d.close();
      return $ret;
  }
 
- my %countries;
- my %states;
- &load_codes({ "country" => \%countries, "state" => \%states });
-
  my $mode = $FORM{'mode'} || "modify";
 
  if ($mode eq "modify")
