@@ -94,7 +94,7 @@
      my $val = $FORM{'q'};
      my $qval = $dbr->quote($val);
      my $qtype = $dbr->quote($FORM{'type'});
-     my $sth = $dbr->prepare("SELECT u.user FROM user u, userproplist upl, userprop up WHERE u.journaltype='P' AND u.statusvis='V' AND u.userid=up.userid AND up.upropid=upl.upropid AND upl.name=$qtype AND up.value=$qval ORDER BY u.userid");
+     my $sth = $dbr->prepare("SELECT u.user FROM user u, userproplist upl, userprop up WHERE u.journaltype='P' AND u.statusvis='V' AND u.allow_contactshow='Y' AND u.userid=up.userid AND up.upropid=upl.upropid AND upl.name=$qtype AND up.value=$qval ORDER BY u.userid");
      $sth->execute;
      my ($user, $emailshow) = $sth->fetchrow_array;
      if ($user) {
