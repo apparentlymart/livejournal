@@ -1027,6 +1027,7 @@ sub postevent
 
     # cluster tracking
     LJ::mark_user_active($u, 'post');
+    LJ::mark_user_active($uowner, 'post') unless LJ::u_equals($u, $uowner);
 
     $res->{'itemid'} = $jitemid;  # by request of mart
     $res->{'anum'} = $anum;
