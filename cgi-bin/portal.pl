@@ -728,7 +728,7 @@ $box{'update'} =
         my $bd = $opts->{'body'};
         my $h = $opts->{'head'};
 
-        $opts->{'onload'}->{"settime(updateForm$box->{'uniq'});"} = 1;
+        $opts->{'onload'}->{"settime(document.updateForm$box->{'uniq'});"} = 1;
         
         box_start($bd, $box, {'title' => "Update Your Journal",
                              'url' => "$LJ::SITEROOT/update.bml",
