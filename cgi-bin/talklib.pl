@@ -871,8 +871,8 @@ sub talkform {
     $ret .= "</td></tr>\n";
 
     # textarea for their message body
-    $ret .= "<tr valign='top'><td align='right'>$BML::ML{'.opt.message'}</td><td colspan='4'>";
-    $ret .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' id='commenttext'></textarea>";
+    $ret .= "<tr valign='top'><td align='right'>$BML::ML{'.opt.message'}</td><td colspan='4' style='width: 90%'>";
+    $ret .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' id='commenttext' style='width: 100%'></textarea>";
     $ret .= "<br /><input type='submit' name='submitpost' value='$BML::ML{'.opt.submit'}' />\n";
 
     ## preview stuff
@@ -1787,11 +1787,11 @@ sub make_preview {
     }
 
     $ret .= "<hr />";
-    $ret .= "<form method='post'>\n";
-    $ret .= "<input name='subject' size='50' maxlength='100' value='" . LJ::ehtml($form->{'subject'}) . "' /><p>";
-    $ret .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' style='width: 99%'>";
+    $ret .= "<div style='width: 90%'><form method='post'><p>\n";
+    $ret .= "<input name='subject' size='50' maxlength='100' value='" . LJ::ehtml($form->{'subject'}) . "' /><br />";
+    $ret .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' style='width: 100%'>";
     $ret .= LJ::ehtml($form->{'body'});
-    $ret .= "</textarea>";
+    $ret .= "</textarea></p>";
 
     # change mode:
     delete $form->{'submitpreview'}; $form->{'submitpost'} = 1;
@@ -1823,7 +1823,7 @@ sub make_preview {
     }
     $ret .= "de?> </p>";
 
-    $ret .= "</form>";
+    $ret .= "</form></div>";
     return $ret;
 }
 

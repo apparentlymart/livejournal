@@ -535,12 +535,12 @@
         $ret .= "</form>\n";
 
         # preview code or ... preview
-        $ret .= "</div><div style='margin: 20px 0 20px 40px'>\n";
+        $ret .= "</div><div style='margin: 20px 0 20px 40px; width: 90%'>\n";
 
         # viewing code, show preview button
         if ($form->{'see_code'}) {
-            $ret .= "<form action='#'><div style='margin: 20px 0 20px 40px'>\n";
-            $ret .= LJ::html_textarea({ 'style' => 'width: 90%', 'rows' => '16', 'cols' => '60', 'value' => $code });
+            $ret .= "<form action='#'>\n";
+            $ret .= LJ::html_textarea({ 'style' => 'width: 100%', 'rows' => '16', 'cols' => '60', 'value' => $code });
             $ret .= "</form>\n";
 
         # seeing preview, show code button

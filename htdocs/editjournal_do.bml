@@ -186,7 +186,7 @@ body<=
 
         $ret .= "<?p $ML{'.body'} p?>\n";
 
-        $ret .= "<form method='post' action='editjournal_do.bml$getextra'>\n";
+        $ret .= "<div style='width: 90%'><form method='post' action='editjournal_do.bml$getextra'>\n";
         $ret .= LJ::html_hidden('itemid', $ditemid) . "\n";
 
         # table of date/time info
@@ -210,9 +210,9 @@ body<=
         
         # event body
         my $postedby = " (Posted by: " . LJ::ljuser($res{'events_1_poster'}) . ")" if $usejournal;
-        $ret .= "<fieldset style='border: solid 0 transparent; padding: 0;'><p><b>$ML{'.event'}</b>$postedby<br />";
+        $ret .= "<p><b>$ML{'.event'}</b>$postedby<br />";
         $ret .= LJ::html_textarea({ 'name' => 'event', 'value' => LJ::durl($res{'events_1_event'}), 'rows' => '12',
-                                    'cols' => '60', 'wrap' => 'soft', 'style' => 'width: 99%;' }) . "</p></fieldset>\n";
+                                    'cols' => '60', 'wrap' => 'soft', 'style' => 'width: 99%;' }) . "</p>\n";
 
         # security
         $ret .= "<p><b>$ML{'label.security.head'}</b> ";
@@ -328,7 +328,7 @@ body<=
         $ret .= LJ::html_submit('action:delete', $ML{'.btn.delete'},
                                 { 'disabled' => $disabled_delete,
                                   'onclick' => "return confirm('" . LJ::ejs($ML{'.delete.confirm'}) . "')" });
-        $ret .= " standout?></form>\n";
+        $ret .= " standout?></form></div>\n";
         
         return $ret;
     }

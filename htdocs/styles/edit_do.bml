@@ -100,7 +100,7 @@ body<=
     # editing a style
     if ($mode eq "editstyle") {
         $ret .= "<?h1 Edit Style h1?><?p Make any desired changes and press \"Save\" when done. p?>\n";
-        $ret .= "<form method='post' action='edit_do.bml$getextra'>";
+        $ret .= "<div style='width: 90%'><form method='post' action='edit_do.bml$getextra'>";
         $ret .= LJ::html_hidden("mode", "savechanges", "styleid", $styleid, "ide", $ide);
         
         $ret .= "<table border='1' cellspacing='1' cellpadding='2' style='margin-bottom: 20px;'>\n";
@@ -240,7 +240,7 @@ body<=
         # save button
         $ret .= "<p align='center'>" . LJ::html_submit(undef, 'Save Style') . "</p>\n";
 
-        $ret .= "</form>";
+        $ret .= "</form></div>";
 
         # convenience links at bottom
         if ($ide eq 'v2') {

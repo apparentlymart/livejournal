@@ -215,7 +215,7 @@
         chop $getextra;
         $getextra = "?$getextra" if $getextra;
 
-        $$body .= "<form method='post' action='update.bml$getextra' name='updateForm'>";
+        $$body .= "<div style='width: 90%'><form method='post' action='update.bml$getextra' name='updateForm'>";
     }
 
     $$body .= "<table align='center' width='80%'>\n<tr><td width='50%'>\n";
@@ -320,7 +320,7 @@
     # event
     $$body .= "<p><b>$ML{'.event'}</b><br />";
     $$body .= LJ::html_textarea({ 'name' => 'event', 'value' => $POST{'event'} || $GET{'event'},
-                                  'rows' => '10', 'cols' => '50', 'style' => 'width: 99%', 'wrap' => 'soft' });
+                                  'rows' => '10', 'cols' => '50', 'style' => 'width: 100%', 'wrap' => 'soft' });
     $$body .= "<br /><?de ($ML{'.htmlokay'}) de?>";
 
     # spell check checkbox
@@ -480,7 +480,7 @@
     # submit button
     $$body .= "<p align='center' style='margin-top: 0px;'>" . LJ::html_submit(undef, $ML{'.btn.update'}) . "</p>\n";
 
-    $$body .= "</form>";
+    $$body .= "</form></div>";
 
     return;
 }
