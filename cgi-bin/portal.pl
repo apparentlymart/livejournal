@@ -487,16 +487,34 @@ $box{'login'} =
         box_start($b, $box, { 'title' => "Login", 
                               'align' => "center",
                               'url' => '/login.bml', });
+        
+        my $chal = LJ::challenge_generate(300); # 5 minute auth token
 
-        $$b .= "<form method='post' action='/login.bml'>";
+        $$b .= "<form method='post' action='/login.bml' id='portallogin'>";
         $$b .= "<input type='hidden' name='mode' value='login' />";
         $$b .= "<table><tr><td align='left'>";
         $$b .= "<b>Username:</b><br /><input name='user' size='14' maxlength='15' /><br /> ";
         $$b .= "<b>Password:</b><br /><input name='password' type='password' size='14' /><br />";
         $$b .= "<input type='checkbox' name='expire' value='never' /> Remember me";
         $$b .= "<input type='hidden' name='ref' value=\"$LJ::SITEROOT$LJ::PORTAL_URI\" />";
+        $$b .= "<input type='hidden' name='chal' id='login_chal' value='$chal' />";
+        $$b .= "<input type='hidden' name='response' id='login_response' value='' />";
         $$b .= "</td></tr><tr><td align='right'>";
-        $$b .= "<input type='submit' value=\"Login\" />";
+
+        $$b .= <<LOGIN;
+        <script>
+            if (document.getElementById && document.getElementById('portallogin')) {
+                document.write("<img src='$LJ::IMGPREFIX/icon_protected.gif' width='14' height='15' alt='secure login' align='middle' />");
+                document.write("&nbsp;");
+                document.write("<input name='action:login' onclick='return sendForm(\\"portallogin\\")' type='submit' value='Login' />");
+              } else {
+                document.write("<input name='action:login' type='submit' value='Login' />");
+              }
+        </script>
+        <noscript>
+            <input name='action:login' type='submit' value='Login' />
+        </noscript>
+LOGIN
         $$b .= "</td></tr></table>";
 
         box_end($b, $box);
@@ -763,7 +781,10 @@ $box{'update'} =
 
         my $mode = $opts->{'form'}->{'mode'} || $box->{'args'}->{'mode'};
 
-        $$bd .= "<form method='post' action='$LJ::SITEROOT/update.bml' name='updateForm$box->{'uniq'}'>";
+        my $chal = LJ::challenge_generate(300); # 5 minute auth token
+        $$bd .= "<form method='post' action='$LJ::SITEROOT/update.bml' id='updatebox' name='updateForm$box->{'uniq'}'>";
+        $$bd .= "<input type='hidden' name='chal' id='login_chal' value='$chal' />";
+        $$bd .= "<input type='hidden' name='response' id='login_response' value='' />";
 
         my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
         $year+=1900;
@@ -776,7 +797,7 @@ $box{'update'} =
             $$bd .= "<tr><td><b>Logged in user:</b> $remote->{'user'} (<a href=\"$LJ::SITEROOT/update.bml?altlogin=1\">other user?</a>)</td></tr>\n";
         } else {
             $$bd .= "<tr><td><b>User:</b> <input name=user size=10 maxlength=15> ";
-            $$bd .= "Password: <input type=password name=password size=10> ";
+            $$bd .= "<b>Password:</b> <input type=password name=password size=10> ";
             $$bd .= "</td></tr>";
         }
         $$bd .= "</table>";
@@ -801,7 +822,21 @@ $box{'update'} =
         $$bd .= "</TEXTAREA>";
         $$bd .= "<BR><?de (HTML okay; by default, newlines will be auto-formatted to <TT>&lt;BR&gt;</TT>) de?><BR>";
         $$bd .= "<input type=checkbox name=do_spellcheck value=1 id=\"spellcheck\"> <label for=\"spellcheck\">Spell check entry before posting</label>";
-        $$bd .= "</TD></TR><TR><TD ALIGN=CENTER><INPUT TYPE=SUBMIT VALUE=\"Update Journal\"></TD></TR>";
+        $$bd .= "</TD></TR><TR><TD ALIGN=CENTER>";
+
+        $$bd .= <<UPDATE;
+        <script>
+            if (document.getElementById && document.getElementById('updatebox')) {
+                document.write("<input onclick='return sendForm(\\"updatebox\\")' type='submit' value='Update Journal' />");
+              } else {
+                document.write("<input type='submit' value='Update Journal' />");
+              }
+        </script>
+        <noscript>
+            <input type='submit' value='Update Journal' />
+        </noscript>
+UPDATE
+        $$bd .= "</TD></TR>";
         
         if ($mode eq "full") 
         {

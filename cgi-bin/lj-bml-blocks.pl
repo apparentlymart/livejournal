@@ -10,6 +10,7 @@ BML::register_block("SITEROOT", "S", $LJ::SITEROOT);
 BML::register_block("SITENAME", "S", $LJ::SITENAME);
 BML::register_block("ADMIN_EMAIL", "S", $LJ::ADMIN_EMAIL);
 BML::register_block("SUPPORT_EMAIL", "S", $LJ::SUPPORT_EMAIL);
+BML::register_block("CHALRESPJS", "", $LJ::COMMON_CODE{'chalresp_js'});
 
 {
     my $dl = "<a href=\"$LJ::SITEROOT/files/%%DATA%%\">HTTP</a>";

@@ -18,6 +18,7 @@ sub ReplyPage
     return if $opts->{'suspendeduser'};
     return if $opts->{'handler_return'};
     my $ditemid = $entry->{'itemid'}*256 + $entry->{'anum'};
+    $p->{'head_content'} .= $LJ::COMMON_CODE{'chalresp_js'};
 
     if ($u->{'opt_blockrobots'}) {
         $p->{'head_content'} .= LJ::robot_meta_tags();

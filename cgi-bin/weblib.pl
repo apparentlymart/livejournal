@@ -280,4 +280,28 @@ sub make_cookie
     return @cookies;
 }
 
+# Common challenge/response javascript, needed by both login pages and comment pages alike.
+$LJ::COMMON_CODE{'chalresp_js'} = q{
+<script type="text/javascript" src="/js/md5.js"></script>
+<script language="JavaScript">
+    <!--
+function sendForm (formid)
+{
+    if (formid == null) formid = 'login';
+
+    if (! document.getElementById) return true;
+    var loginform = document.getElementById(formid);
+    if (! loginform || ! loginform.password ||
+        ! loginform.login_chal || !  loginform.login_response) return true;
+    var pass = loginform.password.value;
+    var chal = loginform.login_chal.value;
+    var res = MD5(chal + MD5(pass));
+    loginform.login_response.value = res;
+    loginform.password.value = "";  // dont send clear-text password!
+    return true;
+}
+// -->
+</script>
+};
+
 1;

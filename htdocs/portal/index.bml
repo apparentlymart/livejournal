@@ -24,8 +24,11 @@ _code?><?page
 title=><?_code return $title; _code?>
 head<=
 <?_c TODO: configurable meta tags could go here? _c?>
-<?_code
- return $head;
+<?_code return $head; _code?>
+<?_code return (! LJ::get_remote() &&
+                ! $LJ::IS_SSL &&
+                ! $LJ::REQ_HEAD_HAS{'chalresp_js'}++) ?
+                $LJ::COMMON_CODE{'chalresp_js'} : "";
 _code?>
 <=head
 bodyopts=><?_code return $bodyopts; _code?>

@@ -70,7 +70,10 @@
     my $did_post = LJ::did_post();
     my $user_is_remote = $remote && $remote->{'user'} eq $POST{'user'};           # user is remote
     my $auth_as_remote = $remote && (! $GET{'altlogin'} || $user_is_remote);      # auth as remote
-    my $auth_missing = $POST{'user'} && ! $POST{'password'} && ! $user_is_remote; # user w/o password
+    my $auth_missing = $POST{'user'} &&
+                       ! $POST{'password'} &&
+                       ! $user_is_remote &&
+                       ! $POST{'response'};                                       # user w/o password
     my $showform = $POST{'showform'} || $auth_missing;                            # show entry form
     my $mode = $GET{'mode'};
     $mode = 'full' if $GET{'usejournal'} || $POST{'usejournal_set'};
@@ -85,6 +88,370 @@
                         ($enabled_rte && ! $spellcheck_html);
     $$bodyopts = "onunload=\"save_entry();\" " if $richtext;
 
+    ###
+    ### show update form
+    ###
+    my $show_updateform = sub {
+
+        my $out;
+
+        $out .= "<?h1 $ML{'.update.head'} h1?><?p $ML{'.update.about'} p?><?hr?>";
+
+        {
+            # if they submit the form and are spellchecking, remember
+            # their settings from the GET requests
+            my $getextra;
+            $getextra .= "altlogin=1&" if $GET{'altlogin'};
+            $getextra .= "mode=full&" if $mode eq 'full';
+            $getextra .= "rich=1&" if $richtext;
+            chop $getextra;
+            $getextra = "?$getextra" if $getextra;
+
+            $out .= "<div style='width: 90%'><form method='post' action='update.bml$getextra' id='updateForm' name='updateForm'>";
+
+            # 15 minute auth token, should be adequate for journal entry.
+            my $chal = LJ::challenge_generate(900);
+            $out .= "<input type='hidden' name='chal' id='login_chal' value='$chal' />";
+            $out .= "<input type='hidden' name='response' id='login_response' value='' />";
+        }
+
+        $out .= "<table align='center' width='80%'>\n<tr><td width='50%'>\n";
+
+        {
+            # which authentication option do we display by default?
+            my $altlogin_display = 'none';
+            my $remotelogin_display = 'none';
+            if ($auth_as_remote) {
+                $remotelogin_display = 'inline';
+            } else {
+                $altlogin_display = 'block';
+            }
+
+            my $altget = $mode eq 'full' ? "?mode=full&altlogin=1" : "?altlogin=1";
+            $out .= "<p id='remotelogin' style='display: $remotelogin_display;'>";
+            if ($remote) { # so lynx won't show this
+                $out .= BML::ml(".loggedinas", {'user' => $remote->{'user'}, 'altget' => $altget});
+            }
+            $out .= "</p>\n";
+
+            # table with username/password fields
+            $out .= "<table id='altlogin' style='display: $altlogin_display;'>\n";
+            $out .= "<tr valign='top'><td align='right'>$ML{'.username'}</td>";
+            $out .= "<td align='left'>";
+            $out .= LJ::html_text({ 'name' => 'user', 'size' => '15', 'maxlength' => '15',
+                                    'value' => $POST{'user'} || $GET{'user'} });
+            $out .= "</td></tr>\n";
+            $out .= "<tr valign='top'><td align='right'>$ML{'.password'}</td>";
+            $out .= "<td align='left'>";
+            $out .= LJ::html_text({ 'type' => 'password', 'name' => 'password',
+                                    'size' => '15', 'maxlength' => '30' });
+
+            # posted with a user, but no password
+            if ($did_post && $auth_missing) {
+                $out .= "<br /><?inerr $ML{'.error.nopass'} inerr?>";
+            }
+            $out .= "</td></tr>\n";
+            $out .= "</table>\n";
+        }
+
+        $out .= "</td><td>\n";
+        $out .= "<table cellspacing='0' cellpadding='0'>\n";
+
+        my ($min,$hour,$mday,$mon,$year);
+
+        # preserve times from form if spellchecking
+        if ($did_spellcheck) {
+            $$bodyopts .= "onload=\"pageload(0);\" "; # js fill-in off
+
+            $year = $POST{'year'};
+            $mon = $POST{'mon'};
+            $mday = $POST{'day'};
+            $hour = $POST{'hour'};
+            $min = $POST{'min'};
+
+        # insert current time
+        } else {
+            $$bodyopts .= "onload=\"pageload(1);\" "; # js fill-in on
+
+            my @time = localtime(time);
+            $year = $time[5] + 1900;
+            $mon = sprintf("%02d", $time[4] + 1);
+            $mday = sprintf("%02d", $time[3]);
+            $hour = $time[2];
+            $min = sprintf("%02d", $time[1]);
+        }
+
+        # date entry boxes / formatting note
+        $out .= "<tr valign='top'><td align='right' rowspan='2'><b>$ML{'.date'}</b>&nbsp;</td><td nowrap='nowrap'>";
+        $out .= LJ::html_text({ 'name' => 'year', 'value' => $year, 'size' => '5', 'maxlength' => '4' }) . '-';
+        $out .= LJ::html_text({ 'name' => 'mon',  'value' => $mon,  'size' => '3', 'maxlength' => '2' }) . '-';
+        $out .= LJ::html_text({ 'name' => 'day',  'value' => $mday, 'size' => '3', 'maxlength' => '2' });
+        $out .= "</td></tr>\n";
+        $out .= "<tr valign='top'><td><i>(yyyy-mm-dd)</i></td></tr>\n";
+
+        # time entry boxes / formatting note
+        $out .= "<tr valign='top'><td align='right' rowspan='2'><b>$ML{'.localtime'}</b>&nbsp;</td><td>";
+        $out .= LJ::html_text({ 'name' => 'hour', 'value' => $hour, 'size' => '3', 'maxlength' => '2' }) . ':';
+        $out .= LJ::html_text({ 'name' => 'min',  'value' => $min,  'size' => '3', 'maxlength' => '2' });
+        $out .= "</td></tr>\n";
+        $out .= "<tr valign='top'><td><i>($ML{'.timeformat'})</i></td></tr>\n";
+        $out .= "</table>\n</td></tr>\n";
+
+        $out .= "</table>\n";
+
+        # if no script, above is server time
+        $out .= "<noscript><p align='center' style=\"font-size: 0.85em;\">$ML{'.note'}</p></noscript>\n";
+
+        # subject
+        $out .= "<table width='90%' align='center'; style='margin-top: 20px;'><tr><td>$ML{'.subject'}<br />";
+        $out .= LJ::html_text({ 'name' => 'subject', 'value' => $POST{subject} || $GET{subject},
+                'size' => '50', 'maxlength' => '100' }) . "\n";
+
+        # display spell check results
+        $out .= "<p><b>$ML{'.spellchecked'}</b><br />$spellcheck_html</p>" if $spellcheck_html;
+
+        # event
+        $out .= "<p><b>$ML{'.event'}</b>";
+        $out .= "<br />";
+        if ($richtext) {
+            my $jevent = $POST{event} || $GET{event};
+
+            # manually typed tags
+            $jevent =~ s/<lj user=['"]?(\w{1,15})['"]?\s?\/?>/&lt;lj user="$1" \/&gt;/ig;
+            $jevent =~ s/<(\/)?lj-cut(.*?)(?: \/)?>/&lt;$1lj-cut$2&gt;/ig;
+
+            $jevent = LJ::ejs($jevent);
+            my $rte_nosupport = LJ::ejs(BML::fill_template("de", { DATA => $ML{'.htmlokay.rte_nosupport'} }));
+
+            $out .= LJ::html_hidden('rich', '1') . "\n";
+            $out .= LJ::html_hidden('saved_entry', '') . "\n";
+
+            $out .= <<RTE;
+<iframe id="testFrame" style="position: absolute; visibility: hidden; width: 0px; height: 0px;"></iframe>
+<script language="JavaScript" type="text/javascript" src="/js/browserdetect.js"></script>
+<script language='JavaScript' type='text/javascript'>
+    <!--
+        var siteroot = "$LJ::SITEROOT";
+    //-->
+</script>
+<script language="JavaScript" type="text/javascript" src="/js/richtext.js"></script>
+<script language='JavaScript' type='text/javascript'>
+    <!--
+        writeRichText('rte', 'event', '$jevent', '95%', 300, true);
+        if (isRichText == false) {
+            document.write("$rte_nosupport");
+        }
+    //-->
+</script>
+<noscript>
+RTE
+        }
+        $out .= LJ::html_textarea({ 'name' => 'event', 'value' => $POST{event} || $GET{event},
+                                    'rows' => '20', 'cols' => '50', 'style' => 'width: 100%', 'wrap' => 'soft' });
+        $out .= '</noscript>' if $richtext;
+
+        my $jrich = LJ::ejs(BML::fill_template("de", {
+                    DATA => BML::ml(".htmlokay.rich", { 'opts' => 'href="#" onClick="enable_rte()"' })
+                    }));
+        my $jnorich = LJ::ejs(BML::fill_template("de", { DATA => $ML{'.htmlokay.norich'} }));
+
+        unless ($richtext || ($POST{do_spellcheck} && $richtext)) {
+            $out .= <<RTE;
+<script language='JavaScript' type='text/javascript'>
+    <!--
+        var t = document.getElementById;
+        if (t) {
+            document.write('<input type="hidden" name="switched_rte_on" value="" />');
+            document.write("$jrich");
+        } else {
+            document.write("$jnorich");
+        }
+    //-->
+</script>
+RTE
+           $out .= '<noscript><?de ' . $ML{'.htmlokay.norich'} . ' de?></noscript>';
+        }
+        $out .= '<br />';
+
+        # spell check checkbox
+        if ($LJ::SPELLER) {
+            $out .= "<br />" . LJ::html_check({ 'name' => 'do_spellcheck', 'id' => 'do_spellcheck' });
+            $out .= "<label for='do_spellcheck'>$ML{'.opt.spellcheck'}</label>";
+        }
+        $out .= "</p></td></tr><tr><td>";
+
+        {
+            # simple mode block
+            my $simple_display = $mode eq 'full' ? 'none' : 'block';
+            $out .= "<div id='simplemsg' style='margin-top: 10px; display: $simple_display;'>";
+            my $fullget = $GET{'altlogin'} ? "?altlogin=1&mode=full" : "?mode=full";
+            $out .= BML::ml(".simple", {'url' => "update.bml$fullget" }) ."</p>";
+            $out .= "</div>";
+
+            # put alternate link in head if not already viewing full mode
+            $$head .= "<link href='update.bml$fullget' rel='alternate' title='$ML{'.full'}' />\n"
+                unless $mode eq 'full';
+        }
+
+        {
+            # full mode block
+            my $full_display = $mode eq 'full' ? 'block' : 'none';
+            $out .= "<div id='fullopts' style='display: $full_display;'>";
+        }
+
+        $out .= "<table>\n<tr><td nowrap='nowrap'>\n";
+        $out .= "<?h2 $ML{'.options'} h2?>\n";
+
+        $out .= LJ::html_hidden('webversion', 'full') . "\n";
+
+        # do a login action to get pics and usejournals, but only if using remote
+        my $res;
+        if ($auth_as_remote) {
+
+            $res = LJ::Protocol::do_request("login", {
+                        "ver" => $LJ::PROTOCOL_VER,
+                        "username" => $remote->{'user'},
+                        "getpickws" => 1,
+                    }, undef, { 
+                        "noauth" => 1, 
+                        "u" => $remote,
+                    });
+        }
+
+        # communities the user can post in
+        my $usejournal = $POST{usejournal} || $GET{usejournal};
+        if ($GET{usejournal} || $POST{usejournal_set}) {
+            $out .= "<b>$ML{'.altpost'}</b> ";
+            $out .= LJ::ljuser($usejournal);
+            $out .= LJ::html_hidden('usejournal' => $usejournal, 'usejournal_set' => 'true');
+        } elsif ($res && ref $res->{'usejournals'} eq 'ARRAY') {
+            $out .= "<p id='usejournal_list' style='display: block;'><b>$ML{'.altpost'} </b> ";
+            $out .= LJ::html_select({ 'name' => 'usejournal',
+                                      'selected' => $POST{'usejournal'} },
+                                      "", BML::ml(".defaultjournal", { 'user' => $remote->{'user'} }),
+                                      map { $_, $_ } @{$res->{'usejournals'}}) . "</p>\n";
+        }
+
+        # possible security groups
+        $out .= "<p><b>$ML{'label.security.head'}</b> ";
+        my @secs = ("public", $ML{'label.security.public'}, "private", $ML{'label.security.private'},
+                    "friends", $ML{'label.security.friends'});
+
+        my @opts;
+        if ($res && ref $res->{'friendgroups'} eq 'ARRAY') {
+            push @secs, ("custom", $ML{'label.security.custom'});
+            push @opts, ("onchange" => "customboxes()");
+        }
+
+        $out .= LJ::html_select({ 'name' => 'security', 'selected' => $POST{'security'}, @opts }, @secs);
+        $out .= LJ::help_icon("security", " ");
+
+        # if custom security groups available, show them in a hidable div
+        if ($res && ref $res->{'friendgroups'} eq 'ARRAY') {
+            my $display = $POST{'security'} eq "custom" ? "block" : "none";
+            $out .= "<div id='custom_boxes' style='display: $display;'>";
+            foreach my $fg (@{$res->{'friendgroups'}}) {
+                $out .= LJ::html_check({ 'name' => "custom_bit_$fg->{'id'}",
+                        'id' => "custom_bit_$fg->{'id'}",
+                        'selected' => $POST{"custom_bit_$fg->{'id'}"} });
+                $out .= "<label for='custom_bit_$fg->{'id'}'>" . LJ::ehtml($fg->{'name'}) . "</label><br />";
+            }
+            $out .= "</div>";
+        }
+        $out .= "\n";
+
+        ### opt_ checkboxes
+        my $prop_check = sub {
+            my $prop = shift;
+            my $prop_ml = shift || $prop;
+
+            return "<b><label for='prop_opt_$prop'>" . $ML{".opt.$prop_ml"} . "</label></b> " .
+                LJ::html_check({ 'type' => 'check',
+                                 'name' => "prop_opt_$prop",
+                                 'id' => "prop_opt_$prop",
+                                 'selected' => $POST{"prop_opt_$prop"} });
+        };
+
+        # backdating
+        $out .= "<p>" . $prop_check->('backdated', 'backdate') . " ";
+
+        # don't auto-format
+        if ($richtext) {
+            $out .= LJ::html_hidden('prop_opt_preformatted', '1') . "\n";
+        } else {
+            $out .= $prop_check->('preformatted', 'noformat') . LJ::help_icon("noautoformat", " ") . "</p>\n";
+        }
+
+        # don't allow comments
+        $out .= "<p>" . $prop_check->('nocomments') . " ";
+
+        # don't email the poster
+        $out .= $prop_check->('noemail') . "\n";
+     
+        # picture to use
+        if ($res && ref $res->{'pickws'} eq 'ARRAY') {
+            $out .= "<p id='userpic_list' style='display: block'>";
+            $out .= "<b>".BML::ml(".picture", {'url' => "$LJ::SITEROOT/allpics.bml?user=$remote->{'user'}"})."</b> ";
+            $out .= LJ::html_select({'name' => 'prop_picture_keyword', 
+                                     'selected' => $POST{'prop_picture_keyword'} },
+                                     "", $ML{'.opt.defpic'},
+                                     map { ($_, $_) } sort { lc($a) cmp lc($b) } @{$res->{'pickws'}});
+            $out .= LJ::help_icon("userpics", " ") . "</p>\n";
+        }
+
+        # mood
+        {
+            my @moodlist = ('', $ML{'.noneother'});
+            my $sel;
+
+            my $moods = LJ::get_moods();
+
+            foreach (sort { $moods->{$a}->{'name'} cmp $moods->{$b}->{'name'} } keys %$moods) {
+                push @moodlist, ($_, $moods->{$_}->{'name'});
+
+                if ($POST{'prop_current_mood'} eq $moods->{$_}->{'name'} ||
+                        $POST{'prop_current_moodid'} == $_) {
+                    $sel = $_;
+                }
+            }
+
+            $out .= "<p><b>$ML{'.currmood'}</b>";
+            $out .= LJ::html_select({ 'name' => 'prop_current_moodid',
+                                      'selected' => $sel }, @moodlist);
+            $out .= " $ML{'.other'} " . LJ::html_text({ 'name' => 'prop_current_mood',
+                                                        'value' => $POST{'prop_current_mood'},
+                                                        'size' => '15', 'maxlength' => '30' }) . "\n";
+        }
+
+        # current music
+        $out .= "<p><b>$ML{'.currmusic'}</b> ";
+        $out .= LJ::html_text({ 'name' => 'prop_current_music', 'value' => $POST{'prop_current_music'},
+                'size' => '40', 'maxlength' => '60' }) . "</p>\n";
+        $out  .= "</td></tr>\n";
+
+        # end full opts block
+        $out .= "</table>";
+        $out .= "</div></td></tr>\n";
+
+        $out .= "</table>\n";
+
+        # submit button
+        $out .= "<p align='center' style='margin-top: 0px;'>";
+        $out .= "<input type='submit' value='$ML{'.btn.update'}' ";
+        if ($richtext || ! $LJ::IS_SSL) {
+            $out .= 'onClick="';
+            $out .= "updateRTE('rte'); " if $richtext;
+            $out .= "return sendForm('updateForm');" if ! $LJ::IS_SSL;
+            $out .= '" ';
+        }
+
+        $out .= "></p>\n";
+        $out .= "</form></div>";
+
+        return $out;
+    };  ### end show_updateform()
+
+
     if ($did_post && ! $spellcheck_html && ! $showform && ! $enabled_rte) {
 
         # what's our authentication scheme for subsequent protocol actions?
@@ -97,11 +464,21 @@
             
             $user = $POST{'user'};
 
+            # Verify entered password, if it is present. 
+            my $ok;
+            my $u = LJ::load_user($user);
+            if ($POST{response}) {
+                $ok = LJ::challenge_check_login($u, $POST{chal}, $POST{response});
+            } else {  # js disabled, fallback to plaintext
+                $ok = LJ::auth_okay($u, $POST{password});
+            }
+            $flags = { 'noauth' => 1, 'u' => $u } if $ok;
+
         } elsif ($remote) {                             # assume remote if we have it
             $flags = { 'noauth' => 1, 'u' => $remote };
             $user = $remote->{'user'};
         }
-       
+
         # do a login action
         my $login_message;
         {
@@ -114,8 +491,6 @@
                         'ver' => $LJ::PROTOCOL_VER,
                         'clientversion' => $clientversion,
                         'user' => $user,
-                        'password' => $POST{'password'},
-                        'hpassword' => $POST{'hpassword'},
                        );
 
             my %res;
@@ -125,6 +500,8 @@
             unless ($res{'success'} eq 'OK') {
                 $$body .= "<?h1 $ML{'.loggingin'} h1?>\n";
                 $$body .= "<?p $ML{'.error.login'} <ul><li><b>" . LJ::ehtml($res{'errmsg'}) . "</b></li></ul> p?>";
+                $$body .= "<br />";
+                $$body .= $show_updateform->();
                 return;
             }
 
@@ -153,7 +530,6 @@
                         'ver' => $LJ::PROTOCOL_VER,
                         'user' => $user,
                         'password' => $POST{'password'},
-                        'hpassword' => $POST{'hpassword'},
                         'usejournal' => $POST{'usejournal'},
                         'security' => $sec,
                         'allowmask' => $amask,
@@ -201,8 +577,10 @@
             $$body .= "<?h1 $ML{'.updating'} h1?>\n";
 
             # update failed?
-            unless ($res{'success'} eq 'OK') {
+            if ($res{'success'} ne 'OK') {
                 $$body .= "<?p $ML{'.error.update'} <ul><li><b>" . LJ::ehtml($res{'errmsg'}) . "</b></li></ul> p?>";
+                $$body .= "<br />";
+                $$body .= $show_updateform->();
                 return;
             }
 
@@ -231,356 +609,7 @@
         return;
     }
 
-    ###
-    ### show update form
-    ###
-
-    $$body .= "<?h1 $ML{'.update.head'} h1?><?p $ML{'.update.about'} p?><?hr?>";
-
-    {
-        # if they submit the form and are spellchecking, remember
-        # their settings from the GET requests
-        my $getextra;
-        $getextra .= "altlogin=1&" if $GET{'altlogin'};
-        $getextra .= "mode=full&" if $mode eq 'full';
-        $getextra .= "rich=1&" if $richtext;
-        chop $getextra;
-        $getextra = "?$getextra" if $getextra;
-
-        $$body .= "<div style='width: 90%'><form method='post' action='update.bml$getextra' name='updateForm'>";
-    }
-
-    $$body .= "<table align='center' width='80%'>\n<tr><td width='50%'>\n";
-
-    {
-        # which authentication option do we display by default?
-        my $altlogin_display = 'none';
-        my $remotelogin_display = 'none';
-        if ($auth_as_remote) {
-            $remotelogin_display = 'inline';
-        } else {
-            $altlogin_display = 'block';
-        }
-
-        my $altget = $mode eq 'full' ? "?mode=full&altlogin=1" : "?altlogin=1";
-        $$body .= "<p id='remotelogin' style='display: $remotelogin_display;'>";
-        if ($remote) { # so lynx won't show this
-            $$body .= BML::ml(".loggedinas", {'user' => $remote->{'user'}, 'altget' => $altget});
-        }
-        $$body .= "</p>\n";
-
-        # table with username/password fields
-        $$body .= "<table id='altlogin' style='display: $altlogin_display;'>\n";
-        $$body .= "<tr valign='top'><td align='right'>$ML{'.username'}</td>";
-        $$body .= "<td align='left'>";
-        $$body .= LJ::html_text({ 'name' => 'user', 'size' => '15', 'maxlength' => '15',
-                                  'value' => $POST{'user'} || $GET{'user'} });
-        $$body .= "</td></tr>\n";
-        $$body .= "<tr valign='top'><td align='right'>$ML{'.password'}</td>";
-        $$body .= "<td align='left'>";
-        $$body .= LJ::html_text({ 'type' => 'password', 'name' => 'password',
-                                  'size' => '15', 'maxlength' => '30' });
-
-        # posted with a user, but no password
-        if ($did_post && $auth_missing) {
-            $$body .= "<br /><?inerr $ML{'.error.nopass'} inerr?>";
-        }
-        $$body .= "</td></tr>\n";
-        $$body .= "</table>\n";
-    }
-
-    $$body .= "</td><td>\n";
-    
-    $$body .= "<table cellspacing='0' cellpadding='0'>\n";
-  
-    my ($min,$hour,$mday,$mon,$year);
-
-    # preserve times from form if spellchecking
-    if ($did_spellcheck) {
-        $$bodyopts .= "onload=\"pageload(0);\" "; # js fill-in off
-
-        $year = $POST{'year'};
-        $mon = $POST{'mon'};
-        $mday = $POST{'day'};
-        $hour = $POST{'hour'};
-        $min = $POST{'min'};
-        
-    # insert current time
-    } else {
-        $$bodyopts .= "onload=\"pageload(1);\" "; # js fill-in on
-
-        my @time = localtime(time);
-        $year = $time[5] + 1900;
-        $mon = sprintf("%02d", $time[4] + 1);
-        $mday = sprintf("%02d", $time[3]);
-        $hour = $time[2];
-        $min = sprintf("%02d", $time[1]);
-    }
-
-    # date entry boxes / formatting note
-    $$body .= "<tr valign='top'><td align='right' rowspan='2'><b>$ML{'.date'}</b>&nbsp;</td><td nowrap='nowrap'>";
-    $$body .= LJ::html_text({ 'name' => 'year', 'value' => $year, 'size' => '5', 'maxlength' => '4' }) . '-';
-    $$body .= LJ::html_text({ 'name' => 'mon',  'value' => $mon,  'size' => '3', 'maxlength' => '2' }) . '-';
-    $$body .= LJ::html_text({ 'name' => 'day',  'value' => $mday, 'size' => '3', 'maxlength' => '2' });
-    $$body .= "</td></tr>\n";
-    $$body .= "<tr valign='top'><td><i>(yyyy-mm-dd)</i></td></tr>\n";
-
-    # time entry boxes / formatting note
-    $$body .= "<tr valign='top'><td align='right' rowspan='2'><b>$ML{'.localtime'}</b>&nbsp;</td><td>";
-    $$body .= LJ::html_text({ 'name' => 'hour', 'value' => $hour, 'size' => '3', 'maxlength' => '2' }) . ':';
-    $$body .= LJ::html_text({ 'name' => 'min',  'value' => $min,  'size' => '3', 'maxlength' => '2' });
-    $$body .= "</td></tr>\n";
-    $$body .= "<tr valign='top'><td><i>($ML{'.timeformat'})</i></td></tr>\n";
-    $$body .= "</table>\n</td></tr>\n";
-
-    $$body .= "</table>\n";
-
-    # if no script, above is server time
-    $$body .= "<noscript><p align='center' style=\"font-size: 0.85em;\">$ML{'.note'}</p></noscript>\n";
-
-    # subject
-    $$body .= "<table width='90%' align='center'; style='margin-top: 20px;'><tr><td>$ML{'.subject'}<br />";
-    $$body .= LJ::html_text({ 'name' => 'subject', 'value' => $POST{subject} || $GET{subject},
-                              'size' => '50', 'maxlength' => '100' }) . "\n";
-
-    # display spell check results
-    $$body .= "<p><b>$ML{'.spellchecked'}</b><br />$spellcheck_html</p>"
-        if $spellcheck_html;
-
-    # event
-    $$body .= "<p><b>$ML{'.event'}</b>";
-    $$body .= "<br />";
-    if ($richtext) {
-        my $jevent = $POST{event} || $GET{event};
-
-        # manually typed tags
-        $jevent =~ s/<lj user=['"]?(\w{1,15})['"]?\s?\/?>/&lt;lj user="$1" \/&gt;/ig;
-        $jevent =~ s/<(\/)?lj-cut(.*?)(?: \/)?>/&lt;$1lj-cut$2&gt;/ig;
-
-        $jevent = LJ::ejs($jevent);
-        my $rte_nosupport = LJ::ejs(BML::fill_template("de", { DATA => $ML{'.htmlokay.rte_nosupport'} }));
-
-        $$body .= LJ::html_hidden('rich', '1') . "\n";
-        $$body .= LJ::html_hidden('saved_entry', '') . "\n";
-
-        $$body .= <<RTE;
-<iframe id="testFrame" style="position: absolute; visibility: hidden; width: 0px; height: 0px;"></iframe>
-<script language="JavaScript" type="text/javascript" src="/js/browserdetect.js"></script>
-<script language='JavaScript' type='text/javascript'>
-    <!--
-        var siteroot = "$LJ::SITEROOT";
-    //-->
-</script>
-<script language="JavaScript" type="text/javascript" src="/js/richtext.js"></script>
-<script language='JavaScript' type='text/javascript'>
-    <!--
-        writeRichText('rte', 'event', '$jevent', '95%', 300, true);
-        if (isRichText == false) {
-            document.write("$rte_nosupport");
-        }
-    //-->
-</script>
-<noscript>
-RTE
-    }
-    $$body .= LJ::html_textarea({ 'name' => 'event', 'value' => $POST{event} || $GET{event},
-        'rows' => '20', 'cols' => '50', 'style' => 'width: 100%', 'wrap' => 'soft' });
-    $$body .= '</noscript>' if $richtext;
-
-    my $jrich = LJ::ejs(BML::fill_template("de", {
-        DATA => BML::ml(".htmlokay.rich", { 'opts' => 'href="#" onClick="enable_rte()"' })
-        }));
-    my $jnorich = LJ::ejs(BML::fill_template("de", { DATA => $ML{'.htmlokay.norich'} }));
-
-    unless ($richtext || ($POST{do_spellcheck} && $richtext)) {
-        $$body .= <<RTE;
-<script language='JavaScript' type='text/javascript'>
-    <!--
-        var t = document.getElementById;
-        if (t) {
-            document.write('<input type="hidden" name="switched_rte_on" value="" />');
-            document.write("$jrich");
-        } else {
-            document.write("$jnorich");
-        }
-    //-->
-</script>
-RTE
-        $$body .= '<noscript><?de ' . $ML{'.htmlokay.norich'} . ' de?></noscript>';
-    }
-    $$body .= '<br />';
-
-    # spell check checkbox
-    if ($LJ::SPELLER) {
-        $$body .= "<br />" . LJ::html_check({ 'name' => 'do_spellcheck', 'id' => 'do_spellcheck' });
-        $$body .= "<label for='do_spellcheck'>$ML{'.opt.spellcheck'}</label>";
-    }
-    $$body .= "</p></td></tr><tr><td>";
-
-    {
-        # simple mode block
-        my $simple_display = $mode eq 'full' ? 'none' : 'block';
-        $$body .= "<div id='simplemsg' style='margin-top: 10px; display: $simple_display;'>";
-        my $fullget = $GET{'altlogin'} ? "?altlogin=1&mode=full" : "?mode=full";
-        $$body .= BML::ml(".simple", {'url' => "update.bml$fullget" }) ."</p>";
-        $$body .= "</div>";
-
-        # put alternate link in head if not already viewing full mode
-        $$head .= "<link href='update.bml$fullget' rel='alternate' title='$ML{'.full'}' />\n"
-            unless $mode eq 'full';
-    }
-
-    {
-        # full mode block
-        my $full_display = $mode eq 'full' ? 'block' : 'none';
-        $$body .= "<div id='fullopts' style='display: $full_display;'>";
-    }
-
-    $$body .= "<table>\n<tr><td nowrap='nowrap'>\n";
-    $$body .= "<?h2 $ML{'.options'} h2?>\n";
-
-    $$body .= LJ::html_hidden('webversion', 'full') . "\n";
-
-    # do a login action to get pics and usejournals, but only if using remote
-    my $res;
-    if ($auth_as_remote) {
-
-        $res = LJ::Protocol::do_request("login", {
-            "ver" => $LJ::PROTOCOL_VER,
-            "username" => $remote->{'user'},
-            "getpickws" => 1,
-        }, undef, { 
-            "noauth" => 1, 
-            "u" => $remote,
-        });
-    }
-
-    # communities the user can post in
-    my $usejournal = $POST{usejournal} || $GET{usejournal};
-    if ($GET{usejournal} || $POST{usejournal_set}) {
-        $$body .= "<b>$ML{'.altpost'}</b> ";
-        $$body .= LJ::ljuser($usejournal);
-        $$body .= LJ::html_hidden('usejournal' => $usejournal, 'usejournal_set' => 'true');
-    } elsif ($res && ref $res->{'usejournals'} eq 'ARRAY') {
-        $$body .= "<p id='usejournal_list' style='display: block;'><b>$ML{'.altpost'} </b> ";
-        $$body .= LJ::html_select({ 'name' => 'usejournal',
-                                    'selected' => $POST{'usejournal'} },
-                                    "", BML::ml(".defaultjournal", { 'user' => $remote->{'user'} }),
-                                    map { $_, $_ } @{$res->{'usejournals'}}) . "</p>\n";
-    }
-    
-    # possible security groups
-    $$body .= "<p><b>$ML{'label.security.head'}</b> ";
-    my @secs = ("public", $ML{'label.security.public'}, "private", $ML{'label.security.private'},
-                "friends", $ML{'label.security.friends'});
-    
-    my @opts;
-    if ($res && ref $res->{'friendgroups'} eq 'ARRAY') {
-        push @secs, ("custom", $ML{'label.security.custom'});
-        push @opts, ("onchange" => "customboxes()");
-    }
-
-    $$body .= LJ::html_select({ 'name' => 'security', 'selected' => $POST{'security'}, @opts }, @secs);
-    $$body .= LJ::help_icon("security", " ");
-     
-    # if custom security groups available, show them in a hidable div
-    if ($res && ref $res->{'friendgroups'} eq 'ARRAY') {
-        my $display = $POST{'security'} eq "custom" ? "block" : "none";
-        $$body .= "<div id='custom_boxes' style='display: $display;'>";
-        foreach my $fg (@{$res->{'friendgroups'}}) {
-            $$body .= LJ::html_check({ 'name' => "custom_bit_$fg->{'id'}",
-                                       'id' => "custom_bit_$fg->{'id'}",
-                                       'selected' => $POST{"custom_bit_$fg->{'id'}"} });
-
-            $$body .= "<label for='custom_bit_$fg->{'id'}'>" . LJ::ehtml($fg->{'name'}) . "</label><br />";
-        }
-        $$body .= "</div>";
-    }
-    $$body .= "\n";
-
-    ### opt_ checkboxes
-    my $prop_check = sub {
-        my $prop = shift;
-        my $prop_ml = shift || $prop;
-
-        return "<b><label for='prop_opt_$prop'>" . $ML{".opt.$prop_ml"} . "</label></b> " .
-            LJ::html_check({ 'type' => 'check',
-                             'name' => "prop_opt_$prop",
-                             'id' => "prop_opt_$prop",
-                             'selected' => $POST{"prop_opt_$prop"} });
-    };
-
-    # backdating
-    $$body .= "<p>" . $prop_check->('backdated', 'backdate') . " ";
-
-    # don't auto-format
-    if ($richtext) {
-        $$body .= LJ::html_hidden('prop_opt_preformatted', '1') . "\n";
-    } else {
-        $$body .= $prop_check->('preformatted', 'noformat') . LJ::help_icon("noautoformat", " ") . "</p>\n";
-    }
-
-    # don't allow comments
-    $$body .= "<p>" . $prop_check->('nocomments') . " ";
-
-    # don't email the poster
-    $$body .= $prop_check->('noemail') . "\n";
-     
-    # picture to use
-    if ($res && ref $res->{'pickws'} eq 'ARRAY') {
-        $$body .= "<p id='userpic_list' style='display: block'>";
-        $$body .= "<b>".BML::ml(".picture", {'url' => "$LJ::SITEROOT/allpics.bml?user=$remote->{'user'}"})."</b> ";
-        $$body .= LJ::html_select({'name' => 'prop_picture_keyword', 
-                                   'selected' => $POST{'prop_picture_keyword'} },
-                                  "", $ML{'.opt.defpic'},
-                                  map { ($_, $_) } sort { lc($a) cmp lc($b) } @{$res->{'pickws'}});
-        $$body .= LJ::help_icon("userpics", " ") . "</p>\n";
-    }
-
-    # mood
-    {
-        my @moodlist = ('', $ML{'.noneother'});
-        my $sel;
-
-        my $moods = LJ::get_moods();
-
-        foreach (sort { $moods->{$a}->{'name'} cmp $moods->{$b}->{'name'} } keys %$moods) {
-            push @moodlist, ($_, $moods->{$_}->{'name'});
-
-            if ($POST{'prop_current_mood'} eq $moods->{$_}->{'name'} ||
-                $POST{'prop_current_moodid'} == $_) {
-                $sel = $_;
-            }
-        }
-
-        $$body .= "<p><b>$ML{'.currmood'}</b>";
-        $$body .= LJ::html_select({ 'name' => 'prop_current_moodid',
-                                  'selected' => $sel }, @moodlist);
-        $$body .= " $ML{'.other'} " . LJ::html_text({ 'name' => 'prop_current_mood',
-                                                      'value' => $POST{'prop_current_mood'},
-                                                      'size' => '15', 'maxlength' => '30' }) . "\n";
-    }
-    
-    # current music
-    $$body .= "<p><b>$ML{'.currmusic'}</b> ";
-    $$body .= LJ::html_text({ 'name' => 'prop_current_music', 'value' => $POST{'prop_current_music'},
-                              'size' => '40', 'maxlength' => '60' }) . "</p>\n";
-    $$body  .= "</td></tr>\n";
-
-    # end full opts block
-    $$body .= "</table>";
-    $$body .= "</div></td></tr>\n";
-
-    $$body .= "</table>\n";
-
-    # submit button
-    $$body .= "<p align='center' style='margin-top: 0px;'>";
-    $$body .= "<input type='submit' value='$ML{'.btn.update'}' ";
-    $$body .= "onClick=\"updateRTE('rte')\"" if $richtext;
-    $$body .= "></p>\n";
-
-    $$body .= "</form></div>";
-
+    $$body = $show_updateform->();
     return;
 }
 
@@ -788,6 +817,8 @@ head<=
 
 // -->
 </script>
+
+<?_code return (! $LJ::REQ_HEAD_HAS{'chalresp_js'}++) ? $LJ::COMMON_CODE{'chalresp_js'} : ""; _code?>
 
 <=head
 page?><?_c <LJDEP>

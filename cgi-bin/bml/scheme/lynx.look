@@ -17,7 +17,6 @@ _code?><html>
     my $elhash = $_[2];
     return $elhash->{'WINDOWTITLE'} || $elhash->{'TITLE'};
 } _code?></title>
-<?_code { (! LJ::get_remote() && ! $LJ::IS_SSL) ? BML::get_template_def('CHALRESPJS') : ""; } _code?>
 %%HEAD%%
 </head>
 

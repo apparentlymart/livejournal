@@ -710,7 +710,7 @@ sub load_comments
 sub talkform {
     # replyto : init->replyto
     # curpickw : FORM{prop_picture_keyword} or something like that
-    my ($remote, $journalu, $parpost, $replyto, $ditemid, $curpickw) = @_;
+    my ($remote, $journalu, $parpost, $replyto, $ditemid, $curpickw, $FORM, @errors) = @_;
 
     my $ret;
     my $pics = LJ::Talk::get_subjecticons();
@@ -723,13 +723,26 @@ sub talkform {
     }
     $ret .= "<form method='post' action='$LJ::SITEROOT/talkpost_do.bml' id='postform'>";
 
+    # Login challenge/response
+    my $authchal = LJ::challenge_generate(900); # 15 minute auth token
+    $ret .= "<input type='hidden' name='chal' id='login_chal' value='$authchal' />";
+    $ret .= "<input type='hidden' name='response' id='login_response' value='' />";
+
+    if (@errors) {
+        $ret .= '<ul>';
+        $ret .= "<li><b>$_</b></li>" foreach @errors;
+        $ret .= '</ul>';
+        $ret .= "<hr />";
+    }
+
     # hidden values
     my $parent = $replyto+0;
-    $ret .= LJ::html_hidden("parenttalkid", $parent,
+    $ret .= LJ::html_hidden("replyto", $replyto,
+                            "parenttalkid", $parent,
                             "itemid", $ditemid,
                             "journal", $journalu->{'user'});
 
-    # challenge
+    # rate limiting challenge
     {
         my ($time, $secret) = LJ::get_secret();
         my $rchars = LJ::rand_chars(20);
@@ -741,7 +754,7 @@ sub talkform {
     # from registered user or anonymous?
     $ret .= "<table>\n";
     if ($journalu->{'opt_whocanreply'} eq "all") {
-        $ret .= "<tr valign='middle'>";
+        $ret .= "<tr valign='center'>";
         $ret .= "<td align='right'>$BML::ML{'.opt.from'}</td>";
         $ret .= "<td align='center'><input type='radio' name='usertype' value='anonymous' id='talkpostfromanon' /></td>";
         $ret .= "<td align='left'><b><label for='talkpostfromanon'>$BML::ML{'.opt.anonymous'}</label></b>";
@@ -757,7 +770,7 @@ sub talkform {
         $ret .= "<td align='left' colspan='3'><font color='#c0c0c0'><b>$BML::ML{'.opt.anonymous'}</b></font>$BML::ML{'.opt.noanonpost'}</td>";
         $ret .= "</tr>\n";
     } else {
-        $ret .= "<tr valign='middle'>";
+        $ret .= "<tr valign='center'>";
         $ret .= "<td align='right'>$BML::ML{'.opt.from'}</td>";
         $ret .= "<td align='center'>(  )</td>";
         $ret .= "<td align='left' colspan='3'><font color='#c0c0c0'><b>$BML::ML{'.opt.anonymous'}</b></font>" .
@@ -791,7 +804,7 @@ sub talkform {
     # ( ) LiveJournal user:
     $ret .= "<tr valign='middle'>";
     $ret .= "<td>&nbsp;</td>";
-    $ret .= "<td align='center'><input type='radio' name='usertype' value='user' id='talkpostfromlj' $checked />";
+    $ret .= "<td align=middle><input type='radio' name='usertype' value='user' id='talkpostfromlj' $checked />";
     $ret .= "</td><td align='left'><b><label for='talkpostfromlj'>$BML::ML{'.opt.ljuser'}</label></b> ";
     $ret .= $BML::ML{'.opt.willscreenfriend'} if $journalu->{'opt_whoscreened'} eq 'F';
     $ret .= $BML::ML{'.opt.willscreen'} if $journalu->{'opt_whoscreened'} eq 'A';
@@ -799,34 +812,53 @@ sub talkform {
 
     # Username: [    ] Password: [    ]  Login? [ ]
     $ret .= "<tr valign='middle' align='left'><td colspan='2'></td><td>";
-    $ret .= "$BML::ML{'Username'}:&nbsp;<input class='textbox' name='userpost' size='13' maxlength='15' id='username' /> ";
+    $ret .= "$BML::ML{'Username'}:&nbsp;<input class='textbox' name='userpost' size='13' maxlength='15' id='username' value='" .
+            BML::eall($FORM->{userpost}). "' /> ";
     $ret .= "$BML::ML{'Password'}:&nbsp;<input class='textbox' name='password' type='password' maxlength='30' size='13' id='password' /> <label for='logincheck'>$BML::ML{'.loginq'}&nbsp;</label><input type='checkbox' name='do_login' id='logincheck' /></td></tr>\n";
     
-    my $basesubject = "";
-    if ($replyto) {
+    my $basesubject = $FORM->{subject} || "";
+    if ($replyto && !$basesubject) {
         $basesubject = $parpost->{'subject'};
         $basesubject =~ s/^Re:\s*//i;
-        if ($basesubject) {
-            $basesubject = "Re: $basesubject";
-            $basesubject = BML::eall($basesubject);
-        }
+        $basesubject = "Re: $basesubject";
     }
 
     # subject
+    $basesubject = BML::eall($basesubject) if $basesubject;
     $ret .= "<tr valign='top'><td align='right'>$BML::ML{'.opt.subject'}</td><td colspan='4'><input class='textbox' type='text' size='50' maxlength='100' name='subject' value=\"$basesubject\" />\n";
 
     # Subject Icon toggle button
     {
-        $ret .= "<input type='hidden' id='subjectIconField' name='subjecticon' value='none' />\n";
+        my $subjicon = $FORM->{subjecticon} || 'none';
+        my $foundicon = 0;
+        $ret .= "<input type='hidden' id='subjectIconField' name='subjecticon' value='$subjicon'>\n";
         $ret .= "<script type='text/javascript' language='Javascript'>\n";
         $ret .= "<!--\n";
         $ret .= "if (document.getElementById) {\n";
         $ret .= "document.write(\"";
-        $ret .= LJ::ejs(LJ::Talk::show_none_image("id='subjectIconImage' style='cursor:hand' align='absmiddle' ".
-                                                  "onclick='subjectIconListToggle();' ".
-                                                  "title='Click to change the subject icon'"));
+        if ($subjicon eq 'none') {
+            $ret .= LJ::ejs(LJ::Talk::show_none_image("id='subjectIconImage' style='cursor:hand' align='absmiddle' ".
+                                                      "onclick='subjectIconListToggle();' ".
+                                                      "title='Click to change the subject icon'"));
+        } else {
+            foreach my $type (@{$pics->{types}}) { 
+                foreach (@{$pics->{lists}->{$type}}) {
+                    if ($_->{id} eq $subjicon) {
+                        $ret .= LJ::Talk::show_image($pics, $subjicon, 
+                                                     "id='subjectIconImage' onclick='subjectIconListToggle();' style='cursor:hand'");
+                        $foundicon = 1;
+                        last;
+                    }
+                }
+                last if $foundicon == 1;
+            }
+        }
+        if ($foundicon == 0 && $subjicon ne 'none') {
+            $ret .= LJ::ejs(LJ::Talk::show_none_image("id='subjectIconImage' style='cursor:hand' align='absmiddle' ".
+                                                      "onclick='subjectIconListToggle();' ".
+                                                      "title='Click to change the subject icon'"));
+        }
         $ret .="\");\n";
-
 
         # spit out a pretty table of all the possible subjecticons
         $ret .= "document.write(\"";
@@ -897,11 +929,29 @@ sub talkform {
 
     # textarea for their message body
     $ret .= "<tr valign='top'><td align='right'>$BML::ML{'.opt.message'}</td><td colspan='4' style='width: 90%'>";
-    $ret .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' id='commenttext' style='width: 100%'></textarea>";
-    $ret .= "<br /><input type='submit' name='submitpost' value='$BML::ML{'.opt.submit'}' />\n";
+    $ret .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' id='commenttext' style='width: 100%'>$FORM->{body}</textarea>";
 
-    ## preview stuff
-    $ret .= "<input type='submit' name='submitpreview' value='$BML::ML{'talk.btn.preview'}' />\n";
+    # post and preview buttons
+    $ret .= <<LOGIN;
+    <br />
+    <script> 
+        if (document.getElementById && document.getElementById('postform')) {
+            document.write("<input name='submitpost' onclick='return sendForm(\\"postform\\")' type='submit' value='$BML::ML{'.opt.submit'}' />");
+            document.write("&nbsp;");
+            document.write("<input name='submitpreview' onclick='return sendForm(\\"postform\\")' type='submit' value='$BML::ML{'talk.btn.preview'}' />");
+        } else {
+            document.write("<input type='submit' name='submitpost' value='$BML::ML{'.opt.submit'}' />");
+            document.write("&nbsp;");
+            document.write("<input type='submit' name='submitpreview' value='$BML::ML{'talk.btn.preview'}' />");
+        }
+    </script>
+    <noscript>
+        <input type='submit' name='submitpost' value='$BML::ML{'.opt.submit'}' />
+        &nbsp;
+        <input type='submit' name='submitpreview' value='$BML::ML{'talk.btn.preview'}' />
+    </noscript>
+LOGIN
+
     if ($LJ::SPELLER) {
         $ret .= "<input type='checkbox' name='do_spellcheck' value='1' id='spellcheck' /> <label for='spellcheck'>$BML::ML{'talk.spellcheck'}</label>";
     }
@@ -1561,9 +1611,14 @@ sub init {
                         }
 
                     # otherwise authenticate on username/password
-                    } elsif (! LJ::auth_okay($up, $form->{'password'}, $form->{'hpassword'}))
-                    {
-                        $bmlerr->("$SC.error.badpassword");
+                    } else {
+                        my $ok;
+                        if ($form->{response}) {
+                            $ok = LJ::challenge_check_login($up, $form->{chal}, $form->{response});
+                        } else {
+                            $ok = LJ::auth_okay($up, $form->{'password'}, $form->{'hpassword'});
+                        }
+                        $bmlerr->("$SC.error.badpassword") unless $ok;
                     }
                 }
 
