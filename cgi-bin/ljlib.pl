@@ -353,6 +353,24 @@ sub set_cached_friend_items
     }
 }
 
+sub get_groupmask
+{
+    my ($journal, $remote) = @_;
+    return 0 unless $journal && $remote;
+    my $jid = want_userid($journal);
+    my $fid = want_userid($remote);
+    return 0 unless $jid && $fid;
+    my $memkey = [$jid,"frgmask:$jid:$fid"];
+    my $mask = LJ::MemCache::get($memkey);
+    unless (defined $mask) {
+        my $dbr = LJ::get_db_reader();
+        $mask = $dbr->selectrow_array("SELECT groupmask FROM friends ".
+                                      "WHERE userid=? AND friendid=?",
+                                      undef, $jid, $fid);
+        LJ::MemCache::set($memkey, $mask+0, time()+60*15);
+    }
+    return $mask;
+}
 
 # <LJFUNC>
 # name: LJ::get_friend_items
@@ -729,15 +747,7 @@ sub get_recent_items
         $gmask_from = {};
         if ($remote && $remote->{'journaltype'} eq "P" && $remoteid != $userid) {
             ## then we need to load the group mask for this friend
-            my $memkey = [$userid,"frgmask:$userid:$remoteid"];
-            my $mask = LJ::MemCache::get($memkey);
-            unless (defined $mask) {
-                $mask = $dbr->selectrow_array("SELECT groupmask FROM friends ".
-                                              "WHERE userid=? AND friendid=?",
-                                              undef, $userid, $remoteid);
-                LJ::MemCache::set($memkey, $mask+0, time()+60*15);
-            }
-            $gmask_from->{$userid} = $mask;
+            $gmask_from->{$userid} = LJ::get_groupmask($userid, $remoteid);
         }
     }
 

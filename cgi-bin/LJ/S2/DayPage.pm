@@ -13,9 +13,6 @@ sub DayPage
     $p->{'view'} = "day";
     $p->{'entries'} = [];
 
-    my $dbr = LJ::get_db_reader();
-    my $dbcr = LJ::get_cluster_reader($u);
-
     my $user = $u->{'user'};
     my $journalbase = LJ::journal_base($user, $opts->{'vhost'});
 
@@ -58,24 +55,24 @@ sub DayPage
         if ($remote->{'userid'} == $u->{'userid'}) {
             $secwhere = "";   # see everything
         } elsif ($remote->{'journaltype'} eq 'P') {
-            my $gmask = $dbr->selectrow_array("SELECT groupmask FROM friends WHERE userid=$u->{'userid'} AND friendid=$remote->{'userid'}");
+            my $gmask = LJ::get_groupmask($u, $remote);
             $secwhere = "AND (security='public' OR (security='usemask' AND allowmask & $gmask))"
                 if $gmask;
         }
     }
 
-    my $logdb = LJ::get_cluster_reader($u);
-    unless ($logdb) {
+    my $dbcr = LJ::get_cluster_reader($u);
+    unless ($dbcr) {
         push @{$opts->{'errors'}}, "Database temporarily unavailable";
         return;
     }
 
     # load the log items
     my $dateformat = "%Y %m %d %H %i %s %w"; # yyyy mm dd hh mm ss day_of_week
-    my $sth = $logdb->prepare("SELECT jitemid AS itemid, posterid, security, replycount, DATE_FORMAT(eventtime, \"$dateformat\") AS 'alldatepart', anum ".
-                              "FROM log2 " .
-                              "WHERE journalid=$u->{'userid'} AND year=$year AND month=$month AND day=$day $secwhere " . 
-                              "ORDER BY eventtime, logtime LIMIT 200");
+    my $sth = $dbcr->prepare("SELECT jitemid AS itemid, posterid, security, replycount, DATE_FORMAT(eventtime, \"$dateformat\") AS 'alldatepart', anum ".
+                             "FROM log2 " .
+                             "WHERE journalid=$u->{'userid'} AND year=$year AND month=$month AND day=$day $secwhere " . 
+                             "ORDER BY eventtime, logtime LIMIT 200");
     $sth->execute;
 
     my @items;
@@ -85,7 +82,7 @@ sub DayPage
     ### load the log properties
     my %logprops = ();
     my $logtext;
-    LJ::load_log_props2($logdb, $u->{'userid'}, \@itemids, \%logprops);
+    LJ::load_log_props2($dbcr, $u->{'userid'}, \@itemids, \%logprops);
     $logtext = LJ::get_logtext2($u, @itemids);
     LJ::load_moods();
 
@@ -95,7 +92,7 @@ sub DayPage
         $apu{$_->{'posterid'}} = undef;
     }
     if (%apu) {
-        LJ::load_userids_multiple($dbr, [map { $_, \$apu{$_} } keys %apu], [$u]);
+        LJ::load_userids_multiple([map { $_, \$apu{$_} } keys %apu], [$u]);
         $apu_lite{$_} = UserLite($apu{$_}) foreach keys %apu;
     }
 
@@ -123,7 +120,7 @@ sub DayPage
 
         LJ::CleanHTML::clean_event(\$text, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
                                                'cuturl' => LJ::item_link($u, $itemid, $anum), });
-        LJ::expand_embedded($dbr, $ditemid, $remote, \$text);
+        LJ::expand_embedded($ditemid, $remote, \$text);
 
         my $nc = "";
         $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
@@ -138,7 +135,7 @@ sub DayPage
             'post_url' => $posturl,
             'count' => $replycount,
             'enabled' => ($u->{'opt_showtalklinks'} eq "Y" && ! $logprops{$itemid}->{'opt_nocomments'}) ? 1 : 0,
-            'screened' => ($logprops{$itemid}->{'hasscreened'} && ($remote->{'user'} eq $u->{'user'}|| LJ::check_rel($dbr, $u, $remote, 'A'))) ? 1 : 0,
+            'screened' => ($logprops{$itemid}->{'hasscreened'} && ($remote->{'user'} eq $u->{'user'}|| LJ::check_rel($u, $remote, 'A'))) ? 1 : 0,
         });
         
         my $userlite_poster = $userlite_journal;
