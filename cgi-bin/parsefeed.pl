@@ -61,6 +61,7 @@ sub parse_feed
             # there was a top-level <feed> there, or we're forced to treat
             # as an Atom feed, so even if $error is set,
             # don't try RSS
+            $feed->{'type'} = 'atom';
             return ($feed, $error, $items);
         }
     }
