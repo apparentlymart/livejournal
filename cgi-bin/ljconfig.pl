@@ -115,7 +115,13 @@
     #   them, increasing them won't change anything until there are
     #   new posts numbering the difference you increased it by.
     $MAX_HINTS_LASTN = 100;
+    $MAX_SCROLLBACK_LASTN = 400;
 
+    # for database replication.  turn this on if you have slave
+    # databases replication everything but logtext and talktext.
+    # contact brad@livejournal.com if you're running a high load
+    # installation and need help.
+    $USE_RECENT_TABLES = 0;
 }
 
 return 1;
