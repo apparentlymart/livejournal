@@ -171,7 +171,7 @@
      $body .= "</TABLE></TD></TR></TABLE>\n";
      $body .= "<noscript><p style=\"font-size: 0.85em;\"><b>Note:</b> The time/date above is from our server.  Correct them for your timezone before posting.</p></noscript>";
 
-     $body .= "<UL><TABLE><TR><TD><B>Subject:</B> <I>(optional, for use on longer entries)</I><BR>";
+     $body .= "<UL><TABLE width=90%><TR><TD><B>Subject:</B> <I>(optional, for use on longer entries)</I><BR>";
      $body .= "<INPUT NAME=\"subject\" SIZE=50 MAXLENGTH=100 VALUE=\"" . LJ::ehtml($FORM{'subject'}) . "\"><P>";
 
      if ($spellcheck_html) {
@@ -180,10 +180,10 @@
 	 $body .= "<P>";
      }
 
-     $body .= "<B>Event:</B><BR>";
-     $body .= "<TEXTAREA NAME=\"event\" COLS=50 ROWS=10 WRAP=VIRTUAL>";
+     $body .= "<b>Event:</b><br />";
+     $body .= "<textarea name=\"event\" cols=\"50\" rows=\"10\" wrap=\"soft\" style=\"width: 99%\">";
      $body .= LJ::ehtml($FORM{'event'});
-     $body .= "</TEXTAREA>";
+     $body .= "</textarea>";
      $body .= "<BR>(=DE (HTML okay; by default, newlines will be auto-formatted to <TT>&lt;BR&gt;</TT>) DE=)";
      if ($LJ::SPELLER) {
 	 $body .= "<BR><input type=checkbox name=do_spellcheck value=1 id=\"spellcheck\"> <label for=\"spellcheck\">Spell check entry before posting</label>";
