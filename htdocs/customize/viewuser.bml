@@ -13,7 +13,7 @@
     my @journals = ($remote->{'user'});
     push @journals, LJ::get_shared_journals($dbs, $remote);
     my $journal = $GET{'journal'} || $remote->{'user'};
-    unless (grep { $_ eq $journal } @journals) {  return BML::redirect("/customize/");  }
+    unless (grep { $_ eq $journal } @journals) {  return "$journal (@journals)"; return BML::redirect("/customize/");  }
 
     my $u = $remote;
     $u = LJ::load_user($dbs, $journal) unless $journal eq $remote->{'user'};
@@ -23,6 +23,18 @@
 
     $body = "";
     $title = "User Layer";
+
+    if (@journals > 1) {
+        $body .= "<form method='get' action='viewuser.bml'>";
+        $body .= "Work with journal: ";
+        $body .= LJ::html_select({
+            'name' => 'journal',
+            'selected' => $journal,
+        }, map { $_, $_ } @journals);
+        $body .= " <input type='submit' value='Switch'> </form>";
+    }
+
+    $body .= "&lt;&lt; <a href='/customize/?journal=$journal'>customize</a><p>";
 
     my $err = sub {
         $title = "Error";
@@ -43,7 +55,11 @@
         $layer = LJ::S2::load_layer($dbh, $style->{'layer'}->{'user'});
     }
 
-    return BML::redirect("/customize/") unless $layer;
+    unless ($layer) {
+        $body .= "No user layer";
+        return;
+    }
+
     return $err->("Layer belongs to another user.") unless $layer->{'userid'} == $u->{'userid'};
     return $err->("Layer isn't of type user or theme.") 
         unless $layer->{'type'} eq "user";
