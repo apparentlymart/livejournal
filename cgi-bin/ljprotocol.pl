@@ -14,7 +14,7 @@ sub do_request
     my ($db_arg, $req, $res, $flags) = @_;
 
     # declare stuff
-    my ($user, $userid, $lastitemid, $journaltype, $name, $paidfeatures, $correctpassword, $status, $statusvis, $track, $sth);
+    my ($user, $userid, $journaltype, $name, $paidfeatures, $correctpassword, $status, $statusvis, $track, $sth);
 
     # initialize some stuff
     my $dbs = LJ::make_dbs_from_arg($db_arg);
@@ -58,7 +58,7 @@ sub do_request
     # authenticate user
     unless ($flags->{'noauth'}) # && $req->{'mode'} ne "login")
     {
-        $sth = $dbr->prepare("SELECT user, userid, lastitemid, journaltype, name, paidfeatures, password, status, statusvis, track FROM user WHERE user=$quser");
+        $sth = $dbr->prepare("SELECT user, userid, journaltype, name, paidfeatures, password, status, statusvis, track FROM user WHERE user=$quser");
         $sth->execute;
         if ($dbh->err)
         {
@@ -66,7 +66,7 @@ sub do_request
 	  $res->{'errmsg'} = "Server database error: " . $dbh->errstr;
 	  return;
         }
-        ($user, $userid, $lastitemid, $journaltype, $name, $paidfeatures, $correctpassword, $status, $statusvis, $track) = $sth->fetchrow_array;
+        ($user, $userid, $journaltype, $name, $paidfeatures, $correctpassword, $status, $statusvis, $track) = $sth->fetchrow_array;
 
         if ($user eq "")
         {
@@ -621,13 +621,13 @@ sub do_request
         if ($res->{'errmsg'}) { $res->{'success'} = "FAIL"; return; }
 
 	## why'd I introduce this redudant method into the protocol?
-	if ($req->{'selecttype'} eq "one" && $req->{'itemid'} == -1) {
-	    if ($ownerid != $posterid) {
-		# we have to lookup lastitemid again
-		$sth = $dbh->prepare("SELECT lastitemid FROM user WHERE userid=$ownerid");
-		$sth->execute;
-		($lastitemid) = $sth->fetchrow_array;		
-	    }
+	if ($req->{'selecttype'} eq "one" && $req->{'itemid'} == -1) 
+	{
+	    $sth = $dbh->prepare("SELECT lastitemid FROM userusage ".
+				 "WHERE userid=$ownerid");
+	    $sth->execute;
+	    my ($lastitemid) = $sth->fetchrow_array;		
+	    
 	    if ($lastitemid) {
 		### we know the last one the entered!
 		$sth = $dbh->prepare("SELECT $fields FROM log l, logtext lt WHERE l.ownerid=$ownerid AND l.itemid=$lastitemid AND lt.itemid=$lastitemid");
@@ -1299,7 +1299,7 @@ sub do_request
 	    }
 	}
         
-        $dbh->do("UPDATE user SET timeupdate=NOW(), lastitemid=$itemid WHERE userid=$qownerid");
+        $dbh->do("UPDATE userusage SET timeupdate=NOW(), lastitemid=$itemid WHERE userid=$qownerid");
 
 	if ($track eq "yes") {
 	    my $quserid = $userid+0;
@@ -1406,7 +1406,7 @@ sub do_request
 	    $lastupdate = "0000-00-00 00:00:00";
 	}
 
-	my $sql = "SELECT MAX(u.timeupdate) FROM user u, friends f WHERE u.userid=f.friendid AND f.userid=$userid";
+	my $sql = "SELECT MAX(u.timeupdate) FROM userusage u, friends f WHERE u.userid=f.friendid AND f.userid=$userid";
 	if ($req->{'mask'} and $req->{'mask'} !~ /\D/) {
 	    $sql .= " AND f.groupmask & $req->{mask} > 0";
 	}
