@@ -111,17 +111,28 @@ body<=
      return LJ::bad_input("You are not authorized to bounce this request")
          unless LJ::Support::can_bounce($sp, $remote);
 
-     # check email using BMLCodeBlock::check_email
-     my @emails = split(/\s*,\s*/, $FORM{'bounce_email'});
+     # check given emails using BMLCodeBlock::check_email
+     my @form_emails = split(/\s*,\s*/, $FORM{'bounce_email'});
 
      return LJ::bad_input("You can only send to 5 email addresses.  Go back and remove some.")
-         if @emails > 5;
+         if @form_emails > 5;
      
+     my @emails; # error-checked, good emails
      my @email_errors;
-     foreach my $email (@emails) {
+     foreach my $email (@form_emails) {
+
+         # see if it's a valid lj username
+         unless ($email =~ /\@/) {
+             my $eu = LJ::load_user($email); # $email is a username
+             $email = $eu->{'email'} if $eu;
+         }
+
          check_email($email, \@email_errors);
          @email_errors = map { "<b>$email:</b> $_" } @email_errors;
          return LJ::bad_input(@email_errors) if @email_errors;
+
+         # push onto our list of valid emails
+         push @emails, $email;
      }
 
      # append notice that this message was bounced

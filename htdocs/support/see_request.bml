@@ -441,7 +441,7 @@ body<=
                                       'onchange' => "check_replytype()" },
                                     @ans_type) . "\n";
             $ret .= "<div id='bounce_email' style='display:none'>";
-            $ret .= "&nbsp;Email: " . LJ::html_text({ 'name' => 'bounce_email', 'size' => '25' });
+            $ret .= "&nbsp;Email/User: " . LJ::html_text({ 'name' => 'bounce_email', 'size' => '25' });
             $ret .= "</div>";
         } else {
             $ret .= LJ::html_hidden('replytype', $ans_type[0]) . "\n";
