@@ -898,6 +898,11 @@ sub load_user_theme
 
 package LJ;
 
+sub did_post
+{
+    return ($ENV{'REQUEST_METHOD'} eq "POST");
+}
+
 # called from a HUP signal handler, so intentionally very very simple
 # so we don't core dump on a system without reentrant libraries.
 sub clear_caches
