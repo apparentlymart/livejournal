@@ -192,11 +192,21 @@ sub process {
         }
     }
 
-    # imgsecurity and gallery name defaults are set in LJ::FBUpload::do_upload()
-    if ($lj_headers{'imgsecurity'} =~ /^(private|regusers|friends)$/) {
-        my %groupmap = ( private => 0, regusers => 253, friends => 254 );
+    # if they specified a imgsecurity header but it isn't valid, default
+    # to private.  Otherwise, set to what they specified.
+    if ($lj_headers{'imgsecurity'} &&
+        $lj_headers{'imgsecurity'} !~ /^(private|regusers|friends|public)$/) {
+        $lj_headers{'imgsecurity'} = 0;
+    }
+    if ($lj_headers{'imgsecurity'} =~ /^(private|regusers|friends|public)$/) {
+        my %groupmap = ( private => 0, regusers => 253,
+                         friends => 254, public => 255 );
+
         $lj_headers{'imgsecurity'} = $groupmap{$1};
     }
+
+    $lj_headers{'imgcut'}    ||= 'totals';
+    $lj_headers{'imglayout'} ||= 'vertical';
 
     # upload picture attachments to fotobilder.
     my $fb_upload_errstr;
@@ -217,16 +227,20 @@ sub process {
         $size = '320x240' unless grep { $size eq $_; } @valid_sizes;
 
         # insert image links into post body
-        # FIXME:  lj-imglayout options? (horizonal, vertical,
-        # tabled, separate lj-cut for each image (with cut-text as image name)?)
         $body .= "<lj-cut text='$icount " .
-                  (($icount == 1) ? 'image' : 'images') . "'>";
+                  (($icount == 1) ? 'image' : 'images') . "'>"
+                  if $lj_headers{'imgcut'} eq lc('totals');
+        $body .= "<span style='white-space: nowrap;'>" if $lj_headers{'imglayout'} =~ /^horiz/i;
         foreach my $img (keys %$fb_upload) {
             my $i = $fb_upload->{$img};
+            $body .= "<lj-cut text='$img'>" if $lj_headers{'imgcut'} eq lc('titles');
             $body .= "<a href='$i->{'url'}'>";
-            $body .= "<img src='$i->{'url'}/s$size' alt='$img' border='0'></a><br />";
+            $body .= "<img src='$i->{'url'}/s$size' alt='$img' border='0'></a>";
+            $body .= ($lj_headers{'imglayout'} =~ /^horiz/i) ? '&nbsp;' : '<br />';
+            $body .= "</lj-cut> " if $lj_headers{'imgcut'} eq lc('titles');
         }
-        $body .= "</lj-cut>\n";
+        $body .= "</lj-cut>\n" if $lj_headers{'imgcut'} eq lc('totals');
+        $body .= "</span>" if $lj_headers{'imglayout'} =~ /^horiz/i;
     }
 
     # at this point, there are either no images in the message ($fb_upload == 1)
@@ -400,7 +414,7 @@ sub check_sig {
 sub upload_images
 {
     my ($entity, $u, $rv, $opts) = @_;
-    return 1 unless LJ::get_cap($u, 'fb_account') && $LJ::FB_SITEROOT;
+    return 1 unless LJ::get_cap($u, 'fb_can_upload') && $LJ::FB_SITEROOT;
 
     my @imgs = get_entity($entity, { type => 'image' });
     return 1 unless scalar @imgs;

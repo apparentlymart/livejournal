@@ -1,5 +1,32 @@
 <?page
 title=>Email gateway settings
+head<=
+    <style type="text/css">
+    .email
+    {
+        width: 50%;
+        font-family: courier;
+        background-color: #efefef;
+        border: dotted #cdcdcd 2px;
+        padding: 5px;
+    }
+    
+    fieldset
+    {
+        border: 1px solid #cdcdcd;
+        margin-bottom: 15px;
+    }
+
+    legend
+    {
+        padding: 2px 10px 2px 10px;
+        border: 1px solid #cdcdcd;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    </style>
+<=head
 body<=
 <?_code
 {
@@ -13,132 +40,368 @@ body<=
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
     my $u = LJ::get_remote();
-    my $mode = $GET{mode};
-    $mode = 'help' unless $u;
-
     return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
+
+    my ($mode, $type) = ($GET{mode}, $GET{type});
+    if ($u) {
+        LJ::load_user_props($u, qw(emailpost_pin emailpost_allowfrom));
+    } else {
+        $mode = 'help';
+    }
 
     # Help text
     if ($mode eq 'help') {
 
         my $ret;
-        my $need_login;
         my $user = $u ? $u->{user} : 'exampleusername';
-        $need_login = 1 unless $u;
+        my $need_login = (! $u && ! $GET{mode}) ? 1 : 0;
 
-        LJ::load_user_props($u, qw(emailpost_pin emailpost_allowfrom));
         my @address = split(/\s*,\s*/, $u->{emailpost_allowfrom});
-        my $addr = $address[0] || 'allowed_sender@example.com';
-        my $pin = $u->{emailpost_pin} || 'PIN';
-        my $to = "To: $user" . '@' . $LJ::EMAIL_POST_DOMAIN . '<br />'; 
+        my $addr    = $address[0] || 'allowed_sender@example.com';
+        my $pin     = $u->{emailpost_pin} || 'PIN';
+        my $to      = "To: $user" . '@' . $LJ::EMAIL_POST_DOMAIN . '<br />'; 
+        my $to_pin  = "To: $user+$pin" . '@' . $LJ::EMAIL_POST_DOMAIN . '<br />'; 
         my $subject = "Subject: Neat, I can post via email." . '<br /><br />';
-        my $from = "From: $addr <br />";
-        my $body = "This is the body of my post.";
+        my $from    = "From: $addr <br />";
+        my $body    = "This is the body of my post.";
 
         if ($need_login) {
             $ret .= '<?h1 Please log in! h1?>';
             $ret .= "<?p $ML{'error.noremote'} p?>";
         }
 
-        $ret .= '<?h1 How does this feature work? h1?>';
-        $ret .= '<?p Email posting uses normal email messages to post to your journal or a community.
+        my @topics = (
+            {
+                name  => 'pin',
+                title => 'Pin usage examples',
+                url   => '?mode=help&type=pin', 
+                text  => qq{
+                    <?h1 PIN usage examples h1?><br />
+
+                    <fieldset><legend>PIN in email address</legend>
+                    <div class='email'>
+                    To: $user<b>+$pin</b>\@$LJ::EMAIL_POST_DOMAIN<br />
+                    $from
+                    $subject
+                    $body
+                    </div></fieldset>
+    
+                    <fieldset><legend>PIN in subject</legend>
+                    <div class='email'>
+                    $to
+                    $from
+                    Subject: <b>+$pin</b> Post subject <br /><br />
+                    $body
+                    </div></fieldset>
+
+                    <fieldset><legend>PIN in body</legend>
+                    <div class='email'>
+                    $to
+                    $from
+                    $subject
+                    <b>+$pin</b> $body
+                    </div></fieldset>
+                }
+            },
+
+            {
+                name  => 'optional',
+                title => 'Optional features',
+                url   => '?mode=help&type=optional',
+                text  => qq{
+                    <?h1 Optional features h1?><br />
+
+                    <fieldset><legend>Posting to a community</legend>
+                    <?p Simply embed the community name in the email address. p?>
+                    <div class='email'>
+                    To: $user.<b>community</b>+$pin\@$LJ::EMAIL_POST_DOMAIN<br />
+                    $from
+                    $subject
+                    $body
+                    </div></fieldset>
+
+                    <fieldset><legend>Removing unwanted text</legend>
+                    <?p All text below two or more dashes or underscores ("--" or "__")
+                    on a line by itself will be automatically removed.
+                    The red text below won't show up in your posting. p?>
+                    <div class='email'>
+                    $to_pin
+                    $from
+                    $subject
+                    $body
+                    <br />--<br />
+                    <font color='red'>
+                    This text and anything underneath it will be ignored,
+                    including automatic signatures added by free email services.<br />
+                    __________________________________________________<br />
+                    Try the all new SUPER FREE MAIL version 17 today!!!<br />
+                    </font></div></fieldset>
+
+                    <fieldset><legend>Hyphens and underscores</legend>
+                    <?p To compensate for mobile phones that don't have an underscore key,
+                    you may substitute a hyphen in their place inside any user or
+                    community account name. The hyphens will be automatically converted
+                    to underscores. p?>
+                    <div class='email'>
+                    To: <b>some-user.some-community</b>+$pin</b>\@$LJ::EMAIL_POST_DOMAIN<br />
+                    $from
+                    $subject
+                    $body
+                    </div></fieldset>
+                }
+            },
+
+            {
+                name  => 'headers',
+                title => 'LJ headers and security',
+                url   => '?mode=help&type=headers',
+                text  => qq{
+                    <?h1 LJ headers h1?><br />
+
+                    <fieldset><legend>Journal entry options</legend>
+                    <?p Most journal specific features can be set via "lj-headers" in the
+                    body of your message. The lj-headers should be at the top of your message,
+                    separated by a newline.  All lj-headers are completely optional, and simply
+                    override your journal defaults. p?>
+                    <div class='email'>
+                    $to_pin
+                    $from
+                    $subject
+                    <b>lj-userpic:</b> pict keywords<br />
+                    <b>lj-mood:</b> happy<br />
+                    <b>lj-music:</b> The Pixies: Where is my mind?<br />
+                    <b>lj-comments:</b> ("off" or "noemail")<br />
+                    <br />
+                    $body
+                    </div></fieldset>
+
+                    <fieldset><legend>Journal entry security</legend>
+                    <?p Security options are set via the lj-header "lj-security". 
+                    If the security type specified is unknown, the journal entry defaults
+                    to private.  If no security is specified, the entry is posted according
+                    to your default journal security. p?>
+                    <div style="margin-left:40px">
+                    <b>lj-security:</b> public<br />
+                    <div style="margin-left:40px">The post is posted publicly.</div><br />
+                    </div>
+                    <div style="margin-left:40px">
+                    <b>lj-security:</b> private<br />
+                    <div style="margin-left:40px">The post is posted privately.</div><br />
+                    </div>
+                    <div style="margin-left:40px">
+                    <b>lj-security:</b> friends<br />
+                    <div style="margin-left:40px">The post can only be viewed by those on your friends list.</div><br />
+                    </div>
+                    <div style="margin-left:40px">
+                    <b>lj-security:</b> friendgroup<br />
+                    <div style="margin-left:40px">This is literally the name of a friend group. 
+                    Only friends belonging to that group can view the post.
+                    <br />Example: lj-security: <b>my friends</b></div><br />
+                    </div></fieldset>
+                }
+            },
+
+            {
+                name  => 'advanced',
+                title => 'Advanced usage',
+                url   => '?mode=help&type=advanced',
+                text  => qq{
+                    <?h1 Advanced usage h1?><br />
+
+                    <a name="pgp"></a>
+                    <fieldset><legend>PGP/GPG message signing <img src="/img/key.gif" width="16" height="16"></legend>
+                    <?p If you specify "<b>PGP</b>" as your PIN,
+                    allowed sender addresses and saved PIN are completely ignored.
+                    Your email will only be posted if it is signed with a valid PGP/GPG private key. p?>
+                    <?p You must first upload your public key <a href="/manage/pubkey.bml">here</a>. p?>
+                    <div class='email'>
+                    To: $user<b>+PGP</b>\@$LJ::EMAIL_POST_DOMAIN<br />
+                    From: anywhere\@example.com <br />
+                    $subject
+                    $body
+                    <br />This body should be properly signed with my private key.
+                    </div></fieldset>
+                }
+            },
+        );
+
+        if ($LJ::FB_SITEROOT && %LJ::FOTOBILDER_IP) {
+            $subject = "Subject: Neat, I can post pictures via email.<br /><br />";
+            $body    = "This is the body of my post, with image attachments.";
+            splice @topics, -1, 0,
+            {
+                name  => 'images',
+                title => 'Image attachments',
+                url   => '?mode=help&type=images', 
+                subject => 
+                body =>
+                text  => qq{
+                    <?h1 Attaching images h1?><br />
+
+                    <?p
+                    If you have Photo Hosting access (and enough disk quota),
+                    any image you attach to your email message will be
+                    automatically uploaded to your
+                    <a href='$LJ::FB_SITEROOT'>$LJ::FB_DOMAIN</a> account
+                    and displayed in your journal entry.
+
+                    All images are displayed under a <a
+                    href='/support/faqbrowse.bml?faqid=75'>lj-cut</a>. 
+
+                    Using <a href='?mode=help&type=headers'>lj-headers</a>,
+                    You can change the way the images look in your journal, 
+                    as well as set various image attributes.
+                    p?><br />
+
+                    <fieldset><legend>Choosing a gallery</legend>
+                    <?p You can specify what photo gallery you want your
+                    attachments uploaded into using the <b>lj-gallery</b> header.
+                    If unspecified, the default gallery is 'LJ_emailpost'.  If
+                    you decide to move your images into different galleries in
+                    the future, the images posted in your journal will still
+                    work correctly.  p?>
+                    <div class='email'>
+                    $to
+                    $from
+                    $subject
+                    <b>lj-gallery:</b> vacation photos<br />
+                    <br />
+                    $body
+                    </div></fieldset>
+
+                    <fieldset><legend>Image security</legend>
+                    <?p Images are publicly viewable by default. Use the
+                    <b>lj-imgsecurity</b> header to change this behavior.
+                    Please note that image security is separate from your 
+                    journal entry security!  For example, you can have a
+                    journal entry that is private, while the pictures within
+                    it are public. This feature only changes the security
+                    on the images themselves - not the journal entry. p?>
+                    <p? Valid options are "private", "regusers", or "friends". p?>
+                    <div class='email'>
+                    $to
+                    $from
+                    $subject
+                    <b>lj-imgsecurity:</b> private<br />
+                    <br />
+                    $body
+                    </div></fieldset>
+
+                    <fieldset><legend>Changing the image display size</legend>
+                    <?p You may attach images of any size.  They will be displayed
+                    in your journal at a maximum size of 640x480.  The default size
+                    is 320x240.  You may specify a size using the <b>lj-imgsize</b>
+                    header.  p?>
+                    <?p Valid sizes are "100x100", "320x240", and "640x480". p?>
+                    <div class='email'>
+                    $to
+                    $from
+                    $subject
+                    <b>lj-imgsize:</b> 640x480<br />
+                    <br />
+                    $body
+                    </div></fieldset>
+
+                    <fieldset><legend>Changing image layout</legend>
+                    <?p If you attach multiple images, you can change the way they
+                    appear in your journal via the <b>lj-imglayout</b> header.<br /><br />
+                    By default, multiple images will be placed in a vertical layout:<br />
+                    <img src='$LJ::IMGPREFIX/imageplaceholder2.png' width='35' height='35'><br />
+                    <img src='$LJ::IMGPREFIX/imageplaceholder2.png' width='35' height='35'><br />
+                    <img src='$LJ::IMGPREFIX/imageplaceholder2.png' width='35' height='35'><br />
+                    <br />
+
+                    Currently, the only other option is "horizontal". p?>
+                    <span style='white-space: nowrap;'>
+                    <img src='$LJ::IMGPREFIX/imageplaceholder2.png' width='35' height='35'> &nbsp;
+                    <img src='$LJ::IMGPREFIX/imageplaceholder2.png' width='35' height='35'> &nbsp;
+                    <img src='$LJ::IMGPREFIX/imageplaceholder2.png' width='35' height='35'>
+                    </span>
+                    <br /><br />
+                    <div class='email'>
+                    $to
+                    $from
+                    $subject
+                    <b>lj-imglayout:</b> horizontal<br />
+                    <br />
+                    $body
+                    </div></fieldset>
+
+                    <fieldset><legend>lj-cut behavior</legend>
+                    <?p All images are placed in your journal under a
+                    <a href='/support/faqbrowse.bml?faqid=75'>lj-cut</a>. 
+                    By default, the cut description is the number of images uploaded.
+                    If you attached 3 images in your email message, the lj-cut would
+                    read, "( 3 images )".  Setting the <b>lj-imgcut</b> header to
+                    "titles" changes the cut caption to the title of the filename, 
+                    one cut per image. "( emo.jpg ) ( pict002.jpg ) ( me_and_bob.jpg )" p?>
+                    <div class='email'>
+                    $to
+                    $from
+                    $subject
+                    <b>lj-imgcut:</b> titles<br />
+                    <br />
+                    $body
+                    </div></fieldset>
+
+                }
+            };
+        }
+
+        # index by name, record order
+        my %topics_by_name;
+        my $ct = 0;
+        foreach my $t (@topics) {
+            $t->{order} = $ct;
+            $topics_by_name{$t->{name}} = $t;
+            $ct++;
+        }
+        my $topic = $topics_by_name{$type};
+
+        if (! $type) {
+            $ret .= <<EOT;
+            <?h1 How does this feature work? h1?>
+            <?p Email posting uses normal email messages to post to your journal or a community.
             Your PIN needs to be embedded in the email address, subject, or body of the message.
             Embed your PIN by prefixing it with the <b>+</b> symbol.  You must be sending the message
             from an email address on your "Allowed sender addresses" list. If you embed your PIN
-            in either the subject or the body, it will be automatically removed before posting. p?>';
+            in either the subject or the body, it will be automatically removed before posting. p?>
 
-        $ret .= '<?h1 Basic usage h1?><br />';
+            <?p Posting via email permits many options to be set on a per message basis.   Because
+            of this complexity, we've separated examples into different topics.  
+            Please select from the list below: p?>
+EOT
+        }
 
-        $ret .= '<?h2 PIN in email address h2?>';
-        $ret .= '<div style="margin-left:40px">';
-        $ret .= "To: $user". '<b>+' . $pin . '</b>@' . $LJ::EMAIL_POST_DOMAIN . '<br />';
-        $ret .= $from . $subject . $body;
-        $ret .= '</div><br />';
-        
-        $ret .= '<?h2 PIN in subject h2?>';
-        $ret .= '<div style="margin-left:40px">' ;
-        $ret .= $to . $from;
-        $ret .= "Subject: <b>+$pin</b> Post subject <br /><br />";
-        $ret .= $body;
-        $ret .= '</div><br />';
+        # list of topics
+        $ret .= '<ul>';
+        foreach (@topics) {
+            $ret .= '<li>';
+            if ($type eq $_->{name}) {
+                $ret .= "<b>$_->{title}</b>";
+            } else {
+                $ret .= "<a href='$_->{url}'>$_->{title}</a>";
+            }
+            $ret .= '</li>';
+        }
+        $ret .= "<li><a href='emailpost.bml'>Manage your emailpost settings</a></li>";
+        $ret .= '</ul>';
+        $ret .= '<hr /><br />' if $type;
 
-        $ret .= '<?h2 PIN in body h2?>';
-        $ret .= '<div style="margin-left:40px">';
-        $ret .= $to . $from . $subject;
-        $ret .= "<b>+$pin</b> " . $body;
-        $ret .= '</div><br /><br />';
+        # content
+        $ret .= $topic->{text} if $topic;
+        $ret .= "<br />";
 
-        $ret .= '<?h1 Optional features h1?><br />';
-
-        $ret .= '<?h2 Posting to a community h2?>';
-        $ret .= '<?p Simply embed the community name in the email address. p?>';
-        $ret .= '<div style="margin-left:40px">';
-        $ret .= "To: $user" . '.<b>community</b>+' . $pin . '@' . $LJ::EMAIL_POST_DOMAIN . '<br />';
-        $ret .= $from . $subject . $body;
-        $ret .= '</div><br />';
-
-        $ret .= '<?h2 Removing unwanted text h2?>';
-        $ret .= '<?p All text below two or more dashes or underscores ("--" or "__") on a line by itself will be automatically removed. The red text below won\'t show up in your posting. p?>';
-        $ret .= '<div style="margin-left:40px">';
-        $ret .= "To: $user+$pin" . '@' . $LJ::EMAIL_POST_DOMAIN . '<br />';
-        $ret .= $from . $subject . $body;
-        $ret .= "<br />--<br /><font color='red'>";
-        $ret .= "This text and anything underneath it will be ignored, including automatic signatures added by free email services.<br />";
-        $ret .= '_' x 50 . "<br />Try the all new SUPER FREE MAIL version 17 today!!!<br />";
-        $ret .= '</font></div><br />';
-
-        $ret .= '<?h2 Hyphens and underscores h2?>';
-        $ret .= '<?p To compensate for mobile phones that don\'t have an underscore key, you may substitute a hyphen in their place inside any user or community account name. The hyphens will be automatically converted to underscores. p?>';
-        $ret .= '<div style="margin-left:40px">';
-        $ret .= 'To: <b>some-user.some-community</b>+' . $pin . '</b>@' . $LJ::EMAIL_POST_DOMAIN . '<br />';
-        $ret .= $from . $subject . $body;
-        $ret .= '</div><br />';
-
-        $ret .= '<?h2 Journal entry options h2?>';
-        $ret .= '<?p Most journal specific features can be set via "lj-headers" in the body of your message. The lj-headers should be at the top of your message, separated by a newline. p?>';
-        $ret .= '<div style="margin-left:40px">';
-        $ret .= "To: $user+$pin" . '@' . $LJ::EMAIL_POST_DOMAIN . '<br />';
-        $ret .= $from . $subject;
-        $ret .= '<b>lj-userpic:</b> pict keywords<br />';
-        $ret .= '<b>lj-mood:</b> happy<br />';
-        $ret .= '<b>lj-music:</b> The Pixies: Where is my mind?<br />';
-        $ret .= '<b>lj-comments:</b> ("off" or "noemail")<br />';
-        $ret .= '<br />' . $body;
-        $ret .= '</div><br />';
-
-        $ret .= '<?h2 Journal entry security h2?>';
-        $ret .= '<?p Security options are set via the lj-header "lj-security".  If the security type specified is unknown, the journal entry defaults to private.  If no security is specified, the entry is posted according to your default journal security. p?>';
-        $ret .= '<div style="margin-left:40px">';
-        $ret .= '<b>lj-security:</b> public<br />';
-        $ret .= '<div style="margin-left:40px">The post is posted publicly.</div><br />';
-        $ret .= '</div>';
-        $ret .= '<div style="margin-left:40px">';
-        $ret .= '<b>lj-security:</b> private<br />';
-        $ret .= '<div style="margin-left:40px">The post is posted privately.</div><br />';
-        $ret .= '</div>';
-        $ret .= '<div style="margin-left:40px">';
-        $ret .= '<b>lj-security:</b> friends<br />';
-        $ret .= '<div style="margin-left:40px">The post can only be viewed by those on your friends list.</div><br />';
-        $ret .= '</div>';
-        $ret .= '<div style="margin-left:40px">';
-        $ret .= '<b>lj-security:</b> friendgroup<br />';
-        $ret .= '<div style="margin-left:40px">This is literally the name of a friend group.  Only friends belonging to that group can view the post.<br />Example: lj-security: <b>my friends</b></div><br />';
-        $ret .= '</div><br /><br />';
-
-        $ret .= '<?h1 Advanced usage h1?><br />';
-
-        $ret .= '<a name="pgp"></a>';
-        $ret .= '<?h2 PGP/GPG message signing <img src="/img/key.gif" width="16" height="16"> h2?>';
-        $ret .= '<?p If you specify "<b>PGP</b>" as your PIN,
-                    allowed sender addresses and saved PIN are completely ignored.
-                    Your email will only be posted if it is signed with a valid PGP/GPG private key.
-                    You must first upload your public key <a href="/manage/pubkey.bml">here</a>. p?>';
-        $ret .= '<div style="margin-left:40px">';
-        $ret .= "To: $user<b>+PGP</b>" . '@' . $LJ::EMAIL_POST_DOMAIN . '<br />';
-        $ret .= 'From: anywhere@example.com <br />';
-        $ret .= $subject . $body;
-        $ret .= '<br />This body should be properly signed with my private key.'; 
-        $ret .= '</div><br />';
+        # next/last links
+        if ($topic->{order} && $topics[$topic->{order} - 1]) {
+            my $lastt = $topics[$topic->{order} - 1];
+            $ret .= "[ &lt;&lt; <a href='$lastt->{url}'>$lastt->{title}</a> ] &nbsp; ";
+        }
+        if ($topics[$topic->{order} + 1]) {
+            $topic->{order} = -1 if ! $type; 
+            my $nextt = $topics[$topic->{order} + 1];
+            $ret .= "[ <a href='$nextt->{url}'>$nextt->{title}</a> &gt;&gt; ]";
+        }
 
         return $ret;
     }
@@ -189,7 +452,6 @@ body<=
     }
 
     # Initial page
-    LJ::load_user_props($u, qw(emailpost_pin));
     my $addrlist = LJ::Emailpost::get_allowed_senders($u);
     my @address;
     foreach (sort keys %$addrlist) { push(@address, $_) }

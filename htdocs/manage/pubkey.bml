@@ -67,7 +67,7 @@ body<=
     $ret .= "<?p ";
     $ret .= BML::ml('.info', {
         aoptsinfo => "href='/userinfo.bml'",
-        aoptshelp => "href='emailpost.bml?mode=help\#pgp'",
+        aoptshelp => "href='emailpost.bml?mode=help&type=advanced\#pgp'",
     });
     $ret .= " p?>";
     $ret .= "<?p ";
