@@ -334,19 +334,14 @@ BODY<=
                  "$u->{'userid'}, 'L', $init->{'itemid'}, $insertid, '$pub')");
      }
 
-     my @prefix = ("");
-     if ($LJ::USE_RECENT_TABLES) { push @prefix, "recent_"; }
-     foreach my $pfx (@prefix) {
-         if ($clustered) {
-             if ($pfx) {
-                 $dbcm->do("INSERT INTO recent_talktext2 (journalid, jtalkid, subject, body, datepost) ".
-                           "VALUES ($u->{'userid'}, $insertid, $qsubject, $qbody, NOW())");
-             } else {
-                 $dbcm->do("INSERT INTO talktext2 (journalid, jtalkid, subject, body) ".
-                           "VALUES ($u->{'userid'}, $insertid, $qsubject, $qbody)");
-             }
-             die $dbcm->errstr if $dbcm->err;
-         } else {
+     if ($clustered) {
+         $dbcm->do("INSERT INTO talktext2 (journalid, jtalkid, subject, body) ".
+                   "VALUES ($u->{'userid'}, $insertid, $qsubject, $qbody)");
+         die $dbcm->errstr if $dbcm->err;
+     } else {
+         my @prefix = ("");
+         if ($LJ::USE_RECENT_TABLES) { push @prefix, "recent_"; }
+         foreach my $pfx (@prefix) {
              $dbh->do("INSERT INTO ${pfx}talktext (talkid, subject, body) ".
                       "VALUES ($insertid, $qsubject, $qbody)");
          }

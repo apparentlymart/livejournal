@@ -191,17 +191,19 @@ BODY<=
 
  # get all talk rows & their subjects.  will load needed body text later.
  {
-     # need to decide if it's safe to get all data from a slave.  if
-     # the owning post is newer than $LJ::RECENT_DAYS, then obviously
-     # all replies are newer to, and they all exist on a slave.  or,
-     # if slaves are full copies, then it's also okay.
-     my $db = $dbcm;
+     # clustered always gets from a reader (no recent tables exist).
+     # otherwise, need to decide if it's safe to get all data from a
+     # slave.  if the owning post is newer than $LJ::RECENT_DAYS, then
+     # obviously all replies are newer to, and they all exist on a
+     # slave.  or, if slaves are full copies, then it's also okay.
+     my $db = $dbcr;
      my $recent = "";
-     if (! $LJ::USE_RECENT_TABLES) {
-         $db = $dbcr;
-     } elsif ($item->{'secondsold'} < $LJ::RECENT_DAYS*86400) {
-         $db = $dbcr;
-         $recent = "recent_";
+     if (! $clustered && $LJ::USE_RECENT_TABLES) {
+         if ($item->{'secondsold'} < $LJ::RECENT_DAYS*86400) {
+             $recent = "recent_";
+         } else {
+             $db = $dbh;
+         }
      }
 
      unless ($db) {
@@ -211,7 +213,7 @@ BODY<=
      if ($clustered) {
          $sth = $db->prepare("SELECT t.jtalkid AS 'talkid', t.posterid, u.user AS 'userpost', ".
                              "t.datepost, t.parenttalkid, tt.subject, t.state ".
-                             "FROM talk2 t, ${recent}talktext2 tt ".
+                             "FROM talk2 t, talktext2 tt ".
                              "LEFT JOIN useridmap u ON u.userid=t.posterid ".
                              "WHERE t.journalid=$u->{'userid'} AND tt.journalid=$u->{'userid'} ".
                              "AND t.nodetype='L' AND t.nodeid=$itemid AND ".

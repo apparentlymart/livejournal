@@ -2319,7 +2319,7 @@ sub get_logtext2
     # available, hit that first.
     my @sources = ([$dbh, "logtext2"]);
     if ($dbr) {
-        unshift @sources, [ $dbr, $LJ::USE_RECENT_TABLES ? "recent_logtext2" : "logtext2" ];
+        unshift @sources, [ $dbr, "logtext2" ];
     }
 
     my $snag_what = "subject, event";
@@ -2378,7 +2378,7 @@ sub get_talktext2
     # available, hit that first.
     my @sources = ([$dbh, "talktext2"]);
     if ($dbr) {
-        unshift @sources, [ $dbr, $LJ::USE_RECENT_TABLES ? "recent_talktext2" : "talktext2" ];
+        unshift @sources, [ $dbr, "talktext2" ];
     }
 
     while (@sources && %need)
@@ -2443,14 +2443,9 @@ sub get_logtext2multi
         foreach my $c (keys %need)
         {
             next unless keys %{$need{$c}};
-            my $db;
             my $table = "logtext2";
-            if ($pass == 1) {
-                $db = LJ::get_dbh("cluster${c}slave");
-                $table = "recent_logtext2" if $LJ::USE_RECENT_TABLES;
-            } else {
-                $db = LJ::get_dbh("cluster${c}");
-            }
+            my $db = $pass == 1 ? LJ::get_dbh("cluster${c}slave") :
+                LJ::get_dbh("cluster${c}");
             next unless $db;
 
             my $fattyin;
@@ -5071,7 +5066,7 @@ sub delete_item2
     }) if $quick;
 
     # delete from clusters
-    foreach my $t (qw(logtext2 recent_logtext2 logprop2 logsec2 logsubject2)) {
+    foreach my $t (qw(logtext2 logprop2 logsec2 logsubject2)) {
         $dbcm->do("DELETE FROM $t WHERE journalid=$jid AND jitemid=$jitemid");
     }
     LJ::dudata_set($dbcm, $jid, 'L', $jitemid, 0);
@@ -5102,7 +5097,7 @@ sub delete_item2
 # name: LJ::delete_talkitem
 # des: Deletes a comment and associated metadata.
 # info: The tables [dbtable[talk2]], [dbtabke[talkprop2]], [dbtable[talktext2]],
-#       [dbtable[recent_talktext2]], and [dbtable[dudata]] are all
+#       and [dbtable[dudata]] are all
 #       deleted from, immediately. Unlike [func[LJ::delete_item2]], there is
 #       no $quick flag to queue the delete for later, nor is one really
 #       necessary, since deleting from 4 tables won't be too slow.
@@ -5125,7 +5120,7 @@ sub delete_talkitem
         $dbcm->do("UPDATE talk2 SET state='D' $where");
         $dbcm->do("UPDATE talktext2 SET subject=NULL, body=NULL $where");
     } else {
-        push @delfrom, qw(talk2 talktext2 recent_talktext2);
+        push @delfrom, qw(talk2 talktext2);
     }
 
     foreach my $t (@delfrom) {

@@ -3,8 +3,8 @@
 #
 
 mark_clustered("useridmap", "userbio", "syncupdates2", "cmdbuffer", "dudata",
-               "log2", "logtext2", "logsubject2", "logprop2", "logsec2", "recent_logtext2",
-               "talk2", "talkprop2", "talktext2", "recent_talktext2", "talkleft",
+               "log2", "logtext2", "logsubject2", "logprop2", "logsec2", 
+               "talk2", "talkprop2", "talktext2", "talkleft",
                "userpicblob2", "events"
                );
 
@@ -1022,18 +1022,6 @@ CREATE TABLE logsubject2 (
 ) max_rows=100000000
 EOC
 
-register_tablecreate("recent_logtext2", <<'EOC');
-CREATE TABLE recent_logtext2 (
-  journalid INT UNSIGNED NOT NULL,
-  jitemid MEDIUMINT UNSIGNED NOT NULL,
-  logtime DATETIME NOT NULL,
-  subject VARCHAR(255) DEFAULT NULL,
-  event TEXT,
-  PRIMARY KEY (journalid, jitemid),
-  INDEX idxtime (logtime)
-) 
-EOC
-
 register_tablecreate("logprop2", <<'EOC');
 CREATE TABLE logprop2 (
   journalid  INT UNSIGNED NOT NULL,
@@ -1088,18 +1076,6 @@ CREATE TABLE talktext2 (
   body TEXT,
   PRIMARY KEY (journalid, jtalkid)
 ) max_rows=100000000
-EOC
-
-register_tablecreate("recent_talktext2", <<'EOC');
-CREATE TABLE recent_talktext2 (
-  journalid INT UNSIGNED NOT NULL,
-  jtalkid MEDIUMINT UNSIGNED NOT NULL,
-  datepost DATETIME NOT NULL,
-  subject VARCHAR(255) DEFAULT NULL,
-  body TEXT,
-  PRIMARY KEY (journalid, jtalkid),
-  INDEX idxtime (datepost)
-) 
 EOC
 
 register_tablecreate("talkleft", <<'EOC');

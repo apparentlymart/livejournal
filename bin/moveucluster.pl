@@ -58,11 +58,6 @@ if ($sclust) {
 
 my $userid = $u->{'userid'};
 
-my $recentpoint;
-if ($LJ::USE_RECENT_TABLES) {
-    $recentpoint = $dbh->selectrow_array("SELECT DATE_SUB(NOW(), INTERVAL $LJ::RECENT_DAYS DAY)");
-}
-
 # find readonly cap class, complain if not found
 my $readonly_bit = undef;
 foreach (keys %LJ::CAP) {
@@ -358,12 +353,6 @@ sub movefrom0_logitem
     my $bytes = length($itemtext->{'event'}) + length($itemtext->{'subject'});
     $replace_into->("dudata", "(userid, area, areaid, bytes)", 50, $userid, 'L', $jitemid, $bytes);
 
-    # is it in recent_?
-    if ($recentpoint && $item->{'logtime'} gt $recentpoint) {
-        $replace_into->("recent_logtext2", "(journalid, jitemid, logtime, subject, event)", 10,
-                        $userid, $jitemid, $item->{'logtime'}, map { $itemtext->{$_} } qw(subject event));
-    }
-
     # add the logsec item, if necessary:
     if ($item->{'security'} ne "public") {
         $replace_into->("logsec2", "(journalid, jitemid, allowmask)", 50,
@@ -442,13 +431,6 @@ sub movefrom0_talkitem
     my $bytes = length($itemtext->{'body'}) + length($itemtext->{'subject'});
     $replace_into->("dudata", "(userid, area, areaid, bytes)", 50,
                     $userid, 'T', $jtalkid, $bytes);
-
-    # is it in recent_?
-    if ($recentpoint && $item->{'datepost'} gt $recentpoint) {
-        $replace_into->("recent_talktext2", "(journalid, jtalkid, datepost, subject, body)",
-                        20, $userid, $jtalkid, $item->{'datepost'}, 
-                        map { $itemtext->{$_} } qw(subject body));
-    }
 
     # copy its logprop over:
     while (my $lp = $treader->(50, "SELECT talkid, tpropid, value FROM talkprop", $talkid)) {
