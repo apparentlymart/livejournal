@@ -217,7 +217,7 @@ sub trans
         if (Apache->header_in("Cookie") =~ /\bljuniq\s*=\s*([a-zA-Z0-9]{15}):(\d+)/) {
             ($uniq, $uniq_time) = ($1, $2);
             $r->notes("uniq" => $uniq);
-            if (LJ::sysban_check('uniq', $uniq) && $r->uri ne $LJ::BLOCKED_BOT_URI) {
+            if (LJ::sysban_check('uniq', $uniq) && index($r->uri, $LJ::BLOCKED_BOT_URI) != 0) {
                 $r->handler("perl-script");
                 $r->push_handlers(PerlHandler => \&blocked_bot );
                 return OK;
@@ -243,13 +243,13 @@ sub trans
 
     # check for sysbans on ip address
     foreach my $ip (@req_hosts) {
-        if (LJ::sysban_check('ip', $ip) && $r->uri ne $LJ::BLOCKED_BOT_URI) {
+        if (LJ::sysban_check('ip', $ip) && index($r->uri, $LJ::BLOCKED_BOT_URI) != 0) {
             $r->handler("perl-script");
             $r->push_handlers(PerlHandler => \&blocked_bot );
             return OK;
         }
     }
-    if (LJ::run_hook("forbid_request", $r) && $r->uri ne $LJ::BLOCKED_BOT_URI) {
+    if (LJ::run_hook("forbid_request", $r) && index($r->uri, $LJ::BLOCKED_BOT_URI) != 0) {
         $r->handler("perl-script");
         $r->push_handlers(PerlHandler => \&blocked_bot );
         return OK;
