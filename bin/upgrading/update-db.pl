@@ -152,11 +152,16 @@ if ($opt_pop)
                 print "skipping\n";
                 next;
             }
-            $dbh->do(qq{ UPDATE style SET formatdata=?, is_embedded=?,
-                         is_colorfree=?, lastupdate=? WHERE styleid=$existing },
-                     undef, map { $s->{$_} } qw(formatdata is_embedded is_colorfree lastupdate));
+            my $ros = $dbh->do("UPDATE style SET formatdata=?, is_embedded=?, ".
+                               "is_colorfree=?, lastupdate=? WHERE styleid=$existing",
+                               undef, map { $s->{$_} } qw(formatdata is_embedded is_colorfree lastupdate));
             die $dbh->errstr if $dbh->err;
-            print "updated \#$existing\n";
+            if ($ros > 0) {
+                $dbh->do("DELETE FROM s1stylecache WHERE styleid=$existing");
+                print "updated \#$existing\n";
+            } else {
+                print "unchanged\n";
+            }
             next;
         }
                 
