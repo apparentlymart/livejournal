@@ -131,13 +131,17 @@
                     # and only after deleting the image do we delete the metadata.
                     if ($LJ::USERPIC_BLOBSERVER &&
                         LJ::Blob::delete($u, "userpic", $fmt, $picid)) {
-                        $dbh->do("DELETE FROM userpic WHERE picid=$picid");
                         $deleted = 1;
                     } elsif ($dbcm->do("DELETE FROM userpicblob2 WHERE ".
                                        "userid=? AND picid=?", undef,
                                        $u->{userid}, $picid) > 0) {
-                        $dbh->do("DELETE FROM userpic WHERE picid=$picid");
                         $deleted = 1;
+                    }
+                    if ($deleted) {
+                        $dbh->do("DELETE FROM userpic WHERE picid=?", undef, $picid);
+                        $dbcm->do("DELETE FROM userblob WHERE journalid=? AND blobid=? " .
+                                  "AND domain=?", undef, $u->{'userid'}, $picid,
+                                  LJ::get_blob_domainid('userpic'));
                     }
                     
                     # if we didn't end up deleting, it's either because of 
