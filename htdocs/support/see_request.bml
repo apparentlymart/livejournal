@@ -72,7 +72,7 @@ body<=
      if ($sp->{_cat}->{'public_read'}) {
          $visemail =~ s/^.+\@/********\@/; 
      }
-     $ret .= "$sp->{'reqname'} ($visemail)</TD></TR>\n";
+     $ret .= LJ::eall($sp->{'reqname'}) . " ($visemail)</TD></TR>\n";
  }
 
  ###
