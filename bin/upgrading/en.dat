@@ -2918,6 +2918,10 @@ This could be because: <ol>
 
 /userinfo.bml.label.nofriends=<i>None listed.</i>
 
+/userinfo.bml.label.post=Post to "[[journal]]"
+
+/userinfo.bml.label.postalt=Update your journal
+
 /userinfo.bml.label.reqfinduser=Only users with 'finduser' priv can lookup users by userid.
 
 /userinfo.bml.label.sendmessage=Send Message

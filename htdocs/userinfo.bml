@@ -264,6 +264,18 @@
      my $label = $com ? $ML{'.monitor.comm'} : $ML{'.monitor.user'};
      push @linkele, "<a href='/friends/add.bml?user=$user'><img src='$LJ::IMGPREFIX/btn_addfriend.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>";
 
+     if (LJ::can_use_journal($remote->{'userid'}, $user)) {
+         if($remote_isowner) {
+             $label = $ML{'.label.postalt'};
+         } else {
+             $label = BML::ml('.label.post', {'journal' => $user});
+         }
+
+         $label = LJ::ehtml("$label");
+
+         push @linkele, "<a href='/update.bml?mode=full&usejournal=$user'><img src='$LJ::IMGPREFIX/btn_edit.gif' width='22' height='20' alt='$label' title='$label' align='middle' b\order='0' /></a>";
+     }
+
      $label = $ML{'.label.todo'};
      push @linkele, "<a href='/todo/?user=$user'><img src='$LJ::IMGPREFIX/btn_todo.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>";
 
