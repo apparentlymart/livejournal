@@ -1,4 +1,9 @@
 #!/usr/bin/perl
+#
+
+BEGIN {
+    unshift @INC, "$ENV{'LJHOME'}/cgi-bin";
+}
 
 use FCGI;
 use LJ::Cache;
