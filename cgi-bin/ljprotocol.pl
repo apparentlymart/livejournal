@@ -708,12 +708,12 @@ sub editevent
     # $EndOfTime, then it's backdated.  if they want that off, need to
     # reset rlogtime to real reverse log time.  also need to set
     # rlogtime to $EndOfTime if they're turning backdate on.
-    if ($req->{'prop_opt_backdated'} eq "1" && 
+    if ($req->{'props'}->{'opt_backdated'} eq "1" && 
 	$oldevent->{'rlogtime'} != $LJ::EndOfTime) {
 	$dbh->do("UPDATE log SET rlogtime=$LJ::EndOfTime WHERE ".
 		 "itemid=$qitemid");
     }
-    if ($req->{'prop_opt_backdated'} eq "0" &&
+    if ($req->{'props'}->{'opt_backdated'} eq "0" &&
 	$oldevent->{'rlogtime'} == $LJ::EndOfTime) {
 	$dbh->do("UPDATE log SET rlogtime=$LJ::EndOfTime-UNIX_TIMESTAMP(logtime) ".
 		 "WHERE itemid=$qitemid");
