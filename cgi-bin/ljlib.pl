@@ -4057,6 +4057,7 @@ sub update_user
     }
     return 1 unless @sets;
     my $dbh = LJ::get_db_writer();
+    return 0 unless $dbh;
     { local $" = ",";
       $dbh->do("UPDATE user SET @sets WHERE userid=?", undef,
                @bindparams, $uid) or return 0; }
