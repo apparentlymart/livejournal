@@ -335,10 +335,35 @@ sub create_view_friends
     my ($dbs, $ret, $u, $vars, $remote, $opts) = @_;
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
-
     my $user = $u->{'user'};
+    my $env = $opts->{'env'};
 
-    my $REFRESH_TIME = 20;
+    # fill in all remote details if present (caps, especially)
+    $remote = LJ::load_userid($dbs, $remote->{'userid'}) if $remote;
+
+    # see how often the remote user can reload this page.
+    my $newinterval = LJ::get_cap($remote, "friendsviewupdate") || 1;
+
+    # when are we going to say page was last modified?  back up to the 
+    # most recent time in the past where $time % $interval == 0
+    my $lastmod = time();
+    $lastmod -= $lastmod % $newinterval;
+
+    # see if they have a previously cached copy of this page they
+    # might be able to still use.
+    if ($env->{'HTTP_IF_MODIFIED_SINCE'}) {
+	my $theirtime = LJ::http_to_time($env->{'HTTP_IF_MODIFIED_SINCE'});
+
+	# send back a 304 Not Modified if they say they've reloaded this 
+	# document in the last $newinterval seconds:
+	unless ($theirtime < $lastmod) {
+	    $opts->{'status'} = "304 Not Modified";
+	    $opts->{'nocontent'} = 1;
+	    return 1;
+	}
+    }
+    $opts->{'headers'}->{'Last-Modified'} = LJ::time_to_http($lastmod);
+
     $$ret = "";
 
     my %FORM = ();
@@ -431,7 +456,7 @@ sub create_view_friends
 	my $first = $itemids[0];
 
 	$$ret .= "time = " . scalar(time()) . "<br>";
-	$opts->{'headers'}->{'Refresh'} = "$REFRESH_TIME;URL=$LJ::SITEROOT/users/$user/friends?mode=livecond&amp;lastitemid=$first";
+	$opts->{'headers'}->{'Refresh'} = "30;URL=$LJ::SITEROOT/users/$user/friends?mode=livecond&amp;lastitemid=$first";
 	if ($FORM{'lastitemid'} == $itemids[0]) {
 	    $$ret .= "nothing new!";
 	} else {

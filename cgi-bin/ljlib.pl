@@ -12,6 +12,7 @@ use DBI;
 use Digest::MD5 qw(md5_hex);
 use Text::Wrap;
 use MIME::Lite;
+use HTTP::Date qw();
 
 ########################
 # CONSTANTS
@@ -584,6 +585,32 @@ sub get_query_string
 package LJ;
 
 # <LJFUNC>
+# name: LJ::http_to_time
+# des: Wrapper around HTTP::Date::str2time.  Converts an HTTP
+#      date to a Unix time.  See also [func[LJ::time_to_http]].
+# args: string
+# des-string: HTTP Date.  See RFC 2616 for format.
+# returns: integer; Unix time.
+# </LJFUNC>
+sub http_to_time {
+    my $string = shift;
+    return HTTP::Date::str2time($string);
+}
+
+# <LJFUNC>
+# name: LJ::time_to_http
+# des: Wrapper around HTTP::Date::time2str.  Converts a Unix time
+#      to an HTTP date (RFC 1123 format)  See also [func[LJ::http_to_time]].
+# args: time
+# des-time: Integer; Unix time.
+# returns: String; RFC 1123 date.
+# </LJFUNC>
+sub time_to_http {
+    my $time = shift;
+    return HTTP::Date::time2str($time);
+}
+
+# <LJFUNC>
 # name: LJ::ljuser
 # des: Returns the HTML for an userinfo/journal link pair for a given user 
 #      name, just like LJUSER does in BML.  But files like cleanhtml.pl
@@ -688,7 +715,8 @@ sub get_cap
 {
     my $caps = shift;   # capability bitmask (16 bits), or user object
     my $cname = shift;  # capability limit name
-    if (ref $caps eq "HASH") { $caps = $caps->{'caps'}; }
+    if (! defined $caps) { $caps = 0; }
+    elsif (ref $caps eq "HASH") { $caps = $caps->{'caps'}; }
     my $max = undef;
     foreach my $bit (keys %LJ::CAP) {
 	next unless ($caps & (1 << $bit));
@@ -716,7 +744,8 @@ sub get_cap_min
 {
     my $caps = shift;   # capability bitmask (16 bits), or user object
     my $cname = shift;  # capability name
-    if (ref $caps eq "HASH") { $caps = $caps->{'caps'}; }
+    if (! defined $caps) { $caps = 0; }
+    elsif (ref $caps eq "HASH") { $caps = $caps->{'caps'}; }
     my $min = undef;
     foreach my $bit (keys %LJ::CAP) {
 	next unless ($caps & (1 << $bit));

@@ -2,6 +2,7 @@
 #
 
 use Digest::MD5;
+use HTTP::Date;
 
 my $ret = "";
 
@@ -37,6 +38,7 @@ if ($ENV{'REQUEST_METHOD'} eq "GET") {
 $ret .= "</body></html>\n";
 
 print "ETag: ", Digest::MD5::md5_hex($ret), "\n";
+print "Last-Modified: ", HTTP::Date::time2str(time()), "\n";
 print "Cache-Control: private, must-revalidate\n";
 print "Content-length: ", length($ret), "\n";
 print "Content-Type: text/html\n\n";

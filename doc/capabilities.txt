@@ -45,6 +45,9 @@ LiveJournal capabilities:
  * todosec
    boolean: can use make non-public todo items?
 
+ * friendsviewupdate
+   integer: after how many seconds user see new friends view items
+
 ljcom-specific:
 ---------------
 
