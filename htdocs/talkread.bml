@@ -434,7 +434,7 @@ body<=
  ########## make the navcrap
  my $navcrap;
  if ($pages > 1) {
-     $navcrap .= "<?standout <center><font face='Arial,Helvetica' size='-1'><b>";
+     $navcrap .= "<center><font face='Arial,Helvetica' size='-1'><b>";
      $navcrap .= BML::ml('.pageofpages',{'page'=>$page, 'total'=>$pages}) . "<br />";
      my $left = "<b>&lt;&lt;</b>";
      if ($page > 1) { $left = "<a href='" . BML::self_link({ 'page' => $page-1 }) . "'>$left</a>"; }
@@ -448,7 +448,8 @@ body<=
          $navcrap .= "$link ";
      }
      $navcrap .= "$right";
-     $navcrap .= "</font></center> standout?>\n";
+     $navcrap .= "</font></center>\n";
+     $navcrap = BML::fill_template("standout", { 'DATA' => $navcrap });
  }
  ####### end navcrap
 

@@ -109,9 +109,11 @@ sub link_bar
     push @linkele, $mlink->("/go.bml?${jargent}itemid=$itemid&amp;dir=next", "next_entry");
     
     if (@linkele) {
-        $ret .= "<?standout <table><tr><td valign='middle'>";
-        $ret .= join("&nbsp;&nbsp;", @linkele);
-        $ret .= "</td></tr></table> standout?>";
+        $ret .= BML::fill_template("standout", {
+            'DATA' => "<table><tr><td valign='middle'>" .
+                join("&nbsp;&nbsp;", @linkele) . 
+                "</td></tr></table>",
+            });
     }
 
     return $ret;
