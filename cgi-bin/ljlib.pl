@@ -4626,8 +4626,11 @@ sub make_journal
                 return (2, $1);
             }
 
+            my $forceflag = 0;
+            LJ::run_hooks("force_s1", $u, \$forceflag);
+
             # if none of the above match, they fall through to here
-            if ($u->{'stylesys'} == 2) {
+            if ( !$forceflag && $u->{'stylesys'} == 2 ) {
                 return (2, $u->{'s2_style'});
             }
 
