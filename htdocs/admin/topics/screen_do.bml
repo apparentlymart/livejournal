@@ -1,17 +1,17 @@
 <?_code
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
+ use strict;
+ use vars qw(%FORM);
 
- my ($ret, $sth);
+ my $remote = LJ::get_remote();
+ return $ML{'error.noremote'} unless $remote;
 
- my $remote = LJ::get_remote($dbs);
+ return "You don't have access to do this."
+    unless LJ::remote_has_priv($remote, "topicscreencat");
 
- unless (LJ::remote_has_priv($remote, "topicscreencat")) {
-     return "You don't have access to do this, or you're not logged in.";
- }
+ my $dbh = LJ::get_db_writer();
 
+ my $ret;
  foreach my $field (keys %FORM)
  {
      my $act = $FORM{$field};
@@ -21,25 +21,25 @@
      my $itemid = $2;
 
      if ($act eq "A") {
-         $sth = $dbh->prepare("UPDATE topic_map SET status='on', screendate=NOW(), screenuserid=$remote->{'userid'} WHERE tptopid=$topid AND itemid=$itemid AND status='new'");
-         $sth->execute;
+         my $sth = $dbh->prepare("UPDATE topic_map SET status='on', screendate=NOW(), " .
+                                 "screenuserid=? WHERE tptopid=? AND itemid=? AND status='new'");
+         $sth->execute($remote->{'userid'}, $topid, $itemid);
          if ($sth->rows) {
-             $ret .= "<B>$itemid</B> approved.<BR>\n";
+             $ret .= "<b>$itemid</b> approved.<br />\n";
          } else {
-             $ret .= "<B>$itemid</B> already acted on.<BR>\n";
+             $ret .= "<b>$itemid</b> already acted on.<br />\n";
          }
      }
      if ($act eq "D") {
-         $sth = $dbh->prepare("UPDATE topic_map SET status='deny', screendate=NOW(), screenuserid=$remote->{'userid'} WHERE tptopid=$topid AND itemid=$itemid AND status='new'");
-         $sth->execute;
+         my $sth = $dbh->prepare("UPDATE topic_map SET status='deny', screendate=NOW(), " .
+                                 "screenuserid=? WHERE tptopid=? AND itemid=? AND status='new'");
+         $sth->execute($remote->{'userid'}, $topid, $itemid);
          if ($sth->rows) {
              $ret .= "<B>$itemid</B> denied.<BR>\n";
          } else {
              $ret .= "<B>$itemid</B> already acted on.<BR>\n";
          }
-
      }
-     
  }
 
  return $ret;

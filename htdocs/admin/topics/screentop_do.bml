@@ -1,16 +1,15 @@
 <?_code
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
-
- my ($ret, $sth);
-
- my $remote = LJ::get_remote($dbs);
+ my $remote = LJ::get_remote();
 
  unless (LJ::remote_has_priv($remote, "topicaddtopic")) {
      return "You don't have access to do this, or you're not logged in.";
  }
+
+ my $dbh = LJ::get_db_writer();
+ my $sth;
+
+ my $ret;
 
  foreach my $field (keys %FORM)
  {

@@ -1,11 +1,8 @@
 <?_code
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
-
  my $user = $FORM{'user'};
 
+ my $dbh = LJ::get_db_writer();
  my $sth = $dbh->prepare("SELECT styleid, user, styledes, type, is_embedded, is_colorfree FROM style WHERE is_public='Y' ORDER BY user");
  $sth->execute;
 
