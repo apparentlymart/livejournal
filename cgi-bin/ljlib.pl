@@ -477,6 +477,7 @@ sub get_recent_items
     my $sth;
 
     my @items = ();             # what we'll return
+    my $err = $opts->{'err'};
 
     my $userid = $opts->{'userid'}+0;
 
@@ -583,6 +584,11 @@ sub get_recent_items
                 "FROM log WHERE ownerid=$userid AND $sort_key <= $notafter $secwhere ".
                 "ORDER BY ownerid, $sort_key ".
                 "LIMIT $skip,$itemshow");
+    }
+
+    unless ($logdb) {
+        $$err = "nodb" if ref $err eq "SCALAR";
+        return ();
     }
 
     $sth = $logdb->prepare($sql);
