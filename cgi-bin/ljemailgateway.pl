@@ -234,7 +234,7 @@ sub process {
         foreach my $img (keys %$fb_upload) {
             my $i = $fb_upload->{$img};
             $body .= "<lj-cut text='$img'>" if $lj_headers{'imgcut'} eq lc('titles');
-            $body .= "<a href='$i->{'url'}'>";
+            $body .= "<a href='$i->{'url'}/'>";
             $body .= "<img src='$i->{'url'}/s$size' alt='$img' border='0'></a>";
             $body .= ($lj_headers{'imglayout'} =~ /^horiz/i) ? '&nbsp;' : '<br />';
             $body .= "</lj-cut> " if $lj_headers{'imgcut'} eq lc('titles');
