@@ -13,7 +13,10 @@ page<=
  return;
 _code?><html>
 <head>
-<title>%%TITLE%%</title>
+<title><?_code {
+    my $elhash = $_[2];
+    return $elhash->{'WINDOWTITLE'} || $elhash->{'TITLE'};
+} _code?></title>
 %%HEAD%%
 </head>
 
