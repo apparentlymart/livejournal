@@ -190,8 +190,6 @@ p?>
 
 /community/manage.bml.commlist.actmembers2=Members
 
-/community/manage.bml.commlist.actmoderate=Moderate: [[num]]
-
 /community/manage.bml.commlist.actsettings=<b>[<a href='[[link]]'>Settings</a>]</b>
 
 /community/manage.bml.commlist.actsettings2=Settings

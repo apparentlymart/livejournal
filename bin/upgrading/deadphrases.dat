@@ -11,6 +11,7 @@ general /community/join.bml.label.closedcomm
 
 general /community/manage.bml.actmembers
 general /community/manage.bml.actsettings
+general /community/manage.bml.commlist.actmoderate
 
 general /community/members.bml.manage
 
