@@ -55,9 +55,9 @@ body<=
 
  # deleted and expunged communities won't show up in this
  if (%names) {
-    $ret .= "<table cellpadding='5'><tr><td>$ML{'.commlist.username'}</td>" .
-       "<td>$ML{'.commlist.title'}</td><td>$ML{'.commlist.actions'}</td></tr>";
-    foreach my $id (sort { $names{$a}->[1] cmp $names{$b}->[1] } keys %names) {
+    $ret .= "<table cellpadding='5'><tr><th>$ML{'.commlist.username'}</th>" .
+       "<th>$ML{'.commlist.title'}</th><th>$ML{'.commlist.actions'}</th></tr>";
+    foreach my $id (sort { $names{$a}->[0] cmp $names{$b}->[0] } keys %names) {
         my $user = $names{$id}->[0];
         my $name = $names{$id}->[1];
         $ret .= "<tr><td><?ljcomm $user ljcomm?></td><td>" . LJ::eall($name) . "</td><td>";
