@@ -190,11 +190,12 @@ body<=
 
         # user clicked the preview button
         if ($POST{'action:preview'}) {
+            my ($event, $subject) = ($POST{'event'}, $POST{'subject'});
+            LJ::CleanHTML::clean_subject(\$subject);
+            LJ::CleanHTML::clean_comment(\$event, $POST{'prop_opt_preformatted'});
             $ret .= "<h2>$ML{'.preview.header'}</h2>";
             $ret .= "<?p $ML{'.preview.text'} p?>";
-            $ret .= "<b>Subject</b>: " . LJ::ehtml($POST{'subject'}) . '<br /><br />';
-            my $event = $POST{'event'};
-            LJ::CleanHTML::clean_comment(\$event, $POST{'prop_opt_preformatted'});
+            $ret .= "<b>Subject</b>: $subject<br /><br />";
             $ret .= "<b>Event</b>: <br/>";
             $ret .= $event;
             $ret .= '<br /><br />';

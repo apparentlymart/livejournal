@@ -206,11 +206,12 @@
         $out .= "<noscript><p align='center' style=\"font-size: 0.85em;\">$ML{'.note'}</p></noscript>\n";
 
         if ($preview) {
+            my ($event, $subject) = ($POST{'event'}, $POST{'subject'});
+            LJ::CleanHTML::clean_subject(\$subject);
+            LJ::CleanHTML::clean_comment(\$event, $POST{'prop_opt_preformatted'});
             $out .= "<hr><h2>$ML{'.preview.header'}</h2>";
             $out .= "<?p $ML{'.preview.text'} p?>";
-            $out .= "<b>Subject</b>: " . LJ::ehtml($POST{'subject'}) . '<br /><br />';
-            my $event = $POST{'event'};
-            LJ::CleanHTML::clean_comment(\$event, $POST{'prop_opt_preformatted'});
+            $out .= "<b>Subject</b>: $subject<br /><br />";
             $out .= "<b>Event</b>: <br/>";
             $out .= $event;
             $out .= '<br /><hr>';
