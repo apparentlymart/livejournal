@@ -6,7 +6,14 @@ LiveJournal programming/style guidelines.
      LJ::did_post() on critical actions.  GET requests can be easily
      spoofed, or hidden in images, etc.
 
+  -- never read in arbitrary amounts of input
+
+  -- never use unsanitized data in a command or SQL
+
 [ LIVEJOURNAL-SPECIFIC ]
+
+  -- BML pages shouldn't interface with the database much.
+     Use the LJ::* API & the protocol handler.
 
   -- always use the LJ:: functions that take an explicit database
      handle.  don't use the old main:: functions that use the global
@@ -43,6 +50,12 @@ LiveJournal programming/style guidelines.
 
   -- between LOCK TABLES & UNLOCK TABLES, never call a subroutine.
 
+  -- check the DB error code after an SQL statement.  just because
+     it worked once and the SQL is correct, that doesn't mean the
+     table might not go corrupt, a disk might fill up, or index
+     space within the file might not fill up.  errors happen.
+     deal with them.
+
   -- preferred way to break up a long SQL query:
 
        $sth = $dbh->prepare("SELECT cola, colb, colc, cold FROM foo ".
@@ -63,6 +76,11 @@ LiveJournal programming/style guidelines.
 
 
 [ PERF / SCALABILITY ]
+
+  -- Large chunks of code should be preloaded in libraries.  Code
+     in BML pages is re-evaled on every request, so it should
+     be small.  If you need a lot of code, put it in a library
+     and load it in cgi-bin/lj-bml-(init|local).pl
 
   -- don't write temporary files to disk... all LJ code should be able
      to run on a cluster of web servers with no session persistence
