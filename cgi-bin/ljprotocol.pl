@@ -63,6 +63,10 @@ sub error_message
              "153" => "Incorrect time value",
              "154" => "Can't add a redirected account as a friend",
              "155" => "Non-authenticated email address",
+             "156" => sub { # to reload w/o restart
+                 LJ::tosagree_str('protocol' => 'text') || 
+                 LJ::tosagree_str('protocol' => 'title')
+             },
 
              # Client Errors
              "200" => "Missing required argument(s)",
@@ -88,7 +92,8 @@ sub error_message
              "307" => "Selected journal no longer exists.",
              "308" => "Account is locked and cannot be used.",
              "309" => "Account is marked as a memorial.",
-             "310" => "Access temporarily disabled.",
+             "310" => "Account needs to be age verified before use.",
+             "311" => "Access temporarily disabled.",
 
              # Limit errors
              "402" => "Your IP address is temporarily banned for exceeding the login failure rate.",
@@ -111,7 +116,7 @@ sub error_message
              );
 
     my $prefix = "";
-    my $error = $e{$code} || "BUG: Unknown error code!";
+    my $error = (ref $e{$code} eq 'CODE' ? $e{$code}->() : $e{$code}) || "BUG: Unknown error code!";
     if ($code >= 200) { $prefix = "Client error: "; }
     if ($code >= 500) { $prefix = "Server error: "; }
     my $totalerror = "$prefix$error";
@@ -608,6 +613,9 @@ sub postevent
                               $u->{'journaltype'} eq "S" ||
                               $u->{'journaltype'} eq "N");
 
+    # underage users can't do this
+    return fail($err,310) if $u->underage;
+
     # suspended users can't post
     return fail($err,305) if ($u->{'statusvis'} eq "S");
 
@@ -1058,6 +1066,9 @@ sub editevent
 
     my $itemid = $req->{'itemid'}+0;
 
+    # underage users can't do this
+    return fail($err,310) if $u->underage;
+
     # check the journal's read-only bit
     return fail($err,306) if LJ::get_cap($uowner, "readonly");
 
@@ -1329,7 +1340,7 @@ sub getevents
     if (ref $reject_code eq "CODE") {
         my $r = eval { Apache->request };
         my $errmsg = $reject_code->($req, $flags, $r);
-        if ($errmsg) { return fail($err, "310", $errmsg); }
+        if ($errmsg) { return fail($err, "311", $errmsg); }
     }
 
     # if this is on, we sort things different (logtime vs. posttime)
@@ -2148,6 +2159,10 @@ sub consolecommand
     my $remote = undef;
     $remote = $flags->{'u'} if authenticate($req, $err, $flags);
 
+    # underage users can't do this, since we don't want to sanitize for
+    # what in particular they're trying to do, might as well disallow it
+    return fail($err, 310) if $remote->underage;
+
     # do not let locked people do this
     return fail($err, 308) if $remote->{statusvis} eq 'L';
 
@@ -2430,6 +2445,10 @@ sub authenticate
         return fail($err,105) if $chal_expired;
         return fail($err,101);
     }
+
+    # if there is a require TOS revision, check for it now
+    return fail($err, 156, LJ::tosagree_str('protocol' => 'text'))
+        unless $u->tosagree_verify;
 
     # remember the user record for later.
     $flags->{'u'} = $u;

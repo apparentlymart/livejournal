@@ -1985,6 +1985,24 @@ sub is_valid_authaction
 }
 
 # <LJFUNC>
+# name: LJ::mark_authaction_used
+# des: Marks an authaction as being used.
+# args: aaid
+# des-aaid: Either an authaction hashref or the id of the authaction to mark used.
+# returns: 1 on success, undef on error.
+# </LJFUNC>
+sub mark_authaction_used
+{
+    my $aaid = ref $_[0] ? $_[0]->{aaid}+0 : $_[0]+0
+        or return undef;
+    my $dbh = LJ::get_db_writer()
+        or return undef;
+    $dbh->do("UPDATE authactions SET used='Y' WHERE aaid = ?", undef, $aaid);
+    return undef if $dbh->err;
+    return 1;
+}
+
+# <LJFUNC>
 # name: LJ::get_mood_picture
 # des: Loads a mood icon hashref given a themeid and moodid.
 # args: themeid, moodid, ref
@@ -2283,6 +2301,13 @@ sub get_cap
         ($LJ::READONLY_CLUSTER{$u->{clusterid}} ||
          $LJ::READONLY_CLUSTER_ADVISORY{$u->{clusterid}} &&
          ! LJ::get_cap($u, "avoid_readonly"))) {
+        return 1;
+    }
+
+    # underage/coppa check etc
+    if ($cname eq "underage" && $u &&
+        ($LJ::UNDERAGE_BIT &&
+         $caps & 1 << $LJ::UNDERAGE_BIT)) {
         return 1;
     }
 

@@ -38,6 +38,10 @@
             return;
         }
 
+        if ($remote->underage) {
+            return BML::redirect("$LJ::SITEROOT/agecheck/?s=1");
+        }
+
         if (! LJ::get_cap($remote, "can_post")) {
             $$title = "Can't Post";
             $$body = $LJ::MSG_NO_POST || $ML{'.error.cantpost'};
@@ -118,6 +122,7 @@
         $hour = $time[2];
         $min = sprintf("%02d", $time[1]);
     }
+
     # richtext
     # 'switched_rte_on' is only set when the user first enables rte.  We do this in a POST
     #    so any pre-existing text in the event and subject fields aren't lost when going to RTE.
@@ -126,23 +131,92 @@
     my $enabled_rte = $POST{'switched_rte_on'};
     my $richtext = 1 if $GET{rich} || $POST{rich} ||
                         ($enabled_rte && ! $spellcheck_html && ! $preview);
-
     $$bodyopts .= "onunload=\"save_entry();\" " if $richtext;
+
+    my $print_entry_form = sub {
+        my $opts = shift;
+
+        # authentication box
+        my $auth = '';
+
+        if ($remote) { # so lynx won't show this
+            $auth .= "<tr valign='top' id='remotelogin' style='display: $remotelogin_display'><th>$ML{'.auth.poster'}</th><td><span id='remotelogin_content'>";
+            $auth .= BML::ml(".loggedinas", {'user' => $remote->{'user'}, 'altget' => "?altlogin=1" });
+            $auth .= "</span></td></tr>\n";
+        }
+
+        # table with username/password fields
+        $auth .= "<tr id='altlogin_username' style='display: $altlogin_display;' valign='top'>\n";
+        $auth .= "<th>" . BML::ml('Username') . ":</th>";
+        $auth .= "<td>" . LJ::html_text({ 'name' => 'user', 'size' => '15', 'maxlength' => '15',
+                                          'value' => $POST{'user'} || $GET{'user'} });
+        $auth .= "</td></tr>\n";
+        $auth .= "<tr id='altlogin_password' style='display: $altlogin_display;' valign='top'>";
+        $auth .= "<th>" . BML::ml('Password') . ":</th>";
+        $auth .= "<td>" . LJ::html_text({ 'type' => 'password', 'name' => 'password',
+                                          'size' => '15', 'maxlength' => '30' });
+        # posted with a user, but no password
+        if ($did_post && $auth_missing) {
+            $auth .= "<br /><?inerr $ML{'.error.nopass'} inerr?>";
+        }
+        $auth .= "</td></tr>";
+        
+        # if they submit the form and are spellchecking, remember
+        # their settings from the GET requests
+        my $getextra;
+        $getextra .= "altlogin=1&" if $GET{'altlogin'};
+        $getextra .= "rich=1&" if $richtext;
+        chop $getextra;
+        $getextra = "?$getextra" if $getextra;
+
+        my $entry = {
+            'mode' => "update",
+            'auth_as_remote' => $auth_as_remote,
+            'subject' => $subject,
+            'event' => $event,
+            'datetime' => "$year-$mon-$mday $hour:$min",
+            'usejournal' => $POST{'usejournal'} || $GET{'usejournal'},
+            'auth' => $auth,
+            'remote' => $remote,
+            'spellcheck_html' => $spellcheck_html,
+            'clientversion' => "WebUpdate/2.0.0",
+            'richtext' => 1,
+            'richtext_on' => $richtext,
+        };
+
+        if ($did_post) {
+            $entry->{$_} = $POST{$_} foreach keys %POST;
+        }
+
+        $$body .= "<div style='width: 100%'><form method='post' action='update.bml$getextra' id='updateForm' name='updateForm'>";
+
+        if ($opts->{require_tos}){ 
+            $$body .= LJ::tosagree_html('update', $POST{agree_tos}, $errors->{require_tos});
+        }
+
+        $$body .= LJ::entry_form($entry, \$$head, \$onload, $errors);
+        $$body .= "</form></div>";
+
+        $$bodyopts .= "onload=\"$onload\" onresize=\"shift_contents();\" ";
+
+        return;
+    };
+
     if ($did_post && !$did_spellcheck && !$showform && !$enabled_rte && !$preview ) {
 
         # what's our authentication scheme for subsequent protocol actions?
         my $flags = {};
-        my $user;
+        my ($u, $user);
 
         if ($POST{'user'} &&                            # user argument given
             ! $user_is_remote &&                        # user != remote 
             (!$remote || $GET{'altlogin'})) {           # user has clicked alt auth
             
             $user = $POST{'user'};
+            $u = LJ::load_user($user);
 
             # Verify entered password, if it is present. 
             my $ok;
-            my $u = LJ::load_user($user);
             if ($POST{response}) {
                 $ok = LJ::challenge_check_login($u, $POST{chal}, $POST{response});
             } else {  # js disabled, fallback to plaintext
@@ -153,6 +227,24 @@
         } elsif ($remote && LJ::check_referer()) {   # assume remote if we have it
             $flags = { 'noauth' => 1, 'u' => $remote };
             $user = $remote->{'user'};
+            $u = $remote;
+        }
+
+        if ($u && ! $u->tosagree_verify) {
+            if ($POST{agree_tos}) {
+                my $err = "";
+                unless ($u->tosagree_set(\$err)) {
+                    # error
+                    $errors->{require_tos} = $err;
+                    $print_entry_form->({ require_tos => 1 });
+                    return;
+                }
+                # successfully set
+            } else {
+                $errors->{require_tos} = $ML{'tos.error'};
+                $print_entry_form->({ require_tos => 1 });
+                return;
+            }
         }
 
         # do a login action
@@ -242,70 +334,9 @@
             }
             return;
         }
-        #return;
     }
 
-    ### Authentication box
-    my $auth;
-    {
-        if ($remote) { # so lynx won't show this
-            $auth .= "<tr valign='top' id='remotelogin' style='display: $remotelogin_display'><th>$ML{'.auth.poster'}</th><td><span id='remotelogin_content'>";
-            $auth .= BML::ml(".loggedinas", {'user' => $remote->{'user'}, 'altget' => "?altlogin=1" });
-            $auth .= "</span></td></tr>\n";
-        }
-
-        # table with username/password fields
-        $auth .= "<tr id='altlogin_username' style='display: $altlogin_display;' valign='top'>\n";
-        $auth .= "<th>" . BML::ml('Username') . ":</th>";
-        $auth .= "<td>" . LJ::html_text({ 'name' => 'user', 'size' => '15', 'maxlength' => '15',
-                                          'value' => $POST{'user'} || $GET{'user'} });
-        $auth .= "</td></tr>\n";
-        $auth .= "<tr id='altlogin_password' style='display: $altlogin_display;' valign='top'>";
-        $auth .= "<th>" . BML::ml('Password') . ":</th>";
-        $auth .= "<td>" . LJ::html_text({ 'type' => 'password', 'name' => 'password',
-                                          'size' => '15', 'maxlength' => '30' });
-        # posted with a user, but no password
-        if ($did_post && $auth_missing) {
-            $auth .= "<br /><?inerr $ML{'.error.nopass'} inerr?>";
-        }
-        $auth .= "</td></tr>";
-        
-    }
-
-    # if they submit the form and are spellchecking, remember
-    # their settings from the GET requests
-    my $getextra;
-    $getextra .= "altlogin=1&" if $GET{'altlogin'};
-    $getextra .= "rich=1&" if $richtext;
-    chop $getextra;
-    $getextra = "?$getextra" if $getextra;
-
-    my $entry = {
-        'mode' => "update",
-        'auth_as_remote' => $auth_as_remote,
-        'subject' => $subject,
-        'event' => $event,
-        'datetime' => "$year-$mon-$mday $hour:$min",
-        'usejournal' => $POST{'usejournal'} || $GET{'usejournal'},
-        'auth' => $auth,
-        'remote' => $remote,
-        'spellcheck_html' => $spellcheck_html,
-        'clientversion' => "WebUpdate/2.0.0",
-        'richtext' => 1,
-        'richtext_on' => $richtext,
-    };
-
-    if ($did_post) {
-        foreach ( keys %POST ) {
-            $entry->{$_} = %POST->{$_};
-        }
-    }
-
-    $$body .= "<div style='width: 100%'><form method='post' action='update.bml$getextra' id='updateForm' name='updateForm'>";
-    $$body .= LJ::entry_form($entry, \$$head, \$onload, $errors);
-    $$body .= "</form></div>";
-
-    $$bodyopts .= "onload=\"$onload\" onresize=\"shift_contents();\" ";
+    $print_entry_form->();
     return;
 }
 

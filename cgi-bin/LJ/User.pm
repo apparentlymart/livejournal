@@ -30,6 +30,56 @@ sub writer {
     return 0;
 }
 
+# returns a true value if the user is underage; or if you give it an argument,
+# will turn on/off that user's underage status.  can also take a second argument
+# when you're setting the flag to also update the underage_status userprop
+# which is used to record if a user was ever marked as underage.
+sub underage {
+    # has no bearing if this isn't on
+    return undef unless $LJ::UNDERAGE_BIT;
+
+    # now get the args and continue
+    my $u = shift;
+    return LJ::get_cap($u, 'underage') unless @_;
+
+    # now set it on or off
+    my $on = shift() ? 1 : 0;
+    if ($on) {
+        LJ::modify_caps($u, [ $LJ::UNDERAGE_BIT ], []);
+        $u->{caps} |= 1 << $LJ::UNDERAGE_BIT;
+    } else {
+        LJ::modify_caps($u, [], [ $LJ::UNDERAGE_BIT ]);
+        $u->{caps} &= !(1 << $LJ::UNDERAGE_BIT);
+    }
+
+    # now set their status flag if one was sent
+    my $status = shift();
+    if ($status || $on) {
+        # by default, just records if user was ever underage ("Y")
+        $u->underage_status($status || 'Y');
+    }
+
+    # return what we set it to
+    return $on;
+}
+
+# return or set the underage status userprop
+sub underage_status {
+    return undef unless $LJ::UNDERAGE_BIT;
+
+    my $u = shift;
+
+    # return if they aren't setting it
+    unless (@_) {
+        LJ::load_user_props($u, 'underage_status');
+        return $u->{underage_status};
+    }
+
+    # set and return what it got set to
+    LJ::set_userprop($u, 'underage_status', shift());
+    return $u->{underage_status};
+}
+
 # this is for debugging/special uses where you need to instruct
 # a user object on what database handle to use.  returns the
 # handle that you gave it.
@@ -257,6 +307,58 @@ sub make_login_session {
     LJ::mark_user_active($u, 'login');
 
     return 1;
+}
+
+sub tosagree_set 
+{
+    my ($u, $err) = @_;
+    return undef unless $u;
+
+    unless (-f "$LJ::HOME/htdocs/inc/legal-tos") {
+        $$err = "TOS include file could not be found";
+        return undef;
+    }
+
+    my $rev;
+    open (TOS, "$LJ::HOME/htdocs/inc/legal-tos");
+    while ((!$rev) && (my $line = <TOS>)) {
+        my $rcstag = "Revision";
+        if ($line =~ /\$$rcstag:\s*(\S+)\s*\$/) {
+            $rev = $1;
+        }
+    }
+    close TOS;
+
+    # if the required version of the tos is not available, error!
+    my $rev_req = $LJ::REQUIRED_TOS{rev};
+    if ($rev_req > 0 && $rev ne $rev_req) {
+        $$err = "Required Terms of Service revision is $rev_req, but system version is $rev.";
+        return undef;
+    }
+
+    my $newval = join(', ', time(), $rev);
+    my $rv = LJ::set_userprop($u, "legal_tosagree", $newval);
+
+    # set in $u object for callers later
+    $u->{legal_tosagree} = $newval if $rv;
+
+    return $rv;
+}
+
+sub tosagree_verify {
+    my $u = shift;
+
+    return 1 unless $LJ::TOS_CHECK;
+
+    my $rev_req = $LJ::REQUIRED_TOS{rev};
+    return 1 unless $rev_req > 0;
+
+    LJ::load_user_props($u, 'legal_tosagree')
+        unless $u->{legal_tosagree};
+
+    my $rev_cur = (split(/\s*,\s*/, $u->{legal_tosagree}))[1];
+
+    return $rev_cur eq $rev_req;
 }
 
 sub kill_sessions {

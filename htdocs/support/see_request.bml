@@ -270,6 +270,21 @@ body<=
         if ($u->{'status'} eq "A") { $ret .= "<b>yes</b>"; }
         if ($u->{'status'} eq "N") { $ret .= "<b>no</b>" . $extraval->(); }
         if ($u->{'status'} eq "T") { $ret .= "<b>transitioning</b> (used to be validated, but changed email addresses and hasn't reconfirmed)" . $extraval->(); }
+        $ret .= "<br />underage? ";
+        if ($u->underage) {
+            $ret .= "<strong>yes because of ";
+            $ret .= "birthday" if $u->underage_status eq 'Y';
+            $ret .= "unique cookie" if $u->underage_status eq 'O';
+            $ret .= "</strong>";
+        } else {
+            $ret .= "<strong>no";
+            if ($u->underage_status) {
+                $ret .= "; was by ";
+                $ret .= "birthday" if $u->underage_status eq 'Y';
+                $ret .= "unique cookie" if $u->underage_status eq 'O';
+            }
+            $ret .= "</strong>";
+        }
         if ($u->{clusterid}) { $ret .= "<br />cluster: " . LJ::get_cluster_description($u->{clusterid}, 1); }
         $ret .= "<br />data version: <b>$u->{dversion}</b>";
     } else {
@@ -447,6 +462,9 @@ body<=
     if ($sp->{'state'} eq "closed") {
         return $ret;
     }
+
+    # underage users can't interact with this
+    return $ret if $remote && $remote->underage;
  
     $ret .= "<p style='margin-bottom: 0px;'><b>Post a comment or solution:</b></p>\n";
  

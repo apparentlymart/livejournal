@@ -14,7 +14,11 @@ body<=
 
  my $ret;
  my $qs = BML::get_query_string();
+
  my $remote = LJ::get_remote();
+ return BML::redirect("$LJ::SITEROOT/agecheck/?s=1")
+     if $remote && $remote->underage;
+
  my $foruser = $GET{foruser};
  my $foru;
  if ($foruser) {

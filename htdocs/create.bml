@@ -148,14 +148,19 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
      my $user = LJ::canonical_username($POST{'user'});
      my $email = LJ::trim(lc($POST{'email'}));
 
+     # setup global things that can be used to modify the user later
+     my $is_underage = 0; # turn on if the user should be marked as underage
+     my $ofage = 0;       # turn on to note that the user is over 13 in actuality
+                          #   (but is_underage might be on which just means that their
+                          #   account is being marked as underage--even if they're old
+                          #   enough [unique cookie check])
+
      # reject this email?
      return LJ::sysban_block(0, "Create user blocked based on email",
                              { 'new_user' => $user, 'email' => $email, 'name' => $user })
          if LJ::sysban_check('email', $email);
 
      my $dbh = LJ::get_db_writer();
-     my $quser = $dbh->quote($user);
-     my $qemail = $dbh->quote($email);
      
      if (length($user) > 15) { 
          $errors{'username'} = "$ML{'error.usernamelong'}";
@@ -235,13 +240,65 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
          $errors{'password'} = "$ML{'.error.password.asciionly'}";
      }
 
-     if ($POST{'under13'} ||
-         ($LJ::COPPA_CHECK && $LJ::COPPA_CHECK ne "under" && ! $POST{'over13'})) {
-         return "$ML{'.error.coppa.under13'}";
+     ### start COPPA_CHECK
+     # age checking to determine how old they are
+     if ($LJ::COPPA_CHECK) {
+         my $uniq;
+         if ($LJ::UNIQ_COOKIES) {
+             $uniq = Apache->request->notes('uniq');
+             if ($uniq) {
+                 my $timeof = $dbh->selectrow_array('SELECT timeof FROM underage WHERE uniq = ?', undef, $uniq);
+                 $is_underage = 1 if $timeof && $timeof > 0;
+             }
+         }
+
+         my ($year, $mon, $day) = ( $POST{"bday_yyyy"}+0, $POST{"bday_mm"}+0, $POST{"bday_dd"}+0 );
+         if ($year < 100) {
+             $POST{'bday_yyyy'} += 1900;
+             $year += 1900;
+         }
+
+         # get current time
+         my ($nday, $nmon, $nyear) = (gmtime())[3, 4, 5];
+         $nyear += 1900;
+         $nmon += 1;
+
+         # require dates in the 1900s (or beyond)
+         if ($year && $mon && $day && $year >= 1900 && $year <= $nyear) {
+             # now see how many years back they are
+             my $ofageyear = $year + 13;
+             if ($ofageyear > $nyear) {
+                 $is_underage = 1;
+             } elsif ($ofageyear == $nyear) {
+                 # years match, see if they were born after this month
+                 if ($mon > $nmon) {
+                     $is_underage = 1;
+                 } elsif ($mon == $nmon) {
+                     # now check the day
+                     if ($day > $nday) {
+                         $is_underage = 1;
+                     } else {
+                         $ofage = 1;
+                     }
+                 } else {
+                     $ofage = 1;
+                 }
+             } else {
+                 $ofage = 1;
+             }
+         } else {
+             $errors{'bday'} = "$ML{'.error.birthday.invalid'}";
+         }
+
+         # note this unique cookie as underage (if we have a unique cookie)
+         if ($is_underage && $uniq) {
+             $dbh->do("REPLACE INTO underage (uniq, timeof) VALUES (?, UNIX_TIMESTAMP())", undef, $uniq);
+         }
      }
+     ### end COPPA_CHECK
 
      if ($LJ::TOS_CHECK && ! $POST{'agree_tos'}) {
-         $errors{'agree_tos'} = $ML{'.tos.error'};
+         $errors{'agree_tos'} = $ML{'tos.error'};
      }
 
      # check the email address
@@ -262,19 +319,20 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
      }
      last SUBMIT if %errors;
 
-     my $qclusterid = ($LJ::ALLOW_CLUSTER_SELECT
-                       ? $POST{'cluster_id'}
-                       : LJ::new_account_cluster()) + 0;
-     die "Cluster 0 not supported" unless $qclusterid;
+     my $clusterid = ($LJ::ALLOW_CLUSTER_SELECT
+                      ? $POST{'cluster_id'}
+                      : LJ::new_account_cluster()) + 0;
+     die "Cluster 0 not supported" unless $clusterid;
 
-     $qpassword = $dbh->quote($POST{'password1'});
-     my $userid = $u->{'userid'}+0;
+     my $userid = $u ? $u->{'userid'}+0 : 0;
      unless ($second_submit)
      {
          my $caps   = int($LJ::NEWUSER_CAPS);
          my $status = ($LJ::EVERYONE_VALID ? 'A'  : 'N');
          $dbh->do("INSERT INTO user (user, email, password, status, caps, name, clusterid, dversion) ".
-                  "VALUES ($quser, $qemail, $qpassword, '$status', $caps, $quser, $qclusterid, $LJ::MAX_DVERSION)");
+                  "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                  undef, $user, $email, $POST{'password1'}, $status, $caps,
+                  $user, $clusterid, $LJ::MAX_DVERSION);
          if ($dbh->err) {
              return "<?h1 $ML{'Error'} h1?><?p $ML{'error.procrequest'} <b>" . $dbh->errstr . "</b> p?>";
          }
@@ -300,8 +358,8 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
          }
 
          # Set any properties that get set in new users
-         while ( my($name,$val) = each %LJ::USERPROP_INIT ) {
-             LJ::set_userprop($u, $name, $val);
+         while (my ($name, $val) = each %LJ::USERPROP_INIT) {
+             LJ::set_userprop($userid, $name, $val);
          }
 
          # Mark the turing test for deletion
@@ -315,50 +373,49 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
              'code' => $code,
          });
      }
-     
-     my $aa = {};
-     if ($userid) {
-         $aa = LJ::register_authaction($userid, "validateemail", $email);
-     }
 
-     my $body = BML::ml('email.newacct2.body', {
-         "email" => $email,
-         "regurl" => "$LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}",
-         "username" => $user,
-         "sitename" => $LJ::SITENAME,
-         "siteroot" => $LJ::SITEROOT,
-         "admin_email" => $LJ::ADMIN_EMAIL,
-         "bogus_email" => $LJ::BOGUS_EMAIL,
-     });
-     
-     LJ::send_mail({
-         'to' => $email,
-         'from' => $LJ::ADMIN_EMAIL,
-         'fromname' => $LJ::SITENAME,
-         'charset' => 'utf-8',
-         'subject' => BML::ml('email.newacct.subject', {'sitename' => $LJ::SITENAME}),
-         'body' => $body,
-     });
+     # send welcome mail... unless they're underage
+     unless ($is_underage) {
+         my $aa = {};
+         if ($userid) {
+             $aa = LJ::register_authaction($userid, "validateemail", $email);
+         }
+
+         my $body = BML::ml('email.newacct2.body', {
+             "email" => $email,
+             "regurl" => "$LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}",
+             "username" => $user,
+             "sitename" => $LJ::SITENAME,
+             "siteroot" => $LJ::SITEROOT,
+             "admin_email" => $LJ::ADMIN_EMAIL,
+             "bogus_email" => $LJ::BOGUS_EMAIL,
+         });
+
+         LJ::send_mail({
+             'to' => $email,
+             'from' => $LJ::ADMIN_EMAIL,
+             'fromname' => $LJ::SITENAME,
+             'charset' => 'utf-8',
+             'subject' => BML::ml('email.newacct.subject', {'sitename' => $LJ::SITENAME}),
+             'body' => $body,
+         });
+     }
 
      my $nu = LJ::load_userid($userid, "force");
 
-     if ($LJ::TOS_CHECK && -f "$LJ::HOME/htdocs/inc/legal-tos") {
-         my $rev;
-         open (TOS, "$LJ::HOME/htdocs/inc/legal-tos");
-         while ((!$rev) && (my $line = <TOS>)) {
-             my $rcstag = "Revision";
-             if ($line =~ /\$$rcstag:\s*(\S+)\s*\$/) {
-                 $rev = $1;
-             }
-         }
-         close TOS;
-         LJ::set_userprop($nu, "legal_tosagree", join(', ', time(), $rev));
+     # now flag as underage (and set O to mean was old or Y to mean was young)
+     $nu->underage(1, $ofage ? 'O' : 'Y');
+
+     if ($LJ::TOS_CHECK) {
+         my $err = "";
+         $nu->tosagree_set(\$err)
+             or return LJ::bad_input($err);
      }
 
      $nu->make_login_session;
 
      # local sites may want to override what happens at this point
-     my $redirect;
+     my $redirect = undef;
      my $stop_output;
      LJ::run_hooks("create.bml_postsession", {
          post => \%POST,
@@ -421,7 +478,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
      $v = LJ::ehtml($FORM{'email'});
      $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.email.input.head'}</div>";
      $ret .= $error_msg->('email', '<p class="formitemFlag">', '</p>');
-     $ret .= "<div class='formitemDesc'>" . BML::ml('.email.text2', {
+     $ret .= "<div class='formitemDesc'>" . BML::ml('.email.text3', {
          aopts => "target='_new' href='$LJ::SITEROOT/legal/privacy.bml'",
      }) . "</div>";
      $ret .= LJ::html_text({'name' => 'email', 'size' => 40, 'maxlength' => 50, 'value' => $v,});
@@ -455,22 +512,17 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
          }
          $ret .= "</div></div></li>";
      }
+
      if ($LJ::COPPA_CHECK)
      {
-         if ($LJ::COPPA_CHECK eq "under") {
-             $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.age.head'}</div>";
-             $ret .= "<div class='formitemDesc'>$ML{'.age.check.question'}</div><div>";
-             $ret .= LJ::html_check({ name => under13, id => under13, value => 1,
-                                      selected => $POST{under13} });
-             $ret .= "<label for='under13'>$ML{'.age.check.yes'}</label>";
-         } elsif ($LJ::COPPA_CHECK) {
-             $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.age.head'}</div>";
-             $ret .= "<div class='formitemDesc'>$ML{'.age.check2.question'}</div><div>";
-             $ret .= LJ::html_check({ name => over13, id => over13, value => 1,
-                                      selected => $POST{over13} });
-             $ret .= "<label for='over13'>$ML{'.age.check2.yes'}</label>";
-         }
-         $ret .= "</div></div></li>";
+         $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.birthday.head'}</div>";
+         $ret .= "<div class='formitemFlag'>$errors{'bday'}</div>" if exists $errors{'bday'};
+         $ret .= "<div class='formitemDesc'>$ML{'.birthday.question'}</div><div>";
+         $ret .= "<table><tr><td><span style='font-weight: bold;'>$ML{'.birthday.birthdate'}</span></td><td>";
+         $ret .= LJ::html_datetime({ name => 'bday', notime => 1,
+             default => sprintf("%04d-%02d-%02d", $POST{bday_yyyy}, $POST{bday_mm}, $POST{bday_dd}) });
+         $ret .= "</td><td><span style='font-style: italic;'>$ML{'.birthday.required'}</span></td></tr>";
+         $ret .= "</table></div></div></li>";
      }
 
      LJ::run_hooks("create.bml_opts", {
@@ -482,14 +534,8 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
      if ($LJ::TOS_CHECK)
      {
          $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.tos.heading'}</div>";
-         $ret .= "<div class='formitemDesc'>" .
-             BML::ml('.tos.p1.2', { aopts => "target='_new' href='$LJ::SITEROOT/legal/tos.bml'" }) . "</div>";
-         $ret .= $error_msg->('agree_tos', '<p class="formitemFlag">', '</p>');
-         my $checked = $POST{'agree_tos'} ? "checked='checked'" : "";
-         $ret .= "<iframe width='600' height='300' src='/legal/tos-mini.bml' style='border: 1px solid gray;'></iframe>";
-         $ret .= "<div><input type='checkbox' name='agree_tos' id='agree_tos' value='1' $checked /> ";
-         $ret .= "<label for='agree_tos'>$ML{'.tos.haveread'}</label>";
-         $ret .= "</div></div></li>";
+          $ret .= LJ::tosagree_widget($POST{agree_tos}, $errors->{agree_tos});
+          $ret .= "</div></li>";
      }
 
      if ($LJ::ALLOW_CLUSTER_SELECT) {

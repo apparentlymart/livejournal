@@ -28,16 +28,13 @@
         return;
     }
 
-    my $login_html = sub {
-        if ($remote) {
-            $body .= "<?p " . BML::ml(".login.text3", {'sitename' => $LJ::SITENAME,
-                    'username' => LJ::ljuser($remote)}) . " p?>\n";
-        } else {
-            $body .= "<?p " . BML::ml(".login.text1", {'sitename' => $LJ::SITENAME}) . " p?>\n";
-        }
-        $body .= "<?p $ML{'.login.text2'} p?>\n";
+    my $require_tos = 0;
 
-        $body .= "<form action='login.bml' method='post' id='login'>\n";
+    my $login_html = sub {
+        my $nojs = $GET{'nojs'};
+        my $getextra = $nojs ? '?nojs=1' : '';
+
+        $body .= "<form action='login.bml$getextra' method='post' id='login'>\n";
 
         my $chal = LJ::challenge_generate(300); # 5 minute auth token
         $body .= "<input type='hidden' name='chal' id='login_chal' value='$chal' />";
@@ -46,8 +43,25 @@
         my $referer = BML::get_client_header('Referer');
         if ($GET{'ret'} == 1 && $referer) {
             my $eh_ref = LJ::ehtml($referer);
-            $body .= "<input type='hidden' NAME='ref' value='$eh_ref' />\n";
+            $body .= "<input type='hidden' name='ref' value='$eh_ref' />\n";
         }
+
+        if ($require_tos) {
+            $body .= "<div style='margin-left: 40px; margin-bottom: 20px;'>";
+            my $tos_err = ref $require_tos eq 'HASH' ? $require_tos->{err} : undef;
+            $body .= LJ::tosagree_html('login', $POST{agree_tos}, $tos_err);
+            $body .= "</div>";
+        }
+
+        if ($remote) {
+            $body .= "<?p " . BML::ml(".login.text3", 
+                                      {'sitename' => $LJ::SITENAME,
+                                       'username' => LJ::ljuser($remote)}) . " p?>\n";
+        } else {
+            $body .= "<?p " . BML::ml(".login.text1", {'sitename' => $LJ::SITENAME}) . " p?>\n";
+        }
+
+        $body .= "<?p $ML{'.login.text2'} p?>\n";
 
         $body .= "<?standout\n";
         $body .= "<table border=0 cellpadding='3'>\n";
@@ -101,8 +115,6 @@
                     "<img src='$LJ::IMGPREFIX/icon_protected.gif' width='14' height='15' alt='secure login' align='middle' /><br />";
                 $body .= $secure;
             } else {
-                my $nojs = $GET{'nojs'};
-
                 my $login_btn_text = LJ::ejs($ML{'.login.btn.login'});
                 unless ($nojs) {
                     $body .= "<script type='text/javascript' language='Javascript'> \n <!-- \n
@@ -170,10 +182,20 @@
         return;
     };
 
-    if (LJ::did_post()) {
+    my $logout_remote = sub {
+        $remote->kill_session if $remote;
+        foreach (qw(ljsession langpref)) {
+            delete $COOKIE{$_};
+        }
+        $remote  = undef;
+        $cursess = undef;
+        LJ::set_remote(undef);
+        LJ::run_hooks("post_logout");
+    };
 
+    if (LJ::did_post()) {
         my $do_change = $POST{'action:change'};
-        my $do_login = $POST{'action:login'};
+        my $do_login  = $POST{'action:login'};
         my $do_logout = $POST{'action:logout'};
 
         # default action is to login:
@@ -187,15 +209,14 @@
             $do_change = 0;
         }
 
+        if ($do_change && ! $remote->tosagree_verify) {
+            $do_change = 0;
+            $do_logout = 1;
+            $require_tos = 1;
+        }
+
         if ($do_logout) {
-            $remote->kill_session if $remote;
-            foreach (qw(ljsession langpref)) {
-                delete $COOKIE{$_};
-            }
-            undef $remote;
-            undef $cursess;
-            LJ::set_remote(undef);
-            LJ::run_hooks("post_logout");
+            $logout_remote->();
         }
 
         if ($do_change) {
@@ -230,10 +251,7 @@
 
         if ($do_login)
         {
-            $remote->kill_session if $remote;
-            undef $remote;
-            undef $cursess;
-            LJ::set_remote(undef);
+            $logout_remote->();
 
             my $u = LJ::load_user($user);
             push @errors, "$ML{'error.username_notfound'}" unless $u;
@@ -272,11 +290,28 @@
                 if $u->{statusvis} eq 'L';
 
             if (@errors) {
-                $login_html->(@errors);
+                $login_html->();
                 return;
             }
 
-            LJ::load_user_props($u, "browselang", "schemepref");
+            LJ::load_user_props($u, "browselang", "schemepref", "legal_tosagree");
+
+            unless ($u->tosagree_verify) {
+                if ($POST{agree_tos}) {
+                    my $err = "";
+                    unless ($u->tosagree_set(\$err)) {
+                        # failed to save userprop, why?
+                        $require_tos = { err => $err };
+                        return $login_html->();
+                    }
+                    # else, successfully set... log them in
+                } else {
+                    # didn't check agreement checkbox
+                    $require_tos = { err => $ML{'tos.error'} };
+                    return $login_html->();
+                }
+            }
+
             my $bl = LJ::Lang::get_lang($u->{'browselang'});
 
             my $bindip;
@@ -349,6 +384,15 @@
             $remote = $u;
         }
     }
+
+    # otherwise if it's a get request, and the user is logged in
+    # but has agreed to an old terms of service, log them out
+    # and force a TOS validation
+    if ($remote && ! LJ::did_post() && ! $remote->tosagree_verify) {
+        $require_tos = 1;
+        $logout_remote->();
+    }
+
     $login_html->();
     return;
 } 

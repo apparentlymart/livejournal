@@ -20,6 +20,10 @@ body<=
     return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.notactive'} p?>"
         unless $remote->{statusvis} eq 'V';
 
+    if ($remote->underage) {
+        return BML::redirect("$LJ::SITEROOT/agecheck/?s=1");
+    }
+
     # fix up the incoming data (is used in getinfo mode and submit mode so it's here)
     $POST{membership} = 'open'
         unless $POST{membership} =~ m/^(?:open|moderated|closed)$/;

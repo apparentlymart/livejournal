@@ -693,15 +693,15 @@ p?>
 
 /community/transfer.bml.title=Transfer Community
 
-/create.bml.age.check.question=Are you under 13 years of age?
+/create.bml.birthday.birthdate=Birthdate:
 
-/create.bml.age.check.yes=Yes, I am under 13 years old.
+/create.bml.birthday.security=Security:
 
-/create.bml.age.check2.question=Are you over 13 years of age?
+/create.bml.birthday.head=Age Verification
 
-/create.bml.age.check2.yes=Yes, I am over 13 years old.
+/create.bml.birthday.question=Please select the month, day, and year you were born.  We require this information to create an account in order to comply with the Children's Online Privacy Protection Act (COPPA).  This information is not stored in our database and is only used during account creation.  Read our <a [[aopts]]>privacy policy</a> for more information on our information practices.
 
-/create.bml.age.head=Age
+/create.bml.birthday.required=(required)
 
 /create.bml.btn.create=Create Journal
 
@@ -739,7 +739,9 @@ p?>
 
 /create.bml.email.input.head=Email Address:
 
-/create.bml.email.text2=For verification and security purposes, we need your email address.  It will never ever, under any circumstances, be sold or given away to spammers.  We hate that more than anything.  Read our <a [[aopts]]>privacy policy</a> for more information.
+/create.bml.email.text3=For verification and security purposes, we need your email address.  Read our <a [[aopts]]>privacy policy</a> for more information on our information practices.
+
+/create.bml.error.birthday.invalid=You must enter a valid birthday.
 
 /create.bml.error.coppa.under13=Sorry, due to COPPA restrictions, you cannot use the service until you're 13 years old.  Please come back on your 13th birthday.
 
@@ -807,7 +809,7 @@ p?>
 
 /create.bml.tos.heading=Terms of Service
 
-/create.bml.tos.p1.2=Before continuing you must read and agree to the <a [[aopts]]>Terms of Service.</a>
+/create.bml.tos.p1.3=Before continuing you must read and agree to the <a [[aopts]]>Terms of Service</a> (which includes our privacy policy).
 
 /create.bml.useacctcodes.entercode=To create a new account, enter an account creation code:
 
@@ -4539,6 +4541,12 @@ talk.somebodywrote_comm=[[realname]] ([[userlink]]) wrote in [[commlink]],
 talk.spellcheck=Check spelling during preview
 
 talk.threadlink=Thread
+
+tos.error=You must read and agree to the terms of service.
+
+tos.haveread=I have read and agree to the Terms of Service.
+
+tos.mustread=Before continuing you must read and agree to the <a [[aopts]]>Terms of Service.</a>
 
 Username=Username
 

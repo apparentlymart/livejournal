@@ -176,6 +176,44 @@ sub bad_input
     return $ret;
 }
 
+sub tosagree_widget {
+    my ($checked, $errstr) = @_;
+
+    return 
+        "<div class='formitemDesc'>" .
+        BML::ml('tos.mustread', 
+                { aopts => "target='_new' href='$LJ::SITEROOT/legal/tos.bml'" }) . 
+        "</div>" .
+        "<iframe width='600' height='300' src='/legal/tos-mini.bml' " .
+        "style='border: 1px solid gray;'></iframe>" .
+        "<div>" . LJ::html_check({ name => 'agree_tos', id => 'agree_tos',
+                                   value => '1', selected =>  $checked }) .
+        "<label for='agree_tos'>" . BML::ml('tos.haveread') . "</label></div>" .
+        ($errstr ? "<?inerr $errstr inerr?>" : '');
+}
+
+sub tosagree_html {
+    my $domain = shift;
+
+    my $ret = "<?h1 $LJ::REQUIRED_TOS{title} h1?>";
+
+    my $html_str = LJ::tosagree_str($domain => 'html');
+    $ret .= "<?p $html_str p?>" if $html_str;
+
+    $ret .= "<div style='margin-left: 40px; margin-bottom: 20px;'>";
+    $ret .= LJ::tosagree_widget(@_);
+    $ret .= "</div>";
+
+    return $ret;
+}
+
+sub tosagree_str {
+    my ($domain, $key) = @_;
+
+    return ref $LJ::REQUIRED_TOS{$domain} && $LJ::REQUIRED_TOS{$domain}->{$key} ?
+        $LJ::REQUIRED_TOS{$domain}->{$key} : $LJ::REQUIRED_TOS{$key};
+}
+
 # <LJFUNC>
 # name: LJ::did_post
 # des: When web pages using cookie authentication, you can't just trust that
@@ -614,6 +652,7 @@ sub create_qr_div {
     my $u = LJ::want_user($user);
     my $remote = LJ::get_remote();
     return undef unless $u && $remote && $ditemid;
+    return undef if $remote->underage;
 
     $stylemine ||= 0;
     my $qrhtml;
@@ -991,7 +1030,7 @@ RTE
             "u" => $remote,
         });
     }
-   
+
     if (!$opts->{'disabled_save'}) {
         ### Options
         $out .= "<b>" . BML::ml('entryform.options') . "</b><br />";

@@ -48,13 +48,15 @@ $USERPIC{'use_disk_cache'} = -d $USERPIC{'cache_dir'};
 $USERPIC{'symlink'} = eval { symlink('',''); 1; };
 
 # redirect data.
-open (REDIR, "$ENV{'LJHOME'}/cgi-bin/redirect.dat");
-while (<REDIR>) {
-    next unless (/^(\S+)\s+(\S+)/);
-    my ($src, $dest) = ($1, $2);
-    $REDIR{$src} = $dest;
+foreach my $file ('redirect.dat', 'redirect-local.dat') {
+    open (REDIR, "$ENV{'LJHOME'}/cgi-bin/$file") or next;
+    while (<REDIR>) {
+        next unless (/^(\S+)\s+(\S+)/);
+        my ($src, $dest) = ($1, $2);
+        $REDIR{$src} = $dest;
+    }
+    close REDIR;
 }
-close REDIR;
 
 my @req_hosts;  # client IP, and/or all proxies, real or claimed
 

@@ -391,7 +391,7 @@ if ($u->{'journaltitle'}) {
 
  ### name or 'syndicated from'
  unless ($synd) {
-     unless ($u->{'name'} eq $u->{'journaltitle'}) {
+     unless ($u->underage || $u->{'name'} eq $u->{'journaltitle'}) {
          $narrow_left--;
          $body .= "<tr><td align='right'><b>$ML{'.label.name'}</b></td><td>$u->{'name'}</td></tr>\n";
      }
@@ -489,7 +489,7 @@ if ($u->{'journaltitle'}) {
           $body .= "</td></tr>";
       }
 
-      if ($u->{'bdate'} && !$com && $u->{'bdate'} ne "0000-00-00") {
+      if ($u->{'bdate'} && !$com && $u->{'bdate'} ne "0000-00-00" && !$u->underage) {
           my $bdate = $u->{'bdate'};
           $bdate =~ s/^0000-//;
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
@@ -497,7 +497,7 @@ if ($u->{'journaltitle'}) {
       }
   }
 
-  if ( ! $synd && ($u->{'allow_contactshow'} eq "Y" ||
+  if ( ! $synd && ! $u->underage && ($u->{'allow_contactshow'} eq "Y" ||
       ($u->{'allow_contactshow'} eq "F" && $remote_isfriend) || $viewall))
   {
       my $mangleaddress = sub {

@@ -14,6 +14,8 @@ body<=
     my $u = LJ::get_remote();
     return "<?needlogin?>"
         unless $u;
+    return BML::redirect("$LJ::SITEROOT/agecheck/?s=1")
+        if $u->underage;
 
     return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
 

@@ -1910,6 +1910,15 @@ CREATE TABLE readonly_user (
 )
 EOC
 
+register_tablecreate("underage", <<'EOC');
+CREATE TABLE underage (
+    uniq        CHAR(15) NOT NULL,
+    timeof      INT(10) NOT NULL,
+    PRIMARY KEY (uniq),
+    KEY         (timeof)
+)
+EOC
+
 # NOTE: new table declarations go here
 
 

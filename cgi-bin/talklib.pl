@@ -984,21 +984,27 @@ sub load_comments
 
 sub talkform {
     # Takes a hashref with the following keys / values:
-    # remote:     optional remote u object
-    # journalu:   required journal u object
-    # parpost:    parent post object
-    # replyto:    init->replyto
-    # ditemid:    init->ditemid
-    # form:       optional full form hashref
-    # do_captcha: optional toggle for creating a captcha challenge
-    # errors:     optional error arrayref
+    # remote:      optional remote u object
+    # journalu:    prequired journal u object
+    # parpost:     parent post object
+    # replyto:     init->replyto
+    # ditemid:     init->ditemid
+    # form:        optional full form hashref
+    # do_captcha:  optional toggle for creating a captcha challenge
+    # require_tos: optional toggle to include TOS requirement form
+    # errors:      optional error arrayref
     my $opts = shift;
     return "Invalid talkform values." unless ref $opts eq 'HASH';
 
     my $ret;
-    my ($remote, $journalu, $parpost, $form) = ($opts->{remote}, $opts->{journalu},
-                                                $opts->{parpost}, $opts->{form});
+    my ($remote, $journalu, $parpost, $form) =
+        map { $opts->{$_} } qw(remote journalu parpost form);
+
     my $pics = LJ::Talk::get_subjecticons();
+
+    # early bail if the user can't be making comments yet
+    return $LJ::UNDERAGE_ERROR
+        if $remote && $remote->underage;
 
     # once we clean out talkpost.bml, this will need to be changed.
     BML::set_language_scope('/talkpost.bml');
@@ -1043,6 +1049,12 @@ sub talkform {
         my $chal = $opts->{ditemid} . "-$journalu->{userid}-$time-$rchars";
         my $res = Digest::MD5::md5_hex($secret . $chal);
         $ret .= LJ::html_hidden("chrp1", "$chal-$res");
+    }
+
+    # if we know the user who is posting (error on talkpost_do POST action),
+    # then see if we 
+    if ($opts->{require_tos}) {
+        $ret .= LJ::tosagree_html('comment', $form->{agree_tos}, BML::ml('tos.error'));
     }
 
     # Default radio button
@@ -2042,11 +2054,11 @@ sub enter_comment {
     my $itemid = $item->{itemid};
 
     my $err = sub {
-        $$errref = "<h2>$_[0]</h2> <p>$_[1]";
+        $$errref = join(": ", @_);
         return 0;
     };
 
-    return $err->("Error", "Invalid user object passed.")
+    return $err->("Invalid user object passed.")
         unless LJ::isu($journalu);
 
     my $jtalkid = LJ::alloc_user_counter($journalu, "T");
@@ -2557,6 +2569,12 @@ sub post_comment {
     if ($parent->{state} eq 'S') {
         LJ::Talk::unscreen_comment($journalu, $item->{itemid}, $parent->{talkid});
         $parent->{state} = 'A';
+    }
+
+    # make sure they're not underage
+    if ($comment->{u} && $comment->{u}->underage) {
+        $$errref = $LJ::UNDERAGE_ERROR;
+        return 0;
     }
 
     # check for duplicate entry (double submission)

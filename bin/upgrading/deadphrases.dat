@@ -25,6 +25,10 @@ general /create.bml.error.seebelow
 general /create.bml.proceed.head
 general /create.bml.proceed.text
 
+general /create.bml.tos.error
+general /create.bml.tos.haveread
+general /create.bml.tos.p1.2
+
 general /editinfo.bml.allowshocontact.email.if_domainaddy
 general /editinfo.bml.allowshowcontact.email.reason
 general /editinfo.bml.newemail.body
@@ -187,3 +191,9 @@ general /talkscreen.bml.title
 general /community/members.bml.success.message
 
 general /community/transfer.bml.error.banned
+
+general /create.bml.age.check.question
+general /create.bml.age.check.yes
+general /create.bml.age.check2.question
+general /create.bml.age.check2.yes
+general /create.bml.age.head
