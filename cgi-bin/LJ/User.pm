@@ -28,6 +28,14 @@ sub writer {
     return 0;
 }
 
+# get an $sth from the writer
+sub prepare {
+    my $u = shift;
+    croak "Database handle unavailable"
+        unless $u->{'_dbcm'} ||= LJ::get_cluster_master($u);
+    return $u->{'_dbcm'}->prepare(@_);
+}
+
 # $u->do("UPDATE foo SET key=?", undef, $val);
 sub do {
     my $u = shift;
@@ -36,7 +44,7 @@ sub do {
     my $uid = $u->{userid}+0
         or croak "Database update called on null user object";
 
-    my $dbcm = LJ::get_cluster_master($u)
+    my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
         or croak "Database handle unavailable";
 
     $query =~ s!^(\s*\w+\s+)!$1/* uid=$uid */ !;

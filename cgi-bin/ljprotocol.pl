@@ -908,7 +908,7 @@ sub postevent
 
     # record journal's disk usage
     my $bytes = length($event) + length($req->{'subject'});
-    LJ::dudata_set($dbcm, $ownerid, 'L', $jitemid, $bytes);
+    $uowner->dudata_set('L', $jitemid, $bytes);
 
     $dbcm->do("$verb INTO logtext2 (journalid, jitemid, subject, event) ".
               "VALUES ($ownerid, $jitemid, ?, ?)", undef, $req->{'subject'}, 
@@ -1225,7 +1225,7 @@ sub editevent
         return fail($err,501,$dbcm->errstr) if $dbcm->err;
 
         # update disk usage
-        LJ::dudata_set($dbcm, $ownerid, 'L', $itemid, $bytes);
+        $uowner->dudata_set('L', $itemid, $bytes);
     }
 
     # up the revision number
