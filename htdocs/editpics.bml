@@ -45,6 +45,7 @@
     my $count;
     $dbcm = LJ::get_cluster_master($u);
     return $err->($ML{'error.nodb'}) unless $dbcm;
+
     if ($u->{'dversion'} > 6) {
         $dbcr = LJ::get_cluster_def_reader($u);
         return $err->($ML{'error.nodb'}) unless $dbcr;
@@ -149,7 +150,8 @@
                 # Find if they changed the comment and then save the new one
                 if ($u->{'dversion'} > 6 && $POST{"com_$pic->{'picid'}"} ne $exist_comments{$pic->{'picid'}}) {
                     my $comment = LJ::text_trim($POST{"com_$pic->{'picid'}"}, LJ::BMAX_UPIC_COMMENT, LJ::CMAX_UPIC_COMMENT);
-                    $dbcm->do("UPDATE userpic2 SET comment=? WHERE userid=? AND picid=?", undef, $comment, $u->{'userid'}, $pic->{'picid'});
+                    $u->do("UPDATE userpic2 SET comment=? WHERE userid=? AND picid=?",
+                           undef, $comment, $u->{'userid'}, $pic->{'picid'});
                 }
             }
 
@@ -195,20 +197,21 @@
                     if ($LJ::USERPIC_BLOBSERVER &&
                         LJ::Blob::delete($u, "userpic", $fmt, $picid)) {
                         $deleted = 1;
-                    } elsif ($dbcm->do("DELETE FROM userpicblob2 WHERE ".
-                                       "userid=? AND picid=?", undef,
-                                       $u->{userid}, $picid) > 0) {
+                    } elsif ($u->do("DELETE FROM userpicblob2 WHERE ".
+                                    "userid=? AND picid=?", undef,
+                                    $u->{userid}, $picid) > 0) {
                         $deleted = 1;
                     }
                     if ($deleted) {
                         if ($u->{'dversion'} > 6) {
-                            $dbcm->do("DELETE FROM userpic2 WHERE picid=? AND userid=?", undef, $picid, $u->{'userid'});
+                            $u->do("DELETE FROM userpic2 WHERE picid=? AND userid=?",
+                                   undef, $picid, $u->{'userid'});
                         } else {
                             $dbh->do("DELETE FROM userpic WHERE picid=?", undef, $picid);
                         }
-                        $dbcm->do("DELETE FROM userblob WHERE journalid=? AND blobid=? " .
-                                  "AND domain=?", undef, $u->{'userid'}, $picid,
-                                  LJ::get_blob_domainid('userpic'));
+                        $u->do("DELETE FROM userblob WHERE journalid=? AND blobid=? " .
+                               "AND domain=?", undef, $u->{'userid'}, $picid,
+                               LJ::get_blob_domainid('userpic'));
 
                         # decrement $count to reflect deletion
                         $count--;
@@ -229,7 +232,8 @@
                                                             $picid);
                         if (! int($present)) {
                             if ($u->{'dversion'} > 6) {
-                                $dbcm->do("DELETE FROM userpic2 WHERE picid=? AND userid=?", undef, $picid, $u->{'userid'});
+                                $u->do("DELETE FROM userpic2 WHERE picid=? AND userid=?",
+                                       undef, $picid, $u->{'userid'});
                             } else {
                                 $dbh->do("DELETE FROM userpic WHERE picid=?", undef, $picid);
                             }
@@ -245,16 +249,16 @@
 
             if (%picid_of_kwid) {
                 if ($u->{'dversion'} > 6) {
-                    $dbcm->do("REPLACE INTO userpicmap2 (userid, kwid, picid) VALUES " .
-                             join(",", map { "(" .
-                                                 join(",", 
-                                                      $dbcm->quote($u->{'userid'}),
-                                                      $dbcm->quote($_),
-                                                      $dbcm->quote($picid_of_kwid{$_})) .
-                                                      ")"
-                                                  }
-                                  keys %picid_of_kwid)
-                             );
+                    $u->do("REPLACE INTO userpicmap2 (userid, kwid, picid) VALUES " .
+                           join(",", map { "(" .
+                                               join(",",
+                                                    $dbcm->quote($u->{'userid'}),
+                                                    $dbcm->quote($_),
+                                                    $dbcm->quote($picid_of_kwid{$_})) .
+                                                    ")"
+                                                }
+                                keys %picid_of_kwid)
+                           );
                 } else {
                     $dbh->do("REPLACE INTO userpicmap (userid, kwid, picid) VALUES " .
                              join(",", map { "(" .
@@ -283,8 +287,8 @@
             if (@kwid_del) {
                 my $kwid_del = join(",", @kwid_del);
                 if ($u->{'dversion'} > 6) {
-                    $dbcm->do("DELETE FROM userpicmap2 WHERE userid=$u->{userid} " .
-                              "AND kwid IN ($kwid_del)");
+                    $u->do("DELETE FROM userpicmap2 WHERE userid=$u->{userid} " .
+                           "AND kwid IN ($kwid_del)");
                 } else {
                     $dbh->do("DELETE FROM userpicmap WHERE userid=$u->{userid} " .
                              "AND kwid IN ($kwid_del)");
@@ -412,11 +416,11 @@
 
                 my $dberr = 0;
                 if ($u->{'dversion'} > 6) {
-                    $dbcm->do("INSERT INTO userpic2 (picid, userid, fmt, width, height, " .
-                             "picdate, md5base64) VALUES (?, ?, ?, ?, ?, NOW(), ?)",
-                             undef, $picid, $u->{'userid'}, $contenttype, $sx, $sy, $base64);
-                    if ($dbcm->err) {
-                        push @errors, $err->($dbcm->errstr);
+                    $u->do("INSERT INTO userpic2 (picid, userid, fmt, width, height, " .
+                           "picdate, md5base64) VALUES (?, ?, ?, ?, ?, NOW(), ?)",
+                           undef, $picid, $u->{'userid'}, $contenttype, $sx, $sy, $base64);
+                    if ($u->err) {
+                        push @errors, $err->($u->errstr);
                         $dberr = 1;
                     }
                 } else {
@@ -431,7 +435,8 @@
 
                 my $clean_err = sub {
                     if ($u->{'dversion'} > 6) {
-                        $dbcm->do("DELETE FROM userpic2 WHERE userid=? AND picid=?", undef, $u->{'userid'}, $picid) if $picid;
+                        $u->do("DELETE FROM userpic2 WHERE userid=? AND picid=?",
+                               undef, $u->{'userid'}, $picid) if $picid;
                     } else {
                         $dbh->do("DELETE FROM userpic WHERE picid=?", undef, $picid) if $picid;
                     }
@@ -447,10 +452,10 @@
                 } elsif (!$dberr) {
                     my $dbcm = LJ::get_cluster_master($u);
                     return $err->($ML{'error.nodb'}) unless $dbcm;
-                    $dbcm->do("INSERT INTO userpicblob2 (userid, picid, imagedata) " .
-                              "VALUES (?, ?, ?)",
-                              undef, $u->{'userid'}, $picid, $POST{'userpic'});
-                    push @errors, $clean_err->($dbcm->errstr) if $dbcm->err;
+                    $u->do("INSERT INTO userpicblob2 (userid, picid, imagedata) " .
+                           "VALUES (?, ?, ?)",
+                           undef, $u->{'userid'}, $picid, $POST{'userpic'});
+                    push @errors, $clean_err->($u->errstr) if $u->err;
                 } else { # We should never get here!
                     push @errors, "User picture uploading failed for unknown reason";
                 }
