@@ -11,7 +11,7 @@ use Apache::Constants ();
 use HTMLCleaner;
 
 use LJ::S2::RecentPage;
-use LJ::S2::CalendarPage;
+use LJ::S2::ArchiveYearPage;
 use LJ::S2::DayPage;
 use LJ::S2::FriendsPage;
 
@@ -62,8 +62,8 @@ sub make_journal
         $entry = "RecentPage::print()";
         $page = RecentPage($u, $remote, $opts);
     } elsif ($view eq "calendar") {
-        $entry = "CalendarPage::print()";
-        $page = CalendarPage($u, $remote, $opts);
+        $entry = "ArchiveYearPage::print()";
+        $page = ArchiveYearPage($u, $remote, $opts);
     } elsif ($view eq "day") {
         $entry = "DayPage::print()";
         $page = DayPage($u, $remote, $opts);
@@ -746,11 +746,10 @@ sub Page
         'view_url' => {
             'recent' => "$base_url/",
             'userinfo' => "$LJ::SITEROOT/userinfo.bml?user=$u->{'user'}",
-            'calendar' => "$base_url/calendar",
+            'archive' => "$base_url/calendar",
             'friends' => "$base_url/friends",
         },
-        'views_order' => [ 'recent', 'calendar', 'friends', 'userinfo' ],
-        'stylesheet_url' => "$base_url/res/stylesheet",
+        'views_order' => [ 'recent', 'archive', 'friends', 'userinfo' ],
         'global_title' => '',
         'head_content' => '',
     };
@@ -976,7 +975,7 @@ sub DateTime__time_format
     return $$c->($this);
 }
 
-sub CalendarPageMonth__month_format
+sub ArchiveYearMonth__month_format
 {
     my ($ctx, $this, $fmt) = @_;
     $fmt ||= "long";

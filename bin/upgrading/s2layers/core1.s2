@@ -243,7 +243,7 @@ class User extends UserLite
 class Page
 "Base template for all views"
 {
-    var string view "The view type (recent, friends, calendar, month, day, entry)";
+    var string view "The view type (recent, friends, archive, month, day, entry)";
     var User journal "User whose journal is being viewed";
     var string journal_type "Journal type, ex: 'P' (personal), 'C' (community), etc.";
     var string base_url "The base URL of the journal being viewed.";
@@ -284,14 +284,10 @@ class Page
     "Output a journal entry. Layouts should override this and the inherited versions in RecentPage, FriendsPage
     and DayPage to change how entries display.";
     
-    function print_entry_summary(Entry e) 
-    "Output a journal entry with no entry text. Layouts should override this for CalendarMonthPage and use
-    it to produce the entry references on that page.";
-
     function print_entry_poster(Entry e) 
     "Output a line of text which says who posted an entry (just \"user\", or \"user posting in somejournal\")";
 
-    function builtin get_this_month() : CalendarPageMonth 
+    function builtin get_this_month() : ArchiveYearPageMonth
     "Returns information about the current month, so that the page may include a mini-calendar or similar features.";
 
 }
@@ -337,18 +333,18 @@ class DayPage extends Page
     var Date date "Date of the current day";
 }
 
-### Calendar page classes
+### Archive classes
 
-class CalendarPageYear
-"Information on how to link to a year in the calendar"
+class ArchiveYearYear
+"Information on how to link to a year in the year archive"
 {
     var int year "Number of the year, eg 2001.";
     var string url "URL to link to for this year.";
     var bool displayed "If this is the year currently being displayed, this will be true.";
 }
 
-class CalendarPageDay 
-"Information on how to link to a day in the calendar"
+class ArchiveYearDay 
+"Information on how to link to a day in the year archive"
 {
     var int day "Day of month number";
     var Date date "Date of day";
@@ -357,24 +353,24 @@ class CalendarPageDay
     var string url "A URL to view the day, if there are entries, else blank.";
 }
 
-class CalendarPageWeek 
-"Represents a 'week' on the calendar"
+class ArchiveYearWeek
+"Represents a 'week' on the year archive"
 {
     var int pre_empty "How many days at the start of the week are blank? (From previous month)";
     var int post_empty "How many days at the end of the week are blank? (From next month)";
-    var CalendarPageDay[] days "An array of the days of the week (0=sunday)";
+    var ArchiveYearDay[] days "An array of the days of the week (0=sunday)";
 
     function print()
     "Print formatted week";
 }
 
-class CalendarPageMonth 
-"A month on from the calendar page (compare [class[CalendarMonthPage]])"
+class ArchiveYearMonth 
+"A month on the calendar page"
 {
     var bool has_entries "If this is false, you probably don't want to display this month.";
     var int month "The number of the month";
     var int year "The number of the year";
-    var CalendarPageWeek[] weeks "An array of the weeks of the month (for ease of building a row-per-week calendar)";
+    var ArchiveYearWeek[] weeks "An array of the weeks of the month (for ease of building a row-per-week calendar)";
     var string url "A url to link to in order to view this month.";
 
     function builtin month_format () : string
@@ -383,24 +379,24 @@ class CalendarPageMonth
     "Returns time formatted as indicated by \$fmt, or long if blank .";
 }
 
-class CalendarPage extends Page 
+class ArchiveYearPage extends Page 
 "Entire calendar page for a single year"
 {
     var int year "The year being viewed";
-    var CalendarPageYear[] years "Information for linking to other years";
-    var CalendarPageMonth[] months "12 months objects, even if no entries are in that month.";
+    var ArchiveYearYear[] years "Information for linking to other years";
+    var ArchiveYearMonth[] months "12 months objects, even if no entries are in that month.";
     var int[] weekdays 
     "Integers representing the days of the week. This will start on Monday (2) or Sunday (1) depending on 
      the property setting for start-of-week and go to Sunday (1) or Saturday (7)";
 
-    function print_month(CalendarPageMonth m)
+    function print_month(ArchiveYearMonth m)
     "Print the calendar cell for the given month";
 
     function print_year_links()
     "Print the navigation links to move between years";
 }
 
-class CalendarMonthPageDay extends CalendarPageDay
+class ArchiveMonthDay extends ArchiveYearDay
 "Summaries of posts by given day"
 {
     var Entry[] entries "Only populated on the month view. Entry text not present.";
@@ -408,15 +404,11 @@ class CalendarMonthPageDay extends CalendarPageDay
     function print_subjectlist 
     "Print a list of entry summaries including subjects";
 }
-class CalendarMonthPageMonth extends CalendarPageMonth 
-"Summaries of posts for each day in the given month"
-{
-    var CalendarMonthPageDay[] days "Array of the days of the month";
-}
-class CalendarMonthPage extends Page 
+
+class ArchiveMonthPage extends Page 
 "A page which contains a list of posts made in that month"
 {
-    var CalendarMonthPageMonth month "The month to be displayed";
+    var ArchiveMonthDay[] days "The days of the month containing entries.";
     var Link prev "A link to the previous month";
     var Link next "A link to the next month";
 
@@ -464,10 +456,10 @@ function builtin get_page () : Page
 "Gets the top-level [class[Page]] instance that LiveJournal ran the [method[Page::print()]] method on.";
 
 function builtin get_url(string user, string view) : string 
-"Returns a URL to the specified view for the specified user. Views use the same names as elsewhere. (recent, friends, calendar, userinfo)";
+"Returns a URL to the specified view for the specified user. Views use the same names as elsewhere. (recent, friends, archive, month, userinfo)";
 
 function builtin get_url(UserLite user, string view) : string
-"Returns a URL to the specified view for the specified user. Views use the same names as elsewhere. (recent, friends, calendar, userinfo)";
+"Returns a URL to the specified view for the specified user. Views use the same names as elsewhere. (recent, friends, archive, month, userinfo)";
 
 function builtin string(int i) : string
 "Return the given integer as a string";
@@ -605,12 +597,12 @@ property string page_day_sortorder {
     des = "Order of entries shown on a Day page";
     values = "forward|Least recent first|reverse|Most recent first";
 }
-property string page_calendar_sortorder {
-    des = "Order of months shown on the Calendar page";
+property string page_archiveyear_sortorder {
+    des = "Order of months shown on the year archive page";
     values = "forward|Least recent first|reverse|Most recent first";
 }
 set page_day_sortorder = "forward";
-set page_calendar_sortorder = "forward";
+set page_archiveyear_sortorder = "forward";
 
 property string text_meta_music {
     des = "Text for 'Current Music'";
@@ -687,8 +679,8 @@ property string text_view_friends_comm {
     "size" = 15;
     example = "Members' Journals";
 }
-property string text_view_calendar {
-    des = "Text used to link to the 'Calendar' view.";
+property string text_view_archive {
+    des = "Text used to link to the archive view.";
     maxlength = 20;
     "size" = 15;
     example = "Journal Archive";
@@ -707,7 +699,7 @@ property string text_view_month {
 }
 set text_view_recent = "Recent Entries";
 set text_view_friends = "Friends";
-set text_view_calendar = "Calendar";
+set text_view_archive = "Archive";
 set text_view_userinfo = "User Info";
 set text_view_month = "View Subjects";
 
@@ -828,7 +820,7 @@ function lang_viewname(string viewid) : string
 "Get some words representing a view"
 {
     if ($viewid == "recent") { return $*text_view_recent; }
-    if ($viewid == "calendar") { return $*text_view_calendar; }
+    if ($viewid == "archive") { return $*text_view_archive; }
     if ($viewid == "friends") { return $*text_view_friends; }
     if ($viewid == "day") { return "Day"; }
     if ($viewid == "month") { return "Month"; }
@@ -948,7 +940,7 @@ function FriendsPage::view_title() : string {
 function DayPage::view_title : string {
     return $.date->date_format("long");
 }
-function CalendarPage::view_title() : string {
+function ArchiveYearPage::view_title() : string {
     return string($.year);
 }
 function Page::title() : string {
@@ -1010,7 +1002,6 @@ function Page::print_entry_poster(Entry e) {
         " posting in ";
         $e.journal->print();
     }
-    #" at "+$e.time->time_long();
 }
 function Page::print_entry(Entry e) {
     ## For most styles, this will be overridden by FriendsPage::print_entry and such.
@@ -1086,17 +1077,17 @@ function RecentPage::print_body {
 }
 
 
-### Calendar view
+### ArchiveYear view
 
-function CalendarPage::print_body {
+function ArchiveYearPage::print_body {
     $this->print_year_links();
-    foreach var CalendarPageMonth m ($.months) {
+    foreach var ArchiveYearMonth m ($.months) {
         $this->print_month($m);
     }
 }
-function CalendarPage::print_year_links() {
+function ArchiveYearPage::print_year_links() {
     """<ul>\n""";
-    foreach var CalendarPageYear y ($.years) {
+    foreach var ArchiveYearYear y ($.years) {
         if ($y.displayed) {
             """<li class="active">$y.year</li>\n""";
         } else {
@@ -1105,7 +1096,7 @@ function CalendarPage::print_year_links() {
     }
     """</ul>\n""";
 }
-function CalendarPage::print_month(CalendarPageMonth m) {
+function ArchiveYearPage::print_month(ArchiveYearMonth m) {
     if (not $m.has_entries) { return; }
     """<table style="margin-left: 25%; margin-right: 25%; margin-top: 1em; margin-bottom: 1em;
        border-collapse: collapse; border: 1px solid;" border="1">\n
@@ -1116,7 +1107,7 @@ function CalendarPage::print_month(CalendarPageMonth m) {
         "<th>"+$*lang_dayname_short[$d]+"</th>\n";
     }
     "</tr>\n";
-    foreach var CalendarPageWeek w ($m.weeks) {
+    foreach var ArchiveYearWeek w ($m.weeks) {
         $w->print();
     }
     """<tr><td colspan="7" style="text-align: center; border: 1px solid;">
@@ -1124,12 +1115,12 @@ function CalendarPage::print_month(CalendarPageMonth m) {
     "</table>";
 }
 
-function CalendarPageWeek::print() {
+function ArchiveYearWeek::print() {
    """<tr valign="top" style="height: 2em;">\n""";
    if ($.pre_empty > 0) {
       """<td class="emptyday" colspan="$.pre_empty">&nbsp;</td>\n""";
    }
-   foreach var CalendarPageDay d ($.days) {
+   foreach var ArchiveYearDay d ($.days) {
        """<td style="border: 1px solid;">\n""";
        """<div style="text-align: right;">$d.day</div>\n""";
        if ($d.num_entries > 0) {
@@ -1143,13 +1134,13 @@ function CalendarPageWeek::print() {
    "</tr>";
 }
 
-function CalendarMonthPage::print_body {
+function ArchiveMonthPage::print_body {
     "<div class=\"monthnav\">";
     $.prev->print_button();
     $this->print_navform();
     $.next->print_button();
     "</div>\n<dl>";
-    foreach var CalendarMonthPageDay d ($.month.days) {
+    foreach var ArchiveMonthDay d ($.days) {
         "<dt><a href=\"$d.url\">";
         print lang_ordinal($d.day);
         "</a></dt>\n<dd>";
@@ -1159,7 +1150,7 @@ function CalendarMonthPage::print_body {
     "</dl>\n";
 }
 
-function CalendarMonthPageDay::print_subjectlist() {
+function ArchiveMonthDay::print_subjectlist() {
     "<table>\n";
     foreach var Entry e ($.entries) {
         "<tr><td>";

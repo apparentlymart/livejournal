@@ -4,8 +4,11 @@ layerinfo type = "layout";
 layerinfo name = "Generator";
 layerinfo redist_uniq = "generator/layout";
 
-property Color page_back { des = "Entry background"; }
-set page_back = "#ffffff";
+property Color entry_back { des = "Entry background"; }
+set entry_back = "#ffffff";
+
+property Color entry_text { des = "Entry text color"; }
+set entry_text = "#000000";
 
 property Color page_link { des = "Link color"; }
 set page_link = "#0000ff";
@@ -16,17 +19,8 @@ set page_vlink = "#0000ff";
 property Color page_alink { des = "Active link color"; }
 set page_alink = "#00ffff";
 
-property Color page_text { des = "Entry text color"; }
-set page_text = "#000000";
-
-property Color page_text_em { des = "Emphasized text color"; }
-set page_text_em = "#ffffff";
-
-property Color page_text_title { des = "Title text color"; }
-set page_text_title = "#ffffff";
-
-property Color strong_back { des = "Surrounding background color (and around userpics)"; }
-set strong_back = "#2d4f89";
+property Color page_back { des = "Page background color (and around userpics)"; }
+set page_back = "#2d4f89";
 
 property Color strong_text { des = "Text on strong surrounding color (where needed)"; }
 set strong_text = "#000000";
@@ -54,7 +48,7 @@ function print_stylesheet () {
 function Page::lay_top_userpic () { 
     var Image up_img = $.journal.default_pic;
     if (defined $up_img) {
-        """<td><table cellpadding="2" bgcolor="$*page_back" cellspacing="0" border="0" summary="">
+        """<td><table cellpadding="2" bgcolor="$*entry_back" cellspacing="0" border="0" summary="">
 <tr><td bgcolor="$*stronger_back" align="center"><img border="0" src="$up_img.url" height="$up_img.height" width="$up_img.width" alt=""></td></tr>
 </table></td>
 """;
@@ -116,7 +110,7 @@ font-size: 8pt;
 $.head_content
 <title>$title</title>
 </head>
-<body bgcolor="$*strong_back" text="$*page_text" link="$*page_link" vlink="$*page_vlink" alink="$*page_alink">
+<body bgcolor="$*page_back" text="$*entry_text" link="$*page_link" vlink="$*page_vlink" alink="$*page_alink">
 <div align="center">
 <table width="600" cellpadding="2" cellspacing="0"
 border="0"
@@ -206,7 +200,7 @@ summary="">
 <td align="right" class="index">[$datetime]</td>
 </tr>
 <tr align='left'>
-<td colspan="2" bgcolor="$*page_back">
+<td colspan="2" bgcolor="$*entry_back">
 """;
 
     if ($p.view == "friends" or
@@ -289,7 +283,7 @@ summary="">
 <td align="center" class="index">navigation</td>
 </tr>
 <tr>
-<td bgcolor="$*page_back" align="center">
+<td bgcolor="$*entry_back" align="center">
 <table cellspacing="0"
 cellpadding="0"
 border="0"
@@ -338,14 +332,14 @@ function CommentInfo::print ()
     "</td></tr>";
 }
 
-function CalendarPage::print_year_links ()
+function ArchiveYearPage::print_year_links ()
 {
     """<table cellpadding="2" cellspacing="0" border="0" summary="">
 <tr><td bgcolor="$*stronger_back" align="center">
 <table cellpadding="5" cellspacing="0" border="0" summary="">
 <tr><td class="caption">Years</td></tr><tr>
-<td colspan="2" bgcolor="$*page_back">""";
-    foreach var CalendarPageYear y ($.years) {
+<td colspan="2" bgcolor="$*entry_back">""";
+    foreach var ArchiveYearYear y ($.years) {
         if ($y.displayed) {
             "<b>$y.year</b>&nbsp;";
         } else {
@@ -356,7 +350,7 @@ function CalendarPage::print_year_links ()
 
 }
 
-function CalendarPage::print_month (CalendarPageMonth m)
+function ArchiveYearPage::print_month (ArchiveYearMonth m)
 {       
     if (not $m.has_entries) { return; }
     """<table cellpadding="2" cellspacing="0" border="0" summary="">
@@ -369,7 +363,7 @@ function CalendarPage::print_month (CalendarPageMonth m)
 <td class="caption" align="right">[<a href="$m.url" class="index">subjects</a>]</td>
 </tr>
 <tr>
-<td colspan="2" bgcolor="$*page_back">
+<td colspan="2" bgcolor="$*entry_back">
 <!-- now the headings for the week -->
 <table width="100%" cellpadding="5" cellspacing="0" border="0" summary="">
 <tr align="center">
@@ -380,17 +374,17 @@ function CalendarPage::print_month (CalendarPageMonth m)
     
     "</tr>";
 
-    foreach var CalendarPageWeek w ($m.weeks) {
+    foreach var ArchiveYearWeek w ($m.weeks) {
         $w->print();
     }
 
     """</table></td></tr></table></td></tr></table><p>""";
 }
 
-function CalendarPageWeek::print () {
+function ArchiveYearWeek::print () {
     "<tr valign='top'>";
     if ($.pre_empty) { "<td colspan='$.pre_empty'></td>"; }
-    foreach var CalendarPageDay d ($.days) {
+    foreach var ArchiveYearDay d ($.days) {
         """<td><div class="meta">$d.day</div>""";
         if ($d.num_entries) {
             """<div align="center"><a href="$d.url">$d.num_entries</a></div>""";
@@ -408,7 +402,7 @@ function DayPage::print_body() {
     """<table cellpadding="2" cellspacing="0" border="0" summary="">
 <tr><td bgcolor="$*stronger_back" align="center">
 <table cellpadding="5" cellspacing="0" border="0" summary="">
-<tr><td bgcolor="$*page_back">""";
+<tr><td bgcolor="$*entry_back">""";
 
     if ($.has_entries) {
         print $.date->date_format("long");
@@ -433,7 +427,7 @@ function DayPage::print_body() {
 <td align="center" class="index">navigation</td>
 </tr>
 <tr>
-<td bgcolor="$*page_back" align="center">
+<td bgcolor="$*entry_back" align="center">
 <table cellspacing="0" cellpadding="0" border="0" summary="">
 <tr>
 <td class="meta">[</td>
