@@ -28,13 +28,13 @@
 
         # was a scheme change posted?
         my $scheme;
-        if ($POST{'action:setscheme'}) {
+        if (exists $POST{'action:setscheme'}) {
             foreach (@text_schemes) {
                 $scheme = $_->{'scheme'} if $POST{'scheme'} eq $_->{'scheme'};
             }
         } else {
             foreach (@thumb_schemes) {
-                $scheme = $_->{'scheme'} if $POST{"action:setscheme:$_->{'scheme'}.x"};
+                $scheme = $_->{'scheme'} if exists $POST{"action:setscheme:$_->{'scheme'}.x"};
             }
         }
 
@@ -67,7 +67,7 @@
         }
 
         # set language
-        if ($POST{'action:setlang'} && $POST{'lang'}) {
+        if (exists $POST{'action:setlang'} && $POST{'lang'}) {
             my $l = LJ::Lang::get_lang($POST{'lang'});
             return $redir->() unless $l;
 
