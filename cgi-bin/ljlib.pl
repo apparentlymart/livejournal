@@ -4599,33 +4599,6 @@ sub load_log_props2multi
 
         }
     }
-    foreach my $c (keys %$idsbyc)
-    {
-        if ($c) {
-            # clustered:
-            my $fattyin = join(" OR ", map {
-                "(journalid=" . ($_->[0]+0) . " AND jitemid=" . ($_->[1]+0) . ")"
-            } @{$idsbyc->{$c}});
-            my $db = LJ::get_cluster_reader($c);
-            $sth = $db->prepare("SELECT journalid, jitemid, propid, value ".
-                                "FROM logprop2 WHERE $fattyin");
-            $sth->execute;
-            while (my ($jid, $jitemid, $propid, $value) = $sth->fetchrow_array) {
-                $hashref->{"$jid $jitemid"}->{$LJ::CACHE_PROPID{'log'}->{$propid}->{'name'}} = $value;
-            }
-        } else {
-            # unclustered:
-            my $dbr = $dbs->{'reader'};
-            my $in = join(",", map { $_+0 } @{$idsbyc->{'0'}});
-            $sth = $dbr->prepare("SELECT itemid, propid, value FROM logprop ".
-                                 "WHERE itemid IN ($in)");
-            $sth->execute;
-            while (my ($itemid, $propid, $value) = $sth->fetchrow_array) {
-                $hashref->{"0 $itemid"}->{$LJ::CACHE_PROPID{'log'}->{$propid}->{'name'}} = $value;
-            }
-
-        }
-    }
 }
 
 # <LJFUNC>
