@@ -54,6 +54,9 @@ general /interests.bml.findsim.text
 general /interests.bml.interests.findsim1
 general /interests.bml.interests.findsim2
 
+general /login.bml.error.forgotpass
+general /login.bml.error.noaccount
+
 general /manage/index.bml.information.setlang.about
 general /manage/index.bml.information.setscheme.about
 

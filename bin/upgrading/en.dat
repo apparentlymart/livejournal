@@ -1698,11 +1698,7 @@ You may wish to go back and try again, selecting fewer interests to add.
 
 /login.bml.bindip.yes=Yes (safer)
 
-/login.bml.error.forgotpass=Have you forgotten your password?  Recover it from the <a href='/lostinfo.bml'>lost password page</a>.
-
 /login.bml.error.mustenterusername=You must <a href='/login.bml'>enter a username</a>.
-
-/login.bml.error.noaccount=Don't have an account?  <a href='/create.bml'>Create one here</a>!
 
 /login.bml.expire.btn.neverexpire=Change expiration mode to NEVER
 
@@ -1949,7 +1945,7 @@ The site team
 /manage/index.bml.information.status.about=Set your account's activation status
 
 /manage/index.bml.login<<
-The following links will nagivate you to pages where your login information
+The following links will navigate you to pages where your login information
 is required. To save yourself some time, you can <a href="/login.bml?ret=1">log in</a> beforehand.
 .
 
