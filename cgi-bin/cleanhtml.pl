@@ -22,6 +22,7 @@ use HTML::TokeParser ();
 #        'maximgheight' => 100,
 #        'keepcomments' => 1,
 #        'cuturl' => 'http://www.domain.com/full_item_view.ext',
+#        'cleancss' => 1
 #     });
 
 package LJ::CleanHTML;
@@ -70,6 +71,9 @@ sub clean
     $action{'script'} = "eat";
 
     my @attrstrip = qw();
+    if ($opts->{'cleancss'}) {
+        push @attrstrip, 'id';
+    }
 
     if (ref $opts->{'attrstrip'} eq "ARRAY") {
         foreach (@{$opts->{'attrstrip'}}) { push @attrstrip, $_; }
@@ -174,6 +178,16 @@ sub clean
                                             a\s*b\s*o\s*u\s*t)\s*:/ix) { 
                         delete $hash->{$attr}; 
                     }
+
+                    if ($attr eq 'style' && $opts->{'cleancss'}) {
+                        foreach my $css (qw(position top left bottom right)) {
+                            if ($hash->{$attr} =~ /$css/i) {
+                                delete $hash->{$attr};
+                                last;
+                            }
+                        }
+                    }
+                        
                     if ($s1var) {
                         if ($attr =~ /%%/) {
                             delete $hash->{$attr};
@@ -517,6 +531,7 @@ sub clean_event
         'mode' => 'allow',
         'remove' => $event_remove,
         'autoclose' => \@comment_close,
+        'cleancss' => 1,
     });
 }
 
@@ -538,6 +553,7 @@ sub clean_comment
         'mode' => 'deny',
         'allow' => \@comment_all,
         'autoclose' => \@comment_close,
+        'cleancss' => 1,
     });
 }
 
