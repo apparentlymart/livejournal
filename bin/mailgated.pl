@@ -164,11 +164,14 @@ sub get_status
 # Either an unrecoverable error, or a total success.  ;)
 # Regardless, we're done with this message.
 # Remove it so it isn't processed again.
+our $last_file;
+our $last_tempdir;
 sub dequeue
 {
-    my ($file, $msg) = @_;
+    my $msg = shift;
     debug("\t\t dequeued: $msg") if $msg;
-    unlink("$mailspool/$file") || debug("\t\t Can't unlink $file!");
+    unlink("$mailspool/$last_file") || debug("\t\t Can't unlink $last_file!");
+    File::Path::rmtree("$workdir/$last_tempdir");
     return 0;
 }
 
@@ -178,6 +181,11 @@ sub process
     debug("\t\t$file");
     my $tmpdir = File::Temp::tempdir("ljmailgate_" . 'X' x 20, DIR=>$workdir);
     my $parser = new MIME::Parser;
+
+    # for dequeue sub:
+    $last_file = $file;
+    $last_tempdir = $tmpdir;
+
     $parser->output_dir($tmpdir);
 
     # Close the message as quickly as possible, in case
@@ -186,7 +194,7 @@ sub process
     my $entity;
     eval { $entity = $parser->parse(\*MESSAGE) };
     close MESSAGE;
-    return dequeue($file, "Can't parse MIME") if $@;
+    return dequeue("Can't parse MIME") if $@;
 
     my $head = $entity->head;
     $head->unfold;
@@ -204,18 +212,18 @@ sub process
             $subject =~ /Attachment block message/i ||
             $subject =~ /Use this patch immediately/i ||
             $subject =~ /^YOUR PAYPAL\.COM ACCOUNT EXPIRES/i ||
-            $subject =~ /^don't be late! ([\w\-]{1,15})$/i || 
+            $subject =~ /^don\'t be late! ([\w\-]{1,15})$/i || 
             $subject =~ /^your account ([\w\-]{1,15})$/i) 
     {
-        return dequeue($file, "Spam");
+        return dequeue("Spam");
     }
 
     # quick and dirty (and effective) scan for viruses
-    return dequeue($file, "Virus found") if virus_check($entity);
+    return dequeue("Virus found") if virus_check($entity);
 
     # stop more spam, based on body text checks
     my $tent = LJ::Emailpost::get_entity($entity);
-    return dequeue($file, "Can't find text entity") unless $tent;
+    return dequeue("Can't find text entity") unless $tent;
     my $body = $tent->bodyhandle->as_string;
     $body = LJ::trim($body);
 
@@ -224,7 +232,7 @@ sub process
             $body =~ /^Content-Type: application\/octet-stream/i||
             $body =~ /^(Please see|See) the attached file for details\.?$/i)
     {
-        return dequeue($file, "Spam");
+        return dequeue("Spam");
     }
 
     # see if it's a post-by-email
@@ -243,7 +251,7 @@ sub process
             # FIXME:  set_status() of mail message?
             return;
         } else {           # dequeue
-            return dequeue($file, $post_msg);
+            return dequeue($post_msg);
         }
 
     }
@@ -270,7 +278,7 @@ sub process
         $ignore = 1 if $address eq $LJ::BOGUS_EMAIL;
     }
 
-    return dequeue($file, "Not deliverable to support system (no match To:)") unless $to;
+    return dequeue("Not deliverable to support system (no match To:)") unless $to;
 
     my $adf = (Mail::Address->parse($head->get('From')))[0];
     my $name = $adf->name;
@@ -308,11 +316,11 @@ sub process
         my $splid = LJ::Support::append_request($sp, {
                 'type' => 'comment',
                 'body' => $body,
-                }) or return dequeue($file, "Error appending request?");
+                }) or return dequeue("Error appending request?");
 
         LJ::Support::touch_request($spid);
 
-        return dequeue($file, "Support reply success");
+        return dequeue("Support reply success");
     }
 
     # Now see if we want to ignore this particular email and bounce it back with
@@ -344,7 +352,7 @@ EMAIL_END
         });
 
         # all done
-        return dequeue($file, "Support request bounced to origin");
+        return dequeue("Support request bounced to origin");
     }
 
 
@@ -353,7 +361,7 @@ EMAIL_END
 
     # convert email body to utf-8
     my $content_type = $head->get('Content-type:');
-    my $charset = $1 if $content_type =~ /\bcharset=['"]?(\S+?)['"]?[\s\;]/i;
+    my $charset = $1 if $content_type =~ /\bcharset=[\'\"]?(\S+?)[\'\"]?[\s\;]/i;
     if (defined($charset) && $charset !~ /^UTF-?8$/i &&
             Unicode::MapUTF8::utf8_supported_charset($charset)) {
         $body = Unicode::MapUTF8::to_utf8({ -string=>$body, -charset=>$charset });
@@ -369,9 +377,12 @@ EMAIL_END
             });
 
     if (@errors) {
-        return dequeue($file, "Support errors: @errors");
+        # FIXME: detect trasient vs. permanent errors (changes to
+	# file_request above, probably) and either dequeue or try
+	# later
+        return dequeue("Support errors: @errors");
     } else {
-        return dequeue($file, "Support request success");
+        return dequeue("Support request success");
     }
 }
 
