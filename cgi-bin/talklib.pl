@@ -564,7 +564,7 @@ sub load_comments
 
     if ($LJ::UNICODE) {
         foreach (@posts_to_load) {
-            if ($posts{$_}->{'unknown8bit'}) {
+            if ($posts{$_}->{'props'}->{'unknown8bit'}) {
                 LJ::item_toutf8($dbs, $u, \$posts{$_}->{'subject'},
                                 \$posts{$_}->{'body'},
                                 {});
