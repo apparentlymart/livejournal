@@ -247,6 +247,10 @@ text-decoration: none;
 #navbar a:hover {
 text-decoration: underline;
 }
+#userlinklist ul {
+margin-top: 0;
+margin-bottom: 0;
+}
 #mainstuff {
 width: 75%;
 background: $*entry_bgcolor none;
@@ -387,6 +391,34 @@ function MonthPage::lay_viewspec_heading() : string {
     return $*text_view_archive;
 }
 
+function Page::print_linklist() {
+    if (size $.linklist <= 0) {
+        return;
+    }
+    
+    var bool section_open = false;
+    
+    println "<ul id='userlinklist'>";
+    foreach var UserLink l ($.linklist) {
+        if ($l.title) {
+            if ($l.is_heading) {
+                if ($section_open) {
+                    println "</ul></li>";
+                }
+                println """<li><span style="font-weight: italic;">$l.title</span>\n<ul>""";
+                $section_open = true;
+            } else {
+                println """<li><a href="$l.url">$l.title</a></li>""";
+            }
+        }
+    }    
+    if ($section_open) {
+        println "</ul></li>";
+    }
+    println "</ul>";
+}
+
+
 function Page::lay_print_navbar() {
     var string userpic;
     var Image up_img = $.journal.default_pic;
@@ -422,24 +454,7 @@ $website
     $this->lay_viewspec_nav();
 "$userpic";
 
-if (size $.linklist) {
-    "<ul id='linklist'>";
-    if (not $.linklist[0].is_heading) {
-        "<li><b>Links</b></li>";
-    }
-    foreach var UserLink l ($.linklist) {
-        if ($l.title) {
-            if ($l.is_heading) {
-                "<li><b>$l.title</b></li>";
-            } else {
-                "<li><a href='$l.url'>$l.title</a></li>";
-            }
-        } else {
-            "<li>&nbsp;</li>";
-        }
-    }
-    "</ul>";
-}
+$this->print_linklist();
 
 "</td>";
 }
