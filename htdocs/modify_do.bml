@@ -300,8 +300,8 @@ if ($FORM{'remoteuser'} eq $user) {
              my $testtag = sub {
                  my $tag = lc(shift);
                  return "<$tag" if ($tag eq "title" || $tag eq "base" ||
-                                 $tag eq "style" || $tag eq "link" ||
-                                 $tag eq "meta");
+                                    $tag eq "style" || $tag eq "link" ||
+                                    $tag eq "meta" || $tag  eq "xx");
                  return "<xx-$tag";
              };
              $newoverrides{$sec} =~ s/\<(\w+)/$testtag->($1)/eig;
