@@ -27,6 +27,21 @@ use HTML::TokeParser ();
 
 package LJ::CleanHTML;
 
+# this treats normal characters and &entities; as single characters
+# also treats UTF-8 chars as single characters if $LJ::UNICODE
+my $onechar;
+{
+    my $utf_longchar = '[\xc2-\xdf][\x80-\xbf]|\xe0[\xa0-\xbf][\x80-\xbf]|[\xe1-\xef][\x80-\xbf][\x80-\xbf]|\xf0[\x90-\xbf][\x80-\xbf][\x80-\xbf]|[\xf1-\xf7][\x80-\xbf][\x80-\xbf][\x80-\xbf]';
+    my $match;
+    if (not $LJ::UNICODE) {
+        $match = '[^&\s]|(&\#?\w{1,7};)';
+    } else {
+        $match = $utf_longchar . '|[^&\s\x80-\xff]|(&\#?\w{1,7};)';
+    }
+    $onechar = qr/$match/o;
+}
+
+
 # <LJFUNC>
 # name: LJ::CleanHTML::clean
 # class: text
@@ -378,21 +393,11 @@ sub clean
 
             # put <wbr> tags into long words, except inside <pre>.
             if ($wordlength && !$opencount{'pre'}) {
-                # this treats normal characters and &entities; as single characters
-                # also treats UTF-8 chars as single characters if $LJ::UNICODE
-                my $utf_longchar = '[\xc2-\xdf][\x80-\xbf]|\xe0[\xa0-\xbf][\x80-\xbf]|[\xe1-\xef][\x80-\xbf][\x80-\xbf]|\xf0[\x90-\xbf][\x80-\xbf][\x80-\xbf]|[\xf1-\xf7][\x80-\xbf][\x80-\xbf][\x80-\xbf]';
-                my $match;
-                if (not $LJ::UNICODE) {
-                    $match = '[^&\s]|(&\#?\w{1,7};)';
-                } else {
-                    $match = $utf_longchar . '|[^&\s\x80-\xff]|(&\#?\w{1,7};)';
-                }
-                my $onechar = qr/$match/o;
-                $token->[1] =~ s/(($onechar){$wordlength})\B/$1<wbr \/>/g;
+                $token->[1] =~ s/((?:$onechar){$wordlength})\B/$1<wbr \/>/g;
             } 
 
             if ($auto_format) {
-                $token->[1] =~ s/(\r)?\n/<br \/>/g;
+                $token->[1] =~ s/\r?\n/<br \/>/g;
                 if (! $opencount{'a'}) {
                     $token->[1] =~ s/&url(\d+);(.*?)&urlend;/<a href=\"$url{$1}\">$2<\/a>/g;
                 }
@@ -526,8 +531,7 @@ my @comment_all = (@comment_close, "img", "br", "hr", "p", "col");
 
 sub clean_event
 {
-    my $ref = shift;
-    my $opts = shift;
+    my ($ref, $opts) = @_;
 
     # old prototype was passing in the ref and preformatted flag.
     # now the second argument is a hashref of options, so convert it to support the old way.
@@ -535,6 +539,14 @@ sub clean_event
         $opts = { 'preformatted' => $opts };
     }
 
+    # fast path:  no markup or URLs to linkify
+    if ($$ref !~ /\<|\>|http/ && ! $opts->{preformatted}) {
+        $$ref =~ s/((?:$onechar){40})\B/$1<wbr \/>/g;
+        $$ref =~ s/\r?\n/<br \/>/g;
+        return;
+    }
+    
+    # slow path: need to be run it through the cleaner
     clean($ref, {
         'linkify' => 1,
         'wordlength' => 40,
@@ -556,9 +568,16 @@ sub get_okay_comment_tags
 
 sub clean_comment
 {
-    my $ref = shift;
-    my $preformatted = shift;
+    my ($ref, $preformatted) = @_;
 
+    # fast path:  no markup or URLs to linkify
+    if ($$ref !~ /\<|\>|http/ && ! $preformatted) {
+        $$ref =~ s/((?:$onechar){40})\B/$1<wbr \/>/g;
+        $$ref =~ s/\r?\n/<br \/>/g;
+        return;
+    }
+
+    # slow path: need to be run it through the cleaner
     clean($ref, {
         'linkify' => 1,
         'wordlength' => 40,
