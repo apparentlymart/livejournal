@@ -119,7 +119,7 @@ body<=
 
     my $remote = LJ::get_remote();
 
-    my @user_props = ("opt_notalkicons", "opt_logcommentips", "opt_whoscreened");
+    my @user_props = ("opt_logcommentips", "opt_whoscreened");
     push @user_props, "opt_blockrobots" if $u->{'statusvis'} eq 'V';
     LJ::load_user_props($u, @user_props);
     if ($u->{'statusvis'} ne 'V' || $u->{'opt_blockrobots'}) {
