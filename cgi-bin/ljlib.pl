@@ -124,7 +124,7 @@ sub auth_fields
 	    $hpass = $1;
 	}
 	my $alturl = $ENV{'REQUEST_URI'};
-	$alturl .= ($alturl =~ /\?/) ? "&" : "?";
+	$alturl .= ($alturl =~ /\?/) ? "&amp;" : "?";
 	$alturl .= "altlogin=1";
 
 	$ret .= "<TR><TD COLSPAN=2>You are currently logged in as <B>$remote->{'user'}</B>.<BR>If this is not you, <A HREF=\"$alturl\">click here</A>.\n";
@@ -1648,7 +1648,7 @@ sub date_to_view_links
 
     my $ret;
     $ret .= "<a href=\"$LJ::SITEROOT/users/$user/calendar/$y\">$y</a>-";
-    $ret .= "<a href=\"$LJ::SITEROOT/view/?type=month&user=$user&y=$y&m=$nm\">$m</a>-";
+    $ret .= "<a href=\"$LJ::SITEROOT/view/?type=month&amp;user=$user&amp;y=$y&amp;m=$nm\">$m</a>-";
     $ret .= "<a href=\"$LJ::SITEROOT/users/$user/day/$y/$m/$d\">$d</a>";
     return $ret;
 }

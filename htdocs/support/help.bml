@@ -56,7 +56,7 @@ BODY<=
  }
  else 
  {
-     $ret .= "(=H1 Open Support Requests H1=)(=P Below are all support requests that are open (they just came in and haven't been touched yet) or answered (either awaiting to be closed by the person needing help, or the person requested they still need help).  The <a href=\"./help.bml?state=closed&cat=$filtercat\">closed reports</a> are also available.  If you help somebody out and they confirm you helped them, you get the number of points indicated in the status column.  These points will show up on your userinfo page. P=)";
+     $ret .= "(=H1 Open Support Requests H1=)(=P Below are all support requests that are open (they just came in and haven't been touched yet) or answered (either awaiting to be closed by the person needing help, or the person requested they still need help).  The <a href=\"./help.bml?state=closed&amp;cat=$filtercat\">closed reports</a> are also available.  If you help somebody out and they confirm you helped them, you get the number of points indicated in the status column.  These points will show up on your userinfo page. P=)";
  
      $sth = $dbr->prepare("SELECT COUNT(*) FROM support WHERE state='open'");
      $sth->execute;

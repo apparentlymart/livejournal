@@ -124,7 +124,7 @@ BODY<=
  ## standout bar
  {
      my @linkele;
-     push @linkele, "<A HREF=\"/go.bml?itemid=$itemid&dir=prev\"><IMG ALIGN=ABSMIDDLE HSPACE=2 VSPACE=2 SRC=\"$LJ::IMGPREFIX/btn_prev.gif\" WIDTH=22 HEIGHT=20 ALT=\"Previous Entry\" TITLE=\"Previous Entry\" BORDER=0></A>";	
+     push @linkele, "<A HREF=\"/go.bml?itemid=$itemid&amp;dir=prev\"><IMG ALIGN=ABSMIDDLE HSPACE=2 VSPACE=2 SRC=\"$LJ::IMGPREFIX/btn_prev.gif\" WIDTH=22 HEIGHT=20 ALT=\"Previous Entry\" TITLE=\"Previous Entry\" BORDER=0></A>";	
      
      push @linkele, "<A HREF=\"/tools/memadd.bml?itemid=$itemid\"><IMG ALIGN=ABSMIDDLE HSPACE=2 VSPACE=2 SRC=\"$LJ::IMGPREFIX/memadd.gif\" WIDTH=22 HEIGHT=20 ALT=\"Add to memories!\" title=\"Add to memories!\" BORDER=0></A>";
 
@@ -141,7 +141,7 @@ BODY<=
 
      push @linkele, "<A HREF=\"/tools/tellafriend.bml?itemid=$itemid\"><IMG ALIGN=ABSMIDDLE HSPACE=2 VSPACE=2 SRC=\"$LJ::IMGPREFIX/btn_tellfriend.gif\" WIDTH=22 HEIGHT=20 ALT=\"Tell a Friend!\" title=\"Tell a Friend!\" BORDER=0></A>";
 
-     push @linkele, "<A HREF=\"/go.bml?itemid=$itemid&dir=next\"><IMG ALIGN=ABSMIDDLE HSPACE=2 VSPACE=2 SRC=\"$LJ::IMGPREFIX/btn_next.gif\" WIDTH=22 HEIGHT=20 ALT=\"Next Entry\" TITLE=\"Next Entry\" BORDER=0></A>";	
+     push @linkele, "<A HREF=\"/go.bml?itemid=$itemid&amp;dir=next\"><IMG ALIGN=ABSMIDDLE HSPACE=2 VSPACE=2 SRC=\"$LJ::IMGPREFIX/btn_next.gif\" WIDTH=22 HEIGHT=20 ALT=\"Next Entry\" TITLE=\"Next Entry\" BORDER=0></A>";	
      if (@linkele) {
 	 $ret .="(=STANDOUT ";
 	 $ret .= join("&nbsp;&nbsp;", @linkele);
@@ -474,7 +474,7 @@ sub recurse_post
 		if ($post->{'poster_ip'} && $remote && $remote->{'user'} eq $up->{'user'}) {
 		    $$ret .= "(from $post->{'poster_ip'})";
 		}
-		$$ret .= " <font size=\"-1\">(<a href=\"$SELF?itemid=$itemid&thread=$tid#t$tid\">link</a>)</font> ";
+		$$ret .= " <font size=\"-1\">(<a href=\"$SELF?itemid=$itemid&amp;thread=$tid#t$tid\">link</a>)</font> ";
 		
 		if ($remote && ($remote->{'user'} eq $userpost ||
 				$remote->{'user'} eq $u->{'user'}))
@@ -492,10 +492,10 @@ sub recurse_post
 		
 		$$ret .= "<P><FONT SIZE=-2>";
 		if ($post->{'parenttalkid'} != 0 && $post_count >= $PAGE_SIZE) {
-		    $$ret .= "<A HREF=\"$SELF?itemid=$itemid&thread=$post->{'parenttalkid'}\">(Parent)</A> ";
+		    $$ret .= "<A HREF=\"$SELF?itemid=$itemid&amp;thread=$post->{'parenttalkid'}\">(Parent)</A> ";
 		}
 		if (defined $opts->{'children'}->{$tid} && $post_count >= $PAGE_SIZE) {
-		    $$ret .= "<A HREF=\"$SELF?itemid=$itemid&thread=$tid\">(Thread)</A> ";
+		    $$ret .= "<A HREF=\"$SELF?itemid=$itemid&amp;thread=$tid\">(Thread)</A> ";
 		}
 		$$ret .= "<A HREF=\"/talkpost.bml?replyto=$tid\">(Reply to this)</A></FONT>";
 		$$ret .= "</TD></TR></TABLE>\n";  # close colored table
@@ -503,7 +503,7 @@ sub recurse_post
 		# link to message
 		$$ret .= "<A NAME=\"t$tid\"><TABLE><TR>";
 		$$ret .= "<TD><IMG SRC=\"$LJ::IMGPREFIX/dot.gif\" HEIGHT=1 WIDTH=" . ($opts->{'depth'} * 25) . "></TD>";
-		$$ret .= "<TD><a href=\"$SELF?itemid=$itemid&thread=$tid\">" . &BML::eall($post->{'subject'} || "(no subject)") . "</A> - $user, <i>$post->{'datepost'}</i></TD></TR></TABLE>\n";
+		$$ret .= "<TD><a href=\"$SELF?itemid=$itemid&amp;thread=$tid\">" . &BML::eall($post->{'subject'} || "(no subject)") . "</A> - $user, <i>$post->{'datepost'}</i></TD></TR></TABLE>\n";
 	    }
 	}
     }

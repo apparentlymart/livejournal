@@ -14,7 +14,7 @@
  sub magic_links
  {
      my $des = shift;
-     $$des =~ s!table\[(\w+?)\]!<a href="./?mode=viewtable&table=$1">$1</a>!g;
+     $$des =~ s!table\[(\w+?)\]!<a href="./?mode=viewtable&amp;table=$1">$1</a>!g;
  }
 
  if ($FORM{'mode'} eq "") 
@@ -31,9 +31,9 @@
      $sth->execute;
      while (my ($table) = $sth->fetchrow_array) {
 	 my $des = $table{$table}->{'des'} || "<i>no description, yet</i>";
-	 $body .= "<tr valign=top><td nowrap><b><a href=\"./?mode=viewtable&table=$table\">$table</a></b>";
+	 $body .= "<tr valign=top><td nowrap><b><a href=\"./?mode=viewtable&amp;table=$table\">$table</a></b>";
 	 if ($table{$table}->{'public'}) {
-	     $body .= " (<a href=\"./?mode=viewdata&table=$table\">data</a>)";
+	     $body .= " (<a href=\"./?mode=viewdata&amp;table=$table\">data</a>)";
 	 }
 	 $body .= "</td><td>$des</td></tr>\n";b
      }
@@ -53,10 +53,10 @@
 
      $body .= "<a href=\"./\">&lt;&lt; Tables</a>";
      if ($browsable) {
-	 $body .= " | <a href=\"./?mode=viewdata&table=$table\">View Data</a>";
+	 $body .= " | <a href=\"./?mode=viewdata&amp;table=$table\">View Data</a>";
      }
      if ($can_doc) {
-	 $body .= " | <a href=\"./?mode=doc&table=$table\">Edit Documentation</a>";
+	 $body .= " | <a href=\"./?mode=doc&amp;table=$table\">Edit Documentation</a>";
      }
      $body .= "(=H1 Table: $table H1=)(=P ";
 
@@ -116,7 +116,7 @@
 
      my $MAX_ROWS = 100;
 
-     $body .= "<a href=\"./\">&lt;&lt; Tables</a><br><a href=\"./?mode=viewtable&table=$table\">&lt;&lt; Table: $table</a>(=H1 Data: $table H1=)(=P Below are the rows in the <b>$table</b> table.  If the table has more than $MAX_ROWS records, only the top $MAX_ROWS are shown.  P=)<p>\n";
+     $body .= "<a href=\"./\">&lt;&lt; Tables</a><br><a href=\"./?mode=viewtable&amp;table=$table\">&lt;&lt; Table: $table</a>(=H1 Data: $table H1=)(=P Below are the rows in the <b>$table</b> table.  If the table has more than $MAX_ROWS records, only the top $MAX_ROWS are shown.  P=)<p>\n";
 
      $sth = $dbh->prepare("SELECT tablename, public_browsable, des FROM schematables WHERE tablename='$table'");
      $sth->execute;
@@ -251,7 +251,7 @@
 	 if ($dbh->err) { $body .= "[3] ($sql)<p>" . $dbh->errstr; return ""; }
      }
 
-     $body .= "(=H1 Success H1=)(=P Documentation saved. <a href=\"./?mode=viewtable&table=$table\">View</a>. P=)";
+     $body .= "(=H1 Success H1=)(=P Documentation saved. <a href=\"./?mode=viewtable&amp;table=$table\">View</a>. P=)";
 
      return "";	 
  }

@@ -4,7 +4,7 @@ BODY<=
 
 (=_CODE
 
- return &server_down_html() if ($LJ::SERVER_DOWN);
+ return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
  require 'propparse.pl';
  my @vars;
@@ -145,7 +145,7 @@ BODY<=
 	 if ($yr) { $extravars .= "&year=$yr&month=$mo&day=$da"; }
      }
      if ($sty->{'opt_cache'} eq "Y") { $extravars .= "&nocache=1"; }
-     $ret .= " <A TARGET=preview HREF=\"/customview.cgi?username=$user&styleid=$sty->{'styleid'}$extravars\">[Preview Current Style]</A> (must save below to see your changes, keep this window open and reload it whenever you save)";
+     $ret .= " <A TARGET=preview HREF=\"/customview.cgi?username=$user&amp;styleid=$sty->{'styleid'}$extravars\">[Preview Current Style]</A> (must save below to see your changes, keep this window open and reload it whenever you save)";
      $ret .= "</TD></TR>\n";
      
      $ret .= "<TR><TD BGCOLOR=#D0D0D0><B>Style Description:</B></TD><TD><INPUT NAME=styledes SIZE=50 MAXLENGTH=50 VALUE=\"" . &BMLUtil::escapeall($sty->{'styledes'}) . "\"></TD></TR>";
@@ -322,7 +322,7 @@ if ($FORM{'mode'} eq "savechanges")
 
      # all good
      return "(=H1 Success H1=)(=P Style has been updated.  You can view it ".
-	 "<a target=preview href=\"/customview.cgi?user=$user&styleid=$qstyleid\">here</a>. P=)";
+	 "<a target=preview href=\"/customview.cgi?user=$user&amp;styleid=$qstyleid\">here</a>. P=)";
  }
 
  return "<B>Error:</B> Unknown mode ($FORM{'mode'}).";

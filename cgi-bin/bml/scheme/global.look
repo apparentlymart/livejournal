@@ -2,7 +2,7 @@ SECURITYPRIVATE=>{Ss}<img src="(=IMGPREFIX=)/icon_private.gif" width=16 height=1
 SECURITYPROTECTED=>{Ss}<img src="(=IMGPREFIX=)/icon_protected.gif" width=14 height=15 align=absmiddle>
 LJUSER=>{DSs}<a href="/userinfo.bml?user=%%DATA%%"><img src="(=IMGPREFIX=)/userinfo.gif" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE border=0></a><b><a href="/users/%%DATA%%/">%%DATA%%</a></b>
 LJCOMM=>{DSs}<a href="/userinfo.bml?user=%%DATA%%"><img src="(=IMGPREFIX=)/community.gif" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE border=0></a><b><a href="/users/%%DATA%%/">%%DATA%%</a></b>
-LJUSERF=>{DSs}<a href="/userinfo.bml?user=%%DATA%%&mode=full"><img src="(=IMGPREFIX=)/userinfo.gif" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE border=0></a><b><a href="/users/%%DATA%%/">%%DATA%%</a></b>
+LJUSERF=>{DSs}<a href="/userinfo.bml?user=%%DATA%%&amp;mode=full"><img src="(=IMGPREFIX=)/userinfo.gif" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE border=0></a><b><a href="/users/%%DATA%%/">%%DATA%%</a></b>
 HELP=>{DS}(<a href="%%DATA%%"><i>help</i></a>)
 
 REQUIREPOST<=

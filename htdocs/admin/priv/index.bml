@@ -140,7 +140,7 @@
 	 } else {
 	     $ret .= "--";
 	 }
-	 $ret .= "</TD><TD><A HREF=\"./?mode=viewpriv&priv=$_->{'prlid'}\">$priv{$_->{'prlid'}}->{'privcode'}</A></TD>";
+	 $ret .= "</TD><TD><A HREF=\"./?mode=viewpriv&amp;priv=$_->{'prlid'}\">$priv{$_->{'prlid'}}->{'privcode'}</A></TD>";
 	 $ret .= "<TD>$_->{'arg'}</TD></TR>\n";
      }
      $ret .= "</TABLE>";
@@ -190,7 +190,7 @@
 	 } else {
 	     $ret .= "--";
 	 }
-	 $ret .= "</TD><TD><A HREF=\"./?mode=viewuser&userid=$_->{'userid'}\">$_->{'user'}</A></TD>";
+	 $ret .= "</TD><TD><A HREF=\"./?mode=viewuser&amp;userid=$_->{'userid'}\">$_->{'user'}</A></TD>";
 	 $ret .= "<TD>$_->{'arg'}</TD></TR>\n";
      }
      $ret .= "</TABLE>";

@@ -18,7 +18,7 @@
 	 $mode = $FORM{'mode'};
 	 $body .= "<b>[ $m->[1] ]</b> ";
      } else {
-	 $body .= "<a href=\"$LJ::SITEROOT/poll/?id=$pollid&mode=$m->[0]\">[ $m->[1] ]</a> ";
+	 $body .= "<a href=\"$LJ::SITEROOT/poll/?id=$pollid&amp;mode=$m->[0]\">[ $m->[1] ]</a> ";
      }
  }
  $body .= "<a href=\"$LJ::SITEROOT/talkread.bml?itemid=$po->{'itemid'}\">[ Discuss Results ]</a> ";

@@ -100,7 +100,7 @@ BODY<=
      my $s = $winner->{'points'} > 1 ? "s" : "";
      my $wuser = $winner->{'user'};
      $state .= " (<B>$winner->{'points'}</B> point$s to <A HREF=\"/users/$wuser/\"><B>$wuser</B></A> ";
-     $state .= "<A HREF=\"/userinfo.bml?user=$wuser&mode=full\"><IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE></A>)";
+     $state .= "<A HREF=\"/userinfo.bml?user=$wuser&amp;mode=full\"><IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE></A>)";
  }
  $ret .= "<tr><td align=right><b>Status:</b></td><td>$state";
  if ($sp->{'state'} eq "open" && $owner_mode) {
@@ -155,7 +155,7 @@ BODY<=
 	 my $picid = $up->{'defaultpicid'};
 	 $header = "<IMG ALIGN=BASELINE SRC=\"/userpic/$picid\" WIDTH=$userpics{$picid}->{'width'} HEIGHT=$userpics{$picid}->{'height'} HSPACE=3>";
 	 $header .= "$up->{'name'} (<B><A HREF=\"$LJ::SITEROOT/users/$up->{'user'}/\">$up->{'user'}</A></B> ";
-	 $header .= "<A HREF=\"/userinfo.bml?user=$up->{'user'}&mode=full\"><IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=BASELINE></A>)";
+	 $header .= "<A HREF=\"/userinfo.bml?user=$up->{'user'}&amp;mode=full\"><IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=BASELINE></A>)";
      }
 
      my $what = "Answer";

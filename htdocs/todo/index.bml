@@ -136,7 +136,7 @@
  {
      my @actions = ();
      if ($permission{'add'}) {
-	 push @actions, [ "item.bml?user=$u->{'user'}&mode=add&cat=" . &eurl($FORM{'cat'}), "Add Item" ];
+	 push @actions, [ "item.bml?user=$u->{'user'}&mode=add&amp;cat=" . &eurl($FORM{'cat'}), "Add Item" ];
      }
      
      if (@actions) 

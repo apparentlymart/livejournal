@@ -175,7 +175,7 @@ BODY<=
 
      $ret .= "(=H1 Interested users H1=)(=P The following users are also interested in <B>\"$interest\"</B>.  ";
      if ($remote) {
-	 $ret .= "If you're also interested in this and would like to be added to this list, <A HREF=\"/interests.bml?mode=add&intid=$qintid\">click here</A>.  ";
+	 $ret .= "If you're also interested in this and would like to be added to this list, <A HREF=\"/interests.bml?mode=add&amp;intid=$qintid\">click here</A>.  ";
      }
      $ret .= "More fun stuff can be found on the <A HREF=\"/interests.bml\">interests page</A>. P=)";
 

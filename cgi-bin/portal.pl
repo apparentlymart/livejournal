@@ -433,10 +433,10 @@ sub box_start
     my $t = join("-", $box->{'key'}, $box->{'loc'}, $box->{'pos'});
 
     $$b .= "<MAP name=$mapname>\n";
-    $$b .= "<area shape=rect target=_self coords=0,0,16,16 href=/portal/alter.bml?op=d&t=$t alt=Down>\n";
-    $$b .= "<area shape=rect target=_self coords=16,0,32,16 href=/portal/alter.bml?op=u&t=$t alt=Up>\n";
-    $$b .= "<area shape=rect coords=32,0,48,16 href=/portal/alter.bml?op=a&t=$t alt=\"Add/Modify\">\n";
-    $$b .= "<area shape=rect target=_self coords=48,0,64,16 href=/portal/alter.bml?op=x&t=$t alt=Kill>\n";
+    $$b .= "<area shape=rect target=_self coords=0,0,16,16 href=/portal/alter.bml?op=d&amp;t=$t alt=Down>\n";
+    $$b .= "<area shape=rect target=_self coords=16,0,32,16 href=/portal/alter.bml?op=u&amp;t=$t alt=Up>\n";
+    $$b .= "<area shape=rect coords=32,0,48,16 href=/portal/alter.bml?op=a&amp;t=$t alt=\"Add/Modify\">\n";
+    $$b .= "<area shape=rect target=_self coords=48,0,64,16 href=/portal/alter.bml?op=x&amp;t=$t alt=Kill>\n";
     $$b .= "</MAP>\n";
 
     if ($box->{'pos'} > 1) { $$b .= "<p>"; }

@@ -51,7 +51,7 @@ BODY<=
  $ret .= "<UL>\n";
  foreach my $top (@list) 
  {
-     $ret .= "<LI><A HREF=\"/topics/add.bml?itemid=$itemid&conf=1&topid=$top->{'tptopid'}\">$top->{'topname'}</A>";
+     $ret .= "<LI><A HREF=\"/topics/add.bml?itemid=$itemid&amp;conf=1&amp;topid=$top->{'tptopid'}\">$top->{'topname'}</A>";
      if ($top->{'des'}) { $ret .= " - "; $ret .= $top->{'des'}; }
  }
  unless (@list) {

@@ -585,7 +585,7 @@ sub show_poll
 	if ($mode eq "results") 
 	{
 	    ### to see individual's answers
-	    $ret .= "<a href=\"$LJ::SITEROOT/poll/?id=$pollid&qid=$qid&mode=ans\">View Answers</a><br>";
+	    $ret .= "<a href=\"$LJ::SITEROOT/poll/?id=$pollid&amp;qid=$qid&amp;mode=ans\">View Answers</a><br>";
 
 	    ### but, if this is a non-text item, and we're showing results, need to load the answers:
 	    $sth = $dbh->prepare("SELECT COUNT(DISTINCT(userid)) FROM pollresult WHERE pollid=$pollid AND pollqid=$qid");

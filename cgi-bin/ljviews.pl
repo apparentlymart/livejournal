@@ -185,7 +185,7 @@ sub create_view_lastn
 		'itemid' => $itemid,
 		'urlpost' => "$LJ::SITEROOT/talkpost.bml?itemid=$itemid",
 		'readlink' => $replycount ? &fill_var_props($vars, 'LASTN_TALK_READLINK', {
-		    'urlread' => "$LJ::SITEROOT/talkread.bml?itemid=$itemid&nc=$replycount",
+		    'urlread' => "$LJ::SITEROOT/talkread.bml?itemid=$itemid&amp;nc=$replycount",
 		    'messagecount' => $replycount,
 		    'mc-plural-s' => $replycount == 1 ? "" : "s",
 		    'mc-plural-es' => $replycount == 1 ? "" : "es",
@@ -344,7 +344,7 @@ sub create_view_friends
 	$$ret .= "<html><head><title>${user}'s friends: live!</title></head>\n";
 	$$ret .= "<frameset rows=\"100%,0%\" border=0>\n";
 	$$ret .= "  <frame name=livetop src=\"friends?mode=framed\">\n";
-	$$ret .= "  <frame name=livebottom src=\"friends?mode=livecond&lastitemid=0\">\n";
+	$$ret .= "  <frame name=livebottom src=\"friends?mode=livecond&amp;lastitemid=0\">\n";
 	$$ret .= "</frameset></html>\n";
 	return 1;
     }
@@ -427,7 +427,7 @@ sub create_view_friends
 	my $first = $itemids[0];
 
 	$$ret .= "time = " . scalar(time()) . "<br>";
-	$opts->{'headers'}->{'Refresh'} = "$REFRESH_TIME;URL=$LJ::SITEROOT/users/$user/friends?mode=livecond&lastitemid=$first";
+	$opts->{'headers'}->{'Refresh'} = "$REFRESH_TIME;URL=$LJ::SITEROOT/users/$user/friends?mode=livecond&amp;lastitemid=$first";
 	if ($FORM{'lastitemid'} == $itemids[0]) {
 	    $$ret .= "nothing new!";
 	} else {
@@ -641,7 +641,7 @@ sub create_view_friends
 		'itemid' => $itemid,
 		'urlpost' => "$LJ::SITEROOT/talkpost.bml?itemid=$itemid",
 		'readlink' => $replycount ? &fill_var_props($vars, 'FRIENDS_TALK_READLINK', {
-		    'urlread' => "$LJ::SITEROOT/talkread.bml?itemid=$itemid&nc=$replycount",
+		    'urlread' => "$LJ::SITEROOT/talkread.bml?itemid=$itemid&amp;nc=$replycount",
 		    'messagecount' => $replycount,
 		    'mc-plural-s' => $replycount==1 ? "" : "s",
 		    'mc-plural-es' => $replycount == 1 ? "" : "es",
@@ -869,7 +869,7 @@ sub create_view_calendar
 	  $calendar_month{'yyyy'} = $year;
 	  $calendar_month{'yy'} = substr($year, 2, 2);
 	  $calendar_month{'weeks'} = "";
-	  $calendar_month{'urlmonthview'} = "$LJ::SITEROOT/view/?type=month&user=$user&y=$year&m=$month";
+	  $calendar_month{'urlmonthview'} = "$LJ::SITEROOT/view/?type=month&amp;user=$user&amp;y=$year&amp;m=$month";
 	  my $weeks = \$calendar_month{'weeks'};
 
 	  my %calendar_week = ();
@@ -1115,7 +1115,7 @@ END_SQL
 		'itemid' => $itemid,
 		'urlpost' => "$LJ::SITEROOT/talkpost.bml?itemid=$itemid",
 		'readlink' => $replycount ? &fill_var_props($vars, 'DAY_TALK_READLINK', {
-		    'urlread' => "$LJ::SITEROOT/talkread.bml?itemid=$itemid&nc=$replycount",
+		    'urlread' => "$LJ::SITEROOT/talkread.bml?itemid=$itemid&amp;nc=$replycount",
 		    'messagecount' => $replycount,
 		    'mc-plural-s' => $replycount==1 ? "" : "s",
 		    'mc-plural-es' => $replycount == 1 ? "" : "es",
