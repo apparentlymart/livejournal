@@ -429,7 +429,10 @@ sub trans
     # redirected resources
     if ($REDIR{$uri}) {
         my $new = $REDIR{$uri};
-        if ($r->args) { $new .= "?" . $r->args; }
+        if ($r->args) {
+            $new .= ($new =~ /\?/ ? "&" : "?");
+            $new .= $r->args;
+        }
         return redir($r, $new, HTTP_MOVED_PERMANENTLY);
     }
 
