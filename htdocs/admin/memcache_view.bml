@@ -112,12 +112,12 @@
      if ($key =~ /^log2lt:/) {
          my $items = [];
          my $ver = substr($val, 0, 1);
-         my $offset = {1=>1, 2=>5}->{$ver};
+         my $offset = {1=>1, 2=>5, 3=>5}->{$ver};
          my $newval;
 
          push @$newval, $ver;
          push @$newval, unpack("N", substr($val, 1, 4)) 
-             if $ver==2;
+             if $ver>=2;
          
          my $n = (length($val) - $offset )/20;
          for (my $i=0; $i<$n; $i++) {
