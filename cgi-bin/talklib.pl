@@ -1211,6 +1211,48 @@ sub talkform {
                                 ("", $BML::ML{'.opt.defpic'}, map { ($_, $_) } @pics));
         $ret .= LJ::help_icon("userpics", " ");
     }
+    # quick quote button
+    my $quickquote = LJ::ejs('<input type="button" value="Quote" onmousedown="quote();" onclick="quote();" />');
+  
+    $ret .= "<script type='text/javascript' language='JavaScript'>\n<!--\n";
+    $ret .= <<"QQ";
+
+var helped = 0; var pasted = 0;
+function quote () {
+    var text = '';
+
+    if (document.getSelection) {
+        text = document.getSelection();
+    } else if (document.selection) {
+        text = document.selection.createRange().text;
+    } else if (window.getSelection) {
+        text = window.getSelection();
+    }
+
+    if (text == '') {
+        if (helped != 1 && pasted != 1) { 
+            helped = 1; alert("If you'd like to quote a portion of the original message, highlight it then press 'Quote'"); 
+        }
+        return false;
+    } else {
+        pasted = 1;
+    }
+
+    var element = text.search(/\\n/) == -1 ? 'q' : 'blockquote';
+    var textarea = document.getElementById('commenttext');
+    textarea.focus();
+    textarea.value = textarea.value + "<" + element + ">" + text + "</" + element + ">";
+    textarea.caretPos = textarea.value;
+    textarea.focus();
+    return false;
+}
+if (document.getElementById && (document.getSelection || document.selection || window.getSelection)) {
+    // Opera clears the paste buffer before mouse events, useless here
+    if (navigator.userAgent.indexOf("Opera") == -1) { document.write('$quickquote'); }
+}
+QQ
+    $ret .= "-->\n</script>\n";
+
     $ret .= "</td></tr>\n";
 
     # textarea for their message body
