@@ -223,20 +223,11 @@ my $move_user = sub {
     my %mappings;
     while (my ($kwid, $keyword) = each %kwidmap) {
         # reallocate counter
-        my $newkwid = LJ::alloc_user_counter($u, 'K');
-        die "Error: unable to allocate type 'K' counter for $u->{user}($u->{userid})\n"
+        my $newkwid = LJ::get_keyword_id($u, $keyword);
+        die "Error: unable to get keyword id for $u->{user}($u->{userid}), keyword '$keyword'\n"
             unless $newkwid;
         $mappings{$kwid} = $newkwid;
-
-        # push data
-        push @bind, "($u->{userid}, ?, ?)";
-        push @vars, ($newkwid, $keyword);
-
-        # flush if necessary
-        $flush->('userkeywords', 'userid, kwid, keyword')
-            if @bind > $BLOCK_INSERT;
     }
-    $flush->('userkeywords', 'userid, kwid, keyword');
 
     # step 5: now we have to do some mapping conversions and put new data into userpicmap2 table
     while (my ($oldkwid, $picids) = each %kwmap) {
