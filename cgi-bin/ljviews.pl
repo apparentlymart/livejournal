@@ -1954,7 +1954,7 @@ sub create_view_rss
 
     # email address of journal owner, but respect their privacy settings
     my $ceditor;
-    if ($u->{'opt_whatemailshow'} ne "N" && $u->{'opt_mangleemail'} ne "Y") {
+    if ($u->{'allow_contactshow'} eq "Y" && $u->{'opt_whatemailshow'} ne "N" && $u->{'opt_mangleemail'} ne "Y") {
         
         # default to their actual email
         $ceditor = $u->{'email'};
