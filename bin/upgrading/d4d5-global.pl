@@ -19,6 +19,25 @@ my $lastuser;
 # what pass are we on?
 my $pass;
 
+# percentage complete
+my $status = sub {
+    my ($ct, $tot, $units, $pass, $user) = @_;
+    my $len = length($tot);
+
+    my $passtxt = $pass ? "[Pass: $pass] " : '';
+    my $usertxt = $user ? " Moving user: $user" : '';
+    return sprintf(" $passtxt\[%6.2f%%: %${len}d/%${len}d $units]$usertxt\n",
+                   ($ct / $tot) * 100, $ct, $tot);
+};
+
+my $header = sub {
+    my $size = 50;
+    return "\n" .
+           ("#" x $size) . "\n" .
+           "# $_[0] " . (" " x ($size - length($_[0]) - 4)) . "#\n" .
+           ("#" x $size) . "\n\n";
+};
+
 # mover function
 my $move_user = sub {
     my $user = shift;
@@ -33,6 +52,10 @@ my $move_user = sub {
 
     # update user count for this pass
     $stats{'move'}->{$pass}->{'user_ct'}++;
+
+    # print status
+    print $status->($stats{'move'}->{$pass}->{'ct'},
+                    $stats{'move'}->{$pass}->{'total'}, "rows", $pass, $user);
 
     # get a handle for every user to revalidate our connection?
     my $dbh = LJ::get_db_writer()
@@ -160,24 +183,6 @@ my $move_user = sub {
     return 1;
 };
 
-# percentage complete
-my $status = sub {
-    my ($ct, $tot, $units, $pass) = @_;
-    my $len = length($tot);
-
-    my $passtxt = $pass ? "[Pass: $pass] " : '';
-    return sprintf(" $passtxt\[%6.2f%%: %${len}d/%${len}d $units]\n",
-                   ($ct / $tot) * 100, $ct, $tot);
-};
-
-my $header = sub {
-    my $size = 50;
-    return "\n" .
-           ("#" x $size) . "\n" .
-           "# $_[0] " . (" " x ($size - length($_[0]) - 4)) . "#\n" .
-           ("#" x $size) . "\n\n";
-};
-
 my $dbh = LJ::get_db_writer();
 die "Could not connect to global master" unless $dbh;
 $dbh->{'RaiseError'} = 1;
@@ -208,6 +213,8 @@ foreach my $p (1..2) {
         $stats{'move'}->{$pass}->{'total'} += $dbslo->selectrow_array("SELECT COUNT(*) FROM $_");
     }
 
+    print "Processing $stats{'move'}->{$p}->{'total'} total rows\n";
+
     # 2 passes, so we catch people with styles & overrides,
     # styles w/o overrides, and overrides w/o styles
     foreach my $table (qw(style overrides)) {
@@ -228,13 +235,10 @@ foreach my $p (1..2) {
                 $ct++;
             }
 
-            # print status
-            print $status->($stats{'move'}->{$pass}->{'ct'},
-                            $stats{'move'}->{$pass}->{'total'}, "rows", $pass)
-                if $ct;
-
         } while $ct;
     }
+
+    print $stats{'move'}->{$p}->{'user_ct'}+0 . " users moved\n\n";
 }
 
 # now we're confident that all users have had their data moved if
