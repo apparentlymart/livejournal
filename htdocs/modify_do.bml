@@ -257,7 +257,7 @@ if ($FORM{'remoteuser'} eq $user) {
 
  if ($mode eq "domodify")
  {
-     return "Post required." unless LJ::did_post();
+     return "<?requirepost?>" unless LJ::did_post();
 
      my @errors = ();
      my $state = "";
