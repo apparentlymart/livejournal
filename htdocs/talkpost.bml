@@ -125,7 +125,11 @@ body<=
 
  # check suspended
  return "<?h1 $ML{'talk.error.suspended.title'} h1?><?p $ML{'talk.error.suspended'} p?>"
- if ($u->{'statusvis'} eq "S" || $up->{'statusvis'} eq "S");
+    if ($u->{'statusvis'} eq "S" || $up->{'statusvis'} eq "S");
+
+ # check deleted
+ return "<?h1 $ML{'talk.error.deleted.title'} h1?><?p $ML{'talk.error.deleted'} p?>"
+    if ($u->{'statusvis'} eq "D");
 
  LJ::load_user_props($dbs, $u,  
                      "opt_showtopicstuff", "opt_notalkicons", 

@@ -1284,6 +1284,10 @@ talk.error.suspended=This journal/poster is suspended.
 
 talk.error.suspended.title=Suspended
 
+talk.error.deleted.title=Deleted
+
+talk.error.deleted=This journal is deleted.
+
 talk.parentlink=Parent
 
 talk.readsimilar=Read similar journal entries:
