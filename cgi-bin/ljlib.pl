@@ -2681,6 +2681,78 @@ sub auth_okay
     return $bad_login->();
 }
 
+
+# Create a challenge token for secure logins
+sub challenge_generate
+{
+    my $goodfor = shift || 60;
+    my ($stime, $secret) = LJ::get_secret();
+
+    # challenge version, secret time, secret age, time in secs token is good for, random chars.
+    my $s_age = time() - $stime;
+    my $chalbare = "c0:$stime:$s_age:$goodfor:" . LJ::rand_chars(20);
+    my $chalsig = Digest::MD5::md5_hex($chalbare . $secret);
+    my $chal = "$chalbare:$chalsig";
+
+    return $chal;
+}
+
+# Validate login/talk md5 responses.
+# Return 1 on valid, 0 on invalid.
+sub challenge_check
+{
+    my ($u, $chal, $res, $banned) = @_;
+    return 0 unless $u;
+    my $pass = $u->{'password'};
+
+    # set the IP banned flag, if it was provided.
+    my $fake_scalar;
+    my $ref = ref $banned ? $banned : \$fake_scalar;
+    if (LJ::login_ip_banned($u)) {
+        $$ref = 1;
+        return 0;
+    } else {
+        $$ref = 0;
+    }
+
+    my ($c_ver, $stime, $s_age, $goodfor, $rand, $chalsig) = split /:/, $chal;
+    my $secret = LJ::get_secret($stime);
+    my $chalbare = "$c_ver:$stime:$s_age:$goodfor:$rand";
+
+    # Validate token
+    return 0 unless $c_ver eq 'c0'; # wrong version
+    return 0 unless time() - ($stime + $s_age) < $goodfor; # expired
+    return 0 unless Digest::MD5::md5_hex($chalbare . $secret) eq $chalsig;
+
+    # Check for token dups
+    my $good;
+    if (@LJ::MEMCACHE_SERVERS) {
+        $good = LJ::MemCache::add("chaltoken:$chal", 1, $goodfor);
+    } else {
+        my $dbh = LJ::get_db_writer();
+        my $rv = $dbh->do("SELECT GET_LOCK(?,5)", undef, $chal);
+        return 0 unless $rv;
+        if (! $dbh->selectrow_array("SELECT challenge FROM challenges WHERE challenge=?",
+                                     undef, $chal)) {
+            $dbh->do("INSERT INTO challenges SET ctime=?, challenge=?",
+                      undef, $stime + $s_age, $chal);
+            $good = 1;
+        }
+        $dbh->do("SELECT RELEASE_LOCK(?)", undef, $chal);
+    }
+    return 0 unless $good;
+
+    # Validate password
+    my $hashed = Digest::MD5::md5_hex($chal . Digest::MD5::md5_hex($pass));
+    if ($hashed eq $res) {
+        return 1;
+    } else {
+        LJ::handle_bad_login($u);
+        return 0;
+    }
+}
+
+
 # <LJFUNC>
 # name: LJ::create_account
 # des: Creates a new basic account.  <b>Note:</b> This function is

@@ -1672,6 +1672,15 @@ CREATE TABLE captchas (
 )
 EOC
 
+# Challenges table (for non-memcache support)
+register_tablecreate("challenges", <<'EOC');
+CREATE TABLE challenges (
+    ctime int(10) unsigned NOT NULL DEFAULT 0,
+    challenge char(80) NOT NULL DEFAULT '',
+    PRIMARY KEY (challenge)
+)
+EOC
+
 register_tablecreate("clustermove_inprogress", <<'EOC');
 CREATE TABLE clustermove_inprogress (
     userid      INT UNSIGNED NOT NULL,
