@@ -1871,6 +1871,8 @@ lostinfo.text=If you forgot your username or password, <a href="lostinfo.bml">re
 
 Password=Password
 
+password.max30=Passwords may not be longer than 30 characters.
+
 protocol.bad_password=Your password is too easy to guess.  It's recommended that you change it, otherwise you risk having your journal hijacked.  Visit [[siteroot]]/changepassword.bml to change your password.
 
 protocol.hello_test=Hello Test Account!
