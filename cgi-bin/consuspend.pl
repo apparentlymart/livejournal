@@ -42,7 +42,7 @@ sub suspend
         return 0;
     }
 
-    if ($u->{'statisvis'} eq $status) {
+    if ($u->{'statusvis'} eq $status) {
         push @$out, [ "error", "User was already in that state ($status)" ];
         return 0;
     }
