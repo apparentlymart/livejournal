@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -22,15 +22,15 @@
 
  return;
 
-_CODE=)(=PAGE
-TITLE=>(=_CODE return $title; _CODE=)
+_code?><?page
+TITLE=><?_code return $title; _code?>
 HEAD<=
-(=_C TODO: configurable meta tags could go here? _C=)
-(=_CODE
+<?_c TODO: configurable meta tags could go here? _c?>
+<?_code
  return $head;
-_CODE=)
+_code?>
 <=HEAD
-BODYOPTS=>(=_CODE return $bodyopts; _CODE=)
-BODY=>(=_CODE return $body; _CODE=)
-PAGE=)(=_C <LJDEP>
-</LJDEP> _C=)
+BODYOPTS=><?_code return $bodyopts; _code?>
+BODY=><?_code return $body; _code?>
+page?><?_c <LJDEP>
+</LJDEP> _c?>

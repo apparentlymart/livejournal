@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  $title = "";
  $body = "";
@@ -7,7 +7,7 @@
  my $dbh = $dbs->{'dbh'};
  my $remote = LJ::get_remote($dbs);
  
- unless ($remote) { $body = "(=NEEDLOGIN=)"; return; }
+ unless ($remote) { $body = "<?needlogin?>"; return; }
 
  my $op = $FORM{'op'};
  my $t = $FORM{'t'};
@@ -42,11 +42,11 @@
  {
      $title = "Customize Homepage";
      
-     $body .= "(=H1 Welcome! H1=)";
-     $body .= "(=P By clicking the little plus sign on the main page you can do several things.  You can change the settings for the box you clicked, you can add a new box, or you can reset your settings back to the default. P=)";
+     $body .= "<?h1 Welcome! h1?>";
+     $body .= "<?p By clicking the little plus sign on the main page you can do several things.  You can change the settings for the box you clicked, you can add a new box, or you can reset your settings back to the default. p?>";
 
-     $body .= "(=H1 Change Box Settings H1=)";
-     $body .= "(=P Change the settings for the box you just clicked:<ul>\n";
+     $body .= "<?h1 Change Box Settings h1?>";
+     $body .= "<?p Change the settings for the box you just clicked:<ul>\n";
      {
          my $modform = LJ::Portal::make_box_modify_form($portopts, $loc, $pos);
          if ($modform) {
@@ -55,9 +55,9 @@
              $body .= "<i>No options for this box.</i>";
          }
      }
-     $body .= "</ul> P=)";
+     $body .= "</ul> p?>";
      
-     $body .= "(=H1 Add New Box H1=)(=P You can create a new box to show on the main page:<ul>";
+     $body .= "<?h1 Add New Box h1?><?p You can create a new box to show on the main page:<ul>";
      foreach my $loc (@LJ::PORTAL_COLS)
      {
          $body .= "<form method=post>";
@@ -70,7 +70,7 @@
                                               LJ::Portal::get_box_types($loc));
          $body .= " <input type=submit value=\"Proceed --&gt;\"></form>";
      }
-     $body .= "</ul> P=)";
+     $body .= "</ul> p?>";
      return;
  }
 
@@ -124,10 +124,10 @@
 
  return;
 
-_CODE=)(=PAGE
-TITLE=>(=_CODE return $title; _CODE=)
-BODY=>(=_CODE return $body; _CODE=)
-PAGE=)(=_C <LJDEP>
+_code?><?page
+TITLE=><?_code return $title; _code?>
+BODY=><?_code return $body; _code?>
+page?><?_c <LJDEP>
 link: htdocs/portal/moz.bml, htdocs/portal/index.bml
 post: htdocs/portal/alter.bml
-</LJDEP> _C=)
+</LJDEP> _c?>
