@@ -1,4 +1,6 @@
 
+var usernameWasFocused = 0;
+
 if (document.getElementById) {
     // If there's no getElementById, this whole script won't do anything
 
@@ -13,6 +15,7 @@ if (document.getElementById) {
     var form = document.getElementById("postform");
 
     var username = form.userpost;
+    username.onfocus = function () { usernameWasFocused = 1; }
     var password = form.password;
 
     var remotef = document.getElementById("cookieuser");
@@ -48,9 +51,12 @@ function submitHandler() {
         radio_remote.checked = true;
         return true;
     }
-    if (username.value && ! radio_user.checked) {
+    if (usernameWasFocused && username.value && ! radio_user.checked) {
         alert(usermismatchtext);
         return false;
+    }
+    if (! radio_user.checked) {
+        username.value = "";
     }
     return true;
 }
