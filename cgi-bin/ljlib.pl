@@ -2058,6 +2058,18 @@ sub get_cap
         return 1;
     }
 
+    # is there a hook for this cap name?
+    if (LJ::are_hooks("check_cap_$cname")) {
+	die "Hook 'check_cap_$cname' requires full user object"
+	    unless defined $u;
+
+	my $val = LJ::run_hooks("check_cap_$cname", $u);
+	return $val if defined $val;
+
+	# otherwise fall back to standard means
+    }
+
+    # otherwise check via other means
     foreach my $bit (keys %LJ::CAP) {
         next unless ($caps & (1 << $bit));
         my $v = $LJ::CAP{$bit}->{$cname};
