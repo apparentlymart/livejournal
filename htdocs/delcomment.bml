@@ -48,9 +48,10 @@ body<=
     my $jposterid = $dbcm->selectrow_array("SELECT posterid FROM log2 WHERE " .
                                            "journalid=? AND jitemid=?",
                                            undef, $u->{'userid'}, $tp->{'itemid'});
+    my $jposter = LJ::load_userid($jposterid);
 
     # can $remote delete this comment?
-    unless (LJ::Talk::can_delete($remote, $u, $jposterid, $tp->{'userpost'})) {
+    unless (LJ::Talk::can_delete($remote, $u, $jposter, $tp->{'userpost'})) {
         return "<?h1 $ML{'Error'} h1?><?p A comment may only be deleted by the author of the journal entry, or the author of the comment. If the entry has been posted in a community, then the maintainer(s) of the community may also delete comments. p?>";
     }
 
