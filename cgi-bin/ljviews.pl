@@ -1532,7 +1532,7 @@ sub create_view_friends
     # load the pictures for the user
     my %userpics;
     my @picids = map { [$_, $friends{$_}->{'defaultpicid'}] } keys %friends;
-    LJ::load_userpics(\%userpics, [ @picids, map { $_->{'defaultpicid'} } values %aposter ]);
+    LJ::load_userpics(\%userpics, [ @picids, map { [ $_, $_->{'defaultpicid'} ] } values %aposter ]);
 
     # load the text of the entries
     my $logtext = LJ::get_logtext2multi(\%idsbycluster);
