@@ -16,6 +16,7 @@ function shift_contents() {
         shift_init = "false";
         bsMacIE5Fix = document.createElement("tr");
         bsMacIE5Fix.style.display = "none";
+        sc_old_border_style = column_one.style.borderRight;
     }
 
     var width;
@@ -31,7 +32,6 @@ function shift_contents() {
         if (layout_mode == "thin" && shift_init == "true") { return true; }
 
         layout_mode = "thin";
-        sc_old_border_style = column_one.style.borderRight;
         column_one.style.borderRight = "0";
         column_two.style.display = "none";
 
@@ -138,7 +138,8 @@ function customboxes (e) {
     }
 
     var altlogin_username = document.getElementById('altlogin_username');    
-    if (altlogin_username != undefined && altlogin_username.style.display == 'table-row') {
+    if (altlogin_username != undefined && (altlogin_username.style.display == 'table-row' ||
+                                           altlogin_username.style.display == 'block')) {
         f.security.selectedIndex = 0;
         custom_boxes.style.display = 'none';
         alert("Custom security is only available when posting as the logged in user.");
@@ -154,16 +155,19 @@ function customboxes (e) {
 }
 
 function altlogin (e) {
+    var agt   = navigator.userAgent.toLowerCase();
+    var is_ie = ((agt.indexOf("msie") != -1) && (agt.indexOf("opera") == -1));
+
     if (! e) var e = window.event;
     if (! document.getElementById) return false;
     
     var altlogin_username = document.getElementById('altlogin_username');
     if (! altlogin_username) return false;
-    altlogin_username.style.display = 'table-row';
+    if (is_ie) { altlogin_username.style.display = 'block'; } else { altlogin_username.style.display = 'table-row'; }
 
     var altlogin_password = document.getElementById('altlogin_password');
     if (! altlogin_password) return false;
-    altlogin_password.style.display = 'table-row';
+    if (is_ie) { altlogin_password.style.display = 'block'; } else { altlogin_password.style.display = 'table-row'; }
     
     var remotelogin = document.getElementById('remotelogin');
     if (! remotelogin) return false;
