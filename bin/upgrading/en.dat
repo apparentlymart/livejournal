@@ -1001,9 +1001,17 @@ already have an account you can <a href="/create.bml">create one</a> to track yo
 
 /logout.bml.already.text=You are already logged out.
 
+/logout.bml.killall.btn=Expire all my sessions
+
+/logout.bml.killall.head=Other sessions
+
+/logout.bml.killall.text=You have other active sessions, from other computers. Do you want to expire all your sessions, and not just this one?
+
 /logout.bml.loggedout.already=Already logged out.
 
 /logout.bml.loggedout.head=Logged out
+
+/logout.bml.loggedout.killedall=All your sessions have been expired.
 
 /logout.bml.loggedout.success=Logged out.
 
