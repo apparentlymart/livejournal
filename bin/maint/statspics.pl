@@ -35,7 +35,7 @@ $maint{'genstatspics'} = sub
 	    );
 
     my $gd = $g->plot(\@data);
-    open(IMG, ">$BASEDIR/stats/paidbyday.png") or die $!;
+    open(IMG, ">$LJ::HTDOCS/stats/paidbyday.png") or die $!;
     binmode IMG;
     print IMG $gd->png;
     close IMG;
@@ -69,7 +69,7 @@ $maint{'genstatspics'} = sub
 	    );
 
     my $gd = $g->plot(\@data);
-    open(IMG, ">$BASEDIR/stats/newbyday.png") or die $!;
+    open(IMG, ">$LJ::HTDOCS/stats/newbyday.png") or die $!;
     binmode IMG;
     print IMG $gd->png;
     close IMG;
@@ -105,7 +105,7 @@ $maint{'genstatspics'} = sub
 	    );
 
     my $gd = $g->plot(\@data);
-    open(IMG, ">$BASEDIR/stats/postsbyday.png") or die $!;
+    open(IMG, ">$LJ::HTDOCS/stats/postsbyday.png") or die $!;
     binmode IMG;
     print IMG $gd->png;
     close IMG;
@@ -141,7 +141,7 @@ $maint{'genstatspics'} = sub
 	    );
 
     my $gd = $g->plot(\@data);
-    open(IMG, ">$BASEDIR/stats/postsbyweek.png") or die $!;
+    open(IMG, ">$LJ::HTDOCS/stats/postsbyweek.png") or die $!;
     binmode IMG;
     print IMG $gd->png;
     close IMG;
