@@ -634,27 +634,68 @@ sub userpic_content
         $r->send_http_header();
     };
 
-    # Handle reproxyable requests
+    # Load the user object and pic and make sure the picture is viewable
+    my $u = LJ::load_userid( $userid );
+    $pic = get_pic_from_picid( $u, $picid ) or return NOT_FOUND;
+    return NOT_FOUND if $pic->{'userid'} != $userid;
+    return NOT_FOUND unless $u && $u->{'statusvis'} !~ /[XS]/ && $pic->{state} ne 'X';
+
+    # Read the mimetype from the pichash if dversion 7
+    if ($u->{'dversion'} > 6) {
+        $mime = { 'G' => 'image/gif',
+                  'J' => 'image/jpeg',
+                  'P' => 'image/png', }->{$pic->{fmt}};
+    } else {
+        $mime = $pic->{contenttype};
+    }
+
+    ### Handle reproxyable requests
+
+    # For dversion 7+ and mogilefs userpics, follow this path
+    if ($u->{dversion} > 6 && $pic->{location} eq 'mogile' ) {
+        my $key = $u->mogfs_userpic_key( $picid );
+
+        if ( $r->header_in('X-Proxy-Capabilities') &&
+             $r->header_in('X-Proxy-Capabilities') =~ m{\breproxy-file\b}i )
+        {
+            my @paths = $LJ::MogileFS->get_paths( $key, 1 );
+
+            # reproxy url
+            if ($paths[0] =~ m/^http:/) {
+                $r->header_out('X-REPROXY-URL', join(' ', @paths));
+            }
+
+            # reproxy file
+            else {
+                $r->header_out('X-REPROXY-FILE', $paths[0]);
+            }
+
+            $send_headers->();
+        }
+
+        else {
+            my $data = $LJ::MogileFS->get_file_data( $key );
+            $size = length $$data;
+            $send_headers->();
+            $r->print( $$data ) unless $r->header_only;
+        }
+
+        return OK;
+    }
+
+    # dversion < 7 reproxy file path
     if ( exists $LJ::PERLBAL_ROOT{userpics} &&
          $r->header_in('X-Proxy-Capabilities') &&
          $r->header_in('X-Proxy-Capabilities') =~ m{\breproxy-file\b}i )
     {
         my (
             $root,
-            $u,
             $fmt,
             $path,
            );
 
         # Get the blobroot and load the pic hash
         $root = $LJ::PERLBAL_ROOT{userpics};
-        $u = LJ::load_userid( $userid );
-        $pic = get_pic_from_picid( $u, $picid ) or return NOT_FOUND;
-        return NOT_FOUND if $pic->{'userid'} != $userid;
-
-        # Load the associated user object and make sure they're allowed to see
-        # the pic.
-        return NOT_FOUND unless $u && $u->{'statusvis'} !~ /[XS]/ && $pic->{state} ne 'X';
 
         # sometimes we don't want to reproxy userpics
         unless ($LJ::USERPIC_REPROXY_DISABLE{$u->{clusterid}}) {
@@ -662,15 +703,6 @@ sub userpic_content
             $fmt = ($u->{'dversion'} > 6) ? $MimeTypeMapd6{ $pic->{fmt} } : $MimeTypeMap{ $pic->{contenttype} };
             $path = LJ::Blob::get_rel_path( $root, $u, "userpic", $fmt, $picid );
     
-            # Set the headers and finish the request
-            if ($u->{'dversion'} > 6) {
-                $mime = { 'G' => 'image/gif',
-                          'J' => 'image/jpeg',
-                          'P' => 'image/png', }->{$pic->{fmt}};
-            } else {
-                $mime = $pic->{contenttype};
-            }
-
             $r->header_out( 'X-REPROXY-FILE', $path );
             $send_headers->();
 
@@ -699,11 +731,6 @@ sub userpic_content
 
     # else, get it from db.
     unless ($data) {
-        my $u = LJ::load_userid($userid);
-        $pic = get_pic_from_picid( $u, $picid ) or return NOT_FOUND;
-        return NOT_FOUND if $pic->{'userid'} != $userid;
-        return NOT_FOUND unless $u && $u->{'statusvis'} !~ /[XS]/ && $pic->{state} ne 'X';
-
         $lastmod = $pic->{'lastmod'};
 
         if ($LJ::USERPIC_BLOBSERVER) {
@@ -756,7 +783,7 @@ sub get_pic_from_picid {
 
     my $rec;
     if ($u->{'dversion'} > 6) {
-        my $query = "SELECT state, userid, fmt, UNIX_TIMESTAMP(picdate) ".
+        my $query = "SELECT state, userid, fmt, location, UNIX_TIMESTAMP(picdate) ".
             "AS 'lastmod' FROM userpic2 WHERE userid=$u->{'userid'} AND picid=$picid";
 
         if (my $dbcr = LJ::get_cluster_def_reader($u)) {

@@ -416,11 +416,19 @@
                 $picid = LJ::alloc_global_counter('P') or
                     return $err->('Unable to allocate new picture id');
 
+                # see where we're inserting this
+                my $target;
+                if ($LJ::USERPIC_MOGILEFS && $LJ::MogileFS) {
+                    $target = 'mogile';
+                } elsif ($LJ::USERPIC_BLOBSERVER) {
+                    $target = 'blob';
+                }
+
                 my $dberr = 0;
                 if ($u->{'dversion'} > 6) {
                     $u->do("INSERT INTO userpic2 (picid, userid, fmt, width, height, " .
-                           "picdate, md5base64) VALUES (?, ?, ?, ?, ?, NOW(), ?)",
-                           undef, $picid, $u->{'userid'}, $contenttype, $sx, $sy, $base64);
+                           "picdate, md5base64, location) VALUES (?, ?, ?, ?, ?, NOW(), ?, ?)",
+                           undef, $picid, $u->{'userid'}, $contenttype, $sx, $sy, $base64, $target);
                     if ($u->err) {
                         push @errors, $err->($u->errstr);
                         $dberr = 1;
@@ -446,7 +454,17 @@
                 };
 
                 ### insert the blob
-                if ($LJ::USERPIC_BLOBSERVER && !$dberr) {
+                if ($LJ::USERPIC_MOGILEFS && $LJ::MogileFS && !$dberr) {
+                    my $fh = $LJ::MogileFS->new_file($u->mogfs_userpic_key($picid), 'userpic');
+                    if (defined $fh) {
+                        $fh->print($POST{'userpic'});
+                        my $rv = $fh->close;
+                        push @errors, $clean_err->("Error saving to storage server: $@") unless $rv;
+                    } else {
+                        # fatal error, we couldn't get a filehandle to use
+                        push @errors, $clean_err->("Unable to contact storage server.  Your picture has not been saved.");
+                    }
+                } elsif ($LJ::USERPIC_BLOBSERVER && !$dberr) {
                     my $et;
                     my $fmt = lc($filetype);
                     my $rv = LJ::Blob::put($u, "userpic", $fmt, $picid, $POST{'userpic'}, \$et);

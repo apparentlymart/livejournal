@@ -240,6 +240,22 @@ sub kill_session {
     return 1;
 }
 
+# <LJFUNC>
+# name: LJ::User::mogfs_userpic_key
+# class: mogilefs
+# des: Make a mogilefs key for the given pic for the user
+# args: pic
+# pic: Either the userpic hash or the picid of the userpic.
+# returns: 1.
+# </LJFUNC>
+sub mogfs_userpic_key {
+    my $self = shift or return undef;
+    my $pic = shift or croak "missing required arg: userpic";
+
+    my $picid = ref $pic ? $pic->{picid} : $pic+0;
+    return "userpic:$self->{userid}:$picid";
+}
+
 # all reads/writes to talk2 must be done inside a lock, so there's
 # no race conditions between reading from db and putting in memcache.
 # can't do a db write in between those 2 steps.  the talk2 -> memcache
