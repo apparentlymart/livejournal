@@ -1586,7 +1586,7 @@ sub editfriends
     ## first, figure out who the current friends are to save us work later
     my %curfriend;
     my $friend_count = 0;
-    $sth = $dbh->prepare("SELECT u.user FROM user u, friends f ".
+    $sth = $dbh->prepare("SELECT u.user FROM useridmap u, friends f ".
                          "WHERE u.userid=f.friendid AND f.userid=$userid");
     $sth->execute;
     while (my ($friend) = $sth->fetchrow_array) {
