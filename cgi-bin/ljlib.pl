@@ -5033,6 +5033,7 @@ sub load_log_props2multi
         next unless @need;
         my $in = join(" OR ", map { "(journalid=" . ($_->[0]+0) . " AND jitemid=" . ($_->[1]+0) . ")" } @need);
         my $db = @LJ::MEMCACHE_SERVERS ? LJ::get_cluster_master($c) : LJ::get_cluster_reader($c);
+        next unless $db;  # FIXME: do something better?
         $sth = $db->prepare("SELECT journalid, jitemid, propid, value ".
                             "FROM logprop2 WHERE $in");
         $sth->execute;
