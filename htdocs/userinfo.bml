@@ -611,8 +611,8 @@ $body .= "<TR><TD ALIGN=RIGHT><B>Comments:</B></TD><TD COLSPAN=2><B>Posted:</B> 
 ### shared journal access
 ###
 {
-    my $posthere = $dbr->selectcol_arrayref("SELECT u.user FROM logaccess l, useridmap u WHERE u.userid=l.posterid AND l.ownerid=$u->{'userid'}");
-    my $canpost = $dbr->selectcol_arrayref("SELECT u.user FROM logaccess l, useridmap u WHERE u.userid=l.ownerid AND l.posterid=$u->{'userid'}");
+    my $posthere = $dbr->selectcol_arrayref("SELECT u.user FROM logaccess l, user u WHERE u.userid=l.posterid AND l.ownerid=$u->{'userid'} AND u.statusvis='V'");
+    my $canpost = $dbr->selectcol_arrayref("SELECT u.user FROM logaccess l, user u WHERE u.userid=l.ownerid AND l.posterid=$u->{'userid'} AND u.statusvis='V'");
 
     if (@$posthere || @$canpost) {
 	$body .= "<tr valign='top'><td align='right'><b>Shared Journal Access:</b></td><td colspan='2'>";
