@@ -4251,7 +4251,7 @@ sub load_userpics
     }
 
     my $dbr = LJ::get_db_reader();
-    my $picid_in = join(",", @load_list_d6);
+    my $picid_in = join(',', map { $_->[1] } @load_list_d6);
     my $sth = $dbr->prepare("SELECT userid, picid, width, height ".
                             "FROM userpic WHERE picid IN ($picid_in)");
     $sth->execute;
