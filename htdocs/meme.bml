@@ -69,6 +69,8 @@
      $body .= "<td><a href='$eurl'>$eurl</a></td></tr>\n";
  }
  $body .= "</table>";
+ $body .= "<?h2 Disclaimer h2?>";
+ $body .= "<?p Many of the links on this page lead to external sites that are not controlled by $LJ::SITENAME. $LJ::SITENAME can not be held responsible for the content of these external sites. p?>";
  $sth->finish;
  return;
  
