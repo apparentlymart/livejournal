@@ -1,7 +1,7 @@
 (=PAGE
 TITLE=>Request #(=_CODE return ($FORM{'id'}+0); _CODE=)
 BODY<=
-	
+        
 (=_CODE
 
  my $dbs = LJ::get_dbs();
@@ -23,9 +23,9 @@ BODY<=
      $u = LJ::load_userid($dbs, $sp->{'requserid'});
      $email = $u->{'email'};
      LJ::load_user_props($dbs, $u, 
-			 "s1_lastn_style", "s1_calendar_style",
-			 "s1_day_style", "s1_friends_style",
-			 );
+                         "s1_lastn_style", "s1_calendar_style",
+                         "s1_day_style", "s1_friends_style",
+                         );
  }
 
  my $winner;  ## who closed it?
@@ -66,7 +66,7 @@ BODY<=
  {
      my $visemail = $email;
      if ($sp->{_cat}->{'public_read'}) {
-	 $visemail =~ s/^.+\@/********\@/; 
+         $visemail =~ s/^.+\@/********\@/; 
      }
      $ret .= "$sp->{'reqname'} ($visemail)</TD></TR>\n";
  }
@@ -83,8 +83,8 @@ BODY<=
      $ret .= "username: (=LJUSERF $u->{'user'} LJUSERF=)";
      $ret .= "<BR>styles: ";
      foreach my $view (@LJ::views) {
-	 my $styid = $u->{"s1_${view}_style"};
-	 $ret .= "$view: <A HREF=\"/styles/browse/styleinfo.bml?styleid=$styid\">$styid</A> ";
+         my $styid = $u->{"s1_${view}_style"};
+         $ret .= "$view: <A HREF=\"/styles/browse/styleinfo.bml?styleid=$styid\">$styid</A> ";
      }
      $ret .= "<BR>email validated? ";
      if ($u->{'status'} eq "A") { $ret .= "<B>yes</B>"; }
@@ -139,10 +139,10 @@ BODY<=
  {
      next if ($le->{'type'} eq "internal" && ! LJ::Support::can_read_internal($dbh, $sp, $remote));
      next if ($le->{'type'} eq "screened" && ! (LJ::Support::can_help($dbh, $sp, $remote) ||
-						($remote && $remote->{'userid'} == $le->{'userid'} )));
+                                                ($remote && $remote->{'userid'} == $le->{'userid'} )));
 
      if ($le->{'type'} eq "screened") {
-	 push @screened, $le;
+         push @screened, $le;
      }
 
      my $message = $le->{'message'};
@@ -155,21 +155,21 @@ BODY<=
 
 
      if ($le->{'type'} eq "req") {
-	 $ret .= "<P><B>Original Request:</B><BR><TABLE BGCOLOR=#000000 WIDTH=100%><TR><TD><TABLE BGCOLOR=#FFFFFF WIDTH=100%><TR><TD>\n";
-	 $ret .= $message;
-	 $ret .= "</TD></TR></TABLE></TD></TR></TABLE>\n";
-	 next;
+         $ret .= "<P><B>Original Request:</B><BR><TABLE BGCOLOR=#000000 WIDTH=100%><TR><TD><TABLE BGCOLOR=#FFFFFF WIDTH=100%><TR><TD>\n";
+         $ret .= $message;
+         $ret .= "</TD></TR></TABLE></TD></TR></TABLE>\n";
+         next;
      }
      
      my $header = ""; #<B>Comment:</B>";
      if ($le->{'userid'} && LJ::Support::can_see_helper($dbh, $sp, $remote)) {
-	 my $up = $userinfo{$le->{'userid'}};
-	 my $picid = $up->{'defaultpicid'};
-	 $header = "<table><tr valign=\"bottom\">";
-	 if ($picid) { 
-	     $header .= "<td><img src=\"/userpic/$picid\" width=\"$userpics{$picid}->{'width'}\" height=\"$userpics{$picid}->{'height'}\" hspace=\"3\"></td>";
-	 }
-	 $header .= "<td>" . LJ::ljuser($up->{'user'}, { 'full' => 1 }) . " - $up->{'name'}</td></tr></table>\n";
+         my $up = $userinfo{$le->{'userid'}};
+         my $picid = $up->{'defaultpicid'};
+         $header = "<table><tr valign=\"bottom\">";
+         if ($picid) { 
+             $header .= "<td><img src=\"/userpic/$picid\" width=\"$userpics{$picid}->{'width'}\" height=\"$userpics{$picid}->{'height'}\" hspace=\"3\"></td>";
+         }
+         $header .= "<td>" . LJ::ljuser($up->{'user'}, { 'full' => 1 }) . " - $up->{'name'}</td></tr></table>\n";
      }
 
      my $what = "Answer";
@@ -179,7 +179,7 @@ BODY<=
 
      $header .= "<FONT SIZE=-1><b>$what</b> (\#$le->{'splid'})</FONT>";
      if ($owner_mode && $sp->{'state'} eq "open" && $le->{'type'} eq "answer") {
-	 $header .= ", <A HREF=\"act.bml?close;$sp->{'spid'};$sp->{'authcode'};$le->{'splid'}\"><B>credit fix here</B></A>";
+         $header .= ", <A HREF=\"act.bml?close;$sp->{'spid'};$sp->{'authcode'};$le->{'splid'}\"><B>credit fix here</B></A>";
      }
 
      my $bordercolor = "#000000";
@@ -189,13 +189,13 @@ BODY<=
 
      $ret .= "<P>$header<BR><TABLE BGCOLOR=$bordercolor WIDTH=100%><TR><TD><TABLE BGCOLOR=#FFFFFF WIDTH=100%><TR><TD>\n";
      if ($le->{'faqid'}) {
-	 my $faqname = "";
-	 my $sth = $dbh->prepare("SELECT question FROM faq WHERE faqid=$le->{'faqid'}");
-	 $sth->execute;
-	 ($faqname) = $sth->fetchrow_array;
-	 $ret .= "<CENTER>\n";
-	 $ret .= "<TABLE BGCOLOR=#D0D0D0><TR><TD ALIGN=CENTER><B>FAQ Reference:</B><BR><A HREF=\"faqbrowse.bml?faqid=$le->{'faqid'}\">$faqname</A></TD></TR></TABLE>\n";
-	 $ret .= "</CENTER>\n";
+         my $faqname = "";
+         my $sth = $dbh->prepare("SELECT question FROM faq WHERE faqid=$le->{'faqid'}");
+         $sth->execute;
+         ($faqname) = $sth->fetchrow_array;
+         $ret .= "<CENTER>\n";
+         $ret .= "<TABLE BGCOLOR=#D0D0D0><TR><TD ALIGN=CENTER><B>FAQ Reference:</B><BR><A HREF=\"faqbrowse.bml?faqid=$le->{'faqid'}\">$faqname</A></TD></TR></TABLE>\n";
+         $ret .= "</CENTER>\n";
      }
      $ret .= $message;
      $ret .= "</TD></TR></TABLE></TD></TR></TABLE>\n";
@@ -229,7 +229,7 @@ BODY<=
      $ret .= "<li>Before answering somebody's question, read the <b><a href=\"/guide/support.bml\">support guide</a></b>.";
      $ret .= "<li>Do <b>NOT</b> answer people if you're not sure of your answer.  Don't answer if your solution is just a guess.  Only answer if you really know what you're talking about ... guessing only makes other people in the support area think you might be right and spread the misinformation further, until it's accepted as truth.";
      if ($LJ::LJDOTCOM) {
-	 $ret .= "<li>Never recommend asking someone else, or somewhere else.  That qualifies as not knowing the answer.  If a support request is open for a day or two, one of the support leaders will find out the answer and reply, and likely post about it in (=LJUSER lj_support LJUSER=) so all the support people will know the answer in the future.";
+         $ret .= "<li>Never recommend asking someone else, or somewhere else.  That qualifies as not knowing the answer.  If a support request is open for a day or two, one of the support leaders will find out the answer and reply, and likely post about it in (=LJUSER lj_support LJUSER=) so all the support people will know the answer in the future.";
      }
      $ret .= "</ul>Thanks! STANDOUT=)";
  }
@@ -258,32 +258,32 @@ BODY<=
      $sth = $dbh->prepare("SELECT faqcat, faqcatname, catorder FROM faqcat WHERE faqcat<>'int-abuse'");
      $sth->execute;
      while ($_ = $sth->fetchrow_hashref) {
-	 $faqcat{$_->{'faqcat'}} = $_;
+         $faqcat{$_->{'faqcat'}} = $_;
      }
      
      $sth = $dbh->prepare("SELECT faqid, question, sortorder, faqcat, lastmodtime FROM faq WHERE faqcat<>'int-abuse'");
      $sth->execute;
      while ($_ = $sth->fetchrow_hashref) {
-	 $faqq{$_->{'faqid'}} = $_;
+         $faqq{$_->{'faqid'}} = $_;
      }
      
      foreach my $faqcat (sort { $faqcat{$a}->{'catorder'} <=> $faqcat{$b}->{'catorder'} } keys %faqcat)
      {
-	 $ret .= "<option value=0>[ " . LJ::ehtml($faqcat{$faqcat}->{'faqcatname'}) . " ]\n";
-	 $ret .= "<ul>\n";
-	 foreach my $faqid (sort { $faqq{$a}->{'sortorder'} <=> $faqq{$b}->{'sortorder'} } grep { $faqq{$_}->{'faqcat'} eq $faqcat } keys %faqq)
-	 {
-	     next unless ($faqq{$faqid}->{'question'});
-	     my $q = LJ::ehtml("... " . $faqq{$faqid}->{'question'});
-	     $q =~ s/^\s+//;
-	     $q =~ s/\s+$//;
-	     $q =~ s/\n/ /g;
-	     if (length($q) > 50) {
-		 $q = substr($q, 0, 50) . "...";
-	     }
-	     $ret .= "<option value=$faqid>$q\n";
-	 }
-	 $ret .= "</ul>\n";
+         $ret .= "<option value=0>[ " . LJ::ehtml($faqcat{$faqcat}->{'faqcatname'}) . " ]\n";
+         $ret .= "<ul>\n";
+         foreach my $faqid (sort { $faqq{$a}->{'sortorder'} <=> $faqq{$b}->{'sortorder'} } grep { $faqq{$_}->{'faqcat'} eq $faqcat } keys %faqq)
+         {
+             next unless ($faqq{$faqid}->{'question'});
+             my $q = LJ::ehtml("... " . $faqq{$faqid}->{'question'});
+             $q =~ s/^\s+//;
+             $q =~ s/\s+$//;
+             $q =~ s/\n/ /g;
+             if (length($q) > 50) {
+                 $q = substr($q, 0, 50) . "...";
+             }
+             $ret .= "<option value=$faqid>$q\n";
+         }
+         $ret .= "</ul>\n";
      }
      $ret .= "</select></td></tr>\n";
  }
@@ -292,14 +292,14 @@ BODY<=
  {
      $ret .= "<tr><td align=right>Reply Type:</td><td>";
      if (@ans_type > 2) {
-	 $ret .= "<select name=replytype>";
-	 while (my ($k, $type) = splice(@ans_type, 0, 2)) {
-	     $ret .= "<option value=\"$k\">$type</option>";
-	 }
-	 $ret .= "</select>\n";
+         $ret .= "<select name=replytype>";
+         while (my ($k, $type) = splice(@ans_type, 0, 2)) {
+             $ret .= "<option value=\"$k\">$type</option>";
+         }
+         $ret .= "</select>\n";
      } else {
-	 $ret .= "<input type=hidden name=replytype value=\"$ans_type[0]\">";
-	 $ret .= "<b>$ans_type[1]</b>";
+         $ret .= "<input type=hidden name=replytype value=\"$ans_type[0]\">";
+         $ret .= "<b>$ans_type[1]</b>";
      }
      $ret .= "</td></tr>";
  }
@@ -316,18 +316,18 @@ BODY<=
      $ret .= "<option value=\"\">($sp->{_cat}->{'catname'})</option>";
      foreach my $cat (LJ::Support::sorted_cats($cats))
      {
-	 $ret .= "<option value=\"$cat->{'spcatid'}\">--&gt; $cat->{'catname'}</option>";
+         $ret .= "<option value=\"$cat->{'spcatid'}\">--&gt; $cat->{'catname'}</option>";
      }
      $ret .= "</select></td>\n";
 
      if (@screened && LJ::Support::can_help($dbh, $sp, $remote)) {
-	 $ret .= "<td>Approve Screened Answer:<br>";
-	 $ret .= "<select name=approveans><option value=\"\"></option>";
-	 foreach my $si (@screened) {
-	     my $suser = $userinfo{$si->{'userid'}}->{'user'};
-	     $ret .= "<option value=$si->{'splid'}>\#$si->{'splid'} ($suser)</option>";
-	 }
-	 $ret .= "</select>";
+         $ret .= "<td>Approve Screened Answer:<br>";
+         $ret .= "<select name=approveans><option value=\"\"></option>";
+         foreach my $si (@screened) {
+             my $suser = $userinfo{$si->{'userid'}}->{'user'};
+             $ret .= "<option value=$si->{'splid'}>\#$si->{'splid'} ($suser)</option>";
+         }
+         $ret .= "</select>";
      }
      $ret .= "</td>";
      $ret .= "</tr></table>\n";

@@ -35,16 +35,16 @@ chomp $subject;
 my $to;
 my $toarg;
 foreach my $a (Mail::Address->parse($head->get('To')),
-	     Mail::Address->parse($head->get('Cc')))
+             Mail::Address->parse($head->get('Cc')))
 {
     my $address = $a->address;
     my $arg;
     if ($address =~ /^(.+)\+(.*)\@(.+)$/) {
-	($address, $arg) = ("$1\@$3", $2);
+        ($address, $arg) = ("$1\@$3", $2);
     }
     if (defined $email2cat->{$address}) {
-	$to = $address;
-	$toarg = $arg;
+        $to = $address;
+        $toarg = $arg;
     }
 }
 unless ($to) {
@@ -89,24 +89,24 @@ if ($toarg =~ /^(\d+)z(.+)$/)
 
     if (LJ::Support::mini_auth($sp) eq $miniauth) 
     {
-	# valid.  need to strip out stuff now with authcodes:
-	$body =~ s!http://.+/support/act\.bml\S+![snipped]!g;
-	$body =~ s!\+(\d)+z\w{1,10}\@!\@!g;
-	$body =~ s!&auth=\S+!!g;
+        # valid.  need to strip out stuff now with authcodes:
+        $body =~ s!http://.+/support/act\.bml\S+![snipped]!g;
+        $body =~ s!\+(\d)+z\w{1,10}\@!\@!g;
+        $body =~ s!&auth=\S+!!g;
 
-	## try to get rid of reply stuff.
-	# Outlook Express:
-	$body =~ s!(\S+.*?)-{4,10} Original Message -{4,10}.+!$1!s;
-	# Pine/Netscape
-	$body =~ s!(\S+.*?)\bOn [^\n]+ wrote:\n.+!$1!s;
-	
-	my $splid = LJ::Support::append_request($dbh, $sp, {
-	    'type' => 'comment',
-	    'body' => $body,
-	    'posterid' => 0,
-	});
-	if ($splid) { exit 0; }
-	die "Error appending request?";
+        ## try to get rid of reply stuff.
+        # Outlook Express:
+        $body =~ s!(\S+.*?)-{4,10} Original Message -{4,10}.+!$1!s;
+        # Pine/Netscape
+        $body =~ s!(\S+.*?)\bOn [^\n]+ wrote:\n.+!$1!s;
+        
+        my $splid = LJ::Support::append_request($dbh, $sp, {
+            'type' => 'comment',
+            'body' => $body,
+            'posterid' => 0,
+        });
+        if ($splid) { exit 0; }
+        die "Error appending request?";
     }
 }
 
@@ -134,25 +134,25 @@ sub get_text_entity
     my $head = $entity->head;
     my $mime_type =  $head->mime_type;
     if ($mime_type eq "text/plain") {
-	return $entity;
+        return $entity;
     }
 
     if ($mime_type eq "multipart/alternative" ||
-	$mime_type eq "multipart/mixed") {
-	my $partcount = $entity->parts;
-	for (my $i=0; $i<$partcount; $i++) {
-	    my $alte = $entity->parts($i);
-	    return $alte if ($alte->mime_type eq "text/plain");
-	}
-	return undef;
+        $mime_type eq "multipart/mixed") {
+        my $partcount = $entity->parts;
+        for (my $i=0; $i<$partcount; $i++) {
+            my $alte = $entity->parts($i);
+            return $alte if ($alte->mime_type eq "text/plain");
+        }
+        return undef;
     }
 
     if ($mime_type eq "multipart/related") {
-	my $partcount = $entity->parts;
-	if ($partcount) {
-	    return get_text_entity($entity->parts(0));
-	}
-	return undef;
+        my $partcount = $entity->parts;
+        if ($partcount) {
+            return get_text_entity($entity->parts(0));
+        }
+        return undef;
     }
 
     $entity->dump_skeleton(\*STDERR);

@@ -22,8 +22,8 @@ sub reset
 
     $ENV{'HTTP_COOKIE'} .= "";  # quiet warning
     foreach (split(/;\s+/, $ENV{'HTTP_COOKIE'})) {
-	next unless ($_ =~ /(.*)=(.*)/);
-	$COOKIE{BMLUtil::durl($1)} = BMLUtil::durl($2);
+        next unless ($_ =~ /(.*)=(.*)/);
+        $COOKIE{BMLUtil::durl($1)} = BMLUtil::durl($2);
     }
 }
 
@@ -68,7 +68,7 @@ sub save
     open (CL, ">$SAVE_DIR/$user.dat") || print "Can't save open<BR>\n";
     for (%data)
     {
-	print CL "$_\n";		
+        print CL "$_\n";		
     }
     close CL;
     $DIRTY = 0;
@@ -80,16 +80,16 @@ sub user_id
     
     if ($COOKIE{'BMLSESSION'} && $COOKIE{'BMLSESSION'} !~ /[^\w]/)
     {
-	$USERID = $COOKIE{'BMLSESSION'};
-	
-	return $USERID;
+        $USERID = $COOKIE{'BMLSESSION'};
+        
+        return $USERID;
     }
     
     $USERID = "";
     srand;
     for (0..25)
     {
-	$USERID .= chr(97+int(rand(26)));
+        $USERID .= chr(97+int(rand(26)));
     }
     &set_cookie('BMLSESSION', $USERID, time()+60*60*24*90, ($main::BMLEnv{'ClientTopPath'} || "/"));	
 }
@@ -103,10 +103,10 @@ sub set_cookie
     # let the domain argument be an array ref, so callers can set
     # cookies in both .foo.com and foo.com, for some broken old browsers.
     if ($domain && ref $domain eq "ARRAY") {
-	foreach (@$domain) {
-	    set_cookie($name, $value, $expires, $path, $_);
-	}
-	return;
+        foreach (@$domain) {
+            set_cookie($name, $value, $expires, $path, $_);
+        }
+        return;
     }
 
     my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime($expires);
@@ -119,8 +119,8 @@ sub set_cookie
 
     # this logic is confusing potentially
     unless (defined $expires && $expires==0) {
-	printf "; expires=$day[$wday], %02d-$month[$mon]-%04d %02d:%02d:%02d GMT", 
-		$mday, $year, $hour, $min, $sec;
+        printf "; expires=$day[$wday], %02d-$month[$mon]-%04d %02d:%02d:%02d GMT", 
+                $mday, $year, $hour, $min, $sec;
     }
 
     print "; path=$path" if $path;

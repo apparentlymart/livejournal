@@ -24,13 +24,13 @@ BODY<=
 
      if (! $u)
      {
-	 push @errors, "Username not found.";
+         push @errors, "Username not found.";
      }
 
      # can we send them the password where they want it?
      # if blank email, then yes.
      elsif ($email eq "") {
-	 $email = $u->{'email'};
+         $email = $u->{'email'};
      }
 
      # if their current email address, then yes.
@@ -39,14 +39,14 @@ BODY<=
 
      elsif (lc($email) ne lc($u->{'email'})) 
      {
-	 my $qe = $dbr->quote($email);
-	 my $sth = $dbr->prepare("SELECT COUNT(*) FROM infohistory WHERE userid=$u->{'userid'} AND what='email' AND oldvalue=$qe AND other='A'");
-	 $sth->execute;
-	 ($okay) = $sth->fetchrow_array;
+         my $qe = $dbr->quote($email);
+         my $sth = $dbr->prepare("SELECT COUNT(*) FROM infohistory WHERE userid=$u->{'userid'} AND what='email' AND oldvalue=$qe AND other='A'");
+         $sth->execute;
+         ($okay) = $sth->fetchrow_array;
 
-	 unless ($okay) {
-	     push @errors, "You never used that email address with this account or it was never validated.";
-	 }
+         unless ($okay) {
+             push @errors, "You never used that email address with this account or it was never validated.";
+         }
      }
 
      return LJ::bad_input(@errors) if @errors;
@@ -61,10 +61,10 @@ BODY<=
      print MAIL "          Password: $u->{'password'}\n";
      print MAIL "     EMail Address: $u->{'email'}\n\n";
      if ($u->{'status'} ne "A"){
-	 my $aa = {};
-	 $aa = LJ::register_authaction($dbs, $u->{'userid'}, "validateemail", $u->{'email'});
-	 print MAIL "To confirm your email address, go here:\n\n";
-	 print MAIL "    $LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}\n\n";	
+         my $aa = {};
+         $aa = LJ::register_authaction($dbs, $u->{'userid'}, "validateemail", $u->{'email'});
+         print MAIL "To confirm your email address, go here:\n\n";
+         print MAIL "    $LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}\n\n";	
      }
      print MAIL "This information was requested on the website from $ENV{'REMOTE_HOST'} ($ENV{'REMOTE_ADDR'}).\n\n";
      print MAIL "Useful links:\n\n";
@@ -89,11 +89,11 @@ BODY<=
      $sth->execute;
      my @users;
      while (my ($ru, $rs) = $sth->fetchrow_array) {
-	 push @users, $ru;
+         push @users, $ru;
      }
 
      unless (@users) {
-	 push @errors, "No username(s) for that email address. qe=$qe";
+         push @errors, "No username(s) for that email address. qe=$qe";
      }
      
      return LJ::bad_input(@errors) if @errors;
@@ -104,7 +104,7 @@ BODY<=
      print MAIL "Subject: Lost Username\n\n";
      print MAIL "This is your requested username reminder from $LJ::SITENAME.  Below are the usernames you have registered for the email address $email:\n\n";
      foreach my $ru (@users) {
-	 print MAIL "          $ru\n";
+         print MAIL "          $ru\n";
      }
 
      print MAIL "\nThis information was requested on the website from $ENV{'REMOTE_HOST'} ($ENV{'REMOTE_ADDR'}).\n\n";

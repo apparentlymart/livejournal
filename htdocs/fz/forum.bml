@@ -3,7 +3,7 @@ NOCACHE=>1
 _INFO=)(=_CODE
 
 my ($sth, $ret);
-	
+        
 BML::set_content_type("text/rdf");
 
 my $dbs = LJ::get_dbs();
@@ -12,7 +12,7 @@ my $dbr = $dbs->{'reader'};
 
 my $u = LJ::load_user($dbs, $user);
 unless ($u) {
-	return;
+        return;
 }
 my $user = $u->{'user'};
 

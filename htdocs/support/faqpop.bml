@@ -13,8 +13,8 @@ P=)
  my $dbr = $dbs->{'reader'};
 
  $sth = $dbr->prepare("SELECT f.faqid, f.question, s.statval AS 'uses'".
-		      "FROM faq f, stats s WHERE f.faqcat<>'int-abuse' AND s.statcat='popfaq' ".
-		      "AND s.statkey=f.faqid ORDER BY s.statval DESC LIMIT 50");
+                      "FROM faq f, stats s WHERE f.faqcat<>'int-abuse' AND s.statcat='popfaq' ".
+                      "AND s.statkey=f.faqid ORDER BY s.statval DESC LIMIT 50");
  $sth->execute;
 
  $ret .= "<ul>";

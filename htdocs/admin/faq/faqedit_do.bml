@@ -42,18 +42,18 @@ BODY<=
      my ($faqcat) = $sth->fetchrow_array;
 
      unless ($ac_edit{'all'} || $ac_edit{$faqcat}) {
-	 if (%ac_edit) {
-	     return "<B>Error: </B> You do not have access to edit a FAQ question in the \"$faqcat\" category.";
-	 } else {
-	     return "<B>Error: </B> You do not have access to edit the FAQ.";
-	 }
+         if (%ac_edit) {
+             return "<B>Error: </B> You do not have access to edit a FAQ question in the \"$faqcat\" category.";
+         } else {
+             return "<B>Error: </B> You do not have access to edit the FAQ.";
+         }
      }
  }
  else 
  {
      LJ::remote_has_priv($dbs, $remote, "faqadd", \%ac_add);
      unless ($ac_add{'all'} || $ac_add{$FORM{'faqcat'}}) {
-	 return "<B>Error: </B> You do not have access to add FAQ questions in this category";
+         return "<B>Error: </B> You do not have access to add FAQ questions in this category";
      }     
  }
  
@@ -61,7 +61,7 @@ BODY<=
  {
      unless ($FORM{'faqcat'})
      {
-	 return "<B>Error: </B> You did not select a FAQ category.";
+         return "<B>Error: </B> You did not select a FAQ category.";
      }
      $dbh->do("INSERT INTO faq (faqid, question, answer, faqcat, sortorder, lastmoduserid, lastmodtime) VALUES (NULL, $qq, $qa, $qfaqcat, $sortorder, $remote->{'userid'}, NOW())");
      $ret .= $dbh->errstr || "Added FAQ item.  All good.";
@@ -70,13 +70,13 @@ BODY<=
  {
      if ($FORM{'q'} =~ /\S/)
      {
-	 $dbh->do("UPDATE faq SET question=$qq, answer=$qa, faqcat=$qfaqcat, lastmoduserid=$remote->{'userid'}, lastmodtime=NOW(), sortorder=$sortorder WHERE faqid=$id");
-	 $ret .= "Updated FAQ item.  All good.  faqid is <B>$id</B>";
+         $dbh->do("UPDATE faq SET question=$qq, answer=$qa, faqcat=$qfaqcat, lastmoduserid=$remote->{'userid'}, lastmodtime=NOW(), sortorder=$sortorder WHERE faqid=$id");
+         $ret .= "Updated FAQ item.  All good.  faqid is <B>$id</B>";
      }
      else
      {
-	 $dbh->do("DELETE FROM faq WHERE faqid=$id");
-	 $ret .= "FAQ item deleted.";
+         $dbh->do("DELETE FROM faq WHERE faqid=$id");
+         $ret .= "FAQ item deleted.";
      }
  }
  

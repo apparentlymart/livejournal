@@ -31,20 +31,20 @@
  if ($mode eq "save")
  {
      return "<b>Error:</b> requires post"
-	 unless (LJ::did_post());
+         unless (LJ::did_post());
 
      return"<b>Error:</b> You don't have access to change a user's capability class."
-	 unless (LJ::check_priv($dbs, $remote, "admin", "all"));
+         unless (LJ::check_priv($dbs, $remote, "admin", "all"));
 
      unless ($u) {
-	 $ret .= "Unknown user.\n";
-	 return $ret;
+         $ret .= "Unknown user.\n";
+         return $ret;
      }
 
      my $newcaps = 0;
      foreach my $n (sort { $a <=> $b } keys %LJ::CAP) {
-	 next unless $FORM{"class_$n"};
-	 $newcaps |= (1 << $n);
+         next unless $FORM{"class_$n"};
+         $newcaps |= (1 << $n);
      }
      $dbh->do("UPDATE user SET caps=$newcaps WHERE userid=$u->{'userid'}");
      $u->{'caps'} = $newcaps;  # so viewuser mode below is correct.
@@ -58,8 +58,8 @@
      $ret .= "<h1><a href='capedit.bml'>&lt;&lt;</a> edit user '$user'</h1>\n";
 
      unless ($u) {
-	 $ret .= "Unknown user.\n";
-	 return $ret;
+         $ret .= "Unknown user.\n";
+         return $ret;
      }
 
      $ret .= "<form method='post'>";
@@ -67,13 +67,13 @@
      $ret .= "<input type='hidden' name='user' value='$user'>\n";
      foreach my $n (sort { $a <=> $b } keys %LJ::CAP)
      {
-	 my $on = ($u->{'caps'}+0) & (1 << $n);
-	 my $checked = $on ? " checked='1'" : "";
-	 $ret .= "<p><input type='checkbox' name='class_$n' value='1' id='class_$n' $checked> ";
-	 my $name = $LJ::CAP{$n}->{'_name'} || "Unnamed capability class \#$n";
-	 if ($on) { $ret .= "<b>"; }
-	 $ret .= "<label for='class_$n'>$name</label>";
-	 if ($on) { $ret .= "</b>"; }
+         my $on = ($u->{'caps'}+0) & (1 << $n);
+         my $checked = $on ? " checked='1'" : "";
+         $ret .= "<p><input type='checkbox' name='class_$n' value='1' id='class_$n' $checked> ";
+         my $name = $LJ::CAP{$n}->{'_name'} || "Unnamed capability class \#$n";
+         if ($on) { $ret .= "<b>"; }
+         $ret .= "<label for='class_$n'>$name</label>";
+         if ($on) { $ret .= "</b>"; }
      }
      
      $ret .= "<p><input type='submit' value='Save'>\n";

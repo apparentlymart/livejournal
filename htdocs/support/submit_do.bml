@@ -23,18 +23,18 @@ BODY<=
      $req{'reqtype'} = "user";
      $user = LJ::canonical_username($FORM{'user'});
      if ($FORM{'password'} eq "_REMOTE") {
-	 $remote = LJ::get_remote($dbh);
-	 if ($remote && $remote->{'user'} eq $user) {
-	     $u = LJ::load_user($dbs, $remote->{'user'});
-	     $req{'requserid'} = $remote->{'userid'};
-	 }
+         $remote = LJ::get_remote($dbh);
+         if ($remote && $remote->{'user'} eq $user) {
+             $u = LJ::load_user($dbs, $remote->{'user'});
+             $req{'requserid'} = $remote->{'userid'};
+         }
      }
      unless ($req{'requserid'}) {
-	 $u = LJ::load_user($dbs, $user);
-	 push @errors, "Invalid username" unless $u;
-	 if (LJ::valid_password($u->{'password'}, \%FORM)) {
-	     $req{'requserid'} = $u->{'userid'};
-	 }
+         $u = LJ::load_user($dbs, $user);
+         push @errors, "Invalid username" unless $u;
+         if (LJ::valid_password($u->{'password'}, \%FORM)) {
+             $req{'requserid'} = $u->{'userid'};
+         }
      }
      $req{'reqemail'} = $u->{'email'};
  }

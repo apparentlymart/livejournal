@@ -44,8 +44,8 @@ if ($dbh->err) { die $dbh->errstr; }
  my $quser;
  while ($_ = $sth->fetchrow_hashref) {
      if ($_->{'userid'} == $item->{'ownerid'})  { 
-	 $u  = $_; 
-	 $quser = $dbh->quote($u->{'user'});
+         $u  = $_; 
+         $quser = $dbh->quote($u->{'user'});
      }
      if ($_->{'userid'} == $item->{'posterid'}) { $up = $_; }
  }
@@ -56,18 +56,18 @@ if ($dbh->err) { die $dbh->errstr; }
      $remote = LJ::get_remote($dbs);
      
      if ($item->{'security'} eq "private" && $u->{'user'} ne $remote->{'user'}) {
-	 return "(=H1 Error H1=)(=P You are not authorized to view this private entry. P=)";
+         return "(=H1 Error H1=)(=P You are not authorized to view this private entry. P=)";
      }
      
      if ($item->{'security'} eq "usemask" && $u->{'user'} ne $remote->{'user'}) {
-	 $sth = $dbh->prepare("SELECT groupmask FROM friends WHERE userid=$u->{'userid'} AND friendid=$remote->{'userid'}");
-	 $sth->execute;
-	 my ($gmask) = $sth->fetchrow_array;
-	 my $allowed = (int($gmask) & int($item->{'allowmask'}));
-	 
-	 unless ($allowed) {
-	     return "(=H1 Error H1=)(=P You are not authorized to view this protected entry. P=)";
-	 }
+         $sth = $dbh->prepare("SELECT groupmask FROM friends WHERE userid=$u->{'userid'} AND friendid=$remote->{'userid'}");
+         $sth->execute;
+         my ($gmask) = $sth->fetchrow_array;
+         my $allowed = (int($gmask) & int($item->{'allowmask'}));
+         
+         unless ($allowed) {
+             return "(=H1 Error H1=)(=P You are not authorized to view this protected entry. P=)";
+         }
      }
  }
 
@@ -83,18 +83,18 @@ if ($dbh->err) { die $dbh->errstr; }
  } else {
 
      if ($userpost) {
-	 $user = "<B><A HREF=\"/users/$userpost/\">$userpost</A></B> <A HREF=\"/userinfo.bml?user=$userpost\"><IMG BORDER=0 SRC=\"/img/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE></A>";
+         $user = "<B><A HREF=\"/users/$userpost/\">$userpost</A></B> <A HREF=\"/userinfo.bml?user=$userpost\"><IMG BORDER=0 SRC=\"/img/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE></A>";
      }
      $ret .= "<P><TABLE WIDTH=100%><TR>";
      $ret .= "<TD ROWSPAN=2><IMG SRC=\"/img/dot.gif\" HEIGHT=1 WIDTH=" . ($opts->{'depth'} * 25) . "></TD>";
      $ret .= "<TD BGCOLOR=#C0C0FF WIDTH=100%>";
      if ($userpost && $uc->{'defaultpicid'}) {
-	 my $picid = $uc->{'defaultpicid'};
-	 my %userpics;
-	 LJ::load_userpics($dbs, \%userpics, [ $picid ]);
-	 $ret .= "<IMG ALIGN=LEFT HSPACE=3 SRC=\"/userpic/$picid\"";
-	 $ret .= " WIDTH=$userpics{$picid}->{'width'}";
-	 $ret .= " HEIGHT=$userpics{$picid}->{'height'}>";
+         my $picid = $uc->{'defaultpicid'};
+         my %userpics;
+         LJ::load_userpics($dbs, \%userpics, [ $picid ]);
+         $ret .= "<IMG ALIGN=LEFT HSPACE=3 SRC=\"/userpic/$picid\"";
+         $ret .= " WIDTH=$userpics{$picid}->{'width'}";
+         $ret .= " HEIGHT=$userpics{$picid}->{'height'}>";
      }
      
      
@@ -102,11 +102,11 @@ if ($dbh->err) { die $dbh->errstr; }
      $ret .= "<BR>$user";
      
      if ($BMLClient::COOKIE{"ljuser"}) {
-	 if ($BMLClient::COOKIE{"ljuser"} eq $userpost ||
-	     $BMLClient::COOKIE{"ljuser"} eq $u->{'user'})
-	 {
-	     $ret .= "<A HREF=\"/delcomment.bml?id=$id\"><IMG ALIGN=ABSMIDDLE HSPACE=2 VSPACE=2 SRC=\"/img/delcomment.gif\" WIDTH=22 HEIGHT=20 ALT=\"Click to delete\" BORDER=0></A>";
-	 }
+         if ($BMLClient::COOKIE{"ljuser"} eq $userpost ||
+             $BMLClient::COOKIE{"ljuser"} eq $u->{'user'})
+         {
+             $ret .= "<A HREF=\"/delcomment.bml?id=$id\"><IMG ALIGN=ABSMIDDLE HSPACE=2 VSPACE=2 SRC=\"/img/delcomment.gif\" WIDTH=22 HEIGHT=20 ALT=\"Click to delete\" BORDER=0></A>";
+         }
      }
      
      $ret .= "</TD></TR>";

@@ -11,82 +11,82 @@
 
      ## magic mode
      if ($FORM{'q'} =~ /^\*(\d+)/) {
-	 print "Status: 302 Found\n";
-	 print "Location: $LJ::SITEROOT/talkread.bml?itemid=$1\n\n";
-	 BML::finish;
-	 return;
+         print "Status: 302 Found\n";
+         print "Location: $LJ::SITEROOT/talkread.bml?itemid=$1\n\n";
+         BML::finish;
+         return;
      }
 
      my $user = lc($FORM{'q'});
      
      my $what;
      if ($user =~ s!/(\w+)!!) {
-	 $what = $1;
+         $what = $1;
      }
 
      $user =~ s/-/_/g;
      $user =~ s/[^\w]//g;
      if ($user) {
-	 my $url;
-	 if ($what eq "pics") {
-	     $url = "$LJ::SITEROOT/allpics.bml?user=$user";
-	 } else {
-	     $url = "$LJ::SITEROOT/userinfo.bml?user=$user";
-	 }
+         my $url;
+         if ($what eq "pics") {
+             $url = "$LJ::SITEROOT/allpics.bml?user=$user";
+         } else {
+             $url = "$LJ::SITEROOT/userinfo.bml?user=$user";
+         }
 
-	 print "Status: 302 Found\n";
-	 print "Location: $url\n\n";
-	 BML::finish;
-	 return;
+         print "Status: 302 Found\n";
+         print "Location: $url\n\n";
+         BML::finish;
+         return;
      } else {
-	 print "Status: 302 Found\n";
-	 print "Location: $LJ::SITEROOT/random.bml\n\n";
-	 BML::finish;
+         print "Status: 302 Found\n";
+         print "Location: $LJ::SITEROOT/random.bml\n\n";
+         BML::finish;
 
-	 $title = "No user";
-	 $body = "(=H1 Error H1=)(=P You did not enter a username. P=)";
-	 return;
+         $title = "No user";
+         $body = "(=H1 Error H1=)(=P You did not enter a username. P=)";
+         return;
      }
  }
 
  if ($FORM{'type'} eq "int") {
      my $int = lc($FORM{'q'});
      if ($int) {
-	 print "Status: 302 Found\n";
-	 print "Location: $LJ::SITEROOT/interests.bml?int=" . LJ::eurl($int) . "\n\n";
-	 BML::finish;
-	 return;
+         print "Status: 302 Found\n";
+         print "Location: $LJ::SITEROOT/interests.bml?int=" . LJ::eurl($int) . "\n\n";
+         BML::finish;
+         return;
      } else {
-	 $title = "No Interest";
-	 $body = "(=H1 Error H1=)(=P You did not enter an interest. P=)";
-	 return;
+         $title = "No Interest";
+         $body = "(=H1 Error H1=)(=P You did not enter an interest. P=)";
+         return;
      }
  }
 
  if ($FORM{'type'} eq "email") {
      my $email = lc($FORM{'q'});
      unless ($email) {
-	 $title = "No Address";
-	 $body = "(=H1 Error H1=)(=P You did not enter an email address. P=)";
-	 return;
+         $title = "No Address";
+         $body = "(=H1 Error H1=)(=P You did not enter an email address. P=)";
+         return;
      } else {
-	 my $qemail = $dbr->quote($email);
-	 my $sth = $dbr->prepare("SELECT u.user, up.value FROM user u, userproplist upl, userprop up WHERE u.journaltype='P' AND u.statusvis='V' AND u.allow_infoshow='Y' AND u.email=$qemail AND u.userid=up.userid AND up.upropid=upl.upropid AND upl.name='opt_whatemailshow' ORDER BY u.userid");
-	 $sth->execute;
-	 my ($user, $emailshow) = $sth->fetchrow_array;
-	 unless ($emailshow eq "A" || $emailshow eq "B") {
-	     $user = "";
-	 }
-	 if ($user) {
-	     print "Status: 302 Found\n";
-	     print "Location: $LJ::SITEROOT/userinfo.bml?user=$user\n\n";
-	     BML::finish;
-	     return;
-	 } else {
-	     $title = "No Match";
-	     $body = "(=H1 Sorry.. H1=)(=P No LiveJournal user is listed as having that email address, or they've chosen to have their address be private. P=)";
-	     return;
-	 }
+         my $qemail = $dbr->quote($email);
+         my $sth = $dbr->prepare("SELECT u.user, up.value FROM user u, userproplist upl, userprop up WHERE u.journaltype='P' AND u.statusvis='V' AND u.allow_infoshow='Y' AND u.email=$qemail AND u.userid=up.userid AND up.upropid=upl.upropid AND upl.name='opt_whatemailshow' ORDER BY u.userid");
+         $sth->execute;
+         my ($user, $emailshow) = $sth->fetchrow_array;
+         unless ($emailshow eq "A" || $emailshow eq "B") {
+             $user = "";
+         }
+         if ($user) {
+             print "Status: 302 Found\n";
+             print "Location: $LJ::SITEROOT/userinfo.bml?user=$user\n\n";
+             BML::finish;
+             return;
+         } else {
+             $title = "No Match";
+             $body = "(=H1 Sorry.. H1=)(=P No LiveJournal user is listed as having that email address, or they've chosen to have their address be private. P=)";
+             return;
+         }
      }
  }
 
@@ -98,14 +98,14 @@
      $sth->execute;
      my ($user, $emailshow) = $sth->fetchrow_array;
      if ($user) {
-	 print "Status: 302 Found\n";
-	 print "Location: $LJ::SITEROOT/userinfo.bml?user=$user\n\n";
-	 BML::finish;
-	 return;
+         print "Status: 302 Found\n";
+         print "Location: $LJ::SITEROOT/userinfo.bml?user=$user\n\n";
+         BML::finish;
+         return;
      } else {
-	 $title = "No Match";
-	 $body = "(=H1 Sorry.. H1=)(=P No LiveJournal found matching that search criteria. P=)";
-	 return;
+         $title = "No Match";
+         $body = "(=H1 Sorry.. H1=)(=P No LiveJournal found matching that search criteria. P=)";
+         return;
      }
      
  }
@@ -114,9 +114,9 @@
      $FORM{'q'} =~ s/^\s+//; $FORM{'q'} =~ s/\s+$//;
      my @parts = split(/\s*,\s*/, $FORM{'q'});
      if (@parts==0 || @parts>3) {
-	 $title = "Format Error";
-	 $body .= "(=H1 Search by Region H1=)(=P You can search by region in one of the following formats: <ul><li>Country<li>City *<li>City, State *<li>State, Country<li>City, State, Country</ul>Notes:<ul><li>* searching for only a city or a city and state defaults to assuming the country is the United States.<li>Country can either be the country's full name, or its two letter country code</ul>If you want to do a different type of search, check out the <a href=\"/directorysearch.bml\">directory search</a>. P=)";
-	 return;
+         $title = "Format Error";
+         $body .= "(=H1 Search by Region H1=)(=P You can search by region in one of the following formats: <ul><li>Country<li>City *<li>City, State *<li>State, Country<li>City, State, Country</ul>Notes:<ul><li>* searching for only a city or a city and state defaults to assuming the country is the United States.<li>Country can either be the country's full name, or its two letter country code</ul>If you want to do a different type of search, check out the <a href=\"/directorysearch.bml\">directory search</a>. P=)";
+         return;
      }
      
      my ($qarg, $sth);
@@ -129,19 +129,19 @@
      my ($state, $city);
      
      if ($country) { 
-	 pop @parts; 
-	 if (@parts == 1) {
-	     $state = $parts[0];
-	 } elsif (@parts == 2) {
-	     ($city, $state) = @parts;
-	 }
+         pop @parts; 
+         if (@parts == 1) {
+             $state = $parts[0];
+         } elsif (@parts == 2) {
+             ($city, $state) = @parts;
+         }
      } else {
-	 $country = "US";
-	 if (@parts ==1) {
-	     $city = $parts[0];
-	 } elsif (@parts == 2) {
-	     ($city, $state) = @parts;
-	 }
+         $country = "US";
+         if (@parts ==1) {
+             $city = $parts[0];
+         } elsif (@parts == 2) {
+             ($city, $state) = @parts;
+         }
      }
      ($city, $state, $country) = map { LJ::eurl($_); } ($city, $state, $country);
      print "Status: 302 Found\n";

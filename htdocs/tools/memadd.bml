@@ -19,8 +19,8 @@
  $body = "";
 
  my %secopts = ( 'public' => "Public",
-		 'friends' => "Your Friends",
-		 'private' => "Private", );
+                 'friends' => "Your Friends",
+                 'private' => "Private", );
 
  my $sth;
  my $journal = $FORM{'journal'};
@@ -34,9 +34,9 @@
  if ($journal) {
      $ju = LJ::load_user($dbs, $journal);
      unless ($ju) {
-	 $title = "Error";
-	 $body = "Unknown journal.";
-	 return;
+         $title = "Error";
+         $body = "Unknown journal.";
+         return;
      }
      $anum = $itemid % 256;
      $itemid = int($itemid / 256);
@@ -52,7 +52,7 @@
 
  # check to see if it already is memorable (thus we're editing, not adding);
  $sth = $dbr->prepare("SELECT memid, des, security FROM memorable WHERE ".
-		      "userid=$remote->{'userid'} AND journalid=$jid AND jitemid=$ditemid");
+                      "userid=$remote->{'userid'} AND journalid=$jid AND jitemid=$ditemid");
  $sth->execute;
  my $memory = $sth->fetchrow_hashref;
  
@@ -65,21 +65,21 @@
      $sth = $dbr->prepare("SELECT DISTINCT k.keyword FROM keywords k, memkeyword mk, memorable m WHERE k.kwid=mk.kwid AND mk.memid=m.memid AND m.userid=$remote->{'userid'}");
      $sth->execute;
      while (my ($kw) = $sth->fetchrow_array) {
-	 push @all_keywords, $kw;
+         push @all_keywords, $kw;
      }
      @all_keywords = sort @all_keywords;
 
      if (defined $memory) {
-	 $title = "Edit Memorable Entry";
-	 $des = $memory->{'des'};
-	 $sth = $dbr->prepare("SELECT k.keyword FROM keywords k, memkeyword mk WHERE mk.kwid=k.kwid AND mk.memid=$memory->{'memid'}");
-	 $sth->execute;
-	 while (my ($kw) = $sth->fetchrow_array) {
-	     next if ($kw eq "*");
-	     if ($keywords) { $keywords .= ", "; }
-	     $keywords .= $kw;
-	     $selected_keyword{$kw} = 1;
-	 }
+         $title = "Edit Memorable Entry";
+         $des = $memory->{'des'};
+         $sth = $dbr->prepare("SELECT k.keyword FROM keywords k, memkeyword mk WHERE mk.kwid=k.kwid AND mk.memid=$memory->{'memid'}");
+         $sth->execute;
+         while (my ($kw) = $sth->fetchrow_array) {
+             next if ($kw eq "*");
+             if ($keywords) { $keywords .= ", "; }
+             $keywords .= $kw;
+             $selected_keyword{$kw} = 1;
+         }
          if (!$log || !($log->{'anum'} == $anum))
          {
              $dbh->do("DELETE FROM memorable WHERE memid=$memory->{'memid'}");
@@ -98,9 +98,9 @@
      }
      else 
      {
-	 my $user = LJ::get_username($dbs, $log->{'ownerid'});
-	 my $dt = substr($log->{'eventtime'}, 0, 10);
-	 $des = "$dt: $user: $log->{'subject'}";
+         my $user = LJ::get_username($dbs, $log->{'ownerid'});
+         my $dt = substr($log->{'eventtime'}, 0, 10);
+         $des = "$dt: $user: $log->{'subject'}";
      }
 
      $des = LJ::ehtml($des);
@@ -118,24 +118,24 @@
      $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B>Keywords:</B></TD><TD><input name=keywords maxlength=80 size=40><BR><FONT SIZE=-1>Why is this post memorable?  Enter zero to five keywords or categories so you can find it back later.  ";
 
      if (@all_keywords) {
-	 my $size = scalar(@all_keywords);
-	 if ($size > 15) { $size = 15; }
-	 $body .= "Or, you can also select keywords you've used in the past:<ul><select name=oldkeywords multiple size=$size>";
-	 foreach my $kw (@all_keywords) {
-	     my $sel = $selected_keyword{$kw} ? " selected" : "";
-	     $body .= "<option$sel>$kw</option>\n";
-	 }
-	 $body .= "</select></ul>Hold down 'Control' while clicking keywords to select multiple ones.";
+         my $size = scalar(@all_keywords);
+         if ($size > 15) { $size = 15; }
+         $body .= "Or, you can also select keywords you've used in the past:<ul><select name=oldkeywords multiple size=$size>";
+         foreach my $kw (@all_keywords) {
+             my $sel = $selected_keyword{$kw} ? " selected" : "";
+             $body .= "<option$sel>$kw</option>\n";
+         }
+         $body .= "</select></ul>Hold down 'Control' while clicking keywords to select multiple ones.";
      } else {
-	 $body .= "Example:  <B>Funny, Geeky, Romantic</B></FONT>";
+         $body .= "Example:  <B>Funny, Geeky, Romantic</B></FONT>";
      }
 
 
      $body .= "</TD></TR>\n";
      $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B>Security:</B></TD><TD><SELECT name=security>";
      foreach my $sec ("public", "friends", "private") {
-	 my $sel = (defined $memory && $memory->{'security'} eq $sec) ? "SELECTED" : "";
-	 $body .= "<OPTION VALUE=\"$sec\" $sel>$secopts{$sec}\n";
+         my $sel = (defined $memory && $memory->{'security'} eq $sec) ? "SELECTED" : "";
+         $body .= "<OPTION VALUE=\"$sec\" $sel>$secopts{$sec}\n";
      }
      $body .= "</SELECT>\n";
      $body .= "<BR><FONT SIZE=-1>Who can see that you've marked this post as memorable?  Everybody, only people you list as a friend, or just you?</FONT></TD></TR>\n";
@@ -150,52 +150,52 @@
  if ($FORM{'mode'} eq "save") 
  {
      if (! $FORM{'des'}) {
-	 # then we're deleting.
-	 if (defined $memory) {
-	     $dbh->do("DELETE FROM memorable WHERE memid=$memory->{'memid'}");
-	     $dbh->do("DELETE FROM memkeyword WHERE memid=$memory->{'memid'}");
-	     $title = "Deleted";
-	     $body = "(=H1 Memory deleted H1=)(=P The journal entry previously described as \"$memory->{'des'}\" has been removed from your list of memorable posts P=)";
-	     return;	     
-	 } else {
-	     $title = "Error";
-	     $body = "(=H1 No description H1=)(=P To add a journal entry to your list of memories, you need to provide a description.  To delete a memory, you can edit it and remove the description, but you didn't already have this entry in your memories. P=)";
-	     return;
-	 }
+         # then we're deleting.
+         if (defined $memory) {
+             $dbh->do("DELETE FROM memorable WHERE memid=$memory->{'memid'}");
+             $dbh->do("DELETE FROM memkeyword WHERE memid=$memory->{'memid'}");
+             $title = "Deleted";
+             $body = "(=H1 Memory deleted H1=)(=P The journal entry previously described as \"$memory->{'des'}\" has been removed from your list of memorable posts P=)";
+             return;	     
+         } else {
+             $title = "Error";
+             $body = "(=H1 No description H1=)(=P To add a journal entry to your list of memories, you need to provide a description.  To delete a memory, you can edit it and remove the description, but you didn't already have this entry in your memories. P=)";
+             return;
+         }
      }
 
      #### we're inserting/replacing now into memories
      my @keywords;
      { 
-	 my %kws;
-	 foreach (split(/\s*,\s*/, $FORM{'keywords'})) { $kws{$_} = 1; }
-	 foreach (split(/\0/, $FORM{'oldkeywords'})) { $kws{$_} = 1; }
-	 @keywords = keys %kws;
+         my %kws;
+         foreach (split(/\s*,\s*/, $FORM{'keywords'})) { $kws{$_} = 1; }
+         foreach (split(/\0/, $FORM{'oldkeywords'})) { $kws{$_} = 1; }
+         @keywords = keys %kws;
      }
      if (scalar(@keywords) > 5) { 
-	 $title = "Error";
-	 $body = "(=H1 Error H1=)(=P Only 5 keywords/categories are allowed per memorable post. P=)";
-	 return;
+         $title = "Error";
+         $body = "(=H1 Error H1=)(=P Only 5 keywords/categories are allowed per memorable post. P=)";
+         return;
      }
      @keywords = grep { s/^\s+//; s/\s+$//; $_; } @keywords;
      push @keywords, "*" unless (@keywords);
      my @kwid;
 
      foreach my $kw (@keywords) {
-	 if (length($kw) > 40) {
-	     $title = "Error";
-	     $body = "(=H1 Error H1=)(=P This keyword exceeds the maximum allowed size: \"$kw\" P=)";
-	     return;
-	 }
+         if (length($kw) > 40) {
+             $title = "Error";
+             $body = "(=H1 Error H1=)(=P This keyword exceeds the maximum allowed size: \"$kw\" P=)";
+             return;
+         }
 
-	 my $kwid = LJ::get_keyword_id($dbs, $kw);
-	 push @kwid, $kwid;
+         my $kwid = LJ::get_keyword_id($dbs, $kw);
+         push @kwid, $kwid;
      }
 
      unless (exists $secopts{$FORM{'security'}}) {
-	 $title = "Error";
-	 $body = "Invalid or missing security option.";
-	 return;
+         $title = "Error";
+         $body = "Invalid or missing security option.";
+         return;
      }
 
      my $qdes = $dbh->quote($FORM{'des'});
@@ -203,28 +203,28 @@
 
      ## this is easiest... just delete it, then add it again.
      if (defined $memory) {
-	 $dbh->do("DELETE FROM memkeyword WHERE memid=$memory->{'memid'}");
+         $dbh->do("DELETE FROM memkeyword WHERE memid=$memory->{'memid'}");
      }
 
      my $memid;
 
      if (defined $memory) 
      {
-	 $memid = $memory->{'memid'};
-	 $sth = $dbh->prepare("UPDATE memorable SET des=$qdes, security=$qsec WHERE memid=$memid");
-	 $sth->execute;
+         $memid = $memory->{'memid'};
+         $sth = $dbh->prepare("UPDATE memorable SET des=$qdes, security=$qsec WHERE memid=$memid");
+         $sth->execute;
      } 
      else 
      {
-	 $sth = $dbh->prepare("INSERT INTO memorable (memid, userid, journalid, jitemid, des, security) ".
-			      "VALUES (NULL, $remote->{'userid'}, $jid, $ditemid, $qdes, $qsec)");
-	 $sth->execute;
-	 $memid = $dbh->{'mysql_insertid'};
+         $sth = $dbh->prepare("INSERT INTO memorable (memid, userid, journalid, jitemid, des, security) ".
+                              "VALUES (NULL, $remote->{'userid'}, $jid, $ditemid, $qdes, $qsec)");
+         $sth->execute;
+         $memid = $dbh->{'mysql_insertid'};
      }
      if (@kwid) {
-	 my $sql = "INSERT INTO memkeyword (memid, kwid) VALUES ";
-	 $sql .= join(",", map { "($memid,$_)" } @kwid);
-	 $dbh->do($sql);
+         my $sql = "INSERT INTO memkeyword (memid, kwid) VALUES ";
+         $sql .= join(",", map { "($memid,$_)" } @kwid);
+         $dbh->do($sql);
      }
 
      $title = "Added";

@@ -16,21 +16,21 @@ P=)
  my %faqq;
  my $ret = "";
  $sth = $dbr->prepare("SELECT faqcat, faqcatname, catorder FROM faqcat ".
-		      "WHERE faqcat<>'int-abuse'");
+                      "WHERE faqcat<>'int-abuse'");
  $sth->execute;
  while ($_ = $sth->fetchrow_hashref) {
      $faqcat{$_->{'faqcat'}} = $_;
  }
  
  $sth = $dbr->prepare("SELECT faqid, question, sortorder, faqcat, lastmodtime ".
-		      "FROM faq WHERE faqcat<>'int-abuse'");
+                      "FROM faq WHERE faqcat<>'int-abuse'");
  $sth->execute;
  while ($_ = $sth->fetchrow_hashref) {
      $faqq{$_->{'faqid'}} = $_;
  }
 
  foreach my $faqcat (sort { $faqcat{$a}->{'catorder'} <=> 
-				$faqcat{$b}->{'catorder'} } keys %faqcat)
+                                $faqcat{$b}->{'catorder'} } keys %faqcat)
  {
      $ret .= "(=H2 ";
      $ret .= LJ::ehtml($faqcat{$faqcat}->{'faqcatname'});
@@ -40,12 +40,12 @@ P=)
      $ret .= "<UL>\n";
      foreach my $faqid (sort { $faqq{$a}->{'sortorder'} <=> $faqq{$b}->{'sortorder'} } grep { $faqq{$_}->{'faqcat'} eq $faqcat } keys %faqq)
      {
-	 next unless ($faqq{$faqid}->{'question'});
-	 &main::note_mod_time($faqq{$faqid}->{'lastmodtime'});	 
-	 my $q = LJ::ehtml($faqq{$faqid}->{'question'});
-	 $q =~ s/^\s+//; $q =~ s/\s+$//;
-	 $q =~ s/\n/<BR>/g;
-	 $ret .= "<LI><A HREF=\"faqbrowse.bml?faqid=$faqid\">$q</A>\n";
+         next unless ($faqq{$faqid}->{'question'});
+         &main::note_mod_time($faqq{$faqid}->{'lastmodtime'});	 
+         my $q = LJ::ehtml($faqq{$faqid}->{'question'});
+         $q =~ s/^\s+//; $q =~ s/\s+$//;
+         $q =~ s/\n/<BR>/g;
+         $ret .= "<LI><A HREF=\"faqbrowse.bml?faqid=$faqid\">$q</A>\n";
      }
      $ret .= "</UL>\n";
  }

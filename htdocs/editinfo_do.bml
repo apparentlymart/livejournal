@@ -35,13 +35,13 @@ BODY<=
  return $LJ::MSG_READONLY_USER if LJ::get_cap($remote, "readonly");
 
  LJ::load_user_props($dbr, $u, "opt_whatemailshow",
-		     "opt_showtopicstuff", "country", "state", "city",
-		     "zip", "icq", "aolim", "yahoo", "msn", "url",
-		     "urlname", "gender", "jabber", "opt_blockrobots",
-		     "opt_notalkicons", "opt_logcommentips",
-		     "howhear", "opt_bdaymail", "opt_hidefriendofs",
-		     "sidx_bdate", "sidx_loc",
-		     );
+                     "opt_showtopicstuff", "country", "state", "city",
+                     "zip", "icq", "aolim", "yahoo", "msn", "url",
+                     "urlname", "gender", "jabber", "opt_blockrobots",
+                     "opt_notalkicons", "opt_logcommentips",
+                     "howhear", "opt_bdaymail", "opt_hidefriendofs",
+                     "sidx_bdate", "sidx_loc",
+                     );
 
  my $user = $u->{'user'};
  my $quser = $dbr->quote($user);
@@ -52,7 +52,7 @@ BODY<=
 
  if ($u->{'has_bio'}) {
      $u->{'bio'} = LJ::dbs_selectrow_array($dbcs, "SELECT bio FROM userbio ".
-					   "WHERE userid=$u->{'userid'}");
+                                           "WHERE userid=$u->{'userid'}");
  }
  
  $sth = $dbr->prepare("SELECT i.interest, i.intid FROM interests i, userinterests ui WHERE i.intid=ui.intid AND ui.userid=$u->{'userid'}");
@@ -96,13 +96,13 @@ BODY<=
      if ($u->{'bdate'} =~ /^(\d\d\d\d)-(\d\d)-(\d\d)$/)
      {
          ($bdpart{'year'}, $bdpart{'month'}, $bdpart{'day'}) = ($1, $2, $3);
-	 if ($bdpart{'year'} eq "0000") { $bdpart{'year'} = ""; }
-	 if ($bdpart{'day'} eq "00") { $bdpart{'day'} = ""; }
+         if ($bdpart{'year'} eq "0000") { $bdpart{'year'} = ""; }
+         if ($bdpart{'day'} eq "00") { $bdpart{'day'} = ""; }
      }
      $ret .= "<SELECT NAME=\"month\"><OPTION VALUE=\"\">";
      for (my $i=1; $i<=12; $i++) {
-	 my $sel = $bdpart{'month'} == $i ? " SELECTED" : "";
-	 $ret .= "<OPTION VALUE=$i$sel>" . LJ::Lang::month_long("EN", $i) . "\n";
+         my $sel = $bdpart{'month'} == $i ? " SELECTED" : "";
+         $ret .= "<OPTION VALUE=$i$sel>" . LJ::Lang::month_long("EN", $i) . "\n";
      }
      $ret .= "</SELECT> ";
      $ret .= "<INPUT SIZE=3 MAXLENGTH=2 NAME=day VALUE=\"$bdpart{'day'}\">, <INPUT SIZE=5 MAXLENGTH=4 NAME=year VALUE=\"$bdpart{'year'}\"> (year is optional)";
@@ -130,12 +130,12 @@ BODY<=
 
      # chat thingies
      foreach my $p (["aolim", "AOL IM", 16], ["icq", "ICQ \#", 12], 
-		    ["yahoo", "Yahoo! ID", 33], ["msn", "MSN Messenger", 60],
-		    ["jabber", "Jabber Address", 60])
+                    ["yahoo", "Yahoo! ID", 33], ["msn", "MSN Messenger", 60],
+                    ["jabber", "Jabber Address", 60])
      {
-	 $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>$p->[1]</TD><TD><INPUT NAME=\"$p->[0]\" VALUE=\"$htmlu{$p->[0]}\" SIZE=20 MAXLENGTH=$p->[2]> (opt.)</TD></TR>\n";
+         $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>$p->[1]</TD><TD><INPUT NAME=\"$p->[0]\" VALUE=\"$htmlu{$p->[0]}\" SIZE=20 MAXLENGTH=$p->[2]> (opt.)</TD></TR>\n";
      }
-	     
+             
      # country
      $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>Country</TD><TD><SELECT NAME=country><OPTION VALUE=\"\">(Pick a country)\n";
      $ret .= "<OPTION VALUE=\"US\">United States\n";
@@ -165,41 +165,41 @@ BODY<=
      # text messaging
      if (LJ::get_cap($u, "textmessaging"))
      {
-	 $sth = $dbr->prepare("SELECT provider, number, security FROM txtmsg WHERE userid=$u->{'userid'}");
-	 $sth->execute;
-	 my $tminfo = $sth->fetchrow_hashref;
+         $sth = $dbr->prepare("SELECT provider, number, security FROM txtmsg WHERE userid=$u->{'userid'}");
+         $sth->execute;
+         my $tminfo = $sth->fetchrow_hashref;
 
-	 # text messaging
-	 $ret .= "<TR VALIGN=TOP><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>Text Messaging<BR>(<A HREF=\"/support/faqbrowse.bml?faqid=30\">about this feature</A>)</TD><TD>";
-	 $ret .= "<TABLE BORDER=0><TR><TD>";
-	 $ret .= "<INPUT TYPE=CHECKBOX NAME=\"use_txtmsg\" " . ($u->{'txtmsg_status'} eq "on" ? "CHECKED" : "") . "></TD><TD COLSPAN=2><B>Enable text messaging from other users.</B></TD></TR>";
-	 $ret .= "<TR><TD ROWSPAN=3>&nbsp;</TD><TD>Security Level:</TD><TD>";
-	 my %levels = ("all" => "Anybody",
-		       "reg" => "Registered Users",
-		       "friends" => "Friends only");
-	 my @levels = qw(all reg friends);
-	 $ret .= "<SELECT NAME=\"txtmsg_security\">";
-	 foreach my $lev (@levels) {
-	     my $sel = $tminfo->{'security'} eq $lev ? " SELECTED" : "";
-	     $ret .= "<OPTION VALUE=\"$lev\"$sel>$levels{$lev}\n";
-	 }
-	 $ret .= "</SELECT>\n";
-	 $ret .= "</TD></TR>";
-	 $ret .= "<TR><TD>Service Provider:</TD><TD>";
-	 {
-	     my @opts = ("", "");
-	     foreach my $p (LJ::TextMessage::providers()) {
-		 my $info = LJ::TextMessage::provider_info($p);
-		 push @opts, ($p, $info->{'name'});
-	     }
-	     $ret .= LJ::html_select({ 'name' => 'txtmsg_provider',
-				       'selected' => $tminfo->{'provider'}, },
-				     @opts);
-	 }
-	 
-	 $ret .= " (<A HREF=\"/tools/textmessage.bml?mode=details\">details</A>)</TD></TR>";
-	 $ret .= "<TR><TD>Full phone #:</TD><TD><INPUT NAME=\"txtmsg_number\" SIZE=15 MAXLENGTH=40 VALUE=\"$tminfo->{'number'}\"></TD></TR>";
-	 $ret .= "</TABLE></TD></TR>\n";
+         # text messaging
+         $ret .= "<TR VALIGN=TOP><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>Text Messaging<BR>(<A HREF=\"/support/faqbrowse.bml?faqid=30\">about this feature</A>)</TD><TD>";
+         $ret .= "<TABLE BORDER=0><TR><TD>";
+         $ret .= "<INPUT TYPE=CHECKBOX NAME=\"use_txtmsg\" " . ($u->{'txtmsg_status'} eq "on" ? "CHECKED" : "") . "></TD><TD COLSPAN=2><B>Enable text messaging from other users.</B></TD></TR>";
+         $ret .= "<TR><TD ROWSPAN=3>&nbsp;</TD><TD>Security Level:</TD><TD>";
+         my %levels = ("all" => "Anybody",
+                       "reg" => "Registered Users",
+                       "friends" => "Friends only");
+         my @levels = qw(all reg friends);
+         $ret .= "<SELECT NAME=\"txtmsg_security\">";
+         foreach my $lev (@levels) {
+             my $sel = $tminfo->{'security'} eq $lev ? " SELECTED" : "";
+             $ret .= "<OPTION VALUE=\"$lev\"$sel>$levels{$lev}\n";
+         }
+         $ret .= "</SELECT>\n";
+         $ret .= "</TD></TR>";
+         $ret .= "<TR><TD>Service Provider:</TD><TD>";
+         {
+             my @opts = ("", "");
+             foreach my $p (LJ::TextMessage::providers()) {
+                 my $info = LJ::TextMessage::provider_info($p);
+                 push @opts, ($p, $info->{'name'});
+             }
+             $ret .= LJ::html_select({ 'name' => 'txtmsg_provider',
+                                       'selected' => $tminfo->{'provider'}, },
+                                     @opts);
+         }
+         
+         $ret .= " (<A HREF=\"/tools/textmessage.bml?mode=details\">details</A>)</TD></TR>";
+         $ret .= "<TR><TD>Full phone #:</TD><TD><INPUT NAME=\"txtmsg_number\" SIZE=15 MAXLENGTH=40 VALUE=\"$tminfo->{'number'}\"></TD></TR>";
+         $ret .= "</TABLE></TD></TR>\n";
      }
 
      # end personal info
@@ -211,18 +211,18 @@ BODY<=
 
      ### How heard Settings
      unless ($htmlu{'howhear'}) {
-	 $ret .= "(=H1 Curiosity H1=)(=P Just for my own curiosity, where did you hear about $LJ::SITENAME from?  If it was a specific person, enter their LiveJournal username, if it was from another source/article/link/website, tell us where.... ";
-	 $ret .= "<UL><INPUT NAME=howhear VALUE=\"$htmlu{'ints'}\" SIZE=60 MAXLENGTH=100></UL>";
-	 $ret .= " P=)";
+         $ret .= "(=H1 Curiosity H1=)(=P Just for my own curiosity, where did you hear about $LJ::SITENAME from?  If it was a specific person, enter their LiveJournal username, if it was from another source/article/link/website, tell us where.... ";
+         $ret .= "<UL><INPUT NAME=howhear VALUE=\"$htmlu{'ints'}\" SIZE=60 MAXLENGTH=100></UL>";
+         $ret .= " P=)";
      }
 
      {
-	 ### Interests
-	 my $eints = BMLUtil::escapeall(join(", ", sort keys %interests));
-	 $ret .= "(=H1 Interests H1=)(=P If you want other people to be able to search the directory and find you by interest, list below everything you're interested in, separated by commas.  Short single-word phrases are best.  <B>Rule of thumb:</B> You should be able to put the interest in the sentence \"I like ________\".  When referring to nouns, use the plural form for consistency.  \"I like DVDs\" instead of \"I like DVD\". P=)";
-	 $ret .= "(=P <FONT COLOR=#009000><B>GOOD</B></FONT> Example: <B>biking, snow skiing, computers, dvds, mp3s, cheese, women</B> P=)";
-	 $ret .= "(=P <FONT COLOR=#FF0000><B>BAD</B></FONT> Example: <B>I like lots of bands and watching movies and talking to friends and going to clubs.</B>  That sort of stuff goes in your bio above. P=)";
-	 $ret .= "<UL><TEXTAREA NAME=interests ROWS=10 COLS=50 WRAP=SOFT>$eints</TEXTAREA></UL>";
+         ### Interests
+         my $eints = BMLUtil::escapeall(join(", ", sort keys %interests));
+         $ret .= "(=H1 Interests H1=)(=P If you want other people to be able to search the directory and find you by interest, list below everything you're interested in, separated by commas.  Short single-word phrases are best.  <B>Rule of thumb:</B> You should be able to put the interest in the sentence \"I like ________\".  When referring to nouns, use the plural form for consistency.  \"I like DVDs\" instead of \"I like DVD\". P=)";
+         $ret .= "(=P <FONT COLOR=#009000><B>GOOD</B></FONT> Example: <B>biking, snow skiing, computers, dvds, mp3s, cheese, women</B> P=)";
+         $ret .= "(=P <FONT COLOR=#FF0000><B>BAD</B></FONT> Example: <B>I like lots of bands and watching movies and talking to friends and going to clubs.</B>  That sort of stuff goes in your bio above. P=)";
+         $ret .= "<UL><TEXTAREA NAME=interests ROWS=10 COLS=50 WRAP=SOFT>$eints</TEXTAREA></UL>";
      }
 #line 172
 
@@ -230,12 +230,12 @@ BODY<=
      $ret .= "(=H1 Your Picture H1=)(=P Below is the miniature picture you have uploaded to represent you throughout the LiveJournal site and in your journal and in your friends' journals... \n<P><CENTER>";
      if ($u->{'defaultpicid'})
      {
-	 my $picid = $u->{'defaultpicid'};
-	 LJ::load_userpics($dbs, \%userpics, [ $picid ]);	 
-	 $ret .= "<IMG SRC=\"/userpic/$picid\" WIDTH=$userpics{$picid}->{'width'} HEIGHT=$userpics{$picid}->{'height'}>";
+         my $picid = $u->{'defaultpicid'};
+         LJ::load_userpics($dbs, \%userpics, [ $picid ]);	 
+         $ret .= "<IMG SRC=\"/userpic/$picid\" WIDTH=$userpics{$picid}->{'width'} HEIGHT=$userpics{$picid}->{'height'}>";
      } else
      {
-	 $ret .= "<I>(no image uploaded)</I>";
+         $ret .= "<I>(no image uploaded)</I>";
      }
      $ret .= "</CENTER><P>To delete this picture, or upload a new one, <A HREF=\"/uploadpic.bml\" TARGET=_blank>go here</A>. P=)\n";
 
@@ -254,32 +254,32 @@ BODY<=
      $ret .= "<tr><td>&nbsp;</td><td>You should keep this option enabled.  This lets other people be able to contact you by showing your email address, ICQ number, and AOL Instant Messenger screenname all on your LiveJournal.";
 
      {
-	 $ret .= "<p><b>Security:</b> ";
-	 $ret .= LJ::html_select({ 'name' => 'contactshow_sec',
-				   'selected' => $u->{'allow_contactshow'},
-			       }, 
-				 "Y" => "Everybody",
-				 "F" => "Friends only",
-				 );
+         $ret .= "<p><b>Security:</b> ";
+         $ret .= LJ::html_select({ 'name' => 'contactshow_sec',
+                                   'selected' => $u->{'allow_contactshow'},
+                               }, 
+                                 "Y" => "Everybody",
+                                 "F" => "Friends only",
+                                 );
 
-	 $ret .= "<p><b>If visible, email address to be displayed:</b><ul>";
+         $ret .= "<p><b>If visible, email address to be displayed:</b><ul>";
 
-	 my $cur = $u->{'opt_whatemailshow'} || "B";
-	 my @vals = ( ($LJ::USER_EMAIL && LJ::get_cap($u, "useremail"))
-		     ? ("B" => "Both (actual + \@$LJ::USER_DOMAIN)",
-			"A" => "Actual address only",
-			"L" => "LiveJournal address only",
-			"N" => "Neither.  Don't show any email address.")
-		     : ("A" => "Show email address",
+         my $cur = $u->{'opt_whatemailshow'} || "B";
+         my @vals = ( ($LJ::USER_EMAIL && LJ::get_cap($u, "useremail"))
+                     ? ("B" => "Both (actual + \@$LJ::USER_DOMAIN)",
+                        "A" => "Actual address only",
+                        "L" => "LiveJournal address only",
+                        "N" => "Neither.  Don't show any email address.")
+                     : ("A" => "Show email address",
                         "N" => "Don't show email address"));
-	 $ret .= "<SELECT NAME=\"opt_whatemailshow\">";
-	 while (my ($key, $des) = splice(@vals, 0, 2)) {
-	     my $sel = $key eq $cur ? "SELECTED" : "";
-	     $ret .= "<OPTION VALUE=\"$key\" $sel>$des";
-	 }
-	 $ret .= "</SELECT>";
-	 
-	 $ret .= "</ul>If you checked the above option, you may also choose to hide your email address (while still showing other contact information)";
+         $ret .= "<SELECT NAME=\"opt_whatemailshow\">";
+         while (my ($key, $des) = splice(@vals, 0, 2)) {
+             my $sel = $key eq $cur ? "SELECTED" : "";
+             $ret .= "<OPTION VALUE=\"$key\" $sel>$des";
+         }
+         $ret .= "</SELECT>";
+         
+         $ret .= "</ul>If you checked the above option, you may also choose to hide your email address (while still showing other contact information)";
          $ret .= ($LJ::USER_EMAIL
                   ? ", only show your livejournal email address (<A HREF=\"$LJ::SITEROOT/paidaccounts/\">paid accounts</A> only), or to show them both."
                   : ".");
@@ -313,11 +313,11 @@ BODY<=
 
      $ret .= "<P><B>Who can reply to your entries?</B> ";
      $ret .= LJ::html_select({ 'name' => 'opt_whocanreply', 'selected' => $u->{'opt_whocanreply'}, },
-			  "all" => "Anybody", "reg" => "Registered Users", "friends" => "Friends only");
+                          "all" => "Anybody", "reg" => "Registered Users", "friends" => "Friends only");
 
      $ret .= "<P><B>Log IP addresses of people replying?</B> ";
      $ret .= LJ::html_select({ 'name' => 'opt_logcommentips', 'selected' => $u->{'opt_logcommentips'}, },
-			  "N" => "No", "S" => "Anonymous posters only", "A" => "Always");
+                          "N" => "No", "S" => "Anonymous posters only", "A" => "Always");
      
      $ret .= "<P><TABLE>\n";
 
@@ -349,12 +349,12 @@ BODY<=
      push @banned, $_ while ($_ = $sth->fetchrow_hashref);
      
      if (@banned) {
-	 $ret .= "(=H1 Unban Users H1=)(=P You have the following users banned from posting in your journal.  Check the checkbox by their username to remove the ban on them. P=)";
-	 $ret .= "<UL>";
-	 foreach (@banned) {
-	     $ret .= "<INPUT TYPE=CHECKBOX NAME=\"unban\" VALUE=\"$_->{'banneduserid'}\"> $_->{'user'}<BR>\n";
-	 }
-	 $ret .= "</UL>";
+         $ret .= "(=H1 Unban Users H1=)(=P You have the following users banned from posting in your journal.  Check the checkbox by their username to remove the ban on them. P=)";
+         $ret .= "<UL>";
+         foreach (@banned) {
+             $ret .= "<INPUT TYPE=CHECKBOX NAME=\"unban\" VALUE=\"$_->{'banneduserid'}\"> $_->{'user'}<BR>\n";
+         }
+         $ret .= "</UL>";
 
      }
 
@@ -374,9 +374,9 @@ BODY<=
      my ($zipcity, $zipstate);
      my $qzip = $dbr->quote($FORM{'zip'});
      if ($FORM{'country'} eq "US") {
-	 $sth = $dbr->prepare("SELECT city, state FROM zip WHERE zip=$qzip");
-	 $sth->execute;
-	 ($zipcity, $zipstate) = $sth->fetchrow_array;
+         $sth = $dbr->prepare("SELECT city, state FROM zip WHERE zip=$qzip");
+         $sth->execute;
+         ($zipcity, $zipstate) = $sth->fetchrow_array;
      }
 
      my $this_year = (localtime())[5]+1900;
@@ -384,11 +384,11 @@ BODY<=
      unless ($FORM{'name'}) { push @errors, "Your name is a required field.  At least provide your first name, or a nickname or handle."; }
      if ($FORM{'year'} && $FORM{'year'} < 100) { push @errors, "Invalid birthday year.  Enter a 4-digit year."; }
      if ($FORM{'year'} && $FORM{'year'} >= 100 && 
-	($FORM{'year'} < 1890 || $FORM{'year'} > $this_year)) { push @errors, "Invalid birthday year."; }
+        ($FORM{'year'} < 1890 || $FORM{'year'} > $this_year)) { push @errors, "Invalid birthday year."; }
      if ($FORM{'month'} && ($FORM{'month'} < 1 || $FORM{'month'} > 12)) { push @errors, "Invalid birthday month.  Enter a month from 1-12.  (Jan-Dec)"; }
      if ($FORM{'day'} && ($FORM{'day'} < 1 || $FORM{'day'} > 31)) { push @errors, "Invalid birthday day.  Enter a day from 1-31."; }
      if (@errors == 0 && $FORM{'day'} > LJ::days_in_month($FORM{'month'}, $FORM{'year'})) {
-	 push @errors, "Invalid day for that month.";
+         push @errors, "Invalid day for that month.";
      }
 
      if ($FORM{'country'} ne "US" && $FORM{'zip'})
@@ -406,13 +406,13 @@ BODY<=
      # zip-code validation stuff
      if ($FORM{'country'} eq "US") 
      {
-	 if ($FORM{'statedrop'} && $zipstate && $FORM{'statedrop'} ne $zipstate) {
-	     push @errors, "Your zip code does not match the state you specified.  Either correct the information, or erase one or both of the state and zip code fields.";
-	 }
-	 if ($zipcity) {
-	     $FORM{'statedrop'} = $zipstate;
-	     $FORM{'city'} = $zipcity;
-	 }
+         if ($FORM{'statedrop'} && $zipstate && $FORM{'statedrop'} ne $zipstate) {
+             push @errors, "Your zip code does not match the state you specified.  Either correct the information, or erase one or both of the state and zip code fields.";
+         }
+         if ($zipcity) {
+             $FORM{'statedrop'} = $zipstate;
+             $FORM{'city'} = $zipcity;
+         }
      }
 
      if ($FORM{'country'} && !defined($countries{$FORM{'country'}})) {
@@ -420,22 +420,22 @@ BODY<=
      }
      
      if ($FORM{'use_txtmsg'}) {
-	 unless ($FORM{'txtmsg_provider'}) {
-	     push @errors, "If you're going to use text messaging, you must select your service provider.  If yours is not listed, please contact us with information about how your service's text messaging feature so we can add support for it.";
-	 }
-	 unless ($FORM{'txtmsg_number'}) {
-	     push @errors, "If you're going to use text messaging, you must enter your phone number.";
-	 }
+         unless ($FORM{'txtmsg_provider'}) {
+             push @errors, "If you're going to use text messaging, you must select your service provider.  If yours is not listed, please contact us with information about how your service's text messaging feature so we can add support for it.";
+         }
+         unless ($FORM{'txtmsg_number'}) {
+             push @errors, "If you're going to use text messaging, you must enter your phone number.";
+         }
      }
 
      unless ($FORM{'email'}) { push @errors, "You must provide your email address"; }
      if ($LJ::USER_EMAIL and $FORM{'email'} =~ /\@\Q$LJ::USER_DOMAIN\E$/i) {
-	 push @errors, "You cannot enter an \@$LJ::USER_DOMAIN email address.  Enter your real address in that field.  If you're a paid user, your $u->{'user'}\@$LJ::USER_DOMAIN address will forward to your real address.  To choose which email address (or both) is displayed publicly, see the option below the \"Show your Contact Information\" option.";
+         push @errors, "You cannot enter an \@$LJ::USER_DOMAIN email address.  Enter your real address in that field.  If you're a paid user, your $u->{'user'}\@$LJ::USER_DOMAIN address will forward to your real address.  To choose which email address (or both) is displayed publicly, see the option below the \"Show your Contact Information\" option.";
      }
      if ($FORM{'email'} =~ /\s/) { push @errors, "No spaces allowed in email address.  If you're on AOL, remember that your Internet Email address is your screen name with all spaces removed, followed by <B>\@aol.com</B>"; }
      unless (@errors)
      {
-	 &check_email($FORM{'email'}, \@errors);
+         &check_email($FORM{'email'}, \@errors);
      }
      
      return LJ::bad_input(@errors) if @errors;
@@ -443,44 +443,44 @@ BODY<=
      $state = $FORM{'statedrop'} || $FORM{'stateother'};
      my $email_changed = ($u->{'email'} ne $FORM{'email'});
      if ($email_changed) {
-	 # record old email address;
-	 my $oldemail = $dbh->quote($u->{'email'});
-	 my $oldstatus = $dbh->quote($u->{'status'});
-	 $dbh->do("INSERT INTO infohistory (userid, what, oldvalue, timechange, other) VALUES ($u->{'userid'}, 'email', $oldemail, NOW(), $oldstatus)");
+         # record old email address;
+         my $oldemail = $dbh->quote($u->{'email'});
+         my $oldstatus = $dbh->quote($u->{'status'});
+         $dbh->do("INSERT INTO infohistory (userid, what, oldvalue, timechange, other) VALUES ($u->{'userid'}, 'email', $oldemail, NOW(), $oldstatus)");
      }
      
      $FORM{'url'} =~ s/\s+$//; $FORM{'url'} =~ s/^\s+//;
      if ($FORM{'url'}) {
-	 unless ($FORM{'url'} =~ /^https?:\/\//) {
-	     $FORM{'url'} =~ s/^http\W*//;
-	     $FORM{'url'} = "http://$FORM{'url'}";
-	 }
+         unless ($FORM{'url'} =~ /^https?:\/\//) {
+             $FORM{'url'} =~ s/^http\W*//;
+             $FORM{'url'} = "http://$FORM{'url'}";
+         }
      }
 
      my $has_bio = ($FORM{'bio'} =~ /\S/) ? "Y" : "N";
      my $txtmsg_status = $FORM{'use_txtmsg'} ? "on" : "off";
      # setup what we're gonna update in the user table:
      my %update = (
-		   'name' => $FORM{'name'},
-		   'bdate' => sprintf("%04d-%02d-%02d", $FORM{'year'}, $FORM{'month'}, $FORM{'day'}),
-		   'email' => $FORM{'email'},
-		   'status' => ($email_changed && $u->{'status'} eq "A") ? "T" : $u->{'status'},
-		   'has_bio' => $has_bio,
-		   'allow_infoshow' => $FORM{'allow_infoshow'} ? "Y" : "N",
-		   'allow_getljnews' => $FORM{'allow_getljnews'} ? "Y" : "N",
-		   'opt_showtalklinks' => $FORM{'opt_showtalklinks'} ? "Y" : "N",
-		   'opt_gettalkemail' => $FORM{'opt_gettalkemail'} ? "Y" : "N",
-		   'opt_htmlemail' => $FORM{'opt_htmlemail'} ? "Y" : "N",
-		   'opt_mangleemail' => $FORM{'opt_mangleemail'} ? "Y" : "N",
-		   'opt_whocanreply' => $FORM{'opt_whocanreply'},
-		   'txtmsg_status' => $txtmsg_status,
-		   );
+                   'name' => $FORM{'name'},
+                   'bdate' => sprintf("%04d-%02d-%02d", $FORM{'year'}, $FORM{'month'}, $FORM{'day'}),
+                   'email' => $FORM{'email'},
+                   'status' => ($email_changed && $u->{'status'} eq "A") ? "T" : $u->{'status'},
+                   'has_bio' => $has_bio,
+                   'allow_infoshow' => $FORM{'allow_infoshow'} ? "Y" : "N",
+                   'allow_getljnews' => $FORM{'allow_getljnews'} ? "Y" : "N",
+                   'opt_showtalklinks' => $FORM{'opt_showtalklinks'} ? "Y" : "N",
+                   'opt_gettalkemail' => $FORM{'opt_gettalkemail'} ? "Y" : "N",
+                   'opt_htmlemail' => $FORM{'opt_htmlemail'} ? "Y" : "N",
+                   'opt_mangleemail' => $FORM{'opt_mangleemail'} ? "Y" : "N",
+                   'opt_whocanreply' => $FORM{'opt_whocanreply'},
+                   'txtmsg_status' => $txtmsg_status,
+                   );
 
      if ($FORM{'allow_contactshow'}) {
-	 $update{'allow_contactshow'} = "Y";
-	 $update{'allow_contactshow'} = "F" if ($FORM{'contactshow_sec'} eq "F");
+         $update{'allow_contactshow'} = "Y";
+         $update{'allow_contactshow'} = "F" if ($FORM{'contactshow_sec'} eq "F");
      } else {
-	 $update{'allow_contactshow'} = "N";
+         $update{'allow_contactshow'} = "N";
      }
 
      # update 'user' table
@@ -497,222 +497,222 @@ BODY<=
 
      ### change any of the userprops ?
      {
-	 $FORM{'opt_showtopicstuff'} = $FORM{'opt_showtopicstuff'} ? "Y" : "N";
-	 $FORM{'opt_blockrobots'} = $FORM{'opt_blockrobots'} ? 1 : 0;
-	 $FORM{'opt_bdaymail'} = $FORM{'opt_bdaymail'} ? 1 : 0;
-	 $FORM{'opt_hidefriendofs'} = $FORM{'opt_hidefriendofs'} ? 1 : 0;
-	 $FORM{'opt_notalkicons'} = $FORM{'opt_talkicons'} ? 0 : 1;   # (negated)
-	 if ($FORM{'opt_logcommentips'} ne "N" && 
-	     $FORM{'opt_logcommentips'} ne "S" && 
-	     $FORM{'opt_logcommentips'} ne "A") { $FORM{'opt_logcommentips'} = "N"; }
-	 $FORM{'state'} = $state;
+         $FORM{'opt_showtopicstuff'} = $FORM{'opt_showtopicstuff'} ? "Y" : "N";
+         $FORM{'opt_blockrobots'} = $FORM{'opt_blockrobots'} ? 1 : 0;
+         $FORM{'opt_bdaymail'} = $FORM{'opt_bdaymail'} ? 1 : 0;
+         $FORM{'opt_hidefriendofs'} = $FORM{'opt_hidefriendofs'} ? 1 : 0;
+         $FORM{'opt_notalkicons'} = $FORM{'opt_talkicons'} ? 0 : 1;   # (negated)
+         if ($FORM{'opt_logcommentips'} ne "N" && 
+             $FORM{'opt_logcommentips'} ne "S" && 
+             $FORM{'opt_logcommentips'} ne "A") { $FORM{'opt_logcommentips'} = "N"; }
+         $FORM{'state'} = $state;
 
-	 # for the directory.
-	 $FORM{'sidx_bdate'} = "";
-	 $FORM{'sidx_loc'} = "";	 
-	 if ($update{'allow_infoshow'} eq 'Y') {
-	     if ($FORM{'year'}) {
-		 $FORM{'sidx_bdate'} = sprintf("%04d-%02d-%02d", map { $FORM{$_} }
-					       qw(year month day));
-	     }
+         # for the directory.
+         $FORM{'sidx_bdate'} = "";
+         $FORM{'sidx_loc'} = "";	 
+         if ($update{'allow_infoshow'} eq 'Y') {
+             if ($FORM{'year'}) {
+                 $FORM{'sidx_bdate'} = sprintf("%04d-%02d-%02d", map { $FORM{$_} }
+                                               qw(year month day));
+             }
 
-	     if ($FORM{'country'}) {
-		 my $state;
-		 if ($FORM{'country'} eq "US") {
-		     $state = $FORM{'statedrop'};
-		 } else {
-		     $state = $FORM{'stateother'};
-		 }
-		 $FORM{'sidx_loc'} = sprintf("%2s-%s-%s",
-					     $FORM{'country'},
-					     $state,
-					     $FORM{'city'});
-	     }
-	 }
+             if ($FORM{'country'}) {
+                 my $state;
+                 if ($FORM{'country'} eq "US") {
+                     $state = $FORM{'statedrop'};
+                 } else {
+                     $state = $FORM{'stateother'};
+                 }
+                 $FORM{'sidx_loc'} = sprintf("%2s-%s-%s",
+                                             $FORM{'country'},
+                                             $state,
+                                             $FORM{'city'});
+             }
+         }
 
-	 my @uprops = (
-		       "opt_whatemailshow", "opt_showtopicstuff",
-		       "country", "state", "city", "zip", "icq",
-		       "aolim", "yahoo", "msn", "url", "urlname",
-		       "gender", "jabber", "opt_blockrobots",
-		       "opt_notalkicons", "opt_logcommentips",
-		       "opt_bdaymail", "opt_hidefriendofs",
-		       "sidx_bdate", "sidx_loc",
-		       );	
+         my @uprops = (
+                       "opt_whatemailshow", "opt_showtopicstuff",
+                       "country", "state", "city", "zip", "icq",
+                       "aolim", "yahoo", "msn", "url", "urlname",
+                       "gender", "jabber", "opt_blockrobots",
+                       "opt_notalkicons", "opt_logcommentips",
+                       "opt_bdaymail", "opt_hidefriendofs",
+                       "sidx_bdate", "sidx_loc",
+                       );	
 
-	 # this is only done once, then never appears again.
-	 if ($FORM{'howhear'}) {
-	     push @uprops, "howhear";
-	 }
+         # this is only done once, then never appears again.
+         if ($FORM{'howhear'}) {
+             push @uprops, "howhear";
+         }
 
-	 foreach my $uprop (@uprops) {
-	     if ($FORM{$uprop} ne $u->{$uprop}) {
-		 LJ::set_userprop($dbs, $u->{'userid'}, $uprop, $FORM{$uprop});
-	     }
-	 }
+         foreach my $uprop (@uprops) {
+             if ($FORM{$uprop} ne $u->{$uprop}) {
+                 LJ::set_userprop($dbs, $u->{'userid'}, $uprop, $FORM{$uprop});
+             }
+         }
      }
 
 
      #### update their bio text
      if ($u->{'bio'} ne $FORM{'bio'}) {
-	 my $db_bio = $dbcs->{'dbh'};
-	 if ($has_bio eq "N") {
-	     $db_bio->do("DELETE FROM userbio WHERE userid=$u->{'userid'}");
-	     LJ::dudata_set($db_bio, $u->{'userid'}, 'B', 0, 0) if $clustered;
-	 } else {
-	     my $qbio = $dbh->quote($FORM{'bio'});
-	     $db_bio->do("REPLACE INTO userbio (userid, bio) VALUES ($u->{'userid'}, $qbio)");
-	     LJ::dudata_set($db_bio, $u->{'userid'}, 'B', 0, length($FORM{'bio'})) if $clustered;
-	 }
+         my $db_bio = $dbcs->{'dbh'};
+         if ($has_bio eq "N") {
+             $db_bio->do("DELETE FROM userbio WHERE userid=$u->{'userid'}");
+             LJ::dudata_set($db_bio, $u->{'userid'}, 'B', 0, 0) if $clustered;
+         } else {
+             my $qbio = $dbh->quote($FORM{'bio'});
+             $db_bio->do("REPLACE INTO userbio (userid, bio) VALUES ($u->{'userid'}, $qbio)");
+             LJ::dudata_set($db_bio, $u->{'userid'}, 'B', 0, length($FORM{'bio'})) if $clustered;
+         }
      }
 
      #### update their text messaging info
      if ($txtmsg_status eq "off") {
-	 if ($u->{'txtmsg_status'} eq "on") {
-	     $dbh->do("DELETE FROM txtmsg WHERE userid=$u->{'userid'}");
-	 }
+         if ($u->{'txtmsg_status'} eq "on") {
+             $dbh->do("DELETE FROM txtmsg WHERE userid=$u->{'userid'}");
+         }
      } elsif ($txtmsg_status eq "on") {
-	 my $qnumber = $dbh->quote($FORM{'txtmsg_number'});
-	 my $qsec = $dbh->quote($FORM{'txtmsg_security'});
-	 my $qprov = $dbh->quote($FORM{'txtmsg_provider'});
-	 $dbh->do("REPLACE INTO txtmsg (userid, provider, number, security) VALUES ($u->{'userid'}, $qprov, $qnumber, $qsec)");
+         my $qnumber = $dbh->quote($FORM{'txtmsg_number'});
+         my $qsec = $dbh->quote($FORM{'txtmsg_security'});
+         my $qprov = $dbh->quote($FORM{'txtmsg_provider'});
+         $dbh->do("REPLACE INTO txtmsg (userid, provider, number, security) VALUES ($u->{'userid'}, $qprov, $qnumber, $qsec)");
      }
 
      ### update interests
      {
-	 my %int_new = ();
-	 my %int_del = %interests;
-	 $FORM{'interests'} =~ s/^\s+//;
-	 $FORM{'interests'} =~ s/\s+$//;
-	 $FORM{'interests'} =~ s/\n/,/g;
-	 my @ints = split (/\s*,\s*/, $FORM{'interests'});
-	 my $errorflag = 0;
-	 my $intcount = scalar(@ints);
-	 if ($intcount > 150) {
-	     $errorflag = 1;
-	     push @errors, "Sorry, you listed too many interests.  The limit is 150, but you've listed $intcount.  Any changes you made to your interests were not saved.  Go back and cut down your list, then save again.";
-	 }
-	 else 
-	 {
-	     foreach my $int (@ints)
-	     {
-		 $int = lc($int);
-		 # The following two lines prevent diacritics in other languages, thus bad.
-		 # $int =~ s/^[^\w]+//;
-		 # $int =~ s/[^\w]+$//;
-		 $int =~ s/^i like //;
-		 next unless ($int);
-		 next if ($int =~ / .+ .+ .+ /);
-		 next if ($int =~ /[\<\>]/);
-		 next if (length($int) > 35);
-		 unless ($interests{$int}) { $int_new{$int} = 1; }
-		 delete $int_del{$int};
-	     }
-	 }
-	     
-	 ### were interests removed?
-	 if (!$errorflag && %int_del) 
-	 {
-	     ## easy, we know their IDs, so delete them en masse
+         my %int_new = ();
+         my %int_del = %interests;
+         $FORM{'interests'} =~ s/^\s+//;
+         $FORM{'interests'} =~ s/\s+$//;
+         $FORM{'interests'} =~ s/\n/,/g;
+         my @ints = split (/\s*,\s*/, $FORM{'interests'});
+         my $errorflag = 0;
+         my $intcount = scalar(@ints);
+         if ($intcount > 150) {
+             $errorflag = 1;
+             push @errors, "Sorry, you listed too many interests.  The limit is 150, but you've listed $intcount.  Any changes you made to your interests were not saved.  Go back and cut down your list, then save again.";
+         }
+         else 
+         {
+             foreach my $int (@ints)
+             {
+                 $int = lc($int);
+                 # The following two lines prevent diacritics in other languages, thus bad.
+                 # $int =~ s/^[^\w]+//;
+                 # $int =~ s/[^\w]+$//;
+                 $int =~ s/^i like //;
+                 next unless ($int);
+                 next if ($int =~ / .+ .+ .+ /);
+                 next if ($int =~ /[\<\>]/);
+                 next if (length($int) > 35);
+                 unless ($interests{$int}) { $int_new{$int} = 1; }
+                 delete $int_del{$int};
+             }
+         }
+             
+         ### were interests removed?
+         if (!$errorflag && %int_del) 
+         {
+             ## easy, we know their IDs, so delete them en masse
 
-	     my $intid_in = join(", ", values %int_del);
-	     $dbh->do("DELETE FROM userinterests WHERE userid=$u->{'userid'} AND intid IN ($intid_in)");
-	     $dbh->do("UPDATE interests SET intcount=intcount-1 WHERE intid IN ($intid_in)");
-	 }
+             my $intid_in = join(", ", values %int_del);
+             $dbh->do("DELETE FROM userinterests WHERE userid=$u->{'userid'} AND intid IN ($intid_in)");
+             $dbh->do("UPDATE interests SET intcount=intcount-1 WHERE intid IN ($intid_in)");
+         }
 
-	 ### do we have new interests to add?
-	 if (!$error_flag && %int_new) 
-	 {
-	     ## difficult, have to find intids of interests, and create new ints for interests
-	     ## that nobody has ever entered before
+         ### do we have new interests to add?
+         if (!$error_flag && %int_new) 
+         {
+             ## difficult, have to find intids of interests, and create new ints for interests
+             ## that nobody has ever entered before
 
-	     my $int_in = join(", ", map { $dbh->quote($_); } keys %int_new);
-	     my %int_exist;
-	     my @new_intids = ();  ## existing IDs we'll add for this user
+             my $int_in = join(", ", map { $dbh->quote($_); } keys %int_new);
+             my %int_exist;
+             my @new_intids = ();  ## existing IDs we'll add for this user
 
-	     ## find existing IDs
-	     $sth = $dbr->prepare("SELECT interest, intid FROM interests WHERE interest IN ($int_in)");
-	     $sth->execute;
-	     while ($_ = $sth->fetchrow_hashref) {
-		 push @new_intids, $_->{'intid'};     # - we'll add this later.
-		 delete $int_new{$_->{'interest'}};   # - so we don't have to make a new intid for
-		                                      #   this next pass.
-	     }
-	     
-	     if (@new_intids) {
-		 my $sql = "";
-		 foreach my $newid (@new_intids) {
-		     if ($sql) { $sql .= ", "; }
-		     else { $sql = "REPLACE INTO userinterests (userid, intid) VALUES "; }
-		     $sql .= "($u->{'userid'}, $newid)";
-		 }
-		 $dbh->do($sql);
+             ## find existing IDs
+             $sth = $dbr->prepare("SELECT interest, intid FROM interests WHERE interest IN ($int_in)");
+             $sth->execute;
+             while ($_ = $sth->fetchrow_hashref) {
+                 push @new_intids, $_->{'intid'};     # - we'll add this later.
+                 delete $int_new{$_->{'interest'}};   # - so we don't have to make a new intid for
+                                                      #   this next pass.
+             }
+             
+             if (@new_intids) {
+                 my $sql = "";
+                 foreach my $newid (@new_intids) {
+                     if ($sql) { $sql .= ", "; }
+                     else { $sql = "REPLACE INTO userinterests (userid, intid) VALUES "; }
+                     $sql .= "($u->{'userid'}, $newid)";
+                 }
+                 $dbh->do($sql);
 
-		 my $intid_in = join(", ", @new_intids);
-		 $dbh->do("UPDATE interests SET intcount=intcount+1 WHERE intid IN ($intid_in)");
-	     }
-	 }
+                 my $intid_in = join(", ", @new_intids);
+                 $dbh->do("UPDATE interests SET intcount=intcount+1 WHERE intid IN ($intid_in)");
+             }
+         }
 
-	 ### do we STILL have interests to add?  (must make new intids)
-	 if (!$error_flag && %int_new) 
-	 {
-	     foreach my $int (keys %int_new) 
-	     {
-		 my $intid;
+         ### do we STILL have interests to add?  (must make new intids)
+         if (!$error_flag && %int_new) 
+         {
+             foreach my $int (keys %int_new) 
+             {
+                 my $intid;
 
-		 ## need to do this atomically so we don't get duplicate interests (there's no unique
-		 ## constraint on the interest column... that'd make for a big index)
-		 $dbh->do("LOCK TABLES interests WRITE");
-		 my $qint = $dbh->quote($int);
+                 ## need to do this atomically so we don't get duplicate interests (there's no unique
+                 ## constraint on the interest column... that'd make for a big index)
+                 $dbh->do("LOCK TABLES interests WRITE");
+                 my $qint = $dbh->quote($int);
 
-		 # let's double-check that some other connection didn't insert it since we last checked
-		 $sth = $dbh->prepare("SELECT intid FROM interests WHERE interest=$qint");
-		 $sth->execute;
-		 ($intid) = $sth->fetchrow_array;
+                 # let's double-check that some other connection didn't insert it since we last checked
+                 $sth = $dbh->prepare("SELECT intid FROM interests WHERE interest=$qint");
+                 $sth->execute;
+                 ($intid) = $sth->fetchrow_array;
 
-		 # more than likely it's still missing, so we have to make it:
-		 unless ($intid)
-		 {
-		     $sth = $dbh->prepare("INSERT INTO interests (intid, intcount, interest) VALUES (NULL, 1, $qint)");
-		     $sth->execute;
-		     $intid = $dbh->{'mysql_insertid'};
-		 }
-		 $dbh->do("UNLOCK TABLES");
+                 # more than likely it's still missing, so we have to make it:
+                 unless ($intid)
+                 {
+                     $sth = $dbh->prepare("INSERT INTO interests (intid, intcount, interest) VALUES (NULL, 1, $qint)");
+                     $sth->execute;
+                     $intid = $dbh->{'mysql_insertid'};
+                 }
+                 $dbh->do("UNLOCK TABLES");
 
-		 ## now we can actually insert it into the userinterests table:
-		 $dbh->do("INSERT INTO userinterests (userid, intid) VALUES ($u->{'userid'}, $intid)");
-	     }
-	 }
-	 
+                 ## now we can actually insert it into the userinterests table:
+                 $dbh->do("INSERT INTO userinterests (userid, intid) VALUES ($u->{'userid'}, $intid)");
+             }
+         }
+         
      }
 
      #### now unban users they selected to be unbanned
      
      if ($FORM{'unban'}) 
      {
-	 my $bannedin = join(",", map { $dbh->quote($_); } split(/\0/, $FORM{'unban'}));
-	 my $quserid = $u->{'userid'}+0;
-	 $dbh->do("DELETE FROM ban WHERE userid=$quserid AND banneduserid IN ($bannedin)");
+         my $bannedin = join(",", map { $dbh->quote($_); } split(/\0/, $FORM{'unban'}));
+         my $quserid = $u->{'userid'}+0;
+         $dbh->do("DELETE FROM ban WHERE userid=$quserid AND banneduserid IN ($bannedin)");
      }
 
      ##### /unban
 
      if ($email_changed) 
      {
-	 my $aa = {};
-	 $aa = LJ::register_authaction($dbs, $u->{'userid'}, 
-				       "validateemail", $FORM{'email'});
+         my $aa = {};
+         $aa = LJ::register_authaction($dbs, $u->{'userid'}, 
+                                       "validateemail", $FORM{'email'});
 
-	 open (MAIL, "|$LJ::SENDMAIL");
-	 print MAIL "To: $FORM{'email'}\n";
-	 print MAIL "From: $LJ::ADMIN_EMAIL\n";
-	 print MAIL "Subject: Email Address Changed\n\n";
-	 print MAIL "You have just changed your LiveJournal email address.  To validate the change, please go to this address:\n\n";
-	 
-	 print MAIL "     $LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}\n\n";
-	 
-	 print MAIL "Regards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n";
-	 close MAIL;
+         open (MAIL, "|$LJ::SENDMAIL");
+         print MAIL "To: $FORM{'email'}\n";
+         print MAIL "From: $LJ::ADMIN_EMAIL\n";
+         print MAIL "Subject: Email Address Changed\n\n";
+         print MAIL "You have just changed your LiveJournal email address.  To validate the change, please go to this address:\n\n";
+         
+         print MAIL "     $LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}\n\n";
+         
+         print MAIL "Regards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n";
+         close MAIL;
 
      }
 
@@ -721,7 +721,7 @@ BODY<=
      if (@errors) {
          $ret .= "(=P However, one or more errors occured while processing your request:\n<ul>\n";
          foreach (@errors) {
-	   $ret .= "<li>$_\n";
+           $ret .= "<li>$_\n";
          }
          $ret .= "</ul> P=)\n";
      }

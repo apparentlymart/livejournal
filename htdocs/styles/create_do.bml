@@ -46,15 +46,15 @@ BODY<=
      $sth->execute;
      my $rec = $sth->fetchrow_hashref;
      unless ($rec) {
-	 push @errors, "The style you're trying to make a new style from ($baseid), does not seem to exist.";
+         push @errors, "The style you're trying to make a new style from ($baseid), does not seem to exist.";
      }
      else {
-	 unless ($rec->{'is_public'} eq "Y" ||
-		 $rec->{'user'} eq $user) 
-	 {
-	     push @errors, "The style you're trying to make a new style from ($baseid) is not public so you cannot copy it.";
-	 }
-	 $base = $rec->{'formatdata'};
+         unless ($rec->{'is_public'} eq "Y" ||
+                 $rec->{'user'} eq $user) 
+         {
+             push @errors, "The style you're trying to make a new style from ($baseid) is not public so you cannot copy it.";
+         }
+         $base = $rec->{'formatdata'};
      }
 
  }

@@ -41,28 +41,28 @@ BODY<=
      $sth = $dbh->prepare("SELECT spcatid, level FROM supportnotify WHERE userid=$remote->{'userid'}");
      $sth->execute;
      while (my ($spcatid, $level) = $sth->fetchrow_array) {
-	 ## if user used to be able to read a category, subscribed, then lost
-	 ## privs, this ensures any future save will turn off things they 
-	 ## don't have access to:
-	 if (LJ::Support::can_read_cat($dbh, $cats->{$spcatid}, $remote)) {
-	     $notify{$spcatid} = $level;
-	 }
+         ## if user used to be able to read a category, subscribed, then lost
+         ## privs, this ensures any future save will turn off things they 
+         ## don't have access to:
+         if (LJ::Support::can_read_cat($dbh, $cats->{$spcatid}, $remote)) {
+             $notify{$spcatid} = $level;
+         }
      }
 
      my %valname = ("" => "Off.",
-		    "new" => "New only.",
-		    "all" => "All",
-		    );
+                    "new" => "New only.",
+                    "all" => "All",
+                    );
 
      $ret .= "<UL>\n";
      foreach my $cat (@filter_cats) {
-	 $ret .= "<P><SELECT NAME=\"spcatid_$cat->{'spcatid'}\">";
-	 foreach my $val ("", "new", "all") {
-	     my $sel = "";
-	     if ($notify{$cat->{'spcatid'}} eq $val) { $sel = " SELECTED"; }
-	     $ret .= "<OPTION VALUE=\"$val\"$sel>$valname{$val}\n";
-	 }
-	 $ret .= "</SELECT> $cat->{'catname'}\n";
+         $ret .= "<P><SELECT NAME=\"spcatid_$cat->{'spcatid'}\">";
+         foreach my $val ("", "new", "all") {
+             my $sel = "";
+             if ($notify{$cat->{'spcatid'}} eq $val) { $sel = " SELECTED"; }
+             $ret .= "<OPTION VALUE=\"$val\"$sel>$valname{$val}\n";
+         }
+         $ret .= "</SELECT> $cat->{'catname'}\n";
      }
      $ret .= "</UL>\n";
 
@@ -82,15 +82,15 @@ BODY<=
 
      foreach my $cat (@filter_cats)
      {
-	 my $id = $cat->{'spcatid'};
-	 my $setting = $FORM{"spcatid_$id"};
-	 if ($setting eq "all" || 
-	     $setting eq "new") 
-	 {
-	     if ($sql) { $sql .= ", "; }
-	     else { $sql .= "REPLACE INTO supportnotify (spcatid, userid, level) VALUES "; }
-	     $sql .= "($id, $remote->{'userid'}, '$setting')";
-	 }
+         my $id = $cat->{'spcatid'};
+         my $setting = $FORM{"spcatid_$id"};
+         if ($setting eq "all" || 
+             $setting eq "new") 
+         {
+             if ($sql) { $sql .= ", "; }
+             else { $sql .= "REPLACE INTO supportnotify (spcatid, userid, level) VALUES "; }
+             $sql .= "($id, $remote->{'userid'}, '$setting')";
+         }
      }     
      if ($sql) { $dbh->do($sql); }
      

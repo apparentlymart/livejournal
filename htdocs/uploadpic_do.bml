@@ -70,15 +70,15 @@ BODY<=
      
      my $too_big = 0;
      while (!$too_big && ($Bytes = read($fh,$Buffer,1024))) {
-	 $BytesRead += $Bytes;
-	 $imagedata .= $Buffer;
-	 if ($BytesRead > $MAXIMUM_UPLOAD) { $too_big = 1; }
+         $BytesRead += $Bytes;
+         $imagedata .= $Buffer;
+         if ($BytesRead > $MAXIMUM_UPLOAD) { $too_big = 1; }
      }
 
      if ($too_big)
      {
-	 push @errors, "File size too big.  File cannot exceed 40K.";
-	 return LJ::bad_input(@errors) if @errors;
+         push @errors, "File size too big.  File cannot exceed 40K.";
+         return LJ::bad_input(@errors) if @errors;
      }
  }
  elsif ($FORM{'src'} eq "url") 
@@ -91,15 +91,15 @@ BODY<=
      my $size = 0;
      my $req = HTTP::Request->new('GET', $FORM{'urlpic'});
      my $res = $ua->simple_request($req, sub { 
-	 my($data, $response, $protocol) = @_;
-	 $size += length($data);
-	 $imagedata .= $data;
-	 die if ($size > $MAXIMUM_UPLOAD);
+         my($data, $response, $protocol) = @_;
+         $size += length($data);
+         $imagedata .= $data;
+         die if ($size > $MAXIMUM_UPLOAD);
      }, 10_000);
 
      if (length($imagedata) > $MAXIMUM_UPLOAD) {
-	 push @errors, "File size too big.  File cannot exceed 40K.";
-	 return LJ::bad_input(@errors) if @errors;
+         push @errors, "File size too big.  File cannot exceed 40K.";
+         return LJ::bad_input(@errors) if @errors;
      }
  }
  else {

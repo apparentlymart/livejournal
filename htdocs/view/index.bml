@@ -34,12 +34,12 @@
  my $secwhere = "AND l.security='public'";
  if ($remote) {
      if ($remote->{'userid'} == $u->{'userid'}) {
-	 $secwhere = "";   # see everything
-	 $is_owner = 1;
+         $secwhere = "";   # see everything
+         $is_owner = 1;
      } else {
-	 my $gmask = $dbr->selectrow_array("SELECT groupmask FROM friends WHERE userid=$u->{'userid'} AND friendid=$remote->{'userid'}");
-	 $secwhere = "AND (l.security='public' OR (l.security='usemask' AND l.allowmask & $gmask))"
-	     if $gmask;
+         my $gmask = $dbr->selectrow_array("SELECT groupmask FROM friends WHERE userid=$u->{'userid'} AND friendid=$remote->{'userid'}");
+         $secwhere = "AND (l.security='public' OR (l.security='usemask' AND l.allowmask & $gmask))"
+             if $gmask;
      }
  }
  
@@ -78,8 +78,8 @@
      $body .= "<td><b>$prev</b></td>";
      $body .= "<td><select name=m>";
      for ($i=1;$i<=12;$i++) {
-	 my $sel = ($i == $month) ? " SELECTED" : "";
-	 $body .= "<option value=$i$sel>" . LJ::Lang::month_long("EN", $i);
+         my $sel = ($i == $month) ? " SELECTED" : "";
+         $body .= "<option value=$i$sel>" . LJ::Lang::month_long("EN", $i);
      }
      $body .= "</select> <input type=text name=y maxlength=4 size=4 value=$year> <input type=submit value=\"View\"></td>";
      $body .= "<td><b>$next</b></td>";
@@ -95,35 +95,35 @@
  {
      my $db = LJ::get_cluster_reader($u);
      if ($is_person) {
-	 $sth = $db->prepare("SELECT l.jitemid*256+l.anum, l.day, ls.subject, l.eventtime, NULL, ".
-			     "l.replycount, l.security, l.allowmask ".
-			     "FROM log2 l, logsubject2 ls ".
-			     "WHERE l.journalid=$u->{'userid'} AND ls.journalid=$u->{'userid'} ".
-			     "AND l.year=$year AND l.month=$month AND l.jitemid=ls.jitemid ".
-			     "$secwhere ORDER BY l.eventtime");
+         $sth = $db->prepare("SELECT l.jitemid*256+l.anum, l.day, ls.subject, l.eventtime, NULL, ".
+                             "l.replycount, l.security, l.allowmask ".
+                             "FROM log2 l, logsubject2 ls ".
+                             "WHERE l.journalid=$u->{'userid'} AND ls.journalid=$u->{'userid'} ".
+                             "AND l.year=$year AND l.month=$month AND l.jitemid=ls.jitemid ".
+                             "$secwhere ORDER BY l.eventtime");
      } else {
-	 $sth = $db->prepare("SELECT l.jitemid*256+l.anum, l.day, ls.subject, l.eventtime, u.user, ".
-			     "l.replycount, l.security, l.allowmask ".
-			     "FROM log2 l, logsubject2 ls, useridmap u ".
-			     "WHERE l.journalid=$u->{'userid'} AND ls.journalid=$u->{'userid'} ".
-			     "AND l.year=$year AND l.month=$month AND l.jitemid=ls.jitemid ".
-			     "AND l.posterid=u.userid $secwhere ORDER BY l.eventtime");
+         $sth = $db->prepare("SELECT l.jitemid*256+l.anum, l.day, ls.subject, l.eventtime, u.user, ".
+                             "l.replycount, l.security, l.allowmask ".
+                             "FROM log2 l, logsubject2 ls, useridmap u ".
+                             "WHERE l.journalid=$u->{'userid'} AND ls.journalid=$u->{'userid'} ".
+                             "AND l.year=$year AND l.month=$month AND l.jitemid=ls.jitemid ".
+                             "AND l.posterid=u.userid $secwhere ORDER BY l.eventtime");
      }
  } else {
      if ($is_person) {
-	 $sth = $dbr->prepare("SELECT l.itemid, l.day, ls.subject, l.eventtime, NULL, ".
-			      "l.replycount, l.security, l.allowmask ".
-			      "FROM log l, logsubject ls ".
-			      "WHERE l.ownerid=$u->{'userid'} AND l.year=$year AND ".
-			      "l.month=$month AND l.itemid=ls.itemid ".
-			      "$secwhere ORDER BY l.eventtime");
+         $sth = $dbr->prepare("SELECT l.itemid, l.day, ls.subject, l.eventtime, NULL, ".
+                              "l.replycount, l.security, l.allowmask ".
+                              "FROM log l, logsubject ls ".
+                              "WHERE l.ownerid=$u->{'userid'} AND l.year=$year AND ".
+                              "l.month=$month AND l.itemid=ls.itemid ".
+                              "$secwhere ORDER BY l.eventtime");
      } else {
-	 $sth = $dbr->prepare("SELECT l.itemid, l.day, ls.subject, l.eventtime, u.user, ".
-			      "l.replycount, l.security, l.allowmask ".
-			      "FROM log l, logsubject ls, useridmap u ".
-			      "WHERE l.ownerid=$u->{'userid'} AND l.year=$year AND ".
-			      "l.month=$month AND l.itemid=ls.itemid AND l.posterid=u.userid ".
-			      "$secwhere ORDER BY l.eventtime");
+         $sth = $dbr->prepare("SELECT l.itemid, l.day, ls.subject, l.eventtime, u.user, ".
+                              "l.replycount, l.security, l.allowmask ".
+                              "FROM log l, logsubject ls, useridmap u ".
+                              "WHERE l.ownerid=$u->{'userid'} AND l.year=$year AND ".
+                              "l.month=$month AND l.itemid=ls.itemid AND l.posterid=u.userid ".
+                              "$secwhere ORDER BY l.eventtime");
      }
  }
 
@@ -131,30 +131,30 @@
  while (my ($itemid, $day, $subject, $eventtime, $poster, $replycount, $security, $allowmask) = $sth->fetchrow_array)
  {
      if ($day != $lday) {
-	 if ($lday) { $body .= "</table></dd>"; }
-	 $lday = $day;
-	 my $ord = LJ::Lang::day_ord("EN", $day);
-	 my $dayview_url = sprintf("$LJ::SITROOT/users/$u->{'user'}/day/%04d/%02d/%02d/",
-				   $year, $month, $day);
-	 $body .= "<dt><b><a href=\"$dayview_url\">$day$ord</a></b></dt>";
-	 $body .= "<dd><table cellpadding=2>";
+         if ($lday) { $body .= "</table></dd>"; }
+         $lday = $day;
+         my $ord = LJ::Lang::day_ord("EN", $day);
+         my $dayview_url = sprintf("$LJ::SITROOT/users/$u->{'user'}/day/%04d/%02d/%02d/",
+                                   $year, $month, $day);
+         $body .= "<dt><b><a href=\"$dayview_url\">$day$ord</a></b></dt>";
+         $body .= "<dd><table cellpadding=2>";
      }
      unless ($subject ne "") { $subject = "(no subject)"; }
      my $h = substr($eventtime, 11, 2);
      my $m = substr($eventtime, 14, 2);
      my ($rep, $sec);
      if ($security eq "private") {
-	 $sec = " (=SECURITYPRIVATE=)";
+         $sec = " (=SECURITYPRIVATE=)";
      } elsif ($security eq "usemask") {
-	 $sec = " (=SECURITYPROTECTED=)";
+         $sec = " (=SECURITYPROTECTED=)";
      }
      if ($replycount) {
-	 if ($replycount == 1) { $rep .= " - $replycount reply"; }
-	 else { $rep .= " - $replycount replies"; }
+         if ($replycount == 1) { $rep .= " - $replycount reply"; }
+         else { $rep .= " - $replycount replies"; }
      }
      $body .= "<tr><td align=right><i>" . LJ::Lang::time_format(12, $h, $m, "short") . "</i></td>";
      if (! $is_person) {
-	 $body .= "<td>(=LJUSER $poster LJUSER=)</td>";
+         $body .= "<td>(=LJUSER $poster LJUSER=)</td>";
      }
 
      LJ::CleanHTML::clean_subject_all(\$subject);

@@ -20,8 +20,8 @@ print "\n";
 
 print "Creating system account...\n";
 unless (LJ::create_account($dbh, { 'user' => 'system',
-				   'name' => 'System Account',
-				   'password' => $pass }))
+                                   'name' => 'System Account',
+                                   'password' => $pass }))
 {
     print "Already exists.\nModifying 'system' account...\n";
     my $qp = $dbh->quote($pass);
@@ -39,12 +39,12 @@ if (LJ::check_priv($dbh, $u, "admin", "all")) {
     print "Already has it.\n";
 } else {
     my $sth = $dbh->prepare("INSERT INTO priv_map (userid, prlid, arg) ".
-			    "SELECT $u->{'userid'}, prlid, 'all' ".
-			    "FROM priv_list WHERE privcode='admin'");
+                            "SELECT $u->{'userid'}, prlid, 'all' ".
+                            "FROM priv_list WHERE privcode='admin'");
     $sth->execute;
     if ($dbh->err || $sth->rows == 0) {
-	print "Couldn't grant system account admin privs\n";
-	exit 1;
+        print "Couldn't grant system account admin privs\n";
+        exit 1;
     }
 }
 

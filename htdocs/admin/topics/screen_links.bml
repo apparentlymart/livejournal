@@ -64,15 +64,15 @@
      my $fullcat;
      my $catup = $catid;
      while ($catup) {
-	 $fullcat = "$cat{$catup}->{'catname'} : $fullcat";
-	 $catup = $cat{$catup}->{'parent'};
+         $fullcat = "$cat{$catup}->{'catname'} : $fullcat";
+         $catup = $cat{$catup}->{'parent'};
      }
      $fullcat .= $topic{$map->{'tptopid'}}->{'topname'};
      $ret .= "<B><FONT SIZE=-1>[$fullcat]</FONT></B>";
      $ret .= "<BR><A HREF=\"/talkread.bml?itemid=$map->{'itemid'}\" TARGET=\"main\">$map->{'itemid'}</A>";
      my %opts = ("L" => "Leave", "A" => "Approve", "D" => "Deny");
      foreach (qw(L A D)) {
-	 $ret .= "<BR><INPUT TYPE=RADIO NAME=\"action:$map->{'tptopid'}:$map->{'itemid'}\" VALUE=\"$_\">$opts{$_}\n";
+         $ret .= "<BR><INPUT TYPE=RADIO NAME=\"action:$map->{'tptopid'}:$map->{'itemid'}\" VALUE=\"$_\">$opts{$_}\n";
      }
  }
 
@@ -87,17 +87,17 @@
      $catid += 0;
      while ($catid)
      {
-	 unless ($hashref->{$catid}) {
-	     $sth = $dbh->prepare("SELECT parent, catname FROM topic_cats WHERE tpcatid=$catid");
-	     $sth->execute;
-	     my $cat = $sth->fetchrow_hashref;
-	     if ($cat) {
-		 $hashref->{$catid} = $cat;
-		 $catid = $cat->{'parent'}
-	     }
-	 } else {
-	     $catid = $hashref->{$catid}->{'parent'};
-	 }
+         unless ($hashref->{$catid}) {
+             $sth = $dbh->prepare("SELECT parent, catname FROM topic_cats WHERE tpcatid=$catid");
+             $sth->execute;
+             my $cat = $sth->fetchrow_hashref;
+             if ($cat) {
+                 $hashref->{$catid} = $cat;
+                 $catid = $cat->{'parent'}
+             }
+         } else {
+             $catid = $hashref->{$catid}->{'parent'};
+         }
      }
  }
 

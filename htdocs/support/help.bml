@@ -22,17 +22,17 @@ BODY<=
  if ($filtercat eq "_nonpublic") {
      $filterwhere = " AND s.spcatid IN (0";
      foreach my $cat (values %$cats) {
-	 if (! $cat->{'public_read'} && LJ::Support::can_read_cat($dbr, $cat, $remote)) {
-	     $filterwhere .= ", $cat->{'spcatid'}";
-	 }
+         if (! $cat->{'public_read'} && LJ::Support::can_read_cat($dbr, $cat, $remote)) {
+             $filterwhere .= ", $cat->{'spcatid'}";
+         }
      }
      $filterwhere .= ")";
  } else {
      my $fcat = LJ::Support::get_cat_by_key($cats, $filtercat);
      if (LJ::Support::can_read_cat($dbr, $fcat, $remote)) {
-	 $filterwhere = " AND s.spcatid=$fcat->{'spcatid'}";
+         $filterwhere = " AND s.spcatid=$fcat->{'spcatid'}";
      } else {
-	 $filtercat = "";
+         $filtercat = "";
      }
  }
 
@@ -48,7 +48,7 @@ BODY<=
      $ret .= "(=H1 Requests you replied to H1=)(=P This shows all open requests you've replied to. P=)";
 
      unless ($remote) {
-	 return "(=H1 Error H1=)(=P You must be logged in to filter on requests that you've replied to. P=)";
+         return "(=H1 Error H1=)(=P You must be logged in to filter on requests that you've replied to. P=)";
      }
      
      $sth = $dbr->prepare("SELECT DISTINCT s.* FROM support s, supportlog sl WHERE s.spid=sl.spid AND s.state='open' AND sl.userid=$remote->{'userid'} $filterwhere GROUP BY s.spid ORDER BY timecreate DESC");
@@ -62,7 +62,7 @@ BODY<=
      $sth->execute;
      my ($count) = $sth->fetchrow_array;
      unless ($count) {
-	 return "(=H1 No support requests! H1=)(=P The support queue is currently empty.  :-) P=)";
+         return "(=H1 No support requests! H1=)(=P The support queue is currently empty.  :-) P=)";
      }
      $sth = $dbr->prepare("SELECT s.* FROM support s WHERE s.state='open' $filterwhere ORDER BY timecreate DESC");
  }
@@ -74,15 +74,15 @@ BODY<=
  $ret .= "<select name=state>";
  {
      my @states = ("" => "Open",
-		   "closed" => "Closed",
-		   "green" => "Green");
+                   "closed" => "Closed",
+                   "green" => "Green");
      if ($remote) {
-	 push @states, ("youreplied", "You Replied");
+         push @states, ("youreplied", "You Replied");
      }
      while (@states) {
-	 my ($skey, $sname) = splice(@states, 0, 2);
-	 my $sel = $FORM{'state'} eq $skey ? " selected" : "";
-	 $ret .= "<option value=\"$skey\"$sel>$sname</option>";
+         my ($skey, $sname) = splice(@states, 0, 2);
+         my $sel = $FORM{'state'} eq $skey ? " selected" : "";
+         $ret .= "<option value=\"$skey\"$sel>$sname</option>";
      }
  }
  $ret .= "</select>";
@@ -92,7 +92,7 @@ BODY<=
  my @filter_cats = LJ::Support::filter_cats($remote, $cats);
  if (LJ::check_priv($dbr, $remote, "supportread")) {
      unshift @filter_cats, { 'catkey' => '_nonpublic',
-			     'catname' => '(Non-Public)' };
+                             'catname' => '(Non-Public)' };
  }
  foreach my $cat (@filter_cats)
  {
@@ -120,16 +120,16 @@ BODY<=
      my $status = "open";
      my $barbg = "BGCOLOR=#D0EED0";
      if ($sp->{'timeclosed'}) { 
-	 $status = "closed"; 
-	 $barbg = "BGCOLOR=#EED0D0";
+         $status = "closed"; 
+         $barbg = "BGCOLOR=#EED0D0";
      }
      elsif ($sp->{'timelasthelp'} > $sp->{'timetouched'}+5) { 
-	 $status = "answered<BR>awaiting close"; 
-	 $barbg = "BGCOLOR=#EEEED0";
+         $status = "answered<BR>awaiting close"; 
+         $barbg = "BGCOLOR=#EEEED0";
      }
      elsif ($sp->{'timelasthelp'} && $sp->{'timetouched'} > $sp->{'timelasthelp'}+5) { 
-	 $status = "answered<BR><B>still needs help</B>"; 
-	 $barbg = "BGCOLOR=#D0EED0";	 
+         $status = "answered<BR><B>still needs help</B>"; 
+         $barbg = "BGCOLOR=#D0EED0";	 
      }
        
      next if ($FORM{'state'} eq "green" && $barbg ne "BGCOLOR=#D0EED0");
@@ -141,9 +141,9 @@ BODY<=
      my $points = LJ::Support::calc_points($sp, $secold);
 
      unless ($status eq "closed") {
-	 $status .= "<BR>($points point";
-	 if ($points > 1) { $status .= "s"; }
-	 $status .= ")";
+         $status .= "<BR>($points point";
+         if ($points > 1) { $status .= "s"; }
+         $status .= ")";
      }
 
      $ret .= "<tr valign=top $barbg>\n";

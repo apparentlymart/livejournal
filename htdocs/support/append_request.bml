@@ -50,19 +50,19 @@ BODY<=
      ($type ne "internal" || ! LJ::Support::can_help($dbh, $sp, $remote)))
  {
      return LJ::bad_input("To approve an answer, you must select \"Internal Comment ".
-		       "/ Action\" and optionally explain why you're approving it.");
+                       "/ Action\" and optionally explain why you're approving it.");
  }
 
  if ($FORM{'changecat'} &&
      ($type ne "internal" || ! LJ::Support::can_help($dbh, $sp, $remote)))
  {
      return LJ::bad_input("To change a request's category, you must select \"Internal Comment ".
-		       "/ Action\" and explain why you're changing it.");
+                       "/ Action\" and explain why you're changing it.");
  }
 
 
  unless ($FORM{'body'} =~ /\S/ || $FORM{'faqid'} || 
-	 ($type eq "internal" && $FORM{'approveans'})) {
+         ($type eq "internal" && $FORM{'approveans'})) {
      return LJ::bad_input("Your message was blank.  Please type at least something in the message field.");
  }
 
@@ -71,10 +71,10 @@ BODY<=
      my $newcat = $FORM{'changecat'}+0;
      my $cats = LJ::Support::load_cats($dbh, $newcat);
      if ($cats->{$newcat}) {
-	 $dbh->do("UPDATE support SET spcatid=$newcat WHERE spid=$spid");
-	 $FORM{'body'} = "Changing from $catkey => $cats->{$newcat}->{'catkey'}\n\n$FORM{'body'}";
+         $dbh->do("UPDATE support SET spcatid=$newcat WHERE spid=$spid");
+         $FORM{'body'} = "Changing from $catkey => $cats->{$newcat}->{'catkey'}\n\n$FORM{'body'}";
      } else {
-	 return LJ::bad_input("That category doesn't seem to exist.");
+         return LJ::bad_input("That category doesn't seem to exist.");
      }
  }
 
@@ -83,11 +83,11 @@ BODY<=
      my $splid = $FORM{'approveans'}+0;
      my $res = LJ::Support::load_response($dbh, $splid);
      if ($res->{'spid'} == $spid && $res->{'type'} eq "screened") {
-	 $dbh->do("UPDATE supportlog SET type='answer' WHERE splid=$splid");
-	 $FORM{'body'} = "(Approving answer \#$splid)\n\n$FORM{'body'}";
+         $dbh->do("UPDATE supportlog SET type='answer' WHERE splid=$splid");
+         $FORM{'body'} = "(Approving answer \#$splid)\n\n$FORM{'body'}";
          LJ::Support::mail_response_to_user($dbh, $sp, $splid);
      } else {
-	 return LJ::bad_input("Invalid screened entry to approve.");
+         return LJ::bad_input("Invalid screened entry to approve.");
      }
  }
 

@@ -27,9 +27,9 @@
      while (my ($journal, $itemid) = $sth->fetchrow_array)
      {
          $body .= "<tr align='left'><td>";
-	 $body .= "(=LJUSER $journal LJUSER=)" if $journal;
-	 $body .= "</td>";
-	 my $jarg = $journal ? "journal=$journal&amp;" : "";
+         $body .= "(=LJUSER $journal LJUSER=)" if $journal;
+         $body .= "</td>";
+         my $jarg = $journal ? "journal=$journal&amp;" : "";
          $body .= "<td><a href='$LJ::SITEROOT/talkread.bml?${jarg}itemid=$itemid'>post</a></td>";
          $body .= "</tr>";
          $count++;

@@ -43,13 +43,13 @@ BODY<=
  if ($topid) 
  {
      if ($status eq "on" && $oldstatus ne "on") {
-	 $dbh->do("UPDATE topic_list SET status=$qstatus WHERE tptopid=$topid");
+         $dbh->do("UPDATE topic_list SET status=$qstatus WHERE tptopid=$topid");
      }
      if ($status eq "new" && $oldstatus eq "deny") {
-	 return "(=H1 Error H1=)(=P The topic has already been suggested and previously was denied.  If you feel this is an error, please contact us. P=)";
+         return "(=H1 Error H1=)(=P The topic has already been suggested and previously was denied.  If you feel this is an error, please contact us. P=)";
      }
      if ($status eq "new" && $oldstatus eq "off") {
-	 return "(=H1 Error H1=)(=P The topic was previously active but has since been turned off.  If you feel this is an error, please contact us. P=)";
+         return "(=H1 Error H1=)(=P The topic was previously active but has since been turned off.  If you feel this is an error, please contact us. P=)";
      }
  }
 

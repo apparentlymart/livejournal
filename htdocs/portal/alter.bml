@@ -21,9 +21,9 @@
      LJ::Portal::delete_box($portopts, $loc, $pos, $bname);
      LJ::Portal::save_portopts($dbs, $remote, $portopts);
      if ($loc eq "moz") {
-	 print "Location: $LJ::SITEROOT/portal/moz.bml\n\n";
+         print "Location: $LJ::SITEROOT/portal/moz.bml\n\n";
      } else {
-	 print "Location: $LJ::SITEROOT$LJ::PORTAL_URI\n\n";
+         print "Location: $LJ::SITEROOT$LJ::PORTAL_URI\n\n";
      }
      BML::finish();
      return;
@@ -34,9 +34,9 @@
      LJ::Portal::move_box($portopts, $loc, $pos, $bname, $op);
      LJ::Portal::save_portopts($dbs, $remote, $portopts);
      if ($loc eq "moz") {
-	 print "Location: $LJ::SITEROOT/portal/moz.bml\n\n";
+         print "Location: $LJ::SITEROOT/portal/moz.bml\n\n";
      } else {
-	 print "Location: $LJ::SITEROOT$LJ::PORTAL_URI\n\n";
+         print "Location: $LJ::SITEROOT$LJ::PORTAL_URI\n\n";
      }
      BML::finish();
      return;
@@ -52,27 +52,27 @@
      $body .= "(=H1 Change Box Settings H1=)";
      $body .= "(=P Change the settings for the box you just clicked:<ul>\n";
      {
-	 my $modform = LJ::Portal::make_box_modify_form($portopts, $loc, $pos);
-	 if ($modform) {
-	     $body .= $modform;
-	 } else {
-	     $body .= "<i>No options for this box.</i>";
-	 }
+         my $modform = LJ::Portal::make_box_modify_form($portopts, $loc, $pos);
+         if ($modform) {
+             $body .= $modform;
+         } else {
+             $body .= "<i>No options for this box.</i>";
+         }
      }
      $body .= "</ul> P=)";
      
      $body .= "(=H1 Add New Box H1=)(=P You can create a new box to show on the main page:<ul>";
      foreach my $loc (@LJ::PORTAL_COLS)
      {
-	 $body .= "<form method=post>";
-	 $body .= "<input type=hidden name=op value=addnew>";
-	 $body .= "<input type=hidden name=loc value=$loc>";
-     	 $body .= "<p><b>$LJ::Portal::colname{$loc}</b><br>";
-	 $body .= LJ::html_select({ 'name' => "bname",
-						'selected' => '', },
-					      "", "(Pick Box Type)",
-					      LJ::Portal::get_box_types($loc));
-	 $body .= " <input type=submit value=\"Proceed --&gt;\"></form>";
+         $body .= "<form method=post>";
+         $body .= "<input type=hidden name=op value=addnew>";
+         $body .= "<input type=hidden name=loc value=$loc>";
+              $body .= "<p><b>$LJ::Portal::colname{$loc}</b><br>";
+         $body .= LJ::html_select({ 'name' => "bname",
+                                                'selected' => '', },
+                                              "", "(Pick Box Type)",
+                                              LJ::Portal::get_box_types($loc));
+         $body .= " <input type=submit value=\"Proceed --&gt;\"></form>";
      }
      $body .= "</ul> P=)";
      return;
@@ -89,19 +89,19 @@
      my $modform =  LJ::Portal::make_box_modify_form($portopts, $loc, $pos);
      if ($modform) 
      {
-	 $title = "Configure Box";
-	 $body .= $modform;
-	 return;
+         $title = "Configure Box";
+         $body .= $modform;
+         return;
      } 
      else
      {
-	 if ($loc eq "moz") {
-	     $op = "mozadd";
-	 } else {
-	     print "Location: $LJ::SITEROOT$LJ::PORTAL_URI\n\n";
-	     BML::finish();
-	     return;
-	 }
+         if ($loc eq "moz") {
+             $op = "mozadd";
+         } else {
+             print "Location: $LJ::SITEROOT$LJ::PORTAL_URI\n\n";
+             BML::finish();
+             return;
+         }
      }
  }
 
@@ -109,11 +109,11 @@
  {
      my $newargs = LJ::Portal::modify_box($dbs, $remote, $portopts, $FORM{'loc'}, $FORM{'pos'}, \%FORM);
      if ($FORM{'loc'} eq "moz") {
-	 $op = "mozadd";
+         $op = "mozadd";
      } else {
-	 print "Location: $LJ::SITEROOT$LJ::PORTAL_URI\n\n";
-	 BML::finish();
-	 return;
+         print "Location: $LJ::SITEROOT$LJ::PORTAL_URI\n\n";
+         BML::finish();
+         return;
      }
  }
 

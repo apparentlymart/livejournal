@@ -33,26 +33,26 @@
     $PORTAL_URI ||= "/portal/";           # either "/" or "/portal/"    
 
     $PORTAL_LOGGED_IN ||= {'main' => [ 
-				     [ 'update', 'mode=full'],
-				     ],
-			 'right' => [ 
-				      [ 'goat', '', ],
-				      [ 'stats', '', ],
-				      [ 'bdays', '', ],
-				      ] };
+                                     [ 'update', 'mode=full'],
+                                     ],
+                         'right' => [ 
+                                      [ 'goat', '', ],
+                                      [ 'stats', '', ],
+                                      [ 'bdays', '', ],
+                                      ] };
     $PORTAL_LOGGED_OUT ||= {'main' => [ 
-				      [ 'update', 'mode='],
-				      ],
-			  'right' => [ 
-				       [ 'newtolj', '', ],
-				       [ 'login', '', ],
-				       [ 'stats', '', ],
-				       [ 'randuser', '', ],
-				       ],
-			  'moz' => [
-				    [ 'login', '', ],
-				    ],
-			  };
+                                      [ 'update', 'mode='],
+                                      ],
+                          'right' => [ 
+                                       [ 'newtolj', '', ],
+                                       [ 'login', '', ],
+                                       [ 'stats', '', ],
+                                       [ 'randuser', '', ],
+                                       ],
+                          'moz' => [
+                                    [ 'login', '', ],
+                                    ],
+                          };
 
    
     $MAX_HINTS_LASTN ||= 100;
@@ -62,40 +62,40 @@
 
     # set default capability limits if the site maintainer hasn't.
     {
-	my %defcap = (
-		      'checkfriends' => 1,
-		      'checkfriends_interval' => 60,
-		      'friendsviewupdate' => 30,
-		      'makepoll' => 1,
-		      'maxfriends' => 500,
-		      'moodthemecreate' => 1,
-		      'styles' => 1,
-		      'textmessage' => 1,
-		      'todomax' => 100,
-		      'todosec' => 1,
-		      'userdomain' => 0,
-		      'useremail' => 0,
-		      'userpics' => 5,
-		      'findsim' => 1,
-		      );
-	foreach my $k (keys %defcap) {
-	    next if (defined $LJ::CAP_DEF{$k});
-	    $LJ::CAP_DEF{$k} = $defcap{$k};	    
-	}
+        my %defcap = (
+                      'checkfriends' => 1,
+                      'checkfriends_interval' => 60,
+                      'friendsviewupdate' => 30,
+                      'makepoll' => 1,
+                      'maxfriends' => 500,
+                      'moodthemecreate' => 1,
+                      'styles' => 1,
+                      'textmessage' => 1,
+                      'todomax' => 100,
+                      'todosec' => 1,
+                      'userdomain' => 0,
+                      'useremail' => 0,
+                      'userpics' => 5,
+                      'findsim' => 1,
+                      );
+        foreach my $k (keys %defcap) {
+            next if (defined $LJ::CAP_DEF{$k});
+            $LJ::CAP_DEF{$k} = $defcap{$k};	    
+        }
     }
 
     # set default userprop limits if site maintainer hasn't
     {
-	my %defuser = (
-		       's1_lastn_style' => 1,
-		       's1_friends_style' => 6,
-		       's1_calendar_style' => 2,
-		       's1_day_style' => 5,
-		       );
-	foreach my $k (keys %defuser) {
-	    next if (defined $LJ::USERPROP_DEF{$k});
-	    $LJ::USERPROP_DEF{$k} = $defuser{$k};
-	}
+        my %defuser = (
+                       's1_lastn_style' => 1,
+                       's1_friends_style' => 6,
+                       's1_calendar_style' => 2,
+                       's1_day_style' => 5,
+                       );
+        foreach my $k (keys %defuser) {
+            next if (defined $LJ::USERPROP_DEF{$k});
+            $LJ::USERPROP_DEF{$k} = $defuser{$k};
+        }
     }
 }
 

@@ -13,7 +13,7 @@ BML::register_block("SUPPORT_EMAIL", "S", $LJ::SUPPORT_EMAIL);
 {
     my $dl = "<a href=\"$LJ::SITEROOT/files/%%DATA%%\">HTTP</a>";
     if ($LJ::FTPPREFIX) {
-	$dl .= " - <a href=\"$LJ::FTPPREFIX/%%DATA%%\">FTP</a>";
+        $dl .= " - <a href=\"$LJ::FTPPREFIX/%%DATA%%\">FTP</a>";
     }
     BML::register_block("DL", "DS", $dl);
 }

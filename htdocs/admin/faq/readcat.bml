@@ -40,17 +40,17 @@ BODY<=
      $ret .= "<UL>\n";
      foreach my $faqid (sort { $faqq{$a}->{'sortorder'} <=> $faqq{$b}->{'sortorder'} } grep { $faqq{$_}->{'faqcat'} eq $faqcat } keys %faqq)
      {
-	 next unless ($faqq{$faqid}->{'question'});
-	 &main::note_mod_time($faqq{$faqid}->{'lastmodtime'}); 
-	 my $q = LJ::ehtml($faqq{$faqid}->{'question'});
-	 $q =~ s/^\s+//; $q =~ s/\s+$//;
-	 $q =~ s/\n/<BR>/g;
-	 my $a = LJ::ehtml($faqq{$faqid}->{'answer'});
-	 $a =~ s/^\s+//; $a =~ s/\s+$//;
-	 $a =~ s/\n( +)/"\n" . "&nbsp;&nbsp;"x length($1)/eg;
-	 $a =~ s/\n/<BR>/g;
-	 $a =~ s!http://[a-z0-9A-Z_\-\.\/\?\%\+\=]+!<A HREF="$&">$&</A>!g;
-	 $ret .= "<P><TABLE BGCOLOR=#C0C0C0><TR><TD><B>$q</B></TD></TR></TABLE>$a";
+         next unless ($faqq{$faqid}->{'question'});
+         &main::note_mod_time($faqq{$faqid}->{'lastmodtime'}); 
+         my $q = LJ::ehtml($faqq{$faqid}->{'question'});
+         $q =~ s/^\s+//; $q =~ s/\s+$//;
+         $q =~ s/\n/<BR>/g;
+         my $a = LJ::ehtml($faqq{$faqid}->{'answer'});
+         $a =~ s/^\s+//; $a =~ s/\s+$//;
+         $a =~ s/\n( +)/"\n" . "&nbsp;&nbsp;"x length($1)/eg;
+         $a =~ s/\n/<BR>/g;
+         $a =~ s!http://[a-z0-9A-Z_\-\.\/\?\%\+\=]+!<A HREF="$&">$&</A>!g;
+         $ret .= "<P><TABLE BGCOLOR=#C0C0C0><TR><TD><B>$q</B></TD></TR></TABLE>$a";
 
      }
      $ret .= "</UL>\n";

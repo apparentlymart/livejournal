@@ -23,7 +23,7 @@
      $sth->execute;
      $u = $sth->fetchrow_hashref;
      unless ($u) {
-	 $body .= "(=H1 Error H1=)(=P <B>Unknown user: </B> " . LJ::ehtml($user) . " P=)\n";
+         $body .= "(=H1 Error H1=)(=P <B>Unknown user: </B> " . LJ::ehtml($user) . " P=)\n";
      }
  }
 
@@ -47,11 +47,11 @@
  unless ($remote && $remote->{'userid'} == $u->{'userid'}) {
      my $friendclause;
      if ($remote) {
-	 # check to see if this user's a friend
-	 $sth = $dbh->prepare("SELECT COUNT(*) AS 'isfriend' FROM friends WHERE userid=$u->{'userid'} AND friendid=$remote->{'userid'}");
-	 $sth->execute;
-	 my ($isfriend) = $sth->fetchrow_array;
-	 if ($isfriend) { $friendclause = ", 'friends'"; }
+         # check to see if this user's a friend
+         $sth = $dbh->prepare("SELECT COUNT(*) AS 'isfriend' FROM friends WHERE userid=$u->{'userid'} AND friendid=$remote->{'userid'}");
+         $sth->execute;
+         my ($isfriend) = $sth->fetchrow_array;
+         if ($isfriend) { $friendclause = ", 'friends'"; }
      }
      $where .= "AND t.security IN ('public' $friendclause)";
  } 
@@ -69,25 +69,25 @@
  $sth->execute;
  while (my ($id, $kwid, $keyword) = $sth->fetchrow_array) {
      if ($kwid) {
-	 $keyword{$kwid}->{'count'}++;
-	 $keyword{$kwid}->{'keyword'} = $keyword;
-	 push @{$itemkws{$id}}, $kwid;
+         $keyword{$kwid}->{'count'}++;
+         $keyword{$kwid}->{'keyword'} = $keyword;
+         push @{$itemkws{$id}}, $kwid;
      }
      $total++;
      if (! $FORM{'cat'} || ($kwid && $keyword eq $FORM{'cat'})) {
-	 push @tdids, $id;
-	 if ($FORM{"delete_$id"}) { 
-	     push @delete, $id;
-	 }
+         push @tdids, $id;
+         if ($FORM{"delete_$id"}) { 
+             push @delete, $id;
+         }
      }
  }
 
  ### deleting?
  if (@delete) {
      unless ($permission{'delete'}) {
-	 $title = "Error";
-	 $body = "(=H1 Security H1=)(=P You're not allowed to delete these to-do items. P=)";
-	 return;
+         $title = "Error";
+         $body = "(=H1 Security H1=)(=P You're not allowed to delete these to-do items. P=)";
+         return;
      }
 
      my $in = join(",", @delete);
@@ -107,13 +107,13 @@
  $body .= "<INPUT TYPE=HIDDEN NAME=user VALUE=$FORM{'user'}>\n" if ($FORM{'user'});
  $body .= "(=H1 Filter Items H1=)(=P ";
  foreach my $kwid (sort { lc($keyword{$a}->{'keyword'}) cmp lc($keyword{$b}->{'keyword'}) } 
-		   keys %keyword)
+                   keys %keyword)
  {
      my $cat = $keyword{$kwid}->{'keyword'};
      if ($FORM{'cat'} eq $cat) {
-	 $body .= "<b>" . LJ::ehtml($cat) . " ($keyword{$kwid}->{'count'})</b>, ";
+         $body .= "<b>" . LJ::ehtml($cat) . " ($keyword{$kwid}->{'count'})</b>, ";
      } else {
-	 $body .= "<b><a href=\"" . LJ::self_link(\%FORM, { 'user' => $u->{'user'}, 'cat' => $cat }) . "\">" . LJ::ehtml($cat) . "</a></b> ($keyword{$kwid}->{'count'}), ";
+         $body .= "<b><a href=\"" . LJ::self_link(\%FORM, { 'user' => $u->{'user'}, 'cat' => $cat }) . "\">" . LJ::ehtml($cat) . "</a></b> ($keyword{$kwid}->{'count'}), ";
      }
  }
  if ($FORM{'cat'}) {
@@ -137,16 +137,16 @@
  {
      my @actions = ();
      if ($permission{'add'}) {
-	 push @actions, [ "item.bml?user=$u->{'user'}&mode=add&amp;cat=" . LJ::eurl($FORM{'cat'}), "Add Item" ];
+         push @actions, [ "item.bml?user=$u->{'user'}&mode=add&amp;cat=" . LJ::eurl($FORM{'cat'}), "Add Item" ];
      }
      
      if (@actions) 
      {
-	 $body .= "(=H1 Actions H1=)(=P ";
-	 foreach (@actions) {
-	     $body .= "[ <a href=\"$_->[0]\">$_->[1]</a> ]";
-	 }
-	 $body .= " P=)";
+         $body .= "(=H1 Actions H1=)(=P ";
+         foreach (@actions) {
+             $body .= "[ <a href=\"$_->[0]\">$_->[1]</a> ]";
+         }
+         $body .= " P=)";
      }
  }
 
@@ -163,10 +163,10 @@
  foreach my $it (@items) {
      $it->{'_duesort'} = $it->{'datedue'};
      if ($it->{'_duesort'} =~ s/^0000-/9999-/) {
-	 $it->{'datedue'} = "";
+         $it->{'datedue'} = "";
      } elsif (length($it->{'datedue'})==0) {
-	 $it->{'_duesort'} = "9999";
-	 }
+         $it->{'_duesort'} = "9999";
+         }
  }
  
  ### 
@@ -199,21 +199,21 @@
  $body .= "<TD><B>&nbsp;</B></TD>\n" if ($permission{'delete'});
  {
      my @cols = (["Status", "status"],
-		 ["P", "priority"],
-		 ["Item", "item"],
-		 ["Date Due", "due"],
-		 ["Category", ""]);
+                 ["P", "priority"],
+                 ["Item", "item"],
+                 ["Date Due", "due"],
+                 ["Category", ""]);
      foreach my $col (@cols) {
-	 if ($col->[1] eq "") {
-	     $body .= "<td><b>$col->[0]</b></td>";
-	 } elsif ($col->[1] eq $FORM{'sort'}) {
-	     $body .= "<td bgcolor=(=EMCOLOR=)><b>$col->[0]</b></td>";
-	 } else {
-	     $body .= "<td><a href=\"" . LJ::self_link(\%FORM, { 'user' => $u->{'user'}, 'sort' => $col->[1] }) . "\"><b>$col->[0]</b></a></td>";
-	 }
+         if ($col->[1] eq "") {
+             $body .= "<td><b>$col->[0]</b></td>";
+         } elsif ($col->[1] eq $FORM{'sort'}) {
+             $body .= "<td bgcolor=(=EMCOLOR=)><b>$col->[0]</b></td>";
+         } else {
+             $body .= "<td><a href=\"" . LJ::self_link(\%FORM, { 'user' => $u->{'user'}, 'sort' => $col->[1] }) . "\"><b>$col->[0]</b></a></td>";
+         }
      }
  }
-		 
+                 
  $body .= "</TR>\n";
 
  foreach my $it (@items) 
@@ -227,44 +227,44 @@
 
      ## priority
      {
-	 my $color;
-	 if ($it->{'priority'} < 3) { $val = "-"; $color = "#0000C0"; }
-	 if ($it->{'priority'} == 1) { $val = "--"; }
-	 if ($it->{'priority'} > 3) { $val = "!"; $color = "#FF0000"; }
-	 if ($it->{'priority'} == 5) { $val = "!!"; }
-	 $val = $color ? "<FONT FACE=\"Arial,Helvetica\" COLOR=$color><B>$val</B></FONT>" : "&nbsp;";
+         my $color;
+         if ($it->{'priority'} < 3) { $val = "-"; $color = "#0000C0"; }
+         if ($it->{'priority'} == 1) { $val = "--"; }
+         if ($it->{'priority'} > 3) { $val = "!"; $color = "#FF0000"; }
+         if ($it->{'priority'} == 5) { $val = "!!"; }
+         $val = $color ? "<FONT FACE=\"Arial,Helvetica\" COLOR=$color><B>$val</B></FONT>" : "&nbsp;";
      }
      push @vals, $val;
 
      ## item & description
      {
-	 my $des = LJ::ehtml($it->{'des'});
-	 $des =~ s,(http://\S+),<a href="$1">$1</a>,g;
-	 $val = "<a href=\"item.bml?id=$it->{'todoid'}\"><b>" . LJ::ehtml($it->{'subject'}) . "</b></a><br /><font size='-1'>$des</font>";
-	 push @vals, $val;
+         my $des = LJ::ehtml($it->{'des'});
+         $des =~ s,(http://\S+),<a href="$1">$1</a>,g;
+         $val = "<a href=\"item.bml?id=$it->{'todoid'}\"><b>" . LJ::ehtml($it->{'subject'}) . "</b></a><br /><font size='-1'>$des</font>";
+         push @vals, $val;
      }
 
      ## due
      {
-	 $val = "&nbsp;";
-	 my $due = $it->{'datedue'};
-	 $due =~ s/:00$//;
-	 $due =~ s/00:00$//;
-	 if ($due) {
-	     $val = "<nobr><font size=-1>$due</font></nobr>";
-	 }
-	 push @vals, $val;
+         $val = "&nbsp;";
+         my $due = $it->{'datedue'};
+         $due =~ s/:00$//;
+         $due =~ s/00:00$//;
+         if ($due) {
+             $val = "<nobr><font size=-1>$due</font></nobr>";
+         }
+         push @vals, $val;
      }
 
      ## categories
      {
-	 $val = "";
-	 foreach my $kwid (@{$itemkws{$it->{'todoid'}}}) {
-	     if ($val) { $val .= ", "; }
-	     $val .= $keyword{$kwid}->{'keyword'};
-	 }
-	 $val = $val ? "<font size=-1>$val</font>" : "&nbsp;";
-	 push @vals, $val;
+         $val = "";
+         foreach my $kwid (@{$itemkws{$it->{'todoid'}}}) {
+             if ($val) { $val .= ", "; }
+             $val .= $keyword{$kwid}->{'keyword'};
+         }
+         $val = $val ? "<font size=-1>$val</font>" : "&nbsp;";
+         push @vals, $val;
      }
 
      ## print the row
@@ -272,7 +272,7 @@
      $body .= "<TR ALIGN=LEFT VALIGN=TOP>\n";
      $body .= "<TD><B><INPUT TYPE=CHECKBOX NAME=\"delete_$it->{'todoid'}\"></B></TD>\n" if ($permission{'delete'});
      foreach $val (@vals) {
-	 $body .= "<TD>$val</TD>";
+         $body .= "<TD>$val</TD>";
      }
      $body .= "</TR>\n";
  }

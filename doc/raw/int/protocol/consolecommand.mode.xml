@@ -28,14 +28,14 @@ and not parse it ourselves.
 
 <key name="results" count="1">
  <list count="1"><des>
-	    One stuct returned for each command run, 
-	    that struct containing both the overall return value,
-	    and the line-by-line output of the command, with
-	    each line of output being tagged by type (think
-	    stdout vs. stderr, but with stdinfo also).  The web interface
-	    shows 'error' with red, '' (stdout) with black, and 'info'
-	    with green.  Clients are encouraged to also, if possible.
-	  </des>
+            One stuct returned for each command run, 
+            that struct containing both the overall return value,
+            and the line-by-line output of the command, with
+            each line of output being tagged by type (think
+            stdout vs. stderr, but with stdinfo also).  The web interface
+            shows 'error' with red, '' (stdout) with black, and 'info'
+            with green.  Clients are encouraged to also, if possible.
+          </des>
    <struct count="0more">
       <key name="success" count="1">
           <scalar><des>
@@ -45,13 +45,13 @@ and not parse it ourselves.
       <key name="output" count="1">
           <list count="1">
              <scalar count="1"><des>
-		    Type of output line.  Either "" (normal output), "error", or "info",
-		    something to be emphasized over normal output.
-		  </des></scalar>
-		<scalar count="1"><des>
-		    The text of that line.
-		    </des></scalar>
-		</list>
+                    Type of output line.  Either "" (normal output), "error", or "info",
+                    something to be emphasized over normal output.
+                  </des></scalar>
+                <scalar count="1"><des>
+                    The text of that line.
+                    </des></scalar>
+                </list>
        </key>
     </struct>
   </list>

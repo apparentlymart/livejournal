@@ -19,13 +19,13 @@ BODY<=
  }
  
  my $sth = $dbr->prepare("SELECT question, answer, lastmoduserid, ".
-			 "DATE_FORMAT(lastmodtime, '%Y-%m-%d'), ".
-			 "UNIX_TIMESTAMP(lastmodtime) FROM faq ".
-			 "WHERE $where ORDER BY sortorder");
+                         "DATE_FORMAT(lastmodtime, '%Y-%m-%d'), ".
+                         "UNIX_TIMESTAMP(lastmodtime) FROM faq ".
+                         "WHERE $where ORDER BY sortorder");
  $sth->execute;
  my ($question, $answer, $unixmodtime, $lastmoduserid, $lastmodtime);
  while (($question, $answer, $lastmoduserid, $lastmodtime, $unixmodtime) =
-	$sth->fetchrow_array)
+        $sth->fetchrow_array)
  {
      my $q = "";
      my $a = "";
@@ -33,7 +33,7 @@ BODY<=
      $lastmodwho = LJ::get_username($dbs, $lastmoduserid);
      
      $dbh->do("REPLACE INTO faquses (faqid, userid, dateview) ".
-	      "VALUES ($id, $remote->{'userid'}, NOW())") if $remote;
+              "VALUES ($id, $remote->{'userid'}, NOW())") if $remote;
 
      &main::note_mod_time($unixmodtime);
      
@@ -51,7 +51,7 @@ BODY<=
      $ret .= "(=H1 $q H1=)<blockquote>$a</blockquote>";
 
      if ($lastmodwho) {
-	 $ret .= "<p align=\"right\"><b>Last Updated:</b><br />$lastmodwho, $lastmodtime</p>";
+         $ret .= "<p align=\"right\"><b>Last Updated:</b><br />$lastmodwho, $lastmodtime</p>";
      }
  }
 

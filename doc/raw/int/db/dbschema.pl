@@ -23,40 +23,40 @@ sub dump_xml
     print "<dbschema>\n";
     foreach my $table (sort keys %$tables)
     {
-	print "<dbtbl id=\"_$table\">\n";
+        print "<dbtbl id=\"_$table\">\n";
 
-	# table name
-	print "<name>$table</name>\n";
-	
-	# description of table
-	if ($tables->{$table}->{'des'}) {
-	    my $des = $tables->{$table}->{'des'};
-	    &magic_links(\$des);
-	    print "<description>$des</description>\n";
-	}
+        # table name
+        print "<name>$table</name>\n";
+        
+        # description of table
+        if ($tables->{$table}->{'des'}) {
+            my $des = $tables->{$table}->{'des'};
+            &magic_links(\$des);
+            print "<description>$des</description>\n";
+        }
 
-	# columns
-	foreach my $col (@{$tables->{$table}->{'cols'}})
-	{
-	    print "<dbcol id=\"_$table.$col->{'name'}\" type=\"$col->{'type'}\" required=\"$col->{'required'}\" default=\"$col->{'default'}\">\n";
-	    print "<name>$col->{'name'}</name>\n";
-	    if ($col->{'des'}) {
-		my $des = $col->{'des'};
-		&magic_links(\$des);
-		print "<description>$des</description>\n";
-	    }
-	    print "</dbcol>\n";
-	}
+        # columns
+        foreach my $col (@{$tables->{$table}->{'cols'}})
+        {
+            print "<dbcol id=\"_$table.$col->{'name'}\" type=\"$col->{'type'}\" required=\"$col->{'required'}\" default=\"$col->{'default'}\">\n";
+            print "<name>$col->{'name'}</name>\n";
+            if ($col->{'des'}) {
+                my $des = $col->{'des'};
+                &magic_links(\$des);
+                print "<description>$des</description>\n";
+            }
+            print "</dbcol>\n";
+        }
 
-	# indexes
-	foreach my $indexname (sort keys %{$tables->{$table}->{'index'}})
-	{
-	    my $index = $tables->{$table}->{'index'}->{$indexname};
+        # indexes
+        foreach my $indexname (sort keys %{$tables->{$table}->{'index'}})
+        {
+            my $index = $tables->{$table}->{'index'}->{$indexname};
 
-	    print "<dbkey name=\"$indexname\" type=\"$index->{'type'}\" colids=\"", join(" ", @{$index->{'cols'}}), "\" />\n";
-	}
+            print "<dbkey name=\"$indexname\" type=\"$index->{'type'}\" colids=\"", join(" ", @{$index->{'cols'}}), "\" />\n";
+        }
 
-	print "</dbtbl>\n";
+        print "</dbtbl>\n";
     }
     print "</dbschema>\n";
 }
@@ -90,34 +90,34 @@ foreach my $table (sort keys %table)
     $sth->execute;
     while (my $r = $sth->fetchrow_hashref)
     {
-	my $col = {};
-	$col->{'name'} = $r->{'Field'};
+        my $col = {};
+        $col->{'name'} = $r->{'Field'};
 
-	my $type = $r->{'Type'};
-	$type =~ s/int\(\d+\)/int/g;
-	if ($r->{'Extra'} eq "auto_increment") {
-	    $type .= " auto_increment";
-	}
-	$col->{'type'} = $type;
+        my $type = $r->{'Type'};
+        $type =~ s/int\(\d+\)/int/g;
+        if ($r->{'Extra'} eq "auto_increment") {
+            $type .= " auto_increment";
+        }
+        $col->{'type'} = $type;
 
-	$col->{'default'} = $r->{'Default'};
-	$col->{'required'} = $r->{'Null'} eq "YES" ? "false" : "true";
+        $col->{'default'} = $r->{'Default'};
+        $col->{'required'} = $r->{'Null'} eq "YES" ? "false" : "true";
 
-	$col->{'des'} = $coldes{$table}->{$r->{'Field'}};
+        $col->{'des'} = $coldes{$table}->{$r->{'Field'}};
 
-	push @{$table{$table}->{'cols'}}, $col;
+        push @{$table{$table}->{'cols'}}, $col;
     }
 
     $sth = $dbr->prepare("SHOW INDEX FROM $table");
     $sth->execute;
     while (my $r = $sth->fetchrow_hashref)
     {
-	my $name = $r->{'Key_name'};
-	my $type = $r->{'Non_unique'} ? "INDEX" : "UNIQUE";
-	if ($name eq "PRIMARY") { $type = "PRIMARY"; }
+        my $name = $r->{'Key_name'};
+        my $type = $r->{'Non_unique'} ? "INDEX" : "UNIQUE";
+        if ($name eq "PRIMARY") { $type = "PRIMARY"; }
 
-	$table{$table}->{'index'}->{$name}->{'type'} = $type;
-	push @{$table{$table}->{'index'}->{$name}->{'cols'}}, "_$table.$r->{'Column_name'}";
+        $table{$table}->{'index'}->{$name}->{'type'} = $type;
+        push @{$table{$table}->{'index'}->{$name}->{'cols'}}, "_$table.$r->{'Column_name'}";
     }
 
 }

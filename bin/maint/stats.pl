@@ -9,7 +9,7 @@ $maint{'genstats'} = sub
     my @which = @_;
 
     unless (@which) { @which = qw(usage users countries 
-				  states gender clients
+                                  states gender clients
                                   pop_interests meme pop_faq); }
     my %do = map { $_, 1, } @which;
     
@@ -31,161 +31,161 @@ $maint{'genstats'} = sub
     my %to_pop;
 
     if ($do{'pop_faq'}) {
-	$sth = $dbr->prepare("SELECT faqid, COUNT(*) FROM faquses WHERE ".
-			     "faqid<>0 GROUP BY 1 ORDER BY 2 DESC LIMIT 50");
-	$sth->execute;
-	my $d = $to_pop{'popfaq'} = {};
-	while (my ($id, $count) = $sth->fetchrow_array) {
-	    $d->{$id} = $count;
-	}
+        $sth = $dbr->prepare("SELECT faqid, COUNT(*) FROM faquses WHERE ".
+                             "faqid<>0 GROUP BY 1 ORDER BY 2 DESC LIMIT 50");
+        $sth->execute;
+        my $d = $to_pop{'popfaq'} = {};
+        while (my ($id, $count) = $sth->fetchrow_array) {
+            $d->{$id} = $count;
+        }
     }
 
     if ($do{'meme'}) {
-	$sth = $dbr->prepare("SELECT url, count(*) FROM meme GROUP BY 1 ORDER BY 2 DESC LIMIT 100");
-	$sth->execute;
-	my $memedata = $to_pop{'popmeme'} = {};
-	while (my ($url, $count) = $sth->fetchrow_array) {
-	    $memedata->{$url} = $count;
-	}
+        $sth = $dbr->prepare("SELECT url, count(*) FROM meme GROUP BY 1 ORDER BY 2 DESC LIMIT 100");
+        $sth->execute;
+        my $memedata = $to_pop{'popmeme'} = {};
+        while (my ($url, $count) = $sth->fetchrow_array) {
+            $memedata->{$url} = $count;
+        }
     }
 
     if ($do{'usage'})
     {
-	print "-I- Getting usage by day in last month...\n";
-	$sth = $dbr->prepare("SELECT UNIX_TIMESTAMP(), DATE_FORMAT(NOW(), '%Y-%m-%d')");
-	$sth->execute;
-	($nowtime, $nowdate) = $sth->fetchrow_array;
-	
-	print "Date is: $nowdate\n";
-	
-	for (my $days_back = 30; $days_back > 0; $days_back--) {
-	    print "  going back $days_back days... ";
-	    $time = $nowtime - 86400*$days_back;
-	    my ($year, $month, $day) = (localtime($time))[5, 4, 3];
-	    $year += 1900;
-	    $month += 1;
-	    my $date = sprintf("%04d-%02d-%02d", $year, $month, $day);
-	    my $qdate = $dbr->quote($date);
-	    my $exist = $dbr->selectrow_array("SELECT COUNT(*) FROM stats WHERE statcat='postsbyday' AND statkey=$qdate");
-	    if ($exist) {
-		print "exists.\n";
-		next;
-	    } 
+        print "-I- Getting usage by day in last month...\n";
+        $sth = $dbr->prepare("SELECT UNIX_TIMESTAMP(), DATE_FORMAT(NOW(), '%Y-%m-%d')");
+        $sth->execute;
+        ($nowtime, $nowdate) = $sth->fetchrow_array;
+        
+        print "Date is: $nowdate\n";
+        
+        for (my $days_back = 30; $days_back > 0; $days_back--) {
+            print "  going back $days_back days... ";
+            $time = $nowtime - 86400*$days_back;
+            my ($year, $month, $day) = (localtime($time))[5, 4, 3];
+            $year += 1900;
+            $month += 1;
+            my $date = sprintf("%04d-%02d-%02d", $year, $month, $day);
+            my $qdate = $dbr->quote($date);
+            my $exist = $dbr->selectrow_array("SELECT COUNT(*) FROM stats WHERE statcat='postsbyday' AND statkey=$qdate");
+            if ($exist) {
+                print "exists.\n";
+                next;
+            } 
 
-	    my $total = 0;
-	    $total += $dbr->selectrow_array("SELECT COUNT(*) FROM log WHERE year=$year ".
-					    "AND month=$month AND day=$day");
-	    foreach my $c (@LJ::CLUSTERS) {
-		my $dbcr = LJ::get_cluster_reader($c);
-		$total += $dbcr->selectrow_array("SELECT COUNT(*) FROM log2 WHERE year=$year ".
-						 "AND month=$month AND day=$day");
-	    }
-	    
-	    print "$date = $total entries\n";
-	    $dbh->do("REPLACE INTO stats (statcat, statkey, statval) ".
-		     "VALUES ('postsbyday', $qdate, $total)");
-	}
+            my $total = 0;
+            $total += $dbr->selectrow_array("SELECT COUNT(*) FROM log WHERE year=$year ".
+                                            "AND month=$month AND day=$day");
+            foreach my $c (@LJ::CLUSTERS) {
+                my $dbcr = LJ::get_cluster_reader($c);
+                $total += $dbcr->selectrow_array("SELECT COUNT(*) FROM log2 WHERE year=$year ".
+                                                 "AND month=$month AND day=$day");
+            }
+            
+            print "$date = $total entries\n";
+            $dbh->do("REPLACE INTO stats (statcat, statkey, statval) ".
+                     "VALUES ('postsbyday', $qdate, $total)");
+        }
     }
 
     if ($do{'users'})
     {
-	$to_pop{'userinfo'} = \%userinfo;
-	$to_pop{'account'} = \%account;
-	$to_pop{'age'} = \%age;
-	$to_pop{'newbyday'} = \%newbyday;
+        $to_pop{'userinfo'} = \%userinfo;
+        $to_pop{'account'} = \%account;
+        $to_pop{'age'} = \%age;
+        $to_pop{'newbyday'} = \%newbyday;
 
-	print "-I- Getting user stats...\n";
+        print "-I- Getting user stats...\n";
 
-	my $now = time();
-	my $count;
-	$sth = $dbr->prepare("SELECT COUNT(*) FROM user");
-	$sth->execute;
-	my ($usertotal) = $sth->fetchrow_array;
-	my $pagesize = 1000;
-	my $pages = int($usertotal / $pagesize) + (($usertotal % $pagesize) ? 1 : 0);
-	
-	for (my $page=0; $page < $pages; $page++)
-	{
-	    my $skip = $page*$pagesize;
-	    my $first = $skip+1;
-	    my $last = $skip+$pagesize;
-	    print "  getting records $first-$last...\n";
-	    $sth = $dbr->prepare("SELECT DATE_FORMAT(uu.timecreate, '%Y-%m-%d') AS 'datereg', u.user, u.caps, FLOOR((TO_DAYS(NOW())-TO_DAYS(u.bdate))/365.25) AS 'age', UNIX_TIMESTAMP(uu.timeupdate) AS 'timeupdate', u.status, u.allow_getljnews, u.allow_getpromos FROM user u, userusage uu WHERE u.userid=uu.userid LIMIT $skip,$pagesize");
-	    $sth->execute;
-	    while (my $rec = $sth->fetchrow_hashref)
-	    {
-		my $co = $rec->{'country'};
-		if ($co) {
-		    $country{$co}++; 
-		    if ($co eq "US" && $rec->{'state'}) {
-			$stateus{$rec->{'state'}}++;
-		    }
-		}
-		
-		my $capnameshort = LJ::name_caps_short($rec->{'caps'});
-		$account{$capnameshort}++;
-		
-		unless ($rec->{'datereg'} eq $nowdate) {
-		    $newbyday{$rec->{'datereg'}}++;
-		}
-		
-		if ($rec->{'age'} > 4 && $rec->{'age'} < 110) {
-		    $age{$rec->{'age'}}++;
-		}
-		
-		$userinfo{'total'}++;
-		$time = $rec->{'timeupdate'};
-		$userinfo{'updated'}++ if ($time);
-		$userinfo{'updated_last30'}++ if ($time > $now-60*60*24*30);
-		$userinfo{'updated_last7'}++ if ($time > $now-60*60*24*7);
-		$userinfo{'updated_last1'}++ if ($time > $now-60*60*24*1);
-		
-		if ($rec->{'status'} eq "A")
-		{
-		    for (qw(allow_getljnews allow_getpromos))
-		    {
-			$userinfo{$_}++ if ($rec->{$_} eq "Y");
-		    }
-		}
-		
-	    }
-	}
+        my $now = time();
+        my $count;
+        $sth = $dbr->prepare("SELECT COUNT(*) FROM user");
+        $sth->execute;
+        my ($usertotal) = $sth->fetchrow_array;
+        my $pagesize = 1000;
+        my $pages = int($usertotal / $pagesize) + (($usertotal % $pagesize) ? 1 : 0);
+        
+        for (my $page=0; $page < $pages; $page++)
+        {
+            my $skip = $page*$pagesize;
+            my $first = $skip+1;
+            my $last = $skip+$pagesize;
+            print "  getting records $first-$last...\n";
+            $sth = $dbr->prepare("SELECT DATE_FORMAT(uu.timecreate, '%Y-%m-%d') AS 'datereg', u.user, u.caps, FLOOR((TO_DAYS(NOW())-TO_DAYS(u.bdate))/365.25) AS 'age', UNIX_TIMESTAMP(uu.timeupdate) AS 'timeupdate', u.status, u.allow_getljnews, u.allow_getpromos FROM user u, userusage uu WHERE u.userid=uu.userid LIMIT $skip,$pagesize");
+            $sth->execute;
+            while (my $rec = $sth->fetchrow_hashref)
+            {
+                my $co = $rec->{'country'};
+                if ($co) {
+                    $country{$co}++; 
+                    if ($co eq "US" && $rec->{'state'}) {
+                        $stateus{$rec->{'state'}}++;
+                    }
+                }
+                
+                my $capnameshort = LJ::name_caps_short($rec->{'caps'});
+                $account{$capnameshort}++;
+                
+                unless ($rec->{'datereg'} eq $nowdate) {
+                    $newbyday{$rec->{'datereg'}}++;
+                }
+                
+                if ($rec->{'age'} > 4 && $rec->{'age'} < 110) {
+                    $age{$rec->{'age'}}++;
+                }
+                
+                $userinfo{'total'}++;
+                $time = $rec->{'timeupdate'};
+                $userinfo{'updated'}++ if ($time);
+                $userinfo{'updated_last30'}++ if ($time > $now-60*60*24*30);
+                $userinfo{'updated_last7'}++ if ($time > $now-60*60*24*7);
+                $userinfo{'updated_last1'}++ if ($time > $now-60*60*24*1);
+                
+                if ($rec->{'status'} eq "A")
+                {
+                    for (qw(allow_getljnews allow_getpromos))
+                    {
+                        $userinfo{$_}++ if ($rec->{$_} eq "Y");
+                    }
+                }
+                
+            }
+        }
     }
 
     if ($do{'countries'})
     {
-	$to_pop{'country'} = \%country;
+        $to_pop{'country'} = \%country;
 
-	print "-I- Countries.\n";
-	$sth = $dbr->prepare("SELECT value, COUNT(*) AS 'count' FROM userprop WHERE upropid=3 AND value<>'' GROUP BY 1 ORDER BY 2");
-	$sth->execute;
-	while ($_ = $sth->fetchrow_hashref) {
-	    $country{$_->{'value'}} = $_->{'count'};
-	}
+        print "-I- Countries.\n";
+        $sth = $dbr->prepare("SELECT value, COUNT(*) AS 'count' FROM userprop WHERE upropid=3 AND value<>'' GROUP BY 1 ORDER BY 2");
+        $sth->execute;
+        while ($_ = $sth->fetchrow_hashref) {
+            $country{$_->{'value'}} = $_->{'count'};
+        }
     }
 
     if ($do{'states'}) 
     {
-	$to_pop{'stateus'} = \%stateus;
+        $to_pop{'stateus'} = \%stateus;
 
-	print "-I- US States.\n";
-	$sth = $dbr->prepare("SELECT ua.value, COUNT(*) AS 'count' FROM userprop ua, userprop ub WHERE ua.userid=ub.userid AND ua.upropid=4 and ub.upropid=3 and ub.value='US' AND ub.value<>'' GROUP BY 1 ORDER BY 2");
-	$sth->execute;
-	while ($_ = $sth->fetchrow_hashref) {
-	    $stateus{$_->{'value'}} = $_->{'count'};
-	}
+        print "-I- US States.\n";
+        $sth = $dbr->prepare("SELECT ua.value, COUNT(*) AS 'count' FROM userprop ua, userprop ub WHERE ua.userid=ub.userid AND ua.upropid=4 and ub.upropid=3 and ub.value='US' AND ub.value<>'' GROUP BY 1 ORDER BY 2");
+        $sth->execute;
+        while ($_ = $sth->fetchrow_hashref) {
+            $stateus{$_->{'value'}} = $_->{'count'};
+        }
     }
 
     if ($do{'gender'}) 
     {
-	$to_pop{'gender'} = \%gender;
+        $to_pop{'gender'} = \%gender;
 
-	print "-I- Gender.\n";
-	$sth = $dbr->prepare("SELECT up.value, COUNT(*) AS 'count' FROM userprop up, userproplist upl WHERE up.upropid=upl.upropid AND upl.name='gender' GROUP BY 1");
-	$sth->execute;
-	while ($_ = $sth->fetchrow_hashref) {
-	    $gender{$_->{'value'}} = $_->{'count'};
-	}
+        print "-I- Gender.\n";
+        $sth = $dbr->prepare("SELECT up.value, COUNT(*) AS 'count' FROM userprop up, userproplist upl WHERE up.upropid=upl.upropid AND upl.name='gender' GROUP BY 1");
+        $sth->execute;
+        while ($_ = $sth->fetchrow_hashref) {
+            $gender{$_->{'value'}} = $_->{'count'};
+        }
     }
 
     if ($do{'pop_interests'})
@@ -202,34 +202,34 @@ $maint{'genstats'} = sub
     
     foreach my $cat (keys %to_pop)
     {
-	print "  dumping $cat stats\n";
-	my $qcat = $dbh->quote($cat);
-	$dbh->do("DELETE FROM stats WHERE statcat=$qcat");
-	if ($dbh->err) { die $dbh->errstr; }
-	foreach (sort keys %{$to_pop{$cat}}) {
-	    my $qkey = $dbh->quote($_);
-	    my $qval = $to_pop{$cat}->{$_}+0;
-	    $dbh->do("REPLACE INTO stats (statcat, statkey, statval) VALUES ($qcat, $qkey, $qval)");
-	    if ($dbh->err) { die $dbh->errstr; }
-	}
+        print "  dumping $cat stats\n";
+        my $qcat = $dbh->quote($cat);
+        $dbh->do("DELETE FROM stats WHERE statcat=$qcat");
+        if ($dbh->err) { die $dbh->errstr; }
+        foreach (sort keys %{$to_pop{$cat}}) {
+            my $qkey = $dbh->quote($_);
+            my $qval = $to_pop{$cat}->{$_}+0;
+            $dbh->do("REPLACE INTO stats (statcat, statkey, statval) VALUES ($qcat, $qkey, $qval)");
+            if ($dbh->err) { die $dbh->errstr; }
+        }
     }
 
     #### client usage stats
 
     if ($do{'clients'})
     {
-	print "-I- Clients.\n";
-	$sth = $dbr->prepare("SELECT c.client, COUNT(*) AS 'count' FROM clients c, clientusage cu ".
-			     "WHERE c.clientid=cu.clientid AND cu.lastlogin > ".
-			     "DATE_SUB(NOW(), INTERVAL 30 DAY) GROUP BY 1 ORDER BY 2");
-	$sth->execute;
+        print "-I- Clients.\n";
+        $sth = $dbr->prepare("SELECT c.client, COUNT(*) AS 'count' FROM clients c, clientusage cu ".
+                             "WHERE c.clientid=cu.clientid AND cu.lastlogin > ".
+                             "DATE_SUB(NOW(), INTERVAL 30 DAY) GROUP BY 1 ORDER BY 2");
+        $sth->execute;
 
-	$dbh->do("DELETE FROM stats WHERE statcat='client'");
-	while ($_ = $sth->fetchrow_hashref) {
-	    my $qkey = $dbh->quote($_->{'client'});
-	    my $qval = $_->{'count'}+0;
-	    $dbh->do("REPLACE INTO stats (statcat, statkey, statval) VALUES ('client', $qkey, $qval)");
-	}
+        $dbh->do("DELETE FROM stats WHERE statcat='client'");
+        while ($_ = $sth->fetchrow_hashref) {
+            my $qkey = $dbh->quote($_->{'client'});
+            my $qval = $_->{'count'}+0;
+            $dbh->do("REPLACE INTO stats (statcat, statkey, statval) VALUES ('client', $qkey, $qval)");
+        }
     }
 
     #### dump to text file
@@ -239,7 +239,7 @@ $maint{'genstats'} = sub
     $sth->execute;
     open (OUT, ">$LJ::HTDOCS/stats/stats.txt");
     while (@_ = $sth->fetchrow_array) {
-	print OUT join("\t", @_), "\n";
+        print OUT join("\t", @_), "\n";
     }
     close OUT;
 
@@ -261,9 +261,9 @@ $maint{'genstats'} = sub
     $statbox{'postyester'} = $v;
 
     foreach my $k (keys %statbox) {
-	my $qk = $dbh->quote($k);
-	my $qv = $dbh->quote($statbox{$k});
-	$dbh->do("REPLACE INTO stats (statcat, statkey, statval) VALUES ('statbox', $qk, $qv)");
+        my $qk = $dbh->quote($k);
+        my $qv = $dbh->quote($statbox{$k});
+        $dbh->do("REPLACE INTO stats (statcat, statkey, statval) VALUES ('statbox', $qk, $qv)");
     }
 
     print "-I- Done.\n";
@@ -284,38 +284,38 @@ $maint{'genstats_weekly'} = sub
     my $buildup = 0;
     $sth->execute;
     {
-	while ($_ = $sth->fetchrow_hashref) 
-	{
-	    if ($lastpoints != $_->{'points'}) {
-		$lastpoints = $_->{'points'};
-		$rank += (1 + $buildup);
-		$buildup = 0;
-	    } else {
-		$buildup++;
-	    }
-	    $supportrank{$_->{'userid'}} = $rank;
-	}
+        while ($_ = $sth->fetchrow_hashref) 
+        {
+            if ($lastpoints != $_->{'points'}) {
+                $lastpoints = $_->{'points'};
+                $rank += (1 + $buildup);
+                $buildup = 0;
+            } else {
+                $buildup++;
+            }
+            $supportrank{$_->{'userid'}} = $rank;
+        }
     }
 
     $dbh->do("DELETE FROM stats WHERE statcat='supportrank_prev'");
     $dbh->do("UPDATE stats SET statcat='supportrank_prev' WHERE statcat='supportrank'");
 
     my %to_pop = (
-		  "supportrank" => \%supportrank,
-		  );
+                  "supportrank" => \%supportrank,
+                  );
     
     foreach my $cat (keys %to_pop)
     {
-	print "  dumping $cat stats\n";
-	my $qcat = $dbh->quote($cat);
-	$dbh->do("DELETE FROM stats WHERE statcat=$qcat");
-	if ($dbh->err) { die $dbh->errstr; }
-	foreach (sort keys %{$to_pop{$cat}}) {
-	    my $qkey = $dbh->quote($_);
-	    my $qval = $to_pop{$cat}->{$_}+0;
-	    $dbh->do("REPLACE INTO stats (statcat, statkey, statval) VALUES ($qcat, $qkey, $qval)");
-	    if ($dbh->err) { die $dbh->errstr; }
-	}
+        print "  dumping $cat stats\n";
+        my $qcat = $dbh->quote($cat);
+        $dbh->do("DELETE FROM stats WHERE statcat=$qcat");
+        if ($dbh->err) { die $dbh->errstr; }
+        foreach (sort keys %{$to_pop{$cat}}) {
+            my $qkey = $dbh->quote($_);
+            my $qval = $to_pop{$cat}->{$_}+0;
+            $dbh->do("REPLACE INTO stats (statcat, statkey, statval) VALUES ($qcat, $qkey, $qval)");
+            if ($dbh->err) { die $dbh->errstr; }
+        }
     }
 
 };
@@ -348,13 +348,13 @@ $maint{'memeclean'} = sub
     $sth->execute;
     while (my $url = $sth->fetchrow_array)
     {
-	my $copy = $url;
-	LJ::run_hooks("canonicalize_url", \$copy);
-	unless ($copy) {
-	    my $d = $dbh->quote($url);
-	    $dbh->do("DELETE FROM stats WHERE statcat='popmeme' AND statkey=$d");
-	    print "Deleting: $url\n";
-	}
+        my $copy = $url;
+        LJ::run_hooks("canonicalize_url", \$copy);
+        unless ($copy) {
+            my $d = $dbh->quote($url);
+            $dbh->do("DELETE FROM stats WHERE statcat='popmeme' AND statkey=$d");
+            print "Deleting: $url\n";
+        }
     }
     print "done.\n";
 };

@@ -86,7 +86,7 @@
      "form" => \%FORM,
      "expiretime" => $etime,
  });
-	
+        
  $BMLClient::COOKIE{"ljuser"} = $user;
  $BMLClient::COOKIE{"ljhpass"} = "$user:$hpassword";
  
@@ -103,7 +103,7 @@
  my $switchtext = "";
  if ($FORM{'expire'} eq "never") {
      $switchtext = "Change expiration mode to SESSION ONLY";
-	    $body .= "(=P Your login will <b>never expire</b>, so if you're at a public internet terminal, a school, library, or other place where people may be using this computer shortly, make sure you log out when you're done!  Or, change your login mode to expire when you close your browser: P=)";
+            $body .= "(=P Your login will <b>never expire</b>, so if you're at a public internet terminal, a school, library, or other place where people may be using this computer shortly, make sure you log out when you're done!  Or, change your login mode to expire when you close your browser: P=)";
  } else {
      $newexpire = "never";
      $switchtext = "Change expiration mode to NEVER";

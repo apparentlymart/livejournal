@@ -26,8 +26,8 @@ sub load_email_to_cat_map
     my $sth = $dbh->prepare("SELECT * FROM supportcat ORDER BY sortorder DESC");
     $sth->execute;
     while (my $sp = $sth->fetchrow_hashref) {
-	next unless ($sp->{'replyaddress'});
-	$map->{$sp->{'replyaddress'}} = $sp;
+        next unless ($sp->{'replyaddress'});
+        $map->{$sp->{'replyaddress'}} = $sp;
     }
     return $map;
 }
@@ -51,17 +51,17 @@ sub init_remote
     return unless ($remote);
 
     if ($remote->{'userid'}) {
-	my $u = LJ::load_userid($dbh, $remote->{'userid'});
-	%$remote = %$u;
+        my $u = LJ::load_userid($dbh, $remote->{'userid'});
+        %$remote = %$u;
         LJ::load_user_privs($dbh, $remote, 
-			    qw(supportclose supporthelp 
-			       supportdelete supportread));
+                            qw(supportclose supporthelp 
+                               supportdelete supportread));
     }
 
     # on see_request.bml page, an 'auth' argument can be passed in
     # to let the requester see their own stuff, regardless of login status.
     if (defined $form->{'auth'}) { 
-	$remote->{'_support'}->{'miniauth'} = $form->{'auth'};
+        $remote->{'_support'}->{'miniauth'} = $form->{'auth'};
     }
 }
 
@@ -70,9 +70,9 @@ sub get_cat_by_key
 {
     my ($cats, $cat) = @_;
     foreach (keys %$cats) {
-	if ($cats->{$_}->{'catkey'} eq $cat) {
-	    return $cats->{$_};
-	}
+        if ($cats->{$_}->{'catkey'} eq $cat) {
+            return $cats->{$_};
+        }
     }
     return undef;
 }
@@ -83,7 +83,7 @@ sub filter_cats
     my $cats = shift;
 
     return grep {
-	can_read_cat(undef, $_, $remote);
+        can_read_cat(undef, $_, $remote);
     } sorted_cats($cats);
 }
 
@@ -106,14 +106,14 @@ sub is_poster
     my ($sp, $remote) = @_;
     return 0 unless ($remote);
     if ($remote->{'_support'}->{'miniauth'} eq mini_auth($sp)) {
-	return 1;
+        return 1;
     }
     if ($sp->{'reqtype'} eq "email") {
-	if ($remote->{'email'} eq $sp->{'reqemail'} && $remote->{'status'} eq "A") {
-	    return 1;
-	}
+        if ($remote->{'email'} eq $sp->{'reqemail'} && $remote->{'status'} eq "A") {
+            return 1;
+        }
     } elsif ($sp->{'reqtype'} eq "user") {
-	if ($remote->{'userid'} eq $sp->{'requserid'}) { return 1; }
+        if ($remote->{'userid'} eq $sp->{'requserid'}) { return 1; }
     }
     return 0;
 }
@@ -123,10 +123,10 @@ sub can_see_helper
     my ($dbh, $sp, $remote) = @_;
     my $see = 1;
     if ($sp->{_cat}->{'hide_helpers'}) { 
-	$see = 0; 
-	if (can_help($dbh, $sp, $remote)) {
-	    $see = 1;
-	}
+        $see = 0; 
+        if (can_help($dbh, $sp, $remote)) {
+            $see = 1;
+        }
     }
     return $see;
 }
@@ -135,7 +135,7 @@ sub can_read
 {
     my ($dbh, $sp, $remote) = @_;
     return (is_poster($sp, $remote) ||
-	    can_read_cat($dbh, $sp->{_cat}, $remote));
+            can_read_cat($dbh, $sp->{_cat}, $remote));
 }
 
 sub can_read_cat
@@ -143,7 +143,7 @@ sub can_read_cat
     my ($dbh, $cat, $remote) = @_;
     return unless ($cat);
     return ($cat->{'public_read'} || 
-	    LJ::check_priv($dbh, $remote, "supportread", $cat->{'catkey'}));
+            LJ::check_priv($dbh, $remote, "supportread", $cat->{'catkey'}));
 }
 
 sub can_close
@@ -151,7 +151,7 @@ sub can_close
     my ($dbh, $sp, $remote) = @_;
     if (is_poster($sp, $remote)) { return 1; }
     if ($sp->{_cat}->{'public_read'}) {
-	if (LJ::check_priv($dbh, $remote, "supportclose", "")) { return 1; }
+        if (LJ::check_priv($dbh, $remote, "supportclose", "")) { return 1; }
     }
     my $catkey = $sp->{_cat}->{'catkey'};
     if (LJ::check_priv($dbh, $remote, "supportclose", $catkey)) { return 1; }
@@ -182,10 +182,10 @@ sub can_help
 {
     my ($dbh, $sp, $remote) = @_;
     if ($sp->{_cat}->{'public_read'}) {
-	if ($sp->{_cat}->{'public_help'}) {
-	    return 1;
-	}
-	if (LJ::check_priv($dbh, $remote, "supporthelp", "")) { return 1; }
+        if ($sp->{_cat}->{'public_help'}) {
+            return 1;
+        }
+        if (LJ::check_priv($dbh, $remote, "supporthelp", "")) { return 1; }
     }
     my $catkey = $sp->{_cat}->{'catkey'};
     if (LJ::check_priv($dbh, $remote, "supporthelp", $catkey)) { return 1; }
@@ -237,25 +237,25 @@ sub get_answer_types
     my @ans_type;
 
     if (is_poster($sp, $remote)) {
-	push @ans_type, ("comment", "More information");
-	return @ans_type;
+        push @ans_type, ("comment", "More information");
+        return @ans_type;
     } 
 
     if (can_help($dbh, $sp, $remote)) {
-	push @ans_type, ("answer" => "Answer", 
-			 "screened" => "Screened Answer (if unsure)", 
-			 "comment" => "Comment or Question");
+        push @ans_type, ("answer" => "Answer", 
+                         "screened" => "Screened Answer (if unsure)", 
+                         "comment" => "Comment or Question");
     }
 
     if (can_read_internal($dbh, $sp, $remote) &&
-	! $sp->{_cat}->{'public_help'})
+        ! $sp->{_cat}->{'public_help'})
     {
-	push @ans_type, ("internal" => "Internal Comment / Action");
-	return @ans_type;
+        push @ans_type, ("internal" => "Internal Comment / Action");
+        return @ans_type;
     }
     
     if ($sp->{_cat}->{'allow_screened'}) {
-	push @ans_type, ("screened" => "Screened Answer");
+        push @ans_type, ("screened" => "Screened Answer");
     }
 
     return @ans_type;
@@ -268,10 +268,10 @@ sub file_request
     my $o = shift;
 
     unless ($o->{'subject'}) {
-	push @$errors, "You must enter a problem summary.";
+        push @$errors, "You must enter a problem summary.";
     }
     unless ($o->{'body'}) {
-	push @$errors, "You did not enter a support request.";
+        push @$errors, "You did not enter a support request.";
     }
     my $scat = $o->{'supportcat'};
 
@@ -298,8 +298,8 @@ sub file_request
     $sth->execute;
     ($dup_id) = $sth->fetchrow_array;
     if ($dup_id) {
-	$dbh->do("UNLOCK TABLES");
-	return $dup_id;
+        $dbh->do("UNLOCK TABLES");
+        return $dup_id;
     }
 
     my ($urlauth, $url, $spid);  # used at the bottom
@@ -309,30 +309,30 @@ sub file_request
     $sth->execute;
     
     if ($dbh->err) { 
-	my $error = $dbh->errstr;
-	$dbh->do("UNLOCK TABLES");
-	push @$errors, "<B>Database error:</B> (report this)<BR>$error";
-	return 0;
+        my $error = $dbh->errstr;
+        $dbh->do("UNLOCK TABLES");
+        push @$errors, "<B>Database error:</B> (report this)<BR>$error";
+        return 0;
     }
     $spid = $dbh->{'mysql_insertid'};
-	
+        
     $dbh->do("INSERT INTO duplock (realm, reid, userid, digest, dupid, instime) VALUES ('support', 0, $qrequserid, '$md5', $spid, NOW())");
     $dbh->do("UNLOCK TABLES");
     
     unless ($spid) { 
-	push @$errors, "<B>Database error:</B> (report this)<BR>Didn't get a spid."; 
-	return 0;
+        push @$errors, "<B>Database error:</B> (report this)<BR>Didn't get a spid."; 
+        return 0;
     }
-	
+        
     $sth = $dbh->prepare("INSERT INTO supportlog (splid, spid, timelogged, type, faqid, userid, message) VALUES (NULL, $spid, UNIX_TIMESTAMP(), 'req', 0, $qrequserid, $qbody)");
     $sth->execute;
     
     my $email = $o->{'reqtype'} eq "email" ? $o->{'reqemail'} : "";
     unless ($email) {
-	if ($o->{'reqtype'} eq "user") {
-	    my $u = LJ::load_userid($dbh, $o->{'requserid'});
-	    $email = $u->{'email'};
-	}
+        if ($o->{'reqtype'} eq "user") {
+            my $u = LJ::load_userid($dbh, $o->{'requserid'});
+            $email = $u->{'email'};
+        }
     }
     
     my $body;
@@ -350,12 +350,12 @@ sub file_request
     unless ($scat->{'no_autoreply'})
     {
       LJ::send_mail({ 
-	  'to' => $email,
-	  'from' => $LJ::BOGUS_EMAIL,
-	  'fromname' => 'LiveJournal Support',
-	  'subject' => "Support Request \#$spid",
-	  'body' => $body  
-	  });
+          'to' => $email,
+          'from' => $LJ::BOGUS_EMAIL,
+          'fromname' => 'LiveJournal Support',
+          'subject' => "Support Request \#$spid",
+          'body' => $body  
+          });
     }
     
     ########## send notifications
@@ -364,7 +364,7 @@ sub file_request
     $sth->execute;
     my @to_notify;
     while ($_ = $sth->fetchrow_hashref) {
-	push @to_notify, $_->{'email'};
+        push @to_notify, $_->{'email'};
     }
     $body = "A LiveJournal support request regarding \"$o->{'subject'}\" has been submitted.  You can track its progress or add information here:\n\n  ";
     $body .= LJ::make_text_link($url, $_->{'email'});
@@ -372,12 +372,12 @@ sub file_request
     $body .= $o->{'body'};
     
     LJ::send_mail({ 
-	'bcc' => join(", ", @to_notify),
-	'from' => $LJ::BOGUS_EMAIL,
-	'fromname' => 'LiveJournal Support',
-	'subject' => "Support Request \#$spid",
-	'body' => $body
-	});
+        'bcc' => join(", ", @to_notify),
+        'from' => $LJ::BOGUS_EMAIL,
+        'fromname' => 'LiveJournal Support',
+        'subject' => "Support Request \#$spid",
+        'body' => $body
+        });
     
     return $spid;
 }
@@ -414,12 +414,12 @@ sub append_request
     
     my $qspcatid = $sp->{'spcatid'}+0;
     $sth = $dbh->prepare("SELECT u.email FROM supportnotify sn, user u WHERE ".
-			 "sn.userid=u.userid AND sn.spcatid=$qspcatid ".
-			 "AND sn.level IN ('all')");
+                         "sn.userid=u.userid AND sn.spcatid=$qspcatid ".
+                         "AND sn.level IN ('all')");
     $sth->execute;
     my @to_notify;
     while (my ($email) = $sth->fetchrow_array) {
-	push @to_notify, $email;
+        push @to_notify, $email;
     }
     
     my $body;
@@ -431,12 +431,12 @@ sub append_request
     $body .= $message;
     
     LJ::send_mail({ 
-	'bcc' => join(", ", @to_notify),
-	'from' => $LJ::BOGUS_EMAIL,
-	'fromname' => 'LiveJournal Support',
-	'subject' => "Re: Support Request \#$spid",
-	'body' => $body
-	});
+        'bcc' => join(", ", @to_notify),
+        'from' => $LJ::BOGUS_EMAIL,
+        'fromname' => 'LiveJournal Support',
+        'subject' => "Re: Support Request \#$spid",
+        'body' => $body
+        });
     
     return $splid;    
 }
@@ -453,10 +453,10 @@ sub mail_response_to_user
     
     my $email;
     if ($sp->{'reqtype'} eq "email") {
-	$email = $sp->{'reqemail'};
+        $email = $sp->{'reqemail'};
     } else {
-	my $u = LJ::load_userid($dbh, $sp->{'requserid'});
-	$email = $u->{'email'};
+        my $u = LJ::load_userid($dbh, $sp->{'requserid'});
+        $email = $u->{'email'};
     }
 
     my $spid = $sp->{'spid'}+0;
@@ -481,22 +481,22 @@ sub mail_response_to_user
     $body .= "Below is $what your support question regarding \"$sp->{'subject'}\".\n";
     $body .= "="x70 . "\n\n";
     if ($faqid) {
-	my $faqname = "";
-	my $sth = $dbh->prepare("SELECT question FROM faq WHERE faqid=$faqid");
-	$sth->execute;
-	($faqname) = $sth->fetchrow_array;
-	if ($faqname) {
-	    $body .= "FAQ QUESTION: " . $faqname . "\n";
-	    $body .= LJ::make_text_link("$LJ::SITEROOT/support/faqbrowse.bml?faqid=$faqid", $email);
-	    $body .= "\n\n";
-	}
+        my $faqname = "";
+        my $sth = $dbh->prepare("SELECT question FROM faq WHERE faqid=$faqid");
+        $sth->execute;
+        ($faqname) = $sth->fetchrow_array;
+        if ($faqname) {
+            $body .= "FAQ QUESTION: " . $faqname . "\n";
+            $body .= LJ::make_text_link("$LJ::SITEROOT/support/faqbrowse.bml?faqid=$faqid", $email);
+            $body .= "\n\n";
+        }
     }
 
     # Need to escape HTML for AOL's crappy client.
     if ($email =~ /\@aol\.com$/i) {
-	$res->{'message'} =~ s/\&/&amp;/g;
-	$res->{'message'} =~ s/</&lt;/g;
-	$res->{'message'} =~ s/>/&gt;/g;
+        $res->{'message'} =~ s/\&/&amp;/g;
+        $res->{'message'} =~ s/</&lt;/g;
+        $res->{'message'} =~ s/>/&gt;/g;
     } 
 
     $body .= $res->{'message'};
@@ -504,16 +504,16 @@ sub mail_response_to_user
     $body .= "Did this answer your question?  If so, please CLOSE THIS SUPPORT REQUEST\n";
     $body .= "so we can help other people by going here:\n";
     if ($type eq "answer") {
-	$body .= LJ::make_text_link("$LJ::SITEROOT/support/act.bml?close;$spid;$sp->{'authcode'};$splid", $email);
+        $body .= LJ::make_text_link("$LJ::SITEROOT/support/act.bml?close;$spid;$sp->{'authcode'};$splid", $email);
     } else {
-	$body .= LJ::make_text_link("$LJ::SITEROOT/support/act.bml?close;$spid;$sp->{'authcode'}", $email);
+        $body .= LJ::make_text_link("$LJ::SITEROOT/support/act.bml?close;$spid;$sp->{'authcode'}", $email);
     }
     
     if ($type eq "answer")
     {
-	$body .= "\n\nIf this wasn't helpful, you need to go to the following address to prevent\n";
-	$body .= "this request from being closed in 7 days.  Click here:\n";
-	$body .= LJ::make_text_link("$LJ::SITEROOT/support/act.bml?touch;$spid;$sp->{'authcode'}", $email);
+        $body .= "\n\nIf this wasn't helpful, you need to go to the following address to prevent\n";
+        $body .= "this request from being closed in 7 days.  Click here:\n";
+        $body .= LJ::make_text_link("$LJ::SITEROOT/support/act.bml?touch;$spid;$sp->{'authcode'}", $email);
     }
     
     my $miniauth = mini_auth($sp);
@@ -524,23 +524,23 @@ sub mail_response_to_user
     
     my $fromemail = $LJ::BOGUS_EMAIL;
     if ($sp->{_cat}->{'replyaddress'}) {
-	my $miniauth = mini_auth($sp);
-	$fromemail = $sp->{_cat}->{'replyaddress'};
-	# insert mini-auth stuff:
-	my $rep = "+${spid}z$miniauth\@";
-	$fromemail =~ s/\@/$rep/;
+        my $miniauth = mini_auth($sp);
+        $fromemail = $sp->{_cat}->{'replyaddress'};
+        # insert mini-auth stuff:
+        my $rep = "+${spid}z$miniauth\@";
+        $fromemail =~ s/\@/$rep/;
     }
     
     LJ::send_mail({ 
-	'to' => $email,
-	'from' => $fromemail,
-	'fromname' => 'LiveJournal Support',
-	'subject' => "Re: $sp->{'subject'}",
-	'body' => $body  
-	});
+        'to' => $email,
+        'from' => $fromemail,
+        'fromname' => 'LiveJournal Support',
+        'subject' => "Re: $sp->{'subject'}",
+        'body' => $body  
+        });
 
     if ($type eq "answer") {
-	$dbh->do("UPDATE support SET timelasthelp=UNIX_TIMESTAMP() WHERE spid=$spid");
+        $dbh->do("UPDATE support SET timelasthelp=UNIX_TIMESTAMP() WHERE spid=$spid");
     }
 }
 

@@ -45,12 +45,12 @@
      return LJ::bad_input(@errors) if @errors;
 
      LJ::send_mail({
-	 'to' => $FORM{'toemail'},
-	 'toname' => $FORM{'toname'},
-	 'from' => $u->{'emailpref'},
-	 'fromname' => $FORM{'fromname'},
-	 'subject' => $FORM{'subject'},
-	 'body' => $FORM{'body'},
+         'to' => $FORM{'toemail'},
+         'toname' => $FORM{'toname'},
+         'from' => $u->{'emailpref'},
+         'fromname' => $FORM{'fromname'},
+         'subject' => $FORM{'subject'},
+         'body' => $FORM{'body'},
      });
 
      $body .= "(=H1 Sent! H1=)(=P $FORM{'toemail'} has been mailed. P=)";    
@@ -76,16 +76,16 @@
      my $uj;
 
      if ($journal) {
-	 $itemid = int($itemid / 256);
-	 
-	 $uj = LJ::load_user($dbs, $journal);
-	 return $err->("Unknown journal") unless $uj;
-	 my $db = LJ::get_cluster_reader($uj);
-	 
-	 $sth = $dbr->prepare("SELECT l.posterid, ls.subject FROM log2 l, logsubject2 ls WHERE l.journalid=$uj->{'userid'} AND ls.journalid=$uj->{'userid'} AND l.jitemid=$itemid AND ls.jitemid=$itemid");	 
+         $itemid = int($itemid / 256);
+         
+         $uj = LJ::load_user($dbs, $journal);
+         return $err->("Unknown journal") unless $uj;
+         my $db = LJ::get_cluster_reader($uj);
+         
+         $sth = $dbr->prepare("SELECT l.posterid, ls.subject FROM log2 l, logsubject2 ls WHERE l.journalid=$uj->{'userid'} AND ls.journalid=$uj->{'userid'} AND l.jitemid=$itemid AND ls.jitemid=$itemid");	 
      } else {
-	 $sth = $dbr->prepare("SELECT l.posterid, ls.subject FROM log l, logsubject ls WHERE l.itemid=$itemid AND ls.itemid=$itemid");
-	 
+         $sth = $dbr->prepare("SELECT l.posterid, ls.subject FROM log l, logsubject ls WHERE l.itemid=$itemid AND ls.itemid=$itemid");
+         
      }
 
      $sth->execute;
@@ -98,9 +98,9 @@
      my $url = "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid";
 
      if ($user eq $u->{'user'}) {
-	 $msg .= "Hey,\n\nCheck out this journal entry of mine:\n\n";
+         $msg .= "Hey,\n\nCheck out this journal entry of mine:\n\n";
      } else {
-	 $msg .= "Hey,\n\nCheck this out... I saw this journal entry while reading ${user}'s journal:\n\n";
+         $msg .= "Hey,\n\nCheck this out... I saw this journal entry while reading ${user}'s journal:\n\n";
      }
      $msg .= " $subject\n" if $subject;
      $msg .= " $url\n\n";
@@ -113,25 +113,25 @@
      my $uj = LJ::load_user($dbs, $quser);
      my $url;
      if (LJ::get_cap($uj, "userdomain")) {
-	 my $sub = $user;
-	 $sub =~ s/_/-/g;
-	 $url .= "http://$sub.$LJ::USER_DOMAIN/";
+         my $sub = $user;
+         $sub =~ s/_/-/g;
+         $url .= "http://$sub.$LJ::USER_DOMAIN/";
      } else {
-	 $url .= "$LJ::SITEROOT/users/$user/";
+         $url .= "$LJ::SITEROOT/users/$user/";
      }
      
      if ($user eq $u->{'user'}) {
-	 $msg .= "Hey,\n\nCheck out my journal that I'm keeping online:\n\n";
-	 $msg .= "  $url\n\n";
-	 $name = $u->{'name'};
-	 $name =~ s/\s.+//;
-	 $msg .= "- $name\n";
+         $msg .= "Hey,\n\nCheck out my journal that I'm keeping online:\n\n";
+         $msg .= "  $url\n\n";
+         $name = $u->{'name'};
+         $name =~ s/\s.+//;
+         $msg .= "- $name\n";
      } else {
-	 $msg .= "Hey,\n\nCheck out my friend's journal online:\n\n";
-	 $msg .= "  $url\n\n";
-	 $name = $u->{'name'};
-	 $name =~ s/\s.+//;
-	 $msg .= "- $name\n";
+         $msg .= "Hey,\n\nCheck out my friend's journal online:\n\n";
+         $msg .= "  $url\n\n";
+         $name = $u->{'name'};
+         $name =~ s/\s.+//;
+         $msg .= "- $name\n";
      }
  }
 

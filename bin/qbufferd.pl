@@ -19,7 +19,7 @@ if (-e $pidfile) {
     close PID;
     my $processes = Proc::ProcessTable->new()->table;
     if (grep { $_->cmndline =~ /qbufferd/ } @$processes) {
-	exit;
+        exit;
     }
 }
 
@@ -28,8 +28,8 @@ my $running = 0;
 
 END {
     unless ($is_parent || ! $running) {
-	print "END-STOP\n";
-	&stop_qbufferd();
+        print "END-STOP\n";
+        &stop_qbufferd();
     }
 }
 
@@ -66,28 +66,28 @@ while (LJ::start_request())
     # do main cluster updates
     my $dbh = LJ::get_dbh("master");
     if ($dbh) {
-	my $sth = $dbh->prepare("SELECT tablename, COUNT(*) FROM querybuffer GROUP BY 1");
-	$sth->execute;
-	my @tables;
-	while (my ($table, $count) = $sth->fetchrow_array) {
-	    push @tables, $table;
-	}
-	foreach my $table (@tables) {
-	    my $count = LJ::query_buffer_flush($dbh, $table);
-	}
+        my $sth = $dbh->prepare("SELECT tablename, COUNT(*) FROM querybuffer GROUP BY 1");
+        $sth->execute;
+        my @tables;
+        while (my ($table, $count) = $sth->fetchrow_array) {
+            push @tables, $table;
+        }
+        foreach my $table (@tables) {
+            my $count = LJ::query_buffer_flush($dbh, $table);
+        }
     }
-	
+        
     # handle clusters
     foreach my $c (@LJ::CLUSTERS) {
-	my $db = LJ::get_cluster_master($c);
-	next unless $db;
+        my $db = LJ::get_cluster_master($c);
+        next unless $db;
 
-	my $sth = $db->prepare("SELECT cmd, COUNT(*) FROM cmdbuffer GROUP BY 1");
-	$sth->execute;
-	my @cmds;
-	while (my ($cmd, $count) = $sth->fetchrow_array) {
-	    LJ::cmd_buffer_flush($dbh, $db, $cmd);
-	}
+        my $sth = $db->prepare("SELECT cmd, COUNT(*) FROM cmdbuffer GROUP BY 1");
+        $sth->execute;
+        my @cmds;
+        while (my ($cmd, $count) = $sth->fetchrow_array) {
+            LJ::cmd_buffer_flush($dbh, $db, $cmd);
+        }
     }
 
     my $elapsed = time() - $cycle_start;

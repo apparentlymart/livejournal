@@ -50,26 +50,26 @@ sub connect_to
     {
         $dbh = $LJ::DBCACHE{$svr};
 
-	# make sure connection is still good.
-	my $sth = $dbh->prepare("SELECT CONNECTION_ID()");  # mysql specific
-	$sth->execute;
-	my ($id) = $sth->fetchrow_array;
-	if ($id) { return $dbh; }
-	undef $dbh;
-	undef $LJ::DBCACHE{$svr};
+        # make sure connection is still good.
+        my $sth = $dbh->prepare("SELECT CONNECTION_ID()");  # mysql specific
+        $sth->execute;
+        my ($id) = $sth->fetchrow_array;
+        if ($id) { return $dbh; }
+        undef $dbh;
+        undef $LJ::DBCACHE{$svr};
     }
 
     my $dbname = $LJ::DBINFO{$svr}->{'dbname'} || "livejournal";
     $dbh = DBI->connect("DBI:mysql:$dbname:$LJ::DBINFO{$svr}->{'host'}", 
-			$LJ::DBINFO{$svr}->{'user'},
-			$LJ::DBINFO{$svr}->{'pass'},
-			{
-			    PrintError => 0,
-			});
+                        $LJ::DBINFO{$svr}->{'user'},
+                        $LJ::DBINFO{$svr}->{'pass'},
+                        {
+                            PrintError => 0,
+                        });
     if ($dbh) 
     {
-	$LJ::DBCACHE{$svr} = $dbh;
-	return $dbh;
+        $LJ::DBCACHE{$svr} = $dbh;
+        return $dbh;
     }
 
     return undef;
@@ -96,9 +96,9 @@ sub check_server
     my $ct = 0;
     while (my $r = $sth->fetchrow_hashref)
     {
-	# weight busy connections more than idle ones.
-	if ($r->{'State'}) { $ct += 2; }
-	else { $ct += 1; }
+        # weight busy connections more than idle ones.
+        if ($r->{'State'}) { $ct += 2; }
+        else { $ct += 1; }
     }
     $db_conncount{$svr} = $ct;
     $db_lastcheck{$svr} = time();
@@ -109,9 +109,9 @@ sub connection_load
     my $svr = shift;
     my $time = time();
     if (! defined $db_lastcheck{$svr} || 
-	$time - $db_lastcheck{$svr} > 10) 
+        $time - $db_lastcheck{$svr} > 10) 
     {
-	check_server($svr);
+        check_server($svr);
     }
     return $db_conncount{$svr};
 }
@@ -124,9 +124,9 @@ sub server_power
     my $weight = $LJ::DBINFO{$svr}->{'role'}->{$cap} || 1;
     my $connections = connection_load($svr);
     if (defined $connections) {
-	$connections ||= 1;
+        $connections ||= 1;
     } else {
-	return 0;
+        return 0;
     }
     return ($weight / $connections);
 }
@@ -141,33 +141,33 @@ sub use_what
     my $time = time();
     if ($conf_stattime + 5 < $time)
     {
-	my $modtime = (stat($DBINFO_FILE))[9];
-	if ($modtime > $conf_modtime) {
-	    delete $INC{$DBINFO_FILE};
-	    require $DBINFO_FILE;
-	    $conf_modtime = $modtime;
-	    $conf_stattime = $time;
-	}
+        my $modtime = (stat($DBINFO_FILE))[9];
+        if ($modtime > $conf_modtime) {
+            delete $INC{$DBINFO_FILE};
+            require $DBINFO_FILE;
+            $conf_modtime = $modtime;
+            $conf_stattime = $time;
+        }
     }
     
     my %cand = ();  # candidates
 
     # best candidate is one the client is already connected to
     foreach my $svr (keys %{$c->{'has'}}) {
-	if (db_can($svr, $cap)) {
-	    $cand{$svr} = 1;   
-	}
+        if (db_can($svr, $cap)) {
+            $cand{$svr} = 1;   
+        }
     }
    
     # if not connected to anything suitable, then:
     unless (%cand)
     {
-	# every db with that capability is a good candidate
-	foreach my $svr (keys %LJ::DBINFO) {
-	    if (db_can($svr, $cap)) { 
-		$cand{$svr} = 1;
-	    }
-	}
+        # every db with that capability is a good candidate
+        foreach my $svr (keys %LJ::DBINFO) {
+            if (db_can($svr, $cap)) { 
+                $cand{$svr} = 1;
+            }
+        }
     }
 
     my @cands = keys %cand;
@@ -175,19 +175,19 @@ sub use_what
     # sort valid candidates by server's connections
     my %power;
     foreach (@cands) {
-	$power{$_} = server_power($_, $cap);
+        $power{$_} = server_power($_, $cap);
     }
     @cands = sort { $power{$b} <=> $power{$a} } @cands;
 
     # use the one with the highest score:
     my $use = $cands[0];
     if ($use) {
-	unless (defined $LJ::DBINFO{$use}->{'dbname'}) {
-	    $LJ::DBINFO{$use}->{'dbname'} = "livejournal";
-	}
-	return join(" ", $use, map { $LJ::DBINFO{$use}->{$_} } qw(host user pass dbname));
+        unless (defined $LJ::DBINFO{$use}->{'dbname'}) {
+            $LJ::DBINFO{$use}->{'dbname'} = "livejournal";
+        }
+        return join(" ", $use, map { $LJ::DBINFO{$use}->{$_} } qw(host user pass dbname));
     } else {
-	return "--";
+        return "--";
     }
 }
 
@@ -203,29 +203,29 @@ sub handle
     my $cmd = $1;
 
     if ($cmd eq "HAVE") {
-	foreach (split(/,/, $line)) {
-	    next if ($_ eq "master");
-	    $c->{'has'}->{$_} = 1;
-	}
-	$$out = "OK\n";
-	return;
+        foreach (split(/,/, $line)) {
+            next if ($_ eq "master");
+            $c->{'has'}->{$_} = 1;
+        }
+        $$out = "OK\n";
+        return;
     }
 
     if ($cmd eq "NEED") {
-	my $cap = $line;
-	my $use = use_what($c, $cap);
-	$$out = "USE $use\n";
-	return;
+        my $cap = $line;
+        my $use = use_what($c, $cap);
+        $$out = "USE $use\n";
+        return;
     }
 
     if ($cmd eq "STATS") {
-	my $svr = $line;
-	$$out = "Stats follow:\n";
-	foreach my $s (keys %LJ::DBINFO) {
-	    $$out .= "STATS $s = " . connection_load($s) . "\n";
-	}
-	$$out .= "End.\n";
-	return;	
+        my $svr = $line;
+        $$out = "Stats follow:\n";
+        foreach my $s (keys %LJ::DBINFO) {
+            $$out .= "STATS $s = " . connection_load($s) . "\n";
+        }
+        $$out .= "End.\n";
+        return;	
     }
 
     $$out = "unknown command.\n";
@@ -262,10 +262,10 @@ if ($opt_foreground) {
 } else {
     print "Forking off and initializing...\n";
     if ($pid = fork) {
-	# Parent, log pid and exit.
-	write_pid($pid);
-	print "Closing ($pid) wrote to $PIDFILE\n";
-	exit;
+        # Parent, log pid and exit.
+        write_pid($pid);
+        print "Closing ($pid) wrote to $PIDFILE\n";
+        exit;
     }
 }
 
@@ -278,11 +278,11 @@ sub killpid_die
 
 # Connection stuff.
 my $server = IO::Socket::INET->new(
-				   "LocalPort" => $PORT, 
-				   "Listen" => 10,
-				   "ReuseAddr" => 1,
-				   "Reuse" => 1,
-				   ) or killpid_die "Can't make server socket: $@\n";
+                                   "LocalPort" => $PORT, 
+                                   "Listen" => 10,
+                                   "ReuseAddr" => 1,
+                                   "Reuse" => 1,
+                                   ) or killpid_die "Can't make server socket: $@\n";
 
 nonblock($server);
 $server->sockopt(SO_REUSEADDR, 1);
@@ -314,7 +314,7 @@ while(1)
         unless (defined($rv) && length($data)) {
             # If a socket says you can read, but there's nothing there, it's
             # actually dead. Clean it up.
-	    cleanup($client);
+            cleanup($client);
 
             $select->remove($client);
             close($client);
@@ -359,7 +359,7 @@ while(1)
       } else {
           # Ahh, something broke. If it was going to block, the above would
           # catch it. Close up...
-	  cleanup($client);
+          cleanup($client);
 
           $select->remove($client);
           close($client);

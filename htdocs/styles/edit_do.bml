@@ -35,25 +35,25 @@ BODY<=
  return LJ::bad_input(@errors) if @errors;
 
  my @style_opts = (
-		   { 'code' => "is_public",
-		     'title' => 'Public?',
-		     'des' => "Mark this style public if you want other people to be able to use it or copy it.", },
-		   { 'code' => "is_embedded", 
-		     'title' => 'Embedded?',
-		     'des' => "Is this style designed to be embedded in somebody's homepage?  Check if so, otherwise it's a full page style." },
-		   { 'code' => "is_colorfree",
-		     'title' => 'Color Free?',
-		     'des' => "A style is color-free if it does not contain any hard-coded color tags, but only uses the generic color codes listed in the table below." }
-		   );
+                   { 'code' => "is_public",
+                     'title' => 'Public?',
+                     'des' => "Mark this style public if you want other people to be able to use it or copy it.", },
+                   { 'code' => "is_embedded", 
+                     'title' => 'Embedded?',
+                     'des' => "Is this style designed to be embedded in somebody's homepage?  Check if so, otherwise it's a full page style." },
+                   { 'code' => "is_colorfree",
+                     'title' => 'Color Free?',
+                     'des' => "A style is color-free if it does not contain any hard-coded color tags, but only uses the generic color codes listed in the table below." }
+                   );
 
  my @style_transforms = (
-			 { 'trans' => 'lc', des => "Lower case.", },
-			 { 'trans' => 'uc', des => "Upper case.", },
-			 { 'trans' => 'ue', des => "URL-Encode.  Turn spaces to +, and all weird characters to <TT>%hh</TT>, the hex representation.  This is useful for builing data files to be used in Flash-4 movies.", },
-			 { 'trans' => 'xe', des => "XML-Encode.  Makes value acceptable for use in an XML attribute or element.  Escapes ampersands, angle brackets, and both types of quotes.  Does <I>not</I> however, escape ]]&gt;, so don't use CDATA elements." },
-			 { 'trans' => 'color', des => "A weird transform that handles color codes.  See the color code table.", },
-			 { 'trans' => 'cons', des => "Access site constants.  Currently supported are 'siteroot', 'sitename', and 'img' (the image root).  Example use: %%cons:img%%/icon_protected.gif", },
-			 );
+                         { 'trans' => 'lc', des => "Lower case.", },
+                         { 'trans' => 'uc', des => "Upper case.", },
+                         { 'trans' => 'ue', des => "URL-Encode.  Turn spaces to +, and all weird characters to <TT>%hh</TT>, the hex representation.  This is useful for builing data files to be used in Flash-4 movies.", },
+                         { 'trans' => 'xe', des => "XML-Encode.  Makes value acceptable for use in an XML attribute or element.  Escapes ampersands, angle brackets, and both types of quotes.  Does <I>not</I> however, escape ]]&gt;, so don't use CDATA elements." },
+                         { 'trans' => 'color', des => "A weird transform that handles color codes.  See the color code table.", },
+                         { 'trans' => 'cons', des => "Access site constants.  Currently supported are 'siteroot', 'sitename', and 'img' (the image root).  Example use: %%cons:img%%/icon_protected.gif", },
+                         );
  
 
  my $ret = "";
@@ -79,9 +79,9 @@ BODY<=
      $sth->execute;
 
      if ($sth->rows) {
-	 $ret .= "(=H1 Deleted H1=)(=P The style has been deleted. P=)";
+         $ret .= "(=H1 Deleted H1=)(=P The style has been deleted. P=)";
      } else {
-	 $ret .= "(=H1 Error H1=)(=P The style was attempted to be deleted, but it doesn't seem to exist anymore.  Perhaps you clicked the proceed button twice. P=)";
+         $ret .= "(=H1 Error H1=)(=P The style was attempted to be deleted, but it doesn't seem to exist anymore.  Perhaps you clicked the proceed button twice. P=)";
      }
 
      return $ret;
@@ -129,8 +129,8 @@ BODY<=
 
      my $extravars = "";
      if ($sty->{'type'} eq "day") {
-	 # FIXME: find day of last user's post, and add args to extraargs
-	 # (was done, but broken after number of changes)
+         # FIXME: find day of last user's post, and add args to extraargs
+         # (was done, but broken after number of changes)
      }
      if ($sty->{'opt_cache'} eq "Y") { $extravars .= "&nocache=1"; }
      $ret .= " <A TARGET=preview HREF=\"/customview.cgi?username=$user&amp;styleid=$sty->{'styleid'}$extravars\">[Preview Current Style]</A> (must save below to see your changes, keep this window open and reload it whenever you save)";
@@ -141,9 +141,9 @@ BODY<=
      $ret .= "<TR><TD BGCOLOR=#D0D0D0><B>Style Options:</B></TD><TD><TABLE>\n";
      foreach my $opt (@style_opts)
      {
-	 my $checked = $sty->{$opt->{'code'}} eq "Y" ? "CHECKED" : "";
-	 $ret .= "<TR VALIGN=TOP><TD><INPUT TYPE=CHECKBOX NAME=$opt->{'code'} VALUE=1 $checked></TD>";
-	 $ret .= "<TD><B>$opt->{'title'}</B><BR>$opt->{'des'}</TD></TR>\n";	     
+         my $checked = $sty->{$opt->{'code'}} eq "Y" ? "CHECKED" : "";
+         $ret .= "<TR VALIGN=TOP><TD><INPUT TYPE=CHECKBOX NAME=$opt->{'code'} VALUE=1 $checked></TD>";
+         $ret .= "<TD><B>$opt->{'title'}</B><BR>$opt->{'des'}</TD></TR>\n";	     
      }
      $ret .= "</TABLE></TD></TR>";
 
@@ -156,7 +156,7 @@ BODY<=
      $sth->execute;
      while ($_ = $sth->fetchrow_hashref) 
      {
-	 $ret .= "<TR><TD><TT>%%color:<B>$_->{'coltype'}</B>%%</TT></TD><TD>$_->{'des'}</TD></TR>\n";
+         $ret .= "<TR><TD><TT>%%color:<B>$_->{'coltype'}</B>%%</TT></TD><TD>$_->{'des'}</TD></TR>\n";
      }
      $ret .= "</TABLE></CENTER>\n";
 
@@ -165,7 +165,7 @@ BODY<=
      $ret .= "<CENTER><P><TABLE WIDTH=75% CELLPADDING=2 BORDER=1 CELLSPACING=1><TR BGCOLOR=#D0D0D0><TD>Transform</TD><TD>Description</TD></TR>\n";
      foreach (@style_transforms) 
      {
-	 $ret .= "<TR><TD><TT>$_->{'trans'}</TT></TD><TD>$_->{'des'}</TD></TR>\n";
+         $ret .= "<TR><TD><TT>$_->{'trans'}</TT></TD><TD>$_->{'des'}</TD></TR>\n";
      }
      $ret .= "</TABLE></CENTER>\n";
 
@@ -173,68 +173,68 @@ BODY<=
      ### customizable vars section
      foreach my $v (sort { $a->{'name'} cmp $b->{'name'} } @vars)
      {
-	 next unless ($v->{'props'}->{'scope'} =~ /\b$sty->{'type'}\b/);
-	 $var{$v->{'name'}} = $v;
+         next unless ($v->{'props'}->{'scope'} =~ /\b$sty->{'type'}\b/);
+         $var{$v->{'name'}} = $v;
      }
      
      if ($ide eq "v2") 
      {
-	 my %styvar = ();
-	 LJ::parse_vars(\$sty->{'formatdata'}, \%styvar);
-	 
-	 $ret .= "(=H1 Customizable Variables H1=)";
-	 my %mark = ();
-	 &make_var_edit_fields(\%var, \%mark, uc("$sty->{'type'}_PAGE"), keys %var);
-	 
-	 sub make_var_edit_fields
-	 {
-	     my ($vars, $marked, @fields) = @_;
-	     foreach my $f (@fields) {
-		 next if ($marked->{$f}++);
-		 my $prop = $vars->{$f}->{'props'};
-		 &make_var_edit_fields($vars, $marked, split(/\s*,\s*/, $prop->{'deps'}));
-		 my $des = $prop->{'des'};
-		 $des =~ s/\[var\[(\S+?)\]\]/<A HREF="#$1">$1<\/A>/g;
-		 $des =~ s/\[view\[(\S+?)\]\]/$1/g;
-		 $des =~ s/%%\S+?%%/<TT>$&<\/TT>/g;
-		 
-		 $ret .= "<P><A NAME=$f><FONT SIZE=+1><TT><B>$f</B></TT></FONT><BR>$des<P>\n";
-		 
-		 if (defined $prop->{'props'})
-		 {
-		     $ret .= "<TABLE CELLSPACING=1 BORDER=1 CELLPADDING=2>\n";
-		     foreach my $p (@{$prop->{'props'}})
-		     {
-			 $p->{'props'}->{'des'} =~ s/\[var\[(\S+?)\]\]/<A HREF="#$1">$1<\/A>/g;
-			 $p->{'props'}->{'des'} =~ s/\[view\[(\S+?)\]\]/$1/g;
-			 $p->{'props'}->{'des'} =~ s/%%\S+?%%/<TT>$&<\/TT>/g;
-			 $ret .= "<TR VALIGN=TOP><TD BGCOLOR=#D0D0D0 ALIGN=RIGHT><B>$p->{'name'}</B></TD>\n";
-			 $ret .= "<TD>$p->{'props'}->{'des'} ";
-			 if ($p->{'props'}->{'min'} > 0)
-			 {
-			     $ret .= "<FONT COLOR=#FF0000>[required]</FONT>";
-			 }
-			 $ret .= "</TD></TR>\n";
-		     }
-		     $ret .= "</TABLE><P>\n";
-		 }
-		 
-		 my $editrows = $prop->{'editrows'} || 5;
-		 my $editcols = $prop->{'editcols'} || 70;
-		 my $estyval = BMLUtil::escapeall($styvar{$f});
+         my %styvar = ();
+         LJ::parse_vars(\$sty->{'formatdata'}, \%styvar);
+         
+         $ret .= "(=H1 Customizable Variables H1=)";
+         my %mark = ();
+         &make_var_edit_fields(\%var, \%mark, uc("$sty->{'type'}_PAGE"), keys %var);
+         
+         sub make_var_edit_fields
+         {
+             my ($vars, $marked, @fields) = @_;
+             foreach my $f (@fields) {
+                 next if ($marked->{$f}++);
+                 my $prop = $vars->{$f}->{'props'};
+                 &make_var_edit_fields($vars, $marked, split(/\s*,\s*/, $prop->{'deps'}));
+                 my $des = $prop->{'des'};
+                 $des =~ s/\[var\[(\S+?)\]\]/<A HREF="#$1">$1<\/A>/g;
+                 $des =~ s/\[view\[(\S+?)\]\]/$1/g;
+                 $des =~ s/%%\S+?%%/<TT>$&<\/TT>/g;
+                 
+                 $ret .= "<P><A NAME=$f><FONT SIZE=+1><TT><B>$f</B></TT></FONT><BR>$des<P>\n";
+                 
+                 if (defined $prop->{'props'})
+                 {
+                     $ret .= "<TABLE CELLSPACING=1 BORDER=1 CELLPADDING=2>\n";
+                     foreach my $p (@{$prop->{'props'}})
+                     {
+                         $p->{'props'}->{'des'} =~ s/\[var\[(\S+?)\]\]/<A HREF="#$1">$1<\/A>/g;
+                         $p->{'props'}->{'des'} =~ s/\[view\[(\S+?)\]\]/$1/g;
+                         $p->{'props'}->{'des'} =~ s/%%\S+?%%/<TT>$&<\/TT>/g;
+                         $ret .= "<TR VALIGN=TOP><TD BGCOLOR=#D0D0D0 ALIGN=RIGHT><B>$p->{'name'}</B></TD>\n";
+                         $ret .= "<TD>$p->{'props'}->{'des'} ";
+                         if ($p->{'props'}->{'min'} > 0)
+                         {
+                             $ret .= "<FONT COLOR=#FF0000>[required]</FONT>";
+                         }
+                         $ret .= "</TD></TR>\n";
+                     }
+                     $ret .= "</TABLE><P>\n";
+                 }
+                 
+                 my $editrows = $prop->{'editrows'} || 5;
+                 my $editcols = $prop->{'editcols'} || 70;
+                 my $estyval = BMLUtil::escapeall($styvar{$f});
 
-		 if ($vars->{$f}->{'props'}->{'override'} eq "only") {
-		     $ret .= "<SPAN STYLE=\"background-color: #FFFF00\"><B>Override only.</B></SPAN>  Only end-users may override this.  You cannot define it in a style.";
-		 } else {
-		     if ($editrows == 1) {
-			 $ret .= "<INPUT TYPE=TEXT NAME=\"var:$f\" SIZE=$editcols VALUE=\"$estyval\">\n";
-		     } else {
-			 $ret .= "<TEXTAREA ROWS=$editrows COLS=$editcols WRAP=SOFT NAME=\"var:$f\">$estyval</TEXTAREA>\n";
-		     }
-		 }
-		 $ret .= "(=HR=)\n";
-	     }
-	 }
+                 if ($vars->{$f}->{'props'}->{'override'} eq "only") {
+                     $ret .= "<SPAN STYLE=\"background-color: #FFFF00\"><B>Override only.</B></SPAN>  Only end-users may override this.  You cannot define it in a style.";
+                 } else {
+                     if ($editrows == 1) {
+                         $ret .= "<INPUT TYPE=TEXT NAME=\"var:$f\" SIZE=$editcols VALUE=\"$estyval\">\n";
+                     } else {
+                         $ret .= "<TEXTAREA ROWS=$editrows COLS=$editcols WRAP=SOFT NAME=\"var:$f\">$estyval</TEXTAREA>\n";
+                     }
+                 }
+                 $ret .= "(=HR=)\n";
+             }
+         }
 }  # end sub
 
 if ($ide eq "v1") {
@@ -252,8 +252,8 @@ if ($ide eq "v2") {
     $ret .= "(=H1 Convenience Links H1=)(=P You can use these links to scroll the page up to where the variable is declared... P=) <UL>";
      foreach my $v (sort { $a->{'name'} cmp $b->{'name'} } @vars)
      {
-	 next unless ($v->{'props'}->{'scope'} =~ /\b$sty->{'type'}\b/);
-	 $ret .= "<LI><A HREF=\"#$v->{'name'}\">$v->{'name'}</A>";
+         next unless ($v->{'props'}->{'scope'} =~ /\b$sty->{'type'}\b/);
+         $ret .= "<LI><A HREF=\"#$v->{'name'}\">$v->{'name'}</A>";
      }
 $ret .= "</UL>";
 }
@@ -266,23 +266,23 @@ if ($FORM{'mode'} eq "savechanges")
     my $formatdata;
     if ($ide eq "v1") 
     {
-	$FORM{'formatdata'} =~ s/\r//;   # carriage returns shouldn't be necessary
-	$formatdata = $FORM{'formatdata'};
+        $FORM{'formatdata'} =~ s/\r//;   # carriage returns shouldn't be necessary
+        $formatdata = $FORM{'formatdata'};
     }
     elsif ($ide eq "v2") 
     {
-	$formatdata = "";
-	foreach (grep { /^var:.+/ } keys %FORM) 
-	{
-	    /^var:(.+)$/;
-	    my ($key, $var) = ($&, $1);
-	    $FORM{$key} =~ s/\r//;   # carriage returns shouldn't be necessary
-	    if ($FORM{$key} =~ /\n/) {
-		$formatdata .= "$var<=\n$FORM{$key}\n<=$var\n\n";
-	    } else {
-		$formatdata .= "$var=>$FORM{$key}\n\n";
-	    }
-	}
+        $formatdata = "";
+        foreach (grep { /^var:.+/ } keys %FORM) 
+        {
+            /^var:(.+)$/;
+            my ($key, $var) = ($&, $1);
+            $FORM{$key} =~ s/\r//;   # carriage returns shouldn't be necessary
+            if ($FORM{$key} =~ /\n/) {
+                $formatdata .= "$var<=\n$FORM{$key}\n<=$var\n\n";
+            } else {
+                $formatdata .= "$var=>$FORM{$key}\n\n";
+            }
+        }
     }
     
     my $qformatdata = $dbh->quote($formatdata);
@@ -291,16 +291,16 @@ if ($FORM{'mode'} eq "savechanges")
 
     my $opts = "";
     foreach (@style_opts) {
-	$opts .= ", $_->{'code'}=";
-	if ($FORM{$_->{'code'}}) { $opts .= "'Y'"; } 
-	else { $opts .= "'N'"; }
+        $opts .= ", $_->{'code'}=";
+        if ($FORM{$_->{'code'}}) { $opts .= "'Y'"; } 
+        else { $opts .= "'N'"; }
     }
     
     $sth = $dbh->prepare("UPDATE style SET formatdata=$qformatdata, styledes=$qstyledes, lastupdate=NOW() $opts WHERE styleid=$qstyleid");
     $sth->execute;
     if ($dbh->err || $sth->rows == 0)
     {
-	return "(=H1 Error H1=)(=P There was some error updating this style. P=)";
+        return "(=H1 Error H1=)(=P There was some error updating this style. P=)";
     }
 
      # get this style's view type
@@ -310,7 +310,7 @@ if ($FORM{'mode'} eq "savechanges")
 
      # all good
      return "(=H1 Success H1=)(=P Style has been updated.  You can view it ".
-	 "<a target=preview href=\"/customview.cgi?user=$user&amp;styleid=$qstyleid\">here</a>. P=)";
+         "<a target=preview href=\"/customview.cgi?user=$user&amp;styleid=$qstyleid\">here</a>. P=)";
  }
 
  return "<B>Error:</B> Unknown mode ($FORM{'mode'}).";

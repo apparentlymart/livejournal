@@ -35,16 +35,16 @@ foreach my $func (sort keys %$api) {
 
     my $optcount;
     foreach my $arg (@{$f->{'args'}}) {
-	my $comma = $argstring ? ", " : "";
-	my $lbrack = "";
-	if ($arg->{'optional'}) { 
-	    $optcount++;
-	    $lbrack = "["	    
-	}
-	$argstring .= "$lbrack$comma$arg->{'name'}";
-	if ($arg->{'list'}) {
-	    $argstring .= "*";
-	}
+        my $comma = $argstring ? ", " : "";
+        my $lbrack = "";
+        if ($arg->{'optional'}) { 
+            $optcount++;
+            $lbrack = "["	    
+        }
+        $argstring .= "$lbrack$comma$arg->{'name'}";
+        if ($arg->{'list'}) {
+            $argstring .= "*";
+        }
     }
     $argstring .= "]"x$optcount;
 
@@ -59,24 +59,24 @@ foreach my $func (sort keys %$api) {
     print "<td><tt>$f->{'source'}</tt></td></tr>\n";
 
     if (@{$f->{'args'}}) {
-	print "<tr valign=\"bottom\"><td align=\"right\"><i>Arguments:</i></td>\n";
-	print "<td><tt><b>$argstring</b></tt></td></tr>\n";
-	
-	print "<tr valign=\"bottom\"><td>&nbsp;</td>\n";
-	print "<td><table cellpadding=\"2\" border=\"1\">\n";
-	foreach my $arg (@{$f->{'args'}}) {
-	    print "<tr valign=\"top\"><td>$arg->{'name'}</td>";
-	    my $des = $arg->{'des'};
-	    xlinkify(\$des);
-	    print "<td>$des</td></tr>\n";
-	}
-	print "</table></td></tr>\n";
+        print "<tr valign=\"bottom\"><td align=\"right\"><i>Arguments:</i></td>\n";
+        print "<td><tt><b>$argstring</b></tt></td></tr>\n";
+        
+        print "<tr valign=\"bottom\"><td>&nbsp;</td>\n";
+        print "<td><table cellpadding=\"2\" border=\"1\">\n";
+        foreach my $arg (@{$f->{'args'}}) {
+            print "<tr valign=\"top\"><td>$arg->{'name'}</td>";
+            my $des = $arg->{'des'};
+            xlinkify(\$des);
+            print "<td>$des</td></tr>\n";
+        }
+        print "</table></td></tr>\n";
     }
-	
+        
     if ($f->{'returns'}) {
-	xlinkify(\$f->{'returns'});
-	print "<tr valign=\"top\"><td align=\"right\"><i>Returns:</i></td>\n";
-	print "<td>$f->{'returns'}</td></tr>\n";
+        xlinkify(\$f->{'returns'});
+        print "<tr valign=\"top\"><td align=\"right\"><i>Returns:</i></td>\n";
+        print "<td>$f->{'returns'}</td></tr>\n";
     }
     
     print "</table></blockquote>\n";

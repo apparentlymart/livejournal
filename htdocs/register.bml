@@ -22,20 +22,20 @@ BODY<=
      my ($aaid, $auth) = ($1, $2);
      my $aa = LJ::is_valid_authaction($dbs, $aaid, $auth);
      if ($aa) {
-	 $sth = $dbr->prepare("SELECT userid, email, user, status, password FROM user WHERE userid=$aa->{'userid'}");
-	 $sth->execute;
-	 $u = $sth->fetchrow_hashref;
+         $sth = $dbr->prepare("SELECT userid, email, user, status, password FROM user WHERE userid=$aa->{'userid'}");
+         $sth->execute;
+         $u = $sth->fetchrow_hashref;
 
-	 push @errors, "User not found." unless ($u);
-	 
-	 # FIXME: the only reason for the $aa->{'arg1'} truth test is to allow existing authcodes out there
-	 # to still work.  that part can be removed 30 days from May-18-2001, along with this comment.
-	 if ($aa->{'arg1'} && $u->{'email'} ne $aa->{'arg1'}) {
-	     push @errors, "This confirmation URL was for a different email address.  You cannot use it to validate your most recently set email address.";
-	 }
-	 
+         push @errors, "User not found." unless ($u);
+         
+         # FIXME: the only reason for the $aa->{'arg1'} truth test is to allow existing authcodes out there
+         # to still work.  that part can be removed 30 days from May-18-2001, along with this comment.
+         if ($aa->{'arg1'} && $u->{'email'} ne $aa->{'arg1'}) {
+             push @errors, "This confirmation URL was for a different email address.  You cannot use it to validate your most recently set email address.";
+         }
+         
      } else {
-	 push @errors, "Invalid registration code. ($aaid, $auth)";
+         push @errors, "Invalid registration code. ($aaid, $auth)";
      }
  }
 

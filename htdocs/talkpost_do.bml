@@ -72,8 +72,8 @@ BODY<=
  ### load users
  my $ujp;                 # poster of item 
  LJ::load_userids_multiple($dbs, [
-				  $item->{'posterid'} => \$ujp,
-				  ], [ $u ]);
+                                  $item->{'posterid'} => \$ujp,
+                                  ], [ $u ]);
  my ($quser, $qjpuser) = map { $dbr->quote($_) } ($u->{'user'}, $ujp->{'user'});
  LJ::load_user_props($dbs, $u, "opt_logcommentips");
 
@@ -114,7 +114,7 @@ BODY<=
 
              if ($up->{'journaltype'} ne "P") {
                  push @errors, "You can't post as a shared or community account.  ".
-		     "Shared accounts represent groups of people, not individual people.";
+                     "Shared accounts represent groups of people, not individual people.";
              }
 
              unless ($cookie_auth || 
@@ -123,8 +123,8 @@ BODY<=
                              $up->{'password'}) eq $FORM{'ecphash'} )
              {
                  push @errors, "Incorrect password given for the username ".
-		     " specified.  You can recover your password <a href=\"/lostinfo.bml\">here</a> ".
-		     "if you've forgotten it.";
+                     " specified.  You can recover your password <a href=\"/lostinfo.bml\">here</a> ".
+                     "if you've forgotten it.";
              }
 
              # if the user chooses to log in, do so (patch by: lucretio)
@@ -159,7 +159,7 @@ BODY<=
  ####  Check security before viewing this post
  unless (LJ::can_view($dbs, $up, $item)) {
      push @errors, "You must be logged in or using a username/password to reply to this protected entry."
-	 unless (defined $up);
+         unless (defined $up);
      push @errors, "You are not authorized to reply to this protected entry.";
      return LJ::bad_input(@errors);     
  }
@@ -203,12 +203,12 @@ BODY<=
  my $unknown8bit = 0;
  if ($FORM{'body'} =~ /[\x80-\xFF]/ || $FORM{'subject'} =~ /[\x80-\xFF]/) {
      if ($LJ::UNICODE) {
-	 # TODO (avva): validate its UTF-8-ness, complain if not 
-	 #              well-formed, or has overlong characters
+         # TODO (avva): validate its UTF-8-ness, complain if not 
+         #              well-formed, or has overlong characters
      } else {
-	 # so rest of site can change chars to ? marks until
-	 # default user's encoding is set.  (legacy support)
-	 $unknown8bit = 1;
+         # so rest of site can change chars to ? marks until
+         # default user's encoding is set.  (legacy support)
+         $unknown8bit = 1;
      }
  }
 
@@ -274,22 +274,22 @@ BODY<=
  if ($clustered) 
  {
      $insertid = $dbcm->selectrow_array
-	 (
-	  "SELECT t.jtalkid FROM talk2 t, talktext2 tt WHERE ".
-	  "t.journalid=$u->{'userid'} AND tt.journalid=$u->{'userid'} ".
-	  "AND t.jtalkid=tt.jtalkid ".
-	  "AND t.nodetype='L' AND t.nodeid=$itemid ".
-	  "AND t.posterid=$posterid AND tt.subject=$qsubject AND MD5(tt.body)='$md5_body' ".
-	  "AND t.parenttalkid=$qpartid"
-	  );
+         (
+          "SELECT t.jtalkid FROM talk2 t, talktext2 tt WHERE ".
+          "t.journalid=$u->{'userid'} AND tt.journalid=$u->{'userid'} ".
+          "AND t.jtalkid=tt.jtalkid ".
+          "AND t.nodetype='L' AND t.nodeid=$itemid ".
+          "AND t.posterid=$posterid AND tt.subject=$qsubject AND MD5(tt.body)='$md5_body' ".
+          "AND t.parenttalkid=$qpartid"
+          );
  } else {
      $insertid = $dbh->selectrow_array
-	 (
-	  "SELECT t.talkid FROM talk t, talktext tt WHERE t.talkid=tt.talkid ".
-	  "AND t.journalid=$u->{'userid'} AND t.nodetype='L' AND t.nodeid=$itemid ".
-	  "AND t.posterid=$posterid AND tt.subject=$qsubject AND MD5(tt.body)='$md5_body' ".
-	  "AND t.parenttalkid=$qpartid"
-	  );
+         (
+          "SELECT t.talkid FROM talk t, talktext tt WHERE t.talkid=tt.talkid ".
+          "AND t.journalid=$u->{'userid'} AND t.nodetype='L' AND t.nodeid=$itemid ".
+          "AND t.posterid=$posterid AND tt.subject=$qsubject AND MD5(tt.body)='$md5_body' ".
+          "AND t.parenttalkid=$qpartid"
+          );
  }
  
  # they don't have a duplicate...
@@ -299,9 +299,9 @@ BODY<=
      my $table = $clustered ? "talk2" : "talk";
      my $now = $dbcm->selectrow_array("SELECT NOW()");
      $sth = $dbcm->prepare("INSERT INTO $table (nodetype, nodeid, parenttalkid, ".
-			   "journalid, posterid, datepost) ".
-			   "VALUES ('L', $itemid, $qpartid, ".
-			   "$u->{'userid'}, $posterid, '$now')");
+                           "journalid, posterid, datepost) ".
+                           "VALUES ('L', $itemid, $qpartid, ".
+                           "$u->{'userid'}, $posterid, '$now')");
      $sth->execute;
      
      # uh oh?  is there an error?  show them if there is.
@@ -314,39 +314,39 @@ BODY<=
 
      # add to poster's talkleft table, or the xfer place
      if ($posterid && $clustered) {
-	 my ($db, $table) = ($dbh, "talkleft_xfp");
-	 if ($up->{'clusterid'}) {
-	     $db = LJ::get_cluster_master($up);
-	     $table = "talkleft";
-	 }
-	 my $pub  = $item->{'security'} eq "public" ? 1 : 0;
-	 $db->do("INSERT INTO $table (userid, posttime, journalid, nodetype, ".
-		 "nodeid, jtalkid, publicitem) VALUES ($posterid, UNIX_TIMESTAMP('$now'), ".
-		 "$u->{'userid'}, 'L', $init->{'itemid'}, $insertid, '$pub')");
+         my ($db, $table) = ($dbh, "talkleft_xfp");
+         if ($up->{'clusterid'}) {
+             $db = LJ::get_cluster_master($up);
+             $table = "talkleft";
+         }
+         my $pub  = $item->{'security'} eq "public" ? 1 : 0;
+         $db->do("INSERT INTO $table (userid, posttime, journalid, nodetype, ".
+                 "nodeid, jtalkid, publicitem) VALUES ($posterid, UNIX_TIMESTAMP('$now'), ".
+                 "$u->{'userid'}, 'L', $init->{'itemid'}, $insertid, '$pub')");
      }
 
      my @prefix = ("");
      if ($LJ::USE_RECENT_TABLES) { push @prefix, "recent_"; }
      foreach my $pfx (@prefix) {
-	 if ($clustered) {
-	     if ($pfx) {
-		 $dbcm->do("INSERT INTO recent_talktext2 (journalid, jtalkid, subject, body, datepost) ".
-			   "VALUES ($u->{'userid'}, $insertid, $qsubject, $qbody, NOW())");
-	     } else {
-		 $dbcm->do("INSERT INTO talktext2 (journalid, jtalkid, subject, body) ".
-			   "VALUES ($u->{'userid'}, $insertid, $qsubject, $qbody)");
-	     }
-	     die $dbcm->errstr if $dbcm->err;
-	 } else {
-	     $dbh->do("INSERT INTO ${pfx}talktext (talkid, subject, body) ".
-		      "VALUES ($insertid, $qsubject, $qbody)");
-	 }
+         if ($clustered) {
+             if ($pfx) {
+                 $dbcm->do("INSERT INTO recent_talktext2 (journalid, jtalkid, subject, body, datepost) ".
+                           "VALUES ($u->{'userid'}, $insertid, $qsubject, $qbody, NOW())");
+             } else {
+                 $dbcm->do("INSERT INTO talktext2 (journalid, jtalkid, subject, body) ".
+                           "VALUES ($u->{'userid'}, $insertid, $qsubject, $qbody)");
+             }
+             die $dbcm->errstr if $dbcm->err;
+         } else {
+             $dbh->do("INSERT INTO ${pfx}talktext (talkid, subject, body) ".
+                      "VALUES ($insertid, $qsubject, $qbody)");
+         }
      }
 
      # dudata
      if ($clustered) {
-	 my $bytes = length($FORM{'subject'}) + length($FORM{'body'});
-	 LJ::dudata_set($dbcm, $u->{'userid'}, 'T', $insertid, $bytes);
+         my $bytes = length($FORM{'subject'}) + length($FORM{'body'});
+         LJ::dudata_set($dbcm, $u->{'userid'}, 'T', $insertid, $bytes);
      }
 
      my %talkprop;   # propname -> value
@@ -362,7 +362,7 @@ BODY<=
      {
          my $ip = $ENV{'REMOTE_ADDR'};
          if ($ENV{'HTTP_X_FORWARDED_FOR'}) { $ip = "$ENV{'HTTP_X_FORWARDED_FOR'}, via $ip"; }
-	 $talkprop{'poster_ip'} = $ip;
+         $talkprop{'poster_ip'} = $ip;
 
      }
 
@@ -371,37 +371,37 @@ BODY<=
 
      LJ::load_props($dbs, "talk");
      if (%talkprop) {
-	 my $values;
-	 foreach (keys %talkprop) {
-	     my $p = LJ::get_prop("talk", $_);
-	     next unless $p;
-	     my $tpropid = $p->{'tpropid'};
-	     my $qv = $dbh->quote($talkprop{$_});
-	     if ($clustered) {
-		 $values .= "($u->{'userid'}, $insertid, $tpropid, $qv),";
-	     } else {
-		 $values .= "($insertid, $tpropid, $qv),";
-	     }
-	 }
-	 if ($values) {
-	     chop $values;
-	     if ($clustered) {
-		 $dbcm->do("INSERT INTO talkprop2 (journalid, jtalkid, tpropid, value) ".
-			   "VALUES $values");
-	     } else {
-		 $dbcm->do("INSERT INTO talkprop (talkid, tpropid, value) ".
-			   "VALUES $values");
-	     }
-	     die $dbcm->errstr if $dbcm->err;
-	 }
+         my $values;
+         foreach (keys %talkprop) {
+             my $p = LJ::get_prop("talk", $_);
+             next unless $p;
+             my $tpropid = $p->{'tpropid'};
+             my $qv = $dbh->quote($talkprop{$_});
+             if ($clustered) {
+                 $values .= "($u->{'userid'}, $insertid, $tpropid, $qv),";
+             } else {
+                 $values .= "($insertid, $tpropid, $qv),";
+             }
+         }
+         if ($values) {
+             chop $values;
+             if ($clustered) {
+                 $dbcm->do("INSERT INTO talkprop2 (journalid, jtalkid, tpropid, value) ".
+                           "VALUES $values");
+             } else {
+                 $dbcm->do("INSERT INTO talkprop (talkid, tpropid, value) ".
+                           "VALUES $values");
+             }
+             die $dbcm->errstr if $dbcm->err;
+         }
      }
      
      # update the "replycount" summary field of the log table
      if ($clustered) {
-	 $dbcm->do("UPDATE log2 SET replycount=replycount+1 WHERE ".
-		   "journalid=$u->{'userid'} AND jitemid=$itemid");
+         $dbcm->do("UPDATE log2 SET replycount=replycount+1 WHERE ".
+                   "journalid=$u->{'userid'} AND jitemid=$itemid");
      } else {
-	 LJ::query_buffer_add($dbh, "log", "UPDATE log SET replycount=replycount+1 WHERE itemid=$itemid");	 
+         LJ::query_buffer_add($dbh, "log", "UPDATE log SET replycount=replycount+1 WHERE itemid=$itemid");	 
      }
      
      # send some emails
@@ -414,16 +414,16 @@ BODY<=
          if ($FORM{'prop_picture_keyword'}) {
              my $qkw = $dbr->quote($FORM{'prop_picture_keyword'});
              my $picid = $dbr->selectrow_array("SELECT m.picid FROM userpicmap m, keywords k ".
-					       "WHERE m.userid=$up->{'userid'} AND m.kwid=k.kwid ".
-					       "AND k.keyword=$qkw");
+                                               "WHERE m.userid=$up->{'userid'} AND m.kwid=k.kwid ".
+                                               "AND k.keyword=$qkw");
          }
          $picid ||= $up->{'defaultpicid'};
          if ($picid) {
              my %pics;
              LJ::load_userpics($dbs, \%pics, [ $picid ]);
              $whopic = "<img src=\"$LJ::SITEROOT/userpic/$picid\" align='absmiddle' ".
-		 "width='$pics{$picid}->{'width'}' height='$pics{$picid}->{'height'}' ".
-		 "hspace='1' vspace='2'> ";
+                 "width='$pics{$picid}->{'width'}' height='$pics{$picid}->{'height'}' ".
+                 "hspace='1' vspace='2'> ";
          }
      }
 
@@ -434,21 +434,21 @@ BODY<=
 
      if ($FORM{'parenttalkid'}) 
      {  
-	 if ($clustered) {
-	     $sth = $dbcm->prepare("SELECT t.posterid, tt.body FROM talk2 t, talktext2 tt ".
-				   "WHERE t.journalid=$u->{'userid'} AND tt.journalid=$u->{'userid'} ".
-				   "AND t.jtalkid=$qpartid AND tt.jtalkid=$qpartid");
-	 } else {
-	     $sth = $dbh->prepare("SELECT t.posterid, tt.body FROM talk t, talktext tt ".
-				  "WHERE t.talkid=$qpartid AND tt.talkid=$qpartid");
-	 }
+         if ($clustered) {
+             $sth = $dbcm->prepare("SELECT t.posterid, tt.body FROM talk2 t, talktext2 tt ".
+                                   "WHERE t.journalid=$u->{'userid'} AND tt.journalid=$u->{'userid'} ".
+                                   "AND t.jtalkid=$qpartid AND tt.jtalkid=$qpartid");
+         } else {
+             $sth = $dbh->prepare("SELECT t.posterid, tt.body FROM talk t, talktext tt ".
+                                  "WHERE t.talkid=$qpartid AND tt.talkid=$qpartid");
+         }
          $sth->execute;
          my ($paruserid, $parbody) = $sth->fetchrow_array;
          $parentcomment = $parbody;
          if ($paruserid) {
              my $qparuserid = $dbr->quote($paruserid);
              $sth = $dbr->prepare("SELECT user, email, opt_htmlemail, password, status, ".
-				  "opt_gettalkemail FROM user WHERE userid=$qparuserid");
+                                  "opt_gettalkemail FROM user WHERE userid=$qparuserid");
              $sth->execute;
              my $paru = $sth->fetchrow_hashref;
              
@@ -583,7 +583,7 @@ BODY<=
          $html .= "<INPUT TYPE=HIDDEN NAME=usertype VALUE=user>";
          $html .= "<INPUT TYPE=HIDDEN NAME=parenttalkid VALUE=$insertid>";
          $html .= "<INPUT TYPE=HIDDEN NAME=itemid VALUE=$ditemid>";
-	 $html .= "<INPUT TYPE=HIDDEN NAME=journal VALUE='$u->{'user'}'>" if $clustered;
+         $html .= "<INPUT TYPE=HIDDEN NAME=journal VALUE='$u->{'user'}'>" if $clustered;
          $html .= "<INPUT TYPE=HIDDEN NAME=userpost VALUE=\"$ujp->{'user'}\">";
          $html .= "<INPUT TYPE=HIDDEN NAME=ecphash VALUE=\"" . LJ::ehtml(ecphash($itemid, $insertid, $ujp->{'password'})) . "\">";
          my $newsub = $FORM{'subject'};

@@ -20,7 +20,7 @@
       <refpurpose><xsl:apply-templates select="description/node()"/></refpurpose>
       </refnamediv>
       <refsect1>
-	<title><database class="table"><xsl:value-of select="name"/></database></title>
+        <title><database class="table"><xsl:value-of select="name"/></database></title>
       <informaltable><tgroup cols="5">
       <thead>
       <row>

@@ -55,30 +55,30 @@
 
      my $curr_changed = 0;
      foreach my $k (keys %FORM) {
-	 next unless $k =~ /^set-(\d+)-(\w+?)-(\w+)$/;
-	 my ($sid, $role, $what) = ($1, $2, $3);
-	 next unless $what eq "norm" or $what eq "curr";
-	 next unless defined $weights{$sid};
-	 next unless defined $weights{$sid}->{$role};
-	 my $val = $FORM{$k}+0;
-	 next if $val == $weights{$sid}->{$role}->{$what};
-	 
-	 $dbh->do("UPDATE dbweights SET $what=$val WHERE ".
-		  "dbid=$sid AND role='$role'");
-	 $weights{$sid}->{$role}->{$what} = $val;
-	 $curr_changed = 1 if $what eq "curr";
+         next unless $k =~ /^set-(\d+)-(\w+?)-(\w+)$/;
+         my ($sid, $role, $what) = ($1, $2, $3);
+         next unless $what eq "norm" or $what eq "curr";
+         next unless defined $weights{$sid};
+         next unless defined $weights{$sid}->{$role};
+         my $val = $FORM{$k}+0;
+         next if $val == $weights{$sid}->{$role}->{$what};
+         
+         $dbh->do("UPDATE dbweights SET $what=$val WHERE ".
+                  "dbid=$sid AND role='$role'");
+         $weights{$sid}->{$role}->{$what} = $val;
+         $curr_changed = 1 if $what eq "curr";
      }
 
      if ($curr_changed) {
-	 my $newserial;
-	 my $rows = $dbh->do("UPDATE dbinfo SET fdsn=fdsn+1 WHERE dbid=0");
-	 if ($rows == 1) {
-	     $newserial = $dbh->selectrow_array("SELECT fdsn FROM dbinfo WHERE dbid=0");
-	 } else {
-	     $dbh->do("INSERT INTO dbinfo (dbid, name, fdsn) VALUES (0, 'lastupdate', 1)");
-	     $newserial = 1;
-	 }
-	 $status .= "<p>New Serial: $newserial</p>\n";
+         my $newserial;
+         my $rows = $dbh->do("UPDATE dbinfo SET fdsn=fdsn+1 WHERE dbid=0");
+         if ($rows == 1) {
+             $newserial = $dbh->selectrow_array("SELECT fdsn FROM dbinfo WHERE dbid=0");
+         } else {
+             $dbh->do("INSERT INTO dbinfo (dbid, name, fdsn) VALUES (0, 'lastupdate', 1)");
+             $newserial = 1;
+         }
+         $status .= "<p>New Serial: $newserial</p>\n";
      }
  }
 
@@ -103,22 +103,22 @@
      my $indent = "&nbsp;" x ($depth*5);
 
      foreach my $sid (sort { $#{$slaves{$a}} <=> $#{$slaves{$b}} } @{$slaves{$mid}}) {
-	 my $db = $dbinfo{$sid};
-	 $p->("<tr bgcolor='#404070'><td colspan='4'><b>$indent$db->{'name'}</b> ($sid)</td></tr>");
+         my $db = $dbinfo{$sid};
+         $p->("<tr bgcolor='#404070'><td colspan='4'><b>$indent$db->{'name'}</b> ($sid)</td></tr>");
 
-	 foreach my $role (sort keys %{$weights{$sid}}) {
-	     my $r = $weights{$sid}->{$role};
-	     my $col;
-	     if ($r->{'norm'} != $r->{'curr'}) {
-		 $col = "bgcolor='#800000'";
-	     }
-	     $p->("<tr valign='bottom' $col><td>$indent$role</td>");
-	     $p->("<td align='center'><input size='3' name='set-$sid-$role-norm' value='$r->{'norm'}'></td>");
-	     $p->("<td align='center'><input size='3' name='set-$sid-$role-curr' value='$r->{'curr'}'></td>");
-	     $p->("<td>" . $slaveroleperc->($sid, $role) . "</td>");
-	     $p->("</tr>");
-	 }
-	 $rec->($sid, $depth+1, $rec);
+         foreach my $role (sort keys %{$weights{$sid}}) {
+             my $r = $weights{$sid}->{$role};
+             my $col;
+             if ($r->{'norm'} != $r->{'curr'}) {
+                 $col = "bgcolor='#800000'";
+             }
+             $p->("<tr valign='bottom' $col><td>$indent$role</td>");
+             $p->("<td align='center'><input size='3' name='set-$sid-$role-norm' value='$r->{'norm'}'></td>");
+             $p->("<td align='center'><input size='3' name='set-$sid-$role-curr' value='$r->{'curr'}'></td>");
+             $p->("<td>" . $slaveroleperc->($sid, $role) . "</td>");
+             $p->("</tr>");
+         }
+         $rec->($sid, $depth+1, $rec);
      }
  };
 
@@ -130,14 +130,14 @@
      
      foreach my $sid (sort { $weights{$b}->{$role}->{'curr'} <=> $weights{$a}->{$role}->{'curr'} } @{$role{$role}})
      {
-	 my $r = $weights{$sid}->{$role};
-	 my $col;
-	 $col = "bgcolor='#800000'" if $r->{'norm'} != $r->{'curr'};
-	 $p->("<tr valign='bottom' $col><td>$dbinfo{$sid}->{'name'}</td>");
-	 $p->("<td align='center'><input size='3' name='set-$sid-$role-norm' value='$r->{'norm'}'></td>");
-	 $p->("<td align='center'><input size='3' name='set-$sid-$role-curr' value='$r->{'curr'}'></td>");
-	     $p->("<td>" . $slaveroleperc->($sid, $role) . "</td>");
-	 $p->("</tr>");
+         my $r = $weights{$sid}->{$role};
+         my $col;
+         $col = "bgcolor='#800000'" if $r->{'norm'} != $r->{'curr'};
+         $p->("<tr valign='bottom' $col><td>$dbinfo{$sid}->{'name'}</td>");
+         $p->("<td align='center'><input size='3' name='set-$sid-$role-norm' value='$r->{'norm'}'></td>");
+         $p->("<td align='center'><input size='3' name='set-$sid-$role-curr' value='$r->{'curr'}'></td>");
+             $p->("<td>" . $slaveroleperc->($sid, $role) . "</td>");
+         $p->("</tr>");
      }
  };
 
@@ -153,7 +153,7 @@
  $p->("<tr bgcolor='#404040'><td>$hr</td><td><b>Norm</b></td><td><b>Curr</b></td><td>%</td></tr>");
  if ($view eq "role") {
      foreach my $role (sort keys %role) {
-	 $dumprole->($role);
+         $dumprole->($role);
      }
  } else {
      $dumpslaves->(0, 0, $dumpslaves);  # root

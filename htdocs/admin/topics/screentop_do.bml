@@ -21,22 +21,22 @@
      my $topid = $1;
 
      if ($act eq "A") {
-	 $sth = $dbh->prepare("UPDATE topic_list SET status='on' WHERE tptopid=$topid AND status='new'");
-	 $sth->execute;
-	 if ($sth->rows) {
-	     $ret .= "<B>$topid</B> approved.<BR>\n";
-	 } else {
-	     $ret .= "<B>$topid</B> already acted on.<BR>\n";
-	 }
+         $sth = $dbh->prepare("UPDATE topic_list SET status='on' WHERE tptopid=$topid AND status='new'");
+         $sth->execute;
+         if ($sth->rows) {
+             $ret .= "<B>$topid</B> approved.<BR>\n";
+         } else {
+             $ret .= "<B>$topid</B> already acted on.<BR>\n";
+         }
      }
      if ($act eq "D") {
-	 $sth = $dbh->prepare("UPDATE topic_list SET status='deny' WHERE tptopid=$topid AND status='new'");
-	 $sth->execute;
-	 if ($sth->rows) {
-	     $ret .= "<B>$topid</B> denied.<BR>\n";
-	 } else {
-	     $ret .= "<B>$topid</B> already acted on.<BR>\n";
-	 }
+         $sth = $dbh->prepare("UPDATE topic_list SET status='deny' WHERE tptopid=$topid AND status='new'");
+         $sth->execute;
+         if ($sth->rows) {
+             $ret .= "<B>$topid</B> denied.<BR>\n";
+         } else {
+             $ret .= "<B>$topid</B> already acted on.<BR>\n";
+         }
 
      }
      

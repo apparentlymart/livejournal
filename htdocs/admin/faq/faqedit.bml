@@ -35,17 +35,17 @@ BODY<=
      $a = LJ::ehtml($answer);
 
      unless ($ac_edit{'all'} || $ac_edit{$faqcat}) {
-	 if (%ac_edit) {
-	     return "<B>Error: </B> You do not have access to edit a FAQ question in the \"$faqcat\" category.";
-	 } else {
-	     return "<B>Error: </B> You do not have access to edit the FAQ.";
-	 }
+         if (%ac_edit) {
+             return "<B>Error: </B> You do not have access to edit a FAQ question in the \"$faqcat\" category.";
+         } else {
+             return "<B>Error: </B> You do not have access to edit the FAQ.";
+         }
      }
  }
  else 
  {
      unless (%ac_add) {
-	 return "<B>Error: </B> You do not have access to add to the FAQ.";
+         return "<B>Error: </B> You do not have access to add to the FAQ.";
      }
  }
 
@@ -61,9 +61,9 @@ BODY<=
  while (($fc, $fcname) = $sth->fetchrow_array)
  {
      if ($id) {
-	 next unless ($ac_add{'all'} || $ac_add{$fc} || ($fc eq $faqcat));
+         next unless ($ac_add{'all'} || $ac_add{$fc} || ($fc eq $faqcat));
      } else {
-	 next unless ($ac_add{'all'} || $ac_add{$fc});
+         next unless ($ac_add{'all'} || $ac_add{$fc});
      }
      $selected = ($fc eq $faqcat) ? " SELECTED" : "";
      $ret .= "<OPTION VALUE=\"$fc\"$selected>" . LJ::ehtml($fcname) . "\n";

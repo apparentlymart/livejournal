@@ -24,19 +24,19 @@
      $sth = $dbh->prepare("SELECT tablename, public_browsable, des FROM schematables");
      $sth->execute;
      while (my ($name, $public, $des) = $sth->fetchrow_array) {
-	 $table{$name} = { 'public' => $public, 'des' => $des };
+         $table{$name} = { 'public' => $public, 'des' => $des };
      }
 
      $body .= "(=H1 Tables H1=)(=P Click a table for more information. P=)<p><table cellpadding=4><tr bgcolor=(=EMCOLOR=)><td><b>Table</b></td><td><b>Description</b></td></tr>\n";
      $sth = $dbh->prepare("SHOW TABLES");
      $sth->execute;
      while (my ($table) = $sth->fetchrow_array) {
-	 my $des = $table{$table}->{'des'} || "<i>no description, yet</i>";
-	 $body .= "<tr valign=top><td nowrap><b><a href=\"./?mode=viewtable&amp;table=$table\">$table</a></b>";
-	 if ($table{$table}->{'public'}) {
-	     $body .= " (<a href=\"./?mode=viewdata&amp;table=$table\">data</a>)";
-	 }
-	 $body .= "</td><td>$des</td></tr>\n";b
+         my $des = $table{$table}->{'des'} || "<i>no description, yet</i>";
+         $body .= "<tr valign=top><td nowrap><b><a href=\"./?mode=viewtable&amp;table=$table\">$table</a></b>";
+         if ($table{$table}->{'public'}) {
+             $body .= " (<a href=\"./?mode=viewdata&amp;table=$table\">data</a>)";
+         }
+         $body .= "</td><td>$des</td></tr>\n";b
      }
      $body .= "</table>\n";
      return;
@@ -54,19 +54,19 @@
 
      $body .= "<a href=\"./\">&lt;&lt; Tables</a>";
      if ($browsable) {
-	 $body .= " | <a href=\"./?mode=viewdata&amp;table=$table\">View Data</a>";
+         $body .= " | <a href=\"./?mode=viewdata&amp;table=$table\">View Data</a>";
      }
      if ($can_doc) {
-	 $body .= " | <a href=\"./?mode=doc&amp;table=$table\">Edit Documentation</a>";
+         $body .= " | <a href=\"./?mode=doc&amp;table=$table\">Edit Documentation</a>";
      }
      $body .= "(=H1 Table: $table H1=)(=P ";
 
      
      if ($tabledes) {
-	 &magic_links(\$tabledes);
-	 $body .= $tabledes;
+         &magic_links(\$tabledes);
+         $body .= $tabledes;
      } else {
-	 $body .= "Below are the columns and descriptions for the <b>$table</b> table.";
+         $body .= "Below are the columns and descriptions for the <b>$table</b> table.";
      }
      $body .= " P=)<p>\n";
 
@@ -87,25 +87,25 @@
      $body .= "</tr>\n";
      while (my $row = $sth->fetchrow_hashref)
      {
-	 my $name = $row->{'Field'};
-	 my $type = $row->{'Type'};
-	 my $key = $row->{'Key'};
-	 my $null = $row->{'Null'};
-	 my $def = $row->{'Default'};
-	 my $des = BML::eall($coldes{$name});
+         my $name = $row->{'Field'};
+         my $type = $row->{'Type'};
+         my $key = $row->{'Key'};
+         my $null = $row->{'Null'};
+         my $def = $row->{'Default'};
+         my $des = BML::eall($coldes{$name});
 
-	 magic_links(\$des);
+         magic_links(\$des);
 
-	 $type =~ s/int\(\d+\)/int/g;
+         $type =~ s/int\(\d+\)/int/g;
 
-	 $body .= "<tr valign=top>";
-	 $body .= "<td align=center>$key</td>";
-	 $body .= "<td><b>$name</b></td>";
-	 $body .= "<td>$type</td>";
-	 $body .= "<td align=center>$null</td>";
-	 $body .= "<td align=center>$def</td>";
-	 $body .= "<td>$des</td>";
-	 $body .= "</tr>\n";
+         $body .= "<tr valign=top>";
+         $body .= "<td align=center>$key</td>";
+         $body .= "<td><b>$name</b></td>";
+         $body .= "<td>$type</td>";
+         $body .= "<td align=center>$null</td>";
+         $body .= "<td align=center>$def</td>";
+         $body .= "<td>$des</td>";
+         $body .= "</tr>\n";
      }
      $body .= "</table>\n";
      return;	 
@@ -128,16 +128,16 @@
      $sth->execute;
      $body .= "<table cellpadding=3><tr bgcolor=(=EMCOLOR=)>";
      foreach my $col (@{$sth->{'NAME'}}) {
-	 $body .= "<td><b>$col</b></td>\n";
+         $body .= "<td><b>$col</b></td>\n";
      }
      $body .= "</tr>\n";
 
      while (my $row = $sth->fetchrow_arrayref) {
-	 $body .= "<tr valign=top>\n";
-	 foreach my $val (@$row) {
-	     $body .= "<td>$val</td>\n";
-	 }
-	 $body .= "</tr>\n";
+         $body .= "<tr valign=top>\n";
+         foreach my $val (@$row) {
+             $body .= "<td>$val</td>\n";
+         }
+         $body .= "</tr>\n";
      }
      $body .= "</table>\n";
      return;
@@ -179,15 +179,15 @@
      $body .= "</tr>\n";
      while (my $row = $sth->fetchrow_hashref)
      {
-	 my $name = $row->{'Field'};
-	 my $type = $row->{'Type'};
-	 $type =~ s/int\(\d+\)/int/g;
+         my $name = $row->{'Field'};
+         my $type = $row->{'Type'};
+         $type =~ s/int\(\d+\)/int/g;
 
-	 $body .= "<tr valign=top>";
-	 $body .= "<td><b>$name</b></td>";
-	 $body .= "<td>$type</td>";
-	 $body .= "<td><input name=\"col-$name\" size=60 maxlength=255 value=\"" . BML::eall($coldes{$name}) . "\"></td>";
-	 $body .= "</tr>\n";
+         $body .= "<tr valign=top>";
+         $body .= "<td><b>$name</b></td>";
+         $body .= "<td>$type</td>";
+         $body .= "<td><input name=\"col-$name\" size=60 maxlength=255 value=\"" . BML::eall($coldes{$name}) . "\"></td>";
+         $body .= "</tr>\n";
      }
      $body .= "</table>\n";
      $body .= "<p><input type=submit value=\"Save Changes\"></form>";
@@ -211,11 +211,11 @@
      my ($tablename, $tabledes) = $sth->fetchrow_array;
      my $qdes = $dbh->quote($FORM{'table-des'});
      if ($tablename) {
-	 # row exists, update.
-	 $dbh->do("UPDATE schematables SET des=$qdes WHERE tablename=$qtable");
+         # row exists, update.
+         $dbh->do("UPDATE schematables SET des=$qdes WHERE tablename=$qtable");
      } else {
-	 # no row exists, so insert
-	 $dbh->do("INSERT INTO schematables (tablename, public_browsable, des) VALUES ($qtable, '0', $qdes)");
+         # no row exists, so insert
+         $dbh->do("INSERT INTO schematables (tablename, public_browsable, des) VALUES ($qtable, '0', $qdes)");
      }
      if ($dbh->err) { $body .= $dbh->errstr; return; }
 
@@ -233,23 +233,23 @@
      if ($dbh->err) { $body .= $dbh->errstr; return; }
      while (my $row = $sth->fetchrow_hashref)
      {
-	 my $name = $row->{'Field'};
-	 my $type = $row->{'Type'};
+         my $name = $row->{'Field'};
+         my $type = $row->{'Type'};
 
-	 if ($FORM{"col-$name"} ne $olddes{$name}) {
-	     $newdes{$name} = $FORM{"col-$name"};
-	 }
+         if ($FORM{"col-$name"} ne $olddes{$name}) {
+             $newdes{$name} = $FORM{"col-$name"};
+         }
      }
      if (%newdes) {
-	 my $sql = "REPLACE INTO schemacols (tablename, colname, des) VALUES ";
-	 foreach my $col (keys %newdes) {
-	     my $qcol = $dbh->quote($col);
-	     my $qdes = $dbh->quote($newdes{$col});
-	     $sql .= "($qtable, $qcol, $qdes),";
-	 }
-	 chop $sql;
-	 $dbh->do($sql);
-	 if ($dbh->err) { $body .= "[3] ($sql)<p>" . $dbh->errstr; return; }
+         my $sql = "REPLACE INTO schemacols (tablename, colname, des) VALUES ";
+         foreach my $col (keys %newdes) {
+             my $qcol = $dbh->quote($col);
+             my $qdes = $dbh->quote($newdes{$col});
+             $sql .= "($qtable, $qcol, $qdes),";
+         }
+         chop $sql;
+         $dbh->do($sql);
+         if ($dbh->err) { $body .= "[3] ($sql)<p>" . $dbh->errstr; return; }
      }
 
      $body .= "(=H1 Success H1=)(=P Documentation saved. <a href=\"./?mode=viewtable&amp;table=$table\">View</a>. P=)";

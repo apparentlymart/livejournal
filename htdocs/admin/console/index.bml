@@ -15,50 +15,50 @@
  if ($commands) 
  {
      unless (LJ::did_post()) {
-	 return "<b>Error:</b> requires post.";
+         return "<b>Error:</b> requires post.";
      }
 
      $ret .= "[ <A HREF=\"./\">console</A> | <A HREF=\"reference.bml\">reference</A> ]<P>";
 
      foreach my $cmd (split(/\n/, $commands))
      {
-	 my @args = LJ::Con::parse_line($cmd);
-	 next unless @args;
+         my @args = LJ::Con::parse_line($cmd);
+         next unless @args;
 
-	 my $first = 1;
-	 $ret .= "<P><TABLE BORDER=1 CELLPADDING=5><TR>";
-	 foreach (@args) {
-	     if ($first) {
-		 $ret .= "<TD><B>$_</B></TD>";
-		 $first = 0;
-	     } else {
-		 $ret .= "<TD>$_</TD>";
-	     }
-	 }
-	 $ret .= "</TR></TABLE>";
+         my $first = 1;
+         $ret .= "<P><TABLE BORDER=1 CELLPADDING=5><TR>";
+         foreach (@args) {
+             if ($first) {
+                 $ret .= "<TD><B>$_</B></TD>";
+                 $first = 0;
+             } else {
+                 $ret .= "<TD>$_</TD>";
+             }
+         }
+         $ret .= "</TR></TABLE>";
 
-	 my @output;
-	 my $rv;
-	 
-	 $rv = LJ::Con::execute($dbh, $remote, \@args, \@output);
-	 
-	 unless ($rv) { $ret .= "<P><B><FONT COLOR=#FF0000>Failed!</FONT></B>"; }
-	 if (@output) {
-	     $ret .= "<PRE><B>";
-	     foreach my $line (@output) {
-		 my $color = "#000000";
-		 if ($line->[0] eq "error") { 
-		     $color = "#FF0000";
-		 } 
-		 if ($line->[0] eq "info") { 
-		     $color = "#008800";
-		 } 
-		 
-		 $ret .= "<FONT COLOR=$color>".LJ::eall($line->[1])."</FONT>\n";
-		 
-	     }
-	     $ret .= "</B></PRE>";
-	 }
+         my @output;
+         my $rv;
+         
+         $rv = LJ::Con::execute($dbh, $remote, \@args, \@output);
+         
+         unless ($rv) { $ret .= "<P><B><FONT COLOR=#FF0000>Failed!</FONT></B>"; }
+         if (@output) {
+             $ret .= "<PRE><B>";
+             foreach my $line (@output) {
+                 my $color = "#000000";
+                 if ($line->[0] eq "error") { 
+                     $color = "#FF0000";
+                 } 
+                 if ($line->[0] eq "info") { 
+                     $color = "#008800";
+                 } 
+                 
+                 $ret .= "<FONT COLOR=$color>".LJ::eall($line->[1])."</FONT>\n";
+                 
+             }
+             $ret .= "</B></PRE>";
+         }
      }
 
      $ret .= "<form method=post><p>";

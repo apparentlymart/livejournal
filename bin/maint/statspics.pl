@@ -19,21 +19,21 @@ $maint{'genstatspics'} = sub
     my $max;
     while ($_ = $sth->fetchrow_hashref) 
     {
-	my $val = $_->{'new'};
-	unshift @{$data[0]}, ($i++ % 5 == 0 ? $_->{'day'} : "");
-	unshift @{$data[1]}, $val;
-	if ($val > $max) { $max = $val; }
+        my $val = $_->{'new'};
+        unshift @{$data[0]}, ($i++ % 5 == 0 ? $_->{'day'} : "");
+        unshift @{$data[1]}, $val;
+        if ($val > $max) { $max = $val; }
     }
 
     # posts by day graph
     my $g = GD::Graph::bars->new(520, 350);
     $g->set(
-	    x_label           => 'Day',
-	    y_label           => 'Accounts',
-	    title             => 'New accounts per day',
-	    tranparent        => 0,
-	    y_max_value       => $max,
-	    );
+            x_label           => 'Day',
+            y_label           => 'Accounts',
+            title             => 'New accounts per day',
+            tranparent        => 0,
+            y_max_value       => $max,
+            );
 
     my $gd = $g->plot(\@data);
     open(IMG, ">$LJ::HTDOCS/stats/newbyday.png") or die $!;
@@ -55,21 +55,21 @@ $maint{'genstatspics'} = sub
     my $max;
     while ($_ = $sth->fetchrow_hashref) 
     {
-	my $val = $_->{'posts'};
-	unshift @{$data[0]}, ($i++ % 5 == 0 ? $_->{'day'} : "");
-	unshift @{$data[1]}, $val;
-	if ($val > $max) { $max = $val; }
+        my $val = $_->{'posts'};
+        unshift @{$data[0]}, ($i++ % 5 == 0 ? $_->{'day'} : "");
+        unshift @{$data[1]}, $val;
+        if ($val > $max) { $max = $val; }
     }
 
     # posts by day graph
     my $g = GD::Graph::bars->new(520, 350);
     $g->set(
-	    x_label           => 'Day',
-	    y_label           => 'Posts',
-	    title             => 'Posts per day',
-	    tranparent        => 0,
-	    y_max_value       => $max,
-	    );
+            x_label           => 'Day',
+            y_label           => 'Posts',
+            title             => 'Posts per day',
+            tranparent        => 0,
+            y_max_value       => $max,
+            );
 
     my $gd = $g->plot(\@data);
     open(IMG, ">$LJ::HTDOCS/stats/postsbyday.png") or die $!;
@@ -91,21 +91,21 @@ $maint{'genstatspics'} = sub
     my $max;
     while ($_ = $sth->fetchrow_hashref) 
     {
-	my $val = $_->{'posts'};
-	unshift @{$data[0]}, ($i++ % 10 == 0 ? $_->{'week'} : "");
-	unshift @{$data[1]}, $val;
-	if ($val > $max) { $max = $val; }
+        my $val = $_->{'posts'};
+        unshift @{$data[0]}, ($i++ % 10 == 0 ? $_->{'week'} : "");
+        unshift @{$data[1]}, $val;
+        if ($val > $max) { $max = $val; }
     }
 
     # posts by week graph
     my $g = GD::Graph::bars->new(520, 350);
     $g->set(
-	    x_label           => 'Week',
-	    y_label           => 'Posts',
-	    title             => 'Posts per week',
-	    tranparent        => 0,
-	    y_max_value       => $max,
-	    );
+            x_label           => 'Week',
+            y_label           => 'Posts',
+            title             => 'Posts per week',
+            tranparent        => 0,
+            y_max_value       => $max,
+            );
 
     my $gd = $g->plot(\@data);
     open(IMG, ">$LJ::HTDOCS/stats/postsbyweek.png") or die $!;

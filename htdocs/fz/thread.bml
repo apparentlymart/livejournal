@@ -6,7 +6,7 @@ $TRUNC_SUBJECT = 60;
 
 my ($sth, $ret);
 my $user = $FORM{'user'};
-	
+        
 BML::set_content_type("text/rdf");
 
 my $dbs = LJ::get_dbs();
@@ -19,10 +19,10 @@ my $remote = LJ::get_remote($dbs);
 
 my @itemids;
 my @items = LJ::get_recent_items($dbs, {
-	'userid' => $u->{'userid'},
-	'itemshow' => 10,
-	'remoteid' => $remote->{'userid'},
-	'itemids' => \@itemids,
+        'userid' => $u->{'userid'},
+        'itemshow' => 10,
+        'remoteid' => $remote->{'userid'},
+        'itemids' => \@itemids,
 });
 
 my %com = ();

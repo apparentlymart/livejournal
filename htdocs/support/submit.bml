@@ -27,7 +27,7 @@ _INCLUDE=)
      $u = LJ::load_userid($dbs, $userid);
 
      foreach (qw(user name)) {
-	 $eh{$_} = LJ::ehtml($u->{$_});
+         $eh{$_} = LJ::ehtml($u->{$_});
      }
 
      $eh{'password'} = "_REMOTE";
@@ -58,7 +58,7 @@ Select what in particular you're having a problem with:
 (=_CODE
  my $ret = "";
  my $sth = $dbh->prepare("SELECT spcatid, catname FROM supportcat ".
-			 "WHERE is_selectable='1' ORDER BY sortorder");
+                         "WHERE is_selectable='1' ORDER BY sortorder");
  $sth->execute;
  while ($_ = $sth->fetchrow_hashref) {
      $ret .= "<OPTION VALUE=$_->{'spcatid'}>$_->{'catname'}\n";

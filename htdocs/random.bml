@@ -9,8 +9,8 @@
      my $rand = int(rand($max))+1;
      my $user = $dbr->selectrow_array("SELECT u.user FROM randomuserset r, useridmap u WHERE r.userid=u.userid AND r.rid=$rand");
      if ($user) {
-	 print "Location: $LJ::SITEROOT/users/$user/\n\n";
-	 return;
+         print "Location: $LJ::SITEROOT/users/$user/\n\n";
+         return;
      }
  }
 

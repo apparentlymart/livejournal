@@ -97,8 +97,8 @@ if ($pid = fork) {
 
     # Quick command parsing, since there isn't much to it.
     if ($cmdmsg =~ s/^cmd:\s//) {
-	handle_request($cmdmsg);
-	next;
+        handle_request($cmdmsg);
+        next;
     }
   }
   die "recv: $!\n";

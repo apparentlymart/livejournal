@@ -17,8 +17,8 @@ BODY<=
      $ret .= "(=H1 Service Providers H1=)(=P The following text messaging service providers are supported. P=)";
      $ret .= "<UL>";
      foreach my $p (LJ::TextMessage::providers()) {
-	 my $info = LJ::TextMessage::provider_info($p);
-	 $ret .= "<P><B>$info->{'name'}</B> (from: $info->{'fromlimit'}, msg: $info->{'msglimit'}, total: $info->{'totlimit'})<BR>$info->{'notes'}";
+         my $info = LJ::TextMessage::provider_info($p);
+         $ret .= "<P><B>$info->{'name'}</B> (from: $info->{'fromlimit'}, msg: $info->{'msglimit'}, total: $info->{'totlimit'})<BR>$info->{'notes'}";
      }
      $ret .= "</UL>";
      &add_footer();
@@ -36,12 +36,12 @@ BODY<=
 
  if ($u->{'txtmsg_status'} eq "on") {
      $tminfo = $dbr->selectrow_hashref("SELECT provider, number, security ".
-				       "FROM txtmsg WHERE userid=$u->{'userid'}")
+                                       "FROM txtmsg WHERE userid=$u->{'userid'}")
  }
 
  unless ($tminfo) {
      $ret .= "(=H1 Unavailable H1=)(=P This user has not setup their text messaging ".
-	 "information at LiveJournal or they've turned it off. P=)";
+         "information at LiveJournal or they've turned it off. P=)";
      &add_footer();
      return $ret;
  }
@@ -57,20 +57,20 @@ BODY<=
      $remote = LJ::get_remote($dbs);
      my $andbefriend;
      if ($tminfo->{'security'} eq "friends") {
-	 $andbefriend = " and be listed as their friend";
+         $andbefriend = " and be listed as their friend";
      }
      unless ($remote) {
-	 $ret .= "(=H1 Not logged in H1=)(=P To send a text message to this user, you must be <A HREF=\"/login.bml?ret=1\">logged in</A>$andbefriend. P=)";
-	 &add_footer();
-	 return $ret;
+         $ret .= "(=H1 Not logged in H1=)(=P To send a text message to this user, you must be <A HREF=\"/login.bml?ret=1\">logged in</A>$andbefriend. P=)";
+         &add_footer();
+         return $ret;
      }
 
      if ($tminfo->{'security'} eq "friends" && $u->{'userid'} != $remote->{'userid'}) {
-	 unless (LJ::is_friend($dbs, $u->{'userid'}, $remote->{'userid'})) {
-	     $ret .= "(=H1 Unauthorized H1=)(=P User <B>$u->{'user'}</B> has selected \"friends only\" as the security level required to send text messages to them.  P=)";
-	     &add_footer();
-	     return $ret;
-	 }
+         unless (LJ::is_friend($dbs, $u->{'userid'}, $remote->{'userid'})) {
+             $ret .= "(=H1 Unauthorized H1=)(=P User <B>$u->{'user'}</B> has selected \"friends only\" as the security level required to send text messages to them.  P=)";
+             &add_footer();
+             return $ret;
+         }
      }
  }
 
@@ -81,13 +81,13 @@ BODY<=
      my $from = $tminfo->{'security'} eq "all" ? $FORM{'from'} : $remote->{'user'};
 
      my $phone = new LJ::TextMessage { 'provider' => $tminfo->{'provider'},
-				       'number' => $tminfo->{'number'}, 
-				       'mailcommand' => $LJ::SENDMAIL,
-				   };
+                                       'number' => $tminfo->{'number'}, 
+                                       'mailcommand' => $LJ::SENDMAIL,
+                                   };
      my @errors;
      $phone->send({ 'from' => $from, 
-		    'message' => $message, },
-		  \@errors);
+                    'message' => $message, },
+                  \@errors);
 
      return LJ::bad_input(@errors) if @errors;
 

@@ -21,22 +21,22 @@ BODY<=
  {
      if ($FORM{'confirm'}) 
      {
-	 my $quid = $aa->{'userid'}+0;
-	 $dbh->do("UPDATE user SET allow_getljnews='N' WHERE userid=$quid");
-	 return "(=H1 Done. H1=)(=P You won't get $LJ::SITENAME news anymore. P=)";
+         my $quid = $aa->{'userid'}+0;
+         $dbh->do("UPDATE user SET allow_getljnews='N' WHERE userid=$quid");
+         return "(=H1 Done. H1=)(=P You won't get $LJ::SITENAME news anymore. P=)";
      } 
      else 
      {
-	 my $ret = "";
-	 $ret .= "(=H1 Are you sure? H1=)(=P If you want to unsubscribe from the $LJ::SITENAME news mailing list, press the button below.... P=)";
-	 $ret .= "<FORM METHOD=POST ACTION=/unsubscribe.bml>\n";
-	 my $eaaid = LJ::ehtml($aaid);
-	 my $eauth = LJ::ehtml($auth);
-	 $ret .= "<INPUT TYPE=HIDDEN NAME=aaid VALUE=\"$eaaid\">\n";
-	 $ret .= "<INPUT TYPE=HIDDEN NAME=auth VALUE=\"$eauth\">\n";
-	 $ret .= "<INPUT TYPE=HIDDEN NAME=confirm VALUE=1>\n";
-	 $ret .= "<CENTER><INPUT TYPE=SUBMIT VALUE=\"Unsubscribe!\"></CENTER></FORM>\n";
-	 return $ret;	 
+         my $ret = "";
+         $ret .= "(=H1 Are you sure? H1=)(=P If you want to unsubscribe from the $LJ::SITENAME news mailing list, press the button below.... P=)";
+         $ret .= "<FORM METHOD=POST ACTION=/unsubscribe.bml>\n";
+         my $eaaid = LJ::ehtml($aaid);
+         my $eauth = LJ::ehtml($auth);
+         $ret .= "<INPUT TYPE=HIDDEN NAME=aaid VALUE=\"$eaaid\">\n";
+         $ret .= "<INPUT TYPE=HIDDEN NAME=auth VALUE=\"$eauth\">\n";
+         $ret .= "<INPUT TYPE=HIDDEN NAME=confirm VALUE=1>\n";
+         $ret .= "<CENTER><INPUT TYPE=SUBMIT VALUE=\"Unsubscribe!\"></CENTER></FORM>\n";
+         return $ret;	 
 
      }
      my $blah = join(", ", %$aa);

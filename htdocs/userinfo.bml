@@ -14,7 +14,7 @@
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
  my $dbcr;
-	
+        
  my $remote = LJ::get_remote($dbr);
 
  my $sth;
@@ -45,7 +45,7 @@
 
  {
      return $error->("Only users with 'finduser' priv can lookup users by userid.")
-	 if ($userid && ! LJ::check_priv($dbs, $remote, "finduser"));
+         if ($userid && ! LJ::check_priv($dbs, $remote, "finduser"));
 
      my $where = $userid ? "userid=$userid" : "user=$quser";
      $sth = $dbr->prepare("SELECT userid, user, statusvis, caps, has_bio, name, defaultpicid, txtmsg_status, allow_infoshow, bdate, allow_contactshow, opt_mangleemail, email, journaltype, dversion, clusterid FROM user WHERE $where");
@@ -55,14 +55,14 @@
      $userid = $u->{'userid'}+0 if $u;
 
      if ($u && $FORM{'mode'} eq "full") {
-	 $sth = $dbr->prepare("SELECT timeupdate, timecreate, ".
-			      "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(timeupdate) ".
-			      "AS 'secondsold' FROM userusage ".
-			      "WHERE userid=$userid");
-	 $sth->execute;
-	 ($u->{'timeupdate'}, 
-	  $u->{'timecreate'},
-	  $u->{'secondsold'}) = $sth->fetchrow_array;
+         $sth = $dbr->prepare("SELECT timeupdate, timecreate, ".
+                              "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(timeupdate) ".
+                              "AS 'secondsold' FROM userusage ".
+                              "WHERE userid=$userid");
+         $sth->execute;
+         ($u->{'timeupdate'}, 
+          $u->{'timecreate'},
+          $u->{'secondsold'}) = $sth->fetchrow_array;
      }
  }
 
@@ -84,7 +84,7 @@
  ### load user props.  some don't apply to communities
  {
      my @props = qw(opt_whatemailshow opt_blockrobots country state city zip 
-		    url urlname opt_hidefriendofs);
+                    url urlname opt_hidefriendofs);
      unless ($com) { push @props, qw(aolim icq yahoo msn gender jabber); }
      LJ::load_user_props($dbr, $u, @props);
  }
@@ -137,9 +137,9 @@
      $sth = $dbr->prepare("SELECT i.interest FROM interests i, userinterests ui WHERE i.intid=ui.intid AND ui.userid=$remote->{'userid'}");
      $sth->execute;
      while (my ($int) = $sth->fetchrow_array) {
-	 if (defined $interests{$int}) {
-	     $interests{$int}->{'common'} = 1;
-	 }
+         if (defined $interests{$int}) {
+             $interests{$int}->{'common'} = 1;
+         }
      }
  }
 
@@ -149,13 +149,13 @@
      $incfriendof = 0; 
  }
  LJ::do_request($dbr, 
-		{ 'mode' => 'getfriends',
-		  'includefriendof' => $incfriendof,
-		  'user' => $u->{'user'}, }, 
-		\%res_fr,
-		{ 'userid' => $u->{'userid'},
-		  'noauth' => 1,
-	      }); 
+                { 'mode' => 'getfriends',
+                  'includefriendof' => $incfriendof,
+                  'user' => $u->{'user'}, }, 
+                \%res_fr,
+                { 'userid' => $u->{'userid'},
+                  'noauth' => 1,
+              }); 
 
  $u->{'name'} = LJ::ehtml($u->{'name'});
 
@@ -179,15 +179,15 @@
              $cowner = LJ::get_username($dbs, $ci->{'ownerid'});
          }
      
-	 if ($ci->{'membership'} eq "open") {
-	     $body .= "This an open-membership community.  To join, <A HREF=\"/community/join.bml?cuserid=$u->{'userid'}\">click here</A>.\n";
-	     if ($ci->{'postlevel'} eq "select") {
-		 $body .= " Although it's open, the setting for this community is that only select users are able to post to it.  To request access, contact <A HREF=\"userinfo.bml?user=$cowner\">its maintainer</A>.";
-	     }
-	 } elsif ($ci->{'membership'} eq "closed") {
-	     $body .= "This is a closed community.  To become a member you must contact <A HREF=\"userinfo.bml?user=$cowner\">its maintainer</A>.";
-	 }
-	$body .= " You may <A HREF=\"/community/leave.bml?cuserid=$u->{'userid'}\">leave the community</A> at any time.";
+         if ($ci->{'membership'} eq "open") {
+             $body .= "This an open-membership community.  To join, <A HREF=\"/community/join.bml?cuserid=$u->{'userid'}\">click here</A>.\n";
+             if ($ci->{'postlevel'} eq "select") {
+                 $body .= " Although it's open, the setting for this community is that only select users are able to post to it.  To request access, contact <A HREF=\"userinfo.bml?user=$cowner\">its maintainer</A>.";
+             }
+         } elsif ($ci->{'membership'} eq "closed") {
+             $body .= "This is a closed community.  To become a member you must contact <A HREF=\"userinfo.bml?user=$cowner\">its maintainer</A>.";
+         }
+        $body .= " You may <A HREF=\"/community/leave.bml?cuserid=$u->{'userid'}\">leave the community</A> at any time.";
      }
      $body .= " P=)";
  }
@@ -196,11 +196,11 @@
  if ($remote->{'user'} && $remote->{'user'} ne $user) {
      $add_friend = 1;
      if ($res_fr{'friendof_count'}) {
-	 for (my $i=1; $i<=$res_fr{'friendof_count'}; $i++) {
-	     if ($remote->{'user'} eq $res_fr{"friendof_${i}_user"}) {
-		 $add_friend = 0;
-	     }
-	 }
+         for (my $i=1; $i<=$res_fr{'friendof_count'}; $i++) {
+             if ($remote->{'user'} eq $res_fr{"friendof_${i}_user"}) {
+                 $add_friend = 0;
+             }
+         }
      }
  }
 
@@ -222,9 +222,9 @@
      push @linkele, "<A HREF=\"/tools/tellafriend.bml?user=$u->{'user'}\"><IMG ALIGN=ABSMIDDLE HSPACE=2 VSPACE=2 SRC=\"$LJ::IMGPREFIX/btn_tellfriend.gif\" WIDTH=22 HEIGHT=20 ALT=\"Tell a Friend!\" title=\"Tell a Friend!\" BORDER=0></A>";
 
      if (@linkele) {
-	 $body .="(=STANDOUT ";
-	 $body .= join("&nbsp;&nbsp;", @linkele);
-	 $body .= " STANDOUT=)";
+         $body .="(=STANDOUT ";
+         $body .= join("&nbsp;&nbsp;", @linkele);
+         $body .= " STANDOUT=)";
      }
  }
 
@@ -234,8 +234,8 @@
  {
      my $hook_extra;
      LJ::run_hooks("userinfo_html_by_user", {
-	 'u' => $u,
-	 'ret' => \$hook_extra,
+         'u' => $u,
+         'ret' => \$hook_extra,
      });
      $body .= "<tr valign=\"top\"><td align=\"right\"><b>User:</b></td><td width=\"100%\"><a href=\"/$dir/$user/\"><b>$user</b></a> ($u->{'userid'}) $hook_extra</td>\n";
  }
@@ -271,8 +271,8 @@
      my $url = LJ::ehtml($u->{'url'});
      my $span = ($narrow_left-- >= 0) ? 1 : 2;
      unless ($url =~ /^https?:\/\//) {
-	 $url =~ s/^http\W*//;
-	 $url = "http://$url";
+         $url =~ s/^http\W*//;
+         $url = "http://$url";
      }
      my	$urlname = LJ::ehtml($u->{'urlname'} || $url);
      $url = "<A HREF=\"$url\">$urlname</A>";
@@ -282,47 +282,47 @@
 
   if ($u->{'allow_infoshow'} eq "Y") {
       if ($u->{'city'} || $u->{'state'} || $u->{'country'}) {
-	  my $span = ($narrow_left-- >= 0) ? 1 : 2;
-	  $body .= "<TR><TD ALIGN=RIGHT><B>Location:</B></TD><TD COLSPAN=$span>";
-	  my $estate = LJ::eurl($u->{'state'});
-	  my $ecity = LJ::eurl($u->{'city'});
-	  my $ecountry = LJ::eurl($u->{'country'});
+          my $span = ($narrow_left-- >= 0) ? 1 : 2;
+          $body .= "<TR><TD ALIGN=RIGHT><B>Location:</B></TD><TD COLSPAN=$span>";
+          my $estate = LJ::eurl($u->{'state'});
+          my $ecity = LJ::eurl($u->{'city'});
+          my $ecountry = LJ::eurl($u->{'country'});
 
-	  my ($state, $city, $country);
+          my ($state, $city, $country);
 
-	  if ($u->{'country'}) {
-	      $country = $LJ::DISABLED{'directory'} ? $countries{$u->{'country'}} :
-		  "<a href=\"$LJ::DIRURI?opt_sort=ut&s_loc=1&loc_cn=$u->{'country'}\">".
-		      $countries{$u->{'country'}} . "</a>";
+          if ($u->{'country'}) {
+              $country = $LJ::DISABLED{'directory'} ? $countries{$u->{'country'}} :
+                  "<a href=\"$LJ::DIRURI?opt_sort=ut&s_loc=1&loc_cn=$u->{'country'}\">".
+                      $countries{$u->{'country'}} . "</a>";
 
-	      my $estate;
-	      if ($u->{'state'}) {
-		  $state = $u->{'state'};
-		  if ($u->{'country'} eq "US") { $state = $states{$state}; }
-		  $estate = LJ::eurl($state);
-		  $state = $LJ::DISABLED{'directory'} ? $state :
-		      "<a href=\"$LJ::DIRURI?opt_sort=ut&s_loc=1&loc_cn=".
-			  "$u->{'country'}&loc_st=$estate\">$state</A>";
-	      }
+              my $estate;
+              if ($u->{'state'}) {
+                  $state = $u->{'state'};
+                  if ($u->{'country'} eq "US") { $state = $states{$state}; }
+                  $estate = LJ::eurl($state);
+                  $state = $LJ::DISABLED{'directory'} ? $state :
+                      "<a href=\"$LJ::DIRURI?opt_sort=ut&s_loc=1&loc_cn=".
+                          "$u->{'country'}&loc_st=$estate\">$state</A>";
+              }
 
-	      if ($u->{'city'}) {
-		  my $ecity = LJ::eurl($u->{'city'});
-		  $city = LJ::ehtml($u->{'city'});
-		  unless ($LJ::DISABLED{'directory'}) {
-		      $city = "<A HREF=\"$LJ::DIRURI?opt_sort=ut&s_loc=1&loc_cn=".
-			  "$u->{'country'}&loc_st=$estate&loc_ci=$ecity\">$city</A>";
-		  }
-	      }
-	  }
+              if ($u->{'city'}) {
+                  my $ecity = LJ::eurl($u->{'city'});
+                  $city = LJ::ehtml($u->{'city'});
+                  unless ($LJ::DISABLED{'directory'}) {
+                      $city = "<A HREF=\"$LJ::DIRURI?opt_sort=ut&s_loc=1&loc_cn=".
+                          "$u->{'country'}&loc_st=$estate&loc_ci=$ecity\">$city</A>";
+                  }
+              }
+          }
 
-	  $body .= join(", ", grep { $_ } ($city, $state, $country))
+          $body .= join(", ", grep { $_ } ($city, $state, $country))
       }
 
       if ($u->{'bdate'} && !$com && $u->{'bdate'} ne "0000-00-00") {
-	  my $bdate = $u->{'bdate'};
-	  $bdate =~ s/^0000-//;
-	  my $span = ($narrow_left-- >= 0) ? 1 : 2;
-	  $body .= "<TR><TD ALIGN=RIGHT><B>Birthdate:</B></TD><TD COLSPAN=$span>$bdate</TD></TR>\n";
+          my $bdate = $u->{'bdate'};
+          $bdate =~ s/^0000-//;
+          my $span = ($narrow_left-- >= 0) ? 1 : 2;
+          $body .= "<TR><TD ALIGN=RIGHT><B>Birthdate:</B></TD><TD COLSPAN=$span>$bdate</TD></TR>\n";
       }
   }
  
@@ -330,58 +330,58 @@
       $u->{'allow_contactshow'} eq "F" && $remote_isfriend)
   {
       unless ($u->{'opt_whatemailshow'} eq "N") {
-	  my $span = ($narrow_left-- >= 0) ? 1 : 2;
-	  $body .= "<TR VALIGN=TOP><TD ALIGN=RIGHT><B>Email:</B></TD><TD COLSPAN=$span>";
-	  my @emails = ($u->{'email'});
-	  if ($u->{'opt_whatemailshow'} eq "L") {
-	      @emails = ();
-	  }
-	  if ($LJ::USER_EMAIL && LJ::get_cap($u, "useremail")) {
-	      unless ($u->{'opt_whatemailshow'} eq "A") {
-		  push @emails, "$u->{'user'}\@$LJ::USER_DOMAIN";
-	      }
-	  } 
-	  foreach my $email (@emails) {
-	      if ($u->{'opt_mangleemail'} eq "Y" || $email =~ /\@livejournal\.com$/) {
-		  $body .= "<TABLE CELLPADDING=0 CELLSPACING=0><TR><TD>";
-		  for (my $i=0; $i<length($email); $i++) {
-		      my $letter = substr($email, $i, 1);
-		      if ($letter eq "\@") { $letter = "</TD><TD ALIGN=CENTER><I>\@</I></TD><TD>"; }
-		      $body .= "$letter";
-		  }
-		  $body .= "</TD></TR></TABLE>\n";
-	      } else {
-		  $body .= "<A HREF=\"mailto:$email\">$email</A><BR>";
-	      }
-	  }
-	  $body .= "</TD></TR>\n";
+          my $span = ($narrow_left-- >= 0) ? 1 : 2;
+          $body .= "<TR VALIGN=TOP><TD ALIGN=RIGHT><B>Email:</B></TD><TD COLSPAN=$span>";
+          my @emails = ($u->{'email'});
+          if ($u->{'opt_whatemailshow'} eq "L") {
+              @emails = ();
+          }
+          if ($LJ::USER_EMAIL && LJ::get_cap($u, "useremail")) {
+              unless ($u->{'opt_whatemailshow'} eq "A") {
+                  push @emails, "$u->{'user'}\@$LJ::USER_DOMAIN";
+              }
+          } 
+          foreach my $email (@emails) {
+              if ($u->{'opt_mangleemail'} eq "Y" || $email =~ /\@livejournal\.com$/) {
+                  $body .= "<TABLE CELLPADDING=0 CELLSPACING=0><TR><TD>";
+                  for (my $i=0; $i<length($email); $i++) {
+                      my $letter = substr($email, $i, 1);
+                      if ($letter eq "\@") { $letter = "</TD><TD ALIGN=CENTER><I>\@</I></TD><TD>"; }
+                      $body .= "$letter";
+                  }
+                  $body .= "</TD></TR></TABLE>\n";
+              } else {
+                  $body .= "<A HREF=\"mailto:$email\">$email</A><BR>";
+              }
+          }
+          $body .= "</TD></TR>\n";
       }
       
       foreach my $k (qw(aolim icq yahoo msn jabber)) {
-	  $u->{$k} = LJ::ehtml($u->{$k});
+          $u->{$k} = LJ::ehtml($u->{$k});
       }
 
       if ($u->{'aolim'}) {
-	  my $qim = $u->{'aolim'};
-	  $qim =~ s/ /+/g;
-	  my $span = ($narrow_left-- >= 0) ? 1 : 2;
-	  $body .= "<TR><TD ALIGN=RIGHT><B><NOBR>AOL IM</NOBR>:</B></TD><TD COLSPAN=$span>$u->{'aolim'} (<B><A HREF=\"aim:addbuddy?screenname=$qim\">Add Buddy</A>, <A HREF=\"aim:goim?screenname=$qim&amp;message=Hello+there!.+How+are+you?\">Send Message</A></B>)</TD></TR>\n";
+          my $qim = $u->{'aolim'};
+          $qim =~ s/ /+/g;
+          my $span = ($narrow_left-- >= 0) ? 1 : 2;
+          $body .= "<TR><TD ALIGN=RIGHT><B><NOBR>AOL IM</NOBR>:</B></TD><TD COLSPAN=$span>$u->{'aolim'} (<B><A HREF=\"aim:addbuddy?screenname=$qim\">Add Buddy</A>, <A HREF=\"aim:goim?screenname=$qim&amp;message=Hello+there!.+How+are+you?\">Send Message</A></B>)</TD></TR>\n";
       }
       if ($u->{'icq'}) {
-	  my $span = ($narrow_left-- >= 0) ? 1 : 2;
-	  $body .= "<TR><TD ALIGN=RIGHT><B><NOBR>ICQ UIN</NOBR>:</B></TD><TD COLSPAN=$span><IMG SRC=\"http://web.icq.com/whitepages/online?icq=$u->{'icq'}&amp;img=5\" height='18' width='18'> $u->{'icq'} (<B><A HREF=\"http://wwp.icq.com/scripts/search.dll?to=$u->{'icq'}\">Add User</A>, <A HREF=\"http://wwp.icq.com/scripts/contact.dll?msgto=$u->{'icq'}\">Send Message</A></B>) </TD></TR>\n";
+          my $span = ($narrow_left-- >= 0) ? 1 : 2;
+          $body .= "<TR><TD ALIGN=RIGHT><B><NOBR>ICQ UIN</NOBR>:</B></TD><TD COLSPAN=$span><IMG SRC=\"http://web.icq.com/whitepages/online?icq=$u->{'icq'}&amp;img=5\" height='18' width='18'> $u->{'icq'} (<B><A HREF=\"http://wwp.icq.com/scripts/search.dll?to=$u->{'icq'}\">Add User</A>, <A HREF=\"http://wwp.icq.com/scripts/contact.dll?msgto=$u->{'icq'}\">Send Message</A></B>) </TD></TR>\n";
       }
       if ($u->{'yahoo'}) {
-	  my $span = ($narrow_left-- >= 0) ? 1 : 2;
-	  $body .= "<tr><td align=right><b><nobr>Yahoo! ID</nobr>:</b></td><td colspan=$span><a href=\"http://profiles.yahoo.com/$u->{'yahoo'}\">$u->{'yahoo'}</a> (<b><a href=\"http://edit.yahoo.com/config/set_buddygrp?.src=&amp;.cmd=a&amp;.bg=Friends&amp;.bdl=$u->{'yahoo'}\">Add User</a>, <a href=\"http://edit.yahoo.com/config/send_webmesg?.target=$u->{'yahoo'}\">Send Message</a></b>) </td></tr>\n";
+          my $span = ($narrow_left-- >= 0) ? 1 : 2;
+          $body .= "<tr><td align=right><b><nobr>Yahoo! ID</nobr>:</b></td><td colspan=$span><a href=\"http://profiles.yahoo.com/$u->{'yahoo'}\">$u->{'yahoo'}</a> (<b><a href=\"http://edit.yahoo.com/config/set_buddygrp?.src=&amp;.cmd=a&amp;.bg=Friends&amp;.bdl=$u->{'yahoo'}\">Add User</a>, <a href=\"http://edit.yahoo.com/config/send_webmesg?.target=$u->{'yahoo'}\">Send Message</a></b>) </td></tr>\n";
       }
       if ($u->{'msn'}) {
-	  my $span = ($narrow_left-- >= 0) ? 1 : 2;
-	  $body .= "<tr><td align=right><b><nobr>MSN Username</nobr>:</b></td><td colspan=$span>$u->{'msn'}</td></tr>\n";
+          my $span = ($narrow_left-- >= 0) ? 1 : 2;
+          $body .= "<tr><td align=right><b><nobr>MSN Username</nobr>:</b></td><td colspan=$span>$u->{'msn'}</td></tr>\n";
       }
       if ($u->{'jabber'}) {
-	  my $span = ($narrow_left-- >= 0) ? 1 : 2;
-	  $body .= "<tr><td align=right><b><nobr>Jabber</nobr>:</b></td><td colspan=$span>$u->{'jabber'}</td></tr>\n";
+          my $span = ($narrow_left-- >= 0) ? 1 : 2;
+          $body .= "<tr><td align=right><b><nobr>Jabber</nobr>:</b></td><td colspan=$span>$u->{'jabber'}</td></tr>\n";
       }
   }
 
@@ -391,13 +391,13 @@
      my $label = $com ? "About" : "Bio";
 
      &LJ::CleanHTML::clean(\$u->{'bio'}, { 
-	 'wordlength' => 100,
-	 'addbreaks' => 1,
-	 'attrstrip' => [qw[style]],
-	 'eat' => [qw[head title style layer iframe applet]],
-	 'mode' => 'allow',
-	 'deny' => [qw[]],
-	 'remove' => [qw[marquee bgsound embed object caption link]],
+         'wordlength' => 100,
+         'addbreaks' => 1,
+         'attrstrip' => [qw[style]],
+         'eat' => [qw[head title style layer iframe applet]],
+         'mode' => 'allow',
+         'deny' => [qw[]],
+         'remove' => [qw[marquee bgsound embed object caption link]],
      });
 
      $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B>$label:</B></TD><TD COLSPAN=$span>$u->{'bio'}</TD></TR>\n";
@@ -409,9 +409,9 @@
      $sth->execute;
      my ($memcount) = $sth->fetchrow_array;
      if ($memcount) {
-	 my $span = ($narrow_left-- > 0) ? 1 : 2;
-	 my $noun = $memcount == 1 ? "entry" : "entries";
-	 $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B>Memories:</B></TD><TD COLSPAN=$span><A HREF=\"/tools/memories.bml?user=$user\">$memcount $noun</A></TD></TR>\n";
+         my $span = ($narrow_left-- > 0) ? 1 : 2;
+         my $noun = $memcount == 1 ? "entry" : "entries";
+         $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B>Memories:</B></TD><TD COLSPAN=$span><A HREF=\"/tools/memories.bml?user=$user\">$memcount $noun</A></TD></TR>\n";
      }
  }
      
@@ -420,23 +420,23 @@
      $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B><A HREF=\"/interests.bml\">Interests</A>:</B></TD><TD COLSPAN=$span>";
      my $intcount = 0;
      foreach (sort keys %interests) {
-	 $intcount++;
-	 next if ($intcount > 150);
-	 my $eint = LJ::eurl($_);
-	 if ($interests{$_}->{'intcount'} > 1) {
-	     if ($interests{$_}->{'common'}) {
-		 $body .= "<B><A HREF=\"/interests.bml?int=$eint\">$_</A></B>, ";
-	     } else {
-		 $body .= "<A HREF=\"/interests.bml?int=$eint\">$_</A>, ";
-	     }
-	 } else {
-	     $body .= "$_, ";
-	 }
+         $intcount++;
+         next if ($intcount > 150);
+         my $eint = LJ::eurl($_);
+         if ($interests{$_}->{'intcount'} > 1) {
+             if ($interests{$_}->{'common'}) {
+                 $body .= "<B><A HREF=\"/interests.bml?int=$eint\">$_</A></B>, ";
+             } else {
+                 $body .= "<A HREF=\"/interests.bml?int=$eint\">$_</A>, ";
+             }
+         } else {
+             $body .= "$_, ";
+         }
      }
      chop $body; chop $body;  # remove trailing ", "
      if ($intcount > 150) {
-	 my $notshown = $intcount - 150;
-	 $body .= "<B>... $notshown interests not shown</B>";
+         my $notshown = $intcount - 150;
+         $body .= "<B>... $notshown interests not shown</B>";
      }
      $body .= "</TD></TR>\n";
  }
@@ -449,18 +449,18 @@
      my $span = ($narrow_left-- >= 0) ? 1 : 2;
      $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B><A HREF=\"$LJ::SITEROOT/$dir/$user/friends\">$label</A>:</B></TD><TD COLSPAN=$span>";
      if ($res_fr{'friend_count'} > 500) {
-	 $body .= "<B>" . $res_fr{'friend_count'} . ":</B> ";
-	 $body .= "<a href=\"$LJ::DIRURI?s_fro=1&amp;fro_user=$u->{'user'}\">View $label</a>.";
+         $body .= "<B>" . $res_fr{'friend_count'} . ":</B> ";
+         $body .= "<a href=\"$LJ::DIRURI?s_fro=1&amp;fro_user=$u->{'user'}\">View $label</a>.";
      } elsif ($res_fr{'friend_count'}) {
-	 $body .= "<B>" . $res_fr{'friend_count'} . ":</B> ";
-	 my $count = 0;
-	 for (my $i=1; $i<=$res_fr{'friend_count'}; $i++) {
-	     my $fr = $res_fr{"friend_${i}_user"};
-	     $body .= "<A HREF=\"/userinfo.bml?user=$fr\">$fr</A>, ";
-	 }
-	 chop $body; chop $body;
+         $body .= "<B>" . $res_fr{'friend_count'} . ":</B> ";
+         my $count = 0;
+         for (my $i=1; $i<=$res_fr{'friend_count'}; $i++) {
+             my $fr = $res_fr{"friend_${i}_user"};
+             $body .= "<A HREF=\"/userinfo.bml?user=$fr\">$fr</A>, ";
+         }
+         chop $body; chop $body;
      } else {
-	 $body .= "<I>None listed.</I>";
+         $body .= "<I>None listed.</I>";
      }
      $body .= "</TD></TR>\n";
  }
@@ -473,41 +473,41 @@
      my @member_of;
      my $label;
      for (my $i=1; $i<=$res_fr{'friendof_count'}; $i++) {
-	 my $fr = $res_fr{"friendof_${i}_user"};
-	 if ($res_fr{"friendof_${i}_type"} eq "community") {
-	     push @member_of, $fr;
-	 } else {
-	     push @friend_of, $fr;
-	 }
+         my $fr = $res_fr{"friendof_${i}_user"};
+         if ($res_fr{"friendof_${i}_type"} eq "community") {
+             push @member_of, $fr;
+         } else {
+             push @friend_of, $fr;
+         }
      }
      if (@friend_of && ($remote_isowner || ! $u->{'opt_hidefriendofs'})) {
-	 $label = $com ? "Watched by" : "Friend of";
-	 $body .= "<tr><td align='right' valign='top'><b><nobr>$label:</nobr></b>";
-	 if ($u->{'opt_hidefriendofs'}) {
-	     $body  .= "<br /><i>(hidden)</i>";
-	 }
-	 $body .= "</td>";
-	 $body .= "<td colspan='2' valign='top'><b>" . scalar(@friend_of) . ":</b> ";
-	 my $count = 0;
-	 foreach (@friend_of) {
-	     $body .= "<A HREF=\"/userinfo.bml?user=$_\">$_</A>, ";
-	     if (++$count == 150 && $FORM{'mode'} ne "full") {
-		 $body .= "<a href=\"" . LJ::self_link(\%FORM, { 'mode' => 'full' }) . "\">...</a>";
-		 last;
-	     }
-	 }
-	 chop $body; chop $body;
-	 $body .= "</TD></TR>\n";
+         $label = $com ? "Watched by" : "Friend of";
+         $body .= "<tr><td align='right' valign='top'><b><nobr>$label:</nobr></b>";
+         if ($u->{'opt_hidefriendofs'}) {
+             $body  .= "<br /><i>(hidden)</i>";
+         }
+         $body .= "</td>";
+         $body .= "<td colspan='2' valign='top'><b>" . scalar(@friend_of) . ":</b> ";
+         my $count = 0;
+         foreach (@friend_of) {
+             $body .= "<A HREF=\"/userinfo.bml?user=$_\">$_</A>, ";
+             if (++$count == 150 && $FORM{'mode'} ne "full") {
+                 $body .= "<a href=\"" . LJ::self_link(\%FORM, { 'mode' => 'full' }) . "\">...</a>";
+                 last;
+             }
+         }
+         chop $body; chop $body;
+         $body .= "</TD></TR>\n";
      };
      if (@member_of) {
-	 $label = "Member of";
-	 $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B><nobr>$label:</nobr></B></TD><TD COLSPAN=2>";
-	 $body .= "<B>" . scalar(@member_of) . ":</B> ";
-	 foreach (@member_of) {
-	     $body .= "<A HREF=\"/userinfo.bml?user=$_\">$_</A>, ";
-	 }
-	 chop $body; chop $body;
-	 $body .= "</TD></TR>\n";
+         $label = "Member of";
+         $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B><nobr>$label:</nobr></B></TD><TD COLSPAN=2>";
+         $body .= "<B>" . scalar(@member_of) . ":</B> ";
+         foreach (@member_of) {
+             $body .= "<A HREF=\"/userinfo.bml?user=$_\">$_</A>, ";
+         }
+         chop $body; chop $body;
+         $body .= "</TD></TR>\n";
      };
  }
 
@@ -541,20 +541,20 @@
      my $num;
      my $unit;
      if ($secondsold > 60*60*24*7) {
-	 $num = int($secondsold / (60*60*24*7));
-	 $unit = "week";
+         $num = int($secondsold / (60*60*24*7));
+         $unit = "week";
      } elsif ($secondsold > 60*60*24) {
-	 $num = int($secondsold / (60*60*24));
-	 $unit = "day";
+         $num = int($secondsold / (60*60*24));
+         $unit = "day";
      } elsif ($secondsold > 60*60) {
-	 $num = int($secondsold / (60*60));
-	 $unit = "hour";
+         $num = int($secondsold / (60*60));
+         $unit = "hour";
      } elsif ($secondsold > 60) {
-	 $num = int($secondsold / (60));
-	 $unit = "minute";
+         $num = int($secondsold / (60));
+         $unit = "minute";
      } else {
-	 $num = $secondsold;
-	 $unit = "second";
+         $num = $secondsold;
+         $unit = "second";
      }
      $body .= "$u->{'timeupdate'}, <I>$num $unit" . ($num==1?"":"s") . " ago</I>";
  } else {
@@ -565,20 +565,20 @@
  {
      $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B><A HREF=\"$LJ::SITEROOT/download/\">Clients</A> used:</B></TD><TD COLSPAN=2>";
      $sth = $dbr->prepare("SELECT DISTINCT c.client FROM clients c, clientusage cu ".
-			  "WHERE cu.userid=$userid AND cu.clientid=c.clientid ORDER BY c.client");
+                          "WHERE cu.userid=$userid AND cu.clientid=c.clientid ORDER BY c.client");
      $sth->execute;
      my $lastclient = "";
      while ($_ = $sth->fetchrow_hashref) {
-	 next unless ($_->{'client'} =~ m!(.+)/(.+)!);
-	 my ($client, $ver) = ($1, $2);
-	 if ($lastclient ne $client) 
-	 {
-	     if ($lastclient) { chop $body; chop $body; $body .= "<BR>"; }
-	     else { 1; }
-	     $body .= "<B>$client</B>: ";
-	     $lastclient = $client;
-	 }
-	 $body .= "$ver, ";
+         next unless ($_->{'client'} =~ m!(.+)/(.+)!);
+         my ($client, $ver) = ($1, $2);
+         if ($lastclient ne $client) 
+         {
+             if ($lastclient) { chop $body; chop $body; $body .= "<BR>"; }
+             else { 1; }
+             $body .= "<B>$client</B>: ";
+             $lastclient = $client;
+         }
+         $body .= "$ver, ";
      }
      if ($lastclient) { chop $body; chop $body; }
      $body .= "</TD></TR>";
@@ -589,12 +589,12 @@
      my $count;
      
      if ($u->{'clusterid'}) {
-	 $count = $dbcr->selectrow_array("SELECT COUNT(*) FROM log2 WHERE journalid=$userid");
+         $count = $dbcr->selectrow_array("SELECT COUNT(*) FROM log2 WHERE journalid=$userid");
      } else {
-	 $count = $dbr->selectrow_array("SELECT COUNT(*) FROM log WHERE ownerid=$userid"); 
+         $count = $dbr->selectrow_array("SELECT COUNT(*) FROM log WHERE ownerid=$userid"); 
      }
      $body .= "<tr><td align='right' nowrap='1'><b>Journal entries:</b></td><td colspan='2'>" . 
-	 &comma($count) . "</td></tr>";
+         &comma($count) . "</td></tr>";
  }
  
  $sth = $dbr->prepare("SELECT SUM(points) AS 'points' FROM supportpoints WHERE userid=$userid");
@@ -608,7 +608,7 @@
  sub comma {
      my $num = shift;
      if ($num =~ s/(\d)(\d\d\d)$/$1,$2/) {
-	 $num =~ s/(\d)(\d\d\d),/$1,$2/g;
+         $num =~ s/(\d)(\d\d\d),/$1,$2/g;
      }
      return $num;
  }
@@ -618,25 +618,25 @@
  {
      my ($com_post, $com_got);
      unless ($LJ::DISABLED{'show-talkleft'}) {
-	 $com_post = "<b>Posted:</b> ";
-	 if ($u->{'clusterid'}) {
-	     $com_post .= comma($dbcr->selectrow_array("SELECT COUNT(*) FROM talkleft ".
-						       "WHERE userid=$userid"));
-	 } else {
-	     $com_post .= comma($dbr->selectrow_array("SELECT COUNT(*) FROM talk ".
-						      "WHERE posterid=$userid"));
-	 }
-	 $com_post .= " - ";
+         $com_post = "<b>Posted:</b> ";
+         if ($u->{'clusterid'}) {
+             $com_post .= comma($dbcr->selectrow_array("SELECT COUNT(*) FROM talkleft ".
+                                                       "WHERE userid=$userid"));
+         } else {
+             $com_post .= comma($dbr->selectrow_array("SELECT COUNT(*) FROM talk ".
+                                                      "WHERE posterid=$userid"));
+         }
+         $com_post .= " - ";
      }
      if ($u->{'clusterid'}) {
-	 $com_got = $dbcr->selectrow_array("SELECT COUNT(*) FROM talk2 ".
-					   "WHERE journalid=$userid");
+         $com_got = $dbcr->selectrow_array("SELECT COUNT(*) FROM talk2 ".
+                                           "WHERE journalid=$userid");
      } else {
-	 $com_got = $dbr->selectrow_array("SELECT COUNT(*) FROM talk ".
-					  "WHERE journalid=$userid");
+         $com_got = $dbr->selectrow_array("SELECT COUNT(*) FROM talk ".
+                                          "WHERE journalid=$userid");
      }
      $body .= "<tr><td align='right'><b>Comments:</b></td><td colspan='2'>$com_post" .
-	 "<b>Received:</b> " . comma($com_got) . "</td></tr>";
+         "<b>Received:</b> " . comma($com_got) . "</td></tr>";
  }
 
 ###
@@ -644,21 +644,21 @@
 ###
 {
     my $posthere = $dbr->selectcol_arrayref("SELECT u.user FROM logaccess l, user u ".
-					    "WHERE u.userid=l.posterid AND l.ownerid=$u->{'userid'} ".
-					    "AND u.statusvis='V'");
+                                            "WHERE u.userid=l.posterid AND l.ownerid=$u->{'userid'} ".
+                                            "AND u.statusvis='V'");
     my $canpost = $dbr->selectcol_arrayref("SELECT u.user FROM logaccess l, user u ".
-					   "WHERE u.userid=l.ownerid AND l.posterid=$u->{'userid'} ".
-					   "AND u.statusvis='V'");
+                                           "WHERE u.userid=l.ownerid AND l.posterid=$u->{'userid'} ".
+                                           "AND u.statusvis='V'");
 
     if (@$posthere || @$canpost) {
-	$body .= "<tr valign='top'><td align='right'><b>Shared Journal Access:</b></td><td colspan='2'>";
-	foreach (sort @$canpost) {
-	    $body .= "$u->{'user'} can post to <a href='userinfo.bml?user=$_'><b>$_</b></a><br>\n";
-	}
-	foreach (sort @$posthere) {
-	    $body .= "<a href='userinfo.bml?user=$_'><b>$_</b></a> can post to $u->{'user'}<br>\n";
-	}
-	$body .= "</td></tr>";
+        $body .= "<tr valign='top'><td align='right'><b>Shared Journal Access:</b></td><td colspan='2'>";
+        foreach (sort @$canpost) {
+            $body .= "$u->{'user'} can post to <a href='userinfo.bml?user=$_'><b>$_</b></a><br>\n";
+        }
+        foreach (sort @$posthere) {
+            $body .= "<a href='userinfo.bml?user=$_'><b>$_</b></a> can post to $u->{'user'}<br>\n";
+        }
+        $body .= "</td></tr>";
     }
 }
 

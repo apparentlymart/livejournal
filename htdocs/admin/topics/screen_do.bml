@@ -21,22 +21,22 @@
      my $itemid = $2;
 
      if ($act eq "A") {
-	 $sth = $dbh->prepare("UPDATE topic_map SET status='on', screendate=NOW(), screenuserid=$remote->{'userid'} WHERE tptopid=$topid AND itemid=$itemid AND status='new'");
-	 $sth->execute;
-	 if ($sth->rows) {
-	     $ret .= "<B>$itemid</B> approved.<BR>\n";
-	 } else {
-	     $ret .= "<B>$itemid</B> already acted on.<BR>\n";
-	 }
+         $sth = $dbh->prepare("UPDATE topic_map SET status='on', screendate=NOW(), screenuserid=$remote->{'userid'} WHERE tptopid=$topid AND itemid=$itemid AND status='new'");
+         $sth->execute;
+         if ($sth->rows) {
+             $ret .= "<B>$itemid</B> approved.<BR>\n";
+         } else {
+             $ret .= "<B>$itemid</B> already acted on.<BR>\n";
+         }
      }
      if ($act eq "D") {
-	 $sth = $dbh->prepare("UPDATE topic_map SET status='deny', screendate=NOW(), screenuserid=$remote->{'userid'} WHERE tptopid=$topid AND itemid=$itemid AND status='new'");
-	 $sth->execute;
-	 if ($sth->rows) {
-	     $ret .= "<B>$itemid</B> denied.<BR>\n";
-	 } else {
-	     $ret .= "<B>$itemid</B> already acted on.<BR>\n";
-	 }
+         $sth = $dbh->prepare("UPDATE topic_map SET status='deny', screendate=NOW(), screenuserid=$remote->{'userid'} WHERE tptopid=$topid AND itemid=$itemid AND status='new'");
+         $sth->execute;
+         if ($sth->rows) {
+             $ret .= "<B>$itemid</B> denied.<BR>\n";
+         } else {
+             $ret .= "<B>$itemid</B> already acted on.<BR>\n";
+         }
 
      }
      

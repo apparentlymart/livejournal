@@ -75,8 +75,8 @@ BODY<=
  ### load users
  my ($up);  # $up = user posted journal item
  LJ::load_userids_multiple($dbs, [
-				  $item->{'posterid'} => \$up,
-				  ], [ $u ]);
+                                  $item->{'posterid'} => \$up,
+                                  ], [ $u ]);
  LJ::load_user_props($dbs, $up, "opt_showtopicstuff");
 
  # check suspended
@@ -100,8 +100,8 @@ BODY<=
  if ($logprops{$itemid}->{'picture_keyword'}) {
      my $qkw = $dbr->quote($logprops{$itemid}->{'picture_keyword'});
      $picid = $dbr->selectrow_array("SELECT m.picid FROM userpicmap m, keywords k ".
-				    "WHERE m.userid=$up->{'userid'} ".
-				    "AND m.kwid=k.kwid AND k.keyword=$qkw");
+                                    "WHERE m.userid=$up->{'userid'} ".
+                                    "AND m.kwid=k.kwid AND k.keyword=$qkw");
  }
 
  my %userpics;
@@ -109,12 +109,12 @@ BODY<=
      LJ::load_userpics($dbs, \%userpics, [ $picid ]);
      my $alt = $up->{'name'};
      if ($logprops{$itemid}->{'picture_keyword'}) {
-	 $alt .= ": $logprops{$itemid}->{'picture_keyword'}";
+         $alt .= ": $logprops{$itemid}->{'picture_keyword'}";
      }
      $alt = LJ::ehtml($alt);
      $ret .= "<td><img src='/userpic/$picid' width='$userpics{$picid}->{'width'}' ".
-	 "height='$userpics{$picid}->{'height'}' align='absmiddle' ".
-	 "hspace='3' title='$alt' alt=''></td>";
+         "height='$userpics{$picid}->{'height'}' align='absmiddle' ".
+         "hspace='3' title='$alt' alt=''></td>";
  }
  
  $ret .= "<td>";
@@ -130,47 +130,47 @@ BODY<=
 
  ## standout bar
  $ret .= LJ::Talk::link_bar($dbs, { 'u' => $u, 'up' => $up, 'headref' => \$head,
-				    'remote' => $remote, 'itemid' => $ditemid, });
+                                    'remote' => $remote, 'itemid' => $ditemid, });
 
  ## dump the log entry, unless we're browsing a thread.
  unless ($thread)
  {
      my %current;
      if ($logprops{$itemid}->{'current_mood'} || $logprops{$itemid}->{'current_moodid'}) {
-	 LJ::load_moods($dbs);
-	 $current{'Mood'} = $logprops{$itemid}->{'current_mood'};
-	 my $mid = $logprops{$itemid}->{'current_moodid'};
-	 if ($mid) {
-	     my $theme = $up->{'moodthemeid'};
-  	     LJ::load_mood_theme($dbs, $theme);
-	     my %pic;
-	     if (LJ::get_mood_picture($theme, $mid, \%pic)) {
-		 $current{'Mood'} = "<img src='$pic{'pic'}' align='absmiddle' width='$pic{'w'}' height='$pic{'h'}' vspace='1'> $LJ::CACHE_MOODS{$mid}->{'name'}";
-	     } else {
-		 $current{'Mood'} = $LJ::CACHE_MOODS{$mid}->{'name'};
-	     }
-	 }
+         LJ::load_moods($dbs);
+         $current{'Mood'} = $logprops{$itemid}->{'current_mood'};
+         my $mid = $logprops{$itemid}->{'current_moodid'};
+         if ($mid) {
+             my $theme = $up->{'moodthemeid'};
+               LJ::load_mood_theme($dbs, $theme);
+             my %pic;
+             if (LJ::get_mood_picture($theme, $mid, \%pic)) {
+                 $current{'Mood'} = "<img src='$pic{'pic'}' align='absmiddle' width='$pic{'w'}' height='$pic{'h'}' vspace='1'> $LJ::CACHE_MOODS{$mid}->{'name'}";
+             } else {
+                 $current{'Mood'} = $LJ::CACHE_MOODS{$mid}->{'name'};
+             }
+         }
      }
      if ($logprops{$itemid}->{'current_music'}) {
-	 $current{'Music'} = $logprops{$itemid}->{'current_music'};
+         $current{'Music'} = $logprops{$itemid}->{'current_music'};
      }
 
      $ret .= "<ul>"; # using <ul> for intenting isn't proper, but this will all go away in s2 anyway.
 
      ### currents
      if (%current) {
-	 $ret .= "<table border=0>\n";
-	 foreach (sort keys %current) {
-	     $ret .= "<tr><td align=right><b>Current $_:</b></td><td>$current{$_}</td></tr>\n";
-	 }
-	 $ret .= "</table><p>\n";
+         $ret .= "<table border=0>\n";
+         foreach (sort keys %current) {
+             $ret .= "<tr><td align=right><b>Current $_:</b></td><td>$current{$_}</td></tr>\n";
+         }
+         $ret .= "</table><p>\n";
      }
 
      ###
      if ($item->{'subject'}) {
-	 my $subject = $item->{'subject'};
+         my $subject = $item->{'subject'};
        LJ::CleanHTML::clean_subject(\$subject);
-	 $ret .= "<font face='Arial,Helvetica' size='+1'><i><b>$subject</b></i></font><br />\n";
+         $ret .= "<font face='Arial,Helvetica' size='+1'><i><b>$subject</b></i></font><br />\n";
      }
 
      $ret .= $event;
@@ -196,27 +196,27 @@ BODY<=
      my $db = $dbcm;
      my $recent = "";
      if (! $LJ::USE_RECENT_TABLES) {
-	 $db = $dbcr;
+         $db = $dbcr;
      } elsif ($item->{'secondsold'} < $LJ::RECENT_DAYS*86400) {
-	 $db = $dbcr;
-	 $recent = "recent_";
+         $db = $dbcr;
+         $recent = "recent_";
      }
 
      if ($clustered) {
-	 $sth = $db->prepare("SELECT t.jtalkid AS 'talkid', t.posterid, u.user AS 'userpost', ".
-			     "t.datepost, t.parenttalkid, tt.subject, t.state ".
-			     "FROM talk2 t, ${recent}talktext2 tt ".
-			     "LEFT JOIN useridmap u ON u.userid=t.posterid ".
-			     "WHERE t.journalid=$u->{'userid'} AND tt.journalid=$u->{'userid'} ".
-			     "AND t.nodetype='L' AND t.nodeid=$itemid AND ".
-			     "t.jtalkid=tt.jtalkid ORDER BY t.jtalkid");
+         $sth = $db->prepare("SELECT t.jtalkid AS 'talkid', t.posterid, u.user AS 'userpost', ".
+                             "t.datepost, t.parenttalkid, tt.subject, t.state ".
+                             "FROM talk2 t, ${recent}talktext2 tt ".
+                             "LEFT JOIN useridmap u ON u.userid=t.posterid ".
+                             "WHERE t.journalid=$u->{'userid'} AND tt.journalid=$u->{'userid'} ".
+                             "AND t.nodetype='L' AND t.nodeid=$itemid AND ".
+                             "t.jtalkid=tt.jtalkid ORDER BY t.jtalkid");
      } else {
-	 $sth = $db->prepare("SELECT t.talkid, t.posterid, u.user AS 'userpost', ".
-			     "t.datepost, t.parenttalkid, tt.subject, t.state ".
-			     "FROM talk t, ${recent}talktext tt ".
-			     "LEFT JOIN useridmap u ON u.userid=t.posterid ".
-			     "WHERE t.nodetype='L' AND t.nodeid=$itemid AND ".
-			     "t.talkid=tt.talkid ORDER BY t.talkid");
+         $sth = $db->prepare("SELECT t.talkid, t.posterid, u.user AS 'userpost', ".
+                             "t.datepost, t.parenttalkid, tt.subject, t.state ".
+                             "FROM talk t, ${recent}talktext tt ".
+                             "LEFT JOIN useridmap u ON u.userid=t.posterid ".
+                             "WHERE t.nodetype='L' AND t.nodeid=$itemid AND ".
+                             "t.talkid=tt.talkid ORDER BY t.talkid");
      }
      $sth->execute;
      die $db->errstr if $db->err;
@@ -252,13 +252,13 @@ BODY<=
      my @check_for_children = @posts_to_load;
      while (@check_for_children && @posts_to_load < $PAGE_SIZE) 
      {
-	 my $cfc = shift @check_for_children;
-	 next unless (defined $children{$cfc});
-	 foreach my $child (sort { $posts{$a}->{'datepost'} cmp $posts{$b}->{'datepost'} } @{$children{$cfc}}) {
-	     last unless (@posts_to_load < $PAGE_SIZE);
-	     push @check_for_children, $child;
-	     push @posts_to_load, $child;
-	 }
+         my $cfc = shift @check_for_children;
+         next unless (defined $children{$cfc});
+         foreach my $child (sort { $posts{$a}->{'datepost'} cmp $posts{$b}->{'datepost'} } @{$children{$cfc}}) {
+             last unless (@posts_to_load < $PAGE_SIZE);
+             push @check_for_children, $child;
+             push @posts_to_load, $child;
+         }
      }
  }
  
@@ -295,23 +295,23 @@ BODY<=
      next if ($_->{'_hide'});
 
      if ($_->{'state'} eq "D") {
-	 $_->{'subject'} = "[deleted]";
+         $_->{'subject'} = "[deleted]";
      }
      elsif ($_->{'state'} eq "A") {
-	 # if the message isn't deleted, flag its parent(s) as
-	 # having children to recurse into later.
-	 my $par = $_->{'parenttalkid'};
-	 while ($par) {
-	     $posts{$par}->{'_haschildren'}++;
-	     $par = $posts{$par}->{'parenttalkid'};
-	 }
+         # if the message isn't deleted, flag its parent(s) as
+         # having children to recurse into later.
+         my $par = $_->{'parenttalkid'};
+         while ($par) {
+             $posts{$par}->{'_haschildren'}++;
+             $par = $posts{$par}->{'parenttalkid'};
+         }
 
-	 unless ($user{$_->{'userpost'}}) {
-	     $user{$_->{'userpost'}} = {};
-	     if ($_->{'_loaded'}) {
-		 $users_to_load{$_->{'posterid'}} = 1;
-	     }
-	 }
+         unless ($user{$_->{'userpost'}}) {
+             $user{$_->{'userpost'}} = {};
+             if ($_->{'_loaded'}) {
+                 $users_to_load{$_->{'posterid'}} = 1;
+             }
+         }
      }
  }
 
@@ -320,12 +320,12 @@ BODY<=
      my @pics_to_load;
      my $userid_in = join(", ", keys %users_to_load);
      $sth = $dbr->prepare("SELECT user, statusvis, email, name, defaultpicid FROM user ".
-			  "WHERE userid IN ($userid_in)");
+                          "WHERE userid IN ($userid_in)");
      $sth->execute;
 
      while ($_ = $sth->fetchrow_hashref) {
-	 $user{$_->{'user'}} = $_;
-	 push @pics_to_load, $_->{'defaultpicid'} if $_->{'defaultpicid'};
+         $user{$_->{'user'}} = $_;
+         push @pics_to_load, $_->{'defaultpicid'} if $_->{'defaultpicid'};
      }
      LJ::load_userpics($dbs, \%userpics, [ @pics_to_load ]);     
 
@@ -342,10 +342,10 @@ BODY<=
      if ($page < $pages) { $right = "<a href='" . LJ::self_link(\%FORM, { 'page' => $page+1 }) . "'>$right</a>"; }
      $navcrap .= $left . " ";
      for (my $i=1; $i<=$pages; $i++) {
-	 my $link = "[$i]";
-	 if ($i != $page) { $link = "<a href='" . LJ::self_link(\%FORM, { 'page' => $i }) . "'>$link</a>"; }
-	 else { $link = "<font size='+1'><b>$link</b></font>"; }
-	 $navcrap .= "$link ";
+         my $link = "[$i]";
+         if ($i != $page) { $link = "<a href='" . LJ::self_link(\%FORM, { 'page' => $i }) . "'>$link</a>"; }
+         else { $link = "<font size='+1'><b>$link</b></font>"; }
+         $navcrap .= "$link ";
      }
      $navcrap .= "$right";
      $navcrap .= "</font></center> STANDOUT=)\n";
@@ -359,14 +359,14 @@ BODY<=
 
      if ($post_count > 0) 
      {
-	 recurse_post(\%posts, \$ret, $thread, {}, { "newfirst" => 0, 
-						     "children" => \%children,  
-						 });
-	 $ret .= "<p><hr /><center><b><a href='talkpost.bml?${jargent}itemid=$ditemid'>(Post a new comment)</a></b></center></p>";
+         recurse_post(\%posts, \$ret, $thread, {}, { "newfirst" => 0, 
+                                                     "children" => \%children,  
+                                                 });
+         $ret .= "<p><hr /><center><b><a href='talkpost.bml?${jargent}itemid=$ditemid'>(Post a new comment)</a></b></center></p>";
      }
-	 
+         
      if ($navcrap) {
-	 $ret .= "<p>$navcrap</p>";
+         $ret .= "<p>$navcrap</p>";
      }
  }
 
@@ -396,121 +396,121 @@ sub recurse_post
 
     if ($tid) 
     {
-	my $datepost = "<font size='-1'>" . substr($post->{'datepost'}, 0, 16) . "</font>";
-	my $userpost = $post->{'userpost'};
-	my $user = "<i>(Anonymous)</i>";
-	if ($post->{'deleted_poster'}) {
-	    $user = "<i>(Deleted user: $post->{'deleted_poster'})</i>";
-	}
+        my $datepost = "<font size='-1'>" . substr($post->{'datepost'}, 0, 16) . "</font>";
+        my $userpost = $post->{'userpost'};
+        my $user = "<i>(Anonymous)</i>";
+        if ($post->{'deleted_poster'}) {
+            $user = "<i>(Deleted user: $post->{'deleted_poster'})</i>";
+        }
 
-	if ($post->{'state'} eq "D") {
-	    $$ret .= "<p><a name='t$tid'></a><table><tr>";
-	    $$ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
-	    $$ret .= "<td><b>(Deleted post)</b></td></tr></table>\n";
-	} elsif ($userpost && $user{$userpost}->{'statusvis'} eq "S") {
-	    $$ret .= "<p><a name='t$tid'></a><table><tr>";
-	    $$ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
-	    $$ret .= "<td><b>(Reply from suspended user)</b></td></tr></table>\n";
-	} else {
-	    if ($userpost) {
-		$user = "(=LJUSER $userpost LJUSER=)";
-	    }
-	    my $icon = LJ::Talk::show_image($pics, $post->{'subjecticon'});
+        if ($post->{'state'} eq "D") {
+            $$ret .= "<p><a name='t$tid'></a><table><tr>";
+            $$ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
+            $$ret .= "<td><b>(Deleted post)</b></td></tr></table>\n";
+        } elsif ($userpost && $user{$userpost}->{'statusvis'} eq "S") {
+            $$ret .= "<p><a name='t$tid'></a><table><tr>";
+            $$ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
+            $$ret .= "<td><b>(Reply from suspended user)</b></td></tr></table>\n";
+        } else {
+            if ($userpost) {
+                $user = "(=LJUSER $userpost LJUSER=)";
+            }
+            my $icon = LJ::Talk::show_image($pics, $post->{'subjecticon'});
 
-	    if ($post->{'_loaded'}) {
-		$$ret .= "<p><a name='t$tid'></a><table width='100%'><tr>";
-		$$ret .= "<td rowspan='2'><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
-		$$ret .= "<td bgcolor='$bgcolor' width='100%'>";
-		if ($userpost) {
-		    my $picid = $user{$userpost}->{'defaultpicid'};
-		    my $pickw = $post->{'picture_keyword'};
-		    if ($pickw) {
-			$picid = $user{$userpost}->{'_pictures'}->{$pickw};
-			unless ($picid) {
-			    my $qkw = $dbr->quote($pickw);
-			    my $sth = $dbr->prepare("SELECT m.picid FROM userpicmap m, keywords k ".
-						    "WHERE m.userid=$post->{'posterid'} ".
-						    "AND m.kwid=k.kwid AND k.keyword=$qkw");
-			    $sth->execute;
-			    my ($alt_picid) = $sth->fetchrow_array;
-			    if ($alt_picid) {
-				LJ::load_userpics($dbs, \%userpics, [ $alt_picid ]);
-				$picid = $alt_picid;
-			    }
-			}
-		    }
-		    $picid ||= $user{$userpost}->{'defaultpicid'};
-		    if ($picid) {
-			my $alt = $user{$userpost}->{'name'};
-			if ($post->{'picture_keyword'}) {
-			    $alt .= ": $post->{'picture_keyword'}";
-			}
-			$alt = LJ::ehtml($alt);
+            if ($post->{'_loaded'}) {
+                $$ret .= "<p><a name='t$tid'></a><table width='100%'><tr>";
+                $$ret .= "<td rowspan='2'><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
+                $$ret .= "<td bgcolor='$bgcolor' width='100%'>";
+                if ($userpost) {
+                    my $picid = $user{$userpost}->{'defaultpicid'};
+                    my $pickw = $post->{'picture_keyword'};
+                    if ($pickw) {
+                        $picid = $user{$userpost}->{'_pictures'}->{$pickw};
+                        unless ($picid) {
+                            my $qkw = $dbr->quote($pickw);
+                            my $sth = $dbr->prepare("SELECT m.picid FROM userpicmap m, keywords k ".
+                                                    "WHERE m.userid=$post->{'posterid'} ".
+                                                    "AND m.kwid=k.kwid AND k.keyword=$qkw");
+                            $sth->execute;
+                            my ($alt_picid) = $sth->fetchrow_array;
+                            if ($alt_picid) {
+                                LJ::load_userpics($dbs, \%userpics, [ $alt_picid ]);
+                                $picid = $alt_picid;
+                            }
+                        }
+                    }
+                    $picid ||= $user{$userpost}->{'defaultpicid'};
+                    if ($picid) {
+                        my $alt = $user{$userpost}->{'name'};
+                        if ($post->{'picture_keyword'}) {
+                            $alt .= ": $post->{'picture_keyword'}";
+                        }
+                        $alt = LJ::ehtml($alt);
 
-			$$ret .= "<img align='left' hspace='3' src='/userpic/$picid'";
-			$$ret .= " width='$userpics{$picid}->{'width'}'";
-			$$ret .= " title='$alt' alt=''";
-			$$ret .= " height='$userpics{$picid}->{'height'}' />";
-		    }
-		}
-		
-		my $cleansubject = LJ::ehtml($post->{'subject'});
+                        $$ret .= "<img align='left' hspace='3' src='/userpic/$picid'";
+                        $$ret .= " width='$userpics{$picid}->{'width'}'";
+                        $$ret .= " title='$alt' alt=''";
+                        $$ret .= " height='$userpics{$picid}->{'height'}' />";
+                    }
+                }
+                
+                my $cleansubject = LJ::ehtml($post->{'subject'});
 
-		$$ret .= "<font size='+1' face='Arial,Helvetica'><b>$cleansubject</b></font> $icon";
-		$$ret .= "<br />$user\n";
-		$$ret .= "<br />$datepost\n";
-		if ($post->{'poster_ip'} && $remote && $remote->{'user'} eq $up->{'user'}) {
-		    $$ret .= "(from $post->{'poster_ip'})";
-		}
+                $$ret .= "<font size='+1' face='Arial,Helvetica'><b>$cleansubject</b></font> $icon";
+                $$ret .= "<br />$user\n";
+                $$ret .= "<br />$datepost\n";
+                if ($post->{'poster_ip'} && $remote && $remote->{'user'} eq $up->{'user'}) {
+                    $$ret .= "(from $post->{'poster_ip'})";
+                }
 
-		$$ret .= " <font size='-1'>(<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$tid#t$tid'>link</a>)</font> ";
-		
-		if ($remote && ($remote->{'user'} eq $userpost ||
-				$remote->{'user'} eq $u->{'user'} ||
-				$remote->{'user'} eq $up->{'user'} ||
-			        LJ::check_priv($dbs, $remote, "sharedjournal", $u->{'user'})))
-		{
-		    $$ret .= "<a href='delcomment.bml?${jargent}id=$tid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
-		}
-	    
-		$$ret .= "</td></tr>";
-		$$ret .= "<tr><td>\n";
-		
-		## escape BML block codes.  so (=TAG ... TAG=) turns into (&#0061; ... TAG=)
-		$post->{'body'} =~ s/\(=/\(&\#0061\;/g;
-		LJ::CleanHTML::clean_comment(\$post->{'body'}, $post->{'opt_preformatted'});
-		$$ret .= $post->{'body'};
-		
-		$$ret .= "<p><font size='-2'>";
-		if ($post->{'parenttalkid'} != 0 && $post_count >= $PAGE_SIZE) {
-		    $$ret .= "<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$post->{'parenttalkid'}'>(Parent)</a> ";
-		}
-		if (defined $opts->{'children'}->{$tid} && $post_count >= $PAGE_SIZE) {
-		    $$ret .= "<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$tid'>(Thread)</a> ";
-		}
-		
-		my $dtid = $clustered ? ($tid * 256 + $init->{'anum'}) : $tid;
-		$$ret .= "<a href='/talkpost.bml?${jargent}replyto=$dtid'>(Reply to this)</a></font>";
-		$$ret .= "</td></tr></table>\n";  # close colored table
-	    } else {
-		# link to message
-		$$ret .= "<a name='t$tid'></a><table><tr>";
-		$$ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
-		$$ret .= "<td><a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$tid'>" . BML::eall($post->{'subject'} || "(no subject)") . "</a> - $user, <i>$post->{'datepost'}</i></td></tr></table>\n";
-	    }
-	}
+                $$ret .= " <font size='-1'>(<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$tid#t$tid'>link</a>)</font> ";
+                
+                if ($remote && ($remote->{'user'} eq $userpost ||
+                                $remote->{'user'} eq $u->{'user'} ||
+                                $remote->{'user'} eq $up->{'user'} ||
+                                LJ::check_priv($dbs, $remote, "sharedjournal", $u->{'user'})))
+                {
+                    $$ret .= "<a href='delcomment.bml?${jargent}id=$tid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
+                }
+            
+                $$ret .= "</td></tr>";
+                $$ret .= "<tr><td>\n";
+                
+                ## escape BML block codes.  so (=TAG ... TAG=) turns into (&#0061; ... TAG=)
+                $post->{'body'} =~ s/\(=/\(&\#0061\;/g;
+                LJ::CleanHTML::clean_comment(\$post->{'body'}, $post->{'opt_preformatted'});
+                $$ret .= $post->{'body'};
+                
+                $$ret .= "<p><font size='-2'>";
+                if ($post->{'parenttalkid'} != 0 && $post_count >= $PAGE_SIZE) {
+                    $$ret .= "<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$post->{'parenttalkid'}'>(Parent)</a> ";
+                }
+                if (defined $opts->{'children'}->{$tid} && $post_count >= $PAGE_SIZE) {
+                    $$ret .= "<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$tid'>(Thread)</a> ";
+                }
+                
+                my $dtid = $clustered ? ($tid * 256 + $init->{'anum'}) : $tid;
+                $$ret .= "<a href='/talkpost.bml?${jargent}replyto=$dtid'>(Reply to this)</a></font>";
+                $$ret .= "</td></tr></table>\n";  # close colored table
+            } else {
+                # link to message
+                $$ret .= "<a name='t$tid'></a><table><tr>";
+                $$ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
+                $$ret .= "<td><a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$tid'>" . BML::eall($post->{'subject'} || "(no subject)") . "</a> - $user, <i>$post->{'datepost'}</i></td></tr></table>\n";
+            }
+        }
     }
 
     if (@childs) 
     {
-	my $count;
-	# go through children and show them too.
-	foreach my $id (@childs) {
-	    next if ($postref->{$id}->{'_hide'});
-	    recurse_post($postref, $ret, $id, $mark, { "depth" => $opts->{'depth'} + ($tid ? 1 : 0),
-						       "children" => $opts->{'children'},
-						   });
-	}
+        my $count;
+        # go through children and show them too.
+        foreach my $id (@childs) {
+            next if ($postref->{$id}->{'_hide'});
+            recurse_post($postref, $ret, $id, $mark, { "depth" => $opts->{'depth'} + ($tid ? 1 : 0),
+                                                       "children" => $opts->{'children'},
+                                                   });
+        }
     } else {
 #	$$ret .= "No sub-posts.";
     }

@@ -42,24 +42,24 @@ sub clean
     my %action = ();
     my %remove = ();
     if (ref $opts->{'eat'} eq "ARRAY") {
-	foreach (@{$opts->{'eat'}}) { $action{$_} = "eat"; }
+        foreach (@{$opts->{'eat'}}) { $action{$_} = "eat"; }
     }
     if (ref $opts->{'allow'} eq "ARRAY") {
-	foreach (@{$opts->{'allow'}}) { $action{$_} = "allow"; }
+        foreach (@{$opts->{'allow'}}) { $action{$_} = "allow"; }
     }
     if (ref $opts->{'deny'} eq "ARRAY") {
-	foreach (@{$opts->{'deny'}}) { $action{$_} = "deny"; }
+        foreach (@{$opts->{'deny'}}) { $action{$_} = "deny"; }
     }
     if (ref $opts->{'remove'} eq "ARRAY") {
-	foreach (@{$opts->{'remove'}}) { $action{$_} = "deny"; $remove{$_} = 1; }
+        foreach (@{$opts->{'remove'}}) { $action{$_} = "deny"; $remove{$_} = 1; }
     }
 
     $action{'script'} = "eat";
     my @attrstrip = qw(onabort onblur onchange onclick onerror onfocus onload
-		       onmouseout onmouseover onreset onselect onsubmit onunload);
+                       onmouseout onmouseover onreset onselect onsubmit onunload);
 
     if (ref $opts->{'attrstrip'} eq "ARRAY") {
-	foreach (@{$opts->{'attrstrip'}}) { push @attrstrip, $_; }
+        foreach (@{$opts->{'attrstrip'}}) { push @attrstrip, $_; }
     }
 
     my %opencount = ();
@@ -67,171 +67,171 @@ sub clean
   TOKEN:
     while (my $token = $p->get_token)
     {
-	my $type = $token->[0];
+        my $type = $token->[0];
 
-	if ($type eq "S")     # start tag
-	{
-	    my $tag = $token->[1];
+        if ($type eq "S")     # start tag
+        {
+            my $tag = $token->[1];
 
-	    if ($action{$tag} eq "eat") {
-		$p->unget_token($token);
-		$p->get_tag("/$tag");
-	    } 
-	    elsif ($tag eq "lj-cut") 
-	    {
-		my $attr = $token->[2];
-		if ($cut) {
-		    my $text = "Read more...";
-		    if ($attr->{'text'}) {
-			$text = $attr->{'text'};
-			$text =~ s/</&lt;/g;
-			$text =~ s/>/&gt;/g;
-		    }
-		    my $url = LJ::ehtml($cut);
-		    $newdata .= "<nobr><b>( <a href=\"$url\">$text</a> )</b></nobr>";
-		    last TOKEN;
-		} else {
-		    next; # ignore the tag.
-		}
-	    }
-	    elsif ($tag eq "lj") 
-	    {
-		my $attr = $token->[2];
-		if ($attr->{'user'}) {
-		    my $user = LJ::canonical_username($attr->{'user'});
-		    if ($user) {
-			$newdata .= LJ::ljuser($user);
-		    } else {
-			$newdata .= "<b>[Bad username in LJ tag]</b>";
-		    }
-		} else {
-		    $newdata .= "<b>[Unknown LJ tag]</b>";
-		}
-	    }
-	    else 
-	    {
-		my $alt_output = 0;
+            if ($action{$tag} eq "eat") {
+                $p->unget_token($token);
+                $p->get_tag("/$tag");
+            } 
+            elsif ($tag eq "lj-cut") 
+            {
+                my $attr = $token->[2];
+                if ($cut) {
+                    my $text = "Read more...";
+                    if ($attr->{'text'}) {
+                        $text = $attr->{'text'};
+                        $text =~ s/</&lt;/g;
+                        $text =~ s/>/&gt;/g;
+                    }
+                    my $url = LJ::ehtml($cut);
+                    $newdata .= "<nobr><b>( <a href=\"$url\">$text</a> )</b></nobr>";
+                    last TOKEN;
+                } else {
+                    next; # ignore the tag.
+                }
+            }
+            elsif ($tag eq "lj") 
+            {
+                my $attr = $token->[2];
+                if ($attr->{'user'}) {
+                    my $user = LJ::canonical_username($attr->{'user'});
+                    if ($user) {
+                        $newdata .= LJ::ljuser($user);
+                    } else {
+                        $newdata .= "<b>[Bad username in LJ tag]</b>";
+                    }
+                } else {
+                    $newdata .= "<b>[Unknown LJ tag]</b>";
+                }
+            }
+            else 
+            {
+                my $alt_output = 0;
 
-		my $hash = $token->[2];
-		foreach (@attrstrip) {
-		    delete $hash->{$_};
-		}
+                my $hash = $token->[2];
+                foreach (@attrstrip) {
+                    delete $hash->{$_};
+                }
 
-		foreach my $attr (qw(href content src dynsrc lowsrc))
-		{
-		    next unless (defined $hash->{$attr});
-		    $hash->{$attr} =~ s/^lj:(?:\/\/)?(.*)$/ExpandLJURL($1)/ei;
-		    if ($hash->{$attr} =~ /^\s*javascript:/i) { delete $hash->{$attr}; }
-		}
+                foreach my $attr (qw(href content src dynsrc lowsrc))
+                {
+                    next unless (defined $hash->{$attr});
+                    $hash->{$attr} =~ s/^lj:(?:\/\/)?(.*)$/ExpandLJURL($1)/ei;
+                    if ($hash->{$attr} =~ /^\s*javascript:/i) { delete $hash->{$attr}; }
+                }
 
-		if ($tag eq "img") 
-		{
-		    my $img_bad = 0;
-		    if ($opts->{'maximgwidth'} &&
-			(! defined $hash->{'width'} ||
-			 $hash->{'width'} > $opts->{'maximgwidth'})) { $img_bad = 1; }
-		    if ($opts->{'maximgheight'} &&
-			(! defined $hash->{'height'} ||
-			 $hash->{'height'} > $opts->{'maximgheight'})) { $img_bad = 1; }
+                if ($tag eq "img") 
+                {
+                    my $img_bad = 0;
+                    if ($opts->{'maximgwidth'} &&
+                        (! defined $hash->{'width'} ||
+                         $hash->{'width'} > $opts->{'maximgwidth'})) { $img_bad = 1; }
+                    if ($opts->{'maximgheight'} &&
+                        (! defined $hash->{'height'} ||
+                         $hash->{'height'} > $opts->{'maximgheight'})) { $img_bad = 1; }
 
-		    if ($img_bad) {
-			$newdata .= "<a href=\"$hash->{'src'}\"><b>(Image Link)</b></a>";
-			$alt_output = 1;
-		    }
-		}
+                    if ($img_bad) {
+                        $newdata .= "<a href=\"$hash->{'src'}\"><b>(Image Link)</b></a>";
+                        $alt_output = 1;
+                    }
+                }
 
-		unless ($alt_output)
-		{
-		    my $allow;
-		    if ($mode eq "allow") {
-			$allow = 1;
-			if ($action{$tag} eq "deny") { $allow = 0; }
-		    } else {
-			$allow = 0;
-			if ($action{$tag} eq "allow") { $allow = 1; }
-		    }
+                unless ($alt_output)
+                {
+                    my $allow;
+                    if ($mode eq "allow") {
+                        $allow = 1;
+                        if ($action{$tag} eq "deny") { $allow = 0; }
+                    } else {
+                        $allow = 0;
+                        if ($action{$tag} eq "allow") { $allow = 1; }
+                    }
 
-		    if ($allow && ! $remove{$tag})
-		    {
-			if ($allow) { $newdata .= "<$tag"; }
-			else { $newdata .= "&lt;$tag"; }
-			my $slashclose = delete $hash->{'/'};
-			foreach (keys %$hash) {
-			    $newdata .= " $_=\"" . LJ::ehtml($hash->{$_}) . "\"";
-			}
-			if ($slashclose) {
-			    $newdata .= " /";
-			    $opencount{$tag}--;
-			}
-			if ($allow) { $newdata .= ">"; }
-			else { $newdata .= "&gt;"; }
+                    if ($allow && ! $remove{$tag})
+                    {
+                        if ($allow) { $newdata .= "<$tag"; }
+                        else { $newdata .= "&lt;$tag"; }
+                        my $slashclose = delete $hash->{'/'};
+                        foreach (keys %$hash) {
+                            $newdata .= " $_=\"" . LJ::ehtml($hash->{$_}) . "\"";
+                        }
+                        if ($slashclose) {
+                            $newdata .= " /";
+                            $opencount{$tag}--;
+                        }
+                        if ($allow) { $newdata .= ">"; }
+                        else { $newdata .= "&gt;"; }
 
-			$opencount{$tag}++;
-		    }
-		}
-	    }
-	}
-	elsif ($type eq "E") 
-	{
-	    my $tag = $token->[1];
+                        $opencount{$tag}++;
+                    }
+                }
+            }
+        }
+        elsif ($type eq "E") 
+        {
+            my $tag = $token->[1];
 
-	    my $allow;
-	    if ($mode eq "allow") {
-		$allow = 1;
-		if ($action{$tag} eq "deny") { $allow = 0; }
-	    } else {
-		$allow = 0;
-		if ($action{$tag} eq "allow") { $allow = 1; }
-	    }
-	    
-	    if ($allow && ! $remove{$tag})
-	    {
-		if ($allow) {
-		    $newdata .= "</$tag>";
-		    $opencount{$tag}--;
-		} else { $newdata .= "&lt;$tag&gt;"; }
-	    }
-	}
-	elsif ($type eq "T" || $type eq "D") {
-	    my %url = ();
-	    my $urlcount = 0;
+            my $allow;
+            if ($mode eq "allow") {
+                $allow = 1;
+                if ($action{$tag} eq "deny") { $allow = 0; }
+            } else {
+                $allow = 0;
+                if ($action{$tag} eq "allow") { $allow = 1; }
+            }
+            
+            if ($allow && ! $remove{$tag})
+            {
+                if ($allow) {
+                    $newdata .= "</$tag>";
+                    $opencount{$tag}--;
+                } else { $newdata .= "&lt;$tag&gt;"; }
+            }
+        }
+        elsif ($type eq "T" || $type eq "D") {
+            my %url = ();
+            my $urlcount = 0;
 
-	    if ($addbreaks && ! $opencount{'a'}) {
-		$token->[1] =~ s!http://[a-z0-9A-Z_\-\.\/\?\%\+\=\~\:\;\#\&\,]+!$url{++$urlcount}=$&;"\{url$urlcount\}";!eg;
-	    }
-	    if ($wordlength) {
-		# this treats normal characters and &entities; as single characters
-		$token->[1] =~ s/(([^&\s]|(&\#?\w{1,7};)){$wordlength})\B/$1<wbr>/g;
-	    } 
-	    if ($addbreaks) {
-		$token->[1] =~ s/\n/<br>/g;
-		if (! $opencount{'a'}) {
-		    $token->[1] =~ s/\{url(\d+)\}/<a href=\"$url{$1}\">$url{$1}<\/a>/g;
-		}
-	    }
-	    
-	    ## the HTML tokenizer returns half-broken comments as text, so
-	    ## want to make sure we delete any comment starts we see until
-	    ## the end, since they could both be used to comment out the 
-	    ## remainder of the page and also to sneak in back HTML/scripting
+            if ($addbreaks && ! $opencount{'a'}) {
+                $token->[1] =~ s!http://[a-z0-9A-Z_\-\.\/\?\%\+\=\~\:\;\#\&\,]+!$url{++$urlcount}=$&;"\{url$urlcount\}";!eg;
+            }
+            if ($wordlength) {
+                # this treats normal characters and &entities; as single characters
+                $token->[1] =~ s/(([^&\s]|(&\#?\w{1,7};)){$wordlength})\B/$1<wbr>/g;
+            } 
+            if ($addbreaks) {
+                $token->[1] =~ s/\n/<br>/g;
+                if (! $opencount{'a'}) {
+                    $token->[1] =~ s/\{url(\d+)\}/<a href=\"$url{$1}\">$url{$1}<\/a>/g;
+                }
+            }
+            
+            ## the HTML tokenizer returns half-broken comments as text, so
+            ## want to make sure we delete any comment starts we see until
+            ## the end, since they could both be used to comment out the 
+            ## remainder of the page and also to sneak in back HTML/scripting
             ## However, we should keep these when $keepcomments is 1 so we don't
             ## remove CSS when being called from LJ::strip_bad_code.
             $token->[1] =~ s/<!--.*//s unless ($keepcomments);
 
-	    $newdata .= $token->[1];
-	} 
-	elsif ($type eq "C") {
-	    # by default, ditch comments
-	    if ($keepcomments) {
-		$newdata .= $token->[1];
-	    }
-	}
-	elsif ($type eq "PI") {
-	    $newdata .= "<?$token->[1]>";
-	}
-	else {
-	    $newdata .= "<!-- OTHER: " . $type . "-->\n";
-	}
+            $newdata .= $token->[1];
+        } 
+        elsif ($type eq "C") {
+            # by default, ditch comments
+            if ($keepcomments) {
+                $newdata .= $token->[1];
+            }
+        }
+        elsif ($type eq "PI") {
+            $newdata .= "<?$token->[1]>";
+        }
+        else {
+            $newdata .= "<!-- OTHER: " . $type . "-->\n";
+        }
     } # end while
 
 #    if ($opts->{'addbreaks'}) {
@@ -240,11 +240,11 @@ sub clean
 #    }
 
     if (ref $opts->{'autoclose'} eq "ARRAY") {
-	foreach my $tag (@{$opts->{'autoclose'}}) {
-	    if ($opencount{$tag}) {
-		$newdata .= "</$tag>" x $opencount{$tag};
-	    }
-	}
+        foreach my $tag (@{$opts->{'autoclose'}}) {
+            if ($opencount{$tag}) {
+                $newdata .= "</$tag>" x $opencount{$tag};
+            }
+        }
     }
 
 
@@ -258,38 +258,38 @@ sub ExpandLJURL
 
     if ($mode eq 'user')
     {
-	my $url;
-	my $user = shift @args;
-	$user = LJ::canonical_username($user);
-	if ($args[0] eq "profile") {
-	    $url = "$LJ::SITEROOT/userinfo.bml?user=$user";
-	} else {
-	    $url = "$LJ::SITEROOT/users/$user/";
-	    foreach (@args) {
-		$url .= "$_/";
-	    }
-	}
-	return $url;
+        my $url;
+        my $user = shift @args;
+        $user = LJ::canonical_username($user);
+        if ($args[0] eq "profile") {
+            $url = "$LJ::SITEROOT/userinfo.bml?user=$user";
+        } else {
+            $url = "$LJ::SITEROOT/users/$user/";
+            foreach (@args) {
+                $url .= "$_/";
+            }
+        }
+        return $url;
     }
     
     if ($mode eq 'support') 
     {
-	if ($args[0]) {
-	    my $id = $args[0]+0;
-	    return "$LJ::SITEROOT/support/see_request.bml?id=$id";
-	} else {
-	    return "$LJ::SITEROOT/support/";
-	}
+        if ($args[0]) {
+            my $id = $args[0]+0;
+            return "$LJ::SITEROOT/support/see_request.bml?id=$id";
+        } else {
+            return "$LJ::SITEROOT/support/";
+        }
     }
 
     if ($mode eq 'faq') 
     {
-	if ($args[0]) {
-	    my $id = $args[0]+0;
-	    return "$LJ::SITEROOT/support/faqbrowse.bml?faqid=$id";
-	} else {
-	    return "$LJ::SITEROOT/support/faq.bml";
-	}
+        if ($args[0]) {
+            my $id = $args[0]+0;
+            return "$LJ::SITEROOT/support/faqbrowse.bml?faqid=$id";
+        } else {
+            return "$LJ::SITEROOT/support/faq.bml";
+        }
     }
 
     return "$LJ::SITEROOT/";
@@ -302,12 +302,12 @@ sub clean_subject
 {
     my $ref = shift;
     clean($ref, {
-	'wordlength' => 40,
-	'addbreaks' => 0,
-	'eat' => $subject_eat,
-	'mode' => 'deny',
-	'allow' => $subject_allow,
-	'remove' => $subject_remove,
+        'wordlength' => 40,
+        'addbreaks' => 0,
+        'eat' => $subject_eat,
+        'mode' => 'deny',
+        'allow' => $subject_allow,
+        'remove' => $subject_remove,
     });
 }
 
@@ -317,10 +317,10 @@ sub clean_subject_all
 {
     my $ref = shift;
     clean($ref, {
-	'wordlength' => 40,
-	'addbreaks' => 0,
-	'eat' => $subjectall_eat,
-	'mode' => 'deny',
+        'wordlength' => 40,
+        'addbreaks' => 0,
+        'eat' => $subjectall_eat,
+        'mode' => 'deny',
     });
 }
 
@@ -338,18 +338,18 @@ sub clean_event
     # old prototype was passing in the ref and preformatted flag.
     # now the second argument is a hashref of options, so convert it to support the old way.
     unless (ref $opts eq "HASH") {
-	$opts = { 'preformatted' => $opts };
+        $opts = { 'preformatted' => $opts };
     }
 
     clean($ref, {
-	'linkify' => 1,
-	'wordlength' => 40,
-	'addbreaks' => $opts->{'preformatted'} ? 0 : 1,
-	'cuturl' => $opts->{'cuturl'},
-	'eat' => $event_eat,
-	'mode' => 'allow',
-	'remove' => $event_remove,
-	'autoclose' => \@comment_close,
+        'linkify' => 1,
+        'wordlength' => 40,
+        'addbreaks' => $opts->{'preformatted'} ? 0 : 1,
+        'cuturl' => $opts->{'cuturl'},
+        'eat' => $event_eat,
+        'mode' => 'allow',
+        'remove' => $event_remove,
+        'autoclose' => \@comment_close,
     });
 }
 
@@ -364,12 +364,12 @@ sub clean_comment
     my $preformatted = shift;
 
     clean($ref, {
-	'linkify' => 1,
-	'wordlength' => 40,
-	'addbreaks' => $preformatted ? 0 : 1,
-	'eat' => [qw[head title style layer iframe applet object]],
-	'mode' => 'deny',
-	'allow' => \@comment_all,
-	'autoclose' => \@comment_close,
+        'linkify' => 1,
+        'wordlength' => 40,
+        'addbreaks' => $preformatted ? 0 : 1,
+        'eat' => [qw[head title style layer iframe applet object]],
+        'mode' => 'deny',
+        'allow' => \@comment_all,
+        'autoclose' => \@comment_close,
     });
 }

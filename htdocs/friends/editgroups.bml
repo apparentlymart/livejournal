@@ -17,25 +17,25 @@
      $FORM{'mode'} = "editfriendgroups";
      $FORM{'user'} = $remote->{'user'};
      LJ::do_request($dbs, \%FORM, \%res, {
-	 'userid' => $remote->{'userid'},
-	 'noauth' => 1, 
+         'userid' => $remote->{'userid'},
+         'noauth' => 1, 
      });
 
      if ($res{'success'} eq "OK") {
-	 $body .= "(=H1 Saved H1=)(=P Your friend groups are now saved. P=)\n";     
+         $body .= "(=H1 Saved H1=)(=P Your friend groups are now saved. P=)\n";     
      } else {
-	 $body .= "(=H1 Error H1=)(=P Server says: <B>$res{'errmsg'}</B> P=)";
+         $body .= "(=H1 Error H1=)(=P Server says: <B>$res{'errmsg'}</B> P=)";
      }
      return;
  }
 
  my %res;
  LJ::do_request($dbs, { 'mode' => 'getfriends',
-			'user' => $remote->{'user'}, 
-			'includegroups' => 1,
-		    },
-		\%res, { 'userid' => $remote->{'userid'},
-			 'noauth' => 1, });
+                        'user' => $remote->{'user'}, 
+                        'includegroups' => 1,
+                    },
+                \%res, { 'userid' => $remote->{'userid'},
+                         'noauth' => 1, });
  my @num_used;
  my @num_free;
 
@@ -48,11 +48,11 @@
      my $sort = 255;
      my $name = "";
      if ($res{"frgrp_${i}_name"}) {
-	 $sort = $res{"frgrp_${i}_sortorder"}+0;
-	 $name = LJ::ehtml($res{"frgrp_${i}_name"});
-	 push @num_used, $i;
+         $sort = $res{"frgrp_${i}_sortorder"}+0;
+         $name = LJ::ehtml($res{"frgrp_${i}_name"});
+         push @num_used, $i;
      } else {
-	 push @num_free, $i;
+         push @num_free, $i;
      }
      $body .= "<input type=hidden name=efg_set_${i}_name value=\"$name\">\n";
      $body .= "<input type=hidden name=efg_set_${i}_sort value=\"$sort\">\n";
@@ -72,7 +72,7 @@
  function eraseList (list)
  {
      while (list.length) {
-	 list.options[0] = null;
+         list.options[0] = null;
      }
  }
  
@@ -102,15 +102,15 @@
      // iterate over all friends, putting them in one group or the other
      var i;
      for (i=0; i<form.elements.length; i++) {
-	 var name = form.elements[i].name;
-	 var mask = form.elements[i].value;
-	 if (name.substring(0, 21) == "editfriend_groupmask_") {
-	     var user = name.substring(21, name.length);
-	     
-	     var list = mask & (1 << selectedGroup) ? inlist : outlist;
-	     var optionName = new Option(user, user, false, false)
-		 list.options[list.length] = optionName;
-	 }
+         var name = form.elements[i].name;
+         var mask = form.elements[i].value;
+         if (name.substring(0, 21) == "editfriend_groupmask_") {
+             var user = name.substring(21, name.length);
+             
+             var list = mask & (1 << selectedGroup) ? inlist : outlist;
+             var optionName = new Option(user, user, false, false)
+                 list.options[list.length] = optionName;
+         }
      }
  }
 
@@ -119,37 +119,37 @@
      var selindex;
      while ((selindex=from.selectedIndex) != -1)
      {
-	 var i;
-	 var item = new Option(from.options[selindex].text,
-			       from.options[selindex].value,
-			       false, true);
+         var i;
+         var item = new Option(from.options[selindex].text,
+                               from.options[selindex].value,
+                               false, true);
 
-	 from.options[selindex] = null;
-	 //to.options[to.options.length] = item;
+         from.options[selindex] = null;
+         //to.options[to.options.length] = item;
 
-	 // find spot to put new item
+         // find spot to put new item
          for (i=0; i<to.options.length && to.options[i].text < item.text; i++) { }
          var newindex = i;
 
-	 // move everything else down
+         // move everything else down
          for (i=to.options.length; i>newindex; i--) {
-     	     to.options[i] = new Option(to.options[i-1].text,
-					to.options[i-1].value,
-					false,
-					to.options[i-1].selected);
-	 }
-	 to.options[newindex] = item;
+                  to.options[i] = new Option(to.options[i-1].text,
+                                        to.options[i-1].value,
+                                        false,
+                                        to.options[i-1].selected);
+         }
+         to.options[newindex] = item;
 
-	 // turn the groupmask bit on or off
+         // turn the groupmask bit on or off
          var user = item.value;
          var element = document.fg["editfriend_groupmask_"+user];
-	 var mask = element.value;
-	 if (bitstatus) {
-	     mask |= (1 << selectedGroup);
-	 } else {
-	     mask &= ~(1 << selectedGroup);
-	 }
-	 element.value = mask;
+         var mask = element.value;
+         if (bitstatus) {
+             mask |= (1 << selectedGroup);
+         } else {
+             mask &= ~(1 << selectedGroup);
+         }
+         element.value = mask;
      }
  }
 
@@ -175,13 +175,13 @@
      var toindex = selindex+dir;
      if (toindex < 0 || toindex >= list.options.length) { return; }
      var selopt = new Option(list.options[selindex].text,
-			     list.options[selindex].value,
-			     false,
-			     list.options[selindex].selected);
+                             list.options[selindex].value,
+                             false,
+                             list.options[selindex].selected);
      var toopt = new Option(list.options[toindex].text,
-			    list.options[toindex].value,
-			    false,
-			    list.options[toindex].selected);
+                            list.options[toindex].value,
+                            false,
+                            list.options[toindex].selected);
      list.options[toindex] = selopt;
      list.options[selindex] = toopt;    
 
@@ -198,9 +198,9 @@
      // set all their sort orders now
      var i;
      for (i=0; i<list.options.length; i++) {
-	 var item = list.options[i];
-	 var key = "efg_set_"+item.value+"_sort";
-	 document.fg[key].value = (i+1)*5;
+         var item = list.options[i];
+         var key = "efg_set_"+item.value+"_sort";
+         document.fg[key].value = (i+1)*5;
      }
  }
 
@@ -238,13 +238,13 @@
      var i;
      var form = document.fg;
      for (i=0; i<form.elements.length; i++) {
-	 var name = form.elements[i].name;
-	 if (name.substring(0, 21) == "editfriend_groupmask_") {
-	     var user = name.substring(21, name.length);
-	     var mask = form.elements[i].value;
-	     mask &= ~(1 << gnum);
-	     form.elements[i].value = mask;
-	 }
+         var name = form.elements[i].name;
+         if (name.substring(0, 21) == "editfriend_groupmask_") {
+             var user = name.substring(21, name.length);
+             var mask = form.elements[i].value;
+             mask &= ~(1 << gnum);
+             form.elements[i].value = mask;
+         }
      }
 
      // clean up the UI
@@ -259,14 +259,14 @@
      var i;
      var foundg = false;
      for (i=1; i<=30; i++) {
-	 if (form["efg_delete_"+i].value==1) { continue; }
-	 if (form["efg_set_"+i+"_name"].value!="") { continue; }
-	 foundg = true;
-	 break;	 
+         if (form["efg_delete_"+i].value==1) { continue; }
+         if (form["efg_set_"+i+"_name"].value!="") { continue; }
+         foundg = true;
+         break;	 
      }
      if (! foundg) {
-	 alert("Sorry, you can only have 30 groups of friends.  If you've deleted friends but haven't saved yet, do so now and then come back.  You'll then be able to create new groups to fill the voids that the delete groups leave.");
-	 return;
+         alert("Sorry, you can only have 30 groups of friends.  If you've deleted friends but haven't saved yet, do so now and then come back.  You'll then be able to create new groups to fill the voids that the delete groups leave.");
+         return;
      }
      var gnum = i;
      var groupname = prompt("Enter name of new group:", "");
@@ -288,7 +288,7 @@ END_JS
 
  $body .= "\n<TD><B>Your groups:</B><BR><SELECT NAME=list_groups STYLE=\"width: 150px;\" SIZE=15 onChange=\"groupClicked();\">";
  foreach my $num (sort { $res{"frgrp_${a}_sortorder"} <=> 
-			 $res{"frgrp_${b}_sortorder"} } @num_used) 
+                         $res{"frgrp_${b}_sortorder"} } @num_used) 
  {
      $body .= "\n<OPTION VALUE=\"$num\">" . LJ::ehtml($res{"frgrp_${num}_name"});
  }

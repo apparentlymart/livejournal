@@ -22,17 +22,17 @@
  }
 
  my %filters = ("all" => "All memories",
-		"own" => "Only '$user' entries",
-		"other" => "Only other entries");
+                "own" => "Only '$user' entries",
+                "other" => "Only other entries");
  my $filter = $FORM{'filter'} || "all";
  unless (defined $filters{$filter}) { $filter = "all"; }
 
  my $secwhere = "AND m.security='public'";
  if ($remote) {
      if ($remote->{'userid'} == $userid) {
-	 $secwhere = "";
+         $secwhere = "";
      } elsif (LJ::is_friend($dbs, $userid, $remote->{'userid'})) {
-	 $secwhere = "AND m.security IN ('public', 'friends')";
+         $secwhere = "AND m.security IN ('public', 'friends')";
      }
  }
 
@@ -40,18 +40,18 @@
  {
      my $qkw = $dbh->quote($FORM{'keyword'});
      if ($FORM{'keyword'} eq "*") {
-	 $title = "Memorable Posts";
-     	 $body .= "(=H1 Memorable Posts H1=)(=P The following is a list of uncategorized journal entries that user <B>$user</B> found memorable. P=)";
+         $title = "Memorable Posts";
+              $body .= "(=H1 Memorable Posts H1=)(=P The following is a list of uncategorized journal entries that user <B>$user</B> found memorable. P=)";
      } else {
-	 $title = "Memorable $FORM{'keyword'} Posts";
-     	 $body .= "(=H1 $FORM{'keyword'} H1=)(=P The following is a list of \"$FORM{'keyword'}\" journal entries that user <B>$user</B> found memorable. P=)";
+         $title = "Memorable $FORM{'keyword'} Posts";
+              $body .= "(=H1 $FORM{'keyword'} H1=)(=P The following is a list of \"$FORM{'keyword'}\" journal entries that user <B>$user</B> found memorable. P=)";
      }
      $body .= "(=P <A HREF=\"/tools/memories.bml?user=$user\">&lt;&lt; Back</A> P=)";
 
      my $extrawhere = "";
      if ($filter eq "own" || $filter eq "other") {
-	 my $op = $filter eq "own" ? "=" : "<>";
-	 $extrawhere = "AND m.journalid $op $userid";
+         my $op = $filter eq "own" ? "=" : "<>";
+         $extrawhere = "AND m.journalid $op $userid";
      }
      
      $sth = $dbr->prepare("SELECT m.memid, u.user, m.journalid, m.jitemid, m.des, m.security FROM memorable m, memkeyword mk, keywords k LEFT JOIN useridmap u ON m.journalid=u.userid WHERE k.keyword=$qkw AND mk.memid=m.memid AND mk.kwid=k.kwid AND m.userid=$userid $secwhere $extrawhere ORDER BY m.memid");
@@ -60,13 +60,13 @@
      $body .= "<UL>\n";
      while (my $mem = $sth->fetchrow_hashref)
      {
-	 my $eh_des = LJ::ehtml($mem->{'des'});
-	 my $edit = "";
-	 my $jargent = $mem->{'user'} ? "journal=$mem->{'user'}&amp;" : "";
-	 if ($remote && $remote->{'user'} eq $user) {
-	     $edit = " [<a href=\"/tools/memadd.bml?${jargent}itemid=$mem->{'jitemid'}\">edit</a>]";
-	 }
-	 $body .= "<p><li><a href=\"/talkread.bml?${jargent}itemid=$mem->{'jitemid'}\"><b>$eh_des</b></a>$edit<br /><font size='-1'><b>$mem->{'user'}</b></font></li>";
+         my $eh_des = LJ::ehtml($mem->{'des'});
+         my $edit = "";
+         my $jargent = $mem->{'user'} ? "journal=$mem->{'user'}&amp;" : "";
+         if ($remote && $remote->{'user'} eq $user) {
+             $edit = " [<a href=\"/tools/memadd.bml?${jargent}itemid=$mem->{'jitemid'}\">edit</a>]";
+         }
+         $body .= "<p><li><a href=\"/talkread.bml?${jargent}itemid=$mem->{'jitemid'}\"><b>$eh_des</b></a>$edit<br /><font size='-1'><b>$mem->{'user'}</b></font></li>";
      }
      $body .= "</ul>";
      return;
@@ -98,7 +98,7 @@
  {
      $rows++;
      if ($rows==1) {
-	 $body .= "<UL>";
+         $body .= "<UL>";
      }
      my $noun = $row->{'count'}==1 ? "entry" : "entries";
      my $ue_keyword = LJ::eurl($row->{'keyword'});

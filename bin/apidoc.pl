@@ -13,11 +13,11 @@ my $opt_file;
 my $opt_stubs = 0;  # generate stubs of undoced funcs
 my $opt_class = 0;  # group by class
 die unless GetOptions(
-	   'warn' => \$opt_warn,
-	   'file=s' => \$opt_file,
-	   'stubs' => \$opt_stubs,
-	   'class' => \$opt_class,
-	   );
+           'warn' => \$opt_warn,
+           'file=s' => \$opt_file,
+           'stubs' => \$opt_stubs,
+           'class' => \$opt_class,
+           );
 
 die "Unknown arguments.\n" if @ARGV;
 
@@ -64,12 +64,12 @@ if ($opt_class)
 {
     my %by_class;
     foreach my $n (sort keys %funcs) {
-	my $f = $funcs{$n};
-	push @{$by_class{$f->{'class'}}}, $f;
+        my $f = $funcs{$n};
+        push @{$by_class{$f->{'class'}}}, $f;
     }
     my $ret = [];
     foreach my $cn (@classes) {
-	push @$ret, [ $classname{$cn}, $by_class{$cn} ];
+        push @$ret, [ $classname{$cn}, $by_class{$cn} ];
     }
     print Dumper($ret);
     exit;
@@ -83,19 +83,19 @@ sub find
     my @dirs = @_;
     while (@dirs)
     {
-	my $dir = shift @dirs;
-	next if ($dir eq "htdocs/img");
+        my $dir = shift @dirs;
+        next if ($dir eq "htdocs/img");
 
-	opendir (D, $dir);
-	my @files = sort { $a cmp $b } readdir(D);
-	close D;
+        opendir (D, $dir);
+        my @files = sort { $a cmp $b } readdir(D);
+        close D;
 
-	foreach my $f (@files) {
-	    next if ($f eq "." || $f eq "..");
-	    my $full = "$dir/$f";
-	    if (-d $full) { find($full); }
-	    elsif (-f $full) { check_file($full); }
-	}
+        foreach my $f (@files) {
+            next if ($f eq "." || $f eq "..");
+            my $full = "$dir/$f";
+            if (-d $full) { find($full); }
+            elsif (-f $full) { check_file($full); }
+        }
     }
 
 }
@@ -120,79 +120,79 @@ sub check_file
     open (F, $file);
     while (my $l = <F>)
     {
-	if ($l =~ /^package\s*(.+);/) {
-	    $curpackage = $1;
-	}
-	if ($opt_warn && $curpackage && $l =~ /^sub\s+([a-zA-Z0-9]\S+)/) {
-	    my $s = $1;
-	    my $total = $curpackage . "::" . $s;
-	    unless ($funcs{$total}) {
-		print STDERR "Undocumented: $total\n";
-		
-		if ($opt_stubs) {
-		    print "# <LJFUNC>\n";
-		    print "# name: $total\n";
-		    print "# class: \n";
-		    print "# des: \n";
-		    print "# info: \n";
-		    print "# args: \n";
-		    print "# des-: \n";
-		    print "# returns: \n";
-		    print "# </LJFUNC>\n";
-		}
-	    }
-	}
+        if ($l =~ /^package\s*(.+);/) {
+            $curpackage = $1;
+        }
+        if ($opt_warn && $curpackage && $l =~ /^sub\s+([a-zA-Z0-9]\S+)/) {
+            my $s = $1;
+            my $total = $curpackage . "::" . $s;
+            unless ($funcs{$total}) {
+                print STDERR "Undocumented: $total\n";
+                
+                if ($opt_stubs) {
+                    print "# <LJFUNC>\n";
+                    print "# name: $total\n";
+                    print "# class: \n";
+                    print "# des: \n";
+                    print "# info: \n";
+                    print "# args: \n";
+                    print "# des-: \n";
+                    print "# returns: \n";
+                    print "# </LJFUNC>\n";
+                }
+            }
+        }
 
-	print $l if $opt_stubs;
-	
-	if (! $infunc) {
-	    if ($l =~ /<LJFUNC>/) {
-		$infunc = 1;
-		$f = {};
-	    }
-	    next;
-	}
-	
-	if ($l =~ /<\/LJFUNC>/) {
-	    $infunc = 0;
-	    $prefix = "";
-	    $curkey = "";
-	    $contlen = 0;
-	    if ($f->{'name'}) {
-		$f->{'source'} = $file;
-		$f->{'class'} ||= "general";
-		unless ($classname{$f->{'class'}}) {
-		    print STDERR "Unknown class: $f->{'class'} ($f->{'name'})\n";
-		}
-		$funcs{$f->{'name'}} = $f;
-		treeify($f);
-	    }
-	    next;
-	}
-	
-	# continuing a line from line before... must have 
-	# same indenting.
-	if ($prefix && $contlen) {
-	    my $cont = $prefix . " "x$contlen;
-	    if ($l =~ /^\Q$cont\E(.+)/) {
-		my $v = $1;
-		$v =~ s/^\s+//;
-		$v =~ s/\s+$//;
-		$f->{$curkey} .= " " . $v;
-		next;
-	    }
-	}
-	
-	if ($l =~ /^(\W*)([\w\-]+)(:\s*)(.+)/) {
-	    $prefix = $1;
-	    my $k = $2;
-	    my $v = $4;
-	    $v =~ s/^\s+//;
-	    $v =~ s/\s+$//;
-	    $f->{$k} = $v;
-	    $curkey = $k;
-	    $contlen = length($2) + length($3);
-	}
+        print $l if $opt_stubs;
+        
+        if (! $infunc) {
+            if ($l =~ /<LJFUNC>/) {
+                $infunc = 1;
+                $f = {};
+            }
+            next;
+        }
+        
+        if ($l =~ /<\/LJFUNC>/) {
+            $infunc = 0;
+            $prefix = "";
+            $curkey = "";
+            $contlen = 0;
+            if ($f->{'name'}) {
+                $f->{'source'} = $file;
+                $f->{'class'} ||= "general";
+                unless ($classname{$f->{'class'}}) {
+                    print STDERR "Unknown class: $f->{'class'} ($f->{'name'})\n";
+                }
+                $funcs{$f->{'name'}} = $f;
+                treeify($f);
+            }
+            next;
+        }
+        
+        # continuing a line from line before... must have 
+        # same indenting.
+        if ($prefix && $contlen) {
+            my $cont = $prefix . " "x$contlen;
+            if ($l =~ /^\Q$cont\E(.+)/) {
+                my $v = $1;
+                $v =~ s/^\s+//;
+                $v =~ s/\s+$//;
+                $f->{$curkey} .= " " . $v;
+                next;
+            }
+        }
+        
+        if ($l =~ /^(\W*)([\w\-]+)(:\s*)(.+)/) {
+            $prefix = $1;
+            my $k = $2;
+            my $v = $4;
+            $v =~ s/^\s+//;
+            $v =~ s/\s+$//;
+            $f->{$k} = $v;
+            $curkey = $k;
+            $contlen = length($2) + length($3);
+        }
     }
     close (F);
 
@@ -207,21 +207,21 @@ sub treeify
     $args =~ s/\s+//g;
     foreach my $arg (split(/\,/, $args))
     {
-	my $opt = 0;
-	if ($arg =~ s/\?$//) { $opt = 1; }
-	my $list = 0;
-	if ($arg =~ s/\*$//) { $list = 1; }
-	my $a = { 'name' => $arg };
-	if ($opt) { $a->{'optional'} = 1; }
-	if ($list) { $a->{'list'} = 1; }
-	$a->{'des'} = $f->{"des-$arg"} || $common_args{$arg};
-	delete $f->{"des-$arg"};
-	unless ($a->{'des'}) {
-	    if ($opt_warn) {
-		print "Warning: undescribed argument '$arg' in $a->{'name'}\n";
-	    }
-	}
-	push @{$f->{'args'}}, $a;
+        my $opt = 0;
+        if ($arg =~ s/\?$//) { $opt = 1; }
+        my $list = 0;
+        if ($arg =~ s/\*$//) { $list = 1; }
+        my $a = { 'name' => $arg };
+        if ($opt) { $a->{'optional'} = 1; }
+        if ($list) { $a->{'list'} = 1; }
+        $a->{'des'} = $f->{"des-$arg"} || $common_args{$arg};
+        delete $f->{"des-$arg"};
+        unless ($a->{'des'}) {
+            if ($opt_warn) {
+                print "Warning: undescribed argument '$arg' in $a->{'name'}\n";
+            }
+        }
+        push @{$f->{'args'}}, $a;
     }
     
       

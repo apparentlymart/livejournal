@@ -19,8 +19,8 @@ use IO::Socket;
 
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
-require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl"; 
-require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl"; 
+require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
+require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
 
 # constants
 $LJ::EndOfTime = 2147483647;
@@ -28,33 +28,33 @@ $LJ::EndOfTime = 2147483647;
 # declare views (calls into ljviews.pl)
 @LJ::views = qw(lastn friends calendar day);
 %LJ::viewinfo = (
-		 "lastn" => {
-		     "creator" => \&create_view_lastn,
-		     "des" => "Most Recent Events",
-		 },
-		 "calendar" => {
-		     "creator" => \&create_view_calendar,
-		     "des" => "Calendar",
-		 },
-		 "day" => { 
-		     "creator" => \&create_view_day,
-		     "des" => "Day View",
-		 },
-		 "friends" => { 
-		     "creator" => \&create_view_friends,
-		     "des" => "Friends View",
-		 },
-		 "rss" => { 
-		     "creator" => \&create_view_rss,
-		     "des" => "RSS View (XML)",
-		     "nostyle" => 1,
-		 },
-		 "info" => {
-		     # just a redirect to userinfo.bml for now. 
-		     # in S2, will be a real view.
-		     "des" => "Profile Page",
-		 }
-		 );
+                 "lastn" => {
+                     "creator" => \&create_view_lastn,
+                     "des" => "Most Recent Events",
+                 },
+                 "calendar" => {
+                     "creator" => \&create_view_calendar,
+                     "des" => "Calendar",
+                 },
+                 "day" => {
+                     "creator" => \&create_view_day,
+                     "des" => "Day View",
+                 },
+                 "friends" => {
+                     "creator" => \&create_view_friends,
+                     "des" => "Friends View",
+                 },
+                 "rss" => {
+                     "creator" => \&create_view_rss,
+                     "des" => "RSS View (XML)",
+                     "nostyle" => 1,
+                 },
+                 "info" => {
+                     # just a redirect to userinfo.bml for now.
+                     # in S2, will be a real view.
+                     "des" => "Profile Page",
+                 }
+                 );
 
 ## we want to set this right away, so when we get a HUP signal later
 ## and our signal handler sets it to true, perl doesn't need to malloc,
@@ -67,11 +67,11 @@ $LJ::CLEAR_CACHES = 0;
 if ($SIG{'HUP'}) {
     my $oldsig = $SIG{'HUP'};
     $SIG{'HUP'} = sub {
-	&{$oldsig};
+        &{$oldsig};
         LJ::clear_caches();
     };
 } else {
-    $SIG{'HUP'} = \&LJ::clear_caches;    
+    $SIG{'HUP'} = \&LJ::clear_caches;
 }
 
 
@@ -99,7 +99,7 @@ sub get_newids
     my $oldid = $dbh->quote(shift);
 
     return $dbr->selectrow_arrayref("SELECT userid, newid FROM oldids ".
-				    "WHERE area=$area AND oldid=$oldid");
+                                    "WHERE area=$area AND oldid=$oldid");
 }
 
 # <LJFUNC>
@@ -107,7 +107,7 @@ sub get_newids
 # name: LJ::dbs_selectrow_array
 # des: Like DBI's selectrow_array, but working on a $dbs preferring the slave.
 # info: Given a dbset and a query, will try to query the slave first.
-#       Falls back to master if not in slave yet.  See also 
+#       Falls back to master if not in slave yet.  See also
 #       [func[LJ::dbs_selectrow_hashref]].
 # returns: In scalar context, the first column selected.  In list context,
 #          the entire row.
@@ -122,8 +122,8 @@ sub dbs_selectrow_array
     my @dbl = ($dbs->{'dbh'});
     if ($dbs->{'has_slave'}) { unshift @dbl, $dbs->{'dbr'}; }
     foreach my $db (@dbl) {
-	my $ans = $db->selectrow_arrayref($query);
-	return wantarray() ? @$ans : $ans->[0] if defined $ans;
+        my $ans = $db->selectrow_arrayref($query);
+        return wantarray() ? @$ans : $ans->[0] if defined $ans;
     }
     return undef;
 }
@@ -133,7 +133,7 @@ sub dbs_selectrow_array
 # name: LJ::dbs_selectrow_hashref
 # des: Like DBI's selectrow_hashref, but working on a $dbs preferring the slave.
 # info: Given a dbset and a query, will try to query the slave first.
-#       Falls back to master if not in slave yet.  See also 
+#       Falls back to master if not in slave yet.  See also
 #       [func[LJ::dbs_selectrow_array]].
 # returns: Hashref, or undef if no row found in either slave or master.
 # args: dbs, query
@@ -147,19 +147,19 @@ sub dbs_selectrow_hashref
     my @dbl = ($dbs->{'dbh'});
     if ($dbs->{'has_slave'}) { unshift @dbl, $dbs->{'dbr'}; }
     foreach my $db (@dbl) {
-	my $ans = $db->selectrow_hashref($query);
-	return $ans if defined $ans;
+        my $ans = $db->selectrow_hashref($query);
+        return $ans if defined $ans;
     }
     return undef;
 }
 
 # <LJFUNC>
 # name: LJ::get_friend_items
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# des:
+# info:
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub get_friend_items
 {
@@ -173,13 +173,13 @@ sub get_friend_items
 
     my $userid = $opts->{'userid'}+0;
 
-    # 'remote' opt takes precendence, then 'remoteid'    
+    # 'remote' opt takes precendence, then 'remoteid'
     my $remote = $opts->{'remote'};
     LJ::load_remote($dbs, $remote);
     my $remoteid = $remote ? $remote->{'userid'} : 0;
     if ($remoteid == 0 && $opts->{'remoteid'}) {
-	$remoteid = $opts->{'remoteid'} + 0;
-	$remote = LJ::load_userid($dbs, $remoteid);
+        $remoteid = $opts->{'remoteid'} + 0;
+        $remote = LJ::load_userid($dbs, $remoteid);
     }
 
     my @items = ();
@@ -197,57 +197,57 @@ sub get_friend_items
     # but only if the remote viewer is a person, not a community/shared journal.
     my $gmask_from = {};
     if ($remote && $remote->{'journaltype'} eq "P") {
-	$sth = $dbr->prepare("SELECT ff.userid, ff.groupmask FROM friends fu, friends ff WHERE fu.userid=$userid AND fu.friendid=ff.userid AND ff.friendid=$remoteid");
-	$sth->execute;
-	while (my ($friendid, $mask) = $sth->fetchrow_array) { 
-	    $gmask_from->{$friendid} = $mask; 
-	}
-	$sth->finish;
+        $sth = $dbr->prepare("SELECT ff.userid, ff.groupmask FROM friends fu, friends ff WHERE fu.userid=$userid AND fu.friendid=ff.userid AND ff.friendid=$remoteid");
+        $sth->execute;
+        while (my ($friendid, $mask) = $sth->fetchrow_array) {
+            $gmask_from->{$friendid} = $mask;
+        }
+        $sth->finish;
     }
 
     my $filtersql;
     if ($filter) {
-	if ($remoteid == $userid) {
-	    $filtersql = "AND f.groupmask & $filter";
-	}
+        if ($remoteid == $userid) {
+            $filtersql = "AND f.groupmask & $filter";
+        }
     }
 
     my @friends_buffer = ();
     my $total_loaded = 0;
     my $buffer_unit = int($getitems * 1.5);  # load a bit more first to avoid 2nd load
 
-    my $get_next_friend = sub 
+    my $get_next_friend = sub
     {
-	# return one if we already have some loaded.
-	if (@friends_buffer) {
-	    return $friends_buffer[0];
-	}
+        # return one if we already have some loaded.
+        if (@friends_buffer) {
+            return $friends_buffer[0];
+        }
 
-	# load another batch if we just started or
-	# if we just finished a batch.
-	if ($total_loaded % $buffer_unit == 0) 
-	{
-	    my $sth = $dbr->prepare("SELECT u.userid, $LJ::EndOfTime-UNIX_TIMESTAMP(uu.timeupdate), u.clusterid FROM friends f, userusage uu, user u WHERE f.userid=$userid AND f.friendid=uu.userid AND f.friendid=u.userid $filtersql AND u.statusvis='V' AND uu.timeupdate IS NOT NULL ORDER BY 2 LIMIT $total_loaded, $buffer_unit");
-	    $sth->execute;
+        # load another batch if we just started or
+        # if we just finished a batch.
+        if ($total_loaded % $buffer_unit == 0)
+        {
+            my $sth = $dbr->prepare("SELECT u.userid, $LJ::EndOfTime-UNIX_TIMESTAMP(uu.timeupdate), u.clusterid FROM friends f, userusage uu, user u WHERE f.userid=$userid AND f.friendid=uu.userid AND f.friendid=u.userid $filtersql AND u.statusvis='V' AND uu.timeupdate IS NOT NULL ORDER BY 2 LIMIT $total_loaded, $buffer_unit");
+            $sth->execute;
 
-	    while (my ($userid, $update, $clusterid) = $sth->fetchrow_array) {
-		push @friends_buffer, [ $userid, $update, $clusterid ];
-		$total_loaded++;
-	    }
+            while (my ($userid, $update, $clusterid) = $sth->fetchrow_array) {
+                push @friends_buffer, [ $userid, $update, $clusterid ];
+                $total_loaded++;
+            }
 
-	    # return one if we just found some fine, else we're all
-	    # out and there's nobody else to load.
-	    if (@friends_buffer) {
-		return $friends_buffer[0];
-	    } else {
-		return undef;
-	    }
-	}
+            # return one if we just found some fine, else we're all
+            # out and there's nobody else to load.
+            if (@friends_buffer) {
+                return $friends_buffer[0];
+            } else {
+                return undef;
+            }
+        }
 
-	# otherwise we must've run out.
-	return undef;
+        # otherwise we must've run out.
+        return undef;
     };
-    
+
     my $loop = 1;
     my $max_age = $LJ::MAX_FRIENDS_VIEW_AGE || 3600*24*14;  # 2 week default.
     my $lastmax = $LJ::EndOfTime - time() + $max_age;
@@ -256,89 +256,89 @@ sub get_friend_items
 
     while ($loop && ($fr = $get_next_friend->()))
     {
-	shift @friends_buffer;
+        shift @friends_buffer;
 
-	# load the next recent updating friend's recent items
-	my $friendid = $fr->[0];
+        # load the next recent updating friend's recent items
+        my $friendid = $fr->[0];
 
-	my @newitems = LJ::get_recent_items($dbs, {
-	    'clustersource' => 'slave',  # no effect for cluster 0
-	    'clusterid' => $fr->[2],
-	    'userid' => $friendid,
-	    'remote' => $remote,
-	    'itemshow' => $itemsleft,
-	    'skip' => 0,
-	    'gmask_from' => $gmask_from,
-	    'friendsview' => 1,
-	    'notafter' => $lastmax,
-	});
-	
-	# stamp each with clusterid if from cluster, so ljviews and other
-	# callers will know which items are old (no/0 clusterid) and which
-	# are new
-	if ($fr->[2]) {
-	    foreach (@newitems) { $_->{'clusterid'} = $fr->[2]; }
-	}
-	
-	if (@newitems)
-	{
-	    push @items, @newitems;
+        my @newitems = LJ::get_recent_items($dbs, {
+            'clustersource' => 'slave',  # no effect for cluster 0
+            'clusterid' => $fr->[2],
+            'userid' => $friendid,
+            'remote' => $remote,
+            'itemshow' => $itemsleft,
+            'skip' => 0,
+            'gmask_from' => $gmask_from,
+            'friendsview' => 1,
+            'notafter' => $lastmax,
+        });
 
-	    $opts->{'owners'}->{$friendid} = 1;
+        # stamp each with clusterid if from cluster, so ljviews and other
+        # callers will know which items are old (no/0 clusterid) and which
+        # are new
+        if ($fr->[2]) {
+            foreach (@newitems) { $_->{'clusterid'} = $fr->[2]; }
+        }
 
-	    $itemsleft--; # we'll need at least one less for the next friend
-	    
-	    # sort all the total items by rlogtime (recent at beginning)
-	    @items = sort { $a->{'rlogtime'} <=> $b->{'rlogtime'} } @items;
+        if (@newitems)
+        {
+            push @items, @newitems;
 
-	    # cut the list down to what we need.
-	    @items = splice(@items, 0, $getitems) if (@items > $getitems);
-	} 
+            $opts->{'owners'}->{$friendid} = 1;
 
-	if (@items == $getitems) 
-	{
-	    $lastmax = $items[-1]->{'rlogtime'};
+            $itemsleft--; # we'll need at least one less for the next friend
 
-	    # stop looping if we know the next friend's newest entry
-	    # is greater (older) than the oldest one we've already
-	    # loaded.
-	    my $nextfr = $get_next_friend->();
-	    $loop = 0 if ($nextfr && $nextfr->[1] > $lastmax);
-	}
+            # sort all the total items by rlogtime (recent at beginning)
+            @items = sort { $a->{'rlogtime'} <=> $b->{'rlogtime'} } @items;
+
+            # cut the list down to what we need.
+            @items = splice(@items, 0, $getitems) if (@items > $getitems);
+        }
+
+        if (@items == $getitems)
+        {
+            $lastmax = $items[-1]->{'rlogtime'};
+
+            # stop looping if we know the next friend's newest entry
+            # is greater (older) than the oldest one we've already
+            # loaded.
+            my $nextfr = $get_next_friend->();
+            $loop = 0 if ($nextfr && $nextfr->[1] > $lastmax);
+        }
     }
 
     # remove skipped ones
     splice(@items, 0, $skip) if $skip;
 
     # TODO: KILL! this knows nothing about clusters.
-    # return the itemids for them if they wanted them 
+    # return the itemids for them if they wanted them
     if (ref $opts->{'itemids'} eq "ARRAY") {
-	@{$opts->{'itemids'}} = map { $_->{'itemid'} } @items;
+        @{$opts->{'itemids'}} = map { $_->{'itemid'} } @items;
     }
 
     # return the itemids grouped by clusters, if callers wants it.
     if (ref $opts->{'idsbycluster'} eq "HASH") {
-	foreach (@items) {
-	    if ($_->{'clusterid'}) {
-		push @{$opts->{'idsbycluster'}->{$_->{'clusterid'}}}, 
-		[ $_->{'ownerid'}, $_->{'itemid'} ];
-	    } else {
-		push @{$opts->{'idsbycluster'}->{'0'}}, $_->{'itemid'};
-	    }
-	}
+        foreach (@items) {
+            if ($_->{'clusterid'}) {
+                push @{$opts->{'idsbycluster'}->{$_->{'clusterid'}}},
+                [ $_->{'ownerid'}, $_->{'itemid'} ];
+            } else {
+                push @{$opts->{'idsbycluster'}->{'0'}}, $_->{'itemid'};
+            }
+        }
     }
-    
+
     return @items;
 }
 
 # <LJFUNC>
 # name: LJ::get_recent_items
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# class:
+# des:
+# info:
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub get_recent_items
 {
@@ -350,17 +350,17 @@ sub get_recent_items
     my $dbr = $dbs->{'reader'};
     my $sth;
 
-    my @items = ();		# what we'll return
+    my @items = ();             # what we'll return
 
     my $userid = $opts->{'userid'}+0;
-    
+
     # 'remote' opt takes precendence, then 'remoteid'
     my $remote = $opts->{'remote'};
     LJ::load_remote($dbs, $remote);
     my $remoteid = $remote ? $remote->{'userid'} : 0;
     if ($remoteid == 0 && $opts->{'remoteid'}) {
-	$remoteid = $opts->{'remoteid'} + 0;
-	$remote = LJ::load_userid($dbs, $remoteid);
+        $remoteid = $opts->{'remoteid'} + 0;
+        $remote = LJ::load_userid($dbs, $remoteid);
     }
 
     my $max_hints = $LJ::MAX_HINTS_LASTN;  # temporary
@@ -370,13 +370,13 @@ sub get_recent_items
     my $logdb = $dbr;
 
     if ($clusterid) {
-	my $source = $opts->{'clustersource'} eq "slave" ? "slave" : "";
-	$logdb = LJ::get_dbh("cluster${clusterid}$source");
+        my $source = $opts->{'clustersource'} eq "slave" ? "slave" : "";
+        $logdb = LJ::get_dbh("cluster${clusterid}$source");
     }
 
     # community/friend views need to post by log time, not event time
     $sort_key = "rlogtime" if ($opts->{'order'} eq "logtime" ||
-			       $opts->{'friendsview'});
+                               $opts->{'friendsview'});
 
     # 'notafter':
     #   the friends view doesn't want to load things that it knows it
@@ -398,19 +398,19 @@ sub get_recent_items
     my $itemload = $itemshow + $skip;
 
     # get_friend_items will give us this data structure all at once so
-    # we don't have to load each friendof mask one by one, but for 
+    # we don't have to load each friendof mask one by one, but for
     # a single lastn view, it's okay to just do it once.
     my $gmask_from = $opts->{'gmask_from'};
     unless (ref $gmask_from eq "HASH") {
-	$gmask_from = {};
-	if ($remote && $remote->{'journaltype'} eq "P") {
-	    ## then we need to load the group mask for this friend
-	    $sth = $dbr->prepare("SELECT groupmask FROM friends WHERE userid=$userid ".
-				 "AND friendid=$remoteid");
-	    $sth->execute;
-	    my ($mask) = $sth->fetchrow_array;
-	    $gmask_from->{$userid} = $mask;
-	}
+        $gmask_from = {};
+        if ($remote && $remote->{'journaltype'} eq "P") {
+            ## then we need to load the group mask for this friend
+            $sth = $dbr->prepare("SELECT groupmask FROM friends WHERE userid=$userid ".
+                                 "AND friendid=$remoteid");
+            $sth->execute;
+            my ($mask) = $sth->fetchrow_array;
+            $gmask_from->{$userid} = $mask;
+        }
     }
 
     # what mask can the remote user see?
@@ -419,51 +419,51 @@ sub get_recent_items
     # decide what level of security the remote user can see
     my $secwhere = "";
     if ($userid == $remoteid || $opts->{'viewall'}) {
-	# no extra where restrictions... user can see all their own stuff
-	# alternatively, if 'viewall' opt flag is set, security is off.
+        # no extra where restrictions... user can see all their own stuff
+        # alternatively, if 'viewall' opt flag is set, security is off.
     } elsif ($mask) {
-	# can see public or things with them in the mask
-	$secwhere = "AND (security='public' OR (security='usemask' AND allowmask & $mask != 0))";
+        # can see public or things with them in the mask
+        $secwhere = "AND (security='public' OR (security='usemask' AND allowmask & $mask != 0))";
     } else {
-	# not a friend?  only see public.
-	$secwhere = "AND security='public' ";
+        # not a friend?  only see public.
+        $secwhere = "AND security='public' ";
     }
 
     # because LJ::get_friend_items needs rlogtime for sorting.
     my $extra_sql;
     if ($opts->{'friendsview'}) {
-	if ($clusterid) {
-	    $extra_sql .= "journalid AS 'ownerid', rlogtime, ";
-	} else {
-	    $extra_sql .= "ownerid, rlogtime, ";
-	}
+        if ($clusterid) {
+            $extra_sql .= "journalid AS 'ownerid', rlogtime, ";
+        } else {
+            $extra_sql .= "ownerid, rlogtime, ";
+        }
     }
 
     my $sql;
 
     if ($clusterid) {
-	$sql = ("SELECT jitemid AS 'itemid', posterid, security, replycount, $extra_sql ".
-		"DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i ".
-		"%l %h %k %H\") AS 'alldatepart', anum ".
-		"FROM log2 WHERE journalid=$userid AND $sort_key <= $notafter $secwhere ".
-		"ORDER BY journalid, $sort_key ".
-		"LIMIT $skip,$itemshow");
+        $sql = ("SELECT jitemid AS 'itemid', posterid, security, replycount, $extra_sql ".
+                "DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i ".
+                "%l %h %k %H\") AS 'alldatepart', anum ".
+                "FROM log2 WHERE journalid=$userid AND $sort_key <= $notafter $secwhere ".
+                "ORDER BY journalid, $sort_key ".
+                "LIMIT $skip,$itemshow");
     } else {
-	# old tables ("cluster 0")
-	$sql = ("SELECT itemid, posterid, security, replycount, $extra_sql ".
-		"DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i ".
-		"%l %h %k %H\") AS 'alldatepart' ".
-		"FROM log WHERE ownerid=$userid AND $sort_key <= $notafter $secwhere ".
-		"ORDER BY ownerid, $sort_key ".
-		"LIMIT $skip,$itemshow");
+        # old tables ("cluster 0")
+        $sql = ("SELECT itemid, posterid, security, replycount, $extra_sql ".
+                "DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i ".
+                "%l %h %k %H\") AS 'alldatepart' ".
+                "FROM log WHERE ownerid=$userid AND $sort_key <= $notafter $secwhere ".
+                "ORDER BY ownerid, $sort_key ".
+                "LIMIT $skip,$itemshow");
     }
 
     $sth = $logdb->prepare($sql);
     $sth->execute;
     if ($logdb->err) { die $logdb->errstr; }
     while (my $li = $sth->fetchrow_hashref) {
-	push @items, $li;
-	push @{$opts->{'itemids'}}, $li->{'itemid'};
+        push @items, $li;
+        push @{$opts->{'itemids'}}, $li->{'itemid'};
     }
     return @items;
 }
@@ -479,7 +479,7 @@ sub get_recent_items
 # args: dbarg, userid, propname, value
 # des-userid: The userid of the user.
 # des-propname: The name of the property.
-# des-value: The value to set to the property.  If undefined or the 
+# des-value: The value to set to the property.  If undefined or the
 #            empty string, then property is deleted.
 # </LJFUNC>
 sub set_userprop
@@ -487,31 +487,31 @@ sub set_userprop
     my ($dbarg, $userid, $propname, $value) = @_;
     my $dbs = LJ::make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
-    
+
     my $p;
 
     if ($LJ::CACHE_USERPROP{$propname}) {
-	$p = $LJ::CACHE_USERPROP{$propname};
+        $p = $LJ::CACHE_USERPROP{$propname};
     } else {
-	my $qpropname = $dbh->quote($propname);
-	$userid += 0;
-	my $propid;
-	my $sth;
-	
-	$sth = $dbh->prepare("SELECT upropid, indexed FROM userproplist WHERE name=$qpropname");
-	$sth->execute;
-	$p = $sth->fetchrow_hashref;
-	return unless ($p);
-	$LJ::CACHE_USERPROP{$propname} = $p;
+        my $qpropname = $dbh->quote($propname);
+        $userid += 0;
+        my $propid;
+        my $sth;
+
+        $sth = $dbh->prepare("SELECT upropid, indexed FROM userproplist WHERE name=$qpropname");
+        $sth->execute;
+        $p = $sth->fetchrow_hashref;
+        return unless ($p);
+        $LJ::CACHE_USERPROP{$propname} = $p;
     }
 
     my $table = $p->{'indexed'} ? "userprop" : "userproplite";
     if (defined $value && $value ne "") {
-	$value = $dbh->quote($value);
-	$dbh->do("REPLACE INTO $table (userid, upropid, value) ".
-		 "VALUES ($userid, $p->{'upropid'}, $value)");
+        $value = $dbh->quote($value);
+        $dbh->do("REPLACE INTO $table (userid, upropid, value) ".
+                 "VALUES ($userid, $p->{'upropid'}, $value)");
     } else {
-	$dbh->do("DELETE FROM $table WHERE userid=$userid AND upropid=$p->{'upropid'}");
+        $dbh->do("DELETE FROM $table WHERE userid=$userid AND upropid=$p->{'upropid'}");
     }
 }
 
@@ -541,18 +541,18 @@ sub register_authaction
     my $userid = shift;  $userid += 0;
     my $action = $dbh->quote(shift);
     my $arg1 = $dbh->quote(shift);
-    
+
     # make the authcode
     my $authcode = LJ::make_auth_code(15);
     my $qauthcode = $dbh->quote($authcode);
 
     $dbh->do("INSERT INTO authactions (aaid, userid, datecreate, authcode, action, arg1) ".
-	     "VALUES (NULL, $userid, NOW(), $qauthcode, $action, $arg1)");
+             "VALUES (NULL, $userid, NOW(), $qauthcode, $action, $arg1)");
 
     return 0 if $dbh->err;
     return { 'aaid' => $dbh->{'mysql_insertid'},
-	     'authcode' => $authcode,
-	 };
+             'authcode' => $authcode,
+         };
 }
 
 # <LJFUNC>
@@ -577,8 +577,8 @@ sub send_statserv {
     return unless ($LJ::STATSERV);
     # If we don't already have a socket defined, do the startup work.
     unless ($LJ::UDP_SOCKET) {
-        my $sock = IO::Socket::INET->new(Proto => 'udp') 
-                   or print STDERR "Can't create socket: $!\n";        
+        my $sock = IO::Socket::INET->new(Proto => 'udp')
+                   or print STDERR "Can't create socket: $!\n";
         my $ipaddr = IO::Socket::inet_aton($LJ::STATSERV);
         my $portaddr = IO::Socket::sockaddr_in($LJ::STATSERV_PORT, $ipaddr);
         $LJ::UDP_SOCKET = $sock;
@@ -602,7 +602,7 @@ sub send_statserv {
 
     $LJ::UDP_SOCKET->send($msg, 0, $LJ::UDP_STATSERV)
                      or print STDERR "Can't send to statserv: $!\n";
-    
+
 }
 
 # <LJFUNC>
@@ -619,21 +619,21 @@ sub send_statserv {
 # des-path: The directory path to bind the cookie to.
 # des-domain: The domain (or domains) to bind the cookie to.
 # </LJFUNC>
-sub make_cookie                     
-{             
+sub make_cookie
+{
     my ($name, $value, $expires, $path, $domain) = @_;
     my $cookie = "";
     my @cookies = ();
-    
+
     # let the domain argument be an array ref, so callers can set
     # cookies in both .foo.com and foo.com, for some broken old browsers.
     if ($domain && ref $domain eq "ARRAY") {
-        foreach (@$domain) {                
+        foreach (@$domain) {
             push(@cookies, LJ::make_cookie($name, $value, $expires, $path, $_));
         }
         return;
     }
-    
+
     my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime($expires);
     $year+=1900;
 
@@ -678,9 +678,9 @@ sub statushistory_add
 
     my $qshtype = $dbh->quote(shift);
     my $qnotes  = $dbh->quote(shift);
-    
+
     $dbh->do("INSERT INTO statushistory (userid, adminid, shtype, notes) ".
-	     "VALUES ($userid, $actid, $qshtype, $qnotes)");
+             "VALUES ($userid, $actid, $qshtype, $qnotes)");
     return $dbh->err ? 0 : 1;
 }
 
@@ -699,9 +699,9 @@ sub make_link
     my $vars = shift;
     my $append = "?";
     foreach (keys %$vars) {
-	next if ($vars->{$_} eq "");
-	$url .= "${append}${_}=$vars->{$_}";
-	$append = "&";
+        next if ($vars->{$_} eq "");
+        $url .= "${append}${_}=$vars->{$_}";
+        $append = "&";
     }
     return $url;
 }
@@ -709,7 +709,7 @@ sub make_link
 # <LJFUNC>
 # class: time
 # name: LJ::ago_text
-# des: Converts integer seconds to English time span 
+# des: Converts integer seconds to English time span
 # info: Turns a number of seconds into the largest possible unit of
 #       time. "2 weeks", "4 days", or "20 hours".
 # returns: A string with the number of largest units found
@@ -723,20 +723,20 @@ sub ago_text
     my $num;
     my $unit;
     if ($secondsold > 60*60*24*7) {
-	$num = int($secondsold / (60*60*24*7));
-	$unit = "week";
+        $num = int($secondsold / (60*60*24*7));
+        $unit = "week";
     } elsif ($secondsold > 60*60*24) {
-	$num = int($secondsold / (60*60*24));
-	$unit = "day";
+        $num = int($secondsold / (60*60*24));
+        $unit = "day";
     } elsif ($secondsold > 60*60) {
-	$num = int($secondsold / (60*60));
-	$unit = "hour";
+        $num = int($secondsold / (60*60));
+        $unit = "hour";
     } elsif ($secondsold > 60) {
-	$num = int($secondsold / (60));
-	$unit = "minute";
+        $num = int($secondsold / (60));
+        $unit = "minute";
     } else {
-	$num = $secondsold;
-	$unit = "second";
+        $num = $secondsold;
+        $unit = "second";
     }
     return "$num $unit" . ($num==1?"":"s") . " ago";
 }
@@ -761,36 +761,36 @@ sub auth_fields
 
     my $remote = LJ::get_remote_noauth();
     my $ret = "";
-    if ((!$form->{'altlogin'} && $remote) || $opts->{'user'}) 
+    if ((!$form->{'altlogin'} && $remote) || $opts->{'user'})
     {
-	my $hpass;
-	my $luser = $opts->{'user'} || $remote->{'user'};
-	if ($opts->{'user'}) {
-	    $hpass = $form->{'hpassword'} || LJ::hash_password($form->{'password'});
-	} elsif ($remote && $BMLClient::COOKIE{"ljhpass"} =~ /^$luser:(.+)/) {
-	    $hpass = $1;
-	}
+        my $hpass;
+        my $luser = $opts->{'user'} || $remote->{'user'};
+        if ($opts->{'user'}) {
+            $hpass = $form->{'hpassword'} || LJ::hash_password($form->{'password'});
+        } elsif ($remote && $BMLClient::COOKIE{"ljhpass"} =~ /^$luser:(.+)/) {
+            $hpass = $1;
+        }
 
-	my $alturl = $ENV{'REQUEST_URI'};
-	$alturl .= ($alturl =~ /\?/) ? "&amp;" : "?";
-	$alturl .= "altlogin=1";
+        my $alturl = $ENV{'REQUEST_URI'};
+        $alturl .= ($alturl =~ /\?/) ? "&amp;" : "?";
+        $alturl .= "altlogin=1";
 
-	$ret .= "<tr align='left'><td colspan='2' align='left'>You are currently logged in as <b>$luser</b>.";
-	$ret .= "<br />If this is not you, <a href='$alturl'>click here</a>.\n"
-	    unless $opts->{'noalt'};
-	$ret .= "<input type='hidden' name='user' value='$luser'>\n";
-	$ret .= "<input type='hidden' name='hpassword' value='$hpass'><br />&nbsp;\n";
-	$ret .= "</td></tr>\n";
+        $ret .= "<tr align='left'><td colspan='2' align='left'>You are currently logged in as <b>$luser</b>.";
+        $ret .= "<br />If this is not you, <a href='$alturl'>click here</a>.\n"
+            unless $opts->{'noalt'};
+        $ret .= "<input type='hidden' name='user' value='$luser'>\n";
+        $ret .= "<input type='hidden' name='hpassword' value='$hpass'><br />&nbsp;\n";
+        $ret .= "</td></tr>\n";
     } else {
-	$ret .= "<tr align='left'><td>Username:</td><td align='left'><input type='text' name='user' size='15' maxlength='15' value='";
-	my $user = $form->{'user'};
-	unless ($user || $ENV{'QUERY_STRING'} =~ /=/) { $user=$ENV{'QUERY_STRING'}; }
-	$ret .= BMLUtil::escapeall($user) unless ($form->{'altlogin'});
-	$ret .= "' /></td></tr>\n";
-	$ret .= "<tr><td>Password:</td><td align='left'>\n";
-	my $epass = LJ::ehtml($form->{'password'});
-	$ret .= "<input type='password' name='password' size='15' maxlength='30' value='$epass' />";
-	$ret .= "</td></tr>\n";
+        $ret .= "<tr align='left'><td>Username:</td><td align='left'><input type='text' name='user' size='15' maxlength='15' value='";
+        my $user = $form->{'user'};
+        unless ($user || $ENV{'QUERY_STRING'} =~ /=/) { $user=$ENV{'QUERY_STRING'}; }
+        $ret .= BMLUtil::escapeall($user) unless ($form->{'altlogin'});
+        $ret .= "' /></td></tr>\n";
+        $ret .= "<tr><td>Password:</td><td align='left'>\n";
+        my $epass = LJ::ehtml($form->{'password'});
+        $ret .= "<input type='password' name='password' size='15' maxlength='30' value='$epass' />";
+        $ret .= "</td></tr>\n";
     }
     return $ret;
 }
@@ -800,12 +800,12 @@ sub auth_fields
 # name: LJ::auth_fields_2
 # des: Makes a login form.
 # info: Like [func[LJ::auth_fields]], with a lot more functionality.  Creates the
-#       HTML for a login box if user not logged in. Creates a drop-down 
+#       HTML for a login box if user not logged in. Creates a drop-down
 #       selection box of possible journals to switch to if user is logged in.
 # returns: The resultant HTML form box.
 # args: form, opts
 # des-form: Form results from the previous page.
-# des-opts: Journal/password options for changing the login box. 
+# des-opts: Journal/password options for changing the login box.
 # </LJFUNC>
 sub auth_fields_2
 {
@@ -816,19 +816,19 @@ sub auth_fields_2
     my $ret = "";
 
     # text box mode
-    if ($form->{'authas'} eq "(other)" || $form->{'altlogin'} || 
-	$form->{'user'} || ! $remote)
+    if ($form->{'authas'} eq "(other)" || $form->{'altlogin'} ||
+        $form->{'user'} || ! $remote)
     {
-	$ret .= "<tr><td align='right'><u>U</u>sername:</td><td align='left'><input type=\"text\" name='user' size='15' maxlength='15' accesskey='u' value=\"";
-	my $user = $form->{'user'};
-	unless ($user || $ENV{'QUERY_STRING'} =~ /=/) { $user=$ENV{'QUERY_STRING'}; }
-	$ret .= BMLUtil::escapeall($user) unless ($form->{'altlogin'});
-	$ret .= "\" /></td></tr>\n";
-	$ret .= "<tr><td align='right'><u>P</u>assword:</td><td align='left'>\n";
-	$ret .= "<input type='password' name='password' size='15' maxlength='30' accesskey='p' value=\"" . 
-	    LJ::ehtml($opts->{'password'}) . "\" />";
-	$ret .= "</td></tr>\n";
-	return $ret;
+        $ret .= "<tr><td align='right'><u>U</u>sername:</td><td align='left'><input type=\"text\" name='user' size='15' maxlength='15' accesskey='u' value=\"";
+        my $user = $form->{'user'};
+        unless ($user || $ENV{'QUERY_STRING'} =~ /=/) { $user=$ENV{'QUERY_STRING'}; }
+        $ret .= BMLUtil::escapeall($user) unless ($form->{'altlogin'});
+        $ret .= "\" /></td></tr>\n";
+        $ret .= "<tr><td align='right'><u>P</u>assword:</td><td align='left'>\n";
+        $ret .= "<input type='password' name='password' size='15' maxlength='30' accesskey='p' value=\"" .
+            LJ::ehtml($opts->{'password'}) . "\" />";
+        $ret .= "</td></tr>\n";
+        return $ret;
     }
 
     # logged in mode
@@ -844,8 +844,8 @@ sub auth_fields_2
     $ret .= LJ::make_shared_select($dbs, $remote, $form, $sopts);
 
     if ($sopts->{'getother'}) {
-	my $alturl = LJ::self_link($form, { 'altlogin' => 1 });
-	$ret .= "&nbsp;(<a href='$alturl'>Other</a>)";
+        my $alturl = LJ::self_link($form, { 'altlogin' => 1 });
+        $ret .= "&nbsp;(<a href='$alturl'>Other</a>)";
     }
 
     $ret .= "</td></tr>\n";
@@ -871,29 +871,29 @@ sub make_shared_select
 
     my @choices = ("(remote)", $u->{'user'});
     unless ($opts->{'notshared'}) {
-	foreach (LJ::get_shared_journals($dbs, $u)) {
-	    push @choices, $_, $_;
-	    $u2k{$_} = $_;
-	}
+        foreach (LJ::get_shared_journals($dbs, $u)) {
+            push @choices, $_, $_;
+            $u2k{$_} = $_;
+        }
     }
     unless ($opts->{'getother'}) {
-	push @choices, "(other)", "Other...";
+        push @choices, "(other)", "Other...";
     }
-    
+
     if (@choices > 2) {
-	my $sel;
-	if ($form->{'user'}) {
-	    $sel = $u2k{$form->{'user'}} || "(other)";
-	} else {
-	    $sel = $form->{'authas'};	    
-	}
-	return LJ::html_select({ 
-	    'name' => 'authas', 
-	    'raw' => "accesskey='u'",
-	    'selected' => $sel,
-	}, @choices);
+        my $sel;
+        if ($form->{'user'}) {
+            $sel = $u2k{$form->{'user'}} || "(other)";
+        } else {
+            $sel = $form->{'authas'};
+        }
+        return LJ::html_select({
+            'name' => 'authas',
+            'raw' => "accesskey='u'",
+            'selected' => $sel,
+        }, @choices);
     } else {
-	return "<b>$u->{'user'}</b>";
+        return "<b>$u->{'user'}</b>";
     }
 }
 
@@ -918,10 +918,10 @@ sub get_shared_journals
 #       reference to an error variable, and a reference to a user hash to
 #       possibly fill. Given the form input, it will authenticate and return
 #       the user (logged in user, a community, other user) that the remote
-#       user requested to do an action with. 
+#       user requested to do an action with.
 # returns: The user to process as.
 # args: dbs, opts
-# des-opts: A hash of options to pass. 
+# des-opts: A hash of options to pass.
 # </LJFUNC>
 sub get_effective_user
 {
@@ -931,7 +931,7 @@ sub get_effective_user
     my $refu = $opts->{'out_u'};
     my $referr = $opts->{'out_err'};
     my $remote = $opts->{'remote'};
-    
+
     $$referr = "";
 
     # presence of 'altlogin' means user is probably logged in but
@@ -947,35 +947,35 @@ sub get_effective_user
     # the password is correct, the user they requested is the
     # effective one, else we have no effective yet.
     if ($f->{'user'}) {
-	my $u = LJ::load_user($dbs, $f->{'user'});
-	unless ($u) {
-	    $$referr = "Invalid user.";
-	    return;
-	}
+        my $u = LJ::load_user($dbs, $f->{'user'});
+        unless ($u) {
+            $$referr = "Invalid user.";
+            return;
+        }
 
-	# if password present, check it.
-	if ($f->{'password'} || $f->{'hpassword'}) {
-	    if (LJ::auth_okay($u, $f->{'password'}, $f->{'hpassword'}, $u->{'password'})) {
-		$$refu = $u;
-		return $f->{'user'};
-	    } else {
-		$$referr = "Invalid password.";
-		return;
-	    }
-	}
+        # if password present, check it.
+        if ($f->{'password'} || $f->{'hpassword'}) {
+            if (LJ::auth_okay($u, $f->{'password'}, $f->{'hpassword'}, $u->{'password'})) {
+                $$refu = $u;
+                return $f->{'user'};
+            } else {
+                $$referr = "Invalid password.";
+                return;
+            }
+        }
 
-	# otherwise don't check it and return nothing (to prevent the
-	# remote setting from taking place... this forces the
-	# user/password boxes to appear)
-	return;
+        # otherwise don't check it and return nothing (to prevent the
+        # remote setting from taking place... this forces the
+        # user/password boxes to appear)
+        return;
     }
-    
+
     # not logged in?
     return unless $remote;
 
     # logged in. use self identity unless they're requesting to act as
     # a community.
-    return $remote->{'user'} 
+    return $remote->{'user'}
     unless ($f->{'authas'} && $f->{'authas'} ne "(remote)");
 
     # if they have the privs, let them be that community
@@ -1005,13 +1005,13 @@ sub self_link
     $link =~ s/\?.+//;
     $link .= "?";
     foreach (keys %$newvars) {
-	if (! exists $form->{$_}) { $form->{$_} = ""; }
+        if (! exists $form->{$_}) { $form->{$_} = ""; }
     }
     foreach (sort keys %$form) {
-	if (defined $newvars->{$_} && ! $newvars->{$_}) { next; }
-	my $val = $newvars->{$_} || $form->{$_};
-	next unless $val;
-	$link .= LJ::eurl($_) . "=" . LJ::eurl($val) . "&";
+        if (defined $newvars->{$_} && ! $newvars->{$_}) { next; }
+        my $val = $newvars->{$_} || $form->{$_};
+        next unless $val;
+        $link .= LJ::eurl($_) . "=" . LJ::eurl($val) . "&";
     }
     chop $link;
     return $link;
@@ -1028,7 +1028,7 @@ sub get_query_string
 {
     my $q = $ENV{'QUERY_STRING'} || $ENV{'REDIRECT_QUERY_STRING'};
     if ($q eq "" && $ENV{'REQUEST_URI'} =~ /\?(.+)/) {
-	$q = $1;
+        $q = $1;
     }
     return $q;
 }
@@ -1041,7 +1041,7 @@ sub get_query_string
 # des-hashref: Hashref to populate with form data.
 # des-type: If "GET", will ignore POST data.
 # </LJFUNC>
-sub get_form_data 
+sub get_form_data
 {
     my $hashref = shift;
     my $type = shift;
@@ -1051,11 +1051,11 @@ sub get_form_data
         read(STDIN, $buffer, $ENV{'CONTENT_LENGTH'});
     } else {
         $buffer = $ENV{'QUERY_STRING'} || $ENV{'REDIRECT_QUERY_STRING'};
-	if ($buffer eq "" && $ENV{'REQUEST_URI'} =~ /\?(.+)/) {
-	    $buffer = $1;
-	}
+        if ($buffer eq "" && $ENV{'REQUEST_URI'} =~ /\?(.+)/) {
+            $buffer = $1;
+        }
     }
-    
+
     # Split the name-value pairs
     LJ::decode_url_string($buffer, $hashref);
 }
@@ -1074,7 +1074,7 @@ sub is_valid_authaction
     my $dbarg = shift;
     my $dbs = LJ::make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
-    
+
     # TODO: make this use slave if available (low usage/priority)
     my ($aaid, $auth) = map { $dbh->quote($_) } @_;
     my $sth = $dbh->prepare("SELECT aaid, userid, datecreate, authcode, action, arg1 FROM authactions WHERE aaid=$aaid AND authcode=$auth");
@@ -1109,7 +1109,7 @@ sub fill_var_props
 # args: transform, vars, hashref, attr
 # des-transform: The transformation type.
 # des-vars: hashref with keys being S1 vars
-# des-hashref: hashref of values that could interpolate. (see 
+# des-hashref: hashref of values that could interpolate. (see
 #              [func[LJ::fill_var_props]])
 # des-attr: the attribute name that's being interpolated.
 # returns: Transformed interpolated variable.
@@ -1119,27 +1119,27 @@ sub fvp_transform
     my ($transform, $vars, $hashref, $attr) = @_;
     my $ret = $hashref->{$attr};
     while ($transform =~ s/(\w+):$//) {
-	my $trans = $1;
-	if ($trans eq "ue") {
-	    $ret = LJ::eurl($ret);
-	}
-	elsif ($trans eq "xe") {
-	    $ret = LJ::exml($ret);
-	}
-	elsif ($trans eq "lc") {
-	    $ret = lc($ret);
-	}
-	elsif ($trans eq "uc") {
-	    $ret = uc($ret);
-	}  
-	elsif ($trans eq "color") {
-	    $ret = $vars->{"color-$attr"};
-	}
-	elsif ($trans eq "cons") {
-	    if ($attr eq "siteroot") { return $LJ::SITEROOT; }
-	    if ($attr eq "sitename") { return $LJ::SITENAME; }
-	    if ($attr eq "img") { return $LJ::IMGPREFIX; }
-	}
+        my $trans = $1;
+        if ($trans eq "ue") {
+            $ret = LJ::eurl($ret);
+        }
+        elsif ($trans eq "xe") {
+            $ret = LJ::exml($ret);
+        }
+        elsif ($trans eq "lc") {
+            $ret = lc($ret);
+        }
+        elsif ($trans eq "uc") {
+            $ret = uc($ret);
+        }
+        elsif ($trans eq "color") {
+            $ret = $vars->{"color-$attr"};
+        }
+        elsif ($trans eq "cons") {
+            if ($attr eq "siteroot") { return $LJ::SITEROOT; }
+            if ($attr eq "sitename") { return $LJ::SITENAME; }
+            if ($attr eq "img") { return $LJ::IMGPREFIX; }
+        }
     }
     return $ret;
 }
@@ -1156,20 +1156,20 @@ sub fvp_transform
 sub get_mood_picture
 {
     my ($themeid, $moodid, $ref) = @_;
-    do 
+    do
     {
-	if ($LJ::CACHE_MOOD_THEME{$themeid}->{$moodid}) {
-	    %{$ref} = %{$LJ::CACHE_MOOD_THEME{$themeid}->{$moodid}};
-	    if ($ref->{'pic'} =~ m!^/!) {
-		$ref->{'pic'} =~ s!^/img!!;
-		$ref->{'pic'} = $LJ::IMGPREFIX . $ref->{'pic'};
-	    }
-	    $ref->{'moodid'} = $moodid;
-	    return 1;
-	} else {
-	    $moodid = $LJ::CACHE_MOODS{$moodid}->{'parent'};
-	}
-    } 
+        if ($LJ::CACHE_MOOD_THEME{$themeid}->{$moodid}) {
+            %{$ref} = %{$LJ::CACHE_MOOD_THEME{$themeid}->{$moodid}};
+            if ($ref->{'pic'} =~ m!^/!) {
+                $ref->{'pic'} =~ s!^/img!!;
+                $ref->{'pic'} = $LJ::IMGPREFIX . $ref->{'pic'};
+            }
+            $ref->{'moodid'} = $moodid;
+            return 1;
+        } else {
+            $moodid = $LJ::CACHE_MOODS{$moodid}->{'parent'};
+        }
+    }
     while ($moodid);
     return 0;
 }
@@ -1194,44 +1194,44 @@ sub prepare_currents
     my %currents = ();
     my $val;
     if ($val = $args->{'props'}->{$datakey}->{'current_music'}) {
-	$currents{'Music'} = $val;
+        $currents{'Music'} = $val;
     }
     if ($val = $args->{'props'}->{$datakey}->{'current_mood'}) {
-	$currents{'Mood'} = $val;
+        $currents{'Mood'} = $val;
     }
     if ($val = $args->{'props'}->{$datakey}->{'current_moodid'}) {
-	my $theme = $args->{'user'}->{'moodthemeid'};
-	LJ::load_mood_theme($dbs, $theme);
-	my %pic;
-	if (LJ::get_mood_picture($theme, $val, \%pic)) {
-	    $currents{'Mood'} = "<img src=\"$pic{'pic'}\" align='absmiddle' width='$pic{'w'}' ".
-		"height='$pic{'h'}' vspace='1'> $LJ::CACHE_MOODS{$val}->{'name'}";
-	} else {
-	    $currents{'Mood'} = $LJ::CACHE_MOODS{$val}->{'name'};
-	}
+        my $theme = $args->{'user'}->{'moodthemeid'};
+        LJ::load_mood_theme($dbs, $theme);
+        my %pic;
+        if (LJ::get_mood_picture($theme, $val, \%pic)) {
+            $currents{'Mood'} = "<img src=\"$pic{'pic'}\" align='absmiddle' width='$pic{'w'}' ".
+                "height='$pic{'h'}' vspace='1'> $LJ::CACHE_MOODS{$val}->{'name'}";
+        } else {
+            $currents{'Mood'} = $LJ::CACHE_MOODS{$val}->{'name'};
+        }
     }
     if (%currents) {
-	if ($args->{'vars'}->{$args->{'prefix'}.'_CURRENTS'}) 
-	{
-	    ### PREFIX_CURRENTS is defined, so use the correct style vars
+        if ($args->{'vars'}->{$args->{'prefix'}.'_CURRENTS'})
+        {
+            ### PREFIX_CURRENTS is defined, so use the correct style vars
 
-	    my $fvp = { 'currents' => "" };
-	    foreach (sort keys %currents) {
-		$fvp->{'currents'} .= LJ::fill_var_props($args->{'vars'}, $args->{'prefix'}.'_CURRENT', {
-		    'what' => $_,
-		    'value' => $currents{$_},
-		});
-	    }
-	    $args->{'event'}->{'currents'} = 
-		LJ::fill_var_props($args->{'vars'}, $args->{'prefix'}.'_CURRENTS', $fvp);
-	} else 
-	{
-	    ### PREFIX_CURRENTS is not defined, so just add to %%events%%
-	    $args->{'event'}->{'event'} .= "<br />&nbsp;";
-	    foreach (sort keys %currents) {
-		$args->{'event'}->{'event'} .= "<br /><b>Current $_</b>: " . $currents{$_} . "\n";
-	    }
-	}
+            my $fvp = { 'currents' => "" };
+            foreach (sort keys %currents) {
+                $fvp->{'currents'} .= LJ::fill_var_props($args->{'vars'}, $args->{'prefix'}.'_CURRENT', {
+                    'what' => $_,
+                    'value' => $currents{$_},
+                });
+            }
+            $args->{'event'}->{'currents'} =
+                LJ::fill_var_props($args->{'vars'}, $args->{'prefix'}.'_CURRENTS', $fvp);
+        } else
+        {
+            ### PREFIX_CURRENTS is not defined, so just add to %%events%%
+            $args->{'event'}->{'event'} .= "<br />&nbsp;";
+            foreach (sort keys %currents) {
+                $args->{'event'}->{'event'} .= "<br /><b>Current $_</b>: " . $currents{$_} . "\n";
+            }
+        }
     }
 }
 
@@ -1240,7 +1240,7 @@ sub prepare_currents
 # class: time
 # name: LJ::http_to_time
 # des: Converts HTTP date to Unix time.
-# info: Wrapper around HTTP::Date::str2time. 
+# info: Wrapper around HTTP::Date::str2time.
 #       See also [func[LJ::time_to_http]].
 # args: string
 # des-string: HTTP Date.  See RFC 2616 for format.
@@ -1270,7 +1270,7 @@ sub time_to_http {
 # class: component
 # name: LJ::ljuser
 # des: Make link to userinfo/journal of user.
-# info: Returns the HTML for an userinfo/journal link pair for a given user 
+# info: Returns the HTML for an userinfo/journal link pair for a given user
 #       name, just like LJUSER does in BML.  But files like cleanhtml.pl
 #       and ljpoll.pl need to do that too, but they aren't run as BML.
 # args: user, opts?
@@ -1299,7 +1299,7 @@ sub get_urls
     my $text = shift;
     my @urls;
     while ($text =~ s!http://[^\s\"\'\<\>]+!!) {
-	push @urls, $&;
+        push @urls, $&;
     }
     return @urls;
 }
@@ -1324,7 +1324,7 @@ sub record_meme
 
     $url =~ s!/$!!;  # strip / at end
     LJ::run_hooks("canonicalize_url", \$url);
-    
+
     # canonicalize_url hook might just erase it, so
     # we don't want to record it.
     return unless $url;
@@ -1334,8 +1334,8 @@ sub record_meme
     $itemid += 0;
     $jid += 0;
     LJ::query_buffer_add($dbs, "meme",
-			 "REPLACE INTO meme (url, posterid, journalid, itemid) " .
-			 "VALUES ($qurl, $posterid, $jid, $itemid)");
+                         "REPLACE INTO meme (url, posterid, journalid, itemid) " .
+                         "VALUES ($qurl, $posterid, $jid, $itemid)");
 }
 
 # <LJFUNC>
@@ -1371,7 +1371,7 @@ sub name_caps_short
 # <LJFUNC>
 # name: LJ::get_cap
 # des: Given a user object or capability class bit mask and a capability/limit name,
-#      returns the maximum value allowed for given user or class, considering 
+#      returns the maximum value allowed for given user or class, considering
 #      all the limits in each class the user is a part of.
 # args: u_cap, capname
 # des-u_cap: 16 bit capability bitmask or a user object from which the
@@ -1386,11 +1386,11 @@ sub get_cap
     elsif (ref $caps eq "HASH") { $caps = $caps->{'caps'}; }
     my $max = undef;
     foreach my $bit (keys %LJ::CAP) {
-	next unless ($caps & (1 << $bit));
-	my $v = $LJ::CAP{$bit}->{$cname};
-	next unless (defined $v);
-	next if (defined $max && $max > $v);
-	$max = $v;
+        next unless ($caps & (1 << $bit));
+        my $v = $LJ::CAP{$bit}->{$cname};
+        next unless (defined $v);
+        next if (defined $max && $max > $v);
+        $max = $v;
     }
     return defined $max ? $max : $LJ::CAP_DEF{$cname};
 }
@@ -1398,7 +1398,7 @@ sub get_cap
 # <LJFUNC>
 # name: LJ::get_cap_min
 # des: Just like [func[LJ::get_cap]], but returns the minimum value.
-#      Although it might not make sense at first, some things are 
+#      Although it might not make sense at first, some things are
 #      better when they're low, like the minimum amount of time
 #      a user might have to wait between getting updates or being
 #      allowed to refresh a page.
@@ -1415,11 +1415,11 @@ sub get_cap_min
     elsif (ref $caps eq "HASH") { $caps = $caps->{'caps'}; }
     my $min = undef;
     foreach my $bit (keys %LJ::CAP) {
-	next unless ($caps & (1 << $bit));
-	my $v = $LJ::CAP{$bit}->{$cname};
-	next unless (defined $v);
-	next if (defined $min && $min < $v);
-	$min = $v;
+        next unless ($caps & (1 << $bit));
+        my $v = $LJ::CAP{$bit}->{$cname};
+        next unless (defined $v);
+        next if (defined $min && $min < $v);
+        $min = $v;
     }
     return defined $min ? $min : $LJ::CAP_DEF{$cname};
 }
@@ -1479,7 +1479,7 @@ sub run_hooks
     my @args = shift;
     my @ret;
     foreach my $hook (@{$LJ::HOOKS{$hookname}}) {
-	push @ret, [ $hook->(@args) ];
+        push @ret, [ $hook->(@args) ];
     }
     return @ret;
 }
@@ -1487,7 +1487,7 @@ sub run_hooks
 # <LJFUNC>
 # name: LJ::register_hook
 # des: Installs a site-specific hook.
-# info: Installing multiple hooks per hookname is valid.  
+# info: Installing multiple hooks per hookname is valid.
 #       They're run later in the order they're registered.
 # args: hookname, subref
 # des-subref: Subroutine reference to run later.
@@ -1531,16 +1531,16 @@ sub acid_encode
     my $acid = "";
     my $digits = "abcdefghjkmnpqrstvwxyz23456789";
     while ($num) {
-	my $dig = $num % 30;
-	$acid = substr($digits, $dig, 1) . $acid;
-	$num = ($num - $dig) / 30;
+        my $dig = $num % 30;
+        $acid = substr($digits, $dig, 1) . $acid;
+        $num = ($num - $dig) / 30;
     }
     return ("a"x(7-length($acid)) . $acid);
 }
 
 # <LJFUNC>
 # name: LJ::acid_decode
-# des: Given an acid encoding from [func[LJ::acid_encode]], 
+# des: Given an acid encoding from [func[LJ::acid_encode]],
 #      returns the original decimal number.
 # returns: Integer.
 # args: acid
@@ -1556,10 +1556,10 @@ sub acid_decode
     my $num = 0;
     my $place = 0;
     while ($acid) {
-	return 0 unless ($acid =~ s/[$digits]$//o);
-	$num += $val{$&} * (30 ** $place++);	
+        return 0 unless ($acid =~ s/[$digits]$//o);
+        $num += $val{$&} * (30 ** $place++);
     }
-    return $num;    
+    return $num;
 }
 
 # <LJFUNC>
@@ -1581,7 +1581,7 @@ sub acct_code_generate
     my $auth = LJ::make_auth_code(5);
     $userid = int($userid);
     $dbh->do("INSERT INTO acctcode (acid, userid, rcptid, auth) ".
-	     "VALUES (NULL, $userid, 0, \"$auth\")");
+             "VALUES (NULL, $userid, 0, \"$auth\")");
     my $acid = $dbh->{'mysql_insertid'};
     return undef unless $acid;
     return acct_code_encode($acid, $auth);
@@ -1633,14 +1633,14 @@ sub acct_code_check
     my $code = shift;
     my $err = shift;     # optional; scalar ref
     my $userid = shift;  # optional; acceptable userid (double-click proof)
-    
+
     my $dbs = LJ::make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
 
     unless (length($code) == 12) {
-	$$err = "Malformed code; not 12 characters.";
-	return 0;	 
+        $$err = "Malformed code; not 12 characters.";
+        return 0;
     }
 
     my ($acid, $auth) = acct_code_decode($code);
@@ -1653,30 +1653,30 @@ sub acct_code_check
 
     # if we loaded something, and that code's used, it must be what master has
     if ($ac && $ac->{'rcptid'}) {
-	$definitive = 1;
+        $definitive = 1;
     }
 
     # unless we're sure we have a clean record, load from master:
     unless ($definitive) {
-	$ac = $dbh->selectrow_hashref("SELECT userid, rcptid, auth FROM acctcode WHERE acid=$acid");
+        $ac = $dbh->selectrow_hashref("SELECT userid, rcptid, auth FROM acctcode WHERE acid=$acid");
     }
 
     unless ($ac && $ac->{'auth'} eq $auth) {
-	$$err = "Invalid account code.";
-	return 0;
+        $$err = "Invalid account code.";
+        return 0;
     }
-    
+
     if ($ac->{'rcptid'} && $ac->{'rcptid'} != $userid) {
-	$$err = "This code has already been used.";
-	return 0;
+        $$err = "This code has already been used.";
+        return 0;
     }
-    
+
     # is the journal this code came from suspended?
     my $statusvis = LJ::dbs_selectrow_array($dbs, "SELECT statusvis FROM user ".
-					    "WHERE userid=$ac->{'userid'}");
+                                            "WHERE userid=$ac->{'userid'}");
     if ($statusvis eq "S") {
-	$$err = "Code belongs to a suspended account.";
-	return 0;
+        $$err = "Code belongs to a suspended account.";
+        return 0;
     }
 
     return 1;
@@ -1701,7 +1701,7 @@ sub load_mood_theme
     my $sth = $dbr->prepare("SELECT moodid, picurl, width, height FROM moodthemedata WHERE moodthemeid=$themeid");
     $sth->execute;
     while (my ($id, $pic, $w, $h) = $sth->fetchrow_array) {
-	$LJ::CACHE_MOOD_THEME{$themeid}->{$id} = { 'pic' => $pic, 'w' => $w, 'h' => $h };
+        $LJ::CACHE_MOOD_THEME{$themeid}->{$id} = { 'pic' => $pic, 'w' => $w, 'h' => $h };
     }
     $sth->finish;
 }
@@ -1725,20 +1725,20 @@ sub load_props
     my $dbr = $dbs->{'reader'};
 
     my %keyname = qw(log  propid
-		     talk tpropid
-		     user upropid);
+                     talk tpropid
+                     user upropid);
 
     foreach my $t (@tables) {
-	next unless defined $keyname{$t};
-	next if (defined $LJ::CACHE_PROP{$t});
-	my $sth = $dbr->prepare("SELECT * FROM ${t}proplist");
-	$sth->execute;
-	while (my $p = $sth->fetchrow_hashref) {
-	    $p->{'id'} = $p->{$keyname{$t}};
-	    $LJ::CACHE_PROP{$t}->{$p->{'name'}} = $p;
-	    $LJ::CACHE_PROPID{$t}->{$p->{'id'}} = $p;
-	}
-	$sth->finish;
+        next unless defined $keyname{$t};
+        next if (defined $LJ::CACHE_PROP{$t});
+        my $sth = $dbr->prepare("SELECT * FROM ${t}proplist");
+        $sth->execute;
+        while (my $p = $sth->fetchrow_hashref) {
+            $p->{'id'} = $p->{$keyname{$t}};
+            $LJ::CACHE_PROP{$t}->{$p->{'name'}} = $p;
+            $LJ::CACHE_PROPID{$t}->{$p->{'id'}} = $p;
+        }
+        $sth->finish;
     }
 }
 
@@ -1784,36 +1784,36 @@ sub load_codes
 
     foreach my $type (keys %{$req})
     {
-	unless ($LJ::CACHE_CODES{$type})
-	{
-	    $LJ::CACHE_CODES{$type} = [];
-	    my $qtype = $dbr->quote($type);
-	    my $sth = $dbr->prepare("SELECT code, item FROM codes WHERE type=$qtype ORDER BY sortorder");
-	    $sth->execute;
-	    while (my ($code, $item) = $sth->fetchrow_array)
-	    {
-		push @{$LJ::CACHE_CODES{$type}}, [ $code, $item ];
-	    }
-	}
+        unless ($LJ::CACHE_CODES{$type})
+        {
+            $LJ::CACHE_CODES{$type} = [];
+            my $qtype = $dbr->quote($type);
+            my $sth = $dbr->prepare("SELECT code, item FROM codes WHERE type=$qtype ORDER BY sortorder");
+            $sth->execute;
+            while (my ($code, $item) = $sth->fetchrow_array)
+            {
+                push @{$LJ::CACHE_CODES{$type}}, [ $code, $item ];
+            }
+        }
 
-	foreach my $it (@{$LJ::CACHE_CODES{$type}})
-	{
-	    if (ref $req->{$type} eq "HASH") {
-		$req->{$type}->{$it->[0]} = $it->[1];
-	    } elsif (ref $req->{$type} eq "ARRAY") {
-		push @{$req->{$type}}, { 'code' => $it->[0], 'item' => $it->[1] };
-	    }
-	}
+        foreach my $it (@{$LJ::CACHE_CODES{$type}})
+        {
+            if (ref $req->{$type} eq "HASH") {
+                $req->{$type}->{$it->[0]} = $it->[1];
+            } elsif (ref $req->{$type} eq "ARRAY") {
+                push @{$req->{$type}}, { 'code' => $it->[0], 'item' => $it->[1] };
+            }
+        }
     }
 }
 
 # <LJFUNC>
 # name: LJ::img
 # des: Returns an HTML &lt;img&gt; or &lt;input&gt; tag to an named image
-#      code, which each site may define with a different image file with 
+#      code, which each site may define with a different image file with
 #      its own dimensions.  This prevents hard-coding filenames & sizes
 #      into the source.  The real image data is stored in LJ::Img, which
-#      has default values provided in cgi-bin/imageconf.pl but can be 
+#      has default values provided in cgi-bin/imageconf.pl but can be
 #      overridden in cgi-bin/ljconfig.pl.
 # args: imagecode, type?, attrs?
 # des-imagecode: The unique string key to reference the image.  Not a filename,
@@ -1821,35 +1821,35 @@ sub load_codes
 # des-type: By default, the tag returned is an &lt;img&gt; tag, but if 'type'
 #           is "input", then an input tag is returned.
 # des-attrs: Optional hashref of other attributes.  If this isn't a hashref,
-#            then it's assumed to be a scalar for the 'name' attribute for 
+#            then it's assumed to be a scalar for the 'name' attribute for
 #            input controls.
 # </LJFUNC>
 sub img
 {
     my $ic = shift;
     my $type = shift;  # either "" or "input"
-    my $attr = shift;  
+    my $attr = shift;
 
     my $attrs;
     if ($attr) {
-	if (ref $attr eq "HASH") {
-	    foreach (keys %$attr) {
-		$attrs .= " $_=\"" . LJ::ehtml($attr->{$_}) . "\"";
-	    }
-	} else {
-	    $attrs = " name=\"$attr\"";
-	}
+        if (ref $attr eq "HASH") {
+            foreach (keys %$attr) {
+                $attrs .= " $_=\"" . LJ::ehtml($attr->{$_}) . "\"";
+            }
+        } else {
+            $attrs = " name=\"$attr\"";
+        }
     }
 
     my $i = $LJ::Img::img{$ic};
     if ($type eq "") {
-	return "<img src=\"$LJ::IMGPREFIX$i->{'src'}\" width=\"$i->{'width'}\" ".
-	    "height=\"$i->{'height'}\" alt=\"$i->{'alt'}\" border='0'$attrs>";
+        return "<img src=\"$LJ::IMGPREFIX$i->{'src'}\" width=\"$i->{'width'}\" ".
+            "height=\"$i->{'height'}\" alt=\"$i->{'alt'}\" border='0'$attrs>";
     }
     if ($type eq "input") {
-	return "<input type=\"image\" src=\"$LJ::IMGPREFIX$i->{'src'}\" ".
-	    "width=\"$i->{'width'}\" height=\"$i->{'height'}\" ".
-	    "alt=\"$i->{'alt'}\" border='0'$attrs>";
+        return "<input type=\"image\" src=\"$LJ::IMGPREFIX$i->{'src'}\" ".
+            "width=\"$i->{'width'}\" height=\"$i->{'height'}\" ".
+            "alt=\"$i->{'alt'}\" border='0'$attrs>";
     }
     return "<b>XXX</b>";
 }
@@ -1873,14 +1873,14 @@ sub load_user_props
     my ($uref, @props) = @_;
     my $uid = $uref->{'userid'}+0;
     unless ($uid) {
-	$uid = LJ::get_userid($dbarg, $uref->{'user'});
+        $uid = LJ::get_userid($dbarg, $uref->{'user'});
     }
-    
+
     my $propname_where;
     if (@props) {
-	$propname_where = "AND upl.name IN (" . join(",", map { $dbh->quote($_) } @props) . ")";
+        $propname_where = "AND upl.name IN (" . join(",", map { $dbh->quote($_) } @props) . ")";
     }
-    
+
     my ($sql, $sth);
 
     # FIXME: right now we read userprops from both tables (indexed and
@@ -1892,14 +1892,14 @@ sub load_user_props
 
     foreach my $table (qw(userprop userproplite))
     {
-	$sql = "SELECT upl.name, up.value FROM $table up, userproplist upl ".
-	    "WHERE up.userid=$uid AND up.upropid=upl.upropid $propname_where";
-	$sth = $dbr->prepare($sql);
-	$sth->execute;
-	while ($_ = $sth->fetchrow_hashref) {
-	    $uref->{$_->{'name'}} = $_->{'value'};
-	}
-	$sth->finish;
+        $sql = "SELECT upl.name, up.value FROM $table up, userproplist upl ".
+            "WHERE up.userid=$uid AND up.upropid=upl.upropid $propname_where";
+        $sth = $dbr->prepare($sql);
+        $sth->execute;
+        while ($_ = $sth->fetchrow_hashref) {
+            $uref->{$_->{'name'}} = $_->{'value'};
+        }
+        $sth->finish;
     }
 
     # Add defaults to user object.
@@ -1910,8 +1910,8 @@ sub load_user_props
     unless (@props) { @props = keys %LJ::USERPROP_DEF; }
 
     foreach my $prop (@props) {
-	next if (defined $uref->{$prop});
-	$uref->{$prop} = $LJ::USERPROP_DEF{$prop};
+        next if (defined $uref->{$prop});
+        $uref->{$prop} = $LJ::USERPROP_DEF{$prop};
     }
 }
 
@@ -1929,7 +1929,7 @@ sub bad_input
     my $ret = "";
     $ret .= "(=BADCONTENT=)\n<ul>\n";
     foreach (@errors) {
-	$ret .= "<li>$_\n";
+        $ret .= "<li>$_\n";
     }
     $ret .= "</ul>\n";
     return $ret;
@@ -1937,19 +1937,19 @@ sub bad_input
 
 # <LJFUNC>
 # name: LJ::debug
-# des: When $LJ::DEBUG is set, logs the given message to 
-#      $LJ::VAR/debug.log.  Or, if $LJ::DEBUG is 2, then 
+# des: When $LJ::DEBUG is set, logs the given message to
+#      $LJ::VAR/debug.log.  Or, if $LJ::DEBUG is 2, then
 #      prints to STDOUT.
 # returns: 1 if logging disabled, 0 on failure to open log, 1 otherwise
 # args: message
 # des-message: Message to log.
 # </LJFUNC>
-sub debug 
+sub debug
 {
     return 1 unless ($LJ::DEBUG);
     if ($LJ::DEBUG == 2) {
-	print $_[0], "\n";
-	return 1;
+        print $_[0], "\n";
+        return 1;
     }
     open (L, ">>$LJ::VAR/debug.log") or return 0;
     print L scalar(time), ": $_[0]\n";
@@ -1989,17 +1989,17 @@ sub auth_okay
     # which case the actual password (last argument) is got from the
     # user object.
     if (ref $user eq "HASH") {
-	$actual = $user->{'password'};
-	$user = $user->{'user'};
+        $actual = $user->{'password'};
+        $user = $user->{'user'};
     }
 
     ## custom authorization:
     if (ref $LJ::AUTH_CHECK eq "CODE") {
-	my $type = $md5 ? "md5" : "clear";
-	my $try = $md5 || $clear;
-	return $LJ::AUTH_CHECK->($user, $try, $type);
+        my $type = $md5 ? "md5" : "clear";
+        my $try = $md5 || $clear;
+        return $LJ::AUTH_CHECK->($user, $try, $type);
     }
-    
+
     ## LJ default authorization:
     return 1 if ($md5 && lc($md5) eq LJ::hash_password($actual));
     return 1 if ($clear eq $actual);
@@ -2023,12 +2023,12 @@ sub create_account
     my $dbs = make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
-    
+
     my $user = LJ::canonical_username($o->{'user'});
     unless ($user)  {
-	return 0;
+        return 0;
     }
-    
+
     my $quser = $dbr->quote($user);
     my $qpassword = $dbr->quote($o->{'password'});
     my $qname = $dbr->quote($o->{'name'});
@@ -2036,7 +2036,7 @@ sub create_account
     my $cluster = $LJ::DEFAULT_CLUSTER + 0;
 
     my $sth = $dbh->prepare("INSERT INTO user (user, name, password, clusterid, dversion) ".
-			    "VALUES ($quser, $qname, $qpassword, $cluster, 1)");
+                            "VALUES ($quser, $qname, $qpassword, $cluster, 1)");
     $sth->execute;
     if ($dbh->err) { return 0; }
 
@@ -2045,10 +2045,10 @@ sub create_account
     $dbh->do("INSERT INTO userusage (userid, timecreate) VALUES ($userid, NOW())");
 
     LJ::run_hooks("post_create", {
-	'dbs' => $dbs,
-	'userid' => $userid,
-	'user' => $user,
-	'code' => undef,
+        'dbs' => $dbs,
+        'userid' => $userid,
+        'user' => $user,
+        'code' => undef,
     });
     return $userid;
 }
@@ -2066,20 +2066,20 @@ sub is_friend
     my $dbarg = shift;
     my $ua = shift;
     my $ub = shift;
-    
+
     my $uaid = (ref $ua ? $ua->{'userid'} : $ua)+0;
     my $ubid = (ref $ub ? $ub->{'userid'} : $ub)+0;
 
     my $dbs = make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
-		
+
     return 0 unless $uaid;
     return 0 unless $ubid;
     return 1 if ($uaid == $ubid);
 
     my $sth = $dbr->prepare("SELECT COUNT(*) FROM friends WHERE ".
-			    "userid=$uaid AND friendid=$ubid");
+                            "userid=$uaid AND friendid=$ubid");
     $sth->execute;
     my ($is_friend) = $sth->fetchrow_array;
     $sth->finish;
@@ -2099,14 +2099,14 @@ sub is_banned
     my $dbarg = shift;
     my $u = shift;
     my $j = shift;
-    
+
     my $uid = (ref $u ? $u->{'userid'} : $u)+0;
     my $jid = (ref $j ? $j->{'userid'} : $j)+0;
 
     my $dbs = LJ::make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
-		
+
     return 1 unless $uid;
     return 1 unless $jid;
 
@@ -2115,7 +2115,7 @@ sub is_banned
     return 0 if ($uid == $jid);
 
     my $sth = $dbr->prepare("SELECT COUNT(*) FROM ban WHERE ".
-			    "userid=$jid AND banneduserid=$uid");
+                            "userid=$jid AND banneduserid=$uid");
     $sth->execute;
     my $is_banned = $sth->fetchrow_array;
     $sth->finish;
@@ -2136,7 +2136,7 @@ sub can_view
     my $dbarg = shift;
     my $remote = shift;
     my $item = shift;
-    
+
     # public is okay
     return 1 if ($item->{'security'} eq "public");
 
@@ -2161,7 +2161,7 @@ sub can_view
     my $dbr = $dbs->{'reader'};
 
     my $sth = $dbr->prepare("SELECT groupmask FROM friends WHERE ".
-			    "userid=$userid AND friendid=$remoteid");
+                            "userid=$userid AND friendid=$remoteid");
     $sth->execute;
     my ($gmask) = $sth->fetchrow_array;
     my $allowed = (int($gmask) & int($item->{'allowmask'}));
@@ -2171,7 +2171,7 @@ sub can_view
 # <LJFUNC>
 # name: LJ::get_talktext
 # des: Efficiently retrieves a large number of comments, trying first
-#      slave database servers for recent items, then the master in 
+#      slave database servers for recent items, then the master in
 #      cases of old items the slaves have already disposed of.  See also:
 #      [func[LJ::get_logtext]].
 # args: dbs, talkid*
@@ -2189,12 +2189,12 @@ sub get_talktext
     my %need;
     foreach (@_) { $need{$_+0} = 1; }
 
-    # always consider hitting the master database, but if a slave is 
+    # always consider hitting the master database, but if a slave is
     # available, hit that first.
     my @sources = ([$dbs->{'dbh'}, "talktext"]);
     if ($dbs->{'has_slave'}) {
         if ($LJ::USE_RECENT_TABLES) {
-	    my $dbt = LJ::get_dbh("recenttext");	    
+            my $dbt = LJ::get_dbh("recenttext");
             unshift @sources, [ $dbt || $dbs->{'dbr'}, "recent_talktext" ];
         } else {
             unshift @sources, [ $dbs->{'dbr'}, "talktext" ];
@@ -2222,7 +2222,7 @@ sub get_talktext
 # <LJFUNC>
 # name: LJ::get_logtext
 # des: Efficiently retrieves a large number of journal entry text, trying first
-#      slave database servers for recent items, then the master in 
+#      slave database servers for recent items, then the master in
 #      cases of old items the slaves have already disposed of.  See also:
 #      [func[LJ::get_talktext]].
 # args: dbs, opts?, itemid*
@@ -2245,35 +2245,35 @@ sub get_logtext
     my %need;
     foreach (@_) { $need{$_+0} = 1; }
 
-    # always consider hitting the master database, but if a slave is 
+    # always consider hitting the master database, but if a slave is
     # available, hit that first.
     my @sources = ([$dbs->{'dbh'}, "logtext"]);
-    if ($dbs->{'has_slave'} && ! $opts->{'usemaster'}) { 
-	if ($LJ::USE_RECENT_TABLES) {
-	    my $dbt = LJ::get_dbh("recenttext");
-	    unshift @sources, [ $dbt || $dbs->{'dbr'}, "recent_logtext" ];
-	} else {
-	    unshift @sources, [ $dbs->{'dbr'}, "logtext" ];
-	}
+    if ($dbs->{'has_slave'} && ! $opts->{'usemaster'}) {
+        if ($LJ::USE_RECENT_TABLES) {
+            my $dbt = LJ::get_dbh("recenttext");
+            unshift @sources, [ $dbt || $dbs->{'dbr'}, "recent_logtext" ];
+        } else {
+            unshift @sources, [ $dbs->{'dbr'}, "logtext" ];
+        }
     }
 
     my $snag_what = "subject, event";
     $snag_what = "NULL, IF(LENGTH(subject), subject, event)"
-	if $opts->{'prefersubjects'};
+        if $opts->{'prefersubjects'};
 
     while (@sources && %need)
     {
-	my $s = shift @sources;
-	my ($db, $table) = ($s->[0], $s->[1]);
-	my $itemid_in = join(", ", keys %need);
+        my $s = shift @sources;
+        my ($db, $table) = ($s->[0], $s->[1]);
+        my $itemid_in = join(", ", keys %need);
 
-	my $sth = $db->prepare("SELECT itemid, $snag_what FROM $table ".
-			       "WHERE itemid IN ($itemid_in)");
-	$sth->execute;
-	while (my ($id, $subject, $event) = $sth->fetchrow_array) {
-	    $lt->{$id} = [ $subject, $event ];
-	    delete $need{$id};
-	}
+        my $sth = $db->prepare("SELECT itemid, $snag_what FROM $table ".
+                               "WHERE itemid IN ($itemid_in)");
+        $sth->execute;
+        while (my ($id, $subject, $event) = $sth->fetchrow_array) {
+            $lt->{$id} = [ $subject, $event ];
+            delete $need{$id};
+        }
     }
     return $lt;
 }
@@ -2281,7 +2281,7 @@ sub get_logtext
 # <LJFUNC>
 # name: LJ::get_logtext2
 # des: Efficiently retrieves a large number of journal entry text, trying first
-#      slave database servers for recent items, then the master in 
+#      slave database servers for recent items, then the master in
 #      cases of old items the slaves have already disposed of.  See also:
 #      [func[LJ::get_talktext2]].
 # args: u, opts?, jitemid*
@@ -2310,30 +2310,30 @@ sub get_logtext2
     my %need;
     foreach (@_) { $need{$_+0} = 1; }
 
-    # always consider hitting the master database, but if a slave is 
+    # always consider hitting the master database, but if a slave is
     # available, hit that first.
     my @sources = ([$dbh, "logtext2"]);
-    if ($dbr) { 
-	unshift @sources, [ $dbr, $LJ::USE_RECENT_TABLES ? "recent_logtext2" : "logtext2" ];
+    if ($dbr) {
+        unshift @sources, [ $dbr, $LJ::USE_RECENT_TABLES ? "recent_logtext2" : "logtext2" ];
     }
 
     my $snag_what = "subject, event";
     $snag_what = "NULL, IF(LENGTH(subject), subject, event)"
-	if $opts->{'prefersubjects'};
-    
+        if $opts->{'prefersubjects'};
+
     while (@sources && %need)
     {
-	my $s = shift @sources;
-	my ($db, $table) = ($s->[0], $s->[1]);
-	my $jitemid_in = join(", ", keys %need);
+        my $s = shift @sources;
+        my ($db, $table) = ($s->[0], $s->[1]);
+        my $jitemid_in = join(", ", keys %need);
 
-	my $sth = $db->prepare("SELECT jitemid, $snag_what FROM $table ".
-			       "WHERE journalid=$journalid AND jitemid IN ($jitemid_in)");
-	$sth->execute;
-	while (my ($id, $subject, $event) = $sth->fetchrow_array) {
-	    $lt->{$id} = [ $subject, $event ];
-	    delete $need{$id};
-	}
+        my $sth = $db->prepare("SELECT jitemid, $snag_what FROM $table ".
+                               "WHERE journalid=$journalid AND jitemid IN ($jitemid_in)");
+        $sth->execute;
+        while (my ($id, $subject, $event) = $sth->fetchrow_array) {
+            $lt->{$id} = [ $subject, $event ];
+            delete $need{$id};
+        }
     }
     return $lt;
 }
@@ -2368,26 +2368,26 @@ sub get_talktext2
     my %need;
     foreach (@_) { $need{$_+0} = 1; }
 
-    # always consider hitting the master database, but if a slave is 
+    # always consider hitting the master database, but if a slave is
     # available, hit that first.
     my @sources = ([$dbh, "talktext2"]);
-    if ($dbr) { 
-	unshift @sources, [ $dbr, $LJ::USE_RECENT_TABLES ? "recent_talktext2" : "talktext2" ];
+    if ($dbr) {
+        unshift @sources, [ $dbr, $LJ::USE_RECENT_TABLES ? "recent_talktext2" : "talktext2" ];
     }
 
     while (@sources && %need)
     {
-	my $s = shift @sources;
-	my ($db, $table) = ($s->[0], $s->[1]);
-	my $in = join(", ", keys %need);
+        my $s = shift @sources;
+        my ($db, $table) = ($s->[0], $s->[1]);
+        my $in = join(", ", keys %need);
 
-	my $sth = $db->prepare("SELECT jtalkid, subject, body FROM $table ".
-			       "WHERE journalid=$journalid AND jtalkid IN ($in)");
-	$sth->execute;
-	while (my ($id, $subject, $event) = $sth->fetchrow_array) {
-	    $lt->{$id} = [ $subject, $event ];
-	    delete $need{$id};
-	}
+        my $sth = $db->prepare("SELECT jtalkid, subject, body FROM $table ".
+                               "WHERE journalid=$journalid AND jtalkid IN ($in)");
+        $sth->execute;
+        while (my ($id, $subject, $event) = $sth->fetchrow_array) {
+            $lt->{$id} = [ $subject, $event ];
+            delete $need{$id};
+        }
     }
     return $lt;
 }
@@ -2413,55 +2413,55 @@ sub get_logtext2multi
     my %need;
     my @needold;
     foreach my $c (keys %$idsbyc) {
-	foreach (@{$idsbyc->{$c}}) {
-	    if ($c) {
-		$need{$c}->{"$_->[0] $_->[1]"} = 1;
-	    } else {
-		push @needold, $_+0;
-	    }
-	}
+        foreach (@{$idsbyc->{$c}}) {
+            if ($c) {
+                $need{$c}->{"$_->[0] $_->[1]"} = 1;
+            } else {
+                push @needold, $_+0;
+            }
+        }
     }
 
     # don't handle non-cluster stuff ourselves
     if (@needold)
     {
-	my $olt = LJ::get_logtext($dbs, @needold);
-	foreach (keys %$olt) {
-	    $lt->{"0 $_"} = $olt->{$_};
-	}
+        my $olt = LJ::get_logtext($dbs, @needold);
+        foreach (keys %$olt) {
+            $lt->{"0 $_"} = $olt->{$_};
+        }
     }
 
     # pass 1: slave (trying recent), pass 2: master
-    foreach my $pass (1, 2) 
+    foreach my $pass (1, 2)
     {
-	foreach my $c (keys %need) 
-	{
-	    next unless keys %{$need{$c}}; 
-	    my $db;
-	    my $table = "logtext2";
-	    if ($pass == 1) { 
-		$db = LJ::get_dbh("cluster${c}slave");
-		$table = "recent_logtext2" if $LJ::USE_RECENT_TABLES;
-	    } else {
-		$db = LJ::get_dbh("cluster${c}");		
-	    }
-	    next unless $db;
+        foreach my $c (keys %need)
+        {
+            next unless keys %{$need{$c}};
+            my $db;
+            my $table = "logtext2";
+            if ($pass == 1) {
+                $db = LJ::get_dbh("cluster${c}slave");
+                $table = "recent_logtext2" if $LJ::USE_RECENT_TABLES;
+            } else {
+                $db = LJ::get_dbh("cluster${c}");
+            }
+            next unless $db;
 
-	    my $fattyin;
-	    foreach (keys %{$need{$c}}) {
-		$fattyin .= " OR " if $fattyin;
-		my ($a, $b) = split(/ /, $_);
-		$fattyin .= "(journalid=$a AND jitemid=$b)";
-	    }
-	    
-	    $sth = $db->prepare("SELECT journalid, jitemid, subject, event ".
-				"FROM $table WHERE $fattyin");
-	    $sth->execute;
-	    while (my ($jid, $jitemid, $subject, $event) = $sth->fetchrow_array) {
-		delete $need{$c}->{"$jid $jitemid"};
-		$lt->{"$jid $jitemid"} = [ $subject, $event ];
-	    }
-	}
+            my $fattyin;
+            foreach (keys %{$need{$c}}) {
+                $fattyin .= " OR " if $fattyin;
+                my ($a, $b) = split(/ /, $_);
+                $fattyin .= "(journalid=$a AND jitemid=$b)";
+            }
+
+            $sth = $db->prepare("SELECT journalid, jitemid, subject, event ".
+                                "FROM $table WHERE $fattyin");
+            $sth->execute;
+            while (my ($jid, $jitemid, $subject, $event) = $sth->fetchrow_array) {
+                delete $need{$c}->{"$jid $jitemid"};
+                $lt->{"$jid $jitemid"} = [ $subject, $event ];
+            }
+        }
     }
 
     return $lt;
@@ -2486,14 +2486,14 @@ sub make_text_link
 {
     my ($url, $email) = @_;
     if ($email =~ /\@aol\.com$/i) {
-	return "<a href=\"$url\">$url</a>";
+        return "<a href=\"$url\">$url</a>";
     }
     return $url;
 }
 
 # <LJFUNC>
 # name: LJ::get_remote
-# des: authenticates the user at the remote end based on their cookies 
+# des: authenticates the user at the remote end based on their cookies
 #      and returns a hashref representing them
 # returns: hashref containing 'user' and 'userid' if valid user, else
 #          undef.
@@ -2506,8 +2506,8 @@ sub make_text_link
 # </LJFUNC>
 sub get_remote
 {
-    my $dbarg = shift;	
-    my $criterr = shift; 
+    my $dbarg = shift;
+    my $criterr = shift;
     my $cgi = shift;
 
     my $dbs = make_dbs_from_arg($dbarg);
@@ -2517,66 +2517,66 @@ sub get_remote
     $$criterr = 0;
 
     my $cookie = sub {
-	return $cgi ? $cgi->cookie($_[0]) : $BMLClient::COOKIE{$_[0]};
+        return $cgi ? $cgi->cookie($_[0]) : $BMLClient::COOKIE{$_[0]};
     };
 
     my ($user, $userid, $caps);
 
     my $validate = sub {
-	my $a = shift;
-	# let hooks reject credentials, or set criterr true:
-	my $hookparam = {
-	    'user' => $a->{'user'},
-	    'userid' => $a->{'userid'},
-	    'dbs' => $dbs,
-	    'caps' => $a->{'caps'},
-	    'criterr' => $criterr,
-	    'cookiesource' => $cookie,
-	};
-	my @r = LJ::run_hooks("validate_get_remote", $hookparam);
-	return undef if grep { ! $_->[0] } @r;
-	return 1;
+        my $a = shift;
+        # let hooks reject credentials, or set criterr true:
+        my $hookparam = {
+            'user' => $a->{'user'},
+            'userid' => $a->{'userid'},
+            'dbs' => $dbs,
+            'caps' => $a->{'caps'},
+            'criterr' => $criterr,
+            'cookiesource' => $cookie,
+        };
+        my @r = LJ::run_hooks("validate_get_remote", $hookparam);
+        return undef if grep { ! $_->[0] } @r;
+        return 1;
     };
 
     ### are they logged in?
     unless ($user = $cookie->('ljuser')) {
-	$validate->();
-	return undef;
+        $validate->();
+        return undef;
     }
 
     ### does their login password match their login?
     my $hpass = $cookie->('ljhpass');
     unless ($hpass =~ /^$user:(.+)/) {
-	$validate->();
-	return undef;
+        $validate->();
+        return undef;
     }
     my $remhpass = $1;
     my $correctpass;     # find this out later.
 
     unless (ref $LJ::AUTH_CHECK eq "CODE") {
-	my $quser = $dbr->quote($user);
-	($userid, $correctpass, $caps) = 
-	    $dbr->selectrow_array("SELECT userid, password, caps ".
-				  "FROM user WHERE user=$quser");
+        my $quser = $dbr->quote($user);
+        ($userid, $correctpass, $caps) =
+            $dbr->selectrow_array("SELECT userid, password, caps ".
+                                  "FROM user WHERE user=$quser");
 
-	# each handler must return true, else credentials are ignored:
-	return undef unless $validate->({
-	    'userid' => $userid,
-	    'user' => $user,
-	    'caps' => $caps,
-	});
+        # each handler must return true, else credentials are ignored:
+        return undef unless $validate->({
+            'userid' => $userid,
+            'user' => $user,
+            'caps' => $caps,
+        });
 
     } else {
-	$userid = LJ::get_userid($dbh, $user);
+        $userid = LJ::get_userid($dbh, $user);
     }
-    
+
     unless ($userid && LJ::auth_okay($user, undef, $remhpass, $correctpass)) {
-	$validate->();
-	return undef;
+        $validate->();
+        return undef;
     }
 
     return { 'user' => $user,
-	     'userid' => $userid, };
+             'userid' => $userid, };
 }
 
 # <LJFUNC>
@@ -2597,21 +2597,21 @@ sub load_remote
 
     my $remote = shift;
     return unless $remote;
-    
+
     # if all three of these are loaded, this hashref is probably full.
     # (don't want to just test for 2 keys, since keys like '_priv' and
     # _privloaded might be present)
-    return if (defined $remote->{'email'} && 
-	       defined $remote->{'caps'} &&
-	       defined $remote->{'status'});
-    
+    return if (defined $remote->{'email'} &&
+               defined $remote->{'caps'} &&
+               defined $remote->{'status'});
+
     # try to load this remote user's record
     my $ru = LJ::load_userid($dbs, $remote->{'userid'});
     return unless $ru;
 
     # merge user record (so we preserve underscore key data structures)
     foreach my $k (keys %$ru) {
-	$remote->{$k} = $ru->{$k};
+        $remote->{$k} = $ru->{$k};
     }
 }
 
@@ -2657,7 +2657,7 @@ sub did_post
 # des: This function is called from a HUP signal handler and is intentionally
 #      very very simple (1 line) so we don't core dump on a system without
 #      reentrant libraries.  It just sets a flag to clear the caches at the
-#      beginning of the next request (see [func[LJ::handle_caches]]).  
+#      beginning of the next request (see [func[LJ::handle_caches]]).
 #      There should be no need to ever call this function directly.
 # </LJFUNC>
 sub clear_caches
@@ -2680,11 +2680,11 @@ sub handle_caches
     $LJ::CLEAR_CACHES = 0;
 
     do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
-      
-    foreach (keys %LJ::DBCACHE) { 
-	my $v = $LJ::DBCACHE{$_};
-	next unless ref $v;
-	$v->disconnect;
+
+    foreach (keys %LJ::DBCACHE) {
+        my $v = $LJ::DBCACHE{$_};
+        next unless ref $v;
+        $v->disconnect;
     }
     %LJ::DBCACHE = ();
 
@@ -2704,7 +2704,7 @@ sub handle_caches
 
 # <LJFUNC>
 # name: LJ::start_request
-# des: Before a new web request is obtained, this should be called to 
+# des: Before a new web request is obtained, this should be called to
 #      determine if process should die or keep working, clean caches,
 #      reload config files, etc.
 # returns: 1 if a new request is to be processed, 0 if process should die.
@@ -2716,7 +2716,7 @@ sub start_request
     # TODO: auto-restat and reload ljconfig.pl if changed.
 
     # clear %LJ::DBREQCACHE (like DBCACHE, but verified already for
-    # this request to be ->ping'able).  
+    # this request to be ->ping'able).
     %LJ::DBREQCACHE = ();
 
     # need to suck db weights down on every request (we check
@@ -2724,7 +2724,7 @@ sub start_request
     # to validate master db connection, instead of selecting
     # the connection ID... just as fast, but with a point!)
     if ($LJ::DBWEIGHTS_FROM_DB) {  # defined in ljconfig.pl
-	$LJ::NEED_DBWEIGHTS = 1; 
+        $LJ::NEED_DBWEIGHTS = 1;
     }
 
     return 1;
@@ -2746,25 +2746,25 @@ sub load_userpics
     my $dbr = $dbs->{'reader'};
 
     my @load_list;
-    foreach my $id (@{$idlist}) 
+    foreach my $id (@{$idlist})
     {
-	if ($LJ::CACHE_USERPIC_SIZE{$id}) {
-	    $upics->{$id}->{'width'} = $LJ::CACHE_USERPIC_SIZE{$id}->{'width'};
-	    $upics->{$id}->{'height'} = $LJ::CACHE_USERPIC_SIZE{$id}->{'height'};
-	} elsif ($id+0) {
-	    push @load_list, ($id+0);
-	}
+        if ($LJ::CACHE_USERPIC_SIZE{$id}) {
+            $upics->{$id}->{'width'} = $LJ::CACHE_USERPIC_SIZE{$id}->{'width'};
+            $upics->{$id}->{'height'} = $LJ::CACHE_USERPIC_SIZE{$id}->{'height'};
+        } elsif ($id+0) {
+            push @load_list, ($id+0);
+        }
     }
     return unless (@load_list);
     my $picid_in = join(",", @load_list);
     my $sth = $dbr->prepare("SELECT picid, width, height FROM userpic WHERE picid IN ($picid_in)");
     $sth->execute;
     while ($_ = $sth->fetchrow_hashref) {
-	my $id = $_->{'picid'};
-	undef $_->{'picid'};	
-	$upics->{$id} = $_;
-	$LJ::CACHE_USERPIC_SIZE{$id}->{'width'} = $_->{'width'};
-	$LJ::CACHE_USERPIC_SIZE{$id}->{'height'} = $_->{'height'};
+        my $id = $_->{'picid'};
+        undef $_->{'picid'};
+        $upics->{$id} = $_;
+        $LJ::CACHE_USERPIC_SIZE{$id}->{'width'} = $_->{'width'};
+        $LJ::CACHE_USERPIC_SIZE{$id}->{'height'} = $_->{'height'};
     }
 }
 
@@ -2781,15 +2781,15 @@ sub send_mail
     open (MAIL, "|$LJ::SENDMAIL");
     my $toname;
     if ($opt->{'toname'}) {
-	$opt->{'toname'} =~ s/[\n\t\(\)]//g;
-	$toname = " ($opt->{'toname'})";
+        $opt->{'toname'} =~ s/[\n\t\(\)]//g;
+        $toname = " ($opt->{'toname'})";
     }
     print MAIL "To: $opt->{'to'}$toname\n";
     print MAIL "Cc: $opt->{'bcc'}\n" if ($opt->{'cc'});
     print MAIL "Bcc: $opt->{'bcc'}\n" if ($opt->{'bcc'});
     print MAIL "From: $opt->{'from'}";
     if ($opt->{'fromname'}) {
-	print MAIL " ($opt->{'fromname'})";
+        print MAIL " ($opt->{'fromname'})";
     }
     print MAIL "\nSubject: $opt->{'subject'}\n\n";
     print MAIL $opt->{'body'};
@@ -2832,15 +2832,15 @@ sub load_user_theme
     my $dbs = make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
-		
+
     my $sth;
     my $quser = $dbh->quote($user);
 
     if ($u->{'themeid'} == 0) {
-	$sth = $dbr->prepare("SELECT coltype, color FROM themecustom WHERE user=$quser");
+        $sth = $dbr->prepare("SELECT coltype, color FROM themecustom WHERE user=$quser");
     } else {
-	my $qtid = $dbh->quote($u->{'themeid'});
-	$sth = $dbr->prepare("SELECT coltype, color FROM themedata WHERE themeid=$qtid");
+        my $qtid = $dbh->quote($u->{'themeid'});
+        $sth = $dbr->prepare("SELECT coltype, color FROM themedata WHERE themeid=$qtid");
     }
     $sth->execute;
     $vars->{"color-$_->{'coltype'}"} = $_->{'color'} while ($_ = $sth->fetchrow_hashref);
@@ -2861,28 +2861,28 @@ sub parse_vars
     my ($dataref, $hashref) = @_;
     my @data = split(/\n/, $$dataref);
     my $curitem = "";
-    
+
     foreach (@data)
     {
         $_ .= "\n";
-	s/\r//g;
+        s/\r//g;
         if ($curitem eq "" && /^([A-Z0-9\_]+)=>([^\n\r]*)/)
         {
-	    $hashref->{$1} = $2;
+            $hashref->{$1} = $2;
         }
         elsif ($curitem eq "" && /^([A-Z0-9\_]+)<=\s*$/)
         {
-	    $curitem = $1;
-	    $hashref->{$curitem} = "";
+            $curitem = $1;
+            $hashref->{$curitem} = "";
         }
         elsif ($curitem && /^<=$curitem\s*$/)
         {
-	    chop $hashref->{$curitem};  # remove the false newline
-	    $curitem = "";
+            chop $hashref->{$curitem};  # remove the false newline
+            $curitem = "";
         }
         else
         {
-	    $hashref->{$curitem} .= $_ if ($curitem =~ /\S/);
+            $hashref->{$curitem} .= $_ if ($curitem =~ /\S/);
         }
     }
 }
@@ -2915,54 +2915,54 @@ sub load_style_fast
     my $dbs = make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
-    
+
     $styleid += 0;
     my $now = time();
-    
+
     if ((defined $LJ::CACHE_STYLE{$styleid}) &&
-	($LJ::CACHE_STYLE{$styleid}->{'lastpull'} > ($now-300)) &&
-	(! $nocache)
-	)
+        ($LJ::CACHE_STYLE{$styleid}->{'lastpull'} > ($now-300)) &&
+        (! $nocache)
+        )
     {
-	$$dataref = $LJ::CACHE_STYLE{$styleid}->{'data'};
-	if (ref $typeref eq "SCALAR") { $$typeref = $LJ::CACHE_STYLE{$styleid}->{'type'}; }
+        $$dataref = $LJ::CACHE_STYLE{$styleid}->{'data'};
+        if (ref $typeref eq "SCALAR") { $$typeref = $LJ::CACHE_STYLE{$styleid}->{'type'}; }
     }
     else
     {
-	my @h = ($dbh);
-	if ($dbs->{'has_slave'}) {
-	    unshift @h, $dbr;
-	}
-	my ($data, $type, $cache);
-	my $sth;
-	foreach my $db (@h) 
-	{
-	    $sth = $dbr->prepare("SELECT formatdata, type, opt_cache FROM style WHERE styleid=$styleid");
-	    $sth->execute;
-	    ($data, $type, $cache) = $sth->fetchrow_array;
-	    $sth->finish;
-	    last if ($data);
-	}
-	if ($cache eq "Y") {
-	    $LJ::CACHE_STYLE{$styleid} = { 'lastpull' => $now,
-				       'data' => $data,
-				       'type' => $type,
-				   };
-	}
+        my @h = ($dbh);
+        if ($dbs->{'has_slave'}) {
+            unshift @h, $dbr;
+        }
+        my ($data, $type, $cache);
+        my $sth;
+        foreach my $db (@h)
+        {
+            $sth = $dbr->prepare("SELECT formatdata, type, opt_cache FROM style WHERE styleid=$styleid");
+            $sth->execute;
+            ($data, $type, $cache) = $sth->fetchrow_array;
+            $sth->finish;
+            last if ($data);
+        }
+        if ($cache eq "Y") {
+            $LJ::CACHE_STYLE{$styleid} = { 'lastpull' => $now,
+                                       'data' => $data,
+                                       'type' => $type,
+                                   };
+        }
 
-	$$dataref = $data;
-	if (ref $typeref eq "SCALAR") { $$typeref = $type; }
+        $$dataref = $data;
+        if (ref $typeref eq "SCALAR") { $$typeref = $type; }
     }
 }
 
 # <LJFUNC>
 # name: LJ::make_journal
-# class: 
-# des: 
-# info: 
+# class:
+# des:
+# info:
 # args: dbarg, user, view, remote, opts
-# des-: 
-# returns: 
+# des-:
+# returns:
 # </LJFUNC>
 sub make_journal
 {
@@ -2973,61 +2973,61 @@ sub make_journal
     my $dbr = $dbs->{'reader'};
 
     if ($LJ::SERVER_DOWN) {
-	if ($opts->{'vhost'} eq "customview") {
-	    return "<!-- LJ down for maintenance -->";
-	}
-	return LJ::server_down_html();
+        if ($opts->{'vhost'} eq "customview") {
+            return "<!-- LJ down for maintenance -->";
+        }
+        return LJ::server_down_html();
     }
-    
+
     my ($styleid);
-    if ($opts->{'styleid'}) { 
-	$styleid = $opts->{'styleid'}+0; 
+    if ($opts->{'styleid'}) {
+        $styleid = $opts->{'styleid'}+0;
     } else {
-	$view ||= "lastn";    # default view when none specified explicitly in URLs
-	if ($LJ::viewinfo{$view})  {
-	    $styleid = -1;    # to get past the return, then checked later for -1 and fixed, once user is loaded.
-	    $view = $view;
-	} else {
-	    $opts->{'badargs'} = 1;
-	}
+        $view ||= "lastn";    # default view when none specified explicitly in URLs
+        if ($LJ::viewinfo{$view})  {
+            $styleid = -1;    # to get past the return, then checked later for -1 and fixed, once user is loaded.
+            $view = $view;
+        } else {
+            $opts->{'badargs'} = 1;
+        }
     }
     return unless ($styleid);
 
     my $quser = $dbh->quote($user);
     my $u;
     if ($opts->{'u'}) {
-	$u = $opts->{'u'};
+        $u = $opts->{'u'};
     } else {
-	$u = LJ::load_user($dbs, $user);
+        $u = LJ::load_user($dbs, $user);
     }
 
     unless ($u)
     {
-	$opts->{'baduser'} = 1;
-	return "<H1>Error</H1>No such user <B>$user</B>";
+        $opts->{'baduser'} = 1;
+        return "<H1>Error</H1>No such user <B>$user</B>";
     }
 
     if ($styleid == -1) {
-	if ($u->{"${view}_style"}) {
-	    # NOTE: old schema.  only here to make transition easier.  remove later.
-	    $styleid = $u->{"${view}_style"};
-	} else {
-	    my $prop = "s1_${view}_style";
-	    unless (defined $u->{$prop}) {
-	      LJ::load_user_props($dbs, $u, $prop);
-	    }
-	    $styleid = $u->{$prop};
-	}
+        if ($u->{"${view}_style"}) {
+            # NOTE: old schema.  only here to make transition easier.  remove later.
+            $styleid = $u->{"${view}_style"};
+        } else {
+            my $prop = "s1_${view}_style";
+            unless (defined $u->{$prop}) {
+              LJ::load_user_props($dbs, $u, $prop);
+            }
+            $styleid = $u->{$prop};
+        }
     }
 
     if ($LJ::USER_VHOSTS && $opts->{'vhost'} eq "users" && ! LJ::get_cap($u, "userdomain")) {
-	return "<b>Notice</b><br />Addresses like <tt>http://<i>username</i>.$LJ::USER_DOMAIN</tt> aren't enabled for this user's account type.  Instead, visit:<ul><font face=\"Verdana,Arial\"><b><a href=\"$LJ::SITEROOT/users/$user/\">$LJ::SITEROOT/users/$user/</a></b></font></ul>";
+        return "<b>Notice</b><br />Addresses like <tt>http://<i>username</i>.$LJ::USER_DOMAIN</tt> aren't enabled for this user's account type.  Instead, visit:<ul><font face=\"Verdana,Arial\"><b><a href=\"$LJ::SITEROOT/users/$user/\">$LJ::SITEROOT/users/$user/</a></b></font></ul>";
     }
     if ($opts->{'vhost'} eq "customview" && ! LJ::get_cap($u, "userdomain")) {
-	return "<b>Notice</b><br />Only users with <A HREF=\"$LJ::SITEROOT/paidaccounts/\">paid accounts</A> can create and embed styles.";
+        return "<b>Notice</b><br />Only users with <A HREF=\"$LJ::SITEROOT/paidaccounts/\">paid accounts</A> can create and embed styles.";
     }
     if ($opts->{'vhost'} eq "community" && $u->{'journaltype'} ne "C") {
-	return "<b>Notice</b><br />This account isn't a community journal.";
+        return "<b>Notice</b><br />This account isn't a community journal.";
     }
 
     return "<h1>Error</h1>Journal has been deleted.  If you are <B>$user</B>, you have a period of 30 days to decide to undelete your journal." if ($u->{'statusvis'} eq "D");
@@ -3038,7 +3038,7 @@ sub make_journal
     # load the base style
     my $basevars = "";
     LJ::load_style_fast($dbs, $styleid, \$basevars, \$view)
-	unless ($LJ::viewinfo{$view}->{'nostyle'});
+        unless ($LJ::viewinfo{$view}->{'nostyle'});
 
     # load the overrides
     my $overrides = "";
@@ -3047,14 +3047,14 @@ sub make_journal
         my $sth = $dbr->prepare("SELECT override FROM overrides WHERE user=$quser");
         $sth->execute;
         ($overrides) = $sth->fetchrow_array;
-	$sth->finish;
+        $sth->finish;
     }
 
     # populate the variable hash
     LJ::parse_vars(\$basevars, \%vars);
     LJ::parse_vars(\$overrides, \%vars);
     LJ::load_user_theme($dbs, $user, $u, \%vars);
-    
+
     # kinda free some memory
     $basevars = "";
     $overrides = "";
@@ -3072,17 +3072,17 @@ sub make_journal
     }
 
     # return it...
-    return $ret;   
+    return $ret;
 }
 
 # <LJFUNC>
 # name: LJ::html_datetime
 # class: component
-# des: 
+# des:
 # info: Parse output later with [func[LJ::html_datetime_decode]].
-# args: 
-# des-: 
-# returns: 
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub html_datetime
 {
@@ -3093,21 +3093,21 @@ sub html_datetime
     my $name = $opts->{'name'};
     my $disabled = $opts->{'disabled'} ? "DISABLED" : "";
     if ($opts->{'default'} =~ /^(\d\d\d\d)-(\d\d)-(\d\d)(?: (\d\d):(\d\d):(\d\d))/) {
-	($yyyy, $mm, $dd, $hh, $nn, $ss) = ($1 > 0 ? $1 : "",
-					    $2+0, 
-					    $3 > 0 ? $3+0 : "",
-					    $4 > 0 ? $4 : "", 
-					    $5 > 0 ? $5 : "", 
-					    $6 > 0 ? $6 : "");
+        ($yyyy, $mm, $dd, $hh, $nn, $ss) = ($1 > 0 ? $1 : "",
+                                            $2+0,
+                                            $3 > 0 ? $3+0 : "",
+                                            $4 > 0 ? $4 : "",
+                                            $5 > 0 ? $5 : "",
+                                            $6 > 0 ? $6 : "");
     }
     $ret .= LJ::html_select({ 'name' => "${name}_mm", 'selected' => $mm, 'disabled' => $opts->{'disabled'} },
-			 map { $_, LJ::Lang::month_long($lang, $_) } (0..12));
+                         map { $_, LJ::Lang::month_long($lang, $_) } (0..12));
     $ret .= "<INPUT SIZE=2 MAXLENGTH=2 NAME=${name}_dd VALUE=\"$dd\" $disabled>, <INPUT SIZE=4 MAXLENGTH=4 NAME=${name}_yyyy VALUE=\"$yyyy\" $disabled>";
     unless ($opts->{'notime'}) {
-	$ret.= " <INPUT SIZE=2 MAXLENGTH=2 NAME=${name}_hh VALUE=\"$hh\" $disabled>:<INPUT SIZE=2 MAXLENGTH=2 NAME=${name}_nn VALUE=\"$nn\" $disabled>";
-	if ($opts->{'seconds'}) {
-	    $ret .= "<INPUT SIZE=2 MAXLENGTH=2 NAME=${name}_ss VALUE=\"$ss\" $disabled>";
-	}
+        $ret.= " <INPUT SIZE=2 MAXLENGTH=2 NAME=${name}_hh VALUE=\"$hh\" $disabled>:<INPUT SIZE=2 MAXLENGTH=2 NAME=${name}_nn VALUE=\"$nn\" $disabled>";
+        if ($opts->{'seconds'}) {
+            $ret .= "<INPUT SIZE=2 MAXLENGTH=2 NAME=${name}_ss VALUE=\"$ss\" $disabled>";
+        }
     }
 
     return $ret;
@@ -3116,34 +3116,34 @@ sub html_datetime
 # <LJFUNC>
 # name: LJ::html_datetime_decode
 # class: component
-# des: 
+# des:
 # info: Generate the form controls with [func[LJ::html_datetime]].
-# args: 
-# des-: 
-# returns: 
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub html_datetime_decode
 {
     my $opts = shift;
     my $hash = shift;
     my $name = $opts->{'name'};
-    return sprintf("%04d-%02d-%02d %02d:%02d:%02d", 
-		   $hash->{"${name}_yyyy"},
-		   $hash->{"${name}_mm"},
-		   $hash->{"${name}_dd"},
-		   $hash->{"${name}_hh"},
-		   $hash->{"${name}_nn"},
-		   $hash->{"${name}_ss"});
+    return sprintf("%04d-%02d-%02d %02d:%02d:%02d",
+                   $hash->{"${name}_yyyy"},
+                   $hash->{"${name}_mm"},
+                   $hash->{"${name}_dd"},
+                   $hash->{"${name}_hh"},
+                   $hash->{"${name}_nn"},
+                   $hash->{"${name}_ss"});
 }
 
 # <LJFUNC>
 # name: LJ::html_select
 # class: component
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# des:
+# info:
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub html_select
 {
@@ -3156,9 +3156,9 @@ sub html_select
     if ($opts->{'raw'}) { $ret .= " $opts->{'raw'}"; }
     $ret .= "$disabled>";
     while (my ($value, $text) = splice(@items, 0, 2)) {
-	my $sel = "";
-	if ($value eq $opts->{'selected'}) { $sel = " selected"; }
-	$ret .= "<option value=\"$value\"$sel>$text</option>";
+        my $sel = "";
+        if ($value eq $opts->{'selected'}) { $sel = " selected"; }
+        $ret .= "<option value=\"$value\"$sel>$text</option>";
     }
     $ret .= "</select>";
     return $ret;
@@ -3167,11 +3167,11 @@ sub html_select
 # <LJFUNC>
 # name: LJ::html_check
 # class: component
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# des:
+# info:
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub html_check
 {
@@ -3180,9 +3180,9 @@ sub html_check
     my $disabled = $opts->{'disabled'} ? " DISABLED" : "";
     my $ret;
     if ($opts->{'type'} eq "radio") {
-	$ret .= "<input type=\"radio\" ";
+        $ret .= "<input type=\"radio\" ";
     } else {
-	$ret .= "<input type=\"checkbox\" ";
+        $ret .= "<input type=\"checkbox\" ";
     }
     if ($opts->{'selected'}) { $ret .= " checked='1'"; }
     if ($opts->{'raw'}) { $ret .= " $opts->{'raw'}"; }
@@ -3195,11 +3195,11 @@ sub html_check
 # <LJFUNC>
 # name: LJ::html_text
 # class: component
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# des:
+# info:
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub html_text
 {
@@ -3218,8 +3218,8 @@ sub html_text
 
 # <LJFUNC>
 # name: LJ::canonical_username
-# des: 
-# info: 
+# des:
+# info:
 # args: user
 # returns: the canonical username given, or blank if the username is not well-formed
 # </LJFUNC>
@@ -3227,9 +3227,9 @@ sub canonical_username
 {
     my $user = shift;
     if ($user =~ /^\s*([\w\-]{1,15})\s*$/) {
-	$user = lc($1);
-	$user =~ s/-/_/g;
-	return $user;
+        $user = lc($1);
+        $user =~ s/-/_/g;
+        return $user;
     }
     return "";  # not a good username.
 }
@@ -3245,7 +3245,7 @@ sub canonical_username
 # </LJFUNC>
 sub decode_url_string
 {
-    my $a = shift; 
+    my $a = shift;
     my $buffer = ref $a ? $a : \$a;
     my $hashref = shift;  # output hash
 
@@ -3267,46 +3267,46 @@ sub decode_url_string
 # given two db roles, returns true only if the two roles are for sure
 # served by different database servers.  this is useful for, say,
 # the moveusercluster script:  you wouldn't want to select something
-# from one db, copy it into another, and then delete it from the 
+# from one db, copy it into another, and then delete it from the
 # source if they were both the same machine.
 # <LJFUNC>
 # name: LJ::use_diff_db
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# class:
+# des:
+# info:
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub use_diff_db
 {
     my ($role1, $role2) = @_;
-    
+
     return 0 if $role1 eq $role2;
 
     # this is implied:  (makes logic below more readable by forcing it)
     $LJ::DBINFO{'master'}->{'role'}->{'master'} = 1;
 
     foreach (keys %LJ::DBINFO) {
-	next if /^_/;
-	next unless ref $LJ::DBINFO{$_} eq "HASH";
-	if ($LJ::DBINFO{$_}->{'role'}->{$role1} &&
-	    $LJ::DBINFO{$_}->{'role'}->{$role2}) {
-	    return 0;
-	}
+        next if /^_/;
+        next unless ref $LJ::DBINFO{$_} eq "HASH";
+        if ($LJ::DBINFO{$_}->{'role'}->{$role1} &&
+            $LJ::DBINFO{$_}->{'role'}->{$role2}) {
+            return 0;
+        }
     }
 
-    return 1;    
+    return 1;
 }
 
 # <LJFUNC>
 # name: LJ::get_dbh
 # class: db
 # des: Given one or more roles, returns a database handle.
-# info: 
-# args: 
-# des-: 
-# returns: 
+# info:
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub get_dbh
 {
@@ -3321,79 +3321,79 @@ sub get_dbh
     # calls LJ::start_request(), then gets master, then gets other)
     # but this path happens also.
     if ($role ne "master" && $LJ::DBWEIGHTS_FROM_DB &&
-	! $LJ::DBINFO{'_fromdb'}) 
+        ! $LJ::DBINFO{'_fromdb'})
     {
-	# this might be enough to do it, if master isn't loaded:
-	$LJ::NEED_DBWEIGHTS = 1;
-	my $dbh = LJ::get_dbh("master");
+        # this might be enough to do it, if master isn't loaded:
+        $LJ::NEED_DBWEIGHTS = 1;
+        my $dbh = LJ::get_dbh("master");
 
-	# or, if we already had a master cached, we have to 
-	# load it by hand:
-	unless ($LJ::DBINFO{'_fromdb'}) {
-	    _reload_weights($dbh);
-	}
+        # or, if we already had a master cached, we have to
+        # load it by hand:
+        unless ($LJ::DBINFO{'_fromdb'}) {
+            _reload_weights($dbh);
+        }
     }
 
     # otherwise, see if we have a role -> full DSN mapping already
     my ($fdsn, $dbh);
-    if ($role eq "master") { 
-	$fdsn = _make_dbh_fdsn($LJ::DBINFO{'master'});
+    if ($role eq "master") {
+        $fdsn = _make_dbh_fdsn($LJ::DBINFO{'master'});
     } else {
-	if ($LJ::DBCACHE{$role}) {
-	    $fdsn = $LJ::DBCACHE{$role};
-	    if ($now > $LJ::DBCACHE_UNTIL{$role}) {
-		# this role -> DSN mapping is too old.  invalidate,
-		# and while we're at it, clean up any connections we have
-		# that are too idle.
-		undef $fdsn;
-		
-		foreach (keys %LJ::DB_USED_AT) {
-		    next if $LJ::DB_USED_AT{$_} > $now - 60;
-		    delete $LJ::DB_USED_AT{$_};
-		    delete $LJ::DBCACHE{$_};
-		}
-	    }
-	}
+        if ($LJ::DBCACHE{$role}) {
+            $fdsn = $LJ::DBCACHE{$role};
+            if ($now > $LJ::DBCACHE_UNTIL{$role}) {
+                # this role -> DSN mapping is too old.  invalidate,
+                # and while we're at it, clean up any connections we have
+                # that are too idle.
+                undef $fdsn;
+
+                foreach (keys %LJ::DB_USED_AT) {
+                    next if $LJ::DB_USED_AT{$_} > $now - 60;
+                    delete $LJ::DB_USED_AT{$_};
+                    delete $LJ::DBCACHE{$_};
+                }
+            }
+        }
     }
 
     if ($fdsn) {
-	$dbh = _get_dbh_conn($fdsn, $role);
-	return $dbh if $dbh;
-	delete $LJ::DBCACHE{$role};  # guess it was bogus
+        $dbh = _get_dbh_conn($fdsn, $role);
+        return $dbh if $dbh;
+        delete $LJ::DBCACHE{$role};  # guess it was bogus
     }
     return undef if $role eq "master";  # no hope now
-    
+
     # time to randomly weightedly select one.
     my @applicable;
     my $total_weight;
     foreach (keys %LJ::DBINFO) {
-	next if /^_/;
-	next unless ref $LJ::DBINFO{$_} eq "HASH";
-	my $weight = $LJ::DBINFO{$_}->{'role'}->{$role};
-	next unless $weight;
-	push @applicable, [ $LJ::DBINFO{$_}, $weight ];
-	$total_weight += $weight;
+        next if /^_/;
+        next unless ref $LJ::DBINFO{$_} eq "HASH";
+        my $weight = $LJ::DBINFO{$_}->{'role'}->{$role};
+        next unless $weight;
+        push @applicable, [ $LJ::DBINFO{$_}, $weight ];
+        $total_weight += $weight;
     }
 
     while (@applicable)
     {
-	my $rand = rand($total_weight);
-	my ($i, $t) = (0, 0);
-	for (; $i<@applicable; $i++) {
-	    $t += $applicable[$i]->[1];
-	    last if $t > $rand;
-	}
-	my $fdsn = _make_dbh_fdsn($applicable[$i]->[0]);
-	$dbh = _get_dbh_conn($fdsn);
-	if ($dbh) {
-	    $LJ::DBCACHE{$role} = $fdsn;
-	    $LJ::DBCACHE_UNTIL{$role} = $now + 20 + int(rand(10));
-	    return $dbh;
-	}
-       
-	# otherwise, discard that one.
-	$total_weight -= $applicable[$i]->[1];
-	splice(@applicable, $i, 1);
+        my $rand = rand($total_weight);
+        my ($i, $t) = (0, 0);
+        for (; $i<@applicable; $i++) {
+            $t += $applicable[$i]->[1];
+            last if $t > $rand;
+        }
+        my $fdsn = _make_dbh_fdsn($applicable[$i]->[0]);
+        $dbh = _get_dbh_conn($fdsn);
+        if ($dbh) {
+            $LJ::DBCACHE{$role} = $fdsn;
+            $LJ::DBCACHE_UNTIL{$role} = $now + 20 + int(rand(10));
+            return $dbh;
+        }
+
+        # otherwise, discard that one.
+        $total_weight -= $applicable[$i]->[1];
+        splice(@applicable, $i, 1);
     }
 
     # try others
@@ -3409,10 +3409,10 @@ sub _make_dbh_fdsn
     $db->{'dbname'} ||= "livejournal";
     $fdsn .= ":$db->{'dbname'}:";
     if ($db->{'host'}) {
-	$fdsn .= "host=$db->{'host'};";
+        $fdsn .= "host=$db->{'host'};";
     }
     if ($db->{'sock'}) {
-	$fdsn .= "mysql_socket=$db->{'sock'};";
+        $fdsn .= "mysql_socket=$db->{'sock'};";
     }
     $fdsn .= "|$db->{'user'}|$db->{'pass'}";
 
@@ -3423,20 +3423,20 @@ sub _make_dbh_fdsn
 sub _get_dbh_conn
 {
     my $fdsn = shift;
-    my $role = shift;  # optional. 
+    my $role = shift;  # optional.
     my $now = time();
 
     my $retdb = sub {
-	my $db = shift;
-	$LJ::DBREQCACHE{$fdsn} = $db;
-	$LJ::DB_USED_AT{$fdsn} = $now;
-	return $db;
+        my $db = shift;
+        $LJ::DBREQCACHE{$fdsn} = $db;
+        $LJ::DB_USED_AT{$fdsn} = $now;
+        return $db;
     };
 
     # have we already created or verified a handle this request for this DSN?
     return $retdb->($LJ::DBREQCACHE{$fdsn})
-	if $LJ::DBREQCACHE{$fdsn};
-    
+        if $LJ::DBREQCACHE{$fdsn};
+
     # check to see if we recently tried to connect to that dead server
     return undef if $now < $LJ::DBDEADUNTIL{$fdsn};
 
@@ -3444,33 +3444,33 @@ sub _get_dbh_conn
     my $dbh = $LJ::DBCACHE{$fdsn};
 
     # if it exists, verify it's still alive and return it:
-    if ($dbh) 
+    if ($dbh)
     {
-	if ($role eq "master" && $LJ::NEED_DBWEIGHTS) {
-	    return $retdb->($dbh) if _reload_weights($dbh);
-	} else { 
-	    return $retdb->($dbh) if $dbh->selectrow_array("SELECT CONNECTION_ID()");
-	}
+        if ($role eq "master" && $LJ::NEED_DBWEIGHTS) {
+            return $retdb->($dbh) if _reload_weights($dbh);
+        } else {
+            return $retdb->($dbh) if $dbh->selectrow_array("SELECT CONNECTION_ID()");
+        }
 
-	# bogus:
-	undef $dbh;
-	undef $LJ::DBCACHE{$fdsn};
+        # bogus:
+        undef $dbh;
+        undef $LJ::DBCACHE{$fdsn};
     }
-    
+
     # time to make one!
     my ($dsn, $user, $pass) = split(/\|/, $fdsn);
-    $dbh = DBI->connect($dsn, $user, $pass, {			
-	PrintError => 0,
+    $dbh = DBI->connect($dsn, $user, $pass, {
+        PrintError => 0,
     });
 
     # mark server as dead if dead.  won't try to reconnect again for 5 seconds.
     if ($dbh) {
-	$LJ::DB_USED_AT{$fdsn} = $now;
-	if ($role eq "master" && $LJ::NEED_DBWEIGHTS) {
-	    _reload_weights($dbh);
-	}
+        $LJ::DB_USED_AT{$fdsn} = $now;
+        if ($role eq "master" && $LJ::NEED_DBWEIGHTS) {
+            _reload_weights($dbh);
+        }
     } else {
-	$LJ::DB_DEAD_UNTIL{$fdsn} = $now + 5;
+        $LJ::DB_DEAD_UNTIL{$fdsn} = $now + 5;
     }
 
     return $LJ::DBREQCACHE{$fdsn} = $LJ::DBCACHE{$fdsn} = $dbh;
@@ -3480,42 +3480,42 @@ sub _reload_weights
 {
     my $dbh = shift;
 
-    my $serial = 
-	$dbh->selectrow_array("SELECT fdsn AS 'serial' FROM dbinfo WHERE dbid=0");
+    my $serial =
+        $dbh->selectrow_array("SELECT fdsn AS 'serial' FROM dbinfo WHERE dbid=0");
 
     return 0 if $dbh->err;
     $LJ::NEED_DBWEIGHTS = 0;
     return 1 if $serial == $LJ::CACHE_DBWEIGHT_SERIAL;
-    
+
     my $sth = $dbh->prepare("SELECT i.masterid, i.name, i.fdsn, ".
-			    "w.role, w.curr FROM dbinfo i, dbweights w ".
-			    "WHERE i.dbid=w.dbid");
+                            "w.role, w.curr FROM dbinfo i, dbweights w ".
+                            "WHERE i.dbid=w.dbid");
     $sth->execute;
-    
+
     my %dbinfo;
     while (my $r = $sth->fetchrow_hashref) {
-	my $name = $r->{'masterid'} ? $r->{'name'} : "master";
-	$dbinfo{$name}->{'_fdsn'} = $r->{'fdsn'};
-	$dbinfo{$name}->{'role'}->{$r->{'role'}} = $r->{'curr'};
-	$dbinfo{$name}->{'_totalweight'} += $r->{'curr'};
+        my $name = $r->{'masterid'} ? $r->{'name'} : "master";
+        $dbinfo{$name}->{'_fdsn'} = $r->{'fdsn'};
+        $dbinfo{$name}->{'role'}->{$r->{'role'}} = $r->{'curr'};
+        $dbinfo{$name}->{'_totalweight'} += $r->{'curr'};
     }
 
     # any host that has no total weight (temporarily disabled?), we want
     # to kill all its live connections.
     foreach my $h (keys %dbinfo) {
-	my $i = $dbinfo{$h};
-	next if $i->{'_totalweight'};
+        my $i = $dbinfo{$h};
+        next if $i->{'_totalweight'};
 
-	# kill open OAconnections to it
-	delete $LJ::DBCACHE{$i->{'_fdsn'}};
+        # kill open OAconnections to it
+        delete $LJ::DBCACHE{$i->{'_fdsn'}};
 
-	# mark nothing as wanting to use it.
-	foreach my $k (keys %LJ::DBCACHE) {
-	    next if ref $LJ::DBCACHE{$k};
-	    if ($LJ::DBCACHE{$k} eq $i->{'_fdsn'}) {
-		delete $LJ::DBCACHE{$k};
-	    }
-	}
+        # mark nothing as wanting to use it.
+        foreach my $k (keys %LJ::DBCACHE) {
+            next if ref $LJ::DBCACHE{$k};
+            if ($LJ::DBCACHE{$k} eq $i->{'_fdsn'}) {
+                delete $LJ::DBCACHE{$k};
+            }
+        }
     }
 
     # copy new config.  good to go!
@@ -3561,7 +3561,7 @@ sub get_cluster_reader
     my $arg = shift;
     my $id = ref $arg eq "HASH" ? $arg->{'clusterid'} : $arg;
     return LJ::get_dbh("cluster${id}slave",
-		       "cluster${id}");
+                       "cluster${id}");
 }
 
 # <LJFUNC>
@@ -3596,12 +3596,12 @@ sub get_cluster_set
     $dbs->{'dbr'} = LJ::get_dbh("cluster${id}slave");
 
     # see note in LJ::get_dbs about why we do this:
-    $dbs->{'dbr'} = undef 
-	if $LJ::DBCACHE{"cluster${id}"} eq $LJ::DBCACHE{"cluster${id}slave"};
+    $dbs->{'dbr'} = undef
+        if $LJ::DBCACHE{"cluster${id}"} eq $LJ::DBCACHE{"cluster${id}slave"};
 
     $dbs->{'has_slave'} = defined $dbs->{'dbr'};
     $dbs->{'reader'} = $dbs->{'has_slave'} ? $dbs->{'dbr'} : $dbs->{'dbh'};
-    return $dbs;    
+    return $dbs;
 }
 
 # <LJFUNC>
@@ -3641,26 +3641,26 @@ sub make_dbs_from_arg
     my $dbarg = shift;
     my $dbs;
     if (ref($dbarg) eq "HASH") {
-	$dbs = $dbarg;
+        $dbs = $dbarg;
     } else {
-	$dbs = LJ::make_dbs($dbarg, undef);
+        $dbs = LJ::make_dbs($dbarg, undef);
     }
-    return $dbs;    
+    return $dbs;
 }
 
- 
+
 # <LJFUNC>
 # name: LJ::date_to_view_links
 # class: component
 # des: Returns HTML of date with links to user's journal.
-# args: u, date 
+# args: u, date
 # des-date: date in yyyy-mm-dd form.
 # returns: HTML with yyy, mm, and dd all links to respective views.
 # </LJFUNC>
 sub date_to_view_links
 {
     my ($u, $date) = @_;
-    
+
     return unless ($date =~ /(\d\d\d\d)-(\d\d)-(\d\d)/);
     my ($y, $m, $d) = ($1, $2, $3);
     my ($nm, $nd) = ($m+0, $d+0);   # numeric, without leading zeros
@@ -3698,12 +3698,12 @@ sub item_link
 
 # <LJFUNC>
 # name: LJ::make_graphviz_dot_file
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# class:
+# des:
+# info:
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub make_graphviz_dot_file
 {
@@ -3717,48 +3717,48 @@ sub make_graphviz_dot_file
     my $quser = $dbr->quote($user);
     my $sth;
     my $ret;
- 
+
     $sth = $dbr->prepare("SELECT u.*, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(uu.timeupdate) AS 'secondsold' FROM user u, userusage uu WHERE u.userid=uu.userid AND u.user=$quser");
     $sth->execute;
     my $u = $sth->fetchrow_hashref;
-    
+
     unless ($u) {
-	return "";	
+        return "";
     }
-    
+
     $ret .= "digraph G {\n";
     $ret .= "  node [URL=\"$LJ::SITEROOT/userinfo.bml?user=\\N\"]\n";
     $ret .= "  node [fontsize=10, color=lightgray, style=filled]\n";
     $ret .= "  \"$user\" [color=yellow, style=filled]\n";
-    
+
     my @friends = ();
     $sth = $dbr->prepare("SELECT friendid FROM friends WHERE userid=$u->{'userid'} AND userid<>friendid");
     $sth->execute;
     while ($_ = $sth->fetchrow_hashref) {
-	push @friends, $_->{'friendid'};
+        push @friends, $_->{'friendid'};
     }
-    
+
     my $friendsin = join(", ", map { $dbh->quote($_); } ($u->{'userid'}, @friends));
     my $sql = "SELECT uu.user, uf.user AS 'friend' FROM friends f, user uu, user uf WHERE f.userid=uu.userid AND f.friendid=uf.userid AND f.userid<>f.friendid AND uu.statusvis='V' AND uf.statusvis='V' AND (f.friendid=$u->{'userid'} OR (f.userid IN ($friendsin) AND f.friendid IN ($friendsin)))";
     $sth = $dbr->prepare($sql);
     $sth->execute;
     while ($_ = $sth->fetchrow_hashref) {
-	$ret .= "  \"$_->{'user'}\"->\"$_->{'friend'}\"\n";
+        $ret .= "  \"$_->{'user'}\"->\"$_->{'friend'}\"\n";
     }
-    
+
     $ret .= "}\n";
-    
+
     return $ret;
 }
 
 # <LJFUNC>
 # name: LJ::expand_embedded
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# class:
+# des:
+# info:
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub expand_embedded
 {
@@ -3786,8 +3786,8 @@ sub make_remote
     my $user = LJ::canonical_username(shift);
     my $userid = shift;
     if ($user && $userid && $userid =~ /^\d+$/) {
-	return { 'user' => $user,
-		 'userid' => $userid, };
+        return { 'user' => $user,
+                 'userid' => $userid, };
     }
     return undef;
 }
@@ -3807,7 +3807,7 @@ sub make_remote
 sub load_userids_multiple
 {
     my ($dbarg, $map, $have) = @_;
-    
+
     my $dbs = LJ::make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
@@ -3815,30 +3815,30 @@ sub load_userids_multiple
 
     my %need;
     while (@$map) {
-	my $id = shift @$map;
-	my $ref = shift @$map;
-	push @{$need{$id}}, $ref;
+        my $id = shift @$map;
+        my $ref = shift @$map;
+        push @{$need{$id}}, $ref;
     }
 
     my $satisfy = sub {
-	my $u = shift;
-	next unless ref $u eq "HASH";
-	foreach (@{$need{$u->{'userid'}}}) {
-	    $$_ = $u;
-	}
-	delete $need{$u->{'userid'}};
+        my $u = shift;
+        next unless ref $u eq "HASH";
+        foreach (@{$need{$u->{'userid'}}}) {
+            $$_ = $u;
+        }
+        delete $need{$u->{'userid'}};
     };
-    
+
     if ($have) {
-	foreach my $u (@$have) {
-	    $satisfy->($u);
-	}
+        foreach my $u (@$have) {
+            $satisfy->($u);
+        }
     }
-    
+
     if (keys %need) {
-	my $in = join(", ", map { $_+0 } keys %need);
-	($sth = $dbr->prepare("SELECT * FROM user WHERE userid IN ($in)"))->execute;
-	$satisfy->($_) while $_ = $sth->fetchrow_hashref;
+        my $in = join(", ", map { $_+0 } keys %need);
+        ($sth = $dbr->prepare("SELECT * FROM user WHERE userid IN ($in)"))->execute;
+        $satisfy->($_) while $_ = $sth->fetchrow_hashref;
     }
 }
 
@@ -3868,24 +3868,24 @@ sub load_user
     # an external authentication source and we should create the account
     # implicitly.
     if (! $u && ref $LJ::AUTH_EXISTS eq "CODE") {
-	if ($LJ::AUTH_EXISTS->($user)) {
-	    if (LJ::create_account($dbh, {
-		'user' => $user,
-		'name' => $user,
-		'password' => "",
-	    }))
-	    {
-		# NOTE: this should pull from the master, since it was _just_
-		# created and the elsif below won't catch.
-		$sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
-		$sth->execute;
-		$u = $sth->fetchrow_hashref;
-		$sth->finish;
-		return $u;		
-	    } else {
-		return undef;
-	    }
-	}
+        if ($LJ::AUTH_EXISTS->($user)) {
+            if (LJ::create_account($dbh, {
+                'user' => $user,
+                'name' => $user,
+                'password' => "",
+            }))
+            {
+                # NOTE: this should pull from the master, since it was _just_
+                # created and the elsif below won't catch.
+                $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
+                $sth->execute;
+                $u = $sth->fetchrow_hashref;
+                $sth->finish;
+                return $u;
+            } else {
+                return undef;
+            }
+        }
     } elsif (! $u && $dbs->{'has_slave'}) {
         # If the user still doesn't exist, and there isn't an alternate auth code
         # try grabbing it from the master.
@@ -3915,19 +3915,19 @@ sub load_userid
     my $dbs = make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
-		
+
     my $quserid = $dbr->quote($userid);
     return LJ::dbs_selectrow_hashref($dbs, "SELECT * FROM user WHERE userid=$quserid");
 }
 
 # <LJFUNC>
 # name: LJ::load_moods
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# class:
+# des:
+# info:
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub load_moods
 {
@@ -3941,15 +3941,15 @@ sub load_moods
     my $sth = $dbr->prepare("SELECT moodid, mood, parentmood FROM moods");
     $sth->execute;
     while (my ($id, $mood, $parent) = $sth->fetchrow_array) {
-	$LJ::CACHE_MOODS{$id} = { 'name' => $mood, 'parent' => $parent };
-	if ($id > $LJ::CACHED_MOOD_MAX) { $LJ::CACHED_MOOD_MAX = $id; }
+        $LJ::CACHE_MOODS{$id} = { 'name' => $mood, 'parent' => $parent };
+        if ($id > $LJ::CACHED_MOOD_MAX) { $LJ::CACHED_MOOD_MAX = $id; }
     }
     $LJ::CACHED_MOODS = 1;
 }
 
 # <LJFUNC>
 # name: LJ::query_buffer_add
-# des: Schedules an insert/update query to be run on a certain table sometime 
+# des: Schedules an insert/update query to be run on a certain table sometime
 #      in the near future in a batch with a lot of similar updates, or
 #      immediately if the site doesn't provide query buffering.  Returns
 #      nothing (no db error code) since there's the possibility it won't
@@ -3967,19 +3967,19 @@ sub query_buffer_add
     my $dbs = make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
-    
-    if ($LJ::BUFFER_QUERIES) 
-    {
-	# if this is a high load site, you'll want to batch queries up and send them at once.
 
-	my $table = $dbh->quote($table);
-	my $query = $dbh->quote($query);
-	$dbh->do("INSERT INTO querybuffer (qbid, tablename, instime, query) VALUES (NULL, $table, NOW(), $query)");
-    }
-    else 
+    if ($LJ::BUFFER_QUERIES)
     {
-	# low load sites can skip this, and just have queries go through immediately.
-	$dbh->do($query);
+        # if this is a high load site, you'll want to batch queries up and send them at once.
+
+        my $table = $dbh->quote($table);
+        my $query = $dbh->quote($query);
+        $dbh->do("INSERT INTO querybuffer (qbid, tablename, instime, query) VALUES (NULL, $table, NOW(), $query)");
+    }
+    else
+    {
+        # low load sites can skip this, and just have queries go through immediately.
+        $dbh->do($query);
     }
 }
 
@@ -4001,45 +4001,45 @@ sub query_buffer_add
 sub cmd_buffer_add
 {
     my ($db, $journalid, $cmd, $h_args) = @_;
-    
+
     return 0 unless $db;
     $journalid += 0;
     my $qcmd = $db->quote($cmd);
     my $qargs;
     if (ref $h_args eq "HASH") {
-	foreach (sort keys %$h_args) {
-	    $qargs .= LJ::eurl($_) . "=" . LJ::eurl($h_args->{$_}) . "&";
-	}
-	chop $qargs;
+        foreach (sort keys %$h_args) {
+            $qargs .= LJ::eurl($_) . "=" . LJ::eurl($h_args->{$_}) . "&";
+        }
+        chop $qargs;
     }
     $qargs = $db->quote($qargs);
     $db->do("INSERT INTO cmdbuffer (journalid, cmd, instime, args) ".
-	    "VALUES ($journalid, $qcmd, NOW(), $qargs)");
+            "VALUES ($journalid, $qcmd, NOW(), $qargs)");
 }
 
 # <LJFUNC>
 # name: LJ::cmd_buffer_flush
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# class:
+# des:
+# info:
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub cmd_buffer_flush
 {
     my ($dbh, $db, $cmd, $userid) = @_;
     return 0 unless $cmd;
-    
+
     my $cmds = {
-	'delitem' => {
-	    'run' => sub {
-		my ($dbh, $db, $c) = @_;
-		my $a = $c->{'args'};
-		LJ::delete_item2($dbh, $db, $c->{'journalid'}, $a->{'itemid'}, 
-				 0, $a->{'anum'});
-	    },
-	},
+        'delitem' => {
+            'run' => sub {
+                my ($dbh, $db, $c) = @_;
+                my $a = $c->{'args'};
+                LJ::delete_item2($dbh, $db, $c->{'journalid'}, $a->{'itemid'},
+                                 0, $a->{'anum'});
+            },
+        },
     };
     # TODO: call hook to augment dispatch table with site-defined commands
     return 0 unless defined $cmds->{$cmd};
@@ -4049,41 +4049,41 @@ sub cmd_buffer_flush
     my $cd = $cmds->{$cmd};
     my $where = "cmd=" . $dbh->quote($cmd);
     if ($userid) {
-	$where .= " AND journalid=" . $dbh->quote($userid);
+        $where .= " AND journalid=" . $dbh->quote($userid);
     }
-    
+
     while ($loop &&
-	   ($clist = $db->selectcol_arrayref("SELECT cbid FROM cmdbuffer ".
-					     "WHERE $where ORDER BY cbid LIMIT 20")) &&
-	   $clist && @$clist)
+           ($clist = $db->selectcol_arrayref("SELECT cbid FROM cmdbuffer ".
+                                             "WHERE $where ORDER BY cbid LIMIT 20")) &&
+           $clist && @$clist)
     {
-	foreach my $cbid (@$clist) {
-	    my $got_lock = $db->selectrow_array("SELECT GET_LOCK('cbid-$cbid',10)");
-	    return 0 unless $got_lock;
-	    my $c = $db->selectrow_hashref("SELECT * FROM cmdbuffer WHERE cbid=$cbid");
-	    next unless $c;
+        foreach my $cbid (@$clist) {
+            my $got_lock = $db->selectrow_array("SELECT GET_LOCK('cbid-$cbid',10)");
+            return 0 unless $got_lock;
+            my $c = $db->selectrow_hashref("SELECT * FROM cmdbuffer WHERE cbid=$cbid");
+            next unless $c;
 
-	    my $a = {};
-	    LJ::decode_url_string($c->{'args'}, $a);
-	    $c->{'args'} = $a;
-	    $cmds->{$cmd}->{'run'}->($dbh, $db, $c);
+            my $a = {};
+            LJ::decode_url_string($c->{'args'}, $a);
+            $c->{'args'} = $a;
+            $cmds->{$cmd}->{'run'}->($dbh, $db, $c);
 
-	    $db->do("DELETE FROM cmdbuffer WHERE cbid=$cbid");
-	    $db->do("SELECT RELEASE_LOCK('cbid-$cbid')");
-	}
-	$loop = 0 unless scalar(@$clist) == 20;
+            $db->do("DELETE FROM cmdbuffer WHERE cbid=$cbid");
+            $db->do("SELECT RELEASE_LOCK('cbid-$cbid')");
+        }
+        $loop = 0 unless scalar(@$clist) == 20;
     }
     return 1;
 }
 
 # <LJFUNC>
 # name: LJ::query_buffer_flush
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# class:
+# des:
+# info:
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub query_buffer_flush
 {
@@ -4095,9 +4095,9 @@ sub query_buffer_flush
 
     return -1 unless ($table);
     return -1 if ($table =~ /[^\w]/);
-    
+
     $dbh->do("LOCK TABLES $table WRITE, querybuffer WRITE");
-    
+
     my $count = 0;
     my $max = 0;
     my $qtable = $dbh->quote($table);
@@ -4109,18 +4109,18 @@ sub query_buffer_flush
     my $sth = $dbh->prepare("SELECT qbid, query FROM querybuffer WHERE tablename=$qtable ORDER BY qbid");
     if ($dbh->err) { $dbh->do("UNLOCK TABLES"); die $dbh->errstr; }
     $sth->execute;
-    if ($dbh->err) { $dbh->do("UNLOCK TABLES"); die $dbh->errstr; }	
+    if ($dbh->err) { $dbh->do("UNLOCK TABLES"); die $dbh->errstr; }
     while (my ($id, $query) = $sth->fetchrow_array)
     {
-	$dbh->do($query);
-	$count++;
-	$max = $id;
+        $dbh->do($query);
+        $count++;
+        $max = $id;
     }
     $sth->finish;
-    
+
     $dbh->do("DELETE FROM querybuffer WHERE tablename=$qtable");
-    if ($dbh->err) { $dbh->do("UNLOCK TABLES"); die $dbh->errstr; }		
-    
+    if ($dbh->err) { $dbh->do("UNLOCK TABLES"); die $dbh->errstr; }
+
     $dbh->do("UNLOCK TABLES");
     return $count;
 }
@@ -4133,7 +4133,7 @@ sub query_buffer_flush
 #       some-user.site.com.
 # args: user, vhost?
 # des-user: Username of user whose URL to make.
-# des-vhost: What type of URL.  Acceptable options are "users", to make a 
+# des-vhost: What type of URL.  Acceptable options are "users", to make a
 #            http://user.site.com/ URL; "tilde" to make http://site.com/~user/;
 #            "community" for http://site.com/community/user; or the default
 #            will be http://site.com/users/user
@@ -4143,15 +4143,15 @@ sub journal_base
 {
     my ($user, $vhost) = @_;
     if ($vhost eq "users") {
-	my $he_user = $user;
-	$he_user =~ s/_/-/g;
-	return "http://$he_user.$LJ::USER_DOMAIN";
+        my $he_user = $user;
+        $he_user =~ s/_/-/g;
+        return "http://$he_user.$LJ::USER_DOMAIN";
     } elsif ($vhost eq "tilde") {
-	return "$LJ::SITEROOT/~$user";
+        return "$LJ::SITEROOT/~$user";
     } elsif ($vhost eq "community") {
-	return "$LJ::SITEROOT/community/$user";
-    } else { 
-	return "$LJ::SITEROOT/users/$user";
+        return "$LJ::SITEROOT/community/$user";
+    } else {
+        return "$LJ::SITEROOT/users/$user";
     }
 }
 
@@ -4159,12 +4159,12 @@ sub journal_base
 # inside the user record ($u->{_privs}->{$priv}->{$arg} = 1)
 # <LJFUNC>
 # name: LJ::load_user_privs
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# class:
+# des:
+# info:
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub load_user_privs
 {
@@ -4175,25 +4175,25 @@ sub load_user_privs
     my $dbs = make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
-    
+
     return unless ($remote and @privs);
 
     # return if we've already loaded these privs for this user.
-    @privs = map { $dbr->quote($_) } 
+    @privs = map { $dbr->quote($_) }
              grep { ! $remote->{'_privloaded'}->{$_}++ } @privs;
-    
+
     return unless (@privs);
 
     my $sth = $dbr->prepare("SELECT pl.privcode, pm.arg ".
-			    "FROM priv_map pm, priv_list pl ".
-			    "WHERE pm.prlid=pl.prlid AND ".
-			    "pl.privcode IN (" . join(',',@privs) . ") ".
-			    "AND pm.userid=$remote->{'userid'}");
+                            "FROM priv_map pm, priv_list pl ".
+                            "WHERE pm.prlid=pl.prlid AND ".
+                            "pl.privcode IN (" . join(',',@privs) . ") ".
+                            "AND pm.userid=$remote->{'userid'}");
     $sth->execute;
     while (my ($priv, $arg) = $sth->fetchrow_array)
     {
-	unless (defined $arg) { $arg = ""; }  # NULL -> ""
-	$remote->{'_priv'}->{$priv}->{$arg} = 1;
+        unless (defined $arg) { $arg = ""; }  # NULL -> ""
+        $remote->{'_priv'}->{$priv}->{$arg} = 1;
     }
 }
 
@@ -4220,33 +4220,33 @@ sub check_priv
     my $dbs = make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
-    
+
     if (! $u->{'_privloaded'}->{$priv}) {
-	if ($dbr) {
-	    load_user_privs($dbr, $u, $priv);
-	} else {
-	    return 0;
-	}
+        if ($dbr) {
+            load_user_privs($dbr, $u, $priv);
+        } else {
+            return 0;
+        }
     }
 
     if (defined $arg) {
-	return (defined $u->{'_priv'}->{$priv} &&
-		defined $u->{'_priv'}->{$priv}->{$arg});
+        return (defined $u->{'_priv'}->{$priv} &&
+                defined $u->{'_priv'}->{$priv}->{$arg});
     } else {
-	return (defined $u->{'_priv'}->{$priv});
+        return (defined $u->{'_priv'}->{$priv});
     }
 }
 
-# 
-# 
+#
+#
 # <LJFUNC>
 # name: LJ::remote_has_priv
-# class: 
+# class:
 # des: Check to see if the given remote user has a certain priviledge
 # info: DEPRECATED.  should use load_user_privs + check_priv
-# args: 
-# des-: 
-# returns: 
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub remote_has_priv
 {
@@ -4266,14 +4266,14 @@ sub remote_has_priv
     my $qprivcode = $dbh->quote($privcode);
     my $sth = $dbr->prepare("SELECT pm.arg FROM priv_map pm, priv_list pl WHERE pm.prlid=pl.prlid AND pl.privcode=$qprivcode AND pm.userid=$remote->{'userid'}");
     $sth->execute;
-    
+
     my $match = 0;
     if (ref $ref eq "ARRAY") { @$ref = (); }
     if (ref $ref eq "HASH") { %$ref = (); }
     while (my ($arg) = $sth->fetchrow_array) {
-	$match++;
-	if (ref $ref eq "ARRAY") { push @$ref, $arg; }
-	if (ref $ref eq "HASH") { $ref->{$arg} = 1; }
+        $match++;
+        if (ref $ref eq "ARRAY") { push @$ref, $arg; }
+        if (ref $ref eq "HASH") { $ref->{$arg} = 1; }
     }
     return $match;
 }
@@ -4293,11 +4293,11 @@ sub get_userid
 {
     my $dbarg = shift;
     my $user = shift;
-		
+
     my $dbs = make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
-    
+
     $user = canonical_username($user);
 
     my $userid;
@@ -4313,11 +4313,11 @@ sub get_userid
     # auth mechanism
     if (! $userid && ref $LJ::AUTH_EXISTS eq "CODE")
     {
-	# TODO: eventual $dbs conversion (even though create_account will ALWAYS
-	# use the master)
-	$userid = LJ::create_account($dbh, { 'user' => $user,
-					     'name' => $user,
-					     'password' => '', });
+        # TODO: eventual $dbs conversion (even though create_account will ALWAYS
+        # use the master)
+        $userid = LJ::create_account($dbh, { 'user' => $user,
+                                             'name' => $user,
+                                             'password' => '', });
     }
 
     return ($userid+0);
@@ -4341,7 +4341,7 @@ sub get_username
     my $user;
     $userid += 0;
 
-    # Checked the cache first. 
+    # Checked the cache first.
     if ($LJ::CACHE_USERNAME{$userid}) { return $LJ::CACHE_USERNAME{$userid}; }
 
     my $dbs = LJ::make_dbs_from_arg($dbarg);
@@ -4364,12 +4364,12 @@ sub get_username
 
 # <LJFUNC>
 # name: LJ::get_itemid_near
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# class:
+# des:
+# info:
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub get_itemid_near
 {
@@ -4380,20 +4380,20 @@ sub get_itemid_near
     my $dbs = LJ::make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
-    
+
     my ($inc, $order);
     if ($after_before eq "after") {
-	($inc, $order) = (-1, "DESC");
+        ($inc, $order) = (-1, "DESC");
     } elsif ($after_before eq "before") {
-	($inc, $order) = (1, "ASC");
+        ($inc, $order) = (1, "ASC");
     } else {
-	return 0;
+        return 0;
     }
 
-    $itemid += 0;	
+    $itemid += 0;
     my $lr = $dbr->selectrow_hashref("SELECT u.userid, u.journaltype, l.rlogtime, l.revttime ".
-				     "FROM user u, log l WHERE l.itemid=$itemid ".
-				     "AND l.ownerid=u.userid");
+                                     "FROM user u, log l WHERE l.itemid=$itemid ".
+                                     "AND l.ownerid=u.userid");
     return 0 unless $lr;
     my $jid = $lr->{'userid'};
     my $field = $lr->{'journaltype'} eq "P" ? "revttime" : "rlogtime";
@@ -4401,16 +4401,16 @@ sub get_itemid_near
 
     my $day = 86400;
     foreach my $distance ($day, $day*7, $day*30, $day*90) {
-	my ($one_away, $further) = ($stime + $inc, $stime + $inc*$distance);
-	if ($further < $one_away) {
-	    # swap them, BETWEEN needs lower number first
-	    ($one_away, $further) = ($further, $one_away);
-	}
-	my ($id, $anum) = 
-	    $dbr->selectrow_array("SELECT itemid FROM log WHERE ownerid=$jid ".
-				  "AND $field BETWEEN $one_away AND $further ".
-				  "ORDER BY $field $order LIMIT 1");
-	return $id if $id;
+        my ($one_away, $further) = ($stime + $inc, $stime + $inc*$distance);
+        if ($further < $one_away) {
+            # swap them, BETWEEN needs lower number first
+            ($one_away, $further) = ($further, $one_away);
+        }
+        my ($id, $anum) =
+            $dbr->selectrow_array("SELECT itemid FROM log WHERE ownerid=$jid ".
+                                  "AND $field BETWEEN $one_away AND $further ".
+                                  "ORDER BY $field $order LIMIT 1");
+        return $id if $id;
     }
     return 0;
 }
@@ -4418,22 +4418,22 @@ sub get_itemid_near
 
 # <LJFUNC>
 # name: LJ::get_itemid_after
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# class:
+# des:
+# info:
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub get_itemid_after  { return get_itemid_near(@_, "after");  }
 # <LJFUNC>
 # name: LJ::get_itemid_before
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# class:
+# des:
+# info:
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub get_itemid_before { return get_itemid_near(@_, "before"); }
 
@@ -4443,41 +4443,41 @@ sub get_itemid_near2
     my $u = shift;
     my $jitemid = shift;
     my $after_before = shift;
-    
+
     $jitemid += 0;
 
     my ($inc, $order);
     if ($after_before eq "after") {
-	($inc, $order) = (-1, "DESC");
+        ($inc, $order) = (-1, "DESC");
     } elsif ($after_before eq "before") {
-	($inc, $order) = (1, "ASC");
+        ($inc, $order) = (1, "ASC");
     } else {
-	return 0;
+        return 0;
     }
-	
+
     my $dbr = LJ::get_cluster_reader($u);
     my $jid = $u->{'userid'}+0;
     my $field = $u->{'journaltype'} eq "P" ? "revttime" : "rlogtime";
 
     my $stime = $dbr->selectrow_array("SELECT $field FROM log2 WHERE ".
-				      "journalid=$jid AND jitemid=$jitemid");
+                                      "journalid=$jid AND jitemid=$jitemid");
     return 0 unless $stime;
 
-    
+
     my $day = 86400;
     foreach my $distance ($day, $day*7, $day*30, $day*90) {
-	my ($one_away, $further) = ($stime + $inc, $stime + $inc*$distance);
-	if ($further < $one_away) {
-	    # swap them, BETWEEN needs lower number first
-	    ($one_away, $further) = ($further, $one_away);
-	}
-	my ($id, $anum) = 
-	    $dbr->selectrow_array("SELECT jitemid, anum FROM log2 WHERE journalid=$jid ".
-				  "AND $field BETWEEN $one_away AND $further ".
-				  "ORDER BY $field $order LIMIT 1");
-	if ($id) {
-	    return wantarray() ? ($id, $anum) : ($id*256 + $anum);
-	}
+        my ($one_away, $further) = ($stime + $inc, $stime + $inc*$distance);
+        if ($further < $one_away) {
+            # swap them, BETWEEN needs lower number first
+            ($one_away, $further) = ($further, $one_away);
+        }
+        my ($id, $anum) =
+            $dbr->selectrow_array("SELECT jitemid, anum FROM log2 WHERE journalid=$jid ".
+                                  "AND $field BETWEEN $one_away AND $further ".
+                                  "ORDER BY $field $order LIMIT 1");
+        if ($id) {
+            return wantarray() ? ($id, $anum) : ($id*256 + $anum);
+        }
     }
     return 0;
 }
@@ -4488,35 +4488,35 @@ sub get_itemid_before2 { return get_itemid_near2(@_, "before"); }
 
 # <LJFUNC>
 # name: LJ::mysql_time
-# des: 
+# des:
 # class: time
-# info: 
-# args: 
-# des-: 
-# returns: 
+# info:
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub mysql_time
 {
     my $time = shift;
     $time ||= time();
     my @ltime = localtime($time);
-    return sprintf("%04d-%02d-%02d %02d:%02d:%02d", 
-		   $ltime[5]+1900,
-		   $ltime[4]+1,
-		   $ltime[3],
-		   $ltime[2],
-		   $ltime[1],
-		   $ltime[0]);
+    return sprintf("%04d-%02d-%02d %02d:%02d:%02d",
+                   $ltime[5]+1900,
+                   $ltime[4]+1,
+                   $ltime[3],
+                   $ltime[2],
+                   $ltime[1],
+                   $ltime[0]);
 }
 
 # <LJFUNC>
 # name: LJ::get_keyword_id
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# class:
+# des:
+# info:
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub get_keyword_id
 {
@@ -4527,7 +4527,7 @@ sub get_keyword_id
     my $dbs = LJ::make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
-		
+
     my $qkw = $dbh->quote($kw);
 
     # Making this a $dbr could cause problems due to the insertion of
@@ -4536,9 +4536,9 @@ sub get_keyword_id
     $sth->execute;
     my ($kwid) = $sth->fetchrow_array;
     unless ($kwid) {
-	$sth = $dbh->prepare("INSERT INTO keywords (kwid, keyword) VALUES (NULL, $qkw)");
-	$sth->execute;
-	$kwid = $dbh->{'mysql_insertid'};
+        $sth = $dbh->prepare("INSERT INTO keywords (kwid, keyword) VALUES (NULL, $qkw)");
+        $sth->execute;
+        $kwid = $dbh->{'mysql_insertid'};
     }
     return $kwid;
 }
@@ -4556,7 +4556,7 @@ sub trim
     my $a = $_[0];
     $a =~ s/^\s+//;
     $a =~ s/\s+$//;
-    return $a;	
+    return $a;
 }
 
 # returns true if $formref->{'password'} matches cleartext password or if
@@ -4564,12 +4564,12 @@ sub trim
 # DEPRECTED: should use LJ::auth_okay
 # <LJFUNC>
 # name: LJ::valid_password
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# class:
+# des:
+# info:
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub valid_password
 {
@@ -4582,22 +4582,22 @@ sub valid_password
     {
         return 1;
     }
-    return 0;    
+    return 0;
 }
 
 # <LJFUNC>
 # name: LJ::delete_user
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# class:
+# des:
+# info:
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub delete_user
 {
-		# TODO: Is this function even being called?
-		# It doesn't look like it does anything useful
+                # TODO: Is this function even being called?
+                # It doesn't look like it does anything useful
     my $dbh = shift;
     my $user = shift;
     my $quser = $dbh->quote($user);
@@ -4605,18 +4605,18 @@ sub delete_user
     $sth = $dbh->prepare("SELECT user, userid FROM useridmap WHERE user=$quser");
     my $u = $sth->fetchrow_hashref;
     unless ($u) { return; }
-    
-    ### so many issues.     
+
+    ### so many issues.
 }
 
 # <LJFUNC>
 # name: LJ::hash_password
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# class:
+# des:
+# info:
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub hash_password
 {
@@ -4626,12 +4626,12 @@ sub hash_password
 # $dbarg can be either a $dbh (master) or a $dbs (db set, master & slave hashref)
 # <LJFUNC>
 # name: LJ::can_use_journal
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# class:
+# des:
+# info:
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub can_use_journal
 {
@@ -4646,36 +4646,36 @@ sub can_use_journal
     ## find the journal owner's info
     my $uowner = LJ::load_user($dbs, $reqownername);
     unless ($uowner) {
-	$res->{'errmsg'} = "Journal \"$reqownername\" does not exist.";
-	return 0;
+        $res->{'errmsg'} = "Journal \"$reqownername\" does not exist.";
+        return 0;
     }
     my $ownerid = $uowner->{'userid'};
 
     ## check if user has access
     my $sql = "SELECT COUNT(*) FROM logaccess WHERE ownerid=$ownerid AND posterid=$qposterid";
-    if ($dbr->selectrow_array($sql) || $dbh->selectrow_array($sql)) 
+    if ($dbr->selectrow_array($sql) || $dbh->selectrow_array($sql))
     {
-	# the 'ownerid' necessity came first, way back when.  but then
-	# with clusters, everything needed to know more, like the
-	# journal's dversion and clusterid, so now it also returns the
-	# user row.
-	$res->{'ownerid'} = $ownerid;
-	$res->{'u_owner'} = $uowner;
-	return 1;
+        # the 'ownerid' necessity came first, way back when.  but then
+        # with clusters, everything needed to know more, like the
+        # journal's dversion and clusterid, so now it also returns the
+        # user row.
+        $res->{'ownerid'} = $ownerid;
+        $res->{'u_owner'} = $uowner;
+        return 1;
     } else {
-	$res->{'errmsg'} = "You do not have access to post to this journal.";
-	return 0;
+        $res->{'errmsg'} = "You do not have access to post to this journal.";
+        return 0;
     }
 }
 
 # <LJFUNC>
 # name: LJ::load_log_props
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# class:
+# des:
+# info:
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub load_log_props
 {
@@ -4687,25 +4687,25 @@ sub load_log_props
     my $itemin = join(", ", map { $_+0; } @{$listref});
     unless ($itemin) { return ; }
     unless (ref $hashref eq "HASH") { return; }
-    
+
     my $sth = $dbr->prepare("SELECT p.itemid, l.name, p.value ".
-			    "FROM logprop p, logproplist l ".
-			    "WHERE p.propid=l.propid AND p.itemid IN ($itemin)");
+                            "FROM logprop p, logproplist l ".
+                            "WHERE p.propid=l.propid AND p.itemid IN ($itemin)");
     $sth->execute;
     while ($_ = $sth->fetchrow_hashref) {
-	$hashref->{$_->{'itemid'}}->{$_->{'name'}} = $_->{'value'};
+        $hashref->{$_->{'itemid'}}->{$_->{'name'}} = $_->{'value'};
     }
 }
 
 # Note: requires caller to first call LJ::load_props($dbs, "log")
 # <LJFUNC>
 # name: LJ::load_log_props2
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# class:
+# des:
+# info:
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub load_log_props2
 {
@@ -4717,22 +4717,22 @@ sub load_log_props2
     return unless defined $LJ::CACHE_PROPID{'log'};
 
     my $sth = $db->prepare("SELECT jitemid, propid, value FROM logprop2 ".
-			   "WHERE journalid=$journalid AND jitemid IN ($jitemin)");
+                           "WHERE journalid=$journalid AND jitemid IN ($jitemin)");
     $sth->execute;
     while (my ($jitemid, $propid, $value) = $sth->fetchrow_array) {
-	$hashref->{$jitemid}->{$LJ::CACHE_PROPID{'log'}->{$propid}->{'name'}} = $value;
+        $hashref->{$jitemid}->{$LJ::CACHE_PROPID{'log'}->{$propid}->{'name'}} = $value;
     }
 }
 
 # Note: requires caller to first call LJ::load_props($dbs, "log")
 # <LJFUNC>
 # name: LJ::load_log_props2multi
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# class:
+# des:
+# info:
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub load_log_props2multi
 {
@@ -4745,68 +4745,68 @@ sub load_log_props2multi
 
     foreach my $c (keys %$idsbyc)
     {
-	if ($c) {
-	    # clustered:
-	    my $fattyin = join(" OR ", map {
-		"(journalid=" . ($_->[0]+0) . " AND jitemid=" . ($_->[1]+0) . ")"
-	    } @{$idsbyc->{$c}});
-	    my $db = LJ::get_cluster_reader($c);
-	    $sth = $db->prepare("SELECT journalid, jitemid, propid, value ".
-				"FROM logprop2 WHERE $fattyin");
-	    $sth->execute;
-	    while (my ($jid, $jitemid, $propid, $value) = $sth->fetchrow_array) {
-		$hashref->{"$jid $jitemid"}->{$LJ::CACHE_PROPID{'log'}->{$propid}->{'name'}} = $value;
-	    }
-	} else {
-	    # unclustered:
-	    my $dbr = $dbs->{'reader'};
-	    my $in = join(",", map { $_+0 } @{$idsbyc->{'0'}});
-	    $sth = $dbr->prepare("SELECT itemid, propid, value FROM logprop ".
-				 "WHERE itemid IN ($in)");
-	    $sth->execute;
-	    while (my ($itemid, $propid, $value) = $sth->fetchrow_array) {
-		$hashref->{"0 $itemid"}->{$LJ::CACHE_PROPID{'log'}->{$propid}->{'name'}} = $value;
-	    }
-	    
-	}
+        if ($c) {
+            # clustered:
+            my $fattyin = join(" OR ", map {
+                "(journalid=" . ($_->[0]+0) . " AND jitemid=" . ($_->[1]+0) . ")"
+            } @{$idsbyc->{$c}});
+            my $db = LJ::get_cluster_reader($c);
+            $sth = $db->prepare("SELECT journalid, jitemid, propid, value ".
+                                "FROM logprop2 WHERE $fattyin");
+            $sth->execute;
+            while (my ($jid, $jitemid, $propid, $value) = $sth->fetchrow_array) {
+                $hashref->{"$jid $jitemid"}->{$LJ::CACHE_PROPID{'log'}->{$propid}->{'name'}} = $value;
+            }
+        } else {
+            # unclustered:
+            my $dbr = $dbs->{'reader'};
+            my $in = join(",", map { $_+0 } @{$idsbyc->{'0'}});
+            $sth = $dbr->prepare("SELECT itemid, propid, value FROM logprop ".
+                                 "WHERE itemid IN ($in)");
+            $sth->execute;
+            while (my ($itemid, $propid, $value) = $sth->fetchrow_array) {
+                $hashref->{"0 $itemid"}->{$LJ::CACHE_PROPID{'log'}->{$propid}->{'name'}} = $value;
+            }
+
+        }
     }
     foreach my $c (keys %$idsbyc)
     {
-	if ($c) {
-	    # clustered:
-	    my $fattyin = join(" OR ", map {
-		"(journalid=" . ($_->[0]+0) . " AND jitemid=" . ($_->[1]+0) . ")"
-	    } @{$idsbyc->{$c}});
-	    my $db = LJ::get_cluster_reader($c);
-	    $sth = $db->prepare("SELECT journalid, jitemid, propid, value ".
-				"FROM logprop2 WHERE $fattyin");
-	    $sth->execute;
-	    while (my ($jid, $jitemid, $propid, $value) = $sth->fetchrow_array) {
-		$hashref->{"$jid $jitemid"}->{$LJ::CACHE_PROPID{'log'}->{$propid}->{'name'}} = $value;
-	    }
-	} else {
-	    # unclustered:
-	    my $dbr = $dbs->{'reader'};
-	    my $in = join(",", map { $_+0 } @{$idsbyc->{'0'}});
-	    $sth = $dbr->prepare("SELECT itemid, propid, value FROM logprop ".
-				 "WHERE itemid IN ($in)");
-	    $sth->execute;
-	    while (my ($itemid, $propid, $value) = $sth->fetchrow_array) {
-		$hashref->{"0 $itemid"}->{$LJ::CACHE_PROPID{'log'}->{$propid}->{'name'}} = $value;
-	    }
-	    
-	}
+        if ($c) {
+            # clustered:
+            my $fattyin = join(" OR ", map {
+                "(journalid=" . ($_->[0]+0) . " AND jitemid=" . ($_->[1]+0) . ")"
+            } @{$idsbyc->{$c}});
+            my $db = LJ::get_cluster_reader($c);
+            $sth = $db->prepare("SELECT journalid, jitemid, propid, value ".
+                                "FROM logprop2 WHERE $fattyin");
+            $sth->execute;
+            while (my ($jid, $jitemid, $propid, $value) = $sth->fetchrow_array) {
+                $hashref->{"$jid $jitemid"}->{$LJ::CACHE_PROPID{'log'}->{$propid}->{'name'}} = $value;
+            }
+        } else {
+            # unclustered:
+            my $dbr = $dbs->{'reader'};
+            my $in = join(",", map { $_+0 } @{$idsbyc->{'0'}});
+            $sth = $dbr->prepare("SELECT itemid, propid, value FROM logprop ".
+                                 "WHERE itemid IN ($in)");
+            $sth->execute;
+            while (my ($itemid, $propid, $value) = $sth->fetchrow_array) {
+                $hashref->{"0 $itemid"}->{$LJ::CACHE_PROPID{'log'}->{$propid}->{'name'}} = $value;
+            }
+
+        }
     }
 }
 
 # <LJFUNC>
 # name: LJ::load_talk_props
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# class:
+# des:
+# info:
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub load_talk_props
 {
@@ -4814,30 +4814,30 @@ sub load_talk_props
     my $itemin = join(", ", map { $_+0; } @{$listref});
     unless ($itemin) { return ; }
     unless (ref $hashref eq "HASH") { return; }
-    
+
     my $dbs = make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
-    
+
     my $sth = $dbr->prepare("SELECT tp.talkid, tpl.name, tp.value ".
-			    "FROM talkproplist tpl, talkprop tp ".
-			    "WHERE tp.tpropid=tpl.tpropid ".
-			    "AND tp.talkid IN ($itemin)");
+                            "FROM talkproplist tpl, talkprop tp ".
+                            "WHERE tp.tpropid=tpl.tpropid ".
+                            "AND tp.talkid IN ($itemin)");
     $sth->execute;
     while (my ($id, $name, $val) = $sth->fetchrow_array) {
-	$hashref->{$id}->{$name} = $val;
+        $hashref->{$id}->{$name} = $val;
     }
 }
 
 # Note: requires caller to first call LJ::load_props($dbs, "talk")
 # <LJFUNC>
 # name: LJ::load_talk_props2
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# class:
+# des:
+# info:
+# args:
+# des-:
+# returns:
 # </LJFUNC>
 sub load_talk_props2
 {
@@ -4849,12 +4849,12 @@ sub load_talk_props2
     die "talkprops not loaded" unless defined $LJ::CACHE_PROPID{'talk'};
 
     my $sth = $db->prepare("SELECT jtalkid, tpropid, value FROM talkprop2 ".
-			   "WHERE journalid=$journalid AND jtalkid IN ($in)");
+                           "WHERE journalid=$journalid AND jtalkid IN ($in)");
     $sth->execute;
     while (my ($jtalkid, $propid, $value) = $sth->fetchrow_array) {
-	my $p = $LJ::CACHE_PROPID{'talk'}->{$propid};
-	next unless $p;
-	$hashref->{$jtalkid}->{$p->{'name'}} = $value;
+        my $p = $LJ::CACHE_PROPID{'talk'}->{$propid};
+        next unless $p;
+        $hashref->{$jtalkid}->{$p->{'name'}} = $value;
     }
 }
 
@@ -4926,7 +4926,7 @@ sub ehtml
     $a =~ s/\'/&\#39;/g;
     $a =~ s/</&lt;/g;
     $a =~ s/>/&gt;/g;
-    return $a;	
+    return $a;
 }
 
 
@@ -4969,17 +4969,17 @@ sub days_in_month
     my ($month, $year) = @_;
     if ($month == 2)
     {
-	return 29 unless $year;  # assume largest
+        return 29 unless $year;  # assume largest
         if ($year % 4 == 0)
         {
-	  # years divisible by 400 are leap years
-	  return 29 if ($year % 400 == 0);
+          # years divisible by 400 are leap years
+          return 29 if ($year % 400 == 0);
 
-	  # if they're divisible by 100, they aren't.
-	  return 28 if ($year % 100 == 0);
+          # if they're divisible by 100, they aren't.
+          return 28 if ($year % 100 == 0);
 
-	  # otherwise, if divisible by 4, they are.
-	  return 29;
+          # otherwise, if divisible by 4, they are.
+          return 29;
         }
     }
     return ((31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)[$month-1]);
@@ -4988,8 +4988,8 @@ sub days_in_month
 # <LJFUNC>
 # name: LJ::delete_item
 # des: Deletes a journal item from a user's journal that resides in the old schema (cluster0).
-# info: This function is deprecated, just as the old schema is deprecated.  In a 
-#       few months this function will be removed.  The new equivalent to this 
+# info: This function is deprecated, just as the old schema is deprecated.  In a
+#       few months this function will be removed.  The new equivalent to this
 #       function is [func[LJ::delete_item2]].
 # args: dbarg, journalid, itemid, quick?, deleter?
 # des-journalid: Userid of journal to delete item from.
@@ -5000,33 +5000,33 @@ sub days_in_month
 #              tools can use this to batch deletes in table locks for speed.  Arguments
 #              to this coderef are ($tablename, $col, @ids).  The default implementation
 #              is: "DELETE FROM $table WHERE $col IN (@ids)"
-# returns: 
+# returns:
 # </LJFUNC>
 sub delete_item
 {
     my ($dbarg, $ownerid, $itemid, $quick, $deleter) = @_;
     my $sth;
-		
+
     my $dbs = make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
-    
+
     $ownerid += 0;
     $itemid += 0;
 
     $deleter ||= sub {
-	my $table = shift;
-	my $col = shift;
-	my @ids = @_;
-	return unless @ids;
-	my $in = join(",", @ids);
-	$dbh->do("DELETE FROM $table WHERE $col IN ($in)");
+        my $table = shift;
+        my $col = shift;
+        my @ids = @_;
+        return unless @ids;
+        my $in = join(",", @ids);
+        $dbh->do("DELETE FROM $table WHERE $col IN ($in)");
     };
 
     $deleter->("memorable", "itemid", $itemid);
     $dbh->do("UPDATE userusage SET lastitemid=0 WHERE userid=$ownerid AND lastitemid=$itemid") unless ($quick);
     foreach my $t (qw(log logtext logsubject logprop)) {
-	$deleter->($t, "itemid", $itemid);
+        $deleter->($t, "itemid", $itemid);
     }
     $dbh->do("DELETE FROM logsec WHERE ownerid=$ownerid AND itemid=$itemid");
 
@@ -5035,7 +5035,7 @@ sub delete_item
     $sth->execute;
     push @talkids, $_ while ($_ = $sth->fetchrow_array);
     foreach my $t (qw(talk talktext talkprop)) {
-	$deleter->($t, "talkid", @talkids);
+        $deleter->($t, "talkid", @talkids);
     }
 }
 
@@ -5061,34 +5061,34 @@ sub delete_item2
     $dbcm->do("DELETE FROM log2 WHERE journalid=$jid AND jitemid=$jitemid");
 
     return LJ::cmd_buffer_add($dbcm, $jid, "delitem", {
-	'itemid' => $jitemid,
-	'anum' => $anum,
+        'itemid' => $jitemid,
+        'anum' => $anum,
     }) if $quick;
-    
+
     # delete from clusters
     foreach my $t (qw(logtext2 recent_logtext2 logprop2 logsec2 logsubject2)) {
-	$dbcm->do("DELETE FROM $t WHERE journalid=$jid AND jitemid=$jitemid");
+        $dbcm->do("DELETE FROM $t WHERE journalid=$jid AND jitemid=$jitemid");
     }
     LJ::dudata_set($dbcm, $jid, 'L', $jitemid, 0);
 
     # delete stuff from meta cluster
     my $aitemid = $jitemid * 256 + $anum;
     foreach my $t (qw(memorable topic_map)) {
-	$dbh->do("DELETE FROM $t WHERE journalid=$jid AND jitemid=$aitemid");
+        $dbh->do("DELETE FROM $t WHERE journalid=$jid AND jitemid=$aitemid");
     }
 
     # delete comments
     my ($t, $loop) = (undef, 1);
-    while ($loop && 
-	   ($t = $dbcm->selectcol_arrayref("SELECT jtalkid FROM talk2 WHERE ".
-					   "nodetype='L' AND journalid=$jid ".
-					   "AND nodeid=$jitemid LIMIT 50"))
-	   && $t && @$t)
+    while ($loop &&
+           ($t = $dbcm->selectcol_arrayref("SELECT jtalkid FROM talk2 WHERE ".
+                                           "nodetype='L' AND journalid=$jid ".
+                                           "AND nodeid=$jitemid LIMIT 50"))
+           && $t && @$t)
     {
-	foreach my $jtalkid (@$t) {
-	    LJ::delete_talkitem($dbcm, $jid, $jtalkid);
-	}
-	$loop = 0 unless @$t == 50;
+        foreach my $jtalkid (@$t) {
+            LJ::delete_talkitem($dbcm, $jid, $jtalkid);
+        }
+        $loop = 0 unless @$t == 50;
     }
     return 1;
 }
@@ -5096,8 +5096,8 @@ sub delete_item2
 # <LJFUNC>
 # name: LJ::delete_talkitem
 # des: Deletes a comment and associated metadata.
-# info: The tables [dbtable[talk2]], [dbtabke[talkprop2]], [dbtable[talktext2]], 
-#       [dbtable[recent_talktext2]], and [dbtable[dudata]] are all 
+# info: The tables [dbtable[talk2]], [dbtabke[talkprop2]], [dbtable[talktext2]],
+#       [dbtable[recent_talktext2]], and [dbtable[dudata]] are all
 #       deleted from, immediately. Unlike [func[LJ::delete_item2]], there is
 #       no $quick flag to queue the delete for later, nor is one really
 #       necessary, since deleting from 4 tables won't be too slow.
@@ -5117,15 +5117,15 @@ sub delete_talkitem
     my $where = "WHERE journalid=$jid AND jtalkid=$jtalkid";
     my @delfrom = qw(talkprop2);
     if ($light) {
-	$dbcm->do("UPDATE talk2 SET state='D' $where");
-	$dbcm->do("UPDATE talktext2 SET subject=NULL, body=NULL $where");	
+        $dbcm->do("UPDATE talk2 SET state='D' $where");
+        $dbcm->do("UPDATE talktext2 SET subject=NULL, body=NULL $where");
     } else {
-	push @delfrom, qw(talk2 talktext2 recent_talktext2);
+        push @delfrom, qw(talk2 talktext2 recent_talktext2);
     }
-    
+
     foreach my $t (@delfrom) {
-	$dbcm->do("DELETE FROM $t $where");
-	return 0 if $dbcm->err;
+        $dbcm->do("DELETE FROM $t $where");
+        return 0 if $dbcm->err;
     }
     LJ::dudata_set($dbcm, $jid, 'T', $jtalkid, 0);
     return 0 if $dbcm->err;
@@ -5139,7 +5139,7 @@ sub delete_talkitem
 # info: This is used by S1.
 # args: alldatepart
 # des-alldatepart: The output of the MySQL function
-#                  DATE_FORMAT(sometime, "%a %W %b %M %y %Y %c %m %e %d 
+#                  DATE_FORMAT(sometime, "%a %W %b %M %y %Y %c %m %e %d
 #                  %D %p %i %l %h %k %H")
 # returns: Hash (whole, not reference), with keys: dayshort, daylong,
 #          monshort, monlong, yy, yyyy, m, mm, d, dd, dth, ap, AP,
@@ -5151,27 +5151,27 @@ sub alldateparts_to_hash
     my $alldatepart = shift;
     my @dateparts = split(/ /, $alldatepart);
     return (
-	    'dayshort' => $dateparts[0],
-	    'daylong' => $dateparts[1],
-	    'monshort' => $dateparts[2],
-	    'monlong' => $dateparts[3],
-	    'yy' => $dateparts[4],
-	    'yyyy' => $dateparts[5],
-	    'm' => $dateparts[6],
-	    'mm' => $dateparts[7],
-	    'd' => $dateparts[8],
-	    'dd' => $dateparts[9],
-	    'dth' => $dateparts[10],
-	    'ap' => substr(lc($dateparts[11]),0,1),
-	    'AP' => substr(uc($dateparts[11]),0,1),
-	    'ampm' => lc($dateparts[11]),
-	    'AMPM' => $dateparts[11],
-	    'min' => $dateparts[12],
-	    '12h' => $dateparts[13],
-	    '12hh' => $dateparts[14],
-	    '24h' => $dateparts[15],
-	    '24hh' => $dateparts[16],
-	    );
+            'dayshort' => $dateparts[0],
+            'daylong' => $dateparts[1],
+            'monshort' => $dateparts[2],
+            'monlong' => $dateparts[3],
+            'yy' => $dateparts[4],
+            'yyyy' => $dateparts[5],
+            'm' => $dateparts[6],
+            'mm' => $dateparts[7],
+            'd' => $dateparts[8],
+            'dd' => $dateparts[9],
+            'dth' => $dateparts[10],
+            'ap' => substr(lc($dateparts[11]),0,1),
+            'AP' => substr(uc($dateparts[11]),0,1),
+            'ampm' => lc($dateparts[11]),
+            'AMPM' => $dateparts[11],
+            'min' => $dateparts[12],
+            '12h' => $dateparts[13],
+            '12hh' => $dateparts[14],
+            '24h' => $dateparts[15],
+            '24hh' => $dateparts[16],
+            );
 }
 
 # <LJFUNC>
@@ -5191,11 +5191,11 @@ sub dudata_set
     $bytes += 0; $areaid += 0; $journalid += 0;
     $area = $dbcm->quote($area);
     if ($bytes) {
-	$dbcm->do("REPLACE INTO dudata (userid, area, areaid, bytes) ".
-		  "VALUES ($journalid, $area, $areaid, $bytes)");
+        $dbcm->do("REPLACE INTO dudata (userid, area, areaid, bytes) ".
+                  "VALUES ($journalid, $area, $areaid, $bytes)");
     } else {
-	$dbcm->do("DELETE FROM dudata WHERE userid=$journalid AND ".
-		  "area=$area AND areaid=$areaid");
+        $dbcm->do("DELETE FROM dudata WHERE userid=$journalid AND ".
+                  "area=$area AND areaid=$areaid");
     }
     return 1;
 }

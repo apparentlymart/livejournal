@@ -10,11 +10,11 @@
  $bodyopts = "";
 
  my $opts = { 'body' => \$body,
-	      'head' => \$head,
-	      'bodyopts' => \$bodyopts,
-	      'dbs' => $dbs,
-	      'remote' => $remote,
-	  };
+              'head' => \$head,
+              'bodyopts' => \$bodyopts,
+              'dbs' => $dbs,
+              'remote' => $remote,
+          };
  
  LJ::Portal::make_mozilla_bar($dbs, $remote, \%FORM, $opts);
 

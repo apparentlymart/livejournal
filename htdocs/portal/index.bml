@@ -12,13 +12,13 @@
  #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
  LJ::Portal::construct_page({ 'dbs' => $dbs,
-			      'form' => \%FORM,
-			      'remote' => $remote,
-			      'head' => \$head,
-			      'body' => \$body,
-			      'bodyopts' => \$bodyopts,
-			      'border' => 0,
-			  });
+                              'form' => \%FORM,
+                              'remote' => $remote,
+                              'head' => \$head,
+                              'body' => \$body,
+                              'bodyopts' => \$bodyopts,
+                              'border' => 0,
+                          });
 
  return;
 

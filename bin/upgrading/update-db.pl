@@ -13,17 +13,17 @@ my $opt_confirm = "";
 my $cluster = 0;   # by default, upgrade master.
 exit 1 unless
 GetOptions("runsql" => \$opt_sql,
-	   "drop" => \$opt_drop,
-	   "populate" => \$opt_pop,
-	   "confirm=s" => \$opt_confirm,
-	   "cluster=i" => \$cluster,
-	   );
+           "drop" => \$opt_drop,
+           "populate" => \$opt_pop,
+           "confirm=s" => \$opt_confirm,
+           "cluster=i" => \$cluster,
+           );
 
 
 ## make sure $LJHOME is set so we can load & run everything
 unless (-d $ENV{'LJHOME'}) {
     die "LJHOME environment variable is not set, or is not a directory.\n".
-	"You must fix this before you can run this database update script.";
+        "You must fix this before you can run this database update script.";
 }
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
@@ -95,32 +95,32 @@ if ($opt_pop)
     print "Populating database with base data:\n";
     $| = 1;
     open (BD, "$ENV{'LJHOME'}/bin/upgrading/base-data.sql")
-	or die ("Can't open base-data.sql file");
+        or die ("Can't open base-data.sql file");
     my $lasttable = "";
     while (my $q = <BD>)
     {
-	chomp $q;  # remove newline
-	next unless ($q =~ /^(REPLACE|INSERT) INTO (\w+).+;/);
-	chop $q;  # remove semicolon
-	my $type = $1;
-	my $table = $2;
-	if ($table ne $lasttable) {
-	    if ($lasttable) { print "\n"; }
-	    print "  $table ";
-	    $lasttable = $table;
-	}
-	$dbh->do($q);
-	if ($dbh->err) {
-	    if ($type eq "REPLACE") {
-		die "#  ERROR: " . $dbh->errstr . "\n";
-	    }
-	    if ($type eq "INSERT") {
-		print "x";
-	    }
-	} else {
-	    print ".";
-	}
-	
+        chomp $q;  # remove newline
+        next unless ($q =~ /^(REPLACE|INSERT) INTO (\w+).+;/);
+        chop $q;  # remove semicolon
+        my $type = $1;
+        my $table = $2;
+        if ($table ne $lasttable) {
+            if ($lasttable) { print "\n"; }
+            print "  $table ";
+            $lasttable = $table;
+        }
+        $dbh->do($q);
+        if ($dbh->err) {
+            if ($type eq "REPLACE") {
+                die "#  ERROR: " . $dbh->errstr . "\n";
+            }
+            if ($type eq "INSERT") {
+                print "x";
+            }
+        } else {
+            print ".";
+        }
+        
     }
     print "\n";
     close (BD);
@@ -134,11 +134,11 @@ sub do_sql
     my $sql = shift;
     print "$sql;\n";
     if ($opt_sql) {
-	print "# Running...\n";
-	$dbh->do($sql);
-	if ($dbh->err) {
-	    die "#  ERROR: " . $dbh->errstr . "\n";
-	}
+        print "# Running...\n";
+        $dbh->do($sql);
+        if ($dbh->err) {
+            die "#  ERROR: " . $dbh->errstr . "\n";
+        }
     }
 }
 
@@ -147,11 +147,11 @@ sub try_sql
     my $sql = shift;
     print "$sql;\n";
     if ($opt_sql) {
-	print "# Non-critical SQL (upgrading only... it might fail)...\n";
-	$dbh->do($sql);
-	if ($dbh->err) {
-	    print "#  Acceptable failure: " . $dbh->errstr . "\n";
-	}
+        print "# Non-critical SQL (upgrading only... it might fail)...\n";
+        $dbh->do($sql);
+        if ($dbh->err) {
+            print "#  Acceptable failure: " . $dbh->errstr . "\n";
+        }
     }
 }
 
@@ -175,17 +175,17 @@ sub create_table
 
     foreach my $pc (@{$post_create{$table}})
     {
-	my @args = @{$pc};
-	my $ac = shift @args;
-	if ($ac eq "sql") { 
-	    print "# post-create SQL\n";
-	    do_sql($args[0]); 
-	}
-	elsif ($ac eq "sqltry") { 
-	    print "# post-create SQL (necessary if upgrading only)\n";
-	    try_sql($args[0]); 
-	}
-	else { print "# don't know how to do \$ac = $ac"; }
+        my @args = @{$pc};
+        my $ac = shift @args;
+        if ($ac eq "sql") { 
+            print "# post-create SQL\n";
+            do_sql($args[0]); 
+        }
+        elsif ($ac eq "sqltry") { 
+            print "# post-create SQL (necessary if upgrading only)\n";
+            try_sql($args[0]); 
+        }
+        else { print "# don't know how to do \$ac = $ac"; }
     }
 }
 
@@ -195,9 +195,9 @@ sub drop_table
     return if $cluster && ! defined $clustered_table{$table};
 
     if ($opt_drop) {
-	do_sql("DROP TABLE $table");
+        do_sql("DROP TABLE $table");
     } else {
-	print "# Not dropping table $table to be paranoid (use --drop)\n";
+        print "# Not dropping table $table to be paranoid (use --drop)\n";
     }
 }
 
@@ -207,7 +207,7 @@ sub load_datfile
     my $local = shift;
     return if ($local && ! -e $file);
     unless (-e $file) {
-	die "Can't find database update file at $file\n";
+        die "Can't find database update file at $file\n";
     }
     require $file or die "Can't run $file\n";
 }
@@ -215,7 +215,7 @@ sub load_datfile
 sub mark_clustered
 {
     foreach (@_) {
-	$clustered_table{$_} = 1;
+        $clustered_table{$_} = 1;
     }
 }
 
@@ -228,9 +228,9 @@ sub register_tablecreate
     return if $cluster && ! defined $clustered_table{$table};
 
     unless ($table_exists{$table}) {
-	$table_create{$table} = $create;
+        $table_create{$table} = $create;
     } else {
-	$table_create{$table} = "--";   # save memory, won't use it.
+        $table_create{$table} = "--";   # save memory, won't use it.
     }
 }
 
@@ -244,7 +244,7 @@ sub post_create
 {
     my $table = shift;
     while (my ($type, $what) = splice(@_, 0, 2)) {
-	push @{$post_create{$table}}, [ $type, $what ];
+        push @{$post_create{$table}}, [ $type, $what ];
     }
 }
 
@@ -269,7 +269,7 @@ sub load_table_columns
     $sth->execute;
     while (my ($Field, $Type) = $sth->fetchrow_array)
     {
-	$coltype{$table}->{$Field} = $Type;
+        $coltype{$table}->{$Field} = $Type;
     }
 }
 
@@ -295,7 +295,7 @@ sub ensure_confirm
     my $area = shift;
 
     return 1 if ($opt_sql && ($opt_confirm eq "all" or
-			      $opt_confirm eq $area));
+                              $opt_confirm eq $area));
 
     print STDERR "To proceeed with the necessary changes, rerun with -r --confirm=$area\n";
     return 0;

@@ -29,12 +29,12 @@
      $ret .= "<tt><a href='\#$anchor'><b>$cmdname</b></a> $args</tt></td></tr></table>";
      $ret .= "<dd><p>$cmd->{'des'}";
      if ($cmd->{'args'}) {
-	 my @des = @{$cmd->{'args'}};
-	 $ret .= "<p><dl>";
-	 while (my ($arg, $des) = splice(@des, 0, 2)) {
-	     $ret .= "<dt><b><i>$arg</i></b><dd>$des";
-	 }
-	 $ret .= "</dl></a>";
+         my @des = @{$cmd->{'args'}};
+         $ret .= "<p><dl>";
+         while (my ($arg, $des) = splice(@des, 0, 2)) {
+             $ret .= "<dt><b><i>$arg</i></b><dd>$des";
+         }
+         $ret .= "</dl></a>";
      }
  }
  $ret .= "</dl>";

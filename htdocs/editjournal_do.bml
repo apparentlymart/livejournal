@@ -39,7 +39,7 @@ BODY<=
      $jump_to_item = 1;
      my $remote = LJ::get_remote($dbs);
      unless ($remote) {
-	 return "(=H1 Error H1=)(=P You have to be logged in to directly edit a journal entry of yours. P=)";
+         return "(=H1 Error H1=)(=P You have to be logged in to directly edit a journal entry of yours. P=)";
      }
      $user = $FORM{'user'} = $remote->{'user'};
      $userid = $remote->{'userid'};
@@ -53,17 +53,17 @@ BODY<=
      my $owner = $FORM{'journal'};
 
      unless ($clustered) {
-	 # cluster 0
-	 $sth = $dbr->prepare("SELECT ownerid, posterid FROM log WHERE itemid=$itemid");
-	 $sth->execute;
-	 my ($ownerid, $posterid) = $sth->fetchrow_array;
-	 if ($ownerid != $posterid) {
-	     $owner = LJ::get_username($dbs, $ownerid);
-	 }
+         # cluster 0
+         $sth = $dbr->prepare("SELECT ownerid, posterid FROM log WHERE itemid=$itemid");
+         $sth->execute;
+         my ($ownerid, $posterid) = $sth->fetchrow_array;
+         if ($ownerid != $posterid) {
+             $owner = LJ::get_username($dbs, $ownerid);
+         }
      }
      
      if ($owner && $owner ne $user) {
-	 $FORM{'usejournal'} = $owner;
+         $FORM{'usejournal'} = $owner;
      }
 
      $FORM{'mode'} = "getevents";
@@ -77,66 +77,66 @@ BODY<=
      $FORM{'mode'} = "getevents";
      if ($FORM{'selecttype'} eq "last") 
      {
-	 $FORM{'selecttype'} = "lastn";
-	 $FORM{'howmany'} = 1;
-	 $just_last = 1;
+         $FORM{'selecttype'} = "lastn";
+         $FORM{'howmany'} = 1;
+         $just_last = 1;
      }
      LJ::do_request($dbs, \%FORM, \%res);
  
      if ($res{'success'} eq "OK")
      {
-	 $ret .= "(=H1 Pick an entry to edit.. H1=)(=P Select which item you want to edit and press the edit button at the bottom of the page. P=)\n";
-	 $ret .= "<FORM METHOD=POST ACTION=\"editjournal_do.bml\">\n";
-	 $ret .= "<INPUT TYPE=HIDDEN NAME=\"mode\" VALUE=\"getevents\">\n";
-	 $ret .= "<INPUT TYPE=HIDDEN NAME=\"selecttype\" VALUE=\"one\">\n";
-	 $ret .= "<INPUT TYPE=HIDDEN NAME=\"user\" VALUE=\"$user\">\n";
-	 $ret .= "<INPUT TYPE=HIDDEN NAME=\"hpassword\" VALUE=\"$hpassword\">\n";
+         $ret .= "(=H1 Pick an entry to edit.. H1=)(=P Select which item you want to edit and press the edit button at the bottom of the page. P=)\n";
+         $ret .= "<FORM METHOD=POST ACTION=\"editjournal_do.bml\">\n";
+         $ret .= "<INPUT TYPE=HIDDEN NAME=\"mode\" VALUE=\"getevents\">\n";
+         $ret .= "<INPUT TYPE=HIDDEN NAME=\"selecttype\" VALUE=\"one\">\n";
+         $ret .= "<INPUT TYPE=HIDDEN NAME=\"user\" VALUE=\"$user\">\n";
+         $ret .= "<INPUT TYPE=HIDDEN NAME=\"hpassword\" VALUE=\"$hpassword\">\n";
 
-	 $clustered = 1 if defined $res{"events_1_anum"};
-	 $ret .= "<INPUT TYPE=HIDDEN NAME=\"clustered\" VALUE=\"$clustered\">\n";	 
+         $clustered = 1 if defined $res{"events_1_anum"};
+         $ret .= "<INPUT TYPE=HIDDEN NAME=\"clustered\" VALUE=\"$clustered\">\n";	 
 
-	 my %props = ();
-	 for (my $i=1; $i<=$res{'prop_count'}; $i++) {
-	     $props{$res{"prop_${i}_itemid"}}->{$res{"prop_${i}_name"}} = $res{"prop_${i}_value"};
-	 }
-	 
-	 my $count = $res{'events_count'};
-	 for (my $i=1; $i<=$count; $i++)
-	 {
-	     my $ditemid = defined $res{"events_${i}_anum"} ? 
-		 $res{"events_${i}_itemid"} * 256 + $res{"events_${i}_anum"} : 
-		 $res{"events_${i}_itemid"};
+         my %props = ();
+         for (my $i=1; $i<=$res{'prop_count'}; $i++) {
+             $props{$res{"prop_${i}_itemid"}}->{$res{"prop_${i}_name"}} = $res{"prop_${i}_value"};
+         }
+         
+         my $count = $res{'events_count'};
+         for (my $i=1; $i<=$count; $i++)
+         {
+             my $ditemid = defined $res{"events_${i}_anum"} ? 
+                 $res{"events_${i}_itemid"} * 256 + $res{"events_${i}_anum"} : 
+                 $res{"events_${i}_itemid"};
 
-	     $ret .= "<HR><INPUT TYPE=RADIO NAME=\"itemid\" VALUE=\"$ditemid\"> <B>" .
-		 $res{"events_${i}_eventtime"} . "</B>";
+             $ret .= "<HR><INPUT TYPE=RADIO NAME=\"itemid\" VALUE=\"$ditemid\"> <B>" .
+                 $res{"events_${i}_eventtime"} . "</B>";
 
-	     if ($res{"events_${i}_subject"}) {
-		 $ret .= "; <I>" . $res{"events_${i}_subject"} . "</I>";
-	     }
-	     $ret .= "<BR>\n";
-	     my $event = LJ::durl($res{"events_${i}_event"});
-	     unless ($props{$res{"events_${i}_itemid"}}->{'opt_preformatted'}) {
-		 $event =~ s/\n/<BR>\n/g;
-	     }
-	     $ret .= $event;
-	 }
-	 
-	 $ret .= "(=H1 Press to continue... H1=)(=P After you select an item to edit or delete, press the Edit button below. P=)(=STANDOUT <INPUT TYPE=SUBMIT VALUE=\"Edit Selected Entry\"> STANDOUT=)</FORM>\n";
-	 
-	 unless ($just_last) 
-	 {
-	     # unless they just want to edit the last entry, let them pick which one.
-	     return $ret;
-	 } else {
-	     # set stuff up so we can go on and edit the entry
-	     $ret = "";  # clear the buffer we were adding to, but aren't going to show.
-	 }
+             if ($res{"events_${i}_subject"}) {
+                 $ret .= "; <I>" . $res{"events_${i}_subject"} . "</I>";
+             }
+             $ret .= "<BR>\n";
+             my $event = LJ::durl($res{"events_${i}_event"});
+             unless ($props{$res{"events_${i}_itemid"}}->{'opt_preformatted'}) {
+                 $event =~ s/\n/<BR>\n/g;
+             }
+             $ret .= $event;
+         }
+         
+         $ret .= "(=H1 Press to continue... H1=)(=P After you select an item to edit or delete, press the Edit button below. P=)(=STANDOUT <INPUT TYPE=SUBMIT VALUE=\"Edit Selected Entry\"> STANDOUT=)</FORM>\n";
+         
+         unless ($just_last) 
+         {
+             # unless they just want to edit the last entry, let them pick which one.
+             return $ret;
+         } else {
+             # set stuff up so we can go on and edit the entry
+             $ret = "";  # clear the buffer we were adding to, but aren't going to show.
+         }
      }
      else
      {
-	 $ret .= "(=H1 Error H1=)\n";
-	 $ret .= "(=P There was an error getting the journal entries to edit: <UL><LI><B>(=_EH $res{'errmsg'} _EH=)</B></UL> P=)";
-	 return $ret;
+         $ret .= "(=H1 Error H1=)\n";
+         $ret .= "(=P There was an error getting the journal entries to edit: <UL><LI><B>(=_EH $res{'errmsg'} _EH=)</B></UL> P=)";
+         return $ret;
      }
  }
 
@@ -147,40 +147,40 @@ BODY<=
  {
      if ($FORM{'mode'} eq "editevent") {
 
-	 ## must explicitly set this.  protocol makes a distinction between not defined
-	 ## and set to zero.  browsers won't send value (undefined) if unchecked.
+         ## must explicitly set this.  protocol makes a distinction between not defined
+         ## and set to zero.  browsers won't send value (undefined) if unchecked.
 
-	 $FORM{"prop_opt_preformatted"} = $FORM{"prop_opt_preformatted"} ? 1 : 0;
-	 $FORM{"prop_opt_nocomments"} = $FORM{"prop_opt_nocomments"} ? 1 : 0;
-	 $FORM{"prop_opt_backdated"} = $FORM{"prop_opt_backdated"} ? 1 : 0;
+         $FORM{"prop_opt_preformatted"} = $FORM{"prop_opt_preformatted"} ? 1 : 0;
+         $FORM{"prop_opt_nocomments"} = $FORM{"prop_opt_nocomments"} ? 1 : 0;
+         $FORM{"prop_opt_backdated"} = $FORM{"prop_opt_backdated"} ? 1 : 0;
 
-	 ## see if an "other" mood they typed in has an equivalent moodid
-	 if ($FORM{'prop_current_mood'} ne "") 
-	 {
-	     delete $FORM{'prop_current_moodid'};
-	     my $qmood = $dbr->quote(lc($FORM{'prop_current_mood'}));
-	     my $sth = $dbr->prepare("SELECT moodid FROM moods WHERE mood=$qmood");
-	     $sth->execute;
-	     my ($moodid) = $sth->fetchrow_array;
-	     if ($moodid) {
-		 delete $FORM{'prop_current_mood'};
-		 $FORM{'prop_current_moodid'} = $moodid;
-	     }
-	 }
+         ## see if an "other" mood they typed in has an equivalent moodid
+         if ($FORM{'prop_current_mood'} ne "") 
+         {
+             delete $FORM{'prop_current_moodid'};
+             my $qmood = $dbr->quote(lc($FORM{'prop_current_mood'}));
+             my $sth = $dbr->prepare("SELECT moodid FROM moods WHERE mood=$qmood");
+             $sth->execute;
+             my ($moodid) = $sth->fetchrow_array;
+             if ($moodid) {
+                 delete $FORM{'prop_current_mood'};
+                 $FORM{'prop_current_moodid'} = $moodid;
+             }
+         }
 
-	 my $sec = "public";
-	 my $amask = 0;
-	 if ($FORM{'security'} eq "private") { $sec = "private"; }
-	 if ($FORM{'security'} eq "friends") { $sec = "usemask"; $amask = 1; }
-	 if ($FORM{'security'} eq "custom") { 
-	     $sec = "usemask"; 
-	     foreach my $bit (1..30) {
-		 next unless $FORM{"custom_bit_$bit"};
-		 $amask |= (1 << $bit);
-	     }
-	 }
-	 $FORM{'security'} = $sec;
-	 $FORM{'allowmask'} = $amask;
+         my $sec = "public";
+         my $amask = 0;
+         if ($FORM{'security'} eq "private") { $sec = "private"; }
+         if ($FORM{'security'} eq "friends") { $sec = "usemask"; $amask = 1; }
+         if ($FORM{'security'} eq "custom") { 
+             $sec = "usemask"; 
+             foreach my $bit (1..30) {
+                 next unless $FORM{"custom_bit_$bit"};
+                 $amask |= (1 << $bit);
+             }
+         }
+         $FORM{'security'} = $sec;
+         $FORM{'allowmask'} = $amask;
      }
 
      LJ::do_request($dbs, \%FORM, \%res);
@@ -190,184 +190,184 @@ BODY<=
  {
      if ($FORM{'mode'} eq "getevents")
      {
-	 $userid = LJ::get_userid($dbs, $user);
-	 my $count = $res{'events_count'};
-	 unless ($count) {
-	     return "(=H1 Error H1=)(=P Could not find selected journal entry. P=)";
-	 }
+         $userid = LJ::get_userid($dbs, $user);
+         my $count = $res{'events_count'};
+         unless ($count) {
+             return "(=H1 Error H1=)(=P Could not find selected journal entry. P=)";
+         }
 
-	 my $gfg;
-	 $gfg = LJ::Protocol::do_request($dbs, "getfriendgroups", {
-	     'username' => $user,
-	 }, undef, {
-	     'noauth' => 1,
-	 }) unless $FORM{'usejournal'};
-	 
-	 my %props = ();
-	 for (my $i=1; $i<=$res{'prop_count'}; $i++) {
-	     $props{$res{"prop_${i}_name"}} = $res{"prop_${i}_value"};
-	 }
+         my $gfg;
+         $gfg = LJ::Protocol::do_request($dbs, "getfriendgroups", {
+             'username' => $user,
+         }, undef, {
+             'noauth' => 1,
+         }) unless $FORM{'usejournal'};
+         
+         my %props = ();
+         for (my $i=1; $i<=$res{'prop_count'}; $i++) {
+             $props{$res{"prop_${i}_name"}} = $res{"prop_${i}_value"};
+         }
 
-	 my $ditemid = defined $res{'events_1_anum'} ? 
-	     $res{'events_1_itemid'} * 256 + $res{'events_1_anum'} : 
-	     $res{'events_1_itemid'};
+         my $ditemid = defined $res{'events_1_anum'} ? 
+             $res{'events_1_itemid'} * 256 + $res{'events_1_anum'} : 
+             $res{'events_1_itemid'};
 
-	 $ret .= "(=H1 Edit Journal Entry H1=)(=P Edit the fields of your journal entry you'd like to modify and press the save button at the bottom of the page.  To delete the entry, just delete all the text and press save... the entry will be deleted. P=)\n";
-	 $ret .= "<FORM METHOD=POST ACTION=\"editjournal_do.bml\">\n";
-	 $ret .= "<INPUT TYPE=HIDDEN NAME=\"mode\" VALUE=\"editevent\">\n";
-	 $ret .= "<INPUT TYPE=HIDDEN NAME=\"user\" VALUE=\"$user\">\n";
-	 $ret .= "<INPUT TYPE=HIDDEN NAME=\"hpassword\" VALUE=\"$hpassword\">\n";
-	 $ret .= "<INPUT TYPE=HIDDEN NAME=\"itemid\" VALUE=\"$ditemid\">\n";
-	 $ret .= "<input type='hidden' name='clustered' value='$clustered'>\n";  # for link later
-	 if ($FORM{'usejournal'}) {
-	     $ret .= "<INPUT TYPE=HIDDEN NAME=\"usejournal\" VALUE=\"$FORM{'usejournal'}\">\n";
-	 }
+         $ret .= "(=H1 Edit Journal Entry H1=)(=P Edit the fields of your journal entry you'd like to modify and press the save button at the bottom of the page.  To delete the entry, just delete all the text and press save... the entry will be deleted. P=)\n";
+         $ret .= "<FORM METHOD=POST ACTION=\"editjournal_do.bml\">\n";
+         $ret .= "<INPUT TYPE=HIDDEN NAME=\"mode\" VALUE=\"editevent\">\n";
+         $ret .= "<INPUT TYPE=HIDDEN NAME=\"user\" VALUE=\"$user\">\n";
+         $ret .= "<INPUT TYPE=HIDDEN NAME=\"hpassword\" VALUE=\"$hpassword\">\n";
+         $ret .= "<INPUT TYPE=HIDDEN NAME=\"itemid\" VALUE=\"$ditemid\">\n";
+         $ret .= "<input type='hidden' name='clustered' value='$clustered'>\n";  # for link later
+         if ($FORM{'usejournal'}) {
+             $ret .= "<INPUT TYPE=HIDDEN NAME=\"usejournal\" VALUE=\"$FORM{'usejournal'}\">\n";
+         }
 
-	 my ($year, $mon, $mday, $hour, $min) = split(/\D/, $res{"events_1_eventtime"});
+         my ($year, $mon, $mday, $hour, $min) = split(/\D/, $res{"events_1_eventtime"});
 
-	 $ret .= "<TABLE>\n";
-	 $ret .= "<TR><TD ALIGN=RIGHT>Date:<BR><I>(yyyy-mm-dd)</I></TD><TD><INPUT NAME=year SIZE=5 MAXLENGTH=4 VALUE=$year>-";
-	 $ret .= "<INPUT NAME=mon SIZE=3 MAXLENGTH=2 VALUE=$mon>-";
-	 $ret .= "<INPUT NAME=day SIZE=3 MAXLENGTH=2 VALUE=$mday></TD>\n";
-	 
-	 $ret .= "<TD ALIGN=RIGHT>Local time:<BR><I>(24 hour time)</I></TD><TD>";
-	 $ret .= "<INPUT NAME=hour SIZE=3 MAXLENGTH=2 VALUE=$hour>:";
-	 $ret .= "<INPUT NAME=min SIZE=3 MAXLENGTH=2 VALUE=$min></TD></TR>\n";
-	 $ret .= "</TABLE>\n";
+         $ret .= "<TABLE>\n";
+         $ret .= "<TR><TD ALIGN=RIGHT>Date:<BR><I>(yyyy-mm-dd)</I></TD><TD><INPUT NAME=year SIZE=5 MAXLENGTH=4 VALUE=$year>-";
+         $ret .= "<INPUT NAME=mon SIZE=3 MAXLENGTH=2 VALUE=$mon>-";
+         $ret .= "<INPUT NAME=day SIZE=3 MAXLENGTH=2 VALUE=$mday></TD>\n";
+         
+         $ret .= "<TD ALIGN=RIGHT>Local time:<BR><I>(24 hour time)</I></TD><TD>";
+         $ret .= "<INPUT NAME=hour SIZE=3 MAXLENGTH=2 VALUE=$hour>:";
+         $ret .= "<INPUT NAME=min SIZE=3 MAXLENGTH=2 VALUE=$min></TD></TR>\n";
+         $ret .= "</TABLE>\n";
 
-	 $ret .= "<P><B>Subject:</B> <I>(optional, for use on longer entries)</I><BR>";
-	 $ret .= "<INPUT NAME=\"subject\" VALUE=\"";
-	 $ret .= LJ::ehtml($res{"events_1_subject"});
-	 $ret .= "\" SIZE=60 MAXLENGTH=255>\n";
-	
-	 $ret .= "<p><b>Event:</b><br /><textarea rows='12' cols='60' wrap='soft' name='event' style='width: 99%'>";
-	 $ret .= LJ::ehtml(LJ::durl($res{"events_1_event"}));
- 	 $ret .= "</textarea></p>\n";
+         $ret .= "<P><B>Subject:</B> <I>(optional, for use on longer entries)</I><BR>";
+         $ret .= "<INPUT NAME=\"subject\" VALUE=\"";
+         $ret .= LJ::ehtml($res{"events_1_subject"});
+         $ret .= "\" SIZE=60 MAXLENGTH=255>\n";
+        
+         $ret .= "<p><b>Event:</b><br /><textarea rows='12' cols='60' wrap='soft' name='event' style='width: 99%'>";
+         $ret .= LJ::ehtml(LJ::durl($res{"events_1_event"}));
+          $ret .= "</textarea></p>\n";
 
-	 $ret .= "<p><b>Security Level:</b>";
-	 my @secs = ("public" => "Public", "private" => "Private", 
-		     "friends" => "Friends");
-	 
-	 my $raw;
-	 if ($gfg && @{$gfg->{'friendgroups'}}) {
-	     push @secs, ("custom", "Custom...");
-	     $raw = "onChange=\"document.getElementById('custom_boxes').style.display = (this.selectedIndex == 3) ? 'block' : 'none';\"";
-	 }
-	 
-	 my $curmask = $res{'events_1_allowmask'};
-	 my $cursec = $res{'events_1_security'};
-	 if ($cursec eq 'usemask') {
-	     $cursec = $curmask == 1 ? "friends" : "custom";
-	 }
-	 $ret .= LJ::html_select({ 'name' => 'security',
-				   'selected' => $cursec,
-				   'raw' => $raw,
-			       }, @secs);
+         $ret .= "<p><b>Security Level:</b>";
+         my @secs = ("public" => "Public", "private" => "Private", 
+                     "friends" => "Friends");
+         
+         my $raw;
+         if ($gfg && @{$gfg->{'friendgroups'}}) {
+             push @secs, ("custom", "Custom...");
+             $raw = "onChange=\"document.getElementById('custom_boxes').style.display = (this.selectedIndex == 3) ? 'block' : 'none';\"";
+         }
+         
+         my $curmask = $res{'events_1_allowmask'};
+         my $cursec = $res{'events_1_security'};
+         if ($cursec eq 'usemask') {
+             $cursec = $curmask == 1 ? "friends" : "custom";
+         }
+         $ret .= LJ::html_select({ 'name' => 'security',
+                                   'selected' => $cursec,
+                                   'raw' => $raw,
+                               }, @secs);
 
-	 $ret .= LJ::help_icon("security");
+         $ret .= LJ::help_icon("security");
 
-	 if ($gfg && @{$gfg->{'friendgroups'}}) {
-	     my $display = $cursec eq "custom" ? "block" : "none";
-	     $ret .= "<blockquote id='custom_boxes' style='display: $display'>";
-	     foreach my $fg (@{$gfg->{'friendgroups'}}) {
-		 my $selected;
-		 if ($curmask+0 & 1<<$fg->{'id'}) {
-		     $selected = "checked=\"checked\"";
-		 }
-		 $ret .= "<input type='checkbox' name='custom_bit_$fg->{'id'}' value='1' $selected> ";
-		 $ret .= LJ::ehtml($fg->{'name'}) . "<br />\n";
-	     }
-	     $ret .= "</blockquote>";
-	 }
+         if ($gfg && @{$gfg->{'friendgroups'}}) {
+             my $display = $cursec eq "custom" ? "block" : "none";
+             $ret .= "<blockquote id='custom_boxes' style='display: $display'>";
+             foreach my $fg (@{$gfg->{'friendgroups'}}) {
+                 my $selected;
+                 if ($curmask+0 & 1<<$fg->{'id'}) {
+                     $selected = "checked=\"checked\"";
+                 }
+                 $ret .= "<input type='checkbox' name='custom_bit_$fg->{'id'}' value='1' $selected> ";
+                 $ret .= LJ::ehtml($fg->{'name'}) . "<br />\n";
+             }
+             $ret .= "</blockquote>";
+         }
 
-	 ### don't auto-format
-	 {
-	     my $check = $props{'opt_preformatted'} ? "CHECKED" : "";
-	     $ret .= "<P><B>Don't auto-format:</B> <INPUT TYPE=CHECKBOX NAME=\"prop_opt_preformatted\" VALUE=1 $check>";
-	     $ret .= LJ::help_icon("noautoformat", " ");
-	 }
+         ### don't auto-format
+         {
+             my $check = $props{'opt_preformatted'} ? "CHECKED" : "";
+             $ret .= "<P><B>Don't auto-format:</B> <INPUT TYPE=CHECKBOX NAME=\"prop_opt_preformatted\" VALUE=1 $check>";
+             $ret .= LJ::help_icon("noautoformat", " ");
+         }
 
-	 ### don't allow comments
-	 {
-	     my $check = $props{'opt_nocomments'} ? "CHECKED" : "";
-	     $ret .= "&nbsp;<B>Disallow Comments:</B> <INPUT TYPE=CHECKBOX NAME=\"prop_opt_nocomments\" VALUE=1 $check>";
-	 }
+         ### don't allow comments
+         {
+             my $check = $props{'opt_nocomments'} ? "CHECKED" : "";
+             $ret .= "&nbsp;<B>Disallow Comments:</B> <INPUT TYPE=CHECKBOX NAME=\"prop_opt_nocomments\" VALUE=1 $check>";
+         }
 
-	 ### backdating
-	 {
-	     my $check = $props{'opt_backdated'} ? "CHECKED" : "";
-	     $ret .= "<P><B>Backdate Entry:</B> <INPUT TYPE=CHECKBOX NAME=\"prop_opt_backdated\" VALUE=1 $check> (will only show on calendar)";
-	 }
+         ### backdating
+         {
+             my $check = $props{'opt_backdated'} ? "CHECKED" : "";
+             $ret .= "<P><B>Backdate Entry:</B> <INPUT TYPE=CHECKBOX NAME=\"prop_opt_backdated\" VALUE=1 $check> (will only show on calendar)";
+         }
 
-	 
-	 ### picture to use
-	 {
-	     my $sth = $dbr->prepare("SELECT k.keyword FROM userpicmap m, keywords k WHERE m.userid=$userid AND m.kwid=k.kwid");
-	     $sth->execute;
-	     my @pics;
-	     push @pics, $_ while ($_ = $sth->fetchrow_array);
-	     @pics = sort { lc($a) cmp lc($b) } @pics;
+         
+         ### picture to use
+         {
+             my $sth = $dbr->prepare("SELECT k.keyword FROM userpicmap m, keywords k WHERE m.userid=$userid AND m.kwid=k.kwid");
+             $sth->execute;
+             my @pics;
+             push @pics, $_ while ($_ = $sth->fetchrow_array);
+             @pics = sort { lc($a) cmp lc($b) } @pics;
 
-	     $ret .= "<P><B>Picture to use:</B> <SELECT NAME=\"prop_picture_keyword\"><OPTION VALUE=\"\">(default)";
-	     foreach (@pics) {
-		 my $sel = $props{'picture_keyword'} eq $_ ? " SELECTED" : "";
-		 $ret .= "<OPTION VALUE=\"$_\"$sel>$_";
-	     }
-	     $ret .= "</SELECT>";
-	     $ret .= LJ::help_icon("userpics", " ");
-	 }
+             $ret .= "<P><B>Picture to use:</B> <SELECT NAME=\"prop_picture_keyword\"><OPTION VALUE=\"\">(default)";
+             foreach (@pics) {
+                 my $sel = $props{'picture_keyword'} eq $_ ? " SELECTED" : "";
+                 $ret .= "<OPTION VALUE=\"$_\"$sel>$_";
+             }
+             $ret .= "</SELECT>";
+             $ret .= LJ::help_icon("userpics", " ");
+         }
 
-	 ### current mood
-	 {
-	     $ret .= "<P><B>Current <A HREF=\"/moodlist.bml\">Mood</A>:</B><SELECT NAME=\"prop_current_moodid\"><OPTION VALUE=\"\">None, or other:";
+         ### current mood
+         {
+             $ret .= "<P><B>Current <A HREF=\"/moodlist.bml\">Mood</A>:</B><SELECT NAME=\"prop_current_moodid\"><OPTION VALUE=\"\">None, or other:";
 
-	     my $match = 0;
-	     my $sth = $dbr->prepare("SELECT moodid, mood FROM moods ORDER BY mood");
-	     $sth->execute;
-	     while ($_ = $sth->fetchrow_hashref) {
-		 my $sel = ($props{'current_mood'} eq $_->{'mood'} || 
-			    $props{'current_moodid'} == $_->{'moodid'}) ? " SELECTED" : "";
-		 if ($sel) { $match = 1; }
-		 $ret .= "<OPTION VALUE=$_->{'moodid'}$sel>$_->{'mood'}\n";
-	     }
-	     $ret .= "</SELECT>";
-	     my $other_mood = $match==0 ? $props{'current_mood'} : "";
-	     $other_mood = LJ::ehtml($other_mood);
-	     $ret .= "Other: <INPUT NAME=\"prop_current_mood\" VALUE=\"$other_mood\" SIZE=15 MAXLENGTH=30>";
-	 }	     
+             my $match = 0;
+             my $sth = $dbr->prepare("SELECT moodid, mood FROM moods ORDER BY mood");
+             $sth->execute;
+             while ($_ = $sth->fetchrow_hashref) {
+                 my $sel = ($props{'current_mood'} eq $_->{'mood'} || 
+                            $props{'current_moodid'} == $_->{'moodid'}) ? " SELECTED" : "";
+                 if ($sel) { $match = 1; }
+                 $ret .= "<OPTION VALUE=$_->{'moodid'}$sel>$_->{'mood'}\n";
+             }
+             $ret .= "</SELECT>";
+             my $other_mood = $match==0 ? $props{'current_mood'} : "";
+             $other_mood = LJ::ehtml($other_mood);
+             $ret .= "Other: <INPUT NAME=\"prop_current_mood\" VALUE=\"$other_mood\" SIZE=15 MAXLENGTH=30>";
+         }	     
 
-	 ## current music
-	 {
-	     my $music = LJ::ehtml($props{'current_music'});
-	     $ret .= "<P><B>Current Music:</B> <INPUT NAME=\"prop_current_music\" VALUE=\"$music\" SIZE=40 MAXLENGTH=60>";
-	 }
+         ## current music
+         {
+             my $music = LJ::ehtml($props{'current_music'});
+             $ret .= "<P><B>Current Music:</B> <INPUT NAME=\"prop_current_music\" VALUE=\"$music\" SIZE=40 MAXLENGTH=60>";
+         }
 
 
-	 $ret .= "(=H1 Press to save... H1=)(=P After you're done editing your journal entry, press Save. P=)(=STANDOUT <INPUT TYPE=SUBMIT VALUE=\"Save Journal Entry\"> STANDOUT=)</FORM>\n";
-	 
-	 return $ret;
+         $ret .= "(=H1 Press to save... H1=)(=P After you're done editing your journal entry, press Save. P=)(=STANDOUT <INPUT TYPE=SUBMIT VALUE=\"Save Journal Entry\"> STANDOUT=)</FORM>\n";
+         
+         return $ret;
      }
      elsif ($FORM{'mode'} eq "editevent")
      {
-	 if ($res{'success'} eq "OK")
-	 {
-	     my $itemid = $FORM{'itemid'}+0;
-	     my $journal = LJ::canonical_username($FORM{'usejournal'} || $FORM{'user'});
-	     my $jargent = defined $res{'anum'} ? "journal=$journal&amp;" : "";
-	     my $ditemid = defined $res{'anum'} ? ($itemid * 256 + $res{'anum'}) : $itemid;
-	     return "(=H1 Success H1=)(=P Journal entry was modified.  You may view it ".
-		 "<a href=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid\">here</a>. P=)";
-	 }
-	 else
-	 {
-	     return "(=H1 Error H1=)(=P An error occured modifying your journal: <UL><LI><B>$res{'errmsg'}</B></UL> P=)";
-	 }
+         if ($res{'success'} eq "OK")
+         {
+             my $itemid = $FORM{'itemid'}+0;
+             my $journal = LJ::canonical_username($FORM{'usejournal'} || $FORM{'user'});
+             my $jargent = defined $res{'anum'} ? "journal=$journal&amp;" : "";
+             my $ditemid = defined $res{'anum'} ? ($itemid * 256 + $res{'anum'}) : $itemid;
+             return "(=H1 Success H1=)(=P Journal entry was modified.  You may view it ".
+                 "<a href=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid\">here</a>. P=)";
+         }
+         else
+         {
+             return "(=H1 Error H1=)(=P An error occured modifying your journal: <UL><LI><B>$res{'errmsg'}</B></UL> P=)";
+         }
      }
      else
      {
-	 $ret .= "(=H1 Error H1=)\n";
-	 $ret .= "(=P You shouldn't get here.. P=)";
-	 return $ret;
+         $ret .= "(=H1 Error H1=)\n";
+         $ret .= "(=P You shouldn't get here.. P=)";
+         return $ret;
      }
  }
  else

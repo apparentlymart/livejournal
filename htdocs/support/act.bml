@@ -35,33 +35,33 @@ BODY<=
  if ($action eq "touch") {
      $dbh->do("UPDATE support SET state='open', timetouched=UNIX_TIMESTAMP(), timeclosed=0 WHERE spid=$spid");
      if ($sp->{'state'} eq "open") {
-	 return "(=H1 Touched H1=)(=P Your support request will stay open now. P=)";
+         return "(=H1 Touched H1=)(=P Your support request will stay open now. P=)";
      } else {
-	 $dbh->do("DELETE FROM supportpoints WHERE spid=$spid");
-	 return "(=H1 Touched H1=)(=P Your support request has been re-opened now. P=)";
+         $dbh->do("DELETE FROM supportpoints WHERE spid=$spid");
+         return "(=H1 Touched H1=)(=P Your support request has been re-opened now. P=)";
      }
  }
 
  if ($action eq "close") {
      if ($sp->{'state'} eq "open") {
-	 $splid += 0;
-	 if ($splid) {
-	     $sth = $dbh->prepare("SELECT userid, timelogged, spid, type FROM supportlog WHERE splid=$splid");
-	     $sth->execute;
-	     my ($userid, $timelogged, $aspid, $type) = $sth->fetchrow_array;
+         $splid += 0;
+         if ($splid) {
+             $sth = $dbh->prepare("SELECT userid, timelogged, spid, type FROM supportlog WHERE splid=$splid");
+             $sth->execute;
+             my ($userid, $timelogged, $aspid, $type) = $sth->fetchrow_array;
 
              if ($aspid != $spid) {
                  return "(=H1 Error H1=)(=P The answer you credited for helping you out was not a response to your support request. If you copied a URL to get here, make sure you copied the entire URL correctly.P=)";
              }
 
-	     ## can't credit yourself.
-	     if ($userid != $sp->{'requserid'} && $type eq "answer") {
-		 my $cats = LJ::Support::load_cats($dbh, $sp->{'spcatid'});
-		 my $secold = $timelogged - $sp->{'timecreate'};
-		 my $points = LJ::Support::calc_points($sp, $secold);
-		 $dbh->do("INSERT INTO supportpoints (spid, userid, points) VALUES ($spid, $userid, $points)");
-	     }
-	 }
+             ## can't credit yourself.
+             if ($userid != $sp->{'requserid'} && $type eq "answer") {
+                 my $cats = LJ::Support::load_cats($dbh, $sp->{'spcatid'});
+                 my $secold = $timelogged - $sp->{'timecreate'};
+                 my $points = LJ::Support::calc_points($sp, $secold);
+                 $dbh->do("INSERT INTO supportpoints (spid, userid, points) VALUES ($spid, $userid, $points)");
+             }
+         }
          $dbh->do("UPDATE support SET state='closed', timeclosed=UNIX_TIMESTAMP() WHERE spid=$spid");
      }
 
@@ -69,17 +69,17 @@ BODY<=
      my $is_admin = LJ::check_priv($dbs, $remote, "supportclose");
      if ($is_admin)
      {
-	 my $catid = $sp->{'_cat'}->{'spcatid'};
-	 my $sql = "SELECT MIN(spid) FROM support WHERE spcatid=$catid AND state='open' AND timelasthelp>timetouched AND spid>$spid";
-	 my $sth = $dbh->prepare($sql);
-	 $sth->execute;
-	 my $next = $sth->fetchrow_array;
-	 if ($next) {
-	     print "Status: 302 Found\n";
-	     print "Location: $LJ::SITEROOT/support/see_request.bml?id=$next\n\n";
-  	     BML::finish();
-	     return;
-	 }
+         my $catid = $sp->{'_cat'}->{'spcatid'};
+         my $sql = "SELECT MIN(spid) FROM support WHERE spcatid=$catid AND state='open' AND timelasthelp>timetouched AND spid>$spid";
+         my $sth = $dbh->prepare($sql);
+         $sth->execute;
+         my $next = $sth->fetchrow_array;
+         if ($next) {
+             print "Status: 302 Found\n";
+             print "Location: $LJ::SITEROOT/support/see_request.bml?id=$next\n\n";
+               BML::finish();
+             return;
+         }
      } 
      
      return "(=H1 Closed H1=)(=P The support request has been closed. P=)";

@@ -21,9 +21,9 @@
  $sth->execute;
  while (my $bday = $sth->fetchrow_hashref) {
      if ($bday->{'month'} != $lastmon) {
-	 if ($lastmon) { $body .= "</ul>\n"; }
-	 $lastmon = $bday->{'month'};
-	 $body .= "(=H1 " . LJ::Lang::month_long("EN", $lastmon) . " H1=)<ul>\n";
+         if ($lastmon) { $body .= "</ul>\n"; }
+         $lastmon = $bday->{'month'};
+         $body .= "(=H1 " . LJ::Lang::month_long("EN", $lastmon) . " H1=)<ul>\n";
      }
      my $day = sprintf("%2s", $bday->{'day'});
      $day =~ s/ /&nbsp;/;

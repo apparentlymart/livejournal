@@ -21,10 +21,10 @@ $maint{'clean_caches'} = sub
 
     print "-I- Cleaning meme.\n";
     do {
-	$sth = $dbh->prepare("DELETE FROM meme WHERE ts < DATE_SUB(NOW(), INTERVAL 7 DAY) LIMIT 250");
-	$sth->execute;
-	if ($dbh->err) { print $dbh->errstr; }
-	print "    deleted ", $sth->rows, "\n";
+        $sth = $dbh->prepare("DELETE FROM meme WHERE ts < DATE_SUB(NOW(), INTERVAL 7 DAY) LIMIT 250");
+        $sth->execute;
+        if ($dbh->err) { print $dbh->errstr; }
+        print "    deleted ", $sth->rows, "\n";
     } while ($sth->rows);
 
     ## clean the recent_* tables now (3 week cache on the slave dbs)
@@ -39,16 +39,16 @@ $maint{'clean_caches'} = sub
     
     ## only do cleaning if there's cleaning to be done:
     if ($maxid) {
-	print "-I-   Cleaning all recent_logtext with itemids < $maxid\n";
-	my $rows;
-	do
-	{
-	    $sth = $dbh->prepare("DELETE FROM recent_logtext WHERE itemid < $maxid LIMIT 500");
-	    $sth->execute;
-	    $rows = $sth->rows;
-	    print "-I-    - deleted $rows rows\n";
-	    sleep 1;
-	} while ($rows);
+        print "-I-   Cleaning all recent_logtext with itemids < $maxid\n";
+        my $rows;
+        do
+        {
+            $sth = $dbh->prepare("DELETE FROM recent_logtext WHERE itemid < $maxid LIMIT 500");
+            $sth->execute;
+            $rows = $sth->rows;
+            print "-I-    - deleted $rows rows\n";
+            sleep 1;
+        } while ($rows);
     }
 
     print "-I- Cleaning recent_talktext.\n";    
@@ -58,16 +58,16 @@ $maint{'clean_caches'} = sub
     
     ## only do cleaning if there's cleaning to be done:
     if ($maxid) {
-	print "-I-   Cleaning all recent_talktext with talkids < $maxid\n";
-	my $rows;
-	do
-	{
-	    $sth = $dbh->prepare("DELETE FROM recent_talktext WHERE talkid < $maxid LIMIT 500");
-	    $sth->execute;
-	    $rows = $sth->rows;
-	    print "-I-    - deleted $rows rows\n";
-	    sleep 1;
-	} while ($rows);
+        print "-I-   Cleaning all recent_talktext with talkids < $maxid\n";
+        my $rows;
+        do
+        {
+            $sth = $dbh->prepare("DELETE FROM recent_talktext WHERE talkid < $maxid LIMIT 500");
+            $sth->execute;
+            $rows = $sth->rows;
+            print "-I-    - deleted $rows rows\n";
+            sleep 1;
+        } while ($rows);
     }
 
 

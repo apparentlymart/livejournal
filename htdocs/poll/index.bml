@@ -26,10 +26,10 @@
  my $mode = "";
  foreach my $m ([ "enter", "Fill-out Poll" ], [ "results" , "View Poll Results" ]) {
      if ($FORM{'mode'} eq $m->[0]) {
-	 $mode = $FORM{'mode'};
-	 $body .= "<b>[ $m->[1] ]</b> ";
+         $mode = $FORM{'mode'};
+         $body .= "<b>[ $m->[1] ]</b> ";
      } else {
-	 $body .= "<a href=\"$LJ::SITEROOT/poll/?id=$pollid&amp;mode=$m->[0]\">[ $m->[1] ]</a> ";
+         $body .= "<a href=\"$LJ::SITEROOT/poll/?id=$pollid&amp;mode=$m->[0]\">[ $m->[1] ]</a> ";
      }
  }
  $body .= "<a href=\"$LJ::SITEROOT/talkread.bml?${jarg}itemid=$po->{'itemid'}\">[ Discuss Results ]</a> ";
@@ -43,9 +43,9 @@
      my $error;
      &LJ::Poll::submit($dbs, $remote, \%FORM, \$error);
      if ($error) {
-	 $title = "Error";
-	 $body .= $error;
-	 return;
+         $title = "Error";
+         $body .= $error;
+         return;
      }
      $title = "Submitted!";
      $body .= "(=H1 Thanks.... H1=)(=P Your poll answers have been submitted. P=)";
@@ -60,9 +60,9 @@
 
 
  my $opts = { 'mode' => $mode,
-	      'qid' => $FORM{'qid'},
-	      'prefill' => 1,
-	  };
+              'qid' => $FORM{'qid'},
+              'prefill' => 1,
+          };
  ## itemid 0 means no security is done to check that it's not hijacked:
  $body .= LJ::Poll::show_poll($dbs, 0, $remote, $pollid, $opts);
 

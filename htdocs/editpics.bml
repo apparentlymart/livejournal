@@ -58,49 +58,49 @@
 
      while (my $pic = $sth->fetchrow_hashref)
      {
-	 if ($FORM{"delete_$pic->{'picid'}"}) {
-	     # delete this one
-	     push @delete, $pic->{'picid'};
-	 }
-	 else 
-	 {
-	     my @keywords = split(/\s*,\s*/, $FORM{"kw_$pic->{'picid'}"});
-	     @keywords = grep { s/^\s+//; s/\s+$//; $_; } @keywords;
-	     foreach my $kw (@keywords) {
-		 my $kwid = LJ::get_keyword_id($dbs, $kw);
-		 next unless $kwid;
-		 if ($picid_of_kwid{$kwid}) {
-		     push @errors, "You used the keyword \"$kw\" for multiple pictures.  One was randomly chosen, but likely not the one you wanted.  You may want to go back and fix that.";
-		 }
-		 $picid_of_kwid{$kwid} = $pic->{'picid'};
-	     }
-	 }
+         if ($FORM{"delete_$pic->{'picid'}"}) {
+             # delete this one
+             push @delete, $pic->{'picid'};
+         }
+         else 
+         {
+             my @keywords = split(/\s*,\s*/, $FORM{"kw_$pic->{'picid'}"});
+             @keywords = grep { s/^\s+//; s/\s+$//; $_; } @keywords;
+             foreach my $kw (@keywords) {
+                 my $kwid = LJ::get_keyword_id($dbs, $kw);
+                 next unless $kwid;
+                 if ($picid_of_kwid{$kwid}) {
+                     push @errors, "You used the keyword \"$kw\" for multiple pictures.  One was randomly chosen, but likely not the one you wanted.  You may want to go back and fix that.";
+                 }
+                 $picid_of_kwid{$kwid} = $pic->{'picid'};
+             }
+         }
      }
 
      if (@delete) {
-	 my $id_in = join(", ", @delete);
-	 $dbh->do("DELETE FROM userpic WHERE picid IN ($id_in)");
-	 $dbh->do("DELETE FROM userpicblob WHERE picid IN ($id_in)");
+         my $id_in = join(", ", @delete);
+         $dbh->do("DELETE FROM userpic WHERE picid IN ($id_in)");
+         $dbh->do("DELETE FROM userpicblob WHERE picid IN ($id_in)");
      }
 
      if (%picid_of_kwid) {
-	 my $sql = "REPLACE INTO userpicmap (userid, kwid, picid) VALUES ";
-	 $sql .= join(",", map { "($u->{'userid'}, $_, $picid_of_kwid{$_})" } keys %picid_of_kwid);
-	 $dbh->do($sql);
+         my $sql = "REPLACE INTO userpicmap (userid, kwid, picid) VALUES ";
+         $sql .= join(",", map { "($u->{'userid'}, $_, $picid_of_kwid{$_})" } keys %picid_of_kwid);
+         $dbh->do($sql);
      }
 
      my $new_default = $FORM{'defaultpic'}+0;
      if ($FORM{"delete_$FORM{'defaultpic'}"}) { $new_default = 0; } # deleting your default
      if ($new_default != $u->{'defaultpicid'}) {
-	 $dbh->do("UPDATE user SET defaultpicid=$new_default WHERE userid=$u->{'userid'}");
+         $dbh->do("UPDATE user SET defaultpicid=$new_default WHERE userid=$u->{'userid'}");
      }
 
      $body .= "(=H1 Saved H1=)(=P Your new picture keywords and defaults have been saved.  You can view them <a href=\"/allpics.bml?user=$u->{'user'}\">here</a>. P=)";
 
      if (@errors) {
-	 $body .= "(=P Some errors occured, though, processing your request: <UL>";
-	 foreach (@errors) { $body .= "<LI>$_"; }
-	 $body .= "</UL> P=)";
+         $body .= "(=P Some errors occured, though, processing your request: <UL>";
+         foreach (@errors) { $body .= "<LI>$_"; }
+         $body .= "</UL> P=)";
      }
      
      return;
@@ -127,28 +127,28 @@
 
      if ($piccount++ == 0) {
 
-	 $body .= "(=H1 Current Pictures H1=)(=P Here are the pictures you've uploaded in the past.  You can assign keywords to them so you can use them by keyword later, select which one to use as your default, or delete old ones.  To upload a new one, <a href='/uploadpic.bml$authlink'>go here</a>. P=)";
+         $body .= "(=H1 Current Pictures H1=)(=P Here are the pictures you've uploaded in the past.  You can assign keywords to them so you can use them by keyword later, select which one to use as your default, or delete old ones.  To upload a new one, <a href='/uploadpic.bml$authlink'>go here</a>. P=)";
 
-	 if ($remote) {
-	     $body .= "<form method='post'>";
-	     $body .= "(=H1 Switch Journal H1=)(=P Work with journal: ";
-	     $body .= LJ::make_shared_select($dbs, $remote, \%FORM);
-	     $body .= " <input type='submit' value='Switch'> P=)</form>";
-	 }
+         if ($remote) {
+             $body .= "<form method='post'>";
+             $body .= "(=H1 Switch Journal H1=)(=P Work with journal: ";
+             $body .= LJ::make_shared_select($dbs, $remote, \%FORM);
+             $body .= " <input type='submit' value='Switch'> P=)</form>";
+         }
 
-	 $body .= "<form method='post'>";
-	 $body .= "<input type='hidden' name='mode' value='save'>";
-	 if ($FORM{'user'}) {
-	     $body .= "<input type='hidden' name='user' value='$user'>\n";
-	     my $hpass = LJ::hash_password($u->{'password'});
-	     $body .= "<input type='hidden' name='hpassword' value='$hpass'>\n";
-	 } else {
-	     $body .= "<input type='hidden' name='authas' value='$FORM{'authas'}'>\n";
-	 }
+         $body .= "<form method='post'>";
+         $body .= "<input type='hidden' name='mode' value='save'>";
+         if ($FORM{'user'}) {
+             $body .= "<input type='hidden' name='user' value='$user'>\n";
+             my $hpass = LJ::hash_password($u->{'password'});
+             $body .= "<input type='hidden' name='hpassword' value='$hpass'>\n";
+         } else {
+             $body .= "<input type='hidden' name='authas' value='$FORM{'authas'}'>\n";
+         }
 
 
-	 $body .= "<ul><table cellpadding='5' border='0' cellspacing='1'>";
-	     
+         $body .= "<ul><table cellpadding='5' border='0' cellspacing='1'>";
+             
      }
      $body .= "<tr valign='middle'>";
      $body .= "<td align='center'><img src='/userpic/$pid' width='$pic->{'width'}' height='$pic->{'height'}'></td>";
@@ -157,14 +157,14 @@
      $body .= "<table>";
      
      {
-	 my $sel = $u->{'defaultpicid'} == $pic->{'picid'} ? "checked='1'" : "";
-	 $body .= "<tr><td align='right'><b><label for='$pid-def'>Default:</label></b></td><td> <input id='$pid-def' type='radio' name='defaultpic' value='$pid' $sel>&nbsp;&nbsp;&nbsp;<b><label for='$pid-del'>Delete:</label></b> <input type='checkbox' name='delete_$pid' value='1' id='$pid-del'></TD></TR>\n";
+         my $sel = $u->{'defaultpicid'} == $pic->{'picid'} ? "checked='1'" : "";
+         $body .= "<tr><td align='right'><b><label for='$pid-def'>Default:</label></b></td><td> <input id='$pid-def' type='radio' name='defaultpic' value='$pid' $sel>&nbsp;&nbsp;&nbsp;<b><label for='$pid-del'>Delete:</label></b> <input type='checkbox' name='delete_$pid' value='1' id='$pid-del'></TD></TR>\n";
      }
 
      {
-	 my $eh_keywords = join(", ", sort { lc($a) cmp lc($b) } @{$keywords{$pic->{'picid'}}});
-	 $eh_keywords = LJ::ehtml($eh_keywords);
-	 $body .= "<tr><td align='right'><b><label for='$pid-key'>Keywords:</label></b></td><td> <input id='$pid-key' size='30' name='kw_$pic->{'picid'}' value='$eh_keywords'></td></tr>\n";
+         my $eh_keywords = join(", ", sort { lc($a) cmp lc($b) } @{$keywords{$pic->{'picid'}}});
+         $eh_keywords = LJ::ehtml($eh_keywords);
+         $body .= "<tr><td align='right'><b><label for='$pid-key'>Keywords:</label></b></td><td> <input id='$pid-key' size='30' name='kw_$pic->{'picid'}' value='$eh_keywords'></td></tr>\n";
      }
 
      $body .= "</TABLE>\n";
@@ -178,11 +178,11 @@
  if ($piccount) {
      $body .= "<tr><td></td><td align=left>&nbsp;<b><label for='nodefpic'>No Default Picture</label></b>&nbsp;";
      $body .= LJ::html_check({ 'name' => 'defaultpic', 
-			       'value' => 0,
-			       'type' => 'radio',
-			       'selected' => ! $u->{'defaultpicid'}, 
-			       'raw' => "id='nodefpic'",
-			   });
+                               'value' => 0,
+                               'type' => 'radio',
+                               'selected' => ! $u->{'defaultpicid'}, 
+                               'raw' => "id='nodefpic'",
+                           });
      $body .= "</td><td>&nbsp;</td></tr>\n";
      $body .= "<TR><TD></TD><TD>&nbsp;<P><INPUT TYPE=SUBMIT VALUE=\"Save Settings\"></TD></TR>\n";
      $body .= "</TABLE>";

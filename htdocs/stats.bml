@@ -76,12 +76,12 @@ P=)
  {
      # FIXME: ljcom specific, make into a hook.
      my %acct_name = ("paid" => "Paid Account",
-		      "off" => "Free Account",
-		      "early" => "Early Adopter",
-		      "on" => "Permanent Account");
+                      "off" => "Free Account",
+                      "early" => "Early Adopter",
+                      "on" => "Permanent Account");
      foreach my $act (qw(off early paid on)) {
-	 my $num = $stat{'account'}->{$act}+0;
-	 $ret .= "<LI><B>$acct_name{$act}: </B> $num (" . sprintf("%0.1f", $num*100/($stat{'userinfo'}->{'total'}||1)) . "%)";	 
+         my $num = $stat{'account'}->{$act}+0;
+         $ret .= "<LI><B>$acct_name{$act}: </B> $num (" . sprintf("%0.1f", $num*100/($stat{'userinfo'}->{'total'}||1)) . "%)";	 
      }
  }
  $ret .= "</ul> P=)\n";
@@ -101,7 +101,7 @@ P=)
      $sth = $dbr->prepare("SELECT u.user, u.name, uu.timeupdate FROM user u, userusage uu WHERE u.userid=uu.userid AND uu.timeupdate > DATE_SUB(NOW(), INTERVAL 30 DAY) ORDER BY uu.timeupdate DESC LIMIT 10");
      $sth->execute;
      while (my ($iuser, $iname, $itime) = $sth->fetchrow_array) {
-	 $ret .= "<li><a href='/users/$iuser/'>(=_EH $iname _EH=)</a>, $itime</li>\n";
+         $ret .= "<li><a href='/users/$iuser/'>(=_EH $iname _EH=)</a>, $itime</li>\n";
      }
      $ret .= "</ul> P=)\n";
  }
@@ -113,7 +113,7 @@ P=)
      $sth = $dbr->prepare("SELECT u.user, u.name, uu.timeupdate FROM user u, userusage uu WHERE u.userid=uu.userid AND uu.timeupdate IS NOT NULL ORDER BY uu.timecreate DESC LIMIT 10");
      $sth->execute;
      while (my ($iuser, $iname, $itime) = $sth->fetchrow_array) {
-	 $ret .= "<li><a href='/users/$iuser/'>(=_EH $iname _EH=)</a>, $itime</li>\n";
+         $ret .= "<li><a href='/users/$iuser/'>(=_EH $iname _EH=)</a>, $itime</li>\n";
      }
      $ret .= "</ul> P=)\n";
  }
@@ -166,9 +166,9 @@ P=)
      $ret .= "<TR VALIGN=TOP><TD><FONT SIZE=+1><B>$stat{'clientname'}->{$cn}</B></FONT></TD><TD><B>$cn</B><BR>\n";
      $ret .= "<FONT SIZE=-1>\n";
      foreach my $c (sort grep { /^\Q$cn\E\// } keys %{$stat{'client'}}) {
-	 my $count = $stat{'client'}->{$c};
-	 $c =~ s/^\Q$cn\E\///;
-	 $ret .= "$c ($count), ";
+         my $count = $stat{'client'}->{$c};
+         $c =~ s/^\Q$cn\E\///;
+         $ret .= "$c ($count), ";
      }
      chop $ret; chop $ret;  # remove trailing ", "
      $ret .= "</FONT>\n";

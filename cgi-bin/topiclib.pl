@@ -23,20 +23,20 @@ sub get_hierarchy
     my $cache = (ref $opts->{'cache'} eq "HASH") ? $opts->{'cache'} : {};
     
     if ($opts->{'topid'}) {
-	my $tpid = $opts->{'topid'}+0;
-	my $it = { 'url' => "$LJ::SITEROOT/topics/?topid=$tpid",
-		   'name' => $cache->{'topic'}->{$tpid}->{'name'}, };
-	$opts->{'catid'} = $cache->{'topic'}->{$tpid}->{'catid'};
-	unless ($cache->{'topic'}->{$tpid}->{'name'}) 
-	{
-	    my $sth = $dbh->prepare("SELECT tpcatid, topname FROM topic_list WHERE tptopid=$tpid");
-	    $sth->execute;
-	    my ($catid, $name) = $sth->fetchrow_array;
-	    $it->{'name'} = $cache->{'topic'}->{$tpid}->{'name'} = $name;
-	    $cache->{'topic'}->{$tpid}->{'catid'} = $catid;
-	    $opts->{'catid'} = $catid;
-	}
-	unshift @ret, $it;
+        my $tpid = $opts->{'topid'}+0;
+        my $it = { 'url' => "$LJ::SITEROOT/topics/?topid=$tpid",
+                   'name' => $cache->{'topic'}->{$tpid}->{'name'}, };
+        $opts->{'catid'} = $cache->{'topic'}->{$tpid}->{'catid'};
+        unless ($cache->{'topic'}->{$tpid}->{'name'}) 
+        {
+            my $sth = $dbh->prepare("SELECT tpcatid, topname FROM topic_list WHERE tptopid=$tpid");
+            $sth->execute;
+            my ($catid, $name) = $sth->fetchrow_array;
+            $it->{'name'} = $cache->{'topic'}->{$tpid}->{'name'} = $name;
+            $cache->{'topic'}->{$tpid}->{'catid'} = $catid;
+            $opts->{'catid'} = $catid;
+        }
+        unshift @ret, $it;
     }
 
     ## at this point $opts->{'catid'} will be set.
@@ -44,22 +44,22 @@ sub get_hierarchy
     my $catid = $opts->{'catid'}+0;
     while ($catid)
     {
-	my $it = { 'url' => "$LJ::SITEROOT/topics/?catid=$catid",
-		   'name' => $cache->{'cat'}->{$catid}->{'name'}, };
-	my $nextcat = $cache->{'cat'}->{$catid}->{'parent'};
-	
-	unless ($it->{'name'}) 
-	{
-	    my $sth = $dbh->prepare("SELECT parent, catname FROM topic_cats WHERE tpcatid=$catid");
-	    $sth->execute;
-	    my ($parent, $name) = $sth->fetchrow_array;
+        my $it = { 'url' => "$LJ::SITEROOT/topics/?catid=$catid",
+                   'name' => $cache->{'cat'}->{$catid}->{'name'}, };
+        my $nextcat = $cache->{'cat'}->{$catid}->{'parent'};
+        
+        unless ($it->{'name'}) 
+        {
+            my $sth = $dbh->prepare("SELECT parent, catname FROM topic_cats WHERE tpcatid=$catid");
+            $sth->execute;
+            my ($parent, $name) = $sth->fetchrow_array;
 
-	    $nextcat = $cache->{'cat'}->{$catid}->{'parent'} = $parent;
-	    $it->{'name'} = $cache->{'cat'}->{$catid}->{'name'} = $name;
-	}
+            $nextcat = $cache->{'cat'}->{$catid}->{'parent'} = $parent;
+            $it->{'name'} = $cache->{'cat'}->{$catid}->{'name'} = $name;
+        }
 
-	unshift @ret, $it;
-	$catid = $nextcat;
+        unshift @ret, $it;
+        $catid = $nextcat;
     }
 
     return @ret;

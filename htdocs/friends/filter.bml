@@ -8,10 +8,10 @@
      my $user = lc($FORM{'user'});
      my $filter = 0;
      foreach my $k (keys %FORM) {
-	 next unless ($k =~ /^bit_(\d+)$/);
-	 my $bit = $1;
-	 next if ($bit < 1 || $bit > 30);
-	 $filter |= (1 << $bit);
+         next unless ($k =~ /^bit_(\d+)$/);
+         my $bit = $1;
+         next if ($bit < 1 || $bit > 30);
+         $filter |= (1 << $bit);
      }
      my $extra = "?filter=$filter";
 
@@ -29,8 +29,8 @@
 
  my %res;
  LJ::do_request($dbs, { 'mode' => 'getfriendgroups',
-			'user' => $remote->{'user'}, },
-		\%res, { 'noauth' => 1, 'userid' => $remote->{'userid'} });
+                        'user' => $remote->{'user'}, },
+                \%res, { 'noauth' => 1, 'userid' => $remote->{'userid'} });
  
  
  unless ($res{'frgrp_maxnum'}) {
@@ -41,10 +41,10 @@
  my %group;
  foreach $k (keys %res) {
      if ($k =~ /^frgrp_(\d+)_name/) {
-	 $group{$1}->{'name'} = $res{$k};
+         $group{$1}->{'name'} = $res{$k};
      } 
      elsif ($k =~ /^frgrp_(\d+)_sortorder/) {
-	 $group{$1}->{'sortorder'} = $res{$k};
+         $group{$1}->{'sortorder'} = $res{$k};
      } 
  }
  

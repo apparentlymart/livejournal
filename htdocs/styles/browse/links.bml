@@ -33,8 +33,8 @@
 
  while ($sty = $sth->fetchrow_hashref) {
      if ($last ne $LJ::viewinfo{$sty->{'type'}}->{'des'}) {
-	 $last = $LJ::viewinfo{$sty->{'type'}}->{'des'};
-	 $ret .= "<B>$last</B><BR>\n";
+         $last = $LJ::viewinfo{$sty->{'type'}}->{'des'};
+         $ret .= "<B>$last</B><BR>\n";
      }
      my $view=substr($sty->{'type'},0,1);
      $ret .= "<nobr>&nbsp;&nbsp;<A TARGET=\"main\" HREF=\"styleinfo.bml?styleid=$sty->{'styleid'}\">-</A> <A TARGET=\"main\" HREF=\"/customview.cgi?styleid=$sty->{'styleid'}&amp;user=$dispuser&amp;nooverride=1$extra{$sty->{'type'}}\">$sty->{'styledes'}</A></nobr><BR>\n";

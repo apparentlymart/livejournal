@@ -18,36 +18,36 @@
      $sth->execute;
      my ($mu, $cu);
      while ($_ = $sth->fetchrow_hashref) {
-	 if ($_->{'user'} eq lc($FORM{'muser'})) { $mu = $_; }
-	 if ($_->{'user'} eq lc($FORM{'cuser'})) { $cu = $_; }
+         if ($_->{'user'} eq lc($FORM{'muser'})) { $mu = $_; }
+         if ($_->{'user'} eq lc($FORM{'cuser'})) { $cu = $_; }
      }
      
      unless ($mu) {
-	 push @errors, "Maintainer account not found.";
+         push @errors, "Maintainer account not found.";
      } else {
-	 if ($mu->{'password'} ne $FORM{'mpassword'}) {
-	     push @errors, "Invalid password for maintainer account.";
-	 }
-	 unless ($mu->{'journaltype'} eq "P") {
-	     push @errors, "Maintainer account must be a person, not another shared account.";
-	 }
+         if ($mu->{'password'} ne $FORM{'mpassword'}) {
+             push @errors, "Invalid password for maintainer account.";
+         }
+         unless ($mu->{'journaltype'} eq "P") {
+             push @errors, "Maintainer account must be a person, not another shared account.";
+         }
      }
 
      unless ($cu) {
-	 push @errors, "Community account not found.";
+         push @errors, "Community account not found.";
      } else {
-	 if ($cu->{'password'} ne $FORM{'cpassword'}) {
-	     push @errors, "Invalid password for maintainer account.";
-	 }
+         if ($cu->{'password'} ne $FORM{'cpassword'}) {
+             push @errors, "Invalid password for maintainer account.";
+         }
      }
 
      if ($cu && $mu && $cu->{'userid'} == $mu->{'userid'}) {
-	 push @errors, "Maintainer account and community account cannot be the same.";
+         push @errors, "Maintainer account and community account cannot be the same.";
      }
 
      if (@errors) {
-	 $body = LJ::bad_input(@errors);
-	 return;
+         $body = LJ::bad_input(@errors);
+         return;
      }
 
      my $qmembership = $dbh->quote($FORM{'membership'} eq "open" ? "open" : "closed");

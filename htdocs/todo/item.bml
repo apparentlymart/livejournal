@@ -28,26 +28,26 @@
      $sth->execute;
      $it = $sth->fetchrow_hashref;
      unless ($it) {
-	 $title = "Not found";
-	 $body = "(=H1 Not found H1=)(=P The requested to-do item was not found. P=)";
-	 return;
+         $title = "Not found";
+         $body = "(=H1 Not found H1=)(=P The requested to-do item was not found. P=)";
+         return;
      }
      
      $u = LJ::load_userid($dbs, $it->{'journalid'});
 
      if ($it->{'security'} eq "private") {
-	 unless ($remote && $remote->{'userid'} == $it->{'journalid'}) {
-	     $title = "Sorry...";
-	     $body = "(=H1 Security H1=)(=P The requested to-do item is private and can only be viewed by the owner. P=)";
-	     return;
-	 }
+         unless ($remote && $remote->{'userid'} == $it->{'journalid'}) {
+             $title = "Sorry...";
+             $body = "(=H1 Security H1=)(=P The requested to-do item is private and can only be viewed by the owner. P=)";
+             return;
+         }
      }
      if ($it->{'security'} eq "friends") {
-	 unless (LJ::is_friend($dbs, $u, $remote)) {
-	     $title = "Sorry...";
-	     $body = "(=H1 Security H1=)(=P The requested to-do item marked 'friends only' by the owner. P=)";
-	     return;
-	 }
+         unless (LJ::is_friend($dbs, $u, $remote)) {
+             $title = "Sorry...";
+             $body = "(=H1 Security H1=)(=P The requested to-do item marked 'friends only' by the owner. P=)";
+             return;
+         }
      }
 
      $sth = $dbh->prepare("SELECT k.keyword FROM todokeyword tk, keywords k WHERE tk.todoid=$id AND tk.kwid=k.kwid ORDER BY k.keyword");
@@ -62,95 +62,95 @@
  my ($todo_count) = $sth->fetchrow_array;
 
  LJ::Todo::get_permissions($dbh, \%permission, { 'user' => $u,
-						 'remote' => $remote,
-						 'item' => $it });
+                                                 'remote' => $remote,
+                                                 'item' => $it });
 
  if ($FORM{'mode'} eq "save") {
 
      unless ($FORM{'subject'} =~ /\S+/) {
-	 $title = "Error";
-	 $body = "(=H1 Need a subject! H1=)(=P You can't have a to-do item without a subject.  That's the one mandatory field. P=)";
-	 return;
+         $title = "Error";
+         $body = "(=H1 Need a subject! H1=)(=P You can't have a to-do item without a subject.  That's the one mandatory field. P=)";
+         return;
      }
 
      my $todoid = $FORM{'id'}+0;
      my %q;
      foreach my $key (qw(statusline security subject des priority datedue progress)) {
-	 $q{$key} = $dbh->quote($FORM{$key});
+         $q{$key} = $dbh->quote($FORM{$key});
      }
      $q{'datedue'} = $dbh->quote(LJ::html_datetime_decode({ 'name' => 'datedue' }, \%FORM));
 
      if ($todoid) {
-	 unless ($permission{'edit'}) {
-	     $title = "Error";
-	     $body = "(=H1 Permission Denied H1=)(=P You don't have permission to edit a to-do item in this journal. P=)";
-	     return;
-	 }
+         unless ($permission{'edit'}) {
+             $title = "Error";
+             $body = "(=H1 Permission Denied H1=)(=P You don't have permission to edit a to-do item in this journal. P=)";
+             return;
+         }
 
-	 $sth = $dbh->prepare("UPDATE todo SET statusline=$q{'statusline'}, subject=$q{'subject'}, security=$q{'security'}, des=$q{'des'}, priority=$q{'priority'}, datedue=$q{'datedue'}, progress=$q{'progress'}, dateupdate=NOW() WHERE todoid=$todoid");
-	 $sth->execute;
-	 if ($dbh->err) { $title = "Error"; $body = $dbh->errstr; return; }
-	 
-	 $title = "Modified";
-	 $body = "(=H1 Success H1=)(=P The todo item was modified.  You can view it <a href=\"item.bml?id=$todoid\">here</a> or view the <a href=\"./?user=$u->{'user'}\">updated list</a>. P=)";
+         $sth = $dbh->prepare("UPDATE todo SET statusline=$q{'statusline'}, subject=$q{'subject'}, security=$q{'security'}, des=$q{'des'}, priority=$q{'priority'}, datedue=$q{'datedue'}, progress=$q{'progress'}, dateupdate=NOW() WHERE todoid=$todoid");
+         $sth->execute;
+         if ($dbh->err) { $title = "Error"; $body = $dbh->errstr; return; }
+         
+         $title = "Modified";
+         $body = "(=H1 Success H1=)(=P The todo item was modified.  You can view it <a href=\"item.bml?id=$todoid\">here</a> or view the <a href=\"./?user=$u->{'user'}\">updated list</a>. P=)";
 
      } else {
-	 unless ($permission{'add'}) {
-	     $title = "Error";
-	     $body .= "(=H1 Permission Denied H1=)(=P You don't have permission to add a to-do item to this journal. P=)";
-	     return;
-	 }
-	 
-	 ## check to see if user's todo list is full
-	 my $max_items = LJ::get_cap($u, "todomax");
-	 if (defined $max_items && $todo_count >= $max_items) {
-	     $title = "Sorry...";
-	     my $atype = "account type";
-	     if ($LJ::HELPURL{'accounttype'}) {
-		 $atype = "<a href=\"$LJ::HELPURL{'accounttype'}\">$atype</a>";
-	     }
-	     $body .= "(=H1 Too many items... H1=)(=P Your $atype is limited to $max_items to-do items at a time.  P=)";
-	     return;
-	 }
+         unless ($permission{'add'}) {
+             $title = "Error";
+             $body .= "(=H1 Permission Denied H1=)(=P You don't have permission to add a to-do item to this journal. P=)";
+             return;
+         }
+         
+         ## check to see if user's todo list is full
+         my $max_items = LJ::get_cap($u, "todomax");
+         if (defined $max_items && $todo_count >= $max_items) {
+             $title = "Sorry...";
+             my $atype = "account type";
+             if ($LJ::HELPURL{'accounttype'}) {
+                 $atype = "<a href=\"$LJ::HELPURL{'accounttype'}\">$atype</a>";
+             }
+             $body .= "(=H1 Too many items... H1=)(=P Your $atype is limited to $max_items to-do items at a time.  P=)";
+             return;
+         }
 
-	 $sth = $dbh->prepare("INSERT INTO todo (todoid, journalid, posterid, ownerid, statusline, security, subject, des, priority, datecreate, dateupdate, datedue, dateclosed, progress) VALUES (NULL, $u->{'userid'}, $remote->{'userid'}, $u->{'userid'}, $q{'statusline'}, $q{'security'}, $q{'subject'}, $q{'des'}, $q{'priority'}, NOW(), NULL, $q{'datedue'}, NULL, $q{'progress'})");
-	 $sth->execute;
-	 if ($dbh->err) { return "<b>db error:</b> " . $dbh->errstr; }
-	 $todoid = $sth->{'mysql_insertid'};
+         $sth = $dbh->prepare("INSERT INTO todo (todoid, journalid, posterid, ownerid, statusline, security, subject, des, priority, datecreate, dateupdate, datedue, dateclosed, progress) VALUES (NULL, $u->{'userid'}, $remote->{'userid'}, $u->{'userid'}, $q{'statusline'}, $q{'security'}, $q{'subject'}, $q{'des'}, $q{'priority'}, NOW(), NULL, $q{'datedue'}, NULL, $q{'progress'})");
+         $sth->execute;
+         if ($dbh->err) { return "<b>db error:</b> " . $dbh->errstr; }
+         $todoid = $sth->{'mysql_insertid'};
 
-	 $title = "Added";
-	 $body = "(=H1 Success H1=)(=P The todo item was added.  You can view it <a href=\"item.bml?id=$todoid\">here</a> or view the <a href=\"./?user=$u->{'user'}\">updated list</a>. P=)";
+         $title = "Added";
+         $body = "(=H1 Success H1=)(=P The todo item was added.  You can view it <a href=\"item.bml?id=$todoid\">here</a> or view the <a href=\"./?user=$u->{'user'}\">updated list</a>. P=)";
      }
 
      if ($it->{'_cats'} ne $FORM{'categories'}) 
      {
-	 #### we're inserting/replacing now into memories
-	 my @keywords = split(/\s*,\s*/, $FORM{'categories'});
-	 if (scalar(@keywords) > 10) { 
-	     $title = "Error";
-	     $body = "(=H1 Error H1=)(=P Only 10 categories are allowed per to-do item. P=)";
-	     return;
-	 }
-	 @keywords = grep { s/^\s+//; s/\s+$//; $_; } @keywords;
-	 my @kwid;
-	 
-	 foreach my $kw (@keywords) {
-	     if (length($kw) > 20) {
-		 $title = "Error";
-		 $body = "(=H1 Error H1=)(=P This category exceeds the maximum allowed size: \"$kw\" P=)";
-		 return;
-	     }
-	     
-	     my $kwid = LJ::get_keyword_id($dbh, $kw);
-	     push @kwid, $kwid;
-	 }
-	 
-	 $dbh->do("DELETE FROM todokeyword WHERE todoid=$todoid");
-	 if (@kwid) {
-	     my $sql = "INSERT INTO todokeyword (todoid, kwid) VALUES ";
-	     $sql .= join(",", map { "($todoid,$_)" } @kwid);
-	     $dbh->do($sql);
-	 }
+         #### we're inserting/replacing now into memories
+         my @keywords = split(/\s*,\s*/, $FORM{'categories'});
+         if (scalar(@keywords) > 10) { 
+             $title = "Error";
+             $body = "(=H1 Error H1=)(=P Only 10 categories are allowed per to-do item. P=)";
+             return;
+         }
+         @keywords = grep { s/^\s+//; s/\s+$//; $_; } @keywords;
+         my @kwid;
+         
+         foreach my $kw (@keywords) {
+             if (length($kw) > 20) {
+                 $title = "Error";
+                 $body = "(=H1 Error H1=)(=P This category exceeds the maximum allowed size: \"$kw\" P=)";
+                 return;
+             }
+             
+             my $kwid = LJ::get_keyword_id($dbh, $kw);
+             push @kwid, $kwid;
+         }
+         
+         $dbh->do("DELETE FROM todokeyword WHERE todoid=$todoid");
+         if (@kwid) {
+             my $sql = "INSERT INTO todokeyword (todoid, kwid) VALUES ";
+             $sql .= join(",", map { "($todoid,$_)" } @kwid);
+             $dbh->do($sql);
+         }
 
      }
      return;
@@ -159,31 +159,31 @@
  if ($FORM{'mode'} eq "add") { 
      $title = "Add To-Do Item";
      $it = { 'todoid' => 0,
-	     'security' => 'public',
-	     'priority' => 3,
-	     'progress' => 0,
-	     'datedue' => '0000-00-00 00:00:00',
-	     '_cats' => $FORM{'cat'},
-	 };
+             'security' => 'public',
+             'priority' => 3,
+             'progress' => 0,
+             'datedue' => '0000-00-00 00:00:00',
+             '_cats' => $FORM{'cat'},
+         };
 
      unless ($permission{'add'}) {
-	 $disabled = "DISABLED";
+         $disabled = "DISABLED";
      }
      
      my $max_items = LJ::get_cap($u, "todomax");
      if (defined $max_items && $todo_count >= $max_items) {
-	 $title = "Sorry...";
-	 my $atype = "account type";
-	 if ($LJ::HELPURL{'accounttype'}) {
-	     $atype = "<a href=\"$LJ::HELPURL{'accounttype'}\">$atype</a>";
-	 }
-	 $body .= "(=H1 Too many items... H1=)(=P Your $atype is limited to $max_items to-do items at a time. P=)";
-	 return;
+         $title = "Sorry...";
+         my $atype = "account type";
+         if ($LJ::HELPURL{'accounttype'}) {
+             $atype = "<a href=\"$LJ::HELPURL{'accounttype'}\">$atype</a>";
+         }
+         $body .= "(=H1 Too many items... H1=)(=P Your $atype is limited to $max_items to-do items at a time. P=)";
+         return;
      }
 
  } else {
      unless ($permission{'edit'}) {
-	 $disabled = "DISABLED";
+         $disabled = "DISABLED";
      }
  }
 
@@ -198,9 +198,9 @@
  } else {
      $body .= "(=H1 To-Do Item \#$it->{'todoid'} H1=)";
      if ($permission{'edit'}) {
-	 $title = "Edit To-Do Item";
+         $title = "Edit To-Do Item";
      } else {
-	 $title = "View To-Do Item";
+         $title = "View To-Do Item";
      }
  }
 
@@ -231,7 +231,7 @@
  ## date due
  $body .= "<tr><td><b>Due Date:</b></td><td>";
  $body .= LJ::html_datetime({ 'name' => 'datedue', 'default' => $it->{'datedue'}, 'disabled' => $disabled,
-			   'lang' => 'EN',     }),
+                           'lang' => 'EN',     }),
  $body .= "</td></tr>";
 
  ## categories
@@ -245,14 +245,14 @@
  {
      my $todosec = LJ::get_cap($u, "todosec");
      if ($todosec) {
-	 $body .= LJ::html_select({ 'name' => 'security', 
-				    'selected' => $it->{'security'}, 
-				    'disabled' => $disabled },
-			       "public" => "Public",
-			       "private" => "Private", 
-			       "friends" => $u->{'journaltype'} eq "C" ? "Community Members" : "Friends");
+         $body .= LJ::html_select({ 'name' => 'security', 
+                                    'selected' => $it->{'security'}, 
+                                    'disabled' => $disabled },
+                               "public" => "Public",
+                               "private" => "Private", 
+                               "friends" => $u->{'journaltype'} eq "C" ? "Community Members" : "Friends");
      } else {
-	 $body .= "<input type=hidden name=security value=\"public\">Your account type doesn't permit non-public to-do items.";
+         $body .= "<input type=hidden name=security value=\"public\">Your account type doesn't permit non-public to-do items.";
      }
  }
  $body .= "</td></tr>";
@@ -267,14 +267,14 @@
      my $permission = 0;
      my $action = "";
      if ($it->{'todoid'}) { $action = "edit"; } else { 
-	 $action = "add"; 
-	 $title = "Add To-Do Item";
+         $action = "add"; 
+         $title = "Add To-Do Item";
      }
      $permission = $permission{$action};
      if ($permission) {
-	 $body .= "<tr><td><b>Done?</b></td><td>";
-	 $body .= "<INPUT TYPE=SUBMIT VALUE=\"" . ucfirst($action) . "\">\n";
-	 $body .= "</td></tr>\n";
+         $body .= "<tr><td><b>Done?</b></td><td>";
+         $body .= "<INPUT TYPE=SUBMIT VALUE=\"" . ucfirst($action) . "\">\n";
+         $body .= "</td></tr>\n";
      }
  }
      

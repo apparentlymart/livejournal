@@ -30,12 +30,12 @@
      return 0 unless $valid_filename->($filename);
 
      if ($LJ::FILEEDIT_VIA_DB) {
-	 my $qname = $dbh->quote($filename);
-	 my $qcontent = $dbh->quote($content);
-	 $dbh->do("REPLACE INTO includetext (incname, inctext, updatetime) ".
-		  "VALUES ($qname, $qcontent, UNIX_TIMESTAMP())");
-	 return 0 if $dbh->err;
-	 return 1;
+         my $qname = $dbh->quote($filename);
+         my $qcontent = $dbh->quote($content);
+         $dbh->do("REPLACE INTO includetext (incname, inctext, updatetime) ".
+                  "VALUES ($qname, $qcontent, UNIX_TIMESTAMP())");
+         return 0 if $dbh->err;
+         return 1;
      }
 
      open (FILE, ">$INC_DIR/$file") or return 0;
@@ -51,9 +51,9 @@
 
      my $contents;
      if ($LJ::FILEEDIT_VIA_DB) {
-	 my $qname = $dbh->quote($filename);
-	 $contents = $dbh->selectrow_array("SELECT inctext FROM includetext WHERE incname=$qname");
-	 return $contents if defined $contents;
+         my $qname = $dbh->quote($filename);
+         $contents = $dbh->selectrow_array("SELECT inctext FROM includetext WHERE incname=$qname");
+         return $contents if defined $contents;
      }
 
      open (FILE, "$INC_DIR/$filename") or return undef;
@@ -68,7 +68,7 @@
      delete $files{'all'};
      opendir (DIR, $INC_DIR);
      while (my $file = readdir(DIR)) {
-	 $files{$file} = 1;
+         $files{$file} = 1;
      }
      closedir (DIR);
  }
@@ -77,8 +77,8 @@
  {
      my @del;
      foreach my $k (keys %files) {
-	 push @del, $k
-	     unless $valid_filename->($k);
+         push @del, $k
+             unless $valid_filename->($k);
      }
      foreach my $k (@del) { delete $files{$k}; }
  }
@@ -93,7 +93,7 @@
      $ret .= "<FORM METHOD=GET>\n";
      $ret .= "Pick file to edit: <SELECT NAME=\"file\">";
      foreach my $file (sort keys %files) {
-	 $ret .= "<OPTION VALUE=\"$file\">$file\n";
+         $ret .= "<OPTION VALUE=\"$file\">$file\n";
      }
      $ret .= "</SELECT> <INPUT TYPE=SUBMIT VALUE=\"load...\"><BR>";
      $ret .= "Wordwrap? <INPUT TYPE=CHECKBOX VALUE=1 NAME=w> ";
@@ -114,7 +114,7 @@
      my $contents = $load_file->($file);
 
      return "<B>Error:</B> Couldn't open file" 
-	 unless defined $contents;
+         unless defined $contents;
 
      my $r = ($FORM{'r'}+0) || $DEF_ROW;
      my $c = ($FORM{'c'}+0) || $DEF_COL;
@@ -133,14 +133,14 @@
  if ($mode eq "save") 
  {
      unless (LJ::did_post()) {
-	 return "<b>Error:</b> requires post";
+         return "<b>Error:</b> requires post";
      }
 
      $ret .= "<B>Saving:</B> <tt>$file</tt><p>";
      if ($save_file->($file, $FORM{'contents'})) {
-	 $ret .= "saved.";
+         $ret .= "saved.";
      } else {
-	 $ret .= "<b>Error saving</b>";
+         $ret .= "<b>Error saving</b>";
      }
      return $ret;
  }

@@ -86,27 +86,27 @@ Once it's done, type:
 
 Now, install the following modules:
 
-	Bundle::libnet
-	Digest::MD5
-	Image::Size
-	FCGI
-	MIME::Lite
-	Compress::Zlib
-	MIME::Base64
-	URI::URL
-	HTML::Tagset
-	HTML::Parser
-	LWP::Simple
-	LWP::UserAgent
-	Time::DaysInMonth
-	GD
-	GD::Graph
-	GD::Text
-	Bundle::Mysql
-	Mail::Address
-	Proc::ProcessTable
-	SOAP::Lite
-	Unicode::MapUTF8
+        Bundle::libnet
+        Digest::MD5
+        Image::Size
+        FCGI
+        MIME::Lite
+        Compress::Zlib
+        MIME::Base64
+        URI::URL
+        HTML::Tagset
+        HTML::Parser
+        LWP::Simple
+        LWP::UserAgent
+        Time::DaysInMonth
+        GD
+        GD::Graph
+        GD::Text
+        Bundle::Mysql
+        Mail::Address
+        Proc::ProcessTable
+        SOAP::Lite
+        Unicode::MapUTF8
 
 If you're using Debian this should get everything:
 
@@ -115,8 +115,8 @@ If you're using Debian this should get everything:
                   libimage-size-perl libdbd-mysql-perl libdbi-perl \
                   libnet-perl libdigest-md5-perl libgd-graph-perl \
                   libgd-text-perl libcompress-zlib-perl \
-		  libunicode-maputf8-perl libproc-process-perl \
-		  libapache-mod-fastcgi
+                  libunicode-maputf8-perl libproc-process-perl \
+                  libapache-mod-fastcgi
 
 NOTE: there used to be three custom LJ:: modules that needed
 installing.  We no longer install those in the system.  Instead LJ
@@ -130,17 +130,17 @@ You'll need the following Apache modules running (either statically or
 as DSOs):
 
 Standard:
-	mod_env
-	mod_setenvif
-	mod_alias
-	mod_expires
-	mod_actions
-	mod_rewrite
-	mod_mime_magic
-	mod_mime
+        mod_env
+        mod_setenvif
+        mod_alias
+        mod_expires
+        mod_actions
+        mod_rewrite
+        mod_mime_magic
+        mod_mime
 
 Special:
-	mod_fastcgi     -- from http://www.fastcgi.com/
+        mod_fastcgi     -- from http://www.fastcgi.com/
 
 NOTE: It is critical that mod_mime_magic appear in the Apache config
       file before mod_mime, otherwise none of the LiveJournal pages

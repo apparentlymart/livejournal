@@ -26,11 +26,11 @@ sub load_objects
         next if ($l =~ /^\#/);
         if ($l =~ /^\{\s*(\S+)\s*$/)
         {
-	  &load_object($fh, $1, $oblist);
+          &load_object($fh, $1, $oblist);
         }
         else
         {
-	  print STDERR "Unexpected line: $l\n";
+          print STDERR "Unexpected line: $l\n";
         }
     }
 }
@@ -50,14 +50,14 @@ sub load_object
         chomp $l;
         if ($l =~ /^\.(\S+)\s*$/)
         {
-	  $var = $1;
-	  print "current var = $var\n" if $verbose;
-	  next SUCKLINES;
+          $var = $1;
+          print "current var = $var\n" if $verbose;
+          next SUCKLINES;
         }
         if ($l =~ /^\}\s*$/)
         {
-	  print "End object $obname.\n" if $verbose;
-	  last SUCKLINES;
+          print "End object $obname.\n" if $verbose;
+          last SUCKLINES;
         }
         next unless $var;
         next unless ($l =~ /\S/);
@@ -65,47 +65,47 @@ sub load_object
 
         if ($l =~ /^\{\s*(\S+)\s*$/)
         {
-	  print "Encounted object ($1) as property.\n" if $verbose;
-	  if (defined $ob->{'props'}->{$var})
-	  {
-	      if (ref $ob->{'props'}->{$var} ne "ARRAY")
-	      {
-		print STDERR "Object encountered where text expected.\n";
-		my $blah = [];
-		&load_object($fh, "blah", $blah); # ignore object
-	      }
-	      else
-	      {
-		&load_object($fh, $1, $ob->{'props'}->{$var});
-	      }
-	  }
-	  else
-	  {
-	      $ob->{'props'}->{$var} = [];
-	      &load_object($fh, $1, $ob->{'props'}->{$var});
-	  }
+          print "Encounted object ($1) as property.\n" if $verbose;
+          if (defined $ob->{'props'}->{$var})
+          {
+              if (ref $ob->{'props'}->{$var} ne "ARRAY")
+              {
+                print STDERR "Object encountered where text expected.\n";
+                my $blah = [];
+                &load_object($fh, "blah", $blah); # ignore object
+              }
+              else
+              {
+                &load_object($fh, $1, $ob->{'props'}->{$var});
+              }
+          }
+          else
+          {
+              $ob->{'props'}->{$var} = [];
+              &load_object($fh, $1, $ob->{'props'}->{$var});
+          }
         }
         else
         {
-	  print "Normal line.\n" if $verbose;
-	  if (defined $ob->{'props'}->{$var})
-	  {
-	      print "defined.\n" if $verbose;
-	      if (ref $ob->{'props'}->{$var} eq "ARRAY")
-	      {
-		print STDERR "Scalar found where object expected!\n";
-	      }
-	      else
-	      {
-		print "appending var \"$var\".\n" if $verbose;
-		$ob->{'props'}->{$var} .= "\n$l";
-	      }
-	  }
-	  else
-	  {
-	      print "setting $var to $l\n" if $verbose;
-	      $ob->{'props'}->{$var} = $l;
-	  }
+          print "Normal line.\n" if $verbose;
+          if (defined $ob->{'props'}->{$var})
+          {
+              print "defined.\n" if $verbose;
+              if (ref $ob->{'props'}->{$var} eq "ARRAY")
+              {
+                print STDERR "Scalar found where object expected!\n";
+              }
+              else
+              {
+                print "appending var \"$var\".\n" if $verbose;
+                $ob->{'props'}->{$var} .= "\n$l";
+              }
+          }
+          else
+          {
+              print "setting $var to $l\n" if $verbose;
+              $ob->{'props'}->{$var} = $l;
+          }
         }
 
     } # end while
@@ -133,9 +133,9 @@ sub dump_struct
         my $count = 0;
         foreach (@{$ref})
         {
-	  print $indent, "[$count] = ";
-	  &dump_struct($_, $depth+1);
-	  $count++;
+          print $indent, "[$count] = ";
+          &dump_struct($_, $depth+1);
+          $count++;
         }
     }
     elsif ($type eq "HASH")
@@ -144,8 +144,8 @@ sub dump_struct
         my $k;
         foreach $k (sort keys %{$ref})
         {
-	  print $indent, "{$k} = ";
-	  &dump_struct($ref->{$k}, $depth+1);
+          print $indent, "{$k} = ";
+          &dump_struct($ref->{$k}, $depth+1);
         }
     }
     elsif ($type eq "")

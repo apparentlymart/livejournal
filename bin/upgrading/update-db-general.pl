@@ -3,9 +3,9 @@
 #
 
 mark_clustered("useridmap", "userbio", "syncupdates2", "cmdbuffer", "dudata",
-	       "log2", "logtext2", "logsubject2", "logprop2", "logsec2", "recent_logtext2",
-	       "talk2", "talkprop2", "talktext2", "recent_talktext2", "talkleft",
-	       );
+               "log2", "logtext2", "logsubject2", "logprop2", "logsec2", "recent_logtext2",
+               "talk2", "talkprop2", "talktext2", "recent_talktext2", "talkleft",
+               );
 
 register_tablecreate("adopt", <<'EOC');
 CREATE TABLE adopt (
@@ -59,8 +59,8 @@ CREATE TABLE clients (
 EOC
 
 post_create("clients", 
-	    "sqltry" => "INSERT INTO clients (client) SELECT DISTINCT client FROM logins",
-	    );
+            "sqltry" => "INSERT INTO clients (client) SELECT DISTINCT client FROM logins",
+            );
 
 register_tablecreate("clientusage", <<'EOC');
 CREATE TABLE clientusage (
@@ -73,8 +73,8 @@ CREATE TABLE clientusage (
 EOC
     
 post_create("clientusage", 
-	    "sqltry" => "INSERT INTO clientusage SELECT u.userid, c.clientid, l.lastlogin FROM user u, clients c, logins l WHERE u.user=l.user AND l.client=c.client",
-	    );
+            "sqltry" => "INSERT INTO clientusage SELECT u.userid, c.clientid, l.lastlogin FROM user u, clients c, logins l WHERE u.user=l.user AND l.client=c.client",
+            );
 
 register_tablecreate("codes", <<'EOC');
 CREATE TABLE codes (
@@ -1166,8 +1166,8 @@ CREATE TABLE useridmap (
 EOC
 
 post_create("useridmap",
-	    "sql" => "REPLACE INTO useridmap (userid, user) SELECT userid, user FROM user",
-	    );
+            "sql" => "REPLACE INTO useridmap (userid, user) SELECT userid, user FROM user",
+            );
 
 register_tablecreate("userusage", <<'EOC');
 CREATE TABLE userusage
@@ -1183,9 +1183,9 @@ CREATE TABLE userusage
 EOC
 
 post_create("userusage",
-	    "sqltry" => "INSERT IGNORE INTO userusage (userid, timecreate, timeupdate, timecheck, lastitemid) SELECT userid, timecreate, timeupdate, timecheck, lastitemid FROM user",
-	    "sqltry" => "ALTER TABLE user DROP timecreate, DROP timeupdate, DROP timecheck, DROP lastitemid",
-	    );
+            "sqltry" => "INSERT IGNORE INTO userusage (userid, timecreate, timeupdate, timecheck, lastitemid) SELECT userid, timecreate, timeupdate, timecheck, lastitemid FROM user",
+            "sqltry" => "ALTER TABLE user DROP timecreate, DROP timeupdate, DROP timecheck, DROP lastitemid",
+            );
 
 register_tablecreate("acctcode", <<'EOC');
 CREATE TABLE acctcode
@@ -1286,71 +1286,71 @@ register_alter(sub {
 
     if (column_type("supportcat", "is_selectable") eq "")
     {
-	do_alter("supportcat",
-		 "ALTER TABLE supportcat ADD is_selectable ENUM('1','0') ".
-		 "NOT NULL DEFAULT '1', ADD public_read  ENUM('1','0') NOT ".
-		 "NULL DEFAULT '1', ADD public_help ENUM('1','0') NOT NULL ".
-		 "DEFAULT '1', ADD allow_screened ENUM('1','0') NOT NULL ".
-		 "DEFAULT '0', ADD replyaddress VARCHAR(50), ADD hide_helpers ".
-		 "ENUM('1','0') NOT NULL DEFAULT '0' AFTER allow_screened");
-	
+        do_alter("supportcat",
+                 "ALTER TABLE supportcat ADD is_selectable ENUM('1','0') ".
+                 "NOT NULL DEFAULT '1', ADD public_read  ENUM('1','0') NOT ".
+                 "NULL DEFAULT '1', ADD public_help ENUM('1','0') NOT NULL ".
+                 "DEFAULT '1', ADD allow_screened ENUM('1','0') NOT NULL ".
+                 "DEFAULT '0', ADD replyaddress VARCHAR(50), ADD hide_helpers ".
+                 "ENUM('1','0') NOT NULL DEFAULT '0' AFTER allow_screened");
+        
     }
     if (column_type("supportlog", "type") =~ /faqref/)
     {
-	do_alter("supportlog",
-		 "ALTER TABLE supportlog MODIFY type ENUM('req', 'answer', ".
-		 "'custom', 'faqref', 'comment', 'internal', 'screened') ".
-		 "NOT NULL");
-	do_sql("UPDATE supportlog SET type='answer' WHERE type='custom'");
-	do_sql("UPDATE supportlog SET type='answer' WHERE type='faqref'");
-	do_alter("supportlog",
-		 "ALTER TABLE supportlog MODIFY type ENUM('req', 'answer', ".
-		 "'comment', 'internal', 'screened') NOT NULL");
-	
+        do_alter("supportlog",
+                 "ALTER TABLE supportlog MODIFY type ENUM('req', 'answer', ".
+                 "'custom', 'faqref', 'comment', 'internal', 'screened') ".
+                 "NOT NULL");
+        do_sql("UPDATE supportlog SET type='answer' WHERE type='custom'");
+        do_sql("UPDATE supportlog SET type='answer' WHERE type='faqref'");
+        do_alter("supportlog",
+                 "ALTER TABLE supportlog MODIFY type ENUM('req', 'answer', ".
+                 "'comment', 'internal', 'screened') NOT NULL");
+        
     }
     if (table_relevant("supportcat") && column_type("supportcat", "catkey") eq "") 
     {
-	do_alter("supportcat",
-		 "ALTER TABLE supportcat ADD catkey VARCHAR(25) AFTER spcatid");
-	do_sql("UPDATE supportcat SET catkey=spcatid WHERE catkey IS NULL");
-	do_alter("supportcat",
-		 "ALTER TABLE supportcat MODIFY catkey VARCHAR(25) NOT NULL");
+        do_alter("supportcat",
+                 "ALTER TABLE supportcat ADD catkey VARCHAR(25) AFTER spcatid");
+        do_sql("UPDATE supportcat SET catkey=spcatid WHERE catkey IS NULL");
+        do_alter("supportcat",
+                 "ALTER TABLE supportcat MODIFY catkey VARCHAR(25) NOT NULL");
     }
     if (column_type("supportcat", "no_autoreply") eq "") 
     {
-	do_alter("supportcat",
-		 "ALTER TABLE supportcat ADD no_autoreply ENUM('1', '0') ".
-		 "NOT NULL DEFAULT '0'");
+        do_alter("supportcat",
+                 "ALTER TABLE supportcat ADD no_autoreply ENUM('1', '0') ".
+                 "NOT NULL DEFAULT '0'");
     }
     
     if (column_type("support", "timelasthelp") eq "")
     {
-	do_alter("supportlog",
-		 "ALTER TABLE supportlog ADD INDEX (userid)");
-	do_alter("support",
-		 "ALTER TABLE support ADD timelasthelp INT UNSIGNED");
+        do_alter("supportlog",
+                 "ALTER TABLE supportlog ADD INDEX (userid)");
+        do_alter("support",
+                 "ALTER TABLE support ADD timelasthelp INT UNSIGNED");
     }
     
     if (column_type("user", "track") !~ /temp/)
     {
-	do_alter("tracking",
-		 "ALTER TABLE tracking ADD INDEX(ip)");
-	do_alter("user",
-		 "ALTER TABLE user MODIFY track ENUM('no','yes','temp'), ADD INDEX(track)");
+        do_alter("tracking",
+                 "ALTER TABLE tracking ADD INDEX(ip)");
+        do_alter("user",
+                 "ALTER TABLE user MODIFY track ENUM('no','yes','temp'), ADD INDEX(track)");
     }
 
     if (column_type("duplock", "realm") !~ /payments/)
     {
-	do_alter("duplock",
-		 "ALTER TABLE duplock MODIFY realm ENUM('support','log',".
-		 "'comment','payments') NOT NULL default 'support'");
+        do_alter("duplock",
+                 "ALTER TABLE duplock MODIFY realm ENUM('support','log',".
+                 "'comment','payments') NOT NULL default 'support'");
     }
 
     if (column_type("schematables", "redist_where") eq "")
     {
-	do_alter("schematables",
-		 "ALTER TABLE schematables ADD ".
-		 "redist_where varchar(255) AFTER redist_mode");
+        do_alter("schematables",
+                 "ALTER TABLE schematables ADD ".
+                 "redist_where varchar(255) AFTER redist_mode");
     }
     
     # upgrade people to the new capabilities system.  if they're
@@ -1358,132 +1358,132 @@ register_alter(sub {
     # the same capability bits that ljcom will be using.
     if (table_relevant("user") && column_type("user", "caps") eq "")
     {
-	do_alter("user",
-		 "ALTER TABLE user ADD ".
-		 "caps SMALLINT UNSIGNED NOT NULL DEFAULT 0 AFTER user");
-	try_sql("UPDATE user SET caps=16|8|2 WHERE paidfeatures='on'");
-	try_sql("UPDATE user SET caps=8|2    WHERE paidfeatures='paid'");
-	try_sql("UPDATE user SET caps=4|2    WHERE paidfeatures='early'");
-	try_sql("UPDATE user SET caps=2      WHERE paidfeatures='off'");
+        do_alter("user",
+                 "ALTER TABLE user ADD ".
+                 "caps SMALLINT UNSIGNED NOT NULL DEFAULT 0 AFTER user");
+        try_sql("UPDATE user SET caps=16|8|2 WHERE paidfeatures='on'");
+        try_sql("UPDATE user SET caps=8|2    WHERE paidfeatures='paid'");
+        try_sql("UPDATE user SET caps=4|2    WHERE paidfeatures='early'");
+        try_sql("UPDATE user SET caps=2      WHERE paidfeatures='off'");
     }
 
     # axe this column (and its two related ones) if it exists.
     if (column_type("user", "paidfeatures"))
     {
-	try_sql("REPLACE INTO paiduser (userid, paiduntil, paidreminder) ".
-		"SELECT userid, paiduntil, paidreminder FROM user WHERE paidfeatures='paid'");
-	try_sql("REPLACE INTO paiduser (userid, paiduntil, paidreminder) ".
-		"SELECT userid, COALESCE(paiduntil,'0000-00-00'), NULL FROM user WHERE paidfeatures='on'");
-	do_alter("user",
-		 "ALTER TABLE user DROP paidfeatures, DROP paiduntil, DROP paidreminder");
+        try_sql("REPLACE INTO paiduser (userid, paiduntil, paidreminder) ".
+                "SELECT userid, paiduntil, paidreminder FROM user WHERE paidfeatures='paid'");
+        try_sql("REPLACE INTO paiduser (userid, paiduntil, paidreminder) ".
+                "SELECT userid, COALESCE(paiduntil,'0000-00-00'), NULL FROM user WHERE paidfeatures='on'");
+        do_alter("user",
+                 "ALTER TABLE user DROP paidfeatures, DROP paiduntil, DROP paidreminder");
     }
 
     if (table_relevant("log") && column_type("log", "revttime") eq "")
     {
-	do_alter("log",
-		 "ALTER TABLE log DROP INDEX eventtime, ADD COLUMN rlogtime INT UNSIGNED NOT NULL DEFAULT 0, ADD COLUMN revttime INT UNSIGNED NOT NULL DEFAULT 0, ADD INDEX rlogtime (ownerid, rlogtime), ADD INDEX revttime (ownerid, revttime), ADD INDEX posterid (posterid, ownerid)");
-	do_sql("UPDATE log SET revttime=POW(2,31)-1-UNIX_TIMESTAMP(eventtime), rlogtime=POW(2,31)-1-UNIX_TIMESTAMP(logtime) WHERE revttime=0 OR rlogtime=0");
-	
-	# related, done at same time:
-	do_alter("talk",
-		 "ALTER TABLE talk ADD INDEX datepost (datepost), DROP INDEX posterid, ADD INDEX posterid (posterid, nodetype, datepost)");
+        do_alter("log",
+                 "ALTER TABLE log DROP INDEX eventtime, ADD COLUMN rlogtime INT UNSIGNED NOT NULL DEFAULT 0, ADD COLUMN revttime INT UNSIGNED NOT NULL DEFAULT 0, ADD INDEX rlogtime (ownerid, rlogtime), ADD INDEX revttime (ownerid, revttime), ADD INDEX posterid (posterid, ownerid)");
+        do_sql("UPDATE log SET revttime=POW(2,31)-1-UNIX_TIMESTAMP(eventtime), rlogtime=POW(2,31)-1-UNIX_TIMESTAMP(logtime) WHERE revttime=0 OR rlogtime=0");
+        
+        # related, done at same time:
+        do_alter("talk",
+                 "ALTER TABLE talk ADD INDEX datepost (datepost), DROP INDEX posterid, ADD INDEX posterid (posterid, nodetype, datepost)");
     }
 
     # move S1 _style ids to userprop table!
     if (column_type("user", "lastn_style")) {
 
-	# be paranoid and insert these in case they don't exist:
-	try_sql("INSERT INTO userproplist VALUES (null, 's1_lastn_style', 0, 'Recent View StyleID', 'num', 'The style ID# of the S1 style for the recent entries view.')");
-	try_sql("INSERT INTO userproplist VALUES (null, 's1_calendar_style', 0, 'Calendar View StyleID', 'num', 'The style ID# of the S1 style for the calendar view.')");
-	try_sql("INSERT INTO userproplist VALUES (null, 's1_day_style', 0, 'Day View StyleID', 'num', 'The style ID# of the S1 style for the day view.')");
-	try_sql("INSERT INTO userproplist VALUES (null, 's1_friends_style', 0, 'Friends View StyleID', 'num', 'The style ID# of the S1 style for the friends view.')");
-	
-	foreach my $v (qw(lastn day calendar friends)) {
-	    do_sql("INSERT INTO userproplite SELECT u.userid, upl.upropid, u.${v}_style FROM user u, userproplist upl WHERE upl.name='s1_${v}_style'");
-	}
-	
-	do_alter("user",
-		 "ALTER TABLE user DROP lastn_style, DROP calendar_style, DROP search_style, DROP searchres_style, DROP day_style, DROP friends_style");
+        # be paranoid and insert these in case they don't exist:
+        try_sql("INSERT INTO userproplist VALUES (null, 's1_lastn_style', 0, 'Recent View StyleID', 'num', 'The style ID# of the S1 style for the recent entries view.')");
+        try_sql("INSERT INTO userproplist VALUES (null, 's1_calendar_style', 0, 'Calendar View StyleID', 'num', 'The style ID# of the S1 style for the calendar view.')");
+        try_sql("INSERT INTO userproplist VALUES (null, 's1_day_style', 0, 'Day View StyleID', 'num', 'The style ID# of the S1 style for the day view.')");
+        try_sql("INSERT INTO userproplist VALUES (null, 's1_friends_style', 0, 'Friends View StyleID', 'num', 'The style ID# of the S1 style for the friends view.')");
+        
+        foreach my $v (qw(lastn day calendar friends)) {
+            do_sql("INSERT INTO userproplite SELECT u.userid, upl.upropid, u.${v}_style FROM user u, userproplist upl WHERE upl.name='s1_${v}_style'");
+        }
+        
+        do_alter("user",
+                 "ALTER TABLE user DROP lastn_style, DROP calendar_style, DROP search_style, DROP searchres_style, DROP day_style, DROP friends_style");
     }
 
     # add scope columns to proplist tables
     if (column_type("userproplist", "scope") eq "") {
-	do_alter("userproplist",
-		 "ALTER TABLE userproplist ADD scope ENUM('general', 'local') ".
-		 "DEFAULT 'general' NOT NULL");
+        do_alter("userproplist",
+                 "ALTER TABLE userproplist ADD scope ENUM('general', 'local') ".
+                 "DEFAULT 'general' NOT NULL");
     }
 
     if (column_type("logproplist", "scope") eq "") {
-	do_alter("logproplist",
-		 "ALTER TABLE logproplist ADD scope ENUM('general', 'local') ".
-		 "DEFAULT 'general' NOT NULL");
+        do_alter("logproplist",
+                 "ALTER TABLE logproplist ADD scope ENUM('general', 'local') ".
+                 "DEFAULT 'general' NOT NULL");
     }
 
     if (column_type("talkproplist", "scope") eq "") {
-	do_alter("talkproplist",
-		 "ALTER TABLE talkproplist ADD scope ENUM('general', 'local') ".
-		 "DEFAULT 'general' NOT NULL");
+        do_alter("talkproplist",
+                 "ALTER TABLE talkproplist ADD scope ENUM('general', 'local') ".
+                 "DEFAULT 'general' NOT NULL");
     }
 
     if (column_type("priv_list", "scope") eq "") {
-	do_alter("priv_list",
-		 "ALTER TABLE priv_list ADD scope ENUM('general', 'local') ".
-		 "DEFAULT 'general' NOT NULL");
+        do_alter("priv_list",
+                 "ALTER TABLE priv_list ADD scope ENUM('general', 'local') ".
+                 "DEFAULT 'general' NOT NULL");
     }
 
     # change size of stats table to accomodate meme data, and shrink statcat,
     # since it's way too big
     if (column_type("stats", "statcat") eq "varchar(100)") {
-	do_alter("stats",
-		 "ALTER TABLE stats ".
-		 "MODIFY statcat VARCHAR(30) NOT NULL, ".
-		 "MODIFY statkey VARCHAR(150) NOT NULL, ".
-		 "MODIFY statval INT UNSIGNED NOT NULL, ". 
-		 "DROP INDEX statcat");
+        do_alter("stats",
+                 "ALTER TABLE stats ".
+                 "MODIFY statcat VARCHAR(30) NOT NULL, ".
+                 "MODIFY statkey VARCHAR(150) NOT NULL, ".
+                 "MODIFY statval INT UNSIGNED NOT NULL, ". 
+                 "DROP INDEX statcat");
     } 
 
     if (column_type("priv_list", "is_public") eq "") {
-	do_alter("priv_list",
-		 "ALTER TABLE priv_list ".
-		 "ADD is_public ENUM('1', '0') DEFAULT '1' NOT NULL");
+        do_alter("priv_list",
+                 "ALTER TABLE priv_list ".
+                 "ADD is_public ENUM('1', '0') DEFAULT '1' NOT NULL");
     }
 
     if (column_type("randomuserset", "rid") eq "") {
-	do_alter("randomuserset",
-		 "ALTER TABLE randomuserset DROP PRIMARY KEY, DROP timeupdate, ".
-		 "ADD rid INT UNSIGNED NOT NULL AUTO_INCREMENT FIRST, ADD PRIMARY KEY (rid)");
+        do_alter("randomuserset",
+                 "ALTER TABLE randomuserset DROP PRIMARY KEY, DROP timeupdate, ".
+                 "ADD rid INT UNSIGNED NOT NULL AUTO_INCREMENT FIRST, ADD PRIMARY KEY (rid)");
     }
 
     # cluster stuff!
     if (column_type("meme", "journalid") eq "") {
-	do_alter("meme",
-		 "ALTER TABLE meme ADD journalid INT UNSIGNED NOT NULL AFTER ts");
+        do_alter("meme",
+                 "ALTER TABLE meme ADD journalid INT UNSIGNED NOT NULL AFTER ts");
     }
 
     if (column_type("topic_map", "jitemid") eq "") {
-	do_alter("topic_map",
-		 "ALTER TABLE topic_map DROP INDEX tptopid_2, DROP INDEX itemid, ".
-		 "ADD journalid INT UNSIGNED NOT NULL AFTER tptopid, ".
-		 "CHANGE itemid jitemid INT UNSIGNED NOT NULL, ".
-		 "ADD UNIQUE tptopid_2 (tptopid, journalid, jitemid), ".
-		 "ADD KEY jitem (journalid, jitemid)");
+        do_alter("topic_map",
+                 "ALTER TABLE topic_map DROP INDEX tptopid_2, DROP INDEX itemid, ".
+                 "ADD journalid INT UNSIGNED NOT NULL AFTER tptopid, ".
+                 "CHANGE itemid jitemid INT UNSIGNED NOT NULL, ".
+                 "ADD UNIQUE tptopid_2 (tptopid, journalid, jitemid), ".
+                 "ADD KEY jitem (journalid, jitemid)");
     }
 
     if (column_type("memorable", "jitemid") eq "") {
-	do_alter("memorable", "ALTER TABLE memorable ".
-		 "DROP INDEX userid, DROP INDEX itemid, ".
-		 "CHANGE itemid jitemid INT UNSIGNED NOT NULL, ".
-		 "ADD journalid INT UNSIGNED NOT NULL AFTER userid, ".
-		 "ADD UNIQUE uniq (userid, journalid, jitemid), ".
-		 "ADD KEY item (journalid, jitemid)");
+        do_alter("memorable", "ALTER TABLE memorable ".
+                 "DROP INDEX userid, DROP INDEX itemid, ".
+                 "CHANGE itemid jitemid INT UNSIGNED NOT NULL, ".
+                 "ADD journalid INT UNSIGNED NOT NULL AFTER userid, ".
+                 "ADD UNIQUE uniq (userid, journalid, jitemid), ".
+                 "ADD KEY item (journalid, jitemid)");
     }
 
     if (column_type("user", "clusterid") eq "") {
-	do_alter("user", "ALTER TABLE user ".
-		 "ADD clusterid TINYINT UNSIGNED NOT NULL AFTER caps, ".
-		 "ADD dversion TINYINT UNSIGNED NOT NULL AFTER clusterid, ".
-		 "ADD INDEX idxcluster (clusterid), ".
-		 "ADD INDEX idxversion (dversion)");
+        do_alter("user", "ALTER TABLE user ".
+                 "ADD clusterid TINYINT UNSIGNED NOT NULL AFTER caps, ".
+                 "ADD dversion TINYINT UNSIGNED NOT NULL AFTER clusterid, ".
+                 "ADD INDEX idxcluster (clusterid), ".
+                 "ADD INDEX idxversion (dversion)");
     }
 
     
