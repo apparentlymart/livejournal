@@ -147,7 +147,7 @@
         </row>
         <row>
           <entry>dayord</entry>
-          <entry>Ordinal day of week, translated.  (English:  1st, 2nd, 3rd, &hellip;)</entry>
+          <entry>Ordinal day of month, translated.  (English:  1st, 2nd, 3rd, &hellip;)</entry>
         </row>
         <row>
           <entry>H</entry>
