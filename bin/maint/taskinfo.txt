@@ -1,0 +1,16 @@
+bday.pl:
+  bdaymail - Sends people birthday wishes & notifications
+
+stats.pl:
+  build_randomuserset - builds/cleans table of users applicable for inclusion in random listings
+  genstats - Generates the nightly statistics
+  genstats_weekly - Generates the weekly statistics
+
+statspics.pl:
+  genstatspics - Makes a bunch of graphs to show on the statistics page.
+
+clean_caches.pl:
+  clean_caches - removes old cache files
+
+batchdelete.pl:
+  db_batchdelete - Delete stuff from the database en masse.
