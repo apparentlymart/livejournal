@@ -264,7 +264,8 @@ sub clean
                     }
 
                     # ignore attributes that do not fit this strict scheme
-                    return $total_fail->("$tag $attr") unless $attr =~ /^[\w_:-]+$/;
+                    return $total_fail->("$tag " . (%$hash > 1 ? "[...] " : "") . "$attr")
+                        unless $attr =~ /^[\w_:-]+$/;
 
                     $hash->{$attr} =~ s/[\t\n]//g;
                     # IE sucks:
