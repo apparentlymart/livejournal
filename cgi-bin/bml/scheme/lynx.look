@@ -30,7 +30,7 @@ _code?><html>
    return unless $BML::Lynx::remote;
    my $user = $BML::Lynx::remote->{'user'};
    return "<a href='/users/$user'>Recent Entries</a> | <a href='/users/$user/friends'>Friends</a> | ";
-_code?><a href='/login.bml'>Login</a>/<a href='/logout.bml'>Logout</a> | <a href='/setscheme.bml'>Set Scheme</a> | <a href='/sitemap.bml'>Site Map</a>]</p>
+_code?><a href='/login.bml'>Login</a>/<a href='/logout.bml'>Logout</a> | <a href='/manage/siteopts.bml'>Browse Options</a> | <a href='/sitemap.bml'>Site Map</a>]</p>
 
 </body>
 </html>
