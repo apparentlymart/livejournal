@@ -1286,6 +1286,15 @@ sub etags {
     return $text;
 }
 
+# sanitize URLs
+sub clean_url {
+    my ($ctx, $text) = @_;
+    unless ($text =~ m!^https?://!) {
+        $text = "";
+    }
+    return $text;
+}
+
 sub get_page
 {
     return $LJ::S2::CURR_PAGE;

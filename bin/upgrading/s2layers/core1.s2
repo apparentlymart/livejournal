@@ -596,6 +596,9 @@ function builtin ehtml (string s) : string
 function builtin etags (string s) : string
 "Escapes all HTML tags (but not entities) from text";
 
+function builtin clean_url (string s) : string
+"Returns the given URL back if it's a valid URL.";
+
 function builtin rand (int high) : int
 "Returns a random integer between 1 and \$high, inclusive.";
 
