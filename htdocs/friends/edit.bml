@@ -19,6 +19,7 @@ body<=
         unless $remote;
 
     my $authas = $GET{'authas'} || $remote->{'user'};
+    my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
 
     my $u = LJ::get_authas_user($authas);
     return LJ::bad_input("You could not be authenticated as the specified user.")
@@ -40,7 +41,7 @@ body<=
                                          'type' => ['P', 'S'] });
         $ret .= "</form>\n\n";
 
-        $ret .= "<form method='post' name='editFriends' action='edit.bml?authas=$authas'>\n";
+        $ret .= "<form method='post' name='editFriends' action='edit.bml$getextra'>\n";
 
         ### who has you defined as a friend?
         my %res = ();
@@ -50,38 +51,56 @@ body<=
             "ver" => $LJ::PROTOCOL_VER,
         }, \%res, { "noauth" => 1, 'u' => $u });
 
-        if ($res{'friendof_count'}) {
-            $ret .= "<?h1 $ML{'.fellowfriends.head'} h1?><?p $ML{'.fellowfriends.text'} p?>\n";
-            $ret .= "<table style='margin-top: 20px;' align='center'>\n";
-            $ret .= "<tr bgcolor='<?emcolor?>'><td width='150'><b>$ML{'.user'}</b></td>";
-            $ret .= "<td width='150'><b>$ML{'.name'}</b></td></tr>\n";
-
-            for (my $i=1; $i <= $res{'friendof_count'}; $i++) {
-                $ret .= "<tr align='left'><td>" . LJ::ljuser($res{"friendof_${i}_user"}) . "</td>";
-                $ret .= "<td>" . LJ::eall($res{"friendof_${i}_name"}) . "</td></tr>\n";
-            }
-            $ret .= "</table>";
-        }
-
         ### who do you have defined as a friend?
-        %res = ();
+        my %resf = ();
         LJ::do_request({
             "user" => $u->{'user'},
             "mode" => "getfriends",
             "ver" => $LJ::PROTOCOL_VER,
-        }, \%res, { "noauth" => 1, 'u' => $u });
+        }, \%resf, { "noauth" => 1, 'u' => $u });
 
-        if ($res{'friend_count'}) {
+        # build hash for checking if user is friend
+        my %isfriend = map { $resf{"friend_${_}_user"}, 1 } 1..$resf{'friend_count'};
+
+        ### table of friend-ofs
+        if ($res{'friendof_count'}) {
+            $ret .= "<?h1 $ML{'.fellowfriends.head'} h1?><?p $ML{'.fellowfriends.text'} p?>\n";
+            $ret .= "<table style='margin-top: 20px;' align='center'>\n";
+            $ret .= "<tr bgcolor='<?emcolor?>'><td width='150'><b>$ML{'.user'}</b></td>";
+            $ret .= "<td width='200'><b>$ML{'.name'}</b></td>";
+            $ret .= "<td align='center'><b>$ML{'.opt.addtolist'}</b></td></tr>";
+
+            my $friendnum = 6; # 1-5 are new friends from the add form
+            for my $i (1..$res{'friendof_count'}) {
+                my $fo_user = $res{"friendof_${i}_user"};
+                $ret .= "<tr align='left'><td>" . LJ::ljuser($fo_user) . "</td>";
+                $ret .= "<td><label for='editfriend_add_${friendnum}_user'>";
+                $ret .= LJ::ehtml($res{"friendof_${i}_name"}) . "</label></td><td align='center'>";
+                my $dis = $isfriend{$fo_user} ? 1 : 0;
+                $ret .= LJ::html_check({ 'type' => 'check',
+                                         'name' => "editfriend_add_${friendnum}_user",
+                                         'id' => "editfriend_add_${friendnum}_user",
+                                         'value' => $fo_user, 'disabled' => $dis });
+                $friendnum++;
+                $ret .= "</td></tr>";
+            }
+            $ret .= "</table>";
+        }
+
+        ### table of friends
+        if ($resf{'friend_count'}) {
             $ret .= "<?h1 $ML{'.yourfriends.head'} h1?><?p $ML{'.yourfriends.text'} p?>\n";
-            $ret .= "<p align='center'><table>\n";
-            $ret .= "<tr bgcolor='<?emcolor?>'><td width='150'><b>$ML{'.friend'}</b></td><td width='250'><b>$ML{'.name'}</b></td>";
+            $ret .= "<p align='center'><table style='margin-top: 20px;' align='center'>";
+            $ret .= "<tr bgcolor='<?emcolor?>'><td width='150'><b>$ML{'.friend'}</b></td>";
+            $ret .= "<td width='250'><b>$ML{'.name'}</b></td>";
             $ret .= "<td align='center'><b>$ML{'.opt.delete'}</b></td></tr>\n";
 
-            for (my $i=1; $i<=$res{'friend_count'}; $i++) {
-                my $fruser = $res{"friend_${i}_user"};
-                my $bgcolor = $res{"friend_${i}_bg"} || "#FFFFFF";
-                my $fgcolor = $res{"friend_${i}_fg"} || "#000000";
-                my $status = $res{"friend_${i}_status"};
+            foreach my $i (1..$resf{'friend_count'}) {
+                my $fruser = $resf{"friend_${i}_user"};
+                $isfriend{$fruser} = 1;
+                my $bgcolor = $resf{"friend_${i}_bg"} || "#FFFFFF";
+                my $fgcolor = $resf{"friend_${i}_fg"} || "#000000";
+                my $status = $resf{"friend_${i}_status"};
                 my $userlink = LJ::ljuser($fruser);
                 if ($status eq 'deleted' || $status eq 'purged' || $status eq 'suspended') {
                     $userlink = "<strike>$userlink</strike>";
@@ -89,7 +108,8 @@ body<=
 
                 $ret .= "<tr align='left'><td>$userlink</td>";
                 $ret .= "<td bgcolor='$bgcolor'><font color='$fgcolor'>";
-                $ret .= "<label for='editfriend_delete_${fruser}'>" . LJ::eall($res{"friend_${i}_name"}) . "</label>";
+                $ret .= "<label for='editfriend_delete_${fruser}'>";
+                $ret .= LJ::ehtml($resf{"friend_${i}_name"}) . "</label>";
                 $ret .= "</font></td><td align='center'>";
                 $ret .= LJ::html_check({ 'type' => 'check',
                                          'name' => "editfriend_delete_${fruser}",
@@ -107,14 +127,14 @@ body<=
         $ret .= "<p align='center'><input type='button' value='" . LJ::ehtml($ML{'.btn.toggle'}) . "' ";
         $ret .= "onClick='togglePreview(); return true;'></p>\n";
 
-        $ret .= "<p align='center'><table cellpadding='4'>\n";
+        $ret .= "<table cellpadding='4' align='center'>\n";
         $ret .= "<tr><td><b>$ML{'.friend'}</b></td><td><b>$ML{'.foreground'}</b></td><td><b>$ML{'.background'}</b></td></tr>\n";
 
         # load the colors
         my @color = ();
         LJ::load_codes({ "color" => \@color });
 
-        for (my $i=0; $i<6; $i++) {
+        foreach my $i (1..5) {
             $ret .= "<tr><td>";
             $ret .= LJ::html_text({ 'name' => "editfriend_add_${i}_user",
                                     'size' => '15', 'maxlength' => '15',
@@ -135,11 +155,11 @@ body<=
 
             $ret .= "</td></tr>\n";
         }
-        $ret .= "</table></p>\n";
+        $ret .= "</table>";
 
         ### color swatch
         my $col = 0;
-        $ret .= "<p align='center'><table border='0' cellspacing='0' cellpadding='0'>";
+        $ret .= "<table border='0' cellspacing='0' cellpadding='0' align='center'>";
         foreach (@color) {
             if ($col==0) { $ret .= "<tr>\n"; }
             $col++;
@@ -149,42 +169,42 @@ body<=
         }
         
         if ($col) { $ret .= "</tr>\n"; $col==0; }
-        $ret .= "</table>\n";
-        $ret .= "<font size='-2' face='Arial,Helvetica'>($ML{'.hover'})</font></p>";
+        $ret .= "<tr><td colspan='23' align='center'><font size='-2' face='Arial,Helvetica'>($ML{'.hover'})</font></td></tr>";
+        $ret .= "</table>";
 
         $ret .= "<p>$ML{'.needmore'}</p>\n";
         
         ### ending submit block
         $ret .= "<?h1 $ML{'.done.head'} h1?><?p $ML{'.done.text'} p?>\n";
-        $ret .= "<?standout " . LJ::html_submit(undef, $ML{'.btn.save'}) . " standout?>\n";
+        $ret .= "<?standout " . LJ::html_submit($ML{'.btn.save'}) . " standout?>\n";
         $ret .= "</form>\n";
 
         return $ret;
- }
+    }
 
- # if they did a post, then process their changes
- if (LJ::did_post()) {
+    # if they did a post, then process their changes
+    if (LJ::did_post()) {
 
-     my %request = ();
-     $request{'mode'} = "editfriends";
-     $request{'ver'} = $LJ::PROTOCOL_VER;
-     $request{'user'} = $u->{'user'};
-     foreach (grep { /^editfriend_/ } keys %POST) {
-         $request{$_} = $POST{$_};
-     }
+        my %request = ();
+        $request{'mode'} = "editfriends";
+        $request{'ver'} = $LJ::PROTOCOL_VER;
+        $request{'user'} = $u->{'user'};
+        foreach (grep { /^editfriend_/ } keys %POST) {
+            $request{$_} = $POST{$_};
+        }
 
-     my %response = ();
-     LJ::do_request(\%request, \%response, { 'noauth' => 1, 'u' => $u });
+        my %response = ();
+        LJ::do_request(\%request, \%response, { 'noauth' => 1, 'u' => $u });
 
-     if ($response{'success'} eq "OK") {
-         # tell the user all is well
-         return "<?h1 $ML{'.success.head'} h1?><?p ".BML::ml(".success.text", {'url' => LJ::journal_base($u) . "/friends"})." p?>";
-     } else {
-         return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.updating'} <ul><li><b>$response{'errmsg'}</b></ul> p?>\n";
-     }
- }
+        if ($response{'success'} eq "OK") {
+            # tell the user all is well
+            return "<?h1 $ML{'.success.head'} h1?><?p ".BML::ml(".success.text", {'url' => LJ::journal_base($u) . "/friends"})." p?>";
+        } else {
+            return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.updating'} <ul><li><b>$response{'errmsg'}</b></ul> p?>\n";
+        }
+    }
 
- return $ML{'error.unknownmode'};
+    return $ML{'error.unknownmode'};
 }
 _code?>
 <=body

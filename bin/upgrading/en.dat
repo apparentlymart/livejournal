@@ -1413,6 +1413,8 @@ then be accessible to the new group.
 
 /friends/edit_do.bml.nofriends.text=You do not currently have any friends defined.  However, we're sure you have to have a few friends!  <tt>:)</tt>  Just enter their LiveJournal names below....
 
+/friends/edit_do.bml.opt.addtolist=Add friend
+
 /friends/edit_do.bml.opt.delete=Delete?
 
 /friends/edit_do.bml.success.head=Success
