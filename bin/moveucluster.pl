@@ -148,6 +148,24 @@ if ($sclust == 0)
 	}
     }
 
+    # fix polls
+    print "Fixing polls.\n";
+    @fix = @{$dbh->selectall_arrayref("SELECT p.pollid, o.newid FROM poll p, oldids o ".
+				      "WHERE o.userid=$u->{'userid'} AND ".
+				      "o.area='L' AND o.oldid=p.itemid AND ".
+				      "p.journalid=$u->{'userid'}")};
+    foreach my $f (@fix) {
+	my ($pollid, $newid) = ($f->[0], $f->[1]);
+	my ($newid2, $anum) = $dbch->selectrow_array("SELECT jitemid, anum FROM log2 ".
+                                                     "WHERE journalid=$u->{'userid'} AND ".
+						     "jitemid=$newid");
+        if ($newid2 == $newid) {
+	    my $ditemid = $newid * 256 + $anum;
+            print "UPDATE $pollid TO $ditemid\n";
+	    $dbh->do("UPDATE poll SET itemid=$ditemid WHERE pollid=$pollid");
+	}
+    }
+
     # before we start deleting, record they've moved servers.
     $dbh->do("UPDATE user SET dversion=1, clusterid=$dclust WHERE userid=$userid");
     $dbh->do("UPDATE userusage SET lastitemid=0 WHERE userid=$userid");
@@ -279,10 +297,6 @@ sub movefrom0_logitem
     foreach my $t (sort { $a <=> $b } @$talkids) {
 	movefrom0_talkitem($t, $jitemid, \%newtalkids, $item);
     }
-
-    # update polls
-    $dbh->do("UPDATE poll SET itemid=$jitemid WHERE ".
-	     "itemid=$itemid AND journalid=$userid");
 }
 
 sub movefrom0_talkitem
