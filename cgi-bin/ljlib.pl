@@ -63,13 +63,6 @@ if ($SIG{'HUP'}) {
     $SIG{'HUP'} = \&LJ::clear_caches;    
 }
 
-sub send_mail
-{
-    my $opt = shift;
-    &LJ::send_mail($opt);
-}
-
-
 sub is_valid_authaction
 {
     &connect_db();
@@ -82,7 +75,9 @@ sub is_valid_authaction
 #  DEPRECATED.  use LJ:: versions.
 sub get_remote { &connect_db(); return LJ::get_remote($dbh, @_); }
 sub get_remote_noauth { return LJ::get_remote_noauth(); }
-sub remote_has_priv { return &LJ::remote_has_priv($dbh, @_); }
+sub remote_has_priv { return LJ::remote_has_priv($dbh, @_); }
+sub send_mail { return LJ::send_mail(@_); }
+
 
 sub register_authaction
 {
@@ -671,6 +666,39 @@ sub get_friend_itemids { return LJ::get_friend_itemids($dbh, @_); }
 
 package LJ;
 
+sub load_props
+{
+    my $dbarg = shift;
+    my @tables = @_;
+
+    my $dbs = make_dbs_from_arg($dbarg);
+    my $dbr = $dbs->{'reader'};
+
+    my %keyname = qw(log  propid
+		     talk tpropid
+		     user upropid);
+
+    foreach my $t (@tables) {
+	next unless defined $keyname{$t};
+	next if (defined $LJ::CACHE_PROP{$t});
+	my $sth = $dbr->prepare("SELECT * FROM ${t}proplist");
+	$sth->execute;
+	while (my $p = $sth->fetchrow_hashref) {
+	    $p->{'id'} = $p->{$keyname{$t}};
+	    $LJ::CACHE_PROP{$t}->{$p->{'name'}} = $p;
+	}
+	$sth->finish;
+    }
+}
+
+sub get_prop
+{
+    my $table = shift;
+    my $name = shift;
+    return 0 unless defined $LJ::CACHE_PROP{$table};
+    return $LJ::CACHE_PROP{$table}->{$name};
+}
+
 sub load_codes
 {
     my $dbarg = shift;
@@ -1068,8 +1096,8 @@ sub handle_caches
     return 1 unless ($LJ::CLEAR_CACHES);
     $LJ::CLEAR_CACHES = 0;
 
+    %LJ::CACHE_PROP = ();
     %LJ::CACHE_STYLE = ();
-    %LJ::CACHE_PROPS = ();
     $LJ::CACHED_MOODS = 0;
     $LJ::CACHED_MOOD_MAX = 0;
     %LJ::CACHE_MOODS = ();

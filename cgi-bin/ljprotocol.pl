@@ -18,6 +18,7 @@ sub error_message
 	     "101" => "Invalid password",
 	     "102" => "Can't use custom security on shared/community journals.",
 	     "103" => "Poll error",
+	     "104" => "Error adding one or more friends",
 	     "150" => "Can't post as non-user",
 
 	     # Client Errors
@@ -31,7 +32,10 @@ sub error_message
 	     # Access Errors
 	     "300" => "Don't have access to shared/community journal",
 	     "301" => "Access of restricted feature",
-
+	     "302" => "Can't edit post from requested journal",
+	     "303" => "Can't edit post in community journal",
+	     "304" => "Can't delete post in this community journal",
+	     
 	     # Server Errors
 	     "500" => "Internal server error",
 	     "501" => "Database error",
@@ -44,24 +48,34 @@ sub error_message
 }
 
 # returns result, or undef on failure
+sub do_request_without_db
+{
+    my ($method, $req, $err, $flags) = @_;
+    my $dbs = LJ::get_dbs();
+    return fail($err,500) unless $dbs;
+    return do_request($dbs, $method, $req, $err, $flags);
+}
+
 sub do_request 
 {
     # get the request and response hash refs
-    my ($method, $req, $err, $flags) = @_;
-    my $dbs = LJ::get_dbs();
+    my ($dbs, $method, $req, $err, $flags) = @_;
+
     $flags ||= {};
     my @args = ($dbs, $req, $err, $flags);
-
-    return fail($err,500) unless $dbs;
     
-    if ($method eq "login")           { return login(@args);           }
-    if ($method eq "getfriendgroups") { return getfriendgroups(@args); }
-    if ($method eq "getfriends")      { return getfriends(@args);      }
-    if ($method eq "friendof")        { return friendof(@args);        }
-    if ($method eq "checkfriends")    { return checkfriends(@args);    }
-    if ($method eq "getdaycounts")    { return getdaycounts(@args);    }
-    if ($method eq "postevent")       { return postevent(@args);       }
-    if ($method eq "syncitems")       { return syncitems(@args);       }
+    if ($method eq "login")            { return login(@args);            }
+    if ($method eq "getfriendgroups")  { return getfriendgroups(@args);  }
+    if ($method eq "getfriends")       { return getfriends(@args);       }
+    if ($method eq "friendof")         { return friendof(@args);         }
+    if ($method eq "checkfriends")     { return checkfriends(@args);     }
+    if ($method eq "getdaycounts")     { return getdaycounts(@args);     }
+    if ($method eq "postevent")        { return postevent(@args);        }
+    if ($method eq "editevent")        { return editevent(@args);        }
+    if ($method eq "syncitems")        { return syncitems(@args);        }
+    if ($method eq "getevents")        { return getevents(@args);        }
+    if ($method eq "editfriends")      { return editfriends(@args);      }
+    if ($method eq "editfriendgroups") { return editfriendgroups(@args); }
 
     return fail($err,201);    
 }
@@ -239,6 +253,68 @@ sub getdaycounts
     return $res;
 }
 
+sub common_event_validation
+{
+    my ($dbs, $req, $err, $flags) = @_;
+    my $dbr = $dbs->{'reader'};
+
+    # date validation
+    if ($req->{'year'} !~ /^\d\d\d\d$/ || 
+	$req->{'year'} < 1980 || 
+	$req->{'year'} > 2037) 
+    {
+	return fail($err,203,"Invalid year value.");
+    }
+    if ($req->{'mon'} !~ /^\d{1,2}$/ || 
+	$req->{'mon'} < 1 || 
+	$req->{'mon'} > 12) 
+    {
+	return fail($err,203,"Invalid month value.");
+    }
+    if ($req->{'day'} !~ /^\d{1,2}$/ || $req->{'day'} < 1 || 
+	$req->{'day'} > LJ::days_in_month($req->{'month'}, 
+					  $req->{'year'})) 
+    {
+	return fail($err,203,"Invalid day of month value.");
+    }
+    if ($req->{'hour'} !~ /^\d{1,2}$/ || 
+	$req->{'hour'} < 0 || $req->{'hour'} > 23) 
+    {
+	return fail($err,203,"Invalid hour value.");
+    }
+    if ($req->{'min'} !~ /^\d{1,2}$/ || 
+	$req->{'min'} < 0 || $req->{'min'} > 59) 
+    {
+	return fail($err,203,"Invalid minute value.");
+    }
+
+    ## handle meta-data (properties)
+    LJ::load_props($dbs, "log");
+    foreach my $pname (keys %{$req->{'props'}}) 
+    {
+	my $p = LJ::get_prop("log", $pname);
+
+	# does the property even exist?
+	return fail($err,205,"Unknown property")
+	    unless $p;
+
+	# don't validate its type if it's 0 or undef (deleting)
+	next unless ($req->{'props'}->{$pname}); 
+
+	my $ptype = $p->{'datatype'};
+	my $val = $req->{'props'}->{$pname};
+
+	if ($ptype eq "bool" && $val !~ /^[01]$/) {
+	    return fail($err,204,"Property \"$pname\" should be 0 or 1");
+	}
+	if ($ptype eq "num" && $val =~ /[^\d]/) {
+	    return fail($err,204,"Property \"$pname\" should be numeric");
+	}
+    }
+
+    return 1;
+}
+
 sub postevent
 {
     my ($dbs, $req, $err, $flags) = @_;
@@ -273,48 +349,8 @@ sub postevent
 	$event =~ s/\r//g;
     }
     
-    # date validation
-    if ($req->{'year'} !~ /^\d\d\d\d$/ || $req->{'year'} < 1980 || $req->{'year'} > 2037) {
-	return fail($err,203,"Invalid year value.");
-    }
-    if ($req->{'mon'} !~ /^\d{1,2}$/ || $req->{'mon'} < 1 || $req->{'mon'} > 12) {
-	return fail($err,203,"Invalid month value.");
-    }
-    if ($req->{'day'} !~ /^\d{1,2}$/ || $req->{'day'} < 1 || 
-	$req->{'day'} > LJ::days_in_month($req->{'month'}, $req->{'year'})) {
-	return fail($err,203,"Invalid day of month value.");
-    }
-    if ($req->{'hour'} !~ /^\d{1,2}$/ || $req->{'hour'} < 0 || $req->{'hour'} > 23) {
-	return fail($err,203,"Invalid hour value.");
-    }
-    if ($req->{'min'} !~ /^\d{1,2}$/ || $req->{'min'} < 0 || $req->{'min'} > 59) {
-	return fail($err,203,"Invalid minute value.");
-    }
-	
-    ## handle meta-data (properties)
-    my %props_byname = ();
-    my %props = ();
-    foreach my $key (keys %{$req->{'props'}}) {
-	next unless ($req->{'props'}->{$key});  # make sure it was non-empty/true interesting value
-	$props_byname{$key} = $req->{'props'}->{$key};
-    }
-    if (%props_byname) {
-	my $qnamein = join(",", map { $dbh->quote($_); } keys %props_byname);
-	my $sth = $dbr->prepare("SELECT propid, name, datatype FROM logproplist WHERE name IN ($qnamein)");
-	$sth->execute;
-	while (my ($pid, $pname, $ptype) = $sth->fetchrow_array) {
-	    if ($ptype eq "bool" && $props_byname{$pname} !~ /^[01]$/) {
-		return fail($err,204,"Property \"$pname\" should be 0 or 1");
-	    }
-	    if ($ptype eq "num" && $props_byname{$pname} =~ /[^\d]/) {
-		return fail($err,204,"Property \"$pname\" should be numeric");
-	    }
-	    $props{$pid} = $props_byname{$pname};
-	    delete $props_byname{$pname};
-	}
-	return fail($err,205,join(",",keys %props_byname)) 
-	    if (%props_byname);
-    }
+    return undef 
+	unless common_event_validation($dbs, $req, $err, $flags);
     
     ### allow for posting to journals that aren't yours (if you have permission)
     my $posterid = $u->{'userid'};
@@ -421,16 +457,19 @@ sub postevent
     }
     
     # meta-data
-    if (%props) {
+    if (%{$req->{'props'}}) {
 	my $propinsert = "";
-	foreach my $propid (keys %props) {
+	foreach my $pname (keys %{$req->{'props'}}) {
 	    if ($propinsert) {
 		$propinsert .= ", ";
 	    } else {
 		$propinsert = "INSERT INTO logprop (itemid, propid, value) VALUES ";
 	    }
-	    my $qvalue = $dbh->quote($props{$propid});
-	    $propinsert .= "($itemid, $propid, $qvalue)";
+	    my $p = LJ::get_prop("log", $pname);
+	    if ($p) {
+		my $qvalue = $dbh->quote($req->{'props'}->{$pname});
+		$propinsert .= "($itemid, $p->{'id'}, $qvalue)";
+	    }
 	}
 	if ($propinsert) { 
 	    $dbh->do($propinsert); 
@@ -462,6 +501,620 @@ sub postevent
     my $res = {};
     $res->{'itemid'} = $itemid;  # by request of mart
     return $res;
+}
+
+sub editevent
+{
+    my ($dbs, $req, $err, $flags) = @_;
+    return undef unless authenticate($dbs, $req, $err, $flags);
+    return undef unless check_altusage($dbs, $req, $err, $flags);
+
+    my $u = $flags->{'u'};    
+    my $ownerid = $flags->{'ownerid'};
+    my $posterid = $u->{'userid'};
+    my $dbr = $dbs->{'reader'};
+    my $dbh = $dbs->{'dbh'};
+    my $sth;
+
+    my $qitemid = $req->{'itemid'}+0;
+
+    # fetch the old entry, so we know what we really have to
+    # update. (less locking)
+    my $oldevent;
+    {
+	my $sth = $dbh->prepare("SELECT l.ownerid, l.posterid, l.eventtime, l.logtime, l.compressed, l.security, l.allowmask, l.year, l.month, l.day, lt.subject, MD5(lt.event) AS 'md5event' FROM log l, logtext lt WHERE l.itemid=$qitemid AND lt.itemid=$qitemid");
+	$sth->execute;
+	$oldevent = $sth->fetchrow_hashref;
+    }
+
+    ### make sure this user is allowed to edit this entry
+    return fail($err,302) 
+	unless ($ownerid == $oldevent->{'ownerid'});
+
+    ### what can they do to somebody elses entry?  (in shared journal)
+    if ($posterid != $oldevent->{'posterid'}) 
+    {
+	## deleting.	
+	return fail($err,304)
+	    if ($req->{'event'} !~ /\S/ && !
+		($ownerid == $u->{'userid'} ||
+		 # community account can delete it (ick)
+		 
+	         LJ::check_priv($dbr, $u, 
+				"sharedjournal", $req->{'usejournal'}) 
+		 # if user is a community maintainer they can delete
+		 # it too (good)
+		 ));
+
+	## editing:
+	return fail($err,303);
+    }
+
+    ## update sync table (before we actually do it!  in case updates
+    ## partially fail below)
+    $dbh->do("REPLACE INTO syncupdates (userid, atime, nodetype, nodeid, atype) VALUES ($ownerid, NOW(), 'L', $qitemid, 'update')");
+    
+    # simple logic for deleting an entry
+    if ($req->{'event'} !~ /\S/)
+    {
+        LJ::delete_item($dbh, $ownerid, $req->{'itemid'});
+	return fail($err,501,$dbh->errstr) if $dbh->err;
+	my $res = { 'itemid' => $qitemid };
+	return $res;
+    }
+	
+    # updating an entry:
+    return undef 
+	unless common_event_validation($dbs, $req, $err, $flags);
+    
+    ### load existing meta-data
+    my %curprops;
+    LJ::load_log_props($dbh, [ $qitemid ], \%curprops);
+    
+    ## handle meta-data (properties)
+    my %props_byname = ();
+    foreach my $key (keys %{$req->{'props'}}) {
+	## changing to something else?
+	if ($curprops{$qitemid}->{$key} ne $req->{'props'}->{$key}) {
+	    $props_byname{$key} = $req->{'props'}->{$key};
+	}
+    }
+	
+    #### clean up the event text        
+    my $event = $req->{'event'};
+	    
+    # remove surrounding whitespace
+    $event =~ s/^\s+//;
+    $event =~ s/\s+$//;
+    
+    # convert line endings to unix format
+    if ($req->{'lineendings'} eq "mac") {
+	$event =~ s/\r/\n/g;
+    } else {
+	$event =~ s/\r//g;
+    }
+    my $qevent = $dbh->quote($event);
+    $event = "";
+	    
+    my $eventtime = sprintf("%04d-%02d-%02d %02d:%02d", $req->{'year'}, $req->{'mon'}, $req->{'day'}, $req->{'hour'}, $req->{'min'});
+    my $qeventtime = $dbh->quote($eventtime);
+    
+    my $qallowmask = $req->{'allowmask'}+0;
+    my $security = "public";
+    if ($req->{'security'} eq "private" || $req->{'security'} eq "usemask") {
+	$security = $req->{'security'};
+    }
+    
+    my $qyear = $req->{'year'}+0;
+    my $qmonth = $req->{'mon'}+0;
+    my $qday = $req->{'day'}+0;
+    
+    if ($qyear != $oldevent->{'year'} ||
+	$qmonth != $oldevent->{'month'} ||
+	$qday != $oldevent->{'day'} ||
+	$eventtime ne $oldevent->{'eventtime'} ||
+	$security ne $oldevent->{'security'} ||
+	$qallowmask != $oldevent->{'allowmask'}
+	)
+    {
+	my $qsecurity = $dbh->quote($security);
+	$sth = $dbh->prepare("UPDATE log SET eventtime=$qeventtime, year=$qyear, month=$qmonth, day=$qday, security=$qsecurity, allowmask=$qallowmask WHERE itemid=$qitemid");
+	$sth->execute;
+    }
+    
+    if ($security ne $oldevent->{'security'} ||
+	$qallowmask != $oldevent->{'allowmask'})
+    {
+	if ($security eq "public" || $security eq "private") {
+	    $dbh->do("DELETE FROM logsec WHERE ownerid=$ownerid AND itemid=$qitemid");
+	} else {
+	    my $qsecurity = $dbh->quote($security);
+	    $dbh->do("REPLACE INTO logsec (ownerid, itemid, allowmask) VALUES ($ownerid, $qitemid, $qallowmask)");		    
+	}
+    }
+    
+    if (Digest::MD5::md5_hex($event) ne $oldevent->{'md5event'} ||
+	$req->{'subject'} ne $oldevent->{'subject'})
+    {
+	my $qsubject = $dbh->quote($req->{'subject'});	    
+	
+	my @prefix = ("");
+	if ($LJ::USE_RECENT_TABLES) { push @prefix, "recent_"; }
+	foreach my $pfx (@prefix) {
+	    $sth = $dbh->prepare("UPDATE ${pfx}logtext SET event=$qevent, subject=$qsubject WHERE itemid=$qitemid");
+	    $sth->execute;
+	}
+	$dbh->do("REPLACE INTO logsubject (itemid, subject) VALUES ($qitemid, $qsubject)");
+    }
+    
+    return fail($err,501,$dbh->errstr) if $dbh->err;
+
+    if (%{$req->{'props'}}) {
+	my $propinsert = "";
+	my @props_to_delete;
+	foreach my $pname (keys %{$req->{'props'}}) {
+	    my $p = LJ::get_prop("log", $pname);
+	    next unless $p;
+	    my $val = $req->{'props'}->{$pname};
+	    unless ($val) {
+		push @props_to_delete, $p->{'id'};
+		next;
+	    }
+	    if ($propinsert) {
+		$propinsert .= ", ";
+	    } else {
+		$propinsert = "REPLACE INTO logprop (itemid, propid, value) VALUES ";
+	    }
+	    my $qvalue = $dbh->quote($val);
+	    $propinsert .= "($qitemid, $p->{'id'}, $qvalue)";
+	}
+	if ($propinsert) { $dbh->do($propinsert); }
+	if (@props_to_delete) {
+	    my $propid_in = join(", ", @props_to_delete);
+	    $dbh->do("DELETE FROM logprop WHERE itemid=$qitemid AND propid IN ($propid_in)");
+	}
+    }
+    
+    ## update lastn hints table, unless it was a backdated entry
+    ## before and they didn't say in their request what its new
+    ## backdated status is:
+    
+    if ($req->{'prop_opt_backdated'} eq "1") {
+	LJ::query_buffer_add($dbh, "hintlastnview", "DELETE FROM hintlastnview WHERE userid=$ownerid AND itemid=$qitemid");
+      } else {
+	  unless ($curprops{$qitemid}->{'opt_backdated'} && ! defined $req->{'prop_opt_backdated'})
+	  {
+	      LJ::query_buffer_add($dbh, "hintlastnview", 
+				   "REPLACE INTO hintlastnview (userid, itemid) VALUES ($ownerid, $qitemid)");
+	    }
+      }
+  
+    return fail($err,501,$dbh->errstr) if $dbh->err;
+
+    # just return something.
+    my $res = { 'itemid' => $qitemid };
+    return $res;
+}
+
+sub getevents
+{
+    my ($dbs, $req, $err, $flags) = @_;
+    return undef unless authenticate($dbs, $req, $err, $flags);
+    return undef unless check_altusage($dbs, $req, $err, $flags);
+
+    my $u = $flags->{'u'};    
+    my $dbr = $dbs->{'reader'};
+    my $dbh = $dbs->{'dbh'};
+    my $sth;
+
+    my $drop_temp_table = "";
+
+    my $midfields = "lt.event, lt.subject";
+    if ($req->{'prefersubject'}) {
+	$midfields = "IF(LENGTH(lt.subject), lt.subject, lt.event) AS 'event'";
+    }
+    my $fields = "l.itemid, l.eventtime, $midfields, l.security, l.allowmask";
+    my $allfields = "l.itemid, l.eventtime, lt.subject, lt.event, l.security, l.allowmask";
+    
+    ### shared-journal support
+    my $posterid = $u->{'userid'};
+    my $ownerid = $flags->{'ownerid'};
+    
+    ## why'd I introduce this redudant method into the protocol?
+    if ($req->{'selecttype'} eq "one" && $req->{'itemid'} == -1) 
+    {
+	$sth = $dbh->prepare("SELECT lastitemid FROM userusage ".
+			     "WHERE userid=$ownerid");
+	$sth->execute;
+	my ($lastitemid) = $sth->fetchrow_array;		
+	
+	if ($lastitemid) {
+	    ### we know the last one the entered!
+	    # Must be on master, since logtext is not replicated.
+	    $sth = $dbh->prepare("SELECT $fields FROM log l, logtext lt WHERE l.ownerid=$ownerid AND l.itemid=$lastitemid AND lt.itemid=$lastitemid");
+	} else  {
+	    ### do it the slower way
+	    $req->{'selecttype'} = "lastn";
+	    $req->{'howmany'} = 1;
+	    undef $req->{'itemid'};
+	}
+    }
+
+    if ($req->{'selecttype'} eq "day")
+    {
+	return fail($err,203) 
+	    unless ($req->{'year'} =~ /^\d\d\d\d$/ && 
+		    $req->{'month'} >= 1 && $req->{'month'} <= 12 &&
+		    $req->{'day'} >= 1 && $req->{'day'} <= 31);
+	
+	my $qyear = $dbh->quote($req->{'year'});
+	my $qmonth = $dbh->quote($req->{'month'});
+	my $qday = $dbh->quote($req->{'day'});
+
+	### MySQL sucks at this query for some reason, but it's fast if you go
+	### to a temporary table and then select and order by on that
+	$dbh->do("DROP TABLE IF EXISTS tmp_selecttype_day");
+	$dbh->do("CREATE TEMPORARY TABLE tmp_selecttype_day SELECT $allfields, l.logtime FROM log l, logtext lt WHERE l.itemid=lt.itemid AND l.ownerid=$ownerid AND l.year=$qyear AND l.month=$qmonth AND l.day=$qday");
+	return fail($err,501,$dbh->errstr) if $dbh->err;
+	
+	$fields =~ s/lt\./l\./g;
+	$sth = $dbh->prepare("SELECT $fields FROM tmp_selecttype_day l ORDER BY l.eventtime, l.logtime");
+	$drop_temp_table = "tmp_selecttype_day";
+    }
+    elsif ($req->{'selecttype'} eq "lastn")
+    {
+	my $beforedatewhere = "";
+	my $howmany = $req->{'howmany'} || 20;
+	if ($howmany > 50) { $howmany = 50; }
+	$howmany = $howmany + 0;
+	if ($req->{'beforedate'}) {
+	    return fail($err,203,"Invalid beforedate format.")
+		unless ($req->{'beforedate'} =~ 
+			/^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$/);
+	    $beforedatewhere = "AND l.eventtime < " . $dbh->quote($req->{'beforedate'});		
+	}
+	
+	my @itemids = LJ::get_recent_itemids($dbh, {
+	    'view' => 'lastn',
+	    'userid' => $ownerid,
+	    'remoteid' => $ownerid,
+	    'itemshow' => $LJ::MAX_HINTS_LASTN,
+	});
+	
+	my $itemid_in = join(",", 0, @itemids);
+	
+	$sth = $dbh->prepare("SELECT $fields FROM log l, logtext lt WHERE l.itemid=lt.itemid AND l.itemid IN ($itemid_in) $beforedatewhere ORDER BY l.eventtime DESC, l.logtime DESC LIMIT $howmany");
+    }
+    elsif ($req->{'selecttype'} eq "one")
+    {
+	if ($req->{'itemid'} > 0) {
+	    my $qitemid = $req->{'itemid'} + 0;
+	    $sth = $dbh->prepare("SELECT $fields FROM log l, logtext lt WHERE l.itemid=lt.itemid AND l.ownerid=$ownerid AND l.itemid=$qitemid");
+	}
+    }
+    elsif ($req->{'selecttype'} eq "syncitems") 
+    {
+	my ($date);
+	## have a valid date?
+	$date = $req->{'lastsync'} || "0000-00-00 00:00:00";
+	if ($date !~ /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/) {
+	    return fail($err,203,"Invalid syncitems date format.");
+	}
+	
+	my $LIMIT = 300;
+	$sth = $dbh->prepare("SELECT $fields FROM log l, logtext lt, syncupdates s WHERE s.userid=$ownerid AND s.atime>='$date' AND s.nodetype='L' AND s.nodeid=l.itemid AND s.nodeid=lt.itemid ORDER BY s.atime LIMIT $LIMIT");
+    }
+
+    return fail($err,200,"Invalid selecttype.")
+	unless $sth;
+
+    $sth->execute;
+    return fail($err,501,$dbh->errstr) if $dbh->err;
+
+    my $count = 0;
+    my @itemids = ();
+    my $res = {};
+    my $events = $res->{'events'} = [];
+    my %evt_from_itemid;
+
+    while (my $row = $sth->fetchrow_hashref)
+    {
+	$count++;
+	my $evt = {};
+	$evt->{'itemid'} = $row->{'itemid'};
+	push @itemids, $row->{'itemid'};
+	$evt_from_itemid{$row->{'itemid'}} = $evt;
+
+	$evt->{"eventtime"} = $row->{'eventtime'};
+	if ($row->{'security'} ne "public") {
+	    $evt->{'security'} = $row->{'security'};
+	    if ($row->{'security'} eq "usemask") {
+		$res->{'allowmask'} = $row->{'allowmask'};
+	    }
+	}
+	if ($row->{'subject'} ne "") {
+	    $row->{'subject'} =~ s/[\r\n]/ /g;
+	    $evt->{'subject'} = $row->{'subject'};
+	}
+	if ($req->{'truncate'} >= 4) {
+	    if (length($row->{'event'}) > $req->{'truncate'}) {
+		$row->{'event'} = substr($row->{'event'}, 0, $req->{'truncate'}-3) . "...";
+	    }
+	}
+	
+	my $event = $row->{'event'};
+	$event =~ s/\r//g;
+	if ($req->{'lineendings'} eq "unix") {
+	    # do nothing.
+	} elsif ($req->{'lineendings'} eq "mac") {
+	    $event =~ s/\n/\r/g;
+	} elsif ($req->{'lineendings'} eq "space") {
+	    $event =~ s/\n/ /g;
+	} elsif ($req->{'lineendings'} eq "dots") {
+	    $event =~ s/\n/ ... /g;
+	} else { # "pc"
+	    $event =~ s/\n/\r\n/g;
+	}
+	
+	$evt->{"event"} = $event;
+
+	push @$events, $evt;
+    }
+    $sth->finish;
+    
+    if ($drop_temp_table) {
+	$dbh->do("DROP TABLE $drop_temp_table");
+    }
+    
+    unless ($req->{'noprops'}) 
+    {
+	### do the properties now
+	$count = 0;
+	my %props = ();
+	LJ::load_log_props($dbh, \@itemids, \%props);
+	foreach my $itemid (keys %props) {
+	    my $evt = $evt_from_itemid{$itemid};
+	    $evt->{'props'} = {};
+	    foreach my $name (keys %{$props{$itemid}}) {
+		my $value = $props{$itemid}->{$name};
+		$value =~ s/\n/ /g;
+		$evt->{'props'}->{$name} = $value;
+	    }
+	}
+    }
+    
+    return $res;
+}
+
+sub editfriends
+{
+    my ($dbs, $req, $err, $flags) = @_;
+    return undef unless authenticate($dbs, $req, $err, $flags);
+
+    my $u = $flags->{'u'};    
+    my $userid = $u->{'userid'};
+    my $dbr = $dbs->{'reader'};
+    my $dbh = $dbs->{'dbh'};
+    my $sth;
+
+    my $res = {};
+
+    ## first, figure out who the current friends are to save us work later
+    my %curfriend;
+    my $friend_count = 0;
+    $sth = $dbh->prepare("SELECT u.user FROM useridmap u, friends f ".
+			 "WHERE u.userid=f.friendid AND f.userid=$userid");
+    $sth->execute;
+    while (my ($friend) = $sth->fetchrow_array) {
+	$curfriend{$friend} = 1;
+	$friend_count++;
+    }
+    $sth->finish;
+
+    # perform the deletions
+  DELETEFRIEND:
+    foreach (@{$req->{'delete'}})
+    {
+	my $deluser = LJ::canonical_username($_);
+	next DELETEFRIEND unless ($curfriend{$deluser});
+
+	my $friendid = LJ::get_userid($dbh, $deluser);
+	$sth = $dbh->prepare("DELETE FROM friends ".
+			     "WHERE userid=$userid AND friendid=$friendid");
+	$sth->execute;
+	$friend_count--;
+    }
+
+    my $error_flag = 0;
+    my $friends_added = 0;
+	
+    # perform the adds
+  ADDFRIEND:
+    foreach my $fa (@{$req->{'add'}})
+    {
+	unless (ref $fa eq "HASH") {
+	    $fa = { 'username' => $fa };
+	}
+
+	my $aname = LJ::canonical_username($fa->{'username'});
+	unless ($aname) {
+	    $error_flag = 1;
+	    next ADDFRIEND;
+	}
+
+	$friend_count++ unless $curfriend{$aname};
+	
+	if ($friend_count > LJ::get_limit("friends", $u->{'paidfeatures'}, 1500)) {
+	    return fail($err,104);
+	}
+
+	my $fg = $fa->{'fgcolor'} || "#000000";
+	my $bg = $fa->{'bgcolor'} || "#FFFFFF"; 
+	if ($fg !~ /^\#[0-9A-F]{6,6}$/i || $bg !~ /^\#[0-9A-F]{6,6}$/i) {
+	    return fail($err,203,"Invalid color values");
+	}
+	
+	my $row = LJ::load_user($dbs, $aname);
+	unless ($row) {
+	    $error_flag = 1;
+	}
+	else
+	{
+	    $friends_added++;
+	    my $added = { 'username' => $aname,
+			  'fullname' => $row->{'name'},
+		      };
+	    push @{$res->{'added'}}, $added;
+
+	    my $qfg = $dbh->quote($fg);
+	    my $qbg = $dbh->quote($bg);
+		    
+	    my $friendid = $row->{'userid'};
+
+	    ### get the group mask if friend already exists, or
+	    ### default to 1 (bit 0 (friend bit) set)
+	    my $sth = $dbh->prepare("SELECT groupmask FROM friends WHERE userid=$userid AND friendid=$friendid");
+	    $sth->execute;
+	    my ($gmask) = $sth->fetchrow_array;
+	    $gmask ||= 1;
+		    
+	    $sth = $dbh->prepare("REPLACE INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) VALUES ($userid, $friendid, $qfg, $qbg, $gmask)");
+	    $sth->execute;
+	    return fail($err,501,$dbh->errstr) if $dbh->err;
+	    
+	}
+    }
+
+    return fail($err,104) if $error_flag;
+    return $res;
+}
+
+sub editfriendgroups
+{
+    my ($dbs, $req, $err, $flags) = @_;
+    return undef unless authenticate($dbs, $req, $err, $flags);
+
+    my $u = $flags->{'u'};    
+    my $userid = $u->{'userid'};
+    my $dbr = $dbs->{'reader'};
+    my $dbh = $dbs->{'dbh'};
+    my $sth;
+
+    my $res = {};
+
+    ## make sure tree is how we want it
+    $req->{'groupmasks'} = {} unless
+	(ref $req->{'groupmasks'} eq "HASH");
+    $req->{'set'} = {} unless
+	(ref $req->{'set'} eq "HASH");
+    $req->{'delete'} = [] unless
+	(ref $req->{'delete'} eq "ARRAY");
+
+    ###
+    ## Keep track of what bits are already set, so we can know later whether to INSERT
+    #  or UPDATE.
+    
+    my %bitset;
+    $sth = $dbr->prepare("SELECT groupnum FROM friendgroup WHERE userid=$userid");
+    $sth->execute;
+    while (my ($bit) = $sth->fetchrow_array) {
+	$bitset{$bit} = 1;
+    }
+    
+    ## figure out deletions we'll do later
+    foreach my $bit (@{$req->{'delete'}})
+    {
+	$bit += 0;
+	next unless ($bit >= 1 && $bit <= 30);
+	$bitset{$bit} = 0;  # so later we replace into, not update.
+    }
+
+    ## change friends' masks
+    foreach my $friend (keys %{$req->{'groupmasks'}})
+    {
+	my $mask = int($req->{'groupmasks'}->{$friend}) | 1;
+	
+	my $friendid = LJ::get_userid($dbs, $friend);
+	if ($friendid) {
+	    $sth = $dbh->prepare("UPDATE friends SET groupmask=$mask WHERE userid=$userid AND friendid=$friendid");
+	    $sth->execute;
+	}	
+    }
+
+    ## do additions/modifications ('set' hash)
+    my %added;
+    foreach my $bit (keys %{$req->{'set'}})
+    {
+	$bit += 0;
+	next unless ($bit >=1 && $bit <= 30);
+	my $sa = $req->{'set'}->{$bit};
+	my $name = $sa->{'name'};
+
+	# setting it to name is like deleting it.
+	unless ($name =~ /\S/) {
+	    push @{$req->{'delete'}}, $bit;
+	    next;
+	}
+
+	my $qname = $dbh->quote($name);
+	my $qsort = defined $sa->{'sort'} ? ($sa->{'sort'}+0) : 50;
+	my $qpublic = $dbh->quote(defined $sa->{'public'} ? ($sa->{'public'}+0) : 0);
+	    
+	if ($bitset{$bit}) {
+	    # so update it
+	    my $sets;
+	    if (defined $sa->{'public'}) {
+		$sets .= ", is_public=$qpublic";
+	    }
+	    $sth = $dbh->prepare("UPDATE friendgroup SET groupname=$qname, sortorder=$qsort ".
+				 "$sets WHERE userid=$userid AND groupnum=$bit");
+	} else {
+	    $sth = $dbh->prepare("REPLACE INTO friendgroup (userid, groupnum, ".
+				 "groupname, sortorder, is_public) VALUES ".
+				 "($userid, $bit, $qname, $qsort, $qpublic)");
+	}
+	$sth->execute;
+	$added{$bit} = 1;
+    }
+	
+
+    ## do deletions ('delete' array)
+    foreach my $bit (@{$req->{'delete'}})
+    {
+	$bit += 0;
+	next unless ($bit >= 1 && $bit <= 30);
+
+	# Old note: remove all friend's priviledges on that bit
+	# number?  No, client should do this.
+
+	# remove all posts from allowing that group:
+	my @posts_to_clean = ();
+	$sth = $dbr->prepare("SELECT itemid FROM logsec WHERE ownerid=$userid AND allowmask & (1 << $bit)");
+	$sth->execute;
+	while (my ($id) = $sth->fetchrow_array) { push @posts_to_clean, $id; }
+	while (@posts_to_clean) {
+	    my @batch;
+	    if (scalar(@posts_to_clean) < 20) {
+		@batch = @posts_to_clean; 
+		@posts_to_clean = ();
+	    } else {
+		@batch = splice(@posts_to_clean, 0, 20); 
+	    }
+	    my $in = join(",", @batch);
+	    $dbh->do("UPDATE log SET allowmask=allowmask & ~(1 << $bit) WHERE itemid IN ($in) AND security='usemask'");
+	    $dbh->do("UPDATE logsec SET allowmask=allowmask & ~(1 << $bit) WHERE ownerid=$userid AND itemid IN ($in)");
+	}
+	
+	# remove the friend group, unless we just added it this transaction
+	unless ($added{$bit}) {
+	    $sth = $dbh->prepare("DELETE FROM friendgroup WHERE ".
+				 "userid=$userid AND groupnum=$bit");
+	    $sth->execute;
+	}
+    }
+    
+    # return value for this is nothing.
+    return {};
 }
 
 sub list_friends
@@ -821,749 +1474,21 @@ sub do_request
     if ($req->{'mode'} eq "postevent") {
 	return postevent($dbs, $req, $res, $flags);
     }
+    if ($req->{'mode'} eq "editevent") {
+	return editevent($dbs, $req, $res, $flags);
+    }
     if ($req->{'mode'} eq "syncitems") {
 	return syncitems($dbs, $req, $res, $flags);
     }
-
-    ### OLD CODE FOLLOWS:
-
-    # authenticate user
-    unless ($flags->{'noauth'}) # && $req->{'mode'} ne "login")
-    {
-        $sth = $dbr->prepare("SELECT user, userid, journaltype, name, paidfeatures, password, status, statusvis, track FROM user WHERE user=$quser");
-        $sth->execute;
-        if ($dbr->err)
-        {
-	  $res->{'success'} = "FAIL";
-	  $res->{'errmsg'} = "Server database error: " . $dbr->errstr;
-	  return;
-        }
-        ($user, $userid, $journaltype, $name, $paidfeatures, $correctpassword, $status, $statusvis, $track) = $sth->fetchrow_array;
-
-        if ($user eq "")
-        {
-	  $res->{'success'} = "FAIL";
-	  $res->{'errmsg'} = "User error: Invalid Username";
-	  return;
-        }
-        unless ($flags->{'nopassword'} || 
-	        LJ::auth_okay($user, 
-			      $req->{'password'}, 
-			      $req->{'hpassword'},
-			      $correctpassword))
-        {
-	  $res->{'success'} = "FAIL";
-	  $res->{'errmsg'} = "User error: Invalid Password";
-	  return;
-        }
-	if ($statusvis eq "S") {
-	    $res->{'success'} = "FAIL";
-	    $res->{'errmsg'} = "Account error: this account has been suspended.  Contact tech support for more information.";
-	}
-	if ($statusvis eq "D") {
-	    $res->{'success'} = "FAIL";
-	    $res->{'errmsg'} = "Account error: this account has been deleted.";
-	}
+    if ($req->{'mode'} eq "getevents") {
+	return getevents($dbs, $req, $res, $flags);
     }
-    
-    ### even if noauth is on, we need the userid
-    if ($userid == 0) 
-    {
-	if ($flags->{'userid'}) {
-	    $userid = $flags->{'userid'};
-	} else {
-	    $userid = LJ::get_userid($dbr, $user);
-	}
+    if ($req->{'mode'} eq "editfriends") {
+	return editfriends($dbs, $req, $res, $flags);
     }
-
-    $userid += 0;
-    
-    # setup the user object manually since the above stuff is old
-    my $u = { 'user' => $user, 'userid' => $userid };
-
-    ################################ AUTHENTICATED NOW ################################
-
- 
-    ###
-    ### MODE: editfriendgroups
-    ### (rename, add, and delete friend groups)
-    ###
-    if ($req->{'mode'} eq "editfriendgroups")
-    {
-	my %delete_pass;
-	my @passes = ($req, \%delete_pass);
-
-	###
-	## Keep track of what bits are already set, so we can know later whether to INSERT
-	#  or UPDATE.
-
-	my %bitset;
-	$sth = $dbr->prepare("SELECT groupnum FROM friendgroup WHERE userid=$userid");
-	$sth->execute;
-	while (my ($bit) = $sth->fetchrow_array) {
-	    $bitset{$bit} = 1;
-	}
-
-	foreach my $hash (@passes) 
-	{
-	    foreach (keys %{$hash})
-	    {
-		if (/^editfriend_groupmask_(\w+)$/) 
-		{
-		    my $friend = $1;
-		    my $mask = $req->{"editfriend_groupmask_${friend}"}+0;
-		    $mask |= 1;  # make sure bit 0 is on
-
-		    my $friendid = LJ::get_userid($dbh, $friend);
-		    if ($friendid) {
-			$sth = $dbh->prepare("UPDATE friends SET groupmask=$mask WHERE userid=$userid AND friendid=$friendid");
-			$sth->execute;
-		    }
-		} 
-		elsif (/^efg_delete_(\d+)/)
-		{
-		    my $bit = $1;
-		    next unless ($req->{"efg_delete_$bit"}); # test for true
-		    next unless ($bit >=1 && $bit <= 30);
-		    
-		    # remove all friend's priviledges on that bit number?  No, client should do this.
-		    
-		    # remove all posts from allowing that group:
-		    my @posts_to_clean = ();
-		    $sth = $dbr->prepare("SELECT itemid FROM logsec WHERE ownerid=$userid AND allowmask & (1 << $bit)");
-		    $sth->execute;
-		    while (my ($id) = $sth->fetchrow_array) { push @posts_to_clean, $id; }
-		    while (@posts_to_clean) {
-			my @batch;
-			if (scalar(@posts_to_clean) < 20) {
-			    @batch = @posts_to_clean; 
-			    @posts_to_clean = ();
-			} else {
-			    @batch = splice(@posts_to_clean, 0, 20); 
-			}
-			my $in = join(",", @batch);
-			$dbh->do("UPDATE log SET allowmask=allowmask & ~(1 << $bit) WHERE itemid IN ($in) AND security='usemask'");
-			$dbh->do("UPDATE logsec SET allowmask=allowmask & ~(1 << $bit) WHERE ownerid=$userid AND itemid IN ($in)");
-		    }
-		    
-		    # remove the friend group
-		    $sth = $dbh->prepare("DELETE FROM friendgroup WHERE userid=$userid AND groupnum=$bit");
-		    $sth->execute;
-		}
-		elsif (/^efg_set_(\d+)_name/)
-		{
-		    my $bit = $1;
-		    next unless ($bit >=1 && $bit <= 30);
-		    my $name = $req->{"efg_set_${bit}_name"};
-		    if ($name =~ /\S/) {
-			my $qname = $dbh->quote($name);
-			my $qsort = defined $req->{"efg_set_${bit}_sort"} ? 
-			    ($req->{"efg_set_${bit}_sort"}+0) : 50;
-			my $qpublic = $dbh->quote(defined $req->{"efg_set_${bit}_public"} ?
-			    ($req->{"efg_set_${bit}_public"}+0) : 0);
-			
-			if ($bitset{$bit}) {
-			    # and set it..
-			    my $sets;
-			    if (defined $req->{"efg_set_${bit}_public"}) {
-				$sets .= ", is_public=$qpublic";
-			    }
-			    $sth = $dbh->prepare("UPDATE friendgroup SET groupname=$qname, sortorder=$qsort $sets WHERE userid=$userid AND groupnum=$bit");
-			} else {
-			    $sth = $dbh->prepare("INSERT INTO friendgroup (userid, groupnum, groupname, sortorder, is_public) VALUES ($userid, $bit, $qname, $qsort, $qpublic)");			    
-			}
-			$sth->execute;
-		    } else {
-			# delete the group if the group name is just whitespace
-			$delete_pass{"efg_delete_$bit"} = 1;
-		    }
-		}
-	    } # end foreach on keys
-	} # end foreach on passes
-
-        $res->{'success'} = "OK";
-	return;
+    if ($req->{'mode'} eq "editfriendgroups") {
+	return editfriendgroups($dbs, $req, $res, $flags);
     }
-    
-    ####
-    #### MODE: editfriends
-    ####
-    if ($req->{'mode'} eq "editfriends")
-    {
-	## first, figure out who the current friends are to save us work later
-	my %curfriend;
-	my $friend_count = 0;
-        $sth = $dbh->prepare("SELECT u.user FROM useridmap u, friends f WHERE u.userid=f.friendid AND f.userid=$userid");
-        $sth->execute;
-	while (my ($friend) = $sth->fetchrow_array) {
-	    $curfriend{$friend} = 1;
-	    $friend_count++;
-	}
-
-        # perform the deletions
-      DELETEFRIEND:
-        foreach (keys %{$req})
-        {
-	    if (/^editfriend_delete_(\w+)/) 
-	    {
-		my $deluser = LJ::canonical_username($1);
-		next DELETEFRIEND unless ($curfriend{$deluser});
-
-		my $qfriend = $dbh->quote($deluser);
-		my $friendid = LJ::get_userid($dbh, $deluser);
-
-		## delete from friends table
-		$sth = $dbh->prepare("DELETE FROM friends WHERE userid=$userid AND friendid=$friendid");
-		$sth->execute;
-
-		$friend_count--;
-	    }
-        }
-	
-        my $error_flag = 0;
-	my $friends_added = 0;
-	
-        # perform the adds
-      ADDFRIEND:
-        foreach (keys %{$req})
-        {
-	    if (/^editfriend_add_(\d+)_user/) 
-	    {
-		my $n = $1;
-		my $raw = $req->{"editfriend_add_${n}_user"};
-		my $name = LJ::canonical_username($raw);
-		next ADDFRIEND unless ($raw);
-		unless ($name) {
-		    $error_flag = 1;
-		    next ADDFRIEND;
-		}
-		
-		if (! $curfriend{$name}) {
-		    $friend_count++;
-		}
-
-		if ($friend_count > LJ::get_limit("friends", $paidfeatures, 1500)) {
-		    $error_flag = 1;
-		    next ADDFRIEND;
-		}
-
-		my $fg = $req->{"editfriend_add_${n}_fg"} || "#000000";
-		my $bg = $req->{"editfriend_add_${n}_bg"} || "#FFFFFF"; 
-		if ($fg !~ /^\#[0-9A-F]{6,6}$/i || $bg !~ /^\#[0-9A-F]{6,6}$/i)
-		{
-		    $res->{'success'} = "FAIL";
-		    $res->{'errmsg'} = "Client error: Invalid color values";
-		    return;
-		}
-
-		my $row = LJ::load_user($dbs, $name);
-		unless ($row) {
-		    $error_flag = 1;
-		}
-		else
-		{
-		    $friends_added++;
-		    $res->{"friend_${friends_added}_user"} = $name;
-		    $res->{"friend_${friends_added}_name"} = $row->{'name'};
-		    my $qfg = $dbh->quote($fg);
-		    my $qbg = $dbh->quote($bg);
-		    
-		    my $friendid = $row->{'userid'};
-
-		    ### get the group mask if friend already exists, or default to 1 (bit 0 (friend bit) set)
-		    my $sth = $dbh->prepare("SELECT groupmask FROM friends WHERE userid=$userid AND friendid=$friendid");
-		    $sth->execute;
-		    my ($gmask) = $sth->fetchrow_array;
-		    $gmask ||= 1;
-		    
-		    $sth = $dbh->prepare("REPLACE INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) VALUES ($userid, $friendid, $qfg, $qbg, $gmask)");
-		    $sth->execute;
-
-		    if ($dbh->err) {
-			$res->{'success'} = "FAIL";
-			$res->{'errmsg'} = "Database error [fr]: " . ($dbh->errstr);
-			return;
-		    }
-		    $sth->finish;
-		}
-	    }  ### end if add user
-	} ## end foreach keys
-
-        if ($error_flag)
-        {
-	  $res->{'success'} = "FAIL";
-	  $res->{'errmsg'} = "Client error: There was an error adding one or more of the users you selected as friends.";
-	  return;
-        }
-     
-        $res->{'success'} = "OK";
-	$res->{"friends_added"} = $friends_added;
-        return;
-    }
-
-    ###
-    ### MODE: getevents
-    ### given a selecttype and a selectwhat, returns events and eventids from the user's journal
-    ###
-    if ($req->{'mode'} eq "getevents")
-    {
-	my $drop_temp_table = "";
-
-	my $midfields = "lt.event, lt.subject";
-	if ($req->{'prefersubject'}) {
-	    $midfields = "IF(LENGTH(lt.subject), lt.subject, lt.event) AS 'event'";
-	}
-	my $fields = "l.itemid, l.eventtime, $midfields, l.security, l.allowmask";
-	my $allfields = "l.itemid, l.eventtime, lt.subject, lt.event, l.security, l.allowmask";
-	
-	### shared-journal support
-	my $posterid = $userid;
-	my $ownerid = $userid;
-	my $qowner = $quser;
-
-	if ($req->{'usejournal'}) {
-            my $info = {};
-	    if (&can_use_journal($dbs, $posterid, $req->{'usejournal'}, $info)) {
-		$ownerid = $info->{'ownerid'};
-		$qowner = $dbh->quote($req->{'usejournal'});
-	    } else {
-                $res->{'errmsg'} = $info->{'errmsg'};
-	    }
-	}
-        if ($res->{'errmsg'}) { $res->{'success'} = "FAIL"; return; }
-
-	## why'd I introduce this redudant method into the protocol?
-	if ($req->{'selecttype'} eq "one" && $req->{'itemid'} == -1) 
-	{
-	    $sth = $dbh->prepare("SELECT lastitemid FROM userusage ".
-				 "WHERE userid=$ownerid");
-	    $sth->execute;
-	    my ($lastitemid) = $sth->fetchrow_array;		
-	    
-	    if ($lastitemid) {
-		### we know the last one the entered!
-		# Must be on master, since logtext is not replicated.
-		$sth = $dbh->prepare("SELECT $fields FROM log l, logtext lt WHERE l.ownerid=$ownerid AND l.itemid=$lastitemid AND lt.itemid=$lastitemid");
-	    } else  {
-		### do it the slower way
-		$req->{'selecttype'} = "lastn";
-		$req->{'howmany'} = 1;
-		undef $req->{'itemid'};
-	    }
-	}
-
-	if ($req->{'selecttype'} eq "day")
-	{
-	    unless ($req->{'year'} =~ /^\d\d\d\d$/ && 
-		    $req->{'month'} >= 1 && $req->{'month'} <= 12 &&
-		    $req->{'day'} >= 1 && $req->{'day'} <= 31)
-	    {
-		$res->{'success'} = "FAIL";
-		$res->{'errmsg'} = "User error: Invalid year, month, or day.";
-		return;
-	    }
-
-	    my $qyear = $dbh->quote($req->{'year'});
-	    my $qmonth = $dbh->quote($req->{'month'});
-	    my $qday = $dbh->quote($req->{'day'});
-
-	    ### MySQL sucks at this query for some reason, but it's fast if you go
-	    ### to a temporary table and then select and order by on that
-	    $dbh->do("DROP TABLE IF EXISTS tmp_selecttype_day");
-	    $dbh->do("CREATE TEMPORARY TABLE tmp_selecttype_day SELECT $allfields, l.logtime FROM log l, logtext lt WHERE l.itemid=lt.itemid AND l.ownerid=$ownerid AND l.year=$qyear AND l.month=$qmonth AND l.day=$qday");
-
-	    if ($dbh->err) {
-		$res->{'success'} = "FAIL";
-		$res->{'errmsg'} = "[1] Database error: " . $dbh->errstr;
-		return;
-	    }
-       
-	    $fields =~ s/lt\./l\./g;
-	    $sth = $dbh->prepare("SELECT $fields FROM tmp_selecttype_day l ORDER BY l.eventtime, l.logtime");
-	    $drop_temp_table = "tmp_selecttype_day";
-	}
-	elsif ($req->{'selecttype'} eq "lastn")
-	{
-	    my $beforedatewhere = "";
-	    my $howmany = $req->{'howmany'} || 20;
-	    if ($howmany > 50) { $howmany = 50; }
-	    $howmany = $howmany + 0;
-	    if ($req->{'beforedate'}) {
-		unless ($req->{'beforedate'} =~ /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$/) {
-		    $res->{'success'} = "FAIL";
-		    $res->{'errmsg'} = "Client error: Invalid beforedate format.";
-		    return;
-		}
-		$beforedatewhere = "AND l.eventtime < " . $dbh->quote($req->{'beforedate'});		
-	    }
-
-	    my @itemids = &get_recent_itemids($dbh, {
-		'view' => 'lastn',
-		'userid' => $ownerid,
-		'remoteid' => $ownerid,
-		'itemshow' => $LJ::MAX_HINTS_LASTN,
-	    });
-	    
-            my $itemid_in = join(",", 0, @itemids);
-
-            $sth = $dbh->prepare("SELECT $fields FROM log l, logtext lt WHERE l.itemid=lt.itemid AND l.itemid IN ($itemid_in) $beforedatewhere ORDER BY l.eventtime DESC, l.logtime DESC LIMIT $howmany");
-	}
-	elsif ($req->{'selecttype'} eq "one")
-	{
-	    if ($req->{'itemid'} > 0) {
-		my $qitemid = $req->{'itemid'} + 0;
-		$sth = $dbh->prepare("SELECT $fields FROM log l, logtext lt WHERE l.itemid=lt.itemid AND l.ownerid=$ownerid AND l.itemid=$qitemid");
-	    }
-	}
-	elsif ($req->{'selecttype'} eq "syncitems") 
-	{
-	    my ($date);
-	    ## have a valid date?
-	    $date = $req->{'lastsync'};
-	    if ($date) {
-		if ($date !~ /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/) {
-		    $res->{'success'} = "FAIL";
-		    $res->{'errmsg'} = "Invalid date format";
-		    return;
-		}
-	    } else {
-		$date = "0000-00-00 00:00:00";
-	    }
-
-	    my $LIMIT = 300;
-	    $sth = $dbh->prepare("SELECT $fields FROM log l, logtext lt, syncupdates s WHERE s.userid=$userid AND s.atime>='$date' AND s.nodetype='L' AND s.nodeid=l.itemid AND s.nodeid=lt.itemid ORDER BY s.atime LIMIT $LIMIT");
-	}
-	else 
-	{
-	    $res->{'success'} = "FAIL";
-	    $res->{'errmsg'} = "Client error: Invalid selecttype.";
-	    return;
-	}
-
-	$sth->execute;
-
-	if ($dbh->err) {
-	    $res->{'success'} = "FAIL";
-	    $res->{'errmsg'} = "[2] Database error: " . $dbh->errstr;
-	    return;
-	}
-
-	my $count = 0;
-	my @itemids = ();
-	while (my $row = $sth->fetchrow_hashref)
-	{
-	    $count++;
-	    $res->{"events_${count}_itemid"} = $row->{'itemid'};
-	    push @itemids, $row->{'itemid'};
-
-	    $res->{"events_${count}_eventtime"} = $row->{'eventtime'};
-	    if ($row->{'security'} ne "public") {
-		$res->{"events_${count}_security"} = $row->{'security'};
-		if ($row->{'security'} eq "usemask") {
-		    $res->{"events_${count}_allowmask"} = $row->{'allowmask'};
-		}
-	    }
-	    if ($row->{'subject'} ne "") {
-		$row->{'subject'} =~ s/[\r\n]/ /g;
-		$res->{"events_${count}_subject"} = $row->{'subject'};
-	    }
-	    if ($req->{'truncate'} >= 4) {
-		if (length($row->{'event'}) > $req->{'truncate'}) {
-		    $row->{'event'} = substr($row->{'event'}, 0, $req->{'truncate'}-3) . "...";
-		}
-	    }
-
-	    my $event = $row->{'event'};
-	    $event =~ s/\r//g;
-	    if ($req->{'lineendings'} eq "unix") {
-		# do nothing.
-	    } elsif ($req->{'lineendings'} eq "mac") {
-		$event =~ s/\n/\r/g;
-	    } elsif ($req->{'lineendings'} eq "space") {
-		$event =~ s/\n/ /g;
-	    } elsif ($req->{'lineendings'} eq "dots") {
-		$event =~ s/\n/ ... /g;
-	    } else { # "pc"
-		$event =~ s/\n/\r\n/g;
-	    }
-
-	    $res->{"events_${count}_event"} = &eurl($event);
-	}
-	$res->{'events_count'} = $count;
-
-	if ($drop_temp_table) {
-	    $dbh->do("DROP TABLE $drop_temp_table");
-	}
-
-	unless ($req->{'noprops'}) {
-	    ### do the properties now
-	    $count = 0;
-	    my %props = ();
-	    &load_log_props($dbh, \@itemids, \%props);
-	    foreach my $itemid (keys %props) {
-		foreach my $name (keys %{$props{$itemid}}) {
-		    $count++;
-		    $res->{"prop_${count}_itemid"} = $itemid;
-		    $res->{"prop_${count}_name"} = $name;
-		    my $value = $props{$itemid}->{$name};
-		    $value =~ s/\n/ /g;
-		    $res->{"prop_${count}_value"} = $value;
-		}
-	    }
-	    $res->{'prop_count'} = $count;
-	}
-
-	$sth->finish;
-        $res->{'success'} = "OK";
-	return;
-    }
-
-    ###
-    ### MODE: editevent
-    ### given an itemid and event and eventtime, changes the event.  a blank event text implies deletion
-    ### 
-    if ($req->{'mode'} eq "editevent")
-    {
-        my $qitemid = $req->{'itemid'}+0;
-
-	### shared-journal support
-	my $posterid = $userid;
-	my $ownerid = $userid;
-	my $qowner = $quser;
-
-	if ($req->{'usejournal'}) {
-            my $info = {};
-	    if (&can_use_journal($dbs, $posterid, $req->{'usejournal'}, $info)) {
-		$ownerid = $info->{'ownerid'};
-		$qowner = $dbh->quote($req->{'usejournal'});
-	    } else {
-                $res->{'errmsg'} = $info->{'errmsg'};
-	    }
-	}
-        if ($res->{'errmsg'}) { $res->{'success'} = "FAIL"; return; }
-
-	## fetch the old entry, so we know what we really have to update. (less locking)
-	my $oldevent = {};
-	{
-	    my $sth = $dbh->prepare("SELECT l.ownerid, l.posterid, l.eventtime, l.logtime, l.compressed, l.security, l.allowmask, l.year, l.month, l.day, lt.subject, MD5(lt.event) AS 'md5event' FROM log l, logtext lt WHERE l.itemid=$qitemid AND lt.itemid=$qitemid");
-	    $sth->execute;
-	    $oldevent = $sth->fetchrow_hashref;
-	}
-
-	### make sure this user is allowed to edit this entry
-	if ($ownerid != $oldevent->{'ownerid'}) {
-	    $res->{'errmsg'} = "Client error: This entry is not from your journal.";
-	    $res->{'success'} = "FAIL"; 
-	    return; 
-	}
-	if ($posterid != $oldevent->{'posterid'}) {
-	    my $allow = 0;
-	    if ($req->{'event'} !~ /\S/) {
-		## deleting.
-		if ($ownerid == $u->{'userid'}) {
-		    ## community account can delete it (ick)
-		    $allow = 1;
-		} elsif (LJ::check_priv($dbr, $u, "sharedjournal", $req->{'usejournal'})) {
-		    ## if user is a community maintainer they can delete it too (good)
-		    $allow = 1;
-		}
-	    }
-	    if (! $allow) {
-		$res->{'errmsg'} = "You can only edit journal entries in shared journals that you posted.";
-		$res->{'success'} = "FAIL"; 
-		return; 
-	    }
-	}
-
-	## update sync table (before we actually do it!  in case updates partially fail below)
-	$dbh->do("REPLACE INTO syncupdates (userid, atime, nodetype, nodeid, atype) VALUES ($ownerid, NOW(), 'L', $qitemid, 'update')");
-	
-	# decide whether we're updating or deleting the entry
-	if ($req->{'event'} =~ /\S/)
-	{
-	    # update
-	    # date validation
-	    if ($req->{'year'} !~ /^\d\d\d\d$/ || $req->{'year'} < 1980 || $req->{'year'} > 2037) {
-		$res->{'errmsg'} = "Client error: Invalid year value.";
-	    }
-	    if ($req->{'mon'} !~ /^\d{1,2}$/ || $req->{'mon'} < 1 || $req->{'mon'} > 12) {
-		$res->{'errmsg'} = "Client error: Invalid month value.";
-	    }
-	    if ($res->{'errmsg'}) { $res->{'success'} = "FAIL"; return; }
-	    if ($req->{'day'} !~ /^\d{1,2}$/ || $req->{'day'} < 1 || $req->{'day'} > &days_in_month($req->{'month'}, $req->{'year'})) {
-		$res->{'errmsg'} = "Client error: Invalid day of month value.";
-	    }
-	    if ($req->{'hour'} !~ /^\d{1,2}$/ || $req->{'hour'} < 0 || $req->{'hour'} > 23) {
-		$res->{'errmsg'} = "Client error: Invalid hour value.";
-	    }
-	    if ($req->{'min'} !~ /^\d{1,2}$/ || $req->{'min'} < 0 || $req->{'min'} > 59) {
-		$res->{'errmsg'} = "Client error: Invalid minute value.";
-	    }
-
-	    ### load existing meta-data
-	    my %curprops;
-	    &LJ::load_log_props($dbh, [ $qitemid ], \%curprops);
-
-	    ## handle meta-data (properties)
-	    my %props_byname = ();
-	    my %props = ();
-	    foreach my $key (keys %{$req}) {
-		next unless ($key =~ /^prop_(\w+)$/);
-
-		## changing to something else?
-		if ($curprops{$qitemid}->{$1} ne $req->{$key}) {
-		    $props_byname{$1} = $req->{$key};
-		}
-	    }
-
-	    if (%props_byname) {
-		my $qnamein = join(",", map { $dbh->quote($_); } keys %props_byname);
-		my $sth = $dbh->prepare("SELECT propid, name, datatype FROM logproplist WHERE name IN ($qnamein)");
-		$sth->execute;
-		while (my ($pid, $pname, $ptype) = $sth->fetchrow_array) {
-		    if ($ptype eq "bool" && $props_byname{$pname} !~ /^[01]$/) {
-			$res->{'errmsg'} = "Client error: Property \"$pname\" should be 0 or 1";
-		    }
-		    if ($ptype eq "num" && $props_byname{$pname} =~ /[^\d]/) {
-			$res->{'errmsg'} = "Client error: Property \"$pname\" should be numeric";
-		    }
-		    $props{$pid} = $props_byname{$pname};
-		    delete $props_byname{$pname};
-		}
-		if (%props_byname) {
-		    $res->{'errmsg'} = "Client error: Unknown property: " . join(",", keys %props_byname);
-		}
-	    }
-
-	    if ($res->{'errmsg'}) { $res->{'success'} = "FAIL"; return; }
-
-	    #### clean up the event text        
-	    my $event = $req->{'event'};
-	    
-	    # remove surrounding whitespace
-	    $event =~ s/^\s+//;
-	    $event =~ s/\s+$//;
-	    
-	    # convert line endings to unix format
-	    if ($req->{'lineendings'} eq "mac") {
-		$event =~ s/\r/\n/g;
-	    } else {
-		$event =~ s/\r//g;
-	    }
-	    my $qevent = $dbh->quote($event);
-	    $event = "";
-	    
-	    my $eventtime = sprintf("%04d-%02d-%02d %02d:%02d", $req->{'year'}, $req->{'mon'}, $req->{'day'}, $req->{'hour'}, $req->{'min'});
-	    my $qeventtime = $dbh->quote($eventtime);
-
-	    my $qallowmask = $req->{'allowmask'}+0;
-	    my $security = "public";
-	    if ($req->{'security'} eq "private" || $req->{'security'} eq "usemask") {
-		$security = $req->{'security'};
-	    }
-
-	    my $qyear = $req->{'year'}+0;
-	    my $qmonth = $req->{'mon'}+0;
-	    my $qday = $req->{'day'}+0;
-
-	    if ($qyear != $oldevent->{'year'} ||
-		$qmonth != $oldevent->{'month'} ||
-		$qday != $oldevent->{'day'} ||
-		$eventtime ne $oldevent->{'eventtime'} ||
-		$security ne $oldevent->{'security'} ||
-		$qallowmask != $oldevent->{'allowmask'}
-		)
-	    {
-		my $qsecurity = $dbh->quote($security);
-		$sth = $dbh->prepare("UPDATE log SET eventtime=$qeventtime, year=$qyear, month=$qmonth, day=$qday, security=$qsecurity, allowmask=$qallowmask WHERE itemid=$qitemid");
-		$sth->execute;
-	    }
-
-	    if ($security ne $oldevent->{'security'} ||
-		$qallowmask != $oldevent->{'allowmask'})
-	    {
-		if ($security eq "public" || $security eq "private") {
-		    $dbh->do("DELETE FROM logsec WHERE ownerid=$ownerid AND itemid=$qitemid");
-		} else {
-		    my $qsecurity = $dbh->quote($security);
-		    $dbh->do("REPLACE INTO logsec (ownerid, itemid, allowmask) VALUES ($ownerid, $qitemid, $qallowmask)");		    
-		}
-	    }
-
-	    if (Digest::MD5::md5_hex($event) ne $oldevent->{'md5event'} ||
-		$req->{'subject'} ne $oldevent->{'subject'})
-	    {
-		my $qsubject = $dbh->quote($req->{'subject'});	    
-
-		my @prefix = ("");
-		if ($LJ::USE_RECENT_TABLES) { push @prefix, "recent_"; }
-		foreach my $pfx (@prefix) {
-		    $sth = $dbh->prepare("UPDATE ${pfx}logtext SET event=$qevent, subject=$qsubject WHERE itemid=$qitemid");
-		    $sth->execute;
-		}
-		$dbh->do("REPLACE INTO logsubject (itemid, subject) VALUES ($qitemid, $qsubject)");
-	    }
-
-
-	    if ($dbh->err) {
-		$res->{'success'} = "FAIL";
-		$res->{'errmsg'} = "Database error [lt]: " . $dbh->errstr;
-		return;
-	    }
-
-	    if (%props) {
-		my $propinsert = "";
-		my @props_to_delete;
-		foreach my $propid (keys %props) {
-		    unless ($props{$propid}) {
-			push @props_to_delete, $propid;
-			next;
-		    }
-		    if ($propinsert) {
-			$propinsert .= ", ";
-		    } else {
-			$propinsert = "REPLACE INTO logprop (itemid, propid, value) VALUES ";
-		    }
-		    my $qvalue = $dbh->quote($props{$propid});
-		    $propinsert .= "($qitemid, $propid, $qvalue)";
-		}
-		if ($propinsert) { $dbh->do($propinsert); }
-		
-		if (@props_to_delete) {
-		    my $propid_in = join(", ", @props_to_delete);
-		    $dbh->do("DELETE FROM logprop WHERE itemid=$qitemid AND propid IN ($propid_in)");
-		}
-	    }
-
-	    ## update lastn hints table, unless it was a backdated entry before and they didn't
-	    ## say in their request what its new backdated status is:
-
-	    if ($req->{'prop_opt_backdated'} eq "1") {
-		&LJ::query_buffer_add($dbh, "hintlastnview", "DELETE FROM hintlastnview WHERE userid=$ownerid AND itemid=$qitemid");
-	    } else {
-		unless ($curprops{$qitemid}->{'opt_backdated'} && ! defined $req->{'prop_opt_backdated'})
-		{
-		    &LJ::query_buffer_add($dbh, "hintlastnview", "REPLACE INTO hintlastnview (userid, itemid) VALUES ($ownerid, $qitemid)");
-		}
-	    }
-
-	}
-	else
-	{
-	    &LJ::delete_item($dbh, $ownerid, $req->{'itemid'});
-	}
-	
-	if ($dbh->err) {
-	    $res->{'success'} = "FAIL";
-	    $res->{'errmsg'} = "Database error [966]: " . $dbh->errstr;
-	    return;
-	}
-	
-        $res->{'success'} = "OK";
-        return 1;
-    }
-
-
 
     ### unknown mode!
     $res->{'success'} = "FAIL";
@@ -1781,18 +1706,115 @@ sub syncitems
 }
 
 ## flat wrapper
-sub postevent
+sub editfriends
 {
     my ($dbs, $req, $res, $flags) = @_;
 
     my $err = 0;
     my $rq = upgrade_request($req);
     
+    $rq->{'add'} = [];
+    $rq->{'delete'} = [];
+
+    foreach (keys %$req) {
+	if (/^editfriend_add_(\d+)_user$/) {
+	    my $n = $1;
+	    my $fa = { 'username' => $req->{"editfriend_add_${n}_user"},
+		       'fgcolor' => $req->{"editfriend_add_${n}_fg"},
+		       'bgcolor' => $req->{"editfriend_add_${n}_bg"},
+		   };
+	    push @{$rq->{'add'}}, $fa;
+	} elsif (/^editfriend_delete_(\w+)$/) {
+	    push @{$rq->{'delete'}}, $1;
+	}
+    }
+
+    my $rs = LJ::Protocol::do_request("editfriends", $rq, \$err, $flags);
+    unless ($rs) {
+	$res->{'success'} = "FAIL";
+	$res->{'errmsg'} = LJ::Protocol::error_message($err);
+	return 0;
+    }
+
+    $res->{'success'} = "OK";
+    
+    my $ct = 0;
+    foreach my $fa (@{ $rs->{'added'} }) {
+	$ct++;
+	$res->{"friend_${ct}_user"} = $fa->{'username'};
+	$res->{"friend_${ct}_name"} = $fa->{'fullname'};
+    }
+
+    $res->{'friends_added'} = $ct;
+
+    return 1;
+}
+
+## flat wrapper
+sub editfriendgroups
+{
+    my ($dbs, $req, $res, $flags) = @_;
+
+    my $err = 0;
+    my $rq = upgrade_request($req);
+    
+    $rq->{'groupmasks'} = {};
+    $rq->{'set'} = {};
+    $rq->{'delete'} = [];
+
+    foreach (keys %$req) {
+	if (/^efg_set_(\d+)_name$/) {
+	    my $n = $1;
+	    my $fs = { 
+		'name' => $req->{"efg_set_${n}_name"},
+		'sort' => $req->{"efg_set_${n}_sort"},
+	    };
+	    if (defined $req->{"efg_set_${n}_public"}) {
+		$fs->{'public'} = $req->{"efg_set_${n}_public"};
+	    }
+	    $rq->{'set'}->{$n} = $fs;
+	} 
+	elsif (/^efg_delete_(\d+)$/) {
+	    if ($req->{$_}) {
+		# delete group if value is true
+		push @{$rq->{'delete'}}, $1;
+	    }
+	}
+	elsif (/^editfriend_groupmask_(\w+)$/) {
+	    $rq->{'groupmasks'}->{$1} = $req->{$_};
+	}
+    }
+
+    my $rs = LJ::Protocol::do_request("editfriendgroups", $rq, \$err, $flags);
+    unless ($rs) {
+	$res->{'success'} = "FAIL";
+	$res->{'errmsg'} = LJ::Protocol::error_message($err);
+	return 0;
+    }
+
+    $res->{'success'} = "OK";
+    return 1;
+}
+
+sub flatten_props
+{
+    my ($req, $rq) = @_;
+
     ## changes prop_* to props hashref
     foreach my $k (keys %$req) {
 	next unless ($k =~ /^prop_(.+)/);
 	$rq->{'props'}->{$1} = $req->{$k};	
     }
+}
+
+## flat wrapper
+sub postevent
+{
+    my ($dbs, $req, $res, $flags) = @_;
+
+    my $err = 0;
+    my $rq = upgrade_request($req);
+    flatten_props($req, $rq);
 
     my $rs = LJ::Protocol::do_request("postevent", $rq, \$err, $flags);
     unless ($rs) {
@@ -1803,6 +1825,72 @@ sub postevent
 
     $res->{'success'} = "OK";
     $res->{'itemid'} = $rs->{'itemid'};
+    return 1;
+}
+
+## flat wrapper
+sub editevent
+{
+    my ($dbs, $req, $res, $flags) = @_;
+
+    my $err = 0;
+    my $rq = upgrade_request($req);
+    flatten_props($req, $rq);
+    
+    my $rs = LJ::Protocol::do_request("editevent", $rq, \$err, $flags);
+    unless ($rs) {
+	$res->{'success'} = "FAIL";
+	$res->{'errmsg'} = LJ::Protocol::error_message($err);
+	return 0;
+    }
+
+    $res->{'success'} = "OK";
+    $res->{'itemid'} = $rs->{'itemid'};
+    return 1;
+}
+
+## flat wrapper
+sub getevents
+{
+    my ($dbs, $req, $res, $flags) = @_;
+
+    my $err = 0;
+    my $rq = upgrade_request($req);
+    
+    my $rs = LJ::Protocol::do_request("getevents", $rq, \$err, $flags);
+    unless ($rs) {
+	$res->{'success'} = "FAIL";
+	$res->{'errmsg'} = LJ::Protocol::error_message($err);
+	return 0;
+    }
+
+    my $ect = 0;
+    my $pct = 0;
+    foreach my $evt (@{$rs->{'events'}}) {
+	$ect++;
+	foreach my $f (qw(itemid eventtime security allowmask subject)) {
+	    if (defined $evt->{$f}) {
+		$res->{"events_${ect}_$f"} = $evt->{$f};
+	    }
+	}
+	$res->{"events_${ect}_event"} = LJ::eurl($evt->{'event'});
+
+	if ($evt->{'props'}) {
+	    foreach my $k (sort keys %{$evt->{'props'}}) {
+		$pct++;
+		$res->{"prop_${pct}_itemid"} = $evt->{'itemid'};
+		$res->{"prop_${pct}_name"} = $k;
+		$res->{"prop_${pct}_value"} = $evt->{'props'}->{$k};
+	    }
+	}
+    }
+
+    unless ($req->{'noprops'}) {
+	$res->{'prop_count'} = $pct;
+    }
+    $res->{'events_count'} = $ect;
+    $res->{'success'} = "OK";
+
     return 1;
 }
 
@@ -1882,6 +1970,5 @@ sub populate_web_menu
     }
     $res->{"menu_${mn}_count"} = $mi;
 }
-
 
 1;
