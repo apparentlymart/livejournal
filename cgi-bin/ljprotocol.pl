@@ -792,7 +792,7 @@ sub editevent
     $event = "";
 	    
     my $eventtime = sprintf("%04d-%02d-%02d %02d:%02d", 
-			    map { $req->{$_} } qw(year mon day hour mon));
+			    map { $req->{$_} } qw(year mon day hour min));
     my $qeventtime = $dbh->quote($eventtime);
     
     my $qallowmask = $req->{'allowmask'}+0;
