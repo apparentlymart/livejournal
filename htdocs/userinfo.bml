@@ -424,6 +424,7 @@
      my $span = ($narrow_left-- > 0) ? 1 : 2;
      $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B><A HREF=\"/interests.bml\">Interests</A>:</B></TD><TD COLSPAN=$span>";
      my $intcount = 0;
+     my $intlist = "";
      foreach (sort keys %interests) {
          $intcount++;
          next if ($intcount > 150);
@@ -431,19 +432,22 @@
          my $eint = LJ::eurl($_);
          if ($interests{$_}->{'intcount'} > 1) {
              if ($interests{$_}->{'common'}) {
-                 $body .= "<B><A HREF=\"/interests.bml?int=$eint\">$_</A></B>, ";
+                 $intlist .= "<b><a href=\"/interests.bml?int=$eint\">$_</a></b>, ";
              } else {
-                 $body .= "<A HREF=\"/interests.bml?int=$eint\">$_</A>, ";
+                 $intlist .= "<a href=\"/interests.bml?int=$eint\">$_</a>, ";
              }
          } else {
-             $body .= "$_, ";
+             $intlist .= "$_, ";
          }
      }
-     chop $body; chop $body;  # remove trailing ", "
+     chop $intlist; chop $intlist;  # remove trailing ", "
      if ($intcount > 150) {
          my $notshown = $intcount - 150;
-         $body .= "<B>... $notshown interests not shown</B>";
+         $intlist .= "<b>... $notshown interests not shown</b>";
      }
+
+     $body .= "<b>$intcount:</b> " . $intlist;
+
      $body .= "</TD></TR>\n";
  }
  
