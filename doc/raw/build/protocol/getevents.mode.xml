@@ -147,6 +147,14 @@ The subject of the journal entry. This won't be returned if "prefersubjects" is 
 The  event text itself. This value is first truncated if the truncate variable is set, and then it is URL-encoded (alphanumerics stay the same, weird symbols to %hh, and spaces to + signs, just like URLs or post request). This allows posts with line breaks to come back on one line.
 </des></scalar></key>
 
+<key name="anum" count="1"><scalar><des>
+The authentication number generated for this entry.  It can be used by the client to generate URLs, but that is not recommended.  (See the returned 'url' element if you want to link to a post.)
+</des></scalar></key>
+
+<key name="url" count="1"><scalar><des>
+The permanent link address to this post.  This is an opaque string--you should store it as is.  While it will generally follow a predictable pattern, there is no guarantee of any particular format for these, and it may change in the future.
+</des></scalar></key>
+
 <key name="poster" count="opt"><scalar><des>
 If the poster of this event is different from the <emphasis>user</emphasis> value sent above, then this key will be included and will specify the username of the poster of this event. If this key is not present, then it is safe to assume that the poster of this event is none other than <emphasis>user</emphasis>.
 </des></scalar></key>

@@ -1523,6 +1523,7 @@ sub getevents
         }
         $evt->{'anum'} = $anum;
         $evt->{'poster'} = LJ::get_username($dbr, $jposterid) if $jposterid != $ownerid;
+        $evt->{'url'} = LJ::item_link($uowner, $itemid, $anum);
         push @$events, $evt;
     }
 
@@ -3067,7 +3068,7 @@ sub getevents
     my $pct = 0;
     foreach my $evt (@{$rs->{'events'}}) {
         $ect++;
-        foreach my $f (qw(itemid eventtime security allowmask subject anum poster)) {
+        foreach my $f (qw(itemid eventtime security allowmask subject anum url poster)) {
             if (defined $evt->{$f}) {
                 $res->{"events_${ect}_$f"} = $evt->{$f};
             }
