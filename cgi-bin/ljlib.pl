@@ -1127,14 +1127,19 @@ sub can_delete_journal_item {
 # name: LJ::get_authas_list
 # des: Get a list of usernames a given user can authenticate as
 # returns: an array of usernames
-# args: u, type?
-# des-type: Optional.  'P' to only return users of journaltype 'P'
+# args: u, opts?
+# des-opts: Optional hashref.  keys are:
+#           - type: 'P' to only return users of journaltype 'P'
+#           - cap:  cap to filter users on
 # </LJFUNC>
 sub get_authas_list {
-    my ($u, $type) = @_;
+    my ($u, $opts) = @_;
+
+    # used to accept a user type, now accept an opts hash
+    $opts = { 'type' => $opts } unless ref $opts;
 
     # only one valid type right now
-    $type = 'P' if $type;
+    $opts->{'type'} = 'P' if $opts->{'type'};
 
     my $ids = LJ::load_rel_target($u, 'A');
     return undef unless $ids;
@@ -1144,7 +1149,8 @@ sub get_authas_list {
     LJ::load_userids_multiple([ map { $_, \$users{$_} } @$ids ], [$u]);
 
     return $u->{'user'}, sort map { $_->{'user'} }
-                         grep { ! $type || $type eq $_->{'journaltype'} }
+                         grep { ! $opts->{'cap'} || LJ::get_cap($_, $opts->{'cap'}) }
+                         grep { ! $opts->{'type'} || $opts->{'type'} eq $_->{'journaltype'} }
                          values %users;
 }
 
@@ -1156,15 +1162,15 @@ sub get_authas_list {
 # returns: string of html elements
 # args: u, opts?
 # des-opts: Optional.  Valid keys are:
-#           'type' - the type argument to pass to LJ::get_authas_list
 #           'authas' - current user, gets selected in drop-down
 #           'label' - label to go before form elements
 #           'button' - button label for submit button
+#           others - arguments to pass to LJ::get_authas_list
 # </LJFUNC>
 sub make_authas_select {
     my ($u, $opts) = @_; # type, authas, label, button
 
-    my @list = LJ::get_authas_list($u, $opts->{'type'});
+    my @list = LJ::get_authas_list($u, $opts);
 
     # only do most of form if there are options to select from
     if (@list > 1) {
