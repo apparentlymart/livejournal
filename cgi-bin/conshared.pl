@@ -63,7 +63,7 @@ sub shared
     my ($dbh, $remote, $args, $out) = @_;
     my $error = 0;
 
-    unless (scalar(@$args) != 3) {
+    unless (scalar(@$args) == 4) {
         $error = 1;
         push @$out, [ "error", "This command takes exactly 3 arguments.  Consult the reference." ];
     }
