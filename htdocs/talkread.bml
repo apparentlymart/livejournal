@@ -265,7 +265,7 @@ body<=
 
  my %userpics;
  if ($picid) {
-     LJ::load_userpics(\%userpics, [ $picid ]);
+     LJ::load_userpics(\%userpics, [ $u, $picid ]);
      my $alt = $up->{'name'};
      if ($props->{'picture_keyword'}) {
          $alt .= ": $props->{'picture_keyword'}";

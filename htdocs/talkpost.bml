@@ -168,7 +168,7 @@ body<=
 
     my %userpics;
     if ($picid) {
-        LJ::load_userpics(\%userpics, [ $picid ]);
+        LJ::load_userpics(\%userpics, [ $u, $picid ]);
 
         # not auto-vivifying $ur here because $picid is based
         # on $ur existing in the first place

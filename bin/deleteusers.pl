@@ -81,15 +81,25 @@ foreach my $du (@delusers)
     }
 
     # delete userpics
-    print "  userpics\n";
-    $ids = $dbh->selectcol_arrayref("SELECT picid FROM userpic WHERE userid=$uid");
     {
+        print "  userpics\n";
+        if ($du->{'dversion'} > 6) {
+            $ids = $dbcm->selectcol_arrayref("SELECT picid FROM userpic2 WHERE userid=$uid");
+        } else {
+            $ids = $dbh->selectcol_arrayref("SELECT picid FROM userpic WHERE userid=$uid");
+        }
 	my $in = join(",",@$ids);
 	if ($in) {
 	    print "  userpics: $in\n";
 	    $runsql->($dbcm, $user, "DELETE FROM userpicblob2 WHERE userid=$uid AND picid IN ($in)");
-	    $runsql->($dbh, $user, "DELETE FROM userpic WHERE userid=$uid");
-	    $runsql->($dbh, $user, "DELETE FROM userpicmap WHERE userid=$uid");
+            if ($du->{'dversion'} > 6) {
+                $runsql->($dbcm, $user, "DELETE FROM userpic2 WHERE userid=$uid");
+                $runsql->($dbcm, $user, "DELETE FROM userpicmap2 WHERE userid=$uid");
+                $runsql->($dbcm, $user, "DELETE FROM userkeywords WHERE userid=$uid");
+            } else {
+                $runsql->($dbh, $user, "DELETE FROM userpic WHERE userid=$uid");
+                $runsql->($dbh, $user, "DELETE FROM userpicmap WHERE userid=$uid");
+            }
 	}
     }
 

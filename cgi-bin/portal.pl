@@ -1029,7 +1029,7 @@ $box{'randuser'} =
         
         my %pic;
         unless ($box->{'args'}->{'hidepic'}) {
-            LJ::load_userpics(\%pic, [ map { $_->{'defaultpicid'} } @ruser ]);
+            LJ::load_userpics(\%pic, [ map { [ $_, $_->{'defaultpicid'} ] } @ruser ]);
         }
 
         if ($size eq "large") {  $$b .= "<table width=100%><tr valign=bottom>"; }

@@ -240,7 +240,7 @@ sub create_view_rss
     ### image block, returns info for their current userpic
     if ($u->{'defaultpicid'}) {
         my $pic = {};
-        LJ::load_userpics($pic, [$u->{'defaultpicid'}]);
+        LJ::load_userpics($pic, [ $u, $u->{'defaultpicid'} ]);
         $pic = $pic->{$u->{'defaultpicid'}}; # flatten
         
         $ret .= "  <image>\n";

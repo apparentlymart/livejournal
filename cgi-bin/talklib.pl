@@ -921,7 +921,7 @@ sub load_comments
 
         # optionally load userpics
         if (ref($opts->{'userpicref'}) eq "HASH") {
-            my %load_pic;
+            my @load_pic;
             foreach my $talkid (@posts_to_load) {
                 my $post = $posts->{$talkid};
                 my $kw;
@@ -931,10 +931,10 @@ sub load_comments
                 my $pu = $opts->{'userref'}->{$post->{'posterid'}};
                 my $id = LJ::get_picid_from_keyword($pu, $kw);
                 $post->{'picid'} = $id;
-                $load_pic{$id} = 1 if $id;
+                push @load_pic, [ $pu, $id ];
             }
             
-            LJ::load_userpics($opts->{'userpicref'}, [ keys %load_pic ]);
+            LJ::load_userpics($opts->{'userpicref'}, \@load_pic);
         }
     }
     
@@ -1541,7 +1541,7 @@ sub format_html_mail {
         my $picid = $comment->{pic} ? $comment->{pic}{'picid'} : $comment->{u}{'defaultpicid'};
         unless ($comment->{pic}) {
             my %pics;
-            LJ::load_userpics(\%pics, [ $comment->{u}{'defaultpicid'} ]);
+            LJ::load_userpics(\%pics, [ $comment->{u}, $comment->{u}{'defaultpicid'} ]);
             $comment->{pic} = $pics{$picid};
             # load_userpics doesn't return picid, but we rely on it above
             $comment->{pic}{'picid'} = $picid;

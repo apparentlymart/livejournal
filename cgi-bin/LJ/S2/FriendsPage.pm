@@ -201,6 +201,7 @@ sub FriendsPage
     }
 
     my %objs_of_picid;
+    my @userpic_load;
     
     my %lite;   # posterid -> s2_UserLite
     my $get_lite = sub {
@@ -320,7 +321,9 @@ sub FriendsPage
         });
         $entry->{'_ymd'} = join('-', map { $entry->{'time'}->{$_} } qw(year month day));
 
-        if ($picid) { 
+
+        if ($picid) {
+            push @userpic_load, [ $friends{$friendid}, $picid ];
             push @{$objs_of_picid{$picid}}, \$entry->{'userpic'};
         }
 
@@ -349,7 +352,8 @@ sub FriendsPage
     # load the pictures that were referenced, then retroactively populate
     # the userpic fields of the Entries above
     my %userpics;
-    LJ::load_userpics(\%userpics, [ keys %objs_of_picid ]);
+    LJ::load_userpics(\%userpics, \@userpic_load);
+
     foreach my $picid (keys %userpics) {
         my $up = Image("$LJ::USERPIC_ROOT/$picid/$userpics{$picid}->{'userid'}",
                        $userpics{$picid}->{'width'},

@@ -37,6 +37,11 @@ my %MimeTypeMap = (
     'image/jpeg' => 'jpg',
     'image/png' => 'png',
 );
+my %MimeTypeMapd6 = (
+    'G' => 'gif',
+    'J' => 'jpg',
+    'P' => 'png',
+);
 
 $USERPIC{'cache_dir'} = "$ENV{'LJHOME'}/htdocs/userpics";
 $USERPIC{'use_disk_cache'} = -d $USERPIC{'cache_dir'};
@@ -642,22 +647,29 @@ sub userpic_content
 
         # Get the blobroot and load the pic hash
         $root = $LJ::PERLBAL_ROOT{userpics};
-        $pic = get_pic_from_picid( $picid ) or return NOT_FOUND;
+        $u = LJ::load_userid( $userid );
+        $pic = get_pic_from_picid( $u, $picid ) or return NOT_FOUND;
         return NOT_FOUND if $pic->{'userid'} != $userid;
 
         # Load the associated user object and make sure they're allowed to see
         # the pic.
-        $u = LJ::load_userid( $userid );
         return NOT_FOUND unless $u && $u->{'statusvis'} !~ /[XS]/ && $pic->{state} ne 'X';
 
         # sometimes we don't want to reproxy userpics
         unless ($LJ::USERPIC_REPROXY_DISABLE{$u->{clusterid}}) {
             # Now ask the blob lib for the path to send to the reproxy
-            $fmt = $MimeTypeMap{ $pic->{contenttype} };
+            $fmt = ($u->{'dversion'} > 6) ? $MimeTypeMapd6{ $pic->{fmt} } : $MimeTypeMap{ $pic->{contenttype} };
             $path = LJ::Blob::get_rel_path( $root, $u, "userpic", $fmt, $picid );
     
             # Set the headers and finish the request
-            $mime = $pic->{contenttype};
+            if ($u->{'dversion'} > 6) {
+                $mime = { 'G' => 'image/gif',
+                          'J' => 'image/jpeg',
+                          'P' => 'image/png', }->{$pic->{fmt}};
+            } else {
+                $mime = $pic->{contenttype};
+            }
+
             $r->header_out( 'X-REPROXY-FILE', $path );
             $send_headers->();
 
@@ -686,15 +698,15 @@ sub userpic_content
 
     # else, get it from db.
     unless ($data) {
-        $pic = get_pic_from_picid( $picid ) or return NOT_FOUND;
-        return NOT_FOUND if $pic->{'userid'} != $userid;
         my $u = LJ::load_userid($userid);
+        $pic = get_pic_from_picid( $u, $picid ) or return NOT_FOUND;
+        return NOT_FOUND if $pic->{'userid'} != $userid;
         return NOT_FOUND unless $u && $u->{'statusvis'} !~ /[XS]/ && $pic->{state} ne 'X';
 
         $lastmod = $pic->{'lastmod'};
 
         if ($LJ::USERPIC_BLOBSERVER) {
-            my $fmt = $MimeTypeMap{ $pic->{contenttype} };
+            my $fmt = ($u->{'dversion'} > 6) ? $MimeTypeMapd6{ $pic->{fmt} } : $MimeTypeMap{ $pic->{contenttype} };
             $data = LJ::Blob::get($u, "userpic", $fmt, $picid);
         }
 
@@ -737,22 +749,42 @@ sub userpic_content
 
 
 sub get_pic_from_picid {
-    my $picid = int(shift);
+    my ($u, $picid) = @_;
+    $picid += 0;
+    return undef unless ref $u;
 
-    my $query = "SELECT state, userid, contenttype, UNIX_TIMESTAMP(picdate) ".
-                "AS 'lastmod' FROM userpic WHERE picid=$picid";
     my $rec;
+    if ($u->{'dversion'} > 6) {
+        my $query = "SELECT state, userid, fmt, UNIX_TIMESTAMP(picdate) ".
+            "AS 'lastmod' FROM userpic2 WHERE userid=$u->{'userid'} AND picid=$picid";
 
-    if (my $dbr = LJ::get_db_reader()) {
-	$rec = $dbr->selectrow_hashref($query);
-	return $rec if $rec;
-    }
+        if (my $dbcr = LJ::get_cluster_def_reader($u)) {
+            $rec = $dbcr->selectrow_hashref($query);
+            return $rec if $rec;
+        }
 
-    # some users report blank userpics after upload.  probably
-    # a race where it's not in the slaves yet?
-    if (my $dbh = LJ::get_db_writer()) {
-	$rec = $dbh->selectrow_hashref($query);
-	return $rec if $rec;
+        # some users report blank userpics after upload.  probably
+        # a race where it's not in the slaves yet?
+        if (my $dbcm = LJ::get_db_cluster_master($u)) {
+            $rec = $dbcm->selectrow_hashref($query);
+            return $rec if $rec;
+        }
+
+    } else {
+        my $query = "SELECT state, userid, contenttype, UNIX_TIMESTAMP(picdate) ".
+            "AS 'lastmod' FROM userpic WHERE picid=$picid";
+
+        if (my $dbr = LJ::get_db_reader()) {
+            $rec = $dbr->selectrow_hashref($query);
+            return $rec if $rec;
+        }
+
+        # some users report blank userpics after upload.  probably
+        # a race where it's not in the slaves yet?
+        if (my $dbh = LJ::get_db_writer()) {
+            $rec = $dbh->selectrow_hashref($query);
+            return $rec if $rec;
+        }
     }
 
     return undef;

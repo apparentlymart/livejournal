@@ -270,7 +270,7 @@ _code?>
         {
             my $picid = $u->{'defaultpicid'};
             my %userpics = ();
-            LJ::load_userpics(\%userpics, [ $picid ]);
+            LJ::load_userpics(\%userpics, [ $u, $picid ]);
             $ret .= "<a href='editpics.bml$getextra'><img src=\"$LJ::USERPIC_ROOT/$picid/$u->{'userid'}\" width='$userpics{$picid}->{'width'}' height='$userpics{$picid}->{'height'} alt='$u->{'user'}' border='0'></a>";
         } else
         {

@@ -699,15 +699,6 @@ CREATE TABLE userpic (
 )
 EOC
 
-register_tablecreate("userpic_comment", <<'EOC');
-CREATE TABLE userpic_comment (
-  userid int unsigned NOT NULL default '0',
-  picid int unsigned NOT NULL default '0',
-  comment varchar(255) BINARY NOT NULL default '',
-  PRIMARY KEY (userid, picid)
-)
-EOC
-
 register_tablecreate("userpicblob2", <<'EOC');
 CREATE TABLE userpicblob2 (
   userid int unsigned not null,
@@ -723,6 +714,30 @@ CREATE TABLE userpicmap (
   kwid int(10) unsigned NOT NULL default '0',
   picid int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (userid,kwid)
+)
+EOC
+
+register_tablecreate("userpicmap2", <<'EOC');
+CREATE TABLE userpicmap2 (
+  userid int(10) unsigned NOT NULL default '0',
+  kwid int(10) unsigned NOT NULL default '0',
+  picid int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (userid, kwid)
+)
+EOC
+
+register_tablecreate("userpic2", <<'EOC');
+CREATE TABLE userpic2 (
+  picid int(10) unsigned NOT NULL,
+  userid int(10) unsigned NOT NULL default '0',
+  fmt char(1) default NULL,
+  width smallint(6) NOT NULL default '0',
+  height smallint(6) NOT NULL default '0',
+  state char(1) NOT NULL default 'N',
+  picdate datetime default NULL,
+  md5base64 char(22) NOT NULL default '',
+  comment varchar(255) BINARY NOT NULL default '',
+  PRIMARY KEY  (userid, picid)
 )
 EOC
 
@@ -960,6 +975,7 @@ register_tabledrop("ipban");
 register_tabledrop("ban");
 register_tabledrop("logaccess");
 register_tabledrop("fvcache");
+register_tabledrop("userpic_comment");
 
 register_tablecreate("portal", <<'EOC');
 CREATE TABLE portal (

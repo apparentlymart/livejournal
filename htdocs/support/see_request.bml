@@ -161,7 +161,7 @@ body<=
     if ($u->{'defaultpicid'} && $u->{'statusvis'} ne 'S') {
         my %pic;
         my $picid = $u->{'defaultpicid'};
-        LJ::load_userpics(\%pic, [ $picid ]);
+        LJ::load_userpics(\%pic, [ $u, $picid ]);
         $ret .= "<a href='$LJ::SITEROOT/allpics.bml?user=$u->{'user'}'>";
         $ret .= "<img align='baseline' src='$LJ::USERPIC_ROOT/$picid/$u->{'userid'}' width='$pic{$picid}->{'width'}' ".
             "height='$pic{$picid}->{'height'}' align='absmiddle' hspace='3' border='0' alt='$u->{'user'}' />";
@@ -355,7 +355,7 @@ body<=
         if ($le->{'userid'} && LJ::Support::can_see_helper($sp, $remote)) {
             my $up = LJ::load_userid($le->{'userid'});
             my $picid = $up->{'defaultpicid'};
-            $userpics{$picid} or LJ::load_userpics(\%userpics, [ $picid ]);
+            $userpics{$picid} or LJ::load_userpics(\%userpics, [[ $up, $picid ]]);
             $header = "<table style='margin-top: 15px;'><tr valign='bottom'>";
             if ($picid && $up->{'statusvis'} ne 'S') {
                 $header .= "<td><img src='$LJ::USERPIC_ROOT/$picid/$up->{'userid'}' width='$userpics{$picid}->{'width'}' height='$userpics{$picid}->{'height'}' hspace='3' alt='$up->{'user'}'/></td>";

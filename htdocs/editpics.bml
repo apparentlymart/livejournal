@@ -39,14 +39,22 @@
     # update this user's activated pics
     LJ::activate_userpics($u);
 
-    my $dbh = LJ::get_db_writer();
-    my $dbcm = LJ::get_cluster_master($u);
-    return $err->($ML{'error.nodb'}) unless $dbh && $dbcm;
-    my $sth;
-    
-    # Put $count and $max in larger scope so they can be used in output 
-    my $count = $dbh->selectrow_array("SELECT COUNT(*) FROM userpic " .
-                                      "WHERE userid=? AND state <> 'X'", undef, $u->{'userid'});
+    my ($dbh, $dbcm, $dbcr, $sth);
+
+    # Put $count and $max in larger scope so they can be used in output
+    my $count;
+    if ($u->{'dversion'} > 6) {
+        $dbcm = LJ::get_cluster_master($u);
+        $dbcr = LJ::get_cluster_def_reader($u);
+        return $err->($ML{'error.nodb'}) unless $dbcm && $dbcr;
+        $count = $dbcr->selectrow_array("SELECT COUNT(*) FROM userpic2 " .
+                                        "WHERE userid=? AND state <> 'X'", undef, $u->{'userid'});
+    } else {
+        $dbh = LJ::get_db_writer();
+        return $err->($ML{'error.nodb'}) unless $dbh;
+        $count = $dbh->selectrow_array("SELECT COUNT(*) FROM userpic " .
+                                       "WHERE userid=? AND state <> 'X'", undef, $u->{'userid'});
+    }
     my $max = LJ::get_cap($u, "userpics");
 
     ### save mode
@@ -54,24 +62,25 @@
 
         ### save changes to existing pics
         if ($POST{'action:save'}) {
-
             # form being posted isn't multipart, since we were able to read from %POST
 
             my %exist_kwids;
-            $sth = $dbh->prepare("SELECT kwid, picid FROM userpicmap WHERE userid=?");
+            if ($u->{'dversion'} > 6) {
+                $sth = $dbcr->prepare("SELECT kwid, picid FROM userpicmap2 WHERE userid=?");
+            } else {
+                $sth = $dbh->prepare("SELECT kwid, picid FROM userpicmap WHERE userid=?");
+            }
             $sth->execute($u->{'userid'});
             while (my ($kwid, $picid) = $sth->fetchrow_array) {
                 push @{$exist_kwids{$picid}}, $kwid;
             }
 
-            my %exist_comments;
-            my $loaded_comments = LJ::get_pic_comments($u, 1);
-            while (my ($comment, $picid) = each %{$loaded_comments}) {
-                $exist_comments{$picid} = $comment;
-            }
- 
             # unconditionally delete from userpicmap, we'll rebuild it later
-            $dbh->do("DELETE FROM userpicmap WHERE userid=?", undef, $u->{'userid'});
+            if ($u->{'dversion'} > 6) {
+                $dbcm->do("DELETE FROM userpicmap2 WHERE userid=?", undef, $u->{'userid'});
+            } else {
+                $dbh->do("DELETE FROM userpicmap WHERE userid=?", undef, $u->{'userid'});
+            }
 
             my @inactive_picids;
             my @delete;
@@ -79,10 +88,16 @@
             my %ctype;  # picid -> contenttype, for delete mode
             my %states; # picid -> state, for setting new default
             my @comments;
+            my %exist_comments;
 
             # select all of their userpics and iterate through them
-            $sth = $dbh->prepare("SELECT picid, width, height, state, contenttype " .
-                                 "FROM userpic WHERE userid=?");
+            if ($u->{'dversion'} > 6) {
+                $sth = $dbcr->prepare("SELECT picid, width, height, state, fmt, comment " .
+                                     "FROM userpic2 WHERE userid=?");
+            } else {
+                $sth = $dbh->prepare("SELECT picid, width, height, state, contenttype " .
+                                     "FROM userpic WHERE userid=?");
+            }
             $sth->execute($u->{'userid'});
             while (my $pic = $sth->fetchrow_hashref)
             {
@@ -92,7 +107,7 @@
                 # delete this pic
                 if ($POST{"delete_$pic->{'picid'}"}) {
                     push @delete, $pic->{'picid'};
-                    $ctype{$pic->{picid}} = $pic->{contenttype};
+                    $ctype{$pic->{picid}} = ($u->{'dversion'} > 6) ? $pic->{'fmt'} : $pic->{'contenttype'};
                     next;
                 }
                 
@@ -102,7 +117,10 @@
                     push @inactive_picids, $pic->{'picid'};
                     next;
                 }
-                
+
+                # comments
+                $exist_comments{$pic->{'picid'}} = $pic->{'comment'};
+
                 # we're going to modify keywords on active pictures
                 my $c = 1;
                 my @kw_errors;
@@ -110,7 +128,7 @@
                 my @keywords = split(/\s*,\s*/, $POST{"kw_$pic->{'picid'}"});
                 @keywords = grep { s/^\s+//; s/\s+$//; $_; } @keywords;
                 foreach my $kw (@keywords) {
-                    my $kwid = LJ::get_keyword_id($kw);
+                    my $kwid = ($u->{'dversion'} > 6) ? LJ::get_keyword_id($u, $kw) : LJ::get_keyword_id($kw);
                     next unless $kwid;
 
                     if ($c > $LJ::MAX_USERPIC_KEYWORDS) {
@@ -134,19 +152,13 @@
                     push @errors, BML::ml(".error.toomanykeywords", {'numwords' => $num_words, 'words' => $kws, 'max' => $LJ::MAX_USERPIC_KEYWORDS});
                 }
 
-                if ($POST{"com_$pic->{'picid'}"} ne $exist_comments{$pic->{'picid'}}) {
+                # Find if they changed the comment and then save the new one
+                if ($u->{'dversion'} > 6 && $POST{"com_$pic->{'picid'}"} ne $exist_comments{$pic->{'picid'}}) {
                     my $comment = LJ::text_trim($POST{"com_$pic->{'picid'}"}, LJ::BMAX_UPI_COMMENT, LJ::CMAX_UPI_COMMENT);
-                    push @comments, $u->{userid}, $pic->{picid}, $comment;
+                    $dbcm->do("UPDATE userpic2 SET comment=? WHERE userid=? AND picid=?", undef, $comment, $u->{'userid'}, $pic->{'picid'});
                 }
             }
 
-            # Update any comments in one replace
-            if (@comments) {
-                my $count = scalar(@comments) / 3; # should be divisible by 3
-                my $bind = join ',', map { "(?, ?, ?)" } 1..$count;
-                $dbcm->do("REPLACE INTO userpic_comment (userid, picid, comment) VALUES $bind", undef, @comments);
-            }
-            
             # now, reapply the existing picids to the inactive pics, unless
             # that picid has already been assigned to a new active one
             foreach my $picid (@inactive_picids) {
@@ -158,18 +170,29 @@
             }
 
             if (@delete) {
-                my $id_in = join(", ", map { $dbh->quote($_) } @delete);
+                my $id_in;
+                if ($u->{'dversion'} > 6) {
+                    $id_in = join(", ", map { $dbcm->quote($_) } @delete);
+                } else {
+                    $id_in = join(", ", map { $dbh->quote($_) } @delete);
+                }
                 
                 # delete data from user cluster
-                my $dbcm = LJ::get_cluster_master($u);
-                return $err->($ML{'error.nodb'}) unless $dbcm;
-
                 foreach my $picid (@delete) {
-                    my $fmt = {
-                        'image/gif' => 'gif',
-                        'image/jpeg' => 'jpg',
-                        'image/png' => 'png',
-                    }->{$ctype{$picid}};
+                    my $fmt;
+                    if ($u->{'dversion'} > 6) {
+                        $fmt = {
+                            'G' => 'gif',
+                            'J' => 'jpg',
+                            'P' => 'png',
+                        }->{$ctype{$picid}};
+                    } else {
+                        $fmt = {
+                            'image/gif' => 'gif',
+                            'image/jpeg' => 'jpg',
+                            'image/png' => 'png',
+                        }->{$ctype{$picid}};
+                    }
 
                     my $deleted = 0;
 
@@ -184,13 +207,14 @@
                         $deleted = 1;
                     }
                     if ($deleted) {
-                        $dbh->do("DELETE FROM userpic WHERE picid=?", undef, $picid);
+                        if ($u->{'dversion'} > 6) {
+                            $dbcm->do("DELETE FROM userpic2 WHERE picid=? AND userid=?", undef, $picid, $u->{'userid'});
+                        } else {
+                            $dbh->do("DELETE FROM userpic WHERE picid=?", undef, $picid);
+                        }
                         $dbcm->do("DELETE FROM userblob WHERE journalid=? AND blobid=? " .
                                   "AND domain=?", undef, $u->{'userid'}, $picid,
                                   LJ::get_blob_domainid('userpic'));
-                        $dbcm->do("DELETE FROM userpic_comment WHERE userid=? AND picid=?",
-                                  undef, $u->{'userid'}, $picid);
-
 
                         # decrement $count to reflect deletion
                         $count--;
@@ -210,7 +234,11 @@
                                                             "userid=? AND picid=?", undef, $u->{'userid'},
                                                             $picid);
                         if (! int($present)) {
-                            $dbh->do("DELETE FROM userpic WHERE picid=$picid");
+                            if ($u->{'dversion'} > 6) {
+                                $dbcm->do("DELETE FROM userpic2 WHERE picid=? AND userid=?", undef, $picid, $u->{'userid'});
+                            } else {
+                                $dbh->do("DELETE FROM userpic WHERE picid=?", undef, $picid);
+                            }
                         }
                     }
                 }
@@ -222,16 +250,29 @@
             }
 
             if (%picid_of_kwid) {
-                $dbh->do("REPLACE INTO userpicmap (userid, kwid, picid) VALUES " .
-                         join(",", map { "(" .
-                                             join(",", 
-                                                  $dbh->quote($u->{'userid'}),
-                                                  $dbh->quote($_),
-                                                  $dbh->quote($picid_of_kwid{$_})) .
-                                         ")"
-                                     }
-                              keys %picid_of_kwid)
-                         );
+                if ($u->{'dversion'} > 6) {
+                    $dbcm->do("REPLACE INTO userpicmap2 (userid, kwid, picid) VALUES " .
+                             join(",", map { "(" .
+                                                 join(",", 
+                                                      $dbcm->quote($u->{'userid'}),
+                                                      $dbcm->quote($_),
+                                                      $dbcm->quote($picid_of_kwid{$_})) .
+                                                      ")"
+                                                  }
+                                  keys %picid_of_kwid)
+                             );
+                } else {
+                    $dbh->do("REPLACE INTO userpicmap (userid, kwid, picid) VALUES " .
+                             join(",", map { "(" .
+                                                 join(",", 
+                                                      $dbh->quote($u->{'userid'}),
+                                                      $dbh->quote($_),
+                                                      $dbh->quote($picid_of_kwid{$_})) .
+                                                      ")"
+                                                  }
+                                  keys %picid_of_kwid)
+                             );
+                }
             }
 
             my $new_default = $POST{'defaultpic'}+0;
@@ -245,7 +286,7 @@
                 if ($states{$new_default} eq 'N' || !$new_default) {
                     LJ::update_user($u, { defaultpicid => $new_default });
                     $u->{'defaultpicid'} = $new_default;
-                }
+                  }
             }
 
             my $memkey = [$u->{'userid'},"upicinf:$u->{'userid'}"];
@@ -256,7 +297,7 @@
 
         ### no post, so we'll parse the multipart data
         unless (%POST) {
- 
+
             my $MAX_UPLOAD = 40960;
 
             my $error;
@@ -313,12 +354,7 @@
                                        { 'imagesize' => "${sx}$ML{'.imagesize.by'}${sy}",
                                          'maxsize'   => "100$ML{'.imagesize.by'}100" }) );
             }
-            
-            my $contenttype;
-            if ($filetype eq "GIF") { $contenttype = "image/gif"; }
-            if ($filetype eq "PNG") { $contenttype = "image/png"; }
-            if ($filetype eq "JPG") { $contenttype = "image/jpeg"; }
-            
+
             my $base64 = Digest::MD5::md5_base64($POST{'userpic'});
             
             ## see if they have too many pictures uploaded
@@ -329,40 +365,76 @@
             }
             
             # see if it's a duplicate
-            my $picid = $dbh->selectrow_array("SELECT picid FROM userpic " .
-                                              "WHERE userid=? AND contenttype=? " .
-                                              "AND md5base64=?",
-                                              undef, $u->{'userid'}, $contenttype, $base64);
-            
+            my $picid;
+            my $contenttype;
+            if ($u->{'dversion'} > 6) {
+                if ($filetype eq "GIF") { $contenttype = 'G'; }
+                elsif ($filetype eq "PNG") { $contenttype = 'P'; }
+                elsif ($filetype eq "JPG") { $contenttype = 'J'; }
+
+                $picid = $dbcr->selectrow_array("SELECT picid FROM userpic2 " .
+                                                "WHERE userid=? AND fmt=? " .
+                                                "AND md5base64=?",
+                                                undef, $u->{'userid'}, $contenttype, $base64);
+            } else {
+                if ($filetype eq "GIF") { $contenttype = "image/gif"; }
+                elsif ($filetype eq "PNG") { $contenttype = "image/png"; }
+                elsif ($filetype eq "JPG") { $contenttype = "image/jpeg"; }
+
+                $picid = $dbh->selectrow_array("SELECT picid FROM userpic " .
+                                               "WHERE userid=? AND contenttype=? " .
+                                               "AND md5base64=?",
+                                               undef, $u->{'userid'}, $contenttype, $base64);
+            }
             # if picture isn't a duplicate, insert it
             if ($picid == 0) {
-                
-                # insert the meta-data
-                $dbh->do("INSERT INTO userpic (userid, contenttype, width, height, " .
-                         "picdate, md5base64) VALUES (?, ?, ?, ?, NOW(), ?)",
-                         undef, $u->{'userid'}, $contenttype, $sx, $sy, $base64);
-                return $err->($dbh->errstr) if $dbh->err;
 
-                $picid = $dbh->{'mysql_insertid'};
-                
+                # insert the meta-data
+                # Make a new global picid
+                $picid = LJ::alloc_global_counter('P');
+                my $dberr = 0;
+                if ($u->{'dversion'} > 6) {
+                    $dbcm->do("INSERT INTO userpic2 (picid, userid, fmt, width, height, " .
+                             "picdate, md5base64) VALUES (?, ?, ?, ?, ?, NOW(), ?)",
+                             undef, $picid, $u->{'userid'}, $contenttype, $sx, $sy, $base64);
+                    if ($dbcm->err) {
+                        push @errors, $err->($dbcm->errstr);
+                        $dberr = 1;
+                    }
+                } else {
+                    $dbh->do("INSERT INTO userpic (picid, userid, contenttype, width, height, " .
+                             "picdate, md5base64) VALUES (?, ?, ?, ?, ?, NOW(), ?)",
+                             undef, $picid, $u->{'userid'}, $contenttype, $sx, $sy, $base64);
+                    if ($dbh->err) {
+                        push @errors, $err->($dbh->errstr);
+                        $dberr = 1;
+                    }
+                }
+
                 my $clean_err = sub {
-                    $dbh->do("DELETE FROM userpic WHERE picid=?", undef, $picid) if $picid;
+                    if ($u->{'dversion'} > 6) {
+                        $dbcm->do("DELETE FROM userpic2 WHERE userid=? AND picid=?", undef, $u->{'userid'}, $picid) if $picid;
+                    } else {
+                        $dbh->do("DELETE FROM userpic WHERE picid=?", undef, $picid) if $picid;
+                    }
                     return $err->(@_);
                 };
 
                 ### insert the blob
-                if ($LJ::USERPIC_BLOBSERVER) {
+                if ($LJ::USERPIC_BLOBSERVER && !$dberr) {
                     my $et;
                     my $fmt = lc($filetype);
                     my $rv = LJ::Blob::put($u, "userpic", $fmt, $picid, $POST{'userpic'}, \$et);
-                    return $clean_err->("Error saving to media server: $et") unless $rv;
-                } else {
+                    push @errors, $clean_err->("Error saving to media server: $et") unless $rv;
+                } elsif (!$dberr) {
                     my $dbcm = LJ::get_cluster_master($u);
                     return $err->($ML{'error.nodb'}) unless $dbcm;
                     $dbcm->do("INSERT INTO userpicblob2 (userid, picid, imagedata) " .
                               "VALUES (?, ?, ?)",
                               undef, $u->{'userid'}, $picid, $POST{'userpic'});
-                    return $clean_err->($dbcm->errstr) if $dbcm->err;
+                    push @errors, $clean_err->($dbcm->errstr) if $dbcm->err;
+                } else { # We should never get here!
+                    push @errors, "User picture uploading failed for unknown reason";
                 }
 
                 # Not a duplicate, so increment $count
@@ -398,26 +470,33 @@
     }
 
     my %keywords = ();
-    $sth = $dbh->prepare("SELECT m.picid, k.keyword FROM userpicmap m, keywords k ".
-                         "WHERE m.userid=? AND m.kwid=k.kwid");
+    my $dbcr = LJ::get_cluster_def_reader($u);
+    if ($u->{'dversion'} > 6) {
+        $sth = $dbcr->prepare("SELECT m.picid, k.keyword FROM userpicmap2 m, userkeywords k ".
+                              "WHERE m.userid=? AND m.kwid=k.kwid AND m.userid=k.userid");
+    } else {
+        $sth = $dbh->prepare("SELECT m.picid, k.keyword FROM userpicmap m, keywords k ".
+                             "WHERE m.userid=? AND m.kwid=k.kwid");
+    }
     $sth->execute($u->{'userid'});
     while (my ($pic, $keyword) = $sth->fetchrow_array) {
         LJ::text_out(\$keyword);
         push @{$keywords{$pic}}, $keyword;
     }
- 
-    my %comments = ();
-    my $loaded_comments = LJ::get_pic_comments($u, 1);
-    while (my ($comment, $picid) = each %{$loaded_comments}) {
-        $comments{$picid} = $comment;
+
+    if ($u->{'dversion'} > 6) {
+        $sth = $dbcr->prepare("SELECT picid, width, height, state, comment " .
+                              "FROM userpic2 WHERE userid=?");
+    } else {
+        $sth = $dbh->prepare("SELECT picid, width, height, state " .
+                             "FROM userpic WHERE userid=?");
     }
-
-    $sth = $dbh->prepare("SELECT picid, width, height, state " .
-                         "FROM userpic WHERE userid=? ORDER BY 1");
     $sth->execute($u->{'userid'});
-    my $piccount = 0;
+    my @sortedpics;
+    push @sortedpics, $_ while $_ = $sth->fetchrow_hashref;
 
-    while (my $pic = $sth->fetchrow_hashref)
+    my $piccount = 0;
+    foreach my $pic (sort { $a->{picid} <=> $b->{picid} } @sortedpics)
     {
         my $pid = $pic->{'picid'};
 
@@ -466,12 +545,15 @@
 
             $body .= "</td></tr>\n";
 
-            $body .= "<tr><td align='right'><b><label for='$pid-com'>$ML{'.label.comment'}</label></b></td><td> ";
-            $body .= LJ::html_text({ 'name' => "com_$pid", 'id' => "$pid-com",
-                                     'size' => '30', 'value' => $comments{$pic->{'picid'}},
-                                     'maxlength' => LJ::CMAX_UPI_COMMENT,
-                                     'disabled' => $pic->{'state'} eq 'I' });
-            $body .= "</td></tr>\n";
+            if ($u->{'dversion'} > 6) {
+                $body .= "<tr><td align='right'><b><label for='$pid-com'>$ML{'.label.comment'}</label></b></td><td> ";
+                $body .= LJ::html_text({ 'name' => "com_$pid", 'id' => "$pid-com",
+                                         'size' => '30', 'value' => $pic->{'comment'},
+                                         'maxlength' => LJ::CMAX_UPI_COMMENT,
+                                         'disabled' => $pic->{'state'} eq 'I' });
+
+                $body .= "</td></tr>\n";
+            }
         }
         
         $body .= "</table>\n</td></tr>\n";

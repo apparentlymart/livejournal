@@ -318,7 +318,7 @@ body<=
      my %last = ();
 
      my %pic;
-     my @picids = map { $_->{'defaultpicid'} } @matches;
+     my @picids = map { [$_, $_->{'defaultpicid'}] } @matches;
      LJ::load_userpics(\%pic, \@picids);
 
      my $count = 0;

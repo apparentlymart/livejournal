@@ -1089,9 +1089,8 @@ sub create_view_lastn
                                @items], [$u]);
 
     # pre load things in a batch (like userpics) to minimize db calls
-    my %userpics;
     my @userpic_load;
-    push @userpic_load, $u->{'defaultpicid'} if $u->{'defaultpicid'};
+    push @userpic_load, [ $u, $u->{'defaultpicid'} ] if $u->{'defaultpicid'};
     foreach my $item (@items) {
         next if $item->{'posterid'} == $u->{'userid'};
         my $itemid = $item->{'itemid'};
@@ -1099,8 +1098,9 @@ sub create_view_lastn
 
         my $picid = LJ::get_picid_from_keyword($pu, $logprops{$itemid}->{'picture_keyword'});
         $item->{'_picid'} = $picid;
-        push @userpic_load, $picid if ($picid && ! grep { $_ eq $picid } @userpic_load);
+        push @userpic_load, [ $pu, $picid ] if ($picid && ! grep { $_ eq $picid } @userpic_load);
     }
+    my %userpics;
     LJ::load_userpics(\%userpics, \@userpic_load);
 
     if (my $picid = $u->{'defaultpicid'}) {
@@ -1531,7 +1531,7 @@ sub create_view_friends
 
     # load the pictures for the user
     my %userpics;
-    my @picids = map { $friends{$_}->{'defaultpicid'} } keys %friends;
+    my @picids = map { [$_, $friends{$_}->{'defaultpicid'}] } keys %friends;
     LJ::load_userpics(\%userpics, [ @picids, map { $_->{'defaultpicid'} } values %aposter ]);
 
     # load the text of the entries
@@ -1648,7 +1648,7 @@ sub create_view_friends
             {
                 my $alt_picid = LJ::get_picid_from_keyword($posterid, $logprops{$datakey}->{'picture_keyword'});
                 if ($alt_picid) {
-                    LJ::load_userpics(\%userpics, [ $alt_picid ]);
+                    LJ::load_userpics(\%userpics, [ $pu, $alt_picid ]);
                     $picid = $alt_picid;
                     $picuserid = $posterid;
                 }

@@ -484,8 +484,9 @@ $cmd{'expunge_userpic'} = {
     'def' => 'consuspend.pl',
     'privs' => [qw(siteadmin)],
     'des' => 'Expunge a user picture icon from the site.',
-    'argsummary' => '<picid>',
+    'argsummary' => '<user> <picid>',
     'args' => [
+               'user' => 'The username of the picture owner.',
                'picid' => 'The id of the picture to expunge.',
                ],
     };

@@ -17,24 +17,26 @@ $cmd{'infohistory'}->{'handler'} = \&infohistory;
 sub expunge_userpic {
     my ($dbh, $remote, $args, $out) = @_;
 
-    unless (scalar(@$args) == 2) {
-        push @$out, [ "error", "This command takes exactly one argument.  Consult the reference." ];
+    unless (scalar(@$args) == 3) {
+        push @$out, [ "error", "This command takes exactly two arguments, username and picid.  Consult the reference." ];
         return 0;
     }
 
-    my $picid = $args->[1]+0;
+    my $user = $args->[1];
+    my $picid = $args->[2]+0;
 
     unless (LJ::check_priv($remote, 'siteadmin', 'userpics') || LJ::check_priv($remote, 'siteadmin', '*')) {
         push @$out, [ "error", "You don't have access to expunge user picture icons." ];
         return 0;
     }
 
+    my $u = LJ::load_user($user);
+
     # the actual expunging happens in ljlib
-    my ($rval, $hookval) = LJ::expunge_userpic($picid);
+    my ($rval, $hookval) = LJ::expunge_userpic($u, $picid);
     push @$out, $hookval if @{$hookval || []};
 
     # now load up from the return value we got
-    my $u = LJ::load_userid($rval+0);
     unless ($rval && $u) {
         push @$out, [ "error", "Error expunging user picture icon." ];
         return 0;
