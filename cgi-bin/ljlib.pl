@@ -12,7 +12,6 @@ use DBI;
 use Digest::MD5 qw(md5_hex);
 use Text::Wrap;
 use MIME::Lite;
-use HTML::LinkExtor;
 
 ########################
 # CONSTANTS
@@ -614,12 +613,9 @@ sub get_urls
 {
     my $text = shift;
     my @urls;
-    my $p = HTML::LinkExtor->new(sub { 
-	my ($tag, %attr) = @_;
-	return if ($tag eq "img");
-	push @urls, values %attr;
-    });
-    $p->parse($text);
+    while ($text =~ s!http://[^\s\"\>]+!!) {
+	push @urls, $&;
+    }
     return @urls;
 }
 
