@@ -12,14 +12,14 @@
 
 <!ELEMENT ljxmlrpc (method*)>
 
-<!ELEMENT method  (arguments, returns)>
+<!ELEMENT method  (des?, arguments, returns)>
 <!ATTLIST method  name NMTOKEN #REQUIRED>
 
 <!-- arguments and return both have a list of values, either structs, lists, or scalars -->
 <!ELEMENT arguments (struct | list | scalar)*>
 <!ELEMENT returns   (struct | list | scalar)*>
 
-<!ELEMENT scalar (#PCDATA)>
+<!ELEMENT scalar (des?)>
 <!ATTLIST scalar %countatt;>
 
 <!ELEMENT struct (key*)>

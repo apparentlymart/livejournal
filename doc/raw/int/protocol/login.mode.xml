@@ -3,34 +3,34 @@
 
 &authInfo;
 
-<key name="clientversion" count="opt"><scalar>
+<key name="clientversion" count="opt"><scalar><des>
 Although optional, this <emphasis>should</emphasis> be a string of the form <literal>Platform-ProductName/ClientVersionMajor.Minor.Rev</literal>, like <emphasis>Win32-MFC/1.2.7</emphasis> or <emphasis>Gtk-LoserJabber/1.0.4</emphasis>.  Note in this case that "Gtk" is not a platform, but rather a toolkit, since the toolkit is multi-platform (Linux, FreeBSD, Solaris, Windows...).  You make the judge what is best to send, but if it's of this form, we'll give you cool statistics about your users.
-</scalar></key>
+</des></scalar></key>
 
-<key name="getmoods" count="opt"><scalar>
+<key name="getmoods" count="opt"><scalar><des>
 If your client supports moods, send this key with a value of the highest mood ID you have cached/stored on the user's computer.  For example, if you logged in last time with and got mood IDs 1, 2, 4, and 5, then send "5" as the value of "getmoods".  The server will return every new mood that has an internal MoodID greater than 5.  If you've never downloaded moods before, send "0".  If you don't care about getting any moods at all (if your client doesn't support them), then don't send this key at all.
-</scalar></key>
+</des></scalar></key>
 
-<key name="getmenus" count="opt"><scalar>
+<key name="getmenus" count="opt"><scalar><des>
 Send something for this key if you want to get a list/tree of web jump menus to show in your client.
-</scalar></key>
+</des></scalar></key>
 
-<key name="getpickws" count="opt"><scalar>
+<key name="getpickws" count="opt"><scalar><des>
 If your client supports picture keywords and you want to receive that list, send something for this key, like "1", and you'll receieve the list of picture keywords the user has defined.
-</scalar></key>
+</des></scalar></key>
 
 </struct></arguments>
 
 <!--===================[ RETURN ]==============================-->
 <returns><struct count="1">
 
-<key name="name" count="1"><scalar>
+<key name="name" count="1"><scalar><des>
 The user's full name.  Often, clients use this to change the top-level window's title bar text to say something like "LiveJournal - User name".  You can just ignore this if you'd like.
-</scalar></key>
+</des></scalar></key>
 	  
-<key name="message" count="opt"><scalar>
+<key name="message" count="opt"><scalar><des>
 A message that <emphasis>should</emphasis> be displayed in a dialog box (or to the screen in a console application).  The message is rarely present but when used notifies the user of software updates they've requested to hear about, problems with their account (if mail is bouncing to them, we'd like them to give us a current email address), etc.  To test this if you're developing a client, use the user account <literal role="username">test</literal> with the password <literal>test</literal> and a message will always be returned.
-</scalar></key>
+</des></scalar></key>
 	  
 <key name="friendgrounds" count="1">
 &friendGroups;
@@ -51,32 +51,32 @@ A message that <emphasis>should</emphasis> be displayed in a dialog box (or to t
 	<des>
 This is requrned if you set "getpickws" in your request.  Picture keywords are used to identify which userpic (100x100 icon) to use for that particular post.  For instance, the user may have "Angry", "Happy", and "Sleepy" picture keywords which map to certain pictures.  The client should also do a case-insensitive compare on this list when a mood is selected or entered, and auto-select the current picture keyword.  That way it seems that selecting a mood also sets their corresponding picture.
 </des>
-<list count="1"><scalar count="0more">
+<list count="1"><scalar count="0more"><des>
 The picture keyword.	    
-</scalar></list>
+</des></scalar></list>
 </key>
       
-<key name="fastserver" count="opt"><scalar>
+<key name="fastserver" count="opt"><scalar><des>
 LiveJournal sites may have priority servers for paying customers.  If this key is both present and set to value "1", then the client has permission to set the "ljfastserver" cookie in subsequent requests.  The HTTP request header to send is "Cookie: ljfastserver=1".  If you send this header without getting permission from the login mode, your requests will fail.  That is, you'll trick the load balancer into directing your request towards the priority servers, but the server you end up hitting won't be happy that you're trying to scam faster access and will deny your request.
-</scalar></key>
+</des></scalar></key>
 
-<key name="userid" count="1"><scalar>
+<key name="userid" count="1"><scalar><des>
 The userid of this user on the system.  Not required for any other requests to
 the server, but some developers have wanted it.
-</scalar></key>
+</des></scalar></key>
 
 <key name="menus" count="opt">
 <des>Returned if you set "getmenus" in your request.</des>
 <list count="1">
 <des>List of menu items in order that should be in the LiveJournal web menu in the client application.</des>
 <struct count="0more">
-  <key name="text" count="1"><scalar>
+  <key name="text" count="1"><scalar><des>
      The text of the menu item, or "-" for a separator. 
-  </scalar></key>
-  <key name="url" count="opt"><scalar>
+  </des></scalar></key>
+  <key name="url" count="opt"><scalar><des>
      The URL the menu item should launch, present for all menu items
      except separators and submenus.
-  </scalar></key>
+  </des></scalar></key>
   <key name="sub" count="opt"><des>
      If this is present, this menu item is a submenu.   
   </des><list count="0more">
