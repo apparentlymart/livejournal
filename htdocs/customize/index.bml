@@ -6,38 +6,31 @@ body<=
     use strict;
     use vars qw(%GET %POST %FORM);
 
-    my $ret;
     my $remote = LJ::get_remote();
+    return LJ::bad_input($ML{'error.noremote'})
+        unless $remote;
 
-    unless ($remote) {
-        return "<?h1 Login Required h1?><?p Before you customize your journal, you must first <a href='/login.bml?ret=1'>login</a>. p?>";
-    }
+    my $authas = $GET{'journal'} || $GET{'authas'} || $remote->{'user'};
+    my $u = LJ::get_authas_user($authas);
+    return LJ::bad_input($ML{'error.invalidauth'})
+        unless $u;
 
-    my @journals = ($remote->{'user'});
-    push @journals, LJ::get_shared_journals($remote);
-
-    my $journal = $GET{'journal'} || $remote->{'user'};
-    unless (grep { $_ eq $journal } @journals) {  return BML::redirect("/customize/");  }
-
-
-    my $u = $remote;
-    $u = LJ::load_user($journal) unless $journal eq $remote->{'user'};
     my $userid = $u->{'userid'};
     
     return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
+
+    my $ret;
+
+    $ret .= "<?h1 Customize Journal h1?>";
     
-    if (@journals > 1) {
-        $ret .= "<form method='get' action='./'>";
-        $ret .= "<?h1 Customize Journal h1?><?p Work with journal: ";
-        $ret .= LJ::html_select({
-            'name' => 'journal',
-            'selected' => $journal,
-        }, map { $_, $_ } @journals);
-        $ret .= " <input type='submit' value='Switch'> p?></form>";
-    }
-    
+    # authas switcher form
+    $ret .= "<form class='postheading' method='get' action='index.bml'>\n";
+    $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} || $GET{'journal'} }) . "\n";
+    $ret .= "</form>\n\n";
+
     LJ::load_user_props($u, "stylesys", "s2_style");
     $u->{'stylesys'} ||= 1;
+
     my $pub = LJ::S2::get_public_layers();
     my $userlay = LJ::S2::get_layers_of_user($u);
     my %style = LJ::S2::get_style($u, "verify");
@@ -96,7 +89,7 @@ body<=
             return "Error: couldn't generate user layer" unless $id;
             LJ::S2::set_style_layers($u, $u->{'s2_style'}, "user", $id);
         }
-        return BML::redirect("/customize/layer.bml?w=user&journal=$journal");
+        return BML::redirect("/customize/layer.bml?w=user&journal=$authas");
     }
 
     if ($POST{'save:theme'}) {
