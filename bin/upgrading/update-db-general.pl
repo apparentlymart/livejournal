@@ -776,12 +776,6 @@ CREATE TABLE user (
   statusvisdate datetime default NULL,
   name char(50) default NULL,
   bdate date default NULL,
-  lastn_style int(11) NOT NULL default '1',
-  calendar_style int(11) NOT NULL default '2',
-  search_style int(11) NOT NULL default '3',
-  searchres_style int(11) NOT NULL default '4',
-  day_style int(11) NOT NULL default '5',
-  friends_style int(11) NOT NULL default '6',
   themeid int(11) NOT NULL default '1',
   moodthemeid int(10) unsigned NOT NULL default '1',
   opt_forcemoodtheme enum('Y','N') NOT NULL default 'N',
@@ -1147,6 +1141,23 @@ register_alter(sub {
 	# related, done at same time:
 	do_alter("talk",
 		 "ALTER TABLE talk ADD INDEX datepost (datepost), DROP INDEX posterid, ADD INDEX posterid (posterid, nodetype, datepost)");
+    }
+
+    # move S1 _style ids to userprop table!
+    if (column_type("user", "lastn_style")) {
+
+	# be paranoid and insert these in case they don't exist:
+	try_sql("INSERT INTO userproplist VALUES (null, 's1_lastn_style', 0, 'Recent View StyleID', 'num', 'The style ID# of the S1 style for the recent entries view.')");
+	try_sql("INSERT INTO userproplist VALUES (null, 's1_calendar_style', 0, 'Calendar View StyleID', 'num', 'The style ID# of the S1 style for the calendar view.')");
+	try_sql("INSERT INTO userproplist VALUES (null, 's1_day_style', 0, 'Day View StyleID', 'num', 'The style ID# of the S1 style for the day view.')");
+	try_sql("INSERT INTO userproplist VALUES (null, 's1_friends_style', 0, 'Friends View StyleID', 'num', 'The style ID# of the S1 style for the friends view.')");
+	
+	foreach my $v (qw(lastn day calendar friends)) {
+	    do_sql("INSERT INTO userproplite SELECT u.userid, upl.upropid, u.${v}_style FROM user u, userproplist upl WHERE upl.name='s1_${v}_style'");
+	}
+	
+	do_alter("user",
+		 "ALTER TABLE user DROP lastn_style, DROP calendar_style, DROP search_style, DROP searchres_style, DROP day_style, DROP friends_style");
     }
 
 });

@@ -22,6 +22,10 @@ BODY<=
  if ($sp->{'reqtype'} eq "user") {
      $u = LJ::load_userid($dbs, $sp->{'requserid'});
      $email = $u->{'email'};
+     LJ::load_user_props($dbs, $u, 
+			 "s1_lastn_style", "s1_calendar_style",
+			 "s1_day_style", "s1_friends_style",
+			 );
  }
 
  my $winner;  ## who closed it?
@@ -79,7 +83,7 @@ BODY<=
      $ret .= "username: (=LJUSERF $u->{'user'} LJUSERF=)";
      $ret .= "<BR>styles: ";
      foreach my $view (@LJ::views) {
-	 my $styid = $u->{"${view}_style"};
+	 my $styid = $u->{"s1_${view}_style"};
 	 $ret .= "$view: <A HREF=\"/styles/browse/styleinfo.bml?styleid=$styid\">$styid</A> ";
      }
      $ret .= "<BR>email validated? ";

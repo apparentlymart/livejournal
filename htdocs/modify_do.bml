@@ -20,7 +20,10 @@ BODY<=
  unless ($u) { push @errors, "Invalid username"; }
  my $capstyles = LJ::get_cap($u, "styles");
 
- LJ::load_user_props($dbs, $u, "opt_usesharedpic");
+ LJ::load_user_props($dbs, $u, "opt_usesharedpic",
+		     "s1_lastn_style", "s1_calendar_style",
+		     "s1_day_style", "s1_friends_style",
+		     );
 
  if (scalar(@errors)==0 && ! LJ::valid_password($u->{'password'}, \%FORM)) { push @errors, "Incorrect password."; }
 
@@ -60,22 +63,22 @@ BODY<=
 
      foreach my $view (@LJ::views)
      {
-         $ret .= "<TR><TD BGCOLOR=#D0D0D0>$LJ::viewinfo{$view}->{'des'}</TD><TD><SELECT NAME=\"${view}_style\">\n";
+         $ret .= "<TR><TD BGCOLOR=#D0D0D0>$LJ::viewinfo{$view}->{'des'}</TD><TD><SELECT NAME=\"s1_${view}_style\">\n";
          foreach (grep { $_->{'user'} eq "system" } @{$styles{$view}})
          {
-	   my $selected = $_->{'styleid'}==$u->{"${view}_style"} ? " SELECTED" : "";
-	   $ret .= "<OPTION VALUE=\"$_->{'styleid'}\"$selected>" . BMLUtil::escapeall($_->{'styledes'}) . "\n";
+	     my $selected = $_->{'styleid'}==$u->{"s1_${view}_style"} ? " SELECTED" : "";
+	     $ret .= "<OPTION VALUE=\"$_->{'styleid'}\"$selected>" . BMLUtil::escapeall($_->{'styledes'}) . "\n";
          }
          my $exist_user_style = 0;
          foreach (grep { $_->{'user'} ne "system" } @{$styles{$view}})
          {
-	   if (!$exist_user_style)
-	   {
-	       $exist_user_style = 1;
-	       $ret .= "<OPTION VALUE=\"\">--- User styles: ---\n";
-	   }
-	   my $selected = $_->{'styleid'}==$u->{"${view}_style"} ? " SELECTED" : "";
-	   $ret .= "<OPTION VALUE=\"$_->{'styleid'}\"$selected>" . BMLUtil::escapeall($_->{'styledes'}) . "\n";
+	     if (!$exist_user_style)
+	     {
+		 $exist_user_style = 1;
+		 $ret .= "<OPTION VALUE=\"\">--- User styles: ---\n";
+	     }
+	     my $selected = $_->{'styleid'}==$u->{"s1_${view}_style"} ? " SELECTED" : "";
+	     $ret .= "<OPTION VALUE=\"$_->{'styleid'}\"$selected>" . BMLUtil::escapeall($_->{'styledes'}) . "\n";
          }
          $ret .= "</SELECT></TD></TR>\n";
      }
@@ -299,8 +302,7 @@ BODY<=
 
      # update 'user' table
      my $sets = "";
-     foreach (keys %update)
-     {
+     foreach (keys %update) {
          $sets .= "$_=" . $dbh->quote($update{$_}) . ",";
      }
 
@@ -312,15 +314,23 @@ BODY<=
 	 my $qstatvis = $dbh->quote($FORM{'statusvis'});
 	 $sets .= "statusvis=$qstatvis,statusvisdate=NOW(),";
      }
+     chop $sets;
+     my $sql = "UPDATE user SET $sets WHERE user=$quser";
+     $dbh->do($sql);
+     if ($dbh->err) { return "(=H1 Error! H1=)(=P A database error occurred: <B>" . $dbh->errstr . "</B> P=)"; }
+
+     # what userprops we'll be setting.
+     my %uprop;
+     $uprop{'opt_usesharedpic'} = $FORM{'opt_usesharedpic'} ? "1" : "0";
 
      # set all the styles
      {
 	 my @picked = ();
 	 foreach my $view (@LJ::views)
 	 {
-	     my $sid = $FORM{"${view}_style"}+0;
+	     my $sid = $FORM{"s1_${view}_style"}+0;
 	     if ($sid) {
-		 $sets .= "${view}_style=$sid,";
+		 $uprop{"s1_${view}_style"} = $sid;
 		 push @picked, $sid;
 	     }
 	 }
@@ -340,24 +350,12 @@ BODY<=
 	     }
 	 }
      }
-     chop $sets;
-     my $sql = "UPDATE user SET $sets WHERE user=$quser";
-     $dbh->do($sql);
-     if ($dbh->err) { return "(=H1 Error! H1=)(=P A database error occurred: <B>" . $dbh->errstr . "</B> P=)"; }
 
      ### change any of the userprops ?
-     {
-	 $FORM{'opt_usesharedpic'} = $FORM{'opt_usesharedpic'} ? "1" : "0";
-	 my @uprops = (
-		       "opt_usesharedpic",
-		       );	
-	 foreach my $uprop (@uprops) {
-	     if ($FORM{$uprop} ne $u->{$uprop}) {
-		 LJ::set_userprop($dbs, $u->{'userid'}, $uprop, $FORM{$uprop});
-	     }
-	 }
+     foreach my $uprop (keys %uprop) {
+	 next if ($FORM{$uprop} eq $u->{$uprop});
+         LJ::set_userprop($dbs, $u->{'userid'}, $uprop, $uprop{$uprop});
      }
-    
 
      # tell the user all is well
      return "(=H1 Success H1=)(=P Your journal settings have been updated.  You can view your journal <A HREF=\"$LJ::SITEROOT/users/$user/\">here</A>. P=)";
