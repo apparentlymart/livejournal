@@ -285,6 +285,9 @@ sub FriendsPage
             'screened' => ($logprops{$itemid}->{'hasscreened'} && ($remote->{'user'} eq $u->{'user'}|| LJ::check_rel($dbs, $u, $remote, 'A'))) ? 1 : 0,
         });
 
+        my $moodthemeid = $u->{'opt_forcemoodtheme'} eq 'Y' ?
+            $u->{'moodthemeid'} : $friends{$friendid}->{'moodthemeid'};
+
         my $entry = Entry($u, {
             'subject' => $subject,
             'text' => $text,
@@ -299,6 +302,7 @@ sub FriendsPage
             'end_day' => 0,  # TODO: implement? is ugly on friends pages when timezones bounce around
             'userpic' => undef,
             'permalink_url' => $permalink,
+            'moodthemeid' => $moodthemeid,
         });
 
         if ($picid) { 

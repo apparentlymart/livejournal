@@ -865,7 +865,7 @@ sub Entry
         $e->{'metadata'}->{'music'} = LJ::ehtml($p->{'current_music'});
     }
     if (my $mid = $p->{'current_moodid'}) {
-        my $theme = $u->{'moodthemeid'};
+        my $theme = defined $arg->{'moodthemeid'} ? $arg->{'moodthemeid'} : $u->{'moodthemeid'};
         LJ::load_mood_theme(undef, $theme);
         my %pic;
         $e->{'mood_icon'} = Image($pic{'pic'}, $pic{'w'}, $pic{'h'})
