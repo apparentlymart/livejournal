@@ -3968,8 +3968,8 @@ sub modify_caps {
     foreach my $bit (@$cap_add, @$cap_del) {
 
         # return 0 if any hook doesn't return true
-        return 0 unless
-            LJ::run_hook("capbit_${bit}_off", $u);
+        my $res = LJ::run_hook("capbit_${bit}_off", $u);
+        return 0 if defined $res && ! $res;
     }
 
     # update user row
