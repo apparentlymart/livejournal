@@ -131,7 +131,7 @@
  $body .= "(=H1 $ML{'.colors.header'} H1=)(=P " .
           BML::ml('.colors.text', {'user'=>$user}) . " P=)";
 
- $ret .= "<P><CENTER><TABLE CELLPADDING=4><TR><TD><B>$ML{'.colors.foreground'}</B></TD><TD><B>$ML{'.colors.background'}</B></TD></TR>\n";
+ $ret .= "<P><CENTER><TABLE CELLPADDING=4><TR><TD><B>$ML{'.colors.fg'}</B></TD><TD><B>$ML{'.colors.bg'}</B></TD></TR>\n";
 
  my @color = ();
  LJ::load_codes($dbs, { "color" => \@color });
