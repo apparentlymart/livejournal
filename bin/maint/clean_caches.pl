@@ -17,6 +17,9 @@ $maint{'clean_caches'} = sub
     print "-I- Cleaning duplock.\n";
     $dbh->do("DELETE FROM duplock WHERE instime < DATE_SUB(NOW(), INTERVAL 1 HOUR)");
 
+    print "-I- Cleaning commenturl.\n";
+    $dbh->do("DELETE FROM commenturls WHERE timecreate < UNIX_TIMESTAMP() - 86400*30 LIMIT 50000");
+
     print "-I- Cleaning captcha sessions.\n";
     foreach my $c (@LJ::CLUSTERS) {
         my $dbcm = LJ::get_cluster_master($c);
