@@ -142,6 +142,12 @@ sub multiMove {
                 next ITER;
             }
             my $line = <$sock>;
+            unless ($line) {
+                $sock = undef;
+                sleep 1;
+                next ITER;
+            }
+
             if ($line =~ /^OK IDLE/) {
                 print "Idling.\n";
                 sleep 5;
