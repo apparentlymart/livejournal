@@ -165,7 +165,7 @@
          if ($use_textarea) {
              $ret .= "<textarea name='newtext_$ict' id='newtext_$ict' $disabled wrap='soft' rows='10' cols='60'>$curtext</textarea>";
          } else {
-             $ret .= "<input name='newtext_$ict' id='newtext_$ict' $disabled size='60' value='$curtext'/>";
+             $ret .= "<input name='newtext_$ict' id='newtext_$ict' $disabled size='60' value=\"$curtext\"/>";
          }
          $ret .= "</dd>\n";
          $ret .= "</dl>";
