@@ -1,17 +1,17 @@
 <?page
-title=><?_code return $FORM{'submitpreview'} ? $ML{'.title.preview'} : $ML{'.title'}; _code?>
+title=><?_code return $POST{'submitpreview'} ? $ML{'.title.preview'} : $ML{'.title'}; _code?>
 body<=
 
 <?_code
 {
     use strict;
-    use vars qw(%FORM %ML);
+    use vars qw(%POST %ML);
 
     my $req = shift;
     my $r = $req->{'r'};
 
     foreach my $re (@LJ::TALKSPAM) {
-        return if ($FORM{'body'} =~ /$re/);
+        return if ($POST{'body'} =~ /$re/);
     }
 
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
@@ -19,7 +19,7 @@ body<=
     # normally require POST.  if an ecphash is specified, we'll let
     # them through since they're coming from a comment page and
     # validate the hash later.
-    return "Comment not posted: POST required, or missing parameter." unless LJ::did_post() || $FORM{'ecphash'};
+    return "Comment not posted: POST required, or missing parameter." unless LJ::did_post() || $POST{'ecphash'};
 
     # as an exception, we do NOT call LJ::text_in() to check for bad
     # input, since it may be not in UTF-8 in replies coming from mail
@@ -31,11 +31,38 @@ body<=
     }
 
     my $remote = LJ::get_remote();
+    my $journalu = LJ::load_user($POST{journal});
+    return 'Unknown journal.  Please go back and try again.' unless $journalu;
+
+    ## preview
+    # ignore errors for previewing
+    if ($POST{'submitpreview'}) {
+        my $cookie_auth;
+        $cookie_auth = 1 if $POST{usertype} eq "cookieuser";
+        my $talkurl = LJ::journal_base($journalu) . "/$POST{itemid}.html";
+        return LJ::Talk::Post::make_preview($talkurl, $cookie_auth, \%POST);
+    }
 
     ## init.  this handles all the error-checking, as well.
     my @errors;
-    my $init = LJ::Talk::Post::init(\%FORM, $remote, \@errors);
-    return LJ::bad_input(@errors) unless $init;
+    my $init = LJ::Talk::Post::init(\%POST, $remote, \@errors);
+
+    # Report errors in a friendly manner by regenerating the field.
+    # Required for challenge/response login, since we also need to regenerate an auth token.
+    # We repopulate what we can via hidden fields - however the objects (journalu & parpost) must be recreated here.
+    if (! $init) {
+        my ($sth, $parpost);
+        my $dbcm = LJ::get_cluster_master($journalu);
+        return 'No database connection present.  Please go back and try again.' unless $dbcm;
+
+        $sth = $dbcm->prepare("SELECT posterid, state FROM talk2 ".
+                              "WHERE journalid=? AND jtalkid=?");
+        $sth->execute($journalu->{userid}, $POST{itemid}+0);
+        $parpost = $sth->fetchrow_hashref;
+        
+        return LJ::Talk::talkform($remote, $journalu, $parpost, $POST{replyto}, $POST{itemid},
+                                  $POST{'prop_picture_keyword'}, \%POST, @errors)
+    }
 
     my $talkurl = $init->{talkurl};
 
@@ -44,11 +71,6 @@ body<=
     my $parent   = $init->{parent};
     my $comment  = $init->{comment};
     my $item     = $init->{item};
-
-    ## preview
-    if ($FORM{'submitpreview'}) {
-        return LJ::Talk::Post::make_preview($talkurl, $init->{cookie_auth}, \%FORM);
-    }
 
     ## insertion
     my $wasscreened = ($parent->{state} eq 'S');
@@ -71,10 +93,10 @@ body<=
     } else {
         # otherwise, it's a screened comment.
         if ($journalu->{'journaltype'} eq 'C') {
-            $mlcode = $FORM{'usertype'} eq 'anonymous' ? '.success.screened.comm.anon'
+            $mlcode = $POST{'usertype'} eq 'anonymous' ? '.success.screened.comm.anon'
                                                        : '.success.screened.comm';
         } else {
-            $mlcode = $FORM{'usertype'} eq 'anonymous' ? '.success.screened.user.anon'
+            $mlcode = $POST{'usertype'} eq 'anonymous' ? '.success.screened.user.anon'
                                                        : '.success.screened.user';
         }
     }
@@ -95,6 +117,9 @@ body<=
 _code?>
 
 <=body
+head<=
+<?_code return (! $LJ::REQ_HEAD_HAS{'chalresp_js'}++) ? $LJ::COMMON_CODE{'chalresp_js'} : ""; _code?>
+<=head
 page?><?_c <LJDEP>
 lib: LJ::SpellCheck
 link: htdocs/lostinfo.bml, htdocs/userinfo.bml, htdocs/talkread.bml, htdocs/editinfo.bml

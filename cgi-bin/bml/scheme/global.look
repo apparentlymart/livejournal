@@ -257,27 +257,3 @@ PAGE<=
 </html>
 <=PAGE
 
-CHALRESPJS<=
-<script type="text/javascript" src="/js/md5.js"></script>
-<script language="JavaScript">
-    <!--
-function sendForm ()
-{
-    if (! document.getElementById) return true;
-    var loginform = document.getElementById('login');
-    if (! loginform) return true;
-    var pass_ele = document.getElementById('xc_password');
-    var chal_ele = document.getElementById('login_chal');
-    var resp_ele = document.getElementById('login_response');
-    if (! pass_ele || ! chal_ele || ! resp_ele) return true;
-    var pass = pass_ele.value;
-    var chal = chal_ele.value;
-    var res = MD5(chal + MD5(pass));
-    resp_ele.value = res;
-    pass_ele.value = "";  // dont send clear-text password!
-    loginform.submit();
-    return false; // cancel browser submit
-}
-// -->
-</script>
-<=CHALRESPJS

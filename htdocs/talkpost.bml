@@ -297,7 +297,10 @@ body<=
 _code?>
 
 <=body
-head=><?_code return $head _code?>
+head<=
+<?_code return $head _code?>
+<?_code return (! $LJ::REQ_HEAD_HAS{'chalresp_js'}++) ? $LJ::COMMON_CODE{'chalresp_js'} : ""; _code?>
+<=head
 windowtitle=><?_ml /talkpost.bml.title _ml?>
 page?><?_c <LJDEP>
 post: htdocs/talkpost_do.bml
