@@ -1,0 +1,202 @@
+<?_code # -*-bml-*-
+{
+    use strict;
+    use vars qw(%POST %GET $title $body);
+
+    my $dbs = LJ::get_dbs();
+    my $dbh = $dbs->{'dbh'};
+
+    my $u = LJ::get_remote($dbs);
+    return BML::redirect("/customize/") unless $u;
+    LJ::load_user_props($dbs, $u, "stylesys", "s2_style");
+
+    $body = "";
+    $title = "Customize";
+
+    my $err = sub {
+        $title = "Error";
+        $body = shift;
+        return;
+    };
+
+    my ($style, $layer);
+    my $savearg;
+
+    # when given 'w' argument, load user's current style, and edit the user layer.
+    # this is the mode redirected to from /customize/ (the simple customization UI)
+    if ($GET{'w'} eq "user" && $u->{'stylesys'} == 2) 
+    {
+        $style = LJ::S2::load_style($u->{'s2_style'});
+        return $err->("Style not found.") unless $style && $style->{'userid'} == $u->{'userid'};
+        $layer = LJ::S2::load_layer($dbh, $style->{'layer'}->{'user'});
+        $savearg = "w=user";
+    }
+
+    return BML::redirect("/customize/") unless $layer;
+    return $err->("Layer belongs to another user.") unless $layer->{'userid'} == $u->{'userid'};
+    return $err->("Layer isn't of type user or theme.") 
+        unless $layer->{'type'} eq "user" || $layer->{'type'} eq "theme";
+        
+    my $lyr_layout = LJ::S2::load_layer($dbh, $layer->{'b2lid'});
+    return $err->("Layout layer for this $layer->{'type'} layer not found.") 
+        unless $lyr_layout;
+    my $lyr_core = LJ::S2::load_layer($dbh, $lyr_layout->{'b2lid'});
+    return $err->("Core layer for layout not found.") 
+        unless $lyr_core;
+
+    my ($lid_i18nc, $lid_theme, $lid_i18n);
+    $lid_i18nc = $style->{'layer'}->{'i18nc'};
+    $lid_theme = $style->{'layer'}->{'theme'};
+    $lid_i18n = $style->{'layer'}->{'i18n'};
+
+    my $layerid = $layer->{'s2lid'};
+
+    my @layers;
+    push @layers, ([ 'core' => $lyr_core->{'s2lid'} ],
+                    [ 'i18nc' => $lid_i18nc ],
+                    [ 'layout' => $lyr_layout->{'s2lid'} ],
+                    [ 'i18n' => $lid_i18n ]);
+    if ($layer->{'type'} eq "user" && $lid_theme) {
+        push @layers, [ 'theme' => $lid_theme ];
+    }
+    push @layers, [ $layer->{'type'} => $layer->{'s2lid'} ];
+
+    my @layerids = grep { $_ } map { $_->[1] } @layers;
+    S2::load_layers_from_db($dbh, @layerids);
+    
+    my %layerinfo;
+
+    # load the language and layout choices for core.
+    LJ::S2::load_layer_info(\%layerinfo, \@layerids);
+
+    # action path
+    if (LJ::did_post()) {
+        # prevent spoofing:
+        return BML::redirect("/customize") 
+            unless $POST{'userid'} == $u->{'userid'};
+
+        my %override;
+        foreach my $prop (S2::get_properties($lyr_layout->{'s2lid'}))
+        {
+            $prop = S2::get_property($lyr_core->{'s2lid'}, $prop)
+                unless ref $prop;
+            next unless ref $prop;
+            next if $prop->{'noui'};
+            my $name = $prop->{'name'};
+            next unless $POST{"${name}_action"} eq "override";
+            $override{$name} = [ $prop, $POST{"${name}_value"} ];
+        }
+        
+        if (LJ::S2::layer_compile_user($layer, \%override)) {
+            $body = "Saved.";
+            return;
+        } else {
+            my $error = LJ::last_error();
+            $body = "Error saving layer:<pre>$error</pre>";
+        }
+        return;
+    }
+
+    $body .= "<form method='post' action='layer.bml?$savearg'>";
+    $body .= LJ::html_hidden("userid", $u->{'userid'});
+    
+    foreach my $prop (S2::get_properties($lyr_layout->{'s2lid'}))
+    {
+        $prop = S2::get_property($lyr_core->{'s2lid'}, $prop)
+            unless ref $prop;
+        next unless ref $prop;
+        next if $prop->{'noui'};
+
+        my $name = $prop->{'name'};
+        my $type = $prop->{'type'};
+        
+        # figure out existing value (if there was no user/theme layer)
+        my $existing;
+        foreach my $lid (reverse @layerids) {
+            next if $lid == $layerid; 
+            $existing = S2::get_set($lid, $name);
+            last if defined $existing;
+        }
+
+        if (ref $existing eq "HASH") { $existing = $existing->{'as_string'}; }
+
+        if ($type eq "bool") {
+            $prop->{'values'} ||= "1|Yes|0|No";
+        }
+
+        my %values = split(/\|/, $prop->{'values'});
+        my $existing_display = defined $values{$existing} ? 
+            $values{$existing} : $existing;
+
+        my $override = S2::get_set($layerid, $name);
+        my $had_override = defined $override;
+        $override = $existing unless defined $override;
+
+        if (ref $override eq "HASH") { $override = $override->{'as_string'}; }
+
+        my $checked;
+
+        $body .= "<?h1 $prop->{'des'} h1?>";
+        $body .= "<?p ";
+        $body .= LJ::eall($prop->{'note'}) if $prop->{'note'};
+        $body .= "<blockquote>";
+        $checked = $had_override ? "" : "checked='checked'";
+        $body .= "<dl><dt><input type='radio' name='${name}_action' value='keep' id='${name}_keep' $checked><label for='${name}_keep'> <b>Keep value: </b></label></dt><dd>";
+        if ($type eq "int" || $type eq "string") {
+            if ($existing_display ne "") {
+                $body .= $existing_display;
+            } else {
+                $body .= "<i>(nothing)</i>";
+            }
+        } elsif ($type eq "Color") {
+            $body .= "<span style=\"border: 1px solid #000000; padding-left: 2em; ".
+                "background-color: $existing;\">&nbsp;</span> <tt>$existing_display</tt>";
+        } elsif ($type eq "bool") {
+            $body .= $existing_display;
+        }
+        $body .= "</dd>";
+        $checked = $had_override ? "checked='checked'" : "";
+        $body .= "<dt><input type='radio' name='${name}_action' value='override' id='${name}_override' $checked><label for='${name}_override'> <b>Override: </b></label></dt><dd>";
+        if ($prop->{'values'}) {
+            $body .= LJ::html_select({ 'name' => "${name}_value",
+                                       'selected' => $override },
+                                     split(/\|/, $prop->{'values'}));
+        } elsif ($type eq "int" || $type eq "string") {
+            my ($length, $maxlength);
+            if ($type eq "int") { ($length, $maxlength) = (7, 5); }
+            if ($type eq "string") { 
+                ($length, $maxlength) = ($prop->{'length'} || 30,
+                                         $prop->{'maxlength'} || 60);
+            }
+            $body .= LJ::html_text({ 'name' => "${name}_value",
+                                     'value' => $override,
+                                     'maxlength' => $maxlength,
+                                     'size' => $length });
+        } elsif ($type eq "Color") {
+            $body .= LJ::html_color({ 'name' => "${name}_value",
+                                      'default' => $override,
+                                      'des' => $prop->{'des'} });
+        }
+        $body .= "</dd></dl>";
+
+        $body .= "</blockquote>";
+        $body .= " p?>";
+    }
+
+    $body .= "<?h1 Finished? h1?><?p When done, click the save button below. p?><center>";
+    $body .= LJ::html_submit('action:save', "Save");
+    $body .= "</center>";
+    
+    $body .= "</form>";
+
+    return;
+
+}
+_code?><?page
+title=><?_code return $title; _code?>
+body=><?_code return $body; _code?>
+head<=
+<script language="JavaScript"></script>
+<script language="JavaScript" src="/js/colorpicker.js"></script>
+<=head
+page?>
