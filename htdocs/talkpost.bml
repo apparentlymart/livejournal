@@ -18,10 +18,21 @@ body<=
  my $errtxt;
 
  my $pics = LJ::Talk::get_subjecticons();
+
+ my $r = Apache->request;
+
+my $uri = BML::get_uri();
+my ($urly, $urlm, $urld, $itemid);
+if ($uri =~ m!/(\d\d\d\d)/(\d\d)/(\d\d)/(\d+)$!) {
+    ($urly, $urlm, $urld, $itemid) = ($1, $2, $3, $4);
+    $FORM{'itemid'} = $itemid;
+    $FORM{'journal'} = $r->notes("_journal");
+    BML::set_language_scope("/talkpost.bml");
+}
+
  my $init = LJ::Talk::init($dbs, \%FORM);
  my $u = $init->{'journalu'};
 
- my $r = Apache->request;
  $r->notes("journalid" => $u->{'userid'});
 
  return "<?h1 $ML{'Error'} h1?><?p $init->{'error'} p?>" if $init->{'error'}; 
@@ -297,7 +308,7 @@ body<=
  $ret .= "<br clear='all'><hr size='2' align='center' />";	
 
  my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&" : "";
- $ret .= "<center><b>(<a href=\"talkread.bml?${jarg}itemid=$ditemid\">$ML{'talk.commentsread'}</a>)</b></center>";
+ $ret .= "<center><b>(<a href=\"/talkread.bml?${jarg}itemid=$ditemid\">$ML{'talk.commentsread'}</a>)</b></center>";
  
  # can a comment even be made?
  if ($logprops{$itemid}->{'opt_nocomments'}) {
@@ -321,7 +332,7 @@ body<=
  if ($parpost->{'state'} eq "S") {
      $ret .= "<br /><?p $ML{'.warnscreened'} p?>";
  }
- $ret .= "<form method='post' action='talkpost_do.bml'>";
+ $ret .= "<form method='post' action='/talkpost_do.bml'>";
  # hidden values
  my $parent = int($init->{'replyto'}+0);
  $ret .= "<input type='hidden' name='parenttalkid' value='$parent'>\n";

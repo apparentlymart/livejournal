@@ -43,10 +43,21 @@ body<=
      $FORM{'journal'} =~ s/^3D//;
      $FORM{'thread'} =~ s/^3D//; 
  }
+
+ my $r = Apache->request;
+
+my $uri = BML::get_uri();
+my ($urly, $urlm, $urld, $itemid);
+if ($uri =~ m!/(\d\d\d\d)/(\d\d)/(\d\d)/(\d+)$!) {
+    ($urly, $urlm, $urld, $itemid) = ($1, $2, $3, $4);
+    $FORM{'itemid'} = $itemid;
+    $FORM{'journal'} = $r->notes("_journal");
+    BML::set_language_scope("/talkread.bml");
+}
+
  my $init = LJ::Talk::init($dbs, \%FORM);
  my $u = $init->{'journalu'};
 
- my $r = Apache->request;
  $r->notes("journalid" => $u->{'userid'});
 
  return "<?h1 $ML{'Error'} h1?><?p $init->{'error'} p?>" if $init->{'error'}; 
@@ -67,7 +78,7 @@ body<=
  my $SELF = "/talkread.bml";
  my $ret = "";
 
- my $itemid = $init->{'itemid'}+0;
+ $itemid = $init->{'itemid'}+0;
 
  # redirect if account was renamed
  if ($u->{'journaltype'} eq "R") {
@@ -616,7 +627,7 @@ body<=
                 $$ret .= $post->{'body'};
 
                 $$ret .= "<p><font size='-2'>";
-                $$ret .= "(<a href='/talkpost.bml?${jargent}replyto=$dtid'>$T{'replythis'}</a>) ";
+                $$ret .= "(<a href='$LJ::SITEROOT/talkpost.bml?${jargent}replyto=$dtid'>$T{'replythis'}</a>) ";
 
                 if ($post->{'parenttalkid'} != 0) {
                     my $dpid =  $clustered ? ($post->{'parenttalkid'} * 256 + $init->{'anum'}) : $post->{'parenttalkid'};
@@ -672,7 +683,7 @@ body<=
      if ($FORM{'thread'} && $pages == 1) {
          $readlink = "(<a href='talkread.bml?${jargent}itemid=$ditemid'>$T{'readcomments'}</a>) - ";
      }
-     $ret .= "<center><b>$readlink(<a href='talkpost.bml?${jargent}itemid=$ditemid'>$T{'postcomments'}</a>)</b></center>";
+     $ret .= "<center><b>$readlink(<a href='$LJ::SITEROOT/talkpost.bml?${jargent}itemid=$ditemid'>$T{'postcomments'}</a>)</b></center>";
 
      if ($post_count > 0)
      {
@@ -684,7 +695,7 @@ body<=
                                                                        "children" => \%children,
                                                                    });
 
-         $ret .= "<hr /><p style='margin-top: 2px;' align='center'><b>$readlink(<a href='talkpost.bml?${jargent}itemid=$ditemid'>$T{'postcomments'}</a>)</b></p>";
+         $ret .= "<hr /><p style='margin-top: 2px;' align='center'><b>$readlink(<a href='$LJ::SITEROOT/talkpost.bml?${jargent}itemid=$ditemid'>$T{'postcomments'}</a>)</b></p>";
 
          if ($showmultiform && $multiform_selects) {
              $ret .= "<p>$ML{'.talkmulti.des'} ";

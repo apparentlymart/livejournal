@@ -710,6 +710,8 @@ sub create_view_lastn
             });
         }
 
+        my $dateslash = join('/', map { $lastn_date_format{$_} } qw(yyyy mm dd));
+
         my $ditemid = $u->{'clusterid'} ? ($itemid * 256 + $item->{'anum'}) : $itemid;
         my $itemargs = $u->{'clusterid'} ? "journal=$user&amp;itemid=$ditemid" : "itemid=$ditemid";
         $lastn_event{'itemargs'} = $itemargs;
@@ -723,9 +725,20 @@ sub create_view_lastn
             ! $logprops{$itemid}->{'opt_nocomments'}
             ) 
         {
-            $itemargs .= "&amp;nc=$replycount" if $replycount && $remote &&
-                         $remote->{'opt_nctalklinks'};
-            my $readurl = "$LJ::SITEROOT/talkread.bml?$itemargs";
+            my ($readurl, $posturl);
+            if ($u->{'clusterid'}) {
+                $readurl = "$journalbase/$dateslash/$ditemid";
+                $posturl = "$journalbase/$dateslash/$ditemid?mode=reply";
+                if ($replycount && $remote && $remote->{'opt_nctalklinks'}) {
+                    $readurl .= "?nc=$replycount";
+                }
+            } else {
+                $itemargs .= "&amp;nc=$replycount" if $replycount && $remote &&
+                    $remote->{'opt_nctalklinks'};
+                $readurl = "$LJ::SITEROOT/talkread.bml?$itemargs";
+                $posturl = "$LJ::SITEROOT/talkpost.bml?$itemargs";
+            }
+
             my $dispreadlink = $replycount || 
                 ($logprops{$itemid}->{'hasscreened'} &&
                  ($remote->{'user'} eq $user
@@ -734,7 +747,7 @@ sub create_view_lastn
             $lastn_event{'talklinks'} = LJ::fill_var_props($vars, 'LASTN_TALK_LINKS', {
                 'itemid' => $ditemid,
                 'itemargs' => $itemargs,
-                'urlpost' => "$LJ::SITEROOT/talkpost.bml?$itemargs",
+                'urlpost' => $posturl,
                 'urlread' => $readurl,
                 'messagecount' => $replycount,
                 'readlink' => $dispreadlink ? LJ::fill_var_props($vars, 'LASTN_TALK_READLINK', {
@@ -851,7 +864,7 @@ sub create_view_lastn
             $skiplinks{'skipbackward'} = 
                 LJ::fill_var_props($vars, 'LASTN_SKIP_BACKWARD', {
                     "numitems" => "Day",
-                    "url" => "$journalbase/day/" . sprintf("%04d/%02d/%02d", $lastyear, $lastmonth, $lastday),
+                    "url" => "$journalbase/" . sprintf("%04d/%02d/%02d/", $lastyear, $lastmonth, $lastday),
                 });
         } else {
             my $newskip = $skip + $itemshow;
@@ -1019,7 +1032,7 @@ sub create_view_friends
         my $first = @items ? $items[0]->{'itemid'} : 0;
 
         $$ret .= "time = " . scalar(time()) . "<br>";
-        $opts->{'headers'}->{'Refresh'} = "30;URL=$LJ::SITEROOT/users/$user/friends?mode=livecond&amp;lastitemid=$first";
+        $opts->{'headers'}->{'Refresh'} = "30;URL=$LJ::SITEROOT/users/$user/friends?mode=livecond&lastitemid=$first";
         if ($FORM{'lastitemid'} == $first) {
             $$ret .= "nothing new!";
         } else {
@@ -1055,9 +1068,9 @@ sub create_view_friends
 
     my %friends = ();
     unless ($opts->{'view'} eq "friendsfriends") {
-        $sth = $dbr->prepare("SELECT u.user, u.userid, u.clusterid, f.fgcolor, f.bgcolor, u.name, u.defaultpicid, u.opt_showtalklinks, u.moodthemeid, u.statusvis, u.oldenc FROM friends f, user u WHERE u.userid=f.friendid AND f.userid=$u->{'userid'} AND f.friendid IN ($ownersin)");
+        $sth = $dbr->prepare("SELECT u.user, u.userid, u.clusterid, f.fgcolor, f.bgcolor, u.name, u.defaultpicid, u.opt_showtalklinks, u.moodthemeid, u.statusvis, u.oldenc, u.journaltype FROM friends f, user u WHERE u.userid=f.friendid AND f.userid=$u->{'userid'} AND f.friendid IN ($ownersin)");
     } else {
-        $sth = $dbr->prepare("SELECT u.user, u.userid, u.clusterid, '#000000', '#ffffff', u.name, u.defaultpicid, u.opt_showtalklinks, u.moodthemeid, u.statusvis, u.oldenc FROM user u WHERE u.userid IN ($ownersin)");
+        $sth = $dbr->prepare("SELECT u.user, u.userid, u.clusterid, '#000000' as 'fgcolor', '#ffffff' as 'bgcolor', u.name, u.defaultpicid, u.opt_showtalklinks, u.moodthemeid, u.statusvis, u.oldenc, u.journaltype FROM user u WHERE u.userid IN ($ownersin)");
     }
 
     $sth->execute;
@@ -1159,7 +1172,8 @@ sub create_view_friends
                 "name" => $friends{$friendid}->{'name'},
             });
         }
-        
+
+        my $dateslash = "$friends_date_format{yyyy}/$friends_date_format{mm}/$friends_date_format{dd}";
         my $ditemid = $clusterid ? ($itemid * 256 + $item->{'anum'}) : $itemid;
         my $itemargs = $clusterid ? "journal=$friend&amp;itemid=$ditemid" : "itemid=$ditemid";
         $friends_event{'itemargs'} = $itemargs;
@@ -1230,18 +1244,27 @@ sub create_view_friends
             ! $logprops{$datakey}->{'opt_nocomments'}
             ) 
         {
-            $itemargs .= "&amp;nc=$replycount" if $replycount && $remote &&
-                          $remote->{'opt_nctalklinks'};
             my $dispreadlink = $replycount || 
                 ($logprops{$datakey}->{'hasscreened'} &&
                  ($remote->{'user'} eq $friend
                   || LJ::check_rel($dbs, $friendid, $remote, 'A')));
 
-            my $readurl = "$LJ::SITEROOT/talkread.bml?$itemargs";
+            my ($readurl, $posturl);
+
+            if ($clusterid) {
+                $posturl = "$LJ::SITEROOT/users/$friend/$dateslash/$ditemid?mode=reply";
+                $readurl = "$LJ::SITEROOT/users/$friend/$dateslash/$ditemid";
+                $readurl .= "?nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
+            } else {
+                $itemargs .= "&amp;nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
+                $posturl = "$LJ::SITEROOT/talkpost.bml?$itemargs",
+                $readurl = "$LJ::SITEROOT/talkread.bml?$itemargs";
+            }
+            
             $friends_event{'talklinks'} = LJ::fill_var_props($vars, 'FRIENDS_TALK_LINKS', {
                 'itemid' => $ditemid,
                 'itemargs' => $itemargs,
-                'urlpost' => "$LJ::SITEROOT/talkpost.bml?$itemargs",
+                'urlpost' => $posturl,
                 'urlread' => $readurl,
                 'messagecount' => $replycount,
                 'readlink' => $dispreadlink ? LJ::fill_var_props($vars, 'FRIENDS_TALK_READLINK', {
@@ -1448,6 +1471,7 @@ sub create_view_calendar
     my $dispyear = $FORM{'year'};  # old form was /users/<user>/calendar?year=1999
 
     # but the new form is purtier:  */calendar/2001
+    # but the NEWER form is purtier:  */2001
     unless ($dispyear) {
         if ($opts->{'pathextra'} =~ m!^/(\d\d\d\d)/?\b!) {
             $dispyear = $1;
@@ -1464,7 +1488,7 @@ sub create_view_calendar
         my $yearlinks = "";
         foreach my $year (@allyears) {
             my $yy = sprintf("%02d", $year % 100);
-            my $url = "$journalbase/calendar/$year";
+            my $url = "$journalbase/$year";
             if ($year != $dispyear) { 
                 $yearlinks .= LJ::fill_var_props($vars, 'CALENDAR_YEAR_LINK', {
                     "url" => $url, "yyyy" => $year, "yy" => $yy });
@@ -1514,7 +1538,7 @@ sub create_view_calendar
           $calendar_month{'yyyy'} = $year;
           $calendar_month{'yy'} = substr($year, 2, 2);
           $calendar_month{'weeks'} = "";
-          $calendar_month{'urlmonthview'} = "$LJ::SITEROOT/view/?type=month&amp;user=$user&amp;y=$year&amp;m=$month";
+          $calendar_month{'urlmonthview'} = sprintf("$journalbase/%04d/%02d/", $year, $month);
           my $weeks = \$calendar_month{'weeks'};
 
           my %calendar_week = ();
@@ -1547,7 +1571,7 @@ sub create_view_calendar
               {
                 $calendar_day{'dayevent'} = LJ::fill_var_props($vars, 'CALENDAR_DAY_EVENT', {
                     'eventcount' => $count{$year}->{$month}->{$i},
-                    'dayurl' => "$journalbase/day/" . sprintf("%04d/%02d/%02d", $year, $month, $i),
+                    'dayurl' => "$journalbase/" . sprintf("%04d/%02d/%02d/", $year, $month, $i),
                 });
               }
               else
@@ -1647,7 +1671,7 @@ sub create_view_day
     my $year = $FORM{'year'};
     my @errors = ();
 
-    if ($opts->{'pathextra'} =~ m!^/(\d\d\d\d)/(\d\d)/(\d\d)\b!) {
+    if ($opts->{'pathextra'} =~ m!^(?:/day)?/(\d\d\d\d)/(\d\d)/(\d\d)\b!) {
         ($month, $day, $year) = ($2, $3, $1);
     }
 
@@ -1667,6 +1691,8 @@ sub create_view_day
         $$ret .= "</ul>\n";
         return 0;
     }
+
+    my $dateslash = sprintf("%04d/%02d/%02d", $year, $month, $day);
 
     my @itemids = ();
 
@@ -1775,9 +1801,19 @@ sub create_view_day
             ! $logprops{$itemid}->{'opt_nocomments'}
             ) 
         {
-            $itemargs .= "&amp;nc=$replycount" if $replycount && $remote &&
-                         $remote->{'opt_nctalklinks'};
-            my $readurl = "$LJ::SITEROOT/talkread.bml?$itemargs";
+            my ($readurl, $posturl);
+            if ($u->{'clusterid'}) {
+                $posturl = "$journalbase/$dateslash/$ditemid?mode=reply";
+                $readurl = "$journalbase/$dateslash/$ditemid";
+                if ($replycount && $remote && $remote->{'opt_nctalklinks'}) {
+                    $readurl .= "?nc=$replycount";
+                }
+            } else {
+                $posturl = "$LJ::SITEROOT/talkpost.bml?$itemargs";
+                $readurl = "$LJ::SITEROOT/talkread.bml?$itemargs";
+                $itemargs .= "&amp;nc=$replycount" if $replycount && $remote &&
+                    $remote->{'opt_nctalklinks'};
+            }
             my $dispreadlink = $replycount || 
                 ($logprops{$itemid}->{'hasscreened'} &&
                  ($remote->{'user'} eq $user
@@ -1785,7 +1821,7 @@ sub create_view_day
             $day_event{'talklinks'} = LJ::fill_var_props($vars, 'DAY_TALK_LINKS', {
                 'itemid' => $ditemid,
                 'itemargs' => $itemargs,
-                'urlpost' => "$LJ::SITEROOT/talkpost.bml?$itemargs",
+                'urlpost' => $posturl,
                 'urlread' => $readurl,
                 'messagecount' => $replycount,
                 'readlink' => $dispreadlink ? LJ::fill_var_props($vars, 'DAY_TALK_READLINK', {
@@ -1860,8 +1896,8 @@ sub create_view_day
         if (++$nxmonth > 12) { ++$nxyear; $nxmonth=1; }
     }
     
-    $day_page{'prevday_url'} = "$journalbase/day/" . sprintf("%04d/%02d/%02d", $pdyear, $pdmonth, $pdday); 
-    $day_page{'nextday_url'} = "$journalbase/day/" . sprintf("%04d/%02d/%02d", $nxyear, $nxmonth, $nxday); 
+    $day_page{'prevday_url'} = "$journalbase/" . sprintf("%04d/%02d/%02d/", $pdyear, $pdmonth, $pdday); 
+    $day_page{'nextday_url'} = "$journalbase/" . sprintf("%04d/%02d/%02d/", $nxyear, $nxmonth, $nxday); 
 
     $$ret .= LJ::fill_var_props($vars, 'DAY_PAGE', \%day_page);
     return 1;

@@ -3,6 +3,15 @@
  $title = "";
  $body = "";
 
+my $uri = BML::get_uri();
+my $r = Apache->request;
+if ($uri =~ m!/(\d\d\d\d)/(\d\d)/?$!) {
+    $FORM{'user'} = $r->notes('_journal');
+    $FORM{'type'} = "month";
+    $FORM{'y'} =  $1;
+    $FORM{'m'} = $2 + 0;
+}
+
  my $view = $FORM{'type'};
  my $user = $FORM{'user'};
 
@@ -134,7 +143,7 @@
          if ($lday) { $body .= "</table></dd>"; }
          $lday = $day;
          my $ord = LJ::Lang::day_ord("EN", $day);
-         my $dayview_url = sprintf("$LJ::SITROOT/users/$u->{'user'}/day/%04d/%02d/%02d/",
+         my $dayview_url = sprintf("$LJ::SITEROOT/users/$u->{'user'}/%04d/%02d/%02d/",
                                    $year, $month, $day);
          $body .= "<dt><b><a href=\"$dayview_url\">$day$ord</a></b></dt>";
          $body .= "<dd><table cellpadding=2>";
@@ -172,8 +181,14 @@
      BML::ebml(\$subject);
      LJ::CleanHTML::clean_subject_all(\$subject);
 
-     my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&amp;" : "";
-     $body .= "<td><a href=\"/talkread.bml?${jarg}itemid=$itemid\">$subject</a>$sec$rep</td></tr>\n";
+     my $itemurl;
+     if ($u->{'clusterid'}) {
+         $itemurl = ("$LJ::SITEROOT/users/$u->{'user'}/" .
+                     sprintf("%04d/%02d/%02d/%d", $year, $month, $day, $itemid));
+     } else {
+         $itemurl = "$LJ::SITEROOT/talkread.bml?itemid=$itemid";
+     }
+     $body .= "<td><a href=\"$itemurl\">$subject</a>$sec$rep</td></tr>\n";
  }
  if ($lday) { $body .= "</table></dd>\n"; }
  $body .= "</dl>";

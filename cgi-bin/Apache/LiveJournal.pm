@@ -168,6 +168,34 @@ sub trans
         }
 
         %RQ = %$opts;
+
+        # can't show BML on user domains... redirect them
+        if ($opts->{'vhost'} eq "users" && ($opts->{'mode'} eq "item" || 
+                                            $opts->{'mode'} eq "month")) {
+            return redir($r, "$LJ::SITEROOT/users/$opts->{'user'}$uri");
+        }
+
+        if ($opts->{'mode'} eq "item") {
+            $r->handler("perl-script");
+            $r->push_handlers(PerlHandler => \&Apache::BML::handler);
+            my $filename = "$LJ::HOME/htdocs/talkread.bml";
+            if ($args eq "mode=reply") {
+                $filename = "$LJ::HOME/htdocs/talkpost.bml";
+            }
+            $r->notes("_journal" => $opts->{'user'});
+            $r->filename($filename);
+            return OK;
+        }
+
+        if ($opts->{'mode'} eq "month") {
+            $r->handler("perl-script");
+            $r->push_handlers(PerlHandler => \&Apache::BML::handler);
+            my $filename = "$LJ::HOME/htdocs/view/index.bml";
+            $r->notes("_journal" => $opts->{'user'});
+            $r->filename($filename);
+            return OK;
+        }
+
         $r->handler("perl-script");
         $r->push_handlers(PerlHandler => \&journal_content);
         return OK;
@@ -179,12 +207,38 @@ sub trans
         $1 ne "www") 
     {
         my $user = $1;
+        my $mode;
+
+        # numbers only URLs
+        if ($uri =~ m!^/(\d\d\d\d)(?:/(\d\d)(?:/(\d\d)(?:/(\d+))?)?)?/?$!) {
+            my ($year, $mon, $day, $item) = ($1, $2, $3, $4);
+            if (defined $item) {
+                $mode = "item";
+            } elsif (defined $day) {
+                $mode = "day";
+            } elsif (defined $mon) {
+                $mode = "month";
+            } elsif (defined $year) {
+                $mode = "calendar";
+            }
+
+            return $journal_view->({'vhost' => 'users',
+                                    'mode' => $mode,
+                                    'pathextra' => $uri,
+                                    'args' => $args,
+                                    'user' => $user,
+                                    'year' => $year, 'mon' => $mon, 'day' => $day,
+                                    'item' => $item,  });
+        }
+        
+        # traditional URL format
         return $journal_view->({'vhost' => 'users',
                                 'mode' => $1,
                                 'pathextra' => $2,
                                 'args' => $args,
                                 'user' => $user, })
-            if $uri =~ m!/(\w+)?(.*)!;
+            if $uri =~ m!^/(\w+)?(.*)!;
+
         return $journal_view->(undef);
     }
 
@@ -230,11 +284,26 @@ sub trans
     if ($uri =~ m!
         ^/(users\/|community\/|\~)  # users/community/tilde
         (\w{1,15})                  # mandatory username
-        (?:/(\w+)?)?                # optional /<viewname>
+        (?:/([a-z\_]+)?)?                # optional /<viewname>
         (.*)?                       # path extra: /FriendGroup, for example
         !x && ($3 eq "" || defined $LJ::viewinfo{$3}))
     {
         my ($part1, $user, $mode, $pe) = ($1, $2, $3, $4);
+        my ($year, $mon, $day, $item);
+        if ($mode eq "" && $pe =~ m!^(\d\d\d\d)(?:/(\d\d)(?:/(\d\d)(?:/(\d+))?)?)?/?$!) {
+            $pe = "/$pe";
+            ($year, $mon, $day, $item) = ($1, $2, $3, $4);
+            if (defined $item) {
+                $mode = "item";
+            } elsif (defined $day) {
+                $mode = "day";
+            } elsif (defined $mon) {
+                $mode = "month";
+            } elsif (defined $year) {
+                $mode = "calendar";
+            }
+        }
+
         my $vhost = { 'users/' => '', 'community/' => 'community',
                       '~' => 'tilde' }->{$part1};
         return DECLINED if $vhost eq "community" && $uri =~ m!\.bml|\.html$!;
@@ -242,7 +311,10 @@ sub trans
                                 'mode' => $mode,
                                 'args' => $args,
                                 'pathextra' => $pe,
-                                'user' => $user, });
+                                'user' => $user,
+                                'year' => $year, 'mon' => $mon, 'day' => $day,
+                                'item' => $item,
+                            });
     }
 
     # protocol support

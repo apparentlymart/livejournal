@@ -3485,16 +3485,16 @@ sub make_dbs_from_arg
 sub date_to_view_links
 {
     my ($u, $date) = @_;
+    return unless $date =~ /^(\d\d\d\d)-(\d\d)-(\d\d)/;
 
-    return unless ($date =~ /(\d\d\d\d)-(\d\d)-(\d\d)/);
     my ($y, $m, $d) = ($1, $2, $3);
     my ($nm, $nd) = ($m+0, $d+0);   # numeric, without leading zeros
     my $user = $u->{'user'};
 
     my $ret;
-    $ret .= "<a href=\"$LJ::SITEROOT/users/$user/calendar/$y\">$y</a>-";
-    $ret .= "<a href=\"$LJ::SITEROOT/view/?type=month&amp;user=$user&amp;y=$y&amp;m=$nm\">$m</a>-";
-    $ret .= "<a href=\"$LJ::SITEROOT/users/$user/day/$y/$m/$d\">$d</a>";
+    $ret .= "<a href=\"$LJ::SITEROOT/users/$user/$y/\">$y</a>-";
+    $ret .= "<a href=\"$LJ::SITEROOT/users/$user/$y/$m/\">$m</a>-";
+    $ret .= "<a href=\"$LJ::SITEROOT/users/$user/$y/$m/$d/\">$d</a>";
     return $ret;
 }
 
