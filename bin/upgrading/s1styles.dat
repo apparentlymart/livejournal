@@ -1161,6 +1161,10 @@ body {
     padding: 0;
     background: #ffffff none;
     color: #000000;
+    font-family: verdana, sans-serif;
+    font-size: 10px;
+    color: #666666;
+    line-height:16px;
 }
 
 A 			{ color: #CC6633; text-decoration: none; } 
@@ -1169,19 +1173,16 @@ A:visited	{ color: #CC6633; text-decoration: none; }
 A:active	{ color: #FF9966;  } 
 A:hover		{ color: #FF9966; } 
 	
-	
 td.body { padding:20px;}
 td.title { padding:20px; font-family: verdana, sans-serif; font-size: 16px; color: #666666; font-weight:bold; letter-spacing:.1em; }
 td.links { padding:8px; font-family: verdana, sans-serif; font-size: 10px; color: #336699; line-height:16px;}
 
-font.descrip { font-family: verdana, sans-serif; font-size: 10px; color: #999966; text-transform:uppercase; font-weight:bold; letter-spacing:.2em; padding:5px;}
-
+font { line-height: 1em; }
+font.descrip { font-family: verdana, sans-serif; font-size: 10px; color: #999966; text-transform:uppercase; font-weight:bold; letter-spacing:.2em; padding:5px; line-height: 16px; }
 font.date { font-family: georgia, sans-serif; font-size: 12px; color: #336699; line-height:16px;}
 font.author { font-family: verdana, sans-serif; font-size: 10px; color: #336699; line-height:16px; text-transform:uppercase;}
 font.time { font-family: verdana, sans-serif; font-size: 10px; color: #336699; line-height:16px; text-transform:uppercase;}
-font { font-family: verdana, sans-serif; font-size: 10px; color: #666666; line-height:16px;}
-font.subhead { font-family: verdana, sans-serif; font-size: 11px; color: #333333; font-weight:bold; padding:8px; 
-letter-spacing:  .1em}
+font.subhead { font-family: verdana, sans-serif; font-size: 11px; color: #333333; font-weight:bold; padding:8px; letter-spacing: .1em; }
 font.subtitle { font-family: verdana, sans-serif; font-size: 12px; color: #FFFFFF; line-height:16px;}
 font.year { font-family: verdana, sans-serif; font-size: 20px; color: #666666; line-height:16px;}
 
@@ -2888,6 +2889,10 @@ body {
   padding: 0;
   background: #ffffff none;
   color: #000000;
+  font-family: verdana, sans-serif;
+  font-size: 10px;
+  color: #666666;
+  line-height:16px;
 }
 
 A 			{ color: #CC6633; text-decoration: none; } 
@@ -2895,20 +2900,17 @@ A:link		{ color: #CC6633; text-decoration: none; }
 A:visited	{ color: #CC6633; text-decoration: none; } 
 A:active	{ color: #FF9966;  } 
 A:hover		{ color: #FF9966;  } 
-	
-	
+
 td.body { padding:20px;}
 td.title { padding:20px; font-family: verdana, sans-serif; font-size: 16px; color: #666666; font-weight:bold; letter-spacing:.1em; }
 td.links { padding:8px; font-family: verdana, sans-serif; font-size: 10px; color: #336699; line-height:16px;}
 
-font.descrip { font-family: verdana, sans-serif; font-size: 10px; color: #999966; text-transform:uppercase; font-weight:bold; letter-spacing:.2em; padding:5px;}
-
+font { line-height: 1em; }
+font.descrip { font-family: verdana, sans-serif; font-size: 10px; color: #999966; text-transform:uppercase; font-weight:bold; letter-spacing:.2em; padding:5px; line-height: 16px; }
 font.date { font-family: georgia, sans-serif; font-size: 12px; color: #336699; line-height:16px;}
 font.author { font-family: verdana, sans-serif; font-size: 10px; color: #336699; line-height:16px; text-transform:uppercase;}
 font.time { font-family: verdana, sans-serif; font-size: 10px; color: #336699; line-height:16px; text-transform:uppercase;}
-font { font-family: verdana, sans-serif; font-size: 10px; color: #666666; line-height:16px;}
-font.subhead { font-family: verdana, sans-serif; font-size: 11px; color: #333333; font-weight:bold; padding:8px; 
-letter-spacing:  .1em}
+font.subhead { font-family: verdana, sans-serif; font-size: 11px; color: #333333; font-weight:bold; padding:8px; letter-spacing: .1em; }
 
 p,td,tr,table,hr,br,ul,ol,li { font-family: georgia, verdana, arial; font-size:12px; color:#666666; line-height:18px; text-align:justify; }
 p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-height:12px; }
@@ -4925,6 +4927,10 @@ body {
   padding: 0;
   background: #ffffff none;
   color: #000000;
+  font-family: verdana, sans-serif;
+  font-size: 10px;
+  color: #666666;
+  line-height:16px;
 }
 
 A 			{ color: #CC6633; text-decoration: none; } 
@@ -4932,20 +4938,17 @@ A:link		{ color: #CC6633; text-decoration: none; }
 A:visited	{ color: #CC6633; text-decoration: none; } 
 A:active	{ color: #FF9966;  } 
 A:hover		{ color: #FF9966;  } 
-	
-	
+
 td.body { padding:20px;}
 td.title { padding:20px; font-family: verdana, sans-serif; font-size: 16px; color: #666666; font-weight:bold; letter-spacing:.1em; }
 td.links { padding:8px; font-family: verdana, sans-serif; font-size: 10px; color: #336699; line-height:16px;}
 
-font.descrip { font-family: verdana, sans-serif; font-size: 10px; color: #999966; text-transform:uppercase; font-weight:bold; letter-spacing:.2em; padding:5px;}
-
+font { line-height: 1em; }
+font.descrip { font-family: verdana, sans-serif; font-size: 10px; color: #999966; text-transform:uppercase; font-weight:bold; letter-spacing:.2em; padding:5px; line-height: 16px; }
 font.date { font-family: georgia, sans-serif; font-size: 12px; color: #336699; line-height:16px;}
 font.author { font-family: verdana, sans-serif; font-size: 10px; color: #336699; line-height:16px; text-transform:uppercase;}
 font.time { font-family: verdana, sans-serif; font-size: 10px; color: #336699; line-height:16px; text-transform:uppercase;}
-font { font-family: verdana, sans-serif; font-size: 10px; color: #666666; line-height:16px;}
-font.subhead { font-family: verdana, sans-serif; font-size: 11px; color: #333333; font-weight:bold; padding:8px; 
-letter-spacing:  .1em}
+font.subhead { font-family: verdana, sans-serif; font-size: 11px; color: #333333; font-weight:bold; padding:8px; letter-spacing: .1em; }
 
 p,td,tr,table,hr,br,ul,ol,li { font-family: georgia, verdana, arial; font-size:12px; color:#666666; line-height:18px; text-align:justify; }
 p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-height:12px; }
@@ -6962,6 +6965,10 @@ body {
   padding: 0;
   background: #ffffff none;
   color: #000000;
+  font-family: verdana, sans-serif;
+  font-size: 10px;
+  color: #666666;
+  line-height:16px;
 }
 
 A 			{ color: #CC6633; text-decoration: none; } 
@@ -6975,14 +6982,12 @@ td.body { padding:20px;}
 td.title { padding:20px; font-family: verdana, sans-serif; font-size: 16px; color: #666666; font-weight:bold; letter-spacing:.1em; }
 td.links { padding:8px; font-family: verdana, sans-serif; font-size: 10px; color: #336699; line-height:16px;}
 
-font.descrip { font-family: verdana, sans-serif; font-size: 10px; color: #999966; text-transform:uppercase; font-weight:bold; letter-spacing:.2em; padding:5px;}
-
+font { line-height: 1em; }
+font.descrip { font-family: verdana, sans-serif; font-size: 10px; color: #999966; text-transform:uppercase; font-weight:bold; letter-spacing:.2em; padding:5px; line-height: 16px; }
 font.date { font-family: georgia, sans-serif; font-size: 12px; color: #336699; line-height:16px;}
 font.author { font-family: verdana, sans-serif; font-size: 10px; color: #336699; line-height:16px; text-transform:uppercase;}
 font.time { font-family: verdana, sans-serif; font-size: 10px; color: #336699; line-height:16px; text-transform:uppercase;}
-font { font-family: verdana, sans-serif; font-size: 10px; color: #666666; line-height:16px;}
-font.subhead { font-family: verdana, sans-serif; font-size: 11px; color: #333333; font-weight:bold; padding:8px; 
-letter-spacing:  .1em}
+font.subhead { font-family: verdana, sans-serif; font-size: 11px; color: #333333; font-weight:bold; padding:8px; letter-spacing: .1em; }
 
 p,td,tr,table,hr,br,ul,ol,li { font-family: georgia, verdana, arial; font-size:12px; color:#666666; line-height:18px; text-align:justify; }
 p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-height:12px; }
