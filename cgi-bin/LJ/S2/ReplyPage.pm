@@ -206,8 +206,62 @@ sub ReplyForm__print
     # subject
     my $txt_subject = "Subject:";
     my $txt_nohtml_subject = "No HTML allowed in subject";
-    $ret .= "<tr valign='top'><td align='right'>$txt_subject</td><td colspan='4'><input class='textbox' type='text' size='50' maxlength='100' name='subject' value=\"" . LJ::ehtml($par_subject) . "\" /><div id='ljnohtmlsubj' class='ljdeem'>$txt_nohtml_subject</div></td></tr>\n";
+    $ret .= "<tr valign='top'><td align='right'>$txt_subject</td><td colspan='4'><input class='textbox' type='text' size='50' maxlength='100' name='subject' value=\"" . LJ::ehtml($par_subject) . "\" />";
 
+    # Subject Icon toggle button
+    unless ($u->{'opt_notalkicons'})
+    {
+        $ret .= "<input type='hidden' id='subjectIconField' name='subjecticon' value='none'>\n";
+        $ret .= "<script type='text/javascript' langauage='Javascript'>\n";
+        $ret .= "<!--\n";
+        $ret .= "document.write(\"";
+        $ret .=  LJ::Talk::show_none_image("id='subjectIconImage' style='cursor:hand' align='absmiddle' ".
+                                           "onclick='subjectIconListToggle();' ".
+                                           "title='Click to change the subject icon'");
+        $ret .="\");\n";
+
+
+        # spit out a pretty table of all the possible subjecticons
+        $ret .= "document.write(\"";
+        $ret .= "<blockquote style='display:none;' id='subjectIconList'>";
+        $ret .= "<table border='0' cellspacing='5' cellpadding='0' style='border: 1px solid #AAAAAA'>\");\n";
+
+        foreach my $type (@{$pics->{'types'}}) {
+            
+            $ret .= "document.write(\"<tr>\");\n";
+
+            # make an option if they don't want an image
+            if ($type eq $pics->{'types'}->[0]) { 
+                $ret .= "document.write(\"";
+                $ret .= "<td valign='middle' align='middle'>";
+                $ret .= LJ::Talk::show_none_image(
+                        "id='none' onclick='subjectIconChange(this);' style='cursor:hand' title='No subject icon'");
+                $ret .= "</td>\");\n";
+            }
+
+            # go through and make clickable image rows.
+            foreach (@{$pics->{'lists'}->{$type}}) {
+                $ret .= "document.write(\"";
+                $ret .= "<td valign='middle' align='middle'>";
+                $ret .= LJ::Talk::show_image($pics, $_->{'id'}, 
+                        "id='$_->{'id'}' onclick='subjectIconChange(this);' style='cursor:hand'");
+                $ret .= "</td>\");\n";
+            }
+            
+            $ret .= "document.write(\"</tr>\");\n";
+            
+        }
+        # end that table, bar!
+        $ret .= "document.write(\"</table></blockquote>\");\n";
+
+        $ret .="//-->\n";
+        $ret .= "</script>\n";
+    }
+
+    # finish off subject line
+    $ret .= "<div id='ljnohtmlsubj' class='ljdeem'>$txt_nohtml_subject</div></tr>\n";
+
+    # options
     $ret .= "<tr><td align='right'>&nbsp;</td><td colspan='4'>";
     my $txt_noautoformat = "Don't auto-format ";
     $ret .= "<label for='ljreplynoauto'>$txt_noautoformat</label> ".

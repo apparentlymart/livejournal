@@ -402,43 +402,60 @@ body<=
     }
 
     # subject
-    $ret .= "<tr valign='top'><td align='right'>$ML{'.opt.subject'}</td><td colspan='4'><input class='textbox' type='text' size='50' maxlength='100' name='subject' value=\"$basesubject\" /><br /><?de $ML{'.nosubjecthtml'} de?></td></tr>\n";
+    $ret .= "<tr valign='top'><td align='right'>$ML{'.opt.subject'}</td><td colspan='4'><input class='textbox' type='text' size='50' maxlength='100' name='subject' value=\"$basesubject\" />\n";
 
+    # Subject Icon toggle button
     unless ($u->{'opt_notalkicons'})
     {
+        $ret .= "<input type='hidden' id='subjectIconField' name='subjecticon' value='none'>\n";
+        $ret .= "<script type='text/javascript' langauage='Javascript'>\n";
+        $ret .= "<!--\n";
+        $ret .= "document.write(\"";
+        $ret .=  LJ::Talk::show_none_image("id='subjectIconImage' style='cursor:hand' align='absmiddle' ".
+                                           "onclick='subjectIconListToggle();' ".
+                                           "title='Click to change the subject icon'");
+        $ret .="\");\n";
+
+
         # spit out a pretty table of all the possible subjecticons
-        $ret .= "<tr valign='middle'><td>&nbsp;</td><td align='left' colspan='4'>\n";
-        $ret .= "<table border='0' cellspacing='3' cellpadding='0'>\n";
-        
+        $ret .= "document.write(\"";
+        $ret .= "<blockquote style='display:none;' id='subjectIconList'>";
+        $ret .= "<table border='0' cellspacing='5' cellpadding='0' style='border: 1px solid #AAAAAA'>\");\n";
+
         foreach my $type (@{$pics->{'types'}}) {
-            my $input = "";
-            my $img = "";
             
-            # go through and make radio button/icon image rows.
-            foreach (@{$pics->{'lists'}->{$type}}) {
-                $input .= "<td valign='middle' align='middle'><input type='radio' name='subjecticon' value='$_->{'id'}' id='talki_$_->{'id'}' /></td>\n";
-                $img .= "<td valign='middle' align='middle'><label for='talki_$_->{'id'}'>" . LJ::Talk::show_image($pics, $_->{'id'}) . "</label></td>\n";
-            }
-            $ret .= "<tr>";
-            
+            $ret .= "document.write(\"<tr>\");\n";
+
             # make an option if they don't want an image
             if ($type eq $pics->{'types'}->[0]) { 
-                $ret .= "<td rowspan='5' valign='middle' align='middle'><input type='radio' name='subjecticon' value='none' checked='1' id='talki_none' /><br /><label for='talki_none'><i>$ML{'.opt.noimage'}</i></label></td><td rowspan='5'>&nbsp;</td>\n"; 
+                $ret .= "document.write(\"";
+                $ret .= "<td valign='middle' align='middle'>";
+                $ret .= LJ::Talk::show_none_image(
+                        "id='none' onclick='subjectIconChange(this);' style='cursor:hand' title='No subject icon'");
+                $ret .= "</td>\");\n";
+            }
+
+            # go through and make clickable image rows.
+            foreach (@{$pics->{'lists'}->{$type}}) {
+                $ret .= "document.write(\"";
+                $ret .= "<td valign='middle' align='middle'>";
+                $ret .= LJ::Talk::show_image($pics, $_->{'id'}, 
+                        "id='$_->{'id'}' onclick='subjectIconChange(this);' style='cursor:hand'");
+                $ret .= "</td>\");\n";
             }
             
-            # then splice in the icon & radio button rows...
-            $ret .= "$input</tr>\n";
-            $ret .= "<tr>\n$img</tr>\n";
+            $ret .= "document.write(\"</tr>\");\n";
             
-            # do a HR between different $types.
-            unless ($type eq $pics->{'types'}->[-1]) {
-                #$ret .= "<tr><td colspan='" . scalar(@{$pics->{'lists'}->{$type}}) . "' valign='middle' align='middle'><hr size='1'></td></tr>\n"; 
-            }
         }
-        # end that table, foo!
-        $ret .= "</table>\n";
-        $ret .= "</td></tr>\n";
+        # end that table, bar!
+        $ret .= "document.write(\"</table></blockquote>\");\n";
+
+        $ret .="//-->\n";
+        $ret .= "</script>\n";
     }
+
+    # finish off subject line
+    $ret .= "<div style='font-size: smaller'><?de $ML{'.nosubjecthtml'} de?></div></td></tr>\n";
 
     $ret .= "<tr><td align='right'>&nbsp;</td><td colspan='4'>";
     $ret .= "$ML{'.opt.noautoformat'}<input type='checkbox' value='1' name='prop_opt_preformatted' />";

@@ -54,11 +54,24 @@ sub show_image
 {
     my $pics = shift;
     my $id = shift;
+    my $extra = shift;
     return unless defined $pics->{'pic'}->{$id};
     my $p = $pics->{'pic'}->{$id};
     my $pfx = "$LJ::IMGPREFIX/talk";
-    return "<img src=\"$LJ::IMGPREFIX/talk/$p->{'img'}\" border='0' ".
-        "width='$p->{'w'}' height='$p->{'h'}' valign='middle' />";
+    return "<img src='$pfx/$p->{'img'}' border='0' ".
+        "width='$p->{'w'}' height='$p->{'h'}' valign='middle' $extra />";
+}
+
+# Returns 'none' icon.
+sub show_none_image
+{
+    my $extra = shift;
+    my $img = 'none.gif';
+    my $w = 15;
+    my $h = 15;
+    my $pfx = "$LJ::IMGPREFIX/talk";
+    return "<img src='$pfx/$img' border='0' ".
+        "width='$w' height='$h' valign='middle' $extra />";
 }
 
 sub link_bar

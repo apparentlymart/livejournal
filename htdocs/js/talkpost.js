@@ -19,6 +19,9 @@ if (document.getElementById) {
     if (remotef) {
         remote = remotef.value;
     }
+
+    var subjectIconField = document.getElementById("subjectIconField");
+    var subjectIconImage = document.getElementById("subjectIconImage");
 }
 
 var apicurl = "";
@@ -84,3 +87,33 @@ if (document.getElementById) {
     }
 
 }
+
+// toggle subject icon list
+
+function subjectIconListToggle() {
+    if (! document.getElementById) { return; }
+    var subjectIconList = document.getElementById("subjectIconList");
+    if(subjectIconList) {
+     if (subjectIconList.style.display != 'block') {
+         subjectIconList.style.display = 'block';
+     } else {
+         subjectIconList.style.display = 'none';
+     }
+    }
+}
+
+// change the subject icon and hide the list
+
+function subjectIconChange(icon) {
+    if (! document.getElementById) { return; }
+    if (icon) {
+        if(subjectIconField) subjectIconField.value=icon.id;
+        if(subjectIconImage) {
+            subjectIconImage.src=icon.src;
+            subjectIconImage.width=icon.width;
+            subjectIconImage.height=icon.height;
+        }
+        subjectIconListToggle();
+    }
+}
+
