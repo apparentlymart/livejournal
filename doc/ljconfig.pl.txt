@@ -151,6 +151,12 @@
     # Users can post to user@$EMAIL_POST_DOMAIN.
     #$EMAIL_POST_DOMAIN = "post.$DOMAIN";
 
+    # This should be a path to a Maildir, matching the delivery
+    # location of your MTA.
+    # If you are using sendmail, you should deliver with procmail
+    # (versions 3.14 and above) for Maildir support.
+    #$MAILSPOOL = '/home/livejournal/mail';
+
     # Allow users to point their own domains here?
     #OTHER_VHOSTS = 1;
 

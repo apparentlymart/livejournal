@@ -30,7 +30,6 @@ sub process {
         # FIXME: Need to log last 10 errors to DB / memcache
         # and create a page to watch this stuff.
 
-        return 0 unless $who;
         my $errbody;
         $errbody .= "There was an error during your email posting:\n\n";
         $errbody .= $msg;
@@ -40,7 +39,7 @@ sub process {
         }
 
         # Rate limit email to 1/5min/address
-        if (LJ::MemCache::add("rate_eperr:$who", 5, 300)) {
+        if ($who && LJ::MemCache::add("rate_eperr:$who", 5, 300)) {
             LJ::send_mail({
                     'to' => $who,
                     'from' => $LJ::BOGUS_EMAIL,
@@ -49,6 +48,7 @@ sub process {
                     'body' => $errbody
                     });
         }
+        return $msg;
     };
 
     # Parse email for lj specific info
@@ -205,7 +205,7 @@ sub process {
     LJ::Protocol::do_request("postevent", $req, \$post_error, { noauth=>1 });
     return $err->(LJ::Protocol::error_message($post_error)) if $post_error;
 
-    return 1;
+    return "Email post success";
 }
 
 # Retreives an allowed email addr list for a given user object.
