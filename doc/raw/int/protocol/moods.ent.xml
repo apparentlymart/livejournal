@@ -1,0 +1,15 @@
+	<list count="1">
+	  <struct count="0more">
+	    
+	    <key name="id"><scalar>
+		The integer moodid.
+	    </scalar></key>
+	    <key name="name"><scalar>
+		The mood name.
+	    </scalar></key>
+	    <key name="parent"><scalar>
+		The mood's parent (base) moodid.
+	    </scalar></key>
+
+	  </struct>
+	</list>

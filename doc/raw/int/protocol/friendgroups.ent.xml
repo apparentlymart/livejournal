@@ -10,7 +10,7 @@ The name of this friend group.
 </scalar></key>
 
 <key name="sortorder" count="1"><scalar>
-The sort integer for this friend group, from 1-255.
+The sort integer for this friend group, from 0-255.
 </scalar></key>
 
 <key name="public" count="1"><scalar>

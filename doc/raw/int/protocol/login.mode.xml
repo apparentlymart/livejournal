@@ -23,17 +23,68 @@ If your client supports picture keywords and you want to receive that list, send
 
 <!--===================[ RETURN ]==============================-->
 <returns><struct count="1">
-	  
-<key name="usejournals" count="opt">
-&useJournals;
-</key>
+
+<key name="name" count="1"><scalar>
+The user's full name.  Often, clients use this to change the top-level window's title bar text to say something like "LiveJournal - User name".  You can just ignore this if you'd like.
+</scalar></key>
 	  
 <key name="message" count="opt"><scalar>
 A message that <emphasis>should</emphasis> be displayed in a dialog box (or to the screen in a console application).  The message is rarely present but when used notifies the user of software updates they've requested to hear about, problems with their account (if mail is bouncing to them, we'd like them to give us a current email address), etc.  To test this if you're developing a client, use the user account <literal role="username">test</literal> with the password <literal>test</literal> and a message will always be returned.
 </scalar></key>
-
+	  
 <key name="friendgrounds" count="1">
 &friendGroups;
+</key>
+
+<key name="usejournals" count="opt">
+&useJournals;
+</key>
+
+<key name="moods" count="opt">
+	<des>
+	  If you sent the 'getmoods' key in your request, this is returned.  The contents are the new moods that have been added on the server since you last requested the list.  Your client should cache the mood list on the client's computer to avoid requesting the whole list everytime.
+	</des>
+	&moods;
+</key>
+
+<key name="pickws" count="opt">
+	<des>
+This is requrned if you set "getpickws" in your request.  Picture keywords are used to identify which userpic (100x100 icon) to use for that particular post.  For instance, the user may have "Angry", "Happy", and "Sleepy" picture keywords which map to certain pictures.  The client should also do a case-insensitive compare on this list when a mood is selected or entered, and auto-select the current picture keyword.  That way it seems that selecting a mood also sets their corresponding picture.
+</des>
+<list count="1"><scalar count="0more">
+The picture keyword.	    
+</scalar></list>
+</key>
+      
+<key name="fastserver" count="opt"><scalar>
+LiveJournal sites may have priority servers for paying customers.  If this key is both present and set to value "1", then the client has permission to set the "ljfastserver" cookie in subsequent requests.  The HTTP request header to send is "Cookie: ljfastserver=1".  If you send this header without getting permission from the login mode, your requests will fail.  That is, you'll trick the load balancer into directing your request towards the priority servers, but the server you end up hitting won't be happy that you're trying to scam faster access and will deny your request.
+</scalar></key>
+
+<key name="userid" count="1"><scalar>
+The userid of this user on the system.  Not required for any other requests to
+the server, but some developers have wanted it.
+</scalar></key>
+
+<key name="menus" count="opt">
+<des>Returned if you set "getmenus" in your request.</des>
+<list count="1">
+<des>List of menu items in order that should be in the LiveJournal web menu in the client application.</des>
+<struct count="0more">
+  <key name="text" count="1"><scalar>
+     The text of the menu item, or "-" for a separator. 
+  </scalar></key>
+  <key name="url" count="opt"><scalar>
+     The URL the menu item should launch, present for all menu items
+     except separators and submenus.
+  </scalar></key>
+  <key name="sub" count="opt"><des>
+     If this is present, this menu item is a submenu.   
+  </des><list count="0more">
+     <des>Same format as top-level menu structure</des>
+     <struct></struct>
+  </list></key>
+</struct>
+</list>	
 </key>
 
 </struct></returns>    

@@ -4,6 +4,7 @@
 <!ENTITY authInfo SYSTEM "authinfo.ent.xml">
 <!ENTITY useJournals SYSTEM "usejournals.ent.xml">
 <!ENTITY friendGroups SYSTEM "friendgroups.ent.xml">
+<!ENTITY moods SYSTEM "moods.ent.xml">
 
 <!ENTITY mode.login SYSTEM "login.mode.xml">
 ]>

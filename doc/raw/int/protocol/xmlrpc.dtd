@@ -28,7 +28,7 @@
 <!ELEMENT key (des?, (scalar | struct | list))>
 <!ATTLIST key name NMTOKEN #REQUIRED %keycountatt;>
 
-<!ELEMENT list (struct | list | scalar)*>
+<!ELEMENT list (des?, (struct | list | scalar)*)>
 <!ATTLIST list %countatt;>
 
 <!ELEMENT des (#PCDATA)>
