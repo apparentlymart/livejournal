@@ -62,14 +62,11 @@
      return;
  }
 
- my $dbb;
- if ($u->{'dversion'} >= 2) {
-     $dbb = LJ::get_cluster_master($u);
-     unless ($dbb) {
-         $title = "Error",
-         $body = "Database temporarily unavailable.";
-         return;
-     }
+ my $dbb = LJ::get_cluster_master($u);
+ unless ($dbb) {
+     $title = "Error",
+     $body = "Database temporarily unavailable.";
+     return;
  }
  
  ### save mode
