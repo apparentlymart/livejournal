@@ -624,8 +624,8 @@ sub create_view_friends
 	    if ($logprops{$datakey}->{'picture_keyword'} && 
 		(! $u->{'opt_usesharedpic'} || ($posterid == $friendid))) 
 	    {
-		my $qkw = $dbh->quote($logprops{$datakey}->{'picture_keyword'});
-		my $sth = $dbh->prepare("SELECT m.picid FROM userpicmap m, keywords k ".
+		my $qkw = $dbr->quote($logprops{$datakey}->{'picture_keyword'});
+		my $sth = $dbr->prepare("SELECT m.picid FROM userpicmap m, keywords k ".
 					"WHERE m.userid=$posterid AND m.kwid=k.kwid AND k.keyword=$qkw");
 		$sth->execute;
 		my ($alt_picid) = $sth->fetchrow_array;
