@@ -192,12 +192,11 @@ body<=
     # reply and unscreen it
 
     my $parpost;
-    my $partid = $FORM{'parenttalkid'};
-    my $qpartid = $dbh->quote($partid);
+    my $partid = $FORM{'parenttalkid'}+0;
 
     if ($partid) {
         $sth = $dbcm->prepare("SELECT posterid, state FROM talk2 ".
-                              "WHERE journalid=$u->{'userid'} AND jtalkid=$qpartid");
+                              "WHERE journalid=$u->{'userid'} AND jtalkid=$partid");
         $sth->execute;
         $parpost = $sth->fetchrow_hashref;
 
@@ -386,7 +385,7 @@ body<=
          "AND t.nodetype='L' AND t.nodeid=$itemid ".
          "AND t.datepost > DATE_SUB(NOW(), INTERVAL 10 MINUTE) ".
          "AND t.posterid=$posterid AND tt.subject=$qsubject AND MD5(tt.body)='$md5_body' ".
-         "AND t.parenttalkid=$qpartid"
+         "AND t.parenttalkid=$partid"
          );
 
     $dtalkid = $jtalkid * 256 + $item->{'anum'};
@@ -401,8 +400,8 @@ body<=
 
         # insert the comment
         $dbcm->do("INSERT INTO talk2 (journalid, jtalkid, nodetype, nodeid, parenttalkid, posterid, datepost, state) ".
-                  "VALUES (?,?,'L',?, ?,?,NOW(),?)", undef,
-                  $u->{'userid'}, $jtalkid, $itemid, $qpartid, $posterid, $state);
+                  "VALUES (?,?,'L',?,?,?,NOW(),?)", undef,
+                  $u->{'userid'}, $jtalkid, $itemid, $partid, $posterid, $state);
         
         # uh oh?  is there an error?  show them if there is.
         if ($dbcm->err) {
@@ -534,7 +533,7 @@ body<=
         {  
             $sth = $dbcm->prepare("SELECT t.posterid, tt.body FROM talk2 t, talktext2 tt ".
                                   "WHERE t.journalid=$u->{'userid'} AND tt.journalid=$u->{'userid'} ".
-                                  "AND t.jtalkid=$qpartid AND tt.jtalkid=$qpartid");
+                                  "AND t.jtalkid=$partid AND tt.jtalkid=$partid");
             $sth->execute;
             my ($paruserid, $parbody) = $sth->fetchrow_array;
             $parentcomment = $parbody;
