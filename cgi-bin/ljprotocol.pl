@@ -6,6 +6,9 @@ use strict;
 require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 
+# constants (FIXME: can remove this when new ljlib is in use)
+$LJ::EndOfTime = 2147483647;
+
 #### New interface (meta handler) ... other handlers should call into this.
 package LJ::Protocol;
 
@@ -402,7 +405,7 @@ sub postevent
     my $qownerid = $ownerid+0;
     my $qposterid = $posterid+0;
     
-    $dbh->do("INSERT INTO log (ownerid, posterid, eventtime, logtime, security, allowmask, replycount, year, month, day) VALUES ($qownerid, $qposterid, $qeventtime, NOW(), $qsecurity, $qallowmask, 0, $req->{'year'}, $req->{'mon'}, $req->{'day'})");
+    $dbh->do("INSERT INTO log (ownerid, posterid, eventtime, logtime, security, allowmask, replycount, year, month, day, revttime, rlogtime) VALUES ($qownerid, $qposterid, $qeventtime, NOW(), $qsecurity, $qallowmask, 0, $req->{'year'}, $req->{'mon'}, $req->{'day'}, $LJ::EndOfTime-UNIX_TIMESTAMP($qeventtime), $LJ::EndOfTime-UNIX_TIMESTAMP())");
     return fail($err,501,$dbh->errstr) if $dbh->err;
 
     my $itemid = $dbh->{'mysql_insertid'};
@@ -635,7 +638,7 @@ sub editevent
 	)
     {
 	my $qsecurity = $dbh->quote($security);
-	$sth = $dbh->prepare("UPDATE log SET eventtime=$qeventtime, year=$qyear, month=$qmonth, day=$qday, security=$qsecurity, allowmask=$qallowmask WHERE itemid=$qitemid");
+	$sth = $dbh->prepare("UPDATE log SET eventtime=$qeventtime, revttime=$LJ::EndOfTime-UNIX_TIMESTAMP($qeventtime), year=$qyear, month=$qmonth, day=$qday, security=$qsecurity, allowmask=$qallowmask WHERE itemid=$qitemid");
 	$sth->execute;
     }
     

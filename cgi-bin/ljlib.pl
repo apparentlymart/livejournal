@@ -17,6 +17,10 @@ require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
 
+# constants
+$LJ::EndOfTime = 2147483647;
+
+# declare views (calls into ljviews.pl)
 @LJ::views = qw(lastn friends calendar day);
 %LJ::viewinfo = (
 		 "lastn" => {
@@ -62,6 +66,183 @@ if ($SIG{'HUP'}) {
 
 
 package LJ;
+
+sub get_friend_items
+{
+    my $dbarg = shift;
+    my $opts = shift;
+
+    my $dbs = LJ::make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+    my $sth;
+
+    my $userid = $opts->{'userid'}+0;
+    my $remoteid = $opts->{'remoteid'}+0;
+
+    my @items = ();
+    my $itemshow = $opts->{'itemshow'}+0;
+    my $skip = $opts->{'skip'}+0;
+    my $getitems = $itemshow + $skip;
+
+    my $owners_ref = (ref $opts->{'owners'} eq "HASH") ? $opts->{'owners'} : {};
+    my $filter = $opts->{'filter'}+0;
+
+    # sanity check:
+    $skip = 0 if ($skip < 0);
+
+    ### what do your friends think of remote viewer?  what security level?
+    my $gmask_from = {};
+    if ($remoteid) {
+	$sth = $dbr->prepare("SELECT ff.userid, ff.groupmask FROM friends fu, friends ff WHERE fu.userid=$userid AND fu.friendid=ff.userid AND ff.friendid=$remoteid");
+	$sth->execute;
+	while (my ($friendid, $mask) = $sth->fetchrow_array) { 
+	    $gmask_from->{$friendid} = $mask; 
+	}
+	$sth->finish;
+    }
+
+    my $filtersql;
+    if ($filter) {
+	if ($remoteid == $userid) {
+	    $filtersql = "AND f.groupmask & $filter";
+	}
+    }
+
+    $sth = $dbr->prepare("SELECT u.userid, uu.timeupdate FROM friends f, userusage uu, user u WHERE f.userid=$userid AND f.friendid=uu.userid AND f.friendid=u.userid $filtersql AND u.statusvis='V'");
+    $sth->execute;
+
+    my @friends = ();
+    while (my ($userid, $update) = $sth->fetchrow_array) {
+	push @friends, [ $userid, $update ];
+    }
+    @friends = sort { $b->[1] cmp $a->[1] } @friends;
+
+    my $loop = 1;
+    my $lastmax = 0;
+    my $itemsleft = $getitems;
+    while ($loop && @friends)
+    {
+	# load the next recent updating friend's recent items
+	my $fr = shift @friends;
+	my $friendid = $fr->[0];
+
+	push @items, LJ::get_recent_items($dbs, {
+	    'userid' => $friendid,
+	    'remoteid' => $remoteid,
+	    'itemshow' => $itemsleft,
+	    'skip' => 0,
+	    'gmask_from' => $gmask_from,
+	    'friendsview' => 1,
+	    'itemids' => $opts->{'itemids'},
+	});
+
+	$opts->{'owners'}->{$friendid} = 1;
+	$itemsleft--; # we'll need at least one less for the next friend
+	
+	# sort all the total items by rlogtime (recent at beginning)
+	@items = sort { $a->{'rlogtime'} <=> $b->{'rlogtime'} } @items;
+
+	# cut the list down to what we need.
+	@items = splice(@items, 0, $getitems) if (@items > $getitems);
+
+	# if we have enough, consider stopping.
+	if (@items == $getitems) {
+	    my $finalrlog = $items[$getitems-1]->{'rlogtime'};
+	    if ($finalrlog == $lastmax) {
+		$loop = 0;
+		delete $opts->{'owners'}->{$friendid}; # didn't load
+	    } 
+	    $lastmax = $finalrlog;
+	} 
+    }
+
+    # remove skipped ones
+    splice(@items, 0, $skip) if $skip;
+    
+    return @items;
+}
+
+sub get_recent_items
+{
+    my $dbarg = shift;
+    my $opts = shift;
+
+    my $dbs = LJ::make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+    my $sth;
+
+    my @items = ();		# what we'll return
+
+    my $userid = $opts->{'userid'}+0;
+    my $remid = $opts->{'remoteid'}+0;
+
+    my $max_hints = $LJ::MAX_HINTS_LASTN;  # temporary
+    my $sort_key = "revttime";
+
+    # community/friend views need to post by log time, not event time
+    $sort_key = "rlogtime" if ($opts->{'order'} eq "logtime" ||
+			       $opts->{'friendsview'});
+
+    my $skip = $opts->{'skip'}+0;
+    my $itemshow = $opts->{'itemshow'}+0;
+    if ($itemshow > $max_hints) { $itemshow = $max_hints; }
+    my $maxskip = $max_hints - $itemshow;
+    if ($skip < 0) { $skip = 0; }
+    if ($skip > $maxskip) { $skip = $maxskip; }
+    my $itemload = $itemshow + $skip;
+
+    # get_friend_items will give us this data structure all at once so
+    # we don't have to load each friendof mask one by one, but for 
+    # a single lastn view, it's okay to just do it once.
+    my $gmask_from = $opts->{'gmask_from'};
+    unless (ref $gmask_from eq "HASH") {
+	$gmask_from = {};
+	if ($remid) {
+	    ## then we need to load the group mask for this friend
+	    $sth = $dbh->prepare("SELECT groupmask FROM friends WHERE userid=$userid AND friendid=$remid");
+	    $sth->execute;
+	    my ($mask) = $sth->fetchrow_array;
+	    $gmask_from->{$userid} = $mask;
+	}
+    }
+
+    # decide what level of security the remote user can see
+    my $secwhere = "";
+    my $mask = $gmask_from->{$userid} + 0;
+    if ($userid == $remid) {
+	# no extra where restrictions... user can see all their own stuff
+    } elsif ($mask) {
+	# can see public or things with them in the mask
+	$secwhere = "AND (security='public' OR (security='usemask' AND allowmask & $mask != 0))";
+    } else {
+	# not a friend?  only see public.
+	$secwhere = "AND security='public' ";
+    }
+
+    # because LJ::get_friend_items needs rlogtime for sorting.
+    my $extra_sql;
+    if ($opts->{'friendsview'}) {
+	$extra_sql .= "ownerid, rlogtime, ";
+    }
+
+    my $sql = ("SELECT itemid, posterid, security, replycount, $extra_sql ".
+	       "DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i ".
+	       "%l %h %k %H\") AS 'alldatepart' ".
+	       "FROM log WHERE ownerid=$userid $secwhere ".
+	       "ORDER BY ownerid, $sort_key ".
+	       "LIMIT $skip,$itemshow");
+
+    $sth = $dbr->prepare($sql);
+    $sth->execute;
+    while (my $li = $sth->fetchrow_hashref) {
+	push @items, $li;
+	push @{$opts->{'itemids'}}, $li->{'itemid'};
+    }
+
+    return @items;
+}
 
 sub set_userprop
 {
@@ -2740,293 +2921,6 @@ sub can_use_journal
 	$res->{'errmsg'} = "You do not have access to post to this journal.";
 	return 0;
     }
-}
-
-## get the friends id
-sub get_friend_itemids
-{
-    my $dbarg = shift;
-    my $opts = shift;
-
-    my $dbs = LJ::make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-
-    my $userid = $opts->{'userid'}+0;
-    my $remoteid = $opts->{'remoteid'}+0;
-    my @items = ();
-    my $itemshow = $opts->{'itemshow'}+0;
-    my $skip = $opts->{'skip'}+0;
-    my $getitems = $itemshow+$skip;
-    my $owners_ref = (ref $opts->{'owners'} eq "HASH") ? $opts->{'owners'} : {};
-    my $filter = $opts->{'filter'}+0;
-
-    my $sth;
-
-    # sanity check:
-    $skip = 0 if ($skip < 0);
-
-    ### what do your friends think of remote viewer?  what security level?
-    my %usermask;
-    if ($remoteid) 
-    {
-	$sth = $dbr->prepare("SELECT ff.userid, ff.groupmask FROM friends fu, friends ff WHERE fu.userid=$userid AND fu.friendid=ff.userid AND ff.friendid=$remoteid");
-	$sth->execute;
-	while (my ($friendid, $mask) = $sth->fetchrow_array) { 
-	    $usermask{$friendid} = $mask; 
-	}
-	$sth->finish;
-    }
-
-    my $filtersql;
-    if ($filter) {
-	if ($remoteid == $userid) {
-	    $filtersql = "AND f.groupmask & $filter";
-	}
-    }
-
-    $sth = $dbr->prepare("SELECT u.userid, uu.timeupdate FROM friends f, userusage uu, user u WHERE f.userid=$userid AND f.friendid=uu.userid AND f.friendid=u.userid $filtersql AND u.statusvis='V'");
-    $sth->execute;
-
-    my @friends = ();
-    while (my ($userid, $update) = $sth->fetchrow_array) {
-	push @friends, [ $userid, $update ];
-    }
-    @friends = sort { $b->[1] cmp $a->[1] } @friends;
-
-    my $loop = 1;
-    my $queries = 0;
-    my $oldest = "";
-    while ($loop)
-    {
-	my @ids = ();
-	while (scalar(@ids) < 20 && @friends) {
-	    my $f = shift @friends;
-	    if ($oldest && $f->[1] lt $oldest) { last; }
-	    push @ids, $f->[0];
-	}
-	last unless (@ids);
-	my $in = join(',', @ids);
-	
-	my $sql;
-	if ($remoteid) {
-	    $sql = "SELECT l.ownerid, h.itemid, l.logtime, l.security, l.allowmask FROM hintlastnview h, log l WHERE h.userid IN ($in) AND h.itemid=l.itemid";
-	} else {
-	    $sql = "SELECT l.ownerid, h.itemid, l.logtime FROM hintlastnview h, log l WHERE h.userid IN ($in) AND h.itemid=l.itemid AND l.security='public'";
-	}
-	if ($oldest) { $sql .= " AND l.logtime > '$oldest'";  }
-
-	# this causes MySQL to do use a temporary table and do an extra pass also (use file sort).  so, we'll do it in memory here.  yay.
-	# $sql .= " ORDER BY l.logtime DESC";
-	
-	$sth = $dbr->prepare($sql);
-	$sth->execute;
-
-	my $rows = $sth->rows;
-	if ($rows == 0) { last; }
-
-	## see comment above.  this is our "ORDER BY l.logtime DESC".  pathetic, huh?
-	my @hintrows;	
-	while (my ($owner, $itemid, $logtime, $sec, $allowmask) = $sth->fetchrow_array) 
-	{
-	    push @hintrows, [ $owner, $itemid, $logtime, $sec, $allowmask ];
-	}
-	$sth->finish;
-	@hintrows = sort { $b->[2] cmp $a->[2] } @hintrows;
-	
-	my $count;
-	while (@hintrows)
-	{
-	    my $rec = shift @hintrows;
-	    my ($owner, $itemid, $logtime, $sec, $allowmask) = @{$rec};
-
-	    if ($sec eq "private" && $owner != $remoteid) { next; }
-	    if ($sec eq "usemask" && $owner != $remoteid && ! (($usermask{$owner}+0) & ($allowmask+0))) { next; }
-	    push @items, [ $itemid, $logtime, $owner ];
-	    $count++;
-	    if ($count >= $getitems) { last; }
-	}
-	@items = sort { $b->[1] cmp $a->[1] } @items;
-	my $size = scalar(@items);
-	if ($size < $getitems) { next; }
-	@items = @items[0..($getitems-1)];
-	$oldest = $items[$getitems-1]->[1] if (@items);
-    }
-
-    my $size = scalar(@items);
-
-    my @ret;
-    my $max = $skip+$itemshow;
-    if ($size < $max) { $max = $size; }
-    foreach my $it (@items[$skip..($max-1)]) {
-	push @ret, $it->[0];
-	$owners_ref->{$it->[2]} = 1;
-    }
-    return @ret;
-}
-
-## internal function to most efficiently retrieve the last 'n' items
-## for either the lastn or friends view
-sub get_recent_itemids
-{
-    my $dbarg = shift;
-    my ($opts) = shift;
-
-    my $dbs = LJ::make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-
-    my @itemids = ();
-    my $userid = $opts->{'userid'}+0;
-    my $view = $opts->{'view'};
-    my $remid = $opts->{'remoteid'}+0;
-
-    my $sth;
-
-    my $max_hints = 0;
-    my $sort_key = "eventtime";
-    if ($view eq "lastn") { $max_hints = $LJ::MAX_HINTS_LASTN; }
-    if ($view eq "friends") { 
-	# THIS IS DEAD CODE!  this is never called with friends anymore.
-	# TODO: Bring out your dead!! Should we put it in the wheel barrow 
-	# and cart it off then?
-	$max_hints = $LJ::MAX_HINTS_FRIENDS; 
-	$sort_key = "logtime";
-    }
-    unless ($max_hints) { return @itemids; }
-
-    my $skip = $opts->{'skip'}+0;
-    my $itemshow = $opts->{'itemshow'}+0;
-    if ($itemshow > $max_hints) { $itemshow = $max_hints; }
-    my $maxskip = $max_hints - $itemshow;
-    if ($skip < 0) { $skip = 0; }
-    if ($skip > $maxskip) { $skip = $maxskip; }
-    my $itemload = $itemshow+$skip;
-    
-    ### get all the known hints, right off the bat.
-
-    $sth = $dbr->prepare("SELECT hintid, itemid FROM hint${view}view WHERE userid=$userid");
-    $sth->execute;
-    my %iteminf;
-    my $numhints = 0;
-    while ($_ = $sth->fetchrow_arrayref) {
-	$numhints++;
-	$iteminf{$_->[1]} = { 'hintid' => $_->[0] };
-    }
-    if ($numhints > $max_hints * 4) {
-	my @extra = sort { $b->{'hintid'} <=> $a->{'hintid'} } values %iteminf;
-	my $minextra = $extra[$max_hints]->{'hintid'};
-	$dbh->do("DELETE FROM hint${view}view WHERE userid=$userid AND hintid<=$minextra");
-	foreach my $itemid (keys %iteminf) {
-	    if ($iteminf{$itemid}->{'hintid'} <= $minextra) {
-		delete $iteminf{$itemid};
-	    }
-	}
-	
-    }
-
-    if (%iteminf) 
-    {
-	my %gmask_from;  # group mask of remote user from context of userid in key
-	my $itemid_in = join(",", keys %iteminf);
-
-	if ($remid) {
-	    if ($view eq "lastn")
-	    {
-		## then we need to load the group mask for this friend
-		$sth = $dbh->prepare("SELECT groupmask FROM friends WHERE userid=$userid AND friendid=$remid");
-		$sth->execute;
-		my ($mask) = $sth->fetchrow_array;
-		$gmask_from{$userid} = $mask;
-	    }
-	}
-
-	$sth = $dbr->prepare("SELECT itemid, security, allowmask, $sort_key FROM log WHERE itemid IN ($itemid_in)");
-	$sth->execute;
-	while (my $li = $sth->fetchrow_hashref) 
-	{
-	    my $this_ownerid = $li->{'ownerid'} || $userid;
-	    
-	    if ($li->{'security'} eq "public" ||
-		($li->{'security'} eq "usemask" && 
-		 (($li->{'allowmask'} + 0) & $gmask_from{$this_ownerid})) ||
-		($remid && $this_ownerid == $remid))
-	    {
-		push @itemids, { 'hintid' => $iteminf{$li->{'itemid'}}->{'hintid'},
-				 'itemid' => $li->{'itemid'},
-				 'ownerid' => $this_ownerid,
-				 $sort_key => $li->{$sort_key}, 
-			     };
-	    }
-	}
-    }
-    
-    %iteminf = ();  # free some memory (like perl would care!)
-
-    @itemids = sort { $b->{$sort_key} cmp $a->{$sort_key} } @itemids;
-    
-    my $hintcount = scalar(@itemids);
-
-    if ($hintcount >= $itemload) 
-    {
-	# we can delete some items from the hints table.
-	if ($hintcount > $max_hints) {
-	    my @remove = splice (@itemids, $max_hints, ($hintcount-$max_hints));
-	    $hintcount = scalar(@itemids);
-	    if (@remove) {
-		my $sql = "REPLACE INTO batchdelete (what, itsid) VALUES ";
-		$sql .= join(",", map { "('hint${view}', $_->{'hintid'})" } @remove);
-		$dbh->do($sql);
-
-		# my $removein = join(",", map { $_->{'hintid'} } @remove);
-		# $dbh->do("DELETE FROM hint${view}view WHERE hintid IN ($removein)");
-	    }
-	}
-    } 
-    elsif (! $opts->{'dont_add_hints'})
-    {
-	## this hints table was too small.  populate it again.
-
-	#print "Not enough in hint table!  hintcount ($hintcount) < itemload ($itemload)\n";
-
-	if ($view eq "lastn")
-        {
-	    my $sql = "
-REPLACE INTO hintlastnview (hintid, userid, itemid)
-SELECT NULL, $userid, l.itemid
-FROM log l
-WHERE l.ownerid=$userid
-ORDER BY l.eventtime DESC, l.logtime DESC
-LIMIT $max_hints
-";
-
-	    # FUCK IT!  This kills MySQL!  Maybe later.
-	    # $dbh->do($sql);
-	}
-
-	## call ourselves recursively, now that we've populated the hints table
-	## however, we set this flag so we don't recurse again.  this may be true
-	## for new journals that don't yet have $max_hints entries in them
-
-	$opts->{'dont_add_hints'} = 1;
-	return get_recent_itemids($dbs, $opts);
-    }
-
-    ### remove the ones we're skipping
-    if ($skip) {
-	splice (@itemids, 0, $skip);
-    }
-    if (@itemids > $itemshow) {
-	splice (@itemids, $itemshow, (scalar(@itemids)-$itemshow));
-    }
-
-    ## change the list of hashrefs to a list of integers (don't need other info now)
-    if (ref $opts->{'owners'} eq "HASH") {
-	grep { $opts->{'owners'}->{$_->{'ownerid'}}++ } @itemids;
-    }
-
-    @itemids = map { $_->{'itemid'} } @itemids;
-    return @itemids;
 }
 
 sub load_log_props

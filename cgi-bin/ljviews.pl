@@ -71,7 +71,6 @@ sub create_view_lastn
     $events = \$lastn_page{'events'};
     
     my $quser = $dbh->quote($user);
-    my $qremoteuser = $dbh->quote($remote->{'user'});
     my $qremoteid = $dbh->quote($remote->{'userid'});
     
     my $itemshow = $vars->{'LASTN_OPT_ITEMS'} + 0;
@@ -84,31 +83,22 @@ sub create_view_lastn
     if ($skip > $maxskip) { $skip = $maxskip; }
 
     ## load the itemids
-    my @itemids = LJ::get_recent_itemids($dbs, {
-	'view' => 'lastn',
+    my @itemids;
+    my @items = LJ::get_recent_items($dbs, {
 	'userid' => $u->{'userid'},
 	'remoteid' => $remote->{'userid'},
 	'itemshow' => $itemshow,
 	'skip' => $skip,
+	'itemids' => \@itemids,
+	'order' => $u->{'journaltype'} eq "C" ? "logtime" : "",
     });
     
-    my $order_by = "eventtime DESC, logtime DESC";
-    if ($u->{'journaltype'} eq "C") {
-	## communties sort by time posted
-	$order_by = "logtime DESC, eventtime DESC";
-    }
-
     ### load the log properties
     my %logprops = ();
     LJ::load_log_props($dbs, \@itemids, \%logprops);
     LJ::load_moods($dbs);
 
     my $logtext = LJ::get_logtext($dbs, @itemids);
-
-    # load the log items
-    my $itemid_in = join(", ", map { $_+0; } @itemids);
-    $sth = $dbr->prepare("SELECT posterid, itemid, security, DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H\") AS 'alldatepart', replycount FROM log WHERE itemid IN ($itemid_in) ORDER BY $order_by");
-    $sth->execute;
 
     my $lastday = -1;
     my $lastmonth = -1;
@@ -117,8 +107,11 @@ sub create_view_lastn
 
     my %altposter_picid = ();  # map ALT_POSTER userids to defaultpicids
 
-    while (my ($posterid, $itemid, $security, $alldatepart, $replycount) = $sth->fetchrow_array)
+    foreach my $item (@items) 
     {
+	my ($posterid, $itemid, $security, $alldatepart, $replycount) = 
+	    map { $item->{$_} } qw(posterid itemid security alldatepart replycount);
+
 	my $subject = $logtext->{$itemid}->[0];
 	my $event = $logtext->{$itemid}->[1];
 
@@ -409,7 +402,6 @@ sub create_view_friends
     $friends_page{'events'} = "";
 
     my $quser = $dbr->quote($user);
-    my $qremoteuser = $dbr->quote($remote->{'user'});
     my $qremoteid = $dbr->quote($remote->{'userid'});
 
     my $itemshow = $vars->{'FRIENDS_OPT_ITEMS'} + 0;
@@ -475,14 +467,15 @@ sub create_view_friends
     }
     
     ## load the itemids
-    my @itemids = LJ::get_friend_itemids($dbs, {
-        'view' => 'friends',
+    my @itemids;
+    my @items = LJ::get_friend_items($dbs, {
         'userid' => $u->{'userid'},
         'remoteid' => $remote->{'userid'},
         'itemshow' => $itemshow,
         'skip' => $skip,
 	'filter' => $filter,
 	'owners' => \%owners,
+	'itemids' => \@itemids,
     });
 
     my $ownersin = join(",", keys %owners);
@@ -523,17 +516,6 @@ sub create_view_friends
     # load the text of the entries
     my $logtext = LJ::get_logtext($dbs, @itemids);
   
-    # load the log items
-    my $itemid_in = join(", ", map { $_+0; } @itemids);
-    $sth = $dbr->prepare("SELECT itemid, security, ownerid, posterid, DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H\") AS 'alldatepart', replycount FROM log WHERE itemid IN ($itemid_in) ORDER BY logtime DESC");
-    $sth->execute;
-
-    ## suck it all into memory to free the db.
-    my @log_rows = ();
-    while (my @logrow = $sth->fetchrow_array) {
-	push @log_rows, [ @logrow ];
-    }
-
     my %posterdefpic;  # map altposter userids -> default picture ids
     
     my %friends_events = ();
@@ -541,11 +523,11 @@ sub create_view_friends
     
     my $lastday = -1;
     my $eventnum = 0;
-    while (@log_rows)
+    foreach my $item (@items) 
     {
-	my $logrow = shift @log_rows;
-	my ($itemid, $security, $friendid, $posterid, $alldatepart, $replycount) = @{$logrow};
-	
+	my ($friendid, $posterid, $itemid, $security, $alldatepart, $replycount) = 
+	    map { $item->{$_} } qw(ownerid posterid itemid security alldatepart replycount);
+
 	my $subject = $logtext->{$itemid}->[0];
 	my $event = $logtext->{$itemid}->[1];
 
@@ -1014,7 +996,6 @@ sub create_view_day
 
     my $initpagedates = 0;
     my $quser = $dbr->quote($user);
-    my $qremoteuser = $dbr->quote($remote->{'user'});
     my $qremoteid = $remote->{'userid'}+0;
 
     my %FORM = ();
@@ -1036,14 +1017,12 @@ sub create_view_day
     if ($day < 1 || $day > 31 || int($day) != $day) { push @errors, "Invalid day."; }
     if (scalar(@errors)==0 && $day > LJ::days_in_month($month, $year)) { push @errors, "That month doesn't have that many days."; }
 
-    if (@errors)
-    {
-        $$ret .= "Errors occurred processing this page:\n<UL>\n";		
-        foreach (@errors)
-        {
-	  $$ret .= "<LI>$_\n";
+    if (@errors) {
+        $$ret .= "Errors occurred processing this page:\n<ul>\n";		
+        foreach (@errors) {
+	  $$ret .= "<li>$_</li>\n";
         }
-        $$ret .= "</UL>\n";
+        $$ret .= "</ul>\n";
         return 0;
     }
 

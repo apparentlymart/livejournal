@@ -1142,6 +1142,15 @@ register_alter(sub {
 		 "ALTER TABLE user DROP paidfeatures, DROP paiduntil, DROP paidreminder");
     }
 
+    if (column_type("log", "revttime") eq "")
+    {
+	do_alter("ALTER TABLE log DROP INDEX eventtime, ADD COLUMN rlogtime INT UNSIGNED NOT NULL DEFAULT 0, ADD COLUMN revttime INT UNSIGNED NOT NULL DEFAULT 0, ADD INDEX rlogtime (ownerid, rlogtime), ADD INDEX revttime (ownerid, revttime), ADD INDEX posterid (posterid, ownerid)");
+	do_sql("UPDATE log SET revttime=POW(2,31)-1-UNIX_TIMESTAMP(eventtime), rlogtime=POW(2,31)-1-UNIX_TIMESTAMP(logtime) WHERE revttime=0 OR rlogtime=0");
+	
+	# related, done at same time:
+	do_alter("ALTER TABLE talk ADD INDEX datepost (datepost), DROP INDEX posterid, ADD INDEX posterid (posterid, nodetype, datepost)");
+    }
+
 });
 
 

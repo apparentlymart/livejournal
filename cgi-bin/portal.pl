@@ -690,12 +690,14 @@ $box{'lastnview'} =
 
 	box_start($bd, $box, { 'title' => "$u->{'name'}",
 			      'url' => "$LJ::SITEROOT/users/$user" });
-	
-	my @itemids = LJ::get_recent_itemids($dbh, {
+
+	my @itemids;
+	my @items = LJ::get_recent_items($dbh, {
 	    'userid' => $u->{'userid'},
-	    'view' => 'lastn',
 	    'skip' => 0,
 	    'itemshow' => $items,
+	    'itemids' => \@itemids,
+	    'order' => 	($u->{'journaltype'} eq "C") ? "logtime" : "",
 	});
 
 	unless (@itemids) {
@@ -704,24 +706,15 @@ $box{'lastnview'} =
 	    return;
 	}
 
-	my $order_by = "l.eventtime DESC, l.logtime DESC";
-	if ($u->{'journaltype'} eq "C") {
-	    ## communties sort by time posted
-	    $order_by = "l.logtime DESC, l.eventtime DESC";
+	# FIXME: need an LJ::get_logsubject 
+	if ($box->{'args'}->{'showtext'}) {
+	} else {
 	}
 
-	my $itemid_in = join(", ", map { $_+0; } @itemids);	
-	if ($box->{'args'}->{'showtext'}) {
-	    $sth = $dbh->prepare("SELECT l.posterid, l.itemid, l.security, lt.subject, lt.event, DATE_FORMAT(l.eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H\") AS 'alldatepart', replycount FROM log l, logtext lt WHERE l.itemid=lt.itemid AND l.itemid IN ($itemid_in) ORDER BY $order_by");
-    $sth->execute;
-	} else {
-	    $sth = $dbh->prepare("SELECT l.posterid, l.itemid, l.security, ls.subject, DATE_FORMAT(l.eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H\") AS 'alldatepart', replycount FROM log l, logsubject ls WHERE l.itemid=ls.itemid AND l.itemid IN ($itemid_in) ORDER BY $order_by");
-	}
-	$sth->execute;
-	if ($dbh->err) { $$bd .= $dbh->errstr; }
-	while (my $row = $sth->fetchrow_hashref)
+	foreach my $item (@items)
 	{
-	    $$bd .= "<a href=\"/talkread.bml?itemid=$row->{'itemid'}\">$row->{'subject'}.</a>, ";
+	    my $subject = "(subject)"; # FIXME; see above
+	    $$bd .= "<a href=\"/talkread.bml?itemid=$item->{'itemid'}\">$subject</a>, ";
 	}
 	
 	box_end($bd, $box);
