@@ -380,7 +380,7 @@ BODY<=
      
      # update the "replycount" summary field of the log table
      if ($clustered) {
-	 LJ::cmd_buffer_add($dbcm, $u->{'userid'}, "increplycount", { 'itemid' => $itemid });
+	 LJ::cmd_buffer_add($dbcm, $u->{'userid'}, "replycount", { 'itemid' => $itemid });
      } else {
 	 LJ::query_buffer_add($dbh, "log", "UPDATE log SET replycount=replycount+1 WHERE itemid=$itemid");	 
      }
