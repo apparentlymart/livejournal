@@ -403,6 +403,12 @@ BODY<=
      } else {
          LJ::query_buffer_add($dbh, "log", "UPDATE log SET replycount=replycount+1 WHERE itemid=$itemid");	 
      }
+
+     # log the event
+     if ($clustered) {
+         LJ::event_register($dbs, $dbcm, "R", $u->{'userid'}, $ditemid);
+         # FUTURE: log events type 'T' (thread) up to root
+     }
      
      # send some emails
      my $who = $up->{'name'} || "Somebody";

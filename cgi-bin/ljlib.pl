@@ -5254,4 +5254,42 @@ sub add_friend
     return 1;
 }
 
+# <LJFUNC>
+# name: LJ::event_register
+# des: Logs a subscribable event, if anybody's subscribed to it.
+# args: dbarg, dbc, etype, ejid, eiarg, duserid, diarg
+# des-dbc: Cluster master of event
+# des-type: One character event type.
+# des-ejid: Journalid event occured in.
+# des-eiarg: 4 byte numeric argument
+# des-duserid: Event doer's userid
+# des-diarg: Event's 4 byte numeric argument
+# returns: boolean; 1 on success; 0 on fail.
+# </LJFUNC>
+sub event_register
+{
+    my ($dbarg, $dbc, $etype, $ejid, $eiarg, $duserid, $diarg) = @_;
+    my $dbs = make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+
+    # see if any subscribers first of all (reads cheap; writes slow)
+    return 0 unless $dbr;
+    my $qetype = $dbr->quote($etype);
+    my $qejid = $ejid+0;
+    my $qeiarg = $eiarg+0;
+    my $qduserid = $duserid+0;
+    my $qdiarg = $diarg+0;
+
+    my $has_sub = $dbr->selectrow_array("SELECT userid FROM subs WHERE etype=$qetype AND ".
+                                        "ejournalid=$qejid AND eiarg=$qeiarg LIMIT 1");
+    return 1 unless $has_sub;
+
+    # so we're going to need to log this event
+    return 0 unless $dbc;
+    $dbc->do("INSERT INTO events (evtime, etype, ejournalid, eiarg, duserid, diarg) ".
+             "VALUES (NOW(), $qetype, $qejid, $qeiarg, $qduserid, $qdiarg)");
+    return $dbc->err ? 0 : 1;
+}
+
 1;

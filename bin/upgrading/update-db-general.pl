@@ -5,7 +5,7 @@
 mark_clustered("useridmap", "userbio", "syncupdates2", "cmdbuffer", "dudata",
                "log2", "logtext2", "logsubject2", "logprop2", "logsec2", "recent_logtext2",
                "talk2", "talkprop2", "talktext2", "recent_talktext2", "talkleft",
-               "userpicblob2"
+               "userpicblob2", "events"
                );
 
 register_tablecreate("adopt", <<'EOC');
@@ -1284,6 +1284,35 @@ CREATE TABLE dbweights (
   PRIMARY KEY (dbid, role),
   norm    TINYINT UNSIGNED NOT NULL,
   curr    TINYINT UNSIGNED NOT NULL
+)
+EOC
+
+# notification/subscription stuff:
+
+register_tablecreate("subs", <<'EOC');  # global
+CREATE TABLE subs (
+  userid INT UNSIGNED NOT NULL,
+  etype       CHAR(1) NOT NULL,
+  ejournalid  INT UNSIGNED NOT NULL,
+  eiarg       INT UNSIGNED NOT NULL,
+  UNIQUE (userid, etype, ejournalid, eiarg),
+  INDEX (etype, ejournalid, eiarg),
+  subtime     DATETIME NOT NULL,
+  exptime     DATETIME NOT NULL,
+  INDEX (exptime)
+  ntype      CHAR(1) NOT NULL
+)
+EOC
+
+register_tablecreate("events", <<'EOC');  # clustered
+CREATE TABLE events (
+  evtime  DATETIME NOT NULL,
+  INDEX (evtime),
+  etype  CHAR(1) NOT NULL,
+  ejournalid  INT UNSIGNED NOT NULL,
+  eiarg       INT UNSIGNED NOT NULL,
+  duserid   INT UNSIGNED NOT NULL,
+  diarg     INT UNSIGNED NOT NULL
 )
 EOC
 
