@@ -36,35 +36,45 @@
 
         my $recurse = sub {
             my $self = shift;
-            my $pid = shift;  # parent id
-            my $lay = $pub->{$pid};
-            my $uniq = $lay->{'uniq'};
-            my $id = $lay->{'s2lid'};
-            my $controls;
-            $controls = "<small>$controls</small>" if $controls;
-            my $typedes;
-            if ($lay->{'type'} eq "core" || $lay->{'type'} eq "layout") {
-                $typedes = " ($lay->{'type'}: <b>$id</b>)";
+            my $lid = shift;           # layer  id
+            my $lay = $pub->{$lid};
+            return unless $lay;
+
+            # set to true if the layer is not core and is not a layout
+            my $is_child = $lay->{'type'} ne 'core' && $lay->{'type'} ne 'layout';
+            
+            my $typedes = " ($lay->{'type'}" . (! $is_child ? ": <b>$lid</b>" : '') . ")";
+
+            # show link to detailed view
+            my $layname = $layerinfo{$lid}->{'name'};
+            my $layinfo = $layerinfo{$lid};
+            if (exists $layinfo->{'source_viewable'} && $layinfo->{'source_viewable'} == 0) {
+                $body .= "<li>$layname$typedes</li>";
             } else {
-                $typedes = " ($lay->{'type'})";
+                $body .= "<li><a href='layerbrowse.bml?id=$lay->{'uniq'}'>$layname</a>$typedes</li>";
             }
-            $body .= "<li><a href='layerbrowse.bml?id=$uniq'>$layerinfo{$_}->{'name'}</a>$typedes$controls</li>";
-            return unless $pub->{$pid} && $pub->{$pid}->{'children'};
+
+            # done unless there are children to recurse through
+            return unless ! $is_child && $lay->{'children'};
 
             # if we're not expanding these children, stop and show a link
-            if ($lay->{'type'} eq 'layout' && $GET{'expand'} != $pid) {
-                $body .= "<ul><li>[<a href='layerbrowse.bml?expand=$pid'>";
-                $body .= scalar(@{$pub->{$pid}->{'children'}}) . " children...</a>]</li></ul>";
-                return;                
-             }
+            if ($lay->{'type'} eq 'layout' && $GET{'expand'} != $lid) {
+                $body .= "<ul><li>[<a href='layerbrowse.bml?expand=$lid'>";
+                $body .= scalar(@{$lay->{'children'}}) . " children...</a>]</li></ul>";
+                return;
+            }
 
             # expand children
             $body .= "<ul>";
-            foreach (@{$pub->{$pid}->{'children'}}) {
+            foreach (@{$lay->{'children'}}) {
                 $self->($self, $_);
             }
             $body .= "</ul>";
+
+            return;
         };
+
+        # iterate through core layers
         $body .= "<ul>";
         foreach (grep { $pub->{$_}->{'b2lid'} == 0 } grep { /^\d+$/ } keys %$pub) {
             $recurse->($recurse, $_);  # start from the top
@@ -86,11 +96,18 @@
 
     # load layer info
     my $layer = defined $pub->{$id} ? $pub->{$id} : LJ::S2::load_layer($id);
-    return $err->("The specified layer does not exist.") unless $layer;
+    return $err->("The specified layer does not exist.")
+        unless $layer;
+
+    my $layerinfo = {};
+    LJ::S2::load_layer_info($layerinfo, [ $id ]);
+    my $srcview = exists $layerinfo->{$id}->{'source_viewable'} ?
+        $layerinfo->{$id}->{'source_viewable'} : undef;
+
+    # do they have access?
     return $err->("You are not authorized to view this layer.") 
-        unless defined $pub->{$id} ||
-               LJ::check_priv($dbr, $remote, "supportviewinternal") ||
-               LJ::check_priv($dbr, $remote, "supporthelp") ||
+        unless defined $pub->{$id} && (! defined $srcview || $srcview != 0) ||
+               $srcview == 1 ||
                LJ::can_manage($remote, $layer->{'userid'});
     
     my $rv = S2::load_layers_from_db($dbr, $id);
@@ -115,8 +132,7 @@
     if (defined $pub->{$id}) {
         $body .= BML::ml('backlink', { 'link' => 'layerbrowse.bml', 'text' => 'Public Layers' }) . "\n";
     } else {
-        my $user = LJ::get_username($layer->{'userid'});
-        $body .= BML::ml('backlink', { 'link' => "layers.bml?authas=$user", 'text' => 'Your Layers' }) . "\n";
+        $body .= BML::ml('backlink', { 'link' => "layers.bml", 'text' => 'Your Layers' }) . "\n";
         $body .= BML::ml('actionlink', { 'link' => "<a href='layeredit.bml?id=$id'>Edit Layer</a>" }) . "\n";
     }
     $body .= "[<a href=\"layersource.bml?id=$id\">Download</a>]\n";

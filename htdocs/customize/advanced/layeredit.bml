@@ -17,16 +17,13 @@
     return $err->("You have not specified a layer to edit.")
         unless $id;
 
-    # get database handles
-    my $dbh = LJ::get_db_writer();
-
     # authenticate user;
     my $remote = LJ::get_remote();
     return $err->("You must be logged in to edit layers.")
         unless $remote;
 
     # load layer
-    my $lay = LJ::S2::load_layer($dbh, $id);
+    my $lay = LJ::S2::load_layer($id);
     return $err->("The specified layer does not exist.")
         unless $lay;
 
@@ -46,6 +43,8 @@
     $ret .= "<form method='post' action='layeredit.bml?id=$id'>\n";
     $ret .= BML::ml('backlink', { 'text' => 'Your Layers', 'link' => "layers.bml?authas=$u->{'user'}" }) . "\n";
 
+    # get s2 code from db - use writer so we know it's up-to-date
+    my $dbh = LJ::get_db_writer();
     my $s2code = $POST{'s2code'};
     $s2code = $dbh->selectrow_array("SELECT s2code FROM s2source WHERE s2lid=?",
                                     undef, $lay->{'s2lid'}) unless $s2code;

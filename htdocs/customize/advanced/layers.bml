@@ -16,9 +16,6 @@
     # this catches core_hidden if it's set
     $POST{'parid'} ||= $POST{'parid_hidden'};
 
-    # get database handles
-    my $dbr = LJ::get_db_reader();
-
     # authenticate user
     my $remote = LJ::get_remote();
     return $err->('You must be logged in to view your layers.') 
@@ -96,7 +93,7 @@
     # delete
     if ($POST{'action:del'}) {
         my $id = $POST{'id'}+0;
-        my $lay = LJ::S2::load_layer($dbr, $id);
+        my $lay = LJ::S2::load_layer($id);
         return $err->("The specified layer does not exist")
             unless $lay;
 
@@ -104,8 +101,9 @@
             unless $lay->{'userid'} == $u->{'userid'};
 
         unless ($POST{'confirm'}) {
-            LJ::S2::load_layer_info($lay, $id);
-            my $name = $lay->{'name'} ? "'$lay->{'name'}'" : "#$id";
+            my $layerinfo = {};
+            LJ::S2::load_layer_info($layerinfo, [ $id ]);
+            my $name = $layerinfo->{$id}->{'name'} ? "'$layerinfo->{$id}->{'name'}'" : "#$id";
 
             $title = "Deleting layer $name";
             $body .= "<br /> ";
