@@ -61,6 +61,7 @@ sub do_request
     if ($method eq "checkfriends")    { return checkfriends(@args);    }
     if ($method eq "getdaycounts")    { return getdaycounts(@args);    }
     if ($method eq "postevent")       { return postevent(@args);       }
+    if ($method eq "syncitems")       { return syncitems(@args);       }
 
     return fail($err,201);    
 }
@@ -501,6 +502,53 @@ sub list_friends
     return $res;
 }
 
+sub syncitems
+{
+    my ($dbs, $req, $err, $flags) = @_;
+    return undef unless authenticate($dbs, $req, $err, $flags);
+    return undef unless check_altusage($dbs, $req, $err, $flags);
+    
+    my $ownerid = $flags->{'ownerid'};
+    my $dbr = $dbs->{'reader'};
+    my ($date, $sth);
+
+    ## have a valid date?
+    $date = $req->{'lastsync'};
+    if ($date) {
+	return fail($err,203,"Invalid date format")
+	    unless ($date =~ /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/);
+    } else {
+	$date = "0000-00-00 00:00:00";
+    }
+
+    my $LIMIT = 500;
+
+    $sth = $dbr->prepare("SELECT COUNT(*) FROM syncupdates WHERE ".
+			 "userid=$ownerid AND atime >= '$date'");
+    $sth->execute;
+    my ($sync_count) = $sth->fetchrow_array;
+	
+    $sth = $dbr->prepare("SELECT atime, nodetype, nodeid, atype FROM ".
+			 "syncupdates WHERE userid=$ownerid AND ".
+			 "atime >= '$date' ORDER BY atime LIMIT $LIMIT");
+    $sth->execute;
+    return fail($err,501,$dbr->errstr) if $dbr->err;
+
+    my $res = {};
+    my $list = $res->{'syncitems'} = [];
+    my $ct = 0;
+    while (my ($atime, $nodetype, $nodeid, $atype) = $sth->fetchrow_array) {
+	$ct++;
+	push @$list, { 'item' => "$nodetype-$nodeid",
+		       'action' => $atype,
+		       'time' => $atime,
+		   };
+    }
+    $res->{'count'} = $ct;
+    $res->{'total'} = $sync_count;
+    return $res;
+}
+
 sub login_message
 {
     my ($dbs, $req, $res, $flags) = @_;
@@ -769,6 +817,9 @@ sub do_request
     }
     if ($req->{'mode'} eq "postevent") {
 	return postevent($dbs, $req, $res, $flags);
+    }
+    if ($req->{'mode'} eq "syncitems") {
+	return syncitems($dbs, $req, $res, $flags);
     }
 
     ### OLD CODE FOLLOWS:
@@ -1510,51 +1561,6 @@ sub do_request
     }
 
 
-    ###
-    ### MODE: syncitems
-    ### 
-    if ($req->{'mode'} eq "syncitems")
-    {
-	my ($date, $sth);
-
-	## have a valid date?
-	$date = $req->{'lastsync'};
-	if ($date) {
-	    if ($date !~ /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/) {
-		$res->{'success'} = "FAIL";
-		$res->{'errmsg'} = "Invalid date format";
-		return;
-	    }
-	} else {
-	    $date = "0000-00-00 00:00:00";
-	}
-
-	my $LIMIT = 500;
-
-	$sth = $dbr->prepare("SELECT COUNT(*) FROM syncupdates WHERE userid=$userid AND atime >= '$date'");
-	$sth->execute;
-	my ($sync_count) = $sth->fetchrow_array;
-	
-	$sth = $dbr->prepare("SELECT atime, nodetype, nodeid, atype FROM syncupdates WHERE userid=$userid AND atime >= '$date' ORDER BY atime LIMIT $LIMIT");
-	$sth->execute;
-	if ($dbr->err) {
-	    $res->{'errmsg'} = $dbr->errstr;
-	    $res->{'success'} = "FAIL";
-	    return 0;
-	}
-	my $ct = 0;
-	while (my ($atime, $nodetype, $nodeid, $atype) = $sth->fetchrow_array) {
-	    $ct++;
-	    $res->{"sync_${ct}_item"} = "$nodetype-$nodeid";
-	    $res->{"sync_${ct}_action"} = $atype;
-	    $res->{"sync_${ct}_time"} = $atime;
-	}
-	$res->{'sync_count'} = $ct;
-	$res->{'sync_total'} = $sync_count;
-
-        $res->{'success'} = "OK";
-        return 1;
-    }
 
     ### unknown mode!
     $res->{'success'} = "FAIL";
@@ -1738,6 +1744,35 @@ sub getdaycounts
     $res->{'success'} = "OK";
     foreach my $d (@{ $rs->{'daycounts'} }) {
 	$res->{$d->{'date'}} = $d->{'count'};
+    }
+    return 1;
+}
+
+## flat wrapper
+sub syncitems
+{
+    my ($dbs, $req, $res, $flags) = @_;
+
+    my $err = 0;
+    my $rq = upgrade_request($req);
+    
+    my $rs = LJ::Protocol::do_request("syncitems", $rq, \$err, $flags);
+    unless ($rs) {
+	$res->{'success'} = "FAIL";
+	$res->{'errmsg'} = LJ::Protocol::error_message($err);
+	return 0;
+    }
+
+    $res->{'success'} = "OK";
+    $res->{'sync_total'} = $rs->{'total'};
+    $res->{'sync_count'} = $rs->{'count'};
+    
+    my $ct = 0;
+    foreach my $s (@{ $rs->{'syncitems'} }) {
+	$ct++;
+	foreach my $a (qw(item action time)) {
+	    $res->{"sync_${ct}_$a"} = $s->{$a};
+	}
     }
     return 1;
 }
