@@ -9,7 +9,7 @@
  $title = "";
  $body = "";
 
- my $user = $FORM{'user'};
+ my $user = LJ::canonical_username($FORM{'user'});
  if ($user eq "" && defined $remote) {
      $user = $remote->{'user'};
  }
@@ -21,21 +21,20 @@
      return;
  }
 
- my %filters = ("all" => "All Memories",
-		"own" => "Only Personal Memories",
-		"other" => "Only Other Memories");
+ my %filters = ("all" => "All memories",
+		"own" => "Only '$user' entries",
+		"other" => "Only other entries");
  my $filter = $FORM{'filter'} || "all";
  unless (defined $filters{$filter}) { $filter = "all"; }
 
- my @sec_in = ("public");
+ my $secwhere = "AND m.security='public'";
  if ($remote) {
      if ($remote->{'userid'} == $userid) {
-	 push @sec_in, "private", "friends";
+	 $secwhere = "";
      } elsif (LJ::is_friend($dbs, $userid, $remote->{'userid'})) {
-	 push @sec_in, "friends";
+	 $secwhere = "AND m.security IN ('public', 'friends')";
      }
  }
- my $sec_in = join(", ", map { $dbh->quote($_) } @sec_in);
 
  if ($FORM{'keyword'}) 
  {
@@ -52,10 +51,10 @@
      my $extrawhere = "";
      if ($filter eq "own" || $filter eq "other") {
 	 my $op = $filter eq "own" ? "=" : "<>";
-	 $extrawhere = "AND l.ownerid $op $userid";
+	 $extrawhere = "AND m.journalid $op $userid";
      }
      
-     $sth = $dbr->prepare("SELECT m.memid, u.user, m.journalid, m.jitemid, m.des, m.security FROM memorable m, memkeyword mk, keywords k LEFT JOIN useridmap u ON m.journalid=u.userid WHERE k.keyword=$qkw AND mk.memid=m.memid AND mk.kwid=k.kwid AND m.userid=$userid AND m.security IN ($sec_in) $extrawhere ORDER BY m.memid");
+     $sth = $dbr->prepare("SELECT m.memid, u.user, m.journalid, m.jitemid, m.des, m.security FROM memorable m, memkeyword mk, keywords k LEFT JOIN useridmap u ON m.journalid=u.userid WHERE k.keyword=$qkw AND mk.memid=m.memid AND mk.kwid=k.kwid AND m.userid=$userid $secwhere $extrawhere ORDER BY m.memid");
      $sth->execute;
     
      $body .= "<UL>\n";
@@ -77,10 +76,10 @@
  $body .= "(=H1 Memorable Posts H1=)(=P The following is a list of categories that user <B>$user</B> has placed memorable journal entries in. P=)";
 
  if ($filter eq "all") {
-     $sth = $dbr->prepare("SELECT k.keyword, COUNT(*) AS 'count' FROM memorable m, memkeyword mk, keywords k WHERE mk.memid=m.memid AND mk.kwid=k.kwid AND m.userid=$userid AND m.security IN ($sec_in) GROUP BY k.keyword ORDER BY k.keyword");
+     $sth = $dbr->prepare("SELECT k.keyword, COUNT(*) AS 'count' FROM memorable m, memkeyword mk, keywords k WHERE mk.memid=m.memid AND mk.kwid=k.kwid AND m.userid=$userid $secwhere GROUP BY k.keyword ORDER BY k.keyword");
  } else {
      my $op = $filter eq "own" ? "=" : "<>";
-     $sth = $dbr->prepare("SELECT k.keyword, COUNT(*) AS 'count' FROM memorable m, memkeyword mk, keywords k, log l WHERE mk.memid=m.memid AND mk.kwid=k.kwid AND m.userid=$userid AND m.security IN ($sec_in) AND m.itemid=l.itemid AND l.ownerid $op $userid GROUP BY k.keyword ORDER BY k.keyword");     
+     $sth = $dbr->prepare("SELECT k.keyword, COUNT(*) AS 'count' FROM memorable m, memkeyword mk, keywords k WHERE mk.memid=m.memid AND mk.kwid=k.kwid AND m.userid=$userid $secwhere AND m.journalid $op $userid GROUP BY k.keyword ORDER BY k.keyword");     
  }
  $sth->execute;
  
