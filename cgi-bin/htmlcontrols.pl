@@ -268,11 +268,34 @@ sub html_color
 sub html_hidden
 {
     my $ret;
+
     while (@_) {
         my $name = shift;
-        my $val = shift;
-        $ret .= "<input type='hidden' name=\"" . ehtml($name) . "\" value=\"" .
-            ehtml($val) . "\" />";
+        my $val;
+
+        my ($ehtml, $extra);
+        if (ref $name eq 'HASH') {
+            my $opts = $name;
+
+            $val = $opts->{value};
+            $name = $opts->{name};
+
+            $ehtml = $opts->{'noescape'} ? 0 : 1;
+            foreach (grep { ! /^(name|value|raw|noescape)$/ } keys %$opts) {
+                $extra .= " $_=\"" . ($ehtml ? ehtml($opts->{$_}) : $opts->{$_}) . "\"";
+            }
+
+            $extra .= " $opts->{'raw'}" if $opts->{'raw'};
+
+        } else {
+            $val = shift;
+        }
+
+        $ret .= "<input type='hidden'";
+        # allow override of these in 'raw'
+        $ret .= " name=\"" . ($ehtml ? ehtml($name) : $name) . "\"" if $name;
+        $ret .= " value=\"" . ($ehtml ? ehtml($val) : $val) . "\"" if defined $val;
+        $ret .= "$extra />";
     }
     return $ret;
 }
@@ -308,7 +331,7 @@ sub html_submit
 
         $ehtml = $opts->{'noescape'} ? 0 : 1;
         foreach (grep { ! /^(raw|disabled|noescape|type)$/ } keys %$opts) {
-            $eopts .= " $_=\"" . ($ehtml ? ehtml($opts->{$_}) : $opts->{$_}) . "\""
+            $eopts .= " $_=\"" . ($ehtml ? ehtml($opts->{$_}) : $opts->{$_}) . "\"";
         }
     }
     my $ret = "<input type='$type'";
