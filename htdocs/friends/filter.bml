@@ -23,6 +23,7 @@
  unless ($remote) { $body .= "<?needlogin?>"; return; }
 
  my %res;
+ # FIXME: make this use LJ::Protocol::do_request 
  LJ::do_request({ 'mode' => 'getfriendgroups',
                   'ver'  => $LJ::PROTOCOL_VER,
                   'user' => $remote->{'user'}, },
