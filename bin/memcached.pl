@@ -120,7 +120,7 @@ sub handle_pending_set
     if ($ps->{bytes} + 1 == $ps->{bytes_read}) {
         $stats{'cmd_set'}++;
         chop $ps->{data};
-        $cache->set($ps->{key}, [ $ps->{exptime}, $ps->{data}], $ps->{bytes});
+        $cache->set($ps->{key}, [ $ps->{exptime}, $ps->{data}], $ps->{bytes}, $ps->{flags});
         $wheel->put("STORED\n");
     } elsif ($ps->{bytes_read} > $ps->{bytes}) {
         $wheel->put("CLIENT_ERROR too much data ($ps->{bytes_read}, not $ps->{bytes})\n");
@@ -139,8 +139,8 @@ sub socket_input {
     my $wheel = $heap->{socket_wheel};
 
     if ($heap->{state} eq "waitcommand") {
-        if ($buf =~ /^set (\S+) (\d+) (\d+) (.*)/s) {
-            my ($key, $exptime, $bytes, $data) = ($1, $2, $3, $4);
+        if ($buf =~ /^set (\S+) (\S+) (\d+) (\d+) (.*)/s) {
+            my ($key, $flags, $exptime, $bytes, $data) = ($1, $2, $3, $4, $5);
             $exptime = time() + 86400*14 unless $exptime;
             my $bytes_read = length $data;
             my $ps = $heap->{pending_set} = {
@@ -149,6 +149,7 @@ sub socket_input {
                 'data' => $data,
                 'bytes' => $bytes,
                 'bytes_read' => $bytes_read,
+                'flags' => $flags,
             };
             handle_pending_set($heap, $wheel);
             return;
@@ -190,14 +191,16 @@ sub socket_input {
         if ($cmd eq "get") {
             $stats{'cmd_get'}++;
             foreach my $key (@args) {
-                my $val = $cache->get($key);
+                my $flags;
+                my $val = $cache->get($key, \$flags);
                 if ($val && $val->[0] < time()) {
                     $stats{'hit_expired'}++;
                     undef $val;
                 }
                 if ($val) {
                     my $length = length $val->[1];
-                    $wheel->put("VALUE $key $length $val->[1]\n");
+                    $flags ||= "-";
+                    $wheel->put("VALUE $key $flags $length $val->[1]\n");
                     $stats{'hit'}++;
                 } else {
                     $stats{'miss'}++;

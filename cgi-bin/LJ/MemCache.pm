@@ -81,9 +81,15 @@ sub set {
     my ($key, $val) = @_;
     my $sock = get_sock($key);
     return 0 unless $sock;
+    my $flags;
     $key = ref $key eq "ARRAY" ? $key->[1] : $key;
+    if (ref $val) {
+        $val = Storable::freeze($val);
+        $flags .= "S";
+    }
     my $len = length($val);
-    my $cmd = "set $key 0 $len $val\n";
+    $flags ||= "-";
+    my $cmd = "set $key $flags 0 $len $val\n";
     $sock->print($cmd);
     $sock->flush;
     my $line = <$sock>;
@@ -99,12 +105,14 @@ sub get {
     $sock->print($cmd);
     $sock->flush;
     my %val;
+    my %flags;
   ITEM:
     while (1) {
         my $line = $sock->getline;
-        if ($line =~ /^VALUE (\S+) (\d+) (.*)/s) {
-            my ($rk, $len, $data) = ($1, $2, $3);
+        if ($line =~ /^VALUE (\S+) (\S+) (\d+) (.*)/s) {
+            my ($rk, $flags, $len, $data) = ($1, $2, $3, $4);
             my $this_len = length($data);
+            $flags{$rk} = $flags unless $flags eq "-";
             if ($this_len == $len + 1) {
                 chop $data;
                 $val{$rk} = $data;
@@ -128,7 +136,9 @@ sub get {
             next ITEM;
         }
         if ($line eq "END\n") {
-            return $val{$key};
+            my $val = $val{$key};
+            $val = Storable::thaw($val) if $flags{$key} =~ /S/;
+            return $val;
         }
         if (length($line) == 0) {
             return undef;

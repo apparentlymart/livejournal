@@ -23,6 +23,7 @@ use constant VALUE => 1;
 use constant NEXTKEY => 2;
 use constant BYTES => 3;
 use constant INSTIME => 4;
+use constant FLAGS => 5;     # caller-defined metadata
 
 $VERSION = '1.0';
 
@@ -50,7 +51,7 @@ sub init {
 
     $self->{'head'} = 0;
     $self->{'tail'} = 0;
-    $self->{'items'} = {}; # key -> [ prev_key, value, next_key, bytes, instime ]
+    $self->{'items'} = {}; # key -> arrayref, indexed by constants above
     $self->{'size'} = 0;
     $self->{'bytes'} = 0;
     $self->{'maxsize'} = $args->{'maxsize'}+0;
@@ -165,7 +166,7 @@ sub print_list {
 }
 
 sub get {
-    my ($self, $key) = @_;
+    my ($self, $key, $out_flags) = @_;
 
     if (exists $self->{'items'}->{$key}) 
     {
@@ -194,6 +195,7 @@ sub get {
 	    $self->{'head'} = $key;
 	}
 	
+        $$out_flags = $item->[FLAGS] if $out_flags;
 	return $item->[VALUE];
     }
     return undef;
@@ -201,7 +203,7 @@ sub get {
 
 # bytes is optional
 sub set {
-    my ($self, $key, $value, $bytes) = @_;
+    my ($self, $key, $value, $bytes, $flags) = @_;
     
     $self->drop_tail() while ($self->{'maxsize'} && 
                               $self->{'size'} >= $self->{'maxsize'} &&
@@ -213,13 +215,13 @@ sub set {
     
     if (exists $self->{'items'}->{$key}) {
 	# update the value
-	my $item = $self->{'items'}->{$key};
-	$item->[VALUE] = $value;
-        my $bytedelta = $bytes - $item->[BYTES];
+	my $it = $self->{'items'}->{$key};
+	$it->[VALUE] = $value;
+        my $bytedelta = $bytes - $it->[BYTES];
         $self->{'bytes'} += $bytedelta;
-        $item->[BYTES] = $bytes;
-    }
-    else {
+        $it->[BYTES] = $bytes;
+        $it->[FLAGS] = $flags;
+    } else {
 	# stick it at the end, for now
 	my $it = $self->{'items'}->{$key} = [];
         $it->[PREVKEY] = undef;
@@ -227,6 +229,7 @@ sub set {
         $it->[VALUE] = $value;
         $it->[BYTES] = $bytes;
         $it->[INSTIME] = time();
+        $it->[FLAGS] = $flags;
 	if ($self->{'size'}) {
 	    $self->{'items'}->{$self->{'tail'}}->[NEXTKEY] = $key;
 	    $self->{'items'}->{$key}->[PREVKEY] = $self->{'tail'};
