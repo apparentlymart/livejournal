@@ -17,11 +17,19 @@ $maint{'synsuck'} = sub
     my $maxcount = shift || 0;
     my $verbose = $LJ::LJMAINT_VERBOSE;
 
+    # let this job only run once per machine
+    my $hlock;
+    return 0 unless
+        $hlock = LJ::locker()->trylock("maint-synsuck-$LJ::SERVER_NAME");
+
     my %child_jobs; # child pid => userid
 
     my $process_user = sub {
         my $urow = shift;
         return unless $urow;
+
+        my ($user, $userid, $synurl, $lastmod, $etag, $readers) =
+            map { $urow->{$_} } qw(user userid synurl lastmod etag numreaders);
 
         # we're a child process now, need to invalidate caches and
         # get a new database handle
@@ -29,8 +37,12 @@ $maint{'synsuck'} = sub
 
         my $dbh = LJ::get_db_writer();
 
-        my ($user, $userid, $synurl, $lastmod, $etag, $readers) =
-            map { $urow->{$_} } qw(user userid synurl lastmod etag numreaders);
+        # see if things have changed since we last looked and acquired the lock.
+        # otherwise we could 1) check work, 2) get lock, and between 1 and 2 another
+        # process could do both steps.  we don't want to duplicate work already done.
+        my $now_checknext = $dbh->selectrow_array("SELECT checknext FROM syndicated ".
+                                                  "WHERE userid=?", undef, $userid);
+        return if $now_checknext ne $urow->{checknext};
 
         my $ua = LWP::UserAgent->new("timeout" => 10);
         my $reader_info = $readers ? "; $readers readers" : "";
@@ -401,11 +413,12 @@ $maint{'synsuck'} = sub
         my $dbh = LJ::get_db_writer();
         my $current_jobs = join(",", map { $dbh->quote($_) } values %child_jobs);
         my $in_sql = " AND u.userid NOT IN ($current_jobs)" if $current_jobs;
-        my $sth = $dbh->prepare("SELECT u.user, s.userid, s.synurl, s.lastmod, s.etag, s.numreaders " .
+        my $sth = $dbh->prepare("SELECT u.user, s.userid, s.synurl, s.lastmod, " .
+                                "       s.etag, s.numreaders, s.checknext " .
                                 "FROM user u, syndicated s " .
                                 "WHERE u.userid=s.userid AND u.statusvis='V' " .
                                 "AND s.checknext < NOW()$in_sql " .
-                                "ORDER BY s.checknext LIMIT 100");
+                                "ORDER BY RAND() LIMIT 500");
         $sth->execute;
         while (my $urow = $sth->fetchrow_hashref) {
             push @all_users, $urow;
@@ -426,10 +439,12 @@ $maint{'synsuck'} = sub
 
         if ($threads < $max_threads && $keep_forking) {
             my $urow = $get_next_user->();
-            $keep_forking = 0 unless $urow;
+            unless ($urow) {
+                $keep_forking = 0;
+                next;
+            }
 
             # spawn a new process
-            my $is_child = 0;
             if (my $pid = fork) {
                 # we are a parent, nothing to do?
                 $child_jobs{$pid} = $urow->{'userid'};
@@ -437,16 +452,13 @@ $maint{'synsuck'} = sub
                 $userct++;
 
             } else {
-                # we are a child, do work
-                $is_child = 1;
-
                 # handles won't survive the fork
                 LJ::disconnect_dbs();
-                
+
                 my $lockname = sprintf "synsuck-user-%s", $urow->{user};
-                if (( my $lock = LJ::locker()->trylock($lockname) )) {
+                if ( my $lock = LJ::locker()->trylock($lockname) ) {
                     print "Got lock on '$lockname'. Running\n" if $verbose;
-                $process_user->($urow);
+                    $process_user->($urow);
                 } else {
                     print "Task '$lockname' already running. Skipping.\n"
                         if $verbose;
