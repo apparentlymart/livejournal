@@ -215,7 +215,8 @@
      }
      @memories = $sortfunc{$sort}->( @memories );
     
-     $body .= "<form method='post' action='./memories.bml?user=$user$authasarge'>\n" if $is_owner;
+     $body .= "<form method='post' action='./memories.bml?user=$user$authasarge'>\n"
+         if $is_owner && $GET{multidelete};
      $body .= "<ul>\n";
      foreach my $mem (@memories) {
          my $eh_des = LJ::ehtml($mem->{'des'});
@@ -237,6 +238,7 @@
          if ($is_owner) {
              $edit = " [<a href=\"$editlink\">$ML{'.edit'}</a>]";
              $delete = LJ::html_check({ type => 'check', name => "select_mem_$mem->{memid}", value => 1 })
+                 if $GET{multidelete};
          }
 
          my %icons = (
@@ -246,7 +248,7 @@
          $body .= "<p><li>$delete <a href=\"$entrylink\"><b>$eh_des</b></a> $edit $icons{$mem->{security}}<br /><font size='-1'><b>$mem->{'user'}</b></font></li>";
      }
      $body .= "</ul>";
-     if ($is_owner) {
+     if ($is_owner && $GET{multidelete}) {
          $body .= LJ::html_submit(undef, $ML{'.delete'}, 
                                   { onclick => "return confirm('" . LJ::ejs($ML{'.delete.confirm'}) . "')" });
          $body .= "</form>\n";
