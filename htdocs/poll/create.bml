@@ -505,7 +505,7 @@
         # parse code into standard poll hashref
         # so we can feed it into LJ::Poll::preview()
         my $err;
-        my $stdpoll = (LJ::Poll::parse({}, \$code, \$err, {}))[0];
+        my $stdpoll = (LJ::Poll::parse(\$code, \$err, {}))[0];
         return "<b>[Error parsing poll: $$err]</b>\n" if $err;
 
         # display poll preview
