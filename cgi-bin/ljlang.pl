@@ -223,6 +223,8 @@ sub set_text
     my $txtid = 0;
     if (defined $text) {
         my $userid = $opts->{'userid'} + 0;
+        # Strip bad characters
+        $text =~ s/\r//;
         my $qtext = $dbh->quote($text);
         $dbh->do("INSERT INTO ml_text (dmid, txtid, lnid, itid, text, userid) ".
                  "VALUES ($dmid, NULL, $lnid, $itid, $qtext, $userid)");
