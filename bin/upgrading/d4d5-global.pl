@@ -103,11 +103,6 @@ my $move_user = sub {
                          undef, @map_vals);
             }
 
-            # mark that the user had rows in this table
-            # unless it's s1stylecache, which we don't care about
-            $stats{'move'}->{$pass}->{'ct'} += @bind
-                unless $src_table eq 's1stylecache';
-
             # reset values
             @bind = ();
             @vals = ();
@@ -131,6 +126,10 @@ my $move_user = sub {
                 push @map_vals, ($row->{'styleid'}, $u->{'userid'});
                 push @delete_styleids, $row->{'styleid'};
             }
+
+            # increment the count for this pass, style or overrides
+            $stats{'move'}->{$pass}->{'ct'}++
+                unless $src_table eq 's1stylecache';
 
             # flush if we've reached our insert limit
             $flush->() if @bind > $BLOCK_INSERT;
