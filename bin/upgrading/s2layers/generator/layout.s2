@@ -494,6 +494,50 @@ function DayPage::print_body() {
 
 }
 
+function MonthPage::print_body () {
+    """<table width="$*box_width" cellpadding="2" cellspacing="0" border="0" summary="" class="entrybox">
+<tr align='left'>
+<td bgcolor="$*stronger_back" align="center">
+<table width="100%" cellpadding="5" cellspacing="0" border="0" summary="">
+<tr align='left'>
+<td class="caption" colspan='2'>""";
+ 
+    print $.date->date_format($*lang_fmt_month_long);
+
+    """</td></tr>
+<tr align='left'>
+<td colspan="2" bgcolor="$*entry_back">""";
+
+    #Lifted from core, looks decent:
+    "<form method='post' action='$.redir.url'><center>";
+    $.redir->print_hiddens();
+    if ($.prev_url != "") { "[<a href='$.prev_url'>&lt;&lt;&lt;</a>]\n"; }
+    if (size $.months > 1) {
+        "<select name='redir_key'>\n";
+        foreach var MonthEntryInfo mei ($.months) {
+            var string sel;
+            if ($mei.date.year == $.date.year and $mei.date.month == $.date.month) {
+                $sel = " selected='selected'";
+            }
+            "<option value='$mei.redir_key'$sel>" + $mei.date->date_format($*lang_fmt_month_long) + "</option>";
+        }
+        "</select>\n<input type='submit' value='View' />";
+    }
+    if ($.next_url != "") { "\n[<a href='$.next_url'>&gt;&gt;&gt;</a>]\n"; }
+    "</center></form>\n<dl>";
+    foreach var MonthDay d ($.days) {
+        if ($d.has_entries) {
+            "<dt><a href=\"$d.url\"><b>";
+            print lang_ordinal($d.day);
+            "</b></a></dt>\n<dd>";
+            $d->print_subjectlist();
+            "</dd>\n";
+        }
+    }
+    "</dl>\n";
+    """</td></tr></table>
+</td></tr></table><p>""";
+}
 
 function print_theme_preview () {
   """<table width='100%' bgcolor='$*page_back' cellpadding=10><tr><td align='center'>
