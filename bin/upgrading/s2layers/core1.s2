@@ -642,6 +642,8 @@ function builtin palimg_gradient(string filename, PalItem start, PalItem end) : 
 ##[ properties ]
 
 propgroup colors = "Colors";
+propgroup fonts = "Fonts";
+propgroup presentation = "Presentation";
 propgroup other = "Other";
 propgroup text = "Text";
 

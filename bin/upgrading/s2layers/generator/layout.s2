@@ -66,7 +66,7 @@ propgroup colors {
     }
 }
 
-propgroup Fonts {
+propgroup fonts {
     property use font_base;
     property use font_fallback;
 }

@@ -10,7 +10,7 @@ layerinfo author_email = "mart@livejournal.com";
 layerinfo redist_uniq = "sturdygesture/layout";
 layerinfo previews = "sturdygesture/sturdygesture.jpg";
 
-propgroup Colors {
+propgroup colors {
     property Color clr_page_back { des = "Page background"; }
     set clr_page_back = "#ffffff";
 
@@ -36,12 +36,12 @@ propgroup Colors {
     set clr_page_vlink = "#0000ff";
 }
 
-propgroup Fonts {
+propgroup fonts {
     property use font_base;
     property use font_fallback;
 }
 
-propgroup Other {
+propgroup other {
     property string opt_navbar_pos {
         des = "Navigation Bar Location";
         values = "left|Left|right|Right";
