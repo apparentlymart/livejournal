@@ -16,14 +16,13 @@
 
      $sth = $dbh->prepare("SELECT userid, user, journaltype, password FROM user WHERE user IN ($qmuser, $qcuser)");
      $sth->execute;
-     my $mu = {};
-     my $cu = {};
+     my ($mu, $cu);
      while ($_ = $sth->fetchrow_hashref) {
 	 if ($_->{'user'} eq lc($FORM{'muser'})) { $mu = $_; }
 	 if ($_->{'user'} eq lc($FORM{'cuser'})) { $cu = $_; }
      }
      
-     unless ($mu->{'user'}) {
+     unless ($mu) {
 	 push @errors, "Maintainer account not found.";
      } else {
 	 if ($mu->{'password'} ne $FORM{'mpassword'}) {
@@ -34,7 +33,7 @@
 	 }
      }
 
-     unless ($cu->{'user'}) {
+     unless ($cu) {
 	 push @errors, "Community account not found.";
      } else {
 	 if ($cu->{'password'} ne $FORM{'cpassword'}) {
@@ -42,11 +41,14 @@
 	 }
      }
 
-     if ($cu->{'userid'} == $mu->{'userid'}) {
+     if ($cu && $mu && $cu->{'userid'} == $mu->{'userid'}) {
 	 push @errors, "Maintainer account and community account cannot be the same.";
      }
 
-     return LJ::bad_input(@errors) if @errors;
+     if (@errors) {
+	 $body = LJ::bad_input(@errors);
+	 return;
+     }
 
      my $qmembership = $dbh->quote($FORM{'membership'} eq "open" ? "open" : "closed");
      my $qpostlevel = $dbh->quote($FORM{'postlevel'} eq "members" ? "members" : "select");
