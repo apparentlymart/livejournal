@@ -25,7 +25,7 @@ body<=
     }
 
     # check for privs
-    unless (LJ::check_priv($dbr, $remote, "supportviewinternal") ||
+    unless (LJ::check_priv($dbr, $remote, "supportviewscreened") ||
             LJ::check_priv($dbr, $remote, "supporthelp") ||
             $remote->{'user'} eq $user) {
         push @errors, BML::ml(".error.noprivs");
