@@ -514,7 +514,7 @@ sub get_log2_recent_log
     my $sql = "SELECT jitemid, posterid, eventtime, rlogtime, " .
         "security, allowmask, anum FROM log2 " .
         "USE INDEX (rlogtime) WHERE journalid=? AND " .
-        "$LJ::EndOfTime - UNIX_TIMESTAMP() >= rlogtime - $max_age ORDER BY journalid, rlogtime";
+        "rlogtime <= ($LJ::EndOfTime - UNIX_TIMESTAMP()) + $max_age ORDER BY journalid, rlogtime";
     
     my $sth = $db->prepare($sql);
     $sth->execute($jid);
