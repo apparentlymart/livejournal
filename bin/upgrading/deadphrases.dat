@@ -46,6 +46,9 @@ general /interests.bml.findsim.text
 general /interests.bml.interests.findsim1
 general /interests.bml.interests.findsim2
 
+general /manage/index.bml.information.setlang.about
+general /manage/index.bml.information.setscheme.about
+
 general /modify.bml.btn.proceed
 general /modify.bml.journalstatus.about
 general /modify.bml.journalstatus.head

@@ -13,10 +13,8 @@ body<=
   <dd><?_ml .information.status.about _ml?></dd>
   <dt><a href="/changepassword.bml"><?_ml .information.changepass _ml?></a></dt>
   <dd><?_ml .information.changepass.about _ml?></dd>
-  <dt><a href="/setlang.bml"><?_ml /setlang.bml.title _ml?></a></dt>
-  <dd><?_ml .information.setlang.about _ml?></dd>
-  <dt><a href="/setscheme.bml"><?_ml /setscheme.bml.title _ml?></a></dt>
-  <dd><?_ml .information.setscheme.about _ml?></dd>
+  <dt><a href="./siteopts.bml"><?_ml /manage/siteopts.bml.title _ml?></a></dt>
+  <dd><?_ml .information.siteopts.about _ml?></dd>
 </dl>
 
 <?h1 <?_ml .customization.header _ml?> h1?>
@@ -24,6 +22,10 @@ body<=
 <dl>
   <dt><a href="/customize/"><?_ml .customization.customize _ml?></a></dt>
   <dd><?_ml .customization.customize.about _ml?></dd>
+  <dt><a href="/customize/advanced/"><?_ml .customization.advanced _ml?></a></dt>
+  <dd><?_ml .customization.advanced.about _ml?></dd>
+  <dt><a href="./links.bml"><?_ml .customization.links _ml?></a></dt>
+  <dd><?_ml .customization.links.about _ml?></dd>
   <dt><a href="/modify.bml"><?_ml /modify.bml.title _ml?></a></dt>
   <dd><?_ml .customization.modify.about _ml?></dd>
 </dl>

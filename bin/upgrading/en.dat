@@ -1625,11 +1625,19 @@ The site team
 
 /manage/index.bml.customization=Customize the look of your journal pages:
 
+/manage/index.bml.customization.advanced=Advanced Customization
+
+/manage/index.bml.customization.advanced.about=Browse, create, and edit your S2 layouts and styles
+
 /manage/index.bml.customization.customize=Customize Journal
 
 /manage/index.bml.customization.customize.about=Change the apearance of your journal
 
 /manage/index.bml.customization.header=Customization
+
+/manage/index.bml.customization.links=Links List
+
+/manage/index.bml.customization.links.about=Create a list of links to appear in your journal
 
 /manage/index.bml.customization.modify.about=Modify your journal's display properties
 
@@ -1663,9 +1671,7 @@ The site team
 
 /manage/index.bml.information.header=Account Information
 
-/manage/index.bml.information.setlang.about=Select your preferred language
-
-/manage/index.bml.information.setscheme.about=Select your preferred site layout
+/manage/index.bml.information.siteopts.about=Select your preferred site layout &amp; language
 
 /manage/index.bml.information.status=Account Status
 
