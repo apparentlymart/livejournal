@@ -116,6 +116,10 @@
 		 'directory' => 0,
 		 );
 
+    # require new free acounts to be referred by an existing user?
+    # NOTE: new and mostly ljcom-specific.  some features
+    # unimplemented in the livejournal-only tree.
+    $USE_ACCT_CODES = 0;
 
     # keep this next line.  it lets you upgrade LiveJournal without
     # having to change your config file.  if there is a new required
