@@ -3,11 +3,9 @@
 
 # to be require'd by modperl.pl
 
-package LJ::ModPerl;
-
 use strict;
 
-# pull in a lot of useful stuff before we fork children
+package LJ;
 
 use Apache;
 use Apache::LiveJournal;
@@ -26,8 +24,9 @@ use Image::Size ();
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
-require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
 require "$ENV{'LJHOME'}/cgi-bin/htmlcontrols.pl";
+require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
+require "$ENV{'LJHOME'}/cgi-bin/weblib.pl";
 require "$ENV{'LJHOME'}/cgi-bin/imageconf.pl";
 require "$ENV{'LJHOME'}/cgi-bin/propparse.pl";
 require "$ENV{'LJHOME'}/cgi-bin/supportlib.pl";
@@ -43,6 +42,11 @@ require "$ENV{'LJHOME'}/cgi-bin/ljmemories.pl";
 # preload site-local libraries, if present:
 require "$ENV{'LJHOME'}/cgi-bin/modperl_subs-local.pl"
     if -e "$ENV{'LJHOME'}/cgi-bin/modperl_subs-local.pl";
+
+
+package LJ::ModPerl;
+
+# pull in a lot of useful stuff before we fork children
 
 sub setup_start {
 
