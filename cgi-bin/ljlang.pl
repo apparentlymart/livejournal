@@ -138,11 +138,11 @@ sub get_root_lang
 sub load_lang_struct
 {
     return 1 if $LS_CACHED;
-    my $dbr = LJ::get_dbh("slave", "master");
+    my $dbr = LJ::get_db_reader();
     return set_error("No database available") unless $dbr;
     my $sth;
 
-    $TXT_CACHE = new LJ::Cache { 'maxsize' => $LJ::LANG_CACHE_SIZE || 2000 };
+    $TXT_CACHE = new LJ::Cache { 'maxbytes' => $LJ::LANG_CACHE_BYTES || 50_000 };
 
     $sth = $dbr->prepare("SELECT dmid, type, args FROM ml_domains");
     $sth->execute;
@@ -284,13 +284,13 @@ sub get_text
     $dmid = int($dmid || 1);
 
     load_lang_struct() unless $LS_CACHED;
-    my $cache_key = "ml.$lang$;$dmid$;$code";
-
+    my $cache_key = "ml.${lang}.${dmid}.${code}";
+    
     my $text = $TXT_CACHE->get($cache_key);
 
     unless (defined $text) {
         my $mem_good = 1;
-        $text = LJ::MemCache::get(0, $cache_key);
+        $text = LJ::MemCache::get($cache_key);
         unless (defined $text) {
             $mem_good = 0;
             my $l = $LN_CODE{$lang} or return "?lang?";
@@ -304,7 +304,7 @@ sub get_text
         }
         if (defined $text) {
             $TXT_CACHE->set($cache_key, $text);
-            LJ::MemCache::set(0, $cache_key, $text) unless $mem_good;
+            LJ::MemCache::set($cache_key, $text) unless $mem_good;
         }
     }
 

@@ -2961,6 +2961,7 @@ sub start_request
         }
         $LJ::CACHE_CONFIG_MODTIME_LASTCHECK = $now;
         $LJ::DBIRole->set_sources(\%LJ::DBINFO);
+        LJ::MemCache::trigger_bucket_reconstruct();
     }
 
     return 1;
@@ -2968,7 +2969,10 @@ sub start_request
 
 sub end_request
 {
-    $LJ::DBIRole->disconnect_all() if $LJ::DISCONNECT_DBS;
+    if ($LJ::DISCONNECT_DBS) {
+        $LJ::DBIRole->disconnect_all();
+        LJ::MemCache::disconnect_all();
+    }
 }
 
 # <LJFUNC>
