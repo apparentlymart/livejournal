@@ -17,6 +17,9 @@
 
  $title = "Add to Memories";
  $body = "";
+
+ $FORM{'oldkeywords'} = [ split('\0', $FORM{'oldkeywords'}) ];
+
  unless (LJ::text_in(\%FORM)) {
      $body = "(=BADINPUT=)";
      return;
@@ -176,7 +179,8 @@
      { 
          my %kws;
          foreach (split(/\s*,\s*/, $FORM{'keywords'})) { $kws{$_} = 1; }
-         foreach (split(/\0/, $FORM{'oldkeywords'})) { $kws{$_} = 1; }
+         # oldkeywords were split at the beginning
+         foreach (@{$FORM{'oldkeywords'}}) { $kws{$_} = 1; }
          @keywords = keys %kws;
      }
      if (scalar(@keywords) > 5) { 

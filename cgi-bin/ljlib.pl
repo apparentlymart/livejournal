@@ -5367,6 +5367,9 @@ sub text_in
     if (ref ($text) eq "HASH") {
         return ! (grep { !LJ::is_utf8($_) } values %{$text});
     }
+    if (ref ($text) eq "ARRAY") {
+        return ! (grep { !LJ::is_utf8($_) } @{$text});
+    }
     return LJ::is_utf8($text);
 }
 

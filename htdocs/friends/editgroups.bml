@@ -3,6 +3,12 @@
  $title = "Edit Friend Groups";
  $body = "";
 
+ # these are only used by the client-side for JS to play with.
+ # we delete them because they may contain embedded NULLs, which
+ # text_in won't like.
+ delete $FORM{'list_in'};
+ delete $FORM{'list_out'};
+
  unless (LJ::text_in(\%FORM)) {
      $body = "(=BADINPUT=)";
      return;
