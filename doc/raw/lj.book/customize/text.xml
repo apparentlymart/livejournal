@@ -3,4 +3,46 @@
   <para>
     (FIXME - describe the /translate/ system)
   </para>
+  <section id="lj.customize.text.new">
+    <title>Using site-specific text</title>
+    <para>
+      To create your own site-specific language file, all you have to do is select which strings you'd like to override from
+      <filename><envar>$LJHOME</envar>/bin/upgrading/en.dat</filename> and put them in a new file: <filename>en_LOCAL.dat</filename>
+      Then, you add the language to your database using the steps below:
+      <procedure><title>Creating a new site-specific language file: <replaceable>en_LOCAL</replaceable>:</title>
+        <step><simpara>
+          Create a new file under <filename><envar>$LJHOME</envar>/bin/upgrading/</filename>, labelled
+          <filename>en_LOCAL.dat</filename>. This file should contain all of the text that you'd like to override from
+          <filename><envar>$LJHOME</envar>/bin/upgrading/en.dat</filename>.
+        </simpara></step>
+        <step><para>
+          If you don't have a local <abbrev>BML</abbrev> configuration file (<filename>_config-local.bml</filename>)
+          in your <filename><envar>$LJHOME</envar>/htdocs/</filename> directory, you should create one now.
+          Add the following line to your local configuration file:
+          <programlisting>DefaultLanguage en_LOCAL</programlisting>
+        </para></step>
+        <step><para>
+          If you don't have a local language directive file (<filename><envar>$LJHOME</envar>/bin/upgrading/text-local.dat</filename>)
+          create one now. Add the following lines to your local language file:
+            
+<programlisting># EnglishLOCAL is child of English for general domain:
+lang:100:en_LOCAL:English (Local):sim:en
+langdomain:en_LOCAL:general
+
+# EnglishLOCAL is root of FAQ:
+langdomain:en_LOCAL:faq:1</programlisting>
+            
+        </para></step>
+        <step><simpara>
+          Run <command><filename><envar>$LJHOME</envar>/bin/upgrading/texttool.pl</filename> <option>load</option></command>.
+        </simpara></step>
+      </procedure>
+    </para>
+  </section>
 </chapter>
+<!--
+Local Variables:
+mode:sgml
+sgml-parent-document: ("index.xml" "part" "chapter")
+End:
+-->

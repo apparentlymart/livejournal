@@ -1,32 +1,29 @@
 <chapter id="lj.customize.layout">
   <title><abbrev>BML</abbrev> Schemes</title>
   <subtitle>Changing your site's layout</subtitle>
-  <section id="lj.customize.layout.intro">
-    <title>Introduction</title>
-    <para>
-      <abbrev>BML</abbrev> is the language used to serve pages to users that they don't manage
-      themselves. To get an idea of what <abbrev>BML</abbrev>is, the following is a quote from the
-      official documentation:
-      <blockquote>
-        <attribution><citetitle pubwork="book">The Better Markup Language</citetitle></attribution>
-        <simpara>
-          <abbrev>BML</abbrev> is a server-side markup language that lets you define your own
-          <abbrev>BML</abbrev> blocks and use them as templates within your <abbrev>BML</abbrev>
-          pages. Your templates don't even have to be static. Because <abbrev>BML</abbrev> pages are
-          converted to <abbrev>HTML</abbrev> on the server when users request them, this also enables
-          you to embed live code within your <abbrev>BML</abbrev> pages, just like a
-          <abbrev>CGI</abbrev> script.
-        </simpara>
-      </blockquote>
-    </para><para>
-      With LiveJournal, we used <abbrev>BML</abbrev> because it makes it easier for us to write the
-      layouts that comprise LiveJournal, without requiring frequent changes or rewrites on our part
-      to come up with a customized look and feel. In the next section you will read how to make the
-      necessary additions to the LiveJournal schemes to tailor your LiveJournal installation to your
-      exact needs.
-    </para>
-    <para>For more information on <abbrev>BML</abbrev>, please refer to <xref linkend="bml.index" />.</para>
-  </section>
+  <para>
+    <abbrev>BML</abbrev> is the language used to serve pages to users that they don't manage
+    themselves. To get an idea of what <abbrev>BML</abbrev>is, the following is a quote from the
+    <abbrev>BML</abbrev> manual:
+    <blockquote>
+      <attribution><citetitle pubwork="book">The Better Markup Language</citetitle></attribution>
+      <simpara>
+        <abbrev>BML</abbrev> is a server-side markup language that lets you define your own
+        <abbrev>BML</abbrev> blocks and use them as templates within your <abbrev>BML</abbrev>
+        pages. Your templates don't even have to be static. Because <abbrev>BML</abbrev> pages are
+        converted to <abbrev>HTML</abbrev> on the server when users request them, this also enables
+        you to embed live code within your <abbrev>BML</abbrev> pages, just like a
+        <abbrev>CGI</abbrev> script.
+      </simpara>
+    </blockquote>
+  </para><para>
+    With LiveJournal, we used <abbrev>BML</abbrev> because it makes it easier for us to write the
+    layouts that comprise LiveJournal, without requiring frequent changes or rewrites on our part
+    to come up with a customized look and feel. In the next section you will read how to make the
+    necessary additions to the LiveJournal schemes to tailor your LiveJournal installation to your
+    exact needs.
+  </para>
+  <para>For more information on <abbrev>BML</abbrev>, please refer to <xref linkend="bml.index" />.</para>
   <section id="lj.customize.layout.new">
     <title>Writing a <abbrev>BML</abbrev> Scheme</title>
     <para>

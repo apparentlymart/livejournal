@@ -2,58 +2,73 @@
   <title>Database</title>
   <itemizedlist>
     <title>Database</title>
-    <listitem><para>
-      Check your db index usage... mysql's "EXPLAIN" is your friend.
-    </para></listitem>
-    <listitem><para>
-      Between LOCK TABLES &amp; UNLOCK TABLES, never call a subroutine.
-    </para></listitem>
-    <listitem><para>
-      Check the DB error code after an SQL statement.  Just because it worked once and the SQL is correct, that doesn't mean the table might not go corrupt, a disk might fill up, or index space within the file might not fill up.  Errors happen. Deal with them.
-    </para></listitem>
-    <listitem><para>
+    <listitem><simpara>
+      Check your db index usage... mysql's <function>EXPLAIN</function> is your friend.
+    </simpara></listitem>
+    <listitem><simpara>
+      Between <function>LOCK TABLES</function> &amp; <function>UNLOCK TABLES</function>,
+      never call a subroutine.
+    </simpara></listitem>
+    <listitem><simpara>
+      Check the DB error code after an SQL statement.  Just because it worked once and the SQL is correct,
+      that doesn't mean the table might not go corrupt, a disk might fill up, or index space within the
+      file might not fill up.  Errors happen. Deal with them.
+    </simpara></listitem>
+    <listitem><simpara>
       Preferred way to break up a long SQL query:
       <programlisting>
       $sth = $dbh->prepare("SELECT cola, colb, colc, cold FROM foo ".
                            "WHERE colb&lt;&gt;cola AND colc=22");
       </programlisting>
-    </para></listitem>
+    </simpara></listitem>
     <listitem><para>
       Note on variable naming:
       <informaltable>
         <tgroup cols="2">
           <tbody>
             <row>
-              <entry><computeroutput>$sth</computeroutput></entry>
+              <entry><varname>$sth</varname></entry>
               <entry>statement handle</entry>
             </row>
             <row>
-              <entry><computeroutput>$dbh</computeroutput></entry>
+              <entry><varname>$dbh</varname></entry>
               <entry>one database handle (usually the master)</entry>
             </row>
             <row>
-              <entry><computeroutput>$dbs</computeroutput></entry>
+              <entry><varname>$dbs</varname></entry>
               <entry>set of database handles [master(, slave)]</entry>
             </row>
             <row>
-              <entry><computeroutput>$dbr</computeroutput></entry>
+              <entry><varname>$dbr</varname></entry>
               <entry>read-only slave db handle (used for selects)</entry>
             </row>
             <row>
-              <entry><computeroutput>$dbarg</computeroutput></entry>
-              <entry>argument that can take a $dbh/r or $dbs</entry>
+              <entry><varname>$dbarg</varname></entry>
+              <entry>argument that can take a <varname>$dbh/r</varname> or <varname>$dbs</varname></entry>
             </row>
             <row>
-              <entry><computeroutput>$remote</computeroutput></entry>
-              <entry>hashref of remote user, based on cookies.  will contain 'userid' and 'user' params, unless faster get_remote_noauth was used, in which case only 'user' will be present.</entry>
+              <entry><varname>$remote</varname></entry>
+              <entry>hashref of remote user, based on cookies.  will contain 'userid' and 'user' params,
+                unless faster get_remote_noauth was used, in which case only 'user' will be present.</entry>
             </row>
             <row>
-              <entry><computeroutput>$u</computeroutput></entry>
+              <entry><varname>$u</varname></entry>
               <entry>a user 'object' (a hashref)</entry>
             </row>
           </tbody>
         </tgroup>
       </informaltable>
     </para></listitem>
+    <listitem><simpara>
+      Call for database handles as you need them, instead of predeclaring <varname>$db<replaceable>x</replaceable></varname> variables.
+      Use <function>LJ::get_db_writer</function> to get a writable handle to the database, and
+      <function>LJ::get_db_reader</function> to get a read-only handle.
+    </simpara></listitem>
   </itemizedlist>
 </chapter>
+<!--
+Local Variables:
+mode:sgml
+sgml-parent-document: ("index.xml" "part" "chapter")
+End:
+-->

@@ -23,12 +23,12 @@
     site and should have a thorough knowledge of whatever system
     they are installing LiveJournal on.
   </para>
-  <para>
+  <highlights>
     <variablelist>
       <title>Organization of this manual</title>
       <varlistentry>
         <term><xref linkend="lj.intro.index" /> - Introduction</term>
-        <listitem><para>An basic introduction to LiveJournal</para></listitem>
+        <listitem><para>A basic introduction to LiveJournal</para></listitem>
       </varlistentry>
       <varlistentry>
         <term><xref linkend="lj.install.index" /> - Installation</term>
@@ -47,7 +47,7 @@
         <listitem><para>Introductions and instructions to different LiveJournal features</para></listitem>
       </varlistentry>
     </variablelist>
-  </para>
+  </highlights>
   <formalpara>
     <title>Versions</title>
     <para>
@@ -63,3 +63,9 @@
     <title></title>
   </formalpara>
 </preface>
+<!--
+Local Variables:
+mode:sgml
+sgml-parent-document: ("index.xml" "book" "preface")
+End:
+-->
