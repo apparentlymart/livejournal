@@ -827,7 +827,7 @@ sub register_language
 {
     my ($isocode, $langcode) = @_;
     next unless $isocode =~ /^\w{2,2}$/;
-    $Apache::BML::Lang{$isocode} = $langcode;
+    $Apache::BML::Lang{$isocode} ||= $langcode;
 }
 
 sub note_mod_time

@@ -1082,7 +1082,7 @@ sub register_language
 {
     my ($isocode, $langcode) = @_;
     next unless $isocode =~ /^\w{2,2}$/;
-    $main::Lang{$isocode} = $langcode;
+    $main::Lang{$isocode} ||= $langcode;
 }
 
 sub note_mod_time
