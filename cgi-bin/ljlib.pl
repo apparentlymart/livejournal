@@ -4153,7 +4153,8 @@ sub disconnect_dbs {
 # des: Loads a bunch of userpic at once.
 # args: dbarg?, upics, idlist
 # des-upics: hashref to load pictures into, keys being the picids
-# des-idlist: arrayref of $u, $picid or multiple [$u, $picid] objects
+# des-idlist: [$u, $picid] or [[$u, $picid], [$u, $picid], +] objects
+# also supports depreciated old method of an array ref of picids
 # </LJFUNC>
 sub load_userpics
 {
@@ -4162,6 +4163,22 @@ sub load_userpics
 
     return undef unless ref $idlist eq 'ARRAY';
 
+    # deal with the old calling convention, just an array ref of picids eg. [7, 4, 6, 2]
+    if (! ref $idlist->[0] && $idlist->[0]) { # assume we have an old style caller
+        my $in = join(',', map { $_+0 } @$idlist);
+        my $dbr = LJ::get_db_reader();
+        my $sth = $dbr->prepare("SELECT userid, picid, width, height " .
+                                "FROM userpic WHERE picid IN ($in)");
+
+        $sth->execute;
+        while ($_ = $sth->fetchrow_hashref) {
+            my $id = $_->{'picid'};
+            undef $_->{'picid'};
+            $upics->{$id} = $_;
+        }
+        return;
+    }
+
     # $idlist needs to be an arrayref of arrayrefs,
     # HOWEVER, there's a special case where it can be
     # an arrayref of 2 items:  $u (which is really an arrayref)
@@ -4169,7 +4186,7 @@ sub load_userpics
     #
     # [$u, $picid] needs to map to [[$u, $picid]] while allowing
     # [[$u1, $picid1], [$u2, $picid2], [etc...]] to work.
-    if (scalar @$idlist == 2 && ref $idlist->[1] ne 'ARRAY') {
+    if (scalar @$idlist == 2 && ! ref $idlist->[1]) {
         $idlist = [ $idlist ];
     }
 
