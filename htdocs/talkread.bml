@@ -189,6 +189,8 @@ if ($uri =~ m!/(\d+)\.html$!) {
                                                   'commlink' => "<?ljcomm $u->{'user'} ljcomm?>" });
  }
 
+ BML::note_mod_time(LJ::mysqldate_to_time($item->{'eventtime'}));
+
  my $etime = $item->{'eventtime'};
  $etime =~ s!(\d\d\d\d)-(\d\d)-(\d\d)!LJ::date_to_view_links($u, $&)!e;
  $ret .= "<br /><font size='-1'>@ $etime</font>";
@@ -314,6 +316,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
  my $post_count = 0;
  while (my $post = $sth->fetchrow_hashref) {
      $post_count++ unless ($post->{'state'} eq "D");
+     BML::note_mod_time(LJ::mysqldate_to_time($post->{'datepost'}));
      $posts{$post->{'talkid'}} = $post;
      push @{$children{$post->{'parenttalkid'}}}, $post->{'talkid'};
  }
