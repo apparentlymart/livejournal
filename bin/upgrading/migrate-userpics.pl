@@ -7,6 +7,7 @@ use LJ::Blob;
 use LJ::User;
 use Getopt::Long;
 use IPC::Open3;
+use Digest::MD5;
 
 # this script is a migrater that will move userpics from an old storage method
 # into mogilefs.
@@ -147,7 +148,7 @@ sub handle_userid {
 
     # get all their photos that aren't in mogile already
     my $picids = $dbcm->selectall_arrayref
-        ("SELECT picid, fmt FROM userpic2 WHERE userid = ? AND (location <> 'mogile' OR location IS NULL)",
+        ("SELECT picid, md5base64, fmt FROM userpic2 WHERE userid = ? AND (location <> 'mogile' OR location IS NULL)",
          undef, $u->{userid});
     return unless @$picids;
 
@@ -156,7 +157,7 @@ sub handle_userid {
 
     # now we have a userid and picids, get the photos from the blob server
     foreach my $row (@$picids) {
-        my ($picid, $fmt) = @$row;
+        my ($picid, $md5, $fmt) = @$row;
         print "\tstarting move for picid $picid\n"
             if $verbose;
         my $format = { G => 'gif', J => 'jpg', P => 'png' }->{$fmt};
@@ -171,10 +172,17 @@ sub handle_userid {
         }
         die "Error: data from blob empty ($u->{user}, 'userpic', $format, $picid)\n"
             unless $len;
+
+        # verify the md5 of this picture with what's in the database
+        my $blobmd5 = Digest::MD5::md5_base64($data);
+        die "\tError: data from blobserver md5 mismatch: database=$md5, blobserver=$blobmd5\n"
+            unless $md5 eq $blobmd5;
+        print "\tverified md5; database=$md5, blobserver=$blobmd5\n"
+            if $verbose;
+        
+        # get filehandle to Mogile and put the file there
         print "\tdata length = $len bytes, uploading to MogileFS...\n"
             if $verbose;
-
-        # get filehandle to Mogile and put the file there
         my $fh = $LJ::MogileFS->new_file($u->mogfs_userpic_key($picid), 'userpics')
             or die "Unable to get filehandle to save file to MogileFS\n";
         $fh->print($data);
