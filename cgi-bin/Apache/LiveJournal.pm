@@ -179,7 +179,7 @@ sub trans
             ($opts->{'vhost'} eq "" || $opts->{'vhost'} eq "tilde")) {
             my $newurl = $uri;
             $newurl =~ s!^/(users/|~)$opts->{'user'}+!!;
-            $newurl = "$LJ::SITEROOT/community/$opts->{'user'}$newurl";
+            $newurl = "$LJ::SITEROOT/community/$opts->{'user'}$newurl$args_wq";
             return redir($r, $newurl);
         }
 
@@ -188,7 +188,7 @@ sub trans
                                             $opts->{'mode'} eq "month")) {
             my $base = "$LJ::SITEROOT/users/$opts->{'user'}";
             $base = "$LJ::SITEROOT/community/$opts->{'user'}" if $u && $u->{'journaltype'} eq "C";
-            return redir($r, "$base$uri");
+            return redir($r, "$base$uri$args_wq");
         }
 
         if ($opts->{'mode'} eq "item") {
