@@ -33,10 +33,11 @@ $SIG{'TERM'} = sub {
 };
 
  REQUEST:
-    while((($SERVING=0) || 1) &&      # set serving to 0
+    while(LJ::start_request() &&
+	  (($SERVING=0) || 1) &&      # set serving to 0
           $CONTINUE &&                # stop if got signal earlier
           ++$REQ_COUNT <= $REQ_MAX && # go until time to restart
-	FCGI::accept() >= 0)
+	  FCGI::accept() >= 0)
 {
     $SERVING = 1;
 

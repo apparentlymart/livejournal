@@ -13,7 +13,7 @@ require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljprotocol.pl";
 
 REQUEST:
-    while(FCGI::accept() >= 0) 
+    while(LJ::start_request() && FCGI::accept() >= 0) 
 {
     # XML-RPC interface
     if ($ENV{'PATH_INFO'} eq "/xmlrpc") {

@@ -36,7 +36,7 @@ my %reqmeth;
 my $lastconn;
 
  REQUEST:
-    while(FCGI::accept() >= 0) 
+    while(LJ::start_request() && FCGI::accept() >= 0) 
 {
     if ($ENV{'HTTP_IF_MODIFIED_SINCE'}) {
 	# we can safely do this without checking since we never re-use

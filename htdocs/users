@@ -26,7 +26,7 @@ unless ($ENV{'SERVER_SOFTWARE'}) {
 }
 
  REQUEST:
-    while(LJ::handle_caches() &&       # clear caches if we received a HUP earlier
+    while(LJ::start_request() &&       # clear caches if we received a HUP earlier
 	  (($SERVING=0) || 1) &&       # set serving to 0,
 	  $CONTINUE &&                 # didn't get a quit signal earlier?
 	  ++$REQ_COUNT <= $REQ_MAX &&  # not time to restart?

@@ -2190,8 +2190,8 @@ sub handle_caches
     foreach (keys %LJ::DBCACHE) { 
 	my $v = $LJ::DBCACHE{$_};
 	$v->disconnect;
-	delete $LJ::DBCACHE{$_}; 
     }
+    %LJ::DBCACHE = ();
 
     %LJ::CACHE_PROP = ();
     %LJ::CACHE_STYLE = ();
@@ -2204,6 +2204,24 @@ sub handle_caches
     %LJ::CACHE_USERPIC_SIZE = ();
     %LJ::CACHE_CODES = ();
     %LJ::CACHE_USERPROP = ();  # {$prop}->{ 'upropid' => ... , 'indexed' => 0|1 };
+    return 1;
+}
+
+# <LJFUNC>
+# name: LJ::start_request
+# des: Before a new web request is obtained, this should be called to 
+#      determine if process should die or keep working, clean caches,
+#      reload config files, etc.
+# returns: 1 if a new request is to be processed, 0 if process should die.
+# </LJFUNC>
+sub start_request
+{
+    handle_caches();
+    # TODO: check process growth size
+    # TODO: auto-restat and reload ljconfig.pl if changed.
+    # TODO: clear %LJ::DBREQCACHE (like DBCACHE, but verified already for
+    #       this request to be ->ping'able).  also need to change get_dbh
+    #       then to initialize this and use it.  one day.
     return 1;
 }
 
