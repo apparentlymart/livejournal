@@ -361,6 +361,7 @@ sub FriendsPage
     if ($skip) {
         my %linkvars;
         $linkvars{'filter'} = $linkfilter if $incfilter;
+        $linkvars{'show'} = $FORM{'show'} if $FORM{'show'} =~ /^\w+$/;
         my $newskip = $skip - $itemshow;
         if ($newskip > 0) { $linkvars{'skip'} = $newskip; }
         else { $newskip = 0; }
@@ -375,6 +376,7 @@ sub FriendsPage
     unless ($eventnum != $itemshow || $skip == $maxskip) {
         my %linkvars;
         $linkvars{'filter'} = $linkfilter if $incfilter;
+        $linkvars{'show'} = $FORM{'show'} if $FORM{'show'} =~ /^\w+$/;
         my $newskip = $skip + $itemshow;
         $linkvars{'skip'} = $newskip;
         $nav->{'backward_url'} = LJ::make_link($base, \%linkvars);

@@ -1334,6 +1334,7 @@ sub create_view_friends
         my %linkvars;
 
         $linkvars{'filter'} = $linkfilter if $incfilter;
+        $linkvars{'show'} = $FORM{'show'} if $FORM{'show'} =~ /^\w+$/;
 
         my $newskip = $skip - $itemshow;
         if ($newskip > 0) { $linkvars{'skip'} = $newskip; }
@@ -1354,6 +1355,7 @@ sub create_view_friends
         my %linkvars;
 
         $linkvars{'filter'} = $linkfilter if $incfilter;
+        $linkvars{'show'} = $FORM{'show'} if $FORM{'show'} =~ /^\w+$/;
 
         my $newskip = $skip + $itemshow;
         $linkvars{'skip'} = $newskip;
