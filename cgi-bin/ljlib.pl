@@ -2833,6 +2833,23 @@ sub start_request
     # at some point.
     LJ::load_banned_ips();
 
+    # check the modtime of ljconfig.pl and reload if necessary
+    # only do a stat every 10 seconds and then only reload
+    # if the file has changed
+
+    # initialize if this is the first request for this child
+    $LJ::CACHE_CONFIG_MODTIME ||= (stat("$ENV{'LJHOME'}/cgi-bin/ljconfig.pl"))[9];
+    my $now = time();
+    if ($now - $LJ::CACHE_CONFIG_MODTIME_LASTCHECK > 10) {
+        my $modtime = (stat("$ENV{'LJHOME'}/cgi-bin/ljconfig.pl"))[9];
+        if ($modtime > $LJ::CACHE_CONFIG_MODTIME) {
+            # reload config and update cached modtime
+            $LJ::CACHE_CONFIG_MODTIME = $modtime;
+            do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
+        }
+        $LJ::CACHE_CONFIG_MODTIME_LASTCHECK = $now;
+    }
+
     return 1;
 }
 
