@@ -274,7 +274,7 @@ body<=
                 $ret .= LJ::html_check({ 'type' => 'check',
                                          'name' => "custom_bit_$fg->{'id'}",
                                          'id' => "custom_bit_$fg->{'id'}",
-                                         'selected' => $curmask+0 & 1 << $fg->{'id'} }) . " ";
+                                         'selected' => $POST{"custom_bit_$fg->{'id'}"} || $curmask+0 & 1 << $fg->{'id'} }) . " ";
                 $ret .= "<label for='custom_bit_$fg->{'id'}'>" . LJ::ehtml($fg->{'name'}) . "</label><br />";
             }
             $ret .= "</div>\n";
