@@ -1518,16 +1518,19 @@ $LJ::COMMON_CODE{'quickreply'} = q{
         var qr_body = xGetElementById('body');
         var qr_subject = xGetElementById('subject');
         var do_spellcheck = xGetElementById('do_spellcheck');
-        var qr_upic = xGetElementById('prop_picture_keyword');
         var qr_dtid = xGetElementById('dtid');
         var qr_ptid = xGetElementById('parenttalkid');
+        var qr_upic = xGetElementById('prop_picture_keyword');
 
         document.multiform.saved_body.value = qr_body.value;
         document.multiform.saved_subject.value = qr_subject.value;
         document.multiform.saved_spell.value = do_spellcheck.checked;
-        document.multiform.saved_upic.value = qr_upic.selectedIndex;
         document.multiform.saved_dtid.value = qr_dtid.value;
         document.multiform.saved_ptid.value = qr_ptid.value;
+
+        if (qr_upic) { // if it was in the form
+            document.multiform.saved_upic.value = qr_upic.selectedIndex;
+        }
 
         return false;
     }
@@ -1558,8 +1561,9 @@ $LJ::COMMON_CODE{'quickreply'} = q{
                 subject.value = document.multiform.saved_subject.value
 
                 var prop_picture_keyword = xGetElementById('prop_picture_keyword');
-                if (! prop_picture_keyword) return false;
-                prop_picture_keyword.selectedIndex = document.multiform.saved_upic.value;
+                if (prop_picture_keyword) { // if it was in the form
+                    prop_picture_keyword.selectedIndex = document.multiform.saved_upic.value;
+                }
 
                 var spell_check = xGetElementById('do_spellcheck');
                 if (! spell_check) return false;
