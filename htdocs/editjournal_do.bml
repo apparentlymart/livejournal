@@ -141,7 +141,13 @@ BODY<=
 	 my $amask = 0;
 	 if ($FORM{'security'} eq "private") { $sec = "private"; }
 	 if ($FORM{'security'} eq "friends") { $sec = "usemask"; $amask = 1; }
-	 if ($FORM{'security'} eq "custom") { $sec = "usemask"; $amask = $FORM{'custommask'}+0; }
+	 if ($FORM{'security'} eq "custom") { 
+	     $sec = "usemask"; 
+	     foreach my $bit (1..30) {
+		 next unless $FORM{"custom_bit_$bit"};
+		 $amask |= (1 << $bit);
+	     }
+	 }
 	 $FORM{'security'} = $sec;
 	 $FORM{'allowmask'} = $amask;
      }
@@ -159,6 +165,13 @@ BODY<=
 	     return "(=H1 Error H1=)(=P Could not find selected journal entry. P=)";
 	 }
 
+	 my $gfg;
+	 $gfg = LJ::Protocol::do_request($dbs, "getfriendgroups", {
+	     'username' => $user,
+	 }, undef, {
+	     'noauth' => 1,
+	 }) unless $FORM{'usejournal'};
+	 
 	 my %props = ();
 	 for (my $i=1; $i<=$res{'prop_count'}; $i++) {
 	     $props{$res{"prop_${i}_name"}} = $res{"prop_${i}_value"};
@@ -195,27 +208,35 @@ BODY<=
 	 $ret .= LJ::ehtml(LJ::durl($res{"events_1_event"}));
  	 $ret .= "</TEXTAREA>\n";
 
-	 $ret .= "<P><B>Security Level:</B><SELECT NAME=\"security\">\n";
-	 my %modes = ("public" => "Public", "private" => "Private", "friends" => "Friends", "custom" => "(Custom)");
-	 my @modes = ("public", "private", "friends");
-	 my $curmode = "";
-	 my $sec = $res{"events_1_security"} || "public";
-	 if ($sec eq "public") { $curmode = "public"; }
-	 elsif ($sec eq "private") { $curmode = "private"; }
-	 elsif ($sec eq "usemask") {
-	     if ($res{"events_1_allowmask"} == 1) { $curmode = "friends"; }
-	     else { $curmode = "custom"; push @modes, "custom"; }
-	 }
-
-	 foreach my $mode (@modes) {
-	     my $checked = ($mode eq $curmode) ? "SELECTED" : "";
-	     $ret .= "<OPTION VALUE=\"$mode\" $checked>$modes{$mode}\n";
-	 }
+	 $ret .= "<p><b>Security Level:</b>";
+	 my @secs = ("public" => "Public", "private" => "Private", 
+		     "friends" => "Friends");
+	 push @secs, ("custom", "Custom...") if ($gfg && @{$gfg->{'friendgroups'}});
 	 
-	 $ret .= "</SELECT> " . LJ::help_icon("security");
-	 if ($curmode eq "custom") {
-	     my $mask = $res{"events_1_allowmask"}+0;
-	     $ret .= "<INPUT TYPE=HIDDEN NAME=\"custommask\" VALUE=$mask>";
+	 my $curmask = $res{'events_1_allowmask'};
+	 my $cursec = $res{'events_1_security'};
+	 if ($cursec eq 'usemask') {
+	     $cursec = $curmask == 1 ? "friends" : "custom";
+	 }
+	 $ret .= LJ::html_select({ 'name' => 'security',
+				   'selected' => $cursec,
+				   'raw' => "onChange=\"document.getElementById('custom_boxes').style.display = (this.selectedIndex == 3) ? 'block' : 'none';\"",
+			       }, @secs);
+
+	 $ret .= LJ::help_icon("security");
+
+	 if ($gfg && @{$gfg->{'friendgroups'}}) {
+	     my $display = $cursec eq "custom" ? "block" : "none";
+	     $ret .= "<blockquote id='custom_boxes' style='display: $display'>";
+	     foreach my $fg (@{$gfg->{'friendgroups'}}) {
+		 my $selected;
+		 if ($curmask+0 & 1<<$fg->{'id'}) {
+		     $selected = "checked=\"checked\"";
+		 }
+		 $ret .= "<input type='checkbox' name='custom_bit_$fg->{'id'}' value='1' $selected> ";
+		 $ret .= LJ::ehtml($fg->{'name'}) . "<br />\n";
+	     }
+	     $ret .= "</blockquote>";
 	 }
 
 	 ### don't auto-format
@@ -326,5 +347,7 @@ BODY<=
 _CODE=)
 
 <=BODY
-PAGE=)
-
+PAGE=)(=_C <LJDEP>
+post: htdocs/editjournal_do.bml
+link: htdocs/moodlist.bml, htdocs/users
+</LJDEP> _C=)
