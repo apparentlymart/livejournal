@@ -27,15 +27,17 @@
 	 $body = "(=H1 Error H1=)(=P (=REQUIREPOST=) P=)";
 	 return "";
      }
-
+     
      my %res = ();
      &LJ::do_request($dbh, {
 	 "user" => $remote->{'user'},
 	 "mode" => "editfriends",
 	 "editfriend_add_1_user" => $user,
-     }, \%res, { "noauth" => 1, "userid" => $remote->{'userid'} });
+	 "editfriend_add_1_fg" => $FORM{'editfriend_add_1_fg'}, 
+	 "editfriend_add_1_bg" => $FORM{'editfriend_add_1_bg'},
+     }, \%res, { "noauth" => 1, "userid" => $remote->{'userid'} } );
      
-     
+
      if ($res{'success'} eq "OK") 
      {
 	 $title = "Friend Added!";
@@ -49,23 +51,80 @@
      return "";
  }
 
- $title .= "Add Friend";
- $body .= "(=H1 Add $user as a friend? H1=)(=P To add <B>$user</B> to your friends list, click the button below. P=)";
+ # check to see if user is already a friend.
+ $sth = $dbh->prepare("SELECT * FROM friends WHERE userid=$remote->{'userid'} AND friendid=$userid");
+ $sth->execute;
+ my $fr = $sth->fetchrow_hashref;
+ 
+ if ($fr) {
+     $title .= "Modify Friend";
+     $body .= "(=H1 Modify Friend H1=)(=P You already have <b>$user</b> listed as a friend.  However, you can modify the colors you've chosen to represent him/her. P=)";
+ } else {
+     $title .= "Add Friend";
+     $body .= "(=H1 Add $user as a friend? H1=)(=P To add <B>$user</B> to your friends list, click the button below.  P=)";
+ }
+
  $body .= "<form method=post>";
  $body .= "<input type=hidden name=mode value=add>";
  $body .= "<input type=hidden name=user value=\"$user\">";
- $body .= "<center><input type=submit value=\"Add $user!\">";
- $body .= "</form>";
 
+ if ($fr) {
+     $body .= "<center><input type=submit value=\"Save.\"></center>";
+ } else {
+     $body .= "<center><input type=submit value=\"Add $user!\"></center>";
+ }
+
+ $body .= "(=H1 Colors H1=)(=P You may also optionally select the colors that will represent $user in your friends list.  P=)";
+
+ $ret .= "<P><CENTER><TABLE CELLPADDING=4><TR><TD><B>Foreground</B></TD><TD><B>Background</B></TD></TR>\n";
+
+ # load the colors
+ my @color = ();
+ &load_codes({ "color" => \@color });
+
+ my $sel = $fr || { 'fgcolor' => '#000000',
+		    'bgcolor' => '#FFFFFF', };
+
+ $ret .= "<TR>";
+ $ret .= "<TD><SELECT NAME=\"editfriend_add_1_fg\">";
+ foreach (@color) {
+     my $selected = $_->{'code'} eq $sel->{'fgcolor'} ? " SELECTED" : "";
+     $ret .= "<OPTION VALUE=\"$_->{'code'}\"$selected>$_->{'item'}\n";
+ }
+ $ret .= "</SELECT></TD>\n";
+ $ret .= "<TD><SELECT NAME=\"editfriend_add_1_bg\">";
+ foreach (@color) {
+     my $selected = $_->{'code'} eq $sel->{'bgcolor'} ? " SELECTED" : "";
+     $ret .= "<OPTION VALUE=\"$_->{'code'}\"$selected>$_->{'item'}\n";
+ }
+ $ret .= "</SELECT></TD>\n";
+ $ret .= "</TR>\n";
+ $ret .= "</TABLE>\n";
+ 
+ ### color swatch
+ my $col = 0;
+ $ret .= "<P><TABLE border=0 cellspacing=0 cellpadding=0>";
+ foreach (@color) {
+     if ($col==0) { $ret .= "<TR>\n"; }
+     $col++;
+	 my $ecolor = &BMLUtil::ehtml($_->{'item'});
+     $ret .= "<TD bgcolor=$_->{'code'}><IMG SRC=\"/img/dot.gif\" WIDTH=14 HEIGHT=14 TITLE=\"$ecolor\" ALT=\"$ecolor\"></TD>\n";
+     if ($col==23) { $ret .= "</TR>\n"; $col==0; }
+ }
+ if ($col) { $ret .= "</TR>\n"; $col==0; }
+ $ret .= "</TABLE>\n";
+ $ret .= "<FONT SIZE=-2 FACE=\"Arial,Helvetica\">(Hover your mouse over a color to see its name)</FONT>";
+
+ $ret .= "</CENTER>\n";
+ $body .= $ret;
+
+ $body .= "</form>";
 
  return "";
      
 _CODE=)
 (=PAGE
 TITLE=>(=_CODE return $title; _CODE=)
-BODY<=
-(=_CODE
-return $body;
-_CODE=)
-<=BODY
+BODY=>(=_CODE return $body; _CODE=)
 PAGE=)
+
