@@ -769,7 +769,7 @@ sub show_poll
             for (my $at=$from; $at<=$to; $at+=$by) {
                 if ($do_radios) {
                     if ($do_form) {
-                        my $sel = ($at == $preval{$qid}) ? " checked='checked" : "";
+                        my $sel = ($at == $preval{$qid}) ? " checked='checked'" : "";
                         $ret .= "<td><input type='radio' value='$at' name='pollq-$qid'$sel /><br />$at</td>";
                     } else {
                         $ret .= "<td>(&nbsp;&nbsp;)<br />$at</td>";
