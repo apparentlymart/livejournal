@@ -803,7 +803,6 @@ sub auth_fields_2
 #      for insertion into a drop-down menu.
 # returns: The HTML for the options menu.
 # args: u, form, opts
-# des-u: A user hash.
 # des-form: The form hash from the previous page.
 # des-opts: A hash of options to change the types of selections shown.
 # </LJFUNC>
@@ -847,8 +846,6 @@ sub make_shared_select
 # des: Gets an array of shared journals a user has access to.
 # returns: An array of shared journals.
 # args: dbs, u
-# des-dbs: A db structure.
-# des-u: A user hash.
 # </LJFUNC>
 sub get_shared_journals
 {
@@ -868,7 +865,6 @@ sub get_shared_journals
 #       user requested to do an action with. 
 # returns: The user to process as.
 # args: dbs, opts
-# des-dbs: A db structure.
 # des-opts: A hash of options to pass. 
 # </LJFUNC>
 sub get_effective_user
@@ -2293,7 +2289,6 @@ sub get_logtext2
 #       servers first. See also [func[LJ::get_logtext2]].
 # returns: Hashref with the talkids as keys, values being [ $subject, $event ].
 # args: u, opts?, jtalkids
-# des-u: A user hashref.
 # des-opts: A hashref of options. 'usermaster' will force checking of the
 #           master only.
 # des-jtalkids: A list of talkids to get text for.
@@ -2810,7 +2805,6 @@ sub strip_bad_code
 # returns: Nothing. Modifies a hash reference.
 # args: user, u, vars
 # des-user: The username to search for data with.
-# des-u: A hashref of user data.
 # des-vars: A hashref to fill with color data. Adds keys "color-$coltype"
 #           with values $color.
 # </LJFUNC>
@@ -2838,10 +2832,11 @@ sub load_user_theme
 
 # <LJFUNC>
 # name: LJ::parse_vars
-# des: Chops up a chunk of data into a proper hash.
-# returns: Nothing. Modifies a hashref.
+# des: Parses S1 style data into hashref.
+# returns: Nothing.  Modifies a hashref.
 # args: dataref, hashref
-# des-dataref: Reference to a data chunk of assignments to run.
+# des-dataref: Reference to scalar with data to parse. Format is
+#              a BML-style full block, as used in the S1 style system.
 # des-hashref: Hashref to populate with data.
 # </LJFUNC>
 sub parse_vars
