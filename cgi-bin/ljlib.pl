@@ -5262,12 +5262,16 @@ sub is_utf8 {
     if (LJ::are_hooks("is_utf8")) {
         return LJ::run_hook("is_utf8", $text);
     }
-    else {
-        $text =~ m/^([\x00-\x7f]|[\xc2-\xdf][\x80-\xbf]|\xe0[\xa0-\xbf][\x80-\xbf]|[\xe1-\xef][\x80-\xbf][\x80-\xbf]|\xf0[\x90-\xbf][\x80-\xbf][\x80-\xbf]|[\xf1-\xf7][\x80-\xbf][\x80-\xbf][\x80-\xbf])*(.*)/;
 
-        return 1 unless $2;
-        return 0;
-    }
+    # for a discussion of the different utf8 validity checking methods,
+    # see:  http://zilla.livejournal.org/657
+    # in summary, this isn't the fastest, but it's pretty fast, it doesn't make
+    # perl segfault, and it doesn't add new crazy dependencies.  if you want
+    # speed, check out ljcom's is_utf8 version in C, using Inline.pm
+
+    my $u = Unicode::String::utf8($text);
+    my $text2 = $u->utf8;
+    return $text eq $text2;
 }
 
 # <LJFUNC>
