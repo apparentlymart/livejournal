@@ -13,6 +13,9 @@ cleansimple/en          i18n            cleansimple/layout
 generator/layout        layout          core1
 generator/en            i18n            generator/layout
 
+magazine/layout         layout          core1
+magazine/en             i18n            magazine/layout
+
 punquin/layout          layout          core1
 punquin/en              i18n            punquin/layout
 punquin/bw              theme           punquin/layout
