@@ -104,14 +104,14 @@
 
                 my $login_btn_text = LJ::ejs($ML{'.login.btn.login'});
                 unless ($nojs) {
-                    $body .= "<script>
+                    $body .= "<script type='text/javascript' language='Javascript'> \n <!-- \n
                       document.write(\"<input name='action:login' onclick='return sendForm()' type='submit' value='$login_btn_text' />\");";
                     $body .= "
                       if (document.getElementById && document.getElementById('login')) {
                         document.write(\"&nbsp; <img src='$LJ::IMGPREFIX/icon_protected.gif' width='14' height='15' alt='secure login' align='middle' />\");
                         document.write(\"<br />\");
                         document.write(\"$secure\")
-                       } ";
+                       }\n // -->\n ";
                     $body .= '</script>';
                     $body .= "<noscript>";
                 }
@@ -121,9 +121,10 @@
                     # insecure now, but because they choose to not use javascript.  link to
                     # javascript version of login if they seem to have javascript, otherwise
                     # noscript to SSL
-                    $body .= "<script> document.write(\"<br />" . 
+                    $body .= "<script type='text/javascript' language='Javascript'>\n";
+                    $body .= "<!-- \n document.write(\"<br />" . 
                         LJ::ejs("[ <b>Standard</b> | <a href='$LJ::SITEROOT/login.bml'>Secure</a> ]") .
-                        "\"); </script>\n";
+                        "\"); \n // -->\n </script>\n";
                     if ($LJ::USE_SSL) {
                         $body .= "<noscript>";
                         $body .= "<br />" . "[ <b>Standard</b> | <a href='$LJ::SSLROOT/login.bml'>Secure</a> ]";
