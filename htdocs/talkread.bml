@@ -415,39 +415,16 @@ BODY<=
  }
  ####### end navcrap
 
- unless ($logprops{$itemid}->{'opt_nocomments'} or $u->{'opt_showtalklinks'} eq "N")
+ my $recurse_post = sub
  {
-     $ret .= "<p>$navcrap</p>" if $navcrap;
-     my $readlink;
-     if ($FORM{'thread'} && $pages == 1) {
-         $readlink = "(<a href='talkread.bml?${jargent}itemid=$ditemid'>$T{'readcomments'}</a>) - ";
-     }
-     $ret .= "<center><b>$readlink(<a href='talkpost.bml?${jargent}itemid=$ditemid'>$T{'postcomments'}</a>)</b></center>";
+     my ($self_sub, $postref, $ret, $tid, $mark, $opts) = @_;
+     # don't let people make circular references
+     return if ($mark->{$tid});
+     $mark->{$tid} = 1;
 
-     if ($post_count > 0)
-     {
-         recurse_post(\%posts, \$ret, $thread, {}, { "newfirst" => 0,
-                                                     "children" => \%children,
-                                                 });
-         $ret .= "<p><hr /><center><b>$readlink(<a href='talkpost.bml?${jargent}itemid=$ditemid'>$T{'postcomments'}</a>)</b></center></p>";
-     }
-
-     if ($navcrap) {
-         $ret .= "<p>$navcrap</p>";
-     }
- }
-
-
-sub recurse_post
-{
-    my ($postref, $ret, $tid, $mark, $opts) = @_;
-    # don't let people make circular references
-    return if ($mark->{$tid});
-    $mark->{$tid} = 1;
-
-    my $bgcolor = ($opts->{'depth'} % 2) ? "(=EMCOLORLITE=)" : "(=EMCOLOR=)";
-
-    # find child messages (replys to $tid)
+     my $bgcolor = ($opts->{'depth'} % 2) ? "(=EMCOLORLITE=)" : "(=EMCOLOR=)";
+     
+     # find child messages (replys to $tid)
     my @childs = sort { $postref->{$a}->{'datepost'} cmp $postref->{$b}->{'datepost'} }
     grep { ($postref->{$_}->{'state'} ne "D" || $postref->{$_}->{'_haschildren'}) }
     @{$opts->{'children'}->{$tid}};
@@ -593,15 +570,37 @@ sub recurse_post
         # go through children and show them too.
         foreach my $id (@childs) {
             next if ($postref->{$id}->{'_hide'});
-            recurse_post($postref, $ret, $id, $mark, { "depth" => $opts->{'depth'} + ($tid ? 1 : 0),
-                                                       "children" => $opts->{'children'},
-                                                   });
+            $self_sub->($self_sub, $postref, $ret, $id, $mark, 
+                        { "depth" => $opts->{'depth'} + ($tid ? 1 : 0),
+                          "children" => $opts->{'children'},
+                      });
         }
     } else {
 #       $$ret .= "No sub-posts.";
     }
-}
+};
 
+ unless ($logprops{$itemid}->{'opt_nocomments'} or $u->{'opt_showtalklinks'} eq "N")
+ {
+     $ret .= "<p>$navcrap</p>" if $navcrap;
+     my $readlink;
+     if ($FORM{'thread'} && $pages == 1) {
+         $readlink = "(<a href='talkread.bml?${jargent}itemid=$ditemid'>$T{'readcomments'}</a>) - ";
+     }
+     $ret .= "<center><b>$readlink(<a href='talkpost.bml?${jargent}itemid=$ditemid'>$T{'postcomments'}</a>)</b></center>";
+
+     if ($post_count > 0)
+     {
+         $recurse_post->($recurse_post, \%posts, \$ret, $thread, {}, { "newfirst" => 0,
+                                                                       "children" => \%children,
+                                                                   });
+         $ret .= "<p><hr /><center><b>$readlink(<a href='talkpost.bml?${jargent}itemid=$ditemid'>$T{'postcomments'}</a>)</b></center></p>";
+     }
+
+     if ($navcrap) {
+         $ret .= "<p>$navcrap</p>";
+     }
+ }
 
 LJ::strip_bad_code(\$ret);
 return $ret;
