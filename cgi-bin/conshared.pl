@@ -103,7 +103,7 @@ sub shared
     }
 
     unless (LJ::check_rel($shared_id, $remote, 'A') ||
-            $remote->{'privarg'}->{'sharedjournal'}->{'all'}) 
+            $remote->{'privarg'}->{'sharedjournal'}->{'*'}) 
     {
         $error = 1;
         push @$out, [ "error", "You don't have access to add/remove users to this shared journal." ];
@@ -187,7 +187,7 @@ sub community
     # user doesn't need admin priv to remove themselves from community
 
     unless (LJ::check_rel($dbs, $com_id, $remote, 'A') ||
-            $remote->{'privarg'}->{'sharedjournal'}->{'all'} ||
+            $remote->{'privarg'}->{'sharedjournal'}->{'*'} ||
             ($remote->{'user'} eq $target_user && $action eq "remove")) 
     {
         my $modifier = $action eq "add" ? "to" : "from";
