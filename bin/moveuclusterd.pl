@@ -197,7 +197,8 @@ BEGIN {
         'totaljobs',            # Count of jobs processed
         'assignments',          # Jobs that have been assigned
         'users',                # Users in the queue
-        'ratelimits',           # Hash of source cluster rates
+        'ratelimits',           # Cached cluster ratelimits
+        'raterules',            # Rules for building ratelimit table
         'jobcounts',            # Counts per cluster of running jobs
         'starttime',            # Server startup epoch time
        );
@@ -258,9 +259,13 @@ INIT {
 #
 # totaljobs:   Count of total jobs added to the daemon.
 #
-# ratelimits:  Maximum number of jobs which can be run against source clusters,
+# raterules:   Maximum number of jobs which can be run against source clusters,
 #              keyed by clusterid. If a global rate limit has been set, this
 #              hash also contains a special key 'global' to contain it.
+#
+# ratelimits:  Cached ratelimits for clusters -- this is rebuilt whenever a
+#              ratelimit rule is added, and is partially rebuilt when new jobs
+#              are added.
 #
 # jobcounts:   Count of jobs running against source clusters, keyed by
 #              source clusterid.
@@ -279,7 +284,8 @@ sub new {
     $self->{users}       = {};  # by-userid hash of jobs
     $self->{assignments} = {};  # fd -> job arrayref
     $self->{totaljobs}   = 0;   # Count of total jobs added
-    $self->{ratelimits}  = {};  # Rate limits by srcclusterid
+    $self->{raterules}   = {};  # User-set rate-limit rules
+    $self->{ratelimits}  = {};  # Cached rate limits by srcclusterid
     $self->{jobcounts}   = {};  # Count of jobs by srcclusterid
 
     # Merge the user-specified configuration with the defaults, with the user's
@@ -383,7 +389,7 @@ sub disconnectClient {
     my (
         $csock,                 # Client socket
         $fd,                    # Client's fdno
-        $retask,                # Job that client was working on
+        $job,                   # Job that client was working on
        );
 
     # Stop further input from the socket
@@ -395,16 +401,7 @@ sub disconnectClient {
 
     # Remove any event handlers registered for the client
     $self->removeAllHandlers( $fd );
-
-    # If requeueing is requested, re-queue any job that was assigned to the
-    # client. Otherwise just remove it.
-    if ( $requeue && ($retask = delete $self->{assignments}{$fd}) ) {
-        $self->logMsg( 'info', "Re-adding job %s to queue", $retask->stringify );
-        $self->{jobs}{ $retask->srcclusterid } ||= [];
-        unshift @{$self->{jobs}{ $retask->srcclusterid }}, $retask;
-    } else {
-        delete $self->{assignments}{$fd};
-    }
+    $self->unassignJobForClient( $fd );
 
     # Remove the client from our list
     delete $self->{clients}{ $fd };
@@ -499,11 +496,65 @@ sub prelockSomeUsers {
 ### the given I<clusterid>.
 sub getClusterRateLimit {
     my JobServer $self = shift;
-    my $clusterid = shift or croak "No clusterid";
+    my $clusterid = shift or confess "No clusterid";
 
-    return $self->{ratelimits}{ $clusterid } if exists $self->{ratelimits}{ $clusterid };
-    return $self->{ratelimits}{global} if exists $self->{ratelimits}{global};
+    # Swap the next two lines to make the 'global' rate override those of
+    # specific clusters.
+    return $self->{raterules}{ $clusterid } if exists $self->{raterules}{ $clusterid };
+    return $self->{raterules}{global} if exists $self->{raterules}{global};
     return $self->{config}{defaultRate};
+}
+
+
+### METHOD: getClusterRateLimits( undef )
+### Return the rate limits for all known clusters as a hash (or hashref if
+### called in scalar context) keyed by clusterid.
+sub getClusterRateLimits {
+    my JobServer $self = shift;
+
+    # (Re)build the rates table as necessary
+    unless ( %{$self->{ratelimits}} ) {
+        for my $clusterid ( keys %{$self->{jobs}} ) {
+            $self->{ratelimits}{ $clusterid } =
+                $self->getClusterRateLimit( $clusterid );
+        }
+    }
+
+    return wantarray ? %{$self->{ratelimits}} : $self->{ratelimits};
+}
+
+
+### METHOD: setClusterRateLimit( $clusterid, $rate )
+### Set the rate limit for the cluster with the given I<clusterid> to I<rate>.
+sub setClusterRateLimit {
+    my JobServer $self = shift;
+    my ( $clusterid, $rate ) = @_;
+
+    die "No clusterid" unless $clusterid;
+    die "No ratelimit" unless defined $rate && int($rate) == $rate;
+
+    # Set the new rule and trash the precalculated table
+    $self->{raterules}{ $clusterid } = $rate;
+    %{$self->{ratelimits}} = ();
+
+    return "Rate limit for cluster $clusterid set to $rate";
+}
+
+
+### METHOD: setGlobalRateLimit( $rate )
+### Set the rate limit for clusters that don't have an explicit ratelimit to
+### I<rate>.
+sub setGlobalRateLimit {
+    my JobServer $self = shift;
+    my $rate = shift;
+    die "No ratelimit" unless defined $rate && int($rate) == $rate;
+
+    # Set the global rule and clear out the cached table to rebuild it next time
+    # it's used
+    $self->{raterules}{global} = $rate;
+    %{$self->{ratelimits}} = ();
+
+    return "Global rate limit set to $rate";
 }
 
 
@@ -512,87 +563,18 @@ sub getClusterRateLimit {
 ### jobs, returns the undefined value.
 sub getJob {
     my JobServer $self = shift;
-    my ( $client ) = @_ or croak "No client object";
+    my ( $client ) = @_ or confess "No client object";
 
     my (
         $fd,                    # Client's fdno
         $job,                   # Job arrayref
        );
 
-    $fd = $client->fdno;
-
-    # Check for another assignment for the client. If it's already been assigned
-    # one, remove that from the assignments table.
-    if ( exists $self->{assignments}{ $fd } ) {
-        $job = delete $self->{assignments}{ $fd };
-        $self->logMsg( 'warn', "Client %d didn't finish job %s",
-                       $fd, $job->stringify );
-    }
+    $fd = $client->fdno or confess "No file descriptor?!?";
+    $self->unassignJobForClient( $fd );
 
     return $self->assignNextJob( $fd );
 }
-
-
-### METHOD: stopAllJobs( $client=JobServer::Client )
-### Stop all pending and currently-assigned jobs.
-sub stopAllJobs {
-    my JobServer $self = shift;
-    my $client = shift or croak "No client object";
-
-    $self->stopNewJobs( $client );
-    $self->logMsg( 'notice', "Clearing currently-assigned jobs." );
-    %{$self->{assignments}} = ();
-
-    return "Cleared all jobs.";
-}
-
-
-### METHOD: stopNewJobs( $client=JobServer::Client )
-### Stop assigning pending jobs.
-sub stopNewJobs {
-    my JobServer $self = shift;
-    my $client = shift or croak "No client object";
-
-    $self->logMsg( 'notice', "Clearing pending jobs." );
-    %{$self->{jobs}} = ();
-
-    return "Cleared pending jobs.";
-}
-
-
-### METHOD: requestJobFinish( $client=JobServer::Client, $userid, $srcclusterid, $dstclusterid )
-### Request authorization to finish a given job.
-sub finishJob {
-    my JobServer $self = shift;
-    my ( $client, $userid, $srcclusterid, $dstclusterid ) = @_;
-
-    my (
-        $fdno,                  # The client's fdno
-        $job,                   # The client's currently assigned job
-       );
-
-    # Fetch the fdno of the client and try to get the job object they were last
-    # assigned. If it doesn't exist, all jobs are stopped or something else has
-    # happened, so advise the client to abort.
-    $fdno = $client->fdno;
-    if ( ! exists $self->{assignments}{$fdno} ) {
-        $self->logMsg( 'warn', "Client $fdno requested finish for cleared or unassigned job" );
-        return "Abort: Not assigned";
-    }
-
-    # If the job the client was last assigned doesn't match the userid they've
-    # specified, abort.
-    $job = $self->{assignments}{$fdno};
-    if ( $job->userid != $userid ) {
-        $self->logMsg( 'warn', "Client %d requested finish for non-assigned job %d:%d:%d",
-                       $fdno, $userid, $srcclusterid, $dstclusterid );
-        return sprintf "Abort: Mismatched userids (%d vs. %d)", $userid, $job->userid;
-    }
-
-    # Otherwise advise them that it's okay to finish
-    return 'OK';
-}
-
 
 
 ### METHOD: assignNextJob( $fdno )
@@ -606,25 +588,25 @@ sub assignNextJob {
 
     my (
         $src,                   # Clusterid of a source
-        $defrate,               # Default rate
         $rates,                 # Rate limits by clusterid
         $jobcounts,             # Counts of current jobs, by clusterid
         @candidates,            # Clusters with open slots
        );
 
-    $defrate = $self->{config}{defaultRate};
-    $rates = $self->{ratelimits};
+    $rates = $self->getClusterRateLimits;
     $jobcounts = $self->{jobcounts};
 
     # Find clusterids of clusters with open slots, returning the undefined value
     # if there are none.
     @candidates = grep {
-        $jobcounts->{$_} < ($rates->{$_} || $defrate)
+        $jobcounts->{$_} < $rates->{$_}
     } keys %{$self->{jobs}};
     return undef unless @candidates;
 
     # Pick a random cluster from the available list
     $src = $candidates[ int rand(@candidates) ];
+    $self->debugMsg( 4, "Assigning job for cluster %d (%d of %d)",
+                     $src, $jobcounts->{$src} + 1, $rates->{$src} );
 
     # Assign the next job from that cluster and return it
     return $self->assignJobFromCluster( $src, $fd );
@@ -646,6 +628,52 @@ sub assignJobFromCluster {
     delete $self->{jobs}{$clusterid} if ! @{$self->{jobs}{$clusterid}};
     $self->{jobcounts}{$clusterid}++;
 
+    # If there are more jobs for this queue, and the next job in the queue isn't
+    # prelocked, lock some more
+    $self->prelockSomeUsers
+        if exists $self->{jobs}{$clusterid}
+            && ! $self->{jobs}{$clusterid}[0]->isPrelocked;
+
+    return $job;
+}
+
+
+### METHOD: unassignJobForClient( $fdno )
+### Unassign the job currently assigned to the client associated with the given
+### I<fdno>.
+sub unassignJobForClient {
+    my JobServer $self = shift;
+    my $fdno = shift or confess "No client fdno";
+    my $requeue = shift || '';
+
+    my (
+        $job,
+        $src,
+       );
+
+    # If there is a currently assigned job, we have work to do
+    if (( $job = delete $self->{assignments}{$fdno} )) {
+        $src = $job->srcclusterid;
+
+        unless ( $job->isFinished ) {
+
+            # If re-queueing of dropped jobs is enabled, requeue it
+            if ( $requeue ) {
+                $self->logMsg( 'info', "Re-adding job %s to queue", $job->stringify );
+                $self->{jobs}{ $job->srcclusterid } ||= [];
+                unshift @{$self->{jobs}{ $job->srcclusterid }}, $job;
+            }
+
+            # Free up a slot on the source
+            $self->debugMsg( 3, "Client %d dropped job %s", $fdno, $job->stringify );
+        }
+
+        # Decrement the job count for the cluster the job belonged to
+        $self->{jobcounts}{ $src }--;
+        $self->debugMsg( 3, "Cluster %d now has %d clients",
+                         $src, $self->{jobcounts}{ $src } );
+    }
+
     return $job;
 }
 
@@ -654,12 +682,80 @@ sub assignJobFromCluster {
 ### Return the job associated with a given userid.
 sub getJobForUser {
     my JobServer $self = shift;
-    my $userid = shift or croak "No userid specified";
+    my $userid = shift or confess "No userid specified";
 
     return exists $self->{users}{ $userid }
         ? $self->{users}{ $userid }
         : undef;
 }
+
+
+### METHOD: stopAllJobs( $client=JobServer::Client )
+### Stop all pending and currently-assigned jobs.
+sub stopAllJobs {
+    my JobServer $self = shift;
+    my $client = shift or confess "No client object";
+
+    $self->stopNewJobs( $client );
+    $self->logMsg( 'notice', "Clearing currently-assigned jobs." );
+    %{$self->{assignments}} = ();
+
+    return "Cleared all jobs.";
+}
+
+
+### METHOD: stopNewJobs( $client=JobServer::Client )
+### Stop assigning pending jobs.
+sub stopNewJobs {
+    my JobServer $self = shift;
+    my $client = shift or confess "No client object";
+
+    $self->logMsg( 'notice', "Clearing pending jobs." );
+    %{$self->{jobs}} = ();
+
+    return "Cleared pending jobs.";
+}
+
+
+### METHOD: requestJobFinish( $client=JobServer::Client, $userid, $srcclusterid, $dstclusterid )
+### Request authorization to finish a given job.
+sub requestJobFinish {
+    my JobServer $self = shift;
+    my ( $client, $userid, $srcclusterid, $dstclusterid ) = @_;
+
+    my (
+        $fdno,                  # The client's fdno
+        $job,                   # The client's currently assigned job
+       );
+
+    # Fetch the fdno of the client and try to get the job object they were last
+    # assigned. If it doesn't exist, all jobs are stopped or something else has
+    # happened, so advise the client to abort.
+    $fdno = $client->fdno;
+    if ( ! exists $self->{assignments}{$fdno} ) {
+        $self->logMsg( 'warn', "Client $fdno: finish on unassigned job" );
+        return "Abort: Not assigned";
+    }
+
+    # If the job the client was last assigned doesn't match the userid they've
+    # specified, abort.
+    $job = $self->{assignments}{$fdno};
+    if ( $job->userid != $userid ) {
+        $self->logMsg( 'warn', "Client %d: finish for non-assigned job %s",
+                       $fdno, $job->stringify );
+        return sprintf( "Abort: Mismatched userids (%d vs. %d)",
+                        $userid, $job->userid );
+    }
+
+    # Otherwise mark the job as finished and advise the client that they can
+    # proceed.
+    $job->finishTime( time );
+    $self->debugMsg( 2, 'Client %d finishing job %s',
+                     $fdno, $job->stringify );
+
+    return 'OK';
+}
+
 
 
 ### METHOD: getJobList( undef )
@@ -668,21 +764,23 @@ sub getJobList {
     my JobServer $self = shift;
 
     my (
-        @list,
-        $queuedCount,
-        $assignedCount,
-        $job,
+        @list,                  # The returned list of job stats
+        $queuedCount,           # Number of queued jobs
+        $assignedCount,         # Number of jobs currently assigned
+        $job,                   # Job object iterator
+        $rates,                 # Rate-limit table
        );
 
     @list = ([], []);
     $queuedCount = $assignedCount = 0;
+    $rates = $self->getClusterRateLimits;
 
     # The first sublist: queued jobs
     foreach my $clusterid ( sort keys %{$self->{jobs}} ) {
         push @{$list[0]}, sprintf( "%3d: %5d jobs queued @ limit %d",
                              $clusterid,
                              scalar @{$self->{jobs}{$clusterid}},
-                             $self->getClusterRateLimit($clusterid) );
+                             $rates->{$clusterid} );
         $queuedCount += scalar @{$self->{jobs}{$clusterid}};
     }
 
@@ -704,7 +802,6 @@ sub getJobList {
                          scalar localtime($self->{starttime}),
                          (time - $self->{starttime}) / ($self->{totaljobs}||0.005)
                         );
-
 
     return wantarray ? @list : \@list;
 }
@@ -941,7 +1038,8 @@ BEGIN {
         'userid',               # The userid of the user to move
         'srcclusterid',         # The cluster id of the source cluster
         'dstclusterid',         # Cluster id of the destination cluster
-        'prelocktime'           # Has the corresponding user already been prelocked?
+        'prelocktime',          # Epoch time of prelock, 0 if not prelocked
+        'finishtime',           # Epoch time of server finish authorization
        );
 }
 
@@ -999,7 +1097,7 @@ sub getDbh {
 ### Create and return a new JobServer::Job object.
 sub new {
     my JobServer::Job $self = shift;
-    my $server = shift or croak "no server object";
+    my $server = shift or confess "no server object";
 
     $self = fields::new( $self ) unless ref $self;
 
@@ -1017,6 +1115,7 @@ sub new {
 
     $self->{server} = $server;
     $self->{prelocktime} = 0;
+    $self->{finishtime} = 0;
 
     return $self;
 }
@@ -1120,6 +1219,34 @@ sub isPrelocked {
 }
 
 
+### METHOD: finishTime( [$newtime] )
+### Returns the epoch time when the job was 'finished'.
+sub finishTime {
+    my JobServer::Job $self = shift;
+    $self->{finishtime} = shift if @_;
+    return $self->{finishtime};
+}
+
+
+### METHOD: secondsSinceFinish( undef )
+### Returns the number of seconds that have elapsed since the job was
+### 'finished'.
+sub secondsSinceFinish {
+    my JobServer::Job $self = shift;
+    return 0 unless $self->{finishtime};
+    return time - $self->{finishtime};
+}
+
+
+### METHOD: isFinished( undef )
+### Returns a true value if the mover has requested authorization from the
+### jobserver to finish the job.
+sub isFinished {
+    my JobServer::Job $self = shift;
+    return $self->{finishtime} != 0;
+}
+
+
 ### METHOD: debugMsg( $level, $format, @args )
 ### Send a debugging message to the server this job belongs to.
 sub debugMsg {
@@ -1215,13 +1342,13 @@ INIT {
         set_rate => {
             help     => "Set the rate for a given source cluster or for all clusters",
             form     => "<globalrate> or <srcclusterid>:<rate>",
-            args     => qr{^(\d+)(?:[:\s]+(\d+))?$},
+            args     => qr{^(\d+)(?:[:\s]+(\d+))?\s*$},
         },
 
         finish => {
             help     => "request authorization to complete a move job",
             form     => "<userid>:<srcclusterid>:<dstclusterid>",
-            args     => qr{^$Tuple$},
+            args     => qr{^($Tuple)$},
         },
 
         quit     => {
@@ -1276,7 +1403,13 @@ sub event_read {
     my JobServer::Client $self = shift;
 
     my $bref = $self->read( 1024 );
-    return $self->{server}->disconnectClient( $self ) unless defined $bref;
+
+    if ( !defined $bref ) {
+        $self->{server}->disconnectClient( $self );
+        $self->close;
+        return undef;
+    }
+
     $self->{read_buf} .= $$bref;
 
     while ($self->{read_buf} =~ s/^(.+?)\r?\n//) {
@@ -1287,24 +1420,33 @@ sub event_read {
 
 }
 
-
+### METHOD: sock( undef )
+### Return the IO::Socket object that corresponds to this client.
 sub sock {
     my JobServer::Client $self = shift;
     return $self->{sock};
 }
 
 
+### METHOD: sock( undef )
+### Return the file descriptor that is associated with the IO::Socket object
+### that corresponds to this client.
 sub fdno {
     my JobServer::Client $self = shift;
     return fileno( $self->{sock} );
 }
 
 
+### METHOD: event_err( undef )
+### Handle Danga::Socket error events.
 sub event_err {
     my JobServer::Client $self = shift;
     $self->close;
 }
 
+
+### METHOD: event_hup( undef )
+### Handle Danga::Socket hangup events.
 sub event_hup {
     my JobServer::Client $self = shift;
     $self->close;
@@ -1327,7 +1469,10 @@ sub logMsg {
 }
 
 
-# Command dispatcher
+### METHOD: processLine( $line )
+### Command dispatcher -- parse I<line> as a command and dispatch it to the
+### correct command handler method. The class-global %CommandTable contains the
+### dispatch table for this method.
 sub processLine {
     my JobServer::Client $self = shift;
     my $line = shift or return undef;
@@ -1343,9 +1488,9 @@ sub processLine {
 
     # Split the line into command and argument string
     ( $cmd, $args ) = split /\s+/, $line, 2;
-    $args ||= '';
+    $args = '' if !defined $args;
 
-    $self->debugMsg( 4, "Matching '%s' against command table pattern %s",
+    $self->debugMsg( 5, "Matching '%s' against command table pattern %s",
                      $cmd, $CommandPattern );
 
     # If it's a command in the command table, dispatch to the appropriate
@@ -1415,7 +1560,7 @@ sub cmd_get_job {
 
     if ( $job ) {
         $self->{state} = sprintf 'got job %d:%d:%d', @$job;
-        return sprintf "Job: %d:%d:%d", @$job;
+        return "Job: ". $job->stringify;
     } else {
         $self->{state} = 'idle (no jobs)';
         return "Idle";
@@ -1507,8 +1652,19 @@ sub cmd_list_jobs {
 ### Command handler for the C<set_rate> command.
 sub cmd_set_rate {
     my JobServer::Client $self = shift;
-    $self->{state} = 'set rate';
-    return $self->error( "Unimplemented command." );
+    my ( $clusterid, $rate ) = @_;
+
+    # Global rate
+    if ( ! defined $rate ) {
+        $rate = $clusterid;
+        $self->{state} = "set global rate";
+        return $self->{server}->setGlobalRateLimit( $rate );
+    }
+
+    else {
+        $self->{state} = "set rate for cluster $clusterid";
+        return $self->{server}->setClusterRateLimit( $clusterid, $rate );
+    }
 }
 
 
@@ -1516,9 +1672,13 @@ sub cmd_set_rate {
 ### Command handler for the C<finish> command.
 sub cmd_finish {
     my JobServer::Client $self = shift;
+    my $spec = shift or confess "No job specification";
     $self->{state} = 'finish';
 
-    return $self->error( "Unimplemented command." );
+    my ( $userid, $srcclusterid, $dstclusterid ) = split /:/, $spec, 3;
+
+    return $self->{server}->requestJobFinish( $self, $userid, $srcclusterid,
+                                              $dstclusterid );
 }
 
 
@@ -1541,6 +1701,9 @@ sub cmd_help {
                      "  $command $cmdinfo->{form}",
                      "",
                      $cmdinfo->{help},
+                     "",
+                     "Pattern:",
+                     "  $cmdinfo->{args}",
                      "",
                     );
     }
@@ -1566,9 +1729,11 @@ sub cmd_lock {
 
     my $job = $self->{server}->getJobForUser( $userid )
         or return $self->error( "No such user '$userid'." );
-    return $self->error( "User $userid has been locked for %d seconds.",
-                         $job->secondsSinceLock )
-        if $job->isPrelocked;
+
+    if ( $job->isPrelocked ) {
+        return sprintf( "User %d already locked for %d seconds.",
+                        $userid, $job->secondsSinceLock );
+    }
 
     my $time = $job->prelock;
     return "User $userid locked at: $time (". scalar localtime($time) .")";
