@@ -30,20 +30,22 @@
     my $fotobilder = defined $GET{'ret'} && index $GET{'ret'}, $LJ::FB_DOMAIN >= 0
         && defined $GET{'urlpic'} && $GET{'urlpic'} =~ m!$LJ::FB_SITEROOT/~?$remote->{'user'}/pic/! ? 1 : 0;
 
+    my $returl = LJ::CleanHTML::canonical_url(LJ::durl($GET{'ret'}));
+
     if ($fotobilder &&
-        (LJ::check_referer($GET{'ret'}) || LJ::check_referer('/editpics.bml'))) {
+        (LJ::check_referer($returl) || LJ::check_referer('/editpics.bml'))) {
 
         return $err->('Invalid referring site or redirection not allowed')
-            unless $GET{'ret'} =~ /$LJ::FB_DOMAIN/ && LJ::get_cap($u, 'fb_account');
+            unless $returl =~ /$LJ::FB_DOMAIN/ && LJ::get_cap($u, 'fb_account');
     }
 
     # extra arguments for get requests
     my $getextra;
     if ($authas ne $remote->{'user'}) {
         $getextra = "?authas=$authas";
-        $getextra .= "&ret=" . LJ::eurl($GET{'ret'}) if $fotobilder;
+        $getextra .= "&ret=" . LJ::eurl($returl) if $fotobilder;
     } else {
-        $getextra = "?ret=" . LJ::eurl($GET{'ret'}) if $fotobilder;
+        $getextra = "?ret=" . LJ::eurl($returl) if $fotobilder;
     }
 
     if (LJ::get_cap($u, "readonly")) {
@@ -579,8 +581,8 @@
         }
 
         if ($fotobilder) {
-            my $redir_host = $1 if LJ::durl($GET{'ret'}) =~ m#^http://([\.:\w-]+)#i;
-            BML::redirect(LJ::durl($GET{'ret'})) if $LJ::REDIRECT_ALLOWED{$redir_host};
+            my $redir_host = $1 if $returl =~ m#^http://([\.:\w-]+)#i;
+            BML::redirect($returl) if $LJ::REDIRECT_ALLOWED{$redir_host};
         }
 
         # now fall through to edit page and show the updated userpic info
@@ -592,7 +594,7 @@
     # authas switcher form
     $body .= "<form method='get' action='editpics.bml'>\n";
     $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
-    $body .= LJ::html_hidden('ret', $GET{'ret'}, 'urlpic', $GET{'urlpic'}) if $fotobilder;
+    $body .= LJ::html_hidden('ret', $returl, 'urlpic', $GET{'urlpic'}) if $fotobilder;
     $body .= "</form>\n\n";
 
 
