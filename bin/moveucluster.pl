@@ -355,8 +355,9 @@ sub movefrom0_logitem
     my %newtalkids = (0 => 0);  # 0 maps back to 0 still
     my $talkids = $dbh->selectcol_arrayref("SELECT talkid FROM talk ".
                                            "WHERE nodetype='L' AND nodeid=$itemid");
-    my $treader = make_buffer_reader("talkid", $talkids);
-    foreach my $t (sort { $a <=> $b } @$talkids) {
+    my @talkids = sort { $a <=> $b } @$talkids;
+    my $treader = make_buffer_reader("talkid", \@talkids);
+    foreach my $t (@talkids) {
         movefrom0_talkitem($t, $jitemid, \%newtalkids, $item, $treader);
     }
 }
