@@ -1369,7 +1369,7 @@ already have an account you can <a href="/create.bml">create one</a> to track yo
 
 /friends/add.bml.remove.header=Success
 
-/friends/add.bml.remove.text=User <?ljuser [[user]] ljuser?> was removed from your friend list.  You can view your friends page <a href="[[url]]">here</a>.
+/friends/add.bml.remove.text=User [[ljuser]] was removed from your friend list.  You can view your friends page <a href="[[url]]">here</a>.
 
 /friends/add.bml.remove.title=Friend Removed!
 
