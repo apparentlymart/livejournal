@@ -1309,7 +1309,7 @@ LOGIN
 
     $ret .= "<script type='text/javascript' language='JavaScript'>\n";
     $ret .= "var usermismatchtext = \"" . LJ::ejs($BML::ML{'.usermismatch'}) . "\";\n";
-    $ret .= "</script><script type='text/javascript' language='JavaScript' src='/js/talkpost.js'></script>";
+    $ret .= "</script><script type='text/javascript' language='JavaScript' src='$LJ::JSPREFIX/talkpost.js'></script>";
     $ret .= "</form>\n";
 
     return $ret;

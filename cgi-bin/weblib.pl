@@ -828,8 +828,8 @@ sub set_lastcomment
 # Common challenge/response javascript, needed by both login pages and comment pages alike.
 # Forms that use this should onclick='return sendForm()' in the submit button.
 # Returns true to let the submit continue.
-$LJ::COMMON_CODE{'chalresp_js'} = q{
-<script type="text/javascript" src="/js/md5.js"></script>
+$LJ::COMMON_CODE{'chalresp_js'} = qq{
+<script type="text/javascript" src="$LJ::JSPREFIX/md5.js"></script>
 <script language="JavaScript" type="text/javascript">
     <!--
 function sendForm (formid, checkuser)

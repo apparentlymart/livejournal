@@ -322,7 +322,7 @@ _code?><?page
 title=><?_code return $title; _code?>
 body=><?_code return $body; _code?>
 head<=
-<script language="JavaScript" src="/js/colorpicker.js"></script>
+<script language="JavaScript" src="<?_code return $LJ::JSPREFIX; _code?>/colorpicker.js"></script>
 <script language="JavaScript">
     colPic_set_imgprefix("<?_code return $LJ::IMGPREFIX; _code?>");
 

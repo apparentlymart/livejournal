@@ -43,6 +43,7 @@
     $SITEROOT ||= "http://www.$DOMAIN:8011";
     $IMGPREFIX ||= "$SITEROOT/img";
     $STATPREFIX ||= "$SITEROOT/stc";
+    $JSPREFIX ||= "$SITEROOT/js";
     $USERPIC_ROOT ||= "$LJ::SITEROOT/userpic";
     $PALIMGROOT ||= "$LJ::SITEROOT/palimg";
 
