@@ -9,19 +9,17 @@
  my $dbr = $dbs->{'reader'};
 
  my $user = LJ::canonical_username($FORM{'user'});
- my $remote = LJ::get_remote_noauth();	
- unless ($user) {
-     $user = $remote->{'user'};
- }
-
- my $quser = $dbr->quote($user);
+ my $remote = LJ::get_remote();
+ my $u = $user ne "" ? LJ::load_user($dbs, $user) : $remote;
+ 
  $title = $ML{'.title'};
 
- my $u = LJ::load_user($dbs, $user);
  unless ($u) {
      $body = "<?h1 $ML{'Error'} h1?><?p $ML{'.error.noparam'} p?>";
      return;
  }
+
+$user = $u->{'user'};
 
  if ($u->{'statusvis'} eq "S") {
      $title = $ML{'error.suspended.title'};
@@ -73,7 +71,7 @@
              
      }
      $body .= "<tr valign='middle'>";
-     $body .= "<td align='center'><img src='/userpic/$pic->{'picid'}' width='$pic->{'width'}' height='$pic->{'height'}'></td>";
+     $body .= "<td align='center'><img src='/userpic/$pic->{'picid'}/$u->{'userid'}' width='$pic->{'width'}' height='$pic->{'height'}'></td>";
      $body .= "<td>";
      if ($u->{'defaultpicid'} == $pic->{'picid'}) {
          $body .= "$ML{'.default'}<br />";

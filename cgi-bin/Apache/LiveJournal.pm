@@ -26,6 +26,7 @@ my %REDIR;
 
 $USERPIC{'cache_dir'} = "$ENV{'LJHOME'}/htdocs/userpics";
 $USERPIC{'use_disk_cache'} = -d $USERPIC{'cache_dir'};
+$USERPIC{'symlink'} = eval { symlink('',''); 1; };
 
 # redirect data.
 open (REDIR, "$ENV{'LJHOME'}/cgi-bin/redirect.dat");
@@ -198,7 +199,7 @@ sub trans
     }
 
     # userpic
-    return userpic_trans($r, $1) if $uri =~ m!^/userpic/(\d+)$!;
+    return userpic_trans($r, $1, $2) if $uri =~ m!^/userpic/(\d+)(?:/(\d+))?$!;
 
     # front page journal
     if ($LJ::FRONTPAGE_JOURNAL && $uri =~ m!^/(\w+)?(.*)$! &&
@@ -273,23 +274,36 @@ sub userpic_trans
 {
     my $r = shift;
     my $picid = shift;
+    my $userid = shift(@_) + 0;
 
     # we can safely do this without checking since we never re-use
     # picture IDs and don't let the contents get modified
     return HTTP_NOT_MODIFIED if $r->header_in('If-Modified-Since');
+    return HTTP_NOT_MODIFIED if $r->header_in('If-None-Match') eq "$picid-$userid";
 
     $RQ{'picid'} = $picid;
+    $RQ{'pic-userid'} = $userid;
+
+    my $file_extra;
+    if ($userid) {
+        $file_extra = "-$userid";
+    } else {
+        # userpics without the trailing /<userid> need to be coming
+        # from the proper domain
+        my $ref = $r->header_in("Referer");
+        return 404 if $ref && $ref !~ m!^http://(\w+\.)?\Q$LJ::DOMAIN\E/!i;
+    }
 
     my @dirs_make;
     my $file;
     if ($picid =~ /^\d*(\d\d)(\d\d\d)$/) {
         push @dirs_make, ("$USERPIC{'cache_dir'}/$2",
                           "$USERPIC{'cache_dir'}/$2/$1");
-        $file = "$USERPIC{'cache_dir'}/$2/$1/$picid";
+        $file = "$USERPIC{'cache_dir'}/$2/$1/$picid$file_extra";
     } else {
         my $mod = sprintf("%03d", $picid % 1000);
         push @dirs_make, "$USERPIC{'cache_dir'}/$mod";
-        $file = "$USERPIC{'cache_dir'}/$mod/p$picid";
+        $file = "$USERPIC{'cache_dir'}/$mod/p$picid$file_extra";
     }
 
     if ($USERPIC{'use_disk_cache'}) {
@@ -316,6 +330,7 @@ sub userpic_content
     my $file = $r->filename;
 
     my $picid = $RQ{'picid'};
+    my $userid = $RQ{'pic-userid'}+0;
 
     # will we try to use disk cache?
     my $disk_cache = $USERPIC{'use_disk_cache'} && 
@@ -338,6 +353,7 @@ sub userpic_content
         $r->header_out("Expires", LJ::time_to_http(time()+3000000));
         $r->header_out("Cache-Control", "no-transform");
         $r->header_out("Last-Modified", LJ::time_to_http($lastmod));
+        $r->header_out("ETag", "$picid-$userid");
         $r->send_http_header();
     };
 
@@ -368,6 +384,7 @@ sub userpic_content
             "p.picid=$picid AND u.userid=p.userid";
         $pic = $dbr->selectrow_hashref($query);
         return NOT_FOUND unless $pic;
+        return NOT_FOUND if $userid && $pic->{'userid'} != $userid;
 
         $lastmod = $pic->{'lastmod'};
         if ($pic->{'dversion'} >= 2) {
@@ -383,9 +400,24 @@ sub userpic_content
 
     return NOT_FOUND unless $data;
 
-    if ($need_cache && open (F, ">$file")) {
-        print F $data;
-        close F;
+    if ($need_cache) {
+        # make $realfile /userpic-userid, and $file /userpic
+        my $realfile = $file;
+        unless ($file =~ s/-\d+$//) { 
+            $realfile .= "-$pic->{'userid'}"; 
+        }
+        
+        # delete short file on Unix if it exists
+        unlink $file if $USERPIC{'symlink'} && -f $file;
+
+        # write real file.
+        open (F, ">$realfile"); print F $data; close F;
+
+        # make symlink, or duplicate file (if on Windows)
+        my $symtarget = $realfile;  $symtarget =~ s!.+/!!;
+        unless (eval { symlink($symtarget, $file) }) {
+            open (F, ">$file"); print F $data; close F;
+        }
     }
 
     $set_mime->($data);

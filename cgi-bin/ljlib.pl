@@ -2836,22 +2836,22 @@ sub load_userpics
     foreach my $id (@{$idlist})
     {
         if ($LJ::CACHE_USERPIC_SIZE{$id}) {
-            $upics->{$id}->{'width'} = $LJ::CACHE_USERPIC_SIZE{$id}->{'width'};
-            $upics->{$id}->{'height'} = $LJ::CACHE_USERPIC_SIZE{$id}->{'height'};
+            $upics->{$id}->{'width'} = $LJ::CACHE_USERPIC_SIZE{$id}->[0];
+            $upics->{$id}->{'height'} = $LJ::CACHE_USERPIC_SIZE{$id}->[1];
+            $upics->{$id}->{'userid'} = $LJ::CACHE_USERPIC_SIZE{$id}->[2];
         } elsif ($id+0) {
             push @load_list, ($id+0);
         }
     }
-    return unless (@load_list);
+    return unless @load_list;
     my $picid_in = join(",", @load_list);
-    my $sth = $dbr->prepare("SELECT picid, width, height FROM userpic WHERE picid IN ($picid_in)");
+    my $sth = $dbr->prepare("SELECT userid, picid, width, height FROM userpic WHERE picid IN ($picid_in)");
     $sth->execute;
     while ($_ = $sth->fetchrow_hashref) {
         my $id = $_->{'picid'};
         undef $_->{'picid'};
         $upics->{$id} = $_;
-        $LJ::CACHE_USERPIC_SIZE{$id}->{'width'} = $_->{'width'};
-        $LJ::CACHE_USERPIC_SIZE{$id}->{'height'} = $_->{'height'};
+        $LJ::CACHE_USERPIC_SIZE{$id} = [ $_->{'width'}, $_->{'height'}, $_->{'userid'} ];
     }
 }
 

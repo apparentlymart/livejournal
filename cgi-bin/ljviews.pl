@@ -328,7 +328,7 @@ sub create_view_lastn
         LJ::load_userpics($dbs, \%userpics, [ $picid ]);
         $lastn_page{'userpic'} = 
             LJ::fill_var_props($vars, 'LASTN_USERPIC', {
-                "src" => "$LJ::SITEROOT/userpic/$picid",
+                "src" => "$LJ::SITEROOT/userpic/$picid/$u->{'userid'}",
                 "width" => $userpics{$picid}->{'width'},
                 "height" => $userpics{$picid}->{'height'},
             });
@@ -531,6 +531,7 @@ sub create_view_lastn
             $lastn_altposter{'owner'} = $user;
             
             my $picid = 0;
+            my $picuserid = $posterid;
             if ($logprops{$itemid}->{'picture_keyword'}) {
                 my $qkw = $dbr->quote($logprops{$itemid}->{'picture_keyword'});
                 my $sth = $dbr->prepare("SELECT m.picid FROM userpicmap m, keywords k WHERE m.userid=$posterid AND m.kwid=k.kwid AND k.keyword=$qkw");
@@ -553,7 +554,7 @@ sub create_view_lastn
                 my $pic = {};
                 LJ::load_userpics($dbs, $pic, [ $picid ]);
                 $lastn_altposter{'pic'} = LJ::fill_var_props($vars, 'LASTN_ALTPOSTER_PIC', {
-                    "src" => "$LJ::SITEROOT/userpic/$picid",
+                    "src" => "$LJ::SITEROOT/userpic/$picid/$picuserid",
                     "width" => $pic->{$picid}->{'width'},
                     "height" => $pic->{$picid}->{'height'},
                 });
@@ -933,6 +934,7 @@ sub create_view_friends
         # do the picture
         {
             my $picid = $friends{$friendid}->{'defaultpicid'};  # this could be the shared journal pic
+            my $picuserid = $friendid;
             if ($friendid != $posterid && ! $u->{'opt_usesharedpic'}) {
                 unless (defined $posterdefpic{$posterid}) {
                     my $pdpic = 0;
@@ -943,6 +945,7 @@ sub create_view_friends
                 }
                 if ($posterdefpic{$posterid}) { 
                     $picid = $posterdefpic{$posterid}; 
+                    $picuserid = $posterid;
                     LJ::load_userpics($dbs, \%userpics, [ $picid ]);
                 }
             }
@@ -957,12 +960,13 @@ sub create_view_friends
                 if ($alt_picid) {
                     LJ::load_userpics($dbs, \%userpics, [ $alt_picid ]);
                     $picid = $alt_picid;
+                    $picuserid = $posterid;
                 }
             }
             if ($picid) {
                 $friends_event{'friendpic'} = 
                     LJ::fill_var_props($vars, 'FRIENDS_FRIENDPIC', {
-                        "src" => "$LJ::SITEROOT/userpic/$picid",
+                        "src" => "$LJ::SITEROOT/userpic/$picid/$picuserid",
                         "width" => $userpics{$picid}->{'width'},
                         "height" => $userpics{$picid}->{'height'},
                     });

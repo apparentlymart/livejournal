@@ -306,7 +306,7 @@ sub FriendsPage
     my %userpics;
     LJ::load_userpics($dbs, \%userpics, [ keys %objs_of_picid ]);
     foreach my $picid (keys %userpics) {
-        my $up = Image("$LJ::SITEROOT/userpic/$picid",
+        my $up = Image("$LJ::SITEROOT/userpic/$picid/$userpics{$picid}->{'userid'}",
                        $userpics{$picid}->{'width'},
                        $userpics{$picid}->{'height'});
         foreach (@{$objs_of_picid{$picid}}) { $$_ = $up; }
