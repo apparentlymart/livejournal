@@ -230,7 +230,7 @@ BODY<=
      print MAIL $etemp;
      close MAIL;
      
-     $ret = "(=H1 Success! H1=)(=P Your journal has been created.  Important registration information has been emailed to <FONT FACE=Arial SIZE=+1><B>$email</B></FONT> containing further instructions.  <B>Note: </B>  You have exactly <I>seven days</I> to confirm your journal creation.  If you still haven't gone and set it up after seven days the username of <B>$user</B> will be automaticaly deleted and somebody else may use it. P=)";
+     $ret = "(=H1 Success! H1=)(=P Your journal has been created.  Important registration information has been emailed to <FONT FACE=Arial SIZE=+1><B>$email</B></FONT> containing further instructions.  <B>Note: </B>  You have exactly <I>seven days</I> to confirm your journal creation.  If you still haven't gone and set it up after seven days the username of <B>$user</B> will be automatically deleted and somebody else may use it. P=)";
      $ret .= "(=P Your LiveJournal will be available at: P=)(=STANDOUT <FONT SIZE=+1 FACe=Arial><B><A HREF=\"$LJ::SITEROOT/users/$user/\">$LJ::SITEROOT/users/$user/</A></B></FONT> STANDOUT=)";
      $ret .= "(=P Now, please take the time to fill in some information about yourself.  It's mostly optional, but it lets us get an idea of who's using LiveJournal. P=)";
      
