@@ -179,7 +179,7 @@ sub trans
 
         if ($opts->{'mode'} eq "item") {
             $r->handler("perl-script");
-            $r->push_handlers(PerlHandler => \&Apache::BML::handler);
+            $r->set_handlers(PerlHandler => [ \&Apache::BML::handler ]);
             my $filename = "$LJ::HOME/htdocs/talkread.bml";
             if ($args =~ /^(?:(?:mode=reply)|(?:replyto=\d+))\b/) {
                 $filename = "$LJ::HOME/htdocs/talkpost.bml";
@@ -191,7 +191,7 @@ sub trans
 
         if ($opts->{'mode'} eq "month") {
             $r->handler("perl-script");
-            $r->push_handlers(PerlHandler => \&Apache::BML::handler);
+            $r->set_handlers(PerlHandler => [ \&Apache::BML::handler ]);
             my $filename = "$LJ::HOME/htdocs/view/index.bml";
             $r->notes("_journal" => $opts->{'user'});
             $r->filename($filename);
@@ -199,7 +199,7 @@ sub trans
         }
 
         $r->handler("perl-script");
-        $r->push_handlers(PerlHandler => \&journal_content);
+        $r->set_handlers(PerlHandler => [ \&journal_content ]);
         return OK;
     };
 
