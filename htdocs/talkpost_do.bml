@@ -19,9 +19,7 @@ body<=
 
 
     $Text::Wrap::columns = 76;
-    my $dbs = LJ::get_dbs();
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+    my $dbr = LJ::get_db_reader();
     my $sth;
 
     my $remote = LJ::get_remote();
@@ -38,12 +36,9 @@ body<=
 
     my $pics = LJ::Talk::get_subjecticons();
 
-    my $dbcs = LJ::get_cluster_set($u);
-    my $dbcm = $dbcs->{'dbh'};
-    my $dbcr = $dbcs->{'reader'};
+    my $dbcm = LJ::get_cluster_master($u);
 
-    return $ML{'error.nodb'} unless $dbcr && $dbr;
-    return $LJ::MSG_READONLY_USER unless $dbcm && $dbh;
+    return $ML{'error.nodb'} unless $dbcm && $dbr;
 
     my $jarg = "journal=$u->{'user'}&";
     my $jargent = "journal=$u->{'user'}&amp;";
@@ -350,11 +345,11 @@ body<=
 
     ## insertion
 
-    my $qsubject = $dbh->quote($FORM{'subject'});
+    my $qsubject = $dbr->quote($FORM{'subject'});
     my $subjecticon = ($FORM{'subjecticon'} eq "none" || $FORM{'subjecticon'} eq "") ? "" : LJ::trim(lc($FORM{'subjecticon'}));
-    my $qbody = $dbh->quote($FORM{'body'});
+    my $qbody = $dbr->quote($FORM{'body'});
     my $datepost = LJ::mysql_time();
-    my $qdatepost = $dbh->quote($datepost);
+    my $qdatepost = $dbr->quote($datepost);
     my $icon = LJ::Talk::show_image($pics, $subjecticon); 
 
     my $dtalkid;
@@ -422,7 +417,7 @@ body<=
                 $table = "talkleft";
             } else {
                 # log to global cluster, another job will move it later.
-                $db = $dbh;
+                $db = LJ::get_db_writer();
                 $table = "talkleft_xfp";
             }
             my $pub  = $item->{'security'} eq "public" ? 1 : 0;
@@ -481,7 +476,7 @@ body<=
                 next unless $p;
                 $hash->{$_} = $talkprop{$_};
                 my $tpropid = $p->{'tpropid'};
-                my $qv = $dbh->quote($talkprop{$_});
+                my $qv = $dbr->quote($talkprop{$_});
                 $values .= "($u->{'userid'}, $jtalkid, $tpropid, $qv),";
             }
             if ($values) {
@@ -547,7 +542,7 @@ body<=
 
             my %props = ($partid => {});
             LJ::load_props("talk");
-            LJ::load_talk_props2($dbcr, $u->{'userid'}, [$partid], \%props);
+            LJ::load_talk_props2($dbcm, $u->{'userid'}, [$partid], \%props);
             $parentpreformatted = $props{$partid}->{'opt_preformatted'};
 
             # convert to UTF-8 if necessary
