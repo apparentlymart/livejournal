@@ -87,7 +87,7 @@ sub handler
     # let BML code blocks see input
     %BMLCodeBlock::GET = ();
     %BMLCodeBlock::POST = ();
-    %BMLCodeBlock::FORM = ();  # old, combines both.
+    %BMLCodeBlock::FORM = ();  # whatever request method is
     my %input_target = ( GET  => [ \%BMLCodeBlock::GET  ],
                          POST => [ \%BMLCodeBlock::POST ], );
     push @{$input_target{$r->method}}, \%BMLCodeBlock::FORM;
