@@ -925,7 +925,7 @@ sub register_ml_getter
 
 sub get_query_string
 {
-    return $Apache::BML::cur_req->{'r'}->query;
+    return $Apache::BML::cur_req->{'r'}->parsed_uri()->query;
 }
 
 sub http_response
