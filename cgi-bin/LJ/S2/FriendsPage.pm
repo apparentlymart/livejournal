@@ -269,10 +269,17 @@ sub FriendsPage
 
         # do the picture
         my $picid = 0;
+        my $picu = undef;
         if ($friendid != $posterid && S2::get_property_value($opts->{ctx}, 'use_shared_pic')) {
+            # using the community, the user wants to see shared pictures
+            $picu = $friends{$friendid};
+
             # use shared pic for community
             $picid = $friends{$friendid}->{defaultpicid};
         } else {
+            # we're using the poster for this picture
+            $picu = $po;
+
             # check if they specified one
             $picid = LJ::get_picid_from_keyword($po, $logprops{$datakey}->{picture_keyword})
                 if $logprops{$datakey}->{picture_keyword};
@@ -322,8 +329,8 @@ sub FriendsPage
         $entry->{'_ymd'} = join('-', map { $entry->{'time'}->{$_} } qw(year month day));
 
 
-        if ($picid) {
-            push @userpic_load, [ $friends{$friendid}, $picid ];
+        if ($picid && $picu) {
+            push @userpic_load, [ $picu, $picid ];
             push @{$objs_of_picid{$picid}}, \$entry->{'userpic'};
         }
 
