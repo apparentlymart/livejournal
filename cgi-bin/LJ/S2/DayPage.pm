@@ -137,8 +137,8 @@ sub DayPage
         my $ditemid = $itemid*256 + $anum;
 
         LJ::CleanHTML::clean_event(\$text, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
-                                               'cuturl' => LJ::item_link($u, $itemid, $anum),
-					       'ljcut_disable' => $remote->{'opt_ljcut_disable_lastn'}, });
+                                             'cuturl' => LJ::item_link($u, $itemid, $anum),
+                                             'ljcut_disable' => $remote->{'opt_ljcut_disable_lastn'}, });
         LJ::expand_embedded($u, $ditemid, $remote, \$text);
 
         my $nc = "";
