@@ -41,7 +41,7 @@ CREATE TABLE ban (
   banneduserid int(10) unsigned NOT NULL default '0',
   KEY (userid),
   PRIMARY KEY  (userid,banneduserid)
-) PACK_KEYS=1
+) 
 EOC
 
 register_tablecreate("clients", <<'EOC');
@@ -199,7 +199,7 @@ CREATE TABLE log (
   KEY (ownerid,year,month,day),
   KEY (eventtime),
   KEY (logtime)
-)  PACK_KEYS=1
+)  
 EOC
 
 register_tablecreate("logaccess", <<'EOC');
@@ -216,7 +216,6 @@ CREATE TABLE logprop (
   itemid int(10) unsigned NOT NULL default '0',
   propid tinyint(3) unsigned NOT NULL default '0',
   value varchar(255) default NULL,
-  KEY (itemid),
   PRIMARY KEY  (itemid,propid)
 ) 
 EOC
@@ -345,7 +344,7 @@ CREATE TABLE overrides (
   user varchar(15) NOT NULL default '',
   override text,
   PRIMARY KEY  (user)
-) PACK_KEYS=1
+) 
 EOC
 
 register_tablecreate("poll", <<'EOC');
@@ -445,7 +444,7 @@ EOC
 
 register_tablecreate("randomuserset", <<'EOC');
 CREATE TABLE randomuserset (
-  rid INT UNSIGNED NOT NULL AUTO_INCREMENT,			    
+  rid INT UNSIGNED NOT NULL AUTO_INCREMENT,
   userid INT UNSIGNED NOT NULL,
   PRIMARY KEY  (rid)
 ) 
@@ -653,7 +652,7 @@ CREATE TABLE themelist (
   themeid mediumint(8) unsigned NOT NULL auto_increment,
   name varchar(50) NOT NULL default '',
   PRIMARY KEY  (themeid)
-) PACK_KEYS=1
+) 
 EOC
 
 register_tablecreate("todo", <<'EOC');
@@ -916,7 +915,7 @@ CREATE TABLE recent_logtext (
   subject varchar(255) default NULL,
   event text,
   PRIMARY KEY  (itemid)
-)  PACK_KEYS=1
+)  
 EOC
 
 register_tablecreate("recent_talktext", <<'EOC');
@@ -925,7 +924,132 @@ CREATE TABLE recent_talktext (
   subject varchar(100) default NULL,
   body text,
   PRIMARY KEY  (talkid)
-)  PACK_KEYS=1
+)  
+EOC
+
+register_tablecreate("log2", <<'EOC');
+CREATE TABLE log2 (
+  journalid INT UNSIGNED NOT NULL default '0',
+  jitemid MEDIUMINT UNSIGNED NOT NULL auto_increment,
+  PRIMARY KEY  (journalid, jitemid),
+  posterid int(10) unsigned NOT NULL default '0',
+  eventtime datetime default NULL,
+  logtime datetime default NULL,
+  compressed char(1) NOT NULL default 'N',
+  security enum('public','private','usemask') NOT NULL default 'public',
+  allowmask int(10) unsigned NOT NULL default '0',
+  replycount smallint(5) unsigned default NULL,
+  year smallint(6) NOT NULL default '0',
+  month tinyint(4) NOT NULL default '0',
+  day tinyint(4) NOT NULL default '0',
+  rlogtime int(10) unsigned NOT NULL default '0',
+  revttime int(10) unsigned NOT NULL default '0',
+  KEY (year,month,day),
+  KEY (journalid,year,month,day),
+  KEY (logtime),
+  KEY `rlogtime` (`journalid`,`rlogtime`),
+  KEY `revttime` (`journalid`,`revttime`),
+  KEY `posterid` (`posterid`,`journalid`)
+) 
+EOC
+
+register_tablecreate("logtext2", <<'EOC');
+CREATE TABLE logtext2 (
+  journalid INT UNSIGNED NOT NULL,
+  jitemid MEDIUMINT UNSIGNED NOT NULL,
+  subject VARCHAR(255) DEFAULT NULL,
+  event TEXT,
+  PRIMARY KEY (journalid, jitemid)
+) max_rows=100000000
+EOC
+
+register_tablecreate("logsubject2", <<'EOC');
+CREATE TABLE logsubject2 (
+  journalid INT UNSIGNED NOT NULL,
+  jitemid MEDIUMINT UNSIGNED NOT NULL,
+  subject VARCHAR(255) DEFAULT NULL,
+  PRIMARY KEY (journalid, jitemid)
+) max_rows=100000000
+EOC
+
+register_tablecreate("recent_logtext2", <<'EOC');
+CREATE TABLE recent_logtext2 (
+  journalid INT UNSIGNED NOT NULL,
+  jitemid MEDIUMINT UNSIGNED NOT NULL,
+  logtime DATETIME NOT NULL,
+  subject VARCHAR(255) DEFAULT NULL,
+  event TEXT,
+  PRIMARY KEY (journalid, jitemid),
+  INDEX idxtime (logtime)
+) 
+EOC
+
+register_tablecreate("logprop2", <<'EOC');
+CREATE TABLE logprop2 (
+  journalid  INT UNSIGNED NOT NULL,
+  jitemid MEDIUMINT UNSIGNED NOT NULL,
+  propid TINYINT unsigned NOT NULL,
+  value VARCHAR(255) default NULL,
+  PRIMARY KEY (journalid,jitemid,propid)
+)
+EOC
+
+register_tablecreate("logsec2", <<'EOC');
+CREATE TABLE logsec2 (
+  journalid INT UNSIGNED NOT NULL,
+  jitemid MEDIUMINT UNSIGNED NOT NULL,
+  allowmask INT UNSIGNED NOT NULL,
+  PRIMARY KEY (journalid,jitemid)
+)
+EOC
+
+register_tablecreate("talk2", <<'EOC');
+CREATE TABLE talk2 (
+  journalid INT UNSIGNED NOT NULL,  
+  jtalkid MEDIUMINT UNSIGNED NOT NULL auto_increment,
+  nodetype CHAR(1) NOT NULL DEFAULT '',
+  nodeid INT UNSIGNED NOT NULL default '0',
+  parenttalkid MEDIUMINT UNSIGNED NOT NULL,
+  posterid INT UNSIGNED NOT NULL default '0',
+  datepost DATETIME NOT NULL default '0000-00-00 00:00:00',
+  state CHAR(1) default 'A',
+  PRIMARY KEY  (journalid,jtalkid),
+  KEY (nodetype,journalid,nodeid),
+  KEY (journalid,state,nodetype),
+  KEY (posterid,nodetype)
+) 
+EOC
+
+register_tablecreate("talkprop2", <<'EOC');
+CREATE TABLE talkprop2 (
+  journalid INT UNSIGNED NOT NULL,
+  jtalkid MEDIUMINT UNSIGNED NOT NULL,
+  tpropid TINYINT UNSIGNED NOT NULL,
+  value VARCHAR(255) DEFAULT NULL,
+  PRIMARY KEY  (journalid,jtalkid,tpropid)
+)
+EOC
+
+register_tablecreate("talktext2", <<'EOC');
+CREATE TABLE talktext2 (
+  journalid INT UNSIGNED NOT NULL,
+  jtalkid MEDIUMINT UNSIGNED NOT NULL,
+  subject VARCHAR(100) DEFAULT NULL,
+  body TEXT,
+  PRIMARY KEY (journalid, jtalkid)
+) max_rows=100000000
+EOC
+
+register_tablecreate("recent_talktext2", <<'EOC');
+CREATE TABLE recent_talktext2 (
+  journalid INT UNSIGNED NOT NULL,
+  jtalkid MEDIUMINT UNSIGNED NOT NULL,
+  datepost DATETIME NOT NULL,
+  subject VARCHAR(255) DEFAULT NULL,
+  body TEXT,
+  PRIMARY KEY (journalid, jtalkid),
+  INDEX idxtime (datepost)
+) 
 EOC
 
 register_tabledrop("ibill_codes");
@@ -1045,10 +1169,21 @@ register_tablecreate("oldids", <<'EOC');
 CREATE TABLE oldids (
   area     CHAR(1) NOT NULL,
   oldid    INT UNSIGNED NOT NULL,
-  PRIMARY KEY (area, oldid),
+  UNIQUE (area, oldid),
   userid   INT UNSIGNED NOT NULL,
-  newid    INT UNSIGNED NOT NULL,
+  newid    INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (area,userid, newid),
   INDEX (userid)
+)
+EOC
+
+register_tablecreate("dudata", <<'EOC');
+CREATE TABLE dudata (
+  userid   INT UNSIGNED NOT NULL,
+  area     CHAR(1) NOT NULL,
+  areaid   INT UNSIGNED NOT NULL,
+  bytes    MEDIUMINT UNSIGNED NOT NULL,
+  PRIMARY KEY (userid, area, areaid)
 )
 EOC
 
@@ -1223,11 +1358,44 @@ register_alter(sub {
 		 "ADD is_public ENUM('1', '0') DEFAULT '1' NOT NULL");
     }
 
-    if (column_type("randomuserset", "timeupdate") ne "") {
+    if (column_type("randomuserset", "rid") eq "") {
 	do_alter("randomuserset",
 		 "ALTER TABLE randomuserset DROP PRIMARY KEY, DROP timeupdate, ".
 		 "ADD rid INT UNSIGNED NOT NULL AUTO_INCREMENT FIRST, ADD PRIMARY KEY (rid)");
     }
+
+    # cluster stuff!
+    if (column_type("meme", "journalid") eq "") {
+	do_alter("meme",
+		 "ALTER TABLE meme ADD journalid INT UNSIGNED NOT NULL AFTER ts");
+    }
+
+    if (column_type("topic_map", "jitemid") eq "") {
+	do_alter("topic_map",
+		 "ALTER TABLE topic_map DROP INDEX tptopid_2, DROP INDEX itemid, ".
+		 "ADD journalid INT UNSIGNED NOT NULL AFTER tptopid, ".
+		 "CHANGE itemid jitemid INT UNSIGNED NOT NULL, ".
+		 "ADD UNIQUE tptopid_2 (tptopid, journalid, jitemid), ".
+		 "ADD KEY jitem (journalid, jitemid)");
+    }
+
+    if (column_type("memorable", "jitemid") eq "") {
+	do_alter("memorable", "ALTER TABLE memorable ".
+		 "DROP INDEX userid, DROP INDEX itemid, ".
+		 "CHANGE itemid jitemid INT UNSIGNED NOT NULL, ".
+		 "ADD journalid INT UNSIGNED NOT NULL AFTER userid, ".
+		 "ADD UNIQUE uniq (userid, journalid, jitemid), ".
+		 "ADD KEY item (journalid, jitemid)");
+    }
+
+    if (column_type("user", "clusterid") eq "") {
+	do_alter("user", "ALTER TABLE user ".
+		 "ADD clusterid TINYINT UNSIGNED NOT NULL AFTER caps, ".
+		 "ADD INDEX idxcluster (clusterid)");
+    }
+
+    
+    ### / cluster config
 
 });
 
