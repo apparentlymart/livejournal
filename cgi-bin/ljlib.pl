@@ -2014,13 +2014,10 @@ sub get_remote
 	$userid = LJ::get_userid($dbh, $user);
     }
     
-    unless ($userid) {
+    unless ($userid && LJ::auth_okay($user, undef, $remhpass, $correctpass)) {
 	$validate->();
 	return undef;
     }
-
-    return undef unless
-      LJ::auth_okay($user, undef, $remhpass, $correctpass);
 
     return { 'user' => $user,
 	     'userid' => $userid, };
