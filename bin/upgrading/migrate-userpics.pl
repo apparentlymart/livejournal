@@ -108,7 +108,7 @@ if ($user) {
         foreach my $userid (@$userids) {
             # move this userpic
             my $extra = sprintf("[%6.2f%%, $ccount of $ctotal] ", (++$count/$total*100));
-            handle_userid($userid, $cid, $dbcm, $extra);
+            handle_userid($userid, $cid, $extra);
         }
 
         # don't hit up more clusters
@@ -126,18 +126,24 @@ print "Updater terminating.\n";
 # move of a user's pictures, and 2 meaning the user isn't ready for moving
 # (dversion < 7, etc)
 sub handle_userid {
-    my ($userid, $cid, $dbcm, $extra) = @_;
+    my ($userid, $cid, $extra) = @_;
     
     # load user to move and do some sanity checks
-    my $u = LJ::load_userid($userid)
-        or die "ERROR: Unable to load userid $userid\n";
+    my $u = LJ::load_userid($userid);
+    unless ($u) {
+        LJ::end_request();
+        LJ::start_request();
+        $u = LJ::load_userid($userid);
+    }
+    die "ERROR: Unable to load userid $userid\n"
+        unless $u;
 
     # if a user has been moved to another cluster, but the source data from
     # userpic2 wasn't deleted, we need to ignore the user
     return unless $u->{clusterid} == $cid;
 
     # get a handle if we weren't given one
-    $dbcm ||= get_db_handle($u->{clusterid});
+    my $dbcm = get_db_handle($u->{clusterid});
 
     # get all their photos that aren't in mogile already
     my $picids = $dbcm->selectall_arrayref
@@ -210,7 +216,9 @@ sub get_db_handle {
         or die "ERROR: unable to get raw handle to cluster $cid\n";
     eval {
         $dbcm->do("SET wait_timeout = 28800");
+        die $dbcm->errstr if $dbcm->err;
     };
+    die "Couldn't set wait_timeout on $cid: $@\n" if $@;
     $dbcm->{'RaiseError'} = 1;
     
     return $dbcm;
