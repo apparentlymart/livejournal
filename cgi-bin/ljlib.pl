@@ -798,7 +798,7 @@ sub get_recent_items
 #       crappy thing about this interface is that it doesn't allow
 #       a batch of userprops to be updated at once, which is the
 #       common thing to do.
-# args: dbarg, uuserid, propname, value
+# args: dbarg?, uuserid, propname, value
 # des-uuserid: The userid of the user or a user hashref.
 # des-propname: The name of the property.  Or a hashref of propname keys and corresponding values.
 # des-value: The value to set to the property.  If undefined or the
@@ -806,10 +806,11 @@ sub get_recent_items
 # </LJFUNC>
 sub set_userprop
 {
-    my ($dbarg, $userid, $propname, $value) = @_;
-    my $dbs = LJ::make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    $userid = $userid->{'userid'} if ref $userid eq "HASH";
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+
+    my ($u, $propname, $value) = @_;
+    $u = ref $u ? $u : LJ::load_userid($u);
+    my $userid = $u->{'userid'}+0;
 
     my $hash = ref $propname eq "HASH" ? $propname : { $propname => $value };
 
@@ -818,24 +819,31 @@ sub set_userprop
     foreach $propname (keys %$hash) {
         my $p = LJ::get_prop("user", $propname) or next;
         my $table = $p->{'indexed'} ? "userprop" : "userproplite";
+
+        # TODO: finish support for userprop2
+        my $db = $action{$table}->{'db'} ||= ($table ne "userprop2" ? LJ::get_db_writer() : 
+                                              LJ::get_cluster_master($u));
+        return 0 unless $db;
         $value = $hash->{$propname};
         if (defined $value && $value) {
-            push @{$action{$table}->{"replace"}}, "($userid, $p->{'id'}, " . $dbh->quote($value) . ")";
+            push @{$action{$table}->{"replace"}}, "($userid, $p->{'id'}, " . $db->quote($value) . ")";
         } else {
             push @{$action{$table}->{"delete"}}, $p->{'id'};
         }
     }
 
     foreach my $table (keys %action) {
+        my $db = $action{$table}->{'db'};
         if (my $list = $action{$table}->{"replace"}) {
             $list = join(',', @$list);
-            $dbh->do("REPLACE INTO $table (userid, upropid, value) VALUES $list");
+            $db->do("REPLACE INTO $table (userid, upropid, value) VALUES $list");
         }
         if (my $list = $action{$table}->{"delete"}) {
             $list = join(',', @$list);
-            $dbh->do("DELETE FROM $table WHERE userid=$userid AND upropid IN ($list)");
+            $->do("DELETE FROM $table WHERE userid=$userid AND upropid IN ($list)");
         }
     }
+    return 1;
 }
 
 # <LJFUNC>
@@ -2042,19 +2050,17 @@ sub get_prop
 # des: Populates hashrefs with lookup data from the database or from memory,
 #      if already loaded in the past.  Examples of such lookup data include
 #      state codes, country codes, color name/value mappings, etc.
-# args: dbarg, whatwhere
+# args: dbarg?, whatwhere
 # des-whatwhere: a hashref with keys being the code types you want to load
 #                and their associated values being hashrefs to where you
 #                want that data to be populated.
 # </LJFUNC>
 sub load_codes
 {
-    my $dbarg = shift;
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";    
     my $req = shift;
 
-    my $dbs = make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+    my $dbr = LJ::get_db_reader();
 
     foreach my $type (keys %{$req})
     {
@@ -2433,20 +2439,18 @@ sub is_friend
 # name: LJ::is_banned
 # des: Checks to see if a user is banned from a journal.
 # returns: boolean; 1 iff user B is banned from journal A
-# args: dbarg, user, journal
+# args: dbarg?, user, journal
 # des-user: User hashref or userid.
 # des-journal: Journal hashref or userid.
 # </LJFUNC>
 sub is_banned
 {
-    my $dbarg = shift;
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
     my $u = shift;
     my $j = shift;
 
     my $uid = (ref $u ? $u->{'userid'} : $u)+0;
     my $jid = (ref $j ? $j->{'userid'} : $j)+0;
-
-    my $dbs = LJ::make_dbs_from_arg($dbarg);
 
     return 1 unless $uid;
     return 1 unless $jid;
@@ -2455,7 +2459,7 @@ sub is_banned
     # in own journal.  avoid db hit.
     return 0 if ($uid == $jid);
 
-    return LJ::check_rel($dbs, $jid, $uid, 'B');
+    return LJ::check_rel($jid, $uid, 'B');
 }
 
 # <LJFUNC>
@@ -2963,6 +2967,11 @@ sub start_request
     }
 
     return 1;
+}
+
+sub end_request
+{
+    
 }
 
 # <LJFUNC>
@@ -4994,7 +5003,7 @@ sub day_of_week
 # <LJFUNC>
 # name: LJ::delete_item2
 # des: Deletes a user's journal item from a cluster.
-# args: dbh, dbcm, journalid, jitemid, quick?, anum?
+# args: dbcm, journalid, jitemid, quick?, anum?
 # des-journalid: Journal ID item is in.
 # des-jitemid: Journal itemid of item to delete.
 # des-quick: Optional boolean.  If set, only [dbtable[log2]] table
@@ -5007,7 +5016,7 @@ sub day_of_week
 # </LJFUNC>
 sub delete_item2
 {
-    my ($dbh, $dbcm, $jid, $jitemid, $quick, $anum) = @_;
+    my ($dbcm, $jid, $jitemid, $quick, $anum) = @_;
     $jid += 0; $jitemid += 0;
 
     $dbcm->do("DELETE FROM log2 WHERE journalid=$jid AND jitemid=$jitemid");
@@ -5025,6 +5034,7 @@ sub delete_item2
 
     # delete stuff from meta cluster
     my $aitemid = $jitemid * 256 + $anum;
+    my $dbh = LJ::get_db_writer();
     foreach my $t (qw(memorable)) {
         $dbh->do("DELETE FROM $t WHERE journalid=$jid AND jitemid=$aitemid");
     }
@@ -5358,7 +5368,7 @@ sub text_in
 # <LJFUNC>
 # name: LJ::text_convert
 # des: convert old entries/comments to UTF-8 using user's default encoding
-# args: dbs, text, u, error
+# args: dbs?, text, u, error
 # des-text: old possibly non-ASCII text to convert
 # des-u: user hashref of the journal's owner
 # des-error: ref to a scalar variable which is set to 1 on error 
@@ -5368,13 +5378,14 @@ sub text_in
 # </LJFUNC>
 sub text_convert
 {
-    my ($dbs, $text, $u, $error) = @_;
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    my ($text, $u, $error) = @_;
 
     # maybe it's pure ASCII?
     return $text if LJ::is_ascii($text);
 
     # load encoding id->name mapping if it's not loaded yet
-    LJ::load_codes($dbs, { "encoding" => \%LJ::CACHE_ENCODINGS } )
+    LJ::load_codes({ "encoding" => \%LJ::CACHE_ENCODINGS } )
         unless %LJ::CACHE_ENCODINGS;
 
     if ($u->{'oldenc'} == 0 ||

@@ -28,11 +28,9 @@ $r->notes("codepath" => "bml.view.index");
      return;
  }
  
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
+ my $dbr = LJ::get_db_reader();
 
- my $u = LJ::load_user($dbs, $user);
+ my $u = LJ::load_user($user);
  unless ($u) {
      $title = "Error";
      $body .= "User doesn't exist.";
@@ -42,13 +40,13 @@ $r->notes("codepath" => "bml.view.index");
  my $base = LJ::journal_base($u);
 
  if ($u->{'journaltype'} eq "R") {
-     LJ::load_user_props($dbs, $u, "renamedto");
+     LJ::load_user_props($dbr, $u, "renamedto");
      if ($u->{'renamedto'}) {
          return BML::redirect(sprintf(LJ::journal_base($u->{'renamedto'}) . "/%04d/%02d/", $FORM{'y'}, $FORM{'m'}));
      }
  }
 
- LJ::load_user_props($dbs, $u, "opt_blockrobots") if $u->{'statusvis'} eq 'V';
+ LJ::load_user_props($dbr, $u, "opt_blockrobots") if $u->{'statusvis'} eq 'V';
  if ($u->{'statusvis'} ne 'V' || $u->{'opt_blockrobots'}) {
      $head .= LJ::robot_meta_tags();
  }
@@ -58,7 +56,7 @@ if (LJ::did_post()) {
     return BML::redirect($newuri);
 }
 
- my $remote = LJ::get_remote($dbs);
+ my $remote = LJ::get_remote();
 
  my $secwhere = "AND l.security='public'";
  if ($remote) {
@@ -155,7 +153,7 @@ if (LJ::did_post()) {
      # well here.
      if ($LJ::UNICODE && !LJ::is_utf8($subject)) {
          my $error;
-         my $subj = LJ::text_convert($dbs, $subject, $u, \$error);
+         my $subj = LJ::text_convert($subject, $u, \$error);
          $subject = $subj unless $error;
          LJ::text_out(\$subject);
      }
