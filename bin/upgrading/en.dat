@@ -4001,6 +4001,7 @@ date.month.september.short=Sep
 
 Email=Email
 
+email.newacct.body|notes=This string is no longer in use, please translate email.newacct2.body instead.
 email.newacct.body<<
 Congratulations, you have a new [[sitename]] account!
 
@@ -4021,6 +4022,37 @@ Below is your LiveJournal username and password:
 
    Username: [[username]]
    Password: [[password]]
+
+Enjoy!
+
+[[sitename]] Team
+[[siteroot]]/
+.
+
+email.newacct2.body|notes=This string replaces email.newacct.body.  You may refer to the old string while translating if you wish.
+email.newacct2.body<<
+Congratulations, you have a new [[sitename]] account!
+
+To complete your journal creation and verify your email address,
+please visit the following location.  Verifying your email address
+will help to protect your account as well as allow you to utilize
+more features within your journal.
+
+   [[regurl]]
+
+You may access your journal at the following two URLs:
+
+   [[siteroot]]/users/[[username]]/
+   [[siteroot]]/~[[username]]/
+
+Below is your [[sitename]] username that you registered:
+
+   Username: [[username]]
+
+If you need to retrieve your password, you can do so at any time by
+visiting the following URL:
+
+   [[siteroot]]/lostinfo.bml
 
 Enjoy!
 
