@@ -873,12 +873,6 @@ throughout the LiveJournal site and in your journal and in your friends' journal
 
 /editjournal.bml.certainday=Certain Day:
 
-/editjournal.bml.enterlogin=Enter your username and password to modify or delete your past journal entries.
-
-/editjournal.bml.lostinfo.head=Forget something?
-
-/editjournal.bml.lostinfo.text=If you forgot your username or password, <a href="lostinfo.bml">recover it here</a>.
-
 /editjournal.bml.recententries=most recent entries
 
 /editjournal.bml.recententry=Most recent entry
@@ -908,8 +902,6 @@ throughout the LiveJournal site and in your journal and in your friends' journal
 /editjournal_do.bml.error.getting=There was an error getting the journal entries to edit:
 
 /editjournal_do.bml.error.modify=An error occurred modifying your journal:
-
-/editjournal_do.bml.error.mustlogin=You have to be logged in to directly edit a journal entry of yours.
 
 /editjournal_do.bml.error.nofind=Could not find selected journal entry.
 

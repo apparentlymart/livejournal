@@ -32,9 +32,10 @@ general /friends/edit.bml.edit.head
 general /friends/edit.bml.edit.text
 
 general /editjournal.bml.enterlogin
-general /editjournal.bml.error.mustlogin
 general /editjournal.bml.lostinfo.head
 general /editjournal.bml.lostinfo.text
+
+general /editjournal_do.bml.error.mustlogin
 
 general /modify.bml.btn.proceed
 general /modify.bml.lostinfo.head
