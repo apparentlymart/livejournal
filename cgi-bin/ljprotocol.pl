@@ -96,6 +96,7 @@ sub error_message
              "503" => "Error obtaining necessary database lock",
              "504" => "Protocol mode no longer supported.",
              "505" => "Account data format on server is old and needs to be upgraded.", # cluster0
+             "506" => "Journal sync temporarily unavailable.",
              );
 
     my $prefix = "";
@@ -1343,6 +1344,7 @@ sub getevents
     }
     elsif ($req->{'selecttype'} eq "syncitems")
     {
+        return fail($err,506) if $LJ::DISABLED{'syncitems'};
         my $date = $req->{'lastsync'} || "0000-00-00 00:00:00";
         return fail($err,203,"Invalid syncitems date format")
             unless ($date =~ /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/);
@@ -1919,6 +1921,7 @@ sub syncitems
     my ($req, $err, $flags) = @_;
     return undef unless authenticate($req, $err, $flags);
     return undef unless check_altusage($req, $err, $flags);
+    return fail($err,506) if $LJ::DISABLED{'syncitems'};
 
     my $ownerid = $flags->{'ownerid'};
     my $uowner = $flags->{'u_owner'} || $flags->{'u'};
