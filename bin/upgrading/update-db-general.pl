@@ -1027,7 +1027,7 @@ CREATE TABLE oldids (
   newid    INT UNSIGNED NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (area,userid, newid),
   INDEX (userid)
-)
+) TYPE=MYISAM
 EOC
 
 register_tablecreate("dudata", <<'EOC');
@@ -1447,7 +1447,7 @@ EOC
 register_tablecreate("modlog", <<'EOC');
 CREATE TABLE modlog (
   journalid  INT UNSIGNED NOT NULL,
-  modid      MEDIUMINT UNSIGNED NOT NULL auto_increment,
+  modid      MEDIUMINT UNSIGNED NOT NULL,
   PRIMARY KEY (journalid, modid),
   posterid   INT UNSIGNED NOT NULL,
   subject    CHAR(30),

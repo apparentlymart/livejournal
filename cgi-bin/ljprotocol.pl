@@ -710,11 +710,13 @@ sub postevent
             return fail($err, 155, "You must have an authenticated email address in order to post to moderated communities") unless $u->{'status'} eq 'A';
 
             # store
-            $dbcm->do("INSERT INTO modlog (journalid, posterid, subject, logtime) ".
-                      "VALUES ($ownerid, $posterid, ?, NOW())", undef,
-                      LJ::text_trim($req->{'subject'}, 30, 0));
-            my $modid = $dbcm->{'mysql_insertid'};
+            my $modid = LJ::alloc_user_counter($uowner, "M"); # note: does GET_LOCK
             return fail($err, 501) unless $modid;
+
+            $dbcm->do("INSERT INTO modlog (journalid, modid, posterid, subject, logtime) ".
+                      "VALUES ($ownerid, $modid, $posterid, ?, NOW())", undef,
+                      LJ::text_trim($req->{'subject'}, 30, 0));
+            return fail($err, 501) if $dbcm->err;
 
             $dbcm->do("INSERT INTO modblob (journalid, modid, request_stor) ".
                       "VALUES ($ownerid, $modid, $fr)");

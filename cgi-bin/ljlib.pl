@@ -5668,11 +5668,11 @@ sub clear_rel
     return;
 }
 
-# $dom: 'L' == log, 'T' == talk
+# $dom: 'L' == log, 'T' == talk, 'M' == modlog
 sub alloc_user_counter
 {
     my ($u, $dom, $pre_locked) = @_;
-    return undef unless $dom =~ /^[LT]$/;
+    return undef unless $dom =~ /^[LTM]$/;
     my $dbcm = LJ::get_cluster_master($u);
     return undef unless $dbcm;
 
@@ -5695,6 +5695,9 @@ sub alloc_user_counter
                                             undef, $uid);
         } elsif ($dom eq "T") {
             $newmax = $dbcm->selectrow_array("SELECT MAX(jtalkid) FROM talk2 WHERE journalid=?",
+                                            undef, $uid);
+        } elsif ($dom eq "M") {
+            $newmax = $dbcm->selectrow_array("SELECT MAX(modid) FROM modlog WHERE journalid=?",
                                             undef, $uid);
         }
         $newmax++;

@@ -20,6 +20,7 @@ my $cluster = 0;   # by default, upgrade master.
 my $opt_listtables;
 my $opt_forcebuild = 0;
 my $opt_compiletodisk = 0;
+my $opt_innodb;
 exit 1 unless
 GetOptions("runsql" => \$opt_sql,
            "drop" => \$opt_drop,
@@ -31,6 +32,7 @@ GetOptions("runsql" => \$opt_sql,
            "listtables" => \$opt_listtables,
            "forcebuild|fb" => \$opt_forcebuild,
            "ctd" => \$opt_compiletodisk,
+           "innodb" => \$opt_innodb,
            );
 
 if ($opt_help) {
@@ -388,6 +390,7 @@ sub skip_opt
 sub do_sql
 {
     my $sql = shift;
+    chomp $sql;
     print "$sql;\n";
     if ($opt_sql) {
         print "# Running...\n";
@@ -427,7 +430,11 @@ sub create_table
     my $table = shift;
     return if $cluster && ! defined $clustered_table{$table};
 
-    do_sql($table_create{$table});
+    my $create_sql = $table_create{$table};
+    if ($opt_innodb && $create_sql !~ /type=myisam/i) {
+        $create_sql .= " TYPE=INNODB";
+    }
+    do_sql($create_sql);
 
     foreach my $pc (@{$post_create{$table}})
     {
