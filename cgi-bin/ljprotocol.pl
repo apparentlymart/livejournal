@@ -66,7 +66,8 @@ sub error_message
              "403" => "This would push you over your syndication quota.",
              "404" => "Cannot post",
              "405" => "Post frequency limit.",
-
+             "406" => "Client is making repeated requests.  Perhaps it's broken?",
+             
              # Server Errors
              "500" => "Internal server error",
              "501" => "Database error",
@@ -1312,6 +1313,27 @@ sub getevents
         my $date = $req->{'lastsync'} || "0000-00-00 00:00:00";
         return fail($err,203,"Invalid syncitems date format")
             unless ($date =~ /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/);
+
+        my $now = time();
+        # broken client loop prevention
+        if ($req->{'lastsync'}) {
+            my $pname = "rl_syncitems_getevents_loop";
+            LJ::load_user_props($dbs, $u, $pname);
+            # format is:  time/date/time/date/time/date/... so split
+            # it into a hash, then delete pairs that are older than an hour
+            my %reqs = split(m!/!, $u->{$pname});
+            foreach (map { $_ > $now - 60*60 } keys %reqs) { delete $reqs{$_}; }
+            my $count = grep { $_ eq $date } values %reqs;
+            $reqs{$now} = $date;
+            LJ::set_userprop($dbs, $u, $pname, 
+                             join('/', map { $_, $reqs{$_} }
+                                  sort { $b <=> $a } keys %reqs));
+            if ($count >= 2) {
+                # 2 prior, plus this one = 3 repeated requests for same synctime.
+                # their client is busted.  (doesn't understand syncitems semantics)
+                return fail($err,406);
+            }
+        }
         
         my %item;
         $sth = $dbcr->prepare("SELECT jitemid, logtime FROM log2 WHERE ".
