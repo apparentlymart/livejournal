@@ -119,7 +119,7 @@ body<=
  # save any changes
  if (LJ::did_post()) {
      my $op = $POST{email};
-     $op = '' if $op && $op !~ /[DN]/;
+     $op = '' if $op && $op !~ /[N]/; # add D back in here when Digest goes live
      LJ::set_userprop($remote, 'opt_communityjoinemail', $op);
  }
 
@@ -136,9 +136,14 @@ body<=
  $ret .= LJ::html_check({ type => 'radio', name => 'email', id => 'email_all', 
                           value => '', selected => ($op eq 'Y') });
  $ret .= "<label for='email_all'>$ML{'.joinmail.email.all'}</label><br />";
- $ret .= LJ::html_check({ type => 'radio', name => 'email', id => 'email_digest', 
-                          value => 'D', selected => ($op eq 'D') });
- $ret .= "<label for='email_digest'>$ML{'.joinmail.email.digest'}</label><br />";
+ if (0) {
+     # we don't do this right now, because the maintenance job to send email isn't
+     # ready for use on LJ.  this will be removed and the option enabled when that
+     # task is rewritten.  NOTE: add D up above in did_post() block.
+     $ret .= LJ::html_check({ type => 'radio', name => 'email', id => 'email_digest', 
+                              value => 'D', selected => ($op eq 'D') });
+     $ret .= "<label for='email_digest'>$ML{'.joinmail.email.digest'}</label><br />";
+ }
  $ret .= LJ::html_check({ type => 'radio', name => 'email', id => 'email_none', 
                           value => 'N', selected => ($op eq 'N') });
  $ret .= "<label for='email_none'>$ML{'.joinmail.email.none'}</label><br />";

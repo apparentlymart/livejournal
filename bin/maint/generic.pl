@@ -2,6 +2,12 @@
 #
 
 $maint{joinmail} = sub {
+    # this needs to be resumeable, so that it can run once every 10 or 15 minutes to digest things
+    # that are a day old but haven't been sent.  also, the first query down there needs to include
+    # the right authaction type in the WHERE clause, and NOT do a GROUP BY.
+    print "Returning without running... I'm disabled right now.\n";
+    return 1;    
+    
     my $dbr = LJ::get_db_reader();
 
     # get all information
