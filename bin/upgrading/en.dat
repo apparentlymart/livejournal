@@ -869,7 +869,7 @@ p?>
 
 /customize/index.bml.previews=(Previews)
 
-/customize/index.bml.s1=The old style system is configured through the <a href="/modify.bml">Modify Journal</a> page.
+/customize/index.bml.s1.2=The old style system is configured through the <a [[aopts]]>Modify Journal</a> page.
 
 /customize/index.bml.s1.header=Using S1
 
