@@ -14,6 +14,12 @@
  $head = "";
  $body = "";
 
+ my $dberr = sub {
+     $title = $ML{'Error'};
+     $body = $ML{'error.nodb'};
+     return undef;
+ };
+
  # Find out if a 'user' argument is specified in the URL.
  my $user = LJ::canonical_username($GET{'user'});
  if ($GET{'user'} && ! $user) {
@@ -156,7 +162,8 @@
      }
  }
 
- my $kwmap = LJ::Memories::get_keywords($u) || {};
+ my $kwmap = LJ::Memories::get_keywords($u);
+ return $dberr->() unless defined $kwmap;
 
  if ($GET{'keyword'})
  {
@@ -187,7 +194,8 @@
          $key_id = $_ if $kwmap->{$_} eq $GET{keyword};
      }
      my $memoryhash = LJ::Memories::get_by_keyword($u, $key_id, 
-             { security => $securities, filter => $filter }) || {};
+             { security => $securities, filter => $filter });
+     return $dberr->() unless defined $memoryhash;
      my @jids = map { $_->{journalid} } values %$memoryhash;
      my $us = LJ::load_userids(@jids);
      my @memories = $sortfunc{$sort}->( values %$memoryhash );
@@ -237,7 +245,8 @@
  $title = $ML{'.title.memorable'};
  $body .= BML::ml(".body.list_categories", { 'user' => $user });
 
- my $rows = LJ::Memories::get_keyword_counts($u, { security => $securities, filter => $filter }) || {};
+ my $rows = LJ::Memories::get_keyword_counts($u, { security => $securities, filter => $filter });
+ return $dberr->() unless defined $rows;
  my @sortedrows;
  push @sortedrows, { keyword => $kwmap->{$_}, count => $rows->{$_} }
     foreach keys %{$rows || {}};
