@@ -1,7 +1,7 @@
-<HTML><HEAD><TITLE>Console Reference</TITLE></HEAD>
-<BODY>
+<html><head><title>Console Reference</title></head>
+<body>
 
-[ <A HREF="./">console</A> | reference ]
+[ <a href="./">console</a> | reference ]
 
 <P><B>Grammar</B>
 <BR>Think of this like a DOS or <tt>bash</tt> prompt.  The first word is a command.  Every word after that is an argument to that command.  Every command has a different number of required and optional parameters.  White space delimits arguments.  If you need a space in an argument, put double quotes around the whole thing.  If you need double quotes and spaces in an argument, escape the quote with a backslash (\) first.  If you need to do a backslash, escape that with a backslash.
@@ -14,34 +14,32 @@
 
  use strict;
  use vars qw($dbh %FORM %cmd);
- require 'ljlib.pl';
- 
  require 'console.pl';
 
  my ($ret, $sth);
- &connect_db();
 
- $ret .= "<DL>";
+ $ret .= "<dl>";
  foreach my $cmdname (sort keys %ljcon::cmd) 
  {
      my $cmd = $ljcon::cmd{$cmdname};
      my $args = &ehtml($cmd->{'argsummary'});
-     $ret .= "<DT><P><TABLE WIDTH=100% CELLPADDING=2><TR><TD BGCOLOR=#D0D0D0><TT><B>$cmdname</B> $args</TT></TD></TR></TABLE>";
-     $ret .= "<DD><P>$cmd->{'des'}";
+     $ret .= "<dt><p><table width=100% cellpadding=2><tr><td bgcolor=#d0d0d0><tt><b>$cmdname</b> $args</tt></td></tr></table>";
+     $ret .= "<dd><p>$cmd->{'des'}";
      if ($cmd->{'args'}) {
 	 my @des = @{$cmd->{'args'}};
-	 $ret .= "<P><DL>";
+	 $ret .= "<p><dl>";
 	 while (my ($arg, $des) = splice(@des, 0, 2)) {
-	     $ret .= "<DT><B><I>$arg</I></B><DD>$des";
+	     $ret .= "<dt><b><i>$arg</i></b><dd>$des";
 	 }
-	 $ret .= "</DL>";
+	 $ret .= "</dl>";
      }
  }
- $ret .= "</DL>";
+ $ret .= "</dl>";
  return $ret;
- 
-
 
 _CODE=)
 
-</BODY></HTML>
+</body></html>(=_C <LJDEP>
+lib: cgi-bin/console.pl, cgi-bin/ljlib.pl
+link: htdocs/admin/console/index.bml
+</LJDEP> _C=)

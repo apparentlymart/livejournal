@@ -8,10 +8,8 @@ BODY<=
 <A HREF="./"><B>(Back to FAQ Index)</B></A>
 </CENTER>
 
-
 (=_CODE
 
- require 'ljlib.pl';
  &connect_db;
 
  $ret = "";
@@ -61,4 +59,7 @@ BODY<=
 _CODE=)
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+lib: cgi-bin/ljlib.pl
+link: htdocs/admin/faq/index.bml
+</LJDEP> _C=)

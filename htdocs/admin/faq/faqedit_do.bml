@@ -11,7 +11,6 @@ BODY<=
 
 (=_CODE
 
- require 'ljlib.pl';
  &connect_db;
 
  my $remote = &get_remote();
@@ -80,4 +79,7 @@ BODY<=
 _CODE=)
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+lib: cgi-bin/ljlib.pl
+link: htdocs/admin/faq/index.bml
+</LJDEP> _C=)
