@@ -227,7 +227,7 @@ sub clean
                 foreach my $attr (keys %$hash)
                 {
                     delete $hash->{$attr} if $attr =~ /^(?:on|dynsrc|data)/;
-                    if ($attr =~ /^=/) {
+                    if ($attr =~ /(?:^=)|[\x0b\x0d]/) {
                         # Cleaner attack:  <p ='>' onmouseover="javascript:alert(document/**/.cookie)" >
                         # is returned by HTML::Parser as P_tag("='" => "='") Text( onmouseover...)
                         # which leads to reconstruction of valid HTML.  Clever!
@@ -668,7 +668,7 @@ sub clean_subject_all
     });
 }
 
-my $event_eat = [qw[head title style layer iframe applet object]];
+my $event_eat = [qw[head title style layer iframe applet object xml]];
 my $event_remove = [qw[bgsound embed object link body meta]];
 
 my @comment_close = qw(
