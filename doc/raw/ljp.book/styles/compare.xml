@@ -18,11 +18,11 @@
           <entry><simpara>S1 forces users to define a template for each new type
             of view: recent entries, friends page, day view, calendar, etc. If
             we want to add a new view type, users have to basically write their
-            style.
+            style again.
           </simpara></entry>
           <entry><simpara>In S2 you describe the formatting of objects, not the
             formatting of views. Thus, we can easily add new views in the future,
-            and making a <quote>lastn</quote> view pretty much makes all your
+            and making a <quote>recent</quote> view pretty much makes all your
             other views automatically.
           </simpara></entry>
         </row>
@@ -35,16 +35,17 @@
           <entry><simpara>The new style system is its own language that gets
             compiled into another language, and run on the webserver. Letting
             users run code on the server is inherently dangerous... it obviously
-            has to be free of things
+            has to be free of things like
             <command>rm</command> <option>-rf /</option>, but also, it has to be
             free from infinite loops, and anything that could consume large
             amounts of resources.</simpara>
             <simpara>The S2 language does not have while loops, gotos, or any
             other control construct that would permit an infinite loops. It only
-            has if/else blocks, and foreach over finite lists. Also, you can only
-            call methods and functions defined in the core layer, so users can't
-            write functions foo and bar which simply call each other. 
-          </simpara></entry>
+            has if/else blocks and foreach over finite lists.</simpara>
+            <simpara>There is also a limit on execution time of a resulting style,
+            to avoid situations we can't easily trap such as functions calling
+            each other in cycle, or badly-written recursion.</simpara>
+          </entry>
         </row>          
         <row valign="top">
           <entry>Speed</entry>
@@ -54,7 +55,7 @@
           <entry><simpara>In the new system, S2 code will be parsed, checked, and
             compiled before the page is loaded. When a page is loaded in the
             future, the code will just be run, which will already be in the
-            language that the LiveJournal server runs on. For LiveJournal.com,
+            language that the LiveJournal server runs on. At the moment
             this is Perl but in the future we could write a PHP or Java servlet
             backend to the S2 compiler.
           </simpara></entry>
@@ -88,8 +89,8 @@
             few administrators to make styles, which would then be made public.
           </simpara></entry>
           <entry><simpara>Wizards and tools generate S2 behind the scenes for
-            most users. The hard-core users can write their styles and overlay
-            layers in the raw S2 language.
+            most users. The hard-core users can write their own layouts and overlay
+            other layers in the raw S2 language.
           </simpara></entry>
         </row>
       </tbody>
