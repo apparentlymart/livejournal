@@ -88,7 +88,7 @@ _code?>
 <?h1 <?_ml .communities.header _ml?> h1?>
 <?p  <?_ml .communities        _ml?>  p?>
 <dl>
-  <dt><a href="/community/settings.bml?mode=create"><?_ml /community/settings.bml.title.create _ml?></a></dt>
+  <dt><a href="/community/create.bml"><?_ml /community/create.bml.title _ml?></a></dt>
   <dd><?_ml .communities.create.about _ml?></dd>
   <dt><a href="/community/manage.bml"><?_ml /community/manage.bml.title _ml?></a></dt>
   <dd><?_ml .communities.manage.about _ml?></dd>

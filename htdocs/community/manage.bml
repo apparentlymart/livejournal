@@ -154,7 +154,7 @@ body<=
  $ret .= "</form></div>";
 
  $ret .= "<?h1 $ML{'.create.header'} h1?>";
- $ret .= "<?p " . BML::ml('.create.text', {'link'=>'/community/settings.bml?mode=create'}) . " p?>";
+ $ret .= "<?p " . BML::ml('.create.text', {'link'=>'/community/create.bml'}) . " p?>";
 
  return $ret;
 

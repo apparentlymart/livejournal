@@ -16,7 +16,7 @@
                'commsearch' => ['Community Search', '/community/search.bml', 'community'],
                'commsentinvites' => ['Sent Invitations', '/community/sentinvites.bml', 'managecommunity'],
                'community' => ['Community Center', '/community/', 'home'],
-               'createcommunity' => ['Create Community', '/community/settings.bml?mode=create', 'managecommunity'],
+               'createcommunity' => ['Create Community', '/community/create.bml', 'managecommunity'],
                'createjournal' => ['Create Journal', '/create.bml', 'home'],
                'createstyle' => ['Create Style', '/styles/create.bml', 'modify'],
                'customize' => ['Customize S2 Settings', '/customize/index.bml', 'manage'],

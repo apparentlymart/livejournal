@@ -4,8 +4,6 @@
 general /allpics.bml.edit
 general /allpics.bml.nopics.text
 
-general /community/create.bml.*
-
 general /community/join.bml.label.authpost
 general /community/join.bml.label.closedcomm
 
