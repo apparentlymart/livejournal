@@ -91,7 +91,11 @@ $user = $u->{'user'};
  if ($piccount) {
      $body .= "</table>";
  } else {
-     $body = "<?h1 $ML{'.nopics.title'} h1?><?p $ML{'.nopics.text'} p?>";
+     if ($remote && $remote->{'user'} eq $u->{'user'}) {
+         $body = "<?h1 $ML{'.nopics.title'} h1?><?p $ML{'.nopics.text'} p?>";
+     } else {
+         $body = "<?h1 $ML{'.nopics.title'} h1?><?p $ML{'.nopics.text.other'} p?>";
+     }
  }
  
  return;
