@@ -200,9 +200,14 @@ body<=
             foreach my $id (keys %{$add{'member'}}) {
                 next if $POST{"wm_$id"};
                 my $u = LJ::load_userid($id);
-                if (LJ::send_comm_invite($u, $c, $remote, [ 'member' ])) {
-                    # if it succeeded, push the reinvited information
-                    push @msgs, BML::ml('.reinvited', { user => LJ::ljuser($u, { type => 'P' }) });
+                if (LJ::u_equals($u, $remote)) {
+                    # you're allowed to add yourself as member
+                    LJ::join_community($remote, $c);
+                } else {
+                    if (LJ::send_comm_invite($u, $c, $remote, [ 'member' ])) {
+                        # if it succeeded, push the reinvited information
+                        push @msgs, BML::ml('.reinvited', { user => LJ::ljuser($u, { type => 'P' }) });
+                    }
                 }
             }
         }
