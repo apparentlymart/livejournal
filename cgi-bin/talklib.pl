@@ -374,6 +374,7 @@ sub get_talk_data
     my $fixup_rp = sub {
         return unless $nodetype eq "L";
         return if $rp_count == $rp_ourcount;
+        return unless @LJ::MEMCACHE_SERVERS;
 
         # probably need to fix.  checking is at least warranted.
         my $dbcm = LJ::get_cluster_master($u);
@@ -385,7 +386,8 @@ sub get_talk_data
                                         $nodeid);
         $dbcm->do("UPDATE log2 SET replycount=? WHERE journalid=? AND jitemid=?",
                   undef, int($ct), $u->{'userid'}, $nodeid);
-        print STDERR "Fixing replycount for $u->{'userid'}/$nodeid from $rp_count to $ct\n";
+        print STDERR "Fixing replycount for $u->{'userid'}/$nodeid from $rp_count to $ct\n"
+            if $LJ::DEBUG{'replycount_fix'};
         $dbcm->do("UNLOCK TABLES");
         LJ::MemCache::delete($rp_memkey);
     };
@@ -723,9 +725,18 @@ sub talkform {
 
     # hidden values
     my $parent = $replyto+0;
-    $ret .= "<input type='hidden' name='parenttalkid' value='$parent' />\n";
-    $ret .= "<input type='hidden' name='itemid' value='$ditemid' />\n";
-    $ret .= "<input type='hidden' name='journal' value='$journalu->{'user'}' />\n";
+    $ret .= LJ::html_hidden("parenttalkid", $parent,
+                            "itemid", $ditemid,
+                            "journal", $journalu->{'user'});
+
+    # challenge
+    {
+        my ($time, $secret) = LJ::get_secret();
+        my $rchars = LJ::rand_chars(20);
+        my $chal = "$ditemid-$journalu->{userid}-$time-$rchars";
+        my $res = Digest::MD5::md5_hex($secret . $chal);
+        $ret .= LJ::html_hidden("chrp1", "$chal-$res");
+    }
 
     # from registered user or anonymous?
     $ret .= "<table>\n";
@@ -1511,6 +1522,7 @@ sub init {
     my $up;             # user posting
     my $exptype;        # set to long if ! after username
     my $ipfixed;        # set to remote  ip if < after username
+    my $used_ecp;       # ecphash was validated and used
 
     if ($form->{'usertype'} eq "user") {
         if ($form->{'userpost'}) {
@@ -1518,7 +1530,7 @@ sub init {
             # parse inline login opts
             if ($form->{'userpost'} =~ s/[!<]{1,2}$//) {
                 $exptype = 'long' if index($&, "!") >= 0;
-                $ipfixed = BML::get_remote_ip() if index($&, "<") >= 0;
+                $ipfixed = LJ::get_remote_ip() if index($&, "<") >= 0;
             }
 
             $up = LJ::load_user($form->{'userpost'});
@@ -1540,9 +1552,11 @@ sub init {
                     # if ecphash present, authenticate on that
                     if ($form->{'ecphash'}) {
 
-                        unless ($form->{'ecphash'} eq
-                                LJ::Talk::ecphash($itemid, $form->{'parenttalkid'}, $up->{'password'}))
+                        if ($form->{'ecphash'} eq
+                            LJ::Talk::ecphash($itemid, $form->{'parenttalkid'}, $up->{'password'}))
                         {
+                            $used_ecp = 1;
+                        } else {
                             $bmlerr->("$SC.error.badpassword");
                         }
 
@@ -1562,6 +1576,32 @@ sub init {
             }
         } else {
             $bmlerr->("$SC.error.nousername");
+        }
+    }
+
+    # validate the challenge/response value (anti-spammer)
+    unless ($used_ecp) {
+        my $chrp_err;
+        if (my $chrp = $form->{'chrp1'}) {
+            my ($c_ditemid, $c_uid, $c_time, $c_chars, $c_res) = 
+                split(/\-/, $chrp);
+            my $chal = "$c_ditemid-$c_uid-$c_time-$c_chars";
+            my $secret = LJ::get_secret($c_time);
+            my $res = Digest::MD5::md5_hex($secret . $chal);
+            if ($res ne $c_res) {
+                $chrp_err = "invalid";
+            } elsif ($c_time < time() - 60*60) {
+                $chrp_err = "too_old";
+            }
+        } else {
+            $chrp_err = "missing";
+        }
+        if ($chrp_err) {
+            my $ip = LJ::get_remote_ip();
+            if ($LJ::DEBUG_TALKSPAM) {
+                my $ruser = $remote ? $remote->{user} : "[nonuser]";
+                print STDERR "talkhash error: from $ruser \@ $ip - $chrp_err - $talkurl\n";
+            }
         }
     }
 
