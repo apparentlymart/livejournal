@@ -163,11 +163,17 @@ sub process {
             );
         }
         else {
+            # Retry if we are unable to connect to the remote server.
+            # Otherwise, the image has probably expired.  Dequeue.
+            my $reason = $ua_rv->status_line;
             return $err->(
-                "Unable to fetch SprintPCS image. (" . $ua_rv->status_line . ")",
-                { sendmail => 1 });
+                "Unable to fetch SprintPCS image. ($reason)",
+                { 
+                    sendmail => 1,
+                    retry => $reason =~ /Connection refused/
+                }
+            );
         }
-
     } 
 
     # All other email (including MMS)
