@@ -1081,7 +1081,8 @@ sub reset_password
 
     my $body = "The password for your $LJ::SITENAME account '$u->{'user'}' has been reset to:\n\n";
     $body .= "     $newpass\n\n";
-    $body .= "Please change it immediately by going to:\n$LJ::SITEROOT/changepassword.bml\n\n";
+    $body .= "Please change it immediately by going to:\n\n";
+    $body .= "     $LJ::SITEROOT/changepassword.bml\n\n";
     $body .= "Regards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n";
 
     LJ::send_mail({
