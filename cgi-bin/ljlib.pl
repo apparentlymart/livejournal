@@ -8454,15 +8454,16 @@ sub clear_rel
     return 1;
 }
 
-# $dom: 'L' == log, 'T' == talk, 'M' == modlog, 'B' == blob (userpic, etc), 'S' == session,
-#       'R' == memory (remembrance), 'K' == keyword id
+# $dom: 'L' == log, 'T' == talk, 'M' == modlog, 'S' == session,
+#       'R' == memory (remembrance), 'K' == keyword id,
+#       'P' == phone post
 sub alloc_user_counter
 {
     my ($u, $dom, $recurse) = @_;
 
     ##################################################################
     # IF YOU UPDATE THIS MAKE SURE YOU ADD INITIALIZATION CODE BELOW #
-    return undef unless $dom =~ /^[LTMBSRK]$/;                       #
+    return undef unless $dom =~ /^[LTMPSRK]$/;                       #
     ##################################################################
 
     my $dbh = LJ::get_db_writer();
@@ -8511,9 +8512,9 @@ sub alloc_user_counter
     } elsif ($dom eq "K") {
         $newmax = $u->selectrow_array("SELECT MAX(kwid) FROM userkeywords WHERE userid=?",
                                       undef, $uid);
-    } elsif ($dom eq "B") {
-        $newmax = $u->selectrow_array("SELECT MAX(blobid) FROM userblob WHERE journalid=?",
-                                      undef, $uid);
+    } elsif ($dom eq "P") {
+        $newmax = $u->selectrow_array("SELECT MAX(blobid) FROM userblob WHERE journalid=? AND domain=?",
+                                      undef, $uid, LJ::get_blob_domainid("phonepost"));
     } else {
         die "No user counter initializer defined for area '$dom'.\n";
     }
