@@ -319,6 +319,21 @@ $hooks{'login_add_opts'} = {
     source => ["htdocs/login.bml"],
 };
 
+$hooks{'set_s2bml_lang'} = {
+    desc => "Given an S2 Context, return the correct BML language id",
+    args => [
+        {
+            'desc' => "S2 Context",
+            'name' => '$ctx',
+        },
+        {
+            'desc' => "Language id reference",
+            'name' => '\$langref',
+        },
+    ],
+    source => ["cgi-bin/LJ/S2.pm"],
+};
+
 sub hooks
 {
     my $hooks = shift;
