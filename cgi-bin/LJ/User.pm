@@ -77,6 +77,35 @@ sub underage {
     return $on;
 }
 
+# log a line to our userlog
+sub log_event {
+    my $u = shift;
+
+    my ($type, $info) = @_;
+    return undef unless $type;
+    $info ||= {};
+
+    # now get variables we need; we use delete to remove them from the hash so when we're
+    # done we can just encode what's left
+    my $ip = delete($info->{ip}) || LJ::get_remote_ip() || undef;
+    my $uniq = delete $info->{uniq};
+    unless ($uniq) {
+        eval {
+            $uniq = Apache->request->notes('uniq');
+        };
+    }
+    my $remote = delete($info->{remote}) || LJ::get_remote() || undef;
+    my $targetid = (delete($info->{actiontarget})+0) || undef;
+    my $extra = %$info ? join('&', map { LJ::eurl($_) . '=' . LJ::eurl($info->{$_}) } keys %$info) : undef;
+
+    # now insert the data we have
+    $u->do("INSERT INTO userlog (userid, logtime, action, actiontarget, remoteid, ip, uniq, extra) " .
+           "VALUES (?, UNIX_TIMESTAMP(), ?, ?, ?, ?, ?, ?)", undef, $u->{userid}, $type,
+           $targetid, $remote ? $remote->{userid} : undef, $ip, $uniq, $extra);
+    return undef if $u->err;
+    return 1;
+}
+
 # return or set the underage status userprop
 sub underage_status {
     return undef unless $LJ::UNDERAGE_BIT;

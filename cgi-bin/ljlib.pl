@@ -49,7 +49,7 @@ sub END { LJ::end_request(); }
                     "tempanonips", "inviterecv", "invitesent",
                     "memorable2", "memkeyword2", "userkeywords",
                     "friendgroup2", "userpicmap2", "userpic2",
-                    "s2stylelayers2", "s2compiled2",
+                    "s2stylelayers2", "s2compiled2", "userlog",
                     );
 
 # keep track of what db locks we have out

@@ -145,6 +145,7 @@ foreach my $uid (@delusers)
     $runsql->($user, "DELETE FROM infohistory WHERE userid=$uid");
     $runsql->($user, "DELETE FROM reluser WHERE userid=$uid");
     $runsql->($user, "DELETE FROM reluser WHERE targetid=$uid");
+    $runsql->($user, "DELETE FROM userlog WHERE userid=$uid");
 
     $runsql->($user, "UPDATE user SET statusvis='X', statusvisdate=NOW(), password='' WHERE userid=$uid");
 

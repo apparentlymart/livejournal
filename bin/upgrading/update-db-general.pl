@@ -1968,6 +1968,21 @@ CREATE TABLE support_answers (
 )
 EOC
 
+register_tablecreate("userlog", <<'EOC');
+CREATE TABLE userlog (
+    userid        INT UNSIGNED NOT NULL,
+    logtime       INT UNSIGNED NOT NULL,
+    action        VARCHAR(30) NOT NULL,
+    actiontarget  INT UNSIGNED,
+    remoteid      INT UNSIGNED,
+    ip            VARCHAR(15),
+    uniq          VARCHAR(15),
+    extra         VARCHAR(255),
+
+    INDEX (userid)
+)
+EOC
+
 # NOTE: new table declarations go here
 
 

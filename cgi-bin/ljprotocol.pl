@@ -1152,6 +1152,17 @@ sub editevent
             }
         }
 
+        # log this event, unless noauth is on, which means it is being done internally and we should
+        # rely on them to log why they're deleting the entry if they need to.  that way we don't have
+        # double entries, and we have as much information available as possible at the location the
+        # delete is initiated.
+        $uowner->log_event('delete_entry', {
+                remote => $u,
+                actiontarget => $req->{itemid},
+                method => 'protocol',
+            })
+            unless $flags->{noauth};
+
         LJ::delete_entry($uowner, $req->{'itemid'}, 'quick', $oldevent->{'anum'});
 
         # clear their duplicate protection, so they can later repost

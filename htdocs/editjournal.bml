@@ -126,8 +126,19 @@ body<=
 
                 # Delete
                 $req{'event'} = '' if $POST{'action:delete'} || $POST{'action:deletespam'};
+
                 # mark as spam, if need be
                 LJ::mark_entry_as_spam($usejournal_u, $itemid) if $POST{'action:deletespam'};
+
+                # if the action is to delete it, then let's note that
+                if ($POST{'action:delete'} || $POST{'action:deletespam'}) {
+                    # now log the event created above
+                    ($usejournal ? $usejournal_u : $u)->log_event('delete_entry', {
+                            remote => $remote,
+                            actiontarget => $itemid,
+                            method => 'web',
+                        });
+                }
 
                 # do editevent request
                 LJ::do_request(\%req, \%res, { 'noauth' => 1, 'u' => $u });
