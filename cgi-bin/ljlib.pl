@@ -926,7 +926,7 @@ sub auth_fields_2
     # logged in mode
     $ret .= "<tr><td align='right'><u>U</u>sername:</td><td align='left'>";
 
-    my $alturl = BMl::self_link($form, { 'altlogin' => 1 });
+    my $alturl = BMl::self_link({ 'altlogin' => 1 });
     my @shared = ($remote->{'user'});
 
     my $sopts = {};
@@ -936,7 +936,7 @@ sub auth_fields_2
     $ret .= LJ::make_shared_select($dbs, $remote, $form, $sopts);
 
     if ($sopts->{'getother'}) {
-        my $alturl = BML::self_link($form, { 'altlogin' => 1 });
+        my $alturl = BML::self_link({ 'altlogin' => 1 });
         $ret .= "&nbsp;(<a href='$alturl'>Other</a>)";
     }
 
