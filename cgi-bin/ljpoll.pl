@@ -374,7 +374,7 @@ sub preview {
         # text questions
         if ($q->{'type'} eq 'text') {
             my ($size, $max) = split(m!/!, $q->{'opts'});
-            $ret .= "<input type='text' size='$size' maxlength='$max' />\n";
+            $ret .= LJ::html_text({ 'size' => $size, 'maxlength' => $max });
 
         # scale questions
         } elsif ($q->{'type'} eq 'scale') {
@@ -383,48 +383,42 @@ sub preview {
             my $count = int(($to-$from)/$by) + 1;
             my $do_radios = ($count <= 11);
             
+            # few opts, display radios
             if ($do_radios) {
                 $ret .= "<table><tr valign='top' align='center'>\n";
-            } else {
-                $ret .= "<select><option></option>\n";
-            }
-            
-            for (my $at = $from; $at <= $to; $at += $by) {
-                if ($do_radios) {
-                    $ret .= "<td><input type='radio' /><br />$at</td>\n";
-                } else {
-                    $ret .= "<option>$at</option>\n";
+                for (my $at = $from; $at <= $to; $at += $by) {
+                    $ret .= "<td>" . LJ::html_check({ 'type' => 'radio' }) . "<br />$at</td>\n";
                 }
-            }
-            
-            if ($do_radios) {
                 $ret .= "</tr></table>\n";
+
+            # many opts, display select
             } else {
-                $ret .= "</select>\n";
+                my @optlist = ();
+                for (my $at = $from; $at <= $to; $at += $by) {
+                    push @optlist, ('', $at);
+                }
+                $ret .= LJ::html_select({}, @optlist);
             }
             
         # questions with items
         } else {
-                
+
+            # drop-down list
             if ($q->{'type'} eq 'drop') {
-                $ret .= "<select>\n";
-                $ret .= "<option></option>\n";
-            }
-            
-            foreach my $it (@{$q->{'items'}}) {
-                LJ::Poll::clean_poll(\$it->{'item'});
-                  
-                  if ($q->{'type'} eq 'drop') {
-                      $ret .= "<option>$it->{'item'}</option>\n";
-                  } elsif ($q->{'type'} eq 'check') {
-                      $ret .= "<input type='checkbox' /> $it->{'item'}<br />\n";
-                  } elsif ($q->{'type'} eq 'radio') {
-                      $ret .= "<input type='radio' /> $it->{'item'}<br />\n";
-                  }
-              }
-            
-            if ($q->{'type'} eq 'drop') {
-                $ret .= "</select>\n";
+                my @optlist = ('', '');
+                foreach my $it (@{$q->{'items'}}) {
+                    LJ::Poll::clean_poll(\$it->{'item'});
+                    push @optlist, ('', $it->{'item'});
+                }
+                $ret .= LJ::html_select({}, @optlist);
+
+
+            # radio or checkbox
+            } else {
+                foreach my $it (@{$q->{'items'}}) {
+                    LJ::Poll::clean_poll(\$it->{'item'});
+                    $ret .= LJ::html_check({ 'type' => $q->{'type'} }) . "$it->{'item'}<br />\n";
+                }
             }
         }
         
@@ -432,7 +426,7 @@ sub preview {
         
     }
     
-    $ret .= "<input type='submit'  value='Submit Poll' disabled='disabled' />\n";
+    $ret .= LJ::html_submit('', 'Submit Poll', { 'disabled' => 1 }) . "\n";
     $ret .= "</form>";
     
     return $ret; 
@@ -455,16 +449,10 @@ sub register
 
         #### CREATE THE POLL!
         
-        my ($sth, $sql);
-        my $qwhovote = $dbh->quote($popts{'whovote'});
-        my $qwhoview = $dbh->quote($popts{'whoview'});
-        my $qname = $dbh->quote($popts{'name'});
-
-        $sql = "INSERT INTO poll (itemid, journalid, posterid, whovote, whoview, name) VALUES ".
-            "($itemid, $popts{'journalid'}, $popts{'posterid'}, $qwhovote, $qwhoview, $qname)";
-
-        $sth = $dbh->prepare($sql);				     
-        $sth->execute;
+        my $sth = $dbh->prepare("INSERT INTO poll (itemid, journalid, posterid, whovote, whoview, name) " .
+                                "VALUES (?, ?, ?, ?, ?, ?)");
+        $sth->execute($itemid, $popts{'journalid'}, $popts{'posterid'},
+                      $popts{'whovote'}, $popts{'whoview'}, $popts{'name'});
         if ($dbh->err) {
             $$error = "Database error: " . $dbh->errstr;
             return 0;
@@ -478,12 +466,9 @@ sub register
         foreach my $q (@{$popts{'questions'}})
         {
             $qnum++;
-            my $qtype = $dbh->quote($q->{'type'});
-            my $qopts = $dbh->quote($q->{'opts'});
-            my $qqtext = $dbh->quote($q->{'qtext'});
-            $sql = "INSERT INTO pollquestion (pollid, pollqid, sortorder, type, opts, qtext) VALUES ($pollid, $qnum, $qnum, $qtype, $qopts, $qqtext)";
-            $sth = $dbh->prepare($sql);
-            $sth->execute;
+            $sth = $dbh->prepare("INSERT INTO pollquestion (pollid, pollqid, sortorder, type, opts, qtext) " . 
+                                 "VALUES (?, ?, ?, ?, ?, ?)");
+            $sth->execute($pollid, $qnum, $qnum, $q->{'type'}, $q->{'opts'}, $q->{'qtext'});
             if ($dbh->err) {
                 $$error = "Database error inserting questions: " . $dbh->errstr;
                 return 0;
@@ -495,9 +480,8 @@ sub register
             my $inum = 0;
             foreach my $it (@{$q->{'items'}}) {
                 $inum++;
-                my $qitem = $dbh->quote($it->{'item'});
-                $sql = "INSERT INTO pollitem (pollid, pollqid, pollitid, sortorder, item) VALUES ($pollid, $qnum, $inum, $inum, $qitem)";
-                $dbh->do($sql);
+                $dbh->do("INSERT INTO pollitem (pollid, pollqid, pollitid, sortorder, item) " . 
+                         "VALUES (?, ?, ?, ?, ?)", undef, $pollid, $qnum, $inum, $inum, $it->{'item'});
                 if ($dbh->err) {
                     $$error = "Database error inserting items: " . $dbh->errstr;
                     return 0;
@@ -529,14 +513,14 @@ sub show_poll
     my $itemid = shift;
     my $remote = shift;
     my $pollid = shift;
-    my $opts = shift;  # hashref.  {"mode" => results/enter}
+    my $opts = shift;  # hashref.  {"mode" => results/enter/ans}
     my $sth;
 
     my $mode = $opts->{'mode'};
     $pollid += 0;
     
-    $sth = $dbr->prepare("SELECT itemid, whovote, journalid, posterid, whoview, whovote, name FROM poll WHERE pollid=$pollid");
-    $sth->execute;
+    $sth = $dbr->prepare("SELECT itemid, whovote, journalid, posterid, whoview, whovote, name FROM poll WHERE pollid=?");
+    $sth->execute($pollid);
     my $po = $sth->fetchrow_hashref;
     unless ($po) {
         return "<b>[Error: poll #$pollid not found]</b>"
@@ -557,27 +541,28 @@ sub show_poll
             return "<b>[Error: you don't have access to view these poll results]</b>";
         }
 
-        my $qid = $opts->{'qid'}+0;
-        $sth = $dbr->prepare("SELECT type, qtext FROM pollquestion WHERE pollid=$pollid AND pollqid=$qid");
-        $sth->execute;
+        $sth = $dbr->prepare("SELECT type, qtext FROM pollquestion WHERE pollid=? AND pollqid=?");
+        $sth->execute($pollid, $opts->{'qid'});
         my $q = $sth->fetchrow_hashref;
         unless ($q) {
             return "<b>[Error: this poll question doesn't exist.]</b>";
         }
 
         my %it;
-        $sth = $dbr->prepare("SELECT pollitid, item FROM pollitem WHERE pollid=$pollid AND pollqid=$qid");
-        $sth->execute;
+        $sth = $dbr->prepare("SELECT pollitid, item FROM pollitem WHERE pollid=? AND pollqid=?");
+        $sth->execute($pollid, $opts->{'qid'});
         while (my ($itid, $item) = $sth->fetchrow_array) {
             $it{$itid} = $item;
         }
 
-        clean_poll(\$q->{'qtext'});
+        LJ::Poll::clean_poll(\$q->{'qtext'});
         $ret .= $q->{'qtext'};
         $ret .= "<p>";
 
-        $sth = $dbr->prepare("SELECT u.user, pr.value FROM user u, pollresult pr, pollsubmission ps WHERE u.userid=pr.userid AND pr.pollid=$pollid AND pollqid=$qid AND ps.pollid=$pollid AND ps.userid=pr.userid ORDER BY ps.datesubmit");
-        $sth->execute;
+        $sth = $dbr->prepare("SELECT u.user, pr.value FROM user u, pollresult pr, pollsubmission ps " . 
+                             "WHERE u.userid=pr.userid AND pr.pollid=? AND pollqid=? " . 
+                             "AND ps.pollid=pr.pollid AND ps.userid=pr.userid ORDER BY ps.datesubmit");
+        $sth->execute($pollid, $opts->{'qid'});
 
         while (my ($user, $value) = $sth->fetchrow_array) 
         {
@@ -589,7 +574,7 @@ sub show_poll
                 $value = join(", ", map { $it{$_} } split(/,/, $value));
             }
 
-            clean_poll(\$value);
+            LJ::Poll::clean_poll(\$value);
             $ret .= "<p>" . LJ::ljuser($user) . " -- $value</p>\n";
         }
         
@@ -605,8 +590,8 @@ sub show_poll
         
         if ($remote)
         {
-            $sth = $dbr->prepare("SELECT pollid FROM pollsubmission WHERE pollid=$pollid AND userid=$remote->{'userid'}");
-            $sth->execute;
+            $sth = $dbr->prepare("SELECT pollid FROM pollsubmission WHERE pollid=? AND userid=?");
+            $sth->execute($pollid, $remote->{'userid'});
             my ($cast) = $sth->fetchrow_array;
             if ($cast) { $mode = "results"; }
             else {
@@ -625,38 +610,35 @@ sub show_poll
 
     my $do_form = ($mode eq "enter" && $can_vote);
     my %preval;
+
     if ($do_form) {
-        $sth = $dbr->prepare("SELECT pollqid, value FROM pollresult WHERE pollid=$pollid AND userid=$remote->{'userid'}");
-        $sth->execute;
+        $sth = $dbr->prepare("SELECT pollqid, value FROM pollresult WHERE pollid=? AND userid=?");
+        $sth->execute($pollid, $remote->{'userid'});
         while (my ($qid, $value) = $sth->fetchrow_array) {
             $preval{$qid} = $value;
         }
+
+        $ret .= "<form action='$LJ::SITEROOT/poll/?id=$pollid' method='post'>";
+        $ret .= LJ::html_hidden('pollid', $pollid);
     }
 
-    if ($do_form)
-    {
-        # this id= is only for people bookmarking it.  
-        # it does nothing, since POST is being used
-        $ret .= "<form action='$LJ::SITEROOT/poll/?id=$pollid' method='post'>";
-        $ret .= "<input type='hidden' name='pollid' value='$pollid' />";
-    }
     $ret .= "<b><a href='$LJ::SITEROOT/poll/?id=$pollid'>Poll \#$pollid:</a></b> ";
     if ($po->{'name'}) {
-        clean_poll(\$po->{'name'});
+        LJ::Poll::clean_poll(\$po->{'name'});
         $ret .= "<i>$po->{'name'}</i>";
     }
     $ret .= "<br />Open to: <b>$po->{'whovote'}</b>, results viewable to: <b>$po->{'whoview'}</b>";
 
     ### load all the questions
     my @qs;
-    $sth = $dbr->prepare("SELECT pollqid, type, opts, qtext FROM pollquestion WHERE pollid=$pollid ORDER BY sortorder");
-    $sth->execute;
+    $sth = $dbr->prepare("SELECT pollqid, type, opts, qtext FROM pollquestion WHERE pollid=? ORDER BY sortorder");
+    $sth->execute($pollid);
     push @qs, $_ while ($_ = $sth->fetchrow_hashref);
 
     ### load all the items
     my %its;
-    $sth = $dbr->prepare("SELECT pollqid, pollitid, item FROM pollitem WHERE pollid=$pollid ORDER BY sortorder");
-    $sth->execute;
+    $sth = $dbr->prepare("SELECT pollqid, pollitid, item FROM pollitem WHERE pollid=? ORDER BY sortorder");
+    $sth->execute($pollid);
     while (my ($qid, $itid, $item) = $sth->fetchrow_array) {
         push @{$its{$qid}}, [ $itid, $item ];
     }
@@ -665,7 +647,7 @@ sub show_poll
     foreach my $q (@qs)
     {
         my $qid = $q->{'pollqid'};
-        clean_poll(\$q->{'qtext'});
+        LJ::Poll::clean_poll(\$q->{'qtext'});
         $ret .= "<p>$q->{'qtext'}</p><div style='margin: 10px 0 10px 40px'>";
         
         ### get statistics, for scale questions
@@ -680,8 +662,8 @@ sub show_poll
                 push @{$its{$qid}}, [ $at, $at ];  # note: fake itemid, doesn't matter, but needed to be unique
             }
 
-            $sth = $dbr->prepare("SELECT COUNT(*), AVG(value), STDDEV(value) FROM pollresult WHERE pollid=$pollid AND pollqid=$qid");
-            $sth->execute;
+            $sth = $dbr->prepare("SELECT COUNT(*), AVG(value), STDDEV(value) FROM pollresult WHERE pollid=? AND pollqid=?");
+            $sth->execute($pollid, $qid);
             ($valcount, $valmean, $valstddev) = $sth->fetchrow_array;
             
             # find median:
@@ -694,9 +676,10 @@ sub show_poll
                 $fetch = ($valcount % 2) ? 1 : 2;
                 $mid = int(($valcount+1)/2);
                 my $skip = $mid-1;
-                my $sql = "SELECT value FROM pollresult WHERE pollid=$pollid AND pollqid=$qid ORDER BY value+0 LIMIT $skip,$fetch";
-                $sth = $dbr->prepare($sql);
-                $sth->execute;
+
+                $sth = $dbr->prepare("SELECT value FROM pollresult WHERE pollid=? AND pollqid=? " .
+                                     "ORDER BY value+0 LIMIT $skip,$fetch");
+                $sth->execute($pollid, $qid);
                 while (my ($v) = $sth->fetchrow_array) {
                     $valmedian += $v;
                 }
@@ -714,12 +697,12 @@ sub show_poll
             $ret .= "<a href='$LJ::SITEROOT/poll/?id=$pollid&amp;qid=$qid&amp;mode=ans'>View Answers</a><br />";
 
             ### but, if this is a non-text item, and we're showing results, need to load the answers:
-            $sth = $dbr->prepare("SELECT COUNT(DISTINCT(userid)) FROM pollresult WHERE pollid=$pollid AND pollqid=$qid");
-            $sth->execute;
+            $sth = $dbr->prepare("SELECT COUNT(DISTINCT(userid)) FROM pollresult WHERE pollid=? AND pollqid=?");
+            $sth->execute($pollid, $qid);
             ($usersvoted) = $sth->fetchrow_array;
 
-            $sth = $dbr->prepare("SELECT value, COUNT(*) FROM pollresult WHERE pollid=$pollid AND pollqid=$qid GROUP BY value");
-            $sth->execute;
+            $sth = $dbr->prepare("SELECT value, COUNT(*) FROM pollresult WHERE pollid=? AND pollqid=? GROUP BY value");
+            $sth->execute($pollid, $qid);
             while (my ($val, $count) = $sth->fetchrow_array) {
                 if ($q->{'type'} eq "check") {
                     foreach (split(/,/,$val)) {
@@ -738,116 +721,107 @@ sub show_poll
 
         #### text questions are the easy case
 
-        if ($q->{'type'} eq "text") {
+        if ($q->{'type'} eq "text" && $do_form) {
             my ($size, $max) = split(m!/!, $q->{'opts'});
-            if ($mode eq "enter") {
-                if ($do_form) {
-                    my $pval = LJ::eall($preval{$qid});
-                    $ret .= "<input type='text' size='$size' maxlength='$max' name='pollq-$qid' value='$pval' />";
-                } else {
-                    $ret .= "[" . ("&nbsp;"x$size) . "]";
-                }
-            }
+
+            my $pval = LJ::eall($preval{$qid});
+            $ret .= LJ::html_text({ 'size' => $size, 'maxlength' => $max, 
+                                    'name' => "pollq-$qid", 'value' => $pval });
         }
 
-        ##### scales (from 1-10) questions
+        #### drop-down list
+        elsif ($q->{'type'} eq 'drop' && $do_form) {
+            my @optlist = ('', '');
+            foreach my $it (@{$its{$qid}}) {
+                my ($itid, $item) = @$it;
+                LJ::Poll::clean_poll(\$item);
+                push @optlist, ($itid, $item);
+            }
+            $ret .= LJ::html_select({ 'name' => "pollq-$qid", 
+                                      'selected' => $preval{$qid} }, @optlist);
+        }
 
-        elsif ($q->{'type'} eq "scale" && $mode ne "results") {
+        #### scales (from 1-10) questions
+
+        elsif ($q->{'type'} eq "scale" && $do_form) {
             my ($from, $to, $by) = split(m!/!, $q->{'opts'});
             $by ||= 1;
             my $count = int(($to-$from)/$by) + 1;
             my $do_radios = ($count <= 11);
 
+            # few opts, display radios
             if ($do_radios) {
+
                 $ret .= "<table><tr valign='top' align='center'>";
-            } else {
-                if ($do_form) { 
-                    $ret .= "<select name='pollq-$qid'><option value=''></option>";
+
+                for (my $at=$from; $at<=$to; $at+=$by) {
+                    $ret .= "<td style='text-align: center;'>";
+                    $ret .= LJ::html_check({ 'type' => 'radio', 'name' => "pollq-$qid",
+                                             'value' => $at, 'id' => "pollq-${qid}-$at",
+                                             'selected' => (defined $preval{$qid} && $at == $preval{$qid}) });
+                    $ret .= "<br /><label for='pollq-${qid}-$at'>$at</label></td>";
                 }
+
+                $ret .= "</tr></table>\n";
+
+            # many opts, display select
+            # but only if displaying form
+            } else {
+
+                my @optlist = ('', '');
+                for (my $at=$from; $at<=$to; $at+=$by) {
+                    push @optlist, ($at, $at);
+                }
+                $ret .= LJ::html_select({ 'name' => "pollq-$qid", 'selected' => $preval{$qid} }, @optlist);
             }
 
-            for (my $at=$from; $at<=$to; $at+=$by) {
-                if ($do_radios) {
-                    if ($do_form) {
-                        my $sel = ($at == $preval{$qid}) ? " checked='checked'" : "";
-                        $ret .= "<td><input type='radio' value='$at' name='pollq-$qid'$sel /><br />$at</td>";
-                    } else {
-                        $ret .= "<td>(&nbsp;&nbsp;)<br />$at</td>";
-                    }
-                } else {
-                    if ($do_form) {
-                        my $sel = ($at == $preval{$qid}) ? " selected='selected'" : "";
-                        $ret .= "<option value='$at'>$at</option>";
-                    } 
-                }
-            }
-
-            if ($do_radios) {
-                $ret .= "</tr></table>";
-            } else {
-                if ($do_form) { 
-                    $ret .= "</select>";
-                }
-            }
         }
 
         #### now, questions with items
 
         else
         {
-            if ($do_form && $q->{'type'} eq "drop") {
-                $ret .= "<select name=\"pollq-$qid\"><option value=''></option>";
-            }
-
             my $do_table = 0;
 
-            if ($q->{'type'} eq "scale") {
+            if ($q->{'type'} eq "scale") { # implies ! do_form
                 my $stddev = sprintf("%.2f", $valstddev);
                 my $mean = sprintf("%.2f", $valmean);
                 $ret .= "<b>Mean:</b> $mean <b>Median:</b> $valmedian <b>Std. Dev:</b> $stddev<br />";
                 $do_table = 1;
-            }
-
-            if ($do_table) {
                 $ret .= "<table>";
             }
 
             foreach my $it (@{$its{$qid}})
             {
                 my ($itid, $item) = @$it;
-                clean_poll(\$item);
+                LJ::Poll::clean_poll(\$item);
 
-                if ($mode eq "enter") {
-                    if ($q->{'type'} eq "drop") {
-                        my $sel = ($itid == $preval{$qid}) ? " selected='selected'" : "";
-                        $ret .= "<option value=\"$itid\"$sel>$item";
-                    } elsif ($q->{'type'} eq "check") {
-                        my $sel = ($preval{$qid} =~ /\b$itid\b/) ? " checked='checked'" : "";
-                        $ret .= "<input type='checkbox' value='$itid' name='pollq-$qid'$sel /> $item<br />";
-                    } elsif ($q->{'type'} eq "radio") {
-                        my $sel = ($itid == $preval{$qid}) ? " checked='checked'" : "";
-                        $ret .= "<input type='radio' value='$itid' name='pollq-$qid'$sel /> $item<br />";
-                    }
+                # displaying a radio or checkbox
+                if ($do_form) {
+                    $ret .= LJ::html_check({ 'type' => $q->{'type'}, 'name' => "pollq-$qid",
+                                             'value' => $itid, 'id' => "pollq-$qid-$itid",
+                                             'selected' => ($preval{$qid} =~ /\b$itid\b/) });
+                    $ret .= " <label for='pollq-${qid}-$itid'>$item</label><br />";
+                    next;
                 }
-                elsif ($mode eq "results") 
-                {
-                    my $count = $itvotes{$itid}+0;
-                    my $percent = sprintf("%.1f", (100 * $count / ($usersvoted||1)));
-                    my $width = 20+int(($count/$maxitvotes)*380);
 
-                    if ($do_table) {
-                        $ret .= "<tr valign='middle'><td align='right'>$item</td>";
-                        $ret .= "<td><img src='$LJ::IMGPREFIX/poll/leftbar.gif' align='absmiddle' height='14' width='7' />";
-                        $ret .= "<img src='$LJ::IMGPREFIX/poll/mainbar.gif' align='absmiddle' height='14' width='$width' alt='$count ($percent%)' />";
-                        $ret .= "<img src='$LJ::IMGPREFIX/poll/rightbar.gif' align='absmiddle' height='14' width='7' /> ";
-                        $ret .= "<b>$count</b> ($percent%)</td></tr>";
-                    } else {
-                        $ret .= "<p>$item<br />";
-                        $ret .= "<span style='white-space: nowrap'><img src='$LJ::IMGPREFIX/poll/leftbar.gif' align='absmiddle' height='14' width='7' />";
-                        $ret .= "<img src='$LJ::IMGPREFIX/poll/mainbar.gif' align='absmiddle' height='14' width='$width' alt='$count ($percent%)' />";
-                        $ret .= "<img src='$LJ::IMGPREFIX/poll/rightbar.gif' align='absmiddle' height='14' width='7' /> ";
-                        $ret .= "<b>$count</b> ($percent%)</span></p>";
-                    }
+                # displaying results
+                my $count = $itvotes{$itid}+0;
+                my $percent = sprintf("%.1f", (100 * $count / ($usersvoted||1)));
+                my $width = 20+int(($count/$maxitvotes)*380);
+
+                if ($do_table) {
+                    $ret .= "<tr valign='middle'><td align='right'>$item</td>";
+                    $ret .= "<td><img src='$LJ::IMGPREFIX/poll/leftbar.gif' align='absmiddle' height='14' width='7' />";
+                    $ret .= "<img src='$LJ::IMGPREFIX/poll/mainbar.gif' align='absmiddle' height='14' width='$width' alt='$count ($percent%)' />";
+                    $ret .= "<img src='$LJ::IMGPREFIX/poll/rightbar.gif' align='absmiddle' height='14' width='7' /> ";
+                    $ret .= "<b>$count</b> ($percent%)</td></tr>";
+                } else {
+                    $ret .= "<p>$item<br />";
+                    $ret .= "<span style='white-space: nowrap'><img src='$LJ::IMGPREFIX/poll/leftbar.gif' align='absmiddle' height='14' width='7' />";
+                    $ret .= "<img src='$LJ::IMGPREFIX/poll/mainbar.gif' align='absmiddle' height='14' width='$width' alt='$count ($percent%)' />";
+                    $ret .= "<img src='$LJ::IMGPREFIX/poll/rightbar.gif' align='absmiddle' height='14' width='7' /> ";
+                    $ret .= "<b>$count</b> ($percent%)</span></p>";
                 }
             }
 
@@ -855,17 +829,13 @@ sub show_poll
                 $ret .= "</table>";
             }
 
-            if ($do_form && $q->{'type'} eq "drop") {
-                $ret .= "</select>";
-            }
         }
-
 
         $ret .= "</div>";
     }
     
     if ($do_form) {
-        $ret .= "<input type='submit' name='poll-submit' value='Submit Poll' /></form>";
+        $ret .= LJ::html_submit('poll-submit', "Submit Poll") . "</form>\n";;
     }
     
     return $ret;
@@ -885,7 +855,7 @@ sub find_security
     }
 
     ## need to be both a person and with a visible journal to vote
-    unless ($remote->{'journaltype'} eq "P" && $remote->{'statusvis'} eq "V") {
+    unless ($remote && $remote->{'journaltype'} eq "P" && $remote->{'statusvis'} eq "V") {
         return (0, 0);
     }
 
@@ -937,8 +907,8 @@ sub submit
     }
 
     my $pollid = $form->{'pollid'}+0;
-    $sth = $dbr->prepare("SELECT itemid, whovote, journalid, posterid, whoview, whovote, name FROM poll WHERE pollid=$pollid");
-    $sth->execute;
+    $sth = $dbr->prepare("SELECT itemid, whovote, journalid, posterid, whoview, whovote, name FROM poll WHERE pollid=?");
+    $sth->execute($pollid);
     my $po = $sth->fetchrow_hashref;
     unless ($po) {
         $$error = "pollid parameter is missing.";
@@ -954,8 +924,8 @@ sub submit
 
     ### load all the questions
     my @qs;
-    $sth = $dbr->prepare("SELECT pollqid, type, opts, qtext FROM pollquestion WHERE pollid=$pollid");
-    $sth->execute;
+    $sth = $dbr->prepare("SELECT pollqid, type, opts, qtext FROM pollquestion WHERE pollid=?");
+    $sth->execute($pollid);
     push @qs, $_ while ($_ = $sth->fetchrow_hashref);
     $sth->finish;
     
@@ -975,15 +945,17 @@ sub submit
             }
         }
         if ($val ne "") {
-            $val = $dbh->quote($val);
-            $dbh->do("REPLACE INTO pollresult (pollid, pollqid, userid, value) VALUES ($pollid, $qid, $remote->{'userid'}, $val)");
+            $dbh->do("REPLACE INTO pollresult (pollid, pollqid, userid, value) VALUES (?, ?, ?, ?)",
+                     undef, $pollid, $qid, $remote->{'userid'}, $val);
         } else {
-            $dbh->do("DELETE FROM pollresult WHERE pollid=$pollid AND pollqid=$qid AND userid=$remote->{'userid'}");
+            $dbh->do("DELETE FROM pollresult WHERE pollid=? AND pollqid=? AND userid=?",
+                     undef, $pollid, $qid, $remote->{'userid'});
         }
     }
     
     ## finally, register the vote happened
-    $dbh->do("REPLACE INTO pollsubmission (pollid, userid, datesubmit) VALUES ($pollid, $remote->{'userid'}, NOW())");
+    $dbh->do("REPLACE INTO pollsubmission (pollid, userid, datesubmit) VALUES (?, ?, NOW())",
+             undef, $pollid, $remote->{'userid'});
 
     return 1;
 }
