@@ -4709,6 +4709,12 @@ sub load_user
     $user = LJ::canonical_username($user);
     return undef unless length $user;
     
+    my $set_req_cache = sub {
+        my $u = shift;
+        $LJ::REQ_CACHE_USER_NAME{$u->{'user'}} = $u;
+        $LJ::REQ_CACHE_USER_ID{$u->{'userid'}} = $u;
+    };
+
     my $get_user = sub {
         my $use_dbh = shift;
         my $db = $use_dbh ? LJ::get_db_writer() : LJ::get_db_reader();
@@ -4717,8 +4723,7 @@ sub load_user
 
         # set caches since we got a u from the master
         LJ::memcache_set_u($u);
-        $LJ::REQ_CACHE_USER_NAME{$u->{'user'}} = $u;
-        $LJ::REQ_CACHE_USER_ID{$u->{'userid'}} = $u;
+        $set_req_cache->($u);
         return $u;
     };
 
@@ -4733,7 +4738,10 @@ sub load_user
 
     # check memcache
     $u = LJ::memcache_get_u("user:$user");
-    return $u if $u;
+    if ($u) {
+        $set_req_cache->($u);
+        return $u;
+    }
 
     # try to load from master if using memcache, otherwise from slave
     $u = $get_user->(@LJ::MEMCACHE_SERVERS);
@@ -4797,6 +4805,12 @@ sub load_userid
     my ($userid, $force) = @_;
     return undef unless $userid;
      
+    my $set_req_cache = sub {
+        my $u = shift;
+        $LJ::REQ_CACHE_USER_NAME{$u->{'user'}} = $u;
+        $LJ::REQ_CACHE_USER_ID{$u->{'userid'}} = $u;
+    };
+
     my $get_user = sub {
         my $use_dbh = shift;
         my $db = $use_dbh ? LJ::get_db_writer() : LJ::get_db_reader();
@@ -4805,8 +4819,7 @@ sub load_userid
 
         # set caches since we got a u from the master
         LJ::memcache_set_u($u);
-        $LJ::REQ_CACHE_USER_NAME{$u->{'user'}} = $u;
-        $LJ::REQ_CACHE_USER_ID{$u->{'userid'}} = $u;
+        $set_req_cache->($u);
         return $u;
     };
 
@@ -4821,7 +4834,10 @@ sub load_userid
 
     # check memcache
     $u = LJ::memcache_get_u([$userid,"userid:$userid"]);
-    return $u if $u;
+    if ($u) {
+        $set_req_cache->($u);
+        return $u;
+    }
 
     # get from master if using memcache
     return $get_user->("master") if @LJ::MEMCACHE_SERVERS;
