@@ -2,6 +2,15 @@
 #
 
 use strict;
+use Getopt::Long;
+
+my ($opt_include, $opt_exclude);
+die unless GetOptions(
+                      'include=s' => \$opt_include,
+                      'exclude=s' => \$opt_exclude,
+		      );
+die "Unknown arguments.\n" if @ARGV;
+die "Can't exclude and include at same time!\n" if $opt_include && $opt_exclude;
 
 unless (-d $ENV{'LJHOME'}) {
     die "\$LJHOME not set.\n";
@@ -11,10 +20,19 @@ chdir $ENV{'LJHOME'} or die "Can't cd to $ENV{'LJOME'}\n";
 
 ### apidoc.pl does all the hard work.
 my $VAR1;
-eval `$ENV{'LJHOME'}/bin/apidoc.pl`;
+my $param;
+$param = "--include=$opt_include" if $opt_include;
+$param = "--exclude=$opt_exclude" if $opt_exclude;
+eval `$ENV{'LJHOME'}/bin/apidoc.pl $param`;
 my $api = $VAR1;
 
-print "<reference id=\"ljp.api.ref\">\n";
+if ($opt_include) {
+    my $package = lc($opt_include);
+    $package =~ s/:://g;
+    print "<reference id=\"ljp.$package.api.ref\">\n";
+} else {
+    print "<reference id=\"ljp.api.ref\">\n";
+} 
 print "  <title>API Documentation</title>\n";
 
 foreach my $func (sort keys %$api) {

@@ -1,6 +1,6 @@
 <chapter id="lj.install.mysql_setup">
   <title>MySQL Setup</title>
-  <section id="install">
+  <section id="mysql_install">
   <title>Install MySQL</title>
   <para>
     LiveJournal requires a MySQL install of at least version 3.23.x,

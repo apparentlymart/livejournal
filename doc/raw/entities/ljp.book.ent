@@ -6,6 +6,10 @@
 <!ENTITY ljp.int.bml.faq                        SYSTEM "../ljp.book/int/bml_faq.xml">
 <!ENTITY ljp.int.cap_classes                    SYSTEM "../ljp.book/int/cap_classes.xml">
 
+<!ENTITY ljp.bml.index                          SYSTEM "../ljp.book/bml/index.xml">
+<!ENTITY ljp.bml.api.ref                        SYSTEM "../ljp.book/bml/api.gen.xml">
+<!ENTITY ljp.bml.flags                          SYSTEM "../ljp.book/bml/flags.xml">
+
 <!-- Client/Server Protocol Reference -->
 
 <!ENTITY ljp.csp.index                          SYSTEM "../ljp.book/csp/index.xml">

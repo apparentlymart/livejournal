@@ -1,6 +1,6 @@
 <chapter id="lj.install.perl_setup">
   <title>Installing and Setting up Perl</title>
-  <section id="install">
+  <section id="perl_install">
     <title>Installing Perl</title>
     <para>
       Perl offers distrobutions for many operating aystems, including Win32 and almost all of the different <quote>flavors</quote> of Unix. Installations on any of these systems should be fairly easy, as most offer a simple installation program that guides you through setup.

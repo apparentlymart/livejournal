@@ -29,7 +29,7 @@
 <!ENTITY lj.customize.layout              SYSTEM "../lj.book/customize/layout.xml">
 <!ENTITY lj.customize.text                SYSTEM "../lj.book/customize/text.xml">
 <!ENTITY lj.customize.tasks               SYSTEM "../lj.book/customize/tasks.xml">
-
+<!ENTITY lj.customize.hooks               SYSTEM "../lj.book/customize/hooks.xml">
 <!-- Administration -->
 
 <!ENTITY lj.admin.index                   SYSTEM "../lj.book/admin/index.xml">
