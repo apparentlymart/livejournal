@@ -835,9 +835,11 @@ sub create_account
 
     my $sth = $dbh->prepare("INSERT INTO user (user, name, password) VALUES ($quser, $qname, $qpassword)");
     $sth->execute;
+    if ($dbh->err) { return 0; }
+
     my $userid = $sth->{'mysql_insertid'};
-    
-    return $dbh->err ? 0 : $userid;
+    $dbh->do("INSERT INTO useridmap (userid, user) VALUES ($userid, $quser)");
+    return $userid;
 }
 
 # returns true if user B is a friend of user A (or if A == B)

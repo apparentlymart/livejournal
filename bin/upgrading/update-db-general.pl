@@ -997,6 +997,18 @@ CREATE TABLE infohistory (
 ) TYPE=MyISAM
 EOC
 
+register_tablecreate("useridmap", <<'EOC');
+CREATE TABLE useridmap (
+  userid int(10) unsigned NOT NULL,
+  user char(15) NOT NULL,
+  PRIMARY KEY  (userid),
+  UNIQUE KEY user (user)
+) TYPE=MyISAM PACK_KEYS=1
+EOC
+
+post_create("useridmap",
+	    "sql" => "REPLACE INTO useridmap (userid, user) SELECT userid, user FROM user",
+	    );
 
 ### changes
 
