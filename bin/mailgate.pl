@@ -63,6 +63,11 @@ my $body = $tent->bodyhandle->as_string;
 $body =~ s/^\s+//;
 $body =~ s/\s+$//;
 
+### spam
+if ($body =~ /I send you this file in order to have your advice/) {
+    exit 0;
+}
+
 my $adf = (Mail::Address->parse($head->get('From')))[0];
 my $name = $adf->name;
 my $from = $adf->address;

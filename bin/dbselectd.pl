@@ -20,6 +20,8 @@ use DBI;
 my $PORT = 5151;
 my $PIDFILE = "$ENV{'LJHOME'}/var/dbselectd.pid";
 
+my $SELECT_DELAY = 0.3;
+
 # temporary:
 my $DBINFO_FILE = "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 my $opt_foreground = 0;
@@ -57,7 +59,8 @@ sub connect_to
 	undef $LJ::DBCACHE{$svr};
     }
 
-    $dbh = DBI->connect("DBI:mysql:livejournal:$LJ::DBINFO{$svr}->{'host'}", 
+    my $dbname = $LJ::DBINFO{$svr}->{'dbname'} || "livejournal";
+    $dbh = DBI->connect("DBI:mysql:$dbname:$LJ::DBINFO{$svr}->{'host'}", 
 			$LJ::DBINFO{$svr}->{'user'},
 			$LJ::DBINFO{$svr}->{'pass'},
 			{
@@ -173,8 +176,15 @@ sub use_what
     @cands = sort { server_power($b, $cap) <=> server_power($a, $cap) } @cands;
 
     # use the one with the highest score:
-    #return $cands[0];
-    return join(",",@cands);
+    my $use = $cands[0];
+    if ($use) {
+	unless (defined $LJ::DBINFO{$use}->{'dbname'}) {
+	    $LJ::DBINFO{$use}->{'dbname'} = "livejournal";
+	}
+	return join(" ", $use, map { $LJ::DBINFO{$use}->{$_} } qw(host user pass dbname));
+    } else {
+	return "--";
+    }
 }
 
 sub handle 
@@ -190,6 +200,7 @@ sub handle
 
     if ($cmd eq "HAVE") {
 	foreach (split(/,/, $line)) {
+	    next if ($_ eq "master");
 	    $c->{'has'}->{$_} = 1;
 	}
 	$$out = "OK\n";
@@ -265,7 +276,6 @@ my $select = IO::Select->new($server);
 
 print "Looping.\n";
 
-# Main loop-de-loop.
 while(1) 
 {
   my $client;
@@ -273,7 +283,7 @@ while(1)
   my $data;
 
   # Got connection? Got data?
-  foreach $client ($select->can_read(1)) {
+  foreach $client ($select->can_read($SELECT_DELAY)) {
     if ($client == $server) {
         # New connection, since there's stuff to read from the server sock.
         $client = $server->accept();
@@ -318,8 +328,8 @@ while(1)
   }
   %cmd = ();
 
-  # Flush de boofers.
-  foreach $client ($select->can_write(1)) {
+  # Flush buffers
+  foreach $client ($select->can_write($SELECT_DELAY)) {
       # Don't try if there's nothing there.
       next unless exists $outbuffer{$client};
 
