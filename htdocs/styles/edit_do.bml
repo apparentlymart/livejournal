@@ -57,6 +57,8 @@ body<=
                          { 'trans' => 'xe', des => "XML-Encode.  Makes value acceptable for use in an XML attribute or element.  Escapes ampersands, angle brackets, and both types of quotes.  Does <I>not</I> however, escape ]]&gt;, so don't use CDATA elements." },
                          { 'trans' => 'color', des => "A weird transform that handles color codes.  See the color code table.", },
                          { 'trans' => 'cons', des => "Access site constants.  Currently supported are 'siteroot', 'sitename', and 'img' (the image root).  Example use: %%cons:img%%/icon_protected.gif", },
+                         { 'trans' => 'ljuser', des => "Transform the variable as if it were surrounded by &lt;lj user=%%variable%%&gt;.  ex: %%ljuser:username%%", },
+                         { 'trans' => 'ljcomm', des => "Transform the variable as if it were surrounded by &lt;lj comm=%%variable%%&gt;.  ex: %%ljcomm:username%%", },
                          );
  
 
