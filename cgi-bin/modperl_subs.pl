@@ -15,6 +15,7 @@ use Apache::CompressClientFixup;
 use Apache::BML;
 use LJ::SpellCheck;
 use LJ::TextMessage;
+use LJ::Captcha;
 use Digest::MD5;
 use MIME::Words;
 use Text::Wrap ();
