@@ -292,7 +292,7 @@ sub talk2_do {
 
     $dbcm->selectrow_array("SELECT GET_LOCK(?,10)", undef, $lockkey);
     my $ret = $u->do($sql, undef, @args);
-    $$errref = $u->errstr if $u->err;
+    $$errref = $u->errstr if ref $errref && $u->err;
     $dbcm->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
 
     LJ::MemCache::delete($memkey, 0) if int($ret);
@@ -313,7 +313,7 @@ sub log2_do {
 
     $dbcm->selectrow_array("SELECT GET_LOCK(?,10)", undef, $lockkey);
     my $ret = $u->do($sql, undef, @args);
-    $$errref = $u->errstr if $u->err;
+    $$errref = $u->errstr if ref $errref && $u->err;
     $dbcm->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
 
     LJ::MemCache::delete($memkey, 0) if int($ret);
