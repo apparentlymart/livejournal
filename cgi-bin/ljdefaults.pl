@@ -167,6 +167,9 @@
     # whether to proactively delete any comments associated with an entry when we assign
     # a new jitemid (see the big comment above LJ::Protocol::new_entry_cleanup_hack)
     $NEW_ENTRY_CLEANUP_HACK ||= 0;
+
+    # block size is used in stats generation code that gets n rows from the db at a time
+    $STATS_BLOCK_SIZE ||= 10_000;
 }
 
 # no dependencies.

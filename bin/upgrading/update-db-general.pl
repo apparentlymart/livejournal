@@ -1745,6 +1745,35 @@ CREATE TABLE tempanonips (
 )
 EOC
 
+# partialstats - stores calculation times:
+#    jobname = 'calc_country'
+#    clusterid = '1'
+#    calctime = time()
+register_tablecreate("partialstats", <<'EOC');
+CREATE TABLE partialstats (
+    jobname  VARCHAR(50),
+    clusterid MEDIUMINT,
+    calctime  INT(10) UNSIGNED,
+    PRIMARY KEY (jobname, clusterid)
+)
+EOC
+
+# partialstatsdata - stores data per cluster:
+#    statname = 'country'
+#    arg = 'US'
+#    clusterid = '1'
+#    value = '500'
+register_tablecreate("partialstatsdata", <<'EOC');
+CREATE TABLE partialstatsdata (
+    statname  VARCHAR(50),
+    arg       VARCHAR(50),
+    clusterid INT(10) UNSIGNED,
+    value     INT(11),
+    PRIMARY KEY (statname, arg, clusterid)
+)
+EOC
+   
+
 # NOTE: new table declarations go here
 
 
