@@ -1911,6 +1911,7 @@ sub time_to_w3c {
 #           link. If user parameter is a hashref, its 'journaltype' overrides
 #           this 'type'.  Key 'del', when true, makes a tag for a deleted user.
 #           If user parameter is a hashref, its 'statusvis' overrides 'del'.
+#           Key 'no_follow', when true, disables traversal of renamed users.
 # returns: HTML with a little head image & bold text link.
 # </LJFUNC>
 sub ljuser
@@ -1926,7 +1927,9 @@ sub ljuser
         my $hops = 0;
 
         # Traverse the renames to the final journal
-        while (ref $user and $user->{'journaltype'} eq 'R' && $hops++ < 5) {
+        while (ref $user and $user->{'journaltype'} eq 'R' 
+               and ! $opts->{'no_follow'} && $hops++ < 5) {
+
             LJ::load_user_props($user, 'renamedto');
             last unless length $user->{'renamedto'};
             $user = LJ::load_user($user->{'renamedto'});
