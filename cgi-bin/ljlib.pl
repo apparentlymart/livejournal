@@ -3711,38 +3711,37 @@ sub load_user
     my $dbs = LJ::make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
-    my $sth;
-
-    my $quser = $dbr->quote($user);
-    my $u = $dbr->selectrow_hashref("SELECT * FROM user WHERE user=$quser");
+    
+    my $sth =  ($LJ::CACHE_HANDLE{$dbr}->{'load_user'} ||=
+                $dbr->prepare("SELECT * FROM user WHERE user=?"));
+    $sth->bind_param(1, $user);
+    $sth->execute;
+    my $u = $sth->fetchrow_hashref();
 
     # if user doesn't exist in the LJ database, it's possible we're using
     # an external authentication source and we should create the account
     # implicitly.
-    if (! $u && ref $LJ::AUTH_EXISTS eq "CODE") {
-        if ($LJ::AUTH_EXISTS->($user)) {
-            if (LJ::create_account($dbh, {
-                'user' => $user,
-                'name' => $user,
-                'password' => "",
-            }))
-            {
-                # NOTE: this should pull from the master, since it was _just_
-                # created and the elsif below won't catch.
-                $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
-                $sth->execute;
-                $u = $sth->fetchrow_hashref;
-                return $u;
-            } else {
-                return undef;
+    unless ($u) {
+        if (ref $LJ::AUTH_EXISTS eq "CODE") {
+            if ($LJ::AUTH_EXISTS->($user)) {
+                if (LJ::create_account($dbh, {
+                    'user' => $user,
+                    'name' => $user,
+                    'password' => "",
+                }))
+                {
+                    # NOTE: this should pull from the master, since it was _just_
+                    # created and the elsif below won't catch.
+                    return $dbh->selectrow_hashref("SELECT * FROM user WHERE user=?", undef, $user);
+                } else {
+                    return undef;
+                }
             }
+        } elsif ($dbs->{'has_slave'}) {
+            # If the user still doesn't exist, and there isn't an alternate auth code
+            # try grabbing it from the master.
+            $u = $dbh->selectrow_hashref("SELECT * FROM user WHERE user=?", undef, $user);
         }
-    } elsif (! $u && $dbs->{'has_slave'}) {
-        # If the user still doesn't exist, and there isn't an alternate auth code
-        # try grabbing it from the master.
-        $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
-        $sth->execute;
-        $u = $sth->fetchrow_hashref;
     }
 
     $LJ::REQ_CACHE_USER_NAME{$u->{'user'}} = $u if $u;
@@ -3771,8 +3770,17 @@ sub load_userid
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
 
-    my $quserid = $dbr->quote($userid);
-    my $u = LJ::dbs_selectrow_hashref($dbs, "SELECT * FROM user WHERE userid=$quserid");
+    my $sth = ($LJ::CACHE_HANDLE{$dbr}->{'load_userid'} ||=
+               $dbr->prepare("SELECT * FROM user WHERE userid=?"));
+    $sth->bind_param(1, $userid);
+    $sth->execute;
+    my $u = $sth->fetchrow_hashref();
+
+    if (!$u && $dbs->{'has_slave'}) {
+        $u = $dbh->selectrow_array("SELECT * FROM user WHERE userid=?",
+                                   undef, $userid);
+    }
+
     $LJ::REQ_CACHE_USER_NAME{$u->{'user'}} = $u if $u;
     $LJ::REQ_CACHE_USER_ID{$u->{'userid'}} = $u if $u;
     return $u;
