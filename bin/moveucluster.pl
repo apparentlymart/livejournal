@@ -130,6 +130,7 @@ if ($sclust == 0)
 
     # before we start deleting, record they've moved servers.
     $dbh->do("UPDATE user SET dversion=1, clusterid=$dclust WHERE userid=$userid");
+    $dbh->do("UPDATE userusage SET lastitemid=0 WHERE userid=$userid");
 
     # if everything's good (nothing's died yet), then delete all from source
     $done = 0;
@@ -252,7 +253,7 @@ sub movefrom0_logitem
     my $talkids = $dbh->selectcol_arrayref("SELECT talkid FROM talk ".
 					   "WHERE nodetype='L' AND nodeid=$itemid");
     foreach my $t (sort { $a <=> $b } @$talkids) {
-	movefrom0_talkitem($t, $jitemid, \%newtalkids);
+	movefrom0_talkitem($t, $jitemid, \%newtalkids, $item);
     }
 
     # update polls
@@ -265,6 +266,7 @@ sub movefrom0_talkitem
     my $talkid = shift;
     my $jitemid = shift;
     my $newtalkids = shift;
+    my $logitem = shift;
 
     my $item = $dbh->selectrow_hashref("SELECT * FROM talk WHERE talkid=$talkid");
     my $itemtext = $dbh->selectrow_hashref("SELECT subject, body FROM talktext WHERE talkid=$talkid");
@@ -322,6 +324,13 @@ sub movefrom0_talkitem
 	    if $values;
     }
 
+    # note that poster commented here
+    if ($item->{'posterid'}) {
+	my $pub = $logitem->{'security'} eq "public" ? 1 : 0;
+	$dbh->do("INSERT INTO talkleft_xfp (userid, posttime, journalid, nodetype, ".
+		 "nodeid, jtalkid, publicitem) VALUES ($item->{'posterid'}, ".
+		 "UNIX_TIMESTAMP('$item->{'datepost'}'), $userid, 'L', $jitemid, $jtalkid, $pub)");
+    }
 }
     
 

@@ -1101,6 +1101,20 @@ CREATE TABLE talkleft (
 )
 EOC
 
+register_tablecreate("talkleft_xfp", <<'EOC');
+CREATE TABLE talkleft_xfp (
+  userid    INT UNSIGNED NOT NULL,
+  posttime  INT UNSIGNED NOT NULL,
+  INDEX (userid, posttime),
+  journalid  INT UNSIGNED NOT NULL,
+  nodetype   CHAR(1) NOT NULL,
+  nodeid     INT UNSIGNED NOT NULL,
+  INDEX (journalid, nodetype, nodeid),
+  jtalkid    MEDIUMINT UNSIGNED NOT NULL,
+  publicitem   ENUM('1','0') NOT NULL DEFAULT '1'
+)
+EOC
+
 register_tabledrop("ibill_codes");
 register_tabledrop("paycredit");
 register_tabledrop("payments");
