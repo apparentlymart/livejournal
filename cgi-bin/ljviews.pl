@@ -438,19 +438,18 @@ sub create_view_friends
     if ($FORM{'mode'} eq "livecond") 
     {
 	## load the itemids
-	my @itemids = LJ::get_friend_itemids($dbs, {
-	    'view' => 'friends',
+	my @items = LJ::get_friend_items($dbs, {
 	    'userid' => $u->{'userid'},
 	    'remoteid' => $remote->{'userid'},
 	    'itemshow' => 1,
 	    'skip' => 0,
 	    'filter' => $filter,
 	});
-	my $first = $itemids[0];
+	my $first = @items ? $items[0]->{'itemid'} : 0;
 
 	$$ret .= "time = " . scalar(time()) . "<br>";
-	$opts->{'headers'}->{'Refresh'} = "30;URL=$LJ::SITEROOT/users/$user/friends?mode=livecond&amp;lastitemid=$first";
-	if ($FORM{'lastitemid'} == $itemids[0]) {
+	$opts->{'headers'}->{'Refresh'} = "30;URL=$LJ::SITEROOT/users/$user/friends?mode=livecond&lastitemid=$first";
+	if ($FORM{'lastitemid'} == $first) {
 	    $$ret .= "nothing new!";
 	} else {
 	    if ($FORM{'lastitemid'}) {
