@@ -86,8 +86,7 @@ body<=
                        "/ Action\" and enter in the new summary.");
  }
 
- unless ($FORM{'body'} =~ /\S/ || $FORM{'faqid'} || 
-         ($type eq "internal" && $FORM{'approveans'})) {
+ if ($FORM{'body'} !~ /\S/ && !$FORM{'approveans'} && !$FORM{'changecat'} && !$FORM{'touch'} && !$FORM{'untouch'}) {
      return LJ::bad_input("Your message was blank.  Please type at least something in the message field.");
  }
 
