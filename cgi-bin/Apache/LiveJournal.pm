@@ -79,34 +79,44 @@ sub handler
         $r->push_handlers(PerlCleanupHandler => sub { %RQ = () });
         $r->push_handlers(PerlCleanupHandler => "Apache::LiveJournal::db_logger");
         $r->push_handlers(PerlCleanupHandler => "LJ::end_request");
-    }
 
-    # if we're behind a lite mod_proxy front-end, we need to trick future handlers
-    # into thinking they know the real remote IP address.  problem is, it's complicated
-    # by the fact that mod_proxy did nothing, requiring mod_proxy_add_forward, then
-    # decided to do X-Forwarded-For, then did X-Forwarded-Host, so we have to deal
-    # with all permutations of versions, hence all the ugliness:
-    @req_hosts = ($r->connection->remote_ip);
-    if (my $forward = $r->header_in('X-Forwarded-For'))
-    {
-        my (@hosts, %seen);
-        foreach (split(/\s*,\s*/, $forward)) {
-            next if $seen{$_}++;
-            push @hosts, $_;
-            push @req_hosts, $_;
-        }
-        if (@hosts) {
-            my $real = pop @hosts;
-            $r->connection->remote_ip($real);
-        }
-        $r->header_in('X-Forwarded-For', join(", ", @hosts));
-    }
+        # if we're behind a lite mod_proxy front-end, we need to trick future handlers
+        # into thinking they know the real remote IP address.  problem is, it's complicated
+        # by the fact that mod_proxy did nothing, requiring mod_proxy_add_forward, then
+        # decided to do X-Forwarded-For, then did X-Forwarded-Host, so we have to deal
+        # with all permutations of versions, hence all the ugliness:
+        my $istrusted = sub {
+            my $ip = shift;
+            foreach my $tip (@LJ::TRUSTED_PROXIES) {
+                return 1 if ($tip eq $ip) or ($tip eq "ANY");
+            }
+            return 0;
+        };
 
-    # and now, deal with getting the right Host header
-    if ($_ = $r->header_in('X-Host')) {
-        $r->header_in('Host', $_);
-    } elsif ($_ = $r->header_in('X-Forwarded-Host')) {
-        $r->header_in('Host', $_);
+        @req_hosts = ($r->connection->remote_ip);
+        if ((my $forward = $r->header_in('X-Forwarded-For')) && @LJ::TRUSTED_PROXIES)
+        {
+            my (@hosts, %seen);
+            foreach (split(/\s*,\s*/, $forward)) {
+                next if $seen{$_}++;
+                push @hosts, $_;
+                push @req_hosts, $_;
+            }
+            if (@hosts) {
+                my $real;
+                my @rh = reverse @hosts;
+                1 while ($istrusted->($real = pop @rh));
+                $r->connection->remote_ip($real) if $real;
+            }
+            $r->header_in('X-Forwarded-For', join(", ", @hosts));
+        }
+
+        # and now, deal with getting the right Host header
+        if ($_ = $r->header_in('X-Host')) {
+            $r->header_in('Host', $_);
+        } elsif ($_ = $r->header_in('X-Forwarded-Host')) {
+            $r->header_in('Host', $_);
+        }
     }
 
     return OK;
