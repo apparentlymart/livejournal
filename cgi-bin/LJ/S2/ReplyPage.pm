@@ -55,8 +55,11 @@ sub ReplyPage
         }
         if ($parpost->{'state'} eq 'F') {
             # frozen comment, no replies allowed
-            $opts->{'handler_return'} = 403;
-            return;
+            
+            # FIXME: eventually have S2 ErrorPage to handle this and similar
+            #    For now, this hack will work; this error is pretty uncommon anyway.
+            $opts->{status} = "403 Forbidden";
+            return "<p>This thread has been frozen; no more replies are allowed.</p>";
         }
 
         my $tt = LJ::get_talktext2($u, $re_talkid);
