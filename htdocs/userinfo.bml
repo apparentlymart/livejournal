@@ -754,10 +754,6 @@ if ($u->{'journaltitle'}) {
      if ($friendsof{'loaded'}) {
          my $label;
          if ($u->{'opt_showmutualfriends'} && @mutual) {
-             # decide whether or not to bold mutual friends
-             my $bold_mutual = (! $u->{'opt_showmutualfriends'}) || # bold if this is off
-                               (! LJ::u_equals($remote, $u));       # bold if they're not the same
-
              $label = $ML{'.label.mutual'};
              $body .= "<tr><td align='right' valign='top'><b style='white-space: nowrap;'>$label</b>";
              $body .= "</td>";
@@ -765,6 +761,7 @@ if ($u->{'journaltitle'}) {
              my $plus = $friendsof{'load_clipped'} ? "+" : "";
              $body .= "<td colspan='2' valign='top'><b>" . $friendsof{'count_b'} . "$plus:</b> ";
              my $count = 0;
+             my $bold_mutual = ! LJ::u_equals($remote, $u);
              foreach (@mutual) {
                  my $frlink = "<a href=\"/userinfo.bml?user=$_->{'user'}\">$_->{'user'}</a>";
                  $frlink = "<b>$frlink</b>" if $bold_mutual && $remote_friendid{$_->{'userid'}};
