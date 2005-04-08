@@ -135,7 +135,7 @@ body<=
                     # now log the event created above
                     ($usejournal ? $usejournal_u : $u)->log_event('delete_entry', {
                             remote => $remote,
-                            actiontarget => $itemid,
+                            actiontarget => $ditemid,
                             method => 'web',
                         });
                 }

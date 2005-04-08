@@ -1158,7 +1158,7 @@ sub editevent
         # delete is initiated.
         $uowner->log_event('delete_entry', {
                 remote => $u,
-                actiontarget => $req->{itemid},
+                actiontarget => ($req->{itemid} * 256 + $oldevent->{anum}),
                 method => 'protocol',
             })
             unless $flags->{noauth};
