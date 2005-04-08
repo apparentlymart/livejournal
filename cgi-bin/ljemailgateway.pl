@@ -2,21 +2,21 @@
 
 package LJ::Emailpost;
 use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
 
 BEGIN {
-    require "$ENV{LJHOME}/cgi-bin/ljconfig.pl";
+    require 'ljconfig.pl';
     if ($LJ::USE_PGP) {
         eval 'use GnuPG::Interface';
         die "Could not load GnuPG::Interface." if $@;
     }
 }
 
-require "$ENV{LJHOME}/cgi-bin/ljlib.pl";
-require "$ENV{LJHOME}/cgi-bin/ljprotocol.pl";
-require "$ENV{LJHOME}/cgi-bin/fbupload.pl";
+require 'ljlib.pl';
+require 'ljprotocol.pl';
+require 'fbupload.pl';
 use HTML::Entities;
 use IO::Handle;
-use Image::Size;
 use LWP::UserAgent;
 use MIME::Words ();
 use XML::Simple;
@@ -277,7 +277,7 @@ sub process {
     if ($body =~ s/^(lj-.+?)\n\n//is) {
         my @headers = split(/\n/, $1);
         foreach (@headers) {
-            $lj_headers{lc($1)} = $2 if /^lj-(\w+):\s*(.+?)\s*$/i;
+            $lj_headers{lc($1)} = lc($2) if /^lj-(\w+):\s*(.+?)\s*$/i;
         }
     }
 
@@ -286,8 +286,7 @@ sub process {
         qw/
           emailpost_userpic emailpost_security
           emailpost_comments emailpost_gallery
-          emailpost_imgsecurity emailpost_imgsize
-          emailpost_imglayout emailpost_imgcut /
+          emailpost_imgsecurity /
     );
 
     # Get post options, using lj-headers first, and falling back
@@ -304,7 +303,7 @@ sub process {
       if $lj_headers{comments}      =~ /noemail/i
       || $u->{'emailpost_comments'} =~ /noemail/i;
 
-    $lj_headers{security} = lc($lj_headers{security}) ||
+    $lj_headers{security} = $lj_headers{security} ||
                             $u->{'emailpost_security'};
     if ($lj_headers{security} =~ /^(public|private|friends)$/) {
         if ($1 eq 'friends') {
@@ -327,19 +326,8 @@ sub process {
     # if they specified a imgsecurity header but it isn't valid, default
     # to private.  Otherwise, set to what they specified.
     $lj_headers{'imgsecurity'} ||= $u->{'emailpost_imgsecurity'} || 'public';
-    if ($lj_headers{'imgsecurity'} &&
-        $lj_headers{'imgsecurity'} !~ /^(private|regusers|friends|public)$/) {
-        $lj_headers{'imgsecurity'} = 0;
-    }
-    if ($lj_headers{'imgsecurity'} =~ /^(private|regusers|friends|public)$/) {
-        my %groupmap = ( private => 0, regusers => 253,
-                         friends => 254, public => 255 );
-
-        $lj_headers{'imgsecurity'} = $groupmap{$1};
-    }
-
-    $lj_headers{'imgcut'}    ||= ($u->{'emailpost_imgcut'}    || 'totals');
-    $lj_headers{'imglayout'} ||= ($u->{'emailpost_imglayout'} || 'vertical');
+    $lj_headers{'imgsecurity'} = 'private'
+      unless $lj_headers{'imgsecurity'} =~ /^(private|regusers|friends|public)$/;
 
     # upload picture attachments to fotobilder.
     my ($fb_upload, $fb_upload_errstr);
@@ -354,52 +342,20 @@ sub process {
       ) || return $err->( $fb_upload_errstr, { retry => 1 } );
 
     # if we found and successfully uploaded some images...
-    if (ref $fb_upload eq 'HASH') {
-        my $icount = scalar keys %$fb_upload;
-        $body .= "\n";
-
-        # set journal image display size
-        my @valid_sizes = qw(100x100 320x240 640x480);
-        my $size = lc($lj_headers{'imgsize'}) || $u->{'emailpost_imgsize'};
-        $size = '320x240' unless grep { $size eq $_; } @valid_sizes;
-        my ($width, $height) = split 'x', $size;
-        $size = "/s$size";
-
-        # force lj-cut on images larger than 320x240
-        $lj_headers{'imgcut'} = 'totals' if $width > 320 || $height > 240;
-
-        # insert image links into post body
-        $body .= "<lj-cut text='$icount " .
-                  (($icount == 1) ? 'image' : 'images') . "'>"
-                  if lc($lj_headers{'imgcut'}) eq 'totals';
-        $body .= "<span style='white-space: nowrap;'>" if $lj_headers{'imglayout'} =~ /^horiz/i;
-        foreach my $img (keys %$fb_upload) {
-            my $i = $fb_upload->{$img};
-
-            # don't set a size on images smaller than the requested width/height
-            # (we never scale larger, just smaller)
-            undef $size if $i->{width}  <= $width || 
-                           $i->{height} <= $height;
-
-            $img =~ s/"//g;
-            $body .= "<lj-cut text=\"$img\">" if lc($lj_headers{'imgcut'}) eq 'titles';
-            $body .= "<a href=\"$i->{'url'}/\">";
-            $body .= "<img src=\"$i->{'url'}$size\" alt=\"$img\" border=\"0\"></a>";
-            $body .= ($lj_headers{'imglayout'} =~ /^horiz/i) ? '&nbsp;' : '<br />';
-            $body .= "</lj-cut> " if lc($lj_headers{'imgcut'}) eq 'titles';
-        }
-        $body .= "</lj-cut>\n" if lc($lj_headers{'imgcut'}) eq 'totals';
-        $body .= "</span>" if $lj_headers{'imglayout'} =~ /^horiz/i;
-    }
+    $body .= LJ::FBUpload::make_html( $u, $fb_upload, \%lj_headers )
+      if ref $fb_upload eq 'HASH';
 
     # at this point, there are either no images in the message ($fb_upload == 1)
     # or we had some error during upload that we may or may not want to retry
     # from.  $fb_upload contains the http error code.
-    if ($fb_upload == 400) { 
-        # bad request - don't retry, but go ahead and post the body to
-        # the journal, postfixed with the remote error.
+    if (   $fb_upload == 400   # bad http request
+        || $fb_upload == 1401  # user has exceeded the fb quota         
+        || $fb_upload == 1402  # user has exceeded the fb quota
+    ) {
+        # don't retry these errors, go ahead and post the body
+        # to the journal, postfixed with the remote error.
         $body .= "\n";
-        $body .= "($fb_upload_errstr)";
+        $body .= "(Your picture was not posted: $fb_upload_errstr)";
     }
 
     # Fotobilder server error.  Retry.
@@ -604,25 +560,39 @@ sub upload_images
         my $img     = $img_entity->bodyhandle;
         my $path    = $img->path;
         
-        my ($width, $height) = Image::Size::imgsize($path);
+        my $result = LJ::FBUpload::do_upload(
+            $u, $rv,
+            {
+                path    => $path,
+                rawdata => \$img->as_string,
+                imgsec  => $opts->{'imgsec'},
+                galname => $opts->{'galname'},
+            }
+        );
 
-        my ($title, $url) =
-        LJ::FBUpload::do_upload($u, $rv,
-                                { path    => $path,
-                                  rawdata => \$img->as_string,
-                                  imgsec  => $opts->{'imgsec'},
-                                  galname => $opts->{'galname'},
-                                });
+        # do upload() returned undef?  This is a posting error
+        # that should most likely be retried, due to something 
+        # wrong on our side of things.
+        return if ! defined $result && $$rv;
 
-        # error posting, we have a http_code (stored in $title)
-        return $title if $title && ! $url;
-        # error posting, no http_code
-        return if $$rv;
+        # http error during upload attempt
+        # decide retry based on error type in caller
+        return $result unless ref $result; 
 
-        $images{$title} = {
-                    'url'    => $url,
-                    'width'  => $width,
-                    'height' => $height
+        # examine $result for errors
+        if ($result->{Error}->{code}) {
+            $$rv = $result->{Error}->{content};
+
+            # add 1000 to error code, so we can easily tell the
+            # difference between fb protocol error and
+            # http error when checking results.
+            return $result->{Error}->{code} + 1000; 
+        }
+
+        $images{ $result->{Title} } = {
+            'url'    => $result->{URL},
+            'width'  => $result->{Width},
+            'height' => $result->{Height},
         };
     }
 

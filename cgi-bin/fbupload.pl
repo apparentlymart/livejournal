@@ -44,10 +44,17 @@ sub get_challenge
     }
 }
 
-# on success, returns title/url pair for uploaded picture
-# on failure, returns http code or undef,
-#             sets $rv reference with errorstring.
-# opts: { path    => path to image on disk
+# returns FB protocol data structure, regardless of
+# success or failure.  it's the callers responsibility
+# to check the structure for FB return values.
+#
+# on http failure, returns numeric http error code,
+# and sets $rv reference with errorstring.
+#
+# returns undef on unrecoverable failure.
+#
+# opts: { path    => path to image on disk,
+#                    or title to use if 'rawdata' isn't on disk.
 #         rawdata => optional image data scalar ref
 #         imgsec  => bitmask for image security
 #         galname => gallery to upload image to }
@@ -83,10 +90,21 @@ sub do_upload
         close F;
     }
 
+    # convert strings to security masks/
+    # default to private on unknown strings.
+    # lack of an imgsec opt means public.
+    $opts->{imgsec} ||= 255;
+    unless ($opts->{imgsec} =~ /^\d+$/) {
+        my %groupmap = (
+            private  => 0,   regusers => 253,
+            friends  => 254, public => 255
+        );
+        $opts->{imgsec} = 'private' unless $groupmap{ $opts->{imgsec} };
+        $opts->{imgsec} = $groupmap{ $opts->{imgsec} };
+    }
+
     my $basename = File::Basename::basename($opts->{'path'});
     my $length = length $$rawdata;
-    $opts->{'imgsec'} = 255 unless defined $opts->{'imgsec'};
-    $opts->{'galname'} ||= 'LJ_emailpost';
 
     my $req = HTTP::Request->new(PUT => "$LJ::FB_SITEROOT/interface/simple");
     my %headers = (
@@ -98,8 +116,8 @@ sub do_upload
         'X-FB-User'                    => $u->{'user'},
         'X-FB-Auth'                    => make_auth( $chal, $u->{'password'} ),
         ':X-FB-UploadPic.Gallery._size'=> 1,
-        'X-FB-UploadPic.PicSec'        => $opts->{'imgsec'} || 255,
-        'X-FB-UploadPic.Gallery.0.GalName' => uri_escape( $opts->{'galname'} ),
+        'X-FB-UploadPic.PicSec'        => $opts->{'imgsec'},
+        'X-FB-UploadPic.Gallery.0.GalName' => $opts->{'galname'} || 'LJ_emailpost',
         'X-FB-UploadPic.Gallery.0.GalSec'  => 255
     );
 
@@ -109,26 +127,88 @@ sub do_upload
     my $res = $ua->request($req);
 
     my $res_code = $1 if $res->status_line =~ /^(\d+)/;
-    if ($res->is_success) {
-        my $xmlres = XML::Simple::XMLin($res->content);
-        my $methres = $xmlres->{UploadPicResponse};
-
-        my $err_str = $xmlres->{Error}->{content} ||
-                      $methres->{Error}->{content};
-        if ($err_str) {
-            $$rv = "Protocol error during upload: $err_str";
-            return $xmlres->{Error}->{code} ||
-                   $methres->{Error}->{code};
-        }
-
-        # good at this point
-        my $url = $methres->{URL};
-        return wantarray ? ($basename, $url) : $url;
-    } else {
+    unless ($res->is_success) {
         $$rv = "HTTP error uploading pict: " . $res->content();
         return $res_code;
     }
 
+    my $xmlres;
+    eval { $xmlres = XML::Simple::XMLin($res->content); };
+    if ($@) {
+        $$rv = "Error parsing XML: $@";
+        return;
+    }
+    my $methres = $xmlres->{UploadPicResponse};
+    $methres->{Title} = $basename;
+
+    return $methres;
+}
+
+# args:
+#       $u,
+#       hashref of { imgtitle => { url, width, height } },
+#       optional option overrides hashref. 
+#               (if not supplied, userprops are used.)
+# returns: html string suitable for entry post body
+# TODO: Hook this like the Fotobilder "post to journal"
+#       caption posting page.  More pretty. (layout keywords?)
+sub make_html
+{
+    my ($u, $images, $opts) = @_;
+    my ($icount, $html);
+
+    $icount = scalar keys %$images if ref $images;
+    return "" unless $icount;
+
+    # Merge overrides with userprops that might
+    # have been passed in.
+    $opts = {} unless $opts && ref $opts;
+    my @props = qw/ emailpost_imgsize emailpost_imglayout emailpost_imgcut /;
+
+    LJ::load_user_props( $u, @props );
+    foreach (@props) {
+        my $prop = $_;
+        $prop =~ s/emailpost_//;
+        $opts->{$prop} = lc($opts->{$prop}) || $u->{$_};
+    }
+
+    $opts->{imgcut} ||= 'totals';
+    $html .= "\n";
+
+    # set journal image display size
+    my @valid_sizes = qw/ 100x100 320x240 640x480 /;
+    $opts->{imgsize} = '320x240' unless grep { $opts->{imgsize} eq $_; } @valid_sizes;
+    my ($width, $height) = split 'x', $opts->{imgsize};
+    my $size = '/s' . $opts->{imgsize};
+
+    # force lj-cut on images larger than 320x240
+    $opts->{imgcut} = 'totals' if $width > 320 || $height > 240;
+
+    # insert image links into post body
+    $html .=
+      "<lj-cut text='$icount "
+      . ( ( $icount == 1 ) ? 'image' : 'images' ) . "'>"
+          if $opts->{imgcut} eq 'totals';
+    $html .= "<span style='white-space: nowrap;'>" if $opts->{imglayout} =~ /^horiz/i;
+
+    foreach my $img (keys %$images) {
+        my $i = $images->{$img};
+
+        # don't set a size on images smaller than the requested width/height
+        # (we never scale larger, just smaller)
+        undef $size if $i->{width} <= $width || $i->{height} <= $height;
+
+        $img =~ s/"//g;
+        $html .= "<lj-cut text=\"$img\">" if $opts->{imgcut} eq 'titles';
+        $html .= "<a href=\"$i->{url}/\">";
+        $html .= "<img src=\"$i->{url}$size\" alt=\"$img\" border=\"0\"></a>";
+        $html .= ($opts->{imglayout} =~ /^horiz/i) ? '&nbsp;' : '<br />';
+        $html .= "</lj-cut> " if $opts->{imgcut} eq 'titles';
+    }
+    $html .= "</lj-cut>\n" if $opts->{imgcut} eq 'totals';
+    $html .= "</span>" if $opts->{imglayout} =~ /^horiz/;
+
+    return $html;
 }
 
 1;

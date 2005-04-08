@@ -8,6 +8,7 @@ use Digest::SHA1;
 use MIME::Base64;
 use lib "$ENV{'LJHOME'}/cgi-bin";
 require 'parsefeed.pl';
+require 'fbupload.pl';
 
 BEGIN {
     $LJ::OPTMOD_XMLATOM = eval "use XML::Atom::Entry; 1;";
@@ -55,15 +56,31 @@ HTML
     return OK;
 };
 
-sub handle_post {
+# TODO: Combine this with the <standalone> tag support for
+# service.upload capabilities.
+sub handle_upload
+{
     my ($r, $remote, $u, $opts) = @_;
 
-    # read the content
     my $buff;
     $r->read($buff, $r->header_in("Content-length"));
 
-    # try parsing it
     my $entry;
+    eval { $entry = XML::Atom::Entry->new( \$buff ); };
+    return respond($r, 400, "Could not parse the entry due to invalid markup.<br /><pre>$@</pre>")
+        if $@;
+
+    return respond($r, 500, "Not implemented.");
+}
+
+sub handle_post {
+    my ($r, $remote, $u, $opts) = @_;
+    my ($buff, $entry);
+
+    # read the content
+    $r->read($buff, $r->header_in("Content-length"));
+
+    # try parsing it
     eval { $entry = XML::Atom::Entry->new( \$buff ); };
     return respond($r, 400, "Could not parse the entry due to invalid markup.<br /><pre>$@</pre>")
         if $@;
@@ -72,11 +89,85 @@ sub handle_post {
     return respond($r, 400, "Must not include an <b>&lt;id&gt;</b> field in a new entry.")
         if $entry->id();
 
+    my $media_mime = qr{^image\/(?:gif|jpe?g|png|tiff?)$}i;
+
+    # detect 'standalone' media posts, send to fotobilder.
+    # this will eventually be phased out in favor of service.upload methods.
+    my $standalone = $entry->get("http://sixapart.com/atom/typepad#", 'standalone');
+    if ($standalone) {
+        return respond($r, 403, "Unable to post standalone entry. Your account doesn't have the required access.")
+            unless LJ::get_cap($u, 'fb_can_upload') && $LJ::FB_SITEROOT;
+
+        my $mime = $entry->content()->type();
+        return respond($r, 400, "Unsupported MIME type: $mime")
+            unless $mime =~ /$media_mime/;
+
+        my $err;
+
+        LJ::load_user_props(
+            $u,
+            qw/ emailpost_gallery emailpost_imgsecurity /
+        );
+
+        my $fb = LJ::FBUpload::do_upload(
+            $u, $err,
+            {
+                path    => $entry->title(),
+                rawdata => \$entry->content()->body(),
+                imgsec  => $u->{emailpost_imgsecurity},
+                galname => $u->{emailpost_gallery} || 'AtomUpload',
+            }
+        );
+
+        if ($fb->{Error}->{code}) {
+            my $errstr = $fb->{Error}->{content};
+            return respond($r, 500, "There was an error uploading the media: $errstr");
+        }
+
+        my $atom_reply = XML::Atom::Entry->new();
+        $atom_reply->title( $fb->{Title} );
+        $atom_reply->summary('Media post');
+        $atom_reply->id( "FB_ID|$fb->{URL}|$fb->{Title}|$fb->{Width}|$fb->{Height}" );
+
+        my $link = XML::Atom::Link->new();
+        $link->type('text/html');
+        $link->rel('alternate');
+        $link->href( $fb->{URL} );
+        $atom_reply->add_link($link);
+
+        return respond($r, 201, \$atom_reply->as_xml(), 'atom');
+    }
+
     # remove the SvUTF8 flag. See same code in synsuck.pl for
     # an explanation
-    $entry->title( pack('C*', unpack('C*', $entry->title())) );
-    $entry->link( pack('C*', unpack('C*', $entry->link())) );
-    $entry->content( pack('C*', unpack('C*', $entry->content()->body())) );
+    $entry->title(   pack( 'C*', unpack( 'C*', $entry->title() ) ) );
+    $entry->link(    pack( 'C*', unpack( 'C*', $entry->link() ) ) );
+    $entry->content( pack( 'C*', unpack( 'C*', $entry->content()->body() ) ) );
+
+    # Retrieve fotobilder media links from clients that embed via
+    # standalone tags or service.upload transfers.  Add to post entry
+    # body.
+    my $body  = $entry->content()->body();
+    my @links = $entry->link();
+    my %images;
+    foreach my $link (@links) {
+        # $link is now a valid XML::Atom::Link object
+        my $rel  = $link->get('rel');
+        my $type = $link->get('type');
+        my $id   = $link->get('href');
+
+        next unless $rel eq 'related' && $type =~ /$media_mime/ && $id;
+        my ($ns, $url, $title, $width, $height) = split /\|/, $id;
+        next unless $ns eq 'FB_ID';
+
+        $images{ $title } = {
+            'url'    => $url,
+            'width'  => $width,
+            'height' => $height,
+        };
+    }
+
+    $body .= LJ::FBUpload::make_html( $u, \%images );
 
     # build a post event request.
     my $req = {
@@ -85,7 +176,7 @@ sub handle_post {
         'username'    => $u->{'user'},
         'lineendings' => 'unix',
         'subject'     => $entry->title(),
-        'event'       => $entry->content()->body(),
+        'event'       => $body,
         'props'       => {},
         'security'    => 'public',
         'tz'          => 'guess',
@@ -100,9 +191,13 @@ sub handle_post {
         return respond($r, 500, "Unable to post new entry. Protocol error: <b>$errstr</b>.");
     }
 
+    my $atom_reply = XML::Atom::Entry->new();
+    $atom_reply->title( $entry->title() );
+    $atom_reply->summary( substr( $entry->content->body(), 0, 100 ) );
+
     my $new_link = "$LJ::SITEROOT/interface/atom/edit/$res->{'itemid'}";
     $r->header_out("Location", $new_link);
-    return respond($r, 201, \$entry->as_xml(), 'atom');
+    return respond($r, 201, \$atom_reply->as_xml(), 'atom');
 }
 
 sub handle_edit {
@@ -183,9 +278,9 @@ sub handle_edit {
 
         # remove the SvUTF8 flag. See same code in synsuck.pl for
         # an explanation
-        $entry->title( pack('C*', unpack('C*', $entry->title())) );
-        $entry->link( pack('C*', unpack('C*', $entry->link())) );
-        $entry->content( pack('C*', unpack('C*', $entry->content()->body())) );
+        $entry->title(   pack( 'C*', unpack( 'C*', $entry->title() ) ) );
+        $entry->link(    pack( 'C*', unpack( 'C*', $entry->link() ) ) );
+        $entry->content( pack( 'C*', unpack( 'C*', $entry->content()->body() ) ) );
 
         # the AtomEntry must include <id> which must match the one we sent
         # on GET
@@ -316,6 +411,9 @@ sub handle {
     return respond( $r, 401, "Authentication failed for this AtomAPI request.")
         unless $u;
 
+    return respond( $r, 401, "Authentication failed for this AtomAPI request.")
+        if $u->{'atom_wsse_nonce_dup'} && $action && $action ne 'post';
+
     # service autodiscovery
     my $method = $r->method;
     if ( $method eq 'GET' && ! $action ) {
@@ -324,7 +422,7 @@ sub handle {
         my $ret = "<?xml version=\"1.0\"?>\n<feed xmlns=\"http://purl.org/atom/ns#\">\n";
         $ret .=
 "\t<link type=\"application/x.atom+xml\" rel=\"service.$_\" href=\"$LJ::SITEROOT/interface/atom/$_\" title=\"$title\"/>\n"
-          foreach qw/ post feed /;  # need to add upload, categories
+          foreach qw/ post feed /;
         $ret .= "\t<link type=\"text/html\" rel=\"alternate\" href=\"$LJ::SITEROOT/users/$u->{user}/\" title=\"$title\"/>\n";
         $ret .= "</feed>\n";
         return respond($r, 200, \$ret, 'atom');
@@ -333,7 +431,7 @@ sub handle {
     $action =~ /$valid_actions/
       or return respond($r, 400, "Unknown URI scheme: /interface/atom/<b>$action</b>");
 
-    unless (($action eq 'feed' and $method eq 'GET') or
+    unless (($action eq 'feed' and $method eq 'GET')  or
             ($action eq 'post' and $method eq 'POST') or
             ($action eq 'edit' and 
              {'GET'=>1,'PUT'=>1,'DELETE'=>1}->{$method})) {
@@ -360,9 +458,9 @@ sub handle {
     };
 
     {
-        'feed' => \&handle_feed,
-        'post' => \&handle_post,
-        'edit' => \&handle_edit
+        'feed'   => \&handle_feed,
+        'post'   => \&handle_post,
+        'edit'   => \&handle_edit,
     }->{$action}->( $r, $remote, $u, $opts );
 
     return OK;
@@ -392,13 +490,14 @@ sub auth_wsse
     # 3 min windows on creation times / nonces
     $ctime = LJ::mysqldate_to_time( $ctime );
     return undef if time() - $ctime > 180;
-    if (@LJ::MEMCACHE_SERVERS) {
-        LJ::MemCache::add( "wsse_auth:$creds{username}:$creds{nonce}", 1, 180 )
-          or return undef;
-    }
 
     my $u = LJ::load_user( LJ::canonical_username( $creds{'username'} ) )
-      or return undef;
+        or return undef;
+
+    if (@LJ::MEMCACHE_SERVERS) {
+        $u->{'atom_wsse_nonce_dup'} = 1
+          unless LJ::MemCache::add( "wsse_auth:$creds{username}:$creds{nonce}", 1, 180 )
+    }
 
     # validate hash
     my $hash =
