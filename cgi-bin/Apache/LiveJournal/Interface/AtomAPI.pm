@@ -408,12 +408,13 @@ sub handle {
     # if wsse information is supplied, use it. 
     # if not, fall back to digest.
     my $wsse = $r->header_in('X-WSSE');
-    my $u = $wsse ? auth_wsse($wsse) : LJ::auth_digest($r);
+    my $nonce_dup;
+    my $u = $wsse ? auth_wsse($wsse, \$nonce_dup) : LJ::auth_digest($r);
     return respond( $r, 401, "Authentication failed for this AtomAPI request.")
         unless $u;
 
     return respond( $r, 401, "Authentication failed for this AtomAPI request.")
-        if $u->{'atom_wsse_nonce_dup'} && $action && $action ne 'post';
+        if $nonce_dup && $action && $action ne 'post';
 
     # service autodiscovery
     # TODO: Add communities?
@@ -472,7 +473,7 @@ sub handle {
 # Returns valid $u on success, undef on failure.
 sub auth_wsse
 {
-    my $wsse = shift;
+    my ($wsse, $nonce_dup) = @_;
     $wsse =~ s/UsernameToken // or return undef;
 
     # parse credentials into a hash.
@@ -495,8 +496,8 @@ sub auth_wsse
     my $u = LJ::load_user( LJ::canonical_username( $creds{'username'} ) )
         or return undef;
 
-    if (@LJ::MEMCACHE_SERVERS) {
-        $u->{'atom_wsse_nonce_dup'} = 1
+    if (@LJ::MEMCACHE_SERVERS && ref $nonce_dup) {
+        $$nonce_dup = 1
           unless LJ::MemCache::add( "wsse_auth:$creds{username}:$creds{nonce}", 1, 180 )
     }
 
