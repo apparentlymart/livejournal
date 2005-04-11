@@ -313,6 +313,8 @@ body<=
  my ($last_talkid, $last_jid) = LJ::get_lastcomment();
  my %LJ_cmtinfo;  # data structure to give to javascript for commentmanage
  $LJ_cmtinfo{'journal'} = $u->{user};
+ $LJ_cmtinfo{'canAdmin'} = LJ::can_manage($remote, $u) ? 1 : 0;
+ $LJ_cmtinfo{'remote'} = $remote ? $remote->{user} : "";
 
  my $recurse_post = sub
  {

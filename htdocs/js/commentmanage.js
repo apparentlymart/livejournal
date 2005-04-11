@@ -11,6 +11,22 @@ function setStyle (did, attr, val) {
 }
 
 // called by S2:
+function setInner (did, val) {
+    if (! document.getElementById) return;
+    var de = document.getElementById(did);
+    if (! de) return;
+    de.innerHTML = val;
+}
+
+// called by S2:
+function hideElement (did) {
+    if (! document.getElementById) return;
+    var de = document.getElementById(did);
+    if (! de) return;
+    de.style.display = 'none';
+}
+
+// called by S2:
 function setAttr (did, attr, classname) {
     if (! document.getElementById) return;
     var de = document.getElementById(did);
@@ -37,14 +53,13 @@ function getXTR () {
     return xtr;
 }
 
-
-// Utility/debugging functions
-function htmlEncode( str ) {
-        str.replace( /&/, "&amp;" );
-        str.replace( /</, "&lt;" );
-        str.replace( />/, "&gt;" );
-
-        return str;
+// push new element 'ne' after sibling 'oe' old element
+function addAfter (oe, ne) {
+    if (oe.nextSibling) {
+        oe.parentNode.insertBefore(ne, oe.nextSibling);
+    } else {
+        oe.parentNode.appendChild(ne);
+    }
 }
 
 // hsv to rgb
@@ -77,13 +92,19 @@ function hsv_to_rgb (h, s, v)
     return [v,p,q];
 }
 
-function stopEvent (e) {
-    if (e.preventDefault)
-        e.preventDefault();
+// stops the bubble
+function stopBubble (e) {
     if (e.stopPropagation)
         e.stopPropagation();
     if ("cancelBubble" in e)
         e.cancelBubble = true;
+}
+
+// stops the bubble, as well as the default action
+function stopEvent (e) {
+    stopBubble(e);
+    if (e.preventDefault)
+        e.preventDefault();
     if ("returnValue" in e)
         e.returnValue = false;
     return false;
@@ -107,23 +128,62 @@ function scrollLeft () {
         return document.body.scrollLeft;
 }
 
-function getEventPos (e)
+function getElementPos (obj)
 {
-    var x = 0;
-    var y = 0;
+    var pos = new Object();
+    if (!obj)
+        return null;
+
+    var it;
+
+    it = obj;
+    pos.x = 0;
+    if (it.offsetParent) {
+	while (it.offsetParent) {
+	    pos.x += it.offsetLeft;
+	    it = it.offsetParent;
+	}
+    }
+    else if (it.x)
+	pos.x += it.x;
+
+    it = obj;
+    pos.y = 0;
+    if (it.offsetParent) {
+	while (it.offsetParent) {
+	    pos.y += it.offsetTop;
+	    it = it.offsetParent;
+	}
+    }
+    else if (it.y)
+	pos.y += it.y;
+
+    return pos;
+}
+
+// returns the mouse position of the event, or failing that, the top-left
+// of the event's target element.  (or the fallBack element, which takes
+// precendence over the event's target element if specified)
+function getEventPos (e, fallBack)
+{
+    var pos = { x:0, y:0 };
+
     if (!e) var e = window.event;
-    if (e.pageX || e.pageY) {
+    if (e.pageX && e.pageY) {
         // useful case (relative to document)
-        x = e.pageX;
-        y = e.pageY;
+        pos.x = e.pageX;
+        pos.y = e.pageY;
     }
-    else if (e.clientX || e.clientY) {
+    else if (e.clientX && e.clientY) {
         // IE case (relative to viewport, so need scroll info)
-        x = e.clientX + scrollLeft();
-        y = e.clientY + scrollTop();
-        //alert("case2: " + [x,y] +", " + [document.body.scrollLeft,document.body.scrollTop]);
+        pos.x = e.clientX + scrollLeft();
+        pos.y = e.clientY + scrollTop();
+    } else {
+	var targ = fallBack || getTarget(e);
+	var pos = getElementPos(targ);
+	return pos;
     }
-    return [x, y];
+    return pos;
 }
 
 var curPopup = null;
@@ -142,7 +202,7 @@ function killPopup () {
         opp -= 0.15;
 
         if (opp <= 0.1) {
-            document.body.removeChild(popup);
+            popup.parentNode.removeChild(popup);
         } else {
             popup.style.filter = "alpha(opacity=" + Math.floor(opp * 100) + ")";
             popup.style.opacity = opp;
@@ -179,7 +239,7 @@ function deleteComment (ditemid) {
 
     var xtr = getXTR();
     if (! xtr) {
-        alert("no xtr now, but earlier?");
+        alert("JS_ASSERT: no xtr now, but earlier?");
         return false;
     }
     pendingReqs[ditemid] = xtr;
@@ -204,7 +264,6 @@ function deleteComment (ditemid) {
     };
 
     xtr.onreadystatechange = state_callback;
-    //xtr.onerror = error_callback;
     xtr.open("POST", "/delcomment.bml?mode=js&journal=" + LJ_cmtinfo.journal + "&id=" + ditemid, true);
     var postdata = "confirm=1";
     if (opt_ban) postdata += "&ban=1";
@@ -237,6 +296,10 @@ function removeComment (ditemid, killChildren) {
     var todel = document.getElementById("ljcmt" + ditemid);
     if (todel) {
         todel.style.display = 'none';
+
+        var userhook = window["userhook_delete_comment_ARG"];
+        if (userhook)
+            userhook(ditemid);
     }
     if (killChildren) {
         var com = LJ_cmtinfo ? LJ_cmtinfo[ditemid] : null;
@@ -246,12 +309,11 @@ function removeComment (ditemid, killChildren) {
     }
 }
 
-function inspect( x )
-{
-    var t = "";
-    for( var i in x )
-    t += i + " = " + x[ i ] + "<br />";
-    return t;
+function docClicked (e) {
+    if (!curPopup)
+	return true;
+    killPopup();
+    return true;
 }
 
 function createDeleteFunction (ae, dItemid) {
@@ -261,7 +323,6 @@ function createDeleteFunction (ae, dItemid) {
 
         var finalHeight = 100;
 
-        //alert("dItemid callback = " + inspect(dItemid));
         if (e.shiftKey || (curPopup && curPopup_id != dItemid)) {
             killPopup();
         }
@@ -271,53 +332,62 @@ function createDeleteFunction (ae, dItemid) {
         if (e.shiftKey) {
             doIT = 1;
         } else {
-            //doIT = confirm("Sure you wanna delete?");
+            if (! LJ_cmtinfo)
+                return true;
 
-            var com = LJ_cmtinfo ? LJ_cmtinfo[dItemid] : null;
-            if (!com) return true;
-            var jOwner = LJ_cmtinfo ? LJ_cmtinfo["journal"] : null;
+            var com = LJ_cmtinfo[dItemid];
+            var remoteUser = LJ_cmtinfo["remote"];
+            if (!com || !remoteUser)
+                return true;
+            var canAdmin = LJ_cmtinfo["canAdmin"];
 
-            var pos = getEventPos(e);
-            var lx = pos[0] + 5 - 250;
+            var clickTarget = getTarget(e);
+            var used_keyboard = clickTarget.nodeName == "A";
+
+            var pos = used_keyboard ? getElementPos(ae) : getEventPos(e);
+            var lx = pos.x + 5 - 250;
             if (lx < 5) lx = 5;
             var de;
 
             if (curPopup && curPopup_id == dItemid) {
                 de = curPopup;
                 de.style.left = lx + "px";
-                de.style.top = (pos[1] + 5) + "px";
+                de.style.top = (pos.y + 5) + "px";
                 return stopEvent(e);
             }
 
             de = document.createElement("div");
-            de.style.color = "#000";
-            de.style.height = "10px";
+            de.style.textAlign = "left";
+	    de.className = 'ljcmtmanage';
+	    de.style.height = "10px";
             de.style.overflow = "hidden";
             de.style.position = "absolute";
             de.style.left = lx + "px";
-            de.style.top = (pos[1] + 5) + "px";
+            de.style.top = (pos.y + 5) + "px";
             de.style.width = "250px";
-            de.style.background = "#e0e0e0";
-            de.style.border = "2px solid black";
-            de.style.padding = "3px";
+  	    regEvent(de, "click", function (e) {
+		e = e || window.event;
+                stopBubble(e);
+		return true;
+	    });
 
             var inHTML = "<form style='display: inline' id='ljdelopts" + dItemid + "'><span style='font-face: Arial; font-size: 8pt'><b>Delete comment?</b><br />";
             var lbl;
-            if (com.u != "" && com.u != jOwner) {
+            if (remoteUser != "" && com.u != "" && com.u != remoteUser && canAdmin) {
                 lbl = "ljpopdel" + dItemid + "ban";
                 inHTML += "<input type='checkbox' value='ban' id='" + lbl + "'> <label for='" + lbl + "'>Ban <b>" + com.u + "</b> from commenting</label><br />";
             } else {
                 finalHeight -= 15;
             }
 
-            if (com.u != jOwner) {
+            if (remoteUser != com.u && canAdmin) {
                 lbl = "ljpopdel" + dItemid + "spam";
                 inHTML += "<input type='checkbox' value='spam' id='" + lbl + "'> <label for='" + lbl + "'>Mark this comment as spam</label><br />";
             } else {
                 finalHeight -= 15;
             }
 
-            if (com.rc && com.rc.length) {
+            if (com.rc && com.rc.length && canAdmin) {
                 lbl = "ljpopdel" + dItemid + "thread";
                 inHTML += "<input type='checkbox' value='thread' id='" + lbl + "'> <label for='" + lbl + "'>Delete thread (all subcomments)</label><br />";
             } else {
@@ -326,8 +396,8 @@ function createDeleteFunction (ae, dItemid) {
             inHTML += "<input type='button' value='Delete' onclick='deleteComment(" + dItemid + ");' /> <input type='button' value='Cancel' onclick='killPopup()' /></span><br /><span style='font-face: Arial; font-size: 8pt'><i>shift-click to delete without options</i></span></form>";
             de.innerHTML = inHTML;
 
-            document.body.appendChild(de);
-            //document.body.insertBefore(de, document.body.childNodes[0]);
+            // we do this so keyboard tab order is correct:
+            addAfter(ae, de);
 
             curPopup = de;
             curPopup_id = dItemid;
@@ -363,8 +433,8 @@ function poofAt (pos) {
     de.style.overflow = "hidden";
     var opp = 1.0;
 
-    var top = pos[1];
-    var left = pos[0];
+    var top = pos.y;
+    var left = pos.x;
     var width = 5;
     var height = 5;
     document.body.appendChild(de);
@@ -377,7 +447,7 @@ function poofAt (pos) {
         left -= 5;
 
         if (opp <= 0.1) {
-            document.body.removeChild(de);
+            de.parentNode.removeChild(de);
         } else {
             de.style.left = left + "px";
             de.style.top = top + "px";
@@ -407,7 +477,6 @@ function getTarget (ev) {
 
 function updateLink (ae, resObj, clickTarget) {
     ae.href = resObj.newurl;
-
     var userhook = window["userhook_" + resObj.mode + "_comment_ARG"];
     var did_something = 0;
 
@@ -435,21 +504,32 @@ var tsInProg = new Object();  // dict of { ditemid => 1 }
 function createModerationFunction (ae, dItemid) {
     return function (e) {
         if (!e) e = window.event;
-        //alert(e.shiftKey ? "SUCKA SHIFTA!" : "SUCKA no shift");
+
         if (tsInProg[dItemid])
             return stopEvent(e);
         tsInProg[dItemid] = 1;
 
         var clickTarget = getTarget(e);
-        var clickPos = getEventPos(e);
+
+        var used_keyboard = clickTarget.nodeName == "A";
+
+        var imgTarget;
+        var imgs = ae.getElementsByTagName("img");
+        if (imgs.length)
+            imgTarget = imgs[0]
+
+        if (! clickTarget || typeof(clickTarget) != "object")
+            return true;
+
+        var clickPos = used_keyboard ? getElementPos(imgTarget || ae) : getEventPos(e);
 
         var de = document.createElement("img");
         de.style.position = "absolute";
         de.width = 17;
         de.height = 17;
         de.src = LJVAR.imgprefix + "/hourglass.gif";
-        de.style.top = (clickPos[1] - 8) + "px";
-        de.style.left = (clickPos[0] - 8) + "px";
+        de.style.top = (clickPos.y - 8) + "px";
+        de.style.left = (clickPos.x - 8) + "px";
         document.body.appendChild(de);
 
         var xtr = getXTR();
@@ -463,7 +543,7 @@ function createModerationFunction (ae, dItemid) {
                 var resObj = eval(xtr.responseText);
                 if (resObj) {
                     poofAt(clickPos);
-                    updateLink(ae, resObj, clickTarget);
+                    updateLink(ae, resObj, imgTarget);
                     tsInProg[dItemid] = 0;
                 } else {
                     tsInProg[dItemid] = 0;
@@ -474,7 +554,6 @@ function createModerationFunction (ae, dItemid) {
                 tsInProg[dItemid] = 0;
             }
         };
-
 
         xtr.onreadystatechange = state_callback;
         xtr.open("POST", ae.href + "&jsmode=1", true);
@@ -488,7 +567,7 @@ function createModerationFunction (ae, dItemid) {
     };
 }
 
-function setup_ajax () {
+function setupAjax () {
     var ct = document.links.length;
     for (var i=0; i<ct; i++) {
         var ae = document.links[i];
@@ -511,10 +590,16 @@ function setup_ajax () {
     }
 }
 
-if (document.getElementById && getXTR()) {
-    if (window.attachEvent)
-        window.attachEvent('onload', setup_ajax);
-    if (window.addEventListener)
-        window.addEventListener('load', setup_ajax, false);
+function regEvent (target, evt, func) {
+    if (! target) return;
+    if (target.attachEvent)
+        target.attachEvent("on"+evt, func);
+    if (target.addEventListener)
+        target.addEventListener(evt, func, false);
 }
 
+if (document.getElementById && getXTR()) {
+	regEvent(window, "load", setupAjax);
+	regEvent(document, "click", docClicked);
+        document.write("<style> div.ljcmtmanage { color: #000; background: #e0e0e0; border: 2px solid #000; padding: 3px; }</style>");
+}
