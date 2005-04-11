@@ -577,15 +577,10 @@
     # optional:
     #    $LJ::LDAP_UID = "uid";  # field containing the username.  defaults to "uid".
 
+    # if you know that your installation is behind a proxy or other fence that inserts
+    # X-Forwarded-For headers that you can trust, enable this.  otherwise, don't!
+    # $TRUST_X_HEADERS = 1;
 
-    # if you are using a reverse proxy that inserts X-Forwarded-For, set the IPs of your
-    # proxy(ies) here.  put "ANY" if you want to trust all IPs (don't do this # unless 
-    # your proxy strips any client-supplied X-Forwarded-For).  leave undefined if you're
-    # not using a proxy.
-    # @TRUSTED_PROXIES = (
-    #   1.2.3.4,
-    #   2.3.4.5,
-    # );
 }
 
 1;  # return true
