@@ -1527,6 +1527,17 @@ $LJ::COMMON_CODE{'quickreply'} = q{
     lastDiv = 'qrdiv';
 
     function quickreply(dtid, pid, newsubject) {
+        var ev = window.event;
+
+        // on IE, cancel the bubble of the event up to the page. other
+        // browsers don't seem to bubble events up registered this way.
+        if (ev) {
+            if (ev.stopPropagation)
+               ev.stopPropagation();
+            if ("cancelBubble" in ev)
+                ev.cancelBubble = true;
+        }
+
         // Mac IE 5.x does not like dealing with
         // nextSibling since it does not support it
         if (xIE4Up && xMac) { return true;}
