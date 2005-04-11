@@ -127,7 +127,8 @@ sub handle_post {
         my $atom_reply = XML::Atom::Entry->new();
         $atom_reply->title( $fb->{Title} );
         $atom_reply->summary('Media post');
-        $atom_reply->id( "FB_ID|$fb->{URL}|$fb->{Title}|$fb->{Width}|$fb->{Height}" );
+        $atom_reply->id( "FB_ID|$fb->{URL}|$fb->{Title}|$fb->{Width}|$fb->{Height}" )
+            if $fb;
 
         my $link = XML::Atom::Link->new();
         $link->type('text/html');
@@ -415,15 +416,16 @@ sub handle {
         if $u->{'atom_wsse_nonce_dup'} && $action && $action ne 'post';
 
     # service autodiscovery
+    # TODO: Add communities?
     my $method = $r->method;
     if ( $method eq 'GET' && ! $action ) {
         LJ::load_user_props( $u, 'journaltitle' );
-        my $title = $u->{journaltitle};
-        my $ret = "<?xml version=\"1.0\"?>\n<feed xmlns=\"http://purl.org/atom/ns#\">\n";
+        my $title = $u->{journaltitle} || 'Untitled Journal';
+        my $ret = "<?xml version=\"1.0\"?>\n<feed xmlns=\"http://purl.org/atom/ns#\">";
         $ret .=
-"\t<link type=\"application/x.atom+xml\" rel=\"service.$_\" href=\"$LJ::SITEROOT/interface/atom/$_\" title=\"$title\"/>\n"
+"<link type=\"application/x.atom+xml\" rel=\"service.$_\" href=\"$LJ::SITEROOT/interface/atom/$_\" title=\"$title\"/>"
           foreach qw/ post feed /;
-        $ret .= "\t<link type=\"text/html\" rel=\"alternate\" href=\"$LJ::SITEROOT/users/$u->{user}/\" title=\"$title\"/>\n";
+        $ret .= "<link type=\"text/html\" rel=\"alternate\" href=\"$LJ::SITEROOT/users/$u->{user}/\" title=\"$title\"/>";
         $ret .= "</feed>\n";
         return respond($r, 200, \$ret, 'atom');
     }
@@ -487,9 +489,8 @@ sub auth_wsse
     my $ctime = LJ::ParseFeed::w3cdtf_to_time( $creds{created} ) or return undef;
 
     # prevent replay attacks.
-    # 3 min windows on creation times / nonces
-    $ctime = LJ::mysqldate_to_time( $ctime );
-    return undef if time() - $ctime > 180;
+    $ctime = LJ::mysqldate_to_time( $ctime, 'gmt' );
+    return undef if abs(time() - $ctime) > 42300;
 
     my $u = LJ::load_user( LJ::canonical_username( $creds{'username'} ) )
         or return undef;

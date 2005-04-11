@@ -36,6 +36,8 @@ sub make_feed
         return undef;
     }
 
+    LJ::load_user_props($u, qw/ journaltitle journalsubtitle /);
+
     LJ::text_out(\$u->{$_}) 
         foreach ("name", "url", "urlname");
 
@@ -318,8 +320,8 @@ sub create_view_atom
     $ret .= LJ::run_hook("bot_director", "<!-- ", " -->");
 
     # AtomAPI interface
-    my $api = "$LJ::SITEROOT/interface/atom";
-    $journalinfo->{link} ||= "$LJ::SITEROOT/users/$u->{user}/";
+    my $api = $opts->{'apilinks'} ? "$LJ::SITEROOT/interface/atom" :
+                                    "$LJ::SITEROOT/users/$u->{user}/data/atom";
 
     # header
     unless ($opts->{'noheader'}) {
@@ -337,7 +339,7 @@ sub create_view_atom
         # link to the AtomAPI version of this feed
         $ret .= "<link rel='service.feed' type='application/x.atom+xml' title='";
         $ret .= LJ::ehtml($journalinfo->{title});
-        $ret .= "' href='$api/feed' />";
+        $ret .= $opts->{'apilinks'} ? "' href='$api/feed' />" : "' href='$api' />";
 
         if ($opts->{'apilinks'}) {
             $ret .= "<link rel='service.post' type='application/x.atom+xml' title='Create a new post' href='$api/post' />";

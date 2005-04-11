@@ -150,28 +150,38 @@ sub time822_to_time {
 # which isn't stable yet so we can't use it directly.
 sub w3cdtf_to_time {
     my $tw3 = shift;
-    
 
     # TODO: Should somehow return the timezone offset
     #   so that it can stored... but we don't do timezones
     #   yet anyway. For now, just strip the timezone
-    #   portion if it is present.
+    #   portion if it is present, along with the decimal
+    #   fractions of a second.
     
-    $tw3 =~ s/([+-]\d\d:\d\d|Z)$//;
+    $tw3 =~ s/(?:\.\d+)?(?:[+-]\d{1,2}:\d{1,2}|Z)$//;
     $tw3 =~ s/^\s*//; $tw3 =~ s/\s*$//; # Eat any superflous whitespace
-
-    my $tw3len = length($tw3);
 
     # We can only use complete times, so anything which
     # doesn't feature the time part is considered invalid.
     
-    if ($tw3 =~ /^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d)(?::(\d\d))?$/) {
-        my ($year, $mon, $day, $hour, $min, $sec) = ($1,$2,$3,$4,$5,$6);
-        return $sec ? "$1-$2-$3 $4:$5:$6" : "$1-$2-$3 $4:$5";
+    # This is working around clients that don't implement W3C-DTF
+    # correctly, and only send single digit values in the dates.
+    # 2004-4-8T16:9:4Z vs 2004-04-08T16:09:44Z
+    # If it's more messed up than that, reject it outright.
+    $tw3 =~ /^(\d{4})-(\d{1,2})-(\d{1,2})T(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/
+        or return undef;
+
+    my %pd; # parsed date
+    $pd{Y} = $1; $pd{M} = $2; $pd{D} = $3;
+    $pd{h} = $4; $pd{m} = $5; $pd{s} = $6;
+
+    # force double digits
+    foreach (qw/ M D h m s /) {
+        next unless defined $pd{$_};
+        $pd{$_} = sprintf "%02d", $pd{$_};
     }
-    else {
-        return undef;
-    }
+
+    return $pd{s} ? "$pd{Y}-$pd{M}-$pd{D} $pd{h}:$pd{m}:$pd{s}" :
+                    "$pd{Y}-$pd{M}-$pd{D} $pd{h}:$pd{m}";
 }
 
 package LJ::ParseFeed::Atom;
