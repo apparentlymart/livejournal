@@ -27,6 +27,7 @@ use URI ();
 #        'cleancss' => 1,
 #        'extractlinks' => 1, # remove a hrefs; implies noautolinks
 #        'noautolinks' => 1, # do not auto linkify
+#        'extractimages' => 1, # placeholder images
 #     });
 
 package LJ::CleanHTML;
@@ -350,6 +351,7 @@ sub clean
                     if (defined $opts->{'maximgheight'} &&
                         (! defined $hash->{'height'} ||
                          $hash->{'height'} > $opts->{'maximgheight'})) { $img_bad = 1; }
+                    if ($opts->{'extractimages'}) { $img_bad = 1; }
 
                     $hash->{src} = canonical_url($hash->{src}, 1);
 
@@ -915,6 +917,7 @@ sub clean_comment
         'autoclose' => \@comment_close,
         'cleancss' => 1,
         'extractlinks' => $opts->{'anon_comment'},
+        'extractimages' => $opts->{'anon_comment'},
     });
 }
 
