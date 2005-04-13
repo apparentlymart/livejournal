@@ -23,12 +23,7 @@ use MIME::Lite;
 use strict;
 use vars qw($VERSION $SENDMAIL %providers);
 
-$VERSION = '1.5.1'; # I'm sorry it's been so long since the last release.
-                    # I screwed up and failed site admins and site users
-                    # alike. Sorry. This will be resolved by smaller, more
-                    # frequent (weekly?) updates in future. Just needed to
-                    # get this one out first because it's so big.
-                    #   -- Aaron (idigital)
+$VERSION = '1.5.2';
 
 # default path to sendmail, if none other specified.  we should probably
 # use something more perl-ish and less unix-specific, but whateva'
@@ -83,14 +78,6 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'fromlimit'	=> 15,
         'msglimit'	=> 240,
         'totlimit'	=> 240,
-    },
-
-    'att' => {
-        'name'		=> 'AT&T Wireless',
-        'notes'		=> 'Enter your phone number. Goes to number@mobile.att.net',
-        'fromlimit'	=> 50,
-        'msglimit'	=> 150,
-        'totlimit'	=> 150,
     },
 
     'bellmobilityca' => {
@@ -172,6 +159,14 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'fromlimit'     => 20,
         'msglimit'      => 160,
         'totlimit'      => 160,
+    },
+
+    'cingularblue' => {
+        'name'          => 'Cingular Blue (formerly AT&T Wireless)',
+        'notes'         => 'Enter your phone number. Goes to number@mmode.com',
+        'fromlimit'     => 50,
+        'msglimit'      => 150,
+        'totlimit'      => 150,
     },
 
     'comviq' =>
@@ -853,6 +848,7 @@ sub remap {
     return "suncom" if $provider eq "tms-suncom";
     return "cingular" if $provider eq "cingular-acs";
     return "cingular" if $provider eq "cingular-texas";
+    return "cingularblue" if $provider eq "att";
     return $provider;
 }
 
@@ -977,15 +973,6 @@ sub send
         },$errors);
     }
 
-    elsif ($provider eq "att")
-    {
-        send_mail($self, { 
-            'to'	=> "$self->{'number'}\@mobile.att.net",
-            'from'	=> "$msg->{'from'}",
-            'body'	=> $msg->{'message'},
-        },$errors);
-    }
-
     elsif ($provider eq "beemail") 
     {
         send_mail($self, {
@@ -1074,6 +1061,15 @@ sub send
             'to'	=> "$self->{'number'}\@mobile.mycingular.com",
             'from'	=> $msg->{'from'},
             'body'	=> $msg->{'message'},
+        },$errors);
+    }
+
+    elsif ($provider eq "cingularblue")
+    {
+        send_mail($self, {
+            'to'        => "$self->{'number'}\@mmode.com",
+            'from'      => "$msg->{'from'}",
+            'body'      => $msg->{'message'},
         },$errors);
     }
 
