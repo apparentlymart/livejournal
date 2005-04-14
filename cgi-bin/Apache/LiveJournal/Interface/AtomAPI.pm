@@ -110,7 +110,7 @@ sub handle_post {
         );
 
         my $fb = LJ::FBUpload::do_upload(
-            $u, $err,
+            $u, \$err,
             {
                 path    => $entry->title(),
                 rawdata => \$entry->content()->body(),
