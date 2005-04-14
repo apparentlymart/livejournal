@@ -482,7 +482,7 @@ sub common_event_validation
         return fail($err,203,"Invalid month value.");
     }
     if ($req->{'day'} !~ /^\d{1,2}$/ || $req->{'day'} < 1 ||
-        $req->{'day'} > LJ::days_in_month($req->{'month'},
+        $req->{'day'} > LJ::days_in_month($req->{'mon'},
                                           $req->{'year'}))
     {
         return fail($err,203,"Invalid day of month value.");
