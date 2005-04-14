@@ -2089,9 +2089,21 @@ sub http_to_time {
 sub mysqldate_to_time {
     my ($string, $gmt) = @_;
     return undef unless $string =~ /^(\d\d\d\d)-(\d\d)-(\d\d)(?: (\d\d):(\d\d)(?::(\d\d))?)?$/;
-    return $gmt ?
-        Time::Local::timegm($6, $5, $4, $3, $2-1, $1) :
-        Time::Local::timelocal($6, $5, $4, $3, $2-1, $1);
+    my ($y, $mon, $d, $h, $min, $s) = ($1, $2, $3, $4, $5, $6);
+    my $calc = sub {
+        $gmt ?
+            Time::Local::timegm($s, $min, $h, $d, $mon-1, $y) :
+            Time::Local::timelocal($s, $min, $h, $d, $mon-1, $y);
+    };
+
+    # try to do it.  it'll die if the day is bogus
+    my $ret = eval { $calc->(); };
+    return $ret unless $@;
+
+    # then fix the day up, if so.
+    my $max_day = LJ::days_in_month($mon, $y);
+    $d = $max_day if $d > $max_day;
+    return $calc->();
 }
 
 # <LJFUNC>
