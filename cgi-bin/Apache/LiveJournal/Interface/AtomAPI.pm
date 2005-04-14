@@ -119,7 +119,10 @@ sub handle_post {
             }
         );
 
-        if ($fb->{Error}->{code}) {
+        return respond($r, 500, "There was an error uploading the media: $err")
+            if $err || ! $fb;
+
+        if (ref $fb && $fb->{Error}->{code}) {
             my $errstr = $fb->{Error}->{content};
             return respond($r, 500, "There was an error uploading the media: $errstr");
         }
@@ -128,17 +131,12 @@ sub handle_post {
         $atom_reply->title( $fb->{Title} );
         $atom_reply->summary('Media post');
 
-        if ($fb && ! $err) {
-            $atom_reply->id( "FB_ID|$fb->{URL}|$fb->{Title}|$fb->{Width}|$fb->{Height}" );
-            my $link = XML::Atom::Link->new();
-            $link->type('text/html');
-            $link->rel('alternate');
-            $link->href( $fb->{URL} );
-            $atom_reply->add_link($link);
-        }
-
-        return respond($r, 500, "There was an error uploading the media: $err")
-            if $err;
+        $atom_reply->id( "FB_ID|$fb->{URL}|$fb->{Title}|$fb->{Width}|$fb->{Height}" );
+        my $link = XML::Atom::Link->new();
+        $link->type('text/html');
+        $link->rel('alternate');
+        $link->href( $fb->{URL} );
+        $atom_reply->add_link($link);
 
         return respond($r, 201, \$atom_reply->as_xml(), 'atom');
     }
