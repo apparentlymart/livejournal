@@ -104,7 +104,7 @@ sub process {
     # and Sprint tells me that their text messaging never contains text/html.
     # Currently, PictureMail can only contain one image per message
     # and the image is always a jpeg. (2/2/05)
-    if ($return_path && $return_path =~ /messaging\.sprintpcs/) {
+    if ($return_path && $return_path =~ /pm\.sprint\.com/) {
         $tent = LJ::Emailpost::get_entity( $entity, { type => 'html' } );
         $subject = 'Sprint PictureMail Post'; 
 
@@ -136,7 +136,9 @@ sub process {
         $body = $xml->{messageContents}->{messageText} . "\n";
         my $url =
           HTML::Entities::decode_entities(
-            $xml->{messageContents}->{mediaItems}->{mediaItem}->{url} );
+            $xml->{messageContents}->{mediaItems}->{mediaItem}->{content} );
+        $url = LJ::trim($url);
+        $url =~ s#</?url>##g;
 
         return $err->(
             "Invalid remote SprintPCS URL.", { sendmail => 1 }
@@ -154,7 +156,7 @@ sub process {
         );
         my $ua = LWP::UserAgent->new(
             timeout => 20,
-            agent   => 'LiveJournal_EmailGateway/0.1'
+            agent   => 'Mozilla',
         );
         my $ua_rv = $ua->get( $url, ':content_file' => $tempfile );
 
