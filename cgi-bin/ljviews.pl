@@ -1909,7 +1909,11 @@ sub create_view_calendar
         my ($year, $month, $day, $count) = @$dy;
 
         # calculate day of week
-        my $time = Time::Local::timegm(0, 0, 0, $day, $month-1, $year);
+        my $time = eval { Time::Local::timegm(0, 0, 0, $day, $month-1, $year) } ||
+            eval { Time::Local::timegm(0, 0, 0, LJ::days_in_month($month, $year), $month-1, $year) } ||
+            0;
+        next unless $time;
+
         my $dayweek = (gmtime($time))[6] + 1;
 
         $count{$year}->{$month}->{$day} = $count;
