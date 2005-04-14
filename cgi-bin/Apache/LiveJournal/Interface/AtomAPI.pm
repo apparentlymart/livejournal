@@ -127,14 +127,18 @@ sub handle_post {
         my $atom_reply = XML::Atom::Entry->new();
         $atom_reply->title( $fb->{Title} );
         $atom_reply->summary('Media post');
-        $atom_reply->id( "FB_ID|$fb->{URL}|$fb->{Title}|$fb->{Width}|$fb->{Height}" )
-            if $fb;
 
-        my $link = XML::Atom::Link->new();
-        $link->type('text/html');
-        $link->rel('alternate');
-        $link->href( $fb->{URL} );
-        $atom_reply->add_link($link);
+        if ($fb && ! $err) {
+            $atom_reply->id( "FB_ID|$fb->{URL}|$fb->{Title}|$fb->{Width}|$fb->{Height}" );
+            my $link = XML::Atom::Link->new();
+            $link->type('text/html');
+            $link->rel('alternate');
+            $link->href( $fb->{URL} );
+            $atom_reply->add_link($link);
+        }
+
+        return respond($r, 500, "There was an error uploading the media: $err")
+            if $err;
 
         return respond($r, 201, \$atom_reply->as_xml(), 'atom');
     }
@@ -159,7 +163,7 @@ sub handle_post {
 
         next unless $rel eq 'related' && $type =~ /$media_mime/ && $id;
         my ($ns, $url, $title, $width, $height) = split /\|/, $id;
-        next unless $ns eq 'FB_ID';
+        next unless $ns eq 'FB_ID' && $url;
 
         $images{ $title } = {
             'url'    => $url,
@@ -247,15 +251,14 @@ sub handle_edit {
             'eventtime'  => LJ::alldatepart_s2($row->{'eventtime'}),
             'createtime' => $ctime,
             'modtime'    => $olditem->{'props'}->{'revtime'} || $ctime,
-            'subject'    => LJ::exml($olditem->{'subject'}),
-            'event'      => LJ::exml($olditem->{'event'}),
+            'subject'    => $olditem->{'subject'},
+            'event'      => $olditem->{'event'},
         };
 
         my $ret = LJ::Feed::create_view_atom(
             { 'u' => $u },
             $u,
             {
-                'noheader'   => 1,
                 'saycharset' => "utf-8",
                 'noheader'   => 1,
                 'apilinks'   => 1,
@@ -422,13 +425,23 @@ sub handle {
     if ( $method eq 'GET' && ! $action ) {
         LJ::load_user_props( $u, 'journaltitle' );
         my $title = $u->{journaltitle} || 'Untitled Journal';
-        my $ret = "<?xml version=\"1.0\"?>\n<feed xmlns=\"http://purl.org/atom/ns#\">";
-        $ret .=
-"<link type=\"application/x.atom+xml\" rel=\"service.$_\" href=\"$LJ::SITEROOT/interface/atom/$_\" title=\"$title\"/>"
-          foreach qw/ post feed /;
-        $ret .= "<link type=\"text/html\" rel=\"alternate\" href=\"$LJ::SITEROOT/users/$u->{user}/\" title=\"$title\"/>";
-        $ret .= "</feed>\n";
-        return respond($r, 200, \$ret, 'atom');
+        my $feed = XML::Atom::Feed->new();
+        foreach (qw/ post feed /) {
+            my $link = XML::Atom::Link->new();
+            $link->title($title);
+            $link->type('application/x.atom+xml');
+            $link->rel("service.$_");
+            $link->href("$LJ::SITEROOT/interface/atom/$_");
+            $feed->add_link($link);
+        }
+        my $link = XML::Atom::Link->new();
+        $link->title($title);
+        $link->type('text/html');
+        $link->rel('alternate');
+        $link->href( LJ::journal_base($u) );
+        $feed->add_link($link);
+
+        return respond($r, 200, \$feed->as_xml(), 'atom');
     }
 
     $action =~ /$valid_actions/
