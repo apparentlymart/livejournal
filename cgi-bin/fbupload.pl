@@ -15,6 +15,10 @@ use File::Basename ();
 
 *hash = \&Digest::MD5::md5_hex;
 
+# This has bitten us one too many times.  
+# Don't let startup continue unless LWP is ok.
+die "* Installed version of LWP is too old! *" if LWP->VERSION < 5.803;
+
 sub make_auth
 {
     my ($chal, $password) = @_;
