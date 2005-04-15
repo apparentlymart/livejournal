@@ -163,11 +163,23 @@ body<=
      }
  }
 
+ my $sort = $FORM{sort};
+ $sort = 'date' unless $sort =~ /^id|summary|area|date$/;
+
  $ret .= "<p>[<b>$rct</b> total open requests]</p>" if $append;
- @support_log = sort { $b->{timecreate} <=> $a->{timecreate} } @support_log;
+ if ($sort eq 'id') {
+    @support_log = sort { $a->{spid} <=> $b->{spid} } @support_log;
+ } elsif ($sort eq 'date') {
+    @support_log = sort { $b->{timecreate} <=> $a->{timecreate} } @support_log;
+ } elsif ($sort eq 'summary') {
+    @support_log = sort { $a->{subject} cmp $b->{subject} } @support_log;
+ } elsif ($sort eq 'area') {
+    @support_log = sort { $cats->{$a->{spcatid}}->{catname} cmp $cats->{$b->{spcatid}}->{catname} } @support_log;
+ }
 
  # filter line:
  $ret .= "<form method='get' action='help.bml'>Show only ";
+ $ret .= "<input type='hidden' name='sort' value='$sort' />";
  $ret .= "<select name='state'>";
  {
      my @states = ("" => "Open",
@@ -206,12 +218,17 @@ body<=
  $ret .= "<form method='post' action='/support/actmulti.bml'>" if $can_close;
 
  # start the rest of the table
+ my $uri = "$LJ::SITEROOT/support/help.bml?cat=$filtercat&state=$state";
  $ret .= "<p><table cellpadding='4' cellspacing='1' border='1' bgcolor='#ffffff'><tr bgcolor='#d0d0d0'>\n";
  $ret .= "<td>&nbsp;<b>X</b></td>\n" if $can_close;
- $ret .= "<td><b>ID#</b></td>\n";
- $ret .= "<td><b>Summary</b></td>\n";
- $ret .= "<td><b>Problem Area</b></td>\n";
- $ret .= "<td><b>Posted</b></td>\n";
+ my @headers = ( id => "ID#", summary => "Summary", area => "Problem Area", date => "Posted" );
+ while (my ($sorttype, $desc) = splice(@headers, 0, 2)) {
+     if ($sort eq $sorttype) {
+         $ret .= "<td><b>$desc</b></td>\n";
+     } else {
+         $ret .= "<td><b><a href='$uri&sort=$sorttype'>$desc</a></b></td>\n";
+     }
+ }
  $ret .= "<td><b>Status</b></td>\n";
  $ret .= "</tr>";
 
