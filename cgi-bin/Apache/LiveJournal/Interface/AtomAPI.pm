@@ -11,7 +11,13 @@ require 'parsefeed.pl';
 require 'fbupload.pl';
 
 BEGIN {
-    $LJ::OPTMOD_XMLATOM = eval "use XML::Atom::Entry; 1;";
+    $LJ::OPTMOD_XMLATOM = eval q{
+        use XML::Atom::Feed;
+        use XML::Atom::Entry;
+        use XML::Atom::Link;
+        1;
+    };
+    $LJ::OPTMOD_XMLATOM = 0 if XML::Atom->VERSION < 0.09;
 };
 
 sub respond {
