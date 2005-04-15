@@ -48,7 +48,7 @@ sub get_challenge
     }
 }
 
-# returns FB protocol data structure, regardless of
+# returns FB protocol data structure, regardless of FB
 # success or failure.  it's the callers responsibility
 # to check the structure for FB return values.
 #
@@ -61,6 +61,7 @@ sub get_challenge
 #                    or title to use if 'rawdata' isn't on disk.
 #         rawdata => optional image data scalar ref
 #         imgsec  => bitmask for image security
+#         caption => optional image description
 #         galname => gallery to upload image to }
 sub do_upload 
 {
@@ -115,7 +116,7 @@ sub do_upload
         'X-FB-Mode'                    => 'UploadPic',
         'X-FB-UploadPic.ImageLength'   => $length,
         'Content-Length'               => $length,
-        'X-FB-UploadPic.Meta.Filename' => uri_escape($basename),
+        'X-FB-UploadPic.Meta.Filename' => $basename,
         'X-FB-UploadPic.MD5'           => hash($$rawdata),
         'X-FB-User'                    => $u->{'user'},
         'X-FB-Auth'                    => make_auth( $chal, $u->{'password'} ),
@@ -124,6 +125,9 @@ sub do_upload
         'X-FB-UploadPic.Gallery.0.GalName' => $opts->{'galname'} || 'LJ_emailpost',
         'X-FB-UploadPic.Gallery.0.GalSec'  => 255
     );
+
+    $headers{'X-FB-UploadPic.Meta.Description'} = $opts->{caption}
+      if $opts->{caption};
 
     $req->push_header($_, $headers{$_}) foreach keys %headers;
 
@@ -150,8 +154,8 @@ sub do_upload
 
 # args:
 #       $u,
-#       hashref of { imgtitle => { url, width, height } },
-#       optional option overrides hashref. 
+#       hashref of { imgtitle => { url, width, height, caption } },
+#       optional opts overrides hashref. 
 #               (if not supplied, userprops are used.)
 # returns: html string suitable for entry post body
 # TODO: Hook this like the Fotobilder "post to journal"
@@ -189,11 +193,13 @@ sub make_html
     $opts->{imgcut} = 'totals' if $width > 320 || $height > 240;
 
     # insert image links into post body
+    my $horiz = $opts->{imglayout} =~ /^horiz/i;
     $html .=
       "<lj-cut text='$icount "
       . ( ( $icount == 1 ) ? 'image' : 'images' ) . "'>"
           if $opts->{imgcut} eq 'totals';
-    $html .= "<span style='white-space: nowrap;'>" if $opts->{imglayout} =~ /^horiz/i;
+    $html .= "<table border='0'><tr>"
+        if $horiz;
 
     foreach my $img (keys %$images) {
         my $i = $images->{$img};
@@ -202,15 +208,17 @@ sub make_html
         # (we never scale larger, just smaller)
         undef $size if $i->{width} <= $width || $i->{height} <= $height;
 
-        $img =~ s/"//g;
+        $img =~ s/"/&quot;/g;
+        $html .= "<td>" if $horiz;
         $html .= "<lj-cut text=\"$img\">" if $opts->{imgcut} eq 'titles';
         $html .= "<a href=\"$i->{url}/\">";
-        $html .= "<img src=\"$i->{url}$size\" alt=\"$img\" border=\"0\"></a>";
-        $html .= ($opts->{imglayout} =~ /^horiz/i) ? '&nbsp;' : '<br />';
+        $html .= "<img src=\"$i->{url}$size\" alt=\"$img\" border=\"0\"></a><br />";
+        $html .= "$i->{caption}<br />" if $i->{caption};
+        $html .= $horiz ? '</td>' : '<br />';
         $html .= "</lj-cut> " if $opts->{imgcut} eq 'titles';
     }
+    $html .= "</tr></table>" if $horiz;
     $html .= "</lj-cut>\n" if $opts->{imgcut} eq 'totals';
-    $html .= "</span>" if $opts->{imglayout} =~ /^horiz/;
 
     return $html;
 }

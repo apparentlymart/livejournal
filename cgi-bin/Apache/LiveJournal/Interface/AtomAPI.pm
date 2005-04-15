@@ -114,12 +114,16 @@ sub handle_post {
             qw/ emailpost_gallery emailpost_imgsecurity /
         );
 
+        my $summary = LJ::trim( $entry->summary() );
+        $summary =~ s/\|\n//g;
+
         my $fb = LJ::FBUpload::do_upload(
             $u, \$err,
             {
                 path    => $entry->title(),
                 rawdata => \$entry->content()->body(),
                 imgsec  => $u->{emailpost_imgsecurity},
+                caption => $summary,
                 galname => $u->{emailpost_gallery} || 'AtomUpload',
             }
         );
@@ -136,7 +140,7 @@ sub handle_post {
         $atom_reply->title( $fb->{Title} );
         $atom_reply->summary('Media post');
 
-        $atom_reply->id( "FB_ID|$fb->{URL}|$fb->{Title}|$fb->{Width}|$fb->{Height}" );
+        $atom_reply->id( "FB_ID|$fb->{URL}|$fb->{Title}|$fb->{Width}|$fb->{Height}|$summary" );
         my $link = XML::Atom::Link->new();
         $link->type('text/html');
         $link->rel('alternate');
@@ -165,13 +169,14 @@ sub handle_post {
         my $id   = $link->get('href');
 
         next unless $rel eq 'related' && $type =~ /$media_mime/ && $id;
-        my ($ns, $url, $title, $width, $height) = split /\|/, $id;
+        my ($ns, $url, $title, $width, $height, $caption) = split /\|/, $id;
         next unless $ns eq 'FB_ID' && $url;
 
         $images{ $title } = {
-            'url'    => $url,
-            'width'  => $width,
-            'height' => $height,
+            url     => $url,
+            width   => $width,
+            height  => $height,
+            caption => $caption,
         };
     }
 
