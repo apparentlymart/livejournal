@@ -15,9 +15,8 @@ BEGIN {
         use XML::Atom::Feed;
         use XML::Atom::Entry;
         use XML::Atom::Link;
-        1;
+        XML::Atom->VERSION < 0.09 ? 0 : 1;
     };
-    $LJ::OPTMOD_XMLATOM = 0 if XML::Atom->VERSION < 0.09;
 };
 
 sub respond {
