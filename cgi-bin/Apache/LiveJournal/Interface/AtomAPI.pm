@@ -161,7 +161,7 @@ sub handle_post {
     # body.
     my $body  = $entry->content()->body();
     my @links = $entry->link();
-    my %images;
+    my (%images, $link_count);
     foreach my $link (@links) {
         # $link is now a valid XML::Atom::Link object
         my $rel  = $link->get('rel');
@@ -171,12 +171,13 @@ sub handle_post {
         next unless $rel eq 'related' && $type =~ /$media_mime/ && $id;
         my ($ns, $url, $title, $width, $height, $caption) = split /\|/, $id;
         next unless $ns eq 'FB_ID' && $url;
-
+        
         $images{ $title } = {
             url     => $url,
             width   => $width,
             height  => $height,
             caption => $caption,
+            order   => ++$link_count,
         };
     }
 

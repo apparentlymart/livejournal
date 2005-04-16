@@ -154,7 +154,7 @@ sub do_upload
 
 # args:
 #       $u,
-#       hashref of { imgtitle => { url, width, height, caption } },
+#       hashref of { imgtitle => { url, width, height, caption, order } },
 #       optional opts overrides hashref. 
 #               (if not supplied, userprops are used.)
 # returns: html string suitable for entry post body
@@ -201,7 +201,11 @@ sub make_html
     $html .= "<table border='0'><tr>"
         if $horiz;
 
-    foreach my $img (keys %$images) {
+    foreach my $img (
+        sort {
+            $images->{$a}->{order} <=> $images->{$b}->{order}
+        } keys %$images) {
+
         my $i = $images->{$img};
 
         # don't set a size on images smaller than the requested width/height
