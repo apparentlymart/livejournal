@@ -154,8 +154,9 @@ sub do_upload
 
 # args:
 #       $u,
-#       hashref of { imgtitle => { url, width, height, caption, order } },
-#       optional opts overrides hashref. 
+#       arrayref of { title, url, width, height, caption } or
+#          [DEPRECATED-SOMEBODY_WAS_ON_CRACK]  hashref of { imgtitle => { url, width, height, caption } },
+#       optional opts overrides hashref.
 #               (if not supplied, userprops are used.)
 # returns: html string suitable for entry post body
 # TODO: Hook this like the Fotobilder "post to journal"
@@ -165,7 +166,20 @@ sub make_html
     my ($u, $images, $opts) = @_;
     my ($icount, $html);
 
-    $icount = scalar keys %$images if ref $images;
+    # DEPRECATED SUPPORT.  PLEASE REMOVE WHEN NO CALLER USES HASHREFS.
+    # (after this point $images is always an arrayref)
+    if (ref $images eq "HASH") {
+        my @images;
+        foreach my $title (keys %$images) {
+            my $val = $images->{$title};
+            $val->{title} = $title;
+            push @images, $val;
+        }
+        $images = \@images;
+    }
+    $images ||= [];
+
+    $icount = scalar @$images;
     return "" unless $icount;
 
     # Merge overrides with userprops that might
@@ -189,8 +203,8 @@ sub make_html
     my ($width, $height) = split 'x', $opts->{imgsize};
     my $size = '/s' . $opts->{imgsize};
 
-    # force lj-cut on images larger than 320x240
-    $opts->{imgcut} = 'totals' if $width > 320 || $height > 240;
+    # force lj-cut on images larger than 320 in either direction
+    $opts->{imgcut} = 'totals' if $width > 320 || $height > 320;
 
     # insert image links into post body
     my $horiz = $opts->{imglayout} =~ /^horiz/i;
@@ -201,22 +215,17 @@ sub make_html
     $html .= "<table border='0'><tr>"
         if $horiz;
 
-    foreach my $img (
-        sort {
-            $images->{$a}->{order} <=> $images->{$b}->{order}
-        } keys %$images) {
-
-        my $i = $images->{$img};
+    foreach my $i (@$images) {
+        my $title = LJ::ehtml($i->{'title'});
 
         # don't set a size on images smaller than the requested width/height
         # (we never scale larger, just smaller)
         undef $size if $i->{width} <= $width || $i->{height} <= $height;
 
-        $img =~ s/"/&quot;/g;
         $html .= "<td>" if $horiz;
-        $html .= "<lj-cut text=\"$img\">" if $opts->{imgcut} eq 'titles';
+        $html .= "<lj-cut text=\"$title\">" if $opts->{imgcut} eq 'titles';
         $html .= "<a href=\"$i->{url}/\">";
-        $html .= "<img src=\"$i->{url}$size\" alt=\"$img\" border=\"0\"></a><br />";
+        $html .= "<img src=\"$i->{url}$size\" alt=\"$title\" border=\"0\"></a><br />";
         $html .= "$i->{caption}<br />" if $i->{caption};
         $html .= $horiz ? '</td>' : '<br />';
         $html .= "</lj-cut> " if $opts->{imgcut} eq 'titles';

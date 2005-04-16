@@ -161,7 +161,7 @@ sub handle_post {
     # body.
     my $body  = $entry->content()->body();
     my @links = $entry->link();
-    my (%images, $link_count);
+    my (@images, $link_count);
     foreach my $link (@links) {
         # $link is now a valid XML::Atom::Link object
         my $rel  = $link->get('rel');
@@ -171,17 +171,17 @@ sub handle_post {
         next unless $rel eq 'related' && $type =~ /$media_mime/ && $id;
         my ($ns, $url, $title, $width, $height, $caption) = split /\|/, $id;
         next unless $ns eq 'FB_ID' && $url;
-        
-        $images{ $title } = {
+
+        push @images, {
             url     => $url,
             width   => $width,
             height  => $height,
             caption => $caption,
-            order   => ++$link_count,
+            title   => $title,
         };
     }
 
-    $body .= LJ::FBUpload::make_html( $u, \%images );
+    $body .= LJ::FBUpload::make_html( $u, \@images );
 
     # build a post event request.
     my $req = {
