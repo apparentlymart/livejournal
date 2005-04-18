@@ -25,24 +25,37 @@ use XML::Simple;
 # set to 1 to dequeue, 0 to leave for further processing.
 sub process {
     my ($entity, $to, $rv) = @_;
-    my $head = $entity->head;
+
+    my (
+        # journal vars
+        $head, $user, $journal,
+        $pin, $u, $req, $post_error,
+
+        # email vars
+        $from, $addrlist, $return_path,
+        $body, $subject, $charset,
+        $format, $tent,
+
+        # pict upload vars
+        $fb_upload, $fb_upload_errstr,
+    );
+
+    $head = $entity->head;
     $head->unfold;
 
     $$rv = 1;  # default dequeue
 
     # Parse email for lj specific info
-    my ($user, $journal, $pin);
     ($user, $pin) = split(/\+/, $to);
     ($user, $journal) = split(/\./, $user) if $user =~ /\./;
-    my $u = LJ::load_user($user);
+    $u = LJ::load_user($user);
     return unless $u;
     LJ::load_user_props($u, 'emailpost_pin') unless (lc($pin) eq 'pgp' && $LJ::USE_PGP);
 
     # Pick what address to send potential errors to.
-    my @froms = Mail::Address->parse($head->get('From:'));
-    return unless @froms;
-    my $from = $froms[0]->address;
-    my $addrlist = LJ::Emailpost::get_allowed_senders($u);
+    $addrlist = LJ::Emailpost::get_allowed_senders($u);
+    $from = ${(Mail::Address->parse( $head->get('From:') ))[0] || []}[1];
+    return unless $from;
     my $err_addr;
     foreach (keys %$addrlist) {
         if (lc($from) eq lc &&
@@ -52,8 +65,6 @@ sub process {
         }
     }
     $err_addr ||= $u->{email};
-
-    my ($body, $subject);
 
     my $err = sub {
         my ($msg, $opt) = @_;
@@ -84,11 +95,9 @@ sub process {
         return $msg;
     };
 
-    # Get various email parts.
-    my $content_type = $head->get('Content-type:');
-    $subject = $head->get('Subject:');
-    my $return_path = ${(Mail::Address->parse( $head->get('Return-Path') ))[0] || []}[1];
-    my $tent;
+    # The return path should normally not ever be perverted enough to require this,
+    # but some mailers nowadays do some very strange things.
+    $return_path = ${(Mail::Address->parse( $head->get('Return-Path') ))[0] || []}[1];
 
     # Is this message from a sprint PCS phone?  Sprint doesn't support
     # MMS (yet) - when it does, we should just be able to rip this block
@@ -98,15 +107,16 @@ sub process {
     #   -  Normal text messaging just sends a text/plain piece.
     #   -  Sprint "PictureMail".
     # PictureMail sends a text/html piece, that contains XML with
-    # the location of the image on their servers - and a blank text/plain.  (?)
+    # the location of the image on their servers - and a text/plain as well.
+    # (The text/plain used to be blank, now it's really text/plain.  We still
+    # can't use it, however, without heavy and fragile parsing.)
     # We assume the existence of a text/html means this is a PictureMail message,
     # as there is no other method (headers or otherwise) to tell the difference,
     # and Sprint tells me that their text messaging never contains text/html.
     # Currently, PictureMail can only contain one image per message
     # and the image is always a jpeg. (2/2/05)
     if ($return_path && $return_path =~ /pm\.sprint\.com/) {
-        $tent = LJ::Emailpost::get_entity( $entity, { type => 'html' } );
-        $subject = 'Sprint PictureMail Post'; 
+        $tent = get_entity( $entity, 'html' );
 
         return $err->(
             "Unable to find Sprint HTML content in PictureMail message.",
@@ -161,8 +171,15 @@ sub process {
         my $ua_rv = $ua->get( $url, ':content_file' => $tempfile );
 
         if ($ua_rv->is_success) {
-            # attach the image to the main entity, so upload_images()
-            # can work without modifications.
+            # (re)create a basic mime entity, so the rest of the
+            # emailgateway can function without modifications.
+            # (We don't need anything but Data, the other parts have
+            # already been pulled from $head->unfold)
+            $subject = 'Sprint PictureMail Post';
+            $entity = MIME::Entity->build(
+                Data => HTML::Entities::decode_entities(
+                    $xml->{messageContents}->{messageText} ),
+            );
             $entity->attach(
                 Path => $tempfile,
                 Type => 'image/jpeg'
@@ -182,20 +199,17 @@ sub process {
         }
     } 
 
-    # All other email (including MMS)
     # Use text/plain piece first - if it doesn't exist, then fallback to text/html
-    else {
-        $tent = get_entity( $entity );
-        $tent = LJ::Emailpost::get_entity( $entity, { type => 'html' } ) unless $tent;
-        return $err->("Unable to find any text content in your mail", { sendmail => 1 }) unless $tent;
+    $tent = get_entity( $entity );
+    $tent = get_entity( $entity, 'html' ) unless $tent;
+    return $err->("Unable to find any text content in your mail", { sendmail => 1 }) unless $tent;
 
-        $body = $tent->bodyhandle->as_string;
-        $body =~ s/^\s+//;
-        $body =~ s/\s+$//;
-    }
+    $body = $tent->bodyhandle->as_string;
+    $body =~ s/^\s+//;
+    $body =~ s/\s+$//;
 
     # Snag charset and do utf-8 conversion
-    my ($charset, $format);
+    my $content_type = $head->get('Content-type:');
     $charset = $1 if $content_type =~ /\bcharset=['"]?(\S+?)['"]?[\s\;]/i;
     $format = $1 if $content_type =~ /\bformat=['"]?(\S+?)['"]?[\s\;]/i;
     if (defined($charset) && $charset !~ /^UTF-?8$/i) { # no charset? assume us-ascii
@@ -205,6 +219,7 @@ sub process {
     }
 
     # check subject for rfc-1521 junk
+    $subject ||= $head->get('Subject:');
     if ($subject =~ /^=\?/) {
         my @subj_data = MIME::Words::decode_mimewords( $subject );
         if (@subj_data) {
@@ -212,11 +227,11 @@ sub process {
                 $subject = $subj_data[0][0];
             } else {
                 $subject = Unicode::MapUTF8::to_utf8(
-                        {
+                    {
                         -string  => $subj_data[0][0],
                         -charset => $subj_data[0][1]
-                        }
-                        );
+                    }
+                );
             }
         }
     }
@@ -232,17 +247,15 @@ sub process {
     # Validity checks.  We only care about these if they aren't using PGP.
     unless (lc($pin) eq 'pgp' && $LJ::USE_PGP) {
         return $err->("No allowed senders have been saved for your account.") unless ref $addrlist;
-        my $ok = 0;
-        foreach (keys %$addrlist) {
-            if (lc($from) eq lc) {
-                $ok = 1;
-                last;
-            }
-        }
-        return $err->("Unauthorized sender address: $from") unless $ok; # don't mail user due to bounce spam
+
+        # don't mail user due to bounce spam
+        return $err->("Unauthorized sender address: $from")
+            unless grep { lc($from) eq lc($_) } keys %$addrlist;
+
         return $err->("Unable to locate your PIN.", { sendmail => 1 }) unless $pin;
         return $err->("Invalid PIN.", { sendmail => 1 }) unless lc($pin) eq lc($u->{emailpost_pin});
     }
+
     return $err->("Email gateway access denied for your account type.", { sendmail => 1 })
         unless LJ::get_cap($u, "emailpost");
 
@@ -332,7 +345,6 @@ sub process {
       unless $lj_headers{'imgsecurity'} =~ /^(private|regusers|friends|public)$/;
 
     # upload picture attachments to fotobilder.
-    my ($fb_upload, $fb_upload_errstr);
     # undef return value? retry posting for later.
     $fb_upload = upload_images(
         $entity, $u,
@@ -364,7 +376,7 @@ sub process {
     return $err->( $fb_upload_errstr, { retry => 1 } ) if $fb_upload == 500;
 
     # build lj entry
-    my $req = {
+    $req = {
         'usejournal' => $journal,
         'ver' => 1,
         'username' => $user,
@@ -377,7 +389,6 @@ sub process {
     };
 
     # post!
-    my $post_error;
     LJ::Protocol::do_request("postevent", $req, \$post_error, { noauth=>1 });
     return $err->(LJ::Protocol::error_message($post_error), { sendmail => 1}) if $post_error;
 
@@ -391,9 +402,8 @@ sub process {
 # regardless of type.
 sub get_entity
 {
-    my ($entity, $opts) = @_;
-    return if $opts && ref $opts ne 'HASH';
-    my $type = $opts->{'type'} || 'text';
+    my ($entity, $type) = @_;
+    $type ||= 'text';
 
     my $head = $entity->head;
     my $mime_type = $head->mime_type;
@@ -425,10 +435,10 @@ sub get_entity
             # Recursively search through nested MIME for various pieces
             if ($alte->mime_type =~ $mimeattach_re) {
                 if ($type =~ /^(?:text|html)$/) {
-                    my $text_entity = get_entity($entity->parts($i));
+                    my $text_entity = get_entity($entity->parts($i), $type);
                     return $text_entity if $text_entity;
                 } else {
-                    push @entities, get_entity($entity->parts($i), $opts);
+                    push @entities, get_entity($entity->parts($i), $type);
                 }
             }
         }
@@ -437,7 +447,6 @@ sub get_entity
     return @entities if $type ne 'text' && scalar @entities;
     return;
 }
-
 
 # Verifies an email pgp signature as being valid.
 # Returns codes so we can use the pre-existing err subref,
@@ -510,7 +519,7 @@ sub check_sig {
 
     if ($entity->effective_type() eq 'multipart/signed') {
         # attached signature
-        $sig_e = (get_entity($entity, { type => 'application/pgp-signature' }))[0];
+        $sig_e = (get_entity($entity, 'application/pgp-signature'))[0];
         $txt = $txt_e->as_string();
         my $txt_fh;
         ($txt_fh, $txt_f) =
@@ -554,7 +563,7 @@ sub upload_images
     my ($entity, $u, $rv, $opts) = @_;
     return 1 unless LJ::get_cap($u, 'fb_can_upload') && $LJ::FB_SITEROOT;
 
-    my @imgs = get_entity($entity, { type => 'image' });
+    my @imgs = get_entity($entity, 'image');
     return 1 unless scalar @imgs;
 
     my @images;

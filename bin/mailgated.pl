@@ -310,7 +310,7 @@ sub process
 
     # stop more spam, based on body text checks
     my $tent = LJ::Emailpost::get_entity($entity);
-    $tent = LJ::Emailpost::get_entity( $entity, { type => 'html' } )
+    $tent = LJ::Emailpost::get_entity( $entity, 'html' )
       unless $tent;
     return dequeue("Can't find text or html entity") unless $tent;
     my $body = $tent->bodyhandle->as_string;
@@ -502,7 +502,7 @@ sub virus_check
     my $entity = shift;
     return unless $entity;
 
-    my @exe = LJ::Emailpost::get_entity( $entity, { type => 'all' } );
+    my @exe = LJ::Emailpost::get_entity( $entity, 'all' );
     return unless scalar @exe;
 
     # If an attachment's encoding begins with one of these strings,
