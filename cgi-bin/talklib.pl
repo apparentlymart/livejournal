@@ -943,7 +943,7 @@ sub load_comments
     my %up = ();
     if (%users_to_load) {
         LJ::load_userids_multiple([ map { $_, \$up{$_} } keys %users_to_load ]);
-          
+
         # fill in the 'userpost' member on each post being shown
         while (my ($id, $post) = each %$posts) {
             $post->{'userpost'} = $up{$post->{'posterid'}}->{'user'} if
@@ -954,7 +954,6 @@ sub load_comments
     # optionally give them back user refs
     if (ref($opts->{'userref'}) eq "HASH") {
         my %userpics = ();
-        
         # copy into their ref the users we've already loaded above.
         while (my ($k, $v) = each %up) {
             $opts->{'userref'}->{$k} = $v;
@@ -974,11 +973,9 @@ sub load_comments
                 $post->{'picid'} = $id;
                 push @load_pic, [ $pu, $id ];
             }
-            
             LJ::load_userpics($opts->{'userpicref'}, \@load_pic);
         }
     }
-    
     return map { $posts->{$_} } @top_replies;
 }
 
@@ -1326,12 +1323,9 @@ QQ
     $ret .= "<textarea class='textbox' rows='10' cols='75' wrap='soft' name='body' id='commenttext'>$form->{body}</textarea>";
 
     # Display captcha challenge if over rate limits.
-    if ($opts->{do_captcha} &&
-       ($form->{'usertype'} eq "anonymous" && $LJ::HUMAN_CHECK{'anonpost'} ||
-        $form->{'usertype'} eq "user"      && $LJ::HUMAN_CHECK{'authpost'})) {
-
+    if ($opts->{do_captcha}) {
         my ($wants_audio, $captcha_sess, $captcha_chal);
-        $wants_audio = 1 if $LJ::HUMAN_CHECK{anonpost} && lc($form->{answer}) eq 'audio';
+        $wants_audio = 1 if lc($form->{answer}) eq 'audio';
 
         # Captcha sessions 
         my $cid = $journalu->{clusterid};
@@ -2552,23 +2546,58 @@ sub init {
 
     # anti-spam captcha check
     if (ref $need_captcha eq 'SCALAR') {
-        $$need_captcha =
-            ($LJ::HUMAN_CHECK{anonpost} || $LJ::HUMAN_CHECK{authpost}) &&
-            ! LJ::Talk::Post::check_rate($comment->{'u'}, $journalu);
 
-        # if the user is anonymous and the IP is marked, ignore rates and always human test.
-        $$need_captcha = 1 if $LJ::HUMAN_CHECK{anonpost} &&
-                              ! $comment->{'u'} &&
-                              LJ::sysban_check('talk_ip_test', LJ::get_remote_ip());
+        # see if they're in the second+ phases of a captcha check.
+        # are they sending us a response?
+        if ($form->{captcha_chal}) {
 
-        if ($$need_captcha) {
-            return $err->("Please confirm you are a human below.") unless $form->{answer};
-            return if lc($form->{answer}) eq 'audio';
+            # assume they won't pass and re-set the flag
+            $$need_captcha = 1;
+
+            # if they typed "audio", we don't double-check if they still need
+            # a captcha (they still do), they just want an audio version.
+            if (lc($form->{answer}) eq 'audio') {
+                return;
+            }
+
             my ($capid, $anum) = LJ::Captcha::session_check_code($form->{captcha_chal},
                                                                  $form->{answer}, $journalu);
+
             return $err->("Incorrect response to spam robot challenge.") unless $capid && $anum;
             my $expire_u = $comment->{'u'} || LJ::load_user('system');
             LJ::Captcha::expire($capid, $anum, $expire_u->{userid});
+
+        } else {
+
+            $$need_captcha =
+                ($LJ::HUMAN_CHECK{anonpost} || $LJ::HUMAN_CHECK{authpost}) &&
+                ! LJ::Talk::Post::check_rate($comment->{'u'}, $journalu);
+
+            if ($LJ::HUMAN_CHECK{comment_html_auth} ||
+                ($LJ::HUMAN_CHECK{comment_html_anon} && ! $comment->{'u'})) {
+                # see if they have any tags or URLs
+                if ($form->{'body'} =~ /<[a-z]/i) {
+                    # strip white-listed bare tags w/o attributes,
+                    # then see if they still have HTML.  if so, it's
+                    # questionable.  (can do evil spammy-like stuff w/
+                    # attributes and other elements)
+                    my $body_copy = $form->{'body'};
+                    $body_copy =~ s/<(?:q|blockquote|b|strong|i|em|cite|sub|sup|var|del|tt|code|pre|p)>//ig;
+                    $$need_captcha = 1 if $body_copy =~ /<[a-z]/i;
+                }
+                # multiple URLs is questionable too
+                $$need_captcha = 1 if
+                    $form->{'body'} =~ /\b(?:http|ftp)\b.+\b(?:http|ftp)\b/s;
+            }
+
+            # if the user is anonymous and the IP is marked, ignore rates and always human test.
+            $$need_captcha = 1 if $LJ::HUMAN_CHECK{anonpost} &&
+                ! $comment->{'u'} &&
+                LJ::sysban_check('talk_ip_test', LJ::get_remote_ip());
+
+            if ($$need_captcha) {
+                return $err->("Please confirm you are a human below.");
+            }
         }
     }
 
@@ -2576,6 +2605,7 @@ sub init {
     return $init;
 }
 
+# returns 1 on success.  0 on fail (with $$errref set)
 sub post_comment {
     my ($entryu, $journalu, $comment, $parent, $item, $errref) = @_;
 
@@ -2729,7 +2759,7 @@ sub check_rate {
 
     # we require memcache to do rate limiting efficiently
     return 1 unless @LJ::MEMCACHE_SERVERS;
-    
+
     # return right away if the account is suspended
     return 0 if $remote && $remote->{'statusvis'} =~ /[SD]/;
 

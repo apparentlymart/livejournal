@@ -1,4 +1,3 @@
-
 <?page
 body<=
 <?_code
@@ -11,6 +10,8 @@ body<=
     # since talklib.pl's LJ::Talk::Post::init checks for $POST{'ecphash'}
     # and requires it to be correct.  if it's not, the page fails.
     %POST = %GET if $GET{'ecphash'};
+
+    return "" if $LJ::TALK_ABORT_REGEXP && $POST{'body'} =~ /$LJ::TALK_ABORT_REGEXP/;
 
     my $req = shift;
     my $r = $req->{'r'};
@@ -81,7 +82,7 @@ body<=
         $parpost = $sth->fetchrow_hashref;
 
         $title = $ML{'.title.error'} unless $need_captcha;
-        
+
         return LJ::Talk::talkform({ 'remote'      => $remote,
                                     'journalu'    => $journalu,
                                     'parpost'     => $parpost,
