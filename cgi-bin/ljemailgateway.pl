@@ -345,7 +345,7 @@ sub process {
 
     # if we found and successfully uploaded some images...
     $body .= LJ::FBUpload::make_html( $u, $fb_upload, \%lj_headers )
-      if ref $fb_upload eq 'HASH';
+      if ref $fb_upload eq 'ARRAY';
 
     # at this point, there are either no images in the message ($fb_upload == 1)
     # or we had some error during upload that we may or may not want to retry
@@ -557,7 +557,7 @@ sub upload_images
     my @imgs = get_entity($entity, { type => 'image' });
     return 1 unless scalar @imgs;
 
-    my %images;
+    my @images;
     foreach my $img_entity (@imgs) {
         my $img     = $img_entity->bodyhandle;
         my $path    = $img->path;
@@ -591,14 +591,15 @@ sub upload_images
             return $result->{Error}->{code} + 1000; 
         }
 
-        $images{ $result->{Title} } = {
-            'url'    => $result->{URL},
-            'width'  => $result->{Width},
-            'height' => $result->{Height},
+        push @images, {
+            url     => $result->{URL},
+            width   => $result->{Width},
+            height  => $result->{Height},
+            title   => $result->{Title},
         };
     }
 
-    return \%images if scalar keys %images;
+    return \@images if scalar @images;
     return;
 }
 

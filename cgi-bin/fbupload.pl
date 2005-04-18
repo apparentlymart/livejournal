@@ -154,8 +154,7 @@ sub do_upload
 
 # args:
 #       $u,
-#       arrayref of { title, url, width, height, caption } or
-#          [DEPRECATED-SOMEBODY_WAS_ON_CRACK]  hashref of { imgtitle => { url, width, height, caption } },
+#       arrayref of { title, url, width, height, caption }
 #       optional opts overrides hashref.
 #               (if not supplied, userprops are used.)
 # returns: html string suitable for entry post body
@@ -165,19 +164,6 @@ sub make_html
 {
     my ($u, $images, $opts) = @_;
     my ($icount, $html);
-
-    # DEPRECATED SUPPORT.  PLEASE REMOVE WHEN NO CALLER USES HASHREFS.
-    # (after this point $images is always an arrayref)
-    if (ref $images eq "HASH") {
-        my @images;
-        foreach my $title (keys %$images) {
-            my $val = $images->{$title};
-            $val->{title} = $title;
-            push @images, $val;
-        }
-        $images = \@images;
-    }
-    $images ||= [];
 
     $icount = scalar @$images;
     return "" unless $icount;
