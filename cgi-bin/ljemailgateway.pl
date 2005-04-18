@@ -403,6 +403,11 @@ sub process {
 sub get_entity
 {
     my ($entity, $type) = @_;
+
+    # old arguments were a hashref
+    $type = $type->{'type'} if ref $type eq "HASH";
+
+    # default to text
     $type ||= 'text';
 
     my $head = $entity->head;
