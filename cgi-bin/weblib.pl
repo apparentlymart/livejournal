@@ -1458,7 +1458,7 @@ sub js_dumper {
         my $ret = "[" . join(", ", map { js_dumper($_) } @$obj) . "]";
         return $ret;
     } else {
-        return $obj if $obj =~ /^\d+/;
+        return $obj if $obj =~ /^\d+$/;
         return "\"" . LJ::ejs($obj) . "\"";
     }
 }
