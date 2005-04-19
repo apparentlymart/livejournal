@@ -115,7 +115,7 @@ sub process {
     # and Sprint tells me that their text messaging never contains text/html.
     # Currently, PictureMail can only contain one image per message
     # and the image is always a jpeg. (2/2/05)
-    if ($return_path && $return_path =~ /pm\.sprint\.com/) {
+    if ($return_path && $return_path =~ /(?:messaging|pm)\.sprint(?:pcs)?\.com/) {
         $tent = get_entity( $entity, 'html' );
 
         return $err->(
@@ -143,7 +143,6 @@ sub process {
             { sendmail => 1 }
           ) unless $xml->{messageContents}->{type} eq 'PICTURE';
 
-        $body = $xml->{messageContents}->{messageText} . "\n";
         my $url =
           HTML::Entities::decode_entities(
             $xml->{messageContents}->{mediaItems}->{mediaItem}->{content} );
