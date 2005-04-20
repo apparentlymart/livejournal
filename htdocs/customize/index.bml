@@ -18,6 +18,7 @@ body<=
         unless $u;
 
     my $userid = $u->{'userid'};
+    my $has_cap = LJ::get_cap($u, "s2styles");
     
     return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
 
@@ -70,11 +71,13 @@ body<=
     };
 
     if ($POST{'save:layout'}) {
-        my $layid = $POST{'layoutid'};
+        my $layid = $POST{'layoutid'}+0;
         return BML::redirect("/customize/?journal=$u->{'user'}")
             if $layid == $style{'layout'};
 
-        my $lay = $pub->{$layid} || $userlay->{$layid};
+        my $lay = $pub->{$layid};
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.disallowed_user_layer'} p?>"
+            if ! $lay and $lay ||= $userlay->{$layid} and ! $has_cap;
         return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.not_your_layout'} p?>"
             unless $lay && LJ::S2::can_use_layer($u, $lay->{'uniq'});
 
@@ -140,7 +143,12 @@ body<=
 
     if ($POST{'save:theme'}) {
         my $themeid = $POST{'themeid'}+0;
-        my $lay = $pub->{$themeid} || $userlay->{$themeid};
+        return BML::redirect("/customize/?journal=$u->{'user'}")
+            if $themeid == $style{'theme'};
+
+        my $lay = $pub->{$themeid};
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.disallowed_theme_layer'} p?>"
+            if ! $lay and $lay ||= $userlay->{$themeid} and ! $has_cap;
         return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.not_your_theme'} p?>" if $themeid && ! $lay;
         $style{'theme'} = $themeid;
 
@@ -226,17 +234,42 @@ body<=
                          ($_ = $tmp)
                        } keys %$pub;
 
-    # add user ones
-    {
+    # custom layers can will be shown in the "Custom Layers" and "Disabled Layers" groups
+    # depending on the user's account status.  if they don't have the s2styles cap, then
+    # they will have all layers disabled, except for the one they are currently using.
+    my $custom_layer_list = sub {
+        my ($type, $ptype) = @_;
+        my @layers = ();
+        
         my @user = map { $_, $userlay->{$_}->{'name'} ? $userlay->{$_}->{'name'} : "\#$_" } 
-                   sort { $userlay->{$a}->{'name'} cmp $userlay->{$b}->{'name'} || 
-                          $userlay->{$a}->{'s2lid'} <=> $userlay->{$b}->{'s2lid'} }
-                   grep { /^\d+$/ && $userlay->{$_}->{'type'} eq "layout" }
+                   sort { $userlay->{$a}->{'name'} cmp $userlay->{$b}->{'name'} || $a <=> $b }
+                   grep { /^\d+$/ && $userlay->{$_}->{'b2lid'} == $style{$ptype} && 
+                          $userlay->{$_}->{'type'} eq $type &&
+                          ($has_cap || $_ == $style{$type}) }
                    keys %$userlay;
         if (@user) {
-            push @layouts, "", "---", @user;
+            push @layers, "", "--- Custom Layers: ---", @user;
         }
-    }
+
+        unless ($has_cap) {
+            my @disabled =
+                map { $_, $userlay->{$_}->{'name'} ? $userlay->{$_}->{'name'} : "\#$_" } 
+                sort { $userlay->{$a}->{'name'} cmp $userlay->{$b}->{'name'} || 
+                       $userlay->{$a}->{'s2lid'} <=> $userlay->{$b}->{'s2lid'} }
+                grep { /^\d+$/ && $userlay->{$_}->{'b2lid'} == $style{$ptype} && 
+                       $userlay->{$_}->{'type'} eq $type && $_ != $style{$type} }
+                keys %$userlay;
+            if (@disabled) {
+                push @layers, "", "--- Disabled Layers: ---", @disabled;
+            }
+        }
+
+        return @layers;
+    };
+
+    # add user/disabled ones
+    push @layouts, $custom_layer_list->('layout', 'core');
+
     $ret .= "<?h1 $ML{'.s2.layout.header'} h1?><?p $ML{'.s2.layout'} p?>";
     $ret .= "<blockquote>";
     $ret .= LJ::html_select({ 'name' => 'layoutid',
@@ -270,19 +303,9 @@ body<=
     
     # theme
     my @themes = LJ::S2::get_layout_themes_select([$pub], $style{'layout'});
-    # add user ones
-    {
-        my @user = map { $userlay->{$_}->{'s2lid'}, $userlay->{$_}->{'name'} ? 
-                                                    $userlay->{$_}->{'name'} : 
-                                                    "\#$userlay->{$_}->{'s2lid'}" }
-                   sort { $userlay->{$a}->{'name'} cmp $userlay->{$b}->{'name'} ||
-                          $userlay->{$a}->{'s2lid'} <=> $userlay->{$b}->{'s2lid'} }
-                   grep { /^\d+$/ && $userlay->{$_}->{'b2lid'} == $style{'layout'} && $userlay->{$_}->{'type'} eq "theme" }
-                   keys %$userlay;
-        if (@user) {
-            push @themes, "", "---", @user;
-        }
-    }
+
+    # add user/disabled ones
+    push @themes, $custom_layer_list->('theme', 'layout');
 
     $ret .= "<?h2 $ML{'.s2.customize.themes.header'} h2?><?p p?>";
     $ret .= "<blockquote>";
@@ -309,7 +332,7 @@ body<=
 
     $ret .= "<?h1 $ML{'.s2.related.header'} h1?>";
     $ret .= "<dl><dt>$ML{'.s2.advanced.header'}</dt><dd>";
-    $ret .= LJ::get_cap($u, 's2styles') ? $ML{'.s2.advanced.permitted'} : $ML{'.s2.advanced.denied'};
+    $ret .= $has_cap ? $ML{'.s2.advanced.permitted'} : $ML{'.s2.advanced.denied'};
     $ret .= "</dd><dt><a href='/manage/links.bml?authas=$authas'>$ML{'/manage/links.bml.title'}</a></dt><dd>$ML{'.s2.related.links.about'}</dd>";
     $ret .= "<dt><a href='/modify.bml?authas=$authas'>$ML{'/modify.bml.title'}</a></dt><dd>$ML{'.s2.related.modify.about'}</dd>";
     $ret .= "<dt><a href='/editinfo.bml?authas=$authas'>$ML{'/editinfo.bml.title'}</a></dt><dd>$ML{'.s2.related.editinfo.about'}</dd></dl>";

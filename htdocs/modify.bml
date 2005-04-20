@@ -223,8 +223,11 @@ body<=
                     my $userstyles = LJ::S1::get_user_styles($u);
 
                     foreach (@picked) {
+                        my $type = $userstyles->{$_}->{'type'};
                         return LJ::bad_input($ML{'.error.stylenotavailable'})
-                            unless exists $pubstyles->{$_} || exists $userstyles->{$_};
+                            unless exists $pubstyles->{$_} || 
+                                   exists $userstyles->{$_} &&
+                                          ($capstyles || $_ == $u->{"s1_${type}_style"});
                     }
                 }
             }
@@ -292,10 +295,19 @@ body<=
                        @{$pubstyles{$view} || []};
 
             if (@{$userstyles{$view} || []}) {
-                push @list, ('', "--- $ML{'.availablestyles.userstyles'} ---");
 
-                push @list, map { $_->{'styleid'}, $_->{'styledes'} }
-                            @{$userstyles{$view} || []}
+                my @user_list = map { $_->{'styleid'}, $_->{'styledes'} }
+                                grep { $capstyles || $u->{"s1_${view}_style"} == $_->{'styleid'} }
+                                @{$userstyles{$view} || []};
+                push @list, ('', "--- $ML{'.availablestyles.userstyles'} ---", @user_list)
+                    if @user_list;
+
+                my @disabled_list = 
+                                map { $_->{'styleid'}, $_->{'styledes'} }
+                                grep { ! $capstyles && $u->{"s1_${view}_style"} != $_->{'styleid'} }
+                                @{$userstyles{$view} || []};
+                push @list, ('', "--- $ML{'.availablestyles.disabledstyles'} ---", @disabled_list)
+                    if @disabled_list;
             }
 
             $ret .= LJ::html_select({ 'name' => "s1_${view}_style",

@@ -861,6 +861,8 @@ p?>
 
 /customize/index.bml.error.cant_generate_user_layer=Could not generate user layer
 
+/customize/index.bml.error.disallowed_custom_layer=Your account status does not allow access to this custom layer
+
 /customize/index.bml.error.fail_create_style=Failed to create new style.
 
 /customize/index.bml.error.not_your_layout=Not your layout.
@@ -2419,6 +2421,8 @@ is required. To save yourself some time, you can <a href="/login.bml?ret=1">log 
 /meme.bml.meme.disabled=The site administrator has disabled this feature.
 
 /modify.bml.title=Modify Journal
+
+/modify_do.bml.availablestyles.disabledstyles=Disabled Styles:
 
 /modify_do.bml.availablestyles.head=Available Styles
 
