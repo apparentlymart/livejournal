@@ -303,9 +303,57 @@ sub moveUser {
     die "Can't move back to legacy cluster 0\n" unless $dclust || $opts->{expungedel};
     my $is_movemaster;
 
+    # for every DB handle we touch, make a signature of a sorted
+    # comma-delimited signature onto this list.  likewise with the
+    # list of tables this mover script knows about. if ANY signature
+    # in this list isn't identical, we just abort.  perhaps this
+    # script wasn't updated, or a long-running mover job wasn't
+    # restarted and new tables were added to the schema.
+    my @alltables = (@LJ::USER_TABLES, @LJ::USER_TABLES_LOCAL);
+    my $mover_sig = join(",", sort @alltables);
+
+    my $get_sig = sub {
+        my $hnd = shift;
+        return join(",", sort
+                    @{ $hnd->selectcol_arrayref("SHOW TABLES") });
+    };
+
+    my $global_sig = $get_sig->($dbh);
+
+    my $check_sig = sub {
+        my $hnd = shift;
+        my $name = shift;
+        my $sig = $get_sig->($hnd);
+
+        # special case:  signature can be that of the global
+        return if $sig eq $global_sig;
+
+        if ($sig ne $mover_sig) {
+            my %sigt = map { $_ => 1 } split(/,/, $sig);
+            my @err;
+            foreach my $tbl (@alltables) {
+                unless ($sigt{$tbl}) {
+                    # missing a table the mover knows about
+                    push @err, "-$tbl";
+                    next;
+                }
+                delete $sigt{$tbl};
+            }
+            foreach my $tbl (sort keys %sigt) {
+                push @err, "?$tbl";
+            }
+            if (@err) {
+                die "Table signature for $name doesn't match!  Stopping.  [@err]\n";
+            }
+        }
+    };
+
+    $check_sig->($dbch, "dbch(database dst)");
+
     # the actual master handle, which we delete from if deleting from source
     $dboa = LJ::get_cluster_master({raw=>1}, $u);
     die "Can't get source cluster handle.\n" unless $dboa;
+    $check_sig->($dboa, "dboa(database src)");
 
     if ($opts->{movemaster}) {
         # if an a/b cluster, the movemaster (the source for moving) is
@@ -323,6 +371,7 @@ sub moveUser {
 
         $dbo = LJ::get_dbh({raw=>1}, $mm_role);
         die "Couldn't get movemaster handle" unless $dbo;
+        $check_sig->($dbo, "dbo(movemaster)");
 
         $dbo->{'RaiseError'} = 1;
         $dbo->do("SET wait_timeout=28800");
@@ -529,7 +578,6 @@ sub moveUser {
 
     # all tables we could be moving.  we need to sort them in
     # order so that we check dependant tables first
-    my @alltables = (@LJ::USER_TABLES, @LJ::USER_TABLES_LOCAL);
     my @tables;
     push @tables, grep { ! $dep{$_} } @alltables;
     push @tables, grep { $dep{$_} } @alltables;
@@ -819,6 +867,7 @@ sub moveUser {
     if ($post_state ne $pre_state) {
         die "Move aborted due to state change during move: Before: [$pre_state], After: [$post_state]\n";
     }
+    $check_sig->($dbo, "dbo(aftermove)");
 
     my $unlocked;
     if (! $verify_code || $verify_code->()) {
