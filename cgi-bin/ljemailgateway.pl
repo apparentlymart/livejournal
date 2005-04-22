@@ -174,7 +174,7 @@ sub process {
             # emailgateway can function without modifications.
             # (We don't need anything but Data, the other parts have
             # already been pulled from $head->unfold)
-            $subject = 'Sprint PictureMail Post';
+            $subject = 'Picture Post';
             $entity = MIME::Entity->build(
                 Data => HTML::Entities::decode_entities(
                     $xml->{messageContents}->{messageText} ),
