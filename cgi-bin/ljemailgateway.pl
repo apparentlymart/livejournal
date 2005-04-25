@@ -169,16 +169,16 @@ sub process {
         );
         my $ua_rv = $ua->get( $url, ':content_file' => $tempfile );
 
+        my $msg = $xml->{messageContents}->{messageText};
+        $msg = ref $msg ? "" : HTML::Entities::decode( $msg );
+
         if ($ua_rv->is_success) {
             # (re)create a basic mime entity, so the rest of the
             # emailgateway can function without modifications.
             # (We don't need anything but Data, the other parts have
             # already been pulled from $head->unfold)
             $subject = 'Picture Post';
-            $entity = MIME::Entity->build(
-                Data => HTML::Entities::decode_entities(
-                    $xml->{messageContents}->{messageText} ),
-            );
+            $entity = MIME::Entity->build( Data => $msg );
             $entity->attach(
                 Path => $tempfile,
                 Type => 'image/jpeg'
