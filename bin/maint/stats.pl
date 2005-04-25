@@ -372,8 +372,9 @@ $maint{'genstats'} = sub
         die $dbh->errstr if $dbh->err;
 
         open (OUT, ">$LJ::HTDOCS/stats/stats.txt");
-        while (@_ = $sth->fetchrow_array) {
-            print OUT join("\t", @_), "\n";
+        while (my @row = $sth->fetchrow_array) {
+            next if grep { $row[0] == $_ } @LJ::PRIVATE_STATS;
+            print OUT join("\t", @row), "\n";
         }
         close OUT;
     }
