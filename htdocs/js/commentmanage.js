@@ -556,7 +556,9 @@ function createModerationFunction (ae, dItemid) {
         };
 
         xtr.onreadystatechange = state_callback;
-        xtr.open("POST", ae.href + "&jsmode=1", true);
+
+        var postUrl = ae.href.replace(/http:\/\/.+?\//, "/");
+        xtr.open("POST", postUrl + "&jsmode=1", true);
 
         var postdata = "confirm=Y";
 
