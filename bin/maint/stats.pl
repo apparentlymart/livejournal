@@ -373,7 +373,7 @@ $maint{'genstats'} = sub
 
         open (OUT, ">$LJ::HTDOCS/stats/stats.txt");
         while (my @row = $sth->fetchrow_array) {
-            next if grep { $row[0] == $_ } @LJ::PRIVATE_STATS;
+            next if grep { $row[0] eq $_ } @LJ::PRIVATE_STATS;
             print OUT join("\t", @row), "\n";
         }
         close OUT;
