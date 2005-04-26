@@ -1,5 +1,11 @@
 <?page
 title=><?_ml .title _ml?>
+head<=
+<style>
+    option.disabled { color: GrayText; }
+</style>
+<=head
+
 body<=
 <?_code
 {
@@ -248,19 +254,25 @@ body<=
                           ($has_cap || $_ == $style{$type}) }
                    keys %$userlay;
         if (@user) {
-            push @layers, "", "--- Custom Layers: ---", @user;
+            push @layers, { value    => "",
+                            text     => "--- Custom Layers: ---",
+                            disabled => 1 }, @user;
         }
 
         unless ($has_cap) {
             my @disabled =
-                map { $_, $userlay->{$_}->{'name'} ? $userlay->{$_}->{'name'} : "\#$_" } 
+                map { { value    => $_,
+                        text     => $userlay->{$_}->{'name'} ? $userlay->{$_}->{'name'} : "\#$_",
+                        disabled => 1 } } 
                 sort { $userlay->{$a}->{'name'} cmp $userlay->{$b}->{'name'} || 
                        $userlay->{$a}->{'s2lid'} <=> $userlay->{$b}->{'s2lid'} }
                 grep { /^\d+$/ && $userlay->{$_}->{'b2lid'} == $style{$ptype} && 
                        $userlay->{$_}->{'type'} eq $type && $_ != $style{$type} }
                 keys %$userlay;
             if (@disabled) {
-                push @layers, "", "--- Disabled Layers: ---", @disabled;
+                push @layers, { value    => "",
+                                text     => "--- Disabled Layers: ---",
+                                disabled => 1 }, @disabled;
             }
         }
 

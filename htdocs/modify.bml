@@ -1,6 +1,11 @@
 <?page
 title=><?_ml .title _ml?>
-head=><?_code return $LJ::COMMON_CODE{'autoradio_check'}; _code?>
+head<=
+<?_code return $LJ::COMMON_CODE{'autoradio_check'}; _code?>
+<style>
+    option.disabled { color: GrayText; }
+</style>
+<=head
 body<=
 
 <?_code
@@ -299,14 +304,20 @@ body<=
                 my @user_list = map { $_->{'styleid'}, $_->{'styledes'} }
                                 grep { $capstyles || $u->{"s1_${view}_style"} == $_->{'styleid'} }
                                 @{$userstyles{$view} || []};
-                push @list, ('', "--- $ML{'.availablestyles.userstyles'} ---", @user_list)
+                push @list, { value    => "",
+                              text     => "--- $ML{'.availablestyles.userstyles'} ---",
+                              disabled => 1 }, @user_list
                     if @user_list;
 
                 my @disabled_list = 
-                                map { $_->{'styleid'}, $_->{'styledes'} }
+                                map { { value    => $_->{'styleid'},
+                                        text     => $_->{'styledes'},
+                                        disabled => 1 } }
                                 grep { ! $capstyles && $u->{"s1_${view}_style"} != $_->{'styleid'} }
                                 @{$userstyles{$view} || []};
-                push @list, ('', "--- $ML{'.availablestyles.disabledstyles'} ---", @disabled_list)
+                push @list, { value    => '',
+                              text     => "--- $ML{'.availablestyles.disabledstyles'} ---",
+                              disabled => 1 }, @disabled_list
                     if @disabled_list;
             }
 

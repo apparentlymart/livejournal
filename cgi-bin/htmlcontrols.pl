@@ -108,7 +108,19 @@ sub html_select
         if $opts->{'multiple'} && ref $opts->{'selected'} eq 'ARRAY';
 
     my $did_sel = 0;
-    while (my ($value, $text) = splice(@items, 0, 2)) {
+    while (defined (my $value = shift @items)) {
+
+        # items can be either pairs of $value, $text or a list of $it hashrefs (or a mix)
+        my $it = {};
+        my $text;
+        if (ref $value) {
+            $it = $value;
+            $value = $it->{value};
+            $text = $it->{text};
+        } else {
+            $text = shift @items;
+        }
+
         my $sel = "";
         # multiple-mode or single-mode?
         if (ref $selref eq 'HASH' && $selref->{$value} ||
@@ -122,8 +134,11 @@ sub html_select
         if ($opts->{'name'} ne "" && $value ne "") {
             $id = " id='$opts->{'name'}_$value'";
         }
+
+        # is this individual option disabled?
+        my $dis = $it->{'disabled'} ? " disabled='disabled'" : '';
         
-        $ret .= "<option value=\"$value\" $id $sel>" .
+        $ret .= "<option value=\"$value\"$id$sel$dis>" .
                  ($ehtml ? ehtml($text) : $text) . "</option>";
     }
     $ret .= "</select>";
