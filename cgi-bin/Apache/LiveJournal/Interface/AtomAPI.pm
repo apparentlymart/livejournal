@@ -19,6 +19,24 @@ BEGIN {
     };
 };
 
+# check allowed Atom upload filetypes
+sub check_mime
+{
+    my $mime = shift;
+    return unless $mime;
+
+    # TODO: add audio/etc support
+    my %allowed_mime = (
+        image => qr{^image\/(?:gif|jpe?g|png|tiff?)$}i,
+        #audio => qr{^(?:application|audio)\/(?:(?:x-)?ogg|wav)$}i
+    );
+
+    foreach (keys %allowed_mime) {
+        return $_ if $mime =~ $allowed_mime{$_}
+    }
+    return;
+}
+
 sub respond {
     my ($r, $status, $body, $type) = @_;
 
@@ -61,61 +79,38 @@ HTML
     return OK;
 };
 
-# TODO: Combine this with the <standalone> tag support for
-# service.upload capabilities.
 sub handle_upload
 {
-    my ($r, $remote, $u, $opts) = @_;
+    my ($r, $remote, $u, $opts, $entry) = @_;
 
-    my $buff;
-    $r->read($buff, $r->header_in("Content-length"));
+    # entry could already be populated from a standalone
+    # service.post posting.
+    my $standalone = $entry ? 1 : 0;
+    unless ($entry) {
+        my $buff;
+        $r->read($buff, $r->header_in("Content-length"));
 
-    my $entry;
-    eval { $entry = XML::Atom::Entry->new( \$buff ); };
-    return respond($r, 400, "Could not parse the entry due to invalid markup.<br /><pre>$@</pre>")
-        if $@;
+        eval { $entry = XML::Atom::Entry->new( \$buff ); };
+        return respond($r, 400, "Could not parse the entry due to invalid markup.<br /><pre>$@</pre>")
+            if $@;
+    }
 
-    return respond($r, 500, "Not implemented.");
-}
+    my $mime = $entry->content()->type();
+    my $mime_area = check_mime( $mime );
+    return respond($r, 400, "Unsupported MIME type: $mime") unless $mime_area;
 
-sub handle_post {
-    my ($r, $remote, $u, $opts) = @_;
-    my ($buff, $entry);
+    if ($mime_area eq 'image') {
 
-    # read the content
-    $r->read($buff, $r->header_in("Content-length"));
-
-    # try parsing it
-    eval { $entry = XML::Atom::Entry->new( \$buff ); };
-    return respond($r, 400, "Could not parse the entry due to invalid markup.<br /><pre>$@</pre>")
-        if $@;
-
-    # on post, the entry must NOT include an id
-    return respond($r, 400, "Must not include an <b>&lt;id&gt;</b> field in a new entry.")
-        if $entry->id();
-
-    my $media_mime = qr{^image\/(?:gif|jpe?g|png|tiff?)$}i;
-
-    # detect 'standalone' media posts, send to fotobilder.
-    # this will eventually be phased out in favor of service.upload methods.
-    my $standalone = $entry->get("http://sixapart.com/atom/typepad#", 'standalone');
-    if ($standalone) {
-        return respond($r, 403, "Unable to post standalone entry. Your account doesn't have the required access.")
+        return respond($r, 403, "Unable to upload media. Your account doesn't have the required access.")
             unless LJ::get_cap($u, 'fb_can_upload') && $LJ::FB_SITEROOT;
 
-        my $mime = $entry->content()->type();
-        return respond($r, 400, "Unsupported MIME type: $mime")
-            unless $mime =~ /$media_mime/;
-
         my $err;
-
         LJ::load_user_props(
             $u,
             qw/ emailpost_gallery emailpost_imgsecurity /
         );
 
         my $summary = LJ::trim( $entry->summary() );
-        $summary =~ s/\|\n//g;
 
         my $fb = LJ::FBUpload::do_upload(
             $u, \$err,
@@ -138,17 +133,45 @@ sub handle_post {
 
         my $atom_reply = XML::Atom::Entry->new();
         $atom_reply->title( $fb->{Title} );
-        $atom_reply->summary('Media post');
 
-        $atom_reply->id( "FB_ID|$fb->{URL}|$fb->{Title}|$fb->{Width}|$fb->{Height}|$summary" );
+        if ($standalone) {
+            $atom_reply->summary('Media post');
+            my $id = "atom:$u->{user}:$fb->{PicID}";
+            $fb->{Summary} = $summary;
+            LJ::MemCache::set( $id, $fb, 1800 );
+            $atom_reply->id( "urn:fb:$LJ::FB_DOMAIN:$id" );
+        }
+
         my $link = XML::Atom::Link->new();
         $link->type('text/html');
         $link->rel('alternate');
         $link->href( $fb->{URL} );
         $atom_reply->add_link($link);
 
+        $r->header_out("Location", $fb->{URL});
         return respond($r, 201, \$atom_reply->as_xml(), 'atom');
     }
+}
+
+sub handle_post {
+    my ($r, $remote, $u, $opts) = @_;
+    my ($buff, $entry);
+
+    # read the content
+    $r->read($buff, $r->header_in("Content-length"));
+
+    # try parsing it
+    eval { $entry = XML::Atom::Entry->new( \$buff ); };
+    return respond($r, 400, "Could not parse the entry due to invalid markup.<br /><pre>$@</pre>")
+        if $@;
+
+    # on post, the entry must NOT include an id
+    return respond($r, 400, "Must not include an <b>&lt;id&gt;</b> field in a new entry.")
+        if $entry->id();
+
+    # detect 'standalone' media posts
+    return handle_upload( @_, $entry )
+        if $entry->get("http://sixapart.com/atom/typepad#", 'standalone');
 
     # remove the SvUTF8 flag. See same code in synsuck.pl for
     # an explanation
@@ -168,16 +191,17 @@ sub handle_post {
         my $type = $link->get('type');
         my $id   = $link->get('href');
 
-        next unless $rel eq 'related' && $type =~ /$media_mime/ && $id;
-        my ($ns, $url, $title, $width, $height, $caption) = split /\|/, $id;
-        next unless $ns eq 'FB_ID' && $url;
+        next unless $rel eq 'related' && check_mime($type) && $id;
+        $id =~ s/^urn:fb:$LJ::FB_DOMAIN://;
+        my $fb = LJ::MemCache::get( $id );
+        next unless $fb;
 
         push @images, {
-            url     => $url,
-            width   => $width,
-            height  => $height,
-            caption => $caption,
-            title   => $title,
+            url     => $fb->{URL},
+            width   => $fb->{Width},
+            height  => $fb->{Height},
+            caption => $fb->{Summary},
+            title   => $fb->{Title}
         };
     }
 
@@ -406,7 +430,7 @@ sub handle {
     my ( $action, $param, $oldparam ) = ( $1, $2, $3 )
       if $r->uri =~ m#^/interface/atom(?:api)?/?(\w+)?(?:/(\w+))?(?:/(\d+))?$#;
 
-    my $valid_actions = qr{feed|edit|post};
+    my $valid_actions = qr{feed|edit|post|upload};
 
     # old uri was was: /interface/atomapi/<username>/<verb>[/<number>]
     # support both by shifting params around if we see something extra.
@@ -435,7 +459,7 @@ sub handle {
         LJ::load_user_props( $u, 'journaltitle' );
         my $title = $u->{journaltitle} || 'Untitled Journal';
         my $feed = XML::Atom::Feed->new();
-        foreach (qw/ post feed /) {
+        foreach (qw/ post feed upload /) {
             my $link = XML::Atom::Link->new();
             $link->title($title);
             $link->type('application/x.atom+xml');
@@ -458,6 +482,7 @@ sub handle {
 
     unless (($action eq 'feed' and $method eq 'GET')  or
             ($action eq 'post' and $method eq 'POST') or
+            ($action eq 'upload' and $method eq 'POST') or
             ($action eq 'edit' and 
              {'GET'=>1,'PUT'=>1,'DELETE'=>1}->{$method})) {
         return respond($r, 400, "URI scheme /interface/atom/<b>$action</b> is incompatible with request method <b>$method</b>.");
@@ -486,6 +511,7 @@ sub handle {
         'feed'   => \&handle_feed,
         'post'   => \&handle_post,
         'edit'   => \&handle_edit,
+        'upload' => \&handle_upload,
     }->{$action}->( $r, $remote, $u, $opts );
 
     return OK;
