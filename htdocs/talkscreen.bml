@@ -140,8 +140,11 @@ _info?><?_code
 
  if ($mode eq 'freeze') {
      my $can_freeze = LJ::Talk::can_freeze($remote, $u, $up, $post->{userpost});
-     return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.privs.freeze'} p?>"
-         unless $can_freeze;
+     unless ($can_freeze) {
+         $body = "<?h1 $ML{'Error'} h1?><?p $ML{'.error.privs.freeze'} p?>";
+         return;
+     }
+
      unless ($POST{confirm} eq 'Y') {
          $body .= "<?h1 $ML{'.freeze.sure.title'} h1?><?p $ML{'.freeze.sure.body'} p?>";
          $body .= "<p><form method='post' action='talkscreen.bml'><center>\n";
@@ -157,13 +160,16 @@ _info?><?_code
      }
      return $jsres->($mode) if $jsmode;
      my $linktext = BML::ml('.link', { aopts => "href='$itemlink'" });
-     return "<?h1 $ML{'.frozen.title'} h1?><?p $ML{'.frozen.body'} $linktext p?>";
+     $body = "<?h1 $ML{'.frozen.title'} h1?><?p $ML{'.frozen.body'} $linktext p?>";
+     return;
  }
 
  if ($mode eq 'unfreeze') {
      my $can_unfreeze = LJ::Talk::can_unfreeze($remote, $u, $up, $post->{userpost});
-     return "<?h1 $ML{'Error'} h1?><?p You are not allowed to unfreeze this thread p?>"
-         unless $can_unfreeze;
+     unless ($can_unfreeze) {
+         $body = "<?h1 $ML{'Error'} h1?><?p You are not allowed to unfreeze this thread p?>";
+         return;
+     }
      unless ($POST{confirm} eq 'Y') {
          $body .= "<?h1 $ML{'.unfreeze.sure.title'} h1?><?p $ML{'.unfreeze.sure.body'} p?>";
          $body .= "<p><form method='post' action='talkscreen.bml'><center>\n";
@@ -179,10 +185,12 @@ _info?><?_code
      }
      return $jsres->($mode) if $jsmode;
      my $linktext = BML::ml('.link', { aopts => "href='$itemlink'" });
-     return "<?h1 $ML{'.unfrozen.title'} h1?><?p $ML{'.unfrozen.body'} $linktext p?>";
+     $body = "<?h1 $ML{'.unfrozen.title'} h1?><?p $ML{'.unfrozen.body'} $linktext p?>";
+     return;
  }
 
- return "<?h1 $ML{'Error'} h1?><?p $ML{'error.unknownmode'} p?>";
+ $body = "<?h1 $ML{'Error'} h1?><?p $ML{'error.unknownmode'} p?>";
+ return;
 
 }
 _code?><?page
