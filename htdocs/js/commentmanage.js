@@ -50,6 +50,17 @@ function getXTR () {
             }
         }
     }
+
+    // let me explain this.  Opera 8 does XMLHttpRequest, but not setRequestHeader.
+    // no problem, we thought:  we'll test for setRequestHeader and if it's not present
+    // then fall back to the old behavior (treat it as not working).  BUT --- IE6 won't
+    // let you even test for setRequestHeader without throwing an exception (you need
+    // to call .open on the .xtr first or something)
+    try {
+        if (xtr && ! xtr.setRequestHeader)
+            xtr = null;
+    } catch (ex) { }
+
     return xtr;
 }
 
