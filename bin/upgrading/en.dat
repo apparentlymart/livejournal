@@ -2687,6 +2687,8 @@ Sincerely,
 
 /register.bml.email.subject=Validate Email
 
+/register.bml.error.emailchanged=This verification link is out of date.  Please <a [[aopts]]>request a new verification email</a>.
+
 /register.bml.error.invalidcode=Invalid validation code.
 
 /register.bml.error.useralreadyvalidated=The email address for [[user]] has already been validated.

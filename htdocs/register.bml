@@ -61,6 +61,13 @@ body<=
      my $aa = LJ::is_valid_authaction($aaid, $auth);
      if (!$aa) { return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.invalidcode'} p?>"; }
      my $u = LJ::load_userid($aa->{'userid'});
+
+     # verify their email hasn't subsequently changed
+     unless ($u->{email} eq $aa->{arg1}) {
+         return "<?h1 $ML{'Error'} h1?>" .
+                BML::ml('.error.emailchanged', { aopts => "href='$LJ::SITEROOT/register.bml'" });
+     }
+
      LJ::update_user($u, { status => 'A' });
      LJ::run_hooks("emailconfirmed", $u);
      if ($u->{'status'} eq "T") {
