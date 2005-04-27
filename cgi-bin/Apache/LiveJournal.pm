@@ -4,7 +4,8 @@
 package Apache::LiveJournal;
 
 use strict;
-use Apache::Constants qw(:common REDIRECT HTTP_NOT_MODIFIED HTTP_MOVED_PERMANENTLY M_TRACE);
+use Apache::Constants qw(:common REDIRECT HTTP_NOT_MODIFIED HTTP_MOVED_PERMANENTLY
+                         M_TRACE M_OPTIONS);
 use Apache::File ();
 use lib "$ENV{'LJHOME'}/cgi-bin";
 use Apache::LiveJournal::PalImg;
@@ -167,7 +168,7 @@ sub blocked_bot
 sub trans
 {
     my $r = shift;
-    return DECLINED if $r->main;  # don't deal with subrequests
+    return DECLINED if ! $r->is_main || $r->method_number == M_OPTIONS;  # don't deal with subrequests or OPTIONS
 
     my $uri = $r->uri;
     my $args = $r->args;
@@ -191,10 +192,41 @@ sub trans
     LJ::procnotify_check();
     S2::set_domain('LJ');
 
-    my $is_ssl = LJ::run_hook("ssl_check", {
+    my $is_ssl = $LJ::IS_SSL = LJ::run_hook("ssl_check", {
         r => $r,
     });
-    $LJ::IS_SSL = $is_ssl;
+
+    # handle uniq cookies
+    if ($LJ::UNIQ_COOKIES && $r->is_initial_req) {
+
+        # if cookie exists, check for sysban
+        my ($uniq, $uniq_time);
+        if (Apache->header_in("Cookie") =~ /\bljuniq\s*=\s*([a-zA-Z0-9]{15}):(\d+)/) {
+            ($uniq, $uniq_time) = ($1, $2);
+            $r->notes("uniq" => $uniq);
+            if (LJ::sysban_check('uniq', $uniq) && index($uri, $LJ::BLOCKED_BOT_URI) != 0) {
+                $r->handler("perl-script");
+                $r->push_handlers(PerlHandler => \&blocked_bot );
+                return OK;
+            };
+        }
+
+        # if no cookie, create one.  if older than a day, revalidate
+        my $now = time();
+        my $DAY = 3600*24;
+        if (! $uniq || $now - $uniq_time > $DAY) {
+            $uniq ||= LJ::rand_chars(15);
+
+            # set uniq cookies for all cookie_domains
+            my @domains = ref $LJ::COOKIE_DOMAIN ? @$LJ::COOKIE_DOMAIN : ($LJ::COOKIE_DOMAIN);
+            foreach my $dom (@domains) {
+                $r->err_headers_out->add("Set-Cookie" =>
+                                         "ljuniq=$uniq:$now; " .
+                                         "expires=" . LJ::time_to_cookie($now + $DAY*60) . "; " .
+                                         ($dom ? "domain=$dom; " : "") . "path=/");
+            }
+        }
+    }
 
     # only allow certain pages over SSL
     if ($is_ssl) {
@@ -226,38 +258,6 @@ sub trans
         my $url = "$LJ::SITEROOT$uri";
         $url .= "?" . $args if $args;
         return redir($r, $url);
-    }
-
-    # handle uniq cookies
-    if ($LJ::UNIQ_COOKIES) {
-
-        # if cookie exists, check for sysban
-        my ($uniq, $uniq_time);
-        if (Apache->header_in("Cookie") =~ /\bljuniq\s*=\s*([a-zA-Z0-9]{15}):(\d+)/) {
-            ($uniq, $uniq_time) = ($1, $2);
-            $r->notes("uniq" => $uniq);
-            if (LJ::sysban_check('uniq', $uniq) && index($uri, $LJ::BLOCKED_BOT_URI) != 0) {
-                $r->handler("perl-script");
-                $r->push_handlers(PerlHandler => \&blocked_bot );
-                return OK;
-            };
-        }
-
-        # if no cookie, create one.  if older than a day, revalidate
-        my $now = time();
-        my $DAY = 3600*24;
-        if (! $uniq || $now - $uniq_time > $DAY) {
-            $uniq ||= LJ::rand_chars(15);
-
-            # set uniq cookies for all cookie_domains
-            my @domains = ref $LJ::COOKIE_DOMAIN ? @$LJ::COOKIE_DOMAIN : ($LJ::COOKIE_DOMAIN);
-            foreach my $dom (@domains) {
-                $r->header_out("Set-Cookie" =>
-                               "ljuniq=$uniq:$now; " .
-                               "expires=" . LJ::time_to_cookie($now + $DAY*60) . "; " .
-                               "domain=$dom; path=/");
-            }
-        }
     }
 
     # check for sysbans on ip address
