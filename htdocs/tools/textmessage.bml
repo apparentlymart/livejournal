@@ -90,6 +90,9 @@ body<=
         $phone->send({ 'from' => $from, 
                        'message' => $message, },
                      \@errors);
+
+        # strip numbers from error messages
+        s/(\d{3,})/'x'x$1/eg foreach @errors;
         
         return LJ::bad_input(@errors) if @errors;
         
