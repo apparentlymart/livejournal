@@ -64,8 +64,9 @@ body<=
 
      # verify their email hasn't subsequently changed
      unless ($u->{email} eq $aa->{arg1}) {
-         return "<?h1 $ML{'Error'} h1?>" .
-                BML::ml('.error.emailchanged', { aopts => "href='$LJ::SITEROOT/register.bml'" });
+         return "<?h1 $ML{'Error'} h1?><?p " .
+                BML::ml('.error.emailchanged', { aopts => "href='$LJ::SITEROOT/register.bml'" }) .
+                " p?>";
      }
 
      LJ::update_user($u, { status => 'A' });
