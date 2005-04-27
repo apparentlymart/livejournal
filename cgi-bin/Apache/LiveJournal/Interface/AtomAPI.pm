@@ -101,7 +101,7 @@ sub handle_upload
 
     if ($mime_area eq 'image') {
 
-        return respond($r, 403, "Unable to upload media. Your account doesn't have the required access.")
+        return respond($r, 400, "Unable to upload media. Your account doesn't have the required access.")
             unless LJ::get_cap($u, 'fb_can_upload') && $LJ::FB_SITEROOT;
 
         my $err;
@@ -233,8 +233,24 @@ sub handle_post {
     $atom_reply->title( $entry->title() );
     $atom_reply->summary( substr( $entry->content->body(), 0, 100 ) );
 
-    my $new_link = "$LJ::SITEROOT/interface/atom/edit/$res->{'itemid'}";
-    $r->header_out("Location", $new_link);
+    my $link;
+    my $edit_url = "$LJ::SITEROOT/interface/atom/edit/$res->{'itemid'}";
+
+    $link = XML::Atom::Link->new();
+    $link->type('application/x.atom+xml');
+    $link->rel('service.edit');
+    $link->href( $edit_url );
+    $link->title( $entry->title() );
+    $atom_reply->add_link($link);
+
+    $link = XML::Atom::Link->new();
+    $link->type('text/html');
+    $link->rel('alternate');
+    $link->href( $res->{url} );
+    $link->title( $entry->title() );
+    $atom_reply->add_link($link);
+
+    $r->header_out("Location", $edit_url);
     return respond($r, 201, \$atom_reply->as_xml(), 'atom');
 }
 
