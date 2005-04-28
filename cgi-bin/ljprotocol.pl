@@ -1219,10 +1219,11 @@ sub editevent
                             map { $req->{$_} } qw(year mon day hour min));
     my $qeventtime = $dbcm->quote($eventtime);
 
-    my $security = "public";
-    if ($req->{'security'} eq "private" || $req->{'security'} eq "usemask") {
-        $security = $req->{'security'};
-    }
+    # preserve old security by default, use user supplied if it's understood
+    my $security = $oldevent->{security};
+    $security = $req->{security}
+        if $req->{security} &&
+           $req->{security} =~ /^(?:public|private|usemask)$/;
 
     my $qyear = $req->{'year'}+0;
     my $qmonth = $req->{'mon'}+0;
