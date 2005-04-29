@@ -36,10 +36,14 @@ sub make_feed
         return undef;
     }
 
-    LJ::load_user_props($u, qw/ journaltitle journalsubtitle /);
+    LJ::load_user_props($u, qw/ journaltitle journalsubtitle opt_synlevel /);
 
     LJ::text_out(\$u->{$_}) 
         foreach ("name", "url", "urlname");
+    
+    # opt_synlevel will default to 'full'
+    $u->{'opt_synlevel'} = 'full' 
+        unless $u->{'opt_synlevel'} =~ /^(?:full|summary|title)$/;
 
     # some data used throughout the channel
     my $journalinfo = {
@@ -149,7 +153,8 @@ sub make_feed
     foreach my $it (@items) 
     {
         # load required data
-        my $itemid = $it->{'itemid'};
+        my $itemid  = $it->{'itemid'};
+        my $ditemid = $itemid*256 + $it->{'anum'};
 
         next ENTRY if $posteru{$it->{'posterid'}} && $posteru{$it->{'posterid'}}->{'statusvis'} eq 'S';
 
@@ -166,38 +171,57 @@ sub make_feed
             $subject = LJ::exml($subject);
         }
 
-        my $event = $logtext->{$itemid}->[1];
+        # an HTML link to the entry. used if we truncate or summarize
+        my $readmore = "<b>(<a href=\"$journalinfo->{link}$ditemid.html\">Read more ...</a>)</b>";
 
-        # users without 'full_rss' get their logtext bodies truncated
-        # do this now so that the html cleaner will hopefully fix html we break
-        unless (LJ::get_cap($u, 'full_rss')) {
-            my $trunc = LJ::text_trim($event, 0, 80);
-            $event = "$trunc..." if $trunc ne $event;
-        }
+        # empty string so we don't waste time cleaning an entry that won't be used
+        my $event = $u->{'opt_synlevel'} eq 'title' ? '' : $logtext->{$itemid}->[1];
 
-        # clean the event
-        LJ::CleanHTML::clean_event(\$event, 
-                                   { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'} });
+        # clean the event, if non-empty
+        my $ppid = 0;
+        if ($event) {
 
-        if ($event =~ /<lj-poll-(\d+)>/) {
-            my $pollid = $1;
-            my $name = $dbr->selectrow_array("SELECT name FROM poll WHERE pollid=?",
-                                             undef, $pollid);
-
-            if ($name) {
-                LJ::Poll::clean_poll(\$name);
-            } else {
-                $name = "#$pollid";
+            # users without 'full_rss' get their logtext bodies truncated
+            # do this now so that the html cleaner will hopefully fix html we break
+            unless (LJ::get_cap($u, 'full_rss')) {
+                my $trunc = LJ::text_trim($event, 0, 80);
+                $event = "$trunc $readmore" if $trunc ne $event;
             }
 
-            $event =~ s!<lj-poll-$pollid>!<div><a href="$LJ::SITEROOT/poll/?id=$pollid">View Poll: $name</a></div>!g;
-        }
+            LJ::CleanHTML::clean_event(\$event, 
+                                       { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'} });
+        
+            # do this after clean so we don't have to about know whether or not
+            # the event is preformatted
+            if ($u->{'opt_synlevel'} eq 'summary') {
 
-        my $ppid = $1
+                # assume the first paragraph is terminated by two <br> or a </p>
+                # valid XML tags should be handled, even though it makes an uglier regex
+                if ($event =~ m!((<br\s*/?\>(</br\s*>)?\s*){2})|(</p\s*>)!i) {
+                    # everything before the matched tag + the tag itself
+                    # + a link to read more
+                    $event = $` . $& . $readmore;
+                }
+            }
+
+            if ($event =~ /<lj-poll-(\d+)>/) {
+                my $pollid = $1;
+                my $name = $dbr->selectrow_array("SELECT name FROM poll WHERE pollid=?",
+                                                 undef, $pollid);
+
+                if ($name) {
+                    LJ::Poll::clean_poll(\$name);
+                } else {
+                    $name = "#$pollid";
+                }
+
+                $event =~ s!<lj-poll-$pollid>!<div><a href="$LJ::SITEROOT/poll/?id=$pollid">View Poll: $name</a></div>!g;
+            }
+
+            $ppid = $1
                 if $event =~ m!<lj-phonepost journalid=['"]\d+['"] dpid=['"](\d+)['"] />!;
-        $event = LJ::exml($event);
-
-        my $ditemid = $itemid*256 + $it->{'anum'};
+            $event = LJ::exml($event);
+        }
 
         my $mood;
         if ($logprops{$itemid}->{'current_mood'}) {
@@ -281,7 +305,11 @@ sub create_view_rss
         $ret .= "  <title>$it->{subject}</title>\n" if $it->{subject};
         $ret .= "  <author>$journalinfo->{email}</author>" if $journalinfo->{email};
         $ret .= "  <link>$journalinfo->{link}$ditemid.html</link>\n";
-        $ret .= "  <description>$it->{event}</description>\n";
+        # omit the description tag if we're only syndicating titles
+        #   note: the $event was also emptied earlier, in make_feed
+        unless ($u->{'opt_synlevel'} eq 'title') {
+            $ret .= "  <description>$it->{event}</description>\n";
+        }
         if ($it->{comments}) {
             $ret .= "  <comments>$journalinfo->{link}$ditemid.html</comments>\n";
         }
@@ -354,7 +382,8 @@ sub create_view_atom
         my $ditemid = $it->{ditemid};
 
         $ret .= "  <entry xmlns=\"http://purl.org/atom/ns#\">\n";
-        $ret .= "    <title mode='escaped'>$it->{subject}</title>\n"; # include empty tag if we don't have a subject.
+        # include empty tag if we don't have a subject.
+        $ret .= "    <title mode='escaped'>$it->{subject}</title>\n";
         $ret .= "    <id>urn:lj:$LJ::DOMAIN:atom1:$journalinfo->{u}{user}:$ditemid</id>\n";
         $ret .= "    <link rel='alternate' type='text/html' href='$journalinfo->{link}$ditemid.html' />\n";
         if ($opts->{'apilinks'}) {
@@ -372,7 +401,19 @@ sub create_view_atom
         $ret .= "      <name>" . LJ::exml($journalinfo->{u}{name}) . "</name>\n";
         $ret .= "      <email>$journalinfo->{editor}</email>\n" if $journalinfo->{editor};
         $ret .= "    </author>\n";
-        $ret .= "    <content type='text/html' mode='escaped'>$it->{event}</content>\n";
+        # if syndicating the complete entry
+        #   -print a content tag
+        # elsif syndicating summaries
+        #   -print a summary tag
+        # else (code omitted), we're syndicating title only
+        #   -print neither (the title has already been printed)
+        #   note: the $event was also emptied earlier, in make_feed
+        if ($u->{'opt_synlevel'} eq 'full') {
+            $ret .= "    <content type='text/html' mode='escaped'>$it->{event}</content>\n";
+        } elsif ($u->{'opt_synlevel'} eq 'summary') {
+            $ret .= "    <summary type='text/html' mode='escaped'>$it->{event}</summary>\n";
+        }
+        
         $ret .= "  </entry>\n";
     }
 

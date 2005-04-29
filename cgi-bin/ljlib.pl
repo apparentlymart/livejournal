@@ -2490,6 +2490,17 @@ sub register_setter
     $LJ::SETTER{$key} = $subref;
 }
 
+register_setter('synlevel', sub {
+    my ($dba, $u, $remote, $key, $value, $err) = @_;
+    unless ($value =~ /^(title|summary|full)$/) {
+        $$err = "Illegal value.  Must be 'title', 'summary', or 'full'";
+        return 0;
+    }
+    
+    LJ::set_userprop($u, 'opt_synlevel', $value);
+    return 1;
+});
+
 register_setter("newpost_minsecurity", sub {
     my ($dba, $u, $remote, $key, $value, $err) = @_;
     unless ($value =~ /^(public|friends|private)$/) {
