@@ -454,18 +454,23 @@ sub get_groupmask
     # TAG:FR:ljlib:get_groupmask
     my ($journal, $remote) = @_;
     return 0 unless $journal && $remote;
-    my $jid = want_userid($journal);
-    my $fid = want_userid($remote);
+
+    my $jid = LJ::want_userid($journal);
+    my $fid = LJ::want_userid($remote);
     return 0 unless $jid && $fid;
+
     my $memkey = [$jid,"frgmask:$jid:$fid"];
     my $mask = LJ::MemCache::get($memkey);
     unless (defined $mask) {
         my $dbr = LJ::get_db_reader();
+        return 0 unless $dbr;
+
         $mask = $dbr->selectrow_array("SELECT groupmask FROM friends ".
                                       "WHERE userid=? AND friendid=?",
                                       undef, $jid, $fid);
         LJ::MemCache::set($memkey, $mask+0, time()+60*15);
     }
+
     return $mask+0;  # force it to a numeric scalar
 }
 
@@ -3586,20 +3591,19 @@ sub new_account_cluster
 sub is_friend
 {
     &nodb;
-    # TAG:FR:ljlib:is_friend   (trusted, not just reading.  check all callers to see what they mean)
-    my $ua = shift;
-    my $ub = shift;
 
-    my $uaid = (ref $ua ? $ua->{'userid'} : $ua)+0;
-    my $ubid = (ref $ub ? $ub->{'userid'} : $ub)+0;
+    my ($ua, $ub) = @_[0, 1];
 
-    return 0 unless $uaid;
-    return 0 unless $ubid;
-    return 1 if ($uaid == $ubid);
+    $ua = LJ::want_userid($ua);
+    $ub = LJ::want_userid($ub);
 
-    my $dbr = LJ::get_db_reader();
-    return $dbr->selectrow_array("SELECT COUNT(*) FROM friends WHERE ".
-                                 "userid=$uaid AND friendid=$ubid");
+    return 0 unless $ua && $ub;
+    return 1 if $ua == $ub;
+
+    # get group mask from the first argument to the second argument and
+    # see if first bit is set.  if it is, they're a friend.  get_groupmask
+    # is memcached and used often, so it's likely to be available quickly.
+    return LJ::get_groupmask(@_[0, 1]) & 1;
 }
 
 # <LJFUNC>
