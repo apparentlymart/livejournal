@@ -808,6 +808,7 @@ sub clean_subject
         'allow' => $subject_allow,
         'remove' => $subject_remove,
         'autoclose' => $subject_allow,
+        'noearlyclose' => 1,
     });
 }
 
@@ -824,6 +825,7 @@ sub clean_subject_all
         'mode' => 'deny',
         'textonly' => 1,
         'autoclose' => $subject_allow,
+        'noearlyclose' => 1,
     });
 }
 
@@ -877,6 +879,7 @@ sub clean_event
         'maximgwidth' => $opts->{'maximgwidth'},
         'maximgheight' => $opts->{'maximgheight'},
         'ljcut_disable' => $opts->{'ljcut_disable'},
+        'noearlyclose' => 1,
     });
 }
 
@@ -918,6 +921,7 @@ sub clean_comment
         'cleancss' => 1,
         'extractlinks' => $opts->{'anon_comment'},
         'extractimages' => $opts->{'anon_comment'},
+        'noearlyclose' => 1,
     });
 }
 
