@@ -463,7 +463,7 @@ sub get_groupmask
     my $mask = LJ::MemCache::get($memkey);
     unless (defined $mask) {
         my $dbr = LJ::get_db_reader();
-        return 0 unless $dbr;
+        die "No database reader available" unless $dbr;
 
         $mask = $dbr->selectrow_array("SELECT groupmask FROM friends ".
                                       "WHERE userid=? AND friendid=?",
