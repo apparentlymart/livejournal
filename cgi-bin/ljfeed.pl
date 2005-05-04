@@ -49,8 +49,8 @@ sub make_feed
     my $journalinfo = {
         u         => $u,
         link      => LJ::journal_base($u) . "/",
-        title     => LJ::exml($u->{journaltitle} || $u->{name}) || $u->{user},
-        subtitle  => LJ::exml($u->{journalsubtitle} || $u->{name}) || $u->{user},
+        title     => $u->{journaltitle} || $u->{name} || $u->{user},
+        subtitle  => $u->{journalsubtitle} || $u->{name},
         builddate => LJ::time_to_http(time()),
     };
 
@@ -142,7 +142,7 @@ sub make_feed
         } 
 
         # clean it up since we know we have one now
-        $journalinfo->{email} = LJ::exml($cemail);
+        $journalinfo->{email} = $cemail;
     }
 
     my %posteru = ();  # map posterids to u objects
@@ -168,7 +168,6 @@ sub make_feed
         if ($subject) {
             $subject =~ s/[\r\n]/ /g;
             LJ::CleanHTML::clean_subject_all(\$subject);
-            $subject = LJ::exml($subject);
         }
 
         # an HTML link to the entry. used if we truncate or summarize
@@ -220,14 +219,13 @@ sub make_feed
 
             $ppid = $1
                 if $event =~ m!<lj-phonepost journalid=['"]\d+['"] dpid=['"](\d+)['"] />!;
-            $event = LJ::exml($event);
         }
 
         my $mood;
         if ($logprops{$itemid}->{'current_mood'}) {
-            $mood = LJ::exml($logprops{$itemid}->{'current_mood'});
+            $mood = $logprops{$itemid}->{'current_mood'};
         } elsif ($logprops{$itemid}->{'current_moodid'}) {
-            $mood = LJ::exml(LJ::mood_name($logprops{$itemid}->{'current_moodid'}+0));
+            $mood = LJ::mood_name($logprops{$itemid}->{'current_moodid'}+0);
         }
 
         my $createtime = $LJ::EndOfTime - $it->{rlogtime};
@@ -240,7 +238,7 @@ sub make_feed
             eventtime  => $it->{alldatepart},  # ugly: this is of a different format than the other two times.
             modtime    => $logprops{$itemid}->{revtime} || $createtime,
             comments   => ($logprops{$itemid}->{'opt_nocomments'} == 0),
-            music      => LJ::exml($logprops{$itemid}->{'current_music'}),
+            music      => $logprops{$itemid}->{'current_music'},
             mood       => $mood,
             ppid       => $ppid,
         };
@@ -267,10 +265,10 @@ sub create_view_rss
 
     # channel attributes
     $ret .= "<channel>\n";
-    $ret .= "  <title>$journalinfo->{title}</title>\n";
+    $ret .= "  <title>" . LJ::exml($journalinfo->{title}) . "</title>\n";
     $ret .= "  <link>$journalinfo->{link}</link>\n";
-    $ret .= "  <description>$journalinfo->{title} - $LJ::SITENAME</description>\n";
-    $ret .= "  <managingEditor>$journalinfo->{email}</managingEditor>\n" if $journalinfo->{email};
+    $ret .= "  <description>" . LJ::exml("$journalinfo->{title} - $LJ::SITENAME") . "</description>\n";
+    $ret .= "  <managingEditor>" . LJ::exml($journalinfo->{email}) . "</managingEditor>\n" if $journalinfo->{email};
     $ret .= "  <lastBuildDate>$journalinfo->{builddate}</lastBuildDate>\n";
     $ret .= "  <generator>LiveJournal / $LJ::SITENAME</generator>\n";
     # TODO: add 'language' field when user.lang has more useful information
@@ -283,7 +281,7 @@ sub create_view_rss
         
         $ret .= "  <image>\n";
         $ret .= "    <url>$LJ::USERPIC_ROOT/$u->{'defaultpicid'}/$u->{'userid'}</url>\n";
-        $ret .= "    <title>$journalinfo->{title}</title>\n";
+        $ret .= "    <title>" . LJ::exml($journalinfo->{title}) . "</title>\n";
         $ret .= "    <link>$journalinfo->{link}</link>\n";
         $ret .= "    <width>$pic->{'width'}</width>\n";
         $ret .= "    <height>$pic->{'height'}</height>\n";
@@ -302,13 +300,13 @@ sub create_view_rss
         $ret .= "<item>\n";
         $ret .= "  <guid isPermaLink='true'>$journalinfo->{link}$ditemid.html</guid>\n";
         $ret .= "  <pubDate>" . LJ::time_to_http($it->{createtime}) . "</pubDate>\n";
-        $ret .= "  <title>$it->{subject}</title>\n" if $it->{subject};
-        $ret .= "  <author>$journalinfo->{email}</author>" if $journalinfo->{email};
+        $ret .= "  <title>" . LJ::exml($it->{subject}) . "</title>\n" if $it->{subject};
+        $ret .= "  <author>" . LJ::exml($journalinfo->{email}) . "</author>" if $journalinfo->{email};
         $ret .= "  <link>$journalinfo->{link}$ditemid.html</link>\n";
         # omit the description tag if we're only syndicating titles
         #   note: the $event was also emptied earlier, in make_feed
         unless ($u->{'opt_synlevel'} eq 'title') {
-            $ret .= "  <description>$it->{event}</description>\n";
+            $ret .= "  <description>" . LJ::exml($it->{event}) . "</description>\n";
         }
         if ($it->{comments}) {
             $ret .= "  <comments>$journalinfo->{link}$ditemid.html</comments>\n";
@@ -317,8 +315,8 @@ sub create_view_rss
         $ret .= LJ::run_hook( "pp_rss_enclosure",
                 { userid => $u->{userid}, ppid => $it->{ppid} }) if $it->{ppid};
         # TODO: add author field with posterid's email address, respect communities
-        $ret .= "  <lj:music>$it->{music}</lj:music>\n" if $it->{music};
-        $ret .= "  <lj:mood>$it->{mood}</lj:mood>\n" if $it->{mood};
+        $ret .= "  <lj:music>" . LJ::exml($it->{music}) . "</lj:music>\n" if $it->{music};
+        $ret .= "  <lj:mood>" . LJ::exml($it->{mood}) . "</lj:mood>\n" if $it->{mood};
         $ret .= "</item>\n";
     }
 
@@ -356,14 +354,15 @@ sub create_view_atom
         $ret .= "<feed version='0.3' xmlns='http://purl.org/atom/ns#'>\n";
 
         # attributes
-        $ret .= "<title mode='escaped'>$journalinfo->{title}</title>\n";
-        $ret .= "<tagline mode='escaped'>$journalinfo->{subtitle}</tagline>\n";
+        $ret .= "<title mode='escaped'>" . LJ::exml($journalinfo->{title}) . "</title>\n";
+        $ret .= "<tagline mode='escaped'>" . LJ::exml($journalinfo->{subtitle}) . "</tagline>\n"
+            if $journalinfo->{subtitle};
         $ret .= "<link rel='alternate' type='text/html' href='$journalinfo->{link}' />\n";
 
         # last update
         $ret .= "<modified>" . LJ::time_to_w3c($journalinfo->{'modtime'}, 'Z')
             . "</modified>";
-        
+
         # link to the AtomAPI version of this feed
         $ret .= "<link rel='service.feed' type='application/x.atom+xml' title='";
         $ret .= LJ::ehtml($journalinfo->{title});
@@ -383,7 +382,7 @@ sub create_view_atom
 
         $ret .= "  <entry xmlns=\"http://purl.org/atom/ns#\">\n";
         # include empty tag if we don't have a subject.
-        $ret .= "    <title mode='escaped'>$it->{subject}</title>\n";
+        $ret .= "    <title mode='escaped'>" . LJ::exml($it->{subject}) . "</title>\n";
         $ret .= "    <id>urn:lj:$LJ::DOMAIN:atom1:$journalinfo->{u}{user}:$ditemid</id>\n";
         $ret .= "    <link rel='alternate' type='text/html' href='$journalinfo->{link}$ditemid.html' />\n";
         if ($opts->{'apilinks'}) {
@@ -399,7 +398,7 @@ sub create_view_atom
         $ret .= "    <modified>" . LJ::time_to_w3c($it->{modtime}, 'Z') . "</modified>\n";
         $ret .= "    <author>\n";
         $ret .= "      <name>" . LJ::exml($journalinfo->{u}{name}) . "</name>\n";
-        $ret .= "      <email>$journalinfo->{editor}</email>\n" if $journalinfo->{editor};
+        $ret .= "      <email>" . LJ::exml($journalinfo->{email}) . "</email>\n" if $journalinfo->{email};
         $ret .= "    </author>\n";
         # if syndicating the complete entry
         #   -print a content tag
@@ -413,7 +412,7 @@ sub create_view_atom
         } elsif ($u->{'opt_synlevel'} eq 'summary') {
             $ret .= "    <summary type='text/html' mode='escaped'>$it->{event}</summary>\n";
         }
-        
+
         $ret .= "  </entry>\n";
     }
 
@@ -439,7 +438,7 @@ sub create_view_foaf {
 
     # set our content type
     $opts->{contenttype} = 'application/rdf+xml; charset=' . $opts->{saycharset};
-    
+
     # setup userprops we will need
     LJ::load_user_props($u, qw{
         aolim icq yahoo jabber msn url urlname external_foaf_url
@@ -473,7 +472,7 @@ sub create_view_foaf {
     $ret .= "        <dc:description>Full $LJ::SITENAME profile, including information such as interests and bio.</dc:description>\n";
     $ret .= "      </foaf:Document>\n";
     $ret .= "    </foaf:page>\n";
-    
+
     # we want to bail out if they have an external foaf file, because 
     # we want them to be able to provide their own information. 
     if ($u->{external_foaf_url}) {
@@ -482,7 +481,7 @@ sub create_view_foaf {
         $ret .= "</rdf:RDF>\n";
         return $ret;
     }
-    
+
     # contact type information
     my %types = (
         aolim => 'aimChatID',
@@ -497,14 +496,14 @@ sub create_view_foaf {
             $ret .= "    <foaf:$types{$type}>" . LJ::exml($u->{$type}) . "</foaf:$types{$type}>\n";
         }
     }
-    
+
     # include a user's journal page and web site info
     $ret .= "    <foaf:weblog rdf:resource=\"" . LJ::journal_base($u) . "/\"/>\n";
     if ($u->{url}) {
         $ret .= "    <foaf:homepage rdf:resource=\"" . LJ::eurl($u->{url});
         $ret .= "\" dc:title=\"" . LJ::exml($u->{urlname}) . "\" />\n";
     }
-    
+
     # interests, please!
     # arrayref of interests rows: [ intid, intname, intcount ]
     my $intu = LJ::get_interests($u);
@@ -517,12 +516,12 @@ sub create_view_foaf {
     # check if the user has a "FOAF-knows" group
     my $groups = LJ::get_friend_group($u->{userid}, { name => 'FOAF-knows' });
     my $mask = $groups ? 1 << $groups->{groupnum} : 0;
-    
+
     # now information on who you know, limited to a certain maximum number of users
     my $friends = LJ::get_friends($u->{userid}, $mask);
     my @ids = keys %$friends;
     @ids = splice(@ids, 0, $LJ::MAX_FOAF_FRIENDS) if @ids > $LJ::MAX_FOAF_FRIENDS;
-    
+
     # now load
     my %users;
     LJ::load_userids_multiple([ map { $_, \$users{$_} } @ids ], [$u]);
@@ -540,7 +539,7 @@ sub create_view_foaf {
         $ret .= "      </foaf:Person>\n";
         $ret .= $comm ? "    </foaf:member>\n" : "    </foaf:knows>\n";
     }
-    
+
     # finish off the document
     $ret .= $comm ? "    </foaf:Group>\n" : "  </foaf:Person>\n";
     $ret .= "</rdf:RDF>\n";
