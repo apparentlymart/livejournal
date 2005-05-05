@@ -164,9 +164,9 @@ sub find_server
 
     # backwards compatibility with earlier ljconfig.
     unless (@objects) {
-        $objects[0] = [ 'sendmail', $LJ::SENDMAIL,    0 ] if $LJ::SENDMAIL;
-        $objects[1] = [ 'smtp',     $LJ::SMTP_SERVER, 0 ] if $LJ::SMTP_SERVER;
-        $objects[2] = [ 'dmtp',     $LJ::DMTP_SERVER, 1 ] if $LJ::DMTP_SERVER;
+        push @objects, [ 'sendmail', $LJ::SENDMAIL,    0 ] if $LJ::SENDMAIL;
+        push @objects, [ 'smtp',     $LJ::SMTP_SERVER, 0 ] if $LJ::SMTP_SERVER;
+        push @objects, [ 'dmtp',     $LJ::DMTP_SERVER, 1 ] if $LJ::DMTP_SERVER;
     }
 
     my ( $server, $proto, $hostname );
