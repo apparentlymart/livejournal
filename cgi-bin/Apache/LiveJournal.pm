@@ -1336,7 +1336,7 @@ sub db_logger
         'anonsess' => $rl->notes('anonsess'),
         'langpref' => $rl->notes('langpref'),
         'clientver' => $rl->notes('clientver'),
-        'uniq' => $rl->notes('uniq'),
+        'uniq' => $r->notes('uniq'),
         'method' => $r->method,
         'uri' => $uri,
         'args' => scalar $r->args,
