@@ -163,7 +163,11 @@ sub find_server
     my @objects = @LJ::MAIL_TRANSPORTS;
 
     # backwards compatibility with earlier ljconfig.
-    $objects[0] = [ 'sendmail', $LJ::SENDMAIL, 1 ] unless @objects;
+    unless (@objects) {
+        $objects[0] = [ 'sendmail', $LJ::SENDMAIL,    0 ] if $LJ::SENDMAIL;
+        $objects[1] = [ 'smtp',     $LJ::SMTP_SERVER, 0 ] if $LJ::SMTP_SERVER;
+        $objects[2] = [ 'dmtp',     $LJ::DMTP_SERVER, 1 ] if $LJ::DMTP_SERVER;
+    }
 
     my ( $server, $proto, $hostname );
 
@@ -204,11 +208,11 @@ sub find_server
         # DMTP
         elsif ( $select->[0] eq 'dmtp' ) {
             my $host = $select->[1];
-            $host .= ":7005" if rindex($host, ':') == -1;
+            my $port = $host =~ s/:(\d+)$// ? $1 : 7005;
 
             $server = IO::Socket::INET->new(
                 PeerAddr => $host,
-                PeerPort => '7005',
+                PeerPort => $port,
                 Proto    => 'tcp'
             );
         }
