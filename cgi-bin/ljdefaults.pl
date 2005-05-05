@@ -61,6 +61,7 @@
     # where we set the cookies (note the period before the domain)
     $COOKIE_DOMAIN ||= ".$DOMAIN";
     $COOKIE_PATH   ||= "/";
+    @COOKIE_DOMAIN_RESET = ("", "$DOMAIN", ".$DOMAIN") unless @COOKIE_DOMAIN_RESET;
 
     ## default portal options
     @PORTAL_COLS = qw(main right moz) unless (@PORTAL_COLS);

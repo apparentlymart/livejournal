@@ -857,12 +857,21 @@ sub journal_content
     }
 
     my $criterr = 0;
-    my $remote = LJ::get_remote(undef, \$criterr);
+    my $remote = LJ::get_remote({ criterr => \$criterr });
 
     # check for faked cookies here, since this is pretty central.
     if ($criterr) {
         $r->status_line("500 Invalid Cookies");
         $r->content_type("text/html");
+        # reset all cookies
+        foreach my $dom (@LJ::COOKIE_DOMAIN_RESET) {
+            my $cookiestr = 'ljsession=';
+            $cookiestr .= '; expires=' . LJ::time_to_cookie(1);
+            $cookiestr .= $dom ? "; domain=$dom" : '';
+            $cookiestr .= '; path=/; HttpOnly';
+            Apache->request->err_headers_out->add('Set-Cookie' => $cookiestr);
+        }
+
         $r->send_http_header();
         $r->print("Invalid cookies.  Try <a href='$LJ::SITEROOT/logout.bml'>logging out</a> and then logging back in.\n");
         $r->print("<!-- xxxxxxxxxxxxxxxxxxxxxxxx -->\n") for (0..100);
@@ -1066,8 +1075,7 @@ sub customview_content
 
     my $remote;
     if ($FORM{'checkcookies'}) {
-        my $criterr = 0;
-        $remote = LJ::get_remote(undef, \$criterr);
+        $remote = LJ::get_remote();
     }
 
     my $data = (LJ::make_journal($user, "", $remote,

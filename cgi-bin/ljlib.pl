@@ -4132,100 +4132,123 @@ sub get_posts
 #      and returns a hashref representing them
 # returns: hashref containing 'user' and 'userid' if valid user, else
 #          undef.
-# args: dbarg?, criterr?, cgi?
-# des-criterr: scalar ref to set critical error flag.  if set, caller
-#              should stop processing whatever it's doing and complain
-#              about an invalid login with a link to the logout page.
-# des-cgi: Optional CGI.pm reference if using in a script which
-#          already uses CGI.pm.
+# args: opts?
+# des-opts: 'criterr': scalar ref to set critical error flag.  if set, caller
+#           should stop processing whatever it's doing and complain
+#           about an invalid login with a link to the logout page..
+#           'ignore_ip': ignore IP address of remote for IP-bound sessions
 # </LJFUNC>
 sub get_remote
 {
     my $opts = ref $_[0] eq "HASH" ? shift : {};
-    my $dbarg = shift;
-    my $criterr = shift;
-    my $cgi = shift;
+    my $dummy;
 
     return $LJ::CACHE_REMOTE if $LJ::CACHED_REMOTE && ! $opts->{'ignore_ip'};
 
+    my $criterr = $opts->{criterr} || \$dummy;
     $$criterr = 0;
 
-    my $cookie = sub {
-        return $cgi ? $cgi->cookie($_[0]) : $BML::COOKIE{$_[0]};
-    };
-
-    my $sopts;
-    my $validate = sub {
-        my $a = shift;
-        # let hooks reject credentials, or set criterr true:
-        my $hookparam = {
-            'user' => $a->{'user'},
-            'userid' => $a->{'userid'},
-            'caps' => $a->{'caps'},
-            'criterr' => $criterr,
-            'cookiesource' => $cookie,
-            'sopts' => $sopts,
-        };
-        my @r = LJ::run_hooks("validate_get_remote", $hookparam);
-        return undef if grep { ! $_->[0] } @r;
-        return 1;
-    };
+    my $cookie = sub { return $BML::COOKIE{$_[0]}; };
 
     my $no_remote = sub {
         LJ::set_remote(undef);
-        $validate->();
         return undef;
     };
 
-    my $sessdata;
-
-    # do they have any sort of session cookie?
-    return $no_remote->("No session")
-        unless ($sessdata = $cookie->('ljsession'));
-
-
-    my ($authtype, $user, $sessid, $auth, $_sopts) = split(/:/, $sessdata);
-    $sopts = $_sopts;
-
-    # fail unless authtype is 'ws' (more might be added in future)
-    return $no_remote->("No ws auth") unless $authtype eq "ws";
-
-    my $u = LJ::load_user($user);
-    return $no_remote->("User doesn't exist") unless $u;
-    
-    # locked accounts can't be logged in
-    return $no_remote->("User account is locked.") if $u->{statusvis} eq 'L';
-
-    my $sess_db;
-    my $sess;
-    my $get_sess = sub {
-        return undef unless $sess_db;
-        $sess = $sess_db->selectrow_hashref("SELECT * FROM sessions ".
-                                            "WHERE userid=? AND sessid=? AND auth=?",
-                                            undef, $u->{'userid'}, $sessid, $auth);
-    };
-    my $memkey = [$u->{'userid'},"sess:$u->{'userid'}:$sessid"];
-    # try memory
-    $sess = LJ::MemCache::get($memkey);
-    # try master
-    unless ($sess) {
-        $sess_db = LJ::get_cluster_def_reader($u);
-        $get_sess->();
-        LJ::MemCache::set($memkey, $sess) if $sess;
-    }
-    # try slave
-    unless ($sess) {
-        $sess_db = LJ::get_cluster_reader($u);
-        $get_sess->();
-    }
-    return $no_remote->("Session bogus") unless $sess;
-    return $no_remote->("Invalid auth") unless $sess->{'auth'} eq $auth;
+    # set this flag if any of their ljsession cookies contained the ".FS"
+    # opt to use the fast server.  if we later find they're not logged
+    # in and set it, or set it with a free account, then we give them
+    # the invalid cookies error.
+    my $tried_fast = 0;
+    my @errs = ();
     my $now = time();
-    return $no_remote->("Session old") if $sess->{'timeexpire'} < $now;
-    if ($sess->{'ipfixed'} && ! $opts->{'ignore_ip'}) {
-        my $remote_ip = $LJ::_XFER_REMOTE_IP || LJ::get_remote_ip();
-        return $no_remote->("Session wrong IP")
-            if $sess->{'ipfixed'} ne $remote_ip;
+
+    my ($u, $sess);     # what we eventually care about
+    my $memkey;
+
+    foreach my $sessdata (@{ $cookie->('ljsession[]'); }) {
+        my ($authtype, $user, $sessid, $auth, $sopts) = split(/:/, $sessdata);
+        $tried_fast = 1 if $sopts =~ /\.FS\b/;
+        my $err = sub {
+            $sess = undef;
+            push @errs, "$sessdata: $_[0]";
+        };
+
+        # fail unless authtype is 'ws' (more might be added in future)
+        unless ($authtype eq "ws") {
+            $err->("no ws auth");
+            next;
+        }
+
+        $u = LJ::load_user($user);
+        unless ($u) {
+            $err->("user doesn't exist");
+            next;
+        }
+
+        # locked accounts can't be logged in
+        if ($u->{statusvis} eq 'L') {
+            $err->("User account is locked.");
+            next;
+        }
+
+        my $sess_db;
+        my $get_sess = sub {
+            return undef unless $sess_db;
+            $sess = $sess_db->selectrow_hashref("SELECT * FROM sessions ".
+                                                "WHERE userid=? AND sessid=? AND auth=?",
+                                                undef, $u->{'userid'}, $sessid, $auth);
+        };
+        $memkey = [$u->{'userid'},"sess:$u->{'userid'}:$sessid"];
+        # try memory
+        $sess = LJ::MemCache::get($memkey);
+        # try master
+        unless ($sess) {
+            $sess_db = LJ::get_cluster_def_reader($u);
+            $get_sess->();
+            LJ::MemCache::set($memkey, $sess) if $sess;
+        }
+        # try slave
+        unless ($sess) {
+            $sess_db = LJ::get_cluster_reader($u);
+            $get_sess->();
+        }
+
+        unless ($sess) {
+            $err->("Couldn't find session");
+            next;
+        }
+
+        unless ($sess->{auth} eq $auth) {
+            $err->("Invald auth");
+            next;
+        }
+
+        if ($sess->{'timeexpire'} < $now) {
+            $err->("Invalid auth");
+            next;
+        }
+
+        if ($sess->{'ipfixed'} && ! $opts->{'ignore_ip'}) {
+            my $remote_ip = $LJ::_XFER_REMOTE_IP || LJ::get_remote_ip();
+            if ($sess->{'ipfixed'} ne $remote_ip) {
+                $err->("Session wrong IP");
+                next;
+            }
+        }
+
+        last;
+    }
+
+    # inform the caller that this user is faking their fast-server cookie
+    # attribute.
+    if ($tried_fast && ! LJ::get_cap($u, "fastserver")) {
+        $$criterr = 1;
+    }
+
+    if (! $sess) {
+        LJ::set_remote(undef);
+        return undef;
     }
 
     # renew short session
