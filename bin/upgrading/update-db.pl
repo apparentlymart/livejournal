@@ -79,6 +79,7 @@ my %table_exists;   # $table -> 1
 my %table_unknown;  # $table -> 1
 my %table_create;   # $table -> $create_sql
 my %table_drop;     # $table -> 1
+my %table_status;   # $table -> { SHOW TABLE STATUS ... row }
 my %post_create;    # $table -> [ [ $action, $what ]* ]
 my %coltype;        # $table -> { $col -> $type }
 my %indexname;      # $table -> "INDEX"|"UNIQUE" . ":" . "col1-col2-col3" -> "PRIMARY" | index_name
@@ -94,10 +95,10 @@ CLUSTER: foreach my $cluster (@clusters) {
         next CLUSTER;
     }
 
-    # reset everythign
+    # reset everything
     %clustered_table = %table_exists = %table_unknown =
         %table_create = %table_drop = %post_create =
-        %coltype = %indexname = ();
+        %coltype = %indexname = %table_status = ();
     @alters = ();
 
     ## figure out what tables already exist (but not details of their structure)
@@ -708,6 +709,7 @@ sub clear_table_info
     my $table = shift;
     delete $coltype{$table};
     delete $indexname{$table};
+    delete $table_status{$table};
 }
 
 sub load_table_info
@@ -723,6 +725,10 @@ sub load_table_info
         $type .= " $1" if $row->{'Extra'} =~ /(auto_increment)/i;
         $coltype{$table}->{ $row->{'Field'} } = lc($type);
     }
+
+    # current physical table properties
+    $table_status{$table} =
+        $dbh->selectrow_hashref("SHOW TABLE STATUS LIKE '$table'");
 
     $sth = $dbh->prepare("SHOW INDEX FROM $table");
     $sth->execute;
@@ -761,6 +767,14 @@ sub column_type
     my $type = $coltype{$table}->{$col};
     $type ||= "";
     return $type;
+}
+
+sub table_status
+{
+    my ($table, $col) = @_;
+    load_table_info($table) unless $table_status{$table};
+
+    return $table_status{$table}->{$col} || "";
 }
 
 sub ensure_confirm
