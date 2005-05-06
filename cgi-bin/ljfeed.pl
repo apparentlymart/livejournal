@@ -408,9 +408,9 @@ sub create_view_atom
         #   -print neither (the title has already been printed)
         #   note: the $event was also emptied earlier, in make_feed
         if ($u->{'opt_synlevel'} eq 'full') {
-            $ret .= "    <content type='text/html' mode='escaped'>$it->{event}</content>\n";
+            $ret .= "    <content type='text/html' mode='escaped'>" . LJ::exml($it->{event}) . "</content>\n";
         } elsif ($u->{'opt_synlevel'} eq 'summary') {
-            $ret .= "    <summary type='text/html' mode='escaped'>$it->{event}</summary>\n";
+            $ret .= "    <summary type='text/html' mode='escaped'>" . LJ::exml($it->{event}) . "</summary>\n";
         }
 
         $ret .= "  </entry>\n";
