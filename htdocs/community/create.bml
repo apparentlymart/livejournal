@@ -124,6 +124,7 @@ SUBMIT:
             LJ::set_userprop($u, 'moderated', $POST{moderated} + 0);
             LJ::set_rel($userid, $remote->{userid}, 'M') if $POST{moderated}; # moderator if moderated
             LJ::set_rel($userid, $remote->{userid}, 'A');                     # maintainer
+            LJ::join_community($remote, $u, 0, 1); # make them a member of the community
 
             LJ::run_hooks("post_create", {
                 'userid' => $userid,
