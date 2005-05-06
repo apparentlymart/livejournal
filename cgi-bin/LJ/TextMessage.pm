@@ -866,7 +866,6 @@ sub init {
     my $args = shift;
     $self->{'sendmail'} = $args->{'mailcommand'} || $SENDMAIL;
     $self->{'provider'} = remap($args->{'provider'});
-    $args->{'number'} =~ s/\D//g;
     $self->{'number'} = $args->{'number'};
     $self->{'smtp'} = $args->{'smtp'};
 }
