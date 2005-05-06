@@ -323,6 +323,10 @@ sub moveUser {
     my $check_sig = sub {
         my $hnd = shift;
         my $name = shift;
+
+        # no signature checks on expunges
+        return if ! $hnd && $opts->{expungedel};
+
         my $sig = $get_sig->($hnd);
 
         # special case:  signature can be that of the global
@@ -434,9 +438,11 @@ sub moveUser {
         $dbh->do("INSERT INTO clustermove (userid, sclust, dclust, timestart, timedone) ".
                  "VALUES (?,?,?,UNIX_TIMESTAMP(),UNIX_TIMESTAMP())", undef, 
                  $userid, $sclust, 0);
+
         LJ::update_user($userid, { clusterid => 0,
                                    statusvis => 'X',
-                                   raw => "caps=caps&~(1<<$readonly_bit), statusvisdate=NOW()" });
+                                   raw => "caps=caps&~(1<<$readonly_bit), statusvisdate=NOW()" })
+            or die "Couldn't update user to expunged";
 
         # now delete all content from user cluster for this user
         if ($opts->{del}) {
@@ -460,6 +466,8 @@ sub moveUser {
                     print "  deleted from s1stylecache\n" if $optv;
                 }
             }
+
+            $dboa->do("DELETE FROM clustertrack2 WHERE userid=?", undef, $userid);
         }
         return 1;
     }
