@@ -190,6 +190,9 @@ sub clean
                     my $text = "Read more...";
                     if ($attr->{'text'}) {
                         $text = $attr->{'text'};
+                        if ($text =~ /[^\x01-\x7f]/) {
+                            $text = pack('C*', unpack('C*', $text));
+                        }
                         $text =~ s/</&lt;/g;
                         $text =~ s/>/&gt;/g;
                     }
@@ -403,7 +406,7 @@ sub clean
                         # output attributes in original order, but only those
                         # that are allowed (by still being in %$hash after cleaning)
                         foreach (@$attrs) {
-                            if ($hash->{$_} =~ /^[\x01-\x7f]/) {
+                            if ($hash->{$_} =~ /[^\x01-\x7f]/) {
                                 # FIXME: this is so ghetto.  make faster.  make generic.
                                 # HTML::Parser decodes entities for us (which is good)
                                 # but in Perl 5.8 also includes the "poison" SvUTF8
