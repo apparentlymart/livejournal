@@ -5422,9 +5422,16 @@ sub make_journal
         $opts->{'status'} = $status if $status;
 
         return qq{
-            <h1>Notice</h1>
-            <p>$msg</p>
-            <p>Instead, please use <nobr><a href=\"$url\">$url</a></nobr></p>
+	    <html>
+	    <head>
+	      <link rel="meta" type="application/rdf+xml" title="FOAF" href="${url}data/foaf" />
+	    </head>
+	    <body>
+	     <h1>Notice</h1>
+	     <p>$msg</p>
+	     <p>Instead, please use <nobr><a href=\"$url\">$url</a></nobr></p>
+	    </body>
+	    </html>
         }.("<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->\n" x 50);
     };
     my $error = sub {
