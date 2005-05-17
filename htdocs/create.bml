@@ -412,6 +412,9 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
              or return LJ::bad_input($err);
      }
 
+     # record create information
+     $nu->log_event('account_create', { remote => $remote });
+
      $nu->make_login_session;
 
      # local sites may want to override what happens at this point

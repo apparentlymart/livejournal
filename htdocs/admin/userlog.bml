@@ -69,6 +69,8 @@ FORM
         my $action;
         if ($row->{action} eq 'delete_entry') {
             $action = "Deleted entry $row->{actiontarget} via $extra->{method}";
+        } elsif ($row->{action} eq 'account_create') {
+            $action = "Account created";
         } else {
             $action = "Unknown action ($row->{action})";
         }
