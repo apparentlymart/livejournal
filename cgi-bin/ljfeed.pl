@@ -452,7 +452,6 @@ sub create_view_foaf {
     $ret .= "   xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n";
     $ret .= "   xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\n";
     $ret .= "   xmlns:foaf=\"http://xmlns.com/foaf/0.1/\"\n";
-    $ret .= "   xmlns:yadis=\"http://danga.com/yadis/vocab/1.0/#\"\n";
     $ret .= "   xmlns:dc=\"http://purl.org/dc/elements/1.1/\">\n";
 
     # precompute some values
@@ -473,9 +472,6 @@ sub create_view_foaf {
     $ret .= "        <dc:description>Full $LJ::SITENAME profile, including information such as interests and bio.</dc:description>\n";
     $ret .= "      </foaf:Document>\n";
     $ret .= "    </foaf:page>\n";
-
-    # identity server info
-    $ret .= "    <yadis:identityServer>$LJ::SITEROOT/misc/yadis.bml</yadis:identityServer>\n";
 
     # we want to bail out if they have an external foaf file, because 
     # we want them to be able to provide their own information. 
