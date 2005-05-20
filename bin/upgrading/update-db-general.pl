@@ -1998,6 +1998,24 @@ CREATE TABLE extuser (
 )
 EOC
 
+# action history tables
+register_tablecreate("actionhistory", <<'EOC');
+CREATE TABLE actionhistory (
+    time      INT UNSIGNED NOT NULL,
+    clusterid TINYINT UNSIGNED NOT NULL,
+    what      CHAR(2) NOT NULL,
+    count     INT UNSIGNED NOT NULL DEFAULT 0,
+    INDEX(time)
+                            
+)
+EOC
+
+register_tablecreate("recentactions", <<'EOC');
+CREATE TABLE recentactions (
+    what CHAR(2) NOT NULL
+) TYPE=MYISAM
+EOC
+
 # NOTE: new table declarations go here
 
 

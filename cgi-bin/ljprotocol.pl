@@ -1002,6 +1002,9 @@ sub postevent
              "WHERE userid=$ownerid");
     LJ::MemCache::set([$ownerid, "tu:$ownerid"], pack("N", time()), 30*60);
 
+    # note this post in recentactions table
+    LJ::note_recent_action($uowner, 'post');
+
     # update user update table (on which friends views rely)
     # NOTE: as of Mar-25-2003, we don't actually use this yet.  we might
     # use it in the future though, for faster ?skip=0 friends views.
