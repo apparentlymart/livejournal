@@ -287,12 +287,9 @@ sub process {
 
     # Find and set entry props.
     my $props = {};
-    my (%lj_headers,$amask);
+    my (%lj_headers, $amask);
     if ($body =~ s/^(lj-.+?)\n\n//is) {
-        my @headers = split(/\n/, $1);
-        foreach (@headers) {
-            $lj_headers{lc($1)} = lc($2) if /^lj-(\w+):\s*(.+?)\s*$/i;
-        }
+        map { $lj_headers{lc($1)} = $2 if /^lj-(\w+):\s*(.+?)\s*$/i } split /\n/, $1;
     }
 
     LJ::load_user_props(
@@ -317,8 +314,7 @@ sub process {
       if $lj_headers{comments}      =~ /noemail/i
       || $u->{'emailpost_comments'} =~ /noemail/i;
 
-    $lj_headers{security} = $lj_headers{security} ||
-                            $u->{'emailpost_security'};
+    $lj_headers{security} = lc($lj_headers{security}) || $u->{'emailpost_security'};
     if ($lj_headers{security} =~ /^(public|private|friends)$/) {
         if ($1 eq 'friends') {
             $lj_headers{security} = 'usemask';
@@ -339,7 +335,8 @@ sub process {
 
     # if they specified a imgsecurity header but it isn't valid, default
     # to private.  Otherwise, set to what they specified.
-    $lj_headers{'imgsecurity'} ||= $u->{'emailpost_imgsecurity'} || 'public';
+    $lj_headers{'imgsecurity'} = lc($lj_headers{'imgsecurity'}) ||
+                                 $u->{'emailpost_imgsecurity'}  || 'public';
     $lj_headers{'imgsecurity'} = 'private'
       unless $lj_headers{'imgsecurity'} =~ /^(private|regusers|friends|public)$/;
 
