@@ -272,14 +272,14 @@ sub process {
             $errstr .= "\nGnuPG error output:\n$gpgerr\n" if $gpgerr;
             return $err->($errstr, { sendmail => 1 });
         }
+
+        # Strip pgp clearsigning and any extra text surrounding it
+        $body =~ s/.+-----BEGIN PGP SIGNED MESSAGE-----.+?\n\n//s;
+        $body =~ s/-----BEGIN PGP SIGNATURE-----.+//s;
     }
 
     $body =~ s/^(?:\- )?[\-_]{2,}\s*\r?\n.*//ms; # trim sigs
     $body =~ s/ \n/ /g if lc($format) eq 'flowed'; # respect flowed text
-
-    # Strip pgp clearsigning
-    $body =~ s/^\s*-----BEGIN PGP SIGNED MESSAGE-----.+?\n\n//s;
-    $body =~ s/-----BEGIN PGP SIGNATURE-----.+//s;
 
     # trim off excess whitespace (html cleaner converts to breaks)
     $body =~ s/\n+$/\n/;
