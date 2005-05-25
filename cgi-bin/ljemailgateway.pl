@@ -99,6 +99,65 @@ sub process {
     # but some mailers nowadays do some very strange things.
     $return_path = ${(Mail::Address->parse( $head->get('Return-Path') ))[0] || []}[1];
 
+    # Use text/plain piece first - if it doesn't exist, then fallback to text/html
+    $tent = get_entity( $entity );
+    $tent = get_entity( $entity, 'html' ) unless $tent;
+
+    $body = $tent ? $tent->bodyhandle->as_string : "";
+    $body =~ s/^\s+//;
+    $body =~ s/\s+$//;
+
+    # Snag charset and do utf-8 conversion
+    my $content_type = $head->get('Content-type:');
+    $charset = $1 if $content_type =~ /\bcharset=['"]?(\S+?)['"]?[\s\;]/i;
+    $format = $1 if $content_type =~ /\bformat=['"]?(\S+?)['"]?[\s\;]/i;
+    if (defined($charset) && $charset !~ /^UTF-?8$/i) { # no charset? assume us-ascii
+        return $err->("Unknown charset encoding type.", { sendmail => 1 })
+            unless Unicode::MapUTF8::utf8_supported_charset($charset);
+        $body = Unicode::MapUTF8::to_utf8({-string=>$body, -charset=>$charset});
+    }
+
+    # check subject for rfc-1521 junk
+    $subject ||= $head->get('Subject:');
+    if ($subject =~ /^=\?/) {
+        my @subj_data = MIME::Words::decode_mimewords( $subject );
+        if (@subj_data) {
+            if ($subject =~ /utf-8/i) {
+                $subject = $subj_data[0][0];
+            } else {
+                $subject = Unicode::MapUTF8::to_utf8(
+                    {
+                        -string  => $subj_data[0][0],
+                        -charset => $subj_data[0][1]
+                    }
+                );
+            }
+        }
+    }
+    
+    # Strip (and maybe use) pin data from viewable areas
+    if ($subject =~ s/^\s*\+([a-z0-9]+)\s+//i) {
+        $pin = $1 unless defined $pin;
+    }
+    if ($body =~ s/^\s*\+([a-z0-9]+)\s+//i) {
+        $pin = $1 unless defined $pin;
+    }
+
+    # Validity checks.  We only care about these if they aren't using PGP.
+    unless (lc($pin) eq 'pgp' && $LJ::USE_PGP) {
+        return $err->("No allowed senders have been saved for your account.") unless ref $addrlist;
+
+        # don't mail user due to bounce spam
+        return $err->("Unauthorized sender address: $from")
+            unless grep { lc($from) eq lc($_) } keys %$addrlist;
+
+        return $err->("Unable to locate your PIN.", { sendmail => 1 }) unless $pin;
+        return $err->("Invalid PIN.", { sendmail => 1 }) unless lc($pin) eq lc($u->{emailpost_pin});
+    }
+
+    return $err->("Email gateway access denied for your account type.", { sendmail => 1 })
+        unless LJ::get_cap($u, "emailpost");
+
     # Is this message from a sprint PCS phone?  Sprint doesn't support
     # MMS (yet) - when it does, we should just be able to rip this block
     # of code completely out.
@@ -112,7 +171,7 @@ sub process {
     # can't use it, however, without heavy and fragile parsing.)
     # We assume the existence of a text/html means this is a PictureMail message,
     # as there is no other method (headers or otherwise) to tell the difference,
-    # and Sprint tells me that their text messaging never contains text/html.
+    # and Sprint tells me that their text messaging never contains text/plain.
     # Currently, PictureMail can only contain one image per message
     # and the image is always a jpeg. (2/2/05)
     if ($return_path && $return_path =~ /(?:messaging|pm)\.sprint(?:pcs)?\.com/) {
@@ -169,8 +228,8 @@ sub process {
         );
         my $ua_rv = $ua->get( $url, ':content_file' => $tempfile );
 
-        my $msg = $xml->{messageContents}->{messageText};
-        $msg = ref $msg ? "" : HTML::Entities::decode( $msg );
+        $body = $xml->{messageContents}->{messageText};
+        $body = ref $body ? "" : HTML::Entities::decode( $body );
 
         if ($ua_rv->is_success) {
             # (re)create a basic mime entity, so the rest of the
@@ -178,7 +237,7 @@ sub process {
             # (We don't need anything but Data, the other parts have
             # already been pulled from $head->unfold)
             $subject = 'Picture Post';
-            $entity = MIME::Entity->build( Data => $msg );
+            $entity = MIME::Entity->build( Data => $body );
             $entity->attach(
                 Path => $tempfile,
                 Type => 'image/jpeg'
@@ -197,66 +256,6 @@ sub process {
             );
         }
     } 
-
-    # Use text/plain piece first - if it doesn't exist, then fallback to text/html
-    $tent = get_entity( $entity );
-    $tent = get_entity( $entity, 'html' ) unless $tent;
-    return $err->("Unable to find any text content in your mail", { sendmail => 1 }) unless $tent;
-
-    $body = $tent->bodyhandle->as_string;
-    $body =~ s/^\s+//;
-    $body =~ s/\s+$//;
-
-    # Snag charset and do utf-8 conversion
-    my $content_type = $head->get('Content-type:');
-    $charset = $1 if $content_type =~ /\bcharset=['"]?(\S+?)['"]?[\s\;]/i;
-    $format = $1 if $content_type =~ /\bformat=['"]?(\S+?)['"]?[\s\;]/i;
-    if (defined($charset) && $charset !~ /^UTF-?8$/i) { # no charset? assume us-ascii
-        return $err->("Unknown charset encoding type.", { sendmail => 1 })
-            unless Unicode::MapUTF8::utf8_supported_charset($charset);
-        $body = Unicode::MapUTF8::to_utf8({-string=>$body, -charset=>$charset});
-    }
-
-    # check subject for rfc-1521 junk
-    $subject ||= $head->get('Subject:');
-    if ($subject =~ /^=\?/) {
-        my @subj_data = MIME::Words::decode_mimewords( $subject );
-        if (@subj_data) {
-            if ($subject =~ /utf-8/i) {
-                $subject = $subj_data[0][0];
-            } else {
-                $subject = Unicode::MapUTF8::to_utf8(
-                    {
-                        -string  => $subj_data[0][0],
-                        -charset => $subj_data[0][1]
-                    }
-                );
-            }
-        }
-    }
-    
-    # Strip (and maybe use) pin data from viewable areas
-    if ($subject =~ s/^\s*\+([a-z0-9]+)\s+//i) {
-        $pin = $1 unless defined $pin;
-    }
-    if ($body =~ s/^\s*\+([a-z0-9]+)\s+//i) {
-        $pin = $1 unless defined $pin;
-    }
-
-    # Validity checks.  We only care about these if they aren't using PGP.
-    unless (lc($pin) eq 'pgp' && $LJ::USE_PGP) {
-        return $err->("No allowed senders have been saved for your account.") unless ref $addrlist;
-
-        # don't mail user due to bounce spam
-        return $err->("Unauthorized sender address: $from")
-            unless grep { lc($from) eq lc($_) } keys %$addrlist;
-
-        return $err->("Unable to locate your PIN.", { sendmail => 1 }) unless $pin;
-        return $err->("Invalid PIN.", { sendmail => 1 }) unless lc($pin) eq lc($u->{emailpost_pin});
-    }
-
-    return $err->("Email gateway access denied for your account type.", { sendmail => 1 })
-        unless LJ::get_cap($u, "emailpost");
 
     # PGP signed mail?  We'll see about that.
     if (lc($pin) eq 'pgp' && $LJ::USE_PGP) {

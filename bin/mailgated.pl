@@ -308,22 +308,6 @@ sub process
     # quick and dirty (and effective) scan for viruses
     return dequeue("Virus found") if virus_check($entity);
 
-    # stop more spam, based on body text checks
-    my $tent = LJ::Emailpost::get_entity($entity);
-    $tent = LJ::Emailpost::get_entity( $entity, 'html' )
-      unless $tent;
-    return dequeue("Can't find text or html entity") unless $tent;
-    my $body = $tent->bodyhandle->as_string;
-    $body = LJ::trim($body);
-
-    ### spam
-    if (   $body =~ /I send you this file in order to have your advice/i
-        || $body =~ /^Content-Type: application\/octet-stream/i
-        || $body =~ /^(Please see|See) the attached file for details\.?$/i )
-    {
-        return dequeue("Spam");
-    }
-
     # see if it's a post-by-email
     my @to = Mail::Address->parse( $head->get('To') );
     if ( scalar @to > 0 ) {
@@ -342,6 +326,22 @@ sub process
             return $post_rv ? dequeue($post_msg) : retry($post_msg);
         }
     }
+
+    # stop more spam, based on body text checks
+    my $tent = LJ::Emailpost::get_entity($entity);
+    $tent = LJ::Emailpost::get_entity( $entity, 'html' ) unless $tent;
+    return dequeue("Can't find text or html entity") unless $tent;
+    my $body = $tent->bodyhandle->as_string;
+    $body = LJ::trim($body);
+
+    ### spam
+    if (   $body =~ /I send you this file in order to have your advice/i
+        || $body =~ /^Content-Type: application\/octet-stream/i
+        || $body =~ /^(Please see|See) the attached file for details\.?$/i )
+    {
+        return dequeue("Spam");
+    }
+
 
     # From this point on we know it's a support request of some type,
     my $email2cat = LJ::Support::load_email_to_cat_map();
