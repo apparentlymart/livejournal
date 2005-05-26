@@ -1489,20 +1489,21 @@ sub Page
         $p->{head_content} .= LJ::run_hook('s2_head_content_extra', $remote, $opts->{r});
     }
 
-    if ($LJ::UNICODE && $opts) {
-        $p->{'head_content'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}."\" />\n";
-        # Automatic Discovery of RSS/Atom
-        $p->{'head_content'} .= qq{<link rel="alternate" type="application/rss+xml" title="RSS" href="$p->{'base_url'}/data/rss" />\n};
-        $p->{'head_content'} .= qq{<link rel="alternate" type="application/atom+xml" title="Atom" href="$p->{'base_url'}/data/atom" />\n};
-        $p->{'head_content'} .= qq{<link rel="service.feed" type="application/atom+xml" title="AtomAPI-enabled feed" href="$LJ::SITEROOT/interface/atomapi/$u->{'user'}/feed" />\n};
-        $p->{'head_content'} .= qq{<link rel="service.post" type="application/atom+xml" title="Create a new post" href="$LJ::SITEROOT/interface/atomapi/$u->{'user'}/post" />\n};
-
-        # FOAF autodiscovery
-        my $foafurl = $u->{external_foaf_url} ? LJ::eurl($u->{external_foaf_url}) : "$p->{base_url}/data/foaf";
-        my $digest = Digest::SHA1::sha1_hex('mailto:' . $u->{email});
-        $p->{head_content} .= qq{<link rel="meta" type="application/rdf+xml" title="FOAF" href="$foafurl" />\n};
-        $p->{head_content} .= qq{<meta name="foaf:maker" content="foaf:mbox_sha1sum '$digest'" />\n};
+    if ($LJ::UNICODE && $opts && $opts->{'saycharset'}) {
+        $p->{'head_content'} .= '<meta http-equiv="Content-Type" content="text/html; charset=' . $opts->{'saycharset'} . "\" />\n";
     }
+
+    # Automatic Discovery of RSS/Atom
+    $p->{'head_content'} .= qq{<link rel="alternate" type="application/rss+xml" title="RSS" href="$p->{'base_url'}/data/rss" />\n};
+    $p->{'head_content'} .= qq{<link rel="alternate" type="application/atom+xml" title="Atom" href="$p->{'base_url'}/data/atom" />\n};
+    $p->{'head_content'} .= qq{<link rel="service.feed" type="application/atom+xml" title="AtomAPI-enabled feed" href="$LJ::SITEROOT/interface/atomapi/$u->{'user'}/feed" />\n};
+    $p->{'head_content'} .= qq{<link rel="service.post" type="application/atom+xml" title="Create a new post" href="$LJ::SITEROOT/interface/atomapi/$u->{'user'}/post" />\n};
+
+    # FOAF autodiscovery
+    my $foafurl = $u->{external_foaf_url} ? LJ::eurl($u->{external_foaf_url}) : "$p->{base_url}/data/foaf";
+    my $digest = Digest::SHA1::sha1_hex('mailto:' . $u->{email});
+    $p->{head_content} .= qq{<link rel="meta" type="application/rdf+xml" title="FOAF" href="$foafurl" />\n};
+    $p->{head_content} .= qq{<meta name="foaf:maker" content="foaf:mbox_sha1sum '$digest'" />\n};
 
     return $p;
 }
