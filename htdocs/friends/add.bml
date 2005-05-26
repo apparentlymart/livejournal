@@ -68,14 +68,14 @@
              $title = $ML{'.remove.title'};
              $body = "<?h1 $ML{'.remove.header'} h1?><?p " .
                      BML::ml('.remove.text', {'user'=>$user,
-                                              'ljuser' => LJ::ljuser($user),
+                                              'ljuser' => LJ::ljuser($u),
                                               'url'=>"$LJ::SITEROOT/users/$remote->{'user'}/friends"}) .
                      " p?>";
          } else {
              $title = $ML{'.add.title'};
              $body = "<?h1 $ML{'.add.header'} h1?><?p " .
                      BML::ml('.add.text', { 'user' => $user,
-                                            'ljuser' => LJ::ljuser($user),
+                                            'ljuser' => LJ::ljuser($u),
                                             'url' => "$LJ::SITEROOT/users/$remote->{'user'}/friends", }) .
                      " p?>";
          }
