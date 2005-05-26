@@ -28,6 +28,11 @@ sub init {
     reload_conf();
 }
 
+sub get_memcache {
+    init() unless $memc;
+    return $memc
+}
+
 sub client_stats {
     return $memc->{'stats'} || {};
 }
