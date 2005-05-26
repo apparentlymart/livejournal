@@ -274,7 +274,8 @@ sub process {
         }
 
         # Strip pgp clearsigning and any extra text surrounding it
-        $body =~ s/.+-----BEGIN PGP SIGNED MESSAGE-----.+?\n\n//s;
+        # This takes into account pgp 'dash escaping' and a possible lack of Hash: headers
+        $body =~ s/.*?^-----BEGIN PGP SIGNED MESSAGE-----(?:\n[^\n].*?\n\n|\n\n)//ms;
         $body =~ s/-----BEGIN PGP SIGNATURE-----.+//s;
     }
 
