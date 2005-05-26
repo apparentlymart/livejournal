@@ -377,8 +377,13 @@
                 # already loaded from multipart parse earlier
                 
             } elsif ($POST{'src'} eq "url") {
-                my $sua = new SafeAgent;
-                $POST{userpic} = $sua->fetch($POST{urlpic}, $MAX_UPLOAD, 10);
+                require LWPx::ParanoidAgent;
+                my $ua = LWPx::ParanoidAgent->new(
+                                                  timeout => 10,
+                                                  max_size => $MAX_UPLOAD + 1024,
+                                                  );
+                my $res = $ua->get($POST{urlpic});
+                $POST{userpic} = $res->content if $res && $res->is_success;
                 return $err->($ML{'.error.urlerror'}) unless $POST{userpic};
             }
             

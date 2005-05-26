@@ -27,7 +27,6 @@ use LJ::SpellCheck;
 use LJ::TextMessage;
 use LJ::Blob;
 use LJ::Captcha;
-use SafeAgent;
 use MogileFS qw(+preload);
 use DDLockClient ();
 
