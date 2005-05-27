@@ -1457,7 +1457,7 @@ sub send
     elsif ($provider eq "qwest")
     {
         send_mail($self, {
-            'to'        => "(f:$msg->{'from'})$self->{'number'}\@uswestdatamail.com",
+            'to'        => "(f:$msg->{'from'})$self->{'number'}\@qwestmp.com",
             'from'      => "$msg->{'from'}",
             'body'      => "$msg->{'message'}",
             'subject'	=> "LJ",
