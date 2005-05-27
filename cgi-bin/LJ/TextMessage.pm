@@ -23,7 +23,7 @@ use MIME::Lite;
 use strict;
 use vars qw($VERSION $SENDMAIL %providers);
 
-$VERSION = '1.5.2';
+$VERSION = '1.5.3';
 
 # default path to sendmail, if none other specified.  we should probably
 # use something more perl-ish and less unix-specific, but whateva'
@@ -78,6 +78,14 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'fromlimit'	=> 15,
         'msglimit'	=> 240,
         'totlimit'	=> 240,
+    },
+
+    'aubykddi' => {
+        'name'		=> 'AU by KDDI',
+        'notes'         => 'Enter your phone number. Goes to username@ezweb.ne.jp',
+        'fromlimit'	=> 20,
+        'msglimit'	=> 10000,
+        'totlimit'	=> 10000,
     },
 
     'bellmobilityca' => {
@@ -169,6 +177,15 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'totlimit'      => 150,
     },
 
+    'claro' =>
+    {
+        'name'          => 'Claro',
+        'notes'         => 'Enter your phone number. Goes to number@clarotorpedo.com.br',
+        'fromlimit'     => 20,
+        'msglimit'      => 160,
+        'totlimit'      => 160,
+    },
+
     'comviq' =>
     {
         'name'          => 'Comviq',
@@ -208,6 +225,14 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'fromlimit'     => 20,
         'msglimit'      => 160,
         'totlimit'      => 160,
+    },
+
+    'eplus' => {
+        'name'          => 'EPlus',
+        'notes'         => 'Enter your phone number. Goes to number@smsmail.eplus.de.',
+        'fromlimit'     => 20,
+        'msglimit'      => 480,
+        'totlimit'      => 480,
     },
 
     'fidoca' => {
@@ -316,6 +341,14 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'totlimit'	=> 120,
     },
 
+    'mtsprimtel' => {
+        'name'		=> 'MTS Primtel',
+        'notes'		=> 'Enter your phone number. Sent via web gateway.',
+        'fromlimit'	=> 20,
+        'msglimit'	=> 160,
+        'totlimit'	=> 160,
+    },
+
     'mobileone' => {
         'name'          => 'MobileOne',
         'notes'         => 'Enter your phone number. Goes to number@m1.com.sg',
@@ -416,8 +449,8 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'name'          => 'Optus',
         'notes'         => 'Enter your phone number. Goes to @optusmobile.com.au',
         'fromlimit'     => 20,
-        'msglimit'      => 160,
-        'totlimit'      => 160,
+        'msglimit'      => 114,
+        'totlimit'      => 114,
     },
 
     'orange' => {
@@ -468,12 +501,20 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'totlimit'	=> 125,
     },
 
-    'primtel' => {
-        'name'          => 'Primtel',
-        'notes'         => 'Enter your phone number. Goes to number@sms.primtel.ru',
-        'fromlimit'     => 20,
-        'msglimit'      => 150,
-        'totlimit'      => 150,
+    'phonehouse' => {
+        'name'		=> 'The Phone House',
+        'notes'		=> '10-digit phone number. Goes to number@sms.phonehouse.de.',
+        'fromlimit'	=> 20,
+        'msglimit'	=> 160,
+        'totlimit'	=> 160,
+    },
+
+    'plusgsm' => {
+        'name'		=> 'Plus GSM Poland',
+        'notes'		=> '10-digit phone number. Goes to number@text.plusgsm.pl.',
+        'fromlimit'	=> 20,
+        'msglimit'	=> 620,
+        'totlimit'	=> 620,
     },
 
     'pscwireless' => {
@@ -482,6 +523,14 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'fromlimit'	=> 20,
         'msglimit'	=> 140,
         'totlimit'	=> 140,
+    },
+
+    'primtel' => {
+        'name'          => 'Primtel',
+        'notes'         => 'Enter your phone number. Goes to number@sms.primtel.ru',
+        'fromlimit'     => 20,
+        'msglimit'      => 150,
+        'totlimit'      => 150,
     },
 
     'ptel' => {
@@ -604,6 +653,14 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'totlimit'      => 200,
     },
 
+    'swisscom' => {
+        'name'          => 'SwissCom Mobile',
+        'notes'         => 'Enter your phone number. Message will be sent to number@bluewin.ch',
+        'fromlimit'     => 20,
+        'msglimit'      => 10000,
+        'totlimit'      => 10000,
+    },
+
     'tele2' => {
         'name'          => 'Tele2 Latvia',
         'notes'         => '10-digit phone number. Goes to number@sms.tele2.lv.',
@@ -644,14 +701,6 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'totlimit'      => 350,
     },
     
-    'tmobileaustria' => {
-        'name'       => 'T-Mobile Austria',
-        'notes'      => 'Enter your number starting with 43676. Email will be sent to number@sms.t-mobile.at.',
-        'fromlimit'  => 15,
-        'msglimit'   => 160,
-        'totlimit'   => 160,
-    },
-
     'tmobilegermany' => {
         'name'       => 'T-Mobile Germany',
         'notes'      => 'Enter your number. Email will be sent to number@T-D1-SMS.de',
@@ -731,28 +780,12 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'totlimit'      => 800,
     },
 
-    'virginmobileuk' => {
-        'name'          => 'Virgin Mobile UK',
-        'notes'         => 'Enter your phone number. Messages are sent to number@vxtras.com.',
-        'fromlimit'     => 20,
-        'msglimit'      => 160,
-        'totlimit'      => 160,
-    },
-
     'virginmobileusa' => {
         'name'          => 'Virgin Mobile USA',
         'notes'         => 'Enter your phone number. Messages are sent to number@vmobl.com.',
         'fromlimit'     => 20,
         'msglimit'      => 160,
         'totlimit'      => 160,
-    },
-
-    'vodacom' => {
-        'name'		=> 'Vodacom',
-        'notes'		=> 'Enter your 10 digit phone number. Messages are sent via Vodacom\'s web gateway.',
-        'fromlimit'	=> 15,
-        'msglimit'	=> 140,
-        'totlimit'	=> 140,
     },
 
     'vodafonees' => {
@@ -772,23 +805,71 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
     },
 
     'vodafonejp-c' => {
-        'name'          => 'Vodafone Japan (Central)',
+        'name'          => 'Vodafone Japan (Toukai/Central)',
         'notes'         => 'Enter your phone number. Messages are sent to number@c.vodafone.ne.jp',
         'fromlimit'     => 20,
         'msglimit'      => 160,
         'totlimit'      => 160,
     },
 
+    'vodafonejp-d' => {
+        'name'          => 'Vodafone Japan (Hokkaido)',
+        'notes'         => 'Enter your phone number. Messages are sent to number@d.vodafone.ne.jp',
+        'fromlimit'     => 20,
+        'msglimit'      => 160,
+        'totlimit'      => 160,
+    },
+
     'vodafonejp-h' => {
-        'name'          => 'Vodafone Japan (Higashi)',
+        'name'          => 'Vodafone Japan (Touhoku/Niigata/North)',
         'notes'         => 'Enter your phone number. Messages are sent to number@h.vodafone.ne.jp',
         'fromlimit'     => 20,
         'msglimit'      => 160,
         'totlimit'      => 160,
     },
 
+    'vodafonejp-k' => {
+        'name'          => 'Vodafone Japan (Kansai/West -- including Osaka)',
+        'notes'         => 'Enter your phone number. Messages are sent to number@k.vodafone.ne.jp',
+        'fromlimit'     => 20,
+        'msglimit'      => 160,
+        'totlimit'      => 160,
+    },
+
+    'vodafonejp-n' => {
+        'name'          => 'Vodafone Japan (Chuugoku/Western)',
+        'notes'         => 'Enter your phone number. Messages are sent to number@n.vodafone.ne.jp',
+        'fromlimit'     => 20,
+        'msglimit'      => 160,
+        'totlimit'      => 160,
+    },
+
+    'vodafonejp-q' => {
+        'name'          => 'Vodafone Japan (Kyuushu/Okinawa)',
+        'notes'         => 'Enter your phone number. Messages are sent to number@q.vodafone.ne.jp',
+        'fromlimit'     => 20,
+        'msglimit'      => 160,
+        'totlimit'      => 160,
+    },
+
+    'vodafonejp-r' => {
+        'name'          => 'Vodafone Japan (Hokuriko/Central North)',
+        'notes'         => 'Enter your phone number. Messages are sent to number@r.vodafone.ne.jp',
+        'fromlimit'     => 20,
+        'msglimit'      => 160,
+        'totlimit'      => 160,
+    },
+
+    'vodafonejp-s' => {
+        'name'          => 'Vodafone Japan (Shikoku)',
+        'notes'         => 'Enter your phone number. Messages are sent to number@s.vodafone.ne.jp',
+        'fromlimit'     => 20,
+        'msglimit'      => 160,
+        'totlimit'      => 160,
+    },
+
     'vodafonejp-t' => {
-        'name'          => 'Vodafone Japan (Tokyo)',
+        'name'          => 'Vodafone Japan (Kanto/Koushin/East -- including Tokyo)',
         'notes'         => 'Enter your phone number. Messages are sent to number@t.vodafone.ne.jp',
         'fromlimit'     => 20,
         'msglimit'      => 160,
@@ -814,6 +895,14 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
     'weblinkwireless' => {
         'name'          => 'Weblink Wireless',
         'notes'         => 'Enter your phone number. Goes to @airmessage.net',
+        'fromlimit'     => 20,
+        'msglimit'      => 160,
+        'totlimit'      => 160,
+    },
+
+    'wellcom' => {
+        'name'          => 'WellCom',
+        'notes'         => 'Enter your phone number. Goes to @sms.welcome2well.com',
         'fromlimit'     => 20,
         'msglimit'      => 160,
         'totlimit'      => 160,
@@ -973,6 +1062,15 @@ sub send
         },$errors);
     }
 
+    elsif ($provider eq "aubykddi")
+    {
+        send_mail($self, { 
+            'to'	=> "$self->{'number'}\@ezweb.ne.jp",
+            'from'	=> "$msg->{'from'}",
+            'body'	=> "$msg->{'message'}",
+        },$errors);
+    }
+
     elsif ($provider eq "beemail") 
     {
         send_mail($self, {
@@ -1039,10 +1137,10 @@ sub send
 
     elsif ($provider eq "cellularonewest")
     {
-        post_webform("http://www.cellularonewest.com/sms.asp", {
-            'txtTo'      => $self->{'number'},
-            'txtFrom'    => $msg->{'message'},
-            'txtMsg'     => $msg->{'from'},
+        send_mail($self, { 
+            'to'	=> "$self->{'number'}\@mycellone.net",
+            'from'	=> "$msg->{'from'}",
+            'body'	=> $msg->{'message'},
         },$errors);
     }
 
@@ -1068,6 +1166,15 @@ sub send
     {
         send_mail($self, {
             'to'        => "$self->{'number'}\@mmode.com",
+            'from'      => "$msg->{'from'}",
+            'body'      => $msg->{'message'},
+        },$errors);
+    }
+
+    elsif ($provider eq "claro")
+    {
+        send_mail($self, {
+            'to'        => "$self->{'number'}\@clarotorpedo.com.br",
             'from'      => "$msg->{'from'}",
             'body'      => $msg->{'message'},
         },$errors);
@@ -1112,6 +1219,15 @@ sub send
             'phoneNo'    => $self->{'number'},
             'userEmail'  => $msg->{'from'},
             'message'    => $msg->{'message'},
+        },$errors);
+    }
+
+    elsif ($provider eq "eplus")
+    {
+        send_mail($self, {
+            'to'        => "$self->{'number'}\@smsmail.eplus.de",
+            'from'      => "$msg->{'from'}",
+            'body'      => "$msg->{'message'}",
         },$errors);
     }
 
@@ -1245,6 +1361,15 @@ sub send
             'to'	=> "$self->{'number'}\@text.mtsmobility.com",
             'from'	=> "$msg->{'from'}",
             'body'	=> "$msg->{'message'}",
+        },$errors);
+    }
+
+    elsif ($provider eq "mtsprimtel")
+    {
+        post_webform("http://80.83.224.19/sms/sent_sakh.shtml", {
+            'ref'       => 8,
+            'txtAddr'  => $self->{'number'},
+            'textSM'	 => "(f:".$msg->{'from'}.")".$msg->{'message'},
         },$errors);
     }
 
@@ -1418,6 +1543,24 @@ sub send
          },$errors);
     }
 
+    elsif ($provider eq "phonehouse")
+    {
+        send_mail($self, {
+            'to'        => "$self->{'number'}\@sms.phonehouse.de",
+            'from'      => "$msg->{'from'}",
+            'body'      => "$msg->{'message'}",
+        },$errors);
+    }
+
+    elsif ($provider eq "plusgsm")
+    {
+        send_mail($self, {
+            'to'        => "$self->{'number'}\@text.plusgsm.pl",
+            'from'      => "$msg->{'from'}",
+            'body'      => "$msg->{'message'}",
+        },$errors);
+    }
+
     elsif ($provider eq "pscwireless")
     {
         send_mail($self, { 
@@ -1426,7 +1569,7 @@ sub send
             'body'	=> "$msg->{'message'}",
         },$errors);
     }
-
+    
     elsif ($provider eq "primtel")
     {
         send_mail($self, {
@@ -1569,6 +1712,14 @@ sub send
         },$errors);
     }
 
+    elsif ($provider eq "swisscom") {
+        send_mail($self, {
+            'to'   => "$self->{'number'}\@bluewin.ch",
+            'from' => "$msg->{'from'}",
+            'body' => "$msg->{'message'}",
+        },$errors);
+    }
+
     elsif ($provider eq "tele2") {
         post_webform("http://sms.tele2.lv/cgi-bin/send_sm_t2.cgi", {
             "msisdn"    => $self->{'number'},
@@ -1597,7 +1748,7 @@ sub send
         send_mail($self, {
             'to'        => "$self->{'number'}\@msg.telus.com",
             'from'      => "$msg->{'from'}",
-            'body'      => "$msg->{'message'}",
+            'body'      => "(f:$msg->{'from'})$msg->{'message'}",
             'subject'	=> "LJ",
         },$errors);
     }
@@ -1713,29 +1864,12 @@ sub send
         },$errors);
     }
 
-    elsif ($provider eq "virginmobileuk" )
-    {
-        send_mail($self, {
-            'to'        => "$self->{'number'}\@vxtras.com",
-            'from'      => "$msg->{'from'}",
-            'body'      => "$msg->{'message'}",
-        },$errors);
-    }
-
     elsif ($provider eq "virginmobileusa" )
     {
         send_mail($self, {
             'to'        => "$self->{'number'}\@vmobl.com",
             'from'      => "$msg->{'from'}",
             'body'      => "$msg->{'message'}",
-        },$errors);
-    }
-
-    elsif ($provider eq "vodacom" )
-    {
-        post_webform("http://websms.vodacom.net/send.php3", {
-            "cellnum"         => $self->{'number'},
-            "message"         => $msg->{'message'},
         },$errors);
     }
 
@@ -1764,9 +1898,57 @@ sub send
         },$errors);
     }
 
+    elsif ($provider eq "vodafonejp-d") {
+        send_mail($self, {
+            'to' => "$self->{'number'}\@d.vodafone.ne.jp",
+            'from' => $msg->{'from'},
+            'body' => $msg->{'message'},
+        },$errors);
+    }
+
     elsif ($provider eq "vodafonejp-h") {
         send_mail($self, {
             'to' => "$self->{'number'}\@h.vodafone.ne.jp",
+            'from' => $msg->{'from'},
+            'body' => $msg->{'message'},
+        },$errors);
+    }
+
+    elsif ($provider eq "vodafonejp-k") {
+        send_mail($self, {
+            'to' => "$self->{'number'}\@k.vodafone.ne.jp",
+            'from' => $msg->{'from'},
+            'body' => $msg->{'message'},
+        },$errors);
+    }
+
+    elsif ($provider eq "vodafonejp-n") {
+        send_mail($self, {
+            'to' => "$self->{'number'}\@n.vodafone.ne.jp",
+            'from' => $msg->{'from'},
+            'body' => $msg->{'message'},
+        },$errors);
+    }
+
+    elsif ($provider eq "vodafonejp-q") {
+        send_mail($self, {
+            'to' => "$self->{'number'}\@q.vodafone.ne.jp",
+            'from' => $msg->{'from'},
+            'body' => $msg->{'message'},
+        },$errors);
+    }
+
+    elsif ($provider eq "vodafonejp-r") {
+        send_mail($self, {
+            'to' => "$self->{'number'}\@r.vodafone.ne.jp",
+            'from' => $msg->{'from'},
+            'body' => $msg->{'message'},
+        },$errors);
+    }
+
+    elsif ($provider eq "vodafonejp-s") {
+        send_mail($self, {
+            'to' => "$self->{'number'}\@s.vodafone.ne.jp",
             'from' => $msg->{'from'},
             'body' => $msg->{'message'},
         },$errors);
@@ -1802,6 +1984,15 @@ sub send
     {
         send_mail($self, {
             'to'        => "$self->{'number'}\@airmessage.net",
+            'from'      => $msg->{'from'},
+            'body'      => $msg->{'message'},
+        },$errors);
+    }
+    
+    elsif ($provider eq "wellcom")
+    {
+        send_mail($self, {
+            'to'        => "$self->{'number'}\@sms.welcome2well.com",
             'from'      => $msg->{'from'},
             'body'      => $msg->{'message'},
         },$errors);
