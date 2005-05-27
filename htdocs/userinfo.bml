@@ -58,14 +58,14 @@
  $userid += 0;
 
  {
-     return $error->($ML{'.label.reqfinduser'})
-         if ($userid && ! LJ::check_priv($remote, "finduser"));
-
      if ($userid) {
          $u = LJ::load_userid($userid);
      } else {
          $u = LJ::load_user($user);
      }
+
+     return $error->($ML{'.label.reqfinduser'})
+         if $userid && ! LJ::check_priv($remote, "finduser") && ! ($GET{t} eq "O" && $u && $u->{journaltype} eq "O");
 
      $user = $u->{'user'} if $u;
      $userid = $u->{'userid'}+0 if $u;
@@ -352,12 +352,16 @@
          'u' => $u,
          'ret' => \$hook_extra,
      });
-     $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.user'}</b></td><td width='100%'><a href='/$dir/$user/'><b>$user</b></a> ($u->{'userid'}) $hook_extra ";
-     if ($u->{public_key}) {
-         $body .= "<a href='/pubkey.bml?user=$user'>";
-         $body .= "<img src='/img/key.gif' width='16' height='16' border='0' alt='View public key' title='View public key' style='vertical-align: middle; border: 0;' /></a>";
+     if ($u->{journaltype} eq "O") {
+         $body .= "<tr valign='top'><td align='right'><b>OpenID:</b></td><td width='100%'>" . LJ::ljuser($u) . "</td>";
+     } else {
+         $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.user'}</b></td><td width='100%'><a href='/$dir/$user/'><b>$user</b></a> ($u->{'userid'}) $hook_extra ";
+         if ($u->{public_key}) {
+             $body .= "<a href='/pubkey.bml?user=$user'>";
+             $body .= "<img src='/img/key.gif' width='16' height='16' border='0' alt='View public key' title='View public key' style='vertical-align: middle; border: 0;' /></a>";
+         }
+         $body .= "</td>\n";
      }
-     $body .= "</td>\n";
  }
      
 ### picture
@@ -530,6 +534,7 @@ if ($u->{'journaltitle'}) {
 
       my $useremail_cap = LJ::get_cap($u, 'useremail');
       unless ($u->{'opt_whatemailshow'} eq "N" ||
+              $u->{'journaltype'} eq "O" ||
               $u->{'opt_whatemailshow'} eq "L" && ($u->{'no_mail_alias'} || ! $useremail_cap || ! $LJ::USER_EMAIL) ||
               $hide_contactinfo->()) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;

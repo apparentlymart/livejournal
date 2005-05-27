@@ -2187,8 +2187,9 @@ sub ljuser
 {
     my $user = shift;
     my $opts = shift;
-
-    if ($LJ::DYNAMIC_LJUSER && ! isu($user) && ! $opts->{'type'}) {
+    my $u;
+    my $do_dynamic = $LJ::DYNAMIC_USER || ($user =~ /^ext_/);
+    if ($do_dynamic && ! isu($user) && ! $opts->{'type'}) {
         # Try to automatically pick the user type, but still
         # make something if we can't (user doesn't exist?)
         $user = LJ::load_user($user) || $user;
@@ -2206,6 +2207,7 @@ sub ljuser
     }
 
     if (isu($user)) {
+        $u = $user;
         $opts->{'type'} = $user->{'journaltype'};
         # Mark accounts as deleted that aren't visible, memorial, or locked
         $opts->{'del'} = $user->{'statusvis'} ne 'V' &&
@@ -2229,6 +2231,16 @@ sub ljuser
         return $make_tag->('syndicated.gif', 'users', 16);
     } elsif ($opts->{'type'} eq 'N') {
         return $make_tag->('newsinfo.gif', 'users', 16);
+    } elsif ($opts->{'type'} eq 'O') {
+        my $url = $u->url;
+        require Net::OpenID::Consumer;
+        my $name = Net::OpenID::VerifiedIdentity::DisplayOfURL($url);
+        $name =~ s/\[(live|dead)journal\.com/\[${1}journal/;
+
+        $url ||= "about:blank";
+        $name ||= "[no_name]";
+
+        return "<span class='ljuser' style='white-space: nowrap;$strike'><a href='$LJ::SITEROOT/userinfo.bml?userid=$u->{userid}&amp;t=O$andfull'><img src='$img/openid-profile.gif' alt='[info]' width='16' height='16' style='vertical-align: bottom; border: 0;' /></a><a href='$url'><b>$name</b></a></span>";
     } else {
         return $make_tag->('userinfo.gif', 'users', 17);
     }
@@ -3510,7 +3522,7 @@ sub get_extuser_map
 #      htdocs/create.bml can use it, rather than doing the work itself.
 # returns: integer of userid created, or 0 on failure.
 # args: dbarg?, opts
-# des-opts: hashref containing keys 'user', 'name', 'password', 'email'
+# des-opts: hashref containing keys 'user', 'name', 'password', 'email', 'caps', 'journaltype'
 # </LJFUNC>
 sub create_account
 {
@@ -3526,13 +3538,14 @@ sub create_account
     my $quser = $dbh->quote($user);
     my $cluster = defined $o->{'cluster'} ? $o->{'cluster'} : LJ::new_account_cluster();
     my $caps = $o->{'caps'} || $LJ::NEWUSER_CAPS;
+    my $journaltype = $o->{'journaltype'} || "P";
 
     # new non-clustered accounts aren't supported anymore
     return 0 unless $cluster;
 
-    $dbh->do("INSERT INTO user (user, name, password, clusterid, dversion, caps, email) ".
-             "VALUES ($quser, ?, ?, ?, $LJ::MAX_DVERSION, ?, ?)", undef,
-             $o->{'name'}, $o->{'password'}, $cluster, $caps, $o->{'email'});
+    $dbh->do("INSERT INTO user (user, name, password, clusterid, dversion, caps, email, journaltype) ".
+             "VALUES ($quser, ?, ?, ?, $LJ::MAX_DVERSION, ?, ?, ?)", undef,
+             $o->{'name'}, $o->{'password'}, $cluster, $caps, $o->{'email'}, $journaltype);
     return 0 if $dbh->err;
 
     my $userid = $dbh->{'mysql_insertid'};
@@ -5470,6 +5483,7 @@ sub make_journal
         return $error->("This journal has been suspended.", "403 Forbidden") if ($u->{'statusvis'} eq "S");
     }
     return $error->("This journal has been deleted and purged.", "410 Gone") if ($u->{'statusvis'} eq "X");
+    return $error->("This user has no journal here.", "404 Not here") if $u->{'journaltype'} eq "O";
 
     $opts->{'view'} = $view;
 

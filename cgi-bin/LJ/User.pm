@@ -545,4 +545,16 @@ sub log2_do {
     return $ret;
 }
 
+sub url {
+    my $u = shift;
+    LJ::load_user_props($u, "url");
+    if ($u->{'journaltype'} eq "O" && ! $u->{url}) {
+        my $dbr = LJ::get_db_reader();
+        my $find_url = $dbr->selectrow_array("SELECT url FROM openid_usermap WHERE userid=? LIMIT 1", undef, $u->{userid});
+        LJ::set_userprop($u, "url", $find_url) if $find_url;
+        return $find_url;
+    }
+    return $u->{url};
+}
+
 1;

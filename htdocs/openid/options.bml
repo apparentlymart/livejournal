@@ -1,0 +1,95 @@
+<?_code
+{
+    use strict;
+    use vars qw($title $body %GET %POST);
+
+    my $err = sub {
+	$title = "Error";
+	$body = shift;
+	return "";
+    };
+
+    my $u = LJ::get_remote() or
+	return $err->("You need to be <a href='/login.bml?ret=1'>logged in</a> to manage your OpenID options.");
+
+    my $dbh = LJ::get_db_writer();
+    my $trusted = {};
+    my @external;
+
+    my $load_trusted = sub {
+	$trusted = $dbh->selectall_hashref("SELECT ye.y_endpoint_id as 'endid', ye.url FROM yadis_endpoint ye, yadis_trust yt WHERE yt.y_endpoint_id=ye.y_endpoint_id AND yt.userid=$u->{userid}", 'endid');
+    };
+
+    my $load_external = sub {
+	@external = @{ $dbh->selectcol_arrayref("SELECT url FROM yadis_external WHERE userid=?", undef, $u->{userid}) };
+    };
+
+    if (LJ::did_post()) {
+	return $err->("Possible form tampering detected.") unless LJ::check_form_auth();
+	my $dur;
+	$body = "";
+
+	$load_trusted->();
+	foreach my $endid (sort { $trusted->{$a} cmp $trusted->{$b} } keys %$trusted) {
+	    next unless $POST{"delete:$endid"};
+	    $dbh->do("DELETE FROM yadis_trust WHERE userid=? AND y_endpoint_id=?", undef, $u->{userid}, $endid);
+	}
+
+	$load_external->();
+        foreach my $url (@external) {
+	    next unless $POST{"extdelete:$url"};
+	    $dbh->do("DELETE FROM yadis_external WHERE userid=? AND url=?", undef, $u->{userid}, $url);
+        }
+
+	if ($POST{'ext_url'} =~ m!^http://!) {
+	    $dbh->do("REPLACE INTO yadis_external (userid, url) VALUES (?,?)", undef, $u->{userid}, $POST{'ext_url'});
+	}
+
+    }
+
+    $load_trusted->();
+    $load_external->();
+
+    $title = "OpenID Options";
+    $body = "";
+    $body .= "<form method='post'>";
+    $body .= LJ::form_auth();
+    $body .= "<?h1 Sites you trust h1?><?p You've marked these sites as able to verify your identity.  You may remove them here. p?>";
+    $body .= "<div style='margin: 5px 0px 5px 30px'>";
+    if (%$trusted) {
+	foreach my $endid (sort { $trusted->{$a} cmp $trusted->{$b} } keys %$trusted) {
+	    my $url = $trusted->{$endid}->{url};
+	    my $dis_site = LJ::ehtml($url);
+	    $dis_site =~ s!\*\.!<i>&lt;anything&gt;</i>.!;
+	    $body .= LJ::html_submit("delete:$endid", "Delete") . " -- $dis_site<br />";
+	}
+    } else {
+	$body .= "<i>(None)</i>";
+    }
+    $body .= "</div>";
+
+
+    $body .= "<?h1 External Assertion URLs h1?><?p Optional URLs LiveJournal will assert for you, if you put this in your HTML's head. p?>";
+
+    $body .= "<b>&lt;link rel=\"openid.server\" href=\"$LJ::SITEROOT/misc/openid.bml?ljuser=$u->{user}\" /&gt;</b>";
+
+    $body .= "<div style='margin: 5px 0px 5px 30px'>";
+    if (@external) {
+	foreach my $url (@external) {
+	    $body .= LJ::html_submit("extdelete:$url", "Delete") . " -- " . LJ::ehtml($url) . "<br />";
+	}
+    } else {
+	$body .= "<i>(None)</i>";
+    }
+    $body .= "</div>";
+    
+    $body .= "Add: " . LJ::html_text({ name => 'ext_url', size => 60 }) . " <input type='submit' value='Add' />";
+    
+    $body .= "</form>";
+    return;
+
+}
+_code?><?page
+title=><?_code return $title; _code?>
+body=><?_code  return $body;  _code?>
+page?>

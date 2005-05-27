@@ -1,0 +1,159 @@
+<?_code
+{
+    use strict;
+    use vars qw($title $head $body %GET %POST);
+    use Net::OpenID::Consumer;
+    LJ::set_active_crumb("openid_login");
+
+    $title = "OpenID Login";
+    $head = "";
+
+    my $err = sub {
+        $title = "Error";
+        $body = shift;
+        return;
+    };
+
+    my $remote = LJ::get_remote();
+    if ($remote) {
+        $body .= "<?h1 Already logged in h1?><?p Before logging in with <a href='http://www.danga.com/openid/'>OpenID</a>, you must first <a href='/logout.bml'>log out</a>. p?>";
+        return;
+    }
+
+    my $get_csr = sub {
+        require LWPx::ParanoidAgent;
+        my $ua = LWPx::ParanoidAgent->new(
+                                          timeout => 10,
+                                          max_size => 1024*300,
+                                          );
+
+        my $csr = Net::OpenID::Consumer->new(
+                                             ua => $ua,
+                                             args => \%GET,
+                                             cache => eval { LJ::MemCache::get_memcache() },
+                                             );
+        return $csr;
+    };
+
+=pod
+
+You need this table:
+
+ CREATE TABLE openid_usermap (
+   url varchar(255) binary NOT NULL default '',
+   userid int(10) unsigned NOT NULL default '0',
+   PRIMARY KEY  (url),
+   KEY userid (userid)
+ )
+
+=cut
+
+
+    if ($GET{'openid.mode'}) {
+        my $csr = $get_csr->();
+        if (my $setup = $csr->user_setup_url) {
+            return BML::redirect($setup);
+        }
+
+        my $vident = eval { $csr->verified_identity; };
+        return $err->($csr->err) unless $vident;
+
+        my $url = $vident->url;
+
+        my $u = LJ::load_user_openid($url, $vident);
+        return $err->("Couldn't vivify your account (but we verified that you're " . LJ::ehtml($url) . ")") unless $u;
+
+        my $sess_opts = {
+            'exptype' => 'short',
+            'ipfixed' => 0,
+        };
+        my $etime = 0;
+        if ($POST{'expire'} eq "never") {
+            $etime = time()+60*60*24*60;
+            $sess_opts->{'exptype'} = "long";
+        }
+
+        my $sess = $u->generate_session($sess_opts);
+        my $cursess = $sess;
+        my @sopts;
+        LJ::run_hooks("login_add_opts", { 'u' => $u, 'form' => \%POST, 'opts' => \@sopts });
+        my $sopts = @sopts ? ":" . join('', map { ".$_" } @sopts) : "";
+        $COOKIE{'ljsession'} = [  "ws:$u->{'user'}:$sess->{'sessid'}:$sess->{'auth'}$sopts", $etime, 1 ]; # 1 => HttpOnly
+
+        $body = "Hello, " . LJ::ljuser($u);
+
+        eval { Apache->request->notes('ljuser' => $u->{user}); };
+        LJ::set_remote($u);
+
+        return;
+    }
+
+
+    if (LJ::did_post()) {
+        my $csr = $get_csr->();
+        my $url = $POST{'openid_url'};
+
+        my $tried_local_id = 0;
+        $csr->ua->blocked_hosts(
+                           sub {
+                               my $dest = shift;
+                               if ($dest =~ /livejournal\.com$/i) {
+                                   $tried_local_id = 1;
+                                   return 1;
+                               }
+                               return 0;
+                           });
+
+        my $claimed_id = $csr->claimed_identity($url);
+
+        unless ($claimed_id) {
+            return $err->("You can't use a LiveJournal OpenID account on LiveJournal &mdash; ".
+                          "just <a href='/login.bml'>go login</a> with your actual LiveJournal account.") if $tried_local_id;
+            return $err->($csr->err);
+        }
+
+        my $check_url = $claimed_id->check_url(
+                                               return_to => "$LJ::SITEROOT/openid/login.bml",
+                                               trust_root => "$LJ::SITEROOT/",
+                                               delayed_return => 1,
+                                               );
+        return BML::redirect($check_url);
+    }
+
+
+## TEMPORARY HOME
+sub LJ::load_user_openid {
+    my ($url, $vident) = @_;
+
+    my $dbh = LJ::get_db_writer();
+    my $uid = $dbh->selectrow_array("SELECT userid FROM openid_usermap WHERE url=?", undef, $url);
+    return LJ::load_userid($uid) if $uid;
+
+    # increment ext_ counter until we successfully create an LJ
+    # account.  hard cap it at 10 tries. (arbitrary, but we really
+    # shouldn't have *any* failures here, let alone 10 in a row)
+    for (1..10) {
+        my $extuser = 'ext_' . LJ::alloc_global_counter( 'E' );
+        $uid = LJ::create_account({
+            caps => undef,
+            user => $extuser,
+            name => ($vident ? $vident->display : $extuser),
+            journaltype => 'O',
+        });
+        last if $uid;
+        select undef, undef, undef, .10;  # lets not thrash over this
+    }
+    return undef unless $uid &&
+        $dbh->do("INSERT INTO openid_usermap (url, userid) VALUES (?,?)", undef, $url, $uid);
+    return LJ::load_userid($uid);
+}
+
+
+return undef;
+} 
+ _code?><?_info
+nocache=>1
+_info?><?page
+title=><?_code return $title; _code?>
+body=><?_code return $body; _code?>
+page?>
