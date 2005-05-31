@@ -852,6 +852,7 @@ if ($u->{'journaltitle'}) {
      'u' => $u,
      'remote' => $remote,
  })) {
+     next unless $row->[0];
      $body .= "<tr><td align='right' valign='top'><b style='white-space: nowrap;'>";
      $body .= $row->[0];
      $body .=":</b></td><td colspan='2'>";

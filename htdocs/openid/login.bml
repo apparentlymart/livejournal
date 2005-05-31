@@ -66,7 +66,7 @@
         my $sopts = @sopts ? ":" . join('', map { ".$_" } @sopts) : "";
         $COOKIE{'ljsession'} = [  "ws:$u->{'user'}:$sess->{'sessid'}:$sess->{'auth'}$sopts", $etime, 1 ]; # 1 => HttpOnly
 
-        $body = "Hello, " . LJ::ljuser($u);
+        $body = "Hello, " . LJ::ljuser($u) . ".  Welcome to the bleeding edge.";
 
         eval { Apache->request->notes('ljuser' => $u->{user}); };
         LJ::set_remote($u);

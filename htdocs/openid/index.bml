@@ -34,6 +34,10 @@ regEvent(window, "load", initPage);
 title=>OpenID
 body<=
 
+<div style='background-color: #ffe680; float: right; width: 175px; font-size: 0.8em; border: 1px outset #333; padding: 2px;'>
+<strong style='text-decoration: underline'>BETA:</strong><br /> Our OpenID consumer support is very new.  That is, external users logging in with their identity here will find some rough edges while we work on smoothing it all out.<br /><br />Our server support is relatively complete, though.
+</div>
+
 <?h1 What is OpenID? h1?>
 <?p <?sitename?> supports the <a href="http://openid.net/">OpenID</a> distributed identity system, letting you bring your <?sitename?> identity to other sites, and letting non-<?sitename?> users bring their identity here.  After all, not everybody uses the same websites, but you should still be able to play together. p?>
 
@@ -44,7 +48,7 @@ p?>
 
    <div style='padding: 0.4em; margin-left: 25px; margin-right: 25px; width: auto; text-align: center; background: #ccc; border: #000'>
 <form method='post' action='login.bml' style='display:inline; width:auto'><nobr><b>Your OpenID URL:</b> <input class='sexy' id='openid_url' name="openid_url" size='30' />
-<input style='background: #ff6200; color: #fff;' type='submit' value='Login' /></nobr></form></div>
+<input style='background: #ff6200; color: #fff;' type='submit' value='Login' /></nobr><br />For example: <tt>melody.someblog.com</tt> (if your host supports OpenID)</form></div>
 
 <?h1 Using your OpenID on another site. h1?>
 <?p

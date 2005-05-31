@@ -37,6 +37,12 @@
             return BML::redirect("$LJ::SITEROOT/agecheck/?s=1");
         }
 
+        if ($remote->identity) {
+            $$title = "Sorry";
+            $$body = "Non-$LJ::SITENAME users can't post, as they don't actually have journals here.  You can leave comments in other journals, though.";
+            return;
+        }
+
         if (! LJ::get_cap($remote, "can_post")) {
             $$title = "Can't Post";
             $$body = $LJ::MSG_NO_POST || $ML{'.error.cantpost'};

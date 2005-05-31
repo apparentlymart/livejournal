@@ -562,6 +562,7 @@ sub url {
 sub identity {
     my $u = shift;
     return $u->{_identity} if $u->{_identity};
+    return undef unless $u->{'journaltype'} eq "I";
     my $memkey = [$u->{userid}, "ident:$u->{userid}"];
     my $ident = LJ::MemCache::get($memkey);
     if ($ident) {
@@ -602,6 +603,9 @@ sub ljuser_display {
 
         $url ||= "about:blank";
         $name ||= "[no_name]";
+
+        $url = LJ::ehtml($url);
+        $name = LJ::ehtml($name);
 
         return "<span class='ljuser' style='white-space: nowrap;'><a href='$LJ::SITEROOT/userinfo.bml?userid=$u->{userid}&amp;t=I$andfull'><img src='$img/openid-profile.gif' alt='[info]' width='16' height='16' style='vertical-align: bottom; border: 0;' /></a><a href='$url'><b>$name</b></a></span>";
 
