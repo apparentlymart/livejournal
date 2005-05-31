@@ -597,6 +597,7 @@ sub moveUser {
                       "s1stylecache" => 1,    # will be recreated
                       "captcha_session" => 1, # temporary
                       "tempanonips" => 1,     # temporary ip storage for spam reports
+                      "recentactions" => 1,   # pre-flushed by clean_caches
                       );
 
     $skip_table{'inviterecv'} = 1 if $u->{journaltype} ne 'P'; # non-person, skip invites received
