@@ -611,6 +611,7 @@ sub postevent
     ##        should one day be a community journal, of some form.
     return fail($err,150) if ($u->{'journaltype'} eq "C" ||
                               $u->{'journaltype'} eq "S" ||
+                              $u->{'journaltype'} eq "I" ||
                               $u->{'journaltype'} eq "N");
 
     # underage users can't do this
@@ -1727,7 +1728,9 @@ sub editfriends
 
     # only people, shared journals, and owned syn feeds can add friends
     return $fail->(104, "Journal type cannot add friends")
-        unless ($u->{'journaltype'} eq 'P' || $u->{'journaltype'} eq 'S' ||
+        unless ($u->{'journaltype'} eq 'P' ||
+                $u->{'journaltype'} eq 'S' ||
+                $u->{'journaltype'} eq 'I' ||
                 ($u->{'journaltype'} eq "Y" && $u->{'password'}));
 
     # perform the adds
@@ -2101,6 +2104,7 @@ sub list_friends
             'Y' => 'syndicated',
             'N' => 'news',
             'S' => 'shared',
+            'I' => 'identity',
         }->{$u->{'journaltype'}} if $u->{'journaltype'} ne 'P';
 
         $r->{"status"} = {

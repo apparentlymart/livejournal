@@ -2016,6 +2016,23 @@ CREATE TABLE recentactions (
 ) TYPE=MYISAM
 EOC
 
+# external identities
+#
+#   idtype ::=
+#      "O" - OpenID
+#      "L" - LID (netmesh)
+#      "T" - TypeKey
+#       ?  - etc
+register_tablecreate("identitymap", <<'EOC');
+CREATE TABLE identitymap (
+  idtype    CHAR(1) NOT NULL,
+  identity  VARCHAR(255) BINARY NOT NULL,
+  userid    INT unsigned NOT NULL,
+  PRIMARY KEY  (idtype, identity),
+  KEY          userid (userid)
+)
+EOC
+
 # NOTE: new table declarations go here
 
 

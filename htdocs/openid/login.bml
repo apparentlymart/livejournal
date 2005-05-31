@@ -35,20 +35,6 @@
         return $csr;
     };
 
-=pod
-
-You need this table:
-
- CREATE TABLE openid_usermap (
-   url varchar(255) binary NOT NULL default '',
-   userid int(10) unsigned NOT NULL default '0',
-   PRIMARY KEY  (url),
-   KEY userid (userid)
- )
-
-=cut
-
-
     if ($GET{'openid.mode'}) {
         my $csr = $get_csr->();
         if (my $setup = $csr->user_setup_url) {
@@ -60,7 +46,7 @@ You need this table:
 
         my $url = $vident->url;
 
-        my $u = LJ::load_user_openid($url, $vident);
+        my $u = LJ::load_identity_user("O", $url, $vident);
         return $err->("Couldn't vivify your account (but we verified that you're " . LJ::ehtml($url) . ")") unless $u;
 
         my $sess_opts = {
@@ -122,35 +108,44 @@ You need this table:
 
 
 ## TEMPORARY HOME
-sub LJ::load_user_openid {
-    my ($url, $vident) = @_;
+sub LJ::load_identity_user {
+    my ($type, $ident, $vident) = @_;
 
     my $dbh = LJ::get_db_writer();
-    my $uid = $dbh->selectrow_array("SELECT userid FROM openid_usermap WHERE url=?", undef, $url);
+    my $uid = $dbh->selectrow_array("SELECT userid FROM identitymap WHERE idtype=? AND identity=?",
+                                    undef, $type, $ident);
     return LJ::load_userid($uid) if $uid;
 
     # increment ext_ counter until we successfully create an LJ
     # account.  hard cap it at 10 tries. (arbitrary, but we really
     # shouldn't have *any* failures here, let alone 10 in a row)
+
     for (1..10) {
-        my $extuser = 'ext_' . LJ::alloc_global_counter( 'E' );
+        my $extuser = 'ext_' . LJ::alloc_global_counter('E');
+
+        my $name = $extuser;
+        if ($type eq "O" && ref $vident) {
+            $name = $vident->display;
+        }
+
         $uid = LJ::create_account({
             caps => undef,
             user => $extuser,
-            name => ($vident ? $vident->display : $extuser),
-            journaltype => 'O',
+            name => $name,
+            journaltype => 'I',
         });
         last if $uid;
         select undef, undef, undef, .10;  # lets not thrash over this
     }
     return undef unless $uid &&
-        $dbh->do("INSERT INTO openid_usermap (url, userid) VALUES (?,?)", undef, $url, $uid);
+        $dbh->do("INSERT INTO identitymap (idtype, identity, userid) VALUES (?,?)",
+                 undef, $type, $ident, $uid);
     return LJ::load_userid($uid);
 }
 
-
 return undef;
-} 
+
+}
  _code?><?_info
 nocache=>1
 _info?><?page

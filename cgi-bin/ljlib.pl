@@ -2231,16 +2231,8 @@ sub ljuser
         return $make_tag->('syndicated.gif', 'users', 16);
     } elsif ($opts->{'type'} eq 'N') {
         return $make_tag->('newsinfo.gif', 'users', 16);
-    } elsif ($opts->{'type'} eq 'O') {
-        my $url = $u->url;
-        require Net::OpenID::Consumer;
-        my $name = Net::OpenID::VerifiedIdentity::DisplayOfURL($url);
-        $name =~ s/\[(live|dead)journal\.com/\[${1}journal/;
-
-        $url ||= "about:blank";
-        $name ||= "[no_name]";
-
-        return "<span class='ljuser' style='white-space: nowrap;$strike'><a href='$LJ::SITEROOT/userinfo.bml?userid=$u->{userid}&amp;t=O$andfull'><img src='$img/openid-profile.gif' alt='[info]' width='16' height='16' style='vertical-align: bottom; border: 0;' /></a><a href='$url'><b>$name</b></a></span>";
+    } elsif ($opts->{'type'} eq 'I') {
+        return $u->ljuser_display($opts);
     } else {
         return $make_tag->('userinfo.gif', 'users', 17);
     }
@@ -5483,7 +5475,8 @@ sub make_journal
         return $error->("This journal has been suspended.", "403 Forbidden") if ($u->{'statusvis'} eq "S");
     }
     return $error->("This journal has been deleted and purged.", "410 Gone") if ($u->{'statusvis'} eq "X");
-    return $error->("This user has no journal here.", "404 Not here") if $u->{'journaltype'} eq "O";
+
+    return $error->("This user has no journal here.", "404 Not here") if $u->{'journaltype'} eq "I" && $view ne "friends";
 
     $opts->{'view'} = $view;
 

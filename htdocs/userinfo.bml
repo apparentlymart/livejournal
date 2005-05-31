@@ -65,7 +65,7 @@
      }
 
      return $error->($ML{'.label.reqfinduser'})
-         if $userid && ! LJ::check_priv($remote, "finduser") && ! ($GET{t} eq "O" && $u && $u->{journaltype} eq "O");
+         if $userid && ! LJ::check_priv($remote, "finduser") && ! ($GET{t} eq "I" && $u && $u->{journaltype} eq "I");
 
      $user = $u->{'user'} if $u;
      $userid = $u->{'userid'}+0 if $u;
@@ -111,6 +111,8 @@
  my $remote_isowner = $remote && $remote->{'user'} eq $u->{'user'};
  my $remote_isfriend = LJ::is_friend($u, $remote);
  my $com = $u->{'journaltype'} eq "C" ? 1 : 0;
+ my $extid = $u->{'journaltype'} eq "I" ? $u->identity : undef;
+
  my $synd;
  if ($u->{'journaltype'} eq "Y") {
      $synd = $dbr->selectrow_hashref("SELECT * FROM syndicated WHERE userid=$u->{'userid'}");
@@ -152,7 +154,12 @@
      $u->{'opt_whatemailshow'} = "N";  # don't show email
      $friends{'load'} = $friends{'display'} = 0;
  }
- $windowtitle = "$u->{'user'} - $title";
+
+ if ($extid) {
+     $windowtitle = "External identity profile";
+ } else {
+     $windowtitle = "$u->{'user'} - $title";
+ }
 
  $friends{'load'} = $friendsof{'load'} = 0 if $com && $u->{'dont_load_members'};
 
@@ -242,7 +249,7 @@
 
      foreach my $ulocal (sort { $a->{'user'} cmp $b->{'user'} } values %fro) {
          next unless $ulocal->{'statusvis'} eq 'V';
-         if ($ulocal->{'journaltype'} eq 'P') {
+         if ($ulocal->{'journaltype'} eq 'P' || $ulocal->{'journaltype'} eq "I") {
              if (!$com && $u->{'opt_showmutualfriends'} && $fr{$ulocal->{userid}}) {
                  push @mutual, $ulocal;   
              } else {
@@ -299,6 +306,13 @@
      $body .= $h1->($ML{'.syndinfo.name'}) . $p->(BML::ml('.syndinfo.body', {
          'addtofriends' => "$LJ::SITEROOT/friends/add.bml?user=$u->{'user'}",
      }));
+ } elsif ($extid) {
+     if ($extid->[0] eq "O") {
+         $body .= $h1->("OpenID user");
+         $body .= $p->("This is a non-$LJ::SITENAME user that's using their external identity to log in to $LJ::SITENAME using <a href='/openid'>OpenID</a> in order to leave authenticated comments and read friends-only entries.");
+     }
+
+
  } else {
      $body .= $h1->($ML{'.userinfo.name'}) . $p->(BML::ml('.userinfo.body', {
          'username' => $u->{'name'}, 'siteroot'=>$LJ::SITEROOT,
@@ -308,11 +322,11 @@
  ## standout bar
  {
      my @linkele;
-    
+
      my $label = $com ? $ML{'.monitor.comm'} : $ML{'.monitor.user'};
      push @linkele, "<a href='/friends/add.bml?user=$user'><img src='$LJ::IMGPREFIX/btn_addfriend.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>";
 
-     if (LJ::can_use_journal($remote->{'userid'}, $user)) {
+     if (LJ::can_use_journal($remote->{'userid'}, $user) && !$extid) {
          if($remote_isowner) {
              $label = $ML{'.label.postalt'};
          } else {
@@ -325,16 +339,16 @@
      }
 
      $label = $ML{'.label.todo'};
-     push @linkele, "<a href='/todo/?user=$user'><img src='$LJ::IMGPREFIX/btn_todo.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>";
+     push @linkele, "<a href='/todo/?user=$user'><img src='$LJ::IMGPREFIX/btn_todo.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>" unless $extid;
 
      $label = $ML{'.label.memories'};
-     push @linkele, "<a href='/tools/memories.bml?user=$user'><img src='$LJ::IMGPREFIX/btn_memories.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>";
+     push @linkele, "<a href='/tools/memories.bml?user=$user'><img src='$LJ::IMGPREFIX/btn_memories.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>" unless $extid;
 
-     unless ($LJ::DISABLED{'tellafriend'}) {
+     unless ($LJ::DISABLED{'tellafriend'} || $extid) {
          push @linkele, "<a href='/tools/tellafriend.bml?user=$u->{'user'}'><img align='middle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_tellfriend.gif' width='22' height='20' alt='$ML{'.tellafriend'}' title='$ML{'.tellafriend'}' border='0' /></a>";
      }
 
-     unless ($LJ::DISABLED{'feedster_search'}) {
+     unless ($LJ::DISABLED{'feedster_search'} || $extid) {
          push @linkele, "<a href='/tools/search.bml?journal=$u->{'user'}'><img align='middle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_search.gif' width='22' height='20' alt='$ML{'.label.searchjournal'}' title='$ML{'.label.searchjournal'}' border='0' /></a>";
      }
 
@@ -352,7 +366,7 @@
          'u' => $u,
          'ret' => \$hook_extra,
      });
-     if ($u->{journaltype} eq "O") {
+     if ($u->{journaltype} eq "I") {
          $body .= "<tr valign='top'><td align='right'><b>OpenID:</b></td><td width='100%'>" . LJ::ljuser($u) . "</td>";
      } else {
          $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.user'}</b></td><td width='100%'><a href='/$dir/$user/'><b>$user</b></a> ($u->{'userid'}) $hook_extra ";
@@ -534,7 +548,7 @@ if ($u->{'journaltitle'}) {
 
       my $useremail_cap = LJ::get_cap($u, 'useremail');
       unless ($u->{'opt_whatemailshow'} eq "N" ||
-              $u->{'journaltype'} eq "O" ||
+              $u->{'journaltype'} eq "I" ||
               $u->{'opt_whatemailshow'} eq "L" && ($u->{'no_mail_alias'} || ! $useremail_cap || ! $LJ::USER_EMAIL) ||
               $hide_contactinfo->()) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
@@ -795,7 +809,12 @@ if ($u->{'journaltitle'}) {
              $body .= "<td colspan='2' valign='top'><b>" . $friendsof{'count'} . "$plus:</b> ";
              my $count = 0;
              foreach (@friend_of) {
-                 my $frlink = "<a href=\"/userinfo.bml?user=$_->{'user'}\">$_->{'user'}</a>";
+                 my $frlink;
+                 if ($_->{'journaltype'} eq "P") {
+                     $frlink = "<a href=\"/userinfo.bml?user=$_->{'user'}\">$_->{'user'}</a>";
+                 } elsif ($_->{'journaltype'} eq "I") {
+                     $frlink = "<a href=\"/userinfo.bml?userid=$_->{'userid'}&amp;t=I\">" . LJ::ehtml($_->{'name'}) . "</a>";
+                 }
                  $frlink = "<b>$frlink</b>" if $remote_friendid{$_->{'userid'}};
                  $body .= "$frlink, ";
                  if (++$count == $MAX_FRIENDOF_SHOW && $GET{'mode'} ne "full") {

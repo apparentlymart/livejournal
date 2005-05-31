@@ -548,13 +548,66 @@ sub log2_do {
 sub url {
     my $u = shift;
     LJ::load_user_props($u, "url");
-    if ($u->{'journaltype'} eq "O" && ! $u->{url}) {
-        my $dbr = LJ::get_db_reader();
-        my $find_url = $dbr->selectrow_array("SELECT url FROM openid_usermap WHERE userid=? LIMIT 1", undef, $u->{userid});
-        LJ::set_userprop($u, "url", $find_url) if $find_url;
-        return $find_url;
+    if ($u->{'journaltype'} eq "I" && ! $u->{url}) {
+        my $id = $u->identity;
+        if ($id && $id->[0] eq "O") {
+            LJ::set_userprop($u, "url", $id->[1]) if $id->[1];
+            return $id->[1];
+        }
     }
     return $u->{url};
+}
+
+# returns arrayref of [idtype, identity]
+sub identity {
+    my $u = shift;
+    return $u->{_identity} if $u->{_identity};
+    my $memkey = [$u->{userid}, "ident:$u->{userid}"];
+    my $ident = LJ::MemCache::get($memkey);
+    if ($ident) {
+        return $u->{_identity} = $ident;
+    }
+
+    my $dbh = LJ::get_db_writer();
+    $ident = $dbh->selectrow_arrayref("SELECT idtype, identity FROM identitymap ".
+                                      "WHERE userid=? LIMIT 1", undef, $u->{userid});
+    if ($ident) {
+        LJ::MemCache::set($memkey, $ident);
+        return $ident;
+    }
+    return undef;
+}
+
+sub ljuser_display {
+    my $u = shift;
+    my $opts = shift;
+
+    return LJ::ljuser($u, $opts) unless $u->{'journaltype'} eq "I";
+
+    my $id = $u->identity;
+    return "<b>????</b>" unless $id;
+
+    my $andfull = $opts->{'full'} ? "&amp;mode=full" : "";
+    my $img = $opts->{'imgroot'} || $LJ::IMGPREFIX;
+    my $strike = $opts->{'del'} ? ' text-decoration: line-through;' : '';
+
+    my ($url, $name);
+
+    if ($id->[0] eq "O") {
+        require Net::OpenID::Consumer;
+        $url = $id->[1];
+        $name = Net::OpenID::VerifiedIdentity::DisplayOfURL($url);
+        # FIXME: make a good out of this
+        $name =~ s/\[(live|dead)journal\.com/\[${1}journal/;
+
+        $url ||= "about:blank";
+        $name ||= "[no_name]";
+
+        return "<span class='ljuser' style='white-space: nowrap;'><a href='$LJ::SITEROOT/userinfo.bml?userid=$u->{userid}&amp;t=I$andfull'><img src='$img/openid-profile.gif' alt='[info]' width='16' height='16' style='vertical-align: bottom; border: 0;' /></a><a href='$url'><b>$name</b></a></span>";
+
+    } else {
+        return "<b>????</b>";
+    }
 }
 
 1;
