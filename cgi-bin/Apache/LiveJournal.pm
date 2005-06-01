@@ -400,7 +400,7 @@ sub trans
                 return redir($r, "http://$host$hostport$newuri");
             } elsif ($mode eq 'rss') {
                 # code 301: moved permanently, update your links.
-                return redir($r, LJ::journal_base($user) . "/data/rss", 301);
+                return redir($r, LJ::journal_base($user) . "/data/rss$args_wq", 301);
             } elsif ($mode eq 'pics' && $LJ::REDIRECT_ALLOWED{$LJ::FB_DOMAIN}) {
                 # redirect to a user's gallery
                 my $url = "$LJ::FB_SITEROOT/$user";
