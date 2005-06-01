@@ -216,13 +216,14 @@ class UserLink
 class UserLite
 "A 'lite' version of a [class[User]] which the system often has more readily-available than a full version."
 {
-    var readonly string username "Canonical Username, ex: johnqpub";
+    var readonly string username "Canonical Username, ex: johnqpub.  Note that if journal_type is an external identity, there will be no username, so this field will be a display version of their URL, longer than 15 characters, and with characters other than a-z, 0-9 and underscore.";
     var readonly string name "User's formatted name, ex: John Q. Public";
-    var readonly string journal_type "Type of account: P (personal), C (community), Y (syndicated), S (shared), etc";
+    var readonly string journal_type "Type of account: P (personal), C (community), Y (syndicated), S (shared), I (external identity) etc";
 
     function builtin equals(UserLite u) : bool "Returns true if the two user objects refer to the same user. Use this rather than comparing usernames, since usernames aren't globally unique.";
+    function builtin as_string() : string;
+
     function base_url () : string "Returns URL of user's journal.";
-    function as_string() : string;
     function print ();
 }
 
@@ -1356,23 +1357,8 @@ function UserLite::base_url() [fixed] : string {
     return "$*SITEROOT/users/$.username";
 }
 
-function UserLite::as_string() [fixed] : string {
-    var Image uiimg = userinfoicon($this);
-    var string dir = $.journal_type == "C" ? "community" : "users";
-    return "<span class='ljuser' style='white-space:nowrap;'><a href='$*SITEROOT/userinfo.bml?user=$.username'><img src='$uiimg.url' alt='[info]' width='$uiimg.width' height='$uiimg.height' style='vertical-align:bottom;border:0;' /></a><a href='$*SITEROOT/$dir/$.username/'><b>$.username</b></a></span>";
-}
-
 function UserLite::print() {
     print $this->as_string();
-}
-
-function Friend::as_string() : string {
-    var Image uiimg;
-    $uiimg = userinfoicon($this);
-    var string style = "";
-    $style = "color: $.fgcolor; background: $.bgcolor;";
-    return "<a" + htmlattr("style",$style) + " href=\"" + get_url($this,"userinfo") + "\">" + $uiimg->as_string() + "</a>" +
-    "<b><a" + htmlattr("style",$style) + htmlattr("title",$.name) + " href=\""+$this->base_url()+"/\">$.username</a></b>";
 }
 
 function Friend::print() {

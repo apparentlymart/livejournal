@@ -16,7 +16,7 @@
 
     my $remote = LJ::get_remote();
     if ($remote) {
-        $body .= "<?h1 Already logged in h1?><?p Before logging in with <a href='http://www.danga.com/openid/'>OpenID</a>, you must first <a href='/logout.bml'>log out</a>. p?>";
+        $body .= "<?h1 Already logged in h1?><?p Hello, " . LJ::ljuser($remote) . ". Before logging in with <a href='http://www.danga.com/openid/'>OpenID</a>, you must first <a href='/logout.bml'>log out</a>. p?>";
         return;
     }
 
@@ -45,6 +45,7 @@
         return $err->($csr->err) unless $vident;
 
         my $url = $vident->url;
+        return $err->("Invalid characters in identity URL.") if $url =~ /[\<\>\s]/;
 
         my $u = LJ::load_identity_user("O", $url, $vident);
         return $err->("Couldn't vivify your account (but we verified that you're " . LJ::ehtml($url) . ")") unless $u;
@@ -66,18 +67,17 @@
         my $sopts = @sopts ? ":" . join('', map { ".$_" } @sopts) : "";
         $COOKIE{'ljsession'} = [  "ws:$u->{'user'}:$sess->{'sessid'}:$sess->{'auth'}$sopts", $etime, 1 ]; # 1 => HttpOnly
 
-        $body = "Hello, " . LJ::ljuser($u) . ".  Welcome to the bleeding edge.";
-
         eval { Apache->request->notes('ljuser' => $u->{user}); };
         LJ::set_remote($u);
 
-        return;
+        return BML::redirect("$LJ::SITEROOT/login.bml");
     }
 
 
     if (LJ::did_post()) {
         my $csr = $get_csr->();
         my $url = $POST{'openid_url'};
+        return $err->("Invalid characters in identity URL.") if $url =~ /[\<\>\s]/;
 
         my $tried_local_id = 0;
         $csr->ua->blocked_hosts(
@@ -138,7 +138,7 @@ sub LJ::load_identity_user {
         select undef, undef, undef, .10;  # lets not thrash over this
     }
     return undef unless $uid &&
-        $dbh->do("INSERT INTO identitymap (idtype, identity, userid) VALUES (?,?)",
+        $dbh->do("INSERT INTO identitymap (idtype, identity, userid) VALUES (?,?,?)",
                  undef, $type, $ident, $uid);
     return LJ::load_userid($uid);
 }

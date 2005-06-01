@@ -1631,8 +1631,8 @@ sub UserLite
     my ($u) = @_;
     my $o = {
         '_type' => 'UserLite',
-        '_userid' => $u->{'userid'},
-        'username' => $u->{'user'},
+        '_u' => $u,
+        'username' => LJ::ehtml($u->display_name),
         'name' => LJ::ehtml($u->{'name'}),
         'journal_type' => $u->{'journaltype'},
     };
@@ -2434,9 +2434,18 @@ sub ItemRange__url_of
 
 sub UserLite__equals
 {
-    return $_[1]->{'_userid'} == $_[2]->{'_userid'};
+    return $_[1]->{'_u'}{'userid'} == $_[2]->{'_u'}{'userid'};
 }
 *User__equals = \&UserLite__equals;
+*Friend__equals = \&UserLite__equals;
+
+sub UserLite__as_string
+{
+    my ($ctx, $this) = @_;
+    return LJ::ljuser($this->{'_u'});
+}
+*User__as_string = \&UserLite__as_string;
+*Friend__as_string = \&UserLite__as_string;
 
 sub string__substr
 {

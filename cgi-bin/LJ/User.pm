@@ -579,6 +579,25 @@ sub identity {
     return undef;
 }
 
+# returns username or identity display name, not escaped
+sub display_name {
+    my $u = shift;
+    return $u->{'user'} unless $u->{'journaltype'} eq "I";
+
+    my $id = $u->identity;
+    return "[ERR:unknown_identity]" unless $id;
+
+    my ($url, $name);
+    if ($id->[0] eq "O") {
+        require Net::OpenID::Consumer;
+        $url = $id->[1];
+        $name = Net::OpenID::VerifiedIdentity::DisplayOfURL($url);
+        # FIXME: make a good out of this
+        $name =~ s/\[(live|dead)journal\.com/\[${1}journal/;
+    }
+    return $name;
+}
+
 sub ljuser_display {
     my $u = shift;
     my $opts = shift;
@@ -595,11 +614,8 @@ sub ljuser_display {
     my ($url, $name);
 
     if ($id->[0] eq "O") {
-        require Net::OpenID::Consumer;
         $url = $id->[1];
-        $name = Net::OpenID::VerifiedIdentity::DisplayOfURL($url);
-        # FIXME: make a good out of this
-        $name =~ s/\[(live|dead)journal\.com/\[${1}journal/;
+        $name = $u->display_name;
 
         $url ||= "about:blank";
         $name ||= "[no_name]";

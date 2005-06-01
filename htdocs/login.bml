@@ -70,7 +70,7 @@
         $body .= "<?standout\n";
         $body .= "<table border=0 cellpadding='3'>\n";
         if ($remote) {
-            $body .= "<tr><td>$ML{'.login.username'}</td><td><b>$remote->{'user'}</b> <input type='submit' name='action:logout' value='$ML{'.logout.btn'}' /></td></tr>\n";
+            $body .= "<tr><td>$ML{'.login.username'}</td><td valign='bottom'><b>" . LJ::ljuser($remote) . "</b>&nbsp;&nbsp;<input type='submit' name='action:logout' value='$ML{'.logout.btn'}' /></td></tr>\n";
         } else {
             $body .= "<tr><td>$ML{'.login.username'}</td><td><input type='text' value='$user' name='user' size='15' maxlength='15' style='<?loginboxstyle?>' /></td></tr>\n";
             $body .= "<tr><td valign='top'>$ML{'.login.password'}</td><td><input type='password' name='password' id='xc_password' size='15' maxlength='30' />";

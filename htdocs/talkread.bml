@@ -340,6 +340,8 @@ body<=
      $LJci->{u} = $pu->{user} if $pu;
 
      my $userpost = $post->{'userpost'};
+     my $upost    = $post->{'upost'};
+
      my $user;
      if ($post->{'props'}->{'deleted_poster'}) {
          $user = BML::ml('.deleteduser', {'username'=>$post->{'deleted_poster'}});
@@ -372,8 +374,8 @@ body<=
          }
          $ret .= "</td></tr></table>\n";
      } else {
-         if ($userpost) {
-             $user = LJ::ljuser($userpost, { type => 'P' });
+         if ($upost) {
+             $user = LJ::ljuser($upost);
          }
          my $icon = LJ::Talk::show_image($pics, $post->{'props'}->{'subjecticon'});
 

@@ -750,6 +750,7 @@ sub get_talk_data
 #      - talkid (jtalkid)
 #      - posterid (or zero for anon)
 #      - userpost (string, or blank if anon)
+#      - upost    ($u object, or undef if anon)
 #      - datepost (mysql format)
 #      - parenttalkid (or zero for top-level)
 #      - state ("A"=approved, "S"=screened, "D"=deleted stub)
@@ -946,8 +947,10 @@ sub load_comments
 
         # fill in the 'userpost' member on each post being shown
         while (my ($id, $post) = each %$posts) {
-            $post->{'userpost'} = $up{$post->{'posterid'}}->{'user'} if
-                $up{$post->{'posterid'}};
+            my $up = $up{$post->{'posterid'}};
+            next unless $up;
+            $post->{'upost'}    = $up;
+            $post->{'userpost'} = $up->{'user'};
         }
     }
 
@@ -1096,6 +1099,9 @@ sub talkform {
         $ret .= "<td align='left'><b><label for='talkpostfromanon'>$BML::ML{'.opt.anonymous'}</label></b>";
         $ret .= " " . $BML::ML{'.opt.willscreen'} if $screening;
         $ret .= "</td></tr>\n";
+
+        # TODO: OpenID support (needs better UI)
+
     } elsif ($journalu->{'opt_whocanreply'} eq "reg") {
         $ret .= "<tr valign='middle'>";
         $ret .= "<td align='right'>$BML::ML{'.opt.from'}</td><td align='center'>(  )</td>";
@@ -1114,14 +1120,16 @@ sub talkform {
     if ($remote) {
         $ret .= "<tr valign='middle'>";
         $ret .= "<td align='right'>&nbsp;</td>";
+        my $logged_in = LJ::ehtml($remote->display_name);
+
         if (LJ::is_banned($remote, $journalu)) {
             $ret .= "<td align='center'>( )</td>";
-            $ret .= "<td align='left'><span class='ljdeem'>" . BML::ml(".opt.loggedin", {'username'=>"<i>$remote->{'user'}</i>"}) . "</font>" . BML::ml(".opt.bannedfrom", {'journal'=>$journalu->{'user'}}) . "</td>";
+            $ret .= "<td align='left'><span class='ljdeem'>" . BML::ml(".opt.loggedin", {'username'=>"<i>$logged_in</i>"}) . "</font>" . BML::ml(".opt.bannedfrom", {'journal'=>$journalu->{'user'}}) . "</td>";
         } else {
             $ret .= "<td align='center'><input type='radio' name='usertype' value='cookieuser' id='talkpostfromremote'" .
                      $whocheck->('remote') .
                      " /></td>";
-            $ret .= "<td align='left'><label for='talkpostfromremote'>" . BML::ml(".opt.loggedin", {'username'=>"<i>$remote->{'user'}</i>"}) . "</label>\n";
+            $ret .= "<td align='left'><label for='talkpostfromremote'>" . BML::ml(".opt.loggedin", {'username'=>"<i>$logged_in</i>"}) . "</label>\n";
             $ret .= "<input type='hidden' name='cookieuser' value='$remote->{'user'}' id='cookieuser' />\n";
             if ($screening eq 'A' ||
                 ($screening eq 'F' && !LJ::is_friend($journalu, $remote))) {
@@ -2329,7 +2337,8 @@ sub init {
                     $bmlerr->("$SC.error.banned");
                 }
 
-                if ($up->{'journaltype'} ne "P") {
+                unless ($up->{'journaltype'} eq "P" ||
+                        ($up->{'journaltype'} eq "I" && $cookie_auth)) {
                     $bmlerr->("$SC.error.postshared");
                 }
 
@@ -2451,7 +2460,7 @@ sub init {
     }
 
     if ($up) {
-        if ($up->{'status'} eq "N") {
+        if ($up->{'status'} eq "N" && $up->{'journaltype'} ne "I") {
             $bmlerr->("$SC.error.noverify");
         }
         if ($up->{'statusvis'} eq "D") {
