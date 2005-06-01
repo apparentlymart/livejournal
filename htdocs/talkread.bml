@@ -115,14 +115,6 @@ body<=
 
  my $remote = LJ::get_remote();
 
- # See if we should inject QuickReply javascript
- LJ::load_user_props($remote, "opt_no_quickreply");
-
- if (($remote && !$remote->{'opt_no_quickreply'}) && !$nocomments) {
-     $$head .= $LJ::COMMON_CODE{'quickreply'};
-     $$bodyopts .= 'onload="restore_entry();" onunload="save_entry();"';
- }
-
  # set viewall/viewsome
  my $viewall = 0;
  my $viewsome = 0;
@@ -148,6 +140,14 @@ body<=
      ####  Check security before viewing this post
      my $errtxt;
      return $errtxt unless LJ::Talk::check_viewable($remote, $item, \%GET, \$errtxt);
+ }
+
+ # See if we should inject QuickReply javascript
+ LJ::load_user_props($remote, "opt_no_quickreply");
+
+ if (($remote && !$remote->{'opt_no_quickreply'}) && !$nocomments) {
+     $$head .= $LJ::COMMON_CODE{'quickreply'};
+     $$bodyopts .= 'onload="restore_entry();" onunload="save_entry();"';
  }
 
  my $showmultiform = $remote &&
