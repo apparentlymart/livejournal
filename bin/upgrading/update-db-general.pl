@@ -2033,6 +2033,39 @@ CREATE TABLE identitymap (
 )
 EOC
 
+register_tablecreate("openid_trust", <<'EOC');
+CREATE TABLE openid_trust (
+  userid int(10) unsigned NOT NULL default '0',
+  endpoint_id int(10) unsigned NOT NULL default '0',
+  trust_time int(10) unsigned NOT NULL default '0',
+  duration enum('always','once') NOT NULL default 'always',
+  last_assert_time int(10) unsigned default NULL,
+  flags tinyint(3) unsigned default NULL,
+  PRIMARY KEY  (userid,endpoint_id),
+  KEY endpoint_id (endpoint_id)
+)
+EOC
+
+register_tablecreate("openid_endpoint", <<'EOC');
+CREATE TABLE openid_endpoint (
+  endpoint_id int(10) unsigned NOT NULL auto_increment,
+  url varchar(255) BINARY NOT NULL default '',
+  last_assert_time int(10) unsigned default NULL,
+  PRIMARY KEY  (endpoint_id),
+  UNIQUE KEY url (url),
+  KEY last_assert_time (last_assert_time)
+)
+EOC
+
+register_tablecreate("openid_external", <<'EOC');
+CREATE TABLE openid_external (
+  userid int(10) unsigned NOT NULL default '0',
+  url varchar(255) binary default NULL,
+  KEY userid (userid)
+)
+EOC
+
+
 # NOTE: new table declarations go here
 
 

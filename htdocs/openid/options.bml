@@ -17,11 +17,11 @@
     my @external;
 
     my $load_trusted = sub {
-	$trusted = $dbh->selectall_hashref("SELECT ye.y_endpoint_id as 'endid', ye.url FROM yadis_endpoint ye, yadis_trust yt WHERE yt.y_endpoint_id=ye.y_endpoint_id AND yt.userid=$u->{userid}", 'endid');
+	$trusted = $dbh->selectall_hashref("SELECT ye.endpoint_id as 'endid', ye.url FROM openid_endpoint ye, openid_trust yt WHERE yt.endpoint_id=ye.endpoint_id AND yt.userid=$u->{userid}", 'endid');
     };
 
     my $load_external = sub {
-	@external = @{ $dbh->selectcol_arrayref("SELECT url FROM yadis_external WHERE userid=?", undef, $u->{userid}) };
+	@external = @{ $dbh->selectcol_arrayref("SELECT url FROM openid_external WHERE userid=?", undef, $u->{userid}) };
     };
 
     if (LJ::did_post()) {
@@ -32,17 +32,17 @@
 	$load_trusted->();
 	foreach my $endid (sort { $trusted->{$a} cmp $trusted->{$b} } keys %$trusted) {
 	    next unless $POST{"delete:$endid"};
-	    $dbh->do("DELETE FROM yadis_trust WHERE userid=? AND y_endpoint_id=?", undef, $u->{userid}, $endid);
+	    $dbh->do("DELETE FROM openid_trust WHERE userid=? AND endpoint_id=?", undef, $u->{userid}, $endid);
 	}
 
 	$load_external->();
         foreach my $url (@external) {
 	    next unless $POST{"extdelete:$url"};
-	    $dbh->do("DELETE FROM yadis_external WHERE userid=? AND url=?", undef, $u->{userid}, $url);
+	    $dbh->do("DELETE FROM openid_external WHERE userid=? AND url=?", undef, $u->{userid}, $url);
         }
 
 	if ($POST{'ext_url'} =~ m!^http://!) {
-	    $dbh->do("REPLACE INTO yadis_external (userid, url) VALUES (?,?)", undef, $u->{userid}, $POST{'ext_url'});
+	    $dbh->do("REPLACE INTO openid_external (userid, url) VALUES (?,?)", undef, $u->{userid}, $POST{'ext_url'});
 	}
 
     }
@@ -82,9 +82,7 @@
 	$body .= "<i>(None)</i>";
     }
     $body .= "</div>";
-    
     $body .= "Add: " . LJ::html_text({ name => 'ext_url', size => 60 }) . " <input type='submit' value='Add' />";
-    
     $body .= "</form>";
     return;
 

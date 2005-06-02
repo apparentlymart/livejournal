@@ -5430,7 +5430,7 @@ sub make_journal
         return qq{
 	    <html>
 	    <head>
-              <link rel="openid.server" href="$LJ::SITEROOT/misc/openid.bml" />
+              <link rel="openid.server" href="$LJ::SITEROOT/openid/server.bml" />
 	    </head>
 	    <body>
 	     <h1>Notice</h1>
