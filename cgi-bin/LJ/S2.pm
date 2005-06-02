@@ -2384,6 +2384,25 @@ sub palimg_gradient
     return $url;
 }
 
+sub userlite_base_url
+{
+    my ($ctx, $UserLite) = @_;
+    my $u = $UserLite->{_u};
+    if ($u->{journaltype} eq "P") {
+        return "$LJ::SITEROOT/users/$.username";
+    } elsif ($u->{journaltype} eq "C") {
+        return "$LJ::SITEROOT/community/$.username";
+    } elsif ($u->{journaltype} eq "I") {
+        return $u->url;
+    }
+}
+sub userlite_as_string
+{
+    my ($ctx, $UserLite) = @_;
+    return LJ::ljuser($UserLite->{'_u'});
+}
+
+
 sub PalItem
 {
     my ($ctx, $idx, $color) = @_;
@@ -2438,14 +2457,6 @@ sub UserLite__equals
 }
 *User__equals = \&UserLite__equals;
 *Friend__equals = \&UserLite__equals;
-
-sub UserLite__as_string
-{
-    my ($ctx, $this) = @_;
-    return LJ::ljuser($this->{'_u'});
-}
-*User__as_string = \&UserLite__as_string;
-*Friend__as_string = \&UserLite__as_string;
 
 sub string__substr
 {

@@ -221,9 +221,8 @@ class UserLite
     var readonly string journal_type "Type of account: P (personal), C (community), Y (syndicated), S (shared), I (external identity) etc";
 
     function builtin equals(UserLite u) : bool "Returns true if the two user objects refer to the same user. Use this rather than comparing usernames, since usernames aren't globally unique.";
-    function builtin as_string() : string;
-
     function base_url () : string "Returns URL of user's journal.";
+    function as_string() : string;
     function print ();
 }
 
@@ -681,6 +680,9 @@ function builtin palimg_gradient(string filename, PalItem start, PalItem end) : 
     "Return a URL to the specified filename (relative to the palimg root) with its palette table made into a gradient.  All palette entries between the inclusive indexes of \$start and \$end will fade from the colors in \$start and \$end.  The palette indexes for the start and end can be between 0 and 255.";
 
 function builtin set_handler(string eventname, string[][] commands);
+
+function builtin userlite_base_url(UserLite ul) : string;
+function builtin userlite_as_string(UserLite ul) : string "Access to the LJ::ljuser function";
 
 ##[ properties ]
 
@@ -1351,10 +1353,11 @@ function userinfoicon(UserLite user) : Image {
 ### UserLite functions
 
 function UserLite::base_url() [fixed] : string {
-    if ($.journal_type == "C") {
-        return "$*SITEROOT/community/$.username";
-    }
-    return "$*SITEROOT/users/$.username";
+    return userlite_base_url($this);
+}
+
+function UserLite::as_string() [fixed] : string {
+    return userlite_as_string($this);
 }
 
 function UserLite::print() {
