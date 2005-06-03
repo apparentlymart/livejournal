@@ -29,7 +29,7 @@ body<=
     return BML::redirect("$LJ::SITEROOT/community/members.bml?comm=$u->{'user'}")
         if $u->{'journaltype'} eq 'C';
     return LJ::bad_input("Cannot modify friends of this journal type.")
-        unless $u->{'journaltype'} eq 'P' || $u->{'journaltype'} eq 'S';
+        unless $u->{'journaltype'} =~ /^[PSI]$/;
 
     my $ret;
 
