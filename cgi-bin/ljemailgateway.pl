@@ -257,6 +257,33 @@ sub process {
         }
     } 
 
+    # tmobile hell.
+    # if there is a message, then they send text/plain and text/html,
+    # with a slew of their tmobile specific images.  If no message
+    # is attached, there is no text/plain piece, and the journal is
+    # polluted with their advertising.  (The tmobile images (both good
+    # and junk) are posted to scrapbook either way.)
+    # gross.  do our best to strip out the nasty stuff.
+    if ($return_path && $return_path =~ /tmomail\.net$/ &&
+        $head->get("X-Operator") =~ /^T-Mobile/i) {
+
+        # if we aren't using their text/plain, then it's just
+        # advertising, and nothing else.  kill it.
+        $body = "" if $tent->effective_type eq 'text/html';
+
+        # strip all images but tmobile phone dated.
+        # 06-03-05_12394.jpg
+        my @imgs;
+        foreach my $img ( get_entity($entity, 'image') ) {
+            my $path = $img->bodyhandle->path;
+            $path =~ s#.*/##;
+            # intentionally not being explicit with regexp, in case
+            # they go to 4 digit year or whatever.
+            push @imgs, $img if $path =~ /^\d+-\d+-\d+_\d+.\w+$/;
+        }
+        $entity->parts(\@imgs);
+    }
+
     # PGP signed mail?  We'll see about that.
     if (lc($pin) eq 'pgp' && $LJ::USE_PGP) {
         my %gpg_errcodes = ( # temp mapping until translation
