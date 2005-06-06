@@ -934,8 +934,7 @@ sub fetchTableInfo
     my $memkey = "moveucluster:" . Digest::MD5::md5_hex(join(",",@tables));
     my $tinfo = LJ::MemCache::get($memkey) || {};
     foreach my $table (@tables) {
-        next if $table eq "events" || $table eq "s1stylecache" ||
-            $table eq "cmdbuffer" || $table eq "captcha_session";
+        next if grep { $_ eq $table } qw(events s1stylecache cmdbuffer captcha_session recentactions);
         next if $tinfo->{$table};  # no need to load this one
 
         # find the index we'll use
