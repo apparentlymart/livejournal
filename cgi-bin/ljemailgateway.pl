@@ -171,10 +171,12 @@ sub process {
     # can't use it, however, without heavy and fragile parsing.)
     # We assume the existence of a text/html means this is a PictureMail message,
     # as there is no other method (headers or otherwise) to tell the difference,
-    # and Sprint tells me that their text messaging never contains text/plain.
+    # and Sprint tells me that their text messaging never contains text/html.
     # Currently, PictureMail can only contain one image per message
     # and the image is always a jpeg. (2/2/05)
-    if ($return_path && $return_path =~ /(?:messaging|pm)\.sprint(?:pcs)?\.com/) {
+    if ($return_path =~ /(?:messaging|pm)\.sprint(?:pcs)?\.com/ &&
+        $content_type =~ m#^multipart/alternative#i) {
+
         $tent = get_entity( $entity, 'html' );
 
         return $err->(
