@@ -8279,10 +8279,9 @@ sub get_secret
 {
     my $time = int($_[0]);
     return undef if $_[0] && ! $time;
-    my $want_new = 0;
+    my $want_new = ! $time || wantarray;
 
     if (! $time) {
-        $want_new = 1;
         $time = time();
         $time -= $time % 3600;  # one hour granularity
     }
@@ -8303,7 +8302,7 @@ sub get_secret
     # return if they specified an explicit time they wanted.
     # (calling with no args means generate a new one if secret
     # doesn't exist)
-    return undef unless $want_new || wantarray;
+    return undef unless $want_new;
 
     # don't generate new times that don't fall in our granularity
     return undef if $time % 3600;
