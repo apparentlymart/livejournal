@@ -8272,8 +8272,9 @@ sub rand_chars
     return $chal;
 }
 
-# with no arg, returns list:  ($time, $secret).
-# with arg, return secret for that $time
+# ($time, $secret) = LJ::get_secret();       # will generate
+# $secret          = LJ::get_secret($time);  # won't generate
+# ($time, $secret) = LJ::get_secret($time);  # will generate (in wantarray)
 sub get_secret
 {
     my $time = int($_[0]);
@@ -8302,7 +8303,7 @@ sub get_secret
     # return if they specified an explicit time they wanted.
     # (calling with no args means generate a new one if secret
     # doesn't exist)
-    return undef unless $want_new;
+    return undef unless $want_new || wantarray;
 
     # don't generate new times that don't fall in our granularity
     return undef if $time % 3600;
