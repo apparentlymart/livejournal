@@ -113,6 +113,9 @@ body<=
 	next unless $r->{nodetype} eq "L";
         next if $r->{state} eq "D";
 
+        my $pu = $us->{$r->{posterid}};
+        next if $pu->{statusvis} =~ /[XS]/;
+
         $r->{'props'} = $props{$r->{'jtalkid'}};
 
         my $lrow = $logrow{"$u->{userid} $r->{nodeid}"} ||= LJ::get_log2_row($u, $r->{'nodeid'});
@@ -131,8 +134,6 @@ body<=
 	} elsif ($r->{state} eq "F") {
             $state = "Frozen";
         }
-
-	my $pu = $us->{$r->{posterid}};
 
         my $ljcmt = $LJ_cmtinfo{$talkid} = {};
         $ljcmt->{u} = $pu ? $pu->{user} : "";
