@@ -337,7 +337,8 @@
             
             if ($res{'success'} ne 'OK') {
                 # update failed?
-                $$body .= "<br /><strong>$ML{'.error.update'}</strong> <ul><li><b>" . LJ::ehtml($res{'errmsg'}) . "</b></li></ul>";
+                $$body .= "<br /><?errorbar <strong>$ML{'.error.update'}</strong> ";
+                $$body .= LJ::ehtml($res{'errmsg'}) . " errorbar?>";
                 $$body .= "<br /> p?>";
             } else {
                 # short bail if this was posted moderated or some other special case (no itemid but a message)
@@ -365,8 +366,8 @@
                         "<li><a href=\"/editjournal.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.edit'}</a></li>" . 
                             "<li><a href=\"/tools/memadd.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.memories'}</a></li>" .
                                 "</ul>";
+                return;
             }
-            return;
         }
     }
 
