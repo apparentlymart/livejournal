@@ -588,7 +588,11 @@ if ($u->{'journaltitle'}) {
       }
       if ($u->{'icq'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
-          $body .= "<tr><td align='right'><b>$ML{'.label.icquin'}</b></td><td colspan='$span'><img alt='ICQ status' src='http://web.icq.com/whitepages/online?icq=$u->{'icq'}&amp;img=5' height='18' width='18' /> $u->{'icq'} (<b><a href='http://wwp.icq.com/scripts/search.dll?to=$u->{'icq'}'>$ML{'.label.adduser'}</a>, <a href='http://wwp.icq.com/scripts/contact.dll?msgto=$u->{'icq'}'>$ML{'.label.sendmessage'}</a></b>) </td></tr>\n";
+          $body .= "<tr><td align='right'><b>$ML{'.label.icquin'}</b></td>";
+          $body .= "<td colspan='$span'><img alt='ICQ status' src='http://web.icq.com/whitepages/online?icq=$u->{'icq'}&amp;img=5' height='18' width='18' /> ";
+          $body .= "$u->{'icq'} (<b><a href='http://wwp.icq.com/$u->{'icq'}'>";
+          $body .= "$ML{'.label.userprofile'}</a></b>)";
+          $body .= "</td></tr>\n";
       }
       if ($u->{'yahoo'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;

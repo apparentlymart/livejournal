@@ -3756,6 +3756,8 @@ This could be because: <ol>
 
 /userinfo.bml.label.user=User:
 
+/userinfo.bml.label.userprofile=User Profile
+
 /userinfo.bml.label.viewfriends=View Friends
 
 /userinfo.bml.label.viewmembers=View Members
