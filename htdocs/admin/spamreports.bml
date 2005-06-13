@@ -222,7 +222,7 @@
             my ($time, $data) = ($1, $2)
                if $POST{what} =~ /^(\d+):(.+)$/;
             $data ||= $POST{what};
-            $count = $dbh->do("UPDATE spamreports SET state='closed' WHERE reporttime=? AND $where=?", undef, $time, $data);
+            $count = $dbh->do("UPDATE spamreports SET state='closed' WHERE reporttime=? AND $where=? AND state='open'", undef, $time, $data);
             return $error->($dbh->errstr) if $dbh->err;
             $backlink = "[ <a href='$POST{ret}'>&lt;&lt; Go Back</a> ]";
         }
