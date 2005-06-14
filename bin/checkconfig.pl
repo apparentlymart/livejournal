@@ -43,6 +43,9 @@ my %modules = (
                    'deb' => 'libnet-perl',
                    'opt' => "Alternative to piping into sendmail to send mail.",
                },
+               "Net::DNS" => {
+                   'deb' => 'libnet-dns-perl',
+               },
                "MIME::Base64" => { 'deb' => 'libmime-base64-perl' },
                "URI::URL" => { 'deb' => 'liburi-perl' },
                "HTML::Tagset" => { 'deb' => 'libhtml-tagset-perl' },
