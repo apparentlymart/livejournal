@@ -31,7 +31,8 @@ sub RecentPage
         $p->{'head_content'} .= LJ::robot_meta_tags();
     }
 
-    $p->{'head_content'} .= qq{<link rel="openid.server" href="$LJ::SITEROOT/openid/server.bml" />\n};
+    $p->{'head_content'} .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n}
+        if $LJ::OPENID_SERVER;
 
     my $itemshow = S2::get_property_value($opts->{'ctx'}, "page_recent_items")+0;
     if ($itemshow < 1) { $itemshow = 20; }

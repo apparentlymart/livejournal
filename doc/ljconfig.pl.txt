@@ -581,6 +581,10 @@
     # X-Forwarded-For headers that you can trust, enable this.  otherwise, don't!
     # $TRUST_X_HEADERS = 1;
 
+    # if you wish to disable the OpenID server, comment out this line.  otherwise, you can
+    # change the location of your OpenID server file by changing the path:
+    $OPENID_SERVER = "$SITEROOT/openid/server.bml";
+
 }
 
 1;  # return true

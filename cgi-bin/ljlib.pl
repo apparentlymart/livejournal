@@ -5427,10 +5427,14 @@ sub make_journal
         my $url = "$LJ::SITEROOT/users/$user/";
         $opts->{'status'} = $status if $status;
 
+        my $head;
+        $head .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n}
+            if $LJ::OPENID_SERVER;
+
         return qq{
 	    <html>
 	    <head>
-              <link rel="openid.server" href="$LJ::SITEROOT/openid/server.bml" />
+            $head
 	    </head>
 	    <body>
 	     <h1>Notice</h1>
