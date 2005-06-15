@@ -518,6 +518,26 @@ sub get_style
         $have_style = scalar %style;
     }
 
+    # this is a hack to add remapping support for s2lids
+    # - if a layerid is loaded above but it has a remapping
+    #   defined in ljconfig, use the remap id instead and 
+    #   also save to database using set_style_layers
+    my @remaps = ();
+
+    # all system layer types (no user layers)
+    foreach (qw(core i18nc i18n layout theme)) {
+        my $lid = $style{$_};
+        if (exists $LJ::S2LID_REMAP{$lid}) {
+            $style{$_} = $LJ::S2LID_REMAP{$lid};
+            push @remaps, "$lid=>$style{$_}";
+        }
+    }
+    if (@remaps) {
+        my $sysid = LJ::get_userid("system");
+        LJ::statushistory_add($u, $sysid, 's2lid_remap', join(", ", @remaps));
+        LJ::S2::set_style_layers($u, $styleid, %style);
+    }
+
     unless ($have_style) {
         my $public = get_public_layers();
         while (my ($layer, $name) = each %$LJ::DEFAULT_STYLE) {
