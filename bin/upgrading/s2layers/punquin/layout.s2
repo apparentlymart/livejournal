@@ -124,6 +124,7 @@ propgroup text {
   property use text_website_default_name;
 }
 set text_gotop = "Go to Top";
+set tags_aware = true;
 
 function print_stylesheet ()
 {
@@ -373,6 +374,16 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
                 }
                 "<strong>$key:</strong> $val<br />";
             }
+        }
+        if ($e.tags) {
+            var int tcount = 0;
+            "<div class='ljtags'><strong>Tags:</strong> ";
+            foreach var Tag t ($e.tags) {
+                """<a rel="tag" href="$t.url">$t.name</a>""";
+                $tcount++;
+                if ($tcount != size $e.tags) { ", "; }
+            }
+            "</div>";
         }
     }
     "</td></tr></table>";

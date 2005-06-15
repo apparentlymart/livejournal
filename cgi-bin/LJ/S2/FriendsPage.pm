@@ -188,6 +188,9 @@ sub FriendsPage
 
     # load the text of the entries
     my $logtext = LJ::get_logtext2multi(\%idsbycluster);
+
+    # load tags on these entries
+    my $logtags = LJ::Tags::get_logtagsmulti(\%idsbycluster);
   
     my %posters;
     {
@@ -310,6 +313,16 @@ sub FriendsPage
         my $moodthemeid = $u->{'opt_forcemoodtheme'} eq 'Y' ?
             $u->{'moodthemeid'} : $friends{$friendid}->{'moodthemeid'};
 
+        my @taglist;
+        while (my ($kwid, $kw) = each %{$logtags->{$datakey} || {}}) {
+            push @taglist, Tag($friends{$friendid}, $kwid => $kw);
+        }
+        @taglist = sort { $a->{name} cmp $b->{name} } @taglist;
+
+        if ($opts->{enable_tags_compatibility} && @taglist) {
+            $text .= LJ::S2::get_tags_text($opts->{ctx}, \@taglist);
+        }
+
         my $entry = Entry($u, {
             'subject' => $subject,
             'text' => $text,
@@ -323,11 +336,11 @@ sub FriendsPage
             'new_day' => 0,  # setup below
             'end_day' => 0,  # setup below
             'userpic' => undef,
+            'tags' => \@taglist,
             'permalink_url' => $permalink,
             'moodthemeid' => $moodthemeid,
         });
         $entry->{'_ymd'} = join('-', map { $entry->{'time'}->{$_} } qw(year month day));
-
 
         if ($picid && $picu) {
             push @userpic_load, [ $picu, $picid ];

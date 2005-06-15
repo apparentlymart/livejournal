@@ -340,6 +340,18 @@ sub EntryPage_entry
     LJ::CleanHTML::clean_event(\$entry->{'event'}, $entry->{'props'}->{'opt_preformatted'});
     LJ::expand_embedded($u, $ditemid, $remote, \$entry->{'event'});
 
+    # load tags
+    my @taglist;
+    my $tags = LJ::Tags::get_logtags($u, $itemid);
+    while (my ($kwid, $kw) = each %{$tags->{$itemid} || {}}) {
+        push @taglist, Tag($u, $kwid => $kw);
+    }
+    @taglist = sort { $a->{name} cmp $b->{name} } @taglist;
+
+    if ($opts->{enable_tags_compatibility} && @taglist) {
+        $entry->{event} .= LJ::S2::get_tags_text($opts->{ctx}, \@taglist);
+    }
+
     my $s2entry = Entry($u, {
         '_rawsubject' => $raw_subj,
         'subject' => $entry->{'subject'},
@@ -351,6 +363,7 @@ sub EntryPage_entry
         'comments' => $comments,
         'journal' => $userlite_journal,
         'poster' => $userlite_poster,
+        'tags' => \@taglist,
         'new_day' => 0,
         'end_day' => 0,
         'userpic' => $userpic,

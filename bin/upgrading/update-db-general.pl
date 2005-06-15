@@ -1998,6 +1998,50 @@ CREATE TABLE extuser (
 )
 EOC
 
+# table showing what tags a user has; parentkwid can be null
+register_tablecreate("usertags", <<'EOC');
+CREATE TABLE usertags (
+    journalid   INT UNSIGNED NOT NULL,
+    kwid        INT UNSIGNED NOT NULL,
+    parentkwid  INT UNSIGNED,
+    display     ENUM('0','1') DEFAULT '1' NOT NULL,
+    PRIMARY KEY (journalid, kwid)
+)
+EOC
+
+# mapping of tags applied to an entry
+register_tablecreate("logtags", <<'EOC');
+CREATE TABLE logtags (
+    journalid INT UNSIGNED NOT NULL,
+    jitemid   MEDIUMINT UNSIGNED NOT NULL,
+    kwid      INT UNSIGNED NOT NULL,
+    PRIMARY KEY (journalid, jitemid, kwid),
+    KEY (journalid, kwid)
+)
+EOC
+
+# logtags but only for the most recent 100 tags-to-entry
+register_tablecreate("logtagsrecent", <<'EOC');
+CREATE TABLE logtagsrecent (
+    journalid INT UNSIGNED NOT NULL,
+    jitemid   MEDIUMINT UNSIGNED NOT NULL,
+    kwid      INT UNSIGNED NOT NULL,
+    PRIMARY KEY (journalid, kwid, jitemid)
+)
+EOC
+
+# summary counts for security on entry keywords
+register_tablecreate("logkwsum", <<'EOC');
+CREATE TABLE logkwsum (
+    journalid INT UNSIGNED NOT NULL,
+    kwid      INT UNSIGNED NOT NULL,
+    security  INT UNSIGNED NOT NULL,
+    entryct   INT UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (journalid, kwid, security),
+    KEY (journalid, security)
+)
+EOC
+
 # action history tables
 register_tablecreate("actionhistory", <<'EOC');
 CREATE TABLE actionhistory (
@@ -2064,7 +2108,6 @@ CREATE TABLE openid_external (
   KEY userid (userid)
 )
 EOC
-
 
 # NOTE: new table declarations go here
 

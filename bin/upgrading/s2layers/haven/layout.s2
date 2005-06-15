@@ -362,6 +362,9 @@ propgroup text
     set text_sidebar_links = "Links";
     set text_sidebar_summary = "Page Summary";
 }
+
+set tags_aware = true;
+
 ################################################################################
 #
 # Color scheme functions
@@ -1095,8 +1098,21 @@ function format_entry(Page p, Entry e, Color bgcolor, Color fgcolor, bool viewin
             }
             $entry = $entry + """<div class="current$k"><strong>$text:</strong> $val</div>""";
         }
-        $entry = $entry + "</div><br />\n";
+        $entry = $entry + "</div>\n";
     }
+
+    if ($e.tags) {
+        var int tcount = 0;
+        $entry = $entry + """<div class="ljtags"><strong>Tags:</strong> """;
+        foreach var Tag t ($e.tags) {
+            $entry = """$entry<a rel="tag" href="$t.url">$t.name</a>""";
+            $tcount++;
+            if ($tcount != size $e.tags) { $entry = """$entry, """; }
+        }
+        $entry = """$entry</div>""";
+    }
+
+    if (size $e.tags or size $e.metadata) { $entry = "$entry<br />"; }
     if (not $viewing_thread) { $entry = $entry + $e.text; }
     $entry = $entry + """<div class="clearer">&nbsp;</div>""";
     $entry = $entry + "</div>";

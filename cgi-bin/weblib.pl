@@ -1193,6 +1193,23 @@ MOODS
                 $out .= "<script type='text/javascript' language='JavaScript'>\n<!--\ndocument.write(\"$mood_preview\");\n//-->\n</script>" if $remote;
                 $out .= "</td></tr>";
             }
+
+            # Tag labeling
+            unless ($LJ::DISABLED{tags}) {
+                $out .= "<tr><th>" . BML::ml('entryform.tags') . "</th><td>";
+                $out .= LJ::html_text(
+                    {
+                        'name'      => 'prop_taglist',
+                        'size'      => '35',
+                        'value'     => $opts->{'prop_taglist'},
+                        'maxlength' => '255',
+                        'tabindex'  => $tabindex->()
+                    }
+                );
+                $out .= LJ::help_icon('addtags');
+                $out .= "</td></tr>";
+            }
+
             $out .= "</table></td>";
         }
         ### Options Column 2
@@ -1397,7 +1414,8 @@ sub entry_form_decode
                 prop_picture_keyword prop_current_moodid
                 prop_current_mood prop_current_music
                 prop_opt_screening prop_opt_noemail
-                prop_opt_preformatted prop_opt_nocomments )) {
+                prop_opt_preformatted prop_opt_nocomments
+                prop_taglist)) {
         $req->{$_} = $POST->{$_};
     }
 

@@ -1599,6 +1599,40 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /editpics.bml.uploadheader.fb=Upload a New Picture From Fotobilder
 
+/edittags.bml.button.save=Save changes
+
+/edittags.bml.current=Current tags:
+
+/edittags.bml.disabled=Sorry, the tags system is currently disabled.
+
+/edittags.bml.entry=Entry:
+
+/edittags.bml.error.db=Sorry, we encountered a database error.  Please try again.
+
+/edittags.bml.intro=Use the form below to edit the tags on this entry.
+
+/edittags.bml.invalid.entry=Specified entry is invalid.
+
+/edittags.bml.invalid.journal=Specified journal is invalid.
+
+/edittags.bml.invalid.link=You have reached this page in an invalid way.  Please follow a link from an entry to edit tags.
+
+/edittags.bml.invalid.notauthorized=You do not have access to view that entry.
+
+/edittags.bml.permissions.add.yes=You may add tags from the list above.
+
+/edittags.bml.permissions.control.yes=You may remove tags or create new ones.
+
+/edittags.bml.permissions.none=(You do not have permission to edit tags on this entry.)
+
+/edittags.bml.subject=Subject:
+
+/edittags.bml.title=Edit Tags on Entry
+
+/edittags.bml.users=User's tags:
+
+/edittags.bml.view=<a [[aopts]]>View</a> this entry.
+
 /export.bml.btn.proceed=Proceed...
 
 /export.bml.description=This feature lets you download your entire journal to a custom format for backup purposes.
@@ -2417,6 +2451,38 @@ is required. To save yourself some time, you can <a href="/login.bml?ret=1">log 
 /manage/siteopts.bml.scheme.preview=[Preview of [[title]] scheme]
 
 /manage/siteopts.bml.title=Browse Preferences
+
+/manage/tags.bml.addnew=Add new tags here!
+
+/manage/tags.bml.button.delete=Remove selected tag(s)
+
+/manage/tags.bml.button.rename=Rename
+
+/manage/tags.bml.button.show=Show journal entries
+
+/manage/tags.bml.confirm.delete=Are you sure you want to remove the selected tags? This operation is not reversible.
+
+/manage/tags.bml.hint.create=You can create multiple tags by separating them with commas.
+
+/manage/tags.bml.hint.delete=Remove all references to the selected tag(s).
+
+/manage/tags.bml.hint.entries=Display journal entries marked with the selected tag(s).
+
+/manage/tags.bml.hint.rename=Change a tag name.
+
+/manage/tags.bml.intro=Use this page to review and edit tags you have defined.
+
+/manage/tags.bml.label.tags=Tag properties
+
+/manage/tags.bml.label.yours=Your tags
+
+/manage/tags.bml.none=You haven't created any tags yet.
+
+/manage/tags.bml.sort.a=<strong>sort</strong>: <a [[aopts]]>alphabetically</a> or by usage
+
+/manage/tags.bml.sort.b=<strong>sort</strong>: alphabetically or by <a [[aopts]]>usage</a>
+
+/manage/tags.bml.title=Tags Management
 
 /meme.bml.meme.disabled=The site administrator has disabled this feature.
 
@@ -4204,6 +4270,8 @@ entryform.spellchecked=Spell checked entry:
 
 entryform.subject=Subject:
 
+entryform.tags=Tags:
+
 entryform.update=Update Journal
 
 entryform.userpics=User Picture Icon:
@@ -4541,6 +4609,8 @@ talk.commentsread=Read comments
 talk.curname_Mood=<b>Current mood:</b>
 
 talk.curname_Music=<b>Current music:</b>
+
+talk.curname_Tags=<b>Entry tags:</b>
 
 talk.error.bogusargs=Bogus arguments
 

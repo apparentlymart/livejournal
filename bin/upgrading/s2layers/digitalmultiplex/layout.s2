@@ -321,6 +321,9 @@ propgroup text {
     set text_sidebar_navigation = "Navigation";
     set text_sidebar_summary = "Page Summary";
 }
+
+set tags_aware = true;
+
 ################################################################################
 #
 # Layout specific functions
@@ -600,6 +603,18 @@ function print_entry_full (Page p, Entry e, Color bgcolor, Color fgcolor, bool h
             }
             "</div>\n";
         }
+        if ($e.tags) {
+            var int tcount = 0;
+            "<div class='ljtags'><strong>Tags:</strong> ";
+            foreach var Tag t ($e.tags) {
+                """<a rel="tag" href="$t.url">$t.name</a>""";
+                $tcount++;
+                if ($tcount != size $e.tags) { ", "; }
+            }
+            "</div>\n";
+        }
+
+        
     }
     if ($p.view != "entry") { $e.comments->print(); }
     println "</td></tr></table>";

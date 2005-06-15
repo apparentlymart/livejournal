@@ -81,7 +81,12 @@ sub make_journal
         ${$opts->{'handle_with_bml_ref'}} = 1;
         return;
     }
-    
+
+    # setup tags backwards compatibility
+    unless ($ctx->[S2::PROPS]->{'tags_aware'}) {
+        $opts->{enable_tags_compatibility} = 1;
+    }
+
     escape_context_props($ctx->[S2::PROPS]);
     
     $opts->{'ctx'} = $ctx;
@@ -196,6 +201,27 @@ sub s2_run
     }
     $cleaner->eof if $cleaner;  # flush any remaining text/tag not yet spit out
     return 1;
+}
+
+# <LJFUNC>
+# name: LJ::S2::get_tags_text
+# class: s2
+# des: Gets text for display in entry for tags compatibility.
+# args: ctx, taglistref
+# des-ctx: Current S2 context
+# des-taglistref: Arrayref containing "Tag" S2 objects
+# returns: String; can be appended to entry... undef on error (no context, no taglistref)
+# </LJFUNC>
+sub get_tags_text {
+    my ($ctx, $taglist) = @_;
+    return undef unless $ctx && $taglist;
+    return "" unless @$taglist;
+
+    # now get the customized tag text and insert the tag list and append to body
+    my $tags = join(', ', map { "<a rel='tag' href='$_->{url}'>" . LJ::ehtml($_->{name}) . "</a>" } @$taglist);
+    my $tagtext = S2::get_property_value($ctx, 'text_tags');
+    $tagtext =~ s/#/$tags/;
+    return "<div class='ljtags'>$tagtext</div>";
 }
 
 # returns hashref { lid => $u }; undef on error
@@ -1365,16 +1391,30 @@ sub DateTime_parts
     return $dt;
 }
 
+sub Tag
+{
+    my ($u, $kwid, $kw) = @_;
+
+    my $e = {
+        _type => 'Tag',
+        _id => $kwid,
+        name => LJ::ehtml($kw),
+        url => LJ::journal_base($u) . '/tag/' . LJ::eurl($kw),
+    };
+
+    return $e;
+}
+
 sub Entry
 {
     my ($u, $arg) = @_;
     my $e = {
         '_type' => 'Entry',
-        'link_keyseq' => [ 'edit_entry' ],
+        'link_keyseq' => [ 'edit_entry', 'edit_tags' ],
         'metadata' => {},
     };
     foreach (qw(subject _rawsubject text journal poster new_day end_day
-                comments userpic permalink_url itemid)) {
+                comments userpic permalink_url itemid tags)) {
         $e->{$_} = $arg->{$_};
     }
 
@@ -2195,6 +2235,13 @@ sub EntryLite__get_link
     return undef;
 }
 
+sub EntryLite__get_tags_text
+{
+    my ($ctx, $this) = @_;
+    return LJ::S2::get_tags_text($ctx, $this->{tags}) || "";
+}
+*Entry__get_tags_text = \&EntryLite__get_tags_text;
+
 sub EntryLite__get_plain_subject
 {
     my ($ctx, $this) = @_;
@@ -2210,7 +2257,7 @@ sub Entry__get_link
 {
     my ($ctx, $this, $key) = @_;
     if ($key eq "nav_prev" || $key eq "edit_entry" || $key eq "mem_add" || 
-        $key eq "tell_friend" || $key eq "nav_next")
+        $key eq "tell_friend" || $key eq "nav_next" || $key eq "edit_tags")
     {
         my $journal = $this->{'journal'}->{'username'};
         my $poster = $this->{'poster'}->{'username'};
@@ -2226,6 +2273,15 @@ sub Entry__get_link
                 'caption' => "Edit Entry",
                 'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_edit.gif", 22, 20),
             }
+        }
+        if ($key eq "edit_tags") {
+            return undef unless $remote && LJ::Tags::can_add_tags(LJ::load_user($journal), $remote);
+            return {
+                '_type' => "Link",
+                'url' => "$LJ::SITEROOT/edittags.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
+                'caption' => 'Edit Tags',
+                'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_edittags.gif", 22, 20),
+            };
         }
         if ($key eq "tell_friend") {
             return undef if $LJ::DISABLED{'tellafriend'};
@@ -2303,6 +2359,36 @@ sub EntryPage__print_multiform_start
                 LJ::html_hidden("ditemid", $this->{'entry'}->{'itemid'},
                                 "journal", $this->{'entry'}->{'journal'}->{'username'}) . "\n");
 }
+
+sub Page__visible_tag_list
+{
+    my $ctx = shift;
+    my $remote = LJ::get_remote();
+    my $u = $LJ::S2::CURR_PAGE->{'_u'};
+    return [] unless $u;
+
+    my $tags = LJ::Tags::get_usertags($u, { remote => $remote });
+    return [] unless $tags;
+
+    my @taglist;
+    foreach my $kwid (keys %{$tags}) {
+        # only show tags for display
+        next unless $tags->{$kwid}->{display};
+
+        # create tag object
+        push @taglist, LJ::S2::Tag($u, $kwid => $tags->{$kwid}->{name});
+    }
+
+    @taglist = sort { $a->{name} cmp $b->{name} } @taglist;
+    return \@taglist;
+}
+*RecentPage__visible_tag_list = \&Page__visible_tag_list;
+*DayPage__visible_tag_list = \&Page__visible_tag_list;
+*MonthPage__visible_tag_list = \&Page__visible_tag_list;
+*YearPage__visible_tag_list = \&Page__visible_tag_list;
+*FriendsPage__visible_tag_list = \&Page__visible_tag_list;
+*EntryPage__visible_tag_list = \&Page__visible_tag_list;
+*ReplyPage__visible_tag_list = \&Page__visible_tag_list;
 
 sub Page__get_latest_month
 {

@@ -128,6 +128,8 @@ propgroup text {
   property use text_read_comments_friends;
 }
 
+set tags_aware = true;
+
 function Page::lay_captionbar_navigation () { }
 
 function captionbar (Page p) {
@@ -367,6 +369,18 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
             $meta{"$key:"} = $val;
         }
     }
+    # Tags
+    if ($e.tags) {
+        var int tcount = 0;
+        var string tag;
+        foreach var Tag t ($e.tags) {
+            $tag = $tag + """<a rel="tag" href="$t.url">$t.name</a>""";
+            $tcount++;
+            if ($tcount != size $e.tags) { $tag = $tag + ", "; }
+        }
+        $meta{"Tags:"} = $tag;
+    }
+
 
     if (not $hide_text) { $content = $e.text; }
 
@@ -390,6 +404,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         $link = $e->get_link("nav_prev"); $footer = "$footer $link";
     }
     $link = $e->get_link("edit_entry");   $footer = "$footer $link";
+    $link = $e->get_link("edit_tags");    $footer = "$footer $link";
     $link = $e->get_link("tell_friend");  $footer = "$footer $link";
     $link = $e->get_link("mem_add");      $footer = "$footer $link";
     if ($p.view == "entry")

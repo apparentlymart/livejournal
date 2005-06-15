@@ -82,6 +82,13 @@ $img{'editentry'} = {
     'alt' => 'Edit Entry',
 };
 
+$img{'edittags'} = {
+    'src' => '/btn_edittags.gif',
+    'width' => 22,
+    'height' => 20,
+    'alt' => 'Edit Tags',
+};
+
 $img{'tellfriend'} = { 
     'src' => '/btn_tellfriend.gif',
     'width' => 22,

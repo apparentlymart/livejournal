@@ -266,7 +266,7 @@
             }
         }
 
-        # Check if the account their posting to is read-only
+        # Check if the account they're posting to is read-only
         my $uj = $POST{'usejournal'} ? LJ::load_user($POST{'usejournal'}) : $u;
         if ($uj && $uj->readonly) {
             # Tell the user they can't post since read only

@@ -730,6 +730,106 @@ $cmd{'change_journal_status'} = {
                ],
     };
 
+$cmd{'tag_display'} = {
+    des => 'Set tag visibility to S2.',
+    argsummary => '[for <community>] <tag> <value>',
+    args => [
+        tag => "The tag to change the display value of.  This must be quoted if it contains any spaces.",
+        value => "A boolean value: 1/on/true/yes or 0/off/false/no.",
+    ],
+    handler => sub {
+        my ($dbh, $remote, $args, $out) = @_;
+
+        my $err = sub { push @$out, [ "error", $_[0] ]; return 0; };
+        my $ok = sub { push @$out, [ "", $_[0] ]; return 1; };
+
+        return $err->("Sorry, the tag system is currently disabled.")
+            if $LJ::DISABLED{tags};
+
+        my $foru = $remote;
+        my ($tag, $val);
+
+        if (scalar(@$args) == 5) {
+            return $err->("Invalid arguments, please see reference.")
+                unless $args->[1] eq 'for';
+            $foru = LJ::load_user($args->[2]);
+            return $err->("Account specified in 'for' parameter invalid.")
+                unless $foru;
+            ($tag, $val) = @{$args}[3,4];
+        } else {
+            ($tag, $val) = @{$args}[1,2];
+        }
+
+        $val = { 1 => 1, 0 => 0, yes => 1, no => 0, true => 1, false => 0, on => 1, off => 0 }->{$val};
+
+        return $err->("Invalid argument list, please see reference.")
+            unless $foru && $tag && defined $val;
+        return $err->("You are not allowed to edit the tags for $foru->{user}.")
+            unless LJ::Tags::can_control_tags($foru, $remote);
+        return $err->("Error changing tag value; please make sure the specified tag exists.")
+            unless LJ::Tags::set_usertag_display($foru, name => $tag, $val);
+
+        return $ok->("Tag display value updated.");
+    },
+};
+
+$cmd{'tag_permissions'} = {
+    des => 'Set permission levels for the tag system.',
+    argsummary => '[for <community>] <add level> <control level>',
+    args => [
+        'add level' => 'Accounts at this level are allowed to assign pre-existing tags to entries.  Accounts are not allowed to define new tags or remove tags from entries.  The value can be one of "public", "private", "friends", or the name of a friend group already defined.',
+        'control level' => 'Accounts at this level have full control over tags and can define new ones, delete old ones, rename, merge, and perform all other functions of the tags system.  Potential values are the same as in the add level.',
+    ],
+    handler => sub {
+        my ($dbh, $remote, $args, $out) = @_;
+
+        my $err = sub { push @$out, [ "error", $_[0] ]; return 0; };
+        my $ok = sub { push @$out, [ "", $_[0] ]; return 1; };
+
+        return $err->("Sorry, the tag system is currently disabled.")
+            if $LJ::DISABLED{tags};
+
+        my $foru = $remote;
+        my ($add, $control);
+
+        if (scalar(@$args) == 5) {
+            return $err->("Invalid arguments, please see reference.")
+                unless $args->[1] eq 'for';
+            $foru = LJ::load_user($args->[2]);
+            return $err->("Account specified in 'for' parameter invalid.")
+                unless $foru;
+            ($add, $control) = @{$args}[3,4];
+        } else {
+            ($add, $control) = @{$args}[1,2];
+        }
+
+        return $err->("Invalid argument list, please see reference.")
+            unless $foru && $add && $control;
+        return $err->("You are not allowed to edit the tags for $foru->{user}.")
+            unless LJ::can_manage($remote, $foru) || # need to check this in case of 'none' control level
+                   LJ::Tags::can_control_tags($foru, $remote);
+
+        my $validate_level = sub {
+            my $level = shift;
+            return $level if $level =~ /^(?:private|public|none|friends)$/;
+
+            my $grp = LJ::get_friend_group($foru, { name => $level });
+            return "group:$grp->{groupnum}" if $grp;
+
+            return undef;
+        };
+
+        $add = $validate_level->($add);
+        $control = $validate_level->($control);
+        return $err->("Levels must be one of: 'private', 'public', 'friends', or the name of a friend's group.")
+            unless $add && $control;
+
+        LJ::set_userprop($foru, opt_tagpermissions => "$add,$control");
+
+        return $ok->("Tag system permissions updated.");        
+    },
+};
+
 sub conhelp 
 {
     my ($dbh, $remote, $args, $out) = @_;

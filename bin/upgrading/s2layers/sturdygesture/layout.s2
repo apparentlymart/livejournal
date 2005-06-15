@@ -79,6 +79,7 @@ propgroup presentation {
         noui = 1;
     }
     set text_entry_links = {"edit_entry" => "Edit Entry",
+                            "edit_tags" => "Edit Tags",
                             "mem_add" => "Add As Memory",
                             "tell_friend" => "Tell a Friend",
                             "nav_prev" => "Previous Entry",
@@ -99,6 +100,7 @@ propgroup presentation {
     property use external_stylesheet;
 }
 
+set tags_aware = true;
 
 function navheading(RecentNav nav, int entries) : string
     "i18n layers should override this to translate the skiplink box heading." {
@@ -527,22 +529,34 @@ function Entry::print_metadata() {
     var string caption;
     var string val;
     var Image i;
-    if (size $.metadata == 0) { return; }
+    if (size $.metadata == 0 and size $.tags == 0) { return; }
     println """<div class="metadata">""";
-    foreach var string k ($.metadata) {
-        $caption = $k;
-        $val = $.metadata{$k};
-        if ($k == "music") {
-            $caption = $*text_meta_music;
+    if ($this.tags) {
+        var int tcount = 0;
+        "<div class='ljtags'><strong>Tags:</strong> ";
+        foreach var Tag t ($this.tags) {
+            """<a rel="tag" href="$t.url">$t.name</a>""";
+            $tcount++;
+            if ($tcount != size $this.tags) { ", "; }
         }
-        elseif ($k == "mood") {
-            $caption = $*text_meta_mood;
-            if (defined $.mood_icon) {
-                $i = $.mood_icon;
-                $val = """<img src="$i.url" width="$i.width" height="$i.height" align="absmiddle"> $val""";
+        "</div>";
+    }
+    if (size $.metadata != 0) {
+        foreach var string k ($.metadata) {
+            $caption = $k;
+            $val = $.metadata{$k};
+            if ($k == "music") {
+                $caption = $*text_meta_music;
             }
+            elseif ($k == "mood") {
+                $caption = $*text_meta_mood;
+                if (defined $.mood_icon) {
+                    $i = $.mood_icon;
+                    $val = """<img src="$i.url" width="$i.width" height="$i.height" align="absmiddle"> $val""";
+                }
+            }
+            println """<div class="metadata-$k"><span style="font-weight: bold;">$caption:</span> $val</div>""";
         }
-        println """<div class="metadata-$k"><span style="font-weight: bold;">$caption:</span> $val</div>""";
     }
     println "</div>";
 }

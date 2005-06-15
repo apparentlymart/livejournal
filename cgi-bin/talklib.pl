@@ -123,6 +123,12 @@ sub link_bar
     {
         push @linkele, $mlink->("/editjournal.bml?${jargent}itemid=$itemid", "editentry");
     }
+
+    unless ($LJ::DISABLED{tags}) {
+        if (defined $remote && LJ::Tags::can_add_tags($up, $remote)) {
+            push @linkele, $mlink->("/edittags.bml?${jargent}itemid=$itemid", "edittags");
+        }
+    }
     
     unless ($LJ::DISABLED{'tellafriend'}) {
         push @linkele, $mlink->("/tools/tellafriend.bml?${jargent}itemid=$itemid", "tellfriend");

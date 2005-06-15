@@ -130,6 +130,8 @@ propgroup text {
   property use text_read_comments_friends;
 }
 
+set tags_aware = true;
+
 function Page::lay_skip_navigation() {}
 
 function Page::lay_bottom_navigation() {}
@@ -337,6 +339,18 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     {
         # Entry
         "<p>$e.text</p>";
+
+        # Tags
+        if ($e.tags) {
+            var int tcount = 0;
+            "<div class='ljtags'><strong>Tags:</strong> ";
+            foreach var Tag t ($e.tags) {
+                """<a rel="tag" href="$t.url">$t.name</a>""";
+                $tcount++;
+                if ($tcount != size $e.tags) { ", "; }
+            }
+            "</div>";
+        }
 
         # Metadata
         if (size $e.metadata) {

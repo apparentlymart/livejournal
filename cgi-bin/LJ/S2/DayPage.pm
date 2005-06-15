@@ -108,6 +108,9 @@ sub DayPage
         $apu_lite{$_} = UserLite($apu{$_}) foreach keys %apu;
     }
 
+    # load tags
+    my $tags = LJ::Tags::get_logtags($u, \@itemids);
+
     my $userlite_journal = UserLite($u);
 
   ENTRY:
@@ -167,6 +170,16 @@ sub DayPage
         }
         my $userpic = Image_userpic($pu, 0, $logprops{$itemid}->{'picture_keyword'});
 
+        my @taglist;
+        while (my ($kwid, $kw) = each %{$tags->{$itemid} || {}}) {
+            push @taglist, Tag($u, $kwid => $kw);
+        }
+        @taglist = sort { $a->{name} cmp $b->{name} } @taglist;
+
+        if ($opts->{enable_tags_compatibility} && @taglist) {
+            $text .= LJ::S2::get_tags_text($opts->{ctx}, \@taglist);
+        }
+
         my $entry = Entry($u, {
             'subject' => $subject,
             'text' => $text,
@@ -177,6 +190,7 @@ sub DayPage
             'journal' => $userlite_journal,
             'poster' => $userlite_poster,
             'comments' => $comments,
+            'tags' => \@taglist,
             'userpic' => $userpic,
             'permalink_url' => $permalink,
         });

@@ -23,6 +23,7 @@ BEGIN {
 require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 require "$ENV{'LJHOME'}/cgi-bin/console.pl";
+require "$ENV{'LJHOME'}/cgi-bin/taglib.pl";
 
 # have to do this else mailgate will croak with email posting, but only want
 # to do it if the site has enabled the hack
@@ -80,6 +81,7 @@ sub error_message
              "208" => "Invalid text encoding",
              "209" => "Parameter out of range",
              "210" => "Client tried to edit with corrupt data.  Preventing.",
+             "211" => "Invalid or malformed tag list",
 
              # Access Errors
              "300" => "Don't have access to requested journal",
@@ -94,6 +96,8 @@ sub error_message
              "309" => "Account is marked as a memorial.",
              "310" => "Account needs to be age verified before use.",
              "311" => "Access temporarily disabled.",
+             "312" => "Not allowed to add tags to entries in this journal",
+             "313" => "Must use existing tags for entries in this journal (can't create new ones)",
 
              # Limit errors
              "402" => "Your IP address is temporarily banned for exceeding the login failure rate.",
@@ -505,6 +509,9 @@ sub common_event_validation
         $req->{'subject'} = LJ::text_trim($req->{'subject'}, LJ::BMAX_SUBJECT, LJ::CMAX_SUBJECT);
         $req->{'event'} = LJ::text_trim($req->{'event'}, LJ::BMAX_EVENT, LJ::CMAX_EVENT);
         foreach (keys %{$req->{'props'}}) {
+            # do not trim these properties as they're magical and handled later
+            next if $_ eq 'taglist';
+
             $req->{'props'}->{$_} = LJ::text_trim($req->{'props'}->{$_}, LJ::BMAX_PROP, LJ::CMAX_PROP);
         }
     }
@@ -583,6 +590,11 @@ sub common_event_validation
         # them from deleting the keyword, posting, then adding it back with editpics.bml
         delete $req->{'props'}->{'picture_keyword'} if ! $pic || $pic->{'state'} eq 'I';
     }
+
+    # validate incoming list of tags
+    return fail($err, 211)
+        if $req->{props}->{taglist} &&
+           ! LJ::Tags::is_valid_tagstring($req->{props}->{taglist});
 
     return 1;
 }
@@ -673,6 +685,11 @@ sub postevent
 
     return undef
         unless common_event_validation($req, $err, $flags);
+
+    # confirm we can add tags, at least
+    return fail($err, 312)
+        if $req->{props} && $req->{props}->{taglist} &&
+           ! LJ::Tags::can_add_tags($uowner, $u);
 
     my $event = $req->{'event'};
 
@@ -979,6 +996,19 @@ sub postevent
         }
     }
 
+    # construct valid prop list
+    if ($req->{props} && $req->{props}->{taglist}) {
+        my $tags = [];
+        LJ::Tags::is_valid_tagstring($req->{props}->{taglist}, $tags);
+        $req->{props}->{taglist} = join(', ', @$tags);
+
+        # handle tags if they're defined
+        LJ::Tags::update_logtags($uowner, $jitemid, {
+                set_string => $req->{props}->{taglist},
+                remote => $u,
+            });
+    }
+
     # meta-data
     if (%{$req->{'props'}}) {
         my $propset = {};
@@ -1229,6 +1259,25 @@ sub editevent
         if $req->{security} &&
            $req->{security} =~ /^(?:public|private|usemask)$/;
 
+    my $do_tags = $req->{props} && $req->{props}->{taglist};
+    if ($oldevent->{security} ne $security || $qallowmask != $oldevent->{allowmask}) {
+        # FIXME: this is a hopefully temporary hack which deletes tags from the entry
+        # when the security has changed.  the real fix is to make update_logtags aware
+        # of security changes so it can update logkwsum appropriately.
+
+        unless ($do_tags) {
+            # we need to fix security on this entry's tags, but the user didn't give us a tag list
+            # to work with, so we have to go get the tags on the entry, and construct a tag list,
+            # in order to pass to update_logtags down at the bottom of this whole update
+            my $tags = LJ::Tags::get_logtags($uowner, $itemid);
+            $tags = $tags->{"$uowner->{userid} $itemid"};
+            $req->{props}->{taglist} = join(',', sort map { $_->{name} } values %{$tags || {}});
+            $do_tags = 1; # bleh, force the update later
+        }
+
+        LJ::Tags::delete_logtags($uowner, $itemid);
+    }
+
     my $qyear = $req->{'year'}+0;
     my $qmonth = $req->{'mon'}+0;
     my $qday = $req->{'day'}+0;
@@ -1306,6 +1355,13 @@ sub editevent
     # up the revision number
     $req->{'props'}->{'revnum'} = ($curprops{$itemid}->{'revnum'} || 0) + 1;
     $req->{'props'}->{'revtime'} = time();
+
+    # handle tags if they're defined
+    LJ::Tags::update_logtags($uowner, $itemid, {
+            set_string => $req->{props}->{taglist},
+            remote => $u,
+        })
+        if $do_tags;
 
     # handle the props
     {
@@ -1566,24 +1622,37 @@ sub getevents
     # entries.
     unless ($req->{'noprops'} && !$LJ::UNICODE) 
     {
-	### do the properties now
-	$count = 0;
-	my %props = ();
+        ### do the properties now
+        $count = 0;
+        my %props = ();
         LJ::load_log_props2($dbcr, $ownerid, \@itemids, \%props);
-	foreach my $itemid (keys %props) {
+
+        # load the tags for these entries, unless told not to
+        unless ($req->{notags}) {
+            # construct %idsbycluster for the multi call to get these tags
+            my $tags = LJ::Tags::get_logtags($uowner, \@itemids);
+
+            # add to props
+            foreach my $itemid (@itemids) {
+                next unless $tags->{$itemid};
+                $props{$itemid}->{taglist} = join(', ', values %{$tags->{$itemid}});
+            }
+        }
+
+        foreach my $itemid (keys %props) {
             # 'replycount' is a pseudo-prop, don't send it.
             # FIXME: this goes away after we restructure APIs and
             # replycounts cease being transferred in props
             delete $props{$itemid}->{'replycount'};
 
-	    my $evt = $evt_from_itemid{$itemid};
-	    $evt->{'props'} = {};
-	    foreach my $name (keys %{$props{$itemid}}) {
-		my $value = $props{$itemid}->{$name};
-		$value =~ s/\n/ /g;
-		$evt->{'props'}->{$name} = $value;
-	    }
-	}
+            my $evt = $evt_from_itemid{$itemid};
+            $evt->{'props'} = {};
+            foreach my $name (keys %{$props{$itemid}}) {
+                my $value = $props{$itemid}->{$name};
+                $value =~ s/\n/ /g;
+                $evt->{'props'}->{$name} = $value;
+            }
+        }
     }
 
     ## load the text
@@ -1961,6 +2030,7 @@ sub editfriendgroups
             }
             LJ::MemCache::delete([$userid, "log2lt:$userid"]);
         }
+        LJ::Tags::deleted_friend_group($u, $bit);
         LJ::run_hooks('delete_friend_group', $u, $bit);
 
         # remove the friend group, unless we just added it this transaction

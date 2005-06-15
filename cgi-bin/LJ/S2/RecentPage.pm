@@ -26,7 +26,7 @@ sub RecentPage
         $opts->{'badargs'} = 1;
         return 1;
     }
-    
+
     if ($u->{'opt_blockrobots'} || $get->{'skip'}) {
         $p->{'head_content'} .= LJ::robot_meta_tags();
     }
@@ -37,7 +37,7 @@ sub RecentPage
     my $itemshow = S2::get_property_value($opts->{'ctx'}, "page_recent_items")+0;
     if ($itemshow < 1) { $itemshow = 20; }
     elsif ($itemshow > 50) { $itemshow = 50; }
-    
+
     my $skip = $get->{'skip'}+0;
     my $maxskip = $LJ::MAX_HINTS_LASTN-$itemshow;
     if ($skip < 0) { $skip = 0; }
@@ -47,7 +47,7 @@ sub RecentPage
     my $viewall = 0;
     my $viewsome = 0;
     if ($get->{'viewall'} && LJ::check_priv($remote, "canview")) {
-        LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
+        LJ::statushistory_add($u->{'userid'}, $remote->{'userid'},
                               "viewall", "lastn: $user, statusvis: $u->{'statusvis'}");
         $viewall = LJ::check_priv($remote, 'canview', '*');
         $viewsome = $viewall || LJ::check_priv($remote, 'canview', 'suspended');
@@ -64,6 +64,7 @@ sub RecentPage
         'remote' => $remote,
         'itemshow' => $itemshow,
         'skip' => $skip,
+        'tagids' => $opts->{tagids},
         'itemids' => \@itemids,
         'dateformat' => 'S2',
         'order' => ($u->{'journaltype'} eq "C" || $u->{'journaltype'} eq "Y")  # community or syndicated
@@ -72,7 +73,7 @@ sub RecentPage
     });
 
     die $err if $err;
-    
+
     ### load the log properties
     my %logprops = ();
     my $logtext;
@@ -93,12 +94,18 @@ sub RecentPage
         $apu_lite{$_} = UserLite($apu{$_}) foreach keys %apu;
     }
 
+    # load tags
+    my $idsbyc = { $u->{clusterid} => [ ] };
+    push @{$idsbyc->{$u->{clusterid}}}, [ $u->{userid}, $_->{itemid} ]
+        foreach @items;
+    my $tags = LJ::Tags::get_logtagsmulti($idsbyc);
+
     my $userlite_journal = UserLite($u);
 
   ENTRY:
-    foreach my $item (@items) 
+    foreach my $item (@items)
     {
-        my ($posterid, $itemid, $security, $alldatepart) = 
+        my ($posterid, $itemid, $security, $alldatepart) =
             map { $item->{$_} } qw(posterid itemid security alldatepart);
 
         my $replycount = $logprops{$itemid}->{'replycount'};
@@ -113,9 +120,9 @@ sub RecentPage
         # don't show posts from suspended users unless the user doing the viewing says to (and is allowed)
         next ENTRY if $apu{$posterid} && $apu{$posterid}->{'statusvis'} eq 'S' && !$viewsome;
 
-	if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
-	    LJ::item_toutf8($u, \$subject, \$text, $logprops{$itemid});
-	}
+        if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
+            LJ::item_toutf8($u, \$subject, \$text, $logprops{$itemid});
+        }
 
         my $date = substr($alldatepart, 0, 10);
         my $new_day = 0;
@@ -131,8 +138,20 @@ sub RecentPage
         my $ditemid = $itemid * 256 + $item->{'anum'};
         LJ::CleanHTML::clean_event(\$text, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
                                               'cuturl' => LJ::item_link($u, $itemid, $item->{'anum'}),
-					      'ljcut_disable' => $remote->{"opt_ljcut_disable_lastn"}, });
+                                              'ljcut_disable' => $remote->{"opt_ljcut_disable_lastn"}, });
         LJ::expand_embedded($u, $ditemid, $remote, \$text);
+
+        my @taglist;
+        while (my ($kwid, $kw) = each %{$tags->{"$u->{userid} $itemid"} || {}}) {
+            push @taglist, Tag($u, $kwid => $kw);
+        }
+        @taglist = sort { $a->{name} cmp $b->{name} } @taglist;
+
+        if ($opts->{enable_tags_compatibility} && @taglist) {
+            print STDERR "[before: {$text}]\n";
+            $text .= LJ::S2::get_tags_text($opts->{ctx}, \@taglist);
+            print STDERR "[after: {$text}]\n";
+        }
 
         my $nc = "";
         $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
@@ -150,7 +169,7 @@ sub RecentPage
             'enabled' => ($u->{'opt_showtalklinks'} eq "Y" && ! $logprops{$itemid}->{'opt_nocomments'}) ? 1 : 0,
             'screened' => ($logprops{$itemid}->{'hasscreened'} && ($remote->{'user'} eq $u->{'user'}|| LJ::can_manage($remote, $u))) ? 1 : 0,
         });
-        
+
         my $userlite_poster = $userlite_journal;
         my $pu = $u;
         if ($u->{'userid'} != $posterid) {
@@ -171,6 +190,7 @@ sub RecentPage
             'comments' => $comments,
             'new_day' => $new_day,
             'end_day' => 0,   # if true, set later
+            'tags' => \@taglist,
             'userpic' => $userpic,
             'permalink_url' => $permalink,
         });
@@ -195,12 +215,12 @@ sub RecentPage
         my $newskip = $skip - $itemshow;
         $newskip = 0 if $newskip <= 0;
         $nav->{'forward_skip'} = $newskip;
-        $nav->{'forward_url'} = $newskip ? "$p->{'base_url'}/?skip=$newskip" : "$p->{'base_url'}/";
+        $nav->{'forward_url'} = LJ::make_link("$p->{base_url}/", { skip => ($newskip || ""), tag => (LJ::eurl($get->{tag}) || "") });
         $nav->{'forward_count'} = $itemshow;
     }
 
     # unless we didn't even load as many as we were expecting on this
-    # page, then there are more (unless there are exactly the number shown 
+    # page, then there are more (unless there are exactly the number shown
     # on the page, but who cares about that)
     unless ($itemnum != $itemshow) {
         $nav->{'backward_count'} = $itemshow;
@@ -210,7 +230,7 @@ sub RecentPage
             $nav->{'backward_url'} = "$p->{'base_url'}/day/$date_slashes";
         } else {
             my $newskip = $skip + $itemshow;
-            $nav->{'backward_url'} = "$p->{'base_url'}/?skip=$newskip";
+            $nav->{'backward_url'} = LJ::make_link("$p->{'base_url'}/", { skip => ($newskip || ""), tag => (LJ::eurl($get->{tag}) || "") });
             $nav->{'backward_skip'} = $newskip;
         }
     }

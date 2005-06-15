@@ -223,6 +223,15 @@ body<=
      $current{'Music'} = LJ::current_music_str($props->{'current_music'});
  }
 
+ my $logtags = LJ::Tags::get_logtags($u, $itemid);
+ if ($logtags->{$itemid} && %{$logtags->{$itemid}}) {
+     my $base = LJ::journal_base($u);
+     $current{'Tags'} = join(', ',
+                            map { "<a href='$base/tag/" . LJ::eurl($_) . "'>" . LJ::ehtml($_) . "</a>" }
+                            sort values %{$logtags->{$itemid}}
+                        );
+ }
+
  $ret .= "<div style='margin-left: 30px'>";
 
  if (%current) 

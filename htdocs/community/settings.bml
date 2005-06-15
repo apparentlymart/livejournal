@@ -184,6 +184,7 @@ body<=
     $ret .= "$ML{'.label.password'}<br /><input name='cpassword' type='password' /><br />";
     $ret .= "<?inerr $errors{'password'} inerr?></td></tr></table> standout?>";
  } else {
+    LJ::set_active_crumb('commsettings');
     $ret .= LJ::html_hidden('cuser', $cname);
     $ret .= "<?p " . BML::ml('.name',{'name'=>"<?ljcomm $cname ljcomm?>"});
     $ret .= " " . BML::ml('.members',{'link'=>"/community/members.bml?comm=$cname"}) . " p?>";

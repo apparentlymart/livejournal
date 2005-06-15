@@ -399,6 +399,22 @@ sub handle_edit {
     
 }
 
+# fetch lj tags, display as categories
+sub handle_categories
+{
+    my ($r, $remote, $u, $opts) = @_;
+    my $ret = '<?xml version="1.0"?>';
+    $ret .= '<categories xmlns="http://sixapart.com/atom/category#">';
+
+    my $tags = LJ::Tags::get_usertags($u, { remote => $remote }) || {};
+    foreach (sort { $a->{name} cmp $b->{name} } values %$tags) {
+        $ret .= "<subject xmlns=\"http://purl.org/dc/elements/1.1/\">$_->{name}</subject>";
+    }
+    $ret .= '</categories>';
+
+    return respond($r, 200, \$ret, 'xml');
+}
+
 sub handle_feed {
     my ($r, $remote, $u, $opts) = @_;
 
@@ -446,7 +462,7 @@ sub handle {
     my ( $action, $param, $oldparam ) = ( $1, $2, $3 )
       if $r->uri =~ m#^/interface/atom(?:api)?/?(\w+)?(?:/(\w+))?(?:/(\d+))?$#;
 
-    my $valid_actions = qr{feed|edit|post|upload};
+    my $valid_actions = qr{feed|edit|post|upload|categories};
 
     # old uri was was: /interface/atomapi/<username>/<verb>[/<number>]
     # support both by shifting params around if we see something extra.
@@ -475,7 +491,7 @@ sub handle {
         LJ::load_user_props( $u, 'journaltitle' );
         my $title = $u->{journaltitle} || 'Untitled Journal';
         my $feed = XML::Atom::Feed->new();
-        foreach (qw/ post feed upload /) {
+        foreach (qw/ post feed upload categories /) {
             my $link = XML::Atom::Link->new();
             $link->title($title);
             $link->type('application/x.atom+xml');
@@ -497,6 +513,7 @@ sub handle {
       or return respond($r, 400, "Unknown URI scheme: /interface/atom/<b>$action</b>");
 
     unless (($action eq 'feed' and $method eq 'GET')  or
+            ($action eq 'categories' and $method eq 'GET') or
             ($action eq 'post' and $method eq 'POST') or
             ($action eq 'upload' and $method eq 'POST') or
             ($action eq 'edit' and 
@@ -524,10 +541,11 @@ sub handle {
     };
 
     {
-        'feed'   => \&handle_feed,
-        'post'   => \&handle_post,
-        'edit'   => \&handle_edit,
-        'upload' => \&handle_upload,
+        'feed'       => \&handle_feed,
+        'post'       => \&handle_post,
+        'edit'       => \&handle_edit,
+        'upload'     => \&handle_upload,
+        'categories' => \&handle_categories,
     }->{$action}->( $r, $remote, $u, $opts );
 
     return OK;

@@ -15,6 +15,7 @@
                'commpending' => ['Pending Memberships', '', 'managecommunity'],
                'commsearch' => ['Community Search', '/community/search.bml', 'community'],
                'commsentinvites' => ['Sent Invitations', '/community/sentinvites.bml', 'managecommunity'],
+               'commsettings' => ['Community Settings', '/community/settings.bml', 'managecommunity'],
                'community' => ['Community Center', '/community/', 'home'],
                'createcommunity' => ['Create Community', '/community/create.bml', 'managecommunity'],
                'createjournal' => ['Create Journal', '/create.bml', 'home'],

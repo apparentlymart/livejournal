@@ -1,6 +1,7 @@
 <uid> userid:<uid>   == $u, 30 min  (in arrayref packed form)
       uidof:<user>   == userid
 <uid> uprop:<uid>:<propid> == scalar, 30 minutes
+<uid> tags:<uid> == { tagid => { **tag info hashref, see LJ::Tags::get_usertags** } }
 <uid> sess:<uid>:<sessid> == sessions row hashref
 <uid> bio:<uid> == user bio text
 
@@ -13,6 +14,7 @@
 
 <uid> logtext:<cid>:<uid>:<jitemid> == [ subject, text ]
 <uid> logprop:<uid>:<jitemid> == { propname => $value, ... }
+<uid> logtag:<uid>:<jitemid> == [ kwid, kwid, kwid, ... ]
 <uid> log2:<uid>:<jitemid> == packed data
 <uid> log2ct:<uid> == # of rows for user
 <uid> log2lt:<uid> == packed data: array of recent log2 entries in rlogtime order, last 2 weeks by default

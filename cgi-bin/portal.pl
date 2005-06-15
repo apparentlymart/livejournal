@@ -918,7 +918,15 @@ UPDATE
             
             $$bd .= "Other: <INPUT NAME=\"prop_current_mood\" SIZE=15 MAXLENGTH=30 VALUE=\"" . LJ::ehtml($opts->{'form'}->{'prop_current_mood'}) . "\">";
             $$bd .= "<P><B>Current Music:</B> <INPUT NAME=\"prop_current_music\" SIZE=40 MAXLENGTH=60 VALUE=\"" . LJ::ehtml($opts->{'form'}->{'prop_current_music'}) . "\">";
-            $$bd .= "</TD></TR><TR><TD ALIGN=CENTER><INPUT TYPE=SUBMIT VALUE=\"Update Journal\"></td></tr>";
+            $$bd .= '<p><b>Tags:</b> ';
+            $$bd .= LJ::html_text(
+                {
+                    'name'      => 'prop_taglist',
+                    'size'      => '35',
+                    'maxlength' => '255',
+                }
+            );
+            $$bd .= "</p></TD></TR><TR><TD ALIGN=CENTER><INPUT TYPE=SUBMIT VALUE=\"Update Journal\"></td></tr>";
             
         }
         else 

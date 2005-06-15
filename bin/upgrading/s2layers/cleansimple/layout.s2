@@ -92,6 +92,7 @@ set comment_bar_two_bgcolor = "#eeeeff";
 set comment_bar_two_fgcolor = "#000000";
 set comment_bar_screened_bgcolor = "#dddddd";
 set comment_bar_screened_fgcolor = "#000000";
+set tags_aware = true;
 
 propgroup fonts {
   property use font_base;
@@ -579,7 +580,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     }
 
     if (not $hide_text) {
-        print $e.text;
+        print "$e.text<br /><br />";
         if (size $e.metadata) {
             """<div class="currents">""";
             foreach var string k ($e.metadata) {
@@ -597,6 +598,16 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
                 """<div class="current$k"><strong>$text:</strong> $val</div>""";
             }
             "</div>\n";
+        }
+        if ($e.tags) {
+            var int tcount = 0;
+            "<strong>Tags:</strong> ";
+            foreach var Tag t ($e.tags) {
+                """<a rel="tag" href="$t.url">$t.name</a>""";
+                $tcount++;
+                if ($tcount != size $e.tags) { ", "; }
+            }
+            "<br />";
         }
     }
 

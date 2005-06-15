@@ -222,8 +222,16 @@ class UserLite
 
     function builtin equals(UserLite u) : bool "Returns true if the two user objects refer to the same user. Use this rather than comparing usernames, since usernames aren't globally unique.";
     function base_url () : string "Returns URL of user's journal.";
+    function tag_manage_url () : string "Returns URL to user's tag management page.";
     function as_string() : string;
     function print ();
+}
+
+class Tag
+"Represents a tag."
+{
+    var string name "Textual representation of this tag.";
+    var string url "URL to view entries with this tag.";
 }
 
 class EntryLite
@@ -235,6 +243,8 @@ class EntryLite
 
     var UserLite poster "Author of the entry, or null if an anonymous comment";
     var UserLite journal "Journal the entry has been posted to";
+
+    var readonly Tag[] tags "Array of tags applied to this entry.";
 
     var Image userpic "The userpic selected to relate to this entry.";
 
@@ -249,6 +259,7 @@ class EntryLite
 
     function builtin get_link (string key) : Link "Get a link to some action related to this entry or comment. You can iterate over [member[EntryLite.link_keyseq]] to get keys to pass in here to produce a 'toolbar' of links.";
     function builtin get_plain_subject () : string "For Entries that can contain HTML subjects, this returns the subjeft without HTML.  Comments can't have HTML in subjects, so this is equivalent to just using \$.subject.  The returned 'plain' subject may still contain HTML entities, so don't do substring chops on it either.";
+    function builtin get_tags_text () : string "Returns a string containing a div of class 'ljtags' with the tags for the entry.  If there are no tags on the entry, returns a blank string.  The string is formatted according to the 'text_tags' property.";
     function print_linkbar() "Print the link bar for this entry or comment.";
 }
 
@@ -290,7 +301,7 @@ class Comment extends EntryLite
 
     function builtin print_multiform_check "Prints the select checkbox in CSS class 'ljcomsel' with DOM id 'ljcomsel_\$talkid' for a multi-action form started with [method[EntryPage.print_multiform_start()]].";
 }
-
+ 
 ### Userinfo
 
 class Friend extends UserLite 
@@ -401,6 +412,8 @@ class Page
     function builtin get_latest_month() : YearMonth
     "Returns information about the latest month the user posted (or the current month, if no posts), so that the page may include a mini-calendar or similar features.";
 
+    function builtin visible_tag_list() : Tag[]
+    "Returns a list of tags that the logged in user can see for the journal being viewed.";
 }
 
 class RecentNav 
@@ -1057,6 +1070,12 @@ property string text_multiform_conf_delete {
 }
 set text_multiform_conf_delete = "Delete selected comments?";
 
+property string text_tags {
+    des = "Text for 'Tags' header, use a # where you want the tag list inserted.";
+    example = "Tags: #";
+}
+set text_tags = "Tags: #";
+
 property string font_base {
     des = "Preferred Font";
     maxlength = 25;
@@ -1191,6 +1210,12 @@ property bool view_entry_disabled {
     des = "Enable to use the old comment page instead of the newer style specific view";
 }
 set view_entry_disabled = false;
+
+property bool tags_aware {
+    des = "When enabled, style is responsible for handling tags.  When disabled, tags are automatically inserted into entry bodies.";
+    noui = 1;
+}
+set tags_aware = false;
 
 property Color color_comment_bar {
    des = "Color of comment bar header";
@@ -1354,6 +1379,10 @@ function userinfoicon(UserLite user) : Image {
 
 function UserLite::base_url() [fixed] : string {
     return userlite_base_url($this);
+}
+
+function UserLite::tag_manage_url() [fixed] : string {
+    return "$*SITEROOT/manage/tags.bml?authas=$.username";
 }
 
 function UserLite::as_string() [fixed] : string {

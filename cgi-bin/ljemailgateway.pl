@@ -332,6 +332,7 @@ sub process {
     # Get post options, using lj-headers first, and falling back
     # to user props.  If neither exist, the regular journal defaults
     # are used.
+    $props->{taglist} = $lj_headers{tags};
     $props->{picture_keyword} = $lj_headers{'userpic'} ||
                                 $u->{'emailpost_userpic'};
     $props->{current_mood}   = $lj_headers{'mood'};

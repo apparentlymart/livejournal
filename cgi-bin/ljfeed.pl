@@ -145,6 +145,9 @@ sub make_feed
         $journalinfo->{email} = $cemail;
     }
 
+    # load tags now that we have no chance of jumping out early
+    my $logtags = LJ::Tags::get_logtags($u, \@itemids);
+
     my %posteru = ();  # map posterids to u objects
     LJ::load_userids_multiple([map { $_->{'posterid'}, \$posteru{$_->{'posterid'}} } @items], [$u]);
 
@@ -241,6 +244,7 @@ sub make_feed
             music      => $logprops{$itemid}->{'current_music'},
             mood       => $mood,
             ppid       => $ppid,
+            tags       => [ values %{$logtags->{$itemid} || {}} ],
         };
         push @cleanitems, $cleanitem;
     }
@@ -311,6 +315,7 @@ sub create_view_rss
         if ($it->{comments}) {
             $ret .= "  <comments>$journalinfo->{link}$ditemid.html</comments>\n";
         }
+        $ret .= "  <category>$_</category>\n" foreach map { LJ::exml($_) } @{$it->{tags} || []};
         # support 'podcasting' enclosures
         $ret .= LJ::run_hook( "pp_rss_enclosure",
                 { userid => $u->{userid}, ppid => $it->{ppid} }) if $it->{ppid};
@@ -400,6 +405,7 @@ sub create_view_atom
         $ret .= "      <name>" . LJ::exml($journalinfo->{u}{name}) . "</name>\n";
         $ret .= "      <email>" . LJ::exml($journalinfo->{email}) . "</email>\n" if $journalinfo->{email};
         $ret .= "    </author>\n";
+        $ret .= "    <category term='$_' />\n" foreach map { LJ::exml($_) } @{$it->{tags} || []};
         # if syndicating the complete entry
         #   -print a content tag
         # elsif syndicating summaries

@@ -50,7 +50,8 @@ sub END { LJ::end_request(); }
                     "memorable2", "memkeyword2", "userkeywords",
                     "friendgroup2", "userpicmap2", "userpic2",
                     "s2stylelayers2", "s2compiled2", "userlog",
-                    "recentactions",
+                    "logtags", "logtagsrecent", "logkwsum",
+                    "recentactions", "usertags",
                     );
 
 # keep track of what db locks we have out
@@ -164,7 +165,12 @@ use constant CMAX_UPIC_COMMENT => 120;
                      # just a redirect to userinfo.bml for now.
                      # in S2, will be a real view.
                      "des" => "Profile Page",
-                 }
+                 },
+                 "tag" => {
+                    "creator" => \&LJ::S1::create_view_lastn,
+                    "des" => "Filtered Most Recent Events",
+                 },
+                 
                  );
 
 ## we want to set this right away, so when we get a HUP signal later
@@ -1420,6 +1426,7 @@ sub get_friend_items
 #           -- remote: remote user's $u
 #           -- remoteid: id of remote user
 #           -- clusterid: clusterid of userid
+#           -- tagids: arrayref of tagids to return entries with
 #           -- clustersource: if value 'slave', uses replicated databases
 #           -- order: if 'logtime', sorts by logtime, not eventtime
 #           -- friendsview: if true, sorts by logtime, not eventtime
@@ -1517,6 +1524,24 @@ sub get_recent_items
         $extra_sql .= "journalid AS 'ownerid', rlogtime, ";
     }
 
+    # if we need to get by tag, get an itemid list now
+    my $jitemidwhere;
+    if (ref $opts->{tagids} eq 'ARRAY' && @{$opts->{tagids}}) {
+        # select jitemids uniquely
+        my $in = join(',', map { $_+0 } @{$opts->{tagids}});
+        my $jitemids = $logdb->selectcol_arrayref(qq{
+                SELECT DISTINCT jitemid FROM logtagsrecent WHERE journalid = ? AND kwid IN ($in)
+            }, undef, $userid);
+        die $logdb->errstr if $logdb->err;
+
+        # set $jitemidwhere iff we have jitemids
+        if (@$jitemids) {
+            $jitemidwhere = " AND jitemid IN (" .
+                            join(',', map { $_+0 } @$jitemids) .
+                            ")";
+        }
+    }
+
     my $sql;
 
     my $dateformat = "%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H";
@@ -1524,11 +1549,14 @@ sub get_recent_items
         $dateformat = "%Y %m %d %H %i %s %w"; # yyyy mm dd hh mm ss day_of_week
     }
 
-    $sql = ("SELECT jitemid AS 'itemid', posterid, security, $extra_sql ".
-            "DATE_FORMAT(eventtime, \"$dateformat\") AS 'alldatepart', anum ".
-            "FROM log2 USE INDEX ($sort_key) WHERE journalid=$userid AND $sort_key <= $notafter $secwhere ".
-            "ORDER BY journalid, $sort_key ".
-            "LIMIT $skip,$itemshow");
+    $sql = qq{
+        SELECT jitemid AS 'itemid', posterid, security, $extra_sql
+               DATE_FORMAT(eventtime, "$dateformat") AS 'alldatepart', anum
+        FROM log2 USE INDEX ($sort_key)
+        WHERE journalid=$userid AND $sort_key <= $notafter $secwhere $jitemidwhere
+        ORDER BY journalid, $sort_key
+        LIMIT $skip,$itemshow
+    };
 
     unless ($logdb) {
         $$err = "nodb" if ref $err eq "SCALAR";
@@ -1854,15 +1882,14 @@ sub get_authas_user {
 # des-u: user object or userid of target user
 # </LJFUNC>
 sub can_manage {
-    my ($remote, $u) = @_;
+    my $remote = LJ::want_user(shift);
+    my $u = LJ::want_user(shift);
     return undef unless $remote && $u;
 
     # is same user?
-    return 1 if LJ::want_userid($remote) == LJ::want_userid($u);
+    return 1 if LJ::u_equals($u, $remote);
 
-    # people/syn/rename accounts can only be managed by the one
-    # account
-    $u = LJ::want_user($u);
+    # people/syn/rename accounts can only be managed by the one account
     return undef if $u->{journaltype} =~ /^[PYR]$/;
 
     # check for admin access
@@ -3615,7 +3642,7 @@ sub is_friend
 # <LJFUNC>
 # name: LJ::is_banned
 # des: Checks to see if a user is banned from a journal.
-# returns: boolean; 1 iff user B is banned from journal A
+# returns: boolean; 1 iff "user" is banned from "journal"
 # args: user, journal
 # des-user: User hashref or userid.
 # des-journal: Journal hashref or userid.
@@ -3623,19 +3650,17 @@ sub is_friend
 sub is_banned
 {
     &nodb;
-    my $u = shift;
-    my $j = shift;
 
-    my $uid = (ref $u ? $u->{'userid'} : $u)+0;
-    my $jid = (ref $j ? $j->{'userid'} : $j)+0;
-
-    return 1 unless $uid;
-    return 1 unless $jid;
+    # get user and journal ids
+    my $uid = LJ::want_userid(shift);
+    my $jid = LJ::want_userid(shift);
+    return 1 unless $uid && $jid;
 
     # for speed: common case is non-community posting and replies
     # in own journal.  avoid db hit.
     return 0 if ($uid == $jid);
 
+    # edge from journal -> user
     return LJ::check_rel($jid, $uid, 'B');
 }
 
@@ -5269,6 +5294,20 @@ sub make_journal
         return LJ::server_down_html();
     }
 
+    # if we're using the 'tag' view, then convert to lastn and set option, this
+    # is done early so it can propogate to S1 and S2 as appropriate
+    if ($view eq 'tag') {
+        # FIXME: would be nice to have boolean logic "foo AND bar" or "+foo -bar" etc
+        # "foo,bar" is interpreted as "foo or bar" for now, common case
+        my $tags = LJ::durl($opts->{pathextra});
+        $tags =~ s/^\///; # clear leading /
+        $opts->{getargs}->{tag} = $tags;
+
+        # use a lastn view to render
+        delete $opts->{pathextra};
+        $view = 'lastn';
+    }
+
     # S1 style hashref.  won't be loaded now necessarily,
     # only if via customview.
     my $style;
@@ -5471,6 +5510,38 @@ sub make_journal
     }
     if ($view eq "friendsfriends" && ! LJ::get_cap($u, "friendsfriendsview")) {
         return "<b>Sorry</b><br />This user's account type doesn't permit showing friends of friends.";
+    }
+
+    # now, if there's a GET argument for tags, split those out
+    if (exists $opts->{getargs}->{tag}) {
+        my $tagfilter = $opts->{getargs}->{tag};
+        return $error->("You must provide tags to filter by.", "404 Not Found")
+            unless $tagfilter;
+
+        # error if disabled
+        return $error->("Sorry, the tag system is currently disabled.", "404 Not Found")
+            if $LJ::DISABLED{tags};
+
+        # throw an error for S1
+        return $error->("Sorry, tag filtering is not supported within S1 styles.", "404 Not Found")
+            if $stylesys == 1;
+
+        # overwrite any tags that exist
+        $opts->{tags} = [];
+        return $error->("Sorry, the tag list specified is invalid.", "404 Not Found")
+            unless LJ::Tags::is_valid_tagstring($tagfilter, $opts->{tags});
+
+        # get user's tags so we know what remote can see, and setup an inverse mapping
+        # from keyword to tag
+        $opts->{tagids} = [];
+        my $tags = LJ::Tags::get_usertags($u, { remote => $remote });
+        my %kwref = ( map { $tags->{$_}->{name} => $_ } keys %{$tags || {}} );
+
+        foreach (@{$opts->{tags}}) {
+            return $error->("Sorry, one or more specified tags do not exist.", "404 Not Found")
+                unless $kwref{$_};
+            push @{$opts->{tagids}}, $kwref{$_};
+        }
     }
 
     unless ($geta->{'viewall'} && LJ::check_priv($remote, "canview") ||
@@ -6827,13 +6898,16 @@ sub alldatepart_s2
 # name: LJ::get_keyword_id
 # class:
 # des: Get the id for a keyword.
-# args: uuid?, keyword
+# args: uuid?, keyword, autovivify?
 # des-uuid: User object or userid to use.  Pass this only if you want to use the userkeywords
 #   clustered table!  If you do not pass user information, the keywords table on the global
 #   will be used.
 # des-keyword: A string keyword to get the id of.
 # returns: Returns a kwid into keywords or userkeywords, depending on if you passed a user or
 #   not.  If the keyword doesn't exist, it is automatically created for you.
+# des-autovivify: If present and 1, automatically create keyword.  If present and 0, do not
+#   automatically create the keyword.  If not present, default behavior is the old style --
+#   yes, do automatically create the keyword.
 # </LJFUNC>
 sub get_keyword_id
 {
@@ -6841,14 +6915,15 @@ sub get_keyword_id
 
     # see if we got a user? if so we use userkeywords on a cluster
     my $u;
-    if (@_ == 2) {
-        $u = shift;
-        $u = LJ::want_user($u);
+    if (@_ >= 2) {
+        $u = LJ::want_user(shift);
         return undef unless $u;
     }
 
+    my ($kw, $autovivify) = @_;
+    $autovivify = 1 unless defined $autovivify;
+
     # setup the keyword for use
-    my $kw = shift;
     unless ($kw =~ /\S/) { return 0; }
     $kw = LJ::text_trim($kw, LJ::BMAX_KEYWORD, LJ::CMAX_KEYWORD);
 
@@ -6858,7 +6933,7 @@ sub get_keyword_id
         # new style userkeywords -- but only if the user has the right dversion
         $kwid = $u->selectrow_array('SELECT kwid FROM userkeywords WHERE userid = ? AND keyword = ?',
                                     undef, $u->{userid}, $kw) + 0;
-        unless ($kwid) {
+        if ($autovivify && ! $kwid) {
             # create a new keyword
             $kwid = LJ::alloc_user_counter($u, 'K');
             return undef unless $kwid;
@@ -6882,7 +6957,7 @@ sub get_keyword_id
         # Making this a $dbr could cause problems due to the insertion of
         # data based on the results of this query. Leave as a $dbh.
         $kwid = $dbh->selectrow_array("SELECT kwid FROM keywords WHERE keyword=$qkw");
-        unless ($kwid) {
+        if ($autovivify && ! $kwid) {
             $dbh->do("INSERT INTO keywords (kwid, keyword) VALUES (NULL, $qkw)");
             $kwid = $dbh->{'mysql_insertid'};
         }
@@ -9126,6 +9201,22 @@ sub infohistory_add {
     $dbh->do("INSERT INTO infohistory (userid, what, timechange, oldvalue, other) VALUES (?, ?, NOW(), ?, ?)",
              undef, $uuid, $what, $value, $other);
     return $dbh->err ? 0 : 1;
+}
+
+# <LJFUNC>
+# name: LJ::bit_breakdown
+# des: Breaks down a bitmask into an array of bits enabled.
+# args: mask
+# des-mask: The number to break down.
+# returns: A list of bits enabled.  E.g., 3 returns (0, 2) indicating that bits 0 and 2 (numbering
+#          from the right) are currently on.
+# </LJFUNC>
+sub bit_breakdown {
+    my $mask = shift()+0;
+
+    # check each bit 0..31 and return only ones that are defined
+    return grep { defined }
+           map { $mask & (1<<$_) ? $_ : undef } 0..31;
 }
 
 sub last_error_code

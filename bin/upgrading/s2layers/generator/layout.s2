@@ -1,5 +1,4 @@
 # -*-s2-*-
-
 layerinfo type = "layout";
 layerinfo name = "Generator";
 layerinfo redist_uniq = "generator/layout";
@@ -137,6 +136,8 @@ set text_view_recent = "entries";
 set text_view_friends = "friends";
 set text_view_archive = "archive";
 set text_view_userinfo = "userinfo";
+
+set tags_aware = true;
 
 set text_website = "website";
 
@@ -449,10 +450,30 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
             $metadata = """$metadata\n<tr><td class="meta">[</td><td class="meta" align="right"><b>$text</b></td>
             <td class="meta" align="center">|</td><td class="meta">$val</td><td class="meta">]</td></tr>""";
         }
-        $metadata = """$metadata</table><p>""";
+        $metadata = """$metadata</table>""";
     }
 
-    if (not $hide_text) { print $metadata; print $e.text; }
+    var string tags;
+    if ($e.tags) {
+        var int tcount = 0;
+        $tags = """<table cellspacing="0" cellpadding="0" border="0" summary=""><tr><td class="meta" align="right">[<b>Tags</b></td>""";
+        $tags = """$tags<td class="meta" align="center">|</td><td class="meta">""";
+        foreach var Tag t ($e.tags) {
+            $tags = """$tags<a rel="tag" href="$t.url">$t.name</a>""";
+            $tcount++;
+            if ($tcount != size $e.tags) { $tags = """$tags, """; }
+        }
+        $tags = """$tags</td><td class="meta">]</td></tr></table>""";
+    }
+
+    if (not $hide_text) { 
+        if ($tags or $metadata) {
+            print $tags;
+            print $metadata;
+            print "<br />";
+        }
+        print $e.text;
+    }
 """</td></tr>
 <tr bgcolor="$*weak_back"><td align='left' class='comments'>
 <a href="$e.permalink_url">$*text_permalink</a></td>""";
