@@ -522,20 +522,22 @@ sub get_style
     # - if a layerid is loaded above but it has a remapping
     #   defined in ljconfig, use the remap id instead and 
     #   also save to database using set_style_layers
-    my @remaps = ();
+    if (%LJ::S2LID_REMAP) {
+        my @remaps = ();
 
-    # all system layer types (no user layers)
-    foreach (qw(core i18nc i18n layout theme)) {
-        my $lid = $style{$_};
-        if (exists $LJ::S2LID_REMAP{$lid}) {
-            $style{$_} = $LJ::S2LID_REMAP{$lid};
-            push @remaps, "$lid=>$style{$_}";
+        # all system layer types (no user layers)
+        foreach (qw(core i18nc i18n layout theme)) {
+            my $lid = $style{$_};
+            if (exists $LJ::S2LID_REMAP{$lid}) {
+                $style{$_} = $LJ::S2LID_REMAP{$lid};
+                push @remaps, "$lid=>$style{$_}";
+            }
         }
-    }
-    if (@remaps) {
-        my $sysid = LJ::get_userid("system");
-        LJ::statushistory_add($u, $sysid, 's2lid_remap', join(", ", @remaps));
-        LJ::S2::set_style_layers($u, $styleid, %style);
+        if (@remaps) {
+            my $sysid = LJ::get_userid("system");
+            LJ::statushistory_add($u, $sysid, 's2lid_remap', join(", ", @remaps));
+            LJ::S2::set_style_layers($u, $styleid, %style);
+        }
     }
 
     unless ($have_style) {
