@@ -2475,19 +2475,19 @@ sub userlite_base_url
     my ($ctx, $UserLite) = @_;
     my $u = $UserLite->{_u};
     if ($u->{journaltype} eq "P") {
-        return "$LJ::SITEROOT/users/$.username";
+        return "$LJ::SITEROOT/users/$u->{user}";
     } elsif ($u->{journaltype} eq "C") {
-        return "$LJ::SITEROOT/community/$.username";
+        return "$LJ::SITEROOT/community/$u->{user}";
     } elsif ($u->{journaltype} eq "I") {
         return $u->url;
     }
 }
+
 sub userlite_as_string
 {
     my ($ctx, $UserLite) = @_;
     return LJ::ljuser($UserLite->{'_u'});
 }
-
 
 sub PalItem
 {
