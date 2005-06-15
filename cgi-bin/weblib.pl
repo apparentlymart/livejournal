@@ -200,6 +200,30 @@ sub error_list
     return $ret;
 }
 
+# <LJFUNC>
+# name: LJ::warning_list
+# des: Returns a warning bar with bulleted list of warnings
+# returns: BML showing warnings
+# args: warnings*
+# des-warnings: A list of warnings
+# </LJFUNC>
+sub warning_list
+{
+    my @warnings = @_;
+    my $ret;
+
+    $ret .= "<?warningbar ";
+    $ret .= "<strong>";
+    $ret .= BML::ml('label.warning');
+    $ret .= "</strong><ul>";
+
+    foreach (@warnings) {
+        $ret .= "<li>$_</li>";
+    }
+    $ret .= " </ul> warningbar?>";
+
+}
+
 sub tosagree_widget {
     my ($checked, $errstr) = @_;
 

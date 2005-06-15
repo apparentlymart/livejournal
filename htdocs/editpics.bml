@@ -642,9 +642,7 @@
     }
 
     if (@errors) {
-         $body .= "<?standout <strong>$ML{'error.procrequest'}</strong><ul><li>";
-         $body .= join ("</li><li>", @errors);
-         $body .= "</li></ul> standout?>";
+        $body .= LJ::error_list(@errors);
     }
 
     if (!$fotobilder) {
@@ -673,6 +671,22 @@
         $sth->execute($u->{'userid'});
         my @sortedpics;
         push @sortedpics, $_ while $_ = $sth->fetchrow_hashref;
+
+
+        # See if they have any without keywords before we output the display table
+        foreach (@sortedpics) {
+            unless ($keywords{$_->{'picid'}}) {
+                my @w;
+                if (defined $LJ::HELPURL{'upic_keywords'}) {
+                    push @w, BML::ml('.warning.keywords.faq', {'aopts' => "href='$LJ::HELPURL{'upic_keywords'}'"});
+                } else {
+                    push @w, $ML{'.warning.keywords'};
+                }
+
+                $body .= LJ::warning_list(@w);
+                last;
+            }
+        }
 
         my $piccount = 0;
         foreach my $pic (sort { $a->{picid} <=> $b->{picid} } @sortedpics)
@@ -767,6 +781,16 @@
             foreach (qw(filesize imagesize fileformat)) {
                 $body .= "<li>" . $ML{".restriction.$_"} . "</li>\n";
             }
+
+            # Keywords is a little different
+            $body .= "<li>";
+            if (defined $LJ::HELPURL{'upic_keywords'}) {
+                $body .= BML::ml('.restriction.keywords.faq', {'aopts' => "href='$LJ::HELPURL{'upic_keywords'}'"});
+            } else {
+                $body .= $ML{'.restriction.keywords'};
+            }
+
+            $body .= "</li>";
             $body .= "</ul>\n";
         }
 

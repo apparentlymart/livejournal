@@ -1589,6 +1589,10 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /editpics.bml.restriction.imagesize=Image dimensions must be no larger than 100x100 pixels
 
+/editpics.bml.restriction.keywords=Picture will be unusable if keywords are not supplied
+
+/editpics.bml.restriction.keywords.faq=Picture will be unusable if <a [[aopts]]>keywords</a> are not supplied
+
 /editpics.bml.title=Edit User Pictures
 
 /editpics.bml.uploaddesc=Use the form below to upload a new picture.
@@ -1598,6 +1602,10 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 /editpics.bml.uploadheader=Upload a New Picture
 
 /editpics.bml.uploadheader.fb=Upload a New Picture From Fotobilder
+
+/editpics.bml.warning.keywords=One or more of your pictures do not have keywords defined and thus cannot currently be used
+
+/editpics.bml.warning.keywords.faq=One or more of your pictures do not have <a [[aopts]]>keywords</a> defined and thus cannot currently be used
 
 /edittags.bml.button.save=Save changes
 
