@@ -2188,7 +2188,7 @@ sub ljuser
     my $user = shift;
     my $opts = shift;
     my $u;
-    my $do_dynamic = $LJ::DYNAMIC_USER || ($user =~ /^ext_/);
+    my $do_dynamic = $LJ::DYNAMIC_LJUSER || ($user =~ /^ext_/);
     if ($do_dynamic && ! isu($user) && ! $opts->{'type'}) {
         # Try to automatically pick the user type, but still
         # make something if we can't (user doesn't exist?)
