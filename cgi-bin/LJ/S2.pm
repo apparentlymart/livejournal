@@ -1667,6 +1667,7 @@ sub User
     my $o = UserLite($u);
     $o->{'_type'} = "User";
     $o->{'default_pic'} = Image_userpic($u, $u->{'defaultpicid'});
+    $o->{'userpic_listing_url'} = "$LJ::SITEROOT/allpics.bml?user=".$u->{'user'};
     $o->{'website_url'} = LJ::ehtml($u->{'url'});
     $o->{'website_name'} = LJ::ehtml($u->{'urlname'});
     return $o;

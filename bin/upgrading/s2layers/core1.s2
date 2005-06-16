@@ -315,6 +315,7 @@ class User extends UserLite
 "A more information-rich userinfo structure"
 {
     var Image default_pic "Information about default userpic";
+    var readonly string userpic_listing_url "URL of a page listing this user's userpics";
     var readonly string website_url "URL pointer to user's website";
     var readonly string website_name "'pretty' name of user's website";
 }
