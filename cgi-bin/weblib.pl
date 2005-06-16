@@ -221,7 +221,7 @@ sub warning_list
         $ret .= "<li>$_</li>";
     }
     $ret .= " </ul> warningbar?>";
-
+    return $ret;
 }
 
 sub tosagree_widget {
