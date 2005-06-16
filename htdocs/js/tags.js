@@ -159,8 +159,7 @@ function edit_tagselect(list)
 
     for ( $i = 0; $i < list.options.length; $i++ ) {
         if (list.options[$i].selected) {
-            var val = list.options[$i].value;
-            selected[selected_num] = val.substring( val.indexOf('_')+1 );
+            selected[selected_num] = list.options[$i].value;
             selected_num++;
         }
     }
