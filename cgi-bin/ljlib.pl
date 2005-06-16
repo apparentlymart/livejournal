@@ -7440,6 +7440,9 @@ sub delete_entry
     LJ::MemCache::decr([$jid, "log2ct:$jid"]);
     LJ::memcache_kill($jid, "dayct");
 
+    # delete tags
+    LJ::Tags::delete_logtags($u, $jitemid);
+
     # if this is running the second time (started by the cmd buffer),
     # the log2 row will already be gone and we shouldn't check for it.
     if ($quick) {
