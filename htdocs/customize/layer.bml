@@ -41,6 +41,15 @@
         $style = LJ::S2::load_style($u->{'s2_style'});
         return $err->("Style not found.") unless $style && $style->{'userid'} == $u->{'userid'};
         $layer = LJ::S2::load_layer($dbh, $style->{'layer'}->{'user'});
+
+        # if the b2lid of this layer has been remapped to a new layerid
+        # then update the b2lid mapping for this layer
+        my $b2lid = $layer->{b2lid};
+        if ($b2lid && $LJ::S2LID_REMAP{$b2lid}) {
+            LJ::S2::b2lid_remap($u, $style->{'layer'}->{'user'}, $b2lid);
+            $layer->{b2lid} = $LJ::S2LID_REMAP{$b2lid};
+        }
+
         $save_arg = "w=user&journal=$journal";
         $save_redir = "/customize/?journal=$journal";
     }

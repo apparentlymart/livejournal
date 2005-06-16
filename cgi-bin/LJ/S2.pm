@@ -411,6 +411,23 @@ sub get_public_layers
     return $LJ::CACHED_PUBLIC_LAYERS;
 }
 
+# update layers whose b2lids have been remapped to new s2lids
+sub b2lid_remap
+{
+    my ($uuserid, $s2lid, $b2lid) = @_;
+    my $b2lid_new = $LJ::S2LID_REMAP{$b2lid};
+    return undef unless $uuserid && $s2lid && $b2lid && $b2lid_new;
+
+    my $sysid = LJ::get_userid("system");
+    return undef unless $sysid;
+
+    LJ::statushistory_add($uuserid, $sysid, 'b2lid_remap', "$s2lid: $b2lid=>$b2lid_new");
+
+    my $dbh = LJ::get_db_writer();
+    return $dbh->do("UPDATE s2layers SET b2lid=? WHERE s2lid=?",
+                    undef, $b2lid_new, $s2lid);
+}
+
 sub get_layers_of_user
 {
     my ($u, $is_system) = @_;
@@ -446,7 +463,17 @@ sub get_layers_of_user
         }
 
         # setup children keys
+        my $bid = $layers{$_}->{b2lid};
         next unless $layers{$_}->{'b2lid'};
+
+        # has the b2lid for this layer been remapped?
+        # if so update this layer's specified b2lid
+        if ($bid && $LJ::S2LID_REMAP{$bid}) {
+            my $s2lid = $layers{$_}->{s2lid};
+            b2lid_remap($userid, $s2lid, $bid);
+            $layers{$_}->{b2lid} = $LJ::S2LID_REMAP{$bid};
+        }
+
         if ($is_system) {
             my $bid = $layers{$_}->{'b2lid'};
             unless ($layers{$bid}) {
