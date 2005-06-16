@@ -148,9 +148,7 @@ sub RecentPage
         @taglist = sort { $a->{name} cmp $b->{name} } @taglist;
 
         if ($opts->{enable_tags_compatibility} && @taglist) {
-            print STDERR "[before: {$text}]\n";
             $text .= LJ::S2::get_tags_text($opts->{ctx}, \@taglist);
-            print STDERR "[after: {$text}]\n";
         }
 
         my $nc = "";
