@@ -61,14 +61,15 @@ body<=
     $ret .= "<?p $ML{'.intro'} p?><br />";
     $ret .= "<script type='text/javascript'> var cur_taglist = '$logtagstr'; </script>";  
 
-    $ret .= '<form method="POST" action="/edittags.bml" id="edit_tagform">';
-    $ret .= LJ::form_auth();
     $ret .= '<table class="edittbl" cellpadding="0" cellspacing="0" width="50%">';
     $ret .= "<tr><td class='l'>$ML{'.subject'}</td><td>$subj</td></tr>" if $subj;
     $ret .= "<tr><td class='l'>$ML{'.entry'}</td><td>$evt</td></tr>";
     $ret .= "<tr><td class='l'>&nbsp;</td><td>&nbsp</td></tr>"; # spacer
 
-    $ret .= "<tr><td class='l'>$ML{'.current'}</td><td class='sep'>";
+    $ret .= "<tr><td class='l'>$ML{'.current'}</td>";
+    $ret .= '<form method="POST" action="/edittags.bml" id="edit_tagform">';
+    $ret .= LJ::form_auth();
+    $ret .= "<td class='sep'>";
     if ( LJ::Tags::can_add_tags($u, $remote) ) {
         $ret .= LJ::html_text(
             {
