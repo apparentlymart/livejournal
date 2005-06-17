@@ -218,7 +218,7 @@ sub get_tags_text {
     return "" unless @$taglist;
 
     # now get the customized tag text and insert the tag list and append to body
-    my $tags = join(', ', map { "<a rel='tag' href='$_->{url}'>" . LJ::ehtml($_->{name}) . "</a>" } @$taglist);
+    my $tags = join(', ', map { "<a rel='tag' href='$_->{url}'>$_->{name}</a>" } @$taglist);
     my $tagtext = S2::get_property_value($ctx, 'text_tags');
     $tagtext =~ s/#/$tags/;
     return "<div class='ljtags'>$tagtext</div>";
