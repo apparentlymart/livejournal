@@ -27,6 +27,14 @@
     return $err->("The specified layer does not exist.")
         unless $lay;
 
+    # if the b2lid of this layer has been remapped to a new layerid
+    # then update the b2lid mapping for this layer
+    my $b2lid = $lay->{b2lid};
+    if ($b2lid && $LJ::S2LID_REMAP{$b2lid}) {
+        LJ::S2::b2lid_remap($remote, $id, $b2lid);
+        $lay->{b2lid} = $LJ::S2LID_REMAP{$b2lid};
+    }
+
     # is authorized admin for this layer?
     return $err->('You are not authorized to edit this layer.')
         unless LJ::can_manage($remote, $lay->{'userid'});
