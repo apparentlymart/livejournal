@@ -56,7 +56,7 @@ body<=
     my $logtags = LJ::Tags::get_logtags($u, $jitemid);
     my $usertags = LJ::Tags::get_usertags($u, { remote => $remote }) || {};
     $logtags = $logtags->{$jitemid} || {};
-    my $logtagstr = join ', ', sort values %$logtags;
+    my $logtagstr = join ', ', map { LJ::ejs($_) } sort values %$logtags;
 
     $ret .= "<?p $ML{'.intro'} p?><br />";
     $ret .= "<script type='text/javascript'> var cur_taglist = '$logtagstr'; </script>";  
@@ -74,7 +74,7 @@ body<=
         $ret .= LJ::html_text(
             {
                 name  => 'edittags',
-                value => $logtagstr,
+                value => (join ', ', sort values %$logtags),
                 size  => 40,
                 class => 'tagfield',
                 id    => 'tagfield',
