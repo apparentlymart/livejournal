@@ -55,7 +55,13 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'msglimit'   => 120,
         'totlimit'   => 120,
     },
-
+    'aliant' => {
+        'name'          => 'Alianet (NBTel, MTT, NewTel, and Island Tel)',
+        'notes'         => 'Enter your phone number. Message is sent to number@wirefree.informe.ca',
+        'fromlimit'     => 11,
+        'msglimit'      => 140,
+        'totlimit'      => 140,
+    },
     'alltel' => {
         'name'          => 'Alltel',
         'notes'         => 'Enter your phone number. Goes to number@message.alltel.com.',
@@ -372,15 +378,6 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'msglimit'      => 160,
         'totlimit'      => 160,
     },
-
-    'nbtel' => {
-        'name'          => 'NBTel',
-        'notes'         => 'Enter your phone number. Message is sent to number@wirefree.informe.ca',
-        'fromlimit'     => 11,
-        'msglimit'      => 140,
-        'totlimit'      => 140,
-    },
-    
     'netcom' => {
         'name'		=> 'Netcom',
         'notes'		=> 'Enter your phone number. Goes to number@sms.netcom.no',
@@ -938,6 +935,7 @@ sub remap {
     return "cingular" if $provider eq "cingular-acs";
     return "cingular" if $provider eq "cingular-texas";
     return "cingularblue" if $provider eq "att";
+    return "aliant" if $provider eq "nbtel";
     return $provider;
 }
 
@@ -1032,6 +1030,15 @@ sub send
             'to'	=> "$self->{'number'}\@sender.airtouchpaging.com",
             'from'	=> "$msg->{'from'}",
             'body'	=> "$msg->{'message'}",
+        },$errors);
+    }
+
+    elsif ($provider eq "aliant")
+    {
+        send_mail($self, {
+            'to'        => "$self->{'number'}\@wirefree.informe.ca",
+            'from'      => "$msg->{'from'}",
+            'body'      => "$msg->{'message'}",
         },$errors);
     }
 
@@ -1382,15 +1389,6 @@ sub send
         },$errors);
     }
 
-    elsif ($provider eq "nbtel") 
-    {
-        send_mail($self, {
-            'to'        => "$self->{'number'}\@wirefree.informe.ca",
-            'from'      => "$msg->{'from'}",
-            'body'      => "$msg->{'message'}",
-        },$errors);
-    } 
-    
     elsif ($provider eq "netcom")
     {
         send_mail($self, { 
