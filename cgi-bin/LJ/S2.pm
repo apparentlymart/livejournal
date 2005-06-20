@@ -1467,9 +1467,10 @@ sub Entry
         $e->{$_} = $arg->{$_};
     }
 
+    $e->{'tags'} ||= [];
     $e->{'time'} = DateTime_parts($arg->{'dateparts'});
     $e->{'depth'} = 0;  # Entries are always depth 0.  Comments are 1+.
-    
+
     my $link_keyseq = $e->{'link_keyseq'};
     push @$link_keyseq, 'mem_add' unless $LJ::DISABLED{'memories'};
     push @$link_keyseq, 'tell_friend' unless $LJ::DISABLED{'tellafriend'};
