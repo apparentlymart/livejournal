@@ -141,6 +141,7 @@ sub EntryPage
                 'text' => $text,
                 'userpic' => $comment_userpic,
                 'time' => $datetime,
+                'tags' => [],
                 'full' => $com->{'_loaded'} ? 1 : 0,
                 'depth' => $depth,
                 'parent_url' => $par_url,
