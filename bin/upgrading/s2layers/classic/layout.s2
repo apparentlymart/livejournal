@@ -330,7 +330,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     var string userpic = "";
     if (defined $e.userpic)
     {
-        $userpic = "<img src='$e.userpic.url' alt='[User Picture] height='$e.userpic.height' width='$e.userpic.width' />";
+        $userpic = "<img src='$e.userpic.url' alt='[User Picture]' height='$e.userpic.height' width='$e.userpic.width' />";
     }
     if ($e.new_day or $p.view == "entry")
     {
