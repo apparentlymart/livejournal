@@ -1539,6 +1539,9 @@ sub get_recent_items
             $jitemidwhere = " AND jitemid IN (" .
                             join(',', map { $_+0 } @$jitemids) .
                             ")";
+        } else {
+            # no items, so show no entries
+            return ();
         }
     }
 
