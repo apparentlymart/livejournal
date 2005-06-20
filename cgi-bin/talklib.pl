@@ -125,7 +125,7 @@ sub link_bar
     }
 
     unless ($LJ::DISABLED{tags}) {
-        if (defined $remote && LJ::Tags::can_add_tags($up, $remote)) {
+        if (defined $remote && LJ::Tags::can_add_tags($u, $remote)) {
             push @linkele, $mlink->("/edittags.bml?${jargent}itemid=$itemid", "edittags");
         }
     }
