@@ -187,6 +187,12 @@
                 'screened' => 0,
             });
         
+        # build tag objects, faking kwid as '0'
+        # * invalid tags will be stripped by is_valid_tagstring()
+        my @taglist = ();
+        LJ::Tags::is_valid_tagstring($POST{prop_taglist}, \@taglist);
+        @taglist = map { LJ::S2::Tag($u, 0, $_) } @taglist;
+
         # format it
         my $raw_subj = $req{'subject'};
         
@@ -203,6 +209,7 @@
             'poster' => $userlite_poster,
             'new_day' => 0,
             'end_day' => 0,
+            'tags' => \@taglist,
             'userpic' => $userpic,
             'permalink_url' => "#",
         });
