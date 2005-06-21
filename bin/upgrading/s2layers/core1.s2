@@ -230,8 +230,8 @@ class UserLite
 class Tag
 "Represents a tag."
 {
-    var string name "Textual representation of this tag.";
-    var string url "URL to view entries with this tag.";
+    var readonly string name "Textual representation of this tag.";
+    var readonly string url "URL to view entries with this tag.";
 }
 
 class EntryLite
