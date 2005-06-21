@@ -13,7 +13,7 @@ _info?><?_code
         return BML::redirect($data);
     } else {
         BML::set_content_type($type) if $type;
-        return $data || "This is ${LJ::SITENAME}'s OpenID server endpoint, not a human-readable resource.  For more information, see <a href='http://openid.net/'>http://openid.net/</a>.<br /><br />Get <a href='server.bml?openid.mode=getpubkey'>public key</a>.";
+        return $data;
     }
 }
 _code?>
