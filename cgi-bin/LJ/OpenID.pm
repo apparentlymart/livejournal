@@ -5,17 +5,21 @@ use Net::OpenID::Server 0.04;
 use Digest::SHA1 qw(sha1 sha1_hex);
 
 sub server {
-    my $get = shift;
+    my ($get, $post) = @_;
 
     return Net::OpenID::Server->new(
-                                    args         => $get || {},
+                                    get_args         => $get  || {},
+                                    post_args        => $post || {},
+
                                     get_user     => \&LJ::get_remote,
                                     is_identity  => sub {
                                         my ($u, $ident) = @_;
                                         return LJ::OpenID::is_identity($u, $ident, $get);
                                     },
                                     is_trusted   => \&LJ::OpenID::is_trusted,
+
                                     setup_url    => "$LJ::SITEROOT/openid/approve.bml",
+
                                     server_secret => \&LJ::OpenID::server_secret,
                                     secret_gen_interval => 3600,
                                     secret_expire_age   => 86400 * 14,

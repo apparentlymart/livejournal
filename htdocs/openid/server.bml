@@ -5,10 +5,10 @@ _info?><?_code
     return "OpenID consumer support is disabled" unless $LJ::OPENID_SERVER;
 
     use strict;
-    use vars qw(%GET);
-    use LJ::OpenID;
+    use vars qw(%GET %POST);
+    require LJ::OpenID;
 
-    my $nos = LJ::OpenID::server(\%GET);
+    my $nos = LJ::OpenID::server(\%GET, \%POST);
 
     my ($type, $data) = $nos->handle_page(redirect_for_setup => 1);
     if ($type eq "redirect") {
