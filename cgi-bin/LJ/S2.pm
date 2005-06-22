@@ -653,13 +653,7 @@ sub s2_context
     };
 
     if ($ctx) {
-        $ctx->[S2::PROPS]->{'SITEROOT'} = $LJ::SITEROOT;
-        $ctx->[S2::PROPS]->{'PALIMGROOT'} = $LJ::PALIMGROOT;
-        $ctx->[S2::PROPS]->{'SITENAME'} = $LJ::SITENAME;
-        $ctx->[S2::PROPS]->{'SITENAMESHORT'} = $LJ::SITENAMESHORT;
-        $ctx->[S2::PROPS]->{'SITENAMEABBREV'} = $LJ::SITENAMEABBREV;
-        $ctx->[S2::PROPS]->{'IMGDIR'} = $LJ::IMGPREFIX;
-
+        LJ::S2::populate_system_props($ctx);
         S2::set_output(sub {});  # printing suppressed
         S2::set_output_safe(sub {}); 
         eval { S2::run_code($ctx, "prop_init()"); };
@@ -1043,6 +1037,17 @@ sub escape_context_props
             }
         }
     }
+}
+
+sub populate_system_props
+{
+    my $ctx = shift;
+    $ctx->[S2::PROPS]->{'SITEROOT'} = $LJ::SITEROOT;
+    $ctx->[S2::PROPS]->{'PALIMGROOT'} = $LJ::PALIMGROOT;
+    $ctx->[S2::PROPS]->{'SITENAME'} = $LJ::SITENAME;
+    $ctx->[S2::PROPS]->{'SITENAMESHORT'} = $LJ::SITENAMESHORT;
+    $ctx->[S2::PROPS]->{'SITENAMEABBREV'} = $LJ::SITENAMEABBREV;
+    $ctx->[S2::PROPS]->{'IMGDIR'} = $LJ::IMGPREFIX;
 }
 
 sub layer_compile_user
