@@ -92,13 +92,6 @@ sub make_journal
     $opts->{'ctx'} = $ctx;
     $LJ::S2::CURR_CTX = $ctx;
 
-    $ctx->[S2::PROPS]->{'SITEROOT'} = $LJ::SITEROOT;
-    $ctx->[S2::PROPS]->{'PALIMGROOT'} = $LJ::PALIMGROOT;
-    $ctx->[S2::PROPS]->{'SITENAME'} = $LJ::SITENAME;
-    $ctx->[S2::PROPS]->{'SITENAMESHORT'} = $LJ::SITENAMESHORT;
-    $ctx->[S2::PROPS]->{'SITENAMEABBREV'} = $LJ::SITENAMEABBREV;
-    $ctx->[S2::PROPS]->{'IMGDIR'} = $LJ::IMGPREFIX;
-
     foreach ("name", "url", "urlname") { LJ::text_out(\$u->{$_}); }
 
     $u->{'_journalbase'} = LJ::journal_base($u->{'user'}, $opts->{'vhost'});
@@ -660,6 +653,13 @@ sub s2_context
     };
 
     if ($ctx) {
+        $ctx->[S2::PROPS]->{'SITEROOT'} = $LJ::SITEROOT;
+        $ctx->[S2::PROPS]->{'PALIMGROOT'} = $LJ::PALIMGROOT;
+        $ctx->[S2::PROPS]->{'SITENAME'} = $LJ::SITENAME;
+        $ctx->[S2::PROPS]->{'SITENAMESHORT'} = $LJ::SITENAMESHORT;
+        $ctx->[S2::PROPS]->{'SITENAMEABBREV'} = $LJ::SITENAMEABBREV;
+        $ctx->[S2::PROPS]->{'IMGDIR'} = $LJ::IMGPREFIX;
+
         S2::set_output(sub {});  # printing suppressed
         S2::set_output_safe(sub {}); 
         eval { S2::run_code($ctx, "prop_init()"); };

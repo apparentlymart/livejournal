@@ -7599,22 +7599,24 @@ sub blocking_report {
 # des-uuserid: a userid or u object
 # des-sql: sql to run via $dbh->do()
 # des-args: a list of arguments to pass use via: $dbh->do($sql, undef, @args)
-# returns: results of $dbh->do()
+# returns: return false on error
 # </LJFUNC>
 sub _friends_do {
     my ($uuid, $sql, @args) = @_;
     my $uid = want_userid($uuid);
     return undef unless $uid && $sql;
 
-    my $dbh = LJ::get_db_writer();
-    my $ret = $dbh->do($sql, undef, @args);
+    my $dbh = LJ::get_db_writer() or return 0;
 
+    my $ret = $dbh->do($sql, undef, @args);
+    return 0 if $dbh->err;
+    
     LJ::memcache_kill($uid, "friends");
 
     # pass $uuid in case it's a $u object which mark_dirty wants
     LJ::mark_dirty($uuid, "friends");
 
-    return $ret;
+    return 1;
 }
 
 
@@ -7764,7 +7766,7 @@ sub add_friend
     my @vals = map { $userid, $_, $black, $white, $groupmask } @add_ids;
 
     my $res = LJ::_friends_do
-        ($userid, "INSERT INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) VALUES $bind", @vals);
+        ($userid, "INSERT IGNORE INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) VALUES $bind", @vals);
 
     # delete friend-of memcache keys for anyone who was added
     foreach (@add_ids) {
