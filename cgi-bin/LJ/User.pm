@@ -636,4 +636,39 @@ sub ljuser_display {
     }
 }
 
+sub load_identity_user {
+    my ($type, $ident, $vident) = @_;
+
+    my $dbh = LJ::get_db_writer();
+    my $uid = $dbh->selectrow_array("SELECT userid FROM identitymap WHERE idtype=? AND identity=?",
+                                    undef, $type, $ident);
+    return LJ::load_userid($uid) if $uid;
+
+    # increment ext_ counter until we successfully create an LJ
+    # account.  hard cap it at 10 tries. (arbitrary, but we really
+    # shouldn't have *any* failures here, let alone 10 in a row)
+
+    for (1..10) {
+        my $extuser = 'ext_' . LJ::alloc_global_counter('E');
+
+        my $name = $extuser;
+        if ($type eq "O" && ref $vident) {
+            $name = $vident->display;
+        }
+
+        $uid = LJ::create_account({
+            caps => undef,
+            user => $extuser,
+            name => $name,
+            journaltype => 'I',
+        });
+        last if $uid;
+        select undef, undef, undef, .10;  # lets not thrash over this
+    }
+    return undef unless $uid &&
+        $dbh->do("INSERT INTO identitymap (idtype, identity, userid) VALUES (?,?,?)",
+                 undef, $type, $ident, $uid);
+    return LJ::load_userid($uid);
+}
+
 1;

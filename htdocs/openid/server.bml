@@ -2,6 +2,8 @@
 nocache=>1
 _info?><?_code
 {
+    return "OpenID consumer support is disabled" unless $LJ::OPENID_SERVER;
+
     use strict;
     use vars qw(%GET);
     use LJ::OpenID;

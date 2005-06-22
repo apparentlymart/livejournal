@@ -1,5 +1,8 @@
 <?_code
 {
+
+    return "OpenID consumer support is disabled" unless $LJ::OPENID_CONSUMER;
+
     use strict;
     use vars qw($title $head $body %GET %POST);
     use Net::OpenID::Consumer;
@@ -47,7 +50,7 @@
         my $url = $vident->url;
         return $err->("Invalid characters in identity URL.") if $url =~ /[\<\>\s]/;
 
-        my $u = LJ::load_identity_user("O", $url, $vident);
+        my $u = LJ::User::load_identity_user("O", $url, $vident);
         return $err->("Couldn't vivify your account (but we verified that you're " . LJ::ehtml($url) . ")") unless $u;
 
         my $sess_opts = {
@@ -105,43 +108,6 @@
                                                );
         return BML::redirect($check_url);
     }
-
-
-## TEMPORARY HOME
-sub LJ::load_identity_user {
-    my ($type, $ident, $vident) = @_;
-
-    my $dbh = LJ::get_db_writer();
-    my $uid = $dbh->selectrow_array("SELECT userid FROM identitymap WHERE idtype=? AND identity=?",
-                                    undef, $type, $ident);
-    return LJ::load_userid($uid) if $uid;
-
-    # increment ext_ counter until we successfully create an LJ
-    # account.  hard cap it at 10 tries. (arbitrary, but we really
-    # shouldn't have *any* failures here, let alone 10 in a row)
-
-    for (1..10) {
-        my $extuser = 'ext_' . LJ::alloc_global_counter('E');
-
-        my $name = $extuser;
-        if ($type eq "O" && ref $vident) {
-            $name = $vident->display;
-        }
-
-        $uid = LJ::create_account({
-            caps => undef,
-            user => $extuser,
-            name => $name,
-            journaltype => 'I',
-        });
-        last if $uid;
-        select undef, undef, undef, .10;  # lets not thrash over this
-    }
-    return undef unless $uid &&
-        $dbh->do("INSERT INTO identitymap (idtype, identity, userid) VALUES (?,?,?)",
-                 undef, $type, $ident, $uid);
-    return LJ::load_userid($uid);
-}
 
 return undef;
 
