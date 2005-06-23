@@ -15,10 +15,10 @@
     my $u = LJ::get_remote() or
 	return $err->("Currently you need to be logged in to grant another site permission to know your identity, but this page will eventually let you log in during the same step.");
 
-    my $is_identity = LJ::OpenID::is_identity($u, $GET{'is_identity'}, \%GET);
-    unless ($is_identity) {
+    my $identity = LJ::OpenID::is_identity($u, $GET{'identity'}, \%GET);
+    unless ($identity) {
         return $err->("The site you just came from seems to want to verify <a href='" .
-                      LJ::ehtml($GET{'is_identity'}) .
+                      LJ::ehtml($GET{'identity'}) .
                       "'>an identity</a> that you, as " .
                       LJ::ljuser($u) .
                       ", cannot provide.");
@@ -49,7 +49,7 @@
 	} elsif ($GET{"openid.post_grant"} eq "return") {
             my $nos = LJ::OpenID::server();
             my $sig_return = $nos->signed_return(
-                                                 identity   => $GET{'is_identity'},
+                                                 identity   => $GET{'identity'},
                                                  return_to  => $GET{'return_to'},
                                                  trust_root => $GET{'trust_root'},
                                                  );
