@@ -142,8 +142,10 @@ body<=
         return "<?h1 Error h1?><?p You don't have the necessary privilege to view this request. p?>";
     }
 
+    # helper variables for commonly called methods
     my $owner_mode = LJ::Support::can_close($sp, $remote, $auth) ? 1 : 0;
     my $helper_mode = LJ::Support::can_help($sp, $remote) ? 1 : 0;
+    my $is_poster = LJ::Support::is_poster($sp, $remote, $auth) ? 1 : 0;
     
     # fix up the subject if needed
     eval {
@@ -366,7 +368,7 @@ body<=
 
     # put in a "this is private!" box if this is a private request and the user viewing
     # this page is the person who opened the request
-    if (!$sp->{_cat}->{public_read} && LJ::Support::is_poster($sp, $remote, $auth)) {
+    if (!$sp->{_cat}->{public_read} && $is_poster) {
         $ret .= "<div style='margin-top: 15px; margin-bottom: 15px; padding: 5px; " .
                 "text-align: center; background-color: #ffff00; border: solid 2px red;'>" .
                 "<b>This is a private request.</b> It is not publicly visible.</div>";
@@ -480,7 +482,7 @@ body<=
  
     $ret .= "<p style='margin-bottom: 0px;'><b>Post a comment or solution:</b></p>\n";
  
-    unless ($remote || LJ::Support::is_poster($sp, $remote, $auth)) {
+    unless ($remote || $is_poster) {
         $ret .= "You must <a href='$LJ::SITEROOT/login.bml?ret=1'>login</a> to help people out.\n";
         return $ret;
     }
@@ -590,8 +592,7 @@ body<=
     }
     
     # helpers can do actions:
-    if (LJ::Support::can_perform_actions($sp, $remote) &&
-        ! LJ::Support::is_poster($sp, $remote, $auth))
+    if (LJ::Support::can_perform_actions($sp, $remote) && ! $is_poster)
     {
         $ret .= "<tr><td align='right'></td><td>\n";
 
@@ -642,13 +643,13 @@ body<=
     my $validationnag;
     if (!(LJ::isu($u) && ($u->underage && $u->{'status'} eq 'T')) &&
         ($u->{'status'} eq "N" || $u->{'status'} eq "T") &&
-        ! LJ::Support::is_poster($sp, $remote, $auth)) {
+        ! $is_poster) {
         my $reminder = LJ::load_include('validationreminder');
         $validationnag .= "\n\n$reminder" if $reminder;
     }
 
     # add in canned answers if there are any for this category and the user can use them
-    if ($helper_mode) {
+    if ($helper_mode && ! $is_poster) {
         my $rows = $dbr->selectall_arrayref('SELECT subject, body FROM support_answers WHERE spcatid = ? ORDER BY subject',
                                             undef, $sp->{_cat}->{spcatid});
         if ($rows && @$rows) {
