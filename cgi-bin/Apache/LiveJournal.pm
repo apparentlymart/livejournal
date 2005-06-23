@@ -72,8 +72,6 @@ sub handler
         return OK;
     }
 
-    $r->set_handlers(PerlTransHandler => [ \&trans ]);
-
     # only perform this once in case of internal redirects
     if ($r->is_initial_req) {
         $r->push_handlers(PerlCleanupHandler => sub { %RQ = () });
@@ -109,7 +107,34 @@ sub handler
                 $r->header_in('Host', $_);
             }
         }
+
+        # reload libraries that might've changed
+        if ($LJ::IS_DEV_SERVER) {
+            my %to_reload;
+            while (my ($file, $mod) = each %LJ::LIB_MOD_TIME) {
+                my $cur_mod = (stat($file))[9];
+                next if $cur_mod == $mod;
+                $to_reload{$file} = 1;
+            }
+            my @key_del;
+            foreach (my ($key, $file) = each %INC) {
+                push @key_del, $key if $to_reload{$file};
+            }
+            delete $INC{$_} foreach @key_del;
+
+            foreach my $file (keys %to_reload) {
+                print STDERR "Reloading $file...\n";
+                my $good = do $file;
+                if ($good) {
+                    $LJ::LIB_MOD_TIME{$file} = (stat($file))[9];
+                } else {
+                    die "Failed to reload module [$file] due to error: $@\n";
+                }
+            }
+        }
     }
+
+    $r->set_handlers(PerlTransHandler => [ \&trans ]);
 
     return OK;
 }
