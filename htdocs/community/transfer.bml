@@ -37,6 +37,7 @@
 
         # everything checks out, transfer it
         unless (%errors) {
+            $cu->log_event('maintainer_add', { actiontarget => $remote->{userid}, remote => $remote });
             LJ::set_rel($cu, $remote, 'A');
             $body = "<?h1 $ML{'.success.title'} h1?><?p ";
             $body .= BML::ml('.success.body', { comm =>  LJ::ljuser($cu, { type => 'C' }) });
