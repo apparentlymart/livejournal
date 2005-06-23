@@ -48,11 +48,12 @@
 	    $body .= "<script>window.close();</script>";
 	} elsif ($GET{"openid.post_grant"} eq "return") {
             my $nos = LJ::OpenID::server();
-            my $sig_return = $nos->signed_return(
-                                                 identity   => $GET{'identity'},
-                                                 return_to  => $GET{'return_to'},
-                                                 trust_root => $GET{'trust_root'},
-                                                 );
+            my $sig_return = $nos->signed_return_url(
+                                                     identity     => $GET{'identity'},
+                                                     return_to    => $GET{'return_to'},
+                                                     trust_root   => $GET{'trust_root'},
+                                                     assoc_handle => $GET{'assoc_handle'},
+                                                     );
             return BML::redirect($sig_return) if $sig_return;
             return $err->("Failed to make signed return URL.");
 	}
