@@ -82,10 +82,9 @@ function handleRadios(sel) {
             radio_user.checked = 1;
         }
 
-        } else {
-            if (lj_more) {
-                lj_more.style.display = 'none';
-            }
+    } else {
+        if (lj_more) {
+            lj_more.style.display = 'none';
         }
     }
 
