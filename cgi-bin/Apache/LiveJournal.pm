@@ -495,7 +495,8 @@ sub trans
     }
 
     # normal (non-domain) journal view
-    if ($uri =~ m!
+    if (! $LJ::ONLY_USER_VHOSTS &&
+        $uri =~ m!
         ^/(users\/|community\/|\~)  # users/community/tilde
         ([^/]*)                     # potential username
         (.*)?                       # rest
