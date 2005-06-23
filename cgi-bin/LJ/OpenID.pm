@@ -3,13 +3,15 @@ package LJ::OpenID;
 use strict;
 use Net::OpenID::Server 0.04;
 use Digest::SHA1 qw(sha1 sha1_hex);
+use LWPx::ParanoidAgent;
+use Net::OpenID::Consumer;
 
 sub server {
     my ($get, $post) = @_;
 
     return Net::OpenID::Server->new(
-                                    get_args         => $get  || {},
-                                    post_args        => $post || {},
+                                    get_args     => $get  || {},
+                                    post_args    => $post || {},
 
                                     get_user     => \&LJ::get_remote,
                                     is_identity  => sub {
@@ -24,6 +26,30 @@ sub server {
                                     secret_gen_interval => 3600,
                                     secret_expire_age   => 86400 * 14,
                                     );
+}
+
+# Returns a Consumer object
+# When planning to verify identity, needs GET
+# arguments passed in
+sub consumer {
+    my $get_args = shift || {};
+
+    my $ua;
+    unless ($LJ::IS_DEV_SERVER) {
+        $ua = LWPx::ParanoidAgent->new(
+                                       timeout => 10,
+                                       max_size => 1024*300,
+                                       );
+    }
+
+    my $csr = Net::OpenID::Consumer->new(
+                                         ua => $ua,
+                                         args => $get_args,
+                                         cache => eval { LJ::MemCache::get_memcache() },
+                                         debug => $LJ::IS_DEV_SERVER || 0,
+                                         );
+
+    return $csr;
 }
 
 sub server_secret {
@@ -122,6 +148,27 @@ sub hmac {
     my $k_opad = $key ^ (chr(0x5c) x $block_size);
 
     &$hash_func($k_opad, &$hash_func($k_ipad, $data));
+}
+
+# Returns 1 if destination identity server
+# is blocked
+sub blocked_hosts {
+    my $csr = shift;
+
+    return do { my $dummy = 0; \$dummy; } if $LJ::IS_DEV_SERVER;
+
+    my $tried_local_id = 0;
+    $csr->ua->blocked_hosts(
+                            sub {
+                                my $dest = shift;
+                                # NEEDS TO BE NOT HARDCODED
+                                if ($dest =~ /livejournal\.com$/i) {
+                                    $tried_local_id = 1;
+                                    return 1;
+                                }
+                                return 0;
+                            });
+    return \$tried_local_id;
 }
 
 1;
