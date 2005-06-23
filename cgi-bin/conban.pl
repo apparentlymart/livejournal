@@ -127,12 +127,14 @@ sub ban_set_unset
 
     if ($args->[0] eq "ban_set") {
         LJ::set_rel($quserid, $qbanid, 'B');
+        $j->log_event('ban_set', { actiontarget => $banid, remote => $remote });
         push @$out, [ "info", "User $user ($banid) banned from $j->{'user'}." ];
         return 1;
     }
 
     if ($args->[0] eq "ban_unset") {
         LJ::clear_rel($quserid, $qbanid, 'B');
+        $j->log_event('ban_unset', { actiontarget => $banid, remote => $remote });
         push @$out, [ "info", "User $user ($banid) un-banned from $j->{'user'}." ];
         return 1;
     }

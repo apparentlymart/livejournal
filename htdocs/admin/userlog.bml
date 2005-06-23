@@ -66,11 +66,17 @@ FORM
         my $extra = {};
         LJ::decode_url_string($row->{extra}, $extra);
 
-        my $action;
+        my $action = "Action undefined for: $row->{action}";
         if ($row->{action} eq 'delete_entry') {
             $action = "Deleted entry $row->{actiontarget} via $extra->{method}";
         } elsif ($row->{action} eq 'account_create') {
             $action = "Account created";
+        } elsif ($row->{action} eq 'ban_set') {
+            my $u = LJ::load_userid($row->{actiontarget});
+            $action = "Banned " . LJ::ljuser($u) if $u;
+        } elsif ($row->{action} eq 'ban_unset') {
+            my $u = LJ::load_userid($row->{actiontarget});
+            $action = "Unbanned " . LJ::ljuser($u) if $u;
         } else {
             $action = "Unknown action ($row->{action})";
         }
