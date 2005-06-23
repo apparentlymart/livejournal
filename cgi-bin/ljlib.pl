@@ -51,7 +51,7 @@ sub END { LJ::end_request(); }
                     "friendgroup2", "userpicmap2", "userpic2",
                     "s2stylelayers2", "s2compiled2", "userlog",
                     "logtags", "logtagsrecent", "logkwsum",
-                    "recentactions", "usertags",
+                    "recentactions", "usertags", "pendcomments",
                     );
 
 # keep track of what db locks we have out
@@ -8879,14 +8879,14 @@ sub clear_rel
 
 # $dom: 'L' == log, 'T' == talk, 'M' == modlog, 'S' == session,
 #       'R' == memory (remembrance), 'K' == keyword id,
-#       'P' == phone post
+#       'P' == phone post, 'C' == pending comment
 sub alloc_user_counter
 {
     my ($u, $dom, $recurse) = @_;
 
     ##################################################################
     # IF YOU UPDATE THIS MAKE SURE YOU ADD INITIALIZATION CODE BELOW #
-    return undef unless $dom =~ /^[LTMPSRK]$/;                       #
+    return undef unless $dom =~ /^[LTMPSRKC]$/;                      #
     ##################################################################
 
     my $dbh = LJ::get_db_writer();
@@ -8965,6 +8965,9 @@ sub alloc_user_counter
         my $ppemax = $u->selectrow_array("SELECT MAX(blobid) FROM phonepostentry WHERE userid=?",
                                          undef, $uid);
         $newmax = ($ppemax > $userblobmax) ? $ppemax : $userblobmax;
+    } elsif ($dom eq "C") {
+        my $commentmax = $u->selectrow_array("SELECT MAX(pendid) FROM pendcomments WHERE jid=?",
+                                             undef, $uid);
     } else {
         die "No user counter initializer defined for area '$dom'.\n";
     }

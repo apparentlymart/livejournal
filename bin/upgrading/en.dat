@@ -3181,6 +3181,8 @@ if you would like to screen, unscreen, or delete the comments.
 
 /talkpost.bml.opt.ljuser=LiveJournal user:
 
+/talkpost.bml.opt.ljuser2=LiveJournal user
+
 /talkpost.bml.opt.loggedin=<b>Logged in user:</b> [[username]]
 
 /talkpost.bml.opt.message=Message:

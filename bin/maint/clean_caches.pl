@@ -50,6 +50,17 @@ $maint{'clean_caches'} = sub
         print "    deleted ", $sth->rows, "\n";
     } while ($sth->rows && ! $sth->err);
 
+    print "-I- Cleaning old pending comments.\n";
+    $count = 0;
+    foreach my $c (@LJ::CLUSTERS) {
+        my $dbcm = LJ::get_cluster_master($c);
+        next unless $dbcm;
+        # 3600 seconds is one hour
+        my $time = time() - 3600;
+        $count += $dbcm->do('DELETE FROM pendcomments WHERE datesubmit < ? LIMIT 2000', undef, $time);
+    }
+    print "    deleted $count\n";
+
     # move rows from talkleft_xfp to talkleft
     print "-I- Moving talkleft_xfp.\n";
 

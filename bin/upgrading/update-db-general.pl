@@ -283,6 +283,17 @@ CREATE TABLE overrides (
 )
 EOC
 
+register_tablecreate("pendcomments", <<'EOC');
+CREATE TABLE pendcomments (
+  jid int(10) unsigned NOT NULL,
+  pendcid int(10) unsigned NOT NULL,
+  data blob NOT NULL,
+  datesubmit int(10) unsigned NOT NULL,
+  PRIMARY KEY (pendcid, jid),
+  KEY (datesubmit)
+)
+EOC
+
 register_tablecreate("poll", <<'EOC');
 CREATE TABLE poll (
   pollid int(10) unsigned NOT NULL auto_increment,

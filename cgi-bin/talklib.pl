@@ -1063,6 +1063,8 @@ sub talkform {
         $ret .= LJ::tosagree_html('comment', $form->{agree_tos}, BML::ml('tos.error'));
     }
 
+    my $oid_identity = $remote ? $remote->openid_identity : undef;
+
     # Default radio button
     # 4 possible scenarios:
     # remote - initial form load, error and redisplay
@@ -1071,9 +1073,23 @@ sub talkform {
         my $type = shift;
         my $default = " checked='checked'";
 
+        # Initial page load (no remote)
+        return $default if $type eq 'anonymous' &&
+            ! $form->{'usertype'} && ! $remote && ! $oid_identity;
+
         # Anonymous
         return $default if $type eq 'anonymous' &&
-                           $form->{'usertype'} eq 'anonymous';
+            $form->{'usertype'} eq 'anonymous';
+
+        if ($LJ::OPENID_CONSUMER) {
+            # OpenID
+            return $default if $type eq 'openid' &&
+                $form->{'usertype'} eq 'openid';
+
+            return $default if $type eq 'openid_cookie' &&
+                ($form->{'usertype'} eq 'openid_cookie' ||
+                (defined $oid_identity));
+        }
 
         # Remote user, remote equals userpost
         return $default if $type eq 'remote' &&
@@ -1085,20 +1101,22 @@ sub talkform {
         return $default if
             # Remote user posting as someone else.
             ($form->{'userpost'} && $form->{'userpost'} ne $form->{'cookieuser'} && $form->{'usertype'} ne 'anonymous') ||
-            ($form->{'usertype'} eq 'user' && ! $form->{'userpost'}) ||
-            # Initial page load (no remote)
-            (! $form->{'usertype'} && ! $remote);
+            ($form->{'usertype'} eq 'user' && ! $form->{'userpost'});
         }
 
         return;
     };
-    
+
     # from registered user or anonymous?
     $ret .= "<table>\n";
+    $ret .= "<tr><td align='right' valign='top'>$BML::ML{'.opt.from'}</td>";
+    $ret .= "<td>";
+    $ret .= "<table>"; # Internal for "From" options
     my $screening = LJ::Talk::screening_level($journalu, $opts->{ditemid} >> 8);
+
     if ($journalu->{'opt_whocanreply'} eq "all") {
         $ret .= "<tr valign='center'>";
-        $ret .= "<td align='right'>$BML::ML{'.opt.from'}</td>";
+        $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/anonymous.gif' onclick='handleRadios(0);'/></td>";
         $ret .= "<td align='center'><input type='radio' name='usertype' value='anonymous' id='talkpostfromanon'" .
                 $whocheck->('anonymous') .
                 " /></td>";
@@ -1106,36 +1124,114 @@ sub talkform {
         $ret .= " " . $BML::ML{'.opt.willscreen'} if $screening;
         $ret .= "</td></tr>\n";
 
-        # TODO: OpenID support (needs better UI)
+        if ($LJ::OPENID_CONSUMER) {
+            # OpenID!!
+            # Logged in
+            if (defined $oid_identity) {
+                # Don't worry about a real href since js hides the row anyway
+                my $other_user = "<script lanaguage='JavaScript'>if (document.getElementById) {document.write(\"&nbsp;<a href='#' onClick='otherOIDUser();return false;'>[other]</a>\");}</script>";
 
-    } elsif ($journalu->{'opt_whocanreply'} eq "reg") {
-        $ret .= "<tr valign='middle'>";
-        $ret .= "<td align='right'>$BML::ML{'.opt.from'}</td><td align='center'>(  )</td>";
-        $ret .= "<td align='left' colspan='3'><font color='#c0c0c0'><b>$BML::ML{'.opt.anonymous'}</b></font>$BML::ML{'.opt.noanonpost'}</td>";
-        $ret .= "</tr>\n";
-    } else {
-        $ret .= "<tr valign='center'>";
-        $ret .= "<td align='right'>$BML::ML{'.opt.from'}</td>";
-        $ret .= "<td align='center'>(  )</td>";
-        $ret .= "<td align='left' colspan='3'><font color='#c0c0c0'><b>$BML::ML{'.opt.anonymous'}</b></font>" .
-            BML::ml(".opt.friendsonly", {'username'=>"<b>$journalu->{'user'}</b>"}) 
-            . "</td>";
-        $ret .= "</tr>\n";
+                $ret .= "<tr valign='middle' id='oidli' name='oidli'>";
+                $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-inputicon.gif' onclick='handleRadios(4);' /></td><td align='center'><input type='radio' name='usertype' value='openid_cookie' id='talkpostfromoidli'" .
+                    $whocheck->('openid_cookie') . "/>";
+                $ret .= "</td><td align='left'><b><label for='talkpostfromoid' onclick='handleRadios(4);return false;'>OpenID identity:</label></b> ";
+
+                $ret .= "<i>" . $remote->display_name . "</i>";
+                $ret .= $other_user . " ";
+
+                $ret .= $BML::ML{'.opt.willscreen'} if $screening;
+                $ret .= "</td></tr>\n";
+            }
+
+            # logged out
+            $ret .= "<tr valign='middle' id='oidlo' name='oidlo'>";
+            $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-inputicon.gif' onclick='handleRadios(3);' /></td><td align='center'><input type='radio' name='usertype' value='openid' id='talkpostfromoidlo'" .
+                $whocheck->('openid') . "/>";
+            $ret .= "</td><td align='left'><b><label for='talkpostfromoidlo' onclick='handleRadios(3);return false;'>OpenID</label></b> ";
+
+            if (defined $LJ::HELPURL{'openid'}) {
+                $ret .= "<a href='$LJ::HELPURL{'openid'}'><img src='$LJ::IMGPREFIX/help.gif' alt='$BML::ML{'Help'}' title='$BML::ML{'Help'}' width='14' height='14' border='0' /></a> ";
+            }
+
+            $ret .= $BML::ML{'.opt.willscreen'} if $screening;
+            $ret .= "</td></tr>\n";
+
+            # URL: [    ]  Verify? [ ]
+            my $url_def = $form->{'oidurl'} || $oid_identity if defined $oid_identity;
+
+            $ret .= "<tr valign='middle' align='left' id='oid_more'><td colspan='2'></td><td>";
+            $ret .= "Identity URL:&nbsp;<input class='textbox' name='oidurl' maxlength='60' size='53' id='oidurl' value='$url_def' /> ";
+            $ret .= "<br /><label for='oidlogincheck'>$BML::ML{'.loginq'}&nbsp;</label><input type='checkbox' name='oiddo_login' id='oidlogincheck' ";
+            $ret .= "checked='checked' " if $form->{'oiddo_login'};
+            $ret .= "/></td></tr>\n";
+        }
     }
 
-    if ($remote) {
+    if ($journalu->{'opt_whocanreply'} eq "reg") {
         $ret .= "<tr valign='middle'>";
-        $ret .= "<td align='right'>&nbsp;</td>";
+        $ret .= "<td align='right'>$BML::ML{'.opt.from'}</td>";
+        $ret .= "<td align='center' width='20'><img src='$LJ::IMGPREFIX/anonymous.gif' /></td>";
+        $ret .= "<td align='center'>(  )</td>";
+        $ret .= "<td align='left' colspan='2'><font color='#c0c0c0'><b>$BML::ML{'.opt.anonymous'}</b></font>$BML::ML{'.opt.noanonpost'}</td>";
+        $ret .= "</tr>\n";
+
+        if ($LJ::OPENID_CONSUMER) {
+            # OpenID - At some point we will include "trusted"
+            $ret .= "<tr valign='middle'>";
+            $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-inputicon.gif' onclick='handleRadios(3);' /></td>";
+            $ret .= "<td align='center'>(  )</td>";
+            $ret .= "<td align='left' colspan='2'><font color='#c0c0c0'<b>OpenID</b></font>";
+
+            if (defined $LJ::HELPURL{'openid'}) {
+                $ret .= "<a href='$LJ::HELPURL{'openid'}'><img src='$LJ::IMGPREFIX/help.gif' alt='$BML::ML{'Help'}' title='$BML::ML{'Help'}' width='14' height='14' border='0' /></a> ";
+            }
+
+            $ret .= "</td></tr>\n";
+        }
+    }
+
+    if ($journalu->{'opt_whocanreply'} eq 'friends') {
+        $ret .= "<tr valign='middle'>";
+        $ret .= "<td align='center' width='20'><img src='$LJ::IMGPREFIX/anonymous.gif' /></td>";
+        $ret .= "<td align='center'>(  )</td>";
+        $ret .= "<td align='left' colspan='2'><font color='#c0c0c0'><b>$BML::ML{'.opt.anonymous'}</b></font>";
+        $ret .= BML::ml(".opt.friendsonly", {'username'=>"<b>$journalu->{'user'}</b>"});
+        $ret .= "</tr>\n";
+
+        if ($LJ::OPENID_CONSUMER) {
+            # OpenID - At some point we will include "trusted"
+            $ret .= "<tr valign='middle'>";
+            $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-inputicon.gif' onclick='handleRadios(3);' /></td>";
+            $ret .= "<td align='center'>(  )</td>";
+            $ret .= "<td align='left' colspan='2'><font color='#c0c0c0'<b>OpenID</b></font>";
+
+            if (defined $LJ::HELPURL{'openid'}) {
+                $ret .= "<a href='$LJ::HELPURL{'openid'}'><img src='$LJ::IMGPREFIX/help.gif' alt='$BML::ML{'Help'}' title='$BML::ML{'Help'}' width='14' height='14' border='0' /></a> ";
+            }
+
+            $ret .= "</td></tr>\n";
+        }
+    }
+
+    if ($remote && !defined $oid_identity) {
+        $ret .= "<tr valign='middle' id='ljuser_row'>";
         my $logged_in = LJ::ehtml($remote->display_name);
 
+        # Don't worry about a real href since js hides the row anyway
+        my $other_user = "<script lanaguage='JavaScript'>if (document.getElementById) {document.write(\"&nbsp;<a href='#' onClick='otherLJUser();return false;'>[other]</a>\");}</script>";
+
         if (LJ::is_banned($remote, $journalu)) {
+            $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/userinfo.gif' /></td>";
             $ret .= "<td align='center'>( )</td>";
-            $ret .= "<td align='left'><span class='ljdeem'>" . BML::ml(".opt.loggedin", {'username'=>"<i>$logged_in</i>"}) . "</font>" . BML::ml(".opt.bannedfrom", {'journal'=>$journalu->{'user'}}) . "</td>";
+            $ret .= "<td align='left'><span class='ljdeem'>" . BML::ml(".opt.loggedin", {'username'=>"<i>$logged_in</i>"}) . "</font>" . BML::ml(".opt.bannedfrom", {'journal'=>$journalu->{'user'}}) . $other_user . "</td>";
         } else {
-            $ret .= "<td align='center'><input type='radio' name='usertype' value='cookieuser' id='talkpostfromremote'" .
+            $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/userinfo.gif'  onclick='handleRadios(1);' /></td><td align='center'><input type='radio' name='usertype' value='cookieuser' id='talkpostfromremote'" .
                      $whocheck->('remote') .
                      " /></td>";
             $ret .= "<td align='left'><label for='talkpostfromremote'>" . BML::ml(".opt.loggedin", {'username'=>"<i>$logged_in</i>"}) . "</label>\n";
+
+            $ret .= $other_user;
+
             $ret .= "<input type='hidden' name='cookieuser' value='$remote->{'user'}' id='cookieuser' />\n";
             if ($screening eq 'A' ||
                 ($screening eq 'F' && !LJ::is_friend($journalu, $remote))) {
@@ -1147,24 +1243,47 @@ sub talkform {
     }
 
     # ( ) LiveJournal user:
-    $ret .= "<tr valign='middle'>";
-    $ret .= "<td>&nbsp;</td>";
-    $ret .= "<td align='center'><input type='radio' name='usertype' value='user' id='talkpostfromlj'" .
-            $whocheck->('ljuser') . "/>";
-    $ret .= "</td><td align='left'><b><label for='talkpostfromlj'>$BML::ML{'.opt.ljuser'}</label></b> ";
+    $ret .= "<tr valign='middle' id='otherljuser_row' name='otherljuser_row'>";
+    $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/pencil.gif' onclick='handleRadios(2);' /></td><td align='center'><input type='radio' name='usertype' value='user' id='talkpostfromlj'" .
+        $whocheck->('ljuser') . "/>";
+    $ret .= "</td><td align='left'><b><label for='talkpostfromlj' onclick='handleRadios(2); return false;'>$BML::ML{'.opt.ljuser2'}</label></b> ";
     $ret .= $BML::ML{'.opt.willscreenfriend'} if $screening eq 'F';
     $ret .= $BML::ML{'.opt.willscreen'} if $screening eq 'A';
     $ret .= "</td></tr>\n";
 
+    if ($remote && ! defined $oid_identity) {
+        $ret .= "<script language='JavaScript'>\n";
+        $ret .= "<!--\n";
+        $ret .= "if (document.getElementById) {\n";
+        $ret .= "var radio_user = document.getElementById(\"talkpostfromlj\");\n";
+        $ret .= "if (!radio_user.checked) {\n";
+        $ret .= "var otherljuser_row = document.getElementById(\"otherljuser_row\");\n";
+        $ret .= "otherljuser_row.style.display = 'none';\n";
+        $ret .= "}\n";
+        $ret .= "}\n";
+        $ret .= "//-->\n";
+        $ret .= "</script>";
+   }
+
     # Username: [    ] Password: [    ]  Login? [ ]
-    $ret .= "<tr valign='middle' align='left'><td colspan='2'></td><td>";
+    $ret .= "<tr valign='middle' align='left' id='lj_more'><td colspan='2'></td><td>";
     my $ljuser_def = ($form->{'userpost'} ne $form->{'cookieuser'} && $form->{'usertype'} ne 'anonymous') ?
-                     BML::eall($form->{userpost}) : "";
-    $ret .= "$BML::ML{'Username'}:&nbsp;<input class='textbox' name='userpost' size='13' maxlength='15' id='username' value='$ljuser_def' />";
-    $ret .= "$BML::ML{'Password'}:&nbsp;<input class='textbox' name='password' type='password' maxlength='30' size='13' id='password' /> <label for='logincheck'>$BML::ML{'.loginq'}&nbsp;</label><input type='checkbox' name='do_login' id='logincheck' /></td></tr>\n";
+                     BML::eall($form->{userpost}) : "$remote->{'user'}" unless $oid_identity;
+
+    $ret .= "<table><tr><td>";
+    $ret .= "$BML::ML{'Username'}:</td><td>";
+    $ret .= "<input class='textbox' name='userpost' size='13' maxlength='15' id='username' value='$ljuser_def' onclick='this.value=\"\"' ";
+    $ret .= "style='background: url($LJ::IMGPREFIX/userinfo.gif) no-repeat; background-color: #fff; background-position: 0px 1px; padding-left: 18px; color: #00C; font-weight: bold;'/>";
+
+    $ret .= "</td></tr><tr><td>";
+    $ret .= "$BML::ML{'Password'}:</td><td>";
+    $ret .= "<input class='textbox' name='password' type='password' maxlength='30' size='18' id='password' />";
+    $ret .= "</td></tr><tr><td colspan='2'>";
+    $ret .= "<label for='logincheck'>$BML::ML{'.loginq'}&nbsp;</label><input type='checkbox' name='do_login' id='logincheck' /></td></tr></table>";
+    $ret .= "</td></tr>\n";
 
     # Link to create an account
-    if (!$remote) {
+    if (!$remote || defined $oid_identity) {
         $ret .= "<tr valign='middle' align='left'><td colspan='2'></td><td><span style='font-size: 8pt; font-style: italic;'>";
         $ret .= BML::ml('.noaccount', {'aopts' => "href='$LJ::SITEROOT/create.bml'"});
         $ret .= "</span></td></tr>\n";
@@ -1177,9 +1296,12 @@ sub talkform {
         $basesubject = "Re: $basesubject";
     }
 
+    # Closing internal "From" table
+    $ret .= "</td></tr></table>";
+
     # subject
     $basesubject = BML::eall($basesubject) if $basesubject;
-    $ret .= "<tr valign='top'><td align='right'>$BML::ML{'.opt.subject'}</td><td colspan='4'><input class='textbox' type='text' size='50' maxlength='100' name='subject' value=\"$basesubject\" />\n";
+    $ret .= "<tr valign='top'><td align='right'>$BML::ML{'.opt.subject'}</td><td><input class='textbox' type='text' size='50' maxlength='100' name='subject' id='subject' value=\"$basesubject\" onKeyPress='subjectNoHTML(event);'/>\n";
 
     # Subject Icon toggle button
     {
@@ -1253,19 +1375,9 @@ sub talkform {
     }
 
     # finish off subject line
-    $ret .= "<div id='ljnohtmlsubj' class='ljdeem'>$BML::ML{'.nosubjecthtml'}</div></td></tr>\n";
+    $ret .= "<div id='ljnohtmlsubj' class='ljdeem'><span style='font-size: 8pt; font-style: italic;'>$BML::ML{'.nosubjecthtml'}</span></div>\n";
 
-    $ret .= "<tr><td align='right'>&nbsp;</td><td colspan='4'>";
-    $ret .= "$BML::ML{'.opt.noautoformat'}";
-    $ret .= LJ::html_check(
-        {
-            name  => 'prop_opt_preformatted',
-            value => 1,
-            selected => $form->{'prop_opt_preformatted'}
-        }
-    );
-    $ret .= LJ::help_icon("noautoformat", " ");
-    
+    $ret .= "<div id='userpics'>";
     my %res;
     if ($remote) {
         LJ::do_request({ "mode" => "login",
@@ -1277,7 +1389,7 @@ sub talkform {
     if ($res{'pickw_count'}) {
         $ret .= BML::ml('.label.picturetouse2',
                         {
-                            'aopts'=>"href='$LJ::SITEROOT/allpics.bml?user=$remote->{'user'}'"});
+                            'aopts'=>"href='$LJ::SITEROOT/allpics.bml?user=$remote->{'user'}'"}) . " ";
         my @pics;
         for (my $i=1; $i<=$res{'pickw_count'}; $i++) {
             push @pics, $res{"pickw_$i"};
@@ -1286,11 +1398,24 @@ sub talkform {
         $ret .= LJ::html_select({'name' => 'prop_picture_keyword', 
                                  'selected' => $form->{'prop_picture_keyword'}, },
                                 ("", $BML::ML{'.opt.defpic'}, map { ($_, $_) } @pics));
-        $ret .= LJ::help_icon("userpics", " ");
+
+        if (defined $LJ::HELPURL{'userpics'}) {
+            $ret .= " <a href='$LJ::HELPURL{'userpics'}'><img src='$LJ::IMGPREFIX/help.gif' alt='$BML::ML{'Help'}' title='$BML::ML{'Help'}' width='14' height='14' border='0' /></a>";
+        }
     }
-    # quick quote button
-    my $quickquote = LJ::ejs('<input type="button" value="Quote" onmousedown="quote();" onclick="quote();" />');
-  
+    $ret .= "</div>";
+    $ret .= "</td></tr>\n";
+
+    # textarea for their message body
+    $ret .= "<tr valign='top'><td align='right'>$BML::ML{'.opt.message'}<br />";
+
+    # only show on initial compostion
+    my $quickquote;
+    unless ($opts->{errors} && @{$opts->{errors}}) {
+        # quick quote button
+        $quickquote = "<br />" . LJ::ejs('<input type="button" value="Quote&gt;&gt;" onmousedown="quote();" onclick="quote();" />');
+    }
+
     $ret .= "<script type='text/javascript' language='JavaScript'>\n<!--\n";
     $ret .= <<"QQ";
 
@@ -1307,8 +1432,8 @@ function quote () {
     }
 
     if (text == '') {
-        if (helped != 1 && pasted != 1) { 
-            helped = 1; alert("If you'd like to quote a portion of the original message, highlight it then press 'Quote'"); 
+        if (helped != 1 && pasted != 1) {
+            helped = 1; alert("If you'd like to quote a portion of the original message, highlight it then press 'Quote'");
         }
         return false;
     } else {
@@ -1330,10 +1455,7 @@ if (document.getElementById && (document.getSelection || document.selection || w
 QQ
     $ret .= "-->\n</script>\n";
 
-    $ret .= "</td></tr>\n";
-
-    # textarea for their message body
-    $ret .= "<tr valign='top'><td align='right'>$BML::ML{'.opt.message'}</td><td colspan='4' style='width: 90%'>";
+    $ret .= "</td><td style='width: 90%'>";
     $ret .= "<textarea class='textbox' rows='10' cols='75' wrap='soft' name='body' id='commenttext'>$form->{body}</textarea>";
 
     # Display captcha challenge if over rate limits.
@@ -1371,6 +1493,23 @@ QQ
         $ret .= '<br />';
     }
 
+    if ($LJ::SPELLER) {
+        $ret .= "<label for='spellcheck'>$BML::ML{'talk.spellcheck'}:</label> <input type='checkbox' name='do_spellcheck' value='1' id='spellcheck' /> ";
+    }
+
+    $ret .= "<label for='prop_opt_preformatted'>$BML::ML{'.opt.noautoformat'}</label>";
+    $ret .= LJ::html_check(
+                           {
+                               name  => 'prop_opt_preformatted',
+                               id    => 'prop_opt_preformatted',
+                               value => 1,
+                               selected => $form->{'prop_opt_preformatted'}
+                           }
+    );
+    if (defined $LJ::HELPURL{'noautoformat'}) {
+        $ret .= " <a href='$LJ::HELPURL{'noautoformat'}'><img src='$LJ::IMGPREFIX/help.gif' alt='$BML::ML{'Help'}' title='$BML::ML{'Help'}' width='14' height='14' border='0' /></a>";
+    }
+
     # post and preview buttons
     my $limit = LJ::CMAX_COMMENT; # javascript String.length uses characters
     $ret .= <<LOGIN;
@@ -1406,10 +1545,6 @@ QQ
     </noscript>
 LOGIN
 
-    if ($LJ::SPELLER) {
-        $ret .= "<input type='checkbox' name='do_spellcheck' value='1' id='spellcheck' /> <label for='spellcheck'>$BML::ML{'talk.spellcheck'}</label>";
-    }
-
     if ($journalu->{'opt_logcommentips'} eq "A") {
         $ret .= "<br />$BML::ML{'.logyourip'}";
         $ret .= LJ::help_icon("iplogging", " ");
@@ -1419,7 +1554,7 @@ LOGIN
         $ret .= LJ::help_icon("iplogging", " ");
     }
 
-    $ret .= "</td></tr></table>\n";
+    $ret .= "</td></tr></td></tr></table>\n";
 
     # Some JavaScript to help the UI out
 
@@ -2385,6 +2520,76 @@ sub init {
             }
         } else {
             $bmlerr->("$SC.error.nousername");
+        }
+    }
+
+    # OpenID
+    if ($LJ::OPENID_CONSUMER && ($form->{'usertype'} eq 'openid' ||  $form->{'usertype'} eq 'openid_cookie')) {
+        return $err->("No OpenID identity URL entered") unless $form->{'oidurl'};
+
+        use LJ::OpenID;
+
+        if ($remote && defined $remote->openid_identity) {
+            $up = $remote;
+
+            if ($form->{'oiddo_login'}) {
+                $up->make_login_session($form->{'exptype'}, $form->{'ipfixed'});
+            }
+        } else { # First time through
+            my $csr = LJ::OpenID::consumer();
+            my $exptype = 'short';
+            my $ipfixed = 0;
+            my $etime = 0;
+
+            # parse inline login opts
+            if ($form->{'oidurl'} =~ s/[!<]{1,2}$//) {
+                if (index($&, "!") >= 0) {
+                    $exptype = 'long';
+                    $etime = time()+60*60*24*60;
+                }
+                $ipfixed = LJ::get_remote_ip() if index($&, "<") >= 0;
+            }
+
+            my $tried_local_ref = LJ::OpenID::blocked_hosts($csr);
+
+            my $claimed_id = $csr->claimed_identity($form->{'oidurl'});
+
+            unless ($claimed_id) {
+                return $err->("You can't use a $LJ::SITENAMESHORT OpenID account on $LJ::SITENAME &mdash; ".
+                                 "just <a href='/login.bml'>go login</a> with your actual $LJ::SITENAMESHORT account.") if $$tried_local_ref;
+                return $err->("No claimed id: ".$csr->err);
+            }
+
+            # Store their cleaned up identity url vs what they
+            # actually typed in
+            $form->{'oidurl'} = $claimed_id->claimed_url();
+
+            # Store the entry
+            my $pendcid = LJ::alloc_user_counter($journalu, "C");
+
+            $err->("Unable to allocate pending id") unless $pendcid;
+
+            # Since these were gotten from the oidurl and won't
+            # persist in the form data
+            $form->{'exptype'} = $exptype;
+            $form->{'etime'} = $etime;
+            $form->{'ipfixed'} = $ipfixed;
+            my $penddata = Storable::freeze($form);
+
+            $err->("Unable to get database handle to store pending comment") unless $journalu->writer;
+
+            $journalu->do("INSERT INTO pendcomments (jid, pendcid, data, datesubmit) VALUES (?, ?, ?, UNIX_TIMESTAMP())", undef, $journalu->{'userid'}, $pendcid, $penddata);
+
+            $err->($journalu->errstr) if $journalu->err;
+
+            my $check_url = $claimed_id->check_url(
+                                                   return_to      => "$LJ::SITEROOT/talkpost_do.bml?jid=$journalu->{'userid'}&pendcid=$pendcid",
+                                                   trust_root     => "http://*.$LJ::DOMAIN/",
+                                                   delayed_return => 1,
+                                                   );
+            # Don't redirect them if errors
+            return undef if @$errret;
+            return BML::redirect($check_url);
         }
     }
 
