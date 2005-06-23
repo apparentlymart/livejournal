@@ -5,7 +5,7 @@
 
     use strict;
     use vars qw($title $head $body %GET %POST);
-    use Net::OpenID::Consumer;
+    use LJ::OpenID;
     LJ::set_active_crumb("openid_login");
 
     $title = "OpenID Login";
@@ -23,23 +23,8 @@
         return;
     }
 
-    my $get_csr = sub {
-        require LWPx::ParanoidAgent;
-        my $ua = LWPx::ParanoidAgent->new(
-                                          timeout => 10,
-                                          max_size => 1024*300,
-                                          );
-
-        my $csr = Net::OpenID::Consumer->new(
-                                             ua => $ua,
-                                             args => \%GET,
-                                             cache => eval { LJ::MemCache::get_memcache() },
-                                             );
-        return $csr;
-    };
-
     if ($GET{'openid.mode'}) {
-        my $csr = $get_csr->();
+        my $csr = LJ::OpenID::consumer(\%GET);
         if (my $setup = $csr->user_setup_url) {
             return BML::redirect($setup);
         }
@@ -63,14 +48,7 @@
             $sess_opts->{'exptype'} = "long";
         }
 
-        my $sess = $u->generate_session($sess_opts);
-        my $cursess = $sess;
-        my @sopts;
-        LJ::run_hooks("login_add_opts", { 'u' => $u, 'form' => \%POST, 'opts' => \@sopts });
-        my $sopts = @sopts ? ":" . join('', map { ".$_" } @sopts) : "";
-        $COOKIE{'ljsession'} = [  "ws:$u->{'user'}:$sess->{'sessid'}:$sess->{'auth'}$sopts", $etime, 1 ]; # 1 => HttpOnly
-
-        eval { Apache->request->notes('ljuser' => $u->{user}); };
+        $u->make_login_session($sess_opts->{'exptype'}, $sess_opts->{'ipfixed'});
         LJ::set_remote($u);
 
         return BML::redirect("$LJ::SITEROOT/login.bml");
@@ -78,26 +56,17 @@
 
 
     if (LJ::did_post()) {
-        my $csr = $get_csr->();
+        my $csr = LJ::OpenID::consumer();
         my $url = $POST{'openid_url'};
         return $err->("Invalid characters in identity URL.") if $url =~ /[\<\>\s]/;
 
-        my $tried_local_id = 0;
-        $csr->ua->blocked_hosts(
-                           sub {
-                               my $dest = shift;
-                               if ($dest =~ /livejournal\.com$/i) {
-                                   $tried_local_id = 1;
-                                   return 1;
-                               }
-                               return 0;
-                           });
+        my $tried_local_ref = LJ::OpenID::blocked_hosts($csr);
 
         my $claimed_id = $csr->claimed_identity($url);
 
         unless ($claimed_id) {
             return $err->("You can't use a LiveJournal OpenID account on LiveJournal &mdash; ".
-                          "just <a href='/login.bml'>go login</a> with your actual LiveJournal account.") if $tried_local_id;
+                          "just <a href='/login.bml'>go login</a> with your actual LiveJournal account.") if $tried_local_ref;
             return $err->($csr->err);
         }
 
