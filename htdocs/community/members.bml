@@ -207,6 +207,11 @@ body<=
             LJ::remove_friend($cid, [ keys %{$delete{'member'}} ]);
         }
 
+        # log maintainer deletions
+        foreach my $uid (keys %{$delete{admin} || {}}) {
+            $c->log_event('maintainer_remove', { actiontarget => $uid, remote => $remote });
+        }
+
         # delete other rel edges
         LJ::clear_rel_multi(
                             (map { [$cid, $_, 'A'] } keys %{$delete{admin}      || {}}),
@@ -233,6 +238,11 @@ body<=
                     }
                 }
             }
+        }
+
+        # log maintainer additions
+        foreach my $uid (keys %{$add{admin} || {}}) {
+            $c->log_event('maintainer_add', { actiontarget => $uid, remote => $remote });
         }
 
         # set rels in db/memcache
