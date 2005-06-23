@@ -89,11 +89,16 @@
                                     [ 'login', '', ],
                                     ],
                           };
-    
-   
+
     $MAX_HINTS_LASTN ||= 100;
     $MAX_SCROLLBACK_FRIENDS ||= 1000;
     $MAX_USERPIC_KEYWORDS ||= 10;
+
+    # this option can be a boolean or a URL, but internally we want a URL
+    # (which can also be a boolean)
+    if ($LJ::OPENID_SERVER == 1) {
+        $LJ::OPENID_SERVER = "$LJ::SITEROOT/openid/server.bml";
+    }
 
     # set default capability limits if the site maintainer hasn't.
     {
