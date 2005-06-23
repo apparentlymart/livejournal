@@ -497,6 +497,7 @@ sub is_valid_tagstring {
     # setup helper subs
     my $valid_tag = sub {
         my $tag = shift;
+        return 0 if $tag =~ /^_/;               # reserved for future use (starting with underscore)
         return 0 if $tag =~ /[\<\>\r\n\t]/;     # no HTML, newlines, tabs, etc
         return 0 unless $tag =~ /^(?:.+\s?)+$/; # one or more "words"
         return 1;
