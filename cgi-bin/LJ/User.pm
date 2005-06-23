@@ -585,6 +585,14 @@ sub identity {
     return undef;
 }
 
+# returns a URL iff account is an OpenID identity.  undef otherwise.
+sub openid_identity {
+    my $u = shift;
+    my $ident = $u->identity;
+    return undef unless $ident && $ident->[0] == 0;
+    return $ident->[1];
+}
+
 # returns username or identity display name, not escaped
 sub display_name {
     my $u = shift;
