@@ -73,7 +73,9 @@ function handleRadios(sel) {
         if (ljuser_row) {
             ljuser_row.style.display = 'none';
         }
-        lj_more.style.display = '';
+        if (lj_more) {
+                lj_more.style.display = '';
+        }
         username.focus();
 
         if (radio_user.checked != 1) {
@@ -81,7 +83,10 @@ function handleRadios(sel) {
         }
 
         } else {
-        lj_more.style.display = 'none';
+            if (lj_more) {
+                lj_more.style.display = 'none';
+            }
+        }
     }
 
     // OpenID
