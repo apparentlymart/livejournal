@@ -3692,6 +3692,8 @@ This could be because: <ol>
 
 /update.bml.success.links.memories=Add the entry to your memories
 
+/update.bml.success.links.tags=Edit this entry's tags
+
 /update.bml.success.links.view=View the entry
 
 /update.bml.timeformat=24 hour time

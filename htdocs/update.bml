@@ -365,7 +365,8 @@
                     "<li><a href=\"$itemlink\">$ML{'.success.links.view'}</a></li>" .
                         "<li><a href=\"/editjournal.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.edit'}</a></li>" . 
                             "<li><a href=\"/tools/memadd.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.memories'}</a></li>" .
-                                "</ul>";
+			        "<li><a href=\"/edittags.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.tags'}</a></li>" .
+				    "</ul>";
                 return;
             }
         }
