@@ -59,6 +59,7 @@ sub END { LJ::end_request(); }
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlib-local.pl"
     if -e "$ENV{'LJHOME'}/cgi-bin/ljlib-local.pl";
+require "$ENV{LJHOME}/cgi-bin/taglib.pl";
 
 # if this is a dev server, alias LJ::D to Data::Dumper::Dumper
 if ($LJ::IS_DEV_SERVER) {
