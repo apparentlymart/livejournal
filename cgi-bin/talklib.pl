@@ -1132,7 +1132,7 @@ sub talkform {
                 my $other_user = "<script lanaguage='JavaScript'>if (document.getElementById) {document.write(\"&nbsp;<a href='#' onClick='otherOIDUser();return false;'>[other]</a>\");}</script>";
 
                 $ret .= "<tr valign='middle' id='oidli' name='oidli'>";
-                $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-inputicon.gif' onclick='handleRadios(4);' /></td><td align='center'><input type='radio' name='usertype' value='openid_cookie' id='talkpostfromoidli'" .
+                $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-profile.gif' onclick='handleRadios(4);' /></td><td align='center'><input type='radio' name='usertype' value='openid_cookie' id='talkpostfromoidli'" .
                     $whocheck->('openid_cookie') . "/>";
                 $ret .= "</td><td align='left'><b><label for='talkpostfromoid' onclick='handleRadios(4);return false;'>OpenID identity:</label></b> ";
 
@@ -1145,7 +1145,7 @@ sub talkform {
 
             # logged out
             $ret .= "<tr valign='middle' id='oidlo' name='oidlo'>";
-            $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-inputicon.gif' onclick='handleRadios(3);' /></td><td align='center'><input type='radio' name='usertype' value='openid' id='talkpostfromoidlo'" .
+            $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-profile.gif' onclick='handleRadios(3);' /></td><td align='center'><input type='radio' name='usertype' value='openid' id='talkpostfromoidlo'" .
                 $whocheck->('openid') . "/>";
             $ret .= "</td><td align='left'><b><label for='talkpostfromoidlo' onclick='handleRadios(3);return false;'>OpenID</label></b> ";
 
@@ -1178,7 +1178,7 @@ sub talkform {
         if (LJ::OpenID::consumer_enabled()) {
             # OpenID - At some point we will include "trusted"
             $ret .= "<tr valign='middle'>";
-            $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-inputicon.gif' onclick='handleRadios(3);' /></td>";
+            $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-profile.gif' onclick='handleRadios(3);' /></td>";
             $ret .= "<td align='center'>(  )</td>";
             $ret .= "<td align='left' colspan='2'><font color='#c0c0c0'<b>OpenID</b></font>";
 
@@ -1201,7 +1201,7 @@ sub talkform {
         if (LJ::OpenID::consumer_enabled()) {
             # OpenID - At some point we will include "trusted"
             $ret .= "<tr valign='middle'>";
-            $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-inputicon.gif' onclick='handleRadios(3);' /></td>";
+            $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-profile.gif' onclick='handleRadios(3);' /></td>";
             $ret .= "<td align='center'>(  )</td>";
             $ret .= "<td align='left' colspan='2'><font color='#c0c0c0'<b>OpenID</b></font>";
 
