@@ -92,8 +92,8 @@ my %modules = (
                    'deb' => 'libxml-atom-perl',
                    'opt' => 'Required for AtomAPI support.',
                },
-               "Class::ErrorHandler" => {
-                   'opt' => 'Required for OpenID support.',
+               "Math::BigInt::GMP" => {
+                   'opt' => 'Aides Crypt::DH so it isn\'t crazy slow.',
                },
                "URI::Fetch" => {
                    'opt' => 'Required for OpenID support.',
