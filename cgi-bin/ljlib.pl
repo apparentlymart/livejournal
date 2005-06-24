@@ -5471,7 +5471,7 @@ sub make_journal
 
         my $head;
         $head .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n}
-            if $LJ::OPENID_SERVER;
+            if LJ::OpenID::server_enabled();
 
         return qq{
 	    <html>

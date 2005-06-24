@@ -1,6 +1,6 @@
 <?_code
 {
-    return "OpenID consumer support is disabled" unless $LJ::OPENID_SERVER;
+    return "OpenID consumer support is disabled" unless LJ::OpenID::server_enabled();
 
     use strict;
     use vars qw($title $body %GET %POST);

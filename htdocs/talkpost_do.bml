@@ -33,7 +33,7 @@ body<=
     if ($GET{'openid.mode'} eq 'id_res' && $GET{'jid'} && $GET{'pendcid'}) {
 
         return LJ::bad_input("OpenID support not enabled")
-            unless $LJ::OPENID_CONSUMER;
+            unless LJ::OpenID::consumer_enabled();
 
         my $csr = LJ::OpenID::consumer(\%GET);
 

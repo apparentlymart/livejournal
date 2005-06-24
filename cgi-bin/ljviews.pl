@@ -1027,7 +1027,7 @@ sub create_view_lastn
     $lastn_page{'head'} .= qq{<link rel="service.feed" type="application/atom+xml" title="AtomAPI-enabled feed" href="$LJ::SITEROOT/interface/atom/feed" />\n};
     $lastn_page{'head'} .= qq{<link rel="service.post" type="application/atom+xml" title="Create a new post" href="$LJ::SITEROOT/interface/atom/post" />\n};
     $lastn_page{'head'} .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n}
-        if $LJ::OPENID_SERVER;
+        if LJ::OpenID::server_enabled();
     
     # FOAF autodiscovery
     my $foafurl = $u->{external_foaf_url} ? LJ::eurl($u->{external_foaf_url}) : "$journalbase/data/foaf";
