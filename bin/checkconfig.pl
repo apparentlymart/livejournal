@@ -91,7 +91,16 @@ my %modules = (
                "XML::Atom" => {
                    'deb' => 'libxml-atom-perl',
                    'opt' => 'Required for AtomAPI support.',
-                },
+               },
+               "Class::ErrorHandler" => {
+                   'opt' => 'Required for OpenID support.',
+               },
+               "URI::Fetch" => {
+                   'opt' => 'Required for OpenID support.',
+               },
+               "Crypt::DH" => {
+                   'opt' => 'Required for OpenID support.',
+               },
                );
 
 sub check_modules {
