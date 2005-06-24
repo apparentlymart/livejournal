@@ -2789,12 +2789,23 @@ sub init {
 
         } else {
 
+            my $show_captcha = sub {
+                return 1 if $LJ::HUMAN_CHECK{'comment_html_auth'};
+
+                # Anonymous commenter
+                return 1 if $LJ::HUMAN_CHECK{'comment_html_anon'} && ! LJ::isu($comment->{'u'});
+
+                # Identity commenter
+                return 1 if $LJ::HUMAN_CHECK{'comment_html_anon'} &&
+                    $comment->{'u'}->identity() &&
+                    ! LJ::is_friend($journalu, $comment->{'u'});
+            };
+
             $$need_captcha =
                 ($LJ::HUMAN_CHECK{anonpost} || $LJ::HUMAN_CHECK{authpost}) &&
                 ! LJ::Talk::Post::check_rate($comment->{'u'}, $journalu);
 
-            if ($LJ::HUMAN_CHECK{comment_html_auth} ||
-                ($LJ::HUMAN_CHECK{comment_html_anon} && ! $comment->{'u'})) {
+            if ($show_captcha->()) {
                 # see if they have any tags or URLs
                 if ($form->{'body'} =~ /<[a-z]/i) {
                     # strip white-listed bare tags w/o attributes,
