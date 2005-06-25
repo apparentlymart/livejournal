@@ -1,7 +1,5 @@
 <?_code
 {
-    return "OpenID server support is disabled" unless LJ::OpenID::server_enabled();
-
     use strict;
     use vars qw($title $body %GET %POST);
 
@@ -10,6 +8,9 @@
 	$body = shift;
 	return "";
     };
+
+    return $err->("OpenID server support is disabled")
+        unless LJ::OpenID::server_enabled();
 
     my $u = LJ::get_remote() or
 	return $err->("You need to be <a href='/login.bml?ret=1'>logged in</a> to manage your OpenID options.");
@@ -73,7 +74,7 @@
 
     $body .= "<?h1 External Assertion URLs h1?><?p Optional URLs LiveJournal will assert for you, if you put this in your HTML's head. p?>";
 
-    $body .= "<b>&lt;link rel=\"openid.server\" href=\"$LJ::SITEROOT/misc/openid.bml?ljuser=$u->{user}\" /&gt;</b>";
+    $body .= "<b>&lt;link rel=\"openid.server\" href=\"$LJ::OPENID_SERVER?ljuser=$u->{user}\" /&gt;</b>";
 
     $body .= "<div style='margin: 5px 0px 5px 30px'>";
     if (@external) {
