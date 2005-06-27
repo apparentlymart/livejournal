@@ -104,13 +104,6 @@ sub is_identity {
         $ident eq "$LJ::SITEROOT/~$user/" ||
         $ident eq "http://$user.$LJ::USER_DOMAIN/";
 
-    if ($get->{'ljuser_sha1'} eq sha1_hex($user) ||
-        $get->{'ljuser'} eq $user) {
-	my $dbh = LJ::get_db_writer();
-	return $dbh->selectrow_array("SELECT COUNT(*) FROM openid_external WHERE userid=? AND url=?",
-                                     undef, $u->{userid}, $ident);
-    }
-
     return 0;
 }
 

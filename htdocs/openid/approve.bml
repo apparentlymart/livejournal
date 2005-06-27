@@ -36,6 +36,22 @@
 	my $dur;
 	$body = "";
 
+        if ($POST{'no'}) {
+            $title = "Cancelled";
+            $body = "Your identity wasn't sent to the other site.";
+
+            if ($GET{"openid.post_grant"} eq "close") {
+                $body .= "<script>window.close();</script>";
+            } elsif ($GET{"openid.post_grant"} eq "return") {
+                my $nos = LJ::OpenID::server();
+                my $cancel_url = $nos->cancel_return_url(
+                                                         return_to => $GET{'return_to'},
+                                                         );
+                return BML::redirect($cancel_url);
+            }
+            return;
+        }
+
 	$dur = "always" if $POST{'yes:always'};
 	$dur = "once"   if $POST{'yes:once'};
 
@@ -71,8 +87,7 @@
 
     $body .= "<div style='overflow: auto; background: #DDD; word-wrap: break-word; color: black; border: 2px solid black; padding: 0.5em; font-size: 13pt'><tt>$dis_site</tt></div>";
     $body .= "<?p Do you want to pass your identity to them? p?>";
-    $body .= "<table align='center'><tr><td><input type='submit' name='yes:once' value='Yes; just this time.' /> <input type='submit' name='yes:always' value='Yes; always.' /></td></tr></table>";
-    $body .= "<?p If not, just close this window. p?>";
+    $body .= "<table align='center'><tr><td><input type='submit' name='yes:once' value='Yes; just this time.' /> <input type='submit' name='yes:always' value='Yes; always.' /> <input type='submit' name='no' value='No.' /></td></tr></table>";
     $body .= "</form>";
     return;
 

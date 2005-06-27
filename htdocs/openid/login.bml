@@ -1,8 +1,5 @@
 <?_code
 {
-
-    return "OpenID consumer support is disabled" unless LJ::OpenID::consumer_enabled();
-
     use strict;
     use vars qw($title $head $body %GET %POST);
     use LJ::OpenID;
@@ -17,6 +14,9 @@
         return;
     };
 
+    return $err->("OpenID consumer support is disabled")
+        unless LJ::OpenID::consumer_enabled();
+
     my $remote = LJ::get_remote();
     if ($remote) {
         $body .= "<?h1 Already logged in h1?><?p Hello, " . LJ::ljuser($remote) . ". Before logging in with <a href='http://www.danga.com/openid/'>OpenID</a>, you must first <a href='/logout.bml'>log out</a>. p?>";
@@ -25,6 +25,11 @@
 
     if ($GET{'openid.mode'}) {
         my $csr = LJ::OpenID::consumer(\%GET);
+
+        if ($csr->user_cancel) {
+            return BML::redirect("$LJ::SITEROOT/openid/");
+        }
+
         if (my $setup = $csr->user_setup_url) {
             return BML::redirect($setup);
         }

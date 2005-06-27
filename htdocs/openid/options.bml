@@ -17,14 +17,9 @@
 
     my $dbh = LJ::get_db_writer();
     my $trusted = {};
-    my @external;
 
     my $load_trusted = sub {
 	$trusted = $dbh->selectall_hashref("SELECT ye.endpoint_id as 'endid', ye.url FROM openid_endpoint ye, openid_trust yt WHERE yt.endpoint_id=ye.endpoint_id AND yt.userid=$u->{userid}", 'endid');
-    };
-
-    my $load_external = sub {
-	@external = @{ $dbh->selectcol_arrayref("SELECT url FROM openid_external WHERE userid=?", undef, $u->{userid}) };
     };
 
     if (LJ::did_post()) {
@@ -38,20 +33,9 @@
 	    $dbh->do("DELETE FROM openid_trust WHERE userid=? AND endpoint_id=?", undef, $u->{userid}, $endid);
 	}
 
-	$load_external->();
-        foreach my $url (@external) {
-	    next unless $POST{"extdelete:$url"};
-	    $dbh->do("DELETE FROM openid_external WHERE userid=? AND url=?", undef, $u->{userid}, $url);
-        }
-
-	if ($POST{'ext_url'} =~ m!^http://!) {
-	    $dbh->do("REPLACE INTO openid_external (userid, url) VALUES (?,?)", undef, $u->{userid}, $POST{'ext_url'});
-	}
-
     }
 
     $load_trusted->();
-    $load_external->();
 
     $title = "OpenID Options";
     $body = "";
@@ -60,7 +44,7 @@
     $body .= "<?h1 Sites you trust h1?><?p You've marked these sites as able to verify your identity.  You may remove them here. p?>";
     $body .= "<div style='margin: 5px 0px 5px 30px'>";
     if (%$trusted) {
-	foreach my $endid (sort { $trusted->{$a} cmp $trusted->{$b} } keys %$trusted) {
+	foreach my $endid (sort { $trusted->{$a}->{url} cmp $trusted->{$b}->{url} } keys %$trusted) {
 	    my $url = $trusted->{$endid}->{url};
 	    my $dis_site = LJ::ehtml($url);
 	    $dis_site =~ s!\*\.!<i>&lt;anything&gt;</i>.!;
@@ -71,21 +55,6 @@
     }
     $body .= "</div>";
 
-
-    $body .= "<?h1 External Assertion URLs h1?><?p Optional URLs LiveJournal will assert for you, if you put this in your HTML's head. p?>";
-
-    $body .= "<b>&lt;link rel=\"openid.server\" href=\"$LJ::OPENID_SERVER?ljuser=$u->{user}\" /&gt;</b>";
-
-    $body .= "<div style='margin: 5px 0px 5px 30px'>";
-    if (@external) {
-	foreach my $url (@external) {
-	    $body .= LJ::html_submit("extdelete:$url", "Delete") . " -- " . LJ::ehtml($url) . "<br />";
-	}
-    } else {
-	$body .= "<i>(None)</i>";
-    }
-    $body .= "</div>";
-    $body .= "Add: " . LJ::html_text({ name => 'ext_url', size => 60 }) . " <input type='submit' value='Add' />";
     $body .= "</form>";
     return;
 
