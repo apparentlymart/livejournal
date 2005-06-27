@@ -5225,12 +5225,15 @@ sub get_timezone {
     # by comparing the gmtime of their last post
     # with the time they specified on that post.
 
-    # grab the times on the last post.
+    # grab the times on the last post that wasn't backdated.
+    # (backdated is rlogtime == $LJ::EndOfTime)
     if (my $last_row = $dbcr->selectrow_hashref(
-                        "SELECT rlogtime, eventtime ".
-                        "FROM log2 WHERE journalid=? ".
-                        "ORDER BY rlogtime LIMIT 1",
-                        undef, $u->{userid})) {
+        qq{
+            SELECT rlogtime, eventtime
+            FROM log2
+            WHERE journalid=? AND rlogtime != ?
+            ORDER BY rlogtime LIMIT 1
+        }, undef, $u->{userid}, $LJ::EndOfTime)) {
         my $logtime = $LJ::EndOfTime - $last_row->{'rlogtime'};
         my $eventtime = LJ::mysqldate_to_time($last_row->{'eventtime'}, 1);
         my $hourdiff = ($eventtime - $logtime) / 3600;
