@@ -71,7 +71,7 @@
 
         unless ($claimed_id) {
             return $err->("You can't use a LiveJournal OpenID account on LiveJournal &mdash; ".
-                          "just <a href='/login.bml'>go login</a> with your actual LiveJournal account.") if $tried_local_ref;
+                          "just <a href='/login.bml'>go login</a> with your actual LiveJournal account.") if $$tried_local_ref;
             return $err->($csr->err);
         }
 
