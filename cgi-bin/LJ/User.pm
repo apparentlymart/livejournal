@@ -606,8 +606,7 @@ sub display_name {
         require Net::OpenID::Consumer;
         $url = $id->[1];
         $name = Net::OpenID::VerifiedIdentity::DisplayOfURL($url, $LJ::IS_DEV_SERVER);
-        # FIXME: make a good out of this
-        $name =~ s/\[(live|dead)journal\.com/\[${1}journal/;
+        $name = LJ::run_hook("identity_display_name", $name) || $name;
     }
     return $name;
 }
