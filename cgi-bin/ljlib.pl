@@ -5231,7 +5231,7 @@ sub get_timezone {
         qq{
             SELECT rlogtime, eventtime
             FROM log2
-            WHERE journalid=? AND rlogtime != ?
+            WHERE journalid = ? AND rlogtime <> ?
             ORDER BY rlogtime LIMIT 1
         }, undef, $u->{userid}, $LJ::EndOfTime)) {
         my $logtime = $LJ::EndOfTime - $last_row->{'rlogtime'};
