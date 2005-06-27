@@ -297,12 +297,24 @@ if ($opt_pop)
             my $error = "";
             my $compiled;
             my $info;
-            die $error unless LJ::S2::layer_compile($lay, \$error, { 
-                's2ref' => \$s2source, 
-                'redist_uniq' => $base,
-                'compiledref' => \$compiled,
-                'layerinfo' => \$info,
-            });
+
+            # do this in an eval, so that if the layer_compile call returns an error,
+            # we die and pass it up in $@.  but if layer_compile dies, it should pass up
+            # an error itself, which we can get.
+            eval {
+                die $error unless
+                    LJ::S2::layer_compile($lay, \$error, { 
+                        's2ref' => \$s2source, 
+                        'redist_uniq' => $base,
+                        'compiledref' => \$compiled,
+                        'layerinfo' => \$info,
+                    });
+            };
+
+            if ($@) {
+                print "S2 compilation failed: $@\n";
+                exit 1;
+            }
             
             if ($info->{'previews'}) {
                 my @pvs = split(/\s*\,\s*/, $info->{'previews'});

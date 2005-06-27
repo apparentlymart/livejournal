@@ -1148,7 +1148,7 @@ sub layer_compile
         my $chk_frz = Storable::freeze($checker);
         LJ::text_compress(\$chk_frz);
         $dbh->do("REPLACE INTO s2checker (s2lid, checker) VALUES (?,?)", undef,
-                 $lid, $chk_frz) or die;
+                 $lid, $chk_frz) or die "replace into s2checker (lid = $lid)";
     }
 
     # load the compiled layer to test it loads and then get layerinfo/etc from it
@@ -1174,7 +1174,8 @@ sub layer_compile
         $notin .= $dbh->quote($_);
     }
     if ($values) {
-        $dbh->do("REPLACE INTO s2info (s2lid, infokey, value) VALUES $values") or die;
+        $dbh->do("REPLACE INTO s2info (s2lid, infokey, value) VALUES $values")
+            or die "replace into s2info (values = $values)";
         $dbh->do("DELETE FROM s2info WHERE s2lid=? AND infokey NOT IN ($notin)", undef, $lid);
     }
     if ($opts->{'layerinfo'}) {
@@ -1184,12 +1185,12 @@ sub layer_compile
     # put compiled into database, with its ID number
     if ($is_system) {
         $dbh->do("REPLACE INTO s2compiled (s2lid, comptime, compdata) ".
-                 "VALUES (?, UNIX_TIMESTAMP(), ?)", undef, $lid, $compiled) or die;
+                 "VALUES (?, UNIX_TIMESTAMP(), ?)", undef, $lid, $compiled) or die "replace into s2compiled (lid = $lid)";
     } else {
         my $gzipped = LJ::text_compress($compiled);
         $dbcm->do("REPLACE INTO s2compiled2 (userid, s2lid, comptime, compdata) ".
                   "VALUES (?, ?, UNIX_TIMESTAMP(), ?)", undef,
-                  $layer->{'userid'}, $lid, $gzipped) or die;
+                  $layer->{'userid'}, $lid, $gzipped) or die "replace into s2compiled2 (lid = $lid)";
 
         # delete from memcache; we can't store since we don't know the exact comptime
         LJ::MemCache::delete([ $lid, "s2c:$lid" ]);
