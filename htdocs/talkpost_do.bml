@@ -37,9 +37,9 @@ body<=
         return LJ::bad_input("OpenID support not enabled")
             unless LJ::OpenID::consumer_enabled();
 
-        if ($GET{'openid.mode'} eq 'id_res') { # Verify their identity
+        my $csr = LJ::OpenID::consumer(\%GET);
 
-            my $csr = LJ::OpenID::consumer(\%GET);
+        if ($GET{'openid.mode'} eq 'id_res') { # Verify their identity
 
             my $vident = $csr->verified_identity;
             return LJ::bad_input("Can't verify identity: ".$csr->err) unless $vident;
@@ -70,7 +70,7 @@ body<=
         %POST = %$penddata;
 
         push @errors, "You chose to cancel your identity verification"
-            if $GET{'openid.mode'} eq 'cancel';
+            if $csr->user_cancel;
     }
     # normally require POST.  if an ecphash is specified, we'll let
     # them through since they're coming from a comment page and
