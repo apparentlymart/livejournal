@@ -104,9 +104,9 @@
          $body .= "<?h1 " . BML::ml('.confirm.syn.header', { user => $user }) . " h1?>";
      } else {
          $title .= $ML{'.confirm.title'};
-         $body .= "<?h1 " . BML::ml(".confirm.header", { 'user' => $user }) . " h1?>";
+         $body .= "<?h1 " . BML::ml(".confirm.header", { 'user' => $u->display_name() }) . " h1?>";
      }
-     $body .= "<?p " . BML::ml(".confirm.text", { 'user' => $user }) . " p?>";
+     $body .= "<?p " . BML::ml(".confirm.text.nobold", { 'user' => $u->ljuser_display() }) . " p?>";
  }
 
  $body .= "<form method='post' action='add.bml'>";
@@ -119,7 +119,7 @@
      $body .= " - <input type='submit' name='action:delete' value=\"$ML{'.btn.remove'}\"></center>";
  } else {
      $body .= "<center><input type='submit' value=\"" .
-              BML::ml('.btn.add', {'user'=>$user}) . "\"></center>";
+              BML::ml('.btn.add', { 'user' => $u->display_name() }) . "\"></center>";
  }
 
  ## let them pick friend groups

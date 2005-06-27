@@ -1719,6 +1719,8 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /friends/add.bml.confirm.text=To add <b>[[user]]</b> to your friends list, click the button below.
 
+/friends/add.bml.confirm.text.nobold=To add [[user]] to your friends list, click the button below.
+
 /friends/add.bml.confirm.title=Add Friend
 
 /friends/add.bml.error1.header=Log In First
