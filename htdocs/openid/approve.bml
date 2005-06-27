@@ -33,7 +33,6 @@
 
     if (LJ::did_post()) {
 	return $err->("Possible form tampering detected.") unless LJ::check_form_auth();
-	my $dur;
 	$body = "";
 
         if ($POST{'no'}) {
@@ -52,11 +51,10 @@
             return;
         }
 
-	$dur = "always" if $POST{'yes:always'};
-	$dur = "once"   if $POST{'yes:once'};
-
-        LJ::OpenID::add_trust($u, $site, $dur)
-            or return $err->("Failed to save");
+        if ($POST{'yes:always'}) {
+            LJ::OpenID::add_trust($u, $site)
+                or return $err->("Failed to save");
+        }
 
 	$title = "Saved";
 	$body .= "Permission has been granted.  You can now <a href='javascript:window.close()'>close this window</a> and login to the site you were previously visiting.";

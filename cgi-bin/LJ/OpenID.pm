@@ -87,10 +87,6 @@ sub is_trusted {
                                                         "WHERE t.userid=? AND t.endpoint_id=e.endpoint_id AND e.url=?",
                                                         undef, $u->{userid}, $trust_root);
     return 0 unless $endpointid;
-
-    if ($duration eq "once") {
-        $dbh->do("DELETE FROM openid_trust WHERE userid=? AND endpoint_id=?", undef, $u->{userid}, $endpointid);
-    }
     return 1;
 }
 
@@ -125,9 +121,7 @@ sub getmake_endpointid {
 }
 
 sub add_trust {
-    my ($u, $site, $dur) = @_;
-
-    return 0 unless $dur =~ /^always|once$/;
+    my ($u, $site) = @_;
 
     my $end_id = LJ::OpenID::getmake_endpointid($site)
         or return 0;
@@ -136,7 +130,7 @@ sub add_trust {
         or return undef;
 
     my $rv = $dbh->do("REPLACE INTO openid_trust (userid, endpoint_id, duration, trust_time) ".
-                      "VALUES (?,?,?,UNIX_TIMESTAMP())", undef, $u->{userid}, $end_id, $dur);
+                      "VALUES (?,?,?,UNIX_TIMESTAMP())", undef, $u->{userid}, $end_id, "always");
     return $rv;
 }
 
