@@ -724,7 +724,6 @@ sub get_talk_data
     $fixup_rp->();
 
     return $ret;
-    
 }
 
 # LJ::Talk::load_comments($u, $remote, $nodetype, $nodeid, $opts)
@@ -735,6 +734,7 @@ sub get_talk_data
 #   thread -- jtalkid to thread from ($init->{'thread'} or $GET{'thread'} >> 8)
 #   page -- $GET{'page'}
 #   view -- $GET{'view'} (picks page containing view's ditemid)
+#   flat -- boolean:  if set, threading isn't done, and it's just a flat chrono view
 #   up -- [optional] hashref of user object who posted the thing being replied to
 #         only used to make things visible which would otherwise be screened?
 #   out_error -- set by us if there's an error code:
@@ -759,6 +759,7 @@ sub get_talk_data
 #      - upost    ($u object, or undef if anon)
 #      - datepost (mysql format)
 #      - parenttalkid (or zero for top-level)
+#      - parenttalkid_actual (set when the $flat mode is set, in which case parenttalkid is always faked to be 0)
 #      - state ("A"=approved, "S"=screened, "D"=deleted stub)
 #      - userpic number
 #      - picid   (if userpicref AND userref were given)
@@ -792,6 +793,13 @@ sub load_comments
         my %showable_children;  # $id -> $count
 
         foreach my $post (sort { $b->{'talkid'} <=> $a->{'talkid'} } values %$posts) {
+
+            # kill the threading in flat mode
+            if ($opts->{'flat'}) {
+                $post->{'parenttalkid_actual'} = $post->{'parenttalkid'};
+                $post->{'parenttalkid'} = 0;
+            }
+
             # see if we should ideally show it or not.  even if it's 
             # zero, we'll still show it if it has any children (but we won't show content)
             my $should_show = $post->{'state'} eq 'D' ? 0 : 1; 

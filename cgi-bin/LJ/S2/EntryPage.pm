@@ -56,9 +56,11 @@ sub EntryPage
     $p->{'entry'} = $s2entry;
 
     # add the comments
+    my $flat_mode = ($get->{'style'} eq "flat");
     my %userpic;
     my %user;
     my $copts = {
+        'flat' => $flat_mode,
         'thread' => ($get->{'thread'} >> 8),
         'page' => $get->{'page'},
         'view' => $get->{'view'},
@@ -106,6 +108,12 @@ sub EntryPage
             my $reply_url = LJ::Talk::talkargs($permalink, "replyto=$dtalkid", $stylemine);
 
             my $par_url;
+
+            # in flat mode, promote the parenttalkid_actual
+            if ($flat_mode) {
+                $com->{'parenttalkid'} ||= $com->{'parenttalkid_actual'};
+            }
+
             if ($com->{'parenttalkid'}) {
                 my $dparent = ($com->{'parenttalkid'} << 8) + $entry->{'anum'};
                 $par_url = LJ::Talk::talkargs($permalink, "thread=$dparent", $stylemine) . "#t$dparent";
@@ -247,8 +255,11 @@ sub EntryPage
         'to_subitem' => $copts->{'out_itemlast'},
         'total' => $copts->{'out_pages'},
         'total_subitems' => $copts->{'out_items'},
-        '_url_of' => sub { return "$permalink?page=" . int($_[0]) .
-                               ($stylemine ? "&$stylemine" : ''); },
+        '_url_of' => sub {
+            my $sty = $flat_mode ? "style=flat&" : "";
+            return "$permalink?${sty}page=" . int($_[0]) .
+                ($stylemine ? "&$stylemine" : '');
+        },
     });
 
     return $p;
