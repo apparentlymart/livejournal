@@ -1182,7 +1182,7 @@ sub talkform {
             $ret .= "<td align='left' colspan='2'><font color='#c0c0c0'<b>OpenID</b></font>";
 
             if (defined $LJ::HELPURL{'openid'}) {
-                $ret .= "<a href='$LJ::HELPURL{'openid'}'><img src='$LJ::IMGPREFIX/help.gif' alt='$BML::ML{'Help'}' title='$BML::ML{'Help'}' width='14' height='14' border='0' /></a> ";
+                $ret .= "&nbsp;<a href='$LJ::HELPURL{'openid'}'><img src='$LJ::IMGPREFIX/help.gif' alt='$BML::ML{'Help'}' title='$BML::ML{'Help'}' width='14' height='14' border='0' /></a> ";
             }
 
             $ret .= "</td></tr>\n";
@@ -1205,7 +1205,7 @@ sub talkform {
             $ret .= "<td align='left' colspan='2'><font color='#c0c0c0'<b>OpenID</b></font>";
 
             if (defined $LJ::HELPURL{'openid'}) {
-                $ret .= "<a href='$LJ::HELPURL{'openid'}'><img src='$LJ::IMGPREFIX/help.gif' alt='$BML::ML{'Help'}' title='$BML::ML{'Help'}' width='14' height='14' border='0' /></a> ";
+                $ret .= "&nbsp;<a href='$LJ::HELPURL{'openid'}'><img src='$LJ::IMGPREFIX/help.gif' alt='$BML::ML{'Help'}' title='$BML::ML{'Help'}' width='14' height='14' border='0' /></a> ";
             }
 
             $ret .= "</td></tr>\n";
@@ -1403,12 +1403,27 @@ sub talkform {
         }
     }
 
+    $ret .= "&nbsp;&nbsp;<label for='prop_opt_preformatted'>$BML::ML{'.opt.noautoformat'}</label>";
+    $ret .= LJ::html_check(
+                           {
+                               name  => 'prop_opt_preformatted',
+                               id    => 'prop_opt_preformatted',
+                               value => 1,
+                               selected => $form->{'prop_opt_preformatted'}
+                           }
+    );
+
+    if (defined $LJ::HELPURL{'noautoformat'}) {
+        $ret .= " <a href='$LJ::HELPURL{'noautoformat'}'><img src='$LJ::IMGPREFIX/help.gif' alt='$BML::ML{'Help'}' title='$BML::ML{'Help'}' width='14' height='14' border='0' /></a>";
+    }
+
+
     if ($remote) {
         # only show on initial compostion
         my $quickquote;
         unless ($opts->{errors} && @{$opts->{errors}}) {
             # quick quote button
-            $quickquote = "&nbsp;" . LJ::ejs('<input type="button" value="Quote" onmousedown="quote();" onclick="quote();" />');
+            $quickquote = "&nbsp;&nbsp;" . LJ::ejs('<input type="button" value="Quote" onmousedown="quote();" onclick="quote();" />');
         }
 
         $ret .= "<script type='text/javascript' language='JavaScript'>\n<!--\n";
@@ -1451,20 +1466,6 @@ QQ
 
         $ret .= "-->\n</script>\n";
     }
-
-    $ret .= "&nbsp;<label for='prop_opt_preformatted'>$BML::ML{'.opt.noautoformat'}</label>";
-    $ret .= LJ::html_check(
-                           {
-                               name  => 'prop_opt_preformatted',
-                               id    => 'prop_opt_preformatted',
-                               value => 1,
-                               selected => $form->{'prop_opt_preformatted'}
-                           }
-    );
-    if (defined $LJ::HELPURL{'noautoformat'}) {
-        $ret .= " <a href='$LJ::HELPURL{'noautoformat'}'><img src='$LJ::IMGPREFIX/help.gif' alt='$BML::ML{'Help'}' title='$BML::ML{'Help'}' width='14' height='14' border='0' /></a>";
-    }
-
 
     $ret .= "</div>";
     $ret .= "</td></tr>\n";
@@ -1545,7 +1546,7 @@ QQ
 LOGIN
 
     if ($LJ::SPELLER) {
-        $ret .= "<label for='spellcheck'>$BML::ML{'talk.spellcheck'}:</label> <input type='checkbox' name='do_spellcheck' value='1' id='spellcheck' /> ";
+        $ret .= "<input type='checkbox' name='do_spellcheck' value='1' id='spellcheck' /> <label for='spellcheck'>$BML::ML{'talk.spellcheck'}</label>";
     }
 
     if ($journalu->{'opt_logcommentips'} eq "A") {
