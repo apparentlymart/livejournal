@@ -2112,12 +2112,8 @@ sub list_friends
 {
     my ($u, $opts) = @_;
 
-    my %hide_fo;  # userid -> 1
-    if ($LJ::HIDE_FRIENDOF_VIA_BAN) {
-        if (my $list = LJ::load_rel_user($u, 'B')) {
-            $hide_fo{$_} = 1 foreach @$list;
-        }
-    }
+    # do not show people in here
+    my %hide;  # userid -> 1
 
     # TAG:FR:protocol:list_friends
     my $sql;
@@ -2125,6 +2121,12 @@ sub list_friends
         $sql = "SELECT friendid, fgcolor, bgcolor, groupmask FROM friends WHERE userid=?";
     } else {
         $sql = "SELECT userid FROM friends WHERE friendid=?";
+
+        if ($LJ::HIDE_FRIENDOF_VIA_BAN) {
+            if (my $list = LJ::load_rel_user($u, 'B')) {
+                $hide{$_} = 1 foreach @$list;
+            }
+        }
     }
 
     my $dbr = LJ::get_db_reader();
@@ -2133,7 +2135,7 @@ sub list_friends
 
     my @frow;
     while (my @row = $sth->fetchrow_array) {
-        next if $hide_fo{$row[0]};
+        next if $hide{$row[0]};
         push @frow, [ @row ];
     }
 
