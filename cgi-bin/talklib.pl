@@ -1169,7 +1169,6 @@ sub talkform {
 
     if ($journalu->{'opt_whocanreply'} eq "reg") {
         $ret .= "<tr valign='middle'>";
-        $ret .= "<td align='right'>$BML::ML{'.opt.from'}</td>";
         $ret .= "<td align='center' width='20'><img src='$LJ::IMGPREFIX/anonymous.gif' /></td>";
         $ret .= "<td align='center'>(  )</td>";
         $ret .= "<td align='left' colspan='2'><font color='#c0c0c0'><b>$BML::ML{'.opt.anonymous'}</b></font>$BML::ML{'.opt.noanonpost'}</td>";
