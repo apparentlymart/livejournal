@@ -314,7 +314,7 @@
  } elsif ($extid) {
      if ($extid->[0] eq "O") {
          $body .= $h1->("OpenID user");
-         $body .= $p->("This is a non-$LJ::SITENAME user that's using their external identity to log in to $LJ::SITENAME using <a href='/openid'>OpenID</a> in order to leave authenticated comments and read friends-only entries.");
+         $body .= $p->("This is a non-$LJ::SITENAME user that's using their external identity to log in to $LJ::SITENAME using <a href='/openid/'>OpenID</a> in order to leave authenticated comments and read friends-only entries.");
      }
 
 
