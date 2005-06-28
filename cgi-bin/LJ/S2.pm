@@ -39,6 +39,14 @@ sub make_journal
     my $con_opts = {};
 
     if ($view eq "res") {
+
+        # the s1shorting comings virtual stylid doesn't have a styleid
+        # so we're making the rule that it can't have resource URLs.
+        if ($styleid eq "s1short") {
+            $opts->{'handler_return'} = 404;
+            return;
+        }
+
         if ($opts->{'pathextra'} =~ m!/(\d+)/stylesheet$!) {
             $styleid = $1;
             $entry = "print_stylesheet()";
@@ -51,6 +59,7 @@ sub make_journal
     }
 
     $u->{'_s2styleid'} = $styleid + 0;
+
     $con_opts->{'u'} = $u;
     $con_opts->{'style_u'} = $opts->{'style_u'};
     my $ctx = s2_context($r, $styleid, $con_opts);
@@ -593,9 +602,15 @@ sub s2_context
                 next unless $public->{$name};
                 my $id = $public->{$name}->{'s2lid'};
                 $style{$layer} = $id if $id;
-            } 
+            }
         }
     };
+
+    # styleid of "s1short" is special in that it makes a
+    # dynamically-created s2 context
+    if ($styleid eq "s1short") {
+        %style = s1_shortcomings_style($u);
+    }
 
     # fall back to the standard call to get a user's styles
     unless (%style) {
@@ -669,6 +684,26 @@ sub s2_context
     $r->print("<b>Error preparing to run:</b> $err");
     return undef;
 
+}
+
+sub s1_shortcomings_style {
+    my $u = shift;
+    my %style;
+
+    my $public = get_public_layers();
+    %style = (
+              core => "core1",
+              layout => "s1shortcomings/layout",
+              );
+
+    # convert the value names to s2layerid
+    while (my ($layer, $name) = each %style) {
+        next unless $public->{$name};
+        my $id = $public->{$name}->{'s2lid'};
+        $style{$layer} = $id;
+    }
+
+    return %style;
 }
 
 # parameter is either a single context, or just a bunch of layerids

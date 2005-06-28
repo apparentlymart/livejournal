@@ -50,5 +50,7 @@ sturdygesture/themes    theme+          sturdygesture/layout
 
 variableflow/layout     layout          core1
 
+s1shortcomings/layout   layout          core1
+
 # include local file
 s2layers-local.dat      INCLUDE

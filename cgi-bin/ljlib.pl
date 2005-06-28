@@ -5458,8 +5458,19 @@ sub make_journal
 
     # signal to LiveJournal.pm that we can't handle this
     if ($stylesys == 1 && ($view eq "entry" || $view eq "reply" || $view eq "month")) {
-        ${$opts->{'handle_with_bml_ref'}} = 1;
-        return;
+
+        # fall back to BML unless we're using the in-development S2
+        # fallback (the "s1shortcomings/layout")
+        unless ($LJ::S1_SHORTCOMINGS) {
+            ${$opts->{'handle_with_bml_ref'}} = 1;
+            return;
+        }
+
+        # S1 can't handle these views, so we fall back to a
+        # system-owned S2 style (magic value "s1short") that renders
+        # this content
+        $stylesys = 2;
+        $styleid = "s1short";
     }
 
     if ($r) {
