@@ -1403,58 +1403,75 @@ sub talkform {
             $ret .= " <a href='$LJ::HELPURL{'userpics'}'><img src='$LJ::IMGPREFIX/help.gif' alt='$BML::ML{'Help'}' title='$BML::ML{'Help'}' width='14' height='14' border='0' /></a>";
         }
     }
+
+    if ($remote) {
+        # only show on initial compostion
+        my $quickquote;
+        unless ($opts->{errors} && @{$opts->{errors}}) {
+            # quick quote button
+            $quickquote = "&nbsp;" . LJ::ejs('<input type="button" value="Quote" onmousedown="quote();" onclick="quote();" />');
+        }
+
+        $ret .= "<script type='text/javascript' language='JavaScript'>\n<!--\n";
+        $ret .= <<"QQ";
+
+        var helped = 0; var pasted = 0;
+        function quote () {
+            var text = '';
+
+            if (document.getSelection) {
+                text = document.getSelection();
+            } else if (document.selection) {
+                text = document.selection.createRange().text;
+            } else if (window.getSelection) {
+                text = window.getSelection();
+            }
+
+            if (text == '') {
+                if (helped != 1 && pasted != 1) {
+                    helped = 1; alert("If you'd like to quote a portion of the original message, highlight it then press 'Quote'");
+                }
+                return false;
+            } else {
+                pasted = 1;
+            }
+
+            var element = text.search(/\\n/) == -1 ? 'q' : 'blockquote';
+            var textarea = document.getElementById('commenttext');
+            textarea.focus();
+            textarea.value = textarea.value + "<" + element + ">" + text + "</" + element + ">";
+            textarea.caretPos = textarea.value;
+            textarea.focus();
+            return false;
+        }
+        if (document.getElementById && (document.getSelection || document.selection || window.getSelection)) {
+            // Opera clears the paste buffer before mouse events, useless here
+                if (navigator.userAgent.indexOf("Opera") == -1) { document.write('$quickquote'); }
+        }
+QQ
+
+        $ret .= "-->\n</script>\n";
+    }
+
+    $ret .= "&nbsp;<label for='prop_opt_preformatted'>$BML::ML{'.opt.noautoformat'}</label>";
+    $ret .= LJ::html_check(
+                           {
+                               name  => 'prop_opt_preformatted',
+                               id    => 'prop_opt_preformatted',
+                               value => 1,
+                               selected => $form->{'prop_opt_preformatted'}
+                           }
+    );
+    if (defined $LJ::HELPURL{'noautoformat'}) {
+        $ret .= " <a href='$LJ::HELPURL{'noautoformat'}'><img src='$LJ::IMGPREFIX/help.gif' alt='$BML::ML{'Help'}' title='$BML::ML{'Help'}' width='14' height='14' border='0' /></a>";
+    }
+
+
     $ret .= "</div>";
     $ret .= "</td></tr>\n";
 
     # textarea for their message body
-    $ret .= "<tr valign='top'><td align='right'>$BML::ML{'.opt.message'}<br />";
-
-    # only show on initial compostion
-    my $quickquote;
-    unless ($opts->{errors} && @{$opts->{errors}}) {
-        # quick quote button
-        $quickquote = "<br />" . LJ::ejs('<input type="button" value="Quote&gt;&gt;" onmousedown="quote();" onclick="quote();" />');
-    }
-
-    $ret .= "<script type='text/javascript' language='JavaScript'>\n<!--\n";
-    $ret .= <<"QQ";
-
-var helped = 0; var pasted = 0;
-function quote () {
-    var text = '';
-
-    if (document.getSelection) {
-        text = document.getSelection();
-    } else if (document.selection) {
-        text = document.selection.createRange().text;
-    } else if (window.getSelection) {
-        text = window.getSelection();
-    }
-
-    if (text == '') {
-        if (helped != 1 && pasted != 1) {
-            helped = 1; alert("If you'd like to quote a portion of the original message, highlight it then press 'Quote'");
-        }
-        return false;
-    } else {
-        pasted = 1;
-    }
-
-    var element = text.search(/\\n/) == -1 ? 'q' : 'blockquote';
-    var textarea = document.getElementById('commenttext');
-    textarea.focus();
-    textarea.value = textarea.value + "<" + element + ">" + text + "</" + element + ">";
-    textarea.caretPos = textarea.value;
-    textarea.focus();
-    return false;
-}
-if (document.getElementById && (document.getSelection || document.selection || window.getSelection)) {
-    // Opera clears the paste buffer before mouse events, useless here
-    if (navigator.userAgent.indexOf("Opera") == -1) { document.write('$quickquote'); }
-}
-QQ
-    $ret .= "-->\n</script>\n";
-
+    $ret .= "<tr valign='top'><td align='right'>$BML::ML{'.opt.message'}";
     $ret .= "</td><td style='width: 90%'>";
     $ret .= "<textarea class='textbox' rows='10' cols='75' wrap='soft' name='body' id='commenttext'>$form->{body}</textarea>";
 
@@ -1493,23 +1510,6 @@ QQ
         $ret .= '<br />';
     }
 
-    if ($LJ::SPELLER) {
-        $ret .= "<label for='spellcheck'>$BML::ML{'talk.spellcheck'}:</label> <input type='checkbox' name='do_spellcheck' value='1' id='spellcheck' /> ";
-    }
-
-    $ret .= "<label for='prop_opt_preformatted'>$BML::ML{'.opt.noautoformat'}</label>";
-    $ret .= LJ::html_check(
-                           {
-                               name  => 'prop_opt_preformatted',
-                               id    => 'prop_opt_preformatted',
-                               value => 1,
-                               selected => $form->{'prop_opt_preformatted'}
-                           }
-    );
-    if (defined $LJ::HELPURL{'noautoformat'}) {
-        $ret .= " <a href='$LJ::HELPURL{'noautoformat'}'><img src='$LJ::IMGPREFIX/help.gif' alt='$BML::ML{'Help'}' title='$BML::ML{'Help'}' width='14' height='14' border='0' /></a>";
-    }
-
     # post and preview buttons
     my $limit = LJ::CMAX_COMMENT; # javascript String.length uses characters
     $ret .= <<LOGIN;
@@ -1544,6 +1544,10 @@ QQ
         <input type='submit' name='submitpreview' value='$BML::ML{'talk.btn.preview'}' />
     </noscript>
 LOGIN
+
+    if ($LJ::SPELLER) {
+        $ret .= "<label for='spellcheck'>$BML::ML{'talk.spellcheck'}:</label> <input type='checkbox' name='do_spellcheck' value='1' id='spellcheck' /> ";
+    }
 
     if ($journalu->{'opt_logcommentips'} eq "A") {
         $ret .= "<br />$BML::ML{'.logyourip'}";
