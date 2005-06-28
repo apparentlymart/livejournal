@@ -56,14 +56,17 @@ sub EntryPage
     $p->{'entry'} = $s2entry;
 
     # add the comments
-    my $flat_mode = ($get->{'style'} eq "flat");
+    my $view_arg = $get->{'view'} || "";
+    my $flat_mode = ($view_arg =~ /\bflat\b/);
+    my $view_num = ($view_arg =~ /(\d+)/) ? $1 : undef;
+
     my %userpic;
     my %user;
     my $copts = {
         'flat' => $flat_mode,
         'thread' => ($get->{'thread'} >> 8),
         'page' => $get->{'page'},
-        'view' => $get->{'view'},
+        'view' => $view_num,
         'userpicref' => \%userpic,
         'userref' => \%user,
         # user object is cached from call just made in EntryPage_entry
@@ -256,7 +259,7 @@ sub EntryPage
         'total' => $copts->{'out_pages'},
         'total_subitems' => $copts->{'out_items'},
         '_url_of' => sub {
-            my $sty = $flat_mode ? "style=flat&" : "";
+            my $sty = $flat_mode ? "view=flat&" : "";
             return "$permalink?${sty}page=" . int($_[0]) .
                 ($stylemine ? "&$stylemine" : '');
         },
