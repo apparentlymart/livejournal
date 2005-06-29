@@ -17,11 +17,20 @@ body<=
         unless $user;
 
     # check for privs
-    unless ($remote->{'user'} eq $user || 
-            LJ::check_priv($remote, "supportviewscreened") ||
-            LJ::check_priv($remote, "supporthelp")) {
-
+    my $haspriv = LJ::check_priv($remote, "supportviewscreened") ||
+            LJ::check_priv($remote, "supporthelp");
+            
+    unless ($remote->{'user'} eq $user || $haspriv) {
         return LJ::bad_input(BML::ml(".error.noprivs"));
+    } elsif (!defined $GET{'user'} && $haspriv) {
+            #if no user is specified and they have privs, let them specify user
+            my $ret;
+            $ret .= "<br /><form action='see_overrides.bml' method='GET'>";
+            $ret .= "View overrides for user: ";
+            $ret .= LJ::html_text({ 'name' => 'user', 'size' => 15, 'maxlength' => 15 }) . " \n";
+            $ret .= LJ::html_submit('View') . "\n";
+            $ret .= "</form>\n";
+            return $ret;
     }
 
     # remote is authenticated, now load $u
