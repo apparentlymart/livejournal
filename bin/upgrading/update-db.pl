@@ -399,11 +399,27 @@ if ($opt_pop)
         }
 
         # now, delete any system layers that don't below (from previous imports?)
+        my @del_ids;
         my $sth = $dbh->prepare("SELECT s2lid FROM s2layers WHERE userid=?");
         $sth->execute($sysid);
         while (my $id = $sth->fetchrow_array) {
             next if $known_id{$id};
-            LJ::S2::delete_layer($id);
+            push @del_ids, $id;
+        }
+
+        # if we need to delete things, prompt before blowing away system layers
+        if (@del_ids) {
+            print "\nWARNING: The following S2 layer ids are known as system layers but are no longer\n" .
+                  "present in the import files.  If this is expected and you really want to DELETE\n" .
+                  "these layers, type 'YES' (in all capitals).\n\nType YES to delete layers " .
+                  join(', ', @del_ids) . ": ";
+            my $inp = <STDIN>;
+            if ($inp =~ /^YES$/) {
+                print "\nOkay, I am PERMANENTLY DELETING the layers.\n";
+                LJ::S2::delete_layer($_) foreach @del_ids;
+            } else {
+                print "\nOkay, I am NOT deleting the layers.\n";
+            }
         }
     }
 
