@@ -33,22 +33,14 @@
 
     if (LJ::did_post()) {
 	return $err->("Possible form tampering detected.") unless LJ::check_form_auth();
-	$body = "";
+
+	my $nos = LJ::OpenID::server();
 
         if ($POST{'no'}) {
-            $title = "Cancelled";
-            $body = "Your identity wasn't sent to the other site.";
-
-            if ($GET{"openid.post_grant"} eq "close") {
-                $body .= "<script>window.close();</script>";
-            } elsif ($GET{"openid.post_grant"} eq "return") {
-                my $nos = LJ::OpenID::server();
-                my $cancel_url = $nos->cancel_return_url(
-                                                         return_to => $GET{'return_to'},
-                                                         );
-                return BML::redirect($cancel_url);
-            }
-            return;
+            my $cancel_url = $nos->cancel_return_url(
+						     return_to => $GET{'return_to'},
+						     );
+	    return BML::redirect($cancel_url);
         }
 
         if ($POST{'yes:always'}) {
@@ -56,22 +48,14 @@
                 or return $err->("Failed to save");
         }
 
-	$title = "Saved";
-	$body .= "Permission has been granted.  You can now <a href='javascript:window.close()'>close this window</a> and login to the site you were previously visiting.";
-	if ($GET{"openid.post_grant"} eq "close") {
-	    $body .= "<script>window.close();</script>";
-	} elsif ($GET{"openid.post_grant"} eq "return") {
-            my $nos = LJ::OpenID::server();
-            my $sig_return = $nos->signed_return_url(
-                                                     identity     => $GET{'identity'},
-                                                     return_to    => $GET{'return_to'},
-                                                     trust_root   => $GET{'trust_root'},
-                                                     assoc_handle => $GET{'assoc_handle'},
-                                                     );
-            return BML::redirect($sig_return) if $sig_return;
-            return $err->("Failed to make signed return URL.");
-	}
-	return;
+	my $sig_return = $nos->signed_return_url(
+						 identity     => $GET{'identity'},
+						 return_to    => $GET{'return_to'},
+						 trust_root   => $GET{'trust_root'},
+						 assoc_handle => $GET{'assoc_handle'},
+						 );
+	return BML::redirect($sig_return) if $sig_return;
+	return $err->("Failed to make signed return URL.");
     }
 
 
