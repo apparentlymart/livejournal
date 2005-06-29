@@ -520,12 +520,16 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
      {
          $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.birthday.head'}</div>";
          $ret .= "<div class='formitemFlag'>$errors{'bday'}</div>" if exists $errors{'bday'};
-         $ret .= "<div class='formitemDesc'>$ML{'.birthday.question'}</div><div>";
+         $ret .= "<div class='formitemDesc'>";
+         $ret .= BML::ml('.birthday.question', {'aopts' => "target='_new' href='$LJ::SITEROOT/legal/privacy.bml'"});
+         $ret .= "</div><div>";
          $ret .= "<table><tr><td><span style='font-weight: bold;'>$ML{'.birthday.birthdate'}</span></td><td>";
          $ret .= LJ::html_datetime({ name => 'bday', notime => 1,
              default => sprintf("%04d-%02d-%02d", $POST{bday_yyyy}, $POST{bday_mm}, $POST{bday_dd}) });
          $ret .= "</td><td><span style='font-style: italic;'>$ML{'.birthday.required'}</span></td></tr>";
          $ret .= "</table></div></div></li>";
+
+         $ret .= "<div class='formitemNote'>$ML{'.birthday.warning'}</div>";
      }
 
      LJ::run_hooks("create.bml_opts", {

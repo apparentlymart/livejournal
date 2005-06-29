@@ -715,6 +715,8 @@ p?>
 
 /create.bml.birthday.birthdate=Birthdate:
 
+/create.bml.birthday.warning=Entering a false birthdate may prevent you from creating a new account or could prevent you from using your account in the future.
+
 /create.bml.birthday.security=Security:
 
 /create.bml.birthday.head=Age Verification
