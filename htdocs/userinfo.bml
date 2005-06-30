@@ -68,7 +68,7 @@
          if $userid && ! LJ::check_priv($remote, "finduser") && ! ($GET{t} eq "I" && $u && $u->{journaltype} eq "I");
 
      # fix accidentally broken ext_nnnn URLs for identity users
-     if ($u->{journaltype} eq "I" && ! $userid) {
+     if ($u && $u->{journaltype} eq "I" && ! $userid) {
          return BML::redirect("$LJ::SITEROOT/userinfo.bml?userid=$u->{'userid'}&t=I");
      }
 
