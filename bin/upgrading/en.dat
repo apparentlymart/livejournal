@@ -264,6 +264,8 @@ p?>
 
 /community/join.bml.title=Join Community
 
+/community/join.bml.toomanyfriends=Adding [[community]] as a friend would exceed the maximum number of friends your account is allowed. You have however now joined this community.
+
 /community/leave.bml.button.leave=Leave Community
 
 /community/leave.bml.label.buttontoleave=Press the button below to leave the "[[commname]]" community.

@@ -302,8 +302,23 @@ sub join_community {
 
     # friend user -> comm?
     return 1 unless $friend;
-    LJ::add_friend($u->{userid}, $cu->{userid}, { defaultview => 1 });
+    
+    #add community as a friend using the protocol
+    my $req = { 'add' => [$cu->{user}], 'username' => $u->{user} };
 
+    my $protocol_error;
+    my $res = LJ::Protocol::do_request('editfriends', $req, \$protocol_error, 
+				       { "noauth" => 1, "u" => $u } );
+                   
+    unless ($res) {
+	my ($errnum, $errstring) = split(':', $protocol_error);
+	return LJ::error(BML::ml('/community/join.bml.toomanyfriends',
+				 { 'community' => LJ::ljuser($cu) }))
+	    if($errnum == 104);
+
+	return LJ::error($errstring);
+    }
+                    
     # done
     return 1;
 }
