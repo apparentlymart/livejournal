@@ -308,15 +308,16 @@ sub join_community {
 
     my $protocol_error;
     my $res = LJ::Protocol::do_request('editfriends', $req, \$protocol_error, 
-				       { "noauth" => 1, "u" => $u } );
+                   { "noauth" => 1, "u" => $u } );
                    
     unless ($res) {
-	my ($errnum, $errstring) = split(':', $protocol_error);
-	return LJ::error(BML::ml('/community/join.bml.toomanyfriends',
-				 { 'community' => LJ::ljuser($cu) }))
-	    if($errnum == 104);
-
-	return LJ::error($errstring);
+       my ($errnum, $errstring) = split(':', $protocol_error);
+       if ($errnum == 104) {
+         return LJ::error(BML::ml('/community/join.bml.toomanyfriends',
+            { 'community' => LJ::ljuser($cu) }));
+       }
+        
+       return LJ::error($errstring);
     }
                     
     # done

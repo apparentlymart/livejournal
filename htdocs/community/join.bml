@@ -90,11 +90,10 @@
      }
 
      # make remote user a friend of the community
-     my $joined = LJ::join_community($remote, $cu, $POST{addfriend});
-     unless ($joined)
-     { 
+     my $friended = LJ::join_community($remote, $cu, $POST{addfriend});
+     unless ($friended) { 
         $body = "<?h1 $ML{'error'} h1?>";
-        $body .= "<?p " . LJ::last_error . " p?>";
+        $body .= "<?p " . LJ::last_error() . " p?>";
         return;
      }
      
