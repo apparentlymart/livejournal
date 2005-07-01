@@ -407,6 +407,8 @@ if ($opt_pop)
             push @del_ids, $id;
         }
 
+        # COMMENTED OUT WHILE WE INVESTIGATE -- Whitaker 06/30/2005
+        if (0) {
         # if we need to delete things, prompt before blowing away system layers
         if (@del_ids) {
             print "\nWARNING: The following S2 layer ids are known as system layers but are no longer\n" .
@@ -420,6 +422,7 @@ if ($opt_pop)
             } else {
                 print "\nOkay, I am NOT deleting the layers.\n";
             }
+        }
         }
     }
 
