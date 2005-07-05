@@ -9,7 +9,7 @@
 
     # authas switcher form
     my $authasform = sub {
-        $body .= "<form method='get' action='styles.bml'>\n";
+        $body .= "<form method='get' action='layers.bml'>\n";
         $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
         $body .= "</form>\n\n";
     };
