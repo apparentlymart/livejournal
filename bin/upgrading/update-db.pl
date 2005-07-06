@@ -91,7 +91,7 @@ CLUSTER: foreach my $cluster (@clusters) {
     ## make sure we can connect
     $dbh = $cluster ? LJ::get_cluster_master($cluster) : LJ::get_db_writer();
     unless ($dbh) {
-        $status{$cluster} = "ERROR: Can't connect to the database (clust\#$cluster), so I can't update it.";
+        $status{$cluster} = "ERROR: Can't connect to the database (clust\#$cluster), so I can't update it. (".DBI->errstr.")";
         next CLUSTER;
     }
 
