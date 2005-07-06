@@ -2120,19 +2120,6 @@ CREATE TABLE openid_external (
 )
 EOC
 
-register_tablecreate("emailpost_log", <<'EOC');
-CREATE TABLE emailpost_log (
-  userid     INT UNSIGNED NOT NULL,
-  time       INT UNSIGNED NOT NULL,
-  err        TINYINT(1) UNSIGNED NOT NULL DEFAULT 0,
-  retry      TINYINT(1) UNSIGNED NOT NULL DEFAULT 0,
-  subj       VARCHAR(255) DEFAULT NULL,
-  msg        VARCHAR(255) DEFAULT NULL,
-  PRIMARY KEY (userid,time),
-  KEY(userid)
-)
-EOC
-
 # NOTE: new table declarations go here
 
 

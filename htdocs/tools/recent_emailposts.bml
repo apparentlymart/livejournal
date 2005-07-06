@@ -79,11 +79,14 @@ body<=
     my $dbcr = LJ::get_cluster_reader( $u );
     my $sql = qq{
         SELECT
-            *, DATE_FORMAT(FROM_UNIXTIME(time), "%M %D %Y, %l:%i%p") AS ftime
-        FROM emailpost_log
+            logtime, extra,
+            DATE_FORMAT(FROM_UNIXTIME(logtime), "%M %D %Y, %l:%i%p") AS ftime
+        FROM userlog
         WHERE userid=?
+            AND action='emailpost'
+        ORDER BY logtime DESC LIMIT 50
     };
-    my $data = $dbcr->selectall_hashref( $sql, 'time', undef, $u->{userid} );
+    my $data = $dbcr->selectall_hashref( $sql, 'logtime', undef, $u->{userid} );
 
     unless ( keys %$data ) {
         $ret .= "There are currently no emailposts logged.";
@@ -101,20 +104,21 @@ body<=
     };
 
     foreach ( reverse sort keys %$data ) {
-        my $row = $data->{$_};
-        $ret .= $row->{err} ? "<tr class='err'>" : "<tr class='ok'>";
+        my $row = {};
+        LJ::decode_url_string( $data->{$_}->{extra}, $row );
+        $ret .= $row->{e} ? "<tr class='err'>" : "<tr class='ok'>";
         $ret .= qq{
-            <td nowrap="1">$row->{ftime}</td>
-            <td nowrap="1"><em>$row->{subj}</em></td>
+            <td nowrap="1">$data->{$_}->{ftime}</td>
+            <td nowrap="1"><em>$row->{s}</em></td>
             <td nowrap="1">
         };
-        if ($row->{err}) {
+        if ($row->{e}) {
             $ret .= '<strong>Yes</strong>';
             $ret .= ' (will retry)' if $row->{retry};
         } else {
             $ret .= 'None';
         }
-        $ret .= "</td><td width='100%'>" . ($row->{msg} ? $row->{msg} : 'Post success.') . "</td></tr>";
+        $ret .= "</td><td width='100%'>" . ($row->{m} ? $row->{m} : 'Post success.') . "</td></tr>";
     }
 
     $ret .= '</table>';

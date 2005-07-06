@@ -90,9 +90,10 @@ sub process {
         }
         $$rv = 0 if $opt->{'retry'};
 
-        $opt->{msg}     = $msg;
-        $opt->{subject} = $subject;
-        dblog( $u, $opt, 1 ) unless $opt->{nolog};
+        $opt->{m} = $msg;
+        $opt->{s} = $subject;
+        $opt->{e} = 1;
+        dblog( $u, $opt ) unless $opt->{nolog};
         return $msg;
     };
 
@@ -419,7 +420,7 @@ sub process {
     LJ::Protocol::do_request("postevent", $req, \$post_error, { noauth => 1 });
     return $err->(LJ::Protocol::error_message($post_error), { sendmail => 1 }) if $post_error;
 
-    dblog( $u, { subject => $subject }, 0 );
+    dblog( $u, { s => $subject } );
     return "Post success";
 }
 
@@ -647,35 +648,9 @@ sub upload_images
 
 sub dblog
 {
-    my ( $u, $opt, $err ) = @_;
-    my ($dbcm, $sql);
-
-    $dbcm = LJ::get_cluster_master( $u );
-    return unless $dbcm;
-
-    # keep table trimmed to the last 50 logs per user
-    $sql = qq{
-        SELECT time FROM emailpost_log
-        WHERE userid=? ORDER BY time DESC LIMIT 49,1
-    };
-    my $oldtime = $dbcm->selectrow_array( $sql, undef, $u->{userid} );
-    if ($oldtime) {
-        $sql = qq{
-            DELETE FROM emailpost_log
-            WHERE userid=? AND time <= ?
-        };
-        $dbcm->do( $sql, undef, $u->{userid}, $oldtime );
-    }
-    
-    chomp $opt->{subject};
-    $sql = qq{
-        INSERT INTO emailpost_log SET
-            userid=?, time=UNIX_TIMESTAMP(), err=?, retry=?,
-            subj=?, msg=?
-    };
-    $dbcm->do( $sql, undef,
-               $u->{userid}, $err, $opt->{retry} ? 1 : 0,
-               $opt->{subject}, $opt->{msg} );
+    my ( $u, $info ) = @_;
+    chomp $info->{s};
+    $u->log_event( 'emailpost', $info );
     return;
 }
 
