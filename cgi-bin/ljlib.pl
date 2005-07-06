@@ -1502,7 +1502,7 @@ sub get_recent_items
     my $itemload = $itemshow + $skip;
 
     my $mask = 0;
-    if ($remote && $remote->{'journaltype'} eq "P" && $remoteid != $userid) {
+    if ($remote && ($remote->{'journaltype'} eq "P" || $remote->{'journaltype'} eq "I") && $remoteid != $userid) {
         $mask = LJ::get_groupmask($userid, $remoteid);
     }
 
@@ -3704,7 +3704,7 @@ sub can_view
 
     # if it's usemask, we have to refuse non-personal journals,
     # so we have to load the user
-    return 0 unless $remote->{'journaltype'} eq 'P';
+    return 0 unless $remote->{'journaltype'} eq 'P' || $remote->{'journaltype'} eq 'I';
 
     # TAG:FR:ljlib:can_view  (turn off bit 0 for just watching?  hmm.)
     my $gmask = LJ::get_groupmask($userid, $remoteid);
