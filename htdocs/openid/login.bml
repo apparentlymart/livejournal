@@ -17,6 +17,8 @@
     return $err->("OpenID consumer support is disabled")
         unless LJ::OpenID::consumer_enabled();
 
+    my $return_to = "$LJ::SITEROOT/openid/login.bml";
+
     my $remote = LJ::get_remote();
     if ($remote) {
         $body .= "<?h1 Already logged in h1?><?p Hello, " . LJ::ljuser($remote) . ". Before logging in with <a href='http://www.danga.com/openid/'>OpenID</a>, you must first <a href='/logout.bml'>log out</a>. p?>";
@@ -32,6 +34,10 @@
 
         if (my $setup = $csr->user_setup_url) {
             return BML::redirect($setup);
+        }
+
+        if ($GET{'openid.return_to'} && $GET{'openid.return_to'} ne $return_to) {
+            return $err->("Invalid return_to");
         }
 
         my $vident = eval { $csr->verified_identity; };
@@ -76,7 +82,7 @@
         }
 
         my $check_url = $claimed_id->check_url(
-                                               return_to => "$LJ::SITEROOT/openid/login.bml",
+                                               return_to => $return_to,
                                                trust_root => "$LJ::SITEROOT/",
                                                delayed_return => 1,
                                                );

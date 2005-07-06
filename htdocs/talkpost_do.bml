@@ -41,6 +41,10 @@ body<=
 
         if ($GET{'openid.mode'} eq 'id_res') { # Verify their identity
 
+            unless ($GET{'openid.return_to'} =~ m!^\Q$LJ::SITEROOT\E/talkpost_do\.bml!) {
+                return LJ::bad_input("Invalid return_to");
+            }
+
             my $vident = $csr->verified_identity;
             return LJ::bad_input("Can't verify identity: ".$csr->err) unless $vident;
 
