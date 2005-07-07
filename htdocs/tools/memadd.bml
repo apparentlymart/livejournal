@@ -39,8 +39,8 @@
  }
 
  my $sth;
- my $journal = $GET{'journal'};
- my $ditemid = $GET{'itemid'}+0;
+ my $journal = $GET{'journal'} || $POST{'journal'};
+ my $ditemid = $GET{'itemid'}+0 || $POST{'itemid'}+0;
 
  # OK.  the memories schema is weird and stores *display* itemids in the database.
  # additionally, we distinguish precluster itemids because they're stored without a userid.
@@ -89,9 +89,20 @@
  my $dbcr = LJ::get_cluster_reader($ju);
 
  my $log = LJ::get_log2_row($ju, $itemid);
- unless ($log) {
+ if (!$log && !$POST{'mode'}) {
      $title = $ML{'Error'};
-     $body = "Error retrieving data to add a memory.";
+     $body = "The entry that this memory references has been deleted.<br/>";
+     
+     if($memoryu->{user} eq $authas) {
+        $body .= "<br /><form action='memadd.bml' method='POST'>";
+        $body .= LJ::html_hidden(journal => $GET{journal}) if $GET{journal};
+        $body .= LJ::html_hidden(itemid => $GET{itemid});
+        $body .= LJ::html_hidden('mode' => 'save');
+        $body .= LJ::form_auth();
+        $body .= LJ::html_submit('delete', 'Delete this memory') . "\n";
+        $body .= "</form>\n";
+     }
+     
      return;
  }
  my $subject = LJ::get_logtext2($ju, $itemid)->{$log->{jitemid}}[0];
@@ -226,6 +237,7 @@
      } else {
          $body .= "<br /><small>$ML{'.whocansee'}</small></td></tr><tr><th></th><td>\n";
      }
+     $body .= LJ::form_auth();
      $body .= LJ::html_submit(undef, $ML{'.form.submit'});
      $body .= LJ::html_submit(undef, $ML{'.form.reset'}, {type => 'reset'}) if defined $memory;
      $body .= "</td></tr></table></form>";
@@ -239,6 +251,10 @@
 
      if (! $POST{'des'}) {
          # then we're deleting.
+         unless(LJ::check_form_auth()) {
+             $body = "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>";
+             return;
+         }
          if (defined $memory) {
              LJ::Memories::delete_by_id($memoryu, $memory->{memid});
              LJ::Memories::updated_keywords($memoryu);
