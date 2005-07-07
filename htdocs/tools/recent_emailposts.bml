@@ -46,8 +46,8 @@ body<=
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
     my $remote = LJ::get_remote();
-    my $admin = 1 if LJ::check_priv( $remote, 'supporthelp', 'mobile' ) ||
-                     LJ::check_priv( $remote, 'supporthelp' );
+    my $admin = LJ::check_priv( $remote, 'supporthelp', 'mobile' ) ||
+                LJ::check_priv( $remote, 'supporthelp', '' );
     return '<?needlogin?>' unless $remote;
 
     my $u;
