@@ -195,7 +195,12 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
      
      my $u = LJ::load_user($user);
      my $second_submit = 0;
-     if ($u) {
+     
+     # do not create if this account name is purged
+     if ($u && $u->{'statusvis'} eq "X") {
+         $errors{'username'} =  BML::ml('.error.username.purged',
+                                        {'aopts' => 'href="/rename/"'} );
+     } elsif ($u) {
          my $in_use = 1;
 
          if ($u->{'email'} eq $POST{'email'}) {
@@ -203,7 +208,9 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
                  # brute-force possible going on
              } else {
                  if ($u->{'password'} eq $POST{'password1'}) {
-                     # oh, they double-clicked the submit button 
+                     # okay either they double-clicked the submit button
+                     # or somebody entered an account name that already exists
+                     # with the existing password
                      $second_submit = 1;
                      $in_use = 0;
                  } else {
@@ -325,6 +332,9 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
      die "Cluster 0 not supported" unless $clusterid;
 
      my $userid = $u ? $u->{'userid'}+0 : 0;
+
+     # create user and send email as long as the user didn't double-click submit
+     # (or they tried to re-create a purged account)
      unless ($second_submit)
      {
          my $caps   = int($LJ::NEWUSER_CAPS);
@@ -372,33 +382,33 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
              'user' => $user,
              'code' => $code,
          });
-     }
 
-     # send welcome mail... unless they're underage
-     unless ($is_underage) {
-         my $aa = {};
-         if ($userid) {
-             $aa = LJ::register_authaction($userid, "validateemail", $email);
+         # send welcome mail... unless they're underage
+         unless ($is_underage) {
+             my $aa = {};
+             if ($userid) {
+                 $aa = LJ::register_authaction($userid, "validateemail", $email);
+             }
+
+             my $body = BML::ml('email.newacct2.body', {
+                 "email" => $email,
+                 "regurl" => "$LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}",
+                 "username" => $user,
+                 "sitename" => $LJ::SITENAME,
+                 "siteroot" => $LJ::SITEROOT,
+                 "admin_email" => $LJ::ADMIN_EMAIL,
+                 "bogus_email" => $LJ::BOGUS_EMAIL,
+             });
+
+             LJ::send_mail({
+                 'to' => $email,
+                 'from' => $LJ::ADMIN_EMAIL,
+                 'fromname' => $LJ::SITENAME,
+                 'charset' => 'utf-8',
+                 'subject' => BML::ml('email.newacct.subject', {'sitename' => $LJ::SITENAME}),
+                 'body' => $body,
+             });
          }
-
-         my $body = BML::ml('email.newacct2.body', {
-             "email" => $email,
-             "regurl" => "$LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}",
-             "username" => $user,
-             "sitename" => $LJ::SITENAME,
-             "siteroot" => $LJ::SITEROOT,
-             "admin_email" => $LJ::ADMIN_EMAIL,
-             "bogus_email" => $LJ::BOGUS_EMAIL,
-         });
-
-         LJ::send_mail({
-             'to' => $email,
-             'from' => $LJ::ADMIN_EMAIL,
-             'fromname' => $LJ::SITENAME,
-             'charset' => 'utf-8',
-             'subject' => BML::ml('email.newacct.subject', {'sitename' => $LJ::SITENAME}),
-             'body' => $body,
-         });
      }
 
      my $nu = LJ::load_userid($userid, "force");
@@ -413,7 +423,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
      }
 
      # record create information
-     $nu->log_event('account_create', { remote => $remote });
+     $nu->log_event('account_create', { remote => $remote }) unless $second_submit;
 
      $nu->make_login_session;
 

@@ -773,6 +773,8 @@ p?>
 
 /create.bml.error.email.lj_domain=You cannot use a [[domain]] alias when creating an account.  Please enter a different email address.
 
+/create.bml.error.username.purged=This account has been deleted and purged.
+
 /create.bml.error.email.nospaces=No spaces allowed in email address.  If you're on AOL, remember that your Internet Email address is your screen name with all spaces removed, followed by <b>@aol.com</b>
 
 /create.bml.error.password.asciionly=You can only use ASCII symbols in the password.
