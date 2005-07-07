@@ -155,7 +155,7 @@
              var user = name.substring(21, name.length);
 
              // see if we remap their display name
-             var display;
+             var display = user;
              if (document.getElementById) {
                  display = document.getElementById('nameremap_' + user);
                  if (display) {
