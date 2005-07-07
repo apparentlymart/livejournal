@@ -26,16 +26,14 @@ sub pretty_type {
 
 sub typeid {
     my LJ::Identity $self = shift;
-    my $nv = shift;
-    die("Cannot set new typeid value") if $nv;
+    die("Cannot set new typeid value") if @_;
 
     return $self->{typeid};
 }
 
 sub value {
     my LJ::Identity $self = shift;
-    my $nv = shift;
-    die("Cannot set new identity value") if $nv;
+    die("Cannot set new identity value") if @_;
 
     return $self->{value};
 }
