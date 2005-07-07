@@ -675,7 +675,14 @@ sub load_identity_user {
     return undef unless $uid &&
         $dbh->do("INSERT INTO identitymap (idtype, identity, userid) VALUES (?,?,?)",
                  undef, $type, $ident, $uid);
-    return LJ::load_userid($uid);
+
+    my $u = LJ::load_userid($uid);
+
+    # record create information
+    my $remote = LJ::get_remote();
+    $u->log_event('account_create', { remote => $remote });
+
+    return $u;
 }
 
 1;
