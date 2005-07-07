@@ -9,6 +9,18 @@ The username of the friend.
 The full name of the friend.
 </des></scalar></key>
 
+<key name="identity_type" count="1"><scalar><des>
+If journaltype is I: Type of Identity user, OpenId, TypeKey, etc.
+</des></scalar></key>
+
+<key name="identity_value" count="1"><scalar><des>
+If journaltype is I: Value for identity, OpenID is a url.
+</des></scalar></key>
+
+<key name="identity_display" count="1"><scalar><des>
+If journaltype is I: Pretty display name of an Identity user.
+</des></scalar></key>
+
 <key name="journaltype" count="1"><scalar><des>
 The type of journal the friend item is.
 </des></scalar></key>

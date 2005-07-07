@@ -2154,6 +2154,14 @@ sub list_friends
             'fullname' => $u->{'name'},
         };
 
+
+        if ($u->identity) {
+            my $i = $u->identity;
+            $r->{'identity_type'} = $i->[0];
+            $r->{'identity_value'} = $i->[1];
+            $r->{'identity_display'} = $u->display_name;
+        }
+
         if ($opts->{'includebdays'} &&
             $u->{'bdate'} &&
             $u->{'bdate'} ne "0000-00-00" &&
@@ -3223,6 +3231,11 @@ sub populate_friends
         }
         if (defined $f->{'type'}) {
             $res->{"${pfx}_${count}_type"} = $f->{'type'};
+            if ($f->{'type'} eq 'identity') {
+                $res->{"${pfx}_${count}_identity_type"}    = $f->{'identity_type'};
+                $res->{"${pfx}_${count}_identity_value"}   = $f->{'identity_value'};
+                $res->{"${pfx}_${count}_identity_display"} = $f->{'identity_display'};
+            }
         }
         if (defined $f->{'status'}) {
             $res->{"${pfx}_${count}_status"} = $f->{'status'};

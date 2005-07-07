@@ -92,8 +92,14 @@
     }
     for (my $i=1; $i<=$res{'friend_count'}; $i++) {
         my $user = $res{"friend_${i}_user"};
+
         my $mask = $res{"friend_${i}_groupmask"} || 1;
         $body .= "<input type='hidden' name='editfriend_groupmask_$user' value='$mask' />";
+
+        if ($res{"friend_${i}_type"} eq 'identity') {
+            my $dn = $res{"friend_${i}_identity_display"};
+            $body .= "<input type='hidden' name='nameremap_$user' id='nameremap_$user' value='$dn' />";
+        }
     }
     
     # escape strings for JavaScript
@@ -147,9 +153,20 @@
          var mask = form.elements[i].value;
          if (name.substring(0, 21) == "editfriend_groupmask_") {
              var user = name.substring(21, name.length);
-             
+
+             // see if we remap their display name
+             var display;
+             if (document.getElementById) {
+                 display = document.getElementById('nameremap_' + user);
+                 if (display) {
+                     display = display.value;
+                 } else {
+                     display = user;
+                 }
+             }
+
              var list = mask & (1 << selectedGroup) ? inlist : outlist;
-             var optionName = new Option(user, user, false, false)
+             var optionName = new Option(display, user, false, false)
                  list.options[list.length] = optionName;
          }
      }
