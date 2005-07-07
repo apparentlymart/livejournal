@@ -36,7 +36,7 @@
             return BML::redirect($setup);
         }
 
-        if ($GET{'openid.return_to'} && $GET{'openid.return_to'} ne $return_to) {
+        if ($GET{'openid.return_to'} && $GET{'openid.return_to'} !~ /^\Q$return_to\E/) {
             return $err->("Invalid return_to");
         }
 
