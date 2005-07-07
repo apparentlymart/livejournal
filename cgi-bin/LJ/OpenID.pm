@@ -163,8 +163,10 @@ sub blocked_hosts {
     $csr->ua->blocked_hosts(
                             sub {
                                 my $dest = shift;
-                                # NEEDS TO BE NOT HARDCODED
-                                if ($dest =~ /livejournal\.com$/i) {
+
+                                my $domain_escaped = $LJ::DOMAIN;
+                                $domain_escaped =~ s/\./\\\./g;
+                                if ($dest =~ /$domain_escaped$/i) {
                                     $tried_local_id = 1;
                                     return 1;
                                 }
