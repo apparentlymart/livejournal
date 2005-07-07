@@ -556,23 +556,31 @@ sub url {
     LJ::load_user_props($u, "url");
     if ($u->{'journaltype'} eq "I" && ! $u->{url}) {
         my $id = $u->identity;
-        if ($id && $id->[0] eq "O") {
+        if ($id && $id->typeid == 0) {
             LJ::set_userprop($u, "url", $id->[1]) if $id->[1];
-            return $id->[1];
+            return $id->value;
         }
     }
     return $u->{url};
 }
 
-# returns arrayref of [idtype, identity]
+# returns LJ::Identity object
 sub identity {
     my $u = shift;
     return $u->{_identity} if $u->{_identity};
     return undef unless $u->{'journaltype'} eq "I";
+
+    require LJ::Identity;
+
     my $memkey = [$u->{userid}, "ident:$u->{userid}"];
     my $ident = LJ::MemCache::get($memkey);
     if ($ident) {
-        return $u->{_identity} = $ident;
+        my $i = LJ::Identity->new(
+                                  typeid => $ident->[0],
+                                  value  => $ident->[1],
+                                  );
+
+        return $u->{_identity} = $i;
     }
 
     my $dbh = LJ::get_db_writer();
@@ -580,17 +588,21 @@ sub identity {
                                       "WHERE userid=? LIMIT 1", undef, $u->{userid});
     if ($ident) {
         LJ::MemCache::set($memkey, $ident);
-        return $ident;
+        my $i = LJ::Identity->new(
+                                  typeid => $ident->[0],
+                                  value  => $ident->[1],
+                                  );
+        return $i;
     }
     return undef;
 }
 
-# returns a URL iff account is an OpenID identity.  undef otherwise.
+# returns a URL if account is an OpenID identity.  undef otherwise.
 sub openid_identity {
     my $u = shift;
     my $ident = $u->identity;
-    return undef unless $ident && $ident->[0] == 0;
-    return $ident->[1];
+    return undef unless $ident && $ident->typeid == 0;
+    return $ident->value;
 }
 
 # returns username or identity display name, not escaped
@@ -602,9 +614,9 @@ sub display_name {
     return "[ERR:unknown_identity]" unless $id;
 
     my ($url, $name);
-    if ($id->[0] eq "O") {
+    if ($id->typeid == 0) {
         require Net::OpenID::Consumer;
-        $url = $id->[1];
+        $url = $id->value;
         $name = Net::OpenID::VerifiedIdentity::DisplayOfURL($url, $LJ::IS_DEV_SERVER);
         $name = LJ::run_hook("identity_display_name", $name) || $name;
     }
@@ -626,8 +638,8 @@ sub ljuser_display {
 
     my ($url, $name);
 
-    if ($id->[0] eq "O") {
-        $url = $id->[1];
+    if ($id->typeid == 0) {
+        $url = $id->value;
         $name = $u->display_name;
 
         $url ||= "about:blank";

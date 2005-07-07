@@ -2157,8 +2157,8 @@ sub list_friends
 
         if ($u->identity) {
             my $i = $u->identity;
-            $r->{'identity_type'} = LJ::Identity::pretty_type($i->[0]);
-            $r->{'identity_value'} = $i->[1];
+            $r->{'identity_type'} = $i->pretty_type;
+            $r->{'identity_value'} = $i->value;
             $r->{'identity_display'} = $u->display_name;
         }
 

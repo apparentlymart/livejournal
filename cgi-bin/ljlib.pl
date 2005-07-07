@@ -27,7 +27,6 @@ use Storable ();
 use Compress::Zlib ();
 use IO::Socket::INET qw{};
 use Unicode::MapUTF8;
-use LJ::Identity;
 
 do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
