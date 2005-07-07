@@ -45,11 +45,13 @@ body<=
         unless $LJ::EMAIL_POST_DOMAIN;
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
-    my $u;
     my $remote = LJ::get_remote();
+    my $admin = 1 if LJ::check_priv( $remote, 'supporthelp', 'mobile' ) ||
+                     LJ::check_priv( $remote, 'supporthelp' );
     return '<?needlogin?>' unless $remote;
 
-    if ( $POST{showuser} && LJ::check_priv( $remote, 'supporthelp', '*' ) ) {
+    my $u;
+    if ( $POST{showuser} && $admin ) {
         $u = LJ::load_user( LJ::canonical_username($POST{showuser}) );
     } else {
         $u = $remote;
@@ -57,7 +59,7 @@ body<=
 
     $ret .= '<?p This page displays up to the last 50 emailposts to your account,
         and their individual status. p?>';
-    if ( LJ::check_priv( $remote, 'supporthelp', '*' ) ) {
+    if ( $admin ) {
         $ret .= "<form action=\"$LJ::SITEROOT/tools/recent_emailposts.bml\" method=\"POST\">";
         $ret .= "Username to view: ";
         $ret .= LJ::html_text(
