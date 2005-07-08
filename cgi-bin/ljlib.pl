@@ -4201,7 +4201,7 @@ sub get_remote
     my ($u, $sess);     # what we eventually care about
     my $memkey;
 
-    foreach my $sessdata (@{ $cookie->('ljsession') || [] }) {
+    foreach my $sessdata (@{ $cookie->('ljsession[]') || [] }) {
         my ($authtype, $user, $sessid, $auth, $sopts) = split(/:/, $sessdata);
         $tried_fast = 1 if $sopts =~ /\.FS\b/;
         my $err = sub {
