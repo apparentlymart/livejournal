@@ -92,17 +92,17 @@
  if (!$log && !$POST{'mode'}) {
      $title = $ML{'Error'};
      $body = "The entry that this memory references has been deleted.<br/>";
-     
-     if($memoryu->{user} eq $authas) {
-        $body .= "<br /><form action='memadd.bml' method='POST'>";
-        $body .= LJ::html_hidden(journal => $GET{journal}) if $GET{journal};
-        $body .= LJ::html_hidden(itemid => $GET{itemid});
-        $body .= LJ::html_hidden('mode' => 'save');
-        $body .= LJ::form_auth();
-        $body .= LJ::html_submit('delete', 'Delete this memory') . "\n";
-        $body .= "</form>\n";
+
+     if ($memoryu->{user} eq $authas) {
+         $body .= "<br /><form action='memadd.bml' method='POST'>";
+         $body .= LJ::html_hidden(journal => $GET{journal}) if $GET{journal};
+         $body .= LJ::html_hidden(itemid => $GET{itemid});
+         $body .= LJ::html_hidden('mode' => 'save');
+         $body .= LJ::form_auth();
+         $body .= LJ::html_submit('delete', 'Delete this memory') . "\n";
+         $body .= "</form>\n";
      }
-     
+
      return;
  }
  my $subject = LJ::get_logtext2($ju, $itemid)->{$log->{jitemid}}[0];
@@ -138,7 +138,7 @@
      return;
  }
 
- if ($POST{'mode'} eq "") 
+ if ($POST{'mode'} eq "")
  {
      my ($des, $keywords);
 
@@ -166,7 +166,7 @@
              return;
          }
 
-     } 
+     }
      elsif (!$log || ($jid && $log->{'anum'} != $anum))
      {
          $title = $ML{'Error'};
@@ -245,13 +245,13 @@
      return;
  }
 
- if ($POST{'mode'} eq "save") 
+ if ($POST{'mode'} eq "save")
  {
      my $dbh = LJ::get_db_writer();
 
      if (! $POST{'des'}) {
          # then we're deleting.
-         unless(LJ::check_form_auth()) {
+         unless (LJ::check_form_auth()) {
              $body = "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>";
              return;
          }
@@ -259,10 +259,10 @@
              LJ::Memories::delete_by_id($memoryu, $memory->{memid});
              LJ::Memories::updated_keywords($memoryu);
              $title = $ML{'.title.deleted'};
-             $body = "<?h1 $ML{'.error.deleted.title'} h1?><?p " . 
+             $body = "<?h1 $ML{'.error.deleted.title'} h1?><?p " .
                      BML::ml(".error.deleted.body", { 'desc' => $memory->{'des'} }) .
                      "p?>";
-             return;	     
+             return;
          } else {
              $title = $ML{'Error'};
              $body = "<?h1 $ML{'.error.nodescription.title'} h1?><?p ";
@@ -274,14 +274,14 @@
 
      #### we're inserting/replacing now into memories
      my @keywords;
-     { 
+     {
          my %kws;
          foreach (split(/\s*,\s*/, $POST{'keywords'})) { $kws{$_} = 1; }
          # oldkeywords were split at the beginning
          foreach (@{$POST{'oldkeywords'}}) { $kws{$_} = 1; }
          @keywords = keys %kws;
      }
-     if (scalar(@keywords) > 5) { 
+     if (scalar(@keywords) > 5) {
          $title = $ML{'Error'};
          $body = "<?h1 $ML{'Error'} h1?><?p $ML{'.error.fivekeywords'} p?>";
          return;
@@ -316,7 +316,7 @@
      # handle edits by deleting the old memory and recreating
      LJ::Memories::delete_by_id($memoryu, $memory->{memid})
          if defined $memory;
-     LJ::Memories::create($memoryu, { 
+     LJ::Memories::create($memoryu, {
                               journalid => $jid,
                               ditemid => $ditemid,
                               des => $des,
