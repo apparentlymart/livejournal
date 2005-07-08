@@ -164,9 +164,7 @@ sub blocked_hosts {
                             sub {
                                 my $dest = shift;
 
-                                my $domain_escaped = $LJ::DOMAIN;
-                                $domain_escaped =~ s/\./\\\./g;
-                                if ($dest =~ /$domain_escaped$/i) {
+                                if ($dest =~ /(^|\.)\Q$LJ::DOMAIN\E$/i) {
                                     $tried_local_id = 1;
                                     return 1;
                                 }
