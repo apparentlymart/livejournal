@@ -206,10 +206,87 @@ body<=
             # TAG:FR:bml_comm_members:del_members
             LJ::remove_friend($cid, [ keys %{$delete{'member'}} ]);
         }
+        
+        # create a closure to send a notification email to a user if they are
+        # added or removed from being a maintainer
+        my $sendmail = sub {
+            my ($targetu, $html, $plain, $subject) = @_;
+            return unless $targetu;
 
-        # log maintainer deletions
+            my $fromname = $remote->{user};
+
+            #todo: check if user wants to receive emails?
+            if ($targetu->{email}) {
+                  # send an email to this user:
+                  # send an email with both plain and html content
+                  my $msg =  new MIME::Lite (
+                                             'From'    => "$LJ::BOGUS_EMAIL ($LJ::SITENAME)",
+                                             'To'      => $targetu->{email},
+                                             'Subject' => $subject,
+                                             'Type'    => 'multipart/alternative',
+                                             );
+
+                  my $encoding = $targetu->{'mailencoding'} ?
+                      $LJ::CACHE_ENCODINGS{$targetu->{'mailencoding'}} :
+                      "UTF-8";
+
+                  # add the plaintext version
+                  my $plainpart = $msg->attach(
+                                               'Type'     => 'TEXT',
+                                               'Data'     => $plain,
+                                               'Encoding' => 'quoted-printable',
+                                               );
+
+                  $plainpart->attr("content-type.charset" => $encoding)
+                      if $LJ::UNICODE;
+
+                  # add the html version
+                  my $htmlpart = $msg->attach(
+                                              'Type'     => 'text/html',
+                                              'Data'     => $html,
+                                              'Encoding' => 'quoted-printable'
+                                              );
+
+                  $htmlpart->attr("content-type.charset" => $encoding)
+                      if $LJ::UNICODE;
+
+                  LJ::send_mail($msg);
+            }
+        };
+
+        # get all the maintainers who were removed
+        my $changedmaintainers = LJ::load_userids(keys %{$delete{admin}}, keys %{$add{admin}});
+        
         foreach my $uid (keys %{$delete{admin} || {}}) {
+            # log maintainer deletions
             $c->log_event('maintainer_remove', { actiontarget => $uid, remote => $remote });
+            
+            my $delmaintu = $changedmaintainers->{$uid};
+            next unless $delmaintu;
+            
+            # send email to the poor maintainer who got removed
+            my $mailusername = $delmaintu->{user};
+            my $mailusercname = $c->{name};
+            my $mailclink = LJ::journal_base($c, ['community']);
+            
+            my $html = qq(
+<p>Dear LiveJournal user $mailusername,</p>
+<p>$remote->{user} has removed you as a maintainer of the community <a href="$mailclink">$mailusercname.</a></p>
+<p>Regards,<br/>
+$LJ::SITENAME Team<br/>$LJ::SITEROOT</p>
+                          );
+
+            my $plain = qq(
+Dear LiveJournal user $mailusername,
+
+$remote->{user} has removed you as a maintainer of the community $mailusercname.
+
+Regards,
+$LJ::SITENAME Team
+$LJ::SITEROOT
+                           );
+            my $subject = "Maintainership removal: $mailusercname";
+            $sendmail->($delmaintu, $html, $plain, $subject);
         }
 
         # delete other rel edges
@@ -239,10 +316,42 @@ body<=
                 }
             }
         }
-
-        # log maintainer additions
+        
         foreach my $uid (keys %{$add{admin} || {}}) {
+            # log maintainer additions
             $c->log_event('maintainer_add', { actiontarget => $uid, remote => $remote });
+            
+            my $newmaintu = $changedmaintainers->{$uid};
+            next unless $newmaintu;
+
+            # send email to the new maintainer
+            my $mailusername = $newmaintu->{user};
+            my $mailusercname = $c->{name};
+            my $mailclink = LJ::journal_base($c, ['community']);
+            my $mailcommanlink = "$LJ::SITEROOT/community/manage.bml";
+            
+            my $html = qq(
+<p>Dear LiveJournal user $mailusername,</p>
+<p>You have just been added as a maintainer of the community <a href="$mailclink">$mailusercname</a> by one of the current maintainers. As the maintainer, you have the ability to control and manage the community. If you do not wish to take on this responsibility, you can remove your maintainership or transfer your community to another user.</p>
+<p>To manage your communities please visit <a href="$mailcommanlink">your community management page.</a></p>
+<p>Regards,<br/>
+$LJ::SITENAME Team<br/>$LJ::SITEROOT</p>
+                          );
+
+            my $plain = qq(
+Dear LiveJournal user $mailusername,
+You have just been added as a maintainer of the community $mailusercname by one of the current maintainers. As the maintainer, you have the ability to control and manage the community. If you do not wish to take on this responsibility, you can remove your maintainership or transfer your community to another user.
+
+To manage your communities please visit the following URL:
+
+$mailcommanlink
+
+Regards,
+$LJ::SITENAME Team
+$LJ::SITEROOT
+                           );
+            my $subject = "You have been added as a maintainer of $mailusercname";
+            $sendmail->($newmaintu, $html, $plain, $subject);
         }
 
         # set rels in db/memcache
