@@ -101,11 +101,14 @@ body<=
 
 	my $term = sub {
 	    my $term = shift;
-	    return "<span class='searchhighlight'>" . LJ::ehtml($term) . "</span>";
+            return $term if $term =~ m!^http://!;
+ 	    return "<span class='searchhighlight'>" . LJ::ehtml($term) . "</span>";
 	};
 	if (my $qterm = $GET{'q'}) {
 	    $q =~ s/\Q$qterm\E/$term->($&)/ige;
-	    $a =~ s/\Q$qterm\E/$term->($&)/ige;
+
+	    # don't highly terms in URLs
+            $a =~ s/(http:\/\/\S+)?\Q$qterm\E/$term->($&)/ige;
 	}
 
         # display output

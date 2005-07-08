@@ -15,7 +15,7 @@
 	$body .= "<p>(search term too short)</p>";
 	return;
     }
-    
+
     my $dbr = LJ::get_db_reader();
     my $sth = $dbr->prepare("SELECT * FROM faq");
     $sth->execute;
@@ -23,6 +23,10 @@
 
     while (my $f = $sth->fetchrow_hashref) {
 	my $score = 0;
+
+        # don't search things in the FURTHER READING section
+        # (a livejournal.com convention)
+	$f->{'answer'} =~ s/FURTHER READING.+//s;
 
 	if ($f->{'question'} =~ /\Q$q\E/i) {
 	    $score += 1;
