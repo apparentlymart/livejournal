@@ -1,4 +1,7 @@
 <?page
+head<=
+<?searchcss?>
+<=head
 body<=
 <?_code
 {
@@ -95,6 +98,15 @@ body<=
         $a =~ s/\n/<br \/>/g;
 
         $a = LJ::auto_linkify($a);
+
+	my $term = sub {
+	    my $term = shift;
+	    return "<span class='searchhighlight'>" . LJ::ehtml($term) . "</span>";
+	};
+	if (my $qterm = $GET{'q'}) {
+	    $q =~ s/\Q$qterm\E/$term->($&)/ige;
+	    $a =~ s/\Q$qterm\E/$term->($&)/ige;
+	}
 
         # display output
         $$body .= "<?h1";

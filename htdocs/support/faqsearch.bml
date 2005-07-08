@@ -1,0 +1,73 @@
+<?_code
+{
+    use strict;
+    use vars qw(%GET $title $body);
+
+    $title = "FAQ Search";
+
+    $body = "<?h1 Beta: FAQ Search h1?><?p Enter a search term! p?>";
+    $body .= "<form method='GET'>Search term: " . LJ::html_text({ size => 30, value => $GET{'q'}, name => 'q' }) . "<input type='submit' value='Search' /><br /><i>Examples:</i> <b>css, style, mood, music, download, mac</b></form>";
+
+    my $q = $GET{'q'};
+    return unless $q;
+
+    if (length $q < 2) {
+	$body .= "<p>(search term too short)</p>";
+	return;
+    }
+    
+    my $dbr = LJ::get_db_reader();
+    my $sth = $dbr->prepare("SELECT * FROM faq");
+    $sth->execute;
+    my @faqs;
+
+    while (my $f = $sth->fetchrow_hashref) {
+	my $score = 0;
+
+	if ($f->{'question'} =~ /\Q$q\E/i) {
+	    $score += 1;
+	}
+	if ($f->{'question'} =~ /\b\Q$q\E\b/i) {
+	    $score += 1;
+	}
+
+	if ($f->{'answer'} =~ /\Q$q\E/i) {
+	    $score += 1;
+	}
+	if ($f->{'answer'} =~ /\b\Q$q\E\b/i) {
+
+	    $score += 1;
+	}
+	
+	next unless $score;
+	$f->{'_score'} = $score;
+	push @faqs, $f;
+    }
+
+    @faqs = sort { $b->{'_score'} <=> $a->{'_score'} } @faqs;
+    if (@faqs > 25) { @faqs = @faqs[0..24]; }
+
+    my $term = sub {
+	my $term = shift;
+	return "<span class='searchhighlight'>" . LJ::ehtml($term) . "</span>";
+    };
+
+    $body .= "<ul>";
+    foreach my $f (@faqs) {
+	my $dq = LJ::ehtml($f->{'question'});
+	$dq =~ s/\Q$q\E/$term->($&)/ige;
+	my $ueq = LJ::eurl($q);
+	
+	$body .= "<li><a href='/support/faqbrowse.bml?faqid=$f->{'faqid'}&amp;q=$ueq'>$dq</a></li>";
+    }
+    $body .= "</ul>";
+    
+    return;
+}
+_code?><?page
+title=><?_code return $title; _code?>
+body=><?_code  return $body; _code?>
+head<=
+<?searchcss?>
+<=head
+page?>
