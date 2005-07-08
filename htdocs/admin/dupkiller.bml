@@ -2,11 +2,12 @@
 {
     use strict;
     use vars qw(%GET %POST);
+    use Digest::SHA1 qw(sha1_hex);
 
-    my ($sth, $ret);
-
+    my $ret;
     my $remote = LJ::get_remote();
 
+    return "Not logged in" unless $remote;
     return "<b>Error:</b> You don't have access to do this."
 	unless LJ::check_priv($remote, "supporthelp");
 
@@ -15,7 +16,6 @@
 	$ret .= "<form method='post'>";
 	$ret .= "Kill duplicates for user: <input name='user' size='15'> <input type='submit' value=\"Kill\">";
 	$ret .= "</form>";
-	
 	return $ret;
     }
 
@@ -54,8 +54,6 @@
 	push @events, @{ $res->{'events'} };
     }
 
-    use Digest::SHA1 qw(sha1_hex);
-
     my %bycontent;
     foreach my $ev (@events) {
 	my $content = sha1_hex($ev->{'subject'} . ": " . $ev->{'event'});
@@ -66,6 +64,8 @@
     foreach my $k (keys %bycontent) {
 	delete $bycontent{$k} unless scalar @{$bycontent{$k}} > 1;
     }
+
+    my $del_count = 0;
 
     # go over the dups, and find the ones without comments
     foreach my $dupk (keys %bycontent) {
@@ -98,11 +98,13 @@
 		}, \$err, { u => $u, nopassword => 1 });
 		return "Error: $err" unless $res;
 		$ret .= "Deleted $ev->{'itemid'}\n";
+                $del_count++;
 	    }
 	}
 
     }
 
+    $ret .= "Total deleted for $u->{user}: $del_count.\n";
     return "<pre>$ret\n</pre>";
 
 
