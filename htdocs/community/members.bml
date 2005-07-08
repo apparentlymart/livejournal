@@ -270,14 +270,14 @@ body<=
             my $mailclink = LJ::journal_base($c, ['community']);
             
             my $html = qq(
-<p>Dear LiveJournal user $mailusername,</p>
+<p>Dear $LJ::SITENAMESHORT user $mailusername,</p>
 <p>$remote->{user} has removed you as a maintainer of the community <a href="$mailclink">$mailusercname.</a></p>
 <p>Regards,<br/>
 $LJ::SITENAME Team<br/>$LJ::SITEROOT</p>
                           );
 
             my $plain = qq(
-Dear LiveJournal user $mailusername,
+Dear $LJ::SITENAMESHORT user $mailusername,
 
 $remote->{user} has removed you as a maintainer of the community $mailusercname.
 
@@ -331,7 +331,7 @@ $LJ::SITEROOT
             my $mailcommanlink = "$LJ::SITEROOT/community/manage.bml";
             
             my $html = qq(
-<p>Dear LiveJournal user $mailusername,</p>
+<p>Dear $LJ::SITENAMESHORT user $mailusername,</p>
 <p>You have just been added as a maintainer of the community <a href="$mailclink">$mailusercname</a> by one of the current maintainers. As the maintainer, you have the ability to control and manage the community. If you do not wish to take on this responsibility, you can remove your maintainership or transfer your community to another user.</p>
 <p>To manage your communities please visit <a href="$mailcommanlink">your community management page.</a></p>
 <p>Regards,<br/>
@@ -339,7 +339,7 @@ $LJ::SITENAME Team<br/>$LJ::SITEROOT</p>
                           );
 
             my $plain = qq(
-Dear LiveJournal user $mailusername,
+Dear $LJ::SITENAMESHORT user $mailusername,
 You have just been added as a maintainer of the community $mailusercname by one of the current maintainers. As the maintainer, you have the ability to control and manage the community. If you do not wish to take on this responsibility, you can remove your maintainership or transfer your community to another user.
 
 To manage your communities please visit the following URL:
