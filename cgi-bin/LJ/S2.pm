@@ -151,8 +151,8 @@ sub make_journal
 
     # If there's an entry for contenttype in the context 'scratch'
     # area, copy it into the "real" content type field.
-    $opts->{contenttype} = $ctx->[3]->{contenttype}
-        if defined $ctx->[3]->{contenttype};
+    $opts->{contenttype} = $ctx->[S2::SCRATCH]->{contenttype}
+        if defined $ctx->[S2::SCRATCH]->{contenttype};
 
     return $ret;
 }
@@ -675,8 +675,8 @@ sub s2_context
     };
 
     if ($ctx) {
-        # SCRATCH field is a hashref
-        $ctx->[S2::SCRATCH] = {};
+        # let's use the scratch field as a hashref
+        $ctx->[S2::SCRATCH] ||= {};
 
         LJ::S2::populate_system_props($ctx);
         S2::set_output(sub {});  # printing suppressed
@@ -1801,7 +1801,7 @@ sub alternate
 {
     my ($ctx, $one, $two) = @_;
 
-    my $scratch = $ctx->[3];
+    my $scratch = $ctx->[S2::SCRATCH];
     
     $scratch->{alternate}{"$one\0$two"} = ! $scratch->{alternate}{"$one\0$two"};
     return $scratch->{alternate}{"$one\0$two"} ? $one : $two;
@@ -1812,7 +1812,7 @@ sub set_content_type
     my ($ctx, $type) = @_;
 
     die "set_content_type is not yet implemented";
-    $ctx->[3]->{contenttype} = $type;
+    $ctx->[S2::SCRATCH]->{contenttype} = $type;
 }
 
 sub striphtml
