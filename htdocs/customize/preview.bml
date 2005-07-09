@@ -19,14 +19,9 @@ body<=
         
         my $author = $l->{author_name} || $l->{author};
         if ($author) {
-            $author = LJ::eall($author);
-            if ($l->{author_email}) {
-                $author = "<a href='mailto:" . LJ::eall($l->{author_email}) . "'>$author</a>";
-            }
-            $ret .= "<?p By " . $author . " p?>";
+            $ret .= "<?p By " . LJ::eall($author) . " p?>";
         }
-        
-        if ($l->{des}) {
+	if ($l->{des}) {
             $ret .= "<?p " . LJ::eall($l->{des}) . " p?>";
         }
         if ($l->{note}) {
@@ -89,9 +84,9 @@ body<=
             $layerdesc->($l);
             
             $ret .= "<ul style=\"list-style: none; padding: 0; margin: 0;\">";
-            $ret .= "<li><a href='themes.bml?layout=$l->{s2lid}&journal=$journal'>View Themes</a>";
+            $ret .= "<li><a href='themes.bml?layout=$l->{s2lid}&amp;journal=$journal'>View Themes</a>";
             if ($morepreviews) {
-                $ret .= "<li><a href='preview.bml?lid=$l->{s2lid}&journal=$journal'>View More Previews</a></li>";
+                $ret .= "<li><a href='preview.bml?lid=$l->{s2lid}&amp;journal=$journal'>View More Previews</a></li>";
             }
             $ret .= "</ul>";
 
