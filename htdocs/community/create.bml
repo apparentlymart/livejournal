@@ -158,8 +158,8 @@ SUBMIT:
         $ret .= "<?standout <font size='+1' face='arial'><b><a href='$uri'>$uri/</a></b></font> standout?>\n";
         $ret .= "<?p $ML{'.success.text3'} p?>\n";
 
-        $ret .= "<form method='get' action='$LJ::SITEROOT/editinfo.bml?authas=$nu->{user}'>";
-        $ret .= "<p align='center'>" . LJ::html_submit(undef, "$ML{'.success.btn.enterinfo'} &rarr;") . "</p>";
+        $ret .= "<form method='get' action='$LJ::SITEROOT/editinfo.bml'>";
+        $ret .= "<p align='center'><input type='hidden' name='authas' value='$nu->{user}' />" . LJ::html_submit(undef, "$ML{'.success.btn.enterinfo'} &rarr;") . "</p>";
         $ret .= "</form>\n";
 
         return $ret;
