@@ -40,7 +40,7 @@ sub make_journal
 
     if ($view eq "res") {
 
-        # the s1shorting comings virtual stylid doesn't have a styleid
+        # the s1shortcomings virtual styleid doesn't have a styleid
         # so we're making the rule that it can't have resource URLs.
         if ($styleid eq "s1short") {
             $opts->{'handler_return'} = 404;
@@ -148,6 +148,11 @@ sub make_journal
 
     # unload layers that aren't public
     LJ::S2::cleanup_layers($ctx);
+
+    # If there's an entry for contenttype in the context 'scratch'
+    # area, copy it into the "real" content type field.
+    $opts->{contenttype} = $ctx->[3]->{contenttype}
+        if defined $ctx->[3]->{contenttype};
 
     return $ret;
 }
@@ -670,6 +675,9 @@ sub s2_context
     };
 
     if ($ctx) {
+        # SCRATCH field is a hashref
+        $ctx->[S2::SCRATCH] = {};
+
         LJ::S2::populate_system_props($ctx);
         S2::set_output(sub {});  # printing suppressed
         S2::set_output_safe(sub {}); 
@@ -1789,6 +1797,32 @@ sub AUTOLOAD {
     die "No such builtin: $AUTOLOAD";
 }
 
+sub alternate
+{
+    my ($ctx, $one, $two) = @_;
+
+    my $scratch = $ctx->[3];
+    
+    $scratch->{alternate}{"$one\0$two"} = ! $scratch->{alternate}{"$one\0$two"};
+    return $scratch->{alternate}{"$one\0$two"} ? $one : $two;
+}
+
+sub set_content_type
+{
+    my ($ctx, $type) = @_;
+
+    die "set_content_type is not yet implemented";
+    $ctx->[3]->{contenttype} = $type;
+}
+
+sub striphtml
+{
+    my ($ctx, $s) = @_;
+
+    $s =~ s/<.*?>//g;
+    return $s;
+}
+
 sub ehtml
 {
     my ($ctx, $text) = @_;
@@ -2174,7 +2208,7 @@ sub Color__darker {
     return $new;
 }
 
-sub Comment__get_link
+sub _Comment__get_link
 {
     my ($ctx, $this, $key) = @_;
     if ($key eq "delete_comment" || $key eq "unscreen_comment" || $key eq "screen_comment" ||
@@ -2326,8 +2360,19 @@ sub DateTime__time_format
 sub EntryLite__get_link
 {
     my ($ctx, $this, $key) = @_;
-    return undef;
+
+    if ($this->{_type} eq 'Entry') {
+        return _Entry__get_link($ctx, $this, $key);
+    }
+    elsif ($this->{_type} eq 'Comment') {
+        return _Comment__get_link($ctx, $this, $key);
+    }
+    else {
+        return undef;
+    }
 }
+*Entry__get_link = \&EntryLite__get_link;
+*Comment__get_link = \&EntryLite__get_link;
 
 sub EntryLite__get_tags_text
 {
@@ -2346,8 +2391,9 @@ sub EntryLite__get_plain_subject
     return $this->{'_plainsubject'} = $subj;
 }
 *Entry__get_plain_subject = \&EntryLite__get_plain_subject;
+*Comment__get_plain_subject = \&EntryLite__get_plain_subject;
 
-sub Entry__get_link
+sub _Entry__get_link
 {
     my ($ctx, $this, $key) = @_;
     if ($key eq "nav_prev" || $key eq "edit_entry" || $key eq "mem_add" || 
