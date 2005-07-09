@@ -627,7 +627,7 @@ sub clean
     1 while $newdata =~ s/<script\b//ig;
 
     $$data = $newdata;
-    return undef;
+    return 0;
 }
 
 
@@ -909,11 +909,11 @@ sub clean_comment
     if ($$ref !~ /\<|\>|http/ && ! $opts->{preformatted}) {
         $$ref =~ s/\S{40,}/break_word($&,40)/eg;
         $$ref =~ s/\r?\n/<br \/>/g;
-        return;
+        return 0;
     }
 
     # slow path: need to be run it through the cleaner
-    clean($ref, {
+    return clean($ref, {
         'linkify' => 1,
         'wordlength' => 40,
         'addbreaks' => $opts->{preformatted} ? 0 : 1,

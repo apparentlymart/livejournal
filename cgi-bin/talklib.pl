@@ -2928,12 +2928,14 @@ sub make_preview {
 
     my $event = $form->{'body'};
     my $spellcheck_html;
-    if ($LJ::SPELLER && $form->{'do_spellcheck'}) {
+    # clean first; if the cleaner finds it invalid, don't spellcheck, so that we
+    # can show the user the error.
+    my $cleanok = LJ::CleanHTML::clean_comment(\$event, $form->{'prop_opt_preformatted'});
+    if (defined($cleanok) && $LJ::SPELLER && $form->{'do_spellcheck'}) {
         my $s = new LJ::SpellCheck { 'spellcommand' => $LJ::SPELLER,
                                      'color' => '<?hotcolor?>', };
         $spellcheck_html = $s->check_html(\$event);
     }
-    LJ::CleanHTML::clean_comment(\$event, $form->{'prop_opt_preformatted'});
 
     $ret .= "$BML::ML{'/talkpost_do.bml.preview.subject'} " . LJ::ehtml($cleansubject) . "<hr />\n";
     if ($spellcheck_html) {
