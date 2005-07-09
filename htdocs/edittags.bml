@@ -50,8 +50,12 @@ body<=
     my ($subj, $evt) = @{$lt2->{$jitemid} || []};
     return $err->($ML{'.error.db'}) unless $evt;
 
+    my (%props, %opts);
+    LJ::load_log_props2($u->{userid}, [$jitemid], \%props);
+    $opts{'preformatted'} = $props{$jitemid}{'opt_preformatted'};
+
     LJ::CleanHTML::clean_subject(\$subj);
-    LJ::CleanHTML::clean_event(\$evt);
+    LJ::CleanHTML::clean_event(\$evt, \%opts);
 
     my $logtags = LJ::Tags::get_logtags($u, $jitemid);
     my $usertags = LJ::Tags::get_usertags($u, { remote => $remote }) || {};
