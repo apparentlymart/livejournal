@@ -288,8 +288,7 @@ body<=
  my $pages = $opts->{'out_pages'};
 
  ########## make the navcrap
- my $navcrap;
- $navcrap .= "<a name='comments'></a>";
+ my $navcrap = '';
  if ($pages > 1) {
      $navcrap .= "<table style='font-weight: bold'>";
      $navcrap .= "<tr><td align='center' colspan='3'>";
@@ -508,7 +507,8 @@ body<=
  unless ($nocomments)
  {
      $ret .= "<div id='Comments'>";
-     $ret .= "$navcrap" if $navcrap;
+     $ret .= "<a name='comments'></a>";
+     $ret .= "<p>$navcrap</p>" if $navcrap;
      my $readlink;
      if ($dthread && $pages == 1) {
          my $readurl = LJ::Talk::talkargs($talkurl, $stylemine);
