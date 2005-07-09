@@ -805,15 +805,15 @@ sub show_poll
 
                 if ($do_table) {
                     $ret .= "<tr valign='middle'><td align='right'>$item</td>";
-                    $ret .= "<td><img src='$LJ::IMGPREFIX/poll/leftbar.gif' align='absmiddle' height='14' width='7' />";
-                    $ret .= "<img src='$LJ::IMGPREFIX/poll/mainbar.gif' align='absmiddle' height='14' width='$width' alt='$count ($percent%)' />";
-                    $ret .= "<img src='$LJ::IMGPREFIX/poll/rightbar.gif' align='absmiddle' height='14' width='7' /> ";
+                    $ret .= "<td><img src='$LJ::IMGPREFIX/poll/leftbar.gif' style='vertical-align:middle' height='14' width='7' alt='' />";
+                    $ret .= "<img src='$LJ::IMGPREFIX/poll/mainbar.gif' style='vertical-align:middle' height='14' width='$width' alt='' />";
+                    $ret .= "<img src='$LJ::IMGPREFIX/poll/rightbar.gif' style='vertical-align:middle' height='14' width='7' alt='' /> ";
                     $ret .= "<b>$count</b> ($percent%)</td></tr>";
                 } else {
                     $ret .= "<p>$item<br />";
-                    $ret .= "<span style='white-space: nowrap'><img src='$LJ::IMGPREFIX/poll/leftbar.gif' align='absmiddle' height='14' width='7' />";
-                    $ret .= "<img src='$LJ::IMGPREFIX/poll/mainbar.gif' align='absmiddle' height='14' width='$width' alt='$count ($percent%)' />";
-                    $ret .= "<img src='$LJ::IMGPREFIX/poll/rightbar.gif' align='absmiddle' height='14' width='7' /> ";
+                    $ret .= "<span style='white-space: nowrap'><img src='$LJ::IMGPREFIX/poll/leftbar.gif' style='vertical-align:middle' height='14' alt='' />";
+                    $ret .= "<img src='$LJ::IMGPREFIX/poll/mainbar.gif' style='vertical-align:middle' height='14' width='$width' alt='' />";
+                    $ret .= "<img src='$LJ::IMGPREFIX/poll/rightbar.gif' style='vertical-align:middle' height='14' width='7' alt='' /> ";
                     $ret .= "<b>$count</b> ($percent%)</span></p>";
                 }
             }
