@@ -2,6 +2,7 @@
 
 layerinfo type = "layout";
 layerinfo name = "A Sturdy Gesture";
+layerinfo des = "Simple boxes arranged in two columns, using the full width of the browser.";
 layerinfo lang = "en";
 
 layerinfo author = "Martin Atkins";

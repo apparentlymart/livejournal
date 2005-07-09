@@ -4,6 +4,7 @@ layerinfo type = "layout";
 layerinfo name = "Magazine";
 layerinfo redist_uniq = "magazine/layout";
 layerinfo previews = "magazine/magazine.jpg";
+layerinfo des = "An uncluttered, efficient layout with a centered heading and clearly-separated entries.";
 
 propgroup colors {
   property Color main_bgcolor { 

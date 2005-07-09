@@ -4,6 +4,7 @@ layerinfo type = "layout";
 layerinfo name = "Notepad";
 layerinfo redist_uniq = "notepad/layout";
 layerinfo previews = "notepad/notepad.jpg";
+layerinfo des = "A layout resembling a tabbed notebook.";
 
 propgroup colors {
   property Color body_bgcolor {

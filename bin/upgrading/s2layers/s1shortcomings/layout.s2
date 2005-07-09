@@ -3,6 +3,7 @@
 layerinfo type = "layout";
 layerinfo name = "S1 Shortcomings";
 layerinfo redist_uniq = "s1shortcomings/layout";
+layerinfo des = "An S2 layout used in S1-based journals for views that S1 can't handle.";
 
 propgroup colors {
   property Color main_bgcolor {

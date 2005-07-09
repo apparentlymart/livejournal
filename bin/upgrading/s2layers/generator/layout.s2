@@ -3,6 +3,7 @@ layerinfo type = "layout";
 layerinfo name = "Generator";
 layerinfo redist_uniq = "generator/layout";
 layerinfo previews = "generator/generator.jpg";
+layerinfo des = "Centered boxes, perfectly aligned.";
 
 propgroup colors {
     property Color entry_back {

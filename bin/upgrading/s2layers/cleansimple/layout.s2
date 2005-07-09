@@ -5,6 +5,7 @@ layerinfo name = "Clean and Simple";
 layerinfo redist_uniq = "cleansimple/layout";
 layerinfo author_name = "Martin Atkins";
 layerinfo previews = "cleansimple/cleansimple.jpg";
+layerinfo des = "A simple layout with a left sidebar, a heading bar and configurable margins.";
 
 propgroup colors {
   property Color body_bgcolor {

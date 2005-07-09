@@ -4,6 +4,7 @@ layerinfo type = "layout";
 layerinfo name = "Classic";
 layerinfo redist_uniq = "classic/layout";
 layerinfo previews = "classic/classic.jpg";
+layerinfo des = "The original LiveJournal style: simple and effective.";
 
 propgroup colors {
   property Color body_bgcolor {

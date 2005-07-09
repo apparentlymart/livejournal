@@ -4,6 +4,7 @@ layerinfo type = "layout";
 layerinfo name = "Punquin Elegant";
 layerinfo redist_uniq = "punquin/layout";
 layerinfo previews = "punquin/punquin.jpg";
+layerinfo des = "The original sidebar layout, with a single box containing all of your recent entries.";
 
 # Colors
 propgroup colors {

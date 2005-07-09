@@ -4,6 +4,7 @@ layerinfo type = "layout";
 layerinfo name = "Tabular Indent";
 layerinfo redist_uniq = "tabularindent/layout";
 layerinfo previews = "tabularindent/tabularindent.jpg";
+layerinfo des = "Two information and navigation boxes at the top and bottom of the page surround entries indented slightly from the left.";
 
 propgroup colors {
   property Color body_bgcolor { 

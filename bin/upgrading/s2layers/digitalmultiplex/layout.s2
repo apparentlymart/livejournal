@@ -2,7 +2,7 @@
 
 layerinfo type = "layout";
 layerinfo name = "Digital Multiplex (OSWD)";
-layerinfo author_name = "Ported by Jesse Proulx";
+layerinfo author_name = "Jesse Proulx";
 layerinfo author_email = "jproulx@livejournal.com";
 layerinfo redist_uniq = "digitalmultiplex/layout";
 layerinfo des = "Based on the Digital Multiplex design available from Open Source Web Designs. Originally written by Jonathan Sutherland.";
