@@ -6,29 +6,96 @@ body<=
     use strict;
     use vars qw(%GET %POST);
 
-    LJ::set_active_crumb('preview');
-
     my $ret;
     my $remote = LJ::get_remote();
     my $journal = LJ::canonical_username($GET{'journal'});
 
-    $ret .= "<p>[&lt;&lt; <a href='/customize/?journal=$journal'>Back</a>]</p>";
-
     my $pub = LJ::S2::get_public_layers();
 
-    my @layouts = 
-        sort { $a->{'name'} cmp $b->{'name'} }
-        map { $pub->{$_} } grep { /^\d+$/ && $pub->{$_}->{'type'} eq "layout" } keys %$pub;
-
-    foreach my $l (@layouts) {
-        $ret .= "<?h1 " . LJ::eall($l->{'name'}) . " h1?>";
-        unless ($l->{'_previews'}) {
-            $ret .= "<?p <i>No preview available.</i> p?>";
-            next;
+    my $layerdesc = sub {
+        my $l = shift;
+        
+        $ret .= "<?h1 " . LJ::eall($l->{name}) . " h1?>";
+        
+        my $author = $l->{author_name} || $l->{author};
+        if ($author) {
+            $author = LJ::eall($author);
+            if ($l->{author_email}) {
+                $author = "<a href='mailto:" . LJ::eall($l->{author_email}) . "'>$author</a>";
+            }
+            $ret .= "<?p By " . $author . " p?>";
         }
-        foreach (split(/\,/, $l->{'_previews'})) {
-            my ($img, $w, $h) = split(/\|/, $_);
-            $ret .= "<p style='margin-left: 20px'><img src=\"$LJ::IMGPREFIX/s2preview/$img\" width=\"$w\" height=\"$h\"></p>";
+        
+        if ($l->{des}) {
+            $ret .= "<?p " . LJ::eall($l->{des}) . " p?>";
+        }
+        if ($l->{note}) {
+            $ret .= "<?p " . LJ::eall($l->{note}) . " p?>";
+        }
+
+    };
+
+    if ($GET{lid} =~ /^\d+$/) {
+
+        my $l = $pub->{$GET{lid}};
+    
+        LJ::set_dynamic_crumb(LJ::eall($l->{name}), 'preview');
+        $ret .= "<p>[&lt;&lt; <a href='preview.bml?journal=$journal'>Back</a>]</p>";
+        
+        $layerdesc->($l);
+
+        unless ($l->{'_previews'}) {
+            $ret .= "<?p <i>No previews available.</i> p?>";
+        }
+        else {
+            foreach (split(/\,/, $l->{'_previews'})) {
+                my ($img, $w, $h) = split(/\|/, $_);
+                $ret .= "<p style='margin-left: 20px'><img src=\"$LJ::IMGPREFIX/s2preview/$img\" width=\"$w\" height=\"$h\"></p>\n";
+            }
+        }
+    }
+    else {
+
+        LJ::set_active_crumb('preview');
+        $ret .= "<p>[&lt;&lt; <a href='/customize/?journal=$journal'>Back</a>]</p>";
+
+        my @layouts = 
+            sort { $a->{'name'} cmp $b->{'name'} }
+            map { $pub->{$_} }
+            grep { /^\d+$/ && $pub->{$_}->{'type'} eq "layout" } keys %$pub;
+
+        my $first = 1;
+
+        foreach my $l (@layouts) {
+            if (!$first) {
+                $ret .= "<hr />";
+            }
+            else {
+                $first = 0;
+            }
+            $ret .= "<table style=\"margin: 2em 0;\"><tr valign=\"top\"><td style=\"width: 310px;\">\n";
+            my $morepreviews = 0;
+            if ($l->{'_previews'}) {
+                my @previews = split(/\,/, $l->{'_previews'}, 2);
+                my ($img, $w, $h) = split(/\|/, $previews[0]);
+                $ret .= "<img src=\"$LJ::IMGPREFIX/s2preview/$img\" width=\"$w\" height=\"$h\" alt=\"\" />";
+                $morepreviews = 1 if (scalar(@previews) > 1);
+            }
+            else {
+                $ret .= "<div style=\"text-align: center; font-style: italic;\">(no preview available)</div>";
+            }
+            $ret .= "</td><td>\n";
+            
+            $layerdesc->($l);
+            
+            $ret .= "<ul style=\"list-style: none; padding: 0; margin: 0;\">";
+            $ret .= "<li><a href='themes.bml?layout=$l->{s2lid}&journal=$journal'>View Themes</a>";
+            if ($morepreviews) {
+                $ret .= "<li><a href='preview.bml?lid=$l->{s2lid}&journal=$journal'>View More Previews</a></li>";
+            }
+            $ret .= "</ul>";
+
+            $ret .= "</td></tr></table>\n";
         }
     }
 

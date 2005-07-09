@@ -35,6 +35,12 @@ body<=
 
     return "S2 required" unless $u->{'stylesys'} == 2 && $style{'layout'};
 
+    if ($GET{layout} =~ /^\d+$/) {
+        # Pretend that the user has the given layout selected
+        $style{layout} = $GET{layout};
+        delete $style{i18n};
+    }
+
     # get themes for this layer
     my @themes = LJ::S2::get_layout_themes([$pub, $userlay], $style{'layout'});
 

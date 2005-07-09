@@ -405,7 +405,7 @@ sub get_public_layers
     return $LJ::CACHED_PUBLIC_LAYERS if $LJ::CACHED_PUBLIC_LAYERS;
 
     $sysid ||= LJ::get_userid("system");
-    my $layers = get_layers_of_user($sysid, "is_system");
+    my $layers = get_layers_of_user($sysid, "is_system", [qw(des note author author_name author_email)]);
 
     return $layers if $LJ::LESS_CACHING;
     $LJ::CACHED_PUBLIC_LAYERS = $layers if $layers;
@@ -432,7 +432,7 @@ sub b2lid_remap
 
 sub get_layers_of_user
 {
-    my ($u, $is_system) = @_;
+    my ($u, $is_system, $infokeys) = @_;
     my $userid = LJ::want_userid($u);
     return undef unless $userid;
     undef $u unless LJ::isu($u);
@@ -443,6 +443,8 @@ sub get_layers_of_user
     my $dbr = LJ::S2::get_s2_reader();
 
     my $extrainfo = $is_system ? "'redist_uniq', " : "";
+    $extrainfo .= join(', ', map { $dbr->quote($_) } @$infokeys).", " if $infokeys;
+    
     my $sth = $dbr->prepare("SELECT i.infokey, i.value, l.s2lid, l.b2lid, l.type ".
                             "FROM s2layers l, s2info i ".
                             "WHERE l.userid=? AND l.s2lid=i.s2lid AND ".
