@@ -12,7 +12,7 @@
     return unless $q;
 
     if (length $q < 2) {
-	$body .= "<p>(search term too short)</p>";
+	$body .= "<p><i>(search term too short)</i></p>";
 	return;
     }
 
@@ -29,23 +29,27 @@
 	$f->{'answer'} =~ s/FURTHER READING.+//s;
 
 	if ($f->{'question'} =~ /\Q$q\E/i) {
-	    $score += 1;
+	    $score += 1.5;
 	}
 	if ($f->{'question'} =~ /\b\Q$q\E\b/i) {
-	    $score += 1;
+	    $score += 1.5;
 	}
 
 	if ($f->{'answer'} =~ /\Q$q\E/i) {
 	    $score += 1;
 	}
 	if ($f->{'answer'} =~ /\b\Q$q\E\b/i) {
-
 	    $score += 1;
 	}
-	
+
 	next unless $score;
 	$f->{'_score'} = $score;
 	push @faqs, $f;
+    }
+
+    if (@faqs < 1) { # ain't no results
+        $body .= "<p><i>(no results found)</i></p>";
+        return;
     }
 
     @faqs = sort { $b->{'_score'} <=> $a->{'_score'} } @faqs;
@@ -61,11 +65,11 @@
 	my $dq = LJ::ehtml($f->{'question'});
 	$dq =~ s/\Q$q\E/$term->($&)/ige;
 	my $ueq = LJ::eurl($q);
-	
+
 	$body .= "<li><a href='/support/faqbrowse.bml?faqid=$f->{'faqid'}&amp;q=$ueq'>$dq</a></li>";
     }
     $body .= "</ul>";
-    
+
     return;
 }
 _code?><?page
