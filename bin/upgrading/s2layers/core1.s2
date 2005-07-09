@@ -238,7 +238,8 @@ class EntryLite
 "Base class for both journal entries and comments."
 {
     var readonly string subject "Subject.  May contain HTML.  Don't do substring chops on this.";
-    var readonly string text "Text (will be blank on some viewtypes, like 'month' view, or with collapsed threads)";
+    var readonly string text
+        "Entry Text; Use [method[EntryLite.print_text()]] to print this so that the entry's trust level is not affected by your layer's trust level.";
     var DateTime time "The user-specified time of the post, or the GMT time if it's a comment.";
 
     var UserLite poster "Author of the entry, or null if an anonymous comment";
@@ -257,6 +258,8 @@ class EntryLite
 
     var string[] link_keyseq "An array of keys which you should pass to [method[EntryLite.get_link(string)]] to produce an entry 'toolbar'. Does not contain nav_next and nav_prev for entries; you should retrieve those separately and put them somewhere appropriate for your layout.";
 
+    function print_text() [fixed]
+        "Print the entry text. Doesn't print anything in some contexts, such as on a month view or in a collapsed comment.";
     function builtin get_link (string key) : Link "Get a link to some action related to this entry or comment. You can iterate over [member[EntryLite.link_keyseq]] to get keys to pass in here to produce a 'toolbar' of links.";
     function builtin get_plain_subject () : string "For Entries that can contain HTML subjects, this returns the subjeft without HTML.  Comments can't have HTML in subjects, so this is equivalent to just using \$.subject.  The returned 'plain' subject may still contain HTML entities, so don't do substring chops on it either.";
     function builtin get_tags_text () : string "Returns a string containing a div of class 'ljtags' with the tags for the entry.  If there are no tags on the entry, returns a blank string.  The string is formatted according to the 'text_tags' property.";
@@ -1579,6 +1582,11 @@ function FriendsPage::print_entry(Entry e) {
     }
     "</div>\n\n";
 }
+
+function EntryLite::print_text() [fixed] {
+    print $.text;
+}
+
 function Entry::print_metadata() {
     if (size $.metadata) {
         """<div class="metadata">\n""";
