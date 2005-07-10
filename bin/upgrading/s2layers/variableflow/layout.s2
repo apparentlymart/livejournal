@@ -965,3 +965,95 @@ if ($*adv_enable_projection_styles) {
 
 }
 
+function print_theme_preview() {
+   var string fontspec=makefontspec();
+   if ($fontspec != "") {
+       $fontspec="  font-family: $fontspec;";
+   }
+
+   # This tries to do a bit of "sanity" checking to ensure users
+   # don't inadvertently break the CSS, but it's not brilliant.
+   var string background_body = $*clr_margin;
+   if ($*url_background_img_page != "" and not $*url_background_img_page->contains(")")) {
+       $background_body = $background_body + " url($*url_background_img_page)";
+       if (not $*background_properties_page->contains(";")) {
+           $background_body = $background_body + " $*background_properties_page";
+       }
+       if (not $*background_position_page->contains(";")) {
+           $background_body = $background_body + " $*background_position_page";
+       }
+   }
+   else {
+       $background_body = $background_body + " none";
+   }
+
+   var string background_page = $*clr_back;
+   if ($*url_background_img_box != "" and not $*url_background_img_box->contains(")")) {
+       $background_page = $background_page + " url($*url_background_img_box)";
+       if (not $*background_properties_box->contains(";")) {
+           $background_page = $background_page + " $*background_properties_box";
+       }
+       if (not $*background_position_box->contains(";")) {
+           $background_page = $background_page + " $*background_position_box";
+       }
+   }
+   else {
+       $background_page = $background_page + " none";
+   }
+
+
+
+"""<div style="margin: 0; padding: 5px; border: 0; background: $background_body; color: $*clr_text; $fontspec font-size: $*font_size;">
+
+<div style=\"""";
+
+  css_rule_if_set("margin-left", $*margin_left);
+  css_rule_if_set("margin-right", $*margin_right);
+  css_rule_if_set("margin-top", $*margin_top);
+  css_rule_if_set("margin-bottom", $*margin_bottom);
+  css_rule_if_set("padding-left", $*padding_left);
+  css_rule_if_set("padding-right", $*padding_right);
+  css_rule_if_set("padding-top", $*padding_top);
+  css_rule_if_set("padding-bottom", $*padding_bottom);
+  css_rule_if_set("max-width", $*adv_page_max_width);
+
+    if ($*opt_page_border) {
+        println """  border: 1px solid $*clr_line;""";
+    }
+    if ($*opt_page_background) {
+        println """  background: $background_page;""";
+    }
+
+"""\">
+
+
+<div style="margin-top: 3em; margin-bottom: 0.5em; color: $*clr_title; background: transparent;">
+<h1 style="font-size: 1.4em; font-weight: bold; text-align: $*align_title; margin: 0;">Joe's Journal</h1>
+<div style="font-size: 1.1em; font-weight: bold; text-align: $*align_title; margin: 0;">A magical world of milk and rectangles</div>
+
+<div>
+
+<div style="margin-bottom: 4em;">
+<h2 style="font-weight: bold; font-size: 1.0em;">6/1/05 01:10 pm - Duis malesuada volutpat elit. Quisque.</h2>
+<p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Suspendisse augue massa,
+<span style="text-decoration: underline; color: $*clr_link; background: transparent;">sagittis eget</span>, venenatis at,
+ornare at, erat. Praesent faucibus consectetuer nulla. Duis auctor justo at nisl. Nulla cursus. Pellentesque
+tortor orci, sodales ut, commodo ut, luctus quis, felis. In a nunc. Morbi ullamcorper quam non tortor. Sed
+vel tellus. Aliquam euismod rutrum elit. Aliquam dolor. Donec mollis scelerisque libero. Praesent auctor ante
+vel metus. Nam ullamcorper facilisis mauris. Donec et mi ut eros feugiat hendrerit. Nam dignissim, lectus
+tempor tempus imperdiet, ante urna feugiat ligula, non vestibulum massa mauris vitae massa. Nam eget velit.</p>
+
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>""";
+
+}
+
+
