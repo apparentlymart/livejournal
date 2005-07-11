@@ -353,7 +353,7 @@
          push @linkele, "<a href='/tools/tellafriend.bml?user=$u->{'user'}'><img align='middle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_tellfriend.gif' width='22' height='20' alt='$ML{'.tellafriend'}' title='$ML{'.tellafriend'}' border='0' /></a>";
      }
 
-     unless ($LJ::DISABLED{'feedster_search'} || $extid) {
+     unless ($LJ::DISABLED{'offsite_journal_search'} || $extid) {
          push @linkele, "<a href='/tools/search.bml?journal=$u->{'user'}'><img align='middle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_search.gif' width='22' height='20' alt='$ML{'.label.searchjournal'}' title='$ML{'.label.searchjournal'}' border='0' /></a>";
      }
 
