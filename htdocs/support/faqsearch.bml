@@ -35,6 +35,13 @@
 	    $score += 1.5;
 	}
 
+	if ($f->{'summary'} =~ /\Q$q\E/i) {
+	    $score += 1;
+	}
+	if ($f->{'summary'} =~ /\b\Q$q\E\b/i) {
+	    $score += 1;
+	}
+
 	if ($f->{'answer'} =~ /\Q$q\E/i) {
 	    $score += 1;
 	}

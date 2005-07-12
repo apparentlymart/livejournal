@@ -11,10 +11,10 @@ body<=
 
 <FORM ACTION="faqedit_do.bml" METHOD=POST>
 <?_code
- 
+
  $id = $FORM{'id'} + 0;
  $ret = "";
- 
+
  my $dbh = LJ::get_db_writer();
 
  my $remote = LJ::get_remote();
@@ -25,13 +25,10 @@ body<=
  if ($id)
  {
      LJ::remote_has_priv($remote, "faqedit", \%ac_edit);
-     my $sth = $dbh->prepare("SELECT question, answer, faqcat, sortorder FROM faq WHERE faqid=$id");
+     my $sth = $dbh->prepare("SELECT question, summary, answer, faqcat, sortorder FROM faq WHERE faqid=$id");
      $sth->execute;
-     ($question, $answer, $faqcat, $sortorder) = $sth->fetchrow_array or
+     ($question, $summary, $answer, $faqcat, $sortorder) = $sth->fetchrow_array or
          return "<b>Error:</b> FAQ #$id does not exist.";
-     
-     $q = LJ::ehtml($question);
-     $a = LJ::ehtml($answer);
 
      unless ($ac_edit{'*'} || $ac_edit{$faqcat}) {
          if (%ac_edit) {
@@ -41,7 +38,7 @@ body<=
          }
      }
  }
- else 
+ else
  {
      unless (%ac_add) {
          return "<B>Error: </B> You do not have access to add to the FAQ.";
@@ -51,12 +48,15 @@ body<=
 
  $sortorder += 0;
  $sortorder ||= 50;
- 
- $ret .= "<INPUT TYPE=HIDDEN NAME=id VALUE=$id>\n";
- $ret .= "<P>Category: <SELECT NAME=\"faqcat\"><OPTION VALUE=\"\">\n";
- 
+
+ $ret .= LJ::html_hidden('id', $id);
+ $ret .= "<p>Category: ";
+
  my $sth = $dbh->prepare("SELECT faqcat, faqcatname FROM faqcat ORDER BY catorder");
  $sth->execute;
+ my @cats;
+ push @cats, '';push @cats, '';
+
  while (($fc, $fcname) = $sth->fetchrow_array)
  {
      if ($id) {
@@ -64,16 +64,55 @@ body<=
      } else {
          next unless ($ac_add{'*'} || $ac_add{$fc});
      }
-     $selected = ($fc eq $faqcat) ? " SELECTED" : "";
-     $ret .= "<OPTION VALUE=\"$fc\"$selected>" . LJ::ehtml($fcname) . "\n";
+
+     push @cats, $fc;
+     push @cats, $fcname;
  }
- 
- $ret .= "</SELECT>";
- $ret .= "SortOrder (1-100): <INPUT NAME=sortorder SIZE=5 MAXLENGTH=4 VALUE=$sortorder>";
- $ret .= "<BR><FONT SIZE=-1>(sort order is how to sort within the category.  categories themselves are also sorted.)</FONT>";
- 
- $ret .= "<P><B>Question:</B> (as brief as possible, do not span multiple lines)<BR><TEXTAREA NAME=\"q\" ROWS=3 COLS=70 WRAP=SOFT>$q</TEXTAREA><BR><FONT SIZE=-1>(erase question to delete FAQ entry)</FONT>\n";
- $ret .= "<P><B>Answer:</B> (long as you want, give URLs to links, not HTML)<BR><TEXTAREA NAME=\"a\" ROWS=15 COLS=70 WRAP=SOFT>$a</TEXTAREA>\n";
+
+ $ret .= LJ::html_select({
+     'name'     => 'faqcat',
+     'selected' => $faqcat,},
+                         @cats);
+
+ $ret .= "&nbsp;SortOrder: ";
+ $ret .= LJ::html_text({
+     'value'     => $sortorder,
+     'size'      => 5,
+     'maxlength' => 4,
+ });
+
+ $ret .= "<br><i>(sort order is how to sort within the category.  categories themselves are also sorted.)</i></p>";
+
+ $ret .= "<p><b>Question:</b> (as brief as possible, do not span multiple lines)<br />";
+
+ $ret .= LJ::html_textarea({
+     'name'  => 'q',
+     'value' => $question,
+     'rows'  => 2,
+     'cols'  => 70,
+     'wrap'  => 'soft'
+     });
+ $ret .= "<br /><i>(erase question to delete FAQ entry)</i>";
+
+ $ret .= "<p><b>Summary:</b> (should be a shortish paragraph, urls are automatically linked, same markup as journal entries, no lj-cut)<br />";
+
+ $ret .= LJ::html_textarea({
+     'name'  => 's',
+     'value' => $summary,
+     'rows'  => '10',
+     'cols'  => '70',
+     'wrap'  => 'soft'
+     });
+
+ $ret .= "<p><b>Answer:</b> (long as you want, urls are automatically linked, same markup as journal entries, no lj-cut)<br />";
+
+ $ret .= LJ::html_textarea({
+     'name'  => 'a',
+     'value' => $answer,
+     'rows'  => '15',
+     'cols'  => '70',
+     'wrap'  => 'soft'
+     });
 
  my $faqd = LJ::Lang::get_dom("faq");
  if ($faqd) {
@@ -86,9 +125,9 @@ body<=
  }
 
 
- $ret .= "<P><INPUT TYPE=SUBMIT VALUE=\"Add/Edit FAQ Item\">";
+ $ret .= "<p>" . LJ::html_submit('', 'Add/Edit FAQ Item') . "</p>";
  return $ret;
- 
+
  _code?>
 
 </FORM>

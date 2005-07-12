@@ -21,6 +21,7 @@ body<=
  $ret = "";
   
  $qq = $dbh->quote($FORM{'q'});
+ $qs = $dbh->quote($FORM{'s'});
  $qa = $dbh->quote($FORM{'a'});
  $qfaqcat = $dbh->quote($FORM{'faqcat'});
  
@@ -63,6 +64,8 @@ body<=
      LJ::Lang::set_text($dbh, $faqd->{'dmid'}, $rlang->{'lncode'},
                         "$id.1question", $FORM{'q'}, $opts);
      LJ::Lang::set_text($dbh, $faqd->{'dmid'}, $rlang->{'lncode'},
+                        "$id.3summary", $FORM{'s'}, $opts);
+     LJ::Lang::set_text($dbh, $faqd->{'dmid'}, $rlang->{'lncode'},
                         "$id.2answer", $FORM{'a'}, $opts);
  };
  
@@ -72,7 +75,7 @@ body<=
      {
          return "<B>Error: </B> You did not select a FAQ category.";
      }
-     $dbh->do("INSERT INTO faq (faqid, question, answer, faqcat, sortorder, lastmoduserid, lastmodtime) VALUES (NULL, $qq, $qa, $qfaqcat, $sortorder, $remote->{'userid'}, NOW())");
+     $dbh->do("INSERT INTO faq (faqid, question, summary, answer, faqcat, sortorder, lastmoduserid, lastmodtime) VALUES (NULL, $qq, $qs, $qa, $qfaqcat, $sortorder, $remote->{'userid'}, NOW())");
      $id = $dbh->{'mysql_insertid'};
      $ret .= $dbh->errstr || "Added FAQ item.  All good.";
 
@@ -84,7 +87,7 @@ body<=
 
      if ($FORM{'q'} =~ /\S/)
      {
-         $dbh->do("UPDATE faq SET question=$qq, answer=$qa, faqcat=$qfaqcat, lastmoduserid=$remote->{'userid'}, lastmodtime=NOW(), sortorder=$sortorder WHERE faqid=$id");
+         $dbh->do("UPDATE faq SET question=$qq, summary=$qs, answer=$qa, faqcat=$qfaqcat, lastmoduserid=$remote->{'userid'}, lastmodtime=NOW(), sortorder=$sortorder WHERE faqid=$id");
          $ret .= "Updated FAQ item.  All good.  faqid is <b><a href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=$id'>$id</a></b>";
 
          $do_trans->($id);

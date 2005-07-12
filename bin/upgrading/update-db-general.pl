@@ -2572,7 +2572,10 @@ register_alter(sub {
                 "ALTER TABLE sessions MODIFY COLUMN userid INT UNSIGNED NOT NULL");
     }
 
-
+    if (column_type("faq", "summary") eq '') {
+        do_alter("faq",
+                 "ALTER TABLE faq ADD summary TEXT AFTER question");
+    }
 });
 
 1; # return true

@@ -18,6 +18,8 @@ body<=
     my $faqid = $GET{'faqid'} + 0;
     my $faqcat = $GET{'faqcat'};
 
+    my $mode = $GET{'view'} eq 'full' ? 'answer' : 'summary';
+
     my $where;
 
     my $dbr = LJ::get_db_reader();
@@ -46,15 +48,16 @@ body<=
     my $deflang = BML::get_language_default();
     my $altlang = $curlang ne $deflang;
     my $mld;
+    my $mll;
     if ($altlang) {
-        my $mll = LJ::Lang::get_lang($curlang);
+        $mll = LJ::Lang::get_lang($curlang);
         $mld = LJ::Lang::get_dom("faq");
         $altlang = 0 unless $mll && $mld;
     }
 
     # query db and get data
-    my $sth = $dbr->prepare("SELECT faqid, question, answer, faqcat, lastmoduserid, ".
-                            "DATE_FORMAT(lastmodtime, '%Y-%m-%d'), ".
+    my $sth = $dbr->prepare("SELECT faqid, question, summary, answer, faqcat, lastmoduserid, ".
+                            "DATE_FORMAT(lastmodtime, '%M %D, %Y'), ".
                             "UNIX_TIMESTAMP(lastmodtime) FROM faq ".
                             "WHERE $where ORDER BY sortorder");
     $sth->execute;
@@ -67,10 +70,9 @@ body<=
     my $count = 0;
     my $dbh;
     my $backfaqcat;
-    while (my ($faqid, $question, $answer, $faqcat, $lastmoduserid, 
-               $lastmodtime, $unixmodtime) = $sth->fetchrow_array)
+    while (my ($faqid, $question, $summary, $answer, $faqcat,
+               $lastmoduserid, $lastmodtime, $unixmodtime) = $sth->fetchrow_array)
     {
-
         $dbh ||= LJ::get_db_writer();
 
         # log this faq view
@@ -84,31 +86,44 @@ body<=
         # it'd be better to load them in a batch, but this works for now:
         if ($altlang) {
             $question = LJ::Lang::get_text($curlang, "$faqid.1question", $mld->{'dmid'});
+            # Load answer anyway since we may need it for old FAQs
             $answer   = LJ::Lang::get_text($curlang, "$faqid.2answer",   $mld->{'dmid'});
+            $summary  = LJ::Lang::get_text($curlang, "$faqid.3summary",  $mld->{'dmid'});
+        }
+
+        # Old FAQs don't have summaries, so show the answer instead
+        my $hassum = 1;
+        unless ($summary) {
+            $hassum = 0;
+            $summary = $answer;
         }
 
         # escape question and answers
-        my $q = LJ::ehtml($question);
-        $q =~ s/^\s+//; $q =~ s/\s+$//;
-        $q =~ s/\n/<br \/>/g;
+        $question = LJ::ehtml($question);
+        $question =~ s/^\s+//; $question =~ s/\s+$//;
+        $question =~ s/\n/<br \/>/g;
 
-        my $a = LJ::ehtml($answer);
-        $a =~ s/^\s+//; $a =~ s/\s+$//;
-        $a =~ s/\n( +)/"\n" . "&nbsp;&nbsp;"x length($1)/eg;
-        $a =~ s/\n/<br \/>/g;
+        # Clean this as if it were an entry, but don't allow lj-cuts
+        LJ::CleanHTML::clean_event(\$summary, {'ljcut_disable' => 1});
+        LJ::CleanHTML::clean_event(\$answer,  {'ljcut_disable' => 1}) if $mode eq 'answer';
 
-        $a = LJ::auto_linkify($a);
-
+        # Highlight search terms
 	my $term = sub {
 	    my $term = shift;
             return $term if $term =~ m!^http://!;
  	    return "<span class='searchhighlight'>" . LJ::ehtml($term) . "</span>";
 	};
-	if (my $qterm = $GET{'q'}) {
-	    $q =~ s/\Q$qterm\E/$term->($&)/ige;
+        my $qterm = $GET{'q'};
+	if ($qterm) {
+	    $question =~ s/\Q$qterm\E/$term->($&)/ige;
 
-	    # don't highly terms in URLs
-            $a =~ s/(http:\/\/\S+)?\Q$qterm\E/$term->($&)/ige;
+            # don't highlight terms in URLs
+            $summary =~ s/(http:\/\/\S+)?\Q$qterm\E/$term->($&)/ige;
+
+            if ($mode eq 'answer') {
+                # don't highlight terms in URLs
+                $answer =~ s/(http:\/\/\S+)?\Q$qterm\E/$term->($&)/ige;
+            }
 	}
 
         # display output
@@ -117,12 +132,39 @@ body<=
             $$body .= " <a style='text-decoration: none;' " .
                       "href='faqbrowse.bml?faqid=$faqid'>&#x00bb;</a>";
         }
-        $$body .= " $q h1?><div style='margin-left: 20px;'>$a</div>";
+        $$body .= " $question h1?>";
+        $$body .= "<div style='margin-left: 20px;'>";
+
+        $$body .= $summary;
+
+        if ($mode eq 'summary' && $hassum) {
+            my $q = "&q=$qterm" if $qterm;
+            $$body .= "<br /><br />(<b><a href='faqbrowse.bml?faqid=$faqid$q&view=full'>$ML{'.more'}</a></b>)";
+        }
+
+        if ($mode eq 'answer') {
+            $$body .= "<br /><br />" . $answer;
+        }
+
+        $$body .= "</div>";
+
+        if ($altlang) {
+            my $itid = LJ::Lang::get_itemid($mld->{'dmid'}, "$faqid.2answer");
+            if ($itid) {
+                my $sql = "SELECT DATE_FORMAT(l.chgtime, '%Y-%m-%d'), t.userid " .
+                    "FROM ml_latest AS l, ml_text AS t WHERE l.dmid = t.dmid AND l.lnid = t.lnid " .
+                    "AND l.lnid=? AND l.dmid=? AND l.itid=? LIMIT 1";
+                my $sth = $dbr->prepare($sql);
+                $sth->execute($mll->{'lnid'}, $mld->{'dmid'}, $itid);
+                ($lastmodtime, $lastmoduserid) = $sth->fetchrow_array;
+            }
+        }
 
         my $lastmodwho = LJ::get_username($lastmoduserid);
         if ($lastmodwho) {
-            $$body .= "<p align=\"right\"><b>$ML{'.lastupdated'}</b><br />$lastmodwho, $lastmodtime</p>";
+            $$body .= "<p align=\"right\"><b>$ML{'.lastupdated'}</b><br />$lastmodtime ($lastmodwho)</p>";
         }
+
         if (LJ::check_priv($remote, "faqedit", "*") ||
             LJ::check_priv($remote, "faqedit", $faqcat))
         {
@@ -138,7 +180,7 @@ body<=
          $$title = $ML{'Error'};
          $$body .= "<p><b>$ML{'.error.nofaq'}</b></p>\n";
      }
-     
+
      $$body .= "<?hr?>";
      $$body .= BML::ml('.backfaqcat',{'faqcat'=>$backfaqcat,}) . "<br />" if $backfaqcat && $faqid;
      $$body .= "$ML{'.backfaq'}<br />$ML{'.backsupport'}";
