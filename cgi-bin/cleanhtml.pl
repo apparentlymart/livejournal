@@ -262,9 +262,14 @@ sub clean
                     delete $hash->{'action'} if $deny;
                 }
 
+              ATTR:
                 foreach my $attr (keys %$hash)
                 {
-                    delete $hash->{$attr} if $attr =~ /^(?:on|dynsrc|data)/;
+                    if ($attr =~ /^(?:on|dynsrc|data)/) {
+                        delete $hash->{$attr};
+                        next;
+                    }
+
                     if ($attr =~ /(?:^=)|[\x0b\x0d]/) {
                         # Cleaner attack:  <p ='>' onmouseover="javascript:alert(document/**/.cookie)" >
                         # is returned by HTML::Parser as P_tag("='" => "='") Text( onmouseover...)
@@ -281,8 +286,9 @@ sub clean
                     # IE sucks:
                     if ($hash->{$attr} =~ /(j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t|
                                             v\s*b\s*s\s*c\s*r\s*i\s*p\s*t|
-                                            a\s*b\s*o\s*u\s*t)\s*:/ix) { 
-                        delete $hash->{$attr}; 
+                                            a\s*b\s*o\s*u\s*t)\s*:/ix) {
+                        delete $hash->{$attr};
+                        next;
                     }
 
                     if ($attr eq 'style' && $opts->{'cleancss'}) {
@@ -290,24 +296,26 @@ sub clean
                         # position === p\osition  :(
                         # strip all slashes no matter what.
                         $hash->{$attr} =~ s/\\//g;
-                        # and catch the obvious ones.
-                        foreach my $css (qw(absolute fixed)) {
-                            if ($hash->{$attr} =~ /$css/i) {
+
+                        # and catch the obvious ones ("[" is for things like document["coo"+"kie"]
+                        foreach my $css ("/*", "[", qw(absolute fixed expression eval behavior cookie document window)) {
+                            if ($hash->{$attr} =~ /\Q$css\E/i) {
                                 delete $hash->{$attr};
-                                last;
+                                next ATTR;
                             }
                         }
                     }
-                    
+
                     # reserve ljs_* ids for divs, etc so users can't override them to replace content
                     if ($attr eq 'id' && $hash->{$attr} =~ /^ljs_/i) {
                         delete $hash->{$attr};
+                        next;
                     }
 
                     if ($s1var) {
                         if ($attr =~ /%%/) {
                             delete $hash->{$attr};
-                            next;
+                            next ATTR;
                         }
 
                         my $props = $LJ::S1::PROPS->{$s1var};
