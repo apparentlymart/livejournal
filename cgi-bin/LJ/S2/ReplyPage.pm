@@ -20,6 +20,8 @@ sub ReplyPage
     my $ditemid = $entry->{'itemid'}*256 + $entry->{'anum'};
     $p->{'head_content'} .= $LJ::COMMON_CODE{'chalresp_js'};
 
+    $p->{'head_content'} .= $LJ::COMMON_CODE{'display_none'};
+
     if ($u->{'opt_blockrobots'}) {
         $p->{'head_content'} .= LJ::robot_meta_tags();
     }

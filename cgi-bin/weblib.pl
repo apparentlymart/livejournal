@@ -1560,6 +1560,15 @@ $LJ::COMMON_CODE{'autoradio_check'} = q{
 </script>
 };
 
+# Create a class designed to hide elements cross browser
+$LJ::COMMON_CODE{'display_none'} = q{
+<style type="text/css">
+    .display_none {
+      display: none;
+    }
+</style>
+};
+
 # Common Javascript functions for Quick Reply
 $LJ::COMMON_CODE{'quickreply'} = q{
     <script language="JavaScript" type="text/javascript" src="/js/x_core.js"></script>

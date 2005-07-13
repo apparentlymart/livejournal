@@ -39,7 +39,7 @@ if (document.getElementById) {
 
     var subject_field = document.getElementById("subject");
     var subject_nohtml = document.getElementById("ljnohtmlsubj");
-    subject_nohtml.style.display = 'none';
+    hideMe(subject_nohtml);
 }
 
 var apicurl = "";
@@ -71,10 +71,10 @@ function handleRadios(sel) {
     // LJ User
     if (sel == 2) {
         if (ljuser_row) {
-            ljuser_row.style.display = 'none';
+            hideMe(ljuser_row);
         }
         if (lj_more) {
-                lj_more.style.display = '';
+                showMe(lj_more);
         }
         username.focus();
 
@@ -84,17 +84,17 @@ function handleRadios(sel) {
 
     } else {
         if (lj_more) {
-            lj_more.style.display = 'none';
+            hideMe(lj_more);
         }
     }
 
     // OpenID
     if (oid_more) {
         if (sel == 3) {
-            oid_more.style.display = '';
+            showMe(oid_more);
             oidurl.focus();
             if (oidli_row) {
-               oidli_row.style.display = 'none';
+               hideMe(oidli_row);
             }
             oidlo_row.style.display = '';
 
@@ -104,16 +104,16 @@ function handleRadios(sel) {
 
         } else if (sel == 4) {
             if (oidlo_row) {
-               oidlo_row.style.display = 'none';
+               hideMe(oidlo_row);
             }
-            oidli_row.style.display = '';
-            oid_more.style.display = 'none';
+            showMe(oidli_row);
+            hideMe(oid_more);
 
             if (radio_oidli.checked != 1) {
                 radio_oidli.checked = 1;
             }
         } else {
-            oid_more.style.display = 'none';
+            hideMe(oid_more);
         }
     }
 
@@ -227,7 +227,7 @@ function subjectNoHTML(e) {
    key = getKey(e);
 
    if (key == 60) {
-      subject_nohtml.style.display = 'block';
+      showMe(subject_nohtml);
    }
 }
 
@@ -252,4 +252,12 @@ function otherOIDUser() {
    handleRadios(3);
 
    radio_oidlo.checked = 1;
+}
+
+function hideMe(e) {
+   e.className = 'display_none';
+}
+
+function showMe(e) {
+   e.className = '';
 }

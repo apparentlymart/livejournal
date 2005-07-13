@@ -310,6 +310,7 @@ _code?>
 head<=
 <?_code return $head _code?>
 <?_code return (! $LJ::REQ_HEAD_HAS{'chalresp_js'}++) ? $LJ::COMMON_CODE{'chalresp_js'} : ""; _code?>
+<?_code return $LJ::COMMON_CODE{'display_none'}; _code?>
 <=head
 windowtitle=><?_ml /talkpost.bml.title _ml?>
 page?><?_c <LJDEP>
