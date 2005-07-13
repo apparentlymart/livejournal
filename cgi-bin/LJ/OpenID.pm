@@ -61,7 +61,9 @@ sub consumer {
                                          ua => $ua,
                                          args => $get_args,
                                          cache => eval { LJ::MemCache::get_memcache() },
+                                         consumer_secret => \&LJ::OpenID::server_secret,
                                          debug => $LJ::IS_DEV_SERVER || 0,
+                                         required_root => $LJ::SITEROOT,
                                          );
 
     return $csr;
