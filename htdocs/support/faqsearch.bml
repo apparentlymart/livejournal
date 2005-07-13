@@ -67,7 +67,7 @@
 	return "<span class='searchhighlight'>" . LJ::ehtml($term) . "</span>";
     };
 
-    $body .= "<ul>";
+    $body .= "<ul style='line-height: 15pt'>";
     foreach my $f (@faqs) {
 	my $dq = LJ::ehtml($f->{'question'});
 	$dq =~ s/\Q$q\E/$term->($&)/ige;
