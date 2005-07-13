@@ -25,6 +25,7 @@ sub server {
     my ($get, $post) = @_;
 
     return Net::OpenID::Server->new(
+                                    compat       => $LJ::OPENID_COMPAT,
                                     get_args     => $get  || {},
                                     post_args    => $post || {},
 
