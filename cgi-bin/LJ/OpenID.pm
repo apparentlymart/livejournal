@@ -62,12 +62,17 @@ sub consumer {
                                          ua => $ua,
                                          args => $get_args,
                                          cache => eval { LJ::MemCache::get_memcache() },
-                                         consumer_secret => \&LJ::OpenID::server_secret,
+                                         consumer_secret => \&LJ::OpenID::consumer_secret,
                                          debug => $LJ::IS_DEV_SERVER || 0,
                                          required_root => $LJ::SITEROOT,
                                          );
 
     return $csr;
+}
+
+sub consumer_secret {
+    my $time = shift;
+    return server_secret($time - $time % 3600);
 }
 
 sub server_secret {
