@@ -5,7 +5,7 @@
 
     $title = "FAQ Search";
 
-    $body = "<?h1 Beta: FAQ Search h1?><?p Enter a search term! p?>";
+    $body = "<?h1 Beta: FAQ Search h1?><?p Enter a search term! FAQs containing this term in either the title or body will be listed below. This search tool is currently restricted to English. p?>";
     $body .= "<form method='GET'>Search term: " . LJ::html_text({ size => 30, value => $GET{'q'}, name => 'q' }) . "<input type='submit' value='Search' /><br /><i>Examples:</i> <b>css, style, mood, music, download, mac</b></form>";
 
     my $q = $GET{'q'};
