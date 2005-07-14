@@ -465,7 +465,7 @@ body<=
             # whitespace between these two DIVs is necessary for proper
             # rendering in IE 5 for Mac OS < X
             $ret .= "<div style='text-align:center;'>";
-            $ret .= "<b>FAQ Reference:</b><br /><a href='faqbrowse.bml?faqid=$le->{'faqid'}'>$faqname</a></div></div>\n";
+            $ret .= "<b>FAQ Reference:</b><br /><a href='faqbrowse.bml?faqid=$le->{'faqid'}&view=full'>$faqname</a></div></div>\n";
         }
         $ret .= "<p align='left' style='margin-top: 0px; margin-bottom: 0px;'>$message</p>\n";
         $ret .= "</td></tr></table>\n";
