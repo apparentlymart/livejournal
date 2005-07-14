@@ -698,7 +698,7 @@ sub mail_response_to_user
         ($faqname) = $sth->fetchrow_array;
         if ($faqname) {
             $body .= "FAQ REFERENCE: $faqname\n";
-            $body .= "$LJ::SITEROOT/support/faqbrowse.bml?faqid=$faqid";
+            $body .= "$LJ::SITEROOT/support/faqbrowse.bml?faqid=$faqid&view=full";
             $body .= "\n\n";
         }
     }
