@@ -67,13 +67,13 @@
 	return "<span class='searchhighlight'>" . LJ::ehtml($term) . "</span>";
     };
 
-    $body .= "<ul>";
+    $body .= "<ul class='spaced'>";
     foreach my $f (@faqs) {
 	my $dq = LJ::ehtml($f->{'question'});
 	$dq =~ s/\Q$q\E/$term->($&)/ige;
 	my $ueq = LJ::eurl($q);
 
-	$body .= "<li style='margin-top: 0.7em'><a href='/support/faqbrowse.bml?faqid=$f->{'faqid'}&amp;q=$ueq'>$dq</a></li>";
+	$body .= "<li><a href='/support/faqbrowse.bml?faqid=$f->{'faqid'}&amp;q=$ueq'>$dq</a></li>";
     }
     $body .= "</ul>";
 
@@ -84,5 +84,8 @@ title=><?_code return $title; _code?>
 body=><?_code  return $body; _code?>
 head<=
 <?searchcss?>
+<style type="text/css">
+ul.spaced li { margin-top: 0.7em; }
+</style>
 <=head
 page?>
