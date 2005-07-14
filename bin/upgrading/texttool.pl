@@ -249,15 +249,17 @@ sub copyfaq
     }
 
     # faq items
-    $sth = $dbh->prepare("SELECT faqid, question, answer FROM faq");
+    $sth = $dbh->prepare("SELECT faqid, question, answer, summary FROM faq");
     $sth->execute;
-    while (my ($faqid, $q, $a) = $sth->fetchrow_array) {
+    while (my ($faqid, $q, $a, $s) = $sth->fetchrow_array) {
         next if
             exists $existing{"$faqid.1question"} and
-            exists $existing{"$faqid.2answer"};
+            exists $existing{"$faqid.2answer"} and
+            exists $existing{"$faqid.3summary"};
         my $opts = { 'childrenlatest' => 1 };
         LJ::Lang::set_text($dbh, $domid, $ll->{'lncode'}, "$faqid.1question", $q, $opts);
         LJ::Lang::set_text($dbh, $domid, $ll->{'lncode'}, "$faqid.2answer", $a, $opts);
+        LJ::Lang::set_text($dbh, $domid, $ll->{'lncode'}, "$faqid.3summary", $s, $opts);
     }
 
     $out->('-', "done.");
