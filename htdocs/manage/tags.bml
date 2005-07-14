@@ -260,7 +260,7 @@ body<=
 } _code?>
 <=body
 head<=
-<link rel='stylesheet' type='text/css' href='/stc/tags.css' />
+<link rel='stylesheet' type='text/css' href='<?statprefix?>/tags.css' />
 <script type="text/javascript" src="/js/tags.js"></script>
 <=head
 bodyopts=>onLoad="initTagPage()"
