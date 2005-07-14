@@ -76,6 +76,7 @@ body<=
 
  $ret .= "&nbsp;SortOrder: ";
  $ret .= LJ::html_text({
+     'name'      => 'sortorder',
      'value'     => $sortorder,
      'size'      => 5,
      'maxlength' => 4,
