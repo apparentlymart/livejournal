@@ -67,13 +67,13 @@
 	return "<span class='searchhighlight'>" . LJ::ehtml($term) . "</span>";
     };
 
-    $body .= "<ul style='line-height: 15pt'>";
+    $body .= "<ul>";
     foreach my $f (@faqs) {
 	my $dq = LJ::ehtml($f->{'question'});
 	$dq =~ s/\Q$q\E/$term->($&)/ige;
 	my $ueq = LJ::eurl($q);
 
-	$body .= "<li><a href='/support/faqbrowse.bml?faqid=$f->{'faqid'}&amp;q=$ueq'>$dq</a></li>";
+	$body .= "<li style='margin-top: 0.7em'><a href='/support/faqbrowse.bml?faqid=$f->{'faqid'}&amp;q=$ueq'>$dq</a></li>";
     }
     $body .= "</ul>";
 
