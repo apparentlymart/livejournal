@@ -1,6 +1,24 @@
 <?page
 head<=
 <?searchcss?>
+
+<script language='JavaScript'>
+<!--
+    function showAnswer() {
+        if (!document.getElementById) {
+            return true;
+        }
+        var a = document.getElementById('answer');
+        var r = document.getElementById('rm');
+        if (!a || !r) {
+            return true;
+        }
+        r.style.display = 'none';
+        a.style.display = 'block';
+        return false;
+    }
+//-->
+</script>
 <=head
 body<=
 <?_code
@@ -105,7 +123,7 @@ body<=
 
         # Clean this as if it were an entry, but don't allow lj-cuts
         LJ::CleanHTML::clean_event(\$summary, {'ljcut_disable' => 1});
-        LJ::CleanHTML::clean_event(\$answer,  {'ljcut_disable' => 1}) if $mode eq 'answer';
+        LJ::CleanHTML::clean_event(\$answer,  {'ljcut_disable' => 1}) if $hassum;
 
         # Highlight search terms
 	my $term = sub {
@@ -117,13 +135,16 @@ body<=
 	if ($qterm) {
 	    $question =~ s/\Q$qterm\E/$term->($&)/ige;
 
+            # don't highlight things in the FURTHER READING section
+            # (a livejournal.com convention)
+            $answer =~ s/(FURTHER READING.+)//s;
+            my $fr = $1;
+
             # don't highlight terms in URLs
             $summary =~ s/(http:\/\/\S+)?\Q$qterm\E/$term->($&)/ige;
+            $answer =~ s/(http:\/\/\S+)?\Q$qterm\E/$term->($&)/ige;
 
-            if ($mode eq 'answer') {
-                # don't highlight terms in URLs
-                $answer =~ s/(http:\/\/\S+)?\Q$qterm\E/$term->($&)/ige;
-            }
+            $answer .= $fr;
 	}
 
         # display output
@@ -135,15 +156,22 @@ body<=
         $$body .= " $question h1?>";
         $$body .= "<div style='margin-left: 20px;'>";
 
-        $$body .= $summary;
+        $$body .= "<div name='summary' id='summary'>$summary</div>";
+        $$body .= "<br />";
 
         if ($mode eq 'summary' && $hassum) {
-            my $q = "&q=$qterm" if $qterm;
-            $$body .= "<br /><br />(<b><a href='faqbrowse.bml?faqid=$faqid$q&view=full'>$ML{'.more'}</a></b>)";
+            my $q = "&amp;q=$qterm" if $qterm;
+
+            $$body .= "<div id='rm' name='rm'>";
+            $$body .= "(<b><a onclick='return showAnswer();' href='faqbrowse.bml?faqid=$faqid$q&view=full'>" .
+                "$ML{'.more'}</a></b>)";
+            $$body .= "</div>";
         }
 
         if ($mode eq 'answer') {
-            $$body .= "<br /><br />" . $answer;
+            $$body .= "<div id='answer' name='answer'>$answer</div";
+        } else {
+            $$body .= "<div id='answer' name='answer' style='display: none'>$answer</div";
         }
 
         $$body .= "</div>";
