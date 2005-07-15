@@ -33,8 +33,8 @@ body<=
     $$title = '';
 
     # get faqid and redirect to faq.bml if none
-    my $faqid = $GET{'faqid'} + 0;
-    my $faqcat = $GET{'faqcat'};
+    my $faqidarg = $GET{'faqid'} + 0;
+    my $faqcatarg = $GET{'faqcat'};
 
     my $mode = $GET{'view'} eq 'full' ? 'answer' : 'summary';
 
@@ -42,17 +42,17 @@ body<=
 
     my $dbr = LJ::get_db_reader();
     # loading single faqid
-    if ($faqid) {
-        $$title = BML::ml('.title_num', { 'num' => $faqid });
-        $where = "faqid=$faqid";
+    if ($faqidarg) {
+        $$title = BML::ml('.title_num', { 'num' => $faqidarg });
+        $where = "faqid=$faqidarg";
 
     # loading entire faqcat
-    } elsif ($faqcat) {
+    } elsif ($faqcatarg) {
         my $catname = $dbr->selectrow_array("SELECT faqcatname FROM faqcat WHERE faqcat=?",
-                                            undef, $faqcat);
+                                            undef, $faqcatarg);
         $$title = BML::ml('.title_cat', { 'catname' => LJ::ehtml($catname) });
 
-        $where = "faqcat=" . $dbr->quote($faqcat);
+        $where = "faqcat=" . $dbr->quote($faqcatarg);
 
     # no faqid or faqcat specified, redirect
     } else {
@@ -62,7 +62,7 @@ body<=
     my $remote = LJ::get_remote();
 
     # get language settings
-    my $curlang = BML::get_language();
+    my $curlang = $GET{'lang'} || BML::get_language();
     my $deflang = BML::get_language_default();
     my $altlang = $curlang ne $deflang;
     my $mld;
@@ -149,7 +149,7 @@ body<=
 
         # display output
         $$body .= "<?h1";
-        if ($faqcat) {
+        if ($faqcatarg) {
             $$body .= " <a style='text-decoration: none;' " .
                       "href='faqbrowse.bml?faqid=$faqid'>&#x00bb;</a>";
         }
@@ -163,15 +163,18 @@ body<=
             my $q = "&amp;q=$qterm" if $qterm;
 
             $$body .= "<div id='rm' name='rm'>";
-            $$body .= "(<b><a onclick='return showAnswer();' href='faqbrowse.bml?faqid=$faqid$q&view=full'>" .
+            my $oc = $faqcatarg ? '' : "onclick='return showAnswer();'";
+            $$body .= "(<b><a $oc href='faqbrowse.bml?faqid=$faqid$q&view=full'>" .
                 "$ML{'.more'}</a></b>)";
             $$body .= "</div>";
         }
 
-        if ($mode eq 'answer') {
-            $$body .= "<div id='answer' name='answer'>$answer</div";
-        } else {
-            $$body .= "<div id='answer' name='answer' style='display: none'>$answer</div";
+        unless ($faqcatarg) { # If we're just viewing one faq
+            if ($mode eq 'answer') {
+                $$body .= "<div id='answer' name='answer'>$answer</div>";
+            } else {
+                $$body .= "<div id='answer' name='answer' style='display: none'>$answer</div>";
+            }
         }
 
         $$body .= "</div>";
@@ -210,7 +213,7 @@ body<=
      }
 
      $$body .= "<?hr?>";
-     $$body .= BML::ml('.backfaqcat',{'faqcat'=>$backfaqcat,}) . "<br />" if $backfaqcat && $faqid;
+     $$body .= BML::ml('.backfaqcat',{'faqcat'=>$backfaqcat,}) . "<br />" if $backfaqcat && $faqidarg;
      $$body .= "$ML{'.backfaq'}<br />$ML{'.backsupport'}";
 
      # we're dynamic, set title as crumb title
