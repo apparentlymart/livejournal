@@ -5,23 +5,99 @@
 
     $title = "FAQ Search Beta";
 
-    $body = "<?standout FAQs containing this term in either the title or body will be listed below. This search tool is currently restricted to English. standout?><br />";
-    $body .= "<form method='GET'>Search term: " . LJ::html_text({ size => 30, value => $GET{'q'}, name => 'q' }) . "&nbsp;<input type='submit' value='Search' /><br /><i>Examples:</i> <b>css, style, mood, music, download, mac</b></form>";
+    $body = "<?standout $ML{'.info'} standout?><br />";
+    $body .= "<form method='GET'>";
+    $body .= "<table><tr><td>$ML{'.label.term'}: </td>";
+    $body .= "<td>" . LJ::html_text({ size => 30, value => $GET{'q'}, name => 'q' }) . "&nbsp;<input type='submit' value='$ML{'.button.search'}' />";
+    $body .= "</td></tr>";
+
+    $body .= "<tr><td>";
+
+    my @langs;
+    foreach my $code (@LJ::LANGS) {
+        my $l = LJ::Lang::get_lang($code);
+        next unless $l;
+
+        my $item = "langname.$code";
+        my $namethislang = BML::ml($item);
+        my $namenative = LJ::Lang::get_text($l->{'lncode'}, $item);
+
+        push @langs, $code;
+
+        my $s = $namenative;
+        $s .= " ($namethislang)" if $namethislang ne $namenative;
+        push @langs, $s;
+    }
+
+    my $curr = BML::get_language();
+    $body .= "$ML{'.label.lang'}: ";
+    $body .= "</td><td>";
+    my $sel = $GET{'lang'} || $curr;
+    $body .= LJ::html_select({
+        'name' => 'lang',
+        'selected' => $sel,},
+                             @langs);
+
+    $body .= "&nbsp;$ML{'.example'}";
+    $body .= "</td></tr></table></form>";
 
     my $q = $GET{'q'};
-    return unless $q;
+    if (defined $q && !$q) {
+        $body .= "<p><i>($ML{'.error.noterm'})</i></p>";
+        return;
+    }
 
-    if (length $q < 2) {
-	$body .= "<p><i>(search term too short)</i></p>";
+    if (defined $q && length $q < 2) {
+	$body .= "<p><i>($ML{'.error.tooshort'})</i></p>";
 	return;
     }
 
-    my $dbr = LJ::get_db_reader();
-    my $sth = $dbr->prepare("SELECT * FROM faq");
-    $sth->execute;
+    # If for some other reason it isn't set or
+    # this is an initial page load
+    return unless $q;
+
     my @faqs;
 
+    # Might as well run this no matter the lang since
+    # we need the faqids to load from translation
+    # system anyway.  Would be nice to memcache
+    # the faqid list
+    my $dbr = LJ::get_db_reader();
+    my $sth = $dbr->prepare("SELECT faqid, question, summary, answer FROM faq");
+    $sth->execute;
     while (my $f = $sth->fetchrow_hashref) {
+        push @faqs, {
+            'faqid'    => $f->{faqid},
+            'question' => $f->{question},
+            'summary'  => $f->{summary},
+            'answer'   => $f->{answer},
+        }
+    }
+
+    # Are they asking for the site default language?
+    unless ($GET{'lang'} eq $LJ::DEFUALT_LANG) {
+        my $faqd = LJ::Lang::get_dom("faq");
+        my $l = LJ::Lang::get_lang($GET{'lang'});
+        last unless $faqd && $l;
+
+        my @load;
+        foreach (@faqs) {
+            push @load, "$_->{faqid}.1question";
+            push @load, "$_->{faqid}.3summary";
+            push @load, "$_->{faqid}.2answer";
+        }
+
+        my $res = LJ::Lang::get_text_multi($l->{'lncode'}, $faqd->{'dmid'}, \@load);
+        foreach (@faqs) {
+            my $id = $_->{faqid};
+            $_->{question} = $res->{"$id.1question"} if $res->{"$id.1question"};
+            $_->{summary}  = $res->{"$id.3summary"} if $res->{"$id.3summary"};
+            $_->{answer}   = $res->{"$id.2answer"} if $res->{"$id.2answer"};
+        }
+    }
+
+    my @results;
+    foreach my $f (@faqs) {
 	my $score = 0;
 
         # don't search things in the FURTHER READING section
@@ -51,16 +127,16 @@
 
 	next unless $score;
 	$f->{'_score'} = $score;
-	push @faqs, $f;
+	push @results, $f;
     }
 
-    if (@faqs < 1) { # ain't no results
-        $body .= "<p><i>(no results found)</i></p>";
+    if (@results < 1) { # ain't no results
+        $body .= "<p><i>($ML{'.error.noresults'})</i></p>";
         return;
     }
 
-    @faqs = sort { $b->{'_score'} <=> $a->{'_score'} } @faqs;
-    if (@faqs > 25) { @faqs = @faqs[0..24]; }
+    @results = sort { $b->{'_score'} <=> $a->{'_score'} } @results;
+    if (@results > 25) { @results = @results[0..24]; }
 
     my $term = sub {
 	my $term = shift;
@@ -68,12 +144,13 @@
     };
 
     $body .= "<ul class='spaced'>";
-    foreach my $f (@faqs) {
+    foreach my $f (@results) {
 	my $dq = LJ::ehtml($f->{'question'});
 	$dq =~ s/\Q$q\E/$term->($&)/ige;
 	my $ueq = LJ::eurl($q);
+        my $ul = $GET{'lang'} ne $curr ? "&amp;lang=".$GET{'lang'} : '';
 
-	$body .= "<li><a href='/support/faqbrowse.bml?faqid=$f->{'faqid'}&amp;q=$ueq'>$dq</a></li>";
+	$body .= "<li><a href='/support/faqbrowse.bml?faqid=$f->{'faqid'}&amp;q=$ueq$ul'>$dq</a></li>";
     }
     $body .= "</ul>";
 

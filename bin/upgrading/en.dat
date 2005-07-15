@@ -3006,6 +3006,22 @@ that area. p?>
 
 /support/faqbrowse.bml.title_num=FAQ Question #[[num]]
 
+/support/faqsearch.bml.button.search=Search
+
+/support/faqsearch.bml.error.noresults=no results found
+
+/support/faqsearch.bml.error.noterm=no search term entered
+
+/support/faqsearch.bml.error.tooshort=search term too short
+
+/support/faqsearch.bml.example=<i>Examples:</i> <b>css, style, mood, music, download, mac</b>
+
+/support/faqsearch.bml.label.lang=Language
+
+/support/faqsearch.bml.label.term=Search term
+
+/support/faqsearch.bml.info=FAQs containing this term in either the title or body will be listed below. All FAQs may not be fully translated in every language.
+
 /support/help.bml.interim=The support queue is intended for use by people with support privileges.
 
 /support/see_overrides.bml.error.noprivs=Only users with the supportviewinternal or supporthelp privilege can view another user's overrides.
