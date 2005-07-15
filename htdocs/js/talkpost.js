@@ -96,7 +96,7 @@ function handleRadios(sel) {
             if (oidli_row) {
                hideMe(oidli_row);
             }
-            oidlo_row.style.display = '';
+            showMe(oidlo_row);
 
             if (radio_oidlo.checked != 1) {
                 radio_oidlo.checked = 1;
@@ -244,7 +244,7 @@ function getKey(e) {
 function otherLJUser() {
    handleRadios(2);
 
-   otherljuser_row.style.display = '';
+   showMe(otherljuser_row);
    radio_user.checked = 1;
 }
 

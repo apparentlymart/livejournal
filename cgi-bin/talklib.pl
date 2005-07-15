@@ -1137,7 +1137,7 @@ sub talkform {
             # Logged in
             if (defined $oid_identity) {
                 # Don't worry about a real href since js hides the row anyway
-                my $other_user = "<script lanaguage='JavaScript'>if (document.getElementById) {document.write(\"&nbsp;<a href='#' onClick='otherOIDUser();return false;'>[other]</a>\");}</script>";
+                my $other_user = "<script language='JavaScript'>if (document.getElementById) {document.write(\"&nbsp;<a href='#' onClick='otherOIDUser();return false;'>[other]</a>\");}</script>";
 
                 $ret .= "<tr valign='middle' id='oidli' name='oidli'>";
                 $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-profile.gif' onclick='handleRadios(4);' /></td><td align='center'><input type='radio' name='usertype' value='openid_cookie' id='talkpostfromoidli'" .
@@ -1225,7 +1225,7 @@ sub talkform {
         my $logged_in = LJ::ehtml($remote->display_name);
 
         # Don't worry about a real href since js hides the row anyway
-        my $other_user = "<script lanaguage='JavaScript'>if (document.getElementById) {document.write(\"&nbsp;<a href='#' onClick='otherLJUser();return false;'>[other]</a>\");}</script>";
+        my $other_user = "<script language='JavaScript'>if (document.getElementById) {document.write(\"&nbsp;<a href='#' onClick='otherLJUser();return false;'>[other]</a>\");}</script>";
 
         if (LJ::is_banned($remote, $journalu)) {
             $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/userinfo.gif' /></td>";
@@ -1265,7 +1265,7 @@ sub talkform {
         $ret .= "var radio_user = document.getElementById(\"talkpostfromlj\");\n";
         $ret .= "if (!radio_user.checked) {\n";
         $ret .= "var otherljuser_row = document.getElementById(\"otherljuser_row\");\n";
-        $ret .= "otherljuser_row.style.display = 'none';\n";
+        $ret .= "otherljuser_row.className = 'display_none';\n";
         $ret .= "}\n";
         $ret .= "}\n";
         $ret .= "//-->\n";
