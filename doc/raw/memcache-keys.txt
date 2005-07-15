@@ -72,6 +72,7 @@ includefile:<name> == text of BML include file
 <uid> rel:<uid>:<targetid>:<rel> == [{0|1}, as_of_time]
 <uid> relmodu:<uid>:<rel> == as_of_time, updated when rel edges of uid change
 <targetid> relmodt:<targetid>:<rel> == as_of_time, updated when rel edges of targetid change
+<uid> reluser:<uid>:<rel> == arrayref of userids on the right side of this rel
 
 <uid>   memct:<uid>    -- number of memories user has
 
