@@ -295,32 +295,9 @@ sub set_text
 sub get_text
 {
     my ($lang, $code, $dmid, $vars) = @_;
-    $dmid = int($dmid || 1);
-    $lang ||= $LJ::DEFAULT_LANG;
-    load_lang_struct() unless $LS_CACHED;
-    my $cache_key = "ml.${lang}.${dmid}.${code}";
-    
-    my $text = $TXT_CACHE->get($cache_key);
 
-    unless (defined $text) {
-        my $mem_good = 1;
-        $text = LJ::MemCache::get($cache_key);
-        unless (defined $text) {
-            $mem_good = 0;
-            my $l = $LN_CODE{$lang} or return "?lang?";
-            my $dbr = LJ::get_db_reader();
-            $text = $dbr->selectrow_array("SELECT t.text".
-                                          "  FROM ml_text t, ml_latest l, ml_items i".
-                                          " WHERE t.dmid=$dmid AND t.txtid=l.txtid".
-                                          "   AND l.dmid=$dmid AND l.lnid=$l->{lnid} AND l.itid=i.itid".
-                                          "   AND i.dmid=$dmid AND i.itcode=?", undef,
-                                          $code);
-        }
-        if (defined $text) {
-            $TXT_CACHE->set($cache_key, $text);
-            LJ::MemCache::set($cache_key, $text) unless $mem_good;
-        }
-    }
+    my $text = get_text_multi($lang, $dmid, [ $code ]);
+    $text = $text->{$code};
 
     if ($vars) {
         $text =~ s/\[\[\?([\w\-]+)\|(.+?)\]\]/resolve_plural($lang, $vars, $1, $2)/eg;
@@ -328,6 +305,81 @@ sub get_text
     }
 
     return $text;
+}
+
+# Loads multiple language strings at once.  These strings
+# cannot however contain variables, if you have variables
+# you wouldn't be calling this anyway!
+# args: $lang, $dmid, array ref of lang codes
+sub get_text_multi
+{
+    my ($lang, $dmid, $codes) = @_;
+
+    return {} unless $codes;
+
+    $dmid = int($dmid || 1);
+    $lang ||= $LJ::DEFAULT_LANG;
+    load_lang_struct() unless $LS_CACHED;
+    my %strings;
+    my @memkeys;
+    my @dbload;
+    my $c = 0;
+
+    foreach my $code (@$codes) {
+        my $cache_key = "ml.${lang}.${dmid}.${code}";
+        my $text = $TXT_CACHE->get($cache_key);
+
+        if ($text) {
+            $strings{$code} = $text;
+            delete @$codes[$c];
+        } else {
+            push @memkeys, $cache_key;
+        }
+        $c++;
+    }
+
+    return \%strings unless @memkeys;
+
+    my $mem = LJ::MemCache::get_multi(@memkeys) || {};
+
+    foreach my $code (@$codes) {
+        next unless $code;
+
+        my $cache_key = "ml.${lang}.${dmid}.${code}";
+        my $text = $mem->{$cache_key};
+
+        if ($text) {
+            $strings{$code} = $text;
+        } else {
+            push @dbload, $code;
+        }
+    }
+
+    return \%strings unless @dbload;
+
+    my $l = $LN_CODE{$lang};
+
+    # This shouldn't happen!
+    die ("Unable to load language code") unless $l;
+
+    my $dbr = LJ::get_db_reader();
+    my $bind = join(',', map { '?' } @dbload);
+    my $sth = $dbr->prepare("SELECT i.itcode, t.text".
+                            " FROM ml_text t, ml_latest l, ml_items i".
+                            " WHERE t.dmid=? AND t.txtid=l.txtid".
+                            " AND l.dmid=? AND l.lnid=? AND l.itid=i.itid".
+                            " AND i.dmid=? AND i.itcode IN ($bind)");
+    $sth->execute($dmid, $dmid, $l->{lnid}, $dmid, @dbload);
+
+    while (my ($code, $text) = $sth->fetchrow_array) {
+        $strings{$code} = $text;
+
+        my $cache_key = "ml.${lang}.${dmid}.${code}";
+        $TXT_CACHE->set($cache_key, $text);
+        LJ::MemCache::set($cache_key, $text);
+    }
+
+    return \%strings;
 }
 
 # The translation system now supports the ability to add multiple plural forms of the word
