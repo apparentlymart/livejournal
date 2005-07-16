@@ -3822,9 +3822,13 @@ This could be because: <ol>
 
 /userinfo.bml.label.location=Location:
 
+/userinfo.bml.label.maintainers=Maintainers
+
 /userinfo.bml.label.memberof=Member of
 
 /userinfo.bml.label.memories=Memories:
+
+/userinfo.bml.label.moderators=Moderators
 
 /userinfo.bml.label.moredetails=(more details...)
 

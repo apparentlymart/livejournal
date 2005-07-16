@@ -132,6 +132,7 @@
                     opt_showmutualfriends fb_num_pubpics);
      unless ($com || $synd) { push @props, qw(aolim icq yahoo msn gender jabber); }
      if ($synd) { push @props, qw(rssparseerror); }
+     if ($com) { push @props, qw(moderated); }
      if ($u->{'statusvis'} eq 'V') { push @props, qw(opt_blockrobots); }
      LJ::run_hooks('userinfo_local_props', {
          'props' => \@props
@@ -695,6 +696,65 @@ if ($u->{'journaltitle'}) {
      $body .= "</td></tr>";
  }
  
+ # Prints out a list of users with links to their
+ # userinfo pages. Apply strikethru and bolding
+ # for deleted journals and friends of user.
+ my $listusers = sub {
+     my $users = shift;
+     foreach my $f (@$users) {
+         my $status = $f->{'statusvis'};
+         my $uilink = "<a href='/userinfo.bml?user=$f->{'user'}'>$f->{'user'}</a>";
+         $uilink = "<strike>$uilink</strike>" if $status =~ /[DXS]/;
+         $uilink = "<b>$uilink</b>" if $remote_friendid{$f->{'userid'}} &&
+             $remote->{'userid'} != $u->{'userid'};
+         $body .= $uilink;
+         $body .= ', ';
+     }
+     # remove trailing ", "
+     chop $body; chop $body;
+ };
+
+
+ ##
+ ## community maintainers and moderators
+ ##
+ if ($com) {
+     # get the list of maintainers and moderators (userid only)
+     my $maintainers = LJ::load_rel_user_cache($userid, 'A') || [];
+     my $moderators  = (LJ::load_rel_user_cache($userid, 'M') || [])
+         if $u->{'moderated'};
+
+     if (scalar @$maintainers || ($u->{'moderated'} && scalar @$moderators)) {
+         # now load all the usernames.
+         my %userhash;
+         LJ::load_userids_multiple([ map { $_, \$userhash{$_} }
+                                     @$maintainers, @$moderators ]);
+
+         my @maintlist = sort { $a->{'user'} cmp $b->{'user'} }
+                         map { $userhash{$_} } @$maintainers;
+
+         my $span = ($narrow_left-- >= 0) ? 1 : 2;
+         $body .= "<tr><td align='right'><b>$ML{'.label.maintainers'}:</b></td>";
+         $body .= "<td colspan='$span'>";
+         $body .= "<b>" . scalar @maintlist . ":</b> ";
+         $listusers->(\@maintlist);
+
+         # moderators
+         if ($u->{'moderated'} && scalar @$moderators) {
+             my @modlist = sort { $a->{'user'} cmp $b->{'user'} }
+                           map { $userhash{$_} } @$moderators;
+
+             if (scalar @modlist) {
+                 my $span = ($narrow_left-- >= 0) ? 1 : 2;
+                 $body .= "<tr><td align='right'><b>$ML{'.label.moderators'}:</b></td>";
+                 $body .= "<td colspan='$span'>";
+                 $body .= "<b>" . scalar @modlist . ":</b> ";
+                 $listusers->(\@modlist);
+             }
+         }
+     }
+ }
+
  ##
  ## friends
  ## 
@@ -756,15 +816,7 @@ if ($u->{'journaltitle'}) {
              $body .= "</tr></table>";
          } else {
              $body .= "<b>" . $friends{'count'} . ":</b> ";
-             foreach my $f (@friends) {
-                 my $status = $f->{'statusvis'};
-                 my $frlink = "<a href='/userinfo.bml?user=$f->{'user'}'>$f->{'user'}</a>";
-                 $frlink = "<strike>$frlink</strike>" if $status =~ /[DXS]/;
-                 $frlink = "<b>$frlink</b>" if $remote_friendid{$f->{'userid'}} && $remote->{'userid'} != $u->{'userid'};
-                 $body .= $frlink;
-                 $body .= ", ";
-             }
-             chop $body; chop $body;
+             $listusers->(\@friends);
          }
      } else {
          $body .= $ML{'.label.nofriends'};
