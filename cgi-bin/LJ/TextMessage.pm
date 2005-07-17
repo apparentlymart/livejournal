@@ -23,7 +23,7 @@ use MIME::Lite;
 use strict;
 use vars qw($VERSION $SENDMAIL %providers);
 
-$VERSION = '1.5.3';
+$VERSION = '1.5.4';
 
 # default path to sendmail, if none other specified.  we should probably
 # use something more perl-ish and less unix-specific, but whateva'
@@ -40,14 +40,6 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'totlimit'   => 100,
     },
 
-    'a1telekom' => {
-        'name'          => 'A1/Telekom Austria',
-        'notes'         => 'Enter your phone number. Messages are sent via web gateway. Number must start 43664, 43676, 43699, 43650, 43660, 38640, 38591 or 42379',
-        'fromlimit'     => 20,
-        'msglimit'      => 420,
-        'totlimit'      => 420,
-    },
-
     'airtouch' => {
         'name'       => 'Verizon Wireless (formerly Airtouch)',
         'notes'      => 'Enter your phone number. Messages are sent to number@airtouchpaging.com. This is ONLY for former AirTouch customers. Verizon Wireless customers should use Verizon Wireless instead.',
@@ -55,6 +47,7 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'msglimit'   => 120,
         'totlimit'   => 120,
     },
+
     'aliant' => {
         'name'          => 'Alianet (NBTel, MTT, NewTel, and Island Tel)',
         'notes'         => 'Enter your phone number. Message is sent to number@wirefree.informe.ca',
@@ -62,6 +55,7 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'msglimit'      => 140,
         'totlimit'      => 140,
     },
+
     'alltel' => {
         'name'          => 'Alltel',
         'notes'         => 'Enter your phone number. Goes to number@message.alltel.com.',
@@ -158,12 +152,20 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'totlimit'      => 120,
     },
 
-    'centennial' => {
+    'Centennial' => {
         'name'		=> 'Centennial Wireless',
         'notes'		=> 'Enter your phone number. Sent via http://www.centennialwireless.com',
         'fromlimit'	=> 10,
         'msglimit'	=> 110,
         'totlimit'	=> 110,
+    },
+
+    'cincinnatibell' => {
+        'name'          => 'Cincinnati Bell',
+        'notes'         => 'Enter your phone number. Goes to number@gocbw.com',
+        'fromlimit'     => 20,
+        'msglimit'      => 50,
+        'totlimit'      => 50,
     },
 
     'cingular' =>
@@ -220,6 +222,14 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
     'edgewireless' => {
         'name'          => 'Edge Wireless',
         'notes'         => 'Enter your phone number. Messages are sent to number@sms.edgewireless.com',
+        'fromlimit'     => 20,
+        'msglimit'      => 160,
+        'totlimit'      => 160,
+    },
+
+    'einstein' => {
+        'name'          => 'EinsteinPCS / Airadigm Communications',
+        'notes'         => 'Enter your phone number. Messages are sent to number@einsteinsms.com',
         'fromlimit'     => 20,
         'msglimit'      => 160,
         'totlimit'      => 160,
@@ -293,7 +303,7 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
 
     'lmt' => {
         'name'		=> 'LMT',
-        'notes'		=> 'Sent by addressing the message to number@smsmail.lmt.lv',
+        'notes'		=> 'Enter your username. Goes to username@sms.lmt.lv',
         'fromlimit'	=> 30,
         'msglimit'	=> 120,
         'totlimit'	=> 120,
@@ -305,14 +315,6 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'fromlimit'     => 20,
         'msglimit'      => 160,
         'totlimit'      => 160,
-    },
-
-    'megafonmoscow' => {
-        'name'          => 'Megafon Moscow',
-        'notes'         => 'Enter your phone number. Sent via web form',
-        'fromlimit'     => 20,
-        'msglimit'      => 110,
-        'totlimit'      => 110,
     },
 
     'metrocall' => {
@@ -378,6 +380,15 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'msglimit'      => 160,
         'totlimit'      => 160,
     },
+
+    'nbtel' => {
+        'name'          => 'NBTel',
+        'notes'         => 'Enter your phone number. Message is sent to number@wirefree.informe.ca',
+        'fromlimit'     => 11,
+        'msglimit'      => 140,
+        'totlimit'      => 140,
+    },
+    
     'netcom' => {
         'name'		=> 'Netcom',
         'notes'		=> 'Enter your phone number. Goes to number@sms.netcom.no',
@@ -392,14 +403,6 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'fromlimit'	=> 50,
         'msglimit'	=> 126,
         'totlimit'	=> 126,
-    },
-
-    'nwgsm-megafon' => {
-        'name'          => 'North-WestGSM Megafon',
-        'notes'         => 'Enter your phone number. Sent via web gateway.',
-        'fromlimit'     => 20,
-        'msglimit'      => 160,
-        'totlimit'      => 160,
     },
 
     'npiwireless' => {
@@ -418,13 +421,6 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'totlimit'      => 160,
     },
 
-    'ntelos' => {
-        'name'		=> 'NTELOS',
-        'notes'		=> '10-digit phone number. Goes to 10digits@pcs.ntelos.com.',
-        'fromlimit'	=> 30,
-        'msglimit'	=> 120,
-        'totlimit'	=> 120,
-    },
 
     'o2' => {
         'name'          => 'O2 (formerly BTCellnet)',
@@ -452,7 +448,7 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
 
     'orange' => {
         'name'          => 'Orange',
-        'notes'         => 'Enter your phone number. Goes to @orange.net',
+        'notes'         => 'Enter your phone number. Goes to @orange.net. You will need to create a user account at orange.net first.',
         'fromlimit'     => 20,
         'msglimit'      => 160,
         'totlimit'      => 160,
@@ -492,7 +488,7 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
 
     'pcsrogers' => {
         'name'		=> 'PCS Rogers',
-        'notes'		=> '10-digit phone number. Sent via web gateway.',
+        'notes'		=> '10-digit phone number. Goes to number@pcs.rogers.com. Requires prior registration with PCS Rogers.',
         'fromlimit'	=> 20,
         'msglimit'	=> 125,
         'totlimit'	=> 125,
@@ -518,9 +514,10 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'name'		=> 'PSC Wireless',
         'notes'		=> 'Enter your phone number. Goes to number@sms.pscel.com',
         'fromlimit'	=> 20,
-        'msglimit'	=> 140,
-        'totlimit'	=> 140,
+        'msglimit'      => 150,
+        'totlimit'      => 150,
     },
+
 
     'primtel' => {
         'name'          => 'Primtel',
@@ -730,6 +727,14 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'totlimit'	=> 160,	      
     },
 
+    'tmobileusasidekick' => {
+        'name'          => 'T-Mobile USA (Sidekick)',
+        'notes'         => 'Messages are sent to username@tmail.com',
+        'fromlimit'     => 30,
+        'msglimit'      => 10000,
+        'totlimit'      => 10000,
+    },
+
     'umc' => {
         'name'		=> 'UMC',
         'notes'		=> 'Sent by addressing the message to number@sms.umc.com.ua',
@@ -775,6 +780,14 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'fromlimit'     => 20,
         'msglimit'      => 800,
         'totlimit'      => 800,
+    },
+
+    'virginmobilecanada' => {
+        'name'          => 'Virgin Mobile Canada',
+        'notes'         => 'Enter your phone number. Messages are sent to number@vmobile.ca.',
+        'fromlimit'     => 20,
+        'msglimit'      => 140,
+        'totlimit'      => 140,
     },
 
     'virginmobileusa' => {
@@ -955,6 +968,18 @@ sub init {
     $self->{'provider'} = remap($args->{'provider'});
     $self->{'number'} = $args->{'number'};
     $self->{'smtp'} = $args->{'smtp'};
+
+    # If the number contains letters, assume provider requires
+    # a username. Otherwise, strip out any parens, spaces,
+    # dashes and underscores, which'll hopefully leave a
+    # valid canonical telephone number.
+
+    if ($self->{'number'} =~ /[A-Za-z\.]/) {
+        $self->{'number'} =~ s/[^\w\.\-]//g;
+    }
+    else {
+        $self->{'number'} =~ s/[\(\)\s\-_]//g;
+    }
 }
  
 sub send
@@ -1013,17 +1038,6 @@ sub send
         },$errors);
     } 
 
-    elsif ($provider eq "a1telekom")
-    {
-        $self->{'number'} =~ /(\d\d\d\d\d)(\d+)/;
-        post_webform("http://www.a1.net/sms_check_tr/1,2855,14-813-html-de,00.html", {
-            'an1'       => $1,
-            'an2'       => $2,
-            'msg'       => $msg->{'message'},
-            'userEmail' => $msg->{'from'},
-        },$errors);
-    }
-                                                                                                               
     elsif ($provider eq "airtouch")
     {
         send_mail($self, { 
@@ -1160,6 +1174,15 @@ sub send
         },$errors);
     }
 
+    elsif ($provider eq "cincinnatibell")
+    {
+        send_mail($self, {
+            'to'        => "$self->{'number'}\@gocbw.com",
+            'from'      => $msg->{'from'},
+            'body'      => $msg->{'message'},
+        },$errors);
+    }
+
     elsif ($provider eq "cingular")
     {
         send_mail($self, {
@@ -1214,6 +1237,14 @@ sub send
     elsif ($provider eq "edgewireless") {
         send_mail($self, {
             'to' => "$self->{'number'}\@sms.edgewireless.com",
+            'from' => $msg->{'from'},
+            'body' => $msg->{'message'},
+        },$errors);
+    }
+
+   elsif ($provider eq "einstein") {
+        send_mail($self, {
+            'to' => "$self->{'number'}\@einsteinsms.com",
             'from' => $msg->{'from'},
             'body' => $msg->{'message'},
         },$errors);
@@ -1293,18 +1324,9 @@ sub send
     elsif ($provider eq "lmt") 
     {
         send_mail($self, {
-            'to'	=> "$self->{'number'}\@smsmail.lmt.lv",
-
+            'to'	=> "$self->{'number'}\@sms.lmt.lv",
+            'from'      => "$msg->{'from'}",
             'body'	=> "$msg->{'message'}",
-        },$errors);
-    }
-
-    elsif ($provider eq "megafonmoscow")
-    {
-        my $prefix = substr($self->{'number'},0,4);
-        post_webform("http://www.megafonmoscow.ru/misc/sms2", {
-            'prefix'     => "$prefix",
-            'message'    => "$msg->{'message'}",
         },$errors);
     }
 
@@ -1389,6 +1411,15 @@ sub send
         },$errors);
     }
 
+    elsif ($provider eq "nbtel") 
+    {
+        send_mail($self, {
+            'to'        => "$self->{'number'}\@wirefree.informe.ca",
+            'from'      => "$msg->{'from'}",
+            'body'      => "$msg->{'message'}",
+        },$errors);
+    } 
+    
     elsif ($provider eq "netcom")
     {
         send_mail($self, { 
@@ -1405,14 +1436,6 @@ sub send
             'from'      => "$msg->{'from'}",
             'body'      => "$msg->{'message'}",
             'subject'	=> "LJ",
-        },$errors);
-    }
-
-    elsif ($provider eq "nwgsm-megafon")
-    {
-        post_webform("http://www-old.nwgsm.ru:8101/sendsms.htm", {
-            "tll"            => $self->{'number'},
-            "txt"            => $msg->{'message'},
         },$errors);
     }
 
@@ -1532,12 +1555,10 @@ sub send
 
     elsif ($provider eq "pcsrogers")
     {
-        $self->{'number'} =~ /(\d\d\d)(\d\d\d)(\d\d\d\d)/;
-        post_webform("http://216.129.53.44:8080/cgi-bin/send_sm_rogers.new", {
-            "area"  => $1,
-            "num1"  => $2,
-            "num2"  => $3,
-            "text"  => "From $msg->{'from'}: $msg->{'message'}",
+        send_mail($self, {
+            'to'        => "$self->{'number'}\@pcs.rogers.com",
+            'from'      => "$msg->{'from'}",
+            'body'      => "$msg->{'message'}",
          },$errors);
     }
 
@@ -1807,6 +1828,16 @@ sub send
         },$errors);
     }
     
+    elsif ($provider eq "tmobileusasidekick")
+    {
+        send_mail($self, {
+            'to'        => "$self->{'number'}\@tmail.com",
+            'subject'   => "$msg->{'from'}",
+            'body'      => "$msg->{'message'}",
+            'from'      => "LJ",
+        },$errors);
+    }
+
     elsif ($provider eq "umc") 
     {
         send_mail($self, {
@@ -1859,6 +1890,15 @@ sub send
             'from'      => "$msg->{'from'}",
             'body'      => "$msg->{'message'}",
 	    'subject'   => "$self->{'number'}",
+        },$errors);
+    }
+
+    elsif ($provider eq "virginmobilecanada" )
+    {
+        send_mail($self, {
+            'to'        => "$self->{'number'}\@vmobile.ca",
+            'from'      => "$msg->{'from'}",
+            'body'      => "$msg->{'message'}",
         },$errors);
     }
 
