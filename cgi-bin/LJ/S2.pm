@@ -1646,6 +1646,9 @@ sub Page
     $p->{head_content} .= qq{<link rel="meta" type="application/rdf+xml" title="FOAF" href="$foafurl" />\n};
     $p->{head_content} .= qq{<meta name="foaf:maker" content="foaf:mbox_sha1sum '$digest'" />\n};
 
+    # Identity (type I) accounts only have friends views
+    $p->{'views_order'} = [ 'friends', 'userinfo' ] if $u->{'journaltype'} eq 'I';
+
     return $p;
 }
 
