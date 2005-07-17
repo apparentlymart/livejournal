@@ -56,5 +56,8 @@ s1shortcomings/layout   layout          core1
 deardiary/layout	layout		core1
 deardiary/themes	theme+		deardiary/layout
 
+lickable/layout		layout		core1
+lickable/themes		theme+		lickable/layout
+
 # include local file
 s2layers-local.dat      INCLUDE
