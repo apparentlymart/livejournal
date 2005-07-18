@@ -169,7 +169,7 @@ body<=
             $$body .= "</div>";
         }
 
-        unless ($faqcatarg) { # If we're just viewing one faq
+        if (!$faqcatarg && $hassum) { # If we're just viewing one faq and it has a summary
             if ($mode eq 'answer') {
                 $$body .= "<div id='answer' name='answer'>$answer</div>";
             } else {
