@@ -26,7 +26,7 @@ body<=
     } 
 
     unless ($user) {
-        $ret .= "<?h1 Enter user h1?><?p Enter the $LJ::SITENAME username of the person you'd like to send a text message to: <div style='margin-left: 40px'><form method='get' action='textmessage.bml'>Username: <input type='text' size='15' maxlength='15' name='user' /> <input type='submit' value=\"Proceed...\" /></form></div> p?>";
+        $ret .= "<?h1 Enter user h1?><?p Enter the $LJ::SITENAMESHORT username of the person you'd like to send a text message to: <div style='margin-left: 40px'><form method='get' action='textmessage.bml'>Username: <input type='text' size='15' maxlength='15' name='user' /> <input type='submit' value=\"Proceed...\" /></form></div> p?>";
         &add_footer();
         return $ret;
     }
@@ -48,7 +48,7 @@ body<=
     
     unless ($tminfo) {
         $ret .= "<?h1 Unavailable h1?><?p This user has not setup their text messaging ".
-            "information at $LJ::SITENAME, or they've turned it off. p?>";
+            "information at $LJ::SITENAMESHORT, or they've turned it off. p?>";
         &add_footer();
         return $ret;
     }
