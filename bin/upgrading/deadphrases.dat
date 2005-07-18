@@ -97,6 +97,9 @@ general /setscheme.bml.select
 general /setscheme.bml.switch
 general /setscheme.bml.title
 
+general /support/faqbrowse.bml.backfaq
+general /support/faqbrowse.bml.backfaqcat
+general /support/faqbrowse.bml.backsupport
 general /support/faqbrowse.bml.title
 
 general /talkpost.bml.label.picturetouse

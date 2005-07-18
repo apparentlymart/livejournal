@@ -2988,11 +2988,13 @@ that area. p?>
 
 /support/encodings.bml.title=Encodings
 
-/support/faqbrowse.bml.backfaq=Back to <a href="faq.bml">the FAQ</a>.
+/support/faqbrowse.bml.backfaq2=Back to the <a [[aopts]]>FAQ listing</a>.
 
-/support/faqbrowse.bml.backfaqcat=Back to <a href="faqbrowse.bml?faqcat=[[faqcat]]">the parent FAQ category</a>.
+/support/faqbrowse.bml.backfaqcat2=Back to the <a [[aopts]]>parent FAQ category</a>.
 
-/support/faqbrowse.bml.backsupport=Back to <a href="./">the support area</a>.
+/support/faqbrowse.bml.backsearch=Back to the <a [[aopts]]>search page</a>.
+
+/support/faqbrowse.bml.backsupport2=Back to the <a [[aopts]]>support area</a>.
 
 /support/faqbrowse.bml.edit.faq=Edit this FAQ
 
