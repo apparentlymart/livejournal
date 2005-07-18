@@ -166,7 +166,25 @@ body<=
  my $sort = $FORM{sort};
  $sort = 'date' unless $sort =~ /^id|summary|area|date$/;
 
- $ret .= "<p>[<b>$rct</b> total open requests]</p>" if $append;
+ if ($append) {
+     # Counts of requests in differing states
+     my $gct = 0;
+     my $snhct = 0;
+     my $aacct = 0;
+     foreach (@support_log) {
+         if ($_->{'timelasthelp'} > $_->{'timetouched'}+5) {
+             $aacct++;
+         } elsif ($_->{'timelasthelp'} && $_->{'timetouched'} > $_->{'timelasthelp'}+5) {
+             $snhct++;
+         } else {
+             $gct++;
+         }
+     }
+
+     $ret .= "<p>[ <b>$gct</b> unanswered, <b>$snhct</b> still need help, ";
+     $ret .= "<b>$aacct</b> answered awaiting closed, <b>$rct</b> total open ]</p>";
+ }
+
  if ($sort eq 'id') {
     @support_log = sort { $a->{spid} <=> $b->{spid} } @support_log;
  } elsif ($sort eq 'date') {
