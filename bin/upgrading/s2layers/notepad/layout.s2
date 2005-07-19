@@ -71,6 +71,7 @@ propgroup presentation {
   property bool show_entrynav_icons {
     des = "Toggle to show the next, memory, edit, etc icons on the entry view page";
   }
+  property use linklist_support;
   property use external_stylesheet;
 }
 set show_entry_userpic = false;
@@ -137,6 +138,33 @@ a:hover {
 }""";
 }
 
+function Page::print_linklist() {
+    if (size $.linklist <= 0) {
+        return;
+    }
+    
+    var bool section_open = false;
+    
+    println "<span style='font-size: 115%'>";
+    foreach var UserLink l ($.linklist) {
+        if ($l.title) {
+            if ($l.is_heading) {
+                if ($section_open) {
+                    println "<br />";
+                }
+                println """<span style="font-weight: bold;">$l.title:</span> """;
+                $section_open = true;
+            } else {
+                println """<a href="$l.url">$l.title</a> | """;
+                $section_open = true;
+            }
+        }
+    }    
+    if ($section_open) {
+        println "</span>";
+    }
+}
+
 function Page::print()
 {
     var string title = $this->title();
@@ -193,6 +221,11 @@ function Page::print()
      &nbsp;
     </td>
     <td width="100%" height="38" style="background-image: url($*imguri/middle.jpg)">
+""";
+if (size $.linklist > 0 and $*linklist_support) {
+$this->print_linklist();
+}
+"""
      <h1>$title</h1>
      <p align="center"><img src="$*imguri/hr.gif" width="345" height="23" alt='' /></p>
     """;

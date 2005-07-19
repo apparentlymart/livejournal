@@ -117,6 +117,7 @@ propgroup presentation {
   property string page_background_image {
     des = "URL to an image to be used for the page background";
   }
+  property use linklist_support;
   property use external_stylesheet;
 }
 set show_entry_userpic = false;
@@ -252,6 +253,34 @@ ACRONYM {
 }""";
 }
 
+function Page::print_linklist() {
+    if (size $.linklist <= 0) {
+        return;
+    }
+    
+    var bool section_open = false;
+    
+    println "<p class='Navigation'>";
+    foreach var UserLink l ($.linklist) {
+        if ($l.title) {
+            if ($l.is_heading) {
+                if ($section_open) {
+                    println "<br />";
+                }
+                println """$l.title: """;
+                $section_open = true;
+            } else {
+                println """(<a href="$l.url">$l.title</a>)""";
+                $section_open = true;
+            }
+        }
+    }    
+    if ($section_open) {
+        println "</p>";
+    }
+    println "";
+}
+
 function Page::print () {
     var string title = $this->title();
 
@@ -282,6 +311,10 @@ function Page::print () {
     """<p class="Navigation">$links $website<br />""";
     $this->lay_skip_navigation();
     "</p>";
+
+    if (size $.linklist > 0 and $*linklist_support) {
+       $this->print_linklist();
+    }
 
     $this->print_body();
 
