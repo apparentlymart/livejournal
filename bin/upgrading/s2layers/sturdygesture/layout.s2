@@ -19,10 +19,10 @@ propgroup colors {
     set clr_page_text = "#000000";
 
     property Color clr_box_text { des = "Box content color"; }
-    set clr_boxhead_text = "#ffffff";
+    set clr_box_text = "#000000";
 
     property Color clr_box_back { des = "Box background color"; }
-    set clr_boxhead_back = "#000000";
+    set clr_box_back = "#ffffff";
 
     property Color clr_boxhead_text { des = "Box heading text color"; }
     set clr_boxhead_text = "#ffffff";
