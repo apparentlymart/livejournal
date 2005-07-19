@@ -334,13 +334,13 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     {
         var string userpic = defined $e.userpic ? "<img src='$e.userpic.url' style='border: 0' />" : "";
         var string url = $e.journal->base_url() + "/";
-        $metapic = "<div style='background-color: $bgcolor'>";
+        $metapic = "<div style='background-color: $bgcolor; color: $fgcolor;'>";
         $metapic = "$metapic <a href='$url'>$userpic</a>";
         if ($e.journal.username != $e.poster.username) { 
             var string purl = $e.poster->base_url() + "/";
-            $metapic = "$metapic<br /><font color='$fgcolor'>[<a href='$purl'>$e.poster.username</a>]</font>"; 
+            $metapic = "$metapic<br />[<a href='$purl' style='color: $fgcolor;'>$e.poster.username</a>]";
         } 
-        if ($p.view == "friends") { $metapic = "$metapic<br /><font color='$fgcolor'><a href='$url'>$e.journal.username</a></font>"; }
+        if ($p.view == "friends") { $metapic = "$metapic<br /><a href='$url' style='color: $fgcolor;'>$e.journal.username</a>"; }
         $metapic = "$metapic</div>";
     }
     # Security Icon
