@@ -161,9 +161,6 @@ if ($*font_base != "" or $*font_fallback != "none") {
 }
 """font-size: 10pt;
 }
-tt, pre {
-font-family: monospace;
-}
 a {
 text-decoration: none;
 }
