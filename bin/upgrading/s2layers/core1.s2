@@ -1211,7 +1211,8 @@ property bool use_shared_pic {
 set use_shared_pic = false;
 
 property bool view_entry_disabled {
-    des = "Enable to use the old comment page instead of the newer style specific view";
+    des = "Use simple comment pages";
+    note = "This disables customized comment pages even where they are usually available.";
 }
 set view_entry_disabled = false;
 
