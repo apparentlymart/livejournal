@@ -160,10 +160,10 @@ body,.body {
 a, a:link {
     color:               $*link_color;
 }
-a:vlink {
+a:visited {
     color:               $*vlink_color;
 }
-a:alink {
+a:active {
     color:               $*alink_color;
 }
 table.main {
