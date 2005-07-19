@@ -271,13 +271,13 @@ function print_box (string{} colors, string metapic, string{} meta, string conte
 
     var string style = "background-color: $bgcolor; color: $fgcolor";
     "<div align='right'><table $domid border='0' width='95%' cellpadding='5' cellspacing='1' style='$style'>";
-    "<tr><td><table border='0' width='100%'><tr>";
+    "<tr><td><table border='0' width='100%' style='$style'><tr>";
 
     if ($metapic) {
         "<td width='100' valign='top' align='center'>$metapic</td>";
     }
 
-    "<td valign='top'><table border='0'>";
+    "<td valign='top'><table border='0' style='$style'>";
 
     foreach var string k ($meta) {
         var string key = $k;
