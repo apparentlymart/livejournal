@@ -210,14 +210,17 @@ td.metabar {
 }
 th.monthheader {
     background-color:    $*headerbar_bgcolor;
+    color:               $*headerbar_fgcolor;
     font-size:           12pt;
 }
 th.daysheader {
     background-color:    $*metabar_bgcolor;
+    color:               $*metabar_fgcolor;
     font-weight:         normal;
 }
 td.weekday_empty {
     background-color:    $*metabar_bgcolor;
+    color:               $*metabar_fgcolor;
 }
 .day_id {
     font-weight:         bold;
