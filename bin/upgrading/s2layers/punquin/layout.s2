@@ -415,16 +415,15 @@ function FriendsPage::print_body {
 
 
 function RecentPage::lay_sidebar_navigation () {
-    var int total = size $.entries;
     var string nav = "";
     if ($.nav.backward_url != "") {
-        $nav = """&gt; <a href="$.nav.backward_url">previous $total entries</a>""";
+        $nav = """&gt; <a href="$.nav.backward_url">previous $.nav.backward_count entries</a>""";
     }
     if ($.nav.forward_url != "" and $.nav.backward_url != "") {
         $nav = "$nav<br />";
     }
     if ($.nav.forward_url != "") {
-        $nav = """${nav}&gt; <a href="$.nav.forward_url">next $total entries</a>""";
+        $nav = """${nav}&gt; <a href="$.nav.forward_url">next $.nav.forward_count entries</a>""";
     }
     print $nav;
 }

@@ -429,16 +429,15 @@ function FriendsPage::print_entry (Entry e) {
 
 function RecentPage::lay_captionbar_navigation() 
 {
-    var int total = size $.entries;
     var string nav = "";
     if ($.nav.backward_url != "") {
-        $nav = """<a href="$.nav.backward_url">back $total entries</a>""";
+        $nav = """<a href="$.nav.backward_url">back $.nav.backward_count entries</a>""";
     }
     if ($.nav.forward_url != "" and $.nav.backward_url != "") {
         $nav = "$nav or ";
     }
     if ($.nav.forward_url != "") {
-        $nav = """$nav<a href="$.nav.forward_url">forward $total entries</a>""";
+        $nav = """$nav<a href="$.nav.forward_url">forward $.nav.forward_count entries</a>""";
     }
     print "You're looking at the latest ";
     print size $.entries;

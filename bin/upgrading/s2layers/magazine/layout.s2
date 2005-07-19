@@ -397,16 +397,15 @@ function Page::print_entry (Entry e)
 
 function RecentPage::lay_skip_navigation() 
 {
-    var int total = size $.entries;
     var string nav = "";
     if ($.nav.backward_url != "") {
-        $nav = """<a href="$.nav.backward_url">Previous $total Entries</a>""";
+        $nav = """<a href="$.nav.backward_url">Previous $.nav.backward_count Entries</a>""";
     }
     if ($.nav.forward_url != "" and $.nav.backward_url != "") {
         $nav = "$nav&nbsp;|&nbsp;";
     }
     if ($.nav.forward_url != "") {
-        $nav = """$nav<a href="$.nav.forward_url">Next $total Entries</a>""";
+        $nav = """$nav<a href="$.nav.forward_url">Next $.nav.forward_count Entries</a>""";
     }
     if ($nav != "") { print "Navigate: ($nav)"; }
 }
