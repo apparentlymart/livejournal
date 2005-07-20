@@ -205,6 +205,11 @@ sub suspend
             next;
         }
 
+        if ($u->{'statusvis'} eq 'X') {
+            push @$out, [ "error", "$username is purged, skipping" ];
+            next;
+        }
+
         LJ::update_user($u->{'userid'}, { statusvis => $status, raw => 'statusvisdate=NOW()' });
         $u->{statusvis} = $status;
 
