@@ -404,10 +404,14 @@ sub load_layers {
 # and their styleids.
 sub get_public_layers
 {
+    my $opts = ref $_[0] eq 'HASH' ? shift : {};
     my $sysid = shift;  # optional system userid (usually not used)
-    $LJ::CACHED_PUBLIC_LAYERS ||= LJ::MemCache::get("s2publayers")
-        unless $LJ::LESS_CACHING;
-    return $LJ::CACHED_PUBLIC_LAYERS if $LJ::CACHED_PUBLIC_LAYERS;
+
+    unless ($opts->{force}) {
+        $LJ::CACHED_PUBLIC_LAYERS ||= LJ::MemCache::get("s2publayers")
+            unless $LJ::LESS_CACHING;
+        return $LJ::CACHED_PUBLIC_LAYERS if $LJ::CACHED_PUBLIC_LAYERS;
+    }
 
     $sysid ||= LJ::get_userid("system");
     my $layers = get_layers_of_user($sysid, "is_system", [qw(des note author author_name author_email)]);
