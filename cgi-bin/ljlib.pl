@@ -5458,7 +5458,7 @@ sub make_journal
 
     # signal to LiveJournal.pm that we can't handle this
     if ($stylesys == 1 && ($view eq "entry" || $view eq "reply" || $view eq "month")) {
-        my $fallback = $geta->{'fallback'};
+        my $fallback = $geta->{'fallback'} || "";
         my $bmlfallback = (!$LJ::S1_SHORTCOMINGS || ($fallback eq 'bml')) && !($fallback eq 's2');
         # fall back to BML unless we're using the in-development S2
         # fallback (the "s1shortcomings/layout")
