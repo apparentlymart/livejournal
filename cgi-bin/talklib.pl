@@ -1481,7 +1481,7 @@ QQ
     # textarea for their message body
     $ret .= "<tr valign='top'><td align='right'>$BML::ML{'.opt.message'}";
     $ret .= "</td><td style='width: 90%'>";
-    $ret .= "<textarea class='textbox' rows='10' cols='75' wrap='soft' name='body' id='commenttext'>$form->{body}</textarea>";
+    $ret .= "<textarea class='textbox' rows='10' cols='75' wrap='soft' name='body' id='commenttext'>" . LJ::ehtml($form->{body}) . "</textarea>";
 
     # Display captcha challenge if over rate limits.
     if ($opts->{do_captcha}) {
