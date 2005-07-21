@@ -708,10 +708,13 @@ sub create_qr_div {
     LJ::load_user_props($remote, "opt_no_quickreply");
     return undef if $remote->{'opt_no_quickreply'};
 
+    $qrhtml .= "<div id='qrformdiv'><form id='qrform' name='qrform' method='POST' action='/talkpost_do.bml'>";
+
     my $stylemineuri = $stylemine ? "style=mine&" : "";
-    my $basepath = LJ::journal_base($u) . "/$ditemid.html?${stylemineuri}replyto=";
+    my $basepath = LJ::journal_base($u) . "/$ditemid.html?${stylemineuri}";
     $qrhtml .= LJ::html_hidden({'name' => 'replyto', 'id' => 'replyto', 'value' => ''},
                                {'name' => 'parenttalkid', 'id' => 'parenttalkid', 'value' => ''},
+                               {'name' => 'journal', 'id' => 'journal', 'value' => $u->{'name'}},
                                {'name' => 'itemid', 'id' => 'itemid', 'value' => $ditemid},
                                {'name' => 'usertype', 'id' => 'usertype', 'value' => 'cookieuser'},
                                {'name' => 'userpost', 'id' => 'userpost', 'value' => $remote->{'user'}},
@@ -739,7 +742,6 @@ sub create_qr_div {
     }
 
     # Start making the div itself
-    $qrhtml .= "<div id='qrdiv' name='qrdiv' style='display:none;'>";
     $qrhtml .= "<table style='border: 1px solid black'>";
     $qrhtml .= "<tr valign='center'>";
     $qrhtml .= "<td align='right'><b>".BML::ml('/talkpost.bml.opt.from')."</b></td><td align='left'>";
@@ -816,13 +818,27 @@ sub create_qr_div {
     }
 
     $qrhtml .= "</td></tr></table>";
-    $qrhtml .= "</div>";
+    $qrhtml .= "</form></div>";
 
     my $ret;
     $ret = "<script language='JavaScript'>\n";
     $ret .= "<!--\n";
     $qrhtml = LJ::ejs($qrhtml);
-    $ret .= "document.write('$qrhtml');\n";
+
+    $ret .= qq(
+
+    var de;
+    if (document.createElement && document.body.insertBefore) {
+        de = document.createElement("div");
+
+        if (de) {
+            de.id = "qrdiv";
+            de.innerHTML = "$qrhtml";
+            de.style.display = 'none';
+            document.body.insertBefore(de, document.body.firstChild);
+        }
+    }
+               );
     $ret .= "-->\n";
     $ret .= "</script>";
     return $ret;
@@ -856,8 +872,7 @@ sub make_qr_link
         $basesubject =~ s/^(Re:\s*)*//i;
         $basesubject = "Re: $basesubject" if $basesubject;
         $basesubject = LJ::ejs($basesubject);
-        my $onclick = "return quickreply('$dtid', $pid, '$basesubject')";
-        $onclick = LJ::ehtml($onclick);
+        my $onclick = "return quickreply(\"$dtid\", $pid, \"$basesubject\")";
         return "<a onclick='$onclick' href='$replyurl' >$linktext</a>";
     } else { # QR Disabled
         return "<a href='$replyurl' >$linktext</a>";
@@ -893,7 +908,7 @@ sub get_lastcomment {
 sub make_qr_target {
     my $name = shift;
 
-    return "<div id='$name' name='$name'></div>";
+    return "<div id='ljqrt$name' name='ljqrt$name'></div>";
 }
 
 # <LJFUNC>
@@ -1570,202 +1585,9 @@ $LJ::COMMON_CODE{'display_none'} = q{
 };
 
 # Common Javascript functions for Quick Reply
-$LJ::COMMON_CODE{'quickreply'} = q{
-    <script language="JavaScript" type="text/javascript" src="/js/x_core.js"></script>
-    <script language='Javascript' type='text/javascript'>
-    <!--
-    var lastDiv;
-    lastDiv = 'qrdiv';
-
-    function quickreply(dtid, pid, newsubject) {
-        var ev = window.event;
-
-        // on IE, cancel the bubble of the event up to the page. other
-        // browsers don't seem to bubble events up registered this way.
-        if (ev) {
-            if (ev.stopPropagation)
-               ev.stopPropagation();
-            if ("cancelBubble" in ev)
-                ev.cancelBubble = true;
-        }
-
-        // Mac IE 5.x does not like dealing with
-        // nextSibling since it does not support it
-        if (xIE4Up && xMac) { return true;}
-
-        var ptalkid = xGetElementById('parenttalkid');
-        ptalkid.value = pid;
-
-        var rto = xGetElementById('replyto');
-        rto.value = pid;
-
-        var dtid_field = xGetElementById('dtid');
-        dtid_field.value = dtid;
-
-        var qr_div = xGetElementById('qrdiv');
-        var cur_div = xGetElementById(dtid);
-
-        if (lastDiv == 'qrdiv') {
-            if (! showQRdiv(qr_div)) {
-               return true;
-            }
-
-            // Only one swap
-            if (! swapnodes(qr_div, cur_div)) {
-                return true;
-            }
-        } else if (lastDiv != dtid) {
-            var last_div = xGetElementById(lastDiv);
-
-            // Two swaps
-            if (! (swapnodes(last_div, cur_div) && swapnodes(qr_div, last_div))) {
-                return true;
-            }
-        }
-
-        lastDiv = dtid;
-
-        var subject = xGetElementById('subject');
-        subject.value = newsubject;
-
-        var multi_form = xGetElementById('multiform');
-        multi_form.action = '/talkpost_do.bml';
-
-        // So it does not follow the link
-        return false;
-    }
-
-    function moreopts()
-    {
-        var multi_form = xGetElementById('multiform');
-        var basepath = xGetElementById('basepath');
-        var dtid = xGetElementById('dtid');
-
-        multi_form.action = basepath.value + dtid.value;
-        return true;
-    }
-
-   function submitform()
-   {
-        var submit = xGetElementById('submitpost');
-        submit.disabled = true;
-
-        var submitmore = xGetElementById('submitmoreopts');
-        submitmore.disabled = true;
-
-        // New top-level comments
-        var dtid = xGetElementById('dtid');
-        if (dtid.value == 'top' || dtid.value == 'bottom') {
-            dtid.value = 0;
-        }
-
-        var multi_form = xGetElementById('multiform');
-        multi_form.submit();
-   }
-
-   function swapnodes (orig, to_swap) {
-        var orig_pn = xParent(orig, true);
-        var next_sibling = orig.nextSibling;
-        var to_swap_pn = xParent(to_swap, true);
-        if (! to_swap_pn) {
-            return false;
-        }
-
-        to_swap_pn.replaceChild(orig, to_swap);
-        orig_pn.insertBefore(to_swap, next_sibling);
-        return true;
-   }
-
-   function checkLength() {
-        var textbox = xGetElementById('body');
-        if (!textbox) return true;
-        if (textbox.value.length > 4300) {
-             alert('Sorry, but your comment of ' + textbox.value.length + ' characters exceeds the maximum character length of 4300.  Please try shortening it and then post again.');
-             return false;
-        }
-        return true;
-   }
-
-    // Maintain entry through browser navigations.
-    function save_entry() {
-        var qr_body = xGetElementById('body');
-        var qr_subject = xGetElementById('subject');
-        var do_spellcheck = xGetElementById('do_spellcheck');
-        var qr_dtid = xGetElementById('dtid');
-        var qr_ptid = xGetElementById('parenttalkid');
-        var qr_upic = xGetElementById('prop_picture_keyword');
-
-        document.multiform.saved_body.value = qr_body.value;
-        document.multiform.saved_subject.value = qr_subject.value;
-        document.multiform.saved_spell.value = do_spellcheck.checked;
-        document.multiform.saved_dtid.value = qr_dtid.value;
-        document.multiform.saved_ptid.value = qr_ptid.value;
-
-        if (qr_upic) { // if it was in the form
-            document.multiform.saved_upic.value = qr_upic.selectedIndex;
-        }
-
-        return false;
-    }
-
-    // Restore saved_entry text across platforms.
-    function restore_entry() {
-        var saved_body = xGetElementById('saved_body');
-        if (saved_body.value == "") return false;
-
-        setTimeout(
-            function () {
-
-                var dtid = xGetElementById('saved_dtid');
-                if (! dtid) return false;
-                var ptid = xGetElementById('saved_ptid');
-                if (! ptid) return false;
-
-                quickreply(dtid.value, ptid.value, document.multiform.saved_subject.value);
-
-                var body = xGetElementById('body');
-                if (! body) return false;
-                body.value = saved_body.value;
-
-                // Some browsers require we explicitly set this after the div has moved
-                // and is now no longer hidden
-                var subject = xGetElementById('subject');
-                if (! subject) return false;
-                subject.value = document.multiform.saved_subject.value
-
-                var prop_picture_keyword = xGetElementById('prop_picture_keyword');
-                if (prop_picture_keyword) { // if it was in the form
-                    prop_picture_keyword.selectedIndex = document.multiform.saved_upic.value;
-                }
-
-                var spell_check = xGetElementById('do_spellcheck');
-                if (! spell_check) return false;
-                if (document.multiform.saved_spell.value == 'true') {
-                    spell_check.checked = true;
-                } else {
-                    spell_check.checked = false;
-                }
-
-            }, 100);
-        return false;
-    }
-
-    function showQRdiv(qr_div) {
-        if (! qr_div) {
-            qr_div = xGetElementById('qr_div');
-            if (! qr_div) {
-                return false;
-            }
-        } else if (qr_div.style && xDef(qr_div.style.display)) {
-            qr_div.style.display='inline';
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    //  -->
-    </script>
+$LJ::COMMON_CODE{'quickreply'} =
+qq{<script language="JavaScript" type="text/javascript" src="$LJ::JSPREFIX/x_core.js"></script>
+<script language="JavaScript" type="text/javascript" src="$LJ::JSPREFIX/quickreply.js"></script>
 };
 
 1;
