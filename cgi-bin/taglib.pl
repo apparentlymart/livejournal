@@ -420,6 +420,9 @@ sub _remote_satisfies_permission {
     my ($u, $remote, $perm) = @_;
     return undef unless $u && $remote && $perm;
 
+    # allow if they can manage it (own, or 'A' edge)
+    return 1 if LJ::can_manage($remote, $u);
+
     # permission checks
     if ($perm eq 'public') {
         return 1;
