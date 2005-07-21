@@ -190,8 +190,8 @@ sub get_usertags {
     # now if they provided a remote, remove the ones they don't want to see; note that
     # remote may be undef so we have to check exists
     if (exists $opts->{remote}) {
-        # never going to cull anything if it's you, so return it
-        return $res if LJ::u_equals($u, $opts->{remote});
+        # never going to cull anything if you control it, so just return
+        return $res if LJ::can_manage($opts->{remote}, $u);
 
         # setup helper variables from u to remote
         my ($is_friend, $grpmask) = (0, 0);
