@@ -228,10 +228,18 @@ class UserLite
 }
 
 class Tag
-"Represents a tag."
+"Represents a tag in its most basic form."
 {
     var readonly string name "Textual representation of this tag.";
     var readonly string url "URL to view entries with this tag.";
+}
+
+class TagDetail extends Tag
+"A rich structure with lots of information about a Tag."
+{
+    var readonly int use_count "Count of how many times this tag has been used.";
+    var readonly string visibility "The visibility level for this tag.  Based on the entries it's used on.  Can be one of: public, private, friends, group.";
+    var readonly int{} security_counts "How many times this tag has used this security.  The keys are which security, one of: public, private, friends, group.  The value is the count of times the tag is used on entries with that security level.";
 }
 
 class EntryLite
@@ -416,8 +424,8 @@ class Page
     function builtin get_latest_month() : YearMonth
     "Returns information about the latest month the user posted (or the current month, if no posts), so that the page may include a mini-calendar or similar features.";
 
-    function builtin visible_tag_list() : Tag[]
-    "Returns a list of tags that the logged in user can see for the journal being viewed.";
+    function builtin visible_tag_list() : TagDetail[]
+    "Returns an array of tags that the logged in user can see for the journal being viewed.";
 }
 
 class RecentNav 

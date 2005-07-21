@@ -1498,15 +1498,40 @@ sub DateTime_parts
 sub Tag
 {
     my ($u, $kwid, $kw) = @_;
+    return undef unless $u && $kwid && $kw;
 
-    my $e = {
+    my $t = {
         _type => 'Tag',
         _id => $kwid,
         name => LJ::ehtml($kw),
         url => LJ::journal_base($u) . '/tag/' . LJ::eurl($kw),
     };
 
-    return $e;
+    return $t;
+}
+
+sub TagDetail
+{
+    my ($u, $kwid, $tag) = @_;
+    return undef unless $u && $kwid && ref $tag eq 'HASH';
+
+    my $t = {
+        _type => 'TagDetail',
+        _id => $kwid,
+        name => LJ::ehtml($tag->{name}),
+        url => LJ::journal_base($u) . '/tag/' . LJ::eurl($tag->{name}),
+        use_count => $tag->{uses},
+        visibility => $tag->{security_level},
+    };
+
+    my $sum = 0;
+    $sum += $tag->{security}->{groups}->{$_}
+        foreach keys %{$tag->{security}->{groups} || {}};
+    $t->{security_counts}->{$_} = $tag->{security}->{$_}
+        foreach qw(public private friends);
+    $t->{security_counts}->{groups} = $sum;
+
+    return $t;
 }
 
 sub Entry
@@ -2523,7 +2548,7 @@ sub Page__visible_tag_list
         next unless $tags->{$kwid}->{display};
 
         # create tag object
-        push @taglist, LJ::S2::Tag($u, $kwid => $tags->{$kwid}->{name});
+        push @taglist, LJ::S2::TagDetail($u, $kwid => $tags->{$kwid});
     }
 
     @taglist = sort { $a->{name} cmp $b->{name} } @taglist;
