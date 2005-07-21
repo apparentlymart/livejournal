@@ -53,6 +53,11 @@ sub EntryPage
         $p->{'head_content'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}."\" />\n";
     }
 
+    # add the quickreply script library
+    $p->{'head_content'} .= "<script>\nvar LJVAR;\n if (!LJVAR) LJVAR = new Object();\n";
+    $p->{'head_content'} .= "LJVAR.siteroot = \"$LJ::SITEROOT\";\n</script>\n";
+    $p->{'head_content'} .= $LJ::COMMON_CODE{'quickreply'};
+
     $p->{'entry'} = $s2entry;
 
     # add the comments
@@ -162,6 +167,7 @@ sub EntryPage
                 'parent_url' => $par_url,
                 'screened' => $com->{'state'} eq "S" ? 1 : 0,
                 'frozen' => $com->{'state'} eq "F" ? 1 : 0,
+                'deleted' => $com->{'state'} eq "D" ? 1 : 0,
                 'link_keyseq' => [ 'delete_comment' ],
                 'anchor' => "t$dtalkid",
                 'dom_id' => "ljcmt$dtalkid",
