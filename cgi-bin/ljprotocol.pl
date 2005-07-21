@@ -997,7 +997,7 @@ sub postevent
     }
 
     # construct valid prop list
-    if ($req->{props} && $req->{props}->{taglist}) {
+    if ($req->{props} && defined $req->{props}->{taglist}) {
         my $tags = [];
         LJ::Tags::is_valid_tagstring($req->{props}->{taglist}, $tags);
         $req->{props}->{taglist} = join(', ', @$tags);
@@ -1259,7 +1259,7 @@ sub editevent
         if $req->{security} &&
            $req->{security} =~ /^(?:public|private|usemask)$/;
 
-    my $do_tags = $req->{props} && $req->{props}->{taglist};
+    my $do_tags = $req->{props} && defined $req->{props}->{taglist};
     if ($oldevent->{security} ne $security || $qallowmask != $oldevent->{allowmask}) {
         # FIXME: this is a hopefully temporary hack which deletes tags from the entry
         # when the security has changed.  the real fix is to make update_logtags aware
