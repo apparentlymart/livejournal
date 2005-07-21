@@ -30,6 +30,12 @@
          return;
      }
 
+     unless (LJ::check_form_auth()) {
+         $title = $ML{'Error'};
+         $body = "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>";
+         return;
+     }
+
      unless ($remote->{'userid'} == $FORM{'remid'}) {
          $title = $ML{'Error'};
          $body = "<?h1 $ML{'Error'} h1?><?p Session info changed.  Try again. p?>";
@@ -110,6 +116,7 @@
  }
 
  $body .= "<form method='post' action='add.bml'>";
+ $body .= LJ::form_auth();
  $body .= LJ::html_hidden(mode => 'add',
                           user => $user,
                           remid => $remote->{userid});
