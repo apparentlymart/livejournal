@@ -2359,7 +2359,7 @@ sub _print_quickreply_link
         if ($align =~ /^\w+$/) { $align = "align=\"$align\""; }
         if ($alt) { $alt = "alt=\"$alt\""; }
         if ($title) { $title = "title=\"$title\""; }
-        $linktext = "<img src=\"$opt_img\" $width $height $align $title $alt>$linktext";
+        $linktext = "<img src=\"$opt_img\" $width $height $align $title $alt />$linktext";
     }
 
     my $basesubject = $opts->{'basesubject'}; #cleaned later
