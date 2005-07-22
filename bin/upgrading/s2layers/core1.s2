@@ -1775,7 +1775,7 @@ function MonthDay::print_subjectlist() {
         if ($e.subject != "") {
             " <a href=\"$e.permalink_url\">$e.subject</a>";
         } else {
-            " <a href=\"$e.permalink_url\" style=\"font-style: italic;\">($*text_nosubject)</a>";
+            " <a href=\"$e.permalink_url\" style=\"font-style: italic;\">$*text_nosubject</a>";
         }
         if ($e.comments.count > 0) {
             " - " + get_plural_phrase($e.comments.count, "text_read_comments");
