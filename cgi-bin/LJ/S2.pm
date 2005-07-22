@@ -2309,6 +2309,121 @@ sub Comment__print_multiform_check
     $S2::pout->("<input type='checkbox' name='selected_$tid' class='ljcomsel' id='ljcomsel_$this->{'talkid'}' />");
 }
 
+sub Comment__print_reply_link
+{
+    my ($ctx, $this, $opts) = @_;
+    $opts ||= {};
+
+    my $basesubject = $this->{'subject'};
+    $opts->{'basesubject'} = $basesubject;
+    $opts->{'target'} ||= $this->{'talkid'};
+
+    _print_quickreply_link($ctx, $this, $opts);
+}
+
+*Page__print_reply_link = \&_print_quickreply_link;
+*EntryPage__print_reply_link = \&_print_quickreply_link;
+
+sub _print_quickreply_link
+{
+    my ($ctx, $this, $opts) = @_;
+
+    $opts ||= {};
+
+    # one of these had better work
+    my $replyurl = $this->{'reply_url'} || $this->{'entry'}->{'comments'}->{'post_url'};
+
+    # clean up input:
+    my $linktext = LJ::ehtml($opts->{'linktext'}) || "";
+
+    my $target = $opts->{'target'};
+    return unless $target =~ /^\w+$/; # if no target specified bail the fuck out
+
+    my $opt_class = $opts->{'class'};
+    undef $opt_class unless $opt_class =~ /^[\w\s]+$/;
+
+    my $opt_img = LJ::CleanHTML::canonical_url($opts->{'img_url'});
+
+    # if they want an image change the text link to the image,
+    # and add the text after the image if they specified it as well
+    if ($opt_img) {
+        # hella robust img options. (width,height,align,alt,title)
+        # s2quickreply does it all. like whitaker's mom.
+        my $width = $opts->{'img_width'} + 0;
+        my $height = $opts->{'img_height'} + 0;
+        my $align = $opts->{'img_align'};
+        my $alt = LJ::ehtml($opts->{'alt'});
+        my $title = LJ::ehtml($opts->{'title'});
+        if ($width) { $width = "width=$width"; }
+        if ($height) { $height = "height=$height"; }
+        if ($align =~ /^\w+$/) { $align = "align=\"$align\""; }
+        if ($alt) { $alt = "alt=\"$alt\""; }
+        if ($title) { $title = "title=\"$title\""; }
+        $linktext = "<img src=\"$opt_img\" $width $height $align $title $alt>$linktext";
+    }
+
+    my $basesubject = $opts->{'basesubject'}; #cleaned later
+
+    if ($opt_class) {
+        $opt_class = "class=\"$opt_class\"";
+    }
+
+    my $remote = LJ::get_remote();
+    LJ::load_user_props($remote, "opt_no_quickreply");
+    my $onclick = "";
+    unless ($remote->{'opt_no_quickreply'}) {
+        my $page = get_page();
+        my $pid = (int($target)&&$page->{'_type'} eq 'EntryPage') ? int($target /256) : 0;
+
+        $basesubject =~ s/^(Re:\s*)*//i;
+        $basesubject = "Re: $basesubject" if $basesubject;
+        $basesubject = LJ::ejs($basesubject);
+        $onclick = "return quickreply(\"$target\", $pid, \"$basesubject\")";
+        $onclick = "onclick='$onclick'";
+    }
+
+    $S2::pout->("<a $onclick href='$replyurl' $opt_class>$linktext</a>");
+}
+
+sub _print_reply_container
+{
+    my ($ctx, $this, $opts) = @_;
+
+    my $target = $opts->{'target'};
+    undef $target unless $target =~ /^\w+$/;
+
+    my $class = $opts->{'class'} || undef;
+
+    # set target to the dtalkid if no target specified (link will be same)
+    my $dtalkid = $this->{'talkid'} || undef;
+    $target ||= $dtalkid;
+    return if !$target;
+
+    undef $class unless $class =~ /^([\w\s]+)$/;
+
+    if ($class) {
+        $class = "class=\"$class\"";
+    }
+
+    $S2::pout->("<div $class id=\"ljqrt$target\" style=\"display: none;\"></div>");
+
+    # unless we've already inserted the big qrdiv ugliness, do it.
+    unless ($ctx->[S2::SCRATCH]->{'quickreply_printed_div'}++) {
+        my $page = get_page();
+
+        my $u = $page->{'_u'};
+        my $ditemid = $page->{'entry'}{'itemid'} || 0;
+
+        my $userpic = LJ::ehtml($page->{'_picture_keyword'}) || "";
+        my $thread = $page->{'viewing_thread'} + 0;
+        $S2::pout->(LJ::create_qr_div($u, $ditemid, $page->{'_stylemine'} || 0, $userpic, $thread));
+    }
+}
+
+*Comment__print_reply_container = \&_print_reply_container;
+*EntryPage__print_reply_container = \&_print_reply_container;
+*Page__print_reply_container = \&_print_reply_container;
+
 # class 'date'
 sub Date__day_of_week
 {
