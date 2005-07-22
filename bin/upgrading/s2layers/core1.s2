@@ -316,6 +316,8 @@ class Comment extends EntryLite
     function builtin print_reply_link(string{} opts) "Prints a link to reply to the comment. You may specify the link text in the 'linktext' option, and the link CSS class in 'class'. You may also specify the url of an image to use as a button in 'img_url'.";
 
     function builtin print_reply_container() "Prints the area in which the quickreply box will go. If no container is available, quickreply will not work.";
+
+    function builtin print_reply_container(string{} opts) "Prints the area in which the quickreply box will go. You may 'class' which will be the CSS class used by the container. If no container is available, quickreply will not work.";
 }
  
 ### Userinfo
