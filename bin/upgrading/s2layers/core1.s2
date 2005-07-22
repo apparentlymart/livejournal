@@ -308,9 +308,14 @@ class Comment extends EntryLite
     var readonly string thread_url "URL to view threaded rooted at this comment, or blank if comment has no children.";
     var readonly bool screened "True if comment is in screened state.";
     var readonly bool frozen "True if comment is in frozen state.";
+    var readonly bool deleted "True if comment has been deleted. Deleted comments still show up if they are the parent of a thread.";
     var readonly string anchor "Direct link to comment, via HTML name anchors";
 
     function builtin print_multiform_check "Prints the select checkbox in CSS class 'ljcomsel' with DOM id 'ljcomsel_\$talkid' for a multi-action form started with [method[EntryPage.print_multiform_start()]].";
+
+    function builtin print_reply_link(string{} opts) "Prints a link to reply to the comment. You may specify the link text in the 'linktext' option, and the link CSS class in 'class'. You may also specify the url of an image to use as a button in 'img_url'.";
+
+    function builtin print_reply_container() "Prints the area in which the quickreply box will go. If no container is available, quickreply will not work.";
 }
  
 ### Userinfo
@@ -426,6 +431,11 @@ class Page
 
     function builtin visible_tag_list() : TagDetail[]
     "Returns an array of tags that the logged in user can see for the journal being viewed.";
+
+    function builtin print_reply_link(string{} opts) "Prints a link to reply to the comment. You may specify the link text in the 'linktext' option, the link CSS class in 'class', and the target container in the 'target' option. You may also specify the url of an image to use as a button in 'img_url'.";
+
+    function builtin print_reply_container(string{} opts) "Prints the area in which the quickreply box will go. Options you may specify are 'target' which will be the target id, and 'class' which will be the CSS class used by the container. If no container is available, quickreply will not work.";
+
 }
 
 class RecentNav 
