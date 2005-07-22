@@ -2335,7 +2335,7 @@ sub _print_quickreply_link
     $opts ||= {};
 
     # one of these had better work
-    my $replyurl = $this->{'reply_url'} || $this->{'entry'}->{'comments'}->{'post_url'};
+    my $replyurl =  $opts->{'reply_url'} || $this->{'reply_url'} || $this->{'entry'}->{'comments'}->{'post_url'};
 
     # clean up input:
     my $linktext = LJ::ehtml($opts->{'linktext'}) || "";
@@ -2347,6 +2347,7 @@ sub _print_quickreply_link
     undef $opt_class unless $opt_class =~ /^[\w\s]+$/;
 
     my $opt_img = LJ::CleanHTML::canonical_url($opts->{'img_url'});
+    $replyurl = LJ::CleanHTML::canonical_url($replyurl);
 
     # if they want an image change the text link to the image,
     # and add the text after the image if they specified it as well
@@ -2358,12 +2359,16 @@ sub _print_quickreply_link
         my $align = $opts->{'img_align'};
         my $alt = LJ::ehtml($opts->{'alt'});
         my $title = LJ::ehtml($opts->{'title'});
-        if ($width) { $width = "width=$width"; }
-        if ($height) { $height = "height=$height"; }
-        if ($align =~ /^\w+$/) { $align = "align=\"$align\""; }
-        if ($alt) { $alt = "alt=\"$alt\""; }
-        if ($title) { $title = "title=\"$title\""; }
-        $linktext = "<img src=\"$opt_img\" $width $height $align $title $alt />$linktext";
+        my $border = $opts->{'img_border'} + 0;
+
+        $width  = $width  ? "width=$width" : "";
+        $height = $height ? "height=$height" : "";
+        $border = $border ne "" ? "border=$border" : "";
+        $alt    = $alt    ? "alt=\"$alt\"" : "";
+        $title  = $title  ? "title=\"$title\"" : "";
+        $align  = $align =~ /^\w+$/ ? "align=\"$align\"" : "";
+
+        $linktext = "<img src=\"$opt_img\" $width $height $align $title $alt $border />$linktext";
     }
 
     my $basesubject = $opts->{'basesubject'}; #cleaned later
@@ -2372,11 +2377,11 @@ sub _print_quickreply_link
         $opt_class = "class=\"$opt_class\"";
     }
 
+    my $page = get_page();
     my $remote = LJ::get_remote();
     LJ::load_user_props($remote, "opt_no_quickreply");
     my $onclick = "";
     unless ($remote->{'opt_no_quickreply'}) {
-        my $page = get_page();
         my $pid = (int($target)&&$page->{'_type'} eq 'EntryPage') ? int($target /256) : 0;
 
         $basesubject =~ s/^(Re:\s*)*//i;
@@ -2386,12 +2391,16 @@ sub _print_quickreply_link
         $onclick = "onclick='$onclick'";
     }
 
+    $onclick = "" unless $page->{'_type'} eq 'EntryPage';
     $S2::pout->("<a $onclick href='$replyurl' $opt_class>$linktext</a>");
 }
 
 sub _print_reply_container
 {
     my ($ctx, $this, $opts) = @_;
+
+    my $page = get_page();
+    return unless $page->{'_type'} eq 'EntryPage';
 
     my $target = $opts->{'target'};
     undef $target unless $target =~ /^\w+$/;
@@ -2413,8 +2422,6 @@ sub _print_reply_container
 
     # unless we've already inserted the big qrdiv ugliness, do it.
     unless ($ctx->[S2::SCRATCH]->{'quickreply_printed_div'}++) {
-        my $page = get_page();
-
         my $u = $page->{'_u'};
         my $ditemid = $page->{'entry'}{'itemid'} || 0;
 
