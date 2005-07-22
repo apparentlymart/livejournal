@@ -430,6 +430,19 @@ sub trans
                 # redirect to a user's gallery
                 my $url = "$LJ::FB_SITEROOT/$user";
                 return redir($r, $url);
+            } elsif ($mode eq 'tag') {
+                return redir($r, "http://$host$hostport$uri/") unless $pe;
+                if ($pe eq '/') {
+                    # tag list page
+                    $mode = 'tag';
+                    $pe = undef;
+                } else {
+                    # filtered lastn page
+                    $mode = 'lastn';
+
+                    # prepend /tag so that lastn knows to do tag filtering
+                    $pe = "/tag$pe";
+                }
             }
         } elsif (($vhost eq "users" || $vhost =~ /^other:/) &&
                  $uuri eq "/robots.txt") {

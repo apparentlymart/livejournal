@@ -168,8 +168,7 @@ use constant CMAX_UPIC_COMMENT => 120;
                      "des" => "Profile Page",
                  },
                  "tag" => {
-                    "creator" => \&LJ::S1::create_view_lastn,
-                    "des" => "Filtered Most Recent Events",
+                     "des" => "Filtered Recent Entries View",   
                  },
                  
                  );
@@ -5301,20 +5300,6 @@ sub make_journal
         return LJ::server_down_html();
     }
 
-    # if we're using the 'tag' view, then convert to lastn and set option, this
-    # is done early so it can propogate to S1 and S2 as appropriate
-    if ($view eq 'tag') {
-        # FIXME: would be nice to have boolean logic "foo AND bar" or "+foo -bar" etc
-        # "foo,bar" is interpreted as "foo or bar" for now, common case
-        my $tags = LJ::durl($opts->{pathextra});
-        $tags =~ s/^\///; # clear leading /
-        $opts->{getargs}->{tag} = $tags;
-
-        # use a lastn view to render
-        delete $opts->{pathextra};
-        $view = 'lastn';
-    }
-
     # S1 style hashref.  won't be loaded now necessarily,
     # only if via customview.
     my $style;
@@ -5456,10 +5441,19 @@ sub make_journal
         ($stylesys, $styleid) = $get_styleinfo->();
     }
 
+    # transcode the tag filtering information into the tag getarg; this has to
+    # be done above the s1shortcomings section so that we can fall through to that
+    # style for lastn filtered by tags view
+    if ($view eq 'lastn' && $opts->{pathextra} && $opts->{pathextra} =~ /^\/tag\/(.+)$/) {
+        $opts->{getargs}->{tag} = $1;
+        $opts->{pathextra} = undef;
+    }
+
     # signal to LiveJournal.pm that we can't handle this
-    if ($stylesys == 1 && ($view eq "entry" || $view eq "reply" || $view eq "month")) {
+    if ($stylesys == 1 && (({ entry=>1, reply=>1, month=>1, tag=>1 }->{$view}) || ($view eq 'lastn' && $geta->{tag}))) {
         my $fallback = $geta->{'fallback'} || "";
         my $bmlfallback = (!$LJ::S1_SHORTCOMINGS || ($fallback eq 'bml')) && !($fallback eq 's2');
+        $bmlfallback = 0 if $view eq 'tag' || $view eq 'lastn';
         # fall back to BML unless we're using the in-development S2
         # fallback (the "s1shortcomings/layout")
         if ($bmlfallback) {

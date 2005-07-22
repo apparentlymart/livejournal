@@ -1,0 +1,43 @@
+use strict;
+package LJ::S2;
+
+sub TagsPage
+{
+    my ($u, $remote, $opts) = @_;
+
+    my $p = Page($u, $opts);
+    $p->{'_type'} = "TagsPage";
+    $p->{'view'} = "tags";
+    $p->{'tags'} = [];
+
+    my $user = $u->{'user'};
+    my $journalbase = LJ::journal_base($user, $opts->{'vhost'});
+
+    if ($u->{'journaltype'} eq "R" && $u->{'renamedto'} ne "") {
+        $opts->{'redir'} = LJ::journal_base($u->{'renamedto'}, $opts->{'vhost'});
+        return;
+    }
+
+    if ($opts->{'pathextra'}) {
+        $opts->{'badargs'} = 1;
+        return 1;
+    }
+
+    $p->{'head_content'} .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n}
+        if LJ::OpenID::server_enabled();
+
+    # get tags for the page to display
+    my @taglist;
+    my $tags = LJ::Tags::get_usertags($u, { remote => $remote });
+    foreach my $kwid (keys %{$tags}) {
+        # only show tags for display
+        next unless $tags->{$kwid}->{display};
+        push @taglist, LJ::S2::TagDetail($u, $kwid => $tags->{$kwid});
+    }
+    @taglist = sort { $a->{name} cmp $b->{name} } @taglist;
+    $p->{'_visible_tag_list'} = $p->{'tags'} = \@taglist;
+
+    return $p;
+}
+
+1;

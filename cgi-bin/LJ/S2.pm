@@ -19,6 +19,7 @@ use LJ::S2::FriendsPage;
 use LJ::S2::MonthPage;
 use LJ::S2::EntryPage;
 use LJ::S2::ReplyPage;
+use LJ::S2::TagsPage;
 
 package LJ::S2;
 
@@ -126,6 +127,9 @@ sub make_journal
     } elsif ($view eq "reply") {
         $entry = "ReplyPage::print()";
         $page = ReplyPage($u, $remote, $opts);
+    } elsif ($view eq "tag") {
+        $entry = "TagsPage::print()";
+        $page = TagsPage($u, $remote, $opts);
     }
 
     return if $opts->{'suspendeduser'};
@@ -2649,7 +2653,10 @@ sub EntryPage__print_multiform_start
 
 sub Page__visible_tag_list
 {
-    my $ctx = shift;
+    my ($ctx, $this) = @_;
+    return $this->{'_visible_tag_list'}
+        if defined $this->{'_visible_tag_list'};
+
     my $remote = LJ::get_remote();
     my $u = $LJ::S2::CURR_PAGE->{'_u'};
     return [] unless $u;
@@ -2667,7 +2674,7 @@ sub Page__visible_tag_list
     }
 
     @taglist = sort { $a->{name} cmp $b->{name} } @taglist;
-    return \@taglist;
+    return $this->{'_visible_tag_list'} = \@taglist;
 }
 *RecentPage__visible_tag_list = \&Page__visible_tag_list;
 *DayPage__visible_tag_list = \&Page__visible_tag_list;
@@ -2676,6 +2683,7 @@ sub Page__visible_tag_list
 *FriendsPage__visible_tag_list = \&Page__visible_tag_list;
 *EntryPage__visible_tag_list = \&Page__visible_tag_list;
 *ReplyPage__visible_tag_list = \&Page__visible_tag_list;
+*TagsPage__visible_tag_list = \&Page__visible_tag_list;
 
 sub Page__get_latest_month
 {
