@@ -98,7 +98,7 @@ body<=
      $ret .= "<?h1 $ML{'.ask.header'} h1?>";
      $ret .= "<form method='get' action='register.bml'>\n";
      $ret .= 'Select user:' . " ";
-     $ret .= LJ::html_select({ 'name' => 'authas' }, @list) . " ";
+     $ret .= LJ::html_select({ 'name' => 'authas', selected => $GET{'authas'} || $remote->{user} }, @list) . " ";
      $ret .= LJ::html_submit(undef, 'Validate');
      $ret .= ' ' . $ML{'.asterisk.comment'};
      $ret .= "</form>\n\n";
