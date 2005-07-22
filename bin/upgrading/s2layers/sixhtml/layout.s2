@@ -1,0 +1,155 @@
+layerinfo type = "layout";
+layerinfo name = "Bloggish";
+layerinfo redist_uniq = "sixhtml/layout";
+layerinfo des = "SixApart's standard HTML structure for blogs, to be styled with CSS.";
+
+function print_stylesheet () {
+   """
+/* base css */
+@import url(http://www.typepad.com/.shared/themes/common/base-weblog.css);
+
+/* theme css */
+@import url(http://www.typepad.com/.shared/themes/lilia/theme-powell-street.css);
+
+/* user css */
+
+""";
+}
+
+function container_open (string name) {
+    "<div id='$name'><div id='$name-inner' class='pkg'>\n";
+}
+
+function container_close () {
+    "</div></div>\n";
+}
+
+function print_banner(Page p) {
+    container_open("banner");
+      "<h1 id='banner-header'>$p.global_title</h1>";
+      "<h2 id='banner-description'>$p.global_subtitle</h2>";
+    container_close();
+}
+
+function render_layout (Page p, string lay) {
+   if ($lay == "1C") {
+      container_open("alpha");
+      $p->print_body();
+      container_close();
+      return;
+   }
+
+   if ($lay == "2CL") {
+      container_open("alpha");
+      container_close();
+      container_open("beta");
+      $p->print_body();
+      container_close();
+      return;
+   }
+
+   if ($lay == "2CR") {
+      container_open("alpha");
+      $p->print_body();
+      container_close();
+      container_open("beta");
+      container_close();
+      return;
+   }
+
+   if ($lay == "3C") {
+      container_open("alpha");
+      container_close();
+      container_open("beta");
+      $p->print_body();
+      container_close();
+      container_open("gamma");
+      container_close();
+      return;
+   }
+
+
+}
+
+function get_layout () : string {
+   var Page p = get_page();
+   var string lay = $p.args{"lay"};
+   if ($lay == "1C" or $lay == "2CR" or $lay == "2CL" or $lay == "3C") {
+      return $lay;
+   }
+   return "2CR";
+}
+
+function body_class (string lay) : string {
+   var string{} map = {
+      "1C" => "layout-one-column",
+      "2CL" => "layout-two-column-left",
+      "2CR" => "layout-two-column-right",
+      "3C" => "layout-three-column",
+   };
+   return $map{$lay};
+}
+
+function Page::print () {
+
+ var string lay = get_layout();
+ var string body_layout_class = body_class($lay);
+
+   """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" id="sixapart-standard">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>""" + $this->title() + """</title>""";
+  $this->print_custom_head();
+"""  <link rel='stylesheet' href='$.stylesheet_url' type="text/css" />
+</head>
+<body class='$body_layout_class'>""";
+
+container_open("container");
+print_banner($this);
+container_open("pagebody");
+
+ render_layout($this, $lay);
+
+container_close();
+container_close();
+"</body></html>";
+}
+
+
+
+function RecentPage::print_body {
+    # Creator for both the Recent and Friends views, since they are similar
+    # If someone wants to do the two views differently, they can create
+    # FriendsPage::print_body since FriendsPage extends RecentPage.
+
+    foreach var Entry e ($.entries) {
+        # Print the entry
+        $this->print_entry($e);
+    }
+}
+
+
+function Page::print_entry(Entry e) {
+
+    ## For most styles, this will be overridden by FriendsPage::print_entry and such.
+    "<div class='entry'" + ($e.dom_id ? " id='$e.dom_id'" : "") + ">\n";
+      "<h3 class='entry-header'>$e.security_icon $e.subject</h3>\n";
+      "<div class='entry-content'>\n";
+
+          "<div class='entry-body'>\n"; $e->print_metadata(); "$e.text\n</div>\n";
+
+         var string sep = "<span class='separator'>|</span>";
+
+         "<p class='entry-footer'>";
+             print $e.time->date_format($*lang_fmt_date_med);
+             " $sep <a class='permalink' href='$e.permalink_url'>Permalink</a>";
+
+            if ($e.comments.enabled) { " $sep <a href='$e.comments.post_url'>Reply</a> "; }
+            if ($e.comments.count)   { " $sep <a href='$e.permalink_url#comments'>$e.comments.count comments</a> "; }
+         "</p>";
+
+       "</div>\n";
+     "</div>\n";
+}

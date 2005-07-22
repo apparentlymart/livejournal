@@ -52,6 +52,7 @@ variableflow/layout     layout          core1
 variableflow/themes     theme+          variableflow/layout
 
 s1shortcomings/layout   layout          core1
+sixhtml/layout          layout          core1
 
 deardiary/layout	layout		core1
 deardiary/themes	theme+		deardiary/layout
