@@ -59,7 +59,7 @@ function Page::print {
   # make our palimg background gradient:
   var Color fg_color = $*grad_color;
   var Color bg_color = $*background_color;
-  var string grad_url = palimg_tint("grad.gif", $bg_color, $fg_color);
+  var string grad_url = palimg_tint("s1gradient.gif", $bg_color, $fg_color);
 
   print "<title>" + $this->title() + "</title>";
 
