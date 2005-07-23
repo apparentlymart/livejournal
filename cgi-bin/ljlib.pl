@@ -168,9 +168,9 @@ use constant CMAX_UPIC_COMMENT => 120;
                      "des" => "Profile Page",
                  },
                  "tag" => {
-                     "des" => "Filtered Recent Entries View",   
+                     "des" => "Filtered Recent Entries View",
                  },
-                 
+
                  );
 
 ## we want to set this right away, so when we get a HUP signal later
@@ -239,10 +239,10 @@ sub locker {
     die "Couldn't load locker client: $@" if $@;
 
     return $LJ::LOCKER_OBJ =
-	new DDLockClient (
-			  servers => [ @LJ::LOCK_SERVERS ],
-			  lockdir => $LJ::LOCKDIR || "$LJ::HOME/locks",
-			  );
+        new DDLockClient (
+                          servers => [ @LJ::LOCK_SERVERS ],
+                          lockdir => $LJ::LOCKDIR || "$LJ::HOME/locks",
+                          );
 }
 
 sub mogclient {
@@ -282,10 +282,10 @@ sub get_dbh {
     #    'raw':  don't return a DBIx::StateKeeper object
 
     unless (exists $opts->{'max_repl_lag'}) {
-	# for slave or cluster<n>slave roles, don't allow lag
-	if ($_[0] =~ /slave$/) {
-	    $opts->{'max_repl_lag'} = $LJ::MAX_REPL_LAG || 100_000;
-	}
+        # for slave or cluster<n>slave roles, don't allow lag
+        if ($_[0] =~ /slave$/) {
+            $opts->{'max_repl_lag'} = $LJ::MAX_REPL_LAG || 100_000;
+        }
     }
 
     if ($LJ::DEBUG{'get_dbh'} && $_[0] ne "logs") {
@@ -301,14 +301,14 @@ sub get_dbh {
     my $mapping;
   ROLE:
     foreach my $role (@_) {
-	# let site admin turn off global master write access during
-	# maintenance
-	return undef if $LJ::DISABLE_MASTER && $role eq "master";
+        # let site admin turn off global master write access during
+        # maintenance
+        return undef if $LJ::DISABLE_MASTER && $role eq "master";
 
         if (($mapping = $LJ::WRAPPED_DB_ROLE{$role}) && ! $opts->{raw}) {
-	    if (my $keeper = $LJ::REQ_DBIX_KEEPER{$role}) {
-		return $keeper->set_database() ? $keeper : undef;
-	    }
+            if (my $keeper = $LJ::REQ_DBIX_KEEPER{$role}) {
+                return $keeper->set_database() ? $keeper : undef;
+            }
             my ($canl_role, $dbname) = @$mapping;
             my $tracker;
             # DBIx::StateTracker::new will die if it can't connect to the database,
@@ -322,7 +322,7 @@ sub get_dbh {
             if ($tracker) {
                 my $keeper = DBIx::StateKeeper->new($tracker, $dbname);
                 $LJ::REQ_DBIX_KEEPER{$role} = $keeper;
-		return $keeper->set_database() ? $keeper : undef;
+                return $keeper->set_database() ? $keeper : undef;
             }
             next ROLE;
         }
@@ -791,7 +791,7 @@ sub get_friend_group {
                            "FROM $fgtable WHERE userid=?");
     $sth->execute($uid);
     return LJ::error($db) if $db->err;
-    
+
     my @row;
     push @$fg, [ @row ] while @row = $sth->fetchrow_array;
 
@@ -820,8 +820,8 @@ sub fill_groups_xmlrpc {
     # grp:30 => 'anothergroup',
     #
     # grpu:whitaker => '0,1,2,3,4',
-    # grpu:test => '0', 
-    
+    # grpu:test => '0',
+
     my $grp = LJ::get_friend_group($u) || {};
 
     $ret->{"grp:0"} = "_all_";
@@ -837,7 +837,7 @@ sub fill_groups_xmlrpc {
         next unless $u->{journaltype} =~ /[PS]/;
 
         my $fname = $u->{user};
-        $ret->{"grpu:$fid:$fname"} = 
+        $ret->{"grpu:$fid:$fname"} =
             join(",", 0, grep { $grp->{$_} && $f->{groupmask} & 1 << $_ } 1..30);
     }
 
@@ -2227,7 +2227,7 @@ sub ljuser
         my $hops = 0;
 
         # Traverse the renames to the final journal
-        while (ref $user and $user->{'journaltype'} eq 'R' 
+        while (ref $user and $user->{'journaltype'} eq 'R'
                and ! $opts->{'no_follow'} && $hops++ < 5) {
 
             LJ::load_user_props($user, 'renamedto');
@@ -2397,13 +2397,13 @@ sub get_cap
 
     # is there a hook for this cap name?
     if (LJ::are_hooks("check_cap_$cname")) {
-	die "Hook 'check_cap_$cname' requires full user object"
-	    unless defined $u;
+        die "Hook 'check_cap_$cname' requires full user object"
+            unless defined $u;
 
-	my $val = LJ::run_hook("check_cap_$cname", $u);
-	return $val if defined $val;
+        my $val = LJ::run_hook("check_cap_$cname", $u);
+        return $val if defined $val;
 
-	# otherwise fall back to standard means
+        # otherwise fall back to standard means
     }
 
     # otherwise check via other means
@@ -2536,7 +2536,7 @@ register_setter('synlevel', sub {
         $$err = "Illegal value.  Must be 'title', 'summary', or 'full'";
         return 0;
     }
-    
+
     LJ::set_userprop($u, 'opt_synlevel', $value);
     return 1;
 });
@@ -2582,8 +2582,8 @@ register_setter("maximagesize", sub {
 register_setter("opt_ljcut_disable_lastn", sub {
     my ($dba, $u, $remote, $key, $value, $err) = @_;
     unless ($value =~ /^(0|1)$/) {
-    	$$err = "Illegal value. Must be '0' or '1'";
-	return 0;
+        $$err = "Illegal value. Must be '0' or '1'";
+        return 0;
     }
     LJ:set_userprop($u, "opt_ljcut_disable_lastn", $value);
     return 1;
@@ -2592,8 +2592,8 @@ register_setter("opt_ljcut_disable_lastn", sub {
 register_setter("opt_ljcut_disable_friends", sub {
     my ($dba, $u, $remote, $key, $value, $err) = @_;
     unless ($value =~ /^(0|1)$/) {
-    	$$err = "Illegal value. Must be '0' or '1'";
-	return 0;
+        $$err = "Illegal value. Must be '0' or '1'";
+        return 0;
     }
     LJ:set_userprop($u, "opt_ljcut_disable_friends", $value);
     return 1;
@@ -2602,8 +2602,8 @@ register_setter("opt_ljcut_disable_friends", sub {
 register_setter("disable_quickreply", sub {
     my ($dba, $u, $remote, $key, $value, $err) = @_;
     unless ($value =~ /^(0|1)$/) {
-    	$$err = "Illegal value. Must be '0' or '1'";
-	return 0;
+        $$err = "Illegal value. Must be '0' or '1'";
+        return 0;
     }
     LJ:set_userprop($u, "opt_no_quickreply", $value);
     return 1;
@@ -3724,7 +3724,7 @@ sub wipe_major_memcache
     foreach my $key ("userid","bio","talk2ct","talkleftct","log2ct",
                      "log2lt","memkwid","dayct","s1overr","s1uc","fgrp",
                      "friends","friendofs","tu","upicinf","upiccom",
-                     "upicurl", "intids", "memct", "lastcomm") 
+                     "upicurl", "intids", "memct", "lastcomm")
     {
         LJ::memcache_kill($userid, $key);
     }
@@ -5484,16 +5484,16 @@ sub make_journal
             if LJ::OpenID::server_enabled();
 
         return qq{
-	    <html>
-	    <head>
+            <html>
+            <head>
             $head
-	    </head>
-	    <body>
-	     <h1>Notice</h1>
-	     <p>$msg</p>
-	     <p>Instead, please use <nobr><a href=\"$url\">$url</a></nobr></p>
-	    </body>
-	    </html>
+            </head>
+            <body>
+             <h1>Notice</h1>
+             <p>$msg</p>
+             <p>Instead, please use <nobr><a href=\"$url\">$url</a></nobr></p>
+            </body>
+            </html>
         }.("<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->\n" x 50);
     };
     my $error = sub {
@@ -7486,7 +7486,7 @@ sub delete_entry
 # des-journalu: User object of journal (community) entry was posted in.
 # des-jitemid: ID of this entry.
 # returns: 1 for success, 0 for failure
-# </LJFUNC> 
+# </LJFUNC>
 sub mark_entry_as_spam {
     my ($journalu, $jitemid) = @_;
     $journalu = LJ::want_user($journalu);
@@ -7499,7 +7499,7 @@ sub mark_entry_as_spam {
 
     my $item = LJ::get_log2_row($journalu, $jitemid);
     return 0 unless $item;
-	
+
     # step 1: get info we need
     my $logtext = LJ::get_logtext2($journalu, $jitemid);
     my ($subject, $body, $posterid) = ($logtext->{$jitemid}[0], $logtext->{$jitemid}[1], $item->{posterid});
@@ -7507,9 +7507,9 @@ sub mark_entry_as_spam {
 
     # step 2: insert into spamreports
     $dbh->do('INSERT INTO spamreports (reporttime, posttime, journalid, posterid, subject, body, report_type) ' .
-             'VALUES (UNIX_TIMESTAMP(), UNIX_TIMESTAMP(?), ?, ?, ?, ?, \'entry\')', 
+             'VALUES (UNIX_TIMESTAMP(), UNIX_TIMESTAMP(?), ?, ?, ?, ?, \'entry\')',
               undef, $item->{logtime}, $journalu->{userid}, $posterid, $subject, $body);
-	
+
     return 0 if $dbh->err;
     return 1;
 }
@@ -7620,7 +7620,7 @@ sub _friends_do {
 
     my $ret = $dbh->do($sql, undef, @args);
     return 0 if $dbh->err;
-    
+
     LJ::memcache_kill($uid, "friends");
 
     # pass $uuid in case it's a $u object which mark_dirty wants
@@ -8706,7 +8706,7 @@ sub set_rel
 # des: Sets relationship edges for lists of user tuples.
 # args: @edges
 # arg-edges: array of arrayrefs of edges to set: [userid, targetid, type]
-#            Where: 
+#            Where:
 #               userid: source userid, or a user hash
 #               targetid: target userid, or a user hash
 #               type: type of the relationship
@@ -8721,7 +8721,7 @@ sub set_rel_multi {
 # des: Clear relationship edges for lists of user tuples.
 # args: @edges
 # arg-edges: array of arrayrefs of edges to clear: [userid, targetid, type]
-#            Where: 
+#            Where:
 #               userid: source userid, or a user hash
 #               targetid: target userid, or a user hash
 #               type: type of the relationship
@@ -8737,7 +8737,7 @@ sub clear_rel_multi {
 # args: $opts
 # arg-opts: keys: mode  => {clear|set}
 #                 edges =>  array of arrayrefs of edges to set: [userid, targetid, type]
-#                    Where: 
+#                    Where:
 #                       userid: source userid, or a user hash
 #                       targetid: target userid, or a user hash
 #                       type: type of the relationship
@@ -8786,7 +8786,7 @@ sub _mod_rel_multi
     }
 
     # if any error occurs with a cluster, we'll skip over that cluster and continue
-    # trying to process others since we've likely already done some amount of db 
+    # trying to process others since we've likely already done some amount of db
     # updates already, but we'll return undef to signify that everything did not
     # go smoothly
     my $ret = 1;
@@ -8830,7 +8830,7 @@ sub _mod_rel_multi
         my $dbh = LJ::get_db_writer()
             or return undef;
 
-        my @vals = map { @$_ } @reluser; 
+        my @vals = map { @$_ } @reluser;
 
         if ($mode eq 'set') {
             my $bind = join(",", map { "(?,?,?)" } @reluser);
@@ -8911,7 +8911,7 @@ sub clear_rel
         LJ::MemCache::set([$userid, "relmodu:$userid:$eff_type"], time());
 
     # if neither userid nor targetid are '*', then just call _set_rel_memcache
-    # to update the rel:userid:targetid:type memcache key as well as the 
+    # to update the rel:userid:targetid:type memcache key as well as the
     # userid and targetid modtime keys
     } else {
         LJ::_set_rel_memcache($userid, $targetid, $eff_type, 0);
@@ -9054,7 +9054,7 @@ sub alloc_global_counter
     } elsif ($dom eq "E") {
         # if there is no extuser counter row, start making extuser names at
         # 'ext_1'  - ( the 0 here is incremented after the recurse )
-        $newmax = 0; 
+        $newmax = 0;
     } elsif ($dom eq "A") {
         $newmax = $dbh->selectrow_array("SELECT MAX(ansid) FROM support_answers");
     } else {
