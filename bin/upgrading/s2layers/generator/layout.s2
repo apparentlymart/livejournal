@@ -686,6 +686,25 @@ function DayPage::print_body() {
 
 }
 
+function TagsPage::print_body () {
+    """<table width="$*box_width" cellpadding="2" cellspacing="0" border="0" summary="" class="entrybox">
+<tr align='left'>
+<td bgcolor="$*stronger_back" align="center">
+<table width="100%" cellpadding="5" cellspacing="0" border="0" summary="">
+<tr align='left'><td class="caption" colspan='2'>Visible Tags</td></tr>
+<tr align='left'>
+<td colspan="2" bgcolor="$*entry_back">
+<ul class='ljtaglist'>""";
+
+    foreach var TagDetail td ($.tags) {
+        var string uses = get_plural_phrase($td.use_count, "text_tag_uses");
+        print """<li><a href="$td.url">$td.name</a> - $uses</li>""";
+    }
+
+    """<ul></td></tr></table>
+    </td></tr></table><p>""";
+}
+
 function MonthPage::print_body () {
     """<table width="$*box_width" cellpadding="2" cellspacing="0" border="0" summary="" class="entrybox">
 <tr align='left'>
