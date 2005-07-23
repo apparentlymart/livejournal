@@ -446,6 +446,18 @@ class TagsPage extends Page
     var TagDetail[] tags "List of tags visible to the user viewing the page.";
 }
 
+class MessagePage extends Page
+"A page showing an error or confirmation message."
+{
+    var readonly string title "The title of the message.";
+    var readonly string message "The body of the message. Do not print this directly; use [method[MessagePage.print_body()]] instead.";
+    var Link{} links "An associative array of links to be displayed alongside this message. Iterate over [member[MessagePage.link_keyseq]] to find the keys.";
+    var string[] link_keyseq "A list of links, indicated by key, that should be displayed alongside this error. They should ideally be displayed in a similar way to the entry links displayed on the entry page.";
+
+    function print_message() [fixed] "Print the message. Call this rather than printing [member[MessagePage.message]] directly.";
+    function print_links() "Print the links from the [member[MessagePage.links]] and [member[MessagePage.link_keyseq]] members. Layouts will probably want to override this.";
+}
+
 class RecentNav 
 "Navigation position within a [class[RecentPage]] or [class[FriendsPage]] and URLs to move about."
 {
@@ -2074,3 +2086,27 @@ function TagsPage::print_body
 
     print "</ul>";
 }
+
+### MessagePage functions
+
+function MessagePage::view_title() : string {
+    return $.title;
+}
+
+function MessagePage::print_body() {
+    $this->print_links();
+    $this->print_message();
+}
+
+function MessagePage::print_message() {
+    print $.message;
+}
+
+function MessagePage::print_links() {
+    println """<div style='text-align: center;'>""";
+    foreach var string k ($.link_keyseq) {
+        println """ $.links{$k} """;
+    }
+    println """</div>""";
+}
+
