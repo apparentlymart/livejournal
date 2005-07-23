@@ -17,7 +17,7 @@ body<=
 
     return $err->($ML{'.invalid.link'})
         unless LJ::did_post() || ($GET{journal} && $GET{itemid});
-    
+
     my $journal = $GET{journal} || $POST{journal};
     my $u = LJ::load_user($journal);
     return $err->($ML{'.invalid.journal'}) unless $u;
@@ -63,7 +63,7 @@ body<=
     my $logtagstr = join ', ', map { LJ::ejs($_) } sort values %$logtags;
 
     $ret .= "<?p $ML{'.intro'} p?><br />";
-    $ret .= "<script type='text/javascript'> var cur_taglist = '$logtagstr'; </script>";  
+    $ret .= "<script type='text/javascript'> var cur_taglist = '$logtagstr'; </script>";
 
     $ret .= '<table class="edittbl" cellpadding="0" cellspacing="0" width="50%">';
     $ret .= "<tr><td class='l'>$ML{'.subject'}</td><td>$subj</td></tr>" if $subj;
@@ -104,8 +104,8 @@ body<=
         $ret .= "</select>";
     } else {
         $ret .= "none"
-    }      
-    
+    }
+
     $ret .= "<br /><br />";
     $ret .= "$ML{'.permissions.add.yes'}<br />" if LJ::Tags::can_add_tags($u, $remote);
     $ret .= "$ML{'.permissions.control.yes'}<br />" if LJ::Tags::can_control_tags($u, $remote);
