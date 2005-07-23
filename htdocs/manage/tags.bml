@@ -14,6 +14,8 @@ body<=
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
 
+    LJ::need_res("stc/tags.css", "js/tags.js");
+
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);
     return LJ::bad_input($ML{'error.invalidauth'})
@@ -80,14 +82,14 @@ body<=
         $max = $data[-1]->[1];
         $min = $data[0]->[1];
         $width  = ($max - $min) / $groups || 1;
-        
+
         # pre calculate ranges for groups
         for (1..$groups) {
              $range{$_} = [];
              @{$range{$_}}[0] = $min + ($_ - 1) * $width;  # low
              @{$range{$_}}[1] = $min + ($_ * $width);      # high
         }
-        
+
         # iterate through sorted data, adding
         # histogram group to the tags data structure.
         foreach (@data) {
@@ -129,7 +131,7 @@ body<=
     foreach (sort keys %$tags) {
         my $tag = $tags->{$_};
         my $sec = $tag->{security};
-        my ($pub, $pri, $fr, $tot) = 
+        my ($pub, $pri, $fr, $tot) =
                 ($sec->{public}, $sec->{private},
                  $sec->{friends}, $tag->{uses});
         my $grp = $tot - ($pub+$pri+$fr);
@@ -259,9 +261,5 @@ body<=
 
 } _code?>
 <=body
-head<=
-<link rel='stylesheet' type='text/css' href='<?statprefix?>/tags.css' />
-<script type="text/javascript" src="/js/tags.js"></script>
-<=head
 bodyopts=>onLoad="initTagPage()"
 page?>
