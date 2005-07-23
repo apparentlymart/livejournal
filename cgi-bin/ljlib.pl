@@ -4443,6 +4443,8 @@ sub start_request
     %LJ::REQ_DBIX_TRACKER = ();       # canonical dbrole -> DBIx::StateTracker
     %LJ::REQ_DBIX_KEEPER = ();        # dbrole -> DBIx::StateKeeper
     %LJ::REQ_HEAD_HAS = ();           # avoid code duplication for js
+    %LJ::NEEDED_RES = ();             # needed resources (css/js/etc):
+                                      #  keys are relative from htdocs, values 1 or 2 (1=external, 2=inline)
 
     # we use this to fake out get_remote's perception of what
     # the client's remote IP is, when we transfer cookies between

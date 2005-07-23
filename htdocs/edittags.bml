@@ -13,6 +13,8 @@ body<=
     return $err->($ML{'.disabled'})
         if $LJ::DISABLED{tags};
 
+    LJ::need_res("stc/tags.css", "js/tags.js");
+
     my ($ret, $msg);
 
     return $err->($ML{'.invalid.link'})
@@ -121,8 +123,4 @@ body<=
 }
 _code?>
 <=body
-head<=
-<link rel='stylesheet' type='text/css' href='<?statprefix?>/tags.css' />
-<script type="text/javascript" src="/js/tags.js"></script>
-<=head
 page?>

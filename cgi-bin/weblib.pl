@@ -1520,6 +1520,27 @@ sub js_dumper {
     }
 }
 
+sub need_res {
+    foreach my $reskey (@_) {
+        die "Bogus reskey $reskey" unless $reskey =~ m!^(js|stc)/!;
+        $LJ::NEEDED_RES{$reskey} = 1;
+    }
+}
+
+sub res_includes {
+    # TODO: dependency tracking
+    my $ret = "";
+    foreach my $key (keys %LJ::NEEDED_RES) {
+        my $path = $key;
+        if ($path =~ s!^js/!$LJ::JSPREFIX/!) {
+            $ret .= "<script type=\"text/javascript\" src=\"$path\"></script>\n";
+        } elsif ($path =~ /\.css$/ && $path =~ s!^stc/!$LJ::STATPREFIX/!) {
+            $ret .= "<link rel=\"stylesheet\" type=\"text/css\" href=\"$path\" />\n";
+        }
+    }
+    return $ret;
+}
+
 # Common challenge/response javascript, needed by both login pages and comment pages alike.
 # Forms that use this should onclick='return sendForm()' in the submit button.
 # Returns true to let the submit continue.

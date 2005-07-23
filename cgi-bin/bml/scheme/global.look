@@ -336,7 +336,10 @@ CHOICES<=
 
 PAGE<=
 {Fp}<html>
-<head><title>%%title%%</title>%%head%%</head>
+<head><title>%%title%%</title>
+<?_code LJ::res_includes() _code?>
+%%head%%
+</head>
 <body %%bodyopts%%>
 %%body%%
 </body>
