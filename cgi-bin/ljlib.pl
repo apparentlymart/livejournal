@@ -8364,7 +8364,7 @@ sub rand_chars
 {
     my $length = shift;
     my $chal = "";
-    my $digits = "abcdefghijklmnopqrstuvwzyzABCDEFGHIJKLMNOPQRSTUVWZYZ0123456789";
+    my $digits = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     for (1..$length) {
         $chal .= substr($digits, int(rand(62)), 1);
     }
