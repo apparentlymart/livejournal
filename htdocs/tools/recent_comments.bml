@@ -239,7 +239,7 @@ body<=
                 $hr_ago = "<a href='$talkurl'>$hr_ago</a>";
                 $subject = $log_text->{"$r->{journalid} $r->{nodeid}"}[0] || "$lrow->{ditemid}.html";
                 LJ::CleanHTML::clean_subject(\$subject);
-                $subject = "<a href='$logurl'>$subject</a>";
+                $subject = "$subject <a href='$logurl'>(link)</a>";
             } else {
                 $subject = "Post Deleted";
             }
