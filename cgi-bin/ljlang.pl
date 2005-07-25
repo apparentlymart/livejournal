@@ -350,6 +350,7 @@ sub get_text_multi
 
         if ($text) {
             $strings{$code} = $text;
+            $TXT_CACHE->set($cache_key, $text);
         } else {
             push @dbload, $code;
         }
