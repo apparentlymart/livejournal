@@ -818,24 +818,19 @@ sub create_qr_div {
     $ret = "<script language='JavaScript'>\n";
     $ret .= "<!--\n";
 
-    $qrhtml =~ s/[\"\\]/\\$&/g;
-    $qrhtml =~ s/\r?\n/\\n/gs;
-    $qrhtml =~ s/\r//;
+    $qrhtml = LJ::ejs($qrhtml);
 
     # here we create some seperate fields for saving the quickreply entry
     # because the browser will not save to a dynamically-created form.
 
-    my $qrsaveform .= LJ::html_hidden(
+    my $qrsaveform .= LJ::ejs(LJ::html_hidden(
                                       {'name' => 'saved_subject', 'id' => 'saved_subject'},
                                       {'name' => 'saved_body', 'id' => 'saved_body'},
                                       {'name' => 'saved_spell', 'id' => 'saved_spell'},
                                       {'name' => 'saved_upic', 'id' => 'saved_upic'},
                                       {'name' => 'saved_dtid', 'id' => 'saved_dtid'},
                                       {'name' => 'saved_ptid', 'id' => 'saved_ptid'},
-                                      );
-    $qrsaveform =~ s/[\"\\]/\\$&/g;
-    $qrsaveform =~ s/\r?\n/\\n/gs;
-    $qrsaveform =~ s/\r//;
+                                      ));
 
     $ret .= qq(
 
