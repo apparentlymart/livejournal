@@ -138,17 +138,24 @@
         var qr_ptid = xGetElementById('parenttalkid');
         var qr_upic = xGetElementById('prop_picture_keyword');
 
-        document.qrform.saved_body.value = qr_body.value;
-        document.qrform.saved_subject.value = qr_subject.value;
+        var qr_saved_body = xGetElementById('saved_body');
+        var qr_saved_subject = xGetElementById('saved_subject');
+        var saved_do_spellcheck = xGetElementById('saved_spell');
+        var qr_saved_dtid = xGetElementById('saved_dtid');
+        var qr_saved_ptid = xGetElementById('saved_ptid');
+        var qr_saved_upic = xGetElementById('saved_upic');
+
+        qr_saved_body.value = qr_body.value;
+        qr_saved_subject.value = qr_subject.value;
         if(do_spellcheck) {
-          document.qrform.saved_spell.value = do_spellcheck.checked;
+          saved_do_spellcheck.value = do_spellcheck.checked;
         }
 
-        document.qrform.saved_dtid.value = qr_dtid.value;
-        document.qrform.saved_ptid.value = qr_ptid.value;
+        qr_saved_dtid.value = qr_dtid.value;
+        qr_saved_ptid.value = qr_ptid.value;
 
         if (qr_upic) { // if it was in the form
-            document.qrform.saved_upic.value = qr_upic.selectedIndex;
+            qr_saved_upic.value = qr_upic.selectedIndex;
         }
 
         return false;
@@ -158,7 +165,6 @@
     function restore_entry() {
         var saved_body = xGetElementById('saved_body');
         if (saved_body.value == "") return false;
-
         setTimeout(
             function () {
 
@@ -167,7 +173,7 @@
                 var ptid = xGetElementById('saved_ptid');
                 if (! ptid) return false;
 
-                quickreply(dtid.value, ptid.value, document.qrform.saved_subject.value);
+                quickreply(dtid.value, ptid.value, saved_body.value);
 
                 var body = xGetElementById('body');
                 if (! body) return false;
@@ -175,18 +181,24 @@
 
                 // Some browsers require we explicitly set this after the div has moved
                 // and is now no longer hidden
+                var qr_saved_subject = xGetElementById('saved_subject');
+                var qr_saved_spell = xGetElementById('saved_spell');
+                var qr_saved_dtid = xGetElementById('saved_dtid');
+                var qr_saved_ptid = xGetElementById('saved_ptid');
+                var qr_saved_upic = xGetElementById('saved_upic');
+
                 var subject = xGetElementById('subject');
                 if (! subject) return false;
-                subject.value = document.qrform.saved_subject.value
+                subject.value = qr_saved_subject.value
 
                 var prop_picture_keyword = xGetElementById('prop_picture_keyword');
                 if (prop_picture_keyword) { // if it was in the form
-                    prop_picture_keyword.selectedIndex = document.qrform.saved_upic.value;
+                    prop_picture_keyword.selectedIndex = qr_saved_upic.value;
                 }
 
                 var spell_check = xGetElementById('do_spellcheck');
                 if (! spell_check) return false;
-                if (document.qrform.saved_spell.value == 'true') {
+                if (qr_saved_spell.value == 'true') {
                     spell_check.checked = true;
                 } else {
                     spell_check.checked = false;

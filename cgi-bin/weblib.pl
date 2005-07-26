@@ -714,7 +714,7 @@ sub create_qr_div {
     my $basepath = LJ::journal_base($u) . "/$ditemid.html?${stylemineuri}";
     $qrhtml .= LJ::html_hidden({'name' => 'replyto', 'id' => 'replyto', 'value' => ''},
                                {'name' => 'parenttalkid', 'id' => 'parenttalkid', 'value' => ''},
-                               {'name' => 'journal', 'id' => 'journal', 'value' => $u->{'name'}},
+                               {'name' => 'journal', 'id' => 'journal', 'value' => $u->{'user'}},
                                {'name' => 'itemid', 'id' => 'itemid', 'value' => $ditemid},
                                {'name' => 'usertype', 'id' => 'usertype', 'value' => 'cookieuser'},
                                {'name' => 'userpost', 'id' => 'userpost', 'value' => $remote->{'user'}},
@@ -723,12 +723,6 @@ sub create_qr_div {
                                {'name' => 'dtid', 'id' => 'dtid', 'value' => ''},
                                {'name' => 'basepath', 'id' => 'basepath', 'value' => $basepath},
                                {'name' => 'stylemine', 'id' => 'stylemine', 'value' => $stylemine},
-                               {'name' => 'saved_subject', 'id' => 'saved_subject'},
-                               {'name' => 'saved_body', 'id' => 'saved_body'},
-                               {'name' => 'saved_spell', 'id' => 'saved_spell'},
-                               {'name' => 'saved_upic', 'id' => 'saved_upic'},
-                               {'name' => 'saved_dtid', 'id' => 'saved_dtid'},
-                               {'name' => 'saved_ptid', 'id' => 'saved_ptid'},
                                {'name' => 'viewing_thread', 'id' => 'viewing_thread', 'value' => $viewing_thread},
                                );
 
@@ -795,13 +789,13 @@ sub create_qr_div {
     $qrhtml .= "<td colspan='3' align='left'>";
 
     $qrhtml .= LJ::html_submit('submitpost', BML::ml('/talkread.bml.button.post'),
-                               { "id" => "submitpost",
-                                 "raw" => "onclick='if (checkLength()) {submitform();}'"
+                               { 'id' => 'submitpost',
+                                 'raw' => 'onclick="if (checkLength()) {submitform();}"'
                                  });
 
     $qrhtml .= "&nbsp;" . LJ::html_submit('submitmoreopts', BML::ml('/talkread.bml.button.more'),
-                                          { "id" => "submitmoreopts",
-                                            "raw" => "onclick='if (moreopts()) {submitform();}'"
+                                          { 'id' => 'submitmoreopts',
+                                            'raw' => 'onclick="if (moreopts()) {submitform();}"'
                                             });
     if ($LJ::SPELLER) {
         $qrhtml .= "&nbsp;<input type='checkbox' name='do_spellcheck' value='1' id='do_spellcheck' /> <label for='do_spellcheck'>";
@@ -823,7 +817,25 @@ sub create_qr_div {
     my $ret;
     $ret = "<script language='JavaScript'>\n";
     $ret .= "<!--\n";
-    $qrhtml = LJ::ejs($qrhtml);
+
+    $qrhtml =~ s/[\"\\]/\\$&/g;
+    $qrhtml =~ s/\r?\n/\\n/gs;
+    $qrhtml =~ s/\r//;
+
+    # here we create some seperate fields for saving the quickreply entry
+    # because the browser will not save to a dynamically-created form.
+
+    my $qrsaveform .= LJ::html_hidden(
+                                      {'name' => 'saved_subject', 'id' => 'saved_subject'},
+                                      {'name' => 'saved_body', 'id' => 'saved_body'},
+                                      {'name' => 'saved_spell', 'id' => 'saved_spell'},
+                                      {'name' => 'saved_upic', 'id' => 'saved_upic'},
+                                      {'name' => 'saved_dtid', 'id' => 'saved_dtid'},
+                                      {'name' => 'saved_ptid', 'id' => 'saved_ptid'},
+                                      );
+    $qrsaveform =~ s/[\"\\]/\\$&/g;
+    $qrsaveform =~ s/\r?\n/\\n/gs;
+    $qrsaveform =~ s/\r//;
 
     $ret .= qq(
 
@@ -837,6 +849,7 @@ sub create_qr_div {
             de.style.display = 'none';
             document.body.insertBefore(de, document.body.firstChild);
         }
+        document.write("$qrsaveform");
     }
                );
     $ret .= "-->\n";
@@ -872,7 +885,7 @@ sub make_qr_link
         $basesubject =~ s/^(Re:\s*)*//i;
         $basesubject = "Re: $basesubject" if $basesubject;
         $basesubject = LJ::ejs($basesubject);
-        my $onclick = "return quickreply(\"$dtid\", $pid, \"$basesubject\")";
+        my $onclick = "return quickreply('$dtid', $pid, '$basesubject')";
         return "<a onclick='$onclick' href='$replyurl' >$linktext</a>";
     } else { # QR Disabled
         return "<a href='$replyurl' >$linktext</a>";
