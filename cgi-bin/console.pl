@@ -1399,12 +1399,16 @@ sub reset_email
         unless ($remote->{'priv'}->{'reset_email'});
 
     my $user = $args->[1];
-    my $userid = LJ::get_userid($user);
+    my $u = LJ::load_user($user);
+    my $userid = $u->{userid};
 
     return $err->("Invalid user $user") unless ($userid);
 
     my $email = $args->[2];
     my $aa = LJ::register_authaction($userid, "validateemail", $email);
+
+    LJ::infohistory_add($u, 'emailreset', $u->{email}, $u->{status})
+        if $u->{email} ne $email;
 
     LJ::update_user($userid, { email => $email, status => 'T' })
         or return $err->("A database error has occurred");
