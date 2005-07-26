@@ -269,8 +269,8 @@ function Page::print {
           [<a href="$friendslink">$*text_view_friends</a>]
           [<a href="$monthlink">$*text_view_month</a>]
           [<a href="$archivelink">$*text_view_archive</a>]
-
-          [<a href="$.journal.website_url">$.journal.website_name</a>]
+        """; if ($.journal.website_name) { """
+          [<a href="$.journal.website_url">$.journal.website_name</a>]"""; } """
       </div>
     </div>
 
