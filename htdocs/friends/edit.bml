@@ -44,6 +44,7 @@ body<=
         $ret .= "</form>\n\n";
 
         $ret .= "<form method='post' name='editFriends' action='edit.bml$getextra'>\n";
+        $ret .= LJ::form_auth();
 
         ### who has you defined as a friend?
         my %res = ();
@@ -186,6 +187,8 @@ body<=
 
     # if they did a post, then process their changes
     if (LJ::did_post()) {
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>"
+            unless LJ::check_form_auth();
 
         my %request = ();
         $request{'mode'} = "editfriends";
