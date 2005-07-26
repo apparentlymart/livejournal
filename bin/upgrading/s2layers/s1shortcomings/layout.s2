@@ -21,7 +21,7 @@ property string deleted_comment_text { des = "Text to display if a comment has b
 property string month_posts_by_text { des = "Describe who wrote the posts for a month view."; }
 property Color grad_color { des = "Foreground color to make the background gradient at the top."; }
 
-set grad_color = "#3333FF";
+set grad_color = "#6699CC";
 set month_posts_by_text = "Here are all the posts for this month by";
 set deleted_comment_text = "(Deleted comment)";
 set text_tags = "Tags:";
@@ -153,6 +153,13 @@ function Page::print {
               padding: 3px;
               padding-top: 1em;
               margin: 1em 2em 2em 2em;
+
+              border-top: 2px;
+              border-left: 0;
+              border-right: 0;
+              border-bottom: 0px;
+              border-style: dashed;
+              border-color:  $*bar_color;
             }
             .BigTitle {
               font-weight: normal;
@@ -186,14 +193,6 @@ function Page::print {
               margin-top: 0px;
               margin-bottom: 0px;
               overflow: auto;
-            }
-            .bottomdashedbar {
-              border-top: 0px;
-              border-left: 0;
-              border-right: 0;
-              border-bottom: 2px;
-              border-style: dashed;
-              border-color:  $*bar_color;
             }
             .nospace {
               padding: 0px;
@@ -274,7 +273,6 @@ function Page::print {
       </div>
     </div>
 
-    <div class="bottomdashedbar"></div>
     """;
 
   $this->print_body();
@@ -299,7 +297,7 @@ function EntryPage::print_comment_partial(Comment comment) {
 
     """
        <div class="comments"
-            id="$comment.dom_id" style="display: inline;">
+            id="$comment.anchor" style="display: inline;">
             <div style="padding-left: ${leftpadding}em;">""";
               if ($comment.deleted) {
                 # first thing check to see if this comment has been deleted
@@ -345,7 +343,7 @@ function EntryPage::print_comment(Comment comment) {
   if ($comment.screened) {
     $barclass = "comment_bar_screened";
   }
-  """
+  """<div class="nospace" id="$comment.anchor">
     <div class="comments"
                 id="ljcmt$comment.talkid" style="padding-left: ${leftpadding}em;">
       <div class="$barclass" id="cmtbar$comment.talkid" style="height: $picheight;">
@@ -376,6 +374,9 @@ function EntryPage::print_comment(Comment comment) {
   if ($comment.frozen) {
     print " ($*text_comment_frozen)";
   }
+  if ($comment.comment_posted) {
+    print "<br/><b>$*text_comment_posted</b>";
+  }
         """
         </div>
       </div>
@@ -393,6 +394,7 @@ function EntryPage::print_comment(Comment comment) {
             """
            </div>
       </div>
+    </div>
     </div>
     """;
 }

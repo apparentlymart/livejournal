@@ -836,6 +836,7 @@ sub create_qr_div {
 
     var de;
     if (document.createElement && document.body.insertBefore) {
+        document.write("$qrsaveform");
         de = document.createElement("div");
 
         if (de) {
@@ -844,7 +845,6 @@ sub create_qr_div {
             de.style.display = 'none';
             document.body.insertBefore(de, document.body.firstChild);
         }
-        document.write("$qrsaveform");
     }
                );
     $ret .= "-->\n";

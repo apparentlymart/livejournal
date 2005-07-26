@@ -310,6 +310,7 @@ class Comment extends EntryLite
     var readonly bool frozen "True if comment is in frozen state.";
     var readonly bool deleted "True if comment has been deleted. Deleted comments still show up if they are the parent of a thread.";
     var readonly string anchor "Direct link to comment, via HTML name anchors";
+    var readonly bool comment_posted "True if comment was just posted by the current user.";
 
     function builtin print_multiform_check "Prints the select checkbox in CSS class 'ljcomsel' with DOM id 'ljcomsel_\$talkid' for a multi-action form started with [method[EntryPage.print_multiform_start()]].";
 
@@ -1118,6 +1119,11 @@ property string text_multiform_conf_delete {
     des = "Text for the confirming mass-delete action";
 }
 set text_multiform_conf_delete = "Delete selected comments?";
+
+property string text_comment_posted {
+    des = "Text to display when a comment has just been posted by the user.";
+}
+set text_comment_posted = "Comment successfully posted.";
 
 property string text_tags {
     des = "Text for 'Tags' header, use a # where you want the tag list inserted.";

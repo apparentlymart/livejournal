@@ -145,6 +145,12 @@ sub EntryPage
                 }
             }
 
+            # Comment Posted Notice
+            my ($last_talkid, $last_jid) = LJ::get_lastcomment();
+            my $commentposted = "";
+            $commentposted = 1
+                 if ($last_talkid == $dtalkid && $last_jid == $remote->{'userid'});
+
             my $s2com = {
                 '_type' => 'Comment',
                 'journal' => $userlite_journal,
@@ -171,6 +177,7 @@ sub EntryPage
                 'link_keyseq' => [ 'delete_comment' ],
                 'anchor' => "t$dtalkid",
                 'dom_id' => "ljcmt$dtalkid",
+                'comment_posted' => $commentposted,
             };
 
             # don't show info from suspended users
