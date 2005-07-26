@@ -83,6 +83,8 @@ FORM
         } elsif ($row->{action} eq 'maintainer_remove') {
             my $u = LJ::load_userid($row->{actiontarget});
             $action = "Removed maintainer " . LJ::ljuser($u) if $u;
+        } elsif ($row->{action} eq 'emailpost') {
+            $action = "User posted via email gateway";
         } else {
             $action = "Unknown action ($row->{action})";
         }
