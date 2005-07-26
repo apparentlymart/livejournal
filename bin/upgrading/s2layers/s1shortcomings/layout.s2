@@ -343,9 +343,10 @@ function EntryPage::print_comment(Comment comment) {
   if ($comment.screened) {
     $barclass = "comment_bar_screened";
   }
-  """<div class="nospace" id="$comment.anchor">
+"""
+    <a name="$comment.anchor"></a>
     <div class="comments"
-                id="ljcmt$comment.talkid" style="padding-left: ${leftpadding}em;">
+                id="$comment.dom_id" style="padding-left: ${leftpadding}em;">
       <div class="$barclass" id="cmtbar$comment.talkid" style="height: $picheight;">
      """;
         if ($comment.userpic.url) { """
@@ -394,7 +395,6 @@ function EntryPage::print_comment(Comment comment) {
             """
            </div>
       </div>
-    </div>
     </div>
     """;
 }
