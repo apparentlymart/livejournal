@@ -98,7 +98,7 @@ sub make_journal
     }
 
     escape_context_props($ctx->[S2::PROPS]);
-    
+
     $opts->{'ctx'} = $ctx;
     $LJ::S2::CURR_CTX = $ctx;
 
@@ -142,9 +142,9 @@ sub make_journal
     return $page if $page && ref $page ne 'HASH';
 
     s2_run($r, $ctx, $opts, $entry, $page);
-    
+
     if (ref $opts->{'errors'} eq "ARRAY" && @{$opts->{'errors'}}) {
-        return join('', 
+        return join('',
                     "Errors occurred processing this page:<ul>",
                     map { "<li>$_</li>" } @{$opts->{'errors'}},
                     "</ul>");
@@ -177,24 +177,24 @@ sub s2_run
         $r->content_type($ctx->[S2::SCRATCH]->{'ctype'} || $ctype);
         $r->send_http_header();
     };
-    
+
     my $need_flush;
-    my $out_straight = sub { 
+    my $out_straight = sub {
         # Hacky: forces text flush.  see:
         # http://zilla.livejournal.org/906
         if ($need_flush) {
             $cleaner->parse("<!-- -->");
             $need_flush = 0;
         }
-        $$LJ::S2::ret_ref .= $_[0]; 
+        $$LJ::S2::ret_ref .= $_[0];
     };
-    my $out_clean = sub { 
-        $cleaner->parse($_[0]); 
+    my $out_clean = sub {
+        $cleaner->parse($_[0]);
         $need_flush = 1;
     };
     S2::set_output($out_straight);
     S2::set_output_safe($cleaner ? $out_clean : $out_straight);
-          
+
     $LJ::S2::CURR_PAGE = $page;
     $LJ::S2::RES_MADE = 0;  # standard resources (Image objects) made yet
 
@@ -204,7 +204,7 @@ sub s2_run
     $LJ::S2::CURR_PAGE = undef;
     $LJ::S2::CURR_CTX  = undef;
 
-    if ($@) { 
+    if ($@) {
         my $error = $@;
         $error =~ s/\n/<br \/>\n/g;
         S2::pout("<b>Error running style:</b> $error");
@@ -457,7 +457,7 @@ sub get_layers_of_user
 
     my $extrainfo = $is_system ? "'redist_uniq', " : "";
     $extrainfo .= join(', ', map { $dbr->quote($_) } @$infokeys).", " if $infokeys;
-    
+
     my $sth = $dbr->prepare("SELECT i.infokey, i.value, l.s2lid, l.b2lid, l.type ".
                             "FROM s2layers l, s2info i ".
                             "WHERE l.userid=? AND l.s2lid=i.s2lid AND ".
@@ -528,11 +528,11 @@ sub get_style
     my ($styleid, $u);
 
     if (ref $opts eq "HASH") {
-	$verify = $opts->{'verify'};
-	$u = $opts->{'u'};
+        $verify = $opts->{'verify'};
+        $u = $opts->{'u'};
     } elsif ($opts) {
-	$verify = 1;
-	die "Bogus second arg to LJ::S2::get_style" if ref $opts;
+        $verify = 1;
+        die "Bogus second arg to LJ::S2::get_style" if ref $opts;
     }
 
     if (ref $arg) {
@@ -564,7 +564,7 @@ sub get_style
 
     # this is a hack to add remapping support for s2lids
     # - if a layerid is loaded above but it has a remapping
-    #   defined in ljconfig, use the remap id instead and 
+    #   defined in ljconfig, use the remap id instead and
     #   also save to database using set_style_layers
     if (%LJ::S2LID_REMAP) {
         my @remaps = ();
@@ -654,7 +654,7 @@ sub s2_context
     unless ($okay) {
         # load the default style instead, if we just tried to load a real one and failed
         if ($styleid) { return s2_context($r, 0, $opts); }
-        
+
         # were we trying to load the default style?
         $r->content_type("text/html");
         $r->send_http_header();
@@ -688,7 +688,7 @@ sub s2_context
 
         LJ::S2::populate_system_props($ctx);
         S2::set_output(sub {});  # printing suppressed
-        S2::set_output_safe(sub {}); 
+        S2::set_output_safe(sub {});
         eval { S2::run_code($ctx, "prop_init()"); };
         return $ctx unless $@;
     }
@@ -748,7 +748,7 @@ sub clone_layer
              undef, $r->{'b2lid'}, $r->{'userid'}, $r->{'type'});
     my $newid = $dbh->{'mysql_insertid'};
     return 0 unless $newid;
-    
+
     foreach my $t (qw(s2compiled s2info s2source)) {
         $r = $dbh->selectrow_hashref("SELECT * FROM $t WHERE s2lid=?", undef, $id);
         next unless $r;
@@ -889,8 +889,8 @@ sub create_layer
     $userid = LJ::want_userid($userid);
 
     return 0 unless $b2lid;  # caller should ensure b2lid exists and is of right type
-    return 0 unless 
-        $type eq "user" || $type eq "i18n" || $type eq "theme" || 
+    return 0 unless
+        $type eq "user" || $type eq "i18n" || $type eq "theme" ||
         $type eq "layout" || $type eq "i18nc" || $type eq "core";
 
     my $dbh = LJ::get_db_writer();
@@ -965,7 +965,7 @@ sub get_style_layers
 
     unless ($u) {
         my $sty = LJ::S2::load_style($styleid) or
-	    die "couldn't load styleid $styleid";
+            die "couldn't load styleid $styleid";
         $u = LJ::load_userid($sty->{userid}) or
             die "couldn't load userid $sty->{userid} for styleid $styleid";
     }
@@ -1072,7 +1072,7 @@ sub escape_context_props
     if (ref $obj eq "HASH") {
         while (my ($k, $v) = each %{$obj}) {
             if (ref $v) {
-                escape_context_props($v); 
+                escape_context_props($v);
             } else {
                 $obj->{$k} =~ s/</&lt;/g;
                 $obj->{$k} =~ s/>/&gt;/g;
@@ -1112,7 +1112,7 @@ sub layer_compile_user
     return 1 unless ref $overrides;
     my $id = $layer->{'s2lid'};
     my $s2 = "layerinfo \"type\" = \"user\";\n";
-   
+
     foreach my $name (keys %$overrides) {
         next if $name =~ /\W/;
         my $prop = $overrides->{$name}->[0];
@@ -1137,7 +1137,7 @@ sub layer_compile
 {
     my ($layer, $err_ref, $opts) = @_;
     my $dbh = LJ::get_db_writer();
-    
+
     my $lid;
     if (ref $layer eq "HASH") {
         $lid = $layer->{'s2lid'}+0;
@@ -1146,7 +1146,7 @@ sub layer_compile
         $layer = LJ::S2::load_layer($dbh, $lid) or return 0;
     }
     return 0 unless $lid;
-    
+
     # get checker (cached, or via compiling) for parent layer
     my $checker = get_layer_checker($layer);
     unless ($checker) {
@@ -1177,7 +1177,7 @@ sub layer_compile
 
     my $compiled;
     my $cplr = S2::Compiler->new({ 'checker' => $checker });
-    eval { 
+    eval {
         $cplr->compile_source({
             'type' => $layer->{'type'},
             'source' => $s2ref,
@@ -1194,7 +1194,7 @@ sub layer_compile
         $dbh->do("REPLACE INTO s2source (s2lid, s2code) VALUES (?,?)",
                  undef, $lid, ${$opts->{'s2ref'}}) or return 0;
     }
-    
+
     # save the checker object for later
     if ($layer->{'type'} eq "core" || $layer->{'type'} eq "layout") {
         $checker->cleanForFreeze();
@@ -1214,7 +1214,7 @@ sub layer_compile
         die "redist_uniq value of '$redist_uniq' doesn't match $opts->{'redist_uniq'}\n"
             unless $redist_uniq eq $opts->{'redist_uniq'};
     }
-    
+
     # put layerinfo into s2info
     my %info = S2::get_layer_info($lid);
     my $values;
@@ -1234,7 +1234,7 @@ sub layer_compile
     if ($opts->{'layerinfo'}) {
         ${$opts->{'layerinfo'}} = \%info;
     }
-    
+
     # put compiled into database, with its ID number
     if ($is_system) {
         $dbh->do("REPLACE INTO s2compiled (s2lid, comptime, compdata) ".
@@ -1253,7 +1253,7 @@ sub layer_compile
     if (ref $opts->{'compiledref'} eq "SCALAR") {
         ${$opts->{'compiledref'}} = $compiled;
     }
-    
+
     S2::unregister_layer($lid);
     return 1;
 }
@@ -1268,7 +1268,7 @@ sub get_layer_checker
     my $dbh = LJ::get_db_writer();
 
     my $get_cached = sub {
-        my $frz = $dbh->selectrow_array("SELECT checker FROM s2checker WHERE s2lid=?", 
+        my $frz = $dbh->selectrow_array("SELECT checker FROM s2checker WHERE s2lid=?",
                                         undef, $parid) or return undef;
         LJ::text_uncompress(\$frz);
         return Storable::thaw($frz); # can be undef, on failure
@@ -1309,7 +1309,7 @@ sub get_layout_langs
         next unless /^\d+$/;
         my $v = $src->{$_};
         next unless $v->{'langcode'};
-        $lang{$v->{'langcode'}} = $src->{$_} 
+        $lang{$v->{'langcode'}} = $src->{$_}
             if ($v->{'type'} eq "i18nc" ||
                 ($v->{'type'} eq "i18n" && $layid && $v->{'b2lid'} == $layid));
     }
@@ -1431,16 +1431,16 @@ sub get_journal_day_counts
 {
     my ($s2page) = @_;
     return $s2page->{'_day_counts'} if defined $s2page->{'_day_counts'};
-    
+
     my $u = $s2page->{'_u'};
     my $counts = {};
-    
+
     my $remote = LJ::get_remote();
     my $days = LJ::get_daycounts($u, $remote) or return {};
     foreach my $day (@$days) {
         $counts->{$day->[0]}->{$day->[1]}->{$day->[2]} = $day->[3];
     }
-    
+
     return $s2page->{'_day_counts'} = $counts;
 }
 
@@ -1605,7 +1605,7 @@ sub Friend
 }
 
 sub Null
-{   
+{
     my $type = shift;
     return {
         '_type' => $type,
@@ -1745,7 +1745,7 @@ sub ItemRange_fromopts
 
     splice(@$items, 0, ($page-1)*$page_size) if $page > 1;
     splice(@$items, $page_size) if @$items > $page_size;
-    
+
     $ir->{'current'} = $page;
     $ir->{'total'} = $pages;
     $ir->{'total_subitems'} = $num_items;
@@ -1823,7 +1823,7 @@ sub UserLite
 package S2::Builtin::LJ;
 use strict;
 
-sub AUTOLOAD { 
+sub AUTOLOAD {
     no strict;
     if ($AUTOLOAD =~ /::(\w+)$/) {
         my $real = \&{"S2::Builtin::$1"};
@@ -1838,7 +1838,7 @@ sub alternate
     my ($ctx, $one, $two) = @_;
 
     my $scratch = $ctx->[S2::SCRATCH];
-    
+
     $scratch->{alternate}{"$one\0$two"} = ! $scratch->{alternate}{"$one\0$two"};
     return $scratch->{alternate}{"$one\0$two"} ? $one : $two;
 }
@@ -2067,7 +2067,7 @@ sub Color__update_rgb
 {
     my ($this) = @_;
 
-    ($this->{'r'}, $this->{'g'}, $this->{'b'}) = 
+    ($this->{'r'}, $this->{'g'}, $this->{'b'}) =
         S2::Color::hsl_to_rgb( map { $this->{$_} / 255 } qw(_h _s _l) );
     Color__make_string($this);
 }
@@ -2076,9 +2076,9 @@ sub Color__make_string
 {
     my ($this) = @_;
     $this->{'as_string'} = sprintf("\#%02x%02x%02x",
-				  $this->{'r'},
-				  $this->{'g'},
-				  $this->{'b'});
+                                  $this->{'r'},
+                                  $this->{'g'},
+                                  $this->{'b'});
 }
 
 # public functions
@@ -2117,10 +2117,10 @@ sub Color__set_hsl
 
 sub Color__red {
     my ($ctx, $this, $r) = @_;
-    if (defined $r) { 
+    if (defined $r) {
         $this->{'r'} = $r % 256;
         delete $this->{'_hslset'};
-        Color__make_string($this); 
+        Color__make_string($this);
     }
     $this->{'r'};
 }
@@ -2160,7 +2160,7 @@ sub Color__hue {
 
 sub Color__saturation {
     my ($ctx, $this, $s) = @_;
-    if (defined $s) { 
+    if (defined $s) {
         $this->{'_s'} = $s % 256;
         $this->{'_hslset'} = 1;
         Color__update_rgb($this);
@@ -2554,7 +2554,7 @@ sub EntryLite__get_plain_subject
 sub _Entry__get_link
 {
     my ($ctx, $this, $key) = @_;
-    if ($key eq "nav_prev" || $key eq "edit_entry" || $key eq "mem_add" || 
+    if ($key eq "nav_prev" || $key eq "edit_entry" || $key eq "mem_add" ||
         $key eq "tell_friend" || $key eq "nav_next" || $key eq "edit_tags")
     {
         my $journal = $this->{'journal'}->{'username'};
@@ -2563,7 +2563,7 @@ sub _Entry__get_link
 
         if ($key eq "edit_entry") {
             return undef unless $remote && ($remote->{'user'} eq $journal ||
-                                            $remote->{'user'} eq $poster || 
+                                            $remote->{'user'} eq $poster ||
                                             LJ::can_manage($remote, LJ::load_user($journal)));
             return {
                 '_type' => "Link",
@@ -2617,7 +2617,7 @@ sub _Entry__get_link
         }
     }
 }
-    
+
 sub Entry__plain_subject
 {
     my ($ctx, $this) = @_;
@@ -2732,7 +2732,7 @@ sub palimg_modify
     foreach my $pi (@$items) {
         die "Can't modify a palette index greater than 15 with palimg_modify\n" if
             $pi->{'index'} > 15;
-        $url .= sprintf("%1x%02x%02x%02x", 
+        $url .= sprintf("%1x%02x%02x%02x",
                         $pi->{'index'},
                         $pi->{'color'}->{'r'},
                         $pi->{'color'}->{'g'},
@@ -2749,7 +2749,7 @@ sub palimg_tint
     $url .= "/pt";
     foreach my $col ($bcol, $dcol) {
         next unless $col;
-        $url .= sprintf("%02x%02x%02x", 
+        $url .= sprintf("%02x%02x%02x",
                         $col->{'r'}, $col->{'g'}, $col->{'b'});
     }
     return $url;
@@ -2763,7 +2763,7 @@ sub palimg_gradient
     $url .= "/pg";
     foreach my $pi ($start, $end) {
         next unless $pi;
-        $url .= sprintf("%02x%02x%02x%02x", 
+        $url .= sprintf("%02x%02x%02x%02x",
                         $pi->{'index'},
                         $pi->{'color'}->{'r'},
                         $pi->{'color'}->{'g'},
