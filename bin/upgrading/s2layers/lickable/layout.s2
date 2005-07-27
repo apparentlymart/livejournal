@@ -244,7 +244,7 @@ propgroup options {
 
     # This layout has quite a hefty stylesheet, so let's
     # make it external to avoid loading it over and over.
-    set external_stylesheet = false;
+    set external_stylesheet = true;
 
     set tags_aware = true;
     set text_tags = "#";
