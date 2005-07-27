@@ -6,10 +6,6 @@ layerinfo "redist_uniq" = "lickable/layout";
 layerinfo "previews" = "lickable/preview1.jpg,lickable/preview2.jpg";
 layerinfo "des" = "A fixed-width layout with drop shadows, various header styles and the possibility for introducing your own background images.";
 
-
-# url="http://goathack.livejournal.org:8016/interface/s2/338"
-# authfile="L:\MARTINS\devel\s2\s2up.secret.goathack.txt"
-
 ## Customization Props
 
 propgroup colors {
