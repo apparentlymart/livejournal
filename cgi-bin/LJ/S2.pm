@@ -179,6 +179,9 @@ sub s2_run
     };
 
     my $need_flush;
+
+    my $print_ctr = 0;  # every 'n' prints we check the recursion depth
+
     my $out_straight = sub {
         # Hacky: forces text flush.  see:
         # http://zilla.livejournal.org/906
@@ -187,10 +190,12 @@ sub s2_run
             $need_flush = 0;
         }
         $$LJ::S2::ret_ref .= $_[0];
+        S2::check_depth() if ++$print_ctr % 8 == 0;
     };
     my $out_clean = sub {
         $cleaner->parse($_[0]);
         $need_flush = 1;
+        S2::check_depth() if ++$print_ctr % 8 == 0;
     };
     S2::set_output($out_straight);
     S2::set_output_safe($cleaner ? $out_clean : $out_straight);
@@ -1440,10 +1445,8 @@ sub get_journal_day_counts
     foreach my $day (@$days) {
         $counts->{$day->[0]}->{$day->[1]}->{$day->[2]} = $day->[3];
     }
-
     return $s2page->{'_day_counts'} = $counts;
 }
-
 
 ## S2 object constructors
 
