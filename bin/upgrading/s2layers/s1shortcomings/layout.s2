@@ -500,11 +500,11 @@ function EntryPage::print_body {
   s1_print_entry($.entry);
   print_comment_page_toolbar($.comment_pages);
 
-  s1_print_reply_link("top", $this);
-
   if ($.multiform_on) {
     $this->print_multiform_start();
   }
+  s1_print_reply_link("top", $this);
+
   $this->print_comments($.comments);
 
   if ($.entry.comments.count > 0) {
