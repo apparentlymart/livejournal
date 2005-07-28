@@ -2395,6 +2395,7 @@ sub _print_quickreply_link
     }
 
     $onclick = "" unless $page->{'_type'} eq 'EntryPage';
+    $onclick = "" if $LJ::DISABLED{'s2quickreply'};
     $S2::pout->("<a $onclick href='$replyurl' $opt_class>$linktext</a>");
 }
 
