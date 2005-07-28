@@ -7422,7 +7422,8 @@ sub days_in_month
 sub day_of_week
 {
     my ($year, $month, $day) = @_;
-    my $time = Time::Local::timelocal(0,0,0,$day,$month-1,$year);
+    my $time = eval { Time::Local::timelocal(0,0,0,$day,$month-1,$year) };
+    return undef if $@;
     return (localtime($time))[6];
 }
 
