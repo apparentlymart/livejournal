@@ -147,7 +147,6 @@ body<=
 
  if (($remote && !$remote->{'opt_no_quickreply'}) && !$nocomments) {
      $$head .= $LJ::COMMON_CODE{'quickreply'};
-     $$bodyopts .= 'onload="restore_entry();" onunload="save_entry();"';
  }
 
  my $showmultiform = $remote &&
