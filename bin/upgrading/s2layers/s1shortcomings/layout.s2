@@ -240,13 +240,8 @@ function Page::print {
             }
         
         </style>
-        </head>""";
-  if($.view == "entry") {
-    """<body onload="restore_entry();" onunload="save_entry();">""";
-  } else {
-    """<body>""";
-  }
-  """
+        </head>
+        <body>
     <div class="toplinkbar">
       <div class="journalmaintitle">
         $.global_title
