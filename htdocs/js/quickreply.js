@@ -4,6 +4,17 @@
     var lastDiv;
     lastDiv = 'qrdiv';
 
+    regEvent(window, 'load', restore_entry);
+    regEvent(window, 'unload', save_entry);
+
+    function regEvent (target, evt, func) {
+      if (! target) return;
+      if (target.attachEvent)
+        target.attachEvent("on"+evt, func);
+      if (target.addEventListener)
+        target.addEventListener(evt, func, false);
+    }
+
     function quickreply(dtid, pid, newsubject) {
         var ev = window.event;
 
@@ -54,7 +65,7 @@
         lastDiv = targetname;
 
         var subject = xGetElementById('subject');
-        subject.value = newsubject;
+        if (!subject.value) subject.value = newsubject;
 
         var qr_form = xGetElementById('qrform');
         qr_form.action = (LJVAR.siteroot || "") + '/talkpost_do.bml';
@@ -132,6 +143,7 @@
     // Maintain entry through browser navigations.
     function save_entry() {
         var qr_body = xGetElementById('body');
+        if (!qr_body) return false;
         var qr_subject = xGetElementById('subject');
         var do_spellcheck = xGetElementById('do_spellcheck');
         var qr_dtid = xGetElementById('dtid');
@@ -163,15 +175,16 @@
 
     // Restore saved_entry text across platforms.
     function restore_entry() {
-        var saved_body = xGetElementById('saved_body');
-        if (saved_body.value == "") return false;
         setTimeout(
             function () {
+
+                var saved_body = xGetElementById('saved_body');
+                if (!saved_body || saved_body.value == "") return false;
 
                 var dtid = xGetElementById('saved_dtid');
                 if (! dtid) return false;
                 var ptid = xGetElementById('saved_ptid');
-                if (! ptid) return false;
+                ptid += 0;
 
                 quickreply(dtid.value, ptid.value, saved_body.value);
 
