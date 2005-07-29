@@ -4,9 +4,6 @@
     var lastDiv;
     lastDiv = 'qrdiv';
 
-    regEvent(window, 'load', restore_entry);
-    regEvent(window, 'unload', save_entry);
-
     function regEvent (target, evt, func) {
       if (! target) return;
       if (target.attachEvent)
@@ -18,6 +15,10 @@
     function quickreply(dtid, pid, newsubject) {
         var ev = window.event;
 
+        // Mac IE 5.x does not like dealing with
+        // nextSibling since it does not support it
+        if (xIE4Up && xMac) { return true; }
+
         // on IE, cancel the bubble of the event up to the page. other
         // browsers don't seem to bubble events up registered this way.
         if (ev) {
@@ -27,23 +28,25 @@
                 ev.cancelBubble = true;
         }
 
-        // Mac IE 5.x does not like dealing with
-        // nextSibling since it does not support it
-        if (xIE4Up && xMac) { return true;}
-
         var targetname = "ljqrt" + dtid;
 
         var ptalkid = xGetElementById('parenttalkid');
-        ptalkid.value = pid;
-
         var rto = xGetElementById('replyto');
-        rto.value = pid;
-
         var dtid_field = xGetElementById('dtid');
-        dtid_field.value = dtid;
-
         var qr_div = xGetElementById('qrdiv');
         var cur_div = xGetElementById(targetname);
+        var qr_form_div  = xGetElementById('qrformdiv');
+        var qr_form = xGetElementById('qrform');
+
+        // Is this a dumb browser (like opera)?
+        if( !ptalkid || !rto || !dtid_field || !qr_div || !cur_div || !qr_form ||
+            !qr_form_div) {
+           return true;
+        }
+
+        ptalkid.value = pid;
+        dtid_field.value = dtid;
+        rto.value = pid;
 
         if (lastDiv == 'qrdiv') {
             if (! showQRdiv(qr_div)) {
@@ -65,11 +68,12 @@
         lastDiv = targetname;
 
         var subject = xGetElementById('subject');
-        if (!subject.value) subject.value = newsubject;
+        if (subject) {
+          if(!subject.value) subject.value = newsubject;
+        } else {
+          return true;
+        }
 
-        var qr_form = xGetElementById('qrform');
-        qr_form.action = (LJVAR.siteroot || "") + '/talkpost_do.bml';
-        var qr_form_div  = xGetElementById('qrformdiv');
         if(cur_div.className) {
           qr_form_div.className = cur_div.className;
         } else {
@@ -234,3 +238,7 @@
             return false;
         }
     }
+
+    //after the functions have been defined, register them
+    regEvent(window, 'load', restore_entry);
+    regEvent(window, 'unload', save_entry);

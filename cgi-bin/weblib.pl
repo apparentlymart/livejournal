@@ -816,7 +816,6 @@ sub create_qr_div {
 
     my $ret;
     $ret = "<script language='JavaScript'>\n";
-    $ret .= "<!--\n";
 
     $qrhtml = LJ::ejs($qrhtml);
 
@@ -847,8 +846,7 @@ sub create_qr_div {
         }
     }
                );
-    $ret .= "-->\n";
-    $ret .= "</script>";
+    $ret .= "\n</script>";
     return $ret;
 }
 
