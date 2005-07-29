@@ -37,10 +37,11 @@
         var cur_div = xGetElementById(targetname);
         var qr_form_div  = xGetElementById('qrformdiv');
         var qr_form = xGetElementById('qrform');
+        var subject = xGetElementById('subject');
 
-        // Is this a dumb browser (like opera)?
+        // Is this a dumb browser?
         if( !ptalkid || !rto || !dtid_field || !qr_div || !cur_div || !qr_form ||
-            !qr_form_div) {
+            !qr_form_div || !subject) {
            return true;
         }
 
@@ -67,12 +68,7 @@
 
         lastDiv = targetname;
 
-        var subject = xGetElementById('subject');
-        if (subject) {
-          if(!subject.value) subject.value = newsubject;
-        } else {
-          return true;
-        }
+        if(!subject.value) subject.value = newsubject;
 
         if(cur_div.className) {
           qr_form_div.className = cur_div.className;
@@ -94,7 +90,7 @@
         var replyto = Number(dtid.value);
         var pid = Number(pidform.value);
 
-        if(replyto > 127 && pid > 0) {
+        if(replyto > 0 && pid > 0) {
           //not a reply to a comment
           qr_form.action = basepath.value + "replyto=" + replyto;
         } else {
