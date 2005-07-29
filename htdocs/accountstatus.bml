@@ -51,6 +51,13 @@ body<=
         return $ok->(BML::ml('.message.nochange', {'statusvis' => $statusvis{$POST{'statusvis'}} }))
             if $u->{'statusvis'} eq $POST{'statusvis'};
 
+        # log the change to userlog
+        $u->log_event('accountstatus', {
+                remote => $remote,
+                old => $u->{statusvis},
+                new => $POST{statusvis},
+            });
+
         # do update
         my $res = LJ::update_user($u, { 'statusvis' => $POST{'statusvis'},
                                         'raw' => 'statusvisdate=NOW()' });
