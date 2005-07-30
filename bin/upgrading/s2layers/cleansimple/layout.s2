@@ -735,8 +735,6 @@ function DayPage::lay_viewspec_nav() {
 
 function DayPage::print_body() {
 
-    """<div class="day"><h3>""" + $.date->date_format("long") + "</h3>";
-
     if (not $.has_entries) {
         println $*text_noentries_day;
     }
