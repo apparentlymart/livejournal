@@ -55,7 +55,17 @@ propgroup options {
     }
 
     set sidebar_primary = [
-        [ "poweredby", "" ],
+        [ "userprofile", "", "0", "1" ],
+        [ "viewlinks", "" ],
+        [ "calendar" ],
+        [ "syndicate", "Syndicate" ],
+        [ "links", "Links" ],
+        [ "poweredby" ],
+    ];
+
+    set sidebar_secondary = [
+        [ "tags", "Tags" ],
+        [ "pagesummary", "Page Summary" ],
     ];
 
 }
@@ -116,7 +126,7 @@ function print_banner(Page p) {
 }
 
 
-function open_module(string intname, string title, string headlink_url) {
+function open_module(string intname, string title, string headlink_url, bool nocontent) {
     println """<div class="module-$intname module">""";
     if ($title != "") {
         """<h2 class="module-header">""";
@@ -125,11 +135,21 @@ function open_module(string intname, string title, string headlink_url) {
         if ($headlink_url != "") { """</a>"""; }
         "</h2>\n";
     }
-    println """<div class="module-content">""";
+    if (not $nocontent) {
+        println """<div class="module-content">""";
+    }
 }
 
+function close_module(bool nocontent) {
+    println "</div>";
+    if (not $nocontent) { println "</div>"; }
+}
+
+function open_module(string intname, string title, string headlink_url) {
+    open_module($intname, $title, $headlink_url, false);
+}
 function close_module() {
-    println "</div></div>";
+    close_module(false);
 }
 
 function print_module_list(string[] list) {
@@ -142,15 +162,36 @@ function print_module_list(string[] list) {
 
 function print_module_userprofile(string title, bool show_profile, bool show_userpic) {
     var Page p = get_page();
+    if ($show_userpic and not $show_profile) {
+        if (defined $p.journal.default_pic) {
+            open_module("photo", $title, $p.journal.userpic_listing_url);
+            println ""+$p.journal.default_pic;
+            close_module();
+        }
+        return;
+    }    
+
+    if (not $show_profile and not $show_userpic) {
+        open_module("about", $title, $p.view_url{"userinfo"}, true);
+        close_module(true);
+        return;
+    }
+
     open_module("about", $title, $p.view_url{"userinfo"});
-    
+    println "<div>"+$p.journal.default_pic+"</div>";
+    println "<p>"+$p.journal.name+"</p>"; # TODO: Display more stuff such as website link
     close_module();
+
 }
 
 function print_module_viewlinks(string title) {
     var Page p = get_page();
     open_module("viewlinks", $title, "");
-    
+    var string[] links = [];
+    foreach var string k ($p.views_order) {
+        $links[size $links] = """<a href="$p.view_url{$k}">"""+lang_viewname($k)+"""</a>""";
+    }
+    print_module_list($links);
     close_module();
 }
 
@@ -161,26 +202,71 @@ function print_module_poweredby(string title) {
     close_module();
 }
 function print_module_pagesummary(string title) {
+    return;
     var Page p = get_page();
     open_module("pagesummary", $title, "");
-
+    # FIXME: Can't actually implement this yet, since we have a Page object
+    # rather than a RecentPage object. :(
     close_module();
 }
 function print_module_tags(string title) {
     var Page p = get_page();
+    var TagDetail[] tags = $p->visible_tag_list();
+    if (size($tags) < 1) { return; }
     open_module("categories", $title, ""); # TODO: Link to the TagsPage?
 
+    var string[] links = [];
+    foreach var TagDetail tag ($tags) {
+        $links[size $links] = """<a href="$tag.url">$tag.name</a>""";
+    }
+    print_module_list($links);
     close_module();
 }
 function print_module_calendar() {
     var Page p = get_page();
-    open_module("calendar", "Month Name Here", "");
+    var YearMonth mon = $p->get_latest_month();
+    open_module("calendar", $mon->month_format(), "");
+
+    println """<table summary="Monthly calendar with links to each day's posts">""";
+
+    println "<tr>";
+    foreach var int d (weekdays()) {
+        "<th>"+$*lang_dayname_short[$d]+"</th>\n";
+    }
+    println "</tr>";
+
+    foreach var YearWeek week ($mon.weeks) {
+        println "<tr>";
+        foreach var int i (1 .. $week.pre_empty) {
+            print "<td>&nbsp;</td>";
+        }
+
+        foreach var YearDay day ($week.days) {
+            print "<td>";
+            if ($day.num_entries > 0) { print """<a href="$day.url">"""; }
+            print $day.day;
+            if ($day.num_entries > 0) { print """</a>"""; }
+            print "</td>";
+        }
+
+        foreach var int i (1 .. $week.post_empty) {
+            print "<td>&nbsp;</td>";
+        }
+        println "</tr>";
+    }
+
+    println """</table>""";
 
     close_module();
 }
 function print_module_syndicate(string title) {
     var Page p = get_page();
+    if ((size $p.data_links_order) < 1) { return; }
     open_module("syndicate", $title, "");
+
+    foreach var string k ($p.data_links_order) {
+        print " $p.data_link{$k} ";
+    }
 
     close_module();
 }
@@ -192,8 +278,17 @@ function print_module_customtext(string title, string text, string titlelink_url
 }
 function print_module_links(string title) {
     var Page p = get_page();
+    var UserLink[] links = $p.linklist;
+    if (size($links) < 1) { return; }
     open_module("typelist", $title, "");
 
+    var string[] items = [];
+    foreach var UserLink link ($links) {
+        if (not $link.is_heading and $link.title != "") {
+            $items[size $items] = """<a href="$link.url">$link.title</a>""";
+        }
+    }
+    print_module_list($items);
     close_module();
 }
 
