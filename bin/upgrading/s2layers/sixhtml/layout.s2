@@ -3,17 +3,86 @@ layerinfo name = "Bloggish";
 layerinfo redist_uniq = "sixhtml/layout";
 layerinfo des = "SixApart's standard HTML structure for blogs, to be styled with CSS.";
 
+propgroup appearance {
+    property bool use_6a_base {
+        des = "Use 'Base Weblog' styles";
+    }    
+    set use_6a_base = true;
+
+    property string base_theme {
+        des = "Base Theme";
+        values = "__none|(None)|powell-street|Powell Street";
+    }
+    set base_theme = "powell-street";
+
+    property string layout_type {
+        des = "Layout Type";
+        values = "1C|One column|2CL|Two column (Sidebar on Left)|2CR|Two column (Sidebar on Right)|3C|Three column";
+    }
+    set layout_type = "2CR";
+
+    property string{} theme_stylesheet {
+        noui = 1;
+    }
+    set theme_stylesheet = {
+        "powell-street" => "http://www.typepad.com/.shared/themes/lilia/theme-powell-street.css",
+    };
+}
+propgroup appearance = "Appearance";
+
+propgroup options {
+
+    property bool opt_dayhead {
+        des = "Show Day Headings";
+    }
+    set opt_dayhead = false;
+
+    property use page_recent_items;
+    property use page_friends_items;
+    property use page_day_sortorder;
+    property use page_year_sortorder;
+    property use view_entry_disabled;
+    property use use_shared_pic;
+}
+propgroup options = "Options";
+
+propgroup text {
+    property use text_post_comment;
+    property use text_read_comments;
+    property use text_post_comment_friends;
+    property use text_read_comments_friends;
+    property use text_view_recent;
+    property use text_view_archive;
+    property use text_view_friends;
+    property use text_view_userinfo;
+    property use lang_fmt_date_med;
+    property use lang_fmt_time_short;
+}
+propgroup text = "Text";
+
+function print_custom_stylesheet() {}
+
 function print_stylesheet () {
-   """
+
+if ($*use_6a_base) {
+"""
 /* base css */
 @import url(http://www.typepad.com/.shared/themes/common/base-weblog.css);
+""";
+}
 
-/* theme css */
-@import url(http://www.typepad.com/.shared/themes/lilia/theme-powell-street.css);
-
-/* user css */
+if ($*base_theme != "__none") {
+"""/* theme css */
+@import url($*theme_stylesheet{$*base_theme});
 
 """;
+}
+
+"""
+
+/* user css */
+""";
+    print_custom_stylesheet();
 }
 
 function container_open (string name) {
@@ -31,6 +100,9 @@ function print_banner(Page p) {
     container_close();
 }
 
+function sidebar_primary() {}
+function sidebar_secondary() {}
+
 function render_layout (Page p, string lay) {
    if ($lay == "1C") {
       container_open("alpha");
@@ -41,6 +113,7 @@ function render_layout (Page p, string lay) {
 
    if ($lay == "2CL") {
       container_open("alpha");
+      sidebar_primary();
       container_close();
       container_open("beta");
       $p->print_body();
@@ -53,17 +126,20 @@ function render_layout (Page p, string lay) {
       $p->print_body();
       container_close();
       container_open("beta");
+      sidebar_primary();
       container_close();
       return;
    }
 
    if ($lay == "3C") {
       container_open("alpha");
+      sidebar_primary();
       container_close();
       container_open("beta");
       $p->print_body();
       container_close();
       container_open("gamma");
+      sidebar_secondary();
       container_close();
       return;
    }
@@ -73,7 +149,7 @@ function render_layout (Page p, string lay) {
 
 function get_layout () : string {
    var Page p = get_page();
-   var string lay = $p.args{"lay"};
+   var string lay = $*layout_type;
    if ($lay == "1C" or $lay == "2CR" or $lay == "2CL" or $lay == "3C") {
       return $lay;
    }
@@ -120,10 +196,6 @@ container_close();
 
 
 function RecentPage::print_body {
-    # Creator for both the Recent and Friends views, since they are similar
-    # If someone wants to do the two views differently, they can create
-    # FriendsPage::print_body since FriendsPage extends RecentPage.
-
     foreach var Entry e ($.entries) {
         # Print the entry
         $this->print_entry($e);
@@ -132,8 +204,6 @@ function RecentPage::print_body {
 
 
 function Page::print_entry(Entry e) {
-
-    ## For most styles, this will be overridden by FriendsPage::print_entry and such.
     "<div class='entry'" + ($e.dom_id ? " id='$e.dom_id'" : "") + ">\n";
       "<h3 class='entry-header'>$e.security_icon $e.subject</h3>\n";
       "<div class='entry-content'>\n";
