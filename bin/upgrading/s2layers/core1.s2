@@ -220,6 +220,9 @@ class UserLite
     var readonly string name "User's formatted name, ex: John Q. Public";
     var readonly string journal_type "Type of account: P (personal), C (community), Y (syndicated), S (shared), I (external identity) etc";
 
+    var Link{} data_link "Links to various machine-readable data sources relating to this user";
+    var string[] data_links_order "An array of data views which can be used to order the data_link hash";
+
     function builtin equals(UserLite u) : bool "Returns true if the two user objects refer to the same user. Use this rather than comparing usernames, since usernames aren't globally unique.";
     function base_url () : string "Returns URL of user's journal.";
     function tag_manage_url () : string "Returns URL to user's tag management page.";
@@ -392,6 +395,9 @@ class Page
 
     var readonly DateTime time
     "A DateTime object filled with the time (GMT) when the page was created.";
+
+    var Link{} data_link "Links to various machine-readable data sources relating to this page";
+    var string[] data_links_order "An array of data views which can be used to order the data_link hash";
 
     function print
     "The main entry point that LiveJournal calls. Layouts should override this to create HTML that's the
