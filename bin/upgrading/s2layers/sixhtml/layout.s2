@@ -43,6 +43,21 @@ propgroup options {
     property use page_year_sortorder;
     property use view_entry_disabled;
     property use use_shared_pic;
+
+
+    property string[][] sidebar_primary {
+        des = "Primary sidebar members";
+        noui = 1;
+    }
+    property string[][] sidebar_secondary {
+        des = "Secondary sidebar members";
+        noui = 1;
+    }
+
+    set sidebar_primary = [
+        [ "poweredby", "" ],
+    ];
+
 }
 propgroup options = "Options";
 
@@ -100,8 +115,134 @@ function print_banner(Page p) {
     container_close();
 }
 
-function sidebar_primary() {}
-function sidebar_secondary() {}
+
+function open_module(string intname, string title, string headlink_url) {
+    println """<div class="module-$intname module">""";
+    if ($title != "") {
+        """<h2 class="module-header">""";
+        if ($headlink_url != "") { """<a href="$headlink_url">"""; }
+        print $title;
+        if ($headlink_url != "") { """</a>"""; }
+        "</h2>\n";
+    }
+    println """<div class="module-content">""";
+}
+
+function close_module() {
+    println "</div></div>";
+}
+
+function print_module_list(string[] list) {
+    println """<ul class="module-list">""";
+    foreach var string s ($list) {
+        println """<li class="module-list-item">$s</li>""";
+    }
+    println """</ul>""";
+}
+
+function print_module_userprofile(string title, bool show_profile, bool show_userpic) {
+    var Page p = get_page();
+    open_module("about", $title, $p.view_url{"userinfo"});
+    
+    close_module();
+}
+
+function print_module_viewlinks(string title) {
+    var Page p = get_page();
+    open_module("viewlinks", $title, "");
+    
+    close_module();
+}
+
+function print_module_poweredby(string title) {
+    var Page p = get_page();
+    open_module("powered", $title, "");
+    println """Powered by <a href="$*SITEROOT/">$*SITENAME</a>""";
+    close_module();
+}
+function print_module_pagesummary(string title) {
+    var Page p = get_page();
+    open_module("pagesummary", $title, "");
+
+    close_module();
+}
+function print_module_tags(string title) {
+    var Page p = get_page();
+    open_module("categories", $title, ""); # TODO: Link to the TagsPage?
+
+    close_module();
+}
+function print_module_calendar() {
+    var Page p = get_page();
+    open_module("calendar", "Month Name Here", "");
+
+    close_module();
+}
+function print_module_syndicate(string title) {
+    var Page p = get_page();
+    open_module("syndicate", $title, "");
+
+    close_module();
+}
+function print_module_customtext(string title, string text, string titlelink_url) {
+    var Page p = get_page();
+    open_module("customtext", $title, $titlelink_url);
+    print safe $text;
+    close_module();
+}
+function print_module_links(string title) {
+    var Page p = get_page();
+    open_module("typelist", $title, "");
+
+    close_module();
+}
+
+
+function handle_sidebar_array(string[][] list) {
+    foreach var string[] item ($list) {
+        var string module = $item[0];
+        var string title = $item[1];
+
+        if ($module == "userprofile") {
+            var bool show_profile = (int($item[2]) != 0 ? true : false);
+            var bool show_userpic = (int($item[3]) != 0 ? true : false);
+            print_module_userprofile($title, $show_profile, $show_userpic);
+        }
+        elseif ($module == "viewlinks") {
+            print_module_viewlinks($title);
+        }
+        elseif ($module == "poweredby") {
+            print_module_poweredby($title);
+        }
+        elseif ($module == "pagesummary") {
+            print_module_pagesummary($title);
+        }
+        elseif ($module == "tags") {
+            print_module_tags($title);
+        }
+        elseif ($module == "calendar") {
+            print_module_calendar();
+        }
+        elseif ($module == "syndicate") {
+            print_module_syndicate($title);
+        }
+        elseif ($module == "customtext") {
+            var string text = $item[2];
+            var string titlelink_url = $item[3];
+            print_module_customtext($title, $text, $titlelink_url);
+        }
+        elseif ($module == "links") {
+            print_module_links($title);
+        }
+    }
+}
+
+function Page::lay_sidebar_primary() {
+    handle_sidebar_array($*sidebar_primary);
+}
+function Page::lay_sidebar_secondary() {
+    handle_sidebar_array($*sidebar_secondary);
+}
 
 function render_layout (Page p, string lay) {
    if ($lay == "1C") {
@@ -113,7 +254,7 @@ function render_layout (Page p, string lay) {
 
    if ($lay == "2CL") {
       container_open("alpha");
-      sidebar_primary();
+      $p->lay_sidebar_primary();
       container_close();
       container_open("beta");
       $p->print_body();
@@ -126,20 +267,20 @@ function render_layout (Page p, string lay) {
       $p->print_body();
       container_close();
       container_open("beta");
-      sidebar_primary();
+      $p->lay_sidebar_primary();
       container_close();
       return;
    }
 
    if ($lay == "3C") {
       container_open("alpha");
-      sidebar_primary();
+      $p->lay_sidebar_primary();
       container_close();
       container_open("beta");
       $p->print_body();
       container_close();
       container_open("gamma");
-      sidebar_secondary();
+      $p->lay_sidebar_secondary();
       container_close();
       return;
    }
