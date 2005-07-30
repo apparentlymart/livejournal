@@ -17,6 +17,28 @@ sub RecentPage
         $opts->{'redir'} = LJ::journal_base($u->{'renamedto'}, $opts->{'vhost'});
         return;
     }
+    
+    my $datalink = sub {
+        my ($what, $caption) = @_;
+        return {
+            '_type' => 'Link',
+            'caption' => $caption,
+            'url' => $p->{'base_url'}."/data/$what",
+            'icon' => {
+                '_type' => 'Image',
+                'alttext' => $caption,
+                'url' => "$LJ::IMGPREFIX/data_$what.gif",
+                'width' => 32,
+                'height' => 15,
+            },
+        };
+    };
+    
+    $p->{'data_link'} = {
+        'rss' => $datalink->('rss', 'RSS'),
+        'atom' => $datalink->('atom', 'Atom'),
+    };
+    $p->{'data_links_order'} = [ qw(rss atom) ];
 
     LJ::load_user_props($remote, "opt_nctalklinks", "opt_ljcut_disable_lastn");
 

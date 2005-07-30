@@ -1659,6 +1659,8 @@ sub Page
         'global_title' =>  LJ::ehtml($u->{'journaltitle'} || $u->{'name'}),
         'global_subtitle' => LJ::ehtml($u->{'journalsubtitle'}),
         'head_content' => '',
+        'data_link' => {},
+        'data_links_order' => [],
     };
 
     if (LJ::are_hooks('s2_head_content_extra')) {
@@ -1816,6 +1818,15 @@ sub UserLite
         'username' => LJ::ehtml($u->display_name),
         'name' => LJ::ehtml($u->{'name'}),
         'journal_type' => $u->{'journaltype'},
+        'data_link' => {
+            'foaf' => {
+                "_type" => 'Link',
+                "url" => "$LJ::SITEROOT/users/".LJ::ehtml($u->{'user'}).'/data/foaf',
+                "icon" => Image("$LJ::IMGPREFIX/data_foaf.gif", 32, 15, "FOAF"),
+                "caption" => "FOAF",
+            },
+        },
+        'data_links_order' => [ "foaf" ],
     };
     return $o;
 }
