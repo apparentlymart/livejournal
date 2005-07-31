@@ -61,11 +61,11 @@
 
     # start of output
     $title = "Your Layers";
-    $body .= BML::ml("backlink", {
+    $body .= BML::ml("Backlink", {
         'link' => './',
         'text' => 'Advanced Customization',
     }) . "\n";
-    $body .= BML::ml("actionlink", {
+    $body .= BML::ml("Actionlink", {
         'link' => "<a href='styles.bml?authas=$authas'>Your Styles</a>",
     }) . "\n";
 
@@ -134,7 +134,7 @@
 
             $title = "Deleting layer $name";
             $body .= "<br /> ";
-            $body .= BML::ml("backlink", {
+            $body .= BML::ml("Backlink", {
                 'link' => "layers.bml?authas=$authas",
                 'text' => 'Your Layers',
             }) . "\n";

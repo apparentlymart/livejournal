@@ -49,7 +49,7 @@
     # at this point, they are authorized, allow viewing & editing
     my $ret;
     $ret .= "<form method='post' action='layeredit.bml?id=$id'>\n";
-    $ret .= BML::ml('backlink', { 'text' => 'Your Layers', 'link' => "layers.bml?authas=$u->{'user'}" }) . "\n";
+    $ret .= BML::ml('Backlink', { 'text' => 'Your Layers', 'link' => "layers.bml?authas=$u->{'user'}" }) . "\n";
 
     # get s2 code from db - use writer so we know it's up-to-date
     my $dbh = LJ::get_db_writer();

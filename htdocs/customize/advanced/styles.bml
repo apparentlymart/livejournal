@@ -54,11 +54,11 @@
 
     # start of output
     $title = "Styles";
-    $body = BML::ml("backlink", {
+    $body = BML::ml("Backlink", {
         'link' => './',
         'text' => 'Advanced Customization',
     }) . "\n";
-    $body .= BML::ml("actionlink", {
+    $body .= BML::ml("Actionlink", {
         'link' => "<a href='layers.bml$getextra'>Your Layers</a>",
     }) . "\n";
 
@@ -134,7 +134,7 @@
 
         # set up start of output
         $title = "Edit Style";
-        $body .= "<br />" . BML::ml('backlink', { 'text' => 'Your Styles', 'link' => "styles.bml$getextra" }) . "\n";
+        $body .= "<br />" . BML::ml('Backlink', { 'text' => 'Your Styles', 'link' => "styles.bml$getextra" }) . "\n";
 
         ### process edit actions
 
