@@ -415,7 +415,7 @@ function Page::print () {
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title>""" + $this->title() + """</title>""";
-  $this->print_custom_head();
+  $this->print_head();
 
     if ($*external_stylesheet) {
         println """<link rel="stylesheet" href="$.stylesheet_url" type="text/css" />""";
@@ -462,10 +462,10 @@ function Page::print_entry(Entry e) {
 
          "<p class='entry-footer'>";
              print $e.time->date_format($*lang_fmt_date_med);
-             " $sep <a class='permalink' href='$e.permalink_url'>Permalink</a>";
+             " $sep <a class='permalink' href='$e.permalink_url'>$*text_permalink</a>";
 
-            if ($e.comments.enabled) { " $sep <a href='$e.comments.post_url'>Reply</a> "; }
-            if ($e.comments.count)   { " $sep <a href='$e.permalink_url#comments'>$e.comments.count comments</a> "; }
+            if ($e.comments.enabled) { " $sep "; $e.comments->print_postlink(); }
+            if ($e.comments.count)   { " $sep "; $e.comments->print_readlink(); }
          "</p>";
 
        "</div>\n";
