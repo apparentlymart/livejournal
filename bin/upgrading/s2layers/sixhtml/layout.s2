@@ -68,6 +68,8 @@ propgroup options {
         [ "pagesummary", "Page Summary" ],
     ];
 
+
+    set external_stylesheet = true;
 }
 propgroup options = "Options";
 
@@ -414,7 +416,17 @@ function Page::print () {
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title>""" + $this->title() + """</title>""";
   $this->print_custom_head();
-"""  <link rel='stylesheet' href='$.stylesheet_url' type="text/css" />
+
+    if ($*external_stylesheet) {
+        println """<link rel="stylesheet" href="$.stylesheet_url" type="text/css" />""";
+    }
+    else {
+        println """<style type="text/css">""";
+        print_stylesheet();
+        println """</style>""";
+    }
+
+"""
 </head>
 <body class='$body_layout_class'>""";
 
