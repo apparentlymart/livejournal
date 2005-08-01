@@ -293,8 +293,6 @@ body<=
 
     $ret .= BML::fill_template("H1", { DATA => $ML{'.postresponse'} });
 
-    $FORM{'body'} = LJ::ehtml($FORM{'body'}) if $FORM{'qr'};
-
     $ret .= LJ::Talk::talkform({ 'remote'   => $remote,
                                  'journalu' => $u,
                                  'parpost'  => $parpost,
