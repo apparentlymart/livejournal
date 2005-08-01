@@ -4,11 +4,11 @@ body<=
 {
     use strict;
     use vars qw($head %FORM %ML);
-    
+
     $head = "";  # not local, used to build <link> tags
-    
+
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
-    
+
     my $errtxt;
 
     my $pics = LJ::Talk::get_subjecticons();
@@ -25,7 +25,7 @@ body<=
     }
 
     my $init = LJ::Talk::init(\%FORM);
-    return "<?h1 $ML{'Error'} h1?><?p $init->{'error'} p?>" if $init->{'error'}; 
+    return "<?h1 $ML{'Error'} h1?><?p $init->{'error'} p?>" if $init->{'error'};
 
     my $u = $init->{'journalu'};
     return $ML{'talk.error.nojournal'} unless $u;
@@ -50,8 +50,8 @@ body<=
 
     my $parpost;
     my $reply;
-    
-    if ($init->{'replyto'}) 
+
+    if ($init->{'replyto'})
     {
         my $qparentid = $init->{'replyto'};
 
@@ -65,7 +65,7 @@ body<=
             last if $parpost;
         }
         return $ML{'.error.noreplypost'} unless $parpost;
-        
+
         unless ($parpost->{'nodetype'} eq "L" && $parpost->{'itemid'}) {
             return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.cannotreplynopost'} p?>";
         }
@@ -76,10 +76,10 @@ body<=
             $parpost->{'subject'} = $tt->{$init->{'replyto'}}->[0];
             $parpost->{'body'} = $tt->{$init->{'replyto'}}->[1];
         }
-        
+
         ### load the talk properties
-        
-        LJ::load_talk_props2($u->{'userid'}, [ $init->{'replyto'} ], {$init->{'replyto'} => $parpost}); 
+
+        LJ::load_talk_props2($u->{'userid'}, [ $init->{'replyto'} ], {$init->{'replyto'} => $parpost});
 
         if($LJ::UNICODE && $parpost->{'unknown8bit'}) {
             LJ::item_toutf8($u, \$parpost->{'subject'}, \$parpost->{'body'}, {});
@@ -128,7 +128,7 @@ body<=
 
     # check suspended
     return "<?h1 $ML{'talk.error.suspended.title'} h1?><?p $ML{'talk.error.suspended'} p?>"
-        if $u->{'statusvis'} eq "S" || $up->{'statusvis'} eq "S" || 
+        if $u->{'statusvis'} eq "S" || $up->{'statusvis'} eq "S" ||
            $ur && $ur->{'statusvis'} eq "S";
 
     # check deleted
@@ -137,7 +137,7 @@ body<=
 
     # checked screened post
     return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.noreply_screened'} p?>"
-        if $parpost->{'state'} eq "S" 
+        if $parpost->{'state'} eq "S"
            && ! LJ::Talk::can_unscreen($remote, $u, $up, ($ur ? $ur->{'user'} : undef));
 
     return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.noreply_deleted'} p?>"
@@ -146,7 +146,7 @@ body<=
     # check if frozen
     return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.noreply_frozen'} p?>"
         if $parpost->{'state'} eq "F";
-    
+
     # don't allow anonymous comments on syndicated items
     if ($u->{'journaltype'} eq "Y" && $u->{'opt_whocanreply'} eq "all") {
         $u->{'opt_whocanreply'} = "reg";
@@ -154,7 +154,7 @@ body<=
 
     ####  Check security before viewing this post
     return $errtxt unless LJ::Talk::check_viewable($remote, $item, \%FORM, \$errtxt);
-    
+
     my $event = $FORM{'replyto'} eq "" ? $item->{'event'} : $parpost->{'body'};
     my $preformatted = $FORM{'replyto'} eq "" ? $props->{'opt_preformatted'} : $parpost->{'opt_preformatted'};
 
@@ -206,14 +206,14 @@ body<=
         $etime =~ s!(\d\d\d\d)-(\d\d)-(\d\d)!LJ::date_to_view_links($u, $&)!e;
         $ret .= "<br /><font size='-1'>@ $etime</font>";
     }
-    
+
     $ret .= "</td></tr></table>";
 
     unless ($init->{'replyto'}) {
         $ret .= LJ::Talk::link_bar({ 'u' => $u, 'up' => $up, 'headref' => \$head,
                                      'remote' => $remote, 'itemid' => $ditemid, });
     }
-    
+
     my %current;
     if ($props->{'current_mood'} || $props->{'current_moodid'}) {
         $current{'Mood'} = LJ::current_mood_str($up->{'moodthemeid'},
@@ -223,11 +223,11 @@ body<=
     if ($props->{'current_music'}) {
         $current{'Music'} = LJ::current_music_str($props->{'current_music'});
     }
-    
+
     $ret .= "<div style='margin-left: 30px'>";
-    
+
     ### currents
-    if (! $init->{'replyto'} && %current) 
+    if (! $init->{'replyto'} && %current)
     {
         $ret .= "<table border=0>\n";
         foreach (sort keys %current) {
@@ -249,7 +249,7 @@ body<=
 
     $sec .= "<br />\n" unless $sec eq "" or $parpost->{'subject'};
     $ret .= $sec;
-    
+
     ###
     if ($parpost->{'subject'}) {
         my $cleansubject = $parpost->{'subject'};
@@ -263,17 +263,17 @@ body<=
           }
         $ret .= "<font face=\"Arial,Helvetica\" size='+1'><i><b>$cleansubject</b></i></font><br />\n";
     }
-    
+
     $ret .= $event;
     $ret .= "</div>";
-    
-    $ret .= "<br clear='all' /><hr size='2' align='center' />";	
-    
+
+    $ret .= "<br clear='all' /><hr size='2' align='center' />";
+
     my $jarg = "journal=$u->{'user'}&amp;";
     my $readurl = LJ::Talk::talkargs($talkurl, $stylemine);
 
     $ret .= "<p align='center' class='lesstop'><b>(<a href=\"$readurl#comments\">$ML{'talk.commentsread'}</a>)</b></p>";
-    
+
     # can a comment even be made?
     if ($props->{'opt_nocomments'}) {
         $ret .= "<?h1 $ML{'Sorry'} h1?><?p $ML{'.error.nocommentspost'} p?>";
