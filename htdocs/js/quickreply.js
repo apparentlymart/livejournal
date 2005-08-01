@@ -1,30 +1,18 @@
-    var LJVAR;
-    if (! LJVAR) LJVAR = new Object()
-
     var lastDiv;
     lastDiv = 'qrdiv';
 
-    function regEvent (target, evt, func) {
-      if (! target) return;
-      if (target.attachEvent)
-        target.attachEvent("on"+evt, func);
-      if (target.addEventListener)
-        target.addEventListener(evt, func, false);
-    }
-
     function quickreply(dtid, pid, newsubject) {
-        var ev = window.event;
-
         // Mac IE 5.x does not like dealing with
         // nextSibling since it does not support it
         if (xIE4Up && xMac) { return true; }
 
         // on IE, cancel the bubble of the event up to the page. other
         // browsers don't seem to bubble events up registered this way.
+        var ev = window.event;
         if (ev) {
             if (ev.stopPropagation)
                ev.stopPropagation();
-            if ("cancelBubble" in ev)
+            if (ev.cancelBubble != "undefined")
                 ev.cancelBubble = true;
         }
 
@@ -40,9 +28,9 @@
         var subject = xGetElementById('subject');
 
         // Is this a dumb browser?
-        if( !ptalkid || !rto || !dtid_field || !qr_div || !cur_div || !qr_form ||
+        if( !ptalkid || !rto || !dtid_field || !qr_div || !cur_div || !qr_form || 
             !qr_form_div || !subject) {
-           return true;
+            return true;
         }
 
         ptalkid.value = pid;
@@ -80,6 +68,14 @@
         return false;
     }
 
+    function regEvent (target, evt, func) {
+      if (! target) { return; }
+      if (target.attachEvent)
+        target.attachEvent("on"+evt, func);
+      if (target.addEventListener)
+        target.addEventListener(evt, func, false);
+    }
+
     function moreopts()
     {
         var qr_form = xGetElementById('qrform');
@@ -87,24 +83,28 @@
         var dtid = xGetElementById('dtid');
         var pidform = xGetElementById('parenttalkid');
 
+        if (!qr_form || !basepath || !dtid || !pidform) return true;
+
         var replyto = Number(dtid.value);
         var pid = Number(pidform.value);
 
         if(replyto > 0 && pid > 0) {
-          //not a reply to a comment
+          //a reply to a comment
           qr_form.action = basepath.value + "replyto=" + replyto;
         } else {
           qr_form.action = basepath.value + "mode=reply";
         }
-        return true;
+        qr_form.submit();
+        return false;
     }
 
    function submitform()
    {
-        var submit = xGetElementById('submitpost');
-        submit.disabled = true;
-
         var submitmore = xGetElementById('submitmoreopts');
+        var submit = xGetElementById('submitpost');
+        if (!submitmore || !submit) return false;
+
+        submit.disabled = true;
         submitmore.disabled = true;
 
         // New top-level comments

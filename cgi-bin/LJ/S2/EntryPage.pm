@@ -54,8 +54,6 @@ sub EntryPage
     }
 
     # add the quickreply script library
-    $p->{'head_content'} .= "<script>\nvar LJVAR;\n if (!LJVAR) LJVAR = new Object();\n";
-    $p->{'head_content'} .= "LJVAR.siteroot = \"$LJ::SITEROOT\";\n</script>\n";
     $p->{'head_content'} .= $LJ::COMMON_CODE{'quickreply'};
 
     $p->{'entry'} = $s2entry;
