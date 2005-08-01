@@ -711,8 +711,7 @@ sub create_qr_div {
     $qrhtml .= "<div id='qrformdiv'><form id='qrform' name='qrform' method='POST' action='$LJ::SITEROOT/talkpost_do.bml'>";
 
     my $stylemineuri = $stylemine ? "style=mine&" : "";
-    my $entryurl = LJ::journal_base($u->{'user'}) . "/$ditemid.html";
-    my $basepath = $entryurl . "?${stylemineuri}";
+    my $basepath =  LJ::journal_base($u) . "/$ditemid.html?${stylemineuri}";
     $qrhtml .= LJ::html_hidden({'name' => 'replyto', 'id' => 'replyto', 'value' => ''},
                                {'name' => 'parenttalkid', 'id' => 'parenttalkid', 'value' => ''},
                                {'name' => 'journal', 'id' => 'journal', 'value' => $u->{'user'}},
@@ -723,7 +722,6 @@ sub create_qr_div {
                                {'name' => 'cookieuser', 'id' => 'cookieuser', 'value' => $remote->{'user'}},
                                {'name' => 'dtid', 'id' => 'dtid', 'value' => ''},
                                {'name' => 'basepath', 'id' => 'basepath', 'value' => $basepath},
-                               {'name' => 'entryurl', 'id' => 'entryurl', 'value' => $entryurl},
                                {'name' => 'stylemine', 'id' => 'stylemine', 'value' => $stylemine},
                                {'name' => 'viewing_thread', 'id' => 'viewing_thread', 'value' => $viewing_thread},
                                );

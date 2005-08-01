@@ -146,6 +146,8 @@ body<=
  LJ::load_user_props($remote, "opt_no_quickreply");
 
  if (($remote && !$remote->{'opt_no_quickreply'}) && !$nocomments) {
+     $$head .= "<script>\nvar LJVAR;\n if (!LJVAR) LJVAR = new Object();\n";
+     $$head .= "LJVAR.siteroot = \"$LJ::SITEROOT\";\n</script>\n";
      $$head .= $LJ::COMMON_CODE{'quickreply'};
  }
 

@@ -1,6 +1,9 @@
     var lastDiv;
     lastDiv = 'qrdiv';
 
+    var LJVAR;
+    if (! LJVAR) LJVAR = new Object()
+
     function quickreply(dtid, pid, newsubject) {
         // Mac IE 5.x does not like dealing with
         // nextSibling since it does not support it
@@ -83,7 +86,8 @@
         var dtid = xGetElementById('dtid');
         var pidform = xGetElementById('parenttalkid');
 
-        if (!qr_form || !basepath || !dtid || !pidform) return true;
+        // do not do the default form action (post comment) if something is broke
+        if (!qr_form || !basepath || !dtid || !pidform) return false;
 
         var replyto = Number(dtid.value);
         var pid = Number(pidform.value);
@@ -94,6 +98,9 @@
         } else {
           qr_form.action = basepath.value + "mode=reply";
         }
+
+        // we changed the form action so submit ourselves
+        // and don't use the default form action
         qr_form.submit();
         return false;
     }
@@ -114,7 +121,11 @@
         }
 
         var qr_form = xGetElementById('qrform');
+        qr_form.action = LJVAR.siteroot + '/talkpost_do.bml';
         qr_form.submit();
+
+        // don't do default form action
+        return false;
    }
 
    function swapnodes (orig, to_swap) {
