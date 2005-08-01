@@ -129,12 +129,15 @@ sub ReplyForm__print
     my $parpost = $form->{'_parpost'};
     my $parent = $parpost ? $parpost->{'jtalkid'} : 0;
 
+    my $r = Apache->request;
+    my $post_vars = { $r->content };
+
     $S2::pout->(LJ::Talk::talkform({ 'remote'   => $remote,
                                      'journalu' => $u,
                                      'parpost'  => $parpost,
                                      'replyto'  => $parent,
                                      'ditemid'  => $form->{'_ditemid'},
-                                     'form'     => $form }));
+                                     'form'     => $post_vars, }));
 
 }
 
