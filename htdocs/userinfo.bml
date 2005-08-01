@@ -734,7 +734,7 @@ if ($u->{'journaltitle'}) {
                          map { $userhash{$_} } @$maintainers;
 
          my $span = ($narrow_left-- >= 0) ? 1 : 2;
-         $body .= "<tr><td align='right'><b>$ML{'.label.maintainers'}:</b></td>";
+         $body .= "<tr><td align='right' valign='top'><b>$ML{'.label.maintainers'}:</b></td>";
          $body .= "<td colspan='$span'>";
          $body .= "<b>" . scalar @maintlist . ":</b> ";
          $listusers->(\@maintlist);
@@ -746,7 +746,7 @@ if ($u->{'journaltitle'}) {
 
              if (scalar @modlist) {
                  my $span = ($narrow_left-- >= 0) ? 1 : 2;
-                 $body .= "<tr><td align='right'><b>$ML{'.label.moderators'}:</b></td>";
+                 $body .= "<tr><td align='right' valign='top'><b>$ML{'.label.moderators'}:</b></td>";
                  $body .= "<td colspan='$span'>";
                  $body .= "<b>" . scalar @modlist . ":</b> ";
                  $listusers->(\@modlist);
