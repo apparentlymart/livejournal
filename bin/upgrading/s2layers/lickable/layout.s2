@@ -1285,7 +1285,7 @@ function EntryPage::print_body() {
     $this->lay_print_pager();
 }
 function ReplyPage::print_body() {
-    $this->lay_print_entrylite($.entry);
+    $this->lay_print_entrylite($.replyto);
     """<div id="commentform">""";
     $.form->print();
     """</div>""";
