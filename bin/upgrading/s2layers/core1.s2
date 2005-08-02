@@ -1655,6 +1655,7 @@ function Entry::print_metadata() {
     }
 }
 
+function EntryLite::print_linkbar() {}
 function Comment::print_linkbar() {
     var Link link;
     foreach var string k ($.link_keyseq) {

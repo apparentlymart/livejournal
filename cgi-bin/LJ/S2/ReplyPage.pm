@@ -93,7 +93,7 @@ sub ReplyPage
         
         my $dtalkid = $re_talkid * 256 + $entry->{'anum'};
         $replyto = {
-            '_type' => 'EntryLite',
+            '_type' => 'Comment',
             'subject' => LJ::ehtml($parpost->{'subject'}),
             'text' => $parpost->{'body'},
             'userpic' => $comment_userpic,
