@@ -26,7 +26,6 @@ use Time::Local ();
 use Storable ();
 use Compress::Zlib ();
 use IO::Socket::INET qw{};
-use Unicode::MapUTF8;
 
 do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
@@ -8067,6 +8066,10 @@ sub text_convert
         $$error = 1;
         return undef;
     };
+
+    # We don't preload this library in non-web context, so this
+    # makes sure it's loaded if it's needed
+    require Unicode::MapUTF8;
 
     # convert!
     my $name = $LJ::CACHE_ENCODINGS{$u->{'oldenc'}};
