@@ -482,6 +482,7 @@ sub clean
                     if (@canonical_urls) {
                         my $url = LJ::ehtml(pop @canonical_urls);
                         $newdata .= "</b> ($url)";
+                        next;
                     }
                 }
 
