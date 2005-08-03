@@ -204,11 +204,19 @@ function print_module_poweredby(string title) {
     close_module();
 }
 function print_module_pagesummary(string title) {
-    return;
     var Page p = get_page();
+
+    var string[] links = [];
+    if ($p isa RecentPage) {
+        var RecentPage cp = $p as RecentPage;
+        foreach var Entry e ($cp.entries) {
+            $links[size $links] = """<a href="$e.permalink_url">"""+striphtml($e.subject)+"</a>";
+        }
+    }
+
+    if (size($links) < 1) { return; }
     open_module("pagesummary", $title, "");
-    # FIXME: Can't actually implement this yet, since we have a Page object
-    # rather than a RecentPage object. :(
+    print_module_list($links);
     close_module();
 }
 function print_module_tags(string title) {
