@@ -11,7 +11,7 @@ propgroup appearance {
 
     property string base_theme {
         des = "Base Theme";
-        values = "__none|(None)|powell-street|Powell Street";
+        values = "__none|(None)|beckett|Beckett|powell-street|Powell Street";
     }
     set base_theme = "powell-street";
 
@@ -26,6 +26,7 @@ propgroup appearance {
     }
     set theme_stylesheet = {
         "powell-street" => "http://www.typepad.com/.shared/themes/lilia/theme-powell-street.css",
+        "beckett" => "http://www.typepad.com/.shared/themes/lilia/theme-beckett.css",
     };
 }
 propgroup appearance = "Appearance";
