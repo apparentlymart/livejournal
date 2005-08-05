@@ -20,18 +20,9 @@ sub RecentPage
     
     my $datalink = sub {
         my ($what, $caption) = @_;
-        return {
-            '_type' => 'Link',
-            'caption' => $caption,
-            'url' => $p->{'base_url'}."/data/$what",
-            'icon' => {
-                '_type' => 'Image',
-                'alttext' => $caption,
-                'url' => "$LJ::IMGPREFIX/data_$what.gif",
-                'width' => 32,
-                'height' => 15,
-            },
-        };
+        return Link($p->{'base_url'} . "/data/$what",
+		    $caption
+		    Image("$LJ::IMGPREFIX/data_$what.gif", 32, 15, $caption));
     };
     
     $p->{'data_link'} = {

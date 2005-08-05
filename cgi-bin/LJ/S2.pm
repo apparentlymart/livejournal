@@ -1690,6 +1690,19 @@ sub Page
     return $p;
 }
 
+sub Link {
+    my ($url, $caption, $icon) = @_;
+
+    my $lnk = {
+	'_type'   => 'Link',
+	'caption' => $caption,
+	'url'     => $url,
+	'icon'    => $icon,
+    };
+
+    return $lnk;
+}
+
 sub Image
 {
     my ($url, $w, $h, $alttext) = @_;
@@ -1819,12 +1832,9 @@ sub UserLite
         'name' => LJ::ehtml($u->{'name'}),
         'journal_type' => $u->{'journaltype'},
         'data_link' => {
-            'foaf' => {
-                "_type" => 'Link',
-                "url" => "$LJ::SITEROOT/users/".LJ::ehtml($u->{'user'}).'/data/foaf',
-                "icon" => Image("$LJ::IMGPREFIX/data_foaf.gif", 32, 15, "FOAF"),
-                "caption" => "FOAF",
-            },
+            'foaf' => Link("$LJ::SITEROOT/users/" . LJ::ehtml($u->{'user'}) . '/data/foaf',
+			   "FOAF",
+			   Image("$LJ::IMGPREFIX/data_foaf.gif", 32, 15, "FOAF")),
         },
         'data_links_order' => [ "foaf" ],
     };
@@ -2270,52 +2280,37 @@ sub _Comment__get_link
         my $remote = LJ::get_remote();
         if ($key eq "delete_comment") {
             return undef unless LJ::Talk::can_delete($remote, $u, $post_user, $com_user);
-            return {
-                '_type' => "Link",
-                'url' => "$LJ::SITEROOT/delcomment.bml?journal=$u->{'user'}&amp;id=$this->{'talkid'}",
-                'caption' => $ctx->[S2::PROPS]->{"text_multiform_opt_delete"},
-                'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_del.gif", 22, 20),
-            };
+            return Link("$LJ::SITEROOT/delcomment.bml?journal=$u->{'user'}&amp;id=$this->{'talkid'}",
+			$ctx->[S2::PROPS]->{"text_multiform_opt_delete"},
+			LJ::S2::Image("$LJ::IMGPREFIX/btn_del.gif", 22, 20));
         }
         if ($key eq "freeze_thread") {
             return undef if $this->{'frozen'};
             return undef unless LJ::Talk::can_freeze($remote, $u, $post_user, $com_user);
-            return {
-                '_type' => "Link",
-                'url' => "$LJ::SITEROOT/talkscreen.bml?mode=freeze&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
-                'caption' => $ctx->[S2::PROPS]->{"text_multiform_opt_freeze"},
-                'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_freeze.gif", 22, 20),
-            };
+            return Link("$LJ::SITEROOT/talkscreen.bml?mode=freeze&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
+			$ctx->[S2::PROPS]->{"text_multiform_opt_freeze"},
+			LJ::S2::Image("$LJ::IMGPREFIX/btn_freeze.gif", 22, 20));
         }
         if ($key eq "unfreeze_thread") {
             return undef unless $this->{'frozen'};
             return undef unless LJ::Talk::can_unfreeze($remote, $u, $post_user, $com_user);
-            return {
-                '_type' => "Link",
-                'url' => "$LJ::SITEROOT/talkscreen.bml?mode=unfreeze&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
-                'caption' => $ctx->[S2::PROPS]->{"text_multiform_opt_unfreeze"},
-                'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_unfreeze.gif", 22, 20),
-            };
+            return Link("$LJ::SITEROOT/talkscreen.bml?mode=unfreeze&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
+			$ctx->[S2::PROPS]->{"text_multiform_opt_unfreeze"},
+			LJ::S2::Image("$LJ::IMGPREFIX/btn_unfreeze.gif", 22, 20));
         }
         if ($key eq "screen_comment") {
             return undef if $this->{'screened'};
             return undef unless LJ::Talk::can_screen($remote, $u, $post_user, $com_user);
-            return {
-                '_type' => "Link",
-                'url' => "$LJ::SITEROOT/talkscreen.bml?mode=screen&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
-                'caption' => $ctx->[S2::PROPS]->{"text_multiform_opt_screen"},
-                'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_scr.gif", 22, 20),
-            };
+            return Link("$LJ::SITEROOT/talkscreen.bml?mode=screen&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
+			$ctx->[S2::PROPS]->{"text_multiform_opt_screen"},
+			LJ::S2::Image("$LJ::IMGPREFIX/btn_scr.gif", 22, 20));
         }
         if ($key eq "unscreen_comment") {
             return undef unless $this->{'screened'};
             return undef unless LJ::Talk::can_unscreen($remote, $u, $post_user, $com_user);
-            return {
-                '_type' => "Link",
-                'url' => "$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
-                'caption' => $ctx->[S2::PROPS]->{"text_multiform_opt_unscreen"},
-                'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_unscr.gif", 22, 20),
-            };
+            return Link("$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
+			$ctx->[S2::PROPS]->{"text_multiform_opt_unscreen"},
+			LJ::S2::Image("$LJ::IMGPREFIX/btn_unscr.gif", 22, 20));
         }
     }
 }
@@ -2580,55 +2575,37 @@ sub _Entry__get_link
             return undef unless $remote && ($remote->{'user'} eq $journal ||
                                             $remote->{'user'} eq $poster ||
                                             LJ::can_manage($remote, LJ::load_user($journal)));
-            return {
-                '_type' => "Link",
-                'url' => "$LJ::SITEROOT/editjournal.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
-                'caption' => "Edit Entry",
-                'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_edit.gif", 22, 20),
-            }
+            return Link("$LJ::SITEROOT/editjournal.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
+			"Edit Entry",
+			LJ::S2::Image("$LJ::IMGPREFIX/btn_edit.gif", 22, 20));
         }
         if ($key eq "edit_tags") {
             return undef unless $remote && LJ::Tags::can_add_tags(LJ::load_user($journal), $remote);
-            return {
-                '_type' => "Link",
-                'url' => "$LJ::SITEROOT/edittags.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
-                'caption' => 'Edit Tags',
-                'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_edittags.gif", 22, 20),
-            };
+            return Link("$LJ::SITEROOT/edittags.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
+			'Edit Tags',
+			LJ::S2::Image("$LJ::IMGPREFIX/btn_edittags.gif", 22, 20));
         }
         if ($key eq "tell_friend") {
             return undef if $LJ::DISABLED{'tellafriend'};
-            return {
-                '_type' => "Link",
-                'url' => "$LJ::SITEROOT/tools/tellafriend.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
-                'caption' => "Tell A Friend",
-                'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_tellfriend.gif", 22, 20),
-            };
+            return Link("$LJ::SITEROOT/tools/tellafriend.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
+			"Tell A Friend",
+			LJ::S2::Image("$LJ::IMGPREFIX/btn_tellfriend.gif", 22, 20));
         }
         if ($key eq "mem_add") {
             return undef if $LJ::DISABLED{'memories'};
-            return {
-                '_type' => "Link",
-                'url' => "$LJ::SITEROOT/tools/memadd.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
-                'caption' => "Add to Memories",
-                'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_memories.gif", 22, 20),
-            };
+            return Link("$LJ::SITEROOT/tools/memadd.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
+			"Add to Memories",
+			LJ::S2::Image("$LJ::IMGPREFIX/btn_memories.gif", 22, 20));
         }
         if ($key eq "nav_prev") {
-            return {
-                '_type' => "Link",
-                'url' => "$LJ::SITEROOT/go.bml?journal=$journal&amp;itemid=$this->{'itemid'}&amp;dir=prev",
-                'caption' => "Previous Entry",
-                'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_prev.gif", 22, 20),
-            };
+            return Link("$LJ::SITEROOT/go.bml?journal=$journal&amp;itemid=$this->{'itemid'}&amp;dir=prev",
+			"Previous Entry",
+			LJ::S2::Image("$LJ::IMGPREFIX/btn_prev.gif", 22, 20));
         }
         if ($key eq "nav_next") {
-            return {
-                '_type' => "Link",
-                'url' => "$LJ::SITEROOT/go.bml?journal=$journal&amp;itemid=$this->{'itemid'}&amp;dir=next",
-                'caption' => "Next Entry",
-                'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_next.gif", 22, 20),
-            };
+            return Link("$LJ::SITEROOT/go.bml?journal=$journal&amp;itemid=$this->{'itemid'}&amp;dir=next",
+			"Next Entry",
+			LJ::S2::Image("$LJ::IMGPREFIX/btn_next.gif", 22, 20));
         }
     }
 }
