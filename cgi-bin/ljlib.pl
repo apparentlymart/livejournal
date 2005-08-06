@@ -5447,7 +5447,7 @@ sub make_journal
     # be done above the s1shortcomings section so that we can fall through to that
     # style for lastn filtered by tags view
     if ($view eq 'lastn' && $opts->{pathextra} && $opts->{pathextra} =~ /^\/tag\/(.+)$/) {
-        $opts->{getargs}->{tag} = $1;
+        $opts->{getargs}->{tag} = LJ::durl($1);
         $opts->{pathextra} = undef;
     }
 
