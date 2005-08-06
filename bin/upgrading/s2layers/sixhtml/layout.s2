@@ -11,7 +11,7 @@ propgroup appearance {
 
     property string base_theme {
         des = "Base Theme";
-        values = "__none|(None)|beckett|Beckett|powell-street|Powell Street";
+        values = "__none|(None)|april|April|baby|Baby|beckett|Beckett|bluecrush|Blue Crush|bonjour|Bonjour Chatette|bryant|Bryant|classy|Classy|earth|Earth|green|Green|folio|Folio|forestgreen|Forest Green|knitting|Knitting|powell-street|Powell Street|masala|Masala|minimalist|Minimalist|porpoise|Porpoise|purplecrush|Purple Crush|stevenson|Stevenson|sunburned|Sunburned|stitch|Stitch|travel|Travel|wedding|Wedding";
     }
     set base_theme = "powell-street";
 
@@ -25,8 +25,31 @@ propgroup appearance {
         noui = 1;
     }
     set theme_stylesheet = {
-        "powell-street" => "http://www.typepad.com/.shared/themes/lilia/theme-powell-street.css",
+        "april" => "http://www.typepad.com/.shared/themes/classic/theme-april.css",
+        "baby" => "http://www.typepad.com/.shared/themes/lilia/theme-baby.css",
         "beckett" => "http://www.typepad.com/.shared/themes/lilia/theme-beckett.css",
+        "bluecrush" => "http://www.typepad.com/.shared/themes/lilia/theme-bluecrush.css",
+        "bonjour" => "http://www.typepad.com/.shared/themes/classic/theme-bonjour.css",
+        "bryant" => "http://www.typepad.com/.shared/themes/lilia/theme-bryant.css",
+        "cityblend" => "http://www.typepad.com/.shared/themes/shea/theme-cityblend.css",
+        "classy" => "http://www.typepad.com/.shared/themes/classic/theme-classy.css",
+        "earth" => "http://www.typepad.com/.shared/themes/classic/theme-earth.css",
+        "green" => "http://www.typepad.com/.shared/themes/classic/theme-green.css",
+        "folio" => "http://www.typepad.com/.shared/themes/shea/theme-folio.css",
+        "forestgreen" => "http://www.typepad.com/.shared/themes/shea/theme-forestgreen.css",
+        "knitting" => "http://www.typepad.com/.shared/themes/lilia/theme-knitting.css",
+        "powell-street" => "http://www.typepad.com/.shared/themes/lilia/theme-powell-street.css",
+        "masala" => "http://www.typepad.com/.shared/themes/lilia/theme-masala.css",
+        "minimalist" => "http://www.typepad.com/.shared/themes/classic/theme-minimalist.css",
+        "porpoise" => "http://www.typepad.com/.shared/themes/shea/theme-porpoise.css",
+        "purplecrush" => "http://www.typepad.com/.shared/themes/lilia/theme-purplecrush.css",
+        "stevenson" => "http://www.typepad.com/.shared/themes/lilia/theme-stevenson.css",
+        "subtle" => "http://www.typepad.com/.shared/themes/lilia/theme-subtle.css",
+        "sunburned" => "http://www.typepad.com/.shared/themes/shea/theme-sunburned.css",
+        "stitch" => "http://www.typepad.com/.shared/themes/lilia/theme-stitch.css",
+        "tickle" => "http://www.typepad.com/.shared/themes/shea/theme-tickle.css",
+        "travel" => "http://www.typepad.com/.shared/themes/lilia/theme-travel.css",
+        "wedding" => "http://www.typepad.com/.shared/themes/lilia/theme-wedding.css",
     };
 }
 propgroup appearance = "Appearance";
@@ -45,6 +68,16 @@ propgroup options {
     property use view_entry_disabled;
     property use use_shared_pic;
 
+    property bool opt_datehead {
+        des = "Show Heading for New Day";
+    }
+    set opt_datehead = true;
+
+    property bool opt_showtime {
+        des = "Show Posting Time on Entries";
+        note = "This is recommended if you regularly post more than one entry per day.";
+    }
+    set opt_showtime = true;
 
     property string[][] sidebar_primary {
         des = "Primary sidebar members";
@@ -85,6 +118,13 @@ propgroup text {
     property use text_view_userinfo;
     property use lang_fmt_date_med;
     property use lang_fmt_time_short;
+
+    # i18n props. Not in the interface.
+    property string text_comments {
+        des = "Text for the heading above the comments on the entry page";
+        noui = 1;
+    }
+    set text_comments = "Comments";
 }
 propgroup text = "Text";
 
@@ -291,16 +331,32 @@ function print_module_links(string title) {
     var Page p = get_page();
     var UserLink[] links = $p.linklist;
     if (size($links) < 1) { return; }
-    open_module("typelist", $title, "");
+
+    var bool box_open = false;
+    if (not $links[0].is_heading) {
+        open_module("typelist", $title, "");
+        $box_open = true;
+    }
 
     var string[] items = [];
     foreach var UserLink link ($links) {
+        if ($link.is_heading) {
+            if ($box_open) {
+                print_module_list($items);
+                close_module();
+                $items = [];
+            }
+            open_module("typelist", $link.title, "");
+            $box_open = true;
+        }
         if (not $link.is_heading and $link.title != "") {
             $items[size $items] = """<a href="$link.url">$link.title</a>""";
         }
     }
-    print_module_list($items);
-    close_module();
+    if ($box_open) {
+        print_module_list($items);
+        close_module();
+    }
 }
 
 
@@ -452,29 +508,132 @@ container_close();
 
 
 
-function RecentPage::print_body {
+function RecentPage::print_body() {
+
+    if ($.nav.backward_url != "" or $.nav.forward_url != "") {
+        println """<p class="content-nav">""";
+        if ($.nav.backward_url != "") {
+            println """<a href="$.nav.backward_url">"""+get_plural_phrase($.nav.backward_count, "text_skiplinks_back")+"</a>";
+        }
+        if ($.nav.backward_url != "" and $.nav.forward_url != "") {
+            print " | ";
+        }
+        if ($.nav.forward_url != "") {
+            println """<a href="$.nav.forward_url">"""+get_plural_phrase($.nav.forward_count, "text_skiplinks_forward")+"</a>";
+        }
+        println """</p>""";
+    }
+
     foreach var Entry e ($.entries) {
+        if ($*opt_datehead and $e.new_day) {
+            print """<h2 class="date-header">"""+$e.time->date_format("med")+"""</h2>""";
+        }
+
         # Print the entry
         $this->print_entry($e);
     }
 }
 
+function EntryPage::print_body() {
+
+    $this->print_entry($.entry);
+
+"""
+	<a id="comments"></a>
+	<div class="comments">
+		<h3 class="comments-header">$*text_comments</h3>
+		<div class="comments-content">
+			<!-- comment list -->
+""";
+
+    foreach var Comment c ($.comments) {
+        $this->print_comment($c);
+    }
+
+"""
+		</div>
+	</div>
+""";
+
+}
+
+function lang_posted_by_date_and_time(UserLite poster, DateTime dt, bool showposter, bool showdate, bool showtime) : string {
+    var string posted = "";
+    if ($showposter) {
+        var string posterstr = (defined $poster ? ""+$poster : "<i>"+$*text_poster_anonymous+"</i>");
+        $posted = "Posted by "+$posterstr;
+        if (not $showtime and not $showdate) {
+            return $posted;
+        }
+        $posted = $posted + ($showdate ? " on " : " at ");
+    }
+    if ($showdate and $showtime) {
+        return $posted + $dt->date_format("med") + " at " + $dt->time_format();
+    }
+    if ($showdate and not $showtime) {
+        return $posted + $dt->date_format("med");
+    }
+    if (not $showdate and $showtime) {
+        return $posted + $dt->time_format();
+    }
+    return "";
+}
+
+function EntryPage::print_comment(Comment e) {
+    "<div class='comment'"+($e.dom_id ? " id='$e.dom_id'" : "")+">\n";
+    if ($e.subject != "") {
+        "<h3 class='comment-header'>$e.subject</h3>\n";
+    }
+    "<div class='comment-content'>$e.text</div>";
+    "<div class='comment-footer'>";
+
+    var string sep = "<span class='separator'>|</span>";
+
+    print lang_posted_by_date_and_time($e.poster, $e.time, true, true, true)+" $sep ";
+
+    "<a class='permalink' href='$e.permalink_url'>$*text_permalink</a>";
+
+    if ($e.parent_url) { print " $sep <a href='$e.parent_url'>$*text_comment_parent</a>"; }
+    if ($e.thread_url) { print " $sep <a href='$e.thread_url'>$*text_comment_thread</a>"; }
+    if ($e.reply_url) { print " $sep <a href='$e.reply_url'>$*text_comment_reply</a>"; }
+
+    "</div>";
+
+    "</div>";
+}
 
 function Page::print_entry(Entry e) {
     "<div class='entry'" + ($e.dom_id ? " id='$e.dom_id'" : "") + ">\n";
-      "<h3 class='entry-header'>$e.security_icon $e.subject</h3>\n";
+      "<h3 class='entry-header'>$e.subject</h3>\n";
       "<div class='entry-content'>\n";
 
           "<div class='entry-body'>\n"; $e->print_metadata(); "$e.text\n</div>\n";
 
          var string sep = "<span class='separator'>|</span>";
 
-         "<p class='entry-footer'>";
-             print $e.time->date_format($*lang_fmt_date_med);
-             " $sep <a class='permalink' href='$e.permalink_url'>$*text_permalink</a>";
+         var bool showtime = $*opt_showtime;
+         var bool showdate = not $*opt_datehead;
+         var bool showposter = false;
+         if ($.view == "friends") { $showtime = true; $showposter = true; }
+         if ($.view == "day") { $showdate = false; }
+         if ($.view == "entry" or $.view == "reply") { $showdate = true; }
+         if (not $e.poster->equals($e.journal)) { $showposter = true; }
 
-            if ($e.comments.enabled) { " $sep "; $e.comments->print_postlink(); }
-            if ($e.comments.count)   { " $sep "; $e.comments->print_readlink(); }
+         "<p class='entry-footer'>";
+         print "$e.security_icon ";
+
+         if ($showdate or $showtime or $showposter) {
+             print lang_posted_by_date_and_time($e.poster, $e.time, $showposter, $showdate, $showtime)+" $sep ";
+         }
+         "<a class='permalink' href='$e.permalink_url'>$*text_permalink</a>";
+
+
+         if ($.view != "reply") {
+             if ($e.comments.enabled) { " $sep "; $e.comments->print_postlink(); }
+         }
+         if ($.view != "entry") {
+             if ($e.comments.count)   { " $sep "; $e.comments->print_readlink(); }
+         }
          "</p>";
 
        "</div>\n";
