@@ -851,6 +851,11 @@ property string IMGDIR {
     doc_flags = "[sys]";
     des = "The base URL of the current LiveJournal site's image directory, without a trailing slash.  Example: \"http://www.livejournal.com/img\".";
 }
+property string STATDIR {
+    noui = 1;
+    doc_flags = "[sys]";
+    des = "The base URL of the current LiveJournal site's static files directory, without a trailing slash.";
+}
 property builtin string SITENAME {
     noui = 1;
     doc_flags = "[sys]";
