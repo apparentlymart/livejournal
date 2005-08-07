@@ -846,12 +846,12 @@ property string[] lang_dayname_short {
 set lang_dayname_short = [ "", "Sun", "Mon",  "Tue", "Wed", 
                            "Thu", "Fri", "Sat" ];
 
-property string IMGDIR {
+property builtin string IMGDIR {
     noui = 1;
     doc_flags = "[sys]";
     des = "The base URL of the current LiveJournal site's image directory, without a trailing slash.  Example: \"http://www.livejournal.com/img\".";
 }
-property string STATDIR {
+property builtin string STATDIR {
     noui = 1;
     doc_flags = "[sys]";
     des = "The base URL of the current LiveJournal site's static files directory, without a trailing slash.";
