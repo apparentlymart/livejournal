@@ -1,0 +1,15 @@
+.comment .comment-replies {
+    margin-left: 30px;
+}
+.comment .comment-header {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+.comment .comment-userpic, .entry .entry-userpic {
+    float: right;
+    margin: 5px;
+}
+.comment .comment-content, .entry .entry-content, .entry .entry-body {
+    clear: none;
+}
+

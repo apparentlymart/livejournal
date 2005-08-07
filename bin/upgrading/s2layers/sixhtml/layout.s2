@@ -79,6 +79,23 @@ propgroup options {
     }
     set opt_showtime = true;
 
+    property bool opt_userpic_main {
+        des = "Show User Pictures on Entries";
+    }
+    property bool opt_userpic_friends {
+        des = "Show User Pictures on Entries on your Friends Page";
+    }
+    property bool opt_userpic_entrypage {
+        des = "Show User Picture on the Entry page";
+    }
+    property bool opt_userpic_comments {
+        des = "Show User Pictures on Comments";
+    }
+    set opt_userpic_main = false;
+    set opt_userpic_friends = true;
+    set opt_userpic_entrypage = true;
+    set opt_userpic_comments = true;
+
     property string[][] sidebar_primary {
         des = "Primary sidebar members";
         noui = 1;
@@ -136,6 +153,7 @@ if ($*use_6a_base) {
 """
 /* base css */
 @import url(http://www.typepad.com/.shared/themes/common/base-weblog.css);
+@import url($*STATDIR/sixhtml/ljextras.css);
 """;
 }
 
@@ -493,7 +511,7 @@ function Page::print () {
 
 """
 </head>
-<body class='$body_layout_class'>""";
+<body class='$body_layout_class lj-view-$.view'>""";
 
 container_open("container");
 print_banner($this);
@@ -580,11 +598,33 @@ function lang_posted_by_date_and_time(UserLite poster, DateTime dt, bool showpos
 }
 
 function EntryPage::print_comment(Comment e) {
+    if (not $e.full) {
+        # Collapsed mode
+
+        "<div class='comment collapsed-comment'"+($e.dom_id ? " id='$e.dom_id'" : "")+">\n";
+        "<div class='comment-footer'>";
+        var string subject = $e.subject;
+        if ($subject == "") { $subject = $*text_nosubject; }
+        "<a href='$e.permalink_url' class='collapsed-comment-link'>$subject</a> <span class='separator'>-</span> ";
+        print lang_posted_by_date_and_time($e.poster, $e.time, true, true, true);
+        "</div>";
+        "</div>";
+
+        return;
+    }
+
     "<div class='comment'"+($e.dom_id ? " id='$e.dom_id'" : "")+">\n";
     if ($e.subject != "") {
         "<h3 class='comment-header'>$e.subject</h3>\n";
     }
-    "<div class='comment-content'>$e.text</div>";
+
+    if ($*opt_userpic_comments and defined $e.userpic) {
+        "<div class='comment-userpic'>$e.userpic</div>";
+    }
+
+    "<div class='comment-content'>";
+    $e->print_text();
+    "</div>";
     "<div class='comment-footer'>";
 
     var string sep = "<span class='separator'>|</span>";
@@ -595,9 +635,19 @@ function EntryPage::print_comment(Comment e) {
 
     if ($e.parent_url) { print " $sep <a href='$e.parent_url'>$*text_comment_parent</a>"; }
     if ($e.thread_url) { print " $sep <a href='$e.thread_url'>$*text_comment_thread</a>"; }
-    if ($e.reply_url) { print " $sep <a href='$e.reply_url'>$*text_comment_reply</a>"; }
+    if ($e.reply_url)  { print " $sep <a href='$e.reply_url'>$*text_comment_reply</a>"; }
 
     "</div>";
+
+    if (size($e.replies) > 0) {
+        println "<div class='comment-replies'>";
+
+        foreach var Comment c ($e.replies) {
+            $this->print_comment($c);
+        }
+
+        println "</div>";
+    }
 
     "</div>";
 }
@@ -607,7 +657,17 @@ function Page::print_entry(Entry e) {
       "<h3 class='entry-header'>$e.subject</h3>\n";
       "<div class='entry-content'>\n";
 
-          "<div class='entry-body'>\n"; $e->print_metadata(); "$e.text\n</div>\n";
+         var bool showuserpic = $*opt_userpic_main;
+         if ($.view == "friends") { $showuserpic = $*opt_userpic_friends; }
+         if ($.view == "entry") { $showuserpic = $*opt_userpic_entrypage; }
+         if ($showuserpic and defined $e.userpic) {
+             "<div class='entry-userpic'>$e.userpic</div>";
+         }
+
+         "<div class='entry-body'>\n";
+         $e->print_metadata();
+         $e->print_text();
+         "</div>\n";
 
          var string sep = "<span class='separator'>|</span>";
 
@@ -620,7 +680,9 @@ function Page::print_entry(Entry e) {
          if (not $e.poster->equals($e.journal)) { $showposter = true; }
 
          "<p class='entry-footer'>";
-         print "$e.security_icon ";
+         if (defined $e.security_icon) {
+             print "<span class='lj-entry-securityicon'>$e.security_icon</span> ";
+         }
 
          if ($showdate or $showtime or $showposter) {
              print lang_posted_by_date_and_time($e.poster, $e.time, $showposter, $showdate, $showtime)+" $sep ";
