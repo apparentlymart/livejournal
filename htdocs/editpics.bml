@@ -81,6 +81,9 @@
         ### save changes to existing pics
         if ($POST{'action:save'}) {
             # form being posted isn't multipart, since we were able to read from %POST
+            unless (LJ::check_form_auth()) {
+                return $err->($ML{'error.invalidform'});
+            }
 
             my %exist_kwids;
             if ($u->{'dversion'} > 6) {
@@ -698,6 +701,7 @@
                 $body .= "<?p <strong>". BML::ml('.piclimitstatus', {current => $count, max => $max}) . "</strong> p?>";
 
                 $body .= "<form method='post' action='editpics.bml$getextra'>";
+                $body .= LJ::form_auth();
                 $body .= "<table cellpadding='5' border='0' cellspacing='1' " .
                     "style='margin-left: 30px'>";
             }
