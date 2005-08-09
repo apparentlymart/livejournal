@@ -8936,7 +8936,7 @@ sub alloc_user_counter
 
     ##################################################################
     # IF YOU UPDATE THIS MAKE SURE YOU ADD INITIALIZATION CODE BELOW #
-    return undef unless $dom =~ /^[LTMPSRKC]$/;                      #
+    return undef unless $dom =~ /^[LTMPSRKCO]$/;                     #
     ##################################################################
 
     my $dbh = LJ::get_db_writer();
@@ -9018,6 +9018,9 @@ sub alloc_user_counter
     } elsif ($dom eq "C") {
         my $commentmax = $u->selectrow_array("SELECT MAX(pendid) FROM pendcomments WHERE jid=?",
                                              undef, $uid);
+    } elsif ($dom eq "O") {
+        $newmax = $u->selectrow_array("SELECT MAX(pboxid) FROM portal_config WHERE userid=?",
+                                      undef, $uid);
     } else {
         die "No user counter initializer defined for area '$dom'.\n";
     }
