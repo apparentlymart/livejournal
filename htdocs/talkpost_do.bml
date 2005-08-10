@@ -24,6 +24,8 @@ body<=
 
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
+    LJ::need_res('stc/display_none.css');
+
     # Set the title to be for an error, it will be changed later
     # upon sucess
     $title = $ML{'Error'};
@@ -237,7 +239,6 @@ _code?>
 title=><?_code return $title _code?>
 head<=
 <?_code return (! $LJ::REQ_HEAD_HAS{'chalresp_js'}++) ? $LJ::COMMON_CODE{'chalresp_js'} : ""; _code?>
-<?_code return $LJ::COMMON_CODE{'display_none'}; _code?>
 <=head
 page?><?_c <LJDEP>
 lib: LJ::SpellCheck

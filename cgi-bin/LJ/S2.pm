@@ -141,6 +141,9 @@ sub make_journal
     # like print_stylesheet() won't run, which don't have an method invocant
     return $page if $page && ref $page ne 'HASH';
 
+    # Include any head stc or js head content
+    $page->{head_content} .= LJ::res_includes();
+
     s2_run($r, $ctx, $opts, $entry, $page);
 
     if (ref $opts->{'errors'} eq "ARRAY" && @{$opts->{'errors'}}) {
