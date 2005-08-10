@@ -6176,7 +6176,7 @@ sub load_user
     # check memcache
     {
         my $uid = LJ::MemCache::get("uidof:$user");
-        $u = LJ::memcache_get_u([$uid, "userid:$uid"]);
+        $u = LJ::memcache_get_u([$uid, "userid:$uid"]) if $uid;
         return $set_req_cache->($u) if $u;
     }
 
