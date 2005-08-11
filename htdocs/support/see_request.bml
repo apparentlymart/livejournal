@@ -46,7 +46,7 @@ head<=
         else
         {
             faqUrl.style.display = 'inline';
-            faqUrl.href = 'faqbrowse.bml?faqid=' + faqDropdown.value;
+            faqUrl.href = 'faqbrowse.bml?faqid=' + faqDropdown.value + '&view=full';
         }
         return false;
     }
