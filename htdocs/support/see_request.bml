@@ -96,6 +96,17 @@ head<=
         return false;
     }
 
+    function doClearFocus () {
+        if (! document.getElementById) return false;
+
+        var submitBox = document.getElementById('submitpost');
+        if (! submitBox) return false;
+
+        submitBox.focus();
+
+        return false;
+    }
+
 // -->
 </script>
 <=head
@@ -731,9 +742,9 @@ body<=
     # textarea for their message body
     $ret .= "<tr valign='top'><td align='right'>Message:</td><td colspan='2'>";
     $ret .= LJ::html_textarea({ 'rows' => '12', 'cols' => '80', 'wrap' => 'virtual', 'id' => 'body', 'name' => 'body', 'value' => $validationnag }) . "<br />";
-    $ret .= "<div style='float: right; font-size: smaller;'><a href='javascript://' onClick='doClearMessage();'>Clear</a></div>";
+    $ret .= "<div style='float: right; font-size: smaller;'><a href='javascript://' onClick='doClearMessage();' onFocus='doClearFocus();'>Clear</a></div>";
     $ret .= "<?de No HTML allowed, so don't worry about about escaping &lt; and &gt;<br />URLs are automatically link-ified, so just reference those. de?><br />";
-    $ret .= LJ::html_submit('submitpost', "Post Comment/Solution");
+    $ret .= LJ::html_submit('submitpost', "Post Comment/Solution", { id => 'submitpost' });
     $ret .= "</td></tr></table>\n";
 
     $ret .= "</form>\n";
