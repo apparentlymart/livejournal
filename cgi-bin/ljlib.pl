@@ -8932,7 +8932,8 @@ sub clear_rel
 #       'P' == phone post, 'C' == pending comment
 sub alloc_user_counter
 {
-    my ($u, $dom, $recurse) = @_;
+    my ($u, $dom, $opts) = @_;
+    $opts ||= {};
 
     ##################################################################
     # IF YOU UPDATE THIS MAKE SURE YOU ADD INITIALIZATION CODE BELOW #
@@ -8957,11 +8958,26 @@ sub alloc_user_counter
                       "WHERE journalid=? AND area=?", undef, $uid, $dom);
     if ($rs > 0) {
         $newmax = $dbh->selectrow_array("SELECT LAST_INSERT_ID()");
+
+        # if we've got a supplied callback, lets check the counter
+        # number for consistency.  If it fails our test, wipe
+        # the counter row and start over, initializing a new one.
+        # callbacks should return true to signal 'all is well.'
+        if ($opts->{callback} && ref $opts->{callback} eq 'CODE') {
+            my $rv = 0;
+            eval { $rv = $opts->{callback}->($u, $newmax) };
+            if ($@ or ! $rv) {
+                $dbh->do("DELETE FROM usercounter WHERE " .
+                         "journalid=? AND area=?", undef, $uid, $dom);
+                return LJ::alloc_user_counter($u, $dom);
+            }
+        }
+
         LJ::MemCache::set($memkey, $newmax);
         return $newmax;
     }
 
-    if ($recurse) {
+    if ($opts->{recurse}) {
         # We shouldn't ever get here if all is right with the world.
         return undef;
     }
@@ -9030,7 +9046,7 @@ sub alloc_user_counter
 
     # The 2nd invocation of the alloc_user_counter sub should do the
     # intended incrementing.
-    return LJ::alloc_user_counter($u, $dom, 1);
+    return LJ::alloc_user_counter($u, $dom, { recurse => 1 });
 }
 
 # $dom: 'S' == style, 'P' == userpic, 'A' == stock support answer
