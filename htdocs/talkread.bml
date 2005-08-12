@@ -159,8 +159,8 @@ body<=
 
  my $event = $item->{'event'};
 
- LJ::expand_embedded($u, $ditemid, $remote, \$event);
  LJ::CleanHTML::clean_event(\$event, $props->{'opt_preformatted'});
+ LJ::expand_embedded($u, $ditemid, $remote, \$event);
  BML::ebml(\$event);
 
  # make the title
