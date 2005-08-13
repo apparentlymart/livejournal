@@ -89,7 +89,7 @@ ENTRYFORMCSS<=
 
 NEEDLOGIN<=
 <?h1 <?_ml bml.needlogin.head _ml?> h1?>
-<?p <?_ml bml.needlogin.body2 _ml?> p?>
+<?p <?_ml bml.needlogin.body3 _ml?> p?>
 <=NEEDLOGIN
 
 BADINPUT<=
