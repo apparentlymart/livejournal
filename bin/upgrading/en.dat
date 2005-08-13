@@ -2349,11 +2349,11 @@ The site team
 
 /manage/index.bml.information.editinfo.about=Edit your account information and various options
 
-/manage/index.bml.information.emailpost=Email Gateway Settings
-
-/manage/index.bml.information.emailpost.about=Manage your email addresses and PIN for post-by-email support
-
 /manage/index.bml.information.header=Account Information
+
+/manage/index.bml.information.mobilepost=Mobile Post Settings
+
+/manage/index.bml.information.mobilepost.about=Manage your email addresses and PIN for mobile posting support
 
 /manage/index.bml.information.siteopts.about=Select your preferred site layout &amp; language
 
@@ -2368,11 +2368,11 @@ is required. To save yourself some time, you can <a href="/login.bml?ret=1">log 
 
 /manage/index.bml.title=Manage Accounts
 
-/manage/index.bml.userpictures=Upload and manage user picture icons for your account:
+/manage/index.bml.userpics=Upload and manage userpics for your account:
 
-/manage/index.bml.userpictures.edit.about=Upload and Manage Your User Picture Icons
+/manage/index.bml.userpics.edit.about=Upload and Manage Your Userpics
 
-/manage/index.bml.userpictures.header=User Picture Icons
+/manage/index.bml.userpics.header=Userpics
 
 /manage/invites.bml.abilities.title=Abilities
 
@@ -2860,6 +2860,12 @@ you to embed your journal in another site.</p>
 /styles/index.bml.nav.edit.about<<
 You may only edit styles &ldquo;owned&rdquo; by your account. In order to customize
 a system style, you must first create a new style based on that system style.
+.
+
+/styles/index.bml.nav.embedding=Embed your journal in your website
+
+/styles/index.bml.nav.embedding.about<<
+There are many different ways to embed your journal into your own website.
 .
 
 /styles/index.bml.nav.modify=Modify your account
@@ -3943,13 +3949,13 @@ Actionlink=[[[link]]]
 
 Backlink=[<a href="[[link]]">&lt;&lt;</a> [[text]]]
 
-bml.badcontent.body=One or more errors occurred processing your request.  Please go back, correct the necessary information, and submit your data again.
+bml.badcontent.body=One or more errors occurred processing your request. Please go back, correct the necessary information, and submit your data again.
 
 bml.badinput.body=Your browser sent some text which is not recognised as valid text in the UTF-8 encoding, as it should be. This might happen if you forced your browser to view the previous page in some other encoding rather than UTF-8. It may also indicate a bug in the browser. If you cannot get around this error, contact us.
 
 bml.badinput.head=Bad Unicode Input
 
-bml.needlogin.body2=In order to view this page, you must <a href="/login.bml?ret=1">log in</a>.
+bml.needlogin.body3=In order to view this page, you must <a href="/login.bml?ret=1">log in</a>. If you do not have an account, you may <a href="/create.bml">create one now</a>.
 
 bml.needlogin.head=Login Required
 

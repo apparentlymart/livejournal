@@ -39,6 +39,11 @@ general /editinfo.bml.tm.about
 general /editinfo.bml.topicdir.about
 general /editinfo.bml.topicdir.header
 
+general /editpics.bml.error.toomanypics2
+general /editpics.bml.error.toomanypics3
+general /editpics.bml.warning.keywords
+general /editpics.bml.warning.keywords.faq
+
 general /friends/edit.bml.btn.proceed
 general /friends/edit.bml.edit.head
 general /friends/edit.bml.edit.text
@@ -67,6 +72,11 @@ general /login.bml.error.noaccount
 
 general /manage/index.bml.information.setlang.about
 general /manage/index.bml.information.setscheme.about
+general /manage/index.bml.userpictures
+general /manage/index.bml.userpictures.edit.about
+general /manage/index.bml.userpictures.header
+general /manage/index.bml.information.emailpost
+general /manage/index.bml.information.emailpost.about
 
 general /modify.bml.btn.proceed
 general /modify.bml.journalstatus.about
@@ -180,6 +190,7 @@ general /syn/index.bml.notused
 general /userinfo.bml.syn.cost
 
 general bml.needlogin.body
+general bml.needlogin.body2
 
 general /userinfo.bml.label.frsyndication
 
