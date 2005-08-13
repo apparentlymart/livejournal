@@ -515,7 +515,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
          $ret .= "<div>";
          foreach my $friend (@LJ::INITIAL_OPTIONAL_FRIENDS) {
              my $selected = LJ::did_post() ? $POST{"initial_optional_friend_$friend"} :
-                 (grep { $_ eq $friend } (@LJ::INITIAL_OPTOUT_FRIENDS || ()));
+                 (grep { $_ eq $friend } @LJ::INITIAL_OPTOUT_FRIENDS);
 
              $ret .= LJ::html_check({'name' => "initial_optional_friend_$friend",
                                      'value' => 1,
