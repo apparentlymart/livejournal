@@ -347,6 +347,12 @@
     # leave undefined if you don't want to use it.
     #@INITIAL_FRIENDS = qw(news);
 
+    # initial optional friends
+    @LJ::INITIAL_OPTIONAL_FRIENDS = qw(news cody);
+
+    # initial friends checked by default on create.bml
+    @LJ::INITIAL_OPTOUT_FRIENDS = qw(news);
+
     # some system accounts have so many friends it is harmful to display
     # them.  list these accounts here.
     #%FORCE_EMPTY_FRIENDS = (
