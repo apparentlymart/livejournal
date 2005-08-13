@@ -4551,6 +4551,28 @@ sub disconnect_dbs {
 }
 
 # <LJFUNC>
+# name: LJ::userpic_count
+# des: Gets a count of userpics for a given user
+# args: dbarg?, upics, idlist
+# des-upics: hashref to load pictures into, keys being the picids
+# des-idlist: [$u, $picid] or [[$u, $picid], [$u, $picid], +] objects
+# also supports depreciated old method of an array ref of picids
+# </LJFUNC>
+sub userpic_count {
+    my $u = shift or return undef;
+
+    if ($u->{'dversion'} > 6) {
+        my $dbcr = LJ::get_cluster_def_reader($u) or return undef;
+        return $dbcr->selectrow_array("SELECT COUNT(*) FROM userpic2 " .
+                                      "WHERE userid=? AND state <> 'X'", undef, $u->{'userid'});
+    }
+
+    my $dbh = LJ::get_db_writer() or return undef;
+    return $dbh->selectrow_array("SELECT COUNT(*) FROM userpic " .
+                                 "WHERE userid=? AND state <> 'X'", undef, $u->{'userid'});
+}
+
+# <LJFUNC>
 # name: LJ::load_userpics
 # des: Loads a bunch of userpic at once.
 # args: dbarg?, upics, idlist
