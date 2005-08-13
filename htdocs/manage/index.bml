@@ -100,7 +100,7 @@ list<=
 <li><a href="/accountstatus.bml<?authas?>" title="<?_ml .information.status.about _ml?>"><?_ml .information.status _ml?></a></li>
 <li><a href="/changepassword.bml" title="<?_ml .information.changepass.about _ml?>"><?_ml .information.changepass _ml?></a></li>
 <li><a href="./siteopts.bml" title="<?_ml .information.siteopts.about _ml?>"><?_ml /manage/siteopts.bml.title _ml?></a></li>
-<li><a href="./emailpost.bml" title="<?_ml .information.emailpost.about _ml?>"><?_ml .information.emailpost _ml?></a></li>
+<li><a href="./emailpost.bml" title="<?_ml .information.mobilepost.about _ml?>"><?_ml .information.mobilepost _ml?></a></li>
 <li><a href="./pubkey.bml" title="Upload your public key">PGP/GPG public key</a></li>
 <li><a href="/manage/invites.bml" title="<?_ml .communities.invites.about _ml?>"><?_ml /manage/invites.bml.title _ml?></a></li>
 <=list
@@ -157,10 +157,10 @@ block?>
 _code?>
 
 <?block
-header=><?_ml .userpictures.header _ml?>
-about=><?_ml .userpictures        _ml?>
+header=><?_ml .userpics.header _ml?>
+about=><?_ml .userpics        _ml?>
 list<=
-<li><a href="/editpics.bml<?authas?>"><?_ml .userpictures.edit.about _ml?></a></li>
+<li><a href="/editpics.bml<?authas?>"><?_ml .userpics.edit.about _ml?></a></li>
 <=list
 block?>
 

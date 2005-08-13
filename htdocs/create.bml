@@ -260,7 +260,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
          }
 
          my ($year, $mon, $day) = ( $POST{"bday_yyyy"}+0, $POST{"bday_mm"}+0, $POST{"bday_dd"}+0 );
-         if ($year < 100) {
+         if ($year < 100 && $year > 0) {
              $POST{'bday_yyyy'} += 1900;
              $year += 1900;
          }

@@ -3,7 +3,7 @@
     use strict;
     use vars qw(%GET %POST $title $body @errors);
 
-    LJ::set_active_crumb('editpics');
+    LJ::set_active_crumb('edituserpics');
 
     $body = "";
     @errors = ();
@@ -416,9 +416,14 @@
             
             ## see if they have too many pictures uploaded
             if ($count >= $max) {
-                return $err->( BML::ml(".error.toomanypics2",
-                                       { 'maxpics'  => $max }) .
-                             LJ::help_icon('userpics', " ", ""));
+                my $toomany;
+                if (my $custom .= LJ::run_hook("editpics_maxlimit", $u)) {
+                    $toomany .= $custom;
+                } else {
+                    $toomany .= BML::ml(".error.toomanypics2", { 'maxpics'  => $max });
+                }
+
+                return $err->( $toomany . LJ::help_icon('userpics', " ", ""));
             }
             
             # see if it's a duplicate
@@ -634,7 +639,7 @@
     }
 
     # show the form to let people edit
-    $title = "Edit User Pictures";
+    $title = "Edit Userpics";
 
     # Fixme: Make this work with Fotobilder
     if (!$fotobilder) {
@@ -858,7 +863,11 @@
         $body .= "</table>\n</form>\n";
     } else {
         $body .= "<?standout \n";
-        $body .= BML::ml(".error.toomanypics3", { 'max'  => $max });
+        if (my $custom .= LJ::run_hook("editpics_maxlimit", $u)) {
+            $body .= $custom;
+        } else {
+            $body .= BML::ml(".error.toomanypics3", { 'max'  => $max });
+        }
     }
     
     $body .= " standout?>\n\n";

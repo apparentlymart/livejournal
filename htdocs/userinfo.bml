@@ -358,6 +358,9 @@
          push @linkele, "<a href='/tools/search.bml?journal=$u->{'user'}'><img align='middle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_search.gif' width='22' height='20' alt='$ML{'.label.searchjournal'}' title='$ML{'.label.searchjournal'}' border='0' /></a>";
      }
 
+     foreach my $row (LJ::run_hooks("userinfo_linkele", $u, $remote)) {
+         push @linkele, $row->[0];
+     }
      if (@linkele) {
          $body .= BML::fill_template("standout", { 
              DATA => join("&nbsp;&nbsp;", @linkele),

@@ -115,8 +115,8 @@ form<=
 </td><td>
 <select name="opt_format">
 <option value="com" selected='selected'><?_ml .sel.commview _ml?></option>
-<option value="pics"><?_ml .sel.bypicture _ml?></option>
-<option value="simple"><?_ml .sel.simple _ml?></option>
+<option value="pics">Picture</option>
+<option value="simple">Text only</option>
 </select>
 </td></tr>
 
@@ -127,7 +127,7 @@ form<=
 <select name="opt_sort">
 <option value="user" selected='selected'><?_ml .sel.username _ml?></option>
 <option value="name"><?_ml .sel.communityname _ml?></option>
-<option value="ut"><?_ml .sel.updatetime _ml?></option>
+<option value="ut">Recently Updated</option>
 </select>
 </td></tr>
 

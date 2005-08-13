@@ -6,9 +6,11 @@ body<=
     return LJ::set_active_crumb('styles');
 _code?>
 
-<?h1 <?_ml .about.header _ml?> h1?>
-<?_ml .about _ml?>
+<?_ml .about2 _ml?>
+<?h1 Quick Links h1?>
 <dl>
+  <dt><a href="/developer/embedding.bml"><?_ml .nav.embedding _ml?></a></dt>
+  <dd><?_ml .nav.embedding.about _ml?></dd>
   <dt><a href="/modify.bml"><?_ml .nav.modify _ml?></a></dt>
   <dd><?_ml .nav.modify.about _ml?></dd>
   <dt><a href="create.bml"><?_ml .nav.create _ml?></a></dt>
