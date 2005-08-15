@@ -23,7 +23,7 @@ use MIME::Lite;
 use strict;
 use vars qw($VERSION $SENDMAIL %providers);
 
-$VERSION = '1.5.4';
+$VERSION = '1.5.5';
 
 # default path to sendmail, if none other specified.  we should probably
 # use something more perl-ish and less unix-specific, but whateva'
@@ -974,11 +974,11 @@ sub init {
     # dashes and underscores, which'll hopefully leave a
     # valid canonical telephone number.
 
-    if ($self->{'number'} =~ /[A-Za-z\.]/) {
-        $self->{'number'} =~ s/[^\w\.\-]//g;
-    }
-    else {
-        $self->{'number'} =~ s/[\(\)\s\-_]//g;
+    if ($self->{'number'} =~ /[A-Za-z@]/ ||   # if number contains letters or the @ sign
+        $self->{'provider'} eq "other") {    # or if the provider is "other":
+        $self->{'number'} =~ s/[\(\)\s]//g;  #     strip parens, and whitespace
+    } else {                                 # else:
+        $self->{'number'} =~ s/\D//g; #     strip any nonword characted, periods or hypens.
     }
 }
  
