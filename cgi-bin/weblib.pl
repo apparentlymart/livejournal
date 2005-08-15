@@ -631,6 +631,7 @@ sub check_referer {
     my $uri = shift(@_) || '';
     my $referer = shift(@_) || BML::get_client_header('Referer');
 
+    print STDERR "uri: $uri referer: $referer\n";
     # get referer and check
     return 1 unless $referer;
     return 1 if $LJ::SITEROOT   && $referer =~ m!^$LJ::SITEROOT$uri!;
@@ -834,15 +835,17 @@ sub create_qr_div {
     $ret .= qq(
 
     var de;
-    if (document.createElement && document.body.insertBefore) {
+    if (document.createElement && document.body.insertBefore && !(xMac && xIE4Up)) {
         document.write("$qrsaveform");
         de = document.createElement("div");
 
         if (de) {
             de.id = "qrdiv";
             de.innerHTML = "$qrhtml";
+            var bodye = document.getElementsByTagName("body");
+            if (bodye[0])
+                bodye[0].insertBefore(de, bodye[0].firstChild);
             de.style.display = 'none';
-            document.body.insertBefore(de, document.body.firstChild);
         }
     }
                );

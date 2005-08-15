@@ -234,7 +234,7 @@
 
     function showQRdiv(qr_div) {
         if (! qr_div) {
-            qr_div = xGetElementById('qr_div');
+            qr_div = xGetElementById('qrdiv');
             if (! qr_div) {
                 return false;
             }
