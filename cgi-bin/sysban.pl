@@ -108,15 +108,44 @@ sub sysban_check {
         return $LJ::UNIQ_BANNED{$value};
     }
 
-    # non-ip bans come straight from the db
+    # need the db below here
     my $dbh = LJ::get_db_writer();
     return undef unless $dbh;
 
-    return $dbh->selectrow_array("SELECT COUNT(*) FROM sysban " .
-                                 "WHERE status='active' AND what=? AND value=? " .
-                                 "AND NOW() > bandate " .
-                                 "AND (NOW() < banuntil OR banuntil=0 OR banuntil IS NULL)",
-                                 undef, $what, $value);
+    # standard check helper
+    my $check = sub {
+        my ($wh, $vl) = @_;
+
+        return $dbh->selectrow_array(qq{
+                SELECT COUNT(*)
+                FROM sysban
+                WHERE status = 'active'
+                  AND what = ?
+                  AND value = ?
+                  AND NOW() > bandate
+                  AND (NOW() < banuntil
+                       OR banuntil = 0
+                       OR banuntil IS NULL)
+            }, undef, $wh, $vl);
+    };
+
+    # check both ban by email and ban by domain if we have an email address
+    if ($what eq 'email') {
+        # short out if this email really is banned directly, or if we can't parse it
+        return 1 if $check->('email', $value);
+        return 0 unless $value =~ /@(.+)$/;
+
+        # see if this domain is banned
+        my @domains = split(/\./, $1);
+        return 0 unless scalar @domains >= 2;
+        return 1 if $check->('email_domain', "$domains[-2].$domains[-1]");
+
+        # must not be banned
+        return 0;
+    }
+
+    # non-ip bans come straight from the db
+    return $check->($what, $value);
 }
 
 # <LJFUNC>
