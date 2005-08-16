@@ -631,7 +631,6 @@ sub check_referer {
     my $uri = shift(@_) || '';
     my $referer = shift(@_) || BML::get_client_header('Referer');
 
-    print STDERR "uri: $uri referer: $referer\n";
     # get referer and check
     return 1 unless $referer;
     return 1 if $LJ::SITEROOT   && $referer =~ m!^$LJ::SITEROOT$uri!;
