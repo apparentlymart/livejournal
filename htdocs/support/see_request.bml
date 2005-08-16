@@ -72,6 +72,10 @@ head<=
         return false;
     }
 
+    function doChangeCategory () {
+        return doSetReplyType('internal');
+    }
+
     function doSummaryClick () {
         if (! document.getElementById) return false;
         
@@ -657,7 +661,8 @@ body<=
         $ret .= "<table cellpadding='5'>";
      
         $ret .= "<tr><td>Change Category:<br />";
-        $ret .= LJ::html_select({ 'name' => 'changecat' },
+        $ret .= LJ::html_select({ 'name' => 'changecat',
+                                  'onchange' => 'doChangeCategory();' },
                                 ('', $sp->{'_cat'}->{'catname'}),
                                 map { $_->{'spcatid'}, "---> $_->{'catname'}" }
                                 LJ::Support::sorted_cats($cats));
