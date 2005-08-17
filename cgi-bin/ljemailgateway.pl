@@ -277,14 +277,15 @@ sub process {
         $body = "" if $tent->effective_type eq 'text/html';
 
         # strip all images but tmobile phone dated.
-        # 06-03-05_12394.jpg
         my @imgs;
         foreach my $img ( get_entity($entity, 'image') ) {
             my $path = $img->bodyhandle->path;
             $path =~ s#.*/##;
             # intentionally not being explicit with regexp, in case
             # they go to 4 digit year or whatever.
-            push @imgs, $img if $path =~ /^\d+-\d+-\d+_\d+.\w+$/;
+            #
+            # 06-03-05_12394.jpg or Image0015.jpg
+            push @imgs, $img if $path =~ /^(?:Image|\d+-\d+-\d+_)\d+.\w+$/;
         }
         $entity->parts(\@imgs);
     }
