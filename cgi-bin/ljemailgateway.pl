@@ -20,6 +20,7 @@ use IO::Handle;
 use LWP::UserAgent;
 use MIME::Words ();
 use XML::Simple;
+use Unicode::MapUTF8 ();
 
 # $rv - scalar ref from mailgated.
 # set to 1 to dequeue, 0 to leave for further processing.
@@ -136,7 +137,7 @@ sub process {
             }
         }
     }
-    
+
     # Strip (and maybe use) pin data from viewable areas
     if ($subject =~ s/^\s*\+([a-z0-9]+)\s+//i) {
         $pin = $1 unless defined $pin;
@@ -253,13 +254,13 @@ sub process {
             my $reason = $ua_rv->status_line;
             return $err->(
                 "Unable to fetch SprintPCS image. ($reason)",
-                { 
+                {
                     sendmail => 1,
                     retry => $reason =~ /Connection refused/
                 }
             );
         }
-    } 
+    }
 
     # tmobile hell.
     # if there is a message, then they send text/plain and text/html,
@@ -391,7 +392,7 @@ sub process {
     # or we had some error during upload that we may or may not want to retry
     # from.  $fb_upload contains the http error code.
     if (   $fb_upload == 400   # bad http request
-        || $fb_upload == 1401  # user has exceeded the fb quota         
+        || $fb_upload == 1401  # user has exceeded the fb quota
         || $fb_upload == 1402  # user has exceeded the fb quota
     ) {
         # don't retry these errors, go ahead and post the body
@@ -570,7 +571,7 @@ sub check_sig {
     $gpg_pid =
         $gpg->wrap_call( handles => $gpg_handles,
                          commands => [qw( --trust-model always --verify )],
-                         command_args => $sig_e ? 
+                         command_args => $sig_e ?
                              [$sig_e->bodyhandle->path(), $txt_f] :
                              $txt_e->bodyhandle->path()
                     );
@@ -604,7 +605,7 @@ sub upload_images
     foreach my $img_entity (@imgs) {
         my $img     = $img_entity->bodyhandle;
         my $path    = $img->path;
-        
+
         my $result = LJ::FBUpload::do_upload(
             $u, $rv,
             {
@@ -616,13 +617,13 @@ sub upload_images
         );
 
         # do upload() returned undef?  This is a posting error
-        # that should most likely be retried, due to something 
+        # that should most likely be retried, due to something
         # wrong on our side of things.
         return if ! defined $result && $$rv;
 
         # http error during upload attempt
         # decide retry based on error type in caller
-        return $result unless ref $result; 
+        return $result unless ref $result;
 
         # examine $result for errors
         if ($result->{Error}->{code}) {
@@ -631,7 +632,7 @@ sub upload_images
             # add 1000 to error code, so we can easily tell the
             # difference between fb protocol error and
             # http error when checking results.
-            return $result->{Error}->{code} + 1000; 
+            return $result->{Error}->{code} + 1000;
         }
 
         push @images, {
