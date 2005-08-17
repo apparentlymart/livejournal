@@ -61,7 +61,7 @@ sub consumer {
     my $csr = Net::OpenID::Consumer->new(
                                          ua => $ua,
                                          args => $get_args,
-                                         cache => eval { LJ::MemCache::get_memcache() },
+                                         cache => scalar(@LJ::MEMCACHE_SERVERS) ? LJ::MemCache::get_memcache() : undef,
                                          consumer_secret => \&LJ::OpenID::consumer_secret,
                                          debug => $LJ::IS_DEV_SERVER || 0,
                                          required_root => $LJ::SITEROOT,
