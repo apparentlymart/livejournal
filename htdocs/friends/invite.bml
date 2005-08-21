@@ -5,7 +5,7 @@
 
 #TODO: pretty
 #TODO: rate-limiting outgoing email (LJ::rate_* functions)
-#TODO: create.bml accepts "from" GET parameter to auto-check that person as a freind, and suggest all their communities that they watch, limited to 25
+#TODO: create.bml accepts "from" GET parameter to auto-check that person as a friend, and suggest all their communities that they watch, limited to 25
 
     $title = "Invite a Friend!";
     $body = "";
