@@ -3,9 +3,7 @@
     use strict;
     use vars qw(%GET $title $body);
 
-#TODO: pretty
-#TODO: rate-limiting outgoing email (LJ::rate_* functions)
-#TODO: create.bml accepts "from" GET parameter to auto-check that person as a friend, and suggest all their communities that they watch, limited to 25
+#TODO: Strip images and offsite links from email body
 
     $title = "Invite a Friend!";
     $body = "";
@@ -41,9 +39,8 @@
 
         $bogus->("name", "Please enter your friend's name") unless $POST{'name'};
 
-
         ($capid, $anum) = LJ::Captcha::session_check_code($POST{captcha_chal}, $POST{answer});
-        $ierr{'captcha'} = "Invalid answer to previous challenge.  Try another." unless $capid && $anum;
+        $bogus->('captcha', 'Invalid answer to previous challenge.  Try another.') unless $capid && $anum;
 
         return $rv;
     };
@@ -59,6 +56,7 @@
     if (LJ::did_post() && $validate_form->()) {
 
         if (LJ::rate_log($u, 'invitefriend', 1)) {
+
             LJ::send_mail({
                 to       => $POST{'email'},
                 toname   => $POST{'name'},
@@ -68,27 +66,36 @@
                 body     => $POST{'msg'},
             });
 
-            $body = "Sent!  Want to <a href='invite.bml'>invite somebody else</a>?";
+            $body .= "<?standout Message sent to $POST{email}!  Want to invite somebody else? standout?>";
+            LJ::Captcha::expire($capid, $anum, $u->{userid});
 
+            # Empty out the form and create a new captcha
+            delete $POST{answer};
+            delete $POST{name};
+            delete $POST{email};
+            delete $POST{captcha_chal};
+            undef $capid;
+            undef $anum;
        # Over rate limit
        } else {
-           $body = "You have already sent the maximum number of allowed friend invites today.";
+           $body = "It looks like you are inviting a lot of your friends to $LJ::SITENAMESHORT.  To help us combat SPAM, you may wish to send the rest of your invitations via your own email address.  Make sure you include the invite link in your email which you can find <a href='/friends/invite.bml'>at the top of the page</a>.";
+           return;
        }
-
-       return;
     }
 
     my $create_link = "$LJ::SITEROOT/create.bml?from=$u->{user}";
 
     my $msg = $POST{'msg'};
-    $msg ||= "Hey,
+    $msg ||= "Hi,
 
-You should join $LJ::SITENAMESHORT.  It's swell.  Here's a link:
+I'm inviting you to join $LJ::SITENAMESHORT, where you can create a personal journal (or blog) for free.
 
+Follow this link to sign up:
 $create_link
 
--- $u->{name} (LJ user: $u->{user})
-";
+This link will take you to a page where you can create a LiveJournal account.  My journal will automatically be added as your friend, and you'll also see a list of some of my communities and choose which ones you'd like to join.
+
+-- $u->{name} ($LJ::SITENAMEABBREV user: $u->{user})";
 
 
     # Generate captcha html
@@ -138,31 +145,33 @@ $create_link
         $captcha_body .= "<br />";
     }
 
+    unless (LJ::did_post()) {
+        $body .= "<?p Want to invite someone to $LJ::SITENAMESHORT?<br /><br />";
+        $body .= 'The link below will send your friend to the page where they can create a LiveJournal account.  Your journal will be automatically added as a friend and the page will list some of your active communities with the option to join. p?>';
 
-    $body .= <<BODY;
+        $body .= "<?p <div style='margin-left: 20px'><b>Link: <a href='$create_link'>$create_link</a></b></div> p?>";
 
-<?h1 Invite a Friend! h1?>
-<?p Want to invite a friend to use $LJ::SITENAMESHORT?  This sends them a link to the create page that automatically adds you back as a friend and asks them if they want to join the communities that you're a member of.  <b>Note:</b>  We don't store any of this after we send the invitation.  p?>
+        $body .= "<?p Enter your friend's name and email address in the form below and we'll send the invitation for you.  If you have multiple people to invite, you can use this form as often as you'd like, or just cut and paste the link and send it from your own email account. p?>";
 
-<form method='POST'>
-<b>Your friend's name:</b> @{[ LJ::html_text({ name => "name", size => 40, value => $POST{name} }) ]} <br />
-@{[ $inerr->("name", "<br />") ]}
+        $body .= "<?p <b>Note:</b> $LJ::SITENAMESHORT doesn't store any of this after the invitation is sent. p?><br />";
+    }
 
-<b>Your friend's email:</b> @{[ LJ::html_text({ name => "email", size => 40, value => $POST{email} }) ]} <br />
-@{[ $inerr->("email", "<br />") ]}
-<br />
+    $body .= "<?p <b>Fill out this form to invite someone to $LJ::SITENAMESHORT:</b> p?>";
 
-<b>Your message to them:</b><br  />
-@{[ $inerr->("msg", "<br />") ]}
-@{[ LJ::html_textarea({ rows => 20, cols => 80, name => "msg", value => $msg }) ]} <br />
-<br />
+    $body .= "<?p <form method='POST'>";
+    $body .= "Your friend's name:";
+    $body .= LJ::html_text({ name => "name", size => 40, value => $POST{name} }) . '<br />' . $inerr->("name", "<br />");
 
-$captcha_body
+    $body .= "Your friend's email:";
+    $body .= LJ::html_text({ name => "email", size => 40, value => $POST{email} }) . '<br />' . $inerr->("email", "<br />");
 
-<br />@{[ LJ::html_submit("Invite 'em!") ]}
-</form>
+    $body .= 'Your message to them:<br />' . $inerr->("msg", "<br />");
+    $body .= LJ::html_textarea({ rows => 20, cols => 80, name => "msg", value => $msg });
+    $body .= '<br /><i>If you want to invite your friend to a specific community, you can mention the community name and URL here.</i><br /><br />';
 
-BODY
+    $body .= $captcha_body;
+
+    $body .= '<br />' . LJ::html_submit("Invite 'em!") . '</form> p?>';
 
     return;
 }

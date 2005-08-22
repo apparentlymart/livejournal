@@ -540,9 +540,12 @@ UPDATE priv_list SET des='Allows a user to edit site text in a given language. a
 INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when wrong username/password is used.', 'failed_login');
 INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged whenever user posts (to any journal)', 'post');
 INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when a forgotten password or username e-mail is requested', 'lostinfo');
+INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when a user sends a friend invite', 'invitefriend');
 UPDATE ratelist SET des='Logged when wrong username/password is used.',name='failed_login' WHERE rlid=NULL;
 UPDATE ratelist SET des='Logged whenever user posts (to any journal)',name='post' WHERE rlid=NULL;
 UPDATE ratelist SET des='Logged when a forgotten password or username e-mail is requested',name='lostinfo' WHERE rlid=NULL;
+UPDATE ratelist SET des='Logged when a user sends a friend invite',name='invitefriend' WHERE rlid=NULL;
+
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('FIPS', '??', 'zips');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('Name', 'Name of city', 'zips');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('State', 'State', 'zips');

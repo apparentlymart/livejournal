@@ -135,6 +135,8 @@
                       'rateperiod-lostinfo' => 24*60, # 24 hours
                       'rateallowed-lostinfo' => 5,
                       'tools_recent_comments_display' => 50,
+                      'rateperiod-invitefriend' => 60, # 1 hour
+                      'rateallowed-invitefriend' => 20,
                       );
         foreach my $k (keys %defcap) {
             next if (defined $LJ::CAP_DEF{$k});
