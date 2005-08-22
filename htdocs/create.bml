@@ -367,6 +367,20 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
              LJ::add_friend($userid, $friendid) if $friendid and $POST{"initial_optional_friend_$friend"};
          }
 
+         # If they were invited then add friend and do joins
+         if ($POST{from}) {
+             my $ivf = LJ::load_user($POST{from});
+             my $friend = $POST{"invitor_friend_$ivf->{user}"};
+             LJ::add_friend($userid, $ivf->{userid})
+                 if $friend;
+
+             foreach (split(',', $POST{invitor_joins})) {
+                 # Join the comm and add to friends list
+                 LJ::join_community($userid, $_, 1)
+                     if $POST{"invitor_join_$_"};
+             }
+         }
+
          # Set any properties that get set in new users
          while (my ($name, $val) = each %LJ::USERPROP_INIT) {
              LJ::set_userprop($userid, $name, $val);
@@ -527,6 +541,147 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
                  "</label><br />";
          }
          $ret .= "</div></div></li>";
+     }
+
+
+     # Was this person invited by another user?  If so,
+     # then show interface to add invitor as friend as
+     # well as 10ish communities they are a member of
+     my $ifrom = LJ::did_post() ? $POST{from} : $GET{from};
+     my $invitor = LJ::load_user($ifrom)
+         if $ifrom;
+
+     if ($invitor) {
+         $ret .= "<li><div class='formitem'><div class='formitemName'>Invitation</div>";
+         $ret .= "<div class='formitemDesc'>Your friend " . LJ::ljuser($invitor) . " welcomes you to ";
+         $ret .= "$LJ::SITENAMESHORT. Below you are able to add this person as one of your friends ";
+         $ret .= "as well as join some of the communities they are a member of.</div>";
+
+         $ret .= "<div>";
+
+         $ret .= LJ::html_hidden('from', $invitor->{user});
+
+         $ret .= LJ::html_check({ name     => "invitor_friend_$invitor->{user}",
+                                  value    => 1,
+                                  selected => LJ::did_post() ? $POST{"invitor_friend_$invitor->{user}"} : 1,
+                                  id       => "invitor_$invitor->{user}",
+                             });
+         $ret .= "<label for='invitor_$invitor->{user}'>" .
+             'Add ' . LJ::ljuser($invitor->{user}) . ' as a friend' .
+             "</label><br />";
+
+         my (%comms, %new_comms);
+         unless ($POST{invitor_joins}) {
+             # Load their friendofs to determine community membership
+             my @ids = LJ::get_friendofs($invitor);
+             my %fro;
+             LJ::load_userids_multiple([ map { $_ => \$fro{$_} } @ids ]);
+
+             foreach my $ulocal (values %fro) {
+                 next unless $ulocal->{'statusvis'} eq 'V';
+                 next unless $ulocal->{'journaltype'} eq 'C';
+
+                 # TODO: This is bad if they belong to a lot of communities,
+                 # is a db query to global each call
+                 my $ci = LJ::get_community_row($ulocal);
+                 next if $ci->{'membership'} eq 'closed';
+
+                 # Add to %comms
+                 $comms{$ulocal->{userid}} = $ulocal;
+             }
+
+             # Get usage information about comms
+             if (%comms) {
+                 my $ids = join(',', map { $_->{userid} } values %comms);
+
+                 my $dbr = LJ::get_db_reader;
+                 my $sth = $dbr->prepare("SELECT UNIX_TIMESTAMP(timeupdate), UNIX_TIMESTAMP(timecreate), userid ".
+                                         "FROM userusage WHERE userid IN($ids)");
+                 $sth->execute;
+
+                 while (my @row = $sth->fetchrow_array) {
+                     ($comms{$row[2]}->{'timeupdate'},
+                      $comms{$row[2]}->{'timecreate'}) = ($row[0], $row[1]);
+                 }
+             }
+
+             # Has this comm been updated in the past 30 days?
+             my $over30 = 0;
+             my $now = time();
+             foreach my $comm (sort {$b->{timeupdate} <=> $a->{timeupdate}} values %comms) {
+                 # Skip activity check if created in past ten days
+                 # Add to %new_comms and delete from %comms
+                 if ($now - $comm->{timecreate} <= 86400*10) {
+                     $new_comms{$comm->{userid}} = $comm;
+                     delete $comms{$comm->{userid}};
+                     next;
+                 }
+
+                 if ($over30) {
+                     delete $comms{$comm->{userid}};
+                     next;
+                 } else {
+                     if (time() - $comm->{timeupdate} > 86400*30) {
+                         delete $comms{$comm->{userid}};
+                         $over30 = 1;
+                     }
+                 }
+             }
+
+             # If we still have more than 30 comms, delete any with less than
+             # five members
+             if (scalar keys %comms > 30) {
+                 foreach my $comm (values %comms) {
+                     my $ids = LJ::get_friends($comm);
+                     if (scalar values %$ids < 5) {
+                     delete $comms{$comm->{userid}};
+                     }
+                 }
+             }
+         }
+
+         if (LJ::did_post()) {
+             foreach (split(',', $POST{invitor_joins})) {
+                 my $cj = LJ::load_userid($_);
+                 $comms{$_} = $cj
+                     if $cj;
+             }
+         }
+
+         if (%comms || %new_comms) {
+             $ret .= "<br />Join communities:<br />";
+             $ret .= "<div style='margin-left: 1em'>";
+
+             my @joins;
+             foreach my $comm (values %new_comms) {
+                 $ret .= LJ::html_check({ name     => "invitor_join_$comm->{userid}",
+                                          value    => 1,
+                                          selected => 1,
+                                          id       => "invitor_$comm->{user}",
+                                      });
+                 $ret .= "<label for='invitor_$comm->{user}'>" .
+                     LJ::ljuser($comm->{user}) . " - $comm->{name} (recently created)</label><br />";
+                 push @joins, $comm->{userid};
+             }
+
+
+             foreach my $comm (values %comms) {
+                 $ret .= LJ::html_check({ name     => "invitor_join_$comm->{userid}",
+                                          value    => 1,
+                                          selected => LJ::did_post() ? $POST{"invitor_join_$comm->{user}"} : 1,
+                                          id       => "invitor_$comm->{user}",
+                                      });
+                 $ret .= "<label for='invitor_$comm->{user}'>" .
+                     LJ::ljuser($comm->{user}) . " - $comm->{name}</label><br />";
+                 push @joins, $comm->{userid};
+             }
+
+             $ret .= LJ::html_hidden('invitor_joins', join(',', @joins));
+
+             $ret .= "</div>";
+         }
+
+         $ret .= "</div></li>";
      }
 
      if ($LJ::COPPA_CHECK)
