@@ -97,16 +97,7 @@ _info?><?_code
             LJ::Talk::delete_thread($u, $tp->{'itemid'}, $tpid);
         } else {
             # delete single comment...
-
-            # if it's screened, unscreen it first to properly adjust
-            # replycount and the hasscreened logprop
-            LJ::Talk::unscreen_comment($u, $tp->{'itemid'}, $tpid)
-                if $tp->{'state'} eq 'S';
-
-        # now do the deletion
-            my $num = LJ::delete_comments($u, "L", $tp->{'itemid'}, $tpid);
-            LJ::replycount_do($u, $tp->{'itemid'}, "decr", $num);
-            LJ::Talk::update_commentalter($u, $tp->{'itemid'});
+            LJ::Talk::delete_comment($u, $tp->{'itemid'}, $tpid, $tp->{'state'});
         }
 
         # ban the user, if selected

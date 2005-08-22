@@ -448,6 +448,42 @@ sub delete_thread {
 }
 
 # <LJFUNC>
+# name: LJ::Talk::delete_comment
+# class: web
+# des: Deletes a single comment.
+# args: u, jitemid, jtalkid, state?
+# des-u: Userid or user object to delete comment from.
+# des-jitemid: Journal itemid of item to delete comment from.
+# des-jtalkid: Journal talkid of the comment to delete.
+# des-state?: if you know it, provide the state of the comment being deleted, else we load it
+# returns: 1 on success; undef on error
+# </LJFUNC>
+sub delete_comment {
+    my ($u, $jitemid, $jtalkid, $state) = @_;
+    return undef unless $u && $jitemid && $jtalkid;
+
+    unless ($state) {
+        my $td = LJ::Talk::get_talk_data($u, 'L', $jitemid);
+        return undef unless $td;
+
+        $state = $td->{$jtalkid}->{state};
+    }
+    return undef unless $state;
+
+    # if it's screened, unscreen it first to properly adjust logprops
+    LJ::Talk::unscreen_comment($u, $jitemid, $jtalkid)
+        if $state eq 'S';
+
+    # now do the deletion
+    my $num = LJ::delete_comments($u, "L", $jitemid, $jtalkid);
+    LJ::replycount_do($u, $jitemid, "decr", $num);
+    LJ::Talk::update_commentalter($u, $jitemid);
+
+    # done
+    return 1;
+}
+
+# <LJFUNC>
 # name: LJ::Talk::freeze_thread
 # class: web
 # des: Freezes an entire thread of comments.
