@@ -367,20 +367,6 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
              LJ::add_friend($userid, $friendid) if $friendid and $POST{"initial_optional_friend_$friend"};
          }
 
-         # If they were invited then add friend and do joins
-         if ($POST{from}) {
-             my $ivf = LJ::load_user($POST{from});
-             my $friend = $POST{"invitor_friend_$ivf->{user}"};
-             LJ::add_friend($userid, $ivf->{userid})
-                 if $friend;
-
-             foreach (split(',', $POST{invitor_joins})) {
-                 # Join the comm and add to friends list
-                 LJ::join_community($userid, $_, 1)
-                     if $POST{"invitor_join_$_"};
-             }
-         }
-
          # Set any properties that get set in new users
          while (my ($name, $val) = each %LJ::USERPROP_INIT) {
              LJ::set_userprop($userid, $name, $val);
@@ -426,6 +412,33 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
      }
 
      my $nu = LJ::load_userid($userid, "force");
+
+     # If they were invited then add friend and do joins
+     # Needed to do this after we load the $nu object
+     if ($POST{from} && !$second_submit) {
+         my $ivf = LJ::load_user($POST{from});
+         my $friend = $POST{"inviter_friend_$ivf->{user}"};
+
+         LJ::add_friend($userid, $ivf->{userid})
+             if $friend;
+
+         foreach (split(',', $POST{inviter_joins})) {
+             # Join the comm and add to friends list
+             next unless $POST{"inviter_join_$_"};
+
+             my $ci = LJ::get_community_row($_);
+             next unless $ci;
+             if ($ci->{membership} eq 'open') {
+                 LJ::join_community($userid, $_, 1);
+               } else {
+                   my $cu = LJ::load_userid($_);
+                   next unless $cu && $nu;
+
+                   LJ::comm_join_request($cu, $nu);
+                   LJ::add_friend($userid, $cu->{userid});
+               }
+         }
+     }
 
      # now flag as underage (and set O to mean was old or Y to mean was young)
      $nu->underage(1, $ofage ? 'O' : 'Y', 'account creation') if $is_underage;
@@ -545,35 +558,36 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
 
 
      # Was this person invited by another user?  If so,
-     # then show interface to add invitor as friend as
+     # then show interface to add inviter as friend as
      # well as 10ish communities they are a member of
      my $ifrom = LJ::did_post() ? $POST{from} : $GET{from};
-     my $invitor = LJ::load_user($ifrom)
+     my $inviter;
+     $inviter = LJ::load_user($ifrom)
          if $ifrom;
 
-     if ($invitor) {
+     if ($inviter) {
          $ret .= "<li><div class='formitem'><div class='formitemName'>Invitation</div>";
-         $ret .= "<div class='formitemDesc'>Your friend " . LJ::ljuser($invitor) . " welcomes you to ";
+         $ret .= "<div class='formitemDesc'>Your friend " . LJ::ljuser($inviter) . " welcomes you to ";
          $ret .= "$LJ::SITENAMESHORT. Below you are able to add this person as one of your friends ";
          $ret .= "as well as join some of the communities they are a member of.</div>";
 
          $ret .= "<div>";
 
-         $ret .= LJ::html_hidden('from', $invitor->{user});
+         $ret .= LJ::html_hidden('from', $inviter->{user});
 
-         $ret .= LJ::html_check({ name     => "invitor_friend_$invitor->{user}",
+         $ret .= LJ::html_check({ name     => "inviter_friend_$inviter->{user}",
                                   value    => 1,
-                                  selected => LJ::did_post() ? $POST{"invitor_friend_$invitor->{user}"} : 1,
-                                  id       => "invitor_$invitor->{user}",
+                                  selected => LJ::did_post() ? $POST{"inviter_friend_$inviter->{user}"} : 1,
+                                  id       => "inviter_$inviter->{user}",
                              });
-         $ret .= "<label for='invitor_$invitor->{user}'>" .
-             'Add ' . LJ::ljuser($invitor->{user}) . ' as a friend' .
+         $ret .= "<label for='inviter_$inviter->{user}'>" .
+             'Add ' . LJ::ljuser($inviter->{user}) . ' as a friend' .
              "</label><br />";
 
-         my (%comms, %new_comms);
-         unless ($POST{invitor_joins}) {
+         my (%comms, %new_comms, %pri_comms);
+         unless ($POST{inviter_joins}) {
              # Load their friendofs to determine community membership
-             my @ids = LJ::get_friendofs($invitor);
+             my @ids = LJ::get_friendofs($inviter);
              my %fro;
              LJ::load_userids_multiple([ map { $_ => \$fro{$_} } @ids ]);
 
@@ -605,16 +619,26 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
                  }
              }
 
-             # Has this comm been updated in the past 30 days?
+             # Prune the list by time last updated and make sure to
+             # display comms created in the past 10 days or where
+             # the inviter is a maint or mod
              my $over30 = 0;
              my $now = time();
              foreach my $comm (sort {$b->{timeupdate} <=> $a->{timeupdate}} values %comms) {
-                 # Skip activity check if created in past ten days
-                 # Add to %new_comms and delete from %comms
                  if ($now - $comm->{timecreate} <= 86400*10) {
                      $new_comms{$comm->{userid}} = $comm;
                      delete $comms{$comm->{userid}};
                      next;
+                 }
+
+                 my $maintainers = LJ::load_rel_user_cache($comm->{userid}, 'A') || [];
+                 my $moderators  = LJ::load_rel_user_cache($comm->{userid}, 'M') || [];
+                 foreach (@$maintainers, @$moderators) {
+                     if ($_ == $inviter->{userid}) {
+                         $pri_comms{$comm->{userid}} = $comm;
+                         delete $comms{$comm->{userid}};
+                         next;
+                     }
                  }
 
                  if ($over30) {
@@ -641,42 +665,55 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
          }
 
          if (LJ::did_post()) {
-             foreach (split(',', $POST{invitor_joins})) {
+             foreach (split(',', $POST{inviter_joins})) {
                  my $cj = LJ::load_userid($_);
                  $comms{$_} = $cj
                      if $cj;
              }
          }
 
-         if (%comms || %new_comms) {
+         if (%comms || %pri_comms || %new_comms) {
              $ret .= "<br />Join communities:<br />";
              $ret .= "<div style='margin-left: 1em'>";
 
              my @joins;
-             foreach my $comm (values %new_comms) {
-                 $ret .= LJ::html_check({ name     => "invitor_join_$comm->{userid}",
+             foreach my $comm (sort { $a->{user} eq $b->{user} } values %pri_comms) {
+                 $ret .= LJ::html_check({ name     => "inviter_join_$comm->{userid}",
                                           value    => 1,
                                           selected => 1,
-                                          id       => "invitor_$comm->{user}",
+                                          id       => "inviter_$comm->{user}",
                                       });
-                 $ret .= "<label for='invitor_$comm->{user}'>" .
-                     LJ::ljuser($comm->{user}) . " - $comm->{name} (recently created)</label><br />";
+                 $ret .= "<label for='inviter_$comm->{user}'>" .
+                     LJ::ljuser($comm->{user}) . " - $comm->{name} (<i>friend involvement</i>)</label><br />";
                  push @joins, $comm->{userid};
              }
 
-
-             foreach my $comm (values %comms) {
-                 $ret .= LJ::html_check({ name     => "invitor_join_$comm->{userid}",
+             foreach my $comm (sort { $a->{user} eq $b->{user} } values %new_comms) {
+                 $ret .= LJ::html_check({ name     => "inviter_join_$comm->{userid}",
                                           value    => 1,
-                                          selected => LJ::did_post() ? $POST{"invitor_join_$comm->{user}"} : 1,
-                                          id       => "invitor_$comm->{user}",
+                                          selected => 1,
+                                          id       => "inviter_$comm->{user}",
                                       });
-                 $ret .= "<label for='invitor_$comm->{user}'>" .
+                 $ret .= "<label for='inviter_$comm->{user}'>" .
+                     LJ::ljuser($comm->{user}) . " - $comm->{name} (<i>recently created</i>)</label><br />";
+                 push @joins, $comm->{userid};
+             }
+
+             my $i = (scalar values %new_comms) + (scalar values %pri_comms);
+             foreach my $comm (sort { $a->{user} eq $b->{user} } values %comms) {
+                 last if $i >= 15;
+                 $ret .= LJ::html_check({ name     => "inviter_join_$comm->{userid}",
+                                          value    => 1,
+                                          selected => LJ::did_post() ? $POST{"inviter_join_$comm->{user}"} : 1,
+                                          id       => "inviter_$comm->{user}",
+                                      });
+                 $ret .= "<label for='inviter_$comm->{user}'>" .
                      LJ::ljuser($comm->{user}) . " - $comm->{name}</label><br />";
                  push @joins, $comm->{userid};
+                 $i++;
              }
 
-             $ret .= LJ::html_hidden('invitor_joins', join(',', @joins));
+             $ret .= LJ::html_hidden('inviter_joins', join(',', @joins));
 
              $ret .= "</div>";
          }
