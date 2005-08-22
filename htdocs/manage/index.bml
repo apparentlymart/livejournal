@@ -76,7 +76,8 @@ body<=
     $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
     $ret .= "</form>\n\n";
 
-    my $status = $u->{'status'} eq "A" ? "Validated" : "Not Validated";
+    my $status = $u->{'status'} eq "A" ? "Validated" :
+        "<a href='/register.bml?authas=$u->{user}'>Not Validated</a>";
 
     $ret .= "<?h1 Your Account: h1?><div style='margin-left: 2em;'>";
     $ret .= "<table width='50%'>";
