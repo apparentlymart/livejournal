@@ -16,6 +16,76 @@ $cmd{'finduser'}->{'handler'} = \&finduser;
 $cmd{'infohistory'}->{'handler'} = \&infohistory;
 $cmd{'change_journal_status'}->{'handler'} = \&change_journal_status;
 $cmd{'set_underage'}->{'handler'} = \&set_underage;
+$cmd{'comment'}->{'handler'} = \&comment;
+
+sub comment {
+    my ($dbh, $remote, $args, $out) = @_;
+
+    my $err = sub { push @$out, [ "error", shift ]; 0; };
+    my $info = sub { push @$out, [ "info", shift ]; 1; };
+
+    return $err->("This command takes three arguments.  Consult the reference for details.")
+        unless scalar(@$args) == 4;
+    return $err->("You don't have the necessary privilege (suspend) to action comments in an account.")
+        unless LJ::check_priv($remote, 'suspend');
+
+    my ($action, $uri, $reason) = splice(@$args, 1, 3);
+    return $err->("Action must be one of: screen, unscreen, freeze, unfreeze, delete, delete_thread.")
+        unless $action =~ /^(?:screen|unscreen|freeze|unfreeze|delete|delete_thread)$/;
+    return $err->("URL must be a valid URI in format: $LJ::SITEROOT/users/username/1234.html?thread=1234.")
+        unless $uri =~ m!^$LJ::SITEROOT/(?:users|community)/(.+?)/(\d+)\.html\?thread=(\d+)!;
+    my ($user, $ditemid, $dtalkid) = ($1, $2, $3);
+    my $u = LJ::load_user($user);
+    my $jitemid = $ditemid >> 8;
+    my $jtalkid = $dtalkid >> 8;
+    return $err->("URL provided does not appear to be valid?")
+        unless $u && $jitemid && $jtalkid;
+    return $err->("You must provide a reason to action a comment.")
+        unless $reason;
+
+    # now load up the comment and see if action needs taking
+    my $td = LJ::Talk::get_talk_data($u, 'L', $jitemid);
+    return $err->("Unable to fetch talk data for entry.")
+        unless $td;
+
+    my $cmt = $td->{$jtalkid};
+    return $err->("Unable to locate comment in talk data from entry.")
+        unless $cmt;
+    return $err->("The comment is already deleted, no further action is possible.")
+        if $cmt->{state} eq 'D';
+
+    if ($action eq 'freeze') {
+        return $err->("Comment is already frozen.")
+            if $cmt->{state} eq 'F';
+        LJ::Talk::freeze_thread($u, $jitemid, $jtalkid);
+
+    } elsif ($action eq 'unfreeze') {
+        return $err->("Comment is not frozen.")
+            unless $cmt->{state} eq 'F';
+        LJ::Talk::unfreeze_thread($u, $jitemid, $jtalkid);
+
+    } elsif ($action eq 'screen') {
+        return $err->("Comment is already screened.")
+            if $cmt->{state} eq 'S';
+        LJ::Talk::screen_comment($u, $jitemid, $jtalkid);
+
+    } elsif ($action eq 'unscreen') {
+        return $err->("Comment is not screened.")
+            unless $cmt->{state} eq 'S';
+        LJ::Talk::unscreen_comment($u, $jitemid, $jtalkid);
+
+    } elsif ($action eq 'delete') {
+        LJ::Talk::delete_comment($u, $jitemid, $jtalkid, $cmt->{state});
+
+    } elsif ($action eq 'delete_thread') {
+        LJ::Talk::delete_thread($u, $jitemid, $jtalkid);
+
+    } 
+
+    LJ::statushistory_add($u->{userid}, $remote->{userid}, 'comment_action', "$action (entry $ditemid comment $dtalkid): $reason");
+
+    return $info->("Comment action taken.");
+}
 
 sub set_underage {
     my ($dbh, $remote, $args, $out) = @_;

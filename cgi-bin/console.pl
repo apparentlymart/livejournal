@@ -489,6 +489,18 @@ $cmd{'unsuspend'} = {
                ],
     };
 
+$cmd{'comment'} = {
+    'def' => 'consuspend.pl',
+    'privs' => [qw(suspend)],
+    'des' => 'Manage comments in a user\'s account.',
+    'argsummary' => '<action> <url> <reason>',
+    'args' => [
+               'action' => 'The action to take on the comment: screen, unscree, freeze, unfreeze, delete, delete_thread.',
+               'url' => 'The URL to the comment. (Use the permanent link that shows this comment topmost.)',
+               'reason' => 'Reason this action is being taken.',
+               ],
+    };
+
 $cmd{'expunge_userpic'} = {
     'def' => 'consuspend.pl',
     'privs' => [qw(siteadmin)],
