@@ -3,6 +3,7 @@
     use strict;
     use vars qw(%GET $title $body);
 
+#TODO: English strip all text from file :-) (file isn't ljcom but mentions lj by name)
 #TODO: Strip images and offsite links from email body
 
     $title = "Invite a Friend!";
