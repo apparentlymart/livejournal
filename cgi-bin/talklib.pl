@@ -2726,6 +2726,8 @@ sub init {
             $bmlerr->("$SC.error.deleted");
         } elsif ($up->{'statusvis'} eq "S") {
             $bmlerr->("$SC.error.suspended");
+        } elsif ($up->{'statusvis'} eq "X") {
+            $bmlerr->("$SC.error.purged");
         }
     }
 
