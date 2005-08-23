@@ -3,9 +3,6 @@
     use strict;
     use vars qw(%GET $title $body);
 
-#TODO: English strip all text from file :-) (file isn't ljcom but mentions lj by name)
-#TODO: Strip images and offsite links from email body
-
     $title = "Invite a Friend!";
     $body = "";
 
@@ -19,7 +16,8 @@
     return $err->($ML{'error.noremote'}) unless $u;
 
     my %ierr;
-    my ($capid, $anum);
+    my $name = $POST{name} || '';
+    my $email = $POST{email} || '';
 
     my $validate_form = sub {
         my $rv = 1;
@@ -30,18 +28,26 @@
             $rv = 0;
         };
 
-        if ($POST{'email'}) {
+        if ($email) {
             my @errs;
-            LJ::check_email($POST{'email'}, \@errs);
+            LJ::check_email($email, \@errs);
             $bogus->("email", "Bogus looking email: @errs") if @errs;
         } else {
             $bogus->("email", "Please enter your friend's email address");
         }
 
-        $bogus->("name", "Please enter your friend's name") unless $POST{'name'};
+        $bogus->("name", "Please enter your friend's name") unless $name;
 
-        ($capid, $anum) = LJ::Captcha::session_check_code($POST{captcha_chal}, $POST{answer});
-        $bogus->('captcha', 'Invalid answer to previous challenge.  Try another.') unless $capid && $anum;
+        if ($POST{'msg'} =~ /<(img|image)\s+src/i) {
+            $bogus->("msg", "Images are not allowed in this message");
+        }
+
+        foreach ( LJ::get_urls($POST{'msg'}) ) {
+            if ($_ !~ m!^https?://(\w+\.)?$LJ::DOMAIN(/.+)?$!i) {
+                $bogus->("msg", "$_<br />Links to sites other than $LJ::SITENAMESHORT are not allowed in this message");
+                last;
+            }
+        }
 
         return $rv;
     };
@@ -59,24 +65,21 @@
         if (LJ::rate_log($u, 'invitefriend', 1)) {
 
             LJ::send_mail({
-                to       => $POST{'email'},
-                toname   => $POST{'name'},
+                to       => $email,
+                toname   => $name,
                 from     => $LJ::BOGUS_EMAIL,
                 fromname => $u->{name},
                 subject  => "Invitation to join $LJ::SITENAMESHORT",
                 body     => $POST{'msg'},
             });
 
-            $body .= "<?standout Message sent to $POST{email}!  Want to invite somebody else? standout?>";
-            LJ::Captcha::expire($capid, $anum, $u->{userid});
+            # Blank name and email so the form is redisplayed for a new
+            # recipient, but with the same message
+            $name = '';
+            $email = '';
 
-            # Empty out the form and create a new captcha
-            delete $POST{answer};
-            delete $POST{name};
-            delete $POST{email};
-            delete $POST{captcha_chal};
-            undef $capid;
-            undef $anum;
+            $body .= "<?standout Message sent to $POST{email}!  Want to invite somebody else? standout?>";
+
        # Over rate limit
        } else {
            $body = "It looks like you are inviting a lot of your friends to $LJ::SITENAMESHORT.  To help us combat SPAM, you may wish to send the rest of your invitations via your own email address.  Make sure you include the invite link in your email which you can find <a href='/friends/invite.bml'>at the top of the page</a>.";
@@ -84,7 +87,7 @@
        }
     }
 
-    my $create_link = "$LJ::SITEROOT/create.bml?from=$u->{user}";
+    my $create_link = ($LJ::USE_SSL ? $LJ::SSLROOT : $LJ::SITEROOT) . "/create.bml?from=$u->{user}";
 
     my $msg = $POST{'msg'};
     $msg ||= "Hi,
@@ -94,61 +97,14 @@ I'm inviting you to join $LJ::SITENAMESHORT, where you can create a personal jou
 Follow this link to sign up:
 $create_link
 
-This link will take you to a page where you can create a LiveJournal account.  My journal will automatically be added as your friend, and you'll also see a list of some of my communities and choose which ones you'd like to join.
+This link will take you to a page where you can create a $LJ::SITENAMESHORT account.  My journal will automatically be added as your friend, and you'll also see a list of some of my communities and choose which ones you'd like to join.
 
 -- $u->{name} ($LJ::SITENAMEABBREV user: $u->{user})";
 
 
-    # Generate captcha html
-    my $captcha_body;
-    my $wants_audio = $POST{answer} eq 'AUDIO' ? 1 : 0;
-    {
-        my ($captcha_chal, $captcha_sess);
-        $captcha_chal = $POST{captcha_chal} || LJ::challenge_generate(900);
-        $captcha_sess = LJ::get_challenge_attributes($captcha_chal);
-
-        my $answer = $POST{answer};
-        undef $answer if $ierr{'captcha'} || $wants_audio;
-
-        my $try = 0;
-        if ($POST{captcha_chal}) {
-            $try = $u->selectrow_array('SELECT trynum FROM captcha_session ' .
-                                       'WHERE sess=?', undef, $captcha_sess);
-        }
-
-        $captcha_body .= "<b>Prove that you're a human:</b><br />";
-
-        # Visual challenge
-        unless ( $wants_audio || $POST{audio_chal} ) {
-            $captcha_body .= "Type the letters and numbers you see below, to prove that you're not a spam robot. If you can't read the text, type 'AUDIO' and take a sound test instead.<br />";
-            if ($capid && $anum) { # previously entered correctly
-                $captcha_body .= "<img src='/captcha/image.bml?capid=$capid&amp;anum=$anum' width='175' height='35' />";
-            } else {
-                $captcha_body .= "<img src='/captcha/image.bml?chal=$captcha_chal&amp;try=$try' width='175' height='35' />";
-            }
-        }
-
-        # Audio challenge
-        else {
-            $captcha_body .= "Type the numbers you hear to prove that you're not a spam robot: ";
-            if ($capid && $anum) {
-                $captcha_body .= "<a href='/captcha/audio.bml?capid=$capid&amp;anum=$anum'>Play the sound</a>";
-            } else {
-                $captcha_body .= "<a href='/captcha/audio.bml?chal=$captcha_chal&amp;try=$try'>Play the sound</a>";
-            }
-            $captcha_body .= LJ::html_hidden(audio_chal => 1);
-        }
-
-        $captcha_body .= "<br /><br />Answer: ";
-        $captcha_body .= LJ::html_text({ name => 'answer', size => 15, value => $answer });
-        $captcha_body .= LJ::html_hidden(captcha_chal => $captcha_chal);
-        $captcha_body .= $inerr->('captcha', '<br />');
-        $captcha_body .= "<br />";
-    }
-
     unless (LJ::did_post()) {
         $body .= "<?p Want to invite someone to $LJ::SITENAMESHORT?<br /><br />";
-        $body .= 'The link below will send your friend to the page where they can create a LiveJournal account.  Your journal will be automatically added as a friend and the page will list some of your active communities with the option to join. p?>';
+        $body .= 'The link below will send your friend to the page where they can create a $LJ::SITENAMESHORT account.  Your journal will be automatically added as a friend and the page will list some of your active communities with the option to join. p?>';
 
         $body .= "<?p <div style='margin-left: 20px'><b>Link: <a href='$create_link'>$create_link</a></b></div> p?>";
 
@@ -161,16 +117,14 @@ This link will take you to a page where you can create a LiveJournal account.  M
 
     $body .= "<?p <form method='POST'>";
     $body .= "Your friend's name:";
-    $body .= LJ::html_text({ name => "name", size => 40, value => $POST{name} }) . '<br />' . $inerr->("name", "<br />");
+    $body .= LJ::html_text({ name => "name", size => 40, value => $name }) . '<br />' . $inerr->("name", "<br />");
 
     $body .= "Your friend's email:";
-    $body .= LJ::html_text({ name => "email", size => 40, value => $POST{email} }) . '<br />' . $inerr->("email", "<br />");
+    $body .= LJ::html_text({ name => "email", size => 40, value => $email }) . '<br />' . $inerr->("email", "<br />");
 
     $body .= 'Your message to them:<br />' . $inerr->("msg", "<br />");
     $body .= LJ::html_textarea({ rows => 20, cols => 80, name => "msg", value => $msg });
     $body .= '<br /><i>If you want to invite your friend to a specific community, you can mention the community name and URL here.</i><br /><br />';
-
-    $body .= $captcha_body;
 
     $body .= '<br />' . LJ::html_submit("Invite 'em!") . '</form> p?>';
 
