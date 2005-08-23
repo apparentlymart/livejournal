@@ -2276,7 +2276,7 @@ sub ljuser
 # </LJFUNC>
 sub get_urls
 {
-    return ($_[0] =~ m!http://[^\s\"\'\<\>]+!g);
+    return ($_[0] =~ m!https?://[^\s\"\'\<\>]+!g);
 }
 
 # <LJFUNC>
