@@ -7947,6 +7947,12 @@ sub procnotify_callback
         delete $LJ::UNIQ_BANNED{$arg->{'uniq'}};
         return;
     }
+
+    # cluster switchovers
+    if ($cmd eq 'cluster_switch') {
+        $LJ::CLUSTER_PAIR_ACTIVE{ $arg->{'cluster'} } = $arg->{ 'role' };
+        return;
+    }
 }
 
 sub procnotify_check
