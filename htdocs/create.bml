@@ -51,7 +51,7 @@ body<=
  my $mode = $POST{'mode'};
  my $code = $POST{'code'} || $GET{'code'};
 
- my $getextra;
+ my $getextra = '';
  $getextra .= "from=$GET{from}" if $GET{from};
  $getextra = '?'.$getextra if $getextra;
 

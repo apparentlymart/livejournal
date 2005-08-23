@@ -95,7 +95,7 @@
 I'm inviting you to join $LJ::SITENAMESHORT, where you can create a personal journal (or blog) for free.
 
 Follow this link to sign up:
-$create_link
+    $create_link
 
 This link will take you to a page where you can create a $LJ::SITENAMESHORT account.  My journal will automatically be added as your friend, and you'll also see a list of some of my communities and choose which ones you'd like to join.
 
@@ -104,7 +104,7 @@ This link will take you to a page where you can create a $LJ::SITENAMESHORT acco
 
     unless (LJ::did_post()) {
         $body .= "<?p Want to invite someone to $LJ::SITENAMESHORT?<br /><br />";
-        $body .= 'The link below will send your friend to the page where they can create a $LJ::SITENAMESHORT account.  Your journal will be automatically added as a friend and the page will list some of your active communities with the option to join. p?>';
+        $body .= "The link below will send your friend to the page where they can create a $LJ::SITENAMESHORT account.  Your journal will be automatically added as a friend and the page will list some of your active communities with the option to join. p?>";
 
         $body .= "<?p <div style='margin-left: 20px'><b>Link: <a href='$create_link'>$create_link</a></b></div> p?>";
 
@@ -126,7 +126,7 @@ This link will take you to a page where you can create a $LJ::SITENAMESHORT acco
     $body .= LJ::html_textarea({ rows => 20, cols => 80, name => "msg", value => $msg });
     $body .= '<br /><i>If you want to invite your friend to a specific community, you can mention the community name and URL here.</i><br /><br />';
 
-    $body .= '<br />' . LJ::html_submit("Invite 'em!") . '</form> p?>';
+    $body .= LJ::html_submit("Invite 'em!") . '</form> p?>';
 
     return;
 }
