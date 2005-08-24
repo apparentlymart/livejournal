@@ -752,12 +752,14 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
 
      if ($LJ::HUMAN_CHECK{create}) {
          my ($captcha_chal, $captcha_sess);
-         $captcha_chal = $POST{captcha_chal} || LJ::challenge_generate(900);
-         $captcha_sess = LJ::get_challenge_attributes($captcha_chal);
 
          my $answer = $POST{answer};
          undef $answer if $errors{'captcha'} || $wants_audio;
+         $captcha_chal = $POST{captcha_chal};
+         undef $captcha_chal if $errors{'captcha'};
 
+         $captcha_chal = $captcha_chal || LJ::challenge_generate(900);
+         $captcha_sess = LJ::get_challenge_attributes($captcha_chal);
 
          my $try = 0;
          if ($form->{captcha_chal}) {
