@@ -426,9 +426,12 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
          LJ::add_friend($userid, $ivf->{userid})
              if $friend;
 
+         my @ijoins;
          foreach (split(',', $POST{inviter_joins})) {
              # Join the comm and add to friends list
              next unless $POST{"inviter_join_$_"};
+
+             push @ijoins, $_;
 
              my $ci = LJ::get_community_row($_);
              next unless $ci;
@@ -442,6 +445,11 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
                    LJ::add_friend($userid, $cu->{userid});
                }
          }
+
+         # Log who invited them
+         my $ijoinsstr = join(',', @ijoins);
+         LJ::statushistory_add($nu->{userid}, $ivf->{userid}, 'create_from_invite',
+                               "Recommended: $POST{inviter_joins}\nJoined: $ijoinsstr");
      }
 
      # now flag as underage (and set O to mean was old or Y to mean was young)
