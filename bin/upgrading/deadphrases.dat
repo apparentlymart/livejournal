@@ -41,8 +41,6 @@ general /editinfo.bml.topicdir.header
 
 general /editpics.bml.error.toomanypics2
 general /editpics.bml.error.toomanypics3
-general /editpics.bml.warning.keywords
-general /editpics.bml.warning.keywords.faq
 
 general /friends/edit.bml.btn.proceed
 general /friends/edit.bml.edit.head
