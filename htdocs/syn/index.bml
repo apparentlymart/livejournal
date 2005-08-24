@@ -90,7 +90,12 @@ body<=
                 return "<?h1 $ML{'.invalid.http.title'} h1?><?p $ML{'.invalid.http.text'} p?>"
                     unless $content;
 
-                my $syn_url;
+                # Start out with the syn_url being equal to the url
+                # they entered of the resource.  If we end up parsing
+                # the resource and finding it has a link to the real
+                # feed, we then want to save the real feed address
+                # to suck from.
+                my $syn_url = $url;
                 # analyze link/meta tags
                 while ($content =~ m!<(link|meta)\b([^>]+)>!g) {
                     my ($type, $val) = ($1, $2);
@@ -104,13 +109,25 @@ body<=
                     }
                 }
 
-                $res = $ua->get($syn_url);
-                $content = $res && $res->is_success ? $res->content : "";
+
+                # Did we find a link to the real feed?  If so,
+                # grab it
+                if ($syn_url ne $url) {
+                    my $adu = $dbh->selectrow_hashref("SELECT u.user FROM syndicated s, useridmap u ".
+                                                      "WHERE s.synurl=? AND s.userid=u.userid",
+                                                      undef, $syn_url);
+                    if ($adu) {
+                        return BML::redirect("$LJ::SITEROOT/friends/add.bml?user=$adu->{user}");
+                    } else {
+                        $res = $ua->get($syn_url);
+                        $content = $res && $res->is_success ? $res->content : "";
+                    }
+                }
 
                 # check whatever we did get for validity (or pseudo-validity)
                 return "<?h1 $ML{'.invalid.notrss.title'} h1?><?p $ML{'.invalid.notrss.text'} p?>"
                     unless $content =~ m/<(\w+:)?(?:rss|feed|RDF)/; # Must have a <[?:]rss <[?:]feed (for Atom support) <[?:]RDF
-                
+
                 # create the feed account
                 my $id = LJ::create_account({
                     'user' => $acct,
@@ -124,7 +141,7 @@ body<=
 
                 LJ::update_user($id, { journaltype => 'Y' });
                 $dbh->do("INSERT INTO syndicated (userid, synurl, checknext) VALUES (?,?,NOW())",
-                         undef, $id, $url);
+                         undef, $id, $syn_url);
 
                 LJ::statushistory_add($u->{'userid'}, $id, "synd_create", "acct: $acct");
 
@@ -150,11 +167,6 @@ body<=
         # at this point, we have a new account, or an old account, but we have an account, so
         # let's redirect them to the add page
         return BML::redirect("$LJ::SITEROOT/friends/add.bml?user=$su->{user}");
-        
-        # TAG:FR:bml_syn:count_friendofs
-        my $count = $dbh->selectrow_array("SELECT COUNT(*) FROM friends WHERE friendid=?", undef,
-                                          $su->{'userid'});
-        LJ::add_friend($u->{'userid'}, $su->{'userid'}, { 'defaultview' => 1 });
     }
 
     # get most popular feeds from memcache
