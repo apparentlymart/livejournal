@@ -702,11 +702,11 @@ $cmd{'syn_merge'} = {
     'privs' => [qw(syn_edit)],
     'des' => "Merge two syndicated accounts into one, keeping an optionally specified url for the final. " .
         "Sets up redirection between from_user and to_user, swapping feed urls if there will be a conflict.",
-    'argsummary' => '<from_user> to <to_user> [using <url>]',
+    'argsummary' => '<from_user> to <to_user> using <url>',
     'args' => [
                'from_user' => "Syndicated account to merge into another.",
                'to_user'   => "Syndicated account to merge 'from_user' into.",
-               'url'       => "Optional.  Url to use for 'to_user' once merge is complete. If none is specified, the 'to_user' URL will be used.",
+               'url'       => "Url to use for 'to_user' once merge is complete. You should use the direct URL to the feed, not the URL to a blog even if it supports auto-discovery.",
                ],
     };
 
@@ -1523,35 +1523,19 @@ sub syn_merge
     LJ::set_userprop($from_u, 'renamedto' => $to_user)
         or return $err->("Unable to set userprop.  Database unavailable?");
 
-    # 2) update the url of the destination syndicated account
-    # if the from_u's url is the same as what we're about to set the to_u's url to, then
-    # we'll get a duplicate key error.  if this is the case, our behavior will be to 
-    # swap the two.
-    my $urls = $dbh->selectall_hashref("SELECT userid, synurl FROM syndicated " .
-                                       "WHERE userid=? OR userid=?",
-                                       'userid', undef, $from_userid, $to_userid);
-    return $err->("Missing 'syndicated' rows: Possible corruption?")
-        unless $urls && $urls->{$from_userid} && $urls->{$to_userid};
+    # 2) delete the row in the syndicated table for the user
+    #    that is now renamed
+    $dbh->do("DELETE FROM syndicated WHERE userid=?",
+             undef, $from_userid);
+    return $err->("Database Error: " . $dbh->errstr) if $dbh->err;
 
-    if ($urls->{$from_userid}->{synurl} eq $url) {
-
-        # clear the to_u's synurl, we'll update it back in a sec
-        $dbh->do("UPDATE syndicated SET synurl=NULL WHERE userid=?",
-                 undef, $to_userid);
-
-        # now update from_u's url to be to_u's old url
-        $dbh->do("UPDATE syndicated SET synurl=? WHERE userid=?",
-                 undef, $urls->{$to_userid}->{synurl}, $from_userid);
-        return $err->("Database Error: " . $dbh->errstr) if $dbh->err;
-    }
-
-    # after possibly swapping above, update the to_u's synurl
-    # ... should have no errors
-    $dbh->do("UPDATE syndicated SET synurl=? WHERE userid=?",
+    # 3) update the url of the destination syndicated account and
+    #    tell it to check it now
+    $dbh->do("UPDATE syndicated SET synurl=?, checknext=NOW() WHERE userid=?",
              undef, $url, $to_userid);
     return $err->("Database Error: " . $dbh->errstr) if $dbh->err;
 
-    # 3) make users who befriend 'from_user' now befriend 'to_user'
+    # 4) make users who befriend 'from_user' now befriend 'to_user'
     #    'force' so we get master db and there's no row limit
     if (my @ids = LJ::get_friendofs($from_u, { force => 1 } )) {
 
