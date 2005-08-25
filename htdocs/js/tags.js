@@ -37,7 +37,7 @@ function tagselect(list)
 
     for ( $i = 0; $i < list.options.length; $i++ ) {
         if (list.options[$i].selected) {
-            var val = list.options[$i].value;
+            var val = list.options[$i].value.replace( /&/g, "&amp;" );
             selected[selected_num] = val.substring( val.indexOf('_')+1 );
             selected_num++;
             selected_id = val.match(id_re);

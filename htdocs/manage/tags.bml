@@ -164,8 +164,7 @@ body<=
             my $etag = LJ::ehtml( $tag->{name} );
 
             # keep id and value for both JS and perl
-            # double escape for javascript div display (so &amp; stays '&amp;')
-            my $value = $_ . '_' . LJ::ehtml( $etag );
+            my $value = $_ . '_' . $etag;
 
             $ret .= "<option class='level$tag->{histogram_group}' ";
             $ret .= "value='$value'>$etag</option>";
