@@ -198,6 +198,13 @@ function AddLJTag(rte, type) {
                 cuttag = '<lj-cut text="' + cut + '">' + "\n";
             }
 
+            // give the user a chance to back out
+            if ( (rng.text && res.length > 0) ||
+                 ( rng.insertNode && rng.toString().length > 0) ) {
+                var ok = confirm("Rich text formatting within your selection will be lost.  Ok to continue?");
+                if ( ! ok ) return false;
+            }
+
             if (rng.text && rng.text != "") { // ie
                 rng.text = cuttag + rng.text;
                 if (res.length > 0) rng.text += cutend;
