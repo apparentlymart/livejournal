@@ -79,11 +79,8 @@
 
         # Mark as spam
         if ($mode eq 'deletespam') {
-            print STDERR LJ::D(\@talkids);
             foreach (@talkids) {
-                print STDERR "Marking as spam: $_\n";
                 my $s = LJ::Talk::mark_comment_as_spam($u, $_);
-                print STDERR " Worked: $s\n";
               }
         }
 
