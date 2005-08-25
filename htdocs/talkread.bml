@@ -577,13 +577,19 @@ body<=
          if ($showmultiform && $multiform_selects) {
              $ret .= "<p>$ML{'.talkmulti.des'} ";
              $ret .= LJ::html_select({'name' => 'mode' },
-                                     "" => "",
-                                     "unscreen" => $ML{'.talkmulti.unscreen'},
-                                     "screen" => $ML{'.talkmulti.screen'},
-                                     "delete" => $ML{'.talkmulti.delete'});
+                                     ''           => '',
+                                     'unscreen'   => $ML{'.talkmulti.unscreen'},
+                                     'screen'     => $ML{'.talkmulti.screen'},
+                                     'delete'     => $ML{'.talkmulti.delete'},
+                                     'deletespam' => $ML{'.talkmulti.deletespam'},
+                                     );
              $ret .= " " . LJ::html_submit('', $ML{'.talkmulti.submit'},
-                                    { "onclick" => "return (document.multiform.mode.value != \"delete\") " .
-                                                   "|| confirm(\"" . LJ::ejs($ML{'.confirm.action'}) . "\");" });
+                                           {
+                                               "onclick" =>
+                                                   'return ((document.multiform.mode.value != "delete" ' .
+                                                   '&& document.multiform.mode.value != "deletespam")) ' .
+                                                   "|| confirm(\"" . LJ::ejs($ML{'.confirm.action'}) . "\");"
+                                           });
              $ret .= "</p>";
          }
      }

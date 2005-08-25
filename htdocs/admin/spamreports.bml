@@ -21,15 +21,14 @@
         return "<a href=\"spamreports.bml?mode=view&amp;by=$by&amp;what=$what&amp;state=$state\">$reporttime</a>";
     };
     my $dellink = sub {
-        my ($by, $what, $text) = @_;
+        my ($srids, $text) = @_;
         return "<form method=\"post\" action=\"spamreports.bml\">" .
-               LJ::html_hidden('mode', $by) .
-               LJ::html_hidden('what', $what) .
-               LJ::html_hidden('ret', "spamreports.bml?" . join('&amp;', map { "$_=" . LJ::eurl($GET{$_}) } keys %GET)) .
-               LJ::html_submit('submit', $text) .
-               "</form>";
+            LJ::html_hidden('mode', 'del') .
+            LJ::html_hidden('srids', join(',', @$srids)) .
+            LJ::html_hidden('ret', "spamreports.bml?" . join('&amp;', map { "$_=" . LJ::eurl($GET{$_}) } keys %GET)) .
+            LJ::html_submit('submit', $text) .
+            "</form>";
     };
-    
     # login check
     my $remote = LJ::get_remote();
     return $error->("You must be logged in to be here.")
@@ -181,7 +180,7 @@
             if $state eq 'open' && $by eq 'posterid';
 
         # now the general info gathering
-        my $res = $dbr->selectall_arrayref('SELECT reporttime, journalid, subject, body, ip, posttime, report_type ' .
+        my $res = $dbr->selectall_arrayref('SELECT reporttime, journalid, subject, body, ip, posttime, report_type, srid ' .
                                            "FROM spamreports WHERE state=? AND $by=? ORDER BY reporttime DESC LIMIT 1000",
                                             undef, $state, $what);
         unless ($res && @$res) {
@@ -189,43 +188,39 @@
             return undef;
         }
         $body .= '<table>';
+        my @srids;
         foreach (@$res) {
             my $u2 = LJ::load_userid($_->[1]);
             my $x = $by eq 'ip' ? 4 : 1;
             my $comment_body = $_->[3];
             LJ::text_uncompress(\$comment_body);
             my $spamlocation = ($_->[6] eq 'entry') ? 'Entry' : 'Comment';
-            $body .= '<tr><td>' .  ($state eq 'open' ? $dellink->("del$by", "$_->[0]:$_->[$x]", 'Close') : '') . '</td><td>' .
+            my $srid = $_->[7];
+            $body .= '<tr><td>' .  ($state eq 'open' ? $dellink->([$srid], 'Close') : '') . '</td><td>' .
                      "<strong>$spamlocation in:</strong> " . LJ::ljuser($u2) . '<br />' .
                      '<strong>Report Time:</strong> ' . LJ::mysql_time($_->[0]) . '<br />' .
                      "<strong>$spamlocation Time:</strong> " . ($_->[5] ? LJ::mysql_time($_->[5]) : 'not recorded') . '<br />' .
                      '<strong>Subject:</strong> ' . LJ::ehtml($_->[2] || 'no subject') . '<br />' .
                      '<strong>Body:</strong> ' . LJ::ehtml($comment_body || 'no body') . '<br />' .
                      '</td></tr><tr><td>&nbsp;</td></tr>';
+            push @srids, $srid;
         }
-        $body .= "</table><br />" . ($state eq 'open' ? $dellink->("delby$by", $what, 'Close All') : '');
+        $body .= "</table><br />" . ($state eq 'open' ? $dellink->(\@srids, 'Close All') : '');
         
     } elsif ($mode =~ /^del/) {
         # figure out our combination
         my $dbh = LJ::get_db_writer();
         return $error->("Unable to get database writer handle.") unless $dbh;
         my ($sql, $count, $backlink);
-        if ($mode =~ /^delby/) {
-            # enmasse deletion
-            my $where = $mode =~ /ip$/ ? 'ip' : 'posterid';
-            $sql = "UPDATE spamreports SET state='closed' WHERE $where=?";
-            $count = $dbh->do($sql, undef, $POST{what});
-            return $error->($dbh->errstr) if $dbh->err;
-        } else {
-            # single item deletion
-            my $where = $mode =~ /ip$/ ? 'ip' : 'journalid';
-            my ($time, $data) = ($1, $2)
-               if $POST{what} =~ /^(\d+):(.+)$/;
-            $data ||= $POST{what};
-            $count = $dbh->do("UPDATE spamreports SET state='closed' WHERE reporttime=? AND $where=? AND state='open'", undef, $time, $data);
-            return $error->($dbh->errstr) if $dbh->err;
-            $backlink = "[ <a href='$POST{ret}'>&lt;&lt; Go Back</a> ]";
-        }
+
+        my @srids = split(',', $POST{srids});
+        my $in = join("','", map { $_+0 } @srids);
+        $in = "'$in'";
+
+        $count = $dbh->do("UPDATE spamreports SET state='closed' WHERE srid IN($in) AND state='open'");
+        return $error->($dbh->errstr) if $dbh->err;
+        $backlink = "[ <a href='$POST{ret}'>&lt;&lt; Go Back</a> ]";
+
         $title = "Close Reports";
         $body .= "<?p [ <a href=\"spamreports.bml\">&lt;&lt; Front Page</a> ] $backlink p?>\n";
         my $s = $count == 1 ? '' : 's';

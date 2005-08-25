@@ -1126,6 +1126,11 @@ property string text_multiform_opt_delete {
 }
 set text_multiform_opt_delete = "Delete";
 
+property string text_multiform_opt_deletespam {
+    des = "Text for the comment delete and mark as spam action";
+}
+set text_multiform_opt_deletespam = "Delete as Spam";
+
 property string text_multiform_conf_delete {
     des = "Text for the confirming mass-delete action";
 }

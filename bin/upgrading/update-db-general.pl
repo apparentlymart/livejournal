@@ -2576,6 +2576,17 @@ register_alter(sub {
         do_alter("faq",
                  "ALTER TABLE faq ADD summary TEXT AFTER question");
     }
+
+    if (column_type("spamreports", "srid") eq '') {
+        do_alter("spamreports",
+                 "ALTER TABLE spamreports DROP PRIMARY KEY");
+
+        do_alter("spamreports",
+                 "ALTER TABLE spamreports ADD srid MEDIUMINT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT FIRST");
+
+        do_alter("spamreports",
+                 "ALTER TABLE spamreports ADD INDEX (reporttime, journalid)");
+    }
 });
 
 1; # return true

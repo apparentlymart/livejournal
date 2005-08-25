@@ -14,7 +14,7 @@
         $title = $ML{'.title.screen'};
     } elsif ($mode eq 'unscreen') {
         $title = $ML{'.title.unscreen'};
-    } elsif ($mode eq 'delete') {
+    } elsif ($mode eq 'delete' || $mode eq 'deletespam') {
         $title = $ML{'.title.delete'};
     } else {
         $title = $ML{'Error'};
@@ -54,7 +54,7 @@
     return $err->($ML{'.error.privs.unscreen'})
         if $mode eq "unscreen" && ! LJ::Talk::can_unscreen($remote, $u, $up);
     return $err->($ML{'.error.privs.delete'})
-        if $mode eq "delete" && ! LJ::Talk::can_delete($remote, $u, $up);
+        if ($mode eq "delete" || $mode eq 'deletespam') && ! LJ::Talk::can_delete($remote, $u, $up);
 
     # filter our talkids down to those that are actually attached to the log2
     # specified.  also, learn the state of all the items.
@@ -70,12 +70,23 @@
     @talkids = keys %state;
 
     # do the work:
-    if ($mode eq "delete") {
+    if ($mode eq "delete" || $mode eq 'deletespam') {
         # first, unscreen everything for replycount and hasscreened to adjust
         my @unscreen = grep { $state{$_} eq "S" } @talkids;
         LJ::Talk::unscreen_comment($u, $itemid, @unscreen);
         # FIXME: race condition here... somebody could get lucky and view items while unscreened. 
         # then delete, updating the log2 replycount as necessary
+
+        # Mark as spam
+        if ($mode eq 'deletespam') {
+            print STDERR LJ::D(\@talkids);
+            foreach (@talkids) {
+                print STDERR "Marking as spam: $_\n";
+                my $s = LJ::Talk::mark_comment_as_spam($u, $_);
+                print STDERR " Worked: $s\n";
+              }
+        }
+
         my $num = LJ::delete_comments($u, "L", $itemid, @talkids);
         LJ::replycount_do($u, $itemid, "decr", $num);
         LJ::Talk::update_commentalter($u, $itemid);

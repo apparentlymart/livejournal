@@ -2622,9 +2622,11 @@ sub EntryPage__print_multiform_actionline
                 LJ::html_select({'name' => 'mode' },
                                 "" => "",
                                 map { $_ => $pr->{"text_multiform_opt_$_"} }
-                                qw(unscreen screen delete)) . "\n" .
+                                qw(unscreen screen delete deletespam)) . "\n" .
                 LJ::html_submit('', $pr->{'text_multiform_btn'},
-                                { "onclick" => "return (document.multiform.mode.value != \"delete\") " .
+                                { "onclick" =>
+                                      'return ((document.multiform.mode.value != "delete" ' .
+                                      '&& document.multiform.mode.value != "deletespam")) ' .
                                       "|| confirm(\"" . LJ::ejs($pr->{'text_multiform_conf_delete'}) . "\");" }));
 }
 

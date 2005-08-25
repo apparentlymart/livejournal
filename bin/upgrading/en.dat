@@ -3363,6 +3363,8 @@ Please either clear the user textbox or select the relevant posting mode and try
 
 /talkread.bml.talkmulti.delete=Delete
 
+/talkread.bml.talkmulti.deletespam=Delete as Spam
+
 /talkread.bml.talkmulti.des=<b>Mass action</b> on selected comments:
 
 /talkread.bml.talkmulti.screen=Screen
