@@ -1830,6 +1830,8 @@ then be accessible to the new group.
 
 /friends/editgroups.bml.yourgroups=Your custom friends groups:
 
+/friends/edit.bml.invite=Do you want to <a [[aopts]]>invite a friend</a>?
+
 /friends/edit_do.bml.addfriends.head=Add Friends
 
 /friends/edit_do.bml.addfriends.text=Enter your friends' LiveJournal user names in the boxes below, and pick what background and foreground colors you want to associate with them....
@@ -1926,6 +1928,10 @@ pick a specific friend group to view.
 /friends/index.bml.filter.about=Filter your friends list according to specific sub groups.
 
 /friends/index.bml.groups=In addition, subgroups of friends can be specified.
+
+/friends/index.bml.invite.about=Invite a friend to create a journal and add you as a friend
+
+/friends/index.bml.invite.title=Invite a Friend
 
 /friends/index.bml.security=Your friends list is also used for posts with restricted access.
 

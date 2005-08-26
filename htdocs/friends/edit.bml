@@ -43,6 +43,8 @@ body<=
                                          'type' => ['P', 'S'] });
         $ret .= "</form>\n\n";
 
+        $ret .= '<?p ' . BML::ml('/friends/edit.bml.invite', { aopts => "href='invite.bml'" }) . ' p?>';
+
         $ret .= "<form method='post' name='editFriends' action='edit.bml$getextra'>\n";
         $ret .= LJ::form_auth();
 
