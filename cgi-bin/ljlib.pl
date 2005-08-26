@@ -5566,7 +5566,7 @@ sub make_journal
         # overwrite any tags that exist
         $opts->{tags} = [];
         return $error->("Sorry, the tag list specified is invalid.", "404 Not Found")
-            unless LJ::Tags::is_valid_tagstring($tagfilter, $opts->{tags});
+            unless LJ::Tags::is_valid_tagstring($tagfilter, $opts->{tags}, { omit_underscore_check => 1 });
 
         # get user's tags so we know what remote can see, and setup an inverse mapping
         # from keyword to tag

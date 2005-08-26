@@ -487,20 +487,27 @@ sub get_permission_levels {
 # name: LJ::Tags::is_valid_tagstring
 # class: tags
 # des: Determines if a string contains a valid list of tags.
-# args: tagstring, listref?
+# args: tagstring, listref?, opts?
 # des-tagstring: Opaque tag string provided by the user.
 # des-listref: If specified, return valid list of canonical tags in arrayref here.
+# des-opts: currently only 'omit_underscore_check' is recognized
 # returns: 1 if list is valid, 0 if not.
 # </LJFUNC>
 sub is_valid_tagstring {
-    my ($tagstring, $listref) = @_;
+    my ($tagstring, $listref, $opts) = @_;
     return 0 unless $tagstring;
     $listref ||= [];
+    $opts    ||= {};
 
     # setup helper subs
     my $valid_tag = sub {
         my $tag = shift;
-        return 0 if $tag =~ /^_/;               # reserved for future use (starting with underscore)
+
+        # a tag that starts with an underscore is reserved for future use,
+        # but we added this after some underscores already existed.
+        # Allow underscore tags to be viewed/deleted, but not created/modified.
+        return 0 if ! $opts->{'omit_underscore_check'} && $tag =~ /^_/;
+
         return 0 if $tag =~ /[\<\>\r\n\t]/;     # no HTML, newlines, tabs, etc
         return 0 unless $tag =~ /^(?:.+\s?)+$/; # one or more "words"
         return 1;
