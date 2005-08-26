@@ -31,7 +31,7 @@ body<=
     return LJ::bad_input("You could not be authenticated as the specified user.")
         unless $u;
 
-    return $LJ::MSG_READONLY_USER if LJ::get_cap($remote, "readonly");
+    return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
 
     ### user is now authenticated ###
 
