@@ -5081,6 +5081,7 @@ sub get_userpic_info
                         my $id = unpack("N", substr($comminfo, $nulpos+1, 4));
                         $pos = $nulpos + 5; # skip NUL + 4 bytes.
                         $info->{'pic'}->{$id}->{'comment'} = $comment;
+                        $info->{'comment'}->{$id} = $comment;
                     }
                     $info->{'_has_comments'} = 1;
                 } else { # Requested to load comments, but they aren't in memcache
