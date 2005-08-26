@@ -763,6 +763,20 @@ p?>
 
 /create.bml.email.input.head=Email Address:
 
+/create.bml.email.invite.body<<
+Dear [[username]],
+
+One of the people you invited to join [[sitename]] has accepted your invitation.  Here's a link to their new user info page:
+[[infolink]]
+
+If you'd like to invite more friends, follow this link:
+[[invitelink]]
+
+Thanks for supporting [[sitename]]!
+.
+
+/create.bml.email.invite.subject=[[sitename]] Friend Invitation Accepted
+
 /create.bml.email.text3=For verification and security purposes, we need your email address.  Read our <a [[aopts]]>privacy policy</a> for more information on our information practices.
 
 /create.bml.error.birthday.invalid=You must enter a valid birthday.

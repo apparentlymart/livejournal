@@ -476,6 +476,24 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
              my $ijoinsstr = join(',', @ijoins);
              LJ::statushistory_add($nu->{userid}, $ivf->{userid}, 'create_from_invite',
                                    "Recommended: $POST{inviter_joins}\nJoined: $ijoinsstr");
+
+             # Send the inviter an email
+             my $body = BML::ml('.email.invite.body', {
+                 username   => $ivf->{user},
+                 sitename   => $LJ::SITENAMESHORT,
+                 infolink   => "$LJ::SITEROOT/userinfo.bml?user=$nu->{user}",
+                 invitelink => "$LJ::SITEROOT/friends/invite.bml"
+                 });
+
+             LJ::send_mail({
+                 'to' => $ivf->{email},
+                 'from' => $LJ::ADMIN_EMAIL,
+                 'fromname' => $LJ::SITENAME,
+                 'charset' => 'utf-8',
+                 'subject' => BML::ml('.email.invite.subject', {'sitename' => $LJ::SITENAMESHORT}),
+                 'body' => $body,
+             });
+
          }
      }
 
