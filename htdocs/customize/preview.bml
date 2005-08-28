@@ -62,6 +62,7 @@ body<=
         my $first = 1;
 
         foreach my $l (@layouts) {
+            next if ($l->{'uniq'} eq 's1shortcomings/layout');
             if (!$first) {
                 $ret .= "<hr />";
             }
