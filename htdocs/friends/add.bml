@@ -139,14 +139,15 @@
 
  if (@{$greq->{'friendgroups'}}) {
      foreach my $g (@{$greq->{'friendgroups'}}) {
-         my $ck = ($fr && ($fr->{'groupmask'} & (1 << $g->{'id'}))) ?
-             "checked='1'" : "";
+         my $ck = ($fr && ($fr->{'groupmask'} & (1 << $g->{'id'}))) ||
+                  # by default, newly added friends are in default view unless unchecked
+                  (! $fr && $g->{'name'} eq 'Default View');
 
-         # by default, newly added friends are in default view unless unchecked
-         $ck = "checked='1'" if (! $fr && $g->{'name'} eq "Default View");
-
-         $body .= "<input type='checkbox' value='1' name='bit_$g->{'id'}' $ck> ";
-         $body .= LJ::ehtml($g->{'name'}) . "<br />\n";
+         $body .= "<label for='fg:bit_$g->{'id'}'>";
+         $body .= LJ::html_check({ 'name' => "bit_$g->{'id'}",
+                                   'id' => "fg:bit_$g->{'id'}",
+                                   'selected' => $ck });
+         $body .= ' ' . LJ::ehtml($g->{'name'}) . "</label><br />\n";
      }
  } else {
      $body .= "<i>$ML{'.groups.nogroup'}</i>";
