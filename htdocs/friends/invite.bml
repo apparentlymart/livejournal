@@ -18,6 +18,7 @@
     my %ierr;
     my $name = $POST{name} || '';
     my $email = $POST{email} || '';
+    my $create_link = ($LJ::USE_SSL ? $LJ::SSLROOT : $LJ::SITEROOT) . "/create.bml?from=$u->{user}";
 
     my $validate_form = sub {
         my $rv = 1;
@@ -42,12 +43,18 @@
             $bogus->("msg", "Images are not allowed in this message");
         }
 
+        my $has_ilink = 0;
         foreach ( LJ::get_urls($POST{'msg'}) ) {
             if ($_ !~ m!^https?://(\w+\.)?$LJ::DOMAIN(/.+)?$!i) {
                 $bogus->("msg", "$_<br />Links to sites other than $LJ::SITENAMESHORT are not allowed in this message");
                 last;
+            } elsif ($_ eq $create_link) {
+                $has_ilink = 1;
             }
         }
+
+        $bogus->("msg", "You must include the link for your friend to create a journal: $create_link")
+            if !$has_ilink && !$ierr{msg};
 
         return $rv;
     };
@@ -60,6 +67,11 @@
         return "<font color='red'><b>$ierr{$key}</b></font>$post";
     };
 
+    my $msg_footer = "\n\n----------\nThis message was sent via the friend ";
+    $msg_footer   .= "invite system on $LJ::SITENAMESHORT ($LJ::SITEROOT) by ";
+    $msg_footer   .= "the user $u->{user} - $u->{name}.  If you believe this ";
+    $msg_footer   .= "message to be spam, you may contact $LJ::ADMIN_EMAIL.";
+
     if (LJ::did_post() && $validate_form->()) {
 
         if (LJ::rate_log($u, 'invitefriend', 1)) {
@@ -70,7 +82,7 @@
                 from     => $LJ::BOGUS_EMAIL,
                 fromname => $u->{name},
                 subject  => "Invitation to join $LJ::SITENAMESHORT",
-                body     => $POST{'msg'},
+                body     => $POST{'msg'} . $msg_footer,
             });
 
             # Blank name and email so the form is redisplayed for a new
@@ -87,8 +99,6 @@
        }
     }
 
-    my $create_link = ($LJ::USE_SSL ? $LJ::SSLROOT : $LJ::SITEROOT) . "/create.bml?from=$u->{user}";
-
     my $msg = $POST{'msg'};
     $msg ||= "Hi,
 
@@ -103,30 +113,37 @@ This link will take you to a page where you can create a $LJ::SITENAMESHORT acco
 
 
     unless (LJ::did_post()) {
-        $body .= "<?p Want to invite someone to $LJ::SITENAMESHORT?<br /><br />";
-        $body .= "The link below will send your friend to the page where they can create a $LJ::SITENAMESHORT account.  Your journal will be automatically added as a friend and the page will list some of your active communities with the option to join. p?>";
+        $body .= "<?p The link below will send your friend to the page where they can create a $LJ::SITENAMESHORT account.  Your journal will be automatically added as a friend and the page will list some of your active communities with the option to join. p?>";
 
         $body .= "<?p <div style='margin-left: 20px'><b>Link: <a href='$create_link'>$create_link</a></b></div> p?>";
 
-        $body .= "<?p Enter your friend's name and email address in the form below and we'll send the invitation for you.  If you have multiple people to invite, you can use this form as often as you'd like, or just cut and paste the link and send it from your own email account. p?>";
-
-        $body .= "<?p <b>Note:</b> $LJ::SITENAMESHORT doesn't store any of this after the invitation is sent. p?><br />";
+        $body .= "<?p Enter your friend's name and email address in the form below and we'll send the invitation for you.  If you have multiple people to invite, you can use this form as often as you'd like, or just cut and paste the link and send it from your own email account. $LJ::SITENAMESHORT doesn't store any of this after the invitation is sent. p?>";
     }
 
     $body .= "<?p <b>Fill out this form to invite someone to $LJ::SITENAMESHORT:</b> p?>";
 
     $body .= "<?p <form method='POST'>";
-    $body .= "Your friend's name:";
+
+    $body .= '<table width="600" style="margin-left: 20px"><tr><td>';
+    $body .= "Your friend's name:</td><td>";
     $body .= LJ::html_text({ name => "name", size => 40, value => $name }) . '<br />' . $inerr->("name", "<br />");
 
-    $body .= "Your friend's email:";
+    $body .= '</td></tr><tr><td>';
+
+    $body .= "Your friend's email:</td><td>";
     $body .= LJ::html_text({ name => "email", size => 40, value => $email }) . '<br />' . $inerr->("email", "<br />");
+
+    $body .= '</td></tr><tr><td colspan="2">';
 
     $body .= 'Your message to them:<br />' . $inerr->("msg", "<br />");
     $body .= LJ::html_textarea({ rows => 20, cols => 80, name => "msg", value => $msg });
-    $body .= '<br /><i>If you want to invite your friend to a specific community, you can mention the community name and URL here.</i><br /><br />';
+    $body .= '</td></tr><tr><td colspan="2">';
+    $body .= '<i>If you want to invite your friend to a specific community, you can mention the community name and URL here.</i>';
 
-    $body .= LJ::html_submit("Invite 'em!") . '</form> p?>';
+    $body .= '</td></tr><tr><td colspan="2" align="left">';
+
+    $body .= LJ::html_submit("Invite 'em!");
+    $body .= '</td></tr></table></form> p?>';
 
     return;
 }
