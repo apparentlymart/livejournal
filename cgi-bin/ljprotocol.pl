@@ -35,6 +35,81 @@ package LJ::Protocol;
 # global declaration of this text since we use it in two places
 our $CannotBeShown = '(cannot be shown)';
 
+# error classes
+use constant {
+    E_TEMP  => 0,
+    E_PERM  => 1,
+};
+
+my %e = (
+     # User Errors
+     "100" => [ E_PERM, "Invalid username" ],
+     "101" => [ E_PERM, "Invalid password" ],
+     "102" => [ E_PERM, "Can't use custom/private security on shared/community journals." ],
+     "103" => [ E_PERM, "Poll error" ],
+     "104" => [ E_TEMP, "Error adding one or more friends" ],
+     "105" => [ E_PERM, "Challenge expired" ],
+     "150" => [ E_PERM, "Can't post as non-user" ],
+     "151" => [ E_TEMP, "Banned from journal" ],
+     "152" => [ E_PERM, "Can't make back-dated entries in non-personal journal." ],
+     "153" => [ E_PERM, "Incorrect time value" ],
+     "154" => [ E_PERM, "Can't add a redirected account as a friend" ],
+     "155" => [ E_TEMP, "Non-authenticated email address" ],
+     "156" => [ E_TEMP, sub { # to reload w/o restart
+         LJ::tosagree_str('protocol' => 'text') || 
+         LJ::tosagree_str('protocol' => 'title')
+     } ],
+
+     # Client Errors
+     "200" => [ E_PERM, "Missing required argument(s)" ],
+     "201" => [ E_PERM, "Unknown method" ],
+     "202" => [ E_PERM, "Too many arguments" ],
+     "203" => [ E_PERM, "Invalid argument(s)" ],
+     "204" => [ E_PERM, "Invalid metadata datatype" ],
+     "205" => [ E_PERM, "Unknown metadata" ],
+     "206" => [ E_PERM, "Invalid destination journal username." ],
+     "207" => [ E_PERM, "Protocol version mismatch" ],
+     "208" => [ E_PERM, "Invalid text encoding" ],
+     "209" => [ E_PERM, "Parameter out of range" ],
+     "210" => [ E_PERM, "Client tried to edit with corrupt data.  Preventing." ],
+     "211" => [ E_PERM, "Invalid or malformed tag list" ],
+
+     # Access Errors
+     "300" => [ E_TEMP, "Don't have access to requested journal" ],
+     "301" => [ E_TEMP, "Access of restricted feature" ],
+     "302" => [ E_TEMP, "Can't edit post from requested journal" ],
+     "303" => [ E_TEMP, "Can't edit post in community journal" ],
+     "304" => [ E_TEMP, "Can't delete post in this community journal" ],
+     "305" => [ E_TEMP, "Action forbidden; account is suspended." ],
+     "306" => [ E_TEMP, "This journal is temporarily in read-only mode.  Try again in a couple minutes." ],
+     "307" => [ E_PERM, "Selected journal no longer exists." ],
+     "308" => [ E_TEMP, "Account is locked and cannot be used." ],
+     "309" => [ E_PERM, "Account is marked as a memorial." ],
+     "310" => [ E_TEMP, "Account needs to be age verified before use." ],
+     "311" => [ E_TEMP, "Access temporarily disabled." ],
+     "312" => [ E_TEMP, "Not allowed to add tags to entries in this journal" ],
+     "313" => [ E_TEMP, "Must use existing tags for entries in this journal (can't create new ones)" ],
+
+     # Limit errors
+     "402" => [ E_TEMP, "Your IP address is temporarily banned for exceeding the login failure rate." ],
+     "404" => [ E_TEMP, "Cannot post" ],
+     "405" => [ E_TEMP, "Post frequency limit." ],
+     "406" => [ E_TEMP, "Client is making repeated requests.  Perhaps it's broken?" ],
+     "407" => [ E_TEMP, "Moderation queue full" ],
+     "408" => [ E_TEMP, "Maximum queued posts for this community+poster combination reached." ],
+     "409" => [ E_PERM, "Post too large." ],
+     "410" => [ E_PERM, "Your trial account has expired.  Posting now disabled." ],
+     
+     # Server Errors
+     "500" => [ E_TEMP, "Internal server error" ],
+     "501" => [ E_TEMP, "Database error" ],
+     "502" => [ E_TEMP, "Database temporarily unavailable" ],
+     "503" => [ E_TEMP, "Error obtaining necessary database lock" ],
+     "504" => [ E_PERM, "Protocol mode no longer supported." ],
+     "505" => [ E_TEMP, "Account data format on server is old and needs to be upgraded." ], # cluster0
+     "506" => [ E_TEMP, "Journal sync temporarily unavailable." ],
+);
+
 sub translate
 {
     my ($u, $msg, $vars) = @_;
@@ -43,86 +118,37 @@ sub translate
     return LJ::Lang::get_text($u->{'browselang'}, "protocol.$msg", undef, $vars);
 }
 
+sub error_class
+{
+    my $code = shift;
+    $code = $1 if $code =~ /^(\d\d\d):(.+)/;
+    return $e{$code} && ref $e{$code} ? $e{$code}->[0] : undef;
+}
+
+sub error_is_transient
+{
+    my $class = error_class($_[0]);
+    return defined $class ? ! $class+0 : undef;
+}
+
+sub error_is_permanent
+{
+    return error_class($_[0]);
+}
+
 sub error_message
 {
     my $code = shift;
     my $des;
-    if ($code =~ /^(\d\d\d):(.+)/) {
-        ($code, $des) = ($1, $2);
-    }
-    my %e = (
-             # User Errors
-             "100" => "Invalid username",
-             "101" => "Invalid password",
-             "102" => "Can't use custom/private security on shared/community journals.",
-             "103" => "Poll error",
-             "104" => "Error adding one or more friends",
-             "105" => "Challenge expired",
-             "150" => "Can't post as non-user",
-             "151" => "Banned from journal",
-             "152" => "Can't make back-dated entries in non-personal journal.",
-             "153" => "Incorrect time value",
-             "154" => "Can't add a redirected account as a friend",
-             "155" => "Non-authenticated email address",
-             "156" => sub { # to reload w/o restart
-                 LJ::tosagree_str('protocol' => 'text') || 
-                 LJ::tosagree_str('protocol' => 'title')
-             },
-
-             # Client Errors
-             "200" => "Missing required argument(s)",
-             "201" => "Unknown method",
-             "202" => "Too many arguments",
-             "203" => "Invalid argument(s)",
-             "204" => "Invalid metadata datatype",
-             "205" => "Unknown metadata",
-             "206" => "Invalid destination journal username.",
-             "207" => "Protocol version mismatch",
-             "208" => "Invalid text encoding",
-             "209" => "Parameter out of range",
-             "210" => "Client tried to edit with corrupt data.  Preventing.",
-             "211" => "Invalid or malformed tag list",
-
-             # Access Errors
-             "300" => "Don't have access to requested journal",
-             "301" => "Access of restricted feature",
-             "302" => "Can't edit post from requested journal",
-             "303" => "Can't edit post in community journal",
-             "304" => "Can't delete post in this community journal",
-             "305" => "Action forbidden; account is suspended.",
-             "306" => "This journal is temporarily in read-only mode.  Try again in a couple minutes.",
-             "307" => "Selected journal no longer exists.",
-             "308" => "Account is locked and cannot be used.",
-             "309" => "Account is marked as a memorial.",
-             "310" => "Account needs to be age verified before use.",
-             "311" => "Access temporarily disabled.",
-             "312" => "Not allowed to add tags to entries in this journal",
-             "313" => "Must use existing tags for entries in this journal (can't create new ones)",
-
-             # Limit errors
-             "402" => "Your IP address is temporarily banned for exceeding the login failure rate.",
-             "404" => "Cannot post",
-             "405" => "Post frequency limit.",
-             "406" => "Client is making repeated requests.  Perhaps it's broken?",
-             "407" => "Moderation queue full",
-             "408" => "Maximum queued posts for this community+poster combination reached.",
-             "409" => "Post too large.",
-             "410" => "Your trial account has expired.  Posting now disabled.",
-             
-             # Server Errors
-             "500" => "Internal server error",
-             "501" => "Database error",
-             "502" => "Database temporarily unavailable",
-             "503" => "Error obtaining necessary database lock",
-             "504" => "Protocol mode no longer supported.",
-             "505" => "Account data format on server is old and needs to be upgraded.", # cluster0
-             "506" => "Journal sync temporarily unavailable.",
-             );
+    ($code, $des) = ($1, $2) if $code =~ /^(\d\d\d):(.+)/;
 
     my $prefix = "";
-    my $error = (ref $e{$code} eq 'CODE' ? $e{$code}->() : $e{$code}) || "BUG: Unknown error code!";
-    if ($code >= 200) { $prefix = "Client error: "; }
-    if ($code >= 500) { $prefix = "Server error: "; }
+    my $error =
+      $e{$code} && ref $e{$code}
+      ? ( ref $e{$code}->[1] eq 'CODE' ? $e{$code}->[1]->() : $e{$code}->[1] )
+      : "BUG: Unknown error code!";
+    $prefix = "Client error: " if $code >= 200; 
+    $prefix = "Server error: " if $code >= 500;
     my $totalerror = "$prefix$error";
     $totalerror .= ": $des" if $des;
     return $totalerror;
