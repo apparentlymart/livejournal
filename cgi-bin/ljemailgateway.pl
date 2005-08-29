@@ -290,6 +290,12 @@ sub process {
         $entity->parts(\@imgs);
     }
 
+    # virgin mobile adds text to the *top* of the message, killing lj-headers.
+    # Kill this silly (and grammatically incorrect) string.
+    if ($return_path && $return_path =~ /vmpix\.com$/) {
+        $body =~ s/^This is an? MMS message\.\s+//ms;
+    }
+
     # PGP signed mail?  We'll see about that.
     if (lc($pin) eq 'pgp' && $LJ::USE_PGP) {
         my %gpg_errcodes = ( # temp mapping until translation
