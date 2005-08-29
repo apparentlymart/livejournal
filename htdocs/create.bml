@@ -735,7 +735,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
              $ret .= "<br />Join communities:<br />";
 
              my $i = 0;
-             foreach my $comm (sort { $a->{user} eq $b->{user} } values %comms) {
+             foreach my $comm (sort { $a->{user} cmp $b->{user} } values %comms) {
                  last if $i >= 20;
                  $ret .= LJ::html_check({ name     => "inviter_join_$comm->{userid}",
                                           value    => 1,
