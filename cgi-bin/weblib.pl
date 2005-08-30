@@ -879,7 +879,7 @@ sub make_qr_link
 
         $basesubject =~ s/^(Re:\s*)*//i;
         $basesubject = "Re: $basesubject" if $basesubject;
-        $basesubject = LJ::ejs($basesubject);
+        $basesubject = LJ::ehtml(LJ::ejs($basesubject));
         my $onclick = "return quickreply(\"$dtid\", $pid, \"$basesubject\")";
         return "<a onclick='$onclick' href='$replyurl' >$linktext</a>";
     } else { # QR Disabled
