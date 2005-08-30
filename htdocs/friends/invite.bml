@@ -117,7 +117,7 @@ This link will take you to a page where you can create a $LJ::SITENAMESHORT acco
 
         $body .= "<?p <div style='margin-left: 20px'><b>Link: <a href='$create_link'>$create_link</a></b></div> p?>";
 
-        $body .= "<?p Enter your friend's name and email address in the form below and we'll send the invitation for you.  If you have multiple people to invite, you can use this form as often as you'd like, or just cut and paste the link and send it from your own email account. $LJ::SITENAMESHORT doesn't store any of this after the invitation is sent. p?>";
+        $body .= "<?p You can use this form as often as you'd like, or just cut and paste the link and send it from your own email account. $LJ::SITENAMESHORT doesn't store any of this after the invitation is sent. p?>";
     }
 
     $body .= "<?p <b>Fill out this form to invite someone to $LJ::SITENAMESHORT:</b> p?>";
