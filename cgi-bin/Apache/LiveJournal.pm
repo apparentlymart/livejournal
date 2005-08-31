@@ -450,6 +450,17 @@ sub trans
         }
 
         return undef unless defined $mode;
+
+        # Now that we know ourselves to be at a sensible URI, redirect renamed
+        # journals. This ensures redirects work sensibly for all valid paths
+        # under a given username, without sprinkling redirects everywhere.
+        my $u = LJ::load_user($user);
+        if ($u && $u->{'journaltype'} eq 'R' && $u->{'statusvis'} eq 'R') {
+            LJ::load_user_props($u, 'renamedto');
+            return redir($r, LJ::journal_base($u->{'renamedto'}, $vhost) . $uuri . $args_wq, 301)
+                if $u->{'renamedto'} ne '';
+        }
+
         return $journal_view->({'vhost' => $vhost,
                                 'mode' => $mode,
                                 'args' => $args,

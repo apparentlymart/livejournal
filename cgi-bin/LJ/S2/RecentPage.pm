@@ -13,11 +13,6 @@ sub RecentPage
     my $user = $u->{'user'};
     my $journalbase = LJ::journal_base($user, $opts->{'vhost'});
 
-    if ($u->{'journaltype'} eq "R" && $u->{'renamedto'} ne "") {
-        $opts->{'redir'} = LJ::journal_base($u->{'renamedto'}, $opts->{'vhost'});
-        return;
-    }
-    
     my $datalink = sub {
         my ($what, $caption) = @_;
         return Link($p->{'base_url'} . "/data/$what",

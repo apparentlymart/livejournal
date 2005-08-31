@@ -13,11 +13,6 @@ sub TagsPage
     my $user = $u->{'user'};
     my $journalbase = LJ::journal_base($user, $opts->{'vhost'});
 
-    if ($u->{'journaltype'} eq "R" && $u->{'renamedto'} ne "") {
-        $opts->{'redir'} = LJ::journal_base($u->{'renamedto'}, $opts->{'vhost'});
-        return;
-    }
-
     if ($opts->{'pathextra'}) {
         $opts->{'badargs'} = 1;
         return 1;

@@ -14,12 +14,6 @@ sub YearPage
 
     my $user = $u->{'user'};
 
-    if ($u->{'journaltype'} eq "R" && $u->{'renamedto'} ne "") {
-        $opts->{'redir'} = LJ::journal_base($u->{'renamedto'}, $opts->{'vhost'}) .
-            "/calendar" . $opts->{'pathextra'};
-        return 1;
-    }
-
     if ($u->{'opt_blockrobots'}) {
         $p->{'head_content'} .= LJ::robot_meta_tags();
     }

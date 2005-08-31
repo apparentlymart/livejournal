@@ -970,11 +970,6 @@ sub create_view_lastn
 
     my $user = $u->{'user'};
 
-    if ($u->{'journaltype'} eq "R" && $u->{'renamedto'} ne "") {
-        $opts->{'redir'} = LJ::journal_base($u->{'renamedto'}, $opts->{'vhost'});
-        return 1;
-    }
-
     foreach ("name", "url", "urlname", "journaltitle") { LJ::text_out(\$u->{$_}); }
 
     my $get = $opts->{'getargs'};
@@ -1383,11 +1378,6 @@ sub create_view_friends
         $$ret .= "  <frame name=livetop src=\"$journalbase/friends?mode=framed\">\n";
         $$ret .= "  <frame name=livebottom src=\"$journalbase/friends?mode=livecond&amp;lastitemid=0\">\n";
         $$ret .= "</frameset></html>\n";
-        return 1;
-    }
-
-    if ($u->{'journaltype'} eq "R" && $u->{'renamedto'} ne "") {
-        $opts->{'redir'} = LJ::journal_base($u->{'renamedto'}, $opts->{'vhost'}) . "/friends";
         return 1;
     }
 
@@ -1847,12 +1837,6 @@ sub create_view_calendar
     
     my $user = $u->{'user'};
 
-    if ($u->{'journaltype'} eq "R" && $u->{'renamedto'} ne "") {
-        $opts->{'redir'} = LJ::journal_base($u->{'renamedto'}, $opts->{'vhost'}) .
-            "/calendar" . $opts->{'pathextra'};
-        return 1;
-    }
-
     foreach ("name", "url", "urlname", "journaltitle") { LJ::text_out(\$u->{$_}); }
 
     my $get = $opts->{'getargs'};
@@ -2084,12 +2068,6 @@ sub create_view_day
     my $sth;
 
     my $user = $u->{'user'};
-
-    if ($u->{'journaltype'} eq "R" && $u->{'renamedto'} ne "") {
-        $opts->{'redir'} = LJ::journal_base($u->{'renamedto'}, $opts->{'vhost'}) .
-            "/day" . $opts->{'pathextra'};
-        return 1;
-    }
 
     foreach ("name", "url", "urlname", "journaltitle") { LJ::text_out(\$u->{$_}); }
 

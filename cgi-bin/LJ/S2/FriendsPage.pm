@@ -60,11 +60,6 @@ sub FriendsPage
         return $ret;
     }
 
-    if ($u->{'journaltype'} eq "R" && $u->{'renamedto'} ne "") {
-        $opts->{'redir'} = LJ::journal_base($u->{'renamedto'}, $opts->{'vhost'}) . "/friends";
-        return 1;
-    }
-
     LJ::load_user_props($remote, "opt_nctalklinks", "opt_stylemine", "opt_imagelinks", "opt_ljcut_disable_friends");
 
     # load options for image links
