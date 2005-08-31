@@ -2297,6 +2297,8 @@ The site team
 
 /lostinfo_do.bml.username_mailed.title=Username mailed!
 
+/manage/emailpost.bml.sorry.acct=Sorry, updating your journal via email is not available for your account type.
+
 /manage/index.bml.about=Managing your account is easy. Just choose from the following areas below:
 
 /manage/index.bml.communities=Create and manage your own communities:
