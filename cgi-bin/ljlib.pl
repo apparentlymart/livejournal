@@ -9078,14 +9078,26 @@ sub alloc_user_counter
     return LJ::alloc_user_counter($u, $dom, { recurse => 1 });
 }
 
-# $dom: 'S' == style, 'P' == userpic, 'A' == stock support answer
-#       'C' == captcha, 'E' == external user
+# Single-letter domain values are for livejournal-generic code.
+#  - 0-9 are reserved for site-local hooks and are mapped from a long
+#    (> 1 char) string passed as the $dom to a single digit by the
+#    'map_global_counter_domain' hook.
+#
+# LJ-generic domains:
+#  $dom: 'S' == style, 'P' == userpic, 'A' == stock support answer
+#        'C' == captcha, 'E' == external user
+#
 sub alloc_global_counter
 {
     my ($dom, $recurse) = @_;
-    return undef unless $dom =~ /^[SPCEA]$/;
     my $dbh = LJ::get_db_writer();
     return undef unless $dbh;
+
+    # $dom can come as a direct argument or as a string to be mapped via hook
+    unless ($dom =~ /^[SPCEA]$/) {
+        $dom = LJ::run_hook('map_global_counter_domain', $dom);
+    }
+    return undef unless defined $dom;
 
     my $newmax;
     my $uid = 0; # userid is not needed, we just use '0'
@@ -9113,7 +9125,9 @@ sub alloc_global_counter
     } elsif ($dom eq "A") {
         $newmax = $dbh->selectrow_array("SELECT MAX(ansid) FROM support_answers");
     } else {
-        die "No alloc_global_counter initalizer for domain '$dom'";
+        $newmax = LJ::run_hook('global_counter_init_value', $dom);
+        die "No alloc_global_counter initalizer for domain '$dom'"
+            unless defined $newmax;
     }
     $newmax += 0;
     $dbh->do("INSERT IGNORE INTO counter (journalid, area, max) VALUES (?,?,?)",
