@@ -125,6 +125,8 @@
 					'stc/s2edit.css');
 					
 	my $includes = LJ::res_includes();
+	
+	$s2code = LJ::ehtml($s2code);
 
 	# -------------------------------------------------------------------------
 	#   S2 Editor HTML follows
