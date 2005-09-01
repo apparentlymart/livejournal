@@ -180,7 +180,6 @@ sub make_html
         $opts->{$prop} = lc($opts->{$prop}) || $u->{$_};
     }
 
-    $opts->{imgcut} ||= 'totals';
     $html .= "\n";
 
     # set journal image display size
@@ -190,16 +189,16 @@ sub make_html
     my $size = '/s' . $opts->{imgsize};
 
     # force lj-cut on images larger than 320 in either direction
-    $opts->{imgcut} = 'totals' if $width > 320 || $height > 320;
+    $opts->{imgcut} = 'count'
+      if ( $width > 320 || $height > 320 ) && ! $opts->{imgcut};
 
     # insert image links into post body
     my $horiz = $opts->{imglayout} =~ /^horiz/i;
     $html .=
       "<lj-cut text='$icount "
       . ( ( $icount == 1 ) ? 'image' : 'images' ) . "'>"
-          if $opts->{imgcut} eq 'totals';
-    $html .= "<table border='0'><tr>"
-        if $horiz;
+          if $opts->{imgcut} eq 'count';
+    $html .= "<table border='0'><tr>" if $horiz;
 
     foreach my $i (@$images) {
         my $title = LJ::ehtml($i->{'title'});
@@ -217,7 +216,7 @@ sub make_html
         $html .= "</lj-cut> " if $opts->{imgcut} eq 'titles';
     }
     $html .= "</tr></table>" if $horiz;
-    $html .= "</lj-cut>\n" if $opts->{imgcut} eq 'totals';
+    $html .= "</lj-cut>\n" if $opts->{imgcut} eq 'count';
 
     return $html;
 }

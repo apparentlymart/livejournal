@@ -300,7 +300,8 @@ body<=
                     <?p You may attach images of any size.  They will be displayed
                     in your journal at a maximum size of 640x480.  The default size
                     is 320x240.  You may specify a size using the <b>lj-imgsize</b>
-                    header.  p?>
+                    header.  Images larger than 320x240 will be automatically placed
+                    behind a <a href='/support/faqbrowse.bml?faqid=75'>lj-cut</a>. p?>
                     <?p Valid sizes are "100x100", "320x240", and "640x480". p?>
                     <?emailex
                     $to_pin
@@ -337,13 +338,15 @@ body<=
                     emailex?></fieldset>
 
                     <fieldset><legend>lj-cut behavior</legend>
-                    <?p All images are placed in your journal under a
-                    <a href='/support/faqbrowse.bml?faqid=75'>lj-cut</a>. 
-                    By default, the cut description is the number of images uploaded.
-                    If you attached 3 images in your email message, the lj-cut would
-                    read, "( 3 images )".  Setting the <b>lj-imgcut</b> header to
-                    "titles" changes the cut caption to the title of the filename, 
-                    one cut per image. "( emo.jpg ) ( pict002.jpg ) ( me_and_bob.jpg )" p?>
+                    <?p By default, images 320x240 or smaller are placed in your journal
+                    without an <a href='/support/faqbrowse.bml?faqid=75'>lj-cut</a>. 
+                    You can change this behavior using the <b>lj-imgcut</b> header.
+                    Valid options are "count" and "titles".
+                    Using "count", if you attached 3 images in your email message,
+                    the lj-cut would read, "( 3 images )". 
+                    Setting the <b>lj-imgcut</b> header to "titles" changes the cut
+                    caption to the title of the filename, one cut per image.
+                    "( emo.jpg ) ( pict002.jpg ) ( me_and_bob.jpg )" p?>
                     <?emailex
                     $to_pin
                     $from
@@ -448,7 +451,7 @@ EOT
             $addrcount++;
         }
 
-        if ( $POST{'emailpost_imgcut'} eq 'none' &&
+        if ( $POST{'emailpost_imgcut'} eq 'default' &&
              $POST{'email_imgsize'} ne 'default' ) {
             my ($w, $h) = split 'x', $POST{'emailpost_imgsize'};
             push @errors, "Image size must be 320x240 or less to disable the lj-cut."
@@ -595,7 +598,7 @@ EOT
         $ret .= "</td></tr>";
         $ret .= "<tr><td>Image cut type:</td><td>";
         $ret .= LJ::html_select({ name=> 'emailpost_imgcut', selected => $u->{'emailpost_imgcut'} },
-                                map { $_ => $_ } qw/ default titles none /);
+                                map { $_ => $_ } qw/ default count titles /);
         $ret .= "</td></tr>";
     }
 
