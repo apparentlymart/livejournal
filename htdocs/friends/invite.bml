@@ -81,7 +81,7 @@
                 toname   => $name,
                 from     => $LJ::BOGUS_EMAIL,
                 fromname => $u->{name},
-                subject  => "Invitation to join $LJ::SITENAMESHORT",
+                subject  => "$u->{user} wants you to join $LJ::SITENAMESHORT",
                 body     => $POST{'msg'} . $msg_footer,
             });
 

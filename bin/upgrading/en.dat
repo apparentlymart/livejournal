@@ -1929,7 +1929,7 @@ pick a specific friend group to view.
 
 /friends/index.bml.groups=In addition, subgroups of friends can be specified.
 
-/friends/index.bml.invite.about=Invite a friend to create a journal and add you as a friend
+/friends/index.bml.invite.about2=Invite a friend to create a [[sitename]] account
 
 /friends/index.bml.invite.title=Invite a Friend
 

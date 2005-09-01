@@ -8,6 +8,10 @@ _code?>
 <?p <?_ml .about _ml?> p?>
 <?h1 <?_ml .tools _ml?> h1?>
 <dl>
+  <dt><a href="invite.bml"><?_ml .invite.title _ml?></a></dt>
+  <dd><?_code BML::ml('.invite.about2', { sitename => $LJ::SITENAMESHORT }); _code?></dd>
+</dl>
+<dl>
   <dt><a href="edit.bml"><?_ml /friends/edit.bml.title _ml?></a></dt>
   <dd><?_ml .edit.about _ml?></dd>
 </dl>
@@ -22,10 +26,6 @@ _code?>
   <dd><?_ml .filter.about _ml?></dd>
 </dl>
 <?p p?>
-<dl>
-  <dt><a href="invite.bml"><?_ml .invite.title _ml?></a></dt>
-  <dd><?_ml .invite.about _ml?></dd>
-</dl>
 <?h1 <?_ml .security.header _ml?> h1?>
 <?p <?_ml .security _ml?> p?>
 <ul>

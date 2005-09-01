@@ -625,8 +625,6 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
      if ($inviter) {
          $ret .= "<li><div class='formitem'><div class='formitemName'>Your friend " . LJ::ljuser($inviter) . " welcomes you to ";
          $ret .= "$LJ::SITENAMESHORT</div>";
-         $ret .= "<div class='formitemDesc'>Below you are able to add this person as one of your friends ";
-         $ret .= "as well as join some of the communities they are a member of.</div>";
 
          $ret .= "<div>";
 

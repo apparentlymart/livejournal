@@ -45,6 +45,7 @@ general /editpics.bml.error.toomanypics3
 general /friends/edit.bml.btn.proceed
 general /friends/edit.bml.edit.head
 general /friends/edit.bml.edit.text
+general /friends/index.bml.invite.about
 
 general /editjournal.bml.enterlogin
 general /editjournal.bml.lostinfo.head
