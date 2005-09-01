@@ -39,6 +39,15 @@ body<=
 
     return $LJ::MSG_READONLY_USER if $LJ::CLUSTER_DOWN{0} || ! $dbcr;
 
+    # redirect if account was renamed
+    if ($u->{'journaltype'} eq "R") {
+        LJ::load_user_props($u, "renamedto");
+        if ($u->{'renamedto'} ne "") {
+            my $id = $FORM{'itemid'}+0;
+            return BML::redirect(LJ::journal_base($u->{'renamedto'}) . "/$id.html?mode=reply");
+        }
+    }
+
     my $ret = "";
 
     my $parpost;

@@ -62,7 +62,15 @@ body<=
 
  my $ditemid = $init->{'ditemid'}+0;
 
- # check for init->error
+ # redirect if account was renamed
+ if ($u->{'journaltype'} eq "R") {
+     LJ::load_user_props($u, "renamedto");
+     if ($u->{'renamedto'} ne "") {
+         return BML::redirect(LJ::journal_base($u->{'renamedto'}) . "/$ditemid.html");
+     }
+ }
+
+ # now check for init->error, since we know the account wasn't renamed
  return "<?h1 $ML{'Error'} h1?><?p $init->{'error'} p?>" if $init->{'error'}; 
 
  LJ::load_user_props($u, "opt_blockrobots") if $u->{'statusvis'} eq 'V';
