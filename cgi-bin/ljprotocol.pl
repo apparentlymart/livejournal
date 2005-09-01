@@ -36,10 +36,8 @@ package LJ::Protocol;
 our $CannotBeShown = '(cannot be shown)';
 
 # error classes
-use constant {
-    E_TEMP  => 0,
-    E_PERM  => 1,
-};
+use constant E_TEMP => 0;
+use constant E_PERM => 1;
 
 my %e = (
      # User Errors
