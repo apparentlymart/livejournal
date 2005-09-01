@@ -1,7 +1,7 @@
 <?_code # -*-bml-*-
 {
     use strict;
-	our (%GET, %POST);
+        our (%GET, %POST);
 
     # for error reporting
     my $err = sub {
@@ -51,7 +51,7 @@
                                     undef, $lay->{'s2lid'}) unless $s2code;
 
     # we tried to compile something
-	my $build;
+        my $build;
     if ($POST{'action'} eq "compile") {
         $build = "<b>S2 Compiler Output</b> <em>at " . scalar(localtime) . "</em><br />\n";
 
@@ -77,7 +77,7 @@
 
                 # and now, fun with regular expressions
                 my $ct = 0;
-                $snippet =~ s!(.*?)\n!sprintf("%3d", ++$ct) . ": " . 
+                $snippet =~ s!(.*?)\n!sprintf("%3d", ++$ct) . ": " .
                     $1 . "\n"!ge;                      # add line breaks and numbering
                 $snippet = LJ::ehtml($snippet);
                 $snippet =~ s!^((?:.*?\n){$kill,$kill})           # kill before relevant lines
@@ -94,8 +94,8 @@
             $build .= "Compiled with no errors.\n";
         }
     } else {
-		$build = "Loaded layer $id.";
-	}
+                $build = "Loaded layer $id.";
+        }
 
     # load layer info
     my $layinf = {};
@@ -111,35 +111,33 @@
         LJ::S2::load_layer_info($layinf, [$par]);
         $name =  $layinf->{$par}->{'name'};
     }
-    
+
     # Only use the layer name if there is one and it's more than just whitespace
     my $title = "[$type] ";
     $title .= $name && $name =~ /[^\s]/ ? "$name [\#$id]" : "Layer \#$id";
 
-	LJ::need_res(	'js/s2edit/xlib.js',
-					'js/s2edit/s2edit.js',
-					'js/s2edit/s2gui.js',
-					'js/s2edit/s2parser.js',
-					'js/s2edit/s2sense.js',
-					'js/s2edit/s2library.js',
-					'stc/s2edit.css');
-					
-	my $includes = LJ::res_includes();
-	
-	$s2code = LJ::ehtml($s2code);
+        LJ::need_res(   'js/s2edit/xlib.js',
+                                        'js/s2edit/s2edit.js',
+                                        'js/s2edit/s2gui.js',
+                                        'js/s2edit/s2parser.js',
+                                        'js/s2edit/s2sense.js',
+                                        'js/s2edit/s2library.js',
+                                        'stc/s2edit.css');
 
-	# -------------------------------------------------------------------------
-	#   S2 Editor HTML follows
-	# -------------------------------------------------------------------------
+        my $includes = LJ::res_includes();
 
-	return <<HERE;
+        # -------------------------------------------------------------------------
+        #   S2 Editor HTML follows
+        # -------------------------------------------------------------------------
+
+        return <<HERE;
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <title>$title - S2 Designer</title>
 
 <script type="text/javascript"><!--
-	var s2docBaseURL = "$LJ::SITEROOT/doc/s2";
+        var s2docBaseURL = "$LJ::SITEROOT/doc/s2";
 // -->
 </script>
 
@@ -161,22 +159,22 @@ $includes
 
     div.output {
         width: expression(xGetElementById('statusbar').clientWidth - (18 + xGetElementById('out').offsetLeft) + "px");
-		bottom: 45px;
+                bottom: 45px;
     }
-	
+
     div.divider {
-		font-size: 2px;
+                font-size: 2px;
     }
-	
-	#outputdivider {
-		width: expression(xGetElementById('statusbar').clientWidth - (18 + xGetElementById('out').offsetLeft) + "px");
-		bottom: 145px;
-		height: 7px;
-	}
-	
-	#refdivider {
-		height: expression(xGetElementById('statusbar').offsetTop - (42 + 9 + 10) + "px");
-	}
+
+        #outputdivider {
+                width: expression(xGetElementById('statusbar').clientWidth - (18 + xGetElementById('out').offsetLeft) + "px");
+                bottom: 145px;
+                height: 7px;
+        }
+
+        #refdivider {
+                height: expression(xGetElementById('statusbar').offsetTop - (42 + 9 + 10) + "px");
+        }
 
     div.main {
         width: expression(xGetElementById('statusbar').clientWidth - (18 + 6 + xGetElementById('out').offsetLeft) + "px");
@@ -196,9 +194,9 @@ $includes
 
 </head>
 <body onMouseMove="s2processDrag(event)" onMouseUp="s2endDrag(event)">
-	<form method="post">
-	<input type="hidden" name="action" value="compile" />
-	
+        <form method="post">
+        <input type="hidden" name="action" value="compile" />
+
     <div class="header">
         <h1>$title</h1>
 
@@ -212,63 +210,63 @@ $includes
     <div class="main" id="maindiv">
         <div class="maincontainer">
         <textarea id="main" class="maintext" name="s2code" onKeyPress="s2keyPressed(event)"
-			onKeyDown="s2IETabKeyPressedHandler(event)">$s2code</textarea>
+                  onKeyDown="s2IETabKeyPressedHandler(event)">@{[ LJ::ehtml($s2code) ]}</textarea>
         </div>
     </div>
-	<div class="divider" id="outputdivider" onMouseDown="s2startDrag(event)"
-		onMouseUp="s2endDrag(event)"
-		onMouseMove="s2processDrag(event)">&nbsp;</div>
+        <div class="divider" id="outputdivider" onMouseDown="s2startDrag(event)"
+                onMouseUp="s2endDrag(event)"
+                onMouseMove="s2processDrag(event)">&nbsp;</div>
     <div class="tabs" id="outputtabs">
         <h2>Build</h2>
     </div>
     <div id="out" class="output">
-		$build
+                $build
     </div>
 
     <div class="tabs" id="reftabs">
-		<span id="navtabs" class="refvisible">
-			<h2>Nav.</h2>
-			<a href="javascript:s2switchRefTab(0)">Classes</a>
-			<a href="javascript:s2switchRefTab(1)">Funcs.</a>
-			<a href="javascript:s2switchRefTab(2)">Props.</a>
-		</span>
-		<span id="classtabs" class="refinvisible">
-			<a href="javascript:s2switchRefTab(-1)">Nav.</a>
-			<h2>Classes</h2>
-			<a href="javascript:s2switchRefTab(1)">Funcs.</a>
-			<a href="javascript:s2switchRefTab(2)">Props.</a>
-		</span>
-		<span id="functabs" class="refinvisible">
-			<a href="javascript:s2switchRefTab(-1)">Nav.</a>
-			<a href="javascript:s2switchRefTab(0)">Classes</a>
-			<h2>Funcs.</h2>
-			<a href="javascript:s2switchRefTab(2)">Props.</a>
-		</span>
-		<span id="proptabs" class="refinvisible">
-			<a href="javascript:s2switchRefTab(-1)">Nav.</a>
-			<a href="javascript:s2switchRefTab(0)">Classes</a>
-			<a href="javascript:s2switchRefTab(1)">Funcs.</a>
-			<h2>Props.</h2>
-		</span>
+                <span id="navtabs" class="refvisible">
+                        <h2>Nav.</h2>
+                        <a href="javascript:s2switchRefTab(0)">Classes</a>
+                        <a href="javascript:s2switchRefTab(1)">Funcs.</a>
+                        <a href="javascript:s2switchRefTab(2)">Props.</a>
+                </span>
+                <span id="classtabs" class="refinvisible">
+                        <a href="javascript:s2switchRefTab(-1)">Nav.</a>
+                        <h2>Classes</h2>
+                        <a href="javascript:s2switchRefTab(1)">Funcs.</a>
+                        <a href="javascript:s2switchRefTab(2)">Props.</a>
+                </span>
+                <span id="functabs" class="refinvisible">
+                        <a href="javascript:s2switchRefTab(-1)">Nav.</a>
+                        <a href="javascript:s2switchRefTab(0)">Classes</a>
+                        <h2>Funcs.</h2>
+                        <a href="javascript:s2switchRefTab(2)">Props.</a>
+                </span>
+                <span id="proptabs" class="refinvisible">
+                        <a href="javascript:s2switchRefTab(-1)">Nav.</a>
+                        <a href="javascript:s2switchRefTab(0)">Classes</a>
+                        <a href="javascript:s2switchRefTab(1)">Funcs.</a>
+                        <h2>Props.</h2>
+                </span>
     </div>
     <div id="ref" class="reference">
-	<div id="nav" class="refvisible">
-		&nbsp;
-	</div>
-	<div id="classref" class="refinvisible">
-		(Classes)
-	</div>
-	<div id="funcref" class="refinvisible">
-		(Functions)
-	</div>
-	<div id="propref" class="refinvisible">
-		(Properties)
-	</div>
+        <div id="nav" class="refvisible">
+                &nbsp;
+        </div>
+        <div id="classref" class="refinvisible">
+                (Classes)
+        </div>
+        <div id="funcref" class="refinvisible">
+                (Functions)
+        </div>
+        <div id="propref" class="refinvisible">
+                (Properties)
+        </div>
     </div>
-	
-	<div class="divider" id="refdivider" onMouseDown="s2startDragRef(event)"
-		onMouseUp="s2endDrag(event)"
-		onMouseMove="s2processDrag(event)">&nbsp;</div>
+
+        <div class="divider" id="refdivider" onMouseDown="s2startDragRef(event)"
+                onMouseUp="s2endDrag(event)"
+                onMouseMove="s2processDrag(event)">&nbsp;</div>
 
     <div class="statusbar" id="statusbar">
         <div class="gutter"> </div>
@@ -279,8 +277,8 @@ $includes
     if (navigator.userAgent.indexOf('Safari') > -1) {
         xGetElementById('main').style.width = '100%';
     }
-	
-	s2init();
+
+        s2init();
 </script>
 
 </body>
