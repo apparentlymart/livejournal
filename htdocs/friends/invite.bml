@@ -100,14 +100,14 @@
     }
 
     my $msg = $POST{'msg'};
-    $msg ||= "Hi,
+    $msg ||= "I'm inviting you to join $LJ::SITENAMESHORT, where you can create a personal journal (or blog) for free.
 
-I'm inviting you to join $LJ::SITENAMESHORT, where you can create a personal journal (or blog) for free.
+To make it easier for us to connect, my journal will automatically be added to your friends list, and you'll also see a list of some of my communities and can choose which ones you'd like to join.
+
+Once you create your account, I'll be notified of your new username so I can add you to my friends list.
 
 Follow this link to sign up:
     $create_link
-
-This link will take you to a page where you can create a $LJ::SITENAMESHORT account.  My journal will automatically be added as your friend, and you'll also see a list of some of my communities and choose which ones you'd like to join.
 
 -- $u->{name} ($LJ::SITENAMEABBREV user: $u->{user})";
 

@@ -623,11 +623,10 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
          if $ifrom;
 
      if ($inviter) {
-         $ret .= "<li><div class='formitem'><div class='formitemName'>Invitation</div>";
-         $ret .= "<div class='formitemDesc'>Your friend " . LJ::ljuser($inviter) . " welcomes you to ";
-         $ret .= "$LJ::SITENAMESHORT. Below you are able to add this person as one of your friends ";
-         $ret .= "as well as join some of the communities they are a member of.  A community with a * ";
-         $ret .= "means that your friend is a maintainer or moderator of that community.</div>";
+         $ret .= "<li><div class='formitem'><div class='formitemName'>Your friend " . LJ::ljuser($inviter) . " welcomes you to ";
+         $ret .= "$LJ::SITENAMESHORT</div>";
+         $ret .= "<div class='formitemDesc'>Below you are able to add this person as one of your friends ";
+         $ret .= "as well as join some of the communities they are a member of.</div>";
 
          $ret .= "<div>";
 
@@ -639,7 +638,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
                                   id       => "inviter_$inviter->{user}",
                              });
          $ret .= "<label for='inviter_$inviter->{user}'>" .
-             'Add ' . LJ::ljuser($inviter->{user}) . ' as a friend' .
+             'add ' . LJ::ljuser($inviter->{user}) . ' as a friend' .
              "</label><br />";
 
          my %comms;
@@ -732,7 +731,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
          }
 
          if (%comms) {
-             $ret .= "<br />Join communities:<br />";
+             $ret .= "<br />Select which of your friend's communities you'd like to join:<br />";
 
              my $i = 0;
              foreach my $comm (sort { $a->{user} cmp $b->{user} } values %comms) {
@@ -751,6 +750,8 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
                  $i++;
              }
              $ret .= LJ::html_hidden('inviter_joins', join(',', @joins));
+
+             $ret .= "<?de A community with a * means that your friend is a maintainer or moderator of that community. de?>";
          }
          $ret .= "</div></li>";
      }
