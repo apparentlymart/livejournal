@@ -1385,6 +1385,7 @@ function lang_viewname(string viewid) [notags] : string
     if ($viewid == "userinfo") { return $*text_view_userinfo; }
     if ($viewid == "entry") { return "Read Comments"; }
     if ($viewid == "reply") { return "Post Comment"; }
+    if ($viewid == "tags") { return "Tags"; }
     return "Unknown View";
 }
 
