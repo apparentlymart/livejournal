@@ -52,6 +52,12 @@ body<=
     };
     my $langcode = $get_lang->($style{'i18n'}) || $get_lang->($style{'i18nc'});
 
+    # if we posted, verify auth
+    if (LJ::did_post()) {
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>"
+            unless LJ::check_form_auth();
+    }
+
     if ($POST{'save:stylesys'}) {
         my $num = $POST{'stylesys'} == 2 ? 2 : 1;
         LJ::set_userprop($u, "stylesys", $num);
@@ -214,6 +220,7 @@ body<=
 
     # choose style system
     $ret .= "<form method='post' action='./?journal=$u->{'user'}'>";
+    $ret .= LJ::form_auth();
     $ret .= "<?h1 $ML{'.choose.header'} h1?><?p $ML{'.choose'} p?>";
     $ret .= "<blockquote>";
     $ret .= LJ::html_select({ 'name' => 'stylesys', 'selected' => $u->{'stylesys'} },

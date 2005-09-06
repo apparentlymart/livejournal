@@ -49,6 +49,8 @@ body<=
     if (LJ::did_post()) {
 
         return "<?badinput?>" unless LJ::text_in(\%POST);
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>"
+            unless LJ::check_form_auth();
 
         # database error reporting
         my $dberr = sub {
@@ -271,6 +273,7 @@ body<=
     ###
 
     $ret .= "<form method='post' action='modify.bml?authas=$authas'>\n";
+    $ret .= LJ::form_auth();
 
     # using S1, need to take style input
     if ($u->{'stylesys'} != 2)
