@@ -1,0 +1,108 @@
+To: [email]
+From: brad@livejournal.com
+Subject: LiveJournal News -- #5
+
+Hey [name]!
+
+WHAT IS THIS?
+=============
+You are getting this because at some point you opted to receive LiveJournal news.  Read below for how to unsubscribe.  However, please don't unsubscribe... I rarely send out updates, so when I do they're usually somewhat interesting.  (well, okay, I *try* to make them interesting)
+
+NEWS:
+=====
+
+* NEW SERVER IS UP!
+
+  The days of LiveJournal being slower than a turd may now
+  be over ... the new server is setup and configured 
+  wonderfully.  All it took was a few days of not sleeping.
+  I've had it running for the past few hours and it seems
+  to be doing quite well.  The better news (which is not
+  obvious to users) is that everything in LiveJournal is now
+  served/logged via the database, so it should be just
+  a 10 minute job to add more servers in the future, and
+  have them all share the load.
+
+  If you encounter ANY problems over the next few days,
+  do tell me ... I'll get on it and fix it.
+
+* REDESIGN..S!
+
+  Okay, some different LiveJournal designs are available now,
+  with more coming.  The default look will be selected later
+  by a vote.  But for now, you can select your preferred
+  scheme by going to one of the following URLs:
+
+    http://www.livejournal.com/?setscheme=classic
+    http://www.livejournal.com/?setscheme=lynx
+    http://www.livejournal.com/?setscheme=bluewhite
+    http://www.livejournal.com/?setscheme=opalcat
+
+  That sets a cookie to remember your favorite scheme.
+  To remove the cookie and go back to the default scheme, go
+  to:
+
+    http://www.livejournal.com/?setscheme=
+
+* STYLE/COLOR CONTEST!!
+
+  This is a sneak announcement which I plan to make in a few
+  days --- LiveJournal will be holding a style & color theme
+  contest in a bit here.  Users will be able to submit custom
+  styles and color themes they've created and a panel of judges
+  will rank them.  There will be prizes for all types of
+  applications, but complete styles (lastn+calendar+day+friends)
+  will have the biggest prizes, with color themes having
+  the smallest.  But perhaps best, I'll give tons of credit and
+  public recognition to all users that submit entries.
+
+  Offical rules and deadlines and all that will be up on the
+  web within a few days, but here are some base rules if you
+  want to get started already:
+
+     * styles must be entirely free of the %%color-*%% tags, or
+       must only use them entirely.  there will be two sets
+       of style entries: fixed color or variable color.  i'm
+       sure fixed-color ones will look fancier, but the biggest
+       prizes will go to variable color ones (where users can
+       select their colors)
+
+     * there can be no hard-coded names or whatnot in the style,
+       it must be usable by any user.  (that's the point of
+       this contest, to get you guys to do the web design because
+       i suck at it ... if you don't want your work being made
+       public, don't enter the contest)
+
+     * styles should be able to use most/any color themes well.
+
+     * color themes should be able to work on any/all styles well.
+
+  I'll also be making a frames-based preview tool, where you can
+  enter a username, style (from drop-down), theme (from drop-down),
+  and press "View" and it'll show up in the bottom frame.  This
+  will assist both you and the judges.
+
+* SLEEP.
+
+  I think that's it.  I'm going to bed.  It's 5:23 am.
+
+REFERENCE INFO:
+===============
+For the record, your information is as follows:
+
+     username: [user]
+     password: (use http://www.livejournal.com/lostinfo.bml)
+email address: [email]
+  last update: [timeupdate]
+ 
+You can login and change this and other information at:
+
+	http://www.livejournal.com/editinfo.bml
+	http://www.livejournal.com/changepassword.bml
+
+To unsubscribe from this newsletter, go to the "editinfo" link above and uncheck the option for "LiveJournal news".
+
+And, as always... if you have *any* questions, feel free to mail me and ask.
+
+Brad
+brad@livejournal.com

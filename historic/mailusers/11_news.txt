@@ -1,0 +1,92 @@
+To: [email]
+From: brad@livejournal.com
+Subject: LiveJournal News -- #11
+
+Hey [name]!
+
+WHAT IS THIS?
+=============
+You are getting this because at some point you opted to receive LiveJournal news.  Read below for how to unsubscribe.
+
+NEWS:
+=====
+
+* NEW WINDOWS CLIENT
+
+  The new LiveJournal for Windows client has been put
+  up on the preview releases page:
+
+     http://www.livejournal.com/download/preview/
+
+  There have been a ton of cool changes, both in new
+  features and fixed bugs.  I'll give free paid-accounts
+  to the first 5 people to report unique critical bugs 
+  in the client (as opposed to lack of features).
+
+  If you're curious what the new client can do, read:
+  http://www.livejournal.com/download/win32_changelog.bml
+
+* CONTEST
+
+  The LiveJournal style/theme contest has been extended
+  another few days until July 27th because so few people
+  had submitted entries.  If you or somebody you know
+  has a really cool looking LiveJournal, tell them to
+  go register, because at this point nearly everybody
+  who enters will win something.
+
+     http://www.livejournal.com/contest/
+
+* BANNER ADS
+
+  Yes, there are now banner ads on LiveJournal, but
+  not on people's journals, only at the bottom of the
+  main LiveJournal information pages.  However,
+  there are ads in the message boards, unless you're
+  a paid user.  That's about the only benefit to
+  sending in money at this point (to have them disabled)
+  but there are more paid-user features coming in
+  the upcoming weeks.  (if you don't pay, don't worry...
+  there are still tons of new things coming for you.
+  In fact, there will probably never be a substantially
+  larger number of paid-user features.  Getting a
+  paid-account is just a way to show your support.)
+
+* NEW SERVER
+
+  Thought LiveJournal has been fast lately?  It has.
+  I've been tuning the database and my code non-stop
+  getting it to behave.  Well, in the middle of it all
+  when I thought I wasn't going to get it fast enough,
+  I decided to upgrade the server.  The machine is
+  currently a single Pentium II 400 Mhz with 384 MB
+  of memory.  The new machine which I just obtained
+  today is a dual-Pentium III 550 w/ 512 MB of memory.
+  The dual processors along with the code improvements
+  should solve LiveJournal performance problems for
+  quite some time.  I'll build the new system starting
+  Monday and do the switch from the old server to the
+  new one late at night on Thursday or so.  The switch
+  should be quick.
+  
+
+REFERENCE INFO:
+===============
+For the record, your information is as follows:
+
+     username: [user]
+     password: (use http://www.livejournal.com/lostinfo.bml)
+email address: [email]
+  last update: [timeupdate]
+ 
+You can login and change this and other information at:
+
+	http://www.livejournal.com/editinfo.bml
+	http://www.livejournal.com/changepassword.bml
+
+To unsubscribe from this newsletter, go to the "editinfo" link above, login, and uncheck the option for "LiveJournal news".
+
+And, as always... if you have *any* questions, feel free to mail me and ask.
+
+Brad
+brad@livejournal.com

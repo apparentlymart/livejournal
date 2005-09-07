@@ -1,0 +1,107 @@
+To: [email]
+From: brad@livejournal.com
+Subject: LiveJournal News
+
+Hey [name]!
+
+WHAT IS THIS?
+=============
+You are getting this because at some point you opted to receive LiveJournal news.  Read below for how to unsubscribe.  However, please don't unsubscribe... I rarely send out updates, so when I do they're usually somewhat interesting.
+
+NEWS:
+=====
+Well, I'm now done with classes for the year.  Only two days of finals remain, and then I'll be working on LiveJournal a ton during the summer!  Here are some new features you should expect sometime in the next week or so:
+
+* PERFORMANCE IMPROVEMENTS
+
+  At times, LiveJournal has been responding pretty slowly lately.
+  I have an extra server just about ready to go and am going to
+  hook that up when I'm done with finals.  That should roughly
+  double (if not more, because of people reloading if it's slow)
+  the speed of the site.  I'll also be improving a lot of the
+  database setup to be faster.  So, please bear with me if
+  LiveJournal is slow the next few days... it'll get better
+  really soon now.
+
+* NICER ADDRESSES
+
+  You can now access your journal with an address like this:
+
+     http://bradfitz.livejournal.com/
+
+  Neat, eh?  Thanks to user 'evan' for this idea.
+
+* NEW WINDOWS CLIENT ... SOON!
+
+  The new upcoming Windows client just plain rocks... that's 
+  about all there is to say.  Changes include:
+
+  - You'll be able to add subjects to your journal entries.  This
+    is extremely important to people who run news sites using
+    LiveJournal.  As an example, I made a LiveJournal theme that
+    makes your friends view look exactly like Slashdot.org.  :)
+    The web client and the Linux client already have this.  The
+    subject support in the Windows client is complete, but it 
+    can't be released until the buggy parts of the new version
+    are fixed.
+
+  - Security settings:  you can pick who can read what journal
+    entries.  You'll be able to do this from the web too,
+    once the windows client is released.  (Trying to keep it in
+    sync).
+
+  - Spell checking!  Thanks to David Beroff (user: d4b) for
+    donating the entire $169 to buy the license for the spell
+    checking component.  The next version of LiveJournal will
+    have a spell checker built-in, so you can spell-check by
+    hitting F7 or automatically before you post (an option).
+    I'd also like to thank the other users that sent in money
+    for this cause... minki & scottbarlow.  I seem to be
+    forgetting somebody else, though.  Let me know!  I'll use
+    the extra money to pay a web designer (I suck at HTML) to
+    make some cool public styles for LiveJournal.
+
+* CURRENT MOOD/MUSIC SUPPORT
+
+  After all the above stuff, I'm going to be adding "current
+  mood" and "current music" support.  Or, more generally:
+  "current <xxxxx>".  Current music will be obtained from
+  WinAmp or XMMS/mpeg123/etc, or you can enter it yourself.
+  Current mood support will be from the client, or from your
+  imood.com mood.  We're going to be working with imood.com
+  to integrate the two services a little.  Current "weather"
+  could be obtained from different weather websites...
+  the possibilities are endless... :)
+
+* MULTI-PICTURE SUPPORT
+
+  LiveJournal will let you have multiple pictures in a bit,
+  and you'll be able to pick which to use for your journal
+  entries.  (one will be your default).  This'll work with
+  current mood support to let you choose different pictures
+  for different moods.  (I'd like to thank user 'faith' for
+  this idea... I really like it)
+
+And so much more... I have so many new ideas for LiveJournal, 
+so I'll have plenty to do this summer.
+
+REFERENCE INFO:
+===============
+For the record, your information is as follows:
+
+     username: [user]
+     password: (use http://www.livejournal.com/lostinfo.bml)
+email address: [email]
+  last update: [timeupdate]
+ 
+You can login and change this and other information at:
+
+	http://www.livejournal.com/editinfo.bml
+	http://www.livejournal.com/changepassword.bml
+
+To unsubscribe from this newsletter, go to the "editinfo" link above and uncheck the option for "LiveJournal news".
+
+And, as always... if you have *any* questions, feel free to mail me and ask.
+
+Brad
+brad@livejournal.com

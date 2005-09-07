@@ -1,0 +1,54 @@
+To: [email]
+From: brad@livejournal.com
+Subject: LiveJournal News -- paid accounts
+
+Hey [name]!
+
+WHAT IS THIS?
+=============
+You are getting this because you have a paid account at LiveJournal.com.
+
+NEWS:
+=====
+I just wanted to write to say that your paid account months are now
+counting down.  Previously I was just crediting them up, waiting until
+I felt that paid accounts were finally valuable.
+
+So, you have a paid account until:
+
+    [paiduntil]
+
+For a list of features that you now have, or soon will have, see:
+
+    http://www.livejournal.com/paidaccounts/
+
+I thank you once again for getting a paid account.  You may have noticed
+the server is bogged down during certain parts of the day lately.  This
+will all change soon enough.  I'm going to be getting a lot of new servers.
+Follow the news at http://news.livejournal.com/ for what I'm planning.
+
+If you want to help, try and get your friends to get paid accounts too, or
+at least make them aware of the URL above, so they can make the decision
+on their own.  The price is set low enough that nobody should have a problem
+with the money.  The biggest annoyance for most is just doing it.
+
+Thanks!
+
+REFERENCE INFO:
+===============
+For the record, your information is as follows:
+
+     username: [user]
+     password: (use http://www.livejournal.com/lostinfo.bml)
+email address: [email]
+  last update: [timeupdate]
+ 
+You can login and change this and other information at:
+
+  http://www.livejournal.com/editinfo.bml
+  http://www.livejournal.com/changepassword.bml
+
+And, as always... if you have *any* questions, feel free to mail me and ask.
+
+Brad
+brad@livejournal.com
