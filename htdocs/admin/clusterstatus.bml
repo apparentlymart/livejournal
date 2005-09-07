@@ -33,7 +33,7 @@ body<=
             if ($dbcm) {
                 $ret .= "; available";
             } else {
-                $ret .= "; <span style='color: red;'>unavailable</a>";
+                $ret .= "; <span style='color: red;'>unavailable</span>";
             }
         }
 
