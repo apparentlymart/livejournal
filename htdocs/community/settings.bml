@@ -44,6 +44,9 @@ body<=
 
  if (LJ::did_post())
  {
+     return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>"
+         unless LJ::check_form_auth();
+
      my $sth;
      my $cuser = LJ::canonical_username($POST{'cuser'});
      my $cu = LJ::load_user($cuser);
@@ -165,6 +168,7 @@ body<=
  }
 
  $ret .= "<form method='post' action='settings.bml?mode=$mode'>";
+ $ret .= LJ::form_auth();
 
  if ($mode eq 'modify') {
     $ret .= "<?h1 $ML{'.label.changeheader'} h1?><?p $ML{'.label.changetext'} p?>";

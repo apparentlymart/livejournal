@@ -38,6 +38,11 @@
     my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
     
     if ($POST{'mode'} eq "save") {
+        unless (LJ::check_form_auth()) {
+            $body = "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>";
+            return;
+        }
+
         my %res;
         $POST{'mode'} = "editfriendgroups";
         $POST{'user'} = $u->{'user'};
@@ -72,6 +77,7 @@
 
     $body .= "<?h1 $ML{'.title'} h1?><?p $ML{'.text'} p?><?p $ML{'.text.sec'} p?><p>";
     $body .= "<form method='post' name='fg' action='editgroups.bml$getextra'>";
+    $body .= LJ::form_auth();
     $body .= "<input type='hidden' name='mode' value='save' />";
     for (my $i=1; $i<=30; $i++) {
         my $sort = 255;
