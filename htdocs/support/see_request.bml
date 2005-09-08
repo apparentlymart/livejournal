@@ -243,19 +243,27 @@ body<=
     {
         my $visemail = $email;
         if ($sp->{_cat}->{'public_read'}) {
-            $visemail =~ s/^.+\@/********\@/; 
+            $visemail =~ s/^.+\@/********\@/;
         }
         my $ename = $sp->{'reqtype'} eq 'user' ? LJ::ljuser($u) : LJ::ehtml($sp->{reqname});
-        
-        # we show links to the history page if the user is a helper in this category or if it's a
-        # private category and the person has supporthelp somewhere (which is the general rule of
-        # thumb to use the history viewer)
-        my $show_history = !$sp->{_cat}->{public_read} && LJ::check_priv($remote, 'supporthelp');
-        if ($helper_mode || $show_history) {
-            $ret .= $sp->{reqtype} eq 'user' ? 
+
+        # we show links to the history page if the user is a helper since
+        # helpers can always find this information anyway just by taking
+        # more steps.  Show email history link if they have finduser and
+        # thus once again could get this information anyway.
+        my $has_sh = LJ::check_priv($remote, 'supporthelp');
+        my $has_fu = LJ::check_priv($remote, 'finduser');
+
+        my %show_history = (
+                            user  => $has_sh,
+                            email => ($has_sh && $has_fu || ($has_sh && !$sp->{_cat}->{public_read})),
+                            );
+
+        if ($show_history{user} || $show_history{email}) {
+            $ret .= $sp->{reqtype} eq 'user' && $show_history{user} ?
                     "$ename <a href=\"history.bml?user=$u->{user}\">$u->{name}</a>" :
                     "$ename";
-            $ret .= $owner_mode || $show_history ?
+            $ret .= $show_history{email} ?
                     " (<a href=\"history.bml?email=" . LJ::eurl($email) . "\">$visemail</a>)" :
                     " ($visemail)";
         } else {
