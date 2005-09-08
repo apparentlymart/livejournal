@@ -5476,12 +5476,24 @@ sub make_journal
 
     # signal to LiveJournal.pm that we can't handle this
     if ($stylesys == 1 && (({ entry=>1, reply=>1, month=>1, tag=>1 }->{$view}) || ($view eq 'lastn' && $geta->{tag}))) {
-        my $fallback = $geta->{'fallback'} || "";
-        my $bmlfallback = (!$LJ::S1_SHORTCOMINGS || ($fallback eq 'bml')) && !($fallback eq 's2');
-        $bmlfallback = 0 if $view eq 'tag' || $view eq 'lastn';
+
+        # pick which fallback method (s2 or bml) we'll use by default, as configured with
+        # $S1_SHORTCOMINGS
+        my $fallback = $LJ::S1_SHORTCOMINGS ? "s2" : "bml";
+
+        # but if the user specifys which they want, override the fallback we picked
+        if ($geta->{'fallback'} && $geta->{'fallback'} =~ /^s2|bml$/) {
+            $fallback = $geta->{'fallback'};
+        }
+
+        # there are no BML handlers for these views, so force s2
+        if ($view eq 'tag' || $view eq 'lastn') {
+            $fallback = "s2";
+        }
+
         # fall back to BML unless we're using the in-development S2
         # fallback (the "s1shortcomings/layout")
-        if ($bmlfallback) {
+        if ($fallback eq "bml") {
             ${$opts->{'handle_with_bml_ref'}} = 1;
             return;
         }
