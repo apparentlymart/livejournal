@@ -259,10 +259,8 @@ sub StartTag {
             $feed = {};
             $feed->{'standard'} = 'atom';
             $feed->{'version'} = $_{'version'};
-            return err("No version specified in <feed>")
-                unless $feed->{'version'};
             return err("Incompatible version specified in <feed>")
-                unless $feed->{'version'} eq '0.3';
+                if $feed->{'version'} && $feed->{'version'} < 0.3;
             last TAGS;
         }
         if ($tag eq 'entry') {

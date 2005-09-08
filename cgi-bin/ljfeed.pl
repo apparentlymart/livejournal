@@ -1,8 +1,16 @@
 #!/usr/bin/perl
 
+package LJ::Feed;
 use strict;
 
-package LJ::Feed;
+BEGIN {
+    $LJ::OPTMOD_XMLATOM = eval q{
+        use XML::Atom::Feed;
+        use XML::Atom::Entry;
+        use XML::Atom::Link;
+        XML::Atom->VERSION < 0.09 ? 0 : 1;
+    };
+};
 
 my %feedtypes = (
     rss  => \&create_view_rss,
@@ -329,78 +337,145 @@ sub create_view_rss
 
 # the creator for the Atom view
 # keys of $opts:
-# saycharset - required: the charset of the feed
-# noheader - only output an <entry>..</entry> block. off by default
+# saycharset - the charset of the feed (defaults to utf-8)
+# single_entry - only output an <entry>..</entry> block. off by default
 # apilinks - output AtomAPI links for posting a new entry or 
 #            getting/editing/deleting an existing one. off by default
 # TODO: define and use an 'lj:' namespace
-
+#
+# TODO: Remove lines marked with 'COMPAT' - they are only present
+# to allow backwards compatibility with atom parsers that are pre 0.6-draft.
+# We create tags valid for 1.1-draft, but we want to be nice during
+# atom's (and atom users) continuing transition.  1.0 parsers, according
+# to spec, should NOT barf on unknown tags.
+# * Where we can't be compatible, we use Atom 1.0. *
+# http://www.ietf.org/internet-drafts/draft-ietf-atompub-format-11.txt
+#
+# TODO: When COMPAT lines are removed, change namespace to
+# http://www.w3.org/2005/Atom  (this requires an XML::Atom update)
 sub create_view_atom
 {
-    my ($journalinfo, $u, $opts, $cleanitems) = @_;
+    my ( $j, $u, $opts, $cleanitems ) = @_;
+    my ( $feed, $xml );
 
-    my $ret;
-
-    # prolog line
-    $ret .= "<?xml version='1.0' encoding='$opts->{'saycharset'}' ?>\n";
-    $ret .= LJ::run_hook("bot_director", "<!-- ", " -->");
-
-    # AtomAPI interface
+    # AtomAPI interface path
     my $api = $opts->{'apilinks'} ? "$LJ::SITEROOT/interface/atom" :
                                     "$LJ::SITEROOT/users/$u->{user}/data/atom";
 
-    # header
-    unless ($opts->{'noheader'}) {
-        $ret .= "<feed version='0.3' xmlns='http://purl.org/atom/ns#'>\n";
+    my $make_link = sub {
+        my ( $rel, $type, $href, $title ) = @_;
+        my $link = XML::Atom::Link->new;
+        $link->rel($rel);
+        $link->type($type);
+        $link->href($href);
+        $link->title( LJ::exml($title) ) if $title;
+        return $link;
+    };
+
+    my $author = XML::Atom::Person->new();
+    $author->email( LJ::exml( $u->{'email'} ) ) if $u->{'email'};
+    $author->name(  LJ::exml( $u->{'name'} ) );
+
+    # feed information
+    unless ($opts->{'single_entry'}) {
+        $feed = XML::Atom::Feed->new();
+        $xml  = $feed->{doc};
+
+        $xml->setEncoding( $opts->{'saycharset'} || 'utf-8' );
+        $xml->insertBefore( $xml->createComment( LJ::run_hook("bot_director") ), $xml->documentElement());
 
         # attributes
-        $ret .= "<title mode='escaped'>" . LJ::exml($journalinfo->{title}) . "</title>\n";
-        $ret .= "<tagline mode='escaped'>" . LJ::exml($journalinfo->{subtitle}) . "</tagline>\n"
-            if $journalinfo->{subtitle};
-        $ret .= "<link rel='alternate' type='text/html' href='$journalinfo->{link}' />\n";
+        $feed->id( "urn:lj:$LJ::DOMAIN:atom1:$u->{user}" );
+        $feed->title( LJ::exml( $j->{'title'} ) );
+        if ( $j->{'subtitle'} ) {
+            $feed->subtitle( LJ::exml( $j->{'subtitle'} ) );
+            $feed->tagline(  LJ::exml( $j->{'subtitle'} ) ); # COMPAT
+        }
 
-        # last update
-        $ret .= "<modified>" . LJ::time_to_w3c($journalinfo->{'modtime'}, 'Z')
-            . "</modified>";
+        $feed->author( $author );
+        $feed->add_link( $make_link->( 'alternate', 'text/html', $j->{'link'} ) );
+        $feed->add_link(
+            $make_link->(
+                'self',
+                $opts->{'apilinks'}
+                ? ( 'application/x.atom+xml', "$api/feed" )
+                : ( 'text/xml', $api )
+            )
+        );
+        $feed->updated( LJ::time_to_w3c($j->{'modtime'}, 'Z') );
+        $feed->modified( LJ::time_to_w3c($j->{'modtime'}, 'Z') );  # COMPAT
 
         # link to the AtomAPI version of this feed
-        $ret .= "<link rel='service.feed' type='application/x.atom+xml' title='";
-        $ret .= LJ::ehtml($journalinfo->{title});
-        $ret .= $opts->{'apilinks'} ? "' href='$api/feed' />" : "' href='$api' />";
+        $feed->add_link(
+            $make_link->(
+                'service.feed',
+                'application/x.atom+xml',
+                ( $opts->{'apilinks'} ? "$api/feed" : $api ),
+                $j->{'title'}
+            )
+        );
 
-        if ($opts->{'apilinks'}) {
-            $ret .= "<link rel='service.post' type='application/x.atom+xml' title='Create a new post' href='$api/post' />";
-        }
+        $feed->add_link(
+            $make_link->(
+                'service.post',
+                'application/x.atom+xml',
+                "$api/post",
+                'Create a new entry'
+            )
+        ) if $opts->{'apilinks'};
     }
 
     # output individual item blocks
-
     foreach my $it (@$cleanitems) 
     {
         my $itemid = $it->{itemid};
         my $ditemid = $it->{ditemid};
 
-        $ret .= "  <entry xmlns=\"http://purl.org/atom/ns#\">\n";
-        # include empty tag if we don't have a subject.
-        $ret .= "    <title mode='escaped'>" . LJ::exml($it->{subject}) . "</title>\n";
-        $ret .= "    <id>urn:lj:$LJ::DOMAIN:atom1:$journalinfo->{u}{user}:$ditemid</id>\n";
-        $ret .= "    <link rel='alternate' type='text/html' href='$journalinfo->{link}$ditemid.html' />\n";
-        if ($opts->{'apilinks'}) {
-            $ret .= "<link rel='service.edit' type='application/x.atom+xml' title='Edit this post' href='$api/edit/$itemid' />";
+        my $entry = XML::Atom::Entry->new();
+        my $entry_xml = $entry->{doc};
+
+        $entry->title( LJ::exml( $it->{'subject'} ) );
+        $entry->id("urn:lj:$LJ::DOMAIN:atom1:$u->{user}:$ditemid");
+
+        # author isn't required if it is in the main <feed>
+        # only add author if we are in a single entry view, or 
+        # the journal entry isn't owned by the journal owner. (communities)
+        if ( $opts->{'single_entry'} or $j->{'u'}->{'email'} ne $u->{'email'} ) {
+            my $author = XML::Atom::Person->new();
+            $author->email( LJ::exml( $j->{'u'}->{'email'} ) ) if $j->{'u'}->{'email'};
+            $author->name(  LJ::exml( $j->{'u'}->{'name'} ) );
+            $entry->author($author);
         }
-        $ret .= "    <created>" . LJ::time_to_w3c($it->{createtime}, 'Z') . "</created>\n"
-             if $it->{createtime} != $it->{modtime};
+
+        $entry->add_link( 
+            $make_link->( 'alternate', 'text/html', "$j->{'link'}$ditemid.html" )
+        );
+
+        $entry->add_link(
+            $make_link->(
+                'service.edit',      'application/x.atom+xml',
+                "$api/edit/$itemid", 'Edit this post'
+            )
+          ) if $opts->{'apilinks'};
 
         my ($year, $mon, $mday, $hour, $min, $sec) = split(/ /, $it->{eventtime});
-        $ret .= "    <issued>" .  sprintf("%04d-%02d-%02dT%02d:%02d:%02d",
-                                          $year, $mon, $mday,
-                                          $hour, $min, $sec) .  "</issued>\n";
-        $ret .= "    <modified>" . LJ::time_to_w3c($it->{modtime}, 'Z') . "</modified>\n";
-        $ret .= "    <author>\n";
-        $ret .= "      <name>" . LJ::exml($journalinfo->{u}{name}) . "</name>\n";
-        $ret .= "      <email>" . LJ::exml($journalinfo->{email}) . "</email>\n" if $journalinfo->{email};
-        $ret .= "    </author>\n";
-        $ret .= "    <category term='$_' />\n" foreach map { LJ::exml($_) } @{$it->{tags} || []};
+        my $event_date = sprintf "%04d-%02d-%02dT%02d:%02d:%02d",
+                                 $year, $mon, $mday, $hour, $min, $sec;
+
+        $entry->published( $event_date );
+        $entry->issued(    $event_date );   # COMPAT
+
+        $entry->updated(  LJ::time_to_w3c($it->{modtime}, 'Z') );
+        $entry->modified( LJ::time_to_w3c($it->{modtime}, 'Z') );  # COMPAT
+
+        # XML::Atom 0.9 doesn't support categories.   Maybe later?
+        foreach my $tag ( @{$it->{tags} || []} ) {
+            $tag = LJ::exml( $tag );
+            my $category = $entry_xml->createElement( 'category' );
+            $category->setAttribute( 'term', $tag );
+            $entry_xml->getDocumentElement->appendChild( $category );
+        }
+
         # if syndicating the complete entry
         #   -print a content tag
         # elsif syndicating summaries
@@ -408,20 +483,32 @@ sub create_view_atom
         # else (code omitted), we're syndicating title only
         #   -print neither (the title has already been printed)
         #   note: the $event was also emptied earlier, in make_feed
+        #
+        # a lack of a content element is allowed,  as long
+        # as we maintain a proper 'alternate' link (above)
         if ($u->{'opt_synlevel'} eq 'full') {
-            $ret .= "    <content type='text/html' mode='escaped'>" . LJ::exml($it->{event}) . "</content>\n";
+            # Do this manually for now, until XML::Atom supports new
+            # content type classifications.
+            my $content = $entry_xml->createElement( 'content' );
+            $content->setAttribute( 'type', 'html' );
+            $content->appendTextNode( LJ::exml( $it->{'event'} ) );
+            $entry_xml->getDocumentElement->appendChild( $content );
         } elsif ($u->{'opt_synlevel'} eq 'summary') {
-            $ret .= "    <summary type='text/html' mode='escaped'>" . LJ::exml($it->{event}) . "</summary>\n";
+            my $summary = $entry_xml->createElement( 'summary' );
+            $summary->setAttribute( 'type', 'html' );
+            $summary->appendTextNode( LJ::exml( $it->{'event'} ) );
+            $entry_xml->getDocumentElement->appendChild( $summary );
         }
 
-        $ret .= "  </entry>\n";
+        if ( $opts->{'single_entry'} ) {
+            return $entry->as_xml();
+        } 
+        else {
+            $feed->add_entry( $entry );
+        }
     }
 
-    unless ($opts->{'noheader'}) {
-        $ret .= "</feed>\n";
-    }
-
-    return $ret;
+    return $xml->encoding eq 'utf-8' ? $feed->as_xml() : $xml->toString();
 }
 
 # create a FOAF page for a user

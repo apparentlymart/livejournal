@@ -308,9 +308,8 @@ sub handle_edit {
             { 'u' => $u },
             $u,
             {
-                'saycharset' => "utf-8",
-                'noheader'   => 1,
-                'apilinks'   => 1,
+                'single_entry' => 1,
+                'apilinks'     => 1,
             },
             [$item]
         );
@@ -422,7 +421,6 @@ sub handle_feed {
     # options
     
     my %op = ('pathextra' => "/atom",
-              'saycharset'=> "utf-8",
               'apilinks'  => 1,
               );
     my $ret = LJ::Feed::make_feed($r, $u, $remote, \%op);
