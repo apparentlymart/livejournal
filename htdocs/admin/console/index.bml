@@ -72,6 +72,7 @@
      }
 
      $ret .= "<form method=post><p>";
+     $ret .= LJ::form_auth();
      $ret .= "<tt>enter commands:</tt><br>";
      $ret .= LJ::html_hidden('remoteuser', $remote->{'user'}) if $remote;
      $ret .= "<textarea name=commands rows=3 cols=60 wrap=off></textarea> ";
