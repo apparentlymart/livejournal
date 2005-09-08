@@ -17,6 +17,10 @@
          return "<b>Error:</b> requires post.";
      }
 
+     unless (LJ::check_form_auth()) {
+         return "<b>Error:</b> invalid form submission, please refresh and try again.";
+     }
+
      if ($remote && $remote->{'user'} ne $POST{'remoteuser'}) {
          return "<b>Error:</b> invalid user.";
      }
@@ -81,6 +85,7 @@
      $ret .= "[ console | <A HREF=\"reference.bml\">reference</A> ]<P>";
      
      $ret .= "<FORM METHOD=POST>";
+     $ret .= LJ::form_auth();
      $ret .= LJ::html_hidden('remoteuser', $remote->{'user'}) if $remote;
      $ret .= "<TABLE WIDTH=400><TR VALIGN=BOTTOM>";
      $ret .= "<TD><IMG SRC=\"$LJ::IMGPREFIX/nerd_small.jpg\" WIDTH=167 HEIGHT=169 HSPACE=2 VSPACE=2></TD>";
