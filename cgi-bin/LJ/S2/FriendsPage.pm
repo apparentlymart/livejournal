@@ -20,7 +20,7 @@ sub FriendsPage
     my $sth;
     my $user = $u->{'user'};
 
-    # see how often the remote user can reload this page.  
+    # see how often the remote user can reload this page.
     # "friendsviewupdate" time determines what granularity time
     # increments by for checking for new updates
     my $nowtime = time();
@@ -28,7 +28,7 @@ sub FriendsPage
     # update delay specified by "friendsviewupdate"
     my $newinterval = LJ::get_cap_min($remote, "friendsviewupdate") || 1;
 
-    # when are we going to say page was last modified?  back up to the 
+    # when are we going to say page was last modified?  back up to the
     # most recent time in the past where $time % $interval == 0
     my $lastmod = $nowtime;
     $lastmod -= $lastmod % $newinterval;
@@ -38,7 +38,7 @@ sub FriendsPage
     if ($opts->{'header'}->{'If-Modified-Since'}) {
         my $theirtime = LJ::http_to_time($opts->{'header'}->{'If-Modified-Since'});
 
-        # send back a 304 Not Modified if they say they've reloaded this 
+        # send back a 304 Not Modified if they say they've reloaded this
         # document in the last $newinterval seconds:
         unless ($theirtime < $lastmod) {
             $opts->{'handler_return'} = 304;
@@ -51,15 +51,6 @@ sub FriendsPage
 
     my $ret;
 
-    if ($get->{'mode'} eq "live") {
-        $ret .= "<html><head><title>${user}'s friends: live!</title></head>\n";
-        $ret .= "<frameset rows=\"100%,0%\" border=0>\n";
-        $ret .= "  <frame name=livetop src=\"friends?mode=framed\">\n";
-        $ret .= "  <frame name=livebottom src=\"friends?mode=livecond&amp;lastitemid=0\">\n";
-        $ret .= "</frameset></html>\n";
-        return $ret;
-    }
-
     LJ::load_user_props($remote, "opt_nctalklinks", "opt_stylemine", "opt_imagelinks", "opt_ljcut_disable_friends");
 
     # load options for image links
@@ -68,14 +59,14 @@ sub FriendsPage
         if ($remote && $remote->{'userid'} == $u->{'userid'} &&
             $remote->{'opt_imagelinks'} =~ m/^(\d+)\|(\d+)$/);
 
-    ## never have spiders index friends pages (change too much, and some 
+    ## never have spiders index friends pages (change too much, and some
     ## people might not want to be indexed)
     $p->{'head_content'} .= LJ::robot_meta_tags();
 
     my $itemshow = S2::get_property_value($opts->{'ctx'}, "page_friends_items")+0;
     if ($itemshow < 1) { $itemshow = 20; }
     elsif ($itemshow > 50) { $itemshow = 50; }
-    
+
     my $skip = $get->{'skip'}+0;
     my $maxskip = ($LJ::MAX_SCROLLBACK_FRIENDS || 1000) - $itemshow;
     if ($skip > $maxskip) { $skip = $maxskip; }
@@ -87,7 +78,7 @@ sub FriendsPage
     my $common_filter = 1;
 
     if (defined $get->{'filter'} && $remote && $remote->{'user'} eq $user) {
-        $filter = $get->{'filter'}; 
+        $filter = $get->{'filter'};
         $common_filter = 0;
         $p->{'filter_active'} = 1;
         $p->{'filter_name'} = "";
@@ -105,51 +96,19 @@ sub FriendsPage
         my $grp = LJ::get_friend_group($u, { 'name' => $group || "Default View" });
         my $bit = $grp->{'groupnum'};
         my $public = $grp->{'is_public'};
-        if ($bit && ($public || ($remote && $remote->{'user'} eq $user))) { 
+        if ($bit && ($public || ($remote && $remote->{'user'} eq $user))) {
             $filter = (1 << $bit);
         } elsif ($group) {
             $opts->{'badfriendgroup'} = 1;
             return 1;
         }
     }
-    
+
     if ($opts->{'view'} eq "friendsfriends") {
         $p->{'friends_mode'} = "friendsfriends";
     }
 
-    if ($get->{'mode'} eq "livecond") 
-    {
-        ## load the itemids
-        my @items = LJ::get_friend_items({
-            'u' => $u,
-            'userid' => $u->{'userid'},
-            'remote' => $remote,
-            'itemshow' => 1,
-            'skip' => 0,
-            'filter' => $filter,
-            'common_filter' => $common_filter,
-        });
-        my $first = @items ? $items[0]->{'itemid'} : 0;
-
-        $ret .= "time = " . scalar(time()) . "<br />";
-        $opts->{'headers'}->{'Refresh'} = "30;URL=$LJ::SITEROOT/users/$user/friends?mode=livecond&lastitemid=$first";
-        if ($get->{'lastitemid'} == $first) {
-            $ret .= "nothing new!";
-        } else {
-            if ($get->{'lastitemid'}) {
-                $ret .= "<b>New stuff!</b>\n";
-                $ret .= "<script language=\"JavaScript\">\n";
-                $ret .= "window.parent.livetop.location.reload(true);\n";	    
-                $ret .= "</script>\n";
-                $opts->{'trusted_html'} = 1;
-            } else {
-                $ret .= "Friends Live! started.";
-            }
-        }
-        return $ret;
-    }
-    
-    ## load the itemids 
+    ## load the itemids
     my %friends;
     my %friends_row;
     my %idsbycluster;
@@ -186,7 +145,7 @@ sub FriendsPage
 
     # load tags on these entries
     my $logtags = LJ::Tags::get_logtagsmulti(\%idsbycluster);
-  
+
     my %posters;
     {
         my @posterids;
@@ -200,20 +159,20 @@ sub FriendsPage
 
     my %objs_of_picid;
     my @userpic_load;
-    
+
     my %lite;   # posterid -> s2_UserLite
     my $get_lite = sub {
         my $id = shift;
         return $lite{$id} if $lite{$id};
         return $lite{$id} = UserLite($posters{$id} || $friends{$id});
     };
-    
+
     my $eventnum = 0;
     my $hiddenentries = 0;
   ENTRY:
-    foreach my $item (@items) 
+    foreach my $item (@items)
     {
-        my ($friendid, $posterid, $itemid, $security, $alldatepart) = 
+        my ($friendid, $posterid, $itemid, $security, $alldatepart) =
             map { $item->{$_} } qw(ownerid posterid itemid security alldatepart);
 
         my $fr = $friends{$friendid};
@@ -222,7 +181,7 @@ sub FriendsPage
         my $clusterid = $item->{'clusterid'}+0;
         my $datakey = "$friendid $itemid";
 
-        my $replycount = $logprops{$datakey}->{'replycount'};    
+        my $replycount = $logprops{$datakey}->{'replycount'};
         my $subject = $logtext->{$datakey}->[0];
         my $text = $logtext->{$datakey}->[1];
         if ($get->{'nohtml'}) {
@@ -247,17 +206,17 @@ sub FriendsPage
                                       $remote->{'userid'} != $friendid;
 
         LJ::CleanHTML::clean_event(\$text, { 'preformatted' => $logprops{$datakey}->{'opt_preformatted'},
-                                             'cuturl' => LJ::item_link($friends{$friendid}, $itemid, $item->{'anum'}, $stylemine), 
+                                             'cuturl' => LJ::item_link($friends{$friendid}, $itemid, $item->{'anum'}, $stylemine),
                                              'maximgwidth' => $maximgwidth,
                                              'maximgheight' => $maximgheight,
-					     'ljcut_disable' => $remote->{'opt_ljcut_disable_friends'}, });
+                                             'ljcut_disable' => $remote->{'opt_ljcut_disable_friends'}, });
         LJ::expand_embedded($friends{$friendid}, $ditemid, $remote, \$text);
 
         my $userlite_poster = $get_lite->($posterid);
         my $userlite_journal = $get_lite->($friendid);
 
         # get the poster user
-        my $po = $posters{$posterid} || $friends{$posterid};  
+        my $po = $posters{$posterid} || $friends{$posterid};
 
         # don't allow posts from suspended users
         if ($po->{'statusvis'} eq 'S') {
@@ -281,7 +240,7 @@ sub FriendsPage
             # check if they specified one
             $picid = LJ::get_picid_from_keyword($po, $logprops{$datakey}->{picture_keyword})
                 if $logprops{$datakey}->{picture_keyword};
-            
+
             # fall back on the poster's default
             $picid ||= $po->{defaultpicid};
         }
@@ -344,7 +303,7 @@ sub FriendsPage
 
         push @{$p->{'entries'}}, $entry;
         $eventnum++;
-        
+
     } # end while
 
     # set the new_day and end_day members.
@@ -410,7 +369,7 @@ sub FriendsPage
     }
 
     ## unless we didn't even load as many as we were expecting on this
-    ## page, then there are more (unless there are exactly the number shown 
+    ## page, then there are more (unless there are exactly the number shown
     ## on the page, but who cares about that)
     # Must remember to count $hiddenentries or we'll have no skiplinks when > 1
     unless (($eventnum + $hiddenentries) != $itemshow || $skip == $maxskip) {
