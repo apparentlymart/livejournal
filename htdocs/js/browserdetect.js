@@ -103,7 +103,7 @@ function BrowserDetectLite() {
    this.isIE4xMac = (this.isIE4x && this.isMac);
 
    this.isRichText = this.isIE55up ? true : false;
-   if (this.isGecko || this.isAppleWebKit) {
+   if (this.isGecko || this.isAppleWebKit || this.isOpera) {
         if (document.designMode && document.execCommand) { this.isRichText = true; }
    }
 }
