@@ -4316,7 +4316,7 @@ entryform.htmlokay.norich=(HTML okay; by default, newlines will be auto-formatte
 
 entryform.htmlokay.rich=(HTML okay; by default, newlines will be auto-formatted to <tt>&lt;br&gt;</tt> - or, use the <a [[opts]]>rich text</a> mode.)
 
-entryform.htmlokay.rte_nosupport=rte_nosupport=(Sorry, your browser does not currently support the rich text environment.)
+entryform.htmlokay.rte_nosupport=(Sorry, your browser does not currently support the rich text environment.)
 
 entryform.mood=Mood:
 
