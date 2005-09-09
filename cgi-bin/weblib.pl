@@ -1514,9 +1514,10 @@ sub js_dumper {
     if (ref $obj eq "HASH") {
         my $ret = "{";
         foreach my $k (keys %$obj) {
-            $ret .= "$k: " . js_dumper($obj->{$k}) . ",";
+            my $kd = ($k =~ /^\w+$/) ? $k : js_dumper($k);
+            $ret .= "$kd: " . js_dumper($obj->{$k}) . ",";
         }
-        chop $ret;
+        chop $ret if keys %$obj;
         $ret .= "}";
         return $ret;
     } elsif (ref $obj eq "ARRAY") {
