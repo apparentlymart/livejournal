@@ -35,6 +35,9 @@ body<=
             return "<?h1 $ML{'Error'} h1?>\n<?p " . $_[0] . " p?>";
         };
 
+        return $dberr->($ML{'error.invalidform'})
+            unless LJ::check_form_auth();
+
         # are they suspended?
         return LJ::bad_input($ML{'.error.nochange.suspend'})
             if $u->{'statusvis'} eq 'S';
@@ -87,6 +90,7 @@ body<=
 
     my $getextra = "?authas=$authas" unless $authas eq $remote->{'user'};
     $ret .= "<form method='post' action='accountstatus.bml$getextra'>\n";
+    $ret .= LJ::form_auth();
 
     $ret .= "<?h1 $ML{'.journalstatus.head'} h1?><?p $ML{'.journalstatus.about'} p?>\n";
     $ret .= "<div style='margin-left: 30px'>$ML{'.journalstatus.select.head'}\n";
