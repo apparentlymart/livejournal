@@ -2120,6 +2120,26 @@ CREATE TABLE openid_external (
 )
 EOC
 
+register_tablecreate("priv_packages", <<'EOC');
+CREATE TABLE priv_packages (
+  pkgid int(10) unsigned NOT NULL auto_increment,
+  name varchar(255) NOT NULL default '',
+  lastmoduserid int(10) unsigned NOT NULL default 0,
+  lastmodtime int(10) unsigned NOT NULL default 0,
+  PRIMARY KEY (pkgid),
+  UNIQUE KEY (name)
+)
+EOC
+
+register_tablecreate("priv_packages_content", <<'EOC');
+CREATE TABLE priv_packages_content (
+  pkgid int(10) unsigned NOT NULL auto_increment,
+  privname varchar(20) NOT NULL, 
+  privarg varchar(40),
+  PRIMARY KEY (pkgid, privname, privarg)
+)
+EOC
+
 # NOTE: new table declarations go here
 
 

@@ -108,7 +108,7 @@ sub execute
     }
 
     ## load the privileges (if not already loaded) that this remote user needs.
-    if ($cmd->{'privs'})
+    if ($cmd->{'privs'} && $remote)
     {
         foreach my $privname (@{$cmd->{'privs'}})
         {
@@ -157,7 +157,7 @@ $cmd{'priv'} =
     argsummary => '<action> <privs> <usernames>',
     args       => [
                    action    => "'grant', 'revoke', or 'revoke_all' to revoke all args for a given priv",
-                   privs     => "Comma-delimited list of priv names or priv:arg pairs",
+                   privs     => "Comma-delimited list of priv names or priv:arg pairs, or package names (prefixed like '#mypkg')",
                    usernames => "Comma-delimited list of usernames",
                   ],
     handler => sub {
@@ -169,6 +169,7 @@ $cmd{'priv'} =
         my $is_grant;           # 1 if granting, 0 if revoking
         my $is_revoke_all;      # 1 if action is revoke_all
         my @privs;              # ([privcode,arg], ...)
+        my @packages;           # (package, ...)
         my @usernames;          # (username, ...)
         {
             my $myname    = shift @$args;
@@ -182,8 +183,34 @@ $cmd{'priv'} =
             $is_grant      = ($action eq "grant");
             $is_revoke_all = ($action eq "revoke_all");
 
-            @privs     = map {[split /:/, $_, 2]} (split /,\s*/, $privstr);
             @usernames = split /,\s*/, $userstr;
+
+            # break out packages and privs separately
+            foreach (split /,\s*/, $privstr) {
+                # things that start with a # are packages
+                if (/^#/) {
+                    my $pname = substr($_, 1);
+                    my $privs = $dbh->selectall_arrayref(qq{
+                            SELECT c.privname, c.privarg
+                            FROM priv_packages p, priv_packages_content c
+                            WHERE c.pkgid = p.pkgid
+                              AND p.name = ?
+                        }, undef, $pname);
+                    return $fail->($out, "Error querying database: " . $dbh->errstr) if $dbh->err;
+
+                    # now push them onto the list, priv and arg
+                    push @privs, [ @$_ ]
+                        foreach @{$privs || []};
+
+                } else {
+                    # old style: just push the split privilege onto the stack
+                    push @privs, [split /:/, $_, 2];
+                }
+            }
+
+            # at this point, fail if we have no privs
+            return $fail->($out, "No privileges specified to action and/or package is empty.")
+                unless @privs;
 
             # To reduce likelihood that someone will do 'priv revoke foo'
             # intending to remove 'foo:*' and accidentally only remove 'foo:'
@@ -299,6 +326,127 @@ $cmd{'priv'} =
             }
         }
         return $result;
+    },
+};
+
+$cmd{'priv_package'} = {
+    des => 'Moderate packages of admin privs.  Basic workflow: priv_package create mypkg "Test Package", priv_package add mypkg admin:*, priv_package list.  To actually grant a package to someone, priv grant #mypkg username.  Works for revoke as well.',
+    privs => [qw(admin)],
+    argsummary => '<command> [package] [arg]',
+    args => [
+                command => 'One of "list", "create", "add", "remove", "delete".',
+                package => 'The package to operate on.  Use the short name.',
+                arg => 'If command is "list", no argument to see all packages, or provide a package to see the privs inside.  For "create" and "delete" of a package, no argument.  For "add" and "remove", arg is the privilege being granted in "privname:privarg" format.',
+            ],
+    handler => sub {
+        my ($dbh, $remote, $args, $out) = @_;
+
+        return $fail->($out, "You must be logged in.")
+            unless $remote;
+        return $fail->($out, "You must have some sort of admin or siteadmin priv to be here.")
+            unless LJ::check_priv($remote, 'admin') ||
+                   LJ::check_priv($remote, 'siteadmin');
+
+        my ($cmd, $pkg, $arg) = splice(@$args, 1, 3);
+        return $usage->($out, 'priv_package') unless $cmd;
+        return $fail->($out, 'Invalid command.')
+            unless $cmd =~ /^(?:list|create|add|remove|delete)$/;
+        return $fail->($out, "'$cmd' requires an argument.")
+            if $cmd =~ /^(?:add|remove)$/ && ! $arg;
+
+        $pkg =~ s/^#//; # just in case they put a # on it...
+        my ($pkgid, $cpkg) = $dbh->selectrow_array('SELECT pkgid, name FROM priv_packages WHERE name = ?', undef, $pkg);
+        return $fail->($out, "Database error: " . $dbh->errstr) if $dbh->err;
+
+        # canonical package name is "#" plus whatever is in the db
+        $cpkg = "#$cpkg";
+
+        # list created packages, or contents of one
+        if ($cmd eq 'list') {
+            if ($pkg) {
+                return $fail->("Package with that name does not exist.")
+                    unless $pkgid;
+                my $contents = $dbh->selectall_arrayref('SELECT privname, privarg FROM priv_packages_content WHERE pkgid = ?',
+                                                        undef, $pkgid);
+                return $fail->("Database error: " . $dbh->errstr) if $dbh->err;
+                push @$out, [ "", "Contents of $cpkg:" ];
+                foreach my $row (@{$contents || []}) {
+                    push @$out, [ "", "\t$row->[0]:$row->[1]" ];
+                }
+            } else {
+                my $packages = $dbh->selectall_arrayref('SELECT pkgid, name, lastmoduserid, lastmodtime FROM priv_packages ORDER BY name');
+                return $fail->("Database error: " . $dbh->errstr) if $dbh->err;
+                push @$out, [ "", "Available packages:" ];
+                foreach my $row (@{$packages || []}) {
+                    my $u = LJ::load_userid($row->[2]);
+                    my $time = LJ::mysql_time($row->[3]);
+                    push @$out, [ "", sprintf("%5d  %-20s%-20s\%s", $row->[0], $row->[1], $u->{user}, $time) ];
+                }
+            }
+            return 1;
+
+        # create a package
+        } elsif ($cmd eq 'create') {
+            return $fail->($out, "Package with that name already exists.")
+                if $pkgid;
+            return $fail->($out, "Package names must contain letters, numbers, hyphens, and underscores only.")
+                unless $pkg =~ /^[a-z0-9_\-:\(\)\[\]]+$/i;
+            $dbh->do("INSERT INTO priv_packages (pkgid, name, lastmoduserid, lastmodtime) VALUES (NULL, ?, ?, UNIX_TIMESTAMP())",
+                     undef, $pkg, $remote->{userid});
+            $pkgid = $dbh->{mysql_insertid};
+            return $success->($out, "Package $pkg created as #$pkgid.");
+
+        # delete a package
+        } elsif ($cmd eq 'delete') {
+            return $fail->($out, "Package with that name does not exist.")
+                unless $pkgid;
+            $dbh->do("DELETE FROM priv_packages WHERE pkgid = ?", undef, $pkgid);
+            return $fail->($out, "Database error: " . $dbh->errstr) if $dbh->err;
+            $dbh->do("DELETE FROM priv_packages_content WHERE pkgid = ?", undef, $pkgid); # no error check
+            return $success->($out, "Package $cpkg deleted.");
+
+        # add or remove a privilige to a package
+        } elsif ($cmd eq 'add' || $cmd eq 'remove') {
+            my ($pname, $parg) = split(/:/, $arg);
+            return $fail->($out, "Argument must be in format of 'priv:arg' with optional arg.  (The colon is required.)")
+                unless $pname && defined $parg;
+
+            # valid priv or not
+            my $valid = $dbh->selectrow_array('SELECT COUNT(*) FROM priv_list WHERE privcode = ?',
+                                              undef, $pname);
+            return $fail->($out, "'$pname' is not a valid privilege.")
+                unless $valid;
+
+            # exists or not
+            my $exists = $dbh->selectrow_array('SELECT COUNT(*) FROM priv_packages_content WHERE pkgid = ? AND privname = ? AND privarg = ?',
+                                               undef, $pkgid, $pname, $parg);
+            return $fail->($out, "Database error: " . $dbh->errstr) if $dbh->err;
+
+            # now, action it
+            if ($cmd eq 'add') {
+                return $fail->($out, "Privilege already exists in package.")
+                    if $exists;
+                $dbh->do("INSERT INTO priv_packages_content (pkgid, privname, privarg) VALUES (?, ?, ?)",
+                         undef, $pkgid, $pname, $parg);
+                return $fail->($out, "Database error: " . $dbh->errstr) if $dbh->err;
+                $dbh->do("UPDATE priv_packages SET lastmoduserid = ?, lastmodtime = UNIX_TIMESTAMP() WHERE pkgid = ?",
+                         undef, $remote->{userid}, $pkgid);
+                return $success->($out, "Privilege ($pname:$parg) added to package $cpkg.");
+
+            # almost same as add, just inverted
+            } elsif ($cmd eq 'remove') {
+                return $fail->($out, "Privilege does not exist in package.")
+                    unless $exists;
+                $dbh->do("DELETE FROM priv_packages_content WHERE pkgid = ? AND privname = ? AND privarg = ?",
+                         undef, $pkgid, $pname, $parg);
+                return $fail->($out, "Database error: " . $dbh->errstr) if $dbh->err;
+                $dbh->do("UPDATE priv_packages SET lastmoduserid = ?, lastmodtime = UNIX_TIMESTAMP() WHERE pkgid = ?",
+                         undef, $remote->{userid}, $pkgid);
+                return $success->($out, "Privilege ($pname:$parg) removed from package $cpkg.");
+
+            }
+        }
+
     },
 };
 
