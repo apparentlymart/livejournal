@@ -1,0 +1,383 @@
+<?page
+title=>School Directory
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET);
+
+    LJ::need_res('stc/display_none.css');
+    LJ::set_active_crumb('schools');
+
+    my $ret = '';
+    my $err = sub { return "<?h1 Error h1?><?p $_[0] p?>"; };
+    my ($ctc, $sc, $cc, $sid) = ($GET{ctc}, $GET{sc}, $GET{cc}, $GET{sid}+0);
+    my $ectc = LJ::eurl($ctc);
+    my $esc = LJ::eurl($sc);
+    my $ecc = LJ::eurl($cc);
+    my $esid = LJ::eurl($sid);
+
+    my $remote = LJ::get_remote();
+
+    my %ierr;
+    my $bogus = sub {
+        my $key = shift;
+        my $msg = shift;
+        $ierr{$key} = $msg;
+    };
+    # inline error
+    my $inerr = sub {
+        my $key  = shift;
+        my $pre  = shift || '';
+        my $post = shift || '';
+        return '' unless $ierr{$key};
+        return "$pre<font color='red'><b>$ierr{$key}</b></font>$post";
+    };
+
+    my $trail = sub {
+        my ($des, $country, $state, $city) = @_;
+
+        $state = 'no defined state or province'
+            if !$state && $city;
+
+        my $ret;
+        $ret .= '<b>Find a school in:</b> '
+            if $des;
+        $ret .= "<a href='$LJ::SITEROOT/schools/index.bml?ctc=$ectc'>$country</a>";
+
+        $ret .= " &gt; <a href='$LJ::SITEROOT/schools/index.bml?ctc=$ectc&sc=$esc'>$state</a>"
+            if $state;
+
+        $ret .= " &gt; <a href='$LJ::SITEROOT/schools/index.bml?ctc=$ectc&sc=$esc&cc=$ecc'>$city</a>"
+            if $city;
+
+        $ret .= '<br />';
+        return $ret;
+    };
+
+
+    my $add_school = sub {
+        my ($country, $state, $city, $name, $remoterl, $class) = @_;
+
+        my $ret;
+
+        my $ex = sub {
+            return " <span style='color: #999'><b>Example:</b> $_[0]</span>";
+        };
+
+        $class = $GET{add} ? '' : 'display_none'
+            unless defined $class;
+
+        $ret .= "<div class='$class' id='addschool'>";
+        $ret .= "<?p Enter your school's information for us to approve and add to the list soon: p?>";
+        $ret .= "<form action='index.bml' method='post'><div style='margin-left: 2em'>";
+
+        $ret .= "<table><tr><td>";
+        $ret .= "Country: ";
+        my %countries;
+        LJ::load_codes({ "country" => \%countries });
+        $ret .= "</td><td>";
+        $ret .= LJ::html_select(
+                                {
+                                    name => "country",
+                                    selected => $country || 'US'
+                                 },  map { $_ => $countries{$_} } sort { $countries{$a} cmp $countries{$b} } keys %countries);
+        $ret .= "</td></tr><tr><td colspan='2'>";
+        $ret .= $inerr->('country');
+        $ret .= "</td></tr><tr><td valign='top'>";
+        $ret .= "State/province:</td><td>" . LJ::html_text({ name => "state", maxlength => 255, size => 15, value => $state }) . "<br />&nbsp;&nbsp" . $ex->("CA, NY, Alberta");
+        $ret .= "</td></tr><tr><td colspan='2'>";
+        $ret .= $inerr->('state');
+        $ret .= "</td></tr><tr><td valign='top'>";
+        $ret .= "City:</td><td>" . LJ::html_text({ name => "city", maxlength => 255, size => 20, value => $city }) . "<br />&nbsp;&nbsp;" . $ex->("San Testico, Portland");
+        $ret .= "</td></tr><tr><td colspan='2'>";
+        $ret .= $inerr->('city');
+        $ret .= "</td></tr><tr><td valign='top'>";
+        $ret .= "Name of school:</td><td valign='top'>" . LJ::html_text({ name => "name", size => 50, value => $name }) . "<br />&nbsp;&nbsp;" . $ex->("University of California Ber\keley, Oregon State University");
+        $ret .= "</td></tr><tr><td colspan='2'>";
+        $ret .= $inerr->('name');
+        $ret .= "</td></tr><tr><td valign='top'>";
+        $ret .= "URL: <?de (optional) de?></td><td>" . LJ::html_text({ name => "url", size => 50, value => $remoterl }) . "<br />";
+        $ret .= "</td></tr><tr><td colspan='2'>";
+        $ret .= $inerr->('url');
+        $ret .= "</td></tr><tr><td colspan='2'>";
+        $ret .= LJ::html_submit("Add School");
+        $ret .= "</td></tr></table>";
+        $ret .= "</div></form></div>";
+
+        return $ret;
+    };
+
+    # Adding a school
+    if (LJ::did_post()) {
+        my $statewhat = 'state';
+        my ($country, $state, $city, $name, $remoterl) =
+            ($POST{country}, $POST{state}, $POST{city}, $POST{name}, $POST{url});
+
+        $bogus->('country', 'You must enter a valid country code.')
+            unless $country && $country =~ /\w\w/;
+
+        if ($country eq 'US') {
+            $statewhat = 'statecode';
+            $bogus->('state', 'You must enter a valid US state code.')
+                unless $state =~ /\w\w/;
+        };
+
+        $bogus->('city', 'You must enter the city this school is located in.')
+            unless length($city);
+
+        $bogus->('name', 'You must enter the school\'s full name.')
+            unless length($name);
+
+        if ($remoterl) {
+            $remoterl = LJ::CleanHTML::canonical_url($remoterl);
+            $bogus->('url', 'The URL entered does not appear to be valid.')
+                if $remoterl !~ m!https?://[^\s\"\'\<\>]+!g;
+        }
+
+        if (%ierr) {
+            $ret .= $add_school->($country, $state, $city, $name, $remoterl, '');
+            return $ret;
+        }
+
+        my $rv = LJ::Schools::add_pending_school($remote,
+                                                 {
+                                                     name        => $name,
+                                                     city        => $city,
+                                                     $statewhat  => $state,
+                                                     countrycode => $country,
+                                                     url         => $remoterl,
+                                                 });
+
+        $ret .= "<?h1 Thank You h1?>";
+        $ret .= "<?p Your school has been submitted for approval.  If approved, your school will be added to the list and it will automatically be added to your <a href='$LJ::SITEROOT/schools/manage.bml'>My Schools</a> list.  Be sure to check back and, if you wish, add the years which you attended. p?>";
+
+        $ret .= "<table><tr><td height='100' valign='middle'><i>What would you like to do next?&nbsp;&nbsp;</td><td height='100' valign='middle'><a href='$LJ::SITEROOT/schools/index.bml'>Find another school</a><br /><br /><a href='$LJ::SITEROOT/schools/manage.bml'>Go to My Schools list</a></td></tr></table>";
+        return $ret;
+    }
+
+
+    ##########################################################################
+    # PAGE 1: return the list of countries
+
+    unless ($ctc) {
+        # Header text
+        $ret .= "<?p WASHINGTON (Reuters) - US President George W. Bush has the power to detain Jose Padilla, a US citizen who has been held in a South Carolina military brig for more than three years as a suspected enemy combatant without any charges, a federal appeals court ... p?>";
+
+        my $cts = LJ::Schools::get_countries();
+        return $err->("Unable to get country list.")
+            unless $cts;
+        return $err->("No countries found.")
+            unless %$cts;
+
+        $ret .= "<?h1 Countries h1?><?p Please select a country below. p?>";
+
+        $ret .= "<ul>";
+        foreach my $ct (sort keys %{$cts}) {
+            $ret .= "<li><a href='$LJ::SITEROOT/schools/index.bml?ctc=$ct'>$cts->{$ct}</a></li>\n";
+        }
+        $ret .= "</ul>";
+
+        return $ret;
+    }
+
+    # Rest of this flow uses a different crumb
+    LJ::set_active_crumb('schoolsfind');
+
+    ##########################################################################
+    # PAGE 2: return the list of areas in that country
+
+    unless (defined $sc) {
+        # Header text
+        $ret .= "<?p It's harvest time in Apple country, and the season's new crop includes a diminutive new iPod to replace the popular Mini, as well as an iTunes cell phone. Both were unveiled at a much-hyped press event in San Francisco this week. ... p?>";
+
+        my $scs = LJ::Schools::get_states($ctc);
+        return $err->("Unable to get necessary data.")
+            unless $scs;
+        return $err->("No states or provinces found.")
+            unless %$scs;
+
+        my ($country) = LJ::Schools::expand_codes($ctc);
+
+        $ret .= $trail->(1, $country);
+
+        $ret .= "<ul>";
+        foreach my $sc (sort { $a cmp $b } keys %{$scs}) {
+            my $esc = LJ::eurl($sc);
+            my $val = $scs->{$sc} || "<i>no defined state or province</i>";
+            $ret .= "<li><a href='$LJ::SITEROOT/schools/index.bml?ctc=$ctc&sc=$esc'>$val</a></li>\n";
+        }
+        $ret .= "</ul>";
+
+        $ret .= "<div id='addlink'><?p <i>Don't see the state/city/school you're looking for?</i><br />";
+        $ret .= "<a href='index.bml?ctc=$ectc&add=1' onclick='return addschool()'>Tell us about your school</a>";
+        $ret .= " and we'll add it soon. p?></div>";
+        $ret .= $add_school->($ctc);
+
+        return $ret;
+    }
+
+    ##########################################################################
+    # PAGE 3: return the list of cities in a state
+
+    unless ($cc) {
+        # Header text
+        $ret .= "<?p International aid meant for the victims of Hurricane Katrina is backing up at an Air Force base in Arkansas because relief lorries are being directed to the wrong places. Civilian truck drivers hired to take ... p?>";
+
+        my $ccs = LJ::Schools::get_cities($ctc, $sc);
+        return $err->("Unable to get necessary data.")
+            unless $ccs;
+        return $err->("No cities found.")
+            unless %$ccs;
+
+        my ($country, $state) = LJ::Schools::expand_codes($ctc, $sc);
+
+        $ret .= $trail->(1, $country, $state);
+
+        $ret .= "<?h1 Cities h1?><?p Please select a city below. p?>";
+
+        $ret .= "<ul>";
+        foreach my $cc (sort { $a cmp $b } keys %{$ccs}) {
+            my $esc = LJ::eurl($cc);
+            $ret .= "<li><a href='$LJ::SITEROOT/schools/index.bml?ctc=$ctc&sc=$sc&cc=$esc'>$ccs->{$cc}</a></li>\n";
+        }
+        $ret .= "</ul>";
+
+        $ret .= "<div id='addlink'><?p <i>Don't see the state/city/school you're looking for?</i><br />";
+        $ret .= "<a href='index.bml?ctc=$ectc&sc=$esc&add=1' onclick='return addschool()'>Tell us about your school</a>";
+        $ret .= " and we'll add it soon. p?></div>";
+        $ret .= $add_school->($ctc, $sc);
+
+        return $ret;
+    }
+
+    ##########################################################################
+    # PAGE 4: return the list of schools in a city
+
+    unless ($sid) {
+        # Header text
+        $ret .= "<?p The timing of s next shuttle launch remains uncertain as the space agency works to recover key facilities from the aftermath of Hurricane Katrina, agency officials said Thursday. In addition to spreading ...  p?>";
+
+        my $schools = LJ::Schools::get_schools($ctc, $sc, $cc);
+        return $err->("Unable to get necessary data.")
+            unless $schools;
+        return $err->("No schools found.")
+            unless %$schools;
+
+        my ($country, $state, $city) = LJ::Schools::expand_codes($ctc, $sc, $cc);
+
+        $ret .= $trail->(1, $country, $state, $city);
+
+        $ret .= "<?h1 Schools h1?><?p Please select a school below. p?>";
+
+        $ret .= "<ul>";
+        foreach my $sid (sort { $schools->{$a} cmp $schools->{$b} } keys %{$schools}) {
+            $ret .= "<li><a href='$LJ::SITEROOT/schools/index.bml?ctc=$ctc&sc=$sc&cc=$ecc&sid=$sid'>$schools->{$sid}</a></li>\n";
+        }
+        $ret .= "</ul>";
+
+        $ret .= "<div id='addlink'><?p <i>Don't see the state/city/school you're looking for?</i><br />";
+        $ret .= "<a href='index.bml?ctc=$ectc&sc=$esc&cc=$ecc&add=1' onclick='return addschool()'>Tell us about your school</a>";
+        $ret .= " and we'll add it soon. p?></div>";
+        $ret .= $add_school->($ctc, $sc, $cc);
+
+        return $ret;
+    }
+
+    ##########################################################################
+    # PAGE 5: show who has listed this school in their attendance list
+    my @ids = LJ::Schools::get_attendees($sid);
+
+    # now multi-load and split
+    my (@users, @comms);
+
+    if (@ids) {
+        my $remotes = LJ::load_userids(@ids);
+        foreach my $remoteid (@ids) {
+            next unless $remotes->{$remoteid};
+            if ($remotes->{$remoteid}->{journaltype} eq 'P') {
+                push @users, $remotes->{$remoteid};
+            } elsif ($remotes->{$remoteid}->{journaltype} eq 'C') {
+                push @comms, $remotes->{$remoteid};
+            }
+        }
+        @users = sort { $a->{user} cmp $b->{user} } @users;
+        @comms = sort { $a->{user} cmp $b->{user} } @comms;
+    }
+
+    # dump the header information
+    my ($country, $state, $city, $school) = LJ::Schools::expand_codes($ctc, $sc, $cc, $sid);
+
+    my ($ectc, $esc, $ecc) = (LJ::eurl($ctc), LJ::eurl($sc), LJ::eurl($cc));
+
+    # now display the information
+    $ret .= "<?h1 $school h1?>";
+    $ret .= $trail->(0, $country, $state, $city);
+
+    # Figure out if they attended this school
+    {
+        # user switcher
+        my @list = LJ::get_authas_list($remote);
+
+        $ret .= "<br /><form method='get' action='$LJ::SITEROOT/schools/manage.bml'>\n";
+        $ret .= LJ::html_hidden('ctc', $ectc) if $ctc;
+        $ret .= LJ::html_hidden('cc', $ecc) if $cc;
+        $ret .= LJ::html_hidden('sid', $esid) if $sid;
+        $ret .= 'Manage attendance at this school for';
+
+        if (@list > 1) {
+            $ret .= ': ' . LJ::html_select({ name => 'authas', 'selected' => $remote->{'user'}}, map {$_, $_} @list);
+        } else {
+            $ret .= ' ' .LJ::ljuser($remote);
+        }
+
+        $ret .= ' ' . LJ::html_submit('Manage');
+        $ret .= " or <a href='$LJ::SITEROOT/schools/index.bml'>find another school</a>";
+        $ret .= "</form>";
+    }
+
+    $ret .= "<br /><?h2 Browse journals associated with this school: h2?>";
+
+    unless (@ids) {
+        $ret .= "<?p No one has attended this school p?>";
+    } else {
+        if (@comms) {
+            $ret .= "<?p <b>Communities</b> associated with this school: p?><ul>";
+            foreach (@comms) {
+                $ret .= "<li>" . LJ::ljuser($_) . " - $_->{name}</li>\n";
+            }
+            $ret .= "</ul>";
+        }
+        if (@users) {
+            $ret .= "<?p <b>Users who are at, ever went to, or work at this school: p?><ul>";
+            foreach (@users) {
+                $ret .= "<li>" . LJ::ljuser($_) . "</li>\n";
+            }
+            $ret .= "</ul>";
+        }
+    }
+
+    return $ret;
+}
+_code?>
+<=body
+head<=
+<script language='JavaScript'>
+    function addschool() {
+        if (!document.getElementById) {
+            return true;
+        }
+
+        var d = document.getElementById('addschool');
+        var l = document.getElementById('addlink');
+        if (!d || !l) {
+            return true;
+        }
+
+        d.className = '';
+        l.className = 'display_none';
+        return false;
+    }
+</script>
+<=head
+page?>
