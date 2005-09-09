@@ -24,7 +24,7 @@ use vars qw(@themecoltypes);
                   [ 'strong_back', 'Strong accent' ],
                   [ 'strong_text', 'Text on strong accent' ],
                   [ 'stronger_back', 'Stronger accent' ],
-                  [ 'stronger_text', 'Text on stronger accent' ],                  
+                  [ 'stronger_text', 'Text on stronger accent' ],
                   );
 
 # updated everytime new S1 style cleaning rules are added,
@@ -230,7 +230,7 @@ $LJ::S1::PROPS = {
         'width' => 'd',
         'height' => 'd',
     },
-    
+
 };
 
 # <LJFUNC>
@@ -258,7 +258,7 @@ sub load_style
 {
     &LJ::nodb;
     my ($styleid, $viewref) = @_;
-    
+
     # first try local cache for this process
     my $cch = $LJ::S1::CACHE_STYLE{$styleid};
     if ($cch && $cch->{'cachetime'} > time() - 300) {
@@ -313,13 +313,13 @@ sub load_style
             'vars_stor' => LJ::CleanHTML::clean_s1_style($style->{'formatdata'}),
             'vars_cleanver' => $LJ::S1::CLEANER_VERSION,
         };
-        
+
         # do this query on the db handle we used above
         $db->do("REPLACE INTO s1stylecache (styleid, cleandate, type, opt_cache, vars_stor, vars_cleanver) ".
-                "VALUES (?,NOW(),?,?,?,?)", undef, $styleid, 
+                "VALUES (?,NOW(),?,?,?,?)", undef, $styleid,
                 map { $styc->{$_} } qw(type opt_cache vars_stor vars_cleanver));
     }
-    
+
     my $ret = Storable::thaw($styc->{'vars_stor'});
     $$viewref = $styc->{'type'} if ref $viewref eq "SCALAR";
 
@@ -482,7 +482,7 @@ sub get_style_userid {
     my $memkey = [$styleid, "s1stylemap:$styleid"];
     my $style = LJ::MemCache::get($memkey);
     return $style if $style;
-   
+
     # fetch from db
     my $dbr = LJ::get_db_reader();
     $userid = $dbr->selectrow_array("SELECT userid FROM s1stylemap WHERE styleid=?",
@@ -545,7 +545,7 @@ sub update_style {
     my $u;
     $u = LJ::load_userid($userid) if $userid;
 
-    my @cols = qw(styledes type formatdata is_public is_embedded 
+    my @cols = qw(styledes type formatdata is_public is_embedded
                   is_colorfree opt_cache has_ads lastupdate);
 
     # what table to operate on ?
@@ -578,7 +578,7 @@ sub update_style {
     # clear out stylecache
     $db->do("UPDATE s1stylecache SET vars_stor=NULL, vars_cleanver=0 WHERE styleid=?",
             undef, $styleid);
-    
+
     # update memcache keys
     LJ::MemCache::delete([$styleid, "s1style:$styleid"]);
     LJ::MemCache::delete([$styleid, "s1style_all:$styleid"]);
@@ -1023,18 +1023,18 @@ sub create_view_lastn
     $lastn_page{'head'} .= qq{<link rel="service.post" type="application/atom+xml" title="Create a new post" href="$LJ::SITEROOT/interface/atom/post" />\n};
     $lastn_page{'head'} .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n}
         if LJ::OpenID::server_enabled();
-    
+
     # FOAF autodiscovery
     my $foafurl = $u->{external_foaf_url} ? LJ::eurl($u->{external_foaf_url}) : "$journalbase/data/foaf";
     my $digest = Digest::SHA1::sha1_hex('mailto:' . $u->{email});
     $lastn_page{head} .= qq{<link rel="meta" type="application/rdf+xml" title="FOAF" href="$foafurl" />\n};
     $lastn_page{head} .= qq{<meta name="foaf:maker" content="foaf:mbox_sha1sum '$digest'" />\n};
 
-    $lastn_page{'head'} .= 
+    $lastn_page{'head'} .=
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'LASTN_HEAD'};
 
     my $events = \$lastn_page{'events'};
-    
+
     # to show
     my $itemshow = $vars->{'LASTN_OPT_ITEMS'} + 0;
     if ($itemshow < 1) { $itemshow = 20; }
@@ -1049,7 +1049,7 @@ sub create_view_lastn
     my $viewall = 0;
     my $viewsome = 0;
     if ($get->{'viewall'} && LJ::check_priv($remote, "canview")) {
-        LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
+        LJ::statushistory_add($u->{'userid'}, $remote->{'userid'},
                               "viewall", "lastn: $user, statusvis: $u->{'statusvis'}");
         $viewall = LJ::check_priv($remote, 'canview', '*');
         $viewsome = $viewall || LJ::check_priv($remote, 'canview', 'suspended');
@@ -1077,7 +1077,7 @@ sub create_view_lastn
         $$ret = "";
         return 0;
     }
-    
+
     ### load the log properties
     my %logprops = ();
     my $logtext;
@@ -1090,7 +1090,7 @@ sub create_view_lastn
     my $eventnum = 0;
 
     my %posteru = ();  # map posterids to u objects
-    LJ::load_userids_multiple([map { $_->{'posterid'}, \$posteru{$_->{'posterid'}} } 
+    LJ::load_userids_multiple([map { $_->{'posterid'}, \$posteru{$_->{'posterid'}} }
                                @items], [$u]);
 
     # pre load things in a batch (like userpics) to minimize db calls
@@ -1109,7 +1109,7 @@ sub create_view_lastn
     LJ::load_userpics(\%userpics, \@userpic_load);
 
     if (my $picid = $u->{'defaultpicid'}) {
-        $lastn_page{'userpic'} = 
+        $lastn_page{'userpic'} =
             LJ::fill_var_props($vars, 'LASTN_USERPIC', {
                 "src" => "$LJ::USERPIC_ROOT/$picid/$u->{'userid'}",
                 "width" => $userpics{$picid}->{'width'},
@@ -1120,9 +1120,9 @@ sub create_view_lastn
     # spit out the S1
 
   ENTRY:
-    foreach my $item (@items) 
+    foreach my $item (@items)
     {
-        my ($posterid, $itemid, $security, $alldatepart) = 
+        my ($posterid, $itemid, $security, $alldatepart) =
             map { $item->{$_} } qw(posterid itemid security alldatepart);
 
         my $pu = $posteru{$posterid};
@@ -1169,7 +1169,7 @@ sub create_view_lastn
         $lastn_event{'datetime'} = LJ::fill_var_props($vars, 'LASTN_DATE_FORMAT', \%lastn_date_format);
         if ($subject ne "") {
             LJ::CleanHTML::clean_subject(\$subject);
-            $lastn_event{'subject'} = LJ::fill_var_props($vars, 'LASTN_SUBJECT', { 
+            $lastn_event{'subject'} = LJ::fill_var_props($vars, 'LASTN_SUBJECT', {
                 "subject" => $subject,
             });
         }
@@ -1180,13 +1180,13 @@ sub create_view_lastn
 
         LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
                                                'cuturl' => LJ::item_link($u, $itemid, $item->{'anum'}),
-					       'ljcut_disable' => $remote->{'opt_ljcut_disable_lastn'}, });
+                                               'ljcut_disable' => $remote->{'opt_ljcut_disable_lastn'}, });
         LJ::expand_embedded($u, $ditemid, $remote, \$event);
         $lastn_event{'event'} = $event;
 
-        if ($u->{'opt_showtalklinks'} eq "Y" && 
+        if ($u->{'opt_showtalklinks'} eq "Y" &&
             ! $logprops{$itemid}->{'opt_nocomments'}
-            ) 
+            )
         {
 
             my $nc;
@@ -1196,7 +1196,7 @@ sub create_view_lastn
             my $posturl = LJ::Talk::talkargs($permalink, "mode=reply");
             my $readurl = LJ::Talk::talkargs($permalink, $nc);
 
-            my $dispreadlink = $replycount || 
+            my $dispreadlink = $replycount ||
                 ($logprops{$itemid}->{'hasscreened'} &&
                  ($remote->{'user'} eq $user
                   || LJ::can_manage($remote, $u)));
@@ -1219,22 +1219,22 @@ sub create_view_lastn
 
         ## current stuff
         LJ::prepare_currents({
-            'props' => \%logprops, 
-            'itemid' => $itemid, 
-            'vars' => $vars, 
+            'props' => \%logprops,
+            'itemid' => $itemid,
+            'vars' => $vars,
             'prefix' => "LASTN",
             'event' => \%lastn_event,
             'user' => $u,
         });
 
-        if ($u->{'userid'} != $posterid) 
+        if ($u->{'userid'} != $posterid)
         {
             my %lastn_altposter = ();
 
             my $poster = $pu->{'user'};
             $lastn_altposter{'poster'} = $poster;
             $lastn_altposter{'owner'} = $user;
-            
+
             if (my $picid = $item->{'_picid'}) {
                 my $pic = $userpics{$picid};
                 $lastn_altposter{'pic'} = LJ::fill_var_props($vars, 'LASTN_ALTPOSTER_PIC', {
@@ -1243,14 +1243,14 @@ sub create_view_lastn
                     "height" => $pic->{'height'},
                 });
             }
-            $lastn_event{'altposter'} = 
+            $lastn_event{'altposter'} =
                 LJ::fill_var_props($vars, 'LASTN_ALTPOSTER', \%lastn_altposter);
         }
 
         my $var = 'LASTN_EVENT';
-        if ($security eq "private" && 
+        if ($security eq "private" &&
             $vars->{'LASTN_EVENT_PRIVATE'}) { $var = 'LASTN_EVENT_PRIVATE'; }
-        if ($security eq "usemask" && 
+        if ($security eq "usemask" &&
             $vars->{'LASTN_EVENT_PROTECTED'}) { $var = 'LASTN_EVENT_PROTECTED'; }
         $$events .= LJ::fill_var_props($vars, $var, \%lastn_event);
     } # end huge while loop
@@ -1262,13 +1262,13 @@ sub create_view_lastn
     my $item_hidden = $item_total - $item_shown;
 
     if ($skip) {
-        $lastn_page{'range'} = 
+        $lastn_page{'range'} =
             LJ::fill_var_props($vars, 'LASTN_RANGE_HISTORY', {
                 "numitems" => $item_shown,
                 "skip" => $skip,
             });
     } else {
-        $lastn_page{'range'} = 
+        $lastn_page{'range'} =
             LJ::fill_var_props($vars, 'LASTN_RANGE_MOSTRECENT', {
                 "numitems" => $item_shown,
             });
@@ -1286,7 +1286,7 @@ sub create_view_lastn
         if ($newskip <= 0) { $newskip = ""; }
         else { $newskip = "?skip=$newskip"; }
 
-        $skiplinks{'skipforward'} = 
+        $skiplinks{'skipforward'} =
             LJ::fill_var_props($vars, 'LASTN_SKIP_FORWARD', {
                 "numitems" => $itemshow,
                 "url" => "$journalbase/$newskip",
@@ -1294,14 +1294,14 @@ sub create_view_lastn
     }
 
     ## unless we didn't even load as many as we were expecting on this
-    ## page, then there are more (unless there are exactly the number shown 
+    ## page, then there are more (unless there are exactly the number shown
     ## on the page, but who cares about that)
 
     unless ($item_total != $itemshow) {
         $skip_b = 1;
 
         if ($skip==$maxskip) {
-            $skiplinks{'skipbackward'} = 
+            $skiplinks{'skipbackward'} =
                 LJ::fill_var_props($vars, 'LASTN_SKIP_BACKWARD', {
                     "numitems" => "Day",
                     "url" => "$journalbase/" . sprintf("%04d/%02d/%02d/", $lastyear, $lastmonth, $lastday),
@@ -1309,7 +1309,7 @@ sub create_view_lastn
         } else {
             my $newskip = $skip + $itemshow;
             $newskip = "?skip=$newskip";
-            $skiplinks{'skipbackward'} = 
+            $skiplinks{'skipbackward'} =
                 LJ::fill_var_props($vars, 'LASTN_SKIP_BACKWARD', {
                     "numitems" => $itemshow,
                     "url" => "$journalbase/$newskip",
@@ -1324,7 +1324,7 @@ sub create_view_lastn
 
     ### if either are on, put skiplinks into lastn_page
     if ($skip_b || $skip_f) {
-        $lastn_page{'skiplinks'} = 
+        $lastn_page{'skiplinks'} =
             LJ::fill_var_props($vars, 'LASTN_SKIP_LINKS', \%skiplinks);
     }
 
@@ -1340,7 +1340,7 @@ sub create_view_friends
     my $sth;
     my $user = $u->{'user'};
 
-    # see how often the remote user can reload this page.  
+    # see how often the remote user can reload this page.
     # "friendsviewupdate" time determines what granularity time
     # increments by for checking for new updates
     my $nowtime = time();
@@ -1348,7 +1348,7 @@ sub create_view_friends
     # update delay specified by "friendsviewupdate"
     my $newinterval = LJ::get_cap_min($remote, "friendsviewupdate") || 1;
 
-    # when are we going to say page was last modified?  back up to the 
+    # when are we going to say page was last modified?  back up to the
     # most recent time in the past where $time % $interval == 0
     my $lastmod = $nowtime;
     $lastmod -= $lastmod % $newinterval;
@@ -1358,7 +1358,7 @@ sub create_view_friends
     if ($opts->{'header'}->{'If-Modified-Since'}) {
         my $theirtime = LJ::http_to_time($opts->{'header'}->{'If-Modified-Since'});
 
-        # send back a 304 Not Modified if they say they've reloaded this 
+        # send back a 304 Not Modified if they say they've reloaded this
         # document in the last $newinterval seconds:
         unless ($theirtime < $lastmod) {
             $opts->{'handler_return'} = 304;
@@ -1371,15 +1371,6 @@ sub create_view_friends
 
     my $get = $opts->{'getargs'};
     my $journalbase = LJ::journal_base($user, $opts->{'vhost'});
-
-    if ($get->{'mode'} eq "live") {
-        $$ret .= "<html><head><title>${user}'s friends: live!</title></head>\n";
-        $$ret .= "<frameset rows=\"100%,0%\" border=0>\n";
-        $$ret .= "  <frame name=livetop src=\"$journalbase/friends?mode=framed\">\n";
-        $$ret .= "  <frame name=livebottom src=\"$journalbase/friends?mode=livecond&amp;lastitemid=0\">\n";
-        $$ret .= "</frameset></html>\n";
-        return 1;
-    }
 
     foreach ("name", "url", "urlname", "friendspagetitle") { LJ::text_out(\$u->{$_}); }
 
@@ -1397,13 +1388,13 @@ sub create_view_friends
         $friends_page{'head'} .= LJ::run_hook('s2_head_content_extra', $remote, $opts->{r});
     }
 
-    ## never have spiders index friends pages (change too much, and some 
+    ## never have spiders index friends pages (change too much, and some
     ## people might not want to be indexed)
     $friends_page{'head'} .= LJ::robot_meta_tags();
     if ($LJ::UNICODE) {
         $friends_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'" />';
     }
-    $friends_page{'head'} .= 
+    $friends_page{'head'} .=
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'FRIENDS_HEAD'};
 
     if ($u->{'url'} =~ m!^https?://!) {
@@ -1434,7 +1425,7 @@ sub create_view_friends
     my $common_filter = 1;
 
     if (defined $get->{'filter'} && $remote && $remote->{'user'} eq $user) {
-        $filter = $get->{'filter'}; 
+        $filter = $get->{'filter'};
         $common_filter = 0;
     } else {
         if ($opts->{'pathextra'}) {
@@ -1447,47 +1438,14 @@ sub create_view_friends
         my $bit = $grp ? $grp->{'groupnum'} : 0;
         my $public = $grp ? $grp->{'is_public'} : 0;
         if ($bit && ($public || ($remote && $remote->{'user'} eq $user))) {
-            $filter = (1 << $bit); 
+            $filter = (1 << $bit);
         } elsif ($group) {
             $opts->{'badfriendgroup'} = 1;
             return 1;
         }
     }
 
-
-    if ($get->{'mode'} eq "livecond") 
-    {
-        ## load the itemids
-        my @items = LJ::get_friend_items({
-            'u' => $u,
-            'userid' => $u->{'userid'},
-            'remote' => $remote,
-            'itemshow' => 1,
-            'skip' => 0,
-            'filter' => $filter,
-            'common_filter' => $common_filter,
-        });
-        my $first = @items ? $items[0]->{'itemid'} : 0;
-
-        $$ret .= "time = " . scalar(time()) . "<br />";
-        $opts->{'headers'}->{'Refresh'} = "30;URL=$LJ::SITEROOT/users/$user/friends?mode=livecond&lastitemid=$first";
-        if ($get->{'lastitemid'} == $first) {
-            $$ret .= "nothing new!";
-        } else {
-            if ($get->{'lastitemid'}) {
-                $$ret .= "<b>New stuff!</b>\n";
-                $$ret .= "<script language=\"JavaScript\">\n";
-                $$ret .= "window.parent.livetop.location.reload(true);\n";	    
-                $$ret .= "</script>\n";
-                $opts->{'trusted_html'} = 1;
-            } else {
-                $$ret .= "Friends Live! started.";
-            }
-        }
-        return 1;
-    }
-    
-    ## load the itemids 
+    ## load the itemids
     my %friends;
     my %friends_row;
     my %idsbycluster;
@@ -1552,17 +1510,17 @@ sub create_view_friends
     ($maximgwidth, $maximgheight) = ($1, $2)
         if ($remote && $remote->{'userid'} == $u->{'userid'} &&
             $remote->{'opt_imagelinks'} =~ m/^(\d+)\|(\d+)$/);
-  
+
     my %friends_events = ();
     my $events = \$friends_events{'events'};
-    
+
     my $lastday = -1;
     my $eventnum = 0;
 
   ENTRY:
-    foreach my $item (@items) 
+    foreach my $item (@items)
     {
-        my ($friendid, $posterid, $itemid, $security, $alldatepart) = 
+        my ($friendid, $posterid, $itemid, $security, $alldatepart) =
             map { $item->{$_} } qw(ownerid posterid itemid security alldatepart);
 
         my $pu = $friends{$posterid} || $aposter{$posterid};
@@ -1572,9 +1530,9 @@ sub create_view_friends
         $eventnum++;
 
         my $clusterid = $item->{'clusterid'}+0;
-        
+
         my $datakey = "$friendid $itemid";
-            
+
         my $replycount = $logprops{$datakey}->{'replycount'};
         my $subject = $logtext->{$datakey}->[0];
         my $event = $logtext->{$datakey}->[1];
@@ -1591,7 +1549,7 @@ sub create_view_friends
         my ($friend, $poster);
         $friend = $poster = $friends{$friendid}->{'user'};
         $poster = $pu->{'user'};
-        
+
         my %friends_date_format = LJ::alldateparts_to_hash($alldatepart);
 
         if ($lastday != $friends_date_format{'d'})
@@ -1607,17 +1565,17 @@ sub create_view_friends
             $$events .= LJ::fill_var_props($vars, 'FRIENDS_NEW_DAY', \%friends_new_day);
             $lastday = $friends_date_format{'d'};
         }
-        
+
         my %friends_event = ();
         $friends_event{'itemid'} = $itemid;
         $friends_event{'datetime'} = LJ::fill_var_props($vars, 'FRIENDS_DATE_FORMAT', \%friends_date_format);
         if ($subject ne "") {
             LJ::CleanHTML::clean_subject(\$subject);
-            $friends_event{'subject'} = LJ::fill_var_props($vars, 'FRIENDS_SUBJECT', { 
+            $friends_event{'subject'} = LJ::fill_var_props($vars, 'FRIENDS_SUBJECT', {
                 "subject" => $subject,
             });
         } else {
-            $friends_event{'subject'} = LJ::fill_var_props($vars, 'FRIENDS_NO_SUBJECT', { 
+            $friends_event{'subject'} = LJ::fill_var_props($vars, 'FRIENDS_NO_SUBJECT', {
                 "friend" => $friend,
                 "name" => $friends{$friendid}->{'name'},
             });
@@ -1632,13 +1590,13 @@ sub create_view_friends
                                       $remote->{'userid'} != $friendid;
 
         LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$datakey}->{'opt_preformatted'},
-                                              'cuturl' => LJ::item_link($friends{$friendid}, $itemid, $item->{'anum'}, $stylemine), 
+                                              'cuturl' => LJ::item_link($friends{$friendid}, $itemid, $item->{'anum'}, $stylemine),
                                               'maximgwidth' => $maximgwidth,
-                                              'maximgheight' => $maximgheight, 
-					      'ljcut_disable' => $remote->{'opt_ljcut_disable_friends'}, });
+                                              'maximgheight' => $maximgheight,
+                                              'ljcut_disable' => $remote->{'opt_ljcut_disable_friends'}, });
         LJ::expand_embedded($friends{$friendid}, $ditemid, $remote, \$event);
         $friends_event{'event'} = $event;
-        
+
         # do the picture
         {
             my $picid = $friends{$friendid}->{'defaultpicid'};  # this could be the shared journal pic
@@ -1649,8 +1607,8 @@ sub create_view_friends
                     $picuserid = $posterid;
                 }
             }
-            if ($logprops{$datakey}->{'picture_keyword'} && 
-                (! $u->{'opt_usesharedpic'} || ($posterid == $friendid))) 
+            if ($logprops{$datakey}->{'picture_keyword'} &&
+                (! $u->{'opt_usesharedpic'} || ($posterid == $friendid)))
             {
                 my $alt_picid = LJ::get_picid_from_keyword($posterid, $logprops{$datakey}->{'picture_keyword'});
                 if ($alt_picid) {
@@ -1660,7 +1618,7 @@ sub create_view_friends
                 }
             }
             if ($picid) {
-                $friends_event{'friendpic'} = 
+                $friends_event{'friendpic'} =
                     LJ::fill_var_props($vars, 'FRIENDS_FRIENDPIC', {
                         "src" => "$LJ::USERPIC_ROOT/$picid/$picuserid",
                         "width" => $userpics{$picid}->{'width'},
@@ -1668,9 +1626,9 @@ sub create_view_friends
                     });
             }
         }
-        
+
         if ($friend ne $poster) {
-            $friends_event{'altposter'} = 
+            $friends_event{'altposter'} =
                 LJ::fill_var_props($vars, 'FRIENDS_ALTPOSTER', {
                     "poster" => $poster,
                     "owner" => $friend,
@@ -1683,12 +1641,12 @@ sub create_view_friends
         $friends_event{'user'} = $friend;
         $friends_event{'fgcolor'} = $friends{$friendid}->{'fgcolor'} || "#000000";
         $friends_event{'bgcolor'} = $friends{$friendid}->{'bgcolor'} || "#ffffff";
-        
+
         if ($friends{$friendid}->{'opt_showtalklinks'} eq "Y" &&
             ! $logprops{$datakey}->{'opt_nocomments'}
-            ) 
+            )
         {
-            my $dispreadlink = $replycount || 
+            my $dispreadlink = $replycount ||
                 ($logprops{$datakey}->{'hasscreened'} &&
                  ($remote->{'user'} eq $friend
                   || LJ::can_manage($remote, $friendid)));
@@ -1720,9 +1678,9 @@ sub create_view_friends
 
         ## current stuff
         LJ::prepare_currents({
-            'props' => \%logprops, 
-            'datakey' => $datakey, 
-            'vars' => $vars, 
+            'props' => \%logprops,
+            'datakey' => $datakey,
+            'vars' => $vars,
             'prefix' => "FRIENDS",
             'event' => \%friends_event,
             'user' => ($u->{'opt_forcemoodtheme'} eq "Y" ? $u :
@@ -1730,11 +1688,11 @@ sub create_view_friends
         });
 
         my $var = 'FRIENDS_EVENT';
-        if ($security eq "private" && 
+        if ($security eq "private" &&
             $vars->{'FRIENDS_EVENT_PRIVATE'}) { $var = 'FRIENDS_EVENT_PRIVATE'; }
-        if ($security eq "usemask" && 
+        if ($security eq "usemask" &&
             $vars->{'FRIENDS_EVENT_PROTECTED'}) { $var = 'FRIENDS_EVENT_PROTECTED'; }
-        
+
         $$events .= LJ::fill_var_props($vars, $var, \%friends_event);
     } # end while
 
@@ -1744,17 +1702,17 @@ sub create_view_friends
     my $item_shown = $eventnum;
     my $item_total = @items;
     my $item_hidden = $item_total - $item_shown;
-    
+
     ### set the range property (what entries are we looking at)
 
     if ($skip) {
-        $friends_page{'range'} = 
+        $friends_page{'range'} =
             LJ::fill_var_props($vars, 'FRIENDS_RANGE_HISTORY', {
                 "numitems" => $item_shown,
                 "skip" => $skip,
             });
     } else {
-        $friends_page{'range'} = 
+        $friends_page{'range'} =
             LJ::fill_var_props($vars, 'FRIENDS_RANGE_MOSTRECENT', {
                 "numitems" => $item_shown,
             });
@@ -1785,7 +1743,7 @@ sub create_view_friends
         my $newskip = $skip - $itemshow;
         if ($newskip > 0) { $linkvars{'skip'} = $newskip; }
 
-        $skiplinks{'skipforward'} = 
+        $skiplinks{'skipforward'} =
             LJ::fill_var_props($vars, 'FRIENDS_SKIP_FORWARD', {
                 "numitems" => $itemshow,
                 "url" => LJ::make_link($base, \%linkvars),
@@ -1793,7 +1751,7 @@ sub create_view_friends
     }
 
     ## unless we didn't even load as many as we were expecting on this
-    ## page, then there are more (unless there are exactly the number shown 
+    ## page, then there are more (unless there are exactly the number shown
     ## on the page, but who cares about that)
 
     unless ($item_total != $itemshow || $skip == $maxskip) {
@@ -1806,7 +1764,7 @@ sub create_view_friends
         my $newskip = $skip + $itemshow;
         $linkvars{'skip'} = $newskip;
 
-        $skiplinks{'skipbackward'} = 
+        $skiplinks{'skipbackward'} =
             LJ::fill_var_props($vars, 'FRIENDS_SKIP_BACKWARD', {
                 "numitems" => $itemshow,
                 "url" => LJ::make_link($base, \%linkvars),
@@ -1820,10 +1778,10 @@ sub create_view_friends
 
     ### if either are on, put skiplinks into lastn_page
     if ($skip_b || $skip_f) {
-        $friends_page{'skiplinks'} = 
+        $friends_page{'skiplinks'} =
             LJ::fill_var_props($vars, 'FRIENDS_SKIP_LINKS', \%skiplinks);
     }
-    
+
     $$ret .= "<base target='_top' />" if ($get->{'mode'} eq "framed");
     $$ret .= LJ::fill_var_props($vars, 'FRIENDS_PAGE', \%friends_page);
 
@@ -1834,7 +1792,7 @@ sub create_view_friends
 sub create_view_calendar
 {
     my ($ret, $u, $vars, $remote, $opts) = @_;
-    
+
     my $user = $u->{'user'};
 
     foreach ("name", "url", "urlname", "journaltitle") { LJ::text_out(\$u->{$_}); }
@@ -1862,7 +1820,7 @@ sub create_view_calendar
     }
     $calendar_page{'head'} .=
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'CALENDAR_HEAD'};
-    
+
     $calendar_page{'months'} = "";
 
     if ($u->{'url'} =~ m!^https?://!) {
@@ -1874,7 +1832,7 @@ sub create_view_calendar
     }
 
     my $journalbase = LJ::journal_base($user, $opts->{'vhost'});
-    
+
     $calendar_page{'urlfriends'} = "$journalbase/friends";
     $calendar_page{'urllastn'} = "$journalbase/";
 
@@ -1922,17 +1880,17 @@ sub create_view_calendar
     }
 
     # else... default to the year they last posted.
-    $dispyear ||= $maxyear;  
+    $dispyear ||= $maxyear;
 
     # we used to show multiple years.  now we only show one at a time:  (hence the @years confusion)
-    if ($dispyear) { push @years, $dispyear; }  
+    if ($dispyear) { push @years, $dispyear; }
 
     if (scalar(@allyears) > 1) {
         my $yearlinks = "";
         foreach my $year (@allyears) {
             my $yy = sprintf("%02d", $year % 100);
             my $url = "$journalbase/$year/";
-            if ($year != $dispyear) { 
+            if ($year != $dispyear) {
                 $yearlinks .= LJ::fill_var_props($vars, 'CALENDAR_YEAR_LINK', {
                     "url" => $url, "yyyy" => $year, "yy" => $yy });
             } else {
@@ -1940,7 +1898,7 @@ sub create_view_calendar
                     "yyyy" => $year, "yy" => $yy });
             }
         }
-        $calendar_page{'yearlinks'} = 
+        $calendar_page{'yearlinks'} =
             LJ::fill_var_props($vars, 'CALENDAR_YEAR_LINKS', { "years" => $yearlinks });
     }
 
@@ -1956,7 +1914,7 @@ sub create_view_calendar
         foreach my $month (@months)
         {
           my $daysinmonth = LJ::days_in_month($month, $year);
-          
+
           # this picks a random day there were journal entries (thus, we know
           # the %dayweek from above)  from that we go backwards and forwards
           # to find the rest of the days of week
@@ -1996,8 +1954,8 @@ sub create_view_calendar
           if ($dayweek{$year}->{$month}->{1} != 1)
           {
               my $spaces = $dayweek{$year}->{$month}->{1} - 1;
-              $calendar_week{'emptydays_beg'} = 
-                  LJ::fill_var_props($vars, 'CALENDAR_EMPTY_DAYS', 
+              $calendar_week{'emptydays_beg'} =
+                  LJ::fill_var_props($vars, 'CALENDAR_EMPTY_DAYS',
                                   { 'numempty' => $spaces });
           }
 
@@ -2042,8 +2000,8 @@ sub create_view_calendar
               if ($dayweek{$year}->{$month}->{$daysinmonth} != 7)
               {
                   my $spaces = 7 - $dayweek{$year}->{$month}->{$daysinmonth};
-                  $calendar_week{'emptydays_end'} = 
-                      LJ::fill_var_props($vars, 'CALENDAR_EMPTY_DAYS', 
+                  $calendar_week{'emptydays_end'} =
+                      LJ::fill_var_props($vars, 'CALENDAR_EMPTY_DAYS',
                                          { 'numempty' => $spaces });
               }
               $$weeks .= LJ::fill_var_props($vars, 'CALENDAR_WEEK', \%calendar_week);
@@ -2058,7 +2016,7 @@ sub create_view_calendar
 
     $$ret .= LJ::fill_var_props($vars, 'CALENDAR_PAGE', \%calendar_page);
 
-    return 1;  
+    return 1;
 }
 
 # the creator for the 'day' view:
@@ -2085,7 +2043,7 @@ sub create_view_day
     if ($LJ::UNICODE) {
         $day_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'" />';
     }
-    $day_page{'head'} .= 
+    $day_page{'head'} .=
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'DAY_HEAD'};
     $day_page{'name'} = LJ::ehtml($u->{'name'});
     $day_page{'name-\'s'} = ($u->{'name'} =~ /s$/i) ? "'" : "'s";
@@ -2127,7 +2085,7 @@ sub create_view_day
     if (scalar(@errors)==0 && $day > LJ::days_in_month($month, $year)) { push @errors, "That month doesn't have that many days."; }
 
     if (@errors) {
-        $$ret .= "Errors occurred processing this page:\n<ul>\n";		
+        $$ret .= "Errors occurred processing this page:\n<ul>\n";
         foreach (@errors) {
           $$ret .= "<li>$_</li>\n";
         }
@@ -2151,7 +2109,7 @@ sub create_view_day
 
         # do they have the viewall priv?
         if ($get->{'viewall'} && LJ::check_priv($remote, "canview")) {
-            LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
+            LJ::statushistory_add($u->{'userid'}, $remote->{'userid'},
                                   "viewall", "day: $user, statusvis: $u->{'statusvis'}");
             $viewall = LJ::check_priv($remote, 'canview', '*');
             $viewsome = $viewall || LJ::check_priv($remote, 'canview', 'suspended');
@@ -2193,7 +2151,7 @@ sub create_view_day
 
   ENTRY:
     foreach my $item (@items) {
-        my ($itemid, $posterid, $security, $alldatepart, $anum) = 
+        my ($itemid, $posterid, $security, $alldatepart, $anum) =
             map { $item->{$_} } qw(itemid posterid security alldatepart anum);
 
         next ENTRY if $posteru{$posterid} && $posteru{$posterid}->{'statusvis'} eq 'S' && !$viewsome;
@@ -2202,9 +2160,9 @@ sub create_view_day
         my $subject = $logtext->{$itemid}->[0];
         my $event = $logtext->{$itemid}->[1];
 
-	if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
-	    LJ::item_toutf8($u, \$subject, \$event, $logprops{$itemid});
-	}
+        if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
+            LJ::item_toutf8($u, \$subject, \$event, $logprops{$itemid});
+        }
 
         my %day_date_format = LJ::alldateparts_to_hash($alldatepart);
 
@@ -2219,7 +2177,7 @@ sub create_view_day
         $day_event{'datetime'} = LJ::fill_var_props($vars, 'DAY_DATE_FORMAT', \%day_date_format);
         if ($subject ne "") {
             LJ::CleanHTML::clean_subject(\$subject);
-            $day_event{'subject'} = LJ::fill_var_props($vars, 'DAY_SUBJECT', { 
+            $day_event{'subject'} = LJ::fill_var_props($vars, 'DAY_SUBJECT', {
                 "subject" => $subject,
             });
         }
@@ -2236,7 +2194,7 @@ sub create_view_day
 
         if ($u->{'opt_showtalklinks'} eq "Y" &&
             ! $logprops{$itemid}->{'opt_nocomments'}
-            ) 
+            )
         {
             my $nc;
             $nc = "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
@@ -2245,7 +2203,7 @@ sub create_view_day
             my $posturl = LJ::Talk::talkargs($permalink, "mode=reply");
             my $readurl = LJ::Talk::talkargs($permalink, $nc);
 
-            my $dispreadlink = $replycount || 
+            my $dispreadlink = $replycount ||
                 ($logprops{$itemid}->{'hasscreened'} &&
                  ($remote->{'user'} eq $user
                   || LJ::can_manage($remote, $u)));
@@ -2267,23 +2225,23 @@ sub create_view_day
 
         ## current stuff
         LJ::prepare_currents({
-            'props' => \%logprops, 
-            'itemid' => $itemid, 
-            'vars' => $vars, 
+            'props' => \%logprops,
+            'itemid' => $itemid,
+            'vars' => $vars,
             'prefix' => "DAY",
             'event' => \%day_event,
             'user' => $u,
         });
 
         my $var = 'DAY_EVENT';
-        if ($security eq "private" && 
+        if ($security eq "private" &&
             $vars->{'DAY_EVENT_PRIVATE'}) { $var = 'DAY_EVENT_PRIVATE'; }
-        if ($security eq "usemask" && 
+        if ($security eq "usemask" &&
             $vars->{'DAY_EVENT_PROTECTED'}) { $var = 'DAY_EVENT_PROTECTED'; }
-            
+
         $events .= LJ::fill_var_props($vars, $var, \%day_event);
     }
-    
+
     if (! $initpagedates)
     {
         # if no entries were on that day, we haven't populated the time shit!
@@ -2328,9 +2286,9 @@ sub create_view_day
         $nxday = 1;
         if (++$nxmonth > 12) { ++$nxyear; $nxmonth=1; }
     }
-    
-    $day_page{'prevday_url'} = "$journalbase/" . sprintf("%04d/%02d/%02d/", $pdyear, $pdmonth, $pdday); 
-    $day_page{'nextday_url'} = "$journalbase/" . sprintf("%04d/%02d/%02d/", $nxyear, $nxmonth, $nxday); 
+
+    $day_page{'prevday_url'} = "$journalbase/" . sprintf("%04d/%02d/%02d/", $pdyear, $pdmonth, $pdday);
+    $day_page{'nextday_url'} = "$journalbase/" . sprintf("%04d/%02d/%02d/", $nxyear, $nxmonth, $nxday);
 
     $$ret .= LJ::fill_var_props($vars, 'DAY_PAGE', \%day_page);
     return 1;
