@@ -1739,6 +1739,201 @@ sub ljuser
     }
 }
 
+sub update_user
+{
+    my ($arg, $ref) = @_;
+    my @uid;
+
+    if (ref $arg eq "ARRAY") {
+        @uid = @$arg;
+    } else {
+        @uid = want_userid($arg);
+    }
+    @uid = grep { $_ } map { $_ + 0 } @uid;
+    return 0 unless @uid;
+
+    my @sets;
+    my @bindparams;
+    while (my ($k, $v) = each %$ref) {
+        if ($k eq "raw") {
+            push @sets, $v;
+        } else {
+            push @sets, "$k=?";
+            push @bindparams, $v;
+        }
+    }
+    return 1 unless @sets;
+    my $dbh = LJ::get_db_writer();
+    return 0 unless $dbh;
+    {
+        local $" = ",";
+        my $where = @uid == 1 ? "userid=$uid[0]" : "userid IN (@uid)";
+        $dbh->do("UPDATE user SET @sets WHERE $where", undef,
+                 @bindparams);
+        return 0 if $dbh->err;
+    }
+    if (@LJ::MEMCACHE_SERVERS) {
+        LJ::memcache_kill($_, "userid") foreach @uid;
+    }
+    return 1;
+}
+
+# <LJFUNC>
+# name: LJ::get_timezone
+# des: Gets the timezone offset for the user.
+# args: u, offsetref, fakedref
+# des-u: user object.
+# des-offsetref: reference to scalar to hold timezone offset;
+# des-fakedref: reference to scalar to hold whether this timezone was
+#               faked.  0 if it is the timezone specified by the user (not supported yet).
+# returns: nonzero if successful.
+# </LJFUNC>
+sub get_timezone {
+    my ($u, $offsetref, $fakedref) = @_;
+
+    # we currently don't support timezones,
+    # but when we do this will be the function to modify.
+
+    my $offset;
+
+    my $dbcr = LJ::get_cluster_def_reader($u);
+    return 0 unless $dbcr;
+
+    # we guess their current timezone's offset
+    # by comparing the gmtime of their last post
+    # with the time they specified on that post.
+
+    # grab the times on the last post that wasn't backdated.
+    # (backdated is rlogtime == $LJ::EndOfTime)
+    if (my $last_row = $dbcr->selectrow_hashref(
+        qq{
+            SELECT rlogtime, eventtime
+            FROM log2
+            WHERE journalid = ? AND rlogtime <> ?
+            ORDER BY rlogtime LIMIT 1
+        }, undef, $u->{userid}, $LJ::EndOfTime)) {
+        my $logtime = $LJ::EndOfTime - $last_row->{'rlogtime'};
+        my $eventtime = LJ::mysqldate_to_time($last_row->{'eventtime'}, 1);
+        my $hourdiff = ($eventtime - $logtime) / 3600;
+
+        # if they're up to a quarter hour behind, round up.
+        $$offsetref = $hourdiff > 0 ? int($hourdiff + 0.25) : int($hourdiff - 0.25);
+    }
+
+    # until we store real timezones, the timezone is always faked.
+    $$fakedref = 1 if $fakedref;
+
+    return 1;
+}
+
+# returns undef on error, or otherwise arrayref of arrayrefs,
+# each of format [ year, month, day, count ] for all days with
+# non-zero count.  examples:
+#  [ [ 2003, 6, 5, 3 ], [ 2003, 6, 8, 4 ], ... ]
+#
+sub get_daycounts
+{
+    my ($u, $remote, $not_memcache) = @_;
+    # NOTE: $remote not yet used.  one of the oldest LJ shortcomings is that
+    # it's public how many entries users have per-day, even if the entries
+    # are protected.  we'll be fixing that with a new table, but first
+    # we're moving everything to this API.
+
+    my $uid = LJ::want_userid($u) or return undef;
+
+    my @days;
+    my $memkey = [$uid,"dayct:$uid"];
+    unless ($not_memcache) {
+        my $list = LJ::MemCache::get($memkey);
+        return $list if $list;
+    }
+
+    my $dbcr = LJ::get_cluster_def_reader($u) or return undef;
+    my $sth = $dbcr->prepare("SELECT year, month, day, COUNT(*) ".
+                             "FROM log2 WHERE journalid=? GROUP BY 1, 2, 3");
+    $sth->execute($uid);
+    while (my ($y, $m, $d, $c) = $sth->fetchrow_array) {
+        # we force each number from string scalars (from DBI) to int scalars,
+        # so they store smaller in memcache
+        push @days, [ int($y), int($m), int($d), int($c) ];
+    }
+    LJ::MemCache::add($memkey, \@days);
+    return \@days;
+}
+
+# <LJFUNC>
+# name: LJ::modify_caps
+# des: Given a list of caps to add and caps to remove, updates a user's caps
+# args: uuid, cap_add, cap_del, res
+# arg-cap_add: arrayref of bit numbers to turn on
+# arg-cap_del: arrayref of bit numbers to turn off
+# arg-res: hashref returned from 'modify_caps' hook
+# returns: updated u object, retrieved from $dbh, then 'caps' key modified
+#          otherwise, returns 0 unless all  hooks run properly
+# </LJFUNC>
+sub modify_caps {
+    my ($argu, $cap_add, $cap_del, $res) = @_;
+    my $userid = LJ::want_userid($argu);
+    return undef unless $userid;
+
+    $cap_add ||= [];
+    $cap_del ||= [];
+    my %cap_add_mod = ();
+    my %cap_del_mod = ();
+
+    # convert capnames to bit numbers
+    if (LJ::are_hooks("get_cap_bit")) {
+        foreach my $bit (@$cap_add, @$cap_del) {
+            next if $bit =~ /^\d+$/;
+
+            # bit is a magical reference into the array
+            $bit = LJ::run_hook("get_cap_bit", $bit);
+        }
+    }
+
+    # get a u object directly from the db
+    my $u = LJ::load_userid($userid, "force");
+
+    # add new caps
+    my $newcaps = int($u->{'caps'});
+    foreach (@$cap_add) {
+        my $cap = 1 << $_;
+
+        # about to turn bit on, is currently off?
+        $cap_add_mod{$_} = 1 unless $newcaps & $cap;
+        $newcaps |= $cap;
+    }
+
+    # remove deleted caps
+    foreach (@$cap_del) {
+        my $cap = 1 << $_;
+
+        # about to turn bit off, is it currently on?
+        $cap_del_mod{$_} = 1 if $newcaps & $cap;
+        $newcaps &= ~$cap;
+    }
+
+    # run hooks for modified bits
+    if (LJ::are_hooks("modify_caps")) {
+        $res = LJ::run_hook("modify_caps",
+                            { 'u' => $u,
+                              'newcaps' => $newcaps,
+                              'oldcaps' => $u->{'caps'},
+                              'cap_on_req'  => { map { $_ => 1 } @$cap_add },
+                              'cap_off_req' => { map { $_ => 1 } @$cap_del },
+                              'cap_on_mod'  => \%cap_add_mod,
+                              'cap_off_mod' => \%cap_del_mod,
+                          });
+
+        # hook should return a status code
+        return undef unless defined $res;
+    }
+
+    # update user row
+    LJ::update_user($u, { 'caps' => $newcaps });
+
+    return $u;
+}
 
 
 1;

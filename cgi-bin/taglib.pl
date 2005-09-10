@@ -86,7 +86,7 @@ sub get_usertagsmulti {
                          "))";
         }
         my $where = join(' OR ', @stmts);
-            
+
         # get the keyword ids they have used as tags
         my $rows = $dbcr->selectall_arrayref("SELECT userid, kwid, keyword FROM userkeywords WHERE $where");
         next if $dbcr->err || ! $rows;
@@ -1171,7 +1171,7 @@ sub set_usertag_display {
 # <LJFUNC>
 # name: LJ::Tags::deleted_friend_group
 # class: tags
-# des: Called internally when a friends group is deleted.
+# des: Called from ljprotocol when a friends group is deleted.
 # args: uobj, bit
 # des-uobj: User id or object of account deleting the group.
 # des-bit: The id (1..30) of the friends group being deleted.
