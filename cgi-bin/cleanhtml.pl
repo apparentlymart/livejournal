@@ -5,13 +5,36 @@
 # link: htdocs/userinfo.bml, htdocs/users
 # </LJDEP>
 
-require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
-
 use strict;
 use HTML::TokeParser ();
 use URI ();
 
-#     LJ::CleanHTML::clean(\$u->{'bio'}, { 
+require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
+
+package LJ;
+
+# <LJFUNC>
+# name: LJ::strip_bad_code
+# class: security
+# des: Removes malicious/annoying HTML.
+# info: This is just a wrapper function around [func[LJ::CleanHTML::clean]].
+# args: textref
+# des-textref: Scalar reference to text to be cleaned.
+# returns: Nothing.
+# </LJFUNC>
+sub strip_bad_code
+{
+    my $data = shift;
+    LJ::CleanHTML::clean($data, {
+        'eat' => [qw[layer iframe script object embed]],
+        'mode' => 'allow',
+        'keepcomments' => 1, # Allows CSS to work
+    });
+}
+
+package LJ::CleanHTML;
+
+#     LJ::CleanHTML::clean(\$u->{'bio'}, {
 #        'wordlength' => 100, # maximum length of an unbroken "word"
 #        'addbreaks' => 1,    # insert <br/> after newlines where appropriate
 #        'tablecheck' => 1,   # make sure they aren't closing </td> that weren't opened.
@@ -29,8 +52,6 @@ use URI ();
 #        'noautolinks' => 1, # do not auto linkify
 #        'extractimages' => 1, # placeholder images
 #     });
-
-package LJ::CleanHTML;
 
 sub helper_preload
 {
@@ -67,7 +88,7 @@ my %tag_substitute = (
 # name: LJ::CleanHTML::clean
 # class: text
 # des: Multifaceted HTML parse function
-# info: 
+# info:
 # args: data, opts
 # des-data: A reference to html to parse to output, or HTML if modified in-place.
 # des-opts: An hash of options to pass to the parser.
@@ -82,7 +103,7 @@ sub clean
 
     # remove the auth portion of any see_request.bml links
     $$data =~ s/(see_request\.bml.+?)auth=\w+/$1/ig;
- 
+
     my $p = HTML::TokeParser->new($data);
 
     my $wordlength = $opts->{'wordlength'};
@@ -169,11 +190,11 @@ sub clean
 
             my $slashclose = 0;   # If set to 1, use XML-style empty tag marker
             # for tags like <name/>, pretend it's <name> and reinsert the slash later
-            $slashclose = 1 if ($tag =~ s!/$!!); 
+            $slashclose = 1 if ($tag =~ s!/$!!);
 
             return $total_fail->($tag) unless $tag =~ /^\w([\w\-:_]*\w)?$/;
 
-            # for incorrect tags like <name/attrib=val> (note the lack of a space) 
+            # for incorrect tags like <name/attrib=val> (note the lack of a space)
             # delete everything after 'name' to prevent a security loophole which happens
             # because IE understands them.
             $tag =~ s!/.+$!!;
@@ -181,8 +202,8 @@ sub clean
             if ($action{$tag} eq "eat") {
                 $p->unget_token($token);
                 $p->get_tag("/$tag");
-            } 
-            elsif ($tag eq "lj-cut" && !$ljcut_disable) 
+            }
+            elsif ($tag eq "lj-cut" && !$ljcut_disable)
             {
                 my $attr = $token->[2];
                 $cutcount++;
@@ -204,7 +225,7 @@ sub clean
                     next;
                 }
             }
-            elsif ($tag eq "lj") 
+            elsif ($tag eq "lj")
             {
                 my $attr = $token->[2];
 
@@ -230,12 +251,12 @@ sub clean
                     $newdata .= "<b>[Unknown LJ tag]</b>";
                 }
             }
-            elsif ($tag eq "lj-raw") 
+            elsif ($tag eq "lj-raw")
             {
                 # Strip it out, but still register it as being open
                 $opencount{$tag}++;
             }
-            else 
+            else
             {
                 my $alt_output = 0;
 
@@ -353,7 +374,7 @@ sub clean
                     delete $hash->{'style'};
                 }
 
-                if ($tag eq "img") 
+                if ($tag eq "img")
                 {
                     my $img_bad = 0;
                     if (defined $opts->{'maximgwidth'} &&
@@ -432,8 +453,8 @@ sub clean
                             $opencount{$tag}--;
                             $tablescope[-1]->{$tag}-- if $opts->{'tablecheck'} && @tablescope;
                         }
-                        if ($allow) { 
-                            $newdata .= ">"; 
+                        if ($allow) {
+                            $newdata .= ">";
                             $opencount{$tag}++;
 
                             # maintain current table scope
@@ -456,7 +477,7 @@ sub clean
             }
         }
         # end tag
-        elsif ($type eq "E") 
+        elsif ($type eq "E")
         {
             my $tag = $token->[1];
 
@@ -581,8 +602,8 @@ sub clean
 
             # put <wbr> tags into long words, except inside <pre> and <textarea>.
             if ($wordlength && !$opencount{'pre'} && !$opencount{'textarea'}) {
-                $token->[1] =~ s/\S{$wordlength,}/break_word($&,$wordlength)/eg;                
-            } 
+                $token->[1] =~ s/\S{$wordlength,}/break_word($&,$wordlength)/eg;
+            }
 
             # auto-format things, unless we're in a textarea, when it doesn't make sense
             if ($auto_format && !$opencount{'textarea'}) {
@@ -593,7 +614,7 @@ sub clean
             }
 
             $newdata .= $token->[1];
-        } 
+        }
         elsif ($type eq "C") {
             # by default, ditch comments
             if ($keepcomments) {
@@ -631,7 +652,7 @@ sub clean
             }
         }
     }
-    
+
     # extra-paranoid check
     1 while $newdata =~ s/<script\b//ig;
 
@@ -648,10 +669,10 @@ sub resolve_relative_urls
 
     # where we look for relative URLs
     my $rel_source = {
-        'a' => { 
+        'a' => {
             'href' => 1,
         },
-        'img' => { 
+        'img' => {
             'src' => 1,
         },
     };
@@ -689,7 +710,7 @@ sub resolve_relative_urls
                 $newdata .= $token->[4];
                 next TOKEN;
             }
-            
+
             # otherwise, rebuild the opening tag
 
             # for tags like <name/>, pretend it's <name> and reinsert the slash later
@@ -705,7 +726,7 @@ sub resolve_relative_urls
                     if exists $hash->{$_};
             }
             $newdata .= " /" if $slashclose;
-            $newdata .= ">"; 
+            $newdata .= ">";
         }
         elsif ($type eq "E") {
             $newdata .= $token->[2];
@@ -715,7 +736,7 @@ sub resolve_relative_urls
         }
         elsif ($type eq "T") {
             $newdata .= $token->[1];
-        } 
+        }
         elsif ($type eq "C") {
             $newdata .= $token->[1];
         }
@@ -875,7 +896,7 @@ sub clean_event
         $$ref =~ s/\r?\n/<br \/>/g;
         return;
     }
-    
+
     # slow path: need to be run it through the cleaner
     clean($ref, {
         'linkify' => 1,
@@ -958,7 +979,7 @@ sub clean_s1_style
 {
     my $s1 = shift;
     my $clean;
-    
+
     my %tmpl;
     LJ::parse_vars(\$s1, \%tmpl);
     foreach my $v (keys %tmpl) {
@@ -990,7 +1011,7 @@ sub s1_attribute_clean {
 sub canonical_url {
     my $url = shift;
     my $allow_all = shift;
-    
+
     # strip leading and trailing spaces
     $url =~ s/^\s*//;
     $url =~ s/\s*$//;
