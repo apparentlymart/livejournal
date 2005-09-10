@@ -337,7 +337,6 @@ sub create_view_rss
 
 # the creator for the Atom view
 # keys of $opts:
-# saycharset - the charset of the feed (defaults to utf-8)
 # single_entry - only output an <entry>..</entry> block. off by default
 # apilinks - output AtomAPI links for posting a new entry or 
 #            getting/editing/deleting an existing one. off by default
@@ -381,7 +380,6 @@ sub create_view_atom
         $feed = XML::Atom::Feed->new();
         $xml  = $feed->{doc};
 
-        $xml->setEncoding( $opts->{'saycharset'} || 'utf-8' );
         $xml->insertBefore( $xml->createComment( LJ::run_hook("bot_director") ), $xml->documentElement());
 
         # attributes
@@ -508,7 +506,7 @@ sub create_view_atom
         }
     }
 
-    return $xml->encoding eq 'utf-8' ? $feed->as_xml() : $xml->toString();
+    return $feed->as_xml();
 }
 
 # create a FOAF page for a user
