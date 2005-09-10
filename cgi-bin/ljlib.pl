@@ -45,13 +45,15 @@ sub END { LJ::end_request(); }
 # keep track of what db locks we have out
 %LJ::LOCK_OUT = (); # {global|user} => caller_with_lock
 
+require "$ENV{'LJHOME'}/cgi-bin/taglib.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljtextutil.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljtimeutil.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljcapabilities.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljmood.pl";
+
 require "$ENV{'LJHOME'}/cgi-bin/ljlib-local.pl"
     if -e "$ENV{'LJHOME'}/cgi-bin/ljlib-local.pl";
 
-require "taglib.pl";
-require "ljtextutil.pl";
-require "ljtimeutil.pl";
-require "ljcapabilities.pl";
 
 # if this is a dev server, alias LJ::D to Data::Dumper::Dumper
 if ($LJ::IS_DEV_SERVER) {
@@ -1843,67 +1845,6 @@ sub mark_authaction_used
 }
 
 # <LJFUNC>
-# name: LJ::get_mood_picture
-# des: Loads a mood icon hashref given a themeid and moodid.
-# args: themeid, moodid, ref
-# des-themeid: Integer; mood themeid.
-# des-moodid: Integer; mood id.
-# des-ref: Hashref to load mood icon data into.
-# returns: Boolean; 1 on success, 0 otherwise.
-# </LJFUNC>
-sub get_mood_picture
-{
-    my ($themeid, $moodid, $ref) = @_;
-    LJ::load_mood_theme($themeid) unless $LJ::CACHE_MOOD_THEME{$themeid};
-    LJ::load_moods() unless $LJ::CACHED_MOODS;
-    do
-    {
-        if ($LJ::CACHE_MOOD_THEME{$themeid} &&
-            $LJ::CACHE_MOOD_THEME{$themeid}->{$moodid}) {
-            %{$ref} = %{$LJ::CACHE_MOOD_THEME{$themeid}->{$moodid}};
-            if ($ref->{'pic'} =~ m!^/!) {
-                $ref->{'pic'} =~ s!^/img!!;
-                $ref->{'pic'} = $LJ::IMGPREFIX . $ref->{'pic'};
-            }
-            $ref->{'moodid'} = $moodid;
-            return 1;
-        } else {
-            $moodid = (defined $LJ::CACHE_MOODS{$moodid} ?
-                       $LJ::CACHE_MOODS{$moodid}->{'parent'} : 0);
-        }
-    }
-    while ($moodid);
-    return 0;
-}
-
-# mood id to name (or undef)
-sub mood_name
-{
-    my ($moodid) = @_;
-    LJ::load_moods() unless $LJ::CACHED_MOODS;
-    my $m = $LJ::CACHE_MOODS{$moodid};
-    return $m ? $m->{'name'} : undef;
-}
-
-# mood name to id (or undef)
-sub mood_id
-{
-    my ($mood) = @_;
-    return undef unless $mood;
-    LJ::load_moods() unless $LJ::CACHED_MOODS;
-    foreach my $m (values %LJ::CACHE_MOODS) {
-        return $m->{'id'} if $mood eq $m->{'name'};
-    }
-    return undef;
-}
-
-sub get_moods
-{
-    LJ::load_moods() unless $LJ::CACHED_MOODS;
-    return \%LJ::CACHE_MOODS;
-}
-
-# <LJFUNC>
 # name: LJ::get_urls
 # des: Returns a list of all referenced URLs from a string
 # args: text
@@ -2121,45 +2062,6 @@ sub make_auth_code
     my $auth;
     for (1..$length) { $auth .= substr($digits, int(rand(30)), 1); }
     return $auth;
-}
-
-# <LJFUNC>
-# name: LJ::load_mood_theme
-# des: Loads and caches a mood theme, or returns immediately if already loaded.
-# args: dbarg?, themeid
-# des-themeid: the mood theme ID to load
-# </LJFUNC>
-sub load_mood_theme
-{
-    &nodb;
-    my $themeid = shift;
-    return if $LJ::CACHE_MOOD_THEME{$themeid};
-    return unless $themeid;
-
-    # check memcache
-    my $memkey = [$themeid, "moodthemedata:$themeid"];
-    return if $LJ::CACHE_MOOD_THEME{$themeid} = LJ::MemCache::get($memkey) and
-        %{$LJ::CACHE_MOOD_THEME{$themeid} || {}};
-
-    # fall back to db
-    my $dbh = LJ::get_db_writer()
-        or return 0;
-
-    $LJ::CACHE_MOOD_THEME{$themeid} = {};
-
-    my $sth = $dbh->prepare("SELECT moodid, picurl, width, height FROM moodthemedata WHERE moodthemeid=?");
-    $sth->execute($themeid);
-    return 0 if $dbh->err;
-
-    while (my ($id, $pic, $w, $h) = $sth->fetchrow_array) {
-        $LJ::CACHE_MOOD_THEME{$themeid}->{$id} = { 'pic' => $pic, 'w' => $w, 'h' => $h };
-    }
-
-    # set in memcache
-    LJ::MemCache::set($memkey, $LJ::CACHE_MOOD_THEME{$themeid}, 3600)
-        if %{$LJ::CACHE_MOOD_THEME{$themeid} || {}};
-
-    return 1;
 }
 
 # <LJFUNC>
@@ -5064,28 +4966,6 @@ sub get_cluster_description {
 }
 
 # <LJFUNC>
-# name: LJ::load_moods
-# class:
-# des:
-# info:
-# args:
-# des-:
-# returns:
-# </LJFUNC>
-sub load_moods
-{
-    return if $LJ::CACHED_MOODS;
-    my $dbr = LJ::get_db_reader();
-    my $sth = $dbr->prepare("SELECT moodid, mood, parentmood FROM moods");
-    $sth->execute;
-    while (my ($id, $mood, $parent) = $sth->fetchrow_array) {
-        $LJ::CACHE_MOODS{$id} = { 'name' => $mood, 'parent' => $parent, 'id' => $id };
-        if ($id > $LJ::CACHED_MOOD_MAX) { $LJ::CACHED_MOOD_MAX = $id; }
-    }
-    $LJ::CACHED_MOODS = 1;
-}
-
-# <LJFUNC>
 # name: LJ::do_to_cluster
 # des: Given a subref, this function will pick a random cluster and run the subref,
 #   passing it the cluster id.  If the subref returns a 1, this function will exit
@@ -6301,54 +6181,6 @@ sub item_toutf8
     return;
 }
 
-# returns 1 if action is permitted.  0 if above rate or fail.
-# action isn't logged on fail.
-#
-# opts keys:
-#   -- "limit_by_ip" => "1.2.3.4"  (when used for checking rate)
-#   --
-sub rate_log
-{
-    my ($u, $ratename, $count, $opts) = @_;
-    my $rateperiod = LJ::get_cap($u, "rateperiod-$ratename");
-    return 1 unless $rateperiod;
-
-    return 0 unless $u->writer;
-
-    my $rp = LJ::get_prop("rate", $ratename);
-    return 0 unless $rp;
-
-    my $now = time();
-    my $beforeperiod = $now - $rateperiod;
-
-    # delete inapplicable stuff (or some of it)
-    $u->do("DELETE FROM ratelog WHERE userid=$u->{'userid'} AND rlid=$rp->{'id'} ".
-           "AND evttime < $beforeperiod LIMIT 1000");
-
-    # check rate.  (okay per period)
-    my $opp = LJ::get_cap($u, "rateallowed-$ratename");
-    return 1 unless $opp;
-    my $udbr = LJ::get_cluster_reader($u);
-    my $ip = $udbr->quote($opts->{'limit_by_ip'} || "0.0.0.0");
-    my $sum = $udbr->selectrow_array("SELECT COUNT(quantity) FROM ratelog WHERE ".
-                                     "userid=$u->{'userid'} AND rlid=$rp->{'id'} ".
-                                     "AND ip=INET_ATON($ip) ".
-                                     "AND evttime > $beforeperiod");
-
-    # would this transaction go over the limit?
-    if ($sum + $count > $opp) {
-        # TODO: optionally log to rateabuse, unless caller is doing it themselves
-        # somehow, like with the "loginstall" table.
-        return 0;
-    }
-
-    # log current
-    $count = $count + 0;
-    $u->do("INSERT INTO ratelog (userid, rlid, evttime, ip, quantity) VALUES ".
-           "($u->{'userid'}, $rp->{'id'}, $now, INET_ATON($ip), $count)");
-    return 1;
-}
-
 # We're not always running under mod_perl... sometimes scripts (syndication sucker)
 # call paths which end up thinking they need the remote IP, but don't.
 sub get_remote_ip
@@ -6358,46 +6190,6 @@ sub get_remote_ip
         $ip = Apache->request->connection->remote_ip;
     };
     return $ip || $ENV{'FAKE_IP'};
-}
-
-sub login_ip_banned
-{
-    my $u = shift;
-    return 0 unless $u;
-
-    my $ip;
-    return 0 unless ($ip = LJ::get_remote_ip());
-
-    my $udbr;
-    my $rateperiod = LJ::get_cap($u, "rateperiod-failed_login");
-    if ($rateperiod && ($udbr = LJ::get_cluster_reader($u))) {
-        my $bantime = $udbr->selectrow_array("SELECT time FROM loginstall WHERE ".
-                                             "userid=$u->{'userid'} AND ip=INET_ATON(?)",
-                                             undef, $ip);
-        if ($bantime && $bantime > time() - $rateperiod) {
-            return 1;
-        }
-    }
-    return 0;
-}
-
-sub handle_bad_login
-{
-    my $u = shift;
-    return 1 unless $u;
-
-    my $ip;
-    return 1 unless ($ip = LJ::get_remote_ip());
-    # an IP address is permitted such a rate of failures
-    # until it's banned for a period of time.
-    my $udbh;
-    if (! LJ::rate_log($u, "failed_login", 1, { 'limit_by_ip' => $ip }) &&
-        ($udbh = LJ::get_cluster_master($u)))
-    {
-        $udbh->do("REPLACE INTO loginstall (userid, ip, time) VALUES ".
-                  "(?,INET_ATON(?),UNIX_TIMESTAMP())", undef, $u->{'userid'}, $ip);
-    }
-    return 1;
 }
 
 sub md5_struct

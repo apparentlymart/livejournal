@@ -1935,5 +1935,92 @@ sub modify_caps {
     return $u;
 }
 
+# returns 1 if action is permitted.  0 if above rate or fail.
+# action isn't logged on fail.
+#
+# opts keys:
+#   -- "limit_by_ip" => "1.2.3.4"  (when used for checking rate)
+#   --
+sub rate_log
+{
+    my ($u, $ratename, $count, $opts) = @_;
+    my $rateperiod = LJ::get_cap($u, "rateperiod-$ratename");
+    return 1 unless $rateperiod;
+
+    return 0 unless $u->writer;
+
+    my $rp = LJ::get_prop("rate", $ratename);
+    return 0 unless $rp;
+
+    my $now = time();
+    my $beforeperiod = $now - $rateperiod;
+
+    # delete inapplicable stuff (or some of it)
+    $u->do("DELETE FROM ratelog WHERE userid=$u->{'userid'} AND rlid=$rp->{'id'} ".
+           "AND evttime < $beforeperiod LIMIT 1000");
+
+    # check rate.  (okay per period)
+    my $opp = LJ::get_cap($u, "rateallowed-$ratename");
+    return 1 unless $opp;
+    my $udbr = LJ::get_cluster_reader($u);
+    my $ip = $udbr->quote($opts->{'limit_by_ip'} || "0.0.0.0");
+    my $sum = $udbr->selectrow_array("SELECT COUNT(quantity) FROM ratelog WHERE ".
+                                     "userid=$u->{'userid'} AND rlid=$rp->{'id'} ".
+                                     "AND ip=INET_ATON($ip) ".
+                                     "AND evttime > $beforeperiod");
+
+    # would this transaction go over the limit?
+    if ($sum + $count > $opp) {
+        # TODO: optionally log to rateabuse, unless caller is doing it themselves
+        # somehow, like with the "loginstall" table.
+        return 0;
+    }
+
+    # log current
+    $count = $count + 0;
+    $u->do("INSERT INTO ratelog (userid, rlid, evttime, ip, quantity) VALUES ".
+           "($u->{'userid'}, $rp->{'id'}, $now, INET_ATON($ip), $count)");
+    return 1;
+}
+
+sub login_ip_banned
+{
+    my $u = shift;
+    return 0 unless $u;
+
+    my $ip;
+    return 0 unless ($ip = LJ::get_remote_ip());
+
+    my $udbr;
+    my $rateperiod = LJ::get_cap($u, "rateperiod-failed_login");
+    if ($rateperiod && ($udbr = LJ::get_cluster_reader($u))) {
+        my $bantime = $udbr->selectrow_array("SELECT time FROM loginstall WHERE ".
+                                             "userid=$u->{'userid'} AND ip=INET_ATON(?)",
+                                             undef, $ip);
+        if ($bantime && $bantime > time() - $rateperiod) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+sub handle_bad_login
+{
+    my $u = shift;
+    return 1 unless $u;
+
+    my $ip;
+    return 1 unless ($ip = LJ::get_remote_ip());
+    # an IP address is permitted such a rate of failures
+    # until it's banned for a period of time.
+    my $udbh;
+    if (! LJ::rate_log($u, "failed_login", 1, { 'limit_by_ip' => $ip }) &&
+        ($udbh = LJ::get_cluster_master($u)))
+    {
+        $udbh->do("REPLACE INTO loginstall (userid, ip, time) VALUES ".
+                  "(?,INET_ATON(?),UNIX_TIMESTAMP())", undef, $u->{'userid'}, $ip);
+    }
+    return 1;
+}
 
 1;
