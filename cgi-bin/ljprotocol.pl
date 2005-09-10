@@ -54,7 +54,7 @@ my %e = (
      "154" => [ E_PERM, "Can't add a redirected account as a friend" ],
      "155" => [ E_TEMP, "Non-authenticated email address" ],
      "156" => [ E_TEMP, sub { # to reload w/o restart
-         LJ::tosagree_str('protocol' => 'text') || 
+         LJ::tosagree_str('protocol' => 'text') ||
          LJ::tosagree_str('protocol' => 'title')
      } ],
 
@@ -97,7 +97,7 @@ my %e = (
      "408" => [ E_TEMP, "Maximum queued posts for this community+poster combination reached." ],
      "409" => [ E_PERM, "Post too large." ],
      "410" => [ E_PERM, "Your trial account has expired.  Posting now disabled." ],
-     
+
      # Server Errors
      "500" => [ E_TEMP, "Internal server error" ],
      "501" => [ E_TEMP, "Database error" ],
@@ -145,7 +145,7 @@ sub error_message
       $e{$code} && ref $e{$code}
       ? ( ref $e{$code}->[1] eq 'CODE' ? $e{$code}->[1]->() : $e{$code}->[1] )
       : "BUG: Unknown error code!";
-    $prefix = "Client error: " if $code >= 200; 
+    $prefix = "Client error: " if $code >= 200;
     $prefix = "Server error: " if $code >= 500;
     my $totalerror = "$prefix$error";
     $totalerror .= ": $des" if $des;
@@ -166,7 +166,7 @@ sub do_request
     my @args = ($req, $err, $flags);
 
     my $r = eval { Apache->request };
-    $r->notes("codepath" => "protocol.$method") 
+    $r->notes("codepath" => "protocol.$method")
         if $r && ! $r->notes("codepath");
 
     if ($method eq "login")            { return login(@args);            }
@@ -263,7 +263,7 @@ sub login
                 LJ::text_out(\$_->{'text'});
                 LJ::text_out(\$_->{'url'}); # should be redundant
             }
-	}
+        }
     }
 
     ## tell some users they can hit the fast servers later.
@@ -276,13 +276,13 @@ sub login
 
     if ($req->{'clientversion'} =~ /^\S+\/\S+$/) {
         eval {
-            my $r = Apache->request;            
+            my $r = Apache->request;
             $r->notes("clientver", $req->{'clientversion'});
         };
     }
 
     ## update or add to clientusage table
-    if ($req->{'clientversion'} =~ /^\S+\/\S+$/ && 
+    if ($req->{'clientversion'} =~ /^\S+\/\S+$/ &&
         ! $LJ::DISABLED{'clientversionlog'})
     {
         my $client = $req->{'clientversion'};
@@ -443,7 +443,7 @@ sub checkfriends
               my $sql = "SELECT MAX(timeupdate) FROM userusage ".
                   "WHERE userid IN ($list)";
               $update = $dbr->selectrow_array($sql);
-            } 
+            }
         }
         LJ::MemCache::set($memkey,$update,time()+$interval) if $update;
     }
@@ -551,11 +551,11 @@ sub common_event_validation
     # we don't want attackers sending something that looks like gzipped data
     # in protocol version 0 (unknown8bit allowed), otherwise they might
     # inject a 100MB string of single letters in a few bytes.
-    return fail($err,208,"Cannot send gzipped data") 
+    return fail($err,208,"Cannot send gzipped data")
         if substr($req->{'event'},0,2) eq "\037\213";
-    
+
     # non-ASCII?
-    unless ( LJ::is_ascii($req->{'event'}) && 
+    unless ( LJ::is_ascii($req->{'event'}) &&
         LJ::is_ascii($req->{'subject'}) &&
         LJ::is_ascii(join(' ', values %{$req->{'props'}}) ))
     {
@@ -661,7 +661,7 @@ sub postevent
 
     # locked accounts can't post
     return fail($err,308) if $u->{statusvis} eq 'L';
-    
+
     # check the journal's read-only bit
     return fail($err,306) if LJ::get_cap($uowner, "readonly");
 
@@ -740,7 +740,7 @@ sub postevent
     }
 
     # are they trying to post back in time?
-    if ($posterid == $ownerid && !$time_was_faked && 
+    if ($posterid == $ownerid && !$time_was_faked &&
         $u->{'newesteventtime'} && $eventtime lt $u->{'newesteventtime'} &&
         !$req->{'props'}->{'opt_backdated'}) {
         return fail($err, 153, "Your most recent journal entry is dated $u->{'newesteventtime'}, but you're trying to post one at $eventtime without the backdate option turned on.  Please check your computer's clock.  Or, if you really mean to post in the past, use the backdate option.");
@@ -756,16 +756,16 @@ sub postevent
         $uselogsec = 1;
     }
 
-    ## if newpost_minsecurity is set, new entries have to be 
+    ## if newpost_minsecurity is set, new entries have to be
     ## a minimum security level
-    $security = "private" 
+    $security = "private"
         if $uowner->{'newpost_minsecurity'} eq "private";
     ($security, $qallowmask) = ("usemask", 1)
-        if $uowner->{'newpost_minsecurity'} eq "friends" 
+        if $uowner->{'newpost_minsecurity'} eq "friends"
         and $security eq "public";
 
     my $qsecurity = $dbh->quote($security);
-    
+
     ### make sure user can't post with "custom/private security" on shared journals
     return fail($err,102)
         if ($ownerid != $posterid && # community post
@@ -803,7 +803,7 @@ sub postevent
 
     my $now = $dbcm->selectrow_array("SELECT UNIX_TIMESTAMP()");
     my $anum  = int(rand(256));
-    
+
     # by default we record the true reverse time that the item was entered.
     # however, if backdate is on, we put the reverse time at the end of time
     # (which makes it equivalent to 1969, but get_recent_items will never load
@@ -815,7 +815,7 @@ sub postevent
         $rlogtime -= $now;
     }
 
-    my $dupsig = Digest::MD5::md5_hex(join('', map { $req->{$_} } 
+    my $dupsig = Digest::MD5::md5_hex(join('', map { $req->{$_} }
                                            qw(subject event usejournal security allowmask)));
     my $lock_key = "post-$ownerid";
 
@@ -911,7 +911,7 @@ sub postevent
                                     "   $LJ::SITEROOT/community/moderate.bml?comm=$uowner->{'user'}\n\n".
                                     "Regards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n");
                         LJ::send_mail({
-                            'to' => $to, 
+                            'to' => $to,
                             'from' => $LJ::ADMIN_EMAIL,
                             'charset' => 'utf-8',
                             'subject' => "Moderated submission notification",
@@ -929,12 +929,12 @@ sub postevent
     # posting:
 
     $getlock->(); return $res if $res_done;
-    
+
     # do rate-checking
     if ($u->{'journaltype'} ne "Y" && ! LJ::rate_log($u, "post", 1)) {
         return $fail->($err,405);
     }
-    
+
     my $jitemid = LJ::alloc_user_counter($uowner, "L");
     return $fail->($err,501,"No itemid could be generated.") unless $jitemid;
 
@@ -958,7 +958,7 @@ sub postevent
     # set userprops.
     {
         my %set_userprop;
-        
+
         # keep track of itemid/anum for later potential duplicates
         $set_userprop{"dupsig_post"} = "$dupsig:$jitemid:$anum";
 
@@ -999,7 +999,7 @@ sub postevent
     $uowner->dudata_set('L', $jitemid, $bytes);
 
     $uowner->do("$verb INTO logtext2 (journalid, jitemid, subject, event) ".
-                "VALUES ($ownerid, $jitemid, ?, ?)", undef, $req->{'subject'}, 
+                "VALUES ($ownerid, $jitemid, ?, ?)", undef, $req->{'subject'},
                 LJ::text_compress($event));
     if ($uowner->err) {
         my $msg = $uowner->errstr;
@@ -1087,7 +1087,7 @@ sub postevent
         $security eq "public" && ! $req->{'props'}->{'opt_backdated'})
     {
         LJ::cmd_buffer_add($uowner->{clusterid}, $u->{'userid'}, 'weblogscom', {
-            'user' => $u->{'user'}, 
+            'user' => $u->{'user'},
             'title' => $u->{'journaltitle'} || $u->{'name'},
             'url' => LJ::journal_base($u) . "/",
         });
@@ -1162,9 +1162,9 @@ sub editevent
     # not every field in every table.  reads are quicker than writes,
     # so this is worth it.
     my $oldevent = $dbcm->selectrow_hashref
-	("SELECT journalid AS 'ownerid', posterid, eventtime, logtime, ".
-	 "compressed, security, allowmask, year, month, day, ".
-	 "rlogtime, anum FROM log2 WHERE journalid=$ownerid AND jitemid=$itemid");
+        ("SELECT journalid AS 'ownerid', posterid, eventtime, logtime, ".
+         "compressed, security, allowmask, year, month, day, ".
+         "rlogtime, anum FROM log2 WHERE journalid=$ownerid AND jitemid=$itemid");
 
     ($oldevent->{event}, $oldevent->{subject}) = $dbcm->selectrow_array
         ("SELECT subject, event FROM logtext2 ".
@@ -1226,7 +1226,7 @@ sub editevent
         # clear their duplicate protection, so they can later repost
         # what they just deleted.  (or something... probably rare.)
         LJ::set_userprop($u, "dupsig_post", undef);
-        
+
         my $res = { 'itemid' => $itemid,
                     'anum' => $oldevent->{'anum'} };
         return $res;
@@ -1323,9 +1323,9 @@ sub editevent
                 # otherwise, if they set the backdated flag,
                 # then we no longer know the newesteventtime.
                 LJ::set_userprop($u, "newesteventtime", undef);
-            } 
+            }
         }
-        
+
         my $qsecurity = $uowner->quote($security);
         my $dberr;
         $uowner->log2_do(\$dberr, "UPDATE log2 SET eventtime=$qeventtime, revttime=$LJ::EndOfTime-".
@@ -1553,11 +1553,11 @@ sub getevents
                 # their client is busted.  (doesn't understand syncitems semantics)
                 return fail($err,406);
             }
-            LJ::set_userprop($u, $pname, 
+            LJ::set_userprop($u, $pname,
                              join('/', map { $_, $reqs{$_} }
                                   sort { $b <=> $a } keys %reqs));
         }
-        
+
         my %item;
         $sth = $dbcr->prepare("SELECT jitemid, logtime FROM log2 WHERE ".
                               "journalid=? and logtime > ?");
@@ -1579,7 +1579,7 @@ sub getevents
         my $limit = 100;
         my @ids = sort { $item{$a} cmp $item{$b} } keys %item;
         if (@ids > $limit) { @ids = @ids[0..$limit-1]; }
-        
+
         my $in = join(',', @ids) || "0";
         $where = "AND jitemid IN ($in)";
     }
@@ -1644,7 +1644,7 @@ sub getevents
     # load properties. Even if the caller doesn't want them, we need
     # them in Unicode installations to recognize older 8bit non-UF-8
     # entries.
-    unless ($req->{'noprops'} && !$LJ::UNICODE) 
+    unless ($req->{'noprops'} && !$LJ::UNICODE)
     {
         ### do the properties now
         $count = 0;
@@ -1697,9 +1697,9 @@ sub getevents
             $t->[0] = undef;    # subject = undef
         }
 
-        # now that we have the subject, the event and the props, 
+        # now that we have the subject, the event and the props,
         # auto-translate them to UTF-8 if they're not in UTF-8.
-        if ($LJ::UNICODE && $req->{'ver'} >= 1 && 
+        if ($LJ::UNICODE && $req->{'ver'} >= 1 &&
                 $evt->{'props'}->{'unknown8bit'}) {
             my $error = 0;
             $t->[0] = LJ::text_convert($t->[0], $uowner, \$error);
@@ -1712,7 +1712,7 @@ sub getevents
         }
 
         if ($LJ::UNICODE && $req->{'ver'} < 1 && !$evt->{'props'}->{'unknown8bit'}) {
-            unless ( LJ::is_ascii($t->[0]) && 
+            unless ( LJ::is_ascii($t->[0]) &&
                      LJ::is_ascii($t->[1]) &&
                      LJ::is_ascii(join(' ', values %{$evt->{'props'}}) )) {
                 # we want to fail the client that wants to get this entry
@@ -1743,7 +1743,7 @@ sub getevents
             # only append the elipsis if the text was actually truncated
             $t->[1] .= "..." if $t->[1] ne $original;
         }
-        
+
         # line endings
         $t->[1] =~ s/\r//g;
         if ($req->{'lineendings'} eq "unix") {
@@ -1948,7 +1948,7 @@ sub editfriendgroups
         $bitset{$bit} = 1;
     }
 
-    ## before we perform any DB operations, validate input text 
+    ## before we perform any DB operations, validate input text
     # (groups' names) for correctness so we can fail gracefully
     if ($LJ::UNICODE) {
         foreach my $bit (keys %{$req->{'set'}})
@@ -1960,7 +1960,7 @@ sub editfriendgroups
                 unless LJ::text_in($name);
         }
     }
-    
+
     ## figure out deletions we'll do later
     foreach my $bit (@{$req->{'delete'}})
     {
@@ -1979,7 +1979,7 @@ sub editfriendgroups
         my $name = LJ::text_trim($sa->{'name'}, $bmax, $cmax);
 
         # can't end with a slash
-        $name =~ s!/$!!;        
+        $name =~ s!/$!!;
 
         # setting it to name is like deleting it.
         unless ($name =~ /\S/) {
@@ -2114,7 +2114,7 @@ sub sessiongenerate {
     $req->{expiration} = 'short' unless $req->{expiration} eq 'long';
     my $boundip;
     $boundip = LJ::get_remote_ip() if $req->{bindtoip};
-    
+
     my $u = $flags->{u};
     my $sess_opts = {
         exptype => $req->{expiration},
@@ -2168,7 +2168,7 @@ sub list_friends
 
     my $res = [];
     foreach my $f (sort { $us->{$a->[0]}{'user'} cmp $us->{$b->[0]}{'user'} }
-                   grep { $us->{$_->[0]} } @frow)  
+                   grep { $us->{$_->[0]} } @frow)
     {
         my $u = $us->{$f->[0]};
         next if $opts->{'friendof'} && $u->{'statusvis'} ne 'V';
@@ -2189,9 +2189,9 @@ sub list_friends
         if ($opts->{'includebdays'} &&
             $u->{'bdate'} &&
             $u->{'bdate'} ne "0000-00-00" &&
-            $u->{'allow_infoshow'} eq 'Y') 
+            $u->{'allow_infoshow'} eq 'Y')
         {
-            $r->{'birthday'} = $u->{'bdate'};            
+            $r->{'birthday'} = $u->{'bdate'};
         }
 
         unless ($opts->{'friendof'}) {
@@ -2272,9 +2272,9 @@ sub syncitems
             $item{$id} = [ 'L', $id, $dt, "update" ];
         }
     }
-    
+
     my @ev = sort { $a->[2] cmp $b->[2] } (values %item, values %cmt);
-    
+
     my $res = {};
     my $list = $res->{'syncitems'} = [];
     $res->{'total'} = scalar @ev;
@@ -2360,7 +2360,7 @@ sub login_message
 
     my @checkpass = LJ::run_hooks("bad_password", $u);
     return $msg->("bad_password")      if (@checkpass and $checkpass[0]->[0]);
-    
+
     return $msg->("old_win32_client")  if $req->{'clientversion'} =~ /^Win32-MFC\/(1.2.[0123456])$/;
     return $msg->("old_win32_client")  if $req->{'clientversion'} =~ /^Win32-MFC\/(1.3.[01234])\b/;
     return $msg->("hello_test")        if $u->{'user'} eq "test";
@@ -2557,7 +2557,7 @@ sub authenticate
         }
         if ($auth_meth eq "challenge") {
             my $chal_opts = {};
-            my $chall_ok = LJ::challenge_check_login($u, 
+            my $chall_ok = LJ::challenge_check_login($u,
                                                      $req->{'auth_challenge'},
                                                      $req->{'auth_response'},
                                                      \$ip_banned,
@@ -2939,7 +2939,7 @@ sub syncitems
     $res->{'success'} = "OK";
     $res->{'sync_total'} = $rs->{'total'};
     $res->{'sync_count'} = $rs->{'count'};
-    
+
     my $ct = 0;
     foreach my $s (@{ $rs->{'syncitems'} }) {
         $ct++;
@@ -3178,7 +3178,7 @@ sub sessionexpire {
 
     $rq->{expire} = [];
     foreach my $k (keys %$rq) {
-        push @{$rq->{expire}}, $1 
+        push @{$rq->{expire}}, $1
             if $k =~ /^expire_id_(\d+)$/;
     }
 
@@ -3247,7 +3247,7 @@ sub populate_friends
         $count++;
         $res->{"${pfx}_${count}_name"} = $f->{'fullname'};
         $res->{"${pfx}_${count}_user"} = $f->{'username'};
-        $res->{"${pfx}_${count}_birthday"} = $f->{'birthday'} if $f->{'birthday'}; 
+        $res->{"${pfx}_${count}_birthday"} = $f->{'birthday'} if $f->{'birthday'};
         $res->{"${pfx}_${count}_bg"} = $f->{'bgcolor'};
         $res->{"${pfx}_${count}_fg"} = $f->{'fgcolor'};
         if (defined $f->{'groupmask'}) {
