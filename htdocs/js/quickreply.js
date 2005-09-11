@@ -68,7 +68,6 @@
         }
 
         var qr_body = xGetElementById('body');
-        if (qr_body) qr_body.focus();
 
         // So it does not follow the link
         return false;
