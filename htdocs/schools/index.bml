@@ -69,7 +69,7 @@ body<=
             unless defined $class;
 
         $ret .= "<div class='$class' id='addschool'>";
-        $ret .= "<?p Enter your school's information for us to approve and add to the list soon: p?>";
+        $ret .= "<?p Enter your school's information. If approved, we'll add it to the Schools Directory and to the Schools list for this journal: p?>";
         $ret .= "<form action='index.bml' method='post'><div style='margin-left: 2em'>";
 
         $ret .= "<table><tr><td>";
@@ -149,10 +149,10 @@ body<=
                                                      url         => $remoterl,
                                                  });
 
-        $ret .= "<?h1 Thank You h1?>";
-        $ret .= "<?p Your school has been submitted for approval.  If approved, your school will be added to the list and it will automatically be added to your <a href='$LJ::SITEROOT/schools/manage.bml'>My Schools</a> list.  Be sure to check back and, if you wish, add the years which you attended. p?>";
+        $ret .= "<?h1 School Submitted h1?>";
+        $ret .= "<?p Your school has been submitted for approval.  If approved, your school will be added to the Schools Directory and automatically added to your <a href='$LJ::SITEROOT/schools/manage.bml'>Schools</a> list.  You can check back later to the <a href='$LJ::SITEROOT/schools/manage.bml'>Manage Schools</a> page to add years attended. p?>";
 
-        $ret .= "<table><tr><td height='100' valign='middle'><i>What would you like to do next?&nbsp;&nbsp;</td><td height='100' valign='middle'><a href='$LJ::SITEROOT/schools/index.bml'>Find another school</a><br /><br /><a href='$LJ::SITEROOT/schools/manage.bml'>Go to My Schools list</a></td></tr></table>";
+        $ret .= "<a href='$LJ::SITEROOT/schools/index.bml'>Return to the Schools Directory</a><br /><br /><a href='$LJ::SITEROOT/schools/manage.bml'>Go to your Schools list</a></td></tr></table>";
         return $ret;
     }
 
@@ -162,7 +162,10 @@ body<=
 
     unless ($ctc) {
         # Header text
-        $ret .= "<?p WASHINGTON (Reuters) - US President George W. Bush has the power to detain Jose Padilla, a US citizen who has been held in a South Carolina military brig for more than three years as a suspected enemy combatant without any charges, a federal appeals court ... p?>";
+        $ret .= "<?p With the Schools Directory, you can:<ul>";
+        $ret .= "<li>Add a school to your journal or community's Schools list.</li>";
+        $ret .= "<li>Find other users and communities associated with a school.</li></ul>";
+        $ret .= "<br /><br />Any schools you add will appear on the userinfo page for your journal or community.  If you don't see your school listed in the Schools Directory, use the Add School button at the bottom of this page to submit it.  p?>";
 
         my $cts = LJ::Schools::get_countries();
         return $err->("Unable to get country list.")
@@ -170,7 +173,7 @@ body<=
         return $err->("No countries found.")
             unless %$cts;
 
-        $ret .= "<?h1 Countries h1?><?p Please select a country below. p?>";
+        $ret .= "<?h1 Country h1?><?p Select a country p?>";
 
         $ret .= "<ul>";
         foreach my $ct (sort keys %{$cts}) {
@@ -184,12 +187,14 @@ body<=
     # Rest of this flow uses a different crumb
     LJ::set_active_crumb('schoolsfind');
 
+    # Rest of this flow uses the same header text
+    $ret .= "<?p  If you don't see what you're searching for, use the Add School button at the bottom of this page to submit it. p?>";
+
+
     ##########################################################################
     # PAGE 2: return the list of areas in that country
 
     unless (defined $sc) {
-        # Header text
-        $ret .= "<?p It's harvest time in Apple country, and the season's new crop includes a diminutive new iPod to replace the popular Mini, as well as an iTunes cell phone. Both were unveiled at a much-hyped press event in San Francisco this week. ... p?>";
 
         my $scs = LJ::Schools::get_states($ctc);
         return $err->("Unable to get necessary data.")
@@ -201,6 +206,8 @@ body<=
 
         $ret .= $trail->(1, $country);
 
+        $ret .= "<?h1 State or Province h1?><?p Select a city p?>";
+
         $ret .= "<ul>";
         foreach my $sc (sort { $a cmp $b } keys %{$scs}) {
             my $esc = LJ::eurl($sc);
@@ -210,7 +217,7 @@ body<=
         $ret .= "</ul>";
 
         unless ($ctc eq 'US') {
-            $ret .= "<div id='addlink'><?p <i>Don't see the state/city/school you're looking for?</i><br />";
+            $ret .= "<div id='addlink'><?p <i>Don't see what you're looking for?</i><br />";
             $ret .= "<a href='index.bml?ctc=$ectc&add=1' onclick='return addschool()'>Tell us about your school</a>";
             $ret .= " and we'll add it soon. p?></div>";
             $ret .= $add_school->($ctc);
@@ -223,8 +230,6 @@ body<=
     # PAGE 3: return the list of cities in a state
 
     unless ($cc) {
-        # Header text
-        $ret .= "<?p International aid meant for the victims of Hurricane Katrina is backing up at an Air Force base in Arkansas because relief lorries are being directed to the wrong places. Civilian truck drivers hired to take ... p?>";
 
         my $ccs = LJ::Schools::get_cities($ctc, $sc);
         return $err->("Unable to get necessary data.")
@@ -236,7 +241,7 @@ body<=
 
         $ret .= $trail->(1, $country, $state);
 
-        $ret .= "<?h1 Cities h1?><?p Please select a city below. p?>";
+        $ret .= "<?h1 City h1?><?p Select a city p?>";
 
         $ret .= "<ul>";
         foreach my $cc (sort { $a cmp $b } keys %{$ccs}) {
@@ -245,7 +250,7 @@ body<=
         }
         $ret .= "</ul>";
 
-        $ret .= "<div id='addlink'><?p <i>Don't see the state/city/school you're looking for?</i><br />";
+        $ret .= "<div id='addlink'><?p <i>Don't see what you're looking for?</i><br />";
         $ret .= "<a href='index.bml?ctc=$ectc&sc=$esc&add=1' onclick='return addschool()'>Tell us about your school</a>";
         $ret .= " and we'll add it soon. p?></div>";
         $ret .= $add_school->($ctc, $sc);
@@ -257,8 +262,6 @@ body<=
     # PAGE 4: return the list of schools in a city
 
     unless ($sid) {
-        # Header text
-        $ret .= "<?p The timing of s next shuttle launch remains uncertain as the space agency works to recover key facilities from the aftermath of Hurricane Katrina, agency officials said Thursday. In addition to spreading ...  p?>";
 
         my $schools = LJ::Schools::get_schools($ctc, $sc, $cc);
         return $err->("Unable to get necessary data.")
@@ -270,7 +273,7 @@ body<=
 
         $ret .= $trail->(1, $country, $state, $city);
 
-        $ret .= "<?h1 Schools h1?><?p Please select a school below. p?>";
+        $ret .= "<?h1 School h1?><?p Select a school p?>";
 
         $ret .= "<ul>";
         foreach my $sid (sort { $schools->{$a} cmp $schools->{$b} } keys %{$schools}) {
@@ -278,7 +281,7 @@ body<=
         }
         $ret .= "</ul>";
 
-        $ret .= "<div id='addlink'><?p <i>Don't see the state/city/school you're looking for?</i><br />";
+        $ret .= "<div id='addlink'><?p <i>Don't see what you're looking for?</i><br />";
         $ret .= "<a href='index.bml?ctc=$ectc&sc=$esc&cc=$ecc&add=1' onclick='return addschool()'>Tell us about your school</a>";
         $ret .= " and we'll add it soon. p?></div>";
         $ret .= $add_school->($ctc, $sc, $cc);
@@ -325,12 +328,12 @@ body<=
         $ret .= LJ::html_hidden('ctc', $ectc) if $ctc;
         $ret .= LJ::html_hidden('cc', $ecc) if $cc;
         $ret .= LJ::html_hidden('sid', $esid) if $sid;
-        $ret .= 'Manage attendance at this school for';
+        $ret .= 'Add this school for ';
 
         if (@list > 1) {
-            $ret .= ': ' . LJ::html_select({ name => 'authas', 'selected' => $remote->{'user'}}, map {$_, $_} @list);
+            $ret .= LJ::html_select({ name => 'authas', 'selected' => $remote->{'user'}}, map {$_, $_} @list);
         } else {
-            $ret .= ' ' .LJ::ljuser($remote);
+            $ret .= LJ::ljuser($remote);
         }
 
         $ret .= ' ' . LJ::html_submit('Manage');
@@ -341,17 +344,17 @@ body<=
     $ret .= "<br /><?h2 Browse journals associated with this school: h2?>";
 
     unless (@ids) {
-        $ret .= "<?p No one has attended this school p?>";
+        $ret .= "<?p There are no communities or users that list this school yet. p?>";
     } else {
         if (@comms) {
-            $ret .= "<?p <b>Communities</b> associated with this school: p?><ul>";
+            $ret .= "<?p <b>Communities</b> p?><ul>";
             foreach (@comms) {
                 $ret .= "<li>" . LJ::ljuser($_) . " - $_->{name}</li>\n";
             }
             $ret .= "</ul>";
         }
         if (@users) {
-            $ret .= "<?p <b>Users who are at, ever went to, or work at this school: p?><ul>";
+            $ret .= "<?p <b>Users p?><ul>";
             foreach (@users) {
                 $ret .= "<li>" . LJ::ljuser($_) . "</li>\n";
             }

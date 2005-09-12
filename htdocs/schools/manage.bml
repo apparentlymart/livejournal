@@ -123,7 +123,7 @@ body<=
     }
 
     # Header
-    $ret .= "<?p Six Apart, maker of award-winning Movable Type, TypePad and LiveJournal weblog software, publicly unveiled the forthcoming 3.2 version of Movable Type at the Blog Business Summit in San Francisco today. San ... p?>";
+    $ret .= "<?p Below you can see the list of schools associated with your journal or communities.  By clicking the <img src='$LJ::IMGPREFIX/btn_edit.gif' alt='Edit' border='0'/> Edit button, you can edit the years you attended or delete the school from your list. p?><?p <a href='$LJ::SITEROOT/schools/index.bml'>Find another school</a> p?>";
 
     # user switcher
     $ret .= "<form method='get' action='manage.bml'>\n";
