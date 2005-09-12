@@ -67,7 +67,13 @@
           qr_form_div.className = "";
         }
 
-        var qr_body = xGetElementById('body');
+        var qr_body = qr_form.body;  // the textarea of the qr_form
+        if (qr_body) {
+            // have to set a timeout because most browsers won't let you focus
+            // on an element that's still in the process of being created.
+            // so lame.
+            window.setTimeout(function () { qr_body.focus() }, 250);
+        }
 
         // So it does not follow the link
         return false;
