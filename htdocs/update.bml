@@ -67,10 +67,10 @@
 
     # Set up form default values:
     my @time = localtime(time);
-    my ($year, $mon, $mday, $hour, $min) = ($time[5] + 1900, 
-                                            sprintf("%02d", $time[4] + 1), 
-                                            sprintf("%02d", $time[3]), 
-                                            $time[2], 
+    my ($year, $mon, $mday, $hour, $min) = ($time[5] + 1900,
+                                            sprintf("%02d", $time[4] + 1),
+                                            sprintf("%02d", $time[3]),
+                                            $time[2],
                                             sprintf("%02d", $time[1]));
     my $subject = $POST{'subject'} || $GET{'subject'};
     my $event   = $POST{'event'}   || $GET{'event'};
@@ -83,7 +83,7 @@
                        ! $POST{'password'} &&
                        ! $user_is_remote &&
                        ! $POST{'response'};                                       # user w/o password
-    
+
     # which authentication option do we display by default?
     my $altlogin_display = 'none';
     my $remotelogin_display = 'none';
@@ -104,7 +104,6 @@
         $did_spellcheck++;
         my $s = new LJ::SpellCheck { 'spellcommand' => $LJ::SPELLER,
                                      'color' => '<?hotcolor?>', };
-        my $event = $event;
         $spellcheck_html = $s->check_html(\$event);
         $spellcheck_html = "<?inerr $ML{'entryform.spellcheck.noerrors'} inerr?>" unless $spellcheck_html ne "";
         $onload .= "pageload(0); "; # js fill-in off
@@ -161,7 +160,7 @@
             $auth .= "<br /><?inerr $ML{'.error.nopass'} inerr?>";
         }
         $auth .= "</td></tr>";
-        
+
         # if they submit the form and are spellchecking, remember
         # their settings from the GET requests
         my $getextra;
@@ -209,7 +208,7 @@
 
         $$body .= "<div style='width: 100%'><form method='post' action='update.bml$getextra' id='updateForm' name='updateForm'>";
 
-        if ($opts->{require_tos}){ 
+        if ($opts->{require_tos}){
             $$body .= LJ::tosagree_html('update', $POST{agree_tos}, $errors->{require_tos});
         }
 
@@ -228,13 +227,13 @@
         my ($u, $user);
 
         if ($POST{'user'} &&                            # user argument given
-            ! $user_is_remote &&                        # user != remote 
+            ! $user_is_remote &&                        # user != remote
             (!$remote || $GET{'altlogin'})) {           # user has clicked alt auth
-            
+
             $user = $POST{'user'};
             $u = LJ::load_user($user);
 
-            # Verify entered password, if it is present. 
+            # Verify entered password, if it is present.
             my $ok;
             if ($POST{response}) {
                 $ok = LJ::challenge_check_login($u, $POST{chal}, $POST{response});
@@ -285,22 +284,22 @@
             # build a clientversion string
             my $clientversion = "Web/2.0.0";
             $clientversion .= 's' if $did_spellcheck;
-            
+
             # build a request object
             my %req = ( 'mode' => 'login',
                         'ver' => $LJ::PROTOCOL_VER,
                         'clientversion' => $clientversion,
                         'user' => $user,
                         );
-            
+
             my %res;
             LJ::do_request(\%req, \%res, $flags);
-            
+
             # error logging in ?
             unless ($res{'success'} eq 'OK') {
                 $errors->{'auth'} = $ML{'.error.login'} . " " . LJ::ehtml($res{'errmsg'});
             }
-            
+
             # server login message for user?
             $login_message = LJ::auto_linkify(LJ::ehtml($res{'message'}))
                 if $res{'message'};
@@ -318,8 +317,8 @@
                     );
 
         LJ::entry_form_decode(\%req, \%POST);
-        if ($req{'event'} eq "") { 
-            $errors->{'entry'} = "Must provide entry text"; 
+        if ($req{'event'} eq "") {
+            $errors->{'entry'} = "Must provide entry text";
         }
 
         my %res;
@@ -331,10 +330,10 @@
             if ($res{'success'} eq "OK" && $res{'message'}) {
                 $update_message = LJ::auto_linkify(LJ::ehtml($res{'message'}));
             }
-            
+
             # report results
             $$body .= "<?p <strong>$ML{'.updating'}</strong> ";
-            
+
             if ($res{'success'} ne 'OK') {
                 # update failed?
                 $$body .= "<br /><?errorbar <strong>$ML{'.error.update'}</strong> ";
@@ -363,10 +362,10 @@
                 $itemid = $itemid * 256 + $anum;
                 $$body .= " p?><?p $ML{'.success.links'} p?><ul>" .
                     "<li><a href=\"$itemlink\">$ML{'.success.links.view'}</a></li>" .
-                        "<li><a href=\"/editjournal.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.edit'}</a></li>" . 
+                        "<li><a href=\"/editjournal.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.edit'}</a></li>" .
                             "<li><a href=\"/tools/memadd.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.memories'}</a></li>" .
-			        "<li><a href=\"/edittags.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.tags'}</a></li>" .
-				    "</ul>";
+                                "<li><a href=\"/edittags.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.tags'}</a></li>" .
+                                    "</ul>";
                 return;
             }
         }
@@ -387,7 +386,7 @@ head<=
 {
     my $ret = $_[1]->{'head'};
     $ret .= "<script language='JavaScript' type='text/javascript' src='$LJ::JSPREFIX/entry.js'></script>";
-    $ret .= (! $LJ::REQ_HEAD_HAS{'chalresp_js'}++) ? $LJ::COMMON_CODE{'chalresp_js'} : ""; 
+    $ret .= (! $LJ::REQ_HEAD_HAS{'chalresp_js'}++) ? $LJ::COMMON_CODE{'chalresp_js'} : "";
     return $ret;
 }
 _code?>
