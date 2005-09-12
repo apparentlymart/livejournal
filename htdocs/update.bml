@@ -104,7 +104,7 @@
         $did_spellcheck++;
         my $s = new LJ::SpellCheck { 'spellcommand' => $LJ::SPELLER,
                                      'color' => '<?hotcolor?>', };
-        my $event = LJ::ehtml($event);
+        my $event = $event;
         $spellcheck_html = $s->check_html(\$event);
         $spellcheck_html = "<?inerr $ML{'entryform.spellcheck.noerrors'} inerr?>" unless $spellcheck_html ne "";
         $onload .= "pageload(0); "; # js fill-in off
