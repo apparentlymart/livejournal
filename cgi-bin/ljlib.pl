@@ -50,6 +50,7 @@ require "$ENV{'LJHOME'}/cgi-bin/ljtextutil.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljtimeutil.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljcapabilities.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljmood.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljhooks.pl";
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlib-local.pl"
     if -e "$ENV{'LJHOME'}/cgi-bin/ljlib-local.pl";
@@ -1620,169 +1621,6 @@ sub record_meme
     $dbh->do("REPLACE DELAYED INTO meme (url, posterid, journalid, itemid) " .
              "VALUES (?, ?, ?, ?)", undef, $url, $posterid, $jid, $itemid);
 }
-
-# <LJFUNC>
-# name: LJ::are_hooks
-# des: Returns true if the site has one or more hooks installed for
-#      the given hookname.
-# args: hookname
-# </LJFUNC>
-sub are_hooks
-{
-    my $hookname = shift;
-    return defined $LJ::HOOKS{$hookname};
-}
-
-# <LJFUNC>
-# name: LJ::clear_hooks
-# des: Removes all hooks.
-# </LJFUNC>
-sub clear_hooks
-{
-    %LJ::HOOKS = ();
-}
-
-# <LJFUNC>
-# name: LJ::run_hooks
-# des: Runs all the site-specific hooks of the given name.
-# returns: list of arrayrefs, one for each hook ran, their
-#          contents being their own return values.
-# args: hookname, args*
-# des-args: Arguments to be passed to hook.
-# </LJFUNC>
-sub run_hooks
-{
-    my ($hookname, @args) = @_;
-    my @ret;
-    foreach my $hook (@{$LJ::HOOKS{$hookname} || []}) {
-        push @ret, [ $hook->(@args) ];
-    }
-    return @ret;
-}
-
-# <LJFUNC>
-# name: LJ::run_hook
-# des: Runs single site-specific hook of the given name.
-# returns: return value from hook
-# args: hookname, args*
-# des-args: Arguments to be passed to hook.
-# </LJFUNC>
-sub run_hook
-{
-    my ($hookname, @args) = @_;
-    return undef unless @{$LJ::HOOKS{$hookname} || []};
-    return $LJ::HOOKS{$hookname}->[0]->(@args);
-    return undef;
-}
-
-# <LJFUNC>
-# name: LJ::register_hook
-# des: Installs a site-specific hook.
-# info: Installing multiple hooks per hookname is valid.
-#       They're run later in the order they're registered.
-# args: hookname, subref
-# des-subref: Subroutine reference to run later.
-# </LJFUNC>
-sub register_hook
-{
-    my $hookname = shift;
-    my $subref = shift;
-    push @{$LJ::HOOKS{$hookname}}, $subref;
-}
-
-# <LJFUNC>
-# name: LJ::register_setter
-# des: Installs code to run for the "set" command in the console.
-# info: Setters can be general or site-specific.
-# args: key, subref
-# des-key: Key to set.
-# des-subref: Subroutine reference to run later.
-# </LJFUNC>
-sub register_setter
-{
-    my $key = shift;
-    my $subref = shift;
-    $LJ::SETTER{$key} = $subref;
-}
-
-register_setter('synlevel', sub {
-    my ($dba, $u, $remote, $key, $value, $err) = @_;
-    unless ($value =~ /^(title|summary|full)$/) {
-        $$err = "Illegal value.  Must be 'title', 'summary', or 'full'";
-        return 0;
-    }
-
-    LJ::set_userprop($u, 'opt_synlevel', $value);
-    return 1;
-});
-
-register_setter("newpost_minsecurity", sub {
-    my ($dba, $u, $remote, $key, $value, $err) = @_;
-    unless ($value =~ /^(public|friends|private)$/) {
-        $$err = "Illegal value.  Must be 'public', 'friends', or 'private'";
-        return 0;
-    }
-    # Don't let commmunities be private
-    if ($u->{'journaltype'} eq "C" && $value eq "private") {
-        $$err = "newpost_minsecurity cannot be private for communities";
-        return 0;
-    }
-    $value = "" if $value eq "public";
-    LJ::set_userprop($u, "newpost_minsecurity", $value);
-    return 1;
-});
-
-register_setter("stylesys", sub {
-    my ($dba, $u, $remote, $key, $value, $err) = @_;
-    unless ($value =~ /^[sS]?(1|2)$/) {
-        $$err = "Illegal value.  Must be S1 or S2.";
-        return 0;
-    }
-    $value = $1 + 0;
-    LJ::set_userprop($u, "stylesys", $value);
-    return 1;
-});
-
-register_setter("maximagesize", sub {
-    my ($dba, $u, $remote, $key, $value, $err) = @_;
-    unless ($value =~ m/^(\d+)[x,|](\d+)$/) {
-        $$err = "Illegal value.  Must be width,height.";
-        return 0;
-    }
-    $value = "$1|$2";
-    LJ::set_userprop($u, "opt_imagelinks", $value);
-    return 1;
-});
-
-register_setter("opt_ljcut_disable_lastn", sub {
-    my ($dba, $u, $remote, $key, $value, $err) = @_;
-    unless ($value =~ /^(0|1)$/) {
-        $$err = "Illegal value. Must be '0' or '1'";
-        return 0;
-    }
-    LJ:set_userprop($u, "opt_ljcut_disable_lastn", $value);
-    return 1;
-});
-
-register_setter("opt_ljcut_disable_friends", sub {
-    my ($dba, $u, $remote, $key, $value, $err) = @_;
-    unless ($value =~ /^(0|1)$/) {
-        $$err = "Illegal value. Must be '0' or '1'";
-        return 0;
-    }
-    LJ:set_userprop($u, "opt_ljcut_disable_friends", $value);
-    return 1;
-});
-
-register_setter("disable_quickreply", sub {
-    my ($dba, $u, $remote, $key, $value, $err) = @_;
-    unless ($value =~ /^(0|1)$/) {
-        $$err = "Illegal value. Must be '0' or '1'";
-        return 0;
-    }
-    LJ:set_userprop($u, "opt_no_quickreply", $value);
-    return 1;
-});
 
 # <LJFUNC>
 # name: LJ::make_auth_code
@@ -6483,123 +6321,24 @@ sub isdb { return ref $_[0] && (ref $_[0] eq "DBI::db" ||
                                 ref $_[0] eq "DBIx::StateKeeper" ||
                                 ref $_[0] eq "Apache::DBI::db"); }
 
-# is a user object (at least a hashref)
-sub isu { return ref $_[0] && (ref $_[0] eq "LJ::User" ||
-                               ref $_[0] eq "HASH" && $_[0]->{userid}); }
-
 use vars qw($AUTOLOAD);
 sub AUTOLOAD {
     if ($AUTOLOAD eq "LJ::send_mail") {
         require "$ENV{'LJHOME'}/cgi-bin/ljmail.pl";
         goto &$AUTOLOAD;
     }
-    croak "Undefined subroutine: $AUTOLOAD";
+    Carp::croak("Undefined subroutine: $AUTOLOAD");
 }
 
-# LJ::S1::get_public_styles lives here in ljlib.pl so that
-# cron jobs can call LJ::load_user_props without including
-# ljviews.pl
 package LJ::S1;
 
-sub get_public_styles {
-
-    my $opts = shift;
-
-    # Try memcache if no extra options are requested
-    my $memkey = "s1pubstyc";
-    my $pubstyc = {};
-    unless ($opts) {
-        my $pubstyc = LJ::MemCache::get($memkey);
-        return $pubstyc if $pubstyc;
+use vars qw($AUTOLOAD);
+sub AUTOLOAD {
+    if ($AUTOLOAD eq "LJ::S1::get_public_styles") {
+        require "$ENV{'LJHOME'}/cgi-bin/ljviews.pl";
+        goto &$AUTOLOAD;
     }
-
-    # not cached, build from db
-    my $sysid = LJ::get_userid("system");
-
-    # all cols *except* formatdata, which is big and unnecessary for most uses.
-    # it'll be loaded by LJ::S1::get_style
-    my $cols = "styleid, styledes, type, is_public, is_embedded, ".
-        "is_colorfree, opt_cache, has_ads, lastupdate";
-    $cols .= ", formatdata" if $opts->{'formatdata'};
-
-    # first try new table
-    my $dbh = LJ::get_db_writer();
-    my $sth = $dbh->prepare("SELECT userid, $cols FROM s1style WHERE userid=? AND is_public='Y'");
-    $sth->execute($sysid);
-    $pubstyc->{$_->{'styleid'}} = $_ while $_ = $sth->fetchrow_hashref;
-
-    # fall back to old table
-    unless (%$pubstyc) {
-        $sth = $dbh->prepare("SELECT user, $cols FROM style WHERE user='system' AND is_public='Y'");
-        $sth->execute();
-        $pubstyc->{$_->{'styleid'}} = $_ while $_ = $sth->fetchrow_hashref;
-    }
-    return undef unless %$pubstyc;
-
-    # set in memcache
-    unless ($opts) {
-        my $expire = time() + 60*30; # 30 minutes
-        LJ::MemCache::set($memkey, $pubstyc, $expire);
-    }
-
-    return $pubstyc;
-}
-
-# this package also doesn't belong in ljlib.pl, and should probably be
-# moved back to ljemailgateway.pl soon, but the web code needed this,
-# as well as the mailgated code, so putting it in weblib.pl doesn't
-# work, and making modperl-subs.pl include ljemailgateway.pl was
-# problematic during the woody-sarge transition (still happening), so
-# for now it's here in ljlib.
-package LJ::Emailpost;
-
-# Retreives an allowed email addr list for a given user object.
-# Returns a hashref with addresses / flags.
-# Used for ljemailgateway and manage/emailpost.bml
-sub get_allowed_senders {
-    my $u = shift;
-    my (%addr, @address);
-
-    LJ::load_user_props($u, 'emailpost_allowfrom');
-    @address = split(/\s*,\s*/, $u->{emailpost_allowfrom});
-    return undef unless scalar(@address) > 0;
-
-    my %flag_english = ( 'E' => 'get_errors' );
-
-    foreach my $add (@address) {
-        my $flags;
-        $flags = $1 if $add =~ s/\((.+)\)$//;
-        $addr{$add} = {};
-        if ($flags) {
-            $addr{$add}->{$flag_english{$_}} = 1 foreach split(//, $flags);
-        }
-    }
-
-    return \%addr;
-}
-
-# Inserts email addresses into the database.
-# Adds flags if needed.
-# Used in manage/emailpost.bml
-sub set_allowed_senders {
-    my ($u, $addr) = @_;
-    my %flag_letters = ( 'get_errors' => 'E' );
-
-    my @addresses;
-    foreach (keys %$addr) {
-        my $email = $_;
-        my $flags = $addr->{$_};
-        if (%$flags) {
-            $email .= '(';
-            foreach my $flag (keys %$flags) {
-                $email .= $flag_letters{$flag};
-            }
-            $email .= ')';
-        }
-        push(@addresses, $email);
-    }
-    close T;
-    LJ::set_userprop($u, "emailpost_allowfrom", join(", ", @addresses));
+    Carp::croak("Undefined subroutine: $AUTOLOAD");
 }
 
 1;

@@ -233,6 +233,50 @@ $LJ::S1::PROPS = {
 
 };
 
+sub get_public_styles {
+
+    my $opts = shift;
+
+    # Try memcache if no extra options are requested
+    my $memkey = "s1pubstyc";
+    my $pubstyc = {};
+    unless ($opts) {
+        my $pubstyc = LJ::MemCache::get($memkey);
+        return $pubstyc if $pubstyc;
+    }
+
+    # not cached, build from db
+    my $sysid = LJ::get_userid("system");
+
+    # all cols *except* formatdata, which is big and unnecessary for most uses.
+    # it'll be loaded by LJ::S1::get_style
+    my $cols = "styleid, styledes, type, is_public, is_embedded, ".
+        "is_colorfree, opt_cache, has_ads, lastupdate";
+    $cols .= ", formatdata" if $opts->{'formatdata'};
+
+    # first try new table
+    my $dbh = LJ::get_db_writer();
+    my $sth = $dbh->prepare("SELECT userid, $cols FROM s1style WHERE userid=? AND is_public='Y'");
+    $sth->execute($sysid);
+    $pubstyc->{$_->{'styleid'}} = $_ while $_ = $sth->fetchrow_hashref;
+
+    # fall back to old table
+    unless (%$pubstyc) {
+        $sth = $dbh->prepare("SELECT user, $cols FROM style WHERE user='system' AND is_public='Y'");
+        $sth->execute();
+        $pubstyc->{$_->{'styleid'}} = $_ while $_ = $sth->fetchrow_hashref;
+    }
+    return undef unless %$pubstyc;
+
+    # set in memcache
+    unless ($opts) {
+        my $expire = time() + 60*30; # 30 minutes
+        LJ::MemCache::set($memkey, $pubstyc, $expire);
+    }
+
+    return $pubstyc;
+}
+
 # <LJFUNC>
 # name: LJ::S1::get_themeid
 # des: Loads or returns cached version of given color theme data.

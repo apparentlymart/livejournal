@@ -2499,4 +2499,8 @@ sub delete_all_comments {
 
 }
 
+# is a user object (at least a hashref)
+sub isu { return ref $_[0] && (ref $_[0] eq "LJ::User" ||
+                               ref $_[0] eq "HASH" && $_[0]->{userid}); }
+
 1;

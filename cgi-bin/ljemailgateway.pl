@@ -13,6 +13,7 @@ BEGIN {
 }
 
 require 'ljlib.pl';
+require 'ljemailgateway-web.pl';
 require 'ljprotocol.pl';
 require 'fbupload.pl';
 use HTML::Entities;
