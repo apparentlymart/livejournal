@@ -209,10 +209,12 @@ body<=
         }
         $ret .= "</ul>";
 
-        $ret .= "<div id='addlink'><?p <i>Don't see the state/city/school you're looking for?</i><br />";
-        $ret .= "<a href='index.bml?ctc=$ectc&add=1' onclick='return addschool()'>Tell us about your school</a>";
-        $ret .= " and we'll add it soon. p?></div>";
-        $ret .= $add_school->($ctc);
+        unless ($ctc eq 'US') {
+            $ret .= "<div id='addlink'><?p <i>Don't see the state/city/school you're looking for?</i><br />";
+            $ret .= "<a href='index.bml?ctc=$ectc&add=1' onclick='return addschool()'>Tell us about your school</a>";
+            $ret .= " and we'll add it soon. p?></div>";
+            $ret .= $add_school->($ctc);
+        }
 
         return $ret;
     }
