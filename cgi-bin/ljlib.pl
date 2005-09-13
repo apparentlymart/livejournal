@@ -5,7 +5,6 @@ use Carp;
 use lib "$ENV{'LJHOME'}/cgi-bin";
 use DBI;
 use DBI::Role;
-use DBIx::StateKeeper;
 use Digest::MD5 ();
 use Digest::SHA1 ();
 use HTTP::Date ();
@@ -279,8 +278,6 @@ sub mogclient {
 # </LJFUNC>
 sub get_dbh {
     my $opts = ref $_[0] eq "HASH" ? shift : {};
-    # supported options:
-    #    'raw':  don't return a DBIx::StateKeeper object
 
     unless (exists $opts->{'max_repl_lag'}) {
         # for slave or cluster<n>slave roles, don't allow lag
