@@ -40,6 +40,7 @@ sub END { LJ::end_request(); }
                     "s2stylelayers2", "s2compiled2", "userlog",
                     "logtags", "logtagsrecent", "logkwsum",
                     "recentactions", "usertags", "pendcomments",
+                    "user_schools",
                     );
 
 # keep track of what db locks we have out
@@ -1693,14 +1694,13 @@ sub load_codes
     &nodb;
     my $req = shift;
 
-    my $dbr = LJ::get_db_reader();
-
     foreach my $type (keys %{$req})
     {
         my $memkey = "load_codes:$type";
         unless ($LJ::CACHE_CODES{$type} ||= LJ::MemCache::get($memkey))
         {
             $LJ::CACHE_CODES{$type} = [];
+            my $dbr = LJ::get_db_reader();
             my $sth = $dbr->prepare("SELECT code, item, sortorder FROM codes WHERE type=?");
             $sth->execute($type);
             while (my ($code, $item, $sortorder) = $sth->fetchrow_array)
@@ -6078,7 +6078,7 @@ sub clear_rel
 #
 # LJ-generic domains:
 #  $dom: 'S' == style, 'P' == userpic, 'A' == stock support answer
-#        'C' == captcha, 'E' == external user
+#        'C' == captcha, 'E' == external user, 'S' == school
 #
 sub alloc_global_counter
 {
@@ -6117,6 +6117,8 @@ sub alloc_global_counter
         $newmax = 0;
     } elsif ($dom eq "A") {
         $newmax = $dbh->selectrow_array("SELECT MAX(ansid) FROM support_answers");
+    } elsif ($dom eq "S") {
+        $newmax = $dbh->selectrow_array("SELECT MAX(schoolid) FROM schools");
     } else {
         $newmax = LJ::run_hook('global_counter_init_value', $dom);
         die "No alloc_global_counter initalizer for domain '$dom'"

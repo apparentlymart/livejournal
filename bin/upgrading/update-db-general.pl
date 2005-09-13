@@ -2120,6 +2120,53 @@ CREATE TABLE openid_external (
 )
 EOC
 
+register_tablecreate("schools", <<'EOC');
+CREATE TABLE `schools` (
+  `schoolid` int(10) unsigned NOT NULL default '0',
+  `name` varchar(255) NOT NULL default '',
+  `country` varchar(4) NOT NULL default '',
+  `state` varchar(255) default NULL,
+  `city` varchar(255) NOT NULL default '',
+  `url` varchar(255) default NULL,
+  PRIMARY KEY  (`schoolid`),
+  KEY `country` (`country`,`state`,`city`)
+)
+EOC
+
+register_tablecreate("schools_attended", <<'EOC');
+CREATE TABLE `schools_attended` (
+  `schoolid` int(10) unsigned NOT NULL default '0',
+  `userid` int(10) unsigned NOT NULL default '0',
+  `year_start` smallint(5) unsigned default NULL,
+  `year_end` smallint(5) unsigned default NULL,
+  PRIMARY KEY  (`schoolid`,`userid`)
+)
+EOC
+
+register_tablecreate("schools_pending", <<'EOC');
+CREATE TABLE schools_pending (
+  `pendid` int(10) unsigned NOT NULL auto_increment,
+  `userid` int(10) unsigned NOT NULL default '0',
+  `name` varchar(255) NOT NULL default '',
+  `country` varchar(4) NOT NULL default '',
+  `state` varchar(255) default NULL,
+  `city` varchar(255) NOT NULL default '',
+  `url` varchar(255) default NULL,
+  PRIMARY KEY (`pendid`),
+  KEY `userid` (`userid`)
+)
+EOC
+
+register_tablecreate("user_schools", <<'EOC');
+CREATE TABLE `user_schools` (
+  `userid` int(10) unsigned NOT NULL default '0',
+  `schoolid` int(10) unsigned NOT NULL default '0',
+  `year_start` smallint(5) unsigned default NULL,
+  `year_end` smallint(5) unsigned default NULL,
+  PRIMARY KEY  (`userid`,`schoolid`)
+)
+EOC
+
 register_tablecreate("priv_packages", <<'EOC');
 CREATE TABLE priv_packages (
   pkgid int(10) unsigned NOT NULL auto_increment,

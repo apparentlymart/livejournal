@@ -58,6 +58,8 @@ require "$ENV{'LJHOME'}/cgi-bin/ljmail.pl";
 require "$ENV{'LJHOME'}/cgi-bin/sysban.pl";
 require "$ENV{'LJHOME'}/cgi-bin/synlib.pl";
 require "$ENV{'LJHOME'}/cgi-bin/communitylib.pl";
+require "$ENV{'LJHOME'}/cgi-bin/taglib.pl";
+require "$ENV{'LJHOME'}/cgi-bin/schoollib.pl";
 require "$ENV{'LJHOME'}/cgi-bin/accountcodes.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljemailgateway-web.pl";
 
