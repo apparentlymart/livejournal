@@ -36,7 +36,7 @@
 
     # when given 'w' argument, load user's current style, and edit the user layer.
     # this is the mode redirected to from /customize/ (the simple customization UI)
-    if ($GET{'w'} eq "user" && $u->{'stylesys'} == 2) 
+    if ($GET{'w'} eq "user" && $u->{'stylesys'} == 2)
     {
         $style = LJ::S2::load_style($u->{'s2_style'});
         return $err->("Style not found.") unless $style && $style->{'userid'} == $u->{'userid'};
@@ -56,14 +56,14 @@
 
     return BML::redirect("/customize/") unless $layer;
     return $err->("Layer belongs to another user.") unless $layer->{'userid'} == $u->{'userid'};
-    return $err->("Layer isn't of type user or theme.") 
+    return $err->("Layer isn't of type user or theme.")
         unless $layer->{'type'} eq "user" || $layer->{'type'} eq "theme";
-        
+
     my $lyr_layout = LJ::S2::load_layer($dbh, $layer->{'b2lid'});
-    return $err->("Layout layer for this $layer->{'type'} layer not found.") 
+    return $err->("Layout layer for this $layer->{'type'} layer not found.")
         unless $lyr_layout;
     my $lyr_core = LJ::S2::load_layer($dbh, $lyr_layout->{'b2lid'});
-    return $err->("Core layer for layout not found.") 
+    return $err->("Core layer for layout not found.")
         unless $lyr_core;
 
     $lyr_layout->{'uniq'} = $dbh->selectrow_array("SELECT value FROM s2info WHERE s2lid=? AND infokey=?",
@@ -88,7 +88,7 @@
 
     my @layerids = grep { $_ } map { $_->[1] } @layers;
     LJ::S2::load_layers(@layerids);
-    
+
     my %layerinfo;
 
     # load the language and layout choices for core.
@@ -97,7 +97,7 @@
     # action path
     if (LJ::did_post()) {
         # prevent spoofing:
-        return BML::redirect("/customize") 
+        return BML::redirect("/customize")
             unless $POST{'userid'} == $u->{'userid'};
 
         my %override;
@@ -112,7 +112,7 @@
             next unless LJ::S2::can_use_prop($u, $lyr_layout->{'uniq'}, $name);
             $override{$name} = [ $prop, $POST{"${name}_value"} ];
         }
-        
+
         if (LJ::S2::layer_compile_user($layer, \%override)) {
             return BML::redirect($save_redir) if $save_redir;
             $body = "Saved.";
@@ -137,7 +137,7 @@
         $prop{$prop->{'name'}} = $prop;
         push @propnames, $prop->{'name'};
     }
-    
+
     my @groups = S2::get_property_groups($lyr_layout->{'s2lid'});
     my $misc_group;
     my %groupprops;  # gname -> [ propname ]
@@ -188,13 +188,13 @@
 
         my $name = $prop->{'name'};
         my $type = $prop->{'type'};
-        
+
         my $can_use = LJ::S2::can_use_prop($u, $lyr_layout->{'uniq'}, $name);
 
         # figure out existing value (if there was no user/theme layer)
         my $existing;
         foreach my $lid (reverse @layerids) {
-            next if $lid == $layerid; 
+            next if $lid == $layerid;
             $existing = S2::get_set($lid, $name);
             last if defined $existing;
         }
@@ -206,7 +206,7 @@
         }
 
         my %values = split(/\|/, $prop->{'values'});
-        my $existing_display = defined $values{$existing} ? 
+        my $existing_display = defined $values{$existing} ?
             $values{$existing} : $existing;
 
         $existing_display = LJ::eall($existing_display);
@@ -221,7 +221,7 @@
         {
             my $t = "";
             $t .= LJ::eall($prop->{'note'}) if $prop->{'note'};
-            $t .= "<?help " . $LJ::HELPPURL{"s2opt_$name"} . " help?>" if $LJ::HELPURL{"s2opt_$name"};
+            $t .= "<?help " . $LJ::HELPURL{"s2opt_$name"} . " help?>" if $LJ::HELPURL{"s2opt_$name"};
             $body .= "<?p $t p?>" if $t;
         }
         $body .= "<div class='inset'>\n";
@@ -296,7 +296,7 @@
         }
         $body .= "</div>";
         $body .= "<div id='propgroupsbody'>";
-   
+
 
         foreach my $gname (@groups) {
             $body .= "<a name='pgroup$gname'></a>\n";
@@ -317,11 +317,11 @@
     }
 
     $body .= "<script type='text/javascript' language='JavaScript'><!--\n$prop_js// --></script>";
-    
+
     $body .= "<?h1 Finished? h1?><?p When done, click the save button below. p?><center>";
     $body .= LJ::html_submit('action:save', "Save");
     $body .= "</center>";
-    
+
     $body .= "</form>";
 
     return;
@@ -402,7 +402,7 @@ head<=
  span.propgrouptab a {
     text-decoration: none;
     color: black;
- } 
+ }
 
  span.propgrouptabsel {
    color: #ddd;
@@ -411,7 +411,7 @@ head<=
  span.propgrouptabsel a {
     text-decoration: none;
     color: #ddd;
- } 
+ }
  div.inset {
     margin-left: 2em;
     margin-top: 0.5em;
