@@ -165,7 +165,7 @@ body<=
         $ret .= "<?p With the Schools Directory, you can:<ul>";
         $ret .= "<li>Add a school to your journal or community's Schools list.</li>";
         $ret .= "<li>Find other users and communities associated with a school.</li></ul>";
-        $ret .= "<br /><br />Any schools you add will appear on the userinfo page for your journal or community.  If you don't see your school listed in the Schools Directory, use the Add School button at the bottom of this page to submit it.  p?>";
+        $ret .= "<br />Any schools you add will appear on the userinfo page for your journal or community.  If you don't see your school listed in the Schools Directory, use the Add School button at the bottom of this page to submit it.  p?>";
 
         my $cts = LJ::Schools::get_countries();
         return $err->("Unable to get country list.")
