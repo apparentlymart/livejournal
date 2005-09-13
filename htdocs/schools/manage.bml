@@ -102,19 +102,22 @@ body<=
     } elsif ($GET{sid}+0 > 0 && $GET{ctc} && $GET{cc} && LJ::check_referer('/schools/index.bml')) {
         my $sid = $GET{sid}+0;
 
-        my $new_school = LJ::Schools::load_schools($sid);
-        return LJ::bad_input('Unable to load school specified')
-            unless $new_school;
+        unless (defined $schools->{sid}) {
+            my $new_school = LJ::Schools::load_schools($sid);
+            return LJ::bad_input('Unable to load school specified')
+                unless $new_school;
 
-        return LJ::bad_input('Country and/or city do not match specified school')
-            if $GET{ctc} ne $new_school->{$sid}->{country} || $GET{cc} ne $new_school->{$sid}->{city};
+            return LJ::bad_input('Country and/or city do not match specified school')
+                if $GET{ctc} ne $new_school->{$sid}->{country} || $GET{cc} ne $new_school->{$sid}->{city};
 
-        unless (defined $schools->{$sid}) {
-            my $rv = LJ::Schools::set_attended($u, $sid);
-            return LJ::bad_input("Unable to set your attendance at $new_school->{$sid}->{name}")
-                unless $rv;
-            $schools = LJ::Schools::get_attended($u);
+            unless (defined $schools->{$sid}) {
+                my $rv = LJ::Schools::set_attended($u, $sid);
+                return LJ::bad_input("Unable to set your attendance at $new_school->{$sid}->{name}")
+                    unless $rv;
+                $schools = LJ::Schools::get_attended($u);
+            }
         }
+
         $edit_sid = $sid;
 
     # Do we want to just highlight a row?
