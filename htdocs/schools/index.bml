@@ -352,6 +352,7 @@ body<=
                 $ret .= "<li>" . LJ::ljuser($_) . " - $_->{name}</li>\n";
             }
             $ret .= "</ul>";
+            $ret .= " p?>";
         }
         if (@users) {
             $ret .= "<?p <b>Users p?><ul>";
@@ -359,6 +360,7 @@ body<=
                 $ret .= "<li>" . LJ::ljuser($_) . "</li>\n";
             }
             $ret .= "</ul>";
+            $ret .= " p?>";
         }
     }
 
