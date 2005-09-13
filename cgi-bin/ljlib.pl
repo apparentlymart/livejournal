@@ -64,7 +64,12 @@ if ($LJ::IS_DEV_SERVER) {
 }
 
 $LJ::DBIRole = new DBI::Role {
-    'timeout' => $LJ::DB_TIMEOUT,
+    'timeout' => sub {
+        my ($dsn, $user, $pass, $role) = @_;
+        return 0 if $role eq "master";
+        return $LJ::DB_TIMEOUT;
+    },
+    'no_timeout' => (%LJ::NO_DBIROLE_TIMEOUT ? \%LJ::NO_DBIROLE_TIMEOUT : {}),
     'sources' => \%LJ::DBINFO,
     'default_db' => "livejournal",
     'time_check' => 60,
@@ -294,34 +299,10 @@ sub get_dbh {
         warn $errmsg;
     }
 
-    my $mapping;
-  ROLE:
     foreach my $role (@_) {
         # let site admin turn off global master write access during
         # maintenance
         return undef if $LJ::DISABLE_MASTER && $role eq "master";
-
-        if (($mapping = $LJ::WRAPPED_DB_ROLE{$role}) && ! $opts->{raw}) {
-            if (my $keeper = $LJ::REQ_DBIX_KEEPER{$role}) {
-                return $keeper->set_database() ? $keeper : undef;
-            }
-            my ($canl_role, $dbname) = @$mapping;
-            my $tracker;
-            # DBIx::StateTracker::new will die if it can't connect to the database,
-            # so it's wrapper in an eval
-            eval {
-                $tracker =
-                    $LJ::REQ_DBIX_TRACKER{$canl_role} ||=
-                    DBIx::StateTracker->new(sub { LJ::get_dbirole_dbh({unshared=>1},
-                                                                      $canl_role) });
-            };
-            if ($tracker) {
-                my $keeper = DBIx::StateKeeper->new($tracker, $dbname);
-                $LJ::REQ_DBIX_KEEPER{$role} = $keeper;
-                return $keeper->set_database() ? $keeper : undef;
-            }
-            next ROLE;
-        }
         my $db = LJ::get_dbirole_dbh($opts, $role);
         return $db if $db;
     }
