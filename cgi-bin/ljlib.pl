@@ -6078,7 +6078,7 @@ sub clear_rel
 #
 # LJ-generic domains:
 #  $dom: 'S' == style, 'P' == userpic, 'A' == stock support answer
-#        'C' == captcha, 'E' == external user, 'S' == school
+#        'C' == captcha, 'E' == external user, 'O' == school
 #
 sub alloc_global_counter
 {
@@ -6087,7 +6087,7 @@ sub alloc_global_counter
     return undef unless $dbh;
 
     # $dom can come as a direct argument or as a string to be mapped via hook
-    unless ($dom =~ /^[SPCEA]$/) {
+    unless ($dom =~ /^[SPCEAO]$/) {
         $dom = LJ::run_hook('map_global_counter_domain', $dom);
     }
     return undef unless defined $dom;
@@ -6117,7 +6117,7 @@ sub alloc_global_counter
         $newmax = 0;
     } elsif ($dom eq "A") {
         $newmax = $dbh->selectrow_array("SELECT MAX(ansid) FROM support_answers");
-    } elsif ($dom eq "S") {
+    } elsif ($dom eq "O") {
         $newmax = $dbh->selectrow_array("SELECT MAX(schoolid) FROM schools");
     } else {
         $newmax = LJ::run_hook('global_counter_init_value', $dom);
