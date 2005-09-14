@@ -104,6 +104,7 @@ list<=
 <li><a href="./emailpost.bml" title="<?_ml .information.mobilepost.about _ml?>"><?_ml .information.mobilepost _ml?></a></li>
 <li><a href="./pubkey.bml" title="Upload your public key">PGP/GPG public key</a></li>
 <li><a href="/manage/invites.bml" title="<?_ml .communities.invites.about _ml?>"><?_ml /manage/invites.bml.title _ml?></a></li>
+<li><a href="/schools/manage.bml" title="<?_ml .schools _ml?>"><?_ml .schools _ml?></a></li>
 <=list
 block?>
 

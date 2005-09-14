@@ -2388,6 +2388,8 @@ The following links will navigate you to pages where your login information
 is required. To save yourself some time, you can <a href="/login.bml?ret=1">log in</a> beforehand.
 .
 
+/manage/index.bml.schools=Manage School Attendance
+
 /manage/index.bml.title=Manage Accounts
 
 /manage/index.bml.userpics=Upload and manage userpics for your account:
