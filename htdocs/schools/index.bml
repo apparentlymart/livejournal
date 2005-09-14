@@ -11,6 +11,10 @@ body<=
 
     my $ret = '';
     my $err = sub { return "<?h1 Error h1?><?p $_[0] p?>"; };
+
+    return $err->('The Schools Directory is currently disabled due to maintenance.')
+        if $LJ::DISABLED{'schools'};
+
     my ($ctc, $sc, $cc, $sid) = ($GET{ctc}, $GET{sc}, $GET{cc}, $GET{sid}+0);
     my $ectc = LJ::eurl($ctc);
     my $esc = LJ::eurl($sc);
