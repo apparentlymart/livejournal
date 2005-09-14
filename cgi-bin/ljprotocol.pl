@@ -1680,10 +1680,9 @@ sub getevents
     }
 
     ## load the text
-    my $gt_opts = {
-        'usemaster' => $use_master,
-    };
-    my $text = LJ::get_logtext2($uowner, $gt_opts, @itemids);
+    my $text = LJ::cond_no_cache($use_master, sub {
+        return LJ::get_logtext2($uowner, @itemids);
+    });
 
     foreach my $i (@itemids)
     {

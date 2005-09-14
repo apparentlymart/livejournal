@@ -12,7 +12,6 @@ use Carp qw/ croak /;
 # internal fields:
 #
 #    u: object, always present
-#    nocache: bool.  off by default, if set, loaded data won't use memcache
 #    anum:    lazily loaded, either by ctor or _loaded_row
 #    ditemid: lazily loaded
 #    jitemid: always present
@@ -68,7 +67,6 @@ sub new
     $self->{anum}    = delete $opts{anum};
     $self->{ditemid} = delete $opts{ditemid};
     $self->{jitemid} = delete $opts{jitemid};
-    $self->{nocache} = delete $opts{nocache};
 
     # make arguments numeric
     for my $f (qw(ditemid jitemid anum)) {
@@ -87,16 +85,6 @@ sub new
     }
 
     return $self;
-}
-
-sub set_caching {
-    my ($self, $val) = @_;
-    $self->{nocache} = $val ? 0 : 1;
-}
-
-sub caching {
-    my $self = shift;
-    return ! $self->{nocache};
 }
 
 sub jitemid {
@@ -212,10 +200,7 @@ sub _load_text {
     my $self = shift;
     return 1 if $self->{_loaded_text};
 
-    my $opts = {};
-    $opts->{usemaster} = 1 if $self->{nocache};
-
-    my $ret = LJ::get_logtext2($self->{'u'}, $opts, $self->{'jitemid'});
+    my $ret = LJ::get_logtext2($self->{'u'}, $self->{'jitemid'});
     my $lt = $ret->{$self->{jitemid}};
     return 0 unless $lt;
 
@@ -1306,9 +1291,7 @@ sub replycount_do {
 #      [func[LJ::get_talktext2]].
 # args: u, opts?, jitemid*
 # returns: hashref with keys being jitemids, values being [ $subject, $body ]
-# des-opts: Optional hashref of special options.  Currently only 'usemaster'
-#           key is supported, which always returns a definitive copy,
-#           and not from a cache or slave database.
+# des-opts: Optional hashref of special options.  NOW IGNORED (2005-09-14)
 # des-jitemid: List of jitemids to retrieve the subject & text for.
 # </LJFUNC>
 sub get_logtext2
@@ -1317,7 +1300,7 @@ sub get_logtext2
     my $clusterid = $u->{'clusterid'};
     my $journalid = $u->{'userid'}+0;
 
-    my $opts = ref $_[0] ? shift : {};
+    my $opts = ref $_[0] ? shift : {};  # this is now ignored
 
     # return structure.
     my $lt = {};
@@ -1332,38 +1315,31 @@ sub get_logtext2
         push @mem_keys, [$journalid,"logtext:$clusterid:$journalid:$id"];
     }
 
-    # pass 0: memory, avoiding databases
-    unless ($opts->{'usemaster'}) {
-        my $mem = LJ::MemCache::get_multi(@mem_keys) || {};
-        while (my ($k, $v) = each %$mem) {
-            next unless $v;
-            $k =~ /:(\d+):(\d+):(\d+)/;
-            delete $need{$3};
-            $lt->{$3} = $v;
-        }
+    # pass 1: memcache
+    my $mem = LJ::MemCache::get_multi(@mem_keys) || {};
+    while (my ($k, $v) = each %$mem) {
+        next unless $v;
+        $k =~ /:(\d+):(\d+):(\d+)/;
+        delete $need{$3};
+        $lt->{$3} = $v;
     }
 
     return $lt unless %need;
 
-    # pass 1 (slave) and pass 2 (master)
-    foreach my $pass (1, 2) {
-        next unless %need;
-        next if $pass == 1 && $opts->{'usemaster'};
-        my $db = $pass == 1 ? LJ::get_cluster_reader($clusterid) :
-            LJ::get_cluster_def_reader($clusterid);
-        next unless $db;
+    # pass 2: databases
+    my $db = LJ::get_cluster_def_reader($clusterid);
+    die "Can't get database handle loading entry text" unless $db;
 
-        my $jitemid_in = join(", ", keys %need);
-        my $sth = $db->prepare("SELECT jitemid, subject, event FROM logtext2 ".
-                               "WHERE journalid=$journalid AND jitemid IN ($jitemid_in)");
-        $sth->execute;
-        while (my ($id, $subject, $event) = $sth->fetchrow_array) {
-            LJ::text_uncompress(\$event);
-            my $val = [ $subject, $event ];
-            $lt->{$id} = $val;
-            LJ::MemCache::add([$journalid,"logtext:$clusterid:$journalid:$id"], $val);
-            delete $need{$id};
-        }
+    my $jitemid_in = join(", ", keys %need);
+    my $sth = $db->prepare("SELECT jitemid, subject, event FROM logtext2 ".
+                           "WHERE journalid=$journalid AND jitemid IN ($jitemid_in)");
+    $sth->execute;
+    while (my ($id, $subject, $event) = $sth->fetchrow_array) {
+        LJ::text_uncompress(\$event);
+        my $val = [ $subject, $event ];
+        $lt->{$id} = $val;
+        LJ::MemCache::add([$journalid,"logtext:$clusterid:$journalid:$id"], $val);
+        delete $need{$id};
     }
     return $lt;
 }
