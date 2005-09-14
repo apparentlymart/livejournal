@@ -2123,10 +2123,10 @@ EOC
 register_tablecreate("schools", <<'EOC');
 CREATE TABLE `schools` (
   `schoolid` int(10) unsigned NOT NULL default '0',
-  `name` varchar(200) NOT NULL default '',
+  `name` varchar(200) BINARY NOT NULL default '',
   `country` varchar(4) NOT NULL default '',
-  `state` varchar(100) default NULL,
-  `city` varchar(100) NOT NULL default '',
+  `state` varchar(100) BINARY default NULL,
+  `city` varchar(100) BINARY NOT NULL default '',
   `url` varchar(255) default NULL,
   PRIMARY KEY  (`schoolid`),
   UNIQUE KEY `country` (`country`,`state`,`city`,`name`)
