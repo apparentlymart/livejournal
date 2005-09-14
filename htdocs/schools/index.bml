@@ -221,7 +221,7 @@ body<=
         unless ($ctc eq 'US') {
             $ret .= "<div id='addlink'><?p <i>Don't see what you're looking for?</i><br />";
             $ret .= "<a href='index.bml?ctc=$ectc&add=1' onclick='return addschool()'>Add A School</a>";
-            $ret .= " and we'll add it soon. p?></div>";
+            $ret .= " p?></div>";
             $ret .= $add_school->($ctc);
         }
 
@@ -255,7 +255,7 @@ body<=
 
         $ret .= "<div id='addlink'><?p <i>Don't see what you're looking for?</i><br />";
         $ret .= "<a href='index.bml?ctc=$ectc&sc=$esc&add=1' onclick='return addschool()'>Add A School</a>";
-        $ret .= " and we'll add it soon. p?></div>";
+        $ret .= " p?></div>";
         $ret .= $add_school->($ctc, $sc);
 
         return $ret;
@@ -287,7 +287,7 @@ body<=
 
         $ret .= "<div id='addlink'><?p <i>Don't see what you're looking for?</i><br />";
         $ret .= "<a href='index.bml?ctc=$ectc&sc=$esc&cc=$ecc&add=1' onclick='return addschool()'>Add A School</a>";
-        $ret .= " and we'll add it soon. p?></div>";
+        $ret .= " p?></div>";
         $ret .= $add_school->($ctc, $sc, $cc);
 
         return $ret;
