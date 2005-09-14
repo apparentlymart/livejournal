@@ -87,6 +87,31 @@ sub new
     return $self;
 }
 
+sub new_from_url {
+    my $class = shift;
+    my $url   = shift;
+
+    my ($user, $ditemid);
+    my $entry = sub {
+        my $u = LJ::load_user($user) or return undef;
+        my $ent = LJ::Entry->new($u, ditemid => $ditemid);
+        return $ent;
+    };
+
+    # FIXME: flesh this out
+    if ($url =~ m!^\Q$LJ::SITEROOT\E/(?:users/|~)(\w+)/(\d+)\.html$!) {
+        ($user, $ditemid) = ($1, $2);
+        return $entry->();
+    }
+
+    if ($LJ::USER_DOMAIN && $url =~ m!^http://(\w+)\.\Q$LJ::USER_DOMAIN\E/(\d+)\.html$!) {
+        ($user, $ditemid) = ($1, $2);
+        return $entry->();
+    }
+
+    return undef;
+}
+
 sub jitemid {
     my $self = shift;
     return $self->{jitemid};
