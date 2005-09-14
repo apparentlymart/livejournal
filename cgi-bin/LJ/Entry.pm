@@ -19,6 +19,8 @@ use Carp qw/ croak /;
 #    props:   hashref of props,  loaded if _loaded_props
 #    subject: text of subject,   loaded if _loaded_text
 #    event:   text of log event, loaded if _loaded_text
+#    subject_orig: text of subject without transcoding,   present if unknown8bit
+#    event_orig:   text of log event without transcoding, present if unknown8bit
 
 #    eventtime:  mysql datetime of event, loaded if _loaded_row
 #    logtime:    mysql datetime of event, loaded if _loaded_row
@@ -118,32 +120,97 @@ sub url {
 sub anum {
     my $self = shift;
     return $self->{anum} if defined $self->{anum};
-    __PACKAGE__->load_rows($self);
+    __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
     return $self->{anum} if defined $self->{anum};
     croak("couldn't retrieve anum for entry");
 }
 
+# returns LJ::User object for the poster of this entry
+sub poster {
+    my $self = shift;
+    return LJ::load_userid($self->posterid);
+}
+
+sub posterid {
+    my $self = shift;
+    __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
+    return $self->{posterid};
+}
+
+sub eventtime_mysql {
+    my $self = shift;
+    __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
+    return $self->{eventtime};
+}
+
+sub logtime_mysql {
+    my $self = shift;
+    __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
+    return $self->{logtime};
+}
+
+sub logtime_unix {
+    my $self = shift;
+    __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
+    return LJ::mysqldate_to_time($self->{logtime}, 1);
+}
+
+sub modtime_unix {
+    my $self = shift;
+    __PACKAGE__->preload_rows ([ $self ]) unless $self->{_loaded_row};
+    __PACKAGE__->preload_props([ $self ]) unless $self->{_loaded_props};
+
+    return LJ::mysqldate_to_time($self->{logtime}, 1);
+}
+
+sub security {
+    my $self = shift;
+    __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
+    return $self->{security};
+}
+
+sub allowmask {
+    my $self = shift;
+    __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
+    return $self->{allowmask};
+}
+
 # class method:
-sub load_rows {
-    my $class = shift;
-    print "class = $class\n";
-    my @objs  = @_;
-    print "objs = [@objs]\n";
-    foreach my $obj (@objs) {
-        # row data
-        my $log2row = LJ::get_log2_row($obj->{u}, $obj->{jitemid});
-        next unless $log2row;
+sub preload_rows {
+    my ($class, $entlist) = @_;
+    foreach my $en (@$entlist) {
+        next if $en->{_loaded_row};
+
+        my $lg = LJ::get_log2_row($en->{u}, $en->{jitemid});
+        next unless $lg;
         for my $f (qw(allowmask posterid eventtime logtime security anum)) {
-            $obj->{$f} = $log2row->{$f};
+            $en->{$f} = $lg->{$f};
         }
+        $en->{_loaded_row} = 1;
     }
+}
+
+# class method:
+sub preload_props {
+    my ($class, $entlist) = @_;
+    foreach my $en (@$entlist) {
+        next if $en->{_loaded_props};
+        $en->_load_props;
+    }
+}
+
+# returns array of tags for this post
+sub tags {
+    my $self = shift;
+    # FIXME: implement
+    return ();
 }
 
 # returns true if loaded, zero if not.
 # also sets _loaded_text and subject and event.
 sub _load_text {
     my $self = shift;
-    return 1 if $self->{'_loaded_text'};
+    return 1 if $self->{_loaded_text};
 
     my $opts = {};
     $opts->{usemaster} = 1 if $self->{nocache};
@@ -154,8 +221,24 @@ sub _load_text {
 
     $self->{subject}      = $lt->[0];
     $self->{event}        = $lt->[1];
+
+    if ($self->prop("unknown8bit")) {
+        # save the old ones away, so we can get back at them if we really need to
+        $self->{subject_orig}  = $self->{subject};
+        $self->{event_orig}    = $self->{event};
+
+        # FIXME: really convert all the props?  what if we binary-pack some in the future?
+        LJ::item_toutf8($self->{u}, \$self->{'subject'}, \$self->{'event'}, $self->{props});
+    }
+
     $self->{_loaded_text} = 1;
     return 1;
+}
+
+sub prop {
+    my ($self, $prop) = @_;
+    $self->_load_props unless $self->{_loaded_props};
+    return $self->{props}{$prop};
 }
 
 sub _load_props {
@@ -191,66 +274,145 @@ sub _load_comments
     return $self;
 }
 
-
-sub as_atom
-{
+# returns an XML::Atom::Entry object for a feed
+sub atom_entry {
     my $self = shift;
+    my $opts = shift || {};  # synlevel ("full"), apilinks (bool)
 
-    my $u         = $self->{u};
+    my $entry     = XML::Atom::Entry->new();
+    my $entry_xml = $entry->{doc};
 
-    # bleh: should be using a method on LJ::User.  and shouldn't be
-    # modifying attributes inside the $u either.  and LJ::Feed should
-    # be loading it if it's not preloaded as an optimization.
-    # this action-at-a-distance bullshit must die.  --brad
-    LJ::load_user_props($u, 'opt_synlevel');
-    $u->{'opt_synlevel'} ||= 'full';
+    my $u       = $self->{u};
+    my $ditemid = $self->ditemid;
+    my $jitemid = $self->{jitemid};
 
-    my $ctime   = LJ::mysqldate_to_time($self->{'logtime'}, 1);
-    my $modtime = $self->{'props'}->{'revtime'} || $ctime;
+    # AtomAPI interface path
+    my $api = $opts->{'apilinks'} ? "$LJ::SITEROOT/interface/atom" :
+                                    "$LJ::SITEROOT/users/$u->{user}/data/atom";
 
-    my $item = {
-        'itemid'     => $self->{jitemid},
-        'ditemid'    => $self->ditemid,
-        'eventtime'  => LJ::alldatepart_s2($self->{'eventtime'}),
-        'modtime'    => $modtime,
-        'subject'    => $self->subject,
-        'event'      => $self->event,
+    $entry->title($self->subject_text);
+    $entry->id("urn:lj:$LJ::DOMAIN:atom1:$u->{user}:$ditemid");
+
+    my $author = XML::Atom::Person->new();
+    $author->name($self->poster->{name});
+    $entry->author($author);
+
+    my $make_link = sub {
+        my ( $rel, $type, $href, $title ) = @_;
+        my $link = XML::Atom::Link->new;
+        $link->rel($rel);
+        $link->type($type);
+        $link->href($href);
+        $link->title($title) if $title;
+        return $link;
     };
 
-    my $atom = LJ::Feed::create_view_atom(
-        {
-            u      => $self->{'u'},
-            'link' => ( LJ::journal_base( $self->{'u'}, "" ) . '/' ),
-        },
-        $self->{'u'},
-        {
-            'single_entry' => 1,
-            'apilinks'     => 1,
-        },
-        [$item]
-    );
+    $entry->add_link($make_link->( 'alternate', 'text/html', $self->url));
+    $entry->add_link($make_link->(
+                                  'service.edit',      'application/x.atom+xml',
+                                  "$api/edit/$jitemid", 'Edit this post'
+                                  )
+                     ) if $opts->{'apilinks'};
 
-    return $atom;
+    my $event_date = LJ::time_to_w3c($self->logtime_unix, "");
+    my $modtime    = LJ::time_to_w3c($self->modtime_unix, 'Z');
+
+    $entry->published($event_date);
+    $entry->issued   ($event_date);   # COMPAT
+
+    $entry->updated ($modtime);
+    $entry->modified($modtime);
+
+    # XML::Atom 0.9 doesn't support categories.   Maybe later?
+    foreach my $tag ($self->tags) {
+        $tag = LJ::exml($tag);
+        my $category = $entry_xml->createElement( 'category' );
+        $category->setAttribute( 'term', $tag );
+        $entry_xml->getDocumentElement->appendChild( $category );
+    }
+
+    my $syn_level = $opts->{synlevel} || $u->prop("opt_synlevel") || "full";
+
+    # if syndicating the complete entry
+    #   -print a content tag
+    # elsif syndicating summaries
+    #   -print a summary tag
+    # else (code omitted), we're syndicating title only
+    #   -print neither (the title has already been printed)
+    #   note: the $event was also emptied earlier, in make_feed
+    #
+    # a lack of a content element is allowed,  as long
+    # as we maintain a proper 'alternate' link (above)
+    if ($syn_level eq 'full') {
+        # Do this manually for now, until XML::Atom supports new
+        # content type classifications.
+        my $content = $entry_xml->createElement( 'content' );
+        $content->setAttribute( 'type', 'html' );
+        $content->appendTextNode( $self->event_html );
+        $entry_xml->getDocumentElement->appendChild( $content );
+    } elsif ($syn_level eq 'summary') {
+        my $summary = $entry_xml->createElement( 'summary' );
+        $summary->setAttribute( 'type', 'html' );
+        $summary->appendTextNode( $self->event_summary );
+        $entry_xml->getDocumentElement->appendChild( $summary );
+    }
+
+    return $entry;
 }
 
-sub subject {
+# returns the entry as an XML Atom string, without the XML prologue
+sub as_atom
+{
+    my $self  = shift;
+    my $entry = $self->atom_entry;
+    my $xml   = $entry->as_xml;
+    $xml =~ s!^<\?xml.+?>\s*!!s;
+    return $xml;
+}
+
+# raw utf8 text, with no HTML cleaning
+sub subject_raw {
     my $self = shift;
-    $self->_load_text unless $self->{_loaded_text};
+    $self->_load_text  unless $self->{_loaded_text};
     return $self->{subject};
 }
 
-sub event {
+# raw text as user sent us, without transcoding while correcting for unknown8bit
+sub subject_orig {
+    my $self = shift;
+    $self->_load_text  unless $self->{_loaded_text};
+    return $self->{subject_orig} || $self->{subject};
+}
+
+# raw utf8 text, with no HTML cleaning
+sub event_raw {
     my $self = shift;
     $self->_load_text unless $self->{_loaded_text};
     return $self->{event};
 }
 
-sub clean_subject
+# raw text as user sent us, without transcoding while correcting for unknown8bit
+sub event_orig {
+    my $self = shift;
+    $self->_load_text unless $self->{_loaded_text};
+    return $self->{event_orig} || $self->{event};
+}
+
+sub subject_html
 {
     my $self = shift;
     $self->_load_text unless $self->{_loaded_text};
     my $subject = $self->{subject};
     LJ::CleanHTML::clean_subject( \$subject ) if $subject;
+    return $subject;
+}
+
+sub subject_text
+{
+    my $self = shift;
+    $self->_load_text unless $self->{_loaded_text};
+    my $subject = $self->{subject};
+    LJ::CleanHTML::clean_subject_all( \$subject ) if $subject;
     return $subject;
 }
 
@@ -260,7 +422,7 @@ sub clean_subject
 #    1:       treats entry as preformatted (no breaks applied)
 #    0:       treats entry as normal (newlines convert to HTML breaks)
 #    hashref: passed to LJ::CleanHTML::clean_event verbatim
-sub clean_event
+sub event_html
 {
     my ($self, $opts) = @_;
 
@@ -277,28 +439,24 @@ sub clean_event
     return $event;
 }
 
-# currently, methods are just getters.
-#
-# posterid, eventtime, logtime, security, allowmask,
-# journalid, jitemid, anum, subject, event, comments
-sub AUTOLOAD {
-    no strict 'refs';
+# like event_html, but truncated for summary mode in rss/atom
+sub event_summary {
     my $self = shift;
-    (my $data = $AUTOLOAD) =~ s/.+:://;
 
-    *$AUTOLOAD = sub {
+    my $url = $self->url;
+    my $readmore = "<b>(<a href=\"$url\">Read more ...</a>)</b>";
 
-        if ($data eq 'comments') {
-            $self->_load_comments() unless defined $self->{'comments'};
-        }
+    my $event = $self->event_html;
 
-        return $self->{$data};
-    };
-
-    goto &$AUTOLOAD;
+    # assume the first paragraph is terminated by two <br> or a </p>
+    # valid XML tags should be handled, even though it makes an uglier regex
+    if ($event =~ m!((<br\s*/?\>(</br\s*>)?\s*){2})|(</p\s*>)!i) {
+        # everything before the matched tag + the tag itself
+        # + a link to read more
+        $event = $` . $& . $readmore;
+    }
+    return $event;
 }
-
-sub DESTROY {}
 
 package LJ;
 
@@ -1270,6 +1428,7 @@ sub item_toutf8
 {
     my ($u, $subject, $text, $props) = @_;
     return unless $LJ::UNICODE;
+    $props ||= {};
 
     my $convert = sub {
         my $rtext = shift;
@@ -1285,6 +1444,8 @@ sub item_toutf8
 
     $convert->($subject);
     $convert->($text);
+
+    # FIXME: really convert all the props?  what if we binary-pack some in the future?
     foreach(keys %$props) {
         $convert->(\$props->{$_});
     }
