@@ -85,6 +85,12 @@ body<=
                     next;
                 }
 
+                # Check for starting later than current year
+                if (defined $year_start && $year_start+0 > $year_now) {
+                    $bogus->($sid, 'You must specify a starting year in the past or present.');
+                    next;
+                }
+
                 # Don't let them do 2000 - 1999
                 if (defined $year_end && $year_end < $year_start) {
                     $bogus->($sid, 'Your ending year cannot be earlier than your starting year.');
@@ -135,7 +141,8 @@ body<=
 
     # must not have posted, dump what schools we've attended
     if ($schools && %$schools) {
-        $ret .= '<form action="manage.bml" method="post">';
+        my $authas = $GET{authas} ? "?authas=$GET{authas}" : '';
+        $ret .= "<form action='manage.bml$authas' method='post'>";
         $ret .= '<table style="border-spacing: 0">';
 
         foreach my $sid (sort { $schools->{$a}->{year_start} <=> $schools->{$b}->{year_stat},
