@@ -153,7 +153,11 @@ body<=
             undef $year_end unless defined $year_start;
 
             my $rowclass = $edit_sid == $sid ? 'highlight' : '';
-            $ret .= "<tr class='$rowclass'><th style='text-align: left'>$schools->{$sid}->{name}</th><td>";
+            my $link = "$LJ::SITEROOT/schools/index.bml?ctc=" . LJ::eurl($schools->{$sid}->{country}) .
+                       "&sc=" . LJ::eurl($schools->{$sid}->{state}) .
+                       "&cc=" . LJ::eurl($schools->{$sid}->{city}) .
+                       "&sid=$sid";
+            $ret .= "<tr class='$rowclass'><th style='text-align: left'><a href='$link'>$schools->{$sid}->{name}</a></th><td>";
 
             if (!$edit_mode && $sid != $edit_sid) {
                 $ret .= "<div id='$sid:showtime' style='whitespace: nowrap'>&nbsp;($schools->{$sid}->{year_start} - $year_end)";
