@@ -7,6 +7,9 @@ use strict;
 
 package LJ::MemCache;
 
+use vars qw($GET_DISABLED);
+$GET_DISABLED = 0;
+
 %LJ::MEMCACHE_ARRAYFMT = (
                           'user' =>
                           [qw[1 userid user caps clusterid dversion email password status statusvis statusvisdate
@@ -72,10 +75,17 @@ sub delete {
 sub add       { $memc->add(@_);       }
 sub replace   { $memc->replace(@_);   }
 sub set       { $memc->set(@_);       }
-sub get       { $memc->get(@_);       }
-sub get_multi { $memc->get_multi(@_); }
 sub incr      { $memc->incr(@_);      }
 sub decr      { $memc->decr(@_);      }
+
+sub get       {
+    return undef if $GET_DISABLED;
+    $memc->get(@_);
+}
+sub get_multi {
+    return {} if $GET_DISABLED;
+    $memc->get_multi(@_);
+}
 
 sub _get_sock { $memc->get_sock(@_);   }
 

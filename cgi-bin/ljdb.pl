@@ -56,6 +56,12 @@ sub root_dbh_by_name {
 
 package LJ;
 
+sub no_cache (&) {
+    my $sb = shift;
+    local $LJ::MemCache::GET_DISABLED = 1;
+    $sb->();
+}
+
 # <LJFUNC>
 # name: LJ::get_dbh
 # class: db
