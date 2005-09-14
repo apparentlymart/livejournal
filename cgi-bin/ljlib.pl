@@ -40,6 +40,7 @@ sub END { LJ::end_request(); }
                     "s2stylelayers2", "s2compiled2", "userlog",
                     "logtags", "logtagsrecent", "logkwsum",
                     "recentactions", "usertags", "pendcomments",
+                    "user_schools",
                     );
 
 # keep track of what db locks we have out
@@ -2463,7 +2464,7 @@ sub get_secret
 #
 # LJ-generic domains:
 #  $dom: 'S' == style, 'P' == userpic, 'A' == stock support answer
-#        'C' == captcha, 'E' == external user
+#        'C' == captcha, 'E' == external user, 'O' == school
 #
 sub alloc_global_counter
 {
@@ -2502,6 +2503,8 @@ sub alloc_global_counter
         $newmax = 0;
     } elsif ($dom eq "A") {
         $newmax = $dbh->selectrow_array("SELECT MAX(ansid) FROM support_answers");
+    } elsif ($dom eq "O") {
+        $newmax = $dbh->selectrow_array("SELECT MAX(schoolid) FROM schools");
     } else {
         $newmax = LJ::run_hook('global_counter_init_value', $dom);
         die "No alloc_global_counter initalizer for domain '$dom'"
