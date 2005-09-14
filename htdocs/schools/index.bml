@@ -352,15 +352,13 @@ body<=
                 $ret .= "<li>" . LJ::ljuser($_) . " - $_->{name}</li>\n";
             }
             $ret .= "</ul>";
-            $ret .= " p?>";
         }
         if (@users) {
-            $ret .= "<?p <b>Users p?><ul>";
-            foreach (@users) {
+            $ret .= "<?p <b>Users</b> p?><ul>";
+           foreach (@users) {
                 $ret .= "<li>" . LJ::ljuser($_) . "</li>\n";
             }
             $ret .= "</ul>";
-            $ret .= " p?>";
         }
     }
 
