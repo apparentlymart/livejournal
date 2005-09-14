@@ -700,7 +700,7 @@ if ($u->{'journaltitle'}) {
  }
 
  # Schools Directory
- {
+ unless ($LJ::DISABLED{'schools'}) {
      my $span = ($narrow_left-- > 0) ? 1 : 2;
      $body .= "<tr><td align='right' valign='top'><b><a href='/schools/index.bml'>$ML{'.label.schools'}</a>:</b></td><td colspan='$span'>";
 
@@ -716,7 +716,7 @@ if ($u->{'journaltitle'}) {
                         "'>" . LJ::ehtml($schools->{$sid}->{name}) . "</a>";
             if (defined $schools->{$sid}->{year_start}) {
                 $link .= " (" . $schools->{$sid}->{year_start} . "-" .
-                         ($schools->{$sid}->{year_end} || "") . ")";
+                         ($schools->{$sid}->{year_end} || "present") . ")";
             }
             push @links, $link;
          }
