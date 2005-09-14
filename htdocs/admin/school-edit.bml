@@ -83,7 +83,7 @@ body<=
             my $rv = LJ::Schools::edit_school($sid,
                                               {
                                                   name => $POST{name},
-                                                  country => $POST{country},
+                                                  countrycode => $POST{country},
                                                   state => $POST{state},
                                                   city => $POST{city},
                                                   url => $POST{url},

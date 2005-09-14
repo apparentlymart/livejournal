@@ -337,7 +337,7 @@ sub expand_codes {
 # args: opts
 # des-opts: Hashref; should contain some combination of city, country, state, citycode,
 #           countrycode, statecode.  The codes trump the non-code arguments.
-# returns: list of: countrycode, statecode, citycode.  undef on error.
+# returns: list of: countrycode, statecode, citycode.  empty list on error.
 # </LJFUNC>
 sub determine_location_opts {
     my $opts = shift;
@@ -350,10 +350,33 @@ sub determine_location_opts {
     unless ($ctc) {
         my %countries;
         LJ::load_codes({ country => \%countries });
-        %countries = reverse %countries;
+        unless ($countries{$opts->{country}}) {
+            %countries = reverse %countries;
+        }
         $ctc = $countries{$opts->{country}};
     }
     return () unless $ctc;
+
+    # now get the state code
+    $sc = $opts->{statecode};
+    unless ($sc) {
+        if ($ctc eq 'US') {
+            my %states;
+            LJ::load_codes({ state => \%states });
+            unless ($states{$opts->{state}}) {
+                %states = reverse %states;
+            }
+            $sc = $states{$opts->{state}};
+        } else {
+            $sc = $opts->{state};
+        }
+    }
+
+    # and finally the city
+    $cc = $opts->{citycode} || $opts->{city};
+
+    # and the list
+    return ($ctc, $sc, $cc);
 }
 
 # <LJFUNC>
@@ -371,9 +394,24 @@ sub add_pending_school {
     $u = LJ::want_user($u);
     return undef unless $u && $opts && ref $opts eq 'HASH';
 
-    # verify we have minimum data
-    return undef unless
-        $opts->{name} && $opts->{city} && $opts->{country}
+    # verify we have location data
+    my ($ctc, $sc, $cc) = LJ::Schools::determine_location_opts($opts);
+    return undef unless $ctc && defined $sc && defined $cc;
+
+    # verify we have minimum data (name)
+    return undef unless $opts->{name};
+
+    # now undef things that need to be null if blank
+    $sc ||= undef;
+    $cc ||= undef;
+    $opts->{url} ||= undef;
+
+    # get db and insert
+    my $dbh = LJ::get_db_writer();
+    $dbh->do("INSERT INTO schools_pending (userid, name, country, state, city, url) VALUES (?, ?, ?, ?, ?, ?)",
+             undef, $u->{userid}, $opts->{name}, $ctc, $sc, $cc, $opts->{url});
+    return undef if $dbh->err;
+    return 1;
 }
 
 # <LJFUNC>
@@ -507,6 +545,44 @@ sub approve_pending {
 # </LJFUNC>
 sub get_pending {
 
+}
+
+# <LJFUNC>
+# name: LJ::Schools::edit_school
+# class: schools
+# des: Edits the information for a school.
+# args: sid, options
+# des-sid: School id to edit.
+# des-options: Hashref; Key=>value pairs that can include: name, city, state, country,
+#              citycode, statecode, countrycode, url.
+# returns: 1 on success, undef on error.
+# </LJFUNC>
+sub edit_school {
+    my ($sid, $opts) = @_;
+    $sid += 0;
+    return undef unless $sid && $opts && ref $opts eq 'HASH';
+
+    # verify we have location data
+    my ($ctc, $sc, $cc) = LJ::Schools::determine_location_opts($opts);
+    return undef unless $ctc && defined $sc && defined $cc;
+
+    # verify we have minimum data (name)
+    return undef unless $opts->{name};
+
+    # now undef things that need to be null if blank
+    $sc ||= undef;
+    $cc ||= undef;
+    $opts->{url} ||= undef;
+
+    # get db and update
+    my $dbh = LJ::get_db_writer();
+    $dbh->do("UPDATE schools SET name = ?, city = ?, state = ?, country = ?, url = ? WHERE schoolid = ?",
+             undef, $opts->{name}, $cc, $sc, $ctc, $opts->{url}, $sid);
+    return undef if $dbh->err;
+
+    # fix memcache
+    LJ::MemCache::delete([ $sid, "sasi:$sid" ]);
+    return 1;
 }
 
 1;
