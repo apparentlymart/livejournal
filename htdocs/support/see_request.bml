@@ -76,6 +76,18 @@ head<=
         return doSetReplyType('internal');
     }
 
+    function doDegreen () {
+        return doSetReplyType('internal');
+    }
+
+    function doRegreen () {
+        return doSetReplyType('internal');
+    }
+
+    function doApproveAnswer () {
+        return doSetReplyType('internal');
+    }
+
     function doSummaryClick () {
         if (! document.getElementById) return false;
         
@@ -678,7 +690,8 @@ body<=
 
         if (@screened && $helper_mode) {
             $ret .= "<td>Approve Screened Response:<br />";
-            $ret .= LJ::html_select({ 'name' => 'approveans' },
+            $ret .= LJ::html_select({ 'name' => 'approveans',
+                                      'onclick' => 'return doApproveAnswer();' },
                                     ('', ''),
                                     map { $_->{'splid'}, "\#$_->{'splid'} (" . LJ::get_username($_->{'userid'}) . ")" }
                                     @screened);
@@ -691,12 +704,14 @@ body<=
         $ret .= "</td></tr>\n";
         if ($sp->{'timelasthelp'} > ($sp->{'timetouched'}+5)) {
             $ret .= "<tr><td align='right'>Put in Queue:</td><td>";
-            $ret .= LJ::html_check({ 'type' => 'checkbox', 'name' => 'touch' });
+            $ret .= LJ::html_check({ 'type' => 'checkbox', 'name' => 'touch',
+                                     'onclick' => 'return doRegreen();' });
             $ret .= "<?de (Use this to re-open the request.) de?>\n";
             $ret .= "</td></tr>\n";
         } else {
             $ret .= "<tr><td align='right'>Take out of Queue:</td><td>";
-            $ret .= LJ::html_check({ 'type' => 'checkbox', 'name' => 'untouch' });
+            $ret .= LJ::html_check({ 'type' => 'checkbox', 'name' => 'untouch',
+                                     'onclick' => 'return doDegreen();' });
             $ret .= "<?de (Use this to change status to &quot;awaiting close&quot;.) de?>\n";
             $ret .= "</td></tr>\n";
         }
