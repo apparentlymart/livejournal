@@ -698,7 +698,29 @@ if ($u->{'journaltitle'}) {
      }
      $body .= "</td></tr>";
  }
- 
+
+ # Schools Directory
+ {
+     my $span = ($narrow_left-- > 0) ? 1 : 2;
+     $body .= "<tr><td align='right' valign='top'><b><a href='/schools/index.bml'>$ML{'.label.schools'}</a>:</b></td><td colspan='$span'>";
+
+     my $schools = LJ::Schools::get_attended($u);
+     if (%$schools) {
+         $body .= join(', ', map { $_->{name} } sort { $schools->{$a}->{name} cmp $schools->{$b}->{name}} keys %$schools);
+     } else {
+         $body .= "<i>$ML{'.label.noschools'}</i>";
+     }
+
+     if ($remote->{userid} == $userid) {
+         $body .= ' <small>';
+         $body .= BML::ml('Actionlink', { 'link' => "<a href='/schools/manage.bml'>$ML{'.label.manageschools'}</a>" });
+         $body .= '</small>';
+     }
+
+     $body .= "</td></tr>";
+ }
+
+
  # Prints out a list of users with links to their
  # userinfo pages. Apply strikethru and bolding
  # for deleted journals and friends of user.

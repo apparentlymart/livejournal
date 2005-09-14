@@ -57,7 +57,7 @@
                'popfaq' => ['Popular FAQs', '/support/popfaq.bml', 'faq'],
                'preview' => ['Layout Previews', '/customize/preview.bml', 'customize'],
                'register' => ['Validate Email', '/register.bml', 'home'],
-               'schools' => ['School Directory', '/schools/index.bml', 'home'],
+               'schools' => ['Schools Directory', '/schools/index.bml', 'home'],
                'schoolsfind' => ['Find a School', '', 'schools'],
                'schoolsmy' => ['My Schools', '/schools/manage.bml', 'schools'],
                'searchinterests' => ['Search By Interest', '/interests.bml', 'search'],

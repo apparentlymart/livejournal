@@ -1,5 +1,5 @@
 <?page
-title=>School Directory
+title=>Schools Directory
 body<=
 <?_code
 {
@@ -163,9 +163,9 @@ body<=
     unless ($ctc) {
         # Header text
         $ret .= "<?p With the Schools Directory, you can:<ul>";
-        $ret .= "<li>Add a school to your journal or community's Schools list.</li>";
+        $ret .= "<li>Add a school to your journal or community's user info page.</li>";
         $ret .= "<li>Find other users and communities associated with a school.</li></ul>";
-        $ret .= "<br />Any schools you add will appear on the userinfo page for your journal or community.  If you don't see your school listed in the Schools Directory, use the Add School button at the bottom of this page to submit it.  p?>";
+        $ret .= "<br />Start your search below.  p?>";
 
         my $cts = LJ::Schools::get_countries();
         return $err->("Unable to get country list.")
@@ -187,14 +187,12 @@ body<=
     # Rest of this flow uses a different crumb
     LJ::set_active_crumb('schoolsfind');
 
-    # Rest of this flow uses the same header text
-    $ret .= "<?p  If you don't see what you're searching for, use the Add School button at the bottom of this page to submit it. p?>";
-
 
     ##########################################################################
     # PAGE 2: return the list of areas in that country
 
     unless (defined $sc) {
+    $ret .= "<?p  If you don't see what you're searching for, use the Add School link at the bottom of this page to submit it. p?>";
 
         my $scs = LJ::Schools::get_states($ctc);
         return $err->("Unable to get necessary data.")
@@ -218,7 +216,7 @@ body<=
 
         unless ($ctc eq 'US') {
             $ret .= "<div id='addlink'><?p <i>Don't see what you're looking for?</i><br />";
-            $ret .= "<a href='index.bml?ctc=$ectc&add=1' onclick='return addschool()'>Tell us about your school</a>";
+            $ret .= "<a href='index.bml?ctc=$ectc&add=1' onclick='return addschool()'>Add a school</a>";
             $ret .= " and we'll add it soon. p?></div>";
             $ret .= $add_school->($ctc);
         }
@@ -230,6 +228,7 @@ body<=
     # PAGE 3: return the list of cities in a state
 
     unless ($cc) {
+        $ret .= "<?p  If you don't see what you're searching for, use the Add School link at the bottom of this page to submit it. p?>";
 
         my $ccs = LJ::Schools::get_cities($ctc, $sc);
         return $err->("Unable to get necessary data.")
@@ -251,7 +250,7 @@ body<=
         $ret .= "</ul>";
 
         $ret .= "<div id='addlink'><?p <i>Don't see what you're looking for?</i><br />";
-        $ret .= "<a href='index.bml?ctc=$ectc&sc=$esc&add=1' onclick='return addschool()'>Tell us about your school</a>";
+        $ret .= "<a href='index.bml?ctc=$ectc&sc=$esc&add=1' onclick='return addschool()'>Add a school</a>";
         $ret .= " and we'll add it soon. p?></div>";
         $ret .= $add_school->($ctc, $sc);
 
@@ -262,6 +261,7 @@ body<=
     # PAGE 4: return the list of schools in a city
 
     unless ($sid) {
+        $ret .= "<?p  If you don't see what you're searching for, use the Add School link at the bottom of this page to submit it. p?>";
 
         my $schools = LJ::Schools::get_schools($ctc, $sc, $cc);
         return $err->("Unable to get necessary data.")
@@ -282,7 +282,7 @@ body<=
         $ret .= "</ul>";
 
         $ret .= "<div id='addlink'><?p <i>Don't see what you're looking for?</i><br />";
-        $ret .= "<a href='index.bml?ctc=$ectc&sc=$esc&cc=$ecc&add=1' onclick='return addschool()'>Tell us about your school</a>";
+        $ret .= "<a href='index.bml?ctc=$ectc&sc=$esc&cc=$ecc&add=1' onclick='return addschool()'>Add a school</a>";
         $ret .= " and we'll add it soon. p?></div>";
         $ret .= $add_school->($ctc, $sc, $cc);
 

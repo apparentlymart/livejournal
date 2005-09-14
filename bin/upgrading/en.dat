@@ -3856,6 +3856,8 @@ This could be because: <ol>
 
 /userinfo.bml.label.location=Location:
 
+/userinfo.bml.label.manageschools=Manage Schools
+
 /userinfo.bml.label.maintainers=Maintainers
 
 /userinfo.bml.label.memberof=Member of
@@ -3874,11 +3876,15 @@ This could be because: <ol>
 
 /userinfo.bml.label.nofriends=<i>None listed.</i>
 
+/userinfo.bml.label.noschools=None listed
+
 /userinfo.bml.label.post=Post to "[[journal]]"
 
 /userinfo.bml.label.postalt=Update your journal
 
 /userinfo.bml.label.reqfinduser=Only users with 'finduser' priv can lookup users by userid.
+
+/userinfo.bml.label.schools=Schools
 
 /userinfo.bml.label.searchjournal=Search This Journal
 
