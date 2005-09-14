@@ -706,7 +706,7 @@ if ($u->{'journaltitle'}) {
 
      my $schools = LJ::Schools::get_attended($u);
      if (%$schools) {
-         $body .= join(', ', map { $_->{name} } sort { $schools->{$a}->{name} cmp $schools->{$b}->{name}} keys %$schools);
+         $body .= join(', ', map { $schools->{$_}->{name} } sort { $schools->{$a}->{name} cmp $schools->{$b}->{name}} keys %$schools);
      } else {
          $body .= "<i>$ML{'.label.noschools'}</i>";
      }
