@@ -30,7 +30,7 @@ sub make_feed
         $opts->{'handler_return'} = 404;
         return undef;
     }
-    
+
     $opts->{noitems} = 1 if $feedtype eq 'foaf';
 
     $r->notes('codepath' => "feed.$feedtype") if $r;
@@ -38,14 +38,14 @@ sub make_feed
     my $dbr = LJ::get_db_reader();
 
     my $user = $u->{'user'};
-    
+
     LJ::load_user_props($u, qw/ journaltitle journalsubtitle opt_synlevel /);
 
-    LJ::text_out(\$u->{$_}) 
+    LJ::text_out(\$u->{$_})
         foreach ("name", "url", "urlname");
-    
+
     # opt_synlevel will default to 'full'
-    $u->{'opt_synlevel'} = 'full' 
+    $u->{'opt_synlevel'} = 'full'
         unless $u->{'opt_synlevel'} =~ /^(?:full|summary|title)$/;
 
     # some data used throughout the channel
@@ -113,7 +113,7 @@ sub make_feed
     $r->set_last_modified($lastmod) if $lastmod;
 
     # use this $lastmod as the feed's last-modified time
-    # we would've liked to use something like 
+    # we would've liked to use something like
     # LJ::get_timeupdate_multi instead, but that only changes
     # with new updates and doesn't change on edits.
     $journalinfo->{'modtime'} = $lastmod;
@@ -133,16 +133,16 @@ sub make_feed
     # email address of journal owner, but respect their privacy settings
     if ($u->{'allow_contactshow'} eq "Y" && $u->{'opt_whatemailshow'} ne "N" && $u->{'opt_mangleemail'} ne "Y") {
         my $cemail;
-        
+
         # default to their actual email
         $cemail = $u->{'email'};
-        
+
         # use their livejournal email if they have one
         if ($LJ::USER_EMAIL && $u->{'opt_whatemailshow'} eq "L" &&
             LJ::get_cap($u, "useremail") && ! $u->{'no_mail_alias'}) {
 
             $cemail = "$u->{'user'}\@$LJ::USER_DOMAIN";
-        } 
+        }
 
         # clean it up since we know we have one now
         $journalinfo->{email} = $cemail;
@@ -156,7 +156,7 @@ sub make_feed
 
     my @cleanitems;
   ENTRY:
-    foreach my $it (@items) 
+    foreach my $it (@items)
     {
         # load required data
         my $itemid  = $it->{'itemid'};
@@ -193,9 +193,9 @@ sub make_feed
                 $event = "$trunc $readmore" if $trunc ne $event;
             }
 
-            LJ::CleanHTML::clean_event(\$event, 
+            LJ::CleanHTML::clean_event(\$event,
                                        { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'} });
-        
+
             # do this after clean so we don't have to about know whether or not
             # the event is preformatted
             if ($u->{'opt_synlevel'} eq 'summary') {
@@ -285,7 +285,7 @@ sub create_view_rss
         my $pic = {};
         LJ::load_userpics($pic, [ $u, $u->{'defaultpicid'} ]);
         $pic = $pic->{$u->{'defaultpicid'}}; # flatten
-        
+
         $ret .= "  <image>\n";
         $ret .= "    <url>$LJ::USERPIC_ROOT/$u->{'defaultpicid'}/$u->{'userid'}</url>\n";
         $ret .= "    <title>" . LJ::exml($journalinfo->{title}) . "</title>\n";
@@ -300,7 +300,7 @@ sub create_view_rss
 
     # output individual item blocks
 
-    foreach my $it (@$cleanitems) 
+    foreach my $it (@$cleanitems)
     {
         my $itemid = $it->{itemid};
         my $ditemid = $it->{ditemid};
@@ -338,7 +338,7 @@ sub create_view_rss
 # the creator for the Atom view
 # keys of $opts:
 # single_entry - only output an <entry>..</entry> block. off by default
-# apilinks - output AtomAPI links for posting a new entry or 
+# apilinks - output AtomAPI links for posting a new entry or
 #            getting/editing/deleting an existing one. off by default
 # TODO: define and use an 'lj:' namespace
 #
@@ -424,7 +424,7 @@ sub create_view_atom
     }
 
     # output individual item blocks
-    foreach my $it (@$cleanitems) 
+    foreach my $it (@$cleanitems)
     {
         my $itemid = $it->{itemid};
         my $ditemid = $it->{ditemid};
@@ -436,7 +436,7 @@ sub create_view_atom
         $entry->id("urn:lj:$LJ::DOMAIN:atom1:$u->{user}:$ditemid");
 
         # author isn't required if it is in the main <feed>
-        # only add author if we are in a single entry view, or 
+        # only add author if we are in a single entry view, or
         # the journal entry isn't owned by the journal owner. (communities)
         if ( $opts->{'single_entry'} or $j->{'u'}->{'email'} ne $u->{'email'} ) {
             my $author = XML::Atom::Person->new();
@@ -445,7 +445,7 @@ sub create_view_atom
             $entry->author($author);
         }
 
-        $entry->add_link( 
+        $entry->add_link(
             $make_link->( 'alternate', 'text/html', "$j->{'link'}$ditemid.html" )
         );
 
@@ -478,7 +478,7 @@ sub create_view_atom
         #   -print a content tag
         # elsif syndicating summaries
         #   -print a summary tag
-        # else (code omitted), we're syndicating title only
+         # else (code omitted), we're syndicating title only
         #   -print neither (the title has already been printed)
         #   note: the $event was also emptied earlier, in make_feed
         #
@@ -500,7 +500,7 @@ sub create_view_atom
 
         if ( $opts->{'single_entry'} ) {
             return $entry->as_xml();
-        } 
+        }
         else {
             $feed->add_entry( $entry );
         }
@@ -542,7 +542,7 @@ sub create_view_foaf {
 
     # precompute some values
     my $digest = Digest::SHA1::sha1_hex('mailto:' . $u->{email});
-    
+
     # channel attributes
     $ret .= ($comm ? "  <foaf:Group>\n" : "  <foaf:Person>\n");
     $ret .= "    <foaf:nick>$u->{user}</foaf:nick>\n";
@@ -559,8 +559,8 @@ sub create_view_foaf {
     $ret .= "      </foaf:Document>\n";
     $ret .= "    </foaf:page>\n";
 
-    # we want to bail out if they have an external foaf file, because 
-    # we want them to be able to provide their own information. 
+    # we want to bail out if they have an external foaf file, because
+    # we want them to be able to provide their own information.
     if ($u->{external_foaf_url}) {
         $ret .= "    <rdfs:seeAlso rdf:resource=\"" . LJ::eurl($u->{external_foaf_url}) . "\" />\n";
         $ret .= ($comm ? "  </foaf:Group>\n" : "  </foaf:Person>\n");
