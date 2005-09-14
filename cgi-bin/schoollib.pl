@@ -18,26 +18,32 @@ sub get_attended {
     return undef unless $u;
 
     # now load what schools they've been to from memcache
-    # FIXME: memcache
+    my $res = LJ::MemCache::get([ $u->{userid}, "saui:$u->{userid}" ]);
 
-    my $dbcr = LJ::get_cluster_reader($u);
-    return undef unless $dbcr;
+    # if that failed, hit db
+    unless ($res) {
+        my $dbcr = LJ::get_cluster_def_reader($u);
+        return undef unless $dbcr;
 
-    my $rows = $dbcr->selectall_arrayref(qq{
+        my $rows = $dbcr->selectall_arrayref(qq{
             SELECT schoolid, year_start, year_end
             FROM user_schools
             WHERE userid = ?
         }, undef, $u->{userid});
-    return undef if $dbcr->err || ! $rows;
+        return undef if $dbcr->err || ! $rows;
 
-    my $res = {};
-    foreach my $row (@$rows) {
-        $res->{$row->[0]} = {
-            year_start => $row->[1],
-            year_end => $row->[2],
-        };
+        $res = {};
+        foreach my $row (@$rows) {
+            $res->{$row->[0]} = {
+                year_start => $row->[1],
+                year_end => $row->[2],
+            };
+        }
+
+        LJ::MemCache::add([ $u->{userid}, "saui:$u->{userid}" ], $res);
     }
 
+    # now populate with school information
     my @sids = keys %$res;
     my $schools = LJ::Schools::load_schools(@sids);
     foreach my $sid (@sids) {
@@ -63,19 +69,30 @@ sub load_schools {
     my @ids = grep { defined $_ && $_ > 0 } @_;
     return {} unless @ids;
 
-    # FIXME: memcache
+    # check from memcache
+    my $res;
+    my %need = map { $_ => 1 } @ids;
+    my @keys = map { [ $_, "sasi:$_" ] } @ids;
+    my $mres = LJ::MemCache::get_multi(@keys);
+    foreach my $key (keys %{$mres || {}}) {
+        if ($key =~ /^sasi:(\d+)$/) {
+            delete $need{$1};
+            $res->{$1} = $mres->{$key};
+        }
+    }
+    return $res unless %need;
 
-    my $in = join(',', @ids);
-    my $dbr = LJ::get_db_reader();
-    return undef unless $dbr;
-    my $rows = $dbr->selectall_arrayref(qq{
+    # now fallback to database
+    my $in = join(',', keys %need);
+    my $dbh = LJ::get_db_writer(); # writer to get data for memcache
+    return undef unless $dbh;
+    my $rows = $dbh->selectall_arrayref(qq{
             SELECT schoolid, name, country, state, city, url
             FROM schools
             WHERE schoolid IN ($in)
         });
-    return undef if $dbr->err || ! $rows;
+    return undef if $dbh->err || ! $rows;
 
-    my $res;
     foreach my $row (@$rows) {
         $res->{$row->[0]} = {
             name => $row->[1],
@@ -84,6 +101,7 @@ sub load_schools {
             city => $row->[4],
             url => $row->[6],
         };
+        LJ::MemCache::set([ $row->[0], "sasi:$row->[0]" ], $res->{$row->[0]});
     }
 
     return $res;
@@ -350,10 +368,14 @@ sub determine_location_opts {
     unless ($ctc) {
         my %countries;
         LJ::load_codes({ country => \%countries });
-        unless ($countries{$opts->{country}}) {
+        if (exists $countries{$opts->{country}}) {
+            # valid code, use it
+            $ctc = $opts->{country};
+        } else {
+            # must be a name, back-convert it
             %countries = reverse %countries;
+            $ctc = $countries{$opts->{country}};
         }
-        $ctc = $countries{$opts->{country}};
     }
     return () unless $ctc;
 
@@ -363,10 +385,14 @@ sub determine_location_opts {
         if ($ctc eq 'US') {
             my %states;
             LJ::load_codes({ state => \%states });
-            unless ($states{$opts->{state}}) {
+            if (exists $states{$opts->{state}}) {
+                # valid code, use it
+                $sc = $opts->{state};
+            } else {
+                # must be a name, back-convert it
                 %states = reverse %states;
+                $sc = $states{$opts->{state}};
             }
-            $sc = $states{$opts->{state}};
         } else {
             $sc = $opts->{state};
         }
