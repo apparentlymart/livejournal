@@ -655,6 +655,7 @@ sub ljuser_display {
     }
 }
 
+# class function
 sub load_identity_user {
     my ($type, $ident, $vident) = @_;
 
@@ -695,6 +696,21 @@ sub load_identity_user {
     $u->log_event('account_create', { remote => $remote });
 
     return $u;
+}
+
+# instance method:  returns userprop for a user.  currently from cache with no
+# way yet to force master.
+sub prop {
+    my ($u, $prop) = @_;
+    unless (exists $u->{$_}) {
+        LJ::load_user_props($u, $prop);
+    }
+    return $u->{$prop};
+}
+
+sub journal_base {
+    my $u = shift;
+    return LJ::journal_base($u);
 }
 
 package LJ;
