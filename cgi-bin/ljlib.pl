@@ -2473,7 +2473,7 @@ sub alloc_global_counter
     return undef unless $dbh;
 
     # $dom can come as a direct argument or as a string to be mapped via hook
-    unless ($dom =~ /^[SPCEA]$/) {
+    unless ($dom =~ /^[SPCEAO]$/) {
         $dom = LJ::run_hook('map_global_counter_domain', $dom);
     }
     return undef unless defined $dom;
