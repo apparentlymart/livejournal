@@ -97,7 +97,7 @@ body<=
         $ret .= "</td></tr><tr><td colspan='2'>";
         $ret .= $inerr->('city');
         $ret .= "</td></tr><tr><td valign='top'>";
-        $ret .= "Name of school:</td><td valign='top'>" . LJ::html_text({ name => "name", size => 50, value => $name }) . "<br />&nbsp;&nbsp;" . $ex->("University of California Ber\keley, Oregon State University");
+        $ret .= "Name of school:</td><td valign='top'>" . LJ::html_text({ name => "name", size => 50, value => $name }) . "<br />&nbsp;&nbsp;" . $ex->("University of California Berkeley, Oregon State University<br /><ul><li>No abbreviations.  (Spell out University, North, State, High School, etc.)</li><li>No acronyms.</li><li>Don't use \"The\" in the beginning</li><li>For state schools, add the city/campus after a dash (ex: University of Texas - Austin)</li><li>Capitalize all words (except of, the, etc.)</li><li>Type in the school's full name (e.g. \"Harvard College\" instead of just \"Harvard\")</ul>");
         $ret .= "</td></tr><tr><td colspan='2'>";
         $ret .= $inerr->('name');
         $ret .= "</td></tr><tr><td valign='top'>";
@@ -196,7 +196,7 @@ body<=
     # PAGE 2: return the list of areas in that country
 
     unless (defined $sc) {
-    $ret .= "<?p  If you don't see what you're searching for, use the Add School link at the bottom of this page to submit it. p?>";
+        $ret .= "<?p  If you don't see what you're searching for, use the Add School link at the bottom of this page to submit it. p?>" unless $ctc eq 'US';
 
         my $scs = LJ::Schools::get_states($ctc);
         return $err->("Unable to get necessary data.")
@@ -220,7 +220,7 @@ body<=
 
         unless ($ctc eq 'US') {
             $ret .= "<div id='addlink'><?p <i>Don't see what you're looking for?</i><br />";
-            $ret .= "<a href='index.bml?ctc=$ectc&add=1' onclick='return addschool()'>Add a school</a>";
+            $ret .= "<a href='index.bml?ctc=$ectc&add=1' onclick='return addschool()'>Add A School</a>";
             $ret .= " and we'll add it soon. p?></div>";
             $ret .= $add_school->($ctc);
         }
@@ -254,7 +254,7 @@ body<=
         $ret .= "</ul>";
 
         $ret .= "<div id='addlink'><?p <i>Don't see what you're looking for?</i><br />";
-        $ret .= "<a href='index.bml?ctc=$ectc&sc=$esc&add=1' onclick='return addschool()'>Add a school</a>";
+        $ret .= "<a href='index.bml?ctc=$ectc&sc=$esc&add=1' onclick='return addschool()'>Add A School</a>";
         $ret .= " and we'll add it soon. p?></div>";
         $ret .= $add_school->($ctc, $sc);
 
@@ -286,7 +286,7 @@ body<=
         $ret .= "</ul>";
 
         $ret .= "<div id='addlink'><?p <i>Don't see what you're looking for?</i><br />";
-        $ret .= "<a href='index.bml?ctc=$ectc&sc=$esc&cc=$ecc&add=1' onclick='return addschool()'>Add a school</a>";
+        $ret .= "<a href='index.bml?ctc=$ectc&sc=$esc&cc=$ecc&add=1' onclick='return addschool()'>Add A School</a>";
         $ret .= " and we'll add it soon. p?></div>";
         $ret .= $add_school->($ctc, $sc, $cc);
 
