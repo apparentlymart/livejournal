@@ -66,7 +66,7 @@ body<=
         if ($bday->{'month'} != $lastmon) {
             if ($lastmon) { $body .= "</ul>\n"; }
             $lastmon = $bday->{'month'};
-            $body .= "<?h1 " . LJ::Lang::month_long($lastmon) . " h1?><ul>\n";
+            $body .= "<?h1 " . BML::ml(LJ::Lang::month_long_langcode($lastmon)) . " h1?><ul>\n";
         }
 
         my $day = sprintf("%2s", $bday->{'day'});
