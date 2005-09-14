@@ -484,6 +484,9 @@ sub set_attended {
                       undef, $sid, $u->{userid}, $ys, $ye);
     return undef if $dbh->err;
 
+    # delete a user's school attended info
+    LJ::MemCache::delete([ $u->{userid}, "saui:$u->{userid}" ]);
+
     # now, if we have a count, do the cluster insert and call it good
     if ($ct > 0) {
         $dbcm->do("INSERT INTO user_schools (userid, schoolid, year_start, year_end) VALUES (?, ?, ?, ?)",

@@ -312,8 +312,7 @@ body<=
 
     # dump the header information
     my ($country, $state, $city, $school) = LJ::Schools::expand_codes($ctc, $sc, $cc, $sid);
-
-    my ($ectc, $esc, $ecc) = (LJ::eurl($ctc), LJ::eurl($sc), LJ::eurl($cc));
+    my ($ectc, $esc, $ecc) = (LJ::ehtml($ctc), LJ::ehtml($sc), LJ::ehtml($cc));
 
     # now display the information
     $ret .= "<?h1 $school h1?>";
