@@ -10,7 +10,7 @@ require "$ENV{LJHOME}/cgi-bin/ljmail.pl";
 package LJ::Cmdbuffer;
 
 # built-in commands
-%LJ::Cmdbuffer::cmds = 
+%LJ::Cmdbuffer::cmds =
     (
 
      # delete journal entries
@@ -38,7 +38,7 @@ package LJ::Cmdbuffer;
          kill_job_ct   => 250,    # calls to LJ::Cmdbuffer::flush
          run => \&LJ::Cmdbuffer::_dirty,
      },
-     
+
      # send notifications for support requests
      support_notify => {
          too_old => 60*60*2, # after two hours, notification seems kinda pointless
@@ -139,7 +139,7 @@ sub LJ::Cmdbuffer::flush
             # run handler
             $code->($dbh, $db, $c);
 
-            # if this task is to be run once per user, go ahead and delete any jobs 
+            # if this task is to be run once per user, go ahead and delete any jobs
             # for this user of this type and remove them from the queue
             my $wh = "cbid=$cbid";
             if ($once_per_user) {
@@ -241,7 +241,7 @@ sub _dirty {
             }
         };
     }
-    
+
     return 1;
 }
 
@@ -263,7 +263,7 @@ sub _support_notify {
     my $data = $dbr->selectall_arrayref("SELECT $select FROM supportnotify sn, user u " .
                                         "WHERE sn.userid=u.userid AND sn.spcatid=? " .
                                         "AND sn.level IN ($level)", undef, $sp->{_cat}{spcatid});
-    
+
     # prepare the email
     my $body;
     my @emails;
@@ -282,7 +282,7 @@ sub _support_notify {
         push @emails, $_->[0] foreach @$data;
     } elsif ($type eq 'update') {
         # load the response we want to stuff in the email
-        my ($resp, $rtype, $posterid) = 
+        my ($resp, $rtype, $posterid) =
             $dbr->selectrow_array("SELECT message, type, userid FROM supportlog WHERE spid = ? AND splid = ?",
                                   undef, $sp->{spid}, $a->{splid}+0);
 
@@ -298,15 +298,15 @@ sub _support_notify {
         foreach my $erow (@$data) {
             next if $posterid == $erow->[1];
             next if $rtype eq 'screened' &&
-                !LJ::Support::can_read_screened($sp, LJ::make_remote($erow->[2], $erow->[1]));
+                !LJ::Support::can_read_screened($sp, LJ::load_userid($erow->[1]));
             next if $rtype eq 'internal' &&
-                !LJ::Support::can_read_internal($sp, LJ::make_remote($erow->[2], $erow->[1]));
+                !LJ::Support::can_read_internal($sp, LJ::load_userid($erow->[2]));
             push @emails, $erow->[0];
         }
     }
 
     # send the email
-    LJ::send_mail({ 
+    LJ::send_mail({
         bcc => join(', ', @emails),
         from => $LJ::BOGUS_EMAIL,
         fromname => "$LJ::SITENAME Support",

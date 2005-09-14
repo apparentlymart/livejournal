@@ -716,6 +716,102 @@ sub journal_base {
 package LJ;
 
 # <LJFUNC>
+# name: LJ::get_authas_list
+# des: Get a list of usernames a given user can authenticate as
+# returns: an array of usernames
+# args: u, opts?
+# des-opts: Optional hashref.  keys are:
+#           - type: 'P' to only return users of journaltype 'P'
+#           - cap:  cap to filter users on
+# </LJFUNC>
+sub get_authas_list {
+    my ($u, $opts) = @_;
+
+    # used to accept a user type, now accept an opts hash
+    $opts = { 'type' => $opts } unless ref $opts;
+
+    # only one valid type right now
+    $opts->{'type'} = 'P' if $opts->{'type'};
+
+    my $ids = LJ::load_rel_target($u, 'A');
+    return undef unless $ids;
+
+    # load_userids_multiple
+    my %users;
+    LJ::load_userids_multiple([ map { $_, \$users{$_} } @$ids ], [$u]);
+
+    return $u->{'user'}, sort map { $_->{'user'} }
+                         grep { ! $opts->{'cap'} || LJ::get_cap($_, $opts->{'cap'}) }
+                         grep { ! $opts->{'type'} || $opts->{'type'} eq $_->{'journaltype'} }
+                         grep { $_->{clusterid} > 0 }
+                         grep { $_->{statusvis} !~ /[XS]/ }
+                         values %users;
+}
+
+# <LJFUNC>
+# name: LJ::can_view
+# des: Checks to see if the remote user can view a given journal entry.
+#      <b>Note:</b> This is meant for use on single entries at a time,
+#      not for calling many times on every entry in a journal.
+# returns: boolean; 1 if remote user can see item
+# args: remote, item
+# des-item: Hashref from the 'log' table.
+# </LJFUNC>
+sub can_view
+{
+    &nodb;
+    my $remote = shift;
+    my $item = shift;
+
+    # public is okay
+    return 1 if $item->{'security'} eq "public";
+
+    # must be logged in otherwise
+    return 0 unless $remote;
+
+    my $userid = int($item->{'ownerid'} || $item->{'journalid'});
+    my $remoteid = int($remote->{'userid'});
+
+    # owners can always see their own.
+    return 1 if ($userid == $remoteid);
+
+    # other people can't read private
+    return 0 if ($item->{'security'} eq "private");
+
+    # should be 'usemask' security from here out, otherwise
+    # assume it's something new and return 0
+    return 0 unless ($item->{'security'} eq "usemask");
+
+    # if it's usemask, we have to refuse non-personal journals,
+    # so we have to load the user
+    return 0 unless $remote->{'journaltype'} eq 'P' || $remote->{'journaltype'} eq 'I';
+
+    # TAG:FR:ljlib:can_view  (turn off bit 0 for just watching?  hmm.)
+    my $gmask = LJ::get_groupmask($userid, $remoteid);
+    my $allowed = (int($gmask) & int($item->{'allowmask'}));
+    return $allowed ? 1 : 0;  # no need to return matching mask
+}
+
+# <LJFUNC>
+# name: LJ::wipe_major_memcache
+# des:  invalidate all major memcache items associated with a given user
+# args: u
+# returns: nothing
+# </LJFUNC>
+sub wipe_major_memcache
+{
+    my $u = shift;
+    my $userid = LJ::want_userid($u);
+    foreach my $key ("userid","bio","talk2ct","talkleftct","log2ct",
+                     "log2lt","memkwid","dayct","s1overr","s1uc","fgrp",
+                     "friends","friendofs","tu","upicinf","upiccom",
+                     "upicurl", "intids", "memct", "lastcomm")
+    {
+        LJ::memcache_kill($userid, $key);
+    }
+}
+
+# <LJFUNC>
 # name: LJ::load_user_props
 # des: Given a user hashref, loads the values of the given named properties
 #      into that user hashref.
@@ -2518,5 +2614,828 @@ sub delete_all_comments {
 # is a user object (at least a hashref)
 sub isu { return ref $_[0] && (ref $_[0] eq "LJ::User" ||
                                ref $_[0] eq "HASH" && $_[0]->{userid}); }
+
+# create externally mapped user.
+# return uid of LJ user on success, undef on error.
+# opts = {
+#     extuser or extuserid (or both, but one is required.),
+#     caps
+# }
+# opts also can contain any additional options that create_account takes. (caps?)
+sub create_extuser
+{
+    my ($type, $opts) = @_;
+    return undef unless $type && $LJ::EXTERNAL_NAMESPACE{$type}->{id};
+    return undef unless ref $opts &&
+        ($opts->{extuser} || defined $opts->{extuserid});
+
+    my $uid;
+    my $dbh = LJ::get_db_writer();
+    return undef unless $dbh;
+
+    # make sure a mapping for this user doesn't already exist.
+    $uid = LJ::get_extuser_uid( $type, $opts, 'force' );
+    return $uid if $uid;
+
+    # increment ext_ counter until we successfully create an LJ account.
+    # hard cap it at 10 tries. (arbitrary, but we really shouldn't have *any*
+    # failures here, let alone 10 in a row.)
+    for (1..10) {
+        my $extuser = 'ext_' . LJ::alloc_global_counter( 'E' );
+        $uid =
+          LJ::create_account(
+            { caps => $opts->{caps}, user => $extuser, name => $extuser } );
+        last if $uid;
+        select undef, undef, undef, .10;  # lets not thrash over this.
+    }
+    return undef unless $uid;
+
+    # add extuser mapping.
+    my $sql = "INSERT INTO extuser SET userid=?, siteid=?";
+    my @bind = ($uid, $LJ::EXTERNAL_NAMESPACE{$type}->{id});
+
+    if ($opts->{extuser}) {
+        $sql .= ", extuser=?";
+        push @bind, $opts->{extuser};
+    }
+
+    if ($opts->{extuserid}) {
+        $sql .= ", extuserid=? ";
+        push @bind, $opts->{extuserid}+0;
+    }
+
+    $dbh->do($sql, undef, @bind) or return undef;
+    return $uid;
+}
+
+# given an extuserid or extuser, return the LJ uid.
+# return undef if there is no mapping.
+sub get_extuser_uid
+{
+    my ($type, $opts, $force) = @_;
+    return undef unless $type && $LJ::EXTERNAL_NAMESPACE{$type}->{id};
+    return undef unless ref $opts &&
+        ($opts->{extuser} || defined $opts->{extuserid});
+
+    my $dbh = $force ? LJ::get_db_writer() : LJ::get_db_reader();
+    return undef unless $dbh;
+
+    my $sql = "SELECT userid FROM extuser WHERE siteid=?";
+    my @bind = ($LJ::EXTERNAL_NAMESPACE{$type}->{id});
+
+    if ($opts->{extuser}) {
+        $sql .= " AND extuser=?";
+        push @bind, $opts->{extuser};
+    }
+
+    if ($opts->{extuserid}) {
+        $sql .= $opts->{extuser} ? ' OR ' : ' AND ';
+        $sql .= "extuserid=?";
+        push @bind, $opts->{extuserid}+0;
+    }
+
+    return $dbh->selectrow_array($sql, undef, @bind);
+}
+
+# given a LJ userid/u, return a hashref of:
+# type, extuser, extuserid
+# returns undef if user isn't an externally mapped account.
+sub get_extuser_map
+{
+    my $uid = LJ::want_userid(shift);
+    return undef unless $uid;
+
+    my $dbr = LJ::get_db_reader();
+    return undef unless $dbr;
+
+    my $sql = "SELECT * FROM extuser WHERE userid=?";
+    my $ret = $dbr->selectrow_hashref($sql, undef, $uid);
+    return undef unless $ret;
+
+    my $type = 'unknown';
+    foreach ( keys %LJ::EXTERNAL_NAMESPACE ) {
+        $type = $_ if $LJ::EXTERNAL_NAMESPACE{$_}->{id} == $ret->{siteid};
+    }
+
+    $ret->{type} = $type;
+    return $ret;
+}
+
+# <LJFUNC>
+# name: LJ::create_account
+# des: Creates a new basic account.  <b>Note:</b> This function is
+#      not really too useful but should be extended to be useful so
+#      htdocs/create.bml can use it, rather than doing the work itself.
+# returns: integer of userid created, or 0 on failure.
+# args: dbarg?, opts
+# des-opts: hashref containing keys 'user', 'name', 'password', 'email', 'caps', 'journaltype'
+# </LJFUNC>
+sub create_account
+{
+    &nodb;
+    my $o = shift;
+
+    my $user = LJ::canonical_username($o->{'user'});
+    unless ($user)  {
+        return 0;
+    }
+
+    my $dbh = LJ::get_db_writer();
+    my $quser = $dbh->quote($user);
+    my $cluster = defined $o->{'cluster'} ? $o->{'cluster'} : LJ::new_account_cluster();
+    my $caps = $o->{'caps'} || $LJ::NEWUSER_CAPS;
+    my $journaltype = $o->{'journaltype'} || "P";
+
+    # new non-clustered accounts aren't supported anymore
+    return 0 unless $cluster;
+
+    $dbh->do("INSERT INTO user (user, name, password, clusterid, dversion, caps, email, journaltype) ".
+             "VALUES ($quser, ?, ?, ?, $LJ::MAX_DVERSION, ?, ?, ?)", undef,
+             $o->{'name'}, $o->{'password'}, $cluster, $caps, $o->{'email'}, $journaltype);
+    return 0 if $dbh->err;
+
+    my $userid = $dbh->{'mysql_insertid'};
+    return 0 unless $userid;
+
+    $dbh->do("INSERT INTO useridmap (userid, user) VALUES ($userid, $quser)");
+    $dbh->do("INSERT INTO userusage (userid, timecreate) VALUES ($userid, NOW())");
+
+    LJ::run_hooks("post_create", {
+        'userid' => $userid,
+        'user' => $user,
+        'code' => undef,
+    });
+    return $userid;
+}
+
+# <LJFUNC>
+# name: LJ::new_account_cluster
+# des: Which cluster to put a new account on.  $DEFAULT_CLUSTER if it's
+#      a scalar, random element from @$DEFAULT_CLUSTER if it's arrayref.
+#      also verifies that the database seems to be available.
+# returns: clusterid where the new account should be created; 0 on error
+#      (such as no clusters available)
+# </LJFUNC>
+sub new_account_cluster
+{
+    # if it's not an arrayref, put it in an array ref so we can use it below
+    my $clusters = ref $LJ::DEFAULT_CLUSTER ? $LJ::DEFAULT_CLUSTER : [ $LJ::DEFAULT_CLUSTER+0 ];
+
+    # iterate through the new clusters from a random point
+    my $size = @$clusters;
+    my $start = int(rand() * $size);
+    foreach (1..$size) {
+        my $cid = $clusters->[$start++ % $size];
+
+        # verify that this cluster is in @LJ::CLUSTERS
+        my @check = grep { $_ == $cid } @LJ::CLUSTERS;
+        next unless scalar(@check) >= 1 && $check[0] == $cid;
+
+        # try this cluster to see if we can use it, return if so
+        my $dbcm = LJ::get_cluster_master($cid);
+        return $cid if $dbcm;
+    }
+
+    # if we get here, we found no clusters that were up...
+    return 0;
+}
+
+# <LJFUNC>
+# name: LJ::make_journal
+# class:
+# des:
+# info:
+# args: dbarg, user, view, remote, opts
+# des-:
+# returns:
+# </LJFUNC>
+sub make_journal
+{
+    &nodb;
+    my ($user, $view, $remote, $opts) = @_;
+
+    my $r = $opts->{'r'};  # mod_perl $r, or undef
+    my $geta = $opts->{'getargs'};
+
+    if ($LJ::SERVER_DOWN) {
+        if ($opts->{'vhost'} eq "customview") {
+            return "<!-- LJ down for maintenance -->";
+        }
+        return LJ::server_down_html();
+    }
+
+    # S1 style hashref.  won't be loaded now necessarily,
+    # only if via customview.
+    my $style;
+
+    my ($styleid);
+    if ($opts->{'styleid'}) {  # s1 styleid
+        $styleid = $opts->{'styleid'}+0;
+
+        # if we have an explicit styleid, we have to load
+        # it early so we can learn its type, so we can
+        # know which uprops to load for its owner
+        $style = LJ::S1::load_style($styleid, \$view);
+    } else {
+        $view ||= "lastn";    # default view when none specified explicitly in URLs
+        if ($LJ::viewinfo{$view} || $view eq "month" ||
+            $view eq "entry" || $view eq "reply")  {
+            $styleid = -1;    # to get past the return, then checked later for -1 and fixed, once user is loaded.
+        } else {
+            $opts->{'badargs'} = 1;
+        }
+    }
+    return unless $styleid;
+
+    my $u;
+    if ($opts->{'u'}) {
+        $u = $opts->{'u'};
+    } else {
+        $u = LJ::load_user($user);
+    }
+
+    unless ($u) {
+        $opts->{'baduser'} = 1;
+        return "<h1>Error</h1>No such user <b>$user</b>";
+    }
+
+    my $eff_view = $LJ::viewinfo{$view}->{'styleof'} || $view;
+    my $s1prop = "s1_${eff_view}_style";
+
+    my @needed_props = ("stylesys", "s2_style", "url", "urlname", "opt_nctalklinks",
+                        "renamedto",  "opt_blockrobots", "opt_usesharedpic",
+                        "journaltitle", "journalsubtitle", "external_foaf_url");
+
+    # S2 is more fully featured than S1, so sometimes we get here and $eff_view
+    # is reply/month/entry/res and that means it *has* to be S2--S1 defaults to a
+    # BML page to handle those, but we don't want to attempt to load a userprop
+    # because now load_user_props dies if you try to load something invalid
+    push @needed_props, $s1prop if $eff_view =~ /^(?:calendar|day|friends|lastn)$/;
+
+    # preload props the view creation code will need later (combine two selects)
+    if (ref $LJ::viewinfo{$eff_view}->{'owner_props'} eq "ARRAY") {
+        push @needed_props, @{$LJ::viewinfo{$eff_view}->{'owner_props'}};
+    }
+
+    if ($eff_view eq "reply") {
+        push @needed_props, "opt_logcommentips";
+    }
+
+    LJ::load_user_props($u, @needed_props);
+
+    # FIXME: remove this after all affected accounts have been fixed
+    # see http://zilla.livejournal.org/1443 for details
+    if ($u->{$s1prop} =~ /^\D/) {
+        $u->{$s1prop} = $LJ::USERPROP_DEF{$s1prop};
+        LJ::set_userprop($u, $s1prop, $u->{$s1prop});
+    }
+
+    # if the remote is the user to be viewed, make sure the $remote
+    # hashref has the value of $u's opt_nctalklinks (though with
+    # LJ::load_user caching, this may be assigning between the same
+    # underlying hashref)
+    $remote->{'opt_nctalklinks'} = $u->{'opt_nctalklinks'} if
+        ($remote && $remote->{'userid'} == $u->{'userid'});
+
+    my $stylesys = 1;
+    if ($styleid == -1) {
+
+        my $get_styleinfo = sub {
+
+            my $get_s1_styleid = sub {
+                my $id = $u->{$s1prop};
+                LJ::run_hooks("s1_style_select", {
+                    'styleid' => \$id,
+                    'u' => $u,
+                    'view' => $view,
+                });
+                return $id;
+            };
+
+            # forced s2 style id
+            if ($geta->{'s2id'} && LJ::get_cap($u, "s2styles")) {
+
+                # see if they own the requested style
+                my $dbr = LJ::get_db_reader();
+                my $style_userid = $dbr->selectrow_array("SELECT userid FROM s2styles WHERE styleid=?",
+                                                         undef, $geta->{'s2id'});
+
+                # if remote owns the style or the journal owns the style, it's okay
+                if ($u->{'userid'} == $style_userid ||
+                    $remote->{'userid'} == $style_userid ) {
+                    $opts->{'style_u'} = LJ::load_userid($style_userid);
+                    return (2, $geta->{'s2id'});
+                }
+            }
+
+            # style=mine passed in GET?
+            if ($remote && $geta->{'style'} eq 'mine') {
+
+                # get remote props and decide what style remote uses
+                LJ::load_user_props($remote, "stylesys", "s2_style");
+
+                # remote using s2; make sure we pass down the $remote object as the style_u to
+                # indicate that they should use $remote to load the style instead of the regular $u
+                if ($remote->{'stylesys'} == 2 && $remote->{'s2_style'}) {
+                    $opts->{'checkremote'} = 1;
+                    $opts->{'style_u'} = $remote;
+                    return (2, $remote->{'s2_style'});
+                }
+
+                # remote using s1
+                return (1, $get_s1_styleid->());
+            }
+
+            # resource URLs have the styleid in it
+            if ($view eq "res" && $opts->{'pathextra'} =~ m!^/(\d+)/!) {
+                return (2, $1);
+            }
+
+            my $forceflag = 0;
+            LJ::run_hooks("force_s1", $u, \$forceflag);
+
+            # if none of the above match, they fall through to here
+            if ( !$forceflag && $u->{'stylesys'} == 2 ) {
+                return (2, $u->{'s2_style'});
+            }
+
+            # no special case and not s2, fall through to s1
+            return (1, $get_s1_styleid->());
+        };
+
+        ($stylesys, $styleid) = $get_styleinfo->();
+    }
+
+    # transcode the tag filtering information into the tag getarg; this has to
+    # be done above the s1shortcomings section so that we can fall through to that
+    # style for lastn filtered by tags view
+    if ($view eq 'lastn' && $opts->{pathextra} && $opts->{pathextra} =~ /^\/tag\/(.+)$/) {
+        $opts->{getargs}->{tag} = LJ::durl($1);
+        $opts->{pathextra} = undef;
+    }
+
+    # signal to LiveJournal.pm that we can't handle this
+    if ($stylesys == 1 && (({ entry=>1, reply=>1, month=>1, tag=>1 }->{$view}) || ($view eq 'lastn' && $geta->{tag}))) {
+
+        # pick which fallback method (s2 or bml) we'll use by default, as configured with
+        # $S1_SHORTCOMINGS
+        my $fallback = $LJ::S1_SHORTCOMINGS ? "s2" : "bml";
+
+        # but if the user specifys which they want, override the fallback we picked
+        if ($geta->{'fallback'} && $geta->{'fallback'} =~ /^s2|bml$/) {
+            $fallback = $geta->{'fallback'};
+        }
+
+        # there are no BML handlers for these views, so force s2
+        if ($view eq 'tag' || $view eq 'lastn') {
+            $fallback = "s2";
+        }
+
+        # fall back to BML unless we're using the in-development S2
+        # fallback (the "s1shortcomings/layout")
+        if ($fallback eq "bml") {
+            ${$opts->{'handle_with_bml_ref'}} = 1;
+            return;
+        }
+
+        # S1 can't handle these views, so we fall back to a
+        # system-owned S2 style (magic value "s1short") that renders
+        # this content
+        $stylesys = 2;
+        $styleid = "s1short";
+    }
+
+    if ($r) {
+        $r->notes('journalid' => $u->{'userid'});
+    }
+
+    my $notice = sub {
+        my $msg = shift;
+        my $status = shift;
+
+        my $url = "$LJ::SITEROOT/users/$user/";
+        $opts->{'status'} = $status if $status;
+
+        my $head;
+        $head .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n}
+            if LJ::OpenID::server_enabled();
+
+        return qq{
+            <html>
+            <head>
+            $head
+            </head>
+            <body>
+             <h1>Notice</h1>
+             <p>$msg</p>
+             <p>Instead, please use <nobr><a href=\"$url\">$url</a></nobr></p>
+            </body>
+            </html>
+        }.("<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->\n" x 50);
+    };
+    my $error = sub {
+        my $msg = shift;
+        my $status = shift;
+        $opts->{'status'} = $status if $status;
+
+        return qq{
+            <h1>Error</h1>
+            <p>$msg</p>
+        }.("<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->\n" x 50);
+    };
+    if ($LJ::USER_VHOSTS && $opts->{'vhost'} eq "users" && $u->{'journaltype'} ne 'R' &&
+        ! LJ::get_cap($u, "userdomain")) {
+        return $notice->("URLs like <nobr><b>http://<i>username</i>.$LJ::USER_DOMAIN/" .
+                         "</b></nobr> are not available for this user's account type.");
+    }
+    if ($opts->{'vhost'} =~ /^other:/ && ! LJ::get_cap($u, "userdomain")) {
+        return $notice->("This user's account type doesn't permit domain aliasing.");
+    }
+    if ($opts->{'vhost'} eq "customview" && ! LJ::get_cap($u, "styles")) {
+        return $notice->("This user's account type is not permitted to create and embed styles.");
+    }
+    if ($opts->{'vhost'} eq "community" && $u->{'journaltype'} !~ /[CR]/) {
+        $opts->{'badargs'} = 1; # Output a generic 'bad URL' message if available
+        return "<h1>Notice</h1><p>This account isn't a community journal.</p>";
+    }
+    if ($view eq "friendsfriends" && ! LJ::get_cap($u, "friendsfriendsview")) {
+        return "<b>Sorry</b><br />This user's account type doesn't permit showing friends of friends.";
+    }
+
+    # now, if there's a GET argument for tags, split those out
+    if (exists $opts->{getargs}->{tag}) {
+        my $tagfilter = $opts->{getargs}->{tag};
+        return $error->("You must provide tags to filter by.", "404 Not Found")
+            unless $tagfilter;
+
+        # error if disabled
+        return $error->("Sorry, the tag system is currently disabled.", "404 Not Found")
+            if $LJ::DISABLED{tags};
+
+        # throw an error for S1, but only on non-rename accounts.
+        return $error->("Sorry, tag filtering is not supported within S1 styles.", "404 Not Found")
+            if $stylesys == 1 && $u->{journaltype} ne 'R';
+
+        # overwrite any tags that exist
+        $opts->{tags} = [];
+        return $error->("Sorry, the tag list specified is invalid.", "404 Not Found")
+            unless LJ::Tags::is_valid_tagstring($tagfilter, $opts->{tags}, { omit_underscore_check => 1 });
+
+        # get user's tags so we know what remote can see, and setup an inverse mapping
+        # from keyword to tag
+        $opts->{tagids} = [];
+        my $tags = LJ::Tags::get_usertags($u, { remote => $remote });
+        my %kwref = ( map { $tags->{$_}->{name} => $_ } keys %{$tags || {}} );
+
+        foreach (@{$opts->{tags}}) {
+            return $error->("Sorry, one or more specified tags do not exist.", "404 Not Found")
+                unless $kwref{$_};
+            push @{$opts->{tagids}}, $kwref{$_};
+        }
+    }
+
+    unless ($geta->{'viewall'} && LJ::check_priv($remote, "canview") ||
+            $opts->{'pathextra'} =~ m#/(\d+)/stylesheet$#) { # don't check style sheets
+        return $error->("Journal has been deleted.  If you are <b>$user</b>, you have a period of 30 days to decide to undelete your journal.", "404 Not Found") if ($u->{'statusvis'} eq "D");
+        return $error->("This journal has been suspended.", "403 Forbidden") if ($u->{'statusvis'} eq "S");
+    }
+    return $error->("This journal has been deleted and purged.", "410 Gone") if ($u->{'statusvis'} eq "X");
+
+    return $error->("This user has no journal here.", "404 Not here") if $u->{'journaltype'} eq "I" && $view ne "friends";
+
+    $opts->{'view'} = $view;
+
+    # what charset we put in the HTML
+    $opts->{'saycharset'} ||= "utf-8";
+
+    if ($view eq 'data') {
+        return LJ::Feed::make_feed($r, $u, $remote, $opts);
+    }
+
+    if ($stylesys == 2) {
+        $r->notes('codepath' => "s2.$view") if $r;
+        return LJ::S2::make_journal($u, $styleid, $view, $remote, $opts);
+    }
+
+    # Everything from here on down is S1.  FIXME: this should be moved to LJ::S1::make_journal
+    # to be more like LJ::S2::make_journal.
+    $r->notes('codepath' => "s1.$view") if $r;
+
+    # For embedded polls
+    BML::set_language($LJ::LANGS[0] || 'en', \&LJ::Lang::get_text);
+
+    # load the user-related S1 data  (overrides and colors)
+    my $s1uc = {};
+    my $s1uc_memkey = [$u->{'userid'}, "s1uc:$u->{'userid'}"];
+    if ($u->{'useoverrides'} eq "Y" || $u->{'themeid'} == 0) {
+        $s1uc = LJ::MemCache::get($s1uc_memkey);
+        unless ($s1uc) {
+            my $db;
+            my $setmem = 1;
+            if (@LJ::MEMCACHE_SERVERS) {
+                $db = LJ::get_cluster_def_reader($u);
+            } else {
+                $db = LJ::get_cluster_reader($u);
+                $setmem = 0;
+            }
+            $s1uc = $db->selectrow_hashref("SELECT * FROM s1usercache WHERE userid=?",
+                                           undef, $u->{'userid'});
+            LJ::MemCache::set($s1uc_memkey, $s1uc) if $s1uc && $setmem;
+        }
+    }
+
+    # we should have our cache row!  we'll update it in a second.
+    my $dbcm;
+    if (! $s1uc) {
+        $u->do("INSERT IGNORE INTO s1usercache (userid) VALUES (?)", undef, $u->{'userid'});
+        $s1uc = {};
+    }
+
+    # conditionally rebuild parts of our cache that are missing
+    my %update;
+
+    # is the overrides cache old or missing?
+    my $dbh;
+    if ($u->{'useoverrides'} eq "Y" && (! $s1uc->{'override_stor'} ||
+                                        $s1uc->{'override_cleanver'} < $LJ::S1::CLEANER_VERSION)) {
+
+        my $overrides = LJ::S1::get_overrides($u);
+        $update{'override_stor'} = LJ::CleanHTML::clean_s1_style($overrides);
+        $update{'override_cleanver'} = $LJ::S1::CLEANER_VERSION;
+    }
+
+    # is the color cache here if it's a custom user theme?
+    if ($u->{'themeid'} == 0 && ! $s1uc->{'color_stor'}) {
+        my $col = {};
+        $dbh ||= LJ::get_db_writer();
+        my $sth = $dbh->prepare("SELECT coltype, color FROM themecustom WHERE user=?");
+        $sth->execute($u->{'user'});
+        $col->{$_->{'coltype'}} = $_->{'color'} while $_ = $sth->fetchrow_hashref;
+        $update{'color_stor'} = Storable::freeze($col);
+    }
+
+    # save the updates
+    if (%update) {
+        my $set;
+        foreach my $k (keys %update) {
+            $s1uc->{$k} = $update{$k};
+            $set .= ", " if $set;
+            $set .= "$k=" . $u->quote($update{$k});
+        }
+        my $rv = $u->do("UPDATE s1usercache SET $set WHERE userid=?", undef, $u->{'userid'});
+        if ($rv && $update{'color_stor'}) {
+            $dbh ||= LJ::get_db_writer();
+            $dbh->do("DELETE FROM themecustom WHERE user=?", undef, $u->{'user'});
+        }
+        LJ::MemCache::set($s1uc_memkey, $s1uc);
+    }
+
+    # load the style
+    my $viewref = $view eq "" ? \$view : undef;
+    $style ||= $LJ::viewinfo{$view}->{'nostyle'} ? {} :
+        LJ::S1::load_style($styleid, $viewref);
+
+    my %vars = ();
+
+    # apply the style
+    foreach (keys %$style) {
+        $vars{$_} = $style->{$_};
+    }
+
+    # apply the overrides
+    if ($opts->{'nooverride'}==0 && $u->{'useoverrides'} eq "Y") {
+        my $tw = Storable::thaw($s1uc->{'override_stor'});
+        foreach (keys %$tw) {
+            $vars{$_} = $tw->{$_};
+        }
+    }
+
+    # apply the color theme
+    my $cols = $u->{'themeid'} ? LJ::S1::get_themeid($u->{'themeid'}) :
+        Storable::thaw($s1uc->{'color_stor'});
+    foreach (keys %$cols) {
+        $vars{"color-$_"} = $cols->{$_};
+    }
+
+    # instruct some function to make this specific view type
+    return unless defined $LJ::viewinfo{$view}->{'creator'};
+    my $ret = "";
+
+    # call the view creator w/ the buffer to fill and the construction variables
+    my $res = $LJ::viewinfo{$view}->{'creator'}->(\$ret, $u, \%vars, $remote, $opts);
+
+    unless ($res) {
+        my $errcode = $opts->{'errcode'};
+        my $errmsg = {
+            'nodb' => 'Database temporarily unavailable during maintenance.',
+            'nosyn' => 'No syndication URL available.',
+        }->{$errcode};
+        return "<!-- $errmsg -->" if ($opts->{'vhost'} eq "customview");
+
+        # If not customview, set the error response code.
+        $opts->{'status'} = {
+            'nodb' => '503 Maintenance',
+            'nosyn' => '404 Not Found',
+        }->{$errcode} || '500 Server Error';
+        return $errmsg;
+    }
+
+    if ($opts->{'redir'}) {
+        return undef;
+    }
+
+    # clean up attributes which we weren't able to quickly verify
+    # as safe in the Storable-stored clean copy of the style.
+    $ret =~ s/\%\%\[attr\[(.+?)\]\]\%\%/LJ::CleanHTML::s1_attribute_clean($1)/eg;
+
+    # return it...
+    return $ret;
+}
+
+# <LJFUNC>
+# name: LJ::canonical_username
+# des:
+# info:
+# args: user
+# returns: the canonical username given, or blank if the username is not well-formed
+# </LJFUNC>
+sub canonical_username
+{
+    my $user = shift;
+    if ($user =~ /^\s*([\w\-]{1,15})\s*$/) {
+        # perl 5.8 bug:  $user = lc($1) sometimes causes corruption when $1 points into $user.
+        $user = $1;
+        $user = lc($user);
+        $user =~ s/-/_/g;
+        return $user;
+    }
+    return "";  # not a good username.
+}
+
+# <LJFUNC>
+# name: LJ::get_userid
+# des: Returns a userid given a username.
+# info: Results cached in memory.  On miss, does DB call.  Not advised
+#       to use this many times in a row... only once or twice perhaps
+#       per request.  Tons of serialized db requests, even when small,
+#       are slow.  Opposite of [func[LJ::get_username]].
+# args: dbarg?, user
+# des-user: Username whose userid to look up.
+# returns: Userid, or 0 if invalid user.
+# </LJFUNC>
+sub get_userid
+{
+    &nodb;
+    my $user = shift;
+
+    $user = LJ::canonical_username($user);
+
+    if ($LJ::CACHE_USERID{$user}) { return $LJ::CACHE_USERID{$user}; }
+
+    my $userid = LJ::MemCache::get("uidof:$user");
+    return $LJ::CACHE_USERID{$user} = $userid if $userid;
+
+    my $dbr = LJ::get_db_reader();
+    $userid = $dbr->selectrow_array("SELECT userid FROM useridmap WHERE user=?", undef, $user);
+
+    # implictly create an account if we're using an external
+    # auth mechanism
+    if (! $userid && ref $LJ::AUTH_EXISTS eq "CODE")
+    {
+        $userid = LJ::create_account({ 'user' => $user,
+                                       'name' => $user,
+                                       'password' => '', });
+    }
+
+    if ($userid) {
+        $LJ::CACHE_USERID{$user} = $userid;
+        LJ::MemCache::set("uidof:$user", $userid);
+    }
+
+    return ($userid+0);
+}
+
+# <LJFUNC>
+# name: LJ::want_userid
+# des: Returns userid when passed either userid or the user hash. Useful to functions that
+#      want to accept either. Forces its return value to be a number (for safety).
+# args: userid
+# des-userid: Either a userid, or a user hash with the userid in its 'userid' key.
+# returns: The userid, guaranteed to be a numeric value.
+# </LJFUNC>
+sub want_userid
+{
+    my $uuserid = shift;
+    return ($uuserid->{'userid'} + 0) if ref $uuserid;
+    return ($uuserid + 0);
+}
+
+# <LJFUNC>
+# name: LJ::want_user
+# des: Returns user object when passed either userid or the user hash. Useful to functions that
+#      want to accept either.
+# args: user
+# des-user: Either a userid, or a user hash with the userid in its 'userid' key.
+# returns: The user hash represented by said userid.
+# </LJFUNC>
+sub want_user
+{
+    my $uuser = shift;
+    return $uuser if ref $uuser;
+    return LJ::load_userid($uuser+0);
+}
+
+# <LJFUNC>
+# name: LJ::get_username
+# des: Returns a username given a userid.
+# info: Results cached in memory.  On miss, does DB call.  Not advised
+#       to use this many times in a row... only once or twice perhaps
+#       per request.  Tons of serialized db requests, even when small,
+#       are slow.  Opposite of [func[LJ::get_userid]].
+# args: dbarg?, user
+# des-user: Username whose userid to look up.
+# returns: Userid, or 0 if invalid user.
+# </LJFUNC>
+sub get_username
+{
+    &nodb;
+    my $userid = shift;
+    $userid += 0;
+
+    # Checked the cache first.
+    if ($LJ::CACHE_USERNAME{$userid}) { return $LJ::CACHE_USERNAME{$userid}; }
+
+    # if we're using memcache, it's faster to just query memcache for
+    # an entire $u object and just return the username.  otherwise, we'll
+    # go ahead and query useridmap
+    if (@LJ::MEMCACHE_SERVERS) {
+        my $u = LJ::load_userid($userid);
+        return undef unless $u;
+
+        $LJ::CACHE_USERNAME{$userid} = $u->{'user'};
+        return $u->{'user'};
+    }
+
+    my $dbr = LJ::get_db_reader();
+    my $user = $dbr->selectrow_array("SELECT user FROM useridmap WHERE userid=?", undef, $userid);
+
+    # Fall back to master if it doesn't exist.
+    unless (defined $user) {
+        my $dbh = LJ::get_db_writer();
+        $user = $dbh->selectrow_array("SELECT user FROM useridmap WHERE userid=?", undef, $userid);
+    }
+
+    return undef unless defined $user;
+
+    $LJ::CACHE_USERNAME{$userid} = $user;
+    return $user;
+}
+
+# <LJFUNC>
+# name: LJ::can_manage
+# des: Given a user and a target user, will determine if the first user is an
+#      admin for the target user.
+# returns: bool: true if authorized, otherwise fail
+# args: remote, u
+# des-remote: user object or userid of user to try and authenticate
+# des-u: user object or userid of target user
+# </LJFUNC>
+sub can_manage {
+    my $remote = LJ::want_user(shift);
+    my $u = LJ::want_user(shift);
+    return undef unless $remote && $u;
+
+    # is same user?
+    return 1 if LJ::u_equals($u, $remote);
+
+    # people/syn/rename accounts can only be managed by the one account
+    return undef if $u->{journaltype} =~ /^[PYR]$/;
+
+    # check for admin access
+    return undef unless LJ::check_rel($u, $remote, 'A');
+
+    # passed checks, return true
+    return 1;
+}
+
+# <LJFUNC>
+# name: LJ::can_manage_other
+# des: Given a user and a target user, will determine if the first user is an
+#      admin for the target user, but not if the two are the same.
+# returns: bool: true if authorized, otherwise fail
+# args: remote, u
+# des-remote: user object or userid of user to try and authenticate
+# des-u: user object or userid of target user
+# </LJFUNC>
+sub can_manage_other {
+    my ($remote, $u) = @_;
+    return 0 if LJ::want_userid($remote) == LJ::want_userid($u);
+    return LJ::can_manage($remote, $u);
+}
+
+sub can_delete_journal_item {
+    return LJ::can_manage(@_);
+}
+
 
 1;

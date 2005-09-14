@@ -1210,4 +1210,85 @@ sub get_logtext2
     return $lt;
 }
 
+# <LJFUNC>
+# name: LJ::item_link
+# class: component
+# des: Returns URL to view an individual journal item.
+# info: The returned URL may have an ampersand in it.  In an HTML/XML attribute,
+#       these must first be escaped by, say, [func[LJ::ehtml]].  This
+#       function doesn't return it pre-escaped because the caller may
+#       use it in, say, a plain-text email message.
+# args: u, itemid, anum?
+# des-itemid: Itemid of entry to link to.
+# des-anum: If present, $u is assumed to be on a cluster and itemid is assumed
+#           to not be a $ditemid already, and the $itemid will be turned into one
+#           by multiplying by 256 and adding $anum.
+# returns: scalar; unescaped URL string
+# </LJFUNC>
+sub item_link
+{
+    my ($u, $itemid, $anum, @args) = @_;
+    my $ditemid = $itemid*256 + $anum;
+
+    # XXX: should have an option of returning a url with escaped (&amp;)
+    #      or non-escaped (&) arguments.  a new link object would be best.
+    my $args = @args ? "?" . join("&amp;", @args) : "";
+    return LJ::journal_base($u) . "/$ditemid.html$args";
+}
+
+# <LJFUNC>
+# name: LJ::expand_embedded
+# class:
+# des:
+# info:
+# args:
+# des-:
+# returns:
+# </LJFUNC>
+sub expand_embedded
+{
+    &nodb;
+    my ($u, $ditemid, $remote, $eventref) = @_;
+
+    LJ::Poll::show_polls($ditemid, $remote, $eventref);
+    LJ::run_hooks("expand_embedded", $u, $ditemid, $remote, $eventref);
+}
+
+# <LJFUNC>
+# name: LJ::item_toutf8
+# des: convert one item's subject, text and props to UTF8.
+#      item can be an entry or a comment (in which cases props can be
+#      left empty, since there are no 8bit talkprops).
+# args: u, subject, text, props
+# des-u: user hashref of the journal's owner
+# des-subject: ref to the item's subject
+# des-text: ref to the item's text
+# des-props: hashref of the item's props
+# returns: nothing.
+# </LJFUNC>
+sub item_toutf8
+{
+    my ($u, $subject, $text, $props) = @_;
+    return unless $LJ::UNICODE;
+
+    my $convert = sub {
+        my $rtext = shift;
+        my $error = 0;
+        my $res = LJ::text_convert($$rtext, $u, \$error);
+        if ($error) {
+            LJ::text_out($rtext);
+        } else {
+            $$rtext = $res;
+        };
+        return;
+    };
+
+    $convert->($subject);
+    $convert->($text);
+    foreach(keys %$props) {
+        $convert->(\$props->{$_});
+    }
+    return;
+}
+
 1;
