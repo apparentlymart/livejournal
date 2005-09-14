@@ -17,7 +17,7 @@ $LJ::DBIRole = new DBI::Role {
     'sources' => \%LJ::DBINFO,
     'default_db' => "livejournal",
     'time_check' => 60,
-    'time_report' => \&dbtime_callback,
+    'time_report' => \&LJ::dbtime_callback,
 };
 
 package LJ::DB;
