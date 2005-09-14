@@ -1,12 +1,13 @@
 <?_code
 
  $title = "";
+ $head = "";
  $body = "";
 
  LJ::set_active_crumb('todo');
 
  use strict;
- use vars qw($title $body %FORM);
+ use vars qw($title $head $body %FORM);
 
  # FIXME: this doesn't use dbr or memcache at all.
  my $dbh = LJ::get_db_writer();
@@ -31,6 +32,12 @@
      $body .= "<form method='get' action='./'>";
      $body .= "Enter the username of the user whose to-do list you would like to view:<UL><INPUT NAME=\"user\" SIZE=15 MAXLENGTH=15> <INPUT TYPE=SUBMIT VALUE=\"View\"></UL></FORM>\n";
      return;
+ }
+
+ # block robots
+ LJ::load_user_props($u, "opt_blockrobots");
+ if ($u->{opt_blockrobots}) {
+     $head = LJ::robot_meta_tags();
  }
 
  LJ::Todo::get_permissions($dbh, \%permission, { 'user' => $u, 'remote' => $remote });
@@ -285,6 +292,7 @@
 
 _code?><?page
 title=><?_code return $title; _code?>
+head=><?_code return $head; _code?>
 body=><?_code return $body; _code?><p><?standout <B>Note:</B> The to-do list system is in beta.  We're well aware it has a lot of work needed, and it definitely needs to be documented-- especially the security related things. standout?>
 page?><?_c <LJDEP>
 form: htdocs/todo/index.bml

@@ -1,14 +1,15 @@
 <?_code
 
+ $title = "";
+ $head = "";
+ $body = "";
+
  use strict;
- use vars qw($title $body %FORM);
+ use vars qw($title $head $body %FORM);
 
  LJ::set_active_crumb('addtodo');
 
  my $dbh = LJ::get_db_writer();
-
- $title = "";
- $body = "";
 
  my ($sth, $hval, $disabled);
  my %permission;
@@ -61,6 +62,12 @@
  $sth = $dbh->prepare("SELECT COUNT(*) FROM todo WHERE journalid=$u->{'userid'}");
  $sth->execute;
  my ($todo_count) = $sth->fetchrow_array;
+
+ # block robots
+ LJ::load_user_props($u, "opt_blockrobots");
+ if ($u->{opt_blockrobots}) {
+     $head = LJ::robot_meta_tags();
+ }
 
  LJ::Todo::get_permissions($dbh, \%permission, { 'user' => $u,
                                                  'remote' => $remote,
@@ -291,6 +298,7 @@
 
 _code?><?page
 title=><?_code return $title; _code?>
+head=><?_code return $head; _code?>
 body=><?_code return $body; _code?><p><?standout <B>Note:</B> The to-do list system is in beta.  We're well aware it has a lot of work needed, and it definitely needs to be documented-- especially the security related things. standout?>
 page?><?_c <LJDEP>
 link: htdocs/todo/index.bml, htdocs/todo/item.bml
