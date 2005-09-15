@@ -367,13 +367,13 @@ sub create_view_atom
         $link->rel($rel);
         $link->type($type);
         $link->href($href);
-        $link->title( LJ::exml($title) ) if $title;
+        $link->title( $title ) if $title;
         return $link;
     };
 
     my $author = XML::Atom::Person->new();
-    $author->email( LJ::exml( $u->{'email'} ) ) if $u->{'email'};
-    $author->name(  LJ::exml( $u->{'name'} ) );
+    $author->email( $u->{'email'} ) if $u->{'email'};
+    $author->name(  $u->{'name'} );
 
     # feed information
     unless ($opts->{'single_entry'}) {
@@ -384,10 +384,10 @@ sub create_view_atom
 
         # attributes
         $feed->id( "urn:lj:$LJ::DOMAIN:atom1:$u->{user}" );
-        $feed->title( LJ::exml( $j->{'title'} ) );
+        $feed->title( $j->{'title'} );
         if ( $j->{'subtitle'} ) {
-            $feed->subtitle( LJ::exml( $j->{'subtitle'} ) );
-            $feed->tagline(  LJ::exml( $j->{'subtitle'} ) ); # COMPAT
+            $feed->subtitle( $j->{'subtitle'} );
+            $feed->tagline(  $j->{'subtitle'} ); # COMPAT
         }
 
         $feed->author( $author );
@@ -432,7 +432,7 @@ sub create_view_atom
         my $entry = XML::Atom::Entry->new();
         my $entry_xml = $entry->{doc};
 
-        $entry->title( LJ::exml( $it->{'subject'} ) );
+        $entry->title( $it->{'subject'} );
         $entry->id("urn:lj:$LJ::DOMAIN:atom1:$u->{user}:$ditemid");
 
         # author isn't required if it is in the main <feed>
@@ -440,8 +440,8 @@ sub create_view_atom
         # the journal entry isn't owned by the journal owner. (communities)
         if ( $opts->{'single_entry'} or $j->{'u'}->{'email'} ne $u->{'email'} ) {
             my $author = XML::Atom::Person->new();
-            $author->email( LJ::exml( $j->{'u'}->{'email'} ) ) if $j->{'u'}->{'email'};
-            $author->name(  LJ::exml( $j->{'u'}->{'name'} ) );
+            $author->email( $j->{'u'}->{'email'} ) if $j->{'u'}->{'email'};
+            $author->name(  $j->{'u'}->{'name'} );
             $entry->author($author);
         }
 
@@ -489,12 +489,12 @@ sub create_view_atom
             # content type classifications.
             my $content = $entry_xml->createElement( 'content' );
             $content->setAttribute( 'type', 'html' );
-            $content->appendTextNode( LJ::exml( $it->{'event'} ) );
+            $content->appendTextNode( $it->{'event'} );
             $entry_xml->getDocumentElement->appendChild( $content );
         } elsif ($u->{'opt_synlevel'} eq 'summary') {
             my $summary = $entry_xml->createElement( 'summary' );
             $summary->setAttribute( 'type', 'html' );
-            $summary->appendTextNode( LJ::exml( $it->{'event'} ) );
+            $summary->appendTextNode( $it->{'event'} );
             $entry_xml->getDocumentElement->appendChild( $summary );
         }
 
