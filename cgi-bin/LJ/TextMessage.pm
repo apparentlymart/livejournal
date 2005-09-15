@@ -2121,6 +2121,13 @@ sub request_string
     return $req;
 }
 
+# get the textmessage info for a user
+sub tm_info {
+    my ($self, $u) = @_;
+    return $u->selectrow_hashref("SELECT * ".
+                                 "FROM txtmsg WHERE userid=?", undef, $u->{'userid'});
+}
+
 1;
 __END__
 # Below is the stub of documentation for your module. You better edit it!
