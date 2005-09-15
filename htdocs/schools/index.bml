@@ -185,6 +185,11 @@ body<=
         }
         $ret .= "</ul>";
 
+        $ret .= "<div id='addlink'><?p <i>Don't see what you're looking for?</i><br />";
+        $ret .= "<a href='index.bml?ctc=$ectc&add=1' onclick='return addschool()'>Add a School</a>";
+        $ret .= " p?></div>";
+        $ret .= $add_school->();
+
         return $ret;
     }
 
