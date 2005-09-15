@@ -1,3 +1,4 @@
+
 <?page
 title=><?_ml .title _ml?>
 body<=
@@ -187,9 +188,7 @@ _code?>
         # text messaging
         if (LJ::get_cap($u, "textmessaging"))
         {
-            $sth = $dbr->prepare("SELECT provider, number, security FROM txtmsg WHERE userid=?");
-            $sth->execute($u->{'userid'});
-            my $tminfo = $sth->fetchrow_hashref;
+            my $tminfo = LJ::TextMessage->tm_info($u);
             foreach (values %$tminfo) { LJ::text_out(\$_); }
             
             # text messaging
