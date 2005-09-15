@@ -714,10 +714,6 @@ if ($u->{'journaltitle'}) {
                         "&cc=" . LJ::eurl($schools->{$sid}->{city}) .
                         "&sid=" . $sid .
                         "'>" . LJ::ehtml($schools->{$sid}->{name}) . "</a>";
-            if (defined $schools->{$sid}->{year_start}) {
-                $link .= " (" . $schools->{$sid}->{year_start} . "-" .
-                         ($schools->{$sid}->{year_end} || "present") . ")";
-            }
             $link .= " - <em>" . $schools->{$sid}->{city};
             $link .= $schools->{$sid}->{state} ? ", $schools->{$sid}->{state}" : "";
             if ($schools->{$sid}->{country} ne 'US') {
@@ -725,7 +721,15 @@ if ($u->{'journaltitle'}) {
                 LJ::load_codes({ country => \%countries });
                 $link .= ", $countries{$schools->{$sid}->{country}}";
             }
-            $link .= "</em><br />\n";
+            $link .= "</em>";
+
+            if (defined $schools->{$sid}->{year_start}) {
+                $link .= " (" . $schools->{$sid}->{year_start} . "-" .
+                         ($schools->{$sid}->{year_end} || "present") . ")";
+            }
+
+             $link .= "<br />\n";
+
             push @links, $link;
          }
          $body .= join('', @links);
