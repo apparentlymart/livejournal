@@ -93,7 +93,7 @@ body<=
         $ret .= "</td></tr><tr><td colspan='2'>";
         $ret .= $inerr->('state');
         $ret .= "</td></tr><tr><td valign='top'>";
-        $ret .= "City:</td><td>" . LJ::html_text({ name => "city", maxlength => 255, size => 20, value => $city }) . "<br />&nbsp;&nbsp;" . $ex->("San Testico, Portland");
+        $ret .= "City:</td><td>" . LJ::html_text({ name => "city", maxlength => 255, size => 20, value => $city }) . "<br />&nbsp;&nbsp;" . $ex->("San Francisco, Portland");
         $ret .= "</td></tr><tr><td colspan='2'>";
         $ret .= $inerr->('city');
         $ret .= "</td></tr><tr><td valign='top'>";
@@ -169,7 +169,7 @@ body<=
         $ret .= "<?p With the Schools Directory, you can:<ul>";
         $ret .= "<li>Add a school to your journal or community's user info page.</li>";
         $ret .= "<li>Find other users and communities associated with a school.</li></ul>";
-        $ret .= "<br />Start your search below.  p?>";
+        $ret .= " p?>";
 
         my $cts = LJ::Schools::get_countries();
         return $err->("Unable to get country list.")
@@ -208,7 +208,9 @@ body<=
 
         $ret .= $trail->(1, $country);
 
-        $ret .= "<?h1 State or Province h1?><?p Select a city p?>";
+        my $sop = $ctc eq 'US' ? 'State' : 'State or Province';
+
+        $ret .= "<?h1 $sop h1?><?p Select a state p?>";
 
         $ret .= "<ul>";
         foreach my $sc (sort { $a cmp $b } keys %{$scs}) {
@@ -323,7 +325,7 @@ body<=
     $ret .= $trail->(0, $country, $state, $city);
 
     # Figure out if they attended this school
-    {
+    if ($remote) {
         # user switcher
         my @list = LJ::get_authas_list($remote);
 
@@ -339,8 +341,9 @@ body<=
             $ret .= LJ::ljuser($remote);
         }
 
-        $ret .= ' ' . LJ::html_submit('Manage');
-        $ret .= " or <a href='$LJ::SITEROOT/schools/index.bml'>find another school</a>";
+        $ret .= ' ' . LJ::html_submit('Add');
+        $ret .= "<br /><a href='$LJ::SITEROOT/schools/index.bml'>Find another school</a>";
+        $ret .= "<br /><a href='$LJ::SITEROOT/schools/manage.bml?sid=$esid'>Manage your schools</a>";
         $ret .= "</form>";
     }
 
