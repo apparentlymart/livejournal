@@ -702,13 +702,13 @@ if ($u->{'journaltitle'}) {
  # Schools Directory
  unless ($LJ::DISABLED{'schools'}) {
      my $span = ($narrow_left-- > 0) ? 1 : 2;
-     $body .= "<tr><td align='right' valign='top'><b><a href='/schools/index.bml'>$ML{'.label.schools'}</a>:</b></td><td colspan='$span'>";
+     $body .= "<tr><td align='right' valign='top'><b><a href='/schools/'>$ML{'.label.schools'}</a>:</b></td><td colspan='$span'>";
 
      my $schools = LJ::Schools::get_attended($u);
      if ($schools && %$schools) {
          my @links;
          foreach my $sid (sort { $schools->{$a}->{name} cmp $schools->{$b}->{name} } keys %$schools) {
-             my $link = "<a href='$LJ::SITEROOT/schools/index.bml" .
+             my $link = "<a href='$LJ::SITEROOT/schools/" .
                         "?ctc=" . LJ::eurl($schools->{$sid}->{country}) .
                         "&sc=" . LJ::eurl($schools->{$sid}->{state}) .
                         "&cc=" . LJ::eurl($schools->{$sid}->{city}) .
@@ -718,9 +718,17 @@ if ($u->{'journaltitle'}) {
                 $link .= " (" . $schools->{$sid}->{year_start} . "-" .
                          ($schools->{$sid}->{year_end} || "present") . ")";
             }
+            $link .= " - <em>" . $schools->{$sid}->{city};
+            $link .= $schools->{$sid}->{state} ? ", $schools->{$sid}->{state}" : "";
+            if ($schools->{$sid}->{country} ne 'US') {
+                my %countries;
+                LJ::load_codes({ country => \%countries });
+                $link .= ", $countries{$schools->{$sid}->{country}}";
+            }
+            $link .= "</em><br />\n";
             push @links, $link;
          }
-         $body .= join(', ', @links);
+         $body .= join('', @links);
      } else {
          $body .= "<i>$ML{'.label.noschools'}</i>";
      }
