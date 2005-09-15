@@ -737,6 +737,55 @@ sub journal_base {
     return LJ::journal_base($u);
 }
 
+# <LJFUNC>
+# name: LJ::User::get_friends_birthdays
+# des: get the upcoming birthdays for friends of a user
+# returns: arrayref of [ user, month, day, user name ] arrayrefs
+# args: birthdaywithin
+# des-birthdaywithin: how many days ahead to get birthdays for
+# </LJFUNC>
+sub get_friends_birthdays {
+    my $u = shift;
+    my $birthdaywithin = shift;
+
+    my $userid = $u->{'userid'};
+
+    # what day is it now?  server time... suck, yeah.
+    my @time = localtime();
+    my ($mnow, $dnow) = ($time[4]+1, $time[3]);
+
+    my $bdays = LJ::MemCache::get([$userid, "frbrth:$userid:$mnow:$dnow:$birthdaywithin" ]);
+
+    if (!$bdays) {
+        $bdays = [];
+        my $sth = $u->prepare
+            ("SELECT u.user, u.name, MONTH(bdate) AS 'month', DAYOFMONTH(bdate) AS 'day' " .
+             "FROM friends f, user u " .
+             "WHERE f.userid=? AND f.friendid=u.userid AND u.journaltype='P' " .
+             "  AND u.statusvis='V' AND u.allow_infoshow='Y' " .
+             "  AND DAYOFYEAR(NOW())<=DAYOFYEAR(bdate) " .
+             "  AND DAYOFYEAR(NOW())<=DAYOFYEAR(DATE_ADD(NOW(), INTERVAL ? DAY))");
+        $sth->execute($userid, $birthdaywithin);
+
+        while (my ($user, $name, $m, $d) = $sth->fetchrow_array) {
+            my $ref = [ $user, $m, $d, $name ];
+            push @$bdays, $ref;
+        }
+
+        @$bdays = sort {
+            # month sort
+            ($a->[1] <=> $b->[1]) ||
+                # day sort
+                ($a->[2] <=> $b->[2])
+            } @$bdays;
+
+        # update memcache, expire two hours
+        LJ::MemCache::set([ $userid, "frbrth:$userid:$mnow:$dnow:$birthdaywithin" ], $bdays, 60*60*2);
+    }
+
+    return $bdays;
+}
+
 package LJ;
 
 # <LJFUNC>
