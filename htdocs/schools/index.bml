@@ -196,7 +196,7 @@ body<=
     # PAGE 2: return the list of areas in that country
 
     unless (defined $sc) {
-        $ret .= "<?p  If you don't see what you're searching for, use the Add School link at the bottom of this page to submit it. p?>" unless $ctc eq 'US';
+        $ret .= "<?p  If you don't see what you're searching for, use the Add a School link at the bottom of this page to submit it. p?>" unless $ctc eq 'US';
 
         my $scs = LJ::Schools::get_states($ctc);
         return $err->("Unable to get necessary data.")
@@ -220,7 +220,7 @@ body<=
 
         unless ($ctc eq 'US') {
             $ret .= "<div id='addlink'><?p <i>Don't see what you're looking for?</i><br />";
-            $ret .= "<a href='index.bml?ctc=$ectc&add=1' onclick='return addschool()'>Add A School</a>";
+            $ret .= "<a href='index.bml?ctc=$ectc&add=1' onclick='return addschool()'>Add a School</a>";
             $ret .= " p?></div>";
             $ret .= $add_school->($ctc);
         }
@@ -232,7 +232,7 @@ body<=
     # PAGE 3: return the list of cities in a state
 
     unless ($cc) {
-        $ret .= "<?p  If you don't see what you're searching for, use the Add School link at the bottom of this page to submit it. p?>";
+        $ret .= "<?p  If you don't see what you're searching for, use the Add a School link at the bottom of this page to submit it. p?>";
 
         my $ccs = LJ::Schools::get_cities($ctc, $sc);
         return $err->("Unable to get necessary data.")
@@ -254,7 +254,7 @@ body<=
         $ret .= "</ul>";
 
         $ret .= "<div id='addlink'><?p <i>Don't see what you're looking for?</i><br />";
-        $ret .= "<a href='index.bml?ctc=$ectc&sc=$esc&add=1' onclick='return addschool()'>Add A School</a>";
+        $ret .= "<a href='index.bml?ctc=$ectc&sc=$esc&add=1' onclick='return addschool()'>Add a School</a>";
         $ret .= " p?></div>";
         $ret .= $add_school->($ctc, $sc);
 
@@ -265,7 +265,7 @@ body<=
     # PAGE 4: return the list of schools in a city
 
     unless ($sid) {
-        $ret .= "<?p  If you don't see what you're searching for, use the Add School link at the bottom of this page to submit it. p?>";
+        $ret .= "<?p  If you don't see what you're searching for, use the Add a School link at the bottom of this page to submit it. p?>";
 
         my $schools = LJ::Schools::get_schools($ctc, $sc, $cc);
         return $err->("Unable to get necessary data.")
@@ -286,7 +286,7 @@ body<=
         $ret .= "</ul>";
 
         $ret .= "<div id='addlink'><?p <i>Don't see what you're looking for?</i><br />";
-        $ret .= "<a href='index.bml?ctc=$ectc&sc=$esc&cc=$ecc&add=1' onclick='return addschool()'>Add A School</a>";
+        $ret .= "<a href='index.bml?ctc=$ectc&sc=$esc&cc=$ecc&add=1' onclick='return addschool()'>Add a School</a>";
         $ret .= " p?></div>";
         $ret .= $add_school->($ctc, $sc, $cc);
 
