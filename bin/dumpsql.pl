@@ -102,16 +102,6 @@ foreach my $table (sort keys %tables)
     }
 }
 
-# now dump school related information
-$sth = $dbh->prepare('SELECT name, country, state, city, url FROM schools');
-$sth->execute;
-while (my @row = $sth->fetchrow_array) {
-    my $sql = "INSERT IGNORE INTO schools (name, country, state, city, url) VALUES (";
-    $sql .= join(',', map { db_quote($_||undef) } @row);
-    $sql .= ");\n";
-    push @{$output{general}}, [ "$row[1].$row[2].$row[3].$row[0]", $sql ];
-}
-
 # don't use $dbh->quote because it's changed between versions
 # and developers sending patches can't generate concise patches
 # it used to not quote " in a single quoted string, but later it does.
@@ -138,6 +128,17 @@ foreach my $k (keys %output) {
     }
     close F;
 }
+
+# now dump school related information
+print "Dumping schools.dat\n";
+open(F, ">$ENV{LJHOME}/bin/upgrading/schools.dat") or die;
+$sth = $dbh->prepare('SELECT name, country, state, city, url FROM schools');
+$sth->execute;
+while (my @row = $sth->fetchrow_array) {
+    my $line = '"' . join('","', map { $_ || "" } @row) . '"';
+    print F "$line\n";
+}
+close F;
 
 # and do S1 styles (ugly schema)
 print "Dumping s1styles.dat\n";

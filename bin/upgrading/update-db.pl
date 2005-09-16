@@ -429,6 +429,24 @@ if ($opt_pop)
         print "Updating external_foaf_url userprop.\n";
         system("$ENV{'LJHOME'}/bin/upgrading/migrate-userprop.pl", 'external_foaf_url');
     }
+
+    # schools
+    if (open(F, "$ENV{LJHOME}/bin/upgrading/schools.dat")) {
+        print "Populating school data.\n";
+
+        while (<F>) {
+            chomp;
+
+            next unless /^"(.+?)","(.+?)","(.*?)","(.*?)","(.*?)"$/;
+            my ($name, $country, $city, $state, $url) = ($1, $2, $3, $4, $5);
+
+            my $sid = LJ::alloc_global_counter('O');
+            $dbh->do("INSERT IGNORE INTO schools (schoolid, name, country, city, state, url) " .
+                     "VALUES (?, ?, ?, ?, ?, ?)", undef, $sid, $name, $country, $city, $state, $url);
+            die "#  ERROR: " . $dbh->errstr . "\n" if $dbh->err;
+        }
+        close F;
+    }
     
     # base data
     foreach my $file ("base-data.sql", "base-data-local.sql") {
