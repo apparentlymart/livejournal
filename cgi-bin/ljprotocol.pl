@@ -2362,7 +2362,7 @@ sub login_message
 
     return $msg->("old_win32_client")  if $req->{'clientversion'} =~ /^Win32-MFC\/(1.2.[0123456])$/;
     return $msg->("old_win32_client")  if $req->{'clientversion'} =~ /^Win32-MFC\/(1.3.[01234])\b/;
-    return $msg->("hello_test")        if $u->{'user'} eq "test";
+    return $msg->("hello_test")        if grep { $u->{user} eq $_ } @LJ::TESTACCTS;
 }
 
 sub list_friendgroups
