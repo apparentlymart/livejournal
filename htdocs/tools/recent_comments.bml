@@ -48,20 +48,12 @@ body<=
 
     # Retrieve received
     {
-        my $max = $dbcr->selectrow_array("SELECT MAX(jtalkid) FROM talk2 WHERE journalid=?",
-                                         undef, $u->{userid});
-        $sth = $dbcr->prepare("SELECT jtalkid, nodetype, nodeid, parenttalkid, ".
-                              "       posterid, UNIX_TIMESTAMP(datepost) as 'datepostunix', state ".
-                              "FROM talk2 ".
-                              "WHERE journalid=? AND jtalkid > ?");
-        $sth->execute($u->{userid}, $max - $count);
-        die $dbcr->errstr if $dbcr->err;
-        while (my $r = $sth->fetchrow_hashref) {
-            $need_userid{$r->{posterid}} = 1 if $r->{posterid};
-            push @recv, $r;
-            $talkids{$r->{jtalkid}} = 1;
-            $need_logids{"$u->{userid} $r->{nodeid}"} = [$u->{userid}, $r->{nodeid}]
-                if $r->{nodetype} eq "L";
+        @recv = $u->get_recent_talkitems($count);
+        foreach my $post (@recv) {
+            $need_userid{$post->{posterid}} = 1 if $post->{posterid};
+            $talkids{$post->{jtalkid}} = 1;
+            $need_logids{"$u->{userid} $post->{nodeid}"} = [$u->{userid}, $post->{nodeid}]
+                if $post->{nodetype} eq "L";
         }
     }
 
@@ -109,7 +101,7 @@ body<=
     my $root = LJ::journal_base($u);
 
     $ret .= "<table style='width: 100%' cellpadding='5' cellspacing='0'>";
-    foreach my $r ( @recv) {
+    foreach my $r (@recv) {
 	next unless $r->{nodetype} eq "L";
         next if $r->{state} eq "D";
 

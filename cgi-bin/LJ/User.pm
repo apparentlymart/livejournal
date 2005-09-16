@@ -780,6 +780,34 @@ sub get_friends_birthdays {
         } @bdays;
 }
 
+
+# get recent talkitems posted to this user
+# args: maximum number of comments to retreive
+# returns: array of hashrefs with jtalkid, nodetype, nodeid, parenttalkid, posterid
+sub get_recent_talkitems {
+    my ($u, $maxshow) = @_;
+
+    $maxshow ||= 15;
+
+    return undef unless LJ::isu($u);
+
+    my @recv;
+    my $max = $u->selectrow_array("SELECT MAX(jtalkid) FROM talk2 WHERE journalid=?",
+                                     undef, $u->{userid});
+    return undef unless $max;
+
+    my $sth = $u->prepare("SELECT jtalkid, nodetype, nodeid, parenttalkid, ".
+                          "       posterid, UNIX_TIMESTAMP(datepost) as 'datepostunix', state ".
+                          "FROM talk2 ".
+                          "WHERE journalid=? AND jtalkid > ?");
+    $sth->execute($u->{'userid'}, $max - $maxshow);
+    while (my $r = $sth->fetchrow_hashref) {
+        push @recv, $r;
+    }
+
+    return @recv;
+}
+
 package LJ;
 
 # <LJFUNC>
