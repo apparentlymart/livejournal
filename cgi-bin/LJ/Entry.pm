@@ -112,6 +112,16 @@ sub new_from_url {
     return undef;
 }
 
+# returns true if entry currently exists.  (it's possible for a given
+# $u, to make a fake jitemid and that'd be a valid skeleton LJ::Entry
+# object, even though that jitemid hasn't been created yet, or was
+# previously deleted)
+sub valid {
+    my $self = shift;
+    __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
+    return $self->{_loaded_row};
+}
+
 sub jitemid {
     my $self = shift;
     return $self->{jitemid};
