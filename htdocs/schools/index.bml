@@ -302,6 +302,10 @@ body<=
 
     ##########################################################################
     # PAGE 5: show who has listed this school in their attendance list
+    my $year = $GET{'year'} || 0;
+    $year += 0;
+    $year = 0 if $year < 1900;
+
     my @ids = LJ::Schools::get_attendees($sid);
 
     # now multi-load and split
@@ -353,6 +357,12 @@ body<=
     }
 
     $ret .= "<br /><?h2 Browse journals associated with this school: h2?>";
+
+    $ret .= "<br /><form action='/schools/index.bml' method='get'><?h2 Limit this list by year: ";
+    $ret .= LJ::html_text(name => 'year', size => 4, maxlength => 4, value => $year ? $year : '');
+    $ret .= LJ::html_hidden('ctc', $ctc, 'cc', $cc, 'sid', $sid);
+    $ret .= LJ::html_submit('Filter');
+    $ret .= " hr?></form>";
 
     unless (@ids) {
         $ret .= "<?p There are no communities or users that list this school yet. p?>";
