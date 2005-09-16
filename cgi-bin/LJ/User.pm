@@ -740,13 +740,11 @@ sub journal_base {
 # <LJFUNC>
 # name: LJ::User::get_friends_birthdays
 # des: get the upcoming birthdays for friends of a user
-# returns: arrayref of [ user, month, day, user name ] arrayrefs
-# args: birthdaywithin
-# des-birthdaywithin: how many days ahead to get birthdays for
+# returns: arrayref of [ month, day, user ] arrayrefs
 # </LJFUNC>
 sub get_friends_birthdays {
     my $u = shift;
-    my $birthdaywithin = shift;
+    return undef unless LJ::isu($u);
 
     my $userid = $u->{'userid'};
 
@@ -754,36 +752,32 @@ sub get_friends_birthdays {
     my @time = localtime();
     my ($mnow, $dnow) = ($time[4]+1, $time[3]);
 
-    my $bdays = LJ::MemCache::get([$userid, "frbrth:$userid:$mnow:$dnow:$birthdaywithin" ]);
+    my $friends = LJ::get_friends($u);
+    return undef unless ref $friends;
 
-    if (!$bdays) {
-        $bdays = [];
-        my $sth = $u->prepare
-            ("SELECT u.user, u.name, MONTH(bdate) AS 'month', DAYOFMONTH(bdate) AS 'day' " .
-             "FROM friends f, user u " .
-             "WHERE f.userid=? AND f.friendid=u.userid AND u.journaltype='P' " .
-             "  AND u.statusvis='V' AND u.allow_infoshow='Y' " .
-             "  AND DAYOFYEAR(NOW())<=DAYOFYEAR(bdate) " .
-             "  AND DAYOFYEAR(NOW())<=DAYOFYEAR(DATE_ADD(NOW(), INTERVAL ? DAY))");
-        $sth->execute($userid, $birthdaywithin);
+    my @uids = keys %$friends;
+    my $users = LJ::load_userids(@uids);
+    return undef unless ref $users;
 
-        while (my ($user, $name, $m, $d) = $sth->fetchrow_array) {
-            my $ref = [ $user, $m, $d, $name ];
-            push @$bdays, $ref;
+    my @bdays = ();
+
+    foreach my $fr (@uids) {
+        my $friend = $users->{$fr};
+
+        my ($year, $month, $day) = split('-', $friend->{bdate});
+
+        if ($month > 0 && $day > 0) {
+            my $ref = [ $month, $day, $friend->{user} ];
+            push @bdays, $ref;
         }
-
-        @$bdays = sort {
-            # month sort
-            ($a->[1] <=> $b->[1]) ||
-                # day sort
-                ($a->[2] <=> $b->[2])
-            } @$bdays;
-
-        # update memcache, expire two hours
-        LJ::MemCache::set([ $userid, "frbrth:$userid:$mnow:$dnow:$birthdaywithin" ], $bdays, 60*60*2);
     }
 
-    return $bdays;
+    return sort {
+        # month sort
+        ($a->[0] <=> $b->[0]) ||
+            # day sort
+            ($a->[1] <=> $b->[1])
+        } @bdays;
 }
 
 package LJ;

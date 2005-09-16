@@ -37,31 +37,32 @@ body<=
     }
     $body .= ' p?>';
 
-    my $bdays;
+    my @bdays;
 
     if (defined $u) {
-        $bdays = $u->get_friends_birthdays(365);
+        @bdays = $u->get_friends_birthdays;
     } else {
-        $bdays = $remote->get_friends_birthdays(365);
+        @bdays = $remote->get_friends_birthdays;
     }
 
-    foreach my $bday (@$bdays) {
-        LJ::text_out(\$bday->[0]);
+    foreach my $bday (@bdays) {
+        LJ::text_out(\$bday->[2]);
 
-        if ($bday->[1] != $lastmon) {
-            if ($lastmon) { $body .= "</ul>\n"; }
-            $lastmon = $bday->[1];
-            $body .= "<?h1 " . LJ::Lang::month_long($lastmon) . " h1?><ul>\n";
-        }
+          if ($bday->[0] != $lastmon) {
+              if ($lastmon) { $body .= "</ul>\n"; }
+              $lastmon = $bday->[0];
+              $body .= "<?h1 " . LJ::Lang::month_long($lastmon) . " h1?><ul>\n";
+          }
 
-        my $day = sprintf("%2s", $bday->[2]);
-        $day =~ s/ /&nbsp;/;
+          my $day = sprintf("%2s", $bday->[1]);
+          $day =~ s/ /&nbsp;/;
 
-        my $name = LJ::ehtml($bday->[3]);
-        $body .= "<b><tt>$day</tt></b>: " . LJ::ljuser($bday->[0]) . " - $name<br />\n";
-    }
+          my $friendu = LJ::load_user($bday->[2]);
+          my $name = LJ::ehtml($friendu->{'name'});
+          $body .= "<b><tt>$day</tt></b>: " . LJ::ljuser($friendu) . " - $name<br />\n";
+      }
 
-    if (@$bdays) {
+    if (@bdays) {
         $body .= "</ul>\n";
     } else {
         $body .= "<?p $ML{'.nobirthdays'} p?>";
