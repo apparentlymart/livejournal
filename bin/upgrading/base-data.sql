@@ -1072,3 +1072,7 @@ INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed,
 UPDATE userproplist SET cldversion='4',datatype='char',des='Default security for post-by-email entries',indexed='',multihomed='',prettyname='Entry security for email posting',scope='general' WHERE name='emailpost_security';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'char', 'Default userpic for post-by-email entries', '', '', 'emailpost_userpic', 'Userpic for email posting', 'general');
 UPDATE userproplist SET cldversion='4',datatype='char',des='Default userpic for post-by-email entries',indexed='',multihomed='',prettyname='Userpic for email posting',scope='general' WHERE name='emailpost_userpic';
+CREATE TABLE portal_config (userid INT(10), pboxid SMALLINT AUTO_INCREMENT, col CHAR(1), sortorder TINYINT, type INT, PRIMARY KEY(userid,pboxid));
+CREATE TABLE portal_box_prop (userid INT(10), pboxid SMALLINT, ppropid SMALLINT, propvalue VARCHAR(255) BINARY, PRIMARY KEY(userid, pboxid, ppropid));
+INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'num', 'Has the user had their portal initialized yet?', '0', '0', 'portalinit', 'Portal Init', 'general');
+UPDATE userproplist SET cldversion='4',datatype='num',des='Has the user had their portal initialized yet?',indexed='0',multihomed='0',prettyname='Portal Init',scope='general' WHERE name='portalinit';

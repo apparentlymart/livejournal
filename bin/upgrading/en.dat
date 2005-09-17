@@ -2751,6 +2751,18 @@ If you want to do a different type of search, check out the <a href='/directorys
 
 /poll/index.bml.viewresults=View Poll Results
 
+/portal/index.bml.addbox=Add a module
+
+/portal/index.bml.configtitle=Configure My [[sitenameabbrev]] Options
+
+/portal/index.bml.notloggedin=If you wish to use My [[sitenameabbrev]], you need to <a href='/login.bml?ret=1'>login</a>.
+
+/portal/index.bml.notloggedintitle=Not Logged In
+
+/portal/index.bml.pagetitle=My [[sitenameabbrev]]
+
+/portal/index.bml.returnlink=Return to My [[sitenameabbrev]]
+
 /pubkey.bml.error.notconfigured=This site is not configured with PGP support.
 
 /pubkey.bml.error.nousername=No username specified.
@@ -4654,6 +4666,8 @@ portal.update.mode.full=Full
 portal.update.mode.name=Mode
 
 portal.update.mode.simple=Simple
+
+portal.update.moreopts=More Options
 
 portal.update.portalname=Journal Update
 

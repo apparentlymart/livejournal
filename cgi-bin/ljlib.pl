@@ -40,7 +40,7 @@ sub END { LJ::end_request(); }
                     "s2stylelayers2", "s2compiled2", "userlog",
                     "logtags", "logtagsrecent", "logkwsum",
                     "recentactions", "usertags", "pendcomments",
-                    "user_schools",
+                    "user_schools", "portal_config", "portal_box_prop",
                     );
 
 # keep track of what db locks we have out

@@ -22,6 +22,7 @@ use Storable;
 use Time::HiRes ();
 use Image::Size ();
 use POSIX ();
+use LJ::Portal ();
 use Unicode::MapUTF8 ();
 
 use LJ::SpellCheck;

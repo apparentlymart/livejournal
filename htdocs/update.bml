@@ -242,7 +242,8 @@
             }
             $flags = { 'noauth' => 1, 'u' => $u } if $ok;
 
-        } elsif ($remote && LJ::check_referer()) {   # assume remote if we have it
+        } elsif ($remote && (LJ::check_referer() || LJ::check_referer("/portal/index.bml")) ) {
+            # assume remote if we have it
             $flags = { 'noauth' => 1, 'u' => $remote };
             $user = $remote->{'user'};
             $u = $remote;
