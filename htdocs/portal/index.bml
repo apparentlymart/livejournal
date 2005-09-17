@@ -1,37 +1,265 @@
 <?_code
+{
+    use strict;
+    use vars qw($title $body $bodyopts $head %GET %POST);
+    use LJ::Portal::Config;
 
- my $remote = LJ::get_remote();
- 
- $title = $LJ::SITENAME;
- $body = "";
- $head = "";
- $bodyopts = "";
+    if ($LJ::DISABLED{'portal'}) {
+        $title = 'Disabled';
+        $body = 'Sorry, the portal is disabled at this time.';
+        return;
+    }
 
- #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+    my $remote = LJ::get_remote;
 
- LJ::Portal::construct_page({ 
-                              'form' => \%FORM,
-                              'remote' => $remote,
-                              'head' => \$head,
-                              'body' => \$body,
-                              'bodyopts' => \$bodyopts,
-                              'border' => 0,
-                          });
+    $title = BML::ml('.pagetitle', { 'sitenameabbrev' => $LJ::SITENAMEABBREV });
+    $body = '';
+    $bodyopts = '';
+    $head = '';
 
- return;
+
+    if (!$remote) {
+        $title = BML::ml('.notloggedintitle');
+        $body = BML::ml('.notloggedin', { 'sitenameabbrev' => $LJ::SITENAMEABBREV });
+        return;
+    }
+
+    # include the default style:
+    LJ::need_res('stc/portal/MainStyle.css');
+    # javascript crap
+    LJ::need_res('js/x/x_core.js');
+    LJ::need_res('js/x/x_dom.js');
+    LJ::need_res('js/portal.js');
+    LJ::need_res('js/x/x_event.js');
+
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+    # this is the url to do XML HTTP posts to
+    my $selflink = $LJ::SITEROOT . BML::get_uri();
+    $selflink =~ s/\?.*//;
+
+    # parameters for portal.js
+    $head .= qq{
+        <script language="JavaScript">
+            var LJVAR;
+        if (!LJVAR)
+            LJVAR = new Object();
+        LJVAR.postUrl = "$selflink";
+        LJVAR.doFade = 0;
+        LJVAR.doAnimate = 1;
+        </script>
+        };
+
+    my $portalconfig = LJ::Portal::Config->new($remote);
+    return unless $portalconfig; # should never happen!
+
+    my $closebutton = LJ::Portal->get_close_button;
+
+    # see if there was a request to be handled by a module:
+    my $portalboxaction = ($POST{'portalboxaction'} || $GET{'portalboxaction'}) + 0;
+    my $actionbox = $portalconfig->get_box_by_id($portalboxaction);
+
+    # verify it's a action for a valid module
+    if ($portalboxaction && $actionbox && LJ::check_referer('/portal')) {
+        if ($actionbox->can('handle_request')) {
+            my $returncode = $actionbox->handle_request(\%GET, \%POST);
+            return LJ::Portal->return_xml($returncode) if $returncode;
+
+            # if it was a post then return update
+            my $updatescript = LJ::Portal->get_portal_box_update_script($portalconfig, $actionbox);
+            return LJ::Portal->return_xml($updatescript) if $POST{'portalboxaction'};
+        }
+    }
+
+    # firstly process any box changes:
+    my @actions = ('addbox', 'configbox', 'delbox', 'getmenu', 'movebox',
+                   'resetbox', 'saveconfig', 'updatebox');
+
+    for(@actions) {
+
+        # if a POST request then it was an XML HTTP request. Do processing and return
+        # to the client info.
+        # if it was a GET, then the client cannot do XML HTTP requests. Do processing
+        # and display the new page.
+
+        # did they do a POST or GET?
+        my $didpost = $POST{$_} ? 1 : undef;
+        my $didget  = $GET{$_}  ? 1 : undef;
+        my $action  = $_;
+
+        if (($didget || $didpost) && LJ::check_referer('/portal')) {
+            # request to create a new box
+            if ($action eq 'addbox') {
+                my $boxtype = $POST{'boxtype'} || $GET{'boxtype'};
+                my $boxcol  = $POST{'boxcol'}  || $GET{'boxcol'};
+
+                my $returncode = LJ::Portal->addbox($portalconfig, $boxtype, $boxcol);
+                return LJ::Portal->return_xml($returncode) if $returncode && $didpost;
+            }
+
+            # request to get a dialog box for configuring box props
+            if ($action eq 'configbox') {
+                my $pboxid = ($POST{'pboxid'} || $GET{'pboxid'}) + 0;
+
+                my ($returncode, $configboxhtml) = LJ::Portal->configbox($pboxid, $portalconfig);
+
+                if ($didget && $configboxhtml) {
+                    # just print out the config box for non-JS people
+                    my $box = $portalconfig->get_box_by_id($pboxid);
+                    if ($box) {
+                        $title = "Configure " . $box->box_name;
+                        $body = $configboxhtml;
+                        my $returnlinktext = BML::ml('.returnlink',
+                                     { 'sitenameabbrev' => $LJ::SITENAMEABBREV });
+                        $body .= "<div class='PortalReturn'><b><a href=\"$LJ::SITEROOT/portal\">$returnlinktext</a></b></div>";
+                    } else {
+                        $title = "Error.";
+                        $body = "Could not load box.";
+                    }
+                    return;
+                }
+
+                return LJ::Portal->return_xml($returncode);
+            }
+            # request to move a box
+            if ($action eq 'movebox') {
+                my $pboxid    = ($POST{'pboxid'}        || $GET{'pboxid'})+ 0;
+                my $boxcol    =  $POST{'boxcol'}        || $GET{'boxcol'};
+                my $boxcolpos = ($POST{'boxcolpos'}     || $GET{'boxcolpos'}) + 0;
+                my $moveUp    =  $POST{'up'}            || $GET{'up'};
+                my $moveDown  =  $POST{'down'}          || $GET{'down'};
+
+                my $returncode = LJ::Portal->movebox($pboxid, $portalconfig, $boxcol,
+                                                     $boxcolpos, $moveUp, $moveDown);
+
+                return LJ::Portal->return_xml($returncode) if $returncode && $didpost;
+            }
+            # request to retreive a config menu
+            if ($action eq 'getmenu') {
+                my $menu = $POST{'menu'} || $GET{'menu'};
+
+                my $returncode = LJ::Portal->getmenu($portalconfig, $menu);
+
+                if ($didpost) {
+                    return LJ::Portal->return_xml($returncode);
+                } else {
+                    if ($menu eq 'addbox') {
+                        $title = 'Add Module';
+                    }
+
+                    $body = $returncode;
+                    my $returnlinktext = BML::ml('.returnlink',
+                                     { 'sitenameabbrev' => $LJ::SITENAMEABBREV });
+                    $body .= "<div class='PortalReturn'><b><a href=\"$LJ::SITEROOT/portal\">$returnlinktext</a></b></div>";
+                    return;
+                }
+            }
+            # reset default box settings
+            if ($action eq 'resetbox') {
+                my $pboxid = ($POST{'pboxid'} || $GET{'pboxid'}) + 0;
+                my $returncode = LJ::Portal->resetbox($pboxid, $portalconfig);
+                return LJ::Portal->return_xml($returncode) if $returncode && $didpost;
+            }
+            # request to save box props
+            # only POST
+            if ($action eq 'saveconfig' && $didpost) {
+                my $pboxid = $POST{'pboxid'} + 0;
+
+                # was this submitted by an actual form instead of a XML
+                # HTTP request? if so then don't return XML.
+                my $realform = $POST{'realform'} + 0;
+
+                # there has got to be a better way to do this instead of passing POST
+                my $returncode = LJ::Portal->saveconfig($portalconfig, $pboxid, $realform, \%POST);
+                return LJ::Portal->return_xml($returncode) if !$realform;
+            }
+            # request to delete a box
+            if ($action eq 'delbox') {
+                my $pboxid = ($POST{'pboxid'} || $GET{'pboxid'}) + 0;
+                my $returncode;
+
+                $returncode = LJ::Portal->delbox($portalconfig, $pboxid);
+                return LJ::Portal->return_xml($returncode) if $didpost && $returncode;
+            }
+            # request to get code to update the contents of a box
+            # only POST
+            if ($action eq 'updatebox') {
+                my $pboxid =  $POST{'pboxid'} + 0;
+                my $box = $portalconfig->get_box_by_id($pboxid);
+                if ($box) {
+                    return LJ::Portal->return_xml(LJ::Portal->get_portal_box_update_script($portalconfig, $box));
+                } else {
+                    return LJ::Portal->return_xml('alert("Box not found.");');
+                }
+            }
+
+            BML::redirect($selflink);
+        }
+    }
+
+    # create the hidden menu at the top
+    my $configmenu = qq {
+        <div id="PortalConfigMenuBar">
+            <span id="AddPortalMenuButton" class="midalign"><a href="$selflink?getmenu=1&menu=addbox" onclick="return showAddPortalBoxMenu();"><img src="$LJ::IMGPREFIX/portal/PortalAddButton.gif" /></a></span>
+            </div>
+        };
+
+    $body .= $configmenu;
+
+    # the config page for non-JS users
+    if ($GET{'mode'} eq 'config') {
+        my $returnlinktext = BML::ml('.returnlink',
+                                     { 'sitenameabbrev' => $LJ::SITENAMEABBREV });
+        $title = BML::ml('.configtitle', { 'sitenameabbrev' => $LJ::SITENAMEABBREV });
+        $body .= "<ul><li><a href=\"$selflink?getmenu=1&menu=addbox\"><?_ml .addbox _ml?></a></li></ul>";
+        $body .= "<b><a href=\"$LJ::SITEROOT/portal\">$returnlinktext</a></b>";
+    } else {
+        $body .= '<div id="PortalContentContainer">';
+
+        # print out each column with boxes
+        my $cols = {};
+        map { $cols->{$_} = 1 if $_ } $portalconfig->get_cols;
+        foreach my $col (keys %$cols) {
+            next unless $col;
+
+            my @colboxes = $portalconfig->get_col_boxes($col);
+            $body .= "<div id='PortalCol$col'>";
+            foreach my $box (@colboxes) {
+                next unless $box;
+                if ($box) {
+                    # get the contents of the box
+                    $body .= $portalconfig->generate_box_with_container($box->pboxid);
+                }
+            }
+            $body .= '</div>';
+        }
+
+        # print out columns that didn't have boxes so you can move boxes around
+        for (('L', 'R')) {
+            if (!$cols->{$_}) {
+                $body .= "<div id='PortalCol$_'></div>";
+            }
+        }
+        $body .= '<div class="clearing" />&nbsp;</div></div>';
+    }
+}
+
+#_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+
+return;
 
 _code?><?page
-title=><?_code return $title; _code?>
-head<=
-<?_c TODO: configurable meta tags could go here? _c?>
-<?_code return $head; _code?>
-<?_code return (! LJ::get_remote() &&
-                ! $LJ::IS_SSL &&
-                ! $LJ::REQ_HEAD_HAS{'chalresp_js'}++) ?
-                $LJ::COMMON_CODE{'chalresp_js'} : "";
+    title=><?_code return $title; _code?>
+    head<=
+    <?_c TODO: configurable meta tags could go here? _c?>
+    <?_code return $head; _code?>
+    <?_code return (! LJ::get_remote() &&
+                    ! $LJ::IS_SSL &&
+                    ! $LJ::REQ_HEAD_HAS{'chalresp_js'}++) ?
+    $LJ::COMMON_CODE{'chalresp_js'} : "";
 _code?>
-<=head
-bodyopts=><?_code return $bodyopts; _code?>
-body=><?_code return $body; _code?>
-page?><?_c <LJDEP>
-</LJDEP> _c?>
+    <=head
+    bodyopts=><?_code return $bodyopts; _code?>
+    body=><?_code return $body; _code?>
+    page?><?_c <LJDEP>
+    </LJDEP> _c?>
