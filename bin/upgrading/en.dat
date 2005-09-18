@@ -4659,6 +4659,8 @@ portal.stats.portaltitle=Statistics
 
 portal.stats.totalusers=Total users
 
+portal.update.entry=Entry:
+
 portal.update.mode.des=Full mode gives you a ton of extra posting options ... including posting in communities and setting your current mood, music, and picture.  Simple mode is nicer if you hardly use those features and would prefer not to see it all.
 
 portal.update.mode.full=Full
@@ -4672,6 +4674,8 @@ portal.update.moreopts=More Options
 portal.update.portalname=Journal Update
 
 portal.update.portaltitle=Update Your Journal
+
+portal.update.subject=Subject:
 
 protocol.bad_password=Your password is too easy to guess.  It's recommended that you change it, otherwise you risk having your journal hijacked.  Visit [[siteroot]]/changepassword.bml to change your password.
 
