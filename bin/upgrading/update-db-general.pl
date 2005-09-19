@@ -1010,6 +1010,27 @@ CREATE TABLE portal (
 )
 EOC
 
+register_tablecreate("portal_box_prop", <<'EOC');
+CREATE TABLE portal_box_prop (
+                              userid INT(10),
+                              pboxid SMALLINT,
+                              ppropid SMALLINT,
+                              propvalue VARCHAR(255) BINARY,
+                              PRIMARY KEY(userid, pboxid, ppropid)
+)
+EOC
+
+register_tablecreate("portal_config", <<'EOC');
+CREATE TABLE portal_config (
+                            userid INT(10),
+                            pboxid SMALLINT AUTO_INCREMENT,
+                            col CHAR(1),
+                            sortorder TINYINT,
+                            type INT,
+                            PRIMARY KEY(userid,pboxid)
+)
+EOC
+
 register_tablecreate("infohistory", <<'EOC');
 CREATE TABLE infohistory (
   userid int(10) unsigned NOT NULL default '0',
