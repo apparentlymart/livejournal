@@ -152,7 +152,7 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'totlimit'      => 120,
     },
 
-    'Centennial' => {
+    'centennial' => {
         'name'		=> 'Centennial Wireless',
         'notes'		=> 'Enter your phone number. Sent via http://www.centennialwireless.com',
         'fromlimit'	=> 10,
