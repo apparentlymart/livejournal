@@ -116,7 +116,7 @@ sub process {
     $charset = $1 if $content_type =~ /\bcharset=['"]?(\S+?)['"]?[\s\;]/i;
     $format = $1 if $content_type =~ /\bformat=['"]?(\S+?)['"]?[\s\;]/i;
     if (defined($charset) && $charset !~ /^UTF-?8$/i) { # no charset? assume us-ascii
-        return $err->("Unknown charset encoding type.", { sendmail => 1 })
+        return $err->("Unknown charset encoding type. ($charset)", { sendmail => 1 })
             unless Unicode::MapUTF8::utf8_supported_charset($charset);
         $body = Unicode::MapUTF8::to_utf8({-string=>$body, -charset=>$charset});
     }
@@ -129,6 +129,11 @@ sub process {
             if ($subject =~ /utf-8/i) {
                 $subject = $subj_data[0][0];
             } else {
+                return $err->(
+                    "Unknown subject charset encoding type. ($subj_data[0][1])",
+                    { sendmail => 1 }
+                  ) unless $subj_data[0][1]
+                      && Unicode::MapUTF8::utf8_supported_charset( $subj_data[0][1] );
                 $subject = Unicode::MapUTF8::to_utf8(
                     {
                         -string  => $subj_data[0][0],
