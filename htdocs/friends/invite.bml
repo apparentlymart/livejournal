@@ -85,6 +85,11 @@
                 body     => $POST{'msg'} . $msg_footer,
             });
 
+            $u->log_event('friend_invite_sent', {
+                remote => $u,
+                extra => $email,
+            });
+
             # Blank name and email so the form is redisplayed for a new
             # recipient, but with the same message
             $name = '';

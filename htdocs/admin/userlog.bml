@@ -77,6 +77,8 @@ FORM
         } elsif ($row->{action} eq 'ban_unset') {
             my $u = LJ::load_userid($row->{actiontarget});
             $action = "Unbanned " . LJ::ljuser($u) if $u;
+        } elsif ($row->{action} eq 'friend_invite_sent') {
+            $action = "Friend invite sent: " . LJ::durl($row->{extra});
         } elsif ($row->{action} eq 'maintainer_add') {
             my $u = LJ::load_userid($row->{actiontarget});
             $action = "Added maintainer " . LJ::ljuser($u) if $u;
