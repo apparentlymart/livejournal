@@ -87,7 +87,7 @@
         my $didget  = $GET{$_}  ? 1 : undef;
         my $action  = $_ if ($POST{$_} || $GET{$_});
 
-        if (($didget || $didpost) && LJ::check_referer('/portal/index.bml')) {
+        if (($didget || $didpost) && LJ::check_referer('/portal')) {
             # request to create a new box
             if ($action eq 'addbox') {
                 my $boxtype = $POST{'boxtype'} || $GET{'boxtype'};
