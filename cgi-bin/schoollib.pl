@@ -577,6 +577,93 @@ sub get_pending {
 }
 
 # <LJFUNC>
+# name: LJ::Schools::canonical_school_name
+# class: schools
+# des: Canonicalizes a school name to a standard format.
+# args: name, city
+# des-name: Name of the school to canonicalize.
+# des-city: Name of the city the school is located in.
+# returns: Canonicalized name of the school.
+# </LJFUNC>
+sub canonical_school_name {
+    my ($name, $city) = @_;
+
+    # condense spaces and trim as our first act
+    $name =~ s/^\s+//;
+    $name =~ s/\s+$//;
+    $name =~ s/\s+/ /g;
+
+    # remove initial The
+    $name =~ s/^The //i;
+
+    # remove a city from the end?
+    if ($city =~ /^[\w\s]+$/) {
+        $name =~ s/\W$city$//i;
+        $name =~ s/ at$//;
+        $name =~ s/ -$//;
+
+        # "Universidad de Buenos Aires" etc.
+        if ($name =~ /\b(?:de|of)$/i) {
+            $name .= " $city";
+        }
+    }
+
+    # hash of do not capitalize these words
+    my %nocaps = map { $_ => 1 }
+        qw( de du la le of the and at for );
+
+    # canonicalize it to lowercase with each word capitalized
+    $name = lc $name;
+    $name = join(' ', map { $nocaps{$_} ? $_ : ucfirst(lc($_)) } split(/\s+/, $name));
+
+    # fix up "O'neill" to "O'Neill"
+    $name =~ s/(O'\w)/uc $1/eg;
+
+    # fix up "Mccarthy" to "McCarthy"
+    $name =~ s/Mc(\w)/"Mc" . uc $1/eg;
+
+    # fix up "H.c." into "H.C."
+    $name =~ s/\b((?:\w\.)+ )/uc $1/eg;
+
+    # fix up "A&m" to "A&M", effectively
+    $name =~ s/\b(\w&\w)\b/uc $1/eg;
+
+    # fix up "Foo-bar" into "Foo-Bar"
+    $name =~ s/\b(\w)(\w+)-(\w)(\w+)\b/uc($1) . $2 . "-" . uc($3) . $4/eg;
+
+    # fix up Ft.
+    $name =~ s/^Ft\.? /Fort /;
+ 
+    # convert Saint to St. at BEGINNING of name
+    $name =~ s/^Saint /St. /;
+    $name =~ s/^St /St. /;
+
+    # convert St. to Saint INSIDE name
+    $name =~ s/ St\.? / Saint /g;
+
+    # fix "foo & bar" to "foo and bar"
+    $name =~ s/ & / and /g;
+
+    # now fix "A and M" ... mostly because "A & M" is expanded to such above
+    $name =~ s/ A and M / A&M /;
+
+    # fix things that are just "Foo High"
+    $name =~ s/ High$/ High School/;
+
+    # we don't call them Senior or Junior high schools
+    $name =~ s/ (?:Senior|Junior) High / High /;
+
+    # kill anybody putting ", State" or similar after the name?
+    $name =~ s/\s*,\s*$//;
+
+    # now ensure the FIRST LETTER is capitalized
+    # fixes case where city names "la Porte" aren't
+    $name = ucfirst($name);
+
+    return $name;
+}
+
+# <LJFUNC>
 # name: LJ::Schools::edit_school
 # class: schools
 # des: Edits the information for a school.

@@ -449,7 +449,7 @@ if ($opt_pop)
 
             # make sure we have a line in the right format
             next unless /^"(.+?)","(.+?)","(.*?)","(.*?)","(.*?)"$/;
-            my ($name, $country, $city, $state, $url) = ($1, $2, $3, $4, $5);
+            my ($name, $country, $state, $city, $url) = ($1, $2, $3, $4, $5);
 
             # get sid and insert (but don't fail on duplicate)
             $sid ||= LJ::alloc_global_counter('O');
