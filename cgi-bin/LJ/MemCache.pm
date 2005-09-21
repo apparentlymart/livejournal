@@ -47,6 +47,10 @@ sub reload_conf {
     $memc->set_debug($LJ::MEMCACHE_DEBUG);
     $memc->set_pref_ip(\%LJ::MEMCACHE_PREF_IP);
     $memc->set_compress_threshold($LJ::MEMCACHE_COMPRESS_THRESHOLD);
+
+    $memc->set_connect_timeout($LJ::MEMCACHE_CONNECT_TIMEOUT);
+    $memc->set_cb_connect_fail($LJ::MEMCACHE_CB_CONNECT_FAIL);
+
     if ($LJ::DB_LOG_HOST) {
         $stat_callback = sub {
             my ($stime, $etime, $host, $action) = @_;
