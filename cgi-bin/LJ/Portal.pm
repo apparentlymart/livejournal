@@ -28,14 +28,6 @@ sub get_faq_link {
         "<img src=\"$LJ::IMGPREFIX/help.gif\" /></a>";
 }
 
-# clients don't actually like XML
-sub return_xml {
-    my LJ::Portal $self = shift;
-    my $response = shift;
-    BML::set_content_type('text/plain');
-    return BML::http_response(200, $response);
-}
-
 sub create_button {
     my LJ::Portal $self = shift;
     my ($text, $action) = @_;
