@@ -621,10 +621,10 @@ sub approve_pending {
 # des: Returns the next "potentially good" set of records to be processed.
 # args: uobj
 # des-uobj: User id or object of user doing the admin work.
-# returns: Hashref; keys being 'primary', 'secondary', 'tertiary' and
-#          values being a hashref of { pendid => { ..school.. } }, where
-#          the school hashref contains name, citycode, statecode, countrycode,
-#          url, userid.  Undef on error!
+# returns: Hashref; keys being 'primary' with a value of a school hashref,
+#          and 'secondary', 'tertiary' with values being a hashref of
+#          { pendid => { ..school.. } }, where the school hashref contains
+#          name, citycode, statecode, countrycode, url, userid.  Undef on error!
 # </LJFUNC>
 sub get_pending {
     my $u = LJ::want_user(shift);
@@ -702,7 +702,7 @@ sub get_pending {
 
     # step 6: return the results
     return {
-        primary   => { $pend => $school },
+        primary   => $school,
         secondary => $second,
         tertiary  => $third,
     };
