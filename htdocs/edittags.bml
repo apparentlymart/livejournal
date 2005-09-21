@@ -22,7 +22,7 @@ body<=
 
     my $journal = $GET{journal} || $POST{journal};
     my $u = LJ::load_user($journal);
-    return $err->($ML{'.invalid.journal'}) unless $u;
+    return $err->($ML{'.invalid.journal'}) unless $u && $u->{statusvis} eq 'V';
 
     my $ditemid = ($GET{itemid} || $POST{itemid})+0;
     my $anum = $ditemid % 256;
@@ -34,6 +34,12 @@ body<=
     return $err->($ML{'.invalid.entry'}) unless $logrow->{anum} == $anum;
     return $err->($ML{'.invalid.notauthorized'})
         unless LJ::can_view($remote, $logrow);
+
+    # poster must be visible too
+    if ($logrow->{posterid} != $u->{userid}) {
+        my $pu = LJ::load_userid($logrow->{posterid});
+        return $err->($ML{'.invalid.journal'}) if $u->{statusvis} ne 'V';
+    }
 
     if (LJ::did_post()) {
         return $err->($ML{'.invalid.link'})
