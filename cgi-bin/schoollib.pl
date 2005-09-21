@@ -546,7 +546,7 @@ sub delete_attended {
     # memcache rows, because then we'd have to load more information to get what
     # years this user attended, and it doesn't help us much.  we want the school
     # attendance lists to be loaded as little as possible.
-    # FIXME: delete user's memcache row
+    LJ::MemCache::delete([ $u->{userid}, "saui:$u->{userid}" ]);
     return 1;
 }
 
@@ -558,22 +558,154 @@ sub delete_attended {
 # des-pendids: Arrayref of pendids from the schools_pending table.
 # des-options: Hashref; Key=>value pairs that define the target school's information.  Keys
 #              are one of: name, city, state, country, citycode, statecode, countrycode, url.
-# returns: 1 on success, undef on error.
+# returns: Allocated school id on success, undef on error.
 # </LJFUNC>
 sub approve_pending {
+    my ($pendids, $opts) = @_;
+    return undef unless $pendids && ref $pendids eq 'ARRAY' && @$pendids &&
+                        $opts && ref $opts eq 'HASH';
 
+    # now verify our pendids are valid
+    @$pendids = grep { $_ } map { $_+0 } @$pendids;
+    return undef unless @$pendids;
+
+    # verify we have location data
+    my ($ctc, $sc, $cc) = LJ::Schools::determine_location_opts($opts);
+    return undef unless $ctc && defined $sc && defined $cc;
+
+    # and verify other options
+    return undef unless $opts->{name};
+
+    # get database handle
+    my $dbh = LJ::get_db_writer();
+    return undef unless $dbh;
+
+    # load these pending rows
+    my $in = join(',', @$pendids);
+    my $rows = $dbh->selectall_hashref(qq{
+            SELECT pendid, userid, name, country, state, city, url
+            FROM schools_pending
+            WHERE pendid IN ($in)
+        }, 'pendid') || {};
+    return undef if $dbh->err;
+
+    # setup to add the new school
+    $sc ||= undef;
+    $cc ||= undef;
+    $opts->{url} ||= undef;
+
+    # actually add the school
+    my $sid = LJ::alloc_global_counter('O');
+    return undef unless $sid;
+    $dbh->do("INSERT INTO schools (schoolid, name, country, state, city, url) VALUES (?, ?, ?, ?, ?, ?)",
+             undef, $sid, $opts->{name}, $ctc, $sc, $cc, $opts->{url});
+    return undef if $dbh->err;
+
+    # now insert the user attendance lists
+    my %userids;
+    foreach my $row (values %$rows) {
+        next if $userids{$row->{userid}}++;
+        LJ::Schools::set_attended($row->{userid}, $sid);
+    }
+
+    # and delete their pending rows, but ignore errors
+    $dbh->do("DELETE FROM schools_pending WHERE pendid IN ($in)");
+
+    # and we're done
+    return $sid;
 }
 
 # <LJFUNC>
 # name: LJ::Schools::get_pending
 # class: schools
 # des: Returns the next "potentially good" set of records to be processed.
-# returns: Arrayref of hashrefs of records; the hashrefs have keys of name,
-#          city, state, country, citycode, statecode, countrycode,
-#          url, userid.
+# args: uobj
+# des-uobj: User id or object of user doing the admin work.
+# returns: Hashref; keys being 'primary', 'secondary', 'tertiary' and
+#          values being a hashref of { pendid => { ..school.. } }, where
+#          the school hashref contains name, citycode, statecode, countrycode,
+#          url, userid.  Undef on error!
 # </LJFUNC>
 sub get_pending {
+    my $u = LJ::want_user(shift);
+    return undef unless $u;
 
+    # need db
+    my $dbh = LJ::get_db_writer();
+    return undef unless $dbh;
+
+    # step 1: select some rows, so we have a sample to choose from
+    my $rows = $dbh->selectall_hashref(qq{
+            SELECT pendid, userid, name, country, state, city, url
+            FROM schools_pending
+            LIMIT 20
+        }, 'pendid');
+    return undef if $dbh->err;
+
+    # step 2: now, we want to find one that isn't being dealt with; I think we will
+    # not run into too many "at the same time" issues, so we're doing the memcache
+    # queries one at a time instead of implementing the multi logic
+    my $pend;
+    foreach my $pendid (keys %$rows) {
+        my $userid = LJ::MemCache::get([ $pendid, "sapiu:$pendid" ]);
+        next if $userid;
+
+        # nobody's touching it, so mark it for us for 10 minutes
+        $pend = $pendid;
+        last;
+    }
+    my $school = $rows->{$pend};
+
+    # step 3: find anything relating to this pending record, by name first
+    my $sim_name = $dbh->selectall_hashref(qq{
+            SELECT pendid, userid, name, country, state, city, url
+            FROM schools_pending
+            WHERE name = ? AND country = ?
+            AND pendid <> ?
+        }, 'pendid', undef, $school->{name}, $school->{country}, $pend) || {};
+    return undef if $dbh->err;
+
+    # step 4: now find anything in this location as 'possible' matches
+    my @args = grep { $_ } ( $school->{state}, $school->{city} );
+    my $state = $school->{state} ? "= ?" : "IS NULL";
+    my $city  = $school->{city}  ? "= ?" : "IS NULL";
+    my $in = join(',', $pend, map { $_+0 } keys %$sim_name);
+    my $sim_loc = $dbh->selectall_hashref(qq{
+            SELECT pendid, userid, name, country, state, city, url
+            FROM schools_pending
+            WHERE country = ? AND state $state AND city $city
+            AND pendid NOT IN ($in)
+        }, 'pendid', undef, $school->{country}, @args) || {};
+    return undef if $dbh->err;
+
+    # step 5: note all of these as being 'used'
+    my %set;
+    foreach my $id ($pend, keys %$sim_name, keys %$sim_loc) {
+        next if $set{$id}++;
+        LJ::MemCache::set([ $id, "sapiu:$id" ], $u->{userid}, 600);
+    }
+
+    # step 6: break things down into secondary and tertiary matches
+    my ($second, $third) = ({}, {});
+    foreach my $value (values %$sim_loc, values %$sim_name) {
+        if (defined $value->{state} && defined $school->{state} &&
+                $value->{state} eq $school->{state} &&
+                defined $value->{city} && defined $school->{city} &&
+                $value->{city} eq $school->{city}) {
+            # state+city present & matches, this is a good match
+            $second->{$value->{pendid}} = $value;
+        } else {
+            # tertiary match
+            $third->{$value->{pendid}} = $value;
+        }
+    }
+
+    # step 6: return the results
+    return {
+        primary   => { $pend => $school },
+        secondary => $second,
+        tertiary  => $third,
+    };
 }
 
 # <LJFUNC>
