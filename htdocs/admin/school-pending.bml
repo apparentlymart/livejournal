@@ -110,7 +110,7 @@ body<=
                     unless $rv;
             }
 
-            $ret .= '<?h1 Success h1?><?p Schools approved! p?>';
+            $ret .= '<?h1 Success h1?><?p Schools approved! <a href="school-pending.bml">Do Another</a> p?>';
         }
 
         return $ret;
