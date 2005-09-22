@@ -2349,16 +2349,6 @@ sub procnotify_check
     $LJ::CACHE_PROCNOTIFY_MAX = $max;
 }
 
-sub dbtime_callback {
-    my ($dsn, $dbtime, $time) = @_;
-    my $diff = abs($dbtime - $time);
-    if ($diff > 2) {
-        $dsn =~ /host=([^:\;\|]*)/;
-        my $db = $1;
-        print STDERR "Clock skew of $diff seconds between web($LJ::SERVER_NAME) and db($db)\n";
-    }
-}
-
 # We're not always running under mod_perl... sometimes scripts (syndication sucker)
 # call paths which end up thinking they need the remote IP, but don't.
 sub get_remote_ip

@@ -332,6 +332,17 @@ sub nodb {
         ref $_[0] eq "DBIx::StateKeeper" || ref $_[0] eq "Apache::DBI::db";
 }
 
+sub dbtime_callback {
+    my ($dsn, $dbtime, $time) = @_;
+    my $diff = abs($dbtime - $time);
+    if ($diff > 2) {
+        $dsn =~ /host=([^:\;\|]*)/;
+        my $db = $1;
+        print STDERR "Clock skew of $diff seconds between web($LJ::SERVER_NAME) and db($db)\n";
+    }
+}
+
+
 sub isdb { return ref $_[0] && (ref $_[0] eq "DBI::db" ||
                                 ref $_[0] eq "DBIx::StateKeeper" ||
                                 ref $_[0] eq "Apache::DBI::db"); }
