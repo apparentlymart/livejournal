@@ -1514,10 +1514,14 @@ sub js_dumper {
     if (ref $obj eq "HASH") {
         my $ret = "{";
         foreach my $k (keys %$obj) {
-            my $kd = ($k =~ /^\w+$/) ? $k : js_dumper($k);
-            $ret .= "$kd: " . js_dumper($obj->{$k}) . ",";
+            # numbers as keys need to be quoted.  and things like "null"
+            my $kd = ($k =~ /^\w+$/) ? "\"$k\"" : LJ::js_dumper($k);
+            $ret .= "$kd: " . js_dumper($obj->{$k}) . ",\n";
         }
-        chop $ret if keys %$obj;
+        if (keys %$obj) {
+            chop $ret;
+            chop $ret;
+        }
         $ret .= "}";
         return $ret;
     } elsif (ref $obj eq "ARRAY") {
