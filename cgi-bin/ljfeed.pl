@@ -353,7 +353,9 @@ sub create_view_rss
 sub create_view_atom
 {
     my ( $j, $u, $opts, $cleanitems ) = @_;
-    my ( $feed, $xml );
+    my ( $feed, $xml, $ns );
+
+    $ns = "http://www.w3.org/2005/Atom";
 
     # AtomAPI interface path
     my $api = $opts->{'apilinks'} ? "$LJ::SITEROOT/interface/atom" :
@@ -369,7 +371,7 @@ sub create_view_atom
         return $link;
     };
 
-    my $author = XML::Atom::Person->new();
+    my $author = XML::Atom::Person->new( Version => 1 );
     $author->email( $u->{'email'} ) if $u->{'email'};
     $author->name(  $u->{'name'} );
 
@@ -437,7 +439,7 @@ sub create_view_atom
         # only add author if we are in a single entry view, or
         # the journal entry isn't owned by the journal owner. (communities)
         if ( $opts->{'single_entry'} or $j->{'u'}->{'email'} ne $u->{'email'} ) {
-            my $author = XML::Atom::Person->new();
+            my $author = XML::Atom::Person->new( Version => 1 );
             $author->email( $j->{'u'}->{'email'} ) if $j->{'u'}->{'email'};
             $author->name(  $j->{'u'}->{'name'} );
             $entry->author($author);
@@ -464,11 +466,12 @@ sub create_view_atom
         $entry->updated(  LJ::time_to_w3c($it->{modtime}, 'Z') );
         $entry->modified( LJ::time_to_w3c($it->{modtime}, 'Z') );  # COMPAT
 
-        # XML::Atom 0.9 doesn't support categories.   Maybe later?
+        # XML::Atom 0.13 doesn't support categories.   Maybe later?
         foreach my $tag ( @{$it->{tags} || []} ) {
             $tag = LJ::exml( $tag );
             my $category = $entry_xml->createElement( 'category' );
             $category->setAttribute( 'term', $tag );
+            $category->setNamespace( $ns );
             $entry_xml->getDocumentElement->appendChild( $category );
         }
 
@@ -482,18 +485,19 @@ sub create_view_atom
         #
         # a lack of a content element is allowed,  as long
         # as we maintain a proper 'alternate' link (above)
+        my $make_content = sub {
+            my $content = $entry_xml->createElement( $_[0] );
+            $content->setAttribute( 'type', 'html' );
+            $content->setNamespace( $ns );
+            $content->appendTextNode( $it->{'event'} );
+            $entry_xml->getDocumentElement->appendChild( $content );
+        };
         if ($u->{'opt_synlevel'} eq 'full') {
             # Do this manually for now, until XML::Atom supports new
             # content type classifications.
-            my $content = $entry_xml->createElement( 'content' );
-            $content->setAttribute( 'type', 'html' );
-            $content->appendTextNode( $it->{'event'} );
-            $entry_xml->getDocumentElement->appendChild( $content );
+            $make_content->('content');
         } elsif ($u->{'opt_synlevel'} eq 'summary') {
-            my $summary = $entry_xml->createElement( 'summary' );
-            $summary->setAttribute( 'type', 'html' );
-            $summary->appendTextNode( $it->{'event'} );
-            $entry_xml->getDocumentElement->appendChild( $summary );
+            $make_content->('summary');
         }
 
         if ( $opts->{'single_entry'} ) {
