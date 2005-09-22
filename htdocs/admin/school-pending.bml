@@ -168,7 +168,10 @@ body<=
             foreach my $school (values %$secondary, values %$tertiary) {
                 $ret .= "<tr><td>";
                 $ret .= LJ::html_check({ 'type' => 'check', 'name' => $school->{pendid} });
-                $ret .= "</td><td>$school->{name}</td><td>$school->{city}</td><td>$school->{url}</td><td>";
+                $ret .= "</td><td>";
+                $ret .= LJ::ehtml($school->{name}) . '</td><td>';
+                $ret .= LJ::ehtml($school->{city}) . '</td><td>';
+                $ret .= LJ::ehtml($school->{url})  . '</td><td>';
                 $ret .= LJ::html_check({ 'type' => 'check', 'name' => "delete$school->{pendid}" });
                 $ret .= "</td></tr>";
             }
