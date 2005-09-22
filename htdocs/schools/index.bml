@@ -47,12 +47,12 @@ body<=
         my $ret;
         $ret .= '<b>Find a school in:</b> '
             if $des;
-        $ret .= "<a href='$LJ::SITEROOT/schools/index.bml?ctc=$ectc'>$country</a>";
+        $ret .= "<a href='$LJ::SITEROOT/schools/?ctc=$ectc'>$country</a>";
 
-        $ret .= " &gt; <a href='$LJ::SITEROOT/schools/index.bml?ctc=$ectc&sc=$esc'>$state</a>"
+        $ret .= " &gt; <a href='$LJ::SITEROOT/schools/?ctc=$ectc&sc=$esc'>$state</a>"
             if $state;
 
-        $ret .= " &gt; <a href='$LJ::SITEROOT/schools/index.bml?ctc=$ectc&sc=$esc&cc=$ecc'>$city</a>"
+        $ret .= " &gt; <a href='$LJ::SITEROOT/schools/?ctc=$ectc&sc=$esc&cc=$ecc'>$city</a>"
             if $city;
 
         $ret .= '<br />';
@@ -158,7 +158,7 @@ body<=
         $ret .= "<?h1 School Submitted h1?>";
         $ret .= "<?p Your school has been submitted for approval.  If approved, your school will be added to the Schools Directory and automatically added to your <a href='$LJ::SITEROOT/schools/manage.bml'>Schools</a> list.  You can check back later to the <a href='$LJ::SITEROOT/schools/manage.bml'>Manage Schools</a> page to add years attended. p?>";
 
-        $ret .= "<a href='$LJ::SITEROOT/schools/index.bml'>Return to the Schools Directory</a><br /><br /><a href='$LJ::SITEROOT/schools/manage.bml'>Go to your Schools list</a></td></tr></table>";
+        $ret .= "<a href='$LJ::SITEROOT/schools/'>Return to the Schools Directory</a><br /><br /><a href='$LJ::SITEROOT/schools/manage.bml'>Go to your Schools list</a></td></tr></table>";
         return $ret;
     }
 
@@ -183,12 +183,12 @@ body<=
 
         $ret .= "<ul>";
         foreach my $ct (sort keys %{$cts}) {
-            $ret .= "<li><a href='$LJ::SITEROOT/schools/index.bml?ctc=$ct'>$cts->{$ct}</a></li>\n";
+            $ret .= "<li><a href='$LJ::SITEROOT/schools/?ctc=$ct'>$cts->{$ct}</a></li>\n";
         }
         $ret .= "</ul>";
 
         $ret .= "<div id='addlink'><?p <i>Don't see what you're looking for?</i><br />";
-        $ret .= "<a href='index.bml?ctc=$ectc&add=1' onclick='return addschool()'>Add a School</a>";
+        $ret .= "<a href='/schools/?ctc=$ectc&add=1' onclick='return addschool()'>Add a School</a>";
         $ret .= " p?></div>";
         $ret .= $add_school->();
 
@@ -223,13 +223,13 @@ body<=
         foreach my $sc (sort { $a cmp $b } keys %{$scs}) {
             my $esc = LJ::eurl($sc);
             my $val = $scs->{$sc} || "<i>no defined state or province</i>";
-            $ret .= "<li><a href='$LJ::SITEROOT/schools/index.bml?ctc=$ctc&sc=$esc'>$val</a></li>\n";
+            $ret .= "<li><a href='$LJ::SITEROOT/schools/?ctc=$ctc&sc=$esc'>$val</a></li>\n";
         }
         $ret .= "</ul>";
 
         unless ($ctc eq 'US') {
             $ret .= "<div id='addlink'><?p <i>Don't see what you're looking for?</i><br />";
-            $ret .= "<a href='index.bml?ctc=$ectc&add=1' onclick='return addschool()'>Add a School</a>";
+            $ret .= "<a href='/schools/?ctc=$ectc&add=1' onclick='return addschool()'>Add a School</a>";
             $ret .= " p?></div>";
             $ret .= $add_school->($ctc);
         }
@@ -258,12 +258,12 @@ body<=
         $ret .= "<ul>";
         foreach my $cc (sort { $a cmp $b } keys %{$ccs}) {
             my $esc = LJ::eurl($cc);
-            $ret .= "<li><a href='$LJ::SITEROOT/schools/index.bml?ctc=$ctc&sc=$sc&cc=$esc'>$ccs->{$cc}</a></li>\n";
+            $ret .= "<li><a href='$LJ::SITEROOT/schools/?ctc=$ctc&sc=$sc&cc=$esc'>$ccs->{$cc}</a></li>\n";
         }
         $ret .= "</ul>";
 
         $ret .= "<div id='addlink'><?p <i>Don't see what you're looking for?</i><br />";
-        $ret .= "<a href='index.bml?ctc=$ectc&sc=$esc&add=1' onclick='return addschool()'>Add a School</a>";
+        $ret .= "<a href='/schools/?ctc=$ectc&sc=$esc&add=1' onclick='return addschool()'>Add a School</a>";
         $ret .= " p?></div>";
         $ret .= $add_school->($ctc, $sc);
 
@@ -290,12 +290,12 @@ body<=
 
         $ret .= "<ul>";
         foreach my $sid (sort { $schools->{$a} cmp $schools->{$b} } keys %{$schools}) {
-            $ret .= "<li><a href='$LJ::SITEROOT/schools/index.bml?ctc=$ctc&sc=$sc&cc=$ecc&sid=$sid'>$schools->{$sid}</a></li>\n";
+            $ret .= "<li><a href='$LJ::SITEROOT/schools/?ctc=$ctc&sc=$sc&cc=$ecc&sid=$sid'>$schools->{$sid}</a></li>\n";
         }
         $ret .= "</ul>";
 
         $ret .= "<div id='addlink'><?p <i>Don't see what you're looking for?</i><br />";
-        $ret .= "<a href='index.bml?ctc=$ectc&sc=$esc&cc=$ecc&add=1' onclick='return addschool()'>Add a School</a>";
+        $ret .= "<a href='/schools/?ctc=$ectc&sc=$esc&cc=$ecc&add=1' onclick='return addschool()'>Add a School</a>";
         $ret .= " p?></div>";
         $ret .= $add_school->($ctc, $sc, $cc);
 
@@ -341,9 +341,9 @@ body<=
         my @list = LJ::get_authas_list($remote);
 
         $ret .= "<br /><form method='get' action='$LJ::SITEROOT/schools/manage.bml'>\n";
-        $ret .= LJ::html_hidden('ctc', $ectc) if $ctc;
-        $ret .= LJ::html_hidden('cc', $ecc) if $cc;
-        $ret .= LJ::html_hidden('sid', $esid) if $sid;
+        $ret .= LJ::html_hidden('ctc', $ctc) if $ctc;
+        $ret .= LJ::html_hidden('cc', $cc) if $cc;
+        $ret .= LJ::html_hidden('sid', $sid) if $sid;
         $ret .= 'Add this school for ';
 
         if (@list > 1) {
@@ -353,33 +353,39 @@ body<=
         }
 
         $ret .= ' ' . LJ::html_submit('Add');
-        $ret .= "<br /><a href='$LJ::SITEROOT/schools/index.bml'>Find another school</a>";
+        $ret .= "<br /><a href='$LJ::SITEROOT/schools/'>Find another school</a>";
         $ret .= "<br /><a href='$LJ::SITEROOT/schools/manage.bml?sid=$esid'>Manage your schools</a>";
         $ret .= "</form>";
     }
 
     $ret .= "<br /><?h2 Browse journals associated with this school: h2?>";
 
-    $ret .= "<br /><form action='/schools/index.bml' method='get'><?h2 Limit this list by year: ";
-    $ret .= LJ::html_text({name => 'year', size => 4, maxlength => 4, value => $year ? $year : ''});
-    $ret .= LJ::html_hidden('ctc', $ctc, 'cc', $cc, 'sid', $sid, 'sc', $sc);
-    $ret .= LJ::html_submit('Filter');
-    $ret .= " h2?></form>";
+    if (@ids) {
+        $ret .= "<form action='/schools/' method='get'><?p Limit this list by year: ";
+        $ret .= LJ::html_text({name => 'year', size => 4, maxlength => 4, value => $year ? $year : ''});
+        $ret .= LJ::html_hidden('ctc', $ctc, 'cc', $cc, 'sid', $sid, 'sc', $sc);
+        $ret .= LJ::html_submit('Filter');
+        $ret .= " p?></form>";
+    }
 
     unless (@ids) {
-        $ret .= "<?p There are no communities or users that list this school yet. p?>";
+        if ($year) {
+            $ret .= "<?p There are no communities or users that list this school in $year. p?>";
+        } else {
+            $ret .= "<?p There are no communities or users that list this school yet. p?>";
+        }
     } else {
         if (@comms) {
             $ret .= "<?p <b>Communities</b> p?><ul>";
-            foreach (@comms) {
-                $ret .= "<li>" . LJ::ljuser($_) . " - $_->{name}</li>\n";
+            foreach my $c (@comms) {
+                $ret .= "<li>" . LJ::ljuser($c) . " - " . LJ::ehtml($c->{name}) . "</li>\n";
             }
             $ret .= "</ul>";
         }
         if (@users) {
             $ret .= "<?p <b>Users</b> p?><ul>";
-           foreach (@users) {
-                $ret .= "<li>" . LJ::ljuser($_) . "</li>\n";
+           foreach my $su (@users) {
+                $ret .= "<li>" . LJ::ljuser($su) . ($su->{name} ? " - " . LJ::ehtml($su->{name}) : "") . "</li>\n";
             }
             $ret .= "</ul>";
         }

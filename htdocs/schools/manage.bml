@@ -9,9 +9,8 @@ body<=
     LJ::need_res('stc/display_none.css');
     LJ::set_active_crumb('schoolsmy');
 
-    my $edit_mode = $GET{edit};
+    my $edit_mode = 1;
     my $edit_sid = undef; # To display edit interface for only one school
-
 
     my $ret = '';
     my $err = sub { return "<?h1 Error h1?><?p $_[0] p?>"; };
@@ -109,7 +108,7 @@ body<=
         }
 
     # See if they are adding a new school
-    } elsif ($GET{sid}+0 > 0 && $GET{ctc} && $GET{cc} && LJ::check_referer('/schools/index.bml')) {
+    } elsif ($GET{sid}+0 > 0 && $GET{ctc} && $GET{cc} && LJ::check_referer('/schools/')) {
         my $sid = $GET{sid}+0;
 
         unless (defined $schools->{sid}) {
@@ -136,7 +135,7 @@ body<=
     }
 
     # Header
-    $ret .= "<?p Below you can see the list of schools associated with your journal or communities.  By clicking the <img src='$LJ::IMGPREFIX/btn_edit.gif' alt='Edit' border='0'/> Edit button, you can edit the years you attended or delete the school from your list. p?><?p <a href='$LJ::SITEROOT/schools/index.bml'>Find another school</a> p?>";
+    $ret .= "<?p Below you can edit the list of schools associated with your journal or communities.  This information is public, if you provide it.  p?>";
 
     # user switcher
     $ret .= "<form method='get' action='manage.bml'>\n";
@@ -147,7 +146,9 @@ body<=
     if ($schools && %$schools) {
         my $authas = $GET{authas} ? "?authas=$GET{authas}" : '';
         $ret .= "<form action='manage.bml$authas' method='post'>";
-        $ret .= '<table style="border-spacing: 0">';
+        $ret .= '<table align="center" cellpadding="5">';
+
+        $ret .= "<tr class='shead'><th>School name</th></td><th>Years attended</th></tr>\n";
 
         foreach my $sid (sort { $schools->{$a}->{year_start} <=> $schools->{$b}->{year_stat},
                                 $schools->{$a}->{name} cmp $schools->{$b}->{name} } keys %$schools) {
@@ -157,21 +158,13 @@ body<=
             undef $year_end unless defined $year_start;
 
             my $rowclass = $edit_sid == $sid ? 'highlight' : '';
-            my $link = "$LJ::SITEROOT/schools/index.bml?ctc=" . LJ::eurl($schools->{$sid}->{country}) .
+            my $link = "$LJ::SITEROOT/schools/?ctc=" . LJ::eurl($schools->{$sid}->{country}) .
                        "&sc=" . LJ::eurl($schools->{$sid}->{state}) .
                        "&cc=" . LJ::eurl($schools->{$sid}->{city}) .
                        "&sid=$sid";
-            $ret .= "<tr class='$rowclass'><th style='text-align: left'><a href='$link'>$schools->{$sid}->{name}</a></th><td>";
+            $ret .= "<tr class='$rowclass'><th style='text-align: left'><a href='$link'>" . LJ::ehtml($schools->{$sid}->{name}) . "</a></th><td>";
 
-            if (!$edit_mode && $sid != $edit_sid) {
-                $ret .= "<div id='$sid:showtime' style='whitespace: nowrap'>&nbsp;($schools->{$sid}->{year_start} - $year_end)";
-                $ret .= " <a href='manage.bml?edit=1' onclick='return edit($sid)'>";
-                $ret .= "<img src='$LJ::IMGPREFIX/btn_edit.gif' alt='Edit' border='0'/></a></div>";
-            }
-
-            my $editclass = ($edit_mode || $edit_sid == $sid) ? '' : 'display_none';
-
-            $ret .= "<div id='$sid:edittime' class='$editclass'>(";
+            $ret .= "<div id='$sid:edittime'>(";
             $ret .= LJ::html_text({name => "$sid:year_start", value => $year_start, size => 4, maxlength => 4}) . ' to ';
             $ret .= LJ::html_text({name => "$sid:year_end", value => $year_end eq 'present' ? 'now' : $year_end, size => 4, maxlength => 4});
             $ret .= ') ' . LJ::html_check({name => "$sid:delete", id => "$sid:delete"}) . "<label for='$sid:delete'>Delete</label>";
@@ -180,12 +173,12 @@ body<=
             $ret .= '</td></tr>';
         }
 
-        my $saveclass = $edit_mode || $edit_sid ? '' : 'display_none';
-        $ret .= "<tr><td colspan='2' align='left'><div id='save' class='$saveclass'>";
+        $ret .= "<tr><td>&nbsp;</td><td align='left'><div id='save'>";
         $ret .= LJ::html_submit('save', 'Save Changes') . '</div></td></tr>';
         $ret .= '</table></form>';
+        $ret .= "<?p <a href='/schools/'>Find another school</a> to add. p?>";
     } else {
-        $ret .= "<?p You have not listed any schools.  <a href='/schools/index.bml'>Browse the school directory to find yours.</a> p?>";
+        $ret .= "<?p You have not listed any schools.  <a href='/schools/'>Browse the school directory</a> to find and add schools.</a> p?>";
     }
 
     return $ret;
@@ -214,6 +207,7 @@ head<=
 </script>
 <style>
     .highlight { background: <?emcolor?> }
+    tr.shead th { text-align: left; text-weight: normal; font-style: italic;  }
 </style>
 <=head
 page?>
