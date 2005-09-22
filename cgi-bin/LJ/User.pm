@@ -1577,6 +1577,7 @@ sub remote_has_priv
 # $dom: 'L' == log, 'T' == talk, 'M' == modlog, 'S' == session,
 #       'R' == memory (remembrance), 'K' == keyword id,
 #       'P' == phone post, 'C' == pending comment
+#       'O' == portal box id
 sub alloc_user_counter
 {
     my ($u, $dom, $opts) = @_;

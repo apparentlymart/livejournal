@@ -154,11 +154,10 @@ sub addbox {
     if ($boxtype =~ /^\w+$/ && $boxcol =~ /^\w$/) {
         my $newbox = $portalconfig->add_box("$boxtype", $boxcol);
         if ($newbox) {
-            my $innerHTML = $portalconfig->generate_box_insides($newbox->pboxid());
-            my $boxclass = $newbox->box_class;
             my $pboxid = $newbox->pboxid;
-            my $boxjs = LJ::Portal->get_portal_box_display_script("pbox$pboxid", "PortalBox $boxclass", $innerHTML, "PortalCol$boxcol");
-            $returncode .= $boxjs;
+            my $innerHTML = $portalconfig->generate_box_insides($pboxid);
+            my $boxclass = $newbox->box_class;
+            $returncode .= LJ::Portal->get_portal_box_display_script("pbox$pboxid", "PortalBox $boxclass", $innerHTML, "PortalCol$boxcol");
 
             # update the arrows on the last box in the column
             my $prevbox = $portalconfig->prev_box($newbox);

@@ -681,12 +681,11 @@ sub generate_box_insides {
     my $boxid = shift;
 
     my $box = $self->{'boxes'}->{$boxid};
-    return unless $box;
+    return 'Could not find box.' unless $box;
 
     my $sort = $box->sortorder;
     my $boxclass = $box->can('box_class') ? $box->box_class : '';
     my $titlebar = $self->generate_box_titlebar($box);
-    my $pboxid = $box->{'pboxid'};
 
     # don't let the box do anything if it's disabled
     my $content;
@@ -697,7 +696,7 @@ sub generate_box_insides {
     }
 
     return  qq{
-        <div class="PortalBoxTitleBar" id="pboxtitlebar$pboxid">
+        <div class="PortalBoxTitleBar" id="pboxtitlebar$boxid">
             $titlebar
         </div>
         <div class="PortalBoxContent $boxclass">
