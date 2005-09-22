@@ -33,6 +33,10 @@
             my @errs;
             LJ::check_email($email, \@errs);
             $bogus->("email", "Bogus looking email: @errs") if @errs;
+
+            if ($LJ::USER_EMAIL && $email =~ /$LJ::USER_DOMAIN$/) {
+                $bogus->("email", "You are sending this invite to a user that already has an account");
+            }
         } else {
             $bogus->("email", "Please enter your friend's email address");
         }
