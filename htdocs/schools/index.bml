@@ -308,7 +308,7 @@ body<=
     $year += 0;
     $year = 0 if $year < 1900;
 
-    my @ids = LJ::Schools::get_attendees($sid);
+    my @ids = LJ::Schools::get_attendees($sid, $year);
 
     # now multi-load and split
     my (@users, @comms);
