@@ -103,11 +103,12 @@ body<=
 
             return "Error approving schools" unless $rv;
 
-            $rv = LJ::Schools::reject_pending($delete_sids);
+            if ($delete_sids) {
+                $rv = LJ::Schools::reject_pending($delete_sids);
 
-            return "Unable to delete primary school"
-                unless $rv;
-
+                return "Unable to delete schools"
+                    unless $rv;
+            }
 
             $ret .= '<?h1 Success h1?><?p Schools approved! p?>';
         }
