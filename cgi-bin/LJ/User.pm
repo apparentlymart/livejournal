@@ -3210,7 +3210,22 @@ sub make_journal
 
     if ($stylesys == 2) {
         $r->notes('codepath' => "s2.$view") if $r;
-        return LJ::S2::make_journal($u, $styleid, $view, $remote, $opts);
+
+        my $mj = LJ::S2::make_journal($u, $styleid, $view, $remote, $opts);
+
+        # intercept flag to handle_with_bml_ref and instead use S1 shortcomings
+        # if BML is disabled
+        if ($opts->{'handle_with_bml_ref'} && ${$opts->{'handle_with_bml_ref'}} &&
+            $LJ::S1_SHORTCOMINGS)
+        {
+            # kill the flag
+            ${$opts->{'handle_with_bml_ref'}} = 0;
+
+            # and proceed with s1shortcomings (which looks like BML) instead of BML
+            $mj = LJ::S2::make_journal($u, "s1short", $view, $remote, $opts);
+        }
+
+        return $mj;
     }
 
     # Everything from here on down is S1.  FIXME: this should be moved to LJ::S1::make_journal

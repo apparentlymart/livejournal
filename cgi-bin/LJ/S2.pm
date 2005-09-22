@@ -80,16 +80,18 @@ sub make_journal
 
     # let layouts disable EntryPage / ReplyPage, using the BML version
     # instead.
-    if ($ctx->[S2::PROPS]->{'view_entry_disabled'} && ($view eq "entry" || $view eq "reply")) {
-        ${$opts->{'handle_with_bml_ref'}} = 1;
-        return;
-    }
+    unless ($styleid eq "s1short") {
+        if ($ctx->[S2::PROPS]->{'view_entry_disabled'} && ($view eq "entry" || $view eq "reply")) {
+            ${$opts->{'handle_with_bml_ref'}} = 1;
+            return;
+        }
 
-    # make sure capability supports it
-    if (($view eq "entry" || $view eq "reply") &&
-        ! LJ::get_cap(($opts->{'checkremote'} ? $remote : $u), "s2view$view")) {
-        ${$opts->{'handle_with_bml_ref'}} = 1;
-        return;
+        # make sure capability supports it
+        if (($view eq "entry" || $view eq "reply") &&
+            ! LJ::get_cap(($opts->{'checkremote'} ? $remote : $u), "s2view$view")) {
+            ${$opts->{'handle_with_bml_ref'}} = 1;
+            return;
+        }
     }
 
     # setup tags backwards compatibility
@@ -1698,10 +1700,10 @@ sub Link {
     my ($url, $caption, $icon) = @_;
 
     my $lnk = {
-	'_type'   => 'Link',
-	'caption' => $caption,
-	'url'     => $url,
-	'icon'    => $icon,
+        '_type'   => 'Link',
+        'caption' => $caption,
+        'url'     => $url,
+        'icon'    => $icon,
     };
 
     return $lnk;
@@ -1837,8 +1839,8 @@ sub UserLite
         'journal_type' => $u->{'journaltype'},
         'data_link' => {
             'foaf' => Link("$LJ::SITEROOT/users/" . LJ::ehtml($u->{'user'}) . '/data/foaf',
-			   "FOAF",
-			   Image("$LJ::IMGPREFIX/data_foaf.gif", 32, 15, "FOAF")),
+                           "FOAF",
+                           Image("$LJ::IMGPREFIX/data_foaf.gif", 32, 15, "FOAF")),
         },
         'data_links_order' => [ "foaf" ],
     };
@@ -2275,36 +2277,36 @@ sub _Comment__get_link
         if ($key eq "delete_comment") {
             return undef unless LJ::Talk::can_delete($remote, $u, $post_user, $com_user);
             return LJ::S2::Link("$LJ::SITEROOT/delcomment.bml?journal=$u->{'user'}&amp;id=$this->{'talkid'}",
-			$ctx->[S2::PROPS]->{"text_multiform_opt_delete"},
-			LJ::S2::Image("$LJ::IMGPREFIX/btn_del.gif", 22, 20));
+                        $ctx->[S2::PROPS]->{"text_multiform_opt_delete"},
+                        LJ::S2::Image("$LJ::IMGPREFIX/btn_del.gif", 22, 20));
         }
         if ($key eq "freeze_thread") {
             return undef if $this->{'frozen'};
             return undef unless LJ::Talk::can_freeze($remote, $u, $post_user, $com_user);
             return LJ::S2::Link("$LJ::SITEROOT/talkscreen.bml?mode=freeze&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
-			$ctx->[S2::PROPS]->{"text_multiform_opt_freeze"},
-			LJ::S2::Image("$LJ::IMGPREFIX/btn_freeze.gif", 22, 20));
+                        $ctx->[S2::PROPS]->{"text_multiform_opt_freeze"},
+                        LJ::S2::Image("$LJ::IMGPREFIX/btn_freeze.gif", 22, 20));
         }
         if ($key eq "unfreeze_thread") {
             return undef unless $this->{'frozen'};
             return undef unless LJ::Talk::can_unfreeze($remote, $u, $post_user, $com_user);
             return LJ::S2::Link("$LJ::SITEROOT/talkscreen.bml?mode=unfreeze&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
-			$ctx->[S2::PROPS]->{"text_multiform_opt_unfreeze"},
-			LJ::S2::Image("$LJ::IMGPREFIX/btn_unfreeze.gif", 22, 20));
+                        $ctx->[S2::PROPS]->{"text_multiform_opt_unfreeze"},
+                        LJ::S2::Image("$LJ::IMGPREFIX/btn_unfreeze.gif", 22, 20));
         }
         if ($key eq "screen_comment") {
             return undef if $this->{'screened'};
             return undef unless LJ::Talk::can_screen($remote, $u, $post_user, $com_user);
             return LJ::S2::Link("$LJ::SITEROOT/talkscreen.bml?mode=screen&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
-			$ctx->[S2::PROPS]->{"text_multiform_opt_screen"},
-			LJ::S2::Image("$LJ::IMGPREFIX/btn_scr.gif", 22, 20));
+                        $ctx->[S2::PROPS]->{"text_multiform_opt_screen"},
+                        LJ::S2::Image("$LJ::IMGPREFIX/btn_scr.gif", 22, 20));
         }
         if ($key eq "unscreen_comment") {
             return undef unless $this->{'screened'};
             return undef unless LJ::Talk::can_unscreen($remote, $u, $post_user, $com_user);
             return LJ::S2::Link("$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
-			$ctx->[S2::PROPS]->{"text_multiform_opt_unscreen"},
-			LJ::S2::Image("$LJ::IMGPREFIX/btn_unscr.gif", 22, 20));
+                        $ctx->[S2::PROPS]->{"text_multiform_opt_unscreen"},
+                        LJ::S2::Image("$LJ::IMGPREFIX/btn_unscr.gif", 22, 20));
         }
     }
 }
@@ -2570,36 +2572,36 @@ sub _Entry__get_link
                                             $remote->{'user'} eq $poster ||
                                             LJ::can_manage($remote, LJ::load_user($journal)));
             return LJ::S2::Link("$LJ::SITEROOT/editjournal.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
-			"Edit Entry",
-			LJ::S2::Image("$LJ::IMGPREFIX/btn_edit.gif", 22, 20));
+                        "Edit Entry",
+                        LJ::S2::Image("$LJ::IMGPREFIX/btn_edit.gif", 22, 20));
         }
         if ($key eq "edit_tags") {
             return undef unless $remote && LJ::Tags::can_add_tags(LJ::load_user($journal), $remote);
             return LJ::S2::Link("$LJ::SITEROOT/edittags.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
-			'Edit Tags',
-			LJ::S2::Image("$LJ::IMGPREFIX/btn_edittags.gif", 22, 20));
+                        'Edit Tags',
+                        LJ::S2::Image("$LJ::IMGPREFIX/btn_edittags.gif", 22, 20));
         }
         if ($key eq "tell_friend") {
             return undef if $LJ::DISABLED{'tellafriend'};
             return LJ::S2::Link("$LJ::SITEROOT/tools/tellafriend.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
-			"Tell A Friend",
-			LJ::S2::Image("$LJ::IMGPREFIX/btn_tellfriend.gif", 22, 20));
+                        "Tell A Friend",
+                        LJ::S2::Image("$LJ::IMGPREFIX/btn_tellfriend.gif", 22, 20));
         }
         if ($key eq "mem_add") {
             return undef if $LJ::DISABLED{'memories'};
             return LJ::S2::Link("$LJ::SITEROOT/tools/memadd.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
-			"Add to Memories",
-			LJ::S2::Image("$LJ::IMGPREFIX/btn_memories.gif", 22, 20));
+                        "Add to Memories",
+                        LJ::S2::Image("$LJ::IMGPREFIX/btn_memories.gif", 22, 20));
         }
         if ($key eq "nav_prev") {
             return LJ::S2::Link("$LJ::SITEROOT/go.bml?journal=$journal&amp;itemid=$this->{'itemid'}&amp;dir=prev",
-			"Previous Entry",
-			LJ::S2::Image("$LJ::IMGPREFIX/btn_prev.gif", 22, 20));
+                        "Previous Entry",
+                        LJ::S2::Image("$LJ::IMGPREFIX/btn_prev.gif", 22, 20));
         }
         if ($key eq "nav_next") {
             return LJ::S2::Link("$LJ::SITEROOT/go.bml?journal=$journal&amp;itemid=$this->{'itemid'}&amp;dir=next",
-			"Next Entry",
-			LJ::S2::Image("$LJ::IMGPREFIX/btn_next.gif", 22, 20));
+                        "Next Entry",
+                        LJ::S2::Image("$LJ::IMGPREFIX/btn_next.gif", 22, 20));
         }
     }
 }
