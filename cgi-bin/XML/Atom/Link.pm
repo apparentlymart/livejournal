@@ -4,9 +4,8 @@ package XML::Atom::Link;
 use strict;
 
 use XML::Atom;
+use XML::Atom::Util qw( set_ns );
 use base qw( XML::Atom::ErrorHandler );
-
-use constant NS => 'http://purl.org/atom/ns#';
 
 sub new {
     my $class = shift;
@@ -18,15 +17,16 @@ sub new {
 sub init {
     my $link = shift;
     my %param = @_ == 1 ? (Body => $_[0]) : @_;
+    $link->set_ns(\%param);
     my $elem;
     unless ($elem = $param{Elem}) {
         if (LIBXML) {
             my $doc = XML::LibXML::Document->createDocument('1.0', 'utf-8');
-            $elem = $doc->createElementNS(NS, 'link');
+            $elem = $doc->createElementNS($link->ns, 'link');
             $doc->setDocumentElement($elem);
         } else {
             $elem = XML::XPath::Node::Element->new('link');
-            my $ns = XML::XPath::Node::Namespace->new('#default' => NS);
+            my $ns = XML::XPath::Node::Namespace->new('#default' => $link->ns);
             $elem->appendNamespace($ns);
         }
     }
@@ -34,6 +34,7 @@ sub init {
     $link;
 }
 
+sub ns   { $_[0]->{ns} }
 sub elem { $_[0]->{elem} }
 
 sub get {

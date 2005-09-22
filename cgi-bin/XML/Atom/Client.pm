@@ -13,7 +13,6 @@ use Digest::SHA1 qw( sha1 );
 use MIME::Base64 qw( encode_base64 );
 use DateTime;
 
-use constant NS_ATOM => 'http://purl.org/atom/ns#';
 use constant NS_SOAP => 'http://schemas.xmlsoap.org/soap/envelope/';
 
 sub new {
@@ -28,6 +27,7 @@ sub init {
     my %param = @_;
     $client->{ua} = LWP::UserAgent::AtomClient->new($client);
     $client->{ua}->agent('XML::Atom/' . XML::Atom->VERSION);
+    $client->{ua}->parse_head(0);
     $client;
 }
 
@@ -127,6 +127,7 @@ sub make_request {
     $client->munge_request($req);
     my $res = $client->{ua}->request($req);
     $client->munge_response($res);
+    $client->{response} = $res;
     $res;
 }
 
@@ -209,10 +210,9 @@ sub munge_response {
 sub make_nonce { sha1(sha1(time() . {} . rand() . $$)) }
 
 sub _utf8_off {
-    my $val = shift;
     if ($] >= 5.008) {
         require Encode;
-        Encode::_utf8_off($val);
+        Encode::_utf8_off($_[0]);
     }
 }
 

@@ -16,8 +16,6 @@ BEGIN {
     }
 }
 
-use constant NS => 'http://purl.org/atom/ns#';
-
 sub init {
     my $atom = shift;
     my %param = @_ == 1 ? (Stream => $_[0]) : @_;
@@ -93,12 +91,12 @@ sub version {
     if (@_) {
         $elem->setAttribute('version', $_[0]);
     }
-    $elem->getAttribute('version');
+    $elem->getAttribute('version') || $feed->SUPER::version(@_);
 }
 
 sub entries_libxml {
     my $feed = shift;
-    my @res = $feed->{doc}->getElementsByTagNameNS(NS, 'entry') or return;
+    my @res = $feed->{doc}->getElementsByTagNameNS($feed->ns, 'entry') or return;
     my @entries;
     for my $res (@res) {
         my $entry = XML::Atom::Entry->new(Elem => $res->cloneNode(1));
@@ -109,13 +107,13 @@ sub entries_libxml {
 
 sub entries_xpath {
     my $feed = shift;
-    my $set = $feed->{doc}->find("descendant-or-self::*[local-name()='entry' and namespace-uri()='" . NS . "']");
+    my $set = $feed->{doc}->find("descendant-or-self::*[local-name()='entry' and namespace-uri()='" . $feed->ns . "']");
     my @entries;
     for my $elem ($set->get_nodelist) {
         ## Delete the link to the parent (feed) element, and append
         ## the default Atom namespace.
         $elem->del_parent_link;
-        my $ns = XML::XPath::Node::Namespace->new('#default' => NS);
+        my $ns = XML::XPath::Node::Namespace->new('#default' => $feed->ns);
         $elem->appendNamespace($ns);
         my $entry = XML::Atom::Entry->new(Elem => $elem);
         push @entries, $entry;

@@ -10,8 +10,6 @@ use XML::Atom::Person;
 use XML::Atom::Content;
 use XML::Atom::Util qw( first );
 
-use constant NS => 'http://purl.org/atom/ns#';
-
 sub element_name { 'entry' }
 
 sub content {

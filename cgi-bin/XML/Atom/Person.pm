@@ -5,9 +5,7 @@ use strict;
 
 use XML::Atom;
 use base qw( XML::Atom::ErrorHandler );
-use XML::Atom::Util qw( first );
-
-use constant NS => 'http://purl.org/atom/ns#';
+use XML::Atom::Util qw( set_ns first );
 
 sub new {
     my $class = shift;
@@ -19,15 +17,16 @@ sub new {
 sub init {
     my $person = shift;
     my %param = @_;
+    $person->set_ns(\%param);
     my $elem;
     unless ($elem = $param{Elem}) {
         if (LIBXML) {
             my $doc = XML::LibXML::Document->createDocument('1.0', 'utf-8');
-            $elem = $doc->createElementNS(NS, 'author'); ## xxx
+            $elem = $doc->createElementNS($person->ns, 'author'); ## xxx
             $doc->setDocumentElement($elem);
         } else {
             $elem = XML::XPath::Node::Element->new('author'); ## xxx
-            my $ns = XML::XPath::Node::Namespace->new('#default' => NS);
+            my $ns = XML::XPath::Node::Namespace->new('#default' => $person->ns);
             $elem->appendNamespace($ns);
         }
     }
@@ -35,12 +34,13 @@ sub init {
     $person;
 }
 
+sub ns   { $_[0]->{ns} }
 sub elem { $_[0]->{elem} }
 
 sub get {
     my $person = shift;
     my($name) = @_;
-    my $node = first($person->elem, NS, $name) or return;
+    my $node = first($person->elem, $person->ns, $name) or return;
     my $val = LIBXML ? $node->textContent : $node->string_value;
     if ($] >= 5.008) {
         require Encode;
@@ -53,13 +53,13 @@ sub set {
     my $person = shift;
     my($name, $val) = @_;
     my $elem;
-    unless ($elem = first($person->elem, NS, $name)) {
+    unless ($elem = first($person->elem, $person->ns, $name)) {
         if (LIBXML) {
             $elem = XML::LibXML::Element->new($name);
-            $elem->setNamespace(NS);
+            $elem->setNamespace($person->ns);
         } else {
             $elem = XML::XPath::Node::Element->new($name);
-            my $ns = XML::XPath::Node::Namespace->new('#default' => NS);
+            my $ns = XML::XPath::Node::Namespace->new('#default' => $person->ns);
             $elem->appendNamespace($ns);
         }
         $person->elem->appendChild($elem);

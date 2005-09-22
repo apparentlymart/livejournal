@@ -2,13 +2,12 @@
 
 package XML::Atom::Content;
 use strict;
-
-use XML::Atom;
 use base qw( XML::Atom::ErrorHandler );
-use XML::Atom::Util qw( remove_default_ns );
-use MIME::Base64 qw( encode_base64 decode_base64 );
 
-use constant NS => 'http://purl.org/atom/ns#';
+use Encode;
+use XML::Atom;
+use XML::Atom::Util qw( set_ns remove_default_ns hack_unicode_entity );
+use MIME::Base64 qw( encode_base64 decode_base64 );
 
 sub new {
     my $class = shift;
@@ -20,11 +19,12 @@ sub new {
 sub init {
     my $content = shift;
     my %param = @_ == 1 ? (Body => $_[0]) : @_;
+    $content->set_ns(\%param);
     my $elem;
     unless ($elem = $param{Elem}) {
         if (LIBXML) {
             my $doc = XML::LibXML::Document->createDocument('1.0', 'utf-8');
-            $elem = $doc->createElementNS(NS, 'content');
+            $elem = $doc->createElementNS($content->ns, 'content');
             $doc->setDocumentElement($elem);
         } else {
             $elem = XML::XPath::Node::Element->new('content');
@@ -40,6 +40,7 @@ sub init {
     $content;
 }
 
+sub ns   { $_[0]->{ns} }
 sub elem { $_[0]->{elem} }
 
 sub type {
@@ -55,6 +56,9 @@ sub mode {
     $content->elem->getAttribute('mode');
 }
 
+sub lang { $_[0]->elem->getAttribute('lang') }
+sub base { $_[0]->elem->getAttribute('base') }
+
 sub body {
     my $content = shift;
     my $elem = $content->elem;
@@ -66,10 +70,11 @@ sub body {
             $elem->removeChild($_) for $elem->getChildNodes;
         }
         if (!_is_printable($data)) {
+            my $raw = Encode::encode("utf-8", $data);
             if (LIBXML) {
-               $elem->appendChild(XML::LibXML::Text->new(encode_base64($data, '')));
+               $elem->appendChild(XML::LibXML::Text->new(encode_base64($raw, '')));
             } else {
-               $elem->appendChild(XML::XPath::Node::Text->new(encode_base64($data, '')));
+               $elem->appendChild(XML::XPath::Node::Text->new(encode_base64($raw, '')));
             }
             $elem->setAttribute('mode', 'base64');
         } else {
@@ -120,16 +125,16 @@ sub body {
                 } else {
                     $content->{__body} = LIBXML ? $elem->textContent : $elem->string_value;
                 }
+                if ($] >= 5.008) {
+                    $content->{__body} = hack_unicode_entity($content->{__body});
+                }
             } elsif ($mode eq 'base64') {
-                $content->{__body} = decode_base64(LIBXML ? $elem->textContent : $elem->string_value);
+                my $raw = decode_base64(LIBXML ? $elem->textContent : $elem->string_value);
+                $content->{__body} = Encode::decode("utf-8", $raw);
             } elsif ($mode eq 'escaped') {
                 $content->{__body} = LIBXML ? $elem->textContent : $elem->string_value;
             } else {
                 $content->{__body} = undef;
-            }
-            if ($] >= 5.008) {
-                require Encode;
-                Encode::_utf8_off($content->{__body});
             }
         }
     }
@@ -139,8 +144,13 @@ sub body {
 sub _is_printable {
     my $data = shift;
 
-    # printable ASCII or UTF-8 bytes
-    $data =~ /^(?:[\x09\x0a\x0d\x20-\x7f]|[\xc0-\xdf][\x80-\xbf]|[\xe0-\xef][\x80-\xbf][\x80-\xbf])*$/;
+    # try decoding this $data with UTF-8
+    my $decoded =
+        ( Encode::is_utf8($data)
+          ? $data
+          : eval { Encode::decode("utf-8", $data, Encode::FB_CROAK) } );
+
+    return ! $@ && $decoded =~ /^\p{IsPrint}*$/;
 }
 
 sub as_xml {
