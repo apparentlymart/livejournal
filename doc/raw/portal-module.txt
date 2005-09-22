@@ -1,0 +1,57 @@
+Updated 08/2005 by Mischa Spiegelmock
+Everything you wanted to know about portal modules but were afraid to axe
+
+What is the minimum I need to do to write a portal box?
+Subclass LJ::Portal::Box and override these methods:
+
+LJ::Portal::Box::initialize()
+        Called when class is instantiated. Good place to set things up.
+
+LJ::Portal::Box::generate_content()
+        Return HTML to be displayed in the box.
+
+LJ::Portal::Box::box_description()
+        A short description of the module for the user
+LJ::Portal::Box::box_name()
+        Short title to be displayed
+LJ::Portal::Box::box_class()
+        Both CSS class and perl class of the module
+
+Optional methods:
+         LJ::Portal::Box::can_refresh()
+                Show a little refresh box button
+         LJ::Portal::Box::config_props()
+                Hashref of options the user can configure. See below.
+         LJ::Portal::Box::prop_keys()
+                Hashref of config name => prop id # (can be any number)
+         LJ::Portal::Box::handle_request($GET, $POST)
+                If you want your module to be interactive, you can do GETs or POSTs
+                with portalboxaction=$pboxid set to get this method called.
+                Return JS to execute or undef to just have the box be updated
+         LJ::Portal::Box::default_added($u)
+                If this returns true, then this box should be added by default
+
+config_props:
+        Hashref with the following options:
+        type => checkbox, dropdown, integer, hidden
+        desc => translation string that describes the prop
+        default => default state
+        min/max => integer min/max values
+        items => hashref of options for dropdown menu
+        maxlength => textfield maxlength
+
+-----------------
+
+Methods and fields available to modules:
+get_prop(propname) return the value for a box property
+set_prop(propname) set " "
+pboxid() this box's ID
+sortorder() what order this box is in its column
+set_default_props() reset all props to their default state
+delete_prop(propid) delete prop by id
+set_props(props) hashref of props by propname => value to set
+
+Handy javascript:
+evalXrequest(str) send an XML HTTP POST request, usually to be handled by handle_request
+                  and do a JS eval of what is returned.
+
