@@ -58,10 +58,15 @@ sub consumer {
                                        );
     }
 
+    my $cache = undef;
+    if (! $LJ::OPENID_STATELESS && scalar(@LJ::MEMCACHE_SERVERS)) {
+        $cache = LJ::MemCache::get_memcache();
+    }
+
     my $csr = Net::OpenID::Consumer->new(
                                          ua => $ua,
                                          args => $get_args,
-                                         cache => scalar(@LJ::MEMCACHE_SERVERS) ? LJ::MemCache::get_memcache() : undef,
+                                         cache => $cache,
                                          consumer_secret => \&LJ::OpenID::consumer_secret,
                                          debug => $LJ::IS_DEV_SERVER || 0,
                                          required_root => $LJ::SITEROOT,
