@@ -80,3 +80,11 @@ includefile:<name> == text of BML include file
 
 <uid>   prtcfg:<uid>   -- arrayref of the portal box configuration for this userid
 <uid>   prtbox:<uid>:<pboxid>  --  arrayref of the state of a LJ::Portal::Box object
+
+<uid> saui:<uid> == { schoolid => { year_start => .., year_end => .. } }
+<schoolid> saal:<schoolid> == [ userid, ... ]; userids at a school
+<schoolid> saaly:<schoolid>:<year> == [ userid, ... ]; userids at a school in this year
+<schoolid> sasi:<schoolid> == hashref; keys: name, country, state, city, url
+saccs == { country_code => country_name}; countries with schools
+sascs:<country_code> == { state_code => state_name }; states with schools
+<pendid> sapiu:<pendid> == userid of person editing this pending row
