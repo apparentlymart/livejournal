@@ -833,4 +833,32 @@ sub edit_school {
     return 1;
 }
 
+# <LJFUNC>
+# name: LJ::Schools::reject_pending
+# class: schools
+# des: Deletes pending schools.
+# args: pendids
+# des-pendids: Arrayref of pendids to delete
+# returns: 1 on success, undef on error.
+# </LJFUNC>
+sub reject_pending {
+    my ($pendids) = @_;
+    return undef unless $pendids && ref $pendids eq 'ARRAY' && @$pendids;
+
+    # now verify our pendids are valid
+    @$pendids = grep { $_ } map { $_+0 } @$pendids;
+    return undef unless @$pendids;
+
+    # get database handle
+    my $dbh = LJ::get_db_writer();
+    return undef unless $dbh;
+
+    my $in = join(',', @$pendids);
+    # and delete their pending rows, but ignore errors
+    $dbh->do("DELETE FROM schools_pending WHERE pendid IN ($in)");
+
+    # and we're done
+    return 1;
+}
+
 1;
