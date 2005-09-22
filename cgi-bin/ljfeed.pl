@@ -350,8 +350,6 @@ sub create_view_rss
 # * Where we can't be compatible, we use Atom 1.0. *
 # http://www.ietf.org/internet-drafts/draft-ietf-atompub-format-11.txt
 #
-# TODO: When COMPAT lines are removed, change namespace to
-# http://www.w3.org/2005/Atom  (this requires an XML::Atom update)
 sub create_view_atom
 {
     my ( $j, $u, $opts, $cleanitems ) = @_;
@@ -363,7 +361,7 @@ sub create_view_atom
 
     my $make_link = sub {
         my ( $rel, $type, $href, $title ) = @_;
-        my $link = XML::Atom::Link->new;
+        my $link = XML::Atom::Link->new( Version => 1 );
         $link->rel($rel);
         $link->type($type);
         $link->href($href);
@@ -377,7 +375,7 @@ sub create_view_atom
 
     # feed information
     unless ($opts->{'single_entry'}) {
-        $feed = XML::Atom::Feed->new();
+        $feed = XML::Atom::Feed->new( Version => 1 );
         $xml  = $feed->{doc};
 
         $xml->insertBefore( $xml->createComment( LJ::run_hook("bot_director") ), $xml->documentElement());
@@ -429,7 +427,7 @@ sub create_view_atom
         my $itemid = $it->{itemid};
         my $ditemid = $it->{ditemid};
 
-        my $entry = XML::Atom::Entry->new();
+        my $entry = XML::Atom::Entry->new( Version => 1 );
         my $entry_xml = $entry->{doc};
 
         $entry->title( $it->{'subject'} );
