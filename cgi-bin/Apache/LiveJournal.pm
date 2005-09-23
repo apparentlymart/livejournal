@@ -132,6 +132,8 @@ sub handler
                 }
             }
         }
+
+        LJ::work_report_start();
     }
 
     $r->set_handlers(PerlTransHandler => [ \&trans ]);
@@ -734,7 +736,7 @@ sub userpic_content
 
             my $zone = $r->header_in('X-MogileFS-Explicit-Zone') || undef;
             $memkey->[1] .= ".$zone" if $zone;
-            
+
             my $paths = LJ::MemCache::get($memkey);
             unless ($paths) {
                 my @paths = LJ::mogclient()->get_paths( $key, { noverify => 1, zone => $zone });
