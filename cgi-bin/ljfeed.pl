@@ -361,7 +361,7 @@ sub create_view_atom
     # Set default namespace, let child tags inherit from it.
     my $normalize_ns = sub {
         my $str = shift;
-        $str =~ s/\s?xmlns="$ns"//g;
+        $str =~ s/\s?xmlns="$ns">/>/g;
         $str =~ s/<feed>/<feed xmlns="$ns">/;
         $str =~ s/<entry>/<entry xmlns="$ns">/ if $opts->{'single_entry'};
         return $str;
