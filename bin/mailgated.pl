@@ -300,7 +300,8 @@ sub process
         || $subject =~ /Use this patch immediately/i
         || $subject =~ /^YOUR PAYPAL\.COM ACCOUNT EXPIRES/i
         || $subject =~ /^don\'t be late! ([\w\-]{1,15})$/i
-        || $subject =~ /^your account ([\w\-]{1,15})$/i )
+        || $subject =~ /^your account ([\w\-]{1,15})$/i
+        || $subject =~ /Message Undeliverable/i )
     {
         return dequeue("Spam");
     }
@@ -337,7 +338,8 @@ sub process
     ### spam
     if (   $body =~ /I send you this file in order to have your advice/i
         || $body =~ /^Content-Type: application\/octet-stream/i
-        || $body =~ /^(Please see|See) the attached file for details\.?$/i )
+        || $body =~ /^(Please see|See) the attached file for details\.?$/i
+        || $body =~ /^I apologize for this automatic reply to your email/i )
     {
         return dequeue("Spam");
     }
