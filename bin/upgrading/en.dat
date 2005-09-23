@@ -105,7 +105,9 @@ Click <a [[aopts]]>here</a> to add the shared journal to your friends list.
 
 /changepassword.bml.changepassword.instructions=Fill out the form below to change your password.  
 
-/changepassword.bml.email.body<<
+/changepassword.bml.email.body2<<
+Dear [[username]],
+
 Your password has been changed at [[sitename]].
 
 To retrieve it in the future, visit:
