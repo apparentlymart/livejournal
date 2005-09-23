@@ -231,11 +231,11 @@ sub load_props {
     if ($state) {
         $self->{'boxprops'} = $state->{'boxprops'};
     } else {
-        my $sth = $self->{'u'}->prepare("SELECT value,ppropid FROM portal_box_prop WHERE userid=? AND pboxid=?");
+        my $sth = $self->{'u'}->prepare("SELECT propvalue,ppropid FROM portal_box_prop WHERE userid=? AND pboxid=?");
         $sth->execute($userid, $pboxid);
 
         while (my $row = $sth->fetchrow_hashref) {
-            $self->{'boxprops'}->{$row->{'ppropid'}} = $row->{'value'};
+            $self->{'boxprops'}->{$row->{'ppropid'}} = $row->{'propvalue'};
         }
     }
     $self->update_memcache_state;
@@ -300,7 +300,7 @@ sub set_prop {
         $self->{'boxprops'}->{$propid} = $propval;
 
         #save prop
-        $u->do("REPLACE INTO portal_box_prop (value,ppropid,userid,pboxid) VALUES " .
+        $u->do("REPLACE INTO portal_box_prop (propvalue,ppropid,userid,pboxid) VALUES " .
                          "(?, ?, ?, ?)",
                          undef, $propval, $propid, $u->{'userid'}, $self->pboxid);
 
