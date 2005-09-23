@@ -148,6 +148,18 @@ sub anum {
     croak("couldn't retrieve anum for entry");
 }
 
+# method:
+#   $entry->correct_anum
+#   $entry->correct_anum($given_anum)
+# if no given anum, gets it from the provided ditemid to constructor
+sub correct_anum {
+    my $self = shift;
+    my $given = defined $_[0] ? int(shift) : $self->{anum};
+    __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
+    return 0 unless defined $self->{anum} && defined $given;
+    return $self->{anum} == $given;
+}
+
 # returns LJ::User object for the poster of this entry
 sub poster {
     my $self = shift;
@@ -158,6 +170,16 @@ sub posterid {
     my $self = shift;
     __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
     return $self->{posterid};
+}
+
+sub journalid {
+    my $self = shift;
+    return $self->{u}{userid};
+}
+
+sub journal {
+    my $self = shift;
+    return $self->{u};
 }
 
 sub eventtime_mysql {
@@ -259,6 +281,12 @@ sub prop {
     my ($self, $prop) = @_;
     $self->_load_props unless $self->{_loaded_props};
     return $self->{props}{$prop};
+}
+
+sub props {
+    my ($self, $prop) = @_;
+    $self->_load_props unless $self->{_loaded_props};
+    return $self->{props} || {};
 }
 
 sub _load_props {
@@ -456,6 +484,8 @@ sub event_html
     $self->_load_text unless $self->{_loaded_text};
     my $event = $self->{event};
     LJ::CleanHTML::clean_event(\$event, $opts);
+
+    LJ::expand_embedded($self->{u}, $self->ditemid, LJ::User->remote, \$event);
     return $event;
 }
 
@@ -476,6 +506,58 @@ sub event_summary {
         $event = $` . $& . $readmore;
     }
     return $event;
+}
+
+sub comments_manageable_by {
+    my ($self, $remote) = @_;
+    return 0 unless $self->valid;
+    my $u = $self->{u};
+    return $remote ||
+        $remote->{userid} == $u->{userid} ||
+        $remote->{userid} == $self->posterid ||
+        LJ::can_manage($remote, $u);
+}
+
+# instance method:  returns bool, if remote user can view this entry
+sub visible_to
+{
+    my ($self, $remote) = @_;
+    return 0 unless $self->valid;
+
+    # public is okay
+    return 1 if $self->{'security'} eq "public";
+
+    # must be logged in otherwise
+    return 0 unless $remote;
+
+    my $userid   = int($self->{u}{userid});
+    my $remoteid = int($remote->{userid});
+
+    # owners can always see their own.
+    return 1 if $userid == $remoteid;
+
+    # other people can't read private
+    return 0 if $self->{'security'} eq "private";
+
+    # should be 'usemask' security from here out, otherwise
+    # assume it's something new and return 0
+    return 0 unless $self->{'security'} eq "usemask";
+
+    # if it's usemask, we have to refuse non-personal journals,
+    # so we have to load the user
+    return 0 unless $remote->{'journaltype'} eq 'P' || $remote->{'journaltype'} eq 'I';
+
+    my $gmask = LJ::get_groupmask($userid, $remoteid);
+    my $allowed = (int($gmask) & int($self->{'allowmask'}));
+    return $allowed ? 1 : 0;  # no need to return matching mask
+}
+
+# returns hashref of (kwid => tag) for tags on the entry
+sub tag_map {
+    my $self = shift;
+    my $tags = LJ::Tags::get_logtags($self->{u}, $self->jitemid);
+    return {} unless $tags;
+    return $tags->{$self->jitemid} || {};
 }
 
 package LJ;

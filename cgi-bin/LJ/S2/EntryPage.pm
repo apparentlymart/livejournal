@@ -30,14 +30,10 @@ sub EntryPage
     return if $opts->{'suspendeduser'};
     return if $opts->{'handler_return'};
 
-    $p->{'multiform_on'} = $remote &&
-        ($remote->{'userid'} == $u->{'userid'} ||
-         $remote->{'userid'} == $entry->{'posterid'} ||
-         LJ::can_manage($remote, $u));
+    $p->{'multiform_on'} = $entry->comments_manageable_by($remote);
 
-    my $itemid = $entry->{'itemid'};
-    my $ditemid = $entry->{'itemid'} * 256 + $entry->{'anum'};
-    my $permalink = LJ::journal_base($u) . "/$ditemid.html";
+    my $itemid = $entry->jitemid;
+    my $permalink = $entry->url;
     my $stylemine = $get->{'style'} eq "mine" ? "style=mine" : "";
 
     if ($u->{'opt_blockrobots'}) {
@@ -82,13 +78,13 @@ sub EntryPage
         my ($self, $destlist, $srclist, $depth) = @_;
 
         foreach my $com (@$srclist) {
-            my $dtalkid = $com->{'talkid'} * 256 + $entry->{'anum'};
+            my $dtalkid = $com->{'talkid'} * 256 + $entry->anum;
             my $text = $com->{'body'};
             if ($get->{'nohtml'}) {
                 # quote all non-LJ tags
                 $text =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
             }
-            LJ::CleanHTML::clean_comment(\$text, { 'preformatted' => $com->{'props'}->{'opt_preformatted'}, 
+            LJ::CleanHTML::clean_comment(\$text, { 'preformatted' => $com->{'props'}->{'opt_preformatted'},
                                                    'anon_comment' => (!$com->{posterid}
                                                                       || (defined $user{$com->{posterid}}
                                                                           && $user{$com->{'posterid'}}->{'journaltype'}
@@ -121,7 +117,7 @@ sub EntryPage
             }
 
             if ($com->{'parenttalkid'}) {
-                my $dparent = ($com->{'parenttalkid'} << 8) + $entry->{'anum'};
+                my $dparent = ($com->{'parenttalkid'} << 8) + $entry->anum;
                 $par_url = LJ::Talk::talkargs($permalink, "thread=$dparent", $stylemine) . "#t$dparent";
             }
 
@@ -193,15 +189,15 @@ sub EntryPage
 
             if (@{$com->{'children'}}) {
                 $s2com->{'thread_url'} = LJ::Talk::talkargs($permalink, "thread=$dtalkid", $stylemine) . "#t$dtalkid";
-            }                    
+            }
 
-            # add the poster_ip metadata if remote user has 
+            # add the poster_ip metadata if remote user has
             # access to see it.
-            $s2com->{'metadata'}->{'poster_ip'} = $com->{'props'}->{'poster_ip'} if 
+            $s2com->{'metadata'}->{'poster_ip'} = $com->{'props'}->{'poster_ip'} if
                 ($com->{'props'}->{'poster_ip'} && $remote &&
-                 ($remote->{'userid'} == $entry->{'posterid'} ||
+                 ($remote->{'userid'} == $entry->posterid ||
                   LJ::can_manage($remote, $u) || $viewall));
-            
+
             push @$destlist, $s2com;
 
             $self->($self, $s2com->{'replies'}, $com->{'children'}, $depth+1);
@@ -247,7 +243,7 @@ sub EntryPage
             "</script>\n";
         $p->{'head_content'} .= $js;
         $p->{'head_content'} .= "<script src='$LJ::SITEROOT/js/commentmanage.js'></script>\n";
-        
+
     }
 
     $p->{'_stylemine'} = $get->{'style'} eq 'mine' ? 1 : 0;
@@ -290,42 +286,39 @@ sub EntryPage_entry
     my $r = $opts->{'r'};
     my $uri = $r->uri;
 
-    my ($ditemid, $itemid, $anum);
+    my ($ditemid, $itemid);
     unless ($uri =~ /(\d+)\.html/) {
         $opts->{'handler_return'} = 404;
         return;
     }
 
     $ditemid = $1;
-    $anum = $ditemid % 256;
-    $itemid = $ditemid >> 8;
 
-    my $entry = LJ::Talk::get_journal_item($u, $itemid);
-    unless ($entry && $entry->{'anum'} == $anum) {
+    my $entry = LJ::Entry->new($u, ditemid => $ditemid);
+    unless ($entry->correct_anum) {
         $opts->{'handler_return'} = 404;
         return;
     }
 
+    $itemid = $entry->jitemid;
+
+    my $pu = $entry->poster;
+
     my $userlite_journal = UserLite($u);
-    my $userlite_poster = $userlite_journal;
-    my $pu = $u;
-    if ($entry->{'posterid'} != $entry->{'ownerid'}) {
-        $pu = LJ::load_userid($entry->{'posterid'});
-        $userlite_poster = UserLite($pu);
-    }
+    my $userlite_poster  = UserLite($pu);
 
     # do they have the viewall priv?
     my $viewall = 0;
     my $viewsome = 0;
     if ($get->{'viewall'} && LJ::check_priv($remote, "canview")) {
-        LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
+        LJ::statushistory_add($u->{'userid'}, $remote->{'userid'},
                               "viewall", "entry: $u->{'user'}, itemid: $itemid, statusvis: $u->{'statusvis'}");
         $viewall = LJ::check_priv($remote, 'canview', '*');
         $viewsome = $viewall || LJ::check_priv($remote, 'canview', 'suspended');
     }
 
     # check using normal rules
-    unless (LJ::can_view($remote, $entry) || $viewall) {
+    unless ($entry->visible_to($remote) || $viewall) {
         $opts->{'handler_return'} = 403;
         return;
     }
@@ -334,15 +327,15 @@ sub EntryPage_entry
         return;
     }
 
-    my $replycount = $entry->{'props'}->{'replycount'};
+    my $replycount = $entry->prop("replycount");
     my $nc = "";
     $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
 
     my $stylemine = $get->{'style'} eq "mine" ? "style=mine" : "";
 
-    my $userpic = Image_userpic($pu, 0, $entry->{'props'}->{'picture_keyword'});
+    my $userpic = Image_userpic($pu, 0, $entry->prop("picture_keyword"));
 
-    my $permalink = LJ::journal_base($u) . "/$ditemid.html";
+    my $permalink = $entry->url;
     my $readurl = LJ::Talk::talkargs($permalink, $nc, $stylemine);
     my $posturl = LJ::Talk::talkargs($permalink, "mode=reply", $stylemine);
 
@@ -351,42 +344,34 @@ sub EntryPage_entry
         'post_url' => $posturl,
         'count' => $replycount,
         'maxcomments' => ($replycount >= LJ::get_cap($u, 'maxcomments')) ? 1 : 0,
-        'enabled' => ($u->{'opt_showtalklinks'} eq "Y" && ! 
-                      $entry->{'props'}->{'opt_nocomments'}) ? 1 : 0,
-        'screened' => ($entry->{'props'}->{'hasscreened'} && $remote &&
+        'enabled' => ($u->{'opt_showtalklinks'} eq "Y" && !
+                      $entry->prop("opt_nocomments")) ? 1 : 0,
+        'screened' => ($entry->prop("hasscreened") && $remote &&
                        ($remote->{'user'} eq $u->{'user'} || LJ::can_manage($remote, $u))) ? 1 : 0,
     });
 
-    # format it
-    if ($opts->{'getargs'}->{'nohtml'}) {
-        # quote all non-LJ tags
-        $entry->{'subject'} =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
-        $entry->{'event'}   =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
-    }
-    my $raw_subj = $entry->{'subject'};
-    LJ::CleanHTML::clean_subject(\$entry->{'subject'});
-    LJ::CleanHTML::clean_event(\$entry->{'event'}, $entry->{'props'}->{'opt_preformatted'});
-    LJ::expand_embedded($u, $ditemid, $remote, \$entry->{'event'});
-
     # load tags
     my @taglist;
-    my $tags = LJ::Tags::get_logtags($u, $itemid);
-    while (my ($kwid, $kw) = each %{$tags->{$itemid} || {}}) {
-        push @taglist, Tag($u, $kwid => $kw);
+    {
+        my $tag_map = $entry->tag_map;
+        while (my ($kwid, $kw) = each %$tag_map) {
+            push @taglist, Tag($u, $kwid => $kw);
+        }
+        @taglist = sort { $a->{name} cmp $b->{name} } @taglist;
     }
-    @taglist = sort { $a->{name} cmp $b->{name} } @taglist;
+
+    my $event = $entry->event_html;
 
     if ($opts->{enable_tags_compatibility} && @taglist) {
-        $entry->{event} .= LJ::S2::get_tags_text($opts->{ctx}, \@taglist);
+        $event .= LJ::S2::get_tags_text($opts->{ctx}, \@taglist);
     }
 
     my $s2entry = Entry($u, {
-        '_rawsubject' => $raw_subj,
-        'subject' => $entry->{'subject'},
-        'text' => $entry->{'event'},
-        'dateparts' => $entry->{'alldatepart'},
-        'security' => $entry->{'security'},
-        'props' => $entry->{'props'},
+        'subject' => $entry->subject_html,
+        'text' => $event,
+        'dateparts' => LJ::alldatepart_s2($entry->eventtime_mysql),
+        'security' => $entry->security,
+        'props' => $entry->props,
         'itemid' => $ditemid,
         'comments' => $comments,
         'journal' => $userlite_journal,
@@ -397,7 +382,7 @@ sub EntryPage_entry
         'userpic' => $userpic,
         'permalink_url' => $permalink,
     });
-    
+
     return ($entry, $s2entry);
 }
 

@@ -17,7 +17,7 @@ sub ReplyPage
     my ($entry, $s2entry) = EntryPage_entry($u, $remote, $opts);
     return if $opts->{'suspendeduser'};
     return if $opts->{'handler_return'};
-    my $ditemid = $entry->{'itemid'}*256 + $entry->{'anum'};
+    my $ditemid = $entry->ditemid;
     $p->{'head_content'} .= $LJ::COMMON_CODE{'chalresp_js'};
 
     LJ::need_res('stc/display_none.css');
@@ -34,14 +34,14 @@ sub ReplyPage
     if ($get->{'replyto'}) {
         my $re_talkid = int($get->{'replyto'} >> 8);
         my $re_anum = $get->{'replyto'} % 256;
-        unless ($re_anum == $entry->{'anum'}) {
+        unless ($re_anum == $entry->anum) {
             $opts->{'handler_return'} = 404;
             return;
         }
 
         my $sql = "SELECT jtalkid, posterid, state, datepost FROM talk2 ".
             "WHERE journalid=$u->{'userid'} AND jtalkid=$re_talkid ".
-            "AND nodetype='L' AND nodeid=$entry->{'jitemid'}";
+            "AND nodetype='L' AND nodeid=" . $entry->jitemid;
         foreach my $pass (1, 2) {
             my $db = $pass == 1 ? LJ::get_cluster_reader($u) : LJ::get_cluster_def_reader($u);
             $parpost = $db->selectrow_hashref($sql);
@@ -57,7 +57,7 @@ sub ReplyPage
         }
         if ($parpost->{'state'} eq 'F') {
             # frozen comment, no replies allowed
-            
+
             # FIXME: eventually have S2 ErrorPage to handle this and similar
             #    For now, this hack will work; this error is pretty uncommon anyway.
             $opts->{status} = "403 Forbidden";
@@ -74,10 +74,10 @@ sub ReplyPage
             LJ::item_toutf8($u, \$parpost->{'subject'}, \$parpost->{'body'}, {});
         }
 
-        LJ::CleanHTML::clean_comment(\$parpost->{'body'}, 
-                                     { 'preformatted' => $parpost->{'props'}->{'opt_preformatted'}, 
+        LJ::CleanHTML::clean_comment(\$parpost->{'body'},
+                                     { 'preformatted' => $parpost->{'props'}->{'opt_preformatted'},
                                        'anon_comment' => !$parpost->{posterid} });
-        
+
         my $datetime = DateTime_unix(LJ::mysqldate_to_time($parpost->{'datepost'}));
 
         my ($s2poster, $pu);
@@ -90,8 +90,8 @@ sub ReplyPage
             # FIXME: this is a little heavy:
             $comment_userpic = Image_userpic($pu, 0, $parpost->{'props'}->{'picture_keyword'});
         }
-        
-        my $dtalkid = $re_talkid * 256 + $entry->{'anum'};
+
+        my $dtalkid = $re_talkid * 256 + $entry->anum;
         $replyto = {
             '_type' => 'Comment',
             'subject' => LJ::ehtml($parpost->{'subject'}),

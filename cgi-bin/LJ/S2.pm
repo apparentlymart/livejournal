@@ -1555,7 +1555,7 @@ sub Entry
         'link_keyseq' => [ 'edit_entry', 'edit_tags' ],
         'metadata' => {},
     };
-    foreach (qw(subject _rawsubject text journal poster new_day end_day
+    foreach (qw(subject text journal poster new_day end_day
                 comments userpic permalink_url itemid tags)) {
         $e->{$_} = $arg->{$_};
     }
@@ -2549,7 +2549,6 @@ sub EntryLite__get_plain_subject
 {
     my ($ctx, $this) = @_;
     return $this->{'_plainsubject'} if $this->{'_plainsubject'};
-    return $this->{'subject'} unless $this->{'_rawsubject'};
     my $subj = $this->{'subject'};
     LJ::CleanHTML::clean_subject_all(\$subj);
     return $this->{'_plainsubject'} = $subj;
