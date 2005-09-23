@@ -474,10 +474,10 @@ sub kill_all_sessions {
     $u->kill_sessions(@$sessions) if @$sessions;
 
     # forget this user, if we knew they were logged in
-    delete $BML::COOKIE{'ljsession'};
-    LJ::User->set_remote(undef) if
-        $LJ::CACHE_REMOTE &&
-        $LJ::CACHE_REMOTE->{userid} == $u->{userid};
+    if ($LJ::CACHE_REMOTE && $LJ::CACHE_REMOTE->{userid} == $u->{userid}) {
+        delete $BML::COOKIE{'ljsession'};
+        LJ::User->set_remote(undef);
+    }
 
     return 1;
 }
@@ -489,10 +489,10 @@ sub kill_session {
     $u->kill_sessions($u->{'_session'}->{'sessid'});
 
     # forget this user, if we knew they were logged in
-    delete $BML::COOKIE{'ljsession'};
-    LJ::User->set_remote(undef) if
-        $LJ::CACHE_REMOTE &&
-        $LJ::CACHE_REMOTE->{userid} == $u->{userid};
+    if ($LJ::CACHE_REMOTE && $LJ::CACHE_REMOTE->{userid} == $u->{userid}) {
+        delete $BML::COOKIE{'ljsession'};
+        LJ::User->set_remote(undef);
+    }
 
     return 1;
 }
