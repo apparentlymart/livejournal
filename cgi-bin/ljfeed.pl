@@ -361,7 +361,7 @@ sub create_view_atom
     # Set default namespace, let child tags inherit from it.
     my $normalize_ns = sub {
         my $str = shift;
-        $str =~ s/\s?xmlns="$ns">/>/g;
+        $str =~ s/(<\w+)\s+xmlns="\Q$ns\E"/$1/og;
         $str =~ s/<feed>/<feed xmlns="$ns">/;
         $str =~ s/<entry>/<entry xmlns="$ns">/ if $opts->{'single_entry'};
         return $str;
@@ -394,10 +394,9 @@ sub create_view_atom
 
         # attributes
         $feed->id( "urn:lj:$LJ::DOMAIN:atom1:$u->{user}" );
-        $feed->title( $j->{'title'} );
+        $feed->title( $j->{'title'} || $u->{user} );
         if ( $j->{'subtitle'} ) {
             $feed->subtitle( $j->{'subtitle'} );
-            $feed->tagline(  $j->{'subtitle'} ); # COMPAT
         }
 
         $feed->author( $author );
@@ -411,7 +410,6 @@ sub create_view_atom
             )
         );
         $feed->updated( LJ::time_to_w3c($j->{'modtime'}, 'Z') );
-        $feed->modified( LJ::time_to_w3c($j->{'modtime'}, 'Z') );  # COMPAT
 
         # link to the AtomAPI version of this feed
         $feed->add_link(
@@ -442,7 +440,6 @@ sub create_view_atom
         my $entry = XML::Atom::Entry->new( Version => 1 );
         my $entry_xml = $entry->{doc};
 
-        $entry->title( $it->{'subject'} );
         $entry->id("urn:lj:$LJ::DOMAIN:atom1:$u->{user}:$ditemid");
 
         # author isn't required if it is in the main <feed>
@@ -466,15 +463,24 @@ sub create_view_atom
             )
           ) if $opts->{'apilinks'};
 
+
+        # Brad wants to keep entry/issued because he's grumpy that it
+        # was removed from 0.3.  Where else do we put the time that
+        # the user says it was?
         my ($year, $mon, $mday, $hour, $min, $sec) = split(/ /, $it->{eventtime});
-        my $event_date = sprintf "%04d-%02d-%02dT%02d:%02d:%02d",
-                                 $year, $mon, $mday, $hour, $min, $sec;
+        my $event_date = sprintf("%04d-%02d-%02dT%02d:%02d:%02d",
+                                 $year, $mon, $mday, $hour, $min, $sec);
+        $entry->issued(    $event_date );   # OLD, not 1.0
 
-        $entry->published( $event_date );
-        $entry->issued(    $event_date );   # COMPAT
 
-        $entry->updated(  LJ::time_to_w3c($it->{modtime}, 'Z') );
-        $entry->modified( LJ::time_to_w3c($it->{modtime}, 'Z') );  # COMPAT
+        # title can't be blank and can't be absent, so we have to fake some subject
+        $entry->title( $it->{'subject'} ||
+                       "$j->{u}{user} \@ $event_date"
+                       );
+
+
+        $entry->published( LJ::time_to_w3c($it->{createtime}, "Z") );
+        $entry->updated(   LJ::time_to_w3c($it->{modtime},    "Z") );
 
         # XML::Atom 0.13 doesn't support categories.   Maybe later?
         foreach my $tag ( @{$it->{tags} || []} ) {
