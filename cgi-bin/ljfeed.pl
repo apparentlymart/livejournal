@@ -357,6 +357,16 @@ sub create_view_atom
 
     $ns = "http://www.w3.org/2005/Atom";
 
+    # Strip namespace from child tags.
+    # Set default namespace, let child tags inherit from it.
+    my $normalize_ns = sub {
+        my $str = shift;
+        $str =~ s/\s?xmlns="$ns"//g;
+        $str =~ s/<feed>/<feed xmlns="$ns">/;
+        $str =~ s/<entry>/<entry xmlns="$ns">/ if $opts->{'single_entry'};
+        return $str;
+    };
+
     # AtomAPI interface path
     my $api = $opts->{'apilinks'} ? "$LJ::SITEROOT/interface/atom" :
                                     "$LJ::SITEROOT/users/$u->{user}/data/atom";
@@ -501,14 +511,14 @@ sub create_view_atom
         }
 
         if ( $opts->{'single_entry'} ) {
-            return $entry->as_xml();
+            return $normalize_ns->( $entry->as_xml() );
         }
         else {
             $feed->add_entry( $entry );
         }
     }
 
-    return $feed->as_xml();
+    return $normalize_ns->( $feed->as_xml() );
 }
 
 # create a FOAF page for a user
