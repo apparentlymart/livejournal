@@ -99,7 +99,7 @@ function Page::print {
               padding: 5px;
             }
             body{
-              font-family: "Verdana", sans-serif;
+              font-family: Verdana;
               font-size: 10pt;
               background-color: $*background_color;
               background-image: url($grad_url);
@@ -434,6 +434,12 @@ function print_comment_page_toolbar(ItemRange comment_pages) {
 
 #print out userpic, poster and entry date info
 function print_user_top_crap(Entry entry, User journal) {
+  var string communitytext = "";
+
+  if ($journal.journal_type == "C") {
+        $communitytext = " in $journal";
+  }
+
   """
          <div class="contentarea">
             <table>
@@ -442,7 +448,8 @@ function print_user_top_crap(Entry entry, User journal) {
                   $entry.userpic
                 </td>
                 <td>
-                   $journal.name - """ + lang_user_wrote($journal) + """ <br/>
+                   $entry.poster.name - """ + lang_user_wrote($entry.poster) +
+                       $communitytext + """ <br/>
                    <div style="font-size: small;">@ """;
                      print_clickable_date($entry);  """</div>
                 </td>
