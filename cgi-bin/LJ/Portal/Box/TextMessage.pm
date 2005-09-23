@@ -53,7 +53,7 @@ sub handle_request {
     }
 
     unless ($tminfo) {
-        return $genjs->("<p>This user has not setup their text messaging information at $LJ::SITENAMESHORT, or they've turned it off.</p>", 0);
+        return $genjs->("<p>This user has not set up their text messaging information at $LJ::SITENAMESHORT, or they've turned it off.</p>", 0);
     }
 
     # are they authorized?

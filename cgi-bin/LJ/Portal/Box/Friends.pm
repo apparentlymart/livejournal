@@ -48,7 +48,7 @@ sub generate_content {
     my @friendids = keys %$friends;
     my $friends_u = {};
 
-    if ($friends) {
+    if (keys %$friends) {
         $friends_u = LJ::load_userids(@friendids);
 
         grep { $friendcount++ if $friends_u->{$_}->{'journaltype'} eq 'P'; } keys %$friends_u;
