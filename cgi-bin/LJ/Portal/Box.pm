@@ -290,20 +290,29 @@ sub set_prop {
     my ($propstr, $propval) = @_;
 
     my $propid = $self->get_prop_id($propstr);
+    my $u = $self->{'u'};
 
     $propid += 0;
-    return unless ($self->{'pboxid'} || $self->{'u'});
+    return undef unless ($self->{'pboxid'} || $u || $propid);
 
     # don't update memcache and do query if setting prop to the current value
     if ($self->{'boxprops'}->{$propid} ne $propval) {
         $self->{'boxprops'}->{$propid} = $propval;
 
         #save prop
-        $self->{'u'}->do("REPLACE INTO portal_box_prop (value,ppropid,userid,pboxid) VALUES " .
+        $u->do("REPLACE INTO portal_box_prop (value,ppropid,userid,pboxid) VALUES " .
                          "(?, ?, ?, ?)",
-                         undef, $propval, $propid, $self->{'u'}->{'userid'}, $self->{'pboxid'});
+                         undef, $propval, $propid, $u->{'userid'}, $self->pboxid);
+
+        if ($u->errstr) {
+            print STDERR "Error: " . $u->errstr . "\n";
+            return undef;
+        }
+
         $self->update_memcache_state;
     }
+
+    return 1;
 }
 
 sub delete_prop {

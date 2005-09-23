@@ -265,7 +265,7 @@ sub add_box {
 
         # save in memcache
         my $typeid = int($type) ? $type : $self->type_string_to_id($type);
-        $self->{'boxlist'}->{$box->{'pboxid'}} = $typeid;
+        $self->{'boxlist'}->{$box->pboxid} = $typeid;
         $self->update_memcache_state;
     }
 

@@ -195,7 +195,7 @@ sub configbox {
 
         my $configboxjs = $insertConfigBox . qq{
             var pbox = xGetElementById("pbox$pboxid");
-            var configbox = xGetElementById("config" + $pboxid);
+            var configbox = xGetElementById("config$pboxid");
             if (pbox && configbox) {
                 xTop(configbox, xPageY(pbox));
                 centerBoxX(configbox);
@@ -361,7 +361,7 @@ sub saveconfig {
         my $configprops = $box->config_props;
         foreach my $propkey (keys %$configprops) {
             if ($propkey) {
-                # slightly different format for non-XML submitted data
+                # slightly different format for non-POST submitted data
                 my $postkey = $realform ? "$propkey$pboxid" : $propkey;
                 my $propval = LJ::ehtml($postvars->{$postkey});
 
@@ -383,7 +383,9 @@ sub saveconfig {
                 }
 
                 if (!$invalid) {
-                    $box->set_prop($propkey, $propval);
+                    unless ($box->set_prop($propkey, $propval)) {
+                        return 'alert("Error saving configuration");';
+                    }
                 } else {
                     return 'alert("Invalid input");';
                 }
