@@ -357,12 +357,13 @@ sub create_view_atom
 
     $ns = "http://www.w3.org/2005/Atom";
 
-    # Strip namespace from child tags.
-    # Set default namespace, let child tags inherit from it.
+    # Strip namespace from child tags. Set default namespace, let
+    # child tags inherit from it.  So ghetto that we even have to do this
+    # and LibXML can't on its own.
     my $normalize_ns = sub {
         my $str = shift;
         $str =~ s/(<\w+)\s+xmlns="\Q$ns\E"/$1/og;
-        $str =~ s/<feed>/<feed xmlns="$ns">/;
+        $str =~ s/<feed\b/<feed xmlns="$ns"/;
         $str =~ s/<entry>/<entry xmlns="$ns">/ if $opts->{'single_entry'};
         return $str;
     };
@@ -389,6 +390,11 @@ sub create_view_atom
     unless ($opts->{'single_entry'}) {
         $feed = XML::Atom::Feed->new( Version => 1 );
         $xml  = $feed->{doc};
+
+        if ($u->prop("opt_blockrobots")) {
+            $xml->getDocumentElement->setAttribute( "xmlns:idx", "urn:atom-extension:indexing" );
+            $xml->getDocumentElement->setAttribute( "idx:index", "no" );
+        }
 
         $xml->insertBefore( $xml->createComment( LJ::run_hook("bot_director") ), $xml->documentElement());
 
