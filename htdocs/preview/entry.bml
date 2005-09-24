@@ -2,7 +2,7 @@
 {
     use strict;
     return "<?requirepost?>" unless LJ::did_post();
-    
+
     my $ret;
     my $remote = LJ::get_remote();
     my $styleid; my $stylesys = 1;
@@ -23,19 +23,19 @@
     my ($ditemid, $anum, $itemid);
     my %req = ( 'usejournal' => $POST{'usejournal'}, );
     LJ::entry_form_decode(\%req, \%POST);
-    
+
     my ($event, $subject) = ($req{'event'}, $req{'subject'});
     LJ::CleanHTML::clean_subject(\$subject);
     LJ::CleanHTML::clean_event(\$event, $req{'prop_opt_preformatted'});
     LJ::expand_embedded($u, $ditemid, $remote, \$event);
-        
+
     if ($u && $up) {
         ### Load necessary props
         my @needed_props = ("stylesys", "s2_style", "url", "urlname",
                             "opt_usesharedpic", "journaltitle", "journalsubtitle",);
-        
+
         LJ::load_user_props($u, @needed_props);
-        
+
         ### Determine style system to preview with
         my $get_styleinfo = sub {
             my $forceflag = 0;
@@ -46,7 +46,7 @@
             # no special case and not s2, fall through to s1
             return (1, 0);
         };
-        
+
         ($stylesys, $styleid) = $get_styleinfo->();
     } else {
         $stylesys = 1; $styleid = 0;
@@ -79,7 +79,7 @@
             my $picid = LJ::get_picid_from_keyword($up, $req{'prop_picture_keyword'});
             my $upics = LJ::get_userpic_info($up);
             my $pic   = $upics->{'pic'}->{$picid};
-            
+
             if ($pic) {
                 my $alt = $up->{'name'};
                 if ($req{'prop_picture_keyword'}) {
@@ -91,7 +91,7 @@
                     "height='$pic->{'height'}' align='absmiddle' ".
                     "hspace='3' title='$alt' alt=''></td>";
             }
-        
+
             $ret .= "<td>";
             my $is_shared = $u->{'journaltype'} eq 'C' || $u->{'journaltype'} eq 'S';
             if ($is_shared) {
@@ -102,7 +102,7 @@
                 $ret .= BML::ml("talk.somebodywrote", { 'realname' => LJ::ehtml($up->{'name'}),
                                                         'userlink' => LJ::ljuser($up) });
             }
-            
+
             my $etime = LJ::date_to_view_links($u, "$req{'year'}-$req{'mon'}-$req{'day'}");
             $ret .= "<br /><font size='-1'>@ $etime $req{'hour'}:$req{'min'}:00</font>";
             $ret .= "</td></tr></table>";
@@ -118,10 +118,10 @@
         if ($req{'prop_current_music'}) {
             $current{'Music'} = LJ::current_music_str($req{'prop_current_music'});
         }
-        
+
         $ret .= "<div style='margin-left: 30px'>";
-        
-        if (%current) 
+
+        if (%current)
         {
             $ret .= "<table border=0>\n";
             foreach (sort keys %current) {
@@ -132,7 +132,7 @@
             }
             $ret .= "</table><p>\n";
         }
-        
+
         ### security indicator
         my $sec = "";
         if ($req{'security'} eq "private") {
@@ -140,19 +140,19 @@
         } elsif ($req{'security'} eq "usemask") {
             $sec = BML::fill_template("securityprotected");
         }
-        
+
         $sec .= "<br />\n" unless $sec eq "" or $req{'subject'};
         $ret .= $sec;
-        
+
         ###
         if ($subject) {
             BML::ebml(\$subject);
             $ret .= "<font face='Arial,Helvetica' size='+1'><i><b>$subject</b></i></font><br />\n";
         }
-        
+
         $ret .= $event;
         $ret .= "</div>";
-        
+
         $ret .= "<br clear='all' /><hr width='100%' size='2' align='center' />";
     } else {
         $LJ::S2::ret_ref = \$ret;
@@ -161,32 +161,32 @@
 
         $u->{'_s2styleid'} = $styleid + 0;
         $u->{'_journalbase'} = LJ::journal_base($u->{'user'});
-        
+
         my $ctx = LJ::S2::s2_context($r, $styleid);
         $LJ::S2::CURR_CTX = $ctx;
-        
+
         my $p = LJ::S2::Page($u, $opts);
         $p->{'_type'} = "EntryPage";
         $p->{'view'} = "entry";
         $p->{'comment_pages'} = undef;
         $p->{'comments'} = [];
         $p->{'comment_pages'} = undef;
-        
+
         my $userlite_journal = LJ::S2::UserLite($u);
         my $userlite_poster  = LJ::S2::UserLite($up);
-        
+
         my $userpic = LJ::S2::Image_userpic($up, 0, $req{'prop_picture_keyword'});
-        
+
         my $comments = LJ::S2::CommentInfo({
             'read_url' => "#",
             'post_url' => "#",
             'count' => "0",
             'maxcomments' => 0,
-            'enabled' => ($u->{'opt_showtalklinks'} eq "Y" && ! 
+            'enabled' => ($u->{'opt_showtalklinks'} eq "Y" && !
                           $req{'prop_opt_nocomments'}) ? 1 : 0,
                 'screened' => 0,
             });
-        
+
         # build tag objects, faking kwid as '0'
         # * invalid tags will be stripped by is_valid_tagstring()
         my @taglist = ();
@@ -195,9 +195,8 @@
 
         # format it
         my $raw_subj = $req{'subject'};
-        
+
         my $s2entry = LJ::S2::Entry($u, {
-            '_rawsubject' => $req{'subject'},
             'subject' => $subject,
             'text' => $event,
             'dateparts' => "$req{'year'} $req{'mon'} $req{'day'} $req{'hour'} $req{'min'} 00 ",
@@ -213,30 +212,30 @@
             'userpic' => $userpic,
             'permalink_url' => "#",
         });
-        
+
         $p->{'multiform_on'} = 0;
-        
+
         if ($u->{'opt_blockrobots'}) {
             $p->{'head_content'} .= LJ::robot_meta_tags();
         }
         if ($LJ::UNICODE) {
             $p->{'head_content'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}."\" />\n";
         }
-        
+
         $p->{'entry'} = $s2entry;
-        
+
         my $userlite_journal = LJ::S2::UserLite($u);
-        
+
         $p->{'comments'} = [];
-        
+
         $p->{'viewing_thread'} = 0;
-        
+
         my $copts;
-        
+
         $copts->{'out_pages'} = $copts->{'out_page'} = 1;
         $copts->{'out_items'} = 0;
         $copts->{'out_itemfirst'} = $copts->{'out_itemlast'} = undef;
-        
+
         $p->{'comment_pages'} = LJ::S2::ItemRange({
             'all_subitems_displayed' => ($copts->{'out_pages'} == 1),
             'current' => $copts->{'out_page'},
@@ -247,9 +246,9 @@
             'total_subitems' => $copts->{'out_items'},
             '_url_of' => sub { return "#"; },
         });
-        
+
         LJ::S2::s2_run($r, $ctx, $opts, "EntryPage::print()", $p);
     }
-    return $ret;    
+    return $ret;
 }
 _code?>
