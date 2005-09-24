@@ -145,12 +145,11 @@ sub underage_status {
 
     # return if they aren't setting it
     unless (@_) {
-        LJ::load_user_props($u, 'underage_status');
-        return $u->{underage_status};
+        return $u->prop("underage_status");
     }
 
     # set and return what it got set to
-    LJ::set_userprop($u, 'underage_status', shift());
+    $u->set_prop('underage_status', shift());
     return $u->{underage_status};
 }
 
@@ -428,7 +427,7 @@ sub tosagree_set
     }
 
     my $newval = join(', ', time(), $rev);
-    my $rv = LJ::set_userprop($u, "legal_tosagree", $newval);
+    my $rv = $u->set_prop("legal_tosagree", $newval);
 
     # set in $u object for callers later
     $u->{legal_tosagree} = $newval if $rv;
@@ -579,11 +578,11 @@ sub log2_do {
 
 sub url {
     my $u = shift;
-    LJ::load_user_props($u, "url");
+    $u->preload_props("url");
     if ($u->{'journaltype'} eq "I" && ! $u->{url}) {
         my $id = $u->identity;
         if ($id && $id->typeid == 0) {
-            LJ::set_userprop($u, "url", $id->[1]) if $id->[1];
+            $u->set_prop("url", $id->[1]) if $id->[1];
             return $id->value;
         }
     }
@@ -730,6 +729,11 @@ sub prop {
     my ($u, $prop) = @_;
     $u->preload_props($prop) unless exists $u->{$_};
     return $u->{$prop};
+}
+
+sub set_prop {
+    my ($u, $prop, $value) = @_;
+    LJ::set_userprop($u, $prop, $value);
 }
 
 sub journal_base {
@@ -1765,7 +1769,6 @@ sub infohistory_add {
 sub set_userprop
 {
     &nodb;
-
     my ($u, $propname, $value, $memonly) = @_;
     $u = ref $u ? $u : LJ::load_userid($u);
     my $userid = $u->{'userid'}+0;
@@ -1908,10 +1911,9 @@ sub ljuser
         # Traverse the renames to the final journal
         while (ref $user and $user->{'journaltype'} eq 'R'
                and ! $opts->{'no_follow'} && $hops++ < 5) {
-
-            LJ::load_user_props($user, 'renamedto');
-            last unless length $user->{'renamedto'};
-            $user = LJ::load_user($user->{'renamedto'});
+            my $rt = $user->prop("renamedto");
+            last unless length $rt;
+            $user = LJ::load_user($rt);
         }
     }
 
@@ -2977,13 +2979,13 @@ sub make_journal
         push @needed_props, "opt_logcommentips";
     }
 
-    LJ::load_user_props($u, @needed_props);
+    $u->preload_props(@needed_props);
 
     # FIXME: remove this after all affected accounts have been fixed
     # see http://zilla.livejournal.org/1443 for details
     if ($u->{$s1prop} =~ /^\D/) {
         $u->{$s1prop} = $LJ::USERPROP_DEF{$s1prop};
-        LJ::set_userprop($u, $s1prop, $u->{$s1prop});
+        $u->set_prop($s1prop, $u->{$s1prop});
     }
 
     # if the remote is the user to be viewed, make sure the $remote
@@ -3028,7 +3030,7 @@ sub make_journal
             if ($remote && $geta->{'style'} eq 'mine') {
 
                 # get remote props and decide what style remote uses
-                LJ::load_user_props($remote, "stylesys", "s2_style");
+                $remote->preload_props("stylesys", "s2_style");
 
                 # remote using s2; make sure we pass down the $remote object as the style_u to
                 # indicate that they should use $remote to load the style instead of the regular $u
