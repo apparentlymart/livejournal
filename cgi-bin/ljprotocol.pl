@@ -1060,28 +1060,6 @@ sub postevent
     # note this post in recentactions table
     LJ::note_recent_action($uowner, 'post');
 
-    # update user update table (on which friends views rely)
-    # NOTE: as of Mar-25-2003, we don't actually use this yet.  we might
-    # use it in the future though, for faster ?skip=0 friends views.
-    # for now, we'll keep it disabled to lessen writes
-    if (0) {
-        my @bits;
-        if ($security eq "public") {
-            push @bits, 31;  # 31 means public
-        } elsif ($security eq "private") {
-            push @bits, 32;  # 1<<32 doesn't exist (too big), but we'll use it in this table
-        } else {
-            for (my $i=0; $i<=30; $i++) {
-                next unless $qallowmask & (1<<$i);
-                push @bits, $i;
-            }
-        }
-        if (@bits) {
-            $dbh->do("REPLACE INTO userupdate (userid, groupbit, timeupdate) VALUES ".
-                     join(",", map { "($ownerid, $_, NOW())" } @bits));
-        }
-    }
-
     # notify weblogs.com of post if necessary
     if ($u->{'opt_weblogscom'} && LJ::get_cap($u, "weblogscom") &&
         $security eq "public" && ! $req->{'props'}->{'opt_backdated'})

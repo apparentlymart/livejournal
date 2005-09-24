@@ -1082,17 +1082,6 @@ CREATE TABLE weekuserusage
 )
 EOC
 
-register_tablecreate("userupdate", <<'EOC');
-CREATE TABLE userupdate
-(
-   userid   INT UNSIGNED NOT NULL,
-   groupbit TINYINT UNSIGNED NOT NULL,
-   PRIMARY KEY (userid, groupbit),
-   timeupdate DATETIME NOT NULL
-)
-EOC
-
-
 post_create("userusage",
             "sqltry" => "INSERT IGNORE INTO userusage (userid, timecreate, timeupdate, timecheck, lastitemid) SELECT userid, timecreate, timeupdate, timecheck, lastitemid FROM user",
             "sqltry" => "ALTER TABLE user DROP timecreate, DROP timeupdate, DROP timecheck, DROP lastitemid",
@@ -1888,7 +1877,7 @@ CREATE TABLE partialstatsdata (
     PRIMARY KEY (statname, arg, clusterid)
 )
 EOC
-   
+
 # inviterecv -- stores community invitations received
 register_tablecreate("inviterecv", <<'EOC');
 CREATE TABLE inviterecv (
@@ -2082,7 +2071,7 @@ CREATE TABLE actionhistory (
     what      CHAR(2) NOT NULL,
     count     INT UNSIGNED NOT NULL DEFAULT 0,
     INDEX(time)
-                            
+
 )
 EOC
 
@@ -2202,7 +2191,7 @@ EOC
 register_tablecreate("priv_packages_content", <<'EOC');
 CREATE TABLE priv_packages_content (
   pkgid int(10) unsigned NOT NULL auto_increment,
-  privname varchar(20) NOT NULL, 
+  privname varchar(20) NOT NULL,
   privarg varchar(40),
   PRIMARY KEY (pkgid, privname, privarg)
 )
@@ -2584,7 +2573,7 @@ register_alter(sub {
         do_alter("userproplist", "ALTER TABLE userproplist " .
                  "ADD multihomed ENUM('1', '0') NOT NULL DEFAULT '0' AFTER cldversion");
     }
-    
+
     if (index_name("moodthemedata", "INDEX:moodthemeid")) {
         do_alter("moodthemedata", "ALTER IGNORE TABLE moodthemedata DROP KEY moodthemeid");
     }
@@ -2652,7 +2641,7 @@ register_alter(sub {
 
     unless (column_type("syndicated", "oldest_ourdate")) {
         do_alter("syndicated",
-		 "ALTER TABLE syndicated ADD oldest_ourdate DATETIME AFTER lastnew");
+                 "ALTER TABLE syndicated ADD oldest_ourdate DATETIME AFTER lastnew");
     }
 
     if (column_type("sessions", "userid") =~ /mediumint/) {
