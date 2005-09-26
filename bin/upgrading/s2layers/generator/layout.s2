@@ -183,6 +183,10 @@ color: $*stronger_text;
 .comments {
 font-size: 8pt;
 }
+.quickreply {
+margin-top: 1em;
+width:100%;
+}
 
 """;
 }
@@ -473,16 +477,18 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         print $e.text;
     }
 """</td></tr>
-<tr bgcolor="$*weak_back"><td align='left' class='comments'>
+<tr bgcolor="$*weak_back"><td align='left' class='comments' valign='top'>
 <a href="$e.permalink_url">$*text_permalink</a></td>""";
     if ($p.view != "entry" and $p.view != "reply") {
-        "<td align='right' class='comments'>"; $e.comments->print(); "</td>";
+        "<td align='right' class='comments'>"; $e.comments->print();
     } elseif ($e.comments.enabled) {
-        "<td align='right' class='comments'>"; $e.comments->print_postlink(); "</td>";
+        "<td align='right' class='comments'>"; $p->print_reply_link({"linktext" => $*text_comment_reply, "target" => "topcomment"});
     } else {
-        "<td></td>";
+        "<td>";
     }
-    """</tr></table></td></tr></table><p>""";
+    "<br/>";
+    $p->print_reply_container({"target" => "topcomment", "class" => "quickreply"});
+    """</td></tr></table></td></tr></table><p>""";
 
 } # print_entry(Page,Entry,Color,Color,bool)
 
@@ -865,12 +871,15 @@ function EntryPage::print_comment (Comment c) {
     if ($c.frozen) {
         "(Replies frozen) ";
     } else {
-        "(<a href='$c.reply_url'>Reply to this</a>) ";
+        "("; $c->print_reply_link({"linktext" => "Reply to this"}); ")";
     }
     "</span>";
 
     if ($c.parent_url != "") { "(<a href='$c.parent_url'>Parent</a>) "; }
     if ($c.thread_url != "") { "(<a href='$c.thread_url'>Thread</a>) "; }
+    if (not $c.frozen) {
+        $c->print_reply_container({"class" => "quickreply"});
+    }
     "</div>";
 }
 
