@@ -47,7 +47,6 @@ require "$ENV{'LJHOME'}/cgi-bin/imageconf.pl";
 require "$ENV{'LJHOME'}/cgi-bin/propparse.pl";
 require "$ENV{'LJHOME'}/cgi-bin/supportlib.pl";
 require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
-require "$ENV{'LJHOME'}/cgi-bin/portal.pl";
 require "$ENV{'LJHOME'}/cgi-bin/talklib.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljtodo.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljfeed.pl";
