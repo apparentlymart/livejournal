@@ -91,7 +91,7 @@ sub generate_content {
         my $lrow = $logrow{"$u->{userid} $r->{nodeid}"} ||= LJ::get_log2_row($u, $r->{'nodeid'});
         my ($subject, $body, $posterid) = (@{$comment_text->{$jtalkid}||[]}[0,1], $lrow->{posterid});
 
-        $subject ||= '(No Subject)';
+        $subject ||= '';
         $body ||= '(No comment text)';
 
         # trim comment body
@@ -107,7 +107,7 @@ sub generate_content {
 
         my $posturl = "$root/$lrow->{ditemid}.html";
         my $talkurl = "$root/$lrow->{ditemid}.html?thread=$talkid\#t$talkid";
-        my $userlink = LJ::isu($pu) ? LJ::ljuser($pu) : "(Anonymous)";
+        my $userlink = LJ::isu($pu) ? LJ::ljuser($pu) : "<i>(Anonymous)</i>";
         $content .= qq {
             <tr>
                 <td>
