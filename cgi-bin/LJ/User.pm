@@ -770,7 +770,8 @@ sub get_friends_birthdays {
 
         my ($year, $month, $day) = split('-', $friend->{bdate});
 
-        if ($month > 0 && $day > 0) {
+        if ($month > 0 && $day > 0 && $friend->{'allow_infoshow'} eq 'Y'
+                       && !$friend->underage) {
             my $ref = [ $month, $day, $friend->{user} ];
             push @bdays, $ref;
         }
