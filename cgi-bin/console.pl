@@ -363,19 +363,19 @@ $cmd{'priv_package'} = {
 
         # list created packages, or contents of one
         if ($cmd eq 'list') {
-            if ($pkg) {
-                return $fail->("Package with that name does not exist.")
+            if ($pkg && $pkg ne 'all') {
+                return $fail->($out, "Package with that name does not exist.")
                     unless $pkgid;
                 my $contents = $dbh->selectall_arrayref('SELECT privname, privarg FROM priv_packages_content WHERE pkgid = ?',
                                                         undef, $pkgid);
-                return $fail->("Database error: " . $dbh->errstr) if $dbh->err;
+                return $fail->($out, "Database error: " . $dbh->errstr) if $dbh->err;
                 push @$out, [ "", "Contents of $cpkg:" ];
                 foreach my $row (@{$contents || []}) {
                     push @$out, [ "", "\t$row->[0]:$row->[1]" ];
                 }
             } else {
                 my $packages = $dbh->selectall_arrayref('SELECT pkgid, name, lastmoduserid, lastmodtime FROM priv_packages ORDER BY name');
-                return $fail->("Database error: " . $dbh->errstr) if $dbh->err;
+                return $fail->($out, "Database error: " . $dbh->errstr) if $dbh->err;
                 push @$out, [ "", "Available packages:" ];
                 foreach my $row (@{$packages || []}) {
                     my $u = LJ::load_userid($row->[2]);
