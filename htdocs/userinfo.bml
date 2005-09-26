@@ -700,14 +700,14 @@ if ($u->{'journaltitle'}) {
  }
 
  # Schools Directory
- unless ($LJ::DISABLED{'schools'}) {
+ if ($u->{'journaltype'} ne 'Y' && !$LJ::DISABLED{'schools'}) {
      my $span = ($narrow_left-- > 0) ? 1 : 2;
      $body .= "<tr><td align='right' valign='top'><b><a href='/schools/'>$ML{'.label.schools'}</a>:</b></td><td colspan='$span'>";
 
      my $schools = LJ::Schools::get_attended($u);
      if ($schools && %$schools) {
          my @links;
-         foreach my $sid (sort { $schools->{$a}->{name} cmp $schools->{$b}->{name} } keys %$schools) {
+         foreach my $sid (sort { $schools->{$a}->{year_start} <=> $schools->{$b}->{year_start} } keys %$schools) {
              my $link = "<a href='$LJ::SITEROOT/schools/" .
                         "?ctc=" . LJ::eurl($schools->{$sid}->{country}) .
                         "&sc=" . LJ::eurl($schools->{$sid}->{state}) .
