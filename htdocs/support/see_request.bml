@@ -501,7 +501,7 @@ body<=
         my $header = "";
         if ($le->{'userid'} && LJ::Support::can_see_helper($sp, $remote)) {
             my $up = LJ::load_userid($le->{'userid'});
-            my $picid = $up->{'defaultpicid'};
+            my $picid = LJ::get_picid_from_keyword($up, '_support') || $up->{defaultpicid};
             $userpics{$picid} or LJ::load_userpics(\%userpics, [[ $up, $picid ]]);
             $header = "<table style='margin-top: 15px;'><tr valign='bottom'>";
             if ($picid && $up->{'statusvis'} ne 'S') {
