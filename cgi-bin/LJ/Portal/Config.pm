@@ -40,7 +40,7 @@ our %DEFAULTBOXSTATES = (
                          },
                          'Manage' => {
                              'added' => 1,
-                             'sort'  => 1,
+                             'sort'  => 2,
                              'col'   => 'L',
                          },
                          'PopWithFriends' => {
@@ -54,7 +54,7 @@ our %DEFAULTBOXSTATES = (
                          },
                          'UpdateJournal' => {
                              'added' => 1,
-                             'sort'  => 2,
+                             'sort'  => 3,
                              'col'   => 'L',
                          },
                          'NewUser' => {
