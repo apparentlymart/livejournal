@@ -1023,7 +1023,7 @@ EOC
 register_tablecreate("portal_config", <<'EOC');
 CREATE TABLE portal_config (
                             userid INT(10),
-                            pboxid SMALLINT AUTO_INCREMENT,
+                            pboxid SMALLINT,
                             col CHAR(1),
                             sortorder TINYINT,
                             type INT,
