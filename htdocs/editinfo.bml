@@ -359,7 +359,7 @@ _code?>
         $ret .= "<tr valign='middle'><td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'allow_showschools', 'id' => 'allow_showschools',
                                  'selected' => $u->{'opt_showschools'} ne 'N' });
-        $ret .= "</td><td><b><label for='allow_showschools'>$ML{'.schools.title'}</label></b></td></tr>\n";
+        $ret .= "</td><td><b><label for='allow_showschools'>$ML{'.schools.title2'}</label></b></td></tr>\n";
         $ret .= "<tr><td>&nbsp;</td><td>$ML{'.schools.des'}";
 
         $ret .= "\n<p><b>$ML{'.schools.who'}</b> ";
