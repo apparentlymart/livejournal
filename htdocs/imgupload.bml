@@ -1,0 +1,61 @@
+<?_code
+{
+    use strict;
+    use vars qw(%GET);
+
+    my $u = LJ::User->remote;
+    return "" unless $u;
+
+    if (my $ct = $GET{upload_count}) {
+        my $js = "";
+        for my $pn (1..$ct) {
+            my $width  = int($GET{"w_$pn"});
+            my $height = int($GET{"h_$pn"});
+            my $eurl   = LJ::ejs($GET{"u_$pn"});
+            $js .= "window.parent.onUpload(\"$eurl\", $width, $height);\n";
+        }
+        my $ret = qq{
+            <html>
+<body>
+  <script>
+  if (window.parent && window.parent.onUpload) {
+     $js
+       window.parent.onClosePopup();
+     }
+  </script>
+
+</body>
+</html>
+};
+        return $ret;
+    }
+
+    my $ret = qq{
+<html>
+<head>
+   <style>
+   body { font: 10pt verdana; background: #ccc;}
+   </style>
+   <script>
+   function onCancel () {
+       window.parent.onClosePopup();
+   }
+   </script>
+</head>
+<body>
+<form enctype="multipart/form-data" action="$LJ::FB_SITEROOT/interface/webupload" method='post'>
+<input type='hidden' name='redir_to_auth_base' value='1' />
+<input type='hidden' name='sec1' value='255' /> <!-- public -->
+
+<table>
+<tr><td align='right'>Image file to upload:</td><td><input type='file' name='file1' width='60' /></td></tr>
+<tr><td align='right'>&nbsp;</td><td><input type='submit' value="Upload!" /> <input type='button' value="Cancel" onclick='onCancel()' /></td></tr>
+</table>
+
+</form>
+</body>
+</html>
+};
+    return $ret;
+}
+_code?>

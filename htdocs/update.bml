@@ -182,6 +182,7 @@
             'clientversion' => "WebUpdate/2.0.0",
             'richtext' => 1,
             'richtext_on' => $richtext,
+            'include_insert_object' => $GET{'insobj'},
         };
 
         if ($did_post) {

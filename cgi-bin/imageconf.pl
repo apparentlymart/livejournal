@@ -5,6 +5,13 @@ use strict;
 package LJ::Img;
 use vars qw(%img);
 
+$img{'ins_obj'} = {
+    'src' => '/ins-object.gif',
+    'width' => 129,
+    'height' => 52,
+    'alt' => "Insert Image/Object",
+};
+
 $img{'btn_up'} = {
     'src' => '/btn_up.gif',
     'width' => 22,
@@ -12,14 +19,14 @@ $img{'btn_up'} = {
     'alt' => 'Up',
 };
 
-$img{'btn_down'} = { 
+$img{'btn_down'} = {
     'src' => '/btn_dn.gif',
     'width' => 22,
     'height' => 20,
     'alt' => 'Down',
 };
 
-$img{'btn_del'} = { 
+$img{'btn_del'} = {
     'src' => '/btn_del.gif',
     'width' => 22,
     'height' => 20,
@@ -40,42 +47,42 @@ $img{'btn_unfreeze'} = {
     'alt' => 'Unfreeze',
 };
 
-$img{'btn_scr'} = { 
+$img{'btn_scr'} = {
     'src' => '/btn_scr.gif',
     'width' => 22,
     'height' => 20,
     'alt' => 'Screen',
 };
 
-$img{'btn_unscr'} = { 
+$img{'btn_unscr'} = {
     'src' => '/btn_unscr.gif',
     'width' => 22,
     'height' => 20,
     'alt' => 'Unscreen',
 };
 
-$img{'prev_entry'} = { 
+$img{'prev_entry'} = {
     'src' => '/btn_prev.gif',
     'width' => 22,
     'height' => 20,
     'alt' => 'Previous Entry',
 };
 
-$img{'next_entry'} = { 
+$img{'next_entry'} = {
     'src' => '/btn_next.gif',
     'width' => 22,
     'height' => 20,
     'alt' => 'Next Entry',
 };
 
-$img{'memadd'} = { 
+$img{'memadd'} = {
     'src' => '/memadd.gif',
     'width' => 22,
     'height' => 20,
     'alt' => 'Add to memories!',
 };
 
-$img{'editentry'} = { 
+$img{'editentry'} = {
     'src' => '/btn_edit.gif',
     'width' => 22,
     'height' => 20,
@@ -89,7 +96,7 @@ $img{'edittags'} = {
     'alt' => 'Edit Tags',
 };
 
-$img{'tellfriend'} = { 
+$img{'tellfriend'} = {
     'src' => '/btn_tellfriend.gif',
     'width' => 22,
     'height' => 20,

@@ -231,3 +231,41 @@ function settime() {
     
     return false;
 }
+
+
+// image upload stuff
+function onUpload (url, width, height) {
+        var ta = document.getElementById("updateForm");
+        var fail = function (msg) {
+            alert("FAIL: " + msg);
+            return 0;
+        };
+        if (! ta) return fail("no updateform");
+        ta = ta.event;
+        ta.value = ta.value + "\n<img src=\"" + url + "\" width=\"" + width + "\" height=\"" + height + "\" />";
+}
+
+var currentPopup;
+function onInsertObject () {
+    onClosePopup();
+    var de = document.createElement("div");
+    de.style.textAlign = "left";
+    de.className = 'updateinsobject';
+    de.style.overflow = "hidden";
+    de.style.position = "absolute";
+    de.style.left = 150 + "px";
+    de.style.top = 300 + "px";
+    de.style.width = "50em";
+    de.style.height = "10em";
+    de.style.backgroundColor = "#fff";
+    de.innerHTML = "<iframe src='imgupload.bml' style='border: 0; overflow: hidden; width: 50em; height: 10em; display: block;'></iframe>";
+    currentPopup = de;
+    document.body.appendChild(de);
+}
+
+function onClosePopup() {
+    if (! currentPopup) return;
+    document.body.removeChild(currentPopup);
+    currentPopup = null;
+}
+
