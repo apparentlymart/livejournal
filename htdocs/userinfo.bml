@@ -129,7 +129,7 @@
      my @props = qw(opt_whatemailshow country state city zip renamedto
                     journaltitle journalsubtitle public_key
                     url urlname opt_hidefriendofs dont_load_members
-                    opt_showmutualfriends fb_num_pubpics);
+                    opt_showmutualfriends fb_num_pubpics opt_showschools);
      unless ($com || $synd) { push @props, qw(aolim icq yahoo msn gender jabber); }
      if ($synd) { push @props, qw(rssparseerror); }
      if ($com) { push @props, qw(moderated); }
@@ -700,50 +700,65 @@ if ($u->{'journaltitle'}) {
  }
 
  # Schools Directory
- if ($u->{'journaltype'} ne 'Y' && !$LJ::DISABLED{'schools'}) {
-     my $span = ($narrow_left-- > 0) ? 1 : 2;
-     $body .= "<tr><td align='right' valign='top'><b><a href='/schools/'>$ML{'.label.schools'}</a>:</b></td><td colspan='$span'>";
+ #
+ # Outer if logic
+ #  - Don't show if journal is syndicated or schools are disabled
+ #  - Show if user set to show school info to everyone (or if userprop hasn't been set yet)
+ #  - Show if user set to show to friends and remote is a friend
+ #  - Show if remote is using viewall
+ if ($u->{'journaltype'} ne 'Y' &&
+     !$LJ::DISABLED{'schools'}  &&
+     (($u->{'opt_showschools'} eq '' || $u->{'opt_showschools'} eq 'Y') ||
+      ($u->{'opt_showschools'} eq 'F' && $remote_isfriend) || $viewall)) {
 
      my $schools = LJ::Schools::get_attended($u);
-     if ($schools && %$schools) {
-         my @links;
-         foreach my $sid (sort { $schools->{$a}->{year_start} <=> $schools->{$b}->{year_start} } keys %$schools) {
-             my $link = "<a href='$LJ::SITEROOT/schools/" .
-                        "?ctc=" . LJ::eurl($schools->{$sid}->{country}) .
-                        "&sc=" . LJ::eurl($schools->{$sid}->{state}) .
-                        "&cc=" . LJ::eurl($schools->{$sid}->{city}) .
-                        "&sid=" . $sid .
-                        "'>" . LJ::ehtml($schools->{$sid}->{name}) . "</a>";
-            $link .= " - <em>" . $schools->{$sid}->{city};
-            $link .= $schools->{$sid}->{state} ? ", $schools->{$sid}->{state}" : "";
-            if ($schools->{$sid}->{country} ne 'US') {
-                my %countries;
-                LJ::load_codes({ country => \%countries });
-                $link .= ", $countries{$schools->{$sid}->{country}}";
-            }
-            $link .= "</em>";
 
-            if (defined $schools->{$sid}->{year_start}) {
-                $link .= " (" . $schools->{$sid}->{year_start} . "-" .
+     # Show if journal is not a community or
+     # if it is a community and there are schools defined
+     if ($u->{'journaltype'} ne 'C' || ($schools && %$schools)) {
+         my $span = ($narrow_left-- > 0) ? 1 : 2;
+         $body .= "<tr><td align='right' valign='top'><b><a href='/schools/'>$ML{'.label.schools'}</a>:</b></td><td colspan='$span'>";
+
+         if ($schools && %$schools) {
+             my @links;
+             foreach my $sid (sort { $schools->{$a}->{year_start} <=> $schools->{$b}->{year_start} } keys %$schools) {
+                 my $link = "<a href='$LJ::SITEROOT/schools/" .
+                     "?ctc=" . LJ::eurl($schools->{$sid}->{country}) .
+                     "&sc=" . LJ::eurl($schools->{$sid}->{state}) .
+                     "&cc=" . LJ::eurl($schools->{$sid}->{city}) .
+                     "&sid=" . $sid .
+                     "'>" . LJ::ehtml($schools->{$sid}->{name}) . "</a>";
+                 $link .= " - <em>" . $schools->{$sid}->{city};
+                 $link .= $schools->{$sid}->{state} ? ", $schools->{$sid}->{state}" : "";
+                 if ($schools->{$sid}->{country} ne 'US') {
+                     my %countries;
+                     LJ::load_codes({ country => \%countries });
+                     $link .= ", $countries{$schools->{$sid}->{country}}";
+                 }
+                 $link .= "</em>";
+
+                 if (defined $schools->{$sid}->{year_start}) {
+                     $link .= " (" . $schools->{$sid}->{year_start} . "-" .
                          ($schools->{$sid}->{year_end} || "present") . ")";
-            }
+                 }
 
-             $link .= "<br />\n";
+                 $link .= "<br />\n";
 
-            push @links, $link;
+                 push @links, $link;
+             }
+             $body .= join('', @links);
+         } else {
+             $body .= "<i>$ML{'.label.noschools'}</i>";
          }
-         $body .= join('', @links);
-     } else {
-         $body .= "<i>$ML{'.label.noschools'}</i>";
-     }
 
-     if ($remote->{userid} == $userid) {
-         $body .= ' <small>';
-         $body .= BML::ml('Actionlink', { 'link' => "<a href='/schools/manage.bml'>$ML{'.label.manageschools'}</a>" });
-         $body .= '</small>';
-     }
+         if ($remote->{userid} == $userid) {
+             $body .= ' <small>';
+             $body .= BML::ml('Actionlink', { 'link' => "<a href='/schools/manage.bml'>$ML{'.label.manageschools'}</a>" });
+             $body .= '</small>';
+         }
 
-     $body .= "</td></tr>";
+         $body .= "</td></tr>";
+     }
  }
 
 

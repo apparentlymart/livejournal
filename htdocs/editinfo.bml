@@ -48,7 +48,7 @@ _code?>
                         "opt_whoscreened", "journaltitle", "journalsubtitle", 
                         "friendspagetitle", "opt_weblogscom", "opt_stylemine",
                         "opt_imagelinks", "opt_getselfemail", "external_foaf_url",
-                        "opt_showmutualfriends",
+                        "opt_showmutualfriends","opt_showschools",
                         );
 
     # to store values before they undergo normalisation
@@ -348,12 +348,27 @@ _code?>
             # opt_mangleemail
             $ret .= "<table style='margin-bottom: 20px;'>\n<tr valign='middle'><td>";
             $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_mangleemail', 'id' => 'opt_mangleemail',
-                                     'selected' => $u->{'opt_mangleemail'} eq 'Y' });
+                                     'selected' => $u->{'opt_mangleemail'} ne 'Y' });
             $ret .= "</td><td><b><label for='opt_mangleemail'>$ML{'.mangleaddress.header'}</label></b></td></tr>\n";
             $ret .= "<tr><td>&nbsp;</td><td>$ML{'.mangleaddress.about'}</td></tr>\n</table>\n";
 
         }
         $ret .= "</td></tr>\n";
+
+        # schools
+        $ret .= "<tr valign='middle'><td>";
+        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'allow_showschools', 'id' => 'allow_showschools',
+                                 'selected' => $u->{'opt_showschools'} ne 'N' });
+        $ret .= "</td><td><b><label for='allow_showschools'>$ML{'.schools.title'}</label></b></td></tr>\n";
+        $ret .= "<tr><td>&nbsp;</td><td>$ML{'.schools.des'}";
+
+        $ret .= "\n<p><b>$ML{'.schools.who'}</b> ";
+        $ret .= LJ::html_select({ 'name' => 'opt_showschools',
+                                  'selected' => $u->{'opt_showschools'} }, 
+                                "Y" => BML::ml(".security.visibility.everybody"),
+                                "F" => BML::ml(".security.visibility.friends") );
+        $ret .= "</p>\n</td></tr>\n";
+
 
         # allow_infoshow
         $ret .= "<tr valign='middle'><td>";
@@ -751,6 +766,9 @@ _code?>
             $POST{'opt_whoscreened'} = "N" unless $POST{'opt_whoscreened'} =~ m/^(N|R|F|A)$/;
             $POST{'opt_imagelinks'} = 0 unless $POST{'opt_imagelinks_on'} &&
                                                $POST{'opt_imagelinks'} =~ m/^(\d+)\|(\d+)$/;
+            $POST{'opt_showschools'} = 'N' unless $POST{'allow_showschools'};
+            $POST{'opt_showschools'} = 'N' unless $POST{'opt_showschools'} =~ m/^(N|Y|F)$/;
+
 
             # for the directory.
             $POST{'sidx_bdate'} = "";
@@ -786,7 +804,7 @@ _code?>
                           "sidx_bdate", "sidx_loc", "mailencoding", "opt_nctalklinks",
                           "opt_whoscreened", "journaltitle", "journalsubtitle", "friendspagetitle",
                           "opt_stylemine", "opt_imagelinks", "opt_getselfemail",
-                          "external_foaf_url", "opt_showmutualfriends",
+                          "external_foaf_url", "opt_showmutualfriends", "opt_showschools",
                           );
 
             # weblogs.com requires a special cap

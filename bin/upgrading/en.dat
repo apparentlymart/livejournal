@@ -1322,6 +1322,12 @@ read our <a href="/legal/privacy.bml">privacy policy</a>.
 
 /editinfo.bml.persinfo.header=Personal Information
 
+/editinfo.bml.schools.des=This option allows you to restrict or hide the schools information displayed on your userinfo page.  Your school attendance will always be viewable by the public when browsing to your school via the Schools Directory.
+
+/editinfo.bml.schools.title=Hide your schools information on your userinfo?
+
+/editinfo.bml.schools.who=Who can view this information?
+
 /editinfo.bml.screen.all=All
 
 /editinfo.bml.screen.anon=Anonymous
