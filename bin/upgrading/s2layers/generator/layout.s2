@@ -476,6 +476,8 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         }
         print $e.text;
     }
+    $p->print_reply_container({"target" => "topcomment", "class" => "quickreply"});
+
 """</td></tr>
 <tr bgcolor="$*weak_back"><td align='left' class='comments' valign='top'>
 <a href="$e.permalink_url">$*text_permalink</a></td>""";
@@ -487,7 +489,6 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         "<td>";
     }
     "<br/>";
-    $p->print_reply_container({"target" => "topcomment", "class" => "quickreply"});
     """</td></tr></table></td></tr></table><p>""";
 
 } # print_entry(Page,Entry,Color,Color,bool)
