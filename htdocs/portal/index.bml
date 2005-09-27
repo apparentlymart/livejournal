@@ -115,8 +115,9 @@
             # request to get a dialog box for configuring box props
             if ($action eq 'configbox') {
                 my $pboxid = ($POST{'pboxid'} || $GET{'pboxid'}) + 0;
+                my $jsmode = $POST{'jsmode'};
 
-                my ($returncode, $configboxhtml) = LJ::Portal->configbox($pboxid, $portalconfig);
+                my ($returncode, $configboxhtml) = LJ::Portal->configbox($pboxid, $portalconfig, $jsmode);
 
                 if ($didget && $configboxhtml) {
                     # just print out the config box for non-JS people

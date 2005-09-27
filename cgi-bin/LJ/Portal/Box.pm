@@ -354,6 +354,7 @@ sub set_props {
 # the config, and if that fails then a normal submit.
 sub generate_box_config_dialog {
     my LJ::Portal::Box $self = shift;
+    my $jsmode = shift;
 
     return unless $self->config_props;
 
@@ -460,7 +461,7 @@ sub generate_box_config_dialog {
         <span class="PortalConfigCancelButton">
             <input type="button" value="Cancel" onclick="fadeOut('config$pboxid'); return false;" />
         </span>
-    };
+    } if $jsmode;
 
     $buttons .= '<span class="PortalConfigSubmitButton">';
     $buttons .= LJ::html_submit('saveconfig', 'Save settings', {'raw' => "onclick=\"if(savePortalBoxConfig($pboxid)) configform$pboxid.submit(); else return false;\""});

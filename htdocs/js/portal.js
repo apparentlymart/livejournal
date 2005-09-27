@@ -54,6 +54,7 @@ function doXrequest (postdata, finishcallback) {
     xtr.open("POST", LJVAR.postUrl, true);
 
     xtr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    postdata = "jsmode=1&" + postdata;
     xtr.send(postdata);
     xtr.onreadystatechange = state_callback;
     return false;

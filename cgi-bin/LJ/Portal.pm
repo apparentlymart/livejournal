@@ -177,14 +177,14 @@ sub addbox {
 
 sub configbox {
     my LJ::Portal $self = shift;
-    my ($pboxid, $portalconfig) = @_;
+    my ($pboxid, $portalconfig, $jsmode) = @_;
 
     my $box = $portalconfig->get_box_by_id($pboxid);
     my $configboxhtml;
     my $returncode;
 
     if ($box) {
-        $configboxhtml = $box->generate_box_config_dialog;
+        $configboxhtml = $box->generate_box_config_dialog($jsmode);
 
         my $insertConfigBox =
             LJ::Portal->create_fenster(
