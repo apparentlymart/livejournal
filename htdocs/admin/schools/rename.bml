@@ -1,0 +1,127 @@
+<?page
+title=>Rename School Location
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%POST);
+
+    my $ret = '';
+    my $err = sub { return "<?errorbar $_[0] errorbar?>"; };
+
+    return $err->('The Schools Directory is currently disabled due to maintenance.')
+        if $LJ::DISABLED{'schools'};
+
+    my $remote = LJ::get_remote();
+    return "<?needlogin?>" unless $remote;
+
+    # higher level of access required, as rename is potentially very hardcore
+    return $err->('You do not have access to use this tool.')
+        unless LJ::check_priv($remote, 'admin', 'siteadmin/school') ||
+               LJ::check_priv($remote, 'admin', '*');
+
+    $ret .= "<?p [ <a href='index.bml'>&lt;&lt; Back to Admin Index</a> ] p?>";
+
+    if (LJ::did_post()) {
+        my $check = sub {
+            return $err->("Invalid form")
+                unless LJ::check_form_auth();
+
+            my $get = sub {
+                my $ctc = $POST{"$_[0]_ctc"};
+                my $sc = $POST{"$_[0]_state"} || $POST{"$_[0]_sc"};
+                my $cc = $POST{"$_[0]_city"};
+                return LJ::Schools::determine_location_opts({
+                    countrycode => $ctc,
+                    statecode => $sc,
+                    citycode => $cc,
+                });
+            };
+
+            my ($from_ctc, $from_sc, $from_cc) = $get->('from');
+            my ($to_ctc, $to_sc, $to_cc) = $get->('to');
+
+            return $err->("Not enough data provided or invalid countries ($from_ctc, $to_ctc)")
+                unless $from_ctc && $to_ctc;
+            return $err->("Countries do not match")
+                unless $from_ctc eq $to_ctc;
+            return $err->("Both State fields must be filled in")
+                unless $from_sc && $to_sc;
+
+            my $citymode = 0;
+            if ($from_cc || $to_cc) {
+                return $err->("State fields must match when renaming a City")
+                    unless $from_sc eq $to_sc;
+                return $err->("Both City fields must be filled in (you only filled in one)")
+                    unless $from_cc && $to_cc;
+                return $err->("City names must differ to rename")
+                    if $from_cc eq $to_cc;
+                $citymode = 1;
+            } else {
+                return $err->("State fields must differ to rename")
+                    if $from_sc eq $to_sc;
+            }
+
+            if ($citymode) {
+                my $rv = LJ::Schools::rename_city($from_ctc, $from_sc, $from_cc, $to_cc);
+                return $err->("Unable to rename city")
+                    unless $rv;
+                return "<?warningbar $from_cc, $from_sc, $from_ctc to $to_cc, $to_sc, $to_ctc successful! warningbar?>";
+
+            } else {
+                my $rv = LJ::Schools::rename_state($from_ctc, $from_sc, $to_sc);
+                return $err->("Unable to rename state")
+                    unless $rv;
+                return "<?warningbar $from_sc, $from_ctc to $to_sc, $to_ctc successful! warningbar?>";
+
+            }
+        };
+        $ret .= $check->();
+    }
+
+    # load countries and US states
+    my (%countries, %states);
+    LJ::load_codes({ country => \%countries, state => \%states });
+    my @ctcs = sort { $countries{$a} cmp $countries{$b} } keys %countries;
+    my @scs = sort { $states{$a} cmp $states{$b} } keys %states;
+
+    # form dumper
+    my $dump = sub {
+        my $val;
+        $val .= "<table>";
+        $val .= "<tr><td>Country:</td><td>";
+        $val .= LJ::html_select({ name => "$_[0]_ctc", selected => ($POST{"$_[0]_ctc"} || "US"), },
+                                map { $_, $countries{$_} } @ctcs);
+        $val .= "</td><td></td></tr><tr><td>State:</td><td>";
+        $val .= LJ::html_text({ name => "$_[0]_state", size => 15, value => $POST{"$_[0]_state"} });
+        $val .= "</td><td></td></tr><tr><td align='right'>or:</td><td>";
+        $val .= LJ::html_select({ name => "$_[0]_sc", selected => $POST{"$_[0]_sc"} },
+                                "", "-- use box above, or select here --",
+                                map { $_, $states{$_} } @scs);
+        $val .= "</td><td></td></tr><tr><td>City:</td><td>";
+        $val .= LJ::html_text({ name => "$_[0]_city", size => 25, value => $POST{"$_[0]_city"} });
+        $val .= "</td><td><em>(optional)</em></td></tr></table>";
+        return $val;
+    };
+
+    # simply dump the form
+    $ret .= "<form method='post' action='rename.bml'>";
+    $ret .= LJ::form_auth();
+    $ret .= "<?p Rename this location: p?>";
+    $ret .= $dump->("from");
+    $ret .= "<?p Into this location: p?>";
+    $ret .= $dump->("to");
+    $ret .= LJ::html_submit(undef, "Rename");
+    $ret .= "</form>";
+
+    # some fancy instructions nobody will read
+    $ret .= "<?p This will rename the first location into the second location, transferring any " .
+            "schools from the first to the second.  Any schools with the same name will be merged " .
+            "automatically. p?>";
+    $ret .= "<?p Country and state are required.  City is optional, as noted. p?>";
+    $ret .= "<?p <b>There is no going back.</b> p?>";
+
+}
+_code?>
+<=body
+page?>

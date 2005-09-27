@@ -47,7 +47,8 @@ body<=
 
             $school = $school->{$sid};
 
-            $ret .= "<form method='post' action='school-edit.bml'>";
+            $ret .= "<form method='post' action='edit.bml'>";
+            $ret .= LJ::form_auth();
             $ret .= LJ::html_hidden('sid', $sid, 'save', 1);
             $ret .= "<table><tr><td>";
             $ret .= "Country: ";
@@ -84,6 +85,9 @@ body<=
 
             return $ret;
         } else {
+            return $err->('Invalid form')
+                unless LJ::check_form_auth();
+
             my $rv = LJ::Schools::edit_school($sid,
                                               {
                                                   name => $POST{name},
@@ -99,7 +103,7 @@ body<=
             return $ret;
         }
     } else {
-        $ret .= "<form method='post' action='school-edit.bml'>";
+        $ret .= "<form method='post' action='edit.bml'>";
         $ret .= "School ID to edit: " . LJ::html_text({name => 'sid', size => 10});
         $ret .= ' ' . LJ::html_submit();
         $ret .= "</form>";

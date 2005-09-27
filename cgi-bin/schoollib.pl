@@ -99,7 +99,7 @@ sub load_schools {
             country => $row->[2],
             state => $row->[3],
             city => $row->[4],
-            url => $row->[6],
+            url => $row->[5],
         };
         LJ::MemCache::set([ $row->[0], "sasi:$row->[0]" ], $res->{$row->[0]});
     }
@@ -181,7 +181,7 @@ sub get_countries {
     }
 
     # set to memcache and return
-    LJ::MemCache::set('saccs', $res);
+    LJ::MemCache::set('saccs', $res, 300);
     return $res;
 }
 
@@ -222,7 +222,7 @@ sub get_states {
     }
 
     # set to memcache and return
-    LJ::MemCache::set("sascs:$ctc", $res);
+    LJ::MemCache::set("sascs:$ctc", $res, 300);
     return $res;
 }
 
@@ -638,7 +638,7 @@ sub get_pending {
     my $rows = $dbh->selectall_hashref(qq{
             SELECT pendid, userid, name, country, state, city, url
             FROM schools_pending
-            LIMIT 20
+            LIMIT 200
         }, 'pendid');
     return undef if $dbh->err;
 
@@ -858,6 +858,200 @@ sub reject_pending {
     $dbh->do("DELETE FROM schools_pending WHERE pendid IN ($in)");
 
     # and we're done
+    return 1;
+}
+
+# <LJFUNC>
+# name: LJ::Schools::rename_state
+# class: schools
+# des: Renames a state within a country.
+# args: countrycode, fromstatecode, tostatecode
+# des-countrycode: The country the state to rename is in.
+# des-fromstatecode: Origin statecode.
+# des-tostatecode: Destination statecode.
+# returns: 1 on success, undef on error.
+# </LJFUNC>
+sub rename_state {
+    my ($ctc, $from_sc, $to_sc) = @_;
+    return undef unless $ctc && $from_sc && $to_sc;
+    return undef unless $from_sc ne $to_sc;
+
+    # get db
+    my $dbh = LJ::get_db_writer();
+    return undef unless $dbh;
+
+    # rename the state, with an update ignore (merge dupes!)
+    $dbh->do("UPDATE IGNORE schools SET state = ? WHERE country = ? AND state = ?",
+             undef, $to_sc, $ctc, $from_sc);
+    return undef if $dbh->err;
+
+    # now, find anything left, to merge it down... ahh, SQL.  'a' is the "FROM"
+    # record, 'b' is the TO record, and we're merging schools FROM a TO b... get it?
+    my $rows = $dbh->selectall_arrayref(qq{
+            SELECT a.schoolid, b.schoolid
+            FROM schools a, schools b
+            WHERE a.country = ?
+              AND b.country = a.country
+              AND a.state = ?
+              AND b.state = ?
+              AND a.city = b.city
+              AND a.name = b.name
+        }, undef, $ctc, $from_sc, $to_sc);
+
+    # now let's merge these down
+    if ($rows && @$rows) {
+        # merge a -> b, which is merge_schools(b, a)
+        LJ::Schools::merge_schools($_->[1], $_->[0])
+            foreach @$rows;
+    }
+
+    # all done
+    return 1;
+}
+
+# <LJFUNC>
+# name: LJ::Schools::rename_city
+# class: schools
+# des: Renames a city within a country and state.
+# args: countrycode, statecode, fromcitycode, tocitycode
+# des-countrycode: The country the city to rename is in.
+# des-statecode: The state the city to rename is in.
+# des-fromcitycode: Origin citycode.
+# des-tocitycode: Destination citycode.
+# returns: 1 on success, undef on error.
+# </LJFUNC>
+sub rename_city {
+    my ($ctc, $sc, $from_cc, $to_cc) = @_;
+    return undef unless $ctc && $sc && $from_cc && $to_cc;
+    return undef unless $from_cc ne $to_cc;
+
+    # get db
+    my $dbh = LJ::get_db_writer();
+    return undef unless $dbh;
+
+    # rename the state, with an update ignore (merge dupes!)
+    $dbh->do("UPDATE IGNORE schools SET city = ? WHERE country = ? AND state = ? AND city = ?",
+             undef, $to_cc, $ctc, $sc, $from_cc);
+    return undef if $dbh->err;
+
+    # now, find anything left, to merge it down... ahh, SQL.  'a' is the "FROM"
+    # record, 'b' is the TO record, and we're merging schools FROM a TO b... get it?
+    my $rows = $dbh->selectall_arrayref(qq{
+            SELECT a.schoolid, b.schoolid
+            FROM schools a, schools b
+            WHERE a.country = ?
+              AND b.country = a.country
+              AND a.state = ?
+              AND b.state = a.state
+              AND a.city = ?
+              AND b.city = ?
+              AND a.name = b.name
+        }, undef, $ctc, $sc, $from_cc, $to_cc);
+
+    # now let's merge these down
+    if ($rows && @$rows) {
+        # merge a -> b, which is merge_schools(b, a)
+        LJ::Schools::merge_schools($_->[1], $_->[0])
+            foreach @$rows;
+    }
+
+    # all done
+    return 1;
+}
+
+
+# <LJFUNC>
+# name: LJ::Schools::merge_schools
+# class: schools
+# des: Merges schools into one record.
+# args: parentsid, childsids
+# des-parentsid: The master/parent schoolid to merge the other schools into.
+# des-childsids: Arrayref of schoolids to merge into the parentsid.
+# returns: 1 on success, undef on error.
+# </LJFUNC>
+sub merge_schools {
+    my ($psid, $csids) = @_;
+    $psid += 0;
+    $csids = [ $csids ] unless ref $csids;
+    $csids = [ grep { defined $_ && $_ > 0 && $_ != $psid } @$csids ];
+    return undef unless $psid && @$csids;
+
+    # validate the schools
+    my $schools = LJ::Schools::load_schools($psid, @$csids);
+    return undef unless $schools->{$psid};
+
+    # database handles
+    my %dbs;
+    my $dbh = LJ::get_db_writer();
+
+    # now iterate and combine the schools up
+    foreach my $csid (@$csids) {
+        next unless $schools->{$csid};
+
+        # basically find everybody who attended this school... we can't use
+        # the API because it does a LIMIT 1000 and we need everybody
+        my $uids = $dbh->selectcol_arrayref("SELECT userid FROM schools_attended WHERE schoolid = ?",
+                                            undef, $csid);
+        return undef if $dbh->err;
+        next unless $uids;
+
+        # now we have a list of users, load them
+        my $us = LJ::load_userids(@$uids);
+        next unless $us;
+
+        # sort by cluster
+        my %idsbyc;
+        foreach my $u (values %$us) {
+            push @{$idsbyc{$u->{clusterid}} ||= []}, $u;
+        }
+
+        # now iterate by cluster
+        foreach my $cid (keys %idsbyc) {
+            my $dbcm = ($dbs{$cid} ||= LJ::get_cluster_master($cid));
+            next unless $dbcm;
+
+            # we're going to update the schoolid for all users on this cluster
+            my $in = join(',', map { $_->{userid} } @{$idsbyc{$cid}});
+            $dbcm->do(qq{
+                    UPDATE IGNORE user_schools
+                    SET schoolid = ?
+                    WHERE userid IN ($in)
+                      AND schoolid = ?
+                }, undef, $psid, $csid);
+            next if $dbcm->err;
+
+            # now delete any that are still around with the old ID -- this is due to
+            # the fact that people may have listed both.  ignore errors here.
+            $dbcm->do(qq{
+                    DELETE FROM user_schools
+                    WHERE userid IN ($in)
+                      AND schoolid = ?
+                }, undef, $csid);
+        }
+
+        # and now update it on the global, if we have users (empty schools need merging too!)
+        if (@$uids) {
+            my $in = join(',', map { $_+0 } keys %$us);
+            $dbh->do(qq{
+                    UPDATE IGNORE schools_attended
+                    SET schoolid = ?
+                    WHERE userid IN ($in)
+                      AND schoolid = ?
+                }, undef, $psid, $csid);
+            return undef if $dbh->err;
+        }
+
+        # and again, delete the ones that didn't rename
+        foreach my $table (qw(schools_attended schools)) {
+            $dbh->do("DELETE FROM $table WHERE schoolid = ?", undef, $csid);
+        }
+
+        # memcache clearing
+        LJ::MemCache::delete([ $csid, "sasi:$csid" ]);
+        LJ::MemCache::delete([ $_, "saui:$_" ]) foreach @$uids;
+    }
+
+    # done
     return 1;
 }
 

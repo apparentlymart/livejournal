@@ -110,7 +110,7 @@ body<=
                     unless $rv;
             }
 
-            $ret .= '<?h1 Success h1?><?p Schools approved! <a href="school-pending.bml">Do Another</a> p?>';
+            $ret .= '<?h1 Success h1?><?p Schools approved! <a href="pending.bml">Do Another</a> p?>';
         }
 
         return $ret;
@@ -124,7 +124,7 @@ body<=
         my $secondary = $schools->{secondary};
         my $tertiary = $schools->{tertiary};
 
-        $ret .= "<form method='post' action='school-pending.bml'>";
+        $ret .= "<form method='post' action='pending.bml'>";
         $ret .= LJ::html_hidden('primary', $primary->{pendid});
         $ret .= LJ::html_hidden('pendids', join(',', map { $_ } keys %$secondary, keys %$tertiary));
         $ret .= "<table><tr><td>";
