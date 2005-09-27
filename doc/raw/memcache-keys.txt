@@ -88,3 +88,5 @@ includefile:<name> == text of BML include file
 saccs == { country_code => country_name}; countries with schools
 sascs:<country_code> == { state_code => state_name }; states with schools
 <pendid> sapiu:<pendid> == userid of person editing this pending row
+saact == number of approved schools in db; cached for admins
+sapct == pending schools to be processed count; cached for admins

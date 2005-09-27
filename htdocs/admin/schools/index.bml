@@ -30,7 +30,7 @@ body<=
         $ct = $dbr->selectrow_array('SELECT COUNT(*) FROM schools_pending');
         return $err->("Database error: " . $dbr->errstr)
             if $dbr->err;
-        LJ::MemCache::set("sact", $ct, 300);
+        LJ::MemCache::set("sapct", $ct, 300);
     };
 
     my $act = LJ::MemCache::get("saact");
