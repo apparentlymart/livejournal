@@ -341,7 +341,17 @@ sub getmenu {
                         </tr>
                         <br/>};
             }
-            $returncode .= '</table></div>';
+            $returncode .= qq {
+                      <tr><td colspan="2">
+                          <div id="PortalResetAllButton">
+                            <form action="$LJ::SITEROOT/portal/index.bml" method="POST">
+                                <input type="Submit" value="Reset..." name="resetall" />
+                            </form>
+                          </div>
+                      </td></tr>
+                    </table>
+                </div>
+            };
         }
     } else {
         $returncode = 'alert("Menu not specified.");';

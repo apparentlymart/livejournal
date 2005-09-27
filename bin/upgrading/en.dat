@@ -2763,6 +2763,10 @@ If you want to do a different type of search, check out the <a href='/directorys
 
 /portal/index.bml.pagetitle=My [[sitenameabbrev]]
 
+/portal/index.bml.resetall=Are you sure you want to reset all your portal modules to their default settings?
+
+/portal/index.bml.resetalltitle=Reset?
+
 /portal/index.bml.returnlink=Return to My [[sitenameabbrev]]
 
 /pubkey.bml.error.notconfigured=This site is not configured with PGP support.

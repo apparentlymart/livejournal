@@ -200,6 +200,18 @@ sub load_default_boxes {
     }
 }
 
+# reset all of a user's settings
+sub reset_all {
+    my LJ::Portal::Config $self = shift;
+
+    foreach my $pboxid (keys %{$self->{'boxlist'}}) {
+        $self->remove_box($pboxid);
+    }
+
+    $self->load_default_boxes;
+    $self->update_memcache_state;
+}
+
 # retreive all loaded boxes
 sub get_boxes {
     my LJ::Portal::Config $self = shift;

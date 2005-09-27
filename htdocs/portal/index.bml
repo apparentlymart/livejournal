@@ -39,6 +39,14 @@
     LJ::need_res('js/portal.js');
     LJ::need_res('js/x/x_event.js');
 
+    # get the current scheme and load the correct style
+    my $scheme = BML::get_scheme();
+    if ($scheme eq 'dystopia' && -e "$LJ::SITEROOT/stc/portal/Dystopia.css") {
+        LJ::need_res('stc/portal/Dystopia.css');
+    } elsif (-e "$LJ::SITEROOT/stc/portal/Xcolibur.css") {
+        LJ::need_res('stc/portal/Xcolibur.css');
+    }
+
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
     # this is the url to do XML HTTP posts to
@@ -80,7 +88,7 @@
 
     # firstly process any box changes:
     my @actions = ('addbox', 'configbox', 'delbox', 'getmenu', 'movebox',
-                   'resetbox', 'saveconfig', 'updatebox');
+                   'resetbox', 'saveconfig', 'updatebox', 'resetalldo');
 
     for(@actions) {
 
@@ -92,7 +100,7 @@
         # did they do a POST or GET?
         my $didpost = $POST{$_} ? 1 : undef;
         my $didget  = $GET{$_}  ? 1 : undef;
-        my $action  = $_ if ($POST{$_} || $GET{$_});
+        my $action  = $_;
 
         if (($didget || $didpost) && LJ::check_referer('/portal')) {
             # request to create a new box
@@ -190,7 +198,7 @@
             }
             # request to get code to update the contents of a box
             # only POST
-            if ($action eq 'updatebox') {
+            if ($action eq 'updatebox' && $didpost) {
                 my $pboxid =  $POST{'pboxid'} + 0;
                 my $box = $portalconfig->get_box_by_id($pboxid);
                 if ($box) {
@@ -199,6 +207,11 @@
                     return $returnjs->('alert("Box not found.");');
                 }
             }
+            # reset entire portal?
+            # only POST
+            if ($action eq 'resetalldo' && $didpost && $POST{'resetyes'}) {
+                $portalconfig->reset_all;
+            }
 
             BML::redirect($selflink);
         }
@@ -206,21 +219,38 @@
 
     # create the hidden menu at the top
     my $configmenu = qq {
-        <div id="PortalConfigMenuBar">
+        <span id="PortalConfigMenuBar">
             <span id="AddPortalMenuButton" class="midalign"><a href="$selflink?getmenu=1&menu=addbox" onclick="return showAddPortalBoxMenu();"><img src="$LJ::IMGPREFIX/portal/PortalAddButton.gif" /></a></span>
-            </div>
+            </span>
         };
 
-    $body .= $configmenu;
+    # user pressed "reset all"
+    # are they sure?
+    if ($POST{'resetall'}) {
+        my $returnlinktext = BML::ml('.returnlink',
+                                     { 'sitenameabbrev' => $LJ::SITENAMEABBREV });
+        $title = BML::ml('.resetalltitle', { 'sitenameabbrev' => $LJ::SITENAMEABBREV });
+        $body .= qq {
+            <h2><?_ml .resetall _ml?></h2>
+            <form action="$selflink" method="POST">
+                <input type="hidden" name="resetalldo" value="1" />
+                <input type="Submit" name="resetyes" value="Yes" />
+                <input type="Submit" name="resetno" value="No" />
+            </form>
+            <b><a href=\"$LJ::SITEROOT/portal\">$returnlinktext</a></b>
+        };
 
-    # the config page for non-JS users
-    if ($GET{'mode'} eq 'config') {
+    } elsif ($GET{'mode'} eq 'config') {
+
+        # the config page for non-JS users
         my $returnlinktext = BML::ml('.returnlink',
                                      { 'sitenameabbrev' => $LJ::SITENAMEABBREV });
         $title = BML::ml('.configtitle', { 'sitenameabbrev' => $LJ::SITENAMEABBREV });
         $body .= "<ul><li><a href=\"$selflink?getmenu=1&menu=addbox\"><?_ml .addbox _ml?></a></li></ul>";
         $body .= "<b><a href=\"$LJ::SITEROOT/portal\">$returnlinktext</a></b>";
     } else {
+        $body .= $configmenu;
+
         $body .= '<div id="PortalContentContainer">';
 
         # print out each column with boxes
