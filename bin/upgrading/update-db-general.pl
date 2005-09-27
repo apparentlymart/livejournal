@@ -1561,6 +1561,15 @@ post_create("reluser",
             "sqltry" => "INSERT IGNORE INTO reluser (userid, targetid, type) SELECT userid, banneduserid, 'B' FROM ban",
             "sqltry" => "INSERT IGNORE INTO reluser (userid, targetid, type) SELECT u.userid, p.userid, 'A' FROM priv_map p, priv_list l, user u WHERE l.privcode='sharedjournal' AND l.prlid=p.prlid AND p.arg=u.user AND p.arg<>'all'",
             "code" => sub {
+
+                # logaccess has been dead for a long time.  In fact, its table
+                # definition has been removed from this file.  No need to try 
+                # and upgrade if the source table doesn't even exist.
+                unless (column_type('logaccess', 'userid')) {
+                    print "# No logaccess source table found, skipping...\n";
+                    return;
+                }
+
                 my $dbh = shift;
                 print "# Converting logaccess rows to reluser...\n";
                 my $sth = $dbh->prepare("SELECT MAX(userid) FROM user");
