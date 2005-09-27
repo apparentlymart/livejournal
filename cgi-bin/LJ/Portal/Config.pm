@@ -25,6 +25,7 @@ our %TYPEMAP = (
                 'Manage'         => 6,
                 'RecentComments' => 7,
                 'NewUser'        => 8,
+                'FriendsPage'    => 9,
 );
 
 our %DEFAULTBOXSTATES = (
