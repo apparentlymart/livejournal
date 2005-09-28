@@ -92,7 +92,7 @@ sub EntryPage
                                                    });
 
             # local time in mysql format to gmtime
-            my $datetime = DateTime_unix(LJ::mysqldate_to_time($com->{'datepost'}));
+            my $datetime = DateTime_unix($com->{'datepost_unix'});
 
             my $subject_icon = undef;
             if (my $si = $com->{'props'}->{'subjecticon'}) {

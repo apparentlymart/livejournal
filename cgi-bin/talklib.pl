@@ -15,26 +15,26 @@ sub get_subjecticons
     my %subjecticon;
     $subjecticon{'types'} = [ 'sm', 'md' ];
     $subjecticon{'lists'}->{'md'} = [
-            { img => "md01_alien.gif",		w => 32,	h => 32 },
-            { img => "md02_skull.gif",		w => 32,	h => 32 },
-            { img => "md05_sick.gif",		w => 25,	h => 25 },
-            { img => "md06_radioactive.gif",	w => 20,	h => 20 },
-            { img => "md07_cool.gif",		w => 20,	h => 20 },
-            { img => "md08_bulb.gif",		w => 17,	h => 23 },
-            { img => "md09_thumbdown.gif",	w => 25,	h => 19 },
-            { img => "md10_thumbup.gif",	w => 25,	h => 19 }
+            { img => "md01_alien.gif",          w => 32,        h => 32 },
+            { img => "md02_skull.gif",          w => 32,        h => 32 },
+            { img => "md05_sick.gif",           w => 25,        h => 25 },
+            { img => "md06_radioactive.gif",    w => 20,        h => 20 },
+            { img => "md07_cool.gif",           w => 20,        h => 20 },
+            { img => "md08_bulb.gif",           w => 17,        h => 23 },
+            { img => "md09_thumbdown.gif",      w => 25,        h => 19 },
+            { img => "md10_thumbup.gif",        w => 25,        h => 19 }
     ];
     $subjecticon{'lists'}->{'sm'} = [
-            { img => "sm01_smiley.gif",		w => 15,	h => 15 },
-            { img => "sm02_wink.gif",		w => 15,	h => 15 },
-            { img => "sm03_blush.gif",		w => 15,	h => 15 },
-            { img => "sm04_shock.gif",		w => 15,	h => 15 },
-            { img => "sm05_sad.gif",		w => 15,	h => 15 },
-            { img => "sm06_angry.gif",		w => 15,	h => 15 },
-            { img => "sm07_check.gif",		w => 15,	h => 15 },
-            { img => "sm08_star.gif",		w => 20,	h => 18 },
-            { img => "sm09_mail.gif",		w => 14,	h => 10 },
-            { img => "sm10_eyes.gif",		w => 24,	h => 12 }
+            { img => "sm01_smiley.gif",         w => 15,        h => 15 },
+            { img => "sm02_wink.gif",           w => 15,        h => 15 },
+            { img => "sm03_blush.gif",          w => 15,        h => 15 },
+            { img => "sm04_shock.gif",          w => 15,        h => 15 },
+            { img => "sm05_sad.gif",            w => 15,        h => 15 },
+            { img => "sm06_angry.gif",          w => 15,        h => 15 },
+            { img => "sm07_check.gif",          w => 15,        h => 15 },
+            { img => "sm08_star.gif",           w => 20,        h => 18 },
+            { img => "sm09_mail.gif",           w => 14,        h => 10 },
+            { img => "sm10_eyes.gif",           w => 24,        h => 12 }
     ];
 
     # assemble ->{'id'} portion of hash.  the part of the imagename before the _
@@ -92,15 +92,15 @@ sub show_none_image
 sub link_bar
 {
     my $opts = shift;
-    my ($u, $up, $remote, $headref, $itemid) = 
+    my ($u, $up, $remote, $headref, $itemid) =
         map { $opts->{$_} } qw(u up remote headref itemid);
     my $ret;
 
     my @linkele;
-    
+
     my $mlink = sub {
         my ($url, $piccode) = @_;
-        return ("<a href=\"$url\">" . 
+        return ("<a href=\"$url\">" .
                 LJ::img($piccode, "", { 'align' => 'absmiddle' }) .
                 "</a>");
     };
@@ -111,14 +111,14 @@ sub link_bar
     # << Previous
     push @linkele, $mlink->("/go.bml?${jargent}itemid=$itemid&amp;dir=prev", "prev_entry");
     $$headref .= "<link href='/go.bml?${jargent}itemid=$itemid&amp;dir=prev' rel='Previous' />\n";
-    
+
     # memories
     unless ($LJ::DISABLED{'memories'}) {
         push @linkele, $mlink->("/tools/memadd.bml?${jargent}itemid=$itemid", "memadd");
     }
-    
+
     if (defined $remote && ($remote->{'user'} eq $u->{'user'} ||
-                            $remote->{'user'} eq $up->{'user'} || 
+                            $remote->{'user'} eq $up->{'user'} ||
                             LJ::can_manage($remote, $u)))
     {
         push @linkele, $mlink->("/editjournal.bml?${jargent}itemid=$itemid", "editentry");
@@ -129,19 +129,19 @@ sub link_bar
             push @linkele, $mlink->("/edittags.bml?${jargent}itemid=$itemid", "edittags");
         }
     }
-    
+
     unless ($LJ::DISABLED{'tellafriend'}) {
         push @linkele, $mlink->("/tools/tellafriend.bml?${jargent}itemid=$itemid", "tellfriend");
     }
-    
+
     ## >>> Next
     push @linkele, $mlink->("/go.bml?${jargent}itemid=$itemid&amp;dir=next", "next_entry");
     $$headref .= "<link href='/go.bml?${jargent}itemid=$itemid&amp;dir=next' rel='Next' />\n";
-    
+
     if (@linkele) {
         $ret .= BML::fill_template("standout", {
             'DATA' => "<table><tr><td valign='middle'>" .
-                join("&nbsp;&nbsp;", @linkele) . 
+                join("&nbsp;&nbsp;", @linkele) .
                 "</td></tr></table>",
             });
     }
@@ -149,7 +149,7 @@ sub link_bar
     return $ret;
 }
 
-sub init 
+sub init
 {
     my ($form) = @_;
     my $init = {};  # structure to return
@@ -166,7 +166,7 @@ sub init
     $init->{'clustered'} = 0;
     $init->{'replyto'} = $form->{'replyto'}+0;
     $init->{'style'} = $form->{'style'} ? "mine" : undef;
-    
+
     if ($journal) {
         # they specified a journal argument, which indicates new style.
         $ju = LJ::load_user($journal);
@@ -231,7 +231,7 @@ sub get_journal_item
     return undef unless $item;
 
     $item->{'alldatepart'} = LJ::alldatepart_s2($item->{'eventtime'});
-    
+
     $item->{'itemid'} = $item->{'jitemid'};    # support old & new keys
     $item->{'ownerid'} = $item->{'journalid'}; # support old & news keys
 
@@ -256,7 +256,7 @@ sub check_viewable
 {
     my ($remote, $item, $form, $errref) = @_;
     # note $form no longer used
-    
+
     my $err = sub {
         $$errref = "<?h1 <?_ml Error _ml?> h1?><?p $_[0] p?>";
         return 0;
@@ -337,7 +337,7 @@ sub screening_level {
     die 'LJ::screening_level needs a user object.' unless ref $journalu;
     $jitemid += 0;
     die 'LJ::screening_level passed invalid jitemid.' unless $jitemid;
-    
+
     # load the logprops for this entry
     my %props;
     LJ::load_log_props2($journalu->{userid}, [ $jitemid ], \%props);
@@ -380,7 +380,7 @@ sub get_comments_in_thread {
     $jitemid += 0;
     $jtalkid += 0;
     $onlystate = uc $onlystate;
-    return undef unless $u && $jitemid && $jtalkid && 
+    return undef unless $u && $jitemid && $jtalkid &&
                         (!$onlystate || $onlystate =~ /^\w$/);
 
     # get all comments to post
@@ -548,7 +548,7 @@ sub freeze_comments {
     my $qnodetype = $u->quote($nodetype);
     my $qnodeid = $nodeid+0;
 
-    # now perform action    
+    # now perform action
     my $in = join(',', map { $_+0 } @$ids);
     my $newstate = $unfreeze ? 'A' : 'F';
     my $res = $u->talk2_do($nodetype, $nodeid, undef,
@@ -616,7 +616,7 @@ sub unscreen_comment {
 }
 
 # retrieves data from the talk2 table (but preferrably memcache)
-# returns a hashref (key -> { 'talkid', 'posterid', 'datepost', 
+# returns a hashref (key -> { 'talkid', 'posterid', 'datepost', 'datepost_unix',
 #                             'parenttalkid', 'state' } , or undef on failure
 sub get_talk_data
 {
@@ -710,7 +710,8 @@ sub get_talk_data
                 talkid => $talkid,
                 state => $state,
                 posterid => $poster,
-                datepost => LJ::mysql_time($time),
+                datepost_unix => $time,
+                datepost => LJ::mysql_time($time),  # timezone surely fucked.  deprecated.
                 parenttalkid => $par,
             };
 
@@ -720,7 +721,7 @@ sub get_talk_data
         $fixup_rp->();
         return $ret;
     };
-    
+
     return $memcache_decode->() if $memcache_good->();
 
     my $dbcr = LJ::get_cluster_def_reader($u);
@@ -729,7 +730,7 @@ sub get_talk_data
     my $lock = $dbcr->selectrow_array("SELECT GET_LOCK(?,10)", undef, $lockkey);
     return undef unless $lock;
 
-    # it's quite likely (for a popular post) that the memcache was 
+    # it's quite likely (for a popular post) that the memcache was
     # already populated while we were waiting for the lock
     $packed = LJ::MemCache::get($memkey);
     if ($memcache_good->()) {
@@ -740,18 +741,19 @@ sub get_talk_data
 
     my $memval = $DATAVER;
     my $sth = $dbcr->prepare("SELECT t.jtalkid AS 'talkid', t.posterid, ".
-                             "t.datepost, t.parenttalkid, t.state ".
+                             "t.datepost, UNIX_TIMESTAMP(t.datepost) as 'datepost_unix', ".
+                             "t.parenttalkid, t.state ".
                              "FROM talk2 t ".
                              "WHERE t.journalid=? AND t.nodetype=? AND t.nodeid=?");
     $sth->execute($u->{'userid'}, $nodetype, $nodeid);
     die $dbcr->errstr if $dbcr->err;
     while (my $r = $sth->fetchrow_hashref) {
         $ret->{$r->{'talkid'}} = $r;
-        $memval .= pack("NNNN", 
+        $memval .= pack("NNNN",
                         ($r->{'talkid'} << 8) + ord($r->{'state'}),
                         $r->{'parenttalkid'},
                         $r->{'posterid'},
-                        LJ::mysqldate_to_time($r->{'datepost'}));
+                        $r->{'datepost_unix'});
         $rp_ourcount++ if $r->{'state'} eq "A";
     }
     LJ::MemCache::set($memkey, $memval);
@@ -836,9 +838,9 @@ sub load_comments
                 $post->{'parenttalkid'} = 0;
             }
 
-            # see if we should ideally show it or not.  even if it's 
+            # see if we should ideally show it or not.  even if it's
             # zero, we'll still show it if it has any children (but we won't show content)
-            my $should_show = $post->{'state'} eq 'D' ? 0 : 1; 
+            my $should_show = $post->{'state'} eq 'D' ? 0 : 1;
             unless ($viewall) {
                 $should_show = 0 if
                     $post->{'state'} eq "S" && ! ($remote && ($remote->{'userid'} == $u->{'userid'} ||
@@ -849,11 +851,11 @@ sub load_comments
             $post->{'_show'} = $should_show;
             $post_count += $should_show;
 
-            # make any post top-level if it says it has a parent but it isn't 
+            # make any post top-level if it says it has a parent but it isn't
             # loaded yet which means either a) row in database is gone, or b)
             # somebody maliciously/accidentally made their parent be a future
             # post, which could result in an infinite loop, which we don't want.
-            $post->{'parenttalkid'} = 0 
+            $post->{'parenttalkid'} = 0
                 if $post->{'parenttalkid'} && ! $posts->{$post->{'parenttalkid'}};
 
             $post->{'children'} = [ map { $posts->{$_} } @{$children{$post->{'talkid'}} || []} ];
@@ -888,11 +890,11 @@ sub load_comments
     # but if it passes threading_point, then everything's in page_size
     # chunks:
     $page_size = $threading_point if $post_count < $threading_point;
-    
+
     my $top_replies = $thread ? 1 : scalar(@{$children{$thread}});
     my $pages = int($top_replies / $page_size);
     if ($top_replies % $page_size) { $pages++; }
-    
+
     my @top_replies = $thread ? ($thread) : @{$children{$thread}};
     my $page_from_view = 0;
     if ($opts->{'view'} && !$opts->{'page'}) {
@@ -910,14 +912,14 @@ sub load_comments
     }
     my $page = int($opts->{'page'}) || $page_from_view || 1;
     $page = $page < 1 ? 1 : $page > $pages ? $pages : $page;
-    
+
     my $itemfirst = $page_size * ($page-1) + 1;
     my $itemlast = $page==$pages ? $top_replies : ($page_size * $page);
-    
+
     @top_replies = @top_replies[$itemfirst-1 .. $itemlast-1];
-    
+
     push @posts_to_load, @top_replies;
-    
+
     # mark child posts of the top-level to load, deeper
     # and deeper until we've hit the page size.  if too many loaded,
     # just mark that we'll load the subjects;
@@ -946,7 +948,7 @@ sub load_comments
     $opts->{'out_itemlast'} = $itemlast;
     $opts->{'out_pagesize'} = $page_size;
     $opts->{'out_items'} = $top_replies;
-    
+
     # load text of posts
     my ($posts_loaded, $subjects_loaded);
     $posts_loaded = LJ::get_talktext2($u, @posts_to_load);
@@ -1102,7 +1104,7 @@ sub talkform {
     }
 
     # if we know the user who is posting (error on talkpost_do POST action),
-    # then see if we 
+    # then see if we
     if ($opts->{require_tos}) {
         $ret .= LJ::tosagree_html('comment', $form->{agree_tos}, BML::ml('tos.error'));
     }
@@ -1360,10 +1362,10 @@ sub talkform {
                                                       "onclick='subjectIconListToggle();' ".
                                                       "title='Click to change the subject icon'"));
         } else {
-            foreach my $type (@{$pics->{types}}) { 
+            foreach my $type (@{$pics->{types}}) {
                 foreach (@{$pics->{lists}->{$type}}) {
                     if ($_->{id} eq $subjicon) {
-                        $ret .= LJ::Talk::show_image($pics, $subjicon, 
+                        $ret .= LJ::Talk::show_image($pics, $subjicon,
                                                      "id='subjectIconImage' onclick='subjectIconListToggle();' style='cursor:pointer;cursor:hand'");
                         $foundicon = 1;
                         last;
@@ -1385,11 +1387,11 @@ sub talkform {
         $ret .= "<table border='0' cellspacing='5' cellpadding='0' style='border: 1px solid #AAAAAA'>\");\n";
 
         foreach my $type (@{$pics->{'types'}}) {
-            
+
             $ret .= "document.write(\"<tr>\");\n";
 
             # make an option if they don't want an image
-            if ($type eq $pics->{'types'}->[0]) { 
+            if ($type eq $pics->{'types'}->[0]) {
                 $ret .= "document.write(\"";
                 $ret .= "<td valign='middle' align='center'>";
                 $ret .= LJ::Talk::show_none_image(
@@ -1401,13 +1403,13 @@ sub talkform {
             foreach (@{$pics->{'lists'}->{$type}}) {
                 $ret .= "document.write(\"";
                 $ret .= "<td valign='middle' align='center'>";
-                $ret .= LJ::Talk::show_image($pics, $_->{'id'}, 
+                $ret .= LJ::Talk::show_image($pics, $_->{'id'},
                         "id='$_->{'id'}' onclick='subjectIconChange(this);' style='cursor:pointer;cursor:hand'");
                 $ret .= "</td>\");\n";
             }
-            
+
             $ret .= "document.write(\"</tr>\");\n";
-            
+
         }
         # end that table, bar!
         $ret .= "document.write(\"</table></blockquote>\");\n";
@@ -1438,7 +1440,7 @@ sub talkform {
             push @pics, $res{"pickw_$i"};
         }
         @pics = sort { lc($a) cmp lc($b) } @pics;
-        $ret .= LJ::html_select({'name' => 'prop_picture_keyword', 
+        $ret .= LJ::html_select({'name' => 'prop_picture_keyword',
                                  'selected' => $form->{'prop_picture_keyword'}, },
                                 ("", $BML::ML{'.opt.defpic'}, map { ($_, $_) } @pics));
 
@@ -1524,7 +1526,7 @@ QQ
         my ($wants_audio, $captcha_sess, $captcha_chal);
         $wants_audio = 1 if lc($form->{answer}) eq 'audio';
 
-        # Captcha sessions 
+        # Captcha sessions
         my $cid = $journalu->{clusterid};
         $captcha_chal = $form->{captcha_chal} || LJ::challenge_generate(900);
         $captcha_sess = LJ::get_challenge_attributes($captcha_chal);
@@ -1558,7 +1560,7 @@ QQ
     my $limit = LJ::CMAX_COMMENT; # javascript String.length uses characters
     $ret .= <<LOGIN;
     <br />
-    <script language="JavaScript" type='text/javascript'> 
+    <script language="JavaScript" type='text/javascript'>
         <!--
         function checkLength() {
             if (!document.getElementById) return true;
@@ -1570,7 +1572,7 @@ QQ
             }
             return true;
         }
-        
+
         if (document.getElementById && document.getElementById('postform')) {
             document.write("<input name='submitpost' onclick='return checkLength() && sendForm(\\"postform\\", \\"username\\")' type='submit' value='$BML::ML{'.opt.submit'}' />");
             document.write("&nbsp;");
@@ -1623,7 +1625,7 @@ LOGIN
 # des-jtalkid: ID of this comment.
 # des-ip: IP address of the poster.
 # returns: 1 for success, 0 for failure
-# </LJFUNC> 
+# </LJFUNC>
 sub record_anon_comment_ip {
     my ($journalu, $jtalkid, $ip) = @_;
     $journalu = LJ::want_user($journalu);
@@ -1644,7 +1646,7 @@ sub record_anon_comment_ip {
 # des-journalu: User object of journal comment was posted in.
 # des-jtalkid: ID of this comment.
 # returns: 1 for success, 0 for failure
-# </LJFUNC> 
+# </LJFUNC>
 sub mark_comment_as_spam {
     my ($journalu, $jtalkid) = @_;
     $journalu = LJ::want_user($journalu);
@@ -1671,10 +1673,10 @@ sub mark_comment_as_spam {
         # we have a completely useless spam report.  pretend we were successful, too.
         return 1 unless $ip;
     }
-    
+
     # step 3: insert into spamreports
     $dbh->do('INSERT INTO spamreports (reporttime, posttime, ip, journalid, posterid, subject, body) ' .
-             'VALUES (UNIX_TIMESTAMP(), UNIX_TIMESTAMP(?), ?, ?, ?, ?, ?)', 
+             'VALUES (UNIX_TIMESTAMP(), UNIX_TIMESTAMP(?), ?, ?, ?, ?, ?)',
              undef, $row->{datepost}, $ip, $journalu->{userid}, $posterid, $subject, $body);
     return 0 if $dbh->err;
     return 1;
@@ -1762,13 +1764,13 @@ sub format_text_mail {
     $text .= indent($comment->{body});
     $text .= "\n\n";
 
-    my $can_unscreen = $comment->{state} eq 'S' && 
+    my $can_unscreen = $comment->{state} eq 'S' &&
                        LJ::Talk::can_unscreen($targetu, $item->{journalu}, $item->{entryu},
                                               $comment->{u} ? $comment->{u}{user} : undef);
 
     if ($comment->{state} eq 'S') {
         $text .= "This comment was screened.  ";
-        $text .= $can_unscreen ? 
+        $text .= $can_unscreen ?
                  "You must respond to it or unscreen it before others can see it.\n\n" :
                  "Someone else must unscreen it before you can reply to it.\n\n";
     }
@@ -1785,12 +1787,12 @@ sub format_text_mail {
         $opts .= "  - Unscreen the comment:\n";
         $opts .= "    $LJ::SITEROOT/talkscreen.bml?mode=unscreen&journal=$item->{journalu}{user}&talkid=$dtalkid\n";
     }
-    if (LJ::Talk::can_delete($targetu, $item->{journalu}, $item->{entryu}, 
+    if (LJ::Talk::can_delete($targetu, $item->{journalu}, $item->{entryu},
                                 $comment->{u} ? $comment->{u}{user} : undef)) {
         $opts .= "  - Delete the comment:\n";
         $opts .= "    $LJ::SITEROOT/delcomment.bml?journal=$item->{journalu}{user}&id=$dtalkid\n";
     }
-    
+
     my $footer = "";
     $footer .= "-- $LJ::SITENAME\n\n";
     $footer .= "(If you'd prefer to not get these updates, go to $LJ::SITEROOT/editinfo.bml and turn off the relevant options.)";
@@ -1824,25 +1826,25 @@ sub format_html_mail {
             $intro = "You replied to a comment somebody left in ";
             $intro .= "<a href=\"$talkurl\">a $LJ::SITENAMESHORT post</a>.  ";
             $intro .= "The comment you replied to was:";
-            LJ::CleanHTML::clean_comment(\$cleanbody, { 'preformatted' => $parent->{preformat}, 
+            LJ::CleanHTML::clean_comment(\$cleanbody, { 'preformatted' => $parent->{preformat},
                                                         'anon_comment' => !$comment->{u} });
         }
     } elsif (LJ::u_equals($targetu, $item->{entryu})) {
         if ($parent->{ispost}) {
             $intro = "$who replied to <a href=\"$talkurl\">your $LJ::SITENAMESHORT post</a> in which you said:";
-            LJ::CleanHTML::clean_comment(\$cleanbody, { 'preformatted' => $parent->{preformat}, 
+            LJ::CleanHTML::clean_comment(\$cleanbody, { 'preformatted' => $parent->{preformat},
                                                         'anon_comment' => !$comment->{u} });
         } else {
             $intro = "$who replied to another comment somebody left in ";
             $intro .= "<a href=\"$talkurl\">your $LJ::SITENAMESHORT post</a>.  ";
             $intro .= "The comment they replied to was:";
-            LJ::CleanHTML::clean_comment(\$cleanbody, { 'preformatted' => $parent->{preformat}, 
+            LJ::CleanHTML::clean_comment(\$cleanbody, { 'preformatted' => $parent->{preformat},
                                                         'anon_comment' => !$comment->{u} });
         }
     } else {
         $intro = "$who replied to <a href=\"$talkurl\">your $LJ::SITENAMESHORT comment</a> ";
         $intro .= "in which you said:";
-        LJ::CleanHTML::clean_comment(\$cleanbody, { 'preformatted' => $parent->{preformat}, 
+        LJ::CleanHTML::clean_comment(\$cleanbody, { 'preformatted' => $parent->{preformat},
                                                     'anon_comment' => !$comment->{u} });
     }
 
@@ -1874,7 +1876,7 @@ sub format_html_mail {
     $cleanbody = $comment->{body};
     LJ::CleanHTML::clean_comment(\$cleanbody, $comment->{preformat});
     my $pics = LJ::Talk::get_subjecticons();
-    my $icon = LJ::Talk::show_image($pics, $comment->{subjecticon}); 
+    my $icon = LJ::Talk::show_image($pics, $comment->{subjecticon});
 
     my $heading;
     if ($comment->{subject}) {
@@ -1885,13 +1887,13 @@ sub format_html_mail {
     # this needs to be one string so blockquote handles it properly.
     $html .= blockquote("$heading$cleanbody");
 
-    my $can_unscreen = $comment->{state} eq 'S' && 
+    my $can_unscreen = $comment->{state} eq 'S' &&
                        LJ::Talk::can_unscreen($targetu, $item->{journalu}, $item->{entryu},
                                               $comment->{u} ? $comment->{u}{user} : undef);
 
     if ($comment->{state} eq 'S') {
         $html .= "<p>This comment was screened.  ";
-        $html .= $can_unscreen ? 
+        $html .= $can_unscreen ?
                  "You must respond to it or unscreen it before others can see it.</p>\n" :
                  "Someone else must unscreen it before you can reply to it.</p>\n";
     }
@@ -1903,7 +1905,7 @@ sub format_html_mail {
     if ($can_unscreen) {
         $html .= "<li><a href=\"$LJ::SITEROOT/talkscreen.bml?mode=unscreen&journal=$item->{journalu}{user}&talkid=$dtalkid\">Unscreen the comment</a></li>";
     }
-    if (LJ::Talk::can_delete($targetu, $item->{journalu}, $item->{entryu}, 
+    if (LJ::Talk::can_delete($targetu, $item->{journalu}, $item->{entryu},
                                 $comment->{u} ? $comment->{u}{user} : undef)) {
         $html .= "<li><a href=\"$LJ::SITEROOT/delcomment.bml?journal=$item->{journalu}{user}&id=$dtalkid\">Delete the comment</a></li>";
     }
@@ -1972,7 +1974,7 @@ sub mail_comments {
     my $talkurl = LJ::journal_base($journalu) . "/$ditemid.html";
     my $threadurl = LJ::Talk::talkargs($talkurl, "thread=$dtalkid");
 
-    # check to see if parent post is from a registered livejournal user, and 
+    # check to see if parent post is from a registered livejournal user, and
     # mail them the response
     my $parentcomment = "";
     my $parentmailed = "";  # who if anybody was just mailed
@@ -1995,7 +1997,7 @@ sub mail_comments {
     my $this_msgid = generate_messageid("comment", $journalu, $dtalkid);
 
     # if a response to another comment, send a mail to the parent commenter.
-    if ($parent->{talkid}) {  
+    if ($parent->{talkid}) {
         my $dbcr = LJ::get_cluster_def_reader($journalu);
 
         # get row of data
@@ -2017,7 +2019,7 @@ sub mail_comments {
         if ($LJ::UNICODE && $props{$parent->{talkid}}->{'unknown8bit'}) {
             LJ::item_toutf8($journalu, \$parentsubject, \$parentcomment, {});
         }
-        
+
         if ($paruserid) {
             my $paru = LJ::load_userid($paruserid);
             LJ::load_user_props($paru, 'mailencoding');
@@ -2027,9 +2029,9 @@ sub mail_comments {
             # we don't want to send email to a parent if the email address on the
             # parent's user is the same as the email address on this comment's user
             # is_diff_email: also so we don't auto-vivify $comment->{u}
-            my $is_diff_email = !$comment->{u} || 
+            my $is_diff_email = !$comment->{u} ||
                 $paru->{'email'} ne $comment->{u}{'email'};
-                
+
             if ($paru->{'opt_gettalkemail'} eq "Y" &&
                 $is_diff_email &&
                 $paru->{'status'} eq "A")
@@ -2040,7 +2042,7 @@ sub mail_comments {
 
                 my $headersubject = $comment->{subject};
                 if ($LJ::UNICODE && $encoding ne "UTF-8") {
-                    $headersubject = Unicode::MapUTF8::from_utf8({-string=>$headersubject, -charset=>$encoding}); 
+                    $headersubject = Unicode::MapUTF8::from_utf8({-string=>$headersubject, -charset=>$encoding});
                 }
 
                 if (!LJ::is_ascii($headersubject)) {
@@ -2065,9 +2067,9 @@ sub mail_comments {
                 $item->{entryu} = $entryu;
                 $item->{journalu} = $journalu;
                 my $text = format_text_mail($paru, $parent, $comment, $talkurl, $item);
- 
+
                 if ($LJ::UNICODE && $encoding ne "UTF-8") {
-                    $text = Unicode::MapUTF8::from_utf8({-string=>$text, -charset=>$encoding}); 
+                    $text = Unicode::MapUTF8::from_utf8({-string=>$text, -charset=>$encoding});
                 }
                 $part = $msg->attach('Type' => 'TEXT',
                                      'Data' => $text,
@@ -2079,7 +2081,7 @@ sub mail_comments {
                 if ($paru->{'opt_htmlemail'} eq "Y") {
                     my $html = format_html_mail($paru, $parent, $comment, $encoding, $talkurl, $item);
                     if ($LJ::UNICODE && $encoding ne "UTF-8") {
-                        $html = Unicode::MapUTF8::from_utf8({-string=>$html, -charset=>$encoding}); 
+                        $html = Unicode::MapUTF8::from_utf8({-string=>$html, -charset=>$encoding});
                     }
                     $part = $msg->attach('Type' => 'text/html',
                                          'Data' => $html,
@@ -2099,7 +2101,7 @@ sub mail_comments {
         !$item->{props}->{'opt_noemail'} &&
         !LJ::u_equals($comment->{u}, $entryu) &&
         $entryu->{'email'} ne $parentmailed &&
-        $entryu->{'status'} eq "A") 
+        $entryu->{'status'} eq "A")
     {
         LJ::load_user_props($entryu, 'mailencoding');
         LJ::load_codes({ "encoding" => \%LJ::CACHE_ENCODINGS } )
@@ -2109,7 +2111,7 @@ sub mail_comments {
 
         my $headersubject = $comment->{subject};
         if ($LJ::UNICODE && $encoding ne "UTF-8") {
-            $headersubject = Unicode::MapUTF8::from_utf8({-string=>$headersubject, -charset=>$encoding}); 
+            $headersubject = Unicode::MapUTF8::from_utf8({-string=>$headersubject, -charset=>$encoding});
         }
 
         if (!LJ::is_ascii($headersubject)) {
@@ -2139,7 +2141,7 @@ sub mail_comments {
         } else {
             $parent->{u} = $entryu;
             $parent->{body} = $item->{'event'},
-            $parent->{ispost} = 1; 
+            $parent->{ispost} = 1;
             $parent->{preformat} = $item->{'props'}->{'opt_preformatted'};
         }
         $item->{entryu} = $entryu;
@@ -2148,7 +2150,7 @@ sub mail_comments {
         my $text = format_text_mail($entryu, $parent, $comment, $talkurl, $item);
 
         if ($LJ::UNICODE && $encoding ne "UTF-8") {
-            $text = Unicode::MapUTF8::from_utf8({-string=>$text, -charset=>$encoding}); 
+            $text = Unicode::MapUTF8::from_utf8({-string=>$text, -charset=>$encoding});
         }
         $part = $msg->attach('Type' => 'TEXT',
                              'Data' => $text,
@@ -2156,11 +2158,11 @@ sub mail_comments {
                              );
         $part->attr("content-type.charset" => $encoding)
             if $LJ::UNICODE;
-        
+
         if ($entryu->{'opt_htmlemail'} eq "Y") {
             my $html = format_html_mail($entryu, $parent, $comment, $encoding, $talkurl, $item);
             if ($LJ::UNICODE && $encoding ne "UTF-8") {
-                $html = Unicode::MapUTF8::from_utf8({-string=>$html, -charset=>$encoding}); 
+                $html = Unicode::MapUTF8::from_utf8({-string=>$html, -charset=>$encoding});
             }
             $part = $msg->attach('Type' => 'text/html',
                                  'Data' => $html,
@@ -2169,7 +2171,7 @@ sub mail_comments {
             $part->attr("content-type.charset" => $encoding)
                 if $LJ::UNICODE;
         }
-        
+
         LJ::send_mail($msg);
     }
 
@@ -2187,7 +2189,7 @@ sub mail_comments {
 
         my $headersubject = $comment->{subject};
         if ($LJ::UNICODE && $encoding ne "UTF-8") {
-            $headersubject = Unicode::MapUTF8::from_utf8({-string=>$headersubject, -charset=>$encoding}); 
+            $headersubject = Unicode::MapUTF8::from_utf8({-string=>$headersubject, -charset=>$encoding});
         }
 
         if (!LJ::is_ascii($headersubject)) {
@@ -2216,7 +2218,7 @@ sub mail_comments {
         } else {
             $parent->{u} = $entryu;
             $parent->{body} = $item->{'event'},
-            $parent->{ispost} = 1; 
+            $parent->{ispost} = 1;
             $parent->{preformat} = $item->{'props'}->{'opt_preformatted'};
         }
         $item->{entryu} = $entryu;
@@ -2225,7 +2227,7 @@ sub mail_comments {
         my $text = format_text_mail($u, $parent, $comment, $talkurl, $item);
 
         if ($LJ::UNICODE && $encoding ne "UTF-8") {
-            $text = Unicode::MapUTF8::from_utf8({-string=>$text, -charset=>$encoding}); 
+            $text = Unicode::MapUTF8::from_utf8({-string=>$text, -charset=>$encoding});
         }
         $part = $msg->attach('Type' => 'TEXT',
                              'Data' => $text,
@@ -2233,11 +2235,11 @@ sub mail_comments {
                              );
         $part->attr("content-type.charset" => $encoding)
             if $LJ::UNICODE;
-        
+
         if ($u->{'opt_htmlemail'} eq "Y") {
             my $html = format_html_mail($u, $parent, $comment, $encoding, $talkurl, $item);
             if ($LJ::UNICODE && $encoding ne "UTF-8") {
-                $html = Unicode::MapUTF8::from_utf8({-string=>$html, -charset=>$encoding}); 
+                $html = Unicode::MapUTF8::from_utf8({-string=>$html, -charset=>$encoding});
             }
             $part = $msg->attach('Type' => 'text/html',
                                  'Data' => $html,
@@ -2246,7 +2248,7 @@ sub mail_comments {
             $part->attr("content-type.charset" => $encoding)
                 if $LJ::UNICODE;
         }
-        
+
         LJ::send_mail($msg);
 
     }
@@ -2268,11 +2270,11 @@ sub enter_comment {
 
     my $jtalkid = LJ::alloc_user_counter($journalu, "T");
     return $err->("Database Error", "Could not generate a talkid necessary to post this comment.")
-        unless $jtalkid; 
+        unless $jtalkid;
 
     # insert the comment
     my $posterid = $comment->{u} ? $comment->{u}{userid} : 0;
-    
+
     my $errstr;
     $journalu->talk2_do("L", $itemid, \$errstr,
                  "INSERT INTO talk2 ".
@@ -2290,9 +2292,9 @@ sub enter_comment {
     $comment->{talkid} = $jtalkid;
 
     # record IP if anonymous
-    LJ::Talk::record_anon_comment_ip($journalu, $comment->{talkid}, LJ::get_remote_ip()) 
+    LJ::Talk::record_anon_comment_ip($journalu, $comment->{talkid}, LJ::get_remote_ip())
         unless $posterid;
-    
+
     # add to poster's talkleft table, or the xfer place
     if ($posterid) {
         my $table;
@@ -2312,7 +2314,7 @@ sub enter_comment {
                     "nodeid, jtalkid, publicitem) VALUES (?, UNIX_TIMESTAMP(), ".
                     "?, 'L', ?, ?, ?)", undef,
                     $posterid, $journalu->{userid}, $itemid, $jtalkid, $pub);
-            
+
             LJ::MemCache::incr([$posterid, "talkleftct:$posterid"]);
         } else {
             # both primary and backup talkleft hosts down.  can't do much now.
@@ -2321,7 +2323,7 @@ sub enter_comment {
 
     $journalu->do("INSERT INTO talktext2 (journalid, jtalkid, subject, body) ".
                   "VALUES (?, ?, ?, ?)", undef,
-                  $journalu->{userid}, $jtalkid, $comment->{subject}, 
+                  $journalu->{userid}, $jtalkid, $comment->{subject},
                   LJ::text_compress($comment->{body}));
     die $journalu->errstr if $journalu->err;
 
@@ -2343,8 +2345,8 @@ sub enter_comment {
     $talkprop{'picture_keyword'} = $comment->{picture_keyword};
 
     $talkprop{'opt_preformatted'} = $comment->{preformat} ? 1 : 0;
-    if ($journalu->{'opt_logcommentips'} eq "A" || 
-        ($journalu->{'opt_logcommentips'} eq "S" && $comment->{usertype} ne "user")) 
+    if ($journalu->{'opt_logcommentips'} eq "A" ||
+        ($journalu->{'opt_logcommentips'} eq "S" && $comment->{usertype} ne "user"))
     {
         my $ip = BML::get_remote_ip();
         my $forwarded = BML::get_client_header('X-Forwarded-For');
@@ -2379,7 +2381,7 @@ sub enter_comment {
 
     # record up to 25 (or $LJ::TALK_MAX_URLS) urls from a comment
     my (%urls, $dbh);
-    if ($LJ::TALK_MAX_URLS && 
+    if ($LJ::TALK_MAX_URLS &&
         ( %urls = map { $_ => 1 } LJ::get_urls($comment->{body}) ) &&
         ( $dbh = LJ::get_db_writer() )) # don't log if no db available
     {
@@ -2398,7 +2400,7 @@ sub enter_comment {
         };
         $dbh->do($sql, undef, @vals);
     }
-    
+
     # update the "replycount" summary field of the log table
     if ($comment->{state} eq 'A') {
         LJ::replycount_do($journalu, $itemid, "incr");
@@ -2408,9 +2410,9 @@ sub enter_comment {
     if ($comment->{state} eq 'S') {
         LJ::set_logprop($journalu, $itemid, { 'hasscreened' => 1 });
     }
-    
+
     # update the comment alter property
-    LJ::Talk::update_commentalter($journalu, $itemid);   
+    LJ::Talk::update_commentalter($journalu, $itemid);
     return $jtalkid;
 }
 
@@ -2432,7 +2434,7 @@ sub init {
     };
 
     my $init = LJ::Talk::init($form);
-    return $err->($init->{error}) if $init->{error}; 
+    return $err->($init->{error}) if $init->{error};
 
     my $journalu = $init->{'journalu'};
     return $bmlerr->('talk.error.nojournal') unless $journalu;
@@ -2489,7 +2491,7 @@ sub init {
         $bmlerr->("$SC.error.lostcookie")
             unless ($remote && $remote->{'user'} eq $form->{'cookieuser'});
         return undef if @$errret;
-        
+
         $cookie_auth = 1;
         $form->{'userpost'} = $remote->{'user'};
         $form->{'usertype'} = "user";
@@ -2498,7 +2500,7 @@ sub init {
     $init->{cookie_auth} = $cookie_auth;
 
     # test accounts may only comment on other test accounts.
-    if ((grep { $form->{'userpost'} eq $_ } @LJ::TESTACCTS) && 
+    if ((grep { $form->{'userpost'} eq $_ } @LJ::TESTACCTS) &&
         !(grep { $journalu->{'user'} eq $_ } @LJ::TESTACCTS))
     {
         $bmlerr->("$SC.error.testacct");
@@ -2645,7 +2647,7 @@ sub init {
     unless ($used_ecp) {
         my $chrp_err;
         if (my $chrp = $form->{'chrp1'}) {
-            my ($c_ditemid, $c_uid, $c_time, $c_chars, $c_res) = 
+            my ($c_ditemid, $c_uid, $c_time, $c_chars, $c_res) =
                 split(/\-/, $chrp);
             my $chal = "$c_ditemid-$c_uid-$c_time-$c_chars";
             my $secret = LJ::get_secret($c_time);
@@ -2698,7 +2700,7 @@ sub init {
         # with a reply from email. so use $up instead of $remote
         # in the call below.
 
-        if ($parpost && $parpost->{'state'} eq "S" && 
+        if ($parpost && $parpost->{'state'} eq "S" &&
             !LJ::Talk::can_unscreen($up, $journalu, $init->{entryu}, $init->{entryu}{'user'})) {
             $bmlerr->("$SC.error.screened");
         }
@@ -2751,7 +2753,7 @@ sub init {
         $form->{'body'} = Unicode::MapUTF8::to_utf8({-string=>$form->{'body'}, -charset=>$form->{'encoding'}});
         $form->{'subject'} = Unicode::MapUTF8::to_utf8({-string=>$form->{'subject'}, -charset=>$form->{'encoding'}});
     }
-    
+
     # unixify line-endings
     $form->{'body'} =~ s/\r\n/\n/g;
 
@@ -3009,7 +3011,7 @@ sub make_preview {
     }
     $ret .= "<p>";
     $ret .= "$BML::ML{'/talkpost.bml.opt.noautoformat'} ".
-        LJ::html_check({ 'name' => 'prop_opt_preformatted', 
+        LJ::html_check({ 'name' => 'prop_opt_preformatted',
                          selected => $form->{'prop_opt_preformatted'} });
     $ret .= LJ::help_icon("noautoformat", " ");
     $ret .= "</p>";
@@ -3082,10 +3084,10 @@ sub check_rate {
     foreach my $watch (@watch) {
         my ($key, $rates) = ($watch->[0], $watch->[1]);
         my $max_period = $rates->[0]->[1];
-        
+
         my $log = LJ::MemCache::get($key);
         my $DATAVER = "1";
-        
+
         # parse the old log
         my @times;
         if (length($log) % 4 == 1 && substr($log,0,1) eq $DATAVER) {
@@ -3095,16 +3097,16 @@ sub check_rate {
                 push @times, $time if $time > $now - $max_period;
             }
         }
-        
+
         # add this event
         push @times, $now;
-        
+
         # check rates
         foreach my $rate (@$rates) {
             my ($allowed, $period) = ($rate->[0], $rate->[1]);
             my $events = scalar grep { $_ > $now-$period } @times;
             if ($events > $allowed) {
-                
+
                 my $ruser = (exists $remote->{'user'}) ? $remote->{'user'} : 'Not logged in';
                 my $nowtime = localtime($now);
                 my $body = <<EOM;
@@ -3115,7 +3117,7 @@ Talk spam from $key:
     Time caught: $nowtime
     Posting to:  $journalu->{'user'}
 EOM
-                if ($LJ::DEBUG_TALK_RATE && 
+                if ($LJ::DEBUG_TALK_RATE &&
                     LJ::MemCache::add("warn:$key", 1, 600)) {
                     LJ::send_mail({
                         'to' => $LJ::DEBUG_TALK_RATE,
@@ -3131,13 +3133,13 @@ EOM
                 last WATCH;
             }
         }
-        
+
         # build the new log
         my $newlog = $DATAVER;
         foreach (@times) {
             $newlog .= pack("N", $_);
         }
-        
+
         LJ::MemCache::set($key, $newlog, $max_period);
     }
 
