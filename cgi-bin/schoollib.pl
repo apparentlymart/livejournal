@@ -709,6 +709,58 @@ sub get_pending {
 }
 
 # <LJFUNC>
+# name: LJ::Schools::canonical_city_name
+# class: schools
+# des: Canonicalizes a cities name to a standard format.
+# args: city
+# des-city: Name of the city the school is located in.
+# returns: Canonicalized name of the city.
+# </LJFUNC>
+sub canonical_city_name {
+    my $city = shift;
+
+    # condense spaces and trim as our first act
+    $city =~ s/^\s+//;
+    $city =~ s/\s+$//;
+    $city =~ s/\s+/ /g;
+
+    # hash of do not capitalize these words
+    my %nocaps = map { $_ => 1 }
+        qw( de du la le of the and at for );
+
+    # canonicalize it to lowercase with each word capitalized
+    $city = lc $city;
+    $city = join(' ', map { $nocaps{$_} ? $_ : ucfirst(lc($_)) } split(/\s+/, $city));
+
+    # fix up "O'neill" to "O'Neill"
+    $city =~ s/(O'\w)/uc $1/eg;
+
+    # fix up "Mccarthy" to "McCarthy"
+    $city =~ s/Mc(\w)/"Mc" . uc $1/eg;
+
+    # fix up "H.c." into "H.C."
+    $city =~ s/\b((?:\w\.)+ )/uc $1/eg;
+
+    # fix up "A&m" to "A&M", effectively
+    $city =~ s/\b(\w&\w)\b/uc $1/eg;
+
+    # fix up "Foo-bar" into "Foo-Bar"
+    $city =~ s/\b(\w)(\w+)-(\w)(\w+)\b/uc($1) . $2 . "-" . uc($3) . $4/eg;
+
+    # fix "foo & bar" to "foo and bar"
+    $city =~ s/ & / and /g;
+
+    # now fix "A and M" ... mostly because "A & M" is expanded to such above
+    $city =~ s/ A and M / A&M /;
+
+    # now ensure the FIRST LETTER is capitalized
+    # fixes case where city names "la Porte" aren't
+    $city = ucfirst($city);
+
+    return $city;
+}
+
+# <LJFUNC>
 # name: LJ::Schools::canonical_school_name
 # class: schools
 # des: Canonicalizes a school name to a standard format.
@@ -727,18 +779,6 @@ sub canonical_school_name {
 
     # remove initial The
     $name =~ s/^The //i;
-
-    # remove a city from the end?
-    if ($city =~ /^[\w\s]+$/) {
-        $name =~ s/\W$city$//i;
-        $name =~ s/ at$//;
-        $name =~ s/ -$//;
-
-        # "Universidad de Buenos Aires" etc.
-        if ($name =~ /\b(?:de|of)$/i) {
-            $name .= " $city";
-        }
-    }
 
     # hash of do not capitalize these words
     my %nocaps = map { $_ => 1 }

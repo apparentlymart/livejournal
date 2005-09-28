@@ -127,6 +127,8 @@ body<=
             $state = uc($state);
         };
 
+        $city = LJ::Schools::canonical_city_name($city);
+
         $bogus->('city', 'You must enter the city this school is located in.')
             unless length($city);
 
