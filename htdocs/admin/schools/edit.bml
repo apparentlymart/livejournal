@@ -33,6 +33,9 @@ body<=
     return $err->('You do not have access to use this tool.')
         unless (LJ::check_priv($remote, 'siteadmin', 'school'));
 
+    my $is_admin = LJ::check_priv($remote, 'admin', 'siteadmin/school') ||
+        LJ::check_priv($remote, 'admin', '*');
+
     if (LJ::did_post()) {
         my $sid = $POST{sid};
 
@@ -80,6 +83,8 @@ body<=
             $ret .= $inerr->('url');
             $ret .= "</td></tr><tr><td colspan='2'>";
             $ret .= LJ::html_submit("Save School");
+            $ret .= LJ::html_submit('delete', "Delete School")
+                if $is_admin;
             $ret .= "</td></tr></table>";
             $ret .= "</form>";
 
@@ -88,18 +93,27 @@ body<=
             return $err->('Invalid form')
                 unless LJ::check_form_auth();
 
-            my $rv = LJ::Schools::edit_school($sid,
-                                              {
-                                                  name => $POST{name},
-                                                  countrycode => $POST{country},
-                                                  state => $POST{state},
-                                                  city => $POST{city},
-                                                  url => $POST{url},
-                                              });
-            return $err->('Unable to save school data')
+            my $rv;
+            if ($POST{'delete'}) {
+                return $err->('Cannot delete as you\'re not an admin')
+                    unless $is_admin;
+
+                $rv = LJ::Schools::delete_school($POST{sid});
+            } else {
+                $rv = LJ::Schools::edit_school($sid,
+                                               {
+                                                   name => $POST{name},
+                                                   countrycode => $POST{country},
+                                                   state => $POST{state},
+                                                   city => $POST{city},
+                                                   url => $POST{url},
+                                               });
+            }
+
+            return $err->('Unable to make changes to school data')
                 unless $rv;
 
-            $ret .= '<?h1 Success h1?><?p You have saved X students from having bad school data! p?>';
+            $ret .= '<?h1 Success h1?><?p School data edited or deleted p?>';
             return $ret;
         }
     } else {
