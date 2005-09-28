@@ -165,7 +165,7 @@ body<=
         if (%$secondary || %$tertiary) {
             $ret .= "<table border='1'>";
             $ret .= "<tr><th>Related</th><th>Name</th><th>City</th><th>URL</th><th>Delete!</th></tr>";
-            foreach my $school (values %$secondary, values %$tertiary) {
+            foreach my $school (sort { $a->{name} cmp $b->{name}} values %$secondary, values %$tertiary) {
                 $ret .= "<tr><td>";
                 $ret .= LJ::html_check({ 'type' => 'check', 'name' => $school->{pendid} });
                 $ret .= "</td><td>";
