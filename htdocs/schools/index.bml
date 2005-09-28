@@ -89,7 +89,7 @@ body<=
         $ret .= "</td></tr><tr><td colspan='2'>";
         $ret .= $inerr->('country');
         $ret .= "</td></tr><tr><td valign='top'>";
-        $ret .= "State/province:</td><td>" . LJ::html_text({ name => "state", maxlength => 255, size => 15, value => $state }) . "<br />&nbsp;&nbsp" . $ex->("CA, NY, Alberta");
+        $ret .= "State/province:</td><td>" . LJ::html_text({ name => "state", maxlength => 255, size => 15, value => $state }) . "<br />&nbsp;&nbsp" . $ex->("CA, NY, Alberta<br /><ul><li>For the United States please use the state's postal abbreviation, otherwise type out the full state/province name.</li></ul>");
         $ret .= "</td></tr><tr><td colspan='2'>";
         $ret .= $inerr->('state');
         $ret .= "</td></tr><tr><td valign='top'>";
