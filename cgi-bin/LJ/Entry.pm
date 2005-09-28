@@ -511,8 +511,9 @@ sub event_summary {
 sub comments_manageable_by {
     my ($self, $remote) = @_;
     return 0 unless $self->valid;
+    return 0 unless $remote;
     my $u = $self->{u};
-    return $remote ||
+    return
         $remote->{userid} == $u->{userid} ||
         $remote->{userid} == $self->posterid ||
         LJ::can_manage($remote, $u);
