@@ -366,6 +366,7 @@ sub generate_box_config_dialog {
     my $selflink = '/portal/index.bml';
 
     $config .= "<form action='$selflink' method='POST' name='configform$pboxid', id='configform$pboxid'>";
+    $config .= "<table>";
     $config .= LJ::html_hidden({'name' => 'realform', 'value' => 1, 'id' => "realform$pboxid"},
                                {'name' => 'pboxid', 'value' => $pboxid});
 
@@ -382,10 +383,12 @@ sub generate_box_config_dialog {
 
         my $inputfield;
 
+        $config .= '<tr><td>';
+
         if ($type eq 'checkbox') {
 
             $inputfield .= "<label for='$name$pboxid'>";
-            $inputfield .= "$desc: ";
+            $inputfield .= "$desc: </td><td>";
 
             # checkboxes are dumb.
             if ($self->get_prop($propkey)) {
@@ -449,11 +452,11 @@ sub generate_box_config_dialog {
         }
 
         $formelements .= $name . ',' unless $type eq 'hidden';
-        $config .= "<div>$inputfield</div>";
+        $config .= "<div>$inputfield</div></td></tr>";
     }
     chop $formelements;
 
-    my $buttons = '<div class="PortalConfigSubmitButtons">';
+    my $buttons = '</table><div class="PortalConfigSubmitButtons">';
 
     $buttons .= "<span class=\"PortalConfigResetButton\"><a href=\"$selflink?resetbox=1&pboxid=$pboxid\" onclick=\"return resetBox($pboxid);\">Reset</a></span>";
 
