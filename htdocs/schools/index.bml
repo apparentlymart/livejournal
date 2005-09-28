@@ -313,6 +313,12 @@ body<=
 
     ##########################################################################
     # PAGE 5: show who has listed this school in their attendance list
+
+    # Make sure this school id actually exists
+    my $school = LJ::Schools::load_schools(($sid));
+    return $err->("No such school found")
+        unless $school;
+
     my $year = $GET{'year'} || 0;
     $year += 0;
     $year = 0 if $year < 1900;
