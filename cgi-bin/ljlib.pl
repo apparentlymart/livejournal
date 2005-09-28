@@ -1160,7 +1160,7 @@ sub get_prop
 {
     my $table = shift;
     my $name = shift;
-    unless (defined $LJ::CACHE_PROP{$table}) {
+    unless (defined $LJ::CACHE_PROP{$table} && $LJ::CACHE_PROP{$table}->{$name}) {
         LJ::load_props($table);
         return undef unless $LJ::CACHE_PROP{$table};
     }
