@@ -3219,7 +3219,7 @@ sub make_journal
         # intercept flag to handle_with_bml_ref and instead use S1 shortcomings
         # if BML is disabled
         if ($opts->{'handle_with_bml_ref'} && ${$opts->{'handle_with_bml_ref'}} &&
-            $LJ::S1_SHORTCOMINGS)
+            ($LJ::S1_SHORTCOMINGS || $geta->{fallback} eq "s2"))
         {
             # kill the flag
             ${$opts->{'handle_with_bml_ref'}} = 0;
