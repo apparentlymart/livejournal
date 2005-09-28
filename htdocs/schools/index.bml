@@ -114,7 +114,6 @@ body<=
 
     # Adding a school
     if (LJ::did_post()) {
-        my $statewhat = 'state';
         my ($country, $state, $city, $name, $remoterl) =
             ($POST{country}, $POST{state}, $POST{city}, $POST{name}, $POST{url});
 
@@ -122,9 +121,10 @@ body<=
             unless $country && $country =~ /\w\w/;
 
         if ($country eq 'US') {
-            $statewhat = 'statecode';
             $bogus->('state', 'You must enter a valid US state code.')
                 unless $state =~ /\w\w/;
+
+            $state = uc($state);
         };
 
         $bogus->('city', 'You must enter the city this school is located in.')
@@ -150,7 +150,7 @@ body<=
                                                  {
                                                      name        => $name,
                                                      city        => $city,
-                                                     $statewhat  => $state,
+                                                     state       => $state,
                                                      countrycode => $country,
                                                      url         => $remoterl,
                                                  });
