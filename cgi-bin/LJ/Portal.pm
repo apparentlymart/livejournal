@@ -72,6 +72,7 @@ sub get_portal_box_update_script {
             if (box) {
                 box.innerHTML = "$newcontents";
             }
+            if (box_reloading && box_reloading[$pboxid]) box_reloading[$pboxid]=0;
         };
 }
 

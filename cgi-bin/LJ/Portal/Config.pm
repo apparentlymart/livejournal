@@ -620,7 +620,7 @@ sub generate_box_titlebar {
 
     if ($box->can('can_refresh') && $box->can_refresh) {
         $refreshbutton = qq {
-            <a onclick="return updatePortalBox($pboxid);" href="">
+            <a onclick="return reloadPortalBox($pboxid);" href="">
                 <img src="$LJ::IMGPREFIX/portal/PortalBoxRefresh.gif" />
             </a>
         };

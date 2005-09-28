@@ -1,6 +1,7 @@
 var LJVAR;
 if (!LJVAR) LJVAR=new Object();
 var portalAnimating = 0;
+var box_reloading = {};
 
 function getXTR () {
   var xtr;
@@ -365,6 +366,16 @@ function swapBoxes(pboxid1, pboxid2) {
 
 function updatePortalBox(pboxid) {
   return evalXrequest("updatebox=1&pboxid="+pboxid);
+}
+
+function reloadPortalBox(pboxid) {
+  // don't let user double-click portal update
+  if (!box_reloading[pboxid]) {
+    box_reloading[pboxid] = 1;
+    return updatePortalBox(pboxid);
+  }
+
+  return false;
 }
 
 function regEvent (target, evt, func) {
