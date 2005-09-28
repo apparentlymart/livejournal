@@ -41,7 +41,7 @@ body<=
     my $trail = sub {
         my ($des, $country, $state, $city) = @_;
 
-        $state = 'no defined state or province'
+        $state = 'undefined state or province'
             if !$state && $city;
 
         my $ret;
@@ -182,8 +182,16 @@ body<=
 
         $ret .= "<?h1 Country h1?><?p Select a country p?>";
 
+        my @sorted;
+        push @sorted, 'US' if defined $cts->{'US'};
+        push @sorted, 'CA' if defined $cts->{'CA'};
+        foreach (sort { $cts->{$a} cmp $cts->{$b}} keys %{$cts}) {
+            next if $_ eq 'US' || $_ eq 'CA';
+            push @sorted, $_;
+        }
+
         $ret .= "<ul>";
-        foreach my $ct (sort { $cts->{$a} cmp $cts->{$b}} keys %{$cts}) {
+        foreach my $ct (@sorted) {
             $ret .= "<li><a href='$LJ::SITEROOT/schools/?ctc=$ct'>$cts->{$ct}</a></li>\n";
         }
         $ret .= "</ul>";
@@ -223,7 +231,7 @@ body<=
         $ret .= "<ul>";
         foreach my $sc (sort { $scs->{$a} cmp $scs->{$b} } keys %{$scs}) {
             my $esc = LJ::eurl($sc);
-            my $val = $scs->{$sc} || "<i>no defined state or province</i>";
+            my $val = $scs->{$sc} || "<i>undefined state or province</i>";
             $ret .= "<li><a href='$LJ::SITEROOT/schools/?ctc=$ctc&sc=$esc'>$val</a></li>\n";
         }
         $ret .= "</ul>";
