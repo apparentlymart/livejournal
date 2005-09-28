@@ -164,13 +164,14 @@ body<=
 
         if (%$secondary || %$tertiary) {
             $ret .= "<table border='1'>";
-            $ret .= "<tr><th>Related</th><th>Name</th><th>City</th><th>URL</th><th>Delete!</th></tr>";
+            $ret .= "<tr><th>Related</th><th>Name</th><th>City</th><th>State</th><th>URL</th><th>Delete!</th></tr>";
             foreach my $school (sort { $a->{name} cmp $b->{name}} values %$secondary, values %$tertiary) {
                 $ret .= "<tr><td>";
                 $ret .= LJ::html_check({ 'type' => 'check', 'name' => $school->{pendid} });
                 $ret .= "</td><td>";
                 $ret .= LJ::ehtml($school->{name}) . '</td><td>';
                 $ret .= LJ::ehtml($school->{city}) . '</td><td>';
+                $ret .= LJ::ehtml($school->{state}) . '</td><td>';
                 $ret .= LJ::ehtml($school->{url})  . '</td><td>';
                 $ret .= LJ::html_check({ 'type' => 'check', 'name' => "delete$school->{pendid}" });
                 $ret .= "</td></tr>";
