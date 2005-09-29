@@ -62,6 +62,7 @@
         LJVAR.postUrl = "$selflink";
         LJVAR.doFade = 0;
         LJVAR.doAnimate = 1;
+        LJVAR.imgprefix = "$LJ::IMGPREFIX";
         </script>
         };
 
@@ -221,7 +222,7 @@
     # create the hidden menu at the top
     my $configmenu = qq {
         <span id="PortalConfigMenuBar">
-            <span id="AddPortalMenuButton" class="midalign"><a href="$selflink?getmenu=1&menu=addbox" onclick="return showAddPortalBoxMenu();"><img src="$LJ::IMGPREFIX/portal/PortalAddButton.gif" /></a></span>
+            <span id="AddPortalMenuButton" class="midalign"><a href="$selflink?getmenu=1&menu=addbox" onclick="return showAddPortalBoxMenu();"><img src="$LJ::IMGPREFIX/portal/PortalAddButton.gif" id="AddPortalMenuButtonImage" /></a></span>
             </span>
         };
 

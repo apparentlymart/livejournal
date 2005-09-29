@@ -253,17 +253,26 @@ function doDropDownMenu(e, menuHTML) {
   }
 
   if (xDef(menuBox)) {
-    xAppendChild(document.body, menuBox);
-    menuBox.innerHTML = menuHTML;
-    menuBox.id = "PortalConfigMenu";
-    menuBox.className = "DropDownMenu";
-    menuBox.newRight = xRight(menuBox);
-    menuBox.newBottom = xBottom(menuBox);
+    // hide if open
+    if (xDisplay(menuBox) == "block") {
+      hidePortalMenu();
+    } else {
+      xAppendChild(document.body, menuBox);
+      menuBox.innerHTML = menuHTML;
+      menuBox.id = "PortalConfigMenu";
+      menuBox.className = "DropDownMenu";
+      menuBox.newRight = xRight(menuBox);
+      menuBox.newBottom = xBottom(menuBox);
 
-    xLeft(menuBox, xPageX(e));
-    xTop(menuBox, xPageY(e) + xHeight(e));
-    fadeIn(menuBox, 200);
-    menuBox.isOpen = 1;
+      xLeft(menuBox, xPageX(e));
+      xTop(menuBox, xPageY(e) + xHeight(e));
+      fadeIn(menuBox, 200);
+      menuBox.isOpen = 1;
+      var addbutton = xGetElementById("AddPortalMenuButtonImage");
+      if (addbutton && LJVAR.imgprefix) {
+        addbutton.src = LJVAR.imgprefix + "/portal/PortalAddButtonSelected.gif";
+      }
+    }
   }
 }
 
@@ -277,6 +286,10 @@ function hidePortalMenu(menu) {
   if (menuelement) {
     menuelement.isOpen = 0;
     hideBox(xGetElementById('PortalConfigMenu'));
+    var addbutton = xGetElementById("AddPortalMenuButtonImage");
+    if (addbutton && LJVAR.imgprefix) {
+      addbutton.src = LJVAR.imgprefix + "/portal/PortalAddButton.gif";
+    }
   }
 }
 
