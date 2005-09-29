@@ -2512,6 +2512,8 @@ sub Date__date_format
     my $realfmt = $fmt;
     if (defined $ctx->[S2::PROPS]->{"lang_fmt_date_$fmt"}) {
         $realfmt = $ctx->[S2::PROPS]->{"lang_fmt_date_$fmt"};
+    } elsif ($fmt eq "iso") {
+        $realfmt = "%%yyyy%%-%%mm%%-%%dd%%";
     }
     my @parts = split(/\%\%/, $realfmt);
     my $code = "\$\$c = sub { my \$time = shift; return join('',";

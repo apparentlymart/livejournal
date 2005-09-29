@@ -327,7 +327,9 @@ class Comment extends EntryLite
 
     function builtin print_reply_container(string{} opts) "Prints the area in which the quickreply box will go. You may 'class' which will be the CSS class used by the container. If no container is available, quickreply will not work.";
 
-    function time_display () : string "Show the time of this post";
+    function time_display () : string "Show the time of this post, with most useful information for user, and with tooltip for more.";
+
+    function time_display (string datefmt, string timefmt) : string "time_post, with customized date/time formats.";
 }
 
 ### Userinfo
@@ -1742,25 +1744,46 @@ function secs_to_string (int sec) : string {
    return string($sec / 86400) + " days";
  }
 
-function Comment::time_display () : string {
-    var string full = "";
+function Comment::time_display (string datefmt, string timefmt) : string {
+    if ($datefmt == "") {
+        $datefmt = "iso";
+    }
+    if ($timefmt == "") {
+        $timefmt = "short";
+    }
+
+    var string tooltip = "";
     var string etime = secs_to_string($this.seconds_since_entry);
-    $full = $etime + " after journal entry";
-    var string firstdate;
+    $tooltip = $etime + " after journal entry";
+
+    var string main;
+    var string main_date;
 
     if ($this.time_remote) {
-        $firstdate = $this.time_remote->date_format("short");
-         $full = $full + ", " + $firstdate + " " + $this.time_remote->time_format("short") + " (your time)";
+        $main_date = $this.time_remote->date_format($datefmt);
+        $main = $main_date;
+        $main = $main + " " + $this.time_remote->time_format("short") + " (local)";
+    } else {
+        $main_date = $this.time->date_format($datefmt);
+        $main = $main_date;
+        $main = $main + " " + $this.time->time_format($timefmt) + " (UTC)";
     }
+
     if (defined $this.time_poster and defined $this.poster)
     {
-        var string seconddate = $this.time_poster->date_format("short");
-        if ($seconddate == $firstdate) { $seconddate = ""; }
-        else { $seconddate = $seconddate + " "; }
+        var string poster_date = $this.time_poster->date_format($datefmt);
+        $tooltip = $tooltip + ", ";
 
-         $full = $full + ", " + $seconddate + $this.time_poster->time_format("short") + " (" + $this.poster.username + "'s time)";
+        if ($poster_date == $main_date) { $poster_date = ""; }
+        else { $poster_date = $poster_date + " "; }
+
+         $tooltip = $tooltip + $poster_date + $this.time_poster->time_format($timefmt) + " (" + $this.poster.username + "'s time)";
     }
-    return "<abbr title=\"" + ehtml($full) + "\">+" + ehtml($etime) + "</abbr>";
+    return "<span title=\"" + ehtml($tooltip) + "\">" + ehtml($main) + "</span>";
+}
+
+function Comment::time_display () : string {
+    return $this->time_display("iso", "short");
 }
 
 ### Year view
