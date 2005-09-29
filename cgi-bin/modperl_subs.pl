@@ -14,6 +14,8 @@ use Apache::BML;
 use Apache::SendStats;
 use Apache::DebateSuicide;
 
+use DateTime;
+use DateTime::TimeZone;
 use Digest::MD5;
 use MIME::Words;
 use Text::Wrap ();

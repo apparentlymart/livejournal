@@ -73,11 +73,19 @@ sub EntryPage
 
     my @comments = LJ::Talk::load_comments($u, $remote, "L", $itemid, $copts);
 
+    my $tz_remote;
+    if ($remote) {
+        my $tz = $remote->prop("timezone");
+        $tz_remote = $tz ? eval { DateTime::TimeZone->new( name => $tz); } : undef;
+    }
+
     my $pics = LJ::Talk::get_subjecticons()->{'pic'};  # hashref of imgname => { w, h, img }
     my $convert_comments = sub {
         my ($self, $destlist, $srclist, $depth) = @_;
 
         foreach my $com (@$srclist) {
+            my $pu = $com->{'posterid'} ? $user{$com->{'posterid'}} : undef;
+
             my $dtalkid = $com->{'talkid'} * 256 + $entry->anum;
             my $text = $com->{'body'};
             if ($get->{'nohtml'}) {
@@ -86,13 +94,14 @@ sub EntryPage
             }
             LJ::CleanHTML::clean_comment(\$text, { 'preformatted' => $com->{'props'}->{'opt_preformatted'},
                                                    'anon_comment' => (!$com->{posterid}
-                                                                      || (defined $user{$com->{posterid}}
-                                                                          && $user{$com->{'posterid'}}->{'journaltype'}
-                                                                          eq 'I'))
-                                                   });
+                                                                      || ($pu && $pu->{'journaltype'} eq "I")),
+                                               });
 
             # local time in mysql format to gmtime
             my $datetime = DateTime_unix($com->{'datepost_unix'});
+            my $datetime_remote = $tz_remote ? DateTime_tz($com->{'datepost_unix'}, $tz_remote) : undef;
+            my $seconds_since_entry = $com->{'datepost_unix'} - $entry->logtime_unix;
+            my $datetime_poster = DateTime_tz($com->{'datepost_unix'}, $pu);
 
             my $subject_icon = undef;
             if (my $si = $com->{'props'}->{'subjecticon'}) {
@@ -123,8 +132,8 @@ sub EntryPage
 
             my $poster;
             if ($com->{'posterid'}) {
-                if ($user{$com->{'posterid'}}) {
-                    $poster = UserLite($user{$com->{'posterid'}});
+                if ($pu) {
+                    $poster = UserLite($pu);
                 } else {
                     $poster = {
                         '_type' => 'UserLite',
@@ -168,12 +177,14 @@ sub EntryPage
                 'anchor' => "t$dtalkid",
                 'dom_id' => "ljcmt$dtalkid",
                 'comment_posted' => $commentposted,
+                'time_remote' => $datetime_remote,
+                'time_poster' => $datetime_poster,
+                'seconds_since_entry' => $seconds_since_entry,
             };
 
             # don't show info from suspended users
             # FIXME: ideally the load_comments should only return these
             # items if there are children, otherwise they should be hidden entirely
-            my $pu = $com->{'posterid'} ? $user{$com->{'posterid'}} : undef;
             if ($pu && $pu->{'statusvis'} eq "S" && !$viewsome) {
                 $s2com->{'text'} = "";
                 $s2com->{'subject'} = "";

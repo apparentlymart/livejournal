@@ -1492,6 +1492,36 @@ sub DateTime_unix
     return $dt;
 }
 
+sub DateTime_tz
+{
+    # timezone can be scalar timezone name, DateTime::TimeZone object, or LJ::User object
+    my ($epoch, $timezone) = @_;
+    return undef unless $timezone;
+
+    if (ref $timezone eq "LJ::User") {
+        $timezone = $timezone->prop("timezone");
+        return undef unless $timezone;
+    }
+
+    my $dt = eval {
+        DateTime->from_epoch(
+                             epoch => $epoch,
+                             time_zone => $timezone,
+                             );
+    };
+    return undef unless $dt;
+
+    my $ret = { '_type' => 'DateTime' };
+    $ret->{'year'} = $dt->year;
+    $ret->{'month'} = $dt->month;
+    $ret->{'day'} = $dt->day;
+    $ret->{'hour'} = $dt->hour;
+    $ret->{'min'} = $dt->minute;
+    $ret->{'sec'} = $dt->second;
+    $ret->{'_dayofweek'} = $dt->day_of_week;
+    return $ret;
+}
+
 sub DateTime_parts
 {
     my @parts = split(/\s+/, shift);

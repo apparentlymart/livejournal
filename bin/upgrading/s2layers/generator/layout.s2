@@ -822,7 +822,7 @@ function EntryPage::print_comment (Comment c) {
         $sub_icon = $c.subject_icon->as_string();
     }
     "<a name='$c.anchor'></a><div id='cmtbar$c.talkid' style='background-color: $background; color: $color; margin-top: 10px; width: 100%;'>";
-    "<table cellpadding='2' cellspacing='0' summary='0' style='width: 100%'><tr valign='top'>";
+    "<table border='0' cellpadding='2' cellspacing='0' summary='0' style='width: 100%'><tr valign='top'>";
     if (defined $c.userpic and $*comment_userpic_style != "off") { 
         var int w = $c.userpic.width;
         var int h = $c.userpic.height;
@@ -836,16 +836,17 @@ function EntryPage::print_comment (Comment c) {
         print "<td style='width: 102px'><img src='$c.userpic.url' width='$w' height='$h' alt='[User Picture]' /></td>";
     }
 
-    "<td style='width: 100%'><table style='width: 100%'><tr>";
+    "<td style='width: 50%'>";
 
     ### From, date, etc
-    "<td align='left' style='width: 50%'>";
-      print "<table>";
-      print "<tr><th align='right' style='white-space: nowrap'>From:</th><td style='white-space: nowrap'>$poster</td></tr>\n";
-      print "<tr><th align='right' style='white-space: nowrap'>Date:</th><td style='white-space: nowrap'>";
-        print $c.time->date_format("long") + " - " + $c.time->time_format() + "</td></tr>";
-      if ($c.metadata{"poster_ip"}) { print "<tr><th align='right' style='white-space: nowrap'>IP Address:</th><td>(" + $c.metadata{"poster_ip"} + ")</td></tr>"; }
-    "</table></td>";
+      print "<strong>From:</strong> $poster<br /><small>";
+      print $c->time_display();
+      if ($c.metadata{"poster_ip"}) { print "<br />IP: [" + $c.metadata{"poster_ip"} + "]"; }
+      "</small><br />";
+
+    print (defined $c.subject_icon or $c.subject != "") ? "<h3>$c.subject_icon $c.subject</h3>" : "";
+
+       "</td>";
 
     ### Gadgets
     "<td align='right' style='width: 50%'>";
@@ -854,17 +855,13 @@ function EntryPage::print_comment (Comment c) {
         $c->print_multiform_check();
     }
     $c->print_linkbar();
-    "</td></tr>";
-
-    ### Subject / icon
-    print "<tr valign='top'><td style='width: 50%'>";
-    print (defined $c.subject_icon or $c.subject != "") ? "<h3>$c.subject_icon $c.subject</h3>" : "";
-    print "</td>";
 
     ### Permalink
-    print "<td style='width: 50%' align='right'><strong>(<a href='$c.permalink_url'>Link</a>)</strong></td></tr>";
+    print "<p><strong>(<a href='$c.permalink_url'>Link</a>)</strong></p>\n";
 
-    print "</table></td></tr></table></div>";
+    "</td>";
+
+    print "</tr></table></div>";
     print "<div style='margin-left: 5px'>$c.text</div>";
     print "<div style='margin-top: 3px; font-size: smaller'>";
 

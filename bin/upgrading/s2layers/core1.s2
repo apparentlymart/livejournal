@@ -153,8 +153,8 @@ class Link
 {
     var readonly string url "URL which the link points to";
     var readonly string caption "The caption for the link";
-    var Image icon 
-    "A suggestion from the server as to which icon to use. layouts/users can override this of course. 
+    var Image icon
+    "A suggestion from the server as to which icon to use. layouts/users can override this of course.
     alt text works similarly to [member[Link.caption]].";
 
     function print_button
@@ -174,7 +174,7 @@ class ItemRange
   var int from_subitem "The index of the first subitem in this range.";
   var int to_subitem "The index of the last subitem in this range.";
   var int total_subitems "The number of subitems.";
-  var readonly string url_next "URL for the 'next' link.  Blank if there isn't a next URL."; 
+  var readonly string url_next "URL for the 'next' link.  Blank if there isn't a next URL.";
   var readonly string url_prev "URL for the 'previous' link.  Blank if there isn't a previous URL.";
   var readonly string url_first "URL for the 'first' link.  Blank if already on the first page.";
   var readonly string url_last "URL for the 'last' link.  Blank if already on the last page.";
@@ -315,6 +315,10 @@ class Comment extends EntryLite
     var readonly string anchor "Direct link to comment, via HTML name anchors";
     var readonly bool comment_posted "True if comment was just posted by the current user.";
 
+    var readonly DateTime time_remote "The local time the comment appeared, in the remote user's (reader's) timezone.  Or undef if no remote user, or remote user hasn't set their timezone.";
+    var readonly DateTime time_poster "The local time the comment appeared, in the commenter's timezone.  Or undef if no anonymous comment, or commenter's timezone is unknown.";
+    var readonly int seconds_since_entry "The number of elapsed seconds from the time of the journal entry until he comment was made.";
+
     function builtin print_multiform_check "Prints the select checkbox in CSS class 'ljcomsel' with DOM id 'ljcomsel_\$talkid' for a multi-action form started with [method[EntryPage.print_multiform_start()]].";
 
     function builtin print_reply_link(string{} opts) "Prints a link to reply to the comment. You may specify the link text in the 'linktext' option, and the link CSS class in 'class'. You may also specify the url of an image to use as a button in 'img_url'.";
@@ -322,18 +326,20 @@ class Comment extends EntryLite
     function builtin print_reply_container() "Prints the area in which the quickreply box will go. If no container is available, quickreply will not work.";
 
     function builtin print_reply_container(string{} opts) "Prints the area in which the quickreply box will go. You may 'class' which will be the CSS class used by the container. If no container is available, quickreply will not work.";
+
+    function time_display () : string "Show the time of this post";
 }
- 
+
 ### Userinfo
 
-class Friend extends UserLite 
+class Friend extends UserLite
 "Represents a friends or friendof list"
 {
     var Color bgcolor "Background color selected for friend";
     var Color fgcolor "Foreground color selected for friend";
 }
 
-class User extends UserLite 
+class User extends UserLite
 "A more information-rich userinfo structure"
 {
     var Image default_pic "Information about default userpic";
@@ -352,11 +358,11 @@ class Redirector
     var readonly string vhost;
     var readonly string type;
     var readonly string url;
-    
+
     function start_form() "Starts an inline HTML form, then calls [method[Redirector.print_hiddens()]].  You can also make it yourself, using [member[Redirector.url]], if you need special form attributes.";
     function print_hiddens() "Prints the necessary hidden elements for a form.  Called automatically by [method[Redirector.start_form()]].";
     function end_form() "Prints a form close tag.";
-    
+
     function builtin get_url(string redir_key) "Returns a GET URL, given a redir_key";
 }
 
@@ -409,30 +415,30 @@ class Page
     or a date for the day view. Should be overridden in i18n layers. Ideally, layout layers should never override
     this.  See [method[Page.title()]].";
 
-    function title : string 
+    function title : string
     "Return a relevant combination of [member[Page.global_title]] and [method[Page.view_title()]].  May be
     overridden in layout layers or left untouched for the core layer to handle.";
-    
-    function print_body 
+
+    function print_body
     "Call from [method[Page.print()]] to render parts of the view that are specific to the view, eg print
     the recent set of journal entries, recent friends entries, or rows of user information";
 
     function print_head [fixed]
-    "Print server side supplied head content. This is a fixed function, so you can't override it. See 
+    "Print server side supplied head content. This is a fixed function, so you can't override it. See
     [method[Page.print_custom_head()]] if you want to supply custom head content.";
 
     function print_custom_head
-    "Layers can override this to add extra HTML to the head section of the HTML document. 
+    "Layers can override this to add extra HTML to the head section of the HTML document.
     Note that layouts are not intended to override this method.";
 
     function print_linklist
     "Print the list of UserLink objects specified by the user.";
- 
-    function print_entry(Entry e) 
+
+    function print_entry(Entry e)
     "Output a journal entry. Layouts should override this and the inherited versions in RecentPage, FriendsPage
     and DayPage to change how entries display.";
-    
-    function print_entry_poster(Entry e) 
+
+    function print_entry_poster(Entry e)
     "Output a line of text which says who posted an entry (just \"user\", or \"user posting in somejournal\")";
 
     function builtin get_latest_month() : YearMonth
@@ -465,7 +471,7 @@ class MessagePage extends Page
     function print_links() "Print the links from the [member[MessagePage.links]] and [member[MessagePage.link_keyseq]] members. Layouts will probably want to override this.";
 }
 
-class RecentNav 
+class RecentNav
 "Navigation position within a [class[RecentPage]] or [class[FriendsPage]] and URLs to move about."
 {
     var int version        "Currently version 1.  A new method of navigation has been frequently discussed, so this is planning for the future";
@@ -481,7 +487,7 @@ class RecentNav
     var int backward_count  "Number of items we'd be potentially seeing going backward.";
 }
 
-class RecentPage extends Page 
+class RecentPage extends Page
 "Most recent entries page, formally known as the LASTN view in the previous style system"
 {
     var Entry[] entries
@@ -501,15 +507,15 @@ class FriendsPage extends RecentPage
 
     var string friends_mode
     "The 'mode' of this view. An empty string indicates a normal friends view, while 'friendsfriends' indicates the Friends-of-friends view.";
-    
+
     var bool filter_active
     "If true, some kind of filter is in effect. If this filter has a name, it will be included in [member[FriendsPage.filter_name]]";
-    
+
     var string filter_name
     "The name of the filter in effect, if it has a name. This is only used when 'custom' [member[FriendsPage.filter_active]] is true.";
 }
 
-class DayPage extends Page 
+class DayPage extends Page
 "View entries by specifc day"
 {
     var Date prev_date "Previous day";
@@ -531,7 +537,7 @@ class YearYear
     var bool displayed "If this is the year currently being displayed, this will be true.";
 }
 
-class YearDay 
+class YearDay
 "Information on how to link to a day in the year archive"
 {
     var int day "Day of month number";
@@ -555,7 +561,7 @@ class YearWeek
     "Print formatted week";
 }
 
-class YearMonth 
+class YearMonth
 "A month on the [class[YearPage]]."
 {
     var bool has_entries "If this is false, you probably don't want to display this month.";
@@ -574,7 +580,7 @@ class YearMonth
     "Returns time formatted as indicated by \$fmt, or 'long' if blank.  // SeeAlso: siteapi.core1.dateformats";
 }
 
-class YearPage extends Page 
+class YearPage extends Page
 "Entire calendar page for a single year."
 {
     var int year "The year being viewed";
@@ -594,7 +600,7 @@ class MonthDay extends YearDay
     var bool has_entries "True if there are entries on this day.";
     var Entry[] entries "Only populated on the month view.  Entry text not present.";
 
-    function print_subjectlist 
+    function print_subjectlist
     "Print a list of entry summaries including subjects";
 }
 
@@ -606,7 +612,7 @@ class MonthEntryInfo
     var readonly string redir_key "The 'redir_key' parameter for a [class[Redirector]] instance.";
 }
 
-class MonthPage extends Page 
+class MonthPage extends Page
 "A page which contains a list of posts made in that month"
 {
     var Date date "Date of this month, with day of zero.";
@@ -637,7 +643,7 @@ class EntryPage extends Page
     function builtin print_multiform_actionline "Prints the line of the multiform giving instructions, options, and the submit button, using the text of the different \$*text_multiform_ properties.";
 }
 
-class ReplyForm 
+class ReplyForm
 "This class will be used more in the future to set options on the reply form before
 it's printed out by the system.  The system has to print it since it contains
 sensitive information which can't be made available to S2."
@@ -691,7 +697,7 @@ function builtin zeropad (int n, int digits) : string
 function builtin zeropad (string n, int digits) : string
 "Returns the number padded with zeroes so it has the amount of digits indicated.";
 
-function builtin striphtml (string s) : string 
+function builtin striphtml (string s) : string
 "Similar to ehtml, but the HTML tags are stripped rather than escaped.";
 
 function builtin viewer_logged_in() : bool
@@ -705,7 +711,7 @@ Useful for returning links to manage information, or edit entries.";
 function builtin get_page () : Page
 "Gets the top-level [class[Page]] instance that LiveJournal ran the [method[Page.print()]] method on.";
 
-function builtin get_url(string user, string view) : string 
+function builtin get_url(string user, string view) : string
 "Returns a URL to the specified view for the specified user. Views use the same names as elsewhere. (recent, friends, archive, month, userinfo)";
 
 function builtin get_url(UserLite user, string view) : string
@@ -723,7 +729,7 @@ function builtin set_content_type(string text)
 function builtin get_plural_phrase(int n, string prop) : string
 "Picks the phrase with the proper plural form from those in the property \$prop, passing \$n to [function[lang_map_plural(int)]] to get the proper form for the current language, and then substituting the # character with \$n.  Also, returned string is HTML-escaped.";
 
-function builtin weekdays() : int[] 
+function builtin weekdays() : int[]
 "Integers representing the days of the week. This will start on Monday (2) or Sunday (1) depending on the property setting for start-of-week and go to Sunday (1) or Saturday (7)";
 
 function builtin PalItem(int index, Color c) : PalItem
@@ -761,55 +767,55 @@ property string lang_current {
 set lang_current = "en";  # core is English.
 
 property string lang_fmt_date_short {
-    noui = 1; 
+    noui = 1;
     des = "Short date format.  All numeric.";
 }
 set lang_fmt_date_short = "%%m%%/%%d%%/%%yy%%";
 
 property string lang_fmt_date_med {
-    noui = 1; 
+    noui = 1;
     des = "Medium date format.  Abbreviated month name, no day of the week.";
 }
 set lang_fmt_date_med = "%%mon%%. %%dayord%%, %%yyyy%%";
 
 property string lang_fmt_date_med_day {
-    noui = 1; 
+    noui = 1;
     des = "Medium date format with day of week.  Abbreviated month name and abbreviated day of the week.";
 }
 set lang_fmt_date_med_day = "%%da%%, %%mon%%. %%dayord%%, %%yyyy%%";
 
 property string lang_fmt_date_long {
-    noui = 1; 
+    noui = 1;
     des = "Long date format.  With full month name, but no day of the week.";
 }
 set lang_fmt_date_long = "%%month%% %%dayord%%, %%yyyy%%";
 
 property string lang_fmt_date_long_day {
-    noui = 1; 
+    noui = 1;
     des = "Long date format.  With full month name and full day of the week.";
 }
 set lang_fmt_date_long_day = "%%day%%, %%month%% %%dayord%%, %%yyyy%%";
 
 property string lang_fmt_time_short {
-    noui = 1; 
+    noui = 1;
     des = "Time format.";
 }
 set lang_fmt_time_short = "%%hh%%:%%min%% %%a%%m";
 
 property string lang_fmt_month_short {
-    noui = 1; 
+    noui = 1;
     des = "Short month format.";
 }
 set lang_fmt_month_short = "%%m%%/%%yy%%";
 
 property string lang_fmt_month_med {
-    noui = 1; 
+    noui = 1;
     des = "Medium month format.";
 }
 set lang_fmt_month_med = "%%mon%% %%yyyy%%";
 
 property string lang_fmt_month_long {
-    noui = 1; 
+    noui = 1;
     des = "Long month format.";
 }
 set lang_fmt_month_long = "%%month%% %%yyyy%%";
@@ -836,14 +842,14 @@ property string[] lang_dayname_long {
     noui = 1;
     des = "Days of the week.  Indexed from 1 (Sunday) to 7 (Saturday).";
 }
-set lang_dayname_long = [ "", "Sunday", "Monday",  "Tuesday", "Wednesday", 
+set lang_dayname_long = [ "", "Sunday", "Monday",  "Tuesday", "Wednesday",
                           "Thursday", "Friday", "Saturday" ];
 
 property string[] lang_dayname_short {
     noui = 1;
     des = "Days of the week, in their short forms.  Indexed from 1 (Sun) to 7 (Sat).";
 }
-set lang_dayname_short = [ "", "Sun", "Mon",  "Tue", "Wed", 
+set lang_dayname_short = [ "", "Sun", "Mon",  "Tue", "Wed",
                            "Thu", "Fri", "Sat" ];
 
 property builtin string IMGDIR {
@@ -1298,7 +1304,7 @@ property string comment_userpic_style {
    des = "Userpic display style for comments";
    doc = "Userpic display style for comments.  Either '' for full, 'small' for small, or 'off' for none.";
    doc_flags = "[construct]";
-   values = "|Full|small|Small|off|Off";  
+   values = "|Full|small|Small|off|Off";
 }
 set comment_userpic_style = "";
 
@@ -1367,14 +1373,14 @@ function lang_ordinal(int num) [notags] : string
     return $num+"th";
 }
 
-function lang_ordinal(string num) [notags, fixed] : string 
+function lang_ordinal(string num) [notags, fixed] : string
 "Make an ordinal number from a cardinal number.  Don't override this, since the core layer implementation just calls [func[lang_ordinal(int)]], which i18nc layers should override."
 {
-    return lang_ordinal(int($num)); 
+    return lang_ordinal(int($num));
 }
 
 
-function lang_viewname(string viewid) [notags] : string 
+function lang_viewname(string viewid) [notags] : string
 "Get some words representing a view"
 {
     if ($viewid == "recent") { return $*text_view_recent; }
@@ -1723,6 +1729,40 @@ function RecentPage::print_body {
 }
 
 
+function secs_to_string (int sec) : string {
+   if ($sec < 60) {
+        return string($sec) + " seconds";
+    }
+   if ($sec < 3600) {
+        return string($sec / 60) + " minutes";
+    }
+   if ($sec < 86400) {
+        return string($sec / 3600) + " hours";
+    }
+   return string($sec / 86400) + " days";
+ }
+
+function Comment::time_display () : string {
+    var string full = "";
+    var string etime = secs_to_string($this.seconds_since_entry);
+    $full = $etime + " after journal entry";
+    var string firstdate;
+
+    if ($this.time_remote) {
+        $firstdate = $this.time_remote->date_format("short");
+         $full = $full + ", " + $firstdate + " " + $this.time_remote->time_format("short") + " (your time)";
+    }
+    if (defined $this.time_poster and defined $this.poster)
+    {
+        var string seconddate = $this.time_poster->date_format("short");
+        if ($seconddate == $firstdate) { $seconddate = ""; }
+        else { $seconddate = $seconddate + " "; }
+
+         $full = $full + ", " + $seconddate + $this.time_poster->time_format("short") + " (" + $this.poster.username + "'s time)";
+    }
+    return "<abbr title=\"" + ehtml($full) + "\">+" + ehtml($etime) + "</abbr>";
+}
+
 ### Year view
 
 function YearPage::print_body {
@@ -1864,7 +1904,7 @@ function DayPage::print_body() {
 function CommentInfo::print_readlink {
     var Page p = get_page();
     "<a href=\"$.read_url\">"+
-        get_plural_phrase($.count, $p.view == "friends" ? 
+        get_plural_phrase($.count, $p.view == "friends" ?
                           "text_read_comments_friends" : "text_read_comments")+
     "</a>";
 }
@@ -1942,7 +1982,7 @@ function EntryPage::print_comment (Comment c) {
 
     "<a name='$c.anchor'></a><div style='background-color: $barc; margin-top: 10px; width: 100%'>";
     "<table cellpadding='2' cellspacing='0' summary='0' style='width: 100%'><tr valign='top'>";
-    if (defined $c.userpic and $*comment_userpic_style != "off") { 
+    if (defined $c.userpic and $*comment_userpic_style != "off") {
         var int w = $c.userpic.width;
         var int h = $c.userpic.height;
         # WARNING: this will later be done by the system (it'll be a
@@ -2026,14 +2066,14 @@ function ItemRange::print() {
     print "</tr></table>";
 }
 
-function EntryPage::print_body 
+function EntryPage::print_body
 {
     var Entry e = $.entry;
     """<div class="entry" id="$e.dom_id">\n""";
 
     "<table><tr valign='middle'>";
-    if (defined $e.userpic) { 
-        print "<td>$e.userpic</td>"; 
+    if (defined $e.userpic) {
+        print "<td>$e.userpic</td>";
     }
     print "<td>"+lang_user_wrote($e.poster);
     print "<br />"+lang_at_datetime($e.time);
@@ -2048,7 +2088,7 @@ function EntryPage::print_body
     $link = $e->get_link("nav_next"); " $link";
     print "</div>";
 
-    "<h2>$e.security_icon $e.subject</h2>\n"; 
+    "<h2>$e.security_icon $e.subject</h2>\n";
 
     if (not $.viewing_thread) {
         "<div class='entrytext'>\n$e.text\n</div>\n";
@@ -2078,12 +2118,12 @@ function ReplyPage::print_body
 {
     if (not $.entry.comments.enabled) {
         print "<h2>$*text_reply_nocomments_header/h2><p>$*text_reply_nocomments</p>";
-        return; 
+        return;
     }
 
     "<table><tr valign='middle'>";
-        if (defined $.replyto.userpic) { 
-            print "<td>$.replyto.userpic</td>"; 
+        if (defined $.replyto.userpic) {
+            print "<td>$.replyto.userpic</td>";
         }
     print "<td>"+lang_user_wrote($.replyto.poster);
     print "<br />"+lang_at_datetime($.replyto.time);
