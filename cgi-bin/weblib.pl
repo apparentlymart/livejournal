@@ -155,6 +155,15 @@ sub help_icon
     return "$pre<?help $LJ::HELPURL{$topic} help?>$post";
 }
 
+# like help_icon, but no BML.
+sub help_icon_html {
+    my $topic = shift;
+    my $url = $LJ::HELPURL{$topic} or return "";
+    my $pre = shift || "";
+    my $post = shift || "";
+    # FIXME: use LJ::img() here, not hard-coding width/height
+    return "$pre<a href=\"$url\"><img src=\"$LJ::IMGPREFIX/help.gif\" alt=\"Help\" title=\"Help\" width='14' height='14' border='0' /></a>$post";
+}
 
 # <LJFUNC>
 # name: LJ::bad_input
@@ -765,8 +774,7 @@ sub create_qr_div {
                                         'selected' => $userpic, 'id' => 'prop_picture_keyword' },
                                        ("", BML::ml('/talkpost.bml.opt.defpic'), map { ($_, $_) } @pics));
 
-            $qrhtml .= ' ' . BML::fill_template('help', { 'DATA' => $LJ::HELPURL{'userpics'} } )
-                if defined $LJ::HELPURL{'userpics'};
+            $qrhtml .= LJ::help_icon_html("userpics", " ");
         }
     }
 
@@ -806,9 +814,8 @@ sub create_qr_div {
     LJ::load_user_props($u, 'opt_logcommentips');
     if ($u->{'opt_logcommentips'} eq 'A') {
         $qrhtml .= '<br />';
-        $qrhtml .= BML::fill_template('de', { 'DATA' => BML::ml('/talkpost.bml.logyourip') } );
-        $qrhtml .= ' ' . BML::fill_template('help', { 'DATA' => $LJ::HELPURL{'iplogging'} } )
-            if defined $LJ::HELPURL{'iplogging'};
+        $qrhtml .= LJ::deemp(BML::ml('/talkpost.bml.logyourip'));
+        $qrhtml .= LJ::help_icon_html("iplogging", " ");
     }
 
     $qrhtml .= "</td></tr></table>";
@@ -947,6 +954,10 @@ sub set_lastcomment
     return;
 }
 
+sub deemp {
+    "<span class='de'>$_[0]</span>";
+}
+
 # <LJFUNC>
 # name: LJ::entry_form
 # class: web
@@ -1048,7 +1059,7 @@ sub entry_form {
         $jevent =~ s/<(\/)?lj-cut(.*?)(?: \/)?>/&lt;$1lj-cut$2&gt;/ig;
 
         $jevent = LJ::ejs($jevent);
-        my $rte_nosupport = LJ::ejs(BML::fill_template("de", { DATA => BML::ml('entryform.htmlokay.rte_nosupport') }));
+        my $rte_nosupport = LJ::ejs(LJ::deemp(BML::ml('entryform.htmlokay.rte_nosupport')));
 
         $out .= LJ::html_hidden('richtext', '1') . "\n";
         $out .= LJ::html_hidden('saved_entry', '') . "\n";
@@ -1081,10 +1092,10 @@ RTE
     $out .= '</noscript>' if $opts->{'richtext_on'};
     $out .= LJ::html_hidden('prop_opt_preformatted', '1') if $opts->{'richtext_on'};
 
-    my $jrich = LJ::ejs(BML::fill_template("de", {
-        DATA => BML::ml("entryform.htmlokay.rich", { 'opts' => 'href="#" onClick="enable_rte()"' })
-    }));
-    my $jnorich = LJ::ejs(BML::fill_template("de", { DATA => BML::ml('entryform.htmlokay.norich') }));
+    my $jrich = LJ::ejs(LJ::deemp(
+            BML::ml("entryform.htmlokay.rich", { 'opts' => 'href="\#" onClick="enable_rte()"' })));
+
+    my $jnorich = LJ::ejs(LJ::deemp(BML::ml('entryform.htmlokay.norich')));
 
     unless ( $opts->{'richtext_on'}   ||
              $opts->{'disabled_save'} ||
