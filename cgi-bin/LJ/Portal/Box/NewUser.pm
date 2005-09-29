@@ -31,9 +31,9 @@ sub generate_content {
                      5) <a href="$LJ::SITEROOT/interests.bml">Find</a> friends and communities<br />
                      6) <a href="$LJ::SITEROOT/users/$u->{user}/friends">Read</a> your Friends page<br />
                 </td>
-                <span class="NewUserMoreLink"><a href="$LJ::SITEROOT/manage">more</a></span>
             </tr>
         </table>
+    <span class="NewUserMoreLink"><a href="$LJ::SITEROOT/manage">more</a></span>
     };
 
     return $content;

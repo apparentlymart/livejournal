@@ -41,10 +41,10 @@
 
     # get the current scheme and load the correct style
     my $scheme = BML::get_scheme();
-    if ($scheme eq 'dystopia' && -e "$LJ::SITEROOT/stc/portal/Dystopia.css") {
+    if ($scheme eq 'dystopia' && -e "$LJ::HOME/htdocs/stc/portal/Dystopia.css") {
         LJ::need_res('stc/portal/Dystopia.css');
-    } elsif (-e "$LJ::SITEROOT/stc/portal/Xcolibur.css") {
-        LJ::need_res('stc/portal/Xcolibur.css');
+    } elsif (-e "$LJ::HOME/htdocs/stc/portal/XColibur.css") {
+        LJ::need_res('stc/portal/XColibur.css');
     }
 
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=

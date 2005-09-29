@@ -22,7 +22,10 @@ img {
 	border: 0px;
   	}
   
-  
+#Content h1 {
+	display: inline;
+	}
+	
   
 /*------------------------ End Global ------------------------*/
  
@@ -34,14 +37,13 @@ img {
 .DropDownMenu {
 	background-color: #fff;
 	z-index: 2;
-	border-right: 3px solid #547da6;
-	border-bottom: 3px solid #003366;
 	position: absolute;
 	overflow: hidden;
 	display: none;
 	font-size: small;
 	width: 400px;
-	padding: 0px 5px 5px 0px;
+	padding: 1px;
+	border: 2px solid #003366;
 	}
 	
 .DropDownMenu br {
@@ -59,11 +61,6 @@ img {
 	margin: 0;
 	}
 	
-.DropDownMenuContent table tbody tr td {
-	margin: 0;
-	background-color: #6699cc;
-	color: #666;
-	}
 	
 .DropDownMenuContent table tbody tr td:hover {
 	background-color: #003366;
@@ -99,13 +96,7 @@ img {
 	float: right;
 	}
 	
-.PortalPatternedTitleBar {
-	display: table;
-	width: 100%;
-	background-color: #6699cc;
-	_margin-right: 1px;
-	padding: 2px 0px 2px 2px;
-	}
+
 	
 .PortalPatternedTitleBar span {
 	display: table-cell;
@@ -118,6 +109,11 @@ img {
 	
 .PortalTitleBarText {
 	color: #fff;
+	}
+	
+.PortalResetAllButton {
+	margin: 0;
+	padding: 0;
 	}
 
 .PortalFensterContent {
@@ -180,16 +176,7 @@ img {
 	border-right: 1px solid #ccc;
 	}
 
-.PortalBoxTitleBar {
-	display: table;
-	width: 100%;
-	background-color: #6699cc;
-	padding: 2px;
-	height: 15px;
-	font-size: 12px;
-	color: #fff;
-	clear: both;
-	}
+
 	
 .PortalBoxTitleText {
 	display: table-cell;
@@ -226,12 +213,7 @@ img {
 	background-color: #fff;
 	}
 	
-.PortalBoxContent a:link, .PortalBoxContent a:visited {
-	font-size: 10px;
-	color: #6699cc;
-	text-decoration: none; 
-	font-weight: bold;
- 	}
+
   
 .PortalBoxContent a:hover {
 	color: #003366;
@@ -256,11 +238,7 @@ img {
 
 /*--- Account Management --*/
 
-.Manage table a {
-	line-height: 150%;
-	border-left: 3px solid #6699cc;
-	padding-left: 3px;
-	}
+
 	
 /*------- Announcements ------*/
 
@@ -268,16 +246,6 @@ img {
 	padding: 1px 0px 0px 0px !important;
 	}
  
-.PortalTableHeader td {
-	background-color: #C5DFF9 !important;
-	padding: 2px;
-	font-size: 9px !important;
-	font-weight: bold !important;
-	color: #000 !important;
-	border: 1px solid #C5DFF9 !important;
-	border-bottom: 1px solid #90ADD5 !important;
-	text-transform: uppercase;
-	}
 	
 .Announcements table {
 	width: 100%;
@@ -305,13 +273,7 @@ img {
 	background-color: #fff;
 	}
 	
-.AnnouncementRow2 {
-	background-color: #dfecfa;
-	}
 	
-.AnnouncementRow1:hover, .AnnouncementRow2:hover {
-	background-color: #74a9dd;
-	}
 	
 .AnnouncementRow1:hover a, .AnnouncementRow2:hover a {
 	color: #fff;
@@ -379,18 +341,11 @@ img {
  	color: #003366;
 	}
 	
-.Todo p {
-	display: inline;
-	color: #6699cc;
-	margin-right: 10px;
-	}
+	
  .Todo td font {
   	font-size: 10px;
   	}
   	
- .Todo td a b {
- 	color: #6699cc !important;
- 	}
  	
  .Todo td a b:hover {
  	color: #003366 !important;
@@ -409,6 +364,12 @@ img {
  .PopWithFriends td {
  	font-size: 10px;
  	}
+ 	
+ .PopWithFriends table td {
+ 	text-align: left;
+ 	}
+ 	
+ 
  	
  /*------- Text Message ------*/
  
@@ -448,10 +409,10 @@ img {
  	}
  	
  .NewUserMoreLink {
- 	display: block;
- 	float: right;
+ 	position: relative;
+ 	text-align: right;
  	margin-right: 5px;
- 	}
+ 	
  	
  .NewUser {
  	padding: 5px 5px 5px 5px;
@@ -473,8 +434,8 @@ img {
 	}
   
 .FriendsCurrentTitle {
-  	font-size: 10px;
-  	font-weight: bold;
+  	font-size: 10px !important;
+  	font-weight: bold !important;
   	margin-bottom: 5px;
   	}
   	
@@ -490,3 +451,21 @@ img {
 	border: 0px solid !important;
 	width: 100% !important;
 }
+
+
+/*------- Friends Page ------*/
+
+.FriendsPageTitle {
+	font-size: 10px;
+	font-weight: bold;
+	}
+	
+.FriendsPageEntry {
+	font-size: 10px !important;
+	margin-bottom: 5px;
+	}
+	
+	
+.Birthdays table td {
+	text-align: left;
+	}

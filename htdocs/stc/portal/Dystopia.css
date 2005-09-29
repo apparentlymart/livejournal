@@ -1,0 +1,70 @@
+.Todo p {
+	display: inline;
+	color: #cc6600;
+	margin-right: 10px;
+	}
+
+ .Todo td a b {
+ 	color: #cc6600 !important;
+ 	}
+
+ .DropDownMenuContent table tbody tr td {
+	margin: 0;
+	background-color: #cc6600;
+	color: #666;
+	}
+
+.PortalPatternedTitleBar {
+	display: table;
+	width: 100%;
+	background-color: #cc6600;
+	_margin-right: 1px;
+	padding: 2px 0px 2px 2px;
+	}
+
+.PortalBoxTitleBar {
+	display: table;
+	width: 100%;
+	background-color: #cc6600;
+	padding: 2px;
+	height: 15px;
+	font-size: 12px;
+	color: #fff;
+	clear: both;
+	}
+
+.PortalBoxContent a:link, .PortalBoxContent a:visited {
+	font-size: 10px;
+	color: #cc6600;
+	text-decoration: none; 
+	font-weight: bold;
+ 	}
+
+ .Manage table a {
+	line-height: 150%;
+	border-left: 3px solid #cc6600;
+	padding-left: 3px;
+	}
+
+.DropDownMenuContent table tbody tr td {
+	margin: 0;
+	background-color: #cc6600;
+	color: #666;
+	}
+
+.AnnouncementRow1:hover, .AnnouncementRow2:hover {
+	background-color: #336699;
+	}
+
+.AnnouncementRow2 {
+	background-color: #fff;
+	}
+
+.PortalTableHeader td {
+	background-color: #660066 !important;
+	padding: 2px;
+	font-size: 9px !important;
+	font-weight: bold !important;
+	color: #fff !important;
+	text-transform: uppercase;
+	}
