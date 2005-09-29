@@ -4,8 +4,8 @@ use strict;
 
 ######################## override this stuff ######################
 
-our $_box_description = 'Show new and current friends and your groups of friends.';
-our $_box_name = "Manage Friends";
+our $_box_description = 'Show your friends';
+our $_box_name = "Friends";
 our $_box_class = "Friends";
 our $_prop_keys = {
     'showsyn' => 1,

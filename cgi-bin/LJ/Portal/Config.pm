@@ -25,7 +25,6 @@ our %TYPEMAP = (
                 'Manage'         => 6,
                 'RecentComments' => 7,
                 'NewUser'        => 8,
-                'FriendsPage'    => 9,
 );
 
 our %DEFAULTBOXSTATES = (
@@ -35,7 +34,7 @@ our %DEFAULTBOXSTATES = (
                              'col'   => 'R',
                          },
                          'Friends' => {
-                             'added' => 1,
+                             'added' => 0,
                              'sort'  => 2,
                              'col'   => 'R',
                          },
