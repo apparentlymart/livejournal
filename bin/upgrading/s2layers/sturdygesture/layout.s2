@@ -11,37 +11,6 @@ layerinfo author_email = "mart@livejournal.com";
 layerinfo redist_uniq = "sturdygesture/layout";
 layerinfo previews = "sturdygesture/sturdygesture.jpg";
 
-propgroup colors {
-    property Color clr_page_back { des = "Page background"; }
-    set clr_page_back = "#ffffff";
-
-    property Color clr_page_text { des = "Box border color"; }
-    set clr_page_text = "#000000";
-
-    property Color clr_box_text { des = "Box content color"; }
-    set clr_box_text = "#000000";
-
-    property Color clr_box_back { des = "Box background color"; }
-    set clr_box_back = "#ffffff";
-
-    property Color clr_boxhead_text { des = "Box heading text color"; }
-    set clr_boxhead_text = "#ffffff";
-
-    property Color clr_boxhead_back { des = "Box heading background color"; }
-    set clr_boxhead_back = "#000000";
-
-    property Color clr_page_link { des = "Link color"; }
-    set clr_page_link = "#0000ff";
-
-    property Color clr_page_vlink { des = "Visited link color"; }
-    set clr_page_vlink = "#0000ff";
-}
-
-propgroup fonts {
-    property use font_base;
-    property use font_fallback;
-}
-
 propgroup presentation {
     property string opt_navbar_pos {
         des = "Navigation Bar Location";
@@ -61,9 +30,7 @@ propgroup presentation {
     }
     set opt_always_userpic = false;
 
-
-
-    ## These have no UI, but S2 generates an empty settings page if they aren't in a group
+    ## These have no UI, but S2 generates an empty settings page if they have no group
     property string text_page_prev {
         des = "Text used to link to the previous page";
         noui = 1;
@@ -99,6 +66,37 @@ propgroup presentation {
     property use use_shared_pic;
     property use linklist_support;
     property use external_stylesheet;
+}
+
+propgroup fonts {
+    property use font_base;
+    property use font_fallback;
+}
+
+propgroup colors {
+    property Color clr_page_back { des = "Page background"; }
+    set clr_page_back = "#ffffff";
+
+    property Color clr_page_text { des = "Box border color"; }
+    set clr_page_text = "#000000";
+
+    property Color clr_box_text { des = "Box content color"; }
+    set clr_box_text = "#000000";
+
+    property Color clr_box_back { des = "Box background color"; }
+    set clr_box_back = "#ffffff";
+
+    property Color clr_boxhead_text { des = "Box heading text color"; }
+    set clr_boxhead_text = "#ffffff";
+
+    property Color clr_boxhead_back { des = "Box heading background color"; }
+    set clr_boxhead_back = "#000000";
+
+    property Color clr_page_link { des = "Link color"; }
+    set clr_page_link = "#0000ff";
+
+    property Color clr_page_vlink { des = "Visited link color"; }
+    set clr_page_vlink = "#0000ff";
 }
 
 set tags_aware = true;

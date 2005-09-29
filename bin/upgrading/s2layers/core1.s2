@@ -761,6 +761,8 @@ propgroup fonts = "Fonts";
 propgroup presentation = "Presentation";
 propgroup other = "Other";
 propgroup text = "Text";
+propgroup background = "Background";
+propgroup sidebar = "Sidebar";
 
 property string lang_current {
         noui = 1;
@@ -1281,7 +1283,7 @@ set text_icon_alt_protected = "[protected post]";
 set text_icon_alt_private = "[private post]";
 
 property bool use_shared_pic {
-    des = "Use shared journal user pictures instead of poster's user picture.";
+    des = "Use shared journal userpics instead of poster's userpic.";
 }
 set use_shared_pic = false;
 

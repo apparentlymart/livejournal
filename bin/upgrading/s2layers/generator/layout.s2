@@ -5,6 +5,27 @@ layerinfo redist_uniq = "generator/layout";
 layerinfo previews = "generator/generator.jpg";
 layerinfo des = "Centered boxes, perfectly aligned.";
 
+propgroup presentation {
+    property use page_recent_items;
+    property use page_friends_items;
+
+    property int box_width {
+        des = "Box width (pixels)";
+    }
+
+    property use view_entry_disabled;
+    property use use_shared_pic;
+    property use comment_userpic_style;
+    property bool show_entrynav_icons {
+        des = "Toggle to show the next, memory, edit, etc icons on the entry view page";
+    }
+    property use external_stylesheet;
+    property use linklist_support;
+}
+propgroup fonts {
+    property use font_base;
+    property use font_fallback;
+}
 propgroup colors {
     property Color entry_back {
         des = "Entry background";
@@ -65,33 +86,25 @@ propgroup colors {
         des = "Text color on background bar for screened comments";
     }
 }
-
-propgroup fonts {
-    property use font_base;
-    property use font_fallback;
-}
-
-propgroup presentation {
-    property use page_recent_items;
-    property use page_friends_items;
-
-    property int box_width {
-        des = "Box width (pixels)";
-    }
-
-    property use view_entry_disabled;
-    property use use_shared_pic;
-    property use comment_userpic_style;
-    property bool show_entrynav_icons {
-        des = "Toggle to show the next, memory, edit, etc icons on the entry view page";
-    }
+propgroup background {
     property string page_background_image {
         des = "URL to an image to be used for the page background";
     }
-    property use external_stylesheet;
-    property use linklist_support;
+    property string page_background_repeat {
+        des = "Background image repeat";
+	values = "repeat|Repeat|no-repeat|Don't repeat|repeat-x|Repeat across only|repeat-y|Repeat down only";
+    }
+    property string page_background_position {
+  	des = "Background image position";
+	note = "Does not apply if Background Image Repeat is set to 'Repeat'.";
+	values = "top|Top|top left|Top-left|top right|Top-right|center|Center|center left|Center-left|center right|Center-right|bottom|Bottom|bottom left|Bottom-left|bottom right|Bottom-right|left|Left|right|Right";
+    }
+    property string page_background_scrolling {
+  	des = "Background image scrolling";
+	note = "Not supported in all browsers, but allows for the background image to be in a fixed position when scrolling.";
+	values = "scroll|Scroll|fixed|Fixed";
+    }
 }
-
 propgroup text {
     property use text_post_comment;
     property use text_read_comments;
@@ -132,7 +145,7 @@ set font_base = "Verdana";
 set font_fallback = "sans-serif";
 
 # Customize the view names to be short and lowercase
-# (Sorry translators, you'll have to do these again - keep them short!)
+# (Sorry translators, you will have to do these again - keep them short!)
 set text_view_recent = "entries";
 set text_view_friends = "friends";
 set text_view_archive = "archive";
@@ -143,7 +156,15 @@ set tags_aware = true;
 set text_website = "website";
 
 function print_stylesheet () {
-    print clean_url($*page_background_image) != "" ? "body { background-image: url($*page_background_image); }" : "";
+    if(clean_url($*page_background_image) != "") {
+      """body {
+    background-image: url("$*page_background_image");
+    background-position: $*page_background_position;
+    background-repeat: $*page_background_repeat;
+    background-attachment: $*page_background_scrolling;
+}""";
+    }
+
 """body, td {
 """;
 if ($*font_base != "" or $*font_fallback != "none") {

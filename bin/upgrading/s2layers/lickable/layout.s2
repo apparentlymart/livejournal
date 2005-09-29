@@ -8,56 +8,7 @@ layerinfo "des" = "A fixed-width layout with drop shadows, various header styles
 
 ## Customization Props
 
-propgroup colors {
-    property Color clr_margins {
-        des = "Page Background Color";
-    }
-    property Color clr_page_bg {
-        des = "Main Content Background Color";
-    }
-    property Color clr_page_fg {
-        des = "Main Content Foreground Color";
-    }
-    property Color clr_title_bg {
-        des = "Title Background Color";
-    }
-    property Color clr_title_fg {
-        des = "Title Text Color";
-    }
-    property Color clr_title_pattern {
-        des = "Color of Title Background Effects";
-        note = "The application of this color depends on your selection of heading style.";
-    }
-    property Color clr_title_separator {
-        des = "Color of Line Under Title";
-        note = "You must also enable the line in the Appearance section.";
-    }
-    property Color clr_side_borders {
-        des = "Color of Side Borders";
-        note = "You must also enable the borders in the Appearance section.";
-    }
-    property Color clr_link_normal {
-        des = "Normal Link Color";
-    }
-    property Color clr_link_visited {
-        des = "Visited Link Color";
-    }
-
-    set clr_page_fg = "#000000";
-    set clr_margins = "#0183fd";
-    set clr_link_visited = "#0063c0";
-    set clr_link_normal = "#0183fd";
-    set clr_title_pattern = "#faf49a";
-    set clr_side_borders = "#000000";
-    set clr_page_bg = "#e3f1ff";
-    set clr_title_bg = "#0063c0";
-    set clr_title_fg = "#ffffff";
-    set clr_title_separator = "#000000";
-}
-propgroup colors = "Colors";
-
-propgroup appearance {
-
+propgroup presentation {
     property int content_width {
         des = "Content area width in pixels";
     }
@@ -140,8 +91,6 @@ propgroup appearance {
     }
     set title_separator = true;
 }
-propgroup appearance = "Appearance";
-
 propgroup fonts {
 
     property string{}{} font_sizes {
@@ -217,42 +166,52 @@ propgroup fonts {
     set font_size_keyword = "tiny";
 
 }
-propgroup fonts = "Fonts";
-
-propgroup options {
-    property bool opt_use_friendcolors {
-        des = "Use friend colors on friends page";
-        noui = 1; # The support for this isn't brilliant
+propgroup colors {
+    property Color clr_margins {
+        des = "Page Background Color";
     }
-    set opt_use_friendcolors = false;
-
-    property bool opt_hide_userpics {
-        des = "Hide user picture icons on entries";
-        note = "The pictures will still be shown on the Friends view";
+    property Color clr_page_bg {
+        des = "Main Content Background Color";
     }
-    set opt_hide_userpics = true;
+    property Color clr_page_fg {
+        des = "Main Content Foreground Color";
+    }
+    property Color clr_title_bg {
+        des = "Title Background Color";
+    }
+    property Color clr_title_fg {
+        des = "Title Text Color";
+    }
+    property Color clr_title_pattern {
+        des = "Color of Title Background Effects";
+        note = "The application of this color depends on your selection of heading style.";
+    }
+    property Color clr_title_separator {
+        des = "Color of Line Under Title";
+        note = "You must also enable the line in the Appearance section.";
+    }
+    property Color clr_side_borders {
+        des = "Color of Side Borders";
+        note = "You must also enable the borders in the Appearance section.";
+    }
+    property Color clr_link_normal {
+        des = "Normal Link Color";
+    }
+    property Color clr_link_visited {
+        des = "Visited Link Color";
+    }
 
-    property use lang_fmt_date_short;
-    property use lang_fmt_date_long;
-    property use lang_fmt_time_short;
-
-    property use page_recent_items;
-    property use page_friends_items;
-
-    property use use_shared_pic;
-    property use view_entry_disabled;
-
-    # This layout has quite a hefty stylesheet, so let's
-    # make it external to avoid loading it over and over.
-    set external_stylesheet = true;
-
-    set tags_aware = true;
-    set text_tags = "#";
+    set clr_page_fg = "#000000";
+    set clr_margins = "#0183fd";
+    set clr_link_visited = "#0063c0";
+    set clr_link_normal = "#0183fd";
+    set clr_title_pattern = "#faf49a";
+    set clr_side_borders = "#000000";
+    set clr_page_bg = "#e3f1ff";
+    set clr_title_bg = "#0063c0";
+    set clr_title_fg = "#ffffff";
+    set clr_title_separator = "#000000";
 }
-propgroup options = "Options";
-
-## I18n Props
-
 propgroup text {
     property use text_view_recent;
     property use text_view_archive;
@@ -319,7 +278,38 @@ propgroup text {
     property use text_read_comments_friends;
     property use text_website_default_name;
 }
-propgroup text = "Text";
+propgroup options = "Miscellaneous Options";
+propgroup options {
+    property bool opt_use_friendcolors {
+        des = "Use friend colors on friends page";
+        noui = 1; # The support for this isn't brilliant
+    }
+    set opt_use_friendcolors = false;
+
+    property bool opt_hide_userpics {
+        des = "Hide user picture icons on entries";
+        note = "The pictures will still be shown on the Friends view";
+    }
+    set opt_hide_userpics = true;
+
+    property use lang_fmt_date_short;
+    property use lang_fmt_date_long;
+    property use lang_fmt_time_short;
+
+    property use page_recent_items;
+    property use page_friends_items;
+
+    property use use_shared_pic;
+    property use view_entry_disabled;
+
+    # This layout has quite a hefty stylesheet, so let's
+    # make it external to avoid loading it over and over.
+    set external_stylesheet = true;
+
+    set tags_aware = true;
+    set text_tags = "#";
+}
+
 
 function prop_init() {
     # A vague attempt at sanity-checking the font properties. Not
