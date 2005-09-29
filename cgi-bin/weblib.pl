@@ -1155,7 +1155,7 @@ RTE
                 }
 
                 $out .= "<tr valign='top'><th>" . LJ::help_icon("security", "", " ") . BML::ml('entryform.security') . "</th><td>";
-                $out .= LJ::html_select({ 'id' => "Security", 'name' => 'security',
+                $out .= LJ::html_select({ 'id' => "Security", 'name' => 'security', 'include_ids' => 1,
 
                                           'selected' => $opts->{'security'},
                                           'tabindex' => $tabindex->(), @secopts }, @secs);

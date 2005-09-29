@@ -83,6 +83,7 @@ sub html_datetime_decode
 #           raw: inserts value unescaped into select tag;
 #           noescape: won't escape key values if set to 1
 #           disabled: disables the element;
+#           include_ids: bool.  if true, puts id attributes on each element in the drop-down.
 #           multiple: creates a drop-down if 0, a multi-select listbox if 1;
 #           selected: if multiple, an arrayref of selected values; otherwise, a scalar equalling the selected value;
 #           All other options will be treated as html attribute/value pairs
@@ -131,13 +132,13 @@ sub html_select
         $value  = $ehtml ? ehtml($value) : $value;
 
         my $id;
-        if ($opts->{'name'} ne "" && $value ne "") {
+        if ($opts->{'include_ids'} && $opts->{'name'} ne "" && $value ne "") {
             $id = " id='$opts->{'name'}_$value'";
         }
 
         # is this individual option disabled?
         my $dis = $it->{'disabled'} ? " disabled='disabled'" : '';
-        
+
         $ret .= "<option value=\"$value\"$id$sel$dis>" .
                  ($ehtml ? ehtml($text) : $text) . "</option>";
     }
