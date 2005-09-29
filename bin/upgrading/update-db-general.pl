@@ -2673,6 +2673,11 @@ register_alter(sub {
         do_alter("spamreports",
                  "ALTER TABLE spamreports ADD INDEX (reporttime, journalid)");
     }
+
+    if (column_type("includetext", "inctext") !~ /mediumtext/) {
+        do_alter("includetext",
+                 "ALTER TABLE includetext MODIFY COLUMN inctext MEDIUMTEXT");
+    }
 });
 
 1; # return true
