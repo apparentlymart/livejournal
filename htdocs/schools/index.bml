@@ -89,7 +89,7 @@ body<=
         $ret .= "</td></tr><tr><td colspan='2'>";
         $ret .= $inerr->('country');
         $ret .= "</td></tr><tr><td valign='top'>";
-        $ret .= "State/province:</td><td>" . LJ::html_text({ name => "state", maxlength => 255, size => 15, value => $state }) . "<br />&nbsp;&nbsp" . $ex->("CA, NY, Alberta<br /><ul><li>For the United States please use the state's postal abbreviation, otherwise type out the full state/province name.</li></ul>");
+        $ret .= "State/province:</td><td>" . LJ::html_text({ name => "state", maxlength => 255, size => 15, value => $state }) . "<br />&nbsp;&nbsp" . $ex->("CA, NY, AB");
         $ret .= "</td></tr><tr><td colspan='2'>";
         $ret .= $inerr->('state');
         $ret .= "</td></tr><tr><td valign='top'>";
@@ -118,14 +118,34 @@ body<=
             ($POST{country}, $POST{state}, $POST{city}, $POST{name}, $POST{url});
 
         $bogus->('country', 'You must enter a valid country code.')
-            unless $country && $country =~ /\w\w/;
+            unless $country && $country =~ /^\w\w$/;
 
         if ($country eq 'US') {
-            $bogus->('state', 'You must enter a valid US state code.')
-                unless $state =~ /\w\w/;
+            $bogus->('state', 'You must enter a valid two-letter abbreviation for the US state.')
+                unless $state =~ /^\w\w$/;
 
             $state = uc($state);
-        };
+
+            my %states;
+            LJ::load_codes({ state => \%states });
+
+            $bogus->('state', 'You must enter a valid two-letter abbreviation for the US state.')
+                unless exists $states{$state};
+        } elsif ($country eq 'CA') {
+            $bogus->('state', 'You must enter a valid two-letter abbreviation for the Canadian province.')
+                unless $state =~ /^\w\w$/;
+
+            $state = uc($state);
+
+            $bogus->('state', 'Valid Canadian abbreviations are AB, BC, MB, NB, NL, NT, NS, NU, ON, PE, QC, SK, and YT.')
+                unless $state =~ /^(AB)|(BC)|(MB)|(NB)|(NL)|(NT)|(NS)|(NU)|(ON)|(PE)|(QC)|(SK)|(YT)$/;
+        } elsif ($country eq 'AU') {
+            $bogus->('state', 'You must enter a valid two or three letter abbreviation for the Australian state.')
+                unless $state =~ /^\w\w\w?$/;
+
+            $bogus->('state', 'Valid Australian state abbreviations are ACT, NSW, NT, Qld, SA, Tas, Vic, and WA.')
+                unless $state =~ /^(ACT)|(NSW)|(NT)|(Qld)|(SA)|(Tas)|(Vic)|(WA)$/i;
+        }
 
         $city = LJ::Schools::canonical_city_name($city);
 
