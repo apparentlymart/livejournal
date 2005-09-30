@@ -146,13 +146,4 @@ sub box_class { $_box_class; }
 sub config_props { $_config_props; }
 sub prop_keys { $_prop_keys; }
 
-# added by default if user has cap
-sub default_added {
-    my $u = shift;
-    if ($u && ref $u) {
-        return LJ::get_cap($u, "friendsfriendsview");
-    }
-    return 0;
-}
-
 1;

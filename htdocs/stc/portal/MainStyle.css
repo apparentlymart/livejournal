@@ -25,8 +25,11 @@ img {
 #Content h1 {
 	display: inline;
 	}
-	
-  
+
+.PortalFaqLink {
+        display: inline;
+ }
+
 /*------------------------ End Global ------------------------*/
  
  
@@ -61,15 +64,10 @@ img {
 	margin: 0;
 	}
 	
-	
-.DropDownMenuContent table tbody tr td:hover {
-	background-color: #003366;
-	}
-	
 .DropDownMenuContent table tbody tr td a:link {
 	display: block;
 	width: 100%;
-	color: #fff;
+	color: #336699;
 	font-weight: bold;
 	text-decoration: none;
 	font-size: 11px;
@@ -381,10 +379,12 @@ img {
 	font-size: 10px;
 	}
 	
-#tmform881 {
+.tmform {
 	font-size: 10px;
-	width: 100%;
-	margin-left: -30px;
+	width: 90%;
+        display: none;
+        margin-left: auto;
+        margin-right: auto;
 	}
 	
 .TextMessage input {
@@ -394,7 +394,7 @@ img {
 	
 .TextMessageDisclaimer {
 	font-size: 8px;
-	margin-top: 10px;
+	margin-top: 3px;
 	}
 	
  /*------- New User ------*/

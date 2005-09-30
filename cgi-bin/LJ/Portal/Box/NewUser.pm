@@ -15,10 +15,6 @@ sub generate_content {
     my $u = $self->{'u'};
 
     $content .= qq {
-        <div class="NewUserBlurb">
-            Get the most out of your journal  by putting your personal stamp on it.
-            Some touches that will get your journal going:
-        </div>
         <table style="width: 100%; border: 0px;">
             <tr>
                 <td style="width: 50%;">
@@ -28,7 +24,7 @@ sub generate_content {
                 </td>
                 <td style="width: 50%;">
                      4) <a href="$LJ::SITEROOT/customize">Customize</a> the look of your journal<br />
-                     5) <a href="$LJ::SITEROOT/interests.bml">Find</a> friends and communities<br />
+                     5) <a href="$LJ::SITEROOT/interests.bml">Find</a> friends and communities by interests<br />
                      6) <a href="$LJ::SITEROOT/users/$u->{user}/friends">Read</a> your Friends page<br />
                 </td>
             </tr>
@@ -41,7 +37,7 @@ sub generate_content {
 
 # add by default if new user (account created after portal goes live date)
 sub default_added {
-    my $u = shift;
+    my ($self, $u) = @_;
 
     return 1;
 }

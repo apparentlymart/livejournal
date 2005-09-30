@@ -203,6 +203,7 @@ sub get_state {
 sub move {
     my LJ::Portal::Box $self = shift;
     my ($col, $sortorder) = @_;
+    return unless $self->{'u'};
     return if (!$col && !$sortorder);
 
     $self->{'col'} = $col if $col;

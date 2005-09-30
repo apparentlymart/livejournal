@@ -6,7 +6,7 @@ use strict;
 
 our $_box_class = "Manage";
 our $_box_description = "Manage your account";
-our $_box_name = "Account management";
+our $_box_name = "Account Management";
 
 sub generate_content {
     my $self = shift;
@@ -17,15 +17,17 @@ sub generate_content {
     $content .= qq {
         <table style="width: 100%;">
             <tr>
-                <td style="width: 50%;">
-                    <a href="$LJ::SITEROOT/community/manage.bml">Manage Communities</a><br />
-                    <a href="$LJ::SITEROOT/editinfo.bml?authas=$u->{user}">Edit Personal Information</a><br />
-                    <a href="$LJ::SITEROOT/friends/edit.bml">Edit Friends</a><br />
-                </td>
-                <td style="width: 50%;">
-                     <a href="$LJ::SITEROOT/editpics.bml">Upload and Manage Your Userpics</a><br />
-                     <a href="$LJ::SITEROOT/modify.bml">Set Your Mood Theme</a><br />
-                     <a href="$LJ::SITEROOT/changepassword.bml">Change Account Password</a><br />
+            <td style="width: 50%;">
+            <a href="$LJ::SITEROOT/friends/edit.bml">Edit Friends</a><br />
+            <a href="$LJ::SITEROOT/editinfo.bml?authas=$u->{user}">Edit Personal Information</a><br />
+            <a href="$LJ::SITEROOT/editpics.bml">Upload and Manage Your Userpics</a><br />
+
+            </td>
+            <td style="width: 50%;">
+            <a href="$LJ::SITEROOT/community/manage.bml">Manage Communities</a><br />
+
+            <a href="$LJ::SITEROOT/modify.bml">Set Your Mood Theme</a><br />
+            <a href="$LJ::SITEROOT/changepassword.bml">Change Account Password</a><br />
                 </td>
             </tr>
         </table>

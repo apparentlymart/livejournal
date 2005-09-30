@@ -24,8 +24,9 @@ sub get_faq_link {
     my LJ::Portal $self = shift;
     my $faqid = shift;
 
-    return "<a href=\"$LJ::SITEROOT/support/faqbrowse.bml?faqid=$faqid\">" .
-        "<img src=\"$LJ::IMGPREFIX/help.gif\" /></a>";
+    return qq {
+        <a href="$LJ::SITEROOT/support/faqbrowse.bml?faqid=$faqid"><img src="$LJ::IMGPREFIX/help.gif" class="PortalFaqLink" /></a>
+    };
 }
 
 sub create_button {
@@ -316,6 +317,7 @@ sub getmenu {
                     <table style="width:100%;">
                 };
 
+            my $row = 0;
             foreach my $boxclass (sort @classes) {
                 my $fullboxclass = "LJ::Portal::Box::$boxclass";
                 # if there can only be one of these boxes at a time and there
@@ -328,16 +330,19 @@ sub getmenu {
                 my $boxdesc = $fullboxclass->box_description;
                 my $boxcol  = $portalconfig->get_box_default_col($boxclass);
                 my $addlink = qq{href="$LJ::SITEROOT/portal/index.bml?addbox=1&boxtype=$boxclass&boxcol=$boxcol" onclick="if(addPortalBox('$boxclass', '$boxcol')) return true; hidePortalMenu('addbox'); return false;"};
+                my $rowmod = $row % 2 + 1;
                 $returncode .= qq{
                     <tr>
-                        <td>
-                        <a $addlink>
-                        $boxname
-                        </a>
-                        <div class="BoxDescription">$boxdesc</div>
+                        <td class="PortalRow$rowmod">
+                          <a $addlink>
+                          $boxname
+                          </a>
+                          <div class="BoxDescription">$boxdesc</div>
                         </td>
-                        <td>
-                        <a $addlink>ADD</a>
+                        <td align="center" valign="middle">
+                          <a $addlink>
+                              <img src="$LJ::IMGPREFIX/portal/AddIcon.gif" style="width: 100%; height: 100%;" />
+                          </a>
                         </td>
                         </tr>
                         <br/>};

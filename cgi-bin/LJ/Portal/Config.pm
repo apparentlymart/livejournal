@@ -16,64 +16,12 @@ use fields qw(u boxes boxconfig boxlist);
 
 use strict;
 
-our %TYPEMAP = (
-                'Birthdays'      => 1,
-                'UpdateJournal'  => 2,
-                'TextMessage'    => 3,
-                'PopWithFriends' => 4,
-                'Friends'        => 5,
-                'Manage'         => 6,
-                'RecentComments' => 7,
-                'NewUser'        => 8,
-);
-
-our %DEFAULTBOXSTATES = (
-                         'Birthdays' => {
-                             'added' => 1,
-                             'sort'  => 5,
-                             'col'   => 'R',
-                         },
-                         'Friends' => {
-                             'added' => 0,
-                             'sort'  => 2,
-                             'col'   => 'R',
-                         },
-                         'Manage' => {
-                             'added' => 1,
-                             'sort'  => 2,
-                             'col'   => 'L',
-                         },
-                         'PopWithFriends' => {
-                             'sort'  => 4,
-                             'col'   => 'R',
-                         },
-                         'RecentComments' => {
-                             'added' => 1,
-                             'sort'  => 6,
-                             'col'   => 'R',
-                         },
-                         'UpdateJournal' => {
-                             'added' => 1,
-                             'sort'  => 3,
-                             'col'   => 'L',
-                         },
-                         'NewUser' => {
-                             'sort'  => 1,
-                             'col'   => 'L',
-                         },
-                         'TextMessage' => {
-                             'added'  => 1,
-                             'sort'   => 3,
-                             'col'    => 'R',
-                         },
-                         );
-
-LJ::run_hook('portal_boxes', \%TYPEMAP, \%DEFAULTBOXSTATES);
+LJ::run_hook('portal_boxes', \%LJ::TYPEMAP, \%LJ::DEFAULTBOXSTATES);
 
 load_box_modules();
 
 sub get_box_classes {
-    return keys %TYPEMAP;
+    return keys %LJ::TYPEMAP;
 }
 
 sub load_box_modules {
@@ -128,11 +76,10 @@ sub load_config {
         # no boxes for user
         if (!%{$self->{'boxlist'}}) {
             # do we need to load the default state?
-            LJ::load_user_props($u, 'portalinit');
-            if (!$u->{portalinit}) {
+            if (!$u->prop('portalinit')) {
                 # load default state
                 $self->load_default_boxes;
-                LJ::set_userprop($u, 'portalinit', localtime());
+                $u->set_prop('portalinit', localtime());
             }
         }
 
@@ -160,7 +107,7 @@ sub get_box_default_col {
     my LJ::Portal::Config $self = shift;
     my $boxclass = shift;
 
-    return $DEFAULTBOXSTATES{$boxclass}->{'col'} || 'R';
+    return $LJ::DEFAULTBOXSTATES{$boxclass}->{'col'} || 'R';
 }
 
 # get whether or not you can have more than one of a box
@@ -168,7 +115,7 @@ sub get_box_unique {
     my LJ::Portal::Config $self = shift;
     my $boxclass = shift;
 
-    return $DEFAULTBOXSTATES{$boxclass}->{'notunique'} ? 0 : 1;
+    return $LJ::DEFAULTBOXSTATES{$boxclass}->{'notunique'} ? 0 : 1;
 }
 
 # add all the default boxes
@@ -184,12 +131,12 @@ sub load_default_boxes {
         if ($fullboxclass->can('default_added')) {
             $toadd = $fullboxclass->default_added($self->{'u'});
         } else {
-            $toadd = $DEFAULTBOXSTATES{$boxclass} && $DEFAULTBOXSTATES{$boxclass}->{'added'};
+            $toadd = $LJ::DEFAULTBOXSTATES{$boxclass} && $LJ::DEFAULTBOXSTATES{$boxclass}->{'added'};
         }
 
         if ($toadd) {
             my $col = $self->get_box_default_col($boxclass);
-            my $order = $DEFAULTBOXSTATES{$boxclass}->{'sort'};
+            my $order = $LJ::DEFAULTBOXSTATES{$boxclass}->{'sort'};
 
             my $box = $self->add_box($boxclass, $col);
             # does it have a default position in the column? (it should, but...)
@@ -503,7 +450,7 @@ sub remove_box {
 sub type_string_to_id {
     my LJ::Portal::Config $self = shift;
     my $typestring = shift;
-    my $typeid = $TYPEMAP{$typestring} || undef;
+    my $typeid = $LJ::TYPEMAP{$typestring} || undef;
     print STDERR "Invalid box type $typestring\n" unless $typeid;
     return $typeid;
 }
@@ -512,8 +459,8 @@ sub type_id_to_string {
     my LJ::Portal::Config $self = shift;
     my $typeid = shift;
 
-    foreach my $typestring (keys %TYPEMAP) {
-        if ($TYPEMAP{$typestring} == $typeid) {
+    foreach my $typestring (keys %LJ::TYPEMAP) {
+        if ($LJ::TYPEMAP{$typestring} == $typeid) {
             return $typestring;
         }
     }

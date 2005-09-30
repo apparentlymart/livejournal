@@ -6,7 +6,7 @@ use strict;
 
 our $_box_class = "TextMessage";
 our $_box_description = "Send a text message to other $LJ::SITENAMESHORT users who have enabled this feature.";
-our $_box_name = "Send a Text Message";
+our $_box_name = "Send a Text Message ";
 
 sub handle_request {
     my ($self, $get, $post) = @_;
@@ -121,7 +121,7 @@ sub generate_content {
     my $content = '';
     my $pboxid = $self->pboxid;
     my $u = $self->{'u'};
-    my $helpbutton = LJ::Portal->get_faq_link(30);
+    my $helplink = LJ::Portal->get_faq_link(30);
 
     my $jssubmit = qq {
         var userfield = xGetElementById('textmessageuser$pboxid');
@@ -133,18 +133,18 @@ sub generate_content {
 
     $content = qq {
         <div class="TextMessage">
-            <p>Enter the $LJ::SITENAMESHORT username of the person you'd like to send a text message to: $helpbutton</p><div style='margin-left: 40px'>
+           <div style='margin-left: 40px'>
 <form method='POST' action='$LJ::SITEROOT/tools/textmessage.bml' id='tmform$pboxid'>
 Username: <input type='text' size='15' maxlength='15' name='user' id='textmessageuser$pboxid'/>
 <input type='submit' value="Proceed..." onclick="$jssubmit" /></div>
 <div id="tmmsg$pboxid" style="display: none;">
 <b>Message:</b><br /><input id='textmessagebody$pboxid' size='50' maxlength='42' />
 </div>
-<div id="tmresult$pboxid" class="standout" style="display: none;"></div>
+<div id="tmresult$pboxid" class="tmform"></div>
 <input type="hidden" name="from" value="$u->{'user'}" />
 </form>
 </div>
-<div class="TextMessageDisclaimer"><B>Disclaimer:</B> The reliability of text messaging should not be trusted in dealing with emergencies.</div>
+<div class="TextMessageDisclaimer">$helplink <B>Disclaimer:</B> The reliability of text messaging should not be trusted in dealing with emergencies.</div>
     };
 
     return $content;

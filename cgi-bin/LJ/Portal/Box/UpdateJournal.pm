@@ -5,21 +5,13 @@ use strict;
 ######################## override this stuff ######################
 
 our $_box_description = 'A handy box for updating your journal.';
-our $_box_name = "Update Journal";
+our $_box_name = "Quick Update";
 our $_box_class = "UpdateJournal";
-#our $_prop_keys = { 'moreopts' => 0, };
-#our $_config_props = {
-#    'moreopts' => {
-#        'type'      => 'checkbox',
-#        'desc'      => 'portal.update.moreopts',
-#        'default'   => '0',
-#    },
-#};
 
 sub generate_content {
     my $self = shift;
 
-    my $moreopts = 0; #$self->get_prop('moreopts');
+    my $moreopts = 0;
     if ($moreopts) {
         return $self->print_big_form;
     } else {

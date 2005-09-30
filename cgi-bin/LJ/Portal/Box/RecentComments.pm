@@ -105,21 +105,22 @@ sub generate_content {
 
         my $talkid = ($r->{'jtalkid'} << 8) + $lrow->{'anum'};
 
-        my $posturl = "$root/$lrow->{ditemid}.html";
-        my $talkurl = "$root/$lrow->{ditemid}.html?thread=$talkid\#t$talkid";
+        my $posturl  = "$root/$lrow->{ditemid}.html";
+        my $replyurl = LJ::Talk::talkargs($posturl, "replyto=$talkid");
+        my $talkurl  = "$root/$lrow->{ditemid}.html?thread=$talkid\#t$talkid";
         my $userlink = LJ::isu($pu) ? LJ::ljuser($pu) : "<i>(Anonymous)</i>";
         $content .= qq {
             <tr>
                 <td>
 
                   <span class="RecentCommentTitle">$userlink: $subject</span>
-                  <span class="RecentCommentDate">$date</span>
+                  <span class="RecentCommentDate"><a href="$talkurl">$date</a></span>
                   <br style="clear: both;" />
 
                   <div class="RecentCommentItem">
                       $body
                       <div class="RecentCommentLinks">
-                        <a href="$talkurl">Comment link</a> | <a href="$posturl">Entry Link</a>
+                        <a href="$replyurl">Reply</a> | <a href="$posturl">Entry Link</a>
                       </div>
                   </div>
                 </td>
@@ -133,7 +134,7 @@ sub generate_content {
 
 # added by default if user has cap
 sub default_added {
-    my $u = shift;
+    my ($self, $u) = @_;
     if (LJ::isu($u)) {
         return LJ::get_cap($u, "tools_recent_comments_display");
     }
