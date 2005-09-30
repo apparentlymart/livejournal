@@ -1159,4 +1159,62 @@ sub merge_schools {
     return 1;
 }
 
+# <LJFUNC>
+# name: LJ::Schools::find_existing
+# class: schools
+# des: Finds an existing school by given criteria
+# args: country, name, state?, city?, url?
+# des-country: country school is in
+# des-name: name of school
+# des-state: state school is in, or nothing for undefined state
+# des-city: optional city school is in
+# des-url: optional URL of school
+# returns: list of school ids found, undef on error or no results
+# </LJFUNC>
+sub find_existing {
+    my ($country, $name, $state, $city, $url) = @_;
+    return undef unless $country && $name;
+
+    my $dbh = LJ::get_db_writer();
+    return undef unless $dbh;
+
+    # Now try to find it by name and location
+    my $scs = $state ? "state = ?" : "state IS NULL";
+    my @args = grep { defined $_ && $_ } ($country, $state);
+
+    my $sids = $dbh->selectall_arrayref
+        ("SELECT schoolid, name, url, city FROM schools WHERE country = ? AND $scs",
+         undef, @args);
+
+    return undef if $dbh->err;
+
+    # Consider them matches if name or URL matches
+    my @res;
+
+    foreach my $sch (@$sids) {
+        # Return one schoolid if city and (name or url) both match
+        return ($sch->[0])
+            if $city
+            && $sch->[3] =~ /^$city$/i
+            && $sch->[1] =~ /^$name$/i;
+
+        return ($sch->[0])
+            if $city && $url
+            && $sch->[3] =~ /^$city$/i
+            && $sch->[2] =~ /^$url\/?$/i;
+
+        # Otherwise, add it as a possible match if name
+        # sort of matches or if url fully matches
+        push @res, $sch->[0]
+            if $sch->[1] =~ /$name/i;
+
+        push @res, $sch->[0]
+            if $url && $sch->[2] =~ /^$url\/?$/i;
+    }
+
+    return @res if @res;
+
+    return undef;
+}
+
 1;

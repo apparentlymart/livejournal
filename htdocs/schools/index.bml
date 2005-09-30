@@ -112,61 +112,8 @@ body<=
         return $ret;
     };
 
-    # Adding a school
-    if (LJ::did_post()) {
-        my ($country, $state, $city, $name, $remoterl) =
-            ($POST{country}, $POST{state}, $POST{city}, $POST{name}, $POST{url});
-
-        $bogus->('country', 'You must enter a valid country code.')
-            unless $country && $country =~ /^\w\w$/;
-
-        if ($country eq 'US') {
-            $bogus->('state', 'You must enter a valid two-letter abbreviation for the US state.')
-                unless $state =~ /^\w\w$/;
-
-            $state = uc($state);
-
-            my %states;
-            LJ::load_codes({ state => \%states });
-
-            $bogus->('state', 'You must enter a valid two-letter abbreviation for the US state.')
-                unless exists $states{$state};
-        } elsif ($country eq 'CA') {
-            $bogus->('state', 'You must enter a valid two-letter abbreviation for the Canadian province.')
-                unless $state =~ /^\w\w$/;
-
-            $state = uc($state);
-
-            $bogus->('state', 'Valid Canadian abbreviations are AB, BC, MB, NB, NL, NT, NS, NU, ON, PE, QC, SK, and YT.')
-                unless $state =~ /^(AB)|(BC)|(MB)|(NB)|(NL)|(NT)|(NS)|(NU)|(ON)|(PE)|(QC)|(SK)|(YT)$/;
-        } elsif ($country eq 'AU') {
-            $bogus->('state', 'You must enter a valid two or three letter abbreviation for the Australian state.')
-                unless $state =~ /^\w\w\w?$/;
-
-            $bogus->('state', 'Valid Australian state abbreviations are ACT, NSW, NT, Qld, SA, Tas, Vic, and WA.')
-                unless $state =~ /^(ACT)|(NSW)|(NT)|(Qld)|(SA)|(Tas)|(Vic)|(WA)$/i;
-        }
-
-        $city = LJ::Schools::canonical_city_name($city);
-
-        $bogus->('city', 'You must enter the city this school is located in.')
-            unless length($city);
-
-        $name = LJ::Schools::canonical_school_name($name, $city);
-
-        $bogus->('name', 'You must enter the school\'s full name.')
-            unless length($name);
-
-        if ($remoterl) {
-            $remoterl = LJ::CleanHTML::canonical_url($remoterl);
-            $bogus->('url', 'The URL entered does not appear to be valid.')
-                if $remoterl !~ m!https?://[^\s\"\'\<\>]+!g;
-        }
-
-        if (%ierr) {
-            $ret .= $add_school->($country, $state, $city, $name, $remoterl, '');
-            return $ret;
-        }
+    my $add_pending = sub {
+        my ($name, $city, $state, $country, $url) = @_;
 
         my $rv = LJ::Schools::add_pending_school($remote,
                                                  {
@@ -174,14 +121,148 @@ body<=
                                                      city        => $city,
                                                      state       => $state,
                                                      countrycode => $country,
-                                                     url         => $remoterl,
+                                                     url         => $url,
                                                  });
+
+        my $ret;
 
         $ret .= "<?h1 School Submitted h1?>";
         $ret .= "<?p Your school has been submitted for approval.  If approved, your school will be added to the Schools Directory and automatically added to your <a href='$LJ::SITEROOT/schools/manage.bml'>Schools</a> list.  You can check back later to the <a href='$LJ::SITEROOT/schools/manage.bml'>Manage Schools</a> page to add years attended. p?>";
 
         $ret .= "<a href='$LJ::SITEROOT/schools/'>Return to the Schools Directory</a><br /><br /><a href='$LJ::SITEROOT/schools/manage.bml'>Go to your Schools list</a></td></tr></table>";
+
         return $ret;
+    };
+
+    # Adding a school
+    if (LJ::did_post()) {
+        return "<?needlogin?>" unless $remote;
+
+        unless ($POST{'choose'}) {
+
+            my ($country, $state, $city, $name, $remoterl) =
+                ($POST{country}, $POST{state}, $POST{city}, $POST{name}, $POST{url});
+
+            $bogus->('country', 'You must enter a valid country code.')
+                unless $country && $country =~ /^\w\w$/;
+
+            if ($country eq 'US') {
+                $bogus->('state', 'You must enter a valid two-letter abbreviation for the US state.')
+                    unless $state =~ /^\w\w$/;
+
+                $state = uc($state);
+
+                my %states;
+                LJ::load_codes({ state => \%states });
+
+                $bogus->('state', 'You must enter a valid two-letter abbreviation for the US state.')
+                    unless exists $states{$state};
+            } elsif ($country eq 'CA') {
+                $bogus->('state', 'You must enter a valid two-letter abbreviation for the Canadian province.')
+                    unless $state =~ /^\w\w$/;
+
+                $state = uc($state);
+
+                $bogus->('state', 'Valid Canadian abbreviations are AB, BC, MB, NB, NL, NT, NS, NU, ON, PE, QC, SK, and YT.')
+                    unless $state =~ /^(AB)|(BC)|(MB)|(NB)|(NL)|(NT)|(NS)|(NU)|(ON)|(PE)|(QC)|(SK)|(YT)$/;
+            } elsif ($country eq 'AU') {
+                $bogus->('state', 'You must enter a valid two or three letter abbreviation for the Australian state.')
+                    unless $state =~ /^\w\w\w?$/;
+
+                $bogus->('state', 'Valid Australian state abbreviations are ACT, NSW, NT, Qld, SA, Tas, Vic, and WA.')
+                    unless $state =~ /^(ACT)|(NSW)|(NT)|(Qld)|(SA)|(Tas)|(Vic)|(WA)$/i;
+            }
+
+            $city = LJ::Schools::canonical_city_name($city);
+
+            $bogus->('city', 'You must enter the city this school is located in.')
+                unless length($city);
+
+            $name = LJ::Schools::canonical_school_name($name, $city);
+
+            $bogus->('name', 'You must enter the school\'s full name.')
+                unless length($name);
+
+            if ($remoterl) {
+                $remoterl = LJ::CleanHTML::canonical_url($remoterl);
+                $bogus->('url', 'The URL entered does not appear to be valid.')
+                    if $remoterl !~ m!https?://[^\s\"\'\<\>]+!g;
+            }
+
+            if (%ierr) {
+                $ret .= $add_school->($country, $state, $city, $name, $remoterl, '');
+                return $ret;
+            }
+
+            my @related = LJ::Schools::find_existing($country, $name, $state, $city, $remoterl);
+
+            unless (@related[0]) {
+                return $add_pending->($name, $city, $state, $country, $remoterl);
+            } elsif (scalar(@related) == 1) {
+                my $rv = LJ::Schools::set_attended($remote, $related[0]);
+
+                return LJ::bad_input("Unable to set your attendance at $name")
+                    unless $rv;
+
+                return BML::redirect("$LJ::SITEROOT/schools/manage.bml?sid=$related[0]");
+            } else {
+                $ret .= "<?h1 Possible Matches Found h1?>";
+                $ret .= "<?p We have found the following possible matches for your school in the same country and state.  Please select one of the following schools or continue to add what you entered if it is in fact a new school.  If your school shows up with incorrect data, please <a href='$LJ::SITEROOT/support/submit.bml?category=schools'>open a support request</a> providing as much information as you can. p?>";
+
+                my $schools = LJ::Schools::load_schools(@related);
+
+                $ret .= "<form action='index.bml' method='POST'><table><tr><td>&nbsp;</td><th>School</th><th>City</th><th>URL</th></tr>";
+                foreach my $sid (sort {$schools->{$a}->{name} cmp $schools->{$b}->{name}} keys %$schools) {
+                    $ret .= "<tr><td>";
+                    $ret .= LJ::html_check(
+                                           {
+                                               type  => 'radio',
+                                               name  => 'sid',
+                                               id    => $sid,
+                                               value => $sid,
+                                           });
+                    $ret .= "</td><td><label for='$sid'>";
+                    $ret .= LJ::ehtml($schools->{$sid}->{name}) . "</label></td><td>";
+                    $ret .= LJ::ehtml($schools->{$sid}->{city}) . "</td><td>";
+                    $ret .= LJ::ehtml($schools->{$sid}->{url}) . "</td></tr>";
+                }
+
+                $ret .= "<tr bgcolor='<?emcolor?>'><td>";
+                $ret .= LJ::html_check(
+                                       {
+                                           type     => 'radio',
+                                           name     => 'sid',
+                                           id       => 'new',
+                                           value    => 'new',
+                                           selected => 1,
+                                       });
+                $ret .= "</td><td><label for='new'>" . LJ::ehtml($name) . "</label></td><td>";
+                $ret .= LJ::ehtml($city) . "</td><td>" . LJ::ehtml($remoterl) . "</td></tr>";
+
+                $ret .= "</table>";
+
+                $ret .= LJ::html_hidden('state', $state, 'countrycode', $country, 'url', $remoterl, 'name', $name, 'city', $city);
+                $ret .= LJ::html_submit('choose', 'Choose School');
+                $ret .= LJ::form_auth();
+                $ret .= "</form>";
+            }
+            return $ret;
+
+        # They are selecting which related school
+        } else {
+            return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>" unless LJ::check_form_auth();
+
+            if ($POST{'sid'} eq 'new') {
+                return $add_pending->($POST{name}, $POST{city}, $POST{state}, $POST{countrycode}, $POST{url});
+            } else {
+                my $rv = LJ::Schools::set_attended($remote, $POST{sid});
+
+                return LJ::bad_input("Unable to set your attendance at $POST{name}")
+                    unless $rv;
+
+                return BML::redirect("$LJ::SITEROOT/schools/manage.bml?sid=$POST{sid}");
+            }
+        }
     }
 
 
@@ -364,12 +445,18 @@ body<=
         @comms = sort { $a->{user} cmp $b->{user} } @comms;
     }
 
+    my $url = $school->{$sid}->{url};
+
     # dump the header information
     my ($country, $state, $city, $school) = LJ::Schools::expand_codes($ctc, $sc, $cc, $sid);
     my ($ectc, $esc, $ecc) = (LJ::ehtml($ctc), LJ::ehtml($sc), LJ::ehtml($cc));
 
     # now display the information
-    $ret .= "<?h1 $school h1?>";
+    $ret .= "<table><tr><td>";
+    $ret .= "<?h1 $school h1?></td>";
+    $ret .= "<td valign='middle'><font size='1'>(<a href='" . LJ::ehtml($url) . "'>official website</a>)</font></td>"
+        if $url;
+    $ret .= "</table>";
     $ret .= $trail->(0, $country, $state, $city);
 
     # Figure out if they attended this school
