@@ -974,15 +974,18 @@ sub reject_pending {
 # </LJFUNC>
 sub rename_state {
     my ($ctc, $from_sc, $to_sc) = @_;
-    return undef unless $ctc && $from_sc && $to_sc;
+    return undef unless $ctc && $to_sc;
     return undef unless $from_sc ne $to_sc;
 
     # get db
     my $dbh = LJ::get_db_writer();
     return undef unless $dbh;
 
+    my @args = grep { defined $_ && $_ } ($ctc, $from_sc, $to_sc);
+    my $scs = $from_sc ? "state = ?" : "state IS NULL";
+
     # rename the state, with an update ignore (merge dupes!)
-    $dbh->do("UPDATE IGNORE schools SET state = ? WHERE country = ? AND state = ?",
+    $dbh->do("UPDATE IGNORE schools SET state = ? WHERE country = ? AND $scs",
              undef, $to_sc, $ctc, $from_sc);
     return undef if $dbh->err;
 
@@ -993,11 +996,11 @@ sub rename_state {
             FROM schools a, schools b
             WHERE a.country = ?
               AND b.country = a.country
-              AND a.state = ?
+              AND a.$scs
               AND b.state = ?
               AND a.city = b.city
               AND a.name = b.name
-        }, undef, $ctc, $from_sc, $to_sc);
+        }, undef, @args);
 
     # now let's merge these down
     if ($rows && @$rows) {
