@@ -40,6 +40,30 @@ body<=
         return $err->('Invalid school ID')
             unless $pri =~ /\d+/;
 
+        # Build up our data structures for use later
+        my $approve_sids = ();
+        my $approve_users = (); # If this school exists already
+        my $delete_sids = ();
+        push @$approve_sids, $pri;
+        push @$approve_users, $POST{'userid'};
+        foreach (@sids) {
+            if ($POST{$_}) {
+                push @$approve_sids, $_;
+                push @$approve_users, $POST{$_};
+                next;
+            } elsif ($POST{"delete$_"}) {
+                push @$delete_sids, $_;
+            }
+        }
+
+        # Reject any secondary schools they said to delete
+        if ($delete_sids) {
+            my $drv = LJ::Schools::reject_pending($delete_sids);
+
+            return "Unable to delete schools"
+                unless $drv;
+        }
+        
         # See if they are deleting primary
         if ($POST{"delete$pri"}) {
             my $rv = LJ::Schools::reject_pending([$pri]);
@@ -47,31 +71,8 @@ body<=
             return "Unable to delete primary school"
                 unless $rv;
 
-            $ret .= '<?h1 Success h1?><?p Primary school deleted p?>';
+            $ret .= '<?h1 Success h1?><?p Primary school deleted along with any secondary selected.  <a href="pending.bml">Do Another</a>p?>';
         } else {
-            # See if they selected this school to merge in
-            my $approve_sids = ();
-            my $approve_users = (); # If this school exists already
-            my $delete_sids = ();
-            push @$approve_sids, $pri;
-            push @$approve_users, $POST{'userid'};
-            foreach (@sids) {
-                if ($POST{$_}) {
-                    push @$approve_sids, $_;
-                    push @$approve_users, $POST{$_};
-                    next;
-                } elsif ($POST{"delete$_"}) {
-                    push @$delete_sids, $_;
-                }
-            }
-
-            if ($delete_sids) {
-                my $drv = LJ::Schools::reject_pending($delete_sids);
-
-                return "Unable to delete schools"
-                    unless $drv;
-            }
-
             my $country = $POST{country};
             my $city = $POST{city};
             my $name = $POST{name};
