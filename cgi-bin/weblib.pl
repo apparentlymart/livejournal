@@ -1093,7 +1093,7 @@ RTE
     $out .= LJ::html_hidden('prop_opt_preformatted', '1') if $opts->{'richtext_on'};
 
     my $jrich = LJ::ejs(LJ::deemp(
-            BML::ml("entryform.htmlokay.rich", { 'opts' => 'href="\#" onClick="enable_rte()"' })));
+            BML::ml("entryform.htmlokay.rich", { 'opts' => 'href="#" onClick="enable_rte()"' })));
 
     my $jnorich = LJ::ejs(LJ::deemp(BML::ml('entryform.htmlokay.norich')));
 
