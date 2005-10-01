@@ -1518,7 +1518,10 @@ sub DateTime_tz
     $ret->{'hour'} = $dt->hour;
     $ret->{'min'} = $dt->minute;
     $ret->{'sec'} = $dt->second;
-    $ret->{'_dayofweek'} = $dt->day_of_week;
+
+    # DateTime.pm's dayofweek is 1-based/Mon-Sun, but S2's is 1-based/Sun-Sat,
+    # so first we make DT's be 0-based/Sun-Sat, then shift it up to 1-based.
+    $ret->{'_dayofweek'} = ($dt->day_of_week % 7) + 1;
     return $ret;
 }
 
