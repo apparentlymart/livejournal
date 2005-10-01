@@ -470,39 +470,59 @@
     ### Portal Options
     ###
 
-    # most of the portal options have sane default values, but if you
-    # need to override them, here's the format:
+    # What portal modules to load
+    %PORTAL_TYPEMAP = (
+                       'Birthdays'      => 1,
+                       'UpdateJournal'  => 2,
+                       'TextMessage'    => 3,
+                       'PopWithFriends' => 4,
+                       'Friends'        => 5,
+                       'Manage'         => 6,
+                       'RecentComments' => 7,
+                       'NewUser'        => 8,
+                       );
 
-    #@PORTAL_COLS = qw(main right moz);  # can also include left, if you want.
-    #$PORTAL_URI = "/portal/";           # either "/" or "/portal/"
-
-    #$PORTAL_LOGGED_IN ||= {'main'   => [
-    #                                    [ 'newtolj', ''],
-    #                                    [ 'update', 'mode=full'],
-    #                                    ],
-    #                       'right' => [
-    #                                    [ 'goat', '', ],
-    #                                    [ 'stats', '', ],
-    #                                    [ 'bdays', '', ],
-    #                                    [ 'memories', '', ],
-    #                                    [ 'popfaq', '', ],
-    #                                    ] };
-
-    #$PORTAL_LOGGED_OUT ||= {'main'  => [
-    #                                     [ 'newtolj', ''],
-    #                                     [ 'update', 'mode='],
-    #                                     ],
-    #                        'right' => [
-    #                                     [ 'goat', '', ],
-    #                                     [ 'login', '', ],
-    #                                     [ 'stats', '', ],
-    #                                     [ 'randuser', '', ],
-    #                                     [ 'popfaq', '', ],
-    #                                     ],
-    #                        'moz' => [
-    #                                  [ 'login', '', ],
-    #                                  ],
-    #                    };
+    # Default portal layout
+    %PORTAL_DEFAULTBOXSTATES = (
+                         'Birthdays' => {
+                             'added' => 1,
+                             'sort'  => 4,
+                             'col'   => 'R',
+                         },
+                         'Friends' => {
+                             'added' => 1,
+                             'sort'  => 6,
+                             'col'   => 'R',
+                         },
+                         'Manage' => {
+                             'added' => 1,
+                             'sort'  => 8,
+                             'col'   => 'L',
+                         },
+                         'PopWithFriends' => {
+                             'added' => 0,
+                             'col'   => 'R',
+                         },
+                         'RecentComments' => {
+                             'added' => 1,
+                             'sort'  => 10,
+                             'col'   => 'L',
+                         },
+                         'UpdateJournal' => {
+                             'added' => 1,
+                             'sort'  => 4,
+                             'col'   => 'L',
+                         },
+                         'NewUser' => {
+                             'sort'  => 2,
+                             'col'   => 'L',
+                         },
+                         'TextMessage' => {
+                             'added'  => 1,
+                             'sort'   => 8,
+                             'col'    => 'R',
+                         },
+                         );
 
     # Setup support email address to not accept new emails.  Basically if an
     # address is specified below, any user who emails it out of the blue will

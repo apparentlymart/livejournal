@@ -38,14 +38,14 @@ img {
  
  
 .DropDownMenu {
-	background-color: #fff;
+	background-color: #AACCFF;
 	z-index: 2;
 	position: absolute;
 	overflow: hidden;
 	display: none;
 	font-size: small;
 	width: 400px;
-	padding: 1px;
+	padding: 0px;
 	border: 2px solid #003366;
 	}
 	

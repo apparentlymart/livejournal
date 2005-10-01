@@ -16,12 +16,10 @@ use fields qw(u boxes boxconfig boxlist);
 
 use strict;
 
-LJ::run_hook('portal_boxes', \%LJ::TYPEMAP, \%LJ::DEFAULTBOXSTATES);
-
 load_box_modules();
 
 sub get_box_classes {
-    return keys %LJ::TYPEMAP;
+    return keys %LJ::PORTAL_TYPEMAP;
 }
 
 sub load_box_modules {
@@ -107,7 +105,7 @@ sub get_box_default_col {
     my LJ::Portal::Config $self = shift;
     my $boxclass = shift;
 
-    return $LJ::DEFAULTBOXSTATES{$boxclass}->{'col'} || 'R';
+    return $LJ::PORTAL_DEFAULTBOXSTATES{$boxclass}->{'col'} || 'R';
 }
 
 # get whether or not you can have more than one of a box
@@ -115,14 +113,16 @@ sub get_box_unique {
     my LJ::Portal::Config $self = shift;
     my $boxclass = shift;
 
-    return $LJ::DEFAULTBOXSTATES{$boxclass}->{'notunique'} ? 0 : 1;
+    return $LJ::PORTAL_DEFAULTBOXSTATES{$boxclass}->{'notunique'} ? 0 : 1;
 }
 
 # add all the default boxes
 sub load_default_boxes {
     my LJ::Portal::Config $self = shift;
 
+
     my @classes = $self->get_box_classes;
+
     foreach my $boxclass (sort @classes) {
         # check to see if the box has it's own code that needs to be run to determine
         # if it should be added by default
@@ -131,12 +131,12 @@ sub load_default_boxes {
         if ($fullboxclass->can('default_added')) {
             $toadd = $fullboxclass->default_added($self->{'u'});
         } else {
-            $toadd = $LJ::DEFAULTBOXSTATES{$boxclass} && $LJ::DEFAULTBOXSTATES{$boxclass}->{'added'};
+            $toadd = $LJ::PORTAL_DEFAULTBOXSTATES{$boxclass} && $LJ::PORTAL_DEFAULTBOXSTATES{$boxclass}->{'added'};
         }
 
         if ($toadd) {
             my $col = $self->get_box_default_col($boxclass);
-            my $order = $LJ::DEFAULTBOXSTATES{$boxclass}->{'sort'};
+            my $order = $LJ::PORTAL_DEFAULTBOXSTATES{$boxclass}->{'sort'};
 
             my $box = $self->add_box($boxclass, $col);
             # does it have a default position in the column? (it should, but...)
@@ -450,7 +450,7 @@ sub remove_box {
 sub type_string_to_id {
     my LJ::Portal::Config $self = shift;
     my $typestring = shift;
-    my $typeid = $LJ::TYPEMAP{$typestring} || undef;
+    my $typeid = $LJ::PORTAL_TYPEMAP{$typestring} || undef;
     print STDERR "Invalid box type $typestring\n" unless $typeid;
     return $typeid;
 }
@@ -459,8 +459,8 @@ sub type_id_to_string {
     my LJ::Portal::Config $self = shift;
     my $typeid = shift;
 
-    foreach my $typestring (keys %LJ::TYPEMAP) {
-        if ($LJ::TYPEMAP{$typestring} == $typeid) {
+    foreach my $typestring (keys %LJ::PORTAL_TYPEMAP) {
+        if ($LJ::PORTAL_TYPEMAP{$typestring} == $typeid) {
             return $typestring;
         }
     }

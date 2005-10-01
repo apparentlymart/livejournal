@@ -63,33 +63,6 @@
     $COOKIE_PATH   ||= "/";
     @COOKIE_DOMAIN_RESET = ("", "$DOMAIN", ".$DOMAIN") unless @COOKIE_DOMAIN_RESET;
 
-    ## default portal options
-    @PORTAL_COLS = qw(main right moz) unless (@PORTAL_COLS);
-
-    $PORTAL_URI ||= "/portal/";           # either "/" or "/portal/"    
-
-    $PORTAL_LOGGED_IN ||= {'main' => [ 
-                                     [ 'update', 'mode=full'],
-                                     ],
-                         'right' => [ 
-                                      [ 'stats', '', ],
-                                      [ 'bdays', '', ],
-                                      [ 'popfaq', '', ],
-                                      ] };
-    $PORTAL_LOGGED_OUT ||= {'main' => [ 
-                                      [ 'update', 'mode='],
-                                      ],
-                          'right' => [ 
-                                       [ 'login', '', ],
-                                       [ 'stats', '', ],
-                                       [ 'randuser', '', ],
-                                       [ 'popfaq', '', ],
-                                       ],
-                          'moz' => [
-                                    [ 'login', '', ],
-                                    ],
-                          };
-
     $MAX_HINTS_LASTN ||= 100;
     $MAX_SCROLLBACK_FRIENDS ||= 1000;
     $MAX_USERPIC_KEYWORDS ||= 10;

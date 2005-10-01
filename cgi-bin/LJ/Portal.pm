@@ -332,8 +332,8 @@ sub getmenu {
                 my $addlink = qq{href="$LJ::SITEROOT/portal/index.bml?addbox=1&boxtype=$boxclass&boxcol=$boxcol" onclick="if(addPortalBox('$boxclass', '$boxcol')) return true; hidePortalMenu('addbox'); return false;"};
                 my $rowmod = $row % 2 + 1;
                 $returncode .= qq{
-                    <tr>
-                        <td class="PortalRow$rowmod">
+                    <tr class="PortalRow$rowmod">
+                        <td>
                           <a $addlink>
                           $boxname
                           </a>
@@ -346,6 +346,7 @@ sub getmenu {
                         </td>
                         </tr>
                         <br/>};
+                $row++;
             }
             $returncode .= qq {
                       <tr><td colspan="2">
