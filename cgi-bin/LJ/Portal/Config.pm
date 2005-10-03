@@ -446,7 +446,7 @@ sub type_string_to_id {
     }
 
     my $typeid = $LJ::PORTAL_TYPEMAP{$typestring} || undef;
-    die STDERR "Invalid box type $typestring\n" unless $typeid;
+    die "Invalid box type $typestring\n" unless $typeid;
     return $typeid;
 }
 
