@@ -24,9 +24,9 @@ use Storable;
 use Time::HiRes ();
 use Image::Size ();
 use POSIX ();
-use LJ::Portal ();
 use Unicode::MapUTF8 ();
 
+use LJ::Portal ();
 use LJ::SpellCheck;
 use LJ::TextMessage;
 use LJ::Blob;
@@ -88,6 +88,8 @@ sub setup_start {
 
     # set this before we fork
     $LJ::CACHE_CONFIG_MODTIME = (stat("$ENV{'LJHOME'}/cgi-bin/ljconfig.pl"))[9];
+
+    LJ::Portal->load_portal_boxes;
 
     eval { setup_start_local(); };
 }

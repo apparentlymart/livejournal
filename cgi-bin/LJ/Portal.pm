@@ -15,6 +15,43 @@ sub new {
     return $self;
 }
 
+sub load_box_typeid {
+    my ($self, $class) = @_;
+
+    die "No portal box class defined" unless $class;
+
+    return 1 if $LJ::PORTAL_TYPEMAP{$class};
+
+    my $boxid;
+
+    # box does not have an ID registered for itself in the DB
+    # try to insert
+    my $dbh = LJ::get_db_writer;
+    $dbh->do("INSERT IGNORE INTO portal_typemap (class_name) VALUES (?)",
+                       undef, $class);
+
+    if ($dbh->{'mysql_insertid'}) {
+        # inserted fine, get ID
+        $boxid = $dbh->{'mysql_insertid'};
+    } else {
+        # race condition, try to select again
+        $boxid = $dbh->selectrow_array("SELECT id FROM portal_typemap WHERE class_name = ?",
+                                       undef, $class)
+                                       or die "Portal typemap should have found ID after race";
+    }
+
+    $LJ::PORTAL_TYPEMAP{$class} = $boxid;
+}
+
+# get typemap out of DB
+sub load_portal_boxes {
+    my $self = shift;
+
+    foreach my $boxclass (@LJ::PORTAL_BOXES) {
+        require "LJ/Portal/Box/${boxclass}.pm";
+    }
+}
+
 sub get_close_button {
     return qq{<img src="$LJ::IMGPREFIX/portal/PortalConfigCloseButton.gif" width=19 height=19 title="Close" alt="Close" valign="middle" />};
 }
@@ -301,7 +338,7 @@ sub getmenu {
 
     if ($menu) {
         if ($menu eq 'addbox') {
-            my @classes = $portalconfig->get_box_classes;
+            my @classes = @LJ::PORTAL_BOXES;
             my $closebutton = $self->get_close_button;
 
             my $addboxtitle = BML::ml('/portal/index.bml.addbox');

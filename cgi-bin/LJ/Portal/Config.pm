@@ -16,17 +16,8 @@ use fields qw(u boxes boxconfig boxlist);
 
 use strict;
 
-load_box_modules();
-
 sub get_box_classes {
-    return keys %LJ::PORTAL_TYPEMAP;
-}
-
-sub load_box_modules {
-    # load all the box modules
-    foreach my $classname (get_box_classes()) {
-        require "LJ/Portal/Box/${classname}.pm";
-    }
+    return @LJ::PORTAL_BOXES;
 }
 
 sub new {
@@ -120,8 +111,7 @@ sub get_box_unique {
 sub load_default_boxes {
     my LJ::Portal::Config $self = shift;
 
-
-    my @classes = $self->get_box_classes;
+    my @classes = @LJ::PORTAL_BOXES;
 
     foreach my $boxclass (sort @classes) {
         # check to see if the box has it's own code that needs to be run to determine
@@ -450,6 +440,11 @@ sub remove_box {
 sub type_string_to_id {
     my LJ::Portal::Config $self = shift;
     my $typestring = shift;
+
+    if (!$LJ::PORTAL_TYPEMAP{$typestring}) {
+        LJ::Portal->load_box_typeid($typestring);
+    }
+
     my $typeid = $LJ::PORTAL_TYPEMAP{$typestring} || undef;
     print STDERR "Invalid box type $typestring\n" unless $typeid;
     return $typeid;
@@ -458,13 +453,20 @@ sub type_string_to_id {
 sub type_id_to_string {
     my LJ::Portal::Config $self = shift;
     my $typeid = shift;
+    my $recurse = shift;
+    $recurse ||= 0;
 
-    foreach my $typestring (keys %LJ::PORTAL_TYPEMAP) {
+    foreach my $typestring (@LJ::PORTAL_BOXES) {
+        if (!$LJ::PORTAL_TYPEMAP{$typestring}) {
+            LJ::Portal->load_box_typeid($typestring);
+        }
+
         if ($LJ::PORTAL_TYPEMAP{$typestring} == $typeid) {
             return $typestring;
         }
     }
-    return '';
+
+    die "Could not map portal type $typeid to a class name.\n";
 }
 
 # look to see if there are any boxes of this class instantiated and return

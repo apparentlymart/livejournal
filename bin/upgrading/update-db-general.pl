@@ -1031,6 +1031,15 @@ CREATE TABLE portal_config (
 )
 EOC
 
+register_tablecreate("portal_typemap", <<'EOC');
+CREATE TABLE portal_typemap (
+                             id SMALLINT UNSIGNED AUTO_INCREMENT NOT NULL,
+                             class_name VARCHAR(255),
+                             PRIMARY KEY (id),
+                             UNIQUE (class_name)
+)
+EOC
+
 register_tablecreate("infohistory", <<'EOC');
 CREATE TABLE infohistory (
   userid int(10) unsigned NOT NULL default '0',
@@ -2677,6 +2686,24 @@ register_alter(sub {
     if (column_type("includetext", "inctext") !~ /mediumtext/) {
         do_alter("includetext",
                  "ALTER TABLE includetext MODIFY COLUMN inctext MEDIUMTEXT");
+    }
+    if (column_type("portal_config", "userid") !~ /unsigned/i) {
+        do_alter("portal_config",
+                 "ALTER TABLE portal_config MODIFY COLUMN userid INT UNSIGNED NOT NULL");
+        do_alter("portal_config",
+                 "ALTER TABLE portal_config MODIFY COLUMN pboxid SMALLINT UNSIGNED NOT NULL");
+        do_alter("portal_config",
+                 "ALTER TABLE portal_config MODIFY COLUMN sortorder SMALLINT UNSIGNED NOT NULL");
+        do_alter("portal_config",
+                 "ALTER TABLE portal_config MODIFY COLUMN TYPE INT UNSIGNED NOT NULL");
+    }
+    if (column_type("portal_box_prop", "userid") !~ /unsigned/i) {
+                 do_alter("portal_box_prop",
+                          "ALTER TABLE portal_box_prop MODIFY COLUMN userid INT UNSIGNED NOT NULL");
+                 do_alter("portal_box_prop",
+                          "ALTER TABLE portal_box_prop MODIFY COLUMN pboxid SMALLINT UNSIGNED NOT NULL");
+                 do_alter("portal_box_prop",
+                          "ALTER TABLE portal_box_prop MODIFY COLUMN ppropid SMALLINT UNSIGNED NOT NULL");
     }
 });
 
