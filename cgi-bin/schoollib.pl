@@ -1169,7 +1169,9 @@ sub merge_schools {
 # des-state: state school is in, or nothing for undefined state
 # des-city: optional city school is in
 # des-url: optional URL of school
-# returns: list of school ids found, undef on error or no results
+# returns: single scalar schoolid on exact match,
+#          arrayref of school ids found if multiple
+#          undef on error or no results
 # </LJFUNC>
 sub find_existing {
     my ($country, $name, $state, $city, $url) = @_;
@@ -1193,12 +1195,12 @@ sub find_existing {
 
     foreach my $sch (@$sids) {
         # Return one schoolid if city and (name or url) both match
-        return ($sch->[0])
+        return $sch->[0]
             if $city
             && $sch->[3] =~ /^$city$/i
             && $sch->[1] =~ /^$name$/i;
 
-        return ($sch->[0])
+        return $sch->[0]
             if $city && $url
             && $sch->[3] =~ /^$city$/i
             && $sch->[2] =~ /^$url\/?$/i;
@@ -1212,7 +1214,7 @@ sub find_existing {
             if $url && $sch->[2] =~ /^$url\/?$/i;
     }
 
-    return @res if @res;
+    return \@res if @res;
 
     return undef;
 }

@@ -194,22 +194,23 @@ body<=
                 return $ret;
             }
 
-            my @related = LJ::Schools::find_existing($country, $name, $state, $city, $remoterl);
+            # Undef on error or no results, scalar id on direct match, arrayref on possibles
+            my $related = LJ::Schools::find_existing($country, $name, $state, $city, $remoterl);
 
-            unless (@related[0]) {
+            if (!$related) {
                 return $add_pending->($name, $city, $state, $country, $remoterl);
-            } elsif (scalar(@related) == 1) {
-                my $rv = LJ::Schools::set_attended($remote, $related[0]);
+            } elsif (ref $related ne 'ARRAY') {
+                my $rv = LJ::Schools::set_attended($remote, $related);
 
                 return LJ::bad_input("Unable to set your attendance at $name")
                     unless $rv;
 
-                return BML::redirect("$LJ::SITEROOT/schools/manage.bml?sid=$related[0]");
+                return BML::redirect("$LJ::SITEROOT/schools/manage.bml?sid=$related");
             } else {
                 $ret .= "<?h1 Possible Matches Found h1?>";
                 $ret .= "<?p We have found the following possible matches for your school in the same country and state.  Please select one of the following schools or continue to add what you entered if it is in fact a new school.  If your school shows up with incorrect data, please <a href='$LJ::SITEROOT/support/submit.bml?category=schools'>open a support request</a> providing as much information as you can. p?>";
 
-                my $schools = LJ::Schools::load_schools(@related);
+                my $schools = LJ::Schools::load_schools(@$related);
 
                 $ret .= "<form action='index.bml' method='POST'><table><tr><td>&nbsp;</td><th>School</th><th>City</th><th>URL</th></tr>";
                 foreach my $sid (sort {$schools->{$a}->{name} cmp $schools->{$b}->{name}} keys %$schools) {
