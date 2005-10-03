@@ -810,9 +810,6 @@ sub canonical_school_name {
     $name =~ s/^Saint /St. /;
     $name =~ s/^St /St. /;
 
-    # convert St. to Saint INSIDE name
-    $name =~ s/ St\.? / Saint /g;
-
     # fix "foo & bar" to "foo and bar"
     $name =~ s/ & / and /g;
 
@@ -821,9 +818,6 @@ sub canonical_school_name {
 
     # fix things that are just "Foo High"
     $name =~ s/ High$/ High School/;
-
-    # we don't call them Senior or Junior high schools
-    $name =~ s/ (?:Senior|Junior) High / High /;
 
     # kill anybody putting ", State" or similar after the name?
     $name =~ s/\s*,\s*$//;
