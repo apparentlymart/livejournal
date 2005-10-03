@@ -36,9 +36,9 @@ body<=
     my $is_admin = LJ::check_priv($remote, 'admin', 'siteadmin/school') ||
         LJ::check_priv($remote, 'admin', '*');
 
-    if (LJ::did_post()) {
-        my $sid = $POST{sid};
+    my $sid = $GET{sid};
 
+    if ($sid) {
         return $err->('Invalid school ID')
             unless $sid =~ /\d+/;
 
@@ -89,7 +89,7 @@ body<=
             $ret .= "</form>";
 
             return $ret;
-        } else {
+        } elsif (LJ::did_post()) {
             return $err->('Invalid form')
                 unless LJ::check_form_auth();
 
@@ -117,7 +117,7 @@ body<=
             return $ret;
         }
     } else {
-        $ret .= "<form method='post' action='edit.bml'>";
+        $ret .= "<form method='GET' action='edit.bml'>";
         $ret .= "School ID to edit: " . LJ::html_text({name => 'sid', size => 10});
         $ret .= ' ' . LJ::html_submit();
         $ret .= "</form>";
