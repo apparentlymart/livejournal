@@ -3073,37 +3073,6 @@ sub make_journal
         $opts->{pathextra} = undef;
     }
 
-    # signal to LiveJournal.pm that we can't handle this
-    if ($stylesys == 1 && (({ entry=>1, reply=>1, month=>1, tag=>1 }->{$view}) || ($view eq 'lastn' && $geta->{tag}))) {
-
-        # pick which fallback method (s2 or bml) we'll use by default, as configured with
-        # $S1_SHORTCOMINGS
-        my $fallback = $LJ::S1_SHORTCOMINGS ? "s2" : "bml";
-
-        # but if the user specifys which they want, override the fallback we picked
-        if ($geta->{'fallback'} && $geta->{'fallback'} =~ /^s2|bml$/) {
-            $fallback = $geta->{'fallback'};
-        }
-
-        # there are no BML handlers for these views, so force s2
-        if ($view eq 'tag' || $view eq 'lastn') {
-            $fallback = "s2";
-        }
-
-        # fall back to BML unless we're using the in-development S2
-        # fallback (the "s1shortcomings/layout")
-        if ($fallback eq "bml") {
-            ${$opts->{'handle_with_bml_ref'}} = 1;
-            return;
-        }
-
-        # S1 can't handle these views, so we fall back to a
-        # system-owned S2 style (magic value "s1short") that renders
-        # this content
-        $stylesys = 2;
-        $styleid = "s1short";
-    }
-
     if ($r) {
         $r->notes('journalid' => $u->{'userid'});
     }
@@ -3159,6 +3128,37 @@ sub make_journal
     }
     if ($view eq "friendsfriends" && ! LJ::get_cap($u, "friendsfriendsview")) {
         return "<b>Sorry</b><br />This user's account type doesn't permit showing friends of friends.";
+    }
+
+    # signal to LiveJournal.pm that we can't handle this
+    if ($stylesys == 1 && (({ entry=>1, reply=>1, month=>1, tag=>1 }->{$view}) || ($view eq 'lastn' && $geta->{tag}))) {
+
+        # pick which fallback method (s2 or bml) we'll use by default, as configured with
+        # $S1_SHORTCOMINGS
+        my $fallback = $LJ::S1_SHORTCOMINGS ? "s2" : "bml";
+
+        # but if the user specifys which they want, override the fallback we picked
+        if ($geta->{'fallback'} && $geta->{'fallback'} =~ /^s2|bml$/) {
+            $fallback = $geta->{'fallback'};
+        }
+
+        # there are no BML handlers for these views, so force s2
+        if ($view eq 'tag' || $view eq 'lastn') {
+            $fallback = "s2";
+        }
+
+        # fall back to BML unless we're using the in-development S2
+        # fallback (the "s1shortcomings/layout")
+        if ($fallback eq "bml") {
+            ${$opts->{'handle_with_bml_ref'}} = 1;
+            return;
+        }
+
+        # S1 can't handle these views, so we fall back to a
+        # system-owned S2 style (magic value "s1short") that renders
+        # this content
+        $stylesys = 2;
+        $styleid = "s1short";
     }
 
     # now, if there's a GET argument for tags, split those out
