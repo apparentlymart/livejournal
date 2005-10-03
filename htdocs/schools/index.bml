@@ -436,6 +436,7 @@ body<=
         my $remotes = LJ::load_userids(@ids);
         foreach my $remoteid (@ids) {
             next unless $remotes->{$remoteid};
+            next if $remotes->{$remoteid}->{statusvis} ne 'V';
             if ($remotes->{$remoteid}->{journaltype} eq 'P' || $remotes->{$remoteid}->{journaltype} eq 'I') {
                 push @users, $remotes->{$remoteid};
             } elsif ($remotes->{$remoteid}->{journaltype} eq 'C') {
