@@ -71,7 +71,7 @@ body<=
             return "Unable to delete primary school"
                 unless $rv;
 
-            $ret .= '<?h1 Success h1?><?p Primary school deleted along with any secondary selected.  <a href="pending.bml">Do Another</a>p?>';
+            return BML::redirect('pending.bml');
         } else {
             my $country = $POST{country};
             my $city = $POST{city};
@@ -139,7 +139,7 @@ body<=
                 LJ::Schools::reject_pending($approve_sids);
             }
 
-            $ret .= '<?h1 Success h1?><?p Schools approved! <a href="pending.bml">Do Another</a> p?>';
+            return BML::redirect('pending.bml');
         }
 
         return $ret;
@@ -153,6 +153,8 @@ body<=
         my $secondary = $schools->{secondary};
         my $tertiary = $schools->{tertiary};
 
+        $ret .= "<a href='pending.bml'>Give me a different school!</a><br /><br />";
+
         $ret .= "<form method='post' action='pending.bml'>";
         $ret .= LJ::html_hidden('primary', $primary->{pendid}, 'userid', $primary->{userid});
         $ret .= LJ::html_hidden('pendids', join(',', map { $_ } keys %$secondary, keys %$tertiary));
@@ -163,7 +165,7 @@ body<=
         $ret .= "</td><td>";
         $ret .= LJ::html_select(
                                 {
-                                    name => "country",
+                                    name     => "country",
                                     selected => $primary->{country},
                                 },  map { $_ => $countries{$_} } sort { $countries{$a} cmp $countries{$b} } keys %countries);
         $ret .= "</td></tr><tr><td colspan='2'>";
