@@ -23,8 +23,6 @@ body<=
 
     my $remote = LJ::get_remote();
 
-    my $canedit = LJ::check_priv($remote, 'siteadmin', 'school');
-
     my %ierr;
     my $bogus = sub {
         my $key = shift;
@@ -460,10 +458,6 @@ body<=
     $ret .= "<?h1 $school h1?></td>";
     $ret .= "<td valign='middle'><font size='1'>(<a href='" . LJ::ehtml($url) . "'>official website</a>)</font></td>"
         if $url;
-
-    $ret .= "<td valign='middle'><font size='1'>(<a href='$LJ::SITEROOT/admin/schools/edit.bml?sid=$sid'>edit</a>)</font></td>"
-        if $canedit;
-
     $ret .= "</table>";
     $ret .= $trail->(0, $country, $state, $city);
 
