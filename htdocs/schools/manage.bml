@@ -101,7 +101,7 @@ body<=
                 }
 
                 my $rv = LJ::Schools::set_attended($u, $sid, { year_start => $year_start, year_end => $year_end });
-                $bogus->($sid, 'Error adding school attendance record, please try again.')
+                $bogus->($sid, 'Error adding school attendance record, please try again.  You may have reached the limit of schools you can attend.')
                     unless $rv;
             }
             $schools = LJ::Schools::get_attended($u);
@@ -121,7 +121,7 @@ body<=
 
             unless (defined $schools->{$sid}) {
                 my $rv = LJ::Schools::set_attended($u, $sid);
-                return LJ::bad_input("Unable to set your attendance at $new_school->{$sid}->{name}")
+                return LJ::bad_input("Unable to set your attendance at $new_school->{$sid}->{name}, please try again.  You may have reached the limit of schools you can attend.")
                     unless $rv;
                 $schools = LJ::Schools::get_attended($u);
             }

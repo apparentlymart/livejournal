@@ -258,7 +258,7 @@ body<=
             } else {
                 my $rv = LJ::Schools::set_attended($remote, $POST{sid});
 
-                return LJ::bad_input("Unable to set your attendance at $POST{name}")
+                return LJ::bad_input("Unable to set your attendance at $POST{name}, please try again.  You may have reached the limit of schools you can attend.")
                     unless $rv;
 
                 return BML::redirect("$LJ::SITEROOT/schools/manage.bml?sid=$POST{sid}");

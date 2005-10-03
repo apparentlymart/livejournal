@@ -461,6 +461,12 @@ sub set_attended {
     my $school = LJ::Schools::load_schools( $sid );
     return undef unless $school->{$sid};
 
+    # check they aren't adding too many schools
+    my $attended = LJ::no_cache(sub { return LJ::Schools::get_attended($u) });
+    return undef
+        if !defined $LJ::SCHOOLSMAX->{$u->{journaltype}} ||
+           scalar keys %$attended >= $LJ::SCHOOLSMAX->{$u->{journaltype}};
+
     # validate our information
     my $ys = ($opts->{year_start} + 0) || undef;
     my $ye = ($opts->{year_end} + 0) || undef;
