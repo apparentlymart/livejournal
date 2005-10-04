@@ -663,16 +663,31 @@ sub get_pending {
     # not run into too many "at the same time" issues, so we're doing the memcache
     # queries one at a time instead of implementing the multi logic
     my $pend;
-    foreach my $pendid (keys %$rows) {
+
+    # We want to select a random row out of the number returned, so if
+    # they hit "give me a different one" it actually will since the rows
+    # are returned from the db in the same order every time.
+    my @ids = keys %$rows;
+    my $nrows = scalar @ids;
+    my $school;
+    my $tries = 0; # so we won't loop forever
+    while (1) {
+        return undef if $tries == $nrows;
+
+        my $rand = int(rand($nrows));
+        my $pendid = $ids[$rand];
+
         my $userid = LJ::MemCache::get([ $pendid, "sapiu:$pendid" ]);
-        next if $userid;
+        if ($userid && $userid ne $u->{userid}) {
+            $tries++;
+            next;
+        }
 
         # nobody's touching it, so mark it for us for 10 minutes
         $pend = $pendid;
+        $school = $rows->{$pend};
         last;
     }
-    my $school = $rows->{$pend};
-
     # step 3: find anything relating to this pending record, by name first
     my $sim_name = $dbh->selectall_hashref(qq{
             SELECT pendid, userid, name, country, state, city, url
