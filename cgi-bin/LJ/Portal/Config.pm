@@ -453,8 +453,6 @@ sub type_string_to_id {
 sub type_id_to_string {
     my LJ::Portal::Config $self = shift;
     my $typeid = shift;
-    my $recurse = shift;
-    $recurse ||= 0;
 
     foreach my $typestring (@LJ::PORTAL_BOXES) {
         if (!$LJ::PORTAL_TYPEMAP{$typestring}) {
