@@ -36,92 +36,93 @@ body<=
     my $is_admin = LJ::check_priv($remote, 'admin', 'siteadmin/school') ||
         LJ::check_priv($remote, 'admin', '*');
 
-    my $sid = $GET{sid};
+    my $sid = LJ::did_post() ? $POST{sid} : $GET{sid};
 
-    if ($sid) {
+    if (!LJ::did_post() && $sid) {
+        $sid = $GET{sid};
+
         return $err->('Invalid school ID')
             unless $sid =~ /\d+/;
 
-        unless ($POST{save}) {
-            my $school = LJ::Schools::load_schools($sid);
+        my $school = LJ::Schools::load_schools($sid);
 
-            return $err->("Unable to load school with id of $sid.")
-                unless ref $school;
+        return $err->("Unable to load school with id of $sid.")
+            unless ref $school;
 
-            $school = $school->{$sid};
+        $school = $school->{$sid};
 
-            $ret .= "<form method='post' action='edit.bml'>";
-            $ret .= LJ::form_auth();
-            $ret .= LJ::html_hidden('sid', $sid, 'save', 1);
-            $ret .= "<table><tr><td>";
-            $ret .= "Country: ";
-            my %countries;
-            LJ::load_codes({ "country" => \%countries });
-            $ret .= "</td><td>";
-            $ret .= LJ::html_select(
-                                    {
-                                        name => "country",
-                                        selected => $school->{country},
-                                    },  map { $_ => $countries{$_} } sort { $countries{$a} cmp $countries{$b} } keys %countries);
-            $ret .= "</td></tr><tr><td colspan='2'>";
-            $ret .= $inerr->('country');
-            $ret .= "</td></tr><tr><td valign='top'>";
-            $ret .= "State/province:</td><td>" . LJ::html_text({ name => "state", maxlength => 255, size => 15, value => $school->{state} });
-            $ret .= "</td></tr><tr><td colspan='2'>";
-            $ret .= $inerr->('state');
-            $ret .= "</td></tr><tr><td valign='top'>";
-            $ret .= "City:</td><td>" . LJ::html_text({ name => "city", maxlength => 255, size => 20, value => $school->{city} });
-            $ret .= "</td></tr><tr><td colspan='2'>";
-            $ret .= $inerr->('city');
-            $ret .= "</td></tr><tr><td valign='top'>";
-            $ret .= "Name of school:</td><td valign='top'>" . LJ::html_text({ name => "name", size => 50, value => $school->{name} });
-            $ret .= "</td></tr><tr><td colspan='2'>";
-            $ret .= $inerr->('name');
-            $ret .= "</td></tr><tr><td valign='top'>";
-            $ret .= "URL: <?de (optional) de?></td><td>" . LJ::html_text({ name => "url", size => 50, value => $school->{url} }) . "<br />";
-            $ret .= "</td></tr><tr><td colspan='2'>";
-            $ret .= $inerr->('url');
-            $ret .= "</td></tr><tr><td colspan='2'>";
-            $ret .= LJ::html_submit("Save School");
-            $ret .= LJ::html_submit('delete', "Delete School")
-                if $is_admin;
-            $ret .= "</td></tr></table>";
-            $ret .= "</form>";
+        $ret .= "<form method='post' action='edit.bml'>";
+        $ret .= LJ::form_auth();
+        $ret .= LJ::html_hidden('sid', $sid, 'save', 1);
+        $ret .= "<table><tr><td>";
+        $ret .= "Country: ";
+        my %countries;
+        LJ::load_codes({ "country" => \%countries });
+        $ret .= "</td><td>";
+        $ret .= LJ::html_select(
+                                {
+                                    name => "country",
+                                    selected => $school->{country},
+                                },  map { $_ => $countries{$_} } sort { $countries{$a} cmp $countries{$b} } keys %countries);
+        $ret .= "</td></tr><tr><td colspan='2'>";
+        $ret .= $inerr->('country');
+        $ret .= "</td></tr><tr><td valign='top'>";
+        $ret .= "State/province:</td><td>" . LJ::html_text({ name => "state", maxlength => 255, size => 15, value => $school->{state} });
+        $ret .= "</td></tr><tr><td colspan='2'>";
+        $ret .= $inerr->('state');
+        $ret .= "</td></tr><tr><td valign='top'>";
+        $ret .= "City:</td><td>" . LJ::html_text({ name => "city", maxlength => 255, size => 20, value => $school->{city} });
+        $ret .= "</td></tr><tr><td colspan='2'>";
+        $ret .= $inerr->('city');
+        $ret .= "</td></tr><tr><td valign='top'>";
+        $ret .= "Name of school:</td><td valign='top'>" . LJ::html_text({ name => "name", size => 50, value => $school->{name} });
+        $ret .= "</td></tr><tr><td colspan='2'>";
+        $ret .= $inerr->('name');
+        $ret .= "</td></tr><tr><td valign='top'>";
+        $ret .= "URL: <?de (optional) de?></td><td>" . LJ::html_text({ name => "url", size => 50, value => $school->{url} }) . "<br />";
+        $ret .= "</td></tr><tr><td colspan='2'>";
+        $ret .= $inerr->('url');
+        $ret .= "</td></tr><tr><td colspan='2'>";
+        $ret .= LJ::html_submit("Save School");
+        $ret .= LJ::html_submit('delete', "Delete School")
+            if $is_admin;
+        $ret .= "</td></tr></table>";
+        $ret .= "</form>";
 
-            return $ret;
-        } elsif (LJ::did_post()) {
-            return $err->('Invalid form')
-                unless LJ::check_form_auth();
+        return $ret;
+    } elsif (LJ::did_post()) {
+        return $err->('Invalid form')
+            unless LJ::check_form_auth();
 
-            my $rv;
-            if ($POST{'delete'}) {
-                return $err->('Cannot delete as you\'re not an admin')
-                    unless $is_admin;
+        my $rv;
+        if ($POST{'delete'}) {
+            return $err->('Cannot delete as you\'re not an admin')
+                unless $is_admin;
 
-                $rv = LJ::Schools::delete_school($POST{sid});
-            } else {
-                $rv = LJ::Schools::edit_school($sid,
-                                               {
-                                                   name => $POST{name},
-                                                   countrycode => $POST{country},
-                                                   state => $POST{state},
-                                                   city => $POST{city},
-                                                   url => $POST{url},
-                                               });
-            }
-
-            return $err->('Unable to make changes to school data')
-                unless $rv;
-
-            $ret .= '<?h1 Success h1?><?p School data edited or deleted p?>';
-            return $ret;
+            $rv = LJ::Schools::delete_school($POST{sid});
+        } else {
+            $rv = LJ::Schools::edit_school($sid,
+                                           {
+                                               name => $POST{name},
+                                               countrycode => $POST{country},
+                                               state => $POST{state},
+                                               city => $POST{city},
+                                               url => $POST{url},
+                                           });
         }
+
+        return $err->('Unable to make changes to school data')
+            unless $rv;
+
+        $ret .= '<?h1 Success h1?><?p School data edited or deleted p?>';
+        return $ret;
     } else {
         $ret .= "<form method='GET' action='edit.bml'>";
         $ret .= "School ID to edit: " . LJ::html_text({name => 'sid', size => 10});
         $ret .= ' ' . LJ::html_submit();
         $ret .= "</form>";
     }
+
 }
 _code?>
 <=body
