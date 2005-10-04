@@ -2689,7 +2689,7 @@ register_alter(sub {
     }
     if (column_type("portal_config", "userid") !~ /unsigned/i) {
         do_alter("portal_config",
-                 "ALTER TABLE portal_config MODIFY COLUMN userid INT UNSIGNED NOT NULL, MODIFY COLUMN pboxid SMALLINT UNSIGNED NOT NULL, MODIFY COLUMN sortorder SMALLINT UNSIGNED NOT NULL, MODIFY COLUMN TYPE INT UNSIGNED NOT NULL");
+                 "ALTER TABLE portal_config MODIFY COLUMN userid INT UNSIGNED NOT NULL, MODIFY COLUMN pboxid SMALLINT UNSIGNED NOT NULL, MODIFY COLUMN sortorder SMALLINT UNSIGNED NOT NULL, MODIFY COLUMN type INT UNSIGNED NOT NULL");
     }
     if (column_type("portal_box_prop", "userid") !~ /unsigned/i) {
                  do_alter("portal_box_prop",
