@@ -33,7 +33,17 @@ body<=
     return $err->('You do not have access to use this tool.')
         unless (LJ::check_priv($remote, 'siteadmin', 'school'));
 
+    my $getextra;
+
     if (LJ::did_post()) {
+
+        my @locextra;
+        push @locextra, "country=" . LJ::eurl($POST{uct}) if defined $POST{uct};
+        push @locextra, "state="   . LJ::eurl($POST{ust}) if defined $POST{ust};
+        push @locextra, "city="    . LJ::eurl($POST{uci}) if defined $POST{uci};
+        $getextra = '?' . join('&', @locextra) if @locextra;
+
+
         my $pri  = $POST{primary};
         my @sids = map { $_ => 0 } split(',', $POST{pendids});
 
@@ -71,7 +81,7 @@ body<=
             return "Unable to delete primary school"
                 unless $rv;
 
-            return BML::redirect('pending.bml');
+            return BML::redirect("pending.bml$getextra");
         } else {
             my $country = $POST{country};
             my $city = $POST{city};
@@ -139,7 +149,7 @@ body<=
                 LJ::Schools::reject_pending($approve_sids);
             }
 
-            return BML::redirect('pending.bml');
+            return BML::redirect("pending.bml$getextra");
         }
 
         return $ret;
@@ -150,6 +160,7 @@ body<=
         my $city = $GET{city};
 
         my $schools = LJ::Schools::get_pending($remote, $country, $state, $city);
+
         return "<?p No pending schools found p?>"
             unless $schools;
 
@@ -157,9 +168,18 @@ body<=
         my $secondary = $schools->{secondary};
         my $tertiary = $schools->{tertiary};
 
-        $ret .= "<a href='pending.bml'>Give me a different school!</a><br /><br />";
+        my @locextra;
+        push @locextra, "country=" . LJ::eurl($country) if defined $country;
+        push @locextra, "state="   . LJ::eurl($state)   if defined $state;
+        push @locextra, "city="    . LJ::eurl($city)    if defined $city;
+        $getextra = '?' . join('&', @locextra) if @locextra;
+
+        $ret .= "<a href='pending.bml$getextra'>Give me a different school!</a><br /><br />";
 
         $ret .= "<form method='post' action='pending.bml'>";
+        $ret .= LJ::html_hidden('uct', $country) if $country;
+        $ret .= LJ::html_hidden('ust', $state) if $state;
+        $ret .= LJ::html_hidden('uci', $city) if $city;
         $ret .= LJ::html_hidden('primary', $primary->{pendid}, 'userid', $primary->{userid});
         $ret .= LJ::html_hidden('pendids', join(',', map { $_ } keys %$secondary, keys %$tertiary));
         $ret .= "<table><tr><td>";
