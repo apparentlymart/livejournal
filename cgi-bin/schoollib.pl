@@ -625,7 +625,7 @@ sub approve_pending {
 # name: LJ::Schools::get_pending
 # class: schools
 # des: Returns the next "potentially good" set of records to be processed.
-# args: uobj
+# args: uobj, country?, state?, city?
 # des-uobj: User id or object of user doing the admin work.
 # returns: Hashref; keys being 'primary' with a value of a school hashref,
 #          and 'secondary', 'tertiary' with values being a hashref of
@@ -633,8 +633,18 @@ sub approve_pending {
 #          name, citycode, statecode, countrycode, url, userid.  Undef on error!
 # </LJFUNC>
 sub get_pending {
-    my $u = LJ::want_user(shift);
+    my ($u, $country, $state, $city) = @_;
+
+    $u = LJ::want_user($u);
     return undef unless $u;
+
+    return undef if ($state || $city) && !$country;
+
+    # might get some nulls
+    my @args = grep { defined $_ } ($country, $state, $city);
+    my $ccs = defined $country ? "country = ?" : "1";
+    my $scs = defined $state   ? "state = ?"   : "1";
+    my $ics = defined $city    ? "city = ?"    : "1";
 
     # need db
     my $dbh = LJ::get_db_writer();
@@ -644,8 +654,9 @@ sub get_pending {
     my $rows = $dbh->selectall_hashref(qq{
             SELECT pendid, userid, name, country, state, city, url
             FROM schools_pending
+            WHERE $ccs AND $scs AND $ics
             LIMIT 200
-        }, 'pendid');
+        }, 'pendid', undef, @args);
     return undef if $dbh->err;
 
     # step 2: now, we want to find one that isn't being dealt with; I think we will
@@ -654,7 +665,7 @@ sub get_pending {
     my $pend;
     foreach my $pendid (keys %$rows) {
         my $userid = LJ::MemCache::get([ $pendid, "sapiu:$pendid" ]);
-        next if $userid;
+        next if $userid ne $u->{userid};
 
         # nobody's touching it, so mark it for us for 10 minutes
         $pend = $pendid;

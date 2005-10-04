@@ -145,7 +145,11 @@ body<=
         return $ret;
 
     } else {
-        my $schools = LJ::Schools::get_pending($remote);
+        my $country = $GET{country};
+        my $state = $GET{state};
+        my $city = $GET{city};
+
+        my $schools = LJ::Schools::get_pending($remote, $country, $state, $city);
         return "<?p No pending schools found p?>"
             unless $schools;
 

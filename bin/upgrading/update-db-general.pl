@@ -2695,10 +2695,6 @@ register_alter(sub {
                  do_alter("portal_box_prop",
                           "ALTER TABLE portal_box_prop MODIFY COLUMN userid INT UNSIGNED NOT NULL, MODIFY COLUMN pboxid SMALLINT UNSIGNED NOT NULL, MODIFY COLUMN ppropid SMALLINT UNSIGNED NOT NULL");
     }
-
-    unless (index_name("schools_pending", "INDEX:country-state-city")) {
-        do_alter("schools_pending", "ALTER TABLE schools_pending ADD INDEX (country, state, city)");
-    }
 });
 
 1; # return true
