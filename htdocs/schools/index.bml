@@ -97,7 +97,7 @@ body<=
         $ret .= "</td></tr><tr><td colspan='2'>";
         $ret .= $inerr->('city');
         $ret .= "</td></tr><tr><td valign='top'>";
-        $ret .= "Name of school:</td><td valign='top'>" . LJ::html_text({ name => "name", size => 50, value => $name }) . "<br />&nbsp;&nbsp;" . $ex->("University of California Berkeley, Oregon State University<br /><ul><li>Type in the school's full name (e.g. \"Harvard College\" instead of just \"Harvard\")</li><li>No abbreviations.  (Spell out University, North, State, High School, etc.)</li><li>For state schools, add the city/campus after a dash (ex: University of Texas - Austin)</li><li>Don't use \"The\" in the beginning</li><li>Capitalize all words (except of, the, and, at, for, de, du, la, le, etc.)</li></ul>");
+        $ret .= "Name of school:</td><td valign='top'>" . LJ::html_text({ name => "name", size => 50, value => $name }) . "<br />&nbsp;&nbsp;" . $ex->("University of California Berkeley, Oregon State University<br /><ul><li>Type in the school's full name (e.g. \"Harvard College\" instead of just \"Harvard\")</li><li>No abbreviations.  (Spell out University, North, State, High School, etc.)</li><li>For schools with multiple location, add the city/campus after a dash (ex: University of Texas - Austin)</li><li>Don't use \"The\" in the beginning</li><li>Capitalize all words (except of, the, and, at, for, de, du, la, le, etc.)</li></ul>");
         $ret .= "</td></tr><tr><td colspan='2'>";
         $ret .= $inerr->('name');
         $ret .= "</td></tr><tr><td valign='top'>";
