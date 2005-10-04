@@ -33,7 +33,7 @@ body<=
     return $err->('You do not have access to use this tool.')
         unless (LJ::check_priv($remote, 'siteadmin', 'school'));
 
-    my $getextra;
+    my $getextra = '';
 
     if (LJ::did_post()) {
 
