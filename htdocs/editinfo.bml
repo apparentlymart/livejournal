@@ -362,7 +362,7 @@ _code?>
             # opt_mangleemail
             $ret .= "<table style='margin-bottom: 20px;'>\n<tr valign='middle'><td>";
             $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_mangleemail', 'id' => 'opt_mangleemail',
-                                     'selected' => $u->{'opt_mangleemail'} ne 'Y' });
+                                     'selected' => $u->{'opt_mangleemail'} eq 'Y' });
             $ret .= "</td><td><b><label for='opt_mangleemail'>$ML{'.mangleaddress.header'}</label></b></td></tr>\n";
             $ret .= "<tr><td>&nbsp;</td><td>$ML{'.mangleaddress.about'}</td></tr>\n</table>\n";
 
