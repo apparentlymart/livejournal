@@ -633,18 +633,18 @@ sub approve_pending {
 #          name, citycode, statecode, countrycode, url, userid.  Undef on error!
 # </LJFUNC>
 sub get_pending {
-    my ($u, $country, $state, $city) = @_;
+    my ($u, $ctc, $sc, $cc) = @_;
 
     $u = LJ::want_user($u);
     return undef unless $u;
 
-    return undef if ($state || $city) && !$country;
+    return undef if (defined $sc || defined $cc) && !defined $ctc;
 
     # might get some nulls
-    my @args1 = grep { defined $_ } ($country, $state, $city);
-    my $ccs = defined $country ? "country = ?" : "1";
-    my $scs = defined $state   ? "state = ?"   : "1";
-    my $ics = defined $city    ? "city = ?"    : "1";
+    my @geoargs = grep { defined $_ } ($ctc, $sc, $cc);
+    my $ccs = defined $ctc ? "country = ?" : "1";
+    my $scs = defined $sc  ? "state = ?"   : "1";
+    my $ics = defined $cc  ? "city = ?"    : "1";
 
     # need db
     my $dbh = LJ::get_db_writer();
@@ -656,7 +656,7 @@ sub get_pending {
             FROM schools_pending
             WHERE $ccs AND $scs AND $ics
             LIMIT 200
-        }, 'pendid', undef, @args1);
+        }, 'pendid', undef, @geoargs);
     return undef if $dbh->err;
 
     # step 2: now, we want to find one that isn't being dealt with; I think we will
@@ -665,7 +665,7 @@ sub get_pending {
     my $pend;
     foreach my $pendid (keys %$rows) {
         my $userid = LJ::MemCache::get([ $pendid, "sapiu:$pendid" ]);
-        next if $userid ne $u->{userid};
+        next if $userid;
 
         # nobody's touching it, so mark it for us for 10 minutes
         $pend = $pendid;
