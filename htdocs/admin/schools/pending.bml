@@ -73,16 +73,20 @@ body<=
             return "Unable to delete schools"
                 unless $drv;
         }
-        
+
+        my $primary_act = $POST{'primary_act'};
+        return "Invalid primary action"
+            unless $primary_act =~ /^approve|delete|ignore$/;
+
         # See if they are deleting primary
-        if ($POST{"delete$pri"}) {
+        if ($primary_act eq 'delete') {
             my $rv = LJ::Schools::reject_pending([$pri]);
 
             return "Unable to delete primary school"
                 unless $rv;
 
             return BML::redirect("pending.bml$getextra");
-        } else {
+        } elsif ($primary_act eq 'approve') {
             my $country = $POST{country};
             my $city = $POST{city};
             my $name = $POST{name};
@@ -150,6 +154,11 @@ body<=
             }
 
             return BML::redirect("pending.bml$getextra");
+
+        # Someday we may do more in the ignore action, but for now
+        # it is just a redirect
+        } elsif ($primary_act eq 'ignore') {
+            return BML::redirect("pending.bml$getextra");
         }
 
         return $ret;
@@ -210,25 +219,30 @@ body<=
         $ret .= "URL: <?de (optional) de?></td><td>" . LJ::html_text({ name => "url", size => 50, value => $primary->{url} }) . "<br />";
         $ret .= "</td></tr><tr><td colspan='2'>";
         $ret .= $inerr->('url');
-        $ret .= "</td></tr><tr><td colspan='2'>Delete Instead: ";
-        $ret .= LJ::html_check({name => "delete$primary->{pendid}"});
+        $ret .= "</td></tr><tr><td>Primary Action:</td><td>";
+        $ret .= LJ::html_select(
+                                {
+                                    name     => "primary_act",
+                                    selected => "approve",
+                                }, ( 'approve' => 'Approve', 'delete' => 'Delete', 'ignore' => 'Ignore')
+                                );
         $ret .= "</td></tr><tr><td colspan='2'>";
-        $ret .= LJ::html_submit("Approve School");
+        $ret .= LJ::html_submit("Do It!");
         $ret .= "</td></tr></table>";
 
-
         if (%$secondary || %$tertiary) {
-            $ret .= "<table border='1'>";
-            $ret .= "<tr><th>Related</th><th>Name</th><th>City</th><th>State</th><th>URL</th><th>Delete!</th></tr>";
+            $ret .= "<br /><table border='0'>";
+            $ret .= "<tr><th>Approve<br />Into Primary</th><th>Reject<br />Fully</th><th>Name</th><th>City</th><th>State</th><th>URL</th></tr>";
             foreach my $school (sort { $a->{name} cmp $b->{name}} values %$secondary, values %$tertiary) {
-                $ret .= "<tr><td>";
-                $ret .= LJ::html_check({ 'type' => 'check', 'name' => $school->{pendid}, value => $school->{userid}});
-                $ret .= "</td><td>";
-                $ret .= LJ::ehtml($school->{name}) . '</td><td>';
-                $ret .= LJ::ehtml($school->{city}) . '</td><td>';
-                $ret .= LJ::ehtml($school->{state}) . '</td><td>';
-                $ret .= LJ::ehtml($school->{url})  . '</td><td>';
+                $ret .= "<tr><td align='center'>";
+                $ret .= LJ::html_check({ 'type' => 'check', 'name' => $school->{pendid}, id => $school->{pendid}, value => $school->{userid}});
+                $ret .= "</td><td align='center'>";
                 $ret .= LJ::html_check({ 'type' => 'check', 'name' => "delete$school->{pendid}" });
+                $ret .= "</td><td><label for='$school->{pendid}'>";
+                $ret .= LJ::ehtml($school->{name}) . '</label></td><td align="center">';
+                $ret .= LJ::ehtml($school->{city}) . '</td><td align="center">';
+                $ret .= LJ::ehtml($school->{state}) . '</td><td>';
+                $ret .= LJ::ehtml($school->{url});
                 $ret .= "</td></tr>";
             }
             $ret .= "</table>";
