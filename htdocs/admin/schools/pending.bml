@@ -231,7 +231,7 @@ body<=
         $ret .= "</td></tr></table>";
 
         if (%$secondary || %$tertiary) {
-            $ret .= "<br /><table border='0'>";
+            $ret .= "<br /><table border='1'>";
             $ret .= "<tr><th>Approve<br />Into Primary</th><th>Reject<br />Fully</th><th>Name</th><th>City</th><th>State</th><th>URL</th></tr>";
             foreach my $school (sort { $a->{name} cmp $b->{name}} values %$secondary, values %$tertiary) {
                 $ret .= "<tr><td align='center'>";
