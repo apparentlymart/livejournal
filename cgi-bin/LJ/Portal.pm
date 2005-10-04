@@ -24,20 +24,29 @@ sub load_box_typeid {
 
     my $boxid;
 
-    # box does not have an ID registered for itself in the DB
-    # try to insert
-    my $dbh = LJ::get_db_writer;
-    $dbh->do("INSERT IGNORE INTO portal_typemap (class_name) VALUES (?)",
-                       undef, $class);
 
-    if ($dbh->{'mysql_insertid'}) {
-        # inserted fine, get ID
-        $boxid = $dbh->{'mysql_insertid'};
-    } else {
-        # race condition, try to select again
-        $boxid = $dbh->selectrow_array("SELECT id FROM portal_typemap WHERE class_name = ?",
-                                       undef, $class)
-                                       or die "Portal typemap should have found ID after race";
+    my $dbh = LJ::get_db_writer;
+
+    # check DB to see if box already has ID
+    $boxid = $dbh->selectrow_array("SELECT id FROM portal_typemap WHERE class_name = ?",
+                                   undef, $class);
+
+    if (!$boxid) {
+        # box does not have an ID registered for itself in the DB
+        # try to insert
+
+        $dbh->do("INSERT IGNORE INTO portal_typemap (class_name) VALUES (?)",
+                 undef, $class);
+
+        if ($dbh->{'mysql_insertid'}) {
+            # inserted fine, get ID
+            $boxid = $dbh->{'mysql_insertid'};
+        } else {
+            # race condition, try to select again
+            $boxid = $dbh->selectrow_array("SELECT id FROM portal_typemap WHERE class_name = ?",
+                                           undef, $class)
+                or die "Portal typemap should have found ID after race";
+        }
     }
 
     $LJ::PORTAL_TYPEMAP{$class} = $boxid;
