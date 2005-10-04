@@ -705,13 +705,13 @@ body<=
         if ($sp->{'timelasthelp'} > ($sp->{'timetouched'}+5)) {
             $ret .= "<tr><td align='right'>Put in Queue:</td><td>";
             $ret .= LJ::html_check({ 'type' => 'checkbox', 'name' => 'touch',
-                                     'onclick' => 'return doRegreen();' });
+                                     'onclick' => 'doRegreen();' });
             $ret .= "<?de (Use this to re-open the request.) de?>\n";
             $ret .= "</td></tr>\n";
         } else {
             $ret .= "<tr><td align='right'>Take out of Queue:</td><td>";
             $ret .= LJ::html_check({ 'type' => 'checkbox', 'name' => 'untouch',
-                                     'onclick' => 'return doDegreen();' });
+                                     'onclick' => 'doDegreen();' });
             $ret .= "<?de (Use this to change status to &quot;awaiting close&quot;.) de?>\n";
             $ret .= "</td></tr>\n";
         }
