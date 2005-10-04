@@ -641,7 +641,7 @@ sub get_pending {
     return undef if ($state || $city) && !$country;
 
     # might get some nulls
-    my @args = grep { defined $_ } ($country, $state, $city);
+    my @args1 = grep { defined $_ } ($country, $state, $city);
     my $ccs = defined $country ? "country = ?" : "1";
     my $scs = defined $state   ? "state = ?"   : "1";
     my $ics = defined $city    ? "city = ?"    : "1";
@@ -656,7 +656,7 @@ sub get_pending {
             FROM schools_pending
             WHERE $ccs AND $scs AND $ics
             LIMIT 200
-        }, 'pendid', undef, @args);
+        }, 'pendid', undef, @args1);
     return undef if $dbh->err;
 
     # step 2: now, we want to find one that isn't being dealt with; I think we will
