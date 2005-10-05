@@ -607,7 +607,7 @@ EOT
 
 
     $ret .= "<?standout ";
-    $ret .= LJ::html_submit($ML{'/manage/phonepost.bml.save'});
+    $ret .= LJ::html_submit($ML{'/manage/voicepost.bml.save'});
     $ret .= " standout?>";
     $ret .= "</form>";
     return $ret;
