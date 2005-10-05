@@ -296,7 +296,7 @@ body<=
 
         $ret .= "<ul>";
         foreach my $ct (@sorted) {
-            $ret .= "<li><a href='$LJ::SITEROOT/schools/?ctc=$ct'>$cts->{$ct}</a></li>\n";
+            $ret .= "<li><a href='$LJ::SITEROOT/schools/?ctc=$ct'>" . LJ::ehtml($cts->{$ct}) . "</a></li>\n";
         }
         $ret .= "</ul>";
 
@@ -336,6 +336,7 @@ body<=
         foreach my $sc (sort { $scs->{$a} cmp $scs->{$b} } keys %{$scs}) {
             my $esc = LJ::eurl($sc);
             my $val = $scs->{$sc} || "<i>undefined state or province</i>";
+            $val = LJ::ehtml($val);
             $ret .= "<li><a href='$LJ::SITEROOT/schools/?ctc=$ctc&sc=$esc'>$val</a></li>\n";
         }
         $ret .= "</ul>";
@@ -371,7 +372,7 @@ body<=
         $ret .= "<ul>";
         foreach my $cc (sort { $ccs->{$a} cmp $ccs->{$b} } keys %{$ccs}) {
             my $esc = LJ::eurl($cc);
-            $ret .= "<li><a href='$LJ::SITEROOT/schools/?ctc=$ctc&sc=$sc&cc=$esc'>$ccs->{$cc}</a></li>\n";
+            $ret .= "<li><a href='$LJ::SITEROOT/schools/?ctc=$ctc&sc=$sc&cc=$esc'>" . LJ::ehtml($ccs->{$cc}) . "</a></li>\n";
         }
         $ret .= "</ul>";
 
@@ -403,7 +404,8 @@ body<=
 
         $ret .= "<ul>";
         foreach my $sid (sort { $schools->{$a} cmp $schools->{$b} } keys %{$schools}) {
-            $ret .= "<li><a href='$LJ::SITEROOT/schools/?ctc=$ctc&sc=$sc&cc=$ecc&sid=$sid'>$schools->{$sid}</a></li>\n";
+            $ret .= "<li><a href='$LJ::SITEROOT/schools/?ctc=$ctc&sc=$sc&cc=$ecc&sid=$sid'>";
+            $ret .= LJ::ehtml($schools->{$sid}) . "</a></li>\n";
         }
         $ret .= "</ul>";
 
