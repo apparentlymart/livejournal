@@ -335,8 +335,7 @@ body<=
         $ret .= "<ul>";
         foreach my $sc (sort { $scs->{$a} cmp $scs->{$b} } keys %{$scs}) {
             my $esc = LJ::eurl($sc);
-            my $val = $scs->{$sc} || "<i>undefined state or province</i>";
-            $val = LJ::ehtml($val);
+            my $val = LJ::ehtml($scs->{$sc}) || "<i>undefined state or province</i>";
             $ret .= "<li><a href='$LJ::SITEROOT/schools/?ctc=$ctc&sc=$esc'>$val</a></li>\n";
         }
         $ret .= "</ul>";
