@@ -464,7 +464,8 @@ sub type_id_to_string {
         }
     }
 
-    die "Could not map portal type $typeid to a class name.\n";
+    # box could not be mapped, die silently
+    return undef;
 }
 
 # look to see if there are any boxes of this class instantiated and return
