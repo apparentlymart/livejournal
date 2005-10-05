@@ -91,13 +91,14 @@ sub generate_content {
         $count{$_}++  foreach (keys %$fr);
     }
 
-    my @pop = (sort { $count{$b} <=> $count{$a} } keys %count)[0..$maxitems];
+    my @pop = (sort { $count{$b} <=> $count{$a} } keys %count);
 
     my $rows;
     my $shown;
 
     my $fofus = LJ::load_userids(@pop);
 
+    my $displayed = 0;
     foreach my $popid (@pop) {
         # don't show self
         next if ($popid eq $u->{'userid'});
@@ -114,6 +115,8 @@ sub generate_content {
 
         my $count = $count{$popid};
         next if $count == 0;
+
+        last if $displayed++ >= $maxitems;
 
         $rows .= "<tr><td>" . LJ::ljuser($fofu) . " - " . LJ::ehtml($fofu->{name}) .
             "</td><td align='right'>$count</td>";
