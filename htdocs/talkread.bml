@@ -15,16 +15,14 @@ body<=
 
  return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
-
-
  my $pics = LJ::Talk::get_subjecticons();
 
  ## workaround mail client bug when don't understand quoted-printable.
- ## Only correct 'journal' if 'itemid' was also broken, to avoid the 
+ ## Only correct 'journal' if 'itemid' was also broken, to avoid the
  ## unlikely clash with a journal name.
  if ($GET{'itemid'} =~ s/^3D//) {
      $GET{'journal'} =~ s/^3D//;
-     $GET{'thread'} =~ s/^3D//; 
+     $GET{'thread'} =~ s/^3D//;
  }
 
  my $r = Apache->request;
@@ -71,7 +69,7 @@ body<=
  }
 
  # now check for init->error, since we know the account wasn't renamed
- return "<?h1 $ML{'Error'} h1?><?p $init->{'error'} p?>" if $init->{'error'}; 
+ return "<?h1 $ML{'Error'} h1?><?p $init->{'error'} p?>" if $init->{'error'};
 
  LJ::load_user_props($u, "opt_blockrobots") if $u->{'statusvis'} eq 'V';
  if ($u->{'statusvis'} ne 'V' || $u->{'opt_blockrobots'}) {
@@ -115,11 +113,18 @@ body<=
 
  my $remote = LJ::get_remote();
 
+ my $tz_remote;
+ my $s2_ctx = [];  # ghetto fake S2 context object
+ if ($remote) {
+     my $tz = $remote->prop("timezone");
+     $tz_remote = $tz ? eval { DateTime::TimeZone->new( name => $tz); } : undef;
+ }
+
  # set viewall/viewsome
  my $viewall = 0;
  my $viewsome = 0;
  if ($GET{viewall} && LJ::check_priv($remote, 'canview')) {
-     LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
+     LJ::statushistory_add($u->{'userid'}, $remote->{'userid'},
                            "viewall", "entry: $u->{'user'}, itemid: $item->{'itemid'}, statusvis: $u->{'statusvis'}");
      $viewall = LJ::check_priv($remote, 'canview', '*');
      $viewsome = $viewall || LJ::check_priv($remote, 'canview', 'suspended');
@@ -235,7 +240,7 @@ body<=
 
  $ret .= "<div style='margin-left: 30px'>";
 
- if (%current) 
+ if (%current)
  {
      $ret .= "<table border=0>\n";
      foreach (sort keys %current) {
@@ -324,6 +329,7 @@ body<=
  $LJ_cmtinfo{'journal'} = $u->{user};
  $LJ_cmtinfo{'canAdmin'} = LJ::can_manage($remote, $u) ? 1 : 0;
  $LJ_cmtinfo{'remote'} = $remote ? $remote->{user} : "";
+ my $fmt_time_short = "%%HH%%:%%min%% %%a%%m";
 
  my $recurse_post = sub
  {
@@ -335,7 +341,13 @@ body<=
      my $dtid = $tid * 256 + $init->{'anum'};
      my $LJci = $LJ_cmtinfo{$dtid} = { rc => [], u => '' };
 
-     my $datepost = "<font size='-1'>" . substr($post->{'datepost'}, 0, 16) . "</font>";
+     my $s2_datetime = $tz_remote ?
+         LJ::S2::DateTime_tz($post->{'datepost_unix'}, $tz_remote) :
+         LJ::S2::DateTime_unix($post->{'datepost_unix'});
+
+     my $datepost = S2::Builtin::LJ::Date__date_format($s2_ctx, $s2_datetime, "iso") .
+         " " . S2::Builtin::LJ::DateTime__time_format($s2_ctx, $s2_datetime, $fmt_time_short) .
+         ($tz_remote ? " (local)" : " UTC");
 
      my $bgcolor = ($opts->{'depth'} % 2) ? "emcolorlite" : "emcolor";
      $bgcolor = BML::get_template_def($bgcolor);
@@ -406,16 +418,16 @@ body<=
              my $cleansubject = LJ::ehtml($post->{'subject'});
              $ret .= "<font size='+1' face='Arial,Helvetica'><b>$cleansubject</b></font> $icon";
              $ret .= "<br />$user\n";
-             $ret .= "<br />$datepost\n";
+             $ret .= "<br /><font size='-1'>$datepost</font>\n";
              if ($post->{'props'}->{'poster_ip'} && $remote &&
                  ($remote->{'user'} eq $up->{'user'} ||
                   LJ::can_manage($remote, $u) || $viewall))
              {
                  $ret .= BML::ml('.fromip', {'ip'=>$post->{'props'}->{'poster_ip'}});
              }
-             
+
              $ret .= " <font size='-1'>(<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dtid") . "#t$dtid'>$T{'link'}</a>)</font> ";
-             
+
              if (LJ::Talk::can_delete($remote, $u, $up, $userpost)) {
                  $ret .= "<a href='/delcomment.bml?${jargent}id=$dtid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
              }
@@ -430,12 +442,12 @@ body<=
                  $ret .= "<a href='/talkscreen.bml?mode=unfreeze&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_unfreeze", "", { align => 'absmiddle', hspace => 2, vspace => }) . "</a>";
              }
 
-             if ($post->{'state'} ne 'S' && 
+             if ($post->{'state'} ne 'S' &&
                  LJ::Talk::can_screen($remote, $u, $up, $userpost)) {
                  $ret .= "<a href='/talkscreen.bml?mode=screen&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_scr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
              }
-             
-             if ($post->{'state'} eq 'S' && 
+
+             if ($post->{'state'} eq 'S' &&
                  LJ::Talk::can_unscreen($remote, $u, $up, $userpost)) {
                  $ret .= "<a href='/talkscreen.bml?mode=unscreen&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_unscr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
              }
@@ -488,7 +500,7 @@ body<=
 
              $ret .= "<a name='t$dtid'></a><table><tr>";
              $ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
-             $ret .= "<td><a href='" . LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine) . "#t$dtid'>" . LJ::ehtml($post->{'subject'} || $T{'nosubject'}) . "</a> - $user, <i>$post->{'datepost'}</i>";
+             $ret .= "<td><a href='" . LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine) . "#t$dtid'>" . LJ::ehtml($post->{'subject'} || $T{'nosubject'}) . "</a> - $user, <i>$datepost</i>";
 
              # Comment Posted Notice
              $ret .= " - <b>$ML{'.posted'}</b>"
