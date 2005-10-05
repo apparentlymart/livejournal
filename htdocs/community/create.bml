@@ -19,6 +19,8 @@ body<=
         if $remote->{journaltype} ne 'P';
     return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.notactive'} p?>"
         unless $remote->{statusvis} eq 'V';
+    return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.notvalidated'} p?>"
+        unless $remote->{status} eq 'A';
 
     if ($remote->underage) {
         return BML::redirect("$LJ::SITEROOT/agecheck/?s=1");

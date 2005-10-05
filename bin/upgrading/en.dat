@@ -166,6 +166,8 @@ Regards,
 
 /community/create.bml.error.notperson=You must be logged in as a personal account to create a community.
 
+/community/create.bml.error.notvalidated=Your email address must be validated in order to create a community.
+
 /community/create.bml.error.postrequired=POST required.
 
 /community/create.bml.error.username.inuse=Account name already in use; please select a different one.
