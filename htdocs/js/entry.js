@@ -245,6 +245,17 @@ function onUpload (url, width, height) {
         ta.value = ta.value + "\n<img src=\"" + url + "\" width=\"" + width + "\" height=\"" + height + "\" />";
 }
 
+function onUpload (url) {
+        var ta = document.getElementById("updateForm");
+        var fail = function (msg) {
+            alert("FAIL: " + msg);
+            return 0;
+        };
+        if (! ta) return fail("no updateform");
+        ta = ta.event;
+        ta.value = ta.value + "\n<img src=\"" + url + "\" />";
+}
+
 var currentPopup;
 function onInsertObject () {
     onClosePopup();
@@ -254,11 +265,12 @@ function onInsertObject () {
     de.style.overflow = "hidden";
     de.style.position = "absolute";
     de.style.left = 150 + "px";
-    de.style.top = 300 + "px";
-    de.style.width = "50em";
-    de.style.height = "10em";
+    de.style.top = 200 + "px";
+    de.style.border = "2px";
+    de.style.borderStyle = "solid";
+    de.style.borderColor = "#bbddff";
     de.style.backgroundColor = "#fff";
-    de.innerHTML = "<iframe src='imgupload.bml' style='border: 0; overflow: hidden; width: 50em; height: 10em; display: block;'></iframe>";
+    de.innerHTML = "<iframe src='imgupload.bml' style='border: 0; overflow: hidden; width: 60em; height: 40em; display: block;'></iframe>";
     currentPopup = de;
     document.body.appendChild(de);
 }

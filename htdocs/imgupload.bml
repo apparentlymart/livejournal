@@ -6,56 +6,82 @@
     my $u = LJ::User->remote;
     return "" unless $u;
 
-    if (my $ct = $GET{upload_count}) {
+    if ($GET{upload_count} || LJ::did_post()) {
         my $js = "";
-        for my $pn (1..$ct) {
-            my $width  = int($GET{"w_$pn"});
-            my $height = int($GET{"h_$pn"});
-            my $eurl   = LJ::ejs($GET{"u_$pn"});
-            $js .= "window.parent.onUpload(\"$eurl\", $width, $height);\n";
+
+        if (my $ct = $GET{upload_count}) {
+            for my $pn (1..$ct) {
+                my $width  = int($GET{"w_$pn"});
+                my $height = int($GET{"h_$pn"});
+                my $eurl   = LJ::ejs($GET{"u_$pn"});
+                $js .= "window.parent.onUpload(\"$eurl\", $width, $height);\n";
+            }
+
+        # From URL
+        } else {
+            my $img = LJ::ejs($POST{'url'});
+            $js = "window.parent.onUpload(\"$img\")\n";
         }
+
+
         my $ret = qq{
             <html>
-<body>
-  <script>
-  if (window.parent && window.parent.onUpload) {
-     $js
-       window.parent.onClosePopup();
-     }
-  </script>
+                <body>
+                <script>
+                if (window.parent && window.parent.onUpload) {
+                    $js
+                    window.parent.onClosePopup();
+                }
+                </script>
+                </body>
+            </html>
+        };
+        return $ret;
 
-</body>
-</html>
-};
+    } else {
+        my $step = 1;
+        my $ret;
+
+        $ret = qq{
+            <html>
+                <head>
+                <style>
+                    body { font: 10pt verdana; background: #ffffff;}
+                </style>
+                <script>
+                    function onCancel () {
+                        window.parent.onClosePopup();
+                    }
+                </script>
+                </head>
+                <body>
+            };
+
+        $ret .= "<table width='100%'>";
+        $ret .= "<tr><td align='left'><?h1 What sort of image? h1?></td><td align='right'><a href='#' onclick='onCancel();return false;'>";
+        $ret .= "<img src='$LJ::IMGROOT/img/portal/PortalConfigCloseButton.gif' border='0' /></a></td></tr>";
+        $ret .= "<tr><td colspan='2'>";
+
+        if ($step == 1) {
+            $ret .= "<br /><table width='90%'>";
+            $ret .= "<tr><td>";
+            $ret .= "<form method='POST' action='imgupload.bml'>";
+            $ret .= LJ::html_check({ 'type' => 'radio', 'name' => 'method', 'value' => 'url', 'selected' => 1 });
+            $ret .= " Image from URL:</td><td>" . LJ::html_text({ 'name' => 'url', 'size' => '50' });
+            $ret .= LJ::html_submit('go', 'Go!');
+            $ret .= "</form></td></tr>";
+            $ret .= "<tr><td>";
+            $ret .= LJ::html_check({ 'type' => 'radio', 'name' => 'method', 'value' => 'file' });
+            $ret .= " Image from file:</td><td>";
+            $ret .= "<form enctype='multipart/form-data' action='$LJ::FB_SITEROOT/interface/webupload' method='post'>";
+            $ret .= LJ::html_hidden('redir_to_auth_base', '1', 'sec1', '255');
+            $ret .= "<input type='file' name='file1' size='50' /><br />";
+            $ret .= "<input type='submit' value='Upload!' /></form></td></tr>";
+
+            $ret .= "</table></td></tr></table>";
+        }
+        $ret .= "</body></html>";
         return $ret;
     }
-
-    my $ret = qq{
-<html>
-<head>
-   <style>
-   body { font: 10pt verdana; background: #ccc;}
-   </style>
-   <script>
-   function onCancel () {
-       window.parent.onClosePopup();
-   }
-   </script>
-</head>
-<body>
-<form enctype="multipart/form-data" action="$LJ::FB_SITEROOT/interface/webupload" method='post'>
-<input type='hidden' name='redir_to_auth_base' value='1' />
-<input type='hidden' name='sec1' value='255' /> <!-- public -->
-
-<table>
-<tr><td align='right'>Image file to upload:</td><td><input type='file' name='file1' width='60' /></td></tr>
-<tr><td align='right'>&nbsp;</td><td><input type='submit' value="Upload!" /> <input type='button' value="Cancel" onclick='onCancel()' /></td></tr>
-</table>
-
-</form>
-</body>
-</html>
-};
-    return $ret;
 }
 _code?>
