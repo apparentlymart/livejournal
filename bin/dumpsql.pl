@@ -25,7 +25,7 @@ my %skip_auto = ("userproplist" => "name",
                  "logproplist" => "name",
                  "priv_list" => "privcode",
                  "supportcat" => "catkey",
-                 "ratelist" => "rlid",
+                 "ratelist" => "name",
                  );
 
 # get tables to export
