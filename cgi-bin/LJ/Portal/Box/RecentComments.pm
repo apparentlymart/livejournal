@@ -39,7 +39,7 @@ sub generate_content {
     my $jargent = "journal=$u->{'user'}&amp;";
 
     # Retrieve received
-    @recv = $u->get_recent_talkitems($maxshow);
+    @recv = $u->get_recent_talkitems(POSIX::ceil(($maxshow * 3) / 2) + 1);
     foreach my $post (@recv) {
         $need_userid{$post->{posterid}} = 1 if $post->{posterid};
         $talkids{$post->{jtalkid}} = 1;
