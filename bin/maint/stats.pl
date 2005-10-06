@@ -448,9 +448,9 @@ $maint{'genstats_weekly'} = sub
                    my $buildup = 0;
 
                    my $sth = $db->prepare
-                       ("SELECT u.userid, SUM(sp.points) AS 'points' " .
-                        "FROM user u, supportpoints sp " .
-                        "WHERE u.userid=sp.userid GROUP BY 1 ORDER BY 2 DESC");
+                       ("SELECT userid, SUM(points) AS 'points' " .
+                        "FROM supportpoints " .
+                        "GROUP BY 1 ORDER BY 2 DESC");
                    $sth->execute;
                    die $db->errstr if $db->err;
 
