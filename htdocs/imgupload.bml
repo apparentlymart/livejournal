@@ -42,13 +42,23 @@
         my $step = 1;
         my $ret;
 
+        my $sbenabled = LJ::get_cap($u, 'fb_account') && LJ::get_cap($u, 'fb_can_upload');
+
         $ret = qq{
             <html>
                 <head>
                 <style>
                     body { font: 10pt verdana; background: #ffffff;}
+                    .insobjOuter {  border: 1px solid;}
+                    .insobjStep { background: <?altcolor1?>; vertical-align: top; width: 100%; }
+                    .insobjNav { background: <?altcolor2?>; text-align: right; vertical-align: middle; width: 100%; height: 30px; padding-top: 6px;}
+                    .insobjContent { padding-bottom: 15px; }
+                    table { width: 100%; margin: 0px}
                 </style>
                 <script>
+                    var fileaction = '$LJ::FB_SITEROOT/interface/webupload';
+                    var urlaction = 'imgupload.bml';
+
                     function onCancel () {
                         window.parent.onClosePopup();
                     }
@@ -57,30 +67,61 @@
                 <body>
             };
 
-        $ret .= "<table width='100%'>";
-        $ret .= "<tr><td align='left'><?h1 What sort of image? h1?></td><td align='right'><a href='#' onclick='onCancel();return false;'>";
+        $ret .= "<div class='insobjOuter' id='insobjOuter'>";
+        $ret .= "<form id='insobjform' action='imgupload.bml' method='post' onsubmit='return window.parent.handleForm()' >";
+        $ret .= "<div class='insobjStep'>";
+        $ret .= "<table><tr><td align='left'><?h1 From where would you like to insert your image? h1?></td><td align='right' valign='top'><a href='#' onclick='onCancel();return false;'>";
         $ret .= "<img src='$LJ::IMGROOT/img/portal/PortalConfigCloseButton.gif' border='0' /></a></td></tr>";
-        $ret .= "<tr><td colspan='2'>";
+        $ret .= "</table></div><div class='insobjContent'><table><tr><td>";
+
 
         if ($step == 1) {
-            $ret .= "<br /><table width='90%'>";
+            $ret .= "<table>";
             $ret .= "<tr><td>";
-            $ret .= "<form method='POST' action='imgupload.bml'>";
-            $ret .= LJ::html_check({ 'type' => 'radio', 'name' => 'method', 'value' => 'url', 'selected' => 1 });
-            $ret .= " Image from URL:</td><td>" . LJ::html_text({ 'name' => 'url', 'size' => '50' });
-            $ret .= LJ::html_submit('go', 'Go!');
-            $ret .= "</form></td></tr>";
+            $ret .= LJ::html_check({
+                'type'     => 'radio',
+                'name'     => 'method',
+                'id'       => 'fromurl',
+                'value'    => 'url',
+                'selected' => 1,
+                'onfocus'  => "window.parent.selectRadio('fromurl');"
+                });
+            $ret .= " <label for='fromurl'>Image from URL:</label></td><td>";
+            $ret .= LJ::html_text({
+                'name'    => 'url',
+                'id'      => 'fromurlentry',
+                'size'    => '50',
+                'onfocus' => "window.parent.selectRadio('fromurl');"
+                });
+            $ret .= "</td></tr>";
             $ret .= "<tr><td>";
-            $ret .= LJ::html_check({ 'type' => 'radio', 'name' => 'method', 'value' => 'file' });
-            $ret .= " Image from file:</td><td>";
-            $ret .= "<form enctype='multipart/form-data' action='$LJ::FB_SITEROOT/interface/webupload' method='post'>";
+            $ret .= LJ::html_check({
+                'type'  => 'radio',
+                'name'  => 'method',
+                'id'    => 'fromfile',
+                'value' => 'file',
+                'onfocus' => "window.parent.selectRadio('fromfile');",
+                'disabled' => $sbenabled ? 0 : 1,
+                });
+            $ret .= " <label for='fromfile'>Image from file</label>:</td><td  style='padding-top: 20px;'>";
             $ret .= LJ::html_hidden('redir_to_auth_base', '1', 'sec1', '255');
-            $ret .= "<input type='file' name='file1' size='50' /><br />";
-            $ret .= "<input type='submit' value='Upload!' /></form></td></tr>";
 
-            $ret .= "</table></td></tr></table>";
+            my $disabled = $sbenabled ? '' : "disabled='1'";
+
+            $ret .= "<div id='filediv'><input type='file' name='file1' id='fromfileentry' size='50' onclick=\"window.parent.selectRadio('fromfile');\" $disabled /></div>";
+
+            $ret .= LJ::run_hook('update_insobj_sb', $sbenabled);
+
+            $ret .= "</td></tr>";
+
+            $ret .= "</table>";
         }
-        $ret .= "</body></html>";
+
+        $ret .= "</td></tr></table></div>";
+        $ret .= "<div class='insobjNav'>";
+        $ret .= LJ::html_submit('insert', 'Insert', { 'id' => 'insbutton' });
+        $ret .= "&nbsp;&nbsp;&nbsp;</div>";
+        $ret .= "</form></div></body></html>";
         return $ret;
     }
 }

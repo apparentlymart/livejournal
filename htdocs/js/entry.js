@@ -257,9 +257,11 @@ function onUpload (url) {
 }
 
 var currentPopup;
+var currentPopupWindow;
 function onInsertObject () {
     onClosePopup();
     var de = document.createElement("div");
+    de.id = "updateinsobject";
     de.style.textAlign = "left";
     de.className = 'updateinsobject';
     de.style.overflow = "hidden";
@@ -270,9 +272,10 @@ function onInsertObject () {
     de.style.borderStyle = "solid";
     de.style.borderColor = "#bbddff";
     de.style.backgroundColor = "#fff";
-    de.innerHTML = "<iframe src='imgupload.bml' style='border: 0; overflow: hidden; width: 60em; height: 40em; display: block;'></iframe>";
+    de.innerHTML = "<iframe src='imgupload.bml' name='insobjiframe' id='insobjiframe' style='border: 0; overflow: hidden; width: 60em; height: 15em; display: block;'></iframe>";
     currentPopup = de;
     document.body.appendChild(de);
+    currentPopupWindow = document.getElementById('insobjiframe').contentWindow;
 }
 
 function onClosePopup() {
@@ -281,3 +284,81 @@ function onClosePopup() {
     currentPopup = null;
 }
 
+function selectRadio(which) {
+    if (! currentPopup) { alert('no popup'); return false; }
+    if (! currentPopupWindow) { alert('no popup window'); return false; }
+
+    var radio = currentPopupWindow.document.getElementById(which);
+    if (! radio) { alert('no radio button'); return false; }
+    radio.checked = true;
+
+    var eirv = emptyInput(which);
+    if (! eirv) return false;
+
+    var cbrv = changeButton(which);
+    if (! cbrv) return false;
+
+    return true;
+}
+
+function emptyInput(selected) {
+    var fromurl  = currentPopupWindow.document.getElementById('fromurlentry');
+    var fromfile = currentPopupWindow.document.getElementById('fromfileentry');
+
+    if (! fromurl)  { alert('no fromurlentry'); return false; }
+    if (! fromfile) { alert('no fromfileentry'); return false; }
+
+    if (selected == 'fromurl') {
+        var filediv = currentPopupWindow.document.getElementById('filediv');
+        filediv.innerHTML = filediv.innerHTML;
+
+        fromurl.focus();
+
+        return true;
+    } else if (selected == 'fromfile') {
+        fromurl.value = '';
+        fromfile.focus();
+
+        return true;
+    } else {
+        alert('Not matching empty type');
+        return false;
+    }
+}
+
+function changeButton(selected) {
+    var submit = currentPopupWindow.document.getElementById('insbutton');
+    if (! submit) { alert('no submit button'); return false; }
+
+    if (selected == 'fromfile') {
+        submit.value = 'Upload';
+    } else if (selected == 'fromsb') {
+        submit.value = 'Continue ->';
+    } else {
+        submit.value = 'Insert';
+    }
+
+    return true;
+}
+
+function handleForm() {
+    var fileradio = currentPopupWindow.document.getElementById('fromfile');
+    var urlradio  = currentPopupWindow.document.getElementById('fromurl');
+    if (! fileradio) { alert('no file radio button'); return false; }
+    if (! urlradio)  { alert('no url radio button'); return false; }
+
+    var form = currentPopupWindow.document.getElementById('insobjform');
+    if (! form)  { alert('no form'); return false; }
+
+    if (fileradio.checked == 1) {
+        form.action = currentPopupWindow.fileaction;
+        form.enctype = "multipart/form-data";
+        return true;
+    } else if (urlradio.checked == 1) {
+        form.action = currentPopupWindow.urlaction;
+        return true;
+    } else {
+        alert('unknown radio button checked');
+        return false;
+    }
+}
