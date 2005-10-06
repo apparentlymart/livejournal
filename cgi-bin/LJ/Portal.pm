@@ -71,7 +71,7 @@ sub get_faq_link {
     my $faqid = shift;
 
     return qq {
-        <a href="$LJ::SITEROOT/support/faqbrowse.bml?faqid=$faqid"><img src="$LJ::IMGPREFIX/help.gif" class="PortalFaqLink" /></a>
+        <a href="$LJ::SITEROOT/support/faqbrowse.bml?faqid=$faqid"><img src="$LJ::IMGPREFIX/help.gif" class="PortalFaqLink" alt="Help" /></a>
     };
 }
 
@@ -387,7 +387,7 @@ sub getmenu {
                         </td>
                         <td align="center" valign="middle">
                           <a $addlink>
-                              <img src="$LJ::IMGPREFIX/portal/AddIcon.gif" width="25" height="25" />
+                              <img src="$LJ::IMGPREFIX/portal/AddIcon.gif" alt="Add this module" width="25" height="25" />
                           </a>
                         </td>
                         </tr>

@@ -73,7 +73,7 @@ sub generate_content {
 
             $content .= "<tr><td nowrap='nowrap'><b>" . LJ::ljuser($bi->[2]) . "</b></td>";
             $content .= "<td align='right' nowrap='nowrap'>$mon $day</td>";
-            $content .= "<td><a href=\"$LJ::SITEROOT/shop/view.bml?gift=1&for=$bi->[2]\"><img src=\"$LJ::IMGPREFIX/btn_gift.gif\" /></a></td></tr>";
+            $content .= "<td><a href=\"$LJ::SITEROOT/shop/view.bml?gift=1&for=$bi->[2]\"><img src=\"$LJ::IMGPREFIX/btn_gift.gif\" alt=\"Buy this user a gift\" /></a></td></tr>";
         }
         $content .= "</table>";
     } else {

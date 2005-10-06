@@ -230,7 +230,7 @@
     # create the hidden menu at the top
     my $configmenu = qq {
         <span id="PortalConfigMenuBar">
-            <span id="AddPortalMenuButton" class="midalign"><a href="$selflink?getmenu=1&menu=addbox" onclick="return showAddPortalBoxMenu();"><img src="$LJ::IMGPREFIX/portal/PortalAddButton.gif" id="AddPortalMenuButtonImage" /></a></span>
+            <span id="AddPortalMenuButton" class="midalign"><a href="$selflink?getmenu=1&menu=addbox" onclick="return showAddPortalBoxMenu();"><img src="$LJ::IMGPREFIX/portal/PortalAddButton.gif" id="AddPortalMenuButtonImage" alt="Add module" /></a></span>
             </span>
         };
 
