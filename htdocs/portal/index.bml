@@ -4,7 +4,15 @@
     use vars qw($title $body $bodyopts $head %GET %POST);
     use LJ::Portal::Config;
 
-    if ($LJ::DISABLED{'portal'}) {
+    my $disabled =  $LJ::DISABLED{'portal'};
+
+    my $remote = LJ::get_remote();
+
+    if (ref $disabled eq "CODE") {
+        $disabled = $disabled->($remote);
+    }
+
+    if ($disabled) {
         $title = 'Disabled';
         $body = 'Sorry, the portal is disabled at this time.';
         return;
