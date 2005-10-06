@@ -685,20 +685,7 @@ sub get_box_cached_contents {
 
     my $content;
 
-    # per-user or global box cache?
-    my $globalcache;
-
-    # global if explicitly defined, otherwise per-box
-    $globalcache = 1 if ($box->can('cache_global') && $box->cache_global);
-
-    # calculate memcache key
-    my $memcachekey;
-    if ($globalcache) {
-        $memcachekey = [$box->type_id, 'prtcong:' . $box->type_id];
-    } else {
-        $memcachekey = [$self->{'u'}->{'userid'}, 'prtcong:' .
-                        $self->{'u'}->{'userid'} . ':' . $box->pboxid ];
-    }
+    my $memcachekey = $box->contents_memcache_key;
 
     # firstly, check if there is a cache in memory
     my $box_cached = LJ::MemCache::get($memcachekey);

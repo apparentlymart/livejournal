@@ -87,7 +87,34 @@ sub delete {
                      undef, $self->pboxid, $self->{'u'}->{'userid'});
 
     LJ::MemCache::delete($self->memcache_key);
+    $self->delete_memcached_contents;
     $self->delete_all_props;
+}
+
+# remove cached contents
+sub delete_memcached_contents {
+    my $self = shift;
+    LJ::MemCache::delete($self->contents_memcache_key) if $self->contents_memcache_key;
+}
+
+# memcache key for caching contents
+sub contents_memcache_key {
+    my $self = shift;
+
+    my $globalcache = 0;
+
+    # global if explicitly defined, otherwise per-box
+    $globalcache = 1 if ($self->can('cache_global') && $self->cache_global);
+
+    # calculate memcache key
+    if ($globalcache) {
+        return [$self->type_id, 'prtcong:' . $self->type_id];
+    } else {
+        return [$self->{'u'}->{'userid'}, 'prtcong:' .
+                $self->{'u'}->{'userid'} . ':' . $self->pboxid ];
+    }
+
+    return undef;
 }
 
 # create a new box and save it
@@ -171,6 +198,7 @@ sub sortorder {
 sub update_memcache_state {
     my LJ::Portal::Box $self = shift;
     LJ::MemCache::set($self->memcache_key, $self->get_state) if $self->memcache_key;
+    $self->delete_memcached_contents;
 }
 
 sub get_memcache_state {

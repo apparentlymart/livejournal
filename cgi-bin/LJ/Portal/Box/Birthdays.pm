@@ -93,4 +93,13 @@ sub config_props { $_config_props; }
 sub prop_keys { $_prop_keys; }
 sub box_class { $_box_class; }
 
+# caching options
+sub cache_global { 0; } # cache per-user
+sub cache_time { 30 * 60; } # check etag every 30 minutes
+sub etag {
+    my $self = shift;
+
+    return $self->get_prop('Show');
+}
+
 1;
