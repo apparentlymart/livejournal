@@ -55,7 +55,7 @@ sub generate_content {
     my $showown = $self->get_prop('showown');
     my $showcoms = $self->get_prop('showcoms');
 
-    my $LIMIT=100;
+    my $LIMIT=300;
 
     if ($LJ::DISABLED{'friendspopwithfriends'}) {
         return 'Sorry, this feature is disabled.';
@@ -113,13 +113,13 @@ sub generate_content {
         next if $journaltype eq 'C' && !$showcoms;
         next if $journaltype eq 'S' && !$showsyn;
 
-        my $count = $count{$popid};
-        next if $count == 0;
+        my $friendcount = $count{$popid};
+        next if $friendcount == 0;
 
         last if $displayed++ >= $maxitems;
 
         $rows .= "<tr><td>" . LJ::ljuser($fofu) . " - " . LJ::ehtml($fofu->{name}) .
-            "</td><td align='right'>$count</td>";
+            "</td><td align='right'>$friendcount</td>";
         $rows .= "<td><a href=\"$LJ::SITEROOT/friends/add.bml?user=$fofu->{user}\"><img src=\"$LJ::IMGPREFIX/btn_addfriend.gif\" /></a></td>" if !$fr->{$fofu->{userid}};
         $rows .= "</tr>\n";
     }
