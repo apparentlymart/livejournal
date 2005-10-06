@@ -75,7 +75,7 @@
     }
 
     # Are they asking for the site default language?
-    unless ($GET{'lang'} eq $LJ::DEFUALT_LANG) {
+    unless ($GET{'lang'} eq $LJ::DEFAULT_LANG) {
         my $faqd = LJ::Lang::get_dom("faq");
         my $l = LJ::Lang::get_lang($GET{'lang'});
         last unless $faqd && $l;
