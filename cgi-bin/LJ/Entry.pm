@@ -155,7 +155,7 @@ sub anum {
 sub correct_anum {
     my $self = shift;
     my $given = defined $_[0] ? int(shift) : $self->{anum};
-    __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
+    return 0 unless $self->valid;
     return 0 unless defined $self->{anum} && defined $given;
     return $self->{anum} == $given;
 }
