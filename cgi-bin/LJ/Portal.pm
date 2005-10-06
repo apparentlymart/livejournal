@@ -387,7 +387,7 @@ sub getmenu {
                         </td>
                         <td align="center" valign="middle">
                           <a $addlink>
-                              <img src="$LJ::IMGPREFIX/portal/AddIcon.gif" style="width: 25px; height: 25px;" />
+                              <img src="$LJ::IMGPREFIX/portal/AddIcon.gif" width="25" height="25" />
                           </a>
                         </td>
                         </tr>
