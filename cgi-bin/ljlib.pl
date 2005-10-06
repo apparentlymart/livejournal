@@ -229,6 +229,7 @@ sub mogclient {
                                       domain => $LJ::MOGILEFS_CONFIG{domain},
                                       root   => $LJ::MOGILEFS_CONFIG{root},
                                       hosts  => $LJ::MOGILEFS_CONFIG{hosts},
+                                      readonly => $LJ::DISABLE_MEDIA_UPLOADS,
                                       )
             or die "Could not initialize MogileFS";
 
@@ -1727,7 +1728,8 @@ sub start_request
                     LJ::mogclient()->reload
                         ( domain => $LJ::MOGILEFS_CONFIG{domain},
                           root   => $LJ::MOGILEFS_CONFIG{root},
-                          hosts  => $LJ::MOGILEFS_CONFIG{hosts}, );
+                          hosts  => $LJ::MOGILEFS_CONFIG{hosts},
+                          readonly => $LJ::DISABLE_MEDIA_UPLOADS, );
                     LJ::mogclient()->set_pref_ip(\%LJ::MOGILEFS_PREF_IP)
                         if %LJ::MOGILEFS_PREF_IP;
                 }

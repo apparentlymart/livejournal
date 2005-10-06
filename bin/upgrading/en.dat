@@ -1567,6 +1567,8 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /editpics.bml.error.keywords=You used the keyword "[[ekw]]" for multiple pictures.  One was randomly chosen, but likely not the one you wanted.  You may want to go back and fix that.
 
+/editpics.bml.error.nomediauploads.delete=Unable to delete userpics at this time.  Media modification is currently disabled for the site.
+
 /editpics.bml.error.toomanykeywords=The [[?numwords|keyword|keywords]] "[[words]]" [[?numwords|has|have]] not been saved as [[?numwords|its|their]] user picture icon already has [[max]] keywords.
 
 /editpics.bml.error.toomanypics2=You are already at your limit of [[maxpics]] pictures.  You cannot upload this picture until you delete one of your existing ones.
@@ -4414,6 +4416,8 @@ error.invalidform=Invalid form submission.  Please refresh and try again.
 error.ipbanned=Your IP address is temporarily banned for exceeding the login failure rate.
 
 error.malformeduser=Malformed username.
+
+error.mediauploadsdisabled=Media modifications are temporarily disabled at this time.  Some or all of the features on this page are currently down.
 
 error.nobutton=No button pressed?
 

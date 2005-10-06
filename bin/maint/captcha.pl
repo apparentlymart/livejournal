@@ -74,6 +74,10 @@ $maint{gen_audio_captchas} = sub {
 
     print "-I- Generating new audio captchas...\n";
 
+    # fail if we're not doing uploads right now
+    die "Unable to generate captchas: media uploads disabled.\n"
+        if $LJ::DISABLE_MEDIA_UPLOADS;
+
     $dbh = LJ::get_dbh({raw=>1}, "master") or die "Failed to get_db_writer()";
     $dbh->do("SET wait_timeout=28800");
 
@@ -197,6 +201,10 @@ $maint{gen_image_captchas} = sub {
 
     print "-I- Generating new image captchas...\n";
 
+    # fail if we're not doing uploads right now
+    die "Unable to generate captchas: media uploads disabled.\n"
+        if $LJ::DISABLE_MEDIA_UPLOADS;
+
     $dbh = LJ::get_dbh({raw=>1}, "master") or die "Failed to get_db_writer()";
     $dbh->do("SET wait_timeout=28800");
 
@@ -296,6 +304,10 @@ $maint{clean_captchas} = sub {
        );
 
     print "-I- Cleaning captchas.\n";
+
+    # fail if we're not doing uploads right now
+    die "Unable to clean captchas: media uploads disabled.\n"
+        if $LJ::DISABLE_MEDIA_UPLOADS;
 
     # Find captchas to delete
     $sql = q{

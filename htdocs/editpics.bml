@@ -187,7 +187,10 @@
                 }
             }
 
-            if (@delete) {
+            if (@delete && $LJ::DISABLE_MEDIA_UPLOADS) {
+                push @errors, $ML{'.error.nomediauploads.delete'};
+
+            } elsif (@delete) {
                 my $id_in;
                 if ($u->{'dversion'} > 6) {
                     $id_in = join(", ", map { $dbcm->quote($_) } @delete);
@@ -649,6 +652,10 @@
         $body .= "</form>\n\n";
     }
 
+    # if we're disabling media, say so
+    $body .= "<?warningbar $ML{'error.mediauploadsdisabled'} warningbar?>"
+        if $LJ::DISABLE_MEDIA_UPLOADS;
+
     if (@errors) {
         $body .= LJ::error_list(@errors);
     }
@@ -723,7 +730,8 @@
 
                 $body .= "&nbsp;&nbsp;&nbsp;<b><label for='$pid-del'>$ML{'.label.delete'}</label></b> ";
                 $body .= LJ::html_check({ 'type' => 'checkbox', 'name' => "delete_$pid",
-                                          'id' => "$pid-del", 'value' => 1 });
+                                          'id' => "$pid-del", 'value' => 1,
+                                          'disabled' => $LJ::DISABLE_MEDIA_UPLOADS });
 
                 if ($pic->{'state'} eq 'I') {
                     $body .= " &nbsp;<i>[$ML{'userpic.inactive'}]</i> " . LJ::help_icon('userpic_inactive');
@@ -859,8 +867,10 @@
 
         $body .= "<label for='make_default'>$ML{'.makedefault'}</label></td></tr>\n";
 
-        $body .= "<tr><td colspan='3' align='center'><br />" .LJ::html_submit(undef, $ML{'.btn.proceed'}) . "</td></tr>\n";
-        $body .= "</table>\n</form>\n";
+        $body .= "<tr><td colspan='3' align='center'><br />";
+        $body .= LJ::html_submit(undef, $ML{'.btn.proceed'},
+                                 { disabled => $LJ::DISABLE_MEDIA_UPLOADS });
+        $body .= "</td></tr>\n</table>\n</form>\n";
     } else {
         $body .= "<?standout \n";
         if (my $custom .= LJ::run_hook("editpics_maxlimit", $u)) {
