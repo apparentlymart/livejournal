@@ -111,7 +111,7 @@ sub generate_content {
         my $journaltype = $fofu->{journaltype};
         next if ($journaltype eq 'P' || $journaltype eq 'I') && !$showpeople;
         next if $journaltype eq 'C' && !$showcoms;
-        next if $journaltype eq 'S' && !$showsyn;
+        next if $journaltype eq 'Y' && !$showsyn;
 
         my $friendcount = $count{$popid};
         next if $friendcount == 0;
