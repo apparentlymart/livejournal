@@ -182,7 +182,7 @@ sub get_memcache_state {
 sub memcache_key {
     my LJ::Portal::Box $self = shift;
     if ($self->{'u'} && $self->{'pboxid'}) {
-        my $key = [ $self->{'u'}->{'userid'}, "prtbox:$self->{'u'}->{'userid'}:$self->{'pboxid'}" ];
+        my $key = [ $self->{'u'}->{'userid'}, "prtbox:$self->{'u'}->{'userid'}:" . $self->pboxid ];
         return $key;
     }
     return undef;

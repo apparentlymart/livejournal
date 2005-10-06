@@ -102,8 +102,10 @@ sub generate_content {
             my $pichtml;
             $picinfo = LJ::get_pic_from_keyword($posteru, $pickeyword) if $pickeyword;
             if ($picinfo) {
-                $pichtml .= "<img src='$LJ::USERPIC_ROOT/$picinfo->{'picid'}/$posteru->{'userid'}' width='$picinfo->{'width'}' ".
-                    "height='$picinfo->{'height'}' align='absmiddle' />";
+                my $width = $picinfo->{'width'} ? "width=\"" . int($picinfo->{'width'} / 2) . '"' : '';
+                my $height = $picinfo->{'height'} ? "height=\"" . int($picinfo->{'height'} / 2) . '"' : '';
+
+                $pichtml .= "<img src='$LJ::USERPIC_ROOT/$picinfo->{'picid'}/$posteru->{'userid'}' $width $height align='absmiddle' />";
             }
 
             $entriescontent .= qq {

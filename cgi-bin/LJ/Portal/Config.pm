@@ -647,12 +647,24 @@ sub generate_box_insides {
     my $boxclass = $box->can('box_class') ? $box->box_class : '';
     my $titlebar = $self->generate_box_titlebar($box);
 
-    # don't let the box do anything if it's disabled
     my $content;
-    unless ($box->box_is_disabled) {
-        $content = $box->generate_content;
-    } else {
+
+    # don't let the box do anything if it's disabled
+    if ($box->box_is_disabled) {
         $content = 'Sorry, this feature is disabled at this time.';
+    }
+
+    # init profiling code
+    my $passback = $LJ::DEV_PRE_BOX_GENERATE ? $LJ::DEV_PRE_BOX_GENERATE->() : undef;
+
+    if (!$content) {
+        $content = $self->get_box_cached_contents($box);
+        $content = $box->generate_content if !$content;
+    }
+
+    # profile
+    if ($passback && $LJ::DEV_POST_BOX_GENERATE) {
+        $LJ::DEV_POST_BOX_GENERATE->($passback);
     }
 
     return  qq{
@@ -663,6 +675,62 @@ sub generate_box_insides {
             $content
         </div>
         };
+}
+
+sub get_box_cached_contents {
+    my ($self, $box) = @_;
+
+    # is this box supposed to be memcached?
+    return undef unless ($box->can('etag'));
+
+    my $content;
+
+    # per-user or global box cache?
+    my $globalcache;
+
+    # global if explicitly defined, otherwise per-box
+    $globalcache = 1 if ($box->can('cache_global') && $box->cache_global);
+
+    # calculate memcache key
+    my $memcachekey;
+    if ($globalcache) {
+        $memcachekey = [$box->type_id, 'prtcong:' . $box->type_id];
+    } else {
+        $memcachekey = [$self->{'u'}->{'userid'}, 'prtcong:' .
+                        $self->{'u'}->{'userid'} . ':' . $box->pboxid ];
+    }
+
+    # firstly, check if there is a cache in memory
+    my $box_cached = LJ::MemCache::get($memcachekey);
+    my $time;
+
+    my $etag = $box->can('etag') ? $box->etag : undef;
+
+    # are the contents of this box cached?
+    if ($box_cached) {
+        my $boxcontent_cached;
+        my $etag_cached;
+        ($etag_cached, $time, $boxcontent_cached) = @$box_cached;
+
+        # is it time to check to see if this content has been modified?
+        if (time() > $time) {
+            # compare etags. if they don't match, regenerate contents
+            if ($etag && $box->etag == $etag_cached && $boxcontent_cached) {
+                $content = $boxcontent_cached;
+            }
+
+            # reset time
+            $time = time() + $box->cache_time if $box->can('cache_time');
+        } else {
+            $content = $boxcontent_cached ? $boxcontent_cached : undef;
+        }
+    }
+
+    # update memcache
+    $content = $box->generate_content if !$content;
+    LJ::MemCache::set($memcachekey, [$etag, $time, $content]);
+
+    return $content;
 }
 
 1;
