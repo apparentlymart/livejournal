@@ -1044,12 +1044,23 @@ sub entry_form {
         if $errors->{'entry'};
 
     ### Event Text Area:
+    my $insobjout;
     if ($LJ::UPDATE_INSERT_OBJECT || $opts->{'include_insert_object'}) {
-        my $show = LJ::img("ins_obj", "", { align => "right", onclick => "onInsertObject();" });
-        $out .= "<script> document.write(\"" . LJ::ejs($show) . "\"); </script>";
+        my $show;
+        $show .= LJ::html_select({
+            'name'     => 'insobjsel',
+            'id'       => 'insobjsel',
+            'onchange' => "handleInsertSelect();",
+        }, ( 'insert', ' -- Insert -- ', 'image', 'Image' ));
+
+        $insobjout = "<script> if (document.getElementById) { document.write(\"" . LJ::ejs($show) . "\"); } </script>";
     }
 
-    $out .= "<p><b>" . BML::ml('entryform.entry') . "</b></p>" unless $opts->{'richtext_on'};
+    unless ( $opts->{'richtext_on'}) {
+        $out .= "<table width='100%'><tr><td align='left'>";
+        $out .= "<p><b>" . BML::ml('entryform.entry');
+        $out .= "</b></p></td><td align='right'>$insobjout</td></tr></table>";
+    }
 
     if ($opts->{'richtext_on'}) {
         my $jevent = $opts->{'event'};

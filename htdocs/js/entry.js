@@ -258,7 +258,7 @@ function onUpload (url) {
 
 var currentPopup;
 var currentPopupWindow;
-function onInsertObject () {
+function onInsertObject (include) {
     onClosePopup();
     var de = document.createElement("div");
     de.id = "updateinsobject";
@@ -272,10 +272,30 @@ function onInsertObject () {
     de.style.borderStyle = "solid";
     de.style.borderColor = "#bbddff";
     de.style.backgroundColor = "#fff";
-    de.innerHTML = "<iframe src='imgupload.bml' name='insobjiframe' id='insobjiframe' style='border: 0; overflow: hidden; width: 60em; height: 15em; display: block;'></iframe>";
+    de.innerHTML = "<iframe src='" + include + "' name='insobjiframe' id='insobjiframe' style='border: 0; overflow: hidden; width: 60em; height: 15em; display: block;'></iframe>";
     currentPopup = de;
     document.body.appendChild(de);
     currentPopupWindow = document.getElementById('insobjiframe').contentWindow;
+}
+
+function handleInsertSelect() {
+    var objsel = document.getElementById('insobjsel');
+    if (! objsel) { alert('can\'t get insert select'); return false; }
+
+    var selected = objsel.selectedIndex;
+    var include;
+
+    if (selected == 1) {
+        include = 'imgupload.bml';
+    } else {
+        alert('Unknown index selected');
+        return false;
+    }
+
+    onInsertObject(include);
+    objsel.selectedIndex = 0;
+
+    return true;
 }
 
 function onClosePopup() {
