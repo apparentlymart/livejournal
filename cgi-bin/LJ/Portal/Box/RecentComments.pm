@@ -42,8 +42,8 @@ sub generate_content {
 
     my $jargent = "journal=$u->{'user'}&amp;";
 
-    # Retrieve received
-    @recv = $u->get_recent_talkitems(int(($maxshow * 3) / 2) + 1);
+    $self->retreive_received_comments(\@recv, $maxshow + 10, $maxshow);
+
     foreach my $post (@recv) {
         $need_userid{$post->{posterid}} = 1 if $post->{posterid};
         $talkids{$post->{jtalkid}} = 1;
@@ -88,9 +88,6 @@ sub generate_content {
 
     $content .= "<table style='width: 100%' cellpadding='5' cellspacing='0'>";
     foreach my $r (@recv) {
-	next unless $r->{nodetype} eq "L";
-        next if $r->{state} eq "D";
-
         last unless $commentcount++ < $maxshow;
 
         my $pu = $us->{$r->{posterid}};
@@ -177,6 +174,34 @@ sub generate_content {
 
 
     return $content;
+}
+
+sub retreive_received_comments {
+    my ($self, $recv, $maxshow, $orig_maxshow) = @_;
+
+    # how far back do we want to go?
+    my $max_recurse_depth = 60;
+
+    return if $maxshow > $max_recurse_depth;
+
+    my %found_comments;
+
+    # Retrieve received
+    my $u = $self->{'u'};
+    my @recent_talkitems = $u->get_recent_talkitems($maxshow);
+    push @$recv, @recent_talkitems;
+
+    my $beforecount = scalar @$recv;
+    # weed out non-comments, deleted comments and repeats
+    @$recv = grep { $_->{nodetype} eq 'L' && $_->{state} ne 'D' &&
+                        !exists($found_comments{$_->{nodeid}}) &&
+                            ($found_comments{$_->{nodeid}} = 1) } @$recv;
+
+    # if comments got weeded out, get some more until we've fufulled our quota
+    if (scalar @$recv < $beforecount && scalar @$recv < $orig_maxshow) {
+        # oh noes, we got too few. get some more.
+        $self->retreive_received_comments($recv, $maxshow + 15, $orig_maxshow);
+    }
 }
 
 # when box is reloaded, execute this javascript

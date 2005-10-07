@@ -788,7 +788,7 @@ sub get_friends_birthdays {
 
 # get recent talkitems posted to this user
 # args: maximum number of comments to retreive
-# returns: array of hashrefs with jtalkid, nodetype, nodeid, parenttalkid, posterid
+# returns: array of hashrefs with jtalkid, nodetype, nodeid, parenttalkid, posterid, state
 sub get_recent_talkitems {
     my ($u, $maxshow) = @_;
 
