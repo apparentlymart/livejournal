@@ -30,6 +30,18 @@ Optional methods:
                 Return JS to execute or undef to just have the box be updated
          LJ::Portal::Box::default_added($u)
                 If this returns true, then this box should be added by default
+         LJ::Portal::Box::box_updated()
+                This is called when the box is reloaded on the page, and any javascript
+                it returns will be executed.
+         LJ::Portal::Box::cache_global
+                Return 1 if box contents should be cached globally, otherwise contents
+                cached per-user (if the cache functions are defined)
+         LJ::Portal::Box::cache_time
+                How long (in seconds) before comparing etags to determine if the content
+                needs to be regenerated
+         LJ::Portal::Box::etag
+                A tag which is easily calculated which reflects the current state of the box,
+                used to determine if the box cache is out of date
 
 config_props:
         Hashref with the following options:

@@ -113,6 +113,14 @@ sub get_portal_box_update_script {
 
     my $pboxid = $box->pboxid();
     my $newcontents = LJ::ejs($config->generate_box_insides($pboxid));
+
+    # does this box have a handler to generate extra javascript to be executed
+    # when the box is reloaded?
+    my $onreload = '';
+    if ($box->can('box_updated')) {
+        $onreload = $box->box_updated;
+    }
+
     return
         qq{
             var box = xGetElementById('pbox$pboxid');
@@ -120,6 +128,7 @@ sub get_portal_box_update_script {
                 box.innerHTML = "$newcontents";
             }
             if (box_reloading && box_reloading[$pboxid]) box_reloading[$pboxid]=0;
+            $onreload
         };
 }
 

@@ -3,6 +3,15 @@ if (!LJVAR) LJVAR=new Object();
 var portalAnimating = 0;
 var box_reloading = {};
 
+// for comment management
+var LJ_cmtinfo;
+var current_pboxid;
+function userhook_delete_comment_ARG (talkid) {
+  hideElement('ljcmt'+talkid);
+  if(current_pboxid)
+    updatePortalBox(current_pboxid);
+}
+
 function getXTR () {
   var xtr;
   var ex;

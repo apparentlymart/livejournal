@@ -18,10 +18,14 @@ our $_config_props = {
 our $_box_description = 'Show latest comments received';
 our $_box_name = "Recent Comments";
 
+our $cmtinfodata = {};
+
 sub generate_content {
     my $self = shift;
     my $content = '';
     my $u = $self->{'u'};
+
+    my $pboxid = $self->pboxid;
 
     my $count = 0;
     my %logrow;
@@ -76,6 +80,12 @@ sub generate_content {
 
     my $commentcount = 0;
 
+    my %LJ_cmtinfo;
+
+    $LJ_cmtinfo{'canAdmin'} = 1;
+    $LJ_cmtinfo{'remote'} = $u->{user};
+    $LJ_cmtinfo{'journal'} = $u->{user};
+
     $content .= "<table style='width: 100%' cellpadding='5' cellspacing='0'>";
     foreach my $r (@recv) {
 	next unless $r->{nodetype} eq "L";
@@ -106,12 +116,36 @@ sub generate_content {
 
         my $talkid = ($r->{'jtalkid'} << 8) + $lrow->{'anum'};
 
+        my $managebtns;
+        my $ljcmt = $LJ_cmtinfo{$talkid} = {};
+        $ljcmt->{u} = $pu ? $pu->{user} : "";
+
+        unless ($r->{state} eq "D")
+        {
+            $managebtns .= "<a href='$LJ::SITEROOT/delcomment.bml?${jargent}id=$talkid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
+            if ($r->{'state'} ne 'F') {
+                $managebtns .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=freeze&amp;${jargent}talkid=$talkid'>" . LJ::img("btn_freeze", "", { align => 'absmiddle', hspace => 2, vspace => }) . "</a>";
+            }
+
+            if ($r->{'state'} eq 'F') {
+                $managebtns .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=unfreeze&amp;${jargent}talkid=$talkid'>" . LJ::img("btn_unfreeze", "", { align => 'absmiddle', hspace => 2, vspace => }) . "</a>";
+            }
+
+            if ($r->{'state'} ne 'S') {
+                $managebtns .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=screen&amp;${jargent}talkid=$talkid'>" . LJ::img("btn_scr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
+            }
+
+            if ($r->{'state'} eq 'S') {
+                 $managebtns .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;${jargent}talkid=$talkid'>" . LJ::img("btn_unscr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
+             }
+         }
+
         my $posturl  = "$root/$lrow->{ditemid}.html";
         my $replyurl = LJ::Talk::talkargs($posturl, "replyto=$talkid");
         my $talkurl  = "$root/$lrow->{ditemid}.html?thread=$talkid\#t$talkid";
         my $userlink = LJ::isu($pu) ? LJ::ljuser($pu) : "<i>(Anonymous)</i>";
         $content .= qq {
-            <tr>
+            <tr id="ljcmt$talkid">
                 <td>
 
                   <span class="RecentCommentTitle">$userlink: $subject</span>
@@ -121,6 +155,7 @@ sub generate_content {
                   <div class="RecentCommentItem">
                       $body
                       <div class="RecentCommentLinks">
+                        $managebtns
                         <a href="$replyurl">Reply</a> | <a href="$posturl">Entry Link</a>
                       </div>
                   </div>
@@ -128,9 +163,32 @@ sub generate_content {
             </tr>
         };
     }
+
     $content .= '</table>';
 
+    $cmtinfodata = LJ::js_dumper(\%LJ_cmtinfo);
+
+    $content .= qq {
+        <script>
+            LJ_cmtinfo = $cmtinfodata;
+            current_pboxid = $pboxid;
+        </script>
+    };
+
+
     return $content;
+}
+
+# when box is reloaded, execute this javascript
+sub box_updated {
+    my $self = shift;
+    my $pboxid = $self->pboxid;
+
+    return qq {
+        LJ_cmtinfo = $cmtinfodata;
+        current_pboxid = $pboxid;
+        setupAjax();
+    };
 }
 
 # added by default if user has cap

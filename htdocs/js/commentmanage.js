@@ -376,6 +376,7 @@ function createDeleteFunction (ae, dItemid) {
             de.style.left = lx + "px";
             de.style.top = (pos.y + 5) + "px";
             de.style.width = "250px";
+            de.style.zIndex = 3;
   	    regEvent(de, "click", function (e) {
 		e = e || window.event;
                 stopBubble(e);
