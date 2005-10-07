@@ -180,9 +180,9 @@ sub retreive_received_comments {
     my ($self, $recv, $maxshow, $orig_maxshow) = @_;
 
     # how far back do we want to go?
-    my $max_recurse_depth = 60;
+    my $max_recurse_comments = 60;
 
-    return if $maxshow > $max_recurse_depth;
+    return if $maxshow > $max_recurse_comments;
 
     my %found_comments;
 
