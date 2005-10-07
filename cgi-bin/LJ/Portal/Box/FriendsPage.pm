@@ -39,8 +39,6 @@ sub generate_content {
 
     my $frpagefaqbtn = LJ::Portal->get_faq_link(61);
 
-    $content .= "<div class=\"FriendsPageTitle\"><img src='$LJ::SITEROOT/img/userinfo.gif' /> Latest Friends page entry: $frpagefaqbtn</div>";
-
     # get latest friends page entries
     my @entries = LJ::get_friend_items( {
         'remoteid'         => $u->{'userid'},
@@ -50,6 +48,11 @@ sub generate_content {
         'u'                => $u,
         'userid'           => $u->{'userid'},
     } );
+
+    # correct pluralization (translationableness would be cool at some point)
+    my $entrytext = @entries == 1 ? 'entry' : 'entries';
+
+    $content .= "<div class=\"FriendsPageTitle\"><img src='$LJ::SITEROOT/img/userinfo.gif' /> Latest Friends page $entrytext: $frpagefaqbtn</div>";
 
     my $entriescontent;
 
