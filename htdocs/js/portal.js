@@ -263,7 +263,7 @@ function doDropDownMenu(e, menuHTML) {
 
   if (xDef(menuBox)) {
     // hide if open
-    if (xDisplay(menuBox) == "block") {
+    if (menuBox.isOpen) {
       hidePortalMenu();
     } else {
       xAppendChild(document.body, menuBox);
@@ -273,9 +273,10 @@ function doDropDownMenu(e, menuHTML) {
       menuBox.newRight = xRight(menuBox);
       menuBox.newBottom = xBottom(menuBox);
 
-      xLeft(menuBox, xPageX(e));
+      showBox(menuBox);
       xTop(menuBox, xPageY(e) + xHeight(e));
-      fadeIn(menuBox, 200);
+      xLeft(menuBox, xPageX(e) - xWidth(menuBox) + xWidth(e));
+
       menuBox.isOpen = 1;
       var addbutton = xGetElementById("AddPortalMenuButtonImage");
       if (addbutton && LJVAR.imgprefix) {
@@ -440,6 +441,7 @@ function showBox (e) {
   var target = xGetElementById(e);
 
   xDisplay(target, 'block');
+  xShow(target);
 
   if (xDef(target.oldwidth) && target.oldwidth > 0)
     xWidth(target, target.oldwidth);

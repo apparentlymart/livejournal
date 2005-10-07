@@ -130,7 +130,8 @@ sub get_portal_box_update_script {
             if (box_reloading && box_reloading[$pboxid]) box_reloading[$pboxid]=0;
             var overlay = xGetElementById("overlay$pboxid");
             if (overlay) {
-                document.body.removeChild(overlay);
+                var callback = 'document.body.removeChild(xGetElementById("overlay$pboxid"));';
+                fadeOut(overlay, 150, callback);
             }
             $onreload
         };
