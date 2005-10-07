@@ -62,6 +62,10 @@
     my $selflink = $LJ::SITEROOT . BML::get_uri();
     $selflink =~ s/\?.*//;
 
+    # fading special effects?
+    my $doFadeDefault = 0;
+    my $doFade = $LJ::PORTAL_DOFADE ? $LJ::PORTAL_DOFADE : $doFadeDefault;
+
     # parameters for portal.js
     $head .= qq{
         <script language="JavaScript">
@@ -69,7 +73,7 @@
         if (!LJVAR)
             LJVAR = new Object();
         LJVAR.postUrl = "$selflink";
-        LJVAR.doFade = 0;
+        LJVAR.doFade = $doFade;
         LJVAR.doAnimate = 1;
         LJVAR.imgprefix = "$LJ::IMGPREFIX";
         </script>

@@ -475,7 +475,7 @@
     ###
 
     # What portal modules to load
-    %PORTAL_BOXES = (
+    @PORTAL_BOXES = (
                        'Birthdays',
                        'UpdateJournal',
                        'TextMessage',
