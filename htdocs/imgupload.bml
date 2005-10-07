@@ -48,8 +48,8 @@
             <html>
                 <head>
                 <style>
-                    body { font: 10pt verdana; background: #ffffff;}
-                    .insobjOuter {  border: 1px solid;}
+                    body { font: 10pt verdana; background: #ffffff; margin: 0px; }
+                    .insobjOuter { }
                     .insobjStep { background: <?altcolor1?>; vertical-align: top; width: 100%; }
                     .insobjNav { background: <?altcolor2?>; text-align: right; vertical-align: middle; width: 100%; height: 30px; padding-top: 6px;}
                     .insobjContent { padding-bottom: 15px; }
@@ -68,7 +68,7 @@
             };
 
         $ret .= "<div class='insobjOuter' id='insobjOuter'>";
-        $ret .= "<form id='insobjform' action='imgupload.bml' method='post' onsubmit='return window.parent.handleForm()' >";
+        $ret .= "<form id='insobjform' action='imgupload.bml' method='post' onsubmit='return window.parent.handleObjectForm()' >";
         $ret .= "<div class='insobjStep'>";
         $ret .= "<table><tr><td align='left'><?h1 From where would you like to insert your image? h1?></td><td align='right' valign='top'><a href='#' onclick='onCancel();return false;'>";
         $ret .= "<img src='$LJ::IMGROOT/img/portal/PortalConfigCloseButton.gif' border='0' /></a></td></tr>";

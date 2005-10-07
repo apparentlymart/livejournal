@@ -260,22 +260,24 @@ var currentPopup;
 var currentPopupWindow;
 function onInsertObject (include) {
     onClosePopup();
-    var de = document.createElement("div");
-    de.id = "updateinsobject";
-    de.style.textAlign = "left";
-    de.className = 'updateinsobject';
-    de.style.overflow = "hidden";
-    de.style.position = "absolute";
-    de.style.left = 150 + "px";
-    de.style.top = 200 + "px";
-    de.style.border = "2px";
-    de.style.borderStyle = "solid";
-    de.style.borderColor = "#bbddff";
-    de.style.backgroundColor = "#fff";
-    de.innerHTML = "<iframe src='" + include + "' name='insobjiframe' id='insobjiframe' style='border: 0; overflow: hidden; width: 60em; height: 15em; display: block;'></iframe>";
-    currentPopup = de;
-    document.body.appendChild(de);
-    currentPopupWindow = document.getElementById('insobjiframe').contentWindow;
+    var iframe = document.createElement("iframe");
+    iframe.id = "updateinsobject";
+    iframe.className = 'updateinsobject';
+    iframe.style.overflow = "hidden";
+    iframe.style.position = "absolute";
+    iframe.style.left = 150 + "px";
+    iframe.style.top = 200 + "px";
+    iframe.style.border = "2px";
+    iframe.style.borderStyle = "solid";
+    iframe.style.borderColor = "#bbddff";
+    iframe.style.backgroundColor = "#fff";
+    iframe.style.width = "60em";
+    iframe.style.height = "20em";
+    iframe.src = include;
+
+    currentPopup = iframe;
+    document.body.appendChild(iframe);
+    currentPopupWindow = iframe.contentWindow;
 }
 
 function handleInsertSelect() {
@@ -285,7 +287,9 @@ function handleInsertSelect() {
     var selected = objsel.selectedIndex;
     var include;
 
-    if (selected == 1) {
+    if (selected == 0) {
+        return true;
+    } else if (selected == 1) {
         include = 'imgupload.bml';
     } else {
         alert('Unknown index selected');
@@ -361,7 +365,7 @@ function changeButton(selected) {
     return true;
 }
 
-function handleForm() {
+function handleInsertForm() {
     var fileradio = currentPopupWindow.document.getElementById('fromfile');
     var urlradio  = currentPopupWindow.document.getElementById('fromurl');
     if (! fileradio) { alert('no file radio button'); return false; }
