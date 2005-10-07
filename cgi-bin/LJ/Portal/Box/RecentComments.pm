@@ -50,7 +50,8 @@ sub generate_content {
 
     $count = ($count > $maxshow) ? $maxshow : $count;
 
-    $content .= (%talkids ? "Last $count comments posted in " : "No comments have been posted in ") . LJ::ljuser($u) . "<br />";
+    $content .= "<a href=\"$LJ::SITEROOT/tools/recent_comments.bml\">";
+    $content .= (%talkids ? "Last $count comments posted in </a>" : "No comments have been posted in </a>") . LJ::ljuser($u) . ":<br />";
 
     @recv = sort { $b->{datepostunix} <=> $a->{datepostunix} } @recv;
     my @recv_talkids = map { $_->{'jtalkid'} } @recv;
