@@ -73,7 +73,7 @@ sub generate_content {
 
             $content .= "<tr><td nowrap='nowrap'><b>" . LJ::ljuser($bi->[2]) . "</b></td>";
             $content .= "<td align='right' nowrap='nowrap'>$mon $day</td>";
-            $content .= "<td><a href=\"$LJ::SITEROOT/shop/view.bml?gift=1&for=$bi->[2]\"><img src=\"$LJ::IMGPREFIX/btn_gift.gif\" alt=\"Buy this user a gift\" /></a></td></tr>";
+            $content .= "<td align='right'><a href=\"$LJ::SITEROOT/shop/view.bml?gift=1&for=$bi->[2]\"><img src=\"$LJ::IMGPREFIX/btn_gift.gif\" alt=\"Buy this user a gift\" align=\"right\" /></a></td></tr>";
         }
         $content .= "</table>";
     } else {
@@ -98,8 +98,9 @@ sub cache_global { 0; } # cache per-user
 sub cache_time { 30 * 60; } # check etag every 30 minutes
 sub etag {
     my $self = shift;
+    my $now = DateTime->now;
 
-    return $self->get_prop('Show');
+    return $self->get_prop('Show') + $now->day;
 }
 
 1;
