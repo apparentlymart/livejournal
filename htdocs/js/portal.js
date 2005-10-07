@@ -294,7 +294,7 @@ function hidePortalMenu(menu) {
 }
 
 function showAddPortalBoxMenu() {
-  return dropDownMenu(xGetElementById('AddPortalMenuButton'), 'addbox');
+  return dropDownMenu(xGetElementById('AddPortalMenuButtonImage'), 'addbox');
 }
 
 function movePortalBoxUp(pboxid) {

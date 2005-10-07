@@ -348,17 +348,10 @@ sub getmenu {
     if ($menu) {
         if ($menu eq 'addbox') {
             my @classes = @LJ::PORTAL_BOXES;
-            my $closebutton = $self->get_close_button;
 
             my $addboxtitle = BML::ml('/portal/index.bml.addbox');
 
             $returncode .= qq{
-                <div class="PortalPatternedTitleBar">
-                    <a onclick="hidePortalMenu('addbox'); return false;" href="#">
-                    $closebutton
-                    </a>
-                    <span class="PortalTitleBarText">$addboxtitle</span>
-                </div>
                     <div class="DropDownMenuContent">
                     <table style="width:100%;">
                 };

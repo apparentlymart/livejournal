@@ -1,10 +1,12 @@
+/* The default portal stylesheet. By Mischa Spiegelmock, 2005
+   featuring added sexiness by Andy Mai.                      
 
-/* The default portal stylesheet. By Mischa Spiegelmock, 2005 */
-/* featuring added sexiness by Andy Mai.                      */
+   This is the main global stylesheet for portal. It contains
+   all the layout, positioning, and font attributes.          */
+
 
 
 /*--------------------------- Global -------------------------*/
-
 
 #PortalColL {
 	width: 68%;
@@ -31,14 +33,14 @@ img {
  }
 
 /*------------------------ End Global ------------------------*/
+/*------------------------------------------------------------*/
+ 
  
  
  
 /*-------------------- Configuration Menus -------------------*/ 
  
- 
 .DropDownMenu {
-	background-color: #AACCFF;
 	z-index: 2;
 	position: absolute;
 	overflow: hidden;
@@ -46,7 +48,6 @@ img {
 	font-size: small;
 	width: 400px;
 	padding: 0px;
-	border: 2px solid #003366;
 	}
 	
 .DropDownMenu br {
@@ -54,7 +55,6 @@ img {
 	}
 	
 .BoxDescription {
-	background-color: #fff;
 	padding: 2px;
 	font-size: 10px;
 	font-style: italic;
@@ -67,7 +67,6 @@ img {
 .DropDownMenuContent table tbody tr td a:link {
 	display: block;
 	width: 100%;
-	color: #336699;
 	font-weight: bold;
 	text-decoration: none;
 	font-size: 11px;
@@ -76,14 +75,17 @@ img {
 .DropDownMenuContent table br {
 	display: none;
 	}
-  
+	
+.DropDownMenuContent table tbody tr td {
+	margin: 0px;
+    padding: 0px;
+	}
+	
 .PortalFenster {
-	border: 2px solid #003366;
 	padding: 2px;
 	margin: 0px;
 	z-index: 1;
 	position: absolute;
-	background-color: #fff;
 	font-size: 10px;
 	width: 300px;
 	height: auto;
@@ -94,19 +96,28 @@ img {
 	float: right;
 	}
 	
-
+.PortalPatternedTitleBar {
+	display: table;
+	width: 100%;
+	_margin-right: 1px;
+	padding: 2px 0px 2px 2px;
+	}
+	
+.PortalBoxTitleBar {
+	display: table;
+	width: 100%;
+	padding: 2px;
+	height: 15px;
+	font-size: 12px;
+	clear: both;
+	}
 	
 .PortalPatternedTitleBar span {
 	display: table-cell;
 	vertical-align: middle;
 	padding: 0px;
-	color: #fff !important;
 	font-weight: bold;
 	font-family: Arial, Verdana, san-serif;
-	}
-	
-.PortalTitleBarText {
-	color: #fff;
 	}
 	
 .PortalResetAllButton {
@@ -120,7 +131,6 @@ img {
 	width: 298px;
 	_width: 300px;
 	font-size: 8px;
-	color: #000;
 	}
 	
 .PortalBoxConfigContent div {
@@ -133,24 +143,16 @@ img {
 	margin-top: 20px;
 	margin-bottom: 0px;
 	width: 294px;
-	background-color: #ccc;
 	padding: 1px;
-	border: 1px solid #999;
 	}
 	
 .PortalConfigResetButton a:link {
 	vertical-align: middle;
-	color: #fff;
 	text-decoration: none;
 	float: right;
 	margin: 4px 5px 0px 0px;
 	font-weight: bold;
 	}
-	
-.PortalConfigResetButton a:hover {
-	color: #666;
-	}
-
 
 .PortalFensterResButton {
 	display: none;
@@ -159,22 +161,25 @@ img {
 .PortalFensterBarMaxButton {
 	display: none;
 	}
+#PortalConfigMenuBar { width: 100%; }
+#AddPortalMenuButtonImage {
+        margin-left: 30%;
+        margin-right: auto;
+}
 
+/*------------------ End Configuration Menus -----------------*/
+/*------------------------------------------------------------*/
  
  
-/*----------------------- Module Styling ----------------------*/
+ 
+/*------------------ General Module Styling ------------------*/
 
 .PortalBox {
 	width: 100%;
 	margin-bottom: 10px;
 	overflow: hidden;
-	border: 1px solid #ccc;
 	padding: 1px;
-	border-bottom: 2px solid #bbb;
-	border-right: 1px solid #ccc;
 	}
-
-
 	
 .PortalBoxTitleText {
 	display: table-cell;
@@ -198,7 +203,6 @@ img {
 	margin-left: 2px;
 	}
 	
-	
 .PortalBoxMoveButtons:hover {
 	visibility: visible;
 	}
@@ -208,23 +212,29 @@ img {
 	width: 100%;
 	margin: 0 auto;
 	font-family: Verdana, Arial, sans-serif;
-	background-color: #fff;
 	}
 	
-
-  
-.PortalBoxContent a:hover {
-	color: #003366;
-	}
+.PortalBoxContent a:link, .PortalBoxContent a:visited {
+	font-size: 10px;
+	text-decoration: none; 
+	font-weight: bold;
+ 	}
 	
 
- /*--------------------- End Module Styling ---------------------*/ 
+ /*---------------- End General Module Styling ----------------*/ 
+ /*------------------------------------------------------------*/
+ 
+ 
  
  
  /*------------------ Specific Module Stylings ------------------*/
+ /*																 */
+ /*                This is where the magic happens.				 */
+ /*																 */
+ /*--------------------------------------------------------------*/
  
  
- /*--- Update Journal --*/
+ /*------------------------ Update Journal ----------------------*/
  
  .UpdateBoxSubject {
  	width: 99%;
@@ -234,16 +244,25 @@ img {
  	width: 99%;
  	}
 
-/*--- Account Management --*/
+/*----------------------- Account Management --------------------*/
 
-
+ .Manage table a {
+	line-height: 150%;
+	padding-left: 3px;
+	}
 	
-/*------- Announcements ------*/
+/*------------------------- Announcements -----------------------*/
 
 .Announcements {
 	padding: 1px 0px 0px 0px !important;
 	}
- 
+	
+.PortalTableHeader td {
+	padding: 2px;
+	font-size: 9px !important;
+	font-weight: bold !important;
+	text-transform: uppercase;
+	}
 	
 .Announcements table {
 	width: 100%;
@@ -252,7 +271,6 @@ img {
 .Announcements table tbody tr td {
 	font-family: arial, verdana, san-serif;
 	font-size: 10px;
-	color: #000;
 	padding: 3px;
 	border-spacing: 0;
 	border-collapse: separate;
@@ -267,89 +285,39 @@ img {
 	width: 100%;
 	}
 	
-.AnnouncementRow1 {
-	background-color: #fff;
-	}
-	
-	
-	
-.AnnouncementRow1:hover a, .AnnouncementRow2:hover a {
-	color: #fff;
-	}
  
- /*------- Recent Comments ------*/
+/*----------------------- Recent Comments ----------------------*/
  
  .RecentCommentTitle {
  	font-weight: bold;
  	font-size: 10px;
- 	color: #003366;
  	}
  	
  .RecentCommentDate {
  	font-size: 9px;
- 	color: #ccc;
  	}
  	
  .RecentCommentItem {
  	font-style: italic;
  	font-size: 10px;
  	padding: 5px 0 0 5px;
- 	background-color: #fff;
- 	color: #003366;
- 	border-top: 1px solid #C5DFF9;
  	}
  	
  .RecentCommentLinks {
- 	background-color: #;
  	padding: 2px 5px 2px 2px;
  	text-align: right;
  	font-size: 10px;
  	font-style: normal;
- 	color: #fff;
  	margin-top: 5px;
  	margin-left: -5px;
- 	border-bottom: 1px solid #ccc;
  	}
  	
  .RecentCommentLinks a {
  	font-size: 9px !important;
  	}
  	
-  /*------- To Do ------*/
-
- .Todo h2 {
- 	font-size: 12px;
- 	margin-right: 10px;
- 	font-weight: bold;
- 	display: inline;
- 	}
-  
- .Todo table {
- 	width: 100%;
- 	}
-  
- .Todo td {
-  	font-size: 10px;
-  	border-right: 1px solid #ccc;
-  	color: #003366;
-  	background-color: #EDF4FD;
-  	}
-  	
- .Todo td b {
- 	color: #003366;
-	}
-	
-	
- .Todo td font {
-  	font-size: 10px;
-  	}
-  	
  	
- .Todo td a b:hover {
- 	color: #003366 !important;
- 	}
- 	
- /*------- PopWithFriends ------*/
+ /*------------------------ PopWithFriends ---------------------*/
  
  .PopWithFriends {
  	padding: 3px;
@@ -369,7 +337,7 @@ img {
  	
  
  	
- /*------- Text Message ------*/
+ /*------------------------- Text Message -----------------------*/
  
 .TextMessage {
 	padding: 3px;
@@ -382,9 +350,9 @@ img {
 .tmform {
 	font-size: 10px;
 	width: 90%;
-        display: none;
-        margin-left: auto;
-        margin-right: auto;
+    display: none;
+    margin-left: auto;
+    margin-right: auto;
 	}
 	
 .TextMessage input {
@@ -397,7 +365,7 @@ img {
 	margin-top: 3px;
 	}
 	
- /*------- New User ------*/
+ /*--------------------------- New User --------------------------*/
  
  .NewUserBlurb {
  	font-size: 11px !important;
@@ -412,13 +380,13 @@ img {
  	position: relative;
  	text-align: right;
  	margin-right: 5px;
- 	
+ 	}
  	
  .NewUser {
  	padding: 5px 5px 5px 5px;
  	}
  	
- /*------- Frank ------*/
+ /*---------------------------- Frank -----------------------------*/
  
 .Frank img {
 	display: block;
@@ -426,10 +394,10 @@ img {
 	margin-right: auto;
 	}
  	
-/*------- Manage Friends ------*/
+/*------------------------ Manage Friends -------------------------*/
   
 	
-.Friends br {
+.FriendsList br {
 	display: none;
 	}
   
@@ -444,27 +412,45 @@ img {
 	font-size: 10px;
 	}
 	
-/*------- Account Status ------*/
+/*------------------------ Account Status -------------------------*/
 	
 .standout table {
-	background-color: #fff !important;
-	border: 0px solid !important;
 	width: 100% !important;
 }
 
 
-/*------- Friends Page ------*/
+/*------------------------- Friends Page --------------------------*/
 
 .FriendsPageTitle {
 	font-size: 10px;
 	font-weight: bold;
-	}
-	
-.FriendsPageEntry {
-	font-size: 10px !important;
 	margin-bottom: 5px;
 	}
 	
+.FriendsPageEntry {
+	margin: 0 10px 0 10px;
+	}
+	
+.PortalFriendsPageSubject {
+	font-weight: bold;
+	font-size: 10px;
+	}
+	
+.PortalFriendsPageEntry {
+	font-size: 10px;
+	}
+	
+.PortalFriendsPageLinks {
+	margin-bottom: 10px;
+	}
+
+.PortalFriendsPagePoster {
+        margin: 0px;
+        padding: 0px;
+        vertical-align: bottom;
+}
+	
+/*----------------------- Friends Birthdays -----------------------*/
 	
 .Birthdays table td {
 	text-align: left;
