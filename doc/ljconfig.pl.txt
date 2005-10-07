@@ -475,15 +475,15 @@
     ###
 
     # What portal modules to load
-    %PORTAL_TYPEMAP = (
-                       'Birthdays'      => 1,
-                       'UpdateJournal'  => 2,
-                       'TextMessage'    => 3,
-                       'PopWithFriends' => 4,
-                       'Friends'        => 5,
-                       'Manage'         => 6,
-                       'RecentComments' => 7,
-                       'NewUser'        => 8,
+    %PORTAL_BOXES = (
+                       'Birthdays',
+                       'UpdateJournal',
+                       'TextMessage',
+                       'PopWithFriends',
+                       'Friends',
+                       'Manage',
+                       'RecentComments',
+                       'NewUser',
                        );
 
     # Default portal layout
