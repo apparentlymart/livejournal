@@ -32,6 +32,19 @@ img {
         display: inline;
  }
 
+.LoadingText {
+               vertical-align: middle;
+               font-size: xx-large;
+               font-weight: bold;
+               font-family: Arial, Verdna;
+               text-align: center;
+}
+
+.LoadingBox {
+              width: 100%;
+              height: 100%;
+}
+
 /*------------------------ End Global ------------------------*/
 /*------------------------------------------------------------*/
  

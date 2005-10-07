@@ -387,6 +387,30 @@ function swapBoxes(pboxid1, pboxid2) {
 }
 
 function updatePortalBox(pboxid) {
+  var pbox = xGetElementById("pbox"+pboxid);
+
+  if (!pbox) return true;
+
+  var overlay = xCreateElement("div");
+  if (!overlay) return true;
+
+  xAppendChild(document.body, overlay);
+
+  overlay.style.position = "absolute";
+  overlay.id = "overlay" + pboxid;
+
+  xLeft(overlay, xPageX(pbox));
+  xTop(overlay, xPageY(pbox));
+  xWidth(overlay, xWidth(pbox));
+  xHeight(overlay, xHeight(pbox));
+
+  overlay.style.zIndex = 3;
+  overlay.style.backgroundColor = "#FFFF55";
+  changeOpac(50, overlay.id);
+  overlay.style.lineHeight = xHeight(overlay) + "px";
+
+  overlay.innerHTML = "<div class='LoadingBox'><div class='LoadingText'>Loading...</div></div>'";
+
   return evalXrequest("updatebox=1&pboxid="+pboxid);
 }
 
