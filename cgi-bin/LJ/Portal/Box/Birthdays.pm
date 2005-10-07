@@ -24,39 +24,14 @@ sub generate_content {
     my @bdays = $self->{'u'}->get_friends_birthdays;
 
     if (@bdays && scalar @bdays > 0) {
-        # find next upcoming birthday element
+
+        # sort upcoming birthdays
         my $now = DateTime->now;
-        my $timedist = -1;
-        my $bdaysi = -1;
-        my $closesti = -1;
-        foreach my $bi (@bdays) {
-            $bdaysi++;
-            if ($bi->[0] == $now->month && $bi->[1] == $now->day) {
-                $closesti = $bdaysi;
-                last;
-            }
+        $now = $now->month . '-' . $now->day;
 
-            my $bdate = DateTime->new(
-                                      month => $bi->[0],
-                                      day   => $bi->[1],
-                                      year  => $now->year,
-                                      );
-            if ($bdate) {
-                my $timeoffset = $bdate->subtract_datetime_absolute($now);
-                if (DateTime->compare( $bdate, $now ) >= 0) {
-                    if ($timedist < 0 || $timeoffset->seconds <= $timedist) {
-                        $timedist = $timeoffset->seconds;
-                        $closesti = $bdaysi;
-                    }
-                }
-            }
-        }
-
-        if ($closesti >= 0) {
-            # rotate bdays
-            for (my $i = 0; $i < $closesti; $i++) {
-                push @bdays, shift @bdays;
-            }
+        my $i = 0;
+        while(($bdays[0]->[0] . '-' . $bdays[0]->[1]) lt $now && $i++ < $#bdays) {
+            push @bdays, shift @bdays;
         }
 
         # cut the list down
