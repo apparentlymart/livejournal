@@ -496,6 +496,9 @@ body<=
             $ret .= "<div style='border: 3px solid #000000; margin-left: auto; margin-right: auto; padding: 3px;'>\n$message\n</div></div>";
             next;
         }
+
+        # print anchor for links to jump here
+        $ret .= "<a name='e$le->{splid}'></a>";
      
         # reply header
         my $header = "";
@@ -519,7 +522,8 @@ body<=
         elsif ($le->{'type'} eq "comment") { $what = "Comment"; }
         elsif ($le->{'type'} eq "screened") { $what = "Screened Response"; }
 
-        $header .= "<span style='font-size: 0.9em;'><b>$what</b> (\#$le->{'splid'})</span><br />";
+        my $link = "<a href='$LJ::SITEROOT/support/see_request.bml?id=$spid#e$le->{splid}'>#$le->{splid}</a>";
+        $header .= "<span style='font-size: 0.9em;'><b>$what</b> ($link)</span><br />";
         my $timehelped = LJ::time_to_http($le->{'timelogged'});
         my $age = LJ::ago_text($le->{'age'});
         $header .= "<b>Posted:</b> $timehelped ($age)";
