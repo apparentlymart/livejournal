@@ -18,42 +18,37 @@ our $_box_name = "Friends' Birthdays";
 
 sub generate_content {
     my $self = shift;
+    my @bdays = $self->{'u'}->get_friends_birthdays
+        or return "(No upcoming friend's birthdays.)";
+
     my $content = '';
-    my $userid = $self->{'u'}->{'userid'};
 
-    my @bdays = $self->{'u'}->get_friends_birthdays;
+    # sort upcoming birthdays
+    my $now = DateTime->now;
+    my $nowstr = sprintf("%02d-%02d", $now->month, $now->day);
 
-    if (@bdays && scalar @bdays > 0) {
-
-        # sort upcoming birthdays
-        my $now = DateTime->now;
-        my $nowstr = sprintf("%02d-%02d", $now->month, $now->day);
-
-        my $i = 0;
-        while(($bdays[0]->[0] . '-' . $bdays[0]->[1]) lt $nowstr && $i++ < $#bdays) {
-            push @bdays, shift @bdays;
-        }
-
-        # cut the list down
-        my $show = $self->get_prop('Show');
-        if (@bdays > $show) { @bdays = @bdays[0..$show-1]; }
-
-        $content .= "<table width='100%'>";
-        my $add_ord = BML::get_language() =~ /^en/i;
-        foreach my $bi (@bdays)
-        {
-            my $mon = BML::ml( LJ::Lang::month_short_langcode($bi->[0]) );
-            my $day = $bi->[1];
-            $day .= LJ::Lang::day_ord($bi->[1]) if $add_ord;
-
-            $content .= "<tr><td nowrap='nowrap'><b>" . LJ::ljuser($bi->[2]) . "</b></td>";
-            $content .= "<td align='right' nowrap='nowrap'>$mon $day</td>";
-            $content .= "<td align='right'><a href=\"$LJ::SITEROOT/shop/view.bml?gift=1&for=$bi->[2]\"><img src=\"$LJ::IMGPREFIX/btn_gift.gif\" alt=\"Buy this user a gift\" align=\"right\" /></a></td></tr>";
-        }
-        $content .= "</table>";
-    } else {
-        $content .= "(No upcoming friend's birthdays.)";
+    my $i = 0;
+    while(sprintf("%02d-%02d", @{ $bdays[0] }) lt $nowstr && $i++ < @bdays) {
+        push @bdays, shift @bdays;
     }
+
+    # cut the list down
+    my $show = $self->get_prop('Show');
+    if (@bdays > $show) { @bdays = @bdays[0..$show-1]; }
+
+    $content .= "<table width='100%'>";
+    my $add_ord = BML::get_language() =~ /^en/i;
+    foreach my $bi (@bdays)
+    {
+        my $mon = BML::ml( LJ::Lang::month_short_langcode($bi->[0]) );
+        my $day = $bi->[1];
+        $day .= LJ::Lang::day_ord($bi->[1]) if $add_ord;
+
+        $content .= "<tr><td nowrap='nowrap'><b>" . LJ::ljuser($bi->[2]) . "</b></td>";
+        $content .= "<td align='right' nowrap='nowrap'>$mon $day</td>";
+        $content .= "<td align='right'><a href=\"$LJ::SITEROOT/shop/view.bml?gift=1&for=$bi->[2]\"><img src=\"$LJ::IMGPREFIX/btn_gift.gif\" alt=\"Buy this user a gift\" align=\"right\" /></a></td></tr>";
+    }
+    $content .= "</table>";
 
     return $content;
 }
