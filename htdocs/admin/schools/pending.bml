@@ -104,8 +104,6 @@ body<=
             return $err->('city', 'You must enter the city this school is located in.')
                 unless length($city);
 
-            $name = LJ::Schools::canonical_school_name($name, $city);
-
             return $err->('name', 'You must enter the school\'s full name.')
                 unless length($name);
 
