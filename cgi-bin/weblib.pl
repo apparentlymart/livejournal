@@ -1048,8 +1048,8 @@ sub entry_form {
     if ($LJ::UPDATE_INSERT_OBJECT || $opts->{'include_insert_object'}) {
         my $show;
 
-        $show .= "<select name='insobjsel' id='insobjsel' onchange='handleInsertSelect()'>";
-        $show .= "<option value='insert' style='padding-left: 20px'>Insert</option>";
+        $show .= "<select name='insobjsel' id='insobjsel' onchange='InOb.handleInsertSelect()'>";
+        $show .= "<option value='insert' style='padding-left: 20px'>Insert...</option>";
         $show .= "<option value='image' style='background: url($LJ::IMGPREFIX/insobj_image.gif) no-repeat; background-color: #fff; background-position: 0px 1px; padding-left: 20px;'>Image</option>";
         $show .= "<option value='image' style='background: url($LJ::IMGPREFIX/insobj_poll.gif) no-repeat; background-color: #fff; background-position: 0px 1px; padding-left: 20px;'>Poll</option>";
         $show .= "</select>";
