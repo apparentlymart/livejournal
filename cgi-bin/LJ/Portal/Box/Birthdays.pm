@@ -27,10 +27,10 @@ sub generate_content {
 
         # sort upcoming birthdays
         my $now = DateTime->now;
-        $now = $now->month . '-' . $now->day;
+        my $nowstr = sprintf("%02d-%02d", $now->month, $now->day);
 
         my $i = 0;
-        while(($bdays[0]->[0] . '-' . $bdays[0]->[1]) lt $now && $i++ < $#bdays) {
+        while(($bdays[0]->[0] . '-' . $bdays[0]->[1]) lt $nowstr && $i++ < $#bdays) {
             push @bdays, shift @bdays;
         }
 
