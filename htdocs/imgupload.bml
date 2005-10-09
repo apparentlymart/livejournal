@@ -58,6 +58,7 @@
               div.insobjOuter p.wintitle { font: 12pt; font-weight: bold; }
                 .insobjOuter div.ex { font: 8pt sans-serif; color: #888; font-style: italic;}
               #insbutton { margin-right: 10px; }
+              .img_error { color: red; font-weight: bold; text-align: center; }
               </style>
                   <script>
                     var fileaction = '$LJ::FB_SITEROOT/interface/webupload';
@@ -83,7 +84,9 @@
 
 
         if ($step == 1) {
-            $ret .= "<table cellspacing='8'>";
+            $ret .= "<table cellspacing='8' valign='top'>";
+
+            $ret .= "<tr><td id='img_error' class='img_error' colspan='2'></td></tr>";
 
             # from URL
             $ret .= "<tr valign='top'><td>";

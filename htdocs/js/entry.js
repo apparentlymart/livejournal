@@ -248,7 +248,7 @@ var InOb = new Object;
 
 InOb.fail = function (msg) {
     alert("FAIL: " + msg);
-    return ;
+    return false;
 };
 
 // image upload stuff
@@ -305,7 +305,7 @@ function onInsertObject (include) {
 // the select's onchange:
 InOb.handleInsertSelect = function () {
     var objsel = $('insobjsel');
-    if (! objsel) { alert('can\'t get insert select'); return false; }
+    if (! objsel) { return InOb.fail('can\'t get insert select'); }
 
     var selected = objsel.selectedIndex;
     var include;
@@ -334,13 +334,10 @@ InOb.onClosePopup = function () {
 
 InOb.setupIframeHandlers = function () {
     var ife = $("popupsIframe");  //currentPopup;
-    if (! ife) { alert('handler without a popup?'); return false; }
+    if (! ife) { return InOb.fail('handler without a popup?'); }
     var ifw = ife.contentWindow;
     currentPopupWindow = ifw;
-    if (! ifw) {
-        alert("no content window?");
-        return;
-    }
+    if (! ifw) return InOb.fail("no content window?");
 
     var el;
 
@@ -348,6 +345,7 @@ InOb.setupIframeHandlers = function () {
     if (el) el.onfocus = function () { return InOb.selectRadio("fromurl"); };
     el = ifw.document.getElementById("fromurlentry");
     if (el) el.onfocus = function () { return InOb.selectRadio("fromurl"); };
+    if (el) el.onkeypress = function () { return InOb.clearError(); };
     el = ifw.document.getElementById("fromfile");
     if (el) el.onfocus = function () { return InOb.selectRadio("fromfile"); };
     el = ifw.document.getElementById("fromfileentry");
@@ -363,16 +361,16 @@ InOb.selectRadio = function (which) {
     if (! currentPopup) { alert('no popup');
                           alert(window.parent.currentPopup);
  return false; }
-    if (! currentPopupWindow) { alert('no popup window'); return false; }
+    if (! currentPopupWindow) return InOb.fail('no popup window');
 
     var radio = currentPopupWindow.document.getElementById(which);
-    if (! radio) { alert('no radio button'); return false; }
+    if (! radio) return InOb.fail('no radio button');
     radio.checked = true;
 
     var fromurl  = currentPopupWindow.document.getElementById('fromurlentry');
     var fromfile = currentPopupWindow.document.getElementById('fromfileentry');
     var submit   = currentPopupWindow.document.getElementById('btnNext');
-    if (! submit) { alert('no submit button'); return false; }
+    if (! submit) return InOb.fail('no submit button');
 
     // clear stuff
     if (which != 'fromurl') {
@@ -415,7 +413,10 @@ InOb.onSubmit = function () {
     var fbradio   = InOb.popid('fromfb');
 
     var form = InOb.popid('insobjform');
-    if (! form)  { alert('no form'); return false; }
+    if (! form) return InOb.fail('no form');
+
+    var div_err = InOb.popid('img_error');
+    if (! div_err) return InOb.fail('Unable to get error div');
 
     var setEnc = function (vl) {
         form.enctype = vl;
@@ -431,6 +432,17 @@ InOb.onSubmit = function () {
     }
 
     if (urlradio && urlradio.checked) {
+        var url = InOb.popid('fromurlentry');
+        if (! url) return InOb.fail('Unable to get url field');
+
+        if (url.value == '') {
+            InOb.setError('You must specify the image\'s URL');
+            return false;
+        } else if (url.value.match(/html?$/i)) {
+            InOb.setError('It looks like you are trying to insert a web page, not an image');
+            return false;
+        }
+
         setEnc("");
         form.action = currentPopupWindow.urlaction;
         return true;
@@ -474,6 +486,23 @@ InOb.onButtonPrevious = function () {
          return InOb.cbForBtnPrevious();
 
     // shouldn't get here, but let's ignore the event (which would do nothing anyway)
+    return true;
+};
+
+InOb.setError = function (errstr) {
+    var div_err = InOb.popid('img_error');
+    if (! div_err) return false;
+
+    div_err.innerHTML = errstr;
+    return true;
+};
+
+
+InOb.clearError = function () {
+    var div_err = InOb.popid('img_error');
+    if (! div_err) return false;
+
+    div_err.innerHTML = '';
     return true;
 };
 
