@@ -58,17 +58,13 @@ sub print_small_form {
     my $pboxid = $self->pboxid;
     my $u = $self->{'u'};
 
-    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
-    $year+=1900;
-    $mon=sprintf("%02d", $mon+1);
-    $mday=sprintf("%02d", $mday);
-    $min=sprintf("%02d", $min);
-
-    my $datetime = LJ::html_hidden({'name' => 'year', 'value' => $year},
-                                   {'name' => 'day', 'value'  => $mday},
-                                   {'name' => 'mon', 'value'  => $mon},
-                                   {'name' => 'hour', 'value' => $hour},
-                                   {'name' => 'min', 'value'  => $min});
+    my $datetime = LJ::entry_form_widget({'widget'      => 'datetime'});
+    my $subjectwidget = LJ::entry_form_widget({'widget' => 'subject',
+                                               'class'  => 'UpdateBoxSubject'});
+    my $entrywidget = LJ::entry_form_widget({'widget'   => 'entry',
+                                             'class'    => 'UpdateBoxEvent'});
+    my $postto = LJ::entry_form_widget({'widget'   => 'postto',
+                                         'remote' => $u});
 
     my $formauth = LJ::form_auth();
 
@@ -82,14 +78,16 @@ sub print_small_form {
 
     $content .= qq {
             $formauth
-            <input type="hidden" name="realform" value="1" />
-        $subjecttitle<br/>
-                                                <input name="subject" class="UpdateBoxSubject"/><br/>
-                                              $eventtitle<br/><textarea cols=50 rows=10 name="event" class="UpdateBoxEvent"></textarea><br/><br/>
-                                              <input type="submit" value="$updatetitle" name="postentry" /> <input type="submit" name="moreoptsbtn" value="$moreoptstitle"/>
-                                              $datetime
-                                              </form>
-                                          };
+                <input type="hidden" name="realform" value="1" />
+                $subjecttitle<br/>
+                $subjectwidget<br/>
+                $eventtitle<br/>
+                $entrywidget<br/>
+                $postto<br/><br/>
+                <input type="submit" value="$updatetitle" name="postentry" /> <input type="submit" name="moreoptsbtn" value="$moreoptstitle"/>
+                $datetime
+                </form>
+            };
     return $content;
 }
 
