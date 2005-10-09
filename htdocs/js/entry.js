@@ -291,6 +291,7 @@ function onInsertObject (include) {
     iframe.style.backgroundColor = "#fff";
     iframe.style.width = "700px"; //"60em";
     iframe.style.height = "300px"; //"20em";
+    iframe.style.overflow = "hidden";
 
     //iframe.src = include;
     iframe.innerHTML = "<iframe id='popupsIframe' style='border:0' width='100%' height='100%' src='" + include + "'></iframe>";
@@ -353,6 +354,8 @@ InOb.setupIframeHandlers = function () {
     if (el) el.onclick = el.onfocus = function () { return InOb.selectRadio("fromfile"); };
     el = ifw.document.getElementById("fromfb");
     if (el) el.onfocus = function () { return InOb.selectRadio("fromfb"); };
+    el = ifw.document.getElementById("btnPrev");
+    if (el) el.onclick = InOb.onButtonPrevious;
 
 };
 
@@ -368,7 +371,7 @@ InOb.selectRadio = function (which) {
 
     var fromurl  = currentPopupWindow.document.getElementById('fromurlentry');
     var fromfile = currentPopupWindow.document.getElementById('fromfileentry');
-    var submit   = currentPopupWindow.document.getElementById('insbutton');
+    var submit   = currentPopupWindow.document.getElementById('btnNext');
     if (! submit) { alert('no submit button'); return false; }
 
     // clear stuff
@@ -400,13 +403,18 @@ InOb.selectRadio = function (which) {
     return true;
 };
 
-InOb.onSubmit = function () {
-    var fileradio = currentPopupWindow.document.getElementById('fromfile');
-    var urlradio  = currentPopupWindow.document.getElementById('fromurl');
-    if (! fileradio) { alert('no file radio button'); return false; }
-    if (! urlradio)  { alert('no url radio button'); return false; }
+// getElementById
+InOb.popid = function (id) {
+    var popdoc = currentPopupWindow.document;
+    return popdoc.getElementById(id);
+};
 
-    var form = currentPopupWindow.document.getElementById('insobjform');
+InOb.onSubmit = function () {
+    var fileradio = InOb.popid('fromfile');
+    var urlradio  = InOb.popid('fromurl');
+    var fbradio   = InOb.popid('fromfb');
+
+    var form = InOb.popid('insobjform');
     if (! form)  { alert('no form'); return false; }
 
     var setEnc = function (vl) {
@@ -416,17 +424,56 @@ InOb.onSubmit = function () {
         }
     };
 
-    if (fileradio.checked) {
+    if (fileradio && fileradio.checked) {
         form.action = currentPopupWindow.fileaction;
         setEnc("multipart/form-data");
         return true;
-    } else if (urlradio.checked) {
+    }
+
+    if (urlradio && urlradio.checked) {
         setEnc("");
         form.action = currentPopupWindow.urlaction;
         return true;
-    } else {
-        alert('unknown radio button checked');
+    }
+
+    if (fbradio && fbradio.checked) {
+        InOb.fotobilderStepOne();
         return false;
     }
+
+    alert('unknown radio button checked');
+    return false;
+};
+
+InOb.showSelectorPage = function () {
+    var div_if = InOb.popid("img_iframe_holder");
+    var div_fw = InOb.popid("img_fromwhere");
+    div_fw.style.display = "block";
+    div_if.style.display = "none";
+    InOb.setPreviousCb(null);
+};
+
+InOb.fotobilderStepOne = function () {
+    var div_if = InOb.popid("img_iframe_holder");
+    var div_fw = InOb.popid("img_fromwhere");
+    div_fw.style.display = "none";
+    div_if.style.display = "block";
+    var url = currentPopupWindow.fbroot + "/manage/tolj_pickgal";
+    div_if.innerHTML = "<iframe src='" + url + "' width='650' height='225'></iframe>";
+    InOb.setPreviousCb(InOb.showSelectorPage);
+}
+
+InOb.setPreviousCb = function (cb) {
+    InOb.cbForBtnPrevious = cb;
+    InOb.popid("btnPrev").style.display = cb ? "block" : "none";
+};
+
+// all previous clicks come in here, then we route it to the registered previous handler
+InOb.onButtonPrevious = function () {
+    if (InOb.cbForBtnPrevious)
+         return InOb.cbForBtnPrevious();
+
+    // shouldn't get here, but let's ignore the event (which would do nothing anyway)
+    return true;
 };
 
