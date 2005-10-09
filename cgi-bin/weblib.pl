@@ -1445,6 +1445,66 @@ PREVIEW
     return $out;
 }
 
+# spit back at you an entryform widget
+# widgets: subject, entry, postto, datetime
+sub entry_form_widget {
+    my $opts = shift;
+
+    my $widget = $opts->{'widget'};
+    my $remote = $opts->{'remote'};
+    my $class = $opts->{'class'};
+
+    if ($class) {
+        $class = qq { class="$class" };
+    }
+
+    if ($widget eq 'subject') {
+        return qq { <input name="subject" $class/> };
+    }
+    if ($widget eq 'datetime') {
+        my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+        $year+=1900;
+        $mon=sprintf("%02d", $mon+1);
+        $mday=sprintf("%02d", $mday);
+        $min=sprintf("%02d", $min);
+        return LJ::html_hidden({'name' => 'year', 'value' => $year},
+                               {'name' => 'day', 'value'  => $mday},
+                               {'name' => 'mon', 'value'  => $mon},
+                               {'name' => 'hour', 'value' => $hour},
+                               {'name' => 'min', 'value'  => $min});
+    }
+    if ($widget eq 'entry') {
+        return qq { <textarea cols=50 rows=10 name="event" $class></textarea> };
+    }
+    if ($widget eq 'postto') {
+        return undef unless LJ::isu($remote);
+
+        my $ret;
+        # log in to get journals can post to
+        my $res;
+        $res = LJ::Protocol::do_request("login", {
+            "ver" => $LJ::PROTOCOL_VER,
+            "username" => $remote->{'user'},
+        }, undef, {
+            "noauth" => 1,
+            "u" => $remote,
+        });
+
+        return undef unless $res;
+
+        my @journals = map { $_, $_ } @{$res->{'usejournals'}};
+        push @journals, $remote->{'user'};
+        push @journals, $remote->{'user'};
+        @journals = sort @journals;
+        $ret .= "<span id='usejournal_list'><b>" . BML::ml('entryform.postto') . "</b> ";
+        $ret .= LJ::html_select({ 'name' => 'usejournal', 'selected' => $remote->{'user'} },
+                                @journals) . "</span>\n";
+        return $ret;
+    }
+
+    return '';
+}
+
 # <LJFUNC>
 # name: LJ::entry_form_decode
 # class: web
