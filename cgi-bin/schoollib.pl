@@ -706,7 +706,7 @@ sub get_pending {
             SELECT pendid, userid, name, country, state, city, url
             FROM schools_pending
             WHERE country = ? AND state $state AND city $city
-            AND pendid NOT IN ($in)
+            AND pendid NOT IN ($in) LIMIT 75
         }, 'pendid', undef, $school->{country}, @args) || {};
     return undef if $dbh->err;
 
