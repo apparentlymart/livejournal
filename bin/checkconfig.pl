@@ -31,6 +31,7 @@ arg: foreach my $arg (@ARGV) {
 }
 
 my %modules = (
+               "DateTime" => { 'deb' => 'libdatetime-perl' },
                "DBI" => { 'deb' => 'libdbi-perl',  },
                "DBD::mysql" => { 'deb' => 'libdbd-mysql-perl', },
                "Digest::MD5" => { 'deb' => 'libdigest-md5-perl', },
@@ -52,7 +53,7 @@ my %modules = (
                "HTML::Parser" => { 'deb' => 'libhtml-parser-perl', },
                "LWP::Simple" => { 'deb' => 'libwww-perl', },
                "LWP::UserAgent" => { 'deb' => 'libwww-perl', },
-               "GD" => { 'deb' => 'libgd-perl' },
+               "GD" => { 'deb' => 'libgd-gd2-perl' },
                "GD::Graph" => {
                    'deb' => 'libgd-graph-perl',
                    'opt' => 'Required to make graphs for the statistics page.',
@@ -94,6 +95,7 @@ my %modules = (
                },
                "Math::BigInt::GMP" => {
                    'opt' => 'Aides Crypt::DH so it isn\'t crazy slow.',
+		   'deb' => 'libmath-bigint-gmp-perl',
                },
                "URI::Fetch" => {
                    'opt' => 'Required for OpenID support.',
