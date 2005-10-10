@@ -128,7 +128,7 @@
 
 
             # from Scrapbook
-            if ($LJ::FB_DOMAIN) {
+            if ($fbenabled) {
                 $ret .= "<tr><td colspan='2'>";
                 $ret .= LJ::html_check({
                     'type'     => 'radio',
