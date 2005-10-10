@@ -58,13 +58,10 @@ sub print_small_form {
     my $pboxid = $self->pboxid;
     my $u = $self->{'u'};
 
-    my $datetime = LJ::entry_form_widget({'widget'      => 'datetime'});
-    my $subjectwidget = LJ::entry_form_widget({'widget' => 'subject',
-                                               'class'  => 'UpdateBoxSubject'});
-    my $entrywidget = LJ::entry_form_widget({'widget'   => 'entry',
-                                             'class'    => 'UpdateBoxEvent'});
-    my $postto = LJ::entry_form_widget({'widget'   => 'postto',
-                                         'remote' => $u});
+    my $datetime = LJ::entry_form_date_widget;
+    my $subjectwidget = LJ::entry_form_subject_widget('UpdateBoxSubject');
+    my $entrywidget = LJ::entry_form_entry_widget('UpdateBoxEvent');
+    my $postto = LJ::entry_form_postto_widget($u);
 
     my $formauth = LJ::form_auth();
 
