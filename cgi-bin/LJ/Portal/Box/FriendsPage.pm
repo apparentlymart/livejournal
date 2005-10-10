@@ -34,6 +34,9 @@ sub generate_content {
 
     my $content;
 
+    # how many characters to truncate entry at
+    my $max_entry_length = 400;
+
     my $showgroups = $self->get_prop('showgroups');
     my $itemshow = $self->get_prop('itemshow');
 
@@ -109,6 +112,12 @@ sub generate_content {
                 my $height = $picinfo->{'height'} ? "height=\"" . int($picinfo->{'height'} / 2) . '"' : '';
 
                 $pichtml .= "<img src='$LJ::USERPIC_ROOT/$picinfo->{'picid'}/$posteru->{'userid'}' $width $height align='absmiddle' />";
+            }
+
+            # trim entry down
+            if (length($event) > $max_entry_length) {
+                $event = substr($event, 0, $max_entry_length);
+                $event .= "... <a href=\"$entrylink\">Read more</a>";
             }
 
             $entriescontent .= qq {
