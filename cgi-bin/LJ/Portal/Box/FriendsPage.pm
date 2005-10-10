@@ -84,6 +84,9 @@ sub generate_content {
             my $entrylink  = $entry->url;
             my $picinfo;
 
+            # replace images with placeholders
+            LJ::CleanHTML::clean(\$event, { 'extractimages' => 1 });
+
             my $replyurl = LJ::Talk::talkargs($entrylink, "mode=reply");
 
             # security icon
