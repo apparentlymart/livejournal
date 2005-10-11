@@ -912,43 +912,45 @@ sub delete_school {
     $sid += 0;
     return undef unless $sid;
 
+    my $dbh = LJ::get_db_writer()
+        or return undef;
+
     # Get everyone who attends this school and delete
     # that relationship.
     my @attendees = LJ::no_cache(sub { return LJ::Schools::get_attendees($sid) });
-    return undef unless @attendees;
 
-    # Load users
-    my $users = LJ::load_userids(@attendees);
+    if (@attendees) {
+        # Load users
+        my $users = LJ::load_userids(@attendees);
 
-    # Build them up by cluster and do memcache deletes
-    my %clusters;
-    foreach my $u (values %$users) {
-        push @{$clusters{$u->{clusterid}}}, $u->{userid};
-        LJ::MemCache::delete([ $u->{userid}, "saui:$u->{userid}" ]);
+        # Build them up by cluster and do memcache deletes
+        my %clusters;
+        foreach my $u (values %$users) {
+            push @{$clusters{$u->{clusterid}}}, $u->{userid};
+            LJ::MemCache::delete([ $u->{userid}, "saui:$u->{userid}" ]);
+        }
+
+        # Do edge deletes on each cluster
+        foreach my $c (keys %clusters) {
+            my $dbcm = LJ::get_cluster_master($c);
+            return undef unless $dbcm;
+
+            my $in = join("','", @{$clusters{$c}});
+
+            $dbcm->do("DELETE FROM user_schools WHERE userid IN ('$in') AND schoolid = ?",
+                      undef, $sid);
+            return undef if $dbcm->err;
+        }
+
+        # Delete attendence information for the school
+        #
+        # Doing this second as we could rebuild the previously deleted
+        # information if we were pressed to do so, while this would
+        # be more difficult to rebuild.
+        $dbh->do("DELETE FROM schools_attended WHERE schoolid = ?",
+                 undef, $sid);
+        return undef if $dbh->err;
     }
-
-    # Do edge deletes on each cluster
-    foreach my $c (keys %clusters) {
-        my $dbcm = LJ::get_cluster_master($c);
-        return undef unless $dbcm;
-
-        my $in = join("','", @{$clusters{$c}});
-
-        $dbcm->do("DELETE FROM user_schools WHERE userid IN ('$in') AND schoolid = ?",
-                  undef, $sid);
-        return undef if $dbcm->err;
-    }
-
-    # Delete attendence information for the school
-    #
-    # Doing this second as we could rebuild the previously deleted
-    # information if we were pressed to do so, while this would
-    # be more difficult to rebuild.
-    my $dbh = LJ::get_db_writer()
-        or return undef;
-    $dbh->do("DELETE FROM schools_attended WHERE schoolid = ?",
-             undef, $sid);
-    return undef if $dbh->err;
 
     # Delete the actual school
     $dbh->do("DELETE FROM schools WHERE schoolid = ?",
