@@ -6,7 +6,7 @@ use strict;
 
 our $_box_class = "TextMessage";
 our $_box_description = "Send a text message to other $LJ::SITENAMESHORT users who have enabled this feature.";
-our $_box_name = "Send a Text Message ";
+our $_box_name = "Text Message";
 
 sub handle_request {
     my ($self, $get, $post) = @_;

@@ -28,6 +28,10 @@ img {
 	display: inline;
 	}
 
+#PortalContentContainer {
+                          font-size: 12px;
+                          }
+
 .PortalFaqLink {
         display: inline;
  }
@@ -58,7 +62,6 @@ img {
 	position: absolute;
 	overflow: hidden;
 	display: none;
-	font-size: small;
 	width: 400px;
 	padding: 0px;
 	}
@@ -69,7 +72,6 @@ img {
 	
 .BoxDescription {
 	padding: 2px;
-	font-size: 10px;
 	font-style: italic;
 	}
 	
@@ -82,7 +84,6 @@ img {
 	width: 100%;
 	font-weight: bold;
 	text-decoration: none;
-	font-size: 11px;
 	}
 	
 .DropDownMenuContent table br {
@@ -99,7 +100,6 @@ img {
 	margin: 0px;
 	z-index: 1;
 	position: absolute;
-	font-size: 10px;
 	width: 300px;
 	height: auto;
 	}
@@ -121,7 +121,6 @@ img {
 	width: 100%;
 	padding: 2px;
 	height: 15px;
-	font-size: 12px;
 	clear: both;
 	}
 	
@@ -130,7 +129,7 @@ img {
 	vertical-align: middle;
 	padding: 0px;
 	font-weight: bold;
-	font-family: Arial, Verdana, san-serif;
+	font-family: Arial, Verdana, sans-serif;
 	}
 	
 .PortalResetAllButton {
@@ -143,11 +142,10 @@ img {
 	padding: 0px;
 	width: 298px;
 	_width: 300px;
-	font-size: 8px;
+	font-size: smaller;
 	}
 	
 .PortalBoxConfigContent div {
-	font-size: 10px;
 	padding: 2px;
 	}
 	
@@ -224,11 +222,9 @@ img {
 	padding: 2px;
 	width: 100%;
 	margin: 0 auto;
-	font-family: Verdana, Arial, sans-serif;
 	}
 	
 .PortalBoxContent a:link, .PortalBoxContent a:visited {
-	font-size: 10px;
 	text-decoration: none; 
 	font-weight: bold;
  	}
@@ -272,7 +268,7 @@ img {
 	
 .PortalTableHeader td {
 	padding: 2px;
-	font-size: 9px !important;
+	font-size: smaller !important;
 	font-weight: bold !important;
 	text-transform: uppercase;
 	}
@@ -282,8 +278,6 @@ img {
 	}
 	
 .Announcements table tbody tr td {
-	font-family: arial, verdana, san-serif;
-	font-size: 10px;
 	padding: 3px;
 	border-spacing: 0;
 	border-collapse: separate;
@@ -300,48 +294,37 @@ img {
 	
  
 /*----------------------- Recent Comments ----------------------*/
- 
+
  .RecentCommentTitle {
  	font-weight: bold;
- 	font-size: 10px;
  	}
- 	
+
  .RecentCommentDate {
- 	font-size: 9px;
+ 	font-size: xx-small
  	}
- 	
+
  .RecentCommentItem {
+        font-size: 90%;
  	font-style: italic;
- 	font-size: 10px;
  	padding: 5px 0 0 5px;
  	}
- 	
+
  .RecentCommentLinks {
  	padding: 2px 5px 2px 2px;
  	text-align: right;
- 	font-size: 10px;
  	font-style: normal;
  	margin-top: 5px;
  	margin-left: -5px;
  	}
- 	
+
  .RecentCommentLinks a {
- 	font-size: 9px !important;
+ 	font-size: xx-small !important;
  	}
- 	
- 	
+
  /*------------------------ PopWithFriends ---------------------*/
  
  .PopWithFriends {
  	padding: 3px;
- 	}
- 
- .PopWithFriendsHeader {
- 	font-size: 10px;
- 	}
- 
- .PopWithFriends td {
- 	font-size: 10px;
  	}
  	
  .PopWithFriends table td {
@@ -355,13 +338,8 @@ img {
 .TextMessage {
 	padding: 3px;
 	}
- 
-.TextMessage p {
-	font-size: 10px;
-	}
-	
+ 	
 .tmform {
-	font-size: 10px;
 	width: 90%;
     display: none;
     margin-left: auto;
@@ -370,23 +348,18 @@ img {
 	
 .TextMessage input {
 	display: inline;
-	font-size: 10px;
 	}
 	
 .TextMessageDisclaimer {
-	font-size: 8px;
+	font-size: smaller;
 	margin-top: 3px;
 	}
 	
  /*--------------------------- New User --------------------------*/
  
  .NewUserBlurb {
- 	font-size: 11px !important;
+ 	font-size: small !important;
  	font-style: italic;
- 	}
- 	
- .NewUser td {
- 	font-size: 10px;
  	}
  	
  .NewUserMoreLink {
@@ -415,14 +388,13 @@ img {
 	}
   
 .FriendsCurrentTitle {
-  	font-size: 10px !important;
+  	font-size: smaller !important;
   	font-weight: bold !important;
   	margin-bottom: 5px;
   	}
   	
 .FriendsList {
 	margin-bottom: 10px;
-	font-size: 10px;
 	}
 	
 /*------------------------ Account Status -------------------------*/
@@ -435,7 +407,6 @@ img {
 /*------------------------- Friends Page --------------------------*/
 
 .FriendsPageTitle {
-	font-size: 10px;
 	font-weight: bold;
 	margin-bottom: 5px;
 	}
@@ -446,11 +417,6 @@ img {
 	
 .PortalFriendsPageSubject {
 	font-weight: bold;
-	font-size: 10px;
-	}
-	
-.PortalFriendsPageEntry {
-	font-size: 10px;
 	}
 	
 .PortalFriendsPageLinks {

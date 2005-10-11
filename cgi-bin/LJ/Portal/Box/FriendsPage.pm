@@ -188,6 +188,8 @@ sub generate_content {
 }
 
 
+sub can_refresh { 1; }
+
 #######################################
 
 

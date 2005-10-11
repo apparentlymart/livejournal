@@ -476,57 +476,63 @@
 
     # What portal modules to load
     @PORTAL_BOXES = (
-                       'Birthdays',
-                       'UpdateJournal',
-                       'TextMessage',
-                       'PopWithFriends',
-                       'Friends',
-                       'Manage',
-                       'RecentComments',
-                       'NewUser',
-                       );
+                     'Birthdays',
+                     'UpdateJournal',
+                     'TextMessage',
+                     'PopWithFriends',
+                     'Friends',
+                     'Manage',
+                     'RecentComments',
+                     'NewUser',
+                     'FriendsPage',
+                     );
 
     # Default portal layout
     %PORTAL_DEFAULTBOXSTATES = (
-                         'Birthdays' => {
-                             'added' => 1,
-                             'sort'  => 4,
-                             'col'   => 'R',
-                         },
-                         'Friends' => {
-                             'added' => 1,
-                             'sort'  => 6,
-                             'col'   => 'R',
-                         },
-                         'Manage' => {
-                             'added' => 1,
-                             'sort'  => 8,
-                             'col'   => 'L',
-                         },
-                         'PopWithFriends' => {
-                             'added' => 0,
-                             'col'   => 'R',
-                         },
-                         'RecentComments' => {
-                             'added' => 1,
-                             'sort'  => 10,
-                             'col'   => 'L',
-                         },
-                         'UpdateJournal' => {
-                             'added' => 1,
-                             'sort'  => 4,
-                             'col'   => 'L',
-                         },
-                         'NewUser' => {
-                             'sort'  => 2,
-                             'col'   => 'L',
-                         },
-                         'TextMessage' => {
-                             'added'  => 1,
-                             'sort'   => 8,
-                             'col'    => 'R',
-                         },
-                         );
+                                'Birthdays' => {
+                                    'added' => 1,
+                                    'sort'  => 4,
+                                    'col'   => 'R',
+                                },
+                                'Friends' => {
+                                    'added' => 1,
+                                    'sort'  => 6,
+                                    'col'   => 'R',
+                                },
+                                'Manage' => {
+                                    'added' => 1,
+                                    'sort'  => 10,
+                                    'col'   => 'L',
+                                },
+                                'PopWithFriends' => {
+                                    'added' => 0,
+                                    'col'   => 'R',
+                                },
+                                'RecentComments' => {
+                                    'added' => 1,
+                                    'sort'  => 12,
+                                    'col'   => 'L',
+                                },
+                                'UpdateJournal' => {
+                                    'added' => 1,
+                                    'sort'  => 6,
+                                    'col'   => 'L',
+                                },
+                                'NewUser' => {
+                                    'added' => 1
+                                    'sort'  => 2,
+                                    'col'   => 'L',
+                                },
+                                'TextMessage' => {
+                                    'added'  => 1,
+                                    'sort'   => 8,
+                                    'col'    => 'R',
+                                },
+                                'FriendsPage' => {
+                                    'added' => 1,
+                                    'sort'  => '4',
+                                    'col'   => 'L',
+                                );
 
     # Setup support email address to not accept new emails.  Basically if an
     # address is specified below, any user who emails it out of the blue will
