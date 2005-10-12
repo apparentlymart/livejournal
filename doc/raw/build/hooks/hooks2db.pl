@@ -265,8 +265,8 @@ $hooks{'bad_password'} = {
             "the password is bad, or undef if the password is ok.",
     args => [
         {
-            'desc' => "Password to check",
-            'name' => "\$password",
+            'desc' => "Hashref containing at least a password element.  Can also contain a u object and user, name, and email elements.",
+            'name' => "\$arg",
         },
     ],
     source => ["cgi-bin/ljprotocol.pl","htdocs/changepassword.bml","htdocs/create.bml","htdocs/update.bml"],

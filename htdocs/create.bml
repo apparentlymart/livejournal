@@ -234,11 +234,14 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
      if ($POST{'password1'} ne $POST{'password2'}) { 
          $errors{'password'} = "$ML{'.error.password.nomatch'}"; 
      } else {
-         my @checkpass = LJ::run_hooks("bad_password", 
-                                       { 'user' => $user, 'name' => $user, 
-                                         'email' => $email, 'password' => $POST{'password1'} });
-         if (@checkpass && $checkpass[0]->[0]) {
-             $errors{'password'} = "Bad password: $checkpass[0]->[0]";
+         my $checkpass = LJ::run_hook("bad_password",
+                                      {
+                                          'user'     => $user,
+                                          'email'    => $email,
+                                          'password' => $POST{'password1'},
+                                      });
+         if ($checkpass) {
+             $errors{'password'} = "Bad password: $checkpass";
          }
      }
      if (! $POST{'password1'}) { 

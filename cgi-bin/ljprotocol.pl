@@ -2335,8 +2335,8 @@ sub login_message
     return $msg->("must_revalidate")   if ($u->{'status'} eq "T" and not $LJ::EVERYONE_VALID);
     return $msg->("mail_bouncing")     if $u->{'status'} eq "B";
 
-    my @checkpass = LJ::run_hooks("bad_password", $u);
-    return $msg->("bad_password")      if (@checkpass and $checkpass[0]->[0]);
+    my $checkpass = LJ::run_hook("bad_password", $u);
+    return $msg->("bad_password")      if $checkpass;
 
     return $msg->("old_win32_client")  if $req->{'clientversion'} =~ /^Win32-MFC\/(1.2.[0123456])$/;
     return $msg->("old_win32_client")  if $req->{'clientversion'} =~ /^Win32-MFC\/(1.3.[01234])\b/;
