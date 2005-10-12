@@ -519,7 +519,7 @@
                                     'col'   => 'L',
                                 },
                                 'NewUser' => {
-                                    'added' => 1
+                                    'added' => 1,
                                     'sort'  => 2,
                                     'col'   => 'L',
                                 },
