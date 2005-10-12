@@ -352,7 +352,7 @@
     #@INITIAL_FRIENDS = qw(news);
 
     # initial optional friends
-    @LJ::INITIAL_OPTIONAL_FRIENDS = qw(news cody);
+    @LJ::INITIAL_OPTIONAL_FRIENDS = qw(news);
 
     # initial friends checked by default on create.bml
     @LJ::INITIAL_OPTOUT_FRIENDS = qw(news);
