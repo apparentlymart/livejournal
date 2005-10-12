@@ -408,7 +408,7 @@ sub getmenu {
             $returncode .= qq {
                       <tr><td colspan="2">
                           <div id="PortalResetAllButton">
-                            <form action="$LJ::SITEROOT/portal/index.bml" method="POST">
+                            <form action="$LJ::SITEROOT/portal/index.bml" method="POST" style="display: inline;">
                                 <input type="Submit" value="Reset..." name="resetall" />
                             </form>
                           </div>

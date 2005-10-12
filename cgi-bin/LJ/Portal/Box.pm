@@ -394,7 +394,7 @@ sub generate_box_config_dialog {
     my $config = '';
     my $selflink = '/portal/index.bml';
 
-    $config .= "<form action='$selflink' method='POST' name='configform$pboxid', id='configform$pboxid'>";
+    $config .= "<form action='$selflink' method='POST' name='configform$pboxid', id='configform$pboxid' style='display: inline;'>";
     $config .= "<table>";
     $config .= LJ::html_hidden({'name' => 'realform', 'value' => 1, 'id' => "realform$pboxid"},
                                {'name' => 'pboxid', 'value' => $pboxid});
