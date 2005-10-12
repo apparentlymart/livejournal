@@ -486,12 +486,6 @@ sub delbox {
             my $nextbox = $portalconfig->next_box($box);
             $returncode .= LJ::Portal->get_portal_box_titlebar_update_script($portalconfig, $prevbox) if ($prevbox);
             $returncode .= LJ::Portal->get_portal_box_titlebar_update_script($portalconfig, $nextbox) if ($nextbox);
-
-            $returncode .= qq {
-                var boxid = "pbox$pboxid";
-                var delbox = xGetElementById(boxid);
-                if (delbox) animateClose(delbox);
-            };
         } else {
             $returncode = 'alert("Box not found.");';
         }

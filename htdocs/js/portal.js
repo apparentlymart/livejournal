@@ -73,6 +73,11 @@ function doXrequest (postdata, finishcallback) {
 }
 
 function deletePortalBox (pboxid) {
+  var delbox = xGetElementById("pbox" + pboxid);
+
+  if (delbox)
+    animateClose(delbox);
+
   return evalXrequest("delbox=1&pboxid=" + pboxid);
 }
 
