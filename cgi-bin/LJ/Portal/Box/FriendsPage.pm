@@ -119,7 +119,7 @@ sub generate_content {
 
             # trim entry down
             if (length($event) > $max_entry_length) {
-                $event = substr($event, 0, $max_entry_length);
+                $event = LJ::text_trim($event, 0, $max_entry_length);
                 $event .= "... <a href=\"$entrylink\">Read more</a>";
             }
 

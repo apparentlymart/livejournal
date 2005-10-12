@@ -105,7 +105,7 @@ sub generate_content {
         # trim comment body
         my $maxlen = 120;
         if (length($body) > $maxlen) {
-            $body = substr($body, 0, $maxlen);
+            $body = LJ::text_trim($body, 0, $maxlen);
             $body .= '...';
         }
 
