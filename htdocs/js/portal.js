@@ -2,6 +2,7 @@ var LJVAR;
 if (!LJVAR) LJVAR=new Object();
 var portalAnimating = 0;
 var box_reloading = {};
+var add_portal_module_menu_html = "";
 
 // for comment management
 var LJ_cmtinfo;
@@ -245,15 +246,41 @@ function changeOpac(opacity, id) {
   }
 }
 
-function dropDownMenu(e, menu) {
-  // hide if the menu is already showing
-  var menuelement = getPortalMenu(menu);
+function updateAddPortalModuleMenu() {
   var finish_callback = function (menuhtml) {
     if (menuhtml) {
-      doDropDownMenu(e, menuhtml);
+      add_portal_module_menu_html = menuhtml;
+      var menuelement = getPortalMenu('addbox');
+
+      if (menuelement) {
+        menuelement.innerHTML = menuhtml;
+      }
+
     } else {
       alert("Error retrieving menu.");
     }
+  };
+
+  return doXrequest("getmenu=1&menu=addbox", finish_callback);
+}
+
+function dropDownMenu(e, menu) {
+  // no other menus yet
+  if (menu != 'addbox')
+    return true;
+
+  // do we already have the menu contents loaded?
+  if (add_portal_module_menu_html) {
+    doDropDownMenu(e, add_portal_module_menu_html);
+    return false;
+  }
+
+  var menuelement = getPortalMenu(menu);
+  var finish_callback = function (menuhtml) {
+    if (menuhtml)
+      doDropDownMenu(e, menuhtml);
+    else
+      alert("Error retrieving menu.");
   };
 
   return doXrequest("getmenu=1&menu="+menu, finish_callback);
@@ -287,6 +314,9 @@ function doDropDownMenu(e, menuHTML) {
       if (addbutton && LJVAR.imgprefix) {
         addbutton.src = LJVAR.imgprefix + "/portal/PortalAddButtonSelected.gif";
       }
+
+      // keep menu up to date
+      updateAddPortalModuleMenu();
     }
   }
 }

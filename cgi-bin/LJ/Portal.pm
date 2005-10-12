@@ -234,6 +234,10 @@ sub addbox {
     } else {
         $returncode = 'alert("Invalid box creation parameters.");';
     }
+
+    # update add module menu in background
+    $returncode .= "\nupdateAddPortalModuleMenu();\n";
+
     return $returncode;
 }
 
@@ -492,6 +496,9 @@ sub delbox {
     } else {
         $returncode = 'alert("Box not specified.");';
     }
+
+    # update add module menu in background
+    $returncode .= "\nupdateAddPortalModuleMenu();\n";
 
     return $returncode;
 }

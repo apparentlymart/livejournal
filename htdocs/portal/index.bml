@@ -48,6 +48,9 @@
     LJ::need_res('js/x/x_event.js');
     LJ::need_res('js/commentmanage.js');
 
+    # background load portal module menu
+    $bodyopts = 'onload="updateAddPortalModuleMenu();"';
+
     # get the current scheme and load the correct style
     my $scheme = BML::get_scheme();
     if ($scheme eq 'dystopia' && -e "$LJ::HOME/htdocs/stc/portal/Dystopia.css") {
