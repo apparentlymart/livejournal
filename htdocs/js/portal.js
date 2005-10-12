@@ -252,7 +252,8 @@ function updateAddPortalModuleMenu() {
       add_portal_module_menu_html = menuhtml;
       var menuelement = getPortalMenu('addbox');
 
-      if (menuelement) {
+      // no sense causing flicker on the box if it isn't changing
+      if (menuelement && menuelement.innerHTML != menuhtml) {
         menuelement.innerHTML = menuhtml;
       }
 
