@@ -63,6 +63,8 @@ sub print_small_form {
     my $entrywidget = LJ::entry_form_entry_widget('UpdateBoxEvent');
     my $postto = LJ::entry_form_postto_widget($u);
 
+    $postto = $postto ? $postto . '<br/><br/>' : '';
+
     my $formauth = LJ::form_auth();
 
     $content .= "<form action='$LJ::SITEROOT/update.bml' method='POST' name='updateform'>";
@@ -80,7 +82,7 @@ sub print_small_form {
                 $subjectwidget<br/>
                 $eventtitle<br/>
                 $entrywidget<br/>
-                $postto<br/><br/>
+                $postto
                 <input type="submit" value="$updatetitle" name="postentry" /> <input type="submit" name="moreoptsbtn" value="$moreoptstitle"/>
                 $datetime
                 </form>

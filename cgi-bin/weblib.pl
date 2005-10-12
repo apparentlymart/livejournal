@@ -1481,6 +1481,7 @@ sub entry_form_entry_widget {
 }
 
 # entry form "journals can post to" dropdown
+# NOTE!!! returns undef if no other journals user can post to
 sub entry_form_postto_widget {
     my ($remote, $class) = @_;
 
@@ -1504,6 +1505,9 @@ sub entry_form_postto_widget {
     return undef unless $res;
 
     my @journals = map { $_, $_ } @{$res->{'usejournals'}};
+
+    return undef unless @journals;
+
     push @journals, $remote->{'user'};
     push @journals, $remote->{'user'};
     @journals = sort @journals;
