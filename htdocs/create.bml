@@ -278,7 +278,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
          $nmon += 1;
 
          # require dates in the 1900s (or beyond)
-         if ($year && $mon && $day && $year >= 1900 && $year <= $nyear) {
+         if ($year && $mon && $day && $year >= 1900 && $year < $nyear) {
              # now see how many years back they are
              my $ofageyear = $year + 13;
              if ($ofageyear > $nyear) {
