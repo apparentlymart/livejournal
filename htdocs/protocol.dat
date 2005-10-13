@@ -1,3 +1,72 @@
+{ getusertags
+.des
+Retrieves a list of the user's defined tags.
+.request
+{ usejournal
+.des
+If you want to get the tags for a community you're a member of, include this key and the username of the account to get the tags of.  By default, you get your own tags.
+.optional
+1
+}
+.response
+{ tag_count
+.des
+The number of tags being returned in this set.  The number is base-1, so start at 1 and count up to this number inclusive in order to make sure you get all of the tags.  If this value is 0, there are no tags for the specified account.
+}
+{ tag_<i>num</i>_name
+.des
+The tag itself, this is the name to be sent when you're posting or editing an entry.  Textual representation of the tag.
+}
+{ tag_<i>num</i>_uses
+.des
+Indicates how many times this tag has been used.  May not be present, which indicates no usage of the tag.
+.optional
+1
+}
+{ tag_<i>num</i>_display
+.des
+If present and on, indicates that this tag is displayed on a user's list of tags.  A tag that is not displayed is hidden from the S2 style system, but is otherwise available for use.
+.optional
+1
+}
+{ tag_<i>num</i>_security
+.des
+The security level of this tag.  This indicates who can see the tag and the entries tagged with it.  Security can be one of 'public', 'private', 'friends', and 'group'.  Note that 'group' secure tags do not elaborate on which groups they're secured to, but that can be inferred from the security breakdown section.
+}
+{ tag_<i>num</i>_sb_friends
+.des
+If present, indicates the number of times this tag has been used on friends only entries.
+.optional
+1
+}
+{ tag_<i>num</i>_sb_public
+.des
+If present, indicates the number of times this tag has been used on public entries.
+.optional
+1
+}
+{ tag_<i>num</i>_sb_private
+.des
+If present, indicates the number of times this tag has been used on public entries.
+.optional
+1
+}
+{ tag_<i>num</i>_sb_group_count
+.des
+If present, indicates the number of groups that are using this tag.  This number can then be used in a loop (from 1 to this number inclusive) to get the actual groups this tag has been used on.
+.optional
+1
+}
+{ tag_<i>num</i>_sb_group_<i>num</i>_id
+.des
+The id of the group this tuple is about.  This has a 1:1 mapping with the frgrp_num in getfriendgroups.
+}
+{ tag_<i>num</i>_sb_group_<i>num</i>_count
+.des
+The number of times this tag has been used on this group.
+}
+}
+
 { getfriendgroups
 .des
 Retrieves a list of the user's defined groups of friends.

@@ -185,6 +185,7 @@ sub do_request
     if ($method eq "getchallenge")     { return getchallenge(@args);     }
     if ($method eq "sessiongenerate")  { return sessiongenerate(@args);  }
     if ($method eq "sessionexpire")    { return sessionexpire(@args);    }
+    if ($method eq "getusertags")      { return getusertags(@args);      }
 
     $r->notes("codepath" => "") if $r;
     return fail($err,201);
@@ -323,6 +324,20 @@ sub getfriendgroups
         }
     }
     return $res;
+}
+
+sub getusertags
+{
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
+    return undef unless check_altusage($req, $err, $flags);
+
+    my $u = $flags->{'u'};
+    my $uowner = $flags->{'u_owner'} || $u;
+    return fail($req, 502) unless $u && $uowner;
+
+    my $tags = LJ::Tags::get_usertags($uowner, { remote => $u });
+    return { tags => [ values %$tags ] };
 }
 
 sub getfriends
@@ -2706,6 +2721,9 @@ sub do_request
     if ($req->{'mode'} eq "sessionexpire") {
         return sessionexpire($req, $res, $flags);
     }
+    if ($req->{'mode'} eq "getusertags") {
+        return getusertags($req, $res, $flags);
+    }
 
     ### unknown mode!
     $res->{'success'} = "FAIL";
@@ -2803,6 +2821,48 @@ sub getfriendgroups
     }
     $res->{'success'} = "OK";
     populate_friend_groups($res, $rs->{'friendgroups'});
+
+    return 1;
+}
+
+## flat wrapper
+sub getusertags
+{
+    my ($req, $res, $flags) = @_;
+
+    my $err = 0;
+    my $rq = upgrade_request($req);
+
+    my $rs = LJ::Protocol::do_request("getusertags", $rq, \$err, $flags);
+    unless ($rs) {
+        $res->{'success'} = "FAIL";
+        $res->{'errmsg'} = LJ::Protocol::error_message($err);
+        return 0;
+    }
+
+    $res->{'success'} = "OK";
+
+    my $ct = 0;
+    foreach my $tag (@{$rs->{tags}}) {
+        $ct++;
+        $res->{"tag_${ct}_security"} = $tag->{security_level};
+        $res->{"tag_${ct}_uses"} = $tag->{uses} if $tag->{uses};
+        $res->{"tag_${ct}_display"} = $tag->{display} if $tag->{display};
+        $res->{"tag_${ct}_name"} = $tag->{name};
+        foreach my $lev (qw(friends private public)) {
+            $res->{"tag_${ct}_sb_$_"} = $tag->{security}->{$_}
+                if $tag->{security}->{$_};
+        }
+        my $gm = 0;
+        foreach my $grpid (keys %{$tag->{security}->{groups}}) {
+            next unless $tag->{security}->{groups}->{$grpid};
+            $gm++;
+            $res->{"tag_${ct}_sb_group_${gm}_id"} = $grpid;
+            $res->{"tag_${ct}_sb_group_${gm}_count"} = $tag->{security}->{groups}->{$grpid};
+        }
+        $res->{"tag_${ct}_sb_group_count"} = $gm if $gm;
+    }
+    $res->{'tag_count'} = $ct;
 
     return 1;
 }

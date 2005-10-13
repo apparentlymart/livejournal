@@ -19,6 +19,7 @@
 <!ENTITY mode.getevents          SYSTEM "getevents.mode.xml">
 <!ENTITY mode.getfriendgroups    SYSTEM "getfriendgroups.mode.xml">
 <!ENTITY mode.getfriends         SYSTEM "getfriends.mode.xml">
+<!ENTITY mode.getusertags        SYSTEM "getusertags.mode.xml">
 <!ENTITY mode.login              SYSTEM "login.mode.xml">
 <!ENTITY mode.postevent          SYSTEM "postevent.mode.xml">
 <!ENTITY mode.sessionexpire      SYSTEM "sessionexpire.mode.xml">
@@ -38,6 +39,7 @@
 &mode.getevents;
 &mode.getfriends;
 &mode.getfriendgroups;
+&mode.getusertags;
 &mode.login;
 &mode.postevent;
 &mode.sessionexpire;
