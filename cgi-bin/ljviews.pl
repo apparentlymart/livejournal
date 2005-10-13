@@ -1386,6 +1386,7 @@ sub create_view_friends
 
     # Check if we should redirect due to a bad password
     $opts->{'redir'} = LJ::bad_password_redirect({ 'returl' => 1 });
+    return 1 if $opts->{'redir'};
 
     # see how often the remote user can reload this page.
     # "friendsviewupdate" time determines what granularity time
