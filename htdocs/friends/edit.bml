@@ -254,6 +254,12 @@ if (previewOn == 0 || winPreview.closed) { return; }
 frm = document.editFriends;
 
 dropdown = frm["editfriend_add_"+lastFriend+"_fg"]
+if (!dropdown) {
+    winPreview.close();
+    previewOn = 0;
+    alert('You have not added any friends to preview');
+    return;
+}
 fg_color = dropdown.options[dropdown.selectedIndex].value;
 fg_color_text = dropdown.options[dropdown.selectedIndex].text;
 
