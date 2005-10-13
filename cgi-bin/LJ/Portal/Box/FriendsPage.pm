@@ -40,7 +40,7 @@ sub generate_content {
     my $showgroups = $self->get_prop('showgroups');
     my $itemshow = $self->get_prop('itemshow');
 
-    my $frpagefaqbtn = LJ::Portal->get_faq_link(61);
+    my $frpagefaqbtn = LJ::Portal->get_faq_link('friendspage');
 
     # get latest friends page entries
     my @entries = LJ::get_friend_items( {

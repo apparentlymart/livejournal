@@ -121,7 +121,7 @@ sub generate_content {
     my $content = '';
     my $pboxid = $self->pboxid;
     my $u = $self->{'u'};
-    my $helplink = LJ::Portal->get_faq_link(30);
+    my $helplink = LJ::Portal->get_faq_link('textmessage');
 
     my $jssubmit = qq {
         var userfield = xGetElementById('textmessageuser$pboxid');

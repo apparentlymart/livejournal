@@ -68,10 +68,10 @@ sub get_close_button {
 # get a little faq link and help icon
 sub get_faq_link {
     my LJ::Portal $self = shift;
-    my $faqid = shift;
+    my $faqkey = shift;
 
     return qq {
-        <a href="$LJ::SITEROOT/support/faqbrowse.bml?faqid=$faqid"><img src="$LJ::IMGPREFIX/help.gif" class="PortalFaqLink" alt="Help" /></a>
+        <a href="$LJ::HELPURL{$faqkey}"><img src="$LJ::IMGPREFIX/help.gif" class="PortalFaqLink" alt="Help" /></a>
     };
 }
 
