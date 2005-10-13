@@ -199,6 +199,13 @@ img {
 	padding: 1px;
 	}
 	
+.PortalBoxIcon {
+	display: table-cell;
+	vertical-align: middle;
+	width: 15px;
+	height: 15px;
+	}
+	
 .PortalBoxTitleText {
 	display: table-cell;
 	vertical-align: middle;

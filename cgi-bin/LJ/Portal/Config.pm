@@ -550,12 +550,19 @@ sub generate_box_titlebar {
     my $pboxid = $box->{'pboxid'};
     my $post_url = "$LJ::SITEROOT/portal/index.bml";
     my $boxtitle = $box->box_name;
+    my $boxclass = $box->box_class;
     my $col = $box->col;
     my $colorder = $self->col_order($box);
 
     my $sort = $box->sortorder;
     my $maxsort = $self->max_sortorder($col);
     my $minsort = $self->min_sortorder($col);
+
+    # is there an icon for this box?
+    my $moduleicon = '';
+    if (-e "$LJ::HTDOCS/img/portal/ModuleIcons/$boxclass.gif") {
+        $moduleicon = "<span class=\"PortalBoxIcon\"><img src=\"$LJ::IMGPREFIX/portal/ModuleIcons/$boxclass.gif\" valign=\"bottom\" /></span>";
+    }
 
     my $closebutton = qq {
         <a onclick="return deletePortalBox($pboxid);" href="$post_url?delbox=1&pboxid=$pboxid">
@@ -629,7 +636,7 @@ sub generate_box_titlebar {
     }
 
     my $titlebarhtml = qq {
-            <span class="PortalBoxTitleText">$boxtitle</span>
+            $moduleicon<span class="PortalBoxTitleText">$boxtitle</span>
             <span class="PortalBoxMoveButtons">$closebutton $refreshbutton $moveBoxButtons $configlink</span>
         };
 

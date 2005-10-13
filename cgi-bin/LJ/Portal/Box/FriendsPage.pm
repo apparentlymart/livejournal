@@ -161,7 +161,7 @@ sub generate_content {
             {$groups->{$a}->{'sortorder'} <=>
                  $groups->{$b}->{'sortorder'}}
             keys %$groups;
-            $content .= "<div class=\"FriendsPageTitle\"><img src='$LJ::SITEROOT/img/userinfo.gif' /> Friend Groups ($groupcount):</div>";
+            $content .= "<div class=\"FriendsPageTitle\"><img src='$LJ::SITEROOT/img/friendgroup.gif' /> Friend Groups ($groupcount):</div>";
             $content .= '<div class="FriendsPageEntry">';
 
             foreach my $group (@sortedgroups) {
