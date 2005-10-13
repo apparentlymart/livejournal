@@ -478,7 +478,7 @@ body<=
                  $ret .= "($T{'frozen'}) ";
              } elsif ($remote) {
                  # See if we want to force them to change their password
-                 my $bp = $remote->bad_pass_redirect(1);
+                 my $bp = LJ::bad_password_redirect({ 'returl' => 1 });
                  if ($bp) {
                      $ret .= "(<a href='$bp'>$T{'replythis'}</a>)";
                  } else {
@@ -543,7 +543,7 @@ body<=
      $ret .= "<p class='lesstop' align='center'><b>$readlink";
      if ($remote) {
          # See if we want to force them to change their password
-         my $bp = $remote->bad_pass_redirect(1);
+         my $bp = LJ::bad_password_redirect({ 'returl' => 1 });
          if ($bp) {
              $ret .= "(<a href='$bp'>$T{'replythis'}</a>)";
          } else {

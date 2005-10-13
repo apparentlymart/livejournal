@@ -2433,8 +2433,7 @@ sub _print_quickreply_link
     $onclick = "" if $LJ::DISABLED{'s2quickreply'};
 
     # See if we want to force them to change their password
-    my $bp = $remote->bad_pass_redirect(1)
-        if $remote;
+    my $bp = LJ::bad_password_redirect({ 'returl' => 1 });
 
     if ($bp) {
         $S2::pout->("<a href='$bp'>$linktext</a>");

@@ -813,28 +813,6 @@ sub get_recent_talkitems {
     return @recv;
 }
 
-# Checks if they are flagged as having a bad password and redirects
-# to changepassword.bml.  If $returl is set it returns the URL to
-# redirect to vs doing the redirect itself.  Useful in non-BML context
-# and for QuickReply links
-sub bad_pass_redirect {
-    my ($remote, $returl) = @_;
-    return undef unless LJ::isu($remote);
-
-    return undef if $LJ::DISABLED{'force_pass_change'};
-
-    LJ::load_user_props($remote, 'badpassword');
-
-    return undef unless $remote->{'badpassword'};
-
-    my $redir = "$LJ::SITEROOT/changepassword.bml";
-    unless ($returl) {
-        return BML::redirect($redir);
-    } else {
-        return $redir;
-    }
-}
-
 package LJ;
 
 # <LJFUNC>
@@ -3760,6 +3738,30 @@ sub unset_remote
 {
     LJ::User->unset_remote;
     1;
+}
+
+# Checks if they are flagged as having a bad password and redirects
+# to changepassword.bml.  If returl is on it returns the URL to
+# redirect to vs doing the redirect itself.  Useful in non-BML context
+# and for QuickReply links
+sub bad_password_redirect {
+    my $opts = shift;
+
+    my $remote = LJ::get_remote();
+    return undef unless $remote;
+
+    return undef if $LJ::DISABLED{'force_pass_change'};
+
+    $remote->prop('badpassword');
+
+    return undef unless $remote->{'badpassword'};
+
+    my $redir = "$LJ::SITEROOT/changepassword.bml";
+    unless (defined $opts->{'returl'}) {
+        return BML::redirect($redir);
+    } else {
+        return $redir;
+    }
 }
 
 1;

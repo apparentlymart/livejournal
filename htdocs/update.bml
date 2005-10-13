@@ -37,7 +37,7 @@
             return BML::redirect("$LJ::SITEROOT/agecheck/?s=1");
         }
 
-        $remote->bad_pass_redirect;
+        return if LJ::bad_password_redirect;
 
         if ($remote->identity) {
             $$title = "Sorry";
