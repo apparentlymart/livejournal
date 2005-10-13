@@ -60,85 +60,85 @@ sub generate_content {
     my $entriescontent;
 
     foreach my $entryinfo (@entries) {
-        if ($entryinfo) {
-            my $entry;
+        next unless $entryinfo;
 
-            if ($entryinfo->{'ditemid'}) {
-                $entry = LJ::Entry->new($entryinfo->{'journalid'},
-                                           ditemid => $entryinfo->{'ditemid'});
-            } elsif ($entryinfo->{'jitemid'} && $entryinfo->{'anum'}) {
-                $entry = LJ::Entry->new($entryinfo->{'journalid'},
-                                           jitemid => $entryinfo->{'jitemid'},
-                                           anum    => $entryinfo->{'anum'});
-            }
+        my $entry;
 
-            next unless $entry;
-
-            my $subject    = $entry->subject_html;
-            my $event      = $entry->event_html;
-            my $posteru    = $entry->poster;
-            my $poster     = $posteru->ljuser_display;
-            my $props      = $entry->props;
-            my $pickeyword = $props->{'picture_keyword'};
-            my $replycount = $props->{'replycount'};
-            my $entrylink  = $entry->url;
-            my $picinfo;
-
-            # replace images with placeholders
-            LJ::CleanHTML::clean(\$event, { 'extractimages' => 1 });
-
-            my $replyurl = LJ::Talk::talkargs($entrylink, "mode=reply");
-
-            # security icon
-            my $sec = "";
-            if ($entry->security eq "private") {
-                $sec = BML::fill_template("securityprivate");
-            } elsif ($entry->security eq "usemask") {
-                $sec = BML::fill_template("securityprotected");
-            }
-
-            # replies link/reply link
-            my $readlinktext = 'No replies';
-            if ($replycount == 1) {
-                $readlinktext = "1 Reply";
-            } elsif ($replycount > 1) {
-                $readlinktext = "$replycount replies";
-            }
-            my $replylink = "<a href=\"$replyurl\">Reply</a>";
-            my $readlink = "<a href=\"$entrylink\">$readlinktext</a>";
-
-            # load userpic
-            my $pichtml;
-            $picinfo = LJ::get_pic_from_keyword($posteru, $pickeyword) if $pickeyword;
-            if ($picinfo) {
-                my $width = $picinfo->{'width'} ? "width=\"" . int($picinfo->{'width'} / 2) . '"' : '';
-                my $height = $picinfo->{'height'} ? "height=\"" . int($picinfo->{'height'} / 2) . '"' : '';
-
-                $pichtml .= "<img src='$LJ::USERPIC_ROOT/$picinfo->{'picid'}/$posteru->{'userid'}' $width $height align='absmiddle' />";
-            }
-
-            # trim entry down
-            if (length($event) > $max_entry_length) {
-                $event = LJ::text_trim($event, 0, $max_entry_length);
-                $event .= "... <a href=\"$entrylink\">Read more</a>";
-            }
-
-            $entriescontent .= qq {
-                <div class="PortalFriendsPageMeta">
-                    <span class="PortalFriendsPagePoster">$sec</span>
-                    <span class="PortalFriendsPagePoster">$poster</span>
-                 </div>
-                 <div class="PortalFriendsPageSubject">
-                    $subject
-                 </div>
-                 <div class="PortalFriendsPageEntry">
-                    $event
-                 </div>
-                 <div class="PortalFriendsPageLinks">
-                    $readlink | $replylink
-                 </div>
-            };
+        if ($entryinfo->{'ditemid'}) {
+            $entry = LJ::Entry->new($entryinfo->{'journalid'},
+                                    ditemid => $entryinfo->{'ditemid'});
+        } elsif ($entryinfo->{'jitemid'} && $entryinfo->{'anum'}) {
+            $entry = LJ::Entry->new($entryinfo->{'journalid'},
+                                    jitemid => $entryinfo->{'jitemid'},
+                                    anum    => $entryinfo->{'anum'});
         }
+
+        next unless $entry;
+
+        my $subject    = $entry->subject_html;
+        my $event      = $entry->event_html;
+        my $posteru    = $entry->poster;
+        my $poster     = $posteru->ljuser_display;
+        my $props      = $entry->props;
+        my $pickeyword = $props->{'picture_keyword'};
+        my $replycount = $props->{'replycount'};
+        my $entrylink  = $entry->url;
+        my $picinfo;
+
+        # replace images with placeholders
+        LJ::CleanHTML::clean(\$event, { 'extractimages' => 1 });
+
+        my $replyurl = LJ::Talk::talkargs($entrylink, "mode=reply");
+
+        # security icon
+        my $sec = "";
+        if ($entry->security eq "private") {
+            $sec = BML::fill_template("securityprivate");
+        } elsif ($entry->security eq "usemask") {
+            $sec = BML::fill_template("securityprotected");
+        }
+
+        # replies link/reply link
+        my $readlinktext = 'No replies';
+        if ($replycount == 1) {
+            $readlinktext = "1 Reply";
+        } elsif ($replycount > 1) {
+            $readlinktext = "$replycount replies";
+        }
+        my $replylink = "<a href=\"$replyurl\">Reply</a>";
+        my $readlink = "<a href=\"$entrylink\">$readlinktext</a>";
+
+        # load userpic
+        my $pichtml;
+        $picinfo = LJ::get_pic_from_keyword($posteru, $pickeyword) if $pickeyword;
+        if ($picinfo) {
+            my $width = $picinfo->{'width'} ? "width=\"" . int($picinfo->{'width'} / 2) . '"' : '';
+            my $height = $picinfo->{'height'} ? "height=\"" . int($picinfo->{'height'} / 2) . '"' : '';
+
+            $pichtml .= "<img src='$LJ::USERPIC_ROOT/$picinfo->{'picid'}/$posteru->{'userid'}' $width $height align='absmiddle' />";
+        }
+
+        # trim entry down
+        if (length($event) > $max_entry_length) {
+            $event = LJ::text_trim($event, 0, $max_entry_length);
+            $event .= "... <a href=\"$entrylink\">Read more</a>";
+        }
+
+        $entriescontent .= qq {
+            <div class="PortalFriendsPageMeta">
+                <span class="PortalFriendsPagePoster">$sec</span>
+                <span class="PortalFriendsPagePoster">$poster</span>
+                </div>
+                <div class="PortalFriendsPageSubject">
+                $subject
+                </div>
+                <div class="PortalFriendsPageEntry">
+                $event
+                </div>
+                <div class="PortalFriendsPageLinks">
+                $readlink | $replylink
+                </div>
+            };
     }
 
     if (! scalar @entries) {
