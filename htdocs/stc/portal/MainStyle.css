@@ -29,25 +29,25 @@ img {
 	}
 
 #PortalContentContainer {
-                          font-size: 12px;
-                          }
+    font-size: 12px;
+    }
 
 .PortalFaqLink {
-        display: inline;
- }
+    display: inline;
+ 	}
 
 .LoadingText {
-               vertical-align: middle;
-               font-size: xx-large;
-               font-weight: bold;
-               font-family: Arial, Verdna;
-               text-align: center;
-}
+    vertical-align: middle;
+    font-size: xx-large;
+    font-weight: bold;
+    font-family: Arial, Verdna;
+    text-align: center;
+	}
 
 .LoadingBox {
-              width: 100%;
-              height: 100%;
-}
+    width: 100%;
+    height: 100%;
+	}
 
 /*------------------------ End Global ------------------------*/
 /*------------------------------------------------------------*/
@@ -172,11 +172,18 @@ img {
 .PortalFensterBarMaxButton {
 	display: none;
 	}
-#PortalConfigMenuBar { width: 100%; }
-#AddPortalMenuButtonImage {
-        margin-left: 30%;
-        margin-right: auto;
-}
+
+#PortalConfigMenuBar { 
+	
+	}
+
+#AddPortalMenuButton {
+	display: block;
+    margin-left: auto;
+    margin-bottom: 10px;
+    margin-top: -20px;
+    width: 135px;
+	}
 
 /*------------------ End Configuration Menus -----------------*/
 /*------------------------------------------------------------*/
@@ -219,14 +226,15 @@ img {
 	}
 	
 .PortalBoxContent {
+	font-family: Verdana, Arial, san-serif !important;
 	padding: 2px;
 	width: 100%;
 	margin: 0 auto;
 	}
 	
 .PortalBoxContent a:link, .PortalBoxContent a:visited {
-	text-decoration: none; 
-	font-weight: bold;
+	font-size: 12px !important;
+	text-decoration: underline;
  	}
 	
 
@@ -401,7 +409,7 @@ img {
 	
 .standout table {
 	width: 100% !important;
-}
+	}
 
 
 /*------------------------- Friends Page --------------------------*/
