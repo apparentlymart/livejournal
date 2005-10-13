@@ -738,8 +738,13 @@ if ($u->{'journaltitle'}) {
                  $link .= "</em>";
 
                  if (defined $schools->{$sid}->{year_start}) {
-                     $link .= " (" . $schools->{$sid}->{year_start} . "-" .
-                         ($schools->{$sid}->{year_end} || "present") . ")";
+                     $link .= " (" . $schools->{$sid}->{year_start};
+
+                     if ($schools->{$sid}->{year_start} != $schools->{$sid}->{year_end}) {
+                         $link .= " - " . ($schools->{$sid}->{year_end} || "present");
+                     }
+
+                     $link .= ")";
                  }
 
                  $link .= "<br />\n";
