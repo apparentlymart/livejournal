@@ -899,6 +899,8 @@ REPLACE INTO themelist (name, themeid) VALUES ('White on Black w/ dark grays', '
 REPLACE INTO themelist (name, themeid) VALUES ('Yellow/Green Pastels', '2');
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('0', 'char', 'AOL IM ScreenName', '1', '1', 'aolim', 'AOL Instant Messanger', 'general');
 UPDATE userproplist SET cldversion='0',datatype='char',des='AOL IM ScreenName',indexed='1',multihomed='1',prettyname='AOL Instant Messanger',scope='general' WHERE name='aolim';
+INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'num', 'If this user has a bad password and should change it', '0', '0', 'badpassword', 'Bad Password', 'general');
+UPDATE userproplist SET cldversion='4',datatype='num',des='If this user has a bad password and should change it',indexed='0',multihomed='0',prettyname='Bad Password',scope='general' WHERE name='badpassword';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('0', 'num', 'The ID of the blob cluster user\'s media resides on.', '1', '0', 'blob_clusterid', 'Blob Cluster ID', 'general');
 UPDATE userproplist SET cldversion='0',datatype='num',des='The ID of the blob cluster user\'s media resides on.',indexed='1',multihomed='0',prettyname='Blob Cluster ID',scope='general' WHERE name='blob_clusterid';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'char', 'LJ lang code in ml_langs', '1', '0', 'browselang', 'Language to browse with', 'general');

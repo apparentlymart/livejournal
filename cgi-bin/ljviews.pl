@@ -1384,6 +1384,15 @@ sub create_view_friends
     my $sth;
     my $user = $u->{'user'};
 
+    # Check if we should redirect due to a bad password
+    if ($remote) {
+        my $bp = $remote->bad_pass_redirect(1); # Get the URL back
+        if ($bp) {
+            $opts->{'redir'} = $bp;
+            return 1;
+        }
+    }
+
     # see how often the remote user can reload this page.
     # "friendsviewupdate" time determines what granularity time
     # increments by for checking for new updates

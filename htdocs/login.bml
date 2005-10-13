@@ -386,6 +386,8 @@
             
             LJ::set_remote($u);
             $remote = $u;
+
+            $remote->bad_pass_redirect;
         }
     }
 

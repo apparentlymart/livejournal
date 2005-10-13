@@ -8,6 +8,15 @@ sub ReplyPage
 {
     my ($u, $remote, $opts) = @_;
 
+    # Check if we should redirect due to a bad password
+    if ($remote) {
+        my $bp = $remote->bad_pass_redirect(1); # Get the URL back
+        if ($bp) {
+            $opts->{'redir'} = $bp;
+            return 1;
+        }
+    }
+
     my $p = Page($u, $opts);
     $p->{'_type'} = "ReplyPage";
     $p->{'view'} = "reply";

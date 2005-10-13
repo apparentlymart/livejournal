@@ -2431,7 +2431,16 @@ sub _print_quickreply_link
 
     $onclick = "" unless $page->{'_type'} eq 'EntryPage';
     $onclick = "" if $LJ::DISABLED{'s2quickreply'};
-    $S2::pout->("<a $onclick href='$replyurl' $opt_class>$linktext</a>");
+
+    # See if we want to force them to change their password
+    my $bp = $remote->bad_pass_redirect(1)
+        if $remote;
+
+    if ($bp) {
+        $S2::pout->("<a href='$bp'>$linktext</a>");
+    } else {
+        $S2::pout->("<a $onclick href='$replyurl' $opt_class>$linktext</a>");
+    }
 }
 
 sub _print_reply_container

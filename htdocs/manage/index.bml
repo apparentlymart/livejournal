@@ -6,6 +6,10 @@
     LJ::set_active_crumb('manage');
 
     my $remote = LJ::get_remote();
+
+    $remote->bad_pass_redirect
+        if $remote;
+
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);
     

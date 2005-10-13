@@ -22,6 +22,8 @@ _code?>
         return BML::redirect("$LJ::SITEROOT/agecheck/?s=1");
     }
 
+    $remote->bad_pass_redirect;
+
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);
     return LJ::bad_input("You could not be authenticated as the specified user.")

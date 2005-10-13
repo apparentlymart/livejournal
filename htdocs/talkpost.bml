@@ -121,6 +121,8 @@ body<=
 
     my $remote = LJ::get_remote();
 
+    $remote->bad_pass_redirect;
+
     my @user_props = ("opt_logcommentips", "opt_whoscreened");
     push @user_props, "opt_blockrobots" if $u->{'statusvis'} eq 'V';
     LJ::load_user_props($u, @user_props);

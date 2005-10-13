@@ -477,7 +477,13 @@ body<=
              if ($post->{'state'} eq 'F') {
                  $ret .= "($T{'frozen'}) ";
              } elsif ($remote) {
-                 $ret .= "(" . LJ::make_qr_link($dtid, $post->{'subject'}, $T{'replythis'}, $replyurl) .  ")";
+                 # See if we want to force them to change their password
+                 my $bp = $remote->bad_pass_redirect(1);
+                 if ($bp) {
+                     $ret .= "(<a href='$bp'>$T{'replythis'}</a>)";
+                 } else {
+                     $ret .= "(" . LJ::make_qr_link($dtid, $post->{'subject'}, $T{'replythis'}, $replyurl) .  ")";
+                 }
              } else {
                  $ret .= "(<a href='$replyurl'>$T{'replythis'}</a>) ";
              }
@@ -536,7 +542,13 @@ body<=
      # requires setup when logged in.
      $ret .= "<p class='lesstop' align='center'><b>$readlink";
      if ($remote) {
-         $ret .= "(" . LJ::make_qr_link('top', '', $T{'postcomments'}, $posturl) . "</a>)";
+         # See if we want to force them to change their password
+         my $bp = $remote->bad_pass_redirect(1);
+         if ($bp) {
+             $ret .= "(<a href='$bp'>$T{'replythis'}</a>)";
+         } else {
+             $ret .= "(" . LJ::make_qr_link('top', '', $T{'postcomments'}, $posturl) . "</a>)";
+         }
      } else {
          $ret .= "(<a href='$posturl'>$T{'postcomments'}</a>)";
      }

@@ -37,6 +37,8 @@
             return BML::redirect("$LJ::SITEROOT/agecheck/?s=1");
         }
 
+        $remote->bad_pass_redirect;
+
         if ($remote->identity) {
             $$title = "Sorry";
             $$body = "Non-$LJ::SITENAME users can't post, as they don't actually have journals here.  You can leave comments in other journals, though.";
