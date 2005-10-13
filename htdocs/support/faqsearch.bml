@@ -63,7 +63,7 @@
     # system anyway.  Would be nice to memcache
     # the faqid list
     my $dbr = LJ::get_db_reader();
-    my $sth = $dbr->prepare("SELECT faqid, question, summary, answer FROM faq");
+    my $sth = $dbr->prepare("SELECT faqid, question, summary, answer FROM faq WHERE faqcat!=''");
     $sth->execute;
     while (my $f = $sth->fetchrow_hashref) {
         push @faqs, {
