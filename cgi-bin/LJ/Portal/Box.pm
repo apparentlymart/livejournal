@@ -150,6 +150,20 @@ sub create {
     return $self;
 }
 
+# returns an image of the icon for this box if one exists
+sub box_icon {
+    my LJ::Portal::Box $self = shift;
+    my $boxclass = $self->box_class;
+
+    # is there an icon for this box?
+    my $boxicon;
+    if (-e "$LJ::HTDOCS/img/portal/ModuleIcons/$boxclass.gif") {
+        $boxicon = "<span class=\"PortalBoxIcon\"><img src=\"$LJ::IMGPREFIX/portal/ModuleIcons/$boxclass.gif\" valign=\"bottom\" /></span>";
+    }
+
+    return $boxicon;
+}
+
 sub type_id {
     my LJ::Portal::Box $self = shift;
     return LJ::Portal::Config->type_string_to_id($self->box_class);
