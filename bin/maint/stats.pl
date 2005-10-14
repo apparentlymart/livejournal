@@ -13,7 +13,7 @@ $maint{'genstats'} = sub
 {
     my @which = @_ || qw(users countries 
                          states gender clients
-                         pop_interests meme pop_faq
+                         pop_interests meme popfaq
                          schools);
     
     # popular faq items
