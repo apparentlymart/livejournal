@@ -241,6 +241,11 @@ img {
 	
 .PortalBoxContent a:link, .PortalBoxContent a:visited {
 	font-size: 12px !important;
+	text-decoration: none;
+ 	}
+
+.PortalBoxContent a:hover {
+	font-size: 12px !important;
 	text-decoration: underline;
  	}
 	
