@@ -386,13 +386,14 @@ sub getmenu {
                 my $boxname = $fullboxclass->box_name;
                 my $boxdesc = $fullboxclass->box_description;
                 my $boxcol  = $portalconfig->get_box_default_col($boxclass);
+                my $boxicon = $fullboxclass->box_icon;
                 my $addlink = qq{href="$LJ::SITEROOT/portal/index.bml?addbox=1&boxtype=$boxclass&boxcol=$boxcol" onclick="if(addPortalBox('$boxclass', '$boxcol')) return true; hidePortalMenu('addbox'); return false;"};
                 my $rowmod = $row % 2 + 1;
                 $returncode .= qq{
                     <tr class="PortalRow$rowmod">
                         <td>
                           <a $addlink>
-                          $boxname
+                            $boxicon <span class="PortalBoxTitleText">$boxname</span>
                           </a>
                           <div class="BoxDescription">$boxdesc</div>
                         </td>
