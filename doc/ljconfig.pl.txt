@@ -532,6 +532,7 @@
                                     'added' => 1,
                                     'sort'  => '4',
                                     'col'   => 'L',
+                                }
                                 );
 
     # Setup support email address to not accept new emails.  Basically if an
