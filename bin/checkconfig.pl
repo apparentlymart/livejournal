@@ -1,34 +1,48 @@
 #!/usr/bin/perl
 #
 
-my @errors;
-my $err = sub {
-    return unless @_;
-    die "Problem:\n" . join('', map { "  * $_\n" } @_);
-};
+use strict;
+use Getopt::Long;
+
+my $debs_only = 0;
+my ($only_check, $no_check);
 
 my %dochecks;   # these are the ones we'll actually do
 my @checks = (  # put these in the order they should be checked in
-    "modules", 
-    "env", 
-    "database" 
+    "modules",
+    "env",
+    "database",
 );
 foreach my $check (@checks) { $dochecks{$check} = 1; }
 
-my $only = 0;
+sub usage {
+    die "Usage: checkconfig.pl
+checkconfig.pl --needed-debs
+checkconfig.pl --only=<check> | --no=<check>
 
-arg: foreach my $arg (@ARGV) {
-    ($w, $c) = ($arg =~ /^-(no|only)(.*)/) or die "unknown option $arg";
-    die "only one '-onlyfoo' option may be specified" if $w eq "only" and $only++;
-    foreach my $check (@checks) {
-        if ($check eq $c) {
-            if ($w eq "only") { %dochecks = ( $check => 1 ); }
-            else { $dochecks{$check} = 0 }
-            next arg;
-        }
-    }
-    die "unknown check '$c' (known checks: " . join(", ", @checks) . ")\n";
+Checks are:
+ " . join(', ', @checks);
 }
+
+usage() unless GetOptions(
+                          'needed-debs' => \$debs_only,
+                          'only=s'      => \$only_check,
+                          'no=s'        => \$no_check,
+                          );
+
+usage() if $only_check && $no_check;
+
+%dochecks = ( $only_check => 1)
+    if $only_check;
+
+$dochecks{$no_check} = 0
+    if $no_check;
+
+my @errors;
+my $err = sub {
+    return unless @_;
+    die "\nProblem:\n" . join('', map { "  * $_\n" } @_);
+};
 
 my %modules = (
                "DateTime" => { 'deb' => 'libdatetime-perl' },
@@ -106,7 +120,8 @@ my %modules = (
                );
 
 sub check_modules {
-    print "[Checking for Perl Modules....]\n";
+    print "[Checking for Perl Modules....]\n"
+        unless $debs_only;
 
     my @debs;
 
@@ -114,10 +129,12 @@ sub check_modules {
         my $rv = eval "use $mod;";
         if ($@) {
             my $dt = $modules{$mod};
-            if ($dt->{'opt'}) {
-                print STDERR "Missing optional module $mod: $dt->{'opt'}\n";
-            } else {
-                push @errors, "Missing perl module: $mod";
+            unless ($debs_only) {
+                if ($dt->{'opt'}) {
+                    print STDERR "Missing optional module $mod: $dt->{'opt'}\n";
+                } else {
+                    push @errors, "Missing perl module: $mod";
+                }
             }
             push @debs, $dt->{'deb'} if $dt->{'deb'};
             next;
@@ -130,14 +147,19 @@ sub check_modules {
         }
     }
     if (@debs && -e '/etc/debian_version') {
-        print STDERR "\n# apt-get install ", join(' ', @debs), "\n\n";
+        if ($debs_only) {
+            print STDERR join(' ', @debs);
+        } else {
+            print STDERR "\n# apt-get install ", join(' ', @debs), "\n\n";
+        }
     }
 
     $err->(@errors);
 }
 
 sub check_env {
-    print "[Checking LJ Environment...]\n";
+    print "[Checking LJ Environment...]\n"
+        unless $debs_only;
 
     $err->("\$LJHOME environment variable not set.")
         unless $ENV{'LJHOME'};
@@ -148,6 +170,7 @@ sub check_env {
     # otherwise ljconfig.pl might load ljconfig-local.pl, which maybe load
     # new modules to implement site-specific hooks.
     my $local_config = "$ENV{'LJHOME'}/bin/checkconfig-local.pl";
+    $local_config .= ' --needed-debs' if $debs_only;
     if (-e $local_config) {
         my $good = eval { require $local_config; };
         exit 1 unless $good;
@@ -166,7 +189,8 @@ sub check_env {
 }
 
 sub check_database {
-    print "[Checking Database...]\n";
+    print "[Checking Database...]\n"
+        unless $debs_only;
 
     require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
     my $dbh = LJ::get_dbh("master");
@@ -180,7 +204,8 @@ sub check_database {
     }
 
     if (%LJ::MOGILEFS_CONFIG && $LJ::MOGILEFS_CONFIG{hosts}) {
-        print "[Checking MogileFS client.]\n";
+        print "[Checking MogileFS client.]\n"
+            unless $debs_only;
         my $mog = LJ::mogclient();
         die "Couldn't create mogilefs client." unless $mog;
     }
@@ -189,9 +214,13 @@ sub check_database {
 foreach my $check (@checks) {
     next unless $dochecks{$check};
     my $cn = "check_".$check;
+    no strict 'refs';
     &$cn;
 }
-print "All good.\n";
-print "NOTE: checkconfig.pl doesn't check everything yet\n";
+
+unless ($debs_only) {
+    print "All good.\n";
+    print "NOTE: checkconfig.pl doesn't check everything yet\n";
+}
 
 
