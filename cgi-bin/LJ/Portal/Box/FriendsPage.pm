@@ -55,7 +55,10 @@ sub generate_content {
     # correct pluralization (translationableness would be cool at some point)
     my $entrytext = @entries == 1 ? 'entry' : 'entries';
 
-    $content .= "<div class=\"FriendsPageTitle\"><img src='$LJ::SITEROOT/img/userinfo.gif' /> Latest Friends page $entrytext: $frpagefaqbtn</div>";
+    # link to friends' page
+    my $friendspageurl = $u->journal_base . '/friends/';
+
+    $content .= "<div class=\"FriendsPageTitle\"><img src='$LJ::SITEROOT/img/userinfo.gif' /> <a href=\"$friendspageurl\">Latest Friends page $entrytext: $frpagefaqbtn</a></div>";
 
     my $entriescontent;
 
