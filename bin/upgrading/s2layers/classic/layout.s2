@@ -419,7 +419,8 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
 
       if ($e.subject) { "\n\n<span class='subject'>$e.subject</span><br />"; }
       if (not $hide_text) {
-          print $e.text; "\n\n";
+          $e->print_text();
+          print "\n\n";
           if (size $e.metadata or size $e.tags)
           {
               "<p>";

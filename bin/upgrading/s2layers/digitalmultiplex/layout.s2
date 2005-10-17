@@ -528,7 +528,9 @@ function print_entry_short (Page p, Entry e, Color bgcolor, Color fgcolor) {
     var string subject = $e.subject ? $e.subject : "(No Subject)";
     println """<a name="entry_$e.itemid"></a><table class="short_entry" width="100%">""";
     println """<tr><th align="left"><a href="$e.permalink_url">&raquo; $subject</a></th></tr>""";
-    println """<tr><td width="100%" align="left">$e.text<br><span class="short_entry_meta">""";
+    println """<tr><td width="100%" align="left">""";
+    $e->print_text();
+    println """<br><span class="short_entry_meta">""";
     println $e.time->date_format("med") + " @ " + $e.time->time_format();
     $e.comments->print();
     println "</span></td></tr></table>";
@@ -583,7 +585,7 @@ function print_entry_full (Page p, Entry e, Color bgcolor, Color fgcolor, bool h
     }
     println """<td valign="top" style="text-align: left; padding: 10px" align="left" width="100%">""";
     if (not $hide_text) {
-        print $e.text;
+        $e->print_text();
         if (size $e.metadata) {
             """<div class="currents">""";
             foreach var string k ($e.metadata) {

@@ -1024,9 +1024,9 @@ $e->lay_print_icon();
     }
 """</div>
 
-<div class="entrycontent">
-$e.text
-</div>
+<div class="entrycontent">""";
+$e->print_text();
+"""</div>
 
 <div class="entryfooter">
 

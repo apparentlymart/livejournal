@@ -392,7 +392,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     }
     "</strong><br />";
     if (not $hide_text) {
-        print $e.text; "<br />";
+        $e->print_text(); "<br />";
         if (size $e.metadata) {
             foreach var string k ($e.metadata) {
                 var string key = $k;

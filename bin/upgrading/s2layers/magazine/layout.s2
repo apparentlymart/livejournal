@@ -402,7 +402,9 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     if (not $hide_text)
     {
         # Entry
-        "<p>$e.text</p>";
+        "<p>";
+        $e->print_text();
+        "</p>";
 
         # Tags
         if ($e.tags) {

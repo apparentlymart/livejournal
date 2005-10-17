@@ -612,7 +612,8 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     }
 
     if (not $hide_text) {
-        print "$e.text<br /><br />";
+        $e->print_text();
+        print "<br /><br />";
         if (size $e.metadata) {
             """<div class="currents">""";
             foreach var string k ($e.metadata) {
