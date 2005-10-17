@@ -96,6 +96,21 @@ function evalXrequest(request) {
   return doXrequest(request, doEval);
 }
 
+// ask if they want to reset their portal
+function askResetAll(confirmtext) {
+
+  // clicked cancel? don't do anything
+  if (!confirm(confirmtext))
+    return false;
+
+  // do a post to reset everything
+  if (evalXrequest("resetalldo=1&resetyes=Yes&jsmode=hella")) {
+    return true;
+  }
+
+  return false;
+}
+
 function showConfigPortalBox (pboxid) {
   var box = xGetElementById("config"+pboxid);
 

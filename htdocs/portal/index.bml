@@ -229,8 +229,18 @@
             # only POST
             if ($action eq 'resetalldo' && $didpost && $POST{'resetyes'}) {
                 $portalconfig->reset_all;
+
+                # tell browser to reload now that everything's finished resetting
+                # (if we're using JS)
+                if ($POST{'jsmode'}) {
+                    return $returnjs->( qq {
+                        // reload the page
+                            window.location.href = LJVAR.postUrl;
+                    } );
+                }
             }
 
+            # make sure we're at /portal/ because of referral checking
             BML::redirect($selflink);
         }
     }
@@ -249,12 +259,14 @@
                                      { 'sitenameabbrev' => $LJ::SITENAMEABBREV });
         $title = BML::ml('.resetalltitle', { 'sitenameabbrev' => $LJ::SITENAMEABBREV });
         $body .= qq {
-            <h2><?_ml .resetall _ml?></h2>
+            <p><?_ml .resetall _ml?></p>
+                <div class="standout">
             <form action="$selflink" method="POST">
                 <input type="hidden" name="resetalldo" value="1" />
                 <input type="Submit" name="resetyes" value="Yes" />
                 <input type="Submit" name="resetno" value="No" />
             </form>
+            </div>
             <b><a href=\"$LJ::SITEROOT/portal\">$returnlinktext</a></b>
         };
 

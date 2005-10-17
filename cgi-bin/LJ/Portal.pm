@@ -62,7 +62,7 @@ sub load_portal_boxes {
 }
 
 sub get_close_button {
-    return qq{<img src="$LJ::IMGPREFIX/portal/PortalConfigCloseButton.gif" width=19 height=19 title="Close" alt="Close" valign="middle" />};
+    return qq{<img src="$LJ::IMGPREFIX/portal/PortalConfigCloseButton.gif" width=19 height=19 title="Close" title="Close" valign="middle" />};
 }
 
 # get a little faq link and help icon
@@ -71,7 +71,7 @@ sub get_faq_link {
     my $faqkey = shift;
 
     return qq {
-        <a href="$LJ::HELPURL{$faqkey}"><img src="$LJ::IMGPREFIX/help.gif" class="PortalFaqLink" alt="Help" /></a>
+        <a href="$LJ::HELPURL{$faqkey}"><img src="$LJ::IMGPREFIX/help.gif" class="PortalFaqLink" title="Help" /></a>
     };
 }
 
@@ -178,7 +178,7 @@ sub create_fenster {
     $id = LJ::ejs($id);
     $parent = LJ::ejs($parent);
 
-    my $resize_image = qq{<img src="$LJ::IMGPREFIX/portal/PortalBoxResizeIcon.gif" title="Resize" alt="Resize" />};
+    my $resize_image = qq{<img src="$LJ::IMGPREFIX/portal/PortalBoxResizeIcon.gif" title="Resize" title="Resize" />};
 
     my $titlebar_html = LJ::ejs(qq{
         <div class="PortalPatternedTitleBar" id="portalbar$id">
@@ -399,18 +399,21 @@ sub getmenu {
                         </td>
                         <td align="center" valign="middle">
                           <a $addlink>
-                              <img src="$LJ::IMGPREFIX/portal/AddIcon.gif" alt="Add this module" width="25" height="25" />
+                              <img src="$LJ::IMGPREFIX/portal/AddIcon.gif" title="Add this module" width="25" height="25" />
                           </a>
                         </td>
                         </tr>
                         <br/>};
                 $row++;
             }
+
+            my $resetask = LJ::ejs(BML::ml('/portal/index.bml.resetall'));
+
             $returncode .= qq {
                       <tr><td colspan="2">
                           <div id="PortalResetAllButton">
                             <form action="$LJ::SITEROOT/portal/index.bml" method="POST" style="display: inline;">
-                                <input type="Submit" value="Reset..." name="resetall" />
+                                <input type="Submit" value="Reset..." name="resetall" onclick="return askResetAll('$resetask');" />
                             </form>
                           </div>
                       </td></tr>
