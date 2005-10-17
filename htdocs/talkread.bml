@@ -329,7 +329,7 @@ body<=
  $LJ_cmtinfo{'journal'} = $u->{user};
  $LJ_cmtinfo{'canAdmin'} = LJ::can_manage($remote, $u) ? 1 : 0;
  $LJ_cmtinfo{'remote'} = $remote ? $remote->{user} : "";
- my $fmt_time_short = "%%HH%%:%%min%% %%a%%m";
+ my $fmt_time_short = "%%hh%%:%%min%% %%a%%m";
 
  my $recurse_post = sub
  {
