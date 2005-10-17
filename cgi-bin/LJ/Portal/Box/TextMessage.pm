@@ -32,7 +32,7 @@ sub handle_request {
                     xDisplay(tmmsg, "block");
                     var messagefield = xGetElementById('textmessagebody$pboxid');
                     if (messagefield) {
-                        messagefield.maxlength = $maxlen;
+                        messagefield.maxLength = $maxlen;
                     }
                 }
             } else {
@@ -138,7 +138,7 @@ sub generate_content {
 Username: <input type='text' size='15' maxlength='15' name='user' id='textmessageuser$pboxid'/>
 <input type='submit' value="Proceed..." onclick="$jssubmit" /></div>
 <div id="tmmsg$pboxid" style="display: none;">
-<b>Message:</b><br /><input id='textmessagebody$pboxid' size='50' maxlength='42' />
+<b>Message:</b><br /><input type="text" id="textmessagebody$pboxid" maxlength=42 />
 </div>
 <div id="tmresult$pboxid" class="tmform"></div>
 <input type="hidden" name="from" value="$u->{'user'}" />
