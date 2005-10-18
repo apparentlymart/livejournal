@@ -53,7 +53,7 @@ set text_read_comments_friends = "1 komento // # komentoj";
 set text_skiplinks_back="# antaŭaj komentoj";
 set text_skiplinks_forward="# sekvontaj komentoj";
 # Views
-set text_view_recent = "Lastatempaj enskribojn";
+set text_view_recent = "Lastatempaj enskriboj";
 set text_view_friends = "Geamikoj";
 set text_view_archive = "Arĥivo";
 set text_view_userinfo = "Uzantinformoj";
