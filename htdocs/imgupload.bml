@@ -4,7 +4,7 @@
     use vars qw(%GET);
 
     my $u = LJ::User->remote;
-    return "" unless $u;
+    return "<?needlogin?>" unless $u;
 
     if ($GET{upload_count} || LJ::did_post()) {
         my $js = "";
@@ -14,13 +14,13 @@
                 my $width  = int($GET{"w_$pn"});
                 my $height = int($GET{"h_$pn"});
                 my $eurl   = LJ::ejs($GET{"u_$pn"});
-                $js .= "window.parent.InOb.onUpload(\"$eurl\", $width, $height);\n";
+                $js .= "InOb.onUpload(\"$eurl\", $width, $height);\n";
             }
 
         # From URL
         } else {
             my $img = LJ::ejs($POST{'url'});
-            $js = "window.parent.InOb.onInsURL(\"$img\")\n";
+            $js = "InOb.onInsURL(\"$img\")\n";
         }
 
 
@@ -28,8 +28,11 @@
             <html>
                 <body>
                 <script>
-                if (window.parent && window.parent.InOb) {
-                    $js
+                if (window.parent.parent && window.parent.parent.InOb) {
+                    window.parent.parent.$js
+                    window.parent.parent.InOb.onClosePopup();
+                } else if (window.parent && window.parent.InOb) {
+                    window.parent.$js
                     window.parent.InOb.onClosePopup();
                 }
                 </script>
