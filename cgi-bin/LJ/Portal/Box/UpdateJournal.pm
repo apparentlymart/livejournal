@@ -11,49 +11,6 @@ our $_box_class = "UpdateJournal";
 sub generate_content {
     my $self = shift;
 
-    my $moreopts = 0;
-    if ($moreopts) {
-        return $self->print_big_form;
-    } else {
-        return $self->print_small_form;
-    }
-}
-
-sub print_big_form {
-    my $self = shift;
-    my $content = '';
-    my $pboxid = $self->pboxid;
-    my $u = $self->{'u'};
-
-    LJ::need_res('js/entry.js');
-
-    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
-    $year+=1900;
-    $mon=sprintf("%02d", $mon+1);
-    $mday=sprintf("%02d", $mday);
-    $min=sprintf("%02d", $min);
-
-    $content = "<form method='post' action='$LJ::SITEROOT/update.bml' id='updateForm' name='updateForm'>";
-
-    my $entry = {
-            'mode' => "update",
-            'auth_as_remote' => 1,
-            'datetime' => "$year-$mon-$mday $hour:$min",
-            'remote' => $u,
-            'clientversion' => "WebUpdate/2.0.0",
-            'richtext' => 0,
-            'richtext_on' => 0,
-        };
-
-    $content .= LJ::entry_form($entry);
-
-    $content .= '</form>';
-
-    return $content;
-}
-
-sub print_small_form {
-    my $self = shift;
     my $content = '';
     my $pboxid = $self->pboxid;
     my $u = $self->{'u'};
@@ -61,7 +18,8 @@ sub print_small_form {
     my $datetime = LJ::entry_form_date_widget;
     my $subjectwidget = LJ::entry_form_subject_widget('UpdateBoxSubject');
     my $entrywidget = LJ::entry_form_entry_widget('UpdateBoxEvent');
-    my $postto = LJ::entry_form_postto_widget($u);
+    my $postto = LJ::entry_form_postto_widget($u, 'UpdateBoxPostTo');
+    my $securitywidget = LJ::entry_form_security_widget($u, 'UpdateBoxSecurity');
 
     $postto = $postto ? $postto . '<br/><br/>' : '';
 
@@ -82,11 +40,16 @@ sub print_small_form {
                 $subjectwidget<br/>
                 $eventtitle<br/>
                 $entrywidget<br/>
-                $postto
+                <table width="100%">
+                <tr><td valign="bottom" align="left">
+                $postto</td><td align="left" valign="top">
+                $securitywidget
+                </tr></table>
                 <input type="submit" value="$updatetitle" name="postentry" /> <input type="submit" name="moreoptsbtn" value="$moreoptstitle"/>
                 $datetime
                 </form>
             };
+
     return $content;
 }
 

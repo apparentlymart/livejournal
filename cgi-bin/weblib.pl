@@ -1483,11 +1483,7 @@ sub entry_form_entry_widget {
 # entry form "journals can post to" dropdown
 # NOTE!!! returns undef if no other journals user can post to
 sub entry_form_postto_widget {
-    my ($remote, $class) = @_;
-
-    if ($class) {
-        $class = qq { class="$class" };
-    }
+    my $remote = shift;
 
     return undef unless LJ::isu($remote);
 
@@ -1511,9 +1507,23 @@ sub entry_form_postto_widget {
     push @journals, $remote->{'user'};
     push @journals, $remote->{'user'};
     @journals = sort @journals;
-    $ret .= "<span id='usejournal_list'><b>" . BML::ml('entryform.postto') . "</b> ";
-    $ret .= LJ::html_select({ 'name' => 'usejournal', 'selected' => $remote->{'user'} },
-                            @journals) . "</span>\n";
+    $ret .= BML::ml('entryform.postto') . ' ';
+    $ret .= LJ::html_select({ 'name' => 'usejournal', 'selected' => $remote->{'user'}},
+                            @journals) . "\n";
+    return $ret;
+}
+
+sub entry_form_security_widget {
+    my $ret = '';
+
+    my @secs = ("public", BML::ml('label.security.public'),
+                "private", BML::ml('label.security.private'),
+                "friends", BML::ml('label.security.friends'));
+
+    $ret .= BML::ml('entryform.security') . ' ';
+    $ret .= LJ::html_select({ 'name' => 'security'},
+                            @secs);
+
     return $ret;
 }
 
