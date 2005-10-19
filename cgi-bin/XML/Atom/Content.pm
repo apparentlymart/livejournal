@@ -130,7 +130,12 @@ sub body {
                 }
             } elsif ($mode eq 'base64') {
                 my $raw = decode_base64(LIBXML ? $elem->textContent : $elem->string_value);
-                $content->{__body} = Encode::decode("utf-8", $raw);
+
+                # commented out by Mahlon.  This was breaking LifeBlog image posting.
+                # Raw data wouldn't be character encoded, anyway?
+                # $content->{__body} = Encode::decode("utf-8", $raw);
+                $content->{__body} = $raw;
+
             } elsif ($mode eq 'escaped') {
                 $content->{__body} = LIBXML ? $elem->textContent : $elem->string_value;
             } else {
