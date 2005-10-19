@@ -45,7 +45,7 @@ sub generate_content {
                 $postto</td><td align="left" valign="top">
                 $securitywidget
                 </tr></table>
-                <input type="submit" value="$updatetitle" name="postentry" /> <input type="submit" name="moreoptsbtn" value="$moreoptstitle"/>
+                <input type="submit" value="$updatetitle" name="postentry" onclick="return portal_settime();" /> <input type="submit" name="moreoptsbtn" value="$moreoptstitle"/>
                 $datetime
                 </form>
             };

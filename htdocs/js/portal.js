@@ -194,6 +194,30 @@ function xBottom (obj) {
   }
 }
 
+// update the date/time for update box so that it's correct for the browser
+function portal_settime() {
+  now = new Date();
+  if (! now) return true;
+
+  var year_field = xGetElementById('update_year');
+  var mon_field = xGetElementById('update_mon');
+  var day_field = xGetElementById('update_day');
+  var hour_field = xGetElementById('update_hour');
+  var min_field = xGetElementById('update_min');
+
+  if (!year_field || !mon_field || !day_field || !hour_field || !min_field)
+    return true;
+
+  year_field.value = now.getYear() < 1900 ? now.getYear() + 1900 : now.getYear();
+  mon_field.value = now.getMonth() + 1;
+  day_field.value = now.getDate();
+  hour_field.value = now.getHours();
+  min_field.value = now.getMinutes();
+
+  return true;
+}
+
+
 function openConfigMenu() {
   var configbar = xGetElementById('PortalConfigMenuBar');
   var configbuttonbar = xGetElementById('PortalConfigButtonBar');

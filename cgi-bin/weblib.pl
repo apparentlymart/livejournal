@@ -1462,11 +1462,11 @@ sub entry_form_date_widget {
     $mon=sprintf("%02d", $mon+1);
     $mday=sprintf("%02d", $mday);
     $min=sprintf("%02d", $min);
-    return LJ::html_hidden({'name' => 'year', 'value' => $year},
-                           {'name' => 'day', 'value'  => $mday},
-                           {'name' => 'mon', 'value'  => $mon},
-                           {'name' => 'hour', 'value' => $hour},
-                           {'name' => 'min', 'value'  => $min});
+    return LJ::html_hidden({'name' => 'year', 'value' => $year, 'id' => 'update_year'},
+                           {'name' => 'day', 'value'  => $mday, 'id' => 'update_day'},
+                           {'name' => 'mon', 'value'  => $mon,  'id' => 'update_mon'},
+                           {'name' => 'hour', 'value' => $hour, 'id' => 'update_hour'},
+                           {'name' => 'min', 'value'  => $min,  'id' => 'update_min'});
 }
 
 # entry form event text box
