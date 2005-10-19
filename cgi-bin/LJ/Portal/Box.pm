@@ -284,9 +284,19 @@ sub load_props {
     $self->update_memcache_state;
 }
 
-sub get_props {
+sub box_props {
     my LJ::Portal::Box $self = shift;
     return $self->{'boxprops'};
+}
+
+sub get_props {
+    my LJ::Portal::Box $self = shift;
+    my $boxprops = $self->prop_keys;
+
+    my @props;
+    grep { push @props, { $_ => $self->get_prop($_) } } keys %$boxprops;
+
+    return @props;
 }
 
 sub get_prop {
@@ -402,7 +412,7 @@ sub generate_box_config_dialog {
     return unless $self->config_props;
 
     my $pboxid = $self->pboxid;
-    my $props = $self->get_props;
+    my $props = $self->box_props;
     my $configopts = $self->config_props;
     my $formelements = '';
     my $config = '';
