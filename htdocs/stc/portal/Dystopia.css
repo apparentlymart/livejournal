@@ -63,6 +63,23 @@
 	color: #000066 !important;
 	}
 	
+.PortalMenuRow1, .PortalMenuRow2 {
+	background-color: #003366 !important;
+	}
+
+.PortalMenuRow1:hover, .PortalMenuRow2:hover {
+	background-color: #AACCFF !important;
+	}
+	
+.PortalMenuRow1 a, .PortalMenuRow2 a {
+	color: #fff !important;
+	}
+	
+.PortalMenuRow1 a:hover, .PortalMenuRow2 a:hover {
+	color: #003366 !important;
+	}
+	
+	
 
 /*------------------ End Configuration Menus -----------------*/
 /*------------------------------------------------------------*/
