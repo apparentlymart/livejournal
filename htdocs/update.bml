@@ -390,6 +390,12 @@ head<=
 <?_code
 {
     my $ret = $_[1]->{'head'};
+
+    # FIXME: Need better dependency loader, core.js must be loaded before dom.js, and then entry.js last!
+    $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/core.js'></script>\n";
+    $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/dom.js'></script>\n";
+    $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/entry.js'></script>\n";
+
     $ret .= "<script language='JavaScript' type='text/javascript' src='$LJ::JSPREFIX/entry.js'></script>";
     $ret .= (! $LJ::REQ_HEAD_HAS{'chalresp_js'}++) ? $LJ::COMMON_CODE{'chalresp_js'} : "";
     return $ret;

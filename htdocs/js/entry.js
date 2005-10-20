@@ -240,9 +240,7 @@ function settime() {
     return false;
 }
 
-
 ///////////////////// Insert Object code
-
 
 var InOb = new Object;
 
@@ -482,7 +480,7 @@ InOb.setPreviousCb = function (cb) {
 
 // all previous clicks come in here, then we route it to the registered previous handler
 InOb.onButtonPrevious = function () {
-    InOb.enableNext();
+    InOb.showNext();
 
     if (InOb.cbForBtnPrevious)
          return InOb.cbForBtnPrevious();
@@ -522,6 +520,24 @@ InOb.enableNext = function () {
     if (! next) return InOb.fail('no next button');
 
     next.disabled = false;
+
+    return true;
+};
+
+InOb.hideNext = function () {
+    var next = currentPopupWindow.document.getElementById('btnNext');
+    if (! next) return InOb.fail('no next button');
+
+    DOM.addClassName(next, 'display_none');
+
+    return true;
+};
+
+InOb.showNext = function () {
+    var next = currentPopupWindow.document.getElementById('btnNext');
+    if (! next) return InOb.fail('no next button');
+
+    DOM.removeClassName(next, 'display_none');
 
     return true;
 };
