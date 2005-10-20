@@ -3752,9 +3752,7 @@ sub bad_password_redirect {
 
     return undef if $LJ::DISABLED{'force_pass_change'};
 
-    $remote->prop('badpassword');
-
-    return undef unless $remote->{'badpassword'};
+    return undef unless $remote->prop('badpassword');
 
     my $redir = "$LJ::SITEROOT/changepassword.bml";
     unless (defined $opts->{'returl'}) {
