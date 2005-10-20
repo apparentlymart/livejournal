@@ -293,10 +293,10 @@ sub get_props {
     my LJ::Portal::Box $self = shift;
     my $boxprops = $self->prop_keys;
 
-    my @props;
-    grep { push @props, { $_ => $self->get_prop($_) } } keys %$boxprops;
+    my $props = {};
+    map { $props->{$_} = $self->get_prop($_) } keys %$boxprops;
 
-    return @props;
+    return $props;
 }
 
 sub get_prop {
