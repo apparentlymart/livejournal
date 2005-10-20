@@ -65,7 +65,7 @@
               </style>
                   <script>
                     var fileaction = '$LJ::FB_SITEROOT/interface/webupload';
-                    var fbroot     = '$LJ::FB_SITEROOT';
+                    var fbroot     = '$LJ::SITEROOT/__using/$LJ::FB_DOMAIN';
                     var urlaction = 'imgupload.bml';
 
                       function onCancel () {

@@ -470,7 +470,7 @@ InOb.fotobilderStepOne = function () {
     var div_fw = InOb.popid("img_fromwhere");
     div_fw.style.display = "none";
     div_if.style.display = "block";
-    var url = currentPopupWindow.fbroot + "/manage/tolj_pickgal";
+    var url = currentPopupWindow.fbroot + "/getgals";
     div_if.innerHTML = "<iframe src='" + url + "' width='650' height='225'></iframe>";
     InOb.setPreviousCb(InOb.showSelectorPage);
 }
@@ -482,6 +482,8 @@ InOb.setPreviousCb = function (cb) {
 
 // all previous clicks come in here, then we route it to the registered previous handler
 InOb.onButtonPrevious = function () {
+    InOb.enableNext();
+
     if (InOb.cbForBtnPrevious)
          return InOb.cbForBtnPrevious();
 
@@ -506,3 +508,20 @@ InOb.clearError = function () {
     return true;
 };
 
+InOb.disableNext = function () {
+    var next = currentPopupWindow.document.getElementById('btnNext');
+    if (! next) return InOb.fail('no next button');
+
+    next.disabled = true;
+
+    return true;
+};
+
+InOb.enableNext = function () {
+    var next = currentPopupWindow.document.getElementById('btnNext');
+    if (! next) return InOb.fail('no next button');
+
+    next.disabled = false;
+
+    return true;
+};
