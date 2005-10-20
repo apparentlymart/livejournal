@@ -387,7 +387,7 @@
             LJ::set_remote($u);
             $remote = $u;
 
-            return if LJ::bad_password_redirect;
+            return if LJ::bad_password_redirect();
         }
     }
 
