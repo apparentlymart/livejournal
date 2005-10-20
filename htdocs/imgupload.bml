@@ -80,7 +80,7 @@
     $ret .= "<div class='insobjOuter' id='insobjOuter'>";
     $ret .= "<form style='display:inline' id='insobjform' enctype='multipart/form-data' action='imgupload.bml' method='post' onsubmit='return window.parent.InOb.onSubmit()' >";
 
-    $ret .= "<table height='100%' border=0 cellpadding=0 cellspacing=0><tr height='20' class='insObjTitle'><td align='left'><p class='wintitle'>Insert Image</p></td><td align='right' valign='top'><a href='#close' onclick='onCancel();return false;'>";
+    $ret .= "<table height='100%' border=0 cellpadding=0 cellspacing=0><tr height='20' class='insObjTitle' id='insObjTitle'><td align='left'><p class='wintitle'>Insert Image</p></td><td align='right' valign='top'><a href='#close' onclick='onCancel();return false;'>";
     $ret .= "<img src='$LJ::IMGPREFIX/portal/PortalConfigCloseButton.gif' border='0' /></a></td></tr>";
 
     # content
@@ -143,7 +143,7 @@
         $ret .= "</table>";
     }
 
-    $ret .= "</div></td></tr><tr height='20' class='insobjNav'><td align='left'><div style='margin-left: 10px'>" .
+    $ret .= "</div></td></tr><tr height='20' class='insobjNav' id='insobjNav'><td align='left'><div style='margin-left: 10px'>" .
         "<input type='button' name='btn:prev' id='btnPrev' style='display:none' value='&lt;-- Back' />" .
         "</div></td>";
     $ret .= "<td align='right'><div style='margin-right: 10px'>";

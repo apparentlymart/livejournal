@@ -281,14 +281,8 @@ function onInsertObject (include) {
     iframe.className = 'updateinsobject';
     iframe.style.overflow = "hidden";
     iframe.style.position = "absolute";
-    iframe.style.left = 75 + "px";
-    iframe.style.top = 200 + "px";
     iframe.style.border = "0";
-    //iframe.style.borderStyle = "solid";
-    //iframe.style.borderColor = "#bbddff";
     iframe.style.backgroundColor = "#fff";
-    iframe.style.width = "700px"; //"60em";
-    iframe.style.height = "300px"; //"20em";
     iframe.style.overflow = "hidden";
 
     //iframe.src = include;
@@ -298,6 +292,8 @@ function onInsertObject (include) {
     document.body.appendChild(iframe);
 
     setTimeout(function () { iframe.src = include; }, 500);
+
+    InOb.smallCenter();
 }
 
 // the select's onchange:
@@ -456,6 +452,8 @@ InOb.onSubmit = function () {
 };
 
 InOb.showSelectorPage = function () {
+    InOb.smallCenter();
+
     var div_if = InOb.popid("img_iframe_holder");
     var div_fw = InOb.popid("img_fromwhere");
     div_fw.style.display = "block";
@@ -464,14 +462,45 @@ InOb.showSelectorPage = function () {
 };
 
 InOb.fotobilderStepOne = function () {
+    InOb.fullCenter();
+
     var div_if = InOb.popid("img_iframe_holder");
     var div_fw = InOb.popid("img_fromwhere");
     div_fw.style.display = "none";
     div_if.style.display = "block";
     var url = currentPopupWindow.fbroot + "/getgals";
-    div_if.innerHTML = "<iframe src='" + url + "' width='650' height='225'></iframe>";
+
+    var titlebar = InOb.popid('insObjTitle');
+    var tdims = DOM.getDimensions(titlebar);
+
+    var navbar = InOb.popid('insobjNav');
+    var ndims = DOM.getDimensions(navbar);
+
+    var h = (ndims.offsetTop - tdims.offsetBottom);
+    h -= 25;
+
+    div_if.innerHTML = "<iframe id='fbstepframe' src=\"" + url + "\" height=\"" + h + "\" width='99%'></iframe>";
     InOb.setPreviousCb(InOb.showSelectorPage);
+
 }
+
+InOb.fullCenter = function () {
+    var windims = DOM.getClientDimensions();
+
+    DOM.setTop(currentPopup, (40 / 2));
+    DOM.setLeft(currentPopup, (40 / 2));
+    DOM.setHeight(currentPopup, windims.y - 40);
+    DOM.setWidth(currentPopup, windims.x - 55);
+};
+
+InOb.smallCenter = function () {
+    var windims = DOM.getClientDimensions();
+
+    DOM.setTop(currentPopup, (windims.y - 300) / 2);
+    DOM.setLeft(currentPopup, (windims.x - 715) / 2);
+    DOM.setHeight(currentPopup, 300);
+    DOM.setWidth(currentPopup, 700);
+};
 
 InOb.setPreviousCb = function (cb) {
     InOb.cbForBtnPrevious = cb;
