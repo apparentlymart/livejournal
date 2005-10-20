@@ -495,6 +495,10 @@ sub trans
             # below fails.
             $skip_domain_checks = 1;
 
+        } elsif ($func eq 'portal') {
+            # if this is a "portal" subdomain then prepend the portal URL
+            return redir($r, "$LJ::SITEROOT/portal/");
+
         } elsif ($uri =~ m!^/(?:talkscreen|delcomment)\.bml!) {
             # these URLs need to always work for the javascript comment management code
             # (JavaScript can't do cross-domain XMLHttpRequest calls)
