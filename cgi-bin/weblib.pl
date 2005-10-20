@@ -1527,6 +1527,22 @@ sub entry_form_security_widget {
     return $ret;
 }
 
+sub entry_form_tags_widget {
+    my $ret = '';
+
+    return '' if $LJ::DISABLED{tags};
+
+    $ret .= BML::ml('entryform.tags');
+    $ret .= LJ::html_text({
+                              'name'      => 'prop_taglist',
+                              'size'      => '35',
+                              'maxlength' => '255',
+                          });
+    $ret .= LJ::help_icon('addtags');
+
+    return $ret;
+}
+
 # <LJFUNC>
 # name: LJ::entry_form_decode
 # class: web

@@ -15,11 +15,12 @@ sub generate_content {
     my $pboxid = $self->pboxid;
     my $u = $self->{'u'};
 
-    my $datetime = LJ::entry_form_date_widget;
+    my $datetime = LJ::entry_form_date_widget();
     my $subjectwidget = LJ::entry_form_subject_widget('UpdateBoxSubject');
     my $entrywidget = LJ::entry_form_entry_widget('UpdateBoxEvent');
     my $postto = LJ::entry_form_postto_widget($u, 'UpdateBoxPostTo');
     my $securitywidget = LJ::entry_form_security_widget($u, 'UpdateBoxSecurity');
+    my $tagswidget = LJ::entry_form_tags_widget();
 
     $postto = $postto ? $postto . '<br/><br/>' : '';
 
@@ -44,7 +45,11 @@ sub generate_content {
                 <tr><td valign="bottom" align="left">
                 $postto</td><td align="left" valign="top">
                 $securitywidget
+                </tr> <tr>
+                <td valign="bottom" align="top">
+                $tagswidget</td>
                 </tr></table>
+                <br/>
                 <input type="submit" value="$updatetitle" name="postentry" onclick="return portal_settime();" /> <input type="submit" name="moreoptsbtn" value="$moreoptstitle"/>
                 $datetime
                 </form>
