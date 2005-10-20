@@ -1045,7 +1045,7 @@ sub entry_form {
 
     ### Event Text Area:
     my $insobjout;
-    if ($LJ::UPDATE_INSERT_OBJECT || $opts->{'include_insert_object'}) {
+    if ($remote && ($LJ::UPDATE_INSERT_OBJECT || $opts->{'include_insert_object'})) {
         my $show;
 
         $show .= "<select name='insobjsel' id='insobjsel' onchange='InOb.handleInsertSelect()'>";
