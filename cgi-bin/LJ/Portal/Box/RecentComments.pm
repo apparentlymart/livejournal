@@ -28,7 +28,6 @@ sub generate_content {
     my $pboxid = $self->pboxid;
 
     my $count = 0;
-    my %logrow;
 
     my $maxshow = $self->get_prop('maxshow');
 
@@ -36,9 +35,9 @@ sub generate_content {
         return "Sorry, your account type cannot view recent comments.";
     }
 
-    my (@recv, @posted, %talkids);
+    my (@recv, @talkids);
     my %need_userid;
-    my %need_logids;  # hash of "journalid jitemid" => [journalid, jitemid]
+    my @need_logids;
 
     my $jargent = "journal=$u->{'user'}&amp;";
 
@@ -46,9 +45,8 @@ sub generate_content {
 
     foreach my $post (@recv) {
         $need_userid{$post->{posterid}} = 1 if $post->{posterid};
-        $talkids{$post->{jtalkid}} = 1;
-        $need_logids{"$u->{userid} $post->{nodeid}"} = [$u->{userid}, $post->{nodeid}]
-            if $post->{nodetype} eq "L";
+        push @talkids, $post->{jtalkid};
+        push @need_logids, [$post->{journalid}, $post->{nodeid}];
         $count++;
     }
 
@@ -58,27 +56,22 @@ sub generate_content {
 
     my $lastcom = $count == 1 ? 'comment' : "$count comments";
 
-    $content .= (%talkids ? "Last $lastcom posted in </a>" : "No comments have been posted in </a>") . LJ::ljuser($u) . ":<br />";
+    $content .= (@talkids ? "Last $lastcom posted in </a>" : "No comments have been posted in </a>") . LJ::ljuser($u) . ":<br />";
 
     @recv = sort { $b->{datepostunix} <=> $a->{datepostunix} } @recv;
-    my @recv_talkids = map { $_->{'jtalkid'} } @recv;
-
-    my %props;
-
-    LJ::load_talk_props2($u->{'userid'}, \@recv_talkids, \%props);
 
     my $us = LJ::load_userids(keys %need_userid);
 
     # setup the parameter to get_logtext2multi
     my $need_logtext = {};
-    foreach my $need (values %need_logids) {
+    foreach my $need (@need_logids) {
         my $ju = $us->{$need->[0]};
         next unless $ju;
         push @{$need_logtext->{$ju->{clusterid}} ||= []}, $need;
     }
 
-    my $comment_text = LJ::get_talktext2($u, keys %talkids);
-    my $log_text     = LJ::get_logtext2multi($need_logtext);
+    my $talk_text = LJ::get_talktext2($u, @talkids);
+    my $log_text = LJ::get_logtext2multi($need_logtext);
     my $root = LJ::journal_base($u);
 
     my $commentcount = 0;
@@ -97,10 +90,12 @@ sub generate_content {
         next if $pu && $pu->{statusvis} =~ /[XS]/;
         my $jtalkid = $r->{'jtalkid'};
 
-        $r->{'props'} = $props{$jtalkid};
+        # get entry info for linking
+        my $lrow = $log_text->{"$u->{userid} $r->{nodeid}"} ||= LJ::get_log2_row($u, $r->{'nodeid'});
 
-        my $lrow = $logrow{"$u->{userid} $r->{nodeid}"} ||= LJ::get_log2_row($u, $r->{'nodeid'});
-        my ($subject, $body, $posterid) = (@{$comment_text->{$jtalkid}||[]}[0,1], $lrow->{posterid});
+        # get comment subject and body
+        my $trow = $talk_text->{$jtalkid} || [];
+        my ($subject, $body) = (@$trow[0,1]);
 
         $subject ||= '';
         $body ||= '(No comment text)';
@@ -120,26 +115,25 @@ sub generate_content {
         my $ljcmt = $LJ_cmtinfo{$talkid} = {};
         $ljcmt->{u} = $pu ? $pu->{user} : "";
 
-        unless ($r->{state} eq "D")
-        {
-            $managebtns .= "<a href='$LJ::SITEROOT/delcomment.bml?${jargent}id=$talkid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
-            if ($r->{'state'} ne 'F') {
-                $managebtns .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=freeze&amp;${jargent}talkid=$talkid'>" . LJ::img("btn_freeze", "", { align => 'absmiddle', hspace => 2, vspace => }) . "</a>";
-            }
+        # comment manage buttons
+        $managebtns .= "<a href='$LJ::SITEROOT/delcomment.bml?${jargent}id=$talkid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
+        if ($r->{'state'} ne 'F') {
+            $managebtns .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=freeze&amp;${jargent}talkid=$talkid'>" . LJ::img("btn_freeze", "", { align => 'absmiddle', hspace => 2, vspace => }) . "</a>";
+        }
 
-            if ($r->{'state'} eq 'F') {
-                $managebtns .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=unfreeze&amp;${jargent}talkid=$talkid'>" . LJ::img("btn_unfreeze", "", { align => 'absmiddle', hspace => 2, vspace => }) . "</a>";
-            }
+        if ($r->{'state'} eq 'F') {
+            $managebtns .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=unfreeze&amp;${jargent}talkid=$talkid'>" . LJ::img("btn_unfreeze", "", { align => 'absmiddle', hspace => 2, vspace => }) . "</a>";
+        }
 
-            if ($r->{'state'} ne 'S') {
-                $managebtns .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=screen&amp;${jargent}talkid=$talkid'>" . LJ::img("btn_scr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
-            }
+        if ($r->{'state'} ne 'S') {
+            $managebtns .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=screen&amp;${jargent}talkid=$talkid'>" . LJ::img("btn_scr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
+        }
 
-            if ($r->{'state'} eq 'S') {
-                 $managebtns .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;${jargent}talkid=$talkid'>" . LJ::img("btn_unscr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
-             }
-         }
+        if ($r->{'state'} eq 'S') {
+            $managebtns .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;${jargent}talkid=$talkid'>" . LJ::img("btn_unscr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
+        }
 
+        # print out comment w/ links
         my $posturl  = "$root/$lrow->{ditemid}.html";
         my $replyurl = LJ::Talk::talkargs($posturl, "replyto=$talkid");
         my $talkurl  = "$root/$lrow->{ditemid}.html?thread=$talkid\#t$talkid";
@@ -197,8 +191,8 @@ sub retreive_received_comments {
     my $beforecount = scalar @$recv;
     # weed out non-comments, deleted comments and repeats
     @$recv = grep { $_->{nodetype} eq 'L' && $_->{state} ne 'D' &&
-                        !exists($found_comments{$_->{nodeid}}) &&
-                            ($found_comments{$_->{nodeid}} = 1) } @$recv;
+                        !exists($found_comments{"$_->{nodeid} $_->{jtalkid}"}) &&
+                            ($found_comments{"$_->{nodeid} $_->{jtalkid}"} = 1) } @$recv;
 
     # if comments got weeded out, get some more until we've fufulled our quota
     if (scalar @$recv < $beforecount && scalar @$recv < $orig_maxshow) {
