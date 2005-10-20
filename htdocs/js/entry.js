@@ -295,7 +295,6 @@ function onInsertObject (include) {
 
     InOb.smallCenter();
 }
-
 // the select's onchange:
 InOb.handleInsertSelect = function () {
     var objsel = $('insobjsel');
@@ -491,6 +490,8 @@ InOb.fullCenter = function () {
     DOM.setLeft(currentPopup, (40 / 2));
     DOM.setHeight(currentPopup, windims.y - 40);
     DOM.setWidth(currentPopup, windims.x - 55);
+
+    scroll(0,0);
 };
 
 InOb.smallCenter = function () {
@@ -500,6 +501,8 @@ InOb.smallCenter = function () {
     DOM.setLeft(currentPopup, (windims.x - 715) / 2);
     DOM.setHeight(currentPopup, 300);
     DOM.setWidth(currentPopup, 700);
+
+    scroll(0,0);
 };
 
 InOb.setPreviousCb = function (cb) {
