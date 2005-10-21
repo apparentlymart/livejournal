@@ -451,13 +451,15 @@ InOb.onSubmit = function () {
 };
 
 InOb.showSelectorPage = function () {
-    InOb.smallCenter();
-
     var div_if = InOb.popid("img_iframe_holder");
     var div_fw = InOb.popid("img_fromwhere");
     div_fw.style.display = "block";
     div_if.style.display = "none";
     InOb.setPreviousCb(null);
+
+    InOb.setTitle('Insert Image');
+
+    setTimeout(function () {  InOb.smallCenter(); }, 200);
 };
 
 InOb.fotobilderStepOne = function () {
@@ -572,4 +574,9 @@ InOb.showNext = function () {
     DOM.removeClassName(next, 'display_none');
 
     return true;
+};
+
+InOb.setTitle = function (title) {
+    var wintitle = currentPopupWindow.document.getElementById('wintitle');
+    wintitle.innerHTML = title;
 };
