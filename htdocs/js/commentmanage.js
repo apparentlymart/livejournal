@@ -321,10 +321,10 @@ function removeComment (ditemid, killChildren) {
 }
 
 function docClicked (e) {
-    if (!curPopup)
-	return true;
+  if (curPopup)
     killPopup();
-    return true;
+
+  // we didn't handle anything, who are we kidding
 }
 
 function createDeleteFunction (ae, dItemid) {
@@ -613,7 +613,7 @@ function regEvent (target, evt, func) {
 }
 
 if (document.getElementById && getXTR()) {
-	regEvent(window, "load", setupAjax);
+       regEvent(window, "load", setupAjax);
 	regEvent(document, "click", docClicked);
         document.write("<style> div.ljcmtmanage { color: #000; background: #e0e0e0; border: 2px solid #000; padding: 3px; }</style>");
 }
