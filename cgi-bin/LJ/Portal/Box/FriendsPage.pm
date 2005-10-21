@@ -10,6 +10,7 @@ our $_box_class = "FriendsPage";
 our $_prop_keys = {
     'showgroups' => 2,
     'itemshow'   => 1,
+    'imageplaceholders' => 3,
 };
 
 our $_config_props = {
@@ -25,6 +26,11 @@ our $_config_props = {
         'min'       => '1',
         'max'       => '25',
     },
+    'imageplaceholders' => {
+        'type'      => 'checkbox',
+        'desc'      => 'Use placeholders for images?',
+        'default'   => '0',
+    },
 };
 
 sub generate_content {
@@ -39,6 +45,7 @@ sub generate_content {
 
     my $showgroups = $self->get_prop('showgroups');
     my $itemshow = $self->get_prop('itemshow');
+    my $useplaceholders = $self->get_prop('imageplaceholders');
 
     my $frpagefaqbtn = LJ::Portal->get_faq_link('friendspage');
 
@@ -89,7 +96,7 @@ sub generate_content {
         my $picinfo;
 
         # replace images with placeholders
-        LJ::CleanHTML::clean(\$event, { 'extractimages' => 1 });
+        LJ::CleanHTML::clean(\$event, { 'extractimages' => 1 }) if $useplaceholders;
 
         my $replyurl = LJ::Talk::talkargs($entrylink, "mode=reply");
 
