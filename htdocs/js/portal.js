@@ -12,6 +12,18 @@ function userhook_delete_comment_ARG (talkid) {
     updatePortalBox(current_pboxid);
 }
 
+// handle clicks
+function portalDoClick(e) {
+  var evt = new xEvent(e);
+
+  if (!evt)
+    return;
+
+  // hide the menu unless they clicked on it
+  if (evt.target.id != 'AddPortalMenuButtonImage')
+      hidePortalMenu('addbox');
+}
+
 function portalGetXTR () {
   var xtr;
   var ex;
@@ -339,6 +351,11 @@ function doDropDownMenu(e, menuHTML) {
   if (!xDef(menuBox))
     return;
 
+  if (menuBox.isOpen) {
+    hidePortalMenu('addbox');
+    return;
+  }
+
   xAppendChild(document.body, menuBox);
   menuBox.innerHTML = menuHTML;
   menuBox.id = "PortalConfigMenu";
@@ -656,5 +673,5 @@ function portalRegEvent (target, evt, func) {
 
 if (document.getElementById) {
   portalRegEvent(window, "load", updateAddPortalModuleMenu);
-  portalRegEvent(document, "click", hidePortalMenu);
+  portalRegEvent(document, "click", portalDoClick);
 }
