@@ -48,7 +48,7 @@ our $linkinfo = {
     'ChangePassword' => [ '/changepassword.bml', 'Change Account Password', 1 ],
 
     'LinkList'       => [ '/manage/links.bml', 'Create Link List', 0 ],
-    'EmailGateway'   => [ '/manage/emailpost.bml', 'Email Gateway Settings', 0 ],
+    'EmailGateway'   => [ '/manage/emailpost.bml', 'Mobile Post Settings', 0 ],
     'VoicePost'      => [ '/manage/voicepost.bml', 'Voice Post Settings', 0 ],
     'InviteFriend'   => [ '/friends/invite.bml', 'Invite a Friend', 0 ],
     'TextMessage'    => [ '/tools/textmessage.bml', 'Text Message Tool', 0 ],
