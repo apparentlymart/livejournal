@@ -1,5 +1,3 @@
-var LJVAR;
-if (!LJVAR) LJVAR=new Object();
 var portalAnimating = 0;
 var box_reloading = {};
 var add_portal_module_menu_html = "";
@@ -7,13 +5,14 @@ var add_portal_module_menu_html = "";
 // for comment management
 var LJ_cmtinfo;
 var current_pboxid;
+
 function userhook_delete_comment_ARG (talkid) {
   hideElement('ljcmt'+talkid);
   if(current_pboxid)
     updatePortalBox(current_pboxid);
 }
 
-function getXTR () {
+function portalGetXTR () {
   var xtr;
   var ex;
 
@@ -60,17 +59,18 @@ function doXrequest (postdata, finishcallback) {
     }
   };
 
-  var xtr = getXTR();
-  if (xtr) {
-    xtr.open("POST", LJVAR.postUrl, true);
+  var xtr = portalGetXTR();
 
-    xtr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    postdata = "jsmode=1&" + postdata;
-    xtr.send(postdata);
-    xtr.onreadystatechange = state_callback;
-    return false;
-  }
-  return true;
+  if (!xtr)
+    return true;
+
+  xtr.open("POST", LJVAR.postUrl, true);
+
+  xtr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  postdata = "jsmode=1&" + postdata;
+  xtr.send(postdata);
+  xtr.onreadystatechange = state_callback;
+  return false;
 }
 
 function deletePortalBox (pboxid) {
@@ -104,7 +104,7 @@ function askResetAll(confirmtext) {
     return false;
 
   // do a post to reset everything
-  if (evalXrequest("resetalldo=1&resetyes=Yes&jsmode=hella")) {
+  if (evalXrequest("resetalldo=1&resetyes=Yes")) {
     return true;
   }
 
@@ -285,7 +285,7 @@ function changeOpac(opacity, id) {
   }
 }
 
-function updateAddPortalModuleMenu() {
+function updateAddPortalModuleMenu(e) {
   var finish_callback = function (menuhtml) {
     if (menuhtml) {
       add_portal_module_menu_html = menuhtml;
@@ -301,13 +301,17 @@ function updateAddPortalModuleMenu() {
     }
   };
 
+  xStopPropagation(e);
+
   return doXrequest("getmenu=1&menu=addbox", finish_callback);
 }
 
 function dropDownMenu(e, menu) {
   // no other menus yet
-  if (menu != 'addbox')
+  if (menu != 'addbox') {
+    alert("No such menu " + menu);
     return true;
+  }
 
   // do we already have the menu contents loaded?
   if (add_portal_module_menu_html) {
@@ -315,7 +319,6 @@ function dropDownMenu(e, menu) {
     return false;
   }
 
-  var menuelement = getPortalMenu(menu);
   var finish_callback = function (menuhtml) {
     if (menuhtml)
       doDropDownMenu(e, menuhtml);
@@ -333,32 +336,28 @@ function doDropDownMenu(e, menuHTML) {
     menuBox = xCreateElement('div');
   }
 
-  if (xDef(menuBox)) {
-    // hide if open
-    if (menuBox.isOpen) {
-      hidePortalMenu();
-    } else {
-      xAppendChild(document.body, menuBox);
-      menuBox.innerHTML = menuHTML;
-      menuBox.id = "PortalConfigMenu";
-      menuBox.className = "DropDownMenu";
-      menuBox.newRight = xRight(menuBox);
-      menuBox.newBottom = xBottom(menuBox);
+  if (!xDef(menuBox))
+    return;
 
-      showBox(menuBox);
-      xTop(menuBox, xPageY(e) + xHeight(e));
-      xLeft(menuBox, xPageX(e) - xWidth(menuBox) + xWidth(e));
+  xAppendChild(document.body, menuBox);
+  menuBox.innerHTML = menuHTML;
+  menuBox.id = "PortalConfigMenu";
+  menuBox.className = "DropDownMenu";
+  menuBox.newRight = xRight(menuBox);
+  menuBox.newBottom = xBottom(menuBox);
 
-      menuBox.isOpen = 1;
-      var addbutton = xGetElementById("AddPortalMenuButtonImage");
-      if (addbutton && LJVAR.imgprefix) {
-        addbutton.src = LJVAR.imgprefix + "/portal/PortalAddButtonSelected.gif";
-      }
+  showBox(menuBox);
+  xTop(menuBox, xPageY(e) + xHeight(e));
+  xLeft(menuBox, xPageX(e) - xWidth(menuBox) + xWidth(e));
 
-      // keep menu up to date
-      updateAddPortalModuleMenu();
-    }
+  menuBox.isOpen = 1;
+  var addbutton = xGetElementById("AddPortalMenuButtonImage");
+  if (addbutton && LJVAR.imgprefix) {
+    addbutton.src = LJVAR.imgprefix + "/portal/PortalAddButtonSelected.gif";
   }
+
+  // keep menu up to date
+  updateAddPortalModuleMenu();
 }
 
 function getPortalMenu(menu) {
@@ -642,4 +641,20 @@ function _xSlideCornerTo2(e)
     e.onslideend=null;
     portalAnimating = 0;
   }
+}
+
+// set up some events
+function portalRegEvent (target, evt, func) {
+  if (! target)
+    return;
+
+  if (target.attachEvent)
+    target.attachEvent("on"+evt, func);
+  if (target.addEventListener)
+    target.addEventListener(evt, func, false);
+}
+
+if (document.getElementById) {
+  portalRegEvent(window, "load", updateAddPortalModuleMenu);
+  portalRegEvent(document, "click", hidePortalMenu);
 }
