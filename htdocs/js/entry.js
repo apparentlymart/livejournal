@@ -480,7 +480,9 @@ InOb.fotobilderStepOne = function () {
     var h = (ndims.offsetTop - tdims.offsetBottom);
     h -= 25;
 
-    div_if.innerHTML = "<iframe id='fbstepframe' src=\"" + url + "\" height=\"" + h + "\" width='99%'></iframe>";
+    div_if.innerHTML = "<iframe id='fbstepframe' src=\"" + url + "\" height=\"" + h + "\" width='99%' frameborder='0'></iframe>";
+    div_if.style.width = 'auto';
+    div_if.style.border = '0px; solid;';
     InOb.setPreviousCb(InOb.showSelectorPage);
 
 }
@@ -494,6 +496,8 @@ InOb.fullCenter = function () {
     DOM.setWidth(currentPopup, windims.x - 55);
 
     scroll(0,0);
+
+    window.onresize = function() { return InOb.fullCenter(); };
 };
 
 InOb.smallCenter = function () {
@@ -505,6 +509,8 @@ InOb.smallCenter = function () {
     DOM.setWidth(currentPopup, 700);
 
     scroll(0,0);
+
+    window.onresize = function() { return InOb.smallCenter(); };
 };
 
 InOb.setPreviousCb = function (cb) {

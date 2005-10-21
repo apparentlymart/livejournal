@@ -85,7 +85,7 @@
     $ret .= "<img src='$LJ::IMGPREFIX/portal/PortalConfigCloseButton.gif' border='0' /></a></td></tr>";
 
     # content
-    $ret .= "<tr><td colspan='2'><div class='insobjContent' id='img_iframe_holder' style='display: none'>worrrd</div><div id='img_fromwhere' class='insobjContent'>";
+    $ret .= "<tr><td colspan='2'><div class='insobjContent' id='img_iframe_holder' style='display: none; margin: 0px 0px 0px 0px;'>worrrd</div><div id='img_fromwhere' class='insobjContent'>";
 
     if ($step == 1) {
         $ret .= "<table cellspacing='8' valign='top'>";
