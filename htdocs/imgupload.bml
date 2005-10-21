@@ -19,10 +19,11 @@
 
         if (my $ct = $GET{upload_count}) {
             for my $pn (1..$ct) {
-                my $width  = int($GET{"w_$pn"});
-                my $height = int($GET{"h_$pn"});
-                my $eurl   = LJ::ejs($GET{"u_$pn"});
-                $js .= "InOb.onUpload(\"$eurl\", $width, $height);\n";
+                my $swidth  = int($GET{"sw_$pn"});
+                my $sheight = int($GET{"sh_$pn"});
+                my $esurl   = LJ::ejs($GET{"su_$pn"});
+                my $eppurl  = LJ::ejs($GET{"pp_$pn"});
+                $js .= "InOb.onUpload(\"$esurl\", \"$eppurl\", $swidth, $sheight);\n";
             }
 
         # From URL
@@ -143,7 +144,7 @@
         $ret .= "</table>";
     }
 
-    $ret .= "</div></td></tr><tr height='20' class='insobjNav' id='insobjNav'><td align='left'><div style='margin-left: 10px'>" .
+    $ret .= "<br /><font size='1' color='gray'><i>Except when inserting via URL, a medium sized image with a link to the larger image will be placed in your post.</i></font></div></td></tr><tr height='20' class='insobjNav' id='insobjNav'><td align='left'><div style='margin-left: 10px'>" .
         "<input type='button' name='btn:prev' id='btnPrev' style='display:none' value='&lt;-- Back' />" .
         "</div></td>";
     $ret .= "<td align='right'><div style='margin-right: 10px'>";

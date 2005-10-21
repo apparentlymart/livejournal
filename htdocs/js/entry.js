@@ -250,11 +250,11 @@ InOb.fail = function (msg) {
 };
 
 // image upload stuff
-InOb.onUpload = function (url, width, height) {
+InOb.onUpload = function (surl, furl, swidth, sheight) {
     var ta = $("updateForm");
     if (! ta) return InOb.fail("no updateform");
     ta = ta.event;
-    ta.value = ta.value + "\n<img src=\"" + url + "\" width=\"" + width + "\" height=\"" + height + "\" />";
+    ta.value = ta.value + "\n<a href=\"" + furl + "\"><img src=\"" + surl + "\" width=\"" + swidth + "\" height=\"" + sheight + "\" border='0'/></a>";
 };
 
 
