@@ -178,17 +178,11 @@ sub create_fenster {
     $id = LJ::ejs($id);
     $parent = LJ::ejs($parent);
 
-    my $resize_image = qq{<img src="$LJ::IMGPREFIX/portal/PortalBoxResizeIcon.gif" title="Resize" title="Resize" />};
-
     my $titlebar_html = LJ::ejs(qq{
         <div class="PortalPatternedTitleBar" id="portalbar$id">
-            <div id="portalbarmax$id" class="PortalFensterBarMaxButton"></div>
-
             <span class="PortalTitleBarText">$title</span>
-
             </div>
         });
-    my $boxbottom_html = LJ::ejs(qq{ <div id="portalbarres$id" class="PortalFensterResButton NormalCursor">$resize_image</div> });
     return qq{
         var boxelement    = xCreateElement("div");
         var parentelement = xGetElementById("$parent");
@@ -197,7 +191,7 @@ sub create_fenster {
             boxelement.id = "$id";
             boxelement.style.position='absolute';
             boxelement.className = "$class_name PortalFenster";
-            boxelement.innerHTML = '$titlebar_html <div class=\"PortalFensterContent NormalCursor\" id=\"PortalFensterContent$id\">$inner_html</div> $boxbottom_html';
+            boxelement.innerHTML = '$titlebar_html <div class=\"PortalFensterContent NormalCursor\" id=\"PortalFensterContent$id\">$inner_html</div>';
             fadeIn(boxelement);
             boxelement.style.zIndex=4;
         }
@@ -383,6 +377,15 @@ sub getmenu {
                     next if $portalconfig->find_box_by_class($boxclass);
                 }
 
+                # is this box hidden from users?
+                # either box_hidden returns true or the box is in
+                # @LJ::PORTAL_BOXES_HIDDEN
+                if ( (@LJ::PORTAL_BOXES_HIDDEN && grep { $_ eq $boxclass }
+                      @LJ::PORTAL_BOXES_HIDDEN) || ($fullboxclass->can('box_hidden') &&
+                                                    $fullboxclass->box_hidden) ) {
+                    next;
+                }
+
                 my $boxname = $fullboxclass->box_name;
                 my $boxdesc = $fullboxclass->box_description;
                 my $boxcol  = $portalconfig->get_box_default_col($boxclass);
@@ -390,7 +393,7 @@ sub getmenu {
                 my $addlink = qq{href="$LJ::SITEROOT/portal/index.bml?addbox=1&boxtype=$boxclass&boxcol=$boxcol" onclick="if(addPortalBox('$boxclass', '$boxcol')) return true; hidePortalMenu('addbox'); return false;"};
                 my $rowmod = $row % 2 + 1;
                 $returncode .= qq{
-                    <tr class="PortalRow$rowmod">
+                    <tr class="PortalMenuRow$rowmod">
                         <td>
                           <a $addlink>
                             $boxicon <span class="PortalBoxTitleText">$boxname</span>

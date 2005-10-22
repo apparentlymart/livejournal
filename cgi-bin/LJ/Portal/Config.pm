@@ -12,7 +12,7 @@ use LJ::Portal::Box;
 # u: user object that is who this config is for
 # boxes: arrayref of loaded Box objects for the user
 # boxlist: arrayref of pboxid => type boxes for this user (memcached)
-use fields qw(u boxes boxconfig boxlist);
+use fields qw(u boxes boxconfig boxlist profile);
 
 use strict;
 
@@ -29,6 +29,10 @@ sub new {
     $self->{'u'} = {};
     $self->{'boxes'} = {};
     $self->{'boxlist'} = {};
+
+    my $profile = shift;
+    $profile ||= 0;
+    $self->{'profile'} = $profile;
 
     # if called with $u then load config for user
     $self->load_config($u) if $u;
@@ -649,7 +653,6 @@ sub generate_box_insides {
     my $sort = $box->sortorder;
     my $boxclass = $box->can('box_class') ? $box->box_class : '';
     my $titlebar = $self->generate_box_titlebar($box);
-
     my $content;
 
     # don't let the box do anything if it's disabled
@@ -657,20 +660,30 @@ sub generate_box_insides {
         $content = 'Sorry, this feature is disabled at this time.';
     }
 
-    # init profiling code
-    my $passback = $LJ::DEV_PRE_BOX_GENERATE ? $LJ::DEV_PRE_BOX_GENERATE->() : undef;
+    my $gencont = sub {
+        my $usecache = shift;
+        $usecache ||= 0;
+        if (!$content) {
+            $content = $self->get_box_cached_contents($box) if $usecache;
+            $content = $box->generate_content if !$content;
+        }
+    };
 
-    if (!$content) {
-        $content = $self->get_box_cached_contents($box);
-        $content = $box->generate_content if !$content;
+    if ($self->{'profile'}) {
+        use Benchmark ':hireswallclock';
+
+        return if $LJ::PORTAL_PROFILED_BOX{$boxclass};
+
+        my $runtime = Benchmark::timeit(100000, $gencont);
+        $LJ::PORTAL_DEBUG_CONTENT .= sprintf("%20s%40s", $boxclass, ": " .
+                                             Benchmark::timestr($runtime) . "\n");
+
+        $LJ::PORTAL_PROFILED_BOX{$boxclass} = 1;
+    } else {
+        $gencont->(1);
     }
 
-    # profile
-    if ($passback && $LJ::DEV_POST_BOX_GENERATE) {
-        $LJ::DEV_POST_BOX_GENERATE->($passback);
-    }
-
-    return  qq{
+    return qq{
         <div class="PortalBoxTitleBar" id="pboxtitlebar$boxid">
             $titlebar
         </div>

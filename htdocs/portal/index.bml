@@ -79,8 +79,17 @@
         </script>
         };
 
-    my $portalconfig = LJ::Portal::Config->new($remote);
+    # reset debug output
+    $LJ::PORTAL_DEBUG_CONTENT = '';
+
+    # do profiling?
+    my $profile = $GET{'profile'};
+
+    my $portalconfig = LJ::Portal::Config->new($remote, $profile);
     return unless $portalconfig; # should never happen!
+
+    # if profiling, add debug box
+    LJ::Portal->addbox($portalconfig, 'Debug', 'R');
 
     my $closebutton = LJ::Portal->get_close_button;
 
@@ -99,6 +108,13 @@
             return $returnjs->($updatescript) if $POST{'portalboxaction'};
         }
     }
+
+    # super-secret add hidden module URL option:
+    if ($GET{'addmodule'}) {
+        my $module = $GET{'addmodule'};
+        $module =~ s/\W+//g;
+        LJ::Portal->addbox($portalconfig, $module, 'R');
+      }
 
     # firstly process any box changes:
     my @actions = ('addbox', 'configbox', 'delbox', 'getmenu', 'movebox',
@@ -283,6 +299,7 @@
         # print out each column with boxes
         my $cols = {};
         map { $cols->{$_} = 1 if $_ } $portalconfig->get_cols;
+        my $debugbox;
         foreach my $col (keys %$cols) {
             next unless $col;
 
@@ -291,6 +308,13 @@
             foreach my $box (@colboxes) {
                 next unless $box;
                 if ($box) {
+
+                    # if it's the debug module, generate it last
+                    if ($box->box_class eq 'Debug') {
+                        $debugbox = $box;
+                        next;
+                    }
+
                     # get the contents of the box
                     $body .= $portalconfig->generate_box_with_container($box->pboxid);
                 }
@@ -304,7 +328,13 @@
                 $body .= "<div id='PortalCol$_'></div>";
             }
         }
+
         $body .= '<div class="clearing" />&nbsp;</div></div>';
+        $body .= "<div style=\"z-index: 5; position: absolute;\"> " .
+            $portalconfig->generate_box_with_container($debugbox->pboxid)
+            . "</div>" if $debugbox;
+
+        %LJ::PORTAL_PROFILED_BOX = ();
     }
 }
 
