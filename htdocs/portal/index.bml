@@ -89,9 +89,7 @@
     return unless $portalconfig; # should never happen!
 
     # if profiling, add debug box
-    LJ::Portal->addbox($portalconfig, 'Debug', 'R');
-
-    my $closebutton = LJ::Portal->get_close_button;
+    LJ::Portal->addbox($portalconfig, 'Debug', 'R') if $profile;
 
     # see if there was a request to be handled by a module:
     my $portalboxaction = ($POST{'portalboxaction'} || $GET{'portalboxaction'}) + 0;
