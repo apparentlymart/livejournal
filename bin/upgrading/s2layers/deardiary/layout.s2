@@ -396,6 +396,9 @@ if ($*title_separator) {
 .entryheader .entrytimestampdate {
     display: none;
 }
+.page_entry .entryheader .entrytimestampdate, .page_reply .entryheader .entrytimestampdate {
+    display: inline;
+}
 
 .comments .entry {
     margin-left: 0;
