@@ -20,8 +20,12 @@ function portalDoClick(e) {
     return;
 
   // hide the menu unless they clicked on it
-  if (evt.target.id != 'AddPortalMenuButtonImage')
+  var menu = getPortalMenu('addbox');
+
+  if (menu && menu.isOpen == 1) {
+    if (evt.target.id != 'AddPortalMenuButtonImage')
       hidePortalMenu('addbox');
+  }
 }
 
 function portalGetXTR () {
@@ -289,10 +293,8 @@ function changeOpac(opacity, id) {
       //reduce flicker
       if (opacity == 100 && (navigator.userAgent.indexOf('Gecko') != -1 && navigator.userAgent.indexOf('Safari') == -1)) opacity = 99.99;
 
-      object.opacity = (opacity / 100);
-      object.MozOpacity = (opacity / 100);
-      object.KhtmlOpacity = (opacity / 100);
       object.filter = "alpha(opacity=" + opacity + ")";
+      object.opacity = opacity / 100;
     }
   }
 }
@@ -363,7 +365,7 @@ function doDropDownMenu(e, menuHTML) {
   menuBox.newRight = xRight(menuBox);
   menuBox.newBottom = xBottom(menuBox);
 
-  showBox(menuBox);
+  fadeIn(menuBox);
   xTop(menuBox, xPageY(e) + xHeight(e));
   xLeft(menuBox, xPageX(e) - xWidth(menuBox) + xWidth(e));
 
@@ -526,7 +528,9 @@ function regEvent (target, evt, func) {
 
 function hideBox (e) {
   var target = xGetElementById(e);
-  xDisplay(target, 'none');
+
+  var callback = "xDisplay('" + target.id + "', 'none');";
+  fadeOut(target, 200, callback);
 }
 function showBox (e) {
   var target = xGetElementById(e);
@@ -542,11 +546,13 @@ function showBox (e) {
 }
 
 function animateClose(target, speed) {
-  fadeOut(target, speed, "1;");
+  target = xGetElementById(target);
+  fadeOut(target, speed / 1.5, "1;");
   animateCollapse(target, speed);
 }
 
 function animateOpen(target, speed) {
+  target = xGetElementById(target);
   fadeIn(target, speed);
 }
 
