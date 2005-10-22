@@ -247,7 +247,7 @@ function openConfigMenu() {
 }
 
 function hideMe(e) {
-  hideBox(e);
+  xDisplay(e, 'none');
 }
 
 function closeConfigMenu() {
@@ -262,28 +262,6 @@ function closeConfigMenu() {
   showBox(configbuttonbar);
 }
 
-function opacity(id, opacStart, opacEnd, millisec, endcallback) {
-    //speed for each frame
-    var speed = Math.round(millisec / 100);
-    var timer = 0;
-
-    //determine the direction for the blending, if start and end are the same nothing happens
-    if(opacStart > opacEnd) {
-        for(i = opacStart; i >= opacEnd; i--) {
-            setTimeout("changeOpac(" + i + ",'" + id + "')",(timer * speed));
-            timer++;
-        }
-    } else if(opacStart < opacEnd) {
-        for(i = opacStart; i <= opacEnd; i++)
-            {
-            setTimeout("changeOpac(" + i + ",'" + id + "')",(timer * speed));
-            timer++;
-        }
-    }
-    if(endcallback)
-      setTimeout(""+endcallback, millisec);
-}
-
 //change the opacity for different browsers
 function changeOpac(opacity, id) {
   var e =  xGetElementById(id);
@@ -291,10 +269,10 @@ function changeOpac(opacity, id) {
     var object = e.style;
     if (object) {
       //reduce flicker
-      if (opacity == 100 && (navigator.userAgent.indexOf('Gecko') != -1 && navigator.userAgent.indexOf('Safari') == -1)) opacity = 99.99;
+      if (opacity == 1 && (navigator.userAgent.indexOf('Gecko') != -1 && navigator.userAgent.indexOf('Safari') == -1)) opacity = 99.99;
 
-      object.filter = "alpha(opacity=" + opacity + ")";
-      object.opacity = opacity / 100;
+      object.filter = "alpha(opacity=" + opacity * 100 + ")";
+      object.opacity = opacity;
     }
   }
 }
@@ -561,21 +539,51 @@ function fadeIn(target, speed) {
   if (!speed) speed = 500;
   showBox(targetelement);
 
+  var opp = 0.0;
+
+  var fadeInCallback = function () {
+    opp += 0.10;
+
+    if (opp <= 1) {
+      changeOpac(opp, targetelement);
+      window.setTimeout(fadeInCallback, 1000/speed);
+    }
+  };
+
   if (LJVAR.doFade)
-    opacity(targetelement.id, 0, 100, speed);
+    fadeInCallback();
 }
 
 function fadeOut(target, speed, callback) {
   var targetelement = xGetElementById(target);
   var targetid = targetelement.id;
+
   if (!speed) speed = 500;
+
   if (!callback)
     callback = "hideMe('"+targetid+"')";
 
-  if (LJVAR.doFade)
-    opacity(targetid, 100, 0, speed, callback);
-  else
+  var fadedelta = 0.05;
+
+  if (LJVAR.doFade) {
+    var opp = 1.0;
+
+    var fadeOutCallback = function () {
+      opp -= fadedelta;
+
+      if (opp >= fadedelta * 2) {
+        changeOpac(opp, targetelement);
+        window.setTimeout(fadeOutCallback, 1000/speed);
+      } else {
+        eval(callback);
+      }
+    };
+
+    if (LJVAR.doFade)
+      fadeOutCallback();
+  } else {
     eval(callback);
+  }
 }
 
 function animateCollapse(target, speed, callback) {
