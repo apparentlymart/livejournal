@@ -86,7 +86,11 @@ sub generate_content {
         next unless $entry;
 
         my $subject    = $entry->subject_html;
-        my $event      = $entry->event_html;
+
+        my $event      = $useplaceholders ?
+            $entry->event_html( { 'extractimages' => 1 } ) :
+            $entry->event_html;
+
         my $posteru    = $entry->poster;
         my $poster     = $posteru->ljuser_display;
         my $props      = $entry->props;
@@ -94,9 +98,6 @@ sub generate_content {
         my $replycount = $props->{'replycount'};
         my $entrylink  = $entry->url;
         my $picinfo;
-
-        # replace images with placeholders
-        LJ::CleanHTML::clean(\$event, { 'extractimages' => 1 }) if $useplaceholders;
 
         my $replyurl = LJ::Talk::talkargs($entrylink, "mode=reply");
 
@@ -129,6 +130,7 @@ sub generate_content {
         }
 
         # trim entry down
+        # FIXME: make it not trim in middle of HTML tag
         if (length($event) > $max_entry_length) {
             $event = LJ::text_trim($event, 0, $max_entry_length);
             $event .= "... <a href=\"$entrylink\">Read more</a>";

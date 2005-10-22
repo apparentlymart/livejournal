@@ -913,6 +913,7 @@ sub clean_event
         'maximgheight' => $opts->{'maximgheight'},
         'ljcut_disable' => $opts->{'ljcut_disable'},
         'noearlyclose' => 1,
+        'extractimages' => $opts->{'extractimages'} ? 1 : 0,
     });
 }
 
