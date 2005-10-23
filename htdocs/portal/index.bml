@@ -89,7 +89,7 @@
     return unless $portalconfig; # should never happen!
 
     # if profiling, add debug box
-    LJ::Portal->addbox($portalconfig, 'Debug', 'R') if $profile;
+    $portalconfig->add_box('Debug', 'R') if $profile;
 
     # see if there was a request to be handled by a module:
     my $portalboxaction = ($POST{'portalboxaction'} || $GET{'portalboxaction'}) + 0;
@@ -306,7 +306,6 @@
             foreach my $box (@colboxes) {
                 next unless $box;
                 if ($box) {
-
                     # if it's the debug module, generate it last
                     if ($box->box_class eq 'Debug') {
                         $debugbox = $box;
@@ -328,9 +327,13 @@
         }
 
         $body .= '<div class="clearing" />&nbsp;</div></div>';
-        $body .= "<div style=\"z-index: 5; position: absolute;\"> " .
-            $portalconfig->generate_box_with_container($debugbox->pboxid)
-            . "</div>" if $debugbox;
+
+        if ($debugbox) {
+            $body .= "<div style=\"z-index: 5; position: absolute; width: 80%; height: 300; overflow-Y: auto;\"> ";
+            my $debug = $portalconfig->generate_box_with_container($debugbox->pboxid);
+            $body .= $debug;
+            $body .= "</div>";
+        }
 
         %LJ::PORTAL_PROFILED_BOX = ();
     }

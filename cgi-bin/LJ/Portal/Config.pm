@@ -20,6 +20,8 @@ sub get_box_classes {
     return @LJ::PORTAL_BOXES;
 }
 
+# args: $u, $profile
+# profile: time the loading of boxes (value = how many times to benchmark)
 sub new {
     my LJ::Portal::Config $self = shift;
     $self = fields::new($self) unless ref $self;
@@ -48,7 +50,7 @@ sub load_config {
     my $u = shift;
     my $opts = shift || {};
 
-    $self->{'u'} = $u;
+    $self->{'u'} = $u if $u;
     return unless $self->{'u'};
 
     # get all portal boxes for this user:
@@ -207,6 +209,11 @@ sub add_box {
     my LJ::Portal::Config $self = shift;
     my ($type, $column) = @_;
     return unless ($type && $column && $self->{'u'});
+
+    # if this is a unique box, make sure we aren't duplicating it
+    if ($self->get_box_unique($type)) {
+        return if $self->find_box_by_class($type);
+    }
 
     my $box = $self->new_box_by_type($type);
     return unless $box;
@@ -536,14 +543,13 @@ sub generate_box_with_container {
     return unless $box;
 
     my $pboxid = $box->pboxid;
-    my $boxinsides = $self->generate_box_insides($boxid);
+    my $boxinsides = $self->generate_box_insides($pboxid);
 
-    my $wholebox = qq{
+    return qq{
             <div class="PortalBox" id="pbox$pboxid">
               $boxinsides
             </div>
         };
-    return $wholebox;
 }
 
 sub generate_box_titlebar {
@@ -674,7 +680,7 @@ sub generate_box_insides {
 
         return if $LJ::PORTAL_PROFILED_BOX{$boxclass};
 
-        my $runtime = Benchmark::timeit(100000, $gencont);
+        my $runtime = Benchmark::timeit($self->{'profile'}, $gencont);
         $LJ::PORTAL_DEBUG_CONTENT .= sprintf("%20s%40s", $boxclass, ": " .
                                              Benchmark::timestr($runtime) . "\n");
 
@@ -683,7 +689,7 @@ sub generate_box_insides {
         $gencont->(1);
     }
 
-    return qq{
+    my $ret = qq{
         <div class="PortalBoxTitleBar" id="pboxtitlebar$boxid">
             $titlebar
         </div>
@@ -691,6 +697,8 @@ sub generate_box_insides {
             $content
         </div>
         };
+
+    return $ret;
 }
 
 sub get_box_cached_contents {
