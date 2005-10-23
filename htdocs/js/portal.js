@@ -23,7 +23,7 @@ function portalDoClick(e) {
   var menu = getPortalMenu('addbox');
 
   if (menu && menu.isOpen == 1) {
-    if (evt.target.id != 'AddPortalMenuButtonImage')
+    if (!xDef(evt.target.className) || evt.target.className.indexOf('PortalMenuItem') == -1)
       hidePortalMenu('addbox');
   }
 }

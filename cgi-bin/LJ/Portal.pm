@@ -364,8 +364,8 @@ sub getmenu {
             my $addboxtitle = BML::ml('/portal/index.bml.addbox');
 
             $returncode .= qq{
-                    <div class="DropDownMenuContent">
-                    <table style="width:100%;">
+                    <div class="DropDownMenuContent PortalMenuItem">
+                    <table style="width:100%;" class="PortalMenuItem">
                 };
 
             my $row = 0;
@@ -393,16 +393,16 @@ sub getmenu {
                 my $addlink = qq{href="$LJ::SITEROOT/portal/index.bml?addbox=1&boxtype=$boxclass&boxcol=$boxcol" onclick="if(addPortalBox('$boxclass', '$boxcol')) return true; hidePortalMenu('addbox'); return false;"};
                 my $rowmod = $row % 2 + 1;
                 $returncode .= qq{
-                    <tr class="PortalMenuRow$rowmod">
-                        <td>
-                          <a $addlink>
-                            $boxicon <span class="PortalBoxTitleText">$boxname</span>
+                    <tr class="PortalMenuRow$rowmod PortalMenuItem">
+                        <td class="PortalMenuItem">
+                          <a $addlink class="PortalMenuItem">
+                            $boxicon <span class="PortalBoxTitleText PortalMenuItem">$boxname</span>
                           </a>
-                          <div class="BoxDescription">$boxdesc</div>
+                          <div class="BoxDescription PortalMenuItem">$boxdesc</div>
                         </td>
-                        <td align="center" valign="middle">
-                          <a $addlink>
-                              <img src="$LJ::IMGPREFIX/portal/AddIcon.gif" title="Add this module" width="25" height="25" />
+                        <td align="center" valign="middle" class="PortalMenuItem">
+                          <a $addlink class="PortalMenuItem">
+                              <img src="$LJ::IMGPREFIX/portal/AddIcon.gif" title="Add this module" width="25" height="25" class="PortalMenuItem" />
                           </a>
                         </td>
                         </tr>
@@ -413,8 +413,8 @@ sub getmenu {
             my $resetask = LJ::ejs(BML::ml('/portal/index.bml.resetall'));
 
             $returncode .= qq {
-                      <tr><td colspan="2">
-                          <div id="PortalResetAllButton">
+                      <tr class="PortalMenuItem"><td colspan="2" class="PortalMenuItem">
+                          <div id="PortalResetAllButton" class="PortalMenuItem">
                             <form action="$LJ::SITEROOT/portal/index.bml" method="POST" style="display: inline;">
                                 <input type="Submit" value="Reset..." name="resetall" onclick="return askResetAll('$resetask');" />
                             </form>
