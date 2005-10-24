@@ -4,8 +4,6 @@ layerinfo "des" = "S2 emulation of talkread and talkpost etc...";
 layerinfo "author_name" = "Mischa Spiegelmock";
 layerinfo "redist_uniq" = "s1shortcomings/layout";
 
-# S1 Shortcomings Layer by revmischa BEEEYATCH
-
 property string comment_bar_1 { des = "Comment bar color"; }
 property string comment_bar_screened { des = "Screened comment bar color"; }
 property string comment_bar_2 { des = "Alternate comment bar color"; }
