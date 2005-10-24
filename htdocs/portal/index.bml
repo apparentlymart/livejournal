@@ -83,7 +83,8 @@
     $LJ::PORTAL_DEBUG_CONTENT = '';
 
     # do profiling?
-    my $profile = $GET{'profile'};
+    my $profile = $GET{'profile'} + 0;
+    $profile = $profile > 9999999 ? 9999999 : $profile;
 
     my $portalconfig = LJ::Portal::Config->new($remote, $profile);
     return unless $portalconfig; # should never happen!
