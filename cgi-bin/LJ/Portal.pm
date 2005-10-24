@@ -112,7 +112,7 @@ sub get_portal_box_update_script {
     my ($config, $box) = @_;
 
     my $pboxid = $box->pboxid();
-    my $newcontents = LJ::ejs($config->generate_box_insides($pboxid));
+    my $newcontents = LJ::ejs($config->generate_box_insides($pboxid), 1);
 
     # does this box have a handler to generate extra javascript to be executed
     # when the box is reloaded?

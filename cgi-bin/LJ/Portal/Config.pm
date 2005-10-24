@@ -649,9 +649,14 @@ sub generate_box_titlebar {
     return $titlebarhtml;
 }
 
+# args: boxid, force?
+# force: don't use cached box contents
 sub generate_box_insides {
     my LJ::Portal::Config $self = shift;
     my $boxid = shift;
+    my $force = shift;
+
+    $force ||= 0;
 
     my $box = $self->{'boxes'}->{$boxid};
     return 'Could not find box.' unless $box;
@@ -686,7 +691,7 @@ sub generate_box_insides {
 
         $LJ::PORTAL_PROFILED_BOX{$boxclass} = 1;
     } else {
-        $gencont->(1);
+        $gencont->(!$force);
     }
 
     my $ret = qq{
@@ -713,9 +718,10 @@ sub get_box_cached_contents {
 
     # firstly, check if there is a cache in memory
     my $box_cached = LJ::MemCache::get($memcachekey);
-    my $time;
 
-    my $etag = $box->can('etag') ? $box->etag : undef;
+    my $time = time();
+
+    my $etag = $box->can('etag') ? $box->etag : 1;
 
     # are the contents of this box cached?
     if ($box_cached) {
