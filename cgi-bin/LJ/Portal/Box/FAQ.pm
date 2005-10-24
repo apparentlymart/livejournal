@@ -41,7 +41,7 @@ sub generate_content {
     if ($showtopten) {
         my $sth = $dbr->prepare("SELECT f.faqid, f.question, s.statval AS 'uses' ".
                                 "FROM faq f, stats s WHERE f.faqcat<>'int-abuse' ".
-                                "AND f.faqcat<>  AND s.statcat='pop_faq' ".
+                                "AND f.faqcat<>'' AND s.statcat='pop_faq' ".
                                 "AND s.statkey=f.faqid ORDER BY s.statval DESC LIMIT 10");
         $sth->execute;
 
@@ -63,7 +63,7 @@ sub generate_content {
     if ($showFOD) {
         # pick a random FAQ.
         my $sth = $dbr->prepare( qq {
-            SELECT faqid, question FROM faq
+            SELECT faqid, question, faqcat FROM faq f WHERE f.faqcat<>'int-abuse' AND f.faqcat<>''
             } );
         $sth->execute;
 
