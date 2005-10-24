@@ -109,12 +109,10 @@ sub contents_memcache_key {
     # calculate memcache key
     if ($globalcache) {
         return [$self->type_id, 'prtcong:' . $self->type_id];
-    } else {
-        return [$self->{'u'}->{'userid'}, 'prtcong:' .
-                $self->{'u'}->{'userid'} . ':' . $self->pboxid ];
     }
 
-    return undef;
+    return [$self->{'u'}->{'userid'}, 'prtcong:' .
+            $self->{'u'}->{'userid'} . ':' . $self->pboxid ];
 }
 
 # create a new box and save it
