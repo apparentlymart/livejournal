@@ -150,7 +150,12 @@ body<=
                 
                 # deleted
                 unless ($req{'event'}) {
-                    my $result = "<?h1 $ML{'.success.head'} h1?><?p $ML{'.success.delete'} p?>";
+                    my $result = qq {
+                        <?h1 $ML{'.success.head'} h1?>
+                        <img src="$LJ::IMGPREFIX/frank-eating-papers.gif" style="float: right;" />
+                        <p style="float: left;"> $ML{'.success.delete'}</p>
+                    };
+
                     $result .= "<?p $ML{'.success.deletespam'} p?>" if $POST{'action:deletespam'};
                     return $result;
                 }
