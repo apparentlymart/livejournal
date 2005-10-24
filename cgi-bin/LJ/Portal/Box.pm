@@ -111,7 +111,7 @@ sub contents_memcache_key {
         return [$self->type_id, 'prtcong:' . $self->type_id];
     }
 
-    return [$self->{'u'}->{'userid'}, 'prtcong:' .
+    return [$self->{'u'}->{'userid'}, 'prtconu:' .
             $self->{'u'}->{'userid'} . ':' . $self->pboxid ];
 }
 
@@ -210,7 +210,6 @@ sub sortorder {
 sub update_memcache_state {
     my LJ::Portal::Box $self = shift;
     LJ::MemCache::set($self->memcache_key, $self->get_state) if $self->memcache_key;
-    $self->delete_memcached_contents;
 }
 
 sub get_memcache_state {
@@ -333,6 +332,7 @@ sub set_default_props {
         $default_props->{$propkey} = $default if defined $default;
     }
     $self->set_props($default_props) if $default_props != {};
+    $self->delete_memcached_contents;
     $self->update_memcache_state;
 }
 
@@ -361,6 +361,7 @@ sub set_prop {
         }
 
         $self->update_memcache_state;
+        $self->delete_memcached_contents;
     }
 
     return 1;
