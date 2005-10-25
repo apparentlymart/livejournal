@@ -495,7 +495,7 @@ sub generate_box_config_dialog {
             $inputfield .= LJ::html_text({'id' => $name . $pboxid,
                                           'value' => $propval,
                                           'maxlength' => $opt->{'maxlength'},
-                                          'size' => $opt->{'maxlength'},
+                                          'size' => $opt->{'maxlength'} || 3,
                                           'max' => $opt->{'max'},
                                           'min' => $opt->{'min'},
                                           'name' => $name . $pboxid,
