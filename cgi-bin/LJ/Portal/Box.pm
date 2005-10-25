@@ -516,7 +516,17 @@ sub generate_box_config_dialog {
 
     my $buttons = '<div class="PortalConfigSubmitButtons">';
 
-    $buttons .= "<span class=\"PortalConfigResetButton\"><a href=\"$selflink?resetbox=1&pboxid=$pboxid\" onclick=\"return resetBox($pboxid);\">Reset</a></span>";
+    $buttons .= "<span class=\"PortalConfigResetButton\">";
+
+    # text link for non-javascript browsers
+    if (!$jsmode) {
+        $buttons .= "<a href=\"$selflink?resetbox=1&pboxid=$pboxid\" onclick=\"return resetBox($pboxid);\">Reset</a>";
+    } else {
+        $buttons .= qq {
+            <input type="Button" value="Reset" onclick="return resetBox($pboxid);" />
+            };
+    }
+    $buttons .= "</span>";
 
     $buttons .= qq {
         <span class="PortalConfigCancelButton">

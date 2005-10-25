@@ -158,7 +158,7 @@ sub get_portal_config_box_update_script {
     return unless $box;
 
     my $pboxid = $box->pboxid;
-    my $newcontents = LJ::ejs($box->generate_box_config_dialog);
+    my $newcontents = LJ::ejs($box->generate_box_config_dialog(1));
     return qq{
             var confbox = xGetElementById('PortalFensterContentconfig$pboxid');
             if (confbox) {
