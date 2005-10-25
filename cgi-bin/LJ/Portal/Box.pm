@@ -417,7 +417,11 @@ sub generate_box_config_dialog {
     my $config = '';
     my $selflink = '/portal/index.bml';
 
-    $config .= "<form action='$selflink' method='POST' name='configform$pboxid', id='configform$pboxid' style='display: inline;'>";
+    $config .= qq {
+        <form action='$selflink' method='POST' name='configform$pboxid' id='configform$pboxid' style='display: inline;'>
+            <div class="PortalBoxConfigContent">
+        };
+
     $config .= "<table>";
     $config .= LJ::html_hidden({'name' => 'realform', 'value' => 1, 'id' => "realform$pboxid"},
                                {'name' => 'pboxid', 'value' => $pboxid});
@@ -506,9 +510,11 @@ sub generate_box_config_dialog {
         $formelements .= $name . ',' unless $type eq 'hidden';
         $config .= "<div>$inputfield</div></td></tr>";
     }
+    $config .= '</table>';
+
     chop $formelements;
 
-    my $buttons = '</table><div class="PortalConfigSubmitButtons">';
+    my $buttons = '<div class="PortalConfigSubmitButtons">';
 
     $buttons .= "<span class=\"PortalConfigResetButton\"><a href=\"$selflink?resetbox=1&pboxid=$pboxid\" onclick=\"return resetBox($pboxid);\">Reset</a></span>";
 
@@ -521,18 +527,19 @@ sub generate_box_config_dialog {
     $buttons .= '<span class="PortalConfigSubmitButton">';
     $buttons .= LJ::html_submit('saveconfig', 'Save settings', {'raw' => "onclick=\"if(savePortalBoxConfig($pboxid)) configform$pboxid.submit(); else return false;\""});
     $buttons .= qq{<input type="hidden" id="box_config_elements$pboxid" value="$formelements"/>};
-    $buttons .= '</span>';
-
-    $buttons .= '</div>';
-
-    $buttons .= '</form>';
+    $buttons .= qq {
+          </span>
+        </div>
+      </form>
+  };
 
     my $dialogbox = qq{
-        <div class="PortalBoxConfigContent">
             $config
         </div>
         $buttons
     };
+
+    return $dialogbox;
 }
 
 1;
