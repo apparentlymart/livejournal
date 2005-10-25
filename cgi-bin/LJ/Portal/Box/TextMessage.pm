@@ -132,18 +132,15 @@ sub generate_content {
     };
 
     $content = qq {
-        <div class="TextMessage">
-           <div style='margin-left: 40px'>
 <form method='POST' action='$LJ::SITEROOT/tools/textmessage.bml' id='tmform$pboxid'>
 Username: <input type='text' size='15' maxlength='15' name='user' id='textmessageuser$pboxid'/>
-<input type='submit' value="Proceed..." onclick="$jssubmit" /></div>
+<input type='submit' value="Proceed..." onclick="$jssubmit" />
 <div id="tmmsg$pboxid" style="display: none;">
 <b>Message:</b><br /><input type="text" id="textmessagebody$pboxid" maxlength=42 />
 </div>
 <div id="tmresult$pboxid" class="tmform"></div>
 <input type="hidden" name="from" value="$u->{'user'}" />
 </form>
-</div>
 <div class="TextMessageDisclaimer">$helplink <B>Disclaimer:</B> The reliability of text messaging should not be trusted in dealing with emergencies.</div>
     };
 
