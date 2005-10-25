@@ -85,6 +85,16 @@ sub generate_content {
         };
     }
 
+    $content .= qq {
+            <b>FAQ Search:</b>
+            <form action="$LJ::SITEROOT/support/faqsearch.bml" method="GET">
+            <div style="padding: 5px;">
+              } . LJ::html_text({ name => 'q' }) . qq {
+                  &nbsp;<input type='submit' value='Search' /><br/>
+            </div>
+            </form>
+        };
+
     return $content;
 }
 
