@@ -63,8 +63,8 @@
     $selflink =~ s/\?.*//;
 
     # fading special effects?
-    my $doFadeDefault = 0;
-    my $doFade = $LJ::PORTAL_DOFADE ? $LJ::PORTAL_DOFADE : $doFadeDefault;
+    my $doFadeDefault = 1;
+    my $doFade = $LJ::DISABLED{'portal_fade'} ? $LJ::DISABLED{'portal_fade'} : $doFadeDefault;
 
     # parameters for portal.js
     $head .= qq{
