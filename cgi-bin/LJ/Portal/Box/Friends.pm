@@ -8,14 +8,20 @@ our $_box_description = 'Show your friends';
 our $_box_name = "Friends";
 our $_box_class = "Friends";
 our $_prop_keys = {
-    'showsyn' => 1,
-    'maxshow' => 2,
+    'showsyn' => 3,
+    'maxshow' => 5,
+    'showcomm' => 4,
 };
 
 our $_config_props = {
     'showsyn' => {
         'type'      => 'checkbox',
         'desc'      => 'Show syndicated accounts',
+        'default'   => '1',
+    },
+    'showcomm' => {
+        'type'      => 'checkbox',
+        'desc'      => 'Show communities',
         'default'   => '1',
     },
     'maxshow' => {
@@ -37,6 +43,7 @@ sub generate_content {
     my $content;
 
     my $showsyn= $self->get_prop('showsyn');
+    my $showcomm= $self->get_prop('showcomm');
     my $maxshow= $self->get_prop('maxshow');
 
     # display current friends of u
@@ -100,6 +107,37 @@ sub generate_content {
         </div>
     };
 
+    # display communities
+    my $commcount=0, my $commlist;
+
+    if ($showcomm) {
+        if ($friends) {
+            grep { $commcount++ if $friends_u->{$_}->{'journaltype'} eq 'C'; } keys %$friends_u;
+
+            foreach my $fid (keys %$friends_u) {
+                my $fu = $friends_u->{$fid};
+
+                next if $fu->{'journaltype'} ne 'C';
+                $commlist .= "<a href=\"$LJ::SITEROOT/userinfo.bml?user=$fu->{user}\">$fu->{user}</a>, ";
+            }
+        }
+
+        if (!$commcount) {
+            $commlist .= "You have no communities listed as friends.";
+        }
+
+        if ($commcount) {
+            chop $commlist;
+            chop $commlist;
+        }
+        $content .= qq {
+            <div class="FriendsList">
+                <img src="$LJ::SITEROOT/img/community.gif" /> ($commcount): <br />
+                $commlist
+            </div>
+        };
+    }
+
     # display syndicated buddies
     my $syncount=0, my $synlist;
 
@@ -130,6 +168,7 @@ sub generate_content {
             </div>
         };
     }
+
     return $content;
 }
 
