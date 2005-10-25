@@ -422,7 +422,7 @@ sub generate_box_config_dialog {
             <div class="PortalBoxConfigContent">
         };
 
-    $config .= "<table>";
+    $config .= "<table><tbody>";
     $config .= LJ::html_hidden({'name' => 'realform', 'value' => 1, 'id' => "realform$pboxid"},
                                {'name' => 'pboxid', 'value' => $pboxid});
 
@@ -510,7 +510,7 @@ sub generate_box_config_dialog {
         $formelements .= $name . ',' unless $type eq 'hidden';
         $config .= "<div>$inputfield</div></td></tr>";
     }
-    $config .= '</table>';
+    $config .= '</tbody></table>';
 
     chop $formelements;
 
