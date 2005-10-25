@@ -466,7 +466,7 @@ sub generate_box_config_dialog {
 
         } elsif ($type eq 'dropdown') {
 
-            $inputfield = "$desc: ";
+            $inputfield = "$desc: </td><td>";
 
             # make a dropdown menu composed of items
             my $selected = '';
@@ -490,7 +490,7 @@ sub generate_box_config_dialog {
 
         } elsif ($type eq 'integer') {
 
-            $inputfield = "$desc: ";
+            $inputfield = "$desc: </td><td>";
 
             $inputfield .= LJ::html_text({'id' => $name . $pboxid,
                                           'value' => $propval,
