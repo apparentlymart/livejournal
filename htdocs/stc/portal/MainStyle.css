@@ -62,8 +62,10 @@ img {
 	position: absolute;
 	overflow: hidden;
 	display: none;
-	width: 400px;
 	padding: 0px;
+	width: auto;
+	max-width: 400px;
+	width:expression(this.width > 400? "400px": "auto" );
 	}
 	
 .DropDownMenu br {
@@ -100,7 +102,7 @@ img {
 	margin: 0px;
 	z-index: 1;
 	position: absolute;
-	width: 300px;
+	width: 320px;
 	height: auto;
 	}
 
@@ -133,16 +135,22 @@ img {
 	}
 	
 .PortalResetAllButton {
-	margin: 0;
+	float: right;
 	padding: 0;
 	}
 
 .PortalFensterContent {
-	display: table;
 	padding: 0px;
-	width: 298px;
-	_width: 300px;
+	width: 318px;
+	_width: 320px;
 	font-size: smaller;
+	}
+	
+.PortalBoxConfigContent {
+	height: auto;
+	_height: 200px;
+	max-height: 200px;
+	overflow: auto;
 	}
 	
 .PortalBoxConfigContent div {
@@ -153,8 +161,8 @@ img {
 	display: block;
 	margin-top: 20px;
 	margin-bottom: 0px;
-	width: 294px;
-	padding: 1px;
+	width: 318px;
+	padding: 0px;
 	}
 	
 .PortalConfigResetButton a:link {
@@ -319,26 +327,30 @@ img {
  	font-weight: bold;
  	}
 
- .RecentCommentDate {
- 	font-size: xx-small
+ .RecentCommentDate a:link, .RecentCommentDate a:visited {
+	position: relative;
+ 	font-size: xx-small !important;
+ 	color: #666 !important;
+ 	margin-left: auto;
+ 	margin-right: 0;
  	}
 
  .RecentCommentItem {
-        font-size: 90%;
+    font-size: 90%;
  	font-style: italic;
- 	padding: 5px 0 0 5px;
+ 	padding: 5px;
+ 	border: 1px solid #dfecfa;
  	}
 
  .RecentCommentLinks {
  	padding: 2px 5px 2px 2px;
  	text-align: right;
- 	font-style: normal;
  	margin-top: 5px;
- 	margin-left: -5px;
  	}
-
- .RecentCommentLinks a {
- 	font-size: xx-small !important;
+ 	
+ .RecentCommentLinks a:link {
+ 	font-size: x-small !important;
+ 	color: #666 !important;
  	}
 
  /*------------------------ PopWithFriends ---------------------*/
