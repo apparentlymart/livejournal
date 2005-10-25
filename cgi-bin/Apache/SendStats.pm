@@ -65,7 +65,8 @@ sub handler
         unless ($sock) {
             $udp_sock{$host} = $sock = IO::Socket::INET->new(Proto => 'udp');
             if ($sock) {
-                $sock->sockopt(SO_BROADCAST, 1);
+                $sock->sockopt(SO_BROADCAST, 1)
+                    if $LJ::SENDSTATS_BCAST;
             } else {
                 $r->log_error("SendStats: couldn't create socket: $host");
                 next;
