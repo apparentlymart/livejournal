@@ -93,8 +93,7 @@ sub EntryPage
                 $text =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
             }
             LJ::CleanHTML::clean_comment(\$text, { 'preformatted' => $com->{'props'}->{'opt_preformatted'},
-                                                   'anon_comment' => (!$com->{posterid}
-                                                                      || ($pu && $pu->{'journaltype'} eq "I")),
+                                                   'anon_comment' => (!$com->{posterid} || $u->{'journaltype'} eq 'I'),
                                                });
 
             # local time in mysql format to gmtime
