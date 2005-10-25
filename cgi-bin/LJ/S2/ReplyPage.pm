@@ -78,10 +78,6 @@ sub ReplyPage
             LJ::item_toutf8($u, \$parpost->{'subject'}, \$parpost->{'body'}, {});
         }
 
-        LJ::CleanHTML::clean_comment(\$parpost->{'body'},
-                                     { 'preformatted' => $parpost->{'props'}->{'opt_preformatted'},
-                                       'anon_comment' => !$parpost->{posterid} || $u->{'journaltype'} eq 'I' });
-
         my $datetime = DateTime_unix(LJ::mysqldate_to_time($parpost->{'datepost'}));
 
         my ($s2poster, $pu);
@@ -94,6 +90,13 @@ sub ReplyPage
             # FIXME: this is a little heavy:
             $comment_userpic = Image_userpic($pu, 0, $parpost->{'props'}->{'picture_keyword'});
         }
+
+        LJ::CleanHTML::clean_comment(\$parpost->{'body'},
+                                     {
+                                         'preformatted' => $parpost->{'props'}->{'opt_preformatted'},
+                                         'anon_comment' => !$parpost->{posterid} || $pu->{'journaltype'} eq 'I',
+                                     });
+
 
         my $dtalkid = $re_talkid * 256 + $entry->anum;
         $replyto = {

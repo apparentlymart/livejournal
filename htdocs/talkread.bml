@@ -465,7 +465,7 @@ body<=
              $ret .= "</td></tr><tr><td>";
 
              LJ::CleanHTML::clean_comment(\$post->{'body'}, { 'preformatted' => $post->{'props'}->{'opt_preformatted'},
-                                                              'anon_comment' => (!$pu || $u->{'journaltype'} eq 'I'),
+                                                              'anon_comment' => (!$pu || $pu->{'journaltype'} eq 'I'),
                                                           });
              BML::ebml(\$post->{'body'});
              $ret .= $post->{'body'};
