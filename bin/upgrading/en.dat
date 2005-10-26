@@ -1097,11 +1097,15 @@ Not all robots respect the rules.
 
 /editinfo.bml.chat.aolim.title=AOL IM
 
+/editinfo.bml.chat.googletalk.title=Google Talk
+
 /editinfo.bml.chat.icquin.title=ICQ UIN
 
 /editinfo.bml.chat.jabber.title=Jabber
 
 /editinfo.bml.chat.msnusername.title=MSN Username
+
+/editinfo.bml.chat.skype.title=Skype
 
 /editinfo.bml.chat.yahooid.title=Yahoo! ID
 
@@ -3870,6 +3874,8 @@ This could be because: <ol>
 
 /userinfo.bml.label.frsyndication2=Feeds
 
+/userinfo.bml.label.googletalk=Google Talk:
+
 /userinfo.bml.label.icquin=ICQ UIN:
 
 /userinfo.bml.label.interests=Interests
@@ -3921,6 +3927,8 @@ This could be because: <ol>
 /userinfo.bml.label.sendmessage=Send Message
 
 /userinfo.bml.label.shared=Posting Access:
+
+/userinfo.bml.label.skype=Skype:
 
 /userinfo.bml.label.supportpoints=Support points
 

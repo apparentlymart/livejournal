@@ -130,7 +130,7 @@
                     journaltitle journalsubtitle public_key
                     url urlname opt_hidefriendofs dont_load_members
                     opt_showmutualfriends fb_num_pubpics opt_showschools);
-     unless ($com || $synd) { push @props, qw(aolim icq yahoo msn gender jabber); }
+     unless ($com || $synd) { push @props, qw(aolim icq yahoo msn gender jabber google_talk skype); }
      if ($synd) { push @props, qw(rssparseerror); }
      if ($com) { push @props, qw(moderated); }
      if ($u->{'statusvis'} eq 'V') { push @props, qw(opt_blockrobots); }
@@ -580,7 +580,7 @@ if ($u->{'journaltitle'}) {
           $body .= "</td></tr>";
       }
       
-      foreach my $k (qw(aolim icq yahoo msn jabber)) {
+      foreach my $k (qw(aolim icq yahoo msn jabber google_talk skype)) {
           $u->{$k} = LJ::ehtml($u->{$k});
       }
 
@@ -611,6 +611,16 @@ if ($u->{'journaltitle'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
           my $jabber = $mangleaddress->($u->{'jabber'});
           $body .= "<tr><td align='right'><b>$ML{'.label.jabber'}</b></td><td colspan='$span'>$jabber</td></tr>\n";
+      }
+      if ($u->{'google_talk'}) {
+          my $span = ($narrow_left-- >= 0) ? 1 : 2;
+          my $google = $mangleaddress->($u->{'google_talk'});
+          $body .= "<tr><td align='right'><b>$ML{'.label.googletalk'}</b></td><td colspan='$span'>$google</td></tr>\n";
+      }
+      if ($u->{'skype'}) {
+          my $span = ($narrow_left-- >= 0) ? 1 : 2;
+          my $skype = $mangleaddress->($u->{'skype'});
+          $body .= "<tr><td align='right'><b>$ML{'.label.skype'}</b></td><td colspan='$span'>$skype</td></tr>\n";
       }
   }
 

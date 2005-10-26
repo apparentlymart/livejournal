@@ -40,18 +40,21 @@ _code?>
     my $sth;
 
     # load user props
-    LJ::load_user_props($u, { use_master => 1 }, "opt_whatemailshow",
-                        "country", "state", "city",
-                        "zip", "icq", "aolim", "yahoo", "msn", "url",
-                        "urlname", "gender", "jabber", "opt_blockrobots",
-                        "opt_logcommentips",
-                        "howhear", "opt_bdaymail", "opt_hidefriendofs",
-                        "sidx_bdate", "sidx_loc", "mailencoding", "opt_nctalklinks",
-                        "opt_whoscreened", "journaltitle", "journalsubtitle",
-                        "friendspagetitle", "opt_weblogscom", "opt_stylemine",
-                        "opt_imagelinks", "opt_getselfemail", "external_foaf_url",
-                        "opt_showmutualfriends", "opt_showschools", "timezone",
-                        );
+    LJ::load_user_props(
+        $u, { use_master => 1 },
+        qw/ opt_whatemailshow
+          country state city
+          zip icq aolim yahoo msn url
+          urlname gender jabber opt_blockrobots
+          opt_logcommentips
+          howhear opt_bdaymail opt_hidefriendofs
+          sidx_bdate sidx_loc mailencoding opt_nctalklinks
+          opt_whoscreened journaltitle journalsubtitle
+          friendspagetitle opt_weblogscom opt_stylemine
+          opt_imagelinks opt_getselfemail external_foaf_url
+          opt_showmutualfriends opt_showschools timezone
+          google_talk skype /
+    );
 
     # to store values before they undergo normalisation
     my %saved = ();
@@ -150,7 +153,8 @@ _code?>
         # chat thingies
         foreach my $p (["aolim", $ML{'.chat.aolim.title'}, 28], ["icq", $ML{'.chat.icquin.title'}, 12],
                        ["yahoo", $ML{'.chat.yahooid.title'}, 33], ["msn", $ML{'.chat.msnusername.title'}, 60],
-                       ["jabber", $ML{'.chat.jabber.title'}, 60])
+                       ["jabber", $ML{'.chat.jabber.title'}, 60], ["google_talk", $ML{'.chat.googletalk.title'}, 60],
+                       ["skype", $ML{'.chat.skype.title'}, 40])
         {
             $ret .= "<tr><td align='right' bgcolor='<?emcolor?>'>$p->[1]</td><td>";
             $ret .= LJ::html_text({ 'name' => $p->[0], 'value' => $u->{$p->[0]}, 'size' => '20', 'maxlength' => $p->[2] });
@@ -814,18 +818,18 @@ _code?>
                 }
             }
 
-            my @uprops = (
-                          "opt_whatemailshow",
-                          "country", "state", "city", "zip", "icq",
-                          "aolim", "yahoo", "msn", "url", "urlname",
-                          "gender", "jabber", "opt_blockrobots",
-                          "opt_logcommentips",
-                          "opt_bdaymail", "opt_hidefriendofs",
-                          "sidx_bdate", "sidx_loc", "mailencoding", "opt_nctalklinks",
-                          "opt_whoscreened", "journaltitle", "journalsubtitle", "friendspagetitle",
-                          "opt_stylemine", "opt_imagelinks", "opt_getselfemail",
-                          "external_foaf_url", "opt_showmutualfriends", "opt_showschools", "timezone",
-                          );
+            my @uprops = qw(
+              opt_whatemailshow
+              country state city zip icq
+              aolim yahoo msn url urlname
+              gender jabber opt_blockrobots
+              opt_logcommentips google_talk skype
+              opt_bdaymail opt_hidefriendofs
+              sidx_bdate sidx_loc mailencoding opt_nctalklinks
+              opt_whoscreened journaltitle journalsubtitle friendspagetitle
+              opt_stylemine opt_imagelinks opt_getselfemail
+              external_foaf_url opt_showmutualfriends opt_showschools timezone
+            );
 
             # weblogs.com requires a special cap
             push @uprops, 'opt_weblogscom' if LJ::get_cap($u, 'weblogscom');
