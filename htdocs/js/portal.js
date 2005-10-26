@@ -22,9 +22,15 @@ function portalDoClick(e) {
   // hide the menu unless they clicked on it
   var menu = getPortalMenu('addbox');
 
+  var parent = xParent(evt.target, true);
+  var targetClasses = evt.target.className;
+  if (parent && xDef(parent.className))
+    targetClasses += parent.className;
+
   if (menu && menu.isOpen == 1) {
-    if (!xDef(evt.target.className) || evt.target.className.indexOf('PortalMenuItem') == -1)
+    if (!xDef(evt.target.className) || targetClasses.indexOf('PortalMenuItem') == -1) {
       hidePortalMenu('addbox');
+    }
   }
 }
 
@@ -348,10 +354,12 @@ function doDropDownMenu(e, menuHTML) {
   xLeft(menuBox, xPageX(e) - xWidth(menuBox) + xWidth(e));
 
   menuBox.isOpen = 1;
-  var addbutton = xGetElementById("AddPortalMenuButtonImage");
+
+
+  /* var addbutton = xGetElementById("AddPortalMenuButtonImage");
   if (addbutton && LJVAR.imgprefix) {
     addbutton.src = LJVAR.imgprefix + "/portal/PortalAddButtonSelected.gif";
-  }
+    }*/
 
   // keep menu up to date
   updateAddPortalModuleMenu();
@@ -364,18 +372,22 @@ function getPortalMenu(menu) {
 function hidePortalMenu(menu) {
   var menuelement = getPortalMenu(menu);
 
-  if (menuelement) {
-    menuelement.isOpen = 0;
-    hideBox(xGetElementById('PortalConfigMenu'));
-    var addbutton = xGetElementById("AddPortalMenuButtonImage");
+  if (menuelement && menuelement.isOpen) {
+
+    var callback = "xDisplay('PortalConfigMenu', 'none'); xGetElementById('" +
+      menuelement.id + "').isOpen = 0;";
+
+    fadeOut('PortalConfigMenu', 200, callback);
+
+    /* var addbutton = xGetElementById("AddPortalMenuButtonImage");
     if (addbutton && LJVAR.imgprefix) {
       addbutton.src = LJVAR.imgprefix + "/portal/PortalAddButton.gif";
-    }
+      }*/
   }
 }
 
 function showAddPortalBoxMenu() {
-  return dropDownMenu(xGetElementById('AddPortalMenuButtonImage'), 'addbox');
+  return dropDownMenu(xGetElementById('AddPortalMenuButton'), 'addbox');
 }
 
 function movePortalBoxUp(pboxid) {
@@ -537,9 +549,17 @@ function animateOpen(target, speed) {
 function fadeIn(target, speed) {
   var targetelement = xGetElementById(target);
   if (!speed) speed = 500;
+
+  if (portalAnimating) {
+    showBox(targetelement);
+    return;
+  }
+
+  changeOpac(0.0, targetelement);
   showBox(targetelement);
 
   var opp = 0.0;
+  portalAnimating = 1;
 
   var fadeInCallback = function () {
     opp += 0.10;
@@ -547,6 +567,8 @@ function fadeIn(target, speed) {
     if (opp <= 1) {
       changeOpac(opp, targetelement);
       window.setTimeout(fadeInCallback, 1000/speed);
+    } else {
+      portalAnimating = 0;
     }
   };
 
@@ -575,12 +597,16 @@ function fadeOut(target, speed, callback) {
         changeOpac(opp, targetelement);
         window.setTimeout(fadeOutCallback, 1000/speed);
       } else {
+        portalAnimating = 0;
         eval(callback);
       }
     };
 
-    if (LJVAR.doFade)
+    if (!portalAnimating) {
       fadeOutCallback();
+      portalAnimating = 1;
+    }
+
   } else {
     eval(callback);
   }
