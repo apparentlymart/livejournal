@@ -84,6 +84,7 @@ PAGE<=
 <HTML>
 <HEAD>
 <TITLE>%%TITLE%% [LiveJournal.com]</TITLE>
+<?_code { LJ::run_hook('hitbox_js'); } _code?>
 %%head%%
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" %%bodyopts%%>

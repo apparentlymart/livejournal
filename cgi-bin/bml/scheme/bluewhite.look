@@ -102,6 +102,7 @@ PAGE<=
 <HTML><?load_page_info?>
 <HEAD>
 <TITLE>%%TITLE%%</TITLE>
+<?_code { LJ::run_hook('hitbox_js'); } _code?>
 %%head%%
 <?_code
     use strict;
