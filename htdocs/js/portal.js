@@ -1,4 +1,5 @@
 var portalAnimating = 0;
+var portalFading = 0;
 var box_reloading = {};
 var add_portal_module_menu_html = "";
 
@@ -550,7 +551,7 @@ function fadeIn(target, speed) {
   var targetelement = xGetElementById(target);
   if (!speed) speed = 500;
 
-  if (portalAnimating) {
+  if (portalFading) {
     showBox(targetelement);
     return;
   }
@@ -559,7 +560,7 @@ function fadeIn(target, speed) {
   showBox(targetelement);
 
   var opp = 0.0;
-  portalAnimating = 1;
+  portalFading = 1;
 
   var fadeInCallback = function () {
     opp += 0.10;
@@ -568,7 +569,7 @@ function fadeIn(target, speed) {
       changeOpac(opp, targetelement);
       window.setTimeout(fadeInCallback, 1000/speed);
     } else {
-      portalAnimating = 0;
+      portalFading = 0;
     }
   };
 
@@ -597,14 +598,14 @@ function fadeOut(target, speed, callback) {
         changeOpac(opp, targetelement);
         window.setTimeout(fadeOutCallback, 1000/speed);
       } else {
-        portalAnimating = 0;
+        portalFading = 0;
         eval(callback);
       }
     };
 
-    if (!portalAnimating) {
+    if (!portalFading) {
       fadeOutCallback();
-      portalAnimating = 1;
+      portalFading = 1;
     }
 
   } else {
