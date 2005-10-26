@@ -535,7 +535,7 @@ sub generate_box_config_dialog {
     } if $jsmode;
 
     $buttons .= '<span class="PortalConfigSubmitButton">';
-    $buttons .= LJ::html_submit('saveconfig', 'Save settings', {'raw' => "onclick=\"if(savePortalBoxConfig($pboxid)) configform$pboxid.submit(); else return false;\""});
+    $buttons .= LJ::html_submit('saveconfig', 'Save Settings', {'raw' => "onclick=\"if(savePortalBoxConfig($pboxid)) configform$pboxid.submit(); else return false;\""});
     $buttons .= qq{<input type="hidden" id="box_config_elements$pboxid" value="$formelements"/>};
     $buttons .= qq {
           </span>

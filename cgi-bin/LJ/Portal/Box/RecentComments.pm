@@ -101,7 +101,9 @@ sub generate_content {
         $body ||= '(No comment text)';
 
         # trim comment body
-        my $maxlen = 120;
+        # more displayed if in big column
+        my $maxlen = $self->col eq 'L' ? 220 : 120;
+
         if (length($body) > $maxlen) {
             $body = LJ::text_trim($body, 0, $maxlen);
             $body .= '...';

@@ -73,7 +73,9 @@ sub generate_content {
             }
             $foundfriends++;
 
-            $friendlist .= "<a href=\"$LJ::SITEROOT/userinfo.bml?user=$fu->{user}\">$fu->{user}</a>, ";
+            my $journallink = $fu->journal_base();
+
+            $friendlist .= "<a href=\"$journallink\">$fu->{user}</a>, ";
         }
     } else {
         # haha they have no friends
@@ -118,7 +120,9 @@ sub generate_content {
                 my $fu = $friends_u->{$fid};
 
                 next if $fu->{'journaltype'} ne 'C';
-                $commlist .= "<a href=\"$LJ::SITEROOT/userinfo.bml?user=$fu->{user}\">$fu->{user}</a>, ";
+
+                my $journallink = $fu->journal_base();
+                $commlist .= "<a href=\"$journallink\">$fu->{user}</a>, ";
             }
         }
 
@@ -149,7 +153,9 @@ sub generate_content {
                 my $fu = $friends_u->{$fid};
 
                 next if $fu->{'journaltype'} ne 'Y';
-                $synlist .= "<a href=\"$LJ::SITEROOT/userinfo.bml?user=$fu->{user}\">$fu->{user}</a>, ";
+
+                my $journallink = $fu->journal_base();
+                $synlist .= "<a href=\"$journallink\">$fu->{user}</a>, ";
             }
         }
 
