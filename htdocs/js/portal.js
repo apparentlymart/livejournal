@@ -549,7 +549,7 @@ function animateOpen(target, speed) {
 
 function fadeIn(target, speed) {
   var targetelement = xGetElementById(target);
-  if (!speed) speed = 500;
+  if (!speed) speed = 200;
 
   if (portalFading) {
     showBox(targetelement);
@@ -581,7 +581,7 @@ function fadeOut(target, speed, callback) {
   var targetelement = xGetElementById(target);
   var targetid = targetelement.id;
 
-  if (!speed) speed = 500;
+  if (!speed) speed = 200;
 
   if (!callback)
     callback = "hideMe('"+targetid+"')";
@@ -594,7 +594,7 @@ function fadeOut(target, speed, callback) {
     var fadeOutCallback = function () {
       opp -= fadedelta;
 
-      if (opp >= fadedelta * 2) {
+      if (opp >= 0) {
         changeOpac(opp, targetelement);
         window.setTimeout(fadeOutCallback, 1000/speed);
       } else {

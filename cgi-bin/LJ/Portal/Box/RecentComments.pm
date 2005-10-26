@@ -142,12 +142,15 @@ sub generate_content {
             <tr id="ljcmt$talkid">
                 <td>
 
-                  <span class="RecentCommentTitle">$userlink: $subject</span>
+                  <span class="RecentCommentTitle">$userlink: </span>
+                  <div class="RecentCommentSubject">$subject</div>
                   <span class="RecentCommentDate"><a href="$talkurl">$date</a></span>
                   <br style="clear: both;" />
 
                   <div class="RecentCommentItem">
-                      $body
+                      <div class="RecentCommentBody">
+                        $body
+                      </div>
                       <div class="RecentCommentLinks">
                         $managebtns
                         <a href="$replyurl">Reply</a> | <a href="$posturl">Entry Link</a>

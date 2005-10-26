@@ -82,8 +82,8 @@
     # reset debug output
     $LJ::PORTAL_DEBUG_CONTENT = '';
 
-    # do profiling?
-    my $profile = $GET{'profile'} + 0;
+    # do profiling? requires siteadmin portal priv
+    my $profile = $GET{'profile'} + 0 && LJ::check_priv($remote, 'siteadmin', 'portal') ;
     $profile = $profile > 9999999 ? 9999999 : $profile;
 
     my $portalconfig = LJ::Portal::Config->new($remote, $profile);
@@ -260,7 +260,8 @@
     # create the hidden menu at the top
     my $configmenu = qq {
         <span id="PortalConfigMenuBar">
-            <div id="AddPortalMenuButton" class="midalign PortalMenuItem"><a href="$selflink?getmenu=1&menu=addbox" onclick="return showAddPortalBoxMenu();" class="PortalMenuItem">Add Content Module</a></div>
+            <div id="AddPortalMenuButton" class="midalign PortalMenuItem" onclick="return showAddPortalBoxMenu();">
+            <a href="$selflink?getmenu=1&menu=addbox" onclick="return showAddPortalBoxMenu();" class="PortalMenuItem">Add Content Module</a></div>
             </span>
         };
 
