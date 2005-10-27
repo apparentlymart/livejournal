@@ -36,6 +36,7 @@ _code?>
 } _code?></title>
 <?_code LJ::res_includes() _code?>
 %%HEAD%%
+<?_code { LJ::run_hook('hitstats_js'); } _code?>
 </head>
 
 <body %%bodyopts%%>
