@@ -128,10 +128,11 @@ sub generate_content {
 
         $entriescontent .= qq {
             <div class="PortalFriendsPageMeta">
-                <span class="PortalFriendsPagePoster">$sec</span>
+                <span class="PortalFriendsPageUserpic">$pichtml</span>
                 <span class="PortalFriendsPagePoster">$poster</span>
                 </div>
                 <div class="PortalFriendsPageSubject">
+                <span class="PortalFriendsPageSecurityIcon">$sec</span>
                 $subject
                 </div>
                 <div class="PortalFriendsPageEntry">
