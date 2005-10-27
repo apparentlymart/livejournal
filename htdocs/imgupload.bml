@@ -125,7 +125,7 @@
 
         $ret .= "<div id='filediv'><input type='file' name='file1' id='fromfileentry' size='50' $disabled /></div>";
 
-        my $msg = LJ::run_hook('update_insobj_fb', $fbenabled) || "Upload a file on your computer";
+        my $msg = LJ::run_hook('update_insobj_fb', $fbenabled) || "Upload a file from your computer";
         $ret .= "<div class='ex'>$msg</div>";
         $ret .= "</td></tr>";
 
@@ -138,7 +138,7 @@
                 'id'       => 'fromfb',
                 'value'    => 'fb',
             });
-            $ret .= " <label for='fromfb'>Existing image(s) from gallery</label></td><td>";
+            $ret .= " <label for='fromfb'>Image(s) from gallery</label></td><td>";
             $ret .= "</td></tr>";
         }
         $ret .= "</table>";
