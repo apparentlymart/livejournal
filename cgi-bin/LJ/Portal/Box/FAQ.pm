@@ -85,9 +85,12 @@ sub generate_content {
         };
     }
 
+    my $currlang = BML::get_language()|| $LJ::DEFAULT_LANG;
+
     $content .= qq {
             <b>FAQ Search:</b>
             <form action="$LJ::SITEROOT/support/faqsearch.bml" method="GET">
+            <input type="hidden" name="lang" value="$currlang" />
             <div style="padding: 5px;">
               } . LJ::html_text({ name => 'q' }) . qq {
                   &nbsp;<input type='submit' value='Search' /><br/>
