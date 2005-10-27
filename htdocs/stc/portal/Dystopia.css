@@ -64,7 +64,7 @@
 	}
 	
 .PortalMenuRow1, .PortalMenuRow2 {
-	background-color: #003366 !important;
+	background-color: #336699 !important;
 	}
 
 .PortalMenuRow1:hover, .PortalMenuRow2:hover {
@@ -79,6 +79,14 @@
 	color: #003366 !important;
 	}
 	
+#AddPortalMenuButton {
+    background: #336699 url(http://pics.livejournal.com/veroz/pic/00051xwq) no-repeat 4% 50% !important;
+	}
+	
+#AddPortalMenuButton:hover {
+    background-color: #003366 !important;
+    }
+
 	
 
 /*------------------ End Configuration Menus -----------------*/
@@ -121,17 +129,18 @@
  
 
 
-/*----------------------- Account Management --------------------*/
+/*--------------- Account Management (Quick Links) --------------*/
 
- .Manage table a {
-	border-left: 3px solid #336699;
+ .Manage table a:link, .Manage table a:hover, .Manage table a:visited {
+	display: list-item;
+	list-style-type: square;
 	}
 	
 /*------------------------- Announcements -----------------------*/
 
 .PortalTableHeader td {
-	background-color: #c5dff9 !important;
-	color: #000 !important;
+	background-color: #4284c6 !important;
+	color: #fff !important;
 	}
 	
 .Announcements table tbody tr td {
@@ -142,16 +151,16 @@
 	background-color: #fff;
 	}
 	
-.PortalRow2 {
-	background-color: #dfecfa;
+.PortalRow2 td {
+	border: 1px solid #dfecfa;
 	}
 
-.PortalRow1 {
-	background-color: #dfecfa;
+.PortalRow1 td {
+	border: 1px solid #dfecfa;
 	}
 
 .PortalRow1:hover, .PortalRow2:hover {
-	background-color: #74a9dd;
+	background-color: #9bc9f6;
 	}
 	
 .AnnouncementRow1:hover a, .AnnouncementRow2:hover a {
@@ -161,7 +170,7 @@
  
 /*----------------------- Recent Comments ----------------------*/
  
- .RecentCommentTitle {
+.RecentCommentTitle {
  	color: #003366;
  	}
  	
@@ -172,13 +181,16 @@
  .RecentCommentItem {
  	background-color: #fff;
  	color: #003366;
- 	border-top: 1px solid #C5DFF9;
  	}
  	
+ .RecentCommentBody {
+    color: #333;
+    }
+ 	
  .RecentCommentLinks {
- 	background-color: #;
  	color: #fff;
- 	border-bottom: 1px solid #ccc;
+ 	border-bottom: 2px solid #ccc;
+ 	border-right: 1px solid #ccc;
  	}	
 	
 /*------------------------ Account Status -------------------------*/
@@ -192,4 +204,11 @@
 
 .PortalFriendsPageEntry {
 	color: #333;
+	padding: 5px;
 	}
+	
+.PortalFriendsPageLinks {
+    text-align: right;
+    border-bottom: 2px solid #ccc;
+    border-right: 1px solid #ccc;
+    }

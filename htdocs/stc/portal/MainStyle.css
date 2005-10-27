@@ -65,7 +65,7 @@ img {
 	padding: 0px;
 	width: auto;
 	max-width: 400px;
-	width:expression(this.width > 400? "400px": "auto" );
+	_width: 400px;
 	}
 	
 .DropDownMenu br {
@@ -73,7 +73,7 @@ img {
 	}
 	
 .BoxDescription {
-	padding: 2px;
+	padding: 5px 10px 5px 10px;
 	font-style: italic;
 	}
 	
@@ -100,7 +100,7 @@ img {
 .PortalFenster {
 	padding: 2px;
 	margin: 0px;
-	z-index: 1;
+	z-index: 5;
 	position: absolute;
 	width: 320px;
 	height: auto;
@@ -123,7 +123,6 @@ img {
 	width: 100%;
 	padding: 2px;
 	height: 15px;
-	clear: both;
 	}
 	
 .PortalPatternedTitleBar span {
@@ -151,6 +150,11 @@ img {
 	_height: 200px;
 	max-height: 200px;
 	overflow: auto;
+	margin-top: 2px;
+	}
+	
+.PortalBoxConfigContent table {
+	width: 100%
 	}
 	
 .PortalBoxConfigContent div {
@@ -159,17 +163,17 @@ img {
 	
 .PortalConfigSubmitButtons {
 	display: block;
-	margin-top: 20px;
+	margin-top: 2px;
 	margin-bottom: 0px;
 	width: 318px;
 	padding: 0px;
 	}
 	
-.PortalConfigResetButton a:link {
+.PortalConfigResetButton {
 	vertical-align: middle;
 	text-decoration: none;
 	float: right;
-	margin: 4px 5px 0px 0px;
+	margin: 0;
 	font-weight: bold;
 	}
 
@@ -187,11 +191,19 @@ img {
 
 #AddPortalMenuButton {
 	display: block;
-    margin-left: auto;
-    margin-bottom: 10px;
-    margin-top: -20px;
-    width: 135px;
+	text-align: right;
+    margin: -20px -4px 10px auto;
+    background: #6699cc url(http://pics.livejournal.com/veroz/pic/00051xwq) no-repeat 4% 50%;
+    width: 125px;
+    padding: 3px;
 	}
+	
+#AddPortalMenuButton a:link, #AddPortalMenuButton a:visited {
+    text-decoration: none;
+    font-weight: bold;
+    color: #fff;
+    font-size: smaller;
+    }
 
 /*------------------ End Configuration Menus -----------------*/
 /*------------------------------------------------------------*/
@@ -204,7 +216,7 @@ img {
 	width: 100%;
 	margin-bottom: 10px;
 	overflow: hidden;
-	padding: 1px;
+	padding: 1px !important;
 	}
 	
 .PortalBoxIcon {
@@ -221,13 +233,14 @@ img {
 	font-weight: bold;
 	font-family: arial, verdana, sans-serif;
 	padding: 0 0 0 5px;
+	_width: 120px;
 	}
 	
 .PortalBoxMoveButtons {
 	display: inline;
-	_margin-top: -15px; /* Lame IE hack to fix positioning - need to find a better workaround */
+	_margin-top: -17px; /* Lame IE hack to fix positioning - need to find a better workaround */
 	float: right;
-	width: 120px;
+	width: 115px;
 	margin-right: 2px;
 	}
 	
@@ -280,12 +293,27 @@ img {
  .UpdateBoxEvent {
  	width: 99%;
  	}
+ 
+.UpdateJournal table {
+	background-color: #dfdfdf;
+	border: 1px outset #000;
+	width: 99%;
+	}
+	
+.UpdateJournal table td {
+	font-weight: bold;
+	width: 49%;
+	}
 
-/*----------------------- Account Management --------------------*/
+.UpdateJournal table br {
+	display: none;
+	}
+	
+/*--------------- Account Management (Quick Links) --------------*/
 
  .Manage table a {
-	line-height: 150%;
-	padding-left: 3px;
+	line-height: 125%;
+	margin-left: 20px;
 	}
 	
 /*------------------------- Announcements -----------------------*/
@@ -326,30 +354,38 @@ img {
  .RecentCommentTitle {
  	font-weight: bold;
  	}
+ 	
+ .RecentCommentSubject {
+    font-weight: bold;
+    }
 
  .RecentCommentDate a:link, .RecentCommentDate a:visited {
-	position: relative;
  	font-size: xx-small !important;
  	color: #666 !important;
- 	margin-left: auto;
- 	margin-right: 0;
  	}
 
  .RecentCommentItem {
     font-size: 90%;
  	font-style: italic;
- 	padding: 5px;
- 	border: 1px solid #dfecfa;
+ 	padding: 0px;
+ 	margin-top: -15px;
  	}
-
+ 	
+ .RecentCommentBody {
+    padding: 5px;
+    font-style: normal;
+    }
+    
  .RecentCommentLinks {
  	padding: 2px 5px 2px 2px;
  	text-align: right;
- 	margin-top: 5px;
+ 	color: #ccc;
+ 	font-size: x-small;
  	}
  	
- .RecentCommentLinks a:link {
+ .RecentCommentLinks a:link, .RecentCommentLinks a:visited {
  	font-size: x-small !important;
+ 	font-style: normal;
  	color: #666 !important;
  	}
 
@@ -370,13 +406,6 @@ img {
 .TextMessage {
 	padding: 3px;
 	}
- 	
-.tmform {
-	width: 90%;
-    display: none;
-    margin-left: auto;
-    margin-right: auto;
-	}
 	
 .TextMessage input {
 	display: inline;
@@ -395,9 +424,9 @@ img {
  	}
  	
  .NewUserMoreLink {
- 	position: relative;
+ 	display: block;
  	text-align: right;
- 	margin-right: 5px;
+ 	width: 99%;
  	}
  	
  .NewUser {
@@ -438,31 +467,58 @@ img {
 
 /*------------------------- Friends Page --------------------------*/
 
+.FriendsPage {
+    width: 99%;
+    }
+    
+.PortalFriendsPageUserpic {
+    float: left;
+    }
+
 .FriendsPageTitle {
 	font-weight: bold;
 	margin-bottom: 5px;
 	}
 	
 .FriendsPageEntry {
-	margin: 0 10px 0 10px;
+	_height: 300px;
+	max-height: 300px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	overflow: auto;
 	}
+	
+.PortalFriendsPageEntry {
+    margin-top: 15px;
+    }
 	
 .PortalFriendsPageSubject {
 	font-weight: bold;
 	}
 	
 .PortalFriendsPageLinks {
+    padding: 5px 5px 5px 2px;
+    font-size: x-small;
+    color: #ccc;
 	margin-bottom: 10px;
+	padding-right: 5px;
 	}
+	
+.PortalFriendsPageLinks a:link, .PortalFriendsPageLinks a:visited {
+ 	font-size: x-small !important;
+ 	font-style: normal;
+ 	color: #666 !important;
+    }
 
 .PortalFriendsPagePoster {
-        margin: 0px;
-        padding: 0px;
-        vertical-align: bottom;
-}
+    margin: 0px;
+    padding: 0px;
+    vertical-align: bottom;
+    }
 	
 /*----------------------- Friends Birthdays -----------------------*/
 	
 .Birthdays table td {
 	text-align: left;
 	}
+
