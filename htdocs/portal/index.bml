@@ -64,7 +64,7 @@
 
     # fading special effects?
     my $doFadeDefault = 1;
-    my $doFade = $LJ::DISABLED{'portal_fade'} ? $LJ::DISABLED{'portal_fade'} : $doFadeDefault;
+    my $doFade = $LJ::DISABLED{'portal_fade'} ? !$LJ::DISABLED{'portal_fade'} : $doFadeDefault;
 
     # parameters for portal.js
     $head .= qq{
