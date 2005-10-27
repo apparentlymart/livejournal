@@ -490,10 +490,10 @@ InOb.fotobilderStepOne = function () {
 InOb.fullCenter = function () {
     var windims = DOM.getClientDimensions();
 
-    DOM.setTop(currentPopup, (40 / 2));
-    DOM.setLeft(currentPopup, (40 / 2));
     DOM.setHeight(currentPopup, windims.y - 40);
     DOM.setWidth(currentPopup, windims.x - 55);
+    DOM.setTop(currentPopup, (40 / 2));
+    DOM.setLeft(currentPopup, (40 / 2));
 
     scroll(0,0);
 
@@ -503,10 +503,10 @@ InOb.fullCenter = function () {
 InOb.smallCenter = function () {
     var windims = DOM.getClientDimensions();
 
-    DOM.setTop(currentPopup, (windims.y - 300) / 2);
-    DOM.setLeft(currentPopup, (windims.x - 715) / 2);
     DOM.setHeight(currentPopup, 300);
     DOM.setWidth(currentPopup, 700);
+    DOM.setTop(currentPopup, (windims.y - 300) / 2);
+    DOM.setLeft(currentPopup, (windims.x - 715) / 2);
 
     scroll(0,0);
 
