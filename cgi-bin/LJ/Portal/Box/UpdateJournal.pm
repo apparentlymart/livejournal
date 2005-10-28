@@ -38,6 +38,17 @@ sub generate_content {
     my $securitytitle = BML::ml('entryform.security');
     my $tagstitle = BML::ml('entryform.tags');
 
+    my $posttowidget = '';
+
+    if ($postto) {
+        $posttowidget = qq {
+                <tr>
+                <td valign="bottom" align="left" width="20%">
+                $posttotitle</td><td>$postto</td>
+                </tr>
+            };
+    }
+
     $content .= qq {
             $formauth
                 <input type="hidden" name="realform" value="1" />
@@ -50,10 +61,7 @@ sub generate_content {
 
                 <table width="100%">
 
-                <tr>
-                <td valign="bottom" align="left" width="20%">
-                $posttotitle</td><td>$postto</td>
-                </tr>
+                $posttowidget
 
                 <tr>
                 <td valign="bottom" align="left" width="20%">
