@@ -584,6 +584,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
      $ret .= LJ::html_text({'name' => 'email', 'size' => 40, 'maxlength' => 50, 'value' => $v,});
      $ret .= "</div></li>";
 
+     # Password
      $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.password.input.head1'}</div>";
      $ret .= $error_msg->('password', '<p class="formitemFlag">', '</p>');
      $ret .= "<div class='formitemFlag'>$ML{'.password.secure'}</div>" if exists $errors{'password'};
@@ -594,6 +595,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
      $ret .= "<div class='formitemDesc'>$ML{'.password.input.head2'}</div>";
      $ret .= LJ::html_text({'name' => 'password2', 'size' => 30, 'maxlength' => 31, 'type' => "password",
                             value => $pass_value, });
+     $ret .= "<div class='formitemNote'>$ML{'.password.secure2'}</div>";
      $ret .= "</div></li>";
 
      if (@LJ::INITIAL_OPTIONAL_FRIENDS) {

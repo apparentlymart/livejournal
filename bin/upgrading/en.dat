@@ -831,7 +831,7 @@ Thanks for supporting [[sitename]]!
 
 /create.bml.password.input.head2=Re-type password:
 
-/create.bml.password.secure=You must choose a secure password that is not based on a dictionary word, your username, or your email address.
+/create.bml.password.secure2=For your security, your password must <strong>not</strong> contain a dictionary word or be based upon your username or email address.  It must also contain at least one numeral or punctuation mark in it.
 
 /create.bml.password.text=Select a password.
 

@@ -22,6 +22,7 @@ general /community/settings.bml.manage
 general /create.bml.aolnotice.head
 general /create.bml.aolnotice.text
 general /create.bml.error.seebelow
+general /create.bml.password.secure
 general /create.bml.proceed.head
 general /create.bml.proceed.text
 
