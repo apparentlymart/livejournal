@@ -629,13 +629,13 @@ function fadeOut(target, speed, callback) {
 }
 
 function animateCollapse(target, speed, callback) {
-  if (portalAnimating)
-    return;
+  var targetelement = xGetElementById(target);
 
   if (!callback)
     callback = function () { hideMe(targetelement); };
 
-  var targetelement = xGetElementById(target);
+  if (portalAnimating)
+    callback();
 
   if (xHeight(targetelement)>0) {
     if (!speed) speed = 500;
