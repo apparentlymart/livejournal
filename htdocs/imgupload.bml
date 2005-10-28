@@ -105,7 +105,7 @@
         $ret .= LJ::html_text({
             'name'    => 'url',
             'id'      => 'fromurlentry',
-                'size'    => '50',
+            'size'    => '50',
         });
         $ret .= "<div class='ex'><b>Example:</b> http://example.com/some-picture.jpg</div></td></tr>";
 
@@ -116,7 +116,7 @@
             'name'  => 'method',
             'id'    => 'fromfile',
             'value' => 'file',
-                'disabled' => $fbenabled ? 0 : 1,
+            'disabled' => $fbenabled ? 0 : 1,
         });
         $ret .= " <label for='fromfile'>Image from file</label>:</td><td>";
         $ret .= LJ::html_hidden('redir_to_auth_base', '1', 'sec1', '255');
