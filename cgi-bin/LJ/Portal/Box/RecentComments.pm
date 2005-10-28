@@ -144,9 +144,9 @@ sub generate_content {
             <tr id="ljcmt$talkid">
                 <td>
 
-                  <span class="RecentCommentTitle">$userlink: </span>
-                  <div class="RecentCommentSubject">$subject</div>
+                  <span class="RecentCommentTitle">$userlink </span>
                   <span class="RecentCommentDate"><a href="$talkurl">$date</a></span>
+                  <div class="RecentCommentSubject">$subject</div>
                   <br style="clear: both;" />
 
                   <div class="RecentCommentItem">

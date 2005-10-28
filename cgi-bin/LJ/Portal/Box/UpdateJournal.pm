@@ -46,7 +46,7 @@ sub generate_content {
                 $postto</td><td align="left" valign="top">
                 $securitywidget
                 </tr> <tr>
-                <td valign="bottom" align="top">
+                <td valign="bottom" align="top" width="100%" colspan="2">
                 $tagswidget</td>
                 </tr></table>
                 <br/>
