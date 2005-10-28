@@ -44,8 +44,11 @@ sub generate_content {
         my $day = $bi->[1];
         $day .= LJ::Lang::day_ord($bi->[1]) if $add_ord;
 
+        # if their birthday is today then say so
+        my $datestr = ($bi->[1] == $now->day && $bi->[0] == $now->month) ? 'Today' : "$mon $day";
+
         $content .= "<tr><td nowrap='nowrap'><b>" . LJ::ljuser($bi->[2]) . "</b></td>";
-        $content .= "<td align='right' nowrap='nowrap'>$mon $day</td>";
+        $content .= "<td align='right' nowrap='nowrap'>$datestr</td>";
         $content .= "<td align='right'><a href=\"$LJ::SITEROOT/shop/view.bml?gift=1&for=$bi->[2]\"><img src=\"$LJ::IMGPREFIX/btn_gift.gif\" alt=\"Buy this user a gift\" align=\"right\" /></a></td></tr>";
     }
     $content .= "</table>";
