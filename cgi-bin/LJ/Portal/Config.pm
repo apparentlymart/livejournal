@@ -671,6 +671,12 @@ sub generate_box_insides {
         $content = 'Sorry, this feature is disabled at this time.';
     }
 
+    my $passback;
+
+    if ($LJ::PORTAL_BOX_PROFILE_START) {
+        $passback = $LJ::PORTAL_BOX_PROFILE_START->($box);
+    }
+
     my $gencont = sub {
         my $usecache = shift;
         $usecache ||= 0;
@@ -692,6 +698,10 @@ sub generate_box_insides {
         $LJ::PORTAL_PROFILED_BOX{$boxclass} = 1;
     } else {
         $gencont->(!$force);
+    }
+
+    if ($LJ::PORTAL_BOX_PROFILE_END) {
+        $LJ::PORTAL_BOX_PROFILE_END->($passback);
     }
 
     my $ret = qq{
