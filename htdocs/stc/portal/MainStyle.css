@@ -220,10 +220,10 @@ img {
 	}
 	
 .PortalBoxIcon {
-	display: table-cell;
-	vertical-align: middle;
-	width: 15px;
-	height: 15px;
+        vertical-align: middle;
+        width: 15px;
+        height: 15px;
+        display: none;
 	}
 	
 .PortalBoxTitleText {
