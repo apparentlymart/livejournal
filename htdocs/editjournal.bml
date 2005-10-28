@@ -150,8 +150,12 @@ body<=
 
                 # deleted
                 unless ($req{'event'}) {
-                    my $result = "<?h1 $ML{'.success.head'} h1?><?p $ML{'.success.delete'} p?>";
+                    my $result = "<?h1 $ML{'.success.head'} h1?>";
 
+                    my $deleted_extras = LJ::run_hook('entry_deleted_page_extras');
+                    $result .= $deleted_extras if defined $deleted_extras;
+
+                    $result .= "<?p $ML{'.success.delete'} p?>";
                     $result .= "<?p $ML{'.success.deletespam'} p?>" if $POST{'action:deletespam'};
                     return $result;
                 }
