@@ -1105,9 +1105,9 @@ RTE
     $out .= LJ::html_hidden('prop_opt_preformatted', '1') if $opts->{'richtext_on'};
 
     my $jrich = LJ::ejs(LJ::deemp(
-            BML::ml("entryform.htmlokay.rich", { 'opts' => 'href="#" onClick="enable_rte()"' })));
+            BML::ml("entryform.htmlokay.rich2", { 'opts' => 'href="#" onClick="enable_rte()"' })));
 
-    my $jnorich = LJ::ejs(LJ::deemp(BML::ml('entryform.htmlokay.norich')));
+    my $jnorich = LJ::ejs(LJ::deemp(BML::ml('entryform.htmlokay.norich2')));
 
     unless ( $opts->{'richtext_on'}   ||
              $opts->{'disabled_save'} ||
@@ -1127,7 +1127,7 @@ RTE
         //-->
             </script>
 RTE
-            $out .= '<noscript><?de ' . BML::ml('entryform.htmlokay.norich') . ' de?></noscript>';
+            $out .= '<noscript><?de ' . BML::ml('entryform.htmlokay.norich2') . ' de?></noscript>';
     }
     $out .= '<br />';
 
@@ -1352,7 +1352,7 @@ if (document.getElementById) {
 //--></script>
 USERPICS
                 $out .= "<tr id='userpic_list_row' valign='top'>";
-                $out .= "<th>" . LJ::help_icon("userpics", "", " ") . BML::ml('entryform.userpics') . "</th><td>";
+                $out .= "<th>" . LJ::help_icon("userpics", "", " ") . BML::ml('entryform.userpic') . "</th><td>";
                 $out .= LJ::html_select({'name' => 'prop_picture_keyword', 'id' => 'prop_picture_keyword',
                                          'selected' => $opts->{'prop_picture_keyword'}, 'onchange' => "userpic_preview()",
                                          'tabindex' => $tabindex->() },

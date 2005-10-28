@@ -1975,6 +1975,10 @@ pick a specific friend group to view.
 
 /go.bml.error.usernotfound=User not found.
 
+/imgupload.bml.gallery.label=Image from gallery
+
+/imgupload.bml.size=When uploading from file or from a gallery, the image will display as 320 x 240 (medium) and will link to the image in the gallery.
+
 /interests.bml.add.added.head=Added!
 
 /interests.bml.add.added.text=The interest has been added to your list.
@@ -4356,9 +4360,9 @@ entryform.format.auto=Auto
 
 entryform.format.preformatted=None
 
-entryform.htmlokay.norich=(HTML okay; by default, newlines will be auto-formatted to <tt>&lt;br&gt;</tt>)
+entryform.htmlokay.norich2=(HTML okay; by default, new lines will be auto-formatted to <tt>&lt;br&gt;</tt>)
 
-entryform.htmlokay.rich=(HTML okay; by default, newlines will be auto-formatted to <tt>&lt;br&gt;</tt> - or, use the <a [[opts]]>rich text</a> mode.)
+entryform.htmlokay.rich2=(HTML okay; by default, new lines will be auto-formatted to <tt>&lt;br&gt;</tt> - or, use the <a [[opts]]>rich text</a> mode.)
 
 entryform.htmlokay.rte_nosupport=(Sorry, your browser does not currently support the rich text environment.)
 
@@ -4394,7 +4398,7 @@ entryform.tags=Tags:
 
 entryform.update=Update Journal
 
-entryform.userpics=User Picture Icon:
+entryform.userpic=Userpic:
 
 Error|notes=typically used inside an H1 tag to announce an error.
 Error=Error

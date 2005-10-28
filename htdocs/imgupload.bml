@@ -137,12 +137,13 @@
             'id'       => 'fromfb',
             'value'    => 'fb',
         });
-        $ret .= " <label for='fromfb'>Image(s) from gallery</label></td><td>";
+
+        $ret .= " <label for='fromfb'>$ML{'.gallery.label'}</label></td><td>";
         $ret .= "</td></tr>";
     }
     $ret .= "</table>";
 
-    $ret .= "<br /><font size='1' color='gray'><i>Except when inserting via URL, a medium sized image with a link to the larger image will be placed in your post.</i></font></div></td></tr><tr height='20' class='insobjNav' id='insobjNav'><td align='left'><div style='margin-left: 10px'>";
+    $ret .= "<br /><font size='1' color='gray'><i>$ML{'.size'}</i></font></div></td></tr><tr height='20' class='insobjNav' id='insobjNav'><td align='left'><div style='margin-left: 10px'>";
     $ret .= "<input type='button' name='btn:prev' id='btnPrev' style='display:none' value='&lt;-- Back' />";
     $ret .= "</div></td>";
     $ret .= "<td align='right'><div style='margin-right: 10px'>";

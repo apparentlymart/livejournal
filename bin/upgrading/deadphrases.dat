@@ -44,6 +44,10 @@ general /editinfo.bml.topicdir.header
 general /editpics.bml.error.toomanypics2
 general /editpics.bml.error.toomanypics3
 
+entryform.htmlokay.norich
+entryform.htmlokay.rich
+general editform.userpics
+
 general /friends/edit.bml.btn.proceed
 general /friends/edit.bml.edit.head
 general /friends/edit.bml.edit.text
