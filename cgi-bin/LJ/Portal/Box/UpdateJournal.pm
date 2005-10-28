@@ -34,21 +34,39 @@ sub generate_content {
     my $updatetitle = BML::ml('/update.bml.btn.update');
     my $moreoptstitle = BML::ml('portal.update.moreopts');
 
+    my $posttotitle = BML::ml('entryform.postto');
+    my $securitytitle = BML::ml('entryform.security');
+    my $tagstitle = BML::ml('entryform.tags');
+
     $content .= qq {
             $formauth
                 <input type="hidden" name="realform" value="1" />
-                $subjecttitle<br/>
+
+                <b>$subjecttitle</b><br/>
                 $subjectwidget<br/>
-                $eventtitle<br/>
+
+                <b>$eventtitle</b><br/>
                 $entrywidget<br/>
+
                 <table width="100%">
-                <tr><td valign="bottom" align="left">
-                $postto</td><td align="left" valign="top">
-                $securitywidget
-                </tr> <tr>
-                <td valign="bottom" align="top" width="100%" colspan="2">
-                $tagswidget</td>
-                </tr></table>
+
+                <tr>
+                <td valign="bottom" align="left" width="20%">
+                $posttotitle</td><td>$postto</td>
+                </tr>
+
+                <tr>
+                <td valign="bottom" align="left" width="20%">
+                $securitytitle</td><td>$securitywidget</td>
+                </tr>
+
+                <tr>
+                <td valign="bottom" align="left" width="20%">
+                $tagstitle</td><td>$tagswidget</td>
+                </tr>
+
+                </table>
+
                 <br/>
                 <input type="submit" value="$updatetitle" name="postentry" onclick="return portal_settime();" /> <input type="submit" name="moreoptsbtn" value="$moreoptstitle"/>
                 $datetime

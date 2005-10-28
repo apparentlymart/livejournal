@@ -117,7 +117,7 @@ sub get_box_unique {
 sub load_default_boxes {
     my LJ::Portal::Config $self = shift;
 
-    my @classes = @LJ::PORTAL_BOXES;
+    my @classes = $self->get_box_classes;
 
     foreach my $boxclass (sort @classes) {
         # check to see if the box has it's own code that needs to be run to determine

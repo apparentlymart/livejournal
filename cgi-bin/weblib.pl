@@ -1507,7 +1507,6 @@ sub entry_form_postto_widget {
     push @journals, $remote->{'user'};
     push @journals, $remote->{'user'};
     @journals = sort @journals;
-    $ret .= BML::ml('entryform.postto') . ' ';
     $ret .= LJ::html_select({ 'name' => 'usejournal', 'selected' => $remote->{'user'}},
                             @journals) . "\n";
     return $ret;
@@ -1520,7 +1519,6 @@ sub entry_form_security_widget {
                 "private", BML::ml('label.security.private'),
                 "friends", BML::ml('label.security.friends'));
 
-    $ret .= BML::ml('entryform.security') . ' ';
     $ret .= LJ::html_select({ 'name' => 'security'},
                             @secs);
 
@@ -1532,7 +1530,6 @@ sub entry_form_tags_widget {
 
     return '' if $LJ::DISABLED{tags};
 
-    $ret .= BML::ml('entryform.tags');
     $ret .= LJ::html_text({
                               'name'      => 'prop_taglist',
                               'size'      => '35',

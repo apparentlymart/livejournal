@@ -129,11 +129,10 @@
  
 
 
-/*--------------- Account Management (Quick Links) --------------*/
+/*----------------------- Account Management --------------------*/
 
- .Manage table a:link, .Manage table a:hover, .Manage table a:visited {
-	display: list-item;
-	list-style-type: square;
+ .Manage table a {
+	border-left: 3px solid #336699;
 	}
 	
 /*------------------------- Announcements -----------------------*/
@@ -170,7 +169,7 @@
  
 /*----------------------- Recent Comments ----------------------*/
  
-.RecentCommentTitle {
+ .RecentCommentTitle {
  	color: #003366;
  	}
  	
@@ -181,16 +180,12 @@
  .RecentCommentItem {
  	background-color: #fff;
  	color: #003366;
+ 	border: 1px solid #dfecfa;
  	}
- 	
- .RecentCommentBody {
-    color: #333;
-    }
  	
  .RecentCommentLinks {
  	color: #fff;
- 	border-bottom: 2px solid #ccc;
- 	border-right: 1px solid #ccc;
+ 	background-color: #dfecfa;
  	}	
 	
 /*------------------------ Account Status -------------------------*/
@@ -204,11 +199,4 @@
 
 .PortalFriendsPageEntry {
 	color: #333;
-	padding: 5px;
 	}
-	
-.PortalFriendsPageLinks {
-    text-align: right;
-    border-bottom: 2px solid #ccc;
-    border-right: 1px solid #ccc;
-    }
