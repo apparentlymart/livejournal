@@ -149,4 +149,8 @@ sub box_class { $_box_class; }
 sub config_props { $_config_props; }
 sub prop_keys { $_prop_keys; }
 
+# caching options
+sub cache_global { 0; } # cache per-user
+sub cache_time { 60 * 60; } # cache for an hour
+
 1;

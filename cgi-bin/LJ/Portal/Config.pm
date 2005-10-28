@@ -730,7 +730,7 @@ sub get_box_cached_contents {
     my ($self, $box) = @_;
 
     # is this box supposed to be memcached?
-    return undef unless ($box->can('etag'));
+    return undef unless ($box->can('cache_global'));
 
     my $content;
 
@@ -752,7 +752,7 @@ sub get_box_cached_contents {
         # is it time to check to see if this content has been modified?
         if (time() > $time) {
             # compare etags. if they don't match, regenerate contents
-            if ($etag && $box->etag == $etag_cached && $boxcontent_cached) {
+            if ($box->can('etag') && $etag && $box->etag == $etag_cached && $boxcontent_cached) {
                 $content = $boxcontent_cached;
             }
 
