@@ -466,6 +466,9 @@ InOb.fotobilderStepOne = function () {
     InOb.fullCenter();
 
     var div_if = InOb.popid("img_iframe_holder");
+    var windims = DOM.getClientDimensions();
+    DOM.setHeight(div_if, windims.y - 110);
+
     var div_fw = InOb.popid("img_fromwhere");
     div_fw.style.display = "none";
     div_if.style.display = "block";
