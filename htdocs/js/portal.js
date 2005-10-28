@@ -28,10 +28,25 @@ function portalDoClick(e) {
   if (parent && xDef(parent.className))
     targetClasses += parent.className;
 
+  // don't mess with menu stuff if the menu was clicked
+  if (targetClasses && targetClasses.indexOf('PortalMenuItem') != -1)
+    return;
+
   if (menu && menu.isOpen == 1) {
-    if (!xDef(evt.target.className) || targetClasses.indexOf('PortalMenuItem') == -1) {
-      hidePortalMenu('addbox');
-    }
+    hidePortalMenu('addbox');
+  }
+}
+
+// run when page is loaded
+function setupPortal() {
+  updateAddPortalModuleMenu();
+
+  // if safari or IE Windows, use fading prefs
+  // otherwise disable, because other guys can't handle it right
+  var safari = xUA.indexOf('safari');
+  if (safari == -1 && !(xIE4Up && !xMac)) {
+    if (LJVAR.doFade)
+      LJVAR.doFade = 0;
   }
 }
 
@@ -356,7 +371,6 @@ function doDropDownMenu(e, menuHTML) {
 
   menuBox.isOpen = 1;
 
-
   /* var addbutton = xGetElementById("AddPortalMenuButtonImage");
   if (addbutton && LJVAR.imgprefix) {
     addbutton.src = LJVAR.imgprefix + "/portal/PortalAddButtonSelected.gif";
@@ -375,8 +389,8 @@ function hidePortalMenu(menu) {
 
   if (menuelement && menuelement.isOpen) {
 
-    var callback = "xDisplay('PortalConfigMenu', 'none'); xGetElementById('" +
-      menuelement.id + "').isOpen = 0;";
+    var callback = "xGetElementById('" +
+      menuelement.id + "').isOpen = 0; xVisibility('" + menuelement.id + "', false);";
 
     fadeOut('PortalConfigMenu', 200, callback);
 
@@ -556,11 +570,9 @@ function fadeIn(target, speed) {
     return;
   }
 
-  changeOpac(0.0, targetelement);
   showBox(targetelement);
 
   var opp = 0.0;
-  portalFading = 1;
 
   var fadeInCallback = function () {
     opp += 0.10;
@@ -573,8 +585,11 @@ function fadeIn(target, speed) {
     }
   };
 
-  if (LJVAR.doFade)
+  if (LJVAR.doFade) {
+    portalFading = 1;
+    changeOpac(0.0, targetelement);
     fadeInCallback();
+  }
 }
 
 function fadeOut(target, speed, callback) {
@@ -713,6 +728,6 @@ function portalRegEvent (target, evt, func) {
 }
 
 if (document.getElementById) {
-  portalRegEvent(window, "load", updateAddPortalModuleMenu);
+  portalRegEvent(window, "load", setupPortal);
   portalRegEvent(document, "click", portalDoClick);
 }

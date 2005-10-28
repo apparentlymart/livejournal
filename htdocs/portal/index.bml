@@ -64,7 +64,7 @@
 
     # fading special effects?
     my $doFadeDefault = 1;
-    my $doFade = $LJ::DISABLED{'portal_fade'} ? !$LJ::DISABLED{'portal_fade'} : $doFadeDefault;
+    my $doFade = $LJ::DISABLED{'portal_fade'} ? 0 : $doFadeDefault;
 
     # parameters for portal.js
     $head .= qq{
@@ -261,7 +261,7 @@
     my $configmenu = qq {
         <span id="PortalConfigMenuBar">
             <div id="AddPortalMenuButton" class="midalign PortalMenuItem" onclick="return showAddPortalBoxMenu();">
-            <a href="$selflink?getmenu=1&menu=addbox" onclick="return showAddPortalBoxMenu();" class="PortalMenuItem">Add Content Module</a></div>
+            <a href="$selflink?getmenu=1&menu=addbox" class="PortalMenuItem">Add Content Module</a></div>
             </span>
         };
 

@@ -61,9 +61,8 @@ img {
 	z-index: 2;
 	position: absolute;
 	overflow: hidden;
-	display: none;
+	visibility: none;
 	padding: 0px;
-	width: auto;
 	max-width: 400px;
 	_width: 400px;
 	}
