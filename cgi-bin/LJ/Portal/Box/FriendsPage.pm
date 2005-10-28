@@ -96,6 +96,18 @@ sub generate_content {
         my $entrylink  = $entry->url;
         my $picinfo;
 
+        my $journalid = $entryinfo->{journalid};
+        my $posterid = $entry->posterid;
+
+        # is this a post in a comm?
+        if ($journalid != $posterid) {
+            my $journalu = LJ::load_userid($journalid);
+            if ($journalu) {
+                $poster = $poster . " posting in ";
+                $poster .= $journalu->ljuser_display;
+            }
+        }
+
         my $replyurl = LJ::Talk::talkargs($entrylink, "mode=reply");
 
         # security icon
