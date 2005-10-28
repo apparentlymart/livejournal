@@ -17,6 +17,16 @@ use fields qw(u boxes boxconfig boxlist profile);
 use strict;
 
 sub get_box_classes {
+    # if someone is calling this function they want to do something
+    # with all the modules available. To make sure nothing bad happens,
+    # we need to "require" all the modules specified in ljconfig. If
+    # the module is already loaded, splendid. If not, require will make
+    # sure that it's loaded so errors don't get thrown.
+
+    # require everything
+    LJ::Portal->load_portal_boxes(); # requires all modules in config
+
+    # return boxes, which should now all be loaded
     return @LJ::PORTAL_BOXES;
 }
 
@@ -465,7 +475,7 @@ sub type_id_to_string {
     my LJ::Portal::Config $self = shift;
     my $typeid = shift;
 
-    foreach my $typestring (@LJ::PORTAL_BOXES) {
+    foreach my $typestring ($self->get_box_classes) {
         if (!$LJ::PORTAL_TYPEMAP{$typestring}) {
             LJ::Portal->load_box_typeid($typestring);
         }

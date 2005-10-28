@@ -15,6 +15,7 @@ sub new {
     return $self;
 }
 
+# get typemap out of DB
 sub load_box_typeid {
     my ($self, $class) = @_;
 
@@ -52,7 +53,6 @@ sub load_box_typeid {
     $LJ::PORTAL_TYPEMAP{$class} = $boxid;
 }
 
-# get typemap out of DB
 sub load_portal_boxes {
     my $self = shift;
 
@@ -359,7 +359,7 @@ sub getmenu {
 
     if ($menu) {
         if ($menu eq 'addbox') {
-            my @classes = @LJ::PORTAL_BOXES;
+            my @classes = $portalconfig->get_box_classes;
 
             my $addboxtitle = BML::ml('/portal/index.bml.addbox');
 
