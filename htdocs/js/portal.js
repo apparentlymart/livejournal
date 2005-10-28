@@ -1,5 +1,5 @@
-var portalAnimating = 0;
-var portalFading = 0;
+var portalAnimating = {};
+var portalFading = {};
 var box_reloading = {};
 var add_portal_module_menu_html = "";
 
@@ -392,7 +392,7 @@ function hidePortalMenu(menu) {
     var callback = "xGetElementById('" +
       menuelement.id + "').isOpen = 0; xVisibility('" + menuelement.id + "', false);";
 
-    fadeOut('PortalConfigMenu', 200, callback);
+    fadeOut('PortalConfigMenu', 500, callback);
 
     /* var addbutton = xGetElementById("AddPortalMenuButtonImage");
     if (addbutton && LJVAR.imgprefix) {
@@ -535,7 +535,7 @@ function hideBox (e) {
   var target = xGetElementById(e);
 
   var callback = "xDisplay('" + target.id + "', 'none');";
-  fadeOut(target, 200, callback);
+  fadeOut(target, 500, callback);
 }
 function showBox (e) {
   var target = xGetElementById(e);
@@ -563,9 +563,9 @@ function animateOpen(target, speed) {
 
 function fadeIn(target, speed) {
   var targetelement = xGetElementById(target);
-  if (!speed) speed = 200;
+  if (!speed) speed = 500;
 
-  if (portalFading) {
+  if (portalFading[targetelement.id]) {
     showBox(targetelement);
     return;
   }
@@ -581,12 +581,12 @@ function fadeIn(target, speed) {
       changeOpac(opp, targetelement);
       window.setTimeout(fadeInCallback, 1000/speed);
     } else {
-      portalFading = 0;
+      portalFading[targetelement.id] = 0;
     }
   };
 
   if (LJVAR.doFade) {
-    portalFading = 1;
+    portalFading[targetelement.id] = 1;
     changeOpac(0.0, targetelement);
     fadeInCallback();
   }
@@ -596,7 +596,7 @@ function fadeOut(target, speed, callback) {
   var targetelement = xGetElementById(target);
   var targetid = targetelement.id;
 
-  if (!speed) speed = 200;
+  if (!speed) speed = 500;
 
   if (!callback)
     callback = "hideMe('"+targetid+"')";
@@ -613,14 +613,14 @@ function fadeOut(target, speed, callback) {
         changeOpac(opp, targetelement);
         window.setTimeout(fadeOutCallback, 1000/speed);
       } else {
-        portalFading = 0;
+        portalFading[targetelement.id] = 0;
         eval(callback);
       }
     };
 
-    if (!portalFading) {
+    if (!portalFading[targetelement.id]) {
       fadeOutCallback();
-      portalFading = 1;
+      portalFading[targetelement.id] = 1;
     }
 
   } else {
