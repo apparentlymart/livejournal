@@ -680,8 +680,8 @@ sub generate_box_insides {
         }
     };
 
-    if ($self->{'profile'}) {
-        use Benchmark ':hireswallclock';
+    if ($LJ::IS_DEV_SERVER && $self->{'profile'}) {
+        eval "use Benchmark ':hireswallclock';";
 
         return if $LJ::PORTAL_PROFILED_BOX{$boxclass};
 
