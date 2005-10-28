@@ -482,9 +482,9 @@ InOb.fotobilderStepOne = function () {
 
     div_if.innerHTML = "<iframe id='fbstepframe' src=\"" + url + "\" height=\"" + h + "\" width='99%' frameborder='0'></iframe>";
     div_if.style.width = 'auto';
-    div_if.style.border = '0px; solid;';
-    InOb.setPreviousCb(InOb.showSelectorPage);
+    div_if.style.border = '0px solid';
 
+    InOb.setPreviousCb(InOb.showSelectorPage);
 }
 
 InOb.fullCenter = function () {
