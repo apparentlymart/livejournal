@@ -87,66 +87,64 @@
     # content
     $ret .= "<tr><td colspan='2'><div class='insobjContent' id='img_iframe_holder' style='display: none; margin: 0px 0px 0px 0px;'>worrrd</div><div id='img_fromwhere' class='insobjContent'>";
 
-    if ($step == 1) {
-        $ret .= "<table cellspacing='8' valign='top'>";
+    $ret .= "<table cellspacing='8' valign='top'>";
 
-        $ret .= "<tr><td id='img_error' class='img_error' colspan='2'></td></tr>";
+    $ret .= "<tr><td id='img_error' class='img_error' colspan='2'></td></tr>";
 
-        # from URL
-        $ret .= "<tr valign='top'><td>";
+    # from URL
+    $ret .= "<tr valign='top'><td>";
+    $ret .= LJ::html_check({
+        'type'     => 'radio',
+        'name'     => 'method',
+        'id'       => 'fromurl',
+        'value'    => 'url',
+        'selected' => 1,
+    });
+    $ret .= " <label for='fromurl'>Image from URL:</label></td><td>";
+    $ret .= LJ::html_text({
+        'name'    => 'url',
+        'id'      => 'fromurlentry',
+        'size'    => '50',
+    });
+    $ret .= "<div class='ex'><b>Example:</b> http://www.example.com/some-picture.jpg</div></td></tr>";
+
+    # from file
+    $ret .= "<tr valign='top'><td>";
+    $ret .= LJ::html_check({
+        'type'  => 'radio',
+        'name'  => 'method',
+        'id'    => 'fromfile',
+        'value' => 'file',
+        'disabled' => $fbenabled ? 0 : 1,
+    });
+    $ret .= " <label for='fromfile'>Image from file</label>:</td><td>";
+    $ret .= LJ::html_hidden('redir_to_auth_base', '1', 'sec1', '255');
+
+    my $disabled = $fbenabled ? '' : "disabled='1'";
+
+    $ret .= "<div id='filediv'><input type='file' name='file1' id='fromfileentry' size='50' $disabled /></div>";
+
+    my $msg = LJ::run_hook('update_insobj_fb', $fbenabled) || "Upload a file from your computer";
+    $ret .= "<div class='ex'>$msg</div>";
+    $ret .= "</td></tr>";
+
+    # from Fotobilder
+    if ($fbenabled) {
+        $ret .= "<tr><td colspan='2'>";
         $ret .= LJ::html_check({
             'type'     => 'radio',
             'name'     => 'method',
-            'id'       => 'fromurl',
-            'value'    => 'url',
-            'selected' => 1,
+            'id'       => 'fromfb',
+            'value'    => 'fb',
         });
-        $ret .= " <label for='fromurl'>Image from URL:</label></td><td>";
-        $ret .= LJ::html_text({
-            'name'    => 'url',
-            'id'      => 'fromurlentry',
-            'size'    => '50',
-        });
-        $ret .= "<div class='ex'><b>Example:</b> http://example.com/some-picture.jpg</div></td></tr>";
-
-        # from file
-        $ret .= "<tr valign='top'><td>";
-        $ret .= LJ::html_check({
-            'type'  => 'radio',
-            'name'  => 'method',
-            'id'    => 'fromfile',
-            'value' => 'file',
-            'disabled' => $fbenabled ? 0 : 1,
-        });
-        $ret .= " <label for='fromfile'>Image from file</label>:</td><td>";
-        $ret .= LJ::html_hidden('redir_to_auth_base', '1', 'sec1', '255');
-
-        my $disabled = $fbenabled ? '' : "disabled='1'";
-
-        $ret .= "<div id='filediv'><input type='file' name='file1' id='fromfileentry' size='50' $disabled /></div>";
-
-        my $msg = LJ::run_hook('update_insobj_fb', $fbenabled) || "Upload a file from your computer";
-        $ret .= "<div class='ex'>$msg</div>";
+        $ret .= " <label for='fromfb'>Image(s) from gallery</label></td><td>";
         $ret .= "</td></tr>";
-
-        # from Scrapbook
-        if ($fbenabled) {
-            $ret .= "<tr><td colspan='2'>";
-            $ret .= LJ::html_check({
-                'type'     => 'radio',
-                'name'     => 'method',
-                'id'       => 'fromfb',
-                'value'    => 'fb',
-            });
-            $ret .= " <label for='fromfb'>Image(s) from gallery</label></td><td>";
-            $ret .= "</td></tr>";
-        }
-        $ret .= "</table>";
     }
+    $ret .= "</table>";
 
-    $ret .= "<br /><font size='1' color='gray'><i>Except when inserting via URL, a medium sized image with a link to the larger image will be placed in your post.</i></font></div></td></tr><tr height='20' class='insobjNav' id='insobjNav'><td align='left'><div style='margin-left: 10px'>" .
-        "<input type='button' name='btn:prev' id='btnPrev' style='display:none' value='&lt;-- Back' />" .
-        "</div></td>";
+    $ret .= "<br /><font size='1' color='gray'><i>Except when inserting via URL, a medium sized image with a link to the larger image will be placed in your post.</i></font></div></td></tr><tr height='20' class='insobjNav' id='insobjNav'><td align='left'><div style='margin-left: 10px'>";
+    $ret .= "<input type='button' name='btn:prev' id='btnPrev' style='display:none' value='&lt;-- Back' />";
+    $ret .= "</div></td>";
     $ret .= "<td align='right'><div style='margin-right: 10px'>";
     $ret .= LJ::html_submit('btn:next', 'Insert', { 'id' => 'btnNext' });
     $ret .= "</div></td></tr></table>";
