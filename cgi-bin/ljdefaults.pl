@@ -219,68 +219,77 @@
                      };
 
     # Portal boxes
-    unless(scalar(@LJ::PORTAL_BOXES)) {
-        @PORTAL_BOXES = (
-                         'Birthdays',
-                         'UpdateJournal',
-                         'TextMessage',
-                         'PopWithFriends',
-                         'Friends',
-                         'Manage',
-                         'RecentComments',
-                         'NewUser',
-                         'FriendsPage',
-                         );
-    }
+    @PORTAL_BOXES = (
+                     'Birthdays',
+                     'UpdateJournal',
+                     'TextMessage',
+                     'PopWithFriends',
+                     'Friends',
+                     'Manage',
+                     'RecentComments',
+                     'NewUser',
+                     'FriendsPage',
+                     'FAQ',
+                     'Debug',
+                     );
 
-    # Portal layout defaults
-    unless (keys %LJ::PORTAL_DEFAULTBOXSTATES) {
-        %PORTAL_DEFAULTBOXSTATES = (
-                                    'Birthdays' => {
-                                        'added' => 1,
-                                        'sort'  => 4,
-                                        'col'   => 'R',
-                                    },
-                                    'Friends' => {
-                                        'added' => 1,
-                                        'sort'  => 6,
-                                        'col'   => 'R',
-                                    },
-                                    'Manage' => {
-                                        'added' => 1,
-                                        'sort'  => 10,
-                                        'col'   => 'L',
-                                    },
-                                    'PopWithFriends' => {
-                                        'added' => 0,
-                                        'col'   => 'R',
-                                    },
-                                    'RecentComments' => {
-                                        'added' => 1,
-                                        'sort'  => 12,
-                                        'col'   => 'L',
-                                    },
-                                    'UpdateJournal' => {
-                                        'added' => 1,
-                                        'sort'  => 6,
-                                        'col'   => 'L',
-                                    },
-                                    'NewUser' => {
-                                        'added' => 1,
-                                        'sort'  => 2,
-                                        'col'   => 'L',
-                                    },
-                                    'TextMessage' => {
-                                        'added'  => 1,
-                                        'sort'   => 8,
-                                        'col'    => 'R',
-                                    },
-                                    'FriendsPage' => {
-                                        'added' => 1,
-                                        'sort'  => '4',
-                                        'col'   => 'L',
-                                    }
-                                    );
+    @PORTAL_BOXES_HIDDEN = (
+                            'Debug',
+                            );
+
+    %PORTAL_DEFAULTBOXSTATES = (
+                         'Birthdays' => {
+                             'added' => 1,
+                             'sort'  => 4,
+                             'col'   => 'R',
+                         },
+                         'FriendsPage' => {
+                             'added' => 1,
+                             'sort'  => 6,
+                             'col'   => 'L',
+                         },
+                         'FAQ' => {
+                             'added' => 1,
+                             'sort'  => 8,
+                             'col'   => 'R',
+                         },
+                         'Friends' => {
+                             'added' => 1,
+                             'sort'  => 10,
+                             'col'   => 'R',
+                         },
+                         'Manage' => {
+                             'added' => 1,
+                             'sort'  => 12,
+                             'col'   => 'L',
+                         },
+                         'PopWithFriends' => {
+                             'added' => 0,
+                             'col'   => 'R',
+                         },
+                         'RecentComments' => {
+                             'added' => 1,
+                             'sort'  => 10,
+                             'col'   => 'L',
+                         },
+                         'UpdateJournal' => {
+                             'added' => 1,
+                             'sort'  => 4,
+                             'col'   => 'L',
+                         },
+                         'NewUser' => {
+                             'added' => 1,
+                             'sort'  => 2,
+                             'col'   => 'L',
+                         },
+                         'TextMessage' => {
+                             'added'  => 1,
+                             'sort'   => 12,
+                             'col'    => 'R',
+                         },
+                         );
+
+
     }
 }
 
