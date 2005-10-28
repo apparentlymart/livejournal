@@ -288,9 +288,6 @@
                              'col'    => 'R',
                          },
                          );
-
-
-    }
 }
 
 # no dependencies.
