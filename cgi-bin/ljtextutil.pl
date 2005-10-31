@@ -130,7 +130,7 @@ sub ejs
     my $a = $_[0];
     $a =~ s/[\"\'\\]/\\$&/g;
     $a =~ s/\r?\n/\\n/gs;
-    $a =~ s/\r//;
+    $a =~ s/\r//gs;
     return $a;
 }
 
