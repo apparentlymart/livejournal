@@ -100,15 +100,6 @@ sub generate_content {
         $subject ||= '';
         $body ||= '(No comment text)';
 
-        # trim comment body
-        # more displayed if in big column
-        my $maxlen = $self->col eq 'L' ? 220 : 120;
-
-        if (length($body) > $maxlen) {
-            $body = LJ::text_trim($body, 0, $maxlen);
-            $body .= '...';
-        }
-
         my $date = LJ::ago_text(time() - $r->{'datepostunix'});
 
         my $talkid = ($r->{'jtalkid'} << 8) + $lrow->{'anum'};
