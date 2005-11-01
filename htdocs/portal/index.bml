@@ -23,7 +23,9 @@
     $title = BML::ml('.pagetitle', { 'sitenameabbrev' => $LJ::SITENAMEABBREV });
     $body = '';
     $bodyopts = '';
-    $head = '';
+
+    # browser caching causes lots of issues
+    $head = '<META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">';
 
 
     if (!$remote) {
