@@ -131,6 +131,11 @@ sub generate_content {
         my $replyurl = LJ::Talk::talkargs($posturl, "replyto=$talkid");
         my $talkurl  = "$root/$lrow->{ditemid}.html?thread=$talkid\#t$talkid";
         my $userlink = LJ::isu($pu) ? LJ::ljuser($pu) : "<i>(Anonymous)</i>";
+
+        # clean comment subject/text
+        LJ::CleanHTML::clean_subject_all(\$subject);
+        LJ::CleanHTML::clean_comment(\$body);
+
         $content .= qq {
             <tr id="ljcmt$talkid">
                 <td>
