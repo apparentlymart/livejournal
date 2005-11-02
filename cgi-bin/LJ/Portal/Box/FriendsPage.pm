@@ -83,17 +83,18 @@ sub generate_content {
         next unless $entry;
 
         my $subject    = $entry->subject_html;
+        my $entrylink  = $entry->url;
 
         my $event      = $useplaceholders ?
-            $entry->event_html( { 'extractimages' => 1 } ) :
-            $entry->event_html;
+            $entry->event_html( { 'extractimages' => 1,
+                                  'cuturl' => $entrylink } ) :
+            $entry->event_html( { 'cuturl' => $entrylink  } );
 
         my $posteru    = $entry->poster;
         my $poster     = $posteru->ljuser_display;
         my $props      = $entry->props;
         my $pickeyword = $props->{'picture_keyword'};
         my $replycount = $props->{'replycount'};
-        my $entrylink  = $entry->url;
         my $picinfo;
 
         my $journalid = $entryinfo->{journalid};
