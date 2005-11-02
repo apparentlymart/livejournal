@@ -329,7 +329,7 @@
             };
             
             my $etime = 0;
-            if ($POST{'expire'} eq "never") { 
+            if ($POST{'expire'} eq "never"  || $POST{'remember_me'}) {
                 $etime = time()+60*60*24*60; 
                 $sess_opts->{'exptype'} = "long";
             }
