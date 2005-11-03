@@ -2342,7 +2342,8 @@ sub login_message
         my $args = shift || {};
         $args->{'sitename'} = $LJ::SITENAME;
         $args->{'siteroot'} = $LJ::SITEROOT;
-        $res->{'message'} = translate($u, $code, $args);
+        my $pre = delete $args->{'pre'};
+        $res->{'message'} = $pre . translate($u, $code, $args);
     };
 
     return $msg->("readonly")          if LJ::get_cap($u, "readonly");
@@ -2351,7 +2352,7 @@ sub login_message
     return $msg->("mail_bouncing")     if $u->{'status'} eq "B";
 
     my $checkpass = LJ::run_hook("bad_password", $u);
-    return $msg->("bad_password")      if $checkpass;
+    return $msg->("bad_password", { 'pre' => "$checkpass. " }) if $checkpass;
 
     return $msg->("old_win32_client")  if $req->{'clientversion'} =~ /^Win32-MFC\/(1.2.[0123456])$/;
     return $msg->("old_win32_client")  if $req->{'clientversion'} =~ /^Win32-MFC\/(1.3.[01234])\b/;
