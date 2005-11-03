@@ -2352,7 +2352,7 @@ sub login_message
     return $msg->("mail_bouncing")     if $u->{'status'} eq "B";
 
     my $checkpass = LJ::run_hook("bad_password", $u);
-    return $msg->("bad_password", { 'pre' => "$checkpass. " }) if $checkpass;
+    return $msg->("bad_password", { 'pre' => "$checkpass " }) if $checkpass;
 
     return $msg->("old_win32_client")  if $req->{'clientversion'} =~ /^Win32-MFC\/(1.2.[0123456])$/;
     return $msg->("old_win32_client")  if $req->{'clientversion'} =~ /^Win32-MFC\/(1.3.[01234])\b/;
