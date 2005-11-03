@@ -15,24 +15,47 @@ sub new {
     return $self;
 }
 
-# get typemap out of DB
+
+# Make sure that there is a typeid loaded for $class, and
+# insert one into the DB if none exists.
+# also loads typemaps from DB into $LJ::PORTAL_TYPEMAP
+
+# args: portal classname to look up ID for
 sub load_box_typeid {
     my ($self, $class) = @_;
 
     die "No portal box class defined" unless $class;
 
+    # is it process-cached?
     return 1 if $LJ::PORTAL_TYPEMAP{$class};
 
-    my $boxid;
+    # is it memcached?
+    my $memcached_typemap = LJ::MemCache::get("portal_typemap");
+    if ($memcached_typemap) {
+        # process-cache it
+        %LJ::PORTAL_TYPEMAP = %$memcached_typemap;
 
+        # if we have the class, we're cool
+        return 1 if $LJ::PORTAL_TYPEMAP{$class};
+    }
 
-    my $dbh = LJ::get_db_writer;
+    my $dbr = LJ::get_db_reader();
+    return undef unless $dbr;
 
-    # check DB to see if box already has ID
-    $boxid = $dbh->selectrow_array("SELECT id FROM portal_typemap WHERE class_name = ?",
-                                   undef, $class);
+    # load typemap from DB
+    my $sth = $dbr->prepare("SELECT id, class_name FROM portal_typemap");
+    return undef unless $sth;
+    $sth->execute;
 
-    if (!$boxid) {
+    while (my $idmap = $sth->fetchrow_hashref) {
+        $LJ::PORTAL_TYPEMAP{$idmap->{'class_name'}} = $idmap->{'id'};
+    }
+
+    my $classid = $LJ::PORTAL_TYPEMAP{$class};
+
+    # do we have this class's ID?
+    if (!$classid) {
+        my $dbh = LJ::get_db_writer();
         # box does not have an ID registered for itself in the DB
         # try to insert
 
@@ -41,16 +64,25 @@ sub load_box_typeid {
 
         if ($dbh->{'mysql_insertid'}) {
             # inserted fine, get ID
-            $boxid = $dbh->{'mysql_insertid'};
+            $classid = $dbh->{'mysql_insertid'};
         } else {
             # race condition, try to select again
-            $boxid = $dbh->selectrow_array("SELECT id FROM portal_typemap WHERE class_name = ?",
+            $classid = $dbh->selectrow_array("SELECT id FROM portal_typemap WHERE class_name = ?",
                                            undef, $class)
                 or die "Portal typemap should have found ID after race";
         }
+
+        # we had better have a classid by now... big trouble if we don't
+        die "Could not create typeid for portal module $class" unless $classid;
+
+        # save new classid
+        $LJ::PORTAL_TYPEMAP{$class} = $classid;
     }
 
-    $LJ::PORTAL_TYPEMAP{$class} = $boxid;
+    # memcache typeids
+    LJ::MemCache::set("portal_typemap", \%LJ::PORTAL_TYPEMAP, 120);
+
+    return $classid;
 }
 
 sub load_portal_boxes {
