@@ -115,8 +115,9 @@ sub generate_content {
     if ($showcomm) {
         if ($friends) {
             grep { $commcount++ if $friends_u->{$_}->{'journaltype'} eq 'C'; } keys %$friends_u;
+            my @sortedfriends = sort { $friends_u->{$a}->{'user'} cmp $friends_u->{$b}->{'user'} } keys %$friends_u;
 
-            foreach my $fid (keys %$friends_u) {
+            foreach my $fid (@sortedfriends) {
                 my $fu = $friends_u->{$fid};
 
                 next if $fu->{'journaltype'} ne 'C';
@@ -148,8 +149,9 @@ sub generate_content {
     if ($showsyn) {
         if ($friends) {
             grep { $syncount++ if $friends_u->{$_}->{'journaltype'} eq 'Y'; } keys %$friends_u;
+            my @sortedfriends = sort { $friends_u->{$a}->{'user'} cmp $friends_u->{$b}->{'user'} } keys %$friends_u;
 
-            foreach my $fid (keys %$friends_u) {
+            foreach my $fid (@sortedfriends) {
                 my $fu = $friends_u->{$fid};
 
                 next if $fu->{'journaltype'} ne 'Y';
