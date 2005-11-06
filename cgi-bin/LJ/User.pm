@@ -3142,6 +3142,13 @@ sub make_journal
             $fallback = $geta->{'fallback'};
         }
 
+        # if we are in this path, and they have style=mine set, it means
+        # they either think they can get a S2 styled page but their account
+        # type won't let them, or they really want this to fallback to bml
+        if ($remote && $geta->{'style'} eq 'mine') {
+            $fallback = 'bml';
+        }
+
         # there are no BML handlers for these views, so force s2
         if ($view eq 'tag' || $view eq 'lastn') {
             $fallback = "s2";
