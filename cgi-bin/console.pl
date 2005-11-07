@@ -407,6 +407,9 @@ $cmd{'priv_package'} = {
 
         # add or remove a privilige to a package
         } elsif ($cmd eq 'add' || $cmd eq 'remove') {
+            return $fail->($out, "Package with that name does not exist.")
+                unless $pkgid;
+
             my ($pname, $parg) = split(/:/, $arg);
             return $fail->($out, "Argument must be in format of 'priv:arg' with optional arg.  (The colon is required.)")
                 unless $pname && defined $parg;
