@@ -1225,7 +1225,7 @@ sub talkform {
             $ret .= "<tr valign='middle'>";
             $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-profile.gif' onclick='handleRadios(3);' /></td>";
             $ret .= "<td align='center'>(  )</td>";
-            $ret .= "<td align='left' colspan='2'><font color='#c0c0c0'<b>OpenID</b></font>";
+            $ret .= "<td align='left' colspan='2'><font color='#c0c0c0'><b>OpenID</b></font>";
 
             if (defined $LJ::HELPURL{'openid'}) {
                 $ret .= "&nbsp;<a href='$LJ::HELPURL{'openid'}'><img src='$LJ::IMGPREFIX/help.gif' alt='$BML::ML{'Help'}' title='$BML::ML{'Help'}' width='14' height='14' border='0' /></a> ";
