@@ -802,10 +802,10 @@ html>body .entry .text, html>body .calendar_month .calendar, html>body .month_da
 
 function print_sidebar_box(string title, string body, string style)
 {
-    println """<table class="sidebar_box" cellspacing="0" cellpadding="4" style="$style">""";
-    println """  <tr><th>&nbsp;$title&nbsp;</th></tr>""";
-    println """  <tr><td>$body</td></tr>""";
-    println """</table><br />""";
+    println safe """<table class="sidebar_box" cellspacing="0" cellpadding="4" style="$style">""";
+    println safe """  <tr><th>&nbsp;$title&nbsp;</th></tr>""";
+    println safe """  <tr><td>$body</td></tr>""";
+    println safe """</table><br />""";
 }
 
 function print_sidebar_box(string title, string body)
@@ -988,18 +988,19 @@ function print_content_box (string title, string body)
     # title
     println """<table cellspacing="0" cellpadding="3" width="100%"><tr>""";
     println """  <td width="40%" bgcolor="#0044bb" style="border-top: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000;">""";
-    println """    <span class="title">&nbsp;<b>$title</b></span>""";
+    print safe """    <span class="title">&nbsp;<b>$title</b></span>""";
     println """  </td><td width="65"><br /></td>""";
     println """</tr></table>""";
 
     # body
     println """<table width="100%" cellspacing="0" cellpadding="0" style="border: 1px solid #000000;"><tr>""";
-    println """ <td bgcolor="#ffffff" align="center">$body</td></tr></table>""";
+    print safe """ <td bgcolor="#ffffff" align="center">$body</td>""";
+    println """</tr></table>""";
 }
 
 function print_content_tab (string content)
 {
-    println """<h3 class="tabs">$content</h3>""";
+    print safe """<h3 class="tabs">$content</h3>""";
 }
 
 function format_replyto(Page p, Entry e, EntryLite el) : string
