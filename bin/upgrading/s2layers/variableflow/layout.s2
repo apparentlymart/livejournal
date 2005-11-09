@@ -641,7 +641,7 @@ function css_rule_if_set(string prop, string val)
 "Print a CSS rule only if val is not an empty string."
 {
     if ($val != "") {
-        println "  $prop: $val;";
+        println safe "  $prop: $val;";
     }
 }
 
