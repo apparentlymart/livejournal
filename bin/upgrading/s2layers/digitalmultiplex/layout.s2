@@ -344,7 +344,11 @@ function sidebar_html_width : string "Return an appropriate HTML tag width for t
 }
 function print_sidebar_box(string id, string body, string title) {
     println """<br /><table cellspacing="0" cellpadding="0" border="0" id="sidebar_$id" class="sidebar_box">""";
-    println """<tr><th class="sidebar_box_header">$title</th></tr><tr><td class="sidebar_box_contents">$body</td></tr></table><br />""";
+    println """<tr><th class="sidebar_box_header">""";
+    println safe $title;
+    println """</th></tr><tr><td class="sidebar_box_contents">""";
+    println safe $body;
+    println """</td></tr></table><br />""";
 }
 function Page::lay_sidebar_view_userpic() : string {
     return "";
@@ -516,13 +520,19 @@ function print_sidebar(Page p)
 function print_heading_bar(string center)
 {
     println """<table width="100%" cellspacing="0" class="heading_bar">""";
-    println """<tr><th align="center">$center</th></tr></table>""";
+    println """<tr><th align="center">""";
+    println safe $center;
+    println """</th></tr></table>""";
 }
 
 function print_heading_bar(string left, string right)
 {
     println """<table width="100%" cellspacing="0" class="heading_bar">""";
-    println """<tr><th align="left">$left</th><th align="right">$right</th></tr></table>""";
+    println """<tr><th align="left">""";
+    println safe $left;
+    println """</th><th align="right">""";
+    println safe $right;
+    println """</th></tr></table>""";
 }
 function print_entry_short (Page p, Entry e, Color bgcolor, Color fgcolor) {
     var string subject = $e.subject ? $e.subject : "(No Subject)";
