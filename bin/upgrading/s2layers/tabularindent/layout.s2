@@ -296,14 +296,14 @@ function Page::print ()
 function print_box (string{} colors, string metapic, string{} meta, string content, string footer, string domid) {
     var string bgcolor = $colors{"bgcolor"};
     var string fgcolor = $colors{"fgcolor"};
-    if ($domid != "") { $domid = "id='$domid'"; }
+    if ($domid != "") { $domid = "id='"+ehtml($domid)+"'"; }
 
-    var string style = "background-color: $bgcolor; color: $fgcolor";
+    var string style = "background-color: "+ehtml($bgcolor)+"; color: "+ehtml($fgcolor);
     "<div align='right'><table $domid border='0' width='95%' cellpadding='5' cellspacing='1' style='$style'>";
     "<tr><td><table border='0' width='100%' style='$style'><tr>";
 
     if ($metapic) {
-        "<td width='100' valign='top' align='center'>$metapic</td>";
+        print safe "<td width='100' valign='top' align='center'>$metapic</td>";
     }
 
     "<td valign='top'><table border='0' style='$style'>";
@@ -311,7 +311,7 @@ function print_box (string{} colors, string metapic, string{} meta, string conte
     foreach var string k ($meta) {
         var string key = $k;
         var string val = $meta{$k};
-        "<tr><td align='right'>$key</td><td>$val</td></tr>";
+        print safe "<tr><td align='right'>$key</td><td>$val</td></tr>";
     }
 
     "</table></td></tr></table></td></tr>";
@@ -322,7 +322,7 @@ function print_box (string{} colors, string metapic, string{} meta, string conte
     "</td></tr>";
 
     if ($footer) {
-        "<tr><td style='white-space: nowrap'>$footer</td></tr>";
+        print safe "<tr><td style='white-space: nowrap'>$footer</td></tr>";
     }
 
     "</table></div><br />";
@@ -330,7 +330,7 @@ function print_box (string{} colors, string metapic, string{} meta, string conte
 
 function print_header (string header)
 {
-    print "<h3 class='page-header'>$header</h3>";
+    print safe "<h3 class='page-header'>$header</h3>";
 }
 
 function print_genericbox_open () {
