@@ -185,13 +185,13 @@ function css_fontspec(string base, string fallback)
     if ($base != "" or $fallback != "none") {
         "font-family: ";
         if ($base != "") {
-            "\"$base\"";
+            print safe "\"$base\"";
             if ($fallback != "none") {
                 ", ";
             }
         }
         if ($fallback != "none") {
-            print $fallback;
+            print safe $fallback;
         }
         ";";
     }
