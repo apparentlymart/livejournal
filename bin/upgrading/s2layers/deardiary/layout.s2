@@ -603,13 +603,14 @@ function print_stylesheet() {
 }
 
 function paraphernalia_box_open(string id, string title) "Open a paraphenalia box" {
-    "<div class=\"pbox\"";
     if ($id != "") {
-        " id=\"$id\"";
+        print safe "<div class=\"pbox\" id=\"$id\">";
     }
-    ">";
+    else {
+        print "<div class=\"pbox\">";
+    }
     if ($title != "") {
-        """<h2>$title</h2>""";
+        print safe """<h2>$title</h2>""";
     }
     """<div class="pboxcontent">\n""";
 }
