@@ -6,7 +6,7 @@ layerinfo des = "SixApart's standard HTML structure for blogs, to be styled with
 propgroup appearance {
     property bool use_6a_base {
         des = "Use 'Base Weblog' styles";
-    }    
+    }
     set use_6a_base = true;
 
     property string base_theme {
@@ -172,7 +172,7 @@ if ($*base_theme != "__none") {
 }
 
 function container_open (string name) {
-    "<div id='$name'><div id='$name-inner' class='pkg'>\n";
+    print safe "<div id='$name'><div id='$name-inner' class='pkg'>\n";
 }
 
 function container_close () {
@@ -188,11 +188,11 @@ function print_banner(Page p) {
 
 
 function open_module(string intname, string title, string headlink_url, bool nocontent) {
-    println """<div class="module-$intname module">""";
+    print safe """<div class="module-$intname module">""";
     if ($title != "") {
         """<h2 class="module-header">""";
-        if ($headlink_url != "") { """<a href="$headlink_url">"""; }
-        print $title;
+        if ($headlink_url != "") { print safe """<a href="$headlink_url">"""; }
+        print safe $title;
         if ($headlink_url != "") { """</a>"""; }
         "</h2>\n";
     }
@@ -216,7 +216,7 @@ function close_module() {
 function print_module_list(string[] list) {
     println """<ul class="module-list">""";
     foreach var string s ($list) {
-        println """<li class="module-list-item">$s</li>""";
+        print safe """<li class="module-list-item">$s</li>""";
     }
     println """</ul>""";
 }
@@ -230,7 +230,7 @@ function print_module_userprofile(string title, bool show_profile, bool show_use
             close_module();
         }
         return;
-    }    
+    }
 
     if (not $show_profile and not $show_userpic) {
         open_module("about", $title, $p.view_url{"userinfo"}, true);
