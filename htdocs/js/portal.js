@@ -128,8 +128,18 @@ function resetBox (pboxid) {
   return evalXrequest("resetbox=1&pboxid="+pboxid);
 }
 
-function evalXrequest(request) {
-  var doEval = function(result) { eval(result); };
+function evalXrequest(request, widget) {
+  var hourglass = null;
+  if (widget) {
+    hourglass = new Hourglass(widget);
+  }
+
+  var doEval = function(result) {
+    if (hourglass)
+      hourglass.hide();
+
+    eval(result);
+  };
 
   return doXrequest(request, doEval);
 }
@@ -153,7 +163,7 @@ function showConfigPortalBox (pboxid) {
   var box = xGetElementById("config"+pboxid);
 
   if (!box) {
-    if(!evalXrequest("configbox=1&pboxid="+pboxid)) {
+    if(!evalXrequest("configbox=1&pboxid="+pboxid, $("edit"+pboxid))) {
       return false;
     }
   } else {
@@ -206,7 +216,7 @@ function savePortalBoxConfig (pboxid) {
     if (valuesfound) {
       //remove trailing "&"
       postdata = postdata.substr(0, postdata.length-1);
-      return evalXrequest(postdata);
+      return evalXrequest(postdata, $("pbox"+pbox));
     }
   }
 
@@ -490,27 +500,7 @@ function updatePortalBox(pboxid) {
 
   if (!pbox) return true;
 
-  var overlay = xCreateElement("div");
-  if (!overlay) return true;
-
-  xAppendChild(document.body, overlay);
-
-  overlay.style.position = "absolute";
-  overlay.id = "overlay" + pboxid;
-
-  xLeft(overlay, xPageX(pbox));
-  xTop(overlay, xPageY(pbox));
-  xWidth(overlay, xWidth(pbox));
-  xHeight(overlay, xHeight(pbox));
-
-  overlay.style.zIndex = 3;
-  overlay.style.backgroundColor = "#FFFF55";
-  changeOpac(50, overlay.id);
-  overlay.style.lineHeight = xHeight(overlay) + "px";
-
-  overlay.innerHTML = "<div class='LoadingBox'><div class='LoadingText'>Loading...</div></div>'";
-
-  return evalXrequest("updatebox=1&pboxid="+pboxid);
+  return evalXrequest("updatebox=1&pboxid="+pboxid, $("refresh"+pboxid));
 }
 
 function reloadPortalBox(pboxid) {

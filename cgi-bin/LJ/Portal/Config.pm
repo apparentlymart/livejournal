@@ -591,7 +591,7 @@ sub generate_box_titlebar {
     if ($box->can('can_refresh') && $box->can_refresh) {
         $refreshbutton = qq {
             <a onclick="return reloadPortalBox($pboxid);" href="">
-                <img src="$LJ::IMGPREFIX/portal/PortalBoxRefresh.gif" title="Reload the contents of this module" />
+                <img src="$LJ::IMGPREFIX/portal/PortalBoxRefresh.gif" title="Reload the contents of this module" id='refresh$pboxid' />
             </a>
         };
     }
@@ -601,7 +601,8 @@ sub generate_box_titlebar {
     if ($box->can('prop_keys')) {
         $configlink = qq {
             <a onclick="return showConfigPortalBox($pboxid);" href="$post_url?configbox=1&pboxid=$pboxid">
-                <img src="$LJ::IMGPREFIX/portal/PortalBoxConfig.gif" title="Edit this module" />
+                <img src="$LJ::IMGPREFIX/portal/PortalBoxConfig.gif" title="Edit this module"
+                id = 'edit$pboxid' />
             </a>
         };
     }

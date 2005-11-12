@@ -160,11 +160,6 @@ sub get_portal_box_update_script {
                 box.innerHTML = "$newcontents";
             }
             if (box_reloading && box_reloading[$pboxid]) box_reloading[$pboxid]=0;
-            var overlay = xGetElementById("overlay$pboxid");
-            if (overlay) {
-                var callback = 'document.body.removeChild(xGetElementById("overlay$pboxid"));';
-                fadeOut(overlay, 150, callback);
-            }
             $onreload
         };
 }
