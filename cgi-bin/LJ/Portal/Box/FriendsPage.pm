@@ -74,9 +74,9 @@ sub generate_content {
         if ($entryinfo->{'ditemid'}) {
             $entry = LJ::Entry->new($entryinfo->{'journalid'},
                                     ditemid => $entryinfo->{'ditemid'});
-        } elsif ($entryinfo->{'jitemid'} && $entryinfo->{'anum'}) {
+        } elsif ($entryinfo->{'itemid'} && $entryinfo->{'anum'}) {
             $entry = LJ::Entry->new($entryinfo->{'journalid'},
-                                    jitemid => $entryinfo->{'jitemid'},
+                                    jitemid => $entryinfo->{'itemid'},
                                     anum    => $entryinfo->{'anum'});
         }
 
