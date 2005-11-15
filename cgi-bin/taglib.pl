@@ -207,7 +207,7 @@ TAG:    foreach my $tagid (keys %$res) {
             next TAG if $sec eq 'public';
             next TAG if $is_friend && $sec eq 'friends';
             if ($grpmask && $sec eq 'group') {
-                foreach my $grpid (%{$res->{$tagid}->{security}->{groups}}) {
+                foreach my $grpid (keys %{$res->{$tagid}->{security}->{groups}}) {
                     next TAG if $grpmask & (1 << $grpid);
                 }
             }
