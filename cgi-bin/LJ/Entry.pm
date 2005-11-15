@@ -1287,14 +1287,14 @@ sub delete_entry
     my $and;
     if (defined $anum) { $and = "AND anum=" . ($anum+0); }
 
+    # delete tags
+    LJ::Tags::delete_logtags($u, $jitemid);
+
     my $dc = $u->log2_do(undef, "DELETE FROM log2 WHERE journalid=$jid AND jitemid=$jitemid $and");
     return 0 unless $dc;
     LJ::MemCache::delete([$jid, "log2:$jid:$jitemid"]);
     LJ::MemCache::decr([$jid, "log2ct:$jid"]);
     LJ::memcache_kill($jid, "dayct");
-
-    # delete tags
-    LJ::Tags::delete_logtags($u, $jitemid);
 
     # if this is running the second time (started by the cmd buffer),
     # the log2 row will already be gone and we shouldn't check for it.
