@@ -131,7 +131,16 @@ sub generate_content {
 
         # load userpic
         my $pichtml;
-        $picinfo = LJ::get_pic_from_keyword($posteru, $pickeyword) if $pickeyword;
+        if ($pickeyword) {
+            $picinfo = LJ::get_pic_from_keyword($posteru, $pickeyword);
+        } else {
+            my $picid = $posteru->{'defaultpicid'};
+            my %pic;
+            LJ::load_userpics(\%pic, [ $posteru, $picid ]);
+            $picinfo = $pic{$picid};
+            $picinfo->{'picid'} = $picid;
+        }
+
         if ($picinfo) {
             my $width = $picinfo->{'width'} ? "width=\"" . int($picinfo->{'width'} / 2) . '"' : '';
             my $height = $picinfo->{'height'} ? "height=\"" . int($picinfo->{'height'} / 2) . '"' : '';
