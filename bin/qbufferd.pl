@@ -18,6 +18,11 @@ exit 1 unless GetOptions('foreground' => \$opt_foreground,
                          'stop' => \$opt_stop,
                          );
 
+if ($LJ::DISABLED{qbufferd_jobs}) {
+    print "qbufferd.pl jobs disabled, exiting\n";
+    exit 0;
+}
+
 BEGIN {
     $LJ::OPTMOD_PROCTABLE = eval "use Proc::ProcessTable; 1;";
 }
