@@ -3,6 +3,12 @@
     use strict;
     use vars qw(%POST);
 
+    unless ($LJ::FIX_USERCOUNTER_ENABLED) {
+        return 
+            "This tool is no longer necessary.  However, it can be re-enabled by " .
+            "setting \$LJ::FIX_USERCOUNTER_ENABLED.";
+    }
+
     my $ret;
     my $remote = LJ::get_remote();
 
