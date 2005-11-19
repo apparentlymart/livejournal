@@ -392,6 +392,9 @@ sub finduser
     foreach my $u (sort { $a->{userid} <=> $b->{userid} } values %$us) {
         push @$out, [ "info", "User: $u->{'user'} ".
                       "($u->{'userid'}), journaltype: $u->{'journaltype'}, statusvis: $u->{'statusvis'}, email: ($u->{'status'}) $u->{'email'}" ];
+
+        push @$out, [ "info", "  User is currently in read-only mode." ] if $u->readonly;
+
         if ($u->underage) {
             my $reason;
             if ($u->underage_status eq 'M') {
