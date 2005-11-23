@@ -123,21 +123,24 @@ sub process {
 
     # check subject for rfc-1521 junk
     $subject ||= $head->get('Subject:');
+    chomp $subject;
     if ($subject =~ /^=\?/) {
         my @subj_data = MIME::Words::decode_mimewords( $subject );
+        my ( $string, $charset ) = ( $subj_data[0][0], $subj_data[0][1] );
         if (@subj_data) {
             if ($subject =~ /utf-8/i) {
-                $subject = $subj_data[0][0];
+                $subject = $string;
             } else {
                 return $err->(
-                    "Unknown subject charset encoding type. ($subj_data[0][1])",
+                    "Unknown subject charset encoding type. ($charset)",
                     { sendmail => 1 }
-                  ) unless $subj_data[0][1]
-                      && Unicode::MapUTF8::utf8_supported_charset( $subj_data[0][1] );
+                  ) unless $charset
+                      && Unicode::MapUTF8::utf8_supported_charset( $charset );
+
                 $subject = Unicode::MapUTF8::to_utf8(
                     {
-                        -string  => $subj_data[0][0],
-                        -charset => $subj_data[0][1]
+                        -string  => $string,
+                        -charset => $charset
                     }
                 );
             }
@@ -300,6 +303,22 @@ sub process {
     # Kill this silly (and grammatically incorrect) string.
     if ($return_path && $return_path =~ /vmpix\.com$/) {
         $body =~ s/^This is an? MMS message\.\s+//ms;
+    }
+
+    # UK service 'O2' does some bizarre stuff.
+    # No concept of a subject - it uses the first 40 characters from the body,
+    # truncating the rest.  The first text/plain is all advertising.
+    # The text/plain titled 'smil.txt' is the actual body of the message.
+    if ($return_path && $return_path =~ /mediamessaging\.o2\.co\.uk$/) {
+        foreach my $ent ( get_entity($entity, '*') ) {
+            my $path = $ent->bodyhandle->path;
+            $path =~ s#.*/##;
+            if ( $path eq 'smil.txt' ) {
+                $body = $ent->bodyhandle->as_string();
+                last;
+            }
+        }
+        $subject = 'Picture Post';
     }
 
     # PGP signed mail?  We'll see about that.
