@@ -3085,8 +3085,23 @@ sub make_journal
         $opts->{'status'} = $status if $status;
 
         my $head;
+        my $journalbase = LJ::journal_base($user);
+
+        # Automatic Discovery of RSS/Atom
+        $head .= qq{<link rel="alternate" type="application/rss+xml" title="RSS" href="$journalbase/data/rss" />\n};
+        $head .= qq{<link rel="alternate" type="application/atom+xml" title="Atom" href="$journalbase/data/atom" />\n};
+        $head .= qq{<link rel="service.feed" type="application/atom+xml" title="AtomAPI-enabled feed" href="$LJ::SITEROOT/interface/atom/feed" />\n};
+        $head .= qq{<link rel="service.post" type="application/atom+xml" title="Create a new post" href="$LJ::SITEROOT/interface/atom/post" />\n};
+
+        # OpenID Server
         $head .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n}
             if LJ::OpenID::server_enabled();
+
+        # FOAF autodiscovery
+        my $foafurl = $u->{external_foaf_url} ? LJ::eurl($u->{external_foaf_url}) : "$journalbase/data/foaf";
+        my $digest = Digest::SHA1::sha1_hex('mailto:' . $u->{email});
+        $head .= qq{<link rel="meta" type="application/rdf+xml" title="FOAF" href="$foafurl" />\n};
+        $head .= qq{<meta name="foaf:maker" content="foaf:mbox_sha1sum '$digest'" />\n};
 
         return qq{
             <html>
