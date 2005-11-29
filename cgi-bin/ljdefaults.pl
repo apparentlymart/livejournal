@@ -232,6 +232,8 @@
                          'FriendsPage',
                          'FAQ',
                          'Debug',
+                         'Note',
+                         'RandomUser',
                          );
     }
 

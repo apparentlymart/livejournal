@@ -486,6 +486,8 @@
                      'FriendsPage',
                      'FAQ',
                      'Debug',
+                     'Note',
+                     'RandomUser',
                      );
 
     @PORTAL_BOXES_HIDDEN = (

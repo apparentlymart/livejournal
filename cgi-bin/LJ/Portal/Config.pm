@@ -577,6 +577,13 @@ sub generate_box_titlebar {
     my $maxsort = $self->max_sortorder($col);
     my $minsort = $self->min_sortorder($col);
 
+    my $editable;
+
+    if ($box->can('config_props')) {
+        my $props = $box->config_props;
+        $editable = grep { $props->{$_}->{type} ne 'hidden' } keys %$props;
+    }
+
     # is there an icon for this box?
     my $moduleicon = $box->box_icon;
 
@@ -598,7 +605,7 @@ sub generate_box_titlebar {
 
     my $configlink;
 
-    if ($box->can('prop_keys')) {
+    if ($editable) {
         $configlink = qq {
             <a onclick="return showConfigPortalBox($pboxid);" href="$post_url?configbox=1&pboxid=$pboxid">
                 <img src="$LJ::IMGPREFIX/portal/PortalBoxConfig.gif" title="Edit this module"
