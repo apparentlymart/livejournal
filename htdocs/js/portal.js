@@ -216,7 +216,7 @@ function savePortalBoxConfig (pboxid) {
     if (valuesfound) {
       //remove trailing "&"
       postdata = postdata.substr(0, postdata.length-1);
-      return evalXrequest(postdata, $("pbox"+pbox));
+      return evalXrequest(postdata, $("pbox"+pboxid));
     }
   }
 
