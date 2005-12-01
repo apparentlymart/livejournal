@@ -53,7 +53,7 @@ _code?>
           friendspagetitle opt_weblogscom opt_stylemine
           opt_imagelinks opt_getselfemail external_foaf_url
           opt_showmutualfriends opt_showschools timezone
-          google_talk skype /
+          google_talk skype gizmo /
     );
 
     # to store values before they undergo normalisation
@@ -151,10 +151,12 @@ _code?>
         $ret .= " ($ML{'.optional'})</td></tr>\n";
 
         # chat thingies
+        $u->{'gizmo'} = $u->gizmo_account();
         foreach my $p (["aolim", $ML{'.chat.aolim.title'}, 28], ["icq", $ML{'.chat.icquin.title'}, 12],
                        ["yahoo", $ML{'.chat.yahooid.title'}, 33], ["msn", $ML{'.chat.msnusername.title'}, 60],
                        ["jabber", $ML{'.chat.jabber.title'}, 60], ["google_talk", $ML{'.chat.googletalk.title'}, 60],
-                       ["skype", $ML{'.chat.skype.title'}, 40])
+                       ["skype", $ML{'.chat.skype.title'}, 40], ["gizmo", $ML{'.chat.gizmo.title'}, 40 ])
+
         {
             $ret .= "<tr><td align='right' bgcolor='<?emcolor?>'>$p->[1]</td><td>";
             $ret .= LJ::html_text({ 'name' => $p->[0], 'value' => $u->{$p->[0]}, 'size' => '20', 'maxlength' => $p->[2] });
@@ -837,6 +839,10 @@ _code?>
             # this is only done once, then never appears again.
             push @uprops, 'howhear' if $POST{'howhear'};
 
+            # reset the gizmo account for this user account
+            $u->gizmo_account( $POST{'gizmo'} )
+                if $u->gizmo_account ne $POST{'gizmo'};
+
             # set userprops
             foreach my $uprop (@uprops) {
                 my $eff_val = $POST{$uprop};   # effective value, since 0 isn't stored
@@ -925,3 +931,5 @@ link: htdocs/paidaccounts/index.bml, htdocs/users, htdocs/userinfo.bml
 post: htdocs/editinfo.bml
 img: htdocs/userpic
 </LJDEP> _c?>
+
+

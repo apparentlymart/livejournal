@@ -108,6 +108,43 @@ sub underage {
     return $on;
 }
 
+# get/set the gizmo account of a user
+sub gizmo_account {
+    my $u = shift;
+
+    # parse out their account information
+    my $acct = $u->prop( 'gizmo' );
+    my ($validated, $gizmo);
+    if ($acct && $acct =~ /^([01]);(.+)$/) {
+        ($validated, $gizmo) = ($1, $2);
+    }
+
+    # setting the account
+    # all account sets are initially unvalidated
+    if (@_) {
+        $gizmo = shift;
+        $u->set_prop( 'gizmo' => "0;$gizmo" );
+		LJ::MemCache::delete( "gizmo-ljmap:$gizmo" );
+    }
+
+    # return the information (either account + validation or just account)
+    return wantarray ? ($gizmo, $validated) : $gizmo unless @_;
+}
+
+# get/set the validated status of a user's gizmo account
+sub gizmo_account_validated {
+	my $u = shift;
+
+    my ($gizmo, $validated) = $u->gizmo_account;
+
+	if ( defined $_[0] && $_[0] =~ /[01]/) {
+		$u->set_prop( 'gizmo' => "$_[0];$gizmo" );
+		return $_[0];
+	}
+
+    return $validated;
+}
+
 # log a line to our userlog
 sub log_event {
     my $u = shift;
@@ -3785,3 +3822,5 @@ sub bad_password_redirect {
 }
 
 1;
+
+

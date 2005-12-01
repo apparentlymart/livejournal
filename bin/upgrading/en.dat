@@ -1099,6 +1099,8 @@ Not all robots respect the rules.
 
 /editinfo.bml.chat.aolim.title=AOL IM
 
+/editinfo.bml.chat.gizmo.title=Gizmo Project
+
 /editinfo.bml.chat.googletalk.title=Google Talk
 
 /editinfo.bml.chat.icquin.title=ICQ UIN
@@ -3879,6 +3881,8 @@ This could be because: <ol>
 /userinfo.bml.label.frpeople=People
 
 /userinfo.bml.label.frsyndication2=Feeds
+
+/userinfo.bml.label.gizmo=Gizmo Project:
 
 /userinfo.bml.label.googletalk=Google Talk:
 

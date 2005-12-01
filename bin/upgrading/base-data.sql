@@ -941,6 +941,8 @@ INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed,
 UPDATE userproplist SET cldversion='4',datatype='char',des='Base Title of Friends Page',indexed='0',multihomed='0',prettyname='Friends Page Title',scope='general' WHERE name='friendspagetitle';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'char', 'M: male, F: female, U: unspecified', '1', '0', 'gender', 'Gender', 'general');
 UPDATE userproplist SET cldversion='4',datatype='char',des='M: male, F: female, U: unspecified',indexed='1',multihomed='0',prettyname='Gender',scope='general' WHERE name='gender';
+INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('0', 'char', 'Gizmo VoIP account ID', '1', '0', 'gizmo', 'Gizmo Project ID', 'general');
+UPDATE userproplist SET cldversion='0',datatype='char',des='Gizmo VoIP account ID',indexed='1',multihomed='0',prettyname='Gizmo Project ID',scope='general' WHERE name='gizmo';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('0', 'char', 'Google\'s \'Talk\' Service address', '1', '1', 'google_talk', 'Google Talk Address', 'general');
 UPDATE userproplist SET cldversion='0',datatype='char',des='Google\'s \'Talk\' Service address',indexed='1',multihomed='1',prettyname='Google Talk Address',scope='general' WHERE name='google_talk';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'char', 'How the user heard about LiveJournal', '0', '0', 'howhear', 'How heard about LiveJouranl', 'general');
