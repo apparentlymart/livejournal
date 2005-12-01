@@ -8,24 +8,24 @@ my $anon = 0;
 my $user = "";
 
 sub usage () {
-	die "
-Usage: 	
+        die "
+Usage:
    lj-repo-own --anonymous
    lj-repo-own --user=<danga_username>
 ";
 }
 
 usage() unless GetOptions(
-	"anonymous" => \$anon,
-	"user=s"    => \$user,
-	);
+        "anonymous" => \$anon,
+        "user=s"    => \$user,
+        );
 
 usage() if      $anon && $user;
 usage() unless  $anon || $user =~ /^\w+$/;
 
 my $src = $anon ?
-	":pserver:anonymous\@cvs.livejournal.org:" :
-	"$user\@danga.com:";
+        ":pserver:anonymous\@cvs.livejournal.org:" :
+        "$user\@cvs.danga.com:";
 
 chdir "$ENV{LJHOME}" or die;
 
