@@ -122,9 +122,11 @@ sub gizmo_account {
     # setting the account
     # all account sets are initially unvalidated
     if (@_) {
-        $gizmo = shift;
-        $u->set_prop( 'gizmo' => "0;$gizmo" );
-		LJ::MemCache::delete( "gizmo-ljmap:$gizmo" );
+        my $newgizmo = shift;
+        $u->set_prop( 'gizmo' => "0;$newgizmo" );
+
+        # purge old memcache keys
+        LJ::MemCache::delete( "gizmo-ljmap:$gizmo" );
     }
 
     # return the information (either account + validation or just account)
