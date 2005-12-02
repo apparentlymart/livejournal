@@ -5,14 +5,14 @@ use strict;
 ######################## override this stuff ######################
 
 our $_box_description = 'Save a little note for yourself';
-our $_box_name = "Note";
+our $_box_name = "Note To Self";
 our $_box_class = "Note";
 
 our $_prop_keys = { 'note' => 1 };
 our $_config_props = {
     'note' => { 'type'    => 'hidden',
                 'desc'    => 'Note',
-                'default' => ' '} };
+                'default' => ''} };
 
 sub generate_content {
     my $self = shift;
@@ -55,5 +55,6 @@ sub box_class { $_box_class; }
 
 sub config_props { $_config_props; }
 sub prop_keys { $_prop_keys; }
+
 
 1;
