@@ -39,6 +39,7 @@
         my $getextra = $nojs ? '?nojs=1' : '';
 
         $body .= "<form action='login.bml$getextra' method='post' id='login'>\n";
+        $body .= "<div style='float: left; width: 70%; padding-right: 20px;'>";
 
         my $chal = LJ::challenge_generate(300); # 5 minute auth token
         $body .= "<input type='hidden' name='chal' id='login_chal' value='$chal' />";
@@ -67,48 +68,67 @@
 
         $body .= "<?p $ML{'.login.text2'} p?>\n";
 
+        $body .= "<?h1 $ML{'.whylogin.head'} h1?>\n";
+        $body .= "<?p $ML{'.whylogin.text'} p?>\n";
+        $body .= "<ul>\n";
+        $body .= "<li>$ML{'.whylogin.benefit1'}</li>\n";
+        $body .= "<li>$ML{'.whylogin.benefit2'}</li>\n";
+        $body .= "<li>$ML{'.whylogin.benefit3'}</li>\n";
+        $body .= "</ul>\n";
+
+        $body .= "</div>";
+
         $body .= "<?standout\n";
-        $body .= "<table border=0 cellpadding='3'>\n";
+        $body .= "<table cellpadding='3'>\n";
         if ($remote) {
-            $body .= "<tr><td>$ML{'.login.username'}</td><td valign='bottom'>" . LJ::ljuser($remote) . "&nbsp;&nbsp;<input type='submit' name='action:logout' value='$ML{'.logout.btn'}' /></td></tr>\n";
+            $body .= "<tr><td colspan='2' style='white-space: nowrap;'><?h2 Change Log in Options h2?></td></tr>";
         } else {
             $body .= "<tr><td>$ML{'.login.username'}</td><td><input type='text' value='$user' name='user' size='15' maxlength='15' style='<?loginboxstyle?>' /></td></tr>\n";
             $body .= "<tr><td valign='top'>$ML{'.login.password'}</td><td><input type='password' name='password' id='xc_password' size='15' maxlength='30' />";
             $body .= "<br /><a href='/lostinfo.bml'><font size='1'>$ML{'.login.forget'}</font></a></td></tr>\n";
             if (@errors) {
-                $body .= "<tr><td colspan='2'>";
+                $body .= "<tr><td>";
                 $body .= "<?soerror $_ soerror?>" foreach @errors;
                 $body .="</td></tr>";
             }
         }
 
-        my $checked;
-        my $checkcond = sub {
-            my $cond = shift;
-            $checked = $cond ? " checked='checked'" : "";
-        };
-
         # expiration
         my $curexp = $cursess ? $cursess->{'exptype'} : "short";
-        $body .= "<tr valign='top'><td>$ML{'.login.expiration'}</td><td>\n";
-        $checkcond->($curexp eq "short");
-        $body .= "<input type='radio' name='expire' value='close' $checked id='close' /> <label for='close'>$ML{'.login.whenbrowsercloses'}</label><br />\n";
-        $checkcond->($curexp eq "long");
-        $body .= "<input type='radio' name='expire' value='never' $checked id='never' /> <label for='never'>$ML{'.login.never'}</label>\n";
-        $body .= "</td></tr>\n";
+        $body .= "<tr valign='top'><td align='right'>";
+        $body .= LJ::html_check(
+                                {
+                                    'type'     => 'check',
+                                    'name'     => 'expire',
+                                    'id'       => 'expire',
+                                    'value'    => 'never',
+                                    'selected' => ($remote && $curexp eq 'long'),
+                                });
 
-        # bind?
-        my $curbind = $cursess && $cursess->{'ipfixed'} ? "yes" : "no";
-        $body .= "<tr valign='top'><td>$ML{'.bindip.label'}</td><td>\n";
-        $checkcond->($curbind eq "yes");
-        $body .= "<input type='radio' name='bindip' value='yes' $checked id='bindyes' /> <label for='bindyes'>$ML{'.bindip.yes'}</label><br />\n";
-        $checkcond->($curbind eq "no");
-        $body .= "<input type='radio' name='bindip' value='no' $checked id='bindipno' /> <label for='bindipno'>$ML{'.bindip.no'}</label>\n";
-        $body .= "</td></tr>\n";
+        $body .= "</td><td>";
+        $body .= "<label for='expire'><b>Remember Me</b></label><br /><font size='1'>Log in automatically on this computer</font></td></tr>\n";
+        $body .= "</tr>";
 
-        $body .= "<tr><td></td><td align='left'>";
         if ($remote) {
-            $body .= "<input name='action:change' type='submit' value='$ML{'.login.btn.changeopts'}' />";
+            $body .= "<tr valign='top'><td>";
+            my $curbind = $cursess && $cursess->{'ipfixed'} ? "yes" : "no";
+            $body .= LJ::html_check(
+                                    {
+                                        'type'     => 'check',
+                                        'name'     => 'bindip',
+                                        'id'       => 'bindip',
+                                        'value'    => 'yes',
+                                        'selected' => $curbind eq 'yes',
+                                    });
+            $body .= "</td><td>";
+            $body .= "<label for='bindip'><b>Bind cookie to IP address</b></label><br /><font size='1'>Don't touch this n00b!</font></td></tr>\n";
+            $body .= "</tr>";
+        }
+
+        $body .= "<tr><td align='center' colspan='2'>";
+        if ($remote) {
+            $body .= "<input name='action:change' type='submit' value='Save' />&nbsp;&nbsp;";
+            $body .= "<input type='submit' name='action:logout' value='$ML{'.logout.btn'}' />";
         } else {
 
             # FIXME: needs translation 'standard'/'secure' and make the below ML strings.
@@ -173,19 +193,10 @@
         # Save offsite redirect uri between POSTs
         my $redir = $GET{'ret'} || $POST{'ret'};
         $body .= LJ::html_hidden('ret', $redir) if $redir && $redir != 1;
-        
+
         $body .= "</form>\n";
-
-        $body .= "<?h1 $ML{'.whylogin.head'} h1?>\n";
-        $body .= "<?p $ML{'.whylogin.text'} p?>\n";
-        $body .= "<ul>\n";
-        $body .= "<li>$ML{'.whylogin.benefit1'}</li>\n";
-        $body .= "<li>$ML{'.whylogin.benefit2'}</li>\n";
-        $body .= "<li>$ML{'.whylogin.benefit3'}</li>\n";
-        $body .= "</ul>\n";
-        return;
+        return $body;
     };
-
     my $logout_remote = sub {
         $remote->kill_session if $remote;
         foreach (qw(ljsession langpref)) {
