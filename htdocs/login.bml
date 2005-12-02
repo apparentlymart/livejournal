@@ -121,7 +121,7 @@
                                         'selected' => $curbind eq 'yes',
                                     });
             $body .= "</td><td>";
-            $body .= "<label for='bindip'><b>Bind cookie to IP address</b></label><br /><font size='1'>Don't touch this n00b!</font></td></tr>\n";
+            $body .= "<label for='bindip'><b>Bind cookie to IP address</b></label><br /><font size='1'>Read the FAQ</font></td></tr>\n";
             $body .= "</tr>";
         }
 
