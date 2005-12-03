@@ -18,13 +18,27 @@ our $_box_name = "Friends' Birthdays";
 
 sub generate_content {
     my $self = shift;
-    my @bdays = $self->{'u'}->get_friends_birthdays
-        or return "(No upcoming friend's birthdays.)";
+    my $u = $self->{'u'};
+    my @bdays = $u->get_friends_birthdays
+        or return "(No upcoming friends' birthdays.)";
 
     my $content = '';
 
     # sort upcoming birthdays
     my $now = DateTime->now;
+
+    # if user has timezone, use it!
+    my $tz = $u->prop("timezone");
+    $tz = $tz ? eval { DateTime::TimeZone->new(name => $tz); } : undef;
+    if($tz) {
+        $now = eval {
+            DateTime->from_epoch(
+                                 epoch => time(),
+                                 time_zone => $tz,
+                                 );
+        };
+    }
+
     my $nowstr = sprintf("%02d-%02d", $now->month, $now->day);
 
     my $i = 0;
