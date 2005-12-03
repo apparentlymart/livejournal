@@ -5,7 +5,7 @@ use strict;
 ######################## override this stuff ######################
 
 our $_box_class = "RandomUser";
-our $_box_description = "See a random user's journal";
+our $_box_description = "See a random user's journal (May contain offensive content)";
 our $_box_name = "Random User";
 
 sub generate_content {
