@@ -163,7 +163,7 @@ function showConfigPortalBox (pboxid) {
   var box = xGetElementById("config"+pboxid);
 
   if (!box) {
-    if(!evalXrequest("configbox=1&pboxid="+pboxid, $("edit"+pboxid))) {
+    if(!evalXrequest("configbox=1&pboxid="+pboxid, xGetElementById("edit"+pboxid))) {
       return false;
     }
   } else {
@@ -216,7 +216,7 @@ function savePortalBoxConfig (pboxid) {
     if (valuesfound) {
       //remove trailing "&"
       postdata = postdata.substr(0, postdata.length-1);
-      return evalXrequest(postdata, $("pbox"+pboxid));
+      return evalXrequest(postdata, xGetElementById("pbox"+pboxid));
     }
   }
 
@@ -500,7 +500,7 @@ function updatePortalBox(pboxid) {
 
   if (!pbox) return true;
 
-  return evalXrequest("updatebox=1&pboxid="+pboxid, $("refresh"+pboxid));
+  return evalXrequest("updatebox=1&pboxid="+pboxid, xGetElementById("refresh"+pboxid));
 }
 
 function reloadPortalBox(pboxid) {
