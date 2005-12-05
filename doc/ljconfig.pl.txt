@@ -329,18 +329,6 @@
     # which cluster should syndication accounts live on?
     $SYND_CLUSTER = 1;
 
-    # Only turn this on if you are using MySQL replication between
-    # multiple databases and have one or more slaves set to not
-    # replicated the logtext and talktext tables.  Turning this on
-    # makes LJ duplicate all logtext & talktext rows into
-    # recent_logtext & recent_talktext which is then replicated.
-    # However, a cron job cleans up that table so it's never too big.
-    # LJ will try the slaves first, then the master.  This is the best
-    # method of scaling your LJ installation, as disk seeks on the
-    # database for journal text is the slowest part.
-    $USE_RECENT_TABLES = 0;
-
-
     ###
     ### Account Information
     ###
