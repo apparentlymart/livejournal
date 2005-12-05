@@ -135,14 +135,14 @@ sub gizmo_account {
 
 # get/set the validated status of a user's gizmo account
 sub gizmo_account_validated {
-	my $u = shift;
+    my $u = shift;
 
     my ($gizmo, $validated) = $u->gizmo_account;
 
-	if ( defined $_[0] && $_[0] =~ /[01]/) {
-		$u->set_prop( 'gizmo' => "$_[0];$gizmo" );
-		return $_[0];
-	}
+    if ( defined $_[0] && $_[0] =~ /[01]/) {
+        $u->set_prop( 'gizmo' => "$_[0];$gizmo" );
+        return $_[0];
+    }
 
     return $validated;
 }
@@ -208,7 +208,17 @@ sub set_dbcm {
 
 sub is_innodb {
     my $u = shift;
-    return $LJ::INNODB_DB{$u->{clusterid}};
+    return $LJ::CACHE_CLUSTER_IS_INNO{$u->{clusterid}}
+    if defined $LJ::CACHE_CLUSTER_IS_INNO{$u->{clusterid}};
+
+    my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
+        or croak "Database handle unavailable";
+    my (undef, $ctable) = $dbcm->selectrow_array("SHOW CREATE TABLE log2");
+    die "Failed to auto-discover database type for cluster \#$u->{clusterid}: [$ctable]"
+        unless $ctable =~ /^CREATE TABLE/;
+
+    my $is_inno = ($ctable =~ /=InnoDB/i ? 1 : 0);
+    return $LJ::CACHE_CLUSTER_IS_INNO{$u->{clusterid}} = $is_inno;
 }
 
 sub begin_work {
