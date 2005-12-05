@@ -59,6 +59,11 @@
         }
 
         if ($remote) {
+            if (LJ::did_post() && $POST{'action:change'}) {
+                $body .= "<tr><td colspan='2' style='white-space: nowrap;'>";
+                $body .= "<?warningbar <b>Login options saved</b> warningbar?></td></tr>";
+            }
+
             $body .= "<?p " . BML::ml(".login.text3", 
                                       {'sitename' => $LJ::SITENAME,
                                        'username' => LJ::ljuser($remote)}) . " p?>\n";
@@ -121,7 +126,12 @@
                                         'selected' => $curbind eq 'yes',
                                     });
             $body .= "</td><td>";
-            $body .= "<label for='bindip'><b>Bind cookie to IP address</b></label><br /><font size='1'>Read the FAQ</font></td></tr>\n";
+            $body .= "<label for='bindip'><b>Bind cookie to IP address</b></label>";
+
+            if (defined $LJ::HELPURL{'loginoptions'}) {
+                $body .= "<br /><font size='1'><a href='$LJ::HELPURL{'loginoptions'}'>Learn about this option</a></font>";
+            }
+            $body .= "</td></tr>\n";
             $body .= "</tr>";
         }
 
