@@ -109,7 +109,7 @@ my %modules = (
                },
                "Math::BigInt::GMP" => {
                    'opt' => 'Aides Crypt::DH so it isn\'t crazy slow.',
-		   'deb' => 'libmath-bigint-gmp-perl',
+                   'deb' => 'libmath-bigint-gmp-perl',
                },
                "URI::Fetch" => {
                    'opt' => 'Required for OpenID support.',
@@ -148,7 +148,7 @@ sub check_modules {
     }
     if (@debs && -e '/etc/debian_version') {
         if ($debs_only) {
-            print STDERR join(' ', @debs);
+            print join(' ', @debs);
         } else {
             print STDERR "\n# apt-get install ", join(' ', @debs), "\n\n";
         }
