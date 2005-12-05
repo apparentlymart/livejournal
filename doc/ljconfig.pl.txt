@@ -89,7 +89,7 @@
     $TOS_CHECK = 1;     # require users to agree to TOS
     #$UNIQ_COOKIES = 1; # give users uniq cookies to help fight abuse
 
-    %REQUIRED_TOS = 
+    %REQUIRED_TOS =
         (
          # revision must be found in first line of your htdocs/inc/legal-tos include file:
          # <!-- $Revision$ -->
@@ -139,9 +139,7 @@
     # the livejournal-only tree.
     #$USE_ACCT_CODES = 1;
 
-    #$EVERYONE_PAID  = 1; # are all users paid by default?
     #$EVERYONE_VALID = 1; # are all users validated by default?
-
 
     ###
     ### System Information
