@@ -206,9 +206,14 @@ sub set_dbcm {
     return $u->{'_dbcm'} = shift;
 }
 
+sub is_innodb {
+    my $u = shift;
+    return $LJ::INNODB_DB{$u->{clusterid}};
+}
+
 sub begin_work {
     my $u = shift;
-    return 1 unless $LJ::INNODB_DB{$u->{clusterid}};
+    return 1 unless $u->is_innodb;
 
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
         or croak "Database handle unavailable";
@@ -222,7 +227,7 @@ sub begin_work {
 
 sub commit {
     my $u = shift;
-    return 1 unless $LJ::INNODB_DB{$u->{clusterid}};
+    return 1 unless $u->is_innodb;
 
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
         or croak "Database handle unavailable";
@@ -236,7 +241,7 @@ sub commit {
 
 sub rollback {
     my $u = shift;
-    return 0 unless $LJ::INNODB_DB{$u->{clusterid}};
+    return 1 unless $u->is_innodb;
 
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
         or croak "Database handle unavailable";

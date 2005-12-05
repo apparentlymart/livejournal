@@ -664,7 +664,7 @@ sub get_talk_data
 
         # if we're doing innodb, begin a transaction, else lock tables
         my $sharedmode = "";
-        if ($LJ::INNODB_DB{$u->{clusterid}}) {
+        if ($u->is_innodb) {
             $sharedmode = "LOCK IN SHARE MODE";
             $u->begin_work;
         } else {
@@ -683,7 +683,7 @@ sub get_talk_data
             if $LJ::DEBUG{'replycount_fix'};
 
         # now, commit or unlock as appropriate
-        if ($LJ::INNODB_DB{$u->{clusterid}}) {
+        if ($u->is_innodb) {
             $u->commit;
         } else {
             $u->do("UNLOCK TABLES");
