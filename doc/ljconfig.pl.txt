@@ -311,11 +311,6 @@
     # list of all clusters - each one needs a 'cluster$i' role in %DBINFO
     @CLUSTERS = (1);    # eg: (1, 2, 3) (for scalability)
 
-    # if any of your clusters are InnoDB based, uncomment this and update the qw()
-    # appropriately.  this changes some locking behavior for those particular
-    # clusters in some of the hot codepaths that use lots of locking.
-    #%INNODB_DB = ( map { $_ => 1 } qw( 1 ) );
-
     # can users choose which cluster they're assigned to?  leave this off.
     $ALLOW_CLUSTER_SELECT = 0;
 
