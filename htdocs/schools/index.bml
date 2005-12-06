@@ -442,7 +442,7 @@ body<=
 
         $ret .= "<ul>";
         foreach my $sid (sort { $schools->{$a} cmp $schools->{$b} } keys %{$schools}) {
-            $ret .= "<li><a href='$LJ::SITEROOT/schools/?ctc=$ctc&sc=$sc&cc=$ecc&sid=$sid'>";
+            $ret .= "<li><a href='$LJ::SITEROOT/schools/?ctc=$ctc&sc=$esc&cc=$ecc&sid=$sid'>";
             $ret .= LJ::ehtml($schools->{$sid}) . "</a></li>\n";
         }
         $ret .= "</ul>";
