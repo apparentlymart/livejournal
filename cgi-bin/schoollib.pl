@@ -157,7 +157,8 @@ sub get_attendees {
 # name: LJ::Schools::get_countries
 # class: schools
 # des: Get a list of countries that we have schools in.
-# returns: Hashref; countrycode as key, countryname as the values.
+# returns: Hashref; countrycode as key, hashref of countryname, countrycode,
+#          and number of schools as values.
 # </LJFUNC>
 sub get_countries {
     # see if we can get it from memcache
@@ -167,7 +168,7 @@ sub get_countries {
     # if not, pull from db
     my $dbh = LJ::get_db_writer();
     return undef unless $dbh;
-    my $rows = $dbh->selectcol_arrayref('SELECT DISTINCT country FROM schools');
+    my $rows = $dbh->selectall_arrayref('SELECT DISTINCT country, COUNT(*) FROM schools GROUP BY country');
     return undef if $dbh->err || ! $rows;
 
     # now we want to dig out the country codes
@@ -176,8 +177,12 @@ sub get_countries {
 
     # and now combine them
     my $res = {};
-    foreach my $cc (@$rows) {
-        $res->{$cc} = $countries{$cc} || $cc;
+    foreach my $row (@$rows) {
+        $res->{$row->[0]} = {
+            'code'  => $row->[0],
+            'count' => $row->[1],
+            'name'  => $countries{$row->[0]} || $row->[0],
+        };
     }
 
     # set to memcache and return

@@ -284,19 +284,58 @@ body<=
         return $err->("No countries found.")
             unless %$cts;
 
-        $ret .= "<?h1 Country h1?><?p Select a country p?>";
-
-        my @sorted;
-        push @sorted, 'US' if defined $cts->{'US'};
-        push @sorted, 'CA' if defined $cts->{'CA'};
-        foreach (sort { $cts->{$a} cmp $cts->{$b}} keys %{$cts}) {
-            next if $_ eq 'US' || $_ eq 'CA';
-            push @sorted, $_;
-        }
-
+        $ret .= "<?h2 Top Five Countries h2?>";
         $ret .= "<ul>";
-        foreach my $ct (@sorted) {
-            $ret .= "<li><a href='$LJ::SITEROOT/schools/?ctc=" . LJ::eurl($ct) . "'>" . LJ::ehtml($cts->{$ct}) . "</a></li>\n";
+
+        # New API method result
+        if (ref $cts->{'US'} eq 'HASH') {
+            my $output_line = sub {
+                my $ct = shift;
+                my $ret;
+                $ret .= "<li><a href='$LJ::SITEROOT/schools/?ctc=" . LJ::eurl($ct->{'code'}) . "'>";
+                $ret .= LJ::ehtml($ct->{'name'});
+                $ret .= "</a> <font size='1'>($ct->{'count'} ";
+                $ret .= $ct->{'count'} == 1 ? 'school' : 'schools';
+                $ret .= ")</font></li>\n";
+                return $ret;
+            };
+
+            my @sorted;
+            foreach (sort { $cts->{$b}->{'count'} <=> $cts->{$a}->{'count'}} keys %{$cts}) {
+                push @sorted, $cts->{$_};
+            }
+
+            for (0..4) {
+                my $ct = $sorted[$_];
+                $ret .= $output_line->($ct);
+            }
+
+            $ret .= "</ul><?h2 All Countries h2?><ul>";
+
+            @sorted = ();
+            foreach (sort { $cts->{$a}->{'name'} cmp $cts->{$b}->{'name'}} keys %{$cts}) {
+                push @sorted, $cts->{$_};
+            }
+
+            foreach my $ct (@sorted) {
+                $ret .= $output_line->($ct);
+            }
+
+        # Old API method result
+        } else {
+            my @sorted;
+            push @sorted, 'US' if defined $cts->{'US'};
+            push @sorted, 'CA' if defined $cts->{'CA'};
+            foreach (sort { $cts->{$a} cmp $cts->{$b}} keys %{$cts}) {
+                next if $_ eq 'US' || $_ eq 'CA';
+                push @sorted, $_;
+            }
+
+            foreach my $ct (@sorted) {
+                $ret .= "<li><a href='$LJ::SITEROOT/schools/?ctc=" . LJ::eurl($ct) . "'>";
+                $ret .= LJ::ehtml($cts->{$ct});
+                $ret .= "</li>\n";
+            }
         }
         $ret .= "</ul>";
 
