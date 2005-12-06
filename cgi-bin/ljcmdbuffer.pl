@@ -28,6 +28,8 @@ package LJ::Cmdbuffer;
      # emails that previously failed to send
      send_mail => {
          arg_format => 'raw',
+         too_old => 60*60*24*30, # 30 days is way too old for mail to be relevant
+         unordered => 1,         # order irrelevant
          run => \&LJ::Cmdbuffer::_send_mail,
      },
 
@@ -86,6 +88,9 @@ sub LJ::Cmdbuffer::flush
     # 'url' = urlencode, 'raw' = don't urlencode
     my $arg_format = LJ::Cmdbuffer::get_property($cmd, 'arg_format') || 'url';
 
+    # 0 == order of the jobs matters, process oldest first
+    my $unordered = LJ::Cmdbuffer::get_property($cmd, 'unordered') || 0;
+
     my $clist;
     my $loop = 1;
 
@@ -94,12 +99,17 @@ sub LJ::Cmdbuffer::flush
         $where .= " AND journalid=" . $dbh->quote($userid);
     }
 
+    my $orderby;
+    unless ($unordered) {
+        $orderby = "ORDER BY cbid";
+    }
+
     my $LIMIT = 500;
 
     while ($loop &&
            ($clist = $db->selectall_arrayref("SELECT cbid, UNIX_TIMESTAMP() - UNIX_TIMESTAMP(instime), journalid ".
                                              "FROM cmdbuffer ".
-                                             "WHERE $where ORDER BY cbid LIMIT $LIMIT")) &&
+                                             "WHERE $where $orderby LIMIT $LIMIT")) &&
            $clist && @$clist)
     {
         my @too_old;
