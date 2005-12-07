@@ -319,7 +319,7 @@ sub clean
                         $hash->{$attr} =~ s/\\//g;
 
                         # and catch the obvious ones ("[" is for things like document["coo"+"kie"]
-                        foreach my $css ("/*", "[", qw(absolute fixed expression eval behavior cookie document window)) {
+                        foreach my $css ("/*", "[", qw(absolute fixed expression eval behavior cookie document window javascript)) {
                             if ($hash->{$attr} =~ /\Q$css\E/i) {
                                 delete $hash->{$attr};
                                 next ATTR;
