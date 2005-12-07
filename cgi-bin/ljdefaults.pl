@@ -234,6 +234,7 @@
                          'Debug',
                          'Note',
                          'RandomUser',
+                         'Tags',
                          );
     }
 
