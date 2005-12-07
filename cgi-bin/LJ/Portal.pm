@@ -396,7 +396,8 @@ sub getmenu {
                 };
 
             my $row = 0;
-            foreach my $boxclass (sort @classes) {
+            @classes = sort { "LJ::Portal::Box::$a"->box_name cmp "LJ::Portal::Box::$b"->box_name } @classes;
+            foreach my $boxclass (@classes) {
                 my $fullboxclass = "LJ::Portal::Box::$boxclass";
                 # if there can only be one of these boxes at a time and there
                 # already is one, don't show it
