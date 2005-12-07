@@ -21,7 +21,11 @@ sub generate_content {
     my $u = $self->{'u'};
 
     # get tags, sort by use, filter
-    my $tags = LJ::Tags::get_usertags($u) || {};
+    my $tags = LJ::Tags::get_usertags($u);
+    unless ($tags && %$tags) {
+        return "You haven't used any tags yet!";
+    }
+
     my $show = $self->get_prop('Show');
     my @sorted = sort { $tags->{$b}->{uses} <=> $tags->{$a}->{uses} } keys %$tags;
     @sorted = splice(@sorted, 0, $show) if $show;
