@@ -108,6 +108,11 @@
      if ($u->{journaltype} eq 'Y') {
          $title = $ML{'.confirm.syn.title'};
          $body .= "<?h1 " . BML::ml('.confirm.syn.header', { user => $user }) . " h1?>";
+
+     # Is this account redirected?
+     } elsif ($u->{'journaltype'} eq "R" && $u->prop('renamedto')) {
+         return BML::redirect("$LJ::SITEROOT/friends/add.bml?user=" . $u->prop('renamedto'));
+
      } else {
          $title .= $ML{'.confirm.title'};
          $body .= "<?h1 " . BML::ml(".confirm.header", { 'user' => $u->display_name() }) . " h1?>";
