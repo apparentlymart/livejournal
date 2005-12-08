@@ -160,15 +160,15 @@ sub is_utf8 {
         return LJ::run_hook("is_utf8", $text);
     }
 
-    # for a discussion of the different utf8 validity checking methods,
-    # see:  http://zilla.livejournal.org/657
-    # in summary, this isn't the fastest, but it's pretty fast, it doesn't make
-    # perl segfault, and it doesn't add new crazy dependencies.  if you want
-    # speed, check out ljcom's is_utf8 version in C, using Inline.pm
-
-    my $u = Unicode::String::utf8($text);
-    my $text2 = $u->utf8;
-    return $text eq $text2;
+    require Unicode::CheckUTF8;
+    {
+        no strict;
+        local $^W = 0;
+        *stab = *{"main::LJ::"};
+        undef $stab{is_utf8};
+    }
+    *LJ::is_utf8 = \&Unicode::CheckUTF8::is_utf8;
+    return Unicode::CheckUTF8::is_utf8($text);
 }
 
 # <LJFUNC>

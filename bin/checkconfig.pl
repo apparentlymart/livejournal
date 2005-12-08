@@ -117,6 +117,7 @@ my %modules = (
                "Crypt::DH" => {
                    'opt' => 'Required for OpenID support.',
                },
+               "Unicode::CheckUTF8" => {},
                );
 
 sub check_modules {
