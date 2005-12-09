@@ -1101,8 +1101,8 @@ if ($u->{'journaltitle'}) {
  
  sub comma {
      my $num = shift;
-     if ($num =~ s/(\d)(\d\d\d)$/$1,$2/) {
-         $num =~ s/(\d)(\d\d\d),/$1,$2/g;
+     if ($num > 0) {
+         $num =~ s/(?<=\d)(?=(\d\d\d)+(?!\d))/,/g;
      }
      return $num;
  }
