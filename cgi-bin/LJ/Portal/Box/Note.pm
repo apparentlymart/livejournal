@@ -24,7 +24,7 @@ sub generate_content {
     return qq {
         <textarea style="width: 90%; height: 100px; margin-left: auto; margin-right: auto;
 display: block;" id="note$pboxid">$note</textarea>
-        <input type="button" value="Save" onclick="evalXrequest('$saveRequest&note='+xGetElementById('note$pboxid').value);" /> <span style="display: none" id="statusbox$pboxid"></span>
+        <input type="button" value="Save" onclick="evalXrequest('$saveRequest&note='+escape(xGetElementById('note$pboxid').value));" /> <span style="display: none" id="statusbox$pboxid"></span>
           };
 }
 
