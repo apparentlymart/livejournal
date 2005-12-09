@@ -78,6 +78,8 @@
                'themes' => ['Theme Previews', '/customize/themes.bml', 'customize'],
                'todo' => ['Todo List', '/todo', 'home'],
                'transfercomm' => ['Transfer Community', '/community/transfer.bml', 'managecommunity'],
+               'translate' => ['Translation Area', '/translate/index.bml', 'home'],
+               'translateteams' => ['Translation Teams', '/translate/teams.bml', 'translate'],
                'unsubscribe' => ['Unsubscribe', '/unsubscribe.bml', 'home'],
                'update' => ['Update Journal', '/update.bml', 'home'],
                'utf8convert' => ['UTF-8 Converter', '/utf8convert.bml', 'manage'],

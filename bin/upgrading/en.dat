@@ -3694,6 +3694,30 @@ This could be because: <ol>
 
 /tools/recent_comments.bml.maxnotshown=Your account is only permitted to see the latest [[current]] entries, not the full limit of [[max]].
 
+/translate/index.bml.table.code=Code
+
+/translate/index.bml.table.done=% Done
+
+/translate/index.bml.table.langname=Language Name
+
+/translate/index.bml.table.lastupdate=Last Update
+
+/translate/index.bml.text=The following table lists the progress by each of the different <a [[aopts]]>translation teams</a>.
+
+/translate/index.bml.title=Translation Area
+
+/translate/teams.bml.table.community=Community
+
+/translate/teams.bml.table.language=Language
+
+/translate/teams.bml.table.users=Users With Privs
+
+/translate/teams.bml.teams.header=Teams
+
+/translate/teams.bml.teams.text=Translation is being done by the following teams:
+
+/translate/teams.bml.title=Translation Teams
+
 /update.bml.altpost=Journal to post in:
 
 /update.bml.auth.poster=Poster:
