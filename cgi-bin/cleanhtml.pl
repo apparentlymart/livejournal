@@ -402,6 +402,39 @@ sub clean
                     next;
                 }
 
+                # Through the xsl namespace in XML, it is possible to embed scripting lanaguages
+                # as elements which will then be executed by the browser.  Combining this with
+                # customview.cgi makes it very easy for someone to replace their entire journal
+                # in S1 with a page that embeds scripting as well.  An example being an AJAX
+                # six degrees tool, while cool it should not be allowed.
+                #
+                # Example syntax:
+                # <xsl:element name="script">
+                # <xsl:attribute name="type">text/javascript</xsl:attribute>
+                if ($tag eq 'xsl:attribute')
+                {
+                    $alt_output = 1; # We'll always deal with output for this token
+
+                    my $orig_value = $p->get_text; # Get the value of this element
+                    my $value = $orig_value; # Make a copy if this turns out to be alright
+                    $value =~ s/\s+//g; # Remove any whitespace
+
+                    # See if they are trying to output scripting, if so eat the xsl:attribute
+                    # container and its value
+                    if ($value =~ /(javascript|vbscript)/i) {
+
+                        # Remove the closing tag from the tree
+                        $p->get_token;
+
+                        # Remove the value itself from the tree
+                        $p->get_text;
+
+                    # No harm, no foul...Write back out the original
+                    } else {
+                        $newdata .= "$token->[4]$orig_value";
+                    }
+                }
+
                 unless ($alt_output)
                 {
                     my $allow;
