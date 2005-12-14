@@ -474,10 +474,7 @@ $maint{'genstats_size'} = sub {
                        # which day interval does this fall in?
                        # -- in last day, in last 7, in last 30?
                        foreach my $int (@intervals) {
-                           if ($days < $int) {
-                               $ret{$int} += $active;
-                               last;
-                           }
+                           $ret{$int} += $active if $days < $int;
                        }
                    }
 
