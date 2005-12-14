@@ -48,7 +48,7 @@ p?>
  my $used7 = $stat{'userinfo'}->{'updated_last7'}+0;
  my $usedlastday = $stat{'userinfo'}->{'updated_last1'}+0;
  my $allow_getljnews = $stat{'userinfo'}->{'allow_getljnews'}+0;
- my $active = $stat{'size'}->{'accounts_active'}+0;
+ my $active = $stat{'size'}->{'accounts_active_30'}+0;
 
  my $ret = "";
  $ret .= "<?h1 Users h1?>\n";

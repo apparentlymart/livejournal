@@ -459,12 +459,29 @@ $maint{'genstats_size'} = sub {
                    my $db = $db_getter->();
                    return undef unless $db;
 
-                   my $period = 30;  # one month is considered active
-                   my $active = $db->selectrow_array
-                       ("SELECT COUNT(*) FROM clustertrack2 WHERE ".
-                        "timeactive > UNIX_TIMESTAMP()-86400*$period");
-                   
-                   return { 'accounts_active' => $active };
+                   my @intervals = qw(1 7 30);
+
+                   my $max_age = 86400 * $intervals[-1];
+                   my $sth = $db->prepare
+                       ("SELECT FLOOR((UNIX_TIMESTAMP()-timeactive)/86400), COUNT(*) " .
+                        "FROM clustertrack2 " .
+                        "WHERE timeactive > UNIX_TIMESTAMP()-$max_age GROUP BY 1");
+                   $sth->execute;
+
+                   my %ret = ();
+                   while (my ($days, $active) = $sth->fetchrow_array) {
+
+                       # which day interval does this fall in?
+                       # -- in last day, in last 7, in last 30?
+                       foreach my $int (@intervals) {
+                           if ($days < $int) {
+                               $ret{$int} += $active;
+                               last;
+                           }
+                       }
+                   }
+
+                   return { map { ("accounts_active_$_" => $ret{$_}+0) } @intervals };
                },
          });
 
