@@ -2159,45 +2159,79 @@ You may wish to go back and try again, selecting fewer interests to add.
 
 /login.bml.links.text=In the future this page will have all sorts of links and relevant information, but for now here are a few places you may want to go:
 
-/login.bml.loggedin.head=Logged in!
+/login.bml.loggedin.head2=Welcome back to [[sitename]]!
 
-/login.bml.loggedin.text=You are now logged in.
+/login.bml.loggedin.text2=You're logged in as [[username]]. Go have fun. Here are some suggestions...
+
+/login.bml.loggedin.suggest1=Did you know you can now easily add a photo?
+
+/login.bml.loggedin.suggest2=See the latest updates to your friends' journals.
+
+/login.bml.loggedin.suggest3=Customize your LJ experience.
+
+/login.bml.loggedin.suggesthead1=Update your Journal
+
+/login.bml.loggedin.suggesthead2=Read your friends page
+
+/login.bml.loggedin.suggesthead3=My [[siteabbrev]]
+
+/login.bml.login.autologin=Log in automatically on this computer
 
 /login.bml.login.btn.changeopts=Change Options
 
 /login.bml.login.btn.login=Login...
 
+/login.bml.login.btn.create=Create an Account
+
+/login.bml.login.btn.save=Save
+
+/login.bml.login.changelog=Change log-in options
+
+/login.bml.login.bindcookie=Bind cookie to IP address
+
+/login.bml.login.bindcookie.learnmore=Learn more about this option
+
 /login.bml.login.expiration=Expiration:
 
-/login.bml.login.forget=Forget?
+/login.bml.login.forget2=Forgot password?
 
 /login.bml.login.head=Login
 
 /login.bml.login.never=Never
 
+/login.bml.login.optionssaved=Login options saved.
+
 /login.bml.login.otheropts=Other Options:
 
 /login.bml.login.password=Password:
 
-/login.bml.login.text1=To login to [[sitename]], enter your username and password below.  <b>New Users:</b> To create an account, <a href='/create.bml'>go here</a>.
+/login.bml.login.remember=Remember me
 
-/login.bml.login.text2=By default your login will expire when you close your browser, which is best on public computers.  However, if you're the only user of your computer and nobody else has access to it, you may choose to remain logged in forever.
+/login.bml.login.secure=Secure
 
-/login.bml.login.text3=[[username]], you are now logged in to [[sitename]].
+/login.bml.login.standard=Standard
+
+/login.bml.login.text4=When you log in to your [[sitename]] account, you can:
+
+/login.bml.login.text5=You can sign up for a [[sitename]] account for free.
+
+/login.bml.login.title=Log in
 
 /login.bml.login.username=Username:
 
 /login.bml.login.whenbrowsercloses=When browser closes
 
-/login.bml.logout.btn=Log Out
+/login.bml.logout.btn1=Log out
 
 /login.bml.title=Login
 
-/login.bml.whylogin.benefit1=You won't have to enter your username/password anywhere on the site anymore.
+/login.bml.whylogin.benefit4=Read friends-only posts that are addressed to you.
 
-/login.bml.whylogin.benefit2=You'll be able to view "protected" journal entries from your friends that give you access to read them.
+/login.bml.whylogin.benefit5=Leave comments in any journal or community.
 
-/login.bml.whylogin.benefit3=A lot of features are only visible or accessible when you're logged in.
+/login.bml.whylogin.benefit6=Add any journal or community to your Friends page.
+
+/login.bml.whylogin.benefit7=Access features that are only visible when you're logged in.
 
 /login.bml.whylogin.head=Why Login?
 

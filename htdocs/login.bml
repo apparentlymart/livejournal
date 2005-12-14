@@ -1,7 +1,7 @@
 <?_code
 { 
     use strict;
-    use vars qw($body %GET %POST);
+    use vars qw($body %GET %POST $title);
 
     my $crumb = $LJ::IS_SSL ? 'securelogin' : 'login';
     LJ::set_active_crumb($crumb);
@@ -23,6 +23,10 @@
     my $remote = LJ::get_remote();
     my $cursess = $remote ? $remote->{'_session'} : undef;
 
+    $title = $remote ?
+        BML::ml(".loggedin.head2", { 'sitename' => $LJ::SITENAMESHORT} ) :
+        BML::ml(".login.title", { 'sitename' => $LJ::SITENAMESHORT} ); 
+
     if ($remote && $remote->readonly) {
         $body = LJ::bad_input("The database is temporarily in read-only mode, so creating new login sessions is temporarily down.  Please try again later.");
         return;
@@ -38,8 +42,18 @@
 
         my $getextra = $nojs ? '?nojs=1' : '';
 
-        $body .= "<form action='login.bml$getextra' method='post' id='login'>\n";
-        $body .= "<div style='float: left; width: 70%; padding-right: 20px;'>";
+        if (@errors) {
+            $body .= "<div style='clear: both'>\n";
+            $body .= LJ::error_list(@errors);
+            $body .= "</div>\n";
+
+        } elsif ($remote && LJ::did_post() && $POST{'action:change'}) {
+            $body .= "<div style='clear: both'>\n";
+            $body .= "<?warningbar <b>$ML{'.login.optionssaved'}</b> warningbar?>\n";
+            $body .= "</div>\n";
+        }
+
+        $body .= "<table><tr><td style='padding-right:20px; vertical-align: top'>";
 
         my $chal = LJ::challenge_generate(300); # 5 minute auth token
         $body .= "<input type='hidden' name='chal' id='login_chal' value='$chal' />";
@@ -59,48 +73,64 @@
         }
 
         if ($remote) {
-            if (LJ::did_post() && $POST{'action:change'}) {
-                $body .= "<tr><td colspan='2' style='white-space: nowrap;'>";
-                $body .= "<?warningbar <b>Login options saved</b> warningbar?></td></tr>";
-            }
-
-            $body .= "<?p " . BML::ml(".login.text3", 
-                                      {'sitename' => $LJ::SITENAME,
-                                       'username' => LJ::ljuser($remote)}) . " p?>\n";
+            $body .= "<?p " . BML::ml(".loggedin.text2", 
+                                      { 'username' => LJ::ljuser($remote)} ) . " p?>\n";
+            $body .= "<br />\n";
+            $body .= "<div style='float: left; padding: 5px 10px 0px 10px;'>";
+            $body .= "<img src='/img/pencil.gif'></div>\n";
+            $body .= "<div style='margin-left: 36px;'>";
+            $body .= "<?h2 <a href='$LJ::SITEROOT/update.bml'>";
+            $body .= "$ML{'.loggedin.suggesthead1'}</a> h2?>\n";
+            $body .= "$ML{'.loggedin.suggest1'}<br />&nbsp;</div>\n";
+            $body .= "<div style='float: left; padding: 5px 10px 0px 10px'>";
+            $body .= "<img src='/img/userinfo.gif'></div>\n";
+            $body .= "<div style='margin-left: 36px'>";
+            $body .= "<?h2 <a href='$LJ::SITEROOT/users/$remote->{'user'}/friends/'>";
+            $body .= "$ML{'.loggedin.suggesthead2'}</a> h2?>\n";
+            $body .= "$ML{'.loggedin.suggest2'}<br />&nbsp;</div>\n";
+            $body .= "<div style='float: left; padding: 5px 10px 0px 10px'>";
+            $body .= "<img src='/img/pencil.gif'></div>\n";
+            $body .= "<div style='margin-left: 36px'>";
+            $body .= "<?h2 <a href=\"http://my.$LJ::DOMAIN/\">";
+            $body .= BML::ml(".loggedin.suggesthead3", { 'siteabbrev' => $LJ::SITENAMEABBREV } ) . "</a> h2?>\n";
+            $body .= "$ML{'.loggedin.suggest3'}</div>\n";
+            $body .= "\n<br />\n";
         } else {
-            $body .= "<?p " . BML::ml(".login.text1", {'sitename' => $LJ::SITENAME}) . " p?>\n";
+            $body .= "<?p " . BML::ml(".login.text4", {'sitename' => $LJ::SITENAMESHORT}) . " p?>\n";
+
+            $body .= "<ul>\n";
+            $body .= "<li>$ML{'.whylogin.benefit4'}</li>\n";
+            $body .= "<li>$ML{'.whylogin.benefit5'}</li>\n";
+            $body .= "<li>$ML{'.whylogin.benefit6'}</li>\n";
+            $body .= "<li>$ML{'.whylogin.benefit7'}</li>\n";
+            $body .= "</ul>\n";
+            $body .= "<?p " . BML::ml(".login.text5", {'sitename' => $LJ::SITENAMESHORT});
+            $body .= "<form style='display: inline' action='/create.bml'>";
+            $body .= "<input type='submit' value='$ML{'.login.btn.create'}' /></form>" . " p?>\n";
         }
 
-        $body .= "<?p $ML{'.login.text2'} p?>\n";
-
-        $body .= "<?h1 $ML{'.whylogin.head'} h1?>\n";
-        $body .= "<?p $ML{'.whylogin.text'} p?>\n";
-        $body .= "<ul>\n";
-        $body .= "<li>$ML{'.whylogin.benefit1'}</li>\n";
-        $body .= "<li>$ML{'.whylogin.benefit2'}</li>\n";
-        $body .= "<li>$ML{'.whylogin.benefit3'}</li>\n";
-        $body .= "</ul>\n";
-
-        $body .= "</div>";
-
+        $body .= "</td><td valign='top'>\n";
+        $body .= "<form action='login.bml$getextra' method='post' id='login'>\n";
         $body .= "<?standout\n";
         $body .= "<table cellpadding='3'>\n";
+
         if ($remote) {
-            $body .= "<tr><td colspan='2' style='white-space: nowrap;'><?h2 Change Log in Options h2?></td></tr>";
+            $body .= "<tr><td colspan='2' style='white-space: nowrap;'>";
+            $body .= "<?h2 $ML{'.login.changelog'} h2?></td></tr>";
         } else {
-            $body .= "<tr><td>$ML{'.login.username'}</td><td><input type='text' value='$user' name='user' size='15' maxlength='15' style='<?loginboxstyle?>' /></td></tr>\n";
-            $body .= "<tr><td valign='top'>$ML{'.login.password'}</td><td><input type='password' name='password' id='xc_password' size='15' maxlength='30' />";
-            $body .= "<br /><a href='/lostinfo.bml'><font size='1'>$ML{'.login.forget'}</font></a></td></tr>\n";
-            if (@errors) {
-                $body .= "<tr><td>";
-                $body .= "<?soerror $_ soerror?>" foreach @errors;
-                $body .="</td></tr>";
-            }
-        }
+            $body .= "<tr><td colspan='2' style='white-space: nowrap;'>";
+            $body .= "<?h2 " . BML::ml('.login.welcome', { 'sitename' => $LJ::SITENAMESHORT }) . " h2?>";
+            $body .= "</td></tr>";
+            $body .= "<tr><td>$ML{'.login.username'}</td>";
+            $body .= "<td><input type='text' value='$user' name='user' size='15' maxlength='15' style='<?loginboxstyle?>' /></td></tr>\n";
+            $body .= "<tr><td valign='top'>$ML{'.login.password'}</td>";
+            $body .= "<td><input type='password' name='password' id='xc_password' size='20' maxlength='30' />";
+       }
 
         # expiration
         my $curexp = $cursess ? $cursess->{'exptype'} : "short";
         $body .= "<tr valign='top'><td align='right'>";
+        $body .= "</td><td>";
         $body .= LJ::html_check(
                                 {
                                     'type'     => 'check',
@@ -108,14 +138,16 @@
                                     'id'       => 'expire',
                                     'value'    => 'never',
                                     'selected' => ($remote && $curexp eq 'long'),
+                                    'style'    => 'margin-left: 0px; margin-bottom: 0px;',
                                 });
 
-        $body .= "</td><td>";
-        $body .= "<label for='expire'><b>Remember Me</b></label><br /><font size='1'>Log in automatically on this computer</font></td></tr>\n";
-        $body .= "</tr>";
+        $body .= "<label for='expire'>$ML{'.login.remember'}</label><br />\n";
+        $body .= "<span style='color: #666; font-size: 0.8em'>$ML{'.login.autologin'}</span></td></tr>\n";
+        $body .= "</tr>\n";
 
         if ($remote) {
             $body .= "<tr valign='top'><td>";
+            $body .= "</td><td>";
             my $curbind = $cursess && $cursess->{'ipfixed'} ? "yes" : "no";
             $body .= LJ::html_check(
                                     {
@@ -124,71 +156,73 @@
                                         'id'       => 'bindip',
                                         'value'    => 'yes',
                                         'selected' => $curbind eq 'yes',
+                                        'style'    => 'margin-left: 0px; margin-bottom: 0px;',
                                     });
-            $body .= "</td><td>";
-            $body .= "<label for='bindip'><b>Bind cookie to IP address</b></label>";
+            $body .= "<label for='bindip'>$ML{'.login.bindcookie'}</label>";
 
             if (defined $LJ::HELPURL{'loginoptions'}) {
-                $body .= "<br /><font size='1'><a href='$LJ::HELPURL{'loginoptions'}'>Learn about this option</a></font>";
+                $body .= "<br /><font size='1'><a href='$LJ::HELPURL{'loginoptions'}'>$ML{'.login.bindcookie.learnmore'}</a></font>";
             }
             $body .= "</td></tr>\n";
             $body .= "</tr>";
         }
 
-        $body .= "<tr><td align='center' colspan='2'>";
+        $body .= "<tr><td></td><td>";
         if ($remote) {
-            $body .= "<input name='action:change' type='submit' value='Save' />&nbsp;&nbsp;";
-            $body .= "<input type='submit' name='action:logout' value='$ML{'.logout.btn'}' />";
+            $body .= "<input name='action:change' type='submit' value='$ML{'.login.btn.save'}' />&nbsp;&nbsp;";
+            $body .= "<input type='submit' name='action:logout' value='$ML{'.logout.btn1'}' />";
         } else {
 
             # FIXME: needs translation 'standard'/'secure' and make the below ML strings.
-            my $secure = "[ <a href='$LJ::SITEROOT/login.bml?nojs=1'>Standard</a> | <b>Secure</b> ]";
+            my $secure = "<p><img src='$LJ::IMGPREFIX/padlocked.gif' width='20' height='16' alt='secure login' align='middle' />";
+            $secure .= " $ML{'.login.secure'} | <a href='$LJ::SITEROOT/login.bml?nojs=1'>$ML{'.login.standard'}</a></p>";
 
             if ($LJ::IS_SSL) {
-                $body .= "<input name='action:login' type='submit' value='$ML{'.login.btn.login'}' /> ".
-                    "<img src='$LJ::IMGPREFIX/icon_protected.gif' width='14' height='15' alt='secure login' align='middle' /><br />";
                 $body .= $secure;
+                $body .= "<input name='action:login' type='submit' value='$ML{'.login.btn.login'}' /> ";
             } else {
                 my $login_btn_text = LJ::ejs($ML{'.login.btn.login'});
                 unless ($nojs) {
                     $body .= "<script type='text/javascript' language='Javascript'> \n <!-- \n
+                      document.write(\"$secure\")
                       document.write(\"<input name='action:login' onclick='return sendForm()' type='submit' value='$login_btn_text' />\");";
                     $body .= "
                       if (document.getElementById && document.getElementById('login')) {
-                        document.write(\"&nbsp; <img src='$LJ::IMGPREFIX/icon_protected.gif' width='14' height='15' alt='secure login' align='middle' />\");
+                        //document.write(\"&nbsp; <img src='$LJ::IMGPREFIX/icon_protected.gif' width='14' height='15' alt='secure login' align='middle' />\");
                         document.write(\"<br />\");
-                        document.write(\"$secure\")
                        }\n // -->\n ";
                     $body .= '</script>';
                     $body .= "<noscript>";
                 }
 
-                $body .= "<input name='action:login' type='submit' value='$ML{'.login.btn.login'}' />";
                 if ($nojs) {
                     # insecure now, but because they choose to not use javascript.  link to
                     # javascript version of login if they seem to have javascript, otherwise
                     # noscript to SSL
                     $body .= "<script type='text/javascript' language='Javascript'>\n";
-                    $body .= "<!-- \n document.write(\"<br />" . 
-                        LJ::ejs("[ <b>Standard</b> | <a href='$LJ::SITEROOT/login.bml'>Secure</a> ]") .
+                    $body .= "<!-- \n document.write(\"<p><img src='$LJ::IMGPREFIX/unpadlocked.gif' width='20' height='16' alt='secure login' align='middle' />" . 
+                        LJ::ejs(" <a href='$LJ::SITEROOT/login.bml'>$ML{'.login.secure'}</a> | $ML{'.login.standard'}</p>") .
                         "\"); \n // -->\n </script>\n";
                     if ($LJ::USE_SSL) {
                         $body .= "<noscript>";
-                        $body .= "<br />" . "[ <b>Standard</b> | <a href='$LJ::SSLROOT/login.bml'>Secure</a> ]";
+                        $body .= "<p><img src='$LJ::IMGPREFIX/unpadlocked.gif' width='20' height='16' alt='secure login' align='middle' /> <a href='$LJ::SSLROOT/login.bml'>$ML{'.login.secure'}</a> | $ML{'.login.standard'}</p>";
                         $body .= "</noscript>";
                     }
                 } else {
                     # insecure now, and not because it was forced, so javascript doesn't work.
                     # only way to get to secure now is via SSL, so link there
-                    $body .= "<br />" . "[ <b>Standard</b> | <a href='$LJ::SSLROOT/login.bml'>Secure</a> ]"
+                    $body .= "<p><img src='$LJ::IMGPREFIX/unpadlocked.gif' width='20' height='16' alt='secure login' align='middle' />";
+                    $body .= " <a href='$LJ::SSLROOT/login.bml'>$ML{'.login.secure'}</a> | $ML{'.login.standard'}</p>\n"
                         if $LJ::USE_SSL;
 
                 }
 
+                $body .= "<input name='action:login' type='submit' value='$ML{'.login.btn.login'}' />";
                 $body .= "</noscript>" unless $nojs;
             }
             $body .= LJ::help_icon('securelogin', '&nbsp;');
 
+            $body .= "<p><a href='/lostinfo.bml'><font size='1'>$ML{'.login.forget2'}</font></a></p></td></tr>\n";
         }
         $body .= "</td></tr>\n";
 
@@ -199,6 +233,7 @@
         }
         $body .= "</table>\n";
         $body .= " standout?>\n";
+        $body .= "</td></tr></table>\n";
 
         # Save offsite redirect uri between POSTs
         my $redir = $GET{'ret'} || $POST{'ret'};
@@ -408,6 +443,8 @@
             LJ::set_remote($u);
             $remote = $u;
 
+            $title = BML::ml(".loggedin.head2", { 'sitename' => $LJ::SITENAMESHORT} );
+
             return if LJ::bad_password_redirect();
         }
     }
@@ -433,7 +470,7 @@ head<=
                 $LJ::COMMON_CODE{'chalresp_js'} : "";
 _code?>
 <=head
-title=><?_ml .title _ml?>
+title=><?_code return $title; _code?>
 body=><?_code return $body; _code?>
 page?><?_c <LJDEP>
 hook: post_login login_formopts
