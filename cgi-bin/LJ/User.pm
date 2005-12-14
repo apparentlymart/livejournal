@@ -2050,23 +2050,39 @@ sub update_user
 # des-u: user object.
 # des-offsetref: reference to scalar to hold timezone offset;
 # des-fakedref: reference to scalar to hold whether this timezone was
-#               faked.  0 if it is the timezone specified by the user (not supported yet).
+#               faked.  0 if it is the timezone specified by the user.
 # returns: nonzero if successful.
 # </LJFUNC>
 sub get_timezone {
     my ($u, $offsetref, $fakedref) = @_;
 
-    # we currently don't support timezones,
-    # but when we do this will be the function to modify.
+    # See if the user specified their timezone
+    if (my $tz = $u->prop('timezone')) {
+        # If we eval fails, we'll fall through to guessing instead
+        my $dt = eval {
+            DateTime->from_epoch(
+                                 epoch => time(),
+                                 time_zone => $tz,
+                                 );
+        };
 
-    my $offset;
+        if ($dt) {
+            $$offsetref = $dt->offset() / (60 * 60); # Convert from seconds to hours
+            $$fakedref  = 0 if $fakedref;
+
+            return 1;
+        }
+    }
+
+    # Either the user hasn't set a timezone or we failed at
+    # loading it.  We guess their current timezone's offset
+    # by comparing the gmtime of their last post with the time
+    # they specified on that post.
 
     my $dbcr = LJ::get_cluster_def_reader($u);
     return 0 unless $dbcr;
 
-    # we guess their current timezone's offset
-    # by comparing the gmtime of their last post
-    # with the time they specified on that post.
+    $$fakedref = 1 if $fakedref;
 
     # grab the times on the last post that wasn't backdated.
     # (backdated is rlogtime == $LJ::EndOfTime)
@@ -2084,9 +2100,6 @@ sub get_timezone {
         # if they're up to a quarter hour behind, round up.
         $$offsetref = $hourdiff > 0 ? int($hourdiff + 0.25) : int($hourdiff - 0.25);
     }
-
-    # until we store real timezones, the timezone is always faked.
-    $$fakedref = 1 if $fakedref;
 
     return 1;
 }
