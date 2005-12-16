@@ -51,6 +51,11 @@
             $body .= "<div style='clear: both'>\n";
             $body .= "<?warningbar <b>$ML{'.login.optionssaved'}</b> warningbar?>\n";
             $body .= "</div>\n";
+
+        } elsif (LJ::did_post() && $POST{'action:logout'}) {
+            $body .= "<div style='clear: both'>\n";
+            $body .= "<?warningbar <b>$ML{'.logout.loggedout'}</b> warningbar?>\n";
+            $body .= "</div>\n";
         }
 
         $body .= "<table><tr><td style='padding-right:20px; vertical-align: top'>";
@@ -109,7 +114,7 @@
             $body .= "<input type='submit' value='$ML{'.login.btn.create'}' /></form>" . " p?>\n";
         }
 
-        $body .= "</td><td valign='top'>\n";
+        $body .= "</td><td valign='top' style='padding-top: 10px'>\n";
         $body .= "<form action='login.bml$getextra' method='post' id='login'>\n";
         $body .= "<?standout\n";
         $body .= "<table cellpadding='3'>\n";
@@ -130,7 +135,7 @@
         # expiration
         my $curexp = $cursess ? $cursess->{'exptype'} : "short";
         $body .= "<tr valign='top'><td align='right'>";
-        $body .= "</td><td>";
+        $body .= "</td><td style='padding-bottom: 5px'>";
         $body .= LJ::html_check(
                                 {
                                     'type'     => 'check',
@@ -147,7 +152,7 @@
 
         if ($remote) {
             $body .= "<tr valign='top'><td>";
-            $body .= "</td><td>";
+            $body .= "</td><td style='padding-bottom: 10px'>";
             my $curbind = $cursess && $cursess->{'ipfixed'} ? "yes" : "no";
             $body .= LJ::html_check(
                                     {
@@ -173,8 +178,8 @@
             $body .= "<input type='submit' name='action:logout' value='$ML{'.logout.btn1'}' />";
         } else {
 
-            # FIXME: needs translation 'standard'/'secure' and make the below ML strings.
-            my $secure = "<p><img src='$LJ::IMGPREFIX/padlocked.gif' width='20' height='16' alt='secure login' align='middle' />";
+            my $secure = "<p style='padding-bottom: 5px'>";
+            $secure .= "<img src='$LJ::IMGPREFIX/padlocked.gif' width='20' height='16' alt='secure login' align='middle' />";
             $secure .= " $ML{'.login.secure'} | <a href='$LJ::SITEROOT/login.bml?nojs=1'>$ML{'.login.standard'}</a></p>";
 
             if ($LJ::IS_SSL) {
@@ -200,18 +205,18 @@
                     # javascript version of login if they seem to have javascript, otherwise
                     # noscript to SSL
                     $body .= "<script type='text/javascript' language='Javascript'>\n";
-                    $body .= "<!-- \n document.write(\"<p><img src='$LJ::IMGPREFIX/unpadlocked.gif' width='20' height='16' alt='secure login' align='middle' />" . 
+                    $body .= "<!-- \n document.write(\"<p style='padding-bottom: 5px'><img src='$LJ::IMGPREFIX/unpadlocked.gif' width='20' height='16' alt='secure login' align='middle' />" . 
                         LJ::ejs(" <a href='$LJ::SITEROOT/login.bml'>$ML{'.login.secure'}</a> | $ML{'.login.standard'}</p>") .
                         "\"); \n // -->\n </script>\n";
                     if ($LJ::USE_SSL) {
                         $body .= "<noscript>";
-                        $body .= "<p><img src='$LJ::IMGPREFIX/unpadlocked.gif' width='20' height='16' alt='secure login' align='middle' /> <a href='$LJ::SSLROOT/login.bml'>$ML{'.login.secure'}</a> | $ML{'.login.standard'}</p>";
+                        $body .= "<p style='padding-bottom: 5px'><img src='$LJ::IMGPREFIX/unpadlocked.gif' width='20' height='16' alt='secure login' align='middle' /> <a href='$LJ::SSLROOT/login.bml'>$ML{'.login.secure'}</a> | $ML{'.login.standard'}</p>";
                         $body .= "</noscript>";
                     }
                 } else {
                     # insecure now, and not because it was forced, so javascript doesn't work.
                     # only way to get to secure now is via SSL, so link there
-                    $body .= "<p><img src='$LJ::IMGPREFIX/unpadlocked.gif' width='20' height='16' alt='secure login' align='middle' />";
+                    $body .= "<p style='padding-bottom: 5px'><img src='$LJ::IMGPREFIX/unpadlocked.gif' width='20' height='16' alt='secure login' align='middle' />";
                     $body .= " <a href='$LJ::SSLROOT/login.bml'>$ML{'.login.secure'}</a> | $ML{'.login.standard'}</p>\n"
                         if $LJ::USE_SSL;
 
@@ -277,6 +282,7 @@
 
         if ($do_logout) {
             $logout_remote->();
+            $title = BML::ml(".login.title", { 'sitename' => $LJ::SITENAMESHORT} );
         }
 
         if ($do_change) {
@@ -314,10 +320,15 @@
             $logout_remote->();
 
             my $u = LJ::load_user($user);
-            push @errors, "$ML{'error.username_notfound'}" unless $u;
-            push @errors, "$ML{'error.purged.text'}" if $u->{'statusvis'} eq "X";
-            push @errors, "$ML{'error.nocommlogin'}"
-                if $u->{'journaltype'} eq 'C' && $LJ::DISABLED{'community-logins'};
+
+            if (! $u) {
+                push @errors, "$ML{'error.username_notfound'}" unless $u;
+            } else {
+                push @errors, "$ML{'error.purged.text'}" if $u->{'statusvis'} eq "X";
+                push @errors, "$ML{'error.nocommlogin'}"
+                    if $u->{'journaltype'} eq 'C' && $LJ::DISABLED{'community-logins'};
+            }
+
             if (LJ::get_cap($u, "readonly")) {
                 $body = LJ::bad_input("The database is temporarily in read-only mode, so creating new login sessions is temporarily down.  Please try again later.");
                 return;
