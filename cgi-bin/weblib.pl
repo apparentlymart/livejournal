@@ -1678,6 +1678,52 @@ sub res_includes {
     return $ret;
 }
 
+# Returns HTML of a dynamic tag could given passed in data
+# Requires hash-ref of tag => { url => url, value => value }
+sub tag_cloud {
+    my $tags = shift;
+
+    # find sizes of tags, sorted
+    my @sizes = sort { $a <=> $b } map { $tags->{$_}->{'value'} } keys %$tags;
+
+    # remove duplicates:
+    my %sizes = map { $_, 1 } @sizes;
+    @sizes = sort { $a <=> $b } keys %sizes;
+
+    my @tag_names = sort keys %$tags;
+
+    my $percentile = sub {
+        my $n = shift;
+        my $total = scalar @sizes;
+        for (my $i = 0; $i < $total; $i++) {
+            next if $n > $sizes[$i];
+            return $i / $total;
+        }
+    };
+
+    my $ret .= "<div id='tagcloud' class='tagcloud' style='margin: 2em 10em 0em 10em'>";
+    my %tagdata = ();
+    foreach my $tag (@tag_names) {
+        my $tagurl = $tags->{$tag}->{'url'};
+        my $ct     = $tags->{$tag}->{'value'};
+        my $pt     = int(8 + $percentile->($ct) * 25);
+        $ret .= "<a id='taglink_$tag' href='";
+        $ret .= LJ::ehtml($tagurl) . "' style='color: <?altcolor2?>; font-size: ${pt}pt;'>";
+        $ret .= LJ::ehtml($tag) . "</a>\n";
+
+        # build hash of tagname => final point size for refresh
+        $tagdata{$tag} = $pt;
+    }
+    $ret .= "</div>";
+
+    LJ::need_res('js/core.js');
+    LJ::need_res('js/dom.js');
+    LJ::need_res('js/httpreq.js');
+    LJ::need_res('js/tagcloud.js');
+
+    return $ret;
+}
+
 # Common challenge/response javascript, needed by both login pages and comment pages alike.
 # Forms that use this should onclick='return sendForm()' in the submit button.
 # Returns true to let the submit continue.
