@@ -2,14 +2,19 @@ var slidingTo;
 var slideStatus = 0;  // 0 to 1
 var slideStep = 0.1;
 var slideDelay = 0;
+var slideRefresh;
+var dataSource; // URL to get new data
 var tagCloudRefresh;
+
+// Set var tagCloudRefresh to 0 to disable automatic refreshing
+// or set to a time value it should refresh.  Defaults to 10 seconds.
 
 // Let them override refresh time
 if (!defined(tagCloudRefresh)) {
-    tagCloudRefresh = 10000; // 10 seconds
+    setInterval(dataRefresh, 10000); // 10 seconds
+} else if (tagCloudRefresh != 0) {
+    setInterval(dataRefresh, tagCloudRefresh);
 }
-
-setInterval(dataRefresh, tagCloudRefresh);
 
 function drawWithData (data) {
     slidingTo = data;
@@ -38,7 +43,7 @@ function slideAnimate () {
 
 function dataRefresh () {
     HTTPReq.getJSON({
-      url: "tagcloud.bml?js=1",
+      url: dataSource,
       onData: function (data) { drawWithData(data); },
       onError: function (msg) { alert("error: " + msg); }
     });
@@ -49,10 +54,14 @@ var curData = {};
 var initData = {};
 
 onload = function () {
+    if (!dataSource) {
+        return;
+    }
+
     var tc = $("tagcloud");
 
     HTTPReq.getJSON({
-      url: "tagcloud.bml?js=1",
+      url: dataSource,
       onData: function (data) { initData = curData = data; },
       onError: function (msg) { alert("error on initial data: " + msg); }
     });

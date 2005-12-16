@@ -1701,7 +1701,7 @@ sub tag_cloud {
         }
     };
 
-    my $ret .= "<div id='tagcloud' class='tagcloud' style='margin: 2em 10em 0em 10em'>";
+    my $ret .= "<div id='tagcloud' class='tagcloud'>";
     my %tagdata = ();
     foreach my $tag (@tag_names) {
         my $tagurl = $tags->{$tag}->{'url'};

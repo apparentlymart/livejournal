@@ -1,8 +1,19 @@
 <?page
 title=><?_ml .title _ml?>
-head=><?_code return LJ::robot_meta_tags(); _code?>
-body<=
+head<=
+<?_code return LJ::robot_meta_tags(); _code?>
+<script language="JavaScript">
+    var tagCloudRefresh = 0;
+</script>
 
+<style>
+    div.tagcloud a { text-decoration: none; }
+    div.tagcloud a:visited { color: #00f; }
+    div.tagcloud a:link { color: #00f; }
+</style>
+<=head
+
+body<=
 <?_code
 {
     use strict;
@@ -29,15 +40,22 @@ body<=
         $sth->execute('pop_interests');
         return "Sorry, interest data currently unavailable." unless $sth->rows();
 
-        $ret .= "<p><table><tr><td><b>$ML{'.interest'}</b></td><td><b>$ML{'.count'}</b></td></tr>";
+        $ret .= "<table width='100%'><tr><td>";
+
+        my %interests;
         while (my ($int, $count) = $sth->fetchrow_array)
         {
-            next if ($count == 1);
-            LJ::text_out(\$int);
             my $eint = LJ::eurl($int);
-            $ret .= "<tr><td><a href=\"/interests.bml?int=$eint\">$int</a></td><td>$count</td></tr>";
+
+            $interests{$int} = {
+                                url   => "/interests.bml?int=$eint",
+                                value => $count,
+                                };
         }
-        $ret .= "</table>";
+
+        $ret .= LJ::tag_cloud(\%interests);
+
+        $ret .= "</td></tr></table>";
         return $ret;
     }
 
