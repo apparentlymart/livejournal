@@ -1,0 +1,36 @@
+<?_code # -*-bml-*-
+{
+    use strict;
+
+    my $err = sub {
+        my $msg = shift;
+        return JSON::objToJson({
+            'alert' => $msg,
+        });
+    };
+
+    # get user
+    my $u = LJ::get_remote()
+        or return $err->("Couldn't save.  No longer logged in.");
+
+    # get userpics
+    my $upinfo = LJ::get_userpic_info($u->{'userid'}, {'load_comments' => 1})
+        or return $err->("No galleries for user $u->{user}.");
+
+    my $ret = {};
+    @{$ret->{'kws'}} = ();
+
+    while (my ($kw, $info) = each %{$upinfo->{kw}}) {
+        next unless $info->{state} eq 'N';
+        $info->{'url'} = "$LJ::USERPIC_ROOT/$info->{'picid'}/$u->{'userid'}";
+        $ret->{'pics'}->{$kw} = $info;
+        push @{$ret->{'kws'}}, $kw;
+    }
+
+    sleep 1 if $LJ::IS_DEV_SERVER;
+
+    print STDERR LJ::D($ret);
+
+    return JSON::objToJson($ret);
+}
+_code?>
