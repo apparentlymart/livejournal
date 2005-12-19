@@ -1716,11 +1716,6 @@ sub tag_cloud {
     }
     $ret .= "</div>";
 
-    LJ::need_res('js/core.js');
-    LJ::need_res('js/dom.js');
-    LJ::need_res('js/httpreq.js');
-    LJ::need_res('js/tagcloud.js');
-
     return $ret;
 }
 

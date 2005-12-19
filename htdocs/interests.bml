@@ -6,6 +6,11 @@ head<=
     var tagCloudRefresh = 0;
 </script>
 
+<script type="text/javascript" src="<?_code return $LJ::SITEROOT; _code?>/js/core.js"></script>
+<script type="text/javascript" src="<?_code return $LJ::SITEROOT; _code?>/js/dom.js"></script>
+<script type="text/javascript" src="<?_code return $LJ::SITEROOT; _code?>/js/httpreq.js"></script>
+<script type="text/javascript" src="<?_code return $LJ::SITEROOT; _code?>/js/tagcloud.js"></script>
+
 <style>
     div.tagcloud a { text-decoration: none; }
     div.tagcloud a:visited { color: #00f; }
