@@ -179,7 +179,9 @@ sub title {
     my $self = shift;
     my $curlang = BML::get_language();
     my $mld = LJ::Lang::get_dom("general");
-    return LJ::Lang::get_text($curlang, $self->{dest} . ".title", $mld->{'dmid'}) ||
+    my $dest = $self->{dest};
+    $dest .= "index.bml" unless $dest =~ /\.bml$/;
+    return LJ::Lang::get_text($curlang, $dest . ".title", $mld->{'dmid'}) ||
 	$self->{dest};
 }
 
