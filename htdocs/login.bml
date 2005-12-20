@@ -59,17 +59,6 @@
         }
 
         $body .= "<table><tr><td style='padding-right:20px; vertical-align: top'>";
-
-        my $chal = LJ::challenge_generate(300); # 5 minute auth token
-        $body .= "<input type='hidden' name='chal' id='login_chal' value='$chal' />";
-        $body .= "<input type='hidden' name='response' id='login_response' value='' />";
-
-        my $referer = BML::get_client_header('Referer');
-        if ($GET{'ret'} == 1 && $referer) {
-            my $eh_ref = LJ::ehtml($referer);
-            $body .= "<input type='hidden' name='ref' value='$eh_ref' />\n";
-        }
-
         if ($require_tos) {
             $body .= "<div style='margin-left: 40px; margin-bottom: 20px;'>";
             my $tos_err = ref $require_tos eq 'HASH' ? $require_tos->{err} : undef;
@@ -98,8 +87,8 @@
             $body .= "<div style='margin-left: 36px'>";
             $body .= "<?h2 <a href=\"http://my.$LJ::DOMAIN/\">";
             $body .= BML::ml(".loggedin.suggesthead3", { 'siteabbrev' => $LJ::SITENAMEABBREV } ) . "</a> h2?>\n";
-            $body .= "$ML{'.loggedin.suggest3'}</div>\n";
-            $body .= "\n<br />\n";
+            $body .= BML::ml(".loggedin.suggest4", { 'siteabbrev' => $LJ::SITENAMEABBREV } );
+            $body .= "</div>\n<br />\n";
         } else {
             $body .= "<?p " . BML::ml(".login.text4", {'sitename' => $LJ::SITENAMESHORT}) . " p?>\n";
 
@@ -116,6 +105,17 @@
 
         $body .= "</td><td valign='top' style='padding-top: 10px'>\n";
         $body .= "<form action='login.bml$getextra' method='post' id='login'>\n";
+
+        my $chal = LJ::challenge_generate(300); # 5 minute auth token
+        $body .= "<input type='hidden' name='chal' id='login_chal' value='$chal' />\n";
+        $body .= "<input type='hidden' name='response' id='login_response' value='' />\n";
+
+        my $referer = BML::get_client_header('Referer');
+        if ($GET{'ret'} == 1 && $referer) {
+            my $eh_ref = LJ::ehtml($referer);
+            $body .= "<input type='hidden' name='ref' value='$eh_ref' />\n";
+        }
+
         $body .= "<?standout\n";
         $body .= "<table cellpadding='3'>\n";
 
