@@ -1,21 +1,5 @@
 <html>
 <head>
-<script language="JavaScript">
-    var tagCloudRefresh = 0;
-</script>
-
-<script type="text/javascript" src="<?_code return $LJ::SITEROOT; _code?>/js/core.js"></script>
-<script type="text/javascript" src="<?_code return $LJ::SITEROOT; _code?>/js/dom.js"></script>
-<script type="text/javascript" src="<?_code return $LJ::SITEROOT; _code?>/js/httpreq.js"></script>
-<script type="text/javascript" src="<?_code return $LJ::SITEROOT; _code?>/js/tagcloud.js"></script>
-
-<style>
-    div.tagcloud a { text-decoration: none; }
-    div.tagcloud a:visited { color: #00f; }
-    div.tagcloud a:link { color: #00f; }
-
-    th { text-align: left; }
-</style>
 </head>
 <body>
 <?_code
@@ -131,7 +115,7 @@
 	    };
 	}
 
-	$ret .= LJ::tag_cloud(\%cloud);
+	$ret .= tag_cloud(\%cloud);
 
 	return $ret;
     }
@@ -193,7 +177,49 @@
 	$ret .= "</table>";
 
 	return $ret;
-    }	
+    }
+
+    # Returns HTML of a dynamic tag could given passed in data
+    # Requires hash-ref of tag => { url => url, value => value }
+    sub tag_cloud {
+        my $tags = shift;
+
+        # find sizes of tags, sorted
+        my @sizes = sort { $a <=> $b } map { $tags->{$_}->{'value'} } keys %$tags;
+
+        # remove duplicates:
+        my %sizes = map { $_, 1 } @sizes;
+        @sizes = sort { $a <=> $b } keys %sizes;
+
+        my @tag_names = sort keys %$tags;
+
+        my $percentile = sub {
+            my $n = shift;
+            my $total = scalar @sizes;
+            for (my $i = 0; $i < $total; $i++) {
+                next if $n > $sizes[$i];
+                return $i / $total;
+            }
+        };
+
+        my $ret .= "<div id='tagcloud' class='tagcloud'>";
+        my %tagdata = ();
+        foreach my $tag (@tag_names) {
+            my $tagurl = $tags->{$tag}->{'url'};
+            my $ct     = $tags->{$tag}->{'value'};
+            my $pt     = int(8 + $percentile->($ct) * 25);
+            $ret .= "<a id='taglink_$tag' href='";
+            $ret .= LJ::ehtml($tagurl) . "' style='color: <?altcolor2?>; font-size: ${pt}pt;'>";
+            $ret .= LJ::ehtml($tag) . "</a>\n";
+
+            # build hash of tagname => final point size for refresh
+            $tagdata{$tag} = $pt;
+        }
+        $ret .= "</div>";
+
+        return $ret;
+    }
+
 }
 _code?>
 </body>
