@@ -10,12 +10,70 @@
  my $output = lc($POST{'output'}) || lc($GET{'output'});
  my $dbr = LJ::get_db_reader();
 
- if ($type eq "user") {
+ if ($type eq "nav_and_user" || $type eq "nav") {
+     do "LJ/NavTag.pm";
+     my @dests = LJ::NavTag->dests_of_tag($q);
+     my $last_is_untrusted = 0;
 
-     ## magic mode
-     if ($q =~ /^\*(\d+)/) {
-         return BML::redirect("$LJ::SITEROOT/talkread.bml?itemid=$1");
+     if ($type eq "nav_and_user") {
+	 if (my $u = LJ::load_user($q)) {
+	     push @dests, LJ::NavTag::Dest->new(type => "LJUSER", dest => $u->{user});
+
+	     # presumably users will start registering usernames that match our site navigation tags,
+	     # so let's preempt that and throw them into a lame bottom section when site-defined tags
+	     # are alse present.
+	     $last_is_untrusted = 1;
+	 }
      }
+
+     my $eq = LJ::ehtml($q);
+     if (@dests == 0) {	
+         $title = "No matches";
+         $body = "<?h1 $ML{'Error'} h1?><?p No site page or username matches your search for <b>$eq</b>. p?>";
+         return;
+     }
+     if (@dests == 1) {
+	 return BML::redirect($dests[0]->url);
+     }
+
+     $title = "Choices";
+     $body = "<?h1 Multiple Choices h1?>";
+
+     my @cats = ({
+	 title => "Site pages",
+	 text => "The following $LJ::SITENAMESHORT pages match your search for <b>$eq</b>:",
+	 list => \@dests,
+     });
+
+     if ($last_is_untrusted) {
+	 push @cats, {
+	     title => "User account",
+	     text => "The following user account matches your search for <b>$eq</b>:",
+	     list => [ pop @dests ],
+	 };
+     }
+
+     foreach my $cat (@cats) {
+	 $body .= "<?h2 $cat->{title} h2?><?p $cat->{text} p?>";
+	 $body .= "<ul>";
+	 foreach my $dst (@{ $cat->{list} }) {
+	     my $lju = $dst->ljuser;
+	     my $link;
+	     if ($lju) {
+		 $link = $dst->ljuser->ljuser_display . " - " . LJ::ehtml($dst->title);
+	     } else {
+		 $link = "<a href=\"" . LJ::ehtml($dst->url) . "\">" . LJ::ehtml($dst->title) . "</a>";
+	     }
+	     $body .= "<li>$link</li>\n";
+	 }
+	 $body .= "</ul>";
+     }
+
+     return;
+     
+ }
+
+ if ($type eq "user") {
 
      my $user = lc($q);
      
