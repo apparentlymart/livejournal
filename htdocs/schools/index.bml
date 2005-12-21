@@ -549,11 +549,11 @@ body<=
             $ret .= "</ul>";
         }
         if (@users) {
-            $ret .= "<?p <b>Users</b> p?><ul>";
-           foreach my $su (@users) {
-                $ret .= "<li>" . LJ::ljuser($su) . ($su->{name} ? " - " . LJ::ehtml($su->{name}) : "") . "</li>\n";
-            }
-            $ret .= "</ul>";
+            $ret .= "<?p <b>Users</b> p?>";
+
+            $ret .= LJ::user_search_display(
+                                            userids  => [ map { $_->{'userid'} } @users ],
+                                            );
         }
     }
 

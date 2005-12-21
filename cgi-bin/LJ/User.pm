@@ -3851,6 +3851,73 @@ sub bad_password_redirect {
     }
 }
 
+# Returns HTML to display user search results
+# Args: %args
+# des-args:
+#           userids  => array ref of userids to include in results
+#           timesort => set to 1 to sort by last updated instead
+#           of username
+sub user_search_display {
+    my %args = @_;
+
+    my $loaded_users = LJ::load_userids(@{$args{userids}});
+
+    # Load when each user last updated
+    my $updated = LJ::get_timeupdate_multi(keys %$loaded_users);
+
+    my $ret;
+    my $sort = sub {
+        return $args{timesort} ? $updated->{$b->{userid}} <=> $updated->{$a->{userid}} :
+            $a->{user} cmp $b->{user};
+    };
+
+    foreach my $u (sort $sort values %$loaded_users) {
+        $ret .= "<div style='width: 300px; height: 105px; overflow: hidden; float: left; ";
+        $ret .= "border-bottom: 1px solid <?altcolor2?>; margin-bottom: 10px; padding-bottom: 5px; margin-right: 10px'>";
+        $ret .= "<table style='height: 105px'><tr>";
+
+        if (my $picid = $u->{'defaultpicid'}) {
+            $ret .= "<td style='width: 100px; text-align: center;'>";
+            my %pic;
+            LJ::load_userpics(\%pic, [ $u, $picid ]);
+            $ret .= "<a href='/allpics.bml?user=$u->{user}'>";
+            $ret .= "<img src='$LJ::USERPIC_ROOT/$picid/$u->{userid}' width='$pic{$picid}->{'width'}' height='$pic{$picid}->{'height'}' alt='$u->{user} userpic' style='border: 1px solid #000;' /></a>";
+            } else {
+                $ret .= "<td style='width: 100px;'>";
+            }
+
+        $ret .= "</td><td style='padding-left: 5px;' valign='middle'><table>";
+
+        $ret .= "<tr><td colspan='2' style='text-align: left;'>";
+        $ret .= LJ::ljuser($u);
+        $ret .= "</td></tr><tr>";
+
+        if ($u->{name}) {
+            $ret .= "<td width='1%'>Name:</td><td><a href='$LJ::SITEROOT/userinfo.bml?user=$u->{user}'>";
+            $ret .= LJ::ehtml($u->{name});
+            $ret .= "</a>";
+            $ret .= "</td></tr><tr>";
+        }
+
+        if (my $jtitle = $u->prop('journaltitle')) {
+            $ret .= "<td width='1%'>Journal:</td><td><a href='" . $u->journal_base . "'>";
+            $ret .= LJ::ehtml($jtitle) . "</a>";
+            $ret .= "</td></tr>";
+        }
+
+        $ret .= "<tr><td colspan='2' style='text-align: left;'>Updated ";
+        $ret .= " $u->{'secondsold'} ";
+        $ret .= LJ::ago_text(time() - $updated->{$u->{'userid'}});
+        $ret .= "</td></tr>";
+
+        $ret .= "</table>";
+        $ret .= "</td></tr>";
+        $ret .= "</table></div>";
+    }
+
+    return $ret;
+}
+
 1;
 
 
