@@ -52,15 +52,16 @@
 
     my $title = $box->box_name;
 
+    BML::set_content_type("text/xml");
+
     BML::noparse();
-    return qq {<?xml version="1.0" encoding="UTF-8" ?>
-    <Module>
-        <ModulePrefs title="$title" />
-        <Content type="url" href="$LJ::SITEROOT/portal/get.bml?pboxid=$pboxid" />
-    </Module>
+    return qq {<?xml version="1.0"?>
+<Module>
+<ModulePrefs title="$title" />
+<Content type="url" href="$LJ::SITEROOT/portal/get.bml?pboxid=$pboxid" />
+</Module>
     };
 
-    BML::content_type("text/xml");
 }
 
 _code?>
