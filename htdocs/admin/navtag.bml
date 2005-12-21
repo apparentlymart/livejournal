@@ -1,5 +1,10 @@
 <html>
 <head>
+<style>
+    div.tagcloud a { text-decoration: none; }
+    div.tagcloud a:visited { color: #00f; }
+    div.tagcloud a:link { color: #00f; }
+</style>
 </head>
 <body>
 <?_code
