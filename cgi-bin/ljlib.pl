@@ -2558,22 +2558,14 @@ sub note_recent_action {
     $cid = ref $cid ? $cid->{clusterid}+0 : $cid+0;
     return undef unless $cid;
 
-    my $flag = { post => 'P' }->{$action};
-
-    if (! $flag && LJ::are_hooks("recent_action_flags")) {
-        $flag = LJ::run_hook("recent_action_flags", $action);
-        die "Invalid flag received from hook: $flag"
-            unless $flag =~ /^_\w$/; # must be prefixed with '_'
-    }
-
-    # should have a flag by now
-    return undef unless $flag;
+    # make sure they gave us an action
+    return undef if !$action || length($action) > 20;;
 
     my $dbcm = LJ::get_cluster_master($cid)
         or return undef;
 
     # append to recentactions table
-    $dbcm->do("INSERT DELAYED INTO recentactions VALUES (?)", undef, $flag);
+    $dbcm->do("INSERT DELAYED INTO recentactions VALUES (?)", undef, $action);
     return undef if $dbcm->err;
 
     return 1;

@@ -2712,6 +2712,24 @@ register_alter(sub {
                  do_alter("portal_box_prop",
                           "ALTER TABLE portal_box_prop MODIFY COLUMN userid INT UNSIGNED NOT NULL, MODIFY COLUMN pboxid SMALLINT UNSIGNED NOT NULL, MODIFY COLUMN ppropid SMALLINT UNSIGNED NOT NULL");
     }
+
+    # These table are both livejournal tables, although could have ljcom values
+    # that we need to update.  Not trying to be lazy, but running the updates in
+    # update-db-local.pl would cause us to have to do a select on the table everytime
+    # to see if it still has old values, which is lame.  The updates also can't run
+    # before the alter so and if on if the alter has happened also isn't really
+    # useful.  So here they live. :-\
+    foreach my $table (qw(recentactions actionhistory)) {
+
+        if (column_type($table, "what") =~ /^char/i) {
+            do_alter($table,
+                     "ALTER TABLE $table MODIFY COLUMN what VARCHAR(20) NOT NULL");
+            do_sql("UPDATE $table SET what='post' WHERE what='P'");
+            do_sql("UPDATE $table SET what='phonepost' WHERE what='_F'");
+            do_sql("UPDATE $table SET what='phonepost_mp3' WHERE what='_M'");
+        }
+    }
+
 });
 
 1; # return true
