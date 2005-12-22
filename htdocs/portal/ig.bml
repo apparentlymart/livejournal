@@ -31,8 +31,6 @@
         return $returncontent->('Sorry, the portal is disabled at this time.');
     }
 
-    my $remote = LJ::get_remote;
-
     if (!$remote) {
         return $returncontent->("Sorry, you must be <a href=\"$LJ::SITEROOT/login.bml\">logged in</a> and have cookies enabled to use your modules.");
     }
@@ -65,3 +63,4 @@
 }
 
 _code?>
+http://internland.sixapart.com/portal/ig.bml?pboxid=3
