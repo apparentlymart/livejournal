@@ -4,6 +4,8 @@
     use vars qw(%FORM);
     use LJ::Portal::Config;
 
+    BML::set_content_type("text/xml");
+
     my $returncontent = sub {
         my $error = shift;
         return qq {
@@ -49,8 +51,6 @@
     }
 
     my $title = $box->box_name;
-
-    BML::set_content_type("text/xml");
 
     BML::noparse();
     return qq {<?xml version="1.0"?>
