@@ -406,7 +406,7 @@ sub resolve_plural {
 sub plural_form {
     my ($lang, $count) = @_;
     return plural_form_en($count) if $lang =~ /^en/;
-    return plural_form_ru($count) if $lang =~ /^ru/ || $lang =~ /^uk/;
+    return plural_form_ru($count) if $lang =~ /^ru/ || $lang =~ /^uk/ || $lang =~ /^be/;
     return plural_form_fr($count) if $lang =~ /^fr/ || $lang =~ /^pt_BR/;
     return plural_form_lt($count) if $lang =~ /^lt/;
     return plural_form_pl($count) if $lang =~ /^pl/;
