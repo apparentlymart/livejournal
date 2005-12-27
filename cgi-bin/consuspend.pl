@@ -287,6 +287,10 @@ sub suspend
 
         LJ::Con::fb_push( $u );
 
+        if ($cmd eq "suspend") {
+            LJ::run_hooks("account_cancel", $u);
+        }
+
         push @$out, [ "info", "User '$username' ${cmd}ed." ];
     }
 
