@@ -1364,7 +1364,7 @@ sub auth_digest {
 
     # sanity checks
     unless ($authname eq 'Digest' && $attrs{'qop'} eq 'auth' &&
-            $attrs{'realm'} eq 'lj' && $attrs{'algorithm'} eq 'MD5') {
+            $attrs{'realm'} eq 'lj' && (!defined $attrs{'algorithm'} || $attrs{'algorithm'} eq 'MD5')) {
         return $decline->(0);
     }
 
