@@ -1251,7 +1251,6 @@ sub editevent
 
     ### load existing meta-data
     my %curprops;
-
     LJ::load_log_props2($dbcm, $ownerid, [ $itemid ], \%curprops);
 
     ## handle meta-data (properties)
@@ -1301,7 +1300,7 @@ sub editevent
 
     if ($eventtime ne $oldevent->{'eventtime'} ||
         $security ne $oldevent->{'security'} ||
-        (!$curprops{opt_backdated} && $req->{props}{opt_backdated}) ||
+        (!$curprops{$itemid}->{opt_backdated} && $req->{props}{opt_backdated}) ||
         $qallowmask != $oldevent->{'allowmask'})
     {
         # are they changing their most recent post?
@@ -1312,7 +1311,7 @@ sub editevent
             if ($eventtime ne $oldevent->{eventtime}) {
                 # the newesteventtime is this event's new time.
                 LJ::set_userprop($u, "newesteventtime", $eventtime);
-            } elsif (!$curprops{opt_backdated} && $req->{props}{opt_backdated}) {
+            } elsif (!$curprops{$itemid}->{opt_backdated} && $req->{props}{opt_backdated}) {
                 # otherwise, if they set the backdated flag,
                 # then we no longer know the newesteventtime.
                 LJ::set_userprop($u, "newesteventtime", undef);
