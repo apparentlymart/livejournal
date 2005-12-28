@@ -12,6 +12,7 @@ my @checks = (  # put these in the order they should be checked in
     "modules",
     "env",
     "database",
+    "ljconfig",
 );
 foreach my $check (@checks) { $dochecks{$check} = 1; }
 
@@ -29,6 +30,11 @@ usage() unless GetOptions(
                           'only=s'      => \$only_check,
                           'no=s'        => \$no_check,
                           );
+
+if ($debs_only) {
+    $dochecks{ljconfig} = 0;
+    $dochecks{database} = 0;
+}
 
 usage() if $only_check && $no_check;
 
@@ -190,8 +196,6 @@ sub check_env {
 }
 
 sub check_database {
-    print "[Checking Database...]\n"
-        unless $debs_only;
 
     require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
     my $dbh = LJ::get_dbh("master");
@@ -205,11 +209,19 @@ sub check_database {
     }
 
     if (%LJ::MOGILEFS_CONFIG && $LJ::MOGILEFS_CONFIG{hosts}) {
-        print "[Checking MogileFS client.]\n"
-            unless $debs_only;
+        print "[Checking MogileFS client.]\n";
         my $mog = LJ::mogclient();
         die "Couldn't create mogilefs client." unless $mog;
     }
+}
+
+sub check_ljconfig {
+    return unless $LJ::IS_DEV_SERVER;
+
+    require LJ::ConfCheck;
+    my @errs = LJ::ConfCheck::config_errors();
+    local $" = ",\n\t";
+    $err->("Config errors: @errs") if @errs;
 }
 
 foreach my $check (@checks) {
