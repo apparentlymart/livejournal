@@ -88,7 +88,13 @@ sub handle_upload
     my $standalone = $entry ? 1 : 0;
     unless ($entry) {
         my $buff;
-        $r->read($buff, $r->header_in("Content-length"));
+
+        # Check length
+        my $len = $r->header_in("Content-length");
+        return respond($r, 400, "Content is too long")
+            if $len > $LJ::MAX_ATOM_UPLOAD;
+
+        $r->read($buff, $len);
 
         eval { $entry = XML::Atom::Entry->new( \$buff ); };
         return respond($r, 400, "Could not parse the entry due to invalid markup.<br /><pre>$@</pre>")
@@ -157,8 +163,13 @@ sub handle_post {
     my ($r, $remote, $u, $opts) = @_;
     my ($buff, $entry);
 
+    # Check length
+    my $len = $r->header_in("Content-length");
+    return respond($r, 400, "Content is too long")
+        if $len > $LJ::MAX_ATOM_UPLOAD;
+
     # read the content
-    $r->read($buff, $r->header_in("Content-length"));
+    $r->read($buff, $len);
 
     # try parsing it
     eval { $entry = XML::Atom::Entry->new( \$buff ); };
@@ -318,9 +329,14 @@ sub handle_edit {
     }
 
     if ($method eq "PUT") {
+        # Check length
+        my $len = $r->header_in("Content-length");
+        return respond($r, 400, "Content is too long")
+            if $len > $LJ::MAX_ATOM_UPLOAD;
+
         # read the content
         my $buff;
-        $r->read($buff, $r->header_in("Content-length"));
+        $r->read($buff, $len);
 
         # try parsing it
         my $entry;

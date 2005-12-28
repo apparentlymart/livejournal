@@ -208,6 +208,10 @@
                      'C' => 50,
                      };
 
+    # max content length we should read via ATOM api
+    # 25MB
+    $MAX_ATOM_UPLOAD ||= 25600;
+
     # Portal boxes
     unless(scalar(@LJ::PORTAL_BOXES)) {
         @PORTAL_BOXES = (
