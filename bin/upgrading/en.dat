@@ -2901,6 +2901,162 @@ Sincerely,
 
 /register.bml.trans.header=Success
 
+/schools/index.bml.addschool.example=Example:
+
+/schools/index.bml.addschool.input.city=City:
+
+/schools/index.bml.addschool.input.city.examples=San Francisco, Portland
+
+/schools/index.bml.addschool.input.country=Country:
+
+/schools/index.bml.addschool.input.name=Name of school:
+
+/schools/index.bml.addschool.input.name.examples=University of California Berkeley, Oregon State University
+
+/schools/index.bml.addschool.input.name.rule1=Type in the school's full name (e.g. "Harvard College" instead of just "Harvard")
+
+/schools/index.bml.addschool.input.name.rule2=No abbreviations. (Spell out University, North, State, High School, etc.)
+
+/schools/index.bml.addschool.input.name.rule3=For schools with multiple locations, add the city/campus after a dash (e.g. University of Texas - Austin)
+
+/schools/index.bml.addschool.input.name.rule4=Don't use "The" in the beginning
+
+/schools/index.bml.addschool.input.name.rule5=Capitalize all words (except of, the, and, at, for, de, du, la, le, etc.)
+
+/schools/index.bml.addschool.input.state=State/province:
+
+/schools/index.bml.addschool.input.state.examples=CA, NY, AB
+
+/schools/index.bml.addschool.input.url=URL:
+
+/schools/index.bml.addschool.input.url.optional=(optional)
+
+/schools/index.bml.addschool.intro=Enter your school's information. If approved, we'll add it to the Schools Directory and to the Schools list for this journal:
+
+/schools/index.bml.allcountries.header=All Countries
+
+/schools/index.bml.btn.add=Add
+
+/schools/index.bml.btn.addschool=Add School
+
+/schools/index.bml.btn.chooseschool=Choose School
+
+/schools/index.bml.btn.filter=Filter
+
+/schools/index.bml.city.header=City
+
+/schools/index.bml.city.select=Select a city
+
+/schools/index.bml.dontseeschool=Don't see what you're looking for?
+
+/schools/index.bml.dontseeschool.add=Add a School
+
+/schools/index.bml.error.cantfindschool=No such school found.
+
+/schools/index.bml.error.cantgetcountries=Unable to get country list.
+
+/schools/index.bml.error.cantgetdata=Unable to get necessary data.
+
+/schools/index.bml.error.cantsetattendance=Unable to set your attendance at [[name]].
+
+/schools/index.bml.error.cantsetattendance_limit=Unable to set your attendance at [[name]], please try again. You may have reached the limit of schools you can attend.
+
+/schools/index.bml.error.disabled=The Schools Directory is currently disabled due to maintenance.
+
+/schools/index.bml.error.invalidaustate=You must enter a valid two or three letter abbreviation for the Australian state.
+
+/schools/index.bml.error.invalidcountry=You must enter a valid country code.
+
+/schools/index.bml.error.invalidprovince=You must enter a valid two-letter abbreviation for the Canadian province.
+
+/schools/index.bml.error.invalidstate=You must enter a valid two-letter abbreviation for the US state.
+
+/schools/index.bml.error.invalidurl=The URL entered does not appear to be valid.
+
+/schools/index.bml.error.nocities=No cities found.
+
+/schools/index.bml.error.nocity=You must enter the city this school is located in.
+
+/schools/index.bml.error.nocountries=No countries found.
+
+/schools/index.bml.error.noname=You must enter the school's full name.
+
+/schools/index.bml.error.noschools=No schools found.
+
+/schools/index.bml.error.nostates=No states or provinces found.
+
+/schools/index.bml.error.undefinedstate=undefined state or province
+
+/schools/index.bml.error.validaustates=Valid Australian state abbreviations are ACT, NSW, NT, Qld, SA, Tas, Vic, and WA.
+
+/schools/index.bml.error.validprovinces=Valid Canadian abbreviations are AB, BC, MB, NB, NL, NT, NS, NU, ON, PE, QC, SK, and YT.
+
+/schools/index.bml.findschool=Find a school in:
+
+/schools/index.bml.intro=With the Schools Directory, you can:
+
+/schools/index.bml.intro.addschool=Add a school to your journal or community's user info page.
+
+/schools/index.bml.intro.dontseeschool=If you don't see what you're searching for, use the Add a School link at the bottom of this page to submit it.
+
+/schools/index.bml.intro.findusers=Find other users and communities associated with a school.
+
+/schools/index.bml.intro.manageschools=<a [[aopts]]>Manage</a> the schools you have attended.
+
+/schools/index.bml.matchesfound.header=Possible Matches Found
+
+/schools/index.bml.matchesfound.table.city=City
+
+/schools/index.bml.matchesfound.table.school=School
+
+/schools/index.bml.matchesfound.table.url=URL
+
+/schools/index.bml.matchesfound.text=We have found the following possible matches for your school in the same country and state. Please select one of the following schools or continue to add what you entered if it is in fact a new school. If your school shows up with incorrect data, please <a [[aopts]]>open a support request</a> providing as much information as you can.
+
+/schools/index.bml.school.addthisschool=Add this school for [[user]]
+
+/schools/index.bml.school.browsejournals=Browse journals associated with this school:
+
+/schools/index.bml.school.communities=Communities
+
+/schools/index.bml.school.findanother=Find another school
+
+/schools/index.bml.school.header=School
+
+/schools/index.bml.school.limitbyyear=Limit this list by year:
+
+/schools/index.bml.school.manage=Manage your schools
+
+/schools/index.bml.school.nousers=There are no communities or users that list this school yet.
+
+/schools/index.bml.school.nousersforthisyear=There are no communities or users that list this school in [[year]].
+
+/schools/index.bml.school.select=Select a school
+
+/schools/index.bml.school.url=(<a [[aopts]]>official website</a>)
+
+/schools/index.bml.school.users=Users
+
+/schools/index.bml.schoolcount=([[numschools]] [[?numschools|school|schools]])
+
+/schools/index.bml.state.header=State
+
+/schools/index.bml.state.select=Select a state
+
+/schools/index.bml.stateorprovince.header=State or Province
+
+/schools/index.bml.submitted.header=School Submitted
+
+/schools/index.bml.submitted.manage=Go to your Schools list
+
+/schools/index.bml.submitted.return=Return to the Schools Directory
+
+/schools/index.bml.submitted.text=Your school has been submitted for approval. If approved, your school will be added to the Schools Directory and automatically added to your <a [[aopts]]>Schools</a> list. You can check the <a [[aopts]]>Manage Schools</a> page later to add years attended.
+
+/schools/index.bml.title=Schools Directory
+
+/schools/index.bml.top5countries.header=Top Five Countries
+
 /styles/create.bml.choosebase=Choose base style to start with and edit:
 
 /styles/create.bml.createstyle.head=Create a Style

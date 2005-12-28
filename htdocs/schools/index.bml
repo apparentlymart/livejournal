@@ -1,5 +1,5 @@
 <?page
-title=>Schools Directory
+title=><?_ml .title _ml?>
 body<=
 <?_code
 {
@@ -10,9 +10,9 @@ body<=
     LJ::set_active_crumb('schools');
 
     my $ret = '';
-    my $err = sub { return "<?h1 Error h1?><?p $_[0] p?>"; };
+    my $err = sub { return "<?h1 $ML{'Error'} h1?><?p $_[0] p?>"; };
 
-    return $err->('The Schools Directory is currently disabled due to maintenance.')
+    return $err->($ML{'.error.disabled'})
         if $LJ::DISABLED{'schools'};
 
     my ($ctc, $sc, $cc, $sid) = ($GET{ctc}, $GET{sc}, $GET{cc}, $GET{sid}+0);
@@ -41,11 +41,11 @@ body<=
     my $trail = sub {
         my ($des, $country, $state, $city) = @_;
 
-        $state = 'undefined state or province'
+        $state = $ML{'.error.undefinedstate'}
             if !$state && $city;
 
         my $ret;
-        $ret .= '<b>Find a school in:</b> '
+        $ret .= "<b>$ML{'.findschool'}</b> "
             if $des;
         $ret .= "<a href='$LJ::SITEROOT/schools/?ctc=$ectc'>$country</a>";
 
@@ -66,18 +66,18 @@ body<=
         my $ret;
 
         my $ex = sub {
-            return " <span style='color: #999'><b>Example:</b> $_[0]</span>";
+            return " <span style='color: #999'><b>$ML{'.addschool.example'}</b> $_[0]</span>";
         };
 
         $class = $GET{add} ? '' : 'display_none'
             unless defined $class;
 
         $ret .= "<div class='$class' id='addschool'>";
-        $ret .= "<?p Enter your school's information. If approved, we'll add it to the Schools Directory and to the Schools list for this journal: p?>";
+        $ret .= "<?p $ML{'.addschool.intro'} p?>";
         $ret .= "<form action='index.bml' method='post'><div style='margin-left: 2em'>";
 
         $ret .= "<table><tr><td>";
-        $ret .= "Country: ";
+        $ret .= "$ML{'.addschool.input.country'}";
         my %countries;
         LJ::load_codes({ "country" => \%countries });
         $ret .= "</td><td>";
@@ -89,23 +89,23 @@ body<=
         $ret .= "</td></tr><tr><td colspan='2'>";
         $ret .= $inerr->('country');
         $ret .= "</td></tr><tr><td valign='top'>";
-        $ret .= "State/province:</td><td>" . LJ::html_text({ name => "state", maxlength => 255, size => 15, value => $state }) . "<br />&nbsp;&nbsp" . $ex->("CA, NY, AB");
+        $ret .= "$ML{'.addschool.input.state'}</td><td>" . LJ::html_text({ name => "state", maxlength => 255, size => 15, value => $state }) . "<br />&nbsp;&nbsp" . $ex->($ML{'.addschool.input.state.examples'});
         $ret .= "</td></tr><tr><td colspan='2'>";
         $ret .= $inerr->('state');
         $ret .= "</td></tr><tr><td valign='top'>";
-        $ret .= "City:</td><td>" . LJ::html_text({ name => "city", maxlength => 255, size => 20, value => $city }) . "<br />&nbsp;&nbsp;" . $ex->("San Francisco, Portland");
+        $ret .= "$ML{'.addschool.input.city'}</td><td>" . LJ::html_text({ name => "city", maxlength => 255, size => 20, value => $city }) . "<br />&nbsp;&nbsp;" . $ex->($ML{'.addschool.input.city.examples'});
         $ret .= "</td></tr><tr><td colspan='2'>";
         $ret .= $inerr->('city');
         $ret .= "</td></tr><tr><td valign='top'>";
-        $ret .= "Name of school:</td><td valign='top'>" . LJ::html_text({ name => "name", size => 50, value => $name }) . "<br />&nbsp;&nbsp;" . $ex->("University of California Berkeley, Oregon State University<br /><ul><li>Type in the school's full name (e.g. \"Harvard College\" instead of just \"Harvard\")</li><li>No abbreviations.  (Spell out University, North, State, High School, etc.)</li><li>For schools with multiple locations, add the city/campus after a dash (ex: University of Texas - Austin)</li><li>Don't use \"The\" in the beginning</li><li>Capitalize all words (except of, the, and, at, for, de, du, la, le, etc.)</li></ul>");
+        $ret .= "$ML{'.addschool.input.name'}</td><td valign='top'>" . LJ::html_text({ name => "name", size => 50, value => $name }) . "<br />&nbsp;&nbsp;" . $ex->("$ML{'.addschool.input.name.examples'}<br /><ul><li>$ML{'.addschool.input.name.rule1'}</li><li>$ML{'.addschool.input.name.rule2'}</li><li>$ML{'.addschool.input.name.rule3'}</li><li>$ML{'.addschool.input.name.rule4'}</li><li>$ML{'.addschool.input.name.rule5'}</li></ul>");
         $ret .= "</td></tr><tr><td colspan='2'>";
         $ret .= $inerr->('name');
         $ret .= "</td></tr><tr><td valign='top'>";
-        $ret .= "URL: <?de (optional) de?></td><td>" . LJ::html_text({ name => "url", size => 50, value => $remoterl }) . "<br />";
+        $ret .= "$ML{'.addschool.input.url'} <?de $ML{'.addschool.input.url.optional'} de?></td><td>" . LJ::html_text({ name => "url", size => 50, value => $remoterl }) . "<br />";
         $ret .= "</td></tr><tr><td colspan='2'>";
         $ret .= $inerr->('url');
         $ret .= "</td></tr><tr><td colspan='2'>";
-        $ret .= LJ::html_submit("Add School");
+        $ret .= LJ::html_submit($ML{'.btn.addschool'});
         $ret .= "</td></tr></table>";
         $ret .= "</div></form></div>";
 
@@ -126,10 +126,10 @@ body<=
 
         my $ret;
 
-        $ret .= "<?h1 School Submitted h1?>";
-        $ret .= "<?p Your school has been submitted for approval.  If approved, your school will be added to the Schools Directory and automatically added to your <a href='$LJ::SITEROOT/schools/manage.bml'>Schools</a> list.  You can check back later to the <a href='$LJ::SITEROOT/schools/manage.bml'>Manage Schools</a> page to add years attended. p?>";
+        $ret .= "<?h1 $ML{'.submitted.header'} h1?>";
+        $ret .= "<?p " . BML::ml('.submitted.text', {'aopts' => "href='$LJ::SITEROOT/schools/manage.bml'"}) . " p?>";
 
-        $ret .= "<a href='$LJ::SITEROOT/schools/'>Return to the Schools Directory</a><br /><br /><a href='$LJ::SITEROOT/schools/manage.bml'>Go to your Schools list</a></td></tr></table>";
+        $ret .= "<a href='$LJ::SITEROOT/schools/'>$ML{'.submitted.return'}</a><br /><br /><a href='$LJ::SITEROOT/schools/manage.bml'>$ML{'.submitted.manage'}</a></td></tr></table>";
 
         return $ret;
     };
@@ -143,49 +143,52 @@ body<=
             my ($country, $state, $city, $name, $remoterl) =
                 ($POST{country}, $POST{state}, $POST{city}, $POST{name}, $POST{url});
 
-            $bogus->('country', 'You must enter a valid country code.')
+            $bogus->('country', $ML{'.error.invalidcountry'})
                 unless $country && $country =~ /^\w\w$/;
 
             if ($country eq 'US') {
-                $bogus->('state', 'You must enter a valid two-letter abbreviation for the US state.')
-                    unless $state =~ /^\w\w$/;
+                if ($state !~ /^\w\w$/) {
+                    $bogus->('state', $ML{'.error.invalidstate'})
+                } else {
+                    $state = uc($state);
 
-                $state = uc($state);
+                    my %states;
+                    LJ::load_codes({ state => \%states });
 
-                my %states;
-                LJ::load_codes({ state => \%states });
-
-                $bogus->('state', 'You must enter a valid two-letter abbreviation for the US state.')
-                    unless exists $states{$state};
+                    $bogus->('state', $ML{'.error.invalidstate'})
+                        unless exists $states{$state};
+                }
             } elsif ($country eq 'CA') {
-                $bogus->('state', 'You must enter a valid two-letter abbreviation for the Canadian province.')
-                    unless $state =~ /^\w\w$/;
+                if ($state !~ /^\w\w$/) {
+                    $bogus->('state', $ML{'.error.invalidprovince'})
+                } else {
+                    $state = uc($state);
 
-                $state = uc($state);
-
-                $bogus->('state', 'Valid Canadian abbreviations are AB, BC, MB, NB, NL, NT, NS, NU, ON, PE, QC, SK, and YT.')
-                    unless $state =~ /^(AB)|(BC)|(MB)|(NB)|(NL)|(NT)|(NS)|(NU)|(ON)|(PE)|(QC)|(SK)|(YT)$/;
+                    $bogus->('state', $ML{'.error.validprovinces'})
+                        unless $state =~ /^(AB)|(BC)|(MB)|(NB)|(NL)|(NT)|(NS)|(NU)|(ON)|(PE)|(QC)|(SK)|(YT)$/;
+                }
             } elsif ($country eq 'AU') {
-                $bogus->('state', 'You must enter a valid two or three letter abbreviation for the Australian state.')
-                    unless $state =~ /^\w\w\w?$/;
-
-                $bogus->('state', 'Valid Australian state abbreviations are ACT, NSW, NT, Qld, SA, Tas, Vic, and WA.')
-                    unless $state =~ /^(ACT)|(NSW)|(NT)|(Qld)|(SA)|(Tas)|(Vic)|(WA)$/i;
+                if ($state !~ /^\w\w\w?$/) {
+                    $bogus->('state', $ML{'.error.invalidaustate'})
+                } else {
+                    $bogus->('state', $ML{'.error.validaustates'})
+                        unless $state =~ /^(ACT)|(NSW)|(NT)|(Qld)|(SA)|(Tas)|(Vic)|(WA)$/i;
+                }
             }
 
             $city = LJ::Schools::canonical_city_name($city);
 
-            $bogus->('city', 'You must enter the city this school is located in.')
+            $bogus->('city', $ML{'.error.nocity'})
                 unless length($city);
 
             $name = LJ::Schools::canonical_school_name($name, $city);
 
-            $bogus->('name', 'You must enter the school\'s full name.')
+            $bogus->('name', $ML{'.error.noname'})
                 unless length($name);
 
             if ($remoterl) {
                 $remoterl = LJ::CleanHTML::canonical_url($remoterl);
-                $bogus->('url', 'The URL entered does not appear to be valid.')
+                $bogus->('url', $ML{'.error.invalidurl'})
                     if $remoterl !~ m!https?://[^\s\"\'\<\>]+!g;
             }
 
@@ -202,17 +205,17 @@ body<=
             } elsif (ref $related ne 'ARRAY') {
                 my $rv = LJ::Schools::set_attended($remote, $related);
 
-                return LJ::bad_input("Unable to set your attendance at $name")
+                return LJ::bad_input(BML::ml('.error.cantsetattendance', {'name' => $name}))
                     unless $rv;
 
                 return BML::redirect("$LJ::SITEROOT/schools/manage.bml?sid=$related");
             } else {
-                $ret .= "<?h1 Possible Matches Found h1?>";
-                $ret .= "<?p We have found the following possible matches for your school in the same country and state.  Please select one of the following schools or continue to add what you entered if it is in fact a new school.  If your school shows up with incorrect data, please <a href='$LJ::SITEROOT/support/submit.bml?category=schools'>open a support request</a> providing as much information as you can. p?>";
+                $ret .= "<?h1 $ML{'.matchesfound.header'} h1?>";
+                $ret .= "<?p " . BML::ml('.matchesfound.text', {'aopts' => "href='$LJ::SITEROOT/support/submit.bml?category=schools'"}) . " p?>";
 
                 my $schools = LJ::Schools::load_schools(@$related);
 
-                $ret .= "<form action='index.bml' method='POST'><table><tr><td>&nbsp;</td><th>School</th><th>City</th><th>URL</th></tr>";
+                $ret .= "<form action='index.bml' method='POST'><table><tr><td>&nbsp;</td><th>$ML{'.matchesfound.table.school'}</th><th>$ML{'.matchesfound.table.city'}</th><th>$ML{'.matchesfound.table.url'}</th></tr>";
                 foreach my $sid (sort {$schools->{$a}->{name} cmp $schools->{$b}->{name}} keys %$schools) {
                     $ret .= "<tr><td>";
                     $ret .= LJ::html_check(
@@ -243,7 +246,7 @@ body<=
                 $ret .= "</table>";
 
                 $ret .= LJ::html_hidden('state', $state, 'countrycode', $country, 'url', $remoterl, 'name', $name, 'city', $city);
-                $ret .= LJ::html_submit('choose', 'Choose School');
+                $ret .= LJ::html_submit('choose', $ML{'.btn.chooseschool'});
                 $ret .= LJ::form_auth();
                 $ret .= "</form>";
             }
@@ -258,7 +261,7 @@ body<=
             } else {
                 my $rv = LJ::Schools::set_attended($remote, $POST{sid});
 
-                return LJ::bad_input("Unable to set your attendance at $POST{name}, please try again.  You may have reached the limit of schools you can attend.")
+                return LJ::bad_input(BML::ml('.error.cantsetattendance_limit', {'name' => $POST{name}}))
                     unless $rv;
 
                 return BML::redirect("$LJ::SITEROOT/schools/manage.bml?sid=$POST{sid}");
@@ -272,19 +275,19 @@ body<=
 
     unless ($ctc) {
         # Header text
-        $ret .= "<?p With the Schools Directory, you can:<ul>";
-        $ret .= "<li>Add a school to your journal or community's user info page.</li>";
-        $ret .= "<li>Find other users and communities associated with a school.</li>";
-        $ret .= "<li><a href='manage.bml'>Manage</a> the schools you have attended.</li></ul>";
+        $ret .= "<?p $ML{'.intro'}<ul>";
+        $ret .= "<li>$ML{'.intro.addschool'}</li>";
+        $ret .= "<li>$ML{'.intro.findusers'}</li>";
+        $ret .= "<li>" . BML::ml('.intro.manageschools', {'aopts' => "href='$LJ::SITEROOT/schools/manage.bml'"}) . "</li></ul>";
         $ret .= " p?>";
 
         my $cts = LJ::Schools::get_countries();
-        return $err->("Unable to get country list.")
+        return $err->($ML{'.error.cantgetcountries'})
             unless $cts;
-        return $err->("No countries found.")
+        return $err->($ML{'.error.nocountries'})
             unless %$cts;
 
-        $ret .= "<?h2 Top Five Countries h2?>";
+        $ret .= "<?h2 $ML{'.top5countries.header'} h2?>";
         $ret .= "<ul>";
 
         # New API method result
@@ -294,9 +297,8 @@ body<=
                 my $ret;
                 $ret .= "<li><a href='$LJ::SITEROOT/schools/?ctc=" . LJ::eurl($ct->{'code'}) . "'>";
                 $ret .= LJ::ehtml($ct->{'name'});
-                $ret .= "</a> <font size='1'>($ct->{'count'} ";
-                $ret .= $ct->{'count'} == 1 ? 'school' : 'schools';
-                $ret .= ")</font></li>\n";
+                $ret .= "</a> <font size='1'>" . BML::ml('.schoolcount', {'numschools' => $ct->{'count'}});
+                $ret .= "</font></li>\n";
                 return $ret;
             };
 
@@ -310,7 +312,7 @@ body<=
                 $ret .= $output_line->($ct);
             }
 
-            $ret .= "</ul><?h2 All Countries h2?><ul>";
+            $ret .= "</ul><?h2 $ML{'.allcountries.header'} h2?><ul>";
 
             @sorted = ();
             foreach (sort { $cts->{$a}->{'name'} cmp $cts->{$b}->{'name'}} keys %{$cts}) {
@@ -339,8 +341,8 @@ body<=
         }
         $ret .= "</ul>";
 
-        $ret .= "<div id='addlink'><?p <i>Don't see what you're looking for?</i><br />";
-        $ret .= "<a href='/schools/?ctc=$ectc&add=1' onclick='return addschool()'>Add a School</a>";
+        $ret .= "<div id='addlink'><?p <i>$ML{'.dontseeschool'}</i><br />";
+        $ret .= "<a href='$LJ::SITEROOT/schools/?ctc=$ectc&add=1' onclick='return addschool()'>$ML{'.dontseeschool.add'}</a>";
         $ret .= " p?></div>";
         $ret .= $add_school->();
 
@@ -355,33 +357,33 @@ body<=
     # PAGE 2: return the list of areas in that country
 
     unless (defined $sc) {
-        $ret .= "<?p  If you don't see what you're searching for, use the Add a School link at the bottom of this page to submit it. p?>" unless $ctc eq 'US';
+        $ret .= "<?p $ML{'.intro.dontseeschool'} p?>" unless $ctc eq 'US';
 
         my $scs = LJ::Schools::get_states($ctc);
-        return $err->("Unable to get necessary data.")
+        return $err->($ML{'.error.cantgetdata'})
             unless $scs;
-        return $err->("No states or provinces found.")
+        return $err->($ML{'.error.nostates'})
             unless %$scs;
 
         my ($country) = LJ::Schools::expand_codes($ctc);
 
         $ret .= $trail->(1, $country);
 
-        my $sop = $ctc eq 'US' ? 'State' : 'State or Province';
+        my $sop = $ctc eq 'US' ? $ML{'.state.header'} : $ML{'.stateorprovince.header'};
 
-        $ret .= "<?h1 $sop h1?><?p Select a state p?>";
+        $ret .= "<?h1 $sop h1?><?p $ML{'.state.select'} p?>";
 
         $ret .= "<ul>";
         foreach my $sc (sort { $scs->{$a} cmp $scs->{$b} } keys %{$scs}) {
             my $esc = LJ::eurl($sc);
-            my $val = LJ::ehtml($scs->{$sc}) || "<i>undefined state or province</i>";
+            my $val = LJ::ehtml($scs->{$sc}) || "<i>$ML{'.error.undefinedstate'}</i>";
             $ret .= "<li><a href='$LJ::SITEROOT/schools/?ctc=$ectc&sc=$esc'>$val</a></li>\n";
         }
         $ret .= "</ul>";
 
         unless ($ctc eq 'US') {
-            $ret .= "<div id='addlink'><?p <i>Don't see what you're looking for?</i><br />";
-            $ret .= "<a href='/schools/?ctc=$ectc&add=1' onclick='return addschool()'>Add a School</a>";
+            $ret .= "<div id='addlink'><?p <i>$ML{'.dontseeschool'}</i><br />";
+            $ret .= "<a href='$LJ::SITEROOT/schools/?ctc=$ectc&add=1' onclick='return addschool()'>$ML{'.dontseeschool.add'}</a>";
             $ret .= " p?></div>";
             $ret .= $add_school->($ctc);
         }
@@ -393,19 +395,19 @@ body<=
     # PAGE 3: return the list of cities in a state
 
     unless ($cc) {
-        $ret .= "<?p  If you don't see what you're searching for, use the Add a School link at the bottom of this page to submit it. p?>";
+        $ret .= "<?p $ML{'.intro.dontseeschool'} p?>";
 
         my $ccs = LJ::Schools::get_cities($ctc, $sc);
-        return $err->("Unable to get necessary data.")
+        return $err->($ML{'.error.cantgetdata'})
             unless $ccs;
-        return $err->("No cities found.")
+        return $err->($ML{'.error.nocities'})
             unless %$ccs;
 
         my ($country, $state) = LJ::Schools::expand_codes($ctc, $sc);
 
         $ret .= $trail->(1, $country, $state);
 
-        $ret .= "<?h1 City h1?><?p Select a city p?>";
+        $ret .= "<?h1 $ML{'.city.header'} h1?><?p $ML{'.city.select'} p?>";
 
         $ret .= "<ul>";
         foreach my $cc (sort { $ccs->{$a} cmp $ccs->{$b} } keys %{$ccs}) {
@@ -414,8 +416,8 @@ body<=
         }
         $ret .= "</ul>";
 
-        $ret .= "<div id='addlink'><?p <i>Don't see what you're looking for?</i><br />";
-        $ret .= "<a href='/schools/?ctc=$ectc&sc=$esc&add=1' onclick='return addschool()'>Add a School</a>";
+        $ret .= "<div id='addlink'><?p <i>$ML{'.dontseeschool'}</i><br />";
+        $ret .= "<a href='$LJ::SITEROOT/schools/?ctc=$ectc&sc=$esc&add=1' onclick='return addschool()'>$ML{'.dontseeschool.add'}</a>";
         $ret .= " p?></div>";
         $ret .= $add_school->($ctc, $sc);
 
@@ -426,19 +428,19 @@ body<=
     # PAGE 4: return the list of schools in a city
 
     unless ($sid) {
-        $ret .= "<?p  If you don't see what you're searching for, use the Add a School link at the bottom of this page to submit it. p?>";
+        $ret .= "<?p $ML{'.intro.dontseeschool'} p?>";
 
         my $schools = LJ::Schools::get_schools($ctc, $sc, $cc);
-        return $err->("Unable to get necessary data.")
+        return $err->($ML{'.error.cantgetdata'})
             unless $schools;
-        return $err->("No schools found.")
+        return $err->($ML{'.error.noschools'})
             unless %$schools;
 
         my ($country, $state, $city) = LJ::Schools::expand_codes($ctc, $sc, $cc);
 
         $ret .= $trail->(1, $country, $state, $city);
 
-        $ret .= "<?h1 School h1?><?p Select a school p?>";
+        $ret .= "<?h1 $ML{'.school.header'} h1?><?p $ML{'.school.select'} p?>";
 
         $ret .= "<ul>";
         foreach my $sid (sort { $schools->{$a} cmp $schools->{$b} } keys %{$schools}) {
@@ -447,8 +449,8 @@ body<=
         }
         $ret .= "</ul>";
 
-        $ret .= "<div id='addlink'><?p <i>Don't see what you're looking for?</i><br />";
-        $ret .= "<a href='/schools/?ctc=$ectc&sc=$esc&cc=$ecc&add=1' onclick='return addschool()'>Add a School</a>";
+        $ret .= "<div id='addlink'><?p <i>$ML{'.dontseeschool'}</i><br />";
+        $ret .= "<a href='$LJ::SITEROOT/schools/?ctc=$ectc&sc=$esc&cc=$ecc&add=1' onclick='return addschool()'>$ML{'.dontseeschool.add'}</a>";
         $ret .= " p?></div>";
         $ret .= $add_school->($ctc, $sc, $cc);
 
@@ -460,7 +462,7 @@ body<=
 
     # Make sure this school id actually exists
     my $school = LJ::Schools::load_schools(($sid));
-    return $err->("No such school found")
+    return $err->($ML{'.error.cantfindschool'})
         unless $school;
 
     my $year = $GET{'year'} || 0;
@@ -496,7 +498,7 @@ body<=
     # now display the information
     $ret .= "<table><tr><td>";
     $ret .= "<?h1 $school h1?></td>";
-    $ret .= "<td valign='middle'><font size='1'>(<a href='" . LJ::ehtml($url) . "'>official website</a>)</font></td>"
+    $ret .= "<td valign='middle'><font size='1'>" . BML::ml('.school.url', {'aopts' => "href='" . LJ::ehtml($url) . "'"}) . "</font></td>"
         if $url;
     $ret .= "</table>";
     $ret .= $trail->(0, $country, $state, $city);
@@ -510,46 +512,46 @@ body<=
         $ret .= LJ::html_hidden('ctc', $ctc) if $ctc;
         $ret .= LJ::html_hidden('cc', $cc) if $cc;
         $ret .= LJ::html_hidden('sid', $sid) if $sid;
-        $ret .= 'Add this school for ';
 
         if (@list > 1) {
-            $ret .= LJ::html_select({ name => 'authas', 'selected' => $remote->{'user'}}, map {$_, $_} @list);
+            my $userlist = LJ::html_select({ name => 'authas', 'selected' => $remote->{'user'}}, map {$_, $_} @list);
+            $ret .= BML::ml('.school.addthisschool', {'user' => $userlist});
         } else {
-            $ret .= LJ::ljuser($remote);
+            $ret .= BML::ml('.school.addthisschool', {'user' => LJ::ljuser($remote)});
         }
 
-        $ret .= ' ' . LJ::html_submit('Add');
-        $ret .= "<br /><a href='$LJ::SITEROOT/schools/'>Find another school</a>";
-        $ret .= "<br /><a href='$LJ::SITEROOT/schools/manage.bml?sid=$esid'>Manage your schools</a>";
+        $ret .= ' ' . LJ::html_submit($ML{'.btn.add'});
+        $ret .= "<br /><a href='$LJ::SITEROOT/schools/'>$ML{'.school.findanother'}</a>";
+        $ret .= "<br /><a href='$LJ::SITEROOT/schools/manage.bml?sid=$esid'>$ML{'.school.manage'}</a>";
         $ret .= "</form>";
     }
 
-    $ret .= "<br /><?h2 Browse journals associated with this school: h2?>";
+    $ret .= "<br /><?h2 $ML{'.school.browsejournals'} h2?>";
 
     if (@ids) {
-        $ret .= "<form action='/schools/' method='get'><?p Limit this list by year: ";
+        $ret .= "<form action='/schools/' method='get'><?p $ML{'.school.limitbyyear'} ";
         $ret .= LJ::html_text({name => 'year', size => 4, maxlength => 4, value => $year ? $year : ''});
         $ret .= LJ::html_hidden('ctc', $ctc, 'cc', $cc, 'sid', $sid, 'sc', $sc);
-        $ret .= LJ::html_submit('Filter');
+        $ret .= LJ::html_submit($ML{'.btn.filter'});
         $ret .= " p?></form>";
     }
 
     unless (@ids) {
         if ($year) {
-            $ret .= "<?p There are no communities or users that list this school in $year. p?>";
+            $ret .= "<?p " . BML::ml('.school.nousersforthisyear', {'year' => $year}) . " p?>";
         } else {
-            $ret .= "<?p There are no communities or users that list this school yet. p?>";
+            $ret .= "<?p $ML{'.school.nousers'} p?>";
         }
     } else {
         if (@comms) {
-            $ret .= "<?p <b>Communities</b> p?><ul>";
+            $ret .= "<?p <b>$ML{'.school.communities'}</b> p?><ul>";
             foreach my $c (@comms) {
                 $ret .= "<li>" . LJ::ljuser($c) . " - " . LJ::ehtml($c->{name}) . "</li>\n";
             }
             $ret .= "</ul>";
         }
         if (@users) {
-            $ret .= "<?p <b>Users</b> p?>";
+            $ret .= "<?p <b>$ML{'.school.users'}</b> p?>";
 
             $ret .= LJ::user_search_display(
                                             userids  => [ map { $_->{'userid'} } @users ],
