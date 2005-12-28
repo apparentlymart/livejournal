@@ -2662,7 +2662,7 @@ sub init {
         }
         if ($chrp_err) {
             my $ip = LJ::get_remote_ip();
-            if ($LJ::DEBUG_TALKSPAM) {
+            if ($LJ::DEBUG{'talkspam'}) {
                 my $ruser = $remote ? $remote->{user} : "[nonuser]";
                 print STDERR "talkhash error: from $ruser \@ $ip - $chrp_err - $talkurl\n";
             }
@@ -3117,10 +3117,10 @@ Talk spam from $key:
     Time caught: $nowtime
     Posting to:  $journalu->{'user'}
 EOM
-                if ($LJ::DEBUG_TALK_RATE &&
+                if ($LJ::DEBUG{'talkrate'} &&
                     LJ::MemCache::add("warn:$key", 1, 600)) {
                     LJ::send_mail({
-                        'to' => $LJ::DEBUG_TALK_RATE,
+                        'to' => $LJ::DEBUG{'talkrate'},
                         'from' => $LJ::ADMIN_EMAIL,
                         'fromname' => $LJ::SITENAME,
                         'charset' => 'utf-8',

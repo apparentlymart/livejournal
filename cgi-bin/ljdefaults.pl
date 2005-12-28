@@ -47,10 +47,6 @@
     $USERPIC_ROOT ||= "$LJ::SITEROOT/userpic";
     $PALIMGROOT ||= "$LJ::SITEROOT/palimg";
 
-    if ($LJ::DB_USERIDMAP ||= "") {
-        $LJ::DB_USERIDMAP .= "." unless  $LJ::DB_USERIDMAP =~ /\.$/;
-    }
-
     # path to sendmail and any necessary options
     $SENDMAIL ||= "/usr/sbin/sendmail -t -oi";
 

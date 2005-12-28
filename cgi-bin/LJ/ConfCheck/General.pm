@@ -88,4 +88,48 @@ add_conf('$COMPRESS_TEXT',
 	 des => "If set, text is gzip-compressed when put in the database.  When reading from the database, this configuration means nothing, as the code automatically determines to uncompress or not.",
 	 );
 
+add_conf('$COOKIE_DOMAIN',
+	 required => 1,
+	 des => "The 'domain' value set on cookies sent to users.  By default, value is \".\$DOMAIN\".  Note the leading period, which is a wildcard for everything at or under \$DOMAIN.",
+	 );
+
+add_conf('$COOKIE_PATH',
+	 required => 0,
+	 des => "The 'path' value set on cookies sent to users.  By default, value is \"/\", and any other value probably wouldn't work anyway.",
+	 STUPID_BECAUSE => "no use, since LJ must be rooted at /.",
+	 );
+
+add_conf('@COOKIE_DOMAIN_RESET',
+	 required => 0,
+	 des => "Array of cookie domain values to send when deleting cookies from users.  Only useful when changing domains, and even then kinda useless.",
+	 STUPID_BECAUSE => "ancient hack for one old specific use",
+	 );
+
+add_conf('$COPPA_CHECK',
+	 required => 0,
+	 type => "bool",
+	 des => "If set, new users are asked for their birthday for COPPA compliance.",
+	 );
+
+add_conf('$DB_LOG_HOST',
+	 required => 0,
+	 type => "hostport",
+	 des => "An optional host:port to send UDP packets to with blocking reports.  See LJ::blocking_report(..)",
+	 );
+
+add_conf('$DB_TIMEOUT',
+	 required => 0,
+	 type => "int",
+	 des => "Integer number of seconds to wait for database handles before timing out.  By default, zero, which means no timeout.",
+	 );
+
+add_conf('$DEFAULT_CLUSTER',
+	 required => 0,
+	 des => "Integer of a user cluster number or arrayref of cluster numbers, for where new users are assigned after account creation.  In the case of an arrayref, you can weight one particular cluster over another by place it in the arrayref more often.  For instance, [1, 2, 2, 2] would make users go onto cluster #2 75% of the time, and cluster #1 25% of the time.",
+	 );
+
+add_conf('$DEFAULT_LANG',
+	 required => 0,
+	 des => "Default language (code) to show site in, for users that haven't set their langauge.  Defaults to the first item in \@LANGS, which is usually \"en\", for English.",
+	 );
 1;
