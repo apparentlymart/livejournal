@@ -14,9 +14,6 @@ BML::register_block("CHALRESPJS", "", $LJ::COMMON_CODE{'chalresp_js'});
 
 {
     my $dl = "<a href=\"$LJ::SITEROOT/files/%%DATA%%\">HTTP</a>";
-    if ($LJ::FTPPREFIX) {
-        $dl .= " - <a href=\"$LJ::FTPPREFIX/%%DATA%%\">FTP</a>";
-    }
     BML::register_block("DL", "DR", $dl);
 }
 

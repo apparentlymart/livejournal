@@ -1066,7 +1066,7 @@ sub canonical_url {
         $url = "$pref://$url";
     }
 
-    if ($LJ::FIXUP_AOL) {
+    if ($LJ::DEBUG{'aol_http_to_ftp'}) {
         # aol blocks http referred from lj, but ftp has no referer header.
         if ($url =~ m!^http://(?:www\.)?(?:members|hometown|users)\.aol\.com/!) {
             $url =~ s!^http!ftp!;

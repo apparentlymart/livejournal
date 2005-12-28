@@ -182,12 +182,27 @@ add_conf('$DOMAIN_WEB',
 	 type => 'hostname,'
 	 );
 
+add_conf('$EMAIL_POST_DOMAIN',
+	 type => 'hostname',
+	 des => "Domain name for incoming emails.  For instance, user 'bob' might post by sending email to 'bob\@post.service.com', where 'post.service.com' is the value of \$EMAIL_POST_DOMAIN",
+	 );
+
+add_conf('$FB_DOMAIN',
+	 type => 'hostname',
+	 des => "Domain name for cooperating Fotobilder (media hosting/cataloging) installation",
+	 );
+
+add_conf('$FB_SITEROOT',
+	 type => 'url',
+	 des => "URL prefix to cooperating Fotobilder installation, without trailing slash.  For instance, http://pics.foo.com"
+	 );
 
 my %bools = (
 	     "DONT_LOG_IMAGES" => "Don't log requests for images.",
 	     "DONT_TOUCH_STYLES" => "During the upgrade populator, don't touch styles.  That is, consider the local styles the definitive ones, and any differences between the database and the distribution files should mean that the distribution is old, not the database.",
 	     "DO_GZIP" => "Compress text content sent to browsers.  Cuts bandwidth by over 50%.",
-
+	     "EVERYONE_VALID" => "Users don't need to validate their email addresses.",
+	     "FB_QUOTA_NOTIFY" => "Do RPC requests to Fotobilder to inform it of disk quota changes.",
 	     );
 
 foreach my $k (keys %bools) {
