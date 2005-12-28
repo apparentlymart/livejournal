@@ -48,5 +48,44 @@ add_conf('$BOGUS_EMAIL',
 	 type => "email",
 	 );
 
+add_conf('$COMMUNITY_EMAIL',
+	 required => 0,
+	 des      => "Email address which comments and other notifications regarding communities come from.  If unspecified, defaults to \$ADMIN_EMAIL .",
+	 type => "email",
+	 );
+
+add_conf('$CAPTCHA_AUDIO_PREGEN',
+	 required => 0,
+	 default => 500,
+	 des => "The max number of audio captchas to pre-generate ahead of time.",
+	 type => "int",
+	 );
+
+add_conf('$CAPTCHA_AUDIO_MAKE',
+	 required => 0,
+	 des => "The max number of audio captchas to make per-process.  Should be less than CAPTCHA_AUDIO_PREGEN.  Useful for farming out generation of CAPTCHA_AUDIO_PREGEN to lots of machines.",
+	 type => "int",
+	 STUPID_BECAUSE => "after each generation, processes should just double-check the number available, then we can kill this configuration variable",
+	 );
+
+add_conf('$CAPTCHA_IMAGE_PREGEN',	
+	 required => 0,
+	 default => 1000,
+	 des => "The max number of image captchas to pre-generate ahead of time.",
+	 type => "int",
+	 );
+
+add_conf('$CAPTCHA_MOGILEFS',
+	 required => 0,
+	 type => "bool",
+	 des => "If true, captchas are stored in MogileFS.",
+	 STUPID_BECAUSE => "Should just be: if using MogileFS, store them there, else not.",
+	 );
+
+add_conf('$COMPRESS_TEXT',
+	 required => 0,
+	 type => "bool",
+	 des => "If set, text is gzip-compressed when put in the database.  When reading from the database, this configuration means nothing, as the code automatically determines to uncompress or not.",
+	 );
 
 1;
