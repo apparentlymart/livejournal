@@ -132,4 +132,70 @@ add_conf('$DEFAULT_LANG',
 	 required => 0,
 	 des => "Default language (code) to show site in, for users that haven't set their langauge.  Defaults to the first item in \@LANGS, which is usually \"en\", for English.",
 	 );
+
+add_conf('$DEFAULT_STYLE',
+	 required => 0,
+	 des => "Hashref describing default S2 style.  Keys are layer types, values being the S2 redist_uniqs.",
+	 type => "hashref",
+	 allowed_keys => qw(core layout theme i18n i81nc),
+	 );
+
+add_conf('$DIRECTORY_SEPARATE',
+	 type => 'bool',
+	 des => "If true, only use the 'directory' DB role for the directory, and don't also try the 'slave' and 'master' roles.",
+	 );
+
+add_conf('$DISABLE_MASTER',
+	 type => 'bool',
+	 des => "If set to true, access to the 'master' DB role is prevented, by breaking the get_dbh function.  Useful during master database migrations.",
+	 );
+
+add_conf('$DISABLE_MEDIA_UPLOADS',
+	 type => 'bool',
+	 des => "If set to true, all media uploads that would go to MogileFS are disabled.",
+	 );
+
+add_conf('$DISCONNECT_DBS',
+	 type => 'bool',
+	 des => "If set to true, all database connections (except those for logging) are disconnected at the end of each request.  Recommended for high-performance sites with lots of database clusters.  See also: \$DISCONNECT_DB_LOG",
+	 );
+
+add_conf('$DISCONNECT_DB_LOG',
+	 type => 'bool',
+	 des => "If set to true, database connections for logging are disconnected at the end of each request.",
+	 );
+
+add_conf('$DISCONNECT_MEMCACHE',
+	 type => 'bool',
+	 des => "If set to true, memcached connections are disconnected at the end of each request.  Not recommended if your memcached instances are Linux 2.6.",
+	 );
+
+add_conf('$DOMAIN',
+	 required => 1,
+	 des => "The base domain name for your installation.  This value is used to auto-set a bunch of other configuration values.",
+	 type => 'hostname,'
+	 );
+
+add_conf('$DOMAIN_WEB',
+	 required => 0,
+	 des => "The preferred domain name for your installation's web root.  For instance, if your \$DOMAIN is 'foo.com', your \$DOMAIN_WEB might be 'www.foo.com', so any user who goes to foo.com will be redirected to www.foo.com.",
+	 type => 'hostname,'
+	 );
+
+
+my %bools = (
+	     "DONT_LOG_IMAGES" => "Don't log requests for images.",
+	     "DONT_TOUCH_STYLES" => "During the upgrade populator, don't touch styles.  That is, consider the local styles the definitive ones, and any differences between the database and the distribution files should mean that the distribution is old, not the database.",
+	     "DO_GZIP" => "Compress text content sent to browsers.  Cuts bandwidth by over 50%.",
+
+	     );
+
+foreach my $k (keys %bools) {
+    my $val = $bools{$k};
+    $val = { des => $val } unless ref $val;
+    $val->{type} = "bool",
+    $val->{des} = "If set to true, " . lcfirst($val->{des});
+    add_conf("\$$k", %$val);
+}
+
 1;
