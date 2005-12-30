@@ -3057,6 +3057,50 @@ Sincerely,
 
 /schools/index.bml.top5countries.header=Top Five Countries
 
+/schools/manage.bml.btn.save=Save Changes
+
+/schools/manage.bml.error.cantaddattendance=Error adding school attendance record, please try again. You may have reached the limit of schools you can attend.
+
+/schools/manage.bml.error.cantbeauthenticated=You could not be authenticated as the specified user.
+
+/schools/manage.bml.error.cantdeleteattendance=Error deleting school attendance record, please try again.
+
+/schools/manage.bml.error.cantendbeforestart=Your ending year cannot be earlier than your starting year.
+
+/schools/manage.bml.error.cantloadschool=Unable to load school specified.
+
+/schools/manage.bml.error.cantsetattendance=Unable to set your attendance at [[school]], please try again. You may have reached the limit of schools you can attend.
+
+/schools/manage.bml.error.currentlyattend=If you currently attend this school, you should leave the end date field blank or enter "[[now]]".
+
+/schools/manage.bml.error.disabled=The Schools Directory is currently disabled due to maintenance.
+
+/schools/manage.bml.error.locationdoesntmatch=Country and/or city do not match specified school.
+
+/schools/manage.bml.error.needstartingyear=You must specify a starting year if you specify an ending year.
+
+/schools/manage.bml.error.toofuture=You must specify a starting year in the past or present.
+
+/schools/manage.bml.error.toopast=Did you really attend this school that long ago?
+
+/schools/manage.bml.findanother=<a [[aopts]]>Find another school</a> to add.
+
+/schools/manage.bml.intro=Below you can edit the list of schools associated with your journal or communities. This information is public, if you provide it.
+
+/schools/manage.bml.noschools=You have not listed any schools. <a [[aopts]]>Browse the school directory</a> to find and add schools.
+
+/schools/manage.bml.selectjournal=See schools for:
+
+/schools/manage.bml.table.input.delete=Delete
+
+/schools/manage.bml.table.name=School name
+
+/schools/manage.bml.table.to=to
+
+/schools/manage.bml.table.years=Years attended
+
+/schools/manage.bml.title=Manage Schools
+
 /styles/create.bml.choosebase=Choose base style to start with and edit:
 
 /styles/create.bml.createstyle.head=Create a Style
