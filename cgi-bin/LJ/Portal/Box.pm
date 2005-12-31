@@ -500,6 +500,16 @@ sub generate_box_config_dialog {
                                           'min' => $opt->{'min'},
                                           'name' => $name . $pboxid,
                                       });
+       } elsif ($type eq 'string') {
+
+            $inputfield = "$desc: </td><td>";
+
+            $inputfield .= LJ::html_text({'id' => $name . $pboxid,
+                                          'value' => $propval,
+                                          'maxlength' => $opt->{'maxlength'},
+                                          'size' => $opt->{'maxlength'} || 3,
+                                          'name' => $name . $pboxid,
+                                      });
 
         } elsif ($type eq 'hidden') {
             #do nothing
