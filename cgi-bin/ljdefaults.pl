@@ -229,6 +229,7 @@
                          'Note',
                          'RandomUser',
                          'Tags',
+                         'Reader',
                          );
     }
 
@@ -288,6 +289,15 @@
                                         'added'  => 1,
                                         'sort'   => 12,
                                         'col'    => 'R',
+                                    },
+                                    'Frank' => {
+                                        'notunique' => 1,
+                                    },
+                                    'Note' => {
+                                        'notunique' => 1,
+                                    },
+                                    'Reader' => {
+                                        'notunique' => 1,
                                     },
                                     );
     }
