@@ -40,13 +40,13 @@
         return if LJ::bad_password_redirect();
 
         if ($remote->identity) {
-            $$title = "Sorry";
-            $$body = "Non-$LJ::SITENAME users can't post, as they don't actually have journals here.  You can leave comments in other journals, though.";
+            $$title = $ML{'Sorry'};
+            $$body = BML::ml('.error.nonusercantpost', {'sitename' => $LJ::SITENAME});
             return;
         }
 
         if (! LJ::get_cap($remote, "can_post")) {
-            $$title = "Can't Post";
+            $$title = $ML{'.error.cantpost.title'};
             $$body = $LJ::MSG_NO_POST || $ML{'.error.cantpost'};
             return;
         }
@@ -149,12 +149,12 @@
 
         # table with username/password fields
         $auth .= "<tr id='altlogin_username' style='display: $altlogin_display;' valign='top'>\n";
-        $auth .= "<th>" . BML::ml('Username') . ":</th>";
+        $auth .= "<th>$ML{'.username'}</th>";
         $auth .= "<td>" . LJ::html_text({ 'name' => 'user', 'size' => '15', 'maxlength' => '15',
                                           'value' => $POST{'user'} || $GET{'user'} });
         $auth .= "</td></tr>\n";
         $auth .= "<tr id='altlogin_password' style='display: $altlogin_display;' valign='top'>";
-        $auth .= "<th>" . BML::ml('Password') . ":</th>";
+        $auth .= "<th>$ML{'.password'}</th>";
         $auth .= "<td>" . LJ::html_text({ 'type' => 'password', 'name' => 'password',
                                           'size' => '15', 'maxlength' => '30' });
         # posted with a user, but no password
@@ -323,7 +323,7 @@
 
         LJ::entry_form_decode(\%req, \%POST);
         if ($req{'event'} eq "") {
-            $errors->{'entry'} = "Must provide entry text";
+            $errors->{'entry'} = $ML{'.error.noentry'};
         }
 
         my %res;

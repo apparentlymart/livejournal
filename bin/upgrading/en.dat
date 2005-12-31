@@ -3976,11 +3976,17 @@ This could be because: <ol>
 
 /update.bml.error.cantpost=Sorry, you cannot post at this time.
 
+/update.bml.error.cantpost.title=Can't Post
+
 /update.bml.error.disabled=Your account type does not permit posting.
 
 /update.bml.error.disabled.title=Posting access disabled
 
 /update.bml.error.login=Error logging on:
+
+/update.bml.error.noentry=Must provide entry text.
+
+/update.bml.error.nonusercantpost=Non-[[sitename]] users can't post, as they don't actually have journals here. You can leave comments in other journals, though.
 
 /update.bml.error.nopass=Enter Password
 
