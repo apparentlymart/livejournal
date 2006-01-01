@@ -939,6 +939,10 @@ Thanks for supporting [[sitename]]!
 
 /customize/index.bml.s2.customize.themes.header=Themes
 
+/customize/index.bml.s2.customlayers=Custom Layers:
+
+/customize/index.bml.s2.disabledlayers=Disabled Layers:
+
 /customize/index.bml.s2.layout<<
 Pick your layout.  Because theme selection and custom modifications depend 
 on your layout, changing this setting discards all other edits you may have made.

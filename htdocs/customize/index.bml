@@ -263,7 +263,7 @@ body<=
                    keys %$userlay;
         if (@user) {
             push @layers, { value    => "",
-                            text     => "--- Custom Layers: ---",
+                            text     => "--- $ML{'.s2.customlayers'} ---",
                             disabled => 1 }, @user;
         }
 
@@ -279,7 +279,7 @@ body<=
                 keys %$userlay;
             if (@disabled) {
                 push @layers, { value    => "",
-                                text     => "--- Disabled Layers: ---",
+                                text     => "--- $ML{'.s2.disabledlayers'} ---",
                                 disabled => 1 }, @disabled;
             }
         }
