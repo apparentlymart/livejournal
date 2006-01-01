@@ -960,6 +960,18 @@ on your layout, changing this setting discards all other edits you may have made
 
 /customize/index.bml.title=Customize Journal
 
+/customize/preview.bml.back2=Back
+
+/customize/preview.bml.nopreview=(no preview available)
+
+/customize/preview.bml.nopreviews=No previews available.
+
+/customize/preview.bml.title=Layout Previews
+
+/customize/preview.bml.viewmore=View More Previews
+
+/customize/preview.bml.viewthemes=View Themes
+
 /delcomment.bml.changeoptions<<
 <strong>Note:</strong> From the [[link]] page, you can choose
 whether to allow <em>all</em>, <em>registered users</em>, or

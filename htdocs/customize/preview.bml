@@ -1,5 +1,5 @@
 <?page
-title=>Layout Previews
+title=><?_ml .title _ml?>
 body<=
 <?_code
 {
@@ -35,12 +35,12 @@ body<=
         my $l = $pub->{$GET{lid}};
     
         LJ::set_dynamic_crumb(LJ::eall($l->{name}), 'preview');
-        $ret .= "<p>[&lt;&lt; <a href='preview.bml?journal=$journal'>Back</a>]</p>";
+        $ret .= "<p>" . BML::ml('Backlink', {'link' => "$LJ::SITEROOT/customize/preview.bml?journal=$journal", 'text' => $ML{'.back2'}}) . "</p>";
         
         $layerdesc->($l);
 
         unless ($l->{'_previews'}) {
-            $ret .= "<?p <i>No previews available.</i> p?>";
+            $ret .= "<?p <i>$ML{'.nopreviews'}</i> p?>";
         }
         else {
             foreach (split(/\,/, $l->{'_previews'})) {
@@ -52,7 +52,7 @@ body<=
     else {
 
         LJ::set_active_crumb('preview');
-        $ret .= "<p>[&lt;&lt; <a href='/customize/?journal=$journal'>Back</a>]</p>";
+        $ret .= "<p>" . BML::ml('Backlink', {'link' => "$LJ::SITEROOT/customize/?journal=$journal", 'text' => $ML{'.back2'}}) . "</p>";
 
         my @layouts = 
             sort { $a->{'name'} cmp $b->{'name'} }
@@ -78,16 +78,16 @@ body<=
                 $morepreviews = 1 if (scalar(@previews) > 1);
             }
             else {
-                $ret .= "<div style=\"text-align: center; font-style: italic;\">(no preview available)</div>";
+                $ret .= "<div style=\"text-align: center; font-style: italic;\">$ML{'.nopreview'}</div>";
             }
             $ret .= "</td><td>\n";
             
             $layerdesc->($l);
             
             $ret .= "<ul style=\"list-style: none; padding: 0; margin: 0;\">";
-            $ret .= "<li><a href='themes.bml?layout=$l->{s2lid}&amp;journal=$journal'>View Themes</a>";
+            $ret .= "<li><a href='themes.bml?layout=$l->{s2lid}&amp;journal=$journal'>$ML{'.viewthemes'}</a>";
             if ($morepreviews) {
-                $ret .= "<li><a href='preview.bml?lid=$l->{s2lid}&amp;journal=$journal'>View More Previews</a></li>";
+                $ret .= "<li><a href='preview.bml?lid=$l->{s2lid}&amp;journal=$journal'>$ML{'.viewmore'}</a></li>";
             }
             $ret .= "</ul>";
 
