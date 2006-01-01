@@ -1,5 +1,5 @@
 <?page
-title=>Theme Previews
+title=><?_ml .title _ml?>
 body<=
 <?_code
 {
@@ -13,7 +13,7 @@ body<=
 
     my $remote = LJ::get_remote();
 
-    return "<?h1 Login Required h1?><?p Before you customize your journal, you must first <a href='/login.bml?ret=1'>login</a>. p?>"
+    return "<?h1 $ML{'.error.notloggedin.header'} h1?><?p " . BML::ml('.error.notloggedin.text', {'aopts' => "href='$LJ::SITEROOT/login.bml?ret=1'"}) . " p?>"
         unless $remote;
 
     my @journals = ($remote->{'user'});
@@ -21,8 +21,8 @@ body<=
     my $journal = $GET{'journal'} || $remote->{'user'};
     unless (grep { $_ eq $journal } @journals) {  return BML::redirect("/customize/");  }
 
-    $ret .= "<p>[&lt;&lt; <a href='/customize/?journal=$journal'>Back</a>]</p>";
-
+    $ret .= "<p>" . BML::ml('Backlink', {'link' => "$LJ::SITEROOT/customize/?journal=$journal", 'text' => $ML{'.back2'}}) . "</p>";
+    
     my $u = $remote;
     $u = LJ::load_user($journal) unless $journal eq $remote->{'user'};
     my $userid = $u->{'userid'};
@@ -33,7 +33,7 @@ body<=
     my $userlay = {};   # TODO: add API call to fetch these
     my %style = LJ::S2::get_style($u->{'s2_style'});
 
-    return "S2 required" unless $u->{'stylesys'} == 2 && $style{'layout'};
+    return $ML{'.error.s2required'} unless $u->{'stylesys'} == 2 && $style{'layout'};
 
     if ($GET{layout} =~ /^\d+$/) {
         # Pretend that the user has the given layout selected
@@ -59,7 +59,7 @@ body<=
 
     foreach my $t (0, @themes) {
         my $id = ref $t ? $t->{'s2lid'} : 0;
-        my $name = ref $t ? LJ::eall($t->{'name'}) : "Layout Default";
+        my $name = ref $t ? LJ::eall($t->{'name'}) : $ML{'.default'};
         my $ctx = S2::make_context(@layers, $id);
         LJ::S2::escape_context_props($ctx);
         LJ::S2::populate_system_props($ctx);

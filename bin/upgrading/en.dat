@@ -972,6 +972,18 @@ on your layout, changing this setting discards all other edits you may have made
 
 /customize/preview.bml.viewthemes=View Themes
 
+/customize/themes.bml.back2=Back
+
+/customize/themes.bml.default=Layout Default
+
+/customize/themes.bml.error.notloggedin.header=Login Required
+
+/customize/themes.bml.error.notloggedin.text=Before you customize your journal, you must first <a [[aopts]]>log in</a>.
+
+/customize/themes.bml.error.s2required=S2 required.
+
+/customize/themes.bml.title=Theme Previews
+
 /delcomment.bml.changeoptions<<
 <strong>Note:</strong> From the [[link]] page, you can choose
 whether to allow <em>all</em>, <em>registered users</em>, or
