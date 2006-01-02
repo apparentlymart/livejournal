@@ -960,6 +960,46 @@ on your layout, changing this setting discards all other edits you may have made
 
 /customize/index.bml.title=Customize Journal
 
+/customize/layer.bml.btn.save=Save
+
+/customize/layer.bml.error.cantsavelayer=Error saving layer: [[errormsg]]
+
+/customize/layer.bml.error.invalidlayer=Layer isn't of type user or theme.
+
+/customize/layer.bml.error.nocorelayer=Core layer for layout not found.
+
+/customize/layer.bml.error.nolayoutlayer=Layout layer for the following layer type not found: [[layertype]]
+
+/customize/layer.bml.error.notloggedin.header=Login Required
+
+/customize/layer.bml.error.notloggedin.text=Before you customize your journal, you must first <a [[aopts]]>log in</a>.
+
+/customize/layer.bml.error.notyourlayer=Layer belongs to another user.
+
+/customize/layer.bml.error.stylenotfound=Style not found.
+
+/customize/layer.bml.finished.header=Finished?
+
+/customize/layer.bml.finished.text=When done, click the save button below.
+
+/customize/layer.bml.label.default=Default:
+
+/customize/layer.bml.label.override=Override:
+
+/customize/layer.bml.label.overridedefault=Override default
+
+/customize/layer.bml.prop.misc=Misc
+
+/customize/layer.bml.saved=Saved.
+
+/customize/layer.bml.title=Customize
+
+/customize/layer.bml.type.bool.no=No
+
+/customize/layer.bml.type.bool.yes=Yes
+
+/customize/layer.bml.type.text.nothing=(nothing)
+
 /customize/preview.bml.back2=Back
 
 /customize/preview.bml.nopreview=(no preview available)

@@ -3,11 +3,18 @@
     use strict;
     use vars qw(%POST %GET $title $body $js);
 
+    LJ::set_active_crumb('customizelayer');
+    
     my $dbh = LJ::get_db_writer();
+    $body = "";
+    $title = $ML{'.title'};
+    $js = "";
 
     my $remote = LJ::get_remote();
-    return "<?h1 Login Required h1?><?p Before you customize your journal, you must first <a href='/login.bml'>login</a>. p?>"
-        unless $remote;
+    unless ($remote) {
+        $body = "<?h1 $ML{'.error.notloggedin.header'} h1?><?p " . BML::ml('.error.notloggedin.text', {'aopts' => "href='$LJ::SITEROOT/login.bml'"}) . " p?>";
+        return;
+    }
 
     my @journals = ($remote->{'user'});
     push @journals, LJ::get_shared_journals($remote);
@@ -20,12 +27,8 @@
 
     LJ::load_user_props($u, "stylesys", "s2_style");
 
-    $body = "";
-    $title = "Customize";
-    $js = "";
-
     my $err = sub {
-        $title = "Error";
+        $title = $ML{'Error'};
         $body = shift;
         return;
     };
@@ -39,7 +42,7 @@
     if ($GET{'w'} eq "user" && $u->{'stylesys'} == 2)
     {
         $style = LJ::S2::load_style($u->{'s2_style'});
-        return $err->("Style not found.") unless $style && $style->{'userid'} == $u->{'userid'};
+        return $err->($ML{'.error.stylenotfound'}) unless $style && $style->{'userid'} == $u->{'userid'};
         $layer = LJ::S2::load_layer($dbh, $style->{'layer'}->{'user'});
 
         # if the b2lid of this layer has been remapped to a new layerid
@@ -55,15 +58,15 @@
     }
 
     return BML::redirect("/customize/") unless $layer;
-    return $err->("Layer belongs to another user.") unless $layer->{'userid'} == $u->{'userid'};
-    return $err->("Layer isn't of type user or theme.")
+    return $err->($ML{'.error.notyourlayer'}) unless $layer->{'userid'} == $u->{'userid'};
+    return $err->($ML{'.error.invalidlayer'})
         unless $layer->{'type'} eq "user" || $layer->{'type'} eq "theme";
 
     my $lyr_layout = LJ::S2::load_layer($dbh, $layer->{'b2lid'});
-    return $err->("Layout layer for this $layer->{'type'} layer not found.")
+    return $err->(BML::ml('.error.nolayoutlayer', {'layertype' => $layer->{'type'}}))
         unless $lyr_layout;
     my $lyr_core = LJ::S2::load_layer($dbh, $lyr_layout->{'b2lid'});
-    return $err->("Core layer for layout not found.")
+    return $err->($ML{'.error.nocorelayer'})
         unless $lyr_core;
 
     $lyr_layout->{'uniq'} = $dbh->selectrow_array("SELECT value FROM s2info WHERE s2lid=? AND infokey=?",
@@ -115,11 +118,11 @@
 
         if (LJ::S2::layer_compile_user($layer, \%override)) {
             return BML::redirect($save_redir) if $save_redir;
-            $body = "Saved.";
+            $body = $ML{'.saved'};
             return;
         } else {
             my $error = LJ::last_error();
-            $body = "Error saving layer:<pre>$error</pre>";
+            $body = BML::ml('.error.cantsavelayer', {'errormsg' => "<pre>$error</pre>"});
         }
         return;
     }
@@ -176,7 +179,7 @@
             my $name = S2::get_property_group_name($lid, $gname);
             return LJ::ehtml($name) if $name;
         }
-        return "Misc" if $gname eq "misc";
+        return $ML{'.prop.misc'} if $gname eq "misc";
         return $gname;
     };
 
@@ -202,7 +205,7 @@
         if (ref $existing eq "HASH") { $existing = $existing->{'as_string'}; }
 
         if ($type eq "bool") {
-            $prop->{'values'} ||= "1|Yes|0|No";
+            $prop->{'values'} ||= "1|$ML{'.type.bool.yes'}|0|$ML{'.type.bool.no'}";
         }
 
         my %values = split(/\|/, $prop->{'values'});
@@ -229,13 +232,13 @@
                                   'selected' => $had_override, 'disabled' => ! $can_use,
                                   'onchange' => "toggleOverride('$name');" });
         my $offhelp = ! $can_use ? LJ::help_icon('s2propoff', ' ') : "";
-        $body .= "<label for='$name:override'> Override default</label>$offhelp<br />\n";
-        $body .= "<dl class='hidedt'>\n<dt>Default:</dt>\n<dd id='$name:default_value' style='font-family: monospace'>\n";
+        $body .= "<label for='$name:override'> $ML{'.label.overridedefault'}</label>$offhelp<br />\n";
+        $body .= "<dl class='hidedt'>\n<dt>$ML{'.label.default'}</dt>\n<dd id='$name:default_value' style='font-family: monospace'>\n";
         if ($type eq "int" || $type eq "string") {
             if ($existing_display ne "") {
                 $body .= $existing_display;
             } else {
-                $body .= "<i>(nothing)</i>";
+                $body .= "<i>$ML{'.type.text.nothing'}</i>";
             }
         } elsif ($type eq "Color") {
             $body .= "<span style=\"border: 1px solid #000000; padding-left: 2em; ".
@@ -243,7 +246,7 @@
         } elsif ($type eq "bool") {
             $body .= $existing_display;
         }
-        $body .= "</dd>\n<dt>Override:</dt>\n<dd id='$name:user_value'>\n";
+        $body .= "</dd>\n<dt>$ML{'.label.override'}</dt>\n<dd id='$name:user_value'>\n";
         if ($prop->{'values'}) {
             $body .= LJ::html_select({ 'name' => "${name}_value",
                                        'disabled' => ! $can_use,
@@ -318,8 +321,8 @@
 
     $body .= "<script type='text/javascript' language='JavaScript'><!--\n$prop_js// --></script>";
 
-    $body .= "<?h1 Finished? h1?><?p When done, click the save button below. p?><center>";
-    $body .= LJ::html_submit('action:save', "Save");
+    $body .= "<?h1 $ML{'.finished.header'} h1?><?p $ML{'.finished.text'} p?><center>";
+    $body .= LJ::html_submit('action:save', $ML{'.btn.save'});
     $body .= "</center>";
 
     $body .= "</form>";

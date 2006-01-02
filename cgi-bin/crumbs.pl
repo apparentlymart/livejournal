@@ -21,6 +21,7 @@
                'createjournal' => ['Create Journal', '/create.bml', 'home'],
                'createstyle' => ['Create Style', '/styles/create.bml', 'modify'],
                'customize' => ['Customize S2 Settings', '/customize/index.bml', 'manage'],
+               'customizelayer' => ['Individual Customizations', '/customize/layer.bml', 'customize'],
                'delcomment' => ['Delete Comment', '/delcomment.bml', 'home'],
                'editentries' => ['Edit Entries', '/editjournal.bml', 'manage'],
                'editentries_do' => ['Edit Entry', '/editjournal_do.bml', 'editentries'],
