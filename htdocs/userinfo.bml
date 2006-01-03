@@ -394,6 +394,7 @@
      my %pic;
      LJ::load_userpics(\%pic, [ $u, $picid ]);
      $body .= "<a href='/allpics.bml?user=$user'><img src='$LJ::USERPIC_ROOT/$picid/$userid' width='$pic{$picid}->{'width'}' height='$pic{$picid}->{'height'}' vspace='3' border='0' alt='$user' /></a>";
+     $body .= "<a href='/allpics.bml?user=$user'><font size='1'>$ML{'.allpics'}</font></a>";
  } else {
      $body .= "&nbsp;";
  }

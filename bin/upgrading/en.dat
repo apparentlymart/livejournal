@@ -4186,6 +4186,8 @@ This could be because: <ol>
 
 /userinfo.bml.about.user=Bio:
 
+/userinfo.bml.allpics=View all userpics
+
 /userinfo.bml.body.leave= You may <a href="/community/leave.bml?comm=[[commname]]">leave the community</a> at any time.
 
 /userinfo.bml.comminfo.body=Below is information about the "[[commname]]" community on LiveJournal.
