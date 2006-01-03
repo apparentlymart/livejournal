@@ -304,6 +304,10 @@ sub clean
                         unless $attr =~ /^[\w_:-]+$/;
 
                     $hash->{$attr} =~ s/[\t\n]//g;
+
+                    # IE ignores the null character, so strip it out
+                    $hash->{$attr} =~ s/\x0//g;
+
                     # IE sucks:
                     if ($hash->{$attr} =~ /(j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t|
                                             v\s*b\s*s\s*c\s*r\s*i\s*p\s*t|
