@@ -410,6 +410,19 @@ head<=
 <script type="text/javascript" language="JavaScript" src="/js/entry.js"></script>
 <?_code return $LJ::COMMON_CODE{'autoradio_check'}; _code?>
 
+<?_code
+{
+    my $ret;
+    # FIXME: Need better dependency loader, core.js must be loaded before dom.js, and then entry.js last!
+    $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/core.js'></script>\n";
+    $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/dom.js'></script>\n";
+    $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/entry.js'></script>\n";
+
+    return $ret;
+}
+_code?>
+
+
 <=head
 page?><?_c <LJDEP>
 post: htdocs/editjournal.bml

@@ -396,7 +396,6 @@ head<=
     $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/dom.js'></script>\n";
     $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/entry.js'></script>\n";
 
-    $ret .= "<script language='JavaScript' type='text/javascript' src='$LJ::JSPREFIX/entry.js'></script>";
     $ret .= (! $LJ::REQ_HEAD_HAS{'chalresp_js'}++) ? $LJ::COMMON_CODE{'chalresp_js'} : "";
     return $ret;
 }
