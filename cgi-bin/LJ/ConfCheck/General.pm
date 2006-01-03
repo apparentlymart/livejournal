@@ -305,8 +305,29 @@ add_conf('$NEW_ENTRY_CLEANUP_HACK',
 	 des => "OLD HISTORIC BAGGAGE: Do not use!  There used to be a bug where only parts of entries got deleted, then there was another bug with per-user number allocation.  Together, they forced this option to be made for awhile, where new entries (when this is on) would blow away any old data if part of it was still there but wasn't supposed to be.  This includes deleting comments tied to those old entries.",
 	 );
 
+add_conf('$QBUFFERD_DELAY',
+	 type => 'int',
+	 des => "Time to sleep between runs of qbuffered tasks.  Default is 15 seconds.",
+	 );
+
+add_conf('$RATE_COMMENT_AUTH',
+	 des => "Arrayref of rate rules to apply incoming comments from authenticated users .  Each rate rule is an arrayref of two items:  number of comments, and period of time.  If user makes more comments in period of time, comment is denied, at least without a captcha.",
+	 );
+
+add_conf('$RATE_COMMENT_ANON',
+	 des => "Arrayref of rate rules to apply incoming comments from anonymous users .  Each rate rule is an arrayref of two items:  number of comments, and period of time.  If user makes more comments in period of time, comment is denied, at least without a captcha.",
+	 );
+
+add_conf('$SCHOOLSMAX',
+	 des => "Hashref of journaltype (P, C, I, ..) to maximum number of allowed schools for that journal type.",
+	 );
+
 
 my %bools = (
+	     'S2COMPILED_MIGRATION_DONE' => "Don't try to load compiled S2 layers from the global cluster.  Any new installation can enable this safely as a minor optimization.  The option only really makes sense for large, old sites.",
+	     "S1_SHORTCOMINGS" => "Use the S2 style named 's1shortcomings' to handle page types that S1 can't handle.  Otherwise, BML is used.  This is off by defalut, but will eventually become on by default, and no longer an option.",
+	     "REQUIRE_TALKHASH" => "Require submitted comments to include a signed hidden value provided by the server.  Slows down comment-spammers, at least, in that they have to fetch pages first, instead of just blasting away POSTs.  Defaults to off.",
+	     "REQUIRE_TALKHASH_NOTOLD" => "If \$REQUIRE_TALKHASH is on, also make sure that the talkhash provided was issued in the past two hours.  Defaults to off.",
 	     "DONT_LOG_IMAGES" => "Don't log requests for images.",
 	     "DONT_TOUCH_STYLES" => "During the upgrade populator, don't touch styles.  That is, consider the local styles the definitive ones, and any differences between the database and the distribution files should mean that the distribution is old, not the database.",
 	     "DO_GZIP" => "Compress text content sent to browsers.  Cuts bandwidth by over 50%.",
