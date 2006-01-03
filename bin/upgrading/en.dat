@@ -875,6 +875,34 @@ Thanks for supporting [[sitename]]!
 
 /create.bml.username.username=username
 
+/customize/advanced/index.bml.advancedoptions.header=Advanced Options
+
+/customize/advanced/index.bml.disclaimer.header=Disclaimer
+
+/customize/advanced/index.bml.disclaimer.text=Unless you're a programmer or web designer, most users should stay away from this area and use the <a [[aopts]]>main customization area</a>, which is designed for anybody to use.
+
+/customize/advanced/index.bml.documentation.header=Documentation
+
+/customize/advanced/index.bml.documentation.text=Before you jump into tweaking/programming S2, you should understand how it works.
+
+/customize/advanced/index.bml.publiclayers.desc=system layers (good reference &amp; place to learn)
+
+/customize/advanced/index.bml.publiclayers.link=Public Layers
+
+/customize/advanced/index.bml.s2doc.desc=under construction, but some good content
+
+/customize/advanced/index.bml.s2doc.link=S2 Documentation
+
+/customize/advanced/index.bml.title=Advanced Customization
+
+/customize/advanced/index.bml.yourlayers.desc=create/manage your layers
+
+/customize/advanced/index.bml.yourlayers.link=Your Layers
+
+/customize/advanced/index.bml.yourstyles.desc=create/manage your styles
+
+/customize/advanced/index.bml.yourstyles.link=Your Styles
+
 /customize/index.bml.change=Change
 
 /customize/index.bml.choose=Do you want to use the old style system, or the new one?
