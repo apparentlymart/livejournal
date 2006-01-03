@@ -5,14 +5,14 @@
 
     # start of content
     $body = BML::ml("Backlink", {
-        'link' => './',
-        'text' => 'Advanced Customization',
+        'link' => "$LJ::SITEROOT/customize/advanced/",
+        'text' => $ML{'.back2'},
     });
 
     my $err = sub {
-        $title = "Error";
+        $title = $ML{'Error'};
         $body = shift;
-        return;        
+        return;
     };
 
     my $pub = LJ::S2::get_public_layers();
@@ -29,7 +29,7 @@
 
     # show the public layers
     unless ($id) {
-        $title = "Public Layers";
+        $title = $ML{'.title'};
         LJ::set_active_crumb('layerbrowse');
 
         my %layerinfo;
@@ -57,7 +57,7 @@
             # if we're not expanding these children, stop and show a link
             if ($lay->{'type'} eq 'layout' && $GET{'expand'} != $lid) {
                 $body .= "<ul><li>[<a href='layerbrowse.bml?expand=$lid'>";
-                $body .= scalar(@{$lay->{'children'}}) . " children...</a>]</li></ul>";
+                $body .= BML::ml('.layerchildren', {'numchildren' => scalar(@{$lay->{'children'}})}) . "</a>]</li></ul>";
                 return;
             }
 
@@ -99,7 +99,7 @@
 
     # load layer info
     my $layer = defined $pub->{$id} ? $pub->{$id} : LJ::S2::load_layer($id);
-    return $err->("The specified layer does not exist.")
+    return $err->($ML{'.error.layerdoesntexist'})
         unless $layer;
 
     my $layerinfo = {};
@@ -111,7 +111,7 @@
     my $isadmin = !defined $pub->{$id} &&                          # public styles are pulled from the system
                   (LJ::check_priv($remote, 'canview', 'styles') || # account, so we don't want to check privileges
                    LJ::check_priv($remote, 'canview', '*'));       # in case they're private styles
-    return $err->("You are not authorized to view this layer.")
+    return $err->($ML{'.error.cantviewlayer'})
         unless defined $pub->{$id} || $srcview == 1 ||
                LJ::can_manage($remote, $layer->{'userid'}) ||
                $isadmin;
@@ -136,28 +136,27 @@
     $body .= "<br />";
     # link to layer list if this is a public layer, otherwise user's layer list
     if (defined $pub->{$id}) {
-        $body .= BML::ml('Backlink', { 'link' => 'layerbrowse.bml', 'text' => 'Public Layers' }) . "\n";
+        $body .= BML::ml('Backlink', { 'link' => "$LJ::SITEROOT/customize/advanced/layerbrowse.bml", 'text' => $ML{'.nav.publiclayers'} }) . "\n";
     } else {
-        $body .= BML::ml('Backlink', { 'link' => "layers.bml", 'text' => 'Your Layers' }) . "\n";
-        $body .= BML::ml('Actionlink', { 'link' => "<a href='layeredit.bml?id=$id'>Edit Layer</a>" }) . "\n";
+        $body .= BML::ml('Backlink', { 'link' => "$LJ::SITEROOT/customize/advanced/layers.bml", 'text' => $ML{'.nav.yourlayers'} }) . "\n";
+        $body .= BML::ml('Actionlink', { 'link' => "<a href='$LJ::SITEROOT/customize/advanced/layeredit.bml?id=$id'>$ML{'.nav.editlayer'}</a>" }) . "\n";
     }
 
 
     if ($layer->{'b2lid'}) {
-        $body .= "[<a href=\"layerbrowse.bml?id=$layer->{'b2lid'}\">Parent Layer</a>]\n";
+        $body .= BML::ml('Actionlink', { 'link' => "<a href=\"$LJ::SITEROOT/customize/advanced/layerbrowse.bml?id=$layer->{'b2lid'}\">$ML{'.nav.parentlayer'}</a>" }) . "\n";
     }
     if (defined $pub->{$id} && (! defined $srcview || $srcview != 0) ||
             $srcview == 1 ||
             LJ::can_manage($remote, $layer->{'userid'}) ||
             $isadmin) {
 
-        $body .= "[View source: <a href=\"layersource.bml?id=$id\">Raw Source Code</a> | \n";
-        $body .= "<a href=\"layersource.bml?id=$id&fmt=html\">Syntax Highlighted</a>]\n";
+        $body .= BML::ml('Actionlink', { 'link' => "$ML{'.nav.viewsource'} <a href=\"$LJ::SITEROOT/customize/advanced/layersource.bml?id=$id\">$ML{'.nav.viewsource.raw'}</a> | <a href=\"$LJ::SITEROOT/customize/advanced/layersource.bml?id=$id&fmt=html\">$ML{'.nav.viewsource.highlighted'}</a>" }) . "\n";
     }
 
     # layerinfo
     if (my $info = $s2info->{'info'}) {
-        $body .= "<?h1 Layer Info h1?>";
+        $body .= "<?h1 $ML{'.layerinfo.header'} h1?>";
         $body .= "<table style='margin-bottom: 10px' border='1' cellpadding='2'>";
         foreach my $k (sort keys %$info) {
             my ($ek, $ev) = map { LJ::ehtml($_) } ($k, $info->{$k});
@@ -176,7 +175,7 @@
                 my $ecolor = LJ::ehtml($v->{'as_string'});
                 $v = "<span style=\"border: 1px solid #000000; padding-left: 2em; background-color: $ecolor\">&nbsp;</span> <tt>$ecolor</tt>";
             } elsif (defined $v->{'_type'}) {
-                $v = LJ::ehtml($v->{'_type'})." object";
+                $v = BML::ml('.propformat.object', {'type' => LJ::ehtml($v->{'_type'})});
             } else {
                 if (scalar(%$v)) {
                     $v = "<code>{</code><ul style='list-style: none; margin: 0 0 0 1.5em; padding: 0;'>"
@@ -196,7 +195,7 @@
                 $v = "<code>[]</code>";
             }
         } else {
-            $v = $v ne '' ? LJ::ehtml($v) : "<i>(empty)</i>";
+            $v = $v ne '' ? LJ::ehtml($v) : "<i>$ML{'.propformat.empty'}</i>";
         }
 
         return $v;
@@ -204,7 +203,7 @@
 
     # sets
     if (my $set = $s2info->{'set'}) {
-        $body .= "<?h1 Properties Set h1?>";
+        $body .= "<?h1 $ML{'.propertiesset.header'} h1?>";
         $body .= "<table style='margin-bottom: 10px' border='1' cellpadding='2' valign='top'>";
         foreach my $k (sort keys %$set) {
             my $v = $set->{$k};
@@ -219,7 +218,7 @@
     # global functions
     my $gb = $s2info->{'global'};
     if (ref $gb eq "HASH" && %$gb) {
-        $body .= "<?h1 Global Functions h1?>";
+        $body .= "<?h1 $ML{'.globalfunctions.header'} h1?>";
         $body .= "<table style='margin-bottom: 10px' border='1' cellpadding='2' valign='top'>";
         foreach my $fname (sort keys %$gb) {
             my $rt = $gb->{$fname}->{'returntype'};
@@ -242,16 +241,16 @@
     if (%$class) 
     {
         # class index
-        $body .= "<?h1 Classes h1?>";
+        $body .= "<?h1 $ML{'.classes.header'} h1?>";
         $body .= "<table style='margin-bottom: 10px'><tr valign='top' align='left'>";
-        $body .= "<td width='50%'>Alphabetical";
+        $body .= "<td width='50%'>$ML{'.classes.sort.alphabetical'}";
         $body .= "<ul>";
         foreach my $cname (sort { lc($a) cmp lc($b) } keys %$class) {
             $body .= "<li><a href='#class.$cname'><b>$cname</b></a></li>\n";
         }
         $body .= "</ul>";
         $body .= "</td>";
-        $body .= "<td width='50%'>Hierarchical";
+        $body .= "<td width='50%'>$ML{'.classes.sort.hierarchical'}";
         my $dumpsub = sub {
             my $self = shift;
             my $parent = shift;
@@ -270,10 +269,10 @@
 
         # classes
         foreach my $cname (sort { lc($a) cmp lc($b) } keys %$class) {
-            $body .= "<a name='class.$cname'><?h1 $cname Class h1?></a>";
+            $body .= "<a name='class.$cname'><?h1 " . BML::ml('.classname.header', {'name' => $cname}) . " h1?></a>";
             my $ds = LJ::ehtml($class->{$cname}->{'docstring'});
             if ($class->{$cname}->{'parent'}) {
-                $ds = "Child class of [class[$class->{$cname}->{'parent'}]].  $ds";
+                $ds = BML::ml('.classname.childclass', {'name' => "[class[$class->{$cname}->{'parent'}]]"}) . " $ds";
             }
             if ($ds) {
                 $xlink->(\$ds);
@@ -298,7 +297,7 @@
             };
             $add->($add, $cname);
 
-            $body .= "<table style='margin-bottom: 10px' border='1' cellpadding='2' valign='top'><?h2 Members h2?>" if %var;
+            $body .= "<table style='margin-bottom: 10px' border='1' cellpadding='2' valign='top'><?h2 $ML{'.members.header'} h2?>" if %var;
             foreach (sort keys %var) {
                 my $type = $var{$_}->{'type'};
                 $type =~ s/(\w+)/defined $class->{$1} ? "[class[$1]]" : $1/eg;
@@ -308,14 +307,14 @@
                 $xlink->(\$ds);
 
                 if ($var{$_}->{'readonly'}) {
-                    $ds = "$ds <i>(Read-only)</i>";
+                    $ds = "$ds <i>$ML{'.members.readonly'}</i>";
                 }
 
                 $body .= "<tr><td><nobr><a name='member.${cname}.$_'><tt>$type $_</tt></a></nobr></td><td>$ds</td></tr>";
             }
             $body .= "</table>" if %var;
             
-            $body .= "<table style='margin-bottom: 10px' border='1' cellpadding='2' valign='top'><?h2 Methods h2?>" if %func;
+            $body .= "<table style='margin-bottom: 10px' border='1' cellpadding='2' valign='top'><?h2 $ML{'.methods.header'} h2?>" if %func;
             foreach (sort keys %func) {
                 my $rt = $func{$_}->{'returntype'};
                 if (defined $class->{$rt}) {

@@ -903,6 +903,56 @@ Thanks for supporting [[sitename]]!
 
 /customize/advanced/index.bml.yourstyles.link=Your Styles
 
+/customize/advanced/layerbrowse.bml.back2=Advanced Customization
+
+/customize/advanced/layerbrowse.bml.classes.header=Classes
+
+/customize/advanced/layerbrowse.bml.classes.sort.alphabetical=Alphabetical
+
+/customize/advanced/layerbrowse.bml.classes.sort.hierarchical=Hierarchical
+
+/customize/advanced/layerbrowse.bml.classname.childclass=Child class of [[name]].
+
+/customize/advanced/layerbrowse.bml.classname.header=[[name]] Class
+
+/customize/advanced/layerbrowse.bml.error.cantviewlayer=You are not authorized to view this layer.
+
+/customize/advanced/layerbrowse.bml.error.layerdoesntexist=The specified layer does not exist.
+
+/customize/advanced/layerbrowse.bml.globalfunctions.header=Global Functions
+
+/customize/advanced/layerbrowse.bml.layerchildren=[[numchildren]] [[?numchildren|child|children]]...
+
+/customize/advanced/layerbrowse.bml.layerinfo.header=Layer Info
+
+/customize/advanced/layerbrowse.bml.members.header=Members
+
+/customize/advanced/layerbrowse.bml.members.readonly=(Read-only)
+
+/customize/advanced/layerbrowse.bml.methods.header=Methods
+
+/customize/advanced/layerbrowse.bml.nav.editlayer=Edit Layer
+
+/customize/advanced/layerbrowse.bml.nav.parentlayer=Parent Layer
+
+/customize/advanced/layerbrowse.bml.nav.publiclayers=Public Layers
+
+/customize/advanced/layerbrowse.bml.nav.viewsource=View source:
+
+/customize/advanced/layerbrowse.bml.nav.viewsource.highlighted=Syntax Highlighted
+
+/customize/advanced/layerbrowse.bml.nav.viewsource.raw=Raw Source Code
+
+/customize/advanced/layerbrowse.bml.nav.yourlayers=Your Layers
+
+/customize/advanced/layerbrowse.bml.propertiesset.header=Properties Set
+
+/customize/advanced/layerbrowse.bml.propformat.empty=(empty)
+
+/customize/advanced/layerbrowse.bml.propformat.object=[[type]] object
+
+/customize/advanced/layerbrowse.bml.title=Public Layers
+
 /customize/index.bml.change=Change
 
 /customize/index.bml.choose=Do you want to use the old style system, or the new one?
