@@ -50,11 +50,6 @@ sub _load_bcid {
     die "No user" unless $u;
     return $u->{blob_clusterid} if $u->{blob_clusterid};
 
-    # if the entire system only has one blob_clusterid, use that
-    # without querying the database/memcache
-    return $u->{blob_clusterid} = $LJ::ONLY_BLOB_CLUSTERID
-        if defined $LJ::ONLY_BLOB_CLUSTERID;
-
     LJ::load_user_props($u, "blob_clusterid");
     return $u->{blob_clusterid} if $u->{blob_clusterid};
     die "Couldn't find user $u->{user}'s blob_clusterid\n";

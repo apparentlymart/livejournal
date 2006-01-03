@@ -107,10 +107,8 @@
 
  # option
  my %hide_fo;  # userid -> 1
- if ($LJ::HIDE_FRIENDOF_VIA_BAN) {
-     if (my $list = LJ::load_rel_user($u, 'B')) {
-         $hide_fo{$_} = 1 foreach @$list;
-     }
+ if (my $list = LJ::load_rel_user($u, 'B')) {
+     $hide_fo{$_} = 1 foreach @$list;
  }
 
  my $remote_isowner = $remote && $remote->{'user'} eq $u->{'user'};

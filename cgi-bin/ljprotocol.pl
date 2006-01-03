@@ -2137,10 +2137,8 @@ sub list_friends
     } else {
         $sql = "SELECT userid FROM friends WHERE friendid=?";
 
-        if ($LJ::HIDE_FRIENDOF_VIA_BAN) {
-            if (my $list = LJ::load_rel_user($u, 'B')) {
-                $hide{$_} = 1 foreach @$list;
-            }
+	if (my $list = LJ::load_rel_user($u, 'B')) {
+	    $hide{$_} = 1 foreach @$list;
         }
     }
 

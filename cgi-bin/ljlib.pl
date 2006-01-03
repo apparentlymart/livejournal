@@ -709,7 +709,7 @@ sub get_recent_items
         $remote = LJ::load_userid($remoteid);
     }
 
-    my $max_hints = $LJ::MAX_HINTS_LASTN;  # temporary
+    my $max_hints = $LJ::MAX_SCROLLBACK_LASTN;  # temporary
     my $sort_key = "revttime";
 
     my $clusterid = $opts->{'clusterid'}+0;

@@ -37,7 +37,6 @@
     }
     $SITENAMEABBREV ||= "[??]";
 
-    $NODB_MSG ||= "Database temporarily unavailable.  Try again shortly.";
     $MSG_READONLY_USER ||= "Database temporarily in read-only mode during maintenance.";
 
     $SITEROOT ||= "http://www.$DOMAIN:8011";
@@ -59,7 +58,7 @@
     $COOKIE_PATH   ||= "/";
     @COOKIE_DOMAIN_RESET = ("", "$DOMAIN", ".$DOMAIN") unless @COOKIE_DOMAIN_RESET;
 
-    $MAX_HINTS_LASTN ||= 100;
+    $MAX_SCROLLBACK_LASTN ||= 100;
     $MAX_SCROLLBACK_FRIENDS ||= 1000;
     $MAX_USERPIC_KEYWORDS ||= 10;
 

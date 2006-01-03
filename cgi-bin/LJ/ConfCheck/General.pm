@@ -194,8 +194,117 @@ add_conf('$FB_DOMAIN',
 
 add_conf('$FB_SITEROOT',
 	 type => 'url',
-	 des => "URL prefix to cooperating Fotobilder installation, without trailing slash.  For instance, http://pics.foo.com"
+	 no_trailing_slash => 1,
+	 des => "URL prefix to cooperating Fotobilder installation, without trailing slash.  For instance, http://pics.foo.com",
 	 );
+
+add_conf('$HOME',
+	 type => 'directory',
+	 no_trailing_slash => 1,
+	 des => "The root of your LJ installation.  This directory should contain, for example, 'htdocs' and 'cgi-bin', etc.",
+	 );
+
+add_conf('$IMGPREFIX',
+	 type => 'url',
+	 no_trailing_slash => 1,
+	 des => "Prefix on (static) image URLs.  By default, it's '\$SITEROOT/img', but your load balancing may dictate another hostname or port for efficiency.  See also: \$IMGPREFIX",
+	 );
+
+add_conf('$JSPREFIX',
+	 type => 'url',
+	 no_trailing_slash => 1,
+	 des => "Prefix on (static) javascript URLs.  By default, it's '\$SITEROOT/js', but your load balancing may dictate another hostname or port for efficiency.  See also: \$IMGPREFIX",
+	 );
+
+add_conf('$PALIMGROOT',
+	 type => 'url',
+	 no_trailing_slash => 1,
+	 des => "Prefix on GIF/PNGs with dynamically generated palettes.  By default, it's '\$SITEROOT/palimg\', and there's little reason to change it.  Somewhat related: note that Perlbal has a plugin to handle these before it gets to mod_perl, if you'd like to relieve some load on your backend mod_perls.   But you don't necessarily need this option for using Perlbal to do it.  Depends on your config.",
+	 );
+
+add_conf('$MAILLOCK',
+	 type => ["hostname", "none", "ddlockd"],
+	 des => "Locking method that mailgated.pl should use when processing incoming emails from the Maildir.  You can safely use 'none' if you have a single host processing mail, otherwise 'ddlockd' or 'hostname' is recommended, though 'hostname' means mail that arrived on a host that then crashes won't be processed until it comes back up.  ddlockd is recommended, if you're using multiple mailgated processes.",
+	 );
+
+add_conf('$MAX_ATOM_UPLOAD',
+	 type => 'int',
+	 des => "Max number of bytes that users are allowed to upload via Atom.  Note that this upload path isn't ideal, so the entire upload must fit in memory.  Default is 25MB until path is optimized.",
+	 );
+
+add_conf('$MAX_FOAF_FRIENDS',
+	 type => 'int',
+	 des => "The maximum number of friends that users' FOAF files will show.  Defaults to 1000.  If they have more than the configured amount, some friends will be omitted.",
+	 );
+
+add_conf('$MAX_FRIENDOF_LOAD',
+	 type => 'int',
+	 des => "The maximum number of friend-ofs ('fans'/'followers') to load for a given user.  Defaults to 5000.  Beyond that, a user is just too popular and saying 5,000 is usually sufficient because people aren't actually reading the list.",
+	 );
+
+add_conf('$MAX_SCROLLBACK_LASTN',
+	 type => 'int',
+	 des => "The recent items (lastn view)'s max scrollback depth.  That is, how far you can skip back with the ?skip= URL argument.  Defaults to 100.  After that, the 'previous' links go to day views, which are stable URLs.  ?skip= URLs aren't stable, and there are inefficiencies making this value too large, so you're advised to not go too far above the default of 100.",
+	 );
+
+add_conf('$MAX_SCROLLBACK_FRIENDS',
+	 type => 'int',
+	 des => "The friends page' max scrollback depth.  That is, how far you can skip back with the ?skip= URL argument.  Defaults to 1000.",
+	 );
+
+add_conf('$MAX_REPL_LAG',
+	 type => 'int',
+	 des => "The max number of bytes that a MySQL database slave can be behind in replication and still be considered usable.  Note that slave databases are never used for any 'important' read operations (and especially never writes, because writes only go to the master), so in general MySQL's async replication won't bite you.  This mostly controls how fresh of data a visitor would see, not a content owner.  But in reality, the default of 100k is pretty much real-time, so you can safely ignore this setting.",
+	 );
+
+add_conf('$MAX_S2COMPILED_CACHE_SIZE',
+	 type => 'int',
+	 des => "Threshold (in bytes) under which compiled S2 layers are cached in memcached.  Default is 7500 bytes.  If you have a lot of free memcached memory and a loaded database server with lots of queries to the s2compiled table, turn this up.",
+	 );
+
+add_conf('$MAX_USERPIC_KEYWORDS',
+	 type => 'int',
+	 des => "Max number of keywords allowed per userpic.  Default is 10.",
+	 );
+
+add_conf('$MINIMAL_BML_SCHEME',
+	 type => "string",
+	 des => "The name of the BML scheme that implements the site's 'lite' interface for minimally capable devices such as cellphones/etc.  See also %MINIMAL_USERAGENT.");
+
+add_conf('%MINIMAL_USERAGENT',
+	 des => "Set of user-agent prefixes (the part before the slash) that should be considered 'lite' devices and thus be given the site's minimal interface.  Keys are prefixes, value is a boolean.  See also \$MINIMAL_BML_SCHEME.",
+	 );
+
+add_conf('$MSG_DB_UNAVAILABLE',
+	 type => "html",
+	 des => "Message to show users on a database unavailable error.",
+	 );
+
+add_conf('$MSG_NO_COMMENT',
+	 type => "html",
+	 des => "Message to show users when they're not allowed to comment due to either their 'get_comments' or 'leave_comments' capability being disabled, probably by the admin to lower activity after a hardware rotation.",
+	 );
+
+add_conf('$MSG_NO_POST',
+	 type => "html",
+	 des => "Message to show users when they're not allowed to post due to their 'can_post' capability being disabled, probably by the admin to lower activity after a hardware rotation.",
+	 );
+
+add_conf('$MSG_READONLY_USER',
+	 type => "string",
+	 des => "Message to show users when their journal (or a journal they're visting) is in read-only mode due to maintenance.",
+	 );
+
+add_conf('$NEWUSER_CAPS',
+	 type => 'int',
+	 des => "Bitmask of capability classes that new users begin their accounts with.  By default users aren't in any capability classes and get only the default site-wide capabilities.  See also \%CAP.",
+	 );
+
+add_conf('$NEW_ENTRY_CLEANUP_HACK',
+	 type => "bool",
+	 des => "OLD HISTORIC BAGGAGE: Do not use!  There used to be a bug where only parts of entries got deleted, then there was another bug with per-user number allocation.  Together, they forced this option to be made for awhile, where new entries (when this is on) would blow away any old data if part of it was still there but wasn't supposed to be.  This includes deleting comments tied to those old entries.",
+	 );
+
 
 my %bools = (
 	     "DONT_LOG_IMAGES" => "Don't log requests for images.",
@@ -203,6 +312,13 @@ my %bools = (
 	     "DO_GZIP" => "Compress text content sent to browsers.  Cuts bandwidth by over 50%.",
 	     "EVERYONE_VALID" => "Users don't need to validate their email addresses.",
 	     "FB_QUOTA_NOTIFY" => "Do RPC requests to Fotobilder to inform it of disk quota changes.",
+	     "IS_DEV_SERVER" => "This is a development installation only, and not used for production.  A lot of debug info and intentional security holes for convenience are introduced when this is enabled.",
+	     "LOG_GTOP" => "Log per-request CPU and memory usage, using gtop libraries.",
+	     "NO_PASSWORD_CHECK" => "Don't do strong password checks.  Users can use any old dumb password they'd like.",
+	     "OPENID_CONSUMER" => "Accept OpenID identies for logging in and commenting.",
+	     "OPENID_SERVER" => "Be an OpenID server.",
+	     "OTHER_VHOSTS" => "Let users CNAME their vanity domains to this LiveJournal installation to transparently load their journal.",
+	     
 	     );
 
 foreach my $k (keys %bools) {

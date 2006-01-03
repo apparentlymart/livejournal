@@ -32,7 +32,7 @@ $mailspool_new = "$mailspool/new";
 $hostname = $1 if Sys::Hostname::hostname() =~ /^([\w-]+)/;
 $locktype = $opt->{'lock'} || $LJ::MAILLOCK;
 die "Invalid lock mechanism specified.  Set \$LJ::MAILLOCK or use --lock.\n"
-  unless $locktype =~ /hostname|none|ddlockd/i;
+  unless $locktype =~ /^hostname|none|ddlockd$/i;
 $workdir = $opt->{'workdir'} || "$mailspool/tmp";
 $maxloop = $opt->{'maxloop'} || 100;
 
@@ -350,7 +350,6 @@ sub process
 
     my $to;
     my $toarg;
-    my $ignore = 0;
     foreach my $a ( @to, Mail::Address->parse( $head->get('Cc') ) ) {
         my $address = $a->address;
         my $arg;
@@ -364,8 +363,6 @@ sub process
             $to    = $address;
             $toarg = $arg;
         }
-        $ignore = 1 if $address eq $LJ::IGNORE_EMAIL;
-        $ignore = 1 if $address eq $LJ::BOGUS_EMAIL;
     }
 
     return dequeue("Not deliverable to support system (no match To:)")

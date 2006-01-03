@@ -1085,7 +1085,7 @@ sub create_view_lastn
     if ($itemshow > 50) { $itemshow = 50; }
 
     my $skip = $get->{'skip'}+0;
-    my $maxskip = $LJ::MAX_HINTS_LASTN-$itemshow;
+    my $maxskip = $LJ::MAX_SCROLLBACK_LASTN-$itemshow;
     if ($skip < 0) { $skip = 0; }
     if ($skip > $maxskip) { $skip = $maxskip; }
 

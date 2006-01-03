@@ -5,7 +5,7 @@ use strict;
 use Getopt::Long;
 
 my $debs_only = 0;
-my ($only_check, $no_check);
+my ($only_check, $no_check, $opt_nolocal);
 
 my %dochecks;   # these are the ones we'll actually do
 my @checks = (  # put these in the order they should be checked in
@@ -29,6 +29,7 @@ usage() unless GetOptions(
                           'needed-debs' => \$debs_only,
                           'only=s'      => \$only_check,
                           'no=s'        => \$no_check,
+			  'nolocal'     => \$opt_nolocal,
                           );
 
 if ($debs_only) {
@@ -40,6 +41,11 @@ usage() if $only_check && $no_check;
 
 %dochecks = ( $only_check => 1)
     if $only_check;
+
+# dependencies
+if ($dochecks{ljconfig}) {
+    $dochecks{env} = 1;
+}
 
 $dochecks{$no_check} = 0
     if $no_check;
@@ -178,7 +184,7 @@ sub check_env {
     # new modules to implement site-specific hooks.
     my $local_config = "$ENV{'LJHOME'}/bin/checkconfig-local.pl";
     $local_config .= ' --needed-debs' if $debs_only;
-    if (-e $local_config) {
+    if (!$opt_nolocal && -e $local_config) {
         my $good = eval { require $local_config; };
         exit 1 unless $good;
     }
