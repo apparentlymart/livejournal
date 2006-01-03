@@ -576,6 +576,14 @@ sub create_view_foaf {
         $ret .= "    <foaf:dateOfBirth>$bdate</foaf:dateOfBirth>\n";
     }
     $ret .= "    <foaf:mbox_sha1sum>$digest</foaf:mbox_sha1sum>\n";
+
+    # userpic
+    if (my $picid = $u->{'defaultpicid'}) {
+        my %pic;
+        LJ::load_userpics(\%pic, [ $u, $picid ]);
+        $ret .= "    <foaf:img rdf:resource=\"$LJ::USERPIC_ROOT/$picid/$u->{userid}\" />\n";
+    }
+
     $ret .= "    <foaf:page>\n";
     $ret .= "      <foaf:Document rdf:about=\"$LJ::SITEROOT/userinfo.bml?user=$u->{user}\">\n";
     $ret .= "        <dc:title>$LJ::SITENAME Profile</dc:title>\n";
