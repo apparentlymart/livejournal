@@ -182,7 +182,7 @@ body<=
      }
 
      $ret .= "<p>[ <b>$gct</b> unanswered, <b>$snhct</b> still need help, ";
-     $ret .= "<b>$aacct</b> answered awaiting closed, <b>$rct</b> total open ]</p>";
+     $ret .= "<b>$aacct</b> answered awaiting close, <b>$rct</b> total open ]</p>";
  }
 
  if ($sort eq 'id') {
