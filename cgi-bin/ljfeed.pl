@@ -579,8 +579,6 @@ sub create_view_foaf {
 
     # userpic
     if (my $picid = $u->{'defaultpicid'}) {
-        my %pic;
-        LJ::load_userpics(\%pic, [ $u, $picid ]);
         $ret .= "    <foaf:img rdf:resource=\"$LJ::USERPIC_ROOT/$picid/$u->{userid}\" />\n";
     }
 
