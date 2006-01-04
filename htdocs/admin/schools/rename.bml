@@ -47,6 +47,8 @@ body<=
                 unless $from_ctc eq $to_ctc;
             return $err->("The to state field must be filled in")
                 unless $to_sc;
+            return $err->("You cannot move a city from one state to another")
+                if $to_cc && $from_cc && $from_sc ne $to_sc;
 
             if ($from_cc ne $to_cc) {
                 return $err->("Both City fields must be filled in (you only filled in one)")
