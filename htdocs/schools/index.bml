@@ -528,7 +528,7 @@ body<=
 
     $ret .= "<br /><?h2 $ML{'.school.browsejournals'} h2?>";
 
-    if (@ids) {
+    if (@users || @comms) {
         $ret .= "<form action='/schools/' method='get'><?p $ML{'.school.limitbyyear'} ";
         $ret .= LJ::html_text({name => 'year', size => 4, maxlength => 4, value => $year ? $year : ''});
         $ret .= LJ::html_hidden('ctc', $ctc, 'cc', $cc, 'sid', $sid, 'sc', $sc);
@@ -536,7 +536,7 @@ body<=
         $ret .= " p?></form>";
     }
 
-    unless (@ids) {
+    if (!(@users || @comms)) {
         if ($year) {
             $ret .= "<?p " . BML::ml('.school.nousersforthisyear', {'year' => $year}) . " p?>";
         } else {
