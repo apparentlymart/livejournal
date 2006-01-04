@@ -7,7 +7,7 @@
 
     # for error reporting
     my $err = sub {
-        return "<h2>Error</h2>" . shift;
+        return "<h2>$ML{'Error'}</h2>" . shift;
     };
 
     my $dbr = LJ::get_db_reader();
@@ -17,7 +17,7 @@
     return BML::redirect('layerbrowse.bml') unless $id =~ /^\d+$/;
 
     my $lay = defined $pub->{$id} ? $pub->{$id} : LJ::S2::load_layer($id);
-    return $err->("The specified layer does not exist.")
+    return $err->($ML{'/customize/advanced/layerbrowse.bml.error.layerdoesntexist'})
         unless $lay;
 
     my $layerinfo = {};
@@ -29,7 +29,7 @@
     my $isadmin = !defined $pub->{$id} &&                          # public styles are pulled from the system 
                   (LJ::check_priv($remote, 'canview', 'styles') || # account, so we don't want to check privileges
                    LJ::check_priv($remote, 'canview', '*'));       # in case they're private styles
-    return $err->("You are not authorized to view this layer.")
+    return $err->($ML{'/customize/advanced/layerbrowse.bml.error.cantviewlayer'})
         unless defined $pub->{$id} && (! defined $srcview || $srcview != 0) ||
                $srcview == 1 ||
                LJ::can_manage($remote, $lay->{'userid'}) ||
