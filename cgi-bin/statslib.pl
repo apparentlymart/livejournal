@@ -35,6 +35,10 @@ sub LJ::Stats::register_stat {
 sub LJ::Stats::run_stats {
     my @stats = @_ ? @_ : sort keys %LJ::Stats::INFO;
 
+    # clear out old partialstatsdata for clusters which are no longer active
+    # (not in @LJ::CLUSTERS)
+    LJ::Stats::clear_invalid_cluster_parts();
+
     foreach my $jobname (@stats) {
 
         my $stat = $LJ::Stats::INFO{$jobname};
@@ -229,6 +233,21 @@ sub LJ::Stats::need_calc {
 
     my $max = $LJ::Stats::INFO{$jobname}->{'max_age'} || 3600*6; # 6 hours default
     return ($calctime < time() - $max);
+}
+
+# clear invalid partialstats data for old clusters
+# -- this way if clusters go inactive/dead their partial tallies won't remain
+sub LJ::Stats::clear_invalid_cluster_parts {
+
+    # delete partialstats rows for invalid clusters
+    # -- query not indexed, but data set is small.  could add one later
+    my $dbh = LJ::Stats::get_db("dbh");
+    my $bind = join(",", map { "?" } @LJ::CLUSTERS);
+    $dbh->do("DELETE FROM partialstatsdata WHERE clusterid NOT IN ($bind)",
+             undef, @LJ::CLUSTERS);
+    die $dbh->errstr if $dbh->err;
+
+    return 1;
 }
 
 # sum up counts for all clusters
