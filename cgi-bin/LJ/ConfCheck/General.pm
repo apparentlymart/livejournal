@@ -9,7 +9,7 @@ use strict;
 
 add_singletons(qw(
 		  @USER_TABLES $PROTOCOL_VER $MAX_DVERSION 
-		  $CLEAR_CACHES $BIN $HTDOCS 
+		  $CLEAR_CACHES $BIN $HTDOCS $SSLDOCS
 		  ));
 
 add_conf('$ADMIN_EMAIL',
@@ -322,8 +322,59 @@ add_conf('$SCHOOLSMAX',
 	 des => "Hashref of journaltype (P, C, I, ..) to maximum number of allowed schools for that journal type.",
 	 );
 
+add_conf('$SENDMAIL',
+	 type => 'command+args',
+	 des => "System path to sendmail, with arguments.  Default is: '/usr/sbin/sendmail -t -oi'.  This option is ignored if you've defined the higher-precedence option: \@MAIL_TRANSPORTS.",
+	 );
+
+add_conf('$SMTP_SERVER',
+	 des => "Host/IP to outgoing SMTP server.  Takes precedence over \$SENDMAIL.",
+	 );
+
+add_conf('$SERVER_DOWN_SUBJECT',
+	 type => "text",
+	 des => "The error message subject/title to show when \$SERVER_DOWN is set.",
+	 );
+
+add_conf('$SERVER_DOWN_MESSAGE',
+	 type => "html",
+	 des => "The error message to show when \$SERVER_DOWN is set.",
+	 );
+
+add_conf('$SERVER_NAME',
+	 des => "System's hostname.  In a massive LJ webfarm, each node has its own value of this.  The default is to query the local machine's hostname at runtime, so you don't need to set this.  It's not used for anything too important anyway.");
+
+add_conf('$SITENAME',
+	 required => 1,
+	 des => "Full name of your site.  For instance, 'LiveJournal.com'.  See also \$SITENAMESHORT and \$SITENAMEABBREV.");
+
+add_conf('$SITENAMESHORT',
+	 des => "Medium-length name of your site.  For instance, 'LiveJournal'.  See also \$SITENAME and \$SITENAMEABBREV.  Defaults to \$SITENAME without any '.*' suffix");
+
+add_conf('$SITENAMEABBREV',
+	 required => 1,
+	 des => "Shorted possible slang name of your site.  For instance, 'LJ'.");
+
+add_conf('$SITEROOT',
+	 required => 1,
+	 type => 'url',
+	 no_trailing_slash => 1,
+	 des => "URL prefix for the base of the site, including 'http://'.  This can't be auto-detected because of reverse-proxies, etc.  See also \$SSLROOT.");
+
+add_conf('$SSLROOT',
+	 required => 0,
+	 type => 'url',
+	 no_trailing_slash => 1,
+	 des => "URL prefix for the base of the SSL-portion of the site, including 'https://'.  This can't be auto-detected because of reverse-proxies, etc.  See also \$SITEROOT.");
+
+add_conf('$SPELLER',
+	 type => 'command+args',
+	 des => "If set, spell checking is enabled.  Value is the full path plus arguments to an ispell-compatible spell checker.  aspell is recommended, using:  '/usr/bin/aspell pipe --sug-mode=fast --ignore-case'.");
+
 
 my %bools = (
+	     'SERVER_DOWN' => "The site is globally marked as 'down' and users get an error message, as defined by \$SERVER_DOWN_MESSAGE and \$SERVER_DOWN_SUBJECT.  It's not clear why this should ever be used instead of \$SERVER_TOTALLY_DOWN",
+	     'SERVER_TOTALLY_DOWN' => "The site is globally marked as 'down' and users get an error message, as defined by \$SERVER_DOWN_MESSAGE and \$SERVER_DOWN_SUBJECT.  But compared to \$SERVER_DOWN, this error message is done incredibly early before any dispatch to different modules.",
 	     'S2COMPILED_MIGRATION_DONE' => "Don't try to load compiled S2 layers from the global cluster.  Any new installation can enable this safely as a minor optimization.  The option only really makes sense for large, old sites.",
 	     "S1_SHORTCOMINGS" => "Use the S2 style named 's1shortcomings' to handle page types that S1 can't handle.  Otherwise, BML is used.  This is off by defalut, but will eventually become on by default, and no longer an option.",
 	     "REQUIRE_TALKHASH" => "Require submitted comments to include a signed hidden value provided by the server.  Slows down comment-spammers, at least, in that they have to fetch pages first, instead of just blasting away POSTs.  Defaults to off.",
@@ -339,7 +390,8 @@ my %bools = (
 	     "OPENID_CONSUMER" => "Accept OpenID identies for logging in and commenting.",
 	     "OPENID_SERVER" => "Be an OpenID server.",
 	     "OTHER_VHOSTS" => "Let users CNAME their vanity domains to this LiveJournal installation to transparently load their journal.",
-	     
+	     "USE_SSL" => "Links to SSL portions of the site should be visible.",
+	     "USE_PGP" => "Let users set their PGP/GPG public key, and accept PGP/GPG-signed emails (for authentication)",
 	     );
 
 foreach my $k (keys %bools) {

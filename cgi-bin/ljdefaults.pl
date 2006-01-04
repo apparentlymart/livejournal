@@ -21,6 +21,7 @@
 
     $HOME = $ENV{'LJHOME'};
     $HTDOCS = "$HOME/htdocs";
+    $SSLDOCS ||= "$HOME/ssldocs";
     $BIN = "$HOME/bin";
 
     $SERVER_NAME ||= Sys::Hostname::hostname();
