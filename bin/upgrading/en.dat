@@ -953,6 +953,98 @@ Thanks for supporting [[sitename]]!
 
 /customize/advanced/layerbrowse.bml.title=Public Layers
 
+/customize/advanced/layers.bml.back2=Advanced Customization
+
+/customize/advanced/layers.bml.back2layers=Your Layers
+
+/customize/advanced/layers.bml.btn.delete=Delete
+
+/customize/advanced/layers.bml.btn.delete2=Delete...
+
+/customize/advanced/layers.bml.btn.edit=Edit...
+
+/customize/advanced/layers.bml.btn.layoutspecific.create=Create
+
+/customize/advanced/layers.bml.btn.toplevel.create=Create
+
+/customize/advanced/layers.bml.createlayer.header=Create Layer
+
+/customize/advanced/layers.bml.createlayer.layoutspecific=Create layout-specific layer
+
+/customize/advanced/layers.bml.createlayer.layoutspecific.label.layout=Layout:
+
+/customize/advanced/layers.bml.createlayer.layoutspecific.label.type=Type:
+
+/customize/advanced/layers.bml.createlayer.layoutspecific.select.language=Language
+
+/customize/advanced/layers.bml.createlayer.layoutspecific.select.theme=Theme
+
+/customize/advanced/layers.bml.createlayer.layoutspecific.select.user=User
+
+/customize/advanced/layers.bml.createlayer.toplevel=Create top-level layer
+
+/customize/advanced/layers.bml.createlayer.toplevel.label.coreversion=Core Version:
+
+/customize/advanced/layers.bml.createlayer.toplevel.label.type=Type:
+
+/customize/advanced/layers.bml.createlayer.toplevel.select.language=Language
+
+/customize/advanced/layers.bml.createlayer.toplevel.select.layout=Layout
+
+/customize/advanced/layers.bml.delete.layerid=#[[id]]
+
+/customize/advanced/layers.bml.delete.layername='[[name]]'
+
+/customize/advanced/layers.bml.delete.text=Are you sure you want to delete [[type]] layer [[name]]?
+
+/customize/advanced/layers.bml.delete.title=Deleting layer [[name]]
+
+/customize/advanced/layers.bml.error.badparentid=No/bogus parent layer ID given (for layouts and core languages, use core parent ID; for themes and layout languages, use layout ID).
+
+/customize/advanced/layers.bml.error.cantbeauthenticated=You could not be authenticated as the specified user.
+
+/customize/advanced/layers.bml.error.cantcreatelayer=Error creating layer.
+
+/customize/advanced/layers.bml.error.cantsetuplayer=Error setting up &amp; compiling layer: [[errormsg]]
+
+/customize/advanced/layers.bml.error.cantuseonsystem=This privilege cannot be used on the system account.
+
+/customize/advanced/layers.bml.error.invalidlayertype=Invalid layer type.
+
+/customize/advanced/layers.bml.error.layerdoesntexist=The specified layer does not exist.
+
+/customize/advanced/layers.bml.error.maxlayers=You have reached your maximum number of allowed layers.
+
+/customize/advanced/layers.bml.error.nolayertypeselected=No layer type selected.
+
+/customize/advanced/layers.bml.error.notloggedin=You must be logged in to view your layers.
+
+/customize/advanced/layers.bml.error.notyourlayer=You do not own the specified layer.
+
+/customize/advanced/layers.bml.error.usercantuseadvanced=The selected user's account type does not allow advanced customization.
+
+/customize/advanced/layers.bml.error.youcantuseadvanced=Your account type does not allow advanced customization.
+
+/customize/advanced/layers.bml.nav.yourstyles=Your Styles
+
+/customize/advanced/layers.bml.title=Your Layers
+
+/customize/advanced/layers.bml.yourlayers.childof=Child of <a [[aopts]]>layer [[layerid]]</a>: [[name]]
+
+/customize/advanced/layers.bml.yourlayers.header=Your Layers
+
+/customize/advanced/layers.bml.yourlayers.noname=(none)
+
+/customize/advanced/layers.bml.yourlayers.none=None
+
+/customize/advanced/layers.bml.yourlayers.table.actions=Actions
+
+/customize/advanced/layers.bml.yourlayers.table.layerid=LayerID
+
+/customize/advanced/layers.bml.yourlayers.table.name=Name
+
+/customize/advanced/layers.bml.yourlayers.table.type=Type
+
 /customize/index.bml.change=Change
 
 /customize/index.bml.choose=Do you want to use the old style system, or the new one?
