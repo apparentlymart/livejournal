@@ -367,12 +367,79 @@ add_conf('$SSLROOT',
 	 no_trailing_slash => 1,
 	 des => "URL prefix for the base of the SSL-portion of the site, including 'https://'.  This can't be auto-detected because of reverse-proxies, etc.  See also \$SITEROOT.");
 
+
+add_conf('$STATPREFIX',
+	 required => 0,
+	 type => 'url',
+	 no_trailing_slash => 1,
+	 des => "URL prefix for the static files.  Defaults to \$SITEROOT/stc.",
+	 );
+
 add_conf('$SPELLER',
 	 type => 'command+args',
 	 des => "If set, spell checking is enabled.  Value is the full path plus arguments to an ispell-compatible spell checker.  aspell is recommended, using:  '/usr/bin/aspell pipe --sug-mode=fast --ignore-case'.");
 
 
+add_conf('$STATS_BLOCK_SIZE',
+	 des => "");
+add_conf('$SUICIDE_UNDER',
+	 des => "");
+add_conf('%SUICIDE_UNDER',
+	 des => "");
+
+add_conf('$SYNSUCK_MAX_THREADS',
+	 des => "");
+
+add_conf('$SYND_CLUSTER',
+	 type => 'integer',
+	 des => "If defined, all syndication (RSS/Atom) 'users' are put on this cluster number.  If undefined, syndication users are assigned to user clusters (partitions) in the normal way.");
+
+add_conf('$SUPPORT_EMAIL',
+	 type => 'email',
+	 des => "The customer support email address.");
+
+add_conf('$TALK_ABORT_REGEXP',
+	 type => 'regexp',
+	 des => "Regular expression which, when matched on incoming comment bodies, kills the comment.");
+
+add_conf('$TALK_MAX_URLS',
+	 type => 'int',
+	 des => "If set, up to this many URLs will be extracted from comments and stored for analysis.");
+
+add_conf('$TOOLS_RECENT_COMMENTS_MAX',
+	 type => 'int',
+	 des => "Number of recent comments to show on /tools/recent_comments.bml");
+
+add_conf('$UNDERAGE_BIT',
+	 type => 'int',
+	 des => "If non-zero, bit number in the caps field that stores whether a user is underage or not.  If zero/undef, underage checking is disabled.");
+
+add_conf('$UNDERAGE_ERROR',
+	 type => 'html',
+	 des => "Error message to show underage users.");
+
+add_conf('$USERPIC_ROOT',
+	 type => 'url',
+	 no_trailing_slash => 1,
+	 des => "URL prefix for userpics.  Defaults to \$SITEROOT/userpic.  See \%SUBDOMAIN_FUNCTION to use something else.");
+
+add_conf('$USER_DOMAIN',
+	 type => 'domain',
+	 des => "Domain for user email aliases and user virtual host domains.  See \$USER_EMAIL and \$USER_VHOSTS.\n");
+
 my %bools = (
+	     'USE_ACCT_CODES' => "Make joining the site require an 'invite code'.  Note that this code might've bitrotted, so perhaps it should be kept off.",
+	     'USER_VHOSTS' => "Let (at least some) users get *.\$USER_DOMAIN URLs.  They'll also need the 'userdomain' cap.",
+	     'USER_EMAIL' => "Let (at least some) users get email aliases on the site.  They'll also need the 'useremail' cap.  See also \$USER_DOMAIN",
+	     'USERPIC_BLOBSERVER' => "Store userpics on the 'blobserver'.  This is old.  MogileFS is the future.  You might want to use this option, though, for development, as blobserver in local-filesystem-mode is easy to setup.",
+	     'UPDATE_INSERT_OBJECT' => "Show an option to insert media/polls/etc from the update page. (STUPID? break this into separate options per item type?)",
+	     'UNIQ_COOKIES' => "Give each user a unique session cookie, unrelated to their login session cookie.",
+	     'TOS_CHECK' => 'Make users agree to the Terms of Service.',
+	     'TRACK_URL_ACTIVE' => "record in memcached what URL a given host/pid is working on",
+	     'TRUST_X_HEADERS' => "LiveJournal should trust the upstream's X-Forwarded-For and similar headers.  Default is off (for direct connection to the net).  If behind your own reverse proxies, you should enable this.",
+	     'UNICODE' => "Unicode support is enabled.  The default has been 'on' for ages, and turning it off is nowadays not recommended or even known to be working/reliable.  Keep it enabled.",
+	     'SUICIDE' => "Large processes should voluntarily kill themselves at the end of requests.",
+	     'STATS_FORCE_SLOW' => "Make all stats hit the 'slow' database role, never using 'slave' or 'master'",
 	     'SERVER_DOWN' => "The site is globally marked as 'down' and users get an error message, as defined by \$SERVER_DOWN_MESSAGE and \$SERVER_DOWN_SUBJECT.  It's not clear why this should ever be used instead of \$SERVER_TOTALLY_DOWN",
 	     'SERVER_TOTALLY_DOWN' => "The site is globally marked as 'down' and users get an error message, as defined by \$SERVER_DOWN_MESSAGE and \$SERVER_DOWN_SUBJECT.  But compared to \$SERVER_DOWN, this error message is done incredibly early before any dispatch to different modules.",
 	     'S2COMPILED_MIGRATION_DONE' => "Don't try to load compiled S2 layers from the global cluster.  Any new installation can enable this safely as a minor optimization.  The option only really makes sense for large, old sites.",
