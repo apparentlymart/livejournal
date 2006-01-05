@@ -239,7 +239,7 @@
                    keys %$pub;
     if (%$ulay) {
         my @ulayouts = ();
-        push @ulayouts, map { $_, "$ulay->{$_}->{'name'} (#$_)" } 
+        push @ulayouts, map { $_, BML::ml('.createlayer.layoutspecific.select.userlayer', {'name' => $ulay->{$_}->{'name'}, 'id' => $_}) } 
                         sort { $ulay->{$a}->{'name'} cmp $ulay->{$b}->{'name'} || $a <=> $b}
                         grep { $ulay->{$_}->{'type'} eq 'layout' } 
                         keys %$ulay;

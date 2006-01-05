@@ -981,6 +981,8 @@ Thanks for supporting [[sitename]]!
 
 /customize/advanced/layers.bml.createlayer.layoutspecific.select.user=User
 
+/customize/advanced/layers.bml.createlayer.layoutspecific.select.userlayer=[[name]] (#[[id]])
+
 /customize/advanced/layers.bml.createlayer.toplevel=Create top-level layer
 
 /customize/advanced/layers.bml.createlayer.toplevel.label.coreversion=Core Version:
