@@ -236,7 +236,7 @@
          @ids = splice(@ids, 0, $MAX_FRIENDS_SHOW);
      }
      LJ::load_userids_multiple([ map { $_ => \$fr{$_} } @ids ]);
-     push @friends, sort { $a->{user} cmp $b->{user} } values %fr;
+     push @friends, sort { $a->display_name() cmp $b->display_name() } values %fr;
      $friends{'loaded'} = 1;
  }
 
@@ -251,7 +251,7 @@
      my %fro;
      LJ::load_userids_multiple([ map { $_ => \$fro{$_} } @ids ]);
 
-     foreach my $ulocal (sort { $a->{'user'} cmp $b->{'user'} } values %fro) {
+     foreach my $ulocal (sort { $a->display_name() cmp $b->display_name() } values %fro) {
          next unless $ulocal->{'statusvis'} eq 'V';
          if ($ulocal->{'journaltype'} eq 'P' || $ulocal->{'journaltype'} eq "I") {
              if (!$com && $u->{'opt_showmutualfriends'} && $fr{$ulocal->{userid}}) {
@@ -860,13 +860,20 @@ if ($u->{'journaltitle'}) {
              my $friend_link = sub {
                  my $f = shift;
                  my $status = $f->{'statusvis'};
-                 my $frlink = "<a href='/userinfo.bml?user=$f->{'user'}'>$f->{'user'}</a>";
+
+                 my $frlink;
+                 if ($f->{'journaltype'} eq "I") {
+                     $frlink = "<a href=\"/userinfo.bml?userid=$f->{'userid'}&amp;t=I\">" . LJ::ehtml($f->display_name()) . "</a>";
+                 } else {
+                     $frlink = "<a href=\"/userinfo.bml?user=$f->{'user'}\">$f->{'user'}</a>";
+                 }
+
                  $frlink = "<strike>$frlink</strike>" if $status =~ /[DXS]/;
                  $frlink = "<b>$frlink</b>" if $remote_friendid{$f->{'userid'}} && $remote->{'userid'} != $u->{'userid'};
                  return $frlink;
              };
              foreach my $f (@friends) {
-                 push @pfriends, $friend_link->($f) if $f->{'journaltype'} eq 'P' or $f->{'journaltype'} eq 'S';
+                 push @pfriends, $friend_link->($f) if $f->{'journaltype'} eq 'P' or $f->{'journaltype'} eq 'S' or $f->{'journaltype'} eq 'I';
                  push @cfriends, $friend_link->($f) if $f->{'journaltype'} eq 'C' or $f->{'journaltype'} eq 'N';
                  push @yfriends, $friend_link->($f) if $f->{'journaltype'} eq 'Y';
              }
@@ -959,7 +966,7 @@ if ($u->{'journaltitle'}) {
                  if ($_->{'journaltype'} eq "P") {
                      $frlink = "<a href=\"/userinfo.bml?user=$_->{'user'}\">$_->{'user'}</a>";
                  } elsif ($_->{'journaltype'} eq "I") {
-                     $frlink = "<a href=\"/userinfo.bml?userid=$_->{'userid'}&amp;t=I\">" . LJ::ehtml($_->{'name'}) . "</a>";
+                     $frlink = "<a href=\"/userinfo.bml?userid=$_->{'userid'}&amp;t=I\">" . LJ::ehtml($_->display_name()) . "</a>";
                  }
                  $frlink = "<b>$frlink</b>" if $remote_friendid{$_->{'userid'}};
                  $body .= "$frlink, ";
