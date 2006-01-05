@@ -826,7 +826,7 @@ sub canonical_school_name {
     $name = join(' ', map { $nocaps{$_} ? $_ : ucfirst(lc($_)) } split(/\s+/, $name));
 
     # fix up "O'neill" to "O'Neill"
-    $name =~ s/(O'\w)/uc $1/eg;
+    $name =~ s/(O'\w)/uc $1/eg; #'
 
     # fix up "Mccarthy" to "McCarthy"
     $name =~ s/Mc(\w)/"Mc" . uc $1/eg;
@@ -842,7 +842,7 @@ sub canonical_school_name {
 
     # fix up Ft.
     $name =~ s/^Ft\.? /Fort /;
- 
+
     # convert Saint to St. at BEGINNING of name
     $name =~ s/^Saint /St. /;
     $name =~ s/^St /St. /;
@@ -853,7 +853,18 @@ sub canonical_school_name {
     # now fix "A and M" ... mostly because "A & M" is expanded to such above
     $name =~ s/ A and M / A&M /;
 
+    # fix the fact that people cannot spell
+    $name =~ s/ Elementry / Elementary /;
+    $name =~ s/ Elemantary / Elementary /;
+    $name =~ s/ Elementery / Elementary /;
+    $name =~ s/ Prepatory / Preparatory /;
+    $name =~ s/ Preperatory / Preparatory /;
+    $name =~ s/ Prep / Preparatory /;
+    $name =~ s/ Collage / College /;
+
     # fix things that are just "Foo High"
+    $name =~ s/ Elementary$/ Elementary School/;
+    $name =~ s/ Middle$/ Middle School/;
     $name =~ s/ High$/ High School/;
 
     # kill anybody putting ", State" or similar after the name?
