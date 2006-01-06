@@ -236,7 +236,7 @@
          @ids = splice(@ids, 0, $MAX_FRIENDS_SHOW);
      }
      LJ::load_userids_multiple([ map { $_ => \$fr{$_} } @ids ]);
-     push @friends, sort { $a->display_name() cmp $b->display_name() } values %fr;
+     push @friends, sort { $a->display_name cmp $b->display_name } values %fr;
      $friends{'loaded'} = 1;
  }
 
@@ -251,7 +251,7 @@
      my %fro;
      LJ::load_userids_multiple([ map { $_ => \$fro{$_} } @ids ]);
 
-     foreach my $ulocal (sort { $a->display_name() cmp $b->display_name() } values %fro) {
+     foreach my $ulocal (sort { $a->display_name cmp $b->display_name } values %fro) {
          next unless $ulocal->{'statusvis'} eq 'V';
          if ($ulocal->{'journaltype'} eq 'P' || $ulocal->{'journaltype'} eq "I") {
              if (!$com && $u->{'opt_showmutualfriends'} && $fr{$ulocal->{userid}}) {
@@ -863,7 +863,7 @@ if ($u->{'journaltitle'}) {
 
                  my $frlink;
                  if ($f->{'journaltype'} eq "I") {
-                     $frlink = "<a href=\"/userinfo.bml?userid=$f->{'userid'}&amp;t=I\">" . LJ::ehtml($f->display_name()) . "</a>";
+                     $frlink = "<a href=\"/userinfo.bml?userid=$f->{'userid'}&amp;t=I\">" . LJ::ehtml($f->display_name) . "</a>";
                  } else {
                      $frlink = "<a href=\"/userinfo.bml?user=$f->{'user'}\">$f->{'user'}</a>";
                  }
@@ -966,7 +966,7 @@ if ($u->{'journaltitle'}) {
                  if ($_->{'journaltype'} eq "P") {
                      $frlink = "<a href=\"/userinfo.bml?user=$_->{'user'}\">$_->{'user'}</a>";
                  } elsif ($_->{'journaltype'} eq "I") {
-                     $frlink = "<a href=\"/userinfo.bml?userid=$_->{'userid'}&amp;t=I\">" . LJ::ehtml($_->display_name()) . "</a>";
+                     $frlink = "<a href=\"/userinfo.bml?userid=$_->{'userid'}&amp;t=I\">" . LJ::ehtml($_->display_name) . "</a>";
                  }
                  $frlink = "<b>$frlink</b>" if $remote_friendid{$_->{'userid'}};
                  $body .= "$frlink, ";
