@@ -183,8 +183,8 @@ body<=
             my $itid = LJ::Lang::get_itemid($mld->{'dmid'}, "$faqid.2answer");
             if ($itid) {
                 my $sql = "SELECT DATE_FORMAT(l.chgtime, '%Y-%m-%d'), t.userid " .
-                    "FROM ml_latest AS l, ml_text AS t WHERE l.dmid = t.dmid AND l.lnid = t.lnid " .
-                    "AND l.lnid=? AND l.dmid=? AND l.itid=? ORDER BY l.txtid DESC LIMIT 1";
+                    "FROM ml_latest AS l, ml_text AS t WHERE l.dmid = t.dmid AND l.lnid = t.lnid AND l.itid = t.itid" .
+                    "AND l.lnid=? AND l.dmid=? AND l.itid=? ORDER BY t.txtid DESC LIMIT 1";
                 my $sth = $dbr->prepare($sql);
                 $sth->execute($mll->{'lnid'}, $mld->{'dmid'}, $itid);
                 ($lastmodtime, $lastmoduserid) = $sth->fetchrow_array;
