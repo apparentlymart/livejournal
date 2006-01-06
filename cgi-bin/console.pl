@@ -640,6 +640,18 @@ $cmd{'unsuspend'} = {
                ],
     };
 
+$cmd{'set_badpassword'} = {
+    'def' => 'consuspend.pl',
+    'privs' => [qw(suspend)],
+    'des' => "Change a journal's badpassword prop.",
+    'argsummary' => '<journal> <on/off> <note>',
+    'args' => [
+               'journal' => "The username of the journal that type is changing.",
+               'on/off' => "Either 'on' or 'off' which is whether to mark them as having a bad password or not.",
+               'note' => "Required information about why you are setting this status.",
+               ],
+    };
+
 $cmd{'comment'} = {
     'def' => 'consuspend.pl',
     'privs' => [qw(suspend)],

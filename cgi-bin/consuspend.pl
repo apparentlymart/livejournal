@@ -17,6 +17,7 @@ $cmd{'infohistory'}->{'handler'} = \&infohistory;
 $cmd{'change_journal_status'}->{'handler'} = \&change_journal_status;
 $cmd{'set_underage'}->{'handler'} = \&set_underage;
 $cmd{'comment'}->{'handler'} = \&comment;
+$cmd{'set_badpassword'}->{'handler'} = \&bad_password;
 
 sub comment {
     my ($dbh, $remote, $args, $out) = @_;
@@ -498,6 +499,68 @@ sub infohistory
     }
     return 1;
 }
+
+sub bad_password {
+    my ($dbh, $remote, $args, $out) = @_;
+
+    my $err = sub { push @$out, [ "error", shift ]; 0; };
+    my $info = sub { push @$out, [ "info", shift ]; 1; };
+
+    return $err->("You don't have the necessary privilege (suspend) to change an account's password status.")
+        unless LJ::check_priv($remote, 'suspend');
+    return $err->("This command takes three arguments.  Consult the reference for details.")
+        unless scalar(@$args) == 4;
+
+    my $u = LJ::load_user($args->[1]);
+    return $err->("Invalid user.")
+        unless $u;
+    return $err->("Account is not a person (or shared).")
+        if $u->{journaltype} !~ /[PS]/;
+
+    return $err->("Second argument must be 'on' or 'off'.")
+        unless $args->[2] =~ /^(?:on|off)$/;
+    my $on = $args->[2] eq 'on' ? 1 : 0;
+
+    my $reason = $args->[3];
+    return $err->("You must provide a reason for this change as the third argument.")
+        unless $reason;
+
+    # can't set state to what it is already
+    return $err->("User is already marked as having a bad password.")
+        if $on && $u->prop('badpassword');
+    return $err->("User is already marked as not having a bad password.")
+        if !$on && !$u->prop('badpassword');
+
+    my ($res, $sh, $status);
+    if ($on) {
+        $u->set_prop('badpassword', 1)
+            or return $err->("Unable to set prop");
+        $res = "User marked as having a bad password.";
+        $sh = "marked; $reason";
+    } else {
+        $u->set_prop('badpassword', 0)
+            or return $err->("Unable to set prop");
+        $res = "User no longer marked as not having a bad password.";
+        $sh = "unmarked; $reason";
+    }
+
+    # now record this change
+    LJ::statushistory_add($u->{userid}, $remote->{userid}, "set_badpassword", $sh);
+
+    # run the hook
+    my $hres = LJ::run_hook("set_badpassword",
+                            {
+                                'user'   => $u,
+                                'on'     => $on,
+                                'reason' => $reason,
+                            });
+
+    $res .= " Running of hook failed!"
+        if $on && !$hres;
+
+    return $info->($res);
+}
+
 
 1;
 
