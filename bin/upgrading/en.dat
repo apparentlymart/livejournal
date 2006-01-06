@@ -292,8 +292,6 @@ p?>
 
 /community/leave.bml.title=Leave Community
 
-/community/manage.bml.error.badaccounttype=You must be logged in as a regular user account in order to access this page.
-
 /community/manage.bml.commlist.actinfo=Info
 
 /community/manage.bml.commlist.actinvites=Invitations
@@ -328,6 +326,8 @@ p?>
 /community/manage.bml.create.header=Create a community
 
 /community/manage.bml.create.text=You can also <a href='[[link]]'><b>create a new community</b></a>.
+
+/community/manage.bml.error.badaccounttype=You must be logged in as a regular user account in order to access this page.
 
 /community/manage.bml.joinmail.body=For communities with closed memberships, you have several e-mail options:
 
@@ -723,15 +723,15 @@ p?>
 
 /create.bml.birthday.birthdate=Birthdate:
 
-/create.bml.birthday.warning=Entering a false birthdate may prevent you from creating a new account or could prevent you from using your account in the future.
-
-/create.bml.birthday.security=Security:
-
 /create.bml.birthday.head=Age Verification
 
 /create.bml.birthday.question=Please select the month, day, and year you were born.  We require this information to create an account in order to comply with the Children's Online Privacy Protection Act (COPPA).  This information is not stored in our database and is only used during account creation.  Read our <a [[aopts]]>privacy policy</a> for more information on our information practices.
 
 /create.bml.birthday.required=(required)
+
+/create.bml.birthday.security=Security:
+
+/create.bml.birthday.warning=Entering a false birthdate may prevent you from creating a new account or could prevent you from using your account in the future.
 
 /create.bml.btn.create=Create Journal
 
@@ -793,8 +793,6 @@ Thanks for supporting [[sitename]]!
 
 /create.bml.error.email.lj_domain=You cannot use a [[domain]] alias when creating an account.  Please enter a different email address.
 
-/create.bml.error.username.purged=This account has been deleted and purged.
-
 /create.bml.error.email.nospaces=No spaces allowed in email address.  If you're on AOL, remember that your Internet Email address is your screen name with all spaces removed, followed by <b>@aol.com</b>
 
 /create.bml.error.password.asciionly=You can only use ASCII symbols in the password.
@@ -812,6 +810,8 @@ Thanks for supporting [[sitename]]!
 /create.bml.error.username.iscode=Username appears to be an invite code, not a username.
 
 /create.bml.error.username.mustenter=You must enter a username.
+
+/create.bml.error.username.purged=This account has been deleted and purged.
 
 /create.bml.error.username.reserved=Sorry, that is a reserved username.
 
@@ -848,10 +848,6 @@ Thanks for supporting [[sitename]]!
 /create.bml.success.text3=Now, please take the time to fill in some information about yourself.  It's mostly optional, but it lets us get an idea of who's using LiveJournal.
 
 /create.bml.title=Create New Journal
-
-/create.bml.tos.error=You must read and agree to the terms of service before creating an account.
-
-/create.bml.tos.haveread=I have read and agree to the Terms of Service.
 
 /create.bml.tos.heading=Terms of Service
 
@@ -1901,10 +1897,6 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /editpics.bml.error.toomanykeywords=The [[?numwords|keyword|keywords]] "[[words]]" [[?numwords|has|have]] not been saved as [[?numwords|its|their]] user picture icon already has [[max]] keywords.
 
-/editpics.bml.error.toomanypics2=You are already at your limit of [[maxpics]] pictures.  You cannot upload this picture until you delete one of your existing ones.
-
-/editpics.bml.error.toomanypics3=You are currently at your limit of [[max]] [[?max|picture|pictures]].  You will not be able to upload additional pictures until you delete one or more of your current pictures.
-
 /editpics.bml.error.unsupportedtype=Files of type [[filetype]] are not supported.  You can only upload GIF, PNG or JPG files.  Nearly all image/photo programs can do this conversion for you.
 
 /editpics.bml.error.urlerror=An error ocurred while trying to fetch your image.
@@ -2112,6 +2104,8 @@ already have an account you can <a href="/create.bml">create one</a> to track yo
 
 /friends/add.bml.remove.title=Friend Removed!
 
+/friends/edit.bml.invite=Do you want to <a [[aopts]]>invite a friend</a>?
+
 /friends/edit.bml.title=Edit Friends
 
 /friends/editgroups.bml.btn.ge.del=Delete
@@ -2171,8 +2165,6 @@ then be accessible to the new group.
 /friends/editgroups.bml.title=Edit Custom Friends Groups
 
 /friends/editgroups.bml.yourgroups=Your custom friends groups:
-
-/friends/edit.bml.invite=Do you want to <a [[aopts]]>invite a friend</a>?
 
 /friends/edit_do.bml.addfriends.head=Add Friends
 
@@ -2483,8 +2475,6 @@ You may wish to go back and try again, selecting fewer interests to add.
 
 /login.bml.loggedin.head2=Welcome back to [[sitename]]!
 
-/login.bml.loggedin.text2=You're logged in as [[username]]. Go have fun. Here are some suggestions...
-
 /login.bml.loggedin.suggest1=Did you know you can now easily add a photo?
 
 /login.bml.loggedin.suggest2=See the latest updates to your friends' journals.
@@ -2497,21 +2487,23 @@ You may wish to go back and try again, selecting fewer interests to add.
 
 /login.bml.loggedin.suggesthead3=My [[siteabbrev]]
 
+/login.bml.loggedin.text2=You're logged in as [[username]]. Go have fun. Here are some suggestions...
+
 /login.bml.login.autologin=Log in automatically on this computer
-
-/login.bml.login.btn.changeopts=Change Options
-
-/login.bml.login.btn.login=Login...
-
-/login.bml.login.btn.create=Create an Account
-
-/login.bml.login.btn.save=Save
-
-/login.bml.login.changelog=Change log-in options
 
 /login.bml.login.bindcookie=Bind cookie to IP address
 
 /login.bml.login.bindcookie.learnmore=Learn more about this option
+
+/login.bml.login.btn.changeopts=Change Options
+
+/login.bml.login.btn.create=Create an Account
+
+/login.bml.login.btn.login=Login...
+
+/login.bml.login.btn.save=Save
+
+/login.bml.login.changelog=Change log-in options
 
 /login.bml.login.expiration=Expiration:
 
@@ -2549,8 +2541,6 @@ You may wish to go back and try again, selecting fewer interests to add.
 
 /login.bml.logout.loggedout=You are logged out.
 
-/login.bml.title=Login
-
 /login.bml.whylogin.benefit4=Read friends-only posts that are addressed to you.
 
 /login.bml.whylogin.benefit5=Leave comments in any journal or community.
@@ -2558,10 +2548,6 @@ You may wish to go back and try again, selecting fewer interests to add.
 /login.bml.whylogin.benefit6=Add any journal or community to your Friends page.
 
 /login.bml.whylogin.benefit7=Access features that are only visible when you're logged in.
-
-/login.bml.whylogin.head=Why Login?
-
-/login.bml.whylogin.text=Here are some of the main benefits of logging in:
 
 /logout.bml.already.head=Already logged out
 
@@ -3488,9 +3474,7 @@ a system style, you must first create a new style based on that system style.
 
 /styles/index.bml.nav.embedding=Embed your journal in your website
 
-/styles/index.bml.nav.embedding.about<<
-There are many different ways to embed your journal into your own website.
-.
+/styles/index.bml.nav.embedding.about=There are many different ways to embed your journal into your own website.
 
 /styles/index.bml.nav.modify=Modify your account
 
@@ -3648,11 +3632,11 @@ that area. p?>
 
 /support/faqsearch.bml.example=<i>Examples:</i> <b>css, style, mood, music, download, mac</b>
 
+/support/faqsearch.bml.info=FAQs containing this term in either the title or body will be listed below. All FAQs may not be fully translated in every language.
+
 /support/faqsearch.bml.label.lang=Language
 
 /support/faqsearch.bml.label.term=Search term
-
-/support/faqsearch.bml.info=FAQs containing this term in either the title or body will be listed below. All FAQs may not be fully translated in every language.
 
 /support/help.bml.interim=The support queue is intended for use by people with support privileges.
 
@@ -4494,9 +4478,9 @@ This could be because: <ol>
 
 /userinfo.bml.label.location=Location:
 
-/userinfo.bml.label.manageschools=Manage Schools
-
 /userinfo.bml.label.maintainers=Maintainers
+
+/userinfo.bml.label.manageschools=Manage Schools
 
 /userinfo.bml.label.memberof=Member of
 
@@ -4649,6 +4633,8 @@ crumb.addtodo=Add To-Do Item
 
 crumb.advcustomize=Customize Advanced S2 Settings
 
+crumb.advsearch=Advanced Search
+
 crumb.birthdays=Birthdays
 
 crumb.changepass=Change Password
@@ -4663,6 +4649,8 @@ crumb.commsearch=Community Search
 
 crumb.commsentinvites=Sent Invitations
 
+crumb.commsettings=Community Settings
+
 crumb.community=Community Center
 
 crumb.createcommunity=Create Community
@@ -4672,6 +4660,8 @@ crumb.createjournal=Create Journal
 crumb.createstyle=Create Style
 
 crumb.customize=Customize S2 Settings
+
+crumb.customizelayer=Individual Customizations
 
 crumb.delcomment=Delete Comment
 
@@ -4688,6 +4678,8 @@ crumb.editinfo=Personal Info
 crumb.editpics=User Pictures
 
 crumb.editstyle=Edit Style
+
+crumb.edituserpics=Edit Userpics
 
 crumb.emailgateway=Email Gateway
 
@@ -4731,6 +4723,8 @@ crumb.meme=Meme Tracker
 
 crumb.memories=Memorable Posts
 
+crumb.mobilepost=Mobile Post Settings
+
 crumb.moderate=Community Moderation
 
 crumb.modify=Journal Settings
@@ -4747,11 +4741,23 @@ crumb.preview=Layout Previews
 
 crumb.register=Validate Email
 
+crumb.schools=Schools Directory
+
+crumb.schoolsfind=Find a School
+
+crumb.schoolsmy=My Schools
+
+crumb.searchinterests=Search By Interest
+
+crumb.searchregion=Search By Region
+
 crumb.seeoverrides=View User Overrides
 
 crumb.setpgpkey=Public Key
 
 crumb.siteopts=Browse Preferences
+
+crumb.stats=Statistics
 
 crumb.styles=Styles
 
@@ -4776,6 +4782,10 @@ crumb.themes=Theme Previews
 crumb.todo=Todo List
 
 crumb.transfercomm=Transfer Community
+
+crumb.translate=Translation Area
+
+crumb.translateteams=Translation Teams
 
 crumb.unsubscribe=Unsubscribe
 
