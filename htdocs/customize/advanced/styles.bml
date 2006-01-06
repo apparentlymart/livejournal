@@ -16,7 +16,7 @@
 
     # used for error messages
     my $err = sub {
-        $title = "Error";
+        $title = $ML{'Error'};
         $body = '';
         $authasform->() if $remote;
         $body .= "<?p $_[0] p?>";
@@ -25,17 +25,17 @@
 
     # authenticate user
     $remote = LJ::get_remote();
-    return $err->('You must be logged in to view your styles.') 
+    return $err->($ML{'.error.notloggedin'}) 
         unless $remote;
 
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);
-    return $err->('You could not be authenticated as the specified user.')
+    return $err->($ML{'.error.cantbeauthenticated'})
         unless $u;
 
     return $err->($remote->{user} eq $u->{user} ?
-            'Your account type does not allow advanced customization.' :
-            'The selected user\'s account type does not allow advanced customization.' )
+            $ML{'.error.youcantuseadvanced'} :
+            $ML{'.error.usercantuseadvanced'} )
         unless LJ::get_cap($u, 's2styles');
 
     # extra arguments for get requests
@@ -53,13 +53,13 @@
     my ($pub, $ulay, $style); # hashrefs
 
     # start of output
-    $title = "Styles";
+    $title = $ML{'.title'};
     $body = BML::ml("Backlink", {
-        'link' => './',
-        'text' => 'Advanced Customization',
+        'link' => "$LJ::SITEROOT/customize/advanced/",
+        'text' => $ML{'.back2'},
     }) . "\n";
     $body .= BML::ml("Actionlink", {
-        'link' => "<a href='layers.bml$getextra'>Your Layers</a>",
+        'link' => "<a href='$LJ::SITEROOT/customize/advanced/layers.bml$getextra'>$ML{'.nav.yourlayers'}</a>",
     }) . "\n";
 
     # edit mode
@@ -67,10 +67,10 @@
 
         # load style
         $style = LJ::S2::load_style($id);
-        return $err->('Style not found') unless $style;
+        return $err->($ML{'.error.stylenotfound'}) unless $style;
 
         # check that they own the style
-        return $err->("You do not own this style.")
+        return $err->($ML{'.error.notyourstyle'})
             unless $style->{'userid'} == $u->{'userid'};
 
         # use selected style
@@ -133,8 +133,8 @@
         }
 
         # set up start of output
-        $title = "Edit Style";
-        $body .= "<br />" . BML::ml('Backlink', { 'text' => 'Your Styles', 'link' => "styles.bml$getextra" }) . "\n";
+        $title = $ML{'.editstyle.title'};
+        $body .= "<br />" . BML::ml('Backlink', { 'text' => $ML{'.back2styles'}, 'link' => "$LJ::SITEROOT/customize/advanced/styles.bml$getextra" }) . "\n";
 
         ### process edit actions
 
@@ -167,8 +167,8 @@
             if (@other_layers) {
                 LJ::S2::load_layer_info(\%other_info, \@other_layers);
                 foreach (@other_layers) {
-                    return $err->("Layer not found: $_") unless exists $other_info{$_};
-                    return $err->("Layer not public: $_") unless $other_info{$_}->{'is_public'};
+                    return $err->(BML::ml('.error.layernotfound', {'layer' => $_})) unless exists $other_info{$_};
+                    return $err->(BML::ml('.error.layernotpublic', {'layer' => $_})) unless $other_info{$_}->{'is_public'};
                 }
             }
             
@@ -179,7 +179,7 @@
                 my $name;
                 $name = $pub->{$lid}->{'name'} if $pub->{$lid};
                 $name ||= $ulay->{$lid}->{'name'} if $ulay->{$lid};
-                $name ||= "#$lid";
+                $name ||= BML::ml('.layerid', {'id' => $lid});
 
                 return $name;
             };
@@ -196,11 +196,11 @@
                 my $layername = $get_layername->($lid);
 
                 # is valid layer type?
-                return "Invalid layer type: <i>$layername</i> is not a $type layer"
+                return BML::ml('.error.invalidlayertype', {'name' => "<i>$layername</i>", 'type' => $type})
                     if $layer->{'type'} ne $type;
 
                 # is a child?
-                return "Layer hierarchy mismatch: <i>$layername</i> is not a child $type layer of <i>$parentname</i>"
+                return BML::ml('.error.layerhierarchymismatch', {'layername' => "<i>$layername</i>", 'type' => $type, 'parentname' => "<i>$parentname</i>"})
                     unless $layer->{'b2lid'} == $parentid;
 
                 return undef;
@@ -241,11 +241,11 @@
         # process create action
         if ($POST{'action:create'} && $POST{'stylename'}) {
 
-            return $err->('You have reached your maximum number of styles.')
+            return $err->($ML{'.error.maxstyles'})
                 if scalar(keys %$ustyle) >= LJ::get_cap($u, 's2stylesmax');
 
             my $styleid = LJ::S2::create_style($u, $POST{'stylename'});
-            return $err->('Style not created: Database error') unless $styleid;
+            return $err->($ML{'.error.cantcreatestyle'}) unless $styleid;
 
             return BML::redirect("styles.bml?id=$styleid$getextra_amp");
         }
@@ -254,11 +254,9 @@
         LJ::load_user_props($u, 's2_style');
 
         # set up page header
-        $title = "Your Styles";
-
         $authasform->();
 
-        $body .= "<div><?h1 Your Styles h1?></div>\n";
+        $body .= "<div><?h1 $ML{'.yourstyles.header'} h1?></div>\n";
 
         # show style listing
         $body .= "<table style='margin-left: 40px'>\n";
@@ -267,17 +265,21 @@
             foreach my $styleid (sort { $ustyle->{$a} cmp $ustyle->{$b} || $a <=> $b} keys %$ustyle) {
                 $body .= "<tr><td><form style='display:inline' method='post' action='styles.bml?id=$styleid$getextra_amp'>";
                 my @b = $styleid == $u->{'s2_style'} ? "<b>" : "</b>";
-                $body .= $b[0] . LJ::ehtml($ustyle->{$styleid});
-                $body .= " (<a href='$journalbase/?s2id=$styleid'>\#$styleid</a>)$b[1] ";
+                $body .= $b[0];
+                $body .= BML::ml('.yourstyles.layername', {'name' => LJ::ehtml($ustyle->{$styleid}), 'aopts' => "href='$journalbase/?s2id=$styleid'", 'id' => $styleid});
+                $body .= $b[1];
                 $body .= "</td><td>";
-                $body .= LJ::html_submit('action:edit', 'Edit') . " ";
-                $body .= LJ::html_submit('action:delete', 'Delete', 
-                                         { 'onclick' => "return confirm('Are you sure you want to delete style \#$styleid?')" }) . " ";
-                $body .= LJ::html_submit('action:usestyle', 'Use', { 'disabled' => $styleid == $u->{'s2_style'} }),
+                $body .= LJ::html_submit('action:edit', $ML{'.btn.edit'}) . " ";
+
+                my $confirm_msg = LJ::ejs(BML::ml('.delete.confirm', {'id' => $styleid}));
+                
+                $body .= LJ::html_submit('action:delete', $ML{'.btn.delete'}, 
+                                         { 'onclick' => "return confirm('$confirm_msg')" }) . " ";
+                $body .= LJ::html_submit('action:usestyle', $ML{'.btn.use'}, { 'disabled' => $styleid == $u->{'s2_style'} }),
                 $body .= "</form></td></tr>\n";
             }
         } else {
-            $body .= "<tr><td><i>none</i></td></tr>\n";
+            $body .= "<tr><td><i>$ML{'.yourstyles.none'}</i></td></tr>\n";
         }
         $body .= "</table>\n";
     }
@@ -292,19 +294,18 @@
     # create a new style, or change the name of the style currently being edited
     # note: this little bit of code appears whether there is an id passed or not.
     #       the textbox just has a different purpose depending on the context.
-    $body .= "<?h1 " . ($id ? "Style Options" : "Create Style") . " h1?>\n";
+    $body .= "<?h1 " . ($id ? $ML{'.styleoptions.header'} : $ML{'.createstyle.header'}) . " h1?>\n";
     $body .= "<table style='margin-bottom: 10px'>\n";
-    $body .= "<tr><td>Name: </td><td>";
+    $body .= "<tr><td>$ML{'.createstyle.label.name'} </td><td>";
     $body .= LJ::html_text({ 'name' => 'stylename', 'size' => '30', 'maxlength' => '255', 
                              'value' => defined $POST{'stylename'} ? $POST{'stylename'} : $style->{'name'} });
-    $body .= " " . LJ::html_submit('action:create', 'Create') unless $id;
+    $body .= " " . LJ::html_submit('action:create', $ML{'.btn.create'}) unless $id;
     $body .= "</td></tr>\n";
     $body .= "</table>\n";
 
     # if no id to edit, we're finished
     $body .= "</form>\n", return unless $id;
-
-    # from here on we have $pub, $ulay, and $style filled in
+# from here on we have $pub, $ulay, and $style filled in
 
     # sub to take a layer type, core, and parent layout
     # and return a list of options to feed to LJ::html_select()
@@ -344,13 +345,13 @@
         # user layers
         push @opts, ('', '---');
         my $startsize = scalar(@opts);
-        push @opts, map { $_, "$ulay->{$_}->{'name'} (\#$_)" } $greplist->($ulay);
+        push @opts, map { $_, BML::ml('.stylelayers.select.layout.user', {'layername' => $ulay->{$_}->{'name'}, 'id' => $_}) } $greplist->($ulay);
 
         # if we didn't push anything above, remove dividing line
         pop @opts, pop @opts unless scalar(@opts) > $startsize;
 
         # add option for other layerids
-        push @opts, ('_other', 'Other ...');
+        push @opts, ('_other', $ML{'.stylelayers.select.layout.other'});
 
         # add blank option to beginning of list
         unshift @opts, ('', @opts ? '' : ' ');
@@ -369,7 +370,7 @@
             $val = $olid;
         }
 
-        return "<div id='layer_$name' style='margin-left: 5px; display: $disp;'>Layerid: " .
+        return "<div id='layer_$name' style='margin-left: 5px; display: $disp;'>$ML{'.stylelayers.label.layerid'} " .
             LJ::html_text({ 'name' => "other_$name", 'id' => "other_$name",
                             'size' => 6, 'value' => $val }) .
             "</div>";
@@ -377,14 +378,14 @@
 
     ### core version
 
-    $body .= "<?h1 Style Layers h1?>\n";
+    $body .= "<?h1 $ML{'.stylelayers.header'} h1?>\n";
     $body .= "<table>\n";
-    $body .= "<tr><td>Core Version: </td><td>";
+    $body .= "<tr><td>$ML{'.stylelayers.label.coreversion'} </td><td>";
     my $coresel = $layerselect->('core', 0);
     $body .= $coresel->[0];
     $body .= LJ::html_hidden('core_hidden', $core);
     my $dis = $coresel->[1]->{'disabled'} ? { 'disabled' => 'disabled' } : undef;
-    $body .= " " . LJ::html_submit('action:change', 'Change', $dis) . "</td></tr>\n";
+    $body .= " " . LJ::html_submit('action:change', $ML{'.btn.change'}, $dis) . "</td></tr>\n";
     $body .= "</table>\n";
 
     ### i18nc / layout
@@ -392,18 +393,18 @@
     $body .= "<table style='margin: 10px 0 0 40px'>\n";
 
     # i18nc
-    $body .= "<tr><td>Language (i18nc): </td><td>";
+    $body .= "<tr><td>$ML{'.stylelayers.label.corelanguage'} </td><td>";
     $body .= $layerselect->('i18nc', $core)->[0];
     $body .= $layerother->('i18nc');
     $body .= "</td></tr>\n";
 
     # layout
-    $body .= "<tr><td>Layout: </td><td>";
+    $body .= "<tr><td>$ML{'.stylelayers.label.layout'} </td><td>";
     my $layoutsel = $layerselect->('layout', $core);
     $body .= $layoutsel->[0];
     $body .= $layerother->('layout');
     my $dis = $layoutsel->[1]->{'disabled'} ? { 'disabled' => 'disabled' } : undef;
-    $body .= " " . LJ::html_submit("action:change", "Change", $dis) . " </td></tr>\n";
+    $body .= " " . LJ::html_submit("action:change", $ML{'.btn.change'}, $dis) . " </td></tr>\n";
     $body .= "</table>\n";
 
     # do we need to show the rest of the form?
@@ -413,17 +414,17 @@
 
     # theme
     $body .= "<table style='margin: 10px 0 0 80px'>\n";
-    $body .= "<tr><td>Language (i18n): </td><td>";
+    $body .= "<tr><td>$ML{'.stylelayers.label.language'} </td><td>";
     $body .= $layerselect->('i18n', $layout)->[0];
     $body .= $layerother->('i18n') . "</td></tr>\n";
-    $body .= "<tr><td>Theme: </td><td>";
+    $body .= "<tr><td>$ML{'.stylelayers.label.theme'} </td><td>";
     $body .= $layerselect->('theme', $layout)->[0];
     $body .= $layerother->('theme') . "</td></tr>\n";
-    $body .= "<tr><td>User: </td><td>";
+    $body .= "<tr><td>$ML{'.stylelayers.label.user'} </td><td>";
     $body .= $layerselect->('user', $layout)->[0];
     $body .= $layerother->('user') . "</td></tr>\n";
     $body .= "<tr><td>&nbsp;</td><td>";
-    $body .= LJ::html_submit('action:savechanges', 'Save Changes') . "</td></tr>\n";
+    $body .= LJ::html_submit('action:savechanges', $ML{'.btn.savechanges'}) . "</td></tr>\n";
     $body .= "</table>\n";
 
     # end edit form

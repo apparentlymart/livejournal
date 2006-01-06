@@ -1047,6 +1047,88 @@ Thanks for supporting [[sitename]]!
 
 /customize/advanced/layers.bml.yourlayers.table.type=Type
 
+/customize/advanced/styles.bml.back2=Advanced Customization
+
+/customize/advanced/styles.bml.back2styles=Your Styles
+
+/customize/advanced/styles.bml.btn.change=Change
+
+/customize/advanced/styles.bml.btn.create=Create
+
+/customize/advanced/styles.bml.btn.delete=Delete
+
+/customize/advanced/styles.bml.btn.edit=Edit
+
+/customize/advanced/styles.bml.btn.savechanges=Save Changes
+
+/customize/advanced/styles.bml.btn.use=Use
+
+/customize/advanced/styles.bml.createstyle.header=Create Style
+
+/customize/advanced/styles.bml.createstyle.label.name=Name:
+
+/customize/advanced/styles.bml.delete.confirm=Are you sure you want to delete style #[[id]]?
+
+/customize/advanced/styles.bml.editstyle.title=Edit Style
+
+/customize/advanced/styles.bml.error.cantbeauthenticated=You could not be authenticated as the specified user.
+
+/customize/advanced/styles.bml.error.cantcreatestyle=Style not created: Database error
+
+/customize/advanced/styles.bml.error.invalidlayertype=Invalid layer type: [[name]] is not a [[type]] layer
+
+/customize/advanced/styles.bml.error.layerhierarchymismatch=Layer hierarchy mismatch: [[layername]] is not a child [[type]] layer of [[parentname]]
+
+/customize/advanced/styles.bml.error.layernotfound=Layer not found: [[layer]]
+
+/customize/advanced/styles.bml.error.layernotpublic=Layer not public: [[layer]]
+
+/customize/advanced/styles.bml.error.maxstyles=You have reached your maximum number of styles.
+
+/customize/advanced/styles.bml.error.notloggedin=You must be logged in to view your styles.
+
+/customize/advanced/styles.bml.error.notyourstyle=You do not own this style.
+
+/customize/advanced/styles.bml.error.stylenotfound=Style not found.
+
+/customize/advanced/styles.bml.error.usercantuseadvanced=The selected user's account type does not allow advanced customization.
+
+/customize/advanced/styles.bml.error.youcantuseadvanced=Your account type does not allow advanced customization.
+
+/customize/advanced/styles.bml.layerid=#[[id]]
+
+/customize/advanced/styles.bml.nav.yourlayers=Your Layers
+
+/customize/advanced/styles.bml.stylelayers.header=Style Layers
+
+/customize/advanced/styles.bml.stylelayers.label.corelanguage=Language (i18nc):
+
+/customize/advanced/styles.bml.stylelayers.label.coreversion=Core Version:
+
+/customize/advanced/styles.bml.stylelayers.label.language=Language (i18n):
+
+/customize/advanced/styles.bml.stylelayers.label.layerid=Layerid:
+
+/customize/advanced/styles.bml.stylelayers.label.layout=Layout:
+
+/customize/advanced/styles.bml.stylelayers.label.theme=Theme:
+
+/customize/advanced/styles.bml.stylelayers.label.user=User:
+
+/customize/advanced/styles.bml.stylelayers.select.layout.other=Other ...
+
+/customize/advanced/styles.bml.stylelayers.select.layout.user=[[layername]] (#[[id]])
+
+/customize/advanced/styles.bml.styleoptions.header=Style Options
+
+/customize/advanced/styles.bml.title=Your Styles
+
+/customize/advanced/styles.bml.yourstyles.header=Your Styles
+
+/customize/advanced/styles.bml.yourstyles.layername=[[name]] (<a [[aopts]]>#[[id]]</a>)
+
+/customize/advanced/styles.bml.yourstyles.none=none
+
 /customize/index.bml.change=Change
 
 /customize/index.bml.choose=Do you want to use the old style system, or the new one?
