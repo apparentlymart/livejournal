@@ -48,6 +48,12 @@ entryform.htmlokay.norich
 entryform.htmlokay.rich
 general editform.userpics
 
+general /friends/add.bml.confirm.header
+general /friends/add.bml.confirm.syn.title
+general /friends/add.bml.confirm.text.nobold
+general /friends/add.bml.confirm.title
+general /friends/add.bml.groups.text
+general /friends/add.bml.error3.text
 general /friends/edit.bml.btn.proceed
 general /friends/edit.bml.edit.head
 general /friends/edit.bml.edit.text
@@ -75,6 +81,7 @@ general /interests.bml.interests.findsim2
 general /login.bml.error.forgotpass
 general /login.bml.error.noaccount
 general /login.bml.loggedin.head
+general /login.bml.loggedin.suggest3
 general /login.bml.loggedin.text
 general /login.bml.login.forget
 general /login.bml.login.text1
