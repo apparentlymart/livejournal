@@ -292,8 +292,6 @@ p?>
 
 /community/leave.bml.title=Leave Community
 
-/community/manage.bml.error.badaccounttype=You must be logged in as a regular user account in order to access this page.
-
 /community/manage.bml.commlist.actinfo=Info
 
 /community/manage.bml.commlist.actinvites=Invitations
@@ -328,6 +326,8 @@ p?>
 /community/manage.bml.create.header=Create a community
 
 /community/manage.bml.create.text=You can also <a href='[[link]]'><b>create a new community</b></a>.
+
+/community/manage.bml.error.badaccounttype=You must be logged in as a regular user account in order to access this page.
 
 /community/manage.bml.joinmail.body=For communities with closed memberships, you have several e-mail options:
 
@@ -723,15 +723,15 @@ p?>
 
 /create.bml.birthday.birthdate=Birthdate:
 
-/create.bml.birthday.warning=Entering a false birthdate may prevent you from creating a new account or could prevent you from using your account in the future.
-
-/create.bml.birthday.security=Security:
-
 /create.bml.birthday.head=Age Verification
 
 /create.bml.birthday.question=Please select the month, day, and year you were born.  We require this information to create an account in order to comply with the Children's Online Privacy Protection Act (COPPA).  This information is not stored in our database and is only used during account creation.  Read our <a [[aopts]]>privacy policy</a> for more information on our information practices.
 
 /create.bml.birthday.required=(required)
+
+/create.bml.birthday.security=Security:
+
+/create.bml.birthday.warning=Entering a false birthdate may prevent you from creating a new account or could prevent you from using your account in the future.
 
 /create.bml.btn.create=Create Journal
 
@@ -793,8 +793,6 @@ Thanks for supporting [[sitename]]!
 
 /create.bml.error.email.lj_domain=You cannot use a [[domain]] alias when creating an account.  Please enter a different email address.
 
-/create.bml.error.username.purged=This account has been deleted and purged.
-
 /create.bml.error.email.nospaces=No spaces allowed in email address.  If you're on AOL, remember that your Internet Email address is your screen name with all spaces removed, followed by <b>@aol.com</b>
 
 /create.bml.error.password.asciionly=You can only use ASCII symbols in the password.
@@ -812,6 +810,8 @@ Thanks for supporting [[sitename]]!
 /create.bml.error.username.iscode=Username appears to be an invite code, not a username.
 
 /create.bml.error.username.mustenter=You must enter a username.
+
+/create.bml.error.username.purged=This account has been deleted and purged.
 
 /create.bml.error.username.reserved=Sorry, that is a reserved username.
 
@@ -849,10 +849,6 @@ Thanks for supporting [[sitename]]!
 
 /create.bml.title=Create New Journal
 
-/create.bml.tos.error=You must read and agree to the terms of service before creating an account.
-
-/create.bml.tos.haveread=I have read and agree to the Terms of Service.
-
 /create.bml.tos.heading=Terms of Service
 
 /create.bml.tos.p1.3=Before continuing you must read and agree to the <a [[aopts]]>Terms of Service</a> (which includes our privacy policy).
@@ -874,6 +870,260 @@ Thanks for supporting [[sitename]]!
 /create.bml.username.text=Each [[sitename]] user must have their own unique username.  Your username is what appears in the address to your journal and what you use to log into the [[sitename]] server.  It also shows up when you post comments in other people's journals.
 
 /create.bml.username.username=username
+
+/customize/advanced/index.bml.advancedoptions.header=Advanced Options
+
+/customize/advanced/index.bml.disclaimer.header=Disclaimer
+
+/customize/advanced/index.bml.disclaimer.text=Unless you're a programmer or web designer, most users should stay away from this area and use the <a [[aopts]]>main customization area</a>, which is designed for anybody to use.
+
+/customize/advanced/index.bml.documentation.header=Documentation
+
+/customize/advanced/index.bml.documentation.text=Before you jump into tweaking/programming S2, you should understand how it works.
+
+/customize/advanced/index.bml.publiclayers.desc=system layers (good reference &amp; place to learn)
+
+/customize/advanced/index.bml.publiclayers.link=Public Layers
+
+/customize/advanced/index.bml.s2doc.desc=under construction, but some good content
+
+/customize/advanced/index.bml.s2doc.link=S2 Documentation
+
+/customize/advanced/index.bml.title=Advanced Customization
+
+/customize/advanced/index.bml.yourlayers.desc=create/manage your layers
+
+/customize/advanced/index.bml.yourlayers.link=Your Layers
+
+/customize/advanced/index.bml.yourstyles.desc=create/manage your styles
+
+/customize/advanced/index.bml.yourstyles.link=Your Styles
+
+/customize/advanced/layerbrowse.bml.back2=Advanced Customization
+
+/customize/advanced/layerbrowse.bml.classes.header=Classes
+
+/customize/advanced/layerbrowse.bml.classes.sort.alphabetical=Alphabetical
+
+/customize/advanced/layerbrowse.bml.classes.sort.hierarchical=Hierarchical
+
+/customize/advanced/layerbrowse.bml.classname.childclass=Child class of [[name]].
+
+/customize/advanced/layerbrowse.bml.classname.header=[[name]] Class
+
+/customize/advanced/layerbrowse.bml.error.cantviewlayer=You are not authorized to view this layer.
+
+/customize/advanced/layerbrowse.bml.error.layerdoesntexist=The specified layer does not exist.
+
+/customize/advanced/layerbrowse.bml.globalfunctions.header=Global Functions
+
+/customize/advanced/layerbrowse.bml.layerchildren=[[numchildren]] [[?numchildren|child|children]]...
+
+/customize/advanced/layerbrowse.bml.layerinfo.header=Layer Info
+
+/customize/advanced/layerbrowse.bml.members.header=Members
+
+/customize/advanced/layerbrowse.bml.members.readonly=(Read-only)
+
+/customize/advanced/layerbrowse.bml.methods.header=Methods
+
+/customize/advanced/layerbrowse.bml.nav.editlayer=Edit Layer
+
+/customize/advanced/layerbrowse.bml.nav.parentlayer=Parent Layer
+
+/customize/advanced/layerbrowse.bml.nav.publiclayers=Public Layers
+
+/customize/advanced/layerbrowse.bml.nav.viewsource=View source:
+
+/customize/advanced/layerbrowse.bml.nav.viewsource.highlighted=Syntax Highlighted
+
+/customize/advanced/layerbrowse.bml.nav.viewsource.raw=Raw Source Code
+
+/customize/advanced/layerbrowse.bml.nav.yourlayers=Your Layers
+
+/customize/advanced/layerbrowse.bml.propertiesset.header=Properties Set
+
+/customize/advanced/layerbrowse.bml.propformat.empty=(empty)
+
+/customize/advanced/layerbrowse.bml.propformat.object=[[type]] object
+
+/customize/advanced/layerbrowse.bml.title=Public Layers
+
+/customize/advanced/layers.bml.back2=Advanced Customization
+
+/customize/advanced/layers.bml.back2layers=Your Layers
+
+/customize/advanced/layers.bml.btn.delete=Delete
+
+/customize/advanced/layers.bml.btn.delete2=Delete...
+
+/customize/advanced/layers.bml.btn.edit=Edit...
+
+/customize/advanced/layers.bml.btn.layoutspecific.create=Create
+
+/customize/advanced/layers.bml.btn.toplevel.create=Create
+
+/customize/advanced/layers.bml.createlayer.header=Create Layer
+
+/customize/advanced/layers.bml.createlayer.layoutspecific=Create layout-specific layer
+
+/customize/advanced/layers.bml.createlayer.layoutspecific.label.layout=Layout:
+
+/customize/advanced/layers.bml.createlayer.layoutspecific.label.type=Type:
+
+/customize/advanced/layers.bml.createlayer.layoutspecific.select.language=Language
+
+/customize/advanced/layers.bml.createlayer.layoutspecific.select.theme=Theme
+
+/customize/advanced/layers.bml.createlayer.layoutspecific.select.user=User
+
+/customize/advanced/layers.bml.createlayer.layoutspecific.select.userlayer=[[name]] (#[[id]])
+
+/customize/advanced/layers.bml.createlayer.toplevel=Create top-level layer
+
+/customize/advanced/layers.bml.createlayer.toplevel.label.coreversion=Core Version:
+
+/customize/advanced/layers.bml.createlayer.toplevel.label.type=Type:
+
+/customize/advanced/layers.bml.createlayer.toplevel.select.language=Language
+
+/customize/advanced/layers.bml.createlayer.toplevel.select.layout=Layout
+
+/customize/advanced/layers.bml.delete.layerid=#[[id]]
+
+/customize/advanced/layers.bml.delete.layername='[[name]]'
+
+/customize/advanced/layers.bml.delete.text=Are you sure you want to delete [[type]] layer [[name]]?
+
+/customize/advanced/layers.bml.delete.title=Deleting layer [[name]]
+
+/customize/advanced/layers.bml.error.badparentid=No/bogus parent layer ID given (for layouts and core languages, use core parent ID; for themes and layout languages, use layout ID).
+
+/customize/advanced/layers.bml.error.cantbeauthenticated=You could not be authenticated as the specified user.
+
+/customize/advanced/layers.bml.error.cantcreatelayer=Error creating layer.
+
+/customize/advanced/layers.bml.error.cantsetuplayer=Error setting up &amp; compiling layer: [[errormsg]]
+
+/customize/advanced/layers.bml.error.cantuseonsystem=This privilege cannot be used on the system account.
+
+/customize/advanced/layers.bml.error.invalidlayertype=Invalid layer type.
+
+/customize/advanced/layers.bml.error.layerdoesntexist=The specified layer does not exist.
+
+/customize/advanced/layers.bml.error.maxlayers=You have reached your maximum number of allowed layers.
+
+/customize/advanced/layers.bml.error.nolayertypeselected=No layer type selected.
+
+/customize/advanced/layers.bml.error.notloggedin=You must be logged in to view your layers.
+
+/customize/advanced/layers.bml.error.notyourlayer=You do not own the specified layer.
+
+/customize/advanced/layers.bml.error.usercantuseadvanced=The selected user's account type does not allow advanced customization.
+
+/customize/advanced/layers.bml.error.youcantuseadvanced=Your account type does not allow advanced customization.
+
+/customize/advanced/layers.bml.nav.yourstyles=Your Styles
+
+/customize/advanced/layers.bml.title=Your Layers
+
+/customize/advanced/layers.bml.yourlayers.childof=Child of <a [[aopts]]>layer [[layerid]]</a>: [[name]]
+
+/customize/advanced/layers.bml.yourlayers.header=Your Layers
+
+/customize/advanced/layers.bml.yourlayers.noname=(none)
+
+/customize/advanced/layers.bml.yourlayers.none=None
+
+/customize/advanced/layers.bml.yourlayers.table.actions=Actions
+
+/customize/advanced/layers.bml.yourlayers.table.layerid=LayerID
+
+/customize/advanced/layers.bml.yourlayers.table.name=Name
+
+/customize/advanced/layers.bml.yourlayers.table.type=Type
+
+/customize/advanced/styles.bml.back2=Advanced Customization
+
+/customize/advanced/styles.bml.back2styles=Your Styles
+
+/customize/advanced/styles.bml.btn.change=Change
+
+/customize/advanced/styles.bml.btn.create=Create
+
+/customize/advanced/styles.bml.btn.delete=Delete
+
+/customize/advanced/styles.bml.btn.edit=Edit
+
+/customize/advanced/styles.bml.btn.savechanges=Save Changes
+
+/customize/advanced/styles.bml.btn.use=Use
+
+/customize/advanced/styles.bml.createstyle.header=Create Style
+
+/customize/advanced/styles.bml.createstyle.label.name=Name:
+
+/customize/advanced/styles.bml.delete.confirm=Are you sure you want to delete style #[[id]]?
+
+/customize/advanced/styles.bml.editstyle.title=Edit Style
+
+/customize/advanced/styles.bml.error.cantbeauthenticated=You could not be authenticated as the specified user.
+
+/customize/advanced/styles.bml.error.cantcreatestyle=Style not created: Database error
+
+/customize/advanced/styles.bml.error.invalidlayertype=Invalid layer type: [[name]] is not a [[type]] layer
+
+/customize/advanced/styles.bml.error.layerhierarchymismatch=Layer hierarchy mismatch: [[layername]] is not a child [[type]] layer of [[parentname]]
+
+/customize/advanced/styles.bml.error.layernotfound=Layer not found: [[layer]]
+
+/customize/advanced/styles.bml.error.layernotpublic=Layer not public: [[layer]]
+
+/customize/advanced/styles.bml.error.maxstyles=You have reached your maximum number of styles.
+
+/customize/advanced/styles.bml.error.notloggedin=You must be logged in to view your styles.
+
+/customize/advanced/styles.bml.error.notyourstyle=You do not own this style.
+
+/customize/advanced/styles.bml.error.stylenotfound=Style not found.
+
+/customize/advanced/styles.bml.error.usercantuseadvanced=The selected user's account type does not allow advanced customization.
+
+/customize/advanced/styles.bml.error.youcantuseadvanced=Your account type does not allow advanced customization.
+
+/customize/advanced/styles.bml.layerid=#[[id]]
+
+/customize/advanced/styles.bml.nav.yourlayers=Your Layers
+
+/customize/advanced/styles.bml.stylelayers.header=Style Layers
+
+/customize/advanced/styles.bml.stylelayers.label.corelanguage=Language (i18nc):
+
+/customize/advanced/styles.bml.stylelayers.label.coreversion=Core Version:
+
+/customize/advanced/styles.bml.stylelayers.label.language=Language (i18n):
+
+/customize/advanced/styles.bml.stylelayers.label.layerid=Layerid:
+
+/customize/advanced/styles.bml.stylelayers.label.layout=Layout:
+
+/customize/advanced/styles.bml.stylelayers.label.theme=Theme:
+
+/customize/advanced/styles.bml.stylelayers.label.user=User:
+
+/customize/advanced/styles.bml.stylelayers.select.layout.other=Other ...
+
+/customize/advanced/styles.bml.stylelayers.select.layout.user=[[layername]] (#[[id]])
+
+/customize/advanced/styles.bml.styleoptions.header=Style Options
+
+/customize/advanced/styles.bml.title=Your Styles
+
+/customize/advanced/styles.bml.yourstyles.header=Your Styles
+
+/customize/advanced/styles.bml.yourstyles.layername=[[name]] (<a [[aopts]]>#[[id]]</a>)
+
+/customize/advanced/styles.bml.yourstyles.none=none
 
 /customize/index.bml.change=Change
 
@@ -939,6 +1189,10 @@ Thanks for supporting [[sitename]]!
 
 /customize/index.bml.s2.customize.themes.header=Themes
 
+/customize/index.bml.s2.customlayers=Custom Layers:
+
+/customize/index.bml.s2.disabledlayers=Disabled Layers:
+
 /customize/index.bml.s2.layout<<
 Pick your layout.  Because theme selection and custom modifications depend 
 on your layout, changing this setting discards all other edits you may have made.
@@ -955,6 +1209,70 @@ on your layout, changing this setting discards all other edits you may have made
 /customize/index.bml.s2.related.modify.about=Set your journal's mood icon set.
 
 /customize/index.bml.title=Customize Journal
+
+/customize/layer.bml.btn.save=Save
+
+/customize/layer.bml.error.cantsavelayer=Error saving layer: [[errormsg]]
+
+/customize/layer.bml.error.invalidlayer=Layer isn't of type user or theme.
+
+/customize/layer.bml.error.nocorelayer=Core layer for layout not found.
+
+/customize/layer.bml.error.nolayoutlayer=Layout layer for the following layer type not found: [[layertype]]
+
+/customize/layer.bml.error.notloggedin.header=Login Required
+
+/customize/layer.bml.error.notloggedin.text=Before you customize your journal, you must first <a [[aopts]]>log in</a>.
+
+/customize/layer.bml.error.notyourlayer=Layer belongs to another user.
+
+/customize/layer.bml.error.stylenotfound=Style not found.
+
+/customize/layer.bml.finished.header=Finished?
+
+/customize/layer.bml.finished.text=When done, click the save button below.
+
+/customize/layer.bml.label.default=Default:
+
+/customize/layer.bml.label.override=Override:
+
+/customize/layer.bml.label.overridedefault=Override default
+
+/customize/layer.bml.prop.misc=Misc
+
+/customize/layer.bml.saved=Saved.
+
+/customize/layer.bml.title=Customize
+
+/customize/layer.bml.type.bool.no=No
+
+/customize/layer.bml.type.bool.yes=Yes
+
+/customize/layer.bml.type.text.nothing=(nothing)
+
+/customize/preview.bml.back2=Back
+
+/customize/preview.bml.nopreview=(no preview available)
+
+/customize/preview.bml.nopreviews=No previews available.
+
+/customize/preview.bml.title=Layout Previews
+
+/customize/preview.bml.viewmore=View More Previews
+
+/customize/preview.bml.viewthemes=View Themes
+
+/customize/themes.bml.back2=Back
+
+/customize/themes.bml.default=Layout Default
+
+/customize/themes.bml.error.notloggedin.header=Login Required
+
+/customize/themes.bml.error.notloggedin.text=Before you customize your journal, you must first <a [[aopts]]>log in</a>.
+
+/customize/themes.bml.error.s2required=S2 required.
+
+/customize/themes.bml.title=Theme Previews
 
 /delcomment.bml.changeoptions<<
 <strong>Note:</strong> From the [[link]] page, you can choose
@@ -1579,10 +1897,6 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /editpics.bml.error.toomanykeywords=The [[?numwords|keyword|keywords]] "[[words]]" [[?numwords|has|have]] not been saved as [[?numwords|its|their]] user picture icon already has [[max]] keywords.
 
-/editpics.bml.error.toomanypics2=You are already at your limit of [[maxpics]] pictures.  You cannot upload this picture until you delete one of your existing ones.
-
-/editpics.bml.error.toomanypics3=You are currently at your limit of [[max]] [[?max|picture|pictures]].  You will not be able to upload additional pictures until you delete one or more of your current pictures.
-
 /editpics.bml.error.unsupportedtype=Files of type [[filetype]] are not supported.  You can only upload GIF, PNG or JPG files.  Nearly all image/photo programs can do this conversion for you.
 
 /editpics.bml.error.urlerror=An error ocurred while trying to fetch your image.
@@ -1806,6 +2120,8 @@ already have an account you can <a href="/create.bml">create one</a> to track yo
 
 /friends/add.bml.remove.title=Friend Removed!
 
+/friends/edit.bml.invite=Do you want to <a [[aopts]]>invite a friend</a>?
+
 /friends/edit.bml.title=Edit Friends
 
 /friends/editgroups.bml.btn.ge.del=Delete
@@ -1865,8 +2181,6 @@ then be accessible to the new group.
 /friends/editgroups.bml.title=Edit Custom Friends Groups
 
 /friends/editgroups.bml.yourgroups=Your custom friends groups:
-
-/friends/edit.bml.invite=Do you want to <a [[aopts]]>invite a friend</a>?
 
 /friends/edit_do.bml.addfriends.head=Add Friends
 
@@ -2177,8 +2491,6 @@ You may wish to go back and try again, selecting fewer interests to add.
 
 /login.bml.loggedin.head2=Welcome back to [[sitename]]!
 
-/login.bml.loggedin.text2=You're logged in as [[username]]. Go have fun. Here are some suggestions...
-
 /login.bml.loggedin.suggest1=Did you know you can now easily add a photo?
 
 /login.bml.loggedin.suggest2=See the latest updates to your friends' journals.
@@ -2191,21 +2503,23 @@ You may wish to go back and try again, selecting fewer interests to add.
 
 /login.bml.loggedin.suggesthead3=My [[siteabbrev]]
 
+/login.bml.loggedin.text2=You're logged in as [[username]]. Go have fun. Here are some suggestions...
+
 /login.bml.login.autologin=Log in automatically on this computer
-
-/login.bml.login.btn.changeopts=Change Options
-
-/login.bml.login.btn.login=Login...
-
-/login.bml.login.btn.create=Create an Account
-
-/login.bml.login.btn.save=Save
-
-/login.bml.login.changelog=Change log-in options
 
 /login.bml.login.bindcookie=Bind cookie to IP address
 
 /login.bml.login.bindcookie.learnmore=Learn more about this option
+
+/login.bml.login.btn.changeopts=Change Options
+
+/login.bml.login.btn.create=Create an Account
+
+/login.bml.login.btn.login=Login...
+
+/login.bml.login.btn.save=Save
+
+/login.bml.login.changelog=Change log-in options
 
 /login.bml.login.expiration=Expiration:
 
@@ -2243,8 +2557,6 @@ You may wish to go back and try again, selecting fewer interests to add.
 
 /login.bml.logout.loggedout=You are logged out.
 
-/login.bml.title=Login
-
 /login.bml.whylogin.benefit4=Read friends-only posts that are addressed to you.
 
 /login.bml.whylogin.benefit5=Leave comments in any journal or community.
@@ -2252,10 +2564,6 @@ You may wish to go back and try again, selecting fewer interests to add.
 /login.bml.whylogin.benefit6=Add any journal or community to your Friends page.
 
 /login.bml.whylogin.benefit7=Access features that are only visible when you're logged in.
-
-/login.bml.whylogin.head=Why Login?
-
-/login.bml.whylogin.text=Here are some of the main benefits of logging in:
 
 /logout.bml.already.head=Already logged out
 
@@ -2871,7 +3179,6 @@ If you want to do a different type of search, check out the <a href='/directorys
 
 /register.bml.asterisk.name=* [[journal]]
 
-/register.bml.email.body|notes=This string is used to create an option in the "Work as user" drop down list to allow a user to view all of their journals. The * signifies that the acount, specified by [[journal]], is not validated yet.
 /register.bml.email.body<<
 This is the validation email as you have requested.
 To complete validating your account, please visit this URL:
@@ -2916,6 +3223,206 @@ Sincerely,
 /register.bml.trans.body=Your new email address has been validated.
 
 /register.bml.trans.header=Success
+
+/schools/index.bml.addschool.example=Example:
+
+/schools/index.bml.addschool.input.city=City:
+
+/schools/index.bml.addschool.input.city.examples=San Francisco, Portland
+
+/schools/index.bml.addschool.input.country=Country:
+
+/schools/index.bml.addschool.input.name=Name of school:
+
+/schools/index.bml.addschool.input.name.examples=University of California Berkeley, Oregon State University
+
+/schools/index.bml.addschool.input.name.rule1=Type in the school's full name (e.g. "Harvard College" instead of just "Harvard")
+
+/schools/index.bml.addschool.input.name.rule2=No abbreviations. (Spell out University, North, State, High School, etc.)
+
+/schools/index.bml.addschool.input.name.rule3=For schools with multiple locations, add the city/campus after a dash (e.g. University of Texas - Austin)
+
+/schools/index.bml.addschool.input.name.rule4=Don't use "The" in the beginning
+
+/schools/index.bml.addschool.input.name.rule5=Capitalize all words (except of, the, and, at, for, de, du, la, le, etc.)
+
+/schools/index.bml.addschool.input.state=State/province:
+
+/schools/index.bml.addschool.input.state.examples=CA, NY, AB
+
+/schools/index.bml.addschool.input.url=URL:
+
+/schools/index.bml.addschool.input.url.optional=(optional)
+
+/schools/index.bml.addschool.intro=Enter your school's information. If approved, we'll add it to the Schools Directory and to the Schools list for this journal:
+
+/schools/index.bml.allcountries.header=All Countries
+
+/schools/index.bml.btn.add=Add
+
+/schools/index.bml.btn.addschool=Add School
+
+/schools/index.bml.btn.chooseschool=Choose School
+
+/schools/index.bml.btn.filter=Filter
+
+/schools/index.bml.city.header=City
+
+/schools/index.bml.city.select=Select a city
+
+/schools/index.bml.dontseeschool=Don't see what you're looking for?
+
+/schools/index.bml.dontseeschool.add=Add a School
+
+/schools/index.bml.error.cantfindschool=No such school found.
+
+/schools/index.bml.error.cantgetcountries=Unable to get country list.
+
+/schools/index.bml.error.cantgetdata=Unable to get necessary data.
+
+/schools/index.bml.error.cantsetattendance=Unable to set your attendance at [[name]].
+
+/schools/index.bml.error.cantsetattendance_limit=Unable to set your attendance at [[name]], please try again. You may have reached the limit of schools you can attend.
+
+/schools/index.bml.error.disabled=The Schools Directory is currently disabled due to maintenance.
+
+/schools/index.bml.error.invalidaustate=You must enter a valid two or three letter abbreviation for the Australian state.
+
+/schools/index.bml.error.invalidcountry=You must enter a valid country code.
+
+/schools/index.bml.error.invalidprovince=You must enter a valid two-letter abbreviation for the Canadian province.
+
+/schools/index.bml.error.invalidstate=You must enter a valid two-letter abbreviation for the US state.
+
+/schools/index.bml.error.invalidurl=The URL entered does not appear to be valid.
+
+/schools/index.bml.error.nocities=No cities found.
+
+/schools/index.bml.error.nocity=You must enter the city this school is located in.
+
+/schools/index.bml.error.nocountries=No countries found.
+
+/schools/index.bml.error.noname=You must enter the school's full name.
+
+/schools/index.bml.error.noschools=No schools found.
+
+/schools/index.bml.error.nostates=No states or provinces found.
+
+/schools/index.bml.error.undefinedstate=undefined state or province
+
+/schools/index.bml.error.validaustates=Valid Australian state abbreviations are ACT, NSW, NT, Qld, SA, Tas, Vic, and WA.
+
+/schools/index.bml.error.validprovinces=Valid Canadian abbreviations are AB, BC, MB, NB, NL, NT, NS, NU, ON, PE, QC, SK, and YT.
+
+/schools/index.bml.findschool=Find a school in:
+
+/schools/index.bml.intro=With the Schools Directory, you can:
+
+/schools/index.bml.intro.addschool=Add a school to your journal or community's user info page.
+
+/schools/index.bml.intro.dontseeschool=If you don't see what you're searching for, use the Add a School link at the bottom of this page to submit it.
+
+/schools/index.bml.intro.findusers=Find other users and communities associated with a school.
+
+/schools/index.bml.intro.manageschools=<a [[aopts]]>Manage</a> the schools you have attended.
+
+/schools/index.bml.matchesfound.header=Possible Matches Found
+
+/schools/index.bml.matchesfound.table.city=City
+
+/schools/index.bml.matchesfound.table.school=School
+
+/schools/index.bml.matchesfound.table.url=URL
+
+/schools/index.bml.matchesfound.text=We have found the following possible matches for your school in the same country and state. Please select one of the following schools or continue to add what you entered if it is in fact a new school. If your school shows up with incorrect data, please <a [[aopts]]>open a support request</a> providing as much information as you can.
+
+/schools/index.bml.school.addthisschool=Add this school for [[user]]
+
+/schools/index.bml.school.browsejournals=Browse journals associated with this school:
+
+/schools/index.bml.school.communities=Communities
+
+/schools/index.bml.school.findanother=Find another school
+
+/schools/index.bml.school.header=School
+
+/schools/index.bml.school.limitbyyear=Limit this list by year:
+
+/schools/index.bml.school.manage=Manage your schools
+
+/schools/index.bml.school.nousers=There are no communities or users that list this school yet.
+
+/schools/index.bml.school.nousersforthisyear=There are no communities or users that list this school in [[year]].
+
+/schools/index.bml.school.select=Select a school
+
+/schools/index.bml.school.url=(<a [[aopts]]>official website</a>)
+
+/schools/index.bml.school.users=Users
+
+/schools/index.bml.schoolcount=([[numschools]] [[?numschools|school|schools]])
+
+/schools/index.bml.state.header=State
+
+/schools/index.bml.state.select=Select a state
+
+/schools/index.bml.stateorprovince.header=State or Province
+
+/schools/index.bml.submitted.header=School Submitted
+
+/schools/index.bml.submitted.manage=Go to your Schools list
+
+/schools/index.bml.submitted.return=Return to the Schools Directory
+
+/schools/index.bml.submitted.text=Your school has been submitted for approval. If approved, your school will be added to the Schools Directory and automatically added to your <a [[aopts]]>Schools</a> list. You can check the <a [[aopts]]>Manage Schools</a> page later to add years attended.
+
+/schools/index.bml.title=Schools Directory
+
+/schools/index.bml.top5countries.header=Top Five Countries
+
+/schools/manage.bml.btn.save=Save Changes
+
+/schools/manage.bml.error.cantaddattendance=Error adding school attendance record, please try again. You may have reached the limit of schools you can attend.
+
+/schools/manage.bml.error.cantbeauthenticated=You could not be authenticated as the specified user.
+
+/schools/manage.bml.error.cantdeleteattendance=Error deleting school attendance record, please try again.
+
+/schools/manage.bml.error.cantendbeforestart=Your ending year cannot be earlier than your starting year.
+
+/schools/manage.bml.error.cantloadschool=Unable to load school specified.
+
+/schools/manage.bml.error.cantsetattendance=Unable to set your attendance at [[school]], please try again. You may have reached the limit of schools you can attend.
+
+/schools/manage.bml.error.currentlyattend=If you currently attend this school, you should leave the end date field blank or enter "[[now]]".
+
+/schools/manage.bml.error.disabled=The Schools Directory is currently disabled due to maintenance.
+
+/schools/manage.bml.error.locationdoesntmatch=Country and/or city do not match specified school.
+
+/schools/manage.bml.error.needstartingyear=You must specify a starting year if you specify an ending year.
+
+/schools/manage.bml.error.toofuture=You must specify a starting year in the past or present.
+
+/schools/manage.bml.error.toopast=Did you really attend this school that long ago?
+
+/schools/manage.bml.findanother=<a [[aopts]]>Find another school</a> to add.
+
+/schools/manage.bml.intro=Below you can edit the list of schools associated with your journal or communities. This information is public, if you provide it.
+
+/schools/manage.bml.noschools=You have not listed any schools. <a [[aopts]]>Browse the school directory</a> to find and add schools.
+
+/schools/manage.bml.selectjournal=See schools for:
+
+/schools/manage.bml.table.input.delete=Delete
+
+/schools/manage.bml.table.name=School name
+
+/schools/manage.bml.table.to=to
+
+/schools/manage.bml.table.years=Years attended
+
+/schools/manage.bml.title=Manage Schools
 
 /styles/create.bml.choosebase=Choose base style to start with and edit:
 
@@ -2982,9 +3489,7 @@ a system style, you must first create a new style based on that system style.
 
 /styles/index.bml.nav.embedding=Embed your journal in your website
 
-/styles/index.bml.nav.embedding.about<<
-There are many different ways to embed your journal into your own website.
-.
+/styles/index.bml.nav.embedding.about=There are many different ways to embed your journal into your own website.
 
 /styles/index.bml.nav.modify=Modify your account
 
@@ -3142,11 +3647,11 @@ that area. p?>
 
 /support/faqsearch.bml.example=<i>Examples:</i> <b>css, style, mood, music, download, mac</b>
 
+/support/faqsearch.bml.info=FAQs containing this term in either the title or body will be listed below. All FAQs may not be fully translated in every language.
+
 /support/faqsearch.bml.label.lang=Language
 
 /support/faqsearch.bml.label.term=Search term
-
-/support/faqsearch.bml.info=FAQs containing this term in either the title or body will be listed below. All FAQs may not be fully translated in every language.
 
 /support/help.bml.interim=The support queue is intended for use by people with support privileges.
 
@@ -3792,11 +4297,17 @@ This could be because: <ol>
 
 /update.bml.error.cantpost=Sorry, you cannot post at this time.
 
+/update.bml.error.cantpost.title=Can't Post
+
 /update.bml.error.disabled=Your account type does not permit posting.
 
 /update.bml.error.disabled.title=Posting access disabled
 
 /update.bml.error.login=Error logging on:
+
+/update.bml.error.noentry=Must provide entry text.
+
+/update.bml.error.nonusercantpost=Non-[[sitename]] users can't post, as they don't actually have journals here. You can leave comments in other journals, though.
 
 /update.bml.error.nopass=Enter Password
 
@@ -3900,6 +4411,8 @@ This could be because: <ol>
 
 /userinfo.bml.about.user=Bio:
 
+/userinfo.bml.allpics=View all userpics
+
 /userinfo.bml.body.leave= You may <a href="/community/leave.bml?comm=[[commname]]">leave the community</a> at any time.
 
 /userinfo.bml.comminfo.body=Below is information about the "[[commname]]" community on LiveJournal.
@@ -3980,9 +4493,9 @@ This could be because: <ol>
 
 /userinfo.bml.label.location=Location:
 
-/userinfo.bml.label.manageschools=Manage Schools
-
 /userinfo.bml.label.maintainers=Maintainers
+
+/userinfo.bml.label.manageschools=Manage Schools
 
 /userinfo.bml.label.memberof=Member of
 
@@ -4135,6 +4648,8 @@ crumb.addtodo=Add To-Do Item
 
 crumb.advcustomize=Customize Advanced S2 Settings
 
+crumb.advsearch=Advanced Search
+
 crumb.birthdays=Birthdays
 
 crumb.changepass=Change Password
@@ -4149,6 +4664,8 @@ crumb.commsearch=Community Search
 
 crumb.commsentinvites=Sent Invitations
 
+crumb.commsettings=Community Settings
+
 crumb.community=Community Center
 
 crumb.createcommunity=Create Community
@@ -4158,6 +4675,8 @@ crumb.createjournal=Create Journal
 crumb.createstyle=Create Style
 
 crumb.customize=Customize S2 Settings
+
+crumb.customizelayer=Individual Customizations
 
 crumb.delcomment=Delete Comment
 
@@ -4174,6 +4693,8 @@ crumb.editinfo=Personal Info
 crumb.editpics=User Pictures
 
 crumb.editstyle=Edit Style
+
+crumb.edituserpics=Edit Userpics
 
 crumb.emailgateway=Email Gateway
 
@@ -4217,6 +4738,8 @@ crumb.meme=Meme Tracker
 
 crumb.memories=Memorable Posts
 
+crumb.mobilepost=Mobile Post Settings
+
 crumb.moderate=Community Moderation
 
 crumb.modify=Journal Settings
@@ -4233,11 +4756,23 @@ crumb.preview=Layout Previews
 
 crumb.register=Validate Email
 
+crumb.schools=Schools Directory
+
+crumb.schoolsfind=Find a School
+
+crumb.schoolsmy=My Schools
+
+crumb.searchinterests=Search By Interest
+
+crumb.searchregion=Search By Region
+
 crumb.seeoverrides=View User Overrides
 
 crumb.setpgpkey=Public Key
 
 crumb.siteopts=Browse Preferences
+
+crumb.stats=Statistics
 
 crumb.styles=Styles
 
@@ -4262,6 +4797,10 @@ crumb.themes=Theme Previews
 crumb.todo=Todo List
 
 crumb.transfercomm=Transfer Community
+
+crumb.translate=Translation Area
+
+crumb.translateteams=Translation Teams
 
 crumb.unsubscribe=Unsubscribe
 
@@ -4351,7 +4890,6 @@ date.month.september.short=Sep
 
 Email=Email
 
-email.newacct.body|notes=This string is no longer in use, please translate email.newacct2.body instead.
 email.newacct.body<<
 Congratulations, you have a new [[sitename]] account!
 
