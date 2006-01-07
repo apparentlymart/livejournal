@@ -1,7 +1,10 @@
 <?_code
+use strict;
+
+use vars qw($body $title $windowtitle %GET %POST);
 
  my $remote = LJ::get_remote();
- my $user = $FORM{'user'};
+ my $user = $POST{'user'} || $GET{'user'};
  my $u = LJ::load_user($user);
  my $userid = $u->{userid};
  $body = "";
@@ -22,7 +25,7 @@
      return;
  }
  
- if ($FORM{'mode'} eq "add") 
+ if ($POST{'mode'} eq "add") 
  {
      unless (LJ::did_post()) { 
          $title = $ML{'Error'};
@@ -36,7 +39,7 @@
          return;
      }
 
-     unless ($remote->{'userid'} == $FORM{'remid'}) {
+     unless ($remote->{'userid'} == $POST{'remid'}) {
          $title = $ML{'Error'};
          $body = "<?h1 $ML{'Error'} h1?><?p Session info changed.  Try again. p?>";
          return;
@@ -44,7 +47,7 @@
 
      my $gmask = 1;
      foreach my $bit (1..30) {
-         next unless $FORM{"bit_$bit"};
+         next unless $POST{"bit_$bit"};
          $gmask |= (1 << $bit);
      }
 
@@ -55,12 +58,12 @@
      };
 
 
-     if ($FORM{'action:delete'}) {
+     if ($POST{'action:delete'}) {
          $req->{"editfriend_delete_$user"} = 1;
      } else {
          $req->{"editfriend_add_1_user"} = $user;
-         $req->{"editfriend_add_1_fg"} = $FORM{'editfriend_add_1_fg'};
-         $req->{"editfriend_add_1_bg"} = $FORM{'editfriend_add_1_bg'};
+         $req->{"editfriend_add_1_fg"} = $POST{'editfriend_add_1_fg'};
+         $req->{"editfriend_add_1_bg"} = $POST{'editfriend_add_1_bg'};
          $req->{"editfriend_add_1_groupmask"} = $gmask;
      }
      
@@ -70,20 +73,37 @@
      
      if ($res{'success'} eq "OK") 
      {
-         if ($FORM{'action:delete'}) {
+         if ($POST{'action:delete'}) {
              $title = $ML{'.remove.title'};
-             $body = "<?h1 $ML{'.remove.header'} h1?><?p " .
-                     BML::ml('.remove.text', {'user'=>$user,
+             $body .= "<?h1 $ML{'.remove.header'} h1?><?p ";
+             $body .= BML::ml('.remove.text', {
+                                              'user'   => $user,
                                               'ljuser' => LJ::ljuser($u),
-                                              'url'=>"$LJ::SITEROOT/users/$remote->{'user'}/friends"}) .
-                     " p?>";
+                                              'url'    => "$LJ::SITEROOT/users/$remote->{'user'}/friends",
+                                              });
+             $body .= " p?>";
          } else {
              $title = $ML{'.add.title'};
-             $body = "<?h1 $ML{'.add.header'} h1?><?p " .
-                     BML::ml('.add.text', { 'user' => $user,
-                                            'ljuser' => LJ::ljuser($u),
-                                            'url' => "$LJ::SITEROOT/users/$remote->{'user'}/friends", }) .
-                     " p?>";
+             $body = "<?h1 $ML{'.add.header'} h1?><?p ";
+             if ($u->{'journaltype'} eq "C") {
+                 $body .= BML::ml('.add.text.community', {
+                                                         'user'   => $user,
+                                                         'ljuser' => LJ::ljuser($u),
+                                                         'url'    => "$LJ::SITEROOT/users/$remote->{'user'}/friends",
+                                                         });
+             } elsif ($u->{'journaltype'} eq "Y") {
+                 $body .= BML::ml('.add.text.feed', {
+                                                    'user'   => $user,
+                                                    'ljuser' => LJ::ljuser($u),
+                                                    'url'    => "$LJ::SITEROOT/users/$remote->{'user'}/friends",
+                                                    });
+             } else {
+                 $body .= BML::ml('.add.text', {
+                                               'user'   => $user,
+                                               'ljuser' => LJ::ljuser($u),
+                                               'url'    => "$LJ::SITEROOT/users/$remote->{'user'}/friends", });
+             }
+             $body .= " p?>";
          }
      } else {
          $title = $ML{'Error'};
@@ -92,120 +112,96 @@
      return;
  }
 
+ $body .= "<form method='post' action='add.bml'>\n";
+ $body .= LJ::form_auth();
+ $body .= LJ::html_hidden(mode  => 'add',
+                          user  => $user,
+                          remid => $remote->{userid});
+
+
  # check to see if user is already a friend.
  # TAG:fr:bml_friends_add:check_is_friend
  my $dbr = LJ::get_db_reader();
- $sth = $dbr->prepare("SELECT * FROM friends WHERE userid=$remote->{'userid'} AND friendid=$userid");
- $sth->execute;
+ my $sth = $dbr->prepare("SELECT userid FROM friends WHERE userid=? AND friendid=?");
+ $sth->execute($remote->{'userid'}, $userid);
  my $fr = $sth->fetchrow_hashref;
  
  if ($fr) {
      $title .= $ML{'.error3.title'};
-     $body .= "<?h1 $ML{'.error3.title'} h1?><?p " .
-              BML::ml('.error3.text', {'user'=>$user}) . " p?>";
+     $body .= "<?p " . BML::ml('.error3.text1', {'user'=> LJ::ljuser($user) }) . " p?>";
  } else {
      # was this a syndicated add?
      if ($u->{journaltype} eq 'Y') {
-         $title = $ML{'.confirm.syn.title'};
-         $body .= "<?h1 " . BML::ml('.confirm.syn.header', { user => $user }) . " h1?>";
+         my $icon = "<img src='$LJ::IMGPREFIX/syndicated.gif' border='0' height='24' width='24' style='padding: 0px 2px 0px 0px' />";
+         $windowtitle = BML::ml('.confirm.syn.title1', {'user'=> $user });
+         $title = BML::ml('.confirm.syn.title1', {'icon'=> $icon, 'user'=> $user });
+         $body .= "<?p $ML{'.confirm.text1.feed'} p?>";
 
      # Is this account redirected?
      } elsif ($u->{'journaltype'} eq "R" && $u->prop('renamedto')) {
          return BML::redirect("$LJ::SITEROOT/friends/add.bml?user=" . $u->prop('renamedto'));
 
      } else {
-         $title .= $ML{'.confirm.title'};
-         $body .= "<?h1 " . BML::ml(".confirm.header", { 'user' => $u->display_name() }) . " h1?>";
+         if ($u->{'journaltype'} eq "C") {
+             my $icon = "<img src='$LJ::IMGPREFIX/community.gif' border='0' align='absmiddle' height='24' width='24' style='padding: 0px 2px 0px 0px' />";
+             $windowtitle = BML::ml('.confirm.title.community', {'user'=> $user });
+             $title = BML::ml('.confirm.title.community', {'icon'=> $icon, 'user'=> $user });
+             $body .= "<?p " . BML::ml('.confirm.text1.community', {'url' => "$LJ::SITEROOT/community/join.bml?comm=$user" }) . " p?>";
+         } else {
+             my $icon = "<img src='$LJ::IMGPREFIX/userinfo.gif' border='0' align='' height='24' width='24' style='padding: 0px 2px 0px 0px' />";
+             if ($u->{'journaltype'} eq "I") {
+                $icon = "<img src='$LJ::IMGPREFIX/openid-profile.gif' border='0' align='' height='24' width='24' style='padding: 0px 2px 0px 0px' />";
+                $windowtitle = BML::ml('.confirm.title.person', {'user'=> $u->{'name'} });
+                $title = BML::ml('.confirm.title.person', {'icon'=> $icon, 'user'=> $u->{'name'} });
+             } else {
+                $windowtitle = BML::ml('.confirm.title.person', {'user'=> $user });
+                $title = BML::ml('.confirm.title.person', {'icon'=> $icon, 'user'=> $user });
+             }
+             $body .= "<?p $ML{'.confirm.text1.person'}";
+             $body .= "<ul><li>$ML{'.confirm.action1.person'}</li>";
+             $body .= "<li>$ML{'.confirm.action2.person'}</li>" if ($u->{'journaltype'} ne "I");
+             $body .= "</ul> p?>";
+         }
      }
-     $body .= "<?p " . BML::ml(".confirm.text.nobold", { 'user' => $u->ljuser_display() }) . " p?>";
- }
-
- $body .= "<form method='post' action='add.bml'>";
- $body .= LJ::form_auth();
- $body .= LJ::html_hidden(mode => 'add',
-                          user => $user,
-                          remid => $remote->{userid});
-
- if ($fr) {
-     $body .= "<center><input type='submit' value=\"$ML{'.btn.modify'}\">";
-     $body .= " - <input type='submit' name='action:delete' value=\"$ML{'.btn.remove'}\"></center>";
- } else {
-     $body .= "<center><input type='submit' value=\"" .
-              BML::ml('.btn.add', { 'user' => $u->display_name() }) . "\"></center>";
  }
 
  ## let them pick friend groups
- $body .= "<?h1 $ML{'.groups.header'} h1?><?p $ML{'.groups.text'} p?><blockquote>";
  my $err;
  my $greq = LJ::Protocol::do_request("getfriendgroups", {
-     'username' => $remote->{'user'},
-     'ver'      => $LJ::PROTOCOL_VER,
- }, \$err, { 'noauth' => 1 });
+                                                        'username' => $remote->{'user'},
+                                                        'ver'      => $LJ::PROTOCOL_VER,
+                                                        },
+                                                        \$err, { 'noauth' => 1 });
 
  if (@{$greq->{'friendgroups'}}) {
-     foreach my $g (@{$greq->{'friendgroups'}}) {
+ $body .= "<?p &nbsp;<br />";
+ $body .= "$ML{'.groups.text1'} " . LJ::help_icon('customgroups', '&nbsp;') . "p?>\n";
+ $body .= "<blockquote>\n";
+    foreach my $g (@{$greq->{'friendgroups'}}) {
          my $ck = ($fr && ($fr->{'groupmask'} & (1 << $g->{'id'}))) ||
                   # by default, newly added friends are in default view unless unchecked
                   (! $fr && $g->{'name'} eq 'Default View');
 
          $body .= "<label for='fg:bit_$g->{'id'}'>";
-         $body .= LJ::html_check({ 'name' => "bit_$g->{'id'}",
-                                   'id' => "fg:bit_$g->{'id'}",
+         $body .= LJ::html_check({ 'name'     => "bit_$g->{'id'}",
+                                   'id'       => "fg:bit_$g->{'id'}",
                                    'selected' => $ck });
          $body .= ' ' . LJ::ehtml($g->{'name'}) . "</label><br />\n";
      }
- } else {
-     $body .= "<i>$ML{'.groups.nogroup'}</i>";
- }
  $body .= "</blockquote>";
-
- ## let them pick the colors
- $body .= "<?h1 $ML{'.colors.header'} h1?><?p " .
-          BML::ml('.colors.text', {'user'=>$user}) . " p?>";
-
- $ret = "";
- $ret .= "<P><CENTER><TABLE CELLPADDING=4><TR><TD><B>$ML{'.colors.fg'}</B></TD><TD><B>$ML{'.colors.bg'}</B></TD></TR>\n";
-
- my @color = ();
- LJ::load_codes({ "color" => \@color });
-
- my $sel = $fr || { 'fgcolor' => hex '000000',
-                    'bgcolor' => hex 'FFFFFF', };
-
- $ret .= "<TR>";
- $ret .= "<TD><SELECT NAME=\"editfriend_add_1_fg\">";
- foreach (@color) {
-     my $color_int = hex (substr($_->{'code'},1));
-     my $selected = $color_int eq $sel->{'fgcolor'} ? " SELECTED" : "";
-     $ret .= "<OPTION VALUE=\"$_->{'code'}\"$selected>$_->{'item'}\n";
  }
- $ret .= "</SELECT></TD>\n";
- $ret .= "<TD><SELECT NAME=\"editfriend_add_1_bg\">";
- foreach (@color) {
-     my $color_int = hex (substr($_->{'code'},1));
-     my $selected = $color_int eq $sel->{'bgcolor'} ? " SELECTED" : "";
-     $ret .= "<OPTION VALUE=\"$_->{'code'}\"$selected>$_->{'item'}\n";
- }
- $ret .= "</SELECT></TD>\n";
- $ret .= "</TR>\n";
- $ret .= "</TABLE>\n";
- 
- ### color swatch
- my $col = 0;
- $ret .= "<P><TABLE border=0 cellspacing=0 cellpadding=0>";
- foreach (@color) {
-     if ($col==0) { $ret .= "<TR>\n"; }
-     $col++;
-     my $ecolor = LJ::ehtml($_->{'item'});
-     $ret .= "<TD bgcolor=$_->{'code'}><IMG SRC=\"/img/dot.gif\" WIDTH=14 HEIGHT=14 TITLE=\"$ecolor\" ALT=\"$ecolor\"></TD>\n";
-     if ($col==23) { $ret .= "</TR>\n"; $col==0; }
- }
- if ($col) { $ret .= "</TR>\n"; $col==0; }
- $ret .= "</TABLE>\n";
- $ret .= "<FONT SIZE=-2 FACE=\"Arial,Helvetica\">$ML{'.colors.hover'}</FONT>";
 
- $ret .= "</CENTER>\n";
- $body .= $ret;
+ if ($fr) {
+     $body .= "<input type='submit' value=\"$ML{'.btn.modify'}\">";
+     $body .= " - <input type='submit' name='action:delete' value=\"$ML{'.btn.remove'}\">\n";
+ } else {
+     $body .= "<input type='submit' value=\"&nbsp; $ML{'.btn.add.friend'} &nbsp;\">\n";
+ }
+
+ $body .= "<script type='text/javascript' language='Javascript'> \n <!-- \n
+    document.write(\"<input type='button' value='Cancel' onclick='history.go(-1); return false;'>\");
+     \n // -->\n ";
+ $body .= '</script>';
 
  $body .= "</form>";
 
@@ -214,6 +210,7 @@
 _code?>
 <?page
 title=><?_code return $title; _code?>
+windowtitle=><?_code return $windowtitle; _code?>
 body=><?_code return $body; _code?>
 page?><?_c <LJDEP>
 link: htdocs/login.bml, htdocs/create.bml, htdocs/friends/edit.bml, htdocs/users
