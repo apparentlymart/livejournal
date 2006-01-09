@@ -83,6 +83,7 @@ body<=
  $itemid = $init->{'itemid'}+0;
 
  my $stylemine = $init->{'style'} eq "mine" ? "style=mine" : "";
+ my $formatlight = $GET{'format'} eq 'light' ? 'format=light' : '';
 
  my $item = LJ::Talk::get_journal_item($u, $itemid);
 
@@ -426,7 +427,7 @@ body<=
                  $ret .= BML::ml('.fromip', {'ip'=>$post->{'props'}->{'poster_ip'}});
              }
 
-             $ret .= " <font size='-1'>(<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dtid") . "#t$dtid'>$T{'link'}</a>)</font> ";
+             $ret .= " <font size='-1'>(<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dtid", $formatlight) . "#t$dtid'>$T{'link'}</a>)</font> ";
 
              if (LJ::Talk::can_delete($remote, $u, $up, $userpost)) {
                  $ret .= "<a href='/delcomment.bml?${jargent}id=$dtid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
@@ -472,7 +473,7 @@ body<=
 
              $ret .= "<p style='margin: 0.7em 0 0.2em 0'><font size='-2'>";
 
-             my $replyurl = LJ::Talk::talkargs($talkurl, "replyto=$dtid", $stylemine);
+             my $replyurl = LJ::Talk::talkargs($talkurl, "replyto=$dtid", $stylemine, $formatlight);
              if ($post->{'state'} eq 'F') {
                  $ret .= "($T{'frozen'}) ";
              } elsif ($remote) {
@@ -489,10 +490,10 @@ body<=
 
              if ($post->{'parenttalkid'} != 0) {
                  my $dpid = $post->{'parenttalkid'} * 256 + $init->{'anum'};
-                 $ret .= "(<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dpid", $stylemine) . "#t$dpid'>$T{'parent'}</a>) ";
+                 $ret .= "(<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dpid", $stylemine, $formatlight) . "#t$dpid'>$T{'parent'}</a>) ";
              }
              if ($post->{'children'} && @{$post->{'children'}}) {
-                 my $url = LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine) . "#t$dtid";
+                 my $url = LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine, $formatlight) . "#t$dtid";
                  $ret .= "(<a href='$url'>$T{'thread'}</a>)";
              }
              $ret .= "</font></p>";
@@ -505,7 +506,7 @@ body<=
 
              $ret .= "<a name='t$dtid'></a><table><tr>";
              $ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
-             $ret .= "<td><a href='" . LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine) . "#t$dtid'>" . LJ::ehtml($post->{'subject'} || $T{'nosubject'}) . "</a> - $user, <i>$datepost</i>";
+             $ret .= "<td><a href='" . LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine, $formatlight) . "#t$dtid'>" . LJ::ehtml($post->{'subject'} || $T{'nosubject'}) . "</a> - $user, <i>$datepost</i>";
 
              # Comment Posted Notice
              $ret .= " - <b>$ML{'.posted'}</b>"
@@ -529,11 +530,11 @@ body<=
      $ret .= "<p>$navcrap</p>" if $navcrap;
      my $readlink;
      if ($dthread && $pages == 1) {
-         my $readurl = LJ::Talk::talkargs($talkurl, $stylemine);
+         my $readurl = LJ::Talk::talkargs($talkurl, $stylemine, $formatlight);
          $readlink = "(<a href='$readurl#comments'>$T{'readcomments'}</a>) - ";
      }
 
-     my $posturl = LJ::Talk::talkargs($talkurl, "mode=reply", $stylemine);
+     my $posturl = LJ::Talk::talkargs($talkurl, "mode=reply", $stylemine, $formatlight);
 
      $ret .= "<form style='display: inline' method='post' action='/talkmulti.bml' name='multiform' id='multiform' >";
 
