@@ -365,6 +365,8 @@ p?>
 
 /community/members.bml.error.nocomm=Community not found.
 
+/community/members.bml.error.notcomm=[[user]] is not a community.
+
 /community/members.bml.error.notactive=Account is not active: <b>[[user]]</b>
 
 /community/members.bml.error.nouser=User does not exist: <b>[[user]]</b>
