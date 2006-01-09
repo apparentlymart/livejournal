@@ -23,21 +23,20 @@ sub get_blobclient {
 sub get_blobclient_reader {
     my $u = shift;
     my $bcid = $u->{blob_clusterid} or die "No blob_clusterid";
- 
+
     return $bc_reader_cache{$bcid} if $bc_reader_cache{$bcid};
 
     my $path = $LJ::BLOBINFO{clusters}->{"$bcid-GET"} ||
         $LJ::BLOBINFO{clusters}->{$bcid};
     my $bpath = $LJ::BLOBINFO{clusters}->{"$bcid-BACKUP"};
-    
+
     return $bc_reader_cache{$bcid} = _bc_from_path($path, $bpath);
 }
 
 sub _bc_from_path {
     my ($path, $bpath) = @_;
     if ($path =~ /^http/) {
-        $bpath = undef unless $bpath =~ /^http/;
-        return BlobClient::Remote->new({ path => $path, backup_path => $bpath });
+        die "BlobClient::Remote support is now removed in favor of MogileFS.";
     } elsif ($path) {
         return BlobClient::Local->new({ path => $path });
     }
@@ -99,14 +98,14 @@ sub put {
         return 0;
     }
 
-    unless ($bc->put($u->{blob_clusterid}, $u->{userid}, $domain, 
+    unless ($bc->put($u->{blob_clusterid}, $u->{userid}, $domain,
                      $fmt, $bid, $data, $errref)) {
         return 0;
     }
 
     $u->do("INSERT IGNORE INTO userblob (journalid, domain, blobid, length) ".
            "VALUES (?, ?, ?, ?)", undef,
-           $u->{userid}, LJ::get_blob_domainid($domain), 
+           $u->{userid}, LJ::get_blob_domainid($domain),
            $bid, length($data));
     die "Error doing userblob accounting: " . $u->errstr if $u->err;
     return 1;
@@ -120,7 +119,7 @@ sub delete {
     return 0 unless $u->writer;
 
     my $bdid = LJ::get_blob_domainid($domain);
-    return 0 unless $bc->delete($u->{blob_clusterid}, $u->{userid}, $domain, 
+    return 0 unless $bc->delete($u->{blob_clusterid}, $u->{userid}, $domain,
                                 $fmt, $bid);
 
     $u->do("DELETE FROM userblob WHERE journalid=? AND domain=? AND blobid=?",

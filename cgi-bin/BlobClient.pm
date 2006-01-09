@@ -2,8 +2,10 @@
 # vim:ts=4 sw=4 et:
 
 use strict;
-use BlobClient::Remote;
+
 use BlobClient::Local;
+
+# Note: BlobClient::Remote is now deprecated, in favor of MogileFS.
 
 package BlobClient;
 
@@ -25,7 +27,7 @@ sub _make_path {
 
     sprintf("%07d", $uid) =~ /^(\d+)(\d\d\d)(\d\d\d)$/;
     my ($uid1, $uid2, $uid3) = ($1, $2, $3);
-    
+
     sprintf("%04d", $bid) =~ /^(\d+)(\d\d\d)$/;
     my ($bid1, $bid2) = ($1, $2);
     return join('/', int($cid), $uid1, $uid2, $uid3, $domain, $bid1, $bid2) . ".$fmt";
