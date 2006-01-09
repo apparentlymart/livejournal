@@ -40,7 +40,7 @@
 
     $MSG_READONLY_USER ||= "Database temporarily in read-only mode during maintenance.";
 
-    $SITEROOT ||= "http://www.$DOMAIN:8011";
+    $SITEROOT ||= $DOMAIN_WEB ? "http://$DOMAIN_WEB:8011" : "http://www.$DOMAIN:8011";
     $IMGPREFIX ||= "$SITEROOT/img";
     $STATPREFIX ||= "$SITEROOT/stc";
     $JSPREFIX ||= "$SITEROOT/js";
@@ -211,6 +211,10 @@
     # max content length we should read via ATOM api
     # 25MB
     $MAX_ATOM_UPLOAD ||= 25600;
+
+    $CAPTCHA_AUDIO_MAKE ||= 100;
+    $CAPTCHA_AUDIO_PREGEN ||= 100;
+    $CAPTCHA_IMAGE_PREGEN ||= 500;
 
     # Portal boxes
     unless(scalar(@LJ::PORTAL_BOXES)) {
