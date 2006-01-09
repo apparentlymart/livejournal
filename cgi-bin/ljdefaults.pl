@@ -9,7 +9,7 @@
     package LJ;
     use Sys::Hostname ();
 
-    $DEFAULT_STYLE ||= { 
+    $DEFAULT_STYLE ||= {
         'core' => 'core1',
         'layout' => 'generator/layout',
         'i18n' => 'generator/en',
@@ -25,7 +25,7 @@
     $BIN = "$HOME/bin";
 
     $SERVER_NAME ||= Sys::Hostname::hostname();
-    
+
     $UNICODE = 1 unless defined $UNICODE;
 
     @LANGS = ("en") unless @LANGS;
@@ -40,7 +40,7 @@
 
     $MSG_READONLY_USER ||= "Database temporarily in read-only mode during maintenance.";
 
-    $SITEROOT ||= $DOMAIN_WEB ? "http://$DOMAIN_WEB:8011" : "http://www.$DOMAIN:8011";
+    $SITEROOT ||= $DOMAIN_WEB ? "http://$DOMAIN_WEB" : "http://www.$DOMAIN";
     $IMGPREFIX ||= "$SITEROOT/img";
     $STATPREFIX ||= "$SITEROOT/stc";
     $JSPREFIX ||= "$SITEROOT/js";
@@ -109,7 +109,7 @@
                       );
         foreach my $k (keys %defcap) {
             next if (defined $LJ::CAP_DEF{$k});
-            $LJ::CAP_DEF{$k} = $defcap{$k};	    
+            $LJ::CAP_DEF{$k} = $defcap{$k};
         }
     }
 
