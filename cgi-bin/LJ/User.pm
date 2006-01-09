@@ -3213,7 +3213,7 @@ sub make_journal
     }
 
     # signal to LiveJournal.pm that we can't handle this
-    if ($stylesys == 1 && (({ entry=>1, reply=>1, month=>1, tag=>1 }->{$view}) || ($view eq 'lastn' && $geta->{tag}))) {
+    if (($stylesys == 1 || $geta->{'fallback'} eq 'bml') && (({ entry=>1, reply=>1, month=>1, tag=>1 }->{$view}) || ($view eq 'lastn' && $geta->{tag}))) {
 
         # pick which fallback method (s2 or bml) we'll use by default, as configured with
         # $S1_SHORTCOMINGS
