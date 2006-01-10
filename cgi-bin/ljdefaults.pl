@@ -305,6 +305,17 @@
                                     },
                                     );
     }
+
+    unless (%LJ::BLOBINFO) {
+        %LJ::BLOBINFO = (
+                         clusters => {
+                             1 => "$LJ::HOME/var/blobs/",
+                         },
+                         );
+    }
+
+    $USERPROP_DEF{'blob_clusterid'} ||= 1;
+
 }
 
 # no dependencies.
