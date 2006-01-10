@@ -11,6 +11,12 @@
  my $dbr = LJ::get_db_reader();
 
  if ($type eq "nav_and_user" || $type eq "nav") {
+
+     # Some special shortcuts used for easy navigation
+     if ($q =~ /^faq (\d+)$/) {
+         return BML::redirect("$LJ::SITEROOT/support/faqbrowse.bml?faqid=$1&view=full");
+     }
+
      do "LJ/NavTag.pm";
      my @dests = LJ::NavTag->dests_of_tag($q);
      my $last_is_untrusted = 0;
