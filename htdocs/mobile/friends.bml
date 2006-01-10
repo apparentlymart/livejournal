@@ -11,6 +11,20 @@
     my $ret;
     $ret .= "<a href='./'>&lt;&lt; Back</a> to LiveJournal Mobile.</a><h1>Friends Page</h1>";
 
+    # Filter first to a "Mobile View" friends group if they have one,
+    # then fall back to "Default View", and then just show them everything
+    my $filter;
+    {
+        my $grp = LJ::get_friend_group($u, { 'name' => 'Mobile View' });
+        unless ($grp) {
+            $grp = LJ::get_friend_group($u, { 'name' => 'Default View' });
+        }
+
+        if ($grp) {
+            $filter = 1 << $grp->{'groupnum'};
+        }
+    }
+
     my @entries = LJ::get_friend_items({
 	'remoteid'          => $u->{'userid'},
 	'itemshow'          => 50,
@@ -18,6 +32,7 @@
 	'showtypes'         => 'PYC',
 	'u'                 => $u,
 	'userid'            => $u->{'userid'},
+        'filter'            => $filter,
     });
 
     # how many characters to truncate entry at
