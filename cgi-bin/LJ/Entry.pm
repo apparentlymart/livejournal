@@ -1065,7 +1065,7 @@ sub get_log2_recent_user
         next if $item->{'security'} eq 'private'
             and $item->{'journalid'} != $remote->{'userid'};
         if ($item->{'security'} eq 'usemask') {
-            next unless $remote->{'journaltype'} eq "P";
+            next unless $remote->{'journaltype'} eq "P" || $remote->{'journaltype'} eq 'I';
             my $permit = ($item->{'journalid'} == $remote->{'userid'});
             unless ($permit) {
                 my $mask = LJ::get_groupmask($item->{'journalid'}, $remote->{'userid'});
