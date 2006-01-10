@@ -1,18 +1,19 @@
 <html>
 <head>
-<title>LiveJournal Mobile</title>
+<title><?_code return $LJ::SITENAMESHORT; _code?> Mobile</title>
 </head>
 <body>
-<h1>LiveJournal Mobile</h1>
+<h1><?_code return $LJ::SITENAMESHORT; _code?> Mobile</h1>
 <p><?_code
 {
     my $u = LJ::User->remote;
     my $ret = "";
     $ret .= $u ? "Hello, <b>" . $u->display_name . "</b>!\n" : "";
-    $ret .= "Welcome to the mobile version LiveJournal.</p>
-<h2>Options:</h2>
-<ul>
-";
+
+    $ret .= "<p>Welcome to the mobile version of $LJ::SITENAMESHORT.</p>"
+        unless $u;
+
+    $ret .= "<h2>Options:</h2><ul>";
 
     unless ($u) {
 	$ret .= <<OPTS
@@ -23,11 +24,11 @@ OPTS
 
 
     if ($u) {
-	$ret .= <<OPTS;
-<li><a href="login.bml">Log in</a> -- you're currently logged in as $u->{user}</li>
-<li><a href="post.bml">Post to LiveJournal</a></li>
-<li><a href="friends.bml">Read friends page</a></li>
-OPTS
+	$ret .= "<li><a href='login.bml'>Log in</a> -- you're currently logged in as ";
+        $ret .= $u->display_name . "</li>";
+        $ret .= '<li><a href="post.bml">Post to LiveJournal</a></li>'
+            unless $u->{'journaltype'} eq 'I';
+        $ret .= '<li><a href="friends.bml">Read friends page</a></li>';
     }
 
 return $ret;
