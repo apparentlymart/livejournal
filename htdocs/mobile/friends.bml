@@ -39,7 +39,7 @@
 	my $pu    = $entry->poster;
 	my $ju    = $entry->journal;
 	my $url   = $entry->url;
-	$url .= "?fallback=bml&usescheme=lynx";
+	$url .= "?format=light";
 
 	my $who = $pu->ljuser_display;
 	if ($pu->{userid} != $ju->{userid}) {
