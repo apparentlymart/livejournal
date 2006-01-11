@@ -133,6 +133,15 @@ add_conf('$DEFAULT_LANG',
          des => "Default language (code) to show site in, for users that haven't set their langauge.  Defaults to the first item in \@LANGS, which is usually \"en\", for English.",
          );
 
+add_conf('@LANGS',
+         des => "Array of language codes to make available for users to select between.  Also, if they haven't selected a language, it's auto-detected from their browser.");
+
+add_conf('@LANGS_IN_PROGRESS',
+         des => "Array of additional language codes to allow users to select, if they know about them.  These ones are actively being translated, but aren't yet ready to be publicly available.");
+
+add_conf('@CLUSTERS',
+         des => "Array of cluster numbers in operation.");
+
 add_conf('$DEFAULT_STYLE',
          required => 0,
          des => "Hashref describing default S2 style.  Keys are layer types, values being the S2 redist_uniqs.",
