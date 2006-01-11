@@ -76,10 +76,10 @@ use vars qw($body $title $windowtitle %GET %POST);
          if ($POST{'action:delete'}) {
              $title = $ML{'.remove.title'};
              $body .= "<?h1 $ML{'.remove.header'} h1?><?p ";
-             $body .= BML::ml('.remove.text', {
-                                              'user'   => $user,
+             $body .= BML::ml('.remove.text2', {
                                               'ljuser' => LJ::ljuser($u),
-                                              'url'    => "$LJ::SITEROOT/users/$remote->{'user'}/friends",
+                                              'aopts'    => "href='$LJ::SITEROOT/users/$remote->{'user'}/friends'",
+                                              'aopts2'   => "href='$LJ::SITEROOT/userinfo.bml?user=$remote->{'user'}'",
                                               });
              $body .= " p?>";
          } else {

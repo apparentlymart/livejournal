@@ -52,8 +52,9 @@ general /friends/add.bml.confirm.header
 general /friends/add.bml.confirm.syn.title
 general /friends/add.bml.confirm.text.nobold
 general /friends/add.bml.confirm.title
-general /friends/add.bml.groups.text
 general /friends/add.bml.error3.text
+general /friends/add.bml.groups.text
+general /freinds/add.bml.remove.text
 general /friends/edit.bml.btn.proceed
 general /friends/edit.bml.edit.head
 general /friends/edit.bml.edit.text
