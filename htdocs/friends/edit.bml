@@ -1,5 +1,5 @@
 <?page
-title=><?_ML .title _ML?>
+title=><?_ml .title _ml?>
 body<=
 <?_code
 {
@@ -24,11 +24,11 @@ body<=
     my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
 
     my $u = LJ::get_authas_user($authas);
-    return LJ::bad_input("You could not be authenticated as the specified user.")
+    return LJ::bad_input($ML{'error.invalidauth'})
         unless $u;
     return BML::redirect("$LJ::SITEROOT/community/members.bml?comm=$u->{'user'}")
         if $u->{'journaltype'} eq 'C';
-    return LJ::bad_input("Cannot modify friends of this journal type.")
+    return LJ::bad_input($ML{'/friends/edit.bml.error.badjournaltype'})
         unless $u->{'journaltype'} =~ /^[PSI]$/;
 
     my $ret;
@@ -43,7 +43,7 @@ body<=
                                          'type' => ['P', 'S'] });
         $ret .= "</form>\n\n";
 
-        $ret .= '<?p ' . BML::ml('/friends/edit.bml.invite', { aopts => "href='invite.bml'" }) . ' p?>';
+        $ret .= '<?p ' . BML::ml('/friends/edit.bml.invite', { aopts => "href='$LJ::SITEROOT/friends/invite.bml'" }) . ' p?>';
 
         $ret .= "<form method='post' name='editFriends' action='edit.bml$getextra'>\n";
         $ret .= LJ::form_auth();

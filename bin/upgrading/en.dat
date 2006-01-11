@@ -2126,6 +2126,8 @@ already have an account you can <a href="/create.bml">create one</a> to track yo
 
 /friends/add.bml.remove.title=Friend Removed!
 
+/friends/edit.bml.error.badjournaltype=Cannot modify friends of this journal type.
+
 /friends/edit.bml.invite=Do you want to <a [[aopts]]>invite a friend</a>?
 
 /friends/edit.bml.title=Edit Friends
