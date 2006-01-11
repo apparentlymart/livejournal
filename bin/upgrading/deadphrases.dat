@@ -245,3 +245,5 @@ general /community/membres.bml.success.invited
 general /customize/index.bml.s1
 
 general /changepassword.bml.email.body
+
+general Success

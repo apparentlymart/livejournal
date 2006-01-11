@@ -5388,9 +5388,6 @@ protocol.readonly=Your account is temporarily in read-only mode.  Some operation
 Sorry|notes=typically used to announce that the requested action can't be done.
 Sorry=Sorry
 
-Success|notes=typically used to announce that the requested action was successful.
-Success=Success
-
 talk.anonwrote=Someone wrote,
 
 talk.anonwrote_comm=Someone wrote in [[commlink]],
