@@ -38,6 +38,7 @@
                'friends' => ['Friends Tools', '/friends/index.bml', 'manage'],
                'friendsfilter' => ['Friends Filter', '/friends/filter.bml', 'friends'],
                'home' => ['Home', '/', ''],
+               'invitefriend' => ['Invite a Friend', '/friends/invite.bml', 'friends'],
                'joincomm' => ['Join Community', '', 'community'],
                'latestposts' => ['Latest Posts', '/stats/latest.bml', 'stats'],
                'layerbrowse' => ['Public Layer Browser', '/customize/advanced/layerbrowse.bml', 'advcustomize'],

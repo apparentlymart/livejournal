@@ -2297,6 +2297,44 @@ pick a specific friend group to view.
 
 /friends/index.bml.tools=Tools
 
+/friends/invite.bml.btn.invite=Invite 'em!
+
+/friends/invite.bml.error.bademail=Bogus looking email: [[errormsg]]
+
+/friends/invite.bml.error.needcreatelink=You must include the link for your friend to create a journal: [[link]]
+
+/friends/invite.bml.error.noemail=Please enter your friend's email address.
+
+/friends/invite.bml.error.noimagesallowed=Images are not allowed in this message.
+
+/friends/invite.bml.error.noname=Please enter your friend's name.
+
+/friends/invite.bml.error.nooffsitelinksallowed=Links to sites other than [[sitename]] are not allowed in this message.
+
+/friends/invite.bml.error.overratelimit=It looks like you are inviting a lot of your friends to [[sitename]]. To help us combat SPAM, you may wish to send the rest of your invitations via your own email address. Make sure you include the invite link in your email which you can find <a [[aopts]]>at the top of the page</a>.
+
+/friends/invite.bml.error.useralreadyhasaccount=You are sending this invite to a user that already has an account.
+
+/friends/invite.bml.form.header=Fill out this form to invite someone to [[sitename]]:
+
+/friends/invite.bml.form.input.email=Your friend's email:
+
+/friends/invite.bml.form.input.message=Your message to them:
+
+/friends/invite.bml.form.input.name=Your friend's name:
+
+/friends/invite.bml.form.note=If you want to invite your friend to a specific community, you can mention the community name and URL here.
+
+/friends/invite.bml.intro=The link below will send your friend to the page where they can create a [[sitename]] account. Your journal will be automatically added as a friend and the page will list some of your active communities with the option to join.
+
+/friends/invite.bml.intro.link=Link: <a [[aopts]]>[[createlink]]</a>
+
+/friends/invite.bml.intro.useform=You can use this form as often as you'd like, or just cut and paste the link and send it from your own email account. [[sitename]] doesn't store any of this after the invitation is sent.
+
+/friends/invite.bml.success=Message sent to [[email]]! Want to invite somebody else?
+
+/friends/invite.bml.title=Invite a Friend!
+
 /go.bml.defaultbody=No parameters given.
 
 /go.bml.defaulttitle=Error

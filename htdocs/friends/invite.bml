@@ -3,11 +3,13 @@
     use strict;
     use vars qw(%GET $title $body);
 
-    $title = "Invite a Friend!";
+    LJ::set_active_crumb('invitefriend');
+    
+    $title = $ML{'.title'};
     $body = "";
 
     my $err = sub {
-        $title = $ML{'.error'};
+        $title = $ML{'Error'};
         $body = LJ::bad_input(@_);
         return;
     };
@@ -32,32 +34,32 @@
         if ($email) {
             my @errs;
             LJ::check_email($email, \@errs);
-            $bogus->("email", "Bogus looking email: @errs") if @errs;
+            $bogus->("email", BML::ml('.error.bademail', {'errormsg' => @errs})) if @errs;
 
             if ($LJ::USER_EMAIL && $email =~ /$LJ::USER_DOMAIN$/) {
-                $bogus->("email", "You are sending this invite to a user that already has an account");
+                $bogus->("email", $ML{'.error.useralreadyhasaccount'});
             }
         } else {
-            $bogus->("email", "Please enter your friend's email address");
+            $bogus->("email", $ML{'.error.noemail'});
         }
 
-        $bogus->("name", "Please enter your friend's name") unless $name;
+        $bogus->("name", $ML{'.error.noname'}) unless $name;
 
         if ($POST{'msg'} =~ /<(img|image)\s+src/i) {
-            $bogus->("msg", "Images are not allowed in this message");
+            $bogus->("msg", $ML{'.error.noimagesallowed'});
         }
 
         my $has_ilink = 0;
         foreach ( LJ::get_urls($POST{'msg'}) ) {
             if ($_ !~ m!^https?://(\w+\.)?$LJ::DOMAIN(/.+)?$!i) {
-                $bogus->("msg", "$_<br />Links to sites other than $LJ::SITENAMESHORT are not allowed in this message");
+                $bogus->("msg", "$_<br />" . BML::ml('.error.nooffsitelinksallowed', {'sitename' => $LJ::SITENAMESHORT}));
                 last;
             } elsif ($_ eq $create_link) {
                 $has_ilink = 1;
             }
         }
 
-        $bogus->("msg", "You must include the link for your friend to create a journal: $create_link")
+        $bogus->("msg", BML::ml('.error.needcreatelink', {'link' => $create_link}))
             if !$has_ilink && !$ierr{msg};
 
         return $rv;
@@ -99,11 +101,11 @@
             $name = '';
             $email = '';
 
-            $body .= "<?standout Message sent to $POST{email}!  Want to invite somebody else? standout?>";
+            $body .= "<?standout " . BML::ml('.success', {'email' => $POST{email}}) . " standout?>";
 
        # Over rate limit
        } else {
-           $body = "It looks like you are inviting a lot of your friends to $LJ::SITENAMESHORT.  To help us combat SPAM, you may wish to send the rest of your invitations via your own email address.  Make sure you include the invite link in your email which you can find <a href='/friends/invite.bml'>at the top of the page</a>.";
+           $body = BML::ml('.error.overratelimit', {'sitename' => $LJ::SITENAMESHORT, 'aopts' => "href='$LJ::SITEROOT/friends/invite.bml'"});
            return;
        }
     }
@@ -122,36 +124,36 @@ Follow this link to sign up:
 
 
     unless (LJ::did_post()) {
-        $body .= "<?p The link below will send your friend to the page where they can create a $LJ::SITENAMESHORT account.  Your journal will be automatically added as a friend and the page will list some of your active communities with the option to join. p?>";
+        $body .= "<?p " . BML::ml('.intro', {'sitename' => $LJ::SITENAMESHORT}) . " p?>";
 
-        $body .= "<?p <div style='margin-left: 20px'><b>Link: <a href='$create_link'>$create_link</a></b></div> p?>";
+        $body .= "<?p <div style='margin-left: 20px'><b>" . BML::ml('.intro.link', {'aopts' => "href='$create_link'", 'createlink' => $create_link}) . "</b></div> p?>";
 
-        $body .= "<?p You can use this form as often as you'd like, or just cut and paste the link and send it from your own email account. $LJ::SITENAMESHORT doesn't store any of this after the invitation is sent. p?>";
+        $body .= "<?p " . BML::ml('.intro.useform', {'sitename' => $LJ::SITENAMESHORT}) . " p?>";
     }
 
-    $body .= "<?p <b>Fill out this form to invite someone to $LJ::SITENAMESHORT:</b> p?>";
+    $body .= "<?p <b>" . BML::ml('.form.header', {'sitename' => $LJ::SITENAMESHORT}) . "</b> p?>";
 
     $body .= "<?p <form method='POST'>";
 
     $body .= '<table width="600" style="margin-left: 20px"><tr><td>';
-    $body .= "Your friend's name:</td><td>";
+    $body .= "$ML{'.form.input.name'}</td><td>";
     $body .= LJ::html_text({ name => "name", size => 40, value => $name }) . '<br />' . $inerr->("name", "<br />");
 
     $body .= '</td></tr><tr><td>';
 
-    $body .= "Your friend's email:</td><td>";
+    $body .= "$ML{'.form.input.email'}</td><td>";
     $body .= LJ::html_text({ name => "email", size => 40, value => $email }) . '<br />' . $inerr->("email", "<br />");
 
     $body .= '</td></tr><tr><td colspan="2">';
 
-    $body .= 'Your message to them:<br />' . $inerr->("msg", "<br />");
+    $body .= "$ML{'.form.input.message'}<br />" . $inerr->("msg", "<br />");
     $body .= LJ::html_textarea({ rows => 20, cols => 80, name => "msg", value => $msg });
     $body .= '</td></tr><tr><td colspan="2">';
-    $body .= '<i>If you want to invite your friend to a specific community, you can mention the community name and URL here.</i>';
+    $body .= "<i>$ML{'.form.note'}</i>";
 
     $body .= '</td></tr><tr><td colspan="2" align="left">';
 
-    $body .= LJ::html_submit("Invite 'em!");
+    $body .= LJ::html_submit($ML{'.btn.invite'});
     $body .= '</td></tr></table></form> p?>';
 
     return;
