@@ -21,7 +21,7 @@ die "eval error: $@" if $@ && $@ !~ /^Can\'t locate/;
 
 sub add_singletons {
     foreach (@_) {
-	$singleton{$_} = 1;
+        $singleton{$_} = 1;
     }
 }
 
@@ -32,34 +32,39 @@ sub add_conf {
 }
 
 sub get_keys {
-    my @list;
+    my %seen;   # $FOO -> 1
 
     my $package = "main::LJ::";
-    use vars qw(*stab *thingy); 
+    use vars qw(*stab *thingy);
     *stab = *{"main::"};
 
     while ($package =~ /(\w+?::)/g) {
-	*stab = ${stab}{$1};
+        *stab = ${stab}{$1};
     }
 
     while (my ($key,$val) = each(%stab)) {
-	return if $DB::signal;
-	next if $key =~ /[a-z]/ || $key =~ /::$/;
+        return if $DB::signal;
+        next if $key =~ /[a-z]/ || $key =~ /::$/;
 
-	my @new;
-	local *thingy = $val;
-	if (defined $thingy) {
-	    push @new, "\$$key";
-	} 
-	if (defined @thingy) {
-	    push @new, "\@$key";
-	} 
-	if (defined %thingy) {
-	    push @new, "\%$key";
-	} 
-	push @list, grep { !$singleton{$_} && !$conf{$_} } @new;
+        my @new;
+        local *thingy = $val;
+        if (defined $thingy) {
+            push @new, "\$$key";
+        }
+        if (defined @thingy) {
+            push @new, "\@$key";
+        }
+        if (defined %thingy) {
+            push @new, "\%$key";
+        }
+        foreach my $sym (@new) {
+            next if $singleton{$sym};
+            $seen{$sym} = 1;
+        }
     }
-    return sort @list;
+
+
+    return sort keys %seen;
 }
 
 sub config_errors {
@@ -67,11 +72,12 @@ sub config_errors {
     my @errors;
 
     # iter through all config, check if okay
-    
+
     my @keys = get_keys();
     foreach my $k (@keys) {
-	next if $ok{$k};
-	push @errors, "Unknown config option: $k";
+        if (!$conf{$k}) {
+            push @errors, "Unknown config option: $k";
+        }
     }
     return @errors;
 }
