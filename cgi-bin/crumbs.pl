@@ -4,7 +4,7 @@
 
 %LJ::CRUMBS = (
                'acctstatus' => ['Account Status', '/accountstatus.bml', 'manage'],
-               'addfriend' => ['Add Friend', '', 'userinfo'],
+               'addfriend' => ['Add Friend', '', 'friends'],
                'addtodo' => ['Add To-Do Item', '', 'todo'],
                'advcustomize' => ['Customize Advanced S2 Settings', '/customize/advanced/index.bml', 'manage'],
                'advsearch' => ['Advanced Search', '/directorysearch.bml', 'search'],

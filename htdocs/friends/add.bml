@@ -9,7 +9,7 @@ use vars qw($body $title $windowtitle %GET %POST);
  my $userid = $u->{userid};
  $body = "";
 
- LJ::set_active_crumb('addfriends');
+ LJ::set_active_crumb('addfriend');
 
  unless ($remote) 
  {
@@ -41,7 +41,7 @@ use vars qw($body $title $windowtitle %GET %POST);
 
      unless ($remote->{'userid'} == $POST{'remid'}) {
          $title = $ML{'Error'};
-         $body = "<?h1 $ML{'Error'} h1?><?p Session info changed.  Try again. p?>";
+         $body = "<?h1 $ML{'Error'} h1?><?p $ML{'.error.sessionchanged'} p?>";
          return;
      }
 
@@ -198,8 +198,10 @@ use vars qw($body $title $windowtitle %GET %POST);
      $body .= "<input type='submit' value=\"&nbsp; $ML{'.btn.add.friend'} &nbsp;\">\n";
  }
 
+ my $cancel_btn = LJ::ejs($ML{'.btn.cancel'});
+ 
  $body .= "<script type='text/javascript' language='Javascript'> \n <!-- \n
-    document.write(\"<input type='button' value='Cancel' onclick='history.go(-1); return false;'>\");
+    document.write(\"<input type='button' value='$cancel_btn' onclick='history.go(-1); return false;'>\");
      \n // -->\n ";
  $body .= '</script>';
 

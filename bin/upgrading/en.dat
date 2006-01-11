@@ -2059,6 +2059,8 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /friends/add.bml.btn.add.friend=Add
 
+/friends/add.bml.btn.cancel=Cancel
+
 /friends/add.bml.btn.modify=Modify
 
 /friends/add.bml.btn.remove=Remove
@@ -2094,6 +2096,8 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 /friends/add.bml.confirm.title.community=Add [[icon]][[user]] to your friends page?
 
 /friends/add.bml.confirm.title.person=Add [[icon]][[user]] as a friend?
+
+/friends/add.bml.error.sessionchanged=Session info changed. Try again.
 
 /friends/add.bml.error1.header=Log In First
 
