@@ -9,7 +9,7 @@
     $body = "";
 
     my $err = sub {
-        $title = "Error";
+        $title = $ML{'Error'};
         $body = LJ::bad_input(@_);
         return;
     };
