@@ -438,7 +438,7 @@ $maint{'synsuck'} = sub
                                 "FROM user u, syndicated s " .
                                 "WHERE u.userid=s.userid AND u.statusvis='V' " .
                                 "AND s.checknext < NOW()$in_sql " .
-                                "ORDER BY RAND() LIMIT 500");
+                                "LIMIT 500");
         $sth->execute;
         while (my $urow = $sth->fetchrow_hashref) {
             push @all_users, $urow;
