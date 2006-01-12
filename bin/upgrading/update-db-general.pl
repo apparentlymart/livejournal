@@ -2724,9 +2724,13 @@ register_alter(sub {
         if (column_type($table, "what") =~ /^char/i) {
             do_alter($table,
                      "ALTER TABLE $table MODIFY COLUMN what VARCHAR(20) NOT NULL");
-            do_sql("UPDATE $table SET what='post' WHERE what='P'");
-            do_sql("UPDATE $table SET what='phonepost' WHERE what='_F'");
-            do_sql("UPDATE $table SET what='phonepost_mp3' WHERE what='_M'");
+
+            next if $table eq 'recentactions';
+
+            # Since actionhistory is updated nightly, is alright to do updates now
+            do_sql("UPDATE actionhistory SET what='post' WHERE what='P'");
+            do_sql("UPDATE actionhistory SET what='phonepost' WHERE what='_F'");
+            do_sql("UPDATE actionhistory SET what='phonepost_mp3' WHERE what='_M'");
         }
     }
 
