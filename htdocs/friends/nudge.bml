@@ -148,7 +148,9 @@ body<=
             };
 
             foreach my $u (sort $sort @mutual) {
-                my $time = LJ::ago_text(time() - $updated->{$u->{userid}});
+                my $secs = time() - $updated->{$u->{userid}};
+                next if $secs < 604800; # Only show if it has been longer than a week
+                my $time = LJ::ago_text($secs);
 
                 $body .= "<li>" . LJ::ljuser($u) . " - posted $time (<i><a href='nudge.bml?user=$u->{user}'>nudge them</a></i>)</li>";
             }
