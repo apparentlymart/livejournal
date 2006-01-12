@@ -2266,6 +2266,14 @@ then be accessible to the new group.
 
 /friends/filter.bml.title=Friends Filter
 
+/friends/graph.bml.error.unknownuser.header=Unknown user
+
+/friends/graph.bml.error.unknownuser.text=No user with that username. Sorry.
+
+/friends/graph.bml.reloadnote=If the image doesn't load, press reload.
+
+/friends/graph.bml.user=User: [[user]] (<a [[aopts]]>user info</a>)
+
 /friends/index.bml.about<<
 Here we have the concept of a "friends list".
 By adding other users to your friends list, you can easily keep

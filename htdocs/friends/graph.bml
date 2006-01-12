@@ -12,12 +12,12 @@ _info?><?_code
 
     my $u = LJ::load_user($FORM{'user'});
     unless ($u) {
-        return "<?h1 Unknown user h1?><?p No user with that username.  Sorry. p?>";
+        return "<?h1 $ML{'.error.unknownuser.header'} h1?><?p $ML{'.error.unknownuser.text'} p?>";
     }
     my $user = $u->{'user'};
 
     my $ret = "";
-    $ret .= "User: <B>$user</B> (<A HREF=\"/userinfo.bml?user=$user\">user info</A>)<BR><I>If image doesn't load, press reload.</I><P>";
+    $ret .= BML::ml('.user', {'user' => "<b>$user</b>", 'aopts' => "href='$LJ::SITEROOT/userinfo.bml?user=$user'"}) . "<br /><i>$ML{'.reloadnote'}</i><br /><br />";
 
     $ret .= "<A HREF=http://www.research.att.com/~north/cgi-bin/webdot.cgi/";
     $ret .= "$LJ::SITEROOT/friends/graph.bml/$user.dot.map>";
