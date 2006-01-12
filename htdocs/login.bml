@@ -322,7 +322,9 @@
             my $u = LJ::load_user($user);
 
             if (! $u) {
-                push @errors, "$ML{'error.username_notfound'}" unless $u;
+                my $euser = LJ::eurl($user);
+                push @errors, BML::ml('.error.notuser', { 'aopts' => "href='$LJ::SITEROOT/create.bml?user=$euser'" })
+                    unless $u;
             } else {
                 push @errors, "$ML{'error.purged.text'}" if $u->{'statusvis'} eq "X";
                 push @errors, "$ML{'error.nocommlogin'}"

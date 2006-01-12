@@ -2527,6 +2527,8 @@ You may wish to go back and try again, selecting fewer interests to add.
 
 /login.bml.error.mustenterusername=You must <a href='/login.bml'>enter a username</a>.
 
+/login.bml.error.notuser=Username not found.  Would you like to <a [[aopts]]>create an account</a> using this username?
+
 /login.bml.expire.btn.neverexpire=Change expiration mode to NEVER
 
 /login.bml.expire.btn.sessiononly=Change expiration mode to SESSION ONLY
@@ -5141,7 +5143,7 @@ error.unknownmode=Unknown mode.
 
 error.usernameinvalid=Username contains invalid characters.
 
-error.usernamelong=Username is too long, 15 character max.   
+error.usernamelong=Username is too long, 15 character max.
 
 error.username_notfound=Username not found.
 

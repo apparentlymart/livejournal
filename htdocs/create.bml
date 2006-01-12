@@ -51,9 +51,10 @@ body<=
  my $mode = $POST{'mode'};
  my $code = $POST{'code'} || $GET{'code'};
 
- my $getextra = '';
- $getextra .= "from=$GET{from}" if $GET{from};
- $getextra = '?'.$getextra if $getextra;
+ my @getargs;
+ push @getargs,"from=$GET{from}" if $GET{from};
+ push @getargs,"user=$GET{user}" if $GET{user};
+ my $getextra = '?' . join('&', @getargs) if @getargs;
 
  if ($LJ::USE_SSL && ! $LJ::IS_SSL && $FORM{'ssl'} ne "no") {
      return BML::redirect("$LJ::SSLROOT/create.bml$getextra");
