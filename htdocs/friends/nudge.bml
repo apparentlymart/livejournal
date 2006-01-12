@@ -29,7 +29,7 @@ body<=
 
         my $ebody;
         $ebody .= "Hey $u->{user},\n";
-        $ebody .= "Your mutual friend $remote->{user} has noticed that you have not recently updated your journal on $LJ::SITENAMESHORT.  Be a friend and go post. (http://$LJ::SITEROOT/update.bml)\n\n";
+        $ebody .= "Your mutual friend $remote->{user} has noticed that you have not recently updated your journal on $LJ::SITENAMESHORT.  Be a friend and go post. ($LJ::SITEROOT/update.bml)\n\n";
         $ebody .= "Sincerely,\n";
         $ebody .= "The $LJ::SITENAMESHORT team";
 
@@ -75,23 +75,34 @@ body<=
 
         } else {
             my $updated = LJ::get_timeupdate_multi(($u->{userid}));
-            my $time = LJ::ago_text(time() - $updated->{$u->{userid}});
 
             $body .= "<?h1 Nudge $u->{user}? h1?>";
-            $body .= "<?p It seems that " . LJ::ljuser($u) . " last updated their journal $time.  If you'd like, we'll send them this short email: p?>";
 
-            $body .= "<div style='margin-left: 40px'>";
-            $body .= "<?p Hey $u->{user},p?>";
-            $body .= "<?p Your mutual friend $remote->{user} has noticed that you have not recently updated your journal on $LJ::SITENAMESHORT.  Be a friend and go post. p?>";
-            $body .= "<?p Sincerely,<br />";
-            $body .= "The $LJ::SITENAMESHORT team p?>";
-            $body .= "</div>";
+            # Don't allow nudging someone who updated in past week
+            if (time() - $updated->{$u->{userid}} >= 604800) {
+                my $time = 'has never updated their journal';
+                if ($updated->{$u->{userid}} > 0) {
+                    $time = ' last updated their journal ' .
+                        LJ::ago_text(time() - $updated->{$u->{userid}});
+                }
 
-            $body .= "<div style='text-align: center'><form method='POST' action='nudge.bml'>";
-            $body .= LJ::form_auth();
-            $body .= LJ::html_hidden('userid', $u->{userid});
-            $body .= LJ::html_submit('nudge', 'Yes, nudge them!');
-            $body .= "</form></div>";
+                $body .= "<?p It seems that " . LJ::ljuser($u) . " $time.  If you'd like, we'll send them this short email: p?>";
+
+                $body .= "<div style='margin-left: 40px'>";
+                $body .= "<?p Hey $u->{user},p?>";
+                $body .= "<?p Your mutual friend $remote->{user} has noticed that you have not recently updated your journal on $LJ::SITENAMESHORT.  Be a friend and go post. p?>";
+                $body .= "<?p Sincerely,<br />";
+                $body .= "The $LJ::SITENAMESHORT team p?>";
+                $body .= "</div>";
+
+                $body .= "<div style='text-align: center'><form method='POST' action='nudge.bml'>";
+                $body .= LJ::form_auth();
+                $body .= LJ::html_hidden('userid', $u->{userid});
+                $body .= LJ::html_submit('nudge', 'Yes, nudge them!');
+                $body .= "</form></div>";
+            } else {
+                $body .= "<?p It seems that " . LJ::ljuser($u) . " has updated their journal within the past week.  While we appreciate that you'd like to hear from them, you cannot nudge them at this time. p?>";
+            }
         }
     }
 
@@ -99,6 +110,7 @@ body<=
     # recently
     {
         $body .= "<?h1 Your Mutual Friends h1?>";
+        $body .= "<?p Feeling you haven't heard from someone recently, but don't know who?  Here are all of your mutual friends who haven't updated in at least a week. p?>";
 
         # Get all of remote's friends
         my $friends = LJ::get_friends($remote);
@@ -147,12 +159,17 @@ body<=
                     $updated->{$a->{userid}} <=> $updated->{$b->{userid}};
             };
 
+            my $now = time();
             foreach my $u (sort $sort @mutual) {
-                my $secs = time() - $updated->{$u->{userid}};
-                next if $secs < 604800; # Only show if it has been longer than a week
-                my $time = LJ::ago_text($secs);
+                my $time = 'never posted';
+                my $updated = $updated->{$u->{userid}};
+                if ($updated > 0) {
+                    my $secs = $now - $updated;
+                    next if $secs < 604800; # Only show if it has been longer than a week
+                    $time = 'posted ' . LJ::ago_text($secs);
+                }
 
-                $body .= "<li>" . LJ::ljuser($u) . " - posted $time (<i><a href='nudge.bml?user=$u->{user}'>nudge them</a></i>)</li>";
+                $body .= "<li>" . LJ::ljuser($u) . " - $time (<i><a href='nudge.bml?user=$u->{user}'>nudge them</a></i>)</li>";
             }
 
             $body .= "</ul>";
