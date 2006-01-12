@@ -122,7 +122,7 @@ use vars qw($body $title $windowtitle %GET %POST);
  # check to see if user is already a friend.
  # TAG:fr:bml_friends_add:check_is_friend
  my $dbr = LJ::get_db_reader();
- my $sth = $dbr->prepare("SELECT userid FROM friends WHERE userid=? AND friendid=?");
+ my $sth = $dbr->prepare("SELECT groupmask FROM friends WHERE userid=? AND friendid=?");
  $sth->execute($remote->{'userid'}, $userid);
  my $fr = $sth->fetchrow_hashref;
  
