@@ -575,6 +575,8 @@ p?>
 
 /community/sentinvites.bml.date=Date Sent
 
+/community/sentinvites.bml.error.notcomm=[[user]] is not a community.
+
 /community/sentinvites.bml.key.date=Date
 
 /community/sentinvites.bml.key.sentby=Sent By

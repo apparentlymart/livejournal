@@ -32,8 +32,16 @@ body<=
         $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'/community/members.bml.error.nocomm'} p?>";
         return $ret;
     }
-    my $cid = $c->{'userid'};
 
+    # make sure it is a comm
+    unless ($c->{'journaltype'} eq 'C') {
+        $ret .= "<?h1 $ML{'Error'} h1?><?p ";
+        $ret .= BML::ml('.error.notcomm', { 'user' => LJ::ljuser($c) });
+        $ret .= " p?>";
+        return $ret;
+    }
+
+    my $cid = $c->{'userid'};
     # is $remote an admin?
     unless (LJ::can_manage_other($remote, $c)) {
         $ret .= "<?h1 $ML{'Error'} h1?><?p ";
