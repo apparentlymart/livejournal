@@ -93,6 +93,16 @@ foreach my $key (keys %LJ::DBINFO) {
 
 die "no database record for role $role\n" unless $db;
 
+if ($db->{_fdsn}) {
+    $db->{_fdsn} =~ /^DBI:mysql:(\w+):host=(.+?)\|(\w+)\|(.+)/
+	or die "Bogus _fdsn format for $dbname: $db->{_fdsn}\n";
+    print "found: $1, $2, $3, $4\n";
+    $db->{dbname} = $1;
+    $db->{host} = $2;
+    $db->{user} = $3;
+    $db->{pass} = $4;
+}
+
 my $database = $db->{dbname} || "livejournal";
 
 print "...connecting to $dbname, $db->{host}, db: $database, user: $db->{user}\n\n";
