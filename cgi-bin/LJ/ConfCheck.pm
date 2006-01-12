@@ -63,6 +63,18 @@ sub get_keys {
         }
     }
 
+    if ($ENV{READ_LJ_SOURCE}) {
+        chdir $ENV{LJHOME} or die;
+        my @lines = `grep -Er '[\$\@\%]LJ::[A-Z_]+\\b' cgi-bin htdocs bin ssldocs`;
+        foreach my $line (@lines) {
+            while ($line =~ s/([\$\@\%])LJ::([A-Z_]+)\b([\{\[]?)//) {
+                my ($sigil, $sym, $deref) = ($1, $2, $3);
+                $sigil = "%" if $sigil eq '$' && $deref eq "{";
+                $sigil = '@' if $sigil eq '$' && $deref eq "[";
+                $seen{"$sigil$sym"} = 1;
+            }
+        }
+    }
 
     return sort keys %seen;
 }
