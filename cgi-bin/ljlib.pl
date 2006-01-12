@@ -1806,15 +1806,14 @@ sub decode_url_string
 # <LJFUNC>
 # name: LJ::get_cluster_description
 # des: Get descriptive text for a cluster id.
-# args: clusterid, bold?
+# args: clusterid
 # des-clusterid: id of cluster to get description of
-# des-bold: 1 == bold cluster name and subcluster id, else don't
 # returns: string representing the cluster description
 # </LJFUNC>
 sub get_cluster_description {
-    my ($cid, $dobold) = @_;
+    my ($cid) = shift;
     $cid += 0;
-    my $text = LJ::run_hook('cluster_description', $cid, $dobold ? 1 : 0);
+    my $text = LJ::run_hook('cluster_description', $cid);
     return $text if $text;
 
     # default behavior just returns clusterid
