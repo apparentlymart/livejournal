@@ -28,19 +28,19 @@ head<=
 
         return false;
     }
-    
+
     function updateFaqLink () {
         if (! document.getElementById) return false;
-    
+
         f = document.supportForm;
         if (! f) return false;
-    
+
         var faqDropdown = f.faqid;
         if (! faqDropdown) return false;
-    
+
         var faqUrl = document.getElementById('faqlink');
-        if (! faqUrl) return false; 
-        
+        if (! faqUrl) return false;
+
         if (faqDropdown.value == 0)
             faqUrl.style.display = 'none';
         else
@@ -53,7 +53,7 @@ head<=
 
     function doSummaryChanged () {
         if (! document.getElementById) return false;
-        
+
         var summaryBox = document.getElementById('changesum');
         if (! summaryBox) return false;
 
@@ -90,7 +90,7 @@ head<=
 
     function doSummaryClick () {
         if (! document.getElementById) return false;
-        
+
         var summaryBox = document.getElementById('changesum');
         if (! summaryBox) return false;
 
@@ -103,7 +103,7 @@ head<=
 
     function doClearMessage () {
         if (! document.getElementById) return false;
-        
+
         var bodyBox = document.getElementById('body');
         if (! bodyBox) return false;
 
@@ -128,7 +128,7 @@ head<=
 <=head
 bodyopts=>onLoad="check_replytype();updateFaqLink();"
 body<=
-        
+
 <?_code
 {
     use strict;
@@ -193,7 +193,7 @@ body<=
         $clusterdown = 1 unless $dbr;
 
         $email = $u->{'email'};
-        LJ::load_user_props($u, "s1_lastn_style", "s1_calendar_style", "s1_day_style", 
+        LJ::load_user_props($u, "s1_lastn_style", "s1_calendar_style", "s1_day_style",
                             "s1_friends_style", "stylesys", "s2_style", )
             unless $clusterdown;
     }
@@ -219,7 +219,7 @@ body<=
     my $owner_mode = LJ::Support::can_close($sp, $remote, $auth) ? 1 : 0;
     my $helper_mode = LJ::Support::can_help($sp, $remote) ? 1 : 0;
     my $is_poster = LJ::Support::is_poster($sp, $remote, $auth) ? 1 : 0;
-    
+
     # fix up the subject if needed
     eval {
         if ($sp->{'subject'} =~ /^=\?(utf-8)?/i) {
@@ -349,7 +349,7 @@ body<=
                              LJ::check_priv($remote, 'siteadmin', '*');
             return " (<a href='$LJ::SITEROOT/register.bml?foruser=$u->{user}'>resend validation email</a>)";
         };
-     
+
         $ret .= "<br />email validated? ";
         if ($u->{'status'} eq "A") { $ret .= "<b>yes</b>"; }
         if ($u->{'status'} eq "N") { $ret .= "<b>no</b>" . $extraval->(); }
@@ -400,7 +400,7 @@ body<=
     my $age = LJ::ago_text(time() - $sp->{'timecreate'});
     $ret .= "<tr><td align='right'><b>Time posted:</b></td><td>$timecreate ($age)</td></tr>\n";
     my $state = $sp->{'state'};
-    if ($state eq "open") { 
+    if ($state eq "open") {
         # check if it's still open or needing help or what
         if ($sp->{'timelasthelp'} > ($sp->{'timetouched'}+5)) {
             # open, answered
@@ -410,7 +410,7 @@ body<=
             $state = "<b><span style='color: #ff0000;'>answered</span></b> (<b>still needs help</b>)";
         } else {
             # default
-            $state = "<b><span style='color: #ff0000;'>open</span></b>"; 
+            $state = "<b><span style='color: #ff0000;'>open</span></b>";
         }
     }
     if ($state eq "closed" && $winner && LJ::Support::can_see_helper($sp, $remote)) {
@@ -424,7 +424,7 @@ body<=
         $ret .= $sp->{'state'} eq "open" ? ", <a href='act.bml?close;$sp->{'spid'};$sp->{'authcode'}'><b>close without credit</b></a>" : "";
         if ($sp->{state} eq 'closed') {
             my $permastatus = LJ::Support::is_locked($sp);
-            $ret .= $sp->{'state'} eq "closed" && !$permastatus ? 
+            $ret .= $sp->{'state'} eq "closed" && !$permastatus ?
                     ", <a href='act.bml?touch;$sp->{'spid'};$sp->{'authcode'}'><b>reopen this request</b></a>" : "";
             if (LJ::Support::can_lock($sp, $remote)) {
                 $ret .= $permastatus ?
@@ -461,7 +461,7 @@ body<=
 
     ### reply loop
     my $dbr = LJ::get_db_reader();
-    $sth = $dbr->prepare("SELECT splid, timelogged, UNIX_TIMESTAMP()-timelogged AS 'age', type, faqid, userid, message " . 
+    $sth = $dbr->prepare("SELECT splid, timelogged, UNIX_TIMESTAMP()-timelogged AS 'age', type, faqid, userid, message " .
                          "FROM supportlog WHERE spid=? ORDER BY timelogged");
     $sth->execute($spid);
     while (my $le = $sth->fetchrow_hashref)
@@ -470,7 +470,7 @@ body<=
                                                    ($remote && $remote->{'userid'} == $le->{'userid'} )));
         next if ($le->{'type'} eq "screened" && ! (LJ::Support::can_read_screened($sp, $remote) ||
                                                    ($remote && $remote->{'userid'} == $le->{'userid'} )));
-        
+
         if ($le->{'type'} eq "screened") {
             push @screened, $le;
         }
@@ -499,7 +499,7 @@ body<=
 
         # print anchor for links to jump here
         $ret .= "<a name='e$le->{splid}'></a>";
-     
+
         # reply header
         my $header = "";
         if ($le->{'userid'} && LJ::Support::can_see_helper($sp, $remote)) {
@@ -554,7 +554,7 @@ body<=
         }
         $ret .= "<p align='left' style='margin-top: 0px; margin-bottom: 0px;'>$message</p>\n";
         $ret .= "</td></tr></table>\n";
-    } 
+    }
     ### end reply loop
 
     # return if support item is closed
@@ -564,14 +564,14 @@ body<=
 
     # underage users can't interact with this
     return $ret if $remote && $remote->underage;
- 
+
     $ret .= "<p style='margin-bottom: 0px;'><b>Post a comment or solution:</b></p>\n";
- 
+
     unless ($remote || $is_poster) {
         $ret .= "You must <a href='$LJ::SITEROOT/login.bml?ret=1'>login</a> to help people out.\n";
         return $ret;
     }
- 
+
     unless (LJ::Support::can_append($sp, $remote, $auth))
     {
         $ret .= "Sorry, you do not have access to answer people's support requests in this category.\n";
@@ -587,12 +587,9 @@ body<=
         $ret .= "<ul>";
         $ret .= "<li>Before answering somebody's question, read the <b><a href='$LJ::SITEROOT/doc/guide/support.bml'>support guide</a></b>.</li>";
         $ret .= "<li>Do <b>NOT</b> answer people if you're not sure of your answer.  Don't answer if your solution is just a guess.  Only answer if you really know what you're talking about ... guessing only makes other people in the support area think you might be right and spread the misinformation further, until it's accepted as truth.</li>";
-        if ($LJ::LJDOTCOM) {
-            $ret .= "<li>Never recommend asking someone else, or somewhere else.  That qualifies as not knowing the answer.  If a support request is open for a day or two, one of the support leaders will find out the answer and reply, and likely post about it in <?ljuser lj_support ljuser?> so all the support people will know the answer in the future.</li>";
-        }
         $ret .= "</ul>Thanks! standout?>\n";
     }
- 
+
     # append_request form
 
     $ret .= "<br /><form method='post' action='append_request.bml' name='supportForm'>\n";
@@ -610,7 +607,7 @@ body<=
     }
     $ret .= "</td></tr>\n";
 
-    if ($ans_type{'answer'} || $ans_type{'screened'}) 
+    if ($ans_type{'answer'} || $ans_type{'screened'})
     {
         my $dbr = LJ::get_db_reader();
         # FAQ reference
@@ -623,18 +620,18 @@ body<=
         while ($_ = $sth->fetchrow_hashref) {
             $faqcat{$_->{'faqcat'}} = $_;
         }
-     
+
         $sth = $dbr->prepare("SELECT faqid, question, sortorder, faqcat, lastmodtime FROM faq WHERE faqcat<>'int-abuse'");
         $sth->execute;
         while ($_ = $sth->fetchrow_hashref) {
             $faqq{$_->{'faqid'}} = $_;
         }
-     
+
         my @faqlist = ('0', "(don't reference FAQ)");
         foreach my $faqcat (sort { $faqcat{$a}->{'catorder'} <=> $faqcat{$b}->{'catorder'} } keys %faqcat)
         {
             push @faqlist, ('0', "[ $faqcat{$faqcat}->{'faqcatname'} ]");
-            foreach my $faqid (sort { $faqq{$a}->{'sortorder'} <=> $faqq{$b}->{'sortorder'} } 
+            foreach my $faqid (sort { $faqq{$a}->{'sortorder'} <=> $faqq{$b}->{'sortorder'} }
                                grep { $faqq{$_}->{'faqcat'} eq $faqcat } keys %faqq)
             {
                 next unless ($faqq{$faqid}->{'question'});
@@ -676,14 +673,14 @@ body<=
         }
         $ret .= "</td></tr>\n";
     }
-    
+
     # helpers can do actions:
     if (LJ::Support::can_perform_actions($sp, $remote) && ! $is_poster)
     {
         $ret .= "<tr><td align='right'></td><td>\n";
 
         $ret .= "<table cellpadding='5'>";
-     
+
         $ret .= "<tr><td>Change Category:<br />";
         $ret .= LJ::html_select({ 'name' => 'changecat',
                                   'onchange' => 'doChangeCategory();' },
@@ -727,7 +724,7 @@ body<=
             $ret .= "<tr><td>&nbsp;</td><td>";
             $ret .= "<?de (Use this to change the request summary.) de?>\n";
             $ret .= "</td></tr>\n";
-	}
+        }
     }
     # Prefill an e-mail validation nag, if needed.
     my $validationnag;
@@ -782,8 +779,8 @@ body<=
     $ret .= "</form>\n";
 
     return $ret;
-    
-} 
+
+}
 _code?>
 <?hr?>
 <?_code

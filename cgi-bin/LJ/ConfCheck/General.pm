@@ -10,6 +10,9 @@ use strict;
 add_singletons(qw(
                   @USER_TABLES $PROTOCOL_VER $MAX_DVERSION
                   $CLEAR_CACHES $BIN $HTDOCS $SSLDOCS
+                  $ACTIVE_CRUMB $IMGPREFIX_BAK $IS_SSL
+                  $IP_BANNED_LOADED $_XFER_REMOTE_IP
+                  %LIB_MOD_TIME %MEMCACHE_ARRAYFMT
                   ));
 
 add_conf('$ADMIN_EMAIL',
@@ -332,7 +335,7 @@ add_conf('$SCHOOLSMAX',
          );
 
 add_conf('$SENDMAIL',
-         type => 'command+args',
+         type => 'program+args',
          des => "System path to sendmail, with arguments.  Default is: '/usr/sbin/sendmail -t -oi'.  This option is ignored if you've defined the higher-precedence option: \@MAIL_TRANSPORTS.",
          );
 
@@ -385,7 +388,7 @@ add_conf('$STATPREFIX',
          );
 
 add_conf('$SPELLER',
-         type => 'command+args',
+         type => 'program+args',
          des => "If set, spell checking is enabled.  Value is the full path plus arguments to an ispell-compatible spell checker.  aspell is recommended, using:  '/usr/bin/aspell pipe --sug-mode=fast --ignore-case'.");
 
 
@@ -442,6 +445,46 @@ add_conf('%ALIAS_TO_SUPPORTCAT',
 add_conf('@SCHEMES',
          des => "An array of hashrefs describing the available site BML schemes (skins).  Each hashref must contain the keys 'scheme' (the BML scheme to use), 'title', and optionally 'thumb', which should be an arrayref of [ partial URL, width, height ].  where partial URL is relative to \$IMGPREFIX.");
 
+add_conf('$BIN_SOX',
+         type => "program",
+         des => "Path to sox.  Needed for audio captcas.");
+
+add_conf('$BIN_FESTIVAL',
+         type => "program",
+         des => "Path to festival.  Needed for audio captchas.");
+
+add_conf('$DYS_LEFT_TOP',
+         type => "html",
+         des => "HTML to show at the top left corner of the dystopia skin.",
+         STUPID_BECAUSE => "weird.  never used.");
+
+add_conf('$LOCKDIR',
+         type => "directory",
+         des => "A directory to use for lock files if you're not using ddlockd for locking.");
+
+add_conf('$MAX_BANS',
+         type => "int",
+         des => "Maximum number of people that users are allowed to ban.  Defaults to 5000.");
+
+add_conf('$MEMCACHE_CB_CONNECT_FAI',
+         type => "subref",
+         des => "Callback when a connection to a memcached instance fails.  Subref gets the IP address that was being connected to, but without the port number.");
+
+add_conf('',
+         type => "",
+         des => "");
+
+add_conf('',
+         type => "",
+         des => "");
+
+add_conf('',
+         type => "",
+         des => "");
+
+
+
+
 my %bools = (
              'USE_ACCT_CODES' => "Make joining the site require an 'invite code'.  Note that this code might've bitrotted, so perhaps it should be kept off.",
              'USER_VHOSTS' => "Let (at least some) users get *.\$USER_DOMAIN URLs.  They'll also need the 'userdomain' cap.",
@@ -474,6 +517,10 @@ my %bools = (
              "OTHER_VHOSTS" => "Let users CNAME their vanity domains to this LiveJournal installation to transparently load their journal.",
              "USE_SSL" => "Links to SSL portions of the site should be visible.",
              "USE_PGP" => "Let users set their PGP/GPG public key, and accept PGP/GPG-signed emails (for authentication)",
+             "OPENID_COMPAT" => "Support pre-1.0 OpenID specs as well as final spec.",
+             "OPENID_STATELESS" => "Speak stateless OpenID.  Slower, but no local state needs to be kept.",
+             "ONLY_USER_VHOSTS" => "Don't allow www.* journals at /users/ and /~ and /community/.  Only allow them on their own user virtual host domains.",
+             "USERPIC_MOGILEFS" => "Store userpics on MogileFS.",
              );
 
 foreach my $k (keys %bools) {

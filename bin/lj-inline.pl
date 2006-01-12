@@ -6,9 +6,6 @@ use lib "$ENV{LJHOME}/cgi-bin";
 
 BEGIN {
     $LJ::HAVE_INLINE = eval 'use Inline Config => DIRECTORY => ($ENV{LJ_INLINE_DIR} || "$ENV{LJHOME}/Inline"); use Inline "C"; 1;';
-
-    # to shutup Apache::SendStat's warning:
-    $LJ::JUST_COMPILING = 1;
 }
 
 print "This script will recompile ljcom's Inline.pm C code, if necessary.  You need a C compiler installed.\n";

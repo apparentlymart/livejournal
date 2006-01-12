@@ -19,7 +19,8 @@ if ($LJ::HAVE_INLINE && $LJ::FREECHILDREN_BCAST) {
     eval {
         Inline->init();
     };
-    if ($@ && ! $LJ::JUST_COMPILING) {
+
+    if ($@ && ! $0 =~ m!bin/lj-inline\.pl$!) {
         print STDERR "Warning: You seem to have Inline.pm, but you haven't run \$LJHOME/bin/lj-inline.pl.  " .
             "Continuing without it, but stats won't broadcast.\n";
         $LJ::HAVE_INLINE = 0;
@@ -40,12 +41,12 @@ sub handler
 
     if ($LJ::TRACK_URL_ACTIVE)
     {
-	my $key = "url_active:$LJ::SERVER_NAME:$$";
-	if ($cleanup) {
-	    LJ::MemCache::delete($key);
-	} else {
-	    LJ::MemCache::set($key, $r->uri . "(" . $r->method . "/" . scalar($r->args) . ")");
-	  }
+        my $key = "url_active:$LJ::SERVER_NAME:$$";
+        if ($cleanup) {
+            LJ::MemCache::delete($key);
+        } else {
+            LJ::MemCache::set($key, $r->uri . "(" . $r->method . "/" . scalar($r->args) . ")");
+          }
     }
 
     my ($active, $free) = count_servers();
@@ -70,14 +71,14 @@ sub handler
             } else {
                 $r->log_error("SendStats: couldn't create socket: $host");
                 next;
-            } 
+            }
         }
 
         my $ipaddr = inet_aton($bcast);
         my $portaddr = sockaddr_in($port, $ipaddr);
         my $message = "bcast_ver=1\nfree=$free\nactive=$active\n";
         my $res = $sock->send($message, 0, $portaddr);
-        $r->log_error("SendStats: couldn't broadcast") 
+        $r->log_error("SendStats: couldn't broadcast")
             unless $res;
     }
 
@@ -91,7 +92,7 @@ __C__
 
 extern unsigned char *ap_scoreboard_image;
 
-/* 
+/*
  * the following structure is for Linux on i32 ONLY! It makes certan
  * choices where apache's scoreboard.h has #ifdef's. See scoreboard.h
  * for real declarations, here we only name a few things we actually need.
@@ -113,7 +114,7 @@ typedef struct {
 
 static int hard_limit = 512; /* array size on debian */
 
-/* 
+/*
  * Scoreboard is laid out like this: array of short_score structs,
  * then array of parent_score structs, then one int, the generation
  * number. Both arrays are of size HARD_SERVERS_LIMIT, 256 by default
@@ -141,9 +142,9 @@ void count_servers() {
     Inline_Stack_Push(newSViv(count_active));
     Inline_Stack_Push(newSViv(count_free));
     Inline_Stack_Done;
-  
+
     return;
 }
 
 
-    
+

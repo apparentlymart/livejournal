@@ -21,7 +21,7 @@ do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
 
 sub END { LJ::end_request(); }
 
-# tables on user databases (ljlib-local should define @LJ::USE_TABLES_LOCAL)
+# tables on user databases (ljlib-local should define @LJ::USER_TABLES_LOCAL)
 # this is here and no longer in bin/upgrading/update-db-{general|local}.pl
 # so other tools (in particular, the inter-cluster user mover) can verify
 # that it knows how to move all types of data before it will proceed.

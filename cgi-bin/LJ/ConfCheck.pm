@@ -58,7 +58,6 @@ sub get_keys {
             push @new, "\%$key";
         }
         foreach my $sym (@new) {
-            next if $singleton{$sym};
             $seen{$sym} = 1;
         }
     }
@@ -69,6 +68,8 @@ sub get_keys {
         foreach my $line (@lines) {
             while ($line =~ s/([\$\@\%])LJ::([A-Z_]+)\b([\{\[]?)//) {
                 my ($sigil, $sym, $deref) = ($1, $2, $3);
+                next if $sym =~ /^(CACHE|REQ_)/; # these are all internal caches/memoizations.
+                next if $sym =~ /^(HAVE|OPTMOD)_/; # these are all module-check booleans
                 $sigil = "%" if $sigil eq '$' && $deref eq "{";
                 $sigil = '@' if $sigil eq '$' && $deref eq "[";
                 $seen{"$sigil$sym"} = 1;
@@ -87,7 +88,7 @@ sub config_errors {
 
     my @keys = get_keys();
     foreach my $k (@keys) {
-        if (!$conf{$k}) {
+        if (!$conf{$k} && !$singleton{$k}) {
             push @errors, "Unknown config option: $k";
         }
     }

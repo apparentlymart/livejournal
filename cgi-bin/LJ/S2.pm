@@ -422,15 +422,13 @@ sub get_public_layers
     my $sysid = shift;  # optional system userid (usually not used)
 
     unless ($opts->{force}) {
-        $LJ::CACHED_PUBLIC_LAYERS ||= LJ::MemCache::get("s2publayers")
-            unless $LJ::LESS_CACHING;
+        $LJ::CACHED_PUBLIC_LAYERS ||= LJ::MemCache::get("s2publayers");
         return $LJ::CACHED_PUBLIC_LAYERS if $LJ::CACHED_PUBLIC_LAYERS;
     }
 
     $sysid ||= LJ::get_userid("system");
     my $layers = get_layers_of_user($sysid, "is_system", [qw(des note author author_name author_email)]);
 
-    return $layers if $LJ::LESS_CACHING;
     $LJ::CACHED_PUBLIC_LAYERS = $layers if $layers;
     LJ::MemCache::set("s2publayers", $layers, 60*10) if $layers;
     return $LJ::CACHED_PUBLIC_LAYERS;

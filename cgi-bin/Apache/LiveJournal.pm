@@ -321,7 +321,7 @@ sub trans
     my %GET = $r->args;
 
     # anti-squatter checking
-    if ($LJ::ANTI_SQUATTER && $r->method eq "GET") {
+    if ($LJ::DEBUG{'anti_squatter'} && $r->method eq "GET") {
         my $ref = $r->header_in("Referer");
         if ($ref && index($ref, $LJ::SITEROOT) != 0) {
             # FIXME: this doesn't anti-squat user domains yet

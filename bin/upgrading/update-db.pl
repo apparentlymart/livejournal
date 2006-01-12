@@ -261,32 +261,32 @@ if ($opt_pop)
                 }
             }
             die "Can't generate ID for '$base'" unless $id;
-            
+
             # remember it so we don't delete it later.
             $known_id{$id} = 1;
-            
+
             $layer{$base} = {
                 'type' => $type,
                 'parent' => $parent,
                 'id' => $id,
             };
-            
+
             my $parid = $layer{$parent}->{'id'};
-            
+
             # see if source changed
             my $md5_source = Digest::MD5::md5_hex($s2source);
             my $md5_exist = $dbh->selectrow_array("SELECT MD5(s2code) FROM s2source WHERE s2lid=?", undef, $id);
-            
+
             # skip compilation if source is unchanged and parent wasn't rebuilt.
             return if $md5_source eq $md5_exist && ! $layer{$parent}->{'built'} && ! $opt_forcebuild;
 
             print "$base($id) is $type";
             if ($parid) { print ", parent = $parent($parid)"; };
             print "\n";
-            
+
             # we're going to go ahead and build it.
             $layer{$base}->{'built'} = 1;
-            
+
             # compile!
             my $lay = {
                 's2lid' => $id,
@@ -303,8 +303,8 @@ if ($opt_pop)
             # an error itself, which we can get.
             eval {
                 die $error unless
-                    LJ::S2::layer_compile($lay, \$error, { 
-                        's2ref' => \$s2source, 
+                    LJ::S2::layer_compile($lay, \$error, {
+                        's2ref' => \$s2source,
                         'redist_uniq' => $base,
                         'compiledref' => \$compiled,
                         'layerinfo' => \$info,
@@ -315,7 +315,7 @@ if ($opt_pop)
                 print "S2 compilation failed: $@\n";
                 exit 1;
             }
-            
+
             if ($info->{'previews'}) {
                 my @pvs = split(/\s*\,\s*/, $info->{'previews'});
                 my @vals;
@@ -332,17 +332,17 @@ if ($opt_pop)
                 $dbh->do("REPLACE INTO s2info (s2lid, infokey, value) VALUES (?,?,?)",
                          undef, $id, '_previews', join(",", @vals)) if @vals;
             }
-            
+
             if ($opt_compiletodisk) {
                 open (CO, ">$LD/$base.pl") or die;
                 print CO $compiled;
                 close CO;
             }
-            
+
             # put raw S2 in database.
             $dbh->do("REPLACE INTO s2source (s2lid, s2code) ".
                      "VALUES ($id, ?)", undef, $s2source);
-            die $dbh->errstr if $dbh->err;            
+            die $dbh->errstr if $dbh->err;
         };
 
         my @layerfiles = ("s2layers.dat");
@@ -362,7 +362,7 @@ if ($opt_pop)
                     push @layerfiles, $base;
                     next;
                 }
-                
+
                 if ($type ne "core" && ! defined $layer{$parent}) {
                     die "'$base' references unknown parent '$parent'\n";
                 }
@@ -370,7 +370,7 @@ if ($opt_pop)
                 # is the referenced $base file really an aggregation of
                 # many smaller layers?  (likely themes, which tend to be small)
                 my $multi = ($type =~ s/\+$//);
-    
+
                 my $s2source;
                 open (L, "$LD/$base.s2") or die "Can't open file: $base.s2\n";
 
@@ -385,10 +385,10 @@ if ($opt_pop)
                             $compile->($curname, $type, $parent, $s2source);
                             $curname = $newname;
                             $s2source = "";
-                        } elsif (/^\#NEWLAYER/) { 
-                            die "Badly formatted \#NEWLAYER line"; 
+                        } elsif (/^\#NEWLAYER/) {
+                            die "Badly formatted \#NEWLAYER line";
                         } else {
-                            $s2source .= $_; 
+                            $s2source .= $_;
                         }
                     }
                     $compile->($curname, $type, $parent, $s2source);
@@ -463,7 +463,7 @@ if ($opt_pop)
         }
         close F;
     }
-    
+
     # base data
     foreach my $file ("base-data.sql", "base-data-local.sql") {
         my $ffile = "$ENV{'LJHOME'}/bin/upgrading/$file";
@@ -497,7 +497,7 @@ if ($opt_pop)
         my %moodtheme;  # name -> [ id, des ]
         $sth = $dbh->prepare("SELECT moodthemeid, name, des FROM moodthemes WHERE is_public='Y'");
         $sth->execute;
-        while (@_ = $sth->fetchrow_array) { $moodtheme{$_[1]} = [ $_[0], $_[2] ]; }        
+        while (@_ = $sth->fetchrow_array) { $moodtheme{$_[1]} = [ $_[0], $_[2] ]; }
 
         my $themeid;  # current themeid (from existing db or just made)
         my %data;     # moodid -> "$url$width$height" (for equality test)
@@ -627,7 +627,8 @@ if ($opt_pop)
 # make sure they don't have cluster0 users (support for that will be going away)
 # Note:  now cluster 0 means expunged (as well as statuvis 'X'), so there's
 # an option to disable the warning if you're running new code and know what's up.
-unless ($LJ::NOWARN{'cluster0'}) { 
+# if they're running modern code (with dversion 6 users), we won't check
+unless ($dbh->selectrow_array("SELECT userid FROM user WHERE dversion >= 6 LIMIT 1")) {
     my $cluster0 = $dbh->selectrow_array("SELECT COUNT(*) FROM user WHERE clusterid=0");
     if ($cluster0) {
         print "\n", "* "x35, "\nWARNING: You have $cluster0 users on cluster 0.\n\n".
@@ -700,13 +701,13 @@ sub create_table
     {
         my @args = @{$pc};
         my $ac = shift @args;
-        if ($ac eq "sql") { 
+        if ($ac eq "sql") {
             print "# post-create SQL\n";
-            do_sql($args[0]); 
+            do_sql($args[0]);
         }
-        elsif ($ac eq "sqltry") { 
+        elsif ($ac eq "sqltry") {
             print "# post-create SQL (necessary if upgrading only)\n";
-            try_sql($args[0]); 
+            try_sql($args[0]);
         }
         elsif ($ac eq "code") {
             print "# post-create code\n";

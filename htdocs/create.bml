@@ -2,26 +2,26 @@
 title=><?_ml .title _ml?>
 head<=
   <style type="text/css">
-  
- 
-        .tablecontent {  
-                border-top: 1px solid #dfdfdf; 
+
+
+        .tablecontent {
+                border-top: 1px solid #dfdfdf;
                 border-bottom: 1px solid #dfdfdf;
                 padding-top: 5px;
                 padding-bottom: 5px;
                 text-align: center;
                 width: 8%;
         }
-        
-        .tablelabel {  
-                border-top: 1px solid #dfdfdf; 
+
+        .tablelabel {
+                border-top: 1px solid #dfdfdf;
                 border-bottom: 1px solid #dfdfdf;
                 padding-top: 5px;
                 padding-bottom: 5px;
                 width: 20%;
                 font-size: .9em;
         }
-        
+
         .tablehead {
                 border-bottom: 1px solid #dfdfdf;
                 padding-top: 5px;
@@ -30,7 +30,7 @@ head<=
                 white-space: nowrap;
                 text-align: center;
         }
-        
+
         .tablebottom {
                 border-top: 1px solid #dfdfdf;
                 padding-top: 5px;
@@ -39,7 +39,7 @@ head<=
  </style>
 <=head
 body<=
-<?_code 
+<?_code
 
  my $crumb = $LJ::IS_SSL ? 'securecreatejournal' : 'createjournal';
  LJ::set_active_crumb($crumb);
@@ -47,7 +47,7 @@ body<=
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
  return "<?badinput?>" unless LJ::text_in(\%POST);
- 
+
  my $mode = $POST{'mode'};
  my $code = $POST{'code'} || $GET{'code'};
 
@@ -62,13 +62,13 @@ body<=
  # with no mode, decide which screen the user sees first, based
  # on whether or not this LJ installation lets in free users
  if ($mode eq "") {
-     $mode = $LJ::USE_ACCT_CODES ? 
+     $mode = $LJ::USE_ACCT_CODES ?
          ($code ? "codesubmit" : "entercode")
-             : "getinfo"; 
+             : "getinfo";
  }
- 
+
  my $remote = LJ::get_remote();
- 
+
  my %errors;
  my $error_msg = sub {
      my $key = shift;
@@ -82,7 +82,7 @@ body<=
  # Flag to indicate they've submitted with 'audio' as the answer to the spambot
  # challenge.
  my $wants_audio = 0;
- 
+
  # Captcha id
  my ($capid, $anum);
 
@@ -103,7 +103,7 @@ body<=
          $mode = "entercode";
      } elsif ($mode eq "codesubmit") {
          $mode = "getinfo";
-     } 
+     }
  }
 
  # MODE: entercode - enter an account code to proceed making an account
@@ -120,14 +120,14 @@ body<=
 
      $v = LJ::ehtml($code);
      $ret .= "<?standout Code: <input type=\"text\" name=\"code\" value=\"$v\" size=\"13\" maxlength=\"12\"> <input type=\"submit\" value=\"$ML{'.btn.proceed'}\">";
-     $ret .= $error_msg->('code', '<br>');     
+     $ret .= $error_msg->('code', '<br>');
      $ret .= " standout?>";
      $ret .= "</form>\n";
 
      open (REM, "$LJ::HOME/htdocs/inc/account-codes");
      while (<REM>) {
          $ret .= $_;
-     }  
+     }
      close REM;
 
      return $ret;
@@ -142,13 +142,13 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
 }
 
  # MODE: submit - try to create an account.  might change mode
- #       if there are errors, we'll populate %errors and 
+ #       if there are errors, we'll populate %errors and
  #       return to "getinfo" mode below
  SUBMIT:
  while ($mode eq "submit")  # using while instead of if so we can 'last' out of it
  {
      return "<b>$ML{'Error'}</b>: $ML{'.error.postrequired'}" unless LJ::did_post();
-     
+
      my $user = LJ::canonical_username($POST{'user'});
      my $email = LJ::trim(lc($POST{'email'}));
 
@@ -165,15 +165,15 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
          if LJ::sysban_check('email', $email);
 
      my $dbh = LJ::get_db_writer();
-     
-     if (length($user) > 15) { 
+
+     if (length($user) > 15) {
          $errors{'username'} = "$ML{'error.usernamelong'}";
      }
-     if ($POST{'user'} && ! $user) { 
+     if ($POST{'user'} && ! $user) {
          $errors{'username'} = "$ML{'error.usernameinvalid'}";
      }
-     unless ($POST{'user'}) { 
-         $errors{'username'} = "$ML{'.error.username.mustenter'}"; 
+     unless ($POST{'user'}) {
+         $errors{'username'} = "$ML{'.error.username.mustenter'}";
      }
      foreach my $re ("^system\$", @LJ::PROTECTED_USERNAMES) {
          next unless ($user =~ /$re/);
@@ -196,10 +196,10 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
          $errors{'username'} = "$ML{'.error.username.iscode'}"
              if $is_valid;
      }
-     
+
      my $u = LJ::load_user($user);
      my $second_submit = 0;
-     
+
      # do not create if this account name is purged
      if ($u && $u->{'statusvis'} eq "X") {
          $errors{'username'} =  BML::ml('.error.username.purged',
@@ -218,21 +218,21 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
                      $second_submit = 1;
                      $in_use = 0;
                  } else {
-                     LJ::handle_bad_login($u);                     
+                     LJ::handle_bad_login($u);
                  }
              }
          }
 
          if ($in_use) {
-             $errors{'username'} = "$ML{'.error.username.inuse'}"; 
+             $errors{'username'} = "$ML{'.error.username.inuse'}";
          }
      }
- 
+
      $POST{'password1'} = LJ::trim($POST{'password1'});
      $POST{'password2'} = LJ::trim($POST{'password2'});
 
-     if ($POST{'password1'} ne $POST{'password2'}) { 
-         $errors{'password'} = "$ML{'.error.password.nomatch'}"; 
+     if ($POST{'password1'} ne $POST{'password2'}) {
+         $errors{'password'} = "$ML{'.error.password.nomatch'}";
      } else {
          my $checkpass = LJ::run_hook("bad_password",
                                       {
@@ -244,7 +244,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
              $errors{'password'} = "Bad password: $checkpass";
          }
      }
-     if (! $POST{'password1'}) { 
+     if (! $POST{'password1'}) {
          $errors{'password'} = "$ML{'.error.password.blank'}";
      } elsif (length $POST{'password1'} > 30) {
          $errors{'password'} = "$ML{'password.max30'}";
@@ -333,7 +333,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
      }
      last SUBMIT if %errors;
 
-     my $clusterid = ($LJ::ALLOW_CLUSTER_SELECT
+     my $clusterid = ($LJ::DEBUG{'allow_cluster_select'}
                       ? $POST{'cluster_id'}
                       : LJ::new_account_cluster()) + 0;
      die "Cluster 0 not supported" unless $clusterid;
@@ -526,19 +526,19 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
      });
      return BML::redirect($redirect) if $redirect;
      return $ret if $stop_output;
-     
+
      $ret = "<?h1 $ML{'.success.head'} h1?><?p ".BML::ml(".success.text1", {'email' => $email, 'username' => $user}) ." p?>";
      my $uri = LJ::journal_base($nu);
      $ret .= "<?p $ML{'.success.text2'} p?>\n";
      $ret .= "<?standout <font size='+1' face='arial'><b><a href='$uri'>$uri/</a></b></font> standout?>\n";
      $ret .= "<?p $ML{'.success.text3'} p?>\n";
-     
+
      $ret .= "<form method='get' action='$LJ::SITEROOT/editinfo.bml?authas=$user'>";
      $ret .= "<p align='center'>" . LJ::html_submit(undef, "$ML{'.success.btn.enterinfo'} &rarr;") . "</p>";
      $ret .= "</form>\n";
-     
+
      return $ret;
-    
+
  }
 
  if ($mode eq "getinfo" || %errors)
@@ -612,7 +612,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
                                      'id' => "optfriend_$friend",
                                  });
              $ret .= "<label for='optfriend_$friend'>" .
-                 LJ::ljuser($friend) . " " . $ML{".initial.friend.$friend"} . 
+                 LJ::ljuser($friend) . " " . $ML{".initial.friend.$friend"} .
                  "</label><br />";
          }
          $ret .= "</div></div></li>";
@@ -780,7 +780,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
          get => \%GET,
          ret => \$ret,
      });
-         
+
      if ($LJ::TOS_CHECK)
      {
          $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.tos.heading'}</div>";
@@ -788,11 +788,11 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
           $ret .= "</div></li>";
      }
 
-     if ($LJ::ALLOW_CLUSTER_SELECT) {
+     if ($LJ::DEBUG{'allow_cluster_select'}) {
          $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.clusterselect.head'}</div>";
          $ret .= "<div class='formitemDesc'>$ML{'.clusterselect.text'}</div>";
          $ret .= LJ::html_select({ 'name' => 'cluster_id' },
-                                 "0", "$BML{'.clusterselect.nocluster'}", 
+                                 "0", "$BML{'.clusterselect.nocluster'}",
                                  map { $_, BML::ml(".clusterselect.clusternum", {'number' => $_}) } @LJ::CLUSTERS);
 
          $ret .= "<div class='formitemNote'>$ML{'.clusterselect.cluster'}</div>";
@@ -816,9 +816,9 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
              $try = $dbcm->selectrow_array('SELECT trynum FROM captcha_session ' .
                                            'WHERE sess=?', undef, $captcha_sess);
          }
-         
+
          $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.captcha.prove'}</div>";
-         
+
          # Visual challenge
          unless ( $wants_audio || $POST{audio_chal} ) {
              $ret .= "<div class='formitemDesc'>$ML{'.captcha.desc'}</div>";
