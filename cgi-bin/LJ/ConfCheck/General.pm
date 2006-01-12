@@ -480,14 +480,327 @@ add_conf('$MEMCACHE_CB_CONNECT_FAIL',
 add_conf('%REPROXY_DISABLE',
          des => "Set of file classes that shouldn't be internally redirected to mogstored nodes.  Values are true, keys are one of 'userpics', 'captchas', or site-local file types like 'phoneposts' for ljcom.  Seee also \%USERPIC_REPROXY_DISABLE");
 
-add_conf('',
-         type => "",
+add_conf('%DEBUG',
+         type => '',
          des => "");
-
-add_conf('',
-         type => "",
+add_conf('@MEMCACHE_SERVERS',
+         type => '',
          des => "");
-
+add_conf('$SQUAT_URL',
+         type => '',
+         des => "");
+add_conf('$FRONTPAGE_JOURNAL',
+         type => '',
+         des => "");
+add_conf('%PERLBAL_ROOT',
+         type => '',
+         des => "");
+add_conf('@DINSERTD_HOSTS',
+         type => '',
+         des => "");
+add_conf('%DB_REPORT_HANDLES',
+         type => '',
+         des => "");
+add_conf('$IMMEDIATE_LOGGING',
+         type => '',
+         des => "");
+add_conf('$FREECHILDREN_BCAST',
+         type => '',
+         des => "");
+add_conf('$SENDSTATS_BCAST',
+         type => '',
+         des => "");
+add_conf('$MAX_FRIENDS_VIEW_AGE',
+         type => '',
+         des => "");
+add_conf('$LDAP_HOST',
+         type => '',
+         des => "");
+add_conf('$LDAP_UID',
+         type => '',
+         des => "");
+add_conf('$LDAP_BASE',
+         type => '',
+         des => "");
+add_conf('$PORTAL_TYPEMAP',
+         type => '',
+         des => "");
+add_conf('%PORTAL_TYPEMAP',
+         type => '',
+         des => "");
+add_conf('$PORTAL_DEBUG_CONTENT',
+         type => '',
+         des => "");
+add_conf('$PORTAL_BOX_PROFILE_START',
+         type => '',
+         des => "");
+add_conf('%PORTAL_PROFILED_BOX',
+         type => '',
+         des => "");
+add_conf('$PORTAL_BOX_PROFILE_END',
+         type => '',
+         des => "");
+add_conf('%COMMON_CODE',
+         type => '',
+         des => "");
+add_conf('$AUTH_EXISTS',
+         type => '',
+         des => "");
+add_conf('%FORCE_EMPTY_FRIENDS',
+         type => '',
+         des => "");
+add_conf('@CLEANUP_HANDLERS',
+         type => '',
+         des => "");
+add_conf('%EXTERNAL_NAMESPACE',
+         type => '',
+         des => "");
+add_conf('%MEMCACHE_PREF_IP',
+         type => '',
+         des => "");
+add_conf('$MEMCACHE_COMPRESS_THRESHOLD',
+         type => '',
+         des => "");
+add_conf('$MEMCACHE_CONNECT_TIMEOUT',
+         type => '',
+         des => "");
+add_conf('%CRUMBS',
+         type => '',
+         des => "");
+add_conf('%READONLY_CLUSTER',
+         type => '',
+         des => "");
+add_conf('%READONLY_CLUSTER_ADVISORY',
+         type => '',
+         des => "");
+add_conf('%LOCKY_CACHE',
+         type => '',
+         des => "");
+add_conf('$WHEN_NEEDED_THRES',
+         type => '',
+         des => "");
+add_conf('%CLUSTER_PAIR_ACTIVE',
+         type => '',
+         des => "");
+add_conf('%DEF_READER_ACTUALLY_SLAVE',
+         type => '',
+         des => "");
+add_conf('%LOCK_OUT',
+         type => '',
+         des => "");
+add_conf('$LANG_CACHE_BYTES',
+         type => '',
+         des => "");
+add_conf('%DISABLE_PROTOCOL',
+         type => '',
+         des => "");
+add_conf('@TESTACCTS',
+         type => '',
+         des => "");
+add_conf('%POST_WITHOUT_AUTH',
+         type => '',
+         des => "");
+add_conf('$ALLOW_PICS_OVER_QUOTA',
+         type => '',
+         des => "");
+add_conf('@PORTAL_COLS',
+         type => '',
+         des => "");
+add_conf('$PORTAL_LOGGED_IN',
+         type => '',
+         des => "");
+add_conf('$PORTAL_LOGGED_OUT',
+         type => '',
+         des => "");
+add_conf('$PORTAL_URI',
+         type => '',
+         des => "");
+add_conf('$SYSBAN_IP_REFRESH',
+         type => '',
+         des => "");
+add_conf('%IP_BANNED',
+         type => '',
+         des => "");
+add_conf('%UNIQ_BANNED',
+         type => '',
+         des => "");
+add_conf('%NEEDED_RES',
+         type => '',
+         des => "");
+add_conf('$TALK_PAGE_SIZE',
+         type => '',
+         des => "");
+add_conf('$TALK_MAX_SUBJECTS',
+         type => '',
+         des => "");
+add_conf('$TALK_THREAD_POINT',
+         type => '',
+         des => "");
+add_conf('$ANTI_TALKSPAM',
+         type => '',
+         des => "");
+add_conf('%FORM_DOMAIN_BANNED',
+         type => '',
+         des => "");
+add_conf('$LOCKER_OBJ',
+         type => '',
+         des => "");
+add_conf('@LOCK_SERVERS',
+         type => '',
+         des => "");
+add_conf('%MOGILEFS_PREF_IP',
+         type => '',
+         des => "");
+add_conf('$SLOPPY_FRIENDS_THRESHOLD',
+         type => '',
+         des => "");
+add_conf('$AUTH_CHECK',
+         type => '',
+         des => "");
+add_conf('$WORK_REPORT_HOST',
+         type => '',
+         des => "");
+add_conf('$FILEEDIT_VIA_DB',
+         type => '',
+         des => "");
+add_conf('$BML_INC_DIR_ADMIN',
+         type => '',
+         des => "");
+add_conf('$BML_INC_DIR',
+         type => '',
+         des => "");
+add_conf('$FIX_USERCOUNTER_ENABLED',
+         type => '',
+         des => "");
+add_conf('%USERPROP_INIT',
+         type => '',
+         des => "");
+add_conf('$FB_SITENAME',
+         type => '',
+         des => "");
+add_conf('$SYND_CAPS',
+         type => '',
+         des => "");
+add_conf('%CLUSTER_DOWN',
+         type => '',
+         des => "");
+add_conf('@TALKSPAM',
+         type => '',
+         des => "");
+add_conf('%HELP_URL',
+         type => '',
+         des => "");
+add_conf('@INITIAL_FRIENDS',
+         type => '',
+         des => "");
+add_conf('%DBCACHE',
+         type => '',
+         des => "");
+add_conf('$LJMAINT_VERBOSE',
+         type => '',
+         des => "");
+add_conf('$MAILSPOOL',
+         type => '',
+         des => "");
+add_conf('$DENY_REQUEST_FROM_EMAIL',
+         type => '',
+         des => "");
+add_conf('%DENY_REQUEST_FROM_EMAIL',
+         type => '',
+         des => "");
+add_conf('@PRIVATE_STATS',
+         type => '',
+         des => "");
+add_conf('$QBUFFERD_PIDFILE',
+         type => '',
+         des => "");
+add_conf('%SUPPORT_DIAGNOSTICS',
+         type => '',
+         des => "");
+add_conf('%CAP',
+         type => '',
+         des => "");
+add_conf('@MAIL_TRANSPORTS',
+         type => '',
+         des => "");
+add_conf('%MOGILEFS_CONFIG',
+         type => '',
+         des => "");
+add_conf('@PROTECTED_USERNAMES',
+         type => '',
+         des => "");
+add_conf('%PORTAL_DEFAULTBOXSTATES',
+         type => '',
+         des => "");
+add_conf('%SUPPORT_ABSTRACTS',
+         type => '',
+         des => "");
+add_conf('%MINIMAL_STYLE',
+         type => '',
+         des => "");
+add_conf('%USERPROP_DEF',
+         type => '',
+         des => "");
+add_conf('@PORTAL_BOXES_HIDDEN',
+         type => '',
+         des => "");
+add_conf('@RBL_LIST',
+         type => '',
+         des => "");
+add_conf('@INITIAL_OPTOUT_FRIENDS',
+         type => '',
+         des => "");
+add_conf('%CAP_DEF',
+         type => '',
+         des => "");
+add_conf('%DISABLED',
+         type => '',
+         des => "");
+add_conf('%HELPURL',
+         type => '',
+         des => "");
+add_conf('@PORTAL_BOXES',
+         type => '',
+         des => "");
+add_conf('@INITIAL_OPTIONAL_FRIENDS',
+         type => '',
+         des => "");
+add_conf('%FILEEDIT_VIA_DB',
+         type => '',
+         des => "");
+add_conf('%REQUIRED_TOS',
+         type => '',
+         des => "");
+add_conf('%SETTER',
+         type => '',
+         des => "");
+add_conf('%SUBDOMAIN_FUNCTION',
+         type => '',
+         des => "");
+add_conf('%REDIRECT_ALLOWED',
+         type => '',
+         des => "");
+add_conf('%HOOKS',
+         type => '',
+         des => "");
+add_conf('%GZIP_OKAY',
+         type => '',
+         des => "");
+add_conf('%HUMAN_CHECK',
+         type => '',
+         des => "");
+add_conf('%DBINFO',
+         type => '',
+         des => "");
+add_conf('%FOTOBILDER_IP',
+         type => '',
+         des => "");
+add_conf('@QBUFFERD_ISOLATE',
+         type => '',
+         des => "");
+add_conf('%BLOBINFO',
+         type => '',
+         des => "");
 
 
 

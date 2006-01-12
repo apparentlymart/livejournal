@@ -222,8 +222,6 @@ sub check_database {
 }
 
 sub check_ljconfig {
-    return unless $LJ::IS_DEV_SERVER;  # FIXME: remove this line when all our config is documented
-
     # if we're a developer running this, make sure we didn't add any
     # new configuration directives without first documenting them:
     $ENV{READ_LJ_SOURCE} = 1 if $LJ::IS_DEV_SERVER;
