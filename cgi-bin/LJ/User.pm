@@ -3862,60 +3862,89 @@ sub bad_password_redirect {
 # Returns HTML to display user search results
 # Args: %args
 # des-args:
-#           userids  => array ref of userids to include in results
+#           users    => hash ref of userid => u object like LJ::load userids
+#                       returns or array ref of user objects
+#           userids  => array ref of userids to include in results, ignored
+#                       if users is defined
 #           timesort => set to 1 to sort by last updated instead
 #           of username
 sub user_search_display {
     my %args = @_;
 
-    my $loaded_users = LJ::load_userids(@{$args{userids}});
+    my $loaded_users;
 
-    # Load when each user last updated
-    my $updated = LJ::get_timeupdate_multi(keys %$loaded_users);
+    unless (defined $args{users}) {
+        $loaded_users = LJ::load_userids(@{$args{userids}});
+    } else {
+        if (ref $args{users} eq 'HASH') { # Assume this is direct from LJ::load_userids
+            $loaded_users = $args{users};
+        } elsif (ref $args{users} eq 'ARRAY') { # They did a grep on it or something
+            foreach (@{$args{users}}) {
+                $loaded_users->{$_->{userid}} = $_;
+            }
+        } else {
+            return undef;
+        }
+    }
+
+    # If we're sorting by last updated, we need to load that
+    # info for all users before the sort.  If sorting by
+    # username we can load it for a subset of users later,
+    # if paginating.
+    my $updated;
+    my @display;
+
+    if ($args{timesort}) {
+        $updated = LJ::get_timeupdate_multi(keys %$loaded_users);
+        @display = sort { $updated->{$b->{userid}} <=> $updated->{$a->{userid}} } values %$loaded_users;
+    } else {
+        @display = sort { $a->{user} cmp $b->{user} } values %$loaded_users;
+        $updated = LJ::get_timeupdate_multi(map { $_->{userid} } @display);
+    }
 
     my $ret;
-    my $sort = sub {
-        return $args{timesort} ? $updated->{$b->{userid}} <=> $updated->{$a->{userid}} :
-            $a->{user} cmp $b->{user};
-    };
-
-    foreach my $u (sort $sort values %$loaded_users) {
+    foreach my $u (@display) {
         $ret .= "<div style='width: 300px; height: 105px; overflow: hidden; float: left; ";
         $ret .= "border-bottom: 1px solid <?altcolor2?>; margin-bottom: 10px; padding-bottom: 5px; margin-right: 10px'>";
         $ret .= "<table style='height: 105px'><tr>";
 
         if (my $picid = $u->{'defaultpicid'}) {
             $ret .= "<td style='width: 100px; text-align: center;'>";
-            my %pic;
-            LJ::load_userpics(\%pic, [ $u, $picid ]);
             $ret .= "<a href='/allpics.bml?user=$u->{user}'>";
-            $ret .= "<img src='$LJ::USERPIC_ROOT/$picid/$u->{userid}' width='$pic{$picid}->{'width'}' height='$pic{$picid}->{'height'}' alt='$u->{user} userpic' style='border: 1px solid #000;' /></a>";
+            $ret .= "<img src='$LJ::USERPIC_ROOT/$picid/$u->{userid}' alt='$u->{user} userpic' style='border: 1px solid #000;' /></a>";
             } else {
                 $ret .= "<td style='width: 100px;'>";
+                $ret .= "<img src='$LJ::IMGPREFIX/userpic_holder.gif' alt='no default userpic' style='border: 1px solid #000;' width='100' height='100' /></a>";
             }
 
-        $ret .= "</td><td style='padding-left: 5px;' valign='middle'><table>";
+        $ret .= "</td><td style='padding-left: 5px;' valign='top'><table>";
 
         $ret .= "<tr><td colspan='2' style='text-align: left;'>";
         $ret .= LJ::ljuser($u);
         $ret .= "</td></tr><tr>";
 
         if ($u->{name}) {
-            $ret .= "<td width='1%'>Name:</td><td><a href='$LJ::SITEROOT/userinfo.bml?user=$u->{user}'>";
+            $ret .= "<td width='1%' style='font-size: smaller' valign='top'>Name:</td><td style='font-size: smaller'><a href='$LJ::SITEROOT/userinfo.bml?user=$u->{user}'>";
             $ret .= LJ::ehtml($u->{name});
             $ret .= "</a>";
             $ret .= "</td></tr><tr>";
         }
 
         if (my $jtitle = $u->prop('journaltitle')) {
-            $ret .= "<td width='1%'>Journal:</td><td><a href='" . $u->journal_base . "'>";
+            $ret .= "<td width='1%' style='font-size: smaller' valign='top'>Journal:</td><td style='font-size: smaller'><a href='" . $u->journal_base . "'>";
             $ret .= LJ::ehtml($jtitle) . "</a>";
             $ret .= "</td></tr>";
         }
 
-        $ret .= "<tr><td colspan='2' style='text-align: left;'>Updated ";
-        $ret .= " $u->{'secondsold'} ";
-        $ret .= LJ::ago_text(time() - $updated->{$u->{'userid'}});
+        $ret .= "<tr><td colspan='2' style='text-align: left; font-size: smaller'>";
+
+        if ($updated->{$u->{'userid'}} > 0) {
+            $ret .= "Updated ";
+            $ret .= LJ::ago_text(time() - $updated->{$u->{'userid'}});
+        } else {
+            $ret .= "Never updated";
+        }
+
         $ret .= "</td></tr>";
 
         $ret .= "</table>";

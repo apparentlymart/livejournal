@@ -412,13 +412,13 @@ body<=
         $sth->execute($intid);
         push @uids, $_ while $_ = $sth->fetchrow_array;
         my $us = LJ::load_userids(@uids);
-        my @ul = map { $_->{userid} } grep { $_->{statusvis} eq "V" && $_->{journaltype} ne "C" } values %$us;
+        my @ul = map { $_ } grep { $_->{statusvis} eq "V" && $_->{journaltype} ne "C" } values %$us;
 
         my $matchcount = BML::ml(@ul == 1 ? ".match" : ".matches", { 'count' => scalar @ul });
         $ret .= "<p><b>$matchcount</b>";
 
         $ret .= LJ::user_search_display(
-                                        userids    => \@ul,
+                                        users      => \@ul,
                                         timeupdate => 1,
                                         );
         return $ret;

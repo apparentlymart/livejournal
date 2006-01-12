@@ -554,7 +554,7 @@ body<=
             $ret .= "<?p <b>$ML{'.school.users'}</b> p?>";
 
             $ret .= LJ::user_search_display(
-                                            userids  => [ map { $_->{'userid'} } @users ],
+                                            users  => \@users,
                                             );
         }
     }
