@@ -13,6 +13,7 @@ add_singletons(qw(
                   $ACTIVE_CRUMB $IMGPREFIX_BAK $IS_SSL
                   $IP_BANNED_LOADED $_XFER_REMOTE_IP
                   %LIB_MOD_TIME %MEMCACHE_ARRAYFMT
+                  $STATPREFIX_BAK $UNIQ_BANNED_LOADED
                   ));
 
 add_conf('$ADMIN_EMAIL',
@@ -340,7 +341,13 @@ add_conf('$SENDMAIL',
          );
 
 add_conf('$SMTP_SERVER',
+         type => "hostip",
          des => "Host/IP to outgoing SMTP server.  Takes precedence over \$SENDMAIL.",
+         );
+
+add_conf('$DMTP_SERVER',
+         type => "hostip:port",
+         des => "Host/IP with port number to outgoing DMTP server.  Takes precedence over \$SMTP_SERVER.  Note: the DMTP protocol and server is a dumb hack.  If you have a good outgoing SMTP server, use that instead.",
          );
 
 add_conf('$SERVER_DOWN_SUBJECT',
@@ -466,13 +473,12 @@ add_conf('$MAX_BANS',
          type => "int",
          des => "Maximum number of people that users are allowed to ban.  Defaults to 5000.");
 
-add_conf('$MEMCACHE_CB_CONNECT_FAI',
+add_conf('$MEMCACHE_CB_CONNECT_FAIL',
          type => "subref",
          des => "Callback when a connection to a memcached instance fails.  Subref gets the IP address that was being connected to, but without the port number.");
 
-add_conf('',
-         type => "",
-         des => "");
+add_conf('%REPROXY_DISABLE',
+         des => "Set of file classes that shouldn't be internally redirected to mogstored nodes.  Values are true, keys are one of 'userpics', 'captchas', or site-local file types like 'phoneposts' for ljcom.  Seee also \%USERPIC_REPROXY_DISABLE");
 
 add_conf('',
          type => "",

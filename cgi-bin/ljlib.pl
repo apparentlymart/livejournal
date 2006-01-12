@@ -1213,29 +1213,6 @@ sub load_codes
     }
 }
 
-
-# <LJFUNC>
-# name: LJ::debug
-# des: When $LJ::DEBUG is set, logs the given message to
-#      the Apache error log.  Or, if $LJ::DEBUG is 2, then
-#      prints to STDOUT.
-# returns: 1 if logging disabled, 0 on failure to open log, 1 otherwise
-# args: message
-# des-message: Message to log.
-# </LJFUNC>
-sub debug
-{
-    return 1 unless ($LJ::DEBUG);
-    if ($LJ::DEBUG == 2) {
-        print $_[0], "\n";
-        return 1;
-    }
-    my $r = Apache->request;
-    return 0 unless $r;
-    $r->log_error($_[0]);
-    return 1;
-}
-
 # <LJFUNC>
 # name: LJ::auth_okay
 # des: Validates a user's password.  The "clear" or "md5" argument

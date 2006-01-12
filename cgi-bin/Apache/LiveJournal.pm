@@ -778,26 +778,17 @@ sub userpic_content
          $r->header_in('X-Proxy-Capabilities') &&
          $r->header_in('X-Proxy-Capabilities') =~ m{\breproxy-file\b}i )
     {
-        my (
-            $root,
-            $fmt,
-            $path,
-           );
-
         # Get the blobroot and load the pic hash
-        $root = $LJ::PERLBAL_ROOT{userpics};
+        my $root = $LJ::PERLBAL_ROOT{userpics};
 
-        # sometimes we don't want to reproxy userpics
-        unless ($LJ::USERPIC_REPROXY_DISABLE{$u->{clusterid}}) {
-            # Now ask the blob lib for the path to send to the reproxy
-            $fmt = ($u->{'dversion'} > 6) ? $MimeTypeMapd6{ $pic->{fmt} } : $MimeTypeMap{ $pic->{contenttype} };
-            $path = LJ::Blob::get_rel_path( $root, $u, "userpic", $fmt, $picid );
+        # Now ask the blob lib for the path to send to the reproxy
+        my $fmt = ($u->{'dversion'} > 6) ? $MimeTypeMapd6{ $pic->{fmt} } : $MimeTypeMap{ $pic->{contenttype} };
+        my $path = LJ::Blob::get_rel_path( $root, $u, "userpic", $fmt, $picid );
 
-            $r->header_out( 'X-REPROXY-FILE', $path );
-            $send_headers->();
+        $r->header_out( 'X-REPROXY-FILE', $path );
+        $send_headers->();
 
-            return OK;
-        }
+        return OK;
     }
 
     # try to get it from disk if in disk-cache mode

@@ -96,7 +96,7 @@ sub send_mail
 
         # this would only fail on denied relay access
         # or somesuch.
-        return store_message $data, $info unless 
+        return store_message $data, $info unless
             $server->to( join ', ', @recips );
 
         $server->data();
@@ -106,7 +106,7 @@ sub send_mail
         $server->quit;
     }
 
-    # DMTP (Danga Mail Transfer Protocol) 
+    # DMTP (Danga Mail Transfer Protocol)
     # (slated for removal if our QMTP stuff is worry-free.)
     if ( $proto eq 'dmtp' ) {
 
@@ -347,7 +347,7 @@ sub store_message (%$$)
 
 sub maildebug ($)
 {
-    return unless $LJ::EMAIL_OUTGOING_DEBUG;
+    return unless $LJ::DEBUG{'email_outgoing'};
     print STDERR "ljmail: " . shift() . "\n";
 }
 

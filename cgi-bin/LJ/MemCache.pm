@@ -44,7 +44,7 @@ sub reload_conf {
     my $stat_callback;
 
     $memc->set_servers(\@LJ::MEMCACHE_SERVERS);
-    $memc->set_debug($LJ::MEMCACHE_DEBUG);
+    $memc->set_debug($LJ::DEBUG{'memcached'});
     $memc->set_pref_ip(\%LJ::MEMCACHE_PREF_IP);
     $memc->set_compress_threshold($LJ::MEMCACHE_COMPRESS_THRESHOLD);
 
