@@ -357,7 +357,7 @@
      }
 
      unless ($LJ::DISABLED{'nudge'} || $remote_isowner) {
-         push @linkele, "<a href='/friends/nudge.bml?user=$u->{'user'}'><img align='middle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_nudge.gif' width='22' height='20' alt='Nudge a freind' title='Nudge a friend' border='0' /></a>";
+         push @linkele, "<a href='/friends/nudge.bml?user=$u->{'user'}'><img align='middle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_nudge.gif' width='22' height='20' alt='Nudge a friend' title='Nudge a friend' border='0' /></a>";
      }
 
      foreach my $row (LJ::run_hooks("userinfo_linkele", $u, $remote)) {
