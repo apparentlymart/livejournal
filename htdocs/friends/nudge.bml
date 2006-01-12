@@ -27,9 +27,18 @@ body<=
         return "<?h1 $ML{'Error'} h1?><?p Can't load specified user. p?>"
             unless $u;
 
+        my $updated = LJ::get_timeupdate_multi(($u->{userid}));
+
         my $ebody;
         $ebody .= "Hey $u->{user},\n";
-        $ebody .= "Your mutual friend $remote->{user} has noticed that you have not recently updated your journal on $LJ::SITENAMESHORT.  Be a friend and go post. ($LJ::SITEROOT/update.bml)\n\n";
+
+        if ($updated->{$u->{userid}} > 0) {
+            my $ago_text = LJ::ago_text(time() - $updated->{$u->{userid}});
+            $ebody .= "Your mutual friend $remote->{user} has noticed that you last updated your journal on $LJ::SITENAMESHORT $ago_text.  Be a friend and go post. ($LJ::SITEROOT/update.bml)\n\n";
+        } else {
+            $ebody .= "Your mutual friend $remote->{user} has noticed that you have never updated your journal on $LJ::SITENAMESHORT!  Be a friend and go post. ($LJ::SITEROOT/update.bml)\n\n";
+        }
+
         $ebody .= "Sincerely,\n";
         $ebody .= "The $LJ::SITENAMESHORT team";
 
@@ -81,16 +90,21 @@ body<=
             # Don't allow nudging someone who updated in past week
             if (time() - $updated->{$u->{userid}} >= 604800) {
                 my $time = 'has never updated their journal';
+                my $ago_text = LJ::ago_text(time() - $updated->{$u->{userid}});
                 if ($updated->{$u->{userid}} > 0) {
-                    $time = ' last updated their journal ' .
-                        LJ::ago_text(time() - $updated->{$u->{userid}});
+                    $time = " last updated their journal $ago_text";
                 }
 
                 $body .= "<?p It seems that " . LJ::ljuser($u) . " $time.  If you'd like, we'll send them this short email: p?>";
 
                 $body .= "<div style='margin-left: 40px'>";
                 $body .= "<?p Hey $u->{user},p?>";
-                $body .= "<?p Your mutual friend $remote->{user} has noticed that you have not recently updated your journal on $LJ::SITENAMESHORT.  Be a friend and go post. p?>";
+
+                if ($updated->{$u->{userid}} > 0) {
+                    $body .= "<?p Your mutual friend $remote->{user} has noticed that you last updated your journal on $LJ::SITENAMESHORT $ago_text!  Be a friend and go post. p?>";
+                } else {
+                    $body .= "<?p Your mutual friend $remote->{user} has noticed that you have never updated your journal on $LJ::SITENAMESHORT!  Be a friend and go post. p?>";
+                }
                 $body .= "<?p Sincerely,<br />";
                 $body .= "The $LJ::SITENAMESHORT team p?>";
                 $body .= "</div>";
