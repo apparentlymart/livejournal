@@ -141,6 +141,7 @@ body<=
         my $loaded = LJ::load_userids(@mutual);
         @mutual = ();
         foreach (values %$loaded) {
+            next if $_->{statusvis} ne 'V';
             push @mutual, $_
                 if $_->{journaltype} eq 'P';
         }
