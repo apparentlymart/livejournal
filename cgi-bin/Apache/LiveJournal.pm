@@ -499,6 +499,23 @@ sub trans
             # if this is a "portal" subdomain then prepend the portal URL
             return redir($r, "$LJ::SITEROOT/portal/");
 
+        } elsif (ref $func eq "ARRAY" && $func->[0] eq "changehost") {
+
+            return redir($r, "http://$func->[1]$uri");
+
+        } elsif ($func eq "journal") {
+
+            unless ($uri =~ m!^/(\w{1,15})(/.*)?$!) {
+                my $redir = LJ::run_hook("journal_subdomain_redirect_url",
+                                         $host, $uri);
+                return redir($r, $redir) if $redir;
+                return 404;
+            }
+            ($user, $uri) = ($1, $2);
+            $r->uri($uri);
+            my $view = $determine_view->($user, "safevhost", $uri);
+            return $view if defined $view;
+
         } elsif ($uri =~ m!^/(?:talkscreen|delcomment)\.bml!) {
             # these URLs need to always work for the javascript comment management code
             # (JavaScript can't do cross-domain XMLHttpRequest calls)
