@@ -164,5 +164,14 @@ register_setter("disable_quickreply", sub {
     return 1;
 });
 
+register_setter("disable_nudge", sub {
+    my ($dba, $u, $remote, $key, $value, $err) = @_;
+    unless ($value =~ /^(0|1)$/) {
+        $$err = "Illegal value. Must be '0' or '1'";
+        return 0;
+    }
+    LJ:set_userprop($u, "opt_no_nudge", $value);
+    return 1;
+});
 
 1;

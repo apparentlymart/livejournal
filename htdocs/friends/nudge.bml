@@ -68,14 +68,18 @@ body<=
 
     # Passed in a specific user to nudge
     if (my $u = LJ::load_user($GET{'user'})) {
+        # Load opt_no_nudge userprop, show disabled message
+        if ($u->prop("opt_no_nudge")) {
+            $body .= "<?errorbar <?h1 Nudging Disabled h1?>";
+            $body .= "<?p While we know you want to hear from " . LJ::ljuser($u);
+            $body .= ", they have disabled nudges from other users. p?> errorbar?>";
         # Make sure they are mutual friends
-        if (!LJ::is_friend($remote, $u) || !LJ::is_friend($u, $remote)) {
+        } elsif (!LJ::is_friend($remote, $u) || !LJ::is_friend($u, $remote)) {
             $body .= "<?errorbar <?h1 Not Mutual Friends h1?>";
             $body .= "<?p While we know you want to hear from " . LJ::ljuser($u);
             $body .= ", it seems that the two of you are not mutual friends.  Currently only";
             $body .= " mutual friends can nudge each other. p?>";
             $body .= "errorbar?>";
-
         } elsif ($u->{journaltype} ne 'P') {
             $body .= "<?errorbar <?h1 Not a Person h1?>";
             $body .= "<?p While we know you want to hear from " . LJ::ljuser($u);
