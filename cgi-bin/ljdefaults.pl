@@ -118,10 +118,10 @@
     # set default userprop limits if site maintainer hasn't
     {
         my %defuser = (
-                       's1_lastn_style'    => 'lastn/Default LiveJournal',
-                       's1_friends_style'  => 'friends/Default Friends View',
-                       's1_calendar_style' => 'calendar/Default Calendar',
-                       's1_day_style'      => 'day/Default Day View',
+                       's1_lastn_style'    => 'lastn/Generator',
+                       's1_friends_style'  => 'friends/Generator',
+                       's1_calendar_style' => 'calendar/Generator',
+                       's1_day_style'      => 'day/Generator',
                        );
         foreach my $k (keys %defuser) {
             next if (defined $LJ::USERPROP_DEF{$k});
