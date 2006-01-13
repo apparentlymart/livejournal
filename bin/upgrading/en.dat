@@ -31,6 +31,50 @@
 
 /accountstatus.bml.title=Account Status
 
+/affiliates.bml.disclaimer1=Six Apart is LiveJournal.com's <a href="http://www.livejournal.com/users/news/82926.html">parent company</a>.
+
+/affiliates.bml.disclaimer2=Applies to purchasers who select <a href="/manage/payments/">automatic payments</a>. You will only earn a commission on the first payment a purchaser makes, and not on subsequent automatic payments or renewals.  LiveJournal and Six Apart reserve the right to refuse payment of commissions for accounts that we suspect to be involved in fraudulent or otherwise unacceptable activity.  Commission levels may change at any time.
+
+/affiliates.bml.head1=How do I sign up?
+
+/affiliates.bml.head2=Helpful Links
+
+/affiliates.bml.link1=Six Apart Affiliate page
+
+/affiliates.bml.link2=Contact the Six Apart Affiliate Team
+
+/affiliates.bml.link3=Commission Junction FAQ
+
+/affiliates.bml.link4=To report suspected abuse of the affiliate program, email <a href="mailto:contact@sixapart.com">contact@sixapart.com</a>.
+
+/affiliates.bml.step1=Visit Commission Junction's website and complete the <a href="https://signup.cj.com/member/brandedPublisherSignUp.do?air_refmerchantid=1574870">Publisher Application</a>. You must be 18 or older to apply.
+
+/affiliates.bml.step2=Once your application is approved, follow the link in your acceptance email, or log in to the Publisher Account Manager at <a href="http://www.cj.com/">Commission Junction's website</a>.
+
+/affiliates.bml.step3=If you're not automatically directed to the right page, search for Six Apart under the "Get Links" tab. Choose from the LiveJournal text or banner links and add the code to your site.
+
+/affiliates.bml.step4=Commission Junction keeps track of any new paid account purchases that are referred through your site, and will issue you a check once your total commissions exceed $25.
+
+/affiliates.bml.table.autopay=with automatic payments
+
+/affiliates.bml.table.col1=Paid Accounts
+
+/affiliates.bml.table.col2=Userpics
+
+/affiliates.bml.table.col3=Storage Space
+
+/affiliates.bml.table.row=[[num]] [[?num|month|months]]
+
+/affiliates.bml.table.title=Commission Structure
+
+/affiliates.bml.text1=The LiveJournal/Six Apart<sup>1</sup> Affiliate Program allows you to earn money for each LiveJournal paid account purchaser you refer to us.  You can earn 20% commission for each paid account you refer.
+
+/affiliates.bml.text2=In order to participate in the Affiliate Program, you will need to sign up for a publisher account with Commission Junction and then add a small bit of code to your website or journal.
+
+/affiliates.bml.text3=Commission Junction is a third party website which will handle all the tracking and payments for the LiveJournal Affiliate Program.  If you have questions or problems with your Commission Junction account, please contact them through their website.
+
+/affiliates.bml.title=About the LiveJournal.com Affiliate Program
+
 /allpics.bml.current=Current Pictures
 
 /allpics.bml.default=<u>Default</u>
