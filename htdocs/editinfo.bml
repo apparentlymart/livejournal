@@ -625,7 +625,7 @@ _code?>
         my @errors = ();
 
         # name
-        unless ($POST{'name'} || defined($POST{'name_absent'})) {
+        unless (LJ::trim($POST{'name'}) || defined($POST{'name_absent'})) {
             push @errors, $ML{'.error.noname'};
         }
 
