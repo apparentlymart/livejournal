@@ -3869,12 +3869,15 @@ sub bad_password_redirect {
 #           userids  => array ref of userids to include in results, ignored
 #                       if users is defined
 #           timesort => set to 1 to sort by last updated instead
-#           of username
+#                       of username
+#           perpage  => Enable pagination and how many users to display on
+#                       each page
+#           curpage  => What page of results to display
+#           navbar   => Scalar reference for paging bar
 sub user_search_display {
     my %args = @_;
 
     my $loaded_users;
-
     unless (defined $args{users}) {
         $loaded_users = LJ::load_userids(@{$args{userids}});
     } else {
@@ -3901,8 +3904,20 @@ sub user_search_display {
         @display = sort { $updated->{$b->{userid}} <=> $updated->{$a->{userid}} } values %$loaded_users;
     } else {
         @display = sort { $a->{user} cmp $b->{user} } values %$loaded_users;
-        $updated = LJ::get_timeupdate_multi(map { $_->{userid} } @display);
     }
+
+    my %items = BML::paging(\@display, $args{curpage}, $args{perpage});
+
+    # Fancy paging bar
+    ${$args{navbar}} = LJ::paging_bar($items{'page'}, $items{'pages'});
+
+    # Now pull out the set of users to display
+    @display = @{$items{'items'}};
+
+    # If we aren't sorting by time updated, load last updated time for the
+    # set of users we are displaying.
+    $updated = LJ::get_timeupdate_multi(map { $_->{userid} } @display)
+        unless $args{timesort};
 
     my $ret;
     foreach my $u (@display) {

@@ -564,9 +564,16 @@ body<=
         if (@users) {
             $ret .= "<?p <b>$ML{'.school.users'}</b> p?>";
 
-            $ret .= LJ::user_search_display(
-                                            users  => \@users,
-                                            );
+            my $navbar;
+            my $results = LJ::user_search_display(
+                                                  users      => \@users,
+                                                  perpage    => 50,
+                                                  curpage    => $GET{'page'} || 1,
+                                                  navbar     => \$navbar,
+                                                  );
+
+            $ret .= "<div style='text-align: center'>$navbar</div><br />";
+            $ret .= $results;
         }
     }
 

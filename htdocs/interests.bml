@@ -417,10 +417,17 @@ body<=
         my $matchcount = BML::ml(@ul == 1 ? ".match" : ".matches", { 'count' => scalar @ul });
         $ret .= "<p><b>$matchcount</b>";
 
-        $ret .= LJ::user_search_display(
-                                        users      => \@ul,
-                                        timeupdate => 1,
-                                        );
+        my $navbar;
+        my $results = LJ::user_search_display(
+                                              users      => \@ul,
+                                              timesort   => 1,
+                                              perpage    => 50,
+                                              curpage    => $GET{'page'} || 1,
+                                              navbar     => \$navbar,
+                                              );
+
+        $ret .= "<div style='text-align: center'>$navbar</div><br />";
+        $ret .= $results;
         return $ret;
     }
 
