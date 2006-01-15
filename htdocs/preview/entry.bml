@@ -111,12 +111,33 @@
         ## dump the log entry, unless we're browsing a thread.
         my %current;
         if ($req{'prop_current_mood'} || $req{'prop_current_moodid'}) {
-            $current{'Mood'} = LJ::current_mood_str($up->{'moodthemeid'},
-                                                    $req{'prop_current_moodid'},
-                                                    $req{'prop_current_mood'});
+            my $themeid = $up->{'moodthemeid'};
+            my $moodid = $req{'prop_current_moodid'};
+            my $mood = $req{'prop_current_mood'};
+
+            my $moodname;
+            my $moodpic;
+
+            # favor custom mood over system mood
+            if (my $val = $mood) {
+                LJ::CleanHTML::clean_subject(\$val);
+                $moodname = $val;
+            }
+
+            if (my $val = $moodid) {
+                $moodname ||= LJ::mood_name($val);
+                my %pic;
+                if (LJ::get_mood_picture($themeid, $val, \%pic)) {
+                    $moodpic = "<img src=\"$pic{'pic'}\" align='absmiddle' width='$pic{'w'}' " .
+                               "height='$pic{'h'}' vspace='1' alt='' /> ";
+                }
+            }
+
+            $current{'Mood'} = "$moodpic$moodname";
         }
         if ($req{'prop_current_music'}) {
-            $current{'Music'} = LJ::current_music_str($req{'prop_current_music'});
+            $current{'Music'} = $req{'prop_current_music'};
+            LJ::CleanHTML::clean_subject(\$current{'Music'});
         }
 
         $ret .= "<div style='margin-left: 30px'>";

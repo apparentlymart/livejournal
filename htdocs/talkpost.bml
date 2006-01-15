@@ -221,12 +221,33 @@ body<=
 
     my %current;
     if ($props->{'current_mood'} || $props->{'current_moodid'}) {
-        $current{'Mood'} = LJ::current_mood_str($up->{'moodthemeid'},
-                                                $props->{'current_moodid'},
-                                                $props->{'current_mood'});
+        my $themeid = $up->{'moodthemeid'};
+        my $moodid = $props->{'current_moodid'};
+        my $mood = $props->{'current_mood'};
+
+        my $moodname;
+        my $moodpic;
+
+        # favor custom mood over system mood
+        if (my $val = $mood) {
+            LJ::CleanHTML::clean_subject(\$val);
+            $moodname = $val;
+        }
+
+        if (my $val = $moodid) {
+            $moodname ||= LJ::mood_name($val);
+            my %pic;
+            if (LJ::get_mood_picture($themeid, $val, \%pic)) {
+                $moodpic = "<img src=\"$pic{'pic'}\" align='absmiddle' width='$pic{'w'}' " .
+                           "height='$pic{'h'}' vspace='1' alt='' /> ";
+            }
+        }
+
+        $current{'Mood'} = "$moodpic$moodname";
     }
     if ($props->{'current_music'}) {
-        $current{'Music'} = LJ::current_music_str($props->{'current_music'});
+        $current{'Music'} = $props->{'current_music'};
+        LJ::CleanHTML::clean_subject(\$current{'Music'});
     }
 
     $ret .= "<div style='margin-left: 30px'>";

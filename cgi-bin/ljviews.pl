@@ -916,38 +916,105 @@ sub parse_vars
 }
 
 sub current_mood_str {
-    my ($themeid, $moodid, $mood) = @_;
+    my ($pic, $moodname) = @_;
 
-    # ideal behavior: if there is a moodid, that defines the picture.
-    # if there is a current_mood, that overrides as the mood name,
-    # otherwise show the mood name associated with current_moodid
+    my $ret = "";
 
-    my $moodname;
-    my $moodpic;
-
-    # favor custom mood over system mood
-    if (my $val = $mood) {
-        LJ::CleanHTML::clean_subject(\$val);
-        $moodname = $val;
+    if ($pic) {
+        $ret .= qq{<img src="$pic->{url}" align="absmiddle" width="$pic->{width}" height="$pic->{height}" vspace="1" alt="" /> };
     }
+    $ret .= $moodname;
 
-    if (my $val = $moodid) {
-        $moodname ||= LJ::mood_name($val);
-        my %pic;
-        if (LJ::get_mood_picture($themeid, $val, \%pic)) {
-            $moodpic = "<img src=\"$pic{'pic'}\" align='absmiddle' width='$pic{'w'}' " .
-                       "height='$pic{'h'}' vspace='1' alt='' /> ";
-        }
-    }
-
-    return "$moodpic$moodname";
+    return $ret;
 }
 
-sub current_music_str {
-    my $val = shift;
+sub prepare_event {
+    my ($item, $vars, $prefix, $eventnum, $s2p) = @_;
 
-    LJ::CleanHTML::clean_subject(\$val);
-    return $val;
+    $s2p ||= {};
+
+    my %date_format = %{LJ::date_s2_to_s1($item->{time})};
+
+    my %event = ();
+    $event{'eventnum'} = $eventnum;
+    $event{'itemid'} = $item->{itemid};
+    $event{'datetime'} = LJ::fill_var_props($vars, "${prefix}_DATE_FORMAT", \%date_format);
+    if ($item->{subject}) {
+        $event{'subject'} = LJ::fill_var_props($vars, "${prefix}_SUBJECT", {
+            "subject" => $item->{subject},
+        });
+    }
+
+    $event{'event'} = $item->{text};
+    $event{'user'} = $item->{journal}{username};
+
+    # Special case for friends view: userpic for friend
+    if ($vars->{"${prefix}_FRIENDPIC"} && $item->{userpic} && $item->{userpic}{url}) {
+        $event{friendpic} = LJ::fill_var_props($vars, "${prefix}_FRIENDPIC", {
+            "width" => $item->{userpic}{width},
+            "height" => $item->{userpic}{height},
+            "src" => $item->{userpic}{url},
+        });
+    }
+
+    # Special case for friends view: per-friend configured colors
+    if ($s2p && $s2p->{friends}) {
+        $event{fgcolor} = $s2p->{friends}{$item->{journal}{username}}{fgcolor}{as_string};
+        $event{bgcolor} = $s2p->{friends}{$item->{journal}{username}}{bgcolor}{as_string};
+    }
+
+    if ($item->{comments}{enabled}) {
+        my $itemargs = "journal=".$item->{journal}{username}."&ditemid=".$item->{itemid};
+
+        $event{'talklinks'} = LJ::fill_var_props($vars, "${prefix}_TALK_LINKS", {
+            'itemid' => $item->{itemid},
+            'itemargs' => $itemargs,
+            'urlpost' => $item->{comments}{post_url},
+            'urlread' => $item->{comments}{read_url},
+            'messagecount' => $item->{comments}{count},
+            'readlink' => $item->{comments}{count} != 0 ? LJ::fill_var_props($vars, "${prefix}_TALK_READLINK", {
+                'urlread' => $item->{comments}{read_url},
+                'messagecount' => $item->{comments}{count} == -1 ? "?" : $item->{comments}{count},
+                'mc-plural-s' => $item->{comments}{count} == 1 ? "" : "s",
+                'mc-plural-es' => $item->{comments}{count} == 1 ? "" : "es",
+                'mc-plural-ies' => $item->{comments}{count} == 1 ? "y" : "ies",
+            }) : "",
+        });
+    }
+
+    LJ::prepare_currents({
+        'entry' => $item,
+        'vars' => $vars,
+        'prefix' => $prefix,
+        'event' => \%event,
+    });
+
+    if ($item->{poster}{_u}{userid} != $item->{journal}{_u}{userid}) {
+        my %altposter = ();
+
+        $altposter{'poster'} = $item->{poster}{username};
+        $altposter{'owner'} = $item->{journal}{username};
+        $altposter{'fgcolor'} = $event{'fgcolor'}; # Only set for friends view
+        $altposter{'bgcolor'} = $event{'bgcolor'}; # Only set for friends view
+
+        if ($item->{userpic} && $item->{userpic}->{url} && $vars->{"${prefix}_ALTPOSTER_PIC"}) {
+            $altposter{'pic'} = LJ::fill_var_props($vars, "${prefix}_ALTPOSTER_PIC", {
+                "src" => $item->{userpic}{url},
+                "width" => $item->{userpic}{width},
+                "height" => $item->{userpic}{height},
+            });
+        }
+        $event{'altposter'} = LJ::fill_var_props($vars, "${prefix}_ALTPOSTER", \%altposter);
+    }
+
+    my $var = "${prefix}_EVENT";
+    if ($item->{security} eq "private" &&
+        $vars->{"${prefix}_EVENT_PRIVATE"}) { $var = "${prefix}_EVENT_PRIVATE"; }
+    if ($item->{security} eq "protected" &&
+        $vars->{"${prefix}_EVENT_PROTECTED"}) { $var = "${prefix}_EVENT_PROTECTED"; }
+
+    return LJ::fill_var_props($vars, $var, \%event);
+    
 }
 
 # <LJFUNC>
@@ -955,8 +1022,8 @@ sub current_music_str {
 # name: LJ::prepare_currents
 # des: do all the current music/mood/weather/whatever stuff.  only used by ljviews.pl.
 # args: dbarg, args
-# des-args: hashref with keys: 'props' (a hashref with itemid keys), 'vars' hashref with
-#           keys being S1 variables.
+# des-args: hashref with keys: 'entry' (an S2 Entry object), 'vars' hashref with
+#           keys being S1 variables and 'prefix' string which is LASTN, DAY, etc.
 # </LJFUNC>
 sub prepare_currents
 {
@@ -964,15 +1031,15 @@ sub prepare_currents
 
     my $datakey = $args->{'datakey'} || $args->{'itemid'}; # new || old
 
+    my $entry = $args->{entry};
+
     my %currents = ();
-    my $val;
-    if ($val = $args->{'props'}->{$datakey}->{'current_music'}) {
-        $currents{'Music'} = LJ::current_music_str($val);
+
+    if (my $val = $entry->{metadata}{music}) {
+        $currents{'Music'} = $val;
     }
 
-    $currents{'Mood'} = LJ::current_mood_str($args->{'user'}->{'moodthemeid'},
-                                             $args->{'props'}->{$datakey}->{'current_moodid'},
-                                             $args->{'props'}->{$datakey}->{'current_mood'});
+    $currents{'Mood'} = LJ::current_mood_str($entry->{mood_icon}, $entry->{metadata}{mood});
     delete $currents{'Mood'} unless $currents{'Mood'};
 
     if (%currents) {
@@ -1000,6 +1067,43 @@ sub prepare_currents
     }
 }
 
+# <LJFUNC>
+# class: s1
+# name: LJ::date_s2_to_s1
+# des: Convert an S2 Date or DateTime object into an S1 date hash
+# args: s2date
+# des-s2date: the S2 date object to convert
+# </LJFUNC>
+sub date_s2_to_s1
+{
+    my ($s2d) = @_;
+    my $dayofweek = S2::Builtin::LJ::Date__day_of_week([], $s2d);
+    my $am = $s2d->{hour} < 12 ? 'am' : 'pm';
+    my $h12h = $s2d->{hour} > 12 ? $s2d->{hour} - 12 : $s2d->{hour};
+    $h12h ||= 12; # Fix up hour 0
+    return {
+        'dayshort' => LJ::Lang::day_short($dayofweek),
+        'daylong' => LJ::Lang::day_long($dayofweek),
+        'monshort' => LJ::Lang::month_short($s2d->{month}),
+        'monlong' => LJ::Lang::month_long($s2d->{month}),
+        'yy' => substr($s2d->{year}, -2),
+        'yyyy' => $s2d->{year},
+        'm' => $s2d->{month},
+        'mm' => sprintf("%02i", $s2d->{month}),
+        'd' => $s2d->{day},
+        'dd' => sprintf("%02i", $s2d->{day}),
+        'dth' => $s2d->{day}.LJ::Lang::day_ord($s2d->{day}),
+        'ap' => substr($am,1),
+        'AP' => substr(uc($am),1),
+        'ampm' => $am,
+        'AMPM' => uc($am),
+        'min' => sprintf("%02i", $s2d->{min}),
+	'12h' => $h12h,
+        '12hh' => sprintf("%02i", $h12h),
+        '24h' => $s2d->{hour},
+        '24hh' => sprintf("%02i", $s2d->{hour}),
+    };
+}
 
 package LJ::S1;
 use strict;
@@ -1012,309 +1116,83 @@ sub create_view_lastn
 {
     my ($ret, $u, $vars, $remote, $opts) = @_;
 
-    my $user = $u->{'user'};
+    # Fake S2 context. Bit of a hack.
+    my $s2ctx = [];
+    $s2ctx->[S2::PROPS] = {
+        "page_recent_items" => $vars->{'LASTN_OPT_ITEMS'}+0,
+    };
+    $opts->{ctx} = $s2ctx;
 
-    foreach ("name", "url", "urlname", "journaltitle") { LJ::text_out(\$u->{$_}); }
-
-    my $get = $opts->{'getargs'};
-
-    if ($opts->{'pathextra'}) {
-        $opts->{'badargs'} = 1;
-        return 1;
-    }
-
-    LJ::load_user_props($remote, "opt_ljcut_disable_lastn");
+    my $s2p = LJ::S2::RecentPage($u, $remote, $opts);
 
     my %lastn_page = ();
-    $lastn_page{'name'} = LJ::ehtml($u->{'name'});
-    $lastn_page{'name-\'s'} = ($u->{'name'} =~ /s$/i) ? "'" : "'s";
-    $lastn_page{'username'} = $user;
+    $lastn_page{'name'} = $s2p->{journal}{name};
+    $lastn_page{'name-\'s'} = ($lastn_page{'name'} =~ /s$/i) ? "'" : "'s";
+    $lastn_page{'username'} = $s2p->{journal}{username};
     $lastn_page{'title'} = LJ::ehtml($u->{'journaltitle'} ||
-                                     $u->{'name'} . $lastn_page{'name-\'s'} . " Journal");
+                                     $lastn_page{'name'} . $lastn_page{'name-\'s'} . " Journal");
     $lastn_page{'numitems'} = $vars->{'LASTN_OPT_ITEMS'} || 20;
 
-    my $journalbase = LJ::journal_base($user, $opts->{'vhost'});
-    $lastn_page{'urlfriends'} = "$journalbase/friends";
-    $lastn_page{'urlcalendar'} = "$journalbase/calendar";
+    $lastn_page{'urlfriends'} = $s2p->{view_url}{friends};
+    $lastn_page{'urlcalendar'} = $s2p->{view_url}{archive};
 
-    if ($u->{'url'} =~ m!^https?://!) {
+    if ($s2p->{journal}{website_url}) {
         $lastn_page{'website'} =
             LJ::fill_var_props($vars, 'LASTN_WEBSITE', {
-                "url" => LJ::ehtml($u->{'url'}),
-                "name" => LJ::ehtml($u->{'urlname'} || "My Website"),
+                "url" => $s2p->{journal}{website_url},
+                "name" => $s2p->{journal}{website_name} || "My Website",
             });
     }
 
     $lastn_page{'events'} = "";
-    $lastn_page{'head'} = "";
+    $lastn_page{'head'} = $s2p->{head_content};
 
-    if (LJ::are_hooks('s2_head_content_extra')) {
-        $lastn_page{'head'} .= LJ::run_hook('s2_head_content_extra', $remote, $opts->{r});
-    }
-
-    # if user has requested, or a skip back link has been followed, don't index or follow
-    if ($u->{'opt_blockrobots'} || $get->{'skip'}) {
-        $lastn_page{'head'} .= LJ::robot_meta_tags()
-    }
-    if ($LJ::UNICODE) {
-        $lastn_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}."\" />\n";
-    }
-
-    # Automatic Discovery of RSS/Atom
-    $lastn_page{'head'} .= qq{<link rel="alternate" type="application/rss+xml" title="RSS" href="$journalbase/data/rss" />\n};
-    $lastn_page{'head'} .= qq{<link rel="alternate" type="application/atom+xml" title="Atom" href="$journalbase/data/atom" />\n};
-    $lastn_page{'head'} .= qq{<link rel="service.feed" type="application/atom+xml" title="AtomAPI-enabled feed" href="$LJ::SITEROOT/interface/atom/feed" />\n};
-    $lastn_page{'head'} .= qq{<link rel="service.post" type="application/atom+xml" title="Create a new post" href="$LJ::SITEROOT/interface/atom/post" />\n};
-    $lastn_page{'head'} .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n}
-        if LJ::OpenID::server_enabled();
-
-    # FOAF autodiscovery
-    my $foafurl = $u->{external_foaf_url} ? LJ::eurl($u->{external_foaf_url}) : "$journalbase/data/foaf";
-    my $digest = Digest::SHA1::sha1_hex('mailto:' . $u->{email});
-    $lastn_page{head} .= qq{<link rel="meta" type="application/rdf+xml" title="FOAF" href="$foafurl" />\n};
-    $lastn_page{head} .= qq{<meta name="foaf:maker" content="foaf:mbox_sha1sum '$digest'" />\n};
-
-    $lastn_page{'head'} .=
-        $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'LASTN_HEAD'};
+    $lastn_page{'head'} .= $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'LASTN_HEAD'};
 
     my $events = \$lastn_page{'events'};
 
-    # to show
-    my $itemshow = $vars->{'LASTN_OPT_ITEMS'} + 0;
-    if ($itemshow < 1) { $itemshow = 20; }
-    if ($itemshow > 50) { $itemshow = 50; }
-
-    my $skip = $get->{'skip'}+0;
-    my $maxskip = $LJ::MAX_SCROLLBACK_LASTN-$itemshow;
-    if ($skip < 0) { $skip = 0; }
-    if ($skip > $maxskip) { $skip = $maxskip; }
-
-    # do they have the viewall priv?
-    my $viewall = 0;
-    my $viewsome = 0;
-    if ($get->{'viewall'} && LJ::check_priv($remote, "canview")) {
-        LJ::statushistory_add($u->{'userid'}, $remote->{'userid'},
-                              "viewall", "lastn: $user, statusvis: $u->{'statusvis'}");
-        $viewall = LJ::check_priv($remote, 'canview', '*');
-        $viewsome = $viewall || LJ::check_priv($remote, 'canview', 'suspended');
-    }
-
-    ## load the itemids
-    my @itemids;
-    my $err;
-    my @items = LJ::get_recent_items({
-        'clusterid' => $u->{'clusterid'},
-        'clustersource' => 'slave',
-        'viewall' => $viewall,
-        'userid' => $u->{'userid'},
-        'remote' => $remote,
-        'itemshow' => $itemshow,
-        'skip' => $skip,
-        'itemids' => \@itemids,
-        'order' => ($u->{'journaltype'} eq "C" || $u->{'journaltype'} eq "Y")  # community or syndicated
-            ? "logtime" : "",
-        'err' => \$err,
-    });
-
-    if ($err) {
-        $opts->{'errcode'} = $err;
-        $$ret = "";
-        return 0;
-    }
-
-    ### load the log properties
-    my %logprops = ();
-    my $logtext;
-    LJ::load_log_props2($u->{'userid'}, \@itemids, \%logprops);
-    $logtext = LJ::get_logtext2($u, @itemids);
-
-    my $lastday = -1;
-    my $lastmonth = -1;
-    my $lastyear = -1;
-    my $eventnum = 0;
-
-    my %posteru = ();  # map posterids to u objects
-    LJ::load_userids_multiple([map { $_->{'posterid'}, \$posteru{$_->{'posterid'}} }
-                               @items], [$u]);
-
-    # pre load things in a batch (like userpics) to minimize db calls
-    my @userpic_load;
-    push @userpic_load, [ $u, $u->{'defaultpicid'} ] if $u->{'defaultpicid'};
-    foreach my $item (@items) {
-        next if $item->{'posterid'} == $u->{'userid'};
-        my $itemid = $item->{'itemid'};
-        my $pu = $posteru{$item->{'posterid'}};
-
-        my $picid = LJ::get_picid_from_keyword($pu, $logprops{$itemid}->{'picture_keyword'});
-        $item->{'_picid'} = $picid;
-        push @userpic_load, [ $pu, $picid ] if ($picid && ! grep { $_ eq $picid } @userpic_load);
-    }
-    my %userpics;
-    LJ::load_userpics(\%userpics, \@userpic_load);
-
-    if (my $picid = $u->{'defaultpicid'}) {
+    if ($s2p->{journal}{default_pic}{url}) {
+        my $pic = $s2p->{journal}{default_pic};
         $lastn_page{'userpic'} =
             LJ::fill_var_props($vars, 'LASTN_USERPIC', {
-                "src" => "$LJ::USERPIC_ROOT/$picid/$u->{'userid'}",
-                "width" => $userpics{$picid}->{'width'},
-                "height" => $userpics{$picid}->{'height'},
+                "src" => $pic->{url},
+                "width" => $pic->{width},
+                "height" => $pic->{height},
             });
     }
 
-    # spit out the S1
-
-  ENTRY:
-    foreach my $item (@items)
-    {
-        my ($posterid, $itemid, $security, $alldatepart) =
-            map { $item->{$_} } qw(posterid itemid security alldatepart);
-
-        my $pu = $posteru{$posterid};
-        next ENTRY if $pu && $pu->{'statusvis'} eq 'S' && !$viewsome;
-
-        my $replycount = $logprops{$itemid}->{'replycount'};
-        my $subject = $logtext->{$itemid}->[0];
-        my $event = $logtext->{$itemid}->[1];
-        if ($get->{'nohtml'}) {
-            # quote all non-LJ tags
-            $subject =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
-            $event   =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
-        }
-
-        if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
-            LJ::item_toutf8($u, \$subject, \$event, $logprops{$itemid});
-        }
-
-        my %lastn_date_format = LJ::alldateparts_to_hash($alldatepart);
-
-        if ($lastday != $lastn_date_format{'d'} ||
-            $lastmonth != $lastn_date_format{'m'} ||
-            $lastyear != $lastn_date_format{'yyyy'})
-        {
-          my %lastn_new_day = ();
-          foreach (qw(dayshort daylong monshort monlong m mm yy yyyy d dd dth))
-          {
-              $lastn_new_day{$_} = $lastn_date_format{$_};
-          }
-          unless ($lastday==-1) {
-              $$events .= LJ::fill_var_props($vars, 'LASTN_END_DAY', {});
-          }
-          $$events .= LJ::fill_var_props($vars, 'LASTN_NEW_DAY', \%lastn_new_day);
-
-          $lastday = $lastn_date_format{'d'};
-          $lastmonth = $lastn_date_format{'m'};
-          $lastyear = $lastn_date_format{'yyyy'};
-        }
-
-        my %lastn_event = ();
-        $eventnum++;
-        $lastn_event{'eventnum'} = $eventnum;
-        $lastn_event{'itemid'} = $itemid;
-        $lastn_event{'datetime'} = LJ::fill_var_props($vars, 'LASTN_DATE_FORMAT', \%lastn_date_format);
-        if ($subject ne "") {
-            LJ::CleanHTML::clean_subject(\$subject);
-            $lastn_event{'subject'} = LJ::fill_var_props($vars, 'LASTN_SUBJECT', {
-                "subject" => $subject,
-            });
-        }
-
-        my $ditemid = $itemid * 256 + $item->{'anum'};
-        my $itemargs = "journal=$user&amp;itemid=$ditemid";
-        $lastn_event{'itemargs'} = $itemargs;
-
-        LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
-                                               'cuturl' => LJ::item_link($u, $itemid, $item->{'anum'}),
-                                               'ljcut_disable' => $remote->{'opt_ljcut_disable_lastn'}, });
-        LJ::expand_embedded($u, $ditemid, $remote, \$event);
-        $lastn_event{'event'} = $event;
-
-        if ($u->{'opt_showtalklinks'} eq "Y" &&
-            ! $logprops{$itemid}->{'opt_nocomments'}
-            )
-        {
-
-            my $nc;
-            $nc = "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
-
-            my $permalink = "$journalbase/$ditemid.html";
-            my $posturl = LJ::Talk::talkargs($permalink, "mode=reply");
-            my $readurl = LJ::Talk::talkargs($permalink, $nc);
-
-            my $dispreadlink = $replycount ||
-                ($logprops{$itemid}->{'hasscreened'} &&
-                 ($remote->{'user'} eq $user
-                  || LJ::can_manage($remote, $u)));
-
-            $lastn_event{'talklinks'} = LJ::fill_var_props($vars, 'LASTN_TALK_LINKS', {
-                'itemid' => $ditemid,
-                'itemargs' => $itemargs,
-                'urlpost' => $posturl,
-                'urlread' => $readurl,
-                'messagecount' => $replycount,
-                'readlink' => $dispreadlink ? LJ::fill_var_props($vars, 'LASTN_TALK_READLINK', {
-                    'urlread' => $readurl,
-                    'messagecount' => $replycount,
-                    'mc-plural-s' => $replycount == 1 ? "" : "s",
-                    'mc-plural-es' => $replycount == 1 ? "" : "es",
-                    'mc-plural-ies' => $replycount == 1 ? "y" : "ies",
-                }) : "",
-            });
-        }
-
-        ## current stuff
-        LJ::prepare_currents({
-            'props' => \%logprops,
-            'itemid' => $itemid,
-            'vars' => $vars,
-            'prefix' => "LASTN",
-            'event' => \%lastn_event,
-            'user' => $u,
-        });
-
-        if ($u->{'userid'} != $posterid)
-        {
-            my %lastn_altposter = ();
-
-            my $poster = $pu->{'user'};
-            $lastn_altposter{'poster'} = $poster;
-            $lastn_altposter{'owner'} = $user;
-
-            if (my $picid = $item->{'_picid'}) {
-                my $pic = $userpics{$picid};
-                $lastn_altposter{'pic'} = LJ::fill_var_props($vars, 'LASTN_ALTPOSTER_PIC', {
-                    "src" => "$LJ::USERPIC_ROOT/$picid/$pic->{'userid'}",
-                    "width" => $pic->{'width'},
-                    "height" => $pic->{'height'},
-                });
+    my $eventnum = 0;
+    my $firstday = 1;
+    foreach my $item (@{$s2p->{entries}}) {
+        if ($item->{new_day}) {
+            my %date_format = %{LJ::date_s2_to_s1($item->{time})};
+            my %new_day = ();
+            foreach (qw(dayshort daylong monshort monlong m mm yy yyyy d dd dth)) {
+                $new_day{$_} = $date_format{$_};
             }
-            $lastn_event{'altposter'} =
-                LJ::fill_var_props($vars, 'LASTN_ALTPOSTER', \%lastn_altposter);
+            unless ($firstday) {
+                $$events .= LJ::fill_var_props($vars, "LASTN_END_DAY", {});
+            }
+            $$events .= LJ::fill_var_props($vars, "LASTN_NEW_DAY", \%new_day);
+
+            $firstday = 0;
         }
 
-        my $var = 'LASTN_EVENT';
-        if ($security eq "private" &&
-            $vars->{'LASTN_EVENT_PRIVATE'}) { $var = 'LASTN_EVENT_PRIVATE'; }
-        if ($security eq "usemask" &&
-            $vars->{'LASTN_EVENT_PROTECTED'}) { $var = 'LASTN_EVENT_PROTECTED'; }
-        $$events .= LJ::fill_var_props($vars, $var, \%lastn_event);
-    } # end huge while loop
+        $$events .= LJ::prepare_event($item, $vars, 'LASTN', $eventnum++);
+    }
 
     $$events .= LJ::fill_var_props($vars, 'LASTN_END_DAY', {});
 
-    my $item_shown = $eventnum;
-    my $item_total = @items;
-    my $item_hidden = $item_total - $item_shown;
-
-    if ($skip) {
+    if ($s2p->{nav}{skip}) {
         $lastn_page{'range'} =
             LJ::fill_var_props($vars, 'LASTN_RANGE_HISTORY', {
-                "numitems" => $item_shown,
-                "skip" => $skip,
+                "numitems" => $s2p->{nav}{count},
+                "skip" => $s2p->{nav}{skip},
             });
     } else {
         $lastn_page{'range'} =
             LJ::fill_var_props($vars, 'LASTN_RANGE_MOSTRECENT', {
-                "numitems" => $item_shown,
+                "numitems" => $s2p->{nav}{count},
             });
     }
 
@@ -1322,43 +1200,26 @@ sub create_view_lastn
     my ($skip_f, $skip_b) = (0, 0);
     my %skiplinks;
 
-    ### if we've skipped down, then we can skip back up
-
-    if ($skip) {
+    if ($s2p->{nav}{forward_url}) {
         $skip_f = 1;
-        my $newskip = $skip - $itemshow;
-        if ($newskip <= 0) { $newskip = ""; }
-        else { $newskip = "?skip=$newskip"; }
 
         $skiplinks{'skipforward'} =
             LJ::fill_var_props($vars, 'LASTN_SKIP_FORWARD', {
-                "numitems" => $itemshow,
-                "url" => "$journalbase/$newskip",
+                "numitems" => $s2p->{nav}{forward_count},
+                "url" => $s2p->{nav}{forward_url},
             });
     }
 
-    ## unless we didn't even load as many as we were expecting on this
-    ## page, then there are more (unless there are exactly the number shown
-    ## on the page, but who cares about that)
+    my $maxskip = $LJ::MAX_SCROLLBACK_LASTN - $vars->{'LASTN_OPT_ITEMS'};
 
-    unless ($item_total != $itemshow) {
+    if ($s2p->{nav}{backward_url}) {
         $skip_b = 1;
 
-        if ($skip==$maxskip) {
-            $skiplinks{'skipbackward'} =
-                LJ::fill_var_props($vars, 'LASTN_SKIP_BACKWARD', {
-                    "numitems" => "Day",
-                    "url" => "$journalbase/" . sprintf("%04d/%02d/%02d/", $lastyear, $lastmonth, $lastday),
-                });
-        } else {
-            my $newskip = $skip + $itemshow;
-            $newskip = "?skip=$newskip";
-            $skiplinks{'skipbackward'} =
-                LJ::fill_var_props($vars, 'LASTN_SKIP_BACKWARD', {
-                    "numitems" => $itemshow,
-                    "url" => "$journalbase/$newskip",
-                });
-        }
+        $skiplinks{'skipbackward'} =
+            LJ::fill_var_props($vars, 'LASTN_SKIP_BACKWARD', {
+                "numitems" => $s2p->{nav}{backward_count},
+                "url" => $s2p->{nav}{backward_url},
+            });
     }
 
     ### if they're both on, show a spacer
@@ -1382,445 +1243,117 @@ sub create_view_friends
 {
     my ($ret, $u, $vars, $remote, $opts) = @_;
     my $sth;
-    my $user = $u->{'user'};
-
-    # Check if we should redirect due to a bad password
-    $opts->{'redir'} = LJ::bad_password_redirect({ 'returl' => 1 });
-    return 1 if $opts->{'redir'};
-
-    # see how often the remote user can reload this page.
-    # "friendsviewupdate" time determines what granularity time
-    # increments by for checking for new updates
-    my $nowtime = time();
-
-    # update delay specified by "friendsviewupdate"
-    my $newinterval = LJ::get_cap_min($remote, "friendsviewupdate") || 1;
-
-    # when are we going to say page was last modified?  back up to the
-    # most recent time in the past where $time % $interval == 0
-    my $lastmod = $nowtime;
-    $lastmod -= $lastmod % $newinterval;
-
-    # see if they have a previously cached copy of this page they
-    # might be able to still use.
-    if ($opts->{'header'}->{'If-Modified-Since'}) {
-        my $theirtime = LJ::http_to_time($opts->{'header'}->{'If-Modified-Since'});
-
-        # send back a 304 Not Modified if they say they've reloaded this
-        # document in the last $newinterval seconds:
-        unless ($theirtime < $lastmod) {
-            $opts->{'handler_return'} = 304;
-            return 1;
-        }
-    }
-    $opts->{'headers'}->{'Last-Modified'} = LJ::time_to_http($lastmod);
 
     $$ret = "";
 
-    my $get = $opts->{'getargs'};
-    my $journalbase = LJ::journal_base($user, $opts->{'vhost'});
+    # Fake S2 context. Bit of a hack.
+    my $s2ctx = [];
+    $s2ctx->[S2::PROPS] = {
+        "page_recent_items" => $vars->{'FRIENDS_OPT_ITEMS'}+0,
+    };
+    $opts->{ctx} = $s2ctx;
 
-    foreach ("name", "url", "urlname", "friendspagetitle") { LJ::text_out(\$u->{$_}); }
+    my $s2p = LJ::S2::FriendsPage($u, $remote, $opts);
+    return $s2p if ref $s2p ne 'HASH';
 
     my %friends_page = ();
-    $friends_page{'name'} = LJ::ehtml($u->{'name'});
-    $friends_page{'name-\'s'} = ($u->{'name'} =~ /s$/i) ? "'" : "'s";
-    $friends_page{'username'} = $user;
-    $friends_page{'title'} = LJ::ehtml($u->{'friendspagetitle'} ||
-                                       $u->{'name'} . $friends_page{'name-\'s'} . " Friends");
+    $friends_page{'name'} = $s2p->{journal}{name};
+    $friends_page{'name-\'s'} = ($friends_page{'name'} =~ /s$/i) ? "'" : "'s";
+    $friends_page{'username'} = $s2p->{journal}{username};
+    $friends_page{'title'} = LJ::ehtml($u->{'journaltitle'} ||
+                                       $friends_page{'name'} . $friends_page{'name-\'s'} . " Journal");
     $friends_page{'numitems'} = $vars->{'FRIENDS_OPT_ITEMS'} || 20;
 
-    $friends_page{'head'} = "";
+    $friends_page{'urllastn'} = $s2p->{view_url}{recent};
+    $friends_page{'urlcalendar'} = $s2p->{view_url}{archive};
 
-    if (LJ::are_hooks('s2_head_content_extra')) {
-        $friends_page{'head'} .= LJ::run_hook('s2_head_content_extra', $remote, $opts->{r});
-    }
-
-    ## never have spiders index friends pages (change too much, and some
-    ## people might not want to be indexed)
-    $friends_page{'head'} .= LJ::robot_meta_tags();
-    if ($LJ::UNICODE) {
-        $friends_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'" />';
-    }
-    $friends_page{'head'} .=
-        $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'FRIENDS_HEAD'};
-
-    if ($u->{'url'} =~ m!^https?://!) {
+    if ($s2p->{journal}{website_url}) {
         $friends_page{'website'} =
             LJ::fill_var_props($vars, 'FRIENDS_WEBSITE', {
-                "url" => LJ::ehtml($u->{'url'}),
-                "name" => LJ::ehtml($u->{'urlname'} || "My Website"),
+                "url" => $s2p->{journal}{website_url},
+                "name" => $s2p->{journal}{website_name} || "My Website",
             });
     }
 
-    $friends_page{'urlcalendar'} = "$journalbase/calendar";
-    $friends_page{'urllastn'} = "$journalbase/";
-
     $friends_page{'events'} = "";
 
-    my $itemshow = $vars->{'FRIENDS_OPT_ITEMS'} + 0;
-    if ($itemshow < 1) { $itemshow = 20; }
-    if ($itemshow > 50) { $itemshow = 50; }
-
-    my $skip = $get->{'skip'}+0;
-    my $maxskip = ($LJ::MAX_SCROLLBACK_FRIENDS || 1000) - $itemshow;
-    if ($skip > $maxskip) { $skip = $maxskip; }
-    if ($skip < 0) { $skip = 0; }
-    my $itemload = $itemshow+$skip;
-
-    my $filter;
-    my $group;
-    my $common_filter = 1;
-
-    if (defined $get->{'filter'} && $remote && $remote->{'user'} eq $user) {
-        $filter = $get->{'filter'};
-        $common_filter = 0;
-    } else {
-        if ($opts->{'pathextra'}) {
-            $group = $opts->{'pathextra'};
-            $group =~ s!^/!!;
-            $group =~ s!/$!!;
-            if ($group) { $group = LJ::durl($group); $common_filter = 0;}
-        }
-        my $grp = LJ::get_friend_group($u, { 'name' => $group || "Default View" });
-        my $bit = $grp ? $grp->{'groupnum'} : 0;
-        my $public = $grp ? $grp->{'is_public'} : 0;
-        if ($bit && ($public || ($remote && $remote->{'user'} eq $user))) {
-            $filter = (1 << $bit);
-        } elsif ($group) {
-            $opts->{'badfriendgroup'} = 1;
-            return 1;
-        }
-    }
-
-    ## load the itemids
-    my %friends;
-    my %friends_row;
-    my %idsbycluster;
-    my @items = LJ::get_friend_items({
-        'u' => $u,
-        'userid' => $u->{'userid'},
-        'remote' => $remote,
-        'itemshow' => $itemshow,
-        'skip' => $skip,
-        'filter' => $filter,
-        'common_filter' => $common_filter,
-        'friends_u' => \%friends,
-        'friends' => \%friends_row,
-        'idsbycluster' => \%idsbycluster,
-        'showtypes' => $get->{'show'},
-        'friendsoffriends' => $opts->{'view'} eq "friendsfriends",
-    });
-
-    while ($_ = each %friends) {
-        # we expect fgcolor/bgcolor to be in here later
-        $friends{$_}->{'fgcolor'} = $friends_row{$_}->{'fgcolor'} || '#000000';
-        $friends{$_}->{'bgcolor'} = $friends_row{$_}->{'bgcolor'} || '#ffffff';
-    }
-
-    unless (%friends)
-    {
+    unless (%{$s2p->{friends}}) {
         $friends_page{'events'} = LJ::fill_var_props($vars, 'FRIENDS_NOFRIENDS', {
-          "name" => LJ::ehtml($u->{'name'}),
-          "name-\'s" => ($u->{'name'} =~ /s$/i) ? "'" : "'s",
-          "username" => $user,
+          "name" => $friends_page{'name'},
+          "name-\'s" => $friends_page{'name-\'s'},
+          "username" => $friends_page{'username'},
         });
 
-        $$ret .= "<base target='_top'>" if ($get->{'mode'} eq "framed");
         $$ret .= LJ::fill_var_props($vars, 'FRIENDS_PAGE', \%friends_page);
         return 1;
     }
 
-    my %aposter;  # alt-posterid -> u object (if not in friends already)
-    LJ::load_userids_multiple([map { $_->{'posterid'}, \$aposter{$_->{'posterid'}} }
-                               grep { $friends{$_->{'ownerid'}} &&
-                                          ! $friends{$_->{'posterid'}} } @items],
-                              [ $u, $remote ]);
-
-    ### load the log properties
-    my %logprops = ();  # key is "$owneridOrZero $[j]itemid"
-    LJ::load_log_props2multi(\%idsbycluster, \%logprops);
-
-    # load the pictures for the user
-    my %userpics;
-    my @picids = map { [$friends{$_}, $friends{$_}->{'defaultpicid'}] } keys %friends;
-    LJ::load_userpics(\%userpics, [ @picids, map { [ $_, $_->{'defaultpicid'} ] } values %aposter ]);
-
-    # load the text of the entries
-    my $logtext = LJ::get_logtext2multi(\%idsbycluster);
-
-    # load 'opt_stylemine' prop for $remote.  don't need to load opt_nctalklinks
-    # because that was already faked in LJ::make_journal previously
-    LJ::load_user_props($remote, "opt_stylemine", "opt_imagelinks", "opt_ljcut_disable_friends");
-
-    # load options for image links
-    my ($maximgwidth, $maximgheight) = (undef, undef);
-    ($maximgwidth, $maximgheight) = ($1, $2)
-        if ($remote && $remote->{'userid'} == $u->{'userid'} &&
-            $remote->{'opt_imagelinks'} =~ m/^(\d+)\|(\d+)$/);
-
     my %friends_events = ();
     my $events = \$friends_events{'events'};
 
-    my $lastday = -1;
+    my $firstday = 1;
     my $eventnum = 0;
 
-  ENTRY:
-    foreach my $item (@items)
-    {
-        my ($friendid, $posterid, $itemid, $security, $alldatepart) =
-            map { $item->{$_} } qw(ownerid posterid itemid security alldatepart);
-
-        my $pu = $friends{$posterid} || $aposter{$posterid};
-        next ENTRY if $pu && $pu->{'statusvis'} eq 'S';
-
-        # counting excludes skipped entries
-        $eventnum++;
-
-        my $clusterid = $item->{'clusterid'}+0;
-
-        my $datakey = "$friendid $itemid";
-
-        my $replycount = $logprops{$datakey}->{'replycount'};
-        my $subject = $logtext->{$datakey}->[0];
-        my $event = $logtext->{$datakey}->[1];
-        if ($get->{'nohtml'}) {
-            # quote all non-LJ tags
-            $subject =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
-            $event   =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
-        }
-
-        if ($LJ::UNICODE && $logprops{$datakey}->{'unknown8bit'}) {
-            LJ::item_toutf8($friends{$friendid}, \$subject, \$event, $logprops{$datakey});
-        }
-
-        my ($friend, $poster);
-        $friend = $poster = $friends{$friendid}->{'user'};
-        $poster = $pu->{'user'};
-
-        my %friends_date_format = LJ::alldateparts_to_hash($alldatepart);
-
-        if ($lastday != $friends_date_format{'d'})
-        {
-            my %friends_new_day = ();
-            foreach (qw(dayshort daylong monshort monlong m mm yy yyyy d dd dth))
-            {
-                $friends_new_day{$_} = $friends_date_format{$_};
+    foreach my $item (@{$s2p->{entries}}) {
+        if ($item->{new_day}) {
+            my %date_format = %{LJ::date_s2_to_s1($item->{time})};
+            my %new_day = ();
+            foreach (qw(dayshort daylong monshort monlong m mm yy yyyy d dd dth)) {
+                $new_day{$_} = $date_format{$_};
             }
-            unless ($lastday==-1) {
-                $$events .= LJ::fill_var_props($vars, 'FRIENDS_END_DAY', {});
+            unless ($firstday) {
+                $$events .= LJ::fill_var_props($vars, "FRIENDS_END_DAY", {});
             }
-            $$events .= LJ::fill_var_props($vars, 'FRIENDS_NEW_DAY', \%friends_new_day);
-            $lastday = $friends_date_format{'d'};
+            $$events .= LJ::fill_var_props($vars, "FRIENDS_NEW_DAY", \%new_day);
+
+            $firstday = 0;
         }
 
-        my %friends_event = ();
-        $friends_event{'itemid'} = $itemid;
-        $friends_event{'datetime'} = LJ::fill_var_props($vars, 'FRIENDS_DATE_FORMAT', \%friends_date_format);
-        if ($subject ne "") {
-            LJ::CleanHTML::clean_subject(\$subject);
-            $friends_event{'subject'} = LJ::fill_var_props($vars, 'FRIENDS_SUBJECT', {
-                "subject" => $subject,
-            });
-        } else {
-            $friends_event{'subject'} = LJ::fill_var_props($vars, 'FRIENDS_NO_SUBJECT', {
-                "friend" => $friend,
-                "name" => $friends{$friendid}->{'name'},
-            });
-        }
-
-        my $ditemid = $itemid * 256 + $item->{'anum'};
-        my $itemargs = "journal=$friend&amp;itemid=$ditemid";
-        $friends_event{'itemargs'} = $itemargs;
-
-        my $stylemine = "";
-        $stylemine .= "style=mine" if $remote && $remote->{'opt_stylemine'} &&
-                                      $remote->{'userid'} != $friendid;
-
-        LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$datakey}->{'opt_preformatted'},
-                                              'cuturl' => LJ::item_link($friends{$friendid}, $itemid, $item->{'anum'}, $stylemine),
-                                              'maximgwidth' => $maximgwidth,
-                                              'maximgheight' => $maximgheight,
-                                              'ljcut_disable' => $remote->{'opt_ljcut_disable_friends'}, });
-        LJ::expand_embedded($friends{$friendid}, $ditemid, $remote, \$event);
-        $friends_event{'event'} = $event;
-
-        # do the picture
-        {
-            my $picid = $friends{$friendid}->{'defaultpicid'};  # this could be the shared journal pic
-            my $picuserid = $friendid;
-            if ($friendid != $posterid && ! $u->{'opt_usesharedpic'}) {
-                if ($pu->{'defaultpicid'}) {
-                    $picid = $pu->{'defaultpicid'};
-                    $picuserid = $posterid;
-                }
-            }
-            if ($logprops{$datakey}->{'picture_keyword'} &&
-                (! $u->{'opt_usesharedpic'} || ($posterid == $friendid)))
-            {
-                my $alt_picid = LJ::get_picid_from_keyword($posterid, $logprops{$datakey}->{'picture_keyword'});
-                if ($alt_picid) {
-                    LJ::load_userpics(\%userpics, [ $pu, $alt_picid ]);
-                    $picid = $alt_picid;
-                    $picuserid = $posterid;
-                }
-            }
-            if ($picid) {
-                $friends_event{'friendpic'} =
-                    LJ::fill_var_props($vars, 'FRIENDS_FRIENDPIC', {
-                        "src" => "$LJ::USERPIC_ROOT/$picid/$picuserid",
-                        "width" => $userpics{$picid}->{'width'},
-                        "height" => $userpics{$picid}->{'height'},
-                    });
-            }
-        }
-
-        if ($friend ne $poster) {
-            $friends_event{'altposter'} =
-                LJ::fill_var_props($vars, 'FRIENDS_ALTPOSTER', {
-                    "poster" => $poster,
-                    "owner" => $friend,
-                    "fgcolor" => $friends{$friendid}->{'fgcolor'} || "#000000",
-                    "bgcolor" => $friends{$friendid}->{'bgcolor'} || "#ffffff",
-                });
-        }
-
-        # friends view specific:
-        $friends_event{'user'} = $friend;
-        $friends_event{'fgcolor'} = $friends{$friendid}->{'fgcolor'} || "#000000";
-        $friends_event{'bgcolor'} = $friends{$friendid}->{'bgcolor'} || "#ffffff";
-
-        if ($friends{$friendid}->{'opt_showtalklinks'} eq "Y" &&
-            ! $logprops{$datakey}->{'opt_nocomments'}
-            )
-        {
-            my $dispreadlink = $replycount ||
-                ($logprops{$datakey}->{'hasscreened'} &&
-                 ($remote->{'user'} eq $friend
-                  || LJ::can_manage($remote, $friendid)));
-
-            my $journalbase = LJ::journal_base($friends{$friendid});
-
-            my $nc = "";
-            $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
-
-            my $permalink = "$journalbase/$ditemid.html";
-            my $readurl = LJ::Talk::talkargs($permalink, $nc, $stylemine);
-            my $posturl = LJ::Talk::talkargs($permalink, "mode=reply", $stylemine);
-
-            $friends_event{'talklinks'} = LJ::fill_var_props($vars, 'FRIENDS_TALK_LINKS', {
-                'itemid' => $ditemid,
-                'itemargs' => $itemargs,
-                'urlpost' => $posturl,
-                'urlread' => $readurl,
-                'messagecount' => $replycount,
-                'readlink' => $dispreadlink ? LJ::fill_var_props($vars, 'FRIENDS_TALK_READLINK', {
-                    'urlread' => $readurl,
-                    'messagecount' => $replycount,
-                    'mc-plural-s' => $replycount == 1 ? "" : "s",
-                    'mc-plural-es' => $replycount == 1 ? "" : "es",
-                    'mc-plural-ies' => $replycount == 1 ? "y" : "ies",
-                }) : "",
-            });
-        }
-
-        ## current stuff
-        LJ::prepare_currents({
-            'props' => \%logprops,
-            'datakey' => $datakey,
-            'vars' => $vars,
-            'prefix' => "FRIENDS",
-            'event' => \%friends_event,
-            'user' => ($u->{'opt_forcemoodtheme'} eq "Y" ? $u :
-                       $friends{$friendid}),
-        });
-
-        my $var = 'FRIENDS_EVENT';
-        if ($security eq "private" &&
-            $vars->{'FRIENDS_EVENT_PRIVATE'}) { $var = 'FRIENDS_EVENT_PRIVATE'; }
-        if ($security eq "usemask" &&
-            $vars->{'FRIENDS_EVENT_PROTECTED'}) { $var = 'FRIENDS_EVENT_PROTECTED'; }
-
-        $$events .= LJ::fill_var_props($vars, $var, \%friends_event);
-    } # end while
+        $$events .= LJ::prepare_event($item, $vars, 'FRIENDS', $eventnum++, $s2p);
+    }
 
     $$events .= LJ::fill_var_props($vars, 'FRIENDS_END_DAY', {});
     $friends_page{'events'} = LJ::fill_var_props($vars, 'FRIENDS_EVENTS', \%friends_events);
 
-    my $item_shown = $eventnum;
-    my $item_total = @items;
-    my $item_hidden = $item_total - $item_shown;
-
-    ### set the range property (what entries are we looking at)
-
-    if ($skip) {
+    if ($s2p->{nav}{skip}) {
         $friends_page{'range'} =
             LJ::fill_var_props($vars, 'FRIENDS_RANGE_HISTORY', {
-                "numitems" => $item_shown,
-                "skip" => $skip,
+                "numitems" => $s2p->{nav}{count},
+                "skip" => $s2p->{nav}{skip},
             });
     } else {
         $friends_page{'range'} =
             LJ::fill_var_props($vars, 'FRIENDS_RANGE_MOSTRECENT', {
-                "numitems" => $item_shown,
+                "numitems" => $s2p->{nav}{count},
             });
     }
 
+    #### make the skip links
     my ($skip_f, $skip_b) = (0, 0);
     my %skiplinks;
-    my $base = "$journalbase/$opts->{'view'}";
-    if ($group) {
-        $base .= "/" . LJ::eurl($group);
-    }
 
-    # $linkfilter is distinct from $filter: if user has a default view,
-    # $filter is now set according to it but we don't want it to show in the links.
-    # $incfilter may be true even if $filter is 0: user may use filter=0 to turn
-    # off the default group
-    my $linkfilter = $get->{'filter'} + 0;
-    my $incfilter = defined $get->{'filter'};
-
-    # if we've skipped down, then we can skip back up
-    if ($skip) {
+    if ($s2p->{nav}{forward_url}) {
         $skip_f = 1;
-        my %linkvars;
-
-        $linkvars{'filter'} = $linkfilter if $incfilter;
-        $linkvars{'show'} = $get->{'show'} if $get->{'show'} =~ /^\w+$/;
-
-        my $newskip = $skip - $itemshow;
-        if ($newskip > 0) { $linkvars{'skip'} = $newskip; }
 
         $skiplinks{'skipforward'} =
             LJ::fill_var_props($vars, 'FRIENDS_SKIP_FORWARD', {
-                "numitems" => $itemshow,
-                "url" => LJ::make_link($base, \%linkvars),
+                "numitems" => $s2p->{nav}{forward_count},
+                "url" => $s2p->{nav}{forward_url},
             });
     }
 
-    ## unless we didn't even load as many as we were expecting on this
-    ## page, then there are more (unless there are exactly the number shown
-    ## on the page, but who cares about that)
-
-    unless ($item_total != $itemshow || $skip == $maxskip) {
+    if ($s2p->{nav}{backward_url}) {
         $skip_b = 1;
-        my %linkvars;
-
-        $linkvars{'filter'} = $linkfilter if $incfilter;
-        $linkvars{'show'} = $get->{'show'} if $get->{'show'} =~ /^\w+$/;
-
-        my $newskip = $skip + $itemshow;
-        $linkvars{'skip'} = $newskip;
 
         $skiplinks{'skipbackward'} =
             LJ::fill_var_props($vars, 'FRIENDS_SKIP_BACKWARD', {
-                "numitems" => $itemshow,
-                "url" => LJ::make_link($base, \%linkvars),
+                "numitems" => $s2p->{nav}{backward_count},
+                "url" => $s2p->{nav}{backward_url},
             });
     }
 
     ### if they're both on, show a spacer
-    if ($skip_f && $skip_b) {
+    if ($skip_b && $skip_f) {
         $skiplinks{'skipspacer'} = $vars->{'FRIENDS_SKIP_SPACER'};
     }
 
@@ -1830,7 +1363,6 @@ sub create_view_friends
             LJ::fill_var_props($vars, 'FRIENDS_SKIP_LINKS', \%skiplinks);
     }
 
-    $$ret .= "<base target='_top' />" if ($get->{'mode'} eq "framed");
     $$ret .= LJ::fill_var_props($vars, 'FRIENDS_PAGE', \%friends_page);
 
     return 1;
@@ -1841,226 +1373,99 @@ sub create_view_calendar
 {
     my ($ret, $u, $vars, $remote, $opts) = @_;
 
+    # Fake S2 context. Bit of a hack.
+    my $s2ctx = [];
+    $s2ctx->[S2::PROPS] = {
+        "page_recent_items" => $vars->{'LASTN_OPT_ITEMS'}+0,
+    };
+    $opts->{ctx} = $s2ctx;
+
+    my $s2p = LJ::S2::YearPage($u, $remote, $opts);
+
     my $user = $u->{'user'};
 
-    foreach ("name", "url", "urlname", "journaltitle") { LJ::text_out(\$u->{$_}); }
-
-    my $get = $opts->{'getargs'};
-
     my %calendar_page = ();
-    $calendar_page{'name'} = LJ::ehtml($u->{'name'});
-    $calendar_page{'name-\'s'} = ($u->{'name'} =~ /s$/i) ? "'" : "'s";
+    $calendar_page{'name'} = $s2p->{journal}{name};
+    $calendar_page{'name-\'s'} = ($calendar_page{'name'} =~ /s$/i) ? "'" : "'s";
     $calendar_page{'username'} = $user;
     $calendar_page{'title'} = LJ::ehtml($u->{'journaltitle'} ||
-                                        $u->{'name'} . $calendar_page{'name-\'s'} . " Journal");
+                                     $calendar_page{'name'} . $calendar_page{'name-\'s'} . " Journal");
 
-    $calendar_page{'head'} = "";
+    $calendar_page{'urlfriends'} = $s2p->{view_url}{friends};
+    $calendar_page{'urllastn'} = $s2p->{view_url}{recent};
 
-    if (LJ::are_hooks('s2_head_content_extra')) {
-        $calendar_page{'head'} .= LJ::run_hook('s2_head_content_extra', $remote, $opts->{r});
-    }
+    $calendar_page{'head'} = $s2p->{head_content};
+    $calendar_page{'head'} .= $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'CALENDAR_HEAD'};
 
-    if ($u->{'opt_blockrobots'}) {
-        $calendar_page{'head'} .= LJ::robot_meta_tags();
+    if ($s2p->{journal}{website_url}) {
+        $calendar_page{'website'} = LJ::fill_var_props($vars, 'CALENDAR_WEBSITE', {
+            "url" => $s2p->{journal}{website_url},
+            "name" => $s2p->{journal}{website_name} || "My Website",
+        });
     }
-    if ($LJ::UNICODE) {
-        $calendar_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'" />';
-    }
-    $calendar_page{'head'} .=
-        $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'CALENDAR_HEAD'};
 
     $calendar_page{'months'} = "";
-
-    if ($u->{'url'} =~ m!^https?://!) {
-        $calendar_page{'website'} =
-            LJ::fill_var_props($vars, 'CALENDAR_WEBSITE', {
-                "url" => LJ::ehtml($u->{'url'}),
-                "name" => LJ::ehtml($u->{'urlname'} || "My Website"),
-            });
-    }
-
-    my $journalbase = LJ::journal_base($user, $opts->{'vhost'});
-
-    $calendar_page{'urlfriends'} = "$journalbase/friends";
-    $calendar_page{'urllastn'} = "$journalbase/";
-
     my $months = \$calendar_page{'months'};
 
-    my $quserid = int($u->{'userid'});
-    my $maxyear = 0;
-
-    my $daycts = LJ::get_daycounts($u, $remote);
-    unless ($daycts) {
-        $opts->{'errcode'} = "nodb";
-        $$ret = "";
-        return 0;
-    }
-
-    my (%count, %dayweek);
-    foreach my $dy (@$daycts) {
-        my ($year, $month, $day, $count) = @$dy;
-
-        # calculate day of week
-        my $time = eval { Time::Local::timegm(0, 0, 0, $day, $month-1, $year) } ||
-            eval { Time::Local::timegm(0, 0, 0, LJ::days_in_month($month, $year), $month-1, $year) } ||
-            0;
-        next unless $time;
-
-        my $dayweek = (gmtime($time))[6] + 1;
-
-        $count{$year}->{$month}->{$day} = $count;
-        $dayweek{$year}->{$month}->{$day} = $dayweek;
-        if ($year > $maxyear) { $maxyear = $year; }
-    }
-
-    my @allyears = sort { $b <=> $a } keys %count;
-    if ($vars->{'CALENDAR_SORT_MODE'} eq "forward") { @allyears = reverse @allyears; }
-
-    my @years = ();
-    my $dispyear = $get->{'year'};  # old form was /users/<user>/calendar?year=1999
-
-    # but the new form is purtier:  */calendar/2001
-    # but the NEWER form is purtier:  */2001
-    unless ($dispyear) {
-        if ($opts->{'pathextra'} =~ m!^/(\d\d\d\d)/?\b!) {
-            $dispyear = $1;
-        }
-    }
-
-    # else... default to the year they last posted.
-    $dispyear ||= $maxyear;
-
-    # we used to show multiple years.  now we only show one at a time:  (hence the @years confusion)
-    if ($dispyear) { push @years, $dispyear; }
-
-    if (scalar(@allyears) > 1) {
+    if (scalar(@{$s2p->{years}}) > 1) {
         my $yearlinks = "";
-        foreach my $year (@allyears) {
-            my $yy = sprintf("%02d", $year % 100);
-            my $url = "$journalbase/$year/";
-            if ($year != $dispyear) {
+        foreach my $year ($vars->{CALENDAR_SORT_MODE} eq 'reverse' ? reverse @{$s2p->{years}} : @{$s2p->{years}}) {
+            my $yy = sprintf("%02d", $year->{year} % 100);
+            my $url = $year->{url};
+            unless ($year->{displayed}) {
                 $yearlinks .= LJ::fill_var_props($vars, 'CALENDAR_YEAR_LINK', {
-                    "url" => $url, "yyyy" => $year, "yy" => $yy });
+                    "url" => $url, "yyyy" => $year->{year}, "yy" => $yy });
             } else {
                 $yearlinks .= LJ::fill_var_props($vars, 'CALENDAR_YEAR_DISPLAYED', {
-                    "yyyy" => $year, "yy" => $yy });
+                    "yyyy" => $year->{year}, "yy" => $yy });
             }
         }
-        $calendar_page{'yearlinks'} =
-            LJ::fill_var_props($vars, 'CALENDAR_YEAR_LINKS', { "years" => $yearlinks });
+        $calendar_page{'yearlinks'} = LJ::fill_var_props($vars, 'CALENDAR_YEAR_LINKS', { "years" => $yearlinks });
     }
 
-    foreach my $year (@years)
-    {
-        $$months .= LJ::fill_var_props($vars, 'CALENDAR_NEW_YEAR', {
-          'yyyy' => $year,
-          'yy' => substr($year, 2, 2),
-        });
+    $$months .= LJ::fill_var_props($vars, 'CALENDAR_NEW_YEAR', {
+        'yyyy' => $s2p->{year},
+        'yy' => substr($s2p->{year}, 2, 2),
+    });
 
-        my @months = sort { $b <=> $a } keys %{$count{$year}};
-        if ($vars->{'CALENDAR_SORT_MODE'} eq "forward") { @months = reverse @months; }
-        foreach my $month (@months)
-        {
-          my $daysinmonth = LJ::days_in_month($month, $year);
+    foreach my $month ($vars->{CALENDAR_SORT_MODE} eq 'reverse' ? reverse @{$s2p->{months}} : @{$s2p->{months}}) {
+	next unless $month->{has_entries};
 
-          # this picks a random day there were journal entries (thus, we know
-          # the %dayweek from above)  from that we go backwards and forwards
-          # to find the rest of the days of week
-          my $firstday = (%{$count{$year}->{$month}})[0];
+        my %calendar_month = ();
+        $calendar_month{'monlong'} = LJ::Lang::month_long($month->{month});
+        $calendar_month{'monshort'} = LJ::Lang::month_short($month->{month});
+        $calendar_month{'yyyy'} = $month->{year};
+        $calendar_month{'yy'} = substr($calendar_month{'yyyy'}, 2, 2);
+        $calendar_month{'weeks'} = "";
+        $calendar_month{'urlmonthview'} = $month->{url};
+        my $weeks = \$calendar_month{'weeks'};
 
-          # go backwards from first day
-          my $dayweek = $dayweek{$year}->{$month}->{$firstday};
-          for (my $i=$firstday-1; $i>0; $i--)
-          {
-              if (--$dayweek < 1) { $dayweek = 7; }
-              $dayweek{$year}->{$month}->{$i} = $dayweek;
-          }
-          # go forwards from first day
-          $dayweek = $dayweek{$year}->{$month}->{$firstday};
-          for (my $i=$firstday+1; $i<=$daysinmonth; $i++)
-          {
-              if (++$dayweek > 7) { $dayweek = 1; }
-              $dayweek{$year}->{$month}->{$i} = $dayweek;
-          }
+	foreach my $week (@{$month->{weeks}}) {
+            my %calendar_week = ();
 
-          my %calendar_month = ();
-          $calendar_month{'monlong'} = LJ::Lang::month_long($month);
-          $calendar_month{'monshort'} = LJ::Lang::month_short($month);
-          $calendar_month{'yyyy'} = $year;
-          $calendar_month{'yy'} = substr($year, 2, 2);
-          $calendar_month{'weeks'} = "";
-          $calendar_month{'urlmonthview'} = sprintf("$journalbase/%04d/%02d/", $year, $month);
-          my $weeks = \$calendar_month{'weeks'};
+            $calendar_week{emptydays_beg} = LJ::fill_var_props($vars, 'CALENDAR_EMPTY_DAYS', { "numempty" => $week->{pre_empty} }) if $week->{pre_empty};
+            $calendar_week{emptydays_end} = LJ::fill_var_props($vars, 'CALENDAR_EMPTY_DAYS', { "numempty" => $week->{post_empty} }) if $week->{post_empty};
+            $calendar_week{days} = "";
+            my $days = \$calendar_week{days};
 
-          my %calendar_week = ();
-          $calendar_week{'emptydays_beg'} = "";
-          $calendar_week{'emptydays_end'} = "";
-          $calendar_week{'days'} = "";
+            foreach my $day (@{$week->{days}}) {
+                my %calendar_day = ();
 
-          # start the first row and check for its empty spaces
-          my $rowopen = 1;
-          if ($dayweek{$year}->{$month}->{1} != 1)
-          {
-              my $spaces = $dayweek{$year}->{$month}->{1} - 1;
-              $calendar_week{'emptydays_beg'} =
-                  LJ::fill_var_props($vars, 'CALENDAR_EMPTY_DAYS',
-                                  { 'numempty' => $spaces });
-          }
+                $calendar_day{d} = $day->{date}{day};
+                $calendar_day{eventcount} = $day->{num_entries};
+                $calendar_day{dayevent} = LJ::fill_var_props($vars, 'CALENDAR_DAY_EVENT', {
+                    eventcount => $day->{num_entries},
+                    dayurl => $day->{url},
+                }) if $day->{num_entries};
+                $calendar_day{daynoevent} = LJ::fill_var_props($vars, 'CALENDAR_DAY_NOEVENT', {}) unless $day->{num_entries};
 
-          # make the days!
-          my $days = \$calendar_week{'days'};
+                $$days .= LJ::fill_var_props($vars, 'CALENDAR_DAY', \%calendar_day);
+            }
 
-          for (my $i=1; $i<=$daysinmonth; $i++)
-          {
-              $count{$year}->{$month}->{$i} += 0;
-              if (! $rowopen) { $rowopen = 1; }
-
-              my %calendar_day = ();
-              $calendar_day{'d'} = $i;
-              $calendar_day{'eventcount'} = $count{$year}->{$month}->{$i};
-              if ($count{$year}->{$month}->{$i})
-              {
-                $calendar_day{'dayevent'} = LJ::fill_var_props($vars, 'CALENDAR_DAY_EVENT', {
-                    'eventcount' => $count{$year}->{$month}->{$i},
-                    'dayurl' => "$journalbase/" . sprintf("%04d/%02d/%02d/", $year, $month, $i),
-                });
-              }
-              else
-              {
-                $calendar_day{'daynoevent'} = $vars->{'CALENDAR_DAY_NOEVENT'};
-              }
-
-              $$days .= LJ::fill_var_props($vars, 'CALENDAR_DAY', \%calendar_day);
-
-              if ($dayweek{$year}->{$month}->{$i} == 7)
-              {
-                $$weeks .= LJ::fill_var_props($vars, 'CALENDAR_WEEK', \%calendar_week);
-                $rowopen = 0;
-                $calendar_week{'emptydays_beg'} = "";
-                $calendar_week{'emptydays_end'} = "";
-                $calendar_week{'days'} = "";
-              }
-          }
-
-          # if rows is still open, we have empty spaces
-          if ($rowopen)
-          {
-              if ($dayweek{$year}->{$month}->{$daysinmonth} != 7)
-              {
-                  my $spaces = 7 - $dayweek{$year}->{$month}->{$daysinmonth};
-                  $calendar_week{'emptydays_end'} =
-                      LJ::fill_var_props($vars, 'CALENDAR_EMPTY_DAYS',
-                                         { 'numempty' => $spaces });
-              }
-              $$weeks .= LJ::fill_var_props($vars, 'CALENDAR_WEEK', \%calendar_week);
-          }
-
-          $$months .= LJ::fill_var_props($vars, 'CALENDAR_MONTH', \%calendar_month);
-        } # end foreach months
-
-    } # end foreach years
-
-    ######## new code
+            $$weeks .= LJ::fill_var_props($vars, 'CALENDAR_WEEK', \%calendar_week);
+        }
+        $$months .= LJ::fill_var_props($vars, 'CALENDAR_MONTH', \%calendar_month);
+    }
 
     $$ret .= LJ::fill_var_props($vars, 'CALENDAR_PAGE', \%calendar_page);
 
@@ -2073,270 +1478,58 @@ sub create_view_day
     my ($ret, $u, $vars, $remote, $opts) = @_;
     my $sth;
 
+    # Fake S2 context. Bit of a hack.
+    my $s2ctx = [];
+    $s2ctx->[S2::PROPS] = {
+        "page_recent_items" => $vars->{'LASTN_OPT_ITEMS'}+0,
+    };
+    $opts->{ctx} = $s2ctx;
+
+    my $s2p = LJ::S2::DayPage($u, $remote, $opts);
+
     my $user = $u->{'user'};
 
-    foreach ("name", "url", "urlname", "journaltitle") { LJ::text_out(\$u->{$_}); }
-
     my %day_page = ();
+    $day_page{'name'} = $s2p->{journal}{name};
+    $day_page{'name-\'s'} = ($day_page{'name'} =~ /s$/i) ? "'" : "'s";
     $day_page{'username'} = $user;
-    $day_page{'head'} = "";
-
-    if (LJ::are_hooks('s2_head_content_extra')) {
-        $day_page{'head'} .= LJ::run_hook('s2_head_content_extra', $remote, $opts->{r});
-    }
-
-    if ($u->{'opt_blockrobots'}) {
-        $day_page{'head'} .= LJ::robot_meta_tags();
-    }
-    if ($LJ::UNICODE) {
-        $day_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'" />';
-    }
-    $day_page{'head'} .=
-        $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'DAY_HEAD'};
-    $day_page{'name'} = LJ::ehtml($u->{'name'});
-    $day_page{'name-\'s'} = ($u->{'name'} =~ /s$/i) ? "'" : "'s";
     $day_page{'title'} = LJ::ehtml($u->{'journaltitle'} ||
-                                   $u->{'name'} . $day_page{'name-\'s'} . " Journal");
+                                   $day_page{'name'} . $day_page{'name-\'s'} . " Journal");
 
-    if ($u->{'url'} =~ m!^https?://!) {
-        $day_page{'website'} =
-            LJ::fill_var_props($vars, 'DAY_WEBSITE', {
-                "url" => LJ::ehtml($u->{'url'}),
-                "name" => LJ::ehtml($u->{'urlname'} || "My Website"),
-            });
-    }
+    $day_page{'urlfriends'} = $s2p->{view_url}{friends};
+    $day_page{'urllastn'} = $s2p->{view_url}{recent};
+    $day_page{'urlcalendar'} = $s2p->{view_url}{archive};
 
-    my $journalbase = LJ::journal_base($user, $opts->{'vhost'});
-    $day_page{'urlfriends'} = "$journalbase/friends";
-    $day_page{'urlcalendar'} = "$journalbase/calendar";
-    $day_page{'urllastn'} = "$journalbase/";
+    $day_page{'head'} = $s2p->{head_content};
+    $day_page{'head'} .= $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'DAY_HEAD'};
 
-    my $initpagedates = 0;
-
-    my $get = $opts->{'getargs'};
-
-    my $month = $get->{'month'};
-    my $day = $get->{'day'};
-    my $year = $get->{'year'};
-    my @errors = ();
-
-    if ($opts->{'pathextra'} =~ m!^(?:/day)?/(\d\d\d\d)/(\d\d)/(\d\d)\b!) {
-        ($month, $day, $year) = ($2, $3, $1);
-    }
-
-    if ($year !~ /^\d+$/) { push @errors, "Corrupt or non-existant year."; }
-    if ($month !~ /^\d+$/) { push @errors, "Corrupt or non-existant month."; }
-    if ($day !~ /^\d+$/) { push @errors, "Corrupt or non-existant day."; }
-    if ($month < 1 || $month > 12 || int($month) != $month) { push @errors, "Invalid month."; }
-    if ($year < 1970 || $year > 2038 || int($year) != $year) { push @errors, "Invalid year: $year"; }
-    if ($day < 1 || $day > 31 || int($day) != $day) { push @errors, "Invalid day."; }
-    if (scalar(@errors)==0 && $day > LJ::days_in_month($month, $year)) { push @errors, "That month doesn't have that many days."; }
-
-    if (@errors) {
-        $$ret .= "Errors occurred processing this page:\n<ul>\n";
-        foreach (@errors) {
-          $$ret .= "<li>$_</li>\n";
-        }
-        $$ret .= "</ul>\n";
-        return 0;
-    }
-
-    my $logdb = LJ::get_cluster_reader($u);
-    unless ($logdb) {
-        $opts->{'errcode'} = "nodb";
-        $$ret = "";
-        return 0;
-    }
-
-    my $optDESC = $vars->{'DAY_SORT_MODE'} eq "reverse" ? "DESC" : "";
-
-    my $secwhere = "AND security='public'";
-    my $viewall = 0;
-    my $viewsome = 0;
-    if ($remote) {
-
-        # do they have the viewall priv?
-        if ($get->{'viewall'} && LJ::check_priv($remote, "canview")) {
-            LJ::statushistory_add($u->{'userid'}, $remote->{'userid'},
-                                  "viewall", "day: $user, statusvis: $u->{'statusvis'}");
-            $viewall = LJ::check_priv($remote, 'canview', '*');
-            $viewsome = $viewall || LJ::check_priv($remote, 'canview', 'suspended');
-        }
-
-        if ($remote->{'userid'} == $u->{'userid'} || $viewall) {
-            $secwhere = "";   # see everything
-        } elsif ($remote->{'journaltype'} eq 'P') {
-            my $gmask = LJ::get_groupmask($u, $remote);
-            $secwhere = "AND (security='public' OR (security='usemask' AND allowmask & $gmask))"
-                if $gmask;
-        }
-    }
-
-    # load the log items
-    my $dateformat = "%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H";
-    $sth = $logdb->prepare("SELECT jitemid AS itemid, posterid, security, ".
-                           "       DATE_FORMAT(eventtime, \"$dateformat\") AS 'alldatepart', anum " .
-                           "FROM log2 " .
-                           "WHERE journalid=? AND year=? AND month=? AND day=? $secwhere " .
-                           "ORDER BY eventtime $optDESC, logtime $optDESC LIMIT 200");
-    $sth->execute($u->{'userid'}, $year, $month, $day);
-    my @items;
-    push @items, $_ while $_ = $sth->fetchrow_hashref;
-    my @itemids = map { $_->{'itemid'} } @items;
-
-    # load 'opt_ljcut_disable_lastn' prop for $remote.
-    LJ::load_user_props($remote, "opt_ljcut_disable_lastn");
-
-    ### load the log properties
-    my %logprops = ();
-    LJ::load_log_props2($logdb, $u->{'userid'}, \@itemids, \%logprops);
-    my $logtext = LJ::get_logtext2($u, @itemids);
-
-    my %posteru = ();  # map posterids to u objects
-    LJ::load_userids_multiple([map { $_->{'posterid'}, \$posteru{$_->{'posterid'}} } @items], [$u]);
-
-    my $events = "";
-
-  ENTRY:
-    foreach my $item (@items) {
-        my ($itemid, $posterid, $security, $alldatepart, $anum) =
-            map { $item->{$_} } qw(itemid posterid security alldatepart anum);
-
-        next ENTRY if $posteru{$posterid} && $posteru{$posterid}->{'statusvis'} eq 'S' && !$viewsome;
-
-        my $replycount = $logprops{$itemid}->{'replycount'};
-        my $subject = $logtext->{$itemid}->[0];
-        my $event = $logtext->{$itemid}->[1];
-
-        if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
-            LJ::item_toutf8($u, \$subject, \$event, $logprops{$itemid});
-        }
-
-        my %day_date_format = LJ::alldateparts_to_hash($alldatepart);
-
-        unless ($initpagedates++) {
-            foreach (qw(dayshort daylong monshort monlong yy yyyy m mm d dd dth)) {
-                $day_page{$_} = $day_date_format{$_};
-            }
-        }
-
-        my %day_event = ();
-        $day_event{'itemid'} = $itemid;
-        $day_event{'datetime'} = LJ::fill_var_props($vars, 'DAY_DATE_FORMAT', \%day_date_format);
-        if ($subject ne "") {
-            LJ::CleanHTML::clean_subject(\$subject);
-            $day_event{'subject'} = LJ::fill_var_props($vars, 'DAY_SUBJECT', {
-                "subject" => $subject,
-            });
-        }
-
-        my $ditemid = $itemid*256 + $anum;
-        my $itemargs = "journal=$user&amp;itemid=$ditemid";
-        $day_event{'itemargs'} = $itemargs;
-
-        LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
-                                              'cuturl' => LJ::item_link($u, $itemid, $anum),
-                                              'ljcut_disable' => $remote->{'opt_ljcut_disable_lastn'}, });
-        LJ::expand_embedded($u, $ditemid, $remote, \$event);
-        $day_event{'event'} = $event;
-
-        if ($u->{'opt_showtalklinks'} eq "Y" &&
-            ! $logprops{$itemid}->{'opt_nocomments'}
-            )
-        {
-            my $nc;
-            $nc = "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
-
-            my $permalink = "$journalbase/$ditemid.html";
-            my $posturl = LJ::Talk::talkargs($permalink, "mode=reply");
-            my $readurl = LJ::Talk::talkargs($permalink, $nc);
-
-            my $dispreadlink = $replycount ||
-                ($logprops{$itemid}->{'hasscreened'} &&
-                 ($remote->{'user'} eq $user
-                  || LJ::can_manage($remote, $u)));
-            $day_event{'talklinks'} = LJ::fill_var_props($vars, 'DAY_TALK_LINKS', {
-                'itemid' => $ditemid,
-                'itemargs' => $itemargs,
-                'urlpost' => $posturl,
-                'urlread' => $readurl,
-                'messagecount' => $replycount,
-                'readlink' => $dispreadlink ? LJ::fill_var_props($vars, 'DAY_TALK_READLINK', {
-                    'urlread' => $readurl,
-                    'messagecount' => $replycount,
-                    'mc-plural-s' => $replycount == 1 ? "" : "s",
-                    'mc-plural-es' => $replycount == 1 ? "" : "es",
-                    'mc-plural-ies' => $replycount == 1 ? "y" : "ies",
-                }) : "",
-            });
-        }
-
-        ## current stuff
-        LJ::prepare_currents({
-            'props' => \%logprops,
-            'itemid' => $itemid,
-            'vars' => $vars,
-            'prefix' => "DAY",
-            'event' => \%day_event,
-            'user' => $u,
+    if ($s2p->{journal}{website_url}) {
+        $day_page{'website'} = LJ::fill_var_props($vars, 'DAY_WEBSITE', {
+            "url" => $s2p->{journal}{website_url},
+            "name" => $s2p->{journal}{website_name} || "My Website",
         });
-
-        my $var = 'DAY_EVENT';
-        if ($security eq "private" &&
-            $vars->{'DAY_EVENT_PRIVATE'}) { $var = 'DAY_EVENT_PRIVATE'; }
-        if ($security eq "usemask" &&
-            $vars->{'DAY_EVENT_PROTECTED'}) { $var = 'DAY_EVENT_PROTECTED'; }
-
-        $events .= LJ::fill_var_props($vars, $var, \%day_event);
     }
 
-    if (! $initpagedates)
-    {
-        # if no entries were on that day, we haven't populated the time shit!
-        # FIXME: don't use the database for this.  it can be done in Perl.
-        my $dbr = LJ::get_db_reader();
-        $sth = $dbr->prepare("SELECT DATE_FORMAT('$year-$month-$day', '%a %W %b %M %y %Y %c %m %e %d %D') AS 'alldatepart'");
-        $sth->execute;
-        my @dateparts = split(/ /, $sth->fetchrow_arrayref->[0]);
-        foreach (qw(dayshort daylong monshort monlong yy yyyy m mm d dd dth))
-        {
-          $day_page{$_} = shift @dateparts;
+    my $date = LJ::date_s2_to_s1($s2p->{date});
+    map { $day_page{$_} = $date->{$_} } qw(dayshort daylong monshort monlong yy yyyy m mm d dd dth);
+
+    $day_page{'prevday_url'} = $s2p->{prev_url};
+    $day_page{'nextday_url'} = $s2p->{next_url};
+
+    $day_page{'events'} = "";
+    my $events = \$day_page{'events'};
+
+    my $entries = $s2p->{entries};
+    if (@$entries) {
+        my $inevents = "";
+        foreach my $item ($vars->{DAY_SORT_MODE} eq 'reverse' ? reverse @$entries : @$entries) {
+            $inevents .= LJ::prepare_event($item, $vars, 'DAY');
         }
-
-        $day_page{'events'} = LJ::fill_var_props($vars, 'DAY_NOEVENTS', {});
+        $$events = LJ::fill_var_props($vars, 'DAY_EVENTS', { events => $inevents });
     }
-    else
-    {
-        $day_page{'events'} = LJ::fill_var_props($vars, 'DAY_EVENTS', { 'events' => $events });
-        $events = "";  # free some memory maybe
+    else {
+        $$events = LJ::fill_var_props($vars, 'DAY_NOEVENTS', {});
     }
-
-    # calculate previous day
-    my $pdyear = $year;
-    my $pdmonth = $month;
-    my $pdday = $day-1;
-    if ($pdday < 1)
-    {
-        if (--$pdmonth < 1)
-        {
-          $pdmonth = 12;
-          $pdyear--;
-        }
-        $pdday = LJ::days_in_month($pdmonth, $pdyear);
-    }
-
-    # calculate next day
-    my $nxyear = $year;
-    my $nxmonth = $month;
-    my $nxday = $day+1;
-    if ($nxday > LJ::days_in_month($nxmonth, $nxyear))
-    {
-        $nxday = 1;
-        if (++$nxmonth > 12) { ++$nxyear; $nxmonth=1; }
-    }
-
-    $day_page{'prevday_url'} = "$journalbase/" . sprintf("%04d/%02d/%02d/", $pdyear, $pdmonth, $pdday);
-    $day_page{'nextday_url'} = "$journalbase/" . sprintf("%04d/%02d/%02d/", $nxyear, $nxmonth, $nxday);
 
     $$ret .= LJ::fill_var_props($vars, 'DAY_PAGE', \%day_page);
     return 1;
