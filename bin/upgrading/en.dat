@@ -2484,6 +2484,8 @@ When you're done, click "Save Changes".
 
 /interests.bml.popular.text=The following are the most popular interests.
 
+/interests.bml.popular.textmode=<a [[aopts]]>View as table</a>.
+
 /interests.bml.results.added=The interests you selected were successfully added to your interests list.
 
 /interests.bml.results.both=The interests you selected were successfully added to your interests list, and those you deselected were removed.

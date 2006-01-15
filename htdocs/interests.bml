@@ -28,7 +28,12 @@ body<=
     if (!$did_post && $GET{'view'} eq "popular") {
         return $ML{'.popular.disabled'} if $LJ::DISABLED{'interests-popular'};
         my $ret = "";
-        $ret .= "<?h1 $ML{'.popular.head'} h1?><?p $ML{'.popular.text'} p?>";
+        $ret .= "<?h1 $ML{'.popular.head'} h1?><?p $ML{'.popular.text'} ";
+
+        $ret .= BML::ml('.popular.textmode', { 'aopts' => "href='$LJ::SITEROOT/interests.bml?view=popular&mode=text'" })
+            unless $GET{mode} eq 'text';
+
+        $ret .= " p?>";
 
         my $dbr = LJ::get_db_reader();
         my $sth = $dbr->prepare("SELECT statkey, statval FROM stats WHERE ".
@@ -36,22 +41,29 @@ body<=
         $sth->execute('pop_interests');
         return "Sorry, interest data currently unavailable." unless $sth->rows();
 
-        $ret .= "<table width='100%'><tr><td>";
-
         my %interests;
         while (my ($int, $count) = $sth->fetchrow_array)
         {
-            my $eint = LJ::eurl($int);
-
             $interests{$int} = {
-                                url   => "/interests.bml?int=$eint",
+                                int   => $int,
+                                eint  => LJ::ehtml($int),
+                                url   => "/interests.bml?int=" . LJ::eurl($int),
                                 value => $count,
                                 };
         }
 
-        $ret .= LJ::tag_cloud(\%interests);
+        unless ($GET{'mode'} eq 'text') {
+            $ret .= "<table width='100%'><tr><td>";
+            $ret .= LJ::tag_cloud(\%interests);
+            $ret .= "</td></tr></table>";
+        } else {
+            $ret .= "<p><table><tr><td><b>$ML{'.interest'}</b></td><td><b>$ML{'.count'}</b></td></tr>";
+            foreach my $i (sort { $b->{value} <=> $a->{value} } values %interests) {
+                $ret .= "<tr><td><a href='$i->{url}'>$i->{eint}</a></td><td>$i->{value}</td></tr>";
+            }
+            $ret .= "</table>";
+        }
 
-        $ret .= "</td></tr></table>";
         return $ret;
     }
 
