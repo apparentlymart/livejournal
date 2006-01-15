@@ -570,6 +570,7 @@ body<=
                                                   perpage    => 50,
                                                   curpage    => $GET{'page'} || 1,
                                                   navbar     => \$navbar,
+                                                  pickwd     => "_schools$sid",
                                                   );
 
             $ret .= "<div style='text-align: center'>$navbar</div><br />";

@@ -3874,6 +3874,8 @@ sub bad_password_redirect {
 #                       each page
 #           curpage  => What page of results to display
 #           navbar   => Scalar reference for paging bar
+#           pickwd   => userpic keyword to display instead of default if it
+#                       exists for the user
 sub user_search_display {
     my %args = @_;
 
@@ -3919,13 +3921,21 @@ sub user_search_display {
     $updated = LJ::get_timeupdate_multi(map { $_->{userid} } @display)
         unless $args{timesort};
 
+    # Allow caller to specify a custom userpic to use instead
+    # of the user's default all userpics
+    my $get_picid = sub {
+        my $u = shift;
+        return $u->{'defaultpicid'} unless $args{'pickwd'};
+        return LJ::get_picid_from_keyword($u, $args{'pickwd'});
+    };
+
     my $ret;
     foreach my $u (@display) {
         $ret .= "<div style='width: 300px; height: 105px; overflow: hidden; float: left; ";
         $ret .= "border-bottom: 1px solid <?altcolor2?>; margin-bottom: 10px; padding-bottom: 5px; margin-right: 10px'>";
         $ret .= "<table style='height: 105px'><tr>";
 
-        if (my $picid = $u->{'defaultpicid'}) {
+        if (my $picid = $get_picid->($u)) {
             $ret .= "<td style='width: 100px; text-align: center;'>";
             $ret .= "<a href='/allpics.bml?user=$u->{user}'>";
             $ret .= "<img src='$LJ::USERPIC_ROOT/$picid/$u->{userid}' alt='$u->{user} userpic' style='border: 1px solid #000;' /></a>";
