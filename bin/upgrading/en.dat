@@ -2823,6 +2823,10 @@ The site team
 
 /manage/index.bml.information.mobilepost.about=Manage your email addresses and PIN for mobile posting support
 
+/manage/index.bml.information.pubkey=PGP/GPG public key
+
+/manage/index.bml.information.pubkey.about=Upload your public key
+
 /manage/index.bml.information.siteopts.about=Select your preferred site layout &amp; language
 
 /manage/index.bml.information.status=Account Status
@@ -2843,6 +2847,20 @@ is required. To save yourself some time, you can <a href="/login.bml?ret=1">log 
 /manage/index.bml.userpics.edit.about=Upload and Manage Your Userpics
 
 /manage/index.bml.userpics.header=Userpics
+
+/manage/index.bml.youraccount.email=Email Address:
+
+/manage/index.bml.youraccount.header=Your Account
+
+/manage/index.bml.youraccount.name=Name:
+
+/manage/index.bml.youraccount.user=User:
+
+/manage/index.bml.youraccount.validated=([[status]])
+
+/manage/index.bml.youraccount.validated.no=Not Validated
+
+/manage/index.bml.youraccount.validated.yes=Validated
 
 /manage/invites.bml.abilities.title=Abilities
 

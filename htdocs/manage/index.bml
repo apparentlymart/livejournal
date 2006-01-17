@@ -71,7 +71,7 @@ body<=
     return $ML{'.login'} unless $remote;
 
     my $u = $BMLCodeBlock::u;
-    return LJ::bad_input("You could not be authenticated as the specified user.")
+    return LJ::bad_input($ML{'error.invalidauth'})
         unless $u;
 
 
@@ -79,14 +79,14 @@ body<=
     $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
     $ret .= "</form>\n\n";
 
-    my $status = $u->{'status'} eq "A" ? "Validated" :
-        "<a href='/register.bml?authas=$u->{user}'>Not Validated</a>";
+    my $status = $u->{'status'} eq "A" ? $ML{'.youraccount.validated.yes'} :
+        "<a href='$LJ::SITEROOT/register.bml?authas=$u->{user}'>$ML{'.youraccount.validated.no'}</a>";
 
-    $ret .= "<?h1 Your Account: h1?><div style='margin-left: 2em;'>";
+    $ret .= "<?h1 $ML{'.youraccount.header'} h1?><div style='margin-left: 2em;'>";
     $ret .= "<table width='50%'>";
-    $ret .= "<tr><th align='left'>User:</th><td>" . LJ::ljuser($u) . "</td></tr>";
-    $ret .= "<tr><th align='left'>Name:</th><td>$u->{'name'}</td></tr>";
-    $ret .= "<tr><th align='left'>E-mail Address:</th><td>$u->{'email'} (<em>$status</em>)</td></tr>";
+    $ret .= "<tr><th align='left'>$ML{'.youraccount.user'}</th><td>" . LJ::ljuser($u) . "</td></tr>";
+    $ret .= "<tr><th align='left'>$ML{'.youraccount.name'}</th><td>$u->{'name'}</td></tr>";
+    $ret .= "<tr><th align='left'>$ML{'.youraccount.email'}</th><td>$u->{'email'} " . BML::ml('.youraccount.validated', {'status' => "<em>$status</em>"}) . "</td></tr>";
     $ret .= "</table></div>";
 
     return $ret;
@@ -118,7 +118,7 @@ _code?>
     return '<li><a href="./emailpost.bml" title="<?_ml .information.mobilepost.about _ml?>"><?_ml .information.mobilepost _ml?></a></li>';
 _code?>
 
-<li><a href="./pubkey.bml" title="Upload your public key">PGP/GPG public key</a></li>
+<li><a href="./pubkey.bml" title="<?_ml .information.pubkey.about _ml?>"><?_ml .information.pubkey _ml?></a></li>
 <li><a href="/manage/invites.bml" title="<?_ml .communities.invites.about _ml?>"><?_ml /manage/invites.bml.title _ml?></a></li>
 <li><a href="/schools/manage.bml" title="<?_ml .schools _ml?>"><?_ml .schools _ml?></a></li>
 <=list
