@@ -29,6 +29,16 @@ body<=
 
         my $updated = LJ::get_timeupdate_multi(($u->{userid}));
 
+        # check that they are still nudgeable
+        if ($u->{journaltype} ne 'P' ||
+            $u->{statusvis} ne 'V'   ||
+            $u->prop("opt_no_nudge") ||
+            (!LJ::is_friend($remote, $u) || !LJ::is_friend($u, $remote) ||
+            time() -  $updated->{$u->{userid}} < 604800))
+        {
+            return "<?h1 $ML{'Error'} h1?><?p The user you are trying to nudge cannot be nudged. p?>";
+        }
+
         my $ebody;
         $ebody .= "Hey $u->{user},\n";
 
@@ -73,17 +83,24 @@ body<=
             $body .= "<?errorbar <?h1 Nudging Disabled h1?>";
             $body .= "<?p While we know you want to hear from " . LJ::ljuser($u);
             $body .= ", they have disabled nudges from other users. p?> errorbar?>";
+
+        } elsif ($u->{statusvis} ne 'V') {
+            $body .= "<?errorbar <?h1 Nudging Disabled h1?>";
+            $body .= "<?p While we know you want to hear from " . LJ::ljuser($u);
+            $body .= ", their account type does not permit being nudged. p?> errorbar?>";
+
+        } elsif ($u->{journaltype} ne 'P') {
+            $body .= "<?errorbar <?h1 Not a Person h1?>";
+            $body .= "<?p While we know you want to hear from " . LJ::ljuser($u);
+            $body .= ", you only can nudge other users. p?>";
+            $body .= "errorbar?>";
+
         # Make sure they are mutual friends
         } elsif (!LJ::is_friend($remote, $u) || !LJ::is_friend($u, $remote)) {
             $body .= "<?errorbar <?h1 Not Mutual Friends h1?>";
             $body .= "<?p While we know you want to hear from " . LJ::ljuser($u);
             $body .= ", it seems that the two of you are not mutual friends.  Currently only";
             $body .= " mutual friends can nudge each other. p?>";
-            $body .= "errorbar?>";
-        } elsif ($u->{journaltype} ne 'P') {
-            $body .= "<?errorbar <?h1 Not a Person h1?>";
-            $body .= "<?p While we know you want to hear from " . LJ::ljuser($u);
-            $body .= ", you only can nudge other users. p?>";
             $body .= "errorbar?>";
 
         } else {
