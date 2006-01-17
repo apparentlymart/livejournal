@@ -2924,6 +2924,70 @@ is required. To save yourself some time, you can <a href="/login.bml?ret=1">log 
 
 /manage/links.bml.title=Links List
 
+/manage/moodthemes.bml.back2=Return To Editor
+
+/manage/moodthemes.bml.btn.create=Create
+
+/manage/moodthemes.bml.btn.delete=Delete
+
+/manage/moodthemes.bml.btn.edit=Edit
+
+/manage/moodthemes.bml.btn.savechanges=Save Changes
+
+/manage/moodthemes.bml.btn.use=Use
+
+/manage/moodthemes.bml.createtheme.header=Create a New Theme
+
+/manage/moodthemes.bml.createtheme.label.name=Name:
+
+/manage/moodthemes.bml.editingtheme.header=Editing Theme [[name]]
+
+/manage/moodthemes.bml.editingtheme.label.name=Theme Name:
+
+/manage/moodthemes.bml.error.cantcreatetheme=There was an error creating this moodtheme.
+
+/manage/moodthemes.bml.error.cantcreatethemes=Sorry, your account type does not allow creation of custom mood themes.
+
+/manage/moodthemes.bml.error.cantdeletetheme=There was an error deleting this moodtheme.
+
+/manage/moodthemes.bml.error.cantupdatetheme=There was an error updating this moodtheme.
+
+/manage/moodthemes.bml.error.nonamegiven=You must specify a name for this theme.
+
+/manage/moodthemes.bml.error.notyourtheme=You do not have permission to edit this theme.
+
+/manage/moodthemes.bml.mood.deleted=[[mood]] was deleted and will now be represented by its parent.
+
+/manage/moodthemes.bml.mood.setpic=[[mood]] is set to [[url]].
+
+/manage/moodthemes.bml.mood.label.height=Height:
+
+/manage/moodthemes.bml.mood.label.inherit=Inherit from [[mood]]:
+
+/manage/moodthemes.bml.mood.label.url=URL:
+
+/manage/moodthemes.bml.mood.label.width=Width:
+
+/manage/moodthemes.bml.saved=Changes have been successfully saved.
+
+/manage/moodthemes.bml.title=Custom Mood Theme Editor
+
+/manage/moodthemes.bml.usepublictheme=Select a public mood theme as your default at the <a [[aopts]]>Modify Journal page</a>.
+
+/manage/moodthemes.bml.yourthemes.delete.confirm=Are you sure you want to delete this mood theme?
+
+/manage/moodthemes.bml.yourthemes.example.angry=Angry
+
+/manage/moodthemes.bml.yourthemes.example.happy=Happy
+
+/manage/moodthemes.bml.yourthemes.example.none=[no image]
+
+/manage/moodthemes.bml.yourthemes.example.sad=Sad
+
+/manage/moodthemes.bml.yourthemes.header=Your Mood Themes
+
+/manage/moodthemes.bml.yourthemes.nothemes=You have not yet made any custom mood themes.
+
 /manage/pubkey.bml.error.invalidkey=That doesn't appear to be a valid PGP/GPG key.
 
 /manage/pubkey.bml.error.notconfigured=This site is not configured with PGP support.

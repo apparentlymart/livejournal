@@ -54,6 +54,7 @@
                'mobilepost' => ['Mobile Post Settings', '/manage/emailpost.bml', 'manage'],
                'moderate' => ['Community Moderation', '/community/moderate.bml', 'community'],
                'modify' => ['Journal Settings', '/modify.bml', 'manage'],
+               'moodeditor' => ['Custom Mood Theme Editor', '/manage/moodthemes.bml', 'manage'],
                'moodlist' => ['Mood Viewer', '/moodlist.bml', 'manage'],
                'news' => ['News', '/news.bml', 'home'],
                'popfaq' => ['Popular FAQs', '/support/popfaq.bml', 'faq'],

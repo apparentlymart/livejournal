@@ -1,5 +1,5 @@
 <?page
-title=>Custom Mood Theme Editor
+title=><?_ml .title _ml?>
 
 head<=
 <script language="Javascript" type="text/javascript">
@@ -146,12 +146,14 @@ body<=
     use strict;
     use vars qw(%POST %GET);
 
+    LJ::set_active_crumb('moodeditor');
+    
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
 
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);
-    return LJ::bad_input("You could not be authenticated as the specified user.")
+    return LJ::bad_input($ML{'error.invalidauth'})
         unless $u;
 
     my $self_uri = "/manage/moodthemes.bml";
@@ -186,21 +188,20 @@ body<=
 
             $ret .= "<table>";
             if ($mood->{'parent'}) {
-                $ret .= "<tr><td colspan='2'><label for='$mood->{id}inherit'>Inherit from ";
-                $ret .= LJ::mood_name($mood->{'parent'}) . "</label>";
-                $ret .= ": " . LJ::html_check({ type => 'check', name => "$mood->{id}inherit",
+                $ret .= "<tr><td colspan='2'><label for='$mood->{id}inherit'>" . BML::ml('.mood.label.inherit', {'mood' => LJ::mood_name($mood->{'parent'})}) . "</label>";
+                $ret .= " " . LJ::html_check({ type => 'check', name => "$mood->{id}inherit",
                                                 id => "$mood->{id}inherit",
                                                 onclick => "enable($mood->{id}, $mood->{parent})",
                                                 selected  => $inherited });
                 $ret .= "</td></tr>\n";
             }
-            $ret .= "<tr><td>URL: </td><td>";
+            $ret .= "<tr><td>$ML{'.mood.label.url'} </td><td>";
             $ret .= LJ::html_text({ name => $mood->{id}, id => $mood->{id}, value => $pic{pic},
                                     size => 75, onchange => "update_children($mood->{id})" });
             $ret .= "</td></tr>\n";
-            $ret .= "<tr><td>Width: </td><td>";
+            $ret .= "<tr><td>$ML{'.mood.label.width'} </td><td>";
             $ret .= LJ::html_text({ name => "$mood->{id}w", id => "$mood->{id}w", value => $pic{w}, size => 4 });
-            $ret .= " Height: " . LJ::html_text({ name => "$mood->{id}h", id => "$mood->{id}h",
+            $ret .= " $ML{'.mood.label.height'} " . LJ::html_text({ name => "$mood->{id}h", id => "$mood->{id}h",
                                                   value => $pic{h}, size => 4 });
             $ret .= "<br /><br /></td></tr>\n";
             $ret .= LJ::html_hidden({ name => "$mood->{id}parent", id => "$mood->{id}parent", value => $mood->{parent} });
@@ -259,7 +260,7 @@ body<=
             my $sth = $dbr->prepare("SELECT name FROM moodthemes WHERE moodthemeid=? AND ownerid=?");
             $sth->execute($themeid, $u->{'userid'});
             $info = $sth->fetchrow_hashref;
-            return LJ::bad_input("You do not have permission to edit this theme.")
+            return LJ::bad_input($ML{'.error.notyourtheme'})
                 unless defined $info;
         }
 
@@ -269,7 +270,7 @@ body<=
                 # good, delete this one
                 my $dbh = LJ::get_db_writer();
                 my $c = $dbh->do("DELETE FROM moodthemes WHERE moodthemeid = ? AND ownerid = ?", undef, $tid, $u->{userid})+0;
-                return "<?h1 $ML{'Error'} h1?><?p There was an error deleting this moodtheme. p?>" unless $c;
+                return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.cantdeletetheme'} p?>" unless $c;
                 $dbh->do("DELETE FROM moodthemedata WHERE moodthemeid = ?", undef, $tid); # safe since we verified $c
                 return BML::redirect($self_uri);
             }
@@ -279,21 +280,21 @@ body<=
         if ($themeid && $POST{'edit'} == 1 || $POST{'isnew'} == 1) {
             # Insert the new theme name and description into the db and grab its new themeid
             if ($POST{'isnew'} == 1) {
-                return LJ::bad_input("You must specify a name for this theme.")
+                return LJ::bad_input($ML{'.error.nonamegiven'})
                     unless LJ::trim($POST{'name'});
                 my $dbh = LJ::get_db_writer();
                 my $i = $dbh->do("INSERT INTO moodthemes (ownerid, name, is_public) VALUES (?, ?, 'N')", undef, $u->{'userid'}, $POST{'name'});
-                return "<?h1 $ML{'Error'} h1?><?p There was an error creating this moodtheme. p?>" unless $i;
+                return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.cantcreatetheme'} p?>" unless $i;
                 $themeid = $dbh->{'mysql_insertid'};
                 $info->{'name'} = $POST{'name'};
             }
 
             $ret .= "<?hr?>\n";
-            $ret .= "<?h2 Editing Theme $info->{name} h2?>\n";
+            $ret .= "<?h2 " . BML::ml('.editingtheme.header', {'name' => $info->{name}}) . " h2?>\n";
 
             # Make the form
             $ret .= "<?p <form action='$self_uri' method='post' id='editform' name='editform'>\n";
-            $ret .= "<b>Theme Name:</b> ";
+            $ret .= "<b>$ML{'.editingtheme.label.name'}</b> ";
             $ret .= LJ::html_text({ name => 'name', value => $info->{name}, size => 50, maxlength => 255 });
             $ret .= "<br /><br />\n";
             $ret .= LJ::html_hidden('themeid' => $themeid) . "\n";
@@ -301,7 +302,7 @@ body<=
             # Actually make the editor form
             $editform->($themeid);
 
-            $ret .= LJ::html_submit('save' => "Save Changes") . "</form> p?>\n";
+            $ret .= LJ::html_submit('save' => $ML{'.btn.savechanges'}) . "</form> p?>\n";
 
         } elsif ($themeid)  { # Save their changes
             my $dbh = LJ::get_db_writer();
@@ -309,7 +310,7 @@ body<=
             # Update the name or description if needed
             if ($info->{'name'} ne $POST{'name'}) {
                 my $u = $dbh->do("UPDATE moodthemes SET name=? WHERE moodthemeid=?", undef, $POST{'name'}, $POST{'themeid'});
-                return "<?h1 $ML{'Error'} h1?><?p There was an error updating this moodtheme. p?>" unless $u;
+                return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.cantupdatetheme'} p?>" unless $u;
             }
 
             # The fun part of figuring out what needs to be changed in the db
@@ -335,12 +336,12 @@ body<=
                         push @del_values, ($themeid, $mid);
                         push @del_bind, ("(moodthemeid=? AND moodid=?)");
 
-                        $ret .= "$mname($mid) was deleted and will now be represented by its parent.<br />\n";
+                        $ret .= BML::ml('.mood.deleted', {'mood' => "$mname($mid)"}) . "<br />\n";
                     } else { # Not inherited, it is different than its parent or it is actually a parent
                         if ($picurl) {
                             push @repl_values, ($themeid, $mid, $picurl, $width, $height);
                             push @repl_bind, ("(?, ?, ?, ?, ?)");
-                            $ret .= "$mname($mid) is set to $picurl.<br />\n";
+                            $ret .= BML::ml('.mood.setpic', {'mood' => "$mname($mid)", 'url' => $picurl}) . "<br />\n";
                         }
                     }
                 }
@@ -350,26 +351,26 @@ body<=
                 my $bind = join(",", @del_bind);
                 my $p = $dbh->do("DELETE FROM moodthemedata WHERE moodthemeid=? AND moodid IN($bind)",
                                  undef, $themeid, @del_values);
-                return "<?h1 $ML{'Error'} h1?><?p There was an error updating this moodtheme. p?>" unless $p;
+                return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.cantupdatetheme'} p?>" unless $p;
             }
 
             my $bind = join(",", @repl_bind);
             my $i = $dbh->do("REPLACE INTO moodthemedata (moodthemeid, moodid, " .
                              "picurl, width, height) VALUES $bind", undef, @repl_values);
-            return "<?h1 $ML{'Error'} h1?><?p There was an error updating this moodtheme. p?>" unless $i;
+            return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.cantupdatetheme'} p?>" unless $i;
 
             # Kill any memcache data about this moodtheme
             LJ::MemCache::delete([$themeid, "moodthemedata:$themeid"]);
 
             delete $LJ::CACHE_MOOD_THEME{$themeid};
 
-           $ret .= "<br />Changes have been successfully saved.<br /><br />\n";
+           $ret .= "<br />$ML{'.saved'}<br /><br />\n";
            return BML::redirect($self_uri);
         }
 
         $ret .= BML::ml('Backlink', {
             'link' => $self_uri,
-            'text' => 'Return To Editor',
+            'text' => $ML{'.back2'},
         });
     } else { # Show the first form to select user, which one to edit, or create a new one
 
@@ -379,17 +380,17 @@ body<=
         $ret .= "</form>\n\n";
 
         unless (LJ::get_cap($u, "moodthemecreate")) {
-            $ret .= "Sorry, your account type does not allow creation of custom mood themes."
+            $ret .= $ML{'.error.cantcreatethemes'};
         } else {
             # form to allow users to create new mood themes
-            $ret .= "<?h1 Create a New Theme h1?>\n";
+            $ret .= "<?h1 $ML{'.createtheme.header'} h1?>\n";
             $ret .= "<form action='$self_uri' method='post' id='editform' name='editform' style='margin-left: 30px;'>\n";
             $ret .= LJ::html_hidden('isnew' => 1) . "\n";
-            $ret .= "<?p <b>Name:</b> " . LJ::html_text({ name => 'name', size => 30, maxlength => 50 });
-            $ret .= LJ::html_submit('create' => "Create") . " p?></form>\n";
+            $ret .= "<?p <b>$ML{'.createtheme.label.name'}</b> " . LJ::html_text({ name => 'name', size => 30, maxlength => 50 });
+            $ret .= LJ::html_submit('create' => $ML{'.btn.create'}) . " p?></form>\n";
 
             # Make up the form to choose to edit a theme or create a new one
-            $ret .= "<?h1 Your Mood Themes h1?>\n";
+            $ret .= "<?h1 $ML{'.yourthemes.header'} h1?>\n";
 
             # Get data to figure out if they have any themes already
             my $dbr = LJ::get_db_reader();
@@ -403,7 +404,7 @@ body<=
                 $ret .= LJ::html_hidden('edit' => 1,
                                         'themeids' => join(",", map { $_->{moodthemeid} } @user_themes));
                 $ret .= "<table>";
-                $ret .= "<tr><th></th><th>Happy</th><th>Sad</th><th>Angry</th><th></th></tr>";
+                $ret .= "<tr><th></th><th>$ML{'.yourthemes.example.happy'}</th><th>$ML{'.yourthemes.example.sad'}</th><th>$ML{'.yourthemes.example.angry'}</th><th></th></tr>";
                 foreach my $theme (@user_themes) {
                     my $name = $theme->{'name'};
                     my $tid = $theme->{'moodthemeid'};
@@ -424,25 +425,26 @@ body<=
                         if (%pic) {
                             $ret .= "<img align='absmiddle' src=\"$pic{'pic'}\" width='$pic{'w'}' height='$pic{'h'}' hspace='2' vspace='2' />";
                         } else {
-                            $ret .= "<i>[no image]</i>";
+                            $ret .= "<i>$ML{'.yourthemes.example.none'}</i>";
                         }
                         $ret .= "</td>";
                     }
 
-                    $ret .= "<td>" . LJ::html_submit("edit:$tid" => "Edit") . " " . 
-                        LJ::html_submit("use:$tid", "Use", {'disabled' => $use_dis}) . " " .
-                        LJ::html_submit("delete:$tid", "Delete", 
-                                        { onclick => 'return confirm("Are you sure you want to delete this mood theme?");' }) . "</td>";
+                    my $confirm_delete = LJ::ejs($ML{'.yourthemes.delete.confirm'});
+                    $ret .= "<td>" . LJ::html_submit("edit:$tid" => $ML{'.btn.edit'}) . " " . 
+                        LJ::html_submit("use:$tid", $ML{'.btn.use'}, {'disabled' => $use_dis}) . " " .
+                        LJ::html_submit("delete:$tid", $ML{'.btn.delete'}, 
+                                        { onclick => "return confirm('$confirm_delete');" }) . "</td>";
                     $ret .= "</tr>";
                 }
                 $ret .= "</table>";
                 $ret .= "</form>\n";
             } else {
-                $ret .= "<?p You have not yet made any custom mood themes. p?>\n";
+                $ret .= "<?p $ML{'.yourthemes.nothemes'} p?>\n";
             }
         }
 
-        $ret .= "<?p Select a public mood theme as your default at the  <a href='$LJ::SITEROOT/modify.bml'>Modify Journal page</a>. p?>";
+        $ret .= "<?p " . BML::ml('.usepublictheme', {'aopts' => "href='$LJ::SITEROOT/modify.bml'"}) . " p?>";
     }
 
     return $ret;
