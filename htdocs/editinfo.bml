@@ -721,7 +721,13 @@ _code?>
         if ($email_changed) {
             # record old email address;
             LJ::infohistory_add($u, 'email', $u->{email}, $u->{status});
-        }
+
+            LJ::run_hook('post_email_change',
+                         {
+                             user     => $u,
+                             newemail => $POST{'email'},
+                         });
+          }
 
         $POST{'url'} =~ s/\s+$//; $POST{'url'} =~ s/^\s+//;
         if ($POST{'url'} && $POST{'url'} !~ /^https?:\/\//) {

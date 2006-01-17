@@ -82,6 +82,13 @@ body<=
          $ret .= "<li>$ML{'.new.update'}</li>";
          $ret .= "</ul>";
      }
+
+     LJ::run_hook('post_email_change',
+                  {
+                      user     => $u,
+                      newemail => $aa->{arg1},
+                      suspend  => 1,
+                  });
  } else {
      return LJ::bad_input("You must be logged in to view this page.") unless $remote;
      my @authas = LJ::get_authas_list($remote);
