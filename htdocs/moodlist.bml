@@ -1,5 +1,5 @@
 <?page
-title=>LiveJournal Moods
+title=><?_code return BML::ml('.title', {'sitename' => $LJ::SITENAMESHORT}); _code?>
 head<=
 <style>
 .lj_moodlist_link {
@@ -29,7 +29,7 @@ body<=
     my $dbr = LJ::get_db_reader();
 
     my $add_header = sub {
-        $ret .= "<?h1 Moods h1?><?p The following are server-supported moods on <?sitename?>.  You can always enter your own, but these are the ones that can have pictures associated with them and can be searched on, etc.  You're encouraged to use these if possible.  p?><?p To change the icons in your journal, go to the <a href=\"/modify.bml\">modify journal page</a> and select your preferred icon set. p?>";
+        $ret .= "<?h1 $ML{'.moods.header'} h1?><?p " . BML::ml('.moods.intro', {'sitename' => $LJ::SITENAME}) . " p?><?p " . BML::ml('.moods.howtochange', {'aopts' => "href='$LJ::SITEROOT/modify.bml'"}) . " p?>";
     };
 
     # Get a list of all possible moods
@@ -52,8 +52,8 @@ body<=
     # Determine the action depending on the GET arguments, or lack thereof
     if (defined $GET{'moodtheme'}) {
         $ret .= BML::ml('Backlink', {
-                'link'=>'/moodlist.bml',
-                'text'=>'Mood Themes',
+                'link'=>"$LJ::SITEROOT/moodlist.bml",
+                'text'=>$ML{'.back2'},
             }). "<br />";
 
         $add_header->();
@@ -83,7 +83,7 @@ body<=
         my $theme = (grep { $_->{moodthemeid} == $GET{moodtheme} } (@themes, @user_themes))[0];
         if (! $theme) {
             # It isn't theirs, or they aren't logged in, and it isn't public and it actually exists
-            return LJ::bad_input("You only have permission to view public mood themes or user themes with an ownerid parameter.");
+            return LJ::bad_input($ML{'.error.cantviewtheme'});
         } elsif ( defined $GET{mode} && $GET{mode} == 'tree') {
 
             if ($GET{'ownerid'}) {
@@ -98,10 +98,10 @@ body<=
                 $ret .= "<div style='margin-bottom:15px; margin-top:30px' align='center'><form action='moodlist.bml' method='GET'>";
                 $ret .= LJ::html_select({'name' => "moodtheme", 'selected' => "$GET{moodtheme}"},
                                         @opts);
-                $ret .= "&nbsp;<input type='submit' value='View' />";
+                $ret .= "&nbsp;<input type='submit' value=\"$ML{'.btn.view'}\" />";
                 $ret .= LJ::html_hidden('mode' => 'tree');
                 $ret .= "</form>";
-                $ret .= "<a href='/moodlist.bml?moodtheme=$theme->{moodthemeid}'>View this theme in a table layout.</a></div>";
+                $ret .= "<a href='/moodlist.bml?moodtheme=$theme->{moodthemeid}'>$ML{'.view.table'}</a></div>";
             }
             $ret .= "<ul>\n";
 
@@ -160,7 +160,7 @@ body<=
             $n++;
         }
 
-        $ret .= "<td align='center'><input type='submit' value='Switch' /></td></tr>\n";
+        $ret .= "<td align='center'><input type='submit' value=\"$ML{'.btn.switch'}\" /></td></tr>\n";
 
         # Output a table row for each mood theme
         foreach my $theme (@show_themes) {
@@ -180,7 +180,7 @@ body<=
 
             $ret .= "<td align='center'>";
             $ret .= BML::ml('Actionlink', {
-                'link' => "<a href='/moodlist.bml?moodtheme=$theme->{moodthemeid}'>View&nbsp;All</a>"
+                'link' => "<a href='$LJ::SITEROOT/moodlist.bml?moodtheme=$theme->{moodthemeid}'>$ML{'.nav.viewall'}</a>"
             });
             $ret .= "</td>";
         }
@@ -206,8 +206,8 @@ body<=
            $ret .= "<div style='margin-bottom:15px'><form action='moodlist.bml' method='GET'>";
            $ret .= LJ::html_select({'name' => "moodtheme", 'selected' => "$themeid"},
                                    @opts);
-           $ret .= "&nbsp;<input type='submit' value='View' /></form>";
-           $ret .= "<a href='/moodlist.bml?moodtheme=$themeid&mode=tree'>View this theme in a hierarchal tree layout.</a></div></td></tr>";
+           $ret .= "&nbsp;<input type='submit' value=\"$ML{'.btn.view'}\" /></form>";
+           $ret .= "<a href='/moodlist.bml?moodtheme=$themeid&mode=tree'>$ML{'.view.tree'}</a></div></td></tr>";
        }
 
        # Output all the moods
@@ -240,18 +240,18 @@ body<=
         return unless $lists{$num};
         $ret .= "<ul>\n";
         foreach my $mood (@{$lists{$num}}) {
-            $ret .= "<li><b><a href=\"http://www.dictionary.com/cgi-bin/dict.pl?term=$mood->{'name'}\" target='dict'>$mood->{'name'}</a></b> (#$mood->{'id'})</li>\n";
+            $ret .= "<li>" . BML::ml('.moodname', {'name' => "<b><a href=\"http://www.dictionary.com/cgi-bin/dict.pl?term=$mood->{'name'}\" target='dict'>$mood->{'name'}</a></b>", 'id' => $mood->{'id'}}) . "</li>\n";
             my %pic;
             if (LJ::get_mood_picture($GET{moodtheme}, $mood->{'id'}, \%pic)) {
                 unless ($GET{'hidederived'} && $pic{'moodid'} != $mood->{'id'}) {
                     $ret .= "<img align='absmiddle' src=\"$pic{'pic'}\" width='$pic{'w'}' height='$pic{'h'}' hspace='2' vspace='2' />\n";
                 }
                 if ($GET{'details'} && ($pic{'moodid'} != $mood->{'id'})) {
-                    $ret .= " (from parent)";
+                    $ret .= " $ML{'.moodname.fromparent'}";
                 }
             } else {
                 if ($GET{'details'}) {
-                    $ret .= "<b>(no pic for theme \#$GET{moodtheme})</b>";
+                    $ret .= "<b>" . BML::ml('.moodname.nopicfortheme', {'id' => $GET{moodtheme}}) . "</b>";
                 }
             }
             do_mood_tree($mood->{'id'});

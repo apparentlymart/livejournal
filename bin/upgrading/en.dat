@@ -3152,6 +3152,34 @@ is required. To save yourself some time, you can <a href="/login.bml?ret=1">log 
 
 /modify_do.bml.success.text=Your journal settings have been updated.  You can view your journal <a href="[[url]]">here</a>.
 
+/moodlist.bml.back2=Mood Themes
+
+/moodlist.bml.btn.switch=Switch
+
+/moodlist.bml.btn.view=View
+
+/moodlist.bml.error.cantviewtheme=You only have permission to view public mood themes or user themes with an ownerid parameter.
+
+/moodlist.bml.moodname=[[name]] (#[[id]])
+
+/moodlist.bml.moodname.fromparent=(from parent)
+
+/moodlist.bml.moodname.nopicfortheme=(no pic for theme #[[id]])
+
+/moodlist.bml.moods.header=Moods
+
+/moodlist.bml.moods.howtochange=To change the icons in your journal, go to the <a [[aopts]]>modify journal page</a> and select your preferred icon set.
+
+/moodlist.bml.moods.intro=The following are server-supported moods on [[sitename]]. You can always enter your own, but these are the ones that can have pictures associated with them and can be searched on, etc. You're encouraged to use these if possible.
+
+/moodlist.bml.nav.viewall=View All
+
+/moodlist.bml.title=[[sitename]] Moods
+
+/moodlist.bml.view.table=View this theme in a table layout.
+
+/moodlist.bml.view.tree=View this theme in a hierarchal tree layout.
+
 /multisearch.bml.formaterror=Format Error
 
 /multisearch.bml.noaddress.text=You did not enter an email address.
