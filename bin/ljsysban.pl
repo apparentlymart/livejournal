@@ -5,7 +5,7 @@ use strict;
 use Getopt::Long;
 
 # parse input options
-my ($list, $add, $modify, $banid, $status, $bandate, $banuntil, $what, $value, $note);
+my ($list, $add, $modify, $banid, $status, $bandate, $banuntil, $banlength, $what, $value, $note);
 exit 1 unless GetOptions('list' => \$list,
                          'add' => \$add,
                          'modify' => \$modify,
@@ -13,6 +13,7 @@ exit 1 unless GetOptions('list' => \$list,
                          'status=s' => \$status,
                          'bandate=s' => \$bandate,
                          'banuntil=s' => \$banuntil,
+                         'banlength=s' => \$banlength,
                          'what=s' => \$what,
                          'value=s' => \$value,
                          'note=s' => \$note,
@@ -30,9 +31,15 @@ unless (($list   && (($banid && ! $an_opt) || (! $banid && $an_opt)) ||
                 "              --value=? --note=?]\n" .
                 "           }\n\n" .
                 "  --add    <--what=? --value=?\n" . 
-                "             [--status=? --bandate=datetime --banuntil=datetime --note=?]>\n\n" .
+                "             [--status=? --bandate=datetime { --banuntil=datetime | --banlength=duration } --note=?]>\n\n" .
                 "  --modify <--banid=?>\n" . 
-                "             [--status=? --bandate=datetime --banuntil=datetime --value=? --note=?]\n\n";
+                "             [--status=? --bandate=datetime { --banuntil=datetime |\n" .
+                "              --banlength=duration } --value=? --note=?]\n\n" .
+                "datetime in format 'YYYY-MM-DD HH:MM:SS', duration in format 'N[dhms]' e.g. '5d' or '3h'.\n\n" .
+                "examples:\n" .
+                "  ljsysban.pl --list --what=ip --value=127.0.0.1\n" .
+                "  ljsysban.pl --add --what=email --value=test\@test.com --banuntil='2006-06-01 00:00:00' --note='test'\n" .
+                "  ljsysban.pl --add --what=uniq --value=jd87fdnef8jf8jef --banlength=3d --note='3 day ban'\n\n";
         }
 
 # now load in the beast
@@ -70,6 +77,17 @@ if ($list) {
     print "\n\tNO MATCHES\n\n" unless $ct;
 
     exit;
+}
+
+# verify ban length and convert to banuntil as necessary
+if ($banlength) {
+    die "--banlength must be of format N[dmhs] such as 3d, 5h, 60m, 35s.\n"
+        unless $banlength =~ /^(\d+)([dhms])$/i;
+    my ($num, $type) = ($1, lc $2);
+    $banlength = "DATE_ADD(NOW(), INTERVAL $num " .
+                 { 'd' => "DAY", 'h' => "HOUR", 'm' => "MINUTE", 's' => "SECOND" }->{$type} . ")";
+    $banuntil = $dbh->selectrow_array("SELECT $banlength");
+    die $dbh->errstr if $dbh->err;
 }
 
 # add new ban
