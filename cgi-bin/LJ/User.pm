@@ -3020,12 +3020,12 @@ sub make_journal
         $u = LJ::load_user($user);
     }
 
-    $u->{'_journalbase'} = LJ::journal_base($u->{'user'}, $opts->{'vhost'});
-
     unless ($u) {
         $opts->{'baduser'} = 1;
         return "<h1>Error</h1>No such user <b>$user</b>";
     }
+
+    $u->{'_journalbase'} = LJ::journal_base($u->{'user'}, $opts->{'vhost'});
 
     my $eff_view = $LJ::viewinfo{$view}->{'styleof'} || $view;
     my $s1prop = "s1_${eff_view}_style";
