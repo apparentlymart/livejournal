@@ -93,6 +93,10 @@ FORM
                     'V -> D' => "Account deleted",
                     'D -> V' => "Account undeleted",
                 }->{$path} || "Account status changed ($extra->{old} to $extra->{new})";
+        } elsif ($row->{action} eq 'password_change') {
+            $action = "User changed password";
+        } elsif ($row->{action} eq 'email_change') {
+            $action = "Email address changed to: $extra->{new}";
         } else {
             $action = "Unknown action ($row->{action})";
         }
