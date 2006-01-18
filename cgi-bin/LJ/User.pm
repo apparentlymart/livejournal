@@ -1496,6 +1496,10 @@ sub journal_base
     my ($user, $vhost) = @_;
     if (isu($user)) {
         my $u = $user;
+
+        my $hookurl = LJ::run_hook("journal_base", $u, $vhost);
+        return $hookurl if $hookurl;
+
         $user = $u->{'user'};
         unless (defined $vhost) {
             if ($LJ::FRONTPAGE_JOURNAL eq $user) {
@@ -1508,6 +1512,7 @@ sub journal_base
 
         }
     }
+
     if ($vhost eq "users") {
         my $he_user = $user;
         $he_user =~ s/_/-/g;
@@ -1954,53 +1959,55 @@ sub ljuser
 {
     my $user = shift;
     my $opts = shift;
-    my $u;
 
-    if (! isu($user) && ! $opts->{'type'}) {
-        # Try to automatically pick the user type, but still
-        # make something if we can't (user doesn't exist?)
-        $user = LJ::load_user($user) || $user;
+    my $andfull = $opts->{'full'} ? "&amp;mode=full" : "";
+    my $img = $opts->{'imgroot'} || $LJ::IMGPREFIX;
 
+    my $make_tag = sub {
+        my ($fil, $url, $x, $y) = @_;
+        $y ||= $x;  # make square if only one dimension given
+        my $strike = $opts->{'del'} ? ' text-decoration: line-through;' : '';
+
+        return "<span class='ljuser' style='white-space: nowrap;$strike'><a href='$LJ::SITEROOT/userinfo.bml?user=$user$andfull'><img src='$img/$fil' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0;' /></a><a href='$url'><b>$user</b></a></span>";
+    };
+
+    my $u = isu($user) ? $user : LJ::load_user($user);
+
+    # Traverse the renames to the final journal
+    if ($u) {
         my $hops = 0;
-
-        # Traverse the renames to the final journal
-        while (ref $user and $user->{'journaltype'} eq 'R'
+        while ($u->{'journaltype'} eq 'R'
                and ! $opts->{'no_follow'} && $hops++ < 5) {
-            my $rt = $user->prop("renamedto");
+            my $rt = $u->prop("renamedto");
             last unless length $rt;
-            $user = LJ::load_user($rt);
+            $u = LJ::load_user($rt);
         }
     }
 
-    if (isu($user)) {
-        $u = $user;
-        $opts->{'type'} = $user->{'journaltype'};
-        # Mark accounts as deleted that aren't visible, memorial, or locked
-        $opts->{'del'} = $user->{'statusvis'} ne 'V' &&
-            $user->{'statusvis'} ne 'M' &&
-            $user->{'statusvis'} ne 'L';
-        $user = $user->{'user'};
+    # if invalid user, link to dummy userinfo page
+    if (! $u) {
+        $user =~ s/\W//g;
+        return $make_tag->('userinfo.gif', "$LJ::SITEROOT/userinfo.bml?user=$user", 17);
     }
-    my $andfull = $opts->{'full'} ? "&amp;mode=full" : "";
-    my $img = $opts->{'imgroot'} || $LJ::IMGPREFIX;
-    my $strike = $opts->{'del'} ? ' text-decoration: line-through;' : '';
-    my $make_tag = sub {
-        my ($fil, $dir, $x, $y) = @_;
-        $y ||= $x;  # make square if only one dimension given
 
-        return "<span class='ljuser' style='white-space: nowrap;$strike'><a href='$LJ::SITEROOT/userinfo.bml?user=$user$andfull'><img src='$img/$fil' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0;' /></a><a href='$LJ::SITEROOT/$dir/$user/'><b>$user</b></a></span>";
-    };
+    my $type = $u->{'journaltype'};
 
-    if ($opts->{'type'} eq 'C') {
-        return $make_tag->('community.gif', 'community', 16);
-    } elsif ($opts->{'type'} eq 'Y') {
-        return $make_tag->('syndicated.gif', 'users', 16);
-    } elsif ($opts->{'type'} eq 'N') {
-        return $make_tag->('newsinfo.gif', 'users', 16);
-    } elsif ($opts->{'type'} eq 'I') {
+    # Mark accounts as deleted that aren't visible, memorial, or locked
+    $opts->{'del'} = 1 unless $u->{'statusvis'} =~ /[VML]/;
+    $user = $u->{'user'};
+
+    my $url = $u->journal_base . "/";
+
+    if ($type eq 'C') {
+        return $make_tag->('community.gif', $url, 16);
+    } elsif ($type eq 'Y') {
+        return $make_tag->('syndicated.gif', $url, 16);
+    } elsif ($type eq 'N') {
+        return $make_tag->('newsinfo.gif', $url, 16);
+    } elsif ($type eq 'I') {
         return $u->ljuser_display($opts);
     } else {
-        return $make_tag->('userinfo.gif', 'users', 17);
+        return $make_tag->('userinfo.gif', $url, 17);
     }
 }
 
