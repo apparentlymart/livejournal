@@ -55,7 +55,7 @@ body<=
         my $username = LJ::get_username($aa->{'userid'});
         return "<?h1 $ML{'.comm.success'} h1?>".
                '<?p '.BML::ml('.comm.text',
-               {'comm'=>LJ::ljuser($username, { 'type' => 'C' }),
+               {'comm'=>LJ::ljuser($username),
                 'aopts'=>'href="'.$LJ::SITEROOT.'/friends/add.bml?user='.$username.'"'}).
                ' p?>';
     }
@@ -75,7 +75,7 @@ body<=
         my $username = LJ::get_username($aa->{'userid'});
         return "<?h1 $ML{'.shared.success'} h1?>".
                '<?p '.BML::ml('.shared.text',
-               {'shared'=>LJ::ljuser($username, { 'type' => 'S' }),
+               {'shared'=>LJ::ljuser($username),
                 'aopts'=>'href="'.$LJ::SITEROOT.'/friends/add.bml?user='.$username.'"'}).
                ' p?>';
     }
@@ -96,9 +96,9 @@ body<=
         my $commname = LJ::get_username($aa->{userid});
         my $username = LJ::get_username($targetid);
         return "<?h1 $ML{'.comm.success'} h1?>".
-               '<?p ' . BML::ml('.commjoin.text', { 
-                           user => LJ::ljuser($username, { type => 'P' }),
-                           comm => LJ::ljuser($commname, { type => 'C' }),
+               '<?p ' . BML::ml('.commjoin.text', {
+                           user => LJ::ljuser($username),
+                           comm => LJ::ljuser($commname),
                            aopts => "href=\"$LJ::SITEROOT/community/members.bml?comm=$commname\"",
                         }) . ' p?>';
     }

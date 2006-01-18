@@ -45,7 +45,7 @@ body<=
     # is $remote an admin?
     unless (LJ::can_manage_other($remote, $c)) {
         $ret .= "<?h1 $ML{'Error'} h1?><?p ";
-        $ret .= BML::ml('.error.noaccess', 
+        $ret .= BML::ml('.error.noaccess',
                         { 'comm' => LJ::ljuser($cname, { 'type' => 'C' }) });
         $ret .= " p?>";
         return $ret;
@@ -121,7 +121,7 @@ body<=
                                             { 'type' => $target->{'journaltype'} }) });
                 next;
             }
-            
+
             # insert authactions row
             push @to_add, [ $target, \@attr ];
         }
@@ -145,11 +145,11 @@ body<=
             my @bad;
             foreach (@fail) {
                 if ($_->[1] eq 'comm_user_has_banned') {
-                    push @bad, BML::ml('.error.adding', { user => LJ::ljuser($_->[0], { type => 'P' }) });
+                    push @bad, BML::ml('.error.adding', { user => LJ::ljuser($_->[0]) });
                 } elsif ($_->[1] eq 'comm_invite_limit') {
-                    push @bad, BML::ml('.error.limit', { user => LJ::ljuser($_->[0], { type => 'P' }) });
+                    push @bad, BML::ml('.error.limit', { user => LJ::ljuser($_->[0]) });
                 } else {
-                    push @bad, BML::ml('.error.unknown', { user => LJ::ljuser($_->[0], { type => 'P' }) });
+                    push @bad, BML::ml('.error.unknown', { user => LJ::ljuser($_->[0]) });
                 }
             }
             return LJ::bad_input(@bad);
@@ -187,12 +187,12 @@ body<=
                     unless ($was{$id}->{$_}) {
                         $add{$_}->{$id} = 1;
                         $addr{$id}->{$_} = 1;
-                    }     
+                    }
                 } else {
                     if ($was{$id}->{$_}) {
                         $delete{$_}->{$id} = 1;
                         $delr{$id}->{$_} = 1;
-                    }                    
+                    }
                 }
             }
             $maints++ if $POST{"edit_${id}_admin"};
@@ -202,19 +202,19 @@ body<=
         # go back and decide who to keep
         if (! $other_maints && $maints < 1) {
              $ret .= "<?h1 $ML{'Error'} h1?><?p Your community, " .
-                     LJ::ljuser($cname, { 'type' => 'C' }) . 
+                     LJ::ljuser($cname, { 'type' => 'C' }) .
                      ", must have at least one maintainer. " .
                      "Please <a href='" . BML::get_uri() . "?comm=$cname'>" .
                      "go back</a> and add a maintainer. p?>";
              return $ret;
         }
-   
+
         # delete members
         if (%{$delete{'member'}}) {
             # TAG:FR:bml_comm_members:del_members
             LJ::remove_friend($cid, [ keys %{$delete{'member'}} ]);
         }
-        
+
         # create a closure to send a notification email to a user if they are
         # added or removed from being a maintainer
         my $sendmail = sub {
@@ -264,19 +264,19 @@ body<=
 
         # get all the maintainers who were removed
         my $changedmaintainers = LJ::load_userids(keys %{$delete{admin}}, keys %{$add{admin}});
-        
+
         foreach my $uid (keys %{$delete{admin} || {}}) {
             # log maintainer deletions
             $c->log_event('maintainer_remove', { actiontarget => $uid, remote => $remote });
-            
+
             my $delmaintu = $changedmaintainers->{$uid};
             next unless $delmaintu;
-            
+
             # send email to the poor maintainer who got removed
             my $mailusername = $delmaintu->{user};
             my $mailusercname = $c->{name};
             my $mailclink = LJ::journal_base($c, ['community']);
-            
+
             my $html = qq(
 <p>Dear $LJ::SITENAMESHORT user $mailusername,</p>
 <p>$remote->{user} has removed you as a maintainer of the community <a href="$mailclink">$mailusercname.</a></p>
@@ -318,17 +318,17 @@ $LJ::SITEROOT
                     if (LJ::send_comm_invite($u, $c, $remote, [ 'member' ])) {
                         # if it succeeded, push the reinvited information
                         push @msgs, BML::ml('.reinvited2',
-                            { user => LJ::ljuser($u, { type => 'P' }),
+                            { user => LJ::ljuser($u),
                               aopts => "href='$LJ::SITEROOT/manage/invites.bml'" });
                     }
                 }
             }
         }
-        
+
         foreach my $uid (keys %{$add{admin} || {}}) {
             # log maintainer additions
             $c->log_event('maintainer_add', { actiontarget => $uid, remote => $remote });
-            
+
             my $newmaintu = $changedmaintainers->{$uid};
             next unless $newmaintu;
 
@@ -337,7 +337,7 @@ $LJ::SITEROOT
             my $mailusercname = $c->{name};
             my $mailclink = LJ::journal_base($c, ['community']);
             my $mailcommanlink = "$LJ::SITEROOT/community/manage.bml";
-            
+
             my $html = qq(
 <p>Dear $LJ::SITENAMESHORT user $mailusername,</p>
 <p>You have just been added as a maintainer of the community <a href="$mailclink">$mailusercname</a> by one of the current maintainers. As the maintainer, you have the ability to control and manage the community. If you do not wish to take on this responsibility, you can remove your maintainership or transfer your community to another user.</p>
@@ -387,7 +387,7 @@ $LJ::SITEROOT
                 foreach keys %{$delr{$id} || {}};
             $str .= "<li>" . BML::ml('.success.added', { list => join(', ', @astr) }) . "</li>\n" if @astr;
             $str .= "<li>" . BML::ml('.success.deleted', { list => join(', ', @dstr) }) . "</li>\n" if @dstr;
-            push @msgs, LJ::ljuser($users{$id}, { type => 'P' }) . ":<ul>$str</ul>" if $str;
+            push @msgs, LJ::ljuser($users{$id}) . ":<ul>$str</ul>" if $str;
         }
 
         $ret .= "<?h1 $ML{'.success.header'} h1?>";
@@ -402,7 +402,7 @@ $LJ::SITEROOT
                             { aopts => "href='$LJ::SITEROOT/manage/invites.bml'" });
             $ret .= " p?><ul>";
             foreach my $row (@invited) {
-                $ret .= "<li>" . LJ::ljuser($row->[0], { type => 'P' }) . ": ";
+                $ret .= "<li>" . LJ::ljuser($row->[0]) . ": ";
                 $ret .= "$ML{\"/manage/invites.bml.label.$_\"}, " foreach @{$row->[1] || []};
                 chop $ret; chop $ret;
                 $ret .= "</li>\n";
