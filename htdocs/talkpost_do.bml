@@ -13,7 +13,7 @@ body<=
     # and requires it to be correct.  if it's not, the page fails.
     %POST = %GET if $GET{'ecphash'};
 
-    return "" if $LJ::TALK_ABORT_REGEXP && $POST{'body'} =~ /$LJ::TALK_ABORT_REGEXP/;
+    return "" if $LJ::TALK_ABORT_REGEXP && $POST{'body'} =~ /$LJ::TALK_ABORT_REGEXP/i;
 
     my $req = shift;
     my $r = $req->{'r'};
