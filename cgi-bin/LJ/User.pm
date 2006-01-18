@@ -3908,13 +3908,15 @@ sub user_search_display {
         @display = sort { $a->{user} cmp $b->{user} } values %$loaded_users;
     }
 
-    my %items = BML::paging(\@display, $args{curpage}, $args{perpage});
+    if (defined $args{perpage}) {
+        my %items = BML::paging(\@display, $args{curpage}, $args{perpage});
 
-    # Fancy paging bar
-    ${$args{navbar}} = LJ::paging_bar($items{'page'}, $items{'pages'});
+        # Fancy paging bar
+        ${$args{navbar}} = LJ::paging_bar($items{'page'}, $items{'pages'});
 
-    # Now pull out the set of users to display
-    @display = @{$items{'items'}};
+        # Now pull out the set of users to display
+        @display = @{$items{'items'}};
+    }
 
     # If we aren't sorting by time updated, load last updated time for the
     # set of users we are displaying.
