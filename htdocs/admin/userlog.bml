@@ -34,7 +34,7 @@ body<=
         unless LJ::check_priv($remote, 'canview', 'userlog') ||
                LJ::check_priv($remote, 'canview', '*');
 
-    my $user = LJ::canonical_username($POST{user});
+    my $user = LJ::canonical_username($POST{user} || $GET{user});
 
     my $ret = <<FORM;
 <form method='post' action='userlog.bml'>
