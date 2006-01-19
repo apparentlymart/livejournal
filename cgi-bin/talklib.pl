@@ -109,34 +109,34 @@ sub link_bar
     my $jargent = "journal=$u->{'user'}&amp;";
 
     # << Previous
-    push @linkele, $mlink->("/go.bml?${jargent}itemid=$itemid&amp;dir=prev", "prev_entry");
-    $$headref .= "<link href='/go.bml?${jargent}itemid=$itemid&amp;dir=prev' rel='Previous' />\n";
+    push @linkele, $mlink->("$LJ::SITEROOT/go.bml?${jargent}itemid=$itemid&amp;dir=prev", "prev_entry");
+    $$headref .= "<link href='$LJ::SITEROOT/go.bml?${jargent}itemid=$itemid&amp;dir=prev' rel='Previous' />\n";
 
     # memories
     unless ($LJ::DISABLED{'memories'}) {
-        push @linkele, $mlink->("/tools/memadd.bml?${jargent}itemid=$itemid", "memadd");
+        push @linkele, $mlink->("$LJ::SITEROOT/tools/memadd.bml?${jargent}itemid=$itemid", "memadd");
     }
 
     if (defined $remote && ($remote->{'user'} eq $u->{'user'} ||
                             $remote->{'user'} eq $up->{'user'} ||
                             LJ::can_manage($remote, $u)))
     {
-        push @linkele, $mlink->("/editjournal.bml?${jargent}itemid=$itemid", "editentry");
+        push @linkele, $mlink->("$LJ::SITEROOT/editjournal.bml?${jargent}itemid=$itemid", "editentry");
     }
 
     unless ($LJ::DISABLED{tags}) {
         if (defined $remote && LJ::Tags::can_add_tags($u, $remote)) {
-            push @linkele, $mlink->("/edittags.bml?${jargent}itemid=$itemid", "edittags");
+            push @linkele, $mlink->("$LJ::SITEROOT/edittags.bml?${jargent}itemid=$itemid", "edittags");
         }
     }
 
     unless ($LJ::DISABLED{'tellafriend'}) {
-        push @linkele, $mlink->("/tools/tellafriend.bml?${jargent}itemid=$itemid", "tellfriend");
+        push @linkele, $mlink->("$LJ::SITEROOT/tools/tellafriend.bml?${jargent}itemid=$itemid", "tellfriend");
     }
 
     ## >>> Next
-    push @linkele, $mlink->("/go.bml?${jargent}itemid=$itemid&amp;dir=next", "next_entry");
-    $$headref .= "<link href='/go.bml?${jargent}itemid=$itemid&amp;dir=next' rel='Next' />\n";
+    push @linkele, $mlink->("$LJ::SITEROOT/go.bml?${jargent}itemid=$itemid&amp;dir=next", "next_entry");
+    $$headref .= "<link href='$LJ::SITEROOT/go.bml?${jargent}itemid=$itemid&amp;dir=next' rel='Next' />\n";
 
     if (@linkele) {
         $ret .= BML::fill_template("standout", {
