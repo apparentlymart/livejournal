@@ -146,6 +146,10 @@ sub redir
     my ($r, $url, $code) = @_;
     $r->content_type("text/html");
     $r->header_out(Location => $url);
+
+    if ($LJ::DEBUG{'log_redirects'}) {
+        $r->log_error("redirect to $url from: " . join(", ", caller(0)));
+    }
     return $code || REDIRECT;
 }
 
@@ -421,7 +425,7 @@ sub trans
             $mode ||= "" unless length $pe;  # if no pathextra, then imply 'lastn'
 
             # redirect old-style URLs to new versions:
-            if ($mode =~ /day|calendar/ && $pe =~ m!^/\d\d\d\d!) {
+            if ($mode =~ /^day|calendar$/ && $pe =~ m!^/\d\d\d\d!) {
                 my $newuri = $uri;
                 $newuri =~ s!$mode/(\d\d\d\d)!$1!;
                 return redir($r, "http://$host$hostport$newuri");
@@ -476,7 +480,7 @@ sub trans
     my $skip_domain_checks = 0;
 
     # user domains
-    if ($LJ::USER_VHOSTS &&
+    if (($LJ::USER_VHOSTS || $LJ::ONLY_USER_VHOSTS) &&
         $host =~ /^([\w\-]{1,15})\.\Q$LJ::USER_DOMAIN\E$/ &&
         $1 ne "www" &&
 
@@ -501,7 +505,7 @@ sub trans
 
         } elsif (ref $func eq "ARRAY" && $func->[0] eq "changehost") {
 
-            return redir($r, "http://$func->[1]$uri");
+            return redir($r, "http://$func->[1]$uri$args_wq");
 
         } elsif ($func eq "journal") {
 
@@ -512,7 +516,17 @@ sub trans
                 return 404;
             }
             ($user, $uri) = ($1, $2);
+            $uri ||= "/";
             $r->uri($uri);
+
+            # redirect them to their canonical URL if on wrong host/prefix
+            if (my $u = LJ::load_user($user)) {
+                my $canon_url = $u->journal_base;
+                unless ($canon_url =~ m!^http://$host!i || $LJ::DEBUG{'user_vhosts_no_wronghost_redirect'}) {
+                    return redir($r, "$canon_url$uri$args_wq");
+                }
+            }
+
             my $view = $determine_view->($user, "safevhost", $uri);
             return $view if defined $view;
 
@@ -567,7 +581,7 @@ sub trans
     }
 
     # normal (non-domain) journal view
-    if (! $LJ::ONLY_USER_VHOSTS &&
+    if (
         $uri =~ m!
         ^/(users\/|community\/|\~)  # users/community/tilde
         ([^/]*)                     # potential username
@@ -581,6 +595,15 @@ sub trans
         return DECLINED unless length($cuser);
 
         my $srest = $rest || '/';
+
+        # need to redirect them to canonical version
+        if ($LJ::ONLY_USER_VHOSTS && ! $LJ::DEBUG{'user_vhosts_no_old_redirect'}) {
+            # FIXME: also set the logged-in cookies they'll be redirected back for anyway
+            my $u = LJ::load_user($cuser)
+                or return 404;
+            my $base = $u->journal_base;
+            return redir($r, "$base$srest$args_wq");
+        }
 
         # redirect to canonical username and/or add slash if needed
         return redir($r, "http://$host$hostport/$part1$cuser$srest$args_wq")
@@ -973,10 +996,12 @@ sub journal_content
         my $args = $r->args;
         my $args_wq = $args ? "?$args" : "";
 
-        # can't show BML on user domains... redirect them
-        if ($RQ{'vhost'} eq "users" && ($RQ{'mode'} eq "entry" ||
-                                        $RQ{'mode'} eq "reply" ||
-                                        $RQ{'mode'} eq "month"))
+        # historical: can't show BML on user domains... redirect them.  nowadays
+        # not a big deal, but debug option retained for other sites w/ old BML schemes
+        if ($LJ::DEBUG{'no_bml_on_user_domains'}
+            && $RQ{'vhost'} eq "users" && ($RQ{'mode'} eq "entry" ||
+                                           $RQ{'mode'} eq "reply" ||
+                                           $RQ{'mode'} eq "month"))
         {
             my $u = LJ::load_user($RQ{'user'});
             my $base = "$LJ::SITEROOT/users/$RQ{'user'}";
