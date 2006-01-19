@@ -1494,6 +1494,12 @@ sub get_bio {
 sub journal_base
 {
     my ($user, $vhost) = @_;
+
+    if (! isu($user) && LJ::are_hooks("journal_base")) {
+        my $u = LJ::load_user($user);
+        $user = $u if $u;
+    }
+
     if (isu($user)) {
         my $u = $user;
 
