@@ -29,8 +29,6 @@
 
     sleep 1 if $LJ::IS_DEV_SERVER;
 
-    print STDERR LJ::D($ret);
-
     return JSON::objToJson($ret);
 }
 _code?>
