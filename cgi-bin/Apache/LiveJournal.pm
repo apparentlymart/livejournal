@@ -517,7 +517,6 @@ sub trans
             }
             ($user, $uri) = ($1, $2);
             $uri ||= "/";
-            $r->uri($uri);
 
             # redirect them to their canonical URL if on wrong host/prefix
             if (my $u = LJ::load_user($user)) {
