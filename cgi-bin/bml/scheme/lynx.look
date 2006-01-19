@@ -48,9 +48,10 @@ _code?>
 <p>[ <a href='/'><?_ml lynx.nav.home _ml?></a> | <a href='/update.bml'><?_ml lynx.nav.update _ml?></a> | <?_code
    use strict;
    if(my $u = LJ::get_remote()) {
-        return "<a href='/users/$u->{'user'}/'>$ML{'lynx.nav.recent'}</a> | <a href='/users/$u->{'user'}/friends/'>$ML{'lynx.nav.friends'}</a> | ";
+       my $base = $u->journal_base;
+        return "<a href='$base/'>$ML{'lynx.nav.recent'}</a> | <a href='$base/friends/'>$ML{'lynx.nav.friends'}</a> | ";
    }
-_code?><a href='/login.bml'><?_ml lynx.nav.login _ml?></a>/<a href='/logout.bml'><?_ml lynx.nav.logout _ml?></a> | <a href='/manage/siteopts.bml'><?_ml lynx.nav.siteopts _ml?></a> | <a href='/site/'><?_ml lynx.nav.sitemap _ml?></a> ]</p>
+_code?><a href='<?siteroot?>/login.bml'><?_ml lynx.nav.login _ml?></a>/<a href='<?siteroot?>/logout.bml'><?_ml lynx.nav.logout _ml?></a> | <a href='<?siteroot?>/manage/siteopts.bml'><?_ml lynx.nav.siteopts _ml?></a> | <a href='<?siteroot?>/site/'><?_ml lynx.nav.sitemap _ml?></a> ]</p>
 <?breadcrumbs?>
 </body>
 </html>
