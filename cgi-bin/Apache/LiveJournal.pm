@@ -507,6 +507,11 @@ sub trans
 
             return redir($r, "http://$func->[1]$uri$args_wq");
 
+        } elsif ($uri =~ m!^/(?:talkscreen|delcomment)\.bml!) {
+            # these URLs need to always work for the javascript comment management code
+            # (JavaScript can't do cross-domain XMLHttpRequest calls)
+            $skip_domain_checks = 1;
+
         } elsif ($func eq "journal") {
 
             unless ($uri =~ m!^/(\w{1,15})(/.*)?$!) {
@@ -528,11 +533,6 @@ sub trans
 
             my $view = $determine_view->($user, "safevhost", $uri);
             return $view if defined $view;
-
-        } elsif ($uri =~ m!^/(?:talkscreen|delcomment)\.bml!) {
-            # these URLs need to always work for the javascript comment management code
-            # (JavaScript can't do cross-domain XMLHttpRequest calls)
-            $skip_domain_checks = 1;
 
         } elsif ($func) {
             my $code = {
