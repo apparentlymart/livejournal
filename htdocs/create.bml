@@ -530,9 +530,9 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
      return $ret if $stop_output;
 
      $ret = "<?h1 $ML{'.success.head'} h1?><?p ".BML::ml(".success.text1", {'email' => $email, 'username' => $user}) ." p?>";
-     my $uri = LJ::journal_base($nu);
+     my $uri = LJ::journal_base($nu) . "/";
      $ret .= "<?p $ML{'.success.text2'} p?>\n";
-     $ret .= "<?standout <font size='+1' face='arial'><b><a href='$uri'>$uri/</a></b></font> standout?>\n";
+     $ret .= "<?standout <font size='+1' face='arial'><b><a href='$uri'>$uri</a></b></font> standout?>\n";
      $ret .= "<?p $ML{'.success.text3'} p?>\n";
 
      $ret .= "<form method='get' action='$LJ::SITEROOT/editinfo.bml?authas=$user'>";
