@@ -14,7 +14,7 @@ page<=
 {Fps}<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<link rel="home" title="<?_ml lynx.nav.home _ml?>" href="/" />
+<link rel="home" title="<?_ml lynx.nav.home _ml?>" href="<?siteroot?>" />
 <link rel="contents" title="<?_ml lynx.nav.sitemap _ml?>" href="/site/" />
 <link rel="help" title="<?_ml lynx.nav.help _ml?>" href="/support/" />
 <?_code
@@ -45,7 +45,7 @@ _code?>
 
 <hr />
 
-<p>[ <a href='/'><?_ml lynx.nav.home _ml?></a> | <a href='/update.bml'><?_ml lynx.nav.update _ml?></a> | <?_code
+<p>[ <a href='/'><?_ml lynx.nav.home _ml?></a> | <a href='<?siteroot?>/update.bml'><?_ml lynx.nav.update _ml?></a> | <?_code
    use strict;
    if(my $u = LJ::get_remote()) {
        my $base = $u->journal_base;
