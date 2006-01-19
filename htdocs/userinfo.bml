@@ -2,7 +2,7 @@
 #line 2
  use strict;
  use vars qw($title $windowtitle $body $head $bml_okay %GET);
- 
+
  $bml_okay = 1;
  $title = $ML{'.title'};
  $body = "";
@@ -82,7 +82,7 @@
                               "AS 'secondsold' FROM userusage ".
                               "WHERE userid=$userid");
          $sth->execute;
-         ($u->{'timeupdate'}, 
+         ($u->{'timeupdate'},
           $u->{'timecreate'},
           $u->{'secondsold'}) = $sth->fetchrow_array;
      }
@@ -120,8 +120,7 @@
  if ($u->{'journaltype'} eq "Y") {
      $synd = $dbr->selectrow_hashref("SELECT * FROM syndicated WHERE userid=$u->{'userid'}");
  }
- my $dir = "users";
- 
+
  ### load user props.  some don't apply to communities
  {
      my @props = qw(opt_whatemailshow country state city zip renamedto
@@ -152,7 +151,6 @@
 
  if ($com) {
      $title = $ML{'.title.communityinfo'};
-     $dir = "community";
  } elsif ($synd) {
      $title = $ML{'.title.syndicated'};
      $u->{'opt_whatemailshow'} = "N";  # don't show email
@@ -173,7 +171,7 @@
  my $viewall = 0;
  if ($GET{'viewall'} && LJ::check_priv($remote, "canview")) {
    $viewall = LJ::check_priv($remote, 'canview', '*');
-   LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
+   LJ::statushistory_add($u->{'userid'}, $remote->{'userid'},
                          "viewall", "userinfo: $u->{'user'}, statusvis: $u->{'statusvis'}");
  } else {
 
@@ -219,9 +217,10 @@
 
  # Add metadata links to <head>
  my $digest = Digest::SHA1::sha1_hex('mailto:' . $u->{'email'});
- $head .= "<link rel='alternate' type='application/rss+xml' title='RSS' href='$LJ::SITEROOT/$dir/$user/data/rss' />\n";
- $head .= "<link rel='alternate' type='application/atom+xml' title='Atom' href='$LJ::SITEROOT/$dir/$user/data/atom' />\n";
- $head .= "<link rel='alternate' type='application/rdf+xml' title='FOAF' href='$LJ::SITEROOT/$dir/$user/data/foaf' />\n";
+ my $jbase = $u->journal_base;
+ $head .= "<link rel='alternate' type='application/rss+xml' title='RSS' href='$jbase/data/rss' />\n";
+ $head .= "<link rel='alternate' type='application/atom+xml' title='Atom' href='$jbase/data/atom' />\n";
+ $head .= "<link rel='alternate' type='application/rdf+xml' title='FOAF' href='$jbase/data/foaf' />\n";
  $head .= "<meta name=\"foaf:maker\" content=\"foaf:mbox_sha1sum '$digest'\" />\n";
 
  my @friends;
@@ -255,7 +254,7 @@
          next unless $ulocal->{'statusvis'} eq 'V';
          if ($ulocal->{'journaltype'} eq 'P' || $ulocal->{'journaltype'} eq "I") {
              if (!$com && $u->{'opt_showmutualfriends'} && $fr{$ulocal->{userid}}) {
-                 push @mutual, $ulocal;   
+                 push @mutual, $ulocal;
              } else {
                  push @friend_of, $ulocal;
              }
@@ -294,7 +293,7 @@
  my $p = sub {
      return BML::fill_template("p", { DATA => $_[0] });
  };
- 
+
  if ($com) {
      $body .= $h1->($ML{'.comminfo.name'});
      my $pt = BML::ml('.comminfo.body',{'commname'=>$u->{'name'}}) . " ";
@@ -365,7 +364,7 @@
      }
 
      if (@linkele) {
-         $body .= BML::fill_template("standout", { 
+         $body .= BML::fill_template("standout", {
              DATA => join("&nbsp;&nbsp;", @linkele),
          });
      }
@@ -381,7 +380,7 @@
      if ($u->{journaltype} eq "I") {
          $body .= "<tr valign='top'><td align='right'><b>OpenID:</b></td><td width='100%'>" . LJ::ljuser($u) . "</td>";
      } else {
-         $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.user'}</b></td><td width='100%'><a href='/$dir/$user/'><b>$user</b></a> ($u->{'userid'}) $hook_extra ";
+         $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.user'}</b></td><td width='100%'><a href='$jbase/'><b>$user</b></a> ($u->{'userid'}) $hook_extra ";
          if ($u->{public_key}) {
              $body .= "<a href='/pubkey.bml?user=$user'>";
              $body .= "<img src='/img/key.gif' width='16' height='16' border='0' alt='View public key' title='View public key' style='vertical-align: middle; border: 0;' /></a>";
@@ -389,10 +388,10 @@
          $body .= "</td>\n";
      }
  }
-     
+
 ### picture
 
- my $narrow_left = 2;  ## rows with smaller colspan to 2 
+ my $narrow_left = 2;  ## rows with smaller colspan to 2
  $body .= "<td align='right' rowspan='3'>";
  if ($u->{'defaultpicid'}) {
      my $picid = $u->{'defaultpicid'};
@@ -459,7 +458,7 @@ if ($u->{'journaltitle'}) {
 
      $body .= "<br />$ML{'.syn.nextcheck'} $synd->{'checknext'}";
      $body .= "</td></tr>\n";
-     
+
  }
 
  ## text message
@@ -467,7 +466,7 @@ if ($u->{'journaltitle'}) {
      my $span = ($narrow_left-- >= 0) ? 1 : 2;
      $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.textmessage'}</b></td><td colspan='$span'>" . BML::ml('.sendmessage.body',{'user'=>$u->{'user'}, 'link'=>"/tools/textmessage.bml?user=$u->{'user'}"}) . "</td></tr>";
  }
- 
+
  if ( ! $synd && $u->{'url'}) {
      my $url = LJ::ehtml($u->{'url'});
      my $span = ($narrow_left-- >= 0) ? 1 : 2;
@@ -475,7 +474,7 @@ if ($u->{'journaltitle'}) {
          $url =~ s/^http\W*//;
          $url = "http://$url";
      }
-     my	$urlname = LJ::ehtml($u->{'urlname'} || $url);
+     my $urlname = LJ::ehtml($u->{'urlname'} || $url);
      $url = "<a href='$url'>$urlname</a>";
      $body .= "<tr><td align='right'><b>$ML{'.label.website'}</b></td><td colspan='$span'>$url</td></tr>\n" if ($u->{'url'});
  }
@@ -571,7 +570,7 @@ if ($u->{'journaltitle'}) {
               @emails = ();
           }
           if ($LJ::USER_EMAIL && $useremail_cap) {
-              
+
               unless ($u->{'opt_whatemailshow'} eq "A" || $u->{'no_mail_alias'}) {
                   push @emails, "$u->{'user'}\@$LJ::USER_DOMAIN";
               }
@@ -583,7 +582,7 @@ if ($u->{'journaltitle'}) {
           }
           $body .= "</td></tr>";
       }
-      
+
       foreach my $k (qw(aolim icq yahoo msn jabber google_talk skype gizmo)) {
           $u->{$k} = LJ::ehtml($u->{$k});
       }
@@ -847,11 +846,11 @@ if ($u->{'journaltitle'}) {
 
  ##
  ## friends
- ## 
+ ##
  unless ($synd || $LJ::FORCE_EMPTY_FRIENDS{$userid}) {
      my $label = $com ? $ML{'.friends.comm'} : $ML{'.friends.user'};
      my $span = ($narrow_left-- >= 0) ? 1 : 2;
-     $body .= "<tr><td align='right' valign='top'><b><a href='$LJ::SITEROOT/$dir/$user/friends'>$label</a>:</b></td><td colspan='$span'>";
+     $body .= "<tr><td align='right' valign='top'><b><a href='$jbase/friends'>$label</a>:</b></td><td colspan='$span'>";
 
      $friends{'display'} = 0 if $friends{'count'} > $MAX_FRIENDS_SHOW;
      if ($friends{'count'}) {
@@ -955,7 +954,7 @@ if ($u->{'journaltitle'}) {
              $body .= "</td></tr>\n";
          }
          if ($friendsof{'display'} && @friend_of) {
-             $label = $com ? $ML{'.friendof.comm'} : 
+             $label = $com ? $ML{'.friendof.comm'} :
                       ($u->{'opt_showmutualfriends'} ? $ML{'.label.alsofriendof'} : $ML{'.friendof.user'});
              $body .= "<tr><td align='right' valign='top'><b style='white-space: nowrap;'>$label</b>";
              if ($u->{'opt_hidefriendofs'}) {
@@ -1017,14 +1016,14 @@ if ($u->{'journaltitle'}) {
      $body .= $row->[1];
      $body .= "</td></tr>\n";
  }
- 
+
  unless ($synd || $GET{'mode'} eq "full") {  # Synd accts are always full, but their full ends early (see below)
      $body .= "</table>\n";
      $body .= "<p align='center'><i><a href='/userinfo.bml?user=$u->{'user'}&amp;mode=full'>$ML{'.label.moredetails'}</a></i></p>";
      $bml_okay = 0;
      return;
  }
- 
+
 
  ##
  ## interesting times
@@ -1077,7 +1076,7 @@ if ($u->{'journaltitle'}) {
      while ($_ = $sth->fetchrow_hashref) {
          next unless ($_->{'client'} =~ m!(.+)/(.+)!);
          my ($client, $ver) = ($1, $2);
-         if ($lastclient ne $client) 
+         if ($lastclient ne $client)
          {
              if ($lastclient) { chop $body; chop $body; $body .= "<br />"; }
              else { 1; }
@@ -1100,16 +1099,16 @@ if ($u->{'journaltitle'}) {
                                          undef, $userid);
          LJ::MemCache::set($memkey, $count, $expire);
      }
-         
+
      $body .= "<tr><td align='right' nowrap='nowrap'><b>$ML{'.label.journalentrs'}</b></td>" .
          "<td colspan='2'>" . &comma($count) . "</td></tr>";
  }
- 
+
  my $points = $dbr->selectrow_array("SELECT SUM(points) AS 'points' FROM supportpoints WHERE userid=$userid");
  if ($points) {
      $body .= "<tr><td align='right' nowrap='nowrap'><b><a href='/support/'>$ML{'.label.supportpoints'}</a>:</b></td><td colspan='2'>" . &comma($points) . "</td></tr>";
  }
- 
+
  sub comma {
      my $num = shift;
      if ($num > 0) {
