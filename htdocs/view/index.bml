@@ -180,7 +180,7 @@ $r->notes("codepath" => "bml.view.index");
          if ($lday) { $body .= "</table></dd>"; }
          $lday = $day;
          my $ord = LJ::Lang::day_ord($day);
-         my $dayview_url = sprintf("$LJ::SITEROOT/users/$u->{'user'}/%04d/%02d/%02d/",
+         my $dayview_url = sprintf("$base/%04d/%02d/%02d/",
                                    $year, $month, $day);
          $body .= "<dt><b><a href=\"$dayview_url\">$day$ord</a></b></dt>";
          $body .= "<dd><table cellpadding=2>";
@@ -228,8 +228,4 @@ _code?><?page
 title=><?_code return $title; _code?>
 head=><?_code return $head; _code?>
 body=><?_code return $body; _code?>
-page?><?_c <LJDEP>
-img: htdocs/img/btn_next.gif, htdocs/img/btn_prev.gif
-form: htdocs/view/index.bml
-link: htdocs/users, htdocs/talkread.bml
-</LJDEP> _c?>
+page?>
