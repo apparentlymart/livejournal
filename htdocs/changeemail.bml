@@ -79,7 +79,7 @@ body<=
         }
 
         ## make note of changed email
-        # record old email address;
+        LJ::statushistory_add($u->{userid}, $u->{userid}, 'email_changed', "old: $u->{email}, new: $POST{'email'}");
         LJ::infohistory_add($u, 'email', $u->{email}, $u->{status});
 
         $u->log_event('email_change', { remote => $u, new => $POST{'email'} });
@@ -90,7 +90,12 @@ body<=
                          newemail => $POST{'email'},
                      });
 
-        LJ::update_user($u, { email => $POST{'email'} });
+        my $tochange = {
+            email => $POST{'email'}
+        };
+        $tochange->{status} = 'T' if $u->{status} eq 'A';
+
+        LJ::update_user($u, $tochange);
 
         $body = "<?h1 $ML{'Success'} h1?><?p Email changed successfuly p?>";
     }
