@@ -796,6 +796,11 @@ sub journal_base {
     return LJ::journal_base($u);
 }
 
+sub profile_url {
+    my $u = shift;
+    return $u->journal_base . "/profile";
+}
+
 # <LJFUNC>
 # name: LJ::User::get_friends_birthdays
 # des: get the upcoming birthdays for friends of a user
@@ -1967,15 +1972,16 @@ sub ljuser
     my $user = shift;
     my $opts = shift;
 
-    my $andfull = $opts->{'full'} ? "&amp;mode=full" : "";
+    my $andfull = $opts->{'full'} ? "?mode=full" : "";
     my $img = $opts->{'imgroot'} || $LJ::IMGPREFIX;
+    my $profile;
 
     my $make_tag = sub {
         my ($fil, $url, $x, $y) = @_;
         $y ||= $x;  # make square if only one dimension given
         my $strike = $opts->{'del'} ? ' text-decoration: line-through;' : '';
 
-        return "<span class='ljuser' style='white-space: nowrap;$strike'><a href='$LJ::SITEROOT/userinfo.bml?user=$user$andfull'><img src='$img/$fil' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0;' /></a><a href='$url'><b>$user</b></a></span>";
+        return "<span class='ljuser' style='white-space: nowrap;$strike'><a href='$profile$andfull'><img src='$img/$fil' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0;' /></a><a href='$url'><b>$user</b></a></span>";
     };
 
     my $u = isu($user) ? $user : LJ::load_user($user);
@@ -1996,6 +2002,8 @@ sub ljuser
         $user =~ s/\W//g;
         return $make_tag->('userinfo.gif', "$LJ::SITEROOT/userinfo.bml?user=$user", 17);
     }
+
+    $profile = $u->profile_url;
 
     my $type = $u->{'journaltype'};
 
