@@ -392,6 +392,10 @@ sub trans
         my $mode = undef;
         my $pe;
 
+        # if favicon, let filesystem handle it, for now, until
+        # we have per-user favicons.
+        return DECLINED if $uuri eq "/favicon.ico";
+
         if ($uuri =~ m#^/(\d+)\.html$#) {
             if ($GET{'mode'} eq "reply" || $GET{'replyto'}) {
                 $mode = "reply";
@@ -510,11 +514,12 @@ sub trans
         } elsif ($uri =~ m!^/(?:talkscreen|delcomment)\.bml!) {
             # these URLs need to always work for the javascript comment management code
             # (JavaScript can't do cross-domain XMLHttpRequest calls)
-            $skip_domain_checks = 1;
+            return DECLINED;
 
         } elsif ($func eq "journal") {
 
             unless ($uri =~ m!^/(\w{1,15})(/.*)?$!) {
+                return DECLINED if $uri eq "/favicon.ico";
                 my $redir = LJ::run_hook("journal_subdomain_redirect_url",
                                          $host, $uri);
                 return redir($r, $redir) if $redir;
