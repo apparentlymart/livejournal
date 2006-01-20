@@ -111,15 +111,14 @@ body<=
             $subject = MIME::Words::encode_mimeword($subject, 'B', $encoding);
         }
 
-        # generate new random password
-        my $newpass = LJ::make_auth_code(8);
-        LJ::update_user($u, { password => $newpass });
-
         my $body = BML::ml('/lostinfo_do.bml.lostpasswordmail.part1',
                            { 'sitename' => $LJ::SITENAME,
                              'username' => $u->{'user'},
                              'password' => $u->{'password'},
                              'emailadr' => $u->{'email'} }) . "\n\n";
+
+        my $remote = LJ::get_remote();
+        LJ::statushistory_add($u->{'userid'}, $remote ? $remote->{'userid'} : 0, 'lostinfo', $email);
 
         if ($u->{'status'} ne "A") {
             my $aa = LJ::register_authaction($u->{'userid'}, "validateemail", $u->{'email'});
