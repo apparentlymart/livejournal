@@ -350,7 +350,7 @@ body<=
                   : $ML{'.results.nothing'};
         }
 
-        $ret .= " p?><?p " . BML::ml('.results.message', { 'url' => '/userinfo.bml?user=' . $u->{'user'} });
+        $ret .= " p?><?p " . BML::ml('.results.message', { 'url' => $u->profile_url() });
         $ret .= " " . BML::ml('.results.goback',
                                { 'url' => '/userinfo.bml?user=' . LJ::eurl($POST{'fromuser'}),
                                  'user' => LJ::ljuser($POST{'fromuser'}),

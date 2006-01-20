@@ -78,8 +78,8 @@ use vars qw($body $title $windowtitle %GET %POST);
              $body .= "<?h1 $ML{'.remove.header'} h1?><?p ";
              $body .= BML::ml('.remove.text2', {
                                               'ljuser' => LJ::ljuser($u),
-                                              'aopts'    => "href='$LJ::SITEROOT/users/$remote->{'user'}/friends'",
-                                              'aopts2'   => "href='$LJ::SITEROOT/userinfo.bml?user=$remote->{'user'}'",
+                                              'aopts'    => "href='" . $remote->journal_base() . "'",
+                                              'aopts2'   => "href='" . $remote->profile_url() . "'",
                                               });
              $body .= " p?>";
          } else {
@@ -89,19 +89,20 @@ use vars qw($body $title $windowtitle %GET %POST);
                  $body .= BML::ml('.add.text.community', {
                                                          'user'   => $user,
                                                          'ljuser' => LJ::ljuser($u),
-                                                         'url'    => "$LJ::SITEROOT/users/$remote->{'user'}/friends",
+                                                         'url'    => $remote->journal_base() . "/friends",
                                                          });
              } elsif ($u->{'journaltype'} eq "Y") {
                  $body .= BML::ml('.add.text.feed', {
                                                     'user'   => $user,
                                                     'ljuser' => LJ::ljuser($u),
-                                                    'url'    => "$LJ::SITEROOT/users/$remote->{'user'}/friends",
+                                                    'url'    => $remote->journal_base() . "/friends",
                                                     });
              } else {
                  $body .= BML::ml('.add.text', {
                                                'user'   => $user,
                                                'ljuser' => LJ::ljuser($u),
-                                               'url'    => "$LJ::SITEROOT/users/$remote->{'user'}/friends", });
+                                               'url'    => $remote->journal_base() . "/friends",
+                                           });
              }
              $body .= " p?>";
          }

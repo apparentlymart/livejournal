@@ -26,6 +26,13 @@
  my $MAX_FRIENDS_SHOW = 500;
  my $MAX_FRIENDOF_SHOW = 150;
 
+ # if new-style URLs, get the GET{user} arg from the request notes,
+ # which was set by LiveJournal.pm
+ unless ($GET{'user'}) {
+     my $r = Apache->request;
+     $GET{'user'} = $r->notes("_journal");
+ }
+
  my $remote = LJ::get_remote();
  if ($GET{'user'} eq "" && !$remote) {
      $body = "<?h1 $ML{'Error'} h1?><?p $ML{'.error.notloggedin'} p?>";
@@ -812,7 +819,7 @@ if ($u->{'journaltitle'}) {
      my $users = shift;
      foreach my $f (@$users) {
          my $status = $f->{'statusvis'};
-         my $uilink = "<a href='$LJ::SITEROOT/userinfo.bml?user=$f->{'user'}'>$f->{'user'}</a>";
+         my $uilink = "<a href='" . $f->profile_url() . "'>$f->{'user'}</a>";
          $uilink = "<strike>$uilink</strike>" if $status =~ /[DXS]/;
          $uilink = "<b>$uilink</b>" if $remote_friendid{$f->{'userid'}} &&
              $remote->{'userid'} != $u->{'userid'};
@@ -889,7 +896,7 @@ if ($u->{'journaltitle'}) {
                  if ($f->{'journaltype'} eq "I") {
                      $frlink = "<a href=\"$LJ::SITEROOT/userinfo.bml?userid=$f->{'userid'}&amp;t=I\">" . LJ::ehtml($f->display_name) . "</a>";
                  } else {
-                     $frlink = "<a href=\"$LJ::SITEROOT/userinfo.bml?user=$f->{'user'}\">$f->{'user'}</a>";
+                     $frlink = "<a href='" . $f->profile_url() . "'>$f->{'user'}</a>";
                  }
 
                  $frlink = "<strike>$frlink</strike>" if $status =~ /[DXS]/;
@@ -959,7 +966,7 @@ if ($u->{'journaltitle'}) {
              my $count = 0;
              my $bold_mutual = ! LJ::u_equals($remote, $u);
              foreach (@mutual) {
-                 my $frlink = "<a href=\"$LJ::SITEROOT/userinfo.bml?user=$_->{'user'}\">$_->{'user'}</a>";
+                 my $frlink = "<a href='" . $_->profile_url() . "'>$_->{'user'}</a>";
                  $frlink = "<b>$frlink</b>" if $bold_mutual && $remote_friendid{$_->{'userid'}};
                  $body .= "$frlink, ";
                  if (++$count == $MAX_FRIENDOF_SHOW && $GET{'mode'} ne "full") {
@@ -988,7 +995,7 @@ if ($u->{'journaltitle'}) {
              foreach (@friend_of) {
                  my $frlink;
                  if ($_->{'journaltype'} eq "P") {
-                     $frlink = "<a href=\"$LJ::SITEROOT/userinfo.bml?user=$_->{'user'}\">$_->{'user'}</a>";
+                     $frlink = "<a href='" . $_->profile_url() . "'>$_->{'user'}</a>";
                  } elsif ($_->{'journaltype'} eq "I") {
                      $frlink = "<a href=\"$LJ::SITEROOT/userinfo.bml?userid=$_->{'userid'}&amp;t=I\">" . LJ::ehtml($_->display_name) . "</a>";
                  }
@@ -1010,7 +1017,7 @@ if ($u->{'journaltitle'}) {
              my $plus = $friendsof{'load_clipped'} ? "+" : "";
              $body .= "<b>" . $friendsof{'count_m'} . "$plus:</b> ";
              foreach (@member_of) {
-                 my $frlink = "<a href='$LJ::SITEROOT/userinfo.bml?user=$_->{'user'}'>$_->{'user'}</a>";
+                 my $frlink = "<a href='" . $_->profile_url() . "'>$_->{'user'}</a>";
                  $frlink = "<b>$frlink</b>" if $remote_friendid{$_->{'userid'}};
                  $body .= "$frlink, ";
              }
@@ -1039,7 +1046,7 @@ if ($u->{'journaltitle'}) {
 
  unless ($synd || $GET{'mode'} eq "full") {  # Synd accts are always full, but their full ends early (see below)
      $body .= "</table>\n";
-     $body .= "<p align='center'><i><a href='$LJ::SITEROOT/userinfo.bml?user=$u->{'user'}&amp;mode=full'>$ML{'.label.moredetails'}</a></i></p>";
+     $body .= "<p align='center'><i><a href='" . $u->profile_url() . "?mode=full'>$ML{'.label.moredetails'}</a></i></p>";
      $bml_okay = 0;
      return;
  }
@@ -1196,7 +1203,7 @@ if ($u->{'journaltitle'}) {
     if (my $vcount = @accesslist) {
         $count = $vcount if $count < $CHOP_POINT;
         $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.shared'}</b></td><td colspan='2'><b>$count</b>: ";
-        $body .= join(", ", map { "<a href='$LJ::SITEROOT/userinfo.bml?user=$_->{user}'>$_->{user}</a>" } @accesslist);
+        $body .= join(", ", map { "<a href='" . $_->profile_url() . "'>$_->{user}</a>" } @accesslist);
         $body .= ", ..." if $chopped;
         $body .= "</td></tr>";
     }
