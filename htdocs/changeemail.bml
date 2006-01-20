@@ -38,10 +38,14 @@ body<=
         }
 
         $ret .= "<?standout\n";
-        $ret .= "New email:<br />\n";
-        $ret .= "<input type='text' name='email' size='50' maxlength='50' /><br />\n";
-        $ret .= "Password:<br />\n";
-        $ret .= "<input type='password' name='password' size='50' maxlength='50' /><br />\n";
+        $ret .= "<div>Username:<br />\n";
+        $ret .= "<b>$u->{user}</b></div><br/>\n";
+        $ret .= "<div>Old email:<br />\n";
+        $ret .= "<b>$u->{email}</b></div><br/>\n";
+        $ret .= "<div>New email:<br />\n";
+        $ret .= "<input type='text' name='email' size='50' maxlength='50' /></div><br />\n";
+        $ret .= "<div>Current password:<br />\n";
+        $ret .= "<input type='password' name='password' size='50' maxlength='50' /></div>\n";
 
         $ret .= "standout?>\n";
 
