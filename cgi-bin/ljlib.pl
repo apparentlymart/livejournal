@@ -157,6 +157,11 @@ use constant CMAX_UPIC_COMMENT => 120;
                      # in S2, will be a real view.
                      "des" => "Profile Page",
                  },
+                 "profile" => {
+                     # just a redirect to userinfo.bml for now.
+                     # in S2, will be a real view.
+                     "des" => "Profile Page",
+                 },
                  "tag" => {
                      "des" => "Filtered Recent Entries View",
                  },

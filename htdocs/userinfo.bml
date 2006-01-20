@@ -9,6 +9,8 @@
  $head = "";
  $windowtitle = "";
 
+ BML::set_language_scope('/userinfo.bml');
+
  # Deal with bots
  my $sep  = "**";
  my $pre  = "<!-- \n" . ($sep x 40 . "\n") x 2 . "$sep\n" x 10 . $sep;
@@ -101,6 +103,19 @@
      BML::set_status(410); # 410 Gone
      return;
  }
+
+ my $domain = BML::get_client_header("Host");
+ if ($LJ::ONLY_USER_VHOSTS) {
+     my $url = $u->journal_base . "/profile";
+     my $good_domain = $url;
+     $good_domain =~ s!^http://!!;
+     $good_domain =~ s!/.*!!;
+     if ($domain ne $good_domain) {
+         return BML::redirect($url);
+     }
+ }
+
+
 
  my $dbcr = LJ::get_cluster_reader($u);
  return $error->($ML{'error.nodb'}) unless $dbcr;

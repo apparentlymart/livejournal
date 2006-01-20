@@ -355,6 +355,13 @@ sub trans
             return redir($r, "$LJ::SITEROOT/userinfo.bml?user=$opts->{'user'}");
         }
 
+        if ($opts->{'mode'} eq "profile") {
+            my $filename = "$LJ::HOME/htdocs/userinfo.bml";
+            $r->notes("_journal" => $RQ{'user'});
+            $r->notes("bml_filename" => $filename);
+            return Apache::BML::handler($r);
+        }
+
         %RQ = %$opts;
 
         # redirect communities to /community/<name>
