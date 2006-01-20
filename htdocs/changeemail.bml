@@ -68,7 +68,10 @@ body<=
 
         LJ::check_email($POST{'email'}, \@errors);
 
+        my $blocked = 0;
+
         if ($LJ::BLOCKED_PASSWORD_EMAIL && $POST{'email'} =~ /$LJ::BLOCKED_PASSWORD_EMAIL/) {
+            $blocked = 1;
             push @errors, "Invalid email.";
         }
 
@@ -76,14 +79,20 @@ body<=
             push @errors, 'Invalid password';
         }
 
+        ## make note of changed email
+        my $loginfo = "old: $u->{email}, new: $POST{'email'}";
+        $loginfo .= ", ip: " . BML::get_remote_ip if $LJ::LOG_CHANGEEMAIL_IP;
+        $loginfo .= ", blocked: " . $blocked;
+        $loginfo .= ", success: " . ((scalar @errors) ? 'false' : 'true');
+
+        LJ::statushistory_add($u->{userid}, $u->{userid}, 'email_changed', $loginfo);
+
         if (@errors) {
             $body .= LJ::error_list(@errors);
             $body .= $update_form->();
             return $body;
         }
 
-        ## make note of changed email
-        LJ::statushistory_add($u->{userid}, $u->{userid}, 'email_changed', "old: $u->{email}, new: $POST{'email'}");
         LJ::infohistory_add($u, 'email', $u->{email}, $u->{status});
 
         $u->log_event('email_change', { remote => $u, new => $POST{'email'} });
