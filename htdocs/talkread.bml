@@ -70,7 +70,7 @@ my $old_url = 0;
      delete $args{'itemid'};
      my $args = "";
      if (%args) {
-	 $args = "?" . join("&", map { LJ::eurl($_) . "=" . LJ::eurl($args{$_}) } keys %args);
+         $args = "?" . join("&", map { LJ::eurl($_) . "=" . LJ::eurl($args{$_}) } keys %args);
      }
      return BML::redirect($u->journal_base . "/$ditemid.html$args");
  }
@@ -572,7 +572,7 @@ my $old_url = 0;
 
      my $posturl = LJ::Talk::talkargs($talkurl, "mode=reply", $stylemine, $formatlight);
 
-     $ret .= "<form style='display: inline' method='post' action='/talkmulti.bml' name='multiform' id='multiform' >";
+     $ret .= "<form style='display: inline' method='post' action='$LJ::SITEROOT/talkmulti.bml' name='multiform' id='multiform' >";
 
      # Quick Reply when posting a new top level comment
      # requires setup when logged in.
