@@ -2689,6 +2689,26 @@ You may wish to go back and try again, selecting fewer interests to add.
 
 /lostinfo_do.bml.error1.text=You never used that email address with this account or it was never validated.
 
+/lostinfo_do.bml.lostpasswordmail.reset<<
+A request has been made at [[lostinfolink]] to reset
+the password to the [[sitename]] account associated with this email address.
+
+The account information is:
+
+          Username: [[username]]
+     Email Address: [[emailadr]]
+
+Follow this link to confirm the request to reset your password:
+
+    [[resetlink]]
+
+If you did not make this request, please ignore this email and your password
+will not be reset.
+
+Regards,
+[[sitename]] Team
+.
+
 /lostinfo_do.bml.lostpasswordmail.part1<<
 *** This is an automated email.  You do not need to respond to it. ***
 

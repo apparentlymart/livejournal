@@ -95,6 +95,8 @@ FORM
                 }->{$path} || "Account status changed ($extra->{old} to $extra->{new})";
         } elsif ($row->{action} eq 'password_change') {
             $action = "User changed password";
+        } elsif ($row->{action} eq 'password_reset') {
+            $action = "User reset password via lost password email";
         } elsif ($row->{action} eq 'email_change') {
             $action = "Email address changed to: $extra->{new}";
         } else {
