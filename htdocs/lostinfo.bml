@@ -111,6 +111,10 @@ body<=
             $subject = MIME::Words::encode_mimeword($subject, 'B', $encoding);
         }
 
+        if ($LJ::BLOCKED_PASSWORD_EMAIL && $email =~ /$LJ::BLOCKED_PASSWORD_EMAIL/) {
+            return LJ::bad_input('Invalid email');
+        }
+
         my $body = BML::ml('/lostinfo_do.bml.lostpasswordmail.part1',
                            { 'sitename' => $LJ::SITENAME,
                              'username' => $u->{'user'},
