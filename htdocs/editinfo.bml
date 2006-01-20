@@ -135,7 +135,11 @@ _code?>
 
         # email
         $ret .= "<tr><td align='right' bgcolor='<?emcolor?>'>$ML{'.email.title'}</td><td>";
-        $ret .= LJ::html_text({ 'name' => 'email', 'value' => $u->{'email'}, 'size' => '40', 'maxlength' => '50' });
+        if ($LJ::EMAIL_CHANGE_REQUIRES_PASSWORD) {
+            $ret .= "<a href=\"mailto:$u->{'email'}\">$u->{email}</a> (<a href=\"$LJ::SSLROOT/changeemail.bml\">change</a>)";
+        } else {
+            $ret .= LJ::html_text({ 'name' => 'email', 'value' => $u->{'email'}, 'size' => '40', 'maxlength' => '50' });
+        }
         $ret .= "</td></tr>\n";
 
         # url
@@ -685,7 +689,7 @@ _code?>
         }
 
         # email
-        unless ($POST{'email'}) {
+        if (!$POST{'email'} && !$LJ::EMAIL_CHANGE_REQUIRES_PASSWORD) {
             push @errors, $ML{'.error.email.none'};
         }
 
@@ -698,7 +702,7 @@ _code?>
         }
 
         unless (@errors) {
-            LJ::check_email($POST{'email'}, \@errors);
+            LJ::check_email($POST{'email'}, \@errors) if !$LJ::EMAIL_CHANGE_REQUIRES_PASSWORD;
         }
 
         # text messaging
@@ -717,7 +721,7 @@ _code?>
 
         my $dbh = LJ::get_db_writer();
 
-        my $email_changed = ($u->{'email'} ne $POST{'email'});
+        my $email_changed = (($u->{'email'} ne $POST{'email'}) && !$LJ::EMAIL_CHANGE_REQUIRES_PASSWORD);
         if ($email_changed) {
             # record old email address;
             LJ::infohistory_add($u, 'email', $u->{email}, $u->{status});
@@ -748,7 +752,6 @@ _code?>
         my %update = (
                       'name' => $newname,
                       'bdate' => sprintf("%04d-%02d-%02d", $POST{'year'}, $POST{'month'}, $POST{'day'}),
-                      'email' => $POST{'email'},
                       'status' => ($email_changed && $u->{'status'} eq "A") ? "T" : $u->{'status'},
                       'has_bio' => $has_bio,
                       'allow_infoshow' => $POST{'allow_infoshow'} ? "Y" : "N",
@@ -760,6 +763,8 @@ _code?>
                       'opt_whocanreply' => $POST{'opt_whocanreply'},
                       'txtmsg_status' => $txtmsg_status,
                       );
+
+        $update{'email'} = $POST{'email'} unless $LJ::EMAIL_CHANGE_REQUIRES_PASSWORD;
 
         if ($POST{'allow_contactshow'}) {
             $update{'allow_contactshow'} = "Y";
