@@ -422,13 +422,13 @@ my $old_url = 0;
          $ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
          $ret .= "<td>$ML{'.replysuspended'}";
          if (LJ::Talk::can_delete($remote, $u, $up, $userpost)) {
-             $ret .= " <a href='/delcomment.bml?${jargent}id=$dtid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
+             $ret .= " <a href='$LJ::SITEROOT/delcomment.bml?${jargent}id=$dtid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
          }
          if ($post->{state} ne 'F' && LJ::Talk::can_freeze($remote, $u, $up, $userpost)) {
-             $ret .= "<a href='/talkscreen.bml?mode=freeze&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_freeze", "", { align => 'absmiddle', hspace => 2, vspace => }) . "</a>";
+             $ret .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=freeze&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_freeze", "", { align => 'absmiddle', hspace => 2, vspace => }) . "</a>";
          }
          if ($post->{state} eq 'F' && LJ::Talk::can_unfreeze($remote, $u, $up, $userpost)) {
-             $ret .= "<a href='/talkscreen.bml?mode=unfreeze&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_unfreeze", "", { align => 'absmiddle', hspace => 2, vspace => }) . "</a>";
+             $ret .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=unfreeze&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_unfreeze", "", { align => 'absmiddle', hspace => 2, vspace => }) . "</a>";
          }
          $ret .= "</td></tr></table>\n";
      } else {
@@ -466,27 +466,27 @@ my $old_url = 0;
              $ret .= " <font size='-1'>(<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dtid", $formatlight) . "#t$dtid'>$T{'link'}</a>)</font> ";
 
              if (LJ::Talk::can_delete($remote, $u, $up, $userpost)) {
-                 $ret .= "<a href='/delcomment.bml?${jargent}id=$dtid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
+                 $ret .= "<a href='$LJ::SITEROOT/delcomment.bml?${jargent}id=$dtid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
              }
 
              if ($post->{'state'} ne 'F' &&
                  LJ::Talk::can_freeze($remote, $u, $up, $userpost)) {
-                 $ret .= "<a href='/talkscreen.bml?mode=freeze&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_freeze", "", { align => 'absmiddle', hspace => 2, vspace => }) . "</a>";
+                 $ret .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=freeze&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_freeze", "", { align => 'absmiddle', hspace => 2, vspace => }) . "</a>";
              }
 
              if ($post->{'state'} eq 'F' &&
                  LJ::Talk::can_unfreeze($remote, $u, $up, $userpost)) {
-                 $ret .= "<a href='/talkscreen.bml?mode=unfreeze&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_unfreeze", "", { align => 'absmiddle', hspace => 2, vspace => }) . "</a>";
+                 $ret .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=unfreeze&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_unfreeze", "", { align => 'absmiddle', hspace => 2, vspace => }) . "</a>";
              }
 
              if ($post->{'state'} ne 'S' &&
                  LJ::Talk::can_screen($remote, $u, $up, $userpost)) {
-                 $ret .= "<a href='/talkscreen.bml?mode=screen&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_scr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
+                 $ret .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=screen&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_scr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
              }
 
              if ($post->{'state'} eq 'S' &&
                  LJ::Talk::can_unscreen($remote, $u, $up, $userpost)) {
-                 $ret .= "<a href='/talkscreen.bml?mode=unscreen&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_unscr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
+                 $ret .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_unscr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
              }
 
              if ($showmultiform) {
