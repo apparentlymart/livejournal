@@ -426,7 +426,8 @@ sub make_login_session {
         'exptype' => $exptype,
         'ipfixed' => $ipfixed,
     });
-    $BML::COOKIE{'ljsession'} = [  "ws:$u->{'user'}:$sess->{'sessid'}:$sess->{'auth'}", $etime, 1 ];
+    my $gen = $LJ::COOKIE_GEN || "";
+    $BML::COOKIE{'ljsession'} = [  "ws$gen:$u->{'user'}:$sess->{'sessid'}:$sess->{'auth'}", $etime, 1 ];
     LJ::User->set_remote($u);
 
     $u->preload_props("browselang", "schemepref");
@@ -3713,7 +3714,8 @@ sub get_remote
         };
 
         # fail unless authtype is 'ws' (more might be added in future)
-        unless ($authtype eq "ws") {
+        my $gen = $LJ::COOKIE_GEN || "";
+        unless ($authtype eq "ws$gen") {
             $err->("no ws auth");
             next;
         }

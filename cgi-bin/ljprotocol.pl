@@ -2116,10 +2116,11 @@ sub sessiongenerate {
     return fail($err, 308) if $u->{statusvis} eq 'L';
 
     my $sess = $u->generate_session($sess_opts);
+    my $gen = $LJ::COOKIE_GEN || "";
 
     # return our hash
     return {
-        ljsession => "ws:$u->{user}:$sess->{sessid}:$sess->{auth}",
+        ljsession => "ws$gen:$u->{user}:$sess->{sessid}:$sess->{auth}",
     };
 }
 
@@ -2137,8 +2138,8 @@ sub list_friends
     } else {
         $sql = "SELECT userid FROM friends WHERE friendid=?";
 
-	if (my $list = LJ::load_rel_user($u, 'B')) {
-	    $hide{$_} = 1 foreach @$list;
+        if (my $list = LJ::load_rel_user($u, 'B')) {
+            $hide{$_} = 1 foreach @$list;
         }
     }
 

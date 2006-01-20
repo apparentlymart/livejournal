@@ -1,5 +1,5 @@
 <?_code
-{ 
+{
     use strict;
     use vars qw($body %GET %POST $title);
 
@@ -25,7 +25,7 @@
 
     $title = $remote ?
         BML::ml(".loggedin.head2", { 'sitename' => $LJ::SITENAMESHORT} ) :
-        BML::ml(".login.title", { 'sitename' => $LJ::SITENAMESHORT} ); 
+        BML::ml(".login.title", { 'sitename' => $LJ::SITENAMESHORT} );
 
     if ($remote && $remote->readonly) {
         $body = LJ::bad_input("The database is temporarily in read-only mode, so creating new login sessions is temporarily down.  Please try again later.");
@@ -67,7 +67,7 @@
         }
 
         if ($remote) {
-            $body .= "<?p " . BML::ml(".loggedin.text2", 
+            $body .= "<?p " . BML::ml(".loggedin.text2",
                                       { 'username' => LJ::ljuser($remote)} ) . " p?>\n";
             $body .= "<br />\n";
             $body .= "<div style='float: left; padding: 5px 10px 0px 10px;'>";
@@ -205,7 +205,7 @@
                     # javascript version of login if they seem to have javascript, otherwise
                     # noscript to SSL
                     $body .= "<script type='text/javascript' language='Javascript'>\n";
-                    $body .= "<!-- \n document.write(\"<p style='padding-bottom: 5px'><img src='$LJ::IMGPREFIX/unpadlocked.gif' width='20' height='16' alt='secure login' align='middle' />" . 
+                    $body .= "<!-- \n document.write(\"<p style='padding-bottom: 5px'><img src='$LJ::IMGPREFIX/unpadlocked.gif' width='20' height='16' alt='secure login' align='middle' />" .
                         LJ::ejs(" <a href='$LJ::SITEROOT/login.bml'>$ML{'.login.secure'}</a> | $ML{'.login.standard'}</p>") .
                         "\"); \n // -->\n </script>\n";
                     if ($LJ::USE_SSL) {
@@ -335,7 +335,7 @@
                 $body = LJ::bad_input("The database is temporarily in read-only mode, so creating new login sessions is temporarily down.  Please try again later.");
                 return;
             }
-            
+
             my ($banned, $ok);
             $banned = $ok = 0;
             my $chal_opts = {};
@@ -396,10 +396,10 @@
                 'exptype' => 'short',
                 'ipfixed' => $bindip,
             };
-            
+
             my $etime = 0;
             if ($POST{'expire'} eq "never"  || $POST{'remember_me'}) {
-                $etime = time()+60*60*24*60; 
+                $etime = time()+60*60*24*60;
                 $sess_opts->{'exptype'} = "long";
             }
 
@@ -410,29 +410,30 @@
             LJ::run_hooks("login_add_opts", { 'u' => $u, 'form' => \%POST, 'opts' => \@sopts });
             my $sopts = @sopts ? ":" . join('', map { ".$_" } @sopts) : "";
 
-            $COOKIE{'ljsession'} = [  "ws:$u->{'user'}:$sess->{'sessid'}:$sess->{'auth'}$sopts", $etime, 1 ]; # 1 => HttpOnly
+            my $gen = $LJ::COOKIE_GEN || "";
+            $COOKIE{'ljsession'} = [  "ws$gen:$u->{'user'}:$sess->{'sessid'}:$sess->{'auth'}$sopts", $etime, 1 ]; # 1 => HttpOnly
 
             # restore default scheme
             $COOKIE{'BMLschemepref'} = [ $u->{'schemepref'}, $etime ];
             BML::set_scheme($u->{'schemepref'});
-            
+
             # kill the old-style cookies:
             foreach (qw(ljuser ljhpass permlogin)) {
                 delete $COOKIE{$_} if $COOKIE{$_};
             }
-            
+
             eval { Apache->request->notes('ljuser' => $user); };
             if ($bl) {
                 $COOKIE{'langpref'} = [ $bl->{'lncode'} . "/" . time(), $etime ];
                 BML::set_language($bl->{'lncode'});
             }
-            
+
             LJ::run_hooks("post_login", {
                 "u" => $u,
                 "form" => \%POST,
                 "expiretime" => $etime,
             });
-            
+
             # Redirect to offsite uri if allowed, and not an internal LJ redirect. ('ret' == 1)
             if ($POST{'ret'} && $POST{'ret'} != 1) {
                 my $redir_host = $1 if $POST{'ret'} =~ m#^http://([\.:\w-]+)#i;
@@ -448,11 +449,11 @@
             }
 
             if ($POST{'ref'} =~ /\Q$LJ::DOMAIN\E/ && $POST{'ref'} !~ m!/logout\.bml$! &&
-                $POST{'ref'} !~ /[\n\r]/) 
+                $POST{'ref'} !~ /[\n\r]/)
             {
                 return BML::redirect("$POST{'ref'}");
             }
-            
+
             LJ::set_remote($u);
             $remote = $u;
 
@@ -472,7 +473,7 @@
 
     $login_html->();
     return;
-} 
+}
  _code?><?_info
 nocache=>1
 _info?><?page

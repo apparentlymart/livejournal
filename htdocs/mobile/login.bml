@@ -6,28 +6,28 @@
     return "" unless LJ::did_post();
 
     my $err = sub {
-	BML::finish();
-	return $_[0];
+        BML::finish();
+        return $_[0];
     };
 
     my $u = LJ::load_user($POST{user})
-	or return $err->("Invalid username");
+        or return $err->("Invalid username");
 
     my ($banned, $ok);
     $ok = LJ::auth_okay($u, $POST{password}, undef, undef, \$banned);
 
     if ($banned) {
-	return $err->("Your IP address is temporarily banned for exceeding the login failure rate.");
+        return $err->("Your IP address is temporarily banned for exceeding the login failure rate.");
     }
 
     unless ($ok) {
-	return $err->("Bad password");
+        return $err->("Bad password");
     }
 
-    my $etime = time() + 60*60*24*60;    
+    my $etime = time() + 60*60*24*60;
     my $sess_opts = {
-	'exptype' => 'long',
-	'ipfixed' => 0,
+        'exptype' => 'long',
+        'ipfixed' => 0,
     };
 
     my $sess = $u->generate_session($sess_opts);
@@ -38,10 +38,11 @@
 
     # NOTE: we don't set HttpOnly attribute here, for paranoia of
     # mobile agents not understanding it
-    $COOKIE{'ljsession'} = [  "ws:$u->{'user'}:$sess->{'sessid'}:$sess->{'auth'}$sopts", $etime ];
+    my $gen = $LJ::COOKIE_GEN || "";
+    $COOKIE{'ljsession'} = [  "ws$gen:$u->{'user'}:$sess->{'sessid'}:$sess->{'auth'}$sopts", $etime ];
 
     LJ::set_remote($u);
-    
+
     return BML::redirect("$LJ::SITEROOT/mobile/?t=" . time());
 }
 _code?>
