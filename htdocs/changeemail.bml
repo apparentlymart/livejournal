@@ -1,0 +1,106 @@
+<?page
+title=><?_ml .title _ml?>
+body<=
+<?_code
+{
+    use strict;
+
+    my $body;
+
+    if ($LJ::SERVER_DOWN) {
+        $body = LJ::server_down_html();
+        return $body;
+    }
+
+    if ($LJ::USE_SSL && ! $LJ::IS_SSL && $FORM{'ssl'} ne "no") {
+        return BML::redirect("$LJ::SSLROOT/changeemail.bml");
+    }
+
+    my $u = LJ::get_remote()
+        or return LJ::bad_input("You must be logged in to edit your info.");
+
+    my $crumb = $LJ::IS_SSL ? 'securechangeemail' : 'changeemail';
+    LJ::set_active_crumb($crumb);
+
+    my $update_form = sub {
+        my $ret;
+
+        # else, show the form to change:
+        $ret .= "<form action='changeemail.bml' method='post'>\n";
+        $ret .= LJ::html_hidden(mode => 'submit',
+                                ssl => $GET{'ssl'});
+
+
+        # Warn them if logged in and not validated
+        if ($u && !LJ::did_post() && $u->{'status'} ne 'A') {
+            $ret .= "<?warningbar <b>$ML{'label.warning'}</b> Your account is not validated. warningbar?>";
+            $ret .= "<br />";
+        }
+
+        $ret .= "<?standout\n";
+        $ret .= "New email:<br />\n";
+        $ret .= "<input type='text' name='email' size='50' maxlength='50' /><br />\n";
+        $ret .= "Password:<br />\n";
+        $ret .= "<input type='password' name='password' size='50' maxlength='50' /><br />\n";
+
+        $ret .= "standout?>\n";
+
+        $ret .= "<?h1 $ML{'Proceed'} h1?>\n";
+
+        $ret .= "<?standout\n";
+        $ret .= "<input type='submit' value='Change email' />\n";
+        $ret .= "standout?>\n";
+        $ret .= "</form>\n";
+        return $ret;
+    };
+
+    unless (LJ::did_post()) {
+        $body .= $update_form->();
+    } elsif ($POST{'mode'} eq 'submit') {
+        my $password = $POST{'password'};
+        my $email = LJ::trim($POST{'email'});
+
+        my @errors = ();
+
+        LJ::check_email($POST{'email'}, \@errors);
+
+        if ($LJ::BLOCKED_PASSWORD_EMAIL && $POST{'email'} =~ /$LJ::BLOCKED_PASSWORD_EMAIL/) {
+            push @errors, "Invalid email.";
+        }
+
+        if ($POST{'password'} ne $u->{'password'}) {
+            push @errors, 'Invalid password';
+        }
+
+        if (@errors) {
+            $body .= LJ::error_list(@errors);
+            $body .= $update_form->();
+            return $body;
+        }
+
+        ## make note of changed email
+        # record old email address;
+        LJ::infohistory_add($u, 'email', $u->{email}, $u->{status});
+
+        $u->log_event('email_change', { remote => $u, new => $POST{'email'} });
+
+        LJ::run_hook('post_email_change',
+                     {
+                         user     => $u,
+                         newemail => $POST{'email'},
+                     });
+
+        LJ::update_user($u, { email => $POST{'email'} });
+
+        $body = "<?h1 $ML{'Success'} h1?><?p Email changed successfuly p?>";
+    }
+
+    return $body;
+}
+_code?>
+    <=body
+    page?><?_c <LJDEP>
+post: htdocs/changepassword.bml
+lib: Digest::MD5
+hook: post_changepassword
+    </LJDEP> _c?>
