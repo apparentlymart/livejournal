@@ -327,7 +327,7 @@
  } elsif ($extid) {
      if ($extid->[0] eq "O") {
          $body .= $h1->("OpenID user");
-         $body .= $p->("This is a non-$LJ::SITENAME user that's using their external identity to log in to $LJ::SITENAME using <a href='/openid/'>OpenID</a> in order to leave authenticated comments and read friends-only entries.");
+         $body .= $p->("This is a non-$LJ::SITENAME user that's using their external identity to log in to $LJ::SITENAME using <a href='$LJ::SITEROOT/openid/'>OpenID</a> in order to leave authenticated comments and read friends-only entries.");
      }
 
 
@@ -342,7 +342,7 @@
      my @linkele;
 
      my $label = $com ? $ML{'.monitor.comm'} : $ML{'.monitor.user'};
-     push @linkele, "<a href='/friends/add.bml?user=$user'><img src='$LJ::IMGPREFIX/btn_addfriend.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>";
+     push @linkele, "<a href='$LJ::SITEROOT/friends/add.bml?user=$user'><img src='$LJ::IMGPREFIX/btn_addfriend.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>";
 
      if (LJ::can_use_journal($remote->{'userid'}, $user) && !$extid) {
          if($remote_isowner) {
@@ -353,25 +353,25 @@
 
          $label = LJ::ehtml("$label");
 
-         push @linkele, "<a href='/update.bml?usejournal=$user'><img src='$LJ::IMGPREFIX/btn_edit.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>";
+         push @linkele, "<a href='$LJ::SITEROOT/update.bml?usejournal=$user'><img src='$LJ::IMGPREFIX/btn_edit.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>";
      }
 
      $label = $ML{'.label.todo'};
-     push @linkele, "<a href='/todo/?user=$user'><img src='$LJ::IMGPREFIX/btn_todo.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>" unless $extid;
+     push @linkele, "<a href='$LJ::SITEROOT/todo/?user=$user'><img src='$LJ::IMGPREFIX/btn_todo.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>" unless $extid;
 
      $label = $ML{'.label.memories'};
-     push @linkele, "<a href='/tools/memories.bml?user=$user'><img src='$LJ::IMGPREFIX/btn_memories.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>" unless $extid;
+     push @linkele, "<a href='$LJ::SITEROOT/tools/memories.bml?user=$user'><img src='$LJ::IMGPREFIX/btn_memories.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>" unless $extid;
 
      unless ($LJ::DISABLED{'tellafriend'} || $extid) {
-         push @linkele, "<a href='/tools/tellafriend.bml?user=$u->{'user'}'><img align='middle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_tellfriend.gif' width='22' height='20' alt='$ML{'.tellafriend'}' title='$ML{'.tellafriend'}' border='0' /></a>";
+         push @linkele, "<a href='$LJ::SITEROOT/tools/tellafriend.bml?user=$u->{'user'}'><img align='middle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_tellfriend.gif' width='22' height='20' alt='$ML{'.tellafriend'}' title='$ML{'.tellafriend'}' border='0' /></a>";
      }
 
      unless ($LJ::DISABLED{'offsite_journal_search'} || $extid) {
-         push @linkele, "<a href='/tools/search.bml?journal=$u->{'user'}'><img align='middle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_search.gif' width='22' height='20' alt='$ML{'.label.searchjournal'}' title='$ML{'.label.searchjournal'}' border='0' /></a>";
+         push @linkele, "<a href='$LJ::SITEROOT/tools/search.bml?journal=$u->{'user'}'><img align='middle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_search.gif' width='22' height='20' alt='$ML{'.label.searchjournal'}' title='$ML{'.label.searchjournal'}' border='0' /></a>";
      }
 
      unless ($LJ::DISABLED{'nudge'} || $remote_isowner) {
-         push @linkele, "<a href='/friends/nudge.bml?user=$u->{'user'}'><img align='middle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_nudge.gif' width='22' height='20' alt='Nudge a friend' title='Nudge a friend' border='0' /></a>";
+         push @linkele, "<a href='$LJ::SITEROOT/friends/nudge.bml?user=$u->{'user'}'><img align='middle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_nudge.gif' width='22' height='20' alt='Nudge a friend' title='Nudge a friend' border='0' /></a>";
      }
 
      foreach my $row (LJ::run_hooks("userinfo_linkele", $u, $remote)) {
@@ -397,7 +397,7 @@
      } else {
          $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.user'}</b></td><td width='100%'><a href='$jbase/'><b>$user</b></a> ($u->{'userid'}) $hook_extra ";
          if ($u->{public_key}) {
-             $body .= "<a href='/pubkey.bml?user=$user'>";
+             $body .= "<a href='$LJ::SITEROOT/pubkey.bml?user=$user'>";
              $body .= "<img src='/img/key.gif' width='16' height='16' border='0' alt='View public key' title='View public key' style='vertical-align: middle; border: 0;' /></a>";
          }
          $body .= "</td>\n";
@@ -412,8 +412,8 @@
      my $picid = $u->{'defaultpicid'};
      my %pic;
      LJ::load_userpics(\%pic, [ $u, $picid ]);
-     $body .= "<a href='/allpics.bml?user=$user'><img src='$LJ::USERPIC_ROOT/$picid/$userid' width='$pic{$picid}->{'width'}' height='$pic{$picid}->{'height'}' vspace='3' border='0' alt='$user $ML{'.allpics'}' /></a>";
-     $body .= "<br /><a href='/allpics.bml?user=$user'><font size='1' style='white-space: nowrap'>$ML{'.allpics'}</font></a>";
+     $body .= "<a href='$LJ::SITEROOT/allpics.bml?user=$user'><img src='$LJ::USERPIC_ROOT/$picid/$userid' width='$pic{$picid}->{'width'}' height='$pic{$picid}->{'height'}' vspace='3' border='0' alt='$user $ML{'.allpics'}' /></a>";
+     $body .= "<br /><a href='$LJ::SITEROOT/allpics.bml?user=$user'><font size='1' style='white-space: nowrap'>$ML{'.allpics'}</font></a>";
  } else {
      $body .= "&nbsp;";
  }
@@ -507,7 +507,7 @@ if ($u->{'journaltitle'}) {
 
           if ($u->{'country'}) {
               $country = $LJ::DISABLED{'directory'} ? $countries{$u->{'country'}} :
-                  "<a href='/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=$u->{'country'}'>".
+                  "<a href='$LJ::SITEROOT/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=$u->{'country'}'>".
                       $countries{$u->{'country'}} . "</a>";
 
               my $estate;
@@ -516,7 +516,7 @@ if ($u->{'journaltitle'}) {
                   if ($u->{'country'} eq "US") { $state = $states{$state}; }
                   $estate = LJ::eurl($state);
                   $state = $LJ::DISABLED{'directory'} ? $state :
-                      "<a href='/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=".
+                      "<a href='$LJ::SITEROOT/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=".
                           "$u->{'country'}&amp;loc_st=$estate'>$state</a>";
               }
 
@@ -524,7 +524,7 @@ if ($u->{'journaltitle'}) {
                   my $ecity = LJ::eurl($u->{'city'});
                   $city = LJ::ehtml($u->{'city'});
                   unless ($LJ::DISABLED{'directory'}) {
-                      $city = "<a href='/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=".
+                      $city = "<a href='$LJ::SITEROOT/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=".
                           "$u->{'country'}&amp;loc_st=$estate&amp;loc_ci=$ecity'>$city</a>";
                   }
               }
@@ -652,7 +652,12 @@ if ($u->{'journaltitle'}) {
      my $span = ($narrow_left-- > 0) ? 1 : 2;
      my $label = $com ? $ML{'.about.comm'} : $ML{'.about.user'};
 
-     LJ::CleanHTML::clean_userbio(\$u->{'bio'});
+     if ($u->{journaltype} eq 'I' && $LJ::ONLY_USER_VHOSTS) {
+         $u->{'bio'} = LJ::ehtml($u->{'bio'}); # XXXXX FIXME: TEMP FIX
+         $u->{'bio'} =~ s!\n!<br/>!g;
+     } else {
+         LJ::CleanHTML::clean_userbio(\$u->{'bio'});
+     }
 
      $body .= "<tr><td align='right' valign='top'><b>$label</b></td><td colspan='$span'>$u->{'bio'}</td></tr>\n";
  }
@@ -664,7 +669,7 @@ if ($u->{'journaltitle'}) {
          my $span = ($narrow_left-- > 0) ? 1 : 2;
          my $noun_name = $memcount == 1 ? '.memories.entry' : '.memories.entries';
          my $count = BML::ml($noun_name, {'count'=>$memcount});
-         $body .= "<tr><td align='right' valign='top'><b>$ML{'.label.memories'}</b></td><td colspan='$span'><a href='/tools/memories.bml?user=$user'>$count</a></td></tr>\n";
+         $body .= "<tr><td align='right' valign='top'><b>$ML{'.label.memories'}</b></td><td colspan='$span'><a href='$LJ::SITEROOT/tools/memories.bml?user=$user'>$count</a></td></tr>\n";
      }
  }
 
@@ -696,7 +701,7 @@ if ($u->{'journaltitle'}) {
 
  if (@$intu) {
      my $span = ($narrow_left-- > 0) ? 1 : 2;
-     $body .= "<tr><td align='right' valign='top'><b><a href='/interests.bml'>$ML{'.label.interests'}</a>:</b></td><td colspan='$span'>";
+     $body .= "<tr><td align='right' valign='top'><b><a href='$LJ::SITEROOT/interests.bml'>$ML{'.label.interests'}</a>:</b></td><td colspan='$span'>";
      my $intcount = 0;
      my $intlist = "";
      foreach my $int (@$intu) {
@@ -705,9 +710,9 @@ if ($u->{'journaltitle'}) {
          my $eint = LJ::eurl($int->[1]);
          if ($int->[2] > 1) {  # 2==intcount
              if ($remote_interest{$int->[0]}) {  # 0==intid
-                 $intlist .= "<b><a href='/interests.bml?int=$eint'>$int->[1]</a></b>, ";
+                 $intlist .= "<b><a href='$LJ::SITEROOT/interests.bml?int=$eint'>$int->[1]</a></b>, ";
              } else {
-                 $intlist .= "<a href='/interests.bml?int=$eint'>$int->[1]</a>, ";
+                 $intlist .= "<a href='$LJ::SITEROOT/interests.bml?int=$eint'>$int->[1]</a>, ";
              }
          } else {
              $intlist .= "$int->[1], ";
@@ -721,7 +726,7 @@ if ($u->{'journaltitle'}) {
 
      $body .= "<b>$intcount:</b> " . $intlist;
      if ($remote) {
-         my $link = "/interests.bml?mode=enmasse";
+         my $link = "$LJ::SITEROOT/interests.bml?mode=enmasse";
          $link .= "&fromuser=$user" unless ($remote->{'userid'} == $userid);
          $body .= ". <small>";
          my $mlcode = ($remote->{'userid'} == $userid) ? '.label.interests.removesome'
@@ -750,7 +755,7 @@ if ($u->{'journaltitle'}) {
      # if it is a community and there are schools defined
      if ($u->{'journaltype'} ne 'C' || ($schools && %$schools)) {
          my $span = ($narrow_left-- > 0) ? 1 : 2;
-         $body .= "<tr><td align='right' valign='top'><b><a href='/schools/'>$ML{'.label.schools'}</a>:</b></td><td colspan='$span'>";
+         $body .= "<tr><td align='right' valign='top'><b><a href='$LJ::SITEROOT/schools/'>$ML{'.label.schools'}</a>:</b></td><td colspan='$span'>";
 
          if ($schools && %$schools) {
              my @links;
@@ -791,7 +796,7 @@ if ($u->{'journaltitle'}) {
 
          if ($remote->{userid} == $userid) {
              $body .= ' <small>';
-             $body .= BML::ml('Actionlink', { 'link' => "<a href='/schools/manage.bml'>$ML{'.label.manageschools'}</a>" });
+             $body .= BML::ml('Actionlink', { 'link' => "<a href='$LJ::SITEROOT/schools/manage.bml'>$ML{'.label.manageschools'}</a>" });
              $body .= '</small>';
          }
 
@@ -807,7 +812,7 @@ if ($u->{'journaltitle'}) {
      my $users = shift;
      foreach my $f (@$users) {
          my $status = $f->{'statusvis'};
-         my $uilink = "<a href='/userinfo.bml?user=$f->{'user'}'>$f->{'user'}</a>";
+         my $uilink = "<a href='$LJ::SITEROOT/userinfo.bml?user=$f->{'user'}'>$f->{'user'}</a>";
          $uilink = "<strike>$uilink</strike>" if $status =~ /[DXS]/;
          $uilink = "<b>$uilink</b>" if $remote_friendid{$f->{'userid'}} &&
              $remote->{'userid'} != $u->{'userid'};
@@ -871,7 +876,7 @@ if ($u->{'journaltitle'}) {
      if ($friends{'count'}) {
          if (!$friends{'loaded'} || !$friends{'display'}) {
              $body .= "<b>" . $friends{'count'} . ":</b> ";
-             $body .= "<a href='/directory.bml?s_fro=1&amp;fro_user=$u->{'user'}'> " . ($com ? $ML{'.label.viewmembers'} : $ML{'.label.viewfriends'}) .  " </a>.";
+             $body .= "<a href='$LJ::SITEROOT/directory.bml?s_fro=1&amp;fro_user=$u->{'user'}'> " . ($com ? $ML{'.label.viewmembers'} : $ML{'.label.viewfriends'}) .  " </a>.";
          } elsif ($u->{'journaltype'} eq 'P' or $u->{'journaltype'} eq 'S') {
              # personal/shared journals have a special way of showing their friends list, it breaks it down into
              # three sublists: personal/shared, community/news, syndication
@@ -882,9 +887,9 @@ if ($u->{'journaltitle'}) {
 
                  my $frlink;
                  if ($f->{'journaltype'} eq "I") {
-                     $frlink = "<a href=\"/userinfo.bml?userid=$f->{'userid'}&amp;t=I\">" . LJ::ehtml($f->display_name) . "</a>";
+                     $frlink = "<a href=\"$LJ::SITEROOT/userinfo.bml?userid=$f->{'userid'}&amp;t=I\">" . LJ::ehtml($f->display_name) . "</a>";
                  } else {
-                     $frlink = "<a href=\"/userinfo.bml?user=$f->{'user'}\">$f->{'user'}</a>";
+                     $frlink = "<a href=\"$LJ::SITEROOT/userinfo.bml?user=$f->{'user'}\">$f->{'user'}</a>";
                  }
 
                  $frlink = "<strike>$frlink</strike>" if $status =~ /[DXS]/;
@@ -954,7 +959,7 @@ if ($u->{'journaltitle'}) {
              my $count = 0;
              my $bold_mutual = ! LJ::u_equals($remote, $u);
              foreach (@mutual) {
-                 my $frlink = "<a href=\"/userinfo.bml?user=$_->{'user'}\">$_->{'user'}</a>";
+                 my $frlink = "<a href=\"$LJ::SITEROOT/userinfo.bml?user=$_->{'user'}\">$_->{'user'}</a>";
                  $frlink = "<b>$frlink</b>" if $bold_mutual && $remote_friendid{$_->{'userid'}};
                  $body .= "$frlink, ";
                  if (++$count == $MAX_FRIENDOF_SHOW && $GET{'mode'} ne "full") {
@@ -983,9 +988,9 @@ if ($u->{'journaltitle'}) {
              foreach (@friend_of) {
                  my $frlink;
                  if ($_->{'journaltype'} eq "P") {
-                     $frlink = "<a href=\"/userinfo.bml?user=$_->{'user'}\">$_->{'user'}</a>";
+                     $frlink = "<a href=\"$LJ::SITEROOT/userinfo.bml?user=$_->{'user'}\">$_->{'user'}</a>";
                  } elsif ($_->{'journaltype'} eq "I") {
-                     $frlink = "<a href=\"/userinfo.bml?userid=$_->{'userid'}&amp;t=I\">" . LJ::ehtml($_->display_name) . "</a>";
+                     $frlink = "<a href=\"$LJ::SITEROOT/userinfo.bml?userid=$_->{'userid'}&amp;t=I\">" . LJ::ehtml($_->display_name) . "</a>";
                  }
                  $frlink = "<b>$frlink</b>" if $remote_friendid{$_->{'userid'}};
                  $body .= "$frlink, ";
@@ -1005,7 +1010,7 @@ if ($u->{'journaltitle'}) {
              my $plus = $friendsof{'load_clipped'} ? "+" : "";
              $body .= "<b>" . $friendsof{'count_m'} . "$plus:</b> ";
              foreach (@member_of) {
-                 my $frlink = "<a href='/userinfo.bml?user=$_->{'user'}'>$_->{'user'}</a>";
+                 my $frlink = "<a href='$LJ::SITEROOT/userinfo.bml?user=$_->{'user'}'>$_->{'user'}</a>";
                  $frlink = "<b>$frlink</b>" if $remote_friendid{$_->{'userid'}};
                  $body .= "$frlink, ";
              }
@@ -1034,7 +1039,7 @@ if ($u->{'journaltitle'}) {
 
  unless ($synd || $GET{'mode'} eq "full") {  # Synd accts are always full, but their full ends early (see below)
      $body .= "</table>\n";
-     $body .= "<p align='center'><i><a href='/userinfo.bml?user=$u->{'user'}&amp;mode=full'>$ML{'.label.moredetails'}</a></i></p>";
+     $body .= "<p align='center'><i><a href='$LJ::SITEROOT/userinfo.bml?user=$u->{'user'}&amp;mode=full'>$ML{'.label.moredetails'}</a></i></p>";
      $bml_okay = 0;
      return;
  }
@@ -1121,7 +1126,7 @@ if ($u->{'journaltitle'}) {
 
  my $points = $dbr->selectrow_array("SELECT SUM(points) AS 'points' FROM supportpoints WHERE userid=$userid");
  if ($points) {
-     $body .= "<tr><td align='right' nowrap='nowrap'><b><a href='/support/'>$ML{'.label.supportpoints'}</a>:</b></td><td colspan='2'>" . &comma($points) . "</td></tr>";
+     $body .= "<tr><td align='right' nowrap='nowrap'><b><a href='$LJ::SITEROOT/support/'>$ML{'.label.supportpoints'}</a>:</b></td><td colspan='2'>" . &comma($points) . "</td></tr>";
  }
 
  sub comma {
@@ -1191,7 +1196,7 @@ if ($u->{'journaltitle'}) {
     if (my $vcount = @accesslist) {
         $count = $vcount if $count < $CHOP_POINT;
         $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.shared'}</b></td><td colspan='2'><b>$count</b>: ";
-        $body .= join(", ", map { "<a href='userinfo.bml?user=$_->{user}'>$_->{user}</a>" } @accesslist);
+        $body .= join(", ", map { "<a href='$LJ::SITEROOT/userinfo.bml?user=$_->{user}'>$_->{user}</a>" } @accesslist);
         $body .= ", ..." if $chopped;
         $body .= "</td></tr>";
     }
@@ -1200,7 +1205,7 @@ if ($u->{'journaltitle'}) {
 $body .= "</table>\n";
 
 # removed until we run graphviz locally
-# $body .= "<p><a href=\"/friends/graph.bml?user=$user\"><b>Graph of friends</b></a></p>";
+# $body .= "<p><a href=\"$LJ::SITEROOT/friends/graph.bml?user=$user\"><b>Graph of friends</b></a></p>";
 
 $bml_okay = 0;
 return;
