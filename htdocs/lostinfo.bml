@@ -111,6 +111,10 @@ body<=
             $subject = MIME::Words::encode_mimeword($subject, 'B', $encoding);
         }
 
+        # generate new random password
+        my $newpass = LJ::make_auth_code(8);
+        LJ::update_user($u, { password => $newpass });
+
         my $body = BML::ml('/lostinfo_do.bml.lostpasswordmail.part1',
                            { 'sitename' => $LJ::SITENAME,
                              'username' => $u->{'user'},
