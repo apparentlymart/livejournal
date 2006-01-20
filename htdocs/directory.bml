@@ -270,7 +270,7 @@ body<=
              }
          }
 
-         $ret .= "<a href=\"/userinfo.bml?user=$rec->{'user'}\">";
+         $ret .= "<a href='" . $rec->profile_url() . "'>";
          if ($rec->{'journaltype'} eq "C") {
              $ret .= "<img border='0' src=\"$LJ::IMGPREFIX/community.gif\" width='16' height='16' align='absmiddle'>";
          } else {
@@ -291,7 +291,7 @@ body<=
      foreach my $rec (@matches) 
      {
          $ret .= "<TR VALIGN=TOP>";
-         $ret .= "<TD NOWRAP><A HREF=\"/userinfo.bml?user=$rec->{'user'}\">";
+         $ret .= "<TD NOWRAP><a href='" . $rec->profile_url() . "'>";
          if ($rec->{'journaltype'} eq "C") {
              $ret .= "<IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/community.gif\" WIDTH=16 HEIGHT=16 ALIGN=ABSMIDDLE>";
          } else {

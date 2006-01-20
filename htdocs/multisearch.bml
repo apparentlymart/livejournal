@@ -136,7 +136,7 @@
                  if ($output eq "foaf") {
                      return BML::redirect(LJ::journal_base($u) . '/data/foaf');
                  } else {    
-                     return BML::redirect("$LJ::SITEROOT/userinfo.bml?user=$u->{'user'}");
+                     return BML::redirect($u->profile_url());
                  }
              }
          }
@@ -166,7 +166,7 @@
          if ($output eq "foaf") {
              return BML::redirect(LJ::journal_base($u) . '/data/foaf');
          } else {
-             return BML::redirect("$LJ::SITEROOT/userinfo.bml?user=$u->{'user'}");
+             return BML::redirect($u->profile_url());
          }
      } else {
          $title = $ML{'.nomatch.title'};
