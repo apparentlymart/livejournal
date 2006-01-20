@@ -108,7 +108,11 @@ sub is_identity {
     return 0 unless $u && $u->{journaltype} eq "P";
 
     my $user = $u->{user};
+    my $url  = $u->journal_base . "/";
+
     return 1 if
+        $ident eq $url ||
+        # legacy:
         $ident eq "$LJ::SITEROOT/users/$user/" ||
         $ident eq "$LJ::SITEROOT/~$user/" ||
         $ident eq "http://$user.$LJ::USER_DOMAIN/";
