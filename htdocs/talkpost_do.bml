@@ -13,9 +13,11 @@ body<=
     # and requires it to be correct.  if it's not, the page fails.
     %POST = %GET if $GET{'ecphash'};
 
-    my $tempbody = $POST{'body'};
-    LJ::CleanHTML::clean_comment(\$tempbody);
-    return "" if $LJ::TALK_ABORT_REGEXP && $tempbody =~ /$LJ::TALK_ABORT_REGEXP/;
+    if ($LJ::TALK_ABORT_REGEXP) {
+        my $tempbody = $POST{'body'};
+        LJ::CleanHTML::clean_comment(\$tempbody);
+        return "" if $tempbody =~ /$LJ::TALK_ABORT_REGEXP/ || $POST{'body'} =~ /$LJ::TALK_ABORT_REGEXP/;
+    }
 
     my $req = shift;
     my $r = $req->{'r'};
