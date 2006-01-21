@@ -3478,17 +3478,22 @@ The [[sitename]] Team
 
 /schools/index.bml.addschool.input.name=Name of school:
 
+/schools/index.bml.addschool.input.name.campus|notes=To leave this rule out, make the string a single hyphen (-) and it won't be printed.
+/schools/index.bml.addschool.input.name.campus=For schools with multiple locations, add the city/campus after a dash (e.g. University of Texas - Austin)
+
+/schools/index.bml.addschool.input.name.capitalize|notes=To leave this rule out, make the string a single hyphen (-) and it won't be printed.
+/schools/index.bml.addschool.input.name.capitalize=Capitalize all words (except of, the, and, at, for, de, du, la, le, etc.)
+
 /schools/index.bml.addschool.input.name.examples=University of California Berkeley, Oregon State University
 
-/schools/index.bml.addschool.input.name.rule1=Type in the school's full name (e.g. "Harvard College" instead of just "Harvard")
+/schools/index.bml.addschool.input.name.fullname|notes=To leave this rule out, make the string a single hyphen (-) and it won't be printed.
+/schools/index.bml.addschool.input.name.fullname=Type in the school's full name (e.g. "Harvard College" instead of just "Harvard")
 
-/schools/index.bml.addschool.input.name.rule2=No abbreviations. (Spell out University, North, State, High School, etc.)
+/schools/index.bml.addschool.input.name.noabbrev|notes=To leave this rule out, make the string a single hyphen (-) and it won't be printed.
+/schools/index.bml.addschool.input.name.noabbrev=No abbreviations. (Spell out University, North, State, High School, etc.)
 
-/schools/index.bml.addschool.input.name.rule3=For schools with multiple locations, add the city/campus after a dash (e.g. University of Texas - Austin)
-
-/schools/index.bml.addschool.input.name.rule4=Don't use "The" in the beginning
-
-/schools/index.bml.addschool.input.name.rule5=Capitalize all words (except of, the, and, at, for, de, du, la, le, etc.)
+/schools/index.bml.addschool.input.name.nothe|notes=To leave this rule out, make the string a single hyphen (-) and it won't be printed.
+/schools/index.bml.addschool.input.name.nothe=Don't use "The" in the beginning
 
 /schools/index.bml.addschool.input.state=State/province:
 

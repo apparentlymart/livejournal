@@ -98,7 +98,7 @@ body<=
         $ret .= $inerr->('city');
         $ret .= "</td></tr><tr><td valign='top'>";
 
-        my @items = qw(.addschool.input.name.rule1 .addschool.input.name.rule2 .addschool.input.name.rule3 .addschool.input.name.rule4 .addschool.input.name.rule5);
+        my @items = qw(.addschool.input.name.fullname .addschool.input.name.noabbrev .addschool.input.name.campus .addschool.input.name.nothe .addschool.input.name.capitalize);
         my $listitems = "";
 
         # If a translation doesn't need a particular rule, they should put '-' as the translated form of the string they don't need, and it won't be printed
