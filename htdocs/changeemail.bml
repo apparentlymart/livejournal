@@ -7,8 +7,6 @@ body<=
 
     my $body;
     
-    LJ::set_active_crumb('changeemail');
-
     if ($LJ::SERVER_DOWN) {
         $body = LJ::server_down_html();
         return $body;
@@ -20,7 +18,10 @@ body<=
 
     my $u = LJ::get_remote()
         or return LJ::bad_input($ML{'error.noremote'});
-
+    
+    my $crumb = $LJ::IS_SSL ? 'securechangeemail' : 'changeemail';
+    LJ::set_active_crumb($crumb);
+    
     my $update_form = sub {
         my $ret;
 
