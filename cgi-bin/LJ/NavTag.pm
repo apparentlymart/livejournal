@@ -37,7 +37,7 @@ sub tags_of_dest {
     my $sth = $dbr->prepare("SELECT tag FROM navtag WHERE dest_type=? AND dest=?");
     $sth->execute($dest->type, $dest->dest);
     while (my ($tag) = $sth->fetchrow_array) {
-	push @tags, $tag;
+        push @tags, $tag;
     }
 
     return @tags;
@@ -53,7 +53,7 @@ sub tags_with_count {
     $sth->execute;
     my $tags = {};
     while (my ($tag, $count) = $sth->fetchrow_array) {
-	$tags->{$tag} = $count;
+        $tags->{$tag} = $count;
     }
     return $tags;
 }
@@ -70,9 +70,9 @@ sub dests_of_tag {
     $sth->execute($tag);
     my @dests;
     while (my $rec = $sth->fetchrow_hashref) {
-	my $dest = LJ::NavTag::Dest->new(type  => $rec->{dest_type},
-					 dest  => $rec->{dest});
-	push @dests, $dest;
+        my $dest = LJ::NavTag::Dest->new(type  => $rec->{dest_type},
+                                         dest  => $rec->{dest});
+        push @dests, $dest;
     }
 
     return @dests;
@@ -97,8 +97,8 @@ sub new {
 sub new_from_url {
     my ($class, $url) = @_;
     foreach my $type (LJ::NavTag->valid_types) {
-	my $dest = "LJ::NavTag::Dest::$type"->dest_from_url($url);
-	return $dest if $dest;
+        my $dest = "LJ::NavTag::Dest::$type"->dest_from_url($url);
+        return $dest if $dest;
     }
     return undef;
 }
@@ -113,7 +113,7 @@ sub add_tag {
     $tag = LJ::NavTag->canonical_tag($tag);
     my $dbh = LJ::get_db_writer();
     return $dbh->do("INSERT INTO navtag SET tag=?, dest_type=?, dest=?",
-		    undef, $tag, $self->type, $self->dest);
+                    undef, $tag, $self->type, $self->dest);
 }
 
 sub remove_tag {
@@ -121,7 +121,7 @@ sub remove_tag {
     $tag = LJ::NavTag->canonical_tag($tag);
     my $dbh = LJ::get_db_writer();
     return $dbh->do("DELETE FROM navtag WHERE tag=? AND dest_type=? AND dest=?",
-		    undef, $tag, $self->type, $self->dest);
+                    undef, $tag, $self->type, $self->dest);
 }
 
 sub title {
@@ -148,18 +148,20 @@ sub title {
     return $u ? $u->{name} : $self->SUPER::title;
 }
 
-sub url { 
+sub url {
     my $self = shift;
     my $user = $self->{dest};
+    my $u = LJ::load_user($user);
+    return $u->profile_url if $u;
     return "$LJ::SITEROOT/userinfo.bml?user=$user";
-#    return $self->ljuser->journal_base . "/info";
 }
 
 sub dest_from_url {
     my ($class, $url) = @_;
+    # FIXME: broken.  wrong URL type
     return undef unless $url =~ m!/userinfo.bml\?user=(\w+)!;
     return LJ::NavTag::Dest->new(type  => "LJUSER",
-				 dest  => $1);
+                                 dest  => $1);
 }
 
 ############################################################################
@@ -172,7 +174,7 @@ sub dest_from_url {
     my ($class, $url) = @_;
     return undef unless $url =~ s!^\Q$LJ::SITEROOT\E!!;
     return LJ::NavTag::Dest->new(type  => "PAGE",
-				 dest  => $url || "/");
+                                 dest  => $url || "/");
 }
 
 sub title {
@@ -182,7 +184,7 @@ sub title {
     my $dest = $self->{dest};
     $dest .= "index.bml" unless $dest =~ /\.bml$/;
     return LJ::Lang::get_text($curlang, $dest . ".title", $mld->{'dmid'}) ||
-	$self->{dest};
+        $self->{dest};
 }
 
 ############################################################################
@@ -195,7 +197,7 @@ sub dest_from_url {
     my ($class, $url) = @_;
     return undef unless $url =~ s!^\Q$LJ::SSLROOT\E!!;
     return LJ::NavTag::Dest->new(type  => "PAGE",
-				 dest  => $url || "/");
+                                 dest  => $url || "/");
 }
 
 ############################################################################
@@ -206,7 +208,7 @@ sub dest_from_url {
     my ($class, $url) = @_;
     return undef unless $url =~ m!/support/faqbrowse.bml\?faqid=(\d+)!;
     return LJ::NavTag::Dest->new(type  => "FAQ",
-				 dest  => $1);
+                                 dest  => $1);
 }
 
 sub _faqid { int($_[0]->{dest}) };
@@ -223,7 +225,7 @@ sub title {
     my $altlang = $curlang ne $deflang;
     my $mld = LJ::Lang::get_dom("faq");
     if ($altlang) {
-	return LJ::Lang::get_text($curlang, $self->_faqid . ".1question", $mld->{'dmid'});
+        return LJ::Lang::get_text($curlang, $self->_faqid . ".1question", $mld->{'dmid'});
     }
 
     my $dbr = LJ::get_db_reader();
