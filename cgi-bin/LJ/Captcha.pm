@@ -18,7 +18,7 @@ require "$ENV{LJHOME}/cgi-bin/ljlib.pl";
 sub generate_visual
 {
     my ($code) = @_;
-    
+
     my $im_width = 25;
     my $im_height = 35;
     my $length = length($code);
@@ -28,7 +28,7 @@ sub generate_visual
     # create a new image and color
     my $im = new GD::Image(($im_width * $length),$im_height);
     my $black = $im->colorAllocate(0,0,0);
-    
+
     # copy the character images into the code graphic
     for(my $i=0; $i < $length; $i++)
     {
@@ -42,7 +42,7 @@ sub generate_visual
         my $d = int(rand (int(($im_height)/3)))-(int(($im_height)/5));
         $im->copyResized($source,($i*($im_width))+$a,$b,0,0,($im_width)+$c,($im_height)+$d,$im_width,$im_height);
     }
-    
+
     # distort the code graphic
     for(my $i=0; $i<($length*$im_width*$im_height/14+150); $i++)
     {
@@ -60,7 +60,7 @@ sub generate_visual
             $im->setPixel($c,$d,$black);
         }
     }
-    
+
     # generate a background
     my $a = int(rand 5)+1;
     my $background_img = "$img/background$a.png";
@@ -72,15 +72,15 @@ sub generate_visual
     my $e = int(rand (int($background_height/7)))+0;
     my $source2 = new GD::Image(($length*($im_width)),$im_height);
     $source2->copyResized($source,0,0,$b,$c,$length*$im_width,$im_height,$background_width-$b-$d,$background_height-$c-$e);
-    
+
     # merge the background onto the image
     $im->copyMerge($source2,0,0,0,0,($length*($im_width)),$im_height,40);
-    
+
     # add a border
     $im->rectangle(0, 0, $length*$im_width-1, $im_height-1, $black);
-    
+
     return $im->png;
-    
+
 }
 
 
@@ -104,7 +104,7 @@ sub get_id
 
     # Fetch database handle and lock the captcha table
     $dbh = LJ::get_db_writer()
-		or return LJ::error( "Couldn't fetch a db writer." );
+                or return LJ::error( "Couldn't fetch a db writer." );
     $dbh->selectrow_array("SELECT GET_LOCK('get_captcha', 10)")
                 or return LJ::error( "Failed lock on getting a captcha." );
 
@@ -273,7 +273,7 @@ sub generate_audio
     print FEST "(Parameter.set 'Audio_Command \"mv \$FILE speech.wav\")\n";
     print FEST "(SayText \"$numbers_speak\")\n";
     close FEST or die "Error closing festival";
-    
+
     my $sox = sub {
         my ($effect, $filename, $inopts, $outopts) = @_;
         $effect = [] unless $effect;
@@ -295,7 +295,7 @@ sub generate_audio
     command("${bin_sox}mix", qw(-v 4 speech.wav noise.wav -r 16000 tmp.wav));
     rename('tmp.wav', 'speech.wav') or die;
     unlink('oldspeech.wav', 'noise.wav');
-    
+
     chdir($old_dir) or return 0;
     return ("$dir/speech.wav", $numbers_clean);
 }
@@ -348,7 +348,7 @@ sub session_check_code {
 
     my $dbcm = LJ::get_cluster_master($u);
     my $dbr = LJ::get_db_reader();
-    
+
     my ($lcapid, $try) =  # clustered
         $dbcm->selectrow_array('SELECT lastcapid, trynum ' .
                                'FROM captcha_session ' .
