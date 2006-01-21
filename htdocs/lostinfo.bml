@@ -119,7 +119,7 @@ body<=
 
         if ($LJ::SECURE_PASSWORD_RESET) {
             # register an auth action for them to reset their password
-            my $aa = LJ::register_authaction($u->{'userid'}, "reset_password", $u->{'email'});
+            my $aa = LJ::register_authaction($u->{'userid'}, "reset_password", $email);
             $body = BML::ml('/lostinfo_do.bml.lostpasswordmail.reset', {
                                 lostinfolink => "$LJ::SITEROOT/lostinfo.bml",
                                 sitename => $LJ::SITENAME,
