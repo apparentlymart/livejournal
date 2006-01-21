@@ -9,6 +9,7 @@
                'advcustomize' => ['Customize Advanced S2 Settings', '/customize/advanced/index.bml', 'manage'],
                'advsearch' => ['Advanced Search', '/directorysearch.bml', 'search'],
                'birthdays' => ['Birthdays', '/birthdays.bml', 'friends'],
+               'changeemail' => ['Change Email Address', '/changeemail.bml', 'editinfo'],
                'changepass' => ['Change Password', '/changepassword.bml', 'manage'],
                'comminvites' => ['Community Invitations', '/manage/invites.bml', 'manage'],
                'commmembers' => ['Community Membership', '', 'managecommunity'],

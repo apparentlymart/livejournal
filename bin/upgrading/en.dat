@@ -99,6 +99,28 @@ Click <a [[aopts]]>here</a> to add the shared journal to your friends list.
 
 /birthdays.bml.view=View
 
+/changeemail.bml.btn.change=Change email address
+
+/changeemail.bml.error.invalidemail=Invalid email address.
+
+/changeemail.bml.error.invalidpassword=Invalid password.
+
+/changeemail.bml.error.notvalidated=Your account is not validated.
+
+/changeemail.bml.label.newemail=New email address:
+
+/changeemail.bml.label.oldemail=Old email address:
+
+/changeemail.bml.label.password=Current password:
+
+/changeemail.bml.label.username=Username:
+
+/changeemail.bml.success.header=Success
+
+/changeemail.bml.success.text=Email address changed successfully.
+
+/changeemail.bml.title=Change Email Address
+
 /changepassword.bml.btn.proceed=Proceed
 
 /changepassword.bml.changepassword.header=Change Password

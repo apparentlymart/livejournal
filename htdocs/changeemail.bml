@@ -6,6 +6,8 @@ body<=
     use strict;
 
     my $body;
+    
+    LJ::set_active_crumb('changeemail');
 
     if ($LJ::SERVER_DOWN) {
         $body = LJ::server_down_html();
@@ -17,10 +19,7 @@ body<=
     }
 
     my $u = LJ::get_remote()
-        or return LJ::bad_input("You must be logged in to edit your info.");
-
-    my $crumb = $LJ::IS_SSL ? 'securechangeemail' : 'changeemail';
-    LJ::set_active_crumb($crumb);
+        or return LJ::bad_input($ML{'error.noremote'});
 
     my $update_form = sub {
         my $ret;
@@ -33,26 +32,24 @@ body<=
 
         # Warn them if logged in and not validated
         if ($u && !LJ::did_post() && $u->{'status'} ne 'A') {
-            $ret .= "<?warningbar <b>$ML{'label.warning'}</b> Your account is not validated. warningbar?>";
+            $ret .= "<?warningbar <b>$ML{'label.warning'}</b> $ML{'.error.notvalidated'} warningbar?>";
             $ret .= "<br />";
         }
 
         $ret .= "<?standout\n";
-        $ret .= "<div>Username:<br />\n";
+        $ret .= "<div>$ML{'.label.username'}<br />\n";
         $ret .= "<b>$u->{user}</b></div><br/>\n";
-        $ret .= "<div>Old email:<br />\n";
+        $ret .= "<div>$ML{'.label.oldemail'}<br />\n";
         $ret .= "<b>$u->{email}</b></div><br/>\n";
-        $ret .= "<div>New email:<br />\n";
+        $ret .= "<div>$ML{'.label.newemail'}<br />\n";
         $ret .= "<input type='text' name='email' size='50' maxlength='50' /></div><br />\n";
-        $ret .= "<div>Current password:<br />\n";
+        $ret .= "<div>$ML{'.label.password'}<br />\n";
         $ret .= "<input type='password' name='password' size='50' maxlength='50' /></div>\n";
 
         $ret .= "standout?>\n";
-
-        $ret .= "<?h1 $ML{'Proceed'} h1?>\n";
-
+        $ret .= "<br />\n";
         $ret .= "<?standout\n";
-        $ret .= "<input type='submit' value='Change email' />\n";
+        $ret .= "<input type='submit' value=\"$ML{'.btn.change'}\" />\n";
         $ret .= "standout?>\n";
         $ret .= "</form>\n";
         return $ret;
@@ -72,11 +69,11 @@ body<=
 
         if ($LJ::BLOCKED_PASSWORD_EMAIL && $POST{'email'} =~ /$LJ::BLOCKED_PASSWORD_EMAIL/) {
             $blocked = 1;
-            push @errors, "Invalid email.";
+            push @errors, $ML{'.error.invalidemail'};
         }
 
         if ($POST{'password'} ne $u->{'password'}) {
-            push @errors, 'Invalid password';
+            push @errors, $ML{'.error.invalidpassword'};
         }
 
         ## make note of changed email
@@ -110,7 +107,7 @@ body<=
 
         LJ::update_user($u, $tochange);
 
-        $body = "<?h1 $ML{'Success'} h1?><?p Email changed successfuly p?>";
+        $body = "<?h1 $ML{'.success.header'} h1?><?p $ML{'.success.text'} p?>";
     }
 
     return $body;
