@@ -1113,10 +1113,10 @@ sub journal_content
 
     $html .= ("<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxx -->\n" x 100) if $generate_iejunk;
 
-    if (my $cb = $LJ::TEMP_NO_EXT_CSS) {
-        $html =~ s!<link (.*)?!$cb->($&)!eig;
-        $html =~ s!\@import(.*)?!$cb->($&)!eig;
-        $html =~ s!<\?xml-stylesheet (.*)?!$cb->($&)!eig;
+    # Parse the page content for any temporary matches
+    # defined in local config
+    if (my $cb = $LJ::TEMP_PARSE_MAKE_JOURNAL) {
+        $html = $cb->($html);
     }
 
     my $do_gzip = $LJ::DO_GZIP && $LJ::OPTMOD_ZLIB;
