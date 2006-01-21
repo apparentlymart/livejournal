@@ -3436,6 +3436,38 @@ Sincerely,
 
 /register.bml.trans.header=Success
 
+/resetpassword.bml.email.body<<
+This is to inform you that the password to your [[sitename]] account
+has been reset.  Here is the new information to log in to your account:
+
+    Account:  [[username]]
+    Password: [[password]]
+
+You can now change your password to something you will remember here:
+
+    [[changepasswordurl]]
+
+
+Thank you,
+The [[sitename]] Team
+.
+
+/resetpassword.bml.email.subject=[[sitename]] Password Reset
+
+/resetpassword.bml.error.actionalreadyperformed=This action has already been performed.
+
+/resetpassword.bml.error.invalidaction=Invalid action.
+
+/resetpassword.bml.error.invalidarg=Invalid argument given.
+
+/resetpassword.bml.error.invaliduser=Internal error: invalid user
+
+/resetpassword.bml.success.header=Password Reset Confirmation
+
+/resetpassword.bml.success.text=Your password has been reset and a new password has been emailed to you.
+
+/resetpassword.bml.title=Reset Account Password
+
 /schools/index.bml.addschool.example=Example:
 
 /schools/index.bml.addschool.input.city=City:
