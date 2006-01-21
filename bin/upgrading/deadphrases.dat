@@ -254,3 +254,9 @@ general /schools/index.bml.addschool.input.name.rule2
 general /schools/index.bml.addschool.input.name.rule3
 general /schools/index.bml.addschool.input.name.rule4
 general /schools/index.bml.addschool.input.name.rule5
+
+general /schools/index.bml.addschool.input.name.campus
+general /schools/index.bml.addschool.input.name.capitalize
+general /schools/index.bml.addschool.input.name.fullname
+general /schools/index.bml.addschool.input.name.noabbrev
+general /schools/index.bml.addschool.input.name.nothe

@@ -98,17 +98,7 @@ body<=
         $ret .= $inerr->('city');
         $ret .= "</td></tr><tr><td valign='top'>";
 
-        my @items = qw(.addschool.input.name.fullname .addschool.input.name.noabbrev .addschool.input.name.campus .addschool.input.name.nothe .addschool.input.name.capitalize);
-        my $listitems = "";
-
-        # If a translation doesn't need a particular rule, they should put '-' as the translated form of the string they don't need, and it won't be printed
-        foreach my $item (@items) {
-            my $translated = $ML{$item};
-            next if $translated eq '-';
-            $listitems .= "<li>$translated</li>";
-        }
-        
-        $ret .= "$ML{'.addschool.input.name'}</td><td valign='top'>" . LJ::html_text({ name => "name", size => 50, value => $name }) . "<br />&nbsp;&nbsp;" . $ex->("$ML{'.addschool.input.name.examples'}<br /><ul>$listitems</ul>");
+        $ret .= "$ML{'.addschool.input.name'}</td><td valign='top'>" . LJ::html_text({ name => "name", size => 50, value => $name }) . "<br />&nbsp;&nbsp;" . $ex->("$ML{'.addschool.input.name.examples'}<br /><ul><li>$ML{'.addschool.input.name.fullname2'}</li><li>$ML{'.addschool.input.name.noabbrev2'}</li><li>$ML{'.addschool.input.name.campus2'}</li></ul>");
         $ret .= "</td></tr><tr><td colspan='2'>";
         $ret .= $inerr->('name');
         $ret .= "</td></tr><tr><td valign='top'>";
