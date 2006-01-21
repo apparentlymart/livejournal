@@ -171,26 +171,41 @@ sub _current_url {
 sub session_from_domain_cookie {
     my $class = shift;
     my $opts = ref $_[0] ? shift() : {};
-    return undef unless $BML::COOKIE{'ljloggedin'};
+
+    warn "session_from_domain_cookie()\n";
+
+    # the logged-in cookie
+    my $li_cook = $BML::COOKIE{'ljloggedin'};
+    return undef unless $li_cook;
+
+    warn "   li_cook = $li_cook\n";
+
+    my $no_session = sub {
+        my $reason = shift;
+        my $rr = $opts->{redirect_ref};
+        if ($rr) {
+            $$rr = "$LJ::SITEROOT/misc/get_domain_session.bml?return=" . LJ::eurl(_current_url());
+            warn "   need_bounce to: $$rr\n";
+        }
+        return undef;
+    };
 
     my @cookies = grep { $_ } @_;
-    if (!@cookies && $opts->{redirect_ref}) {
-        my $rr = $opts->{redirect_ref};
-        $$rr = "$LJ::SITEROOT/misc/get_domain_session.bml?return=" . LJ::eurl(_current_url());
-        return undef;
-    }
+    return $no_session->("no cookies") unless @cookies;
 
     my $cur_url = _current_url();
     my $domcook = LJ::Session->domain_cookie($cur_url);
 
+    warn "   domaincook: $domcook (for $cur_url)\n";
+
     foreach my $cookie (@cookies) {
-        my $sess = valid_domain_cookie($domcook, $cookie);
+        my $sess = valid_domain_cookie($domcook, $cookie, $li_cook);
         warn "for url=$cur_url, domcook=$domcook, sess=$sess\n";
         next unless $sess;
         return $sess;
     }
 
-    return undef;
+    return $no_session->("no valid cookie");
 }
 
 # CLASS METHOD
@@ -217,10 +232,8 @@ sub session_from_master_cookie {
 
   COOKIE:
     foreach my $sessdata (@cookies) {
-        warn "sessdata = $sessdata\n";
+        warn "master cookie: = $sessdata\n";
         my ($cookie, $gen) = split(m!//!, $sessdata);
-        warn "   cookie = $cookie\n";
-        warn "   gen = $gen\n";
 
         my ($version, $userid, $sessid, $auth, $flags);
 
@@ -236,7 +249,6 @@ sub session_from_master_cookie {
         foreach my $var (split /:/, $cookie) {
             if ($var =~ /^(\w)(.+)$/ && $dest->{$1}) {
                 ${$dest->{$1}} = $2;
-                warn "  cookie attr ($1) = $2\n";
             } else {
                 $bogus = 1;
             }
@@ -433,7 +445,7 @@ sub update_master_cookie {
                http_only       => 1,
                @expires,);
 
-    set_cookie(ljloggedin      => "2",
+    set_cookie(ljloggedin      => $sess->loggedin_string,
                domain          => $LJ::DOMAIN,
                path            => '/',
                http_only       => 1,
@@ -456,6 +468,12 @@ sub domsess_signature {
     my $data = join("-", $sess->{auth}, $domcook, $u->{userid}, $sess->{sessid}, $time);
     my $sig  = hmac_sha1_hex($data, $secret);
     return $sig;
+}
+
+# return format of the "ljloggedin" cookie.
+sub loggedin_string {
+    my ($sess) = @_;
+    return "u$sess->{userid}:s$sess->{sessid}";
 }
 
 # sets new ljmastersession cookie given the session object; second parameter is a
@@ -482,9 +500,11 @@ sub get_domain_cookie {
     return $value;
 }
 
-# returns undef or a session object
+# returns undef or a session, given a $domcook and its $val, as well
+# as the current logged-in cookie $li_cook which says the master
+# session's uid/sessid
 sub valid_domain_cookie {
-    my ($domcook, $val) = @_;
+    my ($domcook, $val, $li_cook) = @_;
 
     my ($cookie, $gen) = split m!//!, $val;
 
@@ -502,31 +522,42 @@ sub valid_domain_cookie {
     foreach my $var (split /:/, $cookie) {
         if ($var =~ /^(\w)(.+)$/ && $dest->{$1}) {
             ${$dest->{$1}} = $2;
-            warn "  cookie attr ($1) = $2\n";
         } else {
             $bogus = 1;
         }
     }
 
-    return undef if $bogus;
-    return undef if $gen ne $LJ::COOKIE_GEN;
-    return undef if $version != VERSION;
+    my $not_valid = sub {
+        my $reason = shift;
+        warn "  valid_domain_cookie = 0, because: $reason\n";
+        return undef;
+    };
+
+    return $not_valid->("bogus params") if $bogus;
+    return $not_valid->("wrong gen") if $gen ne $LJ::COOKIE_GEN;
+    return $not_valid->("wrong ver") if $version != VERSION;
 
     # have to be relatively new.  these shouldn't last longer than a day
     # or so anyway.
     my $now = time();
-    return undef unless $time > $now - 86400*7;;
+    return $not_valid->("old cookie") unless $time > $now - 86400*7;;
 
     my $u = LJ::load_userid($uid)
-        or return undef;
+        or return $not_valid->("no user $uid");
 
     my $sess = $u->session($sessid)
-        or return undef;
+        or return $not_valid->("no session $sessid");
 
-    return undef unless $sess->valid;
+    # the master session can't be expired or ip-bound to wrong IP
+    return $not_valid->("not valid") unless $sess->valid;
+
+    # the per-domain cookie has to match the session of the master cookie
+    my $sess_licook = $sess->loggedin_string;
+    return $not_valid->("li_cook mismatch.  session=$sess_licook, user=$li_cook")
+        unless $sess_licook eq $li_cook;
 
     my $correct_sig = domsess_signature($time, $sess, $domcook);
-    return undef unless $correct_sig eq $sig;
+    return $not_valid->("signature wrong") unless $correct_sig eq $sig;
 
     return $sess;
 }
@@ -598,7 +629,7 @@ sub setdomsess_handler {
     warn "  valid dest = $is_valid\n";
     return "$LJ::SITEROOT" unless $is_valid;
 
-    $is_valid = valid_domain_cookie($domcook, $cookie);
+    $is_valid = valid_domain_cookie($domcook, $cookie, $BML::COOKIE{'ljloggedin'});
     warn "  valid dom cookie = $is_valid\n";
     return $dest           unless $is_valid;
 
