@@ -1,0 +1,25 @@
+<?_code
+{
+    use strict;
+    use vars qw(%GET);
+    BML::decl_params('return' => qr!^http://\w+\.\Q$LJ::USER_DOMAIN\E/.*!);
+
+    my $dest = $GET{'return'} or
+        return BML::redirect("$LJ::SITEROOT/login.bml");
+
+    my $u = LJ::get_remote();
+
+    unless ($u) {
+        LJ::Session->clear_master_cookie;
+        return BML::redirect($dest);
+    }
+
+    my $domcook = LJ::Session->domain_cookie($dest) or
+        return BML::redirect("$LJ::SITEROOT/login.bml");
+
+    LJ::Session->send_domain_cookie($u, $domcook);
+    return BML::redirect($dest);
+}
+_code?>
+
+
