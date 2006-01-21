@@ -17,8 +17,10 @@
     my $domcook = LJ::Session->domain_cookie($dest) or
         return BML::redirect("$LJ::SITEROOT/login.bml");
 
-    LJ::Session->send_domain_cookie($u, $domcook);
-    return BML::redirect($dest);
+    my $helper_url = LJ::Session->helper_url($domcook);
+    my $cookie = LJ::Session->get_domain_cookie($u, $domcook);
+    my $url = "$helper_url?dest=" . LJ::eurl($dest) . "&k=" . LJ::eurl($domcook) . "&v=" . LJ::eurl($cookie);
+    return BML::redirect($url);
 }
 _code?>
 
