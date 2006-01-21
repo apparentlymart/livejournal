@@ -1113,6 +1113,12 @@ sub journal_content
 
     $html .= ("<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxx -->\n" x 100) if $generate_iejunk;
 
+    if (my $cb = $LJ::TEMP_NO_EXT_CSS) {
+        $html =~ s!<link (.*)?!$cb->($&)!eig;
+        $html =~ s!\@import(.*)?!$cb->($&)!eig;
+        $html =~ s!<\?xml-stylesheet (.*)?!$cb->($&)!eig;
+    }
+
     my $do_gzip = $LJ::DO_GZIP && $LJ::OPTMOD_ZLIB;
     if ($do_gzip) {
         my $ctbase = $opts->{'contenttype'};
