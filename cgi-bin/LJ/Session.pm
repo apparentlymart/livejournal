@@ -175,7 +175,7 @@ sub session_from_master_cookie {
         }
 
         # try memory
-        my $memkey = LJ::Session->_memkey($u, $sessid);
+        my $memkey = _memkey($u, $sessid);
         $sess = LJ::MemCache::get($memkey);
 
         # try master
@@ -219,6 +219,11 @@ sub session_from_master_cookie {
     return $sess;
 }
 
+sub id {
+    my $sess = shift;
+    return $sess->{sessid};
+}
+
 sub ipfixed {
     my $sess = shift;
     return $sess->{ipfixed};
@@ -227,6 +232,62 @@ sub ipfixed {
 sub exptype {
     my $sess = shift;
     return $sess->{exptype};
+}
+
+# end a session
+sub destroy {
+    my $sess = shift;
+    my $id = $sess->id;
+    my $u = $sess->owner;
+    return LJ::Session->destroy_sessions($u, $id);
+}
+
+# class method
+sub destroy_all_sessions {
+    my ($class, $u) = @_;
+    return 0 unless $u;
+
+    my $udbh = LJ::get_cluster_master($u)
+        or return 0;
+
+    my $sessions = $udbh->selectcol_arrayref("SELECT sessid FROM sessions WHERE ".
+                                             "userid=?", undef, $u->{'userid'});
+
+    return LJ::Session->destroy_sessions($u, @$sessions) if @$sessions;
+    return 1;
+}
+
+# class method
+sub destroy_sessions {
+    my ($class, $u, @sessids) = @_;
+
+    my $in = join(',', map { $_+0 } @sessids);
+    return 1 unless $in;
+    my $userid = $u->{'userid'};
+    foreach (qw(sessions sessions_data)) {
+        $u->do("DELETE FROM $_ WHERE userid=? AND ".
+               "sessid IN ($in)", undef, $userid)
+            or return 0;   # FIXME: use Error::Strict
+    }
+    foreach my $id (@sessids) {
+        $id += 0;
+        LJ::MemCache::delete(_memkey($u, $id));
+    }
+    return 1;
+
+}
+
+sub clear_master_cookie {
+    my ($class) = @_;
+
+    my $domain =
+        $LJ::ONLY_USER_VHOSTS ? ($LJ::DOMAIN_WEB || $LJ::DOMAIN) : $LJ::DOMAIN;
+
+    set_cookie(ljmastersession => "",
+               domain          => $domain,
+               path            => '/',
+               delete          => 1);
+
 }
 
 # CLASS method for getting the length of a given session type in seconds
@@ -315,14 +376,15 @@ sub set_exptype {
                             timeexpire => time() + LJ::Session->session_length($exptype));
 }
 
+# function or instance method.
 # FIXME: update the documentation for memkeys
 sub _memkey {
-    my $sess = shift;
-    if (@_) {
+    if (@_ == 2) {
         my ($u, $sessid) = @_;
         $sessid += 0;
         return [$u->{'userid'}, "ljms:$u->{'userid'}:$sessid"];
     } else {
+        my $sess = shift;
         return [$sess->{'userid'}, "ljms:$sess->{'userid'}:$sess->{sessid}"];
     }
 }
@@ -370,10 +432,17 @@ sub set_cookie {
     my $domain = delete $opts{domain};
     my $path = delete $opts{path};
     my $expires = delete $opts{expires};
+    my $delete = delete $opts{delete};
     croak("Invalid cookie options: " . join(", ", keys %opts)) if %opts;
 
     # expires can be absolute or relative.  this is gross or clever, your pick.
     $expires += time() if $expires && $expires <= 1135217120;
+
+    if ($delete) {
+        # set expires to 5 seconds after 1970.  definitely in the past.
+        # so cookie will be deleted.
+        $expires = 5 if $delete;
+    }
 
     my $cookiestr = $key . '=' . $value;
     $cookiestr .= '; expires=' . LJ::time_to_cookie($expires) if $expires;
