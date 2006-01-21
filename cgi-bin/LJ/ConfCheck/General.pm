@@ -79,6 +79,12 @@ add_conf('$CAPTCHA_IMAGE_PREGEN',
          type => "int",
          );
 
+add_conf('$CAPTCHA_IMAGE_RAW',
+         required => 0,
+         des => "What image files to use to generate image captchas.",
+         default => '$LJ::HOME/htdocs/img/captcha',
+         );
+
 add_conf('$CAPTCHA_MOGILEFS',
          required => 0,
          type => "bool",

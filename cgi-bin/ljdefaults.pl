@@ -215,6 +215,7 @@
     $CAPTCHA_AUDIO_MAKE ||= 100;
     $CAPTCHA_AUDIO_PREGEN ||= 100;
     $CAPTCHA_IMAGE_PREGEN ||= 500;
+    $CAPTCHA_IMAGE_RAW ||= "$LJ::HOME/htdocs/img/captcha";
 
     # Portal boxes
     unless(scalar(@LJ::PORTAL_BOXES)) {

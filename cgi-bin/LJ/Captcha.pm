@@ -23,7 +23,7 @@ sub generate_visual
     my $im_height = 35;
     my $length = length($code);
 
-    my $img = "$LJ::HOME/htdocs/img/captcha";
+    my $img = $LJ::CAPTCHA_IMAGE_RAW;
 
     # create a new image and color
     my $im = new GD::Image(($im_width * $length),$im_height);

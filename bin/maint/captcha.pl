@@ -13,7 +13,7 @@ our ( $FakeUserId, $ClusterId, $Digits, $DigitCount,
       $ExpireThresUser, $ExpireThresNoUser );
 
 # Data for code-generation
-$Digits = "abcdefghkmnpqrstuvwzyz23456789";
+$Digits = "abcdefghknpqrstuvxz23456789";
 $DigitCount = length( $Digits );
 
 # Maximum age of answered captchas.  this is just
