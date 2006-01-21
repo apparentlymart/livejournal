@@ -1,6 +1,7 @@
 package LJ::Session;
 use strict;
 use Carp qw(croak);
+use Digest::HMAC_SHA1 qw(hmac_sha1 hmac_sha1_hex);
 
 use constant VERSION => 1;
 
@@ -9,9 +10,23 @@ use constant VERSION => 1;
 # NOTE: do not store any references in the LJ::Session instances because of serialization
 # and storage in memcache
 
-sub new {
+sub instance {
     my ($class, $u, $sessid) = @_;
 
+    # try memory
+    my $memkey = _memkey($u, $sessid);
+    my $sess = LJ::MemCache::get($memkey);
+    return $sess if $sess;
+
+    # try master
+    $sess = $u->selectrow_hashref("SELECT userid, sessid, exptype, auth, timecreate, timeexpire, ipfixed " .
+                                  "FROM sessions WHERE userid=? AND sessid=?",
+                                  undef, $u->{'userid'}, $sessid)
+        or return undef;
+
+    bless $sess;
+    LJ::MemCache::set($memkey, $sess);
+    return $sess;
 }
 
 sub create {
@@ -23,7 +38,6 @@ sub create {
     croak("Invalid exptype") unless $exptype =~ /^short|long|once$/;
 
     croak("Invalid options: " . join(", ", keys %opts)) if %opts;
-
 
     my $udbh = LJ::get_cluster_master($u);
     return undef unless $udbh;
@@ -97,6 +111,88 @@ sub try_renew {
     }
 }
 
+# given a URL, what domain cookie represents this URL?
+sub domain_cookie {
+    my ($class, $url) = @_;
+
+    return undef unless
+        $url =~ m!^http://(.+?)(/.*)$!;
+
+    my ($host, $path) = ($1, $2);
+    $host = lc($host);
+
+    # don't return a domain cookie for the master domain
+    return undef if $host eq lc($LJ::DOMAIN_WEB) || $host eq lc($LJ::DOMAIN);
+
+    return undef unless
+        $host =~ m!^(\w{1,50})\.\Q$LJ::USER_DOMAIN\E$!;
+
+    my $subdomain = lc($1);
+    if ($LJ::SUBDOMAIN_FUNCTION{$subdomain} eq "journal") {
+        return undef unless $path =~ m!^/(\w{1,15})\b!;
+        my $user = lc($1);
+        return "ljdomsess.$subdomain.$user";
+    }
+
+    # where $subdomain is actually a username:
+    return "ljdomsess.$subdomain";
+}
+
+sub session_from_cookies {
+    my $class = shift;
+    my %getopts = @_;
+
+    # must be in web context
+    return undef unless eval { Apache->request; };
+
+    my $sessobj;
+
+    my $domain_cookie = LJ::Session->domain_cookie(_current_url());
+    if ($domain_cookie) {
+        # journal domain
+        $sessobj = LJ::Session->session_from_domain_cookie(\%getopts, @{ $BML::COOKIE{"$domain_cookie\[\]"} || [] });
+    } else {
+        # this is the master cookie at "www.livejournal.com" or "livejournal.com";
+        $sessobj = LJ::Session->session_from_master_cookie(\%getopts, @{ $BML::COOKIE{'ljmastersession[]'} || [] });
+    }
+
+    return $sessobj;
+}
+
+sub _current_url {
+    my $r = Apache->request;
+    my $args = $r->args;
+    my $args_wq = $args ? "?$args" : "";
+    my $host = $r->header_in("Host");
+    my $uri = $r->uri;
+    return "http://$host$uri$args_wq";
+}
+
+sub session_from_domain_cookie {
+    my $class = shift;
+    my $opts = ref $_[0] ? shift() : {};
+    return undef unless $BML::COOKIE{'ljloggedin'};
+
+    my @cookies = grep { $_ } @_;
+    if (!@cookies && $opts->{redirect_ref}) {
+        my $rr = $opts->{redirect_ref};
+        $$rr = "$LJ::SITEROOT/misc/get_domain_session.bml?return=" . LJ::eurl(_current_url());
+        return undef;
+    }
+
+    my $cur_url = _current_url();
+    my $domcook = LJ::Session->domain_cookie($cur_url);
+
+    foreach my $cookie (@cookies) {
+        my $sess = valid_domain_cookie($domcook, $cookie);
+        warn "for url=$cur_url, domcook=$domcook, sess=$sess\n";
+        next unless $sess;
+        return $sess;
+    }
+
+    return undef;
+}
+
 # CLASS METHOD
 # call: ( $opts?, @ljmastersession_cookie(s) )
 # return value is LJ::Session object if we found one; else undef
@@ -107,10 +203,13 @@ sub session_from_master_cookie {
     my @cookies = grep { $_ } @_;
     return undef unless @cookies;
 
-    my $errs = delete $opts->{errlist} || [];
+    my $errs       = delete $opts->{errlist} || [];
     my $tried_fast = delete $opts->{tried_fast} || do { my $foo; \$foo; };
-    my $ignore_ip = delete $opts->{ignore_ip} ? 1 : 0;
+    my $ignore_ip  = delete $opts->{ignore_ip} ? 1 : 0;
+
+    delete $opts->{'redirect_ref'};  # we don't use this
     croak("Unknown options") if %$opts;
+
     my $now = time();
 
     # our return value
@@ -174,21 +273,7 @@ sub session_from_master_cookie {
             next COOKIE;
         }
 
-        # try memory
-        my $memkey = _memkey($u, $sessid);
-        $sess = LJ::MemCache::get($memkey);
-
-        # try master
-        unless ($sess) {
-            $sess = $u->selectrow_hashref("SELECT userid, sessid, exptype, auth, timecreate, timeexpire, ipfixed " .
-                                          "FROM sessions WHERE userid=? AND sessid=?",
-                                          undef, $u->{'userid'}, $sessid);
-
-            if ($sess) {
-                bless $sess;
-                LJ::MemCache::set($memkey, $sess);
-            }
-        }
+        $sess = LJ::Session->instance($u, $sessid);
 
         unless ($sess) {
             $err->("Couldn't find session");
@@ -200,23 +285,33 @@ sub session_from_master_cookie {
             next COOKIE;
         }
 
-        if ($sess->{'timeexpire'} < $now) {
-            $err->("Invalid auth");
+        unless ($sess->valid) {
+            $err->("expired or IP bound problems");
             next COOKIE;
-        }
-
-        if ($sess->{'ipfixed'} && ! $ignore_ip) {
-            my $remote_ip = $LJ::_XFER_REMOTE_IP || LJ::get_remote_ip();
-            if ($sess->{'ipfixed'} ne $remote_ip) {
-                $err->("Session wrong IP ($remote_ip != $sess->{ipfixed})");
-                next COOKIE;
-            }
         }
 
         last COOKIE;
     }
 
     return $sess;
+}
+
+# instance method:  has this session expired, or is it IP bound and
+# bound to the wrong IP?
+sub valid {
+    my $sess = shift;
+    my $now = time();
+    my $err = sub { 0; };
+
+    return $err->("Invalid auth") if $sess->{'timeexpire'} < $now;
+
+    if ($sess->{'ipfixed'} && ! $LJ::Session::OPT_IGNORE_IP) {
+        my $remote_ip = $LJ::_XFER_REMOTE_IP || LJ::get_remote_ip();
+        return $err->("Session wrong IP ($remote_ip != $sess->{ipfixed})")
+            if $sess->{'ipfixed'} ne $remote_ip;
+    }
+
+    return 1;
 }
 
 sub id {
@@ -288,7 +383,13 @@ sub clear_master_cookie {
                path            => '/',
                delete          => 1);
 
+    set_cookie(ljloggedin      => "",
+               domain          => $LJ::DOMAIN,
+               path            => '/',
+               delete          => 1);
+
 }
+
 
 # CLASS method for getting the length of a given session type in seconds
 sub session_length {
@@ -332,7 +433,114 @@ sub update_master_cookie {
                http_only       => 1,
                @expires,);
 
+    set_cookie(ljloggedin      => "2",
+               domain          => $LJ::DOMAIN,
+               path            => '/',
+               http_only       => 1,
+               @expires,);
+
     return;
+}
+
+sub auth {
+    my $sess = shift;
+    return $sess->{auth};
+}
+
+sub domsess_signature {
+    my ($time, $sess, $domcook) = @_;
+
+    my $u      = $sess->owner;
+    my $secret = LJ::get_secret($time);
+
+    my $data = join("-", $sess->{auth}, $domcook, $u->{userid}, $sess->{sessid}, $time);
+    my $sig  = hmac_sha1_hex($data, $secret);
+    return $sig;
+}
+
+# sets new ljmastersession cookie given the session object; second parameter is a
+# hashref tied to BML's cookies (FIXME: cleaner interface!)
+sub get_domain_cookie {
+    my ($class, $u, $domcook) = @_;
+
+    my $sess = $u->session or
+        return undef;
+
+    # compute a signed domain key
+    my ($time, $key) = LJ::get_secret();
+    my $sig = domsess_signature($time, $sess, $domcook);
+
+    # the cookie
+    my $ver = VERSION;
+    my $value = "v$ver:" .
+        "u$u->{userid}:" .
+        "s$sess->{sessid}:" .
+        "t$time:" .
+        "g$sig//" .
+        ($LJ::COOKIE_GEN || "");
+
+    return $value;
+}
+
+# returns undef or a session object
+sub valid_domain_cookie {
+    my ($domcook, $val) = @_;
+
+    my ($cookie, $gen) = split m!//!, $val;
+
+    my ($version, $uid, $sessid, $time, $sig, $flags);
+    my $dest = {
+        v => \$version,
+        u => \$uid,
+        s => \$sessid,
+        t => \$time,
+        g => \$sig,
+        f => \$flags,
+    };
+
+    my $bogus = 0;
+    foreach my $var (split /:/, $cookie) {
+        if ($var =~ /^(\w)(.+)$/ && $dest->{$1}) {
+            ${$dest->{$1}} = $2;
+            warn "  cookie attr ($1) = $2\n";
+        } else {
+            $bogus = 1;
+        }
+    }
+
+    return undef if $bogus;
+    return undef if $gen ne $LJ::COOKIE_GEN;
+    return undef if $version != VERSION;
+
+    # have to be relatively new.  these shouldn't last longer than a day
+    # or so anyway.
+    my $now = time();
+    return undef unless $time > $now - 86400*7;;
+
+    my $u = LJ::load_userid($uid)
+        or return undef;
+
+    my $sess = $u->session($sessid)
+        or return undef;
+
+    return undef unless $sess->valid;
+
+    my $correct_sig = domsess_signature($time, $sess, $domcook);
+    return undef unless $correct_sig eq $sig;
+
+    return $sess;
+}
+
+# NOTE: internal function REQUIRES trusted input
+sub helper_url {
+    my ($class, $domcook) = @_;
+    return unless $domcook;
+
+    my @parts = split(/\./, $domcook);
+    my $url = "http://$parts[1].$LJ::USER_DOMAIN/";
+    $url .= "$parts[2]/" if @parts == 3;
+    $url .= "__setdomsess";
+    return $url;
 }
 
 sub master_cookie_string {
@@ -350,6 +558,56 @@ sub master_cookie_string {
 
     $cookie .= "//" . LJ::eurl($LJ::COOKIE_GEN || "");
     return $cookie;
+}
+
+sub path_of_domcook {
+    my $domcook = shift;
+    # if domcookie is 3 parts (ljdomsess.community.knitting), then restrict
+    # path of the cookie to /knitting/.  by default path is /
+    my @parts = split(/\./, $domcook);
+    my $path = "/";
+    if (@parts == 3) {
+        $path = "/" . $parts[-1] . "/";
+    }
+    return $path;
+}
+
+sub valid_destination {
+    my $dest = shift;
+    my $rx = valid_dest_rx();
+    return $dest =~ /$rx/;
+}
+
+sub valid_dest_rx {
+    return qr!^http://\w+\.\Q$LJ::USER_DOMAIN\E/.*!;
+}
+
+
+# given an Apache $r object, returns the URL to go to after setting the domain cookie
+sub setdomsess_handler {
+    my ($class, $r) = @_;
+    my %get = $r->args;
+
+    my $dest    = $get{'dest'};
+    my $domcook = $get{'k'};
+    my $cookie  = $get{'v'};
+
+    warn "setdomsess handler!\n";
+
+    my $is_valid = valid_destination($dest);
+    warn "  valid dest = $is_valid\n";
+    return "$LJ::SITEROOT" unless $is_valid;
+
+    $is_valid = valid_domain_cookie($domcook, $cookie);
+    warn "  valid dom cookie = $is_valid\n";
+    return $dest           unless $is_valid;
+
+    set_cookie($domcook   => $cookie,
+               path       => path_of_domcook($domcook),
+               http_only  => 1,
+               expires    => 60*60);
+
+    return $dest;
 }
 
 # not stored in database, call this before calling to update cookie strings
