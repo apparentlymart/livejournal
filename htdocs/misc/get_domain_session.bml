@@ -2,7 +2,7 @@
 {
     use strict;
     use vars qw(%GET);
-    BML::decl_params('return' => qr!^http://\w+\.\Q$LJ::USER_DOMAIN\E/.*!);
+    BML::decl_params('return' => LJ::Session->valid_dest_rx);
 
     my $dest = $GET{'return'} or
         return BML::redirect("$LJ::SITEROOT/login.bml");
@@ -18,7 +18,9 @@
         return BML::redirect("$LJ::SITEROOT/login.bml");
 
     my $helper_url = LJ::Session->helper_url($domcook);
-    my $cookie = LJ::Session->get_domain_cookie($u, $domcook);
+
+    my $sess = $u->session;
+    my $cookie = $sess->domsess_cookie_string($domcook);
     my $url = "$helper_url?dest=" . LJ::eurl($dest) . "&k=" . LJ::eurl($domcook) . "&v=" . LJ::eurl($cookie);
     return BML::redirect($url);
 }
