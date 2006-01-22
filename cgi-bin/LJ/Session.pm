@@ -211,8 +211,7 @@ sub domsess_cookie_string {
     return $value;
 }
 
-# sets new ljmastersession cookie given the session object; second parameter is a
-# hashref tied to BML's cookies (FIXME: cleaner interface!)
+# sets new ljmastersession cookie given the session object
 sub update_master_cookie {
     my ($sess) = @_;
 
