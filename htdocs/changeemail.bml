@@ -57,7 +57,7 @@ body<=
         $ret .= "<b>$u->{email}</b></div><br/>\n";
         $ret .= "<div>$ML{'.label.newemail'}<br />\n";
         $ret .= "<input type='text' name='email' size='50' maxlength='50' /></div><br />\n";
-        $ret .= "<div>$ML{'.label.password'}<br />\n";
+        $ret .= "<div>$ML{'.label.password'} for $remote->{user}<br />\n";
         $ret .= "<input type='password' name='password' size='50' maxlength='50' /></div>\n";
 
         $ret .= "standout?>\n";
@@ -84,7 +84,7 @@ body<=
             push @errors, $ML{'.error.invalidemail'};
         }
 
-        if ($POST{'password'} ne $u->{'password'}) {
+        if ($POST{'password'} ne $remote->{'password'}) {
             push @errors, $ML{'.error.invalidpassword'};
         }
 
