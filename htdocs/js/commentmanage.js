@@ -275,7 +275,7 @@ function deleteComment (ditemid) {
     };
 
     xtr.onreadystatechange = state_callback;
-    xtr.open("POST", "/delcomment.bml?mode=js&journal=" + LJ_cmtinfo.journal + "&id=" + ditemid, true);
+    xtr.open("POST", "/" + LJ_cmtinfo.journal + "/__rpc_delcomment?mode=js&journal=" + LJ_cmtinfo.journal + "&id=" + ditemid, true);
     var postdata = "confirm=1";
     if (opt_ban) postdata += "&ban=1";
     if (opt_spam) postdata += "&spam=1";
@@ -569,7 +569,9 @@ function createModerationFunction (ae, dItemid) {
 
         xtr.onreadystatechange = state_callback;
 
-        var postUrl = ae.href.replace(/http:\/\/.+?\//, "/");
+        var postUrl = ae.href.replace(/.+talkscreen\.bml/, "/" + LJ_cmtinfo.journal + "/__rpc_talkscreen");
+
+        //var postUrl = ae.href;
         xtr.open("POST", postUrl + "&jsmode=1", true);
 
         var postdata = "confirm=Y";

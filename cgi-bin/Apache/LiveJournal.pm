@@ -350,6 +350,14 @@ sub trans
         }
     }
 
+    my $bml_handler = sub {
+        my $filename = shift;
+        $r->handler("perl-script");
+        $r->notes("bml_filename" => $filename);
+        $r->push_handlers(PerlHandler => \&Apache::BML::handler);
+        return OK;
+    };
+
     my $journal_view = sub {
         my $opts = shift;
         $opts ||= {};
@@ -369,10 +377,8 @@ sub trans
             warn "  PROFILE:  remote=$remote, burl=$burl\n";
             return remote_domsess_bounce() if LJ::remote_bounce_url();
 
-            my $filename = "$LJ::HOME/htdocs/userinfo.bml";
             $r->notes("_journal" => $opts->{'user'});
-            $r->notes("bml_filename" => $filename);
-            return Apache::BML::handler($r);
+            return $bml_handler->("$LJ::HOME/htdocs/userinfo.bml");
         }
 
         %RQ = %$opts;
@@ -423,13 +429,11 @@ sub trans
         warn "uuri = $uuri\n";
 
         if ($uuri =~ /^.*\b__rpc_delcomment$/) {
-            $r->notes("bml_filename" => "$LJ::HTDOCS/delcomment.bml");
-            return Apache::BML::handler($r);
+            return $bml_handler->("$LJ::HOME/htdocs/delcomment.bml");
         }
 
         if ($uuri =~ /^.*\b__rpc_talkscreen$/) {
-            $r->notes("bml_filename" => "$LJ::HTDOCS/talkscreen.bml");
-            return Apache::BML::handler($r);
+            return $bml_handler->("$LJ::HOME/htdocs/talkscreen.bml");
         }
 
         if ($uuri =~ m#^/(\d+)\.html$#) {
@@ -1150,7 +1154,7 @@ sub journal_content
     # Parse the page content for any temporary matches
     # defined in local config
     if (my $cb = $LJ::TEMP_PARSE_MAKE_JOURNAL) {
-        $html = $cb->($html);
+        $cb->(\$html);
     }
 
     my $do_gzip = $LJ::DO_GZIP && $LJ::OPTMOD_ZLIB;
