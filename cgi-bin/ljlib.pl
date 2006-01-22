@@ -357,6 +357,16 @@ sub get_friend_items
         $remote = LJ::load_userid($remoteid);
     }
 
+    # if ONLY_USER_VHOSTS is on (where each user gets his/her own domain),
+    # then assume we're also using domain-session cookies, and assume
+    # domain session cookies should be as most useless as possible,
+    # so don't let friends pages on other domains have protected content
+    # because really, nobody reads other people's friends pages anyway
+    if ($LJ::ONLY_USER_VHOSTS && $remote && $remoteid != $userid) {
+        $remote = undef;
+        $remoteid = 0;
+    }
+
     my @items = ();
     my $itemshow = $opts->{'itemshow'}+0;
     my $skip = $opts->{'skip'}+0;
