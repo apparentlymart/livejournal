@@ -1,4 +1,4 @@
-<?_code # -*- mode: bml -*- 
+<?_code # -*- mode: bml -*-
 {
     use strict;
     use vars qw($body %POST %GET);
@@ -17,20 +17,20 @@
     }
 
     if ($POST{'action:killall'}) {
-        $u->kill_all_sessions;
-        delete $COOKIE{'BMLschemepref'};
-        BML::set_scheme(undef);
+        $u->logout_all
+            or die "Failed to log out all sessions.";
         $body = $ML{'.loggedout.killedall'};
         return;
     }
 
-    if ($u->{'_session'} &&
+    my $cursess = $u->session;
+
+    if ($cursess &&
         $user eq $u->{'user'} &&
-        $sessid == $u->{'_session'}->{'sessid'})
+        $sessid == $cursess->id)
     {
-        $u->kill_session;
-        delete $COOKIE{'BMLschemepref'};
-        BML::set_scheme(undef);
+        $u->logout;
+
         $body = "$ML{'.loggedout.success'}";
 
         # Redirect to offsite uri if allowed.
@@ -59,7 +59,7 @@
     my $curid = $u->{'_session'}->{'sessid'} || 0;
 
     my $sessions = $udbr->selectcol_arrayref("SELECT sessid FROM sessions WHERE ".
-					     "userid=$u->{'userid'} AND timeexpire > UNIX_TIMESTAMP() ".
+                                             "userid=$u->{'userid'} AND timeexpire > UNIX_TIMESTAMP() ".
                                              "AND sessid <> $curid");
     if (@$sessions) {
         $body .= "<form method='post' action='logout.bml'>";

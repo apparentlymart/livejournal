@@ -130,6 +130,9 @@ my %modules = (
                    'opt' => 'Required for OpenID support.',
                },
                "Unicode::CheckUTF8" => {},
+               "Digest::HMAC_SHA1" => {
+                   'deb' => 'libdigest-hmac-perl',
+               },
                );
 
 sub check_modules {

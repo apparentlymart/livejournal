@@ -21,7 +21,7 @@
     my $password = $POST{'password'};
 
     my $remote = LJ::get_remote();
-    my $cursess = $remote ? $remote->{'_session'} : undef;
+    my $cursess = $remote ? $remote->session : undef;
 
     $title = $remote ?
         BML::ml(".loggedin.head2", { 'sitename' => $LJ::SITENAMESHORT} ) :
@@ -133,7 +133,7 @@
        }
 
         # expiration
-        my $curexp = $cursess ? $cursess->{'exptype'} : "short";
+        my $curexp = $cursess ? $cursess->exptype : "short";
         $body .= "<tr valign='top'><td align='right'>";
         $body .= "</td><td style='padding-bottom: 5px'>";
         $body .= LJ::html_check(
@@ -153,7 +153,7 @@
         if ($remote) {
             $body .= "<tr valign='top'><td>";
             $body .= "</td><td style='padding-bottom: 10px'>";
-            my $curbind = $cursess && $cursess->{'ipfixed'} ? "yes" : "no";
+            my $curbind = $cursess && $cursess->ipfixed ? "yes" : "no";
             $body .= LJ::html_check(
                                     {
                                         'type'     => 'check',
@@ -252,7 +252,7 @@
         foreach (qw(ljsession langpref)) {
             delete $COOKIE{$_};
         }
-        $remote  = undef;
+        $remote      = undef;
         $cursess = undef;
         LJ::set_remote(undef);
         LJ::run_hooks("post_logout");
@@ -291,28 +291,13 @@
                 $bindip = BML::get_remote_ip();
             }
 
-            my $len = "short";
-            my $etime = 0;  # for cookie
-            my $session_secs = 60*60*24*1.5; # for db.
-            if ($POST{'expire'} eq "never") {
-                $len = "long";
-                $session_secs = 60*60*24*60;
-                $etime = time()+$session_secs;
-            }
-            $cursess->{'ipfixed'} = $bindip;
-            $cursess->{'exptype'} = $len;
+            $cursess->set_ipfixed($bindip) or die "failed to set ipfixed";
+            $cursess->set_exptype($POST{expire} eq 'never' ? 'long' : 'short') or die "failed to set exptype";
+            $cursess->update_master_cookie;
 
-            $COOKIE{'ljsession'} = [ $COOKIE{'ljsession'}, $etime, 1 ]; # 1 => HttpOnly
+            my $etime = $cursess->expiration_time;
             $COOKIE{'langpref'} = [ $COOKIE{'langpref'}, $etime ];
             $COOKIE{'BMLschemepref'} = [ $COOKIE{'BMLschemepref'}, $etime ];
-
-            my $sessid = $remote->{'_session'}->{'sessid'};
-            $remote->do("UPDATE sessions SET timeexpire=UNIX_TIMESTAMP()+$session_secs, ".
-                        "exptype=?, ipfixed=? WHERE " .
-                        "userid=? AND sessid=?", undef,
-                        $len, $bindip, $remote->{'userid'}, $sessid);
-            my $memkey = [$remote->{'userid'},"sess:$remote->{'userid'}:$sessid"];
-            LJ::MemCache::delete($memkey);
         }
 
         if ($do_login)
@@ -403,22 +388,23 @@
                 $sess_opts->{'exptype'} = "long";
             }
 
-            my $sess = $u->generate_session($sess_opts);
+            my $sess = LJ::Session->create($u, %$sess_opts);
             $cursess = $sess;
 
             my @sopts;
             LJ::run_hooks("login_add_opts", { 'u' => $u, 'form' => \%POST, 'opts' => \@sopts });
             my $sopts = @sopts ? ":" . join('', map { ".$_" } @sopts) : "";
+            $sess->flags($sopts);
 
-            my $gen = $LJ::COOKIE_GEN || "";
-            $COOKIE{'ljsession'} = [  "ws$gen:$u->{'user'}:$sess->{'sessid'}:$sess->{'auth'}$sopts", $etime, 1 ]; # 1 => HttpOnly
+            $sess->update_master_cookie();
 
             # restore default scheme
+            my $etime = $sess->expiration_time;
             $COOKIE{'BMLschemepref'} = [ $u->{'schemepref'}, $etime ];
             BML::set_scheme($u->{'schemepref'});
 
             # kill the old-style cookies:
-            foreach (qw(ljuser ljhpass permlogin)) {
+            foreach (qw(ljuser ljhpass permlogin ljsession)) {
                 delete $COOKIE{$_} if $COOKIE{$_};
             }
 

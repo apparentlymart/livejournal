@@ -1673,6 +1673,7 @@ sub start_request
     %LJ::REQ_HEAD_HAS = ();           # avoid code duplication for js
     %LJ::NEEDED_RES = ();             # needed resources (css/js/etc):
                                       #  keys are relative from htdocs, values 1 or 2 (1=external, 2=inline)
+    $LJ::CACHE_REMOTE_BOUNCE_URL = undef;
 
     # we use this to fake out get_remote's perception of what
     # the client's remote IP is, when we transfer cookies between

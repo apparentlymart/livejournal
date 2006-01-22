@@ -4,7 +4,8 @@
 package Apache::LiveJournal;
 
 use strict;
-use Apache::Constants qw(:common REDIRECT HTTP_NOT_MODIFIED HTTP_MOVED_PERMANENTLY
+use Apache::Constants qw(:common REDIRECT HTTP_NOT_MODIFIED
+                         HTTP_MOVED_PERMANENTLY HTTP_MOVED_TEMPORARILY
                          M_TRACE M_OPTIONS);
 use Apache::File ();
 use lib "$ENV{'LJHOME'}/cgi-bin";
@@ -141,8 +142,7 @@ sub handler
     return OK;
 }
 
-sub redir
-{
+sub redir {
     my ($r, $url, $code) = @_;
     $r->content_type("text/html");
     $r->header_out(Location => $url);
@@ -151,6 +151,12 @@ sub redir
         $r->log_error("redirect to $url from: " . join(", ", caller(0)));
     }
     return $code || REDIRECT;
+}
+
+# send the user to the URL for them to get their domain session cookie
+sub remote_domsess_bounce {
+    my $r = Apache->request;
+    return redir($r, LJ::remote_bounce_url(), HTTP_MOVED_TEMPORARILY);
 }
 
 sub totally_down_content
@@ -352,10 +358,17 @@ sub trans
         $opts->{'user'} = LJ::canonical_username($opts->{'user'});
 
         if ($opts->{'mode'} eq "info") {
-            return redir($r, "$LJ::SITEROOT/userinfo.bml?user=$opts->{'user'}");
+            my $u = LJ::load_user($opts->{user})
+                or return 404;
+            return redir($r, $u->profile_url);
         }
 
         if ($opts->{'mode'} eq "profile") {
+            my $remote = LJ::get_remote();
+            my $burl = LJ::remote_bounce_url();
+            warn "  PROFILE:  remote=$remote, burl=$burl\n";
+            return remote_domsess_bounce() if LJ::remote_bounce_url();
+
             my $filename = "$LJ::HOME/htdocs/userinfo.bml";
             $r->notes("_journal" => $opts->{'user'});
             $r->notes("bml_filename" => $filename);
@@ -402,6 +415,22 @@ sub trans
         # if favicon, let filesystem handle it, for now, until
         # we have per-user favicons.
         return DECLINED if $uuri eq "/favicon.ico";
+
+        if ($uuri eq "/__setdomsess") {
+            return redir($r, LJ::Session->setdomsess_handler($r));
+        }
+
+        warn "uuri = $uuri\n";
+
+        if ($uuri =~ /^.*\b__rpc_delcomment$/) {
+            $r->notes("bml_filename" => "$LJ::HTDOCS/delcomment.bml");
+            return Apache::BML::handler($r);
+        }
+
+        if ($uuri =~ /^.*\b__rpc_talkscreen$/) {
+            $r->notes("bml_filename" => "$LJ::HTDOCS/talkscreen.bml");
+            return Apache::BML::handler($r);
+        }
 
         if ($uuri =~ m#^/(\d+)\.html$#) {
             if ($GET{'mode'} eq "reply" || $GET{'replyto'}) {
@@ -955,7 +984,12 @@ sub journal_content
     }
 
     my $criterr = 0;
-    my $remote = LJ::get_remote({ criterr => \$criterr });
+
+    my $remote = LJ::get_remote({
+        criterr      => \$criterr,
+    });
+
+    return remote_domsess_bounce() if LJ::remote_bounce_url();
 
     # check for faked cookies here, since this is pretty central.
     if ($criterr) {

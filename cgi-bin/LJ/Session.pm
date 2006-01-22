@@ -18,6 +18,11 @@ use constant VERSION => 1;
 #
 # * this file is a mix of instance, class, and util functions/methods
 #
+# * the 'auth' field of the session object is the prized possession which
+#   we might hide from XSS attackers.  they can steal domain cookies but
+#   they're not good very long and can't do much.  it's the ljmastersession
+#   containing the auth that we care about.
+#
 
 ############################################################################
 #  CREATE/LOAD SESSIONS OBJECTS

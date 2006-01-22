@@ -16,6 +16,7 @@ package LJ::User;
 use Carp;
 use lib "$ENV{'LJHOME'}/cgi-bin";
 use LJ::MemCache;
+use LJ::Session;
 
 # class method.  returns remote (logged in) user object.  or undef if
 # no session is active.
@@ -422,12 +423,14 @@ sub make_login_session {
     my $etime = 0;
     eval { Apache->request->notes('ljuser' => $u->{'user'}); };
 
-    my $sess = $u->generate_session({
+    my $sess_opts = {
         'exptype' => $exptype,
         'ipfixed' => $ipfixed,
-    });
-    my $gen = $LJ::COOKIE_GEN || "";
-    $BML::COOKIE{'ljsession'} = [  "ws$gen:$u->{'user'}:$sess->{'sessid'}:$sess->{'auth'}", $etime, 1 ];
+    };
+
+    my $sess = LJ::Session->create($u, %$sess_opts);
+    $sess->update_master_cookie;
+
     LJ::User->set_remote($u);
 
     $u->preload_props("browselang", "schemepref");
@@ -501,35 +504,59 @@ sub tosagree_verify {
     return $rev_cur eq $rev_req;
 }
 
+# my $sess = $u->session           (returns current session)
+# my $sess = $u->session($sessid)  (returns given session id for user)
+
+sub session {
+    my ($u, $sessid) = @_;
+    $sessid = $sessid + 0;
+    return $u->{_session} unless $sessid;  # should be undef, or LJ::Session hashref
+    return LJ::Session->instance($u, $sessid);
+}
+
+sub logout {
+    my $u = shift;
+    $u->_logout_common;
+}
+
+sub logout_all {
+    my $u = shift;
+    LJ::Session->destroy_all_sessions($u)
+        or die "Failed to logout all";
+    $u->_logout_common;
+}
+
+sub _logout_common {
+    my $u = shift;
+    LJ::Session->clear_master_cookie;
+    LJ::User->set_remote(undef);
+    delete $BML::COOKIE{'BMLschemepref'};
+    BML::set_scheme(undef);
+}
+
+# returns a new LJ::Session object, or undef on failure
+sub create_session
+{
+    my ($u, %opts) = @_;
+    return LJ::Session->create($u, %opts);
+}
+
+# $u->kill_session(@sessids)
 sub kill_sessions {
     my $u = shift;
-    my (@sessids) = @_;
-    my $in = join(',', map { $_+0 } @sessids);
-    return 1 unless $in;
-    my $userid = $u->{'userid'};
-    foreach (qw(sessions sessions_data)) {
-        $u->do("DELETE FROM $_ WHERE userid=? AND ".
-               "sessid IN ($in)", undef, $userid);
-    }
-    foreach my $id (@sessids) {
-        $id += 0;
-        my $memkey = [$userid,"sess:$userid:$id"];
-        LJ::MemCache::delete($memkey);
-    }
-    return 1;
+    return LJ::Session->destroy_sessions($u, @_);
 }
 
 sub kill_all_sessions {
-    my $u = shift;
-    return 0 unless $u;
-    my $udbh = LJ::get_cluster_master($u);
-    my $sessions = $udbh->selectcol_arrayref("SELECT sessid FROM sessions WHERE ".
-                                             "userid=$u->{'userid'}");
-    $u->kill_sessions(@$sessions) if @$sessions;
+    my $u = shift
+        or return 0;
+
+    LJ::Session->destroy_all_sessions($u)
+        or return 0;
 
     # forget this user, if we knew they were logged in
     if ($LJ::CACHE_REMOTE && $LJ::CACHE_REMOTE->{userid} == $u->{userid}) {
-        delete $BML::COOKIE{'ljsession'};
+        LJ::Session->clear_master_cookie;
         LJ::User->set_remote(undef);
     }
 
@@ -537,14 +564,15 @@ sub kill_all_sessions {
 }
 
 sub kill_session {
-    my $u = shift;
-    return 0 unless $u;
-    return 0 unless exists $u->{'_session'};
-    $u->kill_sessions($u->{'_session'}->{'sessid'});
+    my $u = shift
+        or return 0;
+    my $sess = $u->session
+        or return 0;
 
-    # forget this user, if we knew they were logged in
+    $sess->destroy;
+
     if ($LJ::CACHE_REMOTE && $LJ::CACHE_REMOTE->{userid} == $u->{userid}) {
-        delete $BML::COOKIE{'ljsession'};
+        LJ::Session->clear_master_cookie;
         LJ::User->set_remote(undef);
     }
 
@@ -3688,105 +3716,33 @@ sub can_delete_journal_item {
 sub get_remote
 {
     my $opts = ref $_[0] eq "HASH" ? shift : {};
-    my $dummy;
-
     return $LJ::CACHE_REMOTE if $LJ::CACHED_REMOTE && ! $opts->{'ignore_ip'};
-
-    my $criterr = $opts->{criterr} || \$dummy;
-    $$criterr = 0;
-
-    my $cookie = sub { return $BML::COOKIE{$_[0]}; };
 
     my $no_remote = sub {
         LJ::User->set_remote(undef);
         return undef;
     };
 
+    # can't have a remote user outside of web context
+    my $r = eval { Apache->request; };
+    return $no_remote->() unless $r;
+
+    my $criterr = $opts->{criterr} || do { my $d; \$d; };
+    $$criterr = 0;
+
+    $LJ::CACHE_REMOTE_BOUNCE_URL = "";
+
     # set this flag if any of their ljsession cookies contained the ".FS"
     # opt to use the fast server.  if we later find they're not logged
     # in and set it, or set it with a free account, then we give them
     # the invalid cookies error.
     my $tried_fast = 0;
-    my @errs = ();
-    my $now = time();
+    my $sessobj = LJ::Session->session_from_cookies(tried_fast   => \$tried_fast,
+                                                    redirect_ref => \$LJ::CACHE_REMOTE_BOUNCE_URL,
+                                                    ignore_ip    => $opts->{ignore_ip},
+                                                    );
 
-    my ($u, $sess);     # what we eventually care about
-    my $memkey;
-
-    foreach my $sessdata (@{ $cookie->('ljsession[]') || [] }) {
-        my ($authtype, $user, $sessid, $auth, $sopts) = split(/:/, $sessdata);
-        $tried_fast = 1 if $sopts =~ /\.FS\b/;
-        my $err = sub {
-            $sess = undef;
-            push @errs, "$sessdata: $_[0]";
-        };
-
-        # fail unless authtype is 'ws' (more might be added in future)
-        my $gen = $LJ::COOKIE_GEN || "";
-        unless ($authtype eq "ws$gen") {
-            $err->("no ws auth");
-            next;
-        }
-
-        $u = LJ::load_user($user);
-        unless ($u) {
-            $err->("user doesn't exist");
-            next;
-        }
-
-        # locked accounts can't be logged in
-        if ($u->{statusvis} eq 'L') {
-            $err->("User account is locked.");
-            next;
-        }
-
-        my $sess_db;
-        my $get_sess = sub {
-            return undef unless $sess_db;
-            $sess = $sess_db->selectrow_hashref("SELECT * FROM sessions ".
-                                                "WHERE userid=? AND sessid=? AND auth=?",
-                                                undef, $u->{'userid'}, $sessid, $auth);
-        };
-        $memkey = [$u->{'userid'},"sess:$u->{'userid'}:$sessid"];
-        # try memory
-        $sess = LJ::MemCache::get($memkey);
-        # try master
-        unless ($sess) {
-            $sess_db = LJ::get_cluster_def_reader($u);
-            $get_sess->();
-            LJ::MemCache::set($memkey, $sess) if $sess;
-        }
-        # try slave
-        unless ($sess) {
-            $sess_db = LJ::get_cluster_reader($u);
-            $get_sess->();
-        }
-
-        unless ($sess) {
-            $err->("Couldn't find session");
-            next;
-        }
-
-        unless ($sess->{auth} eq $auth) {
-            $err->("Invald auth");
-            next;
-        }
-
-        if ($sess->{'timeexpire'} < $now) {
-            $err->("Invalid auth");
-            next;
-        }
-
-        if ($sess->{'ipfixed'} && ! $opts->{'ignore_ip'}) {
-            my $remote_ip = $LJ::_XFER_REMOTE_IP || LJ::get_remote_ip();
-            if ($sess->{'ipfixed'} ne $remote_ip) {
-                $err->("Session wrong IP");
-                next;
-            }
-        }
-
-        last;
-    }
+    my $u = $sessobj ? $sessobj->owner : undef;
 
     # inform the caller that this user is faking their fast-server cookie
     # attribute.
@@ -3794,60 +3750,23 @@ sub get_remote
         $$criterr = 1;
     }
 
-    if (! $sess) {
-        LJ::User->set_remote(undef);
-        return undef;
-    }
+    return $no_remote->() unless $sessobj;
 
-    # renew short session
-    my $sess_length = {
-        'short' => 60*60*24*1.5,
-        'long' => 60*60*24*60,
-        'once' => 0, # do not renew these
-    }->{$sess->{exptype}};
-
-    # only long cookies should be given an expiration time
-    # other should get 0 (when browser closes)
-    my $cookie_length = $sess->{exptype} eq 'long' ? $sess_length : 0;
-
-    # if there is a new session length to be set and the user's db writer is available,
-    # go ahead and set the new session expiration in the database. then only update the
-    # cookies if the database operation is successful
-    if ($sess_length && $sess->{'timeexpire'} - $now < $sess_length/2 &&
-        $u->writer && $u->do("UPDATE sessions SET timeexpire=? WHERE userid=? AND sessid=?",
-                             undef, $now + $sess_length, $u->{userid}, $sess->{sessid}))
-    {
-
-        # delete old, now-bogus memcache data
-        LJ::MemCache::delete($memkey);
-
-        # update their ljsession cookie unless it's a session-length cookie
-        if ($cookie_length) {
-
-            eval {
-                my @domains = ref $LJ::COOKIE_DOMAIN ? @$LJ::COOKIE_DOMAIN : ($LJ::COOKIE_DOMAIN);
-                foreach my $dom (@domains) {
-                    my $cookiestr = 'ljsession=' . $cookie->('ljsession');
-                    $cookiestr .= '; expires=' . LJ::time_to_cookie($now + $cookie_length);
-                    $cookiestr .= $dom ? "; domain=$dom" : '';
-                    $cookiestr .= '; path=/; HttpOnly';
-
-                    Apache->request->err_headers_out->add('Set-Cookie' => $cookiestr);
-                }
-            };
-        }
-    }
+    # renew soon-to-expire sessions
+    $sessobj->try_renew;
 
     # augment hash with session data;
-    $u->{'_session'} = $sess;
+    $u->{'_session'} = $sessobj;
 
     LJ::User->set_remote($u);
-
-    eval {
-        Apache->request->notes("ljuser" => $u->{'user'});
-    };
-
+    $r->notes("ljuser" => $u->{'user'});
     return $u;
+}
+
+# returns URL we have to bounce the remote user to in order to
+# get their domain cookie
+sub remote_bounce_url {
+    return $LJ::CACHE_REMOTE_BOUNCE_URL;
 }
 
 sub set_remote {
