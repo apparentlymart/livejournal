@@ -453,6 +453,8 @@ sub session_from_master_cookie {
     # our return value
     my $sess;
 
+    my $li_cook = $BML::COOKIE{'ljloggedin'};
+
   COOKIE:
     foreach my $sessdata (@cookies) {
         warn "master cookie: = $sessdata\n";
@@ -522,6 +524,12 @@ sub session_from_master_cookie {
 
         unless ($sess->valid) {
             $err->("expired or IP bound problems");
+            next COOKIE;
+        }
+
+        # make sure their ljloggedin cookie
+        unless ($sess->loggedin_cookie_string eq $li_cook) {
+            $err->("loggedin cookie bogus");
             next COOKIE;
         }
 
