@@ -34,7 +34,7 @@
  }
 
  my $remote = LJ::get_remote();
- if ($GET{'user'} eq "" && !$remote) {
+ if ($GET{'user'} eq "" && $GET{'userid'} eq "" && !$remote) {
      $body = "<?h1 $ML{'Error'} h1?><?p $ML{'.error.notloggedin'} p?>";
      return;
  }
@@ -112,7 +112,7 @@
  }
 
  my $domain = BML::get_client_header("Host");
- if ($LJ::ONLY_USER_VHOSTS) {
+ if ($LJ::ONLY_USER_VHOSTS && $u->{journaltype} ne "I") {
      my $url = $u->journal_base . "/profile";
      my $good_domain = $url;
      $good_domain =~ s!^http://!!;
