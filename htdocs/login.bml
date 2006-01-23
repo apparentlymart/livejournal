@@ -249,7 +249,7 @@
     };
     my $logout_remote = sub {
         $remote->kill_session if $remote;
-        foreach (qw(ljsession langpref)) {
+        foreach (qw(langpref)) {
             delete $COOKIE{$_};
         }
         $remote      = undef;
@@ -404,7 +404,7 @@
             BML::set_scheme($u->{'schemepref'});
 
             # kill the old-style cookies:
-            foreach (qw(ljuser ljhpass permlogin ljsession)) {
+            foreach (qw(ljuser ljhpass permlogin)) {
                 delete $COOKIE{$_} if $COOKIE{$_};
             }
 

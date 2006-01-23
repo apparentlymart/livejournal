@@ -64,7 +64,8 @@ sub get_user_info
     } elsif ($POST->{user}) {
         $u = LJ::load_user($POST->{user});
     } else {
-        $u = LJ::get_remote();
+        my $sess = LJ::Session->session_from_fb_cookie;
+        $u = $sess->owner if $sess;
     }
     return {} unless $u && $u->{'journaltype'} eq 'P';
 
@@ -92,7 +93,7 @@ sub get_user_info
 }
 
 # Forcefully push user info out to FB.
-# We use this for cases where we don't want to wait for 
+# We use this for cases where we don't want to wait for
 # sync cache timeouts, such as user suspensions.
 sub push_user_info
 {
@@ -152,7 +153,7 @@ sub user_exists
     my $u = LJ::load_user($POST->{'user'});
     return {} unless $u;
 
-    return { 
+    return {
         exists => 1,
         can_upload => can_upload($u),
     };

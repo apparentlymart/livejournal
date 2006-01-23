@@ -196,6 +196,7 @@ sub master_cookie_string {
     return $cookie;
 }
 
+
 sub domsess_cookie_string {
     my ($sess, $domcook) = @_;
     croak("No domain cookie provided") unless $domcook;
@@ -214,6 +215,14 @@ sub domsess_cookie_string {
         ($LJ::COOKIE_GEN || "");
 
     return $value;
+}
+
+# this is just a wrapper around domsess
+sub fb_cookie_string {
+
+    # FIXME: can we just use domsess's function like this?
+    #        might be more differences so we need to write a new one?
+    return domsess_cookie_string(@_);
 }
 
 # sets new ljmastersession cookie given the session object
@@ -239,6 +248,16 @@ sub update_master_cookie {
                path            => '/',
                http_only       => 1,
                @expires,);
+
+    # set fb global cookie
+    if ($LJ::FB_SITEROOT) {
+        my $fb_cookie = fb_cookie();
+        set_cookie($fb_cookie    => $sess->fb_cookie_string($fb_cookie),
+                   domain        => $LJ::DOMAIN,
+                   path          => '/',
+                   http_only     => 1,
+                   @expires,);
+    }
 
     return;
 }
@@ -365,6 +384,13 @@ sub domain_cookie {
     return "ljdomsess.$subdomain";
 }
 
+sub fb_cookie {
+    my ($class) = @_;
+
+    # where $subdomain is actually a username:
+    return "ljsession";
+}
+
 # CLASS METHOD
 #  -- frontend to session_from_domain_cookie and session_from_master_cookie below
 sub session_from_cookies {
@@ -429,6 +455,20 @@ sub session_from_domain_cookie {
 
     return $no_session->("no valid cookie");
 }
+
+sub session_from_fb_cookie {
+    my $class = shift;
+
+    warn "session_from_fb_cookie()\n";
+
+    my $domcook  = LJ::Session->fb_cookie;
+    my $fbcookie = $BML::COOKIE{$domcook};
+    return undef unless $fbcookie;
+
+    my $sess = valid_fb_cookie($domcook, $fbcookie);
+    return $sess;
+}
+
 
 # CLASS METHOD
 #   -- but not called directly.  usually called by LJ::Session->session_from_cookies above
@@ -580,6 +620,8 @@ sub clear_master_cookie {
     my $domain =
         $LJ::ONLY_USER_VHOSTS ? ($LJ::DOMAIN_WEB || $LJ::DOMAIN) : $LJ::DOMAIN;
 
+    Carp::cluck("WTF");
+
     set_cookie(ljmastersession => "",
                domain          => $domain,
                path            => '/',
@@ -590,6 +632,14 @@ sub clear_master_cookie {
                path            => '/',
                delete          => 1);
 
+    # set fb global cookie
+    if ($LJ::FB_SITEROOT) {
+        my $fb_cookie = fb_cookie();
+        set_cookie($fb_cookie    => "",
+                   domain        => $LJ::DOMAIN,
+                   path          => '/',
+                   delete        => 1);
+    }
 }
 
 
@@ -657,6 +707,13 @@ sub domsess_signature {
     return $sig;
 }
 
+# same logic as domsess_signature, so just a wrapper
+sub fb_signature {
+    my ($time, $sess, $fbcook) = @_;
+
+    return domsess_signature($time, $sess, $fbcook);
+}
+
 # function or instance method.
 # FIXME: update the documentation for memkeys
 sub _memkey {
@@ -707,7 +764,8 @@ sub set_cookie {
 # as the current logged-in cookie $li_cook which says the master
 # session's uid/sessid
 sub valid_domain_cookie {
-    my ($domcook, $val, $li_cook) = @_;
+    my ($domcook, $val, $li_cook, $opts) = @_;
+    $opts ||= {};
 
     my ($cookie, $gen) = split m!//!, $val;
 
@@ -738,12 +796,15 @@ sub valid_domain_cookie {
 
     return $not_valid->("bogus params") if $bogus;
     return $not_valid->("wrong gen") if $gen ne $LJ::COOKIE_GEN;
+    warn "version: $version == " . VERSION;
     return $not_valid->("wrong ver") if $version != VERSION;
 
     # have to be relatively new.  these shouldn't last longer than a day
     # or so anyway.
-    my $now = time();
-    return $not_valid->("old cookie") unless $time > $now - 86400*7;;
+    unless ($opts->{ignore_age}) {
+        my $now = time();
+        return $not_valid->("old cookie") unless $time > $now - 86400*7;
+    }
 
     my $u = LJ::load_userid($uid)
         or return $not_valid->("no user $uid");
@@ -755,14 +816,25 @@ sub valid_domain_cookie {
     return $not_valid->("not valid") unless $sess->valid;
 
     # the per-domain cookie has to match the session of the master cookie
-    my $sess_licook = $sess->loggedin_cookie_string;
-    return $not_valid->("li_cook mismatch.  session=$sess_licook, user=$li_cook")
-        unless $sess_licook eq $li_cook;
+    unless ($opts->{ignore_li_cook}) {
+        my $sess_licook = $sess->loggedin_cookie_string;
+        return $not_valid->("li_cook mismatch.  session=$sess_licook, user=$li_cook")
+            unless $sess_licook eq $li_cook;
+    }
 
     my $correct_sig = domsess_signature($time, $sess, $domcook);
     return $not_valid->("signature wrong") unless $correct_sig eq $sig;
 
     return $sess;
+}
+
+sub valid_fb_cookie {
+    my ($domcook, $val) = @_;
+    my $opts = {
+        ignore_age     => 1,
+        ignore_li_cook => 1,
+    };
+    return valid_domain_cookie($domcook, $val, undef, $opts);
 }
 
 sub valid_destination {
