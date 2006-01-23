@@ -355,12 +355,31 @@ sub helper_url {
     return $url;
 }
 
-# given a URL, what domain cookie represents this URL?
+# given a URL (or none, for current url), what domain cookie represents this URL?
 # return undef if not URL for a domain cookie, which means either bogus URL
 # or the master cookies should be tried.
 sub domain_cookie {
     my ($class, $url) = @_;
+    my ($subdomain, $user) = LJ::Session->domain_journal($url);
 
+    # undef:  not on a user-subdomain
+    return undef unless $subdomain;
+
+    # on a user subdomain, or shared subdomain
+    if ($user ne "") {
+        return "ljdomsess.$subdomain.$user";
+    } else {
+        return "ljdomsess.$subdomain";
+    }
+}
+
+# given an optional URL (by default, the current URL), what is the username
+# of that URL?.  undef if no user.  in list context returns the ($subdomain, $user)
+# where $user can be "" if $subdomain isn't, say, "community" or "users".
+sub domain_journal {
+    my ($class, $url) = @_;
+
+    $url ||= _current_url();
     return undef unless
         $url =~ m!^http://(.+?)(/.*)$!;
 
@@ -377,11 +396,19 @@ sub domain_cookie {
     if ($LJ::SUBDOMAIN_FUNCTION{$subdomain} eq "journal") {
         return undef unless $path =~ m!^/(\w{1,15})\b!;
         my $user = lc($1);
-        return "ljdomsess.$subdomain.$user";
+        return wantarray ? ($subdomain, $user) : $user;
     }
 
     # where $subdomain is actually a username:
-    return "ljdomsess.$subdomain";
+    return wantarray ? ($subdomain, "") : $subdomain;
+}
+
+sub url_owner {
+    my ($class, $url) = @_;
+    $url ||= _current_url();
+    my ($subdomain, $user) = LJ::Session->domain_journal($url);
+    $user = $subdomain if $user eq "";
+    return $user;
 }
 
 sub fb_cookie {
@@ -402,7 +429,9 @@ sub session_from_cookies {
 
     my $sessobj;
 
-    my $domain_cookie = LJ::Session->domain_cookie(_current_url());
+    my $domain_cookie = LJ::Session->domain_cookie;
+    warn "session_from_cookies = $domain_cookie\n";
+
     if ($domain_cookie) {
         # journal domain
         $sessobj = LJ::Session->session_from_domain_cookie(\%getopts, @{ $BML::COOKIE{"$domain_cookie\[\]"} || [] });
@@ -441,14 +470,10 @@ sub session_from_domain_cookie {
     my @cookies = grep { $_ } @_;
     return $no_session->("no cookies") unless @cookies;
 
-    my $cur_url = _current_url();
-    my $domcook = LJ::Session->domain_cookie($cur_url);
-
-    warn "   domaincook: $domcook (for $cur_url)\n";
+    my $domcook = LJ::Session->domain_cookie;
 
     foreach my $cookie (@cookies) {
         my $sess = valid_domain_cookie($domcook, $cookie, $li_cook);
-        warn "for url=$cur_url, domcook=$domcook, sess=$sess\n";
         next unless $sess;
         return $sess;
     }
@@ -796,7 +821,6 @@ sub valid_domain_cookie {
 
     return $not_valid->("bogus params") if $bogus;
     return $not_valid->("wrong gen") if $gen ne $LJ::COOKIE_GEN;
-    warn "version: $version == " . VERSION;
     return $not_valid->("wrong ver") if $version != VERSION;
 
     # have to be relatively new.  these shouldn't last longer than a day
