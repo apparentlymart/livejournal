@@ -102,7 +102,7 @@ body<=
 
     $ret .= "<table style='width: 100%' cellpadding='5' cellspacing='0'>";
     foreach my $r (@recv) {
-	next unless $r->{nodetype} eq "L";
+        next unless $r->{nodetype} eq "L";
         next if $r->{state} eq "D";
 
         my $pu = $us->{$r->{posterid}};
@@ -116,14 +116,14 @@ body<=
         my $ditemid = "$root/$lrow->{ditemid}.html";
         my $talkurl = "$root/$lrow->{ditemid}.html?thread=$talkid\#t$talkid";
 
-	my $bgcolor = "transparent";
+        my $bgcolor = "transparent";
         my $state = "";
-	if ($r->{state} eq "S") {
+        if ($r->{state} eq "S") {
             $bgcolor = BML::fill_template("screenedbarcolor");
             $state = "Screened";
-	} elsif ($r->{state} eq "D") {
+        } elsif ($r->{state} eq "D") {
             $state = "Deleted";
-	} elsif ($r->{state} eq "F") {
+        } elsif ($r->{state} eq "F") {
             $state = "Frozen";
         }
 
@@ -131,7 +131,7 @@ body<=
         $ljcmt->{u} = $pu ? $pu->{user} : "";
 
         $ret .= "<tr valign='top' id='ljcmtbar$talkid'><td style='width: 150px; line-height: 1.5em; border-top: 1px solid #999; background-color: $bgcolor' id='cmtbar$talkid'>";
-	 $ret .= (LJ::isu($pu) ? LJ::ljuser($pu) : "Anonymous") . "<br />";
+         $ret .= (LJ::isu($pu) ? LJ::ljuser($pu) : "Anonymous") . "<br />";
 
         $ret .= LJ::ago_text($now - $r->{datepostunix}) . "<br />";
         $ret .= "<div id='state$talkid'>$state</div>" if $r->{state} ne "D";
@@ -168,8 +168,7 @@ body<=
         $ret .= "<strong style='float: left; text-decoration: underline'>$subject</strong> " if $subject ne "";
         $ret .= "<strong style='float: right'>(<a href='$ditemid'>Entry Link</a>)</strong>" unless $lrow->{ditemid} == undef;
         $ret .= "<br /><br />";
-        my $subject = $comment_text->{$r->{jtalkid}}[0];
-        LJ::CleanHTML::clean_subject(\$subject);
+        my $subject = LJ::ehtml($comment_text->{$r->{jtalkid}}[0]);
 
         if ($subject && $subject !~ /^Re:\s*$/) {
             $ret .= "<cite>$subject</cite><br />";
@@ -177,7 +176,9 @@ body<=
 
         my $comment = $comment_text->{$r->{jtalkid}}[1];
         LJ::CleanHTML::clean_comment(\$comment, { 'preformatted' => $r->{'props'}->{'opt_preformatted'},
-                                                  'anon_comment' => !$pu });
+                                                  'anon_comment' => !$pu,
+                                                  'nocss' => 1,
+                                              });
         $ret .= "$comment<br /><br />";
 
         $ret .= "(<a href='$talkurl'>Comment Link</a>) " unless $r->{state} eq "D" || $lrow->{ditemid} == undef;

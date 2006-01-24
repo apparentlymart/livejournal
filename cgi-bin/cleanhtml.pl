@@ -140,6 +140,10 @@ sub clean
         push @attrstrip, 'id';
     }
 
+    if ($opts->{'nocss'}) {
+        push @attrstrip, 'style';
+    }
+
     if (ref $opts->{'attrstrip'} eq "ARRAY") {
         foreach (@{$opts->{'attrstrip'}}) { push @attrstrip, $_; }
     }
@@ -993,6 +997,7 @@ sub clean_comment
         'extractlinks' => $opts->{'anon_comment'},
         'extractimages' => $opts->{'anon_comment'},
         'noearlyclose' => 1,
+        'nocss' => $opts->{'nocss'},
     });
 }
 
