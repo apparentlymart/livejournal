@@ -410,7 +410,7 @@ sub domain_journal {
 
     my $subdomain = lc($1);
     if ($LJ::SUBDOMAIN_FUNCTION{$subdomain} eq "journal") {
-        return undef unless $path =~ m!^/([\w-]{1,15})\b!;
+        return undef unless $path =~ m!^/(\w{1,15})\b!;
         my $user = lc($1);
         return wantarray ? ($subdomain, $user) : $user;
     }
