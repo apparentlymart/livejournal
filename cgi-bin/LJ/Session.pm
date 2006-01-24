@@ -168,7 +168,6 @@ sub expiration_time {
     # expiration time if we have it,
     return $sess->{timeexpire} if $sess->{timeexpire};
 
-    warn "Had no 'timeexpire' for session.\n";
     return time() + LJ::Session->session_length($sess->{exptype});
 }
 
@@ -430,7 +429,6 @@ sub session_from_cookies {
     my $sessobj;
 
     my $domain_cookie = LJ::Session->domain_cookie;
-    warn "session_from_cookies = $domain_cookie\n";
 
     if ($domain_cookie) {
         # journal domain
@@ -449,20 +447,15 @@ sub session_from_domain_cookie {
     my $class = shift;
     my $opts = ref $_[0] ? shift() : {};
 
-    warn "session_from_domain_cookie()\n";
-
     # the logged-in cookie
     my $li_cook = $BML::COOKIE{'ljloggedin'};
     return undef unless $li_cook;
-
-    warn "   li_cook = $li_cook\n";
 
     my $no_session = sub {
         my $reason = shift;
         my $rr = $opts->{redirect_ref};
         if ($rr) {
             $$rr = "$LJ::SITEROOT/misc/get_domain_session.bml?return=" . LJ::eurl(_current_url());
-            warn "   need_bounce to: $$rr\n";
         }
         return undef;
     };
@@ -483,8 +476,6 @@ sub session_from_domain_cookie {
 
 sub session_from_fb_cookie {
     my $class = shift;
-
-    warn "session_from_fb_cookie()\n";
 
     my $domcook  = LJ::Session->fb_cookie;
     my $fbcookie = $BML::COOKIE{$domcook};
@@ -522,7 +513,6 @@ sub session_from_master_cookie {
 
   COOKIE:
     foreach my $sessdata (@cookies) {
-        warn "master cookie: = $sessdata\n";
         my ($cookie, $gen) = split(m!//!, $sessdata);
 
         my ($version, $userid, $sessid, $auth, $flags);
@@ -552,7 +542,6 @@ sub session_from_master_cookie {
         next COOKIE unless $gen eq $LJ::COOKIE_GEN;
 
         my $err = sub {
-            warn "  ERROR due to: $_[0]";
             $sess = undef;
             push @$errs, "$sessdata: $_[0]";
         };
@@ -689,14 +678,10 @@ sub setdomsess_handler {
     my $domcook = $get{'k'};
     my $cookie  = $get{'v'};
 
-    warn "setdomsess handler!\n";
-
     my $is_valid = valid_destination($dest);
-    warn "  valid dest = $is_valid\n";
     return "$LJ::SITEROOT" unless $is_valid;
 
     $is_valid = valid_domain_cookie($domcook, $cookie, $BML::COOKIE{'ljloggedin'});
-    warn "  valid dom cookie = $is_valid\n";
     return $dest           unless $is_valid;
 
     set_cookie($domcook   => $cookie,
@@ -781,7 +766,6 @@ sub set_cookie {
     $cookiestr .= '; path=' . $path if $path;
     $cookiestr .= '; HttpOnly' if $http_only;
 
-    warn "SETTING-COOKIE: $cookiestr\n";
     $r->err_headers_out->add('Set-Cookie' => $cookiestr);
 }
 
@@ -815,7 +799,6 @@ sub valid_domain_cookie {
 
     my $not_valid = sub {
         my $reason = shift;
-        warn "  valid_domain_cookie = 0, because: $reason\n";
         return undef;
     };
 
