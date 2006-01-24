@@ -2115,12 +2115,11 @@ sub sessiongenerate {
     # do not let locked people do this
     return fail($err, 308) if $u->{statusvis} eq 'L';
 
-    my $sess = $u->generate_session($sess_opts);
-    my $gen = $LJ::COOKIE_GEN || "";
+    my $sess = LJ::Session->create($u, %$sess_opts);
 
     # return our hash
     return {
-        ljsession => "ws$gen:$u->{user}:$sess->{sessid}:$sess->{auth}",
+        ljsession => $sess->master_cookie_string,
     };
 }
 

@@ -372,49 +372,6 @@ sub dudata_set {
     return 1;
 }
 
-sub generate_session
-{
-    my ($u, $opts) = @_;
-    my $udbh = LJ::get_cluster_master($u);
-    return undef unless $udbh;
-
-    # clean up any old, expired sessions they might have (lazy clean)
-    $u->do("DELETE FROM sessions WHERE userid=? AND timeexpire < UNIX_TIMESTAMP()",
-           undef, $u->{userid});
-
-    my $sess = {};
-    $opts->{'exptype'} = "short" unless $opts->{'exptype'} eq "long" ||
-                                        $opts->{'exptype'} eq "once";
-    $sess->{'auth'} = LJ::rand_chars(10);
-    my $expsec = $opts->{'expsec'}+0 || {
-        'short' => 60*60*24*1.5, # 36 hours
-        'long' => 60*60*24*60,   # 60 days
-        'once' => 60*60*24*1.5,  # same as short; just doesn't renew
-    }->{$opts->{'exptype'}};
-    my $id = LJ::alloc_user_counter($u, 'S');
-    return undef unless $id;
-    $u->do("REPLACE INTO sessions (userid, sessid, auth, exptype, ".
-           "timecreate, timeexpire, ipfixed) VALUES (?,?,?,?,UNIX_TIMESTAMP(),".
-           "UNIX_TIMESTAMP()+$expsec,?)", undef,
-           $u->{'userid'}, $id, $sess->{'auth'}, $opts->{'exptype'}, $opts->{'ipfixed'});
-    return undef if $u->err;
-    $sess->{'sessid'} = $id;
-    $sess->{'userid'} = $u->{'userid'};
-    $sess->{'ipfixed'} = $opts->{'ipfixed'};
-    $sess->{'exptype'} = $opts->{'exptype'};
-
-    # clean up old sessions
-    my $old = $udbh->selectcol_arrayref("SELECT sessid FROM sessions WHERE ".
-                                        "userid=$u->{'userid'} AND ".
-                                        "timeexpire < UNIX_TIMESTAMP()");
-    $u->kill_sessions(@$old) if $old;
-
-    # mark account as being used
-    LJ::mark_user_active($u, 'login');
-
-    return $sess;
-}
-
 sub make_login_session {
     my ($u, $exptype, $ipfixed) = @_;
     $exptype ||= 'short';

@@ -30,18 +30,7 @@
         'ipfixed' => 0,
     };
 
-    my $sess = $u->generate_session($sess_opts);
-
-    my @sopts;
-    LJ::run_hooks("login_add_opts", { 'u' => $u, 'form' => \%POST, 'opts' => \@sopts });
-    my $sopts = @sopts ? ":" . join('', map { ".$_" } @sopts) : "";
-
-    # NOTE: we don't set HttpOnly attribute here, for paranoia of
-    # mobile agents not understanding it
-    my $gen = $LJ::COOKIE_GEN || "";
-    $COOKIE{'ljsession'} = [  "ws$gen:$u->{'user'}:$sess->{'sessid'}:$sess->{'auth'}$sopts", $etime ];
-
-    LJ::set_remote($u);
+    $u->make_login_session('long');
 
     return BML::redirect("$LJ::SITEROOT/mobile/?t=" . time());
 }
@@ -62,7 +51,7 @@ form { margin-left: 2em; }
 
 <h2>SSL secure login</h2>
 <p>Secure using SSL, but may not work on all mobile devices:</p>
-<form method='post' action='https://www.livejournal.com/mobile/login.bml'>
+<form method='post' action='<?_code return $LJ::SSLROOT _code?>/mobile/login.bml'>
 Username: <input name='user' size='15' /><br />
 Password: <input name='password' type='password' size='15' />
 <input type='submit' value="Login" />
@@ -71,7 +60,7 @@ Password: <input name='password' type='password' size='15' />
 <h2>Insecure basic login</h2>
 <p>This sends your password unprotected, probably over the air.  Not a good idea on Wifi.  Probably okay over a mobile carrier's data network.</p>
 
-<form method='post' action='http://www.livejournal.com/mobile/login.bml'>
+<form method='post' action='<?_code return $LJ::SITEROOT _code?>/mobile/login.bml'>
 Username: <input name='user' size='15' /><br />
 Password: <input name='password' type='password' size='15' />
 <input type='submit' value="Login" />
