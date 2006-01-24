@@ -374,7 +374,6 @@ sub trans
         if ($opts->{'mode'} eq "profile") {
             my $remote = LJ::get_remote();
             my $burl = LJ::remote_bounce_url();
-            warn "  PROFILE:  remote=$remote, burl=$burl\n";
             return remote_domsess_bounce() if LJ::remote_bounce_url();
 
             $r->notes("_journal" => $opts->{'user'});
