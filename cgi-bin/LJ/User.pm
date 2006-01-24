@@ -486,6 +486,9 @@ sub sessions {
 
 sub logout {
     my $u = shift;
+    if (my $sess = $u->session) {
+        $sess->destroy;
+    }
     $u->_logout_common;
 }
 
@@ -501,7 +504,7 @@ sub _logout_common {
     LJ::Session->clear_master_cookie;
     LJ::User->set_remote(undef);
     delete $BML::COOKIE{'BMLschemepref'};
-    BML::set_scheme(undef);
+    eval { BML::set_scheme(undef); };
 }
 
 # returns a new LJ::Session object, or undef on failure

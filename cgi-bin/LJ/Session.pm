@@ -756,7 +756,7 @@ sub set_cookie {
     my ($key, $value, %opts) = @_;
 
     my $r = eval { Apache->request };
-    croak("Can't set cookie in non-web context") unless $r;
+    return unless $r;
 
     my $http_only = delete $opts{http_only};
     my $domain = delete $opts{domain};
