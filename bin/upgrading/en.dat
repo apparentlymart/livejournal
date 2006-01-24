@@ -2785,7 +2785,260 @@ The site team
 
 /lostinfo_do.bml.username_mailed.title=Username mailed!
 
+/manage/emailpost.bml.addresses.header=Allowed sender addresses
+
+/manage/emailpost.bml.addresses.text=Only the addresses listed below are allowed to post to your account via the email gateway. If no addresses are listed, posting via the email gateway will be disabled for your account. Marked addresses will receive errors if there are any to send.
+
+/manage/emailpost.bml.addresses.table.address=Address:
+
+/manage/emailpost.bml.addresses.table.errors=Send errors?
+
+/manage/emailpost.bml.error.invalidemail=Invalid email address: [[email]]
+
+/manage/emailpost.bml.error.invalidimagesize=Image size must be [[size]] or less to disable the lj-cut.
+
+/manage/emailpost.bml.error.invalidpin=Your PIN is currently limited to alphabet characters and numbers, and needs to be at least [[num]] [[?num|character|characters]] long.
+
+/manage/emailpost.bml.error.invalidpinaccount=This PIN is invalid. You should change it to something that does <b>NOT</b> have anything to do with your [[sitename]] account.
+
+/manage/emailpost.bml.error.notloggedin.header=Please log in!
+
+/manage/emailpost.bml.error.sitenotconfigured=Sorry, this site is not configured to allow updating your journal via email.
+
+/manage/emailpost.bml.help.advanced.header=Advanced usage
+
+/manage/emailpost.bml.help.advanced.pgp.body=This body should be properly signed with my private key.
+
+/manage/emailpost.bml.help.advanced.pgp.header=PGP/GPG message signing
+
+/manage/emailpost.bml.help.advanced.pgp.text1=If you specify "[[pgp]]" instead of your PIN, allowed sender addresses and the saved PIN are completely ignored. Your email will only be posted if it is signed with a valid PGP/GPG private key.
+
+/manage/emailpost.bml.help.advanced.pgp.text2=You must first upload your public key <a [[aopts]]>here</a>.
+
+/manage/emailpost.bml.help.allowedsenderemail|notes=A made-up email address for users that haven't specified an allowed email address for email posts to be sent from.
+/manage/emailpost.bml.help.allowedsenderemail=allowed_sender@example.com
+
+/manage/emailpost.bml.help.body|notes=Example body text for the example email.
+/manage/emailpost.bml.help.body=This is the body of my post.
+
+/manage/emailpost.bml.help.body_images|notes=Example body text for the example picture email.
+/manage/emailpost.bml.help.body_images=This is the body of my post, with image attachments.
+
+/manage/emailpost.bml.help.examplecommhyphen|notes=This is the example community username used to show the underscore/hyphen change -- leave as is unless your translations has its own example community account with hyphens.
+/manage/emailpost.bml.help.examplecommhyphen=comm-example
+
+/manage/emailpost.bml.help.examplecommunity|notes=This is the example community username used -- leave as is unless your translation has its own example community account.
+/manage/emailpost.bml.help.examplecommunity=communityname
+
+/manage/emailpost.bml.help.exampleuserhyphen|notes=This is the example username used to show the underscore/hyphen change -- leave as is unless your translation has its own example username account with hyphens.
+/manage/emailpost.bml.help.exampleuserhyphen=user-example
+
+/manage/emailpost.bml.help.exampleusername|notes=This is the username used if you're not logged in -- leave as is unless your translation has its own example username account.
+/manage/emailpost.bml.help.exampleusername=exampleusername
+
+/manage/emailpost.bml.help.from|notes=The "email" variable will be replaced with the .help.allowedsenderemail string if the user has not specified an allowed sender.
+/manage/emailpost.bml.help.from=From: [[email]]
+
+/manage/emailpost.bml.help.header=How does this feature work?
+
+/manage/emailpost.bml.help.headers.header=[[sitenameabbrev]] headers and security
+
+/manage/emailpost.bml.help.headers.options.comments.example=("[[off]]" or "[[noemail]]")
+
+/manage/emailpost.bml.help.headers.options.header=Journal entry options
+
+/manage/emailpost.bml.help.headers.options.mood.example=happy
+
+/manage/emailpost.bml.help.headers.options.music.example=The Pixies: Where is my mind?
+
+/manage/emailpost.bml.help.headers.options.tags.example=greyhounds, potato, wool
+
+/manage/emailpost.bml.help.headers.options.text=Most journal specific features can be set via "lj-headers" in the body of your message. The lj-headers should be at the top of your message, separated by a newline. All lj-headers are completely optional, and simply override your journal defaults.
+
+/manage/emailpost.bml.help.headers.options.userpic.example=userpic keywords
+
+/manage/emailpost.bml.help.headers.security.friends.desc=The post can only be viewed by those on your Friends list.
+
+/manage/emailpost.bml.help.headers.security.group.desc=This is literally the name of a friend group. Only friends belonging to that group can view the post.
+
+/manage/emailpost.bml.help.headers.security.group.example=Example: [[header]] <b>my friends</b>
+
+/manage/emailpost.bml.help.headers.security.group.word|notes=A single word that tells the person to put a friend group name in its place.
+/manage/emailpost.bml.help.headers.security.group.word=friendgroup
+
+/manage/emailpost.bml.help.headers.security.header=Journal entry security
+
+/manage/emailpost.bml.help.headers.security.private.desc=The post is posted privately.
+
+/manage/emailpost.bml.help.headers.security.public.desc=The post is posted publicly.
+
+/manage/emailpost.bml.help.headers.security.text=Security options are set via the lj-header "[[header]]". If the security type specified is unknown, the journal entry defaults to private. If no security is specified, the entry is posted according to your default journal security.
+
+/manage/emailpost.bml.help.images.gallery.example=vacation photos
+
+/manage/emailpost.bml.help.images.gallery.header=Choosing a gallery
+
+/manage/emailpost.bml.help.images.gallery.text=You can specify what photo gallery you want your attachments uploaded into using the [[header]] header. If unspecified, the default gallery is '[[name]]'. If you decide to move your images into different galleries in the future, the images posted in your journal will still work correctly.
+
+/manage/emailpost.bml.help.images.header=Image attachments
+
+/manage/emailpost.bml.help.images.layout.header=Changing image layout
+
+/manage/emailpost.bml.help.images.layout.text1=If you attach multiple images, you can change the way they appear in your journal via the [[header]] header.
+
+/manage/emailpost.bml.help.images.layout.text2=By default, multiple images will be placed in a vertical layout:
+
+/manage/emailpost.bml.help.images.layout.text3=Currently, the only other option is "[[horizontal]]".
+
+/manage/emailpost.bml.help.images.ljcut.header=lj-cut behavior
+
+/manage/emailpost.bml.help.images.ljcut.text=By default, images [[ljcutsize]] or smaller are placed in your journal without an <a [[aopts]]>lj-cut</a>. You can change this behavior using the [[header]] header. Valid options are "[[count]]" and "[[titles]]". Using "[[count]]", if you attached 3 images in your email message, the lj-cut would read, "( 3 images )". Setting the [[header]] header to "[[titles]]" changes the cut caption to the title of the filename, one cut per image. "( emo.jpg ) ( pict002.jpg ) ( me_and_bob.jpg )"
+
+/manage/emailpost.bml.help.images.security.header=Image security
+
+/manage/emailpost.bml.help.images.security.text1=Images are publicly viewable by default. Use the [[header]] header to change this behavior. Please note that image security is separate from your journal entry security! For example, you can have a journal entry that is private, while the pictures within it are public. This feature only changes the security on the images themselves - not the journal entry.
+
+/manage/emailpost.bml.help.images.security.text2=Valid options are "[[option1]]", "[[option2]]", and "[[option3]]".
+
+/manage/emailpost.bml.help.images.size.header=Changing the image display size
+
+/manage/emailpost.bml.help.images.size.text1=You may attach images of any size. They will be displayed in your journal at a maximum size of [[maxsize]]. The default size is [[defaultsize]]. You may specify a size using the [[header]] header. Images larger than [[ljcutsize]] will be automatically placed behind an <a [[aopts]]>lj-cut</a>.
+
+/manage/emailpost.bml.help.images.size.text2=Valid sizes are "[[size1]]", "[[size2]]", and "[[size3]]".
+
+/manage/emailpost.bml.help.images.text=If you have <a [[aopts1]]>[[scrapbook]]</a> access (and enough disk quota), any image you attach to your email message will be automatically uploaded to your [[scrapbook]] account and displayed in your journal entry. All images above [[dimensions]] in size are displayed under an <a [[aopts2]]>lj-cut</a>. Using <a [[aopts3]]>lj-headers</a>, you can change the way the images look in your journal, as well as set various image attributes.
+
+/manage/emailpost.bml.help.manage.header=Manage your emailpost settings
+
+/manage/emailpost.bml.help.optionalfeatures.header=Optional features
+
+/manage/emailpost.bml.help.optionalfeatures.hyphens.header=Hyphens and underscores
+
+/manage/emailpost.bml.help.optionalfeatures.hyphens.text=To compensate for mobile phones that don't have an underscore key, you may substitute a hyphen in their place inside any user or community account name. The hyphens will be automatically converted to underscores.
+
+/manage/emailpost.bml.help.optionalfeatures.posttocommunity.header=Posting to a community
+
+/manage/emailpost.bml.help.optionalfeatures.posttocommunity.text=Simply embed the community name in the email address.
+
+/manage/emailpost.bml.help.optionalfeatures.removetext.example=This text and anything underneath it will be ignored, including automatic signatures added by free email services.<br />__________________________________________________<br />Try the all new SUPER FREE MAIL version 17 today!!!
+
+/manage/emailpost.bml.help.optionalfeatures.removetext.header=Removing unwanted text
+
+/manage/emailpost.bml.help.optionalfeatures.removetext.text=All text below two or more dashes or underscores ("[[dashes]]" or "[[underscores]]") on a line by itself will be automatically removed. The red text below won't show up in your posting.
+
+/manage/emailpost.bml.help.pgpsenderemail|notes=A made-up sender email address for users posting with PGP.  It should imply that the user can post from any email address.
+/manage/emailpost.bml.help.pgpsenderemail=anywhere@example.com
+
+/manage/emailpost.bml.help.pin=PIN
+
+/manage/emailpost.bml.help.pinusage.header=PIN usage examples
+
+/manage/emailpost.bml.help.pinusage.inbody.header=PIN in body
+
+/manage/emailpost.bml.help.pinusage.inemail.header=PIN in email address
+
+/manage/emailpost.bml.help.pinusage.insubject.header=PIN in subject
+
+/manage/emailpost.bml.help.subject|notes=An example subject line for the example email.  The "pin" variable is only filled in in certain cases.
+/manage/emailpost.bml.help.subject=Subject: [[pin]] Neat, I can post via email.
+
+/manage/emailpost.bml.help.subject_images|notes=An example subject line for the example picture email.
+/manage/emailpost.bml.help.subject_images=Subject: Neat, I can post pictures via email.
+
+/manage/emailpost.bml.help.text1=Email posting uses normal email messages to post to your journal or a community. Your PIN needs to be embedded in the email address, subject, or body of the message. Embed your PIN by prefixing it with the [[plus]] symbol. You must be sending the message from an email address on your "Allowed sender addresses" list. If you embed your PIN in either the subject or the body, it will be automatically removed before posting.
+
+/manage/emailpost.bml.help.text2=Posting via email permits many options to be set on a per message basis. Because of this complexity, we've separated examples into different topics. Please select from the list below:
+
+/manage/emailpost.bml.help.to|notes=The "email" variable will be replaced with the .help.exampleusername string + @post.livejournal.com OR .help.exampleusername + .help.pin + @post.livejournal.com (unless the user is logged in and/or has specified a PIN, in which case it uses the user's actual username and/or PIN).
+/manage/emailpost.bml.help.to=To: [[email]]
+
+/manage/emailpost.bml.instructions.header=Instructions
+
+/manage/emailpost.bml.intro=If you'd like to be able to update your journal via email, please fill out the following fields. For more help using this feature, check out the <a [[aopts]]>instructions</a>.
+
+/manage/emailpost.bml.pin.header=PIN
+
+/manage/emailpost.bml.pin.text=Your PIN is used only for the email gateway. Do not use your regular password for this. This way, if someone obtains your PIN, they can't obtain full access to your journal. The PIN should be at least [[num]] [[?num|character|characters]] long, and may only contain alphabet characters and/or numbers.
+
+/manage/emailpost.bml.settings.entry.comments=Comments:
+
+/manage/emailpost.bml.settings.entry.comments.select.default=default
+
+/manage/emailpost.bml.settings.entry.comments.select.noemail=No email
+
+/manage/emailpost.bml.settings.entry.comments.select.off=off
+
+/manage/emailpost.bml.settings.entry.header=Journal entry defaults
+
+/manage/emailpost.bml.settings.entry.security=Security:
+
+/manage/emailpost.bml.settings.entry.security.select.default=default
+
+/manage/emailpost.bml.settings.entry.security.select.friends=friends
+
+/manage/emailpost.bml.settings.entry.security.select.private=private
+
+/manage/emailpost.bml.settings.entry.security.select.public=public
+
+/manage/emailpost.bml.settings.entry.userpic=Userpic:
+
+/manage/emailpost.bml.settings.entry.userpic.select.default=default
+
+/manage/emailpost.bml.settings.header=Default settings
+
+/manage/emailpost.bml.settings.image.cut=Image cut type:
+
+/manage/emailpost.bml.settings.image.cut.select.count=count
+
+/manage/emailpost.bml.settings.image.cut.select.default=default
+
+/manage/emailpost.bml.settings.image.cut.select.titles=titles
+
+/manage/emailpost.bml.settings.image.galname=Gallery name:
+
+/manage/emailpost.bml.settings.image.header=Image hosting defaults
+
+/manage/emailpost.bml.settings.image.layout=Image layout:
+
+/manage/emailpost.bml.settings.image.layout.select.default=default
+
+/manage/emailpost.bml.settings.image.layout.select.horizontal=horizontal
+
+/manage/emailpost.bml.settings.image.layout.select.vertical=vertical
+
+/manage/emailpost.bml.settings.image.security=Image security:
+
+/manage/emailpost.bml.settings.image.security.select.default=default
+
+/manage/emailpost.bml.settings.image.security.select.friends=friends
+
+/manage/emailpost.bml.settings.image.security.select.private=private
+
+/manage/emailpost.bml.settings.image.security.select.public=public
+
+/manage/emailpost.bml.settings.image.security.select.regusers=registered users
+
+/manage/emailpost.bml.settings.image.size=Image size:
+
+/manage/emailpost.bml.settings.image.size.select.100x100=100x100
+
+/manage/emailpost.bml.settings.image.size.select.320x240=320x240
+
+/manage/emailpost.bml.settings.image.size.select.640x480=640x480
+
+/manage/emailpost.bml.settings.image.size.select.default=default
+
+/manage/emailpost.bml.settings.text=These settings apply to all journal updates via email. You can leave these options alone to let your journal defaults take over, or override on a per message basis using lj-headers. These settings (and lj-header overrides) are described <a [[aopts]]>here</a>.
+
 /manage/emailpost.bml.sorry.acct=Sorry, updating your journal via email is not available for your account type.
+
+/manage/emailpost.bml.success.header=Success
+
+/manage/emailpost.bml.success.info=Click <a [[aopts]]>here</a> for information on how to use this feature.
+
+/manage/emailpost.bml.success.saved=Your email gateway settings have been saved.
+
+/manage/emailpost.bml.title=Mobile Post Settings
 
 /manage/index.bml.about=Managing your account is easy. Just choose from the following areas below:
 

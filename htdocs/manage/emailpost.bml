@@ -1,5 +1,5 @@
 <?page
-title=>Mobile Post Settings
+title=><?_ml .title _ml?>
 head<=
     <style type="text/css">
     
@@ -30,10 +30,9 @@ body<=
     use strict;
     use vars qw(%POST %GET);
 
-    LJ::set_active_crumb('emailgateway');
+    LJ::set_active_crumb('mobilepost');
 
-    return "Sorry, this site is not configured to allow updating your
-        journal via email." unless $LJ::EMAIL_POST_DOMAIN;
+    return $ML{'.error.sitenotconfigured'} unless $LJ::EMAIL_POST_DOMAIN;
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
     my $u = LJ::get_remote();
@@ -60,49 +59,59 @@ body<=
     if ($mode eq 'help') {
 
         my $ret;
-        my $user = $u ? $u->{user} : 'exampleusername';
+        my $user = $u ? $u->{user} : $ML{'.help.exampleusername'};
+        my $community = $ML{'.help.examplecommunity'};
+        my $user_hyphen = $ML{'.help.exampleuserhyphen'};
+        my $comm_hyphen = $ML{'.help.examplecommhyphen'};
         my $need_login = (! $u && ! $GET{mode}) ? 1 : 0;
 
-        my @address = split(/\s*,\s*/, $u->{emailpost_allowfrom});
-        my $addr    = $address[0] || 'allowed_sender@example.com';
+        my @address  = split(/\s*,\s*/, $u->{emailpost_allowfrom});
+        my $addr     = $address[0] || $ML{'.help.allowedsenderemail'};
+        my $addr_pgp = $ML{'.help.pgpsenderemail'};
         $addr =~ s/\(\w\)$//;
-        my $pin     = $u->{emailpost_pin} || 'PIN';
-        my $to      = "To: $user" . '@' . $LJ::EMAIL_POST_DOMAIN . '<br />'; 
-        my $to_pin  = "To: $user+$pin" . '@' . $LJ::EMAIL_POST_DOMAIN . '<br />'; 
-        my $subject = "Subject: Neat, I can post via email." . '<br /><br />';
-        my $from    = "From: $addr <br />";
-        my $body    = "This is the body of my post.";
+        my $pin          = $u->{emailpost_pin} || $ML{'.help.pin'};
+        my $to           = BML::ml('.help.to', {'email' => $user . '@' . $LJ::EMAIL_POST_DOMAIN}) . '<br />';
+        my $to_pin       = BML::ml('.help.to', {'email' => "$user+$pin" . '@' . $LJ::EMAIL_POST_DOMAIN}) . '<br />';
+        my $to_pin_bold  = BML::ml('.help.to', {'email' => "$user<b>+$pin</b>" . '@' . $LJ::EMAIL_POST_DOMAIN}) . '<br />';
+        my $to_community = BML::ml('.help.to', {'email' => "$user.<b>$community</b>+$pin" . '@' . $LJ::EMAIL_POST_DOMAIN}) . '<br />';
+        my $to_hyphens   = BML::ml('.help.to', {'email' => "<b>$user_hyphen.$comm_hyphen</b>+$pin" . '@' . $LJ::EMAIL_POST_DOMAIN}) . '<br />';
+        my $to_pgp       = BML::ml('.help.to', {'email' => "$user<b>+PGP</b>" . '@' . $LJ::EMAIL_POST_DOMAIN}) . '<br />';
+        my $subject      = BML::ml('.help.subject', {'pin' => ''}) . '<br /><br />';
+        my $subject_pin  = BML::ml('.help.subject', {'pin' => "<b>+$pin</b>"}) . '<br /><br />';
+        my $from         = BML::ml('.help.from', {'email' => $addr}) . '<br />';
+        my $from_pgp     = BML::ml('.help.from', {'email' => $addr_pgp}) . '<br />';
+        my $body         = $ML{'.help.body'};
 
         if ($need_login) {
-            $ret .= '<?h1 Please log in! h1?>';
+            $ret .= "<?h1 $ML{'.error.notloggedin.header'} h1?>";
             $ret .= "<?p $ML{'error.noremote'} p?>";
         }
 
         my @topics = (
             {
                 name  => 'pin',
-                title => 'Pin usage examples',
+                title => $ML{'.help.pinusage.header'},
                 url   => '?mode=help&type=pin', 
                 text  => qq{
-                    <?h1 PIN usage examples h1?><br />
+                    <?h1 $ML{'.help.pinusage.header'} h1?><br />
 
-                    <fieldset><legend>PIN in email address</legend>
+                    <fieldset><legend>$ML{'.help.pinusage.inemail.header'}</legend>
                     <?emailex
-                    To: $user<b>+$pin</b>\@$LJ::EMAIL_POST_DOMAIN<br />
+                    $to_pin_bold
                     $from
                     $subject
                     $body
                     emailex?></fieldset>
     
-                    <fieldset><legend>PIN in subject</legend>
+                    <fieldset><legend>$ML{'.help.pinusage.insubject.header'}</legend>
                     <?emailex
                     $to
                     $from
-                    Subject: <b>+$pin</b> Post subject <br /><br />
+                    $subject_pin
                     $body
                     emailex?></fieldset>
 
-                    <fieldset><legend>PIN in body</legend>
+                    <fieldset><legend>$ML{'.help.pinusage.inbody.header'}</legend>
                     <?emailex
                     $to
                     $from
@@ -114,24 +123,22 @@ body<=
 
             {
                 name  => 'optional',
-                title => 'Optional features',
+                title => $ML{'.help.optionalfeatures.header'},
                 url   => '?mode=help&type=optional',
                 text  => qq{
-                    <?h1 Optional features h1?><br />
+                    <?h1 $ML{'.help.optionalfeatures.header'} h1?><br />
 
-                    <fieldset><legend>Posting to a community</legend>
-                    <?p Simply embed the community name in the email address. p?>
+                    <fieldset><legend>$ML{'.help.optionalfeatures.posttocommunity.header'}</legend>
+                    <?p $ML{'.help.optionalfeatures.posttocommunity.text'} p?>
                     <?emailex
-                    To: $user.<b>community</b>+$pin\@$LJ::EMAIL_POST_DOMAIN<br />
+                    $to_community
                     $from
                     $subject
                     $body
                     emailex?></fieldset>
 
-                    <fieldset><legend>Removing unwanted text</legend>
-                    <?p All text below two or more dashes or underscores ("--" or "__")
-                    on a line by itself will be automatically removed.
-                    The red text below won't show up in your posting. p?>
+                    <fieldset><legend>$ML{'.help.optionalfeatures.removetext.header'}</legend>
+                    <?p } . BML::ml('.help.optionalfeatures.removetext.text', {'dashes' => "--", 'underscores' => "__"}) . qq{ p?>
                     <?emailex
                     $to_pin
                     $from
@@ -139,19 +146,13 @@ body<=
                     $body
                     <br />--<br />
                     <font color='red'>
-                    This text and anything underneath it will be ignored,
-                    including automatic signatures added by free email services.<br />
-                    __________________________________________________<br />
-                    Try the all new SUPER FREE MAIL version 17 today!!!<br />
+                    $ML{'.help.optionalfeatures.removetext.example'}
                     </font>emailex?></fieldset>
 
-                    <fieldset><legend>Hyphens and underscores</legend>
-                    <?p To compensate for mobile phones that don't have an underscore key,
-                    you may substitute a hyphen in their place inside any user or
-                    community account name. The hyphens will be automatically converted
-                    to underscores. p?>
+                    <fieldset><legend>$ML{'.help.optionalfeatures.hyphens.header'}</legend>
+                    <?p $ML{'.help.optionalfeatures.hyphens.text'} p?>
                     <?emailex
-                    To: <b>some-user.some-community</b>+$pin</b>\@$LJ::EMAIL_POST_DOMAIN<br />
+                    $to_hyphens
                     $from
                     $subject
                     $body
@@ -161,132 +162,99 @@ body<=
 
             {
                 name  => 'headers',
-                title => 'LJ headers and security',
+                title => BML::ml('.help.headers.header', {'sitenameabbrev' => $LJ::SITENAMEABBREV}),
                 url   => '?mode=help&type=headers',
                 text  => qq{
-                    <?h1 LJ headers h1?><br />
+                    <?h1 } . BML::ml('.help.headers.header', {'sitenameabbrev' => $LJ::SITENAMEABBREV}) . qq{ h1?><br />
 
-                    <fieldset><legend>Journal entry options</legend>
-                    <?p Most journal specific features can be set via "lj-headers" in the
-                    body of your message. The lj-headers should be at the top of your message,
-                    separated by a newline.  All lj-headers are completely optional, and simply
-                    override your journal defaults. p?>
+                    <fieldset><legend>$ML{'.help.headers.options.header'}</legend>
+                    <?p $ML{'.help.headers.options.text'} p?>
                     <?emailex
                     $to_pin
                     $from
                     $subject
-                    <b>lj-userpic:</b> pict keywords<br />
-                    <b>lj-tags:</b> greyhounds, potato, wool<br />
-                    <b>lj-mood:</b> happy<br />
-                    <b>lj-music:</b> The Pixies: Where is my mind?<br />
-                    <b>lj-comments:</b> ("off" or "noemail")<br />
+                    <b>lj-userpic:</b> $ML{'.help.headers.options.userpic.example'}<br />
+                    <b>lj-tags:</b> $ML{'.help.headers.options.tags.example'}<br />
+                    <b>lj-mood:</b> $ML{'.help.headers.options.mood.example'}<br />
+                    <b>lj-music:</b> $ML{'.help.headers.options.music.example'}<br />
+                    <b>lj-comments:</b> } . BML::ml('.help.headers.options.comments.example', {'off' => 'off', 'noemail' => 'noemail'}) . qq{<br />
                     <br />
                     $body
                     emailex?></fieldset>
 
-                    <fieldset><legend>Journal entry security</legend>
-                    <?p Security options are set via the lj-header "lj-security". 
-                    If the security type specified is unknown, the journal entry defaults
-                    to private.  If no security is specified, the entry is posted according
-                    to your default journal security. p?>
+                    <fieldset><legend>$ML{'.help.headers.security.header'}</legend>
+                    <?p } . BML::ml('.help.headers.security.text', {'header' => 'lj-security'}) . qq{ p?>
                     <div style="margin-left:40px">
                     <b>lj-security:</b> public<br />
-                    <div style="margin-left:40px">The post is posted publicly.</div><br />
+                    <div style="margin-left:40px">$ML{'.help.headers.security.public.desc'}</div><br />
                     </div>
                     <div style="margin-left:40px">
                     <b>lj-security:</b> private<br />
-                    <div style="margin-left:40px">The post is posted privately.</div><br />
+                    <div style="margin-left:40px">$ML{'.help.headers.security.private.desc'}</div><br />
                     </div>
                     <div style="margin-left:40px">
                     <b>lj-security:</b> friends<br />
-                    <div style="margin-left:40px">The post can only be viewed by those on your friends list.</div><br />
+                    <div style="margin-left:40px">$ML{'.help.headers.security.friends.desc'}</div><br />
                     </div>
                     <div style="margin-left:40px">
-                    <b>lj-security:</b> friendgroup<br />
-                    <div style="margin-left:40px">This is literally the name of a friend group. 
-                    Only friends belonging to that group can view the post.
-                    <br />Example: lj-security: <b>my friends</b></div><br />
+                    <b>lj-security:</b> $ML{'.help.headers.security.group.word'}<br />
+                    <div style="margin-left:40px">$ML{'.help.headers.security.group.desc'}
+                    <br />} . BML::ml('.help.headers.security.group.example', {'header' => 'lj-security:'}) . qq{</div><br />
                     </div></fieldset>
                 }
             },
 
             {
                 name  => 'advanced',
-                title => 'Advanced usage',
+                title => $ML{'.help.advanced.header'},
                 url   => '?mode=help&type=advanced',
                 text  => qq{
-                    <?h1 Advanced usage h1?><br />
+                    <?h1 $ML{'.help.advanced.header'} h1?><br />
 
                     <a name="pgp"></a>
-                    <fieldset><legend>PGP/GPG message signing <img src="/img/key.gif" width="16" height="16"></legend>
-                    <?p If you specify "<b>PGP</b>" instead of your PIN,
-                    allowed sender addresses and the saved PIN are completely ignored.
-                    Your email will only be posted if it is signed with a valid PGP/GPG private key. p?>
-                    <?p You must first upload your public key <a href="/manage/pubkey.bml">here</a>. p?>
+                    <fieldset><legend>$ML{'.help.advanced.pgp.header'} <img src="/img/key.gif" width="16" height="16"></legend>
+                    <?p } . BML::ml('.help.advanced.pgp.text1', {'pgp' => "<b>PGP</b>"}) . qq{ p?>
+                    <?p } . BML::ml('.help.advanced.pgp.text2', {'aopts' => "href='$LJ::SITEROOT/manage/pubkey.bml'"}) . qq{ p?>
                     <?emailex
-                    To: $user<b>+PGP</b>\@$LJ::EMAIL_POST_DOMAIN<br />
-                    From: anywhere\@example.com <br />
+                    $to_pgp
+                    $from_pgp
                     $subject
                     $body
-                    <br />This body should be properly signed with my private key.
+                    <br />$ML{'.help.advanced.pgp.body'}
                     emailex?></fieldset>
                 }
             },
         );
 
         if ($LJ::FB_SITEROOT && %LJ::FOTOBILDER_IP && ! $LJ::DISABLED{fb_email_docs}) {
-            $subject = "Subject: Neat, I can post pictures via email.<br /><br />";
-            $body    = "This is the body of my post, with image attachments.";
+            $subject = "$ML{'.help.subject_images'}<br /><br />";
+            $body    = $ML{'.help.body_images'};
             splice @topics, -1, 0,
             {
                 name  => 'images',
-                title => 'Image attachments',
+                title => $ML{'.help.images.header'},
                 url   => '?mode=help&type=images', 
                 subject => 
                 body =>
                 text  => qq{
-                    <?h1 Attaching images h1?><br />
+                    <?h1 $ML{'.help.images.header'} h1?><br />
 
-                    <?p
-                    If you have Photo Hosting access (and enough disk quota),
-                    any image you attach to your email message will be
-                    automatically uploaded to your
-                    <a href='$LJ::FB_SITEROOT'>$LJ::FB_DOMAIN</a> account
-                    and displayed in your journal entry.
+                    <?p } . BML::ml('.help.images.text', {'aopts1' => "href='$LJ::FB_SITEROOT'", 'scrapbook' => 'ScrapBook', 'dimensions' => "320x240", 'aopts2' => "href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=75'", 'aopts3' => "href='$LJ::SITEROOT/manage/emailpost.bml?mode=help&amp;type=headers'"}) . qq{ p?><br />
 
-                    All images are displayed under a <a
-                    href='/support/faqbrowse.bml?faqid=75'>lj-cut</a>. 
-
-                    Using <a href='?mode=help&type=headers'>lj-headers</a>,
-                    You can change the way the images look in your journal, 
-                    as well as set various image attributes.
-                    p?><br />
-
-                    <fieldset><legend>Choosing a gallery</legend>
-                    <?p You can specify what photo gallery you want your
-                    attachments uploaded into using the <b>lj-gallery</b> header.
-                    If unspecified, the default gallery is 'LJ_emailpost'.  If
-                    you decide to move your images into different galleries in
-                    the future, the images posted in your journal will still
-                    work correctly.  p?>
+                    <fieldset><legend>$ML{'.help.images.gallery.header'}</legend>
+                    <?p } . BML::ml('.help.images.gallery.text', {'header' => "<b>lj-gallery</b>", 'name' => "LJ_emailpost"}) . qq{ p?>
                     <?emailex
                     $to_pin
                     $from
                     $subject
-                    <b>lj-gallery:</b> vacation photos<br />
+                    <b>lj-gallery:</b> $ML{'.help.images.gallery.example'}<br />
                     <br />
                     $body
                     emailex?></fieldset>
 
-                    <fieldset><legend>Image security</legend>
-                    <?p Images are publicly viewable by default. Use the
-                    <b>lj-imgsecurity</b> header to change this behavior.
-                    Please note that image security is separate from your 
-                    journal entry security!  For example, you can have a
-                    journal entry that is private, while the pictures within
-                    it are public. This feature only changes the security
-                    on the images themselves - not the journal entry. p?>
-                    <p? Valid options are "private", "regusers", or "friends". p?>
+                    <fieldset><legend>$ML{'.help.images.security.header'}</legend>
+                    <?p } . BML::ml('.help.images.security.text1', {'header' => "<b>lj-imgsecurity</b>"}) . qq{ p?>
+                    <?p } . BML::ml('.help.images.security.text2', {'option1' => "private", 'option2' => "regusers", 'option3' => "friends"}) . qq{ p?>
                     <?emailex
                     $to_pin
                     $from
@@ -296,13 +264,9 @@ body<=
                     $body
                     emailex?></fieldset>
 
-                    <fieldset><legend>Changing the image display size</legend>
-                    <?p You may attach images of any size.  They will be displayed
-                    in your journal at a maximum size of 640x480.  The default size
-                    is 320x240.  You may specify a size using the <b>lj-imgsize</b>
-                    header.  Images larger than 320x240 will be automatically placed
-                    behind a <a href='/support/faqbrowse.bml?faqid=75'>lj-cut</a>. p?>
-                    <?p Valid sizes are "100x100", "320x240", and "640x480". p?>
+                    <fieldset><legend>$ML{'.help.images.size.header'}</legend>
+                    <?p } . BML::ml('.help.images.size.text1', {'maxsize' => "640x480", 'defaultsize' => "320x240" , 'header' => "<b>lj-imgsize</b>", 'ljcutsize' => "320x240", 'aopts' => "href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=75'"}) . qq{ p?>
+                    <?p } . BML::ml('.help.images.size.text2', {'size1' => "100x100", 'size2' => "320x240", 'size3' => "640x480"}) . qq{ p?>
                     <?emailex
                     $to_pin
                     $from
@@ -312,16 +276,15 @@ body<=
                     $body
                     emailex?></fieldset>
 
-                    <fieldset><legend>Changing image layout</legend>
-                    <?p If you attach multiple images, you can change the way they
-                    appear in your journal via the <b>lj-imglayout</b> header.<br /><br />
-                    By default, multiple images will be placed in a vertical layout:<br />
+                    <fieldset><legend>$ML{'.help.images.layout.header'}</legend>
+                    <?p } . BML::ml('.help.images.layout.text1', {'header' => "<b>lj-imglayout</b>"}) . qq{ <br /><br />
+                    $ML{'.help.images.layout.text2'}<br />
                     <img src='$LJ::IMGPREFIX/imageplaceholder3.png' width='35' height='35'><br />
                     <img src='$LJ::IMGPREFIX/imageplaceholder3.png' width='35' height='35'><br />
                     <img src='$LJ::IMGPREFIX/imageplaceholder3.png' width='35' height='35'><br />
                     <br />
 
-                    Currently, the only other option is "horizontal". p?>
+                    } . BML::ml('.help.images.layout.text3', {'horizontal' => "horizontal"}) . qq{ p?>
                     <span style='white-space: nowrap;'>
                     <img src='$LJ::IMGPREFIX/imageplaceholder3.png' width='35' height='35'> 
                     <img src='$LJ::IMGPREFIX/imageplaceholder3.png' width='35' height='35'> 
@@ -337,16 +300,8 @@ body<=
                     $body
                     emailex?></fieldset>
 
-                    <fieldset><legend>lj-cut behavior</legend>
-                    <?p By default, images 320x240 or smaller are placed in your journal
-                    without an <a href='/support/faqbrowse.bml?faqid=75'>lj-cut</a>. 
-                    You can change this behavior using the <b>lj-imgcut</b> header.
-                    Valid options are "count" and "titles".
-                    Using "count", if you attached 3 images in your email message,
-                    the lj-cut would read, "( 3 images )". 
-                    Setting the <b>lj-imgcut</b> header to "titles" changes the cut
-                    caption to the title of the filename, one cut per image.
-                    "( emo.jpg ) ( pict002.jpg ) ( me_and_bob.jpg )" p?>
+                    <fieldset><legend>$ML{'.help.images.ljcut.header'}</legend>
+                    <?p } . BML::ml('.help.images.ljcut.text', {'ljcutsize' => "320x240", 'aopts' => "href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=75'", 'header' => "<b>lj-imgcut</b>", 'count' => "count", 'titles' => "titles"}) . qq{ p?>
                     <?emailex
                     $to_pin
                     $from
@@ -371,18 +326,9 @@ body<=
         my $topic = $topics_by_name{$type};
 
         if (! $type) {
-            $ret .= <<EOT;
-            <?h1 How does this feature work? h1?>
-            <?p Email posting uses normal email messages to post to your journal or a community.
-            Your PIN needs to be embedded in the email address, subject, or body of the message.
-            Embed your PIN by prefixing it with the <b>+</b> symbol.  You must be sending the message
-            from an email address on your "Allowed sender addresses" list. If you embed your PIN
-            in either the subject or the body, it will be automatically removed before posting. p?>
-
-            <?p Posting via email permits many options to be set on a per message basis.   Because
-            of this complexity, we've separated examples into different topics.  
-            Please select from the list below: p?>
-EOT
+            $ret .= "<?h1 $ML{'.help.header'} h1?>";
+            $ret .= "<?p " . BML::ml('.help.text1', {'plus' => "<b>+</b>"}) . " p?>";
+            $ret .= "<?p $ML{'.help.text2'} p?>";
         }
 
         # list of topics
@@ -396,7 +342,7 @@ EOT
             }
             $ret .= '</li>';
         }
-        $ret .= "<li><a href='emailpost.bml'>Manage your emailpost settings</a></li>";
+        $ret .= "<li><a href='emailpost.bml'>$ML{'.help.manage.header'}</a></li>";
         $ret .= '</ul>';
         $ret .= '<hr /><br />' if $type;
 
@@ -427,14 +373,11 @@ EOT
         my $addresses = $POST{addresses};
         my $pin = $POST{pin};
 
-        # needs $ML{'.error.pin'}
         $pin =~ s/\s+//g;
-        push @errors, "Your PIN is currently limited to alphabet
-            characters and numbers, and needs to be at least 4
-            characters long." unless $pin =~ /^([a-z0-9]){4,20}$/i or $pin eq '';
+        push @errors, BML::ml('.error.invalidpin', {'num' => 4})
+            unless $pin =~ /^([a-z0-9]){4,20}$/i or $pin eq '';
 
-        push @errors, "This PIN is invalid.  You should change it to something that does <b>NOT</b>
-            have anything to do with your $LJ::SITENAMESHORT account."
+        push @errors, BML::ml('.error.invalidpinaccount', {'sitename' => $LJ::SITENAMESHORT})
             if $pin eq $u->{password} or $pin eq $u->{user};
 
         # Check email, add flags if needed.
@@ -445,7 +388,7 @@ EOT
             next unless $_;
             next if length > 80;
             $_ = lc;
-            push @errors, "Invalid email address: " . LJ::ehtml($_) unless /\@/;
+            push @errors, BML::ml('.error.invalidemail', {'email' => LJ::ehtml($_)}) unless /\@/;
             $allowed{$_} = {};
             $allowed{$_}->{'get_errors'} = 1 if $POST{"check_$addrcount"};
             $addrcount++;
@@ -454,7 +397,7 @@ EOT
         if ( $POST{'emailpost_imgcut'} eq 'default' &&
              $POST{'email_imgsize'} ne 'default' ) {
             my ($w, $h) = split 'x', $POST{'emailpost_imgsize'};
-            push @errors, "Image size must be 320x240 or less to disable the lj-cut."
+            push @errors, BML::ml('.error.invalidimagesize', {'size' => "320x240"})
                 if $w > 320 || $h > 240;
         }
 
@@ -475,11 +418,11 @@ EOT
         LJ::set_userprop($u, "emailpost_pin", $pin);
 
         my $ret;
-        $ret .= "<?h1 Success h1?>";
-        $ret .= "<?p Your email gateway settings have been saved. p?>";
-        $ret .= "<?p Click <a href='emailpost.bml?mode=help'>here</a> for information on how to use this feature. p?>";
+        $ret .= "<?h1 $ML{'.success.header'} h1?>";
+        $ret .= "<?p $ML{'.success.saved'} p?>";
+        $ret .= "<?p " . BML::ml('.success.info', {'aopts' => "href='$LJ::SITEROOT/manage/emailpost.bml?mode=help'"}) . " p?>";
         if ($LJ::HELPURL{emailpost}) {
-            $ret .= "<?h1 Instructions h1?>";
+            $ret .= "<?h1 $ML{'.instructions.header'} h1?>";
             $ret .= "<?p FIXME: link to helpurl p?>";
         }
         return $ret;
@@ -506,27 +449,21 @@ EOT
     );
 
     my @groups = map { $_->{'name'} } @{ $res->{'friendgroups'} };
-    unshift @groups, $_ foreach qw/ -------- friends private public default /;
-
     my @userpics = @{ $res->{'pickws'} };
-    unshift @userpics, $_ foreach qw/ default /;
     
-    $ret .= "<?p If you'd like to be able to update your journal via email, please fill out the following fields. 
-        For more help using this feature, check out the <a href='emailpost.bml?mode=help'>instructions</a>. p?><br />";
+    $ret .= "<?p " . BML::ml('.intro', {'aopts' => "href='$LJ::SITEROOT/manage/emailpost.bml?mode=help'"}) . " p?><br />";
 
     unless (LJ::get_cap($u, 'emailpost')) {
         $ret .= $ML{'.sorry.acct'};
         return $ret;
     }
 
-    $ret .= "<?h1 Allowed sender addresses h1?>";
-    $ret .= "<?p Only the addresses listed below are allowed to post to your account via the email gateway. 
-        If no addresses are listed, posting via the email gateway will be disabled for your account. 
-        Marked addresses will receive errors if there are any to send. p?>";
+    $ret .= "<?h1 $ML{'.addresses.header'} h1?>";
+    $ret .= "<?p $ML{'.addresses.text'} p?>";
     $ret .= "<form method='post' action='emailpost.bml'>\n";
     $ret .= LJ::html_hidden(userid => $u->{userid});
     $ret .= "<div style='margin-left:40px;'>";
-    $ret .= '<table border="0"><tr><td>Address:</td><td>Send errors?</td></tr>';
+    $ret .= "<table border=\"0\"><tr><td>$ML{'.addresses.table.address'}</td><td>$ML{'.addresses.table.errors'}</td></tr>";
     for(0..2) { # Limited to 3 addresses.
         $ret .= '<tr><td>';
         my $selected = 0;
@@ -541,64 +478,73 @@ EOT
     }
     $ret .= '</table></div><br />';
 
-    $ret .= "<?h1 PIN h1?>";
-    $ret .= "<?p Your PIN is used only for the email gateway. Do not
-        use your regular password for this. This way, if someone obtains
-        your PIN, they can't obtain full access to your journal.  The PIN
-        should be at least 4 characters long, and may only contain alphabet
-        characters and/or numbers. p?>";
+    $ret .= "<?h1 $ML{'.pin.header'} h1?>";
+    $ret .= "<?p " . BML::ml('.pin.text', {'num' => 4}) . " p?>";
     $ret .= "<div style='margin-left:40px;'>";
     $ret .= LJ::html_text({name=>'pin', value=>$u->{emailpost_pin}, maxlength=>20});
     $ret .= '</div><br />';
 
-    $ret .= "<?h1 Default settings h1?>";
-    $ret .= "<?p 
-        These settings apply to all journal updates via email.  You can leave these options
-        alone to let your journal defaults take over, or override on a per message basis using 
-        lj-headers.  These settings (and lj-header overrides) are described
-        <a href='emailpost.bml?mode=help'>here</a>. p?>";
+    $ret .= "<?h1 $ML{'.settings.header'} h1?>";
+    $ret .= "<?p " . BML::ml('.settings.text', {'aopts' => "href='$LJ::SITEROOT/manage/emailpost.bml?mode=help'"}) . " p?>";
     $ret .= "<div style='margin-left:40px;'>";
     $ret .= "<table cellspacing='0' class='settings'>";
 
-    $ret .= "<tr><td colspan='2'><?h2 Journal entry defaults h2?></td></tr>";
-    $ret .= "<tr><td>Userpic:</td><td>";
+    $ret .= "<tr><td colspan='2'><?h2 $ML{'.settings.entry.header'} h2?></td></tr>";
+    $ret .= "<tr><td>$ML{'.settings.entry.userpic'}</td><td>";
     $ret .= LJ::html_select({ name=> 'emailpost_userpic', selected => $u->{'emailpost_userpic'} },
+                            'default' => $ML{'.settings.entry.userpic.select.default'},
                             map { $_ => $_ } @userpics);
     $ret .= "</td></tr>";
-    $ret .= "<tr><td>Security:</td><td>";
+    $ret .= "<tr><td>$ML{'.settings.entry.security'}</td><td>";
     $ret .= LJ::html_select({ name=> 'emailpost_security', selected => $u->{'emailpost_security'} },
+                            'default' => $ML{'.settings.entry.security.select.default'},
+                            'public' => $ML{'.settings.entry.security.select.public'},
+                            'private' => $ML{'.settings.entry.security.select.private'},
+                            'friends' => $ML{'.settings.entry.security.select.friends'},
+                            '--------' => '--------',
                             map { $_ => $_ } @groups);
     $ret .= "</td></tr>";
-    $ret .= "<tr><td>Comments:</td><td>";
+    $ret .= "<tr><td>$ML{'.settings.entry.comments'}</td><td>";
     $ret .= LJ::html_select({ name=> 'emailpost_comments', selected => $u->{'emailpost_comments'} },
-                            'default','default','noemail','No email','off','off');
+                            'default' => $ML{'.settings.entry.comments.select.default'},
+                            'noemail' => $ML{'.settings.entry.comments.select.noemail'},
+                            'off' => $ML{'.settings.entry.comments.select.off'});
     $ret .= "</td></tr>";
 
     if ($LJ::FB_SITEROOT && %LJ::FOTOBILDER_IP && LJ::get_cap($u, 'fb_account')) {
         $ret .= "<tr><td colspan='2'>&nbsp;</td></tr>";
-        $ret .= "<tr><td colspan='2'><?h2 Image hosting defaults h2?></td></tr>";
+        $ret .= "<tr><td colspan='2'><?h2 $ML{'.settings.image.header'} h2?></td></tr>";
 
-        $ret .= "<tr><td>Gallery name:</td><td>";
+        $ret .= "<tr><td>$ML{'.settings.image.galname'}</td><td>";
         $ret .= LJ::html_text({ name=> 'emailpost_gallery',
                     value => $u->{'emailpost_gallery'} || 'LJ_emailpost' });
         $ret .= "</td></tr>";
-        $ret .= "<tr><td>Image security:</td><td>";
+        $ret .= "<tr><td>$ML{'.settings.image.security'}</td><td>";
         $ret .= LJ::html_select({ name=> 'emailpost_imgsecurity', selected => $u->{'emailpost_imgsecurity'} },
-                            default => 'default',public => 'public',
-                            regusers => 'registered users',
-                            friends => 'friends', private => 'private');
+                            'default' => $ML{'.settings.image.security.select.default'},
+                            'public' => $ML{'.settings.image.security.select.public'},
+                            'regusers' => $ML{'.settings.image.security.select.regusers'},
+                            'friends' => $ML{'.settings.image.security.select.friends'},
+                            'private' => $ML{'.settings.image.security.select.private'});
         $ret .= "</td></tr>";
-        $ret .= "<tr><td>Image size:</td><td>";
+        $ret .= "<tr><td>$ML{'.settings.image.size'}</td><td>";
         $ret .= LJ::html_select({ name=> 'emailpost_imgsize', selected => $u->{'emailpost_imgsize'} },
-                                map { $_ => $_ } qw/ default 100x100 320x240 640x480 /);
+                            'default' => $ML{'.settings.image.size.select.default'},
+                            '100x100' => $ML{'.settings.image.size.select.100x100'},
+                            '320x240' => $ML{'.settings.image.size.select.320x240'},
+                            '640x480' => $ML{'.settings.image.size.select.640x480'});
         $ret .= "</td></tr>";
-        $ret .= "<tr><td>Image layout:</td><td>";
+        $ret .= "<tr><td>$ML{'.settings.image.layout'}</td><td>";
         $ret .= LJ::html_select({ name=> 'emailpost_imglayout', selected => $u->{'emailpost_imglayout'} },
-                                map { $_ => $_ } qw/ default horizontal vertical /);
+                            'default' => $ML{'.settings.image.layout.select.default'},
+                            'horizontal' => $ML{'.settings.image.layout.select.horizontal'},
+                            'vertical' => $ML{'.settings.image.layout.select.vertical'});
         $ret .= "</td></tr>";
-        $ret .= "<tr><td>Image cut type:</td><td>";
+        $ret .= "<tr><td>$ML{'.settings.image.cut'}</td><td>";
         $ret .= LJ::html_select({ name=> 'emailpost_imgcut', selected => $u->{'emailpost_imgcut'} },
-                                map { $_ => $_ } qw/ default count titles /);
+                            'default' => $ML{'.settings.image.cut.select.default'},
+                            'count' => $ML{'.settings.image.cut.select.count'},
+                            'titles' => $ML{'.settings.image.cut.select.titles'});
         $ret .= "</td></tr>";
     }
 
