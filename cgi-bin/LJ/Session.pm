@@ -382,6 +382,7 @@ sub domain_cookie {
 
     # on a user subdomain, or shared subdomain
     if ($user ne "") {
+        $user =~ s/-/_/g; # URLs may be - or _, convert to _ which is what usernames contain
         return "ljdomsess.$subdomain.$user";
     } else {
         return "ljdomsess.$subdomain";
@@ -405,11 +406,11 @@ sub domain_journal {
     return undef if $host eq lc($LJ::DOMAIN_WEB) || $host eq lc($LJ::DOMAIN);
 
     return undef unless
-        $host =~ m!^(\w{1,50})\.\Q$LJ::USER_DOMAIN\E$!;
+        $host =~ m!^([\w-]{1,50})\.\Q$LJ::USER_DOMAIN\E$!;
 
     my $subdomain = lc($1);
     if ($LJ::SUBDOMAIN_FUNCTION{$subdomain} eq "journal") {
-        return undef unless $path =~ m!^/(\w{1,15})\b!;
+        return undef unless $path =~ m!^/([\w-]{1,15})\b!;
         my $user = lc($1);
         return wantarray ? ($subdomain, $user) : $user;
     }
@@ -865,7 +866,7 @@ sub valid_destination {
 }
 
 sub valid_dest_rx {
-    return qr!^http://\w+\.\Q$LJ::USER_DOMAIN\E/.*!;
+    return qr!^http://[\w-]+\.\Q$LJ::USER_DOMAIN\E/.*!;
 }
 
 sub path_of_domcook {
