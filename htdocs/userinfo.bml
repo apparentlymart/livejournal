@@ -3,13 +3,13 @@
  use strict;
  use vars qw($title $windowtitle $body $head $bml_okay %GET);
 
+ BML::set_language_scope('/userinfo.bml');
+
  $bml_okay = 1;
  $title = $ML{'.title'};
  $body = "";
  $head = "";
  $windowtitle = "";
-
- BML::set_language_scope('/userinfo.bml');
 
  # Deal with bots
  my $sep  = "**";
