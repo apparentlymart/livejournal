@@ -44,7 +44,7 @@ body<=
         $state = $ML{'.error.undefinedstate'}
             if !$state && $city;
 
-        my $ret;
+        my $ret = "<?p ";
         $ret .= "<b>$ML{'.findschool'}</b> "
             if $des;
         $ret .= "<a href='$LJ::SITEROOT/schools/?ctc=$ectc'>$country</a>";
@@ -55,7 +55,7 @@ body<=
         $ret .= " &gt; <a href='$LJ::SITEROOT/schools/?ctc=$ectc&sc=$esc&cc=$ecc'>$city</a>"
             if $city;
 
-        $ret .= '<br />';
+        $ret .= ' p?>';
         return $ret;
     };
 
@@ -358,7 +358,7 @@ body<=
     # PAGE 2: return the list of areas in that country
 
     unless (defined $sc) {
-        $ret .= "<?p " . BML::ml('.intro.dontseeschool2', {'aopts' => "href='$LJ::SITEROOT/support/submit.bml?category=schools'"}) . " p?>" unless $ctc eq 'US';
+        $ret .= "<?p $ML{'.intro.dontseeschool3'} p?>" unless $ctc eq 'US';
 
         my $scs = LJ::Schools::get_states($ctc);
         return $err->($ML{'.error.cantgetdata'})
@@ -396,7 +396,7 @@ body<=
     # PAGE 3: return the list of cities in a state
 
     unless ($cc) {
-        $ret .= "<?p " . BML::ml('.intro.dontseeschool2', {'aopts' => "href='$LJ::SITEROOT/support/submit.bml?category=schools'"}) . " p?>";
+        $ret .= "<?p $ML{'.intro.dontseeschool3'} p?>";
 
         my $ccs = LJ::Schools::get_cities($ctc, $sc);
         return $err->($ML{'.error.cantgetdata'})
@@ -429,7 +429,7 @@ body<=
     # PAGE 4: return the list of schools in a city
 
     unless ($sid) {
-        $ret .= "<?p " . BML::ml('.intro.dontseeschool2', {'aopts' => "href='$LJ::SITEROOT/support/submit.bml?category=schools'"}) . " p?>";
+        $ret .= "<?p $ML{'.intro.dontseeschool3'} p?>";
 
         my $schools = LJ::Schools::get_schools($ctc, $sc, $cc);
         return $err->($ML{'.error.cantgetdata'})

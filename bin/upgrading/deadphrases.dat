@@ -262,3 +262,6 @@ general /schools/index.bml.addschool.input.name.noabbrev
 general /schools/index.bml.addschool.input.name.nothe
 
 general /schools/index.bml.intro.dontseeschool
+
+general /schools/index.bml.intro.dontseeschool2
+
