@@ -368,7 +368,8 @@ sub trans
         if ($opts->{'mode'} eq "info") {
             my $u = LJ::load_user($opts->{user})
                 or return 404;
-            return redir($r, $u->profile_url);
+            my $mode = $GET{mode} eq 'full' ? '?mode=full' : '';
+            return redir($r, $u->profile_url . $mode);
         }
 
         if ($opts->{'mode'} eq "profile") {
