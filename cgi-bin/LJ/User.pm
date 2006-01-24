@@ -3866,6 +3866,11 @@ sub user_search_display {
 
     my $ret;
     foreach my $u (@display) {
+        # We should always have loaded user objects, but it seems
+        # when the site is overloaded we don't always load the users
+        # we request.
+        next unless LJ::isu($u);
+
         $ret .= "<div style='width: 300px; height: 105px; overflow: hidden; float: left; ";
         $ret .= "border-bottom: 1px solid <?altcolor2?>; margin-bottom: 10px; padding-bottom: 5px; margin-right: 10px'>";
         $ret .= "<table style='height: 105px'><tr>";
