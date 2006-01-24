@@ -1,0 +1,66 @@
+<?page
+title=>Manage Your Login Sessions
+head<=
+<style>
+    td { text-align: center; }
+</style>
+<=head
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET);
+
+    my $body;
+
+    my $u = LJ::get_remote();
+    unless ($u) {
+        $body .= "<?needlogin?>";
+        return $body;
+    }
+
+    $body .= "<?p This page shows you all of your currently logged in sessions on $LJ::SITENAMESHORT as well as some of your prior login sessions.  Overtime it will also allow you to logout a specific session. p?>";
+
+    my $sessions = $u->sessions();
+
+    my $sth = $u->prepare("SELECT logintime, sessid, ip, ua FROM loginlog WHERE userid=?")
+        or die('Unable to prepare loginlog');
+    $sth->execute($u->{userid})
+        or die('Unable to execute loginlog query');
+    my $logins = $sth->fetchall_arrayref
+        or die('Unable to fetch loginlog');
+
+    my @prior;
+    $body .= "<?h1 Currently Logged In Sessions h1?>";
+    $body .= "<table width='100%'><tr><th>Login Time</th><th>Session ID</th><th>IP Address</th><th width='45%'>User Agent</th></tr>";
+    foreach my $login (@$logins) {
+        unless (defined $sessions->{$login->[1]}) {
+            push @prior, $login;
+        }
+
+        $body .= "<tr>";
+        $body .= "<td>" . LJ::ehtml(LJ::time_to_http($login->[0])) . "</td>";
+        $body .= "<td>" . LJ::ehtml($login->[1]) . "</td>";
+        $body .= "<td>" . LJ::ehtml($login->[2]) . "</td>";
+        $body .= "<td>" . LJ::ehtml($login->[3]) . "</td>";
+        $body .= "</tr>";
+    }
+    $body .= "</table><br />";
+
+    $body .= "<?h1 Prior Login Sessions h1?>";
+    $body .= "<table width='100%'><tr><th>Login Time</th><th>Session ID</th><th>IP Address</th><th width='45%'>User Agent</th></tr>";
+    foreach my $login (@prior) {
+        $body .= "<tr>";
+        $body .= "<td>" . LJ::ehtml(LJ::time_to_http($login->[0])) . "</td>";
+        $body .= "<td>" . LJ::ehtml($login->[1]) . "</td>";
+        $body .= "<td>" . LJ::ehtml($login->[2]) . "</td>";
+        $body .= "<td>" . LJ::ehtml($login->[3]) . "</td>";
+        $body .= "</tr>";
+    }
+    $body .= "</table>";
+
+    return $body;
+}
+_code?>
+<=body
+page?>
