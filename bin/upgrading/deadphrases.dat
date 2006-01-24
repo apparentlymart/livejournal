@@ -260,3 +260,5 @@ general /schools/index.bml.addschool.input.name.capitalize
 general /schools/index.bml.addschool.input.name.fullname
 general /schools/index.bml.addschool.input.name.noabbrev
 general /schools/index.bml.addschool.input.name.nothe
+
+general /schools/index.bml.intro.dontseeschool

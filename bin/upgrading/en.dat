@@ -3813,7 +3813,7 @@ The [[sitename]] Team
 
 /schools/index.bml.intro.addschool=Add a school to your journal or community's user info page.
 
-/schools/index.bml.intro.dontseeschool=If you don't see what you're searching for, use the Add a School link at the bottom of this page to submit it.
+/schools/index.bml.intro.dontseeschool2=If you don't see what you're searching for, use the Add a School link at the bottom of this page to submit it. To report any errors in the directory, please <a [[aopts]]>open a Support request</a> in the "Schools Directory" category.
 
 /schools/index.bml.intro.findusers=Find other users and communities associated with a school.
 
