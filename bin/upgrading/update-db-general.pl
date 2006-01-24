@@ -1572,7 +1572,7 @@ post_create("reluser",
             "code" => sub {
 
                 # logaccess has been dead for a long time.  In fact, its table
-                # definition has been removed from this file.  No need to try 
+                # definition has been removed from this file.  No need to try
                 # and upgrade if the source table doesn't even exist.
                 unless (column_type('logaccess', 'userid')) {
                     print "# No logaccess source table found, skipping...\n";
@@ -2231,6 +2231,18 @@ CREATE TABLE navtag (
    PRIMARY KEY (tag, dest_type, dest)
 )
 EOC
+
+register_tablecreate("loginlog", <<'EOC');
+CREATE TABLE loginlog (
+   userid    INT UNSIGNED NOT NULL,
+   logintime INT UNSIGNED NOT NULL,
+   INDEX     (userid, logintime),
+   sessid    MEDIUMINT UNSIGNED NOT NULL,
+   ip        VARCHAR(15),
+   ua        VARCHAR(100)
+)
+EOC
+
 
 # NOTE: new table declarations go here
 

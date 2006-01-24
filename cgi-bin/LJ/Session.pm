@@ -63,6 +63,7 @@ sub create {
     # clean up any old, expired sessions they might have (lazy clean)
     $u->do("DELETE FROM sessions WHERE userid=? AND timeexpire < UNIX_TIMESTAMP()",
            undef, $u->{userid});
+    # FIXME: but this doesn't remove their memcached keys
 
     my $expsec     = LJ::Session->session_length($exptype);
     my $timeexpire = time() + $expsec;
@@ -76,6 +77,8 @@ sub create {
 
     my $id = LJ::alloc_user_counter($u, 'S');
     return undef unless $id;
+
+    $u->record_login($id);
 
     $u->do("REPLACE INTO sessions (userid, sessid, auth, exptype, ".
            "timecreate, timeexpire, ipfixed) VALUES (?,?,?,?,UNIX_TIMESTAMP(),".
@@ -633,8 +636,6 @@ sub clear_master_cookie {
 
     my $domain =
         $LJ::ONLY_USER_VHOSTS ? ($LJ::DOMAIN_WEB || $LJ::DOMAIN) : $LJ::DOMAIN;
-
-    Carp::cluck("WTF");
 
     set_cookie(ljmastersession => "",
                domain          => $domain,
