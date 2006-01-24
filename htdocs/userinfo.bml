@@ -486,7 +486,7 @@ if ($u->{'journaltitle'}) {
  ## text message
  if ($u->{'txtmsg_status'} eq "on" && LJ::get_cap($u, "textmessaging")) {
      my $span = ($narrow_left-- >= 0) ? 1 : 2;
-     $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.textmessage'}</b></td><td colspan='$span'>" . BML::ml('.sendmessage.body',{'user'=>$u->{'user'}, 'link'=>"/tools/textmessage.bml?user=$u->{'user'}"}) . "</td></tr>";
+     $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.textmessage'}</b></td><td colspan='$span'>" . BML::ml('.sendmessage.body',{'user'=>$u->{'user'}, 'link'=>"$LJ::SITEROOT/tools/textmessage.bml?user=$u->{'user'}"}) . "</td></tr>";
  }
 
  if ( ! $synd && $u->{'url'}) {
