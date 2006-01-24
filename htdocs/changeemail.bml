@@ -119,6 +119,20 @@ body<=
 
         LJ::update_user($u, $tochange);
 
+        # send validation mail
+        my $aa = LJ::register_authaction($u->{'userid'}, "validateemail", $u->{'email'});
+        LJ::send_mail({
+            'to' => $POST{'email'},
+            'from' => $LJ::ADMIN_EMAIL,
+            'charset' => 'utf-8',
+            'subject' => $ML{'/editinfo.bml.newemail.subject'},
+            'body' => BML::ml('/editinfo.bml.newemail.body2',
+                              { username => $u->{user},
+                                sitename => $LJ::SITENAME,
+                                sitelink => $LJ::SITEROOT,
+                                conflink => "$LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}" }),
+        });
+
         $body = "<?h1 $ML{'.success.header'} h1?><?p $ML{'.success.text'} p?>";
     } else {
         $body .= $update_form->();
