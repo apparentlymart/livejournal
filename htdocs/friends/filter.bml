@@ -55,7 +55,7 @@
  
  foreach my $g (sort { $group{$a}->{'sortorder'} <=> $group{$b}->{'sortorder'} } keys %group)
  {
-     my $url = "$LJ::SITEROOT/users/$remote->{'user'}/friends/" . LJ::eurl($group{$g}->{'name'});
+     my $url = $remote->journal_base . "/friends/" . LJ::eurl($group{$g}->{'name'});
      $body .= "<input type='checkbox' value='1' name=\"bit_$g\" /> <a href=\"$url\">" . LJ::ehtml($group{$g}->{'name'}) . "</a><br />\n";
  }
 
