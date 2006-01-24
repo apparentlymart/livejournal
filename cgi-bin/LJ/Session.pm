@@ -47,6 +47,19 @@ sub instance {
     return $sess;
 }
 
+sub active_sessions {
+    my ($class, $u) = @_;
+    my $sth = $u->prepare("SELECT userid, sessid, exptype, auth, timecreate, timeexpire, ipfixed " .
+                          "FROM sessions WHERE userid=? AND timeexpire > UNIX_TIMESTAMP()");
+    $sth->execute($u->{userid});
+    my @ret;
+    while (my $rec = $sth->fetchrow_hashref) {
+        bless $rec;
+        push @ret, $rec;
+    }
+    return @ret;
+}
+
 sub create {
     my ($class, $u, %opts) = @_;
 
@@ -334,7 +347,7 @@ sub try_renew {
     # go ahead and set the new session expiration in the database. then only update the
     # cookies if the database operation is successful
     if ($sess_length && $sess->{'timeexpire'} - $now < $sess_length/2 &&
-        $u->writer && $sess->_dbupdate(timexpire => $new_expire))
+        $u->writer && $sess->_dbupdate(timeexpire => $new_expire))
     {
         $sess->update_master_cookie;
     }

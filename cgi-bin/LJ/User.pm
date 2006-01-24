@@ -471,6 +471,19 @@ sub session {
     return LJ::Session->instance($u, $sessid);
 }
 
+# in list context, returns an array of LJ::Session objects which are active.
+# in scalar context, returns hashref of sessid -> LJ::Sesssion, which are active
+sub sessions {
+    my $u = shift;
+    my @sessions = LJ::Session->active_sessions($u);
+    return @sessions if wantarray;
+    my $ret = {};
+    foreach my $s (@sessions) {
+        $ret->{$s->id} = $s;
+    }
+    return $ret;
+}
+
 sub logout {
     my $u = shift;
     $u->_logout_common;

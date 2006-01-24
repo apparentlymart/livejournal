@@ -426,8 +426,6 @@ sub trans
             return redir($r, LJ::Session->setdomsess_handler($r));
         }
 
-        warn "uuri = $uuri\n";
-
         if ($uuri =~ /^.*\b__rpc_delcomment$/) {
             return $bml_handler->("$LJ::HOME/htdocs/delcomment.bml");
         }
