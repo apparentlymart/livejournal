@@ -1,5 +1,5 @@
 <?page
-title=>Submit Request
+title=><?_ml .title _ml?>
 body<=
 
 <?_code
@@ -35,11 +35,11 @@ body<=
         }
         unless ($req{'requserid'}) {
             $u = LJ::load_user($user);
-            push @errors, "Invalid username" unless $u;
+            push @errors, $ML{'.error.invalidusername'} unless $u;
             if (LJ::auth_okay($u, $POST{'password'}, $POST{'hpassword'})) {
                 $req{'requserid'} = $u->{'userid'};
             } else {
-                push @errors, "Invalid password";
+                push @errors, $ML{'.error.invalidpassword'};
             }
         }
         $req{'reqemail'} = $u->{'email'};
@@ -67,13 +67,16 @@ body<=
     return LJ::bad_input(@errors) if @errors;
  
     my $url = "$LJ::SITEROOT/support/see_request.bml?id=$spid";
+    my $ret;
     
-    return "Your $LJ::SITENAMESHORT support request has been filed and will be answered as soon as possible.  Your request tracking number is <B>$spid</B>.  You can track its progress here: <div style='margin-left: 30px'><a href='$url'>$url</a></div>";
+    $ret .= "<?p " . BML::ml('.text1', {'sitename' => $LJ::SITENAMESHORT, 'requestid' => "<b>$spid</b>", 'link' => "<div style='margin-left: 30px'><a href='$url'>$url</a></div>"}) . " p?>";
+    $ret .= "<?p " . BML::ml('.text2', {'sitename' => $LJ::SITENAMESHORT, 'aopts' => "href='$LJ::SITEROOT/support/help.bml'"}) . " p?>";
+    $ret .= "<?hr?>";
+    $ret .= "<?p " . BML::ml('.back2', {'aopts' => "href='$LJ::SITEROOT/support/'"}) . " p?>";
+
+    return $ret;
 }
 _code?>
-
-<?hr?>
-<p>Back to the <a href="./">support area</a>.</p>
 
 <=body
 page?><?_c <LJDEP>
