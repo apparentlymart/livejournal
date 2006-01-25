@@ -29,8 +29,7 @@
 
 
     if (!$remote) {
-        $title = BML::ml('.notloggedintitle');
-        $body = BML::ml('.notloggedin', { 'sitenameabbrev' => $LJ::SITENAMEABBREV });
+        $body = "<?needlogin?>";
         return;
     }
 

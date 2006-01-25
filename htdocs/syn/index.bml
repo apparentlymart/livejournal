@@ -11,7 +11,7 @@ body<=
     my $u = LJ::get_remote();
 
     unless ($u) {
-        return "<?h1 $ML{'.loginrequired.title'} h1?><?p $ML{'.loginrequired.text'} p?>";
+        return "<?needlogin?>";
     }
     return "<?h1 $ML{'error.suspended.title'} h1?><?p $ML{'error.suspended.text'} p?>" if $u->{'statusvis'} eq "S";
 

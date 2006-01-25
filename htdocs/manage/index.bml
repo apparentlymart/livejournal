@@ -68,7 +68,7 @@ body<=
     my $ret;
 
     my $remote = LJ::get_remote();
-    return $ML{'.login'} unless $remote;
+    return BML::ml('.login2', {'aopts' => "href='$LJ::SITEROOT/login.bml?ret=1'"}) unless $remote;
 
     my $u = $BMLCodeBlock::u;
     return LJ::bad_input($ML{'error.invalidauth'})

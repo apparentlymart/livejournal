@@ -272,3 +272,15 @@ general /community/leave.bml.label.removed
 general /community/settings.bml.label.commcreate
 general /community/settings.bml.label.createtext
 general /community/settings.bml.label.maintainer.login
+
+general /friends/add.bml.error1.header
+general /friends/add.bml.error1.text
+general /friends/add.bml.error2.text
+general /friends/filter.bml.error.nogroups
+general /manage/index.bml.login
+general /portal/index.bml.notloggedin
+general /portal/index.bml.notloggedintitle
+general /syn/index.bml.loginrequired.text
+general /syn/index.bml.loginrequired.title
+general /tools/emailmanage.bml.notvalidated.text
+general /tools/memadd.bml.error.login

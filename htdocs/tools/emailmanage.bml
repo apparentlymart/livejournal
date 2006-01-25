@@ -63,8 +63,7 @@ body<=
 
     unless ($u->{'status'} eq "A") {
         $ret .= "<?h1 $ML{'.notvalidated.title'} h1?>\n";
-        $ret .= "<?p " . BML::ml('.notvalidated.text',
-                                 { 'email' => $u->{'email'} }) . " p?>";
+        $ret .= "<?p " . BML::ml('.notvalidated.text2', {'email' => $u->{'email'}, 'aopts' => "href='$LJ::SITEROOT/register.bml'"}) . " p?>";
         return $ret;
     }
 

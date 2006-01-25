@@ -2127,16 +2127,9 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /friends/add.bml.error.sessionchanged=Session info changed. Try again.
 
-/friends/add.bml.error1.header=Log In First
-
-/friends/add.bml.error1.text<<
-To add a user to your friends list you must first go and <a href="/login.bml?ret=1">log in</a>.  If you don't
-already have an account you can <a href="/create.bml">create one</a> to track your friend's journals. 
-.
-
 /friends/add.bml.error1.title=Add Friend
 
-/friends/add.bml.error2.text=Invalid or missing username given.  To add a friend, go to the <a href="/friends/edit.bml">edit friends</a> page.
+/friends/add.bml.error2.text2=Invalid or missing username given. To add a friend, go to the <a [[aopts]]>edit friends</a> page.
 
 /friends/add.bml.error3.text1=You already have <b>[[user]]</b> listed as a friend.  However, you can modify the custom friends groups you've chosen to represent him/her.
 
@@ -2282,7 +2275,7 @@ then be accessible to the new group.
 
 /friends/filter.bml.editgroups=If you want to edit your friends groups, go to the [[link]] page.
 
-/friends/filter.bml.error.nogroups=You cannot filter your friends list because you must first <a href="/friends/editgroups.bml">setup your friend groups</a>.
+/friends/filter.bml.error.nogroups2=You cannot filter your friends list because you must first <a [[aopts]]>set up your friends groups</a>.
 
 /friends/filter.bml.error.nogroups.header=No Groups Defined
 
@@ -3134,10 +3127,7 @@ The site team
 
 /manage/index.bml.information.status.about=Set your account's activation status
 
-/manage/index.bml.login<<
-The following links will navigate you to pages where your login information
-is required. To save yourself some time, you can <a href="/login.bml?ret=1">log in</a> beforehand.
-.
+/manage/index.bml.login2=The following links will navigate you to pages where your login information is required. To save yourself some time, you can <a [[aopts]]>log in</a> beforehand.
 
 /manage/index.bml.schools=Manage School Attendance
 
@@ -3611,10 +3601,6 @@ If you want to do a different type of search, check out the <a href='/directorys
 /portal/index.bml.addbox=Add a module
 
 /portal/index.bml.configtitle=Configure My [[sitenameabbrev]] Options
-
-/portal/index.bml.notloggedin=If you wish to use My [[sitenameabbrev]], you need to <a href='/login.bml?ret=1'>login</a>.
-
-/portal/index.bml.notloggedintitle=Not Logged In
 
 /portal/index.bml.pagetitle=My [[sitenameabbrev]]
 
@@ -4236,10 +4222,6 @@ that area. p?>
 
 /syn/index.bml.invalid.url=The URL you have typed is invalid. Please make sure you have typed the URL correctly and try again.
 
-/syn/index.bml.loginrequired.text=To manage your syndicated accounts, first <a href="/login.bml?ret=1">login</a>.
-
-/syn/index.bml.loginrequired.title=Login Required
-
 /syn/index.bml.promo.text=After you've created a syndicated account, share it with others! The more people there are watching a syndicated account, the more points are freed up to read and create syndicated accounts.
 
 /syn/index.bml.remove=Remove Selected
@@ -4599,11 +4581,7 @@ attacker's email address.
 
 /tools/emailmanage.bml.log.deleted.title=Changes Saved
 
-/tools/emailmanage.bml.notvalidated.text<<
-To use this tool, your current email address [[email]] must be validated.  
-To do this, visit the <a href='/lostinfo.bml'>lost info</a> page, which will 
-send you an authorization URL.  After visiting it, come back here.
-.
+/tools/emailmanage.bml.notvalidated.text2=To use this tool, your current email address, [[email]] , must be validated. If you've lost the confirmation email to do this, you can <a [[aopts]]>have it re-sent</a>. After you validate your email, come back here.
 
 /tools/emailmanage.bml.notvalidated.title=Email not validated
 
@@ -4634,8 +4612,6 @@ send you an authorization URL.  After visiting it, come back here.
 /tools/memadd.bml.error.fivekeywords=Only 5 keywords/categories are allowed per memorable post.
 
 /tools/memadd.bml.error.invalid_security=Invalid or missing security option.
-
-/tools/memadd.bml.error.login=You must be <a href="/login.bml?ret=1">logged in</a> to use this feature.  Go login and you'll be brought back here.
 
 /tools/memadd.bml.error.maxsize=This keyword exceeds the maximum allowed size: "[[keyword]]"
 

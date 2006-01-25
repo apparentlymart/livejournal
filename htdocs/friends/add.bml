@@ -16,14 +16,14 @@ use vars qw($body $title $windowtitle %GET %POST);
  unless ($remote) 
  {
      $title = $ML{'.error1.title'};
-     $body = "<?h1 $ML{'.error1.header'} h1?><?p $ML{'.error1.text'} p?>";
+     $body = "<?needlogin?>";
      return;
  }
 
  unless ($user && $userid) 
  {
      $title = $ML{'Error'};
-     $body = $ML{'.error2.text'};
+     $body = BML::ml('.error2.text2', {'aopts' => "href='$LJ::SITEROOT/friends/edit.bml'"});
      return;
  }
  
