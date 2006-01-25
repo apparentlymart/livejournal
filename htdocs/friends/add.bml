@@ -3,6 +3,8 @@ use strict;
 
 use vars qw($body $title $windowtitle %GET %POST);
 
+ my $head     = \$_[1]->{'head'};
+
  my $remote = LJ::get_remote();
  my $user = $POST{'user'} || $GET{'user'};
  my $u = LJ::load_user($user);
@@ -123,7 +125,7 @@ use vars qw($body $title $windowtitle %GET %POST);
  # check to see if user is already a friend.
  # TAG:fr:bml_friends_add:check_is_friend
  my $dbr = LJ::get_db_reader();
- my $sth = $dbr->prepare("SELECT groupmask FROM friends WHERE userid=? AND friendid=?");
+ my $sth = $dbr->prepare("SELECT groupmask, fgcolor, bgcolor FROM friends WHERE userid=? AND friendid=?");
  $sth->execute($remote->{'userid'}, $userid);
  my $fr = $sth->fetchrow_hashref;
  
@@ -192,6 +194,69 @@ use vars qw($body $title $windowtitle %GET %POST);
  $body .= "</blockquote>";
  }
 
+ ## let them pick the colors
+ my $color_text = "<?p <i>$ML{'.optional'}</i> <input type='checkbox' id='color_switch' value='' onClick='color_display(this);'> " .
+          BML::ml('.colors.text', {'user'=>$user}) . " p?>";
+ $body .= "<script>\n";
+ $body .= "function color_display(check) {\n";
+ $body .= "  if (check.checked) {\n";
+ $body .= "    \$(\"color_opt\").style.display = '';\n";
+ $body .= "  } else {\n";
+ $body .= "    \$(\"color_opt\").style.display = 'none';\n";
+ $body .= "  }\n";
+ $body .= "}\n";
+ $body .= "document.write(\"$color_text\");\n";
+ $body .= "</script>\n";
+
+ my $ret = "";
+ $ret .= "<div id='color_opt' style='display: none'>\n";
+ $ret .= "<script>\n";
+ $ret .= "  color_display(\$(\"color_switch\"));\n";
+ $ret .= "</script>\n";
+ $ret .= "<TABLE CELLPADDING=4><TR><TD><B>$ML{'.colors.fg'}</B></TD><TD><B>$ML{'.colors.bg'}</B></TD></TR>\n";
+
+ my @color = ();
+ LJ::load_codes({ "color" => \@color });
+
+ my $sel = $fr || { 'fgcolor' => hex '000000',
+                    'bgcolor' => hex 'FFFFFF', };
+
+ $ret .= "<TR>";
+ $ret .= "<TD><SELECT NAME=\"editfriend_add_1_fg\">";
+ foreach (@color) {
+     my $color_int = hex (substr($_->{'code'},1));
+     my $selected = $color_int eq $sel->{'fgcolor'} ? " SELECTED" : "";
+     $ret .= "<OPTION VALUE=\"$_->{'code'}\"$selected>$_->{'item'}\n";
+ }
+ $ret .= "</SELECT></TD>\n";
+ $ret .= "<TD><SELECT NAME=\"editfriend_add_1_bg\">";
+ foreach (@color) {
+     my $color_int = hex (substr($_->{'code'},1));
+     my $selected = $color_int eq $sel->{'bgcolor'} ? " SELECTED" : "";
+     $ret .= "<OPTION VALUE=\"$_->{'code'}\"$selected>$_->{'item'}\n";
+ }
+ $ret .= "</SELECT></TD>\n";
+ $ret .= "</TR>\n";
+ $ret .= "</TABLE>\n";
+ 
+ ### color swatch
+ my $col = 0;
+ $ret .= "<P><TABLE border=0 cellspacing=0 cellpadding=0>";
+ foreach (@color) {
+     if ($col==0) { $ret .= "<TR>\n"; }
+     $col++;
+     my $ecolor = LJ::ehtml($_->{'item'});
+     $ret .= "<TD bgcolor=$_->{'code'}><IMG SRC=\"/img/dot.gif\" WIDTH=14 HEIGHT=14 TITLE=\"$ecolor\" ALT=\"$ecolor\"></TD>\n";
+     if ($col==23) { $ret .= "</TR>\n"; $col==0; }
+ }
+ if ($col) { $ret .= "</TR>\n"; $col==0; }
+ $ret .= "</TABLE>\n";
+ $ret .= "<FONT SIZE=-2 FACE=\"Arial,Helvetica\">$ML{'.colors.hover'}</FONT></p></div>";
+
+ $body .= $ret;
+ $body .= "<br />\n<p>";
+
+ # Form submit buttons
  if ($fr) {
      $body .= "<input type='submit' value=\"$ML{'.btn.modify'}\">";
      $body .= " - <input type='submit' name='action:delete' value=\"$ML{'.btn.remove'}\">\n";
@@ -204,8 +269,9 @@ use vars qw($body $title $windowtitle %GET %POST);
  $body .= "<script type='text/javascript' language='Javascript'> \n <!-- \n
     document.write(\"<input type='button' value='$cancel_btn' onclick='history.go(-1); return false;'>\");
      \n // -->\n ";
- $body .= '</script>';
+ $body .= '</script></p>';
 
+ 
  $body .= "</form>";
 
  return;
@@ -214,6 +280,16 @@ _code?>
 <?page
 title=><?_code return $title; _code?>
 windowtitle=><?_code return $windowtitle; _code?>
+head<=
+<?_code return $_[1]->{'head'}; _code?>
+<?_code
+{
+    $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/core.js'></script>\n";
+    $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/dom.js'></script>\n";
+    return $ret;
+}
+_code?>
+<=head
 body=><?_code return $body; _code?>
 page?><?_c <LJDEP>
 link: htdocs/login.bml, htdocs/create.bml, htdocs/friends/edit.bml, htdocs/users

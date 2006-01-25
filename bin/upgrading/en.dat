@@ -2146,6 +2146,8 @@ already have an account you can <a href="/create.bml">create one</a> to track yo
 
 /friends/add.bml.groups.text1=<i>Optional:</i> Include in one or more custom friends groups.
 
+/friends/add.bml.optional=Optional
+
 /friends/add.bml.remove.header=Success
 
 /friends/add.bml.remove.text2=[[ljuser]] has now been removed from your friend list.  You can view your updated  <a [[aopts]]>friends page</a> or go back to your <a [[aopts2]]>user info</a>.
