@@ -424,7 +424,7 @@ sub url_owner {
     $url ||= _current_url();
     my ($subdomain, $user) = LJ::Session->domain_journal($url);
     $user = $subdomain if $user eq "";
-    return $user;
+    return LJ::canonical_username($user);
 }
 
 sub fb_cookie {
