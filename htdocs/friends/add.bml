@@ -195,8 +195,10 @@ use vars qw($body $title $windowtitle %GET %POST);
  }
 
  ## let them pick the colors
- my $color_text = "<?p <i>$ML{'.optional'}</i> <input type='checkbox' id='color_switch' value='' onClick='color_display(this);'> " .
-          BML::ml('.colors.text', {'user'=>$user}) . " p?>";
+ my $color_text = "<?p <table><tr><td valign='top'><i>$ML{'.optional'}:</i> ".
+          "<input type='checkbox' id='color_switch' value='' onClick='color_display(this);'> </td><td>" .
+          BML::ml('.colors.text', {'user'=>$user}) . 
+          "<br /><FONT SIZE=-2 FACE='Arial,Helvetica'>($ML{'.colors.disclaimer'})</FONT></td></tr></table> p?>";
  $body .= "<script>\n";
  $body .= "function color_display(check) {\n";
  $body .= "  if (check.checked) {\n";
@@ -208,11 +210,21 @@ use vars qw($body $title $windowtitle %GET %POST);
  $body .= "document.write(\"$color_text\");\n";
  $body .= "</script>\n";
 
+ $body .= "<noscript>\n";
+ $body .= "<?p <table><tr><td valign='top'><i>$ML{'.optional'}:</i> </td><td>" .
+          BML::ml('.colors.text', {'user'=>$user}) .
+          "<br /><FONT SIZE=-2 FACE='Arial,Helvetica'>($ML{'.colors.disclaimer'})</FONT></td></tr></table> p?>";
+ $body .= "</noscript>\n";
+              
+
  my $ret = "";
- $ret .= "<div id='color_opt' style='display: none'>\n";
+ $ret .= "  <div id='color_opt'>\n";
  $ret .= "<script>\n";
+# $ret .= "  document.write(\"<div id='color_opt' style='display: none'>\");\n";
+ $ret .= "  \$(\"color_opt\").style.display = 'none'\n";
  $ret .= "  color_display(\$(\"color_switch\"));\n";
  $ret .= "</script>\n";
+
  $ret .= "<TABLE CELLPADDING=4><TR><TD><B>$ML{'.colors.fg'}</B></TD><TD><B>$ML{'.colors.bg'}</B></TD></TR>\n";
 
  my @color = ();
