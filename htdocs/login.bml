@@ -67,6 +67,8 @@
         }
 
         if ($remote) {
+            my $base = $remote->journal_base;
+            
             $body .= "<?p " . BML::ml(".loggedin.text2",
                                       { 'username' => LJ::ljuser($remote)} ) . " p?>\n";
             $body .= "<br />\n";
@@ -79,7 +81,7 @@
             $body .= "<div style='float: left; padding: 5px 10px 0px 10px'>";
             $body .= "<img src='/img/userinfo.gif'></div>\n";
             $body .= "<div style='margin-left: 36px'>";
-            $body .= "<?h2 <a href='$LJ::SITEROOT/users/$remote->{'user'}/friends/'>";
+            $body .= "<?h2 <a href='$base/friends/'>";
             $body .= "$ML{'.loggedin.suggesthead2'}</a> h2?>\n";
             $body .= "$ML{'.loggedin.suggest2'}<br />&nbsp;</div>\n";
             $body .= "<div style='float: left; padding: 5px 10px 0px 10px'>";
