@@ -793,7 +793,7 @@ sub set_cookie {
 
     # Backwards compatability for older browsers
     my @labels = split(/\./, $domain);
-    if ($domain && scalar @labels == 2) {
+    if ($domain && scalar @labels == 2 && ! $LJ::DEBUG{'no_extra_dot_cookie'}) {
         my $cookiestr = $key . '=' . $value;
         $cookiestr .= '; expires=' . LJ::time_to_cookie($expires) if $expires;
         $cookiestr .= '; domain=.' . $domain;
