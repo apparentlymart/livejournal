@@ -7,7 +7,7 @@ body<=
 _code?>
 
 <?_ml .about2 _ml?>
-<?h1 Quick Links h1?>
+<?h1 <?_ml .nav.header _ml?> h1?>
 <dl>
   <dt><a href="/developer/embedding.bml"><?_ml .nav.embedding _ml?></a></dt>
   <dd><?_ml .nav.embedding.about _ml?></dd>

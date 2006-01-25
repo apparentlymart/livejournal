@@ -3988,6 +3988,8 @@ a system style, you must first create a new style based on that system style.
 
 /styles/index.bml.nav.embedding.about=There are many different ways to embed your journal into your own website.
 
+/styles/index.bml.nav.header=Quick Links
+
 /styles/index.bml.nav.modify=Modify your account
 
 /styles/index.bml.nav.modify.about=Change your account's default style, either one of the system provided styles
