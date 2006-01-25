@@ -452,7 +452,14 @@ sub session_from_cookies {
         $sessobj = LJ::Session->session_from_domain_cookie(\%getopts, @{ $BML::COOKIE{"$domain_cookie\[\]"} || [] });
     } else {
         # this is the master cookie at "www.livejournal.com" or "livejournal.com";
-        $sessobj = LJ::Session->session_from_master_cookie(\%getopts, @{ $BML::COOKIE{'ljmastersession[]'} || [] });
+        my @cookies = @{ $BML::COOKIE{'ljmastersession[]'} || [] };
+        # but support old clients who are just sending an "ljsession" cookie which they got
+        # from ljprotocol's "generatesession" mode.
+        unless (@cookies) {
+            @cookies = @{ $BML::COOKIE{'ljsession[]'} || [] };
+            $getopts{old_cookie} = 1;
+        }
+        $sessobj = LJ::Session->session_from_master_cookie(\%getopts, @cookies);
     }
 
     return $sessobj;
@@ -517,6 +524,7 @@ sub session_from_master_cookie {
     my $errs       = delete $opts->{errlist} || [];
     my $tried_fast = delete $opts->{tried_fast} || do { my $foo; \$foo; };
     my $ignore_ip  = delete $opts->{ignore_ip} ? 1 : 0;
+    my $old_cookie = delete $opts->{old_cookie} ? 1 : 0;
 
     delete $opts->{'redirect_ref'};  # we don't use this
     croak("Unknown options") if %$opts;
@@ -599,7 +607,7 @@ sub session_from_master_cookie {
         }
 
         # make sure their ljloggedin cookie
-        unless ($sess->loggedin_cookie_string eq $li_cook) {
+        unless ($old_cookie || $sess->loggedin_cookie_string eq $li_cook) {
             $err->("loggedin cookie bogus");
             next COOKIE;
         }
