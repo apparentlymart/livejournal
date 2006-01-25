@@ -782,6 +782,18 @@ sub set_cookie {
     $cookiestr .= '; HttpOnly' if $http_only;
 
     $r->err_headers_out->add('Set-Cookie' => $cookiestr);
+
+    # Backwards compatability for older browsers
+    my @labels = split(/\./, $domain);
+    if ($domain && scalar @labels == 2) {
+        my $cookiestr = $key . '=' . $value;
+        $cookiestr .= '; expires=' . LJ::time_to_cookie($expires) if $expires;
+        $cookiestr .= '; domain=.' . $domain;
+        $cookiestr .= '; path=' . $path if $path;
+        $cookiestr .= '; HttpOnly' if $http_only;
+
+        $r->err_headers_out->add('Set-Cookie' => $cookiestr);
+    }
 }
 
 # returns undef or a session, given a $domcook and its $val, as well
