@@ -173,15 +173,23 @@ body<=
  if ($mode eq 'modify') {
     $ret .= "<?h1 $ML{'.label.changeheader'} h1?><?p $ML{'.label.changetext'} p?>";
  } else {
-    $ret .= "<?h1 $ML{'.label.createheader'} h1?><?p $ML{'.label.createtext'} p?>";
+    my $cu = LJ::load_user("seattle");
+    my $profile_url = $cu->profile_url
+        if $cu;
+    
+    $ret .= "<?h1 $ML{'.label.createheader'} h1?><?p $ML{'.label.createtext2'} ";
+    if ($profile_url) {
+        $ret .= BML::ml('.label.createtext2_example', {'aopts' => "href='$profile_url'", 'commname' => $cu->{'name'}});
+    }
+    $ret .= " p?>";
  }
 
  if ($mode eq 'create') {
     LJ::set_active_crumb('createcommunity');
     $ret .= "<?h2 $ML{'.label.commheader'} h2?>" .
-       ($mode eq 'modify' ? "<?p $ML{'.label.commchange'} p?>" : "<?p $ML{'.label.commcreate'} p?>");
+       ($mode eq 'modify' ? "<?p $ML{'.label.commchange'} p?>" : "<?p " . BML::ml('.label.commcreate2', {'aopts' => "href='$LJ::SITEROOT/create.bml'"}) . " p?>");
     $ret .= "<?standout <table width='350' cellpadding='7'><tr valign='top'><td><b>$ML{'.label.maintainer'}</b></td>";
-    $ret .= "<td><?ljuser $remote->{'user'} ljuser?><br />$ML{'.label.maintainer.login'}</td></tr>";
+    $ret .= "<td><?ljuser $remote->{'user'} ljuser?><br />" . BML::ml('.label.maintainer.login2', {'aopts' => "href='$LJ::SITEROOT/login.bml?ret=1'"}) . "</td></tr>";
     $ret .= "<tr valign='top'><td><b>$ML{'.label.community'}</b></td>";
     $ret .= "<td>$ML{'.label.username'}<br /><input name='cuser' maxlength='15' value='$cname' /><br />";
     $ret .= "<?inerr $errors{'username'} inerr?><br />";

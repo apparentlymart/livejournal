@@ -265,3 +265,10 @@ general /schools/index.bml.intro.dontseeschool
 
 general /schools/index.bml.intro.dontseeschool2
 
+general /community/join.bml.label.loginfirst
+general /community/join.bml.label.membernow
+general /community/leave.bml.label.logoutfirst
+general /community/leave.bml.label.removed
+general /community/settings.bml.label.commcreate
+general /community/settings.bml.label.createtext
+general /community/settings.bml.label.maintainer.login

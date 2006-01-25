@@ -14,7 +14,7 @@
     };
 
     my $remote = LJ::get_remote();
-    return $error->($ML{'.label.logoutfirst'}) unless $remote;
+    return $error->(BML::ml('.label.logoutfirst2', {'aopts' => "href='$LJ::SITEROOT/login.bml?ret=1'"})) unless $remote;
 
     # get info about the community
     my $cuserid = $FORM{'cuserid'}+0;
@@ -43,8 +43,9 @@
         LJ::leave_community($remote, $cu, $FORM{removefriend});
 
         # success message
+        my $profile_url = $cu->profile_url;
         $body .= "<?h1 $ML{'.success'} h1?><?p " .
-                 BML::ml('.label.removed', { commuser => $cu->{user}, commname => $ecname }) .
+                 BML::ml('.label.removed2', {'aopts' => "href='$profile_url'", 'commname' => $ecname}) .
                  " p?>";
     } else {
         # show a confirmation form

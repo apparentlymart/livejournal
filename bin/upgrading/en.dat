@@ -272,9 +272,9 @@ p?>
 
 /community/join.bml.label.expls=Press the button below to join the "[[maintainer]]" community. Uncheck the box below if you want to join the community without seeing community entries on your friends page.
 
-/community/join.bml.label.loginfirst=To join a community you must first <a href="/login.bml?ret=1">log in</a>.
+/community/join.bml.label.loginfirst2=To join a community you must first <a [[aopts]]>log in</a>.
 
-/community/join.bml.label.membernow=You are now a member of the <a href="/userinfo.bml?user=[[username]]">[[commname]] Community</a>
+/community/join.bml.label.membernow2=You are now a member of the <a [[aopts]]>[[commname]] Community</a>.
 
 /community/join.bml.label.sure=You sure?
 
@@ -302,9 +302,9 @@ p?>
 
 /community/leave.bml.label.lastmaintainer=You are not allowed to leave this community because you are the sole maintainer.  If you wish to leave the community, please appoint another maintainer and then try leaving again.
 
-/community/leave.bml.label.logoutfirst=To leave a community you must first <a href="/login.bml?ret=1">log in</a>.
+/community/leave.bml.label.logoutfirst2=To leave a community you must first <a [[aopts]]>log in</a>.
 
-/community/leave.bml.label.removed=You are now removed from the <a href="/userinfo.bml?user=[[commuser]]">[[commname]] Community</a>
+/community/leave.bml.label.removed2=You are now removed from the <a [[aopts]]>[[commname]] Community</a>.
 
 /community/leave.bml.label.removefromfriends=Also remove "[[user]]" from friends list.
 
@@ -643,7 +643,7 @@ p?>
 
 /community/settings.bml.label.commchanged=Your community settings have been changed.
 
-/community/settings.bml.label.commcreate=This is the account that you want to turn into a community.  It must <a href="/create.bml">already be created</a>, but should not already be in use by an individual, because after this, many different people will potentially be able to post in it.
+/community/settings.bml.label.commcreate2=This is the account that you want to turn into a community. It must <a [[aopts]]>already be created</a>, but should not already be in use by an individual, because after this, many different people will potentially be able to post in it.
 
 /community/settings.bml.label.commcreated=Your community is now set up.
 
@@ -659,13 +659,15 @@ p?>
 
 /community/settings.bml.label.createheader=Create Community
 
-/community/settings.bml.label.createtext=From here you can create a community account.  A community is a special type of account that other users can join and post in.  For an example of a community, check out the <a href="/userinfo.bml?user=seattle">Seattle Party Community</a>.
+/community/settings.bml.label.createtext2=From here you can create a community account. A community is a special type of account that other users can join and post in.
+
+/community/settings.bml.label.createtext2_example=For an example of a community, check out the <a [[aopts]]>[[commname]] Community</a>.
 
 /community/settings.bml.label.howoperates=Choose how your community operates.  You can change these later.
 
 /community/settings.bml.label.maintainer=Maintainer:
 
-/community/settings.bml.label.maintainer.login=If this is not the maintainer account, <a href='/login.bml?ret=1'>login</a> as somebody else.
+/community/settings.bml.label.maintainer.login2=If this is not the maintainer account, <a [[aopts]]>log in</a> as somebody else.
 
 /community/settings.bml.label.managepage=<a [[aopts]]>Community Management</a> - to add members, grant posting access, appoint moderators, etc.
 

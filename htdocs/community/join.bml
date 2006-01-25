@@ -8,7 +8,7 @@
  # is there a user out there?
  my $remote = LJ::get_remote();
  unless ($remote) {
-     $body = "<?h1 $ML{'Sorry'}.. h1?><?p $ML{'.label.loginfirst'} p?>";
+     $body = "<?h1 $ML{'Sorry'}.. h1?><?p " . BML::ml('.label.loginfirst2', {'aopts' => "href='$LJ::SITEROOT/login.bml?ret=1'"}) . " p?>";
      return;
  }
 
@@ -98,8 +98,9 @@
      }
      
      # success message
-     $body .= "<?h1 $ML{'.success'} h1?><?p " . BML::ml('.label.membernow', 
-                    { username => $ci->{user}, commname => $ecname}) . " p?>";
+     my $profile_url = $cu->profile_url;
+     $body .= "<?h1 $ML{'.success'} h1?><?p " . BML::ml('.label.membernow2', 
+                    {'aopts' => "href='$profile_url'", 'commname' => $ecname}) . " p?>";
      
      # if community permits it, tell the user they have access
      if ($ci->{postlevel} eq "members") {
