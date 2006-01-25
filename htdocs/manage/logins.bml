@@ -19,9 +19,23 @@ body<=
         return $body;
     }
 
-    $body .= "<?p This page shows you all of your currently logged in sessions on $LJ::SITENAMESHORT as well as some of your prior login sessions.  Overtime it will also allow you to logout a specific session. p?>";
+    $body .= "<?p This page shows you all of your currently logged in sessions on $LJ::SITENAMESHORT as well as some of your prior login sessions.  You can individually logout any current login session if for example you forgot to log out when leaving a friend's computer. p?>";
 
-    my $sessions = $u->sessions();
+    my $sessions = $u->sessions;
+    my $session = $u->session;
+
+    if (LJ::did_post()) {
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>"
+            unless LJ::check_form_auth();
+
+        foreach my $sid (keys %$sessions) {
+            next unless $POST{$sid};
+
+            $sessions->{$sid}->destroy;
+            delete $sessions->{$sid};
+            last;
+        }
+    }
 
     my $sth = $u->prepare("SELECT logintime, sessid, ip, ua FROM loginlog WHERE userid=?")
         or die('Unable to prepare loginlog');
@@ -32,8 +46,10 @@ body<=
 
     my @prior;
     $body .= "<?h1 Currently Logged In Sessions h1?>";
-    $body .= "<table width='100%'><tr><th>Login Time</th><th>Session ID</th><th>IP Address</th><th width='45%'>User Agent</th></tr>";
-    foreach my $login (@$logins) {
+    $body .= "<form method='POST' action='$LJ::SITEROOT/manage/logins.bml'>";
+    $body .= LJ::form_auth();
+    $body .= "<table width='100%'><tr><th>Login Time</th><th>IP Address</th><th width='45%'>User Agent</th><th>Log Out</th></tr>";
+    foreach my $login (sort { $a->[1] <=> $b->[1] } @$logins) {
         unless (defined $sessions->{$login->[1]}) {
             push @prior, $login;
             next;
@@ -41,19 +57,24 @@ body<=
 
         $body .= "<tr>";
         $body .= "<td>" . LJ::ehtml(LJ::time_to_http($login->[0])) . "</td>";
-        $body .= "<td>" . LJ::ehtml($login->[1]) . "</td>";
         $body .= "<td>" . LJ::ehtml($login->[2]) . "</td>";
         $body .= "<td>" . LJ::ehtml($login->[3]) . "</td>";
+
+        # Is this their current session?
+        if ($session->id == $login->[1]) {
+            $body .= "<td style='whitespace: nowrap;'><font size='1'>Current Session</font></td>";
+        } else {
+            $body .= "<td>" . LJ::html_submit($login->[1], 'X') . "</td>";
+        }
         $body .= "</tr>";
     }
-    $body .= "</table><br />";
+    $body .= "</table></form><br />";
 
     $body .= "<?h1 Prior Login Sessions h1?>";
-    $body .= "<table width='100%'><tr><th>Login Time</th><th>Session ID</th><th>IP Address</th><th width='45%'>User Agent</th></tr>";
-    foreach my $login (@prior) {
+    $body .= "<table width='100%'><tr><th>Login Time</th><th>IP Address</th><th width='57%'>User Agent</th></tr>";
+    foreach my $login (sort { $b->[1] <=> $a->[1] } @prior) {
         $body .= "<tr>";
         $body .= "<td>" . LJ::ehtml(LJ::time_to_http($login->[0])) . "</td>";
-        $body .= "<td>" . LJ::ehtml($login->[1]) . "</td>";
         $body .= "<td>" . LJ::ehtml($login->[2]) . "</td>";
         $body .= "<td>" . LJ::ehtml($login->[3]) . "</td>";
         $body .= "</tr>";
