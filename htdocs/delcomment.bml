@@ -38,7 +38,8 @@ _info?><?_code
 
     if ($LJ::ONLY_USER_VHOSTS) {
         my $domain_owner = LJ::Session->url_owner;
-        return $bad_input->("URL doesn't match journal owner") unless $domain_owner eq $u->{user};
+        return $bad_input->("URL doesn't match journal owner")
+            unless LJ::canonical_username($domain_owner) eq $u->{user};
     }
 
     # can't delete if you're suspended
