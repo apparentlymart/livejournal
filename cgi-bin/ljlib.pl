@@ -41,7 +41,7 @@ sub END { LJ::end_request(); }
                     "logtags", "logtagsrecent", "logkwsum",
                     "recentactions", "usertags", "pendcomments",
                     "user_schools", "portal_config", "portal_box_prop",
-                    "loginlog",
+                    "loginlog", "active_user",
                     );
 
 # keep track of what db locks we have out

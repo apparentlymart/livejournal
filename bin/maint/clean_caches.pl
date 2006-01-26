@@ -127,6 +127,86 @@ $maint{'clean_caches'} = sub
         print "    rows remaining: " . ($xfp_count - $row_ct) . "\n";
     }
 
+    # move clustered active_user stats from each cluster to the global active_user_summary table
+    print "-I- Migrating active_user records.\n";
+    $count = 0;
+    foreach my $cid (@LJ::CLUSTERS) {
+        next unless $cid;
+
+        my $dbcm = LJ::get_cluster_master($cid);
+        unless ($dbcm) {
+            print "    cluster down: $clusterid\n";
+            next;
+        }
+
+        unless ($dbcm->do("LOCK TABLES active_user WRITE")) {
+            print "    db error (lock): " . $dbcm->errstr . "\n";
+            next;
+        }
+
+        my $sth = $dbcm->prepare
+            ("SELECT type, DATE_FORMAT(FROM_UNIXTIME(time), '%Y-%m-%d-%H'), COUNT(DISTINCT(userid)) " .
+             "FROM active_user GROUP BY 1,2");
+        $sth->execute;
+        if ($dbcm->err) {
+            print "    db error (select): " . $dbcm->errstr . "\n";
+            next;
+        }
+
+        my %counts = ();
+        my $total_ct = 0;
+        while (my ($type, $hkey, $ct) = $sth->fetchrow_array) {
+            $counts{"$hkey-$type"} += $ct;
+            $total_ct += $ct;
+        }
+
+        print "    cluster $cid: $total_ct rows\n" if $verbose;
+
+        # Note: We can experience failures on both sides of this 
+        #       transaction.  Either our delete can succeed then
+        #       insert fail or vice versa.  Luckily this data is
+        #       for statistical purposes so we can just live with
+        #       the possibility of a small skew.
+
+        unless ($dbcm->do("DELETE FROM active_user")) {
+            print "    db error (delete): " . $dbcm->errstr . "\n";
+            next;
+        }
+
+        # at this point if there is an error we will ignore it and try
+        # to insert the count data above anyway
+        my $rv = $dbcm->do("UNLOCK TABLES")
+            or print "    db error (unlock): " . $dbcm->errstr . "\n";
+
+        # nothing to insert, why bother?
+        next unless %counts;
+
+        # insert summary into active_user_summary table
+        my @bind = ();
+        my @vals = ();
+        while (my ($hkey, $ct) = each %counts) {
+
+            # yyyy, mm, dd, hh, cid, type, ct
+            push @bind, "(?, ?, ?, ?, ?, ?, ?)";
+
+            my ($yr, $mo, $day, $hr, $type) = split(/-/, $hkey);
+            push @vals, ($yr, $mo, $day, $hr, $cid, $type, $ct);
+        }
+        my $bind = join(",", @bind);
+
+        $dbh->do("INSERT INTO active_user_summary (year, month, day, hour, clusterid, type, count) " .
+                 "VALUES $bind", undef, @vals);
+
+        if ($dbh->err) {
+            print "    db error (insert): " . $dbh->errstr . "\n";
+
+            # something's badly b0rked, don't try any other clusters for now
+            last;
+        }
+
+        # next cluster
+    }
+
     # move clustered recentaction summaries from their respective clusters
     # to the global actionhistory table
     print "-I- Migrating recentactions.\n";
@@ -221,7 +301,6 @@ $maint{'clean_caches'} = sub
 
         # next cluster
     }
-
 };
 
 1;

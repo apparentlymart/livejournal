@@ -2232,6 +2232,29 @@ CREATE TABLE navtag (
 )
 EOC
 
+register_tablecreate("active_user", <<'EOC');
+CREATE TABLE active_user (
+   userid INT UNSIGNED NOT NULL,
+   type   CHAR(1) NOT NULL,
+   time   INT UNSIGNED NOT NULL,
+   KEY (userid),
+   KEY (time)
+)
+EOC
+
+register_tablecreate("active_user_summary", <<'EOC');
+CREATE TABLE active_user_summary (
+    year      SMALLINT NOT NULL,
+    month     TINYINT NOT NULL,
+    day       TINYINT NOT NULL,
+    hour      TINYINT NOT NULL,
+    clusterid TINYINT UNSIGNED NOT NULL,
+    type      CHAR(1) NOT NULL,
+    count     INT UNSIGNED NOT NULL DEFAULT 0,
+    INDEX (year, month, day, hour)
+)
+EOC
+
 register_tablecreate("loginlog", <<'EOC');
 CREATE TABLE loginlog (
    userid    INT UNSIGNED NOT NULL,

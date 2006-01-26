@@ -3749,6 +3749,36 @@ sub get_remote
     # augment hash with session data;
     $u->{'_session'} = $sessobj;
 
+    # keep track of activity for the user we just loaded from db/memcache
+    # - this code will actually run in Apache's cleanup handler so latency
+    #   won't affect the user
+    push @LJ::CLEANUP_HANDLERS, sub {
+        my $now    = time();       # _inside_ the closure
+        my $uid    = $u->{userid}; # yep, lazy typist w/ rsi
+        my $atype  = 'S';          # session activity
+        my $explen = 1800;         # 30 min
+
+        my $memkey = [ $uid, "uactive:$atype:$uid" ];
+
+        # get activity key from memcache
+        my $atime = LJ::MemCache::get($memkey);
+
+        # key didn't exist due to expiration, or was too old,
+        # means we need to make an activity entry for the user
+        if (! $atime || $atime < $now - $explen) {
+
+            # delayed insert in case the table is currently locked due to an analysis
+            # running.  this way the apache won't be tied up waiting
+            $u->do("INSERT DELAYED INTO active_user SET userid=?, type=?, time=?",
+                   undef, $uid, $atype, $now);
+
+            # set a new memcache key good for $explen
+            LJ::MemCache::set($memkey, $now, $explen);
+        }
+
+        return 1;
+    };
+
     LJ::User->set_remote($u);
     $r->notes("ljuser" => $u->{'user'});
     return $u;
