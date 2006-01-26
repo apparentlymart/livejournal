@@ -5439,6 +5439,36 @@ Enjoy!
 [[siteroot]]/
 .
 
+email.newacct3.body|notes=Updated for correct journal URL
+email.newacct3.body<<
+Congratulations, you have a new [[sitename]] account!
+
+To complete your journal creation and verify your email address,
+please visit the following location.  Verifying your email address
+will help to protect your account as well as allow you to utilize
+more features within your journal.
+
+   [[regurl]]
+
+You may access your journal at the following URL:
+
+   [[journal_base]]
+
+Below is your [[sitename]] username that you registered:
+
+   Username: [[username]]
+
+If you need to retrieve your password, you can do so at any time by
+visiting the following URL:
+
+   [[siteroot]]/lostinfo.bml
+
+Enjoy!
+
+[[sitename]] Team
+[[siteroot]]/
+.
+
 entryform.backdated=Entry is Backdated:
 
 entryform.comment.screening=Screen Comments:

@@ -398,7 +398,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
                  $aa = LJ::register_authaction($userid, "validateemail", $email);
              }
 
-             my $body = BML::ml('email.newacct2.body', {
+             my $body = BML::ml('email.newacct3.body', {
                  "email" => $email,
                  "regurl" => "$LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}",
                  "username" => $user,
@@ -406,6 +406,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
                  "siteroot" => $LJ::SITEROOT,
                  "admin_email" => $LJ::ADMIN_EMAIL,
                  "bogus_email" => $LJ::BOGUS_EMAIL,
+                 "journal_base" => LJ::journal_base($user),
              });
 
              LJ::send_mail({
