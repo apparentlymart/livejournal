@@ -443,7 +443,13 @@ sub trans
         } elsif ($uuri =~ m#^/(\d\d\d\d)(?:/(\d\d)(?:/(\d\d))?)?(/?)$#) {
             my ($year, $mon, $day, $slash) = ($1, $2, $3, $4);
             unless ($slash) {
-                return redir($r, "http://$host$hostport$uri/");
+                my $u = LJ::load_user($user)
+                    or return 404;
+                my $proper = $u->journal_base . "/$year";
+                $proper .= "/$mon" if defined $mon;
+                $proper .= "/$day" if defined $day;
+                $proper .= "/";
+                return redir($r, $proper);
             }
 
             # the S1 ljviews code looks at $opts->{'pathextra'}, because
