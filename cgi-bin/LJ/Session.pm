@@ -774,6 +774,12 @@ sub set_cookie {
     my $delete = delete $opts{delete};
     croak("Invalid cookie options: " . join(", ", keys %opts)) if %opts;
 
+    # Mac IE 5 can't handle HttpOnly, so filter it out
+    if ($http_only && ! $LJ::DEBUG{'no_mac_ie_httponly'}) {
+        my $ua = $r->header_in("User-Agent");
+        $http_only = 0 if $ua =~ /MSIE.+Mac_/;
+    }
+
     # expires can be absolute or relative.  this is gross or clever, your pick.
     $expires += time() if $expires && $expires <= 1135217120;
 
