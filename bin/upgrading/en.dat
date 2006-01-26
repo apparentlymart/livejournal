@@ -105,7 +105,13 @@ Click <a [[aopts]]>here</a> to add the shared journal to your friends list.
 
 /changeemail.bml.error.invalidpassword=Invalid password.
 
+/changeemail.bml.error.lj_domain=You cannot enter an @[[domain]] email address.  Enter your real address in that field.  If you're a paid user, your [[user]]@[[domain]] address will forward to your real address.  To choose which email address (or both) is displayed publicly, see the option below the "Show your Contact Information" option.
+
+/changeemail.bml.error.nospace=No spaces are allowed in an e-mail address.
+
 /changeemail.bml.error.notvalidated=Your account is not validated.
+
+/changeemail.bml.instructions=To better protect your account we require you enter your current password when changing your email address.  As your email address is used to prove ownership of your account and request a new password, please make sure you also protect your email account.  Using the same password for [[sitename]] and your email account is a bad idea.
 
 /changeemail.bml.label.newemail=New email address:
 

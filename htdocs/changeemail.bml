@@ -35,6 +35,8 @@ body<=
     my $update_form = sub {
         my $ret;
 
+        $ret .= '<?p ' . BML::ml('.instructions', { sitename => $LJ::SITENAMESHORT }) . ' p?>';
+
         # else, show the form to change:
         $ret .= "<form action='changeemail.bml$getextra' method='post'>\n";
         $ret .= LJ::html_hidden(mode => 'submit',
@@ -52,12 +54,12 @@ body<=
         $ret .= LJ::make_authas_select($remote, { 'authas' => $FORM{'authas'} });
 
         $ret .= "<br/><br/><div>$ML{'.label.username'}<br />\n";
-        $ret .= "<b>$u->{user}</div><br/>\n";
+        $ret .= LJ::ljuser($u) . "</div><br/>\n";
         $ret .= "<div>$ML{'.label.oldemail'}<br />\n";
         $ret .= "<b>$u->{email}</b></div><br/>\n";
         $ret .= "<div>$ML{'.label.newemail'}<br />\n";
         $ret .= "<input type='text' name='email' size='50' maxlength='50' /></div><br />\n";
-        $ret .= "<div>$ML{'.label.password'} for $remote->{user}<br />\n";
+        $ret .= "<div>$ML{'.label.password'}<br />\n";
         $ret .= "<input type='password' name='password' size='50' maxlength='50' /></div>\n";
 
         $ret .= "standout?>\n";
@@ -84,8 +86,22 @@ body<=
             push @errors, $ML{'.error.invalidemail'};
         }
 
+        if ($LJ::USER_EMAIL and $POST{'email'} =~ /\@\Q$LJ::USER_DOMAIN\E$/i) {
+            push @errors, BML::ml(".error.lj_domain", { 'user' => $remote->{'user'}, 'domain' => $LJ::USER_DOMAIN, });
+        }
+
+        if ($POST{'email'} =~ /\s/) {
+            push @errors, $ML{'.error.nospace'};
+        }
+
         if ($POST{'password'} ne $remote->{'password'}) {
             push @errors, $ML{'.error.invalidpassword'};
+        }
+
+        if (@errors) {
+            $body .= LJ::error_list(@errors) . "<br />";
+            $body .= $update_form->();
+            return $body;
         }
 
         ## make note of changed email
@@ -95,12 +111,6 @@ body<=
         $loginfo .= ", success: " . ((scalar @errors) ? 'false' : 'true');
 
         LJ::statushistory_add($u->{userid}, $u->{userid}, 'email_changed', $loginfo);
-
-        if (@errors) {
-            $body .= LJ::error_list(@errors);
-            $body .= $update_form->();
-            return $body;
-        }
 
         LJ::infohistory_add($u, 'email', $u->{email}, $u->{status});
 
