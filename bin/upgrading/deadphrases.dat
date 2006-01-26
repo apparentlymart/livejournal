@@ -284,3 +284,11 @@ general /syn/index.bml.loginrequired.text
 general /syn/index.bml.loginrequired.title
 general /tools/emailmanage.bml.notvalidated.text
 general /tools/memadd.bml.error.login
+
+general /directory.bml.error.accounttype
+general /support/append_request.bml.back.requests
+general /support/append_request.bml.back.support
+general /support/append_request.bml.login.required
+general /support/encodings.bml.edit.text
+general /support/encodings.bml.groups.text
+general /support/encodings.bml.still.text

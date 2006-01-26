@@ -6,10 +6,10 @@
  $body = "";
 
  $body .= "<?h1 $ML{'.overview.header'} h1?>$ML{'.overview.text'}";
- $body .= "<?h1 $ML{'.edit.header'} h1?>$ML{'.edit.text'}";
+ $body .= "<?h1 $ML{'.edit.header'} h1?>" . BML::ml('.edit.text2', {'aopts1' => "href='$LJ::SITEROOT/editinfo.bml'", 'aopts2' => "href='$LJ::SITEROOT/support/'"});
  $body .= "<?h1 $ML{'.editcl.header'} h1?>$ML{'.editcl.text'}";
- $body .= "<?h1 $ML{'.groups.header'} h1?>$ML{'.groups.text'}";
- $body .= "<?h1 $ML{'.still.header'} h1?>$ML{'.still.text'}";
+ $body .= "<?h1 $ML{'.groups.header'} h1?>" . BML::ml('.groups.text2', {'aopts' => "href='$LJ::SITEROOT/friends/editgroups.bml'"});
+ $body .= "<?h1 $ML{'.still.header'} h1?>" . BML::ml('.still.text2', {'aopts' => "href='$LJ::SITEROOT/support/'"});
 
  return;
 

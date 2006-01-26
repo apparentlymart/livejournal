@@ -25,7 +25,7 @@ body<=
     LJ::Support::init_remote($remote);
 
     unless (LJ::Support::can_append($sp, $remote, $FORM{'auth'}) || $remote) {
-        return LJ::bad_input($ML{'.login.required'});
+        return "<?needlogin?>";
     }
 
     if ($remote && ! $remote->tosagree_verify) {
@@ -236,8 +236,7 @@ body<=
 }
 _code?>
 <?hr?>
-Back to the <A HREF="help.bml">list of open requests</A>.<BR>
-Back to the <A HREF="./">support area</A>.
+<?_code return BML::ml('.back.support2', {'aopts' => "href='$LJ::SITEROOT/support/'"}); _code?>
 
 <=body
 page?><?_c <LJDEP>

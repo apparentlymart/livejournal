@@ -1356,9 +1356,9 @@ whether to allow <em>all</em>, <em>registered users</em>, or
 
 /directory.bml.browse.usa.title=Browse Journals by US State
 
-/directory.bml.error.accounttype<<
+/directory.bml.error.accounttype2<<
 Sorry, your account type doesn't permit usage of the
-directory, or you aren't currently <a href='/login.bml'>logged in</a>.  If your account type permits
+directory, or you aren't currently <a [[aopts]]>logged in</a>.  If your account type permits
 directory usage, be sure that you are logged in and then try again.
 .
 
@@ -3990,9 +3990,7 @@ a system style, you must first create a new style based on that system style.
 
 /styles/index.bml.title=Custom Styles
 
-/support/append_request.bml.back.requests=Back to the <a href="help.bml">list of open requests</a>.
-
-/support/append_request.bml.back.support=Back to the <a href="/support/">support area</a>.
+/support/append_request.bml.back.support2=Back to the <a [[aopts]]>support area</a>.
 
 /support/append_request.bml.bounce.noemail=No email address specified for bounce.
 
@@ -4030,8 +4028,6 @@ a system style, you must first create a new style based on that system style.
 
 /support/append_request.bml.logged.title=Success
 
-/support/append_request.bml.login.required=You must <a href="/login.bml">login</a> to help people out.
-
 /support/append_request.bml.successlinks<<
 <ul>
    <li>Go back to <a href='[[back]]'>Request #[[number]]</a></li>
@@ -4050,19 +4046,18 @@ a system style, you must first create a new style based on that system style.
 
 /support/encodings.bml.edit.header=I cannot edit my entries in the web interface!
 
-/support/encodings.bml.edit.text<<
+/support/encodings.bml.edit.text2<<
 <?p <b>Short answer:</b> <i>(applicable if you write your journal in English)</i>: Go to your 
-<a href="/editinfo.bml">personal settings page</a>. Find an option
-neat the bottom of the page that is called <b>Auto-convert older entries from:</b>. Choose
-"Western European (Windows)" from the pull-down menu and save your settings. Your entries should
-now be editable. p?>
+<a [[aopts1]]>personal settings page</a>. Find an option near the bottom of the page that is
+called <b>Auto-convert older entries from:</b>. Choose "Western European (Windows)" from the
+pull-down menu and save your settings. Your entries should now be editable. p?>
 
 <?p <b>Long answer</b>: In order to allow you to edit a non-Unicode entry, LiveJournal code needs to 
 know which encoding that entry has been posted in. For users of English and other West European 
 languages, this will normally be "Western European (Windows)", although if that doesn't work well
 for quote characters and other similar meta-characters, try "Western European (ISO)". Users
 writing in other languages should select their encoding; if it isn't in the supplied list, 
-contact <a href="/support/">Support</a> and explain the problem.  p?>
+contact <a [[aopts2]]>Support</a> and explain the problem.  p?>
 
 <?p Note that "non-Unicode entry" may mean either a journal entry posted before LiveJournal underwent
 the conversion to Unicode, or a new journal entry posted recently with a client program that 
@@ -4080,12 +4075,12 @@ languages you will have to resort to editing via the web interface, which works 
 
 /support/encodings.bml.groups.header=I cannot edit my friend lists with my client program!
 
-/support/encodings.bml.groups.text<<
+/support/encodings.bml.groups.text2<<
 <?p This is probably due to you having friend groups with names that aren't exclusively ASCII (for
 example, written in non-Latin languages or containing accent symbols). In order to successfully
 work with such group names, you have to use a Unicode-supporting client. Alternatively, you
 can rename your groups to ASCII-only names on the 
-<a href="/friends/editgroups.bml">group editing page</a> and then use your client program. p?>
+<a [[aopts]]>group editing page</a> and then use your client program. p?>
 .
 
 /support/encodings.bml.overview.header=What is this all about?
@@ -4106,7 +4101,7 @@ that area. p?>
 
 /support/encodings.bml.still.header=Still stumped?
 
-/support/encodings.bml.still.text=<?p You can try asking your question in the <a href="/support/">Support Area</a>. p?>
+/support/encodings.bml.still.text2=<?p You can try asking your question in the <a [[aopts]]>Support Area</a>. p?>
 
 /support/encodings.bml.title=Encodings
 

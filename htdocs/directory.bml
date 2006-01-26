@@ -145,7 +145,7 @@ body<=
          LJ::get_cap($remote, "directory") ||
          (@filters == 1 && $filters[0] eq "int" && $GET{'opt_format'} eq "simple"))
  {
-     return $ML{'.error.accounttype'};
+     return BML::ml('.error.accounttype2', {'aopts' => "href='$LJ::SITEROOT/login.bml?ret=1'"});
  }
 
  unless (LJ::Dir::do_search($dbr, $dbdir, \%FORM, \@matches, \%info)) {
