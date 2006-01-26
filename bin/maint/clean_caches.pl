@@ -168,7 +168,7 @@ $maint{'clean_caches'} = sub
         #       for statistical purposes so we can just live with
         #       the possibility of a small skew.
 
-        unless ($dbcm->do("TRUNCATE TABLE recentactions")) {
+        unless ($dbcm->do("DELETE FROM recentactions")) {
             print "    db error (delete): " . $dbcm->errstr . "\n";
             next;
         }
