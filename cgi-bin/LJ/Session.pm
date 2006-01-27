@@ -707,15 +707,16 @@ sub setdomsess_handler {
     $is_valid = valid_domain_cookie($domcook, $cookie, $BML::COOKIE{'ljloggedin'});
     return $dest           unless $is_valid;
 
+    my $path = path_of_domcook($domcook);
     set_cookie($domcook   => $cookie,
-               path       => path_of_domcook($domcook),
+               path       => $path,
                http_only  => 1,
                expires    => 60*60);
 
     # add in a trailing slash, if URL doesn't have at least two slashes.
     # otherwise the path on the cookie above (which is like /community/)
     # won't be caught when we bounce them to /community.
-    unless ($dest =~ m!^http://.+?/.+?/!) {
+    unless ($dest =~ m!^http://.+?/.+?/! || $path eq "/") {
         # add a slash unless we can slip one in before the query parameters
         $dest .= "/" unless $dest =~ s!\?!/?!;
     }
