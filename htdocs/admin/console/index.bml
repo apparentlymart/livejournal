@@ -17,6 +17,10 @@
          return "<b>Error:</b> requires post.";
      }
 
+     unless ($remote) {
+         return "<?needlogin?>";
+     }
+
      unless (LJ::check_form_auth()) {
          return "<b>Error:</b> invalid form submission, please refresh and try again.";
      }
