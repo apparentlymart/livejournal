@@ -210,6 +210,7 @@
         }
 
         $$body .= "<div style='width: 100%'><form method='post' action='update.bml$getextra' id='updateForm' name='updateForm'>";
+        $$body .= LJ::form_auth();
 
         if ($opts->{require_tos}){
             $$body .= LJ::tosagree_html('update', $POST{agree_tos}, $errors->{require_tos});
@@ -224,8 +225,8 @@
     };
 
     if ($did_post && !$did_spellcheck && !$showform && !$enabled_rte && !$preview &&
-        !$POST{'moreoptsbtn'} ) {
-
+        LJ::check_form_auth() && !$POST{'moreoptsbtn'} )
+    {
         # what's our authentication scheme for subsequent protocol actions?
         my $flags = {};
         my ($u, $user);
