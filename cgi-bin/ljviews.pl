@@ -515,6 +515,20 @@ sub check_dup_style {
     }
 }
 
+# returns userid of styleid, regardless of it being clusterd or not
+sub get_style_userid_always {
+    my $styleid = shift;
+
+    my $uid = get_style_userid($styleid);
+    return $uid if $uid;
+
+    my $style = get_style($styleid)
+        or return 0;
+
+    return $style->{userid} or
+        die "S1 style \#$styleid has no userid field?";
+}
+
 # returns undef if style isn't clustered
 sub get_style_userid {
     my $styleid = shift;

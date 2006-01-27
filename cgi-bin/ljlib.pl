@@ -2544,6 +2544,13 @@ sub alloc_global_counter
     return LJ::alloc_global_counter($dom, 1);
 }
 
+sub system_userid {
+    return $LJ::CACHE_SYSTEM_ID if $LJ::CACHE_SYSTEM_ID;
+    my $u = LJ::load_user("system")
+        or die "No 'system' user available for LJ::system_userid()";
+    return $LJ::CACHE_SYSTEM_ID = $u->{userid};
+}
+
 sub note_recent_action {
     my ($cid, $action) = @_;
 

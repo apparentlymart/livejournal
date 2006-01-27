@@ -401,7 +401,13 @@ sub trans
         }
 
         if ($opts->{mode} eq "data" && $opts->{pathextra} =~ m!^/(\w+)(/.*)?!) {
-            if (my $handler = LJ::run_hook("data_handler:$1", $RQ{'user'}, $2)) {
+            my ($mode, $path) = ($1, $2);
+            if ($mode eq "customview") {
+                $r->handler("perl-script");
+                $r->push_handlers(PerlHandler => \&customview_content);
+                return OK;
+            }
+            if (my $handler = LJ::run_hook("data_handler:$mode", $RQ{'user'}, $path)) {
                 $r->handler("perl-script");
                 $r->push_handlers(PerlHandler => $handler);
                 return OK;
@@ -646,11 +652,12 @@ sub trans
 
         # need to redirect them to canonical version
         if ($LJ::ONLY_USER_VHOSTS && ! $LJ::DEBUG{'user_vhosts_no_old_redirect'}) {
-            # FIXME: also set the logged-in cookies they'll be redirected back for anyway
+            # FIXME: skip two redirects and send them right to __setdomsess with the right
+            #        cookie-to-be-set arguments.  below is the easy/slow route.
             my $u = LJ::load_user($cuser)
                 or return 404;
             my $base = $u->journal_base;
-            return redir($r, "$base$srest$args_wq");
+            return redir($r, "$base$srest$args_wq", correct_url_redirect_code());
         }
 
         # redirect to canonical username and/or add slash if needed
@@ -686,7 +693,7 @@ sub trans
         return 404;
     }
 
-    # customview
+    # customview (get an S1 journal by number)
     if ($uri =~ m!^/customview\.cgi!) {
         $r->handler("perl-script");
         $r->push_handlers(PerlHandler => \&customview_content);
@@ -1191,7 +1198,6 @@ sub journal_content
 sub customview_content
 {
     my $r = shift;
-
     my %FORM = $r->args;
 
     my $charset = "utf-8";
@@ -1220,6 +1226,14 @@ sub customview_content
     my $user = $FORM{'username'} || $FORM{'user'};
     my $styleid = $FORM{'styleid'} + 0;
     my $nooverride = $FORM{'nooverride'} ? 1 : 0;
+
+    if ($LJ::ONLY_USER_VHOSTS && ! defined LJ::Session->domain_journal) {
+        my $u = LJ::load_user($user)
+            or return 404;
+        my $safeurl = $u->journal_base . "/data/customview?";
+        $safeurl .= join("&", map { LJ::eurl($_) . "=" . LJ::eurl($FORM{$_}) } keys %FORM);
+        return redir($r, $safeurl);
+    }
 
     my $remote;
     if ($FORM{'checkcookies'}) {
@@ -1255,6 +1269,13 @@ sub customview_content
     $r->send_http_header();
     $r->print($data) unless $r->header_only;
     return OK;
+}
+
+sub correct_url_redirect_code {
+    if ($LJ::CORRECT_URL_PERM_REDIRECT) {
+        return Apache::Constants::HTTP_MOVED_PERMANENTLY();
+    }
+    return Apache::Constants::REDIRECT();
 }
 
 sub interface_content

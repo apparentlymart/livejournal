@@ -3031,6 +3031,12 @@ sub make_journal
         return LJ::server_down_html();
     }
 
+    my $u = $opts->{'u'} || LJ::load_user($user);
+    unless ($u) {
+        $opts->{'baduser'} = 1;
+        return "<h1>Error</h1>No such user <b>$user</b>";
+    }
+
     # S1 style hashref.  won't be loaded now necessarily,
     # only if via customview.
     my $style;
@@ -3042,7 +3048,22 @@ sub make_journal
         # if we have an explicit styleid, we have to load
         # it early so we can learn its type, so we can
         # know which uprops to load for its owner
-        $style = LJ::S1::load_style($styleid, \$view);
+        if ($LJ::ONLY_USER_VHOSTS && $opts->{vhost} eq "customview") {
+            # reject this style if it's not trusted by the user, and we're showing
+            # stuff on user domains
+            my $ownerid = LJ::S1::get_style_userid_always($styleid);
+            my $is_trusted = sub {
+                return 1 if $ownerid == $u->{userid};
+                return 1 if $ownerid == LJ::system_userid();
+                my $trust_list = eval { $u->prop("trusted_s1") };
+                return 1 if $trust_list =~ /\b$styleid\b/;
+                return 0;
+            };
+            unless ($is_trusted->()) {
+                $style = undef;
+                $styleid = 0;
+            }
+        }
     } else {
         $view ||= "lastn";    # default view when none specified explicitly in URLs
         if ($LJ::viewinfo{$view} || $view eq "month" ||
@@ -3054,17 +3075,6 @@ sub make_journal
     }
     return unless $styleid;
 
-    my $u;
-    if ($opts->{'u'}) {
-        $u = $opts->{'u'};
-    } else {
-        $u = LJ::load_user($user);
-    }
-
-    unless ($u) {
-        $opts->{'baduser'} = 1;
-        return "<h1>Error</h1>No such user <b>$user</b>";
-    }
 
     $u->{'_journalbase'} = LJ::journal_base($u->{'user'}, $opts->{'vhost'});
 
