@@ -844,7 +844,7 @@ sub valid_domain_cookie {
     };
 
     return $not_valid->("bogus params") if $bogus;
-    return $not_valid->("wrong gen") if valid_cookie_generation($gen);
+    return $not_valid->("wrong gen") unless valid_cookie_generation($gen);
     return $not_valid->("wrong ver") if $version != VERSION;
 
     # have to be relatively new.  these shouldn't last longer than a day
