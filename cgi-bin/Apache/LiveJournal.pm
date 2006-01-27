@@ -1223,15 +1223,19 @@ sub customview_content
 
     $r->content_type($ctype);
 
-    my $user = $FORM{'username'} || $FORM{'user'};
+    my $cur_journal = LJ::Session->domain_journal;
+    my $user = LJ::canonical_username($FORM{'username'} || $FORM{'user'} || $cur_journal);
     my $styleid = $FORM{'styleid'} + 0;
     my $nooverride = $FORM{'nooverride'} ? 1 : 0;
 
-    if ($LJ::ONLY_USER_VHOSTS && ! defined LJ::Session->domain_journal) {
+    if ($LJ::ONLY_USER_VHOSTS && $cur_journal ne $user) {
         my $u = LJ::load_user($user)
             or return 404;
         my $safeurl = $u->journal_base . "/data/customview?";
-        $safeurl .= join("&", map { LJ::eurl($_) . "=" . LJ::eurl($FORM{$_}) } keys %FORM);
+        my %get_args = %FORM;
+        delete $get_args{'user'};
+        delete $get_args{'username'};
+        $safeurl .= join("&", map { LJ::eurl($_) . "=" . LJ::eurl($get_args{$_}) } keys %get_args);
         return redir($r, $safeurl);
     }
 
