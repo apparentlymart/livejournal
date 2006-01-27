@@ -140,7 +140,7 @@ register_setter("opt_ljcut_disable_lastn", sub {
         $$err = "Illegal value. Must be '0' or '1'";
         return 0;
     }
-    LJ:set_userprop($u, "opt_ljcut_disable_lastn", $value);
+    LJ::set_userprop($u, "opt_ljcut_disable_lastn", $value);
     return 1;
 });
 
@@ -150,7 +150,7 @@ register_setter("opt_ljcut_disable_friends", sub {
         $$err = "Illegal value. Must be '0' or '1'";
         return 0;
     }
-    LJ:set_userprop($u, "opt_ljcut_disable_friends", $value);
+    LJ::set_userprop($u, "opt_ljcut_disable_friends", $value);
     return 1;
 });
 
@@ -160,7 +160,7 @@ register_setter("disable_quickreply", sub {
         $$err = "Illegal value. Must be '0' or '1'";
         return 0;
     }
-    LJ:set_userprop($u, "opt_no_quickreply", $value);
+    LJ::set_userprop($u, "opt_no_quickreply", $value);
     return 1;
 });
 
@@ -170,7 +170,17 @@ register_setter("disable_nudge", sub {
         $$err = "Illegal value. Must be '0' or '1'";
         return 0;
     }
-    LJ:set_userprop($u, "opt_no_nudge", $value);
+    LJ::set_userprop($u, "opt_no_nudge", $value);
+    return 1;
+});
+
+register_setter("trusted_s1", sub {
+    my ($dba, $u, $remote, $key, $value, $err) = @_;
+    unless ($value =~ /^(\d+,?)+$/) {
+        $$err = "Illegal value. Must be a comma separated list of style ids";
+        return 0;
+    }
+    LJ::set_userprop($u, "trusted_s1", $value);
     return 1;
 });
 
