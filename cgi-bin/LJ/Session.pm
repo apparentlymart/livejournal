@@ -227,7 +227,7 @@ sub domsess_cookie_string {
         "s$sess->{sessid}:" .
         "t$time:" .
         "g$sig//" .
-        ($LJ::COOKIE_GEN || "");
+        LJ::eurl($LJ::COOKIE_GEN || "");
 
     return $value;
 }
@@ -564,7 +564,7 @@ sub session_from_master_cookie {
 
         next COOKIE if $bogus;
 
-        next COOKIE unless $gen eq $LJ::COOKIE_GEN;
+        next COOKIE unless valid_cookie_generation($gen);
 
         my $err = sub {
             $sess = undef;
@@ -844,7 +844,7 @@ sub valid_domain_cookie {
     };
 
     return $not_valid->("bogus params") if $bogus;
-    return $not_valid->("wrong gen") if $gen ne $LJ::COOKIE_GEN;
+    return $not_valid->("wrong gen") if valid_cookie_generation($gen);
     return $not_valid->("wrong ver") if $version != VERSION;
 
     # have to be relatively new.  these shouldn't last longer than a day
@@ -905,6 +905,16 @@ sub path_of_domcook {
         $path = "/" . $parts[-1] . "/";
     }
     return $path;
+}
+
+sub valid_cookie_generation {
+    my $gen    = shift;
+    my $dgen   = LJ::durl($gen);
+    foreach my $okay ($LJ::COOKIE_GEN, @LJ::COOKIE_GEN_OKAY) {
+        return 1 if $gen  eq $okay;
+        return 1 if $dgen eq $okay;
+    }
+    return 0;
 }
 
 1;
