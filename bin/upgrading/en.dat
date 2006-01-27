@@ -117,7 +117,7 @@ Click <a [[aopts]]>here</a> to add the shared journal to your friends list.
 
 /changeemail.bml.label.oldemail=Old email address:
 
-/changeemail.bml.label.password=Current password:
+/changeemail.bml.label.password2=[[remote]]'s current password:
 
 /changeemail.bml.label.username=Username:
 

@@ -59,7 +59,7 @@ body<=
         $ret .= "<b>$u->{email}</b></div><br/>\n";
         $ret .= "<div>$ML{'.label.newemail'}<br />\n";
         $ret .= "<input type='text' name='email' size='50' maxlength='50' /></div><br />\n";
-        $ret .= "<div>$ML{'.label.password'}<br />\n";
+        $ret .= "<div>" . BML::ml('.label.password2', { remote => LJ::ljuser($remote) }) . "<br />\n";
         $ret .= "<input type='password' name='password' size='50' maxlength='50' /></div>\n";
 
         $ret .= "standout?>\n";
