@@ -786,6 +786,7 @@ $box{'update'} =
 
         my $chal = LJ::challenge_generate(300); # 5 minute auth token
         $$bd .= "<form method='post' action='$LJ::SITEROOT/update.bml' id='updatebox' name='updateForm$box->{'uniq'}'>";
+        $$bd .= LJ::form_auth();
         $$bd .= "<input type='hidden' name='chal' id='login_chal' value='$chal' />";
         $$bd .= "<input type='hidden' name='response' id='login_response' value='' />";
 

@@ -643,6 +643,7 @@
         # submit button / form
         my $usejournal = $getextra ? "?usejournal=$authas" : '';
         $ret .= "<form method='post' action='$LJ::SITEROOT/update.bml$usejournal' style='display: inline'>\n";
+        $ret .= LJ::form_auth();
         $ret .= LJ::html_hidden('event', $code) . "\n";
         $ret .= LJ::html_submit('showform', undef, { 'raw' => "value='$ML{'.button.postpoll'} &rarr;'" }) . "\n";
         $ret .= "</form>\n";
