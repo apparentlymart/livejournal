@@ -2251,7 +2251,7 @@ CREATE TABLE active_user_summary (
     clusterid TINYINT UNSIGNED NOT NULL,
     type      CHAR(1) NOT NULL,
     count     INT UNSIGNED NOT NULL DEFAULT 0,
-    INDEX (year, month, day, hour)
+    PRIMARY KEY (year, month, day, hour, clusterid, type)
 )
 EOC
 

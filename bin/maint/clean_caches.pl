@@ -194,7 +194,7 @@ $maint{'clean_caches'} = sub
         }
         my $bind = join(",", @bind);
 
-        $dbh->do("INSERT INTO active_user_summary (year, month, day, hour, clusterid, type, count) " .
+        $dbh->do("INSERT IGNORE INTO active_user_summary (year, month, day, hour, clusterid, type, count) " .
                  "VALUES $bind", undef, @vals);
 
         if ($dbh->err) {

@@ -3777,7 +3777,8 @@ sub get_remote
         }
 
         return 1;
-    };
+
+    } unless $LJ::DISABLED{active_user_tracking};
 
     LJ::User->set_remote($u);
     $r->notes("ljuser" => $u->{'user'});
