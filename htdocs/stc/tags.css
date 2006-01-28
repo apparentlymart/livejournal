@@ -9,10 +9,8 @@ legend
     padding: 2px 10px 2px 10px;
     border: 1px solid #cdcdcd;
     font-weight: bold;
-    /*
-    font-family: Arial;
-    background: #eee url(/img/grey_gradbg.gif);
-    */
+    /* font-family: Arial; */
+    /* background: #eee url(/img/grey_gradbg.gif); */
 }
 
 .tagsort
