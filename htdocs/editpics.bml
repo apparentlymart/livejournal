@@ -490,7 +490,7 @@
                     return $err->("couldn't parse upload: $error");
                 }
 
-                return BML::redirect("$LJ::SITEROOT/userpicfactory.bml?keywords=" . BML::eurl($POST{'keywords'}) . "&comments=" .
+                return BML::redirect("$LJ::SITEROOT/tools/userpicfactory.bml?keywords=" . BML::eurl($POST{'keywords'}) . "&comments=" .
                                                                                          BML::eurl($POST{'comments'}) .
                                      "&make_default=" . BML::eurl($POST{'make_default'}) . '&authas=' . BML::eurl($GET{'authas'}));
             } else {
