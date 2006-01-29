@@ -15,9 +15,9 @@
 
     $head .= qq {
 
-        <script type="text/javascript" src="http://m.lj/js/core.js"></script>
-        <script type="text/javascript" src="http://m.lj/js/dom.js"></script>
-        <script type="text/javascript" src="http://m.lj/js/image-region-select.js"></script>
+        <script type="text/javascript" src="$LJ::SITEROOT/js/core.js"></script>
+        <script type="text/javascript" src="$LJ::SITEROOT/js/dom.js"></script>
+        <script type="text/javascript" src="$LJ::SITEROOT/js/image-region-select.js"></script>
 
         <script>
 
