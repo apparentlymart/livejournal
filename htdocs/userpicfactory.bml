@@ -113,14 +113,14 @@
 
       <div><input type="checkbox" id="constrain" checked="1" onChange="regsel.setConstrain(\$('constrain').checked);" /> <label for="constrain">Keep square</label></div>
 
-      <!-- table cellpadding="4"><tr>
-      <td valign="center">Preview:</td><td -->
+      <table cellpadding="4"><tr>
+      <td valign="center">Preview:</td><td>
       <div style="width: 100px; height: 100px; overflow: hidden; padding: 0px;">
         <div style="width: 100px; height: 100px; overflow: hidden; display:inline; float:left;" id="prevcon">
             <img src="$picpath" id="userpicpreview"  />
         </div>
         </div>
-        <!-- /td></tr></table -->
+        </td></tr></table>
 
       <form action="$LJ::SITEROOT/editpics.bml?authas=$GET{'authas'}" method="POST" enctype='multipart/form-data'>
       <input type="hidden" name="create" value="1" />
