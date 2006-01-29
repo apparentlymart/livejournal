@@ -591,9 +591,20 @@ sub get_picid_from_keyword
 # note: this will always keep the image's original aspect ratio and not distort it.
 sub get_upf_scaled
 {
-    my ($size, $x1, $y1, $x2, $y2) = @_;
+    my %opts = @_;
+    my $size = delete $opts{size} || 640;
+
+    my $x1 = delete $opts{x1};
+    my $y1 = delete $opts{y1};
+    my $x2 = delete $opts{x2};
+    my $y2 = delete $opts{y2};
+
+    print STDERR "Invalid parameters to get_upf_scaled\n" if scalar keys %opts;
+
     my $remote = LJ::get_remote();
     return undef unless $remote;
+
+    use Image::Magick ();
 
     my $key = 'upf:' . $remote->{userid};
 
@@ -602,8 +613,6 @@ sub get_upf_scaled
     my $imgdata = $$dataref;
 
     my $image = Image::Magick->new() or return undef;
-
-    $size ||= 640;
 
     $image->BlobToImage($imgdata);
 

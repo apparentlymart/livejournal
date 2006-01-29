@@ -6,7 +6,7 @@
     return $ML{'error.noremote'}
         unless $remote;
 
-    my $size = $GET{'size'}+0 || 640;
+    my $size = $GET{'size'}+0;
 
     my $upf = LJ::get_upf_scaled($size);
 
