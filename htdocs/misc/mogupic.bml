@@ -1,0 +1,24 @@
+<?_code
+{
+    use strict;
+    use vars qw(%GET);
+    my $remote = LJ::get_remote();
+    return $ML{'error.noremote'}
+        unless $remote;
+
+    my $size = $GET{'size'}+0 || 640;
+
+    my $upf = LJ::get_upf_scaled($size);
+
+    return "Error retreiving image." unless $upf;
+
+    my $blob = $upf->[0];
+    my $mime = $upf->[1];
+
+    BML::set_content_type($mime);
+    BML::noparse();
+
+    return $blob;
+}
+_code?>
+

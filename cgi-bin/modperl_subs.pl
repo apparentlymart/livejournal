@@ -25,6 +25,7 @@ use Time::HiRes ();
 use Image::Size ();
 use POSIX ();
 use Unicode::MapUTF8 ();
+use Image::Magick ();
 
 use LJ::Portal ();
 use LJ::SpellCheck;

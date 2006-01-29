@@ -1,0 +1,173 @@
+<?_code
+{
+    use strict;
+    use vars qw($title $body $head $bodyopts %POST %GET);
+
+    $title = 'Create Userpic';
+
+    my $remote = LJ::get_remote();
+    return $ML{'error.noremote'}
+        unless $remote;
+
+    my $scaledSizeMax = 640;
+
+    my $picpath = $LJ::SITEROOT . "/misc/mogupic.bml?size=$scaledSizeMax";
+
+    $head .= qq {
+
+        <script type="text/javascript" src="http://m.lj/js/core.js"></script>
+        <script type="text/javascript" src="http://m.lj/js/dom.js"></script>
+        <script type="text/javascript" src="http://m.lj/js/image-region-select.js"></script>
+
+        <script>
+
+        var origW, origH;
+        var regsel;
+
+        function onRegionChange (c) {
+            updatePreview(c);
+        }
+
+        function onRegionChanged (c) {
+            if (!c.x1 && !c.x2 && !c.y1 && !c.y2) return;
+
+            updatePreview(c);
+
+            \$("x1").value = c.x1;
+            \$("y1").value = c.y1;
+            \$("x2").value = c.x2;
+            \$("y2").value = c.y2;
+        }
+
+        function updatePreview (c) {
+            var w = c.x2 - c.x1, h = c.y2 - c.y1;
+
+            var upp = \$("userpicpreview");
+
+            var newsizes = getSizedCoords(100, w, h);
+
+            var zoomw = 1/(w/origW);
+            var zoomh = 1/(h/origH);
+
+            var nw = Math.floor(newsizes[0] * zoomw);
+            var nh = Math.floor(newsizes[1] * zoomh);
+
+            upp.width = nw;
+            upp.height = nh;
+
+            var zoomx = nw/origW;
+            var zoomy = nh/origH;
+
+            \$("prevcon").style.width = Math.floor(newsizes[0]) + "px";
+            \$("prevcon").style.height = Math.floor(newsizes[1]) + "px";
+
+            var nl = zoomx * c.x1;
+            var nt = zoomy * c.y1;
+
+            upp.style.marginLeft = "-" + Math.floor(nl) + "px";
+            upp.style.marginTop = "-" + Math.floor(nt) + "px";
+        }
+
+        function getSizedCoords (newsize, w, h) {
+            var nw, nh;
+
+            if (h > w) {
+                nh = newsize;
+                nw = newsize * w/h;
+            } else {
+                nw = newsize;
+                nh = newsize * h/w;
+            }
+            return [nw, nh];
+        }
+
+        DOM.addEventListener(window, "load", function () {
+            regsel = new ImageRegionSelect();
+            regsel.init({
+              src: \$("userpic"),
+              onRegionChange:  onRegionChange,
+              onRegionChanged: onRegionChanged,
+            });
+
+            var w = \$("userpic").width;
+            var h = \$("userpic").height;
+            origW = w;
+            origH = h;
+
+            var x1 = w/2-50, y1 = h/2-50, x2 = w/2+50, y2 = h/2+50;
+            regsel.setTopLeft(x1, y1);
+            regsel.setBottomRight(x2, y2);
+            regsel.fireOnRegionChanged();
+
+            regsel.setConstrain(true);
+        });
+
+    </script>
+
+    };
+
+    my $checked = $GET{'make_default'} ? "checked" : "";
+
+    $body .= qq {
+      <img src="$picpath" id="userpic" />
+
+      <div><input type="checkbox" id="constrain" checked="1" onChange="regsel.setConstrain(\$('constrain').checked);" /> <label for="constrain">Keep square</label></div>
+
+      <!-- table cellpadding="4"><tr>
+      <td valign="center">Preview:</td><td -->
+      <div style="width: 100px; height: 100px; overflow: hidden; padding: 0px;">
+        <div style="width: 100px; height: 100px; overflow: hidden; display:inline; float:left;" id="prevcon">
+            <img src="$picpath" id="userpicpreview"  />
+        </div>
+        </div>
+        <!-- /td></tr></table -->
+
+      <form action="$LJ::SITEROOT/editpics.bml?authas=$GET{'authas'}" method="POST" enctype='multipart/form-data'>
+      <input type="hidden" name="create" value="1" />
+
+      <input type="hidden" name="x1" id="x1" />
+      <input type="hidden" name="y1" id="y1" />
+      <input type="hidden" name="x2" id="x2" />
+      <input type="hidden" name="y2" id="y2" />
+
+      <input type="hidden" name="scaledSizeMax" id="scaledSizeMax" value="$scaledSizeMax" />
+
+      <table>
+       <tr>
+        <td align="right">Keywords:</td>
+        <td align="left"><input type="text" size="40" value="$GET{'keywords'}" name="keywords" /></td>
+       </tr>
+       <tr>
+        <td align="right">Comments:</td>
+        <td align="left"><input type="text" size="40" value="$GET{'comments'}" name="comments" /></td>
+       </tr>
+       <tr>
+        <td>&nbsp;</td>
+        <td align="left">
+         <input type="checkbox" id="make_default" name="make_default" $checked />
+         <label for='make_default'>Make this my default userpic</label>
+        </td>
+       </tr>
+      </table>
+
+      <input type="hidden" name="src" value="factory" />
+      } . LJ::form_auth() . qq {
+
+      <input type="submit" value="Create Userpic" />
+      </form>
+    };
+
+    LJ::need_res('stc/global.css');
+}
+#_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+
+return;
+
+_code?><?page
+    title=><?_code return $title; _code?>
+    head<=
+    <?_code return $head; _code?>
+    <=head
+    bodyopts=><?_code return $bodyopts; _code?>
+    body=><?_code return $body; _code?>
+    page?>

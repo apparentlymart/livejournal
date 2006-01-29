@@ -578,4 +578,101 @@ sub get_picid_from_keyword
     return $pr ? $pr->{'picid'} : $default;
 }
 
+# this will return a user's userpicfactory image stored in mogile scaled down.
+# if only $size is passed, will return image scaled so the largest dimension will
+# not be greater than $size. If $x1, $y1... are set then it will return the image
+# scaled so the largest dimension will not be greater than 100 and the image will be
+# no larger than 40kb.
+# all parameters are optional, default size is 640. if $x1 is present, the rest of
+# the points should be as well.
+#
+# returns [image, mime, width, height] on success, undef on failure.
+#
+# note: this will always keep the image's original aspect ratio and not distort it.
+sub get_upf_scaled
+{
+    my ($size, $x1, $y1, $x2, $y2) = @_;
+    my $remote = LJ::get_remote();
+    return undef unless $remote;
+
+    my $key = 'upf:' . $remote->{userid};
+
+    my $dataref = LJ::mogclient()->get_file_data($key) or return undef;
+
+    my $imgdata = $$dataref;
+
+    my $image = Image::Magick->new() or return undef;
+
+    $size ||= 640;
+
+    $image->BlobToImage($imgdata);
+
+    my $mime = $image->Get('MIME');
+
+    my $w = $image->Get('width');
+    my $h = $image->Get('height');
+
+    # compute new width and height while keeping aspect ratio
+    my $getSizedCoords = sub {
+        my $newsize = shift;
+
+        my $_w = $image->Get('width');
+        my $_h = $image->Get('height');
+
+        my ($nh, $nw);
+
+        if ($_h > $_w) {
+            $nh = $newsize;
+            $nw = $newsize * $_w/$_h;
+        } else {
+            $nw = $newsize;
+            $nh = $newsize * $_h/$_w;
+        }
+
+        return ($nw, $nh);
+    };
+
+    # resize image keeping aspect ratio and ensuring that the largest bound is $newsize
+    my $aspectResize = sub {
+        my $newsize = shift;
+
+        my ($nw, $nh) = $getSizedCoords->($newsize);
+
+        if ($nw || $nh) {
+            $image->Scale(width => $nw, height => $nh);
+        }
+    };
+
+    if ($x1 && $x2 && $y1 && $y2) {
+        # scale small coords to full-size so we can crop the high quality source image before for
+        # higher quality scaled userpics.
+        my ($scaledw, $scaledh) = $getSizedCoords->($size);
+
+        $x1 *= ($w/$scaledw);
+        $x2 *= ($w/$scaledw);
+
+        $y1 *= ($h/$scaledh);
+        $y2 *= ($h/$scaledh);
+
+        my $tw = $x2 - $x1;
+        my $th = $y2 - $y1;
+
+        $image->Crop(
+                     x => $x1,
+                     y => $y1,
+                     width => $tw,
+                     height => $th
+                     );
+        $aspectResize->(100);
+        # keep image under 40k
+        $image->Set('disk-limit' => .04); # in MB
+    } else {
+        $aspectResize->($size);
+    }
+
+    my ($blob) = $image->ImageToBlob;
+
+    return [$blob, $mime, $image->Get('width'), $image->Get('height')];
+}
+
 1;
