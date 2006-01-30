@@ -10,6 +10,7 @@ use S2::Compiler;
 use Storable;
 use Apache::Constants ();
 use HTMLCleaner;
+use CSS::Cleaner;
 use POSIX ();
 
 use LJ::S2::RecentPage;
@@ -1883,6 +1884,35 @@ sub UserLite
 
 package S2::Builtin::LJ;
 use strict;
+
+sub start_css {
+    my ($ctx) = @_;
+    my $sc = $ctx->[S2::SCRATCH];
+    $sc->{_start_css_pout}   = S2::get_output();
+    $sc->{_start_css_pout_s} = S2::get_output_safe();
+    $sc->{_start_css_buffer} = "";
+    my $printer = sub {
+        $sc->{_start_css_buffer} .= shift;
+    };
+    S2::set_output($printer);
+    S2::set_output_safe($printer);
+}
+
+sub end_css {
+    my ($ctx) = @_;
+    my $sc = $ctx->[S2::SCRATCH];
+
+    # restore our printer/safe printer
+    S2::set_output($sc->{_start_css_pout});
+    S2::set_output_safe($sc->{_start_css_pout_s});
+
+    # our CSS to clean:
+    my $css = $sc->{_start_css_buffer};
+    my $cleaner = CSS::Cleaner->new;
+    $sc->{_start_css_pout}->("/* Cleaned CSS: */\n" .
+                             $cleaner->clean($css) .
+                             "\n");
+}
 
 sub alternate
 {
