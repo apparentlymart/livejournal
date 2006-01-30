@@ -1059,9 +1059,11 @@ function Page::lay_print_viewspec_head() {}
 function FriendsPage::lay_print_viewspec_head() {
     if (not $*opt_use_friendcolors) { return; }
     println """<style type="text/css">""";
+    start_css();
     foreach var string f ($.friends) {
         println ".ljuser_$f { background: $.friends{$f}.bgcolor none; color: $.friends{$f}.fgcolor; padding: 0 0.25em;}";
     }
+    end_css();
     println """</style>""";
 }
 

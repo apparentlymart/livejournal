@@ -61,8 +61,9 @@ function Page::print {
 
   print "<title>" + $this->title() + "</title>";
 
+  print "<style type=\"text/css\">";
+  start_css();
   """
-    <style type="text/css">
             .centertext {
               text-align: center !important;
             }
@@ -236,7 +237,9 @@ function Page::print {
               background-color: $*comment_bar_screened;
               padding: 3px;
             }
-        
+  """;
+  end_css();
+  """
         </style>
         </head>
         <body>

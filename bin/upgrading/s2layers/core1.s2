@@ -1561,7 +1561,9 @@ function Page::print() {
     "<html>\n<head>\n<title>"+$this->title()+"</title>\n";
 
     if ($*font_base != "" or $*font_fallback != "none") {
-"""<style type="text/css">
+        """<style type="text/css">""";
+        start_css();
+        """
 <!--
 body, td, th, table, p, div {
     font-family: """;
@@ -1575,6 +1577,7 @@ body, td, th, table, p, div {
             print $*font_fallback;
         }
         ";\n}\n--></style>\n";
+        end_css();
     }
 
     $this->print_head();
