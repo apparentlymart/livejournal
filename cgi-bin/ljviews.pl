@@ -29,7 +29,7 @@ use vars qw(@themecoltypes);
 
 # updated everytime new S1 style cleaning rules are added,
 # so cached cleaned versions are invalidated.
-$LJ::S1::CLEANER_VERSION = 5;
+$LJ::S1::CLEANER_VERSION = 6;
 
 # PROPERTY Flags:
 

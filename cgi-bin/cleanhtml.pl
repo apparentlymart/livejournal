@@ -8,6 +8,7 @@
 use strict;
 use HTML::TokeParser ();
 use URI ();
+use CSS::Cleaner;
 
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 
@@ -229,6 +230,16 @@ sub clean
                     next;
                 }
             }
+            elsif ($tag eq "style") { # && $opts->{cleancss}) {
+                my $style = $p->get_text("/style");
+                $p->get_tag("/style");
+                unless ($LJ::DISABLED{'css_cleaner'}) {
+                    my $cleaner = CSS::Cleaner->new;
+                    $style = "/* cleaned */\n" . $cleaner->clean($style);
+                }
+                $newdata .= "\n<style>\n$style</style>\n";
+                next;
+            }
             elsif ($tag eq "lj")
             {
                 my $attr = $token->[2];
@@ -333,6 +344,13 @@ sub clean
                                 next ATTR;
                             }
                         }
+
+                        # and then run it through a harder CSS cleaner that does a full parse
+                        unless ($LJ::DISABLED{'css_cleaner'}) {
+                            my $css = CSS::Cleaner->new;
+                            $hash->{style} = $css->clean_property($hash->{style});
+                        }
+                        next ATTR;
                     }
 
                     # reserve ljs_* ids for divs, etc so users can't override them to replace content
@@ -377,9 +395,6 @@ sub clean
                     unless ($hash->{href} =~ s/^lj:(?:\/\/)?(.*)$/ExpandLJURL($1)/ei) {
                         $hash->{href} = canonical_url($hash->{href}, 1);
                     }
-                }
-                if ($hash->{'style'} =~ /expression/i) {
-                    delete $hash->{'style'};
                 }
 
                 if ($tag eq "img")
@@ -1015,6 +1030,7 @@ sub clean_userbio {
         'eat' => $userbio_eat,
         'remove' => $userbio_remove,
         'autoclose' => \@userbio_close,
+        'cleancss' => 1,
     });
 }
 
