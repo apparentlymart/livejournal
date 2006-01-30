@@ -49,7 +49,7 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
     },
 
     'aliant' => {
-        'name'          => 'Alianet (NBTel, MTT, NewTel, and Island Tel)',
+        'name'          => 'Aliant (NBTel, MTT, NewTel, and Island Tel)',
         'notes'         => 'Enter your phone number. Message is sent to number@wirefree.informe.ca',
         'fromlimit'     => 11,
         'msglimit'      => 140,
