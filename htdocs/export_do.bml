@@ -121,7 +121,9 @@
             foreach my $e (@{$buf}) {
                 $e->{'subject'} = $lt->{$e->{'ritemid'}}->[0];
                 $e->{'event'} = $lt->{$e->{'ritemid'}}->[1];
-                  
+                LJ::CleanHTML::clean_subject_all(\$e->{'subject'});
+                LJ::CleanHTML::clean_event(\$e->{'event'}, $props->{'opt_preformatted'});
+
                 my $eprops = $props{$e->{'ritemid'}};
 
                 # convert to UTF-8 if necessary
