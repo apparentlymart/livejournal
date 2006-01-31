@@ -338,7 +338,7 @@ body<=
 
                         $ret .= BML::ml('.mood.deleted', {'mood' => "$mname($mid)"}) . "<br />\n";
                     } else { # Not inherited, it is different than its parent or it is actually a parent
-                        if ($picurl) {
+                        if ($picurl && $picurl =~ m!^https?://[^\'\"\0\s]+$!) {
                             push @repl_values, ($themeid, $mid, $picurl, $width, $height);
                             push @repl_bind, ("(?, ?, ?, ?, ?)");
                             $ret .= BML::ml('.mood.setpic', {'mood' => "$mname($mid)", 'url' => $picurl}) . "<br />\n";
