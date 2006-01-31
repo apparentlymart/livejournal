@@ -299,14 +299,14 @@ function print_box (string{} colors, string metapic, string{} meta, string conte
     if ($domid != "") { $domid = "id='"+ehtml($domid)+"'"; }
 
     var string style = "background-color: "+ehtml($bgcolor)+"; color: "+ehtml($fgcolor);
-    "<div align='right'><table $domid border='0' width='95%' cellpadding='5' cellspacing='1' style='$style'>";
-    "<tr><td><table border='0' width='100%' style='$style'><tr>";
+    print safe "<div align='right'><table $domid border='0' width='95%' cellpadding='5' cellspacing='1' style='$style'>";
+    print safe "<tr><td><table border='0' width='100%' style='$style'><tr>";
 
     if ($metapic) {
         print safe "<td width='100' valign='top' align='center'>$metapic</td>";
     }
 
-    "<td valign='top'><table border='0' style='$style'>";
+    print safe "<td valign='top'><table border='0' style='$style'>";
 
     foreach var string k ($meta) {
         var string key = $k;
@@ -315,9 +315,9 @@ function print_box (string{} colors, string metapic, string{} meta, string conte
     }
 
     "</table></td></tr></table></td></tr>";
-    "<tr><td style='background-color: $*main_bgcolor; color: $*main_fgcolor'>";
+    print safe "<tr><td style='background-color: $*main_bgcolor; color: $*main_fgcolor'>";
 
-    print $content;
+    print safe $content;
 
     "</td></tr>";
 

@@ -343,11 +343,11 @@ function sidebar_html_width : string "Return an appropriate HTML tag width for t
     }
 }
 function print_sidebar_box(string id, string body, string title) {
-    println """<br /><table cellspacing="0" cellpadding="0" border="0" id="sidebar_$id" class="sidebar_box">""";
+    println safe """<br /><table cellspacing="0" cellpadding="0" border="0" id="sidebar_$id" class="sidebar_box">""";
     println """<tr><th class="sidebar_box_header">""";
-    println safe $title;
+    print   safe $title;
     println """</th></tr><tr><td class="sidebar_box_contents">""";
-    println safe $body;
+    print   safe $body;
     println """</td></tr></table><br />""";
 }
 function Page::lay_sidebar_view_userpic() : string {
