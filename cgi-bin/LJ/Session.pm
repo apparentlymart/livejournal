@@ -392,6 +392,7 @@ sub domain_cookie {
 # given an optional URL (by default, the current URL), what is the username
 # of that URL?.  undef if no user.  in list context returns the ($subdomain, $user)
 # where $user can be "" if $subdomain isn't, say, "community" or "users".
+# in scalar context, userame is always the canonical username (no hypens/capitals)
 sub domain_journal {
     my ($class, $url) = @_;
 
@@ -416,7 +417,7 @@ sub domain_journal {
     }
 
     # where $subdomain is actually a username:
-    return wantarray ? ($subdomain, "") : $subdomain;
+    return wantarray ? ($subdomain, "") : LJ::canonical_username($subdomain);
 }
 
 sub url_owner {
