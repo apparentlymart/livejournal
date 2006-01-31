@@ -405,7 +405,7 @@
          $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.user'}</b></td><td width='100%'><a href='$jbase/'><b>$user</b></a> ($u->{'userid'}) $hook_extra ";
          if ($u->{public_key}) {
              $body .= "<a href='$LJ::SITEROOT/pubkey.bml?user=$user'>";
-             $body .= "<img src='/img/key.gif' width='16' height='16' border='0' alt='View public key' title='View public key' style='vertical-align: middle; border: 0;' /></a>";
+             $body .= "<img src='$LJ::IMGPREFIX/key.gif' width='16' height='16' border='0' alt='View public key' title='View public key' style='vertical-align: middle; border: 0;' /></a>";
          }
          $body .= "</td>\n";
      }
