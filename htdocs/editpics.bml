@@ -383,6 +383,8 @@
                     $upload{md5ctx} = new Digest::MD5;
 
                     # get MogileFS filehandle
+                    return "Sorry, MogileFS must be running to handle the uploading of large images." unless LJ::mogclient();
+
                     $upload{spool_fh} = LJ::mogclient()->new_file("upf:$u->{userid}", 'temp')
                         or die "Failed to open MogileFS tempfile";
 
