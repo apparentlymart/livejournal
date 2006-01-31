@@ -180,14 +180,6 @@ sub clean
         {
             my $tag = $token->[1];
 
-            # check for exploit using TIME namespace to set data and introduce javascript that
-            # would affect IE users.
-            if ($tag =~ m/:set$/ &&
-                ($token->[2]->{attributename} =~ /innerHTML/i ||
-                 $token->[2]->{attributename} =~ /outerHTML/i)) {
-                next;
-            }
-
             # do some quick checking to see if this is an email address/URL, and if so, just
             # escape it and ignore it
             if ($tag =~ m!(?:\@|://)!) {
@@ -272,6 +264,11 @@ sub clean
             {
                 # Strip it out, but still register it as being open
                 $opencount{$tag}++;
+            }
+
+            # Don't allow any tag with the "set" attribute
+            elsif ($tag =~ m/:set$/) {
+                next;
             }
             else
             {
