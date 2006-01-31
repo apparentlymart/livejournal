@@ -106,21 +106,22 @@
 
     };
 
-    my $checked = $GET{'make_default'} ? "checked" : "";
-
     $body .= qq {
-      <img src="$picpath" id="userpic" />
+      <div style='float: left; margin-bottom: 15px;'><img src="$picpath" id="userpic" /></div>
 
-      <div><input type="checkbox" id="constrain" checked="1" onChange="regsel.setConstrain(\$('constrain').checked);" /> <label for="constrain">Keep square</label></div>
-
+      <?standout <div style='float: right;'>
       <table cellpadding="4"><tr>
-      <td valign="center">Preview:</td><td>
+      <td style='whitespace: nowrap'>
+        <input type="checkbox" id="constrain" checked="1" onChange="regsel.setConstrain(\$('constrain').checked);" />
+        <label for="constrain">Keep square</label>
+      </td></tr><tr>
+      <td valign="center">Preview:<br />
       <div style="width: 100px; height: 100px; overflow: hidden; padding: 0px;">
         <div style="width: 100px; height: 100px; overflow: hidden; display:inline; float:left;" id="prevcon">
             <img src="$picpath" id="userpicpreview"  />
         </div>
-        </div>
-        </td></tr></table>
+      </div>
+      </td></tr></table>
 
       <form action="$LJ::SITEROOT/editpics.bml?authas=$GET{'authas'}" method="POST" enctype='multipart/form-data'>
       <input type="hidden" name="create" value="1" />
@@ -132,29 +133,14 @@
 
       <input type="hidden" name="scaledSizeMax" id="scaledSizeMax" value="$scaledSizeMax" />
 
-      <table>
-       <tr>
-        <td align="right">Keywords:</td>
-        <td align="left"><input type="text" size="40" value="$GET{'keywords'}" name="keywords" /></td>
-       </tr>
-       <tr>
-        <td align="right">Comments:</td>
-        <td align="left"><input type="text" size="40" value="$GET{'comments'}" name="comments" /></td>
-       </tr>
-       <tr>
-        <td>&nbsp;</td>
-        <td align="left">
-         <input type="checkbox" id="make_default" name="make_default" $checked />
-         <label for='make_default'>Make this my default userpic</label>
-        </td>
-       </tr>
-      </table>
-
       <input type="hidden" name="src" value="factory" />
       } . LJ::form_auth() . qq {
 
       <input type="submit" value="Create Userpic" />
-      </form>
+      } . LJ::html_hidden('keywords', $GET{'keywords'},
+                          'comments', $GET{'comments'},
+                          'make_default', $GET{'make_default'}) . qq {
+      </form></div> standout?>
     };
 
     LJ::need_res('stc/global.css');
