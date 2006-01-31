@@ -14,11 +14,12 @@
     my $picpath = $LJ::SITEROOT . "/misc/mogupic.bml?size=$scaledSizeMax";
 
     $head .= qq {
-
         <script type="text/javascript" src="$LJ::SITEROOT/js/core.js"></script>
         <script type="text/javascript" src="$LJ::SITEROOT/js/dom.js"></script>
         <script type="text/javascript" src="$LJ::SITEROOT/js/image-region-select.js"></script>
+    };
 
+    $head .= q {
         <script>
 
         var origW, origH;
@@ -33,16 +34,16 @@
 
             updatePreview(c);
 
-            \$("x1").value = c.x1;
-            \$("y1").value = c.y1;
-            \$("x2").value = c.x2;
-            \$("y2").value = c.y2;
+            $("x1").value = c.x1;
+            $("y1").value = c.y1;
+            $("x2").value = c.x2;
+            $("y2").value = c.y2;
         }
 
         function updatePreview (c) {
             var w = c.x2 - c.x1, h = c.y2 - c.y1;
 
-            var upp = \$("userpicpreview");
+            var upp = $("userpicpreview");
 
             var newsizes = getSizedCoords(100, w, h);
 
@@ -58,8 +59,8 @@
             var zoomx = nw/origW;
             var zoomy = nh/origH;
 
-            \$("prevcon").style.width = Math.floor(newsizes[0]) + "px";
-            \$("prevcon").style.height = Math.floor(newsizes[1]) + "px";
+            $("prevcon").style.width = Math.floor(newsizes[0]) + "px";
+            $("prevcon").style.height = Math.floor(newsizes[1]) + "px";
 
             var nl = zoomx * c.x1;
             var nt = zoomy * c.y1;
@@ -84,15 +85,18 @@
         DOM.addEventListener(window, "load", function () {
             regsel = new ImageRegionSelect();
             regsel.init({
-              src: \$("userpic"),
+              src: $("userpic"),
               onRegionChange:  onRegionChange,
               onRegionChanged: onRegionChanged,
             });
 
-            var w = \$("userpic").width;
-            var h = \$("userpic").height;
+            var w = $("userpic").width;
+            var h = $("userpic").height;
             origW = w;
             origH = h;
+
+$("picContainer").style.width = $("userpic").width + "px";
+$("picContainer").style.height = $("userpic").height + "px";
 
             var x1 = w/2-50, y1 = h/2-50, x2 = w/2+50, y2 = h/2+50;
             regsel.setTopLeft(x1, y1);
@@ -109,7 +113,7 @@
     $body .= qq {
         <?p Click and drag anywhere within the photo to create your userpic. When you're happy with what you see in the preview box click the Create Userpic button to save it. p?>
 
-      <div style='float: left; margin-bottom: 15px;'><img src="$picpath" id="userpic" /></div>
+      <div id="picContainer" style="float: left; margin-bottom: 15px; width: ${scaledSizeMax}px; height: ${scaledSizeMax}px; border: 2px solid #EEEEEE; padding: 2px;"> <img src="$picpath" id="userpic" /></div>
 
       <?standout <div style='float: right;'>
       <table cellpadding="4"><tr>
@@ -117,7 +121,7 @@
         <input type="checkbox" id="constrain" checked="1" onChange="regsel.setConstrain(\$('constrain').checked);" />
         <label for="constrain">Keep square</label>
       </td></tr><tr>
-      <td valign="center">Preview:<br />
+      <td valign="center">Low quality preview:<br />
       <div style="width: 100px; height: 100px; overflow: hidden; padding: 0px;">
         <div style="width: 100px; height: 100px; overflow: hidden; display:inline; float:left;" id="prevcon">
             <img src="$picpath" id="userpicpreview"  />

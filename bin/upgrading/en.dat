@@ -1975,7 +1975,7 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /editpics.bml.restriction.filesize=File size must be less than 40k
 
-/editpics.bml.restriction.imagesize=Image dimensions must be no larger than 100x100 pixels
+/editpics.bml.restriction.imagesize2=If dimensions are larger than 100x100 pixels, you will be taken to the Create Userpic page
 
 /editpics.bml.restriction.keywords=Picture will be unusable if keywords are not supplied
 

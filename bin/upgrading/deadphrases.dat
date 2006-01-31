@@ -45,6 +45,7 @@ general /editinfo.bml.topicdir.header
 
 general /editpics.bml.error.toomanypics2
 general /editpics.bml.error.toomanypics3
+general /editpics.bml.restriction.imagesize
 
 entryform.htmlokay.norich
 entryform.htmlokay.rich

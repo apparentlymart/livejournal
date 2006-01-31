@@ -955,7 +955,7 @@
             $body .= "<?p $ML{'.uploaddesc'} p?>\n\n";
 
             $body .= "<ul>\n";
-            foreach (qw(filesize imagesize fileformat)) {
+            foreach (qw(filesize imagesize2 fileformat)) {
                 $body .= "<li>" . $ML{".restriction.$_"} . "</li>\n";
             }
 
