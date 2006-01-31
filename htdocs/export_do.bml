@@ -13,9 +13,9 @@
         my $u = LJ::get_authas_user($authas);
         return LJ::bad_input($ML{'error.invalidauth'})
             unless $u;
-          
+
         my @errors = ();
-        
+
         my $year = $POST{'year'}+0;
         my $month = $POST{'month'}+0;
 
@@ -33,11 +33,11 @@
         $encoding ||= $POST{'encoding'};
         $encoding ||= $LJ::UNICODE ? 'utf-8' : 'iso-8859-1';
 
-        if ($LJ::UNICODE && lc($encoding) ne "utf-8" && 
-            ! Unicode::MapUTF8::utf8_supported_charset($encoding)) {                    
+        if ($LJ::UNICODE && lc($encoding) ne "utf-8" &&
+            ! Unicode::MapUTF8::utf8_supported_charset($encoding)) {
             push @errors, $ML{'.error.encoding'};
         }
-        
+
         if (@errors) {
             return LJ::bad_input(@errors);
         }
@@ -54,7 +54,7 @@
         foreach my $f (qw(itemid eventtime logtime subject event security allowmask)) {
             if ($POST{"field_${f}"}) {
                 push @fields, $f;
-            }	    
+            }
         }
 
         if ($POST{'field_currents'}) {
@@ -63,14 +63,16 @@
         }
 
         #### do file-format specific initialization
-       
+
         if ($POST{'format'} eq "csv") {
             $opts->{'format'} = "csv";
             $r->content_type("text/plain");
+            my $filename = "$u->{user}-$year-$month.csv";
+            $r->header_out('Content-Disposition' => "attachment; filename=$filename");
             $r->send_http_header();
             if ($POST{'header'}) {
                 $r->print(join(",",@fields) . "\n");
-            }	    
+            }
         }
         if ($POST{'format'} eq "xml") {
             $opts->{'format'} = "xml";
@@ -99,7 +101,7 @@
                 load_and_dump_buffer($u, \@buffer, $opts);
                 @buffer = ();
             }
-            
+
         }
         load_and_dump_buffer($u, \@buffer, $opts);
 
@@ -121,8 +123,6 @@
             foreach my $e (@{$buf}) {
                 $e->{'subject'} = $lt->{$e->{'ritemid'}}->[0];
                 $e->{'event'} = $lt->{$e->{'ritemid'}}->[1];
-                LJ::CleanHTML::clean_subject_all(\$e->{'subject'});
-                LJ::CleanHTML::clean_event(\$e->{'event'}, $props->{'opt_preformatted'});
 
                 my $eprops = $props{$e->{'ritemid'}};
 
@@ -153,10 +153,10 @@
                 # is merely a label.
 
                 if ($LJ::UNICODE && lc($opts->{'encoding'}) ne 'utf-8' && !$opts->{'notranslation'}) {
-                    $entry = Unicode::MapUTF8::from_utf8({-string=>$entry, 
+                    $entry = Unicode::MapUTF8::from_utf8({-string=>$entry,
                                                           -charset=>$opts->{'encoding'}});
                 }
-                  
+
                 $r->print($entry);
             }
         }
@@ -199,7 +199,7 @@
             }
             return $entry;
         }
-        
+
 
 _code?><?_c <LJDEP>
 </LJDEP> _c?>
