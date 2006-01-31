@@ -85,6 +85,8 @@ sub get_mood_picture
                 $ref->{'pic'} =~ s!^/img!!;
                 $ref->{'pic'} = $LJ::IMGPREFIX . $ref->{'pic'};
             }
+            $ref->{'pic'} = "#invalid" unless
+                $ref->{'pic'} =~ m!^https?://[^\'\"\0\s]+$!;
             $ref->{'moodid'} = $moodid;
             return 1;
         } else {
