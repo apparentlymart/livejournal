@@ -604,7 +604,8 @@ sub get_upf_scaled
     my $remote = LJ::get_remote();
     return undef unless $remote;
 
-    use Image::Magick ();
+    my $has_magick = eval "use Image::Magick (); 1;";
+    return undef unless $has_magick;
 
     my $key = 'upf:' . $remote->{userid};
 

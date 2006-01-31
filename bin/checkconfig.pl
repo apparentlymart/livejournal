@@ -136,6 +136,10 @@ my %modules = (
                "Digest::HMAC_SHA1" => {
                    'deb' => 'libdigest-hmac-perl',
                },
+               "Image::Magick" => {
+                   deb => 'perlmagick',
+                   opt => "Required for the userpic factory.",
+               },
                );
 
 sub check_modules {
