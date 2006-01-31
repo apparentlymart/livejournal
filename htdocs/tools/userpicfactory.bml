@@ -87,7 +87,7 @@
             regsel.init({
               src: $("userpic"),
               onRegionChange:  onRegionChange,
-              onRegionChanged: onRegionChanged,
+              onRegionChanged: onRegionChanged
             });
 
             var w = $("userpic").width;
@@ -148,8 +148,6 @@ $("picContainer").style.height = $("userpic").height + "px";
                           'make_default', $GET{'make_default'}) . qq {
       </form></div> standout?>
     };
-
-    LJ::need_res('stc/global.css');
 }
 #_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 
