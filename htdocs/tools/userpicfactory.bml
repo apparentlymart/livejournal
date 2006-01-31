@@ -107,6 +107,8 @@
     };
 
     $body .= qq {
+        <?p Click and drag anywhere within the photo to create your userpic. When you're happy with what you see in the preview box click the Create Userpic button to save it. p?>
+
       <div style='float: left; margin-bottom: 15px;'><img src="$picpath" id="userpic" /></div>
 
       <?standout <div style='float: right;'>
