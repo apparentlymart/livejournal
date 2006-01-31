@@ -209,9 +209,14 @@ sub s2_run
     $LJ::S2::CURR_PAGE = $page;
     $LJ::S2::RES_MADE = 0;  # standard resources (Image objects) made yet
 
+    my $css_mode = $ctype eq "text/css";
+
+    S2::Builtin::LJ::start_css($ctx) if $css_mode;
     eval {
         S2::run_code($ctx, $entry, $page);
     };
+    S2::Builtin::LJ::end_css($ctx) if $css_mode;
+
     $LJ::S2::CURR_PAGE = undef;
     $LJ::S2::CURR_CTX  = undef;
 
