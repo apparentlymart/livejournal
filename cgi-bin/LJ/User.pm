@@ -3055,6 +3055,8 @@ sub make_journal
             my $is_trusted = sub {
                 return 1 if $ownerid == $u->{userid};
                 return 1 if $ownerid == LJ::system_userid();
+                return 1 if $LJ::S1_CUSTOMVIEW_WHITELIST{"styleid-$styleid"};
+                return 1 if $LJ::S1_CUSTOMVIEW_WHITELIST{"userid-$ownerid"};
                 my $trust_list = eval { $u->prop("trusted_s1") };
                 return 1 if $trust_list =~ /\b$styleid\b/;
                 return 0;
