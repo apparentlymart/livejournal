@@ -290,7 +290,7 @@ body<=
             }
 
             $ret .= "<?hr?>\n";
-            $ret .= "<?h2 " . BML::ml('.editingtheme.header', {'name' => $info->{name}}) . " h2?>\n";
+            $ret .= "<?h2 " . BML::ml('.editingtheme.header', {'name' => LJ::ehtml($info->{name})}) . " h2?>\n";
 
             # Make the form
             $ret .= "<?p <form action='$self_uri' method='post' id='editform' name='editform'>\n";
@@ -406,15 +406,15 @@ body<=
                 $ret .= "<table>";
                 $ret .= "<tr><th></th><th>$ML{'.yourthemes.example.happy'}</th><th>$ML{'.yourthemes.example.sad'}</th><th>$ML{'.yourthemes.example.angry'}</th><th></th></tr>";
                 foreach my $theme (@user_themes) {
-                    my $name = $theme->{'name'};
+                    my $ename = LJ::ehtml($theme->{'name'});
                     my $tid = $theme->{'moodthemeid'};
 
                     my $use_dis = 0;
                     if ($tid == $u->{'moodthemeid'}) {
-                        $ret .= "<tr><td><b><a href='/moodlist.bml?moodtheme=$tid&ownerid=$u->{'userid'}'>$name</a></b></td>";
+                        $ret .= "<tr><td><b><a href='/moodlist.bml?moodtheme=$tid&ownerid=$u->{'userid'}'>$ename</a></b></td>";
                         $use_dis = 1;
                     } else {
-                        $ret .= "<tr><td><a href='/moodlist.bml?moodtheme=$tid&ownerid=$u->{'userid'}'>$name</a></td>";
+                        $ret .= "<tr><td><a href='/moodlist.bml?moodtheme=$tid&ownerid=$u->{'userid'}'>$ename</a></td>";
                     }
 
                     my @head_moods = (15, 25, 2); # happy, sad, angry
