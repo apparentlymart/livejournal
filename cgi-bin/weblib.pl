@@ -103,6 +103,35 @@ sub auto_linkify
     return $str;
 }
 
+# return 1 if URL is a safe stylesheet that S1/S2/etc can pull in.
+# return 0 to reject the link tag
+# return a URL to rewrite the stylesheet URL
+# $href will always be present.  $host and $path may not.
+sub valid_stylesheet_url {
+    my ($href, $host, $path) = @_;
+    unless ($host && $path) {
+        return 0 unless $href =~ m!^https?://([^/]+?)(/.*)$!;
+        ($host, $path) = ($1, $2);
+    }
+
+    my $cleanit = sub {
+        return 0 unless $LJ::CSSPROXY;
+        return "$LJ::CSSPROXY?u=" . LJ::eurl($href);
+    };
+
+    return $cleanit->() unless $host =~ /\Q$LJ::DOMAIN\E$/i;
+
+    # let users use system stylesheets.
+    return 1 if $host eq $LJ::DOMAIN || $host eq $LJ::DOMAIN_WEB ||
+        $href =~ /^\Q$LJ::STATPREFIX\E/;
+
+    # S2 stylesheets:
+    return 1 if $path =~ m!^(/\w+)?/res/(\d+)/stylesheet(\?\d+)?$!;
+
+    # unknown, reject.
+    return $cleanit->();
+}
+
 
 # <LJFUNC>
 # name: LJ::make_authas_select

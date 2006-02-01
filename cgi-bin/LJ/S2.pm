@@ -174,7 +174,10 @@ sub s2_run
     my $ctype = $opts->{'contenttype'} || "text/html";
     my $cleaner;
     if ($ctype =~ m!^text/html!) {
-        $cleaner = new HTMLCleaner ('output' => sub { $$LJ::S2::ret_ref .= $_[0]; });
+        $cleaner = new HTMLCleaner (
+                                    'output' => sub { $$LJ::S2::ret_ref .= $_[0]; },
+                                    'valid_stylesheet' => \&LJ::valid_stylesheet_url,
+                                    );
     }
 
     my $send_header = sub {

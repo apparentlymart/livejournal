@@ -553,6 +553,10 @@ sub trans
             # below fails.
             $skip_domain_checks = 1;
 
+        } elsif ($func eq "cssproxy") {
+
+            return $bml_handler->("$LJ::HOME/htdocs/extcss/index.bml");
+
         } elsif ($func eq 'portal') {
             # if this is a "portal" subdomain then prepend the portal URL
             return redir($r, "$LJ::SITEROOT/portal/");
