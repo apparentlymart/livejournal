@@ -35,7 +35,7 @@
 
  my $remote = LJ::get_remote();
  if ($GET{'user'} eq "" && $GET{'userid'} eq "" && !$remote) {
-     $body = "<?h1 $ML{'Error'} h1?><?p $ML{'.error.notloggedin'} p?>";
+     $body = "<?needlogin?>";
      return;
  }
 
@@ -324,8 +324,8 @@
          'u' => $u,
          'ret' => \$userinfo_join_community,
      });
-     $pt .= $userinfo_join_community ? $userinfo_join_community : BML::ml('.membership.body',{'commname'=>$u->{'user'}});
-     $pt .= BML::ml('.body.leave',{'commname'=>$u->{'user'}});
+     $pt .= $userinfo_join_community ? $userinfo_join_community : BML::ml('.membership.body2', {'aopts' => "href='$LJ::SITEROOT/community/join.bml?comm=$u->{'user'}'"});
+     $pt .= " " . BML::ml('.body.leave2', {'aopts' => "href='$LJ::SITEROOT/community/leave.bml?comm=$u->{'user'}'"});
      $body .= $p->($pt);
  } elsif ($synd) {
      $body .= $h1->($ML{'.syndinfo.name'}) . $p->(BML::ml('.syndinfo.body', {

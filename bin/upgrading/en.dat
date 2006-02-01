@@ -1473,6 +1473,8 @@ Not all robots respect the rules.
 
 /editinfo.bml.donotlog=No
 
+/editinfo.bml.email.address=[[email]] (<a [[aopts]]>change</a>)
+
 /editinfo.bml.email.title=Email
 
 /editinfo.bml.enableboards.about=Check this if you want people to be able to reply to journal entries you post.
@@ -1507,21 +1509,15 @@ Any changes you made to your interests were not saved.  Go back and cut down you
 then save again.
 .
 
-/editinfo.bml.error.invalidbio<<
+/editinfo.bml.error.invalidbio2<<
 Your stored bio contains invalid characters. You must visit 
-the <a href='/utf8convert.bml'><b>conversion page</b></a> to convert it 
+the <a [[aopts]]><b>conversion page</b></a> to convert it 
 to Unicode.
 .
 
-/editinfo.bml.error.invalidints<<
-Your currently stored list of interests contains invalid characters. You must visit 
-the <a href='/utf8convert.bml'><b>conversion page</b></a> to convert it 
-to Unicode.
-.
-
-/editinfo.bml.error.invalidname<<
+/editinfo.bml.error.invalidname2<<
 Your name contains invalid characters. You must visit 
-the <a href='/utf8convert.bml'><b>conversion page</b></a> to convert it 
+the <a [[aopts]]><b>conversion page</b></a> to convert it 
 to Unicode.
 .
 
@@ -1567,7 +1563,13 @@ If yours is not listed, please contact us with information about how your servic
 
 /editinfo.bml.foafurl.title=External FOAF URL:
 
+/editinfo.bml.gender.female=Female
+
+/editinfo.bml.gender.male=Male
+
 /editinfo.bml.gender.title=Gender
+
+/editinfo.bml.gender.unspecified=(Unspecified)
 
 /editinfo.bml.getreplies.about=Check this if you want to get email updates when people reply to your journal entries in the message boards.
 
@@ -1675,11 +1677,11 @@ Your email address will not be visible to other users, and you can turn this off
 
 /editinfo.bml.opt_in.header=Send me LiveJournal news.
 
-/editinfo.bml.persinfo.disclaimer<<
+/editinfo.bml.persinfo.disclaimer2<<
 Fill in some quick information about yourself, for our own curiosity and statistical purposes. 
 We're not going to do anything evil or annoying with this information, we'd just like to see 
 who and where our users are.  Please, fill it in correctly.  If you're concerned, 
-read our <a href="/legal/privacy.bml">privacy policy</a>.
+read our <a [[aopts]]>privacy policy</a>.
 .
 
 /editinfo.bml.persinfo.header=Personal Information
@@ -1740,7 +1742,7 @@ read our <a href="/legal/privacy.bml">privacy policy</a>.
 
 /editinfo.bml.success.header=Success!
 
-/editinfo.bml.success.message=Your information and <a href="/users/[[user]]/">journal</a> settings and <a href="/userinfo.bml?user=[[user]]">profile</a> have been updated.
+/editinfo.bml.success.message2=Your information, <a [[aopts1]]>journal</a> settings, and <a [[aopts2]]>profile</a> have been updated.
 
 /editinfo.bml.switch.button=Switch
 
@@ -1748,9 +1750,13 @@ read our <a href="/legal/privacy.bml">privacy policy</a>.
 
 /editinfo.bml.switch.workwith=Work with journal:
 
+/editinfo.bml.timezone.select=(Select your timezone)
+
+/editinfo.bml.timezone.title=Timezone
+
 /editinfo.bml.title=Edit Personal Information
 
-/editinfo.bml.tm.details=<a href="/tools/textmessage.bml?mode=details">details</a>
+/editinfo.bml.tm.details2=(<a [[aopts]]>details</a>)
 
 /editinfo.bml.tm.phonenum=Full phone number:
 
@@ -1778,7 +1784,7 @@ Below is the miniature picture you have uploaded to represent you
 throughout the LiveJournal site and in your journal and in your friends' journals:
 .
 
-/editinfo.bml.userpic.edit=To delete this picture, or upload a new one, <a href="/uploadpic.bml" target="_blank">go here</a>.
+/editinfo.bml.userpic.edit2=To delete this picture, or upload a new one, <a [[aopts]]>go here</a>.
 
 /editinfo.bml.userpic.header=Your Picture
 
@@ -4903,7 +4909,7 @@ This could be because: <ol>
 
 /userinfo.bml.allpics=View all userpics
 
-/userinfo.bml.body.leave= You may <a href="/community/leave.bml?comm=[[commname]]">leave the community</a> at any time.
+/userinfo.bml.body.leave2=You may <a [[aopts]]>leave the community</a> at any time.
 
 /userinfo.bml.comminfo.body=Below is information about the "[[commname]]" community on LiveJournal.
 
@@ -4912,8 +4918,6 @@ This could be because: <ol>
 /userinfo.bml.date.never=<i>Never.</i>
 
 /userinfo.bml.error.malfname=Malformed username.
-
-/userinfo.bml.error.notloggedin=If you wish to view your own user profile, you need to <a href='/login.bml?ret=1'>login</a>.
 
 /userinfo.bml.fbpictures.lessthan=less than [[count]] public
 
@@ -5043,7 +5047,7 @@ This could be because: <ol>
 
 /userinfo.bml.label.yahooid=Yahoo! ID:
 
-/userinfo.bml.membership.body=To join this community, <a href="/community/join.bml?comm=[[commname]]">click here</a>.
+/userinfo.bml.membership.body2=To join this community, <a [[aopts]]>click here</a>.
 
 /userinfo.bml.memories.entries=[[count]] entries
 

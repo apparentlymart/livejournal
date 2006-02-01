@@ -295,3 +295,14 @@ general /support/append_request.bml.login.required
 general /support/encodings.bml.edit.text
 general /support/encodings.bml.groups.text
 general /support/encodings.bml.still.text
+
+general /editinfo.bml.error.invalidbio
+general /editinfo.bml.error.invalidints
+general /editinfo.bml.error.invalidname
+general /editinfo.bml.persinfo.disclaimer
+general /editinfo.bml.success.message
+general /editinfo.bml.tm.details
+general /editinfo.bml.userpic.edit
+general /userinfo.bml.body.leave
+general /userinfo.bml.error.notloggedin
+general /userinfo.bml.membership.body
