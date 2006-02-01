@@ -17,12 +17,15 @@
         <script type="text/javascript" src="$LJ::SITEROOT/js/core.js"></script>
         <script type="text/javascript" src="$LJ::SITEROOT/js/dom.js"></script>
         <script type="text/javascript" src="$LJ::SITEROOT/js/image-region-select.js"></script>
+        <script>
+                var origW = $GET{'imageWidth'};
+                var origH = $GET{'imageHeight'};
+                var scaledSizeMax = $scaledSizeMax;
+        </script>    
     };
 
     $head .= q {
         <script>
-
-        var origW, origH;
         var regsel;
 
         function onRegionChange (c) {
@@ -83,20 +86,19 @@
         }
 
         DOM.addEventListener(window, "load", function () {
-            regsel = new ImageRegionSelect();
-            regsel.init({
-              src: $("userpic"),
+            regsel = new ImageRegionSelect({src: $("userpic"),
               onRegionChange:  onRegionChange,
               onRegionChanged: onRegionChanged
             });
 
-            var w = $("userpic").width;
-            var h = $("userpic").height;
-            origW = w;
-            origH = h;
+            var imageDimensions = getSizedCoords(scaledSizeMax, origW, origH);
+            origW = imageDimensions[0];
+            origH = imageDimensions[1];
+            var w = origW;
+            var h = origH;
 
-$("picContainer").style.width = $("userpic").width + "px";
-$("picContainer").style.height = $("userpic").height + "px";
+            $("picContainer").style.width = $("userpic").width + "px";
+            $("picContainer").style.height = $("userpic").height + "px";
 
             var x1 = w/2-50, y1 = h/2-50, x2 = w/2+50, y2 = h/2+50;
             regsel.setTopLeft(x1, y1);

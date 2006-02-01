@@ -492,8 +492,11 @@
                     return $err->("couldn't parse upload: $error");
                 }
 
+		my $imgdata = $upload{spool_fh};
+		my ($imagew, $imageh) = Image::Size::imgsize($imgdata);
+
                 return BML::redirect("$LJ::SITEROOT/tools/userpicfactory.bml?keywords=" . BML::eurl($POST{'keywords'}) . "&comments=" .
-                                                                                         BML::eurl($POST{'comments'}) .
+                                                                                         BML::eurl($POST{'comments'}) . "&imageWidth=${imagew}&imageHeight=$imageh".
                                      "&make_default=" . BML::eurl($POST{'make_default'}) . '&authas=' . BML::eurl($GET{'authas'}));
             } else {
                 # Add some slop to account for the size of the form headers etc.
