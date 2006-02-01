@@ -21,7 +21,7 @@
                 var origW = $GET{'imageWidth'};
                 var origH = $GET{'imageHeight'};
                 var scaledSizeMax = $scaledSizeMax;
-        </script>    
+        </script>
     };
 
     $head .= q {
@@ -97,8 +97,8 @@
             var w = origW;
             var h = origH;
 
-            $("picContainer").style.width = $("userpic").width + "px";
-            $("picContainer").style.height = $("userpic").height + "px";
+            $("picContainer").style.width = w + "px";
+            $("picContainer").style.height = h + "px";
 
             var x1 = w/2-50, y1 = h/2-50, x2 = w/2+50, y2 = h/2+50;
             regsel.setTopLeft(x1, y1);

@@ -359,9 +359,27 @@
                 return $err->("No content-length header: can't upload");
             }
 
+            my ($imagew, $imageh, $filetype);
+
             my $MAX_UPLOAD = 40960;
             my $error;
-            if ($size > $MAX_UPLOAD + 2048) {
+
+            my $gotofactory = ($size > $MAX_UPLOAD + 2048);
+
+            # small file size, check the pic out
+            if (!$gotofactory) {
+                BML::parse_multipart(\%POST, \$error, $MAX_UPLOAD + 2048);
+                  ($imagew, $imageh, $filetype) = Image::Size::imgsize(\$POST{'userpic'});
+                  if ($imagew > 100 || $imageh > 100) {
+                      # large image size, to the factory!
+                      $gotofactory = 1;
+                  }
+            }
+
+            # if we're coming from the factory, we definitely don't want to go back!
+            $gotofactory = 0 if ($POST{'src'} && $POST{'src'} eq 'factory');
+
+            if ($gotofactory) {
                 # large path
 
                 my %upload = (); # { spool_fh, spool_path, filename, bytes, md5sum, md5ctx, mime }
@@ -471,14 +489,21 @@
                     return 1;
                 };
 
-                # parse multipart-mime submission, one chunk at a time,
-                # calling our hooks as we go to put uploads in temporary
-                # MogileFS filehandles
-                my $res = BML::parse_multipart_interactive($r, \$error, {
-                    newheaders => $hook_newheaders,
-                    data       => $hook_data,
-                    enddata    => $hook_enddata,
-                });
+                my $res = 1;
+
+                if ($POST{userpic}) {
+                    # we already have the oversize pic, just stash it directly in mogile
+                    LJ::mogclient()->store_content("upf:$u->{userid}", "temp", \$POST{userpic});
+                } else {
+                    # parse multipart-mime submission, one chunk at a time,
+                    # calling our hooks as we go to put uploads in temporary
+                    # MogileFS filehandles
+                    $res = BML::parse_multipart_interactive($r, \$error, {
+                        newheaders => $hook_newheaders,
+                        data       => $hook_data,
+                        enddata    => $hook_enddata,
+                    });
+                }
 
                 # if BML::Parse_multipart_interactive failed, we need to add
                 # all of our gpics to the gpic_delete queue.  if any of them
@@ -492,15 +517,14 @@
                     return $err->("couldn't parse upload: $error");
                 }
 
-		my $imgdata = $upload{spool_fh};
-		my ($imagew, $imageh) = Image::Size::imgsize($imgdata);
+		my $imgdata = $POST{userpic} ? \$POST{userpic} : $upload{spool_fh};
+		($imagew, $imageh, $filetype) = Image::Size::imgsize($imgdata);
 
-                return BML::redirect("$LJ::SITEROOT/tools/userpicfactory.bml?keywords=" . BML::eurl($POST{'keywords'}) . "&comments=" .
-                                                                                         BML::eurl($POST{'comments'}) . "&imageWidth=${imagew}&imageHeight=$imageh".
-                                     "&make_default=" . BML::eurl($POST{'make_default'}) . '&authas=' . BML::eurl($GET{'authas'}));
-            } else {
-                # Add some slop to account for the size of the form headers etc.
-                BML::parse_multipart(\%POST, \$error, $MAX_UPLOAD + 2048);
+                return BML::redirect("$LJ::SITEROOT/tools/userpicfactory.bml?keywords=" .
+                                     BML::eurl($POST{'keywords'}) . "&comments=" .
+                                     BML::eurl($POST{'comments'}) . "&imageWidth=${imagew}&imageHeight=${imageh}".
+                                     "&make_default=" . BML::eurl($POST{'make_default'}) . '&authas=' .
+                                     BML::eurl($GET{'authas'}));
             }
 
             # was there an error parsing the multipart form?
@@ -556,26 +580,17 @@
                 return $err->($ML{'.error.urlerror'}) unless $POST{userpic};
             }
 
+            ($imagew, $imageh, $filetype) = Image::Size::imgsize(\$POST{'userpic'});
+
             if (length($POST{'userpic'}) > $MAX_UPLOAD) {
                 return $err->(BML::ml('.error.filetoolarge',
                                       { 'maxsize' => int($MAX_UPLOAD / 1024) .
                                             $ML{'.kilobytes'} }));
             }
 
-            my ($sx, $sy, $filetype) = Image::Size::imgsize(\$POST{'userpic'});
-            unless (defined $sx) {
-                return $err->($ML{'.error.invalidimage'});
-            }
-
             unless ($filetype eq "GIF" || $filetype eq "JPG" || $filetype eq "PNG") {
                 return $err->(BML::ml(".error.unsupportedtype",
                                       { 'filetype' => $filetype }));
-            }
-
-            if ($sx > 100 || $sy > 100) {
-                return $err->( BML::ml(".error.imagetoolarge",
-                                       { 'imagesize' => "${sx}$ML{'.imagesize.by'}${sy}",
-                                         'maxsize'   => "100$ML{'.imagesize.by'}100" }) );
             }
 
             my $base64 = Digest::MD5::md5_base64($POST{'userpic'});
@@ -634,7 +649,7 @@
                 if ($u->{'dversion'} > 6) {
                     $u->do("INSERT INTO userpic2 (picid, userid, fmt, width, height, " .
                            "picdate, md5base64, location) VALUES (?, ?, ?, ?, ?, NOW(), ?, ?)",
-                           undef, $picid, $u->{'userid'}, $contenttype, $sx, $sy, $base64, $target);
+                           undef, $picid, $u->{'userid'}, $contenttype, $imagew, $imageh, $base64, $target);
                     if ($u->err) {
                         push @errors, $err->($u->errstr);
                         $dberr = 1;
@@ -642,7 +657,7 @@
                 } else {
                     $dbh->do("INSERT INTO userpic (picid, userid, contenttype, width, height, " .
                              "picdate, md5base64) VALUES (?, ?, ?, ?, ?, NOW(), ?)",
-                             undef, $picid, $u->{'userid'}, $contenttype, $sx, $sy, $base64);
+                             undef, $picid, $u->{'userid'}, $contenttype, $imagew, $imageh, $base64);
                     if ($dbh->err) {
                         push @errors, $err->($dbh->errstr);
                         $dberr = 1;
