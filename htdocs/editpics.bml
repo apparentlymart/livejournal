@@ -520,6 +520,8 @@
 		my $imgdata = $POST{userpic} ? \$POST{userpic} : $upload{spool_fh};
 		($imagew, $imageh, $filetype) = Image::Size::imgsize($imgdata);
 
+                return $err->("The dimensions of this image are too large.") if ($imagew > 5000 || $imageh > 5000);
+
                 return BML::redirect("$LJ::SITEROOT/tools/userpicfactory.bml?keywords=" .
                                      BML::eurl($POST{'keywords'}) . "&comments=" .
                                      BML::eurl($POST{'comments'}) . "&imageWidth=${imagew}&imageHeight=${imageh}".
