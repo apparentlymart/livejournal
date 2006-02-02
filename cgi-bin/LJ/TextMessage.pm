@@ -2055,7 +2055,7 @@ sub post_webform
     my ($url, $postvars, $errors) = @_;
 
     ### we're going to POST to provider's page
-    my $ua = new LWP::UserAgent;
+    my $ua = LJ::get_useragent(role => 'textmessage');
     $ua->agent("Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.0)");
     $ua->timeout(5);
 

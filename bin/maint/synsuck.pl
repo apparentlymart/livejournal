@@ -4,7 +4,6 @@
 use strict;
 use vars qw(%maint %maintinfo);
 use lib "$ENV{'LJHOME'}/cgi-bin";  # extra XML::Encoding files in cgi-bin/XML/*
-use LWP::UserAgent;
 use XML::RSS;
 use HTTP::Status;
 require "ljprotocol.pl";
@@ -39,7 +38,7 @@ $maint{'synsuck'} = sub
                                                   "WHERE userid=?", undef, $userid);
         return if $now_checknext ne $urow->{checknext};
 
-        my $ua = LWP::UserAgent->new("timeout" => 10);
+        my $ua = LJ::get_useragent(role => 'syn_sucker');
         my $reader_info = $readers ? "; $readers readers" : "";
         $ua->agent("$LJ::SITENAME ($LJ::ADMIN_EMAIL; for $LJ::SITEROOT/users/$user/" . $reader_info . ")");
 

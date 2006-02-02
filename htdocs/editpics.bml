@@ -571,11 +571,11 @@
 
                 $POST{userpic} = $picinfo->[0];
             } elsif ($POST{'src'} eq "url") {
-                require LWPx::ParanoidAgent;
-                my $ua = LWPx::ParanoidAgent->new(
-                                                  timeout => 10,
-                                                  max_size => $MAX_UPLOAD + 1024,
-                                                  );
+                my $ua = LJ::get_useragent(
+                                           role     => 'userpic',
+                                           max_size => $MAX_UPLOAD + 1024,
+                                           timeout  => 10,
+                                           );
 
                 my $res = $ua->get($POST{urlpic});
                 $POST{userpic} = $res->content if $res && $res->is_success;

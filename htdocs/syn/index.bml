@@ -78,11 +78,10 @@ body<=
                     unless $acct;
                 
                 # create a safeagent to fetch the feed for validation purposes
-                require LWPx::ParanoidAgent;
-                my $ua = LWPx::ParanoidAgent->new(
-                                                  timeout => 7,
-                                                  max_size => (1024 * 300),
-                                                  );
+                my $ua = LJ::get_useragent(
+                                           role     => 'syn_new',
+                                           max_size => (1024 * 300),
+                                           );
                 $ua->agent("$LJ::SITENAME ($LJ::ADMIN_EMAIL; Initial check)");
 
                 my $res = $ua->get($url);

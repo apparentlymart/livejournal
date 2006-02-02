@@ -18,7 +18,6 @@ require 'ljprotocol.pl';
 require 'fbupload.pl';
 use HTML::Entities;
 use IO::Handle;
-use LWP::UserAgent;
 use MIME::Words ();
 use XML::Simple;
 use Unicode::MapUTF8 ();
@@ -236,10 +235,13 @@ sub process {
             OPEN   => 0,
             DIR    => $tmpdir
         );
-        my $ua = LWP::UserAgent->new(
-            timeout => 20,
-            agent   => 'Mozilla',
-        );
+        my $ua = LJ::get_useragent(
+                                   role => 'emailgateway',
+                                   timeout => 20,
+                                   );
+
+        $ua->agent("Mozilla");
+
         my $ua_rv = $ua->get( $url, ':content_file' => $tempfile );
 
         $body = $xml->{messageContents}->{messageText};

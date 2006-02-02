@@ -2704,6 +2704,22 @@ sub error
     return undef;
 }
 
+# Returns a LWPx::UserAgent
+sub get_useragent {
+    my %opts = @_;
+
+    my $timeout  = $opts{'timeout'}  || 10;
+    my $max_size = $opts{'max_size'} || undef;
+    my $role     = $opts{'role'};
+
+    require LWPx::ParanoidAgent;
+    my $ua = LWPx::ParanoidAgent->new(
+                                      timeout  => $timeout,
+                                      max_size => $max_size,
+                                      );
+
+    return $ua;
+}
 
 use vars qw($AUTOLOAD);
 sub AUTOLOAD {
