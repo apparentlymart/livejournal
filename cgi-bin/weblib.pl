@@ -115,7 +115,13 @@ sub valid_stylesheet_url {
     }
 
     my $cleanit = sub {
+        # allow tag, if we're doing no css cleaning
+        return 1 if $LJ::DISABLED{'css_cleaner'};
+
+        # remove tag, if we have no CSSPROXY configured
         return 0 unless $LJ::CSSPROXY;
+
+        # rewrite tag for CSS cleaning
         return "$LJ::CSSPROXY?u=" . LJ::eurl($href);
     };
 
