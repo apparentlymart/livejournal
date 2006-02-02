@@ -2704,19 +2704,28 @@ sub error
     return undef;
 }
 
-# Returns a LWPx::UserAgent
+# Returns a LWP::UserAgent or LWPx::Paranoid agent depending on role
+# passed in by the caller.
+# Des-%opts:
+#           role     => what is this UA being used for? (required)
+#           timeout  => seconds before request will timeout, defaults to 10
+#           max_size => maximum size of returned document, defaults to no limit
 sub get_useragent {
     my %opts = @_;
 
     my $timeout  = $opts{'timeout'}  || 10;
     my $max_size = $opts{'max_size'} || undef;
     my $role     = $opts{'role'};
+    return unless $role;
 
-    require LWPx::ParanoidAgent;
-    my $ua = LWPx::ParanoidAgent->new(
-                                      timeout  => $timeout,
-                                      max_size => $max_size,
-                                      );
+    my $lib = 'LWPx::ParanoidAgent';
+    $lib = $LJ::USERAGENT_LIB{$role} if defined $LJ::USERAGENT_LIB{$role};
+
+    eval "require $lib";
+    my $ua = $lib->new(
+                       timeout  => $timeout,
+                       max_size => $max_size,
+                       );
 
     return $ua;
 }
