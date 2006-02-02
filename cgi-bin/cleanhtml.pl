@@ -166,6 +166,8 @@ sub clean
         return undef;
     };
 
+    my $htmlcleaner = HTMLCleaner->new(valid_stylesheet => \&LJ::valid_stylesheet_url);
+
   TOKEN:
     while (my $token = $p->get_token)
     {
@@ -201,8 +203,25 @@ sub clean
             if ($action{$tag} eq "eat") {
                 $p->unget_token($token);
                 $p->get_tag("/$tag");
+                next;
             }
-            elsif ($tag eq "lj-cut" && !$ljcut_disable)
+
+            # try to call HTMLCleaner's element-specific cleaner on this open tag
+            my $clean_res = eval {
+                my $cleantag = $tag;
+                $cleantag =~ s/^.*://s;
+                $cleantag =~ s/[^\w]//g;
+                no strict 'subs';
+                my $meth = "CLEAN_$cleantag";
+                my $attr  = $token->[2];  # hashref
+                my $seq   = $token->[3];  # attribute names, listref
+                my $code = $htmlcleaner->can($meth)
+                    or return 1;
+                return $code->($htmlcleaner, $seq, $attr);
+            };
+            next if !$@ && !$clean_res;
+
+            if ($tag eq "lj-cut" && !$ljcut_disable)
             {
                 my $attr = $token->[2];
                 $cutcount++;
@@ -224,7 +243,7 @@ sub clean
                     next;
                 }
             }
-            elsif ($tag eq "style") { # && $opts->{cleancss}) {
+            elsif ($tag eq "style") {
                 my $style = $p->get_text("/style");
                 $p->get_tag("/style");
                 unless ($LJ::DISABLED{'css_cleaner'}) {
@@ -610,19 +629,9 @@ sub clean
             my $urlcount = 0;
 
             if ($opencount{'style'}) {
-                # remove anything that might run javascript/vbscript code
-                # (Note: Ghetto.  Need to use CSS.pm to build full tree, analyze, redump)
-                my $reduced = lc($token->[1]);
-                $reduced =~ s/\s+//g;
-                $reduced =~ s/\\//g;
-                $reduced =~ s/&\#(\d+);?/chr($1)/eg;
-                $reduced =~ s/&\#x(\w+);?/chr(hex($1))/eg;
-                $token->[1] = "/* potential scripting */"
-                    if $reduced =~ /javascript|vbscript|expression/;
-
-                $token->[1] =~ s/<!--/[COMS]/g;
-                $token->[1] =~ s/-->/[COME]/g;
+                warn "Got text node while style elements open.  Shouldn't happen anymore.\n";
             }
+
             my $auto_format = $addbreaks &&
                 ($opencount{'table'} <= ($opencount{'td'} + $opencount{'th'})) &&
                  ! $opencount{'pre'} &&
@@ -646,14 +655,7 @@ sub clean
             # especially because the parser returns things it's
             # confused about (broken, ill-formed HTML) as text.
             $token->[1] =~ s/</&lt;/g;
-            unless ($opencount{'style'}) {
-                # don't escape this, because that breaks a CSS construct
-                $token->[1] =~ s/>/&gt;/g;
-            }
-            if ($opencount{'style'}) {
-                $token->[1] =~ s/\[COMS\]/<!--/g;
-                $token->[1] =~ s/\[COME\]/-->/g;
-            }
+            $token->[1] =~ s/>/&gt;/g;
 
             # put <wbr> tags into long words, except inside <pre> and <textarea>.
             if ($wordlength && !$opencount{'pre'} && !$opencount{'textarea'}) {
