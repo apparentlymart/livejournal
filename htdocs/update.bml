@@ -224,8 +224,10 @@
         return;
     };
 
+    my $okay_formauth = !$remote || LJ::check_form_auth();
+
     if ($did_post && !$did_spellcheck && !$showform && !$enabled_rte && !$preview &&
-        LJ::check_form_auth() && !$POST{'moreoptsbtn'} )
+        $okay_formauth && !$POST{'moreoptsbtn'} )
     {
         # what's our authentication scheme for subsequent protocol actions?
         my $flags = {};
