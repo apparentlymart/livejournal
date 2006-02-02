@@ -708,11 +708,12 @@ sub setdomsess_handler {
     $is_valid = valid_domain_cookie($domcook, $cookie, $BML::COOKIE{'ljloggedin'});
     return $dest           unless $is_valid;
 
-    my $path = path_of_domcook($domcook);
+    my $path    = path_of_domcook($domcook);
+    my $expires = $LJ::DOMSESS_EXPIRATION || 0; # session-cookie only
     set_cookie($domcook   => $cookie,
                path       => $path,
                http_only  => 1,
-               expires    => 60*60);
+               expires    => $expires);
 
     # add in a trailing slash, if URL doesn't have at least two slashes.
     # otherwise the path on the cookie above (which is like /community/)
