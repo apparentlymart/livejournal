@@ -674,8 +674,6 @@ sub get_upf_scaled
                      height => $th
                      );
         $aspectResize->(100);
-        # keep image under 40k
-        $image->Set('disk-limit' => .04); # in MB
     } else {
         $aspectResize->($size);
     }
