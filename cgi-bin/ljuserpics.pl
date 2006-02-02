@@ -581,10 +581,12 @@ sub get_picid_from_keyword
 # this will return a user's userpicfactory image stored in mogile scaled down.
 # if only $size is passed, will return image scaled so the largest dimension will
 # not be greater than $size. If $x1, $y1... are set then it will return the image
-# scaled so the largest dimension will not be greater than 100 and the image will be
-# no larger than 40kb.
+# scaled so the largest dimension will not be greater than 100
 # all parameters are optional, default size is 640. if $x1 is present, the rest of
 # the points should be as well.
+#
+# if maxfilesize option is passed, get_upf_scaled will decrease the image quality
+# until it reaches maxfilesize, in kilobytes. (only applies to the 100x100 userpic)
 #
 # returns [image, mime, width, height] on success, undef on failure.
 #
@@ -598,6 +600,9 @@ sub get_upf_scaled
     my $y1 = delete $opts{y1};
     my $x2 = delete $opts{x2};
     my $y2 = delete $opts{y2};
+
+    my $maxfilesize = delete $opts{maxfilesize} || 40;
+    $maxfilesize *= 1024;
 
     print STDERR "Invalid parameters to get_upf_scaled\n" if scalar keys %opts;
 
@@ -667,6 +672,8 @@ sub get_upf_scaled
         my $tw = $x2 - $x1;
         my $th = $y2 - $y1;
 
+        $image->Set('quality', 100);
+
         $image->Crop(
                      x => $x1,
                      y => $y1,
@@ -674,6 +681,37 @@ sub get_upf_scaled
                      height => $th
                      );
         $aspectResize->(100);
+
+        # try different compression levels in a binary search pattern until we get our desired file size
+        my $adjustQuality;
+        $adjustQuality = sub {
+            my ($left, $right, $iters) = @_;
+
+            # make sure we don't take too long. if it takes more than 10 iterations, oh well
+            if ($iters++ > 10 || $left > $right) {
+                return;
+            }
+
+            my $mid = ($left + $right) / 2;
+            $image->Set('quality' => $mid);
+
+            my $quality = $image->Get('quality');
+            my $filesize = length($image->ImageToBlob);
+
+            # not good if filesize > maxfilesize, but good if filesize < maxfilesize within 5%
+            return if ($maxfilesize - $filesize > 0 && $maxfilesize - $filesize < $filesize * .05);
+
+            if ($filesize > $maxfilesize) {
+                $adjustQuality->($left, $mid - 1, $iters);
+            } else {
+                $adjustQuality->($mid + 1, $right, $iters);
+            }
+        };
+
+        if (length($image->ImageToBlob) > $maxfilesize) {
+            $adjustQuality->(0, 100, 0);
+        }
+
     } else {
         $aspectResize->($size);
     }
