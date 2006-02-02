@@ -199,7 +199,7 @@ body<=
 
     if (!$did_post && $GET{'mode'} eq "enmasse")
     {
-        return LJ::bad_input($ML{'.error.enmasse.mustlogin'}) unless $remote;
+        return "<?needlogin?>" unless $remote;
 
         my $authas = $GET{'authas'} || $remote->{'user'};
         my $u = LJ::get_authas_user($authas);
@@ -285,7 +285,7 @@ body<=
     }
 
     if ($did_post && $POST{'mode'} eq "enmasse_do") {
-        return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.enmasse.mustlogin'} p?>" unless $remote;
+        return "<?needlogin?>" unless $remote;
 
         my $authas = $GET{'authas'} || $remote->{'user'};
         my $u = LJ::get_authas_user($authas);
@@ -350,11 +350,12 @@ body<=
                   : $ML{'.results.nothing'};
         }
 
-        $ret .= " p?><?p " . BML::ml('.results.message', { 'url' => $u->profile_url() });
-        $ret .= " " . BML::ml('.results.goback',
-                               { 'url' => '/userinfo.bml?user=' . LJ::eurl($POST{'fromuser'}),
-                                 'user' => LJ::ljuser($POST{'fromuser'}),
-                               }) if ($POST{'fromuser'} ne "" && $POST{'fromuser'} ne $u->{'user'});
+        my $profile_url = $u->profile_url;
+        my $profile_url_other = $POST{'fromuser'} ne "" ? LJ::load_user($POST{'fromuser'})->profile_url : "";
+        
+        $ret .= " p?><?p " . BML::ml('.results.message2', {'aopts' => "href='$profile_url'"});
+        $ret .= " " . BML::ml('.results.goback2', {'user' => LJ::ljuser($POST{'fromuser'}), 'aopts' => "href='$profile_url_other'"})
+            if ($POST{'fromuser'} ne "" && $POST{'fromuser'} ne $u->{'user'});
         $ret .= " p?>";
         LJ::memcache_kill($u, "intids");
         return $ret;
@@ -404,10 +405,9 @@ body<=
             }
 
             if (@cl) {
-                my $matchcount = BML::ml(@cl == 1 ? ".match" : ".matches", {'count' => $count });
                 $ret .= "<?h1 $ML{'.communities.head'} h1?><?p " .
                     BML::ml(".communities.text", {'interest' => $interest}) ." p?>";
-                $ret .= "<p><b>$matchcount</b><ul>$list</ul></p>";
+                $ret .= "<p><b>" . BML::ml('.matches2', {'num' => $count}) . "</b><ul>$list</ul></p>";
             }
         }
 
@@ -415,9 +415,9 @@ body<=
 
         $ret .= "<?h1 $ML{'.users.head'} h1?><?p " . BML::ml(".users.text", {'interest' => $interest});
         if ($remote) {
-            $ret .= " " . BML::ml(".addint", {'qintid' => $intid});
+            $ret .= " " . BML::ml('.addint2', {'aopts' => "href='$LJ::SITEROOT/interests.bml?mode=add&amp;intid=$intid'"});
         }
-        $ret .= " $ML{'.morestuff'} p?>";
+        $ret .= " " . BML::ml('.morestuff2', {'aopts' => "href='$LJ::SITEROOT/interests.bml'"}) . " p?>";
 
         my @uids;
         $sth = $dbr->prepare("SELECT userid FROM userinterests WHERE intid=? LIMIT $LIMIT");
@@ -426,8 +426,7 @@ body<=
         my $us = LJ::load_userids(@uids);
         my @ul = map { $_ } grep { $_->{statusvis} eq "V" && $_->{journaltype} ne "C" } values %$us;
 
-        my $matchcount = BML::ml(@ul == 1 ? ".match" : ".matches", { 'count' => scalar @ul });
-        $ret .= "<p><b>$matchcount</b>";
+        $ret .= "<p><b>" . BML::ml('.matches2', {'num' => scalar @ul}) . "</b>";
 
         my $navbar;
         my $results = LJ::user_search_display(

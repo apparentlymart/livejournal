@@ -306,3 +306,16 @@ general /editinfo.bml.userpic.edit
 general /userinfo.bml.body.leave
 general /userinfo.bml.error.notloggedin
 general /userinfo.bml.membership.body
+
+general /interests.bml.addint
+general /interests.bml.error.enmasse.mustlogin
+general /interests.bml.match
+general /interests.bml.matches
+general /interests.bml.morestuff
+general /interests.bml.results.goback
+general /interests.bml.results.message
+general /login.bml.error.mustenterusername
+general /login.bml.links.link1
+general /login.bml.links.link2
+general /modify_do.bml.overrides.note
+general /modify_do.bml.journaloptions.about

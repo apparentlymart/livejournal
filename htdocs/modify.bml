@@ -266,7 +266,7 @@ body<=
     $ret .= "</form>\n\n";
 
     ### journal style
-    $ret .= "<?h1 $ML{'.journaloptions.head'} h1?>\n<?p $ML{'.journaloptions.about'} p?>\n\n";
+    $ret .= "<?h1 $ML{'.journaloptions.head'} h1?>\n<?p " . BML::ml('.journaloptions.about2', {'sitename' => $LJ::SITENAMESHORT, 'aopts' => "href='$LJ::SITEROOT/developer/' target='_blank'"}) . " p?>\n\n";
 
     ###
     ### LAYOUT OPTIONS
@@ -419,7 +419,7 @@ body<=
         $ret .= "<div style='margin-bottom: 20px'>\n";
         $ret .= "<?h1 $ML{'.overrides.head'} h1?><?p $ML{'.overrides.about'} p?>\n";
         $ret .= "<?p <font size='+1'><b>$ML{'.overrides.warning'}</b></font> p?>\n";
-        $ret .= "<?p $ML{'.overrides.note'} p?>\n";
+        $ret .= "<?p " . BML::ml('.overrides.note2', {'aopts' => "href='$LJ::SITEROOT/developer/varlist.bml'"}) . " p?>\n";
         $ret .= "<?standout <b>$ML{'.overrides.box.head'}</b><br />";
         $ret .= LJ::html_textarea({ 'name' => 'overrides', 'cols' => '60', 'rows' => '15',
                                     'wrap' => 'off', 'value' => $overrides }) . " standout?>";
