@@ -105,7 +105,7 @@
             regsel.setBottomRight(x2, y2);
             regsel.fireOnRegionChanged();
 
-            regsel.setConstrain(true);
+            regsel.keepSquare(true);
         });
 
     </script>
@@ -120,7 +120,7 @@
       <?standout <div style='float: right;'>
       <table cellpadding="4"><tr>
       <td style='whitespace: nowrap'>
-        <input type="checkbox" id="constrain" checked="1" onChange="regsel.setConstrain(\$('constrain').checked);" />
+        <input type="checkbox" id="constrain" checked="1" onChange="if(!regsel) return; regsel.keepSquare(\$('constrain').checked);" />
         <label for="constrain">Keep square</label>
       </td></tr><tr>
       <td valign="center">Low quality preview:<br />
