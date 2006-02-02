@@ -576,7 +576,6 @@
                                            max_size => $MAX_UPLOAD + 1024,
                                            timeout  => 10,
                                            );
-
                 my $res = $ua->get($POST{urlpic});
                 $POST{userpic} = $res->content if $res && $res->is_success;
                 return $err->($ML{'.error.urlerror'}) unless $POST{userpic};
@@ -883,6 +882,105 @@
             }
         }
 
+        # let users upload more pics
+        $body .= "<a name='upload'></a>";
+
+        if ($count < $max) {
+            if ($fotobilder) {
+                $body .= "<?h1 $ML{'.uploadheader.fb'} h1?>\n";
+                $body .= "<?p " . BML::ml('.uploaddesc.fb', {'aopts' => "href='$LJ::FB_SITEROOT'", 'sitename' => $LJ::FB_SITENAME}) . " p?>\n\n";
+            } else {
+                $body .= "<?h1 $ML{'.uploadheader'} h1?>\n";
+                $body .= "<?p $ML{'.uploaddesc'} p?>\n\n";
+
+                $body .= "<ul>\n";
+                foreach (qw(filesize imagesize2 fileformat)) {
+                    $body .= "<li>" . $ML{".restriction.$_"} . "</li>\n";
+                }
+
+                # Keywords is a little different
+                $body .= "<li>";
+                if (defined $LJ::HELPURL{'upic_keywords'}) {
+                    $body .= BML::ml('.restriction.keywords.faq', {'aopts' => "href='$LJ::HELPURL{'upic_keywords'}'"});
+                } else {
+                    $body .= $ML{'.restriction.keywords'};
+                }
+
+                $body .= "</li>";
+                $body .= "</ul>\n";
+            }
+
+            # upload form
+            $body .= "<?standout \n";
+            $body .= "<form action='editpics.bml$getextra' method='post' " .
+                "enctype='multipart/form-data' style='display: inline;'>\n";
+
+            $body .= "<table>\n";
+
+            if ($fotobilder) {
+                $body .= "<tr><td colspan='3' align='center'>\n";
+                $body .= "<img src='$picurl' />";
+                my $url = LJ::CleanHTML::canonical_url($POST{'url'});
+                $body .= LJ::html_hidden('src', 'url', 'urlpic', $picurl, 'url', $url, 'ret' => $returl);
+            } else {
+                $body .= "<tr><td align='right'>\n";
+                $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'src', 'id' => 'radio_file',
+                                          'value' => 'file', 'selected' => '1',
+                                          'accesskey' => $ML{'.fromfile.key'} });
+                $body .= "</td><td align='right'>";
+                $body .= "<label for='radio_file'>$ML{'.fromfile'}</label></td>";
+                $body .= "<td align='left'><input type='file' name='userpic' size='28' /></td></tr>\n";
+
+                $body .= "<tr><td align='right'>";
+                $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'src', 'value' => 'url',
+                                          'id' => 'radio_url', 'accesskey' => $ML{'.fromurl.key'} });
+                $body .= "</td><td align='right'>";
+                $body .= "<label for='radio_url'>$ML{'.fromurl'}</label></td><td align='left'>";
+                $body .= LJ::html_text({ 'name' => 'urlpic', 'size' => '40' }) . "</td></tr>\n";
+            }
+
+            $body .= "<tr><td colspan='3' align='center'><hr></td></tr>";
+
+            $body .= "<tr><td align='right'>";
+            $body .= LJ::help_icon('upic_keywords');
+            $body .= "</td><td align='right'><label for='keywords'>";
+            $body .= "$ML{'.label.keywords'}</label></td><td align='left'>";
+            $body .= LJ::html_text({ 'name' => 'keywords', 'size' => '40' });
+            $body .= "</td></tr>";
+
+            if ($u->{'dversion'} > 6) {
+                $body .= "<tr><td align='right'>";
+                $body .= LJ::help_icon('upic_comments');
+                $body .= "</td><td align='right'><label for='comments'>$ML{'.label.comment'}</label></td><td align='left'>";
+                my $comments = $POST{'comments'} if $fotobilder;
+                $body .= LJ::html_text({ 'name' => 'comments', 'size' => '40', 'maxlength' => LJ::CMAX_UPIC_COMMENT, 'value', $comments });
+                $body .= "</td></tr>";
+            }
+
+            $body .= "<tr><td colspan='2'>&nbsp;</td><td align='left'>";
+            $body .= LJ::html_check({ 'type' => 'checkbox',
+                                      'name' => 'make_default',
+                                      'id' => 'make_default',
+                                      'selected' => '1', 'value' => '1',
+                                      'accesskey' => $ML{'.makedefault.key'} });
+
+            $body .= "<label for='make_default'>$ML{'.makedefault'}</label></td></tr>\n";
+
+            $body .= "<tr><td colspan='3' align='center'><br />";
+            $body .= LJ::html_submit(undef, $ML{'.btn.proceed'},
+                                     { disabled => $LJ::DISABLE_MEDIA_UPLOADS });
+            $body .= "</td></tr>\n</table>\n</form>\n";
+        } else {
+            $body .= "<?standout \n";
+            if (my $custom .= LJ::run_hook("editpics_maxlimit", $u)) {
+                $body .= $custom;
+            } else {
+                $body .= BML::ml(".error.toomanypics3", { 'max'  => $max });
+            }
+        }
+
+        $body .= " standout?>\n\n";
+
         my $piccount = 0;
         foreach my $pic (sort { $a->{picid} <=> $b->{picid} } @sortedpics)
         {
@@ -962,107 +1060,6 @@
             $body .= "<?h1 $ML{'.nopics'} h1?><?p $ML{'.noneupload'} p?>";
         }
     }
-
-    # let users upload more pics
-    $body .= "<a name='upload'></a>";
-
-    if ($count < $max) {
-        if ($fotobilder) {
-            $body .= "<?h1 $ML{'.uploadheader.fb'} h1?>\n";
-            $body .= "<?p " . BML::ml('.uploaddesc.fb', {'aopts' => "href='$LJ::FB_SITEROOT'", 'sitename' => $LJ::FB_SITENAME}) . " p?>\n\n";
-        } else {
-            $body .= "<?h1 $ML{'.uploadheader'} h1?>\n";
-            $body .= "<?p $ML{'.uploaddesc'} p?>\n\n";
-
-            $body .= "<ul>\n";
-            foreach (qw(filesize imagesize2 fileformat)) {
-                $body .= "<li>" . $ML{".restriction.$_"} . "</li>\n";
-            }
-
-            # Keywords is a little different
-            $body .= "<li>";
-            if (defined $LJ::HELPURL{'upic_keywords'}) {
-                $body .= BML::ml('.restriction.keywords.faq', {'aopts' => "href='$LJ::HELPURL{'upic_keywords'}'"});
-            } else {
-                $body .= $ML{'.restriction.keywords'};
-            }
-
-            $body .= "</li>";
-            $body .= "</ul>\n";
-        }
-
-        # upload form
-        $body .= "<?standout \n";
-        $body .= "<form action='editpics.bml$getextra' method='post' " .
-                 "enctype='multipart/form-data' style='display: inline;'>\n";
-
-        $body .= "<table>\n";
-
-        if ($fotobilder) {
-            $body .= "<tr><td colspan='3' align='center'>\n";
-            $body .= "<img src='$picurl' />";
-            my $url = LJ::CleanHTML::canonical_url($POST{'url'});
-            $body .= LJ::html_hidden('src', 'url', 'urlpic', $picurl, 'url', $url, 'ret' => $returl);
-        } else {
-            $body .= "<tr><td align='right'>\n";
-            $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'src', 'id' => 'radio_file',
-                                      'value' => 'file', 'selected' => '1',
-                                      'accesskey' => $ML{'.fromfile.key'} });
-            $body .= "</td><td align='right'>";
-            $body .= "<label for='radio_file'>$ML{'.fromfile'}</label></td>";
-            $body .= "<td align='left'><input type='file' name='userpic' size='28' /></td></tr>\n";
-
-            $body .= "<tr><td align='right'>";
-            $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'src', 'value' => 'url',
-                                      'id' => 'radio_url', 'accesskey' => $ML{'.fromurl.key'} });
-            $body .= "</td><td align='right'>";
-            $body .= "<label for='radio_url'>$ML{'.fromurl'}</label></td><td align='left'>";
-            $body .= LJ::html_text({ 'name' => 'urlpic', 'size' => '40' }) . "</td></tr>\n";
-        }
-
-        $body .= "<tr><td colspan='3' align='center'><hr></td></tr>";
-
-        $body .= "<tr><td align='right'>";
-        $body .= LJ::help_icon('upic_keywords');
-        $body .= "</td><td align='right'><label for='keywords'>";
-        $body .= "$ML{'.label.keywords'}</label></td><td align='left'>";
-        $body .= LJ::html_text({ 'name' => 'keywords', 'size' => '40' });
-        $body .= "</td></tr>";
-
-        if ($u->{'dversion'} > 6) {
-            $body .= "<tr><td align='right'>";
-            $body .= LJ::help_icon('upic_comments');
-            $body .= "</td><td align='right'><label for='comments'>$ML{'.label.comment'}</label></td><td align='left'>";
-            my $comments = $POST{'comments'} if $fotobilder;
-            $body .= LJ::html_text({ 'name' => 'comments', 'size' => '40', 'maxlength' => LJ::CMAX_UPIC_COMMENT, 'value', $comments });
-            $body .= "</td></tr>";
-        }
-
-        $body .= "<tr><td colspan='2'>&nbsp;</td><td align='left'>";
-        $body .= LJ::html_check({ 'type' => 'checkbox',
-                                  'name' => 'make_default',
-                                  'id' => 'make_default',
-                                  'selected' => '1', 'value' => '1',
-                                 'accesskey' => $ML{'.makedefault.key'} });
-
-        $body .= "<label for='make_default'>$ML{'.makedefault'}</label></td></tr>\n";
-
-        $body .= "<tr><td colspan='3' align='center'><br />";
-        $body .= LJ::html_submit(undef, $ML{'.btn.proceed'},
-                                 { disabled => $LJ::DISABLE_MEDIA_UPLOADS });
-        $body .= "</td></tr>\n</table>\n</form>\n";
-    } else {
-        $body .= "<?standout \n";
-        if (my $custom .= LJ::run_hook("editpics_maxlimit", $u)) {
-            $body .= $custom;
-        } else {
-            $body .= BML::ml(".error.toomanypics3", { 'max'  => $max });
-        }
-    }
-    
-    $body .= " standout?>\n\n";
-
-
  
     return;
 
