@@ -601,7 +601,7 @@ sub get_upf_scaled
     my $x2 = delete $opts{x2};
     my $y2 = delete $opts{y2};
 
-    my $maxfilesize = delete $opts{maxfilesize} || 40;
+    my $maxfilesize = delete $opts{maxfilesize} || 38;
     $maxfilesize *= 1024;
 
     print STDERR "Invalid parameters to get_upf_scaled\n" if scalar keys %opts;
