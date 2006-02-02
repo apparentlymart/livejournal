@@ -325,7 +325,8 @@ if ($opt_pop)
                     my $dir = File::Basename::dirname($pv);
                     File::Path::mkpath("$LJ::HOME/htdocs/img/s2preview/$dir");
                     my $target = "$LJ::HOME/htdocs/img/s2preview/$pv";
-                    File::Copy::copy($from, $target);
+                    File::Copy::copy($from, $target)
+                        unless -s $target && -s $target == -s $from;
                     my ($w, $h) = Image::Size::imgsize($target);
                     push @vals, "$pv|$w|$h";
                 }
