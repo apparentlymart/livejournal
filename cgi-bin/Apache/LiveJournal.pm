@@ -401,6 +401,10 @@ sub trans
         }
 
         if ($opts->{mode} eq "data" && $opts->{pathextra} =~ m!^/(\w+)(/.*)?!) {
+            my $remote = LJ::get_remote();
+            my $burl = LJ::remote_bounce_url();
+            return remote_domsess_bounce() if LJ::remote_bounce_url();
+
             my ($mode, $path) = ($1, $2);
             if ($mode eq "customview") {
                 $r->handler("perl-script");
