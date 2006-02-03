@@ -684,32 +684,45 @@ sub get_upf_scaled
 
         # try different compression levels in a binary search pattern until we get our desired file size
         my $adjustQuality;
+        my $lastbest;
+
         $adjustQuality = sub {
             my ($left, $right, $iters) = @_;
 
             # make sure we don't take too long. if it takes more than 10 iterations, oh well
             if ($iters++ > 10 || $left > $right) {
-                return;
+                return undef;
             }
 
-            my $mid = ($left + $right) / 2;
-            $image->Set('quality' => $mid);
+            # work off a copy of the image so we aren't recompressing it
+            my $piccopy = Image::Magick->new();
+            $piccopy->BlobToImage($image->ImageToBlob);
 
-            my $quality = $image->Get('quality');
-            my $filesize = length($image->ImageToBlob);
+            my $mid = ($left + $right) / 2;
+            $piccopy->Set('quality' => $mid);
+            my $quality = $piccopy->Get('quality');
+            my $filesize = length($piccopy->ImageToBlob);
+
+            # save a workable solution if things don't work out
+            $lastbest = $quality if ($filesize < $maxfilesize);
 
             # not good if filesize > maxfilesize, but good if filesize < maxfilesize within 5%
-            return if ($maxfilesize - $filesize > 0 && $maxfilesize - $filesize < $filesize * .05);
+            return $mid if ($maxfilesize - $filesize > 0 && $maxfilesize - $filesize < $maxfilesize * .005);
 
             if ($filesize > $maxfilesize) {
-                $adjustQuality->($left, $mid - 1, $iters);
+                return $adjustQuality->($left, $mid - 1, $iters);
             } else {
-                $adjustQuality->($mid + 1, $right, $iters);
+                return $adjustQuality->($mid + 1, $right, $iters);
             }
         };
 
         if (length($image->ImageToBlob) > $maxfilesize) {
-            $adjustQuality->(0, 100, 0);
+            my $newquality = $adjustQuality->(0, 100, 0);
+            if ($newquality) {
+                $image->Set('quality' => $newquality);
+            } elsif($lastbest) {
+                $image->Set('quality' => $lastbest);
+            }
         }
 
     } else {
