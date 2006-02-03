@@ -146,12 +146,12 @@ use vars qw($body $title $windowtitle %GET %POST);
 
      } else {
          if ($u->{'journaltype'} eq "C") {
-             my $icon = "<img src='$LJ::IMGPREFIX/community24x24.gif' border='0' align='absmiddle' height='24' width='24' style='padding: 0px 2px 0px 0px' />";
+             my $icon = "<img src='$LJ::IMGPREFIX/community24x24.gif' border='0' height='24' width='24' style='padding: 0px 2px 0px 0px' />";
              $windowtitle = BML::ml('.confirm.title.community', {'user'=> $user });
              $title = BML::ml('.confirm.title.community', {'icon'=> $icon, 'user'=> $user });
              $body .= "<?p " . BML::ml('.confirm.text1.community', {'url' => "$LJ::SITEROOT/community/join.bml?comm=$user" }) . " p?>";
          } else {
-             my $icon = "<img src='$LJ::IMGPREFIX/userinfo24x24.gif' border='0' align='' height='24' width='24' style='padding: 0px 2px 0px 0px' />";
+             my $icon = "<img src='$LJ::IMGPREFIX/userinfo24x24.gif' border='0' height='24' width='24' style='padding: 0px 2px 0px 0px' />";
              if ($u->{'journaltype'} eq "I") {
                 $icon = "<img src='$LJ::IMGPREFIX/openid24x24.gif' border='0' align='' height='24' width='24' style='padding: 0px 2px 0px 0px' />";
                 $windowtitle = BML::ml('.confirm.title.person', {'user'=> $u->{'name'} });
