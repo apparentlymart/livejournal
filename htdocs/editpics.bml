@@ -573,6 +573,9 @@
                                                  );
                 return $err->("There was an error in generating the userpic.") unless $picinfo;
 
+                # now delete the uploaded picture from mogile
+                LJ::mogclient()->delete("upf:$u->{userid}");
+
                 $POST{userpic} = $picinfo->[0];
             } elsif ($POST{'src'} eq "url") {
                 my $ua = LJ::get_useragent(
