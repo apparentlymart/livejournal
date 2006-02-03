@@ -77,9 +77,6 @@ my %modules = (
                "URI::URL" => { 'deb' => 'liburi-perl' },
                "HTML::Tagset" => { 'deb' => 'libhtml-tagset-perl' },
                "HTML::Parser" => { 'deb' => 'libhtml-parser-perl', },
-               "CSS" => {
-                   ver => 1.07,
-               },
                "LWP::Simple" => { 'deb' => 'libwww-perl', },
                "LWP::UserAgent" => { 'deb' => 'libwww-perl', },
                "GD" => { 'deb' => 'libgd-gd2-perl' },
