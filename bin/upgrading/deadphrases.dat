@@ -319,3 +319,14 @@ general /login.bml.links.link1
 general /login.bml.links.link2
 general /modify_do.bml.overrides.note
 general /modify_do.bml.journaloptions.about
+
+general /multisearch.bml.region.bodytext
+general /register.bml.new.editinfo
+general /register.bml.new.login
+general /register.bml.new.modify
+general /register.bml.new.update
+general /talkpost_do.bml.error.badpassword
+general /talkpost_do.bml.error.badusername
+general /talkpost_do.bml.error.noverify
+general /update.bml.currmood
+general /update.bml.update.alternate

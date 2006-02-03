@@ -2482,7 +2482,7 @@ sub init {
 
     # anonymous/cookie users cannot authenticate with ecphash
     if ($form->{'ecphash'} && $form->{'usertype'} ne "user") {
-        $bmlerr->("$SC.error.badusername");
+        $err->(BML::ml("$SC.error.badusername2", {'sitename' => $LJ::SITENAMESHORT, 'aopts' => "href='$LJ::SITEROOT/lostinfo.bml'"}));
         return undef;
     }
 
@@ -2546,7 +2546,7 @@ sub init {
                         {
                             $used_ecp = 1;
                         } else {
-                            $bmlerr->("$SC.error.badpassword");
+                            $err->(BML::ml("$SC.error.badpassword2", {'aopts' => "href='$LJ::SITEROOT/lostinfo.bml'"}));
                         }
 
                     # otherwise authenticate on username/password
@@ -2557,7 +2557,7 @@ sub init {
                         } else {
                             $ok = LJ::auth_okay($up, $form->{'password'}, $form->{'hpassword'});
                         }
-                        $bmlerr->("$SC.error.badpassword") unless $ok;
+                        $err->(BML::ml("$SC.error.badpassword2", {'aopts' => "href='$LJ::SITEROOT/lostinfo.bml'"})) unless $ok;
                     }
                 }
 
@@ -2566,7 +2566,7 @@ sub init {
                     $init->{didlogin} = $up->make_login_session($exptype, $ipfixed);
                 }
             } else {
-                $bmlerr->("$SC.error.badusername");
+                $err->(BML::ml("$SC.error.badusername2", {'sitename' => $LJ::SITENAMESHORT, 'aopts' => "href='$LJ::SITEROOT/lostinfo.bml'"}));
             }
         } else {
             $bmlerr->("$SC.error.nousername");
@@ -2722,7 +2722,7 @@ sub init {
 
     if ($up) {
         if ($up->{'status'} eq "N" && $up->{'journaltype'} ne "I") {
-            $bmlerr->("$SC.error.noverify");
+            $err->(BML::ml("$SC.error.noverify2", {'aopts' => "href='$LJ::SITEROOT/register.bml'"}));
         }
         if ($up->{'statusvis'} eq "D") {
             $bmlerr->("$SC.error.deleted");

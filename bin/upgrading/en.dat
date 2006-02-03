@@ -3493,7 +3493,7 @@ used in the *_HEAD overrides are those elements that are valid in the head of a 
 
 /multisearch.bml.nomatch.title=No Match
 
-/multisearch.bml.region.bodytext<<
+/multisearch.bml.region.bodytext2<<
 You can search by region in one of the following formats:
 <ul>
  <li>Country</li>
@@ -3507,7 +3507,7 @@ Notes:
  <li>* searching for only a city or a city and state defaults to assuming the country is the United States.</li>
  <li>Country can either be the country's full name, or its two letter country code</li>
 </ul>
-If you want to do a different type of search, check out the <a href='/directorysearch.bml'>directory search</a>.
+If you want to do a different type of search, check out the <a [[aopts]]>directory search</a>.
 .
 
 /multisearch.bml.region.head=Search by Region
@@ -3669,15 +3669,15 @@ Sincerely,
 
 /register.bml.new.bodyuser=Thanks!  The email address for [[user]] has now been verified.  From here, you may be interested in doing the following things:
 
-/register.bml.new.editinfo=<a href="/editinfo.bml">Edit Information</a> -- Fill out your user profile and set various settings.
+/register.bml.new.editinfo2=<a [[aopts]]>Edit Information</a> -- Fill out your user profile and set various settings.
 
 /register.bml.new.header=Success
 
-/register.bml.new.login=<a href="/login.bml">Login</a> -- So you don't have to enter your username and password everywhere.
+/register.bml.new.login2=<a [[aopts]]>Log In</a> -- So you don't have to enter your username and password everywhere.
 
-/register.bml.new.modify=<a href="/modify.bml">Modify Journal</a> -- Modify the look of your journal.
+/register.bml.new.modify2=<a [[aopts]]>Modify Journal</a> -- Modify the look of your journal.
 
-/register.bml.new.update=<a href="/update.bml">Update Journal</a> -- Write in your journal.
+/register.bml.new.update2=<a [[aopts]]>Update Journal</a> -- Write in your journal.
 
 /register.bml.sent.body=A validation email has been sent to <b>[[email]]</b>. In order to complete validation, you need to click the link in that email.
 
@@ -4374,9 +4374,9 @@ Please either clear the user textbox or select the relevant posting mode and try
 
 /talkpost.bml.warnscreened=<b>Notice:</b> This comment is screened. Replying to it will automatically un-screen it and make it visible.
 
-/talkpost_do.bml.error.badpassword=Incorrect password given for the username specified.  You can recover your password <a href='/lostinfo.bml'>here</a> if you've forgotten it.
+/talkpost_do.bml.error.badpassword2=Incorrect password given for the username specified. You can recover your password <a [[aopts]]>here</a> if you've forgotten it.
 
-/talkpost_do.bml.error.badusername=The LiveJournal username you specified does not exist.  You can recover your username <a href='/lostinfo.bml'>here</a> if you've forgotten it, or you may post as "Anonymous" instead.
+/talkpost_do.bml.error.badusername2=The [[sitename]] username you specified does not exist. You can recover your username <a [[aopts]]>here</a> if you've forgotten it, or you may post as "Anonymous" instead.
 
 /talkpost_do.bml.error.banned=You are not allowed to post in this user's journal.
 
@@ -4408,7 +4408,7 @@ Please either clear the user textbox or select the relevant posting mode and try
 
 /talkpost_do.bml.error.nousername=You did not enter your LiveJournal username.  You can choose to post as "Anonymous" if you don't have a LiveJournal user account.
 
-/talkpost_do.bml.error.noverify=Sorry, you aren't allowed to post comments in other people's journals until your email address has been verified.  If you've lost the confirmation email to do this, you can have it resent from the <a href='/lostinfo.bml'>lost information page</a>.
+/talkpost_do.bml.error.noverify2=Sorry, you aren't allowed to post comments in other people's journals until your email address has been verified. If you've lost the confirmation email to do this, you can <a [[aopts]]>have it re-sent</a>.
 
 /talkpost_do.bml.error.postshared=You can't post as a shared or community account.  Shared accounts represent groups of people, not individual people.
 
@@ -4777,8 +4777,6 @@ This could be because: <ol>
 
 /update.bml.btn.update=Update Journal
 
-/update.bml.currmood=Current <a href="/moodlist.bml">Mood</a>:
-
 /update.bml.currmusic=Current Music:
 
 /update.bml.date=Date:
@@ -4886,8 +4884,6 @@ This could be because: <ol>
 /update.bml.title=Update Journal
 
 /update.bml.title.readonly=Read-only mode
-
-/update.bml.update.alternate=If you don't want to <a href="/download/">download a client</a> for your computer, or if one doesn't exist for your computer, you may use this page to update your journal.  This is also useful if you're on vacation or away from your primary computer.
 
 /update.bml.update.head=Update your Journal...
 

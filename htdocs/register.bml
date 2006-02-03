@@ -76,10 +76,10 @@ body<=
      } else {
          $ret .= "<?h1 $ML{'.new.header'} h1?><?p " . BML::ml('.new.bodyuser', {'user'=>LJ::ljuser($u)}) . " p?>";
          $ret .= "<ul>";
-         $ret .= "<li>$ML{'.new.login'}</li>";
-         $ret .= "<li>$ML{'.new.editinfo'}</li>";
-         $ret .= "<li>$ML{'.new.modify'}</li>";
-         $ret .= "<li>$ML{'.new.update'}</li>";
+         $ret .= "<li>" . BML::ml('.new.login2', {'aopts' => "href='$LJ::SITEROOT/login.bml'"}) . "</li>";
+         $ret .= "<li>" . BML::ml('.new.editinfo2', {'aopts' => "href='$LJ::SITEROOT/editinfo.bml'"}) . "</li>";
+         $ret .= "<li>" . BML::ml('.new.modify2', {'aopts' => "href='$LJ::SITEROOT/modify.bml'"}) . "</li>";
+         $ret .= "<li>" . BML::ml('.new.update2', {'aopts' => "href='$LJ::SITEROOT/update.bml'"}) . "</li>";
          $ret .= "</ul>";
      }
 
