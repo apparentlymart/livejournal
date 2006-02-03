@@ -22,7 +22,7 @@
                 var origH = $GET{'imageHeight'};
                 var scaledSizeMax = $scaledSizeMax;
         </script>
-    };
+        };
 
     $head .= q {
         <script>
@@ -112,7 +112,20 @@
 
     </script>
 
+};
+
+$body .= qq {
+    <a href="/editpics.bml"><< Edit Userpics</a>
     };
+
+# is there a pic in mogile? If not, there's no real reason to be here
+my @paths = LJ::mogclient()->get_paths("upf:$remote->{userid}");
+if (! @paths) {
+    $body .= qq {
+        <?p You have no image uploaded. You must upload one on the <a href="/editpics.bml">Edit Userpics</a> page. p?>
+        };
+    return;
+}
 
     $body .= qq {
         <?p Click and drag anywhere within the photo to create your userpic. When you're happy with what you see in the preview box click the Create Userpic button to save it. p?>
