@@ -381,6 +381,10 @@ sub trans
             return $bml_handler->("$LJ::HOME/htdocs/userinfo.bml");
         }
 
+        if ($opts->{'mode'} eq "update") {
+            return redir($r, "$LJ::SITEROOT/update.bml");
+        }
+
         %RQ = %$opts;
 
         # redirect communities to /community/<name>

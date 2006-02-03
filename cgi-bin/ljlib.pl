@@ -166,7 +166,12 @@ use constant CMAX_UPIC_COMMENT => 120;
                  "tag" => {
                      "des" => "Filtered Recent Entries View",
                  },
-
+                 "update" => {
+                     # just a redirect to update.bml for now.
+                     # real solution is some sort of better nav
+                     # within journal styles.
+                     "des" => "Update Journal",
+                 },
                  );
 
 ## we want to set this right away, so when we get a HUP signal later
