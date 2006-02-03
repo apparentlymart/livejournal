@@ -387,7 +387,7 @@ $maint{'genstats'} = sub
                     my %ret;
 
                     my $approved_counts = $db->selectall_hashref("SELECT country, COUNT(*) as count FROM schools GROUP BY country ORDER BY count DESC LIMIT 10", 'country');
-                    my $pending_counts  = $db->selectall_hashref("SELECT country, COUNT(*) as count FROM schools_pending GROUP BY country ORDER BY count DESC LIMIT 10", 'country');
+                    my $pending_counts  = $db->selectall_hashref("SELECT country, COUNT(*) as count FROM schools_pending GROUP BY country ORDER BY count DESC", 'country');
 
                     $ret{'approved'} = $approved_total[0];
                     $ret{'pending'}  = $pending_total[0];
