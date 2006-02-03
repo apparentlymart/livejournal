@@ -369,10 +369,13 @@
             # small file size, check the pic out
             if (!$gotofactory) {
                 BML::parse_multipart(\%POST, \$error, $MAX_UPLOAD + 2048);
-                  ($imagew, $imageh, $filetype) = Image::Size::imgsize(\$POST{'userpic'});
-                  if ($imagew > 100 || $imageh > 100) {
-                      # large image size, to the factory!
-                      $gotofactory = 1;
+
+                  if ($POST{'userpic'}) {
+                      ($imagew, $imageh, $filetype) = Image::Size::imgsize(\$POST{'userpic'});
+                      if ($imagew > 100 || $imageh > 100) {
+                          # large image size, to the factory!
+                          $gotofactory = 1;
+                      }
                   }
             }
 
@@ -551,6 +554,7 @@
             if ($POST{'src'} eq "file")  {
 
                 # already loaded from multipart parse earlier
+                return $err->("You must choose a file to upload or enter the URL of an image") unless $POST{'userpic'};
 
             } elsif ($POST{'src'} eq "factory") {
                 my $scaledsizemax = $POST{'scaledSizeMax'};
