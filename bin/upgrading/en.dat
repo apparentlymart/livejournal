@@ -1921,7 +1921,7 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /editpics.bml.curpics=Current Pictures
 
-/editpics.bml.curpics.desc=Here are the pictures you've uploaded in the past.  You can assign keywords to them so you can use them by keyword later, select which one to use as your default, or delete old ones.  To upload a new one, use the form at the bottom of the page.
+/editpics.bml.curpics.desc2=Here are the pictures you've uploaded in the past. You can assign keywords to them so you can use them by keyword later, select which one to use as your default, or delete old ones. To upload a new one, use the form at the top of the page.
 
 /editpics.bml.error.badurl=The address for the picture to be uploaded does not look correct.  It should start with <b>http://</b>
 
@@ -1988,6 +1988,9 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 /editpics.bml.restriction.keywords.faq=Picture will be unusable if <a [[aopts]]>keywords</a> are not supplied
 
 /editpics.bml.title=Edit User Pictures
+
+/editpics.bml.title2|notes=This is the new page title.  .title is used by multisearch.bml.
+/editpics.bml.title2=Edit Userpics
 
 /editpics.bml.uploaddesc=Use the form below to upload a new picture.
 

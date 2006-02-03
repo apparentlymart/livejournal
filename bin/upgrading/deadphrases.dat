@@ -330,3 +330,5 @@ general /talkpost_do.bml.error.badusername
 general /talkpost_do.bml.error.noverify
 general /update.bml.currmood
 general /update.bml.update.alternate
+
+general /editpics.bml.curpics.desc

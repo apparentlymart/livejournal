@@ -9,7 +9,7 @@
     @errors = ();
 
     my $err = sub {
-        $title = "Error";
+        $title = $ML{'Error'};
         $body = LJ::bad_input(@_);
         return;
     };
@@ -825,7 +825,7 @@
     }
 
     # show the form to let people edit
-    $title = "Edit Userpics";
+    $title = $ML{'.title2'};
 
     # Fixme: Make this work with Fotobilder
     if (!$fotobilder) {
@@ -991,7 +991,7 @@
             my $pid = $pic->{'picid'};
 
             if ($piccount++ == 0) {
-                $body .= "<?h1 $ML{'.curpics'} h1?><?p $ML{'.curpics.desc'} p?>";
+                $body .= "<?h1 $ML{'.curpics'} h1?><?p $ML{'.curpics.desc2'} p?>";
                 $body .= "<?p <strong>". BML::ml('.piclimitstatus', {current => $count, max => $max}) . "</strong> p?>";
 
                 $body .= "<form method='post' action='editpics.bml$getextra'>";
