@@ -15,7 +15,10 @@
     };
 
     my $u = LJ::get_remote();
-    return $err->($ML{'error.noremote'}) unless $u;
+    unless ($u) {
+        $body = "<?needlogin?>";
+        return;
+    }
 
     my %ierr;
     my $name = $POST{name} || '';

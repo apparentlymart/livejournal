@@ -17,7 +17,7 @@ body<=
     }
 
     my $u = LJ::get_remote()
-        or return LJ::bad_input($ML{'error.noremote'});
+        or return "<?needlogin?>";
 
     my $remote = $u;
 

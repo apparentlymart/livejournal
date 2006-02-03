@@ -26,8 +26,7 @@ _info?><?_code
     LJ::set_active_crumb('delcomment');
 
     my $remote = LJ::get_remote();
-    return $bad_input->($ML{'error.noremote'})
-        unless $remote;
+    return $error->(LJ::error_noremote()) unless $remote;
 
     return $error->("Missing parameters.") unless $GET{'journal'} ne "" && $GET{'id'};
 

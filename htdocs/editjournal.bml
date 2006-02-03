@@ -12,8 +12,7 @@ body<=
     LJ::set_active_crumb('editentries');
 
     my $remote = LJ::get_remote();
-    return LJ::bad_input($ML{'error.noremote'})
-        unless $remote;
+    return "<?needlogin?>" unless $remote;
 
     if ($remote->underage) {
         return BML::redirect("$LJ::SITEROOT/agecheck/?s=1");

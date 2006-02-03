@@ -17,8 +17,7 @@ body<=
     BML::set_language_scope("/friends/edit_do.bml");
 
     my $remote = LJ::get_remote();
-    return LJ::bad_input($ML{'error.noremote'})
-        unless $remote;
+    return "<?needlogin?>" unless $remote;
 
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';

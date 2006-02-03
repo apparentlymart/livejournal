@@ -244,6 +244,18 @@ sub error_list
     return $ret;
 }
 
+
+# <LJFUNC>
+# name: LJ::error_noremote
+# des: Returns an error telling the user to log in
+# returns: Translation string "error.notloggedin"
+# </LJFUNC>
+sub error_noremote
+{
+    return BML::ml('error.notloggedin', {'aopts' => "href='$LJ::SITEROOT/login.bml?ret=1'"});
+}
+
+
 # <LJFUNC>
 # name: LJ::warning_list
 # des: Returns a warning bar with bulleted list of warnings

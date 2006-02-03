@@ -13,7 +13,7 @@ body<=
     my $remote = LJ::get_remote();
 
     unless ($remote) {
-        $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'error.noremote'} p?>";
+        $ret .= "<?needlogin?>";
         return $ret;
     }
 

@@ -9,8 +9,7 @@ body<=
     LJ::set_active_crumb('seeoverrides');
 
     my $remote = LJ::get_remote();
-    return LJ::bad_input($ML{'error.noremote'})
-        unless $remote;
+    return "<?needlogin?>" unless $remote;
 
     my $user = LJ::canonical_username($GET{'user'} || $remote->{'user'});
     return LJ::bad_input(BML::ml("error.malformeduser"))

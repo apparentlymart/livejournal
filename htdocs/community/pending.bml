@@ -18,8 +18,7 @@ body<=
 
     # get remote
     my $remote = LJ::get_remote();
-    return "<?h1 $ML{'Error'} h1?><?p $ML{'error.noremote'} p?>"
-        unless $remote;
+    return "<?needlogin?>" unless $remote;
 
     my $cname = $GET{'comm'};
     return BML::redirect("$LJ::SITEROOT/community/manage.bml") unless $cname;

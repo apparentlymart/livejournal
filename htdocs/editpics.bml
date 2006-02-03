@@ -5,6 +5,7 @@
 
     LJ::set_active_crumb('edituserpics');
 
+    $title = $ML{'.title2'};
     $body = "";
     @errors = ();
 
@@ -19,8 +20,10 @@
     }
 
     my $remote = LJ::get_remote();
-    return $err->($ML{'error.noremote'})
-        unless $remote;
+    unless ($remote) {
+        $body = "<?needlogin?>";
+        return;
+    }
 
     if ($remote->underage) {
         return BML::redirect("$LJ::SITEROOT/agecheck/?s=1");
@@ -828,7 +831,6 @@
     }
 
     # show the form to let people edit
-    $title = $ML{'.title2'};
 
     # Fixme: Make this work with Fotobilder
     if (!$fotobilder) {

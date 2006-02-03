@@ -12,8 +12,7 @@ body<=
     my %LJ_cmtinfo;
 
     my $remote = LJ::get_remote();
-    return LJ::bad_input($ML{'error.noremote'})
-        unless $remote;
+    return "<?needlogin?>" unless $remote;
 
     $LJ_cmtinfo{'canAdmin'} = 1;
     $LJ_cmtinfo{'remote'} = $remote->{user};

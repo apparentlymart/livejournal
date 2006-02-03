@@ -21,8 +21,10 @@
  }
 
  my $remote = LJ::get_remote();
- return $err->($ML{'error.noremote'})
-     unless $remote;
+ unless ($remote) {
+    $body = "<?needlogin?>";
+    return;
+ }
 
  my $authas = $GET{'authas'} || $remote->{'user'};
  my $memoryu = LJ::get_authas_user($authas);

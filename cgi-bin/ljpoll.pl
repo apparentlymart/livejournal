@@ -894,7 +894,7 @@ sub submit
     my $dbh = LJ::get_db_writer();
 
     unless ($remote) {
-        $$error = $BML::ML{'error.noremote'}; # instead of <?needremote?>, because errors are displayed in LJ::bad_input()
+        $$error = LJ::error_noremote(); # instead of <?needlogin?>, because errors are displayed in LJ::bad_input()
         return 0;
     }
 

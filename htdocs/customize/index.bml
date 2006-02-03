@@ -15,8 +15,7 @@ body<=
     LJ::set_active_crumb('customize');
 
     my $remote = LJ::get_remote();
-    return LJ::bad_input($ML{'error.noremote'})
-        unless $remote;
+    return "<?needlogin?>" unless $remote;
 
     my $authas = $GET{'journal'} || $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);

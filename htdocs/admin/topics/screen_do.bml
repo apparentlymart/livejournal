@@ -4,7 +4,7 @@
  use vars qw(%FORM);
 
  my $remote = LJ::get_remote();
- return $ML{'error.noremote'} unless $remote;
+ return LJ::error_noremote() unless $remote;
 
  return "You don't have access to do this."
     unless LJ::remote_has_priv($remote, "topicscreencat");

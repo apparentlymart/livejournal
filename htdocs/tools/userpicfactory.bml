@@ -6,8 +6,10 @@
     $title = 'Create Userpic';
 
     my $remote = LJ::get_remote();
-    return $ML{'error.noremote'}
-        unless $remote;
+    unless ($remote) {
+        $body = "<?needlogin?>";
+        return;
+    }
 
     my $scaledSizeMax = 640;
 

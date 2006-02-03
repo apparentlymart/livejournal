@@ -5584,7 +5584,7 @@ error.noentry=No such journal entry.
 
 error.nojournal=Unknown Journal
 
-error.noremote=You have to <a href="/login.bml">login</a> in order to use this page.
+error.notloggedin=You have to <a [[aopts]]>log in</a> in order to use this page.
 
 error.procrequest=There was an error processing your request:
 

@@ -10,8 +10,7 @@ body<=
     LJ::set_active_crumb('createstyle');
 
     my $remote = LJ::get_remote();
-    return LJ::bad_input($ML{'error.noremote'})
-        unless $remote;
+    return "<?needlogin?>" unless $remote;
 
     my $ret;
     my $authas = $GET{'authas'} || $remote->{'user'};

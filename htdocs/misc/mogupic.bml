@@ -3,8 +3,7 @@
     use strict;
     use vars qw(%GET);
     my $remote = LJ::get_remote();
-    return $ML{'error.noremote'}
-        unless $remote;
+    return LJ::error_noremote() unless $remote;
 
     my $size = $GET{'size'}+0;
 

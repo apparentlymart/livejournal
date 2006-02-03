@@ -332,3 +332,5 @@ general /update.bml.currmood
 general /update.bml.update.alternate
 
 general /editpics.bml.curpics.desc
+
+general error.noremote
