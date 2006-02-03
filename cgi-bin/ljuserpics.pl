@@ -704,7 +704,7 @@ sub get_upf_scaled
             my $filesize = length($piccopy->ImageToBlob);
 
             # save a workable solution if things don't work out
-            $lastbest = $quality if ($filesize < $maxfilesize);
+            $lastbest = $piccopy if ($filesize < $maxfilesize);
 
             # not good if filesize > maxfilesize, but good if filesize < maxfilesize within 5%
             return $mid if ($maxfilesize - $filesize > 0 && $maxfilesize - $filesize < $maxfilesize * .005);
@@ -721,7 +721,7 @@ sub get_upf_scaled
             if ($newquality) {
                 $image->Set('quality' => $newquality);
             } elsif($lastbest) {
-                $image->Set('quality' => $lastbest);
+                $image = $lastbest;
             }
         }
 
