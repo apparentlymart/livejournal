@@ -212,6 +212,7 @@ about=><?_ml .communities        _ml?>
 list<=
 <li><a href="/community/create.bml" title="<?_ml .communities.create.about _ml?>"><?_ml /community/create.bml.title _ml?></a></li>
 <li><a href="/community/manage.bml" title="<?_ml .communities.manage.about _ml?>"><?_ml /community/manage.bml.title _ml?></a></li>
+<li><a href="/manage/invites.bml" title="<?_ml .communities.invites.about _ml?>"><?_ml /manage/invites.bml.title _ml?></a></li>
 <=list
 block?>
           );

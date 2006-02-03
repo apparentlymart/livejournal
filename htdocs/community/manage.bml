@@ -180,6 +180,10 @@ body<=
  $ret .= "<?h1 $ML{'.create.header'} h1?>";
  $ret .= "<?p " . BML::ml('.create.text', {'link'=>'/community/create.bml'}) . " p?>";
 
+
+ $ret .= "<?h1 $ML{'/manage/invites.bml.title'} h1?>";
+ $ret .= "<?p <a href=\"/manage/invites.bml\"><?_ml /manage/invites.bml.title _ml?></a> p?>";
+
  return $ret;
 
 _code?>
