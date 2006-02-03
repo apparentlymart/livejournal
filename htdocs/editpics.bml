@@ -612,7 +612,7 @@
                 if (my $custom .= LJ::run_hook("editpics_maxlimit", $u)) {
                     $toomany .= $custom;
                 } else {
-                    $toomany .= BML::ml(".error.toomanypics2", { 'maxpics'  => $max });
+                    $toomany .= BML::ml('.error.toomanypics4', {'num' => $max, 'aopts' => "href='$LJ::SITEROOT/editpics.bml?authas=$authas'"});
                 }
 
                 return $err->( $toomany . LJ::help_icon('userpics', " ", ""));
@@ -980,11 +980,11 @@
                                      { disabled => $LJ::DISABLE_MEDIA_UPLOADS });
             $body .= "</td></tr>\n</table>\n</form>\n";
         } else {
-            $body .= "<?standout \n";
+            $body .= "<br /><?standout \n";
             if (my $custom .= LJ::run_hook("editpics_maxlimit", $u)) {
                 $body .= $custom;
             } else {
-                $body .= BML::ml(".error.toomanypics3", { 'max'  => $max });
+                $body .= BML::ml('.error.toomanypics_standout', {'num' => $max});
             }
         }
 

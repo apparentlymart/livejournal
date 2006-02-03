@@ -1937,6 +1937,10 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /editpics.bml.error.toomanykeywords=The [[?numwords|keyword|keywords]] "[[words]]" [[?numwords|has|have]] not been saved as [[?numwords|its|their]] user picture icon already has [[max]] keywords.
 
+/editpics.bml.error.toomanypics4=You are already at your limit of [[num]] [[?num|userpic|userpics]]. You cannot upload this userpic until you delete <a [[aopts]]>one of your existing ones</a>.
+
+/editpics.bml.error.toomanypics_standout=You are at your limit of [[num]] [[?num|userpic|userpics]]. You cannot upload any more userpics until you delete one of your existing ones.
+
 /editpics.bml.error.unsupportedtype=Files of type [[filetype]] are not supported.  You can only upload GIF, PNG or JPG files.  Nearly all image/photo programs can do this conversion for you.
 
 /editpics.bml.error.urlerror=An error ocurred while trying to fetch your image.
