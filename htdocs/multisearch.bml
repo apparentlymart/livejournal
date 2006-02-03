@@ -155,20 +155,20 @@
      $type eq "jabber") {
 
      # lame solution to people "stealing" lower userids' chat values in search results
-     my $sth = $dbr->prepare("SELECT u.userid, u.user FROM user u, userproplist upl, userprop up ".
+     my $sth = $dbr->prepare("SELECT u.userid FROM user u, userproplist upl, userprop up ".
                              "WHERE u.journaltype='P' AND u.statusvis='V' ".
                              "AND u.allow_contactshow='Y' AND u.userid=up.userid ".
                              "AND up.upropid=upl.upropid AND upl.name=? AND up.value=? ".
                              "LIMIT 100");
      $sth->execute($type, $q);
      my @rows;
-     push @rows, $_ while $_ = $sth->fetchrow_hashref;
-     @rows = sort { $a->{'userid'} <=> $b->{'userid'} } @rows;
+     push @rows, $_ while $_ = $sth->fetchrow_array;
+     @rows = sort { $a <=> $b } @rows;
 
      if (@rows) {
-         my $u = $rows[0];
+         my $u = LJ::load_userid($rows[0]);
          if ($output eq "foaf") {
-             return BML::redirect(LJ::journal_base($u) . '/data/foaf');
+             return BML::redirect($u->journal_base . '/data/foaf');
          } else {
              return BML::redirect($u->profile_url);
          }
