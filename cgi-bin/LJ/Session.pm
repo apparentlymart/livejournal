@@ -66,6 +66,7 @@ sub create {
     # validate options
     my $exptype = delete $opts{'exptype'} || "short";
     my $ipfixed = delete $opts{'ipfixed'};   # undef or scalar ipaddress  FIXME: validate
+    my $nolog   = delete $opts{'nolog'} || 0; # 1 to not log to loginlogs
     croak("Invalid exptype") unless $exptype =~ /^short|long|once$/;
 
     croak("Invalid options: " . join(", ", keys %opts)) if %opts;
@@ -91,7 +92,8 @@ sub create {
     my $id = LJ::alloc_user_counter($u, 'S');
     return undef unless $id;
 
-    $u->record_login($id);
+    $u->record_login($id)
+        unless $nolog;
 
     $u->do("REPLACE INTO sessions (userid, sessid, auth, exptype, ".
            "timecreate, timeexpire, ipfixed) VALUES (?,?,?,?,UNIX_TIMESTAMP(),".
