@@ -382,7 +382,10 @@ sub trans
         }
 
         if ($opts->{'mode'} eq "update") {
-            return redir($r, "$LJ::SITEROOT/update.bml");
+            my $u = LJ::load_user($opts->{user})
+                or return 404;
+
+            return redir($r, "$LJ::SITEROOT/update.bml?usejournal=".$u->{'user'});
         }
 
         %RQ = %$opts;
