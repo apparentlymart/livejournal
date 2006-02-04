@@ -111,7 +111,7 @@ body<=
 
         # Old FAQs don't have summaries, so show the answer instead
         my $hassum = 1;
-        unless ($summary) {
+        if ($summary eq "" || $summary eq "-") { # If translators make the summary "-" (they can't save blank strings), then don't show the summary
             $hassum = 0;
             $summary = $answer;
         }
