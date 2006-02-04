@@ -432,6 +432,10 @@ if ($*title_separator) {
     display: none;
 }
 
+.journallinkbar {
+text-align: center;
+}
+
 """;
 }
 
@@ -632,6 +636,7 @@ function Page::lay_print_journalinfo() {
     if (defined $.journal.default_pic) {
         println """<div id="journalinfouserpic">$.journal.default_pic</div>""";
     }
+    """<div class="journallinkbar">"""; $.journal->print_linkbar(); """</div>""";
     println "<dl>";
     println "<dt>$*i18n_journalinfo_name</dt><dd>$.journal.name</dd>";
     if ($.journal.website_url != "") {

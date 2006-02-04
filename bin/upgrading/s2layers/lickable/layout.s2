@@ -669,6 +669,10 @@ input, textarea {
     font-size: $size{"body"};
 }
 
+.journallinkbar {
+    text-align: center;
+}
+
 """;
 }
 
@@ -871,6 +875,7 @@ function Page::lay_print_journalinfo() {
     if (defined $.journal.default_pic) {
         println """<div id="journalinfouserpic">$.journal.default_pic</div>""";
     }
+    """<div class="journallinkbar">"""; $.journal->print_linkbar(); """</div>""";
     if ($*i18n_paraphernalia_journalinfo_blurb != "") {
         println "<p>$*i18n_paraphernalia_journalinfo_blurb</p>";
     }
