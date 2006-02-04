@@ -229,6 +229,7 @@ class UserLite
     function builtin get_link(string key) : Link "Returns a link based on the given key, or null if the link is unavailable";
     function base_url () : string "Returns URL of user's journal.";
     function tag_manage_url () : string "Returns URL to user's tag management page.";
+    function print_linkbar() "Print the link bar for this user/journal.";
     function as_string() : string;
     function print ();
 }
@@ -1480,6 +1481,14 @@ function UserLite::as_string() [fixed] : string {
 
 function UserLite::print() {
     print $this->as_string();
+}
+
+function UserLite::print_linkbar() {
+    var Link link;
+    foreach var string k ($.link_keyseq) {
+        $link = $this->get_link($k);
+        " $link ";
+    }
 }
 
 function Friend::print() {
