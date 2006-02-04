@@ -223,7 +223,10 @@ class UserLite
     var Link{} data_link "Links to various machine-readable data sources relating to this user";
     var string[] data_links_order "An array of data views which can be used to order the data_link hash";
 
+    var string[] link_keyseq "Array of keys which can be passed into the get_link";
+
     function builtin equals(UserLite u) : bool "Returns true if the two user objects refer to the same user. Use this rather than comparing usernames, since usernames aren't globally unique.";
+    function builtin get_link(string key) : Link "Returns a link based on the given key, or null if the link is unavailable";
     function base_url () : string "Returns URL of user's journal.";
     function tag_manage_url () : string "Returns URL to user's tag management page.";
     function as_string() : string;
