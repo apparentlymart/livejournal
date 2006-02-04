@@ -143,6 +143,8 @@
      $synd = $dbr->selectrow_hashref("SELECT * FROM syndicated WHERE userid=$u->{'userid'}");
  }
 
+ my $has_journal = ! ($extid or $synd);
+
  ### load user props.  some don't apply to communities
  {
      my @props = qw(opt_whatemailshow country state city zip renamedto
@@ -351,7 +353,7 @@
      my $label = $com ? $ML{'.monitor.comm'} : $ML{'.monitor.user'};
      push @linkele, "<a href='$LJ::SITEROOT/friends/add.bml?user=$user'><img src='$LJ::IMGPREFIX/btn_addfriend.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>";
 
-     if (LJ::can_use_journal($remote->{'userid'}, $user) && !$extid) {
+     if ($has_journal && LJ::can_use_journal($remote->{'userid'}, $user)) {
          if($remote_isowner) {
              $label = $ML{'.label.postalt'};
          } else {
@@ -364,20 +366,20 @@
      }
 
      $label = $ML{'.label.todo'};
-     push @linkele, "<a href='$LJ::SITEROOT/todo/?user=$user'><img src='$LJ::IMGPREFIX/btn_todo.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>" unless $extid;
+     push @linkele, "<a href='$LJ::SITEROOT/todo/?user=$user'><img src='$LJ::IMGPREFIX/btn_todo.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>" unless $extid or $synd;
 
      $label = $ML{'.label.memories'};
-     push @linkele, "<a href='$LJ::SITEROOT/tools/memories.bml?user=$user'><img src='$LJ::IMGPREFIX/btn_memories.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>" unless $extid;
+     push @linkele, "<a href='$LJ::SITEROOT/tools/memories.bml?user=$user'><img src='$LJ::IMGPREFIX/btn_memories.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>" unless $extid or $synd;
 
      unless ($LJ::DISABLED{'tellafriend'} || $extid) {
          push @linkele, "<a href='$LJ::SITEROOT/tools/tellafriend.bml?user=$u->{'user'}'><img align='middle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_tellfriend.gif' width='22' height='20' alt='$ML{'.tellafriend'}' title='$ML{'.tellafriend'}' border='0' /></a>";
      }
 
-     unless ($LJ::DISABLED{'offsite_journal_search'} || $extid) {
-         push @linkele, "<a href='$LJ::SITEROOT/tools/search.bml?journal=$u->{'user'}'><img align='middle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_search.gif' width='22' height='20' alt='$ML{'.label.searchjournal'}' title='$ML{'.label.searchjournal'}' border='0' /></a>";
+     unless ($LJ::DISABLED{'offsite_journal_search'} || ! $has_journal) {
+         push @linkele, "<a href='$LJ::SITEROOT/tools/search.bml?journal=$u->{'user'}'><img align='middle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_search.gif' width='22' height='20' alt='$ML{'.label.searchjournal'}' title='$ML{'.label.searchjournal'}' border='0' /></a>" unless $synd;
      }
 
-     unless ($LJ::DISABLED{'nudge'} || $remote_isowner) {
+     unless ($LJ::DISABLED{'nudge'} || $remote_isowner || $com || ! $has_journal) {
          push @linkele, "<a href='$LJ::SITEROOT/friends/nudge.bml?user=$u->{'user'}'><img align='middle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_nudge.gif' width='22' height='20' alt='Nudge a friend' title='Nudge a friend' border='0' /></a>";
      }
 
