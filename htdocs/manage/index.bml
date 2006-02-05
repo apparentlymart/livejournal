@@ -121,6 +121,7 @@ _code?>
 <li><a href="./pubkey.bml" title="<?_ml .information.pubkey.about _ml?>"><?_ml .information.pubkey _ml?></a></li>
 <li><a href="/manage/invites.bml" title="<?_ml .communities.invites.about _ml?>"><?_ml /manage/invites.bml.title _ml?></a></li>
 <li><a href="/schools/manage.bml" title="<?_ml .schools _ml?>"><?_ml .schools _ml?></a></li>
+<li><a href="/manage/logins.bml" title="Manage Logins">Manage Logins</a></li>
 <=list
 block?>
 
