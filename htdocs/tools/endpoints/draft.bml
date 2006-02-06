@@ -1,0 +1,37 @@
+<?_code # -*-bml-*-
+{
+    use strict;
+    use vars qw(%POST);
+
+    my $err = sub {
+        my $msg = shift;
+        return LJ::js_dumper({
+            'alert' => $msg,
+        });
+    };
+
+    # get user
+    my $u = LJ::get_remote()
+        or return $err->("User logged in");
+
+    # check referers. should only be accessed from update.bml at the moment
+    #LJ::check_referer("/update.bml")
+    #    or return $err->("Invalid referer");
+
+    if ($POST{'saveDraft'}) {
+        $u->set_prop('entry_draft', $POST{'saveDraft'});
+    }
+
+    if ($POST{'clearDraft'}) {
+        $u->set_prop('entry_draft', '');
+    }
+
+    my $ret = {};
+
+    $ret->{draft} = $u->prop("entry_draft");
+
+    sleep 1 if $LJ::IS_DEV_SERVER;
+
+    return LJ::js_dumper($ret);
+}
+_code?>

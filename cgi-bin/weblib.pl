@@ -1105,9 +1105,12 @@ sub entry_form {
     }
 
     unless ( $opts->{'richtext_on'}) {
+        ### Draft Status Area
+        my $draft = "<span id='draftstatus' style='font-style: italic'></span>";
+
         $out .= "<table width='100%'><tr><td align='left'>";
         $out .= "<p><b>" . BML::ml('entryform.entry');
-        $out .= "</b></p></td><td align='right'>$insobjout</td></tr></table>";
+        $out .= "</b></p></td><td align='right'>$draft&nbsp;&nbsp;$insobjout</td></tr></table>";
     }
 
     if ($opts->{'richtext_on'}) {
@@ -1146,7 +1149,8 @@ RTE
     $out .= LJ::html_textarea({ 'name' => 'event', 'value' => $opts->{'event'},
                                 'rows' => '20', 'cols' => '50', 'style' => 'width: 100%',
                                 'wrap' => 'soft', 'tabindex' => $tabindex->(),
-                                'disabled' => $opts->{'disabled_save'}});
+                                'disabled' => $opts->{'disabled_save'},
+                                'id' => 'draft'});
 
     $out .= '</noscript>' if $opts->{'richtext_on'};
     $out .= LJ::html_hidden('prop_opt_preformatted', '1') if $opts->{'richtext_on'};

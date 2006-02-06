@@ -96,7 +96,7 @@
     }
 
     # Check for errors, store in hash to render later
-    my $errors; my $onload = "shift_contents(); ";
+    my $errors; my $onload = "shift_contents(); initDraft(); ";
     my $showform = $POST{'showform'} || $auth_missing;                            # show entry form
     my $preview = $POST{'action:preview'};
 
@@ -398,6 +398,75 @@ head<=
     $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/core.js'></script>\n";
     $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/dom.js'></script>\n";
     $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/entry.js'></script>\n";
+    $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/httpreq.js'></script>\n";
+    $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/draft.js'></script>\n";
+
+    # draft autosave and restore
+    $ret .= qq^
+            <script>
+            var lastDraft = '';
+            var draftField;
+            var draftStatusField;
+            function initDraft() {
+                draftField = \$("draft");
+                draftStatusField = \$("draftstatus");
+                var answer = true;
+                if (draftField.value) answer = confirm('Restore from saved Draft?');
+                if (answer) {
+                    draftStatusField.innerHTML = 'Restoring last saved draft...';
+                    updateDraft();
+                }
+                setInterval(draftSave, 2000);
+            }
+
+            function updateDraft () {
+                getDraft(gotDraft);
+            }
+
+            function gotDraft (draft) {
+                lastDraft = draft.draft;
+                draftField.value = lastDraft;
+                draftStatusField.innerHTML = 'Restored last saved draft';
+            }
+
+            function draftSave () {
+                if (draftField.value != lastDraft && draftField.value) {
+                    lastDraft = draftField.value;
+                    saveDraft(lastDraft);
+                    draftStatusField.innerHTML = 'Autosaved draft at ' + getTime();
+                }
+            }
+
+            function getTime () {
+                var date = new Date();
+                var hour;
+                var minute;
+                var time;
+
+                hour = date.getHours();
+                if (hour >= 12) {
+                    time = ' PM';
+                } else {
+                    time = ' AM';
+                }
+
+                if (hour > 12) {
+                    hour -= 12;
+                } else if (hour == 0) {
+                    hour = 12;
+                }
+
+                minute = date.getMinutes();
+                if (minute < 10) {
+                    minute = '0' + minute;
+                }
+
+                time = hour + ':' + minute + time;
+                return time;
+            }
+            </script>
+^;
+
 
     $ret .= (! $LJ::REQ_HEAD_HAS{'chalresp_js'}++) ? $LJ::COMMON_CODE{'chalresp_js'} : "";
     return $ret;
