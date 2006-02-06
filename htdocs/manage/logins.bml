@@ -1,10 +1,5 @@
 <?page
 title=>Manage Your Login Sessions
-head<=
-<style>
-    td { text-align: center; }
-</style>
-<=head
 body<=
 <?_code
 {
@@ -62,9 +57,9 @@ body<=
 
         # Is this their current session?
         if ($session->id == $login->[1]) {
-            $body .= "<td style='whitespace: nowrap;'><font size='1'>Current Session</font></td>";
+            $body .= "<td style='whitespace: nowrap; text-align: center'><font size='1'>Current Session</font></td>";
         } else {
-            $body .= "<td>" . LJ::html_submit($login->[1], 'X') . "</td>";
+            $body .= "<td style='text-align: center'>" . LJ::html_submit($login->[1], 'X') . "</td>";
         }
         $body .= "</tr>";
     }
