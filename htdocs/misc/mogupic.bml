@@ -5,7 +5,8 @@
     my $remote = LJ::get_remote();
     return LJ::error_noremote() unless $remote;
 
-    my $size = $GET{'size'}+0;
+    my $size = int($GET{'size'});
+    $size = 640 if $size < 0 || $size > 640;
 
     my $upf = LJ::get_upf_scaled(size => $size);
 
