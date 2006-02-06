@@ -317,6 +317,18 @@
 
     $USERPROP_DEF{'blob_clusterid'} ||= 1;
 
+    # setup default limits for mogilefs classes
+    if (%LJ::MOGILEFS_CONFIG) {
+        my %classes = (userpics => 3,
+                       captcha => 2,
+                       temp => 2,
+                       );
+        $LJ::MOGILEFS_CONFIG{classes} ||= {};
+        foreach my $class (keys %classes) {
+            $LJ::MOGILEFS_CONFIG{classes}{$class} ||= $classes{$class};
+        }
+    }
+
 }
 
 # no dependencies.
