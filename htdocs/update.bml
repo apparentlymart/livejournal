@@ -351,6 +351,9 @@
                 $$body .= LJ::ehtml($res{'errmsg'}) . " errorbar?>";
                 $$body .= "<br /> p?>";
             } else {
+                # Clear out a draft
+                $remote->set_prop('entry_draft', '');
+
                 # short bail if this was posted moderated or some other special case (no itemid but a message)
                 if (!defined $res{itemid} && $res{message}) {
                     $$body .= "<br />$res{message} p?>";
@@ -429,11 +432,15 @@ head<=
             function gotDraft (draft) {
                 lastDraft = draft.draft;
                 draftField.value = lastDraft;
-                draftStatusField.innerHTML = 'Restored last saved draft';
+                if (lastDraft != '') {
+                    draftStatusField.innerHTML = 'Restored last saved draft';
+                } else {
+                    draftStatusField.innerHTML = 'No draft stored';
+                }
             }
 
             function draftSave () {
-                if (draftField.value != lastDraft && draftField.value) {
+                if (draftField.value != lastDraft) {
                     lastDraft = draftField.value;
                     saveDraft(lastDraft);
                     draftStatusField.innerHTML = 'Autosaved draft at ' + getTime();

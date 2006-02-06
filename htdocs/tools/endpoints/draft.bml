@@ -18,7 +18,7 @@
     LJ::check_referer("/update.bml")
         or return $err->("Invalid referer");
 
-    if ($POST{'saveDraft'}) {
+    if (defined $POST{'saveDraft'}) {
         $u->set_prop('entry_draft', $POST{'saveDraft'});
     }
 
