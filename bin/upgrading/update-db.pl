@@ -41,6 +41,8 @@ GetOptions("runsql" => \$opt_sql,
            "innodb" => \$opt_innodb,
            );
 
+$opt_innodb = 1 if $LJ::USE_INNODB;
+
 if ($opt_help) {
     die "Usage: update-db.pl
   -r  --runsql       Actually do the SQL, instead of just showing it.
