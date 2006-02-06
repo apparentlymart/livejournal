@@ -96,7 +96,10 @@
     }
 
     # Check for errors, store in hash to render later
-    my $errors; my $onload = "shift_contents(); initDraft(); ";
+    my $errors;
+    my $onload = "shift_contents(); ";
+    $onload .= "initDraft(); "
+        unless $LJ::DISABLED{'update_draft'};
     my $showform = $POST{'showform'} || $auth_missing;                            # show entry form
     my $preview = $POST{'action:preview'};
 
@@ -416,7 +419,7 @@ head<=
                     draftStatusField.innerHTML = 'Restoring last saved draft...';
                     updateDraft();
                 }
-                setInterval(draftSave, 2000);
+                setInterval(draftSave, 10000);
             }
 
             function updateDraft () {
@@ -441,6 +444,7 @@ head<=
                 var date = new Date();
                 var hour;
                 var minute;
+                var sec;
                 var time;
 
                 hour = date.getHours();
@@ -461,7 +465,12 @@ head<=
                     minute = '0' + minute;
                 }
 
-                time = hour + ':' + minute + time;
+                sec = date.getSeconds();
+                if (sec < 10) {
+                    sec = '0' + sec;
+                }
+
+                time = hour + ':' + minute + ':' + sec + time;
                 return time;
             }
             </script>

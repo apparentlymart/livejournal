@@ -15,8 +15,8 @@
         or return $err->("User logged in");
 
     # check referers. should only be accessed from update.bml at the moment
-    #LJ::check_referer("/update.bml")
-    #    or return $err->("Invalid referer");
+    LJ::check_referer("/update.bml")
+        or return $err->("Invalid referer");
 
     if ($POST{'saveDraft'}) {
         $u->set_prop('entry_draft', $POST{'saveDraft'});
