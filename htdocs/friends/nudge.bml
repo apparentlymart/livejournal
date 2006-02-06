@@ -40,7 +40,7 @@ body<=
         }
 
         my $ebody;
-        $ebody .= "Hey $u->{user},\n";
+        $ebody .= "Hey $u->{user},\n\n";
 
         if ($updated->{$u->{userid}} > 0) {
             my $ago_text = LJ::ago_text(time() - $updated->{$u->{userid}});
