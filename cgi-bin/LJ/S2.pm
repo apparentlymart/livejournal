@@ -1709,13 +1709,13 @@ sub Page
         'data_links_order' => [],
     };
 
+    if ($LJ::UNICODE && $opts && $opts->{'saycharset'}) {
+        $p->{'head_content'} .= '<meta http-equiv="Content-Type" content="text/html; charset=' . $opts->{'saycharset'} . "\" />\n";
+    }
+
     if (LJ::are_hooks('s2_head_content_extra')) {
         my $remote = LJ::get_remote();
         $p->{head_content} .= LJ::run_hook('s2_head_content_extra', $remote, $opts->{r});
-    }
-
-    if ($LJ::UNICODE && $opts && $opts->{'saycharset'}) {
-        $p->{'head_content'} .= '<meta http-equiv="Content-Type" content="text/html; charset=' . $opts->{'saycharset'} . "\" />\n";
     }
 
     # Automatic Discovery of RSS/Atom

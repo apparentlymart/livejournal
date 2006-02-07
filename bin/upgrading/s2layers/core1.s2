@@ -1570,7 +1570,9 @@ function server_sig() {
 }
 
 function Page::print() {
-    "<html>\n<head>\n<title>"+$this->title()+"</title>\n";
+    "<html>\n<head>\n";
+    $this->print_head();
+    "<title>"+$this->title()+"</title>\n";
 
     if ($*font_base != "" or $*font_fallback != "none") {
         """<style type="text/css">""";
@@ -1592,7 +1594,6 @@ body, td, th, table, p, div {
         end_css();
     }
 
-    $this->print_head();
     "</head>\n<body>\n";
     if (defined $.journal.default_pic and
         $.view != "entry" and
