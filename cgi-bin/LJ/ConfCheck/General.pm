@@ -14,6 +14,7 @@ add_singletons(qw(
                   $IP_BANNED_LOADED $_XFER_REMOTE_IP
                   %LIB_MOD_TIME %MEMCACHE_ARRAYFMT
                   $STATPREFIX_BAK $UNIQ_BANNED_LOADED
+                  @LJ::CLEANUP_HANDLERS
                   ));
 
 add_conf('$ADMIN_EMAIL',
