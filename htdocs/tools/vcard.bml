@@ -15,6 +15,7 @@
         my $file = $upic ? $upic->imagedata : undef;
 
         my $vcard = $address_book->add_vcard;
+        $vcard->UID("$LJ::DOMAIN-uid-$u->{userid}");
         $vcard->add_node({ 'node_type' => 'ADR', });
         $vcard->add_node({ 'node_type' => 'N', });
         $vcard->EMAIL($u->email($remote));
