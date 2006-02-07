@@ -1047,6 +1047,7 @@ sub clean_s1_style
             'eat' => [qw[layer iframe script object embed applet]],
             'mode' => 'allow',
             'keepcomments' => 1, # allows CSS to work
+            'cleancss' => 1,
             's1var' => $v,
         });
     }
