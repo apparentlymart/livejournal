@@ -295,8 +295,8 @@ sub process {
             # intentionally not being explicit with regexp, in case
             # they go to 4 digit year or whatever.
             #
-            # 06-03-05_12394.jpg or Image0015.jpg
-            push @imgs, $img if $path =~ /^(?:Image|\d+-\d+-\d+_)\d+.\w+$/;
+            # 06-03-05_12394.jpg or Image0015.jpg or 0015.jpg
+            push @imgs, $img if $path =~ /^(?:Image|\d+-\d+-\d+_)?\d+.(?:gif|jpe?g|png)$/;
         }
         $entity->parts(\@imgs);
     }
