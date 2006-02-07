@@ -329,12 +329,16 @@ function Page::print ()
   <head>
 """;
 
-    if ($*external_stylesheet) {
-        println """<link rel="stylesheet" href="$.stylesheet_url" type="text/css" />""";
-    } else {
-        println """<style type="text/css">"""; print_stylesheet(); "</style>";
-    }
     $this->print_head();
+    if ($*external_stylesheet) {
+        println safe """<link rel="stylesheet" href="$.stylesheet_url" type="text/css" />""";
+    } else {
+        println """<style type="text/css">"""; 
+        start_css();
+        print_stylesheet();
+        end_css(); 
+        print "</style>";
+    }
 
 """
   <title>$title</title>

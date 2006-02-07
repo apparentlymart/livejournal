@@ -310,12 +310,12 @@ function Page::print ()
 
 """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">\n<html>\n<head>\n""";
 
+    $this->print_head();
     if ($*external_stylesheet) {
         println safe """<link rel="stylesheet" href="$.stylesheet_url" type="text/css" />""";
     } else {
         println """<style type="text/css">"""; start_css(); print_stylesheet(); end_css(); "</style>";
     }
-    $this->print_head();
 
 """<title>$title</title>
 </head>

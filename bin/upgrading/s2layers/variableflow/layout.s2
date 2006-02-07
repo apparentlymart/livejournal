@@ -307,17 +307,19 @@ function Page::print() {
    """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/loose.dtd">
 <html>
 <head>
-<title>"""+$this->title()+"""</title>
 """;
+    $this->print_head();
+    """<title>"""+$this->title()+"""</title>""";
     if ($*external_stylesheet) {
-        println """<link rel="stylesheet" href="$.stylesheet_url" type="text/css" />""";
+        println safe """<link rel="stylesheet" href="$.stylesheet_url" type="text/css" />""";
     }
     else {
         println """<style type="text/css">""";
+        start_css();
         print_stylesheet();
+        end_css();
         println """</style>""";
     }
-    $this->print_head();
 """
 </head>
 

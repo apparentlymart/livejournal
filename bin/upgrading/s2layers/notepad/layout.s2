@@ -170,12 +170,16 @@ function Page::print()
     var string title = $this->title();
     """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">\n<html>\n<head>\n""";
 
-    if ($*external_stylesheet) {
-        println """<link rel="stylesheet" href="$.stylesheet_url" type="text/css" />""";
-    } else {
-        println """<style type="text/css">"""; print_stylesheet(); "</style>";
-    }
     $this->print_head();
+    if ($*external_stylesheet) {
+        println safe """<link rel="stylesheet" href="$.stylesheet_url" type="text/css" />""";
+    } else {
+        println """<style type="text/css">"""; 
+        start_css();
+        print_stylesheet();
+        end_css();
+        "</style>";
+    }
 
     """<title>$title</title>
  </head>
