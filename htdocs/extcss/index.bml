@@ -1,0 +1,49 @@
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST);
+    use LWPx::ParanoidAgent;
+    use CSS::Cleaner;
+    use Digest::SHA1;
+
+    BML::decl_params(
+                     # url to proxy/clean
+                     u => qr/^https?:\/\//,
+                     );
+
+    BML::set_content_type("text/css");
+
+    # don't allow access via www.
+    my $host = lc(Apache->request->header_in("Host"));
+    $host =~ s/:.*//;
+    if ($LJ::ONLY_USER_VHOSTS && ($host eq $LJ::DOMAIN ||
+                                  $host eq $LJ::DOMAIN_WEB)) {
+        return "/* invalid domain */";
+    }
+
+    return "/* invalid URL */" unless $GET{u};
+
+    my $memkey = "css:" . Digest::SHA1::sha1_hex($GET{u});
+
+    if (my $clean = LJ::MemCache::get($memkey)) {
+        return $clean;
+    }
+
+    my $ua = LWPx::ParanoidAgent->new(
+                                      timeout => $LJ::CSS_FETCH_TIMEOUT || 2,
+                                      max_size => 1024*300,
+                                      );
+    my $res = $ua->get($GET{u});
+    unless ($res->is_success) {
+        my $errmsg = $res->error_as_HTML;
+        $errmsg =~ s/<.+?>//g;
+        $errmsg =~ s/[^\w ]/ /g;
+        $errmsg =~ s/\s+/ /g;
+        return "/* Error fetching CSS: $errmsg */";
+    }
+    my $cleaner = CSS::Cleaner->new;
+    my $clean = $cleaner->clean($res->content);
+    LJ::MemCache::set($memkey, $clean, 300);  # 5 minute caching
+    return $clean;
+}
+_code?>
