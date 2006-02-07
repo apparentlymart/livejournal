@@ -37,6 +37,7 @@ body<=
 
     my (@recv, @posted, %talkids);
     my %need_userid;
+    $need_userid{$u->{userid}} = 1 if $u->{'journaltype'} eq 'C'; # Need to load the community for logtext
     my %logrow;  # "jid nodeid" -> $logrow
     my %need_logids;  # hash of "journalid jitemid" => [journalid, jitemid]
 
