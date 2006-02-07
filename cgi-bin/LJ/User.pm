@@ -954,6 +954,13 @@ sub email {
     return wantarray ? @emails : $emails[0];
 }
 
+sub share_contactinfo {
+    my ($u, $remote) = @_;
+    return 0 if $u->{journaltype} eq "Y" || $u->underage;
+    return $u->{'allow_contactshow'} eq "Y" ||
+        ($u->{'allow_contactshow'} eq "F" && LJ::is_friend($u, $remote));
+}
+
 package LJ;
 
 # <LJFUNC>

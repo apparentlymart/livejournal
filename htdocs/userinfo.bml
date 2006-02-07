@@ -551,9 +551,7 @@ if ($u->{'journaltitle'}) {
       }
   }
 
-  if ( ! $synd && ! $u->underage && ($u->{'allow_contactshow'} eq "Y" ||
-      ($u->{'allow_contactshow'} eq "F" && $remote_isfriend) || $viewall))
-  {
+  if ($u->share_contactinfo($remote) || $viewall) {
       my $mangleaddress = sub {
           my $email = shift;
           my $mret = "<table cellpadding='0' cellspacing='0'><tr><td>";
