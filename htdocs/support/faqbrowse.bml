@@ -141,8 +141,8 @@ body<=
             my $fr = $1;
 
             # don't highlight terms in URLs
-            $summary =~ s/(http:\/\/\S+)?\Q$qterm\E/$term->($&)/ige;
-            $answer =~ s/(http:\/\/\S+)?\Q$qterm\E/$term->($&)/ige;
+            $summary =~ s/(https?:\/\/\S+)?\Q$qterm\E/$term->($&)/ige;
+            $answer =~ s/(https?:\/\/\S+)?\Q$qterm\E/$term->($&)/ige;
 
             $answer .= $fr;
 	}
