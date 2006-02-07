@@ -206,6 +206,12 @@ add_conf('$EMAIL_POST_DOMAIN',
          des => "Domain name for incoming emails.  For instance, user 'bob' might post by sending email to 'bob\@post.service.com', where 'post.service.com' is the value of \$EMAIL_POST_DOMAIN",
          );
 
+add_conf('$EXAMPLE_USER_ACCOUNT',
+         required => 0,
+         type => "string",
+         des => "The username of the example user account, for use in Support and documentation.  Must be an actual account on the site.",
+         );
+         
 add_conf('$FB_DOMAIN',
          type => 'hostname',
          des => "Domain name for cooperating Fotobilder (media hosting/cataloging) installation",

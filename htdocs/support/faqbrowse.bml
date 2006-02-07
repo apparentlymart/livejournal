@@ -120,6 +120,51 @@ body<=
         $question = LJ::ehtml($question);
         $question =~ s/^\s+//; $question =~ s/\s+$//;
         $question =~ s/\n/<br \/>/g;
+        
+        my $user;
+        my $user_url;
+        my $u;
+
+        # Get remote username and journal URL, or example user's username and journal URL
+        if ($remote) {
+            $user = $remote->{'user'};
+            $user_url = $remote->journal_base;
+        } else {
+            $u = LJ::load_user($LJ::EXAMPLE_USER_ACCOUNT);
+            $user = $u ? $u->{'user'} : "<b>[Unknown or undefined example username]</b>";
+            $user_url = $u ? $u->journal_base : "<b>[Unknown or undefined example username]</b>";
+        }
+
+        # Replace a variable like [[var]] or [[var:arg]] with the correct text
+        my $replace_var = sub {
+            my ($var, $arg) = @_;
+            if ($arg) {
+                # They gave us an argument
+                my $u_arg = LJ::load_user($arg)
+                    or return "<b>[Unknown username]</b>";
+                return {
+                    journalurl => $u_arg->journal_base,
+                }->{$var} || "<b>[Unknown or improper variable]</b>";
+            } else {
+                # No argument, use remote or example user
+                return {
+                    username => $user,
+                    journalurl => $user_url,
+                }->{$var} || "<b>[Unknown or improper variable]</b>";
+            }
+        };
+        
+        # Change [[username]] to remote's username, or site's example username if no remote
+        # Change [[journalurl]] to remote's or example's appropriate journal URL
+        # Change [[journalurl:username]] to given username's appropriate journal URL
+        my $replace_all_vars = sub {
+            my $ref = shift;
+            while ($$ref =~ s/\[\[(\w+)(?::(.+?))?\]\]/$replace_var->($1, $2)/eg) { 1; }
+        };
+        
+        $replace_all_vars->(\$question);
+        $replace_all_vars->(\$answer);
+        $replace_all_vars->(\$summary);
 
         # Clean this as if it were an entry, but don't allow lj-cuts
         LJ::CleanHTML::clean_event(\$summary, {'ljcut_disable' => 1});
