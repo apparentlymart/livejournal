@@ -970,7 +970,7 @@
             $body .= LJ::html_check({ 'type' => 'checkbox',
                                       'name' => 'make_default',
                                       'id' => 'make_default',
-                                      'selected' => '1', 'value' => '1',
+                                      'value' => '1',
                                       'accesskey' => $ML{'.makedefault.key'} });
 
             $body .= "<label for='make_default'>$ML{'.makedefault'}</label></td></tr>\n";
