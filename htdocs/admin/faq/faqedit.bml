@@ -56,6 +56,7 @@ body<=
  $sth->execute;
  my @cats;
  push @cats, '';push @cats, '';
+ my $faqd = LJ::Lang::get_dom("faq");
 
  while (($fc, $fcname) = $sth->fetchrow_array)
  {
@@ -84,7 +85,7 @@ body<=
 
  $ret .= "<br><i>(sort order is how to sort within the category.  categories themselves are also sorted.)</i></p>";
 
- $ret .= "<p><b>Question:</b> (as brief as possible, do not span multiple lines)<br />";
+ $ret .= "<?h1 Question h1?> <?p (as brief as possible, do not span multiple lines) p?><p>";
 
  $ret .= LJ::html_textarea({
      'name'  => 'q',
@@ -93,9 +94,18 @@ body<=
      'cols'  => 70,
      'wrap'  => 'soft'
      });
- $ret .= "<br /><i>(erase question to delete FAQ entry)</i>";
+ $ret .= "<br /><i>(erase question to delete FAQ entry)</i></p>";
+ 
+ if ($faqd) {
+     $ret .= "<p><b>Select modification level for question:</b> ";
+     $ret .= LJ::html_select({ 'name' => "sev_question", "selected" => 0 },
+                             0 => "Typo/etc (no notify)",
+                             1 => "Minor (notify translators)",
+                             2 => "Major (require translation updates)");
+     $ret .= "</p>";
+ }
 
- $ret .= "<p><b>Summary:</b> (should be a shortish paragraph, urls are automatically linked, same markup as journal entries, no lj-cut)<br />";
+ $ret .= "<?h1 Summary h1?> <?p (should be a shortish paragraph, urls are automatically linked, same markup as journal entries, no lj-cut) p?><p>";
 
  $ret .= LJ::html_textarea({
      'name'  => 's',
@@ -104,8 +114,18 @@ body<=
      'cols'  => '70',
      'wrap'  => 'soft'
      });
+ $ret .= "</p>";
 
- $ret .= "<p><b>Answer:</b> (long as you want, urls are automatically linked, same markup as journal entries, no lj-cut)<br />";
+ if ($faqd) {
+     $ret .= "<p><b>Select modification level for summary:</b> ";
+     $ret .= LJ::html_select({ 'name' => "sev_summary", "selected" => 0 },
+                             0 => "Typo/etc (no notify)",
+                             1 => "Minor (notify translators)",
+                             2 => "Major (require translation updates)");
+     $ret .= "</p>";
+ }
+
+ $ret .= "<?h1 Answer h1?> <?p (long as you want, urls are automatically linked, same markup as journal entries, no lj-cut) p?><p>";
 
  $ret .= LJ::html_textarea({
      'name'  => 'a',
@@ -114,11 +134,11 @@ body<=
      'cols'  => '70',
      'wrap'  => 'soft'
      });
+ $ret .= "</p>";
 
- my $faqd = LJ::Lang::get_dom("faq");
  if ($faqd) {
-     $ret .= "<p><b>Select modification level:</b> ";
-     $ret .= LJ::html_select({ 'name' => "sev", "selected" => 1 },
+     $ret .= "<p><b>Select modification level for answer:</b> ";
+     $ret .= LJ::html_select({ 'name' => "sev_answer", "selected" => 0 },
                              0 => "Typo/etc (no notify)",
                              1 => "Minor (notify translators)",
                              2 => "Major (require translation updates)");

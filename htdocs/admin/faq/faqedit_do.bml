@@ -55,18 +55,24 @@ body<=
  my $faqd = LJ::Lang::get_dom("faq");
  my $rlang = LJ::Lang::get_root_lang($faqd);
  unless ($rlang) { undef $faqd; }
- my $opts = {
-     'changeseverity' => $FORM{'sev'}+0,
+ my $opts_question = {
+     'changeseverity' => $FORM{'sev_question'}+0,
+ };
+ my $opts_summary = {
+     'changeseverity' => $FORM{'sev_summary'}+0,
+ };
+ my $opts_answer = {
+     'changeseverity' => $FORM{'sev_answer'}+0,
  };
  my $do_trans = sub {
      my $id = shift;
      return unless $faqd;
      LJ::Lang::set_text($dbh, $faqd->{'dmid'}, $rlang->{'lncode'},
-                        "$id.1question", $FORM{'q'}, $opts);
+                        "$id.1question", $FORM{'q'}, $opts_question);
      LJ::Lang::set_text($dbh, $faqd->{'dmid'}, $rlang->{'lncode'},
-                        "$id.3summary", $FORM{'s'}, $opts);
+                        "$id.3summary", $FORM{'s'}, $opts_summary);
      LJ::Lang::set_text($dbh, $faqd->{'dmid'}, $rlang->{'lncode'},
-                        "$id.2answer", $FORM{'a'}, $opts);
+                        "$id.2answer", $FORM{'a'}, $opts_answer);
  };
  
  unless ($id)
