@@ -26,7 +26,7 @@
         $layerinfo->{$id}->{'source_viewable'} : undef;
 
     # authorized to view this layer?
-    my $isadmin = !defined $pub->{$id} &&                          # public styles are pulled from the system 
+    my $isadmin = !defined $pub->{$id} &&                          # public styles are pulled from the system
                   (LJ::check_priv($remote, 'canview', 'styles') || # account, so we don't want to check privileges
                    LJ::check_priv($remote, 'canview', '*'));       # in case they're private styles
     return $err->($ML{'/customize/advanced/layerbrowse.bml.error.cantviewlayer'})
@@ -72,6 +72,12 @@
 
     # return text version
     BML::set_content_type("text/plain");
+    my $ua = BML::get_client_header("User-Agent");
+    if ($ua && $ua =~ /\bMSIE\b/) {
+        my $filename = "s2source-$id.txt";
+        Apache->request->header_out('Content-Disposition' => "attachment; filename=$filename");
+    }
+
     BML::noparse();
     return $s2code;
 }
