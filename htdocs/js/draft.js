@@ -11,14 +11,15 @@ function saveDraft (draft) {
     HTTPReq.getJSON(reqOpts);
 }
 
-// draft was saved successfully, if you care
+// Draft was saved successfully, we update the status line within the callback
+// passed to getDraft.
 function draftSaved (res) {
-
 }
 
+// Since this is supposed to be a background task, we don't want to present errors
+// to the user.  We do however need to have this callback.  In the future we may
+// try and do something with errors.
 function draftError (err) {
-    // error handling? eh
-        alert(err);
 }
 
 // initiates a request to get the current draft. doesn't actually return the data. data is returned to callback.

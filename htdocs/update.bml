@@ -398,6 +398,8 @@ head<=
 <?entryformcss?>
 <?_code
 {
+    use strict;
+
     my $ret = $_[1]->{'head'};
 
     # FIXME: Need better dependency loader, core.js must be loaded before dom.js, and then entry.js last!
@@ -408,20 +410,30 @@ head<=
     $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/draft.js'></script>\n";
 
     # draft autosave and restore
+    my $remote = LJ::get_remote();
+    my $draft = '';
+    if ($remote) {
+        $draft = LJ::ejs($remote->prop('entry_draft'));
+    }
+
     $ret .= qq^
             <script>
-            var lastDraft = '';
+            var lastDraft = '$draft';
             var draftField;
             var draftStatusField;
             function initDraft() {
                 draftField = \$("draft");
                 draftStatusField = \$("draftstatus");
-                var answer = true;
-                if (draftField.value) answer = confirm('Restore from saved Draft?');
+                var answer = false;
+                if (lastDraft != '') answer = confirm('Restore from saved Draft?');
                 if (answer) {
-                    draftStatusField.innerHTML = 'Restoring last saved draft...';
-                    updateDraft();
+                    draftField.value = lastDraft;
+                    draftStatusField.innerHTML = 'Restored last saved draft';
+                } else {
+                    // Clear out their current draft
+                    saveDraft('');
                 }
+                // Check for changes every 10 seconds to save
                 setInterval(draftSave, 10000);
             }
 
