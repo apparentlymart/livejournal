@@ -62,6 +62,12 @@ sub writer {
     return 0;
 }
 
+sub userpic {
+    my $u = shift;
+    return undef unless $u->{defaultpicid};
+    return LJ::Userpic->new($u, $u->{defaultpicid});
+}
+
 # returns a true value if the user is underage; or if you give it an argument,
 # will turn on/off that user's underage status.  can also take a second argument
 # when you're setting the flag to also update the underage_status userprop
@@ -892,6 +898,62 @@ sub record_login {
                   "ip=?, ua=?", undef, $u->{userid}, $sessid, $ip, $ua);
 }
 
+sub bdate_string {
+    my $u = shift;
+    return "" unless $u->{bdate} && $u->{bdate} ne "0000-00-00";
+    my $str = $u->{bdate};
+    $str =~ s/^0000-//;
+    return $str;
+}
+
+# in scalar context, returns user's email address.  given a remote user,
+# bases decision based on whether $remote user can see it.  in list context,
+# returns all emails that can be shown
+sub email {
+    my ($u, $remote) = @_;
+    return () if $u->{journaltype} =~ /[YI]/;
+
+    # security controls
+    return () unless
+        $u->{'allow_contactshow'} eq "Y" ||
+        ($u->{'allow_contactshow'} eq "F" && LJ::is_friend($u, $remote));
+
+    my $whatemail = $u->prop("opt_whatemailshow");
+    my $useremail_cap = LJ::get_cap($u, 'useremail');
+
+    # some classes of users we want to have their contact info hidden
+    # after so much time of activity, to prevent people from bugging
+    # them for their account or trying to brute force it.
+    my $hide_contactinfo = sub {
+        my $hide_after = LJ::get_cap($u, "hide_email_after");
+        return 0 unless $hide_after;
+        my $memkey = [$u->{userid}, "timeactive:$u->{userid}"];
+        my $active;
+        unless (defined($active = LJ::MemCache::get($memkey))) {
+            my $dbcr = LJ::get_cluster_def_reader($u) or return 0;
+            $active = $dbcr->selectrow_array("SELECT timeactive FROM clustertrack2 ".
+                                             "WHERE userid=?", undef, $u->{userid});
+            LJ::MemCache::set($memkey, $active, 86400);
+        }
+        return $active && (time() - $active) > $hide_after * 86400;
+    };
+
+    return () if $u->{'opt_whatemailshow'} eq "N" ||
+        $u->{'opt_whatemailshow'} eq "L" && ($u->prop("no_mail_alias") || ! $useremail_cap || ! $LJ::USER_EMAIL) ||
+        $hide_contactinfo->();
+
+    my @emails = ($u->{'email'});
+    if ($u->{'opt_whatemailshow'} eq "L") {
+        @emails = ();
+    }
+    if ($LJ::USER_EMAIL && $useremail_cap) {
+        unless ($u->{'opt_whatemailshow'} eq "A" || $u->{'no_mail_alias'}) {
+            push @emails, "$u->{'user'}\@$LJ::USER_DOMAIN";
+        }
+    }
+    return wantarray ? @emails : $emails[0];
+}
+
 package LJ;
 
 # <LJFUNC>
@@ -1672,7 +1734,10 @@ sub remote_has_priv
 # $dom: 'L' == log, 'T' == talk, 'M' == modlog, 'S' == session,
 #       'R' == memory (remembrance), 'K' == keyword id,
 #       'P' == phone post, 'C' == pending comment
-#       'O' == portal box id
+#       'O' == portal box id, 'V' == 'vgift'
+#
+# FIXME: both phonepost and vgift are ljcom.  need hooks. but then also
+#        need a sepate namespace.  perhaps a separate function/table?
 sub alloc_user_counter
 {
     my ($u, $dom, $opts) = @_;
@@ -1680,7 +1745,7 @@ sub alloc_user_counter
 
     ##################################################################
     # IF YOU UPDATE THIS MAKE SURE YOU ADD INITIALIZATION CODE BELOW #
-    return undef unless $dom =~ /^[LTMPSRKCO]$/;                     #
+    return undef unless $dom =~ /^[LTMPSRKCOV]$/;                     #
     ##################################################################
 
     my $dbh = LJ::get_db_writer();
@@ -1779,6 +1844,9 @@ sub alloc_user_counter
                                       undef, $uid);
     } elsif ($dom eq "O") {
         $newmax = $u->selectrow_array("SELECT MAX(pboxid) FROM portal_config WHERE userid=?",
+                                      undef, $uid);
+    } elsif ($dom eq "V") {
+        $newmax = $u->selectrow_array("SELECT MAX(giftid) FROM vgifts WHERE userid=?",
                                       undef, $uid);
     } else {
         die "No user counter initializer defined for area '$dom'.\n";

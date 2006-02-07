@@ -11,6 +11,7 @@ use HTTP::Date ();
 use LJ::MemCache;
 use LJ::User;
 use LJ::Entry;
+use LJ::Userpic;
 use Time::Local ();
 use Storable ();
 use Compress::Zlib ();

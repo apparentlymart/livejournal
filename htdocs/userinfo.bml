@@ -566,39 +566,10 @@ if ($u->{'journaltitle'}) {
           return $mret;
       };
 
-      # some classes of users we want to have their contact info hidden
-      # after so much time of activity, to prevent people from bugging
-      # them for their account or trying to brute force it.
-      my $hide_contactinfo = sub {
-          my $hide_after = LJ::get_cap($u, "hide_email_after");
-          return 0 unless $hide_after;
-          my $memkey = [$u->{userid}, "timeactive:$u->{userid}"];
-          my $active;
-          unless (defined($active = LJ::MemCache::get($memkey))) {
-              $active = $dbcr->selectrow_array("SELECT timeactive FROM clustertrack2 ".
-                                               "WHERE userid=?", undef, $u->{userid});
-              LJ::MemCache::set($memkey, $active, 86400);
-          }
-          return $active && (time() - $active) > $hide_after * 86400;
-      };
-
-      my $useremail_cap = LJ::get_cap($u, 'useremail');
-      unless ($u->{'opt_whatemailshow'} eq "N" ||
-              $u->{'journaltype'} eq "I" ||
-              $u->{'opt_whatemailshow'} eq "L" && ($u->{'no_mail_alias'} || ! $useremail_cap || ! $LJ::USER_EMAIL) ||
-              $hide_contactinfo->()) {
+      my @emails = $u->email($remote);
+      if (@emails) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
           $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.email'}</b></td><td colspan='$span'>";
-          my @emails = ($u->{'email'});
-          if ($u->{'opt_whatemailshow'} eq "L") {
-              @emails = ();
-          }
-          if ($LJ::USER_EMAIL && $useremail_cap) {
-
-              unless ($u->{'opt_whatemailshow'} eq "A" || $u->{'no_mail_alias'}) {
-                  push @emails, "$u->{'user'}\@$LJ::USER_DOMAIN";
-              }
-          }
           foreach my $email (@emails) {
               $body .= ($u->{'opt_mangleemail'} eq "Y" || $email =~ /\@livejournal\.com$/)
                         ? $mangleaddress->($email)
