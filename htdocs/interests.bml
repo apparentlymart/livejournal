@@ -351,7 +351,8 @@ body<=
         }
 
         my $profile_url = $u->profile_url;
-        my $profile_url_other = $POST{'fromuser'} ne "" ? LJ::load_user($POST{'fromuser'})->profile_url : "";
+        my $u_other = LJ::load_user($POST{'fromuser'});
+        my $profile_url_other = $u_other ? $u_other->profile_url : "";
         
         $ret .= " p?><?p " . BML::ml('.results.message2', {'aopts' => "href='$profile_url'"});
         $ret .= " " . BML::ml('.results.goback2', {'user' => LJ::ljuser($POST{'fromuser'}), 'aopts' => "href='$profile_url_other'"})
