@@ -137,7 +137,7 @@ sub clean
     $action{'script'} = "eat";
 
     my @attrstrip = qw();
-    if ($opts->{'cleancss'}) {
+    if ($opts->{'cleancss'} && ! $opts->{'allow_id_attrs'}) {
         push @attrstrip, 'id';
     }
 
@@ -371,7 +371,6 @@ sub clean
                             my $css = CSS::Cleaner->new;
                             $hash->{style} = $css->clean_property($hash->{style});
                         }
-                        next ATTR;
                     }
 
                     # reserve ljs_* ids for divs, etc so users can't override them to replace content
@@ -1054,6 +1053,7 @@ sub clean_s1_style
             'mode' => 'allow',
             'keepcomments' => 1, # allows CSS to work
             'cleancss' => 1,
+            'allow_id_attrs' => 1,
             's1var' => $v,
         });
     }
