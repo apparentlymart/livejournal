@@ -83,6 +83,9 @@ body<=
             $ret .= "</td><td>\n";
             
             $layerdesc->($l);
+
+            my $u = LJ::load_user($journal);
+            $ret .= "<?de " . BML::ml('.unavailable', { 'aopts' => "href='/paidaccounts/'" }) . " de?>" unless LJ::S2::can_use_layer($u, $l->{'uniq'});
             
             $ret .= "<ul style=\"list-style: none; padding: 0; margin: 0;\">";
             $ret .= "<li><a href='themes.bml?layout=$l->{s2lid}&amp;journal=$journal'>$ML{'.viewthemes'}</a>";

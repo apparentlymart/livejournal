@@ -1292,6 +1292,10 @@ on your layout, changing this setting discards all other edits you may have made
 
 /customize/preview.bml.title=Layout Previews
 
+/customize/preview.bml.unavailable<<
+Layout currently unavailable to the selected account.
+.
+
 /customize/preview.bml.viewmore=View More Previews
 
 /customize/preview.bml.viewthemes=View Themes
