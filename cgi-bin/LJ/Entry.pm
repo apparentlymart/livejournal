@@ -561,6 +561,30 @@ sub tag_map {
     return $tags->{$self->jitemid} || {};
 }
 
+# returns a LJ::Userpic object for this post, or undef
+# currently this is for the permalink view, not for the friends view
+# context.  TODO: add a context option for friends page, and perhaps
+# respect $remote's userpic viewing preferences (community shows poster
+# vs community's picture)
+sub userpic {
+    my $self = shift;
+
+    my $up = $self->poster;
+
+    # try their entry-defined userpic keyword, then their custom
+    # mood, then their standard mood
+    my $key = $self->prop('picture_keyword') ||
+        $self->prop('current_mood') ||
+        LJ::mood_name($self->prop('current_moodid'));
+
+    # return the picture from keyword, if defined
+    my $picid = LJ::get_picid_from_keyword($up, $key);
+    return LJ::Userpic->new($up, $picid) if $picid;
+
+    # else return poster's default userpic
+    return $up->userpic;
+}
+
 package LJ;
 
 # <LJFUNC>

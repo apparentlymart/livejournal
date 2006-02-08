@@ -58,4 +58,17 @@ sub imagedata {
     return undef;
 }
 
+# returns (width, height)
+sub dimensions {
+    my $self = shift;
+
+    my %upics;
+    my $u = LJ::load_userid($self->{userid});
+    LJ::load_userpics(\%upics, [ $u, $self->{picid} ]);
+    my $up = $upics{$self->{picid}} or
+        return ();
+
+    return ($up->{width}, $up->{height});
+}
+
 1;

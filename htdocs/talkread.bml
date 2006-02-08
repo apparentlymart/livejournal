@@ -198,19 +198,20 @@ my $old_url = 0;
  $ret .= "<p>";
  $ret .= "<table><tr valign='middle'>";
 
- my $picid = LJ::get_picid_from_keyword($up, $props->{'picture_keyword'});
+ my $entry = LJ::Entry->new($u, ditemid => $ditemid);
+ my $userpic = $entry->userpic;
 
  my %userpics;
- if ($picid) {
-     LJ::load_userpics(\%userpics, [ $u, $picid ]);
+ if ($userpic) {
      my $alt = $up->{'name'};
      if ($props->{'picture_keyword'}) {
          $alt .= ": $props->{'picture_keyword'}";
      }
      LJ::text_out(\$alt);
      $alt = LJ::ehtml($alt);
-     $ret .= "<td><img src='$LJ::USERPIC_ROOT/$picid/$up->{'userid'}' width='$userpics{$picid}->{'width'}' ".
-         "height='$userpics{$picid}->{'height'}' align='absmiddle' ".
+     my ($w, $h) = $userpic->dimensions;
+     $ret .= "<td><img src='" . $userpic->url . "' width='$w' height='$h' " .
+         "align='absmiddle' ".
          "hspace='3' title='$alt' alt=''></td>";
  }
 

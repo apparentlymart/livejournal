@@ -168,20 +168,28 @@ body<=
     BML::ebml(\$event);
 
     $ret .= "<table><tr valign='middle'>";
+
+    my $entry = LJ::Entry->new($u, ditemid => $ditemid);
     my $pickw = $init->{'replyto'} ? $parpost->{'picture_keyword'} : $props->{'picture_keyword'};
-    my $picid = LJ::get_picid_from_keyword($ur, $pickw);
+
+    my $userpic;
+    if ($init->{'replyto'}) {
+        my $picid = LJ::get_picid_from_keyword($ur, $pickw);
+        $userpic = LJ::Userpic->new($ur, $picid) if $picid;
+    } else {
+        $userpic = $entry->userpic;
+    }
 
     my %userpics;
-    if ($picid) {
-        LJ::load_userpics(\%userpics, [ $u, $picid ]);
-
+    if ($userpic) {
         # not auto-vivifying $ur here because $picid is based
         # on $ur existing in the first place
         my $alt = $ur->{'name'};
         $alt .= ": $pickw" if $pickw;
         $alt = LJ::ehtml($alt);
-        $ret .= "<td><img src='$LJ::USERPIC_ROOT/$picid/$ur->{'userid'}' width='$userpics{$picid}->{'width'}' ".
-                "height='$userpics{$picid}->{'height'}' align='absmiddle' ".
+        my ($w, $h) = $userpic->dimensions;
+        $ret .= "<td><img src='" . $userpic->url . "'' width='$w' height='$h' " .
+                "align='absmiddle' ".
                 "hspace='3' title='$alt' alt='' /></td>";
     }
 
