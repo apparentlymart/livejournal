@@ -631,7 +631,8 @@ sub clean
             if ($opencount{'style'} && $LJ::DEBUG{'s1_style_textnode'}) {
                 my $r = Apache->request;
                 my $uri = $r->uri;
-                warn "Got text node while style elements open.  Shouldn't happen anymore. ($uri)\n";
+                my $host = $r->header_in("Host");
+                warn "Got text node while style elements open.  Shouldn't happen anymore. ($host$uri)\n";
             }
 
             my $auto_format = $addbreaks &&
