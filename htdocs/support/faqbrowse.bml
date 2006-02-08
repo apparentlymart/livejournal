@@ -65,13 +65,9 @@ body<=
     my $curlang = $GET{'lang'} || BML::get_language();
     my $deflang = BML::get_language_default();
     my $altlang = $curlang ne $deflang;
-    my $mld;
-    my $mll;
-    if ($altlang) {
-        $mll = LJ::Lang::get_lang($curlang);
-        $mld = LJ::Lang::get_dom("faq");
-        $altlang = 0 unless $mll && $mld;
-    }
+    my $mll = LJ::Lang::get_lang($curlang);
+    my $mld = LJ::Lang::get_dom("faq");
+    $altlang = 0 unless $mll && $mld;
 
     # query db and get data
     my $sth = $dbr->prepare("SELECT faqid, question, summary, answer, faqcat, lastmoduserid, ".
@@ -116,11 +112,35 @@ body<=
             $summary = $answer;
         }
 
-        # escape question and answers
+        # escape question
         $question = LJ::ehtml($question);
         $question =~ s/^\s+//; $question =~ s/\s+$//;
         $question =~ s/\n/<br \/>/g;
         
+        my @faqids;
+        my %faqtitles;
+        
+        # Create an array of FAQ ids that are needed to display the [[faqtitle:#]] variables in this FAQ
+        my $find_faq_ids = sub {
+            my $text = shift;
+
+            while ($$text =~ /\[\[faqtitle:(\d+)\]\]/g) {
+                push @faqids, LJ::ehtml($1);
+            }
+        };
+        
+        # Don't worry about the question, since there shouldn't ever be other FAQ titles in it
+        $find_faq_ids->(\$summary);
+        $find_faq_ids->(\$answer) if $hassum;
+
+        # Create a hash of faqid->faqtitle from the given faqids for displaying [[faqtitle:#]] variables in this FAQ
+        foreach my $faqid (@faqids) {
+            my $title = LJ::Lang::get_text($curlang, "$faqid.1question", $mld->{'dmid'});
+            if (!$faqtitles{$faqid}) {
+                $faqtitles{$faqid} = $title || "<b>[Failed to get title of FAQ #$faqid]</b>";
+            }
+        }
+
         my $user;
         my $user_url;
         my $u;
@@ -135,36 +155,55 @@ body<=
             $user_url = $u ? $u->journal_base : "<b>[Unknown or undefined example username]</b>";
         }
 
+        my $err_bad_variable = sub {
+            my $var = LJ::ehtml(shift);
+            return "<b>[Unknown or improper variable: $var]</b>";
+        };
+ 
         # Replace a variable like [[var]] or [[var:arg]] with the correct text
         my $replace_var = sub {
-            my ($var, $arg) = @_;
-            if ($arg) {
-                # They gave us an argument
+            my ($var, $arg, $section) = @_;
+            if ($arg && $var eq "journalurl") {
+                # They gave us a journalurl argument
                 my $u_arg = LJ::load_user($arg)
-                    or return "<b>[Unknown username]</b>";
+                    or return "<b>[Unknown username: " . LJ::ehtml($arg) . "]</b>";
                 return {
                     journalurl => $u_arg->journal_base,
-                }->{$var} || "<b>[Unknown or improper variable]</b>";
-            } else {
-                # No argument, use remote or example user
+                }->{$var} || $err_bad_variable->($var . ':' . $arg);
+            }
+            elsif ($arg && $var eq "faqtitle" && $section ne 'q') {
+                # They gave us a FAQ title argument
+                my $faqtitle = $faqtitles{$arg}
+                    or return "<b>[Unknown FAQ id: " . LJ::ehtml($arg) . "]</b>";
+                return {
+                    faqtitle => $faqtitle,
+                }->{$var} || $err_bad_variable->($var . ':' . $arg);
+            }
+            elsif (!$arg) {
+                # Variable with no argument
                 return {
                     username => $user,
                     journalurl => $user_url,
-                }->{$var} || "<b>[Unknown or improper variable]</b>";
+                }->{$var} || $err_bad_variable->($var);
+            }
+            else {
+                # Error
+                return $err_bad_variable->($var . ':' . $arg);
             }
         };
         
         # Change [[username]] to remote's username, or site's example username if no remote
         # Change [[journalurl]] to remote's or example's appropriate journal URL
         # Change [[journalurl:username]] to given username's appropriate journal URL
+        # Change [[faqtitle:#]] to the given FAQ id's title/question (not valid in titles/questions)
         my $replace_all_vars = sub {
-            my $ref = shift;
-            while ($$ref =~ s/\[\[(\w+)(?::(.+?))?\]\]/$replace_var->($1, $2)/eg) { 1; }
+            my ($ref, $section) = @_;
+            while ($$ref =~ s/\[\[(\w+)(?::([\w-]+?))?\]\]/$replace_var->($1, $2, $section)/eg) { 1; }
         };
         
-        $replace_all_vars->(\$question);
-        $replace_all_vars->(\$answer);
-        $replace_all_vars->(\$summary);
+        $replace_all_vars->(\$question, 'q');
+        $replace_all_vars->(\$summary, 's');
+        $replace_all_vars->(\$answer, 'a') if $hassum;
 
         # Clean this as if it were an entry, but don't allow lj-cuts
         LJ::CleanHTML::clean_event(\$summary, {'ljcut_disable' => 1});
