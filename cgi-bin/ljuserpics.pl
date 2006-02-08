@@ -631,8 +631,8 @@ sub get_upf_scaled
     my $getSizedCoords = sub {
         my $newsize = shift;
 
-        my $_w = $image->Get('width');
-        my $_h = $image->Get('height');
+        my $_w = $image->Get('width') || return undef;
+        my $_h = $image->Get('height') || return undef;
 
         my ($nh, $nw);
 
@@ -661,7 +661,7 @@ sub get_upf_scaled
     if ($x1 && $x2 && $y1 && $y2) {
         # scale small coords to full-size so we can crop the high quality source image before for
         # higher quality scaled userpics.
-        my ($scaledw, $scaledh) = $getSizedCoords->($size);
+        my ($scaledw, $scaledh) = $getSizedCoords->($size) || return undef;
 
         $x1 *= ($w/$scaledw);
         $x2 *= ($w/$scaledw);
