@@ -248,7 +248,10 @@ sub clean
                 $p->get_tag("/style");
                 unless ($LJ::DISABLED{'css_cleaner'}) {
                     my $cleaner = CSS::Cleaner->new;
-                    $style = "/* cleaned */\n" . $cleaner->clean($style);
+                    $style = $cleaner->clean($style);
+                    if ($LJ::IS_DEV_SERVER) {
+                        $style = "/* cleaned */\n" . $style;
+                    }
                 }
                 $newdata .= "\n<style>\n$style</style>\n";
                 next;
