@@ -628,8 +628,10 @@ sub clean
             my %url = ();
             my $urlcount = 0;
 
-            if ($opencount{'style'}) {
-                warn "Got text node while style elements open.  Shouldn't happen anymore.\n";
+            if ($opencount{'style'} && $LJ::DEBUG{'s1_style_textnode'}) {
+                my $r = Apache->request;
+                my $uri = $r->uri;
+                warn "Got text node while style elements open.  Shouldn't happen anymore. ($uri)\n";
             }
 
             my $auto_format = $addbreaks &&
