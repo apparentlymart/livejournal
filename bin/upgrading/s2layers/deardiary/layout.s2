@@ -372,8 +372,7 @@ if ($*title_separator) {
     padding: 0 10px 0 0;
 }
 * html #main {
-    width: expression((document.body.clientWidth - document.getElementById('paraphernalia').clientWidth - 10)+"px");
-    height: expression((document.body.clientHeight)+"px");
+    width: 95%;
 }
 
 .day h2 {
