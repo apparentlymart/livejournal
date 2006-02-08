@@ -149,23 +149,7 @@ function print_custom_stylesheet() {}
 
 function print_stylesheet () {
 
-if ($*use_6a_base) {
 """
-/* base css */
-@import url(http://www.typepad.com/.shared/themes/common/base-weblog.css);
-@import url($*STATDIR/sixhtml/ljextras.css);
-""";
-}
-
-if ($*base_theme != "__none") {
-"""/* theme css */
-@import url($*theme_stylesheet{$*base_theme});
-
-""";
-}
-
-"""
-
 /* user css */
 """;
     print_custom_stylesheet();
@@ -500,10 +484,19 @@ function Page::print () {
    """;
 
     $this->print_head();
-    """<title>""" + $this->title() + """</title>""";
+    """<title>""" + $this->title() + """</title>\n""";
+
+    if ($*use_6a_base) {
+        println safe """<link rel="stylesheet" href="http://www.typepad.com/.shared/themes/common/base-weblog.css" type="text/css" />\n""";
+        println safe """<link rel="stylesheet" href="$*STATDIR/sixhtml/ljextras.css" type="text/css" />\n""";
+    }
+
+    if ($*base_theme != "__none") {
+        println safe """<link rel="stylesheet" href="$*theme_stylesheet{$*base_theme}" type="text/css" />\n""";
+    }
 
     if ($*external_stylesheet) {
-        println safe """<link rel="stylesheet" href="$.stylesheet_url" type="text/css" />""";
+        println safe """<link rel="stylesheet" href="$.stylesheet_url" type="text/css" />\n""";
     }
     else {
         println """<style type="text/css">""";
