@@ -137,8 +137,12 @@ sub clean
     $action{'script'} = "eat";
 
     my @attrstrip = qw();
-    if ($opts->{'cleancss'} && ! $opts->{'allow_id_attrs'}) {
+
+    # cleancss means clean annoying css
+    # clean_js_css means clean javascript from css
+    if ($opts->{'cleancss'}) {
         push @attrstrip, 'id';
+        $opts->{'clean_js_css'} = 1;
     }
 
     if ($opts->{'nocss'}) {
@@ -352,22 +356,24 @@ sub clean
                         next;
                     }
 
-                    if ($attr eq 'style' && $opts->{'cleancss'}) {
-                        # css2 spec, section 4.1.3
-                        # position === p\osition  :(
-                        # strip all slashes no matter what.
-                        $hash->{$attr} =~ s/\\//g;
+                    if ($attr eq 'style') {
+                        if ($opts->{'cleancss'}) {
+                            # css2 spec, section 4.1.3
+                            # position === p\osition  :(
+                            # strip all slashes no matter what.
+                            $hash->{style} =~ s/\\//g;
 
-                        # and catch the obvious ones ("[" is for things like document["coo"+"kie"]
-                        foreach my $css ("/*", "[", qw(absolute fixed expression eval behavior cookie document window javascript -moz-binding)) {
-                            if ($hash->{$attr} =~ /\Q$css\E/i) {
-                                delete $hash->{$attr};
-                                next ATTR;
+                            # and catch the obvious ones ("[" is for things like document["coo"+"kie"]
+                            foreach my $css ("/*", "[", qw(absolute fixed expression eval behavior cookie document window javascript -moz-binding)) {
+                                if ($hash->{style} =~ /\Q$css\E/i) {
+                                    delete $hash->{style};
+                                    next ATTR;
+                                }
                             }
                         }
 
-                        # and then run it through a harder CSS cleaner that does a full parse
-                        unless ($LJ::DISABLED{'css_cleaner'}) {
+                        if ($opts->{'clean_js_css'} && ! $LJ::DISABLED{'css_cleaner'}) {
+                            # and then run it through a harder CSS cleaner that does a full parse
                             my $css = CSS::Cleaner->new;
                             $hash->{style} = $css->clean_property($hash->{style});
                         }
@@ -1052,8 +1058,7 @@ sub clean_s1_style
             'eat' => [qw[layer iframe script object embed applet]],
             'mode' => 'allow',
             'keepcomments' => 1, # allows CSS to work
-            'cleancss' => 1,
-            'allow_id_attrs' => 1,
+            'clean_js_css' => 1,
             's1var' => $v,
         });
     }
