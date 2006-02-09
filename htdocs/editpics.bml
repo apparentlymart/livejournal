@@ -14,7 +14,7 @@
         $body = LJ::bad_input(@_);
         return;
     };
- 
+
     unless (LJ::text_in(\%POST)) {
         return $err->("Invalid UTF-8 Input");
     }
@@ -28,7 +28,7 @@
     if ($remote->underage) {
         return BML::redirect("$LJ::SITEROOT/agecheck/?s=1");
     }
-    
+
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);
     return $err->($ML{'error.invalidauth'})
@@ -121,7 +121,7 @@
             {
                 # ignore anything expunged
                 next if $pic->{state} eq 'X';
-                
+
                 # store picture information
                 $states{$pic->{picid}} = $pic->{state};
                 $locations{$pic->{picid}} = $pic->{location}
@@ -134,7 +134,7 @@
                     $ctype{$pic->{picid}} = ($u->{'dversion'} > 6) ? $pic->{'fmt'} : $pic->{'contenttype'};
                     next;
                 }
-                
+
                 # make a list of inactive picids
                 if ($pic->{'state'} eq 'I') {
                     push @inactive_picids, $pic->{'picid'};
@@ -184,7 +184,7 @@
             # that picid has already been assigned to a new active one
             foreach my $picid (@inactive_picids) {
                 next unless $exist_kwids{$picid};
-                
+
                 foreach (@{$exist_kwids{$picid}}) {
                     $picid_of_kwid{$_} ||= $picid;
                 }
@@ -200,7 +200,7 @@
                 } else {
                     $id_in = join(", ", map { $dbh->quote($_) } @delete);
                 }
-                
+
                 # delete data from user cluster
                 foreach my $picid (@delete) {
                     my $fmt;
@@ -249,8 +249,8 @@
                         # decrement $count to reflect deletion
                         $count--;
                     }
-                    
-                    # if we didn't end up deleting, it's either because of 
+
+                    # if we didn't end up deleting, it's either because of
                     # some transient error, or maybe there was nothing to delete
                     # for some bizarre reason, in which case we should verify
                     # that and make sure they can delete their metadata
@@ -525,8 +525,8 @@
                     return $err->("couldn't parse upload: $error");
                 }
 
-		my $imgdata = $POST{userpic} ? \$POST{userpic} : $upload{spool_fh};
-		($imagew, $imageh, $filetype) = Image::Size::imgsize($imgdata);
+                my $imgdata = $POST{userpic} ? \$POST{userpic} : $upload{spool_fh};
+                ($imagew, $imageh, $filetype) = Image::Size::imgsize($imgdata);
 
                 return $err->("The dimensions of this image are too large.") if ($imagew > 5000 || $imageh > 5000);
 
@@ -874,24 +874,8 @@
                                  "FROM userpic WHERE userid=?");
         }
         $sth->execute($u->{'userid'});
-        my @sortedpics;
-        push @sortedpics, $_ while $_ = $sth->fetchrow_hashref;
-
-
-        # See if they have any without keywords before we output the display table
-        foreach (@sortedpics) {
-            unless ($keywords{$_->{'picid'}}) {
-                my @w;
-                if (defined $LJ::HELPURL{'upic_keywords'}) {
-                    push @w, BML::ml('.warning.keywords.faq', {'aopts' => "href='$LJ::HELPURL{'upic_keywords'}'"});
-                } else {
-                    push @w, $ML{'.warning.keywords'};
-                }
-
-                $body .= LJ::warning_list(@w);
-                last;
-            }
-        }
+        my @piclist;
+        push @piclist, $_ while $_ = $sth->fetchrow_hashref;
 
         # let users upload more pics
         $body .= "<a name='upload'></a>";
@@ -903,22 +887,6 @@
             } else {
                 $body .= "<?h1 $ML{'.uploadheader'} h1?>\n";
                 $body .= "<?p $ML{'.uploaddesc'} p?>\n\n";
-
-                $body .= "<ul>\n";
-                foreach (qw(filesize imagesize2 fileformat)) {
-                    $body .= "<li>" . $ML{".restriction.$_"} . "</li>\n";
-                }
-
-                # Keywords is a little different
-                $body .= "<li>";
-                if (defined $LJ::HELPURL{'upic_keywords'}) {
-                    $body .= BML::ml('.restriction.keywords.faq', {'aopts' => "href='$LJ::HELPURL{'upic_keywords'}'"});
-                } else {
-                    $body .= $ML{'.restriction.keywords'};
-                }
-
-                $body .= "</li>";
-                $body .= "</ul>\n";
             }
 
             # upload form
@@ -952,19 +920,21 @@
 
             $body .= "<tr><td colspan='3' align='center'><hr></td></tr>";
 
-            $body .= "<tr><td align='right'>";
+            $body .= "<tr valign='top'><td align='right'>";
             $body .= LJ::help_icon('upic_keywords');
             $body .= "</td><td align='right'><label for='keywords'>";
             $body .= "$ML{'.label.keywords'}</label></td><td align='left'>";
             $body .= LJ::html_text({ 'name' => 'keywords', 'size' => '40' });
+            $body .= "<div><small>Comma-separated list of terms you'll use to select this picture.</small></div>";
             $body .= "</td></tr>";
 
             if ($u->{'dversion'} > 6) {
-                $body .= "<tr><td align='right'>";
+                $body .= "<tr valign='top' ><td align='right'>";
                 $body .= LJ::help_icon('upic_comments');
                 $body .= "</td><td align='right'><label for='comments'>$ML{'.label.comment'}</label></td><td align='left'>";
                 my $comments = $POST{'comments'} if $fotobilder;
                 $body .= LJ::html_text({ 'name' => 'comments', 'size' => '40', 'maxlength' => LJ::CMAX_UPIC_COMMENT, 'value', $comments });
+                $body .= "<div><small>Optional description of this picture for your friends.</small></div>";
                 $body .= "</td></tr>";
             }
 
@@ -973,11 +943,12 @@
                                       'name' => 'make_default',
                                       'id' => 'make_default',
                                       'value' => '1',
+                                      'selected' => (@piclist ? 0 : 1),
                                       'accesskey' => $ML{'.makedefault.key'} });
 
             $body .= "<label for='make_default'>$ML{'.makedefault'}</label></td></tr>\n";
 
-            $body .= "<tr><td colspan='3' align='center'><br />";
+            $body .= "<tr><td colspan='3' align='center'>";
             $body .= LJ::html_submit(undef, $ML{'.btn.proceed'},
                                      { disabled => $LJ::DISABLE_MEDIA_UPLOADS });
             $body .= "</td></tr>\n</table>\n</form>\n";
@@ -993,7 +964,7 @@
         $body .= " standout?>\n\n";
 
         my $piccount = 0;
-        foreach my $pic (sort { $a->{picid} <=> $b->{picid} } @sortedpics)
+        foreach my $pic (sort { $a->{picid} <=> $b->{picid} } @piclist)
         {
             my $pid = $pic->{'picid'};
 
@@ -1013,7 +984,7 @@
             my ($dis, $distxt);
             {
                 $body .= "<tr><td align='right'><b><label for='$pid-def'>$ML{'.label.default'}</label></b></td><td> ";
-                $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'defaultpic', 'value' => $pid, 
+                $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'defaultpic', 'value' => $pid,
                                           'selected' => $u->{'defaultpicid'} == $pid,
                                           'disabled' => $pic->{'state'} eq 'I' });
 
@@ -1057,10 +1028,10 @@
 
         if ($piccount) {
             $body .= "<tr><td></td><td align=left>&nbsp;<b><label for='nodefpic'>$ML{'.nodefault'}</label></b>&nbsp;";
-            $body .= LJ::html_check({ 'name' => 'defaultpic', 
+            $body .= LJ::html_check({ 'name' => 'defaultpic',
                                       'value' => 0,
                                       'type' => 'radio',
-                                      'selected' => ! $u->{'defaultpicid'}, 
+                                      'selected' => ! $u->{'defaultpicid'},
                                       'raw' => "id='nodefpic'" });
 
             $body .= "</td><td>&nbsp;</td></tr>\n";
@@ -1071,7 +1042,7 @@
             $body .= "<?h1 $ML{'.nopics'} h1?><?p $ML{'.noneupload'} p?>";
         }
     }
- 
+
     return;
 
 }
