@@ -88,6 +88,9 @@
         }
 
         DOM.addEventListener(window, "load", function () {
+            if (!origW || !origH)
+                return;
+
             regsel = new ImageRegionSelect({src: $("userpic"),
               onRegionChange:  onRegionChange,
               onRegionChanged: onRegionChanged
@@ -102,7 +105,7 @@
             $("picContainer").style.width = w + "px";
             $("picContainer").style.height = h + "px";
 
-            var x1 = w/2-50, y1 = h/2-50, x2 = w/2+50, y2 = h/2+50;
+            var x1 = 20, y1 = 20, x2 = w - 20, y2 = h - 20;
             regsel.setTopLeft(x1, y1);
             regsel.setBottomRight(x2, y2);
             regsel.fireOnRegionChanged();
