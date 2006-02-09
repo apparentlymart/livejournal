@@ -358,7 +358,8 @@
                 $$body .= "<br /> p?>";
             } else {
                 # Clear out a draft
-                $remote->set_prop('entry_draft', '');
+                $remote->set_prop('entry_draft', '')
+                    if $remote;
 
                 # short bail if this was posted moderated or some other special case (no itemid but a message)
                 if (!defined $res{itemid} && $res{message}) {
