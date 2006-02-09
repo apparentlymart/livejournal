@@ -371,6 +371,18 @@
 
             # file over 40k, return too large error
             if ($disabled && ($size > $MAX_UPLOAD + 2048)) {
+                # we have to suck in the data otherwise the browser gets upset because we're
+                # closing the connection before reading in all the data and it will sometimes
+                # refuse to show the error.
+
+                # pretend to tell apache that we care about parsing the data, but we really don't
+                my $bogus = sub {return 1;};
+                BML::parse_multipart_interactive($r, \$error, {
+                        newheaders => $bogus,
+                        data       => $bogus,
+                        enddata    => $bogus,
+                    });
+
                 return $err->(BML::ml('.error.filetoolarge',
                                       { 'maxsize' => int($MAX_UPLOAD / 1024) .
                                             $ML{'.kilobytes'} }));
