@@ -367,13 +367,15 @@
             my $MAX_UPLOAD = 40960;
             my $error;
 
-            my $gotofactory = ($size > $MAX_UPLOAD + 2048);
+            my $disabled = $LJ::DISABLED{'userpicfactory'};
+
+            my $gotofactory = !$disabled && ($size > $MAX_UPLOAD + 2048);
 
             # small file size, check the pic out
             if (!$gotofactory) {
                 BML::parse_multipart(\%POST, \$error, $MAX_UPLOAD + 2048);
 
-                  if ($POST{'userpic'}) {
+                  if ($POST{'userpic'} && !$disabled) {
                       ($imagew, $imageh, $filetype) = Image::Size::imgsize(\$POST{'userpic'});
                       if ($imagew > 100 || $imageh > 100) {
                           # large image size, to the factory!
