@@ -369,19 +369,37 @@
 
             my $disabled = $LJ::DISABLED{'userpicfactory'};
 
+            # file over 40k, return too large error
+            if ($disabled && ($size > $MAX_UPLOAD + 2048)) {
+                return $err->(BML::ml('.error.filetoolarge',
+                                      { 'maxsize' => int($MAX_UPLOAD / 1024) .
+                                            $ML{'.kilobytes'} }));
+            }
+
             my $gotofactory = !$disabled && ($size > $MAX_UPLOAD + 2048);
 
             # small file size, check the pic out
             if (!$gotofactory) {
                 BML::parse_multipart(\%POST, \$error, $MAX_UPLOAD + 2048);
 
-                  if ($POST{'userpic'} && !$disabled) {
-                      ($imagew, $imageh, $filetype) = Image::Size::imgsize(\$POST{'userpic'});
-                      if ($imagew > 100 || $imageh > 100) {
-                          # large image size, to the factory!
-                          $gotofactory = 1;
-                      }
-                  }
+                # couldn't parse correctly
+                if ($error) {
+                    # return parse_multipart error
+                    return $err->($error);
+                }
+
+                if ($POST{'userpic'}) {
+                    ($imagew, $imageh, $filetype) = Image::Size::imgsize(\$POST{'userpic'});
+                    if ($imagew > 100 || $imageh > 100) {
+                        if ($disabled) {
+                            # less than 40k, greater than 100x100 and factory is disabled
+                            return $err->(BML::ml('.error.imagetoolarge', {imagesize => "${imagew}x$imageh"}));
+                        } else {
+                            # large image size, to the factory!
+                            $gotofactory = 1;
+                        }
+                    }
+                }
             }
 
             # if we're coming from the factory, we definitely don't want to go back!
