@@ -562,9 +562,22 @@ sub get_userpic_info
 sub get_pic_from_keyword
 {
     my ($u, $kw) = @_;
-    my $info = LJ::get_userpic_info($u);
-    return undef unless $info;
-    return $info->{'kw'}{$kw};
+    my $info = LJ::get_userpic_info($u) or
+        return undef;
+
+    if (my $pic = $info->{'kw'}{$kw}) {
+        return $pic;
+    }
+
+    # the lame "pic#2343" thing when they didn't assign a keyword
+    if ($kw =~ /^pic\#(\d+)$/) {
+        my $picid = $1;
+        if (my $pic = $info->{'pic'}{$picid}) {
+            return $pic;
+        }
+    }
+
+    return undef;
 }
 
 sub get_picid_from_keyword
@@ -572,10 +585,21 @@ sub get_picid_from_keyword
     my ($u, $kw, $default) = @_;
     $default ||= (ref $u ? $u->{'defaultpicid'} : 0);
     return $default unless $kw;
+
     my $info = LJ::get_userpic_info($u);
     return $default unless $info;
+
     my $pr = $info->{'kw'}{$kw};
-    return $pr ? $pr->{'picid'} : $default;
+    # normal keyword
+    return $pr->{picid} if $pr->{'picid'};
+
+    # the lame "pic#2343" thing when they didn't assign a keyword
+    if ($kw =~ /^pic\#(\d+)$/) {
+        my $picid = $1;
+        return $picid if $info->{'pic'}{$picid};
+    }
+
+    return $default;
 }
 
 # this will return a user's userpicfactory image stored in mogile scaled down.

@@ -2436,11 +2436,21 @@ sub list_pickws
     my $pi = LJ::get_userpic_info($u);
     my @res;
 
+    my %seen;  # mashifiedptr -> 1
+
     # FIXME: should be a utf-8 sort
     foreach my $kw (sort keys %{$pi->{'kw'}}) {
         my $pic = $pi->{'kw'}{$kw};
+        $seen{$pic} = 1;
         next if $pic->{'state'} eq "I";
         push @res, [ $kw, $pic->{'picid'} ];
+    }
+
+    # now add all the pictures that don't have a keyword
+    foreach my $picid (keys %{$pi->{'pic'}}) {
+        my $pic = $pi->{'pic'}{$picid};
+        next if $seen{$pic};
+        push @res, [ "pic#$picid", $picid ];
     }
 
     return \@res;
