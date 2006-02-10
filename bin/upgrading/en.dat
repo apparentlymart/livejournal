@@ -5123,7 +5123,7 @@ bml.badinput.body=Your browser sent some text which is not recognised as valid t
 
 bml.badinput.head=Bad Unicode Input
 
-bml.needlogin.body3=In order to view this page, you must <a href="/login.bml?ret=1">log in</a>. If you do not have an account, you may <a href="/create.bml">create one now</a>.
+bml.needlogin.body4=In order to view this page, you must <a [[aopts]]>log in</a>. If you do not have an account, you may <a [[aopts]]>create one now</a>.
 
 bml.needlogin.head=Login Required
 
