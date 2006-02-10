@@ -531,6 +531,9 @@ head<=
             oFCKeditor.BasePath = "$LJ::STATPREFIX/fck/";
             oFCKeditor.Height = 350;
             oFCKeditor.ToolbarSet = "Update";
+
+            \$("draft").value = \$("draft").value.replace(/\\n/g, '<br />');
+
             oFCKeditor.ReplaceTextarea();
 
             // Need to pause here as it takes some time for the editor
