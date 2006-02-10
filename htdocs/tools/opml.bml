@@ -1,12 +1,21 @@
 <?_code
 {
     use strict;
-    my $u = LJ::get_remote()
-        or return "Not logged in.";
+    BML::decl_params(user => qr/^\w{1,15}$/);
+
+    my $remote = LJ::get_remote();
+    if ($remote && $GET{'user'} eq "") {
+        return BML::redirect("$LJ::SITEROOT/tools/opml.bml?user=$remote->{user}");
+    }
+
+    return "No 'user' argument" unless $GET{'user'};
+
+    my $u = LJ::load_user($GET{'user'})
+        or return "Invalid user.";
 
     BML::set_content_type("text/plain");
     my $x = "<?" . "xml version='1.0'?>
-<opml><head>
+<opml version='1.1'><head>
 ";
 
     my $add = sub {
