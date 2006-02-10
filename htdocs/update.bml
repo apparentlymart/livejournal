@@ -532,7 +532,9 @@ head<=
             oFCKeditor.Height = 350;
             oFCKeditor.ToolbarSet = "Update";
 
-            \$("draft").value = \$("draft").value.replace(/\\n/g, '<br />');
+            if (\$("event_format").selectedIndex == 0) {
+                \$("draft").value = \$("draft").value.replace(/\\n/g, '<br />');
+            }
 
             oFCKeditor.ReplaceTextarea();
 
@@ -542,7 +544,8 @@ head<=
             setTimeout(RTEAddClasses, 2000);
 
             \$("switched_rte_on").value = '1';
-
+            \$("event_format").selectedIndex = 1;
+            \$("event_format").disabled = 1;
             return false; // do not follow link
         }
 
