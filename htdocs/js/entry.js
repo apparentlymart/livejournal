@@ -70,48 +70,7 @@ function shift_contents() {
     }
 }
 
-function enable_rte () {
-    if (! document.getElementById) return false;
-    
-    f = document.updateForm;
-    if (! f) return false;
-    f.switched_rte_on.value = 1;
-    f.submit();
-    return false;
-}
-// Maintain entry through browser navigations.
-// IE does this onBlur, Gecko onUnload.
-function save_entry () {
-    if (! document.getElementById) return false;
-    
-    f = document.updateForm;
-    if (! f) return false;
-    rte = $('rte');
-    if (! rte) return false;
-    content = rte.contentWindow.document.body.innerHTML;
-    f.saved_entry.value = content;
-    return false;
-}
-
-// Restore saved_entry text across platforms.
-// This is only used for IE, Gecko browser support is in the RTE library.
-function restore_entry () {
-    if (! document.getElementById) return false;
-    f = document.updateForm;
-    if (! f) return false;
-    rte = $('rte');
-    if (! rte) return false;
-    if (document.updateForm.saved_entry.value == "") return false;
-    setTimeout(
-               function () {
-                   $('rte').contentWindow.document.body.innerHTML = 
-                       document.updateForm.saved_entry.value;
-               }, 100);
-    return false;
-}
-
 function pageload (dotime) {
-    restore_entry();
 
     if (dotime) settime();
     if (!document.getElementById) return false;

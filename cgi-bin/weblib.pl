@@ -1019,7 +1019,6 @@ sub deemp {
 #   subject: entry subject
 #   event: entry text
 #   richtext: allow rich text formatting
-#   richtext_on: rich text formatting has been turned on
 #   auth_as_remote: bool option to authenticate as remote user, prefilling pic/friend groups/etc
 # return: form to include in BML pages
 # </LJFUNC>
@@ -1104,74 +1103,41 @@ sub entry_form {
         $insobjout = "<script> if (document.getElementById) { document.write(\"" . LJ::ejs($show) . "\"); } </script>";
     }
 
-    unless ( $opts->{'richtext_on'}) {
-        ### Draft Status Area
+
+    ### Draft Status Area
+    {
+        my $insobj = "<span id='insobj'>$insobjout</span>";
         my $draft = "<span id='draftstatus' style='font-style: italic'></span>";
 
         $out .= "<table width='100%'><tr><td align='left'>";
         $out .= "<p><b>" . BML::ml('entryform.entry');
-        $out .= "</b></p></td><td align='right'>$draft&nbsp;&nbsp;$insobjout</td></tr></table>";
+        $out .= "</b></p></td><td align='right'>$draft&nbsp;&nbsp;$insobj</td></tr></table>";
     }
 
-    if ($opts->{'richtext_on'}) {
-        my $jevent = $opts->{'event'};
-
-        # manually typed tags
-        $jevent =~ s/<lj user=['"]?(\w{1,15})['"]?\s?\/?>/&lt;lj user="$1" \/&gt;/ig;
-        $jevent =~ s/<(\/)?lj-cut(.*?)(?: \/)?>/&lt;$1lj-cut$2&gt;/ig;
-
-        $jevent = LJ::ejs($jevent);
-        my $rte_nosupport = LJ::ejs(LJ::deemp(BML::ml('entryform.htmlokay.rte_nosupport')));
-
-        $out .= LJ::html_hidden('richtext', '1') . "\n";
-        $out .= LJ::html_hidden('saved_entry', '') . "\n";
-
-        $out .= <<RTE;
-        <iframe id="testFrame" style="position: absolute; visibility: hidden; width: 0px; height: 0px;"></iframe>
-            <script language="JavaScript" type="text/javascript" src="$LJ::JSPREFIX/browserdetect.js"></script>
-            <script language='JavaScript' type='text/javascript'>
-            <!--
-            var siteroot = "$LJ::SITEROOT";
-        //-->
-            </script>
-            <script language="JavaScript" type="text/javascript" src="$LJ::JSPREFIX/richtext.js"></script>
-            <script language='JavaScript' type='text/javascript'>
-            <!--
-            writeRichText('rte', 'event', '$jevent', '99%', 300, true, "Entry:");
-        if (isRichText == false) {
-            document.write("$rte_nosupport");
-        }
-        //-->
-            </script>
-            <noscript>
-RTE
-    }
     $out .= LJ::html_textarea({ 'name' => 'event', 'value' => $opts->{'event'},
                                 'rows' => '20', 'cols' => '50', 'style' => 'width: 100%',
                                 'wrap' => 'soft', 'tabindex' => $tabindex->(),
                                 'disabled' => $opts->{'disabled_save'},
                                 'id' => 'draft'});
 
-    $out .= '</noscript>' if $opts->{'richtext_on'};
-    $out .= LJ::html_hidden('prop_opt_preformatted', '1') if $opts->{'richtext_on'};
-
     my $jrich = LJ::ejs(LJ::deemp(
-            BML::ml("entryform.htmlokay.rich2", { 'opts' => 'href="#" onClick="enable_rte()"' })));
+            BML::ml("entryform.htmlokay.rich2", { 'opts' => 'href="#" onClick="return useRichText();"' })));
 
     my $jnorich = LJ::ejs(LJ::deemp(BML::ml('entryform.htmlokay.norich2')));
 
-    unless ( $opts->{'richtext_on'}   ||
-             $opts->{'disabled_save'} ||
-             ! $opts->{'richtext'}    ||
-             ( $opts->{'did_spellcheck'} && $opts->{'richtext_on'} )
+    unless ( $opts->{'disabled_save'} ||
+             !$opts->{'richtext'}     ||
+             $opts->{'did_spellcheck'}
            ) {
         $out .= <<RTE;
         <script language='JavaScript' type='text/javascript'>
             <!--
-            var t = document.getElementById;
+
+        // Check if this browser supports FCKeditor
+        var rte = new FCKeditor();
+        var t = rte._IsCompatibleBrowser();
         if (t) {
-            document.write('<input type="hidden" name="switched_rte_on" value="" />');
-            document.write("$jrich");
+            document.write("<div id='jrich'>$jrich</div>");
         } else {
             document.write("$jnorich");
         }
@@ -1179,6 +1145,7 @@ RTE
             </script>
 RTE
             $out .= '<noscript><?de ' . BML::ml('entryform.htmlokay.norich2') . ' de?></noscript>';
+        $out .= LJ::html_hidden({ name => 'switched_rte_on', id => 'switched_rte_on', value => '0'});
     }
     $out .= '<br />';
 
@@ -1198,7 +1165,7 @@ RTE
 
     if (!$opts->{'disabled_save'}) {
         ### Options
-        $out .= "<b>" . BML::ml('entryform.options') . "</b><br />";
+        $out .= "<br /><b>" . BML::ml('entryform.options') . "</b><br />";
         $out .= "<table style='width: 100%' id='Options'><tr valign='top'>";
 
         ### Options Column 1

@@ -67,6 +67,8 @@
     # see if we need to do any transformations
     LJ::run_hooks("transform_update_$POST{transform}", \%GET, \%POST) if $POST{transform};
 
+    LJ::need_res('stc/display_none.css');
+
     # Set up form default values:
     my @time = localtime(time);
     my ($year, $mon, $mday, $hour, $min) = ($time[5] + 1900,
@@ -134,16 +136,6 @@
             if $remote && !$LJ::DISABLED{'update_draft'};
     }
 
-    # richtext
-    # 'switched_rte_on' is only set when the user first enables rte.  We do this in a POST
-    #    so any pre-existing text in the event and subject fields aren't lost when going to RTE.
-    # 'rich' is used to keep RTE mode enabled between pages, such as spellchecks.
-    # The $GET{'rich'} is simply for user bookmarking / faq linking convenience.
-    my $enabled_rte = $POST{'switched_rte_on'};
-    my $richtext = 1 if $GET{rich} || $POST{rich} ||
-                        ($enabled_rte && ! $spellcheck_html && ! $preview);
-    $$bodyopts .= "onunload=\"save_entry();\" " if $richtext;
-
     my $print_entry_form = sub {
         my $opts = shift;
 
@@ -176,7 +168,6 @@
         # their settings from the GET requests
         my $getextra;
         $getextra .= "altlogin=1&" if $GET{'altlogin'};
-        $getextra .= "rich=1&" if $richtext;
         chop $getextra;
         $getextra = "?$getextra" if $getextra;
 
@@ -192,7 +183,6 @@
             'spellcheck_html' => $spellcheck_html,
             'clientversion' => "WebUpdate/2.0.0",
             'richtext' => 1,
-            'richtext_on' => $richtext,
             'include_insert_object' => $GET{'insobj'},
         };
 
@@ -235,7 +225,7 @@
 
     my $okay_formauth = !$remote || LJ::check_form_auth();
 
-    if ($did_post && !$did_spellcheck && !$showform && !$enabled_rte && !$preview &&
+    if ($did_post && !$did_spellcheck && !$showform && !$preview &&
         $okay_formauth && !$POST{'moreoptsbtn'} )
     {
         # what's our authentication scheme for subsequent protocol actions?
@@ -338,6 +328,19 @@
             $errors->{'entry'} = $ML{'.error.noentry'};
         }
 
+        # The rich text editor adds a </lj> after <lj user="exampleusername">
+        # Deal with this, assuming the user really wanted an lj user tag.
+        # Also deal with the case where we made the lj user tag via the RTE
+        # and we have a bunch of styling HTML we need to remove.
+        if ($POST{'switched_rte_on'}) {
+            $req{'event'} =~ s!<lj user=""><span class="LJUser"><img width="17" height="17" style="vertical-align: bottom;" src="(?:$LJ::SITEROOT)?/tools/FCKeditor/editor/plugins/livejournal/userinfo.gif" alt="" />(\w+)</span></lj>!<lj user="$1" />!g;
+            $req{'event'} =~ s!<lj user="(\w+)"></lj>!<lj user="$1" />!gi;
+            $req{'event'} =~ s!<lj user="">(\w+)</lj>!<lj user="$1" />!gi;
+
+            $req{'event'} =~ s!<lj-cut class="LJCut">(.+)</lj-cut>!<lj-cut>$1</lj-cut>!gi;
+            $req{'event'} =~ s!<lj-raw class="LJRaw">(.+)</lj-raw>!<lj-raw>$1</lj-raw>!gi;
+        }
+
         my %res;
         LJ::do_request(\%req, \%res, $flags);
 
@@ -415,6 +418,7 @@ head<=
     $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/entry.js'></script>\n";
     $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/httpreq.js'></script>\n";
     $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/draft.js'></script>\n";
+    $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/tools/FCKeditor/fckeditor.js'></script>\n";
 
     # draft autosave and restore
     my $remote = LJ::get_remote();
@@ -461,10 +465,23 @@ head<=
             }
 
             function draftSave () {
-                if (draftField.value != lastDraft) {
-                    lastDraft = draftField.value;
-                    saveDraft(lastDraft);
-                    draftStatusField.innerHTML = 'Autosaved draft at ' + getTime();
+                if (\$("draft").style.display == 'none') { // Need to check this to deal with hitting the back button
+                    // Since they may start using the RTE in the middle of writing their
+                    // entry, we should just get the editor each time.
+                    var oEditor = FCKeditorAPI.GetInstance('draft');
+                    var curDraft = oEditor.GetXHTML(true);
+
+                    if (curDraft != lastDraft) {
+                        lastDraft = curDraft;
+                        saveDraft(lastDraft);
+                        draftStatusField.innerHTML = 'Autosaved draft at ' + getTime();
+                    }
+                } else {
+                    if (draftField.value != lastDraft) {
+                        lastDraft = draftField.value;
+                        saveDraft(lastDraft);
+                        draftStatusField.innerHTML = 'Autosaved draft at ' + getTime();
+                    }
                 }
             }
 
@@ -502,6 +519,45 @@ head<=
                 return time;
             }
             </script>
+^;
+
+    # Rich Text Editor!
+    $ret .= qq^
+        <script>
+        function useRichText() {
+            \$("insobj").className = 'display_none';
+            \$("jrich").className = 'display_none';
+            var oFCKeditor = new FCKeditor('draft');
+            oFCKeditor.BasePath = "$LJ::SITEROOT/tools/FCKeditor/";
+            oFCKeditor.Height = 350;
+            oFCKeditor.ToolbarSet = "Update";
+            oFCKeditor.ReplaceTextarea();
+
+            // Need to pause here as it takes some time for the editor
+            // to actually load within the browser before we can
+            // access it.
+            setTimeout(RTEAddClasses, 2000);
+
+            \$("switched_rte_on").value = '1';
+
+            return false; // do not follow link
+        }
+
+        function RTEAddClasses() {
+            if (! FCKeditorAPI) return;
+            var oEditor = FCKeditorAPI.GetInstance('draft');
+            if (! oEditor) return;
+
+            var html = oEditor.GetXHTML();
+
+            html = html.replace(/<lj-cut>(.+)<\\/lj-cut>/g, '<lj-cut class="LJCut">\$1</lj-cut>');
+            html = html.replace(/<lj-raw>([\\w\\s]+)<\\/lj-raw>/g, '<lj-cut class="LJRaw">\$1</lj-raw>');
+
+            html = html.replace(/<lj user=['"](\\w+)["'] ?\\/?>/g, "<lj user=''><span class='LJUser'><img src='$LJ::SITEROOT/tools/FCKeditor/editor/plugins/livejournal/userinfo.gif' width='17' height='17' style='vertical-align: bottom' />\$1</span></lj>");
+
+            oEditor.SetHTML(html);
+        }
+        </script>
 ^;
 
 
