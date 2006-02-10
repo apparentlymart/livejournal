@@ -1,0 +1,36 @@
+<?_code
+{
+    use strict;
+    my $u = LJ::get_remote()
+        or return "Not logged in.";
+
+    BML::set_content_type("text/plain");
+    my $x = "<?" . "xml version='1.0'?>
+<opml><head>
+";
+
+    my $add = sub {
+        my ($e, $v) = @_;
+        $x .= "<$e>" . LJ::exml($v) . "</$e>\n";
+    };
+
+    $add->("title", "$u->{user}'s $LJ::SITENAME reading list");
+    $add->("ownerName", $u->{name});
+    $add->("ownerEmail", $u->{email});
+
+    $x .= "</head><body>\n";
+
+    my $frs = LJ::get_friends($u);
+    my @uids = keys %$frs;
+    my $us  = LJ::load_userids(@uids);
+    foreach my $uid (sort { $a <=> $b } @uids) {
+        my $fr = $us->{$uid} or next;
+        my $title = $fr->{name};
+        $x .= "<outline text=\"" . LJ::exml($title) . "\" xmlURL=\"" . LJ::exml($fr->journal_base . "/data/rss") . "\" />\n";
+    }
+    $x .= "</body></opml>\n";
+    BML::noparse();
+    return $x;
+
+}
+_code?>
