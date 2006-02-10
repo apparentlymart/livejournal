@@ -333,7 +333,7 @@
         # Also deal with the case where we made the lj user tag via the RTE
         # and we have a bunch of styling HTML we need to remove.
         if ($POST{'switched_rte_on'}) {
-            $req{'event'} =~ s!<lj user=""><span class="LJUser"><img width="17" height="17" style="vertical-align: bottom;" src="(?:$LJ::SITEROOT)?/tools/FCKeditor/editor/plugins/livejournal/userinfo.gif" alt="" />(\w+)</span></lj>!<lj user="$1" />!g;
+            $req{'event'} =~ s!<lj user=""><span class="LJUser"><img width="17" height="17" style="vertical-align: bottom;" src="(?:$LJ::STATPREFIX)?/stc/fck/editor/plugins/livejournal/userinfo.gif" alt="" />(\w+)</span></lj>!<lj user="$1" />!g;
             $req{'event'} =~ s!<lj user="(\w+)"></lj>!<lj user="$1" />!gi;
             $req{'event'} =~ s!<lj user="">(\w+)</lj>!<lj user="$1" />!gi;
 
@@ -418,7 +418,7 @@ head<=
     $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/entry.js'></script>\n";
     $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/httpreq.js'></script>\n";
     $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/draft.js'></script>\n";
-    $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/tools/FCKeditor/fckeditor.js'></script>\n";
+    $ret .= "<script type='text/javascript' src='$LJ::STATPREFIX/fck/fckeditor.js'></script>\n";
 
     # draft autosave and restore
     my $remote = LJ::get_remote();
@@ -528,7 +528,7 @@ head<=
             \$("insobj").className = 'display_none';
             \$("jrich").className = 'display_none';
             var oFCKeditor = new FCKeditor('draft');
-            oFCKeditor.BasePath = "$LJ::SITEROOT/tools/FCKeditor/";
+            oFCKeditor.BasePath = "$LJ::STATPREFIX/fck/";
             oFCKeditor.Height = 350;
             oFCKeditor.ToolbarSet = "Update";
             oFCKeditor.ReplaceTextarea();
