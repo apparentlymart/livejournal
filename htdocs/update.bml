@@ -328,17 +328,30 @@
             $errors->{'entry'} = $ML{'.error.noentry'};
         }
 
-        # The rich text editor adds a </lj> after <lj user="exampleusername">
-        # Deal with this, assuming the user really wanted an lj user tag.
-        # Also deal with the case where we made the lj user tag via the RTE
-        # and we have a bunch of styling HTML we need to remove.
         if ($POST{'switched_rte_on'}) {
-            $req{'event'} =~ s!<lj user=""><span class="LJUser"><img width="17" height="17" style="vertical-align: bottom;" src="(?:$LJ::STATPREFIX)?/stc/fck/editor/plugins/livejournal/userinfo.gif" alt="" />(\w+)</span></lj>!<lj user="$1" />!g;
-            $req{'event'} =~ s!<lj user="(\w+)"></lj>!<lj user="$1" />!gi;
-            $req{'event'} =~ s!<lj user="">(\w+)</lj>!<lj user="$1" />!gi;
 
-            $req{'event'} =~ s!<lj-cut class="LJCut">(.+)</lj-cut>!<lj-cut>$1</lj-cut>!gi;
-            $req{'event'} =~ s!<lj-raw class="LJRaw">(.+)</lj-raw>!<lj-raw>$1</lj-raw>!gi;
+            # We want to see if we can hit the fast path for cleaning
+            # if they did nothing but add line breaks.
+            my $attempt = $req{'event'};
+            $attempt =~ s!<br />!\n!g;
+
+            if ($attempt !~ /<\w/) {
+                $req{'event'} = $attempt;
+                $req{'prop_opt_preformatted'} = 0;
+            } else {
+
+                # The rich text editor adds a </lj> after <lj user="exampleusername">
+                # Deal with this, assuming the user really wanted an lj user tag.
+                # Also deal with the case where we made the lj user tag via the RTE
+                # and we have a bunch of styling HTML we need to remove.
+
+                $req{'event'} =~ s!<lj user=""><span class="LJUser"><img width="17" height="17" style="vertical-align: bottom;" src="(?:$LJ::STATPREFIX)?/stc/fck/editor/plugins/livejournal/userinfo.gif" alt="" />(\w+)</span></lj>!<lj user="$1" />!g;
+                $req{'event'} =~ s!<lj user="(\w+)"></lj>!<lj user="$1" />!gi;
+                $req{'event'} =~ s!<lj user="">(\w+)</lj>!<lj user="$1" />!gi;
+
+                $req{'event'} =~ s!<lj-cut class="LJCut">(.+)</lj-cut>!<lj-cut>$1</lj-cut>!gi;
+                $req{'event'} =~ s!<lj-raw class="LJRaw">(.+)</lj-raw>!<lj-raw>$1</lj-raw>!gi;
+            }
         }
 
         my %res;
