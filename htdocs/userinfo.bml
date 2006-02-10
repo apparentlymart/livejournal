@@ -404,12 +404,12 @@
      if ($u->{journaltype} eq "I") {
          $body .= "<tr valign='top'><td align='right'><b>OpenID:</b></td><td width='100%'>" . LJ::ljuser($u) . "</td>";
      } else {
-         $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.user'}</b></td><td width='100%'><a href='$jbase/'><b>$user</b></a> ($u->{'userid'}) $hook_extra ";
+         $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.user'}</b></td><td width='100%'><a href='$jbase/'><b>$user</b></a> ($u->{'userid'}) ";
          if ($u->{public_key}) {
              $body .= "<a href='$LJ::SITEROOT/pubkey.bml?user=$user'>";
              $body .= "<img src='$LJ::IMGPREFIX/key.gif' width='16' height='16' border='0' alt='View public key' title='View public key' style='vertical-align: middle; border: 0;' /></a>";
          }
-         $body .= "</td>\n";
+         $body .= " $hook_extra </td>\n";
      }
  }
 
