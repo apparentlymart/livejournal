@@ -540,6 +540,8 @@ REPLACE INTO schemacols (colname, des, tablename) VALUES ('Name', 'Name of city'
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('State', 'State', 'zips');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('aaid', 'Primary key for each authaction.', 'authactions');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('acid', 'Account code ID.  Primary key.', 'acctcode');
+REPLACE INTO schemacols (colname, des, tablename) VALUES ('acid', 'The account code ID from [dbtable[acctcode]].', 'acctpay');
+REPLACE INTO schemacols (colname, des, tablename) VALUES ('acid', 'The resultant acid code in table [dbtable[acctcode]].', 'acctinvite');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('action', 'The action command name to be run when the authaction is confirmed (clicked/etc)', 'authactions');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('alloc', '??', 'zips');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('answer', 'The answer text, in plaintext.', 'faq');
@@ -561,6 +563,7 @@ REPLACE INTO schemacols (colname, des, tablename) VALUES ('color', 'The #rrggbb 
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('coltype', 'The color code, references [dbtable[themecoltypes]].', 'themedata');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('curr', 'The current weighting value for this dbid+role.', 'dbweights');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('datatype', 'Either \"char\" for text data, \"num\" for an integer, or \"bool\" for a 1/0 value.', 'userproplist');
+REPLACE INTO schemacols (colname, des, tablename) VALUES ('dateadd', 'Date code was create.', 'acctinvite');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('datecreate', 'Date the auth code was created.', 'authactions');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('dateins', 'The date the search was made.', 'dirsearchres2');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('dateview', 'The time of the viewing.', 'faquses');
@@ -602,6 +605,7 @@ REPLACE INTO schemacols (colname, des, tablename) VALUES ('name', 'Name of prope
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('norm', 'The normal weighting value for this dbid+role.', 'dbweights');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('oldvalue', 'The old value of the item.', 'infohistory');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('other', 'Optional note space.', 'infohistory');
+REPLACE INTO schemacols (colname, des, tablename) VALUES ('payid', 'The payment ID from [dbtable[payments]].', 'acctpay');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('pop1990', 'Population in 1990.', 'zips');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('postlevel', 'Who can post?  Members only, or a select group.  \"screened\" is not yet used.', 'community');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('prettyname', 'Mixed case pretty name with spaces and punctuation.  Indeded for use by humans.', 'userproplist');
@@ -610,6 +614,7 @@ REPLACE INTO schemacols (colname, des, tablename) VALUES ('qdigest', 'An MD5sum 
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('question', 'The question text, in plaintext.', 'faq');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('rcptid', 'Userid of recipient, or 0 if code is unused.', 'acctcode');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('realm', 'The area of the site the lock is being provided for.', 'duplock');
+REPLACE INTO schemacols (colname, des, tablename) VALUES ('reason', 'Reason code for generating invite code.  See invite/gen.bml', 'acctinvite');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('redist_mode', 'Determines if data from this table is made available in the LJ source distribution.  And if so, is it to be updated with upgrades (REPLACE INTO) or just inserted once.', 'schematables');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('reid', 'Realm ID.  If you don\'t need it (most don\'t), use 0.  Example: for comment realm, reid is the itemid being replied to.', 'duplock');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('role', 'The database role type:  master, slave, clusterN, clusterNslave, etc...  See other documentation.', 'dbweights');
@@ -634,6 +639,7 @@ REPLACE INTO schemacols (colname, des, tablename) VALUES ('userid', 'The userid 
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('userid', 'The userid of the [dbtable[user]] who this friends group belongs to.', 'friendgroup');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('userid', 'The userid of the remote [dbtable[user]] viewing the FAQ item.', 'faquses');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('userid', 'The userid the disk usage item belongs to.', 'dudata');
+REPLACE INTO schemacols (colname, des, tablename) VALUES ('userid', 'Userid of [dbtable[user]] that code was made for.', 'acctinvite');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('userid', 'Userid of [dbtable[user]] using client.', 'clientusage');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('userid', 'Userid of [dbtable[user]] we\'re verifying.', 'authactions');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('userid', 'Userid of [dbtable[user]] whose journal should be loaded.', 'domains');
@@ -657,7 +663,9 @@ REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tab
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Holds the results of a directory search query. userids is either \"[searching]\" if a query is still running, or a list of userids if it is finished.', '0', 'off', NULL, 'dirsearchres2');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Keep track of when [dbtable[user]]s did certain things.', '0', 'off', NULL, 'userusage');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Keeps track of clients that access the protocol.\n\r\nWhenever the protocol encounters a new client, a new row (and thus a new clientid) is generated.', '0', 'off', NULL, 'clients');
+REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Keeps track of generated invite codes.', '0', 'off', NULL, 'acctinvite');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Keeps track of properties of community accounts (which are just normal [dbtable[user]] accounts with some extra behavior)', '0', 'off', NULL, 'community');
+REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Keeps track of relationship between invite codes and payments.  Some people pay to join the site before they have an account, so their invite code carries with it the knowledge that it comes with paid time.', '0', 'off', NULL, 'acctpay');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Keeps track of user-owned domain names, and which journals they map to when pointed at the LiveJournal installation\'s IP address.', '0', 'off', NULL, 'domains');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Keeps track of valid invite codes and who has used them.  To see why they were made, see table [dbtable[acctinvite]].', '0', 'off', NULL, 'acctcode');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Keeps track of when different users use which clients, for purposes of statistics.', '0', 'off', NULL, 'clientusage');
@@ -926,7 +934,7 @@ UPDATE userproplist SET cldversion='4',datatype='char',des='Default security for
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'char', 'Default userpic for post-by-email entries', '', '', 'emailpost_userpic', 'Userpic for email posting', 'general');
 UPDATE userproplist SET cldversion='4',datatype='char',des='Default userpic for post-by-email entries',indexed='',multihomed='',prettyname='Userpic for email posting',scope='general' WHERE name='emailpost_userpic';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'blobchar', 'Backup of a user\'s most recent unposted entry', '0', '0', 'entry_draft', 'New Entry Draft', 'general');
-UPDATE userproplist SET cldversion='4',datatype='blobchar',des='Backup of a user\'s most recent unposted entry',indexed='0',multihomed='0',prettyname='New Entry Draft',scope='general' WHERE name='entry_draft'; 
+UPDATE userproplist SET cldversion='4',datatype='blobchar',des='Backup of a user\'s most recent unposted entry',indexed='0',multihomed='0',prettyname='New Entry Draft',scope='general' WHERE name='entry_draft';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'char', 'Location of External FOAF file', '0', '0', 'external_foaf_url', 'FOAF address', 'general');
 UPDATE userproplist SET cldversion='4',datatype='char',des='Location of External FOAF file',indexed='0',multihomed='0',prettyname='FOAF address',scope='general' WHERE name='external_foaf_url';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'num', 'Number of Public Fotobilder Pictures', '0', '0', 'fb_num_pubpics', 'Num FB Pics', 'general');
