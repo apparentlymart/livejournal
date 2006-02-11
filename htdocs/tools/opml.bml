@@ -20,12 +20,13 @@
 
     my $add = sub {
         my ($e, $v) = @_;
+        return unless $v;
         $x .= "<$e>" . LJ::exml($v) . "</$e>\n";
     };
 
     $add->("title", "$u->{user}'s $LJ::SITENAME reading list");
     $add->("ownerName", $u->{name});
-    $add->("ownerEmail", $u->{email});
+    $add->("ownerEmail", scalar $u->email($remote));
 
     $x .= "</head><body>\n";
 
