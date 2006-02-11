@@ -96,7 +96,7 @@ body<=
      });
  $ret .= "<br /><i>(erase question to delete FAQ entry)</i></p>";
  
- if ($faqd) {
+ if ($faqd && $id != 0) {
      $ret .= "<p><b>Select modification level for question:</b> ";
      $ret .= LJ::html_select({ 'name' => "sev_question", "selected" => 0 },
                              0 => "Typo/etc (no notify)",
@@ -116,7 +116,7 @@ body<=
      });
  $ret .= "</p>";
 
- if ($faqd) {
+ if ($faqd && $id != 0) {
      $ret .= "<p><b>Select modification level for summary:</b> ";
      $ret .= LJ::html_select({ 'name' => "sev_summary", "selected" => 0 },
                              0 => "Typo/etc (no notify)",
@@ -136,7 +136,7 @@ body<=
      });
  $ret .= "</p>";
 
- if ($faqd) {
+ if ($faqd && $id != 0) {
      $ret .= "<p><b>Select modification level for answer:</b> ";
      $ret .= LJ::html_select({ 'name' => "sev_answer", "selected" => 0 },
                              0 => "Typo/etc (no notify)",

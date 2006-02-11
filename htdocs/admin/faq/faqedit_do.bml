@@ -85,7 +85,9 @@ body<=
      $id = $dbh->{'mysql_insertid'};
      $ret .= $dbh->errstr || "Added FAQ item.  All good.";
 
-     $opts->{'childrenlatest'} = 1; 
+     $opts_question->{'childrenlatest'} = 1; 
+     $opts_summary->{'childrenlatest'} = 1; 
+     $opts_answer->{'childrenlatest'} = 1; 
      $do_trans->($id) if $id;
  }
  else
