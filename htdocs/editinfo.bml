@@ -46,7 +46,7 @@ _code?>
           urlname gender jabber opt_blockrobots
           opt_logcommentips
           howhear opt_bdaymail opt_hidefriendofs
-          sidx_bdate sidx_loc mailencoding opt_nctalklinks
+          sidx_bdate sidx_bday sidx_loc mailencoding opt_nctalklinks
           opt_whoscreened journaltitle journalsubtitle
           friendspagetitle opt_weblogscom opt_stylemine
           opt_imagelinks opt_getselfemail external_foaf_url
@@ -811,6 +811,10 @@ _code?>
             $POST{'sidx_bdate'} = "";
             $POST{'sidx_loc'} = "";
             $POST{'state'} = $POST{'statedrop'} || $POST{'stateother'};
+
+            $POST{'sidx_bday'} = sprintf("%02d-%02d", map { $POST{$_} } qw(month day));
+            $POST{'sidx_bday'} = undef if $POST{'sidx_bday'} =~ /00/;
+
             if ($update{'allow_infoshow'} eq 'Y') {
                 if ($POST{'year'}) {
                     $POST{'sidx_bdate'} = sprintf("%04d-%02d-%02d", map { $POST{$_} }
@@ -838,7 +842,7 @@ _code?>
               gender jabber opt_blockrobots
               opt_logcommentips google_talk skype
               opt_bdaymail opt_hidefriendofs
-              sidx_bdate sidx_loc mailencoding opt_nctalklinks
+              sidx_bdate sidx_bday sidx_loc mailencoding opt_nctalklinks
               opt_whoscreened journaltitle journalsubtitle friendspagetitle
               opt_stylemine opt_imagelinks opt_getselfemail
               external_foaf_url opt_showmutualfriends opt_showschools timezone
