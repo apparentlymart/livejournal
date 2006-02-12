@@ -57,18 +57,26 @@ propgroup layout {
     property string margin_left {
         des = "Page Left Margin Size";
         values = "0|None|5px|Tiny|5%|Small|10%|Medium|25%|Large|50%|Massive";
+        allow_other = 1;
+        allow_other_noui = 1; # Don't expect friendly interface users to enter CSS length values
     }
     property string margin_right {
         des = "Page Right Margin Size";
         values = "0|None|5px|Tiny|5%|Small|10%|Medium|25%|Large|50%|Massive";
+        allow_other = 1;
+        allow_other_noui = 1;
     }
     property string margin_top {
         des = "Page Top Margin Size";
         values = "0|None|5px|Tiny|5%|Small|10%|Medium|25%|Large|50%|Massive";
+        allow_other = 1;
+        allow_other_noui = 1;
     }
     property string margin_bottom {
         des = "Page Bottom Margin Size";
         values = "0|None|5px|Tiny|5%|Small|10%|Medium|25%|Large|50%|Massive";
+        allow_other = 1;
+        allow_other_noui = 1;
     }
     set margin_left = "25%";
     set margin_right = "25%";
@@ -78,18 +86,26 @@ propgroup layout {
     property string padding_left {
         des = "Page Left Inner Padding Size";
         values = "0|None|5px|Tiny|5%|Small|10%|Medium|25%|Large|50%|Massive";
+        allow_other = 1;
+        allow_other_noui = 1;
     }
     property string padding_right {
         des = "Page Right Inner Padding Size";
         values = "0|None|5px|Tiny|5%|Small|10%|Medium|25%|Large|50%|Massive";
+        allow_other = 1;
+        allow_other_noui = 1;
     }
     property string padding_top {
         des = "Page Top Inner Padding Size";
         values = "0|None|5px|Tiny|5%|Small|10%|Medium|25%|Large|50%|Massive";
+        allow_other = 1;
+        allow_other_noui = 1;
     }
     property string padding_bottom {
         des = "Page Bottom Inner Padding Size";
         values = "0|None|5px|Tiny|5%|Small|10%|Medium|25%|Large|50%|Massive";
+        allow_other = 1;
+        allow_other_noui = 1;
     }
     set padding_left = "5px";
     set padding_right = "5px";
@@ -156,6 +172,8 @@ propgroup presentation {
     property string font_size {
         des = "Size of text";
         values = "0.75em|Tiny|1em|Normal|1.1em|Large";
+        allow_other = 1;
+        allow_other_noui = 1;
     }
     set font_size = "0.75em";
 
@@ -181,6 +199,8 @@ propgroup presentation {
         des = "Page Background Image Display Options";
         values = "scroll|Scrolling, Tiled|scroll no-repeat|Scrolling, No repeat|scroll repeat-x|Scrolling, tile horizontally|scroll repeat-y|Scrolling, tile vertically|fixed|Fixed, Tiled|fixed no-repeat|Fixed, No repeat|fixed repeat-x|Fixed, tile horizontally|fixed repeat-y|Fixed, tile vertically";
         requires = "url_background_img_page";
+        allow_other = 1;
+        allow_other_noui = 1;
     }
     set background_properties_page = "scroll";
 
@@ -188,6 +208,8 @@ propgroup presentation {
         des = "Page Background Position";
         values = "center|Centered|center left|Centered Vertically, Left|center right|Centered Vertically, Right|top center|Top, Centered Horizontally|top left|Top, Left|top right|Top, Right|bottom center|Bottom, Centered Horizontally|bottom left|Bottom, Left|bottom right|Bottom, Right";
         requires = "url_background_img_page";
+        allow_other = 1;
+        allow_other_noui = 1;
     }
     set background_position_page = "top left";
 
@@ -203,6 +225,8 @@ propgroup presentation {
         des = "Content Box Background Image Display Options";
         values = "scroll|Scrolling, Tiled|scroll no-repeat|Scrolling, No repeat|scroll repeat-x|Scrolling, tile horizontally|scroll repeat-y|Scrolling, tile vertically|fixed|Fixed, Tiled|fixed no-repeat|Fixed, No repeat|fixed repeat-x|Fixed, tile horizontally|fixed repeat-y|Fixed, tile vertically";
         requires = "opt_page_background,url_background_img_box";
+        allow_other = 1;
+        allow_other_noui = 1;
     }
     set background_properties_box = "scroll";
 
@@ -210,6 +234,8 @@ propgroup presentation {
         des = "Content Box Background Position";
         values = "center|Centered|center left|Centered Vertically, Left|center right|Centered Vertically, Right|top center|Top, Centered Horizontally|top left|Top, Left|top right|Top, Right|bottom center|Bottom, Centered Horizontally|bottom left|Bottom, Left|bottom right|Bottom, Right";
         requires = "opt_page_background,url_background_img_box";
+        allow_other = 1;
+        allow_other_noui = 1;
     }
     set background_position_box = "top left";
 
@@ -260,12 +286,15 @@ function makefontspec() : string
 {
     var string fontspec;
     if ($*font_base != "") {
-        $fontspec="\""+$*font_base+"\"";
-        if ($*font_fallback != "") {
+        $fontspec = $*font_base->css_string();
+        if ($*font_fallback != "none") {
             $fontspec=$fontspec+",";
         }
     }
-    $fontspec=$fontspec+$*font_fallback;
+    # Don't need to be paranoid about the fallback since it's restricted by the "values" attribute
+    if ($*font_fallback != "none") {
+        $fontspec=$fontspec + $*font_fallback;
+    }
     return $fontspec;
 }
 
@@ -642,9 +671,38 @@ function EntryPage::print_comment (Comment c) {
 function css_rule_if_set(string prop, string val)
 "Print a CSS rule only if val is not an empty string."
 {
+    if ($prop->css_keyword() == "") { return; }
+
     if ($val != "") {
-        println safe "  $prop: $val;";
+        println "  $prop: $val;";
     }
+}
+function css_rule_if_length(string prop, string val) [fixed] {
+    css_rule_if_set($prop, $val->css_length_value());
+}
+function css_rule_if_keyword(string prop, string val, string[] allowed) [fixed] {
+    if (size $allowed > 0) {
+        css_rule_if_set($prop, $val->css_keyword($allowed));
+    }
+    else {
+        css_rule_if_set($prop, $val->css_keyword());
+    }
+}
+function css_rule_if_keyword_list(string prop, string val, string[] allowed) [fixed] {
+    if (size $allowed > 0) {
+        css_rule_if_set($prop, $val->css_keyword_list($allowed));
+    }
+    else {
+        css_rule_if_set($prop, $val->css_keyword_list());
+    }
+}
+function css_rule_if_set_quoted(string prop, string val) [fixed] {
+    if ($val != "") {
+        css_rule_if_set($prop, $val->css_string());
+    }
+}
+function css_rule_if_url(string prop, string val) [fixed] {
+    css_rule_if_set($prop, $val->css_url_value());
 }
 
 function custom_stylesheet()
@@ -776,36 +834,25 @@ function print_stylesheet() {
    $eextrastyle=$eextrastyle+
    """.entryextra { text-align: $*align_talklinks; font-size: 0.9em; }""";
 
-   # This tries to do a bit of "sanity" checking to ensure users
-   # don't inadvertently break the CSS, but it's not brilliant.
    var string background_body = $*clr_margin;
-   if ($*url_background_img_page != "" and not $*url_background_img_page->contains(")")) {
-       $background_body = $background_body + " url($*url_background_img_page)";
-       if (not $*background_properties_page->contains(";")) {
-           $background_body = $background_body + " $*background_properties_page";
-       }
-       if (not $*background_position_page->contains(";")) {
-           $background_body = $background_body + " $*background_position_page";
-       }
+   if ($*url_background_img_page->css_url_value() != "") {
+       $background_body = $background_body + " " + $*url_background_img_page->css_url_value();
+       $background_body = $background_body + " " + $*background_properties_page->css_keyword_list([ "scroll", "no-repeat", "repeat-x", "repeat-y", "fixed" ]);
+       $background_body = $background_body + " " + $*background_position_page->css_keyword_list([ "top", "center", "middle", "bottom", "left", "right" ]);
    }
    else {
        $background_body = $background_body + " none";
    }
 
    var string background_page = $*clr_back;
-   if ($*url_background_img_box != "" and not $*url_background_img_box->contains(")")) {
-       $background_page = $background_page + " url($*url_background_img_box)";
-       if (not $*background_properties_box->contains(";")) {
-           $background_page = $background_page + " $*background_properties_box";
-       }
-       if (not $*background_position_box->contains(";")) {
-           $background_page = $background_page + " $*background_position_box";
-       }
+   if ($*url_background_img_box->css_url_value() != "") {
+       $background_page = $background_page + " " + $*url_background_img_box->css_url_value();
+       $background_page = $background_page + " " + $*background_properties_box->css_keyword_list([ "scroll", "no-repeat", "repeat-x", "repeat-y", "fixed" ]);
+       $background_page = $background_page + " " + $*background_position_box->css_keyword_list([ "top", "center", "middle", "bottom", "left", "right" ]);
    }
    else {
        $background_page = $background_page + " none";
    }
-
 
 """
 body {
@@ -814,22 +861,25 @@ body {
   border: 0;
   background: $background_body;
   color: $*clr_text;
-  $fontspec  font-size: $*font_size;
-}
+  $fontspec""";
+
+  css_rule_if_length("font-size", $*font_size);
+
+"""}
 table, tr, td, th {
   font-size: 1em;
 }
 #page {
 """;
-  css_rule_if_set("margin-left", $*margin_left);
-  css_rule_if_set("margin-right", $*margin_right);
-  css_rule_if_set("margin-top", $*margin_top);
-  css_rule_if_set("margin-bottom", $*margin_bottom);
-  css_rule_if_set("padding-left", $*padding_left);
-  css_rule_if_set("padding-right", $*padding_right);
-  css_rule_if_set("padding-top", $*padding_top);
-  css_rule_if_set("padding-bottom", $*padding_bottom);
-  css_rule_if_set("max-width", $*adv_page_max_width);
+  css_rule_if_length("margin-left", $*margin_left);
+  css_rule_if_length("margin-right", $*margin_right);
+  css_rule_if_length("margin-top", $*margin_top);
+  css_rule_if_length("margin-bottom", $*margin_bottom);
+  css_rule_if_length("padding-left", $*padding_left);
+  css_rule_if_length("padding-right", $*padding_right);
+  css_rule_if_length("padding-top", $*padding_top);
+  css_rule_if_length("padding-bottom", $*padding_bottom);
+  css_rule_if_length("max-width", $*adv_page_max_width);
 
     if ($*opt_page_border) {
         println """  border: 1px solid $*clr_line;""";
@@ -892,7 +942,7 @@ a:active, a:hover { color: $*clr_alink; background: transparent; }
   font-weight: bold; font-size: 1.0em;
 }
 .entrytext {
-"""; css_rule_if_set("max-width", $*adv_entry_max_width);
+"""; css_rule_if_length("max-width", $*adv_entry_max_width);
 """  margin-left: auto;
   margin-right: auto;
 }
@@ -973,51 +1023,43 @@ function print_theme_preview() {
        $fontspec="  font-family: $fontspec;";
    }
 
-   # This tries to do a bit of "sanity" checking to ensure users
-   # don't inadvertently break the CSS, but it's not brilliant.
    var string background_body = $*clr_margin;
-   if ($*url_background_img_page != "" and not $*url_background_img_page->contains(")")) {
-       $background_body = $background_body + " url($*url_background_img_page)";
-       if (not $*background_properties_page->contains(";")) {
-           $background_body = $background_body + " $*background_properties_page";
-       }
-       if (not $*background_position_page->contains(";")) {
-           $background_body = $background_body + " $*background_position_page";
-       }
+   if ($*url_background_img_page->css_url_value() != "") {
+       $background_body = $background_body + " " + $*url_background_img_page->css_url_value();
+       $background_body = $background_body + " " + $*background_properties_page->css_keyword_list([ "scroll", "no-repeat", "repeat-x", "repeat-y", "fixed" ]);
+       $background_body = $background_body + " " + $*background_position_page->css_keyword_list([ "top", "center", "middle", "bottom", "left", "right" ]);
    }
    else {
        $background_body = $background_body + " none";
    }
 
    var string background_page = $*clr_back;
-   if ($*url_background_img_box != "" and not $*url_background_img_box->contains(")")) {
-       $background_page = $background_page + " url($*url_background_img_box)";
-       if (not $*background_properties_box->contains(";")) {
-           $background_page = $background_page + " $*background_properties_box";
-       }
-       if (not $*background_position_box->contains(";")) {
-           $background_page = $background_page + " $*background_position_box";
-       }
+   if ($*url_background_img_box->css_url_value() != "") {
+       $background_page = $background_page + " " + $*url_background_img_box->css_url_value();
+       $background_page = $background_page + " " + $*background_properties_box->css_keyword_list([ "scroll", "no-repeat", "repeat-x", "repeat-y", "fixed" ]);
+       $background_page = $background_page + " " + $*background_position_box->css_keyword_list([ "top", "center", "middle", "bottom", "left", "right" ]);
    }
    else {
        $background_page = $background_page + " none";
    }
 
+"""<div style="margin: 0; padding: 5px; border: 0; background: $background_body; color: $*clr_text; $fontspec """;
 
+  css_rule_if_length("font-size", $*font_size);
 
-"""<div style="margin: 0; padding: 5px; border: 0; background: $background_body; color: $*clr_text; $fontspec font-size: $*font_size;">
+""" ">
 
 <div style=\"""";
 
-  css_rule_if_set("margin-left", $*margin_left);
-  css_rule_if_set("margin-right", $*margin_right);
-  css_rule_if_set("margin-top", $*margin_top);
-  css_rule_if_set("margin-bottom", $*margin_bottom);
-  css_rule_if_set("padding-left", $*padding_left);
-  css_rule_if_set("padding-right", $*padding_right);
-  css_rule_if_set("padding-top", $*padding_top);
-  css_rule_if_set("padding-bottom", $*padding_bottom);
-  css_rule_if_set("max-width", $*adv_page_max_width);
+  css_rule_if_length("margin-left", $*margin_left);
+  css_rule_if_length("margin-right", $*margin_right);
+  css_rule_if_length("margin-top", $*margin_top);
+  css_rule_if_length("margin-bottom", $*margin_bottom);
+  css_rule_if_length("padding-left", $*padding_left);
+  css_rule_if_length("padding-right", $*padding_right);
+  css_rule_if_length("padding-top", $*padding_top);
+  css_rule_if_length("padding-bottom", $*padding_bottom);
+  css_rule_if_length("max-width", $*adv_page_max_width);
 
     if ($*opt_page_border) {
         println """  border: 1px solid $*clr_line;""";
