@@ -292,6 +292,12 @@ propgroup options {
     }
     set opt_hide_userpics = true;
 
+    property bool opt_show_user_linkele {
+        des = "Show action toolbar in the sidebar";
+        note = "With this enabled, a small toolbar of links to your memories, todo and to add you as a friend will be shown in the sidebar";
+    }
+    set opt_show_user_linkele = true;
+
     property use lang_fmt_date_short;
     property use lang_fmt_date_long;
     property use lang_fmt_time_short;
@@ -875,7 +881,9 @@ function Page::lay_print_journalinfo() {
     if (defined $.journal.default_pic) {
         println """<div id="journalinfouserpic">$.journal.default_pic</div>""";
     }
-    """<div class="journallinkbar">"""; $.journal->print_linkbar(); """</div>""";
+    if ($*opt_show_user_linkele) {
+        """<div class="journallinkbar">"""; $.journal->print_linkbar(); """</div>""";
+    }
     if ($*i18n_paraphernalia_journalinfo_blurb != "") {
         println "<p>$*i18n_paraphernalia_journalinfo_blurb</p>";
     }
