@@ -5,6 +5,7 @@
     use LWPx::ParanoidAgent;
     use CSS::Cleaner;
     use Digest::SHA1;
+    use URI::URL;
 
     BML::decl_params(
                      # url to proxy/clean
@@ -21,9 +22,10 @@
         return "/* invalid domain */";
     }
 
-    return "/* invalid URL */" unless $GET{u};
+    return "/* invalid URL */" unless $GET{u} and $GET{u} !~ /[<>]/;
 
-    my $memkey = "css:" . Digest::SHA1::sha1_hex($GET{u});
+    my $url = $GET{u};
+    my $memkey = "css:" . Digest::SHA1::sha1_hex($url);
 
     if (my $clean = LJ::MemCache::get($memkey)) {
         return $clean;
@@ -33,7 +35,7 @@
                                       timeout => $LJ::CSS_FETCH_TIMEOUT || 2,
                                       max_size => 1024*300,
                                       );
-    my $res = $ua->get($GET{u});
+    my $res = $ua->get($url);
     unless ($res->is_success) {
         my $errmsg = $res->error_as_HTML;
         $errmsg =~ s/<.+?>//g;
@@ -41,8 +43,18 @@
         $errmsg =~ s/\s+/ /g;
         return "/* Error fetching CSS: $errmsg */";
     }
+
+    my $unclean = $res->content;
+
+    # Braindead URL rewriting. Once there's a proper CSS parser behind the CSS cleaner
+    # this can be done more intelligently, but this should do for now aside from some
+    # odd-ball cases.
+    # We do this before CSS cleaning to avoid this being used to introduce nasties.
+    $unclean =~ s/\burl\(([\"\']?)(.+?)\1\)/ 'url('.URI::URL->new($2, $url)->abs().')' /egi;
+
     my $cleaner = CSS::Cleaner->new;
-    my $clean = $cleaner->clean($res->content);
+    my $clean = $cleaner->clean($unclean);
+
     LJ::MemCache::set($memkey, $clean, 300);  # 5 minute caching
     return $clean;
 }
