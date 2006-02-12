@@ -47,6 +47,28 @@ class string
 
     function builtin repeat(int n) : string
     "Returns the string repeated n times";
+
+    function builtin css_string() : string
+    "Returns the string escaped and quoted as a CSS string literal, safe for insertion into a stylesheet.";
+
+    function builtin css_keyword() : string
+    "If the string is syntactically valid as a CSS keyword (only letters and spaces) returns it, else returns an empty string.";
+
+    function builtin css_keyword_list() : string
+    "Analyses the string as a space-separated list of CSS keywords and returns a string containing the items that are syntactically acceptable.";
+
+    function builtin css_keyword(string[] allowed) : string
+    "Same as [method[string.css_keyword()]] except also imposes a whitelist of valid keywords given in \$allowed.";
+
+    function builtin css_keyword_list(string[] allowed) : string
+    "Same as [method[string.css_keyword_list()]] except also imposes a whitelist of valid keywords given in \$allowed.";
+
+    function builtin css_length_value() : string
+    "If the string contains a valid CSS length value, returns a canonical version. Else returns an empty string.";
+
+    function builtin css_url_value : string
+    "If the string contains a valid HTTP or HTTPS URL it is returned. Otherwise, an empty string is returned.";
+
 }
 
 class Color

@@ -3031,4 +3031,85 @@ sub string__repeat
     return $this x $num;
 }
 
+sub string__css_length_value
+{
+    my ($ctx, $this) = @_;
+
+    $this =~ s/^\s+//g;
+    $this =~ s/\s+$//g;
+
+    # Is it one of the acceptable keywords?
+    my %allowed_keywords = map { $_ => 1 } qw(larger smaller xx-small x-small small medium large x-large xx-large auto inherit);
+    return $this if $allowed_keywords{$this};
+
+    # Is it a number followed by an acceptable unit?
+    my %allowed_units = map { $_ => 1 } qw(em ex px in cm mm pt pc %);
+    return $this if $this =~ /^[\-\+]?(\d*\.)?\d+([a-z]+|\%)$/ && $allowed_units{$2};
+
+    # Is it zero?
+    return "0" if $this =~ /^(0*\.)?0+$/;
+
+    return '';
+}
+
+sub string__css_string
+{
+    my ($ctx, $this) = @_;
+
+    $this =~ s/\\/\\\\/g;
+    $this =~ s/\"/\\\"/g;
+
+    return '"'.$this.'"';
+
+}
+
+sub string__css_url_value
+{
+    my ($ctx, $this) = @_;
+
+    return '' if $this !~ m!^https?://!;
+    return '' if $this =~ /[^a-z0-9A-Z\.\@\$\-_\.\+\!\*'\(\),&=#;:\?\/]/;
+    return 'url('.string__css_string($ctx, $this).')';
+}
+
+sub string__css_keyword
+{
+    my ($ctx, $this, $allowed) = @_;
+
+    $this =~ s/^\s+//g;
+    $this =~ s/\s+$//g;
+
+    return '' if $this =~ /[^a-z\-]/i;
+
+    if ($allowed) {
+        # If we've got an arrayref, transform it into a hashref.
+        $allowed = { map { $_ => 1 } @$allowed } if ref $allowed eq 'ARRAY';
+        return '' unless $allowed->{$this};
+    }
+
+    return lc($this);
+}
+
+sub string__css_keyword_list
+{
+    my ($ctx, $this, $allowed) = @_;
+
+    $this =~ s/^\s+//g;
+    $this =~ s/\s+$//g;
+
+    my @in = split(/\s+/, $this);
+    my @out = ();
+
+    # Do the transform of $allowed to a hash once here rather than once for each keyword
+    $allowed = { map { $_ => 1 } @$allowed } if ref $allowed eq 'ARRAY';
+
+    foreach my $kw (@in) {
+        $kw = string__css_keyword($ctx, $kw, $allowed);
+        push @out, $kw if $kw;
+    }
+
+    return join(' ', @out);
+}
+
+
 1;
