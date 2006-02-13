@@ -130,7 +130,7 @@ body<=
         LJ::update_user($u, $tochange);
 
         # send validation mail
-        my $aa = LJ::register_authaction($u->{'userid'}, "validateemail", $u->{'email'});
+        my $aa = LJ::register_authaction($u->{'userid'}, "validateemail", $POST{'email'});
         LJ::send_mail({
             'to' => $POST{'email'},
             'from' => $LJ::ADMIN_EMAIL,
