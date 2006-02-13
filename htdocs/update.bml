@@ -182,7 +182,7 @@
             'remote' => $remote,
             'spellcheck_html' => $spellcheck_html,
             'clientversion' => "WebUpdate/2.0.0",
-            'richtext' => 1,
+            'richtext' => $LJ::DISABLED{'richtext'} ? 0 : 1,
             'include_insert_object' => $GET{'insobj'},
         };
 
