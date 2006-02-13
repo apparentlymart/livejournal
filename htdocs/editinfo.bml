@@ -136,7 +136,7 @@ _code?>
         # email
         $ret .= "<tr><td align='right' bgcolor='<?emcolor?>'>$ML{'.email.title'}</td><td>";
         if ($LJ::EMAIL_CHANGE_REQUIRES_PASSWORD) {
-            $ret .= BML::ml('.email.address', {'email' => $u->{email}, 'aopts' => "href='$LJ::SITEROOT/changeemail.bml'"});
+            $ret .= BML::ml('.email.address', {'email' => $u->{email}, 'aopts' => "href='$LJ::SITEROOT/changeemail.bml$getextra'"});
         } else {
             $ret .= LJ::html_text({ 'name' => 'email', 'value' => $u->{'email'}, 'size' => '40', 'maxlength' => '50' });
         }
