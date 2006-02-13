@@ -1,3 +1,4 @@
+
 //////////  LJ User Button //////////////
 var LJUserCommand=function(){
 };
@@ -30,13 +31,13 @@ LJUserCommand.Execute=function() {
         }
 
         // Make the tag like the editor would and apply formatting
-        var html = "<lj user=''>";
-        html    += "<span class='LJUser'>";
-        html    += "<img src='" + FCKConfig.PluginsPath + "livejournal/userinfo.gif' width='17' height='17' style='vertical-align: bottom' />";
-        html    += user;
-        html    += "</span></lj>";
+        var html = "<span class='LJUser'>";
+        html     += "<img width='17' height='17' style='vertical-align: bottom' src='" + FCKConfig.PluginsPath + "livejournal/userinfo.gif' alt='' />";
+        html     += user;
+        html     += "</span>";
 
         FCK.InsertHtml(html);
+        FCK.Focus();
     }
     return;
 }
@@ -71,6 +72,7 @@ LJCutCommand.Execute=function() {
         html    += "</lj-cut>";
 
         FCK.InsertHtml(html);
+        FCK.Focus();
     }
     return;
 }

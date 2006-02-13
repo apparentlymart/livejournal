@@ -340,17 +340,23 @@
                 $req{'prop_opt_preformatted'} = 0;
             } else {
 
-                # The rich text editor adds a </lj> after <lj user="exampleusername">
-                # Deal with this, assuming the user really wanted an lj user tag.
-                # Also deal with the case where we made the lj user tag via the RTE
-                # and we have a bunch of styling HTML we need to remove.
-
-                $req{'event'} =~ s!<lj user=""><span class="LJUser"><img width="17" height="17" style="vertical-align: bottom;" src="(?:$LJ::STATPREFIX)?/stc/fck/editor/plugins/livejournal/userinfo.gif" alt="" />(\w+)</span></lj>!<lj user="$1" />!g;
+                # In order for the <lj user> tag to show up correctly, we need
+                # to add a span and an image so that it shows up as it will in
+                # the entry.  Strip all of this extra stuff back down into a
+                # <lj user> tag for the cleaner to parse instead.
+                $req{'event'} =~ s!<span class="LJUser"><img width="17" height="17" alt="" src="(?:$LJ::STATPREFIX)?/stc/fck/editor/plugins/livejournal/userinfo.gif" style="vertical-align: bottom;" />(\w+)</span>!<lj user="$1" />!g;
+                # Remove closing </lj> tags
                 $req{'event'} =~ s!<lj user="(\w+)"></lj>!<lj user="$1" />!gi;
                 $req{'event'} =~ s!<lj user="">(\w+)</lj>!<lj user="$1" />!gi;
 
-                $req{'event'} =~ s!<lj-cut class="LJCut">(.+)</lj-cut>!<lj-cut>$1</lj-cut>!gi;
-                $req{'event'} =~ s!<lj-raw class="LJRaw">(.+)</lj-raw>!<lj-raw>$1</lj-raw>!gi;
+                # We add a CSS class to the lj-cut and lj-raw tags so that they
+                # show up formatted in the editor.  Strip out this class since
+                # we don't want to save it in the database.  Rather when invoking
+                # the rich text editor, add back whatever is needed to format
+                # the text correctly.  Thus if we move to a different editor or
+                # something in the future, we don't have this legacy CSS in entries.
+                $req{'event'} =~ s!<lj-cut class="LJCut">!<lj-cut>!gi;
+                $req{'event'} =~ s!<lj-raw class="LJRaw">!<lj-raw>!gi;
             }
         }
 
