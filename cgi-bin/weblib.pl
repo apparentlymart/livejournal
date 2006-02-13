@@ -1120,15 +1120,15 @@ sub entry_form {
                                 'disabled' => $opts->{'disabled_save'},
                                 'id' => 'draft'});
 
-    my $jrich = LJ::ejs(LJ::deemp(
-            BML::ml("entryform.htmlokay.rich2", { 'opts' => 'href="#" onClick="return useRichText();"' })));
+    if ($opts->{'richtext'} && !$opts->{'did_spellcheck'}) {
+        LJ::need_res('js/rte.js', 'stc/fck/fckeditor.js');
 
-    my $jnorich = LJ::ejs(LJ::deemp(BML::ml('entryform.htmlokay.norich2')));
+        my $jrich = LJ::ejs(LJ::deemp(
+                                      BML::ml("entryform.htmlokay.rich2", { 'opts' => 'href="#" onClick="return useRichText(\'draft\', \'' . LJ::ejs($LJ::STATPREFIX) . '\');"' })));
 
-    unless ( $opts->{'disabled_save'} ||
-             !$opts->{'richtext'}     ||
-             $opts->{'did_spellcheck'}
-           ) {
+        my $jnorich = LJ::ejs(LJ::deemp(BML::ml('entryform.htmlokay.norich2')));
+
+
         $out .= <<RTE;
         <script language='JavaScript' type='text/javascript'>
             <!--
@@ -1144,7 +1144,7 @@ sub entry_form {
         //-->
             </script>
 RTE
-            $out .= '<noscript><?de ' . BML::ml('entryform.htmlokay.norich2') . ' de?></noscript>';
+        $out .= '<noscript><?de ' . BML::ml('entryform.htmlokay.norich2') . ' de?></noscript>';
         $out .= LJ::html_hidden({ name => 'switched_rte_on', id => 'switched_rte_on', value => '0'});
     }
     $out .= '<br />';
@@ -1692,6 +1692,8 @@ sub res_includes {
             $ret .= "<script type=\"text/javascript\" src=\"$path\"></script>\n";
         } elsif ($path =~ /\.css$/ && $path =~ s!^stc/!$LJ::STATPREFIX/!) {
             $ret .= "<link rel=\"stylesheet\" type=\"text/css\" href=\"$path\" />\n";
+        } elsif ($path =~ /\.js$/ && $path =~ s!^stc/!$LJ::STATPREFIX/!) {
+            $ret .= "<script type=\"text/javascript\" src=\"$path\"></script>\n";
         }
     }
     return $ret;

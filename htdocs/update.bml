@@ -437,7 +437,6 @@ head<=
     $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/entry.js'></script>\n";
     $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/httpreq.js'></script>\n";
     $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/draft.js'></script>\n";
-    $ret .= "<script type='text/javascript' src='$LJ::STATPREFIX/fck/fckeditor.js'></script>\n";
 
     # draft autosave and restore
     my $remote = LJ::get_remote();
@@ -539,52 +538,6 @@ head<=
             }
             </script>
 ^;
-
-    # Rich Text Editor!
-    $ret .= qq^
-        <script>
-        function useRichText() {
-            \$("insobj").className = 'display_none';
-            \$("jrich").className = 'display_none';
-            var oFCKeditor = new FCKeditor('draft');
-            oFCKeditor.BasePath = "$LJ::STATPREFIX/fck/";
-            oFCKeditor.Height = 350;
-            oFCKeditor.ToolbarSet = "Update";
-
-            if (\$("event_format").selectedIndex == 0) {
-                \$("draft").value = \$("draft").value.replace(/\\n/g, '<br />');
-            }
-
-            oFCKeditor.ReplaceTextarea();
-
-            // Need to pause here as it takes some time for the editor
-            // to actually load within the browser before we can
-            // access it.
-            setTimeout(RTEAddClasses, 2000);
-
-            \$("switched_rte_on").value = '1';
-            \$("event_format").selectedIndex = 1;
-            \$("event_format").disabled = 1;
-            return false; // do not follow link
-        }
-
-        function RTEAddClasses() {
-            if (! FCKeditorAPI) return;
-            var oEditor = FCKeditorAPI.GetInstance('draft');
-            if (! oEditor) return;
-
-            var html = oEditor.GetXHTML();
-
-            html = html.replace(/<lj-cut>(.+)<\\/lj-cut>/g, '<lj-cut class="LJCut">\$1</lj-cut>');
-            html = html.replace(/<lj-raw>([\\w\\s]+)<\\/lj-raw>/g, '<lj-cut class="LJRaw">\$1</lj-raw>');
-
-            html = html.replace(/<lj user=['"](\\w+)["'] ?\\/?>/g, "<lj user=''><span class='LJUser'><img src='$LJ::SITEROOT/tools/FCKeditor/editor/plugins/livejournal/userinfo.gif' width='17' height='17' style='vertical-align: bottom' />\$1</span></lj>");
-
-            oEditor.SetHTML(html);
-        }
-        </script>
-^;
-
 
     $ret .= (! $LJ::REQ_HEAD_HAS{'chalresp_js'}++) ? $LJ::COMMON_CODE{'chalresp_js'} : "";
     return $ret;
