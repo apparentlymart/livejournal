@@ -142,6 +142,11 @@
     my $print_entry_form = sub {
         my $opts = shift;
 
+        # If they got an error, or spellchecked, and we're in rich text mode, enable rich text mode:
+        if ($did_post && $POST{'switched_rte_on'} && !$LJ::DISABLED{'richtext'}) {
+            $onload .= "useRichText('draft', '" . LJ::ejs($LJ::STATPREFIX) . "'); ";
+        }
+
         # authentication box
         my $auth = '';
 
