@@ -2715,6 +2715,7 @@ sub error
 }
 
 *errobj = \&LJ::Error::errobj;
+*throw = \&LJ::Error::throw;
 
 # Returns a LWP::UserAgent or LWPx::Paranoid agent depending on role
 # passed in by the caller.

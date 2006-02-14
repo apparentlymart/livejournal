@@ -71,6 +71,18 @@ sub errobj {
     return errobj("DieObject", object => $_[0]);
 }
 
+# called via LJ::throw(@errors)
+sub throw {
+    return unless @_;
+    my @errors = @_;
+
+    # throw a single error
+    $errors[0]->throw if @errors == 1;
+
+    # throw a group of errors
+    LJ::errobj("Multiple", errors => \@errors)->throw;
+}
+
 # don't override this!
 sub new {
     my $class = shift;
@@ -153,6 +165,9 @@ sub die_string { return $_[0]->field('message'); }
 package LJ::Error::DieObject;
 sub fields { qw(object) }
 sub die_object { return $_[0]->field('object'); }
+
+package LJ::Error::Multiple;
+sub fields { qw(errors); }  # arrayref of errors
 
 
 1;

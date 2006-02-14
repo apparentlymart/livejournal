@@ -34,21 +34,24 @@ sub create {
 
     my $size = length $$dataref;
 
+    my @errors;
     if ($size > $MAX_UPLOAD) {
-        LJ::errobj("Userpic::ByteSize",
-                   size => $size,
-                   max  => $MAX_UPLOAD)->throw;
+        push @errors, LJ::errobj("Userpic::ByteSize",
+                                 size => $size,
+                                 max  => $MAX_UPLOAD);
     }
 
     unless ($w >= 1 && $w <= 100 && $h >= 1 && $h <= 100) {
-        LJ::errobj("Userpic::Dimensions",
-                   w => $w, h => $h)->throw;
+        push @errors, LJ::errobj("Userpic::Dimensions",
+                                 w => $w, h => $h);
     }
 
     unless ($filetype eq "GIF" || $filetype eq "JPG" || $filetype eq "PNG") {
-        LJ::errobj("Userpic::FileType",
-                   type => $filetype)->throw;
+        push @errors, LJ::errobj("Userpic::FileType",
+                                 type => $filetype);
     }
+
+    LJ::throw(@errors);
 
     my $base64 = Digest::MD5::md5_base64($$dataref);
 
@@ -303,7 +306,6 @@ sub set_keywords {
 }
 
 package LJ::Error::Userpic::TooManyKeywords;
-use base 'LJ::Error';
 
 sub user_caused { 1 }
 sub fields      { qw(userpic lost); }
@@ -317,6 +319,18 @@ sub lost_keywords_as_html {
     my $self = shift;
     return join(", ", map { LJ::ehtml($_) } @{ $self->field("lost") });
 }
+
+package LJ::Error::Userpic::Bytesize;
+sub user_caused { 1 }
+sub fields      { qw(size max); }
+
+package LJ::Error::Userpic::Dimensions;
+sub user_caused { 1 }
+sub fields      { qw(w h); }
+
+package LJ::Error::Userpic::FileType;
+sub user_caused { 1 }
+sub fields      { qw(type); }
 
 
 
