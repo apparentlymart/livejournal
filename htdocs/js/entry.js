@@ -548,3 +548,31 @@ InOb.setTitle = function (title) {
     var wintitle = currentPopupWindow.document.getElementById('wintitle');
     wintitle.innerHTML = title;
 };
+
+
+/* ******************** DRAFT SUPPORT ******************** */
+
+var LJDraft = {};
+
+LJDraft.saveInProg = false;
+
+LJDraft.save = function (drafttext) {
+    if (LJDraft.saveInProg)
+        return;
+
+    LJDraft.saveInProg = true;
+
+    var finished = function () {
+        LJDraft.saveInProg = false;
+    };
+
+    HTTPReq.getJSON({
+      method: "POST",
+      url: "/tools/endpoints/draft.bml",
+      onData: finished,
+      onError: finished,
+      data: HTTPReq.formEncoded({"saveDraft": drafttext})
+    });
+};
+
+

@@ -405,9 +405,9 @@ head<=
     # FIXME: Need better dependency loader, core.js must be loaded before dom.js, and then entry.js last!
     $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/core.js'></script>\n";
     $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/dom.js'></script>\n";
-    $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/entry.js'></script>\n";
     $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/httpreq.js'></script>\n";
-    $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/draft.js'></script>\n";
+    $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/entry.js?v=2'></script>\n";
+
 
     # draft autosave and restore
     my $remote = LJ::get_remote();
@@ -432,25 +432,11 @@ head<=
                         draftStatusField.innerHTML = 'Restored last saved draft';
                     } else {
                         // Clear out their current draft
-                            saveDraft('');
+                            LJDraft.save('');
                     }
                 }
                 // Check for changes every 10 seconds to save
                 setInterval(draftSave, 10000);
-            }
-
-            function updateDraft () {
-                getDraft(gotDraft);
-            }
-
-            function gotDraft (draft) {
-                lastDraft = draft.draft;
-                draftField.value = lastDraft;
-                if (lastDraft != '') {
-                    draftStatusField.innerHTML = 'Restored last saved draft';
-                } else {
-                    draftStatusField.innerHTML = 'No draft stored';
-                }
             }
 
             function draftSave () {
@@ -462,13 +448,13 @@ head<=
 
                     if (curDraft != lastDraft) {
                         lastDraft = curDraft;
-                        saveDraft(lastDraft);
+                        LJDraft.save(lastDraft);
                         draftStatusField.innerHTML = 'Autosaved draft at ' + getTime();
                     }
                 } else {
                     if (draftField.value != lastDraft) {
                         lastDraft = draftField.value;
-                        saveDraft(lastDraft);
+                        LJDraft.save(lastDraft);
                         draftStatusField.innerHTML = 'Autosaved draft at ' + getTime();
                     }
                 }
