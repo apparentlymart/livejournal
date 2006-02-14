@@ -97,14 +97,20 @@ sub get_dbh {
         warn $errmsg;
     }
 
+    my $nodb = sub {
+        my $err = LJ::errobj("Database::Unavailable",
+                             roles => [@_]);
+        return $err->cond_throw;
+    };
+
     foreach my $role (@_) {
         # let site admin turn off global master write access during
         # maintenance
-        return undef if $LJ::DISABLE_MASTER && $role eq "master";
+        return $nodb->() if $LJ::DISABLE_MASTER && $role eq "master";
         my $db = LJ::get_dbirole_dbh($opts, $role);
         return $db if $db;
     }
-    return undef;
+    return $nodb->();
 }
 
 sub get_db_reader {
@@ -346,6 +352,30 @@ sub dbtime_callback {
 sub isdb { return ref $_[0] && (ref $_[0] eq "DBI::db" ||
                                 ref $_[0] eq "DBIx::StateKeeper" ||
                                 ref $_[0] eq "Apache::DBI::db"); }
+
+
+package LJ::Error::Database::Unavailable;
+sub fields { qw(roles) }
+
+package LJ::Error::Database::Failure;
+sub fields { qw(db) }
+
+sub as_string {
+    my $self = shift;
+    my $code = $self->err;
+    my $txt  = $self->errstr;
+    return "Database error code $code: $txt";
+}
+
+sub err {
+    my $self = shift;
+    return $self->field('db')->err;
+}
+
+sub errstr {
+    my $self = shift;
+    return $self->field('db')->errstr;
+}
 
 1;
 

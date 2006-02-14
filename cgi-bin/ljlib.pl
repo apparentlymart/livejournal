@@ -9,6 +9,7 @@ use Digest::MD5 ();
 use Digest::SHA1 ();
 use HTTP::Date ();
 use LJ::MemCache;
+use LJ::Error;
 use LJ::User;
 use LJ::Entry;
 use LJ::Userpic;
@@ -2508,10 +2509,12 @@ sub alloc_global_counter
     return undef unless $dbh;
 
     # $dom can come as a direct argument or as a string to be mapped via hook
+    my $dom_unmod = $dom;
     unless ($dom =~ /^[SPCEAO]$/) {
         $dom = LJ::run_hook('map_global_counter_domain', $dom);
     }
-    return undef unless defined $dom;
+    return LJ::errobj("InvalidParameters", params => { dom => $dom_unmod })->cond_throw
+        unless defined $dom;
 
     my $newmax;
     my $uid = 0; # userid is not needed, we just use '0'
@@ -2547,7 +2550,7 @@ sub alloc_global_counter
     }
     $newmax += 0;
     $dbh->do("INSERT IGNORE INTO counter (journalid, area, max) VALUES (?,?,?)",
-            undef, $uid, $dom, $newmax) or return undef;
+             undef, $uid, $dom, $newmax) or return LJ::errobj($dbh)->cond_throw;
     return LJ::alloc_global_counter($dom, 1);
 }
 
@@ -2711,6 +2714,8 @@ sub error
     return undef;
 }
 
+*errobj = \&LJ::Error::errobj;
+
 # Returns a LWP::UserAgent or LWPx::Paranoid agent depending on role
 # passed in by the caller.
 # Des-%opts:
@@ -2768,5 +2773,8 @@ sub AUTOLOAD {
     require $lib;
     goto &$AUTOLOAD;
 }
+
+package LJ::Error::InvalidParameters;
+sub opt_fields { qw(params) }
 
 1;
