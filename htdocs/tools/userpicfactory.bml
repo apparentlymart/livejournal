@@ -35,7 +35,7 @@
         }
 
         function onRegionChanged (c) {
-            if (!c.x1 && !c.x2 && !c.y1 && !c.y2) return;
+            if (!c.x2 && !c.y2) return;
 
             updatePreview(c);
 
