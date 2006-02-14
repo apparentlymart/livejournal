@@ -18,8 +18,6 @@ function useRichText(textArea, statPrefix) {
     setTimeout("RTEAddClasses('" + textArea + "', '" + statPrefix + "')", 2000);
 
     $("switched_rte_on").value = '1';
-    $("event_format").selectedIndex = 1;
-    $("event_format").disabled = 1;
     return false; // do not follow link
 }
 
