@@ -13,23 +13,23 @@ use vars qw($body $title $windowtitle %GET %POST);
 
  LJ::set_active_crumb('addfriend');
 
- unless ($remote) 
+ unless ($remote)
  {
      $title = $ML{'.error1.title'};
      $body = "<?needlogin?>";
      return;
  }
 
- unless ($user && $userid) 
+ unless ($user && $userid)
  {
      $title = $ML{'Error'};
      $body = BML::ml('.error2.text2', {'aopts' => "href='$LJ::SITEROOT/friends/edit.bml'"});
      return;
  }
- 
- if ($POST{'mode'} eq "add") 
+
+ if ($POST{'mode'} eq "add")
  {
-     unless (LJ::did_post()) { 
+     unless (LJ::did_post()) {
          $title = $ML{'Error'};
          $body = "<?h1 $ML{'Error'} h1?><?p <?requirepost?> p?>";
          return;
@@ -68,12 +68,12 @@ use vars qw($body $title $windowtitle %GET %POST);
          $req->{"editfriend_add_1_bg"} = $POST{'editfriend_add_1_bg'};
          $req->{"editfriend_add_1_groupmask"} = $gmask;
      }
-     
+
      my %res = ();
-     LJ::do_request($req, \%res, 
+     LJ::do_request($req, \%res,
                     { "noauth" => 1, "userid" => $remote->{'userid'} } );
-     
-     if ($res{'success'} eq "OK") 
+
+     if ($res{'success'} eq "OK")
      {
          if ($POST{'action:delete'}) {
              $title = $ML{'.remove.title'};
@@ -128,7 +128,7 @@ use vars qw($body $title $windowtitle %GET %POST);
  my $sth = $dbr->prepare("SELECT groupmask, fgcolor, bgcolor FROM friends WHERE userid=? AND friendid=?");
  $sth->execute($remote->{'userid'}, $userid);
  my $fr = $sth->fetchrow_hashref;
- 
+
  if ($fr) {
      $title .= $ML{'.error3.title'};
      $body .= "<?p " . BML::ml('.error3.text1', {'user'=> LJ::ljuser($user) }) . " p?>";
@@ -197,8 +197,8 @@ use vars qw($body $title $windowtitle %GET %POST);
  ## let them pick the colors
  my $color_text = "<?p <table><tr><td valign='top'><i>$ML{'.optional'}:</i> ".
           "<input type='checkbox' id='color_switch' value='' onClick='color_display(this);'> </td><td>" .
-          BML::ml('.colors.text', {'user'=>$user}) . 
-          "<br /><FONT SIZE=-2 FACE='Arial,Helvetica'>($ML{'.colors.disclaimer'})</FONT></td></tr></table> p?>";
+          BML::ml('.colors.text', {'user'=>$user}) .
+          "<br /><span style='font-size: 0.7em;'>($ML{'.colors.disclaimer'})</span></td></tr></table> p?>";
  $body .= "<script>\n";
  $body .= "function color_display(check) {\n";
  $body .= "  if (check.checked) {\n";
@@ -213,9 +213,9 @@ use vars qw($body $title $windowtitle %GET %POST);
  $body .= "<noscript>\n";
  $body .= "<?p <table><tr><td valign='top'><i>$ML{'.optional'}:</i> </td><td>" .
           BML::ml('.colors.text', {'user'=>$user}) .
-          "<br /><FONT SIZE=-2 FACE='Arial,Helvetica'>($ML{'.colors.disclaimer'})</FONT></td></tr></table> p?>";
+          "<br /><span style='font-size: 0.7em;'>($ML{'.colors.disclaimer'})</span></td></tr></table> p?>";
  $body .= "</noscript>\n";
-              
+
 
  my $ret = "";
  $ret .= "  <div id='color_opt'>\n";
@@ -225,7 +225,7 @@ use vars qw($body $title $windowtitle %GET %POST);
  $ret .= "  color_display(\$(\"color_switch\"));\n";
  $ret .= "</script>\n";
 
- $ret .= "<TABLE CELLPADDING=4><TR><TD><B>$ML{'.colors.fg'}</B></TD><TD><B>$ML{'.colors.bg'}</B></TD></TR>\n";
+ $ret .= "<table cellpadding='4'><tr><td><b>$ML{'.colors.fg'}</b></td><td><b>$ML{'.colors.bg'}</b></td></tr>\n";
 
  my @color = ();
  LJ::load_codes({ "color" => \@color });
@@ -233,37 +233,37 @@ use vars qw($body $title $windowtitle %GET %POST);
  my $sel = $fr || { 'fgcolor' => hex '000000',
                     'bgcolor' => hex 'FFFFFF', };
 
- $ret .= "<TR>";
- $ret .= "<TD><SELECT NAME=\"editfriend_add_1_fg\">";
+ $ret .= "<tr>";
+ $ret .= "<td><select name=\"editfriend_add_1_fg\">";
  foreach (@color) {
      my $color_int = hex (substr($_->{'code'},1));
-     my $selected = $color_int eq $sel->{'fgcolor'} ? " SELECTED" : "";
-     $ret .= "<OPTION VALUE=\"$_->{'code'}\"$selected>$_->{'item'}\n";
+     my $selected = $color_int eq $sel->{'fgcolor'} ? " selected" : "";
+     $ret .= "<option value=\"$_->{'code'}\"$selected>$_->{'item'}\n";
  }
- $ret .= "</SELECT></TD>\n";
- $ret .= "<TD><SELECT NAME=\"editfriend_add_1_bg\">";
+ $ret .= "</select></TD>\n";
+ $ret .= "<td><select name=\"editfriend_add_1_bg\">";
  foreach (@color) {
      my $color_int = hex (substr($_->{'code'},1));
-     my $selected = $color_int eq $sel->{'bgcolor'} ? " SELECTED" : "";
-     $ret .= "<OPTION VALUE=\"$_->{'code'}\"$selected>$_->{'item'}\n";
+     my $selected = $color_int eq $sel->{'bgcolor'} ? " selected" : "";
+     $ret .= "<option value=\"$_->{'code'}\"$selected>$_->{'item'}\n";
  }
- $ret .= "</SELECT></TD>\n";
- $ret .= "</TR>\n";
- $ret .= "</TABLE>\n";
- 
+ $ret .= "</select></td>\n";
+ $ret .= "</tr>\n";
+ $ret .= "</table>\n";
+
  ### color swatch
  my $col = 0;
- $ret .= "<P><TABLE border=0 cellspacing=0 cellpadding=0>";
+ $ret .= "<p><table border='0' cellspacing='0' cellpadding='0'>";
  foreach (@color) {
-     if ($col==0) { $ret .= "<TR>\n"; }
+     if ($col==0) { $ret .= "<tr>\n"; }
      $col++;
      my $ecolor = LJ::ehtml($_->{'item'});
-     $ret .= "<TD bgcolor=$_->{'code'}><IMG SRC=\"/img/dot.gif\" WIDTH=14 HEIGHT=14 TITLE=\"$ecolor\" ALT=\"$ecolor\"></TD>\n";
-     if ($col==23) { $ret .= "</TR>\n"; $col==0; }
+     $ret .= "<td bgcolor=$_->{'code'}><img src=\"/img/dot.gif\" width='14' height='14' title=\"$ecolor\" alt=\"$ecolor\"></td>\n";
+     if ($col==23) { $ret .= "</tr>\n"; $col==0; }
  }
- if ($col) { $ret .= "</TR>\n"; $col==0; }
- $ret .= "</TABLE>\n";
- $ret .= "<FONT SIZE=-2 FACE=\"Arial,Helvetica\">$ML{'.colors.hover'}</FONT></p></div>";
+ if ($col) { $ret .= "</tr>\n"; $col==0; }
+ $ret .= "</table>\n";
+ $ret .= "<span style='font-size: 0.7em;'>$ML{'.colors.hover'}</span></p></div>";
 
  $body .= $ret;
  $body .= "<br />\n<p>";
@@ -277,17 +277,17 @@ use vars qw($body $title $windowtitle %GET %POST);
  }
 
  my $cancel_btn = LJ::ejs($ML{'.btn.cancel'});
- 
+
  $body .= "<script type='text/javascript' language='Javascript'> \n <!-- \n
     document.write(\"<input type='button' value='$cancel_btn' onclick='history.go(-1); return false;'>\");
      \n // -->\n ";
  $body .= '</script></p>';
 
- 
+
  $body .= "</form>";
 
  return;
-     
+
 _code?>
 <?page
 title=><?_code return $title; _code?>
