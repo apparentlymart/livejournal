@@ -103,6 +103,16 @@
     my $showform = $POST{'showform'} || $auth_missing;                            # show entry form
     my $preview = $POST{'action:preview'};
 
+    # Setup draft saving and try to restore from a draft
+    # unless we did a post action
+    if ($remote && !$LJ::DISABLED{'update_draft'}) {
+        if (!$did_post) {
+            $onload .= "initDraft(true); ";
+        } else {
+            $onload .= "initDraft(false); ";
+        }
+    }
+
     # are we spellchecking before we post?
     my $did_spellcheck; my $spellcheck_html;
     if ($LJ::SPELLER && $POST{'action:spellcheck'}) {
@@ -118,9 +128,6 @@
         $hour = $POST{'hour'};
         $min  = $POST{'min'};
 
-        # Setup draft saving, but do not try to restore from draft
-        $onload .= "initDraft(false); "
-            if $remote && !$LJ::DISABLED{'update_draft'};
     } else {
         $onload .= "pageload(1); "; # js fill-in on
 
@@ -130,10 +137,6 @@
         $mday = sprintf("%02d", $time[3]);
         $hour = $time[2];
         $min = sprintf("%02d", $time[1]);
-
-        # Setup draft saving and try to restore from a draft
-        $onload .= "initDraft(true); "
-            if $remote && !$LJ::DISABLED{'update_draft'};
     }
 
     my $print_entry_form = sub {
@@ -326,38 +329,6 @@
         LJ::entry_form_decode(\%req, \%POST);
         if ($req{'event'} eq "") {
             $errors->{'entry'} = $ML{'.error.noentry'};
-        }
-
-        if ($POST{'switched_rte_on'}) {
-
-            # We want to see if we can hit the fast path for cleaning
-            # if they did nothing but add line breaks.
-            my $attempt = $req{'event'};
-            $attempt =~ s!<br />!\n!g;
-
-            if ($attempt !~ /<\w/) {
-                $req{'event'} = $attempt;
-                $req{'prop_opt_preformatted'} = 0;
-            } else {
-
-                # In order for the <lj user> tag to show up correctly, we need
-                # to add a span and an image so that it shows up as it will in
-                # the entry.  Strip all of this extra stuff back down into a
-                # <lj user> tag for the cleaner to parse instead.
-                $req{'event'} =~ s!<span class="LJUser"><img width="17" height="17" alt="" src="(?:$LJ::STATPREFIX)?/stc/fck/editor/plugins/livejournal/userinfo.gif" style="vertical-align: bottom;" />(\w+)</span>!<lj user="$1" />!g;
-                # Remove closing </lj> tags
-                $req{'event'} =~ s!<lj user="(\w+)"></lj>!<lj user="$1" />!gi;
-                $req{'event'} =~ s!<lj user="">(\w+)</lj>!<lj user="$1" />!gi;
-
-                # We add a CSS class to the lj-cut and lj-raw tags so that they
-                # show up formatted in the editor.  Strip out this class since
-                # we don't want to save it in the database.  Rather when invoking
-                # the rich text editor, add back whatever is needed to format
-                # the text correctly.  Thus if we move to a different editor or
-                # something in the future, we don't have this legacy CSS in entries.
-                $req{'event'} =~ s!<lj-cut class="LJCut">!<lj-cut>!gi;
-                $req{'event'} =~ s!<lj-raw class="LJRaw">!<lj-raw>!gi;
-            }
         }
 
         my %res;

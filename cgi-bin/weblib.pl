@@ -1616,15 +1616,41 @@ sub entry_form_decode
 
     # Convert the rich text editor output back to parsable lj tags.
     my $event = $POST->{'event'};
-    if ($POST->{'richtext'}) {
-        # check for blank entry
-        (my $event_tmp = $event) =~ s!(?:<br>|<P>(?:&nbsp;|\s)+</P>|&nbsp;)\s*?!!gm;
-        if ($event_tmp =~ /\w/) { # ok, we still have content
-            $event =~ s/&lt;(\/)?lj-cut(.*?)(?: \/)?&gt;/<$1lj-cut$2>/ig;
-            $event =~ s/&lt;lj user=['"]?(\w{1,15})['"]?\s?\/?&gt;/<lj user="$1" \/>/ig; # manually typed tags
-            $event =~ s/<span class="?ljuser"?.*?userinfo\.bml\?user=(.+?)".*?<\/b><\/a>(?:<\/span>)?/<lj user="$1" \/>/ig;
-        } else { # RTE blanks (just <br>, newlines, &nbsp; - no real content)
-            $event = undef; # force protocol error
+    if ($POST->{'switched_rte_on'}) {
+
+        # We want to see if we can hit the fast path for cleaning
+        # if they did nothing but add line breaks.
+        my $attempt = $event;
+        $attempt =~ s!<br />!\n!g;
+
+        if ($attempt !~ /<\w/) {
+            $event = $attempt;
+
+            # Make sure they actually typed something, and not just hit
+            # enter a lot
+            $attempt =~ s!(?:<p>(?:&nbsp;|\s)+</p>|&nbsp;)\s*?!!gm;
+            $event = '' unless $attempt =~ /\w+/;
+
+            $req->{'prop_opt_preformatted'} = 0;
+        } else {
+
+            # In order for the <lj user> tag to show up correctly, we need
+            # to add a span and an image so that it shows up as it will in
+            # the entry.  Strip all of this extra stuff back down into a
+            # <lj user> tag for the cleaner to parse instead.
+            $event =~ s!<span class="LJUser"><img width="17" height="17" alt="" src="(?:$LJ::STATPREFIX|/stc)/fck/editor/plugins/livejournal/userinfo.gif" style="vertical-align: bottom;" />(\w+)</span>!<lj user="$1" />!g;
+            # Remove closing </lj> tags
+            $event =~ s!<lj user="(\w+)"></lj>!<lj user="$1" />!gi;
+            $event =~ s!<lj user="">(\w+)</lj>!<lj user="$1" />!gi;
+
+            # We add a CSS class to the lj-cut and lj-raw tags so that they
+            # show up formatted in the editor.  Strip out this class since
+            # we don't want to save it in the database.  Rather when invoking
+            # the rich text editor, add back whatever is needed to format
+            # the text correctly.  Thus if we move to a different editor or
+            # something in the future, we don't have this legacy CSS in entries.
+            $event =~ s!<lj-cut class="LJCut">!<lj-cut>!gi;
+            $event =~ s!<lj-raw class="LJRaw">!<lj-raw>!gi;
         }
     }
     $req->{'event'} = $event;
