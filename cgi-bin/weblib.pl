@@ -1716,11 +1716,22 @@ sub res_includes {
     my $ret = "";
     foreach my $key (keys %LJ::NEEDED_RES) {
         my $path = $key;
+        # some files need to be served from same host as the app (must be on "www.")
+        # and those are WSTATPREFIX (the "W" meaning "Web")
+        my $changepath = sub {
+            if ($key =~ m!^stc/fck/! || $LJ::FORCE_WSTAT{$key}) {
+                $path = $key;
+                $path =~ s!^stc/!$LJ::WSTATPREFIX/!;
+            }
+        };
         if ($path =~ s!^js/!$LJ::JSPREFIX/!) {
+            $changepath->();
             $ret .= "<script type=\"text/javascript\" src=\"$path\"></script>\n";
         } elsif ($path =~ /\.css$/ && $path =~ s!^stc/!$LJ::STATPREFIX/!) {
+            $changepath->();
             $ret .= "<link rel=\"stylesheet\" type=\"text/css\" href=\"$path\" />\n";
         } elsif ($path =~ /\.js$/ && $path =~ s!^stc/!$LJ::STATPREFIX/!) {
+            $changepath->();
             $ret .= "<script type=\"text/javascript\" src=\"$path\"></script>\n";
         }
     }
