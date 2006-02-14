@@ -407,6 +407,13 @@ add_conf('$STATPREFIX',
          des => "URL prefix for the static files.  Defaults to \$SITEROOT/stc.",
          );
 
+add_conf('$WSTATPREFIX',
+         required => 0,
+         type => 'url',
+         no_trailing_slash => 1,
+         des => "URL prefix for the static files.  Must be located on the same domain as $DOMAIN_WEB.",
+         );
+
 add_conf('$SPELLER',
          type => 'program+args',
          des => "If set, spell checking is enabled.  Value is the full path plus arguments to an ispell-compatible spell checker.  aspell is recommended, using:  '/usr/bin/aspell pipe --sug-mode=fast --ignore-case'.");

@@ -1124,7 +1124,7 @@ sub entry_form {
         LJ::need_res('js/rte.js', 'stc/fck/fckeditor.js');
 
         my $jrich = LJ::ejs(LJ::deemp(
-                                      BML::ml("entryform.htmlokay.rich2", { 'opts' => 'href="#" onClick="return useRichText(\'draft\', \'' . LJ::ejs($LJ::STATPREFIX) . '\');"' })));
+                                      BML::ml("entryform.htmlokay.rich2", { 'opts' => 'href="#" onClick="return useRichText(\'draft\', \'' . LJ::ejs($LJ::WSTATPREFIX) . '\');"' })));
 
         my $jnorich = LJ::ejs(LJ::deemp(BML::ml('entryform.htmlokay.norich2')));
 
@@ -1638,7 +1638,9 @@ sub entry_form_decode
             # to add a span and an image so that it shows up as it will in
             # the entry.  Strip all of this extra stuff back down into a
             # <lj user> tag for the cleaner to parse instead.
-            $event =~ s!<span class="LJUser"><img width="17" height="17" alt="" src="(?:$LJ::STATPREFIX|/stc)/fck/editor/plugins/livejournal/userinfo.gif" style="vertical-align: bottom;" />(\w+)</span>!<lj user="$1" />!g;
+            $event =~ s!<span class="LJUser"><img width="17" height="17" alt="" src="(?:$LJ::WSTATPREFIX|/stc)/fck/editor/plugins/livejournal/userinfo.gif" style="vertical-align: bottom;" />(\w+)</span>!<lj user="$1" />!g;
+            $event =~ s!<span class="LJUser"><img width="17" height="17" style="vertical-align: bottom;" src="(?:$LJ::WSTATPREFIX|/stc)/fck/editor/plugins/livejournal/userinfo.gif" alt="" />(\w+)</span>!<lj user="$1" />!g;
+
             # Remove closing </lj> tags
             $event =~ s!<lj user="(\w+)"></lj>!<lj user="$1" />!gi;
             $event =~ s!<lj user="">(\w+)</lj>!<lj user="$1" />!gi;

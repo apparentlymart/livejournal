@@ -32,7 +32,7 @@ LJUserCommand.Execute=function() {
 
         // Make the tag like the editor would and apply formatting
         var html = "<span class='LJUser'>";
-        html     += "<img width='17' height='17' style='vertical-align: bottom' src='" + FCKConfig.PluginsPath + "livejournal/userinfo.gif' alt='' />";
+        html     += "<img width='17' height='17' alt='' src='" + FCKConfig.PluginsPath + "livejournal/userinfo.gif' style='vertical-align: bottom' />";
         html     += user;
         html     += "</span>";
 

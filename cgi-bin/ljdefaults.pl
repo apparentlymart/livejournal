@@ -43,6 +43,7 @@
     $SITEROOT ||= $DOMAIN_WEB ? "http://$DOMAIN_WEB" : "http://www.$DOMAIN";
     $IMGPREFIX ||= "$SITEROOT/img";
     $STATPREFIX ||= "$SITEROOT/stc";
+    $WSTATPREFIX ||= "$SITEROOT/stc";
     $JSPREFIX ||= "$SITEROOT/js";
     $USERPIC_ROOT ||= "$LJ::SITEROOT/userpic";
     $PALIMGROOT ||= "$LJ::SITEROOT/palimg";
