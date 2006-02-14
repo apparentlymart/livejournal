@@ -20,7 +20,7 @@ use Carp qw(croak);
 # As a way to get an LJ::Error instance after an eval
 # that died:
 #   eval { LJ::scary(); }
-#   if (my $err = LJ::errobj($@)) {
+#   if (my $err = LJ::errobj()) {  # or you can pass in errobj($@)
 #      ....
 #   }
 #
@@ -38,7 +38,7 @@ use Carp qw(croak);
 sub errobj {
     # constructing a new LJ::Error instance.  either with a classname
     # and args, or just a classname (no whitespace, must have one capital letter)
-    if (@_ > 1 || ($_[0] !~ /\s/ && $_[0] =~ /[A-Z]/ && $_[0] !~ /[^:\w]/)) {
+    if (@_ > 0 && (@_ > 1 || ($_[0] !~ /\s/ && $_[0] =~ /[A-Z]/ && $_[0] !~ /[^:\w]/))) {
         my ($classtail, @ctor_args) = @_;
         my $class = "LJ::Error::$classtail";
         my $makeit = sub { $class->new(@ctor_args); };
@@ -50,6 +50,9 @@ sub errobj {
         }
         return $val || $makeit->();
     }
+
+    # if no parameters, act like errobj($@)
+    $_[0] = $@ unless @_;
 
     my $ref = ref $_[0];
 

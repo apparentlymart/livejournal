@@ -33,7 +33,7 @@ like($@, qr/Invalid field/i, "bogus field threw");
 my $val = eval {
     die "A normal error message";
 };
-my $ero = LJ::errobj($@);
+my $ero = LJ::errobj();
 is(ref $ero, "LJ::Error::DieString", "got die string object");
 like($ero->die_string, qr/A normal error message/, "got message back");
 
