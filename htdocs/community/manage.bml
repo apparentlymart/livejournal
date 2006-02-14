@@ -113,8 +113,7 @@ body<=
         $ret .= "</td><td align='center'>";
         if ($mods{$id}) {
             my $num = $modcount{$id} || "0"; # relying on this to be <b>-wrapped
-            $ret .= BML::ml('.commlist.moderation.num', { num => $num,
-                            link => "/community/moderate.bml?comm=$user" });
+            $ret .= BML::ml('.commlist.moderation.num2', {'aopts' => "href='$LJ::SITEROOT/community/moderate.bml?comm=$user'", 'num' => $num});
         }
         $ret .= "</td></tr>";
     }
@@ -178,7 +177,7 @@ body<=
  $ret .= " p?></form>";
 
  $ret .= "<?h1 $ML{'.create.header'} h1?>";
- $ret .= "<?p " . BML::ml('.create.text', {'link'=>'/community/create.bml'}) . " p?>";
+ $ret .= "<?p " . BML::ml('.create.text2', {'aopts' => "href='$LJ::SITEROOT/community/create.bml'"}) . " p?>";
 
 
  $ret .= "<?h1 $ML{'/manage/invites.bml.title'} h1?>";

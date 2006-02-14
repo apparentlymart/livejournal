@@ -368,7 +368,7 @@ _code?>
             $ret .= LJ::html_select({ 'name' => 'opt_whatemailshow', 'selected' => $cur }, @vals) . "\n";
 
             $ret .= "<p>" . ($LJ::USER_EMAIL
-                             ? $ML{'.allowshowcontact.email.withdomainaddr'}
+                             ? BML::ml('.allowshowcontact.email.withdomainaddr2', {'sitename' => $LJ::SITENAMESHORT})
                              : $ML{'.allowshowcontact.email.withoutdomainaddr'}) . "</p>\n</div>\n";
 
             # opt_mangleemail

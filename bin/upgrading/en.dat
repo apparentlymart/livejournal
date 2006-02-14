@@ -35,7 +35,7 @@
 
 /allpics.bml.default=<u>Default</u>
 
-/allpics.bml.edit2=You may be interested in <a href='[[editlink]]'>editing your picture keywords</a> or <a href='[[uploadlink]]'>uploading a new picture</a>.
+/allpics.bml.edit3=You may be interested in <a [[aopts1]]>editing your picture keywords</a> or <a [[aopts2]]>uploading a new picture</a>.
 
 /allpics.bml.error.noparam=You need to specify a user parameter.
 
@@ -43,7 +43,7 @@
 
 /allpics.bml.nopics.text.other=This user has not uploaded any user pictures.
 
-/allpics.bml.nopics.text2=You have no pictures uploaded. To upload one, go <a href='[[link]]'>here</a>.
+/allpics.bml.nopics.text3=You have no pictures uploaded. To upload one, go <a [[aopts]]>here</a>.
 
 /allpics.bml.nopics.title=No Pictures
 
@@ -232,7 +232,7 @@ Regards,
 
 /community/create.bml.username.text=Each [[sitename]] account must have their own unique account name.  The account name is what appears in the address to the community.
 
-/community/index.bml.main<<
+/community/index.bml.main2<<
 <?h1 Welcome! h1?>
 <?p
 Welcome to the Community Center. This is the place to find out how and where to 
@@ -247,7 +247,7 @@ A community is a journal run by a member of the site for people with common inte
 Communities are free to use and create... anyone can have them, and they're easy to set up.
 p?>
 
-<p align='center' style='font-size: 1.7em'><a href='./settings.bml?mode=create'>Create a Community Now!</a></p>
+<p align='center' style='font-size: 1.7em'><a [[aopts]]>Create a Community Now!</a></p>
 .
 
 /community/index.bml.title=Community Center
@@ -326,14 +326,10 @@ p?>
 
 /community/manage.bml.commlist.actions=<b>Actions</b>
 
-/community/manage.bml.commlist.actmembers=<b>[<a href='[[link]]'>Members</a>]</b>
-
 /community/manage.bml.commlist.actmembers2=Members
 
 /community/manage.bml.commlist.actpending|notes=This is appended to /community/manage.bml.commlist.actmembers2 when there are pending people.
 /community/manage.bml.commlist.actpending=, <a [[aopts]]>[[num]] pending</a>
-
-/community/manage.bml.commlist.actsettings=<b>[<a href='[[link]]'>Settings</a>]</b>
 
 /community/manage.bml.commlist.actsettings2=Settings
 
@@ -341,7 +337,7 @@ p?>
 
 /community/manage.bml.commlist.moderation=Awaiting Moderation
 
-/community/manage.bml.commlist.moderation.num=[<a href='[[link]]'>[[num]] in queue</a>]
+/community/manage.bml.commlist.moderation.num2=[<a [[aopts]]>[[num]] in queue</a>]
 
 /community/manage.bml.commlist.none=<i>You are not managing any communities.</i>
 
@@ -353,7 +349,7 @@ p?>
 
 /community/manage.bml.create.header=Create a community
 
-/community/manage.bml.create.text=You can also <a href='[[link]]'><b>create a new community</b></a>.
+/community/manage.bml.create.text2=You can also <a [[aopts]]><b>create a new community</b></a>.
 
 /community/manage.bml.error.badaccounttype=You must be logged in as a regular user account in order to access this page.
 
@@ -423,7 +419,7 @@ p?>
 
 /community/members.bml.reinvited2=[[user]] has been reinvited to join this community.  They will need to accept the invite from the <a [[aopts]]>Community Invitation Page</a>.
 
-/community/members.bml.settings=[<a href='[[link]]'>Settings</a>]
+/community/members.bml.settings2=Settings
 
 /community/members.bml.success.added=added: [[list]]
 
@@ -437,7 +433,7 @@ p?>
 
 /community/members.bml.success.nochanges=No changes have been made.
 
-/community/members.bml.success.return=<a href='[[link]]'>Return to the list</a>
+/community/members.bml.success.return2=<a [[aopts]]>Return to the list</a>
 
 /community/members.bml.title=Community Members
 
@@ -715,7 +711,7 @@ p?>
 
 /community/settings.bml.manage2=Manage communities
 
-/community/settings.bml.members=[<a href='[[link]]'>Members</a>]
+/community/settings.bml.members2=Members
 
 /community/settings.bml.name=<b>Community name:</b> [[name]]
 
@@ -1410,9 +1406,9 @@ all on your LiveJournal.
 
 /editinfo.bml.allowshowcontact.email.show=Show email address
 
-/editinfo.bml.allowshowcontact.email.withdomainaddr<<
+/editinfo.bml.allowshowcontact.email.withdomainaddr2<<
 With the option above, you may also choose to hide your email address
-(while still showing other contact information), only show your site email address,
+(while still showing other contact information), only show your [[sitename]] email address,
 only show your real address, or show them both.
 .
 

@@ -97,9 +97,9 @@
             $body .= "<?h1 $ML{'.current'} h1?><?p ";
             $body .= BML::ml('.pics', {'user'=> LJ::ljuser($u)});
             if ($can_manage) {
-                $body .= ' ' . BML::ml('.edit2', 
-                                       { 'editlink' => "$LJ::SITEROOT/editpics.bml$getextra",
-                                         'uploadlink' => "$LJ::SITEROOT/editpics.bml$getextra#upload" });
+                $body .= ' ' . BML::ml('.edit3', 
+                                       { 'aopts1' => "href='$LJ::SITEROOT/editpics.bml$getextra'",
+                                         'aopts2' => "href='$LJ::SITEROOT/editpics.bml$getextra#upload'" });
             }
             $body .= " p?><div style='margin-left: 50px;'><table cellpadding='5' border='0' cellspacing='1'>";
         }
@@ -167,7 +167,7 @@
     } else {
         if ($can_manage) {
             $body = "<?h1 $ML{'.nopics.title'} h1?><?p ";
-            $body .= BML::ml('.nopics.text2', { 'link' => "$LJ::SITEROOT/editpics.bml$getextra#upload" }) . " p?>";
+            $body .= BML::ml('.nopics.text3', {'aopts' => "href='$LJ::SITEROOT/editpics.bml$getextra#upload'"}) . " p?>";
         } else {
             $body = "<?h1 $ML{'.nopics.title'} h1?><?p $ML{'.nopics.text.other'} p?>";
         }

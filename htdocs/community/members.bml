@@ -410,7 +410,7 @@ $LJ::SITEROOT
             $ret .= "</ul>";
         }
         $ret .= "<?p $ML{'.success.nochanges'} p?>" unless @msgs || @invited;
-        $ret .= "<?p " . BML::ml(".success.return", { 'link' => BML::get_uri() . "?comm=$cname" }) . " p?>";
+        $ret .= "<?p " . BML::ml('.success.return2', {'aopts' => "href='" . BML::get_uri() . "?comm=$cname'"}) . " p?>";
 
         return $ret;
 
@@ -500,7 +500,7 @@ $LJ::SITEROOT
 
     # output starts here
     $ret .= "<?p " . BML::ml('.name', { 'name' => LJ::ljuser($cname, { 'type' => 'C' }) });
-    $ret .= " " . BML::ml('.settings', { 'link' => "settings.bml?comm=$cname"}) . " p?>";
+    $ret .= " " . BML::ml('Actionlink', {'link' => "<a href='$LJ::SITEROOT/community/settings.bml?comm=$cname'>$ML{'.settings2'}</a>"}) . " p?>";
 
     $ret .= "<form method='post' action='members.bml?comm=$cname'>";
     $ret .= LJ::form_auth();

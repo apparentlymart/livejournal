@@ -336,3 +336,15 @@ general /editpics.bml.curpics.desc
 general error.noremote
 
 general bml.needlogin.body3
+
+general /allpics.bml.edit2
+general /allpics.bml.nopics.text2
+general /community/index.bml.main
+general /community/manage.bml.commlist.actmembers
+general /community/manage.bml.commlist.actsettings
+general /community/manage.bml.commlist.moderation.num
+general /community/manage.bml.create.text
+general /community/members.bml.settings
+general /community/members.bml.success.return
+general /community/settings.bml.members
+general /editinfo.bml.allowshowcontact.email.withdomainaddr
