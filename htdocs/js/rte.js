@@ -28,10 +28,10 @@ function RTEAddClasses(textArea, statPrefix) {
 
     var html = oEditor.GetXHTML();
 
-    html = html.replace(/<lj-cut>(.+)<\/lj-cut>/g, '<lj-cut class="LJCut">$1</lj-cut>');
-    html = html.replace(/<lj-raw>([\w\s]+)<\/lj-raw>/g, '<lj-cut class="LJRaw">$1</lj-raw>');
+    html = html.replace(/<lj-cut>(.+)<\/lj-cut>/g, '<div class="ljcut">$1<!--/ljcut--></div>');
+    html = html.replace(/<lj-raw>([\w\s]+)<\/lj-raw>/g, '<lj-cut class="ljraw">$1</lj-raw>');
 
-    html = html.replace(/<lj user=['"](\w+)["'] ?\/?>/g, "<span class='LJUser'><img src='" + statPrefix + "/fck/editor/plugins/livejournal/userinfo.gif' width='17' height='17' style='vertical-align: bottom' />$1</span>");
+    html = html.replace(/<lj user=['"](\w+)["'] ?\/?>/g, "<span class='ljuser'><img src='" + statPrefix + "/fck/editor/plugins/livejournal/userinfo.gif' width='17' height='17' style='vertical-align: bottom' />$1</span>");
 
     oEditor.SetHTML(html);
 }

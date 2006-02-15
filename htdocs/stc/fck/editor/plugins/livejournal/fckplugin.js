@@ -37,7 +37,7 @@ LJUserCommand.Execute=function() {
         }
 
         // Make the tag like the editor would and apply formatting
-        var html = "<span class='LJUser'>";
+        var html = "<span class='ljuser'>";
         html     += "<img width='17' height='17' alt='' src='" + FCKConfig.PluginsPath + "livejournal/userinfo.gif' style='vertical-align: bottom' />";
         html     += user;
         html     += "</span>";
@@ -79,9 +79,9 @@ LJCutCommand.Execute=function() {
         selection += ''; // Cast it to a string
         selection = selection.replace(/\n/g, '<br />');
 
-        var html = "<div class='LJCut'>";
+        var html = "<div class='ljcut'>";
         html    += selection;
-        html    += "<!--/LJCut--></div>";
+        html    += "<!--/ljcut--></div>";
 
         FCK.InsertHtml(html);
         FCK.Focus();

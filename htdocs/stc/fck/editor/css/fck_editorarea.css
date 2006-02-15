@@ -66,18 +66,18 @@ P, UL, LI
 	background-color: #ff9933;
 }
 
-.LJRaw
+.ljraw
 {
 	border: #000000 1px dotted;
 }
 
-.LJCut
+.ljcut
 {
         border: #000000 1px dotted;
         background-color: #d2d2d2;
 }
 
-.LJUser
+.ljuser
 {
         white-space: nowrap;
         color: #00C;

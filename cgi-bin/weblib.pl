@@ -1646,8 +1646,8 @@ sub entry_form_decode
             # to add a span and an image so that it shows up as it will in
             # the entry.  Strip all of this extra stuff back down into a
             # <lj user> tag for the cleaner to parse instead.
-            $event =~ s!<span class="LJUser"><img width="17" height="17" alt="" src="(?:$LJ::WSTATPREFIX|/stc)/fck/editor/plugins/livejournal/userinfo.gif" style="vertical-align: bottom;" />(\w+)</span>!<lj user="$1" />!g;
-            $event =~ s!<span class="LJUser"><img width="17" height="17" style="vertical-align: bottom;" src="(?:$LJ::WSTATPREFIX|/stc)/fck/editor/plugins/livejournal/userinfo.gif" alt="" />(\w+)</span>!<lj user="$1" />!g;
+            $event =~ s!<span class="ljuser"><img width="17" height="17" alt="" src="(?:$LJ::WSTATPREFIX|/stc)/fck/editor/plugins/livejournal/userinfo.gif" style="vertical-align: bottom;" />(\w+)</span>!<lj user="$1" />!g;
+            $event =~ s!<span class="ljuser"><img width="17" height="17" style="vertical-align: bottom;" src="(?:$LJ::WSTATPREFIX|/stc)/fck/editor/plugins/livejournal/userinfo.gif" alt="" />(\w+)</span>!<lj user="$1" />!g;
 
             # We add a CSS class to the lj-cut and lj-raw tags so that they
             # show up formatted in the editor.  Strip out this class since
@@ -1655,13 +1655,13 @@ sub entry_form_decode
             # the rich text editor, add back whatever is needed to format
             # the text correctly.  Thus if we move to a different editor or
             # something in the future, we don't have this legacy CSS in entries.
-            $event =~ s!<div class="LJCut">!<lj-cut>!gi;
-            $event =~ s!<\!--/LJCut--></div>!</lj-cut>!gi;
+            $event =~ s!<div class="ljcut">!<lj-cut>!gi;
+            $event =~ s!<\!--/ljcut--></div>!</lj-cut>!gi;
 
             # Old method, left in for compatibility during code push
-            $event =~ s!<lj-cut class="LJCut">!<lj-cut>!gi;
+            $event =~ s!<lj-cut class="ljcut">!<lj-cut>!gi;
 
-            $event =~ s!<lj-raw class="LJRaw">!<lj-raw>!gi;
+            $event =~ s!<lj-raw class="ljraw">!<lj-raw>!gi;
         }
     }
     $req->{'event'} = $event;
