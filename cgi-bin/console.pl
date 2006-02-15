@@ -1105,8 +1105,8 @@ sub change_journal_type
     my $type = $args->[2];
     my $owner = $args->[3];
 
-    return $err->("Type argument must be 'person', 'shared', or 'community'.")
-        unless $type =~ /^(?:person|shared|community)$/;
+    return $err->("Type argument must be 'person', 'shared', 'community', or 'news'.")
+        unless $type =~ /^(?:person|shared|community|news)$/;
 
     my $u = LJ::load_user($user);
     return $err->("User doesn't exist.")
@@ -1116,7 +1116,7 @@ sub change_journal_type
         unless $u->{statusvis} eq 'V';
 
     return $err->("An account must be a community, shared account, or personal journal to be eligible for conversion.")
-        unless $u->{journaltype} =~ /[PCS]/;
+        unless $u->{journaltype} =~ /[PCSN]/;
 
     return $err->("This command cannot be used on an account you are logged in as.")
         if LJ::u_equals($remote, $u);
@@ -1217,7 +1217,7 @@ sub change_journal_type
         update_user => sub {
             my ($journaltype, $password, $adoptemail) = @_;
             return $err->('Invalid journaltype sent to update_user.')
-                unless $journaltype =~ /[PCS]/;
+                unless $journaltype =~ /[PCSN]/;
             $password = '' unless defined $password;
             $adoptemail += 0;
             my %extra = ();
@@ -1270,7 +1270,7 @@ sub change_journal_type
     if ($type eq 'community') {
         # what are they coming FROM?
         return unless $actions{self_entry_check}->();
-        if ($u->{journaltype} eq 'P') {
+        if ($u->{journaltype} eq 'P' || $u->{journaltype} eq 'N') {
             # person -> comm, admins only
             return $err->("Not authorized.  Please verify you have the changejournaltype privilege and you specified an owner/parent.")
                 unless $byadmin;
@@ -1293,7 +1293,7 @@ sub change_journal_type
     # or to a shared journal
     } elsif ($type eq 'shared') {
         # from?
-        if ($u->{journaltype} eq 'P') {
+        if ($u->{journaltype} eq 'P' || $u->{journaltype} eq 'N') {
             # person -> shared, admins only
             return $err->("Not authorized.  Please verify you have the changejournaltype privilege and you specified an owner/parent.")
                 unless $byadmin;
@@ -1312,7 +1312,7 @@ sub change_journal_type
                      [ 'update_user', 'S', $ou->{password}, $byadmin ? 1 : 0 ]);
         }
 
-    # or finally perhaps to a person
+    # perhaps to a person
     } elsif ($type eq 'person') {
         # all conversions to a person must go through these checks
         return $err->("Not authorized.  Please verify you have the changejournaltype privilege and you specified an owner/parent.")
@@ -1320,12 +1320,36 @@ sub change_journal_type
         return unless $actions{other_entry_check}->();
 
         # doesn't matter what they're coming from, as long as they're coming from something valid
-        if ($u->{journaltype} =~ /[CS]/) {
+        if ($u->{journaltype} =~ /[CSN]/) {
             @todo = ([ 'update_rels', 0 ],
                      [ 'clear_friends' ],
                      [ 'update_commrow', 0 ],
                      [ 'update_user', 'P', $ou->{password}, 1 ]);
         }
+
+    # convert personal journal to news
+    } elsif ($type eq 'news') {
+        return $err->("Not authorized.  Please verify you have the changejournaltype privilege.")
+            unless $byadmin;
+
+        # can't have entries before conversion to news
+        return unless $actions{self_entry_check};
+
+        if ($u->{journaltype} =~ /[CSP]/) {
+            @todo = (
+                     # set 'A' edge
+                     [ 'update_rels', [ $u->{userid}, $ou->{userid}, 'A' ] ],
+
+                     # remove community row
+                     [ 'update_commrow', 0 ],
+
+                     # update_user's journaltype, password, and email from $ou
+                     [ 'update_user', 'N', $ou->{password}, 1 ],
+
+                     );
+        }
+
+
     }
 
     # register this action in statushistory
