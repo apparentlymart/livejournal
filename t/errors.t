@@ -9,7 +9,7 @@ require 'ljlib.pl';
 my $db = LJ::get_dbh("foo", "bar");
 ok(! defined $db, "undef for foo/bar roles");
 
-do {
+{
     # declare that for this block, all functions everywhere
     # should throw errors if possible.
     local $LJ::THROW_ERRORS = 1;
@@ -20,7 +20,7 @@ do {
     };
     is(ref $@, "LJ::Error::Database::Unavailable", "got no db object");
     ok(! defined $db, "still no database");
-};
+}
 
 # test errobj creating an object
 my $ero = LJ::errobj("DieString", message => "My test message");

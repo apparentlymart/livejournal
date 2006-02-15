@@ -2777,5 +2777,6 @@ sub AUTOLOAD {
 
 package LJ::Error::InvalidParameters;
 sub opt_fields { qw(params) }
+sub user_caused { 0; }
 
 1;

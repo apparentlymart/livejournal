@@ -213,8 +213,15 @@ sub bad_input
     my @errors = @_;
     my $ret = "";
     $ret .= "<?badcontent?>\n<ul>\n";
-    foreach (@errors) {
-        $ret .= "<li>$_</li>\n";
+    # separate out system errors and user errors...
+    # make strings into LJ::Error::StringError
+    foreach my $err (@errors) {
+        my $ref = ref $err;
+        if ($ref && $ref =~ /^LJ::Error/) {
+            $ret .= $err->as_bullets;
+        } else {
+            $ret .= "<li>$err</li>\n";
+        }
     }
     $ret .= "</ul>\n";
     return $ret;
@@ -230,6 +237,7 @@ sub bad_input
 # </LJFUNC>
 sub error_list
 {
+    # FIXME: retrofit like bad_input above?  merge?  make aliases for each other?
     my @errors = @_;
     my $ret;
     $ret .= "<?errorbar ";

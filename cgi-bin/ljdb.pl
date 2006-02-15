@@ -98,19 +98,20 @@ sub get_dbh {
     }
 
     my $nodb = sub {
+        my $roles = shift;
         my $err = LJ::errobj("Database::Unavailable",
-                             roles => [@_]);
+                             roles => $roles);
         return $err->cond_throw;
     };
 
     foreach my $role (@_) {
         # let site admin turn off global master write access during
         # maintenance
-        return $nodb->() if $LJ::DISABLE_MASTER && $role eq "master";
+        return $nodb->([@_]) if $LJ::DISABLE_MASTER && $role eq "master";
         my $db = LJ::get_dbirole_dbh($opts, $role);
         return $db if $db;
     }
-    return $nodb->();
+    return $nodb->([@_]);
 }
 
 sub get_db_reader {
@@ -355,7 +356,17 @@ sub isdb { return ref $_[0] && (ref $_[0] eq "DBI::db" ||
 
 
 package LJ::Error::Database::Unavailable;
-sub fields { qw(roles) }
+sub fields { qw(roles) }  # arrayref of roles requested
+
+sub as_string {
+    my $self = shift;
+    my $ct = @{$self->field('roles')};
+    my $clist = join(", ", @{$self->field('roles')});
+    return $ct == 1 ?
+        "Database unavailable for role $clist" :
+        "Database unavailable for roles $clist";
+}
+
 
 package LJ::Error::Database::Failure;
 sub fields { qw(db) }
@@ -378,5 +389,3 @@ sub errstr {
 }
 
 1;
-
-

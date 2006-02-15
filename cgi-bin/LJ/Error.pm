@@ -71,18 +71,6 @@ sub errobj {
     return errobj("DieObject", object => $_[0]);
 }
 
-# called via LJ::throw(@errors)
-sub throw {
-    return unless @_;
-    my @errors = @_;
-
-    # throw a single error
-    $errors[0]->throw if @errors == 1;
-
-    # throw a group of errors
-    LJ::errobj("Multiple", errors => \@errors)->throw;
-}
-
 # don't override this!
 sub new {
     my $class = shift;
@@ -118,10 +106,18 @@ sub field {
     return $self->{$field};
 }
 
-# don't override.
+# don't override.  also aliased from LJ::throw(@throw).  or an instance method.
 sub throw {
-    my $self = shift;
-    die $self;
+    return unless @_;
+
+    if (@_ == 1) {
+        my $self = shift;
+        die $self;
+    }
+
+    # throw multiple errors as one
+    my @errors = @_;
+    LJ::errobj("Multiple", errors => \@errors)->throw;
 }
 
 # throws self, if $LJ::THROW_ERRORS is dynamically set w/ local,
@@ -148,6 +144,11 @@ sub as_html {
     return LJ::ehtml($self->as_string);
 }
 
+sub as_bullets {
+    my $self = shift;
+    return "<li>" . $self->as_html . "</li>\n";
+}
+
 # override this
 sub as_string {
     my $self = shift;
@@ -168,6 +169,11 @@ sub die_object { return $_[0]->field('object'); }
 
 package LJ::Error::Multiple;
 sub fields { qw(errors); }  # arrayref of errors
+
+sub as_bullets {
+    my $self = shift;
+    return join('', map { $_->as_bullets } @{ $self->{errors} });
+}
 
 
 1;
