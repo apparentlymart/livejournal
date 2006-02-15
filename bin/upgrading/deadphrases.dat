@@ -348,3 +348,19 @@ general /community/members.bml.settings
 general /community/members.bml.success.return
 general /community/settings.bml.members
 general /editinfo.bml.allowshowcontact.email.withdomainaddr
+
+general /customize/index.bml.s2.advanced.permitted
+general /editinfo.bml.login.enterinfo
+general /editinfo.bml.login.forgot.header
+general /editinfo.bml.login.forgot.recover
+general /editjournal_do.bml.currmood
+general /editjournal_do.bml.picture
+general /friends/add.bml.add.text
+general /friends/add.bml.add.text.community
+general /friends/add.bml.add.text.feed
+general /friends/add.bml.confirm.text1.community
+general /friends/edit_do.bml.success.text
+general /interests.bml.nointerests.text
+general /modify_do.bml.overrides.about
+general /modify_do.bml.success.text
+general /poll/index.bml.gotocreate

@@ -351,7 +351,7 @@ body<=
 
     $ret .= "<?h1 $ML{'.s2.related.header'} h1?>";
     $ret .= "<dl><dt>$ML{'.s2.advanced.header'}</dt><dd>";
-    $ret .= $has_cap ? $ML{'.s2.advanced.permitted'} : $ML{'.s2.advanced.denied'};
+    $ret .= $has_cap ? BML::ml('.s2.advanced.permitted2', {'aopts' => "href='$LJ::SITEROOT/customize/advanced/'"}) : $ML{'.s2.advanced.denied'};
     $ret .= "</dd><dt><a href='/manage/links.bml?authas=$authas'>$ML{'/manage/links.bml.title'}</a></dt><dd>$ML{'.s2.related.links.about'}</dd>";
     $ret .= "<dt><a href='/modify.bml?authas=$authas'>$ML{'/modify.bml.title'}</a></dt><dd>$ML{'.s2.related.modify.about'}</dd>";
     $ret .= "<dt><a href='/editinfo.bml?authas=$authas'>$ML{'/editinfo.bml.title'}</a></dt><dd>$ML{'.s2.related.editinfo.about'}</dd></dl>";

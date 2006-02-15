@@ -1187,7 +1187,7 @@ Thanks for supporting [[sitename]]!
 
 /customize/index.bml.s2.advanced.header=Advanced Customizations
 
-/customize/index.bml.s2.advanced.permitted=To create new layers and styles from scratch, visit <a href='./advanced/'>the advanced customization</a> center.
+/customize/index.bml.s2.advanced.permitted2=To create new layers and styles from scratch, visit <a [[aopts]]>the advanced customization</a> center.
 
 /customize/index.bml.s2.customize=The following settings are layout-dependent.
 
@@ -1625,12 +1625,6 @@ plural form for consistency.  "I like DVDs" instead of "I like DVD".
 
 /editinfo.bml.int.header=Interests
 
-/editinfo.bml.login.enterinfo=Enter your username and password to modify your personal information.
-
-/editinfo.bml.login.forgot.header=Forget something?
-
-/editinfo.bml.login.forgot.recover=If you forgot your username or password, <a href='lostinfo.bml'>recover it here!</a>.
-
 /editinfo.bml.logip.always=Always
 
 /editinfo.bml.logip.anon_only=Anonymous posters only
@@ -1847,8 +1841,6 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /editjournal_do.bml.continue.text=After you select an item to edit or delete, press the Edit button below.
 
-/editjournal_do.bml.currmood=Current <A HREF="/moodlist.bml">Mood</A>:
-
 /editjournal_do.bml.currmusic=Current Music:
 
 /editjournal_do.bml.date=Date:
@@ -1890,8 +1882,6 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 /editjournal_do.bml.pickentry.head=Pick an entry to edit
 
 /editjournal_do.bml.pickentry.text=Select which item you want to edit and press the edit button at the bottom of the page.
-
-/editjournal_do.bml.picture=<a href="[[url]]">Picture</a> to use:
 
 /editjournal_do.bml.preview.header=Preview Entry
 
@@ -2092,11 +2082,11 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /friends/add.bml.add.header=Success
 
-/friends/add.bml.add.text=User [[ljuser]] was added to your friend list.  You can view your friends page <a href="[[url]]">here</a>.
+/friends/add.bml.add.text2=User [[ljuser]] was added to your friends list. You can view your friends page <a [[aopts]]>here</a>.
 
-/friends/add.bml.add.text.community=Community [[ljuser]] was added to your friend list.  You can view updates on your <a href="[[url]]">friends page</a>.
+/friends/add.bml.add.text.community2=Community [[ljuser]] was added to your friends list. You can view updates on your <a [[aopts]]>friends page</a>.
 
-/friends/add.bml.add.text.feed=The [[ljuser]] feed was added to your friend list.  You can view updates on your <a href="[[url]]">friends page</a>.
+/friends/add.bml.add.text.feed2=The [[ljuser]] feed was added to your friends list. You can view updates on your <a [[aopts]]>friends page</a>.
 
 /friends/add.bml.add.title=Friend Added!
 
@@ -2132,7 +2122,7 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /friends/add.bml.confirm.text=To add <b>[[user]]</b> to your friends list, click the button below.
 
-/friends/add.bml.confirm.text1.community=Adding a community allows you to read the community's public posts on your friends page. If you would like to post to the community and be listed as a member, you'll need to <a href="[[url]]">join the community</a>.
+/friends/add.bml.confirm.text1.community2=Adding a community allows you to read the community's public posts on your friends page. If you would like to post to the community and be listed as a member, you'll need to <a [[aopts]]>join the community</a>.
 
 /friends/add.bml.confirm.text1.feed=Adding a feed allows you to read new content from the feed on your friends page.
 
@@ -2278,7 +2268,7 @@ then be accessible to the new group.
 
 /friends/edit_do.bml.success.head=Success
 
-/friends/edit_do.bml.success.text=Your friends have been updated.  You may view your newly updated friends page <a href="[[url]]">here</a>.
+/friends/edit_do.bml.success.text2=Your friends have been updated. You can view your newly updated friends page <a [[aopts]]>here</a>.
 
 /friends/edit_do.bml.textcolor=Text Color:
 
@@ -2512,7 +2502,7 @@ When you're done, click "Save Changes".
 
 /interests.bml.morestuff2=More fun stuff can be found on the <a [[aopts]]>interests page</a>.
 
-/interests.bml.nointerests.text=Don't have any interests listed?  Add some by going to the <A HREF="/editinfo.bml">Edit Personal Info & Settings</A> page.
+/interests.bml.nointerests.text2=Don't have any interests listed? Add some by going to the <a [[aopts]]>Edit Personal Information</a> page.
 
 /interests.bml.popular.disabled=Sorry, the popular interests feature has been disabled.
 
@@ -3432,7 +3422,7 @@ The site team
 
 /modify_do.bml.moodicons.select=Select mood icon set:
 
-/modify_do.bml.overrides.about=You can ignore this section.  This is for tweaking very specific things about your page layout.  See the <a href="/developer/" target='_blank'>developer section</A> for details.  Also note that overrides are for overriding only one or two things about a style.  If you'd like to override everything, you need to <a href="/styles/create.bml" target='_blank'>create your own style</A>.
+/modify_do.bml.overrides.about2=You can ignore this section. This is for tweaking very specific things about your page layout. See the <a [[aopts1]]>developer section</a> for details. Also note that overrides are for overriding only one or two things about a style. If you'd like to override everything, you need to <a [[aopts2]]>create your own style</a>.
 
 /modify_do.bml.overrides.box.head=Overrides:
 
@@ -3456,7 +3446,7 @@ used in the *_HEAD overrides are those elements that are valid in the head of a 
 
 /modify_do.bml.success.head=Success
 
-/modify_do.bml.success.text=Your journal settings have been updated.  You can view your journal <a href="[[url]]">here</a>.
+/modify_do.bml.success.text2=Your journal settings have been updated. You can view your journal <a [[aopts]]>here</a>.
 
 /moodlist.bml.back2=Mood Themes
 
@@ -3599,7 +3589,7 @@ If you want to do a different type of search, check out the <a [[aopts]]>directo
 
 /poll/index.bml.filloutpoll=Fill out Poll
 
-/poll/index.bml.gotocreate=This is the address to participate in a poll.  You've stumbled onto an address which does nothing right now.  If you'd like, you can <a href='create.bml'>create a new poll</a>.
+/poll/index.bml.gotocreate2=This is the address to participate in a poll. You've stumbled onto an address which does nothing right now. If you'd like, you can <a [[aopts]]>create a new poll</a>.
 
 /poll/index.bml.pollnotfound=Poll not found.
 

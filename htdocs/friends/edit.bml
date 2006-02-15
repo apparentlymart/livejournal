@@ -204,7 +204,7 @@ body<=
 
         if ($response{'success'} eq "OK") {
             # tell the user all is well
-            return "<?h1 $ML{'.success.head'} h1?><?p ".BML::ml(".success.text", {'url' => LJ::journal_base($u) . "/friends"})." p?>";
+            return "<?h1 $ML{'.success.head'} h1?><?p " . BML::ml('.success.text2', {'aopts' => "href='" . $u->journal_base . "/friends'"}) . " p?>";
         } else {
             return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.updating'} <ul><li><b>$response{'errmsg'}</b></ul> p?>\n";
         }

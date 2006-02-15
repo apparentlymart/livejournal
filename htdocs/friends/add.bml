@@ -88,22 +88,19 @@ use vars qw($body $title $windowtitle %GET %POST);
              $title = $ML{'.add.title'};
              $body = "<?h1 $ML{'.add.header'} h1?><?p ";
              if ($u->{'journaltype'} eq "C") {
-                 $body .= BML::ml('.add.text.community', {
-                                                         'user'   => $user,
+                 $body .= BML::ml('.add.text.community2', {
                                                          'ljuser' => LJ::ljuser($u),
-                                                         'url'    => $remote->journal_base() . "/friends",
+                                                         'aopts'  => "href='" . $remote->journal_base . "/friends'",
                                                          });
              } elsif ($u->{'journaltype'} eq "Y") {
-                 $body .= BML::ml('.add.text.feed', {
-                                                    'user'   => $user,
+                 $body .= BML::ml('.add.text.feed2', {
                                                     'ljuser' => LJ::ljuser($u),
-                                                    'url'    => $remote->journal_base() . "/friends",
+                                                    'aopts'  => "href='" . $remote->journal_base . "/friends'",
                                                     });
              } else {
-                 $body .= BML::ml('.add.text', {
-                                               'user'   => $user,
+                 $body .= BML::ml('.add.text2', {
                                                'ljuser' => LJ::ljuser($u),
-                                               'url'    => $remote->journal_base() . "/friends",
+                                               'aopts'  => "href='" . $remote->journal_base . "/friends'",
                                            });
              }
              $body .= " p?>";
@@ -149,7 +146,7 @@ use vars qw($body $title $windowtitle %GET %POST);
              my $icon = "<img src='$LJ::IMGPREFIX/community24x24.gif' border='0' height='24' width='24' style='padding: 0px 2px 0px 0px' />";
              $windowtitle = BML::ml('.confirm.title.community', {'user'=> $user });
              $title = BML::ml('.confirm.title.community', {'icon'=> $icon, 'user'=> $user });
-             $body .= "<?p " . BML::ml('.confirm.text1.community', {'url' => "$LJ::SITEROOT/community/join.bml?comm=$user" }) . " p?>";
+             $body .= "<?p " . BML::ml('.confirm.text1.community2', {'aopts' => "href='$LJ::SITEROOT/community/join.bml?comm=$user'"}) . " p?>";
          } else {
              my $icon = "<img src='$LJ::IMGPREFIX/userinfo24x24.gif' border='0' height='24' width='24' style='padding: 0px 2px 0px 0px' />";
              if ($u->{'journaltype'} eq "I") {

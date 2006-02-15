@@ -474,7 +474,7 @@ body<=
     $ret .= "</form></td></tr>";
 
     $ret .= "</table>";
-    $ret .= $ML{'.nointerests.text'};
+    $ret .= BML::ml('.nointerests.text2', {'aopts' => "href='$LJ::SITEROOT/editinfo.bml'"});
 
     return $ret;
 }

@@ -254,7 +254,7 @@ body<=
         }
 
         # tell the user all is well
-        return "<?h1 $ML{'.success.head'} h1?><?p ".BML::ml(".success.text", {'url' => LJ::journal_base($u)})." p?>";
+        return "<?h1 $ML{'.success.head'} h1?><?p " . BML::ml('.success.text2', {'aopts' => "href='" . $u->journal_base . "/'"}) . " p?>";
     }
 
     # not submitting a post, show edit form
@@ -417,7 +417,10 @@ body<=
         }
 
         $ret .= "<div style='margin-bottom: 20px'>\n";
-        $ret .= "<?h1 $ML{'.overrides.head'} h1?><?p $ML{'.overrides.about'} p?>\n";
+        $ret .= "<?h1 $ML{'.overrides.head'} h1?><?p " . BML::ml('.overrides.about2', {
+                                                            'aopts1' => "href='$LJ::SITEROOT/developer/' target='_blank'",
+                                                            'aopts2' => "href='$LJ::SITEROOT/styles/create.bml' target='_blank'"
+                                                        }) . " p?>\n";
         $ret .= "<?p <font size='+1'><b>$ML{'.overrides.warning'}</b></font> p?>\n";
         $ret .= "<?p " . BML::ml('.overrides.note2', {'aopts' => "href='$LJ::SITEROOT/developer/varlist.bml'"}) . " p?>\n";
         $ret .= "<?standout <b>$ML{'.overrides.box.head'}</b><br />";
