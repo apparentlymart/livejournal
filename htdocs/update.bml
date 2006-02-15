@@ -152,7 +152,7 @@
 
         if ($remote) { # so lynx won't show this
             $auth .= "<tr valign='top' id='remotelogin' style='display: $remotelogin_display'><th>$ML{'.auth.poster'}</th><td><span id='remotelogin_content'>";
-            $auth .= BML::ml(".loggedinas", {'user' => $remote->{'user'}, 'altget' => "?altlogin=1" });
+            $auth .= BML::ml('.loggedinas2', {'user' => "<b>$remote->{'user'}</b>", 'aopts' => "href='$LJ::SITEROOT/update.bml?altlogin=1'"});
             $auth .= "</span></td></tr>\n";
         }
 
@@ -374,7 +374,7 @@
                 } else {
                     $ju = $remote;                             # posting as remote
                 };
-                $$body .= BML::ml(".update.success", { 'uri' => LJ::journal_base($ju) . "/" });
+                $$body .= BML::ml('.update.success2', {'aopts' => "href='" . $ju->journal_base . "/'"});
                 my $juser = $ju->{'user'};
                 my ($itemid, $anum) = ($res{'itemid'}, $res{'anum'});
                 my $itemlink = LJ::item_link($ju, $itemid, $anum);

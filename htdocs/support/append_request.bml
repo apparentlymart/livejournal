@@ -54,15 +54,15 @@ body<=
 
     ### links to show on success
     my $auth_arg = $FORM{'auth'} ? "&amp;auth=$FORM{'auth'}" : "";
-    my $successlinks = BML::ml('.successlinks',
+    my $successlinks = BML::ml('.successlinks2',
         {   'number'    => $sp->{'spid'},
-            'back'      => "see_request.bml?id=$sp->{'spid'}$auth_arg",
-            'open'      => "help.bml",
-            'opencat'   => "help.bml?cat=$scat->{'catkey'}",
-            'prevopen'  => "see_request.bml?id=$sp->{'spid'}&amp;find=prev",
-            'nextopen'  => "see_request.bml?id=$sp->{'spid'}&amp;find=next",
-            'cprevopen' => "see_request.bml?id=$sp->{'spid'}&amp;find=cprev",
-            'cnextopen' => "see_request.bml?id=$sp->{'spid'}&amp;find=cnext",
+            'aopts1'    => "href='$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}$auth_arg'",
+            'aopts2'    => "href='$LJ::SITEROOT/support/help.bml'",
+            'aopts3'    => "href='$LJ::SITEROOT/support/help.bml?cat=$scat->{'catkey'}'",
+            'aopts4'    => "href='$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}&amp;find=prev'",
+            'aopts5'    => "href='$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}&amp;find=next'",
+            'aopts6'    => "href='$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}&amp;find=cprev'",
+            'aopts7'    => "href='$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}&amp;find=cnext'",
         });
     
     ### insert record

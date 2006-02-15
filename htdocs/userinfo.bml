@@ -330,9 +330,7 @@
      $pt .= " " . BML::ml('.body.leave2', {'aopts' => "href='$LJ::SITEROOT/community/leave.bml?comm=$u->{'user'}'"});
      $body .= $p->($pt);
  } elsif ($synd) {
-     $body .= $h1->($ML{'.syndinfo.name'}) . $p->(BML::ml('.syndinfo.body', {
-         'addtofriends' => "$LJ::SITEROOT/friends/add.bml?user=$u->{'user'}",
-     }));
+     $body .= $h1->($ML{'.syndinfo.name'}) . $p->(BML::ml('.syndinfo.body2', {'aopts' => "href='$LJ::SITEROOT/friends/add.bml?user=$u->{'user'}'"}));
  } elsif ($extid) {
      if ($extid->[0] eq "O") {
          $body .= $h1->("OpenID user");
@@ -341,9 +339,7 @@
 
 
  } else {
-     $body .= $h1->($ML{'.userinfo.name'}) . $p->(BML::ml('.userinfo.body', {
-         'username' => $u->{'name'}, 'siteroot'=>$LJ::SITEROOT,
-     }));
+     $body .= $h1->($ML{'.userinfo.name'}) . $p->(BML::ml('.userinfo.body2', {'username' => $u->{'name'}, 'aopts' => "href='$LJ::SITEROOT/editinfo.bml'"}));
  }
 
  ## standout bar
@@ -488,7 +484,7 @@ if ($u->{'journaltitle'}) {
  ## text message
  if ($u->{'txtmsg_status'} eq "on" && LJ::get_cap($u, "textmessaging")) {
      my $span = ($narrow_left-- >= 0) ? 1 : 2;
-     $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.textmessage'}</b></td><td colspan='$span'>" . BML::ml('.sendmessage.body',{'user'=>$u->{'user'}, 'link'=>"$LJ::SITEROOT/tools/textmessage.bml?user=$u->{'user'}"}) . "</td></tr>";
+     $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.textmessage'}</b></td><td colspan='$span'>" . BML::ml('.sendmessage.body2', {'user' => "<b>$u->{'user'}</b>", 'aopts' => "href='$LJ::SITEROOT/tools/textmessage.bml?user=$u->{'user'}'"}) . "</td></tr>";
  }
 
  if ( ! $synd && $u->{'url'}) {
@@ -1066,7 +1062,7 @@ if ($u->{'journaltitle'}) {
  }
 
  unless ($LJ::DISABLED{'userinfo_clientusage'}) {
-     $body .= "<tr><td align='right' valign='top'><b>" . BML::ml('.label.clientsused',{'siteroot'=>$LJ::SITEROOT}) . "</b></td><td colspan='2'>";
+     $body .= "<tr><td align='right' valign='top'><b>" . BML::ml('.label.clientsused2', {'aopts' => "href='$LJ::SITEROOT/download/'"}) . "</b></td><td colspan='2'>";
      $sth = $dbr->prepare("SELECT DISTINCT c.client FROM clients c, clientusage cu ".
                           "WHERE cu.userid=$userid AND cu.clientid=c.clientid ORDER BY c.client");
      $sth->execute;

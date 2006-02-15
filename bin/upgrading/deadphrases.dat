@@ -364,3 +364,24 @@ general /interests.bml.nointerests.text
 general /modify_do.bml.overrides.about
 general /modify_do.bml.success.text
 general /poll/index.bml.gotocreate
+
+general /support/append_request.bml.successlinks
+general /talkmulti.bml.deleted.body
+general /talkmulti.bml.screened.body
+general /talkmulti.bml.unscreened.body
+general /talkpost_do.bml.success.message
+general /talkpost_do.bml.success.screened.comm
+general /talkpost_do.bml.success.screened.comm.anon
+general /talkpost_do.bml.success.screened.user
+general /talkpost_do.bml.success.screened.user.anon
+general /tools/memadd.bml.login.forgot.header
+general /tools/memadd.bml.login.forgot.recover
+general /update.bml.loggedinas
+general /update.bml.picture
+general /update.bml.simple
+general /update.bml.update.success
+general /userinfo.bml.label.clientsused
+general /userinfo.bml.sendmessage.body
+general /userinfo.bml.syndinfo.body
+general /userinfo.bml.userinfo.body
+general lostinfo.text

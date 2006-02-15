@@ -4027,15 +4027,15 @@ a system style, you must first create a new style based on that system style.
 
 /support/append_request.bml.logged.title=Success
 
-/support/append_request.bml.successlinks<<
+/support/append_request.bml.successlinks2<<
 <ul>
-   <li>Go back to <a href='[[back]]'>Request #[[number]]</a></li>
-   <li>Go back to the <a href='[[open]]'>open support requests</a></li>
-   <li>Go back to the <a href='[[opencat]]'>open support requests in the the same category</a></li>
-   <li>Go to <a href='[[prevopen]]'>previous</a> /
-             <a href='[[nextopen]]'>next</a> open request</li>
-   <li>Go to <a href='[[cprevopen]]'>previous</a> /
-             <a href='[[cnextopen]]'>next</a> open request in the same category</li>
+   <li>Go back to <a [[aopts1]]>Request #[[number]]</a></li>
+   <li>Go back to the <a [[aopts2]]>open support requests</a></li>
+   <li>Go back to the <a [[aopts3]]>open support requests in the the same category</a></li>
+   <li>Go to <a [[aopts4]]>previous</a> /
+             <a [[aopts5]]>next</a> open request</li>
+   <li>Go to <a [[aopts6]]>previous</a> /
+             <a [[aopts7]]>next</a> open request in the same category</li>
 </ul>
 .
 
@@ -4254,7 +4254,7 @@ that area. p?>
 
 /syn/list.bml.xml_icon.alt=[View Raw Feed]
 
-/talkmulti.bml.deleted.body=The comments have been deleted. You can view the rest of the thread <a href="[[link]]">here</a>.
+/talkmulti.bml.deleted.body2=The comments have been deleted. You can view the rest of the thread <a [[aopts]]>here</a>.
 
 /talkmulti.bml.deleted.title=Comments deleted
 
@@ -4279,7 +4279,7 @@ if you would like to screen, unscreen, or delete the comments.
 
 /talkmulti.bml.error.privs.unscreen=You do not have permission to unscreen these comments.
 
-/talkmulti.bml.screened.body=The comments have been screened. You can view them <a href="[[link]]">here</a>.
+/talkmulti.bml.screened.body2=The comments have been screened. You can view them <a [[aopts]]>here</a>.
 
 /talkmulti.bml.screened.title=Comments screened
 
@@ -4289,7 +4289,7 @@ if you would like to screen, unscreen, or delete the comments.
 
 /talkmulti.bml.title.unscreen=Unscreen Multiple Comments
 
-/talkmulti.bml.unscreened.body=The comments have been unscreened. You can view them <a href="[[link]]">here</a>.
+/talkmulti.bml.unscreened.body2=The comments have been unscreened. You can view them <a [[aopts]]>here</a>.
 
 /talkmulti.bml.unscreened.title=Comments unscreened
 
@@ -4429,15 +4429,15 @@ Please either clear the user textbox or select the relevant posting mode and try
 
 /talkpost_do.bml.success.loggedin=You are now logged in.
 
-/talkpost_do.bml.success.message=Your comment has been added.  You can view it <a href="[[link]]">here</a>.
+/talkpost_do.bml.success.message2=Your comment has been added. You can view it <a [[aopts]]>here</a>.
 
-/talkpost_do.bml.success.screened.comm=Your comment has been added.  According to this community's settings, it was marked as screened, and will be visible only to you and the community maintainers until they choose to unscreen it. You can view your comment <a href="[[link]]">here</a>.
+/talkpost_do.bml.success.screened.comm2=Your comment has been added. According to this community's settings, it was marked as screened, and will be visible only to you and the community maintainers until they choose to unscreen it. You can view your comment <a [[aopts]]>here</a>.
 
-/talkpost_do.bml.success.screened.comm.anon=Your anonymous comment has been added.  According to this community's settings, it was marked as screened, and will be visible only to the community maintainers until they choose to unscreen it.  You can go back to the comment thread <a href="[[link]]">here</a>.
+/talkpost_do.bml.success.screened.comm.anon2=Your anonymous comment has been added. According to this community's settings, it was marked as screened, and will be visible only to the community maintainers until they choose to unscreen it. You can go back to the comment thread <a [[aopts]]>here</a>.
 
-/talkpost_do.bml.success.screened.user=Your comment has been added.  According to this journal's settings, it was marked as screened, and will be visible only to you and the journal's owner until the owner chooses to unscreen it. You can view your comment <a href="[[link]]">here</a>.
+/talkpost_do.bml.success.screened.user2=Your comment has been added. According to this journal's settings, it was marked as screened, and will be visible only to you and the journal's owner until the owner chooses to unscreen it. You can view your comment <a [[aopts]]>here</a>.
 
-/talkpost_do.bml.success.screened.user.anon=Your anonymous comment has been added.  According to this journal's settings, it was marked as screened, and will be visible only to the journal's owner until the owner chooses to unscreen it. You can go back to the comment thread <a href="[[link]]">here</a>.
+/talkpost_do.bml.success.screened.user.anon2=Your anonymous comment has been added. According to this journal's settings, it was marked as screened, and will be visible only to the journal's owner until the owner chooses to unscreen it. You can go back to the comment thread <a [[aopts]]>here</a>.
 
 /talkpost_do.bml.success.title=Success
 
@@ -4639,10 +4639,6 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /tools/memadd.bml.login.enterinfo=Enter username and password of the account you wish to save the memory into.
 
-/tools/memadd.bml.login.forgot.header=Forget something?
-
-/tools/memadd.bml.login.forgot.recover=If you forgot your username or password, <a href='lostinfo.bml'>recover it here!</a>.
-
 /tools/memadd.bml.multiple_selections=Hold down 'Control' while clicking keywords to select multiple ones.
 
 /tools/memadd.bml.security=Security:
@@ -4812,7 +4808,7 @@ This could be because: <ol>
 
 /update.bml.localtime=Local time:
 
-/update.bml.loggedinas=You are currently logged in as <b>[[user]]</b>.<br />To post as another user, <a href="update.bml[[altget]]">click here</a>.
+/update.bml.loggedinas2=You are currently logged in as [[user]].<br />To post as another user, <a [[aopts]]>click here</a>.
 
 /update.bml.loggingin=Logging in to server...
 
@@ -4840,8 +4836,6 @@ This could be because: <ol>
 
 /update.bml.password=Password:
 
-/update.bml.picture=<a href="[[url]]">Picture</a> to use:
-
 /update.bml.preview.header=Preview
 
 /update.bml.preview.text=This is how the entry will look when posted. Using the form below, you can edit the entry further, or you can submit it as is.
@@ -4859,8 +4853,6 @@ This could be because: <ol>
 /update.bml.security.public=Public
 
 /update.bml.servermsg=Also, the server has a message for you:
-
-/update.bml.simple=You're looking at the simple page.  For more options, <a href="[[url]]">click here</a>.
 
 /update.bml.spellchecked=Your spell-checked post:
 
@@ -4884,7 +4876,7 @@ This could be because: <ol>
 
 /update.bml.update.head=Update your Journal...
 
-/update.bml.update.success=Update successful.  You may view your updated journal <a href="[[uri]]">here</a>.
+/update.bml.update.success2=Update successful. You can view your updated journal <a [[aopts]]>here</a>.
 
 /update.bml.updating=Updating journal...
 
@@ -4934,7 +4926,7 @@ This could be because: <ol>
 
 /userinfo.bml.label.birthdate=Birthdate:
 
-/userinfo.bml.label.clientsused=<a href="[[siteroot]]/download/">Clients</a> used:
+/userinfo.bml.label.clientsused2=<a [[aopts]]>Clients</a> used:
 
 /userinfo.bml.label.comments=Comments:
 
@@ -5050,7 +5042,7 @@ This could be because: <ol>
 
 /userinfo.bml.nonexist.name=Unknown user
 
-/userinfo.bml.sendmessage.body=<a href="[[link]]">Send <b>[[user]]</b> a text message</a><br />on his/her cellphone/pager.
+/userinfo.bml.sendmessage.body2=<a [[aopts]]>Send [[user]] a text message</a><br />on his/her cellphone/pager.
 
 /userinfo.bml.syn.last.never=Never
 
@@ -5060,10 +5052,7 @@ This could be because: <ol>
 
 /userinfo.bml.syn.parseerror=Error Message:
 
-/userinfo.bml.syndinfo.body<<
-If you would like articles from the syndicated site to appear on your friends page,
-you can <a href="[[addtofriends]]">add this journal to your friends list</a>.
-.
+/userinfo.bml.syndinfo.body2=If you would like articles from the syndicated site to appear on your friends page, you can <a [[aopts]]>add this journal to your friends list</a>.
 
 /userinfo.bml.syndinfo.name=Syndication Journal
 
@@ -5095,7 +5084,7 @@ you can <a href="[[addtofriends]]">add this journal to your friends list</a>.
 
 /userinfo.bml.title.syndicated=Syndicated Account
 
-/userinfo.bml.userinfo.body=Below is user information for [[username]].  If you are this user, you can edit your information (or choose what information is considered public) at <a href="[[siteroot]]/editinfo.bml">the Edit Info page</a>.
+/userinfo.bml.userinfo.body2=Below is user information for [[username]]. If you are this user, you can edit your information (or choose what information is considered public) at the <a [[aopts]]>Edit Personal Information</a> page.
 
 /userinfo.bml.userinfo.name=User Information
 
@@ -5646,7 +5635,7 @@ ljlib.pageofpages=Page [[page]] of [[total]]
 
 lostinfo.head=Forget something?
 
-lostinfo.text=If you forgot your username or password, <a href="lostinfo.bml">recover it here</a>.
+lostinfo.text2=If you forgot your username or password, <a [[aopts]]>recover it here</a>.
 
 lynx.nav.friends=Friends
 

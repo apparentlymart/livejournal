@@ -98,8 +98,9 @@ standout?>
 </form>
 
 <?h1 <?_ml lostinfo.head _ml?> h1?>
-<?p <?_ml lostinfo.text _ml?> p?>
 HTMLBLOCK
+
+    $ret .= "<?p " . BML::ml('lostinfo.text2', {'aopts' => "href='$LJ::SITEROOT/lostinfo.bml'"}) . " p?>";
 
 }
 _code?>

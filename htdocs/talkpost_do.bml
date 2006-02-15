@@ -210,19 +210,19 @@ body<=
             return BML::redirect($commentlink);
         }
 
-        $mlcode = '.success.message';
+        $mlcode = '.success.message2';
     } else {
         # otherwise, it's a screened comment.
         if ($journalu->{'journaltype'} eq 'C') {
-            $mlcode = $POST{'usertype'} eq 'anonymous' ? '.success.screened.comm.anon'
-                                                       : '.success.screened.comm';
+            $mlcode = $POST{'usertype'} eq 'anonymous' ? '.success.screened.comm.anon2'
+                                                       : '.success.screened.comm2';
         } else {
-            $mlcode = $POST{'usertype'} eq 'anonymous' ? '.success.screened.user.anon'
-                                                       : '.success.screened.user';
+            $mlcode = $POST{'usertype'} eq 'anonymous' ? '.success.screened.user.anon2'
+                                                       : '.success.screened.user2';
         }
     }
 
-    $ret .= "<?p " . BML::ml($mlcode, { 'link' => $commentlink }) . " p?>";
+    $ret .= "<?p " . BML::ml($mlcode, {'aopts' => "href='$commentlink'"}) . " p?>";
 
     # did this comment unscreen its parent?
     if ($wasscreened and $parent->{state} ne 'S') {
