@@ -16,7 +16,13 @@ LJUserCommand.validUsername = function(str) {
 
 LJUserCommand.Execute=function() {
     var user;
-    var selection = FCK.EditorWindow.getSelection();
+    var selection = '';
+
+    if (FCK.EditorWindow.getSelection) {
+        selection = FCK.EditorWindow.getSelection();
+    } else if (FCK.EditorDocument.selection) {
+        selection = FCK.EditorDocument.selection.createRange().text;
+    }
 
     if (selection != '') {
         user = selection;
@@ -61,15 +67,21 @@ LJCutCommand.GetState=function() {
 }
 
 LJCutCommand.Execute=function() {
-    var selection = FCK.EditorWindow.getSelection();
+    var selection = '';
+
+    if (FCK.EditorWindow.getSelection) {
+        selection = FCK.EditorWindow.getSelection();
+    } else if (FCK.EditorDocument.selection) {
+        selection = FCK.EditorDocument.selection.createRange().text;
+    }
 
     if (selection != '') {
         selection += ''; // Cast it to a string
         selection = selection.replace(/\n/g, '<br />');
 
-        var html = "<lj-cut class='LJCut'>";
+        var html = "<div class='LJCut'>";
         html    += selection;
-        html    += "</lj-cut>";
+        html    += "<!--/LJCut--></div>";
 
         FCK.InsertHtml(html);
         FCK.Focus();
