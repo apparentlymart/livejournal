@@ -562,6 +562,7 @@ sub clean
         elsif ($type eq "E")
         {
             my $tag = $token->[1];
+            next TOKEN if $tag =~ /[^\w\-:]/;
 
             my $allow;
             if ($tag eq "lj-raw") {
