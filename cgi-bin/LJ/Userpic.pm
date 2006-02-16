@@ -3,12 +3,95 @@ use strict;
 use Carp qw(croak);
 use Digest::MD5;
 
+my %MimeTypeMap = (
+                   'image/gif'  => 'gif',
+                   'G'          => 'gif',
+                   'image/jpeg' => 'jpg',
+                   'J'          => 'jpg',
+                   'image/png'  => 'png',
+                   'P'          => 'png',
+                   );
+
 sub new {
     my ($class, $u, $picid) = @_;
     return bless {
         userid => $u->{userid},
         picid  => int($picid),
     };
+}
+
+sub new_from_row {
+    my ($class, $row) = @_;
+    my $self = LJ::Userpic->new(LJ::load_userid($row->{userid}), $row->{picid});
+    $self->absorb_row($row);
+    return $self;
+}
+
+sub absorb_row {
+    my ($self, $row) = @_;
+    for my $f(qw(userid picid width height comment location state)) {
+        $self->{$f} = $row->{$f};
+    }
+    $self->{_ext} = $MimeTypeMap{$row->{fmt} || $row->{contenttype}};
+    return $self;
+}
+
+sub id {
+    return $_[0]->{picid};
+}
+
+sub inactive {
+    my $self = shift;
+    return $self->state eq 'I';
+}
+
+sub state {
+    my $self = shift;
+    return $self->{state} if defined $self->{state};
+    $self->load_row;
+    return $self->{state};
+}
+
+# TODO: add in lazy peer loading here
+sub load_row {
+    my $self = shift;
+    my $u = $self->owner;
+    my $row;
+    if ($u->{'dversion'} > 6) {
+        $row = $u->selectrow_hashref("SELECT userid, picid, width, height, state, fmt, comment, location " .
+                                     "FROM userpic2 WHERE userid=? AND picid=?", undef,
+                                     $u->{userid}, $self->{picid});
+    } else {
+        my $dbh = LJ::get_db_writer();
+        $row = $dbh->selectrow_hashref("SELECT userid, picid, width, height, state, contenttype " .
+                                       "FROM userpic WHERE userid=? AND picid=?", undef,
+                                       $u->{userid}, $self->{picid});
+    }
+    $self->absorb_row($row);
+}
+
+sub load_user_userpics {
+    my ($class, $u) = @_;
+    local $LJ::THROW_ERRORS = 1;
+    my @ret;
+
+    # select all of their userpics and iterate through them
+    my $sth;
+    if ($u->{'dversion'} > 6) {
+        $sth = $u->prepare("SELECT userid, picid, width, height, state, fmt, comment, location " .
+                           "FROM userpic2 WHERE userid=?");
+    } else {
+        my $dbh = LJ::get_db_writer();
+        $sth = $dbh->prepare("SELECT userid, picid, width, height, state, contenttype " .
+                             "FROM userpic WHERE userid=?");
+    }
+    $sth->execute($u->{'userid'});
+    while (my $rec = $sth->fetchrow_hashref) {
+        # ignore anything expunged
+        next if $rec->{state} eq 'X';
+        push @ret, LJ::Userpic->new_from_row($rec);
+    }
+    return @ret;
 }
 
 sub max_allowed_bytes {
@@ -94,6 +177,8 @@ sub create {
     # if doesn't exist, make it
 
     $picid = LJ::alloc_global_counter('P');
+
+    @errors = (); # TEMP: FIXME: remove... using exceptions
 
     my $dberr = 0;
     if ($u->{'dversion'} > 6) {
@@ -222,6 +307,57 @@ sub dimensions {
     return ($up->{width}, $up->{height});
 }
 
+
+package LJ::Error::Userpic::TooManyKeywords;
+
+sub user_caused { 1 }
+sub fields      { qw(userpic lost); }
+
+sub number_lost {
+    my $self = shift;
+    return scalar @{ $self->field("lost") };
+}
+
+sub lost_keywords_as_html {
+    my $self = shift;
+    return join(", ", map { LJ::ehtml($_) } @{ $self->field("lost") });
+}
+
+sub as_html {
+    my $self = shift;
+    my $num_words = $self->number_lost;
+    return BML::ml("/editpics.bml.error.toomanykeywords", {
+        numwords => $self->number_lost,
+        words    => $self->lost_keywords_as_html,
+        max      => $LJ::MAX_USERPIC_KEYWORDS,
+    });
+
+}
+
+package LJ::Error::Userpic::Bytesize;
+sub user_caused { 1 }
+sub fields      { qw(size max); }
+
+#            BML::ml('.error.filetoolarge',
+#                    { 'maxsize' => int($MAX_UPLOAD / 1024) .
+#                          $ML{'.kilobytes'} })) if $err eq "error.bytesize";
+
+
+package LJ::Error::Userpic::Dimensions;
+sub user_caused { 1 }
+sub fields      { qw(w h); }
+
+package LJ::Error::Userpic::FileType;
+sub user_caused { 1 }
+sub fields      { qw(type); }
+
+ #               return $err->(BML::ml(".error.unsupportedtype",
+ #                                     { 'filetype' => $filetype })) if $err eq "error.filetype";
+
+
+
+__END__
+
 # instance method:  takes a string of comma-separate keywords, or an array of keywords
 # FIXME: XXX: NOT YET FINISHED (NOT YET TESTED)
 sub set_keywords {
@@ -303,32 +439,163 @@ sub set_keywords {
     }
 }
 
-package LJ::Error::Userpic::TooManyKeywords;
 
-sub user_caused { 1 }
-sub fields      { qw(userpic lost); }
+sub set_keywords {
+    my ($self, $keywords) = @_;
 
-sub number_lost {
-    my $self = shift;
-    return scalar @{ $self->field("lost") };
+            if (%picid_of_kwid) {
+                if ($u->{'dversion'} > 6) {
+                    $u->do("REPLACE INTO userpicmap2 (userid, kwid, picid) VALUES " .
+                           join(",", map { "(" .
+                                               join(",",
+                                                    $dbcm->quote($u->{'userid'}),
+                                                    $dbcm->quote($_),
+                                                    $dbcm->quote($picid_of_kwid{$_})) .
+                                                    ")"
+                                                }
+                                keys %picid_of_kwid)
+                           );
+                } else {
+                    $dbh->do("REPLACE INTO userpicmap (userid, kwid, picid) VALUES " .
+                             join(",", map { "(" .
+                                                 join(",",
+                                                      $dbh->quote($u->{'userid'}),
+                                                      $dbh->quote($_),
+                                                      $dbh->quote($picid_of_kwid{$_})) .
+                                                      ")"
+                                                  }
+                                  keys %picid_of_kwid)
+                             );
+                }
+            }
+
+            # Delete keywords that are no longer being used
+            my @kwid_del;
+
+
+            if (@kwid_del) {
+                my $kwid_del = join(",", @kwid_del);
+                if ($u->{'dversion'} > 6) {
+                    $u->do("DELETE FROM userpicmap2 WHERE userid=$u->{userid} " .
+                           "AND kwid IN ($kwid_del)");
+                } else {
+                    $dbh->do("DELETE FROM userpicmap WHERE userid=$u->{userid} " .
+                             "AND kwid IN ($kwid_del)");
+                }
+            }
+
 }
 
-sub lost_keywords_as_html {
-    my $self = shift;
-    return join(", ", map { LJ::ehtml($_) } @{ $self->field("lost") });
+sub delete_memcache {
+    my ($class, $u) = @_;
+    my $memkey = [$u->{'userid'},"upicinf:$u->{'userid'}"];
+    LJ::MemCache::delete($memkey);
+    $memkey = [$u->{'userid'},"upiccom:$u->{'userid'}"];
+    LJ::MemCache::delete($memkey);
+    $memkey = [$u->{'userid'},"upicurl:$u->{'userid'}"];
+    LJ::MemCache::delete($memkey);
+
 }
 
-package LJ::Error::Userpic::Bytesize;
-sub user_caused { 1 }
-sub fields      { qw(size max); }
+sub set_comment {
+    my ($self, $comment) = @_;
+    return 0 unless $u->{'dversion'} > 6;
+    my $comment = LJ::text_trim($POST{"com_$pic->{'picid'}"}, LJ::BMAX_UPIC_COMMENT, LJ::CMAX_UPIC_COMMENT);
+    $u->do("UPDATE userpic2 SET comment=? WHERE userid=? AND picid=?",
+           undef, $comment, $u->{'userid'}, $pic->{'picid'});
+}
 
-package LJ::Error::Userpic::Dimensions;
-sub user_caused { 1 }
-sub fields      { qw(w h); }
+sub set_fullurl {
+    my ($self, $url) = @_;
+    return 0 unless $u->{'dversion'} > 6;
+    $u->do("UPDATE userpic2 SET $set WHERE userid=? AND picid=?",
+           undef, @data, $u->{'userid'}, $picid);
+}
 
-package LJ::Error::Userpic::FileType;
-sub user_caused { 1 }
-sub fields      { qw(type); }
+sub delete {
+                    my $fmt;
+                    if ($u->{'dversion'} > 6) {
+                        $fmt = {
+                            'G' => 'gif',
+                            'J' => 'jpg',
+                            'P' => 'png',
+                        }->{$ctype{$picid}};
+                    } else {
+                        $fmt = {
+                            'image/gif' => 'gif',
+                            'image/jpeg' => 'jpg',
+                            'image/png' => 'png',
+                        }->{$ctype{$picid}};
+                    }
+
+                    my $deleted = 0;
+
+                my $id_in;
+                if ($u->{'dversion'} > 6) {
+                    $id_in = join(", ", map { $dbcm->quote($_) } @delete);
+                } else {
+                    $id_in = join(", ", map { $dbh->quote($_) } @delete);
+                }
+
+
+                    # try and delete from either the blob server or database,
+                    # and only after deleting the image do we delete the metadata.
+                    if ($locations{$picid} eq 'mogile') {
+                        $deleted = 1
+                            if LJ::mogclient()->delete($u->mogfs_userpic_key($picid));
+                    } elsif ($LJ::USERPIC_BLOBSERVER &&
+                        LJ::Blob::delete($u, "userpic", $fmt, $picid)) {
+                        $deleted = 1;
+                    } elsif ($u->do("DELETE FROM userpicblob2 WHERE ".
+                                    "userid=? AND picid=?", undef,
+                                    $u->{userid}, $picid) > 0) {
+                        $deleted = 1;
+                    }
+
+                    # now delete the metadata if we got the real data
+                    if ($deleted) {
+                        if ($u->{'dversion'} > 6) {
+                            $u->do("DELETE FROM userpic2 WHERE picid=? AND userid=?",
+                                   undef, $picid, $u->{'userid'});
+                        } else {
+                            $dbh->do("DELETE FROM userpic WHERE picid=?", undef, $picid);
+                        }
+                        $u->do("DELETE FROM userblob WHERE journalid=? AND blobid=? " .
+                               "AND domain=?", undef, $u->{'userid'}, $picid,
+                               LJ::get_blob_domainid('userpic'));
+
+                        # decrement $count to reflect deletion
+                        $count--;
+                    }
+
+                    # if we didn't end up deleting, it's either because of
+                    # some transient error, or maybe there was nothing to delete
+                    # for some bizarre reason, in which case we should verify
+                    # that and make sure they can delete their metadata
+                    if (! $deleted) {
+                        my $present;
+                        if ($locations{$picid} eq 'mogile') {
+                            my $blob = LJ::mogclient()->get_file_data($u->mogfs_userpic_key($picid));
+                            $present = length($blob) ? 1 : 0;
+                        } elsif ($LJ::USERPIC_BLOBSERVER) {
+                            my $blob = LJ::Blob::get($u, "userpic", $fmt, $picid);
+                            $present = length($blob) ? 1 : 0;
+                        }
+                        $present ||= $dbcm->selectrow_array("SELECT COUNT(*) FROM userpicblob2 WHERE ".
+                                                            "userid=? AND picid=?", undef, $u->{'userid'},
+                                                            $picid);
+                        if (! int($present)) {
+                            if ($u->{'dversion'} > 6) {
+                                $u->do("DELETE FROM userpic2 WHERE picid=? AND userid=?",
+                                       undef, $picid, $u->{'userid'});
+                            } else {
+                                $dbh->do("DELETE FROM userpic WHERE picid=?", undef, $picid);
+                            }
+                        }
+                    }
+
+                }
+
 
 
 
