@@ -1,10 +1,99 @@
 #-*-s2-*- ;; -*- coding: utf-8 -*-
 
 layerinfo "type" = "i18nc";
-layerinfo "redist_uniq" = "i18nc/ru1";
+layerinfo "redist_uniq" = "i18nc/ru1"; 
 layerinfo "name" = "Russian";
 layerinfo "langcode" = "ru";
 set lang_current = "ru";
+
+set lang_fmt_date_short = "%%m%%/%%d%%/%%yyyy%%";
+set lang_fmt_date_med = "%%mon%% %%dayord%% %%yyyy%%";
+set lang_fmt_date_med_day = "%%da%% %%mon%% %%dayord%% %%yyyy%%";
+set lang_fmt_date_long = "%%dayord%% %%month%% %%yyyy%%";
+set lang_fmt_date_long_day = "%%day%% %%month%% %%dayord%% %%yyyy%%";
+set lang_fmt_time_short = "%%HH%%:%%min%%";
+set lang_fmt_month_short = "%%mon%% %%yy%%";
+set lang_fmt_month_med = "%%mon%% %%yyyy%%";
+set lang_fmt_month_long = "%%month%% %%yyyy%%";
+
+set lang_monthname_long = [ "", "Январь",  "Февраль", "Март",
+                            "Апрель", "Май", "Июнь",
+                            "Июль", "Август", "Сентябрь",
+                            "Октябрь", "Ноябрь", "Декабрь" ];
+
+set lang_monthname_short = [ "", "Ян",  "Фев", "Мар",
+                             "Апр", "Май", "Июн",
+                             "Июл", "Авг", "Сент",
+                             "Окт", "Ноя", "Дек" ];
+
+set lang_dayname_long = [ "", "Воскресенье", "Понедельник",  "Вторник", "Среда", 
+                          "Четверг", "Пятница", "Суббота" ];
+
+set lang_dayname_short = [ "", "Вс", "Пн",  "Вт", "Ср", 
+                           "Чт", "Пт", "Сб" ];
+
+set reg_firstdayofweek = "monday";
+
+
+set text_meta_music = "Музыка";
+set text_meta_mood = "Настроение";
+
+set text_post_comment = "Оставить комментарий";
+set text_read_comments = "# комментарий // # комментария // # комментариев";
+set text_post_comment_friends = "Оставить комментарий";
+set text_read_comments_friends = "# комментарий // # комментария // # комментариев";
+set text_max_comments = "Достигнуто максимальное количество комментариев.";
+
+set text_skiplinks_back="Предыдущие #";
+set text_skiplinks_forward="Следующие #";
+set text_skiplinks_forward_words="Вперёд";
+
+set text_tag_uses = "# раз // # раза // # раз";
+
+set text_view_recent = "Последние записи";
+set text_view_friends = "Друзья";
+set text_view_friends_comm = "Участники";
+set text_view_friends_filter = "Друзья (фильтр)";
+set text_view_friendsfriends = "Друзья друзей";
+set text_view_friendsfriends_filter = "Друзья друзей (фильтр)";
+set text_view_archive = "Архив";
+set text_view_userinfo = "Личная информация";
+set text_view_month = "Просмотр заголовков";
+
+set text_nosubject = "(без темы)";
+set text_noentries_recent = "Записей нет";
+set text_noentries_day = "За этот день записей нет";
+set text_permalink = "ссылка";
+set text_month_screened_comments = "со скрытыми";
+set text_multiform_check = "Выбрать:";
+set text_multiform_des = "Групповая операция над выбранными комментариями:";
+set text_multiform_btn = "Выполнить";
+set text_multiform_opt_unscreen = "Раскрыть";
+set text_multiform_opt_screen = "Скрыть";
+set text_multiform_opt_delete = "Удалить";
+set text_multiform_conf_delete = "Вы уверены, что хотите удалить выделенные комментарии?";
+set text_multiform_opt_deletespam = "Удалить и отметить как спам";
+set text_multiform_opt_freeze = "Заморзить";
+set text_multiform_opt_unfreeze = "Разморозить";
+set text_comment_posted = "Комментарий добавлен.";
+set text_tags = "Метки: #";
+set text_day_prev = "На день вперед";
+set text_day_next = "На день назад";
+set text_comment_from = "От:";
+set text_comment_date = "Дата:";
+set text_comment_ipaddr = "IP-адрес:";
+set text_comment_reply = "Ответить";
+set text_comment_parent = "Уровень выше";
+set text_comment_thread = "Ветвь дискусии";
+set text_reply_back = "Читать комментарии";
+set text_comment_frozen = "Ответы заморожены";
+set text_reply_nocomments_header = "Комментарии отключены:";
+set text_reply_nocomments = "Для этой записи комментарии отключены.";
+set text_website_default_name = "Мой сайт";
+set text_poster_anonymous = "(Анонимно)";
+set text_icon_alt_protected = "[защищённая запись]";
+set text_icon_alt_private = "[личная запись]";
+
 
 # Three forms, special cases for numbers ending in 1 and 2, 3, 4, except those ending in 1[1-4]
 function lang_map_plural (int n) : int {
@@ -13,9 +102,56 @@ function lang_map_plural (int n) : int {
     return 2;
 }
 
-set text_post_comment="Оставить комментарий";
-set text_read_comments="# комментарий // # комментария // # комментариев";
-set text_post_comment_friends="Оставить комментарий";
-set text_read_comments_friends="# комментарий // # комментария // # комментариев";
+function lang_page_of_pages (int pg, int pgs) [notags] : string {
+    return "Страница $pg из $pgs";
+}
 
+function lang_ordinal(int num) [notags] : string
+"Make an ordinal number from a cardinal number"
+{
+	if ($num%10 == 3 and $num%100 != 13) { return $num+"-ье"; } 
+	return $num+"-ое"; 
+}
 
+function lang_viewname(string viewid) [notags] : string {
+
+    if ($viewid == "recent") { return $*text_view_recent; }
+    if ($viewid == "archive") { return $*text_view_archive; }
+    if ($viewid == "friends") { return $*text_view_friends; }
+    if ($viewid == "day") { return "День"; }
+    if ($viewid == "month") { return "Месяц"; }
+    if ($viewid == "userinfo") { return $*text_view_userinfo; }
+    if ($viewid == "entry") { return "Читать комментарии"; }
+    if ($viewid == "reply") { return "Добавить комментарий"; }
+    if ($viewid == "tags") { return "Метки"; }
+    return "Неизвестный тип страницы";
+}
+
+function ReplyPage::view_title() : string {
+    return "Добавить комментарий";
+}
+
+function server_sig() {
+    """Разработано <a href="$*SITEROOT/">$*SITENAME</a>""";
+}
+
+function Page::print_entry_poster(Entry e) {
+    $e.poster->print();
+    if ($.view == "friends" and $e.poster.username != $e.journal.username) {
+        " написал в ";
+        $e.journal->print();
+    }
+}
+
+function lang_user_wrote(UserLite u) : string {
+    if (defined $u) {
+        return $u->as_string()+" написал:";
+    }
+    else {
+        return "Аноним написал";
+    }
+}
+
+function lang_at_datetime(DateTime d) : string {
+    return " " + $d->date_format("long") + " в " + $d->time_format();
+}
