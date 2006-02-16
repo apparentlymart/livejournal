@@ -4778,6 +4778,12 @@ This could be because: <ol>
 
 /update.bml.defaultjournal=([[user]]) -- default
 
+/update.bml.draft.autosave=Autosaved draft at [[time]]
+
+/update.bml.draft.confirm=Restore from saved draft?
+
+/update.bml.draft.restored=Restored last saved draft
+
 /update.bml.error.cantpost=Sorry, you cannot post at this time.
 
 /update.bml.error.cantpost.title=Can't Post
