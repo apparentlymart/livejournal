@@ -95,8 +95,6 @@ sub create {
 
     $picid = LJ::alloc_global_counter('P');
 
-    my @errors; # TEMP: FIXME: remove... using exceptions
-
     my $dberr = 0;
     if ($u->{'dversion'} > 6) {
         $u->do("INSERT INTO userpic2 (picid, userid, fmt, width, height, " .
