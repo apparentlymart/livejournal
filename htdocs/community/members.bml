@@ -84,41 +84,42 @@ body<=
         my @to_add;
         my @add_errors;
         foreach my $num (1..5) {
-            $POST{"add_$num"} = LJ::trim($POST{"add_$num"});
-            next unless $POST{"add_$num"} =~ /^\w+$/;
+            my $given_user = LJ::ehtml(LJ::trim($POST{"add_$num"}));
 
-            my $target = LJ::load_user($POST{"add_$num"});
+            next unless $given_user;
+
+            my $target = LJ::load_user($given_user);
             unless ($target) {
                 push @add_errors, BML::ml('.error.nouser',
-                                          { 'user' => $POST{"add_$num"} });
+                                          { 'user' => $given_user });
                 next;
             }
 
             unless ($target->{statusvis} eq 'V') {
                 push @add_errors, BML::ml('.error.notactive',
-                                          { 'user' => LJ::ljuser($POST{"add_$num"}) });
+                                          { 'user' => LJ::ljuser($target) });
                 next;
             }
 
             my @attr = grep { defined $POST{"add_${num}_$_"} } @saveattribs;
             unless (@attr) {
                 push @add_errors, BML::ml('.error.noattr',
-                                          { 'user' => LJ::ljuser($POST{"add_$num"},
-                                            { 'type' => $target->{'journaltype'} }) });
+                                          { 'user' => LJ::ljuser($target),
+                                            'type' => $target->{'journaltype'} });
                 next;
             }
 
             unless ($target->{'journaltype'} eq 'P') {
                 push @add_errors, BML::ml('.error.invaliduser',
-                                          { 'user' => LJ::ljuser($POST{"add_$num"},
-                                            { 'type' => $target->{'journaltype'} }) });
+                                          { 'user' => LJ::ljuser($target),
+                                            'type' => $target->{'journaltype'} });
                 next;
             }
 
             if (grep { $target->{'userid'} == $_ } @userids) {
                 push @add_errors, BML::ml('.error.alreadyadded',
-                                          { 'user' => LJ::ljuser($POST{"add_$num"},
-                                            { 'type' => $target->{'journaltype'} }) });
+                                          { 'user' => LJ::ljuser($target),
+                                            'type' => $target->{'journaltype'} });
                 next;
             }
 
