@@ -125,11 +125,11 @@ FCKConfig.MaxUndoLevels = 15 ;
 FCKConfig.DisableImageHandles = false ;
 FCKConfig.DisableTableHandles = false ;
 
-FCKConfig.LinkDlgHideTarget		= false ;
-FCKConfig.LinkDlgHideAdvanced	= false ;
+FCKConfig.LinkDlgHideTarget	= true ;
+FCKConfig.LinkDlgHideAdvanced	= true ;
 
-FCKConfig.ImageDlgHideLink		= false ;
-FCKConfig.ImageDlgHideAdvanced	= false ;
+FCKConfig.ImageDlgHideLink	= false ;
+FCKConfig.ImageDlgHideAdvanced	= true ;
 
 FCKConfig.FlashDlgHideAdvanced	= false ;
 

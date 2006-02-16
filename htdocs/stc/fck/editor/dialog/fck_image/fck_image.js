@@ -247,7 +247,6 @@ function Ok()
 		}
 
 		SetAttribute( oLink, '_fcksavedurl', sLnkUrl ) ;
-		SetAttribute( oLink, 'target', GetE('cmbLnkTarget').value ) ;
 	}
 
 	return true ;
