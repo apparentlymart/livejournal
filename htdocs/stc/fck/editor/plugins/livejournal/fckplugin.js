@@ -67,6 +67,14 @@ LJCutCommand.GetState=function() {
 }
 
 LJCutCommand.Execute=function() {
+    var text = prompt('Cut link text?', 'Read more...');
+    if (text == 'Read more...') {
+        text = '';
+    } else {
+        text = text.replace('"', '\"');
+        text = ' text="' + text + '"';
+    }
+
     var selection = '';
 
     if (FCK.EditorWindow.getSelection) {
@@ -79,7 +87,7 @@ LJCutCommand.Execute=function() {
         selection += ''; // Cast it to a string
         selection = selection.replace(/\n/g, '<br />');
 
-        var html = "<div class='ljcut'>";
+        var html = "<div class='ljcut'" +  text + ">";
         html    += selection;
         html    += "<!--/ljcut--></div>";
 
