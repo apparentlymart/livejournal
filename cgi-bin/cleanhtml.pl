@@ -172,6 +172,12 @@ sub clean
 
     my $htmlcleaner = HTMLCleaner->new(valid_stylesheet => \&LJ::valid_stylesheet_url);
 
+    my $eating_ljuser_span = 0;  # bool, if we're eating an ljuser span
+    my $ljuser_text_node   = ""; # the last text node we saw while eating ljuser tags
+
+    my @eatuntil = ();  # if non-empty, we're eating everything.  thing at end is thing
+                        # we're looking to open again or close again.
+
   TOKEN:
     while (my $token = $p->get_token)
     {
@@ -184,7 +190,24 @@ sub clean
 
         if ($type eq "S")     # start tag
         {
-            my $tag = $token->[1];
+            my $tag  = $token->[1];
+            my $attr = $token->[2];  # hashref
+
+            if (@eatuntil) {
+                if ($tag eq $eatuntil[-1]) {
+                    push @eatuntil, $tag;
+                }
+                next TOKEN;
+            }
+
+            if ($tag eq "span" && lc $attr->{class} eq "ljuser") {
+                $eating_ljuser_span = 1;
+                $ljuser_text_node = "";
+            }
+
+            if ($eating_ljuser_span) {
+                next TOKEN;
+            }
 
             # do some quick checking to see if this is an email address/URL, and if so, just
             # escape it and ignore it
@@ -198,7 +221,6 @@ sub clean
             $slashclose = 1 if ($tag =~ s!/$!!);
 
             return $total_fail->($tag) unless $tag =~ /^\w([\w\-:_]*\w)?$/;
-
             # for incorrect tags like <name/attrib=val> (note the lack of a space)
             # delete everything after 'name' to prevent a security loophole which happens
             # because IE understands them.
@@ -217,7 +239,6 @@ sub clean
                 $cleantag =~ s/[^\w]//g;
                 no strict 'subs';
                 my $meth = "CLEAN_$cleantag";
-                my $attr  = $token->[2];  # hashref
                 my $seq   = $token->[3];  # attribute names, listref
                 my $code = $htmlcleaner->can($meth)
                     or return 1;
@@ -225,11 +246,24 @@ sub clean
             };
             next if !$@ && !$clean_res;
 
-            if ($tag eq "lj-cut" && !$ljcut_disable)
-            {
-                my $attr = $token->[2];
+            # stupid hack to remove the class='ljcut' from divs when we're
+            # disabling them, so we account for the open div normally later.
+            my $ljcut_div = $tag eq "div" && lc $attr->{class} eq "ljcut";
+            if ($ljcut_div && $ljcut_disable) {
+                $ljcut_div = 0;
+            }
+
+            # no cut URL, record the anchor, but then fall through
+            if (0 && $ljcut_div && !$cut) {
                 $cutcount++;
-                if ($cut) {
+                $newdata .= "<a name=\"cutid$cutcount\"></a>";
+                $ljcut_div = 0;
+            }
+
+            if (($tag eq "lj-cut" || $ljcut_div) && !$ljcut_disable)
+            {
+                $cutcount++;
+                my $link_text = sub {
                     my $text = "Read more...";
                     if ($attr->{'text'}) {
                         $text = $attr->{'text'};
@@ -239,11 +273,23 @@ sub clean
                         $text =~ s/</&lt;/g;
                         $text =~ s/>/&gt;/g;
                     }
+                    return $text;
+                };
+                if ($cut) {
+                    my $etext = $link_text->();
                     my $url = LJ::ehtml($cut);
-                    $newdata .= "<b>(&nbsp;<a href=\"$url#cutid$cutcount\">$text</a>&nbsp;)</b>";
-                    $p->get_tag("/lj-cut") unless $opts->{'cutpreview'}
+                    $newdata .= "<b>(&nbsp;<a href=\"$url#cutid$cutcount\">$etext</a>&nbsp;)</b>";
+                    unless ($opts->{'cutpreview'}) {
+                        push @eatuntil, $tag;
+                        next TOKEN;
+                    }
                 } else {
                     $newdata .= "<a name=\"cutid$cutcount\"></a>";
+                    if ($tag eq "div") {
+                        $opencount{"div"}++;
+                        my $etext = $link_text->();
+                        $newdata .= "<div class=\"ljcut\" text=\"$etext\">";
+                    }
                     next;
                 }
             }
@@ -262,8 +308,6 @@ sub clean
             }
             elsif ($tag eq "lj")
             {
-                my $attr = $token->[2];
-
                 # keep <lj comm> working for backwards compatibility, but pretend
                 # it was <lj user> so we don't have to account for it below.
                 my $user = $attr->{'user'} = exists $attr->{'user'} ? $attr->{'user'} :
@@ -564,6 +608,20 @@ sub clean
             my $tag = $token->[1];
             next TOKEN if $tag =~ /[^\w\-:]/;
 
+            if (@eatuntil) {
+                if ($eatuntil[-1] eq $tag) {
+                    pop @eatuntil;
+                    next TOKEN;
+                }
+                next TOKEN if @eatuntil;
+            }
+
+            if ($eating_ljuser_span && $tag eq "span") {
+                $eating_ljuser_span = 0;
+                $newdata .= LJ::ljuser($ljuser_text_node);
+                next TOKEN;
+            }
+
             my $allow;
             if ($tag eq "lj-raw") {
                 $opencount{$tag}--;
@@ -621,8 +679,9 @@ sub clean
 
                         $newdata .= "</$tag>";
                         $opencount{$tag}--;
-
-                    } else { $newdata .= "&lt;/$tag&gt;"; }
+                    } else {
+                        $newdata .= "&lt;/$tag&gt;";
+                    }
                 }
             }
         }
@@ -636,6 +695,12 @@ sub clean
         elsif ($type eq "T") {
             my %url = ();
             my $urlcount = 0;
+            next TOKEN if @eatuntil;
+
+            if ($eating_ljuser_span) {
+                $ljuser_text_node = $token->[1];
+                next TOKEN;
+            }
 
             if ($opencount{'style'} && $LJ::DEBUG{'s1_style_textnode'}) {
                 my $r = Apache->request;
