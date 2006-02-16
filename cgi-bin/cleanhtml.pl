@@ -278,7 +278,9 @@ sub clean
                 if ($cut) {
                     my $etext = $link_text->();
                     my $url = LJ::ehtml($cut);
+                    $newdata .= "<div>" if $tag eq "div";
                     $newdata .= "<b>(&nbsp;<a href=\"$url#cutid$cutcount\">$etext</a>&nbsp;)</b>";
+                    $newdata .= "</div>" if $tag eq "div";
                     unless ($opts->{'cutpreview'}) {
                         push @eatuntil, $tag;
                         next TOKEN;

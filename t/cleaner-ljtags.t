@@ -43,16 +43,16 @@ is($clean->("And a cut:<lj-cut text='foo'>foooooooooooooo</lj-cut>"),
 
 # new lj-cut
 is($clean->(qq{New cut: <div class="ljcut">baaaaaaaaaarrrrr</div>}),
-   qq{New cut: <b>(&nbsp;<a href="http://lj.example/full.html#cutid1">Read more...</a>&nbsp;)</b>},
+   qq{New cut: <div><b>(&nbsp;<a href="http://lj.example/full.html#cutid1">Read more...</a>&nbsp;)</b></div>},
    "new lj-cut w/ div");
 
 is($clean->(qq{New cut: <div class="ljcut" text="This is my div cut">baaaaaaaaaarrrrr</div>}),
-   qq{New cut: <b>(&nbsp;<a href="http://lj.example/full.html#cutid1">This is my div cut</a>&nbsp;)</b>},
+   qq{New cut: <div><b>(&nbsp;<a href="http://lj.example/full.html#cutid1">This is my div cut</a>&nbsp;)</b></div>},
    "new lj-cut w/ div w/ text");
 
 # nested div cuts
 is($clean->(qq{Nested: <div class="ljcut" text="Nested">baaaaaaaaaa<div style="background: red">I AM RED</div>arrrrrr</div>}),
-   qq{Nested: <b>(&nbsp;<a href="http://lj.example/full.html#cutid1">Nested</a>&nbsp;)</b>},
+   qq{Nested: <div><b>(&nbsp;<a href="http://lj.example/full.html#cutid1">Nested</a>&nbsp;)</b></div>},
    "nested div cuts");
 is($clean->(qq{Nested: <div class="ljcut" text="Nested">baaaaaaaaaa<div style="background: red">I AM RED</div>arrrrrr</div>},
             cuturl => ""),
