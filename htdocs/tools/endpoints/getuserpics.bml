@@ -11,24 +11,32 @@
 
     # get user
     my $u = LJ::get_remote()
-        or return $err->("Couldn't save.  No longer logged in.");
+        or return $err->("Sorry, you must be logged in to use this feature.");
 
     # get userpics
-    my $upinfo = LJ::get_userpic_info($u->{'userid'}, {'load_comments' => 1})
-        or return $err->("No galleries for user $u->{user}.");
+    my @userpics = LJ::Userpic->load_user_userpics($u);
 
-    my $ret = {};
-    @{$ret->{'kws'}} = ();
+    my %upics = (); # info to return
+    $upics{pics} = {}; # upicid -> hashref of metadata
 
-    while (my ($kw, $info) = each %{$upinfo->{kw}}) {
-        next unless $info->{state} eq 'N';
-        $info->{'url'} = "$LJ::USERPIC_ROOT/$info->{'picid'}/$u->{'userid'}";
-        $ret->{'pics'}->{$kw} = $info;
-        push @{$ret->{'kws'}}, $kw;
+    foreach my $upic (@userpics) {
+        next if $upic->inactive;
+
+        my $id = $upic->id;
+        $upics{pics}{$id} = {
+            url => $upic->url,
+            state => $upic->state,
+            width => $upic->width,
+            height => $upic->height,
+            comment => $upic->comment,
+            id => $id,
+            keywords => [$upic->keywords],
+        };
     }
 
+    $upics{ids} = [keys %{$upics{pics}}];
     sleep 1 if $LJ::IS_DEV_SERVER;
 
-    return JSON::objToJson($ret);
+    return JSON::objToJson(\%upics);
 }
 _code?>
