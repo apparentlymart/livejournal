@@ -144,10 +144,44 @@ $maint{'clean_caches'} = sub
             next;
         }
 
+        # We always want to keep at least an hour worth of data in the
+        # clustered table for duplicate checking.  We won't select out 
+        # any rows for this hour or the full hour before in order to avoid
+        # extra rows counted in hour-boundary edge cases
+        my $now = time();
+
+        # one hour from the start of this hour (
+        my $before_time = $now - 3600 - ($now % 3600);
+        my $time_str = LJ::mysql_time($before_time, 'gmt');
+       
+        # now extract parts from the modified time
+        my ($yr, $mo, $day, $hr) = 
+            $time_str =~ /^(\d\d\d\d)-(\d\d)-(\d\d) (\d\d)/;
+
+        # Building up all this sql is pretty ghetto but otherwise it
+        # becomes unwieldy with tons of code duplication and more places
+        # for this fairly-complicated where condition to break.  So we'll
+        # build a nice where clause which uses bind vars and then create
+        # an array to go inline in the spot where those bind vars should
+        # be within the larger query
+        my $where = "WHERE year=? AND month=? AND day=? AND hour<? OR " .
+                    "year=? AND month=? AND day<? OR " .
+                    "year=? AND month<? OR " .
+                    "year<?";
+
+        my @where_vals = ($yr, $mo, $day, $hr,
+                          $yr, $mo, $day,
+                          $yr, $mo,
+                          $yr                );
+
+        # don't need to check for distinct userid in the count here
+        # because y,m,d,h,uid is the primary key so we know it's
+        # unique for this hour anyway
         my $sth = $dbcm->prepare
-            ("SELECT type, DATE_FORMAT(FROM_UNIXTIME(time), '%Y-%m-%d-%H'), COUNT(DISTINCT(userid)) " .
-             "FROM active_user GROUP BY 1,2");
-        $sth->execute;
+            ("SELECT type, year, month, day, hour, COUNT(userid) " .
+             "FROM active_user $where GROUP BY 1,2");
+        $sth->execute(@where_vals);
+
         if ($dbcm->err) {
             print "    db error (select): " . $dbcm->errstr . "\n";
             next;
@@ -155,8 +189,8 @@ $maint{'clean_caches'} = sub
 
         my %counts = ();
         my $total_ct = 0;
-        while (my ($type, $hkey, $ct) = $sth->fetchrow_array) {
-            $counts{"$hkey-$type"} += $ct;
+        while (my ($type, $yr, $mo, $day, $hr, $ct) = $sth->fetchrow_array) {
+            $counts{"$yr-$mo-$day-$hr-$type"} += $ct;
             $total_ct += $ct;
         }
 
@@ -168,7 +202,7 @@ $maint{'clean_caches'} = sub
         #       for statistical purposes so we can just live with
         #       the possibility of a small skew.
 
-        unless ($dbcm->do("DELETE FROM active_user")) {
+        unless ($dbcm->do("DELETE FROM active_user $where", undef, @where_vals)) {
             print "    db error (delete): " . $dbcm->errstr . "\n";
             next;
         }

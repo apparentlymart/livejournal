@@ -415,7 +415,62 @@ sub make_login_session {
         "expiretime" => $etime,
     });
 
+    # activity for cluster usage tracking
     LJ::mark_user_active($u, 'login');
+
+    # activity for global account number tracking
+    $u->note_activity('A');
+
+    return 1;
+}
+
+# We have about 10 million different forms of activity tracking.
+# This one is for tracking types of user activity on a per-hour basis
+#
+#    Example: $u had login activity during this out
+#
+sub note_activity {
+    my ($u, $atype) = @_;
+    $u = LJ::want_user($u);
+    croak ("invalid user") unless ref $u;
+    croak ("invalid activity type") unless $atype;
+
+    # If we have no memcache servers, this function would trigger
+    # an insert for every logged-in pageview.  Probably not a problem
+    # load-wise if the site isn't using memcache anyway, but if the 
+    # site is that small active user tracking probably doesn't matter
+    # much either.  :/
+    return undef unless @LJ::MEMCACHE_SERVERS;
+
+    # Also disable via config flag
+    return undef if $LJ::DISABLED{active_user_tracking};
+
+    my $now    = time();
+    my $uid    = $u->{userid}; # yep, lazy typist w/ rsi
+    my $explen = 1800;         # 30 min, same for all types now
+
+    my $memkey = [ $uid, "uactive:$atype:$uid" ];
+
+    # get activity key from memcache
+    my $atime = LJ::MemCache::get($memkey);
+
+    # nothing to do if we got an $atime within the last hour
+    return 1 if $atime && $atime > $now - $explen;
+
+    # key didn't exist due to expiration, or was too old,
+    # means we need to make an activity entry for the user
+    my ($hr, $dy, $mo, $yr) = (gmtime($now))[2..5];
+    $yr += 1900; # offset from 1900
+    $mo += 1;    # 0-based
+            
+    # delayed insert in case the table is currently locked due to an analysis
+    # running.  this way the apache won't be tied up waiting
+    $u->do("INSERT DELAYED IGNORE INTO active_user " . 
+           "SET year=?, month=?, day=?, hour=?, userid=?, type=?",
+           undef, $yr, $mo, $dy, $hr, $uid, $atype);
+
+    # set a new memcache key good for $explen
+    LJ::MemCache::set($memkey, $now, $explen);
 
     return 1;
 }
@@ -3837,35 +3892,11 @@ sub get_remote
     $u->{'_session'} = $sessobj;
 
     # keep track of activity for the user we just loaded from db/memcache
-    # - this code will actually run in Apache's cleanup handler so latency
-    #   won't affect the user
-    push @LJ::CLEANUP_HANDLERS, sub {
-        my $now    = time();       # _inside_ the closure
-        my $uid    = $u->{userid}; # yep, lazy typist w/ rsi
-        my $atype  = 'S';          # session activity
-        my $explen = 1800;         # 30 min
-
-        my $memkey = [ $uid, "uactive:$atype:$uid" ];
-
-        # get activity key from memcache
-        my $atime = LJ::MemCache::get($memkey);
-
-        # key didn't exist due to expiration, or was too old,
-        # means we need to make an activity entry for the user
-        if (! $atime || $atime < $now - $explen) {
-
-            # delayed insert in case the table is currently locked due to an analysis
-            # running.  this way the apache won't be tied up waiting
-            $u->do("INSERT DELAYED INTO active_user SET userid=?, type=?, time=?",
-                   undef, $uid, $atype, $now);
-
-            # set a new memcache key good for $explen
-            LJ::MemCache::set($memkey, $now, $explen);
-        }
-
-        return 1;
-
-    } unless $LJ::DISABLED{active_user_tracking};
+    # - if necessary, this code will actually run in Apache's cleanup handler 
+    #   so latency won't affect the user
+    if (@LJ::MEMCACHE_SERVERS && ! $LJ::DISABLED{active_user_tracking}) {
+        push @LJ::CLEANUP_HANDLERS, sub { $u->note_activity('A') };
+    }
 
     LJ::User->set_remote($u);
     $r->notes("ljuser" => $u->{'user'});

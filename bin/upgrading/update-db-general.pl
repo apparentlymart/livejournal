@@ -2769,6 +2769,26 @@ register_alter(sub {
         }
     }
 
+    # table format totally changed, we'll just truncate and modify
+    # all of the columns since the data is just summary anyway
+    if (index_name("active_user", "INDEX:time")) {
+        do_sql("TRUNCATE TABLE active_user");
+        do_alter("active_user",
+                 "ALTER TABLE active_user " . 
+                 "DROP time, DROP KEY userid, " .
+                 "ADD year SMALLINT NOT NULL FIRST, " .
+                 "ADD month TINYINT NOT NULL AFTER year, " .
+                 "ADD day TINYINT NOT NULL AFTER month, " .
+                 "ADD hour TINYINT NOT NULL AFTER day, " .
+                 "ADD PRIMARY KEY (year, month, day, hour, userid)");
+    }
+
+    if (index_name("active_user_summary", "UNIQUE:year-month-day-hour-clusterid-type")) {
+        do_alter("active_user_summary",
+                 "ALTER TABLE active_user_summary DROP PRIMARY KEY, " .
+                 "ADD INDEX (year, month, day, hour)");
+    }
+
 });
 
 1; # return true

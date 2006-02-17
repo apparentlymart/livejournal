@@ -422,6 +422,12 @@
                 "expiretime" => $etime,
             });
 
+            # activity for cluster usage tracking
+            LJ::mark_user_active($u, 'login');
+
+            # activity for global account number tracking
+            $u->note_activity('A');
+
             # Redirect to offsite uri if allowed, and not an internal LJ redirect. ('ret' == 1)
             if ($POST{'ret'} && $POST{'ret'} != 1) {
                 my $redir_host = $1 if $POST{'ret'} =~ m#^http://([\.:\w-]+)#i;
