@@ -36,6 +36,8 @@ sub absorb_row {
     return $self;
 }
 
+# accessors
+
 sub id {
     return $_[0]->{picid};
 }
@@ -50,6 +52,136 @@ sub state {
     return $self->{state} if defined $self->{state};
     $self->load_row;
     return $self->{state};
+}
+
+sub comment {
+    my $self = shift;
+    return $self->{comment} if defined $self->{comment};
+    $self->load_row;
+    return $self->{comment};
+}
+
+sub width {
+    my $self = shift;
+    my @dims = $self->dimensions;
+    return undef unless @dims;
+    return $dims[0];
+}
+
+sub height {
+    my $self = shift;
+    my @dims = $self->dimensions;
+    return undef unless @dims;
+    return $dims[0];
+}
+
+# returns (width, height)
+sub dimensions {
+    my $self = shift;
+
+    # width and height probably loaded from DB
+    return ($self->{width}. $self->{height}) if ($self->{width} && $self->{height});
+
+    my %upics;
+    my $u = LJ::load_userid($self->{userid});
+    LJ::load_userpics(\%upics, [ $u, $self->{picid} ]);
+    my $up = $upics{$self->{picid}} or
+        return ();
+
+    return ($up->{width}, $up->{height});
+}
+
+sub max_allowed_bytes {
+    my ($class, $u) = @_;
+    return 40960;
+}
+
+sub owner {
+    my $self = shift;
+    return LJ::load_userid($self->{userid});
+}
+
+sub url {
+    my $self = shift;
+    return "$LJ::USERPIC_ROOT/$self->{picid}/$self->{userid}";
+}
+
+# in scalar context returns comma-seperated list of keywords or "pic#12345" if no keywords defined
+# in list context returns list of keywords ( (pic#12345) if none defined )
+sub keywords {
+    my $self = shift;
+
+    my $picinfo = LJ::get_userpic_info($self->{userid}, {load_comments => 0});
+
+    # $picinfo is a hashref of userpic data
+    # keywords are stored in the "kw" field in the format keyword => {hash of some picture info}
+
+    # create a hash of picids => keywords
+    my $keywords = {};
+    foreach my $keyword (keys %{$picinfo->{kw}}) {
+        my $picid = $picinfo->{kw}->{$keyword}->{picid};
+        $keywords->{$picid} = [] unless $keywords->{$picid};
+        push @{$keywords->{$picid}}, $keyword if ($keyword && $picid);
+    }
+
+    # return keywords for this picid
+    my @pickeywords = $keywords->{$self->id} ? @{$keywords->{$self->id}} : ();
+
+    if (wantarray) {
+        # if list context return the array
+        return ("pic#" . $self->id) unless @pickeywords;
+
+        return @pickeywords;
+    } else {
+        # if scalar context return comma-seperated list of keywords, or "pic#12345" if no keywords
+        return ("pic#" . $self->id) unless @pickeywords;
+
+        return join(',', @pickeywords);
+    }
+}
+
+sub imagedata {
+    my $self = shift;
+
+    my %upics;
+    my $u = $self->owner;
+    LJ::load_userpics(\%upics, [ $u, $self->{picid} ]);
+    my $pic = $upics{$self->{picid}} or
+        return undef;
+
+    return undef if $pic->{'userid'} != $self->{userid} || $pic->{state} eq 'X';
+
+    if ($pic->{location} eq "M") {
+        my $key = $u->mogfs_userpic_key( $self->{picid} );
+        my $data = LJ::mogclient()->get_file_data( $key );
+        return $$data;
+    }
+
+    my %MimeTypeMap = (
+                       'image/gif' => 'gif',
+                       'image/jpeg' => 'jpg',
+                       'image/png' => 'png',
+                       );
+    my %MimeTypeMapd6 = (
+                         'G' => 'gif',
+                         'J' => 'jpg',
+                         'P' => 'png',
+                         );
+
+    my $data;
+    if ($LJ::USERPIC_BLOBSERVER) {
+        my $fmt = ($u->{'dversion'} > 6) ? $MimeTypeMapd6{ $pic->{fmt} } : $MimeTypeMap{ $pic->{contenttype} };
+        $data = LJ::Blob::get($u, "userpic", $fmt, $self->{picid});
+        return $data if $data;
+    }
+
+    my $dbb = LJ::get_cluster_reader($u)
+        or return undef;
+
+    $data = $dbb->selectrow_array("SELECT imagedata FROM userpicblob2 WHERE ".
+                                  "userid=? AND picid=?", undef, $self->{userid},
+                                  $self->{picid});
+    return undef;
 }
 
 # TODO: add in lazy peer loading here
@@ -92,11 +224,6 @@ sub load_user_userpics {
         push @ret, LJ::Userpic->new_from_row($rec);
     }
     return @ret;
-}
-
-sub max_allowed_bytes {
-    my ($class, $u) = @_;
-    return 40960;
 }
 
 # FIXME: XXX: NOT YET FINISHED
@@ -239,74 +366,6 @@ sub create {
 
 
 }
-
-sub owner {
-    my $self = shift;
-    return LJ::load_userid($self->{userid});
-}
-
-sub url {
-    my $self = shift;
-    return "$LJ::USERPIC_ROOT/$self->{picid}/$self->{userid}";
-}
-
-sub imagedata {
-    my $self = shift;
-
-    my %upics;
-    my $u = $self->owner;
-    LJ::load_userpics(\%upics, [ $u, $self->{picid} ]);
-    my $pic = $upics{$self->{picid}} or
-        return undef;
-
-    return undef if $pic->{'userid'} != $self->{userid} || $pic->{state} eq 'X';
-
-    if ($pic->{location} eq "M") {
-        my $key = $u->mogfs_userpic_key( $self->{picid} );
-        my $data = LJ::mogclient()->get_file_data( $key );
-        return $$data;
-    }
-
-    my %MimeTypeMap = (
-                       'image/gif' => 'gif',
-                       'image/jpeg' => 'jpg',
-                       'image/png' => 'png',
-                       );
-    my %MimeTypeMapd6 = (
-                         'G' => 'gif',
-                         'J' => 'jpg',
-                         'P' => 'png',
-                         );
-
-    my $data;
-    if ($LJ::USERPIC_BLOBSERVER) {
-        my $fmt = ($u->{'dversion'} > 6) ? $MimeTypeMapd6{ $pic->{fmt} } : $MimeTypeMap{ $pic->{contenttype} };
-        $data = LJ::Blob::get($u, "userpic", $fmt, $self->{picid});
-        return $data if $data;
-    }
-
-    my $dbb = LJ::get_cluster_reader($u)
-        or return undef;
-
-    $data = $dbb->selectrow_array("SELECT imagedata FROM userpicblob2 WHERE ".
-                                  "userid=? AND picid=?", undef, $self->{userid},
-                                  $self->{picid});
-    return undef;
-}
-
-# returns (width, height)
-sub dimensions {
-    my $self = shift;
-
-    my %upics;
-    my $u = LJ::load_userid($self->{userid});
-    LJ::load_userpics(\%upics, [ $u, $self->{picid} ]);
-    my $up = $upics{$self->{picid}} or
-        return ();
-
-    return ($up->{width}, $up->{height});
-}
-
 
 package LJ::Error::Userpic::TooManyKeywords;
 
