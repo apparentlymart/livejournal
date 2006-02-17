@@ -1642,9 +1642,6 @@ sub entry_form_decode
             $req->{'prop_opt_preformatted'} = 0;
         } else {
             # Old methods, left in for compatibility during code push
-            $event =~ s!<span class="ljuser"><img width="17" height="17" alt="" src="(?:$LJ::WSTATPREFIX|/stc)/fck/editor/plugins/livejournal/userinfo.gif" style="vertical-align: bottom;" />(\w+)</span>!<lj user="$1" />!g;
-            $event =~ s!<span class="ljuser"><img width="17" height="17" style="vertical-align: bottom;" src="(?:$LJ::WSTATPREFIX|/stc)/fck/editor/plugins/livejournal/userinfo.gif" alt="" />(\w+)</span>!<lj user="$1" />!g;
-
             $event =~ s!<lj-cut class="ljcut">!<lj-cut>!gi;
 
             $event =~ s!<lj-raw class="ljraw">!<lj-raw>!gi;
