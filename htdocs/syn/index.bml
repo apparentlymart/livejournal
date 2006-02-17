@@ -2,7 +2,7 @@
 title=><?_ml .title _ml?>
 body<=
 
-<?_code 
+<?_code
 {
     use strict;
     use vars qw(%POST);
@@ -23,7 +23,7 @@ body<=
         return "<?h1 $ML{'Error'} h1?><?p $_[0] p?><?p " .
                 BML::ml('Backlink', {'link' => '/syn/', 'text' => $ML{'.back'}}) . " p?>";
     };
-    
+
     # add custom feed
     if ($POST{'action:addcustom'} || $GET{'url'}) {
         my $acct = LJ::trim($POST{'acct'});
@@ -55,7 +55,7 @@ body<=
             $su = $dbh->selectrow_hashref("SELECT u.user, s.* FROM syndicated s, useridmap u ".
                                           "WHERE s.synurl=? AND s.userid=u.userid",
                                           undef, $url);
-            
+
             unless ($su) {
                 # check cap to create new feeds
                 return $error->($ML{'.error.nocreate'})
@@ -65,7 +65,7 @@ body<=
                 # for the url, just pass that through (we'll recheck it anyway, though)
                 unless ($acct) {
                     my $ret .= "<?h1 $ML{'.create'} h1?><?p $ML{'.create.name'} p?>";
-                    $ret .= "<form method='post' action='./'>"; 
+                    $ret .= "<form method='post' action='./'>";
                     $ret .= LJ::html_hidden("userid", $u->{'userid'}, 'synurl', $url);
                     $ret .= "<blockquote>";
                     $ret .= "<p>$ML{'.account'} <input size='15' maxlength='15' name='acct' />";
@@ -73,10 +73,10 @@ body<=
                     $ret .= "</blockquote></form>";
                     return $ret;
                 }
-                
+
                 return "<?h1 $ML{'.invalid.needname.title'} h1?><?p $ML{'.invalid.needname.text'} p?>"
                     unless $acct;
-                
+
                 # create a safeagent to fetch the feed for validation purposes
                 my $ua = LJ::get_useragent(
                                            role     => 'syn_new',
@@ -186,7 +186,7 @@ body<=
         my $suser = LJ::load_userid($suserid);
         LJ::load_user_props($suser, 'url');
         $urls{$user} = $suser->{url};
-        
+
         # skip suspended/deleted accounts, already watched feeds
         next if $friends->{$suserid} || $suser->{'statusvis'} ne "V";
 
@@ -200,9 +200,11 @@ body<=
 
     # intro paragraph
     my $title = BML::ml('.using.title', {'sitename' => $LJ::SITENAME});
-    my $ret = "<?h1 $title h1?><?p $ML{'.using.text'} p?><?p $ML{'.promo.text'} p?>";
+    my $ret = "<?h1 $title h1?><?p $ML{'.using.text'} p?>";
+    $ret .= "<?p " . BML::ml('.top1000.text', {'aopts' => "href='$LJ::SITEROOT/syn/list.bml'"}) . " p?>";
+    $ret .= "<?p $ML{'.promo.text'} p?>";
 
-    $ret .= "<form method='post' action='./'>"; 
+    $ret .= "<form method='post' action='./'>";
     $ret .= LJ::html_hidden("userid", $u->{'userid'});
 
     if (@pop) {
@@ -228,12 +230,12 @@ body<=
             $ret .= "</tr>";
         }
         $ret .= "<tr><td align='left' colspan='4'>";
-        $ret .= "<input type='submit' name='action:add' value='" . LJ::ehtml($ML{'.add.selected'}) . "'>";        
+        $ret .= "<input type='submit' name='action:add' value='" . LJ::ehtml($ML{'.add.selected'}) . "'>";
         $ret .= "</td></tr>";
         $ret .= "</table>";
     }
 
-    $ret .= "</form><form method='post' action='./'>"; 
+    $ret .= "</form><form method='post' action='./'>";
     $ret .= LJ::html_hidden("userid", $u->{'userid'});
 
     $ret .= "<?h1 $ML{'.add.byurl.title'} h1?><?p $ML{'.add.byurl.text'} p?>";

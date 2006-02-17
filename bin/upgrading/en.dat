@@ -4234,6 +4234,8 @@ that area. p?>
 
 /syn/index.bml.title=Syndication
 
+/syn/index.bml.top1000.text=Browse a list of our <a [[aopts]]>top 1000 syndicated feeds</a>.
+
 /syn/index.bml.user.nomatch=User posting doesn't match user that filled out the form.
 
 /syn/index.bml.using.text=Here you can add syndicated feeds (RSS) from other sites to your friends list, removing the need to check a dozen sites every day.
@@ -5655,11 +5657,15 @@ lynx.nav.logout=Logout
 
 lynx.nav.recent=Recent Entries
 
+lynx.nav.search=Search
+
 lynx.nav.sitemap=Site Map
 
 lynx.nav.siteopts=Browse Options
 
 lynx.nav.update=Update Journal
+
+number.punctuation=,
 
 Password=Password
 
