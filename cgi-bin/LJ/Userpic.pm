@@ -80,7 +80,7 @@ sub dimensions {
     my $self = shift;
 
     # width and height probably loaded from DB
-    return ($self->{width}. $self->{height}) if ($self->{width} && $self->{height});
+    return ($self->{width}, $self->{height}) if ($self->{width} && $self->{height});
 
     my %upics;
     my $u = LJ::load_userid($self->{userid});
