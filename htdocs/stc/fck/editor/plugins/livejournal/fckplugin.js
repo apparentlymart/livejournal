@@ -89,7 +89,7 @@ LJCutCommand.Execute=function() {
 
         var html = "<div class='ljcut'" +  text + ">";
         html    += selection;
-        html    += "<!--/ljcut--></div>";
+        html    += "</div>";
 
         FCK.InsertHtml(html);
         FCK.Focus();

@@ -28,8 +28,8 @@ function RTEAddClasses(textArea, statPrefix) {
 
     var html = oEditor.GetXHTML();
 
-    html = html.replace(/<lj-cut>(.+)<\/lj-cut>/g, '<div class="ljcut">$1<!--/ljcut--></div>');
-    html = html.replace(/<lj-raw>([\w\s]+)<\/lj-raw>/g, '<lj-cut class="ljraw">$1</lj-raw>');
+    html = html.replace(/<lj-cut>(.+)<\/lj-cut>/g, '<div class="ljcut">$1</div>');
+    html = html.replace(/<lj-raw>([\w\s]+)<\/lj-raw>/g, '<lj-raw class="ljraw">$1</lj-raw>');
 
     html = html.replace(/<lj user=['"](\w+)["'] ?\/?>/g, "<span class='ljuser'><img src='" + statPrefix + "/fck/editor/plugins/livejournal/userinfo.gif' width='17' height='17' style='vertical-align: bottom' />$1</span>");
 
