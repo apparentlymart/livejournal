@@ -230,8 +230,32 @@ UserpicSelect = new Class (LJ_IPPU, {
       return;
     }
 
+    if (!picinfo || !picinfo.ids || !picinfo.pics || !picinfo.ids.length)
+      return;
+
+    // force convert integers to strings
+    for (var i=0; i < picinfo.ids.length; i++) {
+      var picid = picinfo.ids[i];
+
+      var pic = picinfo.pics[picid];
+
+      if (!pic)
+        continue;
+
+      if (pic.comment)
+        pic.comment += "";
+
+      for (var j=0; j < pic.keywords.length; j++)
+        pic.keywords[j] += "";
+    }
+
     this.pics = picinfo;
+
+    this.setPics(picinfo);
     this.redraw();
+
+    if (this.hourglass)
+      this.hourglass.hide();
   },
 
   redraw: function () {
