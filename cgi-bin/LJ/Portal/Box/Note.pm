@@ -32,9 +32,14 @@ sub handle_request {
     my ($self, $GET, $POST) = @_;
     my $pboxid = $self->pboxid;
 
-    my $note = $POST->{'note'};
+    my $enote = LJ::ehtml($POST->{'note'});
 
-    $self->set_prop('note', LJ::ehtml($note));
+    # since props have a maximum length of 255 bytes we must truncate before
+    # setting the prop because otherwise the full-length string will be stored
+    # in memcache and the truncated string stored in the DB
+    $enote = LJ::text_trim($enote, 255, 0);
+
+    $self->set_prop('note', $enote);
 
     return qq {
         var stat = xGetElementById('statusbox$pboxid');
