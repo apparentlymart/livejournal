@@ -444,8 +444,13 @@ head<=
                             LJDraft.save('');
                     }
                 }
-                // Check for changes every 10 seconds to save
-                setInterval(draftSave, 10000);
+                // Check for changes every so many seconds to save
+                var autoSaveInterval = $LJ::AUTOSAVE_DRAFT_INTERVAL * 1000;
+                if (autoSaveInterval < 1000) {
+                    // But default to 10 seconds if no delay or bad delay...
+                    autoSaveInterval = 10000;
+                }
+                setInterval(draftSave, autoSaveInterval);
             }
 
             function draftSave () {

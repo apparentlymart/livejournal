@@ -493,6 +493,11 @@ add_conf('$MAX_BANS',
          type => "int",
          des => "Maximum number of people that users are allowed to ban.  Defaults to 5000.");
 
+add_conf('$AUTOSAVE_DRAFT_INTERVAL',
+         type => 'int',
+         default => 10,
+         des => "Number of seconds to use as interval to saving drafts back to the server.  Defaults to 10.");
+
 add_conf('$MEMCACHE_CB_CONNECT_FAIL',
          type => "subref",
          des => "Callback when a connection to a memcached instance fails.  Subref gets the IP address that was being connected to, but without the port number.");
