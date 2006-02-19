@@ -16,6 +16,7 @@ my %feedtypes = (
     rss  => \&create_view_rss,
     atom => \&create_view_atom,
     foaf => \&create_view_foaf,
+    yadis => \&create_view_yadis,
 );
 
 sub make_feed
@@ -31,7 +32,7 @@ sub make_feed
         return undef;
     }
 
-    $opts->{noitems} = 1 if $feedtype eq 'foaf';
+    $opts->{noitems} = 1 if $feedtype eq 'foaf' or $feedtype eq 'yadis';
 
     $r->notes('codepath' => "feed.$feedtype") if $r;
 
@@ -660,6 +661,33 @@ sub create_view_foaf {
     $ret .= $comm ? "    </foaf:Group>\n" : "  </foaf:Person>\n";
     $ret .= "</rdf:RDF>\n";
 
+    return $ret;
+}
+
+# YADIS capability discovery
+sub create_view_yadis {
+    my ($journalinfo, $u, $opts) = @_;
+    my $person = ($u->{journaltype} eq 'P');
+
+    my $ret = "";
+
+    my $println = sub { $ret .= $_[0]."\n"; };
+
+    $println->('<?xml version="1.0" encoding="UTF-8"?>');
+    $println->('<xrds:XRDS xmlns:xrds="xri://$xrds" xmlns="xri://$xrd*($v*2.0)"><XRD>');
+
+    # Only people (not communities, etc) can be OpenID authenticated
+    if ($person && LJ::OpenID::server_enabled()) {
+        $println->('    <Service>');
+        $println->('        <Type>http://openid.net/signon/1.0</Type>');
+        $println->('        <URI>'.LJ::ehtml($LJ::OPENID_SERVER).'</URI>');
+        $println->('    </Service>');
+    }
+
+    # Local site-specific content
+    LJ::run_hook("yadis_service_descriptors", \$ret);
+
+    $println->('</XRD></xrds:XRDS>');
     return $ret;
 }
 

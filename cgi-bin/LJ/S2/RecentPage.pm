@@ -42,6 +42,8 @@ sub RecentPage
     $p->{'head_content'} .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n}
         if LJ::OpenID::server_enabled();
 
+    $p->{'head_content'} .= qq{<meta http-equiv="X-YADIS-Location" href="$journalbase/data/yadis" />\n};
+
     my $itemshow = S2::get_property_value($opts->{'ctx'}, "page_recent_items")+0;
     if ($itemshow < 1) { $itemshow = 20; }
     elsif ($itemshow > 50) { $itemshow = 50; }
