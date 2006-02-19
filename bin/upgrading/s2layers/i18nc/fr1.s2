@@ -124,7 +124,7 @@ function server_sig() {
 
 function Page::print_entry_poster(Entry e) {
     $e.poster->print();
-    if ($.view == "friends" and $e.poster.username != $e.journal.username) {
+    if ($.view == "friends" and not $e.poster->equals($e.journal)) {
         " a écrit dans ";
         $e.journal->print();
     }

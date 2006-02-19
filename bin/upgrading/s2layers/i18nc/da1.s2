@@ -154,7 +154,7 @@ function ReplyPage::view_title() : string {
     
 function Page::print_entry_poster(Entry e) {
     $e.poster->print();
-    if ($.view == "friends" and $e.poster.username != $e.journal.username) {
+    if ($.view == "friends" and not $e.poster->equals($e.journal)) {
         " skrev i ";
         $e.journal->print();
     }
