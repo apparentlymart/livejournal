@@ -1,7 +1,7 @@
 UserpicSelect = new Class (LJ_IPPU, {
   init: function () {
     UserpicSelect.superClass.init.apply(this, ["Choose Userpic"]);
-    this.setDimensions("60%", "80%");
+    this.setDimensions("60%", "90%");
     this.selectedPicid = null;
     this.displayPics = null;
     this.dataLoaded = false;
@@ -16,6 +16,8 @@ UserpicSelect = new Class (LJ_IPPU, {
 
   show: function() {
     UserpicSelect.superClass.show.apply(this, []);
+
+    this.setDimensions("60%", "90%");
 
     if (!this.dataLoaded) {
       this.setStatus("Loading...");
@@ -87,6 +89,8 @@ UserpicSelect = new Class (LJ_IPPU, {
     // we redrew the window so reselect the current selection, if any
     if (this.selectedPicid)
       this.selectPic(this.selectedPicid);
+
+    DOM.addEventListener($("ups_closebutton"), "click", this.closeButtonClicked.bindEventListener(this));
   },
 
   kwmenuChange: function(evt) {
@@ -165,13 +169,12 @@ UserpicSelect = new Class (LJ_IPPU, {
       if (!pic)
         continue;
 
-      var piccomment;
-
-      if (pic.comment)
-        piccomment = pic.comment.toLocaleUpperCase();
-
       for (var j=0; j < pic.keywords.length; j++) {
         var kw = pic.keywords[j];
+
+        var piccomment = "";
+        if (pic.comment)
+          piccomment = pic.comment.toLocaleUpperCase();
 
         if(kw.toLocaleUpperCase().indexOf(filter) != -1 || // matches a keyword
            (piccomment && piccomment.indexOf(filter) != -1) || // matches comment
@@ -293,9 +296,6 @@ UserpicSelect = new Class (LJ_IPPU, {
     } catch(e) {}
 
     DOM.addEventListener($("ups_kwmenu"), "change", this.kwmenuChange.bindEventListener(this));
-
-    DOM.addEventListener($("ups_closebutton"), "click", this.closeButtonClicked.bindEventListener(this));
-
   },
 
   setPics: function(pics) {
