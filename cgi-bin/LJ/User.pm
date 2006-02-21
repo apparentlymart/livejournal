@@ -1017,7 +1017,7 @@ sub share_contactinfo {
 }
 
 # <LJFUNC>
-# name: LJ::activate_userpics
+# name: LJ::User::activate_userpics
 # des: Sets/unsets userpics as inactive based on account caps
 # returns: nothing
 # </LJFUNC>
