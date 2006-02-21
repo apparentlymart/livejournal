@@ -362,9 +362,15 @@ sub create {
     } else { # We should never get here!
         push @errors, "User picture uploading failed for unknown reason";
     }
+}
 
+# make this picture the default
+sub make_default {
+    my $self = shift;
+    my $u = $self->owner;
 
-
+    LJ::update_user($u, { defaultpicid => $self->id });
+    $u->{'defaultpicid'} = $self->id;
 }
 
 package LJ::Error::Userpic::TooManyKeywords;
@@ -427,7 +433,7 @@ sub set_keywords {
     if (@keywords > 1) {
         @keywords = @_;
     } else {
-        @keywords = split(/,/, $_[0]);
+        @keywords = split(',', $_[0]);
     }
     @keywords = grep { s/^\s+//; s/\s+$//; $_; } @keywords;
 
@@ -572,90 +578,87 @@ sub set_fullurl {
 }
 
 sub delete {
-                    my $fmt;
-                    if ($u->{'dversion'} > 6) {
-                        $fmt = {
-                            'G' => 'gif',
-                            'J' => 'jpg',
-                            'P' => 'png',
-                        }->{$ctype{$picid}};
-                    } else {
-                        $fmt = {
-                            'image/gif' => 'gif',
-                            'image/jpeg' => 'jpg',
-                            'image/png' => 'png',
-                        }->{$ctype{$picid}};
-                    }
+    my $fmt;
+    if ($u->{'dversion'} > 6) {
+        $fmt = {
+            'G' => 'gif',
+            'J' => 'jpg',
+            'P' => 'png',
+        }->{$ctype{$picid}};
+    } else {
+        $fmt = {
+            'image/gif' => 'gif',
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
+        }->{$ctype{$picid}};
+    }
 
-                    my $deleted = 0;
+    my $deleted = 0;
 
-                my $id_in;
-                if ($u->{'dversion'} > 6) {
-                    $id_in = join(", ", map { $dbcm->quote($_) } @delete);
-                } else {
-                    $id_in = join(", ", map { $dbh->quote($_) } @delete);
-                }
-
-
-                    # try and delete from either the blob server or database,
-                    # and only after deleting the image do we delete the metadata.
-                    if ($locations{$picid} eq 'mogile') {
-                        $deleted = 1
-                            if LJ::mogclient()->delete($u->mogfs_userpic_key($picid));
-                    } elsif ($LJ::USERPIC_BLOBSERVER &&
-                        LJ::Blob::delete($u, "userpic", $fmt, $picid)) {
-                        $deleted = 1;
-                    } elsif ($u->do("DELETE FROM userpicblob2 WHERE ".
-                                    "userid=? AND picid=?", undef,
-                                    $u->{userid}, $picid) > 0) {
-                        $deleted = 1;
-                    }
-
-                    # now delete the metadata if we got the real data
-                    if ($deleted) {
-                        if ($u->{'dversion'} > 6) {
-                            $u->do("DELETE FROM userpic2 WHERE picid=? AND userid=?",
-                                   undef, $picid, $u->{'userid'});
-                        } else {
-                            $dbh->do("DELETE FROM userpic WHERE picid=?", undef, $picid);
-                        }
-                        $u->do("DELETE FROM userblob WHERE journalid=? AND blobid=? " .
-                               "AND domain=?", undef, $u->{'userid'}, $picid,
-                               LJ::get_blob_domainid('userpic'));
-
-                        # decrement $count to reflect deletion
-                        $count--;
-                    }
-
-                    # if we didn't end up deleting, it's either because of
-                    # some transient error, or maybe there was nothing to delete
-                    # for some bizarre reason, in which case we should verify
-                    # that and make sure they can delete their metadata
-                    if (! $deleted) {
-                        my $present;
-                        if ($locations{$picid} eq 'mogile') {
-                            my $blob = LJ::mogclient()->get_file_data($u->mogfs_userpic_key($picid));
-                            $present = length($blob) ? 1 : 0;
-                        } elsif ($LJ::USERPIC_BLOBSERVER) {
-                            my $blob = LJ::Blob::get($u, "userpic", $fmt, $picid);
-                            $present = length($blob) ? 1 : 0;
-                        }
-                        $present ||= $dbcm->selectrow_array("SELECT COUNT(*) FROM userpicblob2 WHERE ".
-                                                            "userid=? AND picid=?", undef, $u->{'userid'},
-                                                            $picid);
-                        if (! int($present)) {
-                            if ($u->{'dversion'} > 6) {
-                                $u->do("DELETE FROM userpic2 WHERE picid=? AND userid=?",
-                                       undef, $picid, $u->{'userid'});
-                            } else {
-                                $dbh->do("DELETE FROM userpic WHERE picid=?", undef, $picid);
-                            }
-                        }
-                    }
-
-                }
+    my $id_in;
+    if ($u->{'dversion'} > 6) {
+        $id_in = join(", ", map { $dbcm->quote($_) } @delete);
+    } else {
+        $id_in = join(", ", map { $dbh->quote($_) } @delete);
+    }
 
 
+    # try and delete from either the blob server or database,
+    # and only after deleting the image do we delete the metadata.
+    if ($locations{$picid} eq 'mogile') {
+        $deleted = 1
+            if LJ::mogclient()->delete($u->mogfs_userpic_key($picid));
+    } elsif ($LJ::USERPIC_BLOBSERVER &&
+             LJ::Blob::delete($u, "userpic", $fmt, $picid)) {
+        $deleted = 1;
+    } elsif ($u->do("DELETE FROM userpicblob2 WHERE ".
+                    "userid=? AND picid=?", undef,
+                    $u->{userid}, $picid) > 0) {
+        $deleted = 1;
+    }
 
+    # now delete the metadata if we got the real data
+    if ($deleted) {
+        if ($u->{'dversion'} > 6) {
+            $u->do("DELETE FROM userpic2 WHERE picid=? AND userid=?",
+                   undef, $picid, $u->{'userid'});
+        } else {
+            $dbh->do("DELETE FROM userpic WHERE picid=?", undef, $picid);
+        }
+        $u->do("DELETE FROM userblob WHERE journalid=? AND blobid=? " .
+               "AND domain=?", undef, $u->{'userid'}, $picid,
+               LJ::get_blob_domainid('userpic'));
+
+        # decrement $count to reflect deletion
+        $count--;
+    }
+
+    # if we didn't end up deleting, it's either because of
+    # some transient error, or maybe there was nothing to delete
+    # for some bizarre reason, in which case we should verify
+    # that and make sure they can delete their metadata
+    if (! $deleted) {
+        my $present;
+        if ($locations{$picid} eq 'mogile') {
+            my $blob = LJ::mogclient()->get_file_data($u->mogfs_userpic_key($picid));
+            $present = length($blob) ? 1 : 0;
+        } elsif ($LJ::USERPIC_BLOBSERVER) {
+            my $blob = LJ::Blob::get($u, "userpic", $fmt, $picid);
+            $present = length($blob) ? 1 : 0;
+        }
+        $present ||= $dbcm->selectrow_array("SELECT COUNT(*) FROM userpicblob2 WHERE ".
+                                            "userid=? AND picid=?", undef, $u->{'userid'},
+                                            $picid);
+        if (! int($present)) {
+            if ($u->{'dversion'} > 6) {
+                $u->do("DELETE FROM userpic2 WHERE picid=? AND userid=?",
+                       undef, $picid, $u->{'userid'});
+            } else {
+                $dbh->do("DELETE FROM userpic WHERE picid=?", undef, $picid);
+            }
+        }
+    }
+
+}
 
 1;
