@@ -736,8 +736,8 @@ sub clean
             $token->[1] =~ s/</&lt;/g;
             $token->[1] =~ s/>/&gt;/g;
 
-            # put <wbr> tags into long words, except inside <pre> and <textarea> and not creating a link.
-            if ($wordlength && !$opencount{'pre'} && !$opencount{'textarea'} && !$urlcount) {
+            # put <wbr> tags into long words, except inside <pre> and <textarea>.
+            if ($wordlength && !$opencount{'pre'} && !$opencount{'textarea'}) {
                 $token->[1] =~ s/\S{$wordlength,}/break_word($&,$wordlength)/eg;
             }
 
