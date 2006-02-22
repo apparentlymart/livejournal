@@ -184,6 +184,14 @@ sub imagedata {
     return undef;
 }
 
+# does the user's dataversion support userpic comments?
+sub supports_comments {
+    my $self = shift;
+
+    my $u = $self->owner;
+    return $u->{dversion} > 6;
+}
+
 # TODO: add in lazy peer loading here
 sub load_row {
     my $self = shift;
@@ -362,6 +370,10 @@ sub create {
     } else { # We should never get here!
         push @errors, "User picture uploading failed for unknown reason";
     }
+
+    # now that we've created a new pic, invalidate the user's memcached userpic info
+    my $memkey = [$u->{'userid'},"upicinf:$u->{'userid'}"];
+    LJ::MemCache::delete($memkey);
 }
 
 # make this picture the default
