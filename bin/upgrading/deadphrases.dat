@@ -385,3 +385,5 @@ general /userinfo.bml.sendmessage.body
 general /userinfo.bml.syndinfo.body
 general /userinfo.bml.userinfo.body
 general lostinfo.text
+
+general /customize/index.bml.s2.advanced.denied
