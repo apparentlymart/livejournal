@@ -192,6 +192,16 @@ sub supports_comments {
     return $u->{dversion} > 6;
 }
 
+# class method
+# does this user's dataversion support usepic comments?
+sub user_supports_userpic_comments {
+    my ($class, $u) = @_;
+
+    return undef unless ref $u;
+
+    return $u->{dversion} > 6;
+}
+
 # TODO: add in lazy peer loading here
 sub load_row {
     my $self = shift;
@@ -372,8 +382,7 @@ sub create {
     }
 
     # now that we've created a new pic, invalidate the user's memcached userpic info
-    my $memkey = [$u->{'userid'},"upicinf:$u->{'userid'}"];
-    LJ::MemCache::delete($memkey);
+    LJ::Userpic->delete_memcache($u);
 }
 
 # make this picture the default
@@ -384,6 +393,28 @@ sub make_default {
     LJ::update_user($u, { defaultpicid => $self->id });
     $u->{'defaultpicid'} = $self->id;
 }
+
+# returns true if this picture if the default userpic
+sub is_default {
+    my $self = shift;
+    my $u = $self->owner;
+
+    return $u->{'defaultpicid'} == $self->id;
+}
+
+sub delete_memcache {
+    my ($class, $u) = @_;
+    my $memkey = [$u->{'userid'},"upicinf:$u->{'userid'}"];
+    LJ::MemCache::delete($memkey);
+    $memkey = [$u->{'userid'},"upiccom:$u->{'userid'}"];
+    LJ::MemCache::delete($memkey);
+    $memkey = [$u->{'userid'},"upicurl:$u->{'userid'}"];
+    LJ::MemCache::delete($memkey);
+
+}
+
+####
+# error classes:
 
 package LJ::Error::Userpic::TooManyKeywords;
 
@@ -408,29 +439,36 @@ sub as_html {
         words    => $self->lost_keywords_as_html,
         max      => $LJ::MAX_USERPIC_KEYWORDS,
     });
-
 }
 
 package LJ::Error::Userpic::Bytesize;
 sub user_caused { 1 }
 sub fields      { qw(size max); }
-
-#            BML::ml('.error.filetoolarge',
-#                    { 'maxsize' => int($MAX_UPLOAD / 1024) .
-#                          $ML{'.kilobytes'} })) if $err eq "error.bytesize";
-
+sub as_html {
+    my $self = shift;
+    return BML::ml('/editpics.bml.error.filetoolarge',
+                   { 'maxsize' => $self->{'max'} .
+                         BML::ml('/editpics.bml.kilobytes')} );
+}
 
 package LJ::Error::Userpic::Dimensions;
 sub user_caused { 1 }
 sub fields      { qw(w h); }
+sub as_html {
+    my $self = shift;
+    return BML::ml('/editpics.bml.error.imagetoolarge', {
+        imagesize => $self->{'w'} . 'x' . $self->{'h'}
+        });
+}
 
 package LJ::Error::Userpic::FileType;
 sub user_caused { 1 }
 sub fields      { qw(type); }
-
- #               return $err->(BML::ml(".error.unsupportedtype",
- #                                     { 'filetype' => $filetype })) if $err eq "error.filetype";
-
+sub as_html {
+    my $self = shift;
+    return BML::ml("/editpics.bml.error.unsupportedtype",
+                          { 'filetype' => $self->{'type'} });
+}
 
 
 __END__
@@ -563,17 +601,6 @@ sub set_keywords {
 
 }
 
-sub delete_memcache {
-    my ($class, $u) = @_;
-    my $memkey = [$u->{'userid'},"upicinf:$u->{'userid'}"];
-    LJ::MemCache::delete($memkey);
-    $memkey = [$u->{'userid'},"upiccom:$u->{'userid'}"];
-    LJ::MemCache::delete($memkey);
-    $memkey = [$u->{'userid'},"upicurl:$u->{'userid'}"];
-    LJ::MemCache::delete($memkey);
-
-}
-
 sub set_comment {
     my ($self, $comment) = @_;
     return 0 unless $u->{'dversion'} > 6;
@@ -589,7 +616,11 @@ sub set_fullurl {
            undef, @data, $u->{'userid'}, $picid);
 }
 
+# delete this userpic
+# TODO: error checking/throw errors on failure
 sub delete {
+    my $self = shift;
+
     my $fmt;
     if ($u->{'dversion'} > 6) {
         $fmt = {
@@ -670,7 +701,7 @@ sub delete {
             }
         }
     }
-
 }
+
 
 1;
