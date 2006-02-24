@@ -26,15 +26,27 @@ body<=
     use strict;
     use vars qw(%GET);
 
+    # get faqid and redirect to faq.bml if none
+    my $faqidarg = $GET{'faqid'} + 0;
+    my $faqcatarg = $GET{'faqcat'};
+    
+    unless ($faqidarg || $faqcatarg) {
+        return BML::redirect("faq.bml");
+    }
+    
     # make title and body references to BML scratch area
     my $title = \$_[1]->{'title'};
     my $body = \$_[1]->{'body'};
     $$body = '';
     $$title = '';
 
-    # get faqid and redirect to faq.bml if none
-    my $faqidarg = $GET{'faqid'} + 0;
-    my $faqcatarg = $GET{'faqcat'};
+    # get language settings
+    my $curlang = $GET{'lang'} || BML::get_language();
+    my $deflang = BML::get_language_default();
+    my $altlang = $curlang ne $deflang;
+    my $mll = LJ::Lang::get_lang($curlang);
+    my $mld = LJ::Lang::get_dom("faq");
+    $altlang = 0 unless $mll && $mld;
 
     my $mode = $GET{'view'} eq 'full' ? 'answer' : 'summary';
 
@@ -50,24 +62,16 @@ body<=
     } elsif ($faqcatarg) {
         my $catname = $dbr->selectrow_array("SELECT faqcatname FROM faqcat WHERE faqcat=?",
                                             undef, $faqcatarg);
+        if ($altlang) {
+            $catname = LJ::Lang::get_text($curlang, "cat.$faqcatarg", $mld->{'dmid'});
+        }
+
         $$title = BML::ml('.title_cat', { 'catname' => LJ::ehtml($catname) });
 
         $where = "faqcat=" . $dbr->quote($faqcatarg);
-
-    # no faqid or faqcat specified, redirect
-    } else {
-        return BML::redirect("faq.bml");
     }
 
     my $remote = LJ::get_remote();
-
-    # get language settings
-    my $curlang = $GET{'lang'} || BML::get_language();
-    my $deflang = BML::get_language_default();
-    my $altlang = $curlang ne $deflang;
-    my $mll = LJ::Lang::get_lang($curlang);
-    my $mld = LJ::Lang::get_dom("faq");
-    $altlang = 0 unless $mll && $mld;
 
     # query db and get data
     my $sth = $dbr->prepare("SELECT faqid, question, summary, answer, faqcat, lastmoduserid, ".
