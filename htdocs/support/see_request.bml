@@ -740,7 +740,7 @@ body<=
         my $rows = $dbr->selectall_arrayref('SELECT subject, body FROM support_answers WHERE spcatid = ? ORDER BY subject',
                                             undef, $sp->{_cat}->{spcatid});
         if ($rows && @$rows) {
-            $ret .= "<tr valign='top'><td align='right'>Stock answers:</td><td colspan='2'>\n";
+            $ret .= "<tr valign='top'><td align='right'><a href='$LJ::SITEROOT/support/stock_answers.bml?spcatid=$sp->{_cat}->{spcatid}'>Stock answers</a>:</td><td colspan='2'>\n";
             $ret .= "<script type='text/javascript'>\n";
             $ret .= "var Iarr = new Array();\n";
             my $i = 0;
