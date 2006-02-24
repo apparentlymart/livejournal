@@ -135,8 +135,13 @@ body<=
 
         # Create a hash of faqid->faqtitle from the given faqids for displaying [[faqtitle:#]] variables in this FAQ
         foreach my $faqid (@faqids) {
-            my $title = LJ::Lang::get_text($curlang, "$faqid.1question", $mld->{'dmid'});
-            if (!$faqtitles{$faqid}) {
+            my $title;
+            if ($mll && $mld) {
+                $title = LJ::Lang::get_text($curlang, "$faqid.1question", $mld->{'dmid'});
+            } elsif ($mld) {
+                $title = LJ::Lang::get_text($deflang, "$faqid.1question", $mld->{'dmid'});
+            }
+            unless ($faqtitles{$faqid}) {
                 $faqtitles{$faqid} = $title || "<b>[Failed to get title of FAQ #$faqid]</b>";
             }
         }
