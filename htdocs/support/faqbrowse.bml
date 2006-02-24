@@ -88,6 +88,7 @@ body<=
     my $count = 0;
     my $dbh;
     my $backfaqcat;
+    my $categoryname;
     while (my ($faqid, $question, $summary, $answer, $faqcat,
                $lastmoduserid, $lastmodtime, $unixmodtime) = $sth->fetchrow_array)
     {
@@ -296,6 +297,15 @@ body<=
         }
 
         $count++;
+
+        # get the name of this faq's category, if loading a single faqid
+        if ($faqidarg) {
+            $categoryname = $dbr->selectrow_array("SELECT faqcatname FROM faqcat WHERE faqcat=?",
+                                             undef, $faqcat);
+            if ($altlang) {
+                $categoryname = LJ::Lang::get_text($curlang, "cat.$faqcat", $mld->{'dmid'});
+            }
+        }
         $backfaqcat = $faqcat;
      }
 
@@ -306,8 +316,14 @@ body<=
      }
 
      $$body .= "<?hr?>";
-     $$body .= BML::ml('.backfaqcat2', { 'aopts' => "href='/support/faqbrowse.bml?faqcat=$backfaqcat'" }) . "<br />"
-         if $backfaqcat && $faqidarg;
+
+     if ($categoryname) {
+         $$body .= BML::ml('.backfaqcat3', {'aopts' => "href='/support/faqbrowse.bml?faqcat=$backfaqcat'", 'categoryname' => $categoryname}) . "<br />"
+            if $backfaqcat && $faqidarg;
+     } else {
+         $$body .= BML::ml('.backfaqcat2', {'aopts' => "href='/support/faqbrowse.bml?faqcat=$backfaqcat'"}) . "<br />"
+            if $backfaqcat && $faqidarg;
+     }
 
      $$body .= BML::ml('.backfaq2', { 'aopts' => 'href="faq.bml"' }) . "<br />";
      $$body .= BML::ml('.backsearch', { 'aopts' => 'href="/support/faqsearch.bml"' }) . "<br />";

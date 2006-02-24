@@ -4108,6 +4108,8 @@ that area. p?>
 
 /support/faqbrowse.bml.backfaqcat2=Back to the <a [[aopts]]>parent FAQ category</a>.
 
+/support/faqbrowse.bml.backfaqcat3=Back to the <a [[aopts]]>[[categoryname]] FAQ category</a>.
+
 /support/faqbrowse.bml.backsearch=Back to the <a [[aopts]]>search page</a>.
 
 /support/faqbrowse.bml.backsupport2=Back to the <a [[aopts]]>support area</a>.
