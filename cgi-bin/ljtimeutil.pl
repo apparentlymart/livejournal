@@ -213,26 +213,25 @@ sub alldatepart_s2
 sub ago_text
 {
     my $secondsold = shift;
-    return "Never." unless defined $secondsold;
+    return $BML::ML{'time.ago.never'} unless defined $secondsold;
     my $num;
     my $unit;
     if ($secondsold > 60*60*24*7) {
         $num = int($secondsold / (60*60*24*7));
-        $unit = "week";
+        return BML::ml('time.ago.week', {'num' => $num});
     } elsif ($secondsold > 60*60*24) {
         $num = int($secondsold / (60*60*24));
-        $unit = "day";
+        return BML::ml('time.ago.day', {'num' => $num});
     } elsif ($secondsold > 60*60) {
         $num = int($secondsold / (60*60));
-        $unit = "hour";
+        return BML::ml('time.ago.hour', {'num' => $num});
     } elsif ($secondsold > 60) {
         $num = int($secondsold / (60));
-        $unit = "minute";
+        return BML::ml('time.ago.minute', {'num' => $num});
     } else {
         $num = $secondsold;
-        $unit = "second";
+        return BML::ml('time.ago.second', {'num' => $num});
     }
-    return "$num $unit" . ($num==1?"":"s") . " ago";
 }
 
 1;

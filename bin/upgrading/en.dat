@@ -5928,6 +5928,18 @@ tos.haveread=I have read and agree to the Terms of Service.
 
 tos.mustread=Before continuing you must read and agree to the <a [[aopts]]>Terms of Service.</a>
 
+time.ago.day=[[num]] [[?num|day|days]] ago
+
+time.ago.hour=[[num]] [[?num|hour|hours]] ago
+
+time.ago.minute=[[num]] [[?num|minute|minutes]] ago
+
+time.ago.never=Never.
+
+time.ago.second=[[num]] [[?num|second|seconds]] ago
+
+time.ago.week=[[num]] [[?num|week|weeks]] ago
+
 Username=Username
 
 userpic.inactive=Inactive
