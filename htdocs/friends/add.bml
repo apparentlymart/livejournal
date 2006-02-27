@@ -217,7 +217,6 @@ use vars qw($body $title $windowtitle %GET %POST);
  my $ret = "";
  $ret .= "  <div id='color_opt'>\n";
  $ret .= "<script>\n";
-# $ret .= "  document.write(\"<div id='color_opt' style='display: none'>\");\n";
  $ret .= "  \$(\"color_opt\").style.display = 'none'\n";
  $ret .= "  color_display(\$(\"color_switch\"));\n";
  $ret .= "</script>\n";
@@ -237,6 +236,7 @@ use vars qw($body $title $windowtitle %GET %POST);
      my $selected = $color_int eq $sel->{'fgcolor'} ? " selected" : "";
      $ret .= "<option value=\"$_->{'code'}\"$selected>$_->{'item'}\n";
  }
+
  $ret .= "</select></TD>\n";
  $ret .= "<td><select name=\"editfriend_add_1_bg\">";
  foreach (@color) {
