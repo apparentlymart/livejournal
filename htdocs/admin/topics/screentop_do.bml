@@ -6,6 +6,8 @@
      return "You don't have access to do this, or you're not logged in.";
  }
 
+ return $ML{'error.invalidform'} unless LJ::check_form_auth();
+
  my $dbh = LJ::get_db_writer();
  my $sth;
 

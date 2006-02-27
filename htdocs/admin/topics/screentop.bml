@@ -31,6 +31,7 @@ body<=
  }
 
  $ret .= "<FORM METHOD=POST ACTION=\"screentop_do.bml\">";
+ $ret .= LJ::form_auth();
 
  my $count = 0;
  foreach my $new (@new)

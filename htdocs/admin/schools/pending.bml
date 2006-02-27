@@ -36,6 +36,7 @@ body<=
     my $getextra = '';
 
     if (LJ::did_post()) {
+        return $err->($ML{'error.invalidform'}) unless LJ::check_form_auth();
 
         my @locextra;
         push @locextra, "country=" . LJ::eurl($POST{uct}) if defined $POST{uct};
@@ -185,6 +186,7 @@ body<=
 
         $ret .= "<?h2 Primary School Record h2?>";
         $ret .= "<form method='post' action='pending.bml'>";
+        $ret .= LJ::form_auth();
         $ret .= LJ::html_hidden('uct', $country) if $country;
         $ret .= LJ::html_hidden('ust', $state) if $state;
         $ret .= LJ::html_hidden('uci', $city) if $city;

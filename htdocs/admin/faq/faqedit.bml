@@ -49,6 +49,7 @@ body<=
  $sortorder += 0;
  $sortorder ||= 50;
 
+ $ret .= LJ::form_auth();
  $ret .= LJ::html_hidden('id', $id);
  $ret .= "<p>Category: ";
 

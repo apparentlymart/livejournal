@@ -28,6 +28,7 @@ body<=
  $sortorder = $FORM{'sortorder'}+0 || 50;
 
  return "<?requirepost?>" unless LJ::did_post();
+ return "<b>$ML{'Error'}</b> $ML{'error.invalidform'}" unless LJ::check_form_auth();
  
  if ($id)
  {

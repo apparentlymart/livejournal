@@ -117,6 +117,7 @@
      my $wrap = $FORM{'w'} ? "SOFT" : "OFF";
 
      $ret .= "<FORM METHOD=POST>\n";
+     $ret .= LJ::form_auth();
      $ret .= "<INPUT TYPE=HIDDEN NAME=mode VALUE=\"save\">";
      $ret .= "<INPUT TYPE=HIDDEN NAME=file VALUE=\"$file\">";
      $ret .= "<TEXTAREA ROWS=$r COLS=$c WRAP=$wrap NAME=contents>";
@@ -129,7 +130,10 @@
  if ($mode eq "save") 
  {
      unless (LJ::did_post()) {
-         return "<b>Error:</b> requires post";
+         return "<b>$ML{'Error'}</b> requires post";
+     }
+     unless (LJ::check_form_auth()) {
+         return "<b>$ML{'Error'}</b> $ML{'error.invalidform'}";
      }
 
      $ret .= "<B>Saving:</B> <tt>$file</tt><p>";

@@ -14,13 +14,17 @@
     unless (LJ::did_post()) {
 	$ret .= "<h1>duplicate entry killer</h1>\n";
 	$ret .= "<form method='post'>";
+        $ret .= LJ::form_auth();
 	$ret .= "Kill duplicates for user: <input name='user' size='15'> <input type='submit' value=\"Kill\">";
 	$ret .= "</form>";
 	return $ret;
     }
 
-    return "<b>Error:</b> requires post"
+    return "<b>$ML{'Error'}</b> requires post"
 	unless (LJ::did_post());
+
+    return "<b>$ML{'Error'}</b> $ML{'error.invalidform'}"
+	unless LJ::check_form_auth();
 
     my $u = LJ::load_user($POST{'user'});
     unless ($u) {

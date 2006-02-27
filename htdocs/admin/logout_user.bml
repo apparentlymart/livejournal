@@ -15,6 +15,8 @@ body<=
     my $ret = "";
     
     if (LJ::did_post()) {
+        return "<b>$ML{'Error'}</b> $ML{'error.invalidform'}" unless LJ::check_form_auth();
+
         my $user = $POST{user};
         my $u = LJ::load_user($user);
         if ($u) {
@@ -34,8 +36,10 @@ body<=
 
     my $popuser = $POST{user} || $GET{user};
 
+    my $form_auth = LJ::form_auth();
     $ret .= <<FORM;
 <form method='post'>
+$form_auth
 User: <input type='text' name='user' value='$popuser' /> <input type='submit' value='Expire Sessions' />
 </form>
 FORM

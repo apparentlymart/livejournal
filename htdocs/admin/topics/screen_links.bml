@@ -52,6 +52,7 @@
  }
  
  $ret .= "<FORM METHOD=POST ACTION=\"screen_do.bml\">";
+ $ret .= LJ::form_auth();
 
  foreach my $map (@maps)
  {

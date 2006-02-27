@@ -9,6 +9,8 @@
  return "You don't have access to do this."
     unless LJ::remote_has_priv($remote, "topicscreencat");
 
+ return $ML{'error.invalidform'} unless LJ::check_form_auth();
+
  my $dbh = LJ::get_db_writer();
 
  my $ret;
