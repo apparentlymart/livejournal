@@ -1806,9 +1806,10 @@ sub format_html_mail {
     my $threadurl = LJ::Talk::talkargs($talkurl, "thread=$dtalkid");
 
     my $who = "Somebody";
-    if ($comment->{u}) {
-        $who = "$comment->{u}{name} ".
-            "(<a href=\"$LJ::SITEROOT/userinfo.bml?user=$comment->{u}{user}\">$comment->{u}{user}</a>)";
+    if (my $cu = $comment->{u}) {
+        my $profile_url = $cu->profile_url;
+        $who = LJ::ehtml($cu->{name}) .
+            " (<a href=\"$profile_url\">$cu->{user}</a>)";
     }
 
     my $html = "";
@@ -1818,8 +1819,10 @@ sub format_html_mail {
     my $cleanbody = $parent->{body};
     if (LJ::u_equals($targetu, $comment->{u})) {
         if ($parent->{ispost}) {
-            $who = "$parent->{u}{name} " .
-                "(<a href=\"$LJ::SITEROOT/userinfo.bml?user=$parent->{u}{user}\">$parent->{u}{user}</a>)";
+            my $pu = $parent->{u};
+            my $profile_url = $pu->profile_url;
+            $who = LJ::ehtml($pu->{name}) .
+                " (<a href=\"$profile_url\">$pu->{user}</a>)";
             $intro = "You replied to <a href=\"$talkurl\">a $LJ::SITENAMESHORT post</a> in which $who said:";
             LJ::CleanHTML::clean_event(\$cleanbody, {preformatted => $parent->{preformat}});
         } else {
