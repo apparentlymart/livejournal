@@ -178,6 +178,12 @@ sub clean
     my @eatuntil = ();  # if non-empty, we're eating everything.  thing at end is thing
                         # we're looking to open again or close again.
 
+    my $form_tag = {
+        input => 1,
+        select => 1,
+        option => 1,
+    };
+
   TOKEN:
     while (my $token = $p->get_token)
     {
@@ -214,6 +220,19 @@ sub clean
             if ($tag =~ m!(?:\@|://)!) {
                 $newdata .= LJ::ehtml("<$tag>");
                 next;
+            }
+
+            if ($form_tag->{$tag}) {
+                if (! $opencount{form}) {
+                    $newdata .= "&lt;$tag ... &gt;";
+                    next;
+                }
+
+                if ($tag eq "input") {
+                    if ($attr->{type} !~ /^\w+$/ || $attr->{type} eq "password") {
+                        delete $attr->{type};
+                    }
+                }
             }
 
             my $slashclose = 0;   # If set to 1, use XML-style empty tag marker
@@ -395,9 +414,9 @@ sub clean
                     $hash->{$attr} =~ s/\x0//g;
 
                     # IE sucks:
-                    if ($hash->{$attr} =~ /(j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t|
-                                            v\s*b\s*s\s*c\s*r\s*i\s*p\s*t|
-                                            a\s*b\s*o\s*u\s*t)\s*:/ix) {
+                    my $nowhite = $hash->{$attr};
+                    $nowhite =~ s/[\s\x0b]+//g;
+                    if ($nowhite =~ /(?:javascript|vbscript|about):/ix) {
                         delete $hash->{$attr};
                         next;
                     }
