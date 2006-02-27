@@ -44,6 +44,8 @@ SUBMIT:
     while ($mode eq 'submit')  # using while instead of if so we can 'last' out of it
     {
         return "<b>$ML{'Error'}</b>: $ML{'.error.postrequired'}" unless LJ::did_post();
+        # Note: If a captcha check is added, then form auth would be redundant
+        return "<b>$ML{'Error'}</b>: $ML{'error.invalidform'}" unless LJ::check_form_auth();
 
         my $user = LJ::canonical_username($POST{user});
         my $title = $POST{title} || $user;
@@ -181,6 +183,7 @@ SUBMIT:
         $ret .= "<?p $ML{'.create.text'} p?>" unless $error;
         $ret .= "<form action=\"create.bml\" method=\"post\">\n";
         $ret .= LJ::html_hidden(mode => 'submit', ssl => $FORM{'ssl'});
+        $ret .= LJ::form_auth();
 
         $ret .= "<ol>";
 

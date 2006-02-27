@@ -81,6 +81,11 @@
 
  # now do the join
  if ($POST{confirm}) {
+     unless (LJ::check_form_auth()) {
+         $body .= "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>";
+         return;
+    }
+     
      # can members join this community openly?
      if ($ci->{membership} ne 'open') {
          # hit up the maintainers to let them know a join was requested
@@ -113,6 +118,7 @@
          $body .= "<?h1 $ML{'.request.title'} h1?><?p ";
          $body .= BML::ml('.request.body', { comm => LJ::ljuser($cu) }) . "<br /> p?>";
          $body .= "<div style='margin-left: 30px;'><form method='post' action='join.bml'>";
+         $body .= LJ::form_auth();
          $body .= "<input type='hidden' name='cuserid' value='$ci->{userid}' />";
          $body .= "<input type='hidden' name='confirm' value='1' />";
          $body .= "<input type='submit' value=\"$ML{'.button.join'}\" /></form></div>";
@@ -121,6 +127,7 @@
 
      $body .= "<?h1 $ML{'.label.sure'} h1?><?p " . BML::ml('.label.expls', { maintainer => $ecname });
      $body .= "<form method='post' action='join.bml'>";
+     $body .= LJ::form_auth();
      $body .= "<input type='hidden' name='cuserid' value='$ci->{'userid'}' />";
      $body .= "<input type='hidden' name='confirm' value='1' /><center>";
      $body .= "<input type='checkbox' name='addfriend' checked>";

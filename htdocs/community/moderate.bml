@@ -21,6 +21,10 @@ body<=
     my ($saved_comm, $saved_modid) = ("", 0);
 
     if (LJ::did_post() && ($mode eq 'approve_do' || $mode eq 'reject_do')) {
+        unless (LJ::check_form_auth()) {
+            $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>";
+            return $ret;
+        }
         my $cid = $POST{'cid'}+0;
         my $modid = $POST{'modid'}+0;
         
@@ -191,6 +195,7 @@ body<=
         my $poster = LJ::load_userid($posterid);
         $ret .= "<?h1 $ML{'.approve.header'} h1?><?p $ML{'.approve.text'} p?>";
         $ret .= "<p><form method='post' action='/community/moderate.bml'><center>";
+        $ret .= LJ::form_auth();
         $ret .= "<input type='hidden' name='mode' value='approve_do'>";
         $ret .= "<input type='hidden' name='cid' value='$c->{'userid'}'>";
         $ret .= "<input type='hidden' name='modid' value='$modid'>";

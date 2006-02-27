@@ -17,6 +17,7 @@
 
     # see if they posted and perform actions if so
     if (LJ::did_post()) {
+        $errors{invalidform} = $ML{'error.invalidform'} unless LJ::check_form_auth();
         # get info about the community
         my $cu = LJ::load_user($POST{comm});
         $errors{username} = $ML{'.error.notfound'} unless $cu;
@@ -49,8 +50,10 @@
     # setup the form to transfer the community
     $body .= "<?h1 $ML{'.title'} h1?><?p $ML{'.body'} p?>";
     $body .= "<form method='post' action='/community/transfer.bml'>";
+    $body .= LJ::form_auth();
     $body .= "<table><tr><td>$ML{'.account'}</td>";
     $body .= "<td>" . LJ::html_text({ name => 'comm', id => 'comm', value => $POST{comm} }) . "</td></tr>\n";
+    $body .= "<tr><td></td><td><?inerr $errors{invalidform} inerr?></td></tr>" if $errors{invalidform};
     $body .= "<tr><td></td><td><?inerr $errors{username} inerr?></td></tr>" if $errors{username};
     $body .= "<tr><td>$ML{'.password'}</td>";
     $body .= "<td>" . LJ::html_text({ type => 'password', name => 'password', id => 'password' }) . "</td></tr>\n";

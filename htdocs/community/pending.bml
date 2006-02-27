@@ -48,6 +48,10 @@ body<=
 
     # saving a form submission
     if ($POST{'action:update'}) {
+        unless (LJ::check_form_auth()) {
+            $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>";
+            return $ret;
+        }
         my @userids = split(',', $POST{'ids'});
 
         # need a db handle now
@@ -99,6 +103,7 @@ body<=
     $ret .= " " . BML::ml('/community/members.bml.settings', { 'link' => "settings.bml?comm=$cname"}) . " p?>";
 
     $ret .= "<form method='post' action='pending.bml?comm=$cname'>";
+    $ret .= LJ::form_auth();
 
     # table headers
     $ret .= "<br /><div align='center'><table class='borderedtable' cellspacing='0' cellpadding='2'>\n<tr>" .

@@ -126,6 +126,10 @@ body<=
 
  # save any changes
  if (LJ::did_post()) {
+    unless (LJ::check_form_auth()) {
+        $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>";
+        return $ret;
+    }
      my $op = $POST{email};
      $op = '' if $op && $op !~ /[N]/; # add D back in here when Digest goes live
      LJ::set_userprop($remote, 'opt_communityjoinemail', $op);
@@ -144,6 +148,7 @@ body<=
  $ret .= "<?h1 $ML{'.joinmail.title'} h1?>";
  $ret .= "<?p $ML{'.joinmail.body'} p?>";
  $ret .= "<form method='post' action='manage.bml'>";
+ $ret .= LJ::form_auth();
  $ret .= "<div style='margin-left: 30px;'>";
  $ret .= LJ::html_check({ type => 'radio', name => 'email', id => 'email_all', 
                           value => '', selected => ($op eq 'Y') });
