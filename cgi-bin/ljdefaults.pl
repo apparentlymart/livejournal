@@ -64,6 +64,8 @@
     $MAX_SCROLLBACK_FRIENDS ||= 1000;
     $MAX_USERPIC_KEYWORDS ||= 10;
 
+    $LJ::AUTOSAVE_DRAFT_INTERVAL ||= 3;
+
     # this option can be a boolean or a URL, but internally we want a URL
     # (which can also be a boolean)
     if ($LJ::OPENID_SERVER && $LJ::OPENID_SERVER == 1) {

@@ -21,13 +21,13 @@
     my $ret = {};
 
     if (defined $POST{'saveDraft'}) {
-        $u->set_prop('entry_draft', $POST{'saveDraft'});
+        $u->set_draft_text($POST{'saveDraft'});
 
     } elsif ($POST{'clearDraft'}) {
-        $u->set_prop('entry_draft', '');
+        $u->set_draft_text('');
 
     } else {
-        $ret->{draft} = $u->prop("entry_draft");
+        $ret->{draft} = $u->draft_text;
     }
 
     sleep 1 if $LJ::IS_DEV_SERVER;

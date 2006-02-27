@@ -437,7 +437,7 @@ sub note_activity {
 
     # If we have no memcache servers, this function would trigger
     # an insert for every logged-in pageview.  Probably not a problem
-    # load-wise if the site isn't using memcache anyway, but if the 
+    # load-wise if the site isn't using memcache anyway, but if the
     # site is that small active user tracking probably doesn't matter
     # much either.  :/
     return undef unless @LJ::MEMCACHE_SERVERS;
@@ -462,10 +462,10 @@ sub note_activity {
     my ($hr, $dy, $mo, $yr) = (gmtime($now))[2..5];
     $yr += 1900; # offset from 1900
     $mo += 1;    # 0-based
-            
+
     # delayed insert in case the table is currently locked due to an analysis
     # running.  this way the apache won't be tied up waiting
-    $u->do("INSERT DELAYED IGNORE INTO active_user " . 
+    $u->do("INSERT DELAYED IGNORE INTO active_user " .
            "SET year=?, month=?, day=?, hour=?, userid=?, type=?",
            undef, $yr, $mo, $dy, $hr, $uid, $atype);
 
@@ -848,9 +848,11 @@ sub prop {
     return $u->{$prop};
 }
 
+# sets prop, and also updates $u's cached version
 sub set_prop {
     my ($u, $prop, $value) = @_;
-    LJ::set_userprop($u, $prop, $value);
+    return 0 unless LJ::set_userprop($u, $prop, $value);  # FIXME: use exceptions
+    $u->{$prop} = $value;
 }
 
 sub journal_base {
@@ -1148,6 +1150,52 @@ sub activate_userpics {
     LJ::MemCache::delete([$userid, "upicinf:$userid"]);
 
     return 1;
+}
+
+sub set_draft_text {
+    my ($u, $draft) = @_;
+    # TODO: make this all atomic
+    my $old = $u->draft_text;
+
+    # try to find a shortcut that makes the SQL shorter
+    my @methods;  # list of [ $subref, $cost ]
+
+    # one method is just setting it all at once.  which incurs about
+    # 75 bytes of SQL overhead on top of the length of the draft,
+    # not counting the escaping
+    push @methods, [ "set", sub { $u->set_prop('entry_draft', $draft); },
+                     75 + length $draft ];
+
+    # stupid case, setting the same thing:
+    push @methods, [ "noop", sub {}, 0 ] if $draft eq $old;
+
+    # simple case: appending
+    if ($draft =~ /^\Q$old\E(.+)/s) {
+        my $new = $1;
+        my $appending = sub {
+            my $prop = LJ::get_prop("user", "entry_draft") or die; # FIXME: use exceptions
+            $u->do("UPDATE userpropblob SET value = CONCAT(value, ?) WHERE userid=? AND upropid=?",
+                   undef, $new, $u->{userid}, $prop->{id});
+        };
+        push @methods, [ "append", $appending, 40 + length $new ];
+    }
+
+    # TODO: prepending/middle insertion (the former being just the latter), as well
+    # appending, wihch we could then get rid of
+
+    # find the least expensive method
+    my $least;
+    foreach my $m (@methods) {
+        $least = $m if ! defined $least || $m->[2] < $least->[2];
+    }
+
+    # execute the least expensive method
+    return $least->[1]->();
+}
+
+sub draft_text {
+    my ($u) = @_;
+    return $u->prop('entry_draft');
 }
 
 package LJ;
@@ -4027,7 +4075,7 @@ sub get_remote
     $u->{'_session'} = $sessobj;
 
     # keep track of activity for the user we just loaded from db/memcache
-    # - if necessary, this code will actually run in Apache's cleanup handler 
+    # - if necessary, this code will actually run in Apache's cleanup handler
     #   so latency won't affect the user
     if (@LJ::MEMCACHE_SERVERS && ! $LJ::DISABLED{active_user_tracking}) {
         push @LJ::CLEANUP_HANDLERS, sub { $u->note_activity('A') };
