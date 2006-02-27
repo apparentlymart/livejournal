@@ -708,6 +708,15 @@ sub trans
         return 404;
     }
 
+    # some RPC stuff
+    if ($uri =~ /^.*\b__rpc_delcomment$/) {
+        return $bml_handler->("$LJ::HOME/htdocs/delcomment.bml");
+    }
+
+    if ($uri =~ /^.*\b__rpc_talkscreen$/) {
+        return $bml_handler->("$LJ::HOME/htdocs/talkscreen.bml");
+    }
+
     # customview (get an S1 journal by number)
     if ($uri =~ m!^/customview\.cgi!) {
         $r->handler("perl-script");
