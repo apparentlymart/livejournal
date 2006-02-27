@@ -14,6 +14,10 @@
         $body .= "</form>\n\n";
     };
 
+    # only one of the many forms should be submitted,
+    # so only bother with generating one form_auth
+    my $formauth = LJ::form_auth();
+
     # used for error messages
     my $err = sub {
         $title = $ML{'Error'};
@@ -75,6 +79,7 @@
 
         # use selected style
         if ($POST{'action:usestyle'}) {
+            return "<b>$ML{'Error'}</b> $ML{'error.invalidform'}" unless LJ::check_form_auth();
 
             # save to db and update user object
             LJ::set_userprop($u, "stylesys", '2');
@@ -140,6 +145,7 @@
 
         # delete
         if ($POST{'action:delete'}) {
+            return "<b>$ML{'Error'}</b> $ML{'error.invalidform'}" unless LJ::check_form_auth();
             LJ::S2::delete_user_style($u, $id);
             undef $id; # don't show form below
             return BML::redirect("styles.bml$getextra");
@@ -147,6 +153,7 @@
 
         # save changes
         if ($POST{'action:change'} || $POST{'action:savechanges'}) {
+            return "<b>$ML{'Error'}</b> $ML{'error.invalidform'}" unless LJ::check_form_auth();
 
             # are they renaming their style?
             if ($POST{'stylename'} && $style->{'name'} &&
@@ -240,6 +247,7 @@
 
         # process create action
         if ($POST{'action:create'} && $POST{'stylename'}) {
+            return "<b>$ML{'Error'}</b> $ML{'error.invalidform'}" unless LJ::check_form_auth();
 
             return $err->($ML{'.error.maxstyles'})
                 if scalar(keys %$ustyle) >= LJ::get_cap($u, 's2stylesmax');
@@ -264,6 +272,7 @@
             my $journalbase = LJ::journal_base($u);
             foreach my $styleid (sort { $ustyle->{$a} cmp $ustyle->{$b} || $a <=> $b} keys %$ustyle) {
                 $body .= "<tr><td><form style='display:inline' method='post' action='styles.bml?id=$styleid$getextra_amp'>";
+                $body .= $formauth;
                 my @b = $styleid == $u->{'s2_style'} ? "<b>" : "</b>";
                 $body .= $b[0];
                 $body .= BML::ml('.yourstyles.layername', {'name' => LJ::ehtml($ustyle->{$styleid}), 'aopts' => "href='$journalbase/?s2id=$styleid'", 'id' => $styleid});
@@ -290,6 +299,7 @@
     my $extra = $id ? "?id=$id" : '';
     $extra .= $extra ? $getextra_amp : $getextra;
     $body .= "<form name='styleForm' method='post' action='styles.bml$extra'>";
+    $body .= $formauth;
 
     # create a new style, or change the name of the style currently being edited
     # note: this little bit of code appears whether there is an id passed or not.

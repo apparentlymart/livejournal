@@ -83,6 +83,7 @@ body<=
 
     my $message = $POST{'message'} || $GET{'message'};
     if ($message) {
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>" unless LJ::check_form_auth();
         my $inputfrom = $POST{'from'} || $GET{'from'};
         my $from = $tminfo->{'security'} eq "all" ? $inputfrom : $remote->{'user'};
 
@@ -111,6 +112,7 @@ body<=
     $ret .= "<?h1 Send a message h1?><?p Fill out this form to send a text message to <B>$u->{'user'}</B>. p?>";
     $ret .= "<ul>";
     $ret .= "<form name='frmMsg' method='post' action='textmessage.bml'><input type='hidden' name='user' value=\"$u->{'user'}\" />";
+    $ret .= LJ::form_auth();
     $ret .= "<b>From: </b> ";
     my $maxlen = $pinfo->{'totlimit'};
     if ($tminfo->{'security'} eq "all") {

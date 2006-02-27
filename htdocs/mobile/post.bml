@@ -23,6 +23,7 @@ _info?><?_code
     });
 
     return "" unless LJ::did_post();
+    return "<b>$ML{'Error'}</b> $ML{'error.invalidform'}" unless LJ::check_form_auth();
 
     my $event = LJ::Util::blogger_deserialize($POST{'event'});
     my $journal = $POST{'usejournal'};
@@ -74,6 +75,7 @@ _code?>
 <h1>Post</h1>
 
 <form method='post'>
+<?_code { return LJ::form_auth(); } _code?>
 Subject:<br />
 <input name='subject' size='50' style='width: 90%' /><br />
 Post:<br />

@@ -709,16 +709,20 @@ sub check_referer {
 # class: web
 # des: Creates an authentication token to be used later to verify that a form
 #   submission came from a particular user.
+# args: raw?
+# des-raw: boolean; If true, returns only the token (no HTML)
 # returns: HTML hidden field to be inserted into the output of a page.
 # </LJFUNC>
 sub form_auth {
+    my $raw = shift;
     my $remote = LJ::get_remote()    or return "";
     my $sess = $remote->{'_session'} or return "";
     my $auth = join('-',
                     LJ::rand_chars(10),
                     $remote->{userid},
                     $sess->{auth});
-    return LJ::html_hidden("lj_form_auth", LJ::challenge_generate(86400, $auth));
+    my $chal = LJ::challenge_generate(86400, $auth);
+    return $raw? $chal : LJ::html_hidden("lj_form_auth", $chal);
 }
 
 # <LJFUNC>
@@ -773,6 +777,7 @@ sub create_qr_div {
     return undef if $remote->{'opt_no_quickreply'};
 
     $qrhtml .= "<div id='qrformdiv'><form id='qrform' name='qrform' method='POST' action='$LJ::SITEROOT/talkpost_do.bml'>";
+    $qrhtml .= LJ::form_auth();
 
     my $stylemineuri = $stylemine ? "style=mine&" : "";
     my $basepath =  LJ::journal_base($u) . "/$ditemid.html?${stylemineuri}";

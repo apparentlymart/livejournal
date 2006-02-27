@@ -32,6 +32,8 @@ _include?>
      $eh{'password'} = "_REMOTE";
  }
 
+ $ret .= LJ::form_auth() if $remote;
+
  $ret .= <<"END";
 <p><b>Your name:</b><br />
 <input name="reqname" size='40' maxlength='50' value=\"$eh{'name'}\" /></p>

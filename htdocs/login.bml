@@ -22,6 +22,7 @@
 
     my $remote = LJ::get_remote();
     my $cursess = $remote ? $remote->session : undef;
+    my $form_auth_ok = LJ::did_post() && LJ::check_form_auth();
 
     $title = $remote ?
         BML::ml(".loggedin.head2", { 'sitename' => $LJ::SITENAMESHORT} ) :
@@ -49,7 +50,8 @@
 
         } elsif ($remote && LJ::did_post() && $POST{'action:change'}) {
             $body .= "<div style='clear: both'>\n";
-            $body .= "<?warningbar <b>$ML{'.login.optionssaved'}</b> warningbar?>\n";
+            my $text = $form_auth_ok? $ML{'.login.optionssaved'} : $ML{'error.invalidform'};
+            $body .= "<?warningbar <b>$text</b> warningbar?>\n";
             $body .= "</div>\n";
 
         } elsif (LJ::did_post() && $POST{'action:logout'}) {
@@ -155,6 +157,7 @@
         if ($remote) {
             $body .= "<tr valign='top'><td>";
             $body .= "</td><td style='padding-bottom: 10px'>";
+            $body .= LJ::form_auth();
             my $curbind = $cursess && $cursess->ipfixed ? "yes" : "no";
             $body .= LJ::html_check(
                                     {
@@ -287,7 +290,7 @@
             $title = BML::ml(".login.title", { 'sitename' => $LJ::SITENAMESHORT} );
         }
 
-        if ($do_change) {
+        if ($do_change && $form_auth_ok) {
             my $bindip;
             if ($POST{'bindip'} eq "yes") {
                 $bindip = BML::get_remote_ip();

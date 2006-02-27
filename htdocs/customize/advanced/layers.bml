@@ -14,6 +14,10 @@
         $body .= "</form>\n\n";
     };
 
+    # only one of the many forms should be submitted,
+    # so only bother with generating one form_auth
+    my $formauth = LJ::form_auth();
+
     # used for error messages
     my $err = sub {
         $title = $ML{'Error'};
@@ -74,6 +78,8 @@
 
     # create
     if ($POST{'action:create'} && !$noactions) {
+        return $err->($ML{'error.invalidform'}) unless LJ::check_form_auth();
+
         return $err->($ML{'.error.maxlayers'})
             if keys %$ulay >= LJ::get_cap($u, 's2layersmax');
 
@@ -118,6 +124,8 @@
 
     # delete
     if ($POST{'action:del'} && !$noactions) {
+        return $err->($ML{'error.invalidform'}) unless LJ::check_form_auth();
+
         my $id = $POST{'id'}+0;
         my $lay = LJ::S2::load_layer($id);
         return $err->($ML{'.error.layerdoesntexist'})
@@ -139,6 +147,7 @@
                 'text' => $ML{'.back2layers'},
             }) . "\n";
             $body .= "<form method='post' action='layers.bml?authas=$authas'>";
+            $body .= $formauth;
             $body .= LJ::html_hidden('action:del', '1', 'id', $id);
               
             $body .= BML::ml('.delete.text', {'type' => $lay->{'type'}, 'name' => $name});
@@ -180,6 +189,7 @@
             $body .= "</form>";
 
             $body .= "<form method='post' style='display:inline' action='layers.bml?authas=$authas'>";
+            $body .= $formauth;
             $body .= LJ::html_hidden('id', $lid);
             $body .= LJ::html_submit('action:del', $ML{'.btn.delete2'}, { disabled => $noactions });
             $body .= "</form>";

@@ -1074,6 +1074,7 @@ sub talkform {
         $ret .= "<div class='ljwarnscreened'>$BML::ML{'.warnscreened'}</div>";
     }
     $ret .= "<form method='post' action='$LJ::SITEROOT/talkpost_do.bml' id='postform'>";
+    $ret .= LJ::form_auth();
 
     # Login challenge/response
     my $authchal = LJ::challenge_generate(900); # 15 minute auth token
@@ -2990,6 +2991,7 @@ sub make_preview {
 
     $ret .= "<hr />";
     $ret .= "<div style='width: 90%'><form method='post'><p>\n";
+    $ret .= LJ::form_auth();
     $ret .= "<input name='subject' size='50' maxlength='100' value='" . LJ::ehtml($form->{'subject'}) . "' /><br />";
     $ret .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' style='width: 100%'>";
     $ret .= LJ::ehtml($form->{'body'});

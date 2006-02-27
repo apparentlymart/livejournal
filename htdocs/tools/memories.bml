@@ -104,6 +104,12 @@
  }
 
  if (LJ::did_post()) {
+     unless (LJ::check_form_auth()) {
+         $title = $ML{'Error'};
+         $body = "<?p $ML{'error.invalidform'} p?>\n";
+         return;
+     }
+
      unless ($is_owner) {
          $title = $ML{'Error'};
          $body = "<?p $ML{'error.invalidauth'} p?>\n";
@@ -200,7 +206,7 @@
      my $us = LJ::load_userids(@jids);
      my @memories = $sortfunc{$sort}->( values %$memoryhash );
     
-     $body .= "<form method='post' action='./memories.bml?user=$user$authasarge'>\n"
+     $body .= "<form method='post' action='./memories.bml?user=$user$authasarge'>\n" . LJ::form_auth()
          if $is_owner && $GET{multidelete};
      $body .= "<ul>\n";
      foreach my $mem (@memories) {

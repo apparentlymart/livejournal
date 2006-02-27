@@ -97,6 +97,7 @@
 
      if ($memoryu->{user} eq $authas) {
          $body .= "<br /><form action='memadd.bml' method='POST'>";
+         $body .= LJ::form_auth();
          $body .= LJ::html_hidden(journal => $GET{journal}) if $GET{journal};
          $body .= LJ::html_hidden(itemid => $GET{itemid});
          $body .= LJ::html_hidden('mode' => 'save');
@@ -207,6 +208,7 @@
      $getextra .= "&amp;journal=$journal" unless $oldstyle;
 
      $body .= "<form method='post' action='memadd.bml$getextra'>";
+     $body .= LJ::form_auth();
      $body .= LJ::html_hidden(mode => "save");
 
      $body .= "<table cellpadding='4'>";
@@ -249,6 +251,8 @@
 
  if ($POST{'mode'} eq "save")
  {
+     return "<?h1 $ML{'Error'} h1?> $ML{'error.invalidform'}" unless LJ::check_form_auth();
+
      my $dbh = LJ::get_db_writer();
 
      if (! $POST{'des'}) {

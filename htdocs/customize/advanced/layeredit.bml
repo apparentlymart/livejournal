@@ -53,6 +53,8 @@
     # we tried to compile something
         my $build;
     if ($POST{'action'} eq "compile") {
+        return "<b>$ML{'Error'}</b> $ML{'error.invalidform'}" unless LJ::check_form_auth();
+
         $build = "<b>S2 Compiler Output</b> <em>at " . scalar(localtime) . "</em><br />\n";
 
         my $error;
@@ -125,6 +127,7 @@
                                         'stc/s2edit.css');
 
         my $includes = LJ::res_includes();
+        my $formauth = LJ::form_auth();
 
         # -------------------------------------------------------------------------
         #   S2 Editor HTML follows
@@ -195,6 +198,7 @@ $includes
 </head>
 <body onMouseMove="s2processDrag(event)" onMouseUp="s2endDrag(event)">
         <form method="post">
+        $formauth
         <input type="hidden" name="action" value="compile" />
 
     <div class="header">

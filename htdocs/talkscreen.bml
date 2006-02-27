@@ -108,9 +108,12 @@ _info?><?_code
     if ($mode eq 'screen') {
         my $can_screen = LJ::Talk::can_screen($remote, $u, $up, $post->{'userpost'});
         return $error->($ML{'.error.privs.screen'}) unless $can_screen;
-        unless ($POST{'confirm'} eq 'Y') {
+        if ($POST{'confirm'} eq 'Y') {
+            $error->($ML{'error.invalidform'}) unless LJ::check_form_auth();
+        } else {
             $body .= "<?h1 $ML{'.screen.sure.title'} h1?><?p $ML{'.screen.sure.body'} p?>";
             $body .= "<p><form method='POST' action='talkscreen.bml'><center>\n";
+            $body .= LJ::form_auth();
             $body .= LJ::html_hidden(mode => 'screen', 'talkid' => $talkid,
                                     journal => $u->{user}, confirm => 'Y');
             $body .= LJ::html_submit(undef, $ML{'.screen.doit'});
@@ -130,9 +133,12 @@ _info?><?_code
  if ($mode eq 'unscreen') {
      my $can_unscreen = LJ::Talk::can_unscreen($remote, $u, $up, $post->{'userpost'});
      return $error->($ML{'.error.privs.unscreen'}) unless $can_unscreen;
-     unless ($POST{'confirm'} eq 'Y') {
+     if ($POST{'confirm'} eq 'Y') {
+            $error->($ML{'error.invalidform'}) unless LJ::check_form_auth();
+     } else {
          $body .= "<?h1 $ML{'.unscreen.sure.title'} h1?><?p $ML{'.unscreen.sure.body'} p?>";
          $body .= "<p><form method='POST' action='talkscreen.bml'><center>\n";
+         $body .= LJ::form_auth();
          $body .= LJ::html_hidden(mode => 'unscreen', 'talkid' => $talkid,
                                  journal => $u->{user}, confirm => 'Y');
          $body .= LJ::html_submit(undef, $ML{'.unscreen.doit'});
@@ -156,9 +162,12 @@ _info?><?_code
          return;
      }
 
-     unless ($POST{confirm} eq 'Y') {
+     if ($POST{confirm} eq 'Y') {
+            $error->($ML{'error.invalidform'}) unless LJ::check_form_auth();
+     } else {
          $body .= "<?h1 $ML{'.freeze.sure.title'} h1?><?p $ML{'.freeze.sure.body'} p?>";
          $body .= "<p><form method='post' action='talkscreen.bml'><center>\n";
+         $body .= LJ::form_auth();
          $body .= LJ::html_hidden(mode => 'freeze', 'talkid' => $talkid,
                                  journal => $u->{user}, confirm => 'Y');
          $body .= LJ::html_submit(undef, $ML{'.freeze.doit'});
@@ -181,9 +190,12 @@ _info?><?_code
          $body = "<?h1 $ML{'Error'} h1?><?p You are not allowed to unfreeze this thread p?>";
          return;
      }
-     unless ($POST{confirm} eq 'Y') {
+     if ($POST{confirm} eq 'Y') {
+            $error->($ML{'error.invalidform'}) unless LJ::check_form_auth();
+     } else {
          $body .= "<?h1 $ML{'.unfreeze.sure.title'} h1?><?p $ML{'.unfreeze.sure.body'} p?>";
          $body .= "<p><form method='post' action='talkscreen.bml'><center>\n";
+         $body .= LJ::form_auth();
          $body .= LJ::html_hidden(mode => 'unfreeze', 'talkid' => $talkid,
                                  journal => $u->{user}, confirm => 'Y');
          $body .= LJ::html_submit(undef, $ML{'.unfreeze.doit'});

@@ -50,6 +50,9 @@ body<=
             'link' => '/manage/invites.bml',
             'text' => $ML{'/manage/invites.bml.back'},
         });
+
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>"
+            unless LJ::check_form_auth();
         
         my (@accepted, @rejected, @undecided);
         foreach my $invite (@$pending) {
@@ -102,6 +105,7 @@ body<=
     
     # prepare table
     $ret .= "<br /><form method='post'><div align='center'><table class='borderedtable' cellspacing='0' cellpadding='2'>";
+    $ret .= LJ::form_auth();
     $ret .= "<tr><th>$ML{'.community.title'}</th><th>$ML{'.abilities.title'}</th>";
     $ret .= "<th colspan='2'>$ML{'.actions.title'}</th>";
     $ret .= "</tr>";

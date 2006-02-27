@@ -24,6 +24,7 @@ body<=
     # do user requested changes
     my $add_text = $ML{'.addnew'};
     if (LJ::did_post()) {
+        return "<b>$ML{'Error'}</b> $ML{'error.invalidform'}" unless LJ::check_form_auth();
 
         # Adding new tags
         $POST{add} = 1 if $POST{'add.x'} or $POST{'add.y'}; # image submit
@@ -139,10 +140,12 @@ body<=
     }
     $ret .= "</script>\n";
 
+    my $formauth = LJ::form_auth();
     # the extra 'padding' div is a workaround for how
     # IE incorrectly renders fieldsets.
     $ret .= qq{
     <form method="POST" name="tagform" id="tagform">
+    $formauth
     <table cellpadding="0" cellspacing="0">
     <tr><td valign="top">
         <fieldset>

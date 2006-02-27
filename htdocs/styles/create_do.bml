@@ -10,7 +10,7 @@ body<=
     LJ::set_active_crumb('createstyle');
 
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
-    return BML::redirect("create.bml") unless LJ::did_post();
+    return BML::redirect("create.bml") unless LJ::did_post() && LJ::check_form_auth();
 
     my $remote = LJ::get_remote();
     return "<?needlogin?>"
@@ -60,6 +60,7 @@ body<=
     my $editform = sub {
         my $getextra = "?authas=$authas" if $u->{'user'} ne $remote->{'user'};
         return "<div align='center'><form method='post' action='$LJ::SITEROOT/styles/edit_do.bml$getextra'>\n" .
+               LJ::form_auth() ."\n" .
                LJ::html_hidden('mode', 'editstyle', 'styleid', $_[0]) . "\n" .
                LJ::html_submit(undef, $ML{'.editstyle'}) . "</form></div>\n";
     };

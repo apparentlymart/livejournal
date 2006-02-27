@@ -76,7 +76,7 @@
  if ($FORM{'mode'} eq "save") {
 
      unless ($FORM{'subject'} =~ /\S+/) {
-         $title = "Error";
+         $title = $ML{'Error'};
          $body = "<?h1 Need a subject! h1?><?p You can't have a to-do item without a subject.  That's the one mandatory field. p?>";
          return;
      }
@@ -90,8 +90,14 @@
 
      if ($todoid) {
          unless ($permission{'edit'}) {
-             $title = "Error";
+             $title = $ML{'Error'};
              $body = "<?h1 Permission Denied h1?><?p You don't have permission to edit a to-do item in this journal. p?>";
+             return;
+         }
+
+         unless (LJ::check_form_auth()) {
+             $title = "Error";
+             $body .= "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>";
              return;
          }
 
@@ -108,7 +114,13 @@
              $body .= "<?h1 Permission Denied h1?><?p You don't have permission to add a to-do item to this journal. p?>";
              return;
          }
-         
+
+         unless (LJ::check_form_auth()) {
+             $title = "Error";
+             $body .= "<?h1 Error h1?><?p $ML{'error.invalidform'} p?>";
+             return;
+         }
+
          ## check to see if user's todo list is full
          my $max_items = LJ::get_cap($u, "todomax");
          if (defined $max_items && $todo_count >= $max_items) {
@@ -200,6 +212,7 @@
  }
 
  $body .= "<FORM METHOD=POST ACTION=\"item.bml\">\n";
+ $body .= LJ::form_auth();
  $body .= "<INPUT TYPE=HIDDEN NAME=mode VALUE=\"save\">\n";
  $body .= "<INPUT TYPE=HIDDEN NAME=user VALUE=\"$u->{'user'}\">\n";
  $body .= "<INPUT TYPE=HIDDEN NAME=id VALUE=\"$it->{'todoid'}\">\n";

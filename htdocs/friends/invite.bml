@@ -34,6 +34,8 @@
             $rv = 0;
         };
 
+        $bogus->('form_auth', $ML{'error.invalidform'}) unless LJ::check_form_auth();
+
         if ($email) {
             my @errs;
             LJ::check_email($email, \@errs);
@@ -137,6 +139,7 @@ Follow this link to sign up:
     $body .= "<?p <b>" . BML::ml('.form.header', {'sitename' => $LJ::SITENAMESHORT}) . "</b> p?>";
 
     $body .= "<?p <form method='POST'>";
+    $body .= LJ::form_auth();
 
     $body .= '<table width="600" style="margin-left: 20px"><tr><td>';
     $body .= "$ML{'.form.input.name'}</td><td>";
@@ -146,6 +149,9 @@ Follow this link to sign up:
 
     $body .= "$ML{'.form.input.email'}</td><td>";
     $body .= LJ::html_text({ name => "email", size => 40, value => $email }) . '<br />' . $inerr->("email", "<br />");
+
+    $body .= '</td></tr><tr><td colspan="2">';
+    $body .= $inerr->('form_auth');
 
     $body .= '</td></tr><tr><td colspan="2">';
 

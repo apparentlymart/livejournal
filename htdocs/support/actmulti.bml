@@ -9,6 +9,8 @@ body<=
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
 
+    return "<?h1 $ML{'Error'} h1?> $ML{'error.invalidform'}" unless LJ::check_form_auth();
+
     my $spcatid = $POST{spcatid};
     my $cat = LJ::Support::load_cats($spcatid);
     return "<?h1 Error h1?><?p That category doesn't exist. p?>" unless $cat;

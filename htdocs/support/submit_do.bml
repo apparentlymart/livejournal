@@ -24,6 +24,7 @@ body<=
 
     if ($POST{'reqtype'} eq "user") 
     {
+        push @errors, $ML{'.error.invalidform'} unless LJ::check_form_auth();
         $req{'reqtype'} = "user";
         $user = LJ::canonical_username($POST{'user'});
         if ($POST{'password'} eq "_REMOTE") {

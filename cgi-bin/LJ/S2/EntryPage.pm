@@ -231,6 +231,8 @@ sub EntryPage
         my $js = "<script>\n// don't crawl this.  read http://www.livejournal.com/developer/exporting.bml\n";
         $js .= "var LJ_cmtinfo = {\n";
         my $canAdmin = LJ::can_manage($remote, $u) ? 1 : 0;
+        my $formauth = LJ::ejs(LJ::eurl(LJ::form_auth(1)));
+        $js .= "\tform_auth: '$formauth',\n";
         $js .= "\tjournal: '$u->{user}',\n";
         $js .= "\tcanAdmin: $canAdmin,\n";
         $js .= "\tremote: '$remote->{user}',\n" if $remote;

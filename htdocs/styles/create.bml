@@ -24,6 +24,7 @@ body<=
     $ret .= "</form>\n\n";
 
     $ret .= "<form action='create_do.bml$getextra' method='post'>\n";
+    $ret .= LJ::form_auth();
     
     # main form
     $ret .= "<?h1 $ML{'.createstyle.head'} h1?>\n";

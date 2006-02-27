@@ -97,6 +97,8 @@ _info?><?_code
 
     ### perform actions
     if (LJ::did_post() && $POST{'confirm'}) {
+        return $error->($ML{'error.invalidform'}) unless LJ::check_form_auth();
+
         # mark this as spam?
         LJ::Talk::mark_comment_as_spam($u, $tp->{talkid})
             if $POST{spam};
@@ -135,6 +137,7 @@ _info?><?_code
     $body .= "<?p $ML{'.confirm.body'} p?>";
     $body .= "<form method='post' action='delcomment.bml?";
     $body .= "journal=$u->{'user'}&id=$GET{'id'}'>\n";
+    $body .= LJ::form_auth();
     $body .= "<?standout ";
 
     $body .= "<div align='center' style='margin: 8px'>" . LJ::html_submit('confirm', $ML{'.confirm.submit'}) . "</div>\n";

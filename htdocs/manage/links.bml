@@ -45,8 +45,12 @@ body<=
 
     # save any changes to the database
     if ($POST{'action:savelinks'}) {
-        LJ::Links::save_linkobj($u, $linkobj);
-        $ret .= "<p><b>$ML{'.success'}</b></p>";
+        if (LJ::check_form_auth()) {
+            LJ::Links::save_linkobj($u, $linkobj);
+            $ret .= "<p><b>$ML{'.success'}</b></p>";
+        } else {
+            $ret .= "<b>$ML{'Error'}</b> $ML{'error.invalidform'}";
+        }
     }
 
     # intro paragraph
@@ -57,6 +61,7 @@ body<=
 
     # link modify form
     $ret .= "<form method='post' action='links.bml$getextra' style='margin-top: 1.5em;'>";
+    $ret .= LJ::form_auth();
     $ret .= LJ::Links::make_modify_form($u, $linkobj, \%POST);
     $ret .= "</form>";
 

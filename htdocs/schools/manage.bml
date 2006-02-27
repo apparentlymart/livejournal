@@ -50,6 +50,9 @@ body<=
 
     # if we posted, then we're updating something... see what we did
     if (LJ::did_post()) {
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>"
+            unless LJ::check_form_auth();
+
         if ($schools && %$schools) {
             foreach my $sid (keys %$schools) {
                 if ($POST{"$sid:delete"}) {
@@ -146,6 +149,7 @@ body<=
     if ($schools && %$schools) {
         my $authas = $GET{authas} ? "?authas=$GET{authas}" : '';
         $ret .= "<form action='manage.bml$authas' method='post'>";
+        $ret .= LJ::form_auth();
         $ret .= '<table align="center" cellpadding="5">';
 
         $ret .= "<tr class='shead'><th>$ML{'.table.name'}</th></td><th>$ML{'.table.years'}</th></tr>\n";

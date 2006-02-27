@@ -275,7 +275,7 @@ function deleteComment (ditemid) {
     };
 
     xtr.onreadystatechange = state_callback;
-    xtr.open("POST", "/" + LJ_cmtinfo.journal + "/__rpc_delcomment?mode=js&journal=" + LJ_cmtinfo.journal + "&id=" + ditemid, true);
+    xtr.open("POST", "/" + LJ_cmtinfo.journal + "/__rpc_delcomment?mode=js&journal=" + LJ_cmtinfo.journal + "&id=" + ditemid + "&lj_form_auth=" + LJ_cmtinfo.form_auth, true);
     var postdata = "confirm=1";
     if (opt_ban) postdata += "&ban=1";
     if (opt_spam) postdata += "&spam=1";
@@ -574,7 +574,7 @@ function createModerationFunction (ae, dItemid) {
         //var postUrl = ae.href;
         xtr.open("POST", postUrl + "&jsmode=1", true);
 
-        var postdata = "confirm=Y";
+        var postdata = "confirm=Y&lj_form_auth=" + LJ_cmtinfo.form_auth;
 
         xtr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xtr.send(postdata);

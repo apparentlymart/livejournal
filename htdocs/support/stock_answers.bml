@@ -16,13 +16,18 @@ body<=
     return "<?h1 Error h1?><?p Requested category doesn't exist. p?>"
         unless !$spcatid || $cats->{$spcatid};
 
+    $formauth = LJ::form_auth();
+
     # editing is based on ability to grant supporthelp.  and throw an error if they
     # posted but can't edit.
     my $canedit = ($spcatid && LJ::check_priv($remote, 'admin', "supporthelp/$cats->{$spcatid}->{catkey}")) ||
                   LJ::check_priv($remote, 'admin', 'supporthelp') ||
                   LJ::check_priv($remote, 'admin', '*');
-    return "<?h1 Error h1?><?p You do not have access to perform actions here. p?>"
-        if LJ::did_post() && ! $canedit;
+    if (LJ::did_post()) {
+        return "<?h1 $ML{'Error'} h1?> $ML{'error.invalidform'}" unless LJ::check_form_auth();
+        return "<?h1 Error h1?><?p You do not have access to perform actions here. p?>"
+        if ! $canedit;
+    }
 
     # viewing is based on having supporthelp over the particular category you're viewing.
     my %canview; # spcatid => 0/1
@@ -96,6 +101,7 @@ body<=
 
     if ($GET{new}) {
         $ret .= "<form method='post' action='$self'>";
+        $ret .= $formauth;
 
         $ret .= "<?p Please fill out the following form to create a new stock answer. p?>";
         $ret .= "<?p Category: " . LJ::html_select({ name => 'spcatid', selected => $spcatid },
@@ -181,6 +187,7 @@ body<=
             if ($body) {
                 $ret .= "<li>";
                 $ret .= "<form method='post' action='$self?ansid=$ansid&spcatid=$spcatid'>";
+                $ret .= $formauth;
                 $ret .= LJ::html_text({ name => 'subject', value => $subj, size => 40, maxlength => 255 });
                 $ret .= "<br />";
                 $ret .= LJ::html_textarea({ name => 'body', value => $body, rows => 15, cols => 80 });

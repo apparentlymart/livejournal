@@ -27,6 +27,8 @@ body<=
 
     my @deleted;
     if (LJ::did_post() && $u->{'status'} eq 'A') {
+        return "<?h1 $ML{'Error'} ?h1> $ML{'error.invalidform'}" unless LJ::check_form_auth();
+
         my $sth = $dbh->prepare("SELECT timechange, oldvalue " .
                                 "FROM infohistory WHERE userid=? " . 
                                 "AND what='email' ORDER BY timechange");
@@ -91,6 +93,7 @@ body<=
     if ($rows) {
         my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
         $ret .= "<form method='post' action='emailmanage.bml$getextra'>";
+        $ret .= LJ::form_auth();
         $ret .= "<table border='1' cellpadding='2' style='margin-bottom: 3px;'>\n";
         $ret .= $rows;
         $ret .= "</table>\n";

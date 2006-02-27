@@ -87,6 +87,7 @@ body<=
         $ret .= "<?h1 Are you sure? h1?><?p Are you sure you want to delete <b>$style->{'styledes'}</b>?  If so, press the button below.  This will temporarily break your journal if you're using this style, until you select a different style to use. p?>";
 
         $ret .= "<form method='post' action='edit_do.bml$getextra'>";
+        $ret .= LJ::form_auth();
         $ret .= LJ::html_hidden("mode", "delete_confirm", "styleid", $styleid);
         $ret .= "<p align='center'>" . LJ::html_submit(undef, "Yes, delete it!") . "</p></form>\n";
         return $ret;
@@ -94,6 +95,7 @@ body<=
 
     # process delete
     if ($mode eq "delete_confirm") {
+        return "<b>$ML{'Error'}</b> $ML{'error.invalidform'}" unless LJ::check_form_auth();
 
         LJ::S1::delete_style($styleid);
         return "<?h1 Deleted h1?><?p The style has been deleted. You can view your current list of styles " .
@@ -104,6 +106,7 @@ body<=
     if ($mode eq "editstyle") {
         $ret .= "<?h1 Edit Style h1?><?p Make any desired changes and press \"Save\" when done. p?>\n";
         $ret .= "<div style='width: 90%'><form method='post' action='edit_do.bml$getextra'>";
+        $ret .= LJ::form_auth();
         $ret .= LJ::html_hidden("mode", "savechanges", "styleid", $styleid, "ide", $ide);
         
         $ret .= "<table border='1' cellspacing='1' cellpadding='2' style='margin-bottom: 20px;'>\n";
@@ -260,6 +263,7 @@ body<=
 
     # save changes from a previous edit form
     if ($mode eq "savechanges") {
+        return "<b>$ML{'Error'}</b> $ML{'error.invalidform'}" unless LJ::check_form_auth();
 
         my $formatdata;
 

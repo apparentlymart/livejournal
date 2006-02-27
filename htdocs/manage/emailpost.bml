@@ -367,8 +367,10 @@ body<=
 #--------------------------------------------------------------------------
 
     # Update settings
-    if ($POST{userid} == $u->{userid}) {
+    if (LJ::did_post()) {
         my @errors;
+
+        push @errors, $ML{'error.invalidform'} unless LJ::check_form_auth();
 
         my $addresses = $POST{addresses};
         my $pin = $POST{pin};
@@ -461,7 +463,7 @@ body<=
     $ret .= "<?h1 $ML{'.addresses.header'} h1?>";
     $ret .= "<?p $ML{'.addresses.text'} p?>";
     $ret .= "<form method='post' action='emailpost.bml'>\n";
-    $ret .= LJ::html_hidden(userid => $u->{userid});
+    $ret .= LJ::form_auth();
     $ret .= "<div style='margin-left:40px;'>";
     $ret .= "<table border=\"0\"><tr><td>$ML{'.addresses.table.address'}</td><td>$ML{'.addresses.table.errors'}</td></tr>";
     for(0..2) { # Limited to 3 addresses.

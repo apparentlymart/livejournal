@@ -331,6 +331,8 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
      if ($LJ::HUMAN_CHECK{create}) {
          ($capid, $anum) = LJ::Captcha::session_check_code($POST{captcha_chal}, $POST{answer});
          $errors{'captcha'} = $ML{'.captcha.invalid'} unless $capid && $anum;
+     } else {
+         $errors{'invalidform'} = $ML{'error.invalidform'} unless LJ::check_form_auth();
      }
      last SUBMIT if %errors;
 
@@ -550,7 +552,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
      my $v;
 
      if (%errors) {
-         my @errors_order = ('code', 'username', 'email', 'password', 'agree_tos', 'captcha');
+         my @errors_order = ('code', 'username', 'email', 'password', 'agree_tos', 'captcha', 'invalidform');
          my %errors_def;
          $errors_def{$_} = 1 for @errors_order;
          foreach my $key (keys %errors) { push @errors_order, $key unless $errors_def{$key}; }

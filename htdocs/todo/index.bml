@@ -89,10 +89,16 @@
  }
 
  ### deleting?
- if (@delete) {
+ if (@delete) {     
      unless ($permission{'delete'}) {
          $title = "Error";
          $body = "<?h1 Security h1?><?p You're not allowed to delete these to-do items. p?>";
+         return;
+     }
+
+     unless (LJ::check_form_auth()) {
+         $title = "Error";
+         $body = "<?h1 Error h1?><?p $ML{'error.invalidform'} p?>";
          return;
      }
 
@@ -202,6 +208,7 @@
 
  
  $body .= "<form method='post' action='./'><P><TABLE BORDER=1 CELLPADDING=4 CELLSPACING=1>\n";
+ $body .= LJ::form_auth();
  $body .= "<TR BGCOLOR=<?emcolorlite?> ALIGN=LEFT VALIGN=BOTTOM>\n";
  $body .= "<TD><B>&nbsp;</B></TD>\n" if ($permission{'delete'});
  {
