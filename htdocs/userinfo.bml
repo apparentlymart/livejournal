@@ -504,7 +504,6 @@ if ($u->{'journaltitle'}) {
       if ($u->{'city'} || $u->{'state'} || $u->{'country'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
           $body .= "<tr><td align='right'><b>$ML{'.label.location'}</b></td><td colspan='$span'>";
-          my $estate = LJ::eurl($u->{'state'});
           my $ecity = LJ::eurl($u->{'city'});
           my $ecountry = LJ::eurl($u->{'country'});
 
@@ -512,17 +511,17 @@ if ($u->{'journaltitle'}) {
 
           if ($u->{'country'}) {
               $country = $LJ::DISABLED{'directory'} ? $countries{$u->{'country'}} :
-                  "<a href='$LJ::SITEROOT/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=$u->{'country'}'>".
+                  "<a href='$LJ::SITEROOT/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=$ecountry'>".
                       $countries{$u->{'country'}} . "</a>";
 
-              my $estate;
+              my $estate = "";
               if ($u->{'state'}) {
                   $state = $u->{'state'};
                   if ($u->{'country'} eq "US") { $state = $states{$state}; }
                   $estate = LJ::eurl($state);
                   $state = $LJ::DISABLED{'directory'} ? $state :
                       "<a href='$LJ::SITEROOT/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=".
-                          "$u->{'country'}&amp;loc_st=$estate'>$state</a>";
+                          "$ecountry&amp;loc_st=$estate'>" . LJ::ehtml($state) . "</a>";
               }
 
               if ($u->{'city'}) {
@@ -530,7 +529,7 @@ if ($u->{'journaltitle'}) {
                   $city = LJ::ehtml($u->{'city'});
                   unless ($LJ::DISABLED{'directory'}) {
                       $city = "<a href='$LJ::SITEROOT/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=".
-                          "$u->{'country'}&amp;loc_st=$estate&amp;loc_ci=$ecity'>$city</a>";
+                          "$ecountry&amp;loc_st=$estate&amp;loc_ci=$ecity'>$city</a>";
                   }
               }
           }
