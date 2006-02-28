@@ -2381,6 +2381,80 @@ pick a specific friend group to view.
 
 /friends/invite.bml.title=Invite a Friend!
 
+/friends/nudge.bml.btn.nudge=Yes, nudge them!
+
+/friends/nudge.bml.email.body.closing=Sincerely,
+
+/friends/nudge.bml.email.body.greeting=Hey [[user]],
+
+/friends/nudge.bml.email.body.info=Find out more about the nudge: [[helpurl]]
+
+/friends/nudge.bml.email.body.lastupdated|notes=[[timeago]] will be one of the strings "time.ago.week", "time.ago.day", "time.ago.hour", "time.ago.minute", or "time.ago.second".
+/friends/nudge.bml.email.body.lastupdated=Your mutual friend [[user]] has noticed that you last updated your journal on [[sitename]] [[timeago]]!  Be a friend and go post. ([[updateurl]])
+
+/friends/nudge.bml.email.body.neverupdated=Your mutual friend [[user]] has noticed that you have never updated your journal on [[sitename]]!  Be a friend and go post. ([[updateurl]])
+
+/friends/nudge.bml.email.body.team=The [[sitename]] Team
+
+/friends/nudge.bml.email.subject=Your friend has sent you a [[sitename]] nudge
+
+/friends/nudge.bml.error.cantloaduser=Can't load specified user.
+
+/friends/nudge.bml.error.cantnudgeuser=The user you are trying to nudge cannot be nudged.
+
+/friends/nudge.bml.error.disabled=Nudge is currently disabled.
+
+/friends/nudge.bml.error.invalidacctstatus.header=Nudging Disabled
+
+/friends/nudge.bml.error.invalidacctstatus.text=While we know you want to hear from [[user]], their account status does not permit being nudged.
+
+/friends/nudge.bml.error.invalidaccttype.header=Not a Person
+
+/friends/nudge.bml.error.invalidaccttype.text=While we know you want to hear from [[user]], you can only nudge other users.
+
+/friends/nudge.bml.error.nonudge.header=Nudging Disabled
+
+/friends/nudge.bml.error.nonudge.text=While we know you want to hear from [[user]], they have disabled nudges from other users.
+
+/friends/nudge.bml.error.notmutual.header=Not Mutual Friends
+
+/friends/nudge.bml.error.notmutual.text=While we know you want to hear from [[user]], it seems that the two of you are not mutual friends. Currently only mutual friends can nudge each other.
+
+/friends/nudge.bml.intro=Are you disappointed that one of your mutual friends hasn't updated their journal lately? Send them a nudge to let them know that you really want to hear from them!
+
+/friends/nudge.bml.mutualfriends.header=Your Mutual Friends
+
+/friends/nudge.bml.mutualfriends.none=It seems you have no mutual friends. Nudging is currently limited to mutual friends only.
+
+/friends/nudge.bml.mutualfriends.sort.lastupdated=Sort by: <a [[aopts]]>last updated</a> or <b>username</b>?
+
+/friends/nudge.bml.mutualfriends.sort.username=Sort by: <b>last updated</b> or <a [[aopts]]>username</a>?
+
+/friends/nudge.bml.mutualfriends.text=Feeling you haven't heard from someone recently, but don't know who? Here are all of your mutual friends who haven't updated within the past week.
+
+/friends/nudge.bml.mutualfriends.userinfo|notes=[[timeago]] will be either of the strings ".mutualfriends.userinfo.lastupdated" or ".mutualfriends.userinfo.neverupdated".
+/friends/nudge.bml.mutualfriends.userinfo=[[user]] - [[timeago]] (<i><a [[aopts]]>nudge them</a></i>)
+
+/friends/nudge.bml.mutualfriends.userinfo.lastupdated|notes=[[timeago]] will be one of the strings "time.ago.week", "time.ago.day", "time.ago.hour", "time.ago.minute", or "time.ago.second".
+/friends/nudge.bml.mutualfriends.userinfo.lastupdated=posted [[timeago]]
+
+/friends/nudge.bml.mutualfriends.userinfo.neverupdated=never posted
+
+/friends/nudge.bml.nudgeuser.header=Nudge [[user]]?
+
+/friends/nudge.bml.nudgeuser.lastupdated|notes=[[timeago]] will be one of the strings "time.ago.week", "time.ago.day", "time.ago.hour", "time.ago.minute", or "time.ago.second".
+/friends/nudge.bml.nudgeuser.lastupdated=It seems that [[user]] last updated their journal [[timeago]]. If you'd like, we'll send them this short email in their language:
+
+/friends/nudge.bml.nudgeuser.neverupdated=It seems that [[user]] has never updated their journal. If you'd like, we'll send them this short email in their language:
+
+/friends/nudge.bml.nudgeuser.recentlyupdated=It seems that [[user]] has updated their journal within the past week. While we appreciate that you'd like to hear from them, you cannot nudge them at this time.
+
+/friends/nudge.bml.success.header=Nudge Sent
+
+/friends/nudge.bml.success.text=[[user]] has been nudged.
+
+/friends/nudge.bml.title=Nudge a Friend!
+
 /go.bml.defaultbody=No parameters given.
 
 /go.bml.defaulttitle=Error

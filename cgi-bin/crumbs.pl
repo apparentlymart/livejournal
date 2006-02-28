@@ -58,6 +58,7 @@
                'moodeditor' => ['Custom Mood Theme Editor', '/manage/moodthemes.bml', 'manage'],
                'moodlist' => ['Mood Viewer', '/moodlist.bml', 'manage'],
                'news' => ['News', '/news.bml', 'home'],
+               'nudgefriend' => ['Nudge a Friend', '/friends/nudge.bml', 'friends'],
                'popfaq' => ['Popular FAQs', '/support/popfaq.bml', 'faq'],
                'preview' => ['Layout Previews', '/customize/preview.bml', 'customize'],
                'register' => ['Validate Email', '/register.bml', 'home'],
