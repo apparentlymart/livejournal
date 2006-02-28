@@ -2331,6 +2331,10 @@ pick a specific friend group to view.
 
 /friends/index.bml.invite.title=Invite a Friend
 
+/friends/index.bml.nudge.about=Nudge a mutual friend who hasn't posted recently to let them know that you want to hear from them.
+
+/friends/index.bml.nudge.title=Nudge a Friend
+
 /friends/index.bml.security=Your friends list is also used for posts with restricted access.
 
 /friends/index.bml.security.custom=With "Custom" posts, you can specify which friend groups can view your post.

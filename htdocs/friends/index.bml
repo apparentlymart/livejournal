@@ -8,22 +8,26 @@ _code?>
 <?p <?_ml .about _ml?> p?>
 <?h1 <?_ml .tools _ml?> h1?>
 <dl>
-  <dt><a href="invite.bml"><?_ml .invite.title _ml?></a></dt>
+  <dt><a href="<?siteroot?>/friends/invite.bml"><?_ml .invite.title _ml?></a></dt>
   <dd><?_code BML::ml('.invite.about2', { sitename => $LJ::SITENAMESHORT }); _code?></dd>
 </dl>
 <dl>
-  <dt><a href="edit.bml"><?_ml /friends/edit.bml.title _ml?></a></dt>
+  <dt><a href="<?siteroot?>/friends/edit.bml"><?_ml /friends/edit.bml.title _ml?></a></dt>
   <dd><?_ml .edit.about _ml?></dd>
 </dl>
 <?p <?_ml .groups _ml?> p?> 
 <dl>
-  <dt><a href="editgroups.bml"><?_ml /friends/editgroups.bml.title _ml?></a></dt>
+  <dt><a href="<?siteroot?>/friends/editgroups.bml"><?_ml /friends/editgroups.bml.title _ml?></a></dt>
   <dd><?_ml .editgroups.about _ml?></dd>
 </dl>
 <?p <?_ml .filter _ml?> p?>
 <dl>
-  <dt><a href="filter.bml"><?_ml /friends/filter.bml.title _ml?></a></dt>
+  <dt><a href="<?siteroot?>/friends/filter.bml"><?_ml /friends/filter.bml.title _ml?></a></dt>
   <dd><?_ml .filter.about _ml?></dd>
+</dl>
+<dl>
+  <dt><a href="<?siteroot?>/friends/nudge.bml"><?_ml .nudge.title _ml?></a></dt>
+  <dd><?_ml .nudge.about _ml?></dd>
 </dl>
 <?p p?>
 <?h1 <?_ml .security.header _ml?> h1?>
