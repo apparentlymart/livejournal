@@ -416,7 +416,7 @@ sub clean
                     # IE sucks:
                     my $nowhite = $hash->{$attr};
                     $nowhite =~ s/[\s\x0b]+//g;
-                    if ($nowhite =~ /(?:javascript|vbscript|about):/ix) {
+                    if ($nowhite =~ /(?:jscript|livescript|javascript|vbscript|about):/ix) {
                         delete $hash->{$attr};
                         next;
                     }
