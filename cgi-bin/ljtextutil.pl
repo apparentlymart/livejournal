@@ -134,6 +134,15 @@ sub ejs
     return $a;
 }
 
+# given a string, makes it into a string you can put into javascript,
+# including protecting against closing </script> tags in the entry.
+# does the double quotes for ya.
+sub ejs_string {
+    my $str = ejs($_[0]);
+    $str =~ s!</script!</scri\" + \"pt!g;
+    return "\"" . $str . "\"";
+}
+
 # <LJFUNC>
 # name: LJ::is_ascii
 # des: checks if text is pure ASCII

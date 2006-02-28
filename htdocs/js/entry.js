@@ -552,11 +552,24 @@ InOb.setTitle = function (title) {
 
 /* ******************** DRAFT SUPPORT ******************** */
 
+  /* RULES:
+    -- don't save if they have typed in last 3 seconds, unless it's been
+       15 seconds.  otherwise save at most every 10 seconds, if dirty.
+  */
+
 var LJDraft = {};
 
 LJDraft.saveInProg = false;
+LJDraft.epoch      = 0;
+LJDraft.lastSavedBody = "";
+LJDraft.prevCheckBody = "";
+LJDraft.lastTypeTime  = 0;
+LJDraft.lastSaveTime  = 0;
+LJDraft.autoSaveInterval = 10;
+LJDraft.savedMsg = "Autosaved at [[time]]";
 
-LJDraft.save = function (drafttext) {
+LJDraft.save = function (drafttext, cb) {
+    var callback = cb;  // old safari closure bug
     if (LJDraft.saveInProg)
         return;
 
@@ -564,15 +577,98 @@ LJDraft.save = function (drafttext) {
 
     var finished = function () {
         LJDraft.saveInProg = false;
+        if (callback) callback();
     };
 
     HTTPReq.getJSON({
       method: "POST",
       url: "/tools/endpoints/draft.bml",
       onData: finished,
-      onError: finished,
+      onError: function () { LJDraft.saveInProg = false; },
       data: HTTPReq.formEncoded({"saveDraft": drafttext})
     });
 };
 
+LJDraft.startTimer = function () {
+    setInterval(LJDraft.checkIfDirty, 1000);  // check every second
+    LJDraft.epoch = 0;
+};
 
+LJDraft.checkIfDirty = function () {
+    LJDraft.epoch++;
+    var curBody;
+
+    if ($("draft").style.display == 'none') { // Need to check this to deal with hitting the back button
+        // Since they may start using the RTE in the middle of writing their
+        // entry, we should just get the editor each time.
+        var oEditor = FCKeditorAPI.GetInstance('draft');
+        curBody = oEditor.GetXHTML(true);
+    } else {
+        curBody = $("draft").value;
+    }
+
+    // no changes to save
+    if (curBody == LJDraft.lastSavedBody)
+    return;
+
+    // at this point, things are dirty.
+
+    // see if they've typed in the last second.  if so,
+    // we'll want to note their last type time, and defer
+    // saving until they settle down, unless they've been
+    // typing up a storm and pass our 15 second barrier.
+    if (curBody != LJDraft.prevCheckBody) {
+        LJDraft.lastTypeTime  = LJDraft.epoch;
+        LJDraft.prevCheckBody = curBody;
+    }
+
+    if (LJDraft.lastSaveTime < LJDraft.lastTypeTime - 15) {
+        // let's fall through and save!  they've been busy.
+    } else if (LJDraft.lastTypeTime > LJDraft.epoch - 3) {
+        // they're recently typing, don't save.  let them finish.
+        return;
+    } else if (LJDraft.lastSaveTime > LJDraft.epoch - LJDraft.autoSaveInterval) {
+        // we've saved recently enough.
+        return;
+    }
+
+    // async save, and pass in our callback
+    var curEpoch = LJDraft.epoch;
+    LJDraft.save(curBody, function () {
+        var msg = LJDraft.savedMsg.replace(/\[\[time\]\]/, LJDraft.getTime());
+        $("draftstatus").innerHTML = msg;
+        LJDraft.lastSaveTime  = curEpoch; /* capture lexical.  remember: async! */
+        LJDraft.lastSavedBody = curBody;
+    });
+};
+
+LJDraft.getTime = function () {
+    var date = new Date();
+    var hour, minute, sec, time;
+
+    hour = date.getHours();
+    if (hour >= 12) {
+        time = ' PM';
+    } else {
+        time = ' AM';
+    }
+
+    if (hour > 12) {
+        hour -= 12;
+    } else if (hour == 0) {
+        hour = 12;
+    }
+
+    minute = date.getMinutes();
+    if (minute < 10) {
+        minute = '0' + minute;
+    }
+
+    sec = date.getSeconds();
+    if (sec < 10) {
+        sec = '0' + sec;
+    }
+
+    time = hour + ':' + minute + ':' + sec + time;
+    return time;
+}

@@ -411,14 +411,13 @@ head<=
     $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/core.js'></script>\n";
     $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/dom.js'></script>\n";
     $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/httpreq.js'></script>\n";
-    $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/entry.js?v=2'></script>\n";
-
+    $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/entry.js?v=3'></script>\n";
 
     # draft autosave and restore
     my $remote = LJ::get_remote();
-    my $draft = '';
+    my $draft = '""';
     if ($remote) {
-        $draft = LJ::ejs($remote->prop('entry_draft'));
+        $draft = LJ::ejs_string($remote->prop('entry_draft'));
     }
 
     my $eMLautosave = LJ::ejs(BML::ml('.draft.autosave', { 'time' => '[[time]]' }));
@@ -426,92 +425,26 @@ head<=
     my $eMLrestored = LJ::ejs($ML{'.draft.restored'});
 
     $ret .= qq^
-            <script>
-            var lastDraft = '$draft';
-            var draftField;
-            var draftStatusField;
-            function initDraft(restore) {
-                draftField = \$("draft");
-                draftStatusField = \$("draftstatus");
-                if (restore) {
-                    var answer = false;
-                    if (lastDraft != '') answer = confirm('$eMLconfirm');
-                    if (answer) {
-                        draftField.value = lastDraft;
-                        draftStatusField.innerHTML = '$eMLrestored';
+<script>
+        var restoredDraft = $draft;
+
+        // TODO: make these function calls
+        LJDraft.autoSaveInterval = $LJ::AUTOSAVE_DRAFT_INTERVAL;
+        LJDraft.savedMsg = '$eMLautosave';
+
+            function initDraft(askToRestore) {
+                if (askToRestore && restoredDraft) {
+                    if (confirm("$eMLconfirm")) {
+                        \$("draft").value = restoredDraft;
+                        \$("draftstatus").innerHTML = '$eMLrestored';
                     } else {
                         // Clear out their current draft
-                            LJDraft.save('');
+                        LJDraft.save('');
                     }
                 }
-                // Check for changes every so many seconds to save
-                var autoSaveInterval = $LJ::AUTOSAVE_DRAFT_INTERVAL * 1000;
-                if (autoSaveInterval < 1000) {
-                    // But default to 10 seconds if no delay or bad delay...
-                    autoSaveInterval = 10000;
-                }
-                setInterval(draftSave, autoSaveInterval);
-            }
-
-            function draftSave () {
-                var msg = '$eMLautosave';
-                msg = msg.replace(/\\[\\[time\\]\\]/, getTime());
-
-                if (\$("draft").style.display == 'none') { // Need to check this to deal with hitting the back button
-                    // Since they may start using the RTE in the middle of writing their
-                    // entry, we should just get the editor each time.
-                    var oEditor = FCKeditorAPI.GetInstance('draft');
-                    var curDraft = oEditor.GetXHTML(true);
-
-                    if (curDraft != lastDraft) {
-                        lastDraft = curDraft;
-                        LJDraft.save(lastDraft);
-                        draftStatusField.innerHTML = msg;
-                    }
-                } else {
-                    if (draftField.value != lastDraft) {
-                        lastDraft = draftField.value;
-                        LJDraft.save(lastDraft);
-                        draftStatusField.innerHTML = msg;
-                    }
-                }
-            }
-
-            function getTime () {
-                var date = new Date();
-                var hour;
-                var minute;
-                var sec;
-                var time;
-
-                hour = date.getHours();
-                if (hour >= 12) {
-                    time = ' PM';
-                } else {
-                    time = ' AM';
-                }
-
-                if (hour > 12) {
-                    hour -= 12;
-                } else if (hour == 0) {
-                    hour = 12;
-                }
-
-                minute = date.getMinutes();
-                if (minute < 10) {
-                    minute = '0' + minute;
-                }
-
-                sec = date.getSeconds();
-                if (sec < 10) {
-                    sec = '0' + sec;
-                }
-
-                time = hour + ':' + minute + ':' + sec + time;
-                return time;
-            }
-            </script>
-^;
+                LJDraft.startTimer();
+           }
+</script>^;
 
     $ret .= (! $LJ::REQ_HEAD_HAS{'chalresp_js'}++) ? $LJ::COMMON_CODE{'chalresp_js'} : "";
     return $ret;

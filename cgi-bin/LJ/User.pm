@@ -1170,7 +1170,7 @@ sub set_draft_text {
     push @methods, [ "noop", sub {}, 0 ] if $draft eq $old;
 
     # simple case: appending
-    if ($draft =~ /^\Q$old\E(.+)/s) {
+    if (length $old && $draft =~ /^\Q$old\E(.+)/s) {
         my $new = $1;
         my $appending = sub {
             my $prop = LJ::get_prop("user", "entry_draft") or die; # FIXME: use exceptions
