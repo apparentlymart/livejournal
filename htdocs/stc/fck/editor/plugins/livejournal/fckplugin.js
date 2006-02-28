@@ -86,14 +86,17 @@ LJCutCommand.Execute=function() {
     if (selection != '') {
         selection += ''; // Cast it to a string
         selection = selection.replace(/\n/g, '<br />');
-
-        var html = "<div class='ljcut'" +  text + ">";
-        html    += selection;
-        html    += "</div>";
-
-        FCK.InsertHtml(html);
-        FCK.Focus();
+    } else {
+        selection += 'Type your cut contents here.';
     }
+
+    var html = "<div class='ljcut'" +  text + ">";
+    html    += selection;
+    html    += "</div>";
+
+    FCK.InsertHtml(html);
+    FCK.Focus();
+
     return;
 }
 
