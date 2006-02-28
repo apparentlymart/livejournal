@@ -159,11 +159,11 @@ sub make_authas_select {
 
     # only do most of form if there are options to select from
     if (@list > 1) {
-        return ($opts->{'label'} || 'Work as user:') . " " .
+        return ($opts->{'label'} || $BML::ML{'web.authas.label'}) . " " .
                LJ::html_select({ 'name' => 'authas',
                                  'selected' => $opts->{'authas'} || $u->{'user'}},
                                  map { $_, $_ } @list) . " " .
-               LJ::html_submit(undef, $opts->{'button'} || 'Switch');
+               LJ::html_submit(undef, $opts->{'button'} || $BML::ML{'web.authas.btn'});
     }
 
     # no communities to choose from, give the caller a hidden

@@ -6022,3 +6022,7 @@ Username=Username
 
 userpic.inactive=Inactive
 
+web.authas.btn=Switch
+
+web.authas.label=Work as user:
+
