@@ -212,7 +212,7 @@ add_conf('$EXAMPLE_USER_ACCOUNT',
          type => "string",
          des => "The username of the example user account, for use in Support and documentation.  Must be an actual account on the site.",
          );
-         
+
 add_conf('$FB_DOMAIN',
          type => 'hostname',
          des => "Domain name for cooperating Fotobilder (media hosting/cataloging) installation",
@@ -411,7 +411,7 @@ add_conf('$WSTATPREFIX',
          required => 0,
          type => 'url',
          no_trailing_slash => 1,
-         des => "URL prefix for the static files.  Must be located on the same domain as $DOMAIN_WEB.",
+         des => "URL prefix for the static files.  Must be located on the same domain as \$DOMAIN_WEB.",
          );
 
 add_conf('$SPELLER',
