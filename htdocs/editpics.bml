@@ -56,7 +56,7 @@
     }
 
     # update this user's activated pics
-    LJ::activate_userpics($u);
+    $u->{activate_userpics};
 
     my ($dbh, $dbcm, $dbcr, $sth);
 
