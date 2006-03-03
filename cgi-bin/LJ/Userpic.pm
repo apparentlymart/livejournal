@@ -194,7 +194,7 @@ sub supports_comments {
 
 # class method
 # does this user's dataversion support usepic comments?
-sub user_supports_userpic_comments {
+sub user_supports_comments {
     my ($class, $u) = @_;
 
     return undef unless ref $u;
