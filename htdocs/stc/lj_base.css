@@ -2,27 +2,6 @@ a img {
     border: 0px;
 }
 
-.EditPicsStatus {
-    font-weight: bold;
-    margin: 0 0 15px 0;
-    }
-
-.EditPicsItem {
-    margin: 0 0 10px 0;
-    }
-
-.EditPicsUserpic {
-    float: left;
-    width: 100px;
-    height: 100px;
-    margin: 0 10px 0 0;
-    }
-
-.EditPicsUserpic img {
-    display: block;
-    margin: 0 auto;
-    }
-
 .clear {
     clear: both;
     margin: 0 -1px -1px 0;
@@ -32,7 +11,7 @@ a img {
     height: 1px;
     font-size: 0;
     line-height: 0;
-    }
+}
 
 .lj_progresscontainer {
     height: 25px;
@@ -43,47 +22,8 @@ a img {
 
 .lj_progressoverlay {
     background: url(/img/progress/active.gif) repeat;
-    }
+}
 
 .lj_progressindefinite {
     background-image: url(/img/progress/barber.gif) repeat;
-    }
-
-/*
-
-.EditPicsItem {
-        float: left;
-        margin: 0 5px 5px 0;
-        height: 100px;
-        padding: 2px;
-        background: #f0f0f0;
 }
-
-.EditPicsItem table {
-
-}
-
-
-.EditPicsItem label {
-        margin: 0 0 0 5px;
-        font-size: 10px !important;
-}
-
-.EditPicsUserpic {
-        float: left;
-        width: 100px;
-        height: 100px;
-}
-
-.EditPicsUserpic img {
-        display: block;
-        margin: 0 auto 0 auto;
-}
-
-.EditPicsSave {
-        display: inline;
-}
-
-*/
-
-
