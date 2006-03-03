@@ -56,7 +56,7 @@
     }
 
     # update this user's activated pics
-    $u->{activate_userpics};
+    $u->activate_userpics;
 
     my ($dbh, $dbcm, $dbcr, $sth);
 
