@@ -20,6 +20,29 @@ sub new {
     };
 }
 
+# given a md5sum, load a userpic
+# takes $u, $md5sum
+sub new_from_md5 {
+    my ($class, $u, $md5sum) = @_;
+
+    return unless $u && $md5sum;
+
+    my $sth;
+
+    if (LJ::Userpic->user_supports_comments($u)) {
+        $sth = $u->prepare("SELECT * FROM userpic2 WHERE userid=? " .
+                                  "AND md5base64=?");
+    } else {
+        my $dbh = LJ::get_db_reader;
+        $sth = $dbh->prepare("SELECT * FROM userpic WHERE userid=? " .
+                                    "AND md5base64=?");
+    }
+    $sth->execute($u->{'userid'}, $md5sum);
+    my $row = $sth->fetchrow_hashref;
+
+    return LJ::Userpic->new_from_row($row);
+}
+
 sub new_from_row {
     my ($class, $row) = @_;
     my $self = LJ::Userpic->new(LJ::load_userid($row->{userid}), $row->{picid});
