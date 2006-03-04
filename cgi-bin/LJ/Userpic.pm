@@ -12,7 +12,28 @@ my %MimeTypeMap = (
                    'P'          => 'png',
                    );
 
-sub new {
+my %singletons;  # userid -> picid -> LJ::Userpic
+
+sub reset_singletons {
+    %singletons = ();
+}
+
+sub instance {
+    my ($class, $u, $picid) = @_;
+    my $up;
+
+    # return existing one, if loaded
+    if (my $us = $singletons{$u->{userid}}) {
+        return $up if $up = $us->{$picid};
+    }
+
+    $up = $class->_skeleton($u, $picid);
+    $singletons{$u->{userid}}->{$picid} = $up;
+    return $up;
+}
+*new = \&instance;
+
+sub _skeleton {
     my ($class, $u, $picid) = @_;
     # starts out as a skeleton and gets loaded in over time, as needed:
     return bless {
