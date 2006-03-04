@@ -1136,9 +1136,6 @@ sub entry_form {
     if ($opts->{'richtext'} && !$opts->{'did_spellcheck'}) {
         LJ::need_res('js/rte.js', 'stc/fck/fckeditor.js');
 
-        my $jrich = LJ::ejs(LJ::deemp(
-                                      BML::ml("entryform.htmlokay.rich2", { 'opts' => 'href="#" onClick="return useRichText(\'draft\', \'' . LJ::ejs($LJ::WSTATPREFIX) . '\');"' })));
-
         my $jnorich = LJ::ejs(LJ::deemp(BML::ml('entryform.htmlokay.norich2')));
 
 
@@ -1150,13 +1147,24 @@ sub entry_form {
         var rte = new FCKeditor();
         var t = rte._IsCompatibleBrowser();
         if (t) {
-            document.write("<div id='jrich'>$jrich</div>");
+RTE
+
+        if ($opts->{'richtext_default'}) {
+            $$onload .= 'useRichText("draft", "' . LJ::ejs($LJ::WSTATPREFIX) . '");';
+        } else {
+            my $jrich = LJ::ejs(LJ::deemp(
+                                          BML::ml("entryform.htmlokay.rich2", { 'opts' => 'href="#" onClick="return useRichText(\'draft\', \'' . LJ::ejs($LJ::WSTATPREFIX) . '\');"' })));
+            $out .= "\t\tdocument.write(\"<div id='jrich'>$jrich</div>\");\n";
+        }
+
+        $out .= <<RTE;
         } else {
             document.write("$jnorich");
         }
         //-->
             </script>
 RTE
+
         $out .= '<noscript><?de ' . BML::ml('entryform.htmlokay.norich2') . ' de?></noscript>';
         $out .= LJ::html_hidden({ name => 'switched_rte_on', id => 'switched_rte_on', value => '0'});
     }
@@ -1630,6 +1638,7 @@ sub entry_form_decode
     # Convert the rich text editor output back to parsable lj tags.
     my $event = $POST->{'event'};
     if ($POST->{'switched_rte_on'}) {
+        $req->{"prop_used_rte"} = 1;
 
         # We want to see if we can hit the fast path for cleaning
         # if they did nothing but add line breaks.
