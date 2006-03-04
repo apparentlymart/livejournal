@@ -19,7 +19,17 @@ ok(!$@, "deleted all userpics, if any existed");
 
 $up = eval { LJ::Userpic->create($u, data => file_contents("good.jpg")); };
 ok($up, "made a userpic");
-is($up->extension, "jpg", "it's a jpeg");
+is($up->extension, "jpg", "... it's a jpeg");
+ok(! $up->inactive, "... not inactive");
+ok($up->state, "... have some state");
+
+# test comments
+{
+    ok(! $up->comment, "... has no comment set");
+    my $cmt = "Comment on first userpic";
+    ok($up->set_comment($cmt), "Set a comment.");
+    is($up->comment, $cmt, "... it matches");
+}
 
 # duplicate testing
 {
@@ -45,7 +55,6 @@ is($up->extension, "jpg", "it's a jpeg");
     ok(!$bogus2, "... no instance found");
 }
 
-ok(0, "TODO: set_comment");
 ok(0, "TODO: set_keywords and keywords accessor");
 ok(0, "TODO: Mutable methods modify data structure ");
 ok(0, "TODO: setting defaults");

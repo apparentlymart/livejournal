@@ -101,7 +101,7 @@ sub state {
 
 sub comment {
     my $self = shift;
-    return $self->{comment} if defined $self->{comment};
+    return $self->{comment} if exists $self->{comment};
     $self->load_row;
     return $self->{comment};
 }
@@ -527,6 +527,24 @@ sub delete {
     return 1;
 }
 
+sub set_comment {
+    my ($self, $comment) = @_;
+    local $LJ::THROW_ERRORS = 1;
+
+    my $u = $self->owner;
+    return 0 unless LJ::Userpic->user_supports_comments($u);
+    $comment = LJ::text_trim($comment, LJ::BMAX_UPIC_COMMENT(), LJ::CMAX_UPIC_COMMENT());
+    $u->do("UPDATE userpic2 SET comment=? WHERE userid=? AND picid=?",
+                  undef, $comment, $u->{'userid'}, $self->id)
+        or die;
+    $self->{comment} = $comment;
+
+    my $memkey = [$u->{'userid'},"upiccom:$u->{'userid'}"];
+    LJ::MemCache::delete($memkey);
+    return 1;
+}
+
+
 ####
 # error classes:
 
@@ -718,13 +736,6 @@ sub set_keywords {
 
 }
 
-sub set_comment {
-    my ($self, $comment) = @_;
-    return 0 unless $u->{'dversion'} > 6;
-    my $comment = LJ::text_trim($POST{"com_$pic->{'picid'}"}, LJ::BMAX_UPIC_COMMENT, LJ::CMAX_UPIC_COMMENT);
-    $u->do("UPDATE userpic2 SET comment=? WHERE userid=? AND picid=?",
-           undef, $comment, $u->{'userid'}, $pic->{'picid'});
-}
 
 sub set_fullurl {
     my ($self, $url) = @_;
