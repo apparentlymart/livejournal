@@ -1134,7 +1134,7 @@ sub entry_form {
                                 'id' => 'draft'});
 
     if ($opts->{'richtext'} && !$opts->{'did_spellcheck'}) {
-        LJ::need_res('js/rte.js', 'stc/fck/fckeditor.js');
+        LJ::need_res('js/rte.js', 'stc/fck/fckeditor.js', 'stc/display_none.css');
 
         my $jnorich = LJ::ejs(LJ::deemp(BML::ml('entryform.htmlokay.norich2')));
 

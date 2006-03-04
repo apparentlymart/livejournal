@@ -210,7 +210,7 @@ body<=
                 'auth' => $auth,
                 'remote' => $remote,
                 'spellcheck_html' => $spellcheck_html,
-                'richtext' => 0,
+                'richtext' => $LJ::DISABLED{'richtext'} ? 0 : 1,
                 'mood' => $res{'events_1_'},
                 'disabled_save' => $disabled_save,
                 'disabled_delete' => $disabled_delete,
@@ -220,6 +220,7 @@ body<=
                 $entry->{"prop_" . $res{"prop_${i}_name"}} = $res{"prop_${i}_value"};
             }
             foreach ( keys %POST ) { $entry->{$_} = %POST->{$_}; }
+            $entry->{'richtext_default'} = $entry->{"prop_used_rte"} ? 1 : 0,
 
             my $onload = "shift_contents(); ";
             $ret .= LJ::entry_form($entry, \$$head, \$onload);
@@ -406,7 +407,6 @@ head<=
 
 <?entryformcss?>
 <?_code return $_[1]->{'head'}; _code?>
-<script type="text/javascript" language="JavaScript" src="/js/entry.js"></script>
 <?_code return $LJ::COMMON_CODE{'autoradio_check'}; _code?>
 
 <?_code
