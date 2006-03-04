@@ -22,30 +22,30 @@ sub new {
 }
 
 # given a md5sum, load a userpic
-# takes $u, $md5sum
+# takes $u, $md5sum (base64)
+# TODO: croak if md5sum is wrong number of bytes
 sub new_from_md5 {
     my ($class, $u, $md5sum) = @_;
-
-    return unless $u && $md5sum;
+    die unless $u && $md5sum;  #FIXME: better
 
     my $sth;
-
     if (LJ::Userpic->userpics_partitioned($u)) {
         $sth = $u->prepare("SELECT * FROM userpic2 WHERE userid=? " .
-                                  "AND md5base64=?");
+                           "AND md5base64=?");
     } else {
         my $dbr = LJ::get_db_reader();
         $sth = $dbr->prepare("SELECT * FROM userpic WHERE userid=? " .
-                                    "AND md5base64=?");
+                             "AND md5base64=?");
     }
     $sth->execute($u->{'userid'}, $md5sum);
-    my $row = $sth->fetchrow_hashref;
-
+    my $row = $sth->fetchrow_hashref
+        or return undef;
     return LJ::Userpic->new_from_row($row);
 }
 
 sub new_from_row {
     my ($class, $row) = @_;
+    die unless $row && $row->{userid} && $row->{picid};
     my $self = LJ::Userpic->new(LJ::load_userid($row->{userid}), $row->{picid});
     $self->absorb_row($row);
     return $self;
@@ -53,7 +53,7 @@ sub new_from_row {
 
 sub absorb_row {
     my ($self, $row) = @_;
-    for my $f(qw(userid picid width height comment location state)) {
+    for my $f (qw(userid picid width height comment location state)) {
         $self->{$f} = $row->{$f};
     }
     $self->{_ext} = $MimeTypeMap{$row->{fmt} || $row->{contenttype}};
@@ -332,35 +332,28 @@ sub create {
 
     my $dbh = LJ::get_db_writer();
 
-    # see if it's a duplicate
-    my $picid;
-    my $contenttype;
-    if ($u->{'dversion'} > 6) {
-        if ($filetype eq "GIF") { $contenttype = 'G'; }
-        elsif ($filetype eq "PNG") { $contenttype = 'P'; }
-        elsif ($filetype eq "JPG") { $contenttype = 'J'; }
-
-        my $dbcr = LJ::get_cluster_def_reader($u);
-        $picid = $dbcr->selectrow_array("SELECT picid FROM userpic2 " .
-                                        "WHERE userid=? AND fmt=? " .
-                                        "AND md5base64=?",
-                                        undef, $u->{'userid'}, $contenttype, $base64);
-    } else {
-        if ($filetype eq "GIF") { $contenttype = "image/gif"; }
-        elsif ($filetype eq "PNG") { $contenttype = "image/png"; }
-        elsif ($filetype eq "JPG") { $contenttype = "image/jpeg"; }
-
-        $picid = $dbh->selectrow_array("SELECT picid FROM userpic " .
-                                       "WHERE userid=? AND contenttype=? " .
-                                       "AND md5base64=?",
-                                       undef, $u->{'userid'}, $contenttype, $base64);
+    # see if it's a duplicate, return it if it is
+    if (my $dup_up = LJ::Userpic->new_from_md5($u, $base64)) {
+        return $dup_up;
     }
 
-    # return it if it exists
+    # start making a new onew
+    my $picid = LJ::alloc_global_counter('P');
 
-    # if doesn't exist, make it
-
-    $picid = LJ::alloc_global_counter('P');
+    my $contenttype;
+    if (LJ::Userpic->userpics_partitioned($u)) {
+        $contenttype = {
+            'GIF' => 'G',
+            'PNG' => 'P',
+            'JPG' => 'J',
+        }->{$filetype};
+    } else {
+        $contenttype = {
+            'GIF' => 'image/gif',
+            'PNG' => 'image/png',
+            'JPG' => 'image/jpeg',
+        }->{$filetype};
+    }
 
     @errors = (); # TEMP: FIXME: remove... using exceptions
 
