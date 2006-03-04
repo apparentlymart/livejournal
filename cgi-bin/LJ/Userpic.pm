@@ -47,7 +47,7 @@ sub _skeleton {
 # TODO: croak if md5sum is wrong number of bytes
 sub new_from_md5 {
     my ($class, $u, $md5sum) = @_;
-    die unless $u && $md5sum;  #FIXME: better
+    die unless $u && length($md5sum) == 22;
 
     my $sth;
     if (LJ::Userpic->userpics_partitioned($u)) {
