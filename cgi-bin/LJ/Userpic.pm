@@ -14,6 +14,7 @@ my %MimeTypeMap = (
 
 sub new {
     my ($class, $u, $picid) = @_;
+    # starts out as a skeleton and gets loaded in over time, as needed:
     return bless {
         userid => $u->{userid},
         picid  => int($picid),
@@ -29,12 +30,12 @@ sub new_from_md5 {
 
     my $sth;
 
-    if (LJ::Userpic->user_supports_comments($u)) {
+    if (LJ::Userpic->userpics_partitioned($u)) {
         $sth = $u->prepare("SELECT * FROM userpic2 WHERE userid=? " .
                                   "AND md5base64=?");
     } else {
-        my $dbh = LJ::get_db_reader;
-        $sth = $dbh->prepare("SELECT * FROM userpic WHERE userid=? " .
+        my $dbr = LJ::get_db_reader();
+        $sth = $dbr->prepare("SELECT * FROM userpic WHERE userid=? " .
                                     "AND md5base64=?");
     }
     $sth->execute($u->{'userid'}, $md5sum);
@@ -96,6 +97,20 @@ sub height {
     my @dims = $self->dimensions;
     return undef unless @dims;
     return $dims[0];
+}
+
+sub extension {
+    my $self = shift;
+    return $self->{_ext} if $self->{_ext};
+    $self->load_row;
+    return $self->{_ext};
+}
+
+sub location {
+    my $self = shift;
+    return $self->{location} if $self->{location};
+    $self->load_row;
+    return $self->{location};
 }
 
 # returns (width, height)
@@ -217,13 +232,12 @@ sub supports_comments {
 
 # class method
 # does this user's dataversion support usepic comments?
-sub user_supports_comments {
+sub userpics_partitioned {
     my ($class, $u) = @_;
-
-    return undef unless ref $u;
-
+    Carp::croak("Not a valid \$u object") unless LJ::isu($u);
     return $u->{dversion} > 6;
 }
+*user_supports_comments = \&userpics_partitioned;
 
 # TODO: add in lazy peer loading here
 sub load_row {
@@ -273,13 +287,15 @@ sub create {
     local $LJ::THROW_ERRORS = 1;
 
     my $dataref = delete $opts{'data'};
-    $dataref = \$dataref unless ref $dataref;
+    croak("dataref not a scalarref") unless ref $dataref eq 'SCALAR';
+
     croak("Unknown options: " . join(", ", scalar keys %opts)) if %opts;
 
     my $err = sub {
         my $msg = shift;
     };
 
+    eval "use Image::Size;";
     my ($w, $h, $filetype) = Image::Size::imgsize($dataref);
     my $MAX_UPLOAD = LJ::Userpic->max_allowed_bytes($u);
 
@@ -404,8 +420,12 @@ sub create {
         push @errors, "User picture uploading failed for unknown reason";
     }
 
+    LJ::throw(@errors);
+
     # now that we've created a new pic, invalidate the user's memcached userpic info
     LJ::Userpic->delete_memcache($u);
+
+    return LJ::Userpic->new($u, $picid);
 }
 
 # make this picture the default
@@ -434,6 +454,63 @@ sub delete_memcache {
     $memkey = [$u->{'userid'},"upicurl:$u->{'userid'}"];
     LJ::MemCache::delete($memkey);
 
+}
+
+# delete this userpic
+# TODO: error checking/throw errors on failure
+sub delete {
+    my $self = shift;
+    local $LJ::THROW_ERRORS = 1;
+
+    my $fail = sub {
+        LJ::errobj("WithSubError",
+                   main   => LJ::errobj("DeleteFailed"),
+                   suberr => $@)->throw;
+    };
+
+    my $u = $self->owner;
+    my $picid = $self->id;
+
+    # delete meta-data first so it doesn't get stranded if errors
+    # between this and deleting row
+    $u->do("DELETE FROM userblob WHERE journalid=? AND blobid=? " .
+           "AND domain=?", undef, $u->{'userid'}, $picid,
+           LJ::get_blob_domainid('userpic'));
+    $fail->() if $@;
+
+    # userpic keywords
+    if (LJ::Userpic->userpics_partitioned($u)) {
+        eval {
+            $u->do("DELETE FROM userpicmap2 WHERE userid=? " .
+                   "AND picid=?", undef, $u->{userid}, $picid) or die;
+            $u->do("DELETE FROM userpic2 WHERE picid=? AND userid=?",
+                   undef, $picid, $u->{'userid'}) or die;
+            };
+    } else {
+        eval {
+            my $dbh = LJ::get_db_writer();
+            $dbh->do("DELETE FROM userpicmap WHERE userid=? " .
+                 "AND picid=?", undef, $u->{userid}, $picid) or die;
+            $dbh->do("DELETE FROM userpic WHERE picid=?", undef, $picid) or die;
+        };
+    }
+    $fail->() if $@;
+
+    # best-effort on deleteing the blobs
+    # TODO: we could fire warnings if they fail, then if $LJ::DIE_ON_WARN is set,
+    # the ->warn methods on errobjs are actually dies.
+    eval {
+        if ($self->location eq 'mogile') {
+            LJ::mogclient()->delete($u->mogfs_userpic_key($picid));
+        } elsif ($LJ::USERPIC_BLOBSERVER &&
+                 LJ::Blob::delete($u, "userpic", $self->extensions, $picid)) {
+        } elsif ($u->do("DELETE FROM userpicblob2 WHERE ".
+                        "userid=? AND picid=?", undef,
+                        $u->{userid}, $picid) > 0) {
+        }
+    };
+
+    return 1;
 }
 
 ####
@@ -492,6 +569,9 @@ sub as_html {
     return BML::ml("/editpics.bml.error.unsupportedtype",
                           { 'filetype' => $self->{'type'} });
 }
+
+package LJ::Error::Userpic::DeleteFailed;
+sub user_caused { 0 }
 
 
 __END__
@@ -639,92 +719,6 @@ sub set_fullurl {
            undef, @data, $u->{'userid'}, $picid);
 }
 
-# delete this userpic
-# TODO: error checking/throw errors on failure
-sub delete {
-    my $self = shift;
-
-    my $fmt;
-    if ($u->{'dversion'} > 6) {
-        $fmt = {
-            'G' => 'gif',
-            'J' => 'jpg',
-            'P' => 'png',
-        }->{$ctype{$picid}};
-    } else {
-        $fmt = {
-            'image/gif' => 'gif',
-            'image/jpeg' => 'jpg',
-            'image/png' => 'png',
-        }->{$ctype{$picid}};
-    }
-
-    my $deleted = 0;
-
-    my $id_in;
-    if ($u->{'dversion'} > 6) {
-        $id_in = join(", ", map { $dbcm->quote($_) } @delete);
-    } else {
-        $id_in = join(", ", map { $dbh->quote($_) } @delete);
-    }
-
-
-    # try and delete from either the blob server or database,
-    # and only after deleting the image do we delete the metadata.
-    if ($locations{$picid} eq 'mogile') {
-        $deleted = 1
-            if LJ::mogclient()->delete($u->mogfs_userpic_key($picid));
-    } elsif ($LJ::USERPIC_BLOBSERVER &&
-             LJ::Blob::delete($u, "userpic", $fmt, $picid)) {
-        $deleted = 1;
-    } elsif ($u->do("DELETE FROM userpicblob2 WHERE ".
-                    "userid=? AND picid=?", undef,
-                    $u->{userid}, $picid) > 0) {
-        $deleted = 1;
-    }
-
-    # now delete the metadata if we got the real data
-    if ($deleted) {
-        if ($u->{'dversion'} > 6) {
-            $u->do("DELETE FROM userpic2 WHERE picid=? AND userid=?",
-                   undef, $picid, $u->{'userid'});
-        } else {
-            $dbh->do("DELETE FROM userpic WHERE picid=?", undef, $picid);
-        }
-        $u->do("DELETE FROM userblob WHERE journalid=? AND blobid=? " .
-               "AND domain=?", undef, $u->{'userid'}, $picid,
-               LJ::get_blob_domainid('userpic'));
-
-        # decrement $count to reflect deletion
-        $count--;
-    }
-
-    # if we didn't end up deleting, it's either because of
-    # some transient error, or maybe there was nothing to delete
-    # for some bizarre reason, in which case we should verify
-    # that and make sure they can delete their metadata
-    if (! $deleted) {
-        my $present;
-        if ($locations{$picid} eq 'mogile') {
-            my $blob = LJ::mogclient()->get_file_data($u->mogfs_userpic_key($picid));
-            $present = length($blob) ? 1 : 0;
-        } elsif ($LJ::USERPIC_BLOBSERVER) {
-            my $blob = LJ::Blob::get($u, "userpic", $fmt, $picid);
-            $present = length($blob) ? 1 : 0;
-        }
-        $present ||= $dbcm->selectrow_array("SELECT COUNT(*) FROM userpicblob2 WHERE ".
-                                            "userid=? AND picid=?", undef, $u->{'userid'},
-                                            $picid);
-        if (! int($present)) {
-            if ($u->{'dversion'} > 6) {
-                $u->do("DELETE FROM userpic2 WHERE picid=? AND userid=?",
-                       undef, $picid, $u->{'userid'});
-            } else {
-                $dbh->do("DELETE FROM userpic WHERE picid=?", undef, $picid);
-            }
-        }
-    }
-}
 
 
 1;
