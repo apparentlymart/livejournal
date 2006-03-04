@@ -1,6 +1,10 @@
 function useRichText(textArea, statPrefix) {
-    $("insobj").className = 'display_none';
-    $("jrich").className = 'display_none';
+    if ($("insobj")) {
+        $("insobj").className = 'display_none';
+    }
+    if ($("jrich")) {
+        $("jrich").className = 'display_none';
+    }
     var oFCKeditor = new FCKeditor(textArea);
     oFCKeditor.BasePath = statPrefix + "/fck/";
     oFCKeditor.Height = 350;
