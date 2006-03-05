@@ -356,7 +356,6 @@ sub create {
 
     my $base64 = Digest::MD5::md5_base64($$dataref);
 
-
     my $target;
     if ($u->{dversion} > 6 && $LJ::USERPIC_MOGILEFS) {
         $target = 'mogile';
@@ -629,7 +628,7 @@ sub set_keywords {
     if (! @data or scalar @data == 0) {
         # delete all keywords
         $u->do("DELETE FROM userpicmap2 WHERE userid=? AND picid=?", undef, $u->{userid}, $self->id);
-        return;
+        return 1;
     }
 
     my $bind = join(',', @bind);
@@ -641,6 +640,8 @@ sub set_keywords {
         return $dbh->do("INSERT INTO userpicmap (userid, kwid, picid) VALUES $bind",
                         undef, @data);
     }
+
+    return 1;
 }
 
 sub set_fullurl {
@@ -650,6 +651,8 @@ sub set_fullurl {
     $u->do("UPDATE userpic2 SET url=? WHERE userid=? AND picid=?",
            undef, $url, $u->{'userid'}, $self->id);
     $self->{url} = $url;
+
+    return 1;
 }
 
 ####
