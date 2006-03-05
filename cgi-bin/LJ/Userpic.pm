@@ -74,7 +74,7 @@ sub new_from_row {
 
 sub absorb_row {
     my ($self, $row) = @_;
-    for my $f (qw(userid picid width height comment location state)) {
+    for my $f (qw(userid picid width height comment location state url)) {
         $self->{$f} = $row->{$f};
     }
     $self->{_ext} = $MimeTypeMap{$row->{fmt} || $row->{contenttype}};
@@ -165,10 +165,23 @@ sub url {
     return "$LJ::USERPIC_ROOT/$self->{picid}/$self->{userid}";
 }
 
+sub fullurl {
+    my $self = shift;
+    return $self->{url} if $self->{url};
+    $self->load_row;
+    return $self->{url};
+}
+
 # in scalar context returns comma-seperated list of keywords or "pic#12345" if no keywords defined
 # in list context returns list of keywords ( (pic#12345) if none defined )
+# opts: 'raw' = return '' instead of 'pic#12345'
 sub keywords {
     my $self = shift;
+    my %opts = @_;
+
+    my $raw = delete $opts{raw} || undef;
+
+    croak "Invalid opts passed to LJ::Userpic::keywords" if keys %opts;
 
     my $picinfo = LJ::get_userpic_info($self->{userid}, {load_comments => 0});
 
@@ -188,14 +201,14 @@ sub keywords {
 
     if (wantarray) {
         # if list context return the array
-        return ("pic#" . $self->id) unless @pickeywords;
+        return ($raw ? ('') : ("pic#" . $self->id)) unless @pickeywords;
 
         return @pickeywords;
     } else {
         # if scalar context return comma-seperated list of keywords, or "pic#12345" if no keywords
-        return ("pic#" . $self->id) unless @pickeywords;
+        return ($raw ? '' : "pic#" . $self->id) unless @pickeywords;
 
-        return join(',', @pickeywords);
+        return join(', ', sort @pickeywords);
     }
 }
 
@@ -265,13 +278,13 @@ sub load_row {
     my $self = shift;
     my $u = $self->owner;
     my $row;
-    if ($u->{'dversion'} > 6) {
-        $row = $u->selectrow_hashref("SELECT userid, picid, width, height, state, fmt, comment, location " .
+    if (LJ::Userpic->userpics_partitioned($u)) {
+        $row = $u->selectrow_hashref("SELECT userid, picid, width, height, state, fmt, comment, location, url " .
                                      "FROM userpic2 WHERE userid=? AND picid=?", undef,
                                      $u->{userid}, $self->{picid});
     } else {
-        my $dbh = LJ::get_db_writer();
-        $row = $dbh->selectrow_hashref("SELECT userid, picid, width, height, state, contenttype " .
+        my $dbr = LJ::get_db_reader();
+        $row = $dbr->selectrow_hashref("SELECT userid, picid, width, height, state, contenttype " .
                                        "FROM userpic WHERE userid=? AND picid=?", undef,
                                        $u->{userid}, $self->{picid});
     }
@@ -437,7 +450,7 @@ sub create {
     LJ::throw(@errors);
 
     # now that we've created a new pic, invalidate the user's memcached userpic info
-    LJ::Userpic->delete_memcache($u);
+    LJ::Userpic->delete_cache($u);
 
     return LJ::Userpic->new($u, $picid);
 }
@@ -459,7 +472,7 @@ sub is_default {
     return $u->{'defaultpicid'} == $self->id;
 }
 
-sub delete_memcache {
+sub delete_cache {
     my ($class, $u) = @_;
     my $memkey = [$u->{'userid'},"upicinf:$u->{'userid'}"];
     LJ::MemCache::delete($memkey);
@@ -468,6 +481,8 @@ sub delete_memcache {
     $memkey = [$u->{'userid'},"upicurl:$u->{'userid'}"];
     LJ::MemCache::delete($memkey);
 
+    # clear process cache
+    $LJ::CACHE_USERPIC_INFO{$u->{'userid'}} = undef;
 }
 
 # delete this userpic
@@ -524,6 +539,8 @@ sub delete {
         }
     };
 
+    LJ::Userpic->delete_cache($u);
+
     return 1;
 }
 
@@ -544,6 +561,96 @@ sub set_comment {
     return 1;
 }
 
+# instance method:  takes a string of comma-separate keywords, or an array of keywords
+sub set_keywords {
+    my $self = shift;
+
+    my @keywords;
+    if (@_ > 1) {
+        @keywords = @_;
+    } else {
+        @keywords = split(',', $_[0]);
+    }
+    @keywords = grep { s/^\s+//; s/\s+$//; $_; } @keywords;
+
+    my $u = $self->owner;
+    my $sth;
+    my $dbh;
+
+    if (LJ::Userpic->userpics_partitioned($u)) {
+        $sth = $u->prepare("SELECT kwid, picid FROM userpicmap2 WHERE userid=?");
+    } else {
+        $dbh = LJ::get_db_writer();
+        $sth = $dbh->prepare("SELECT kwid, picid FROM userpicmap WHERE userid=?");
+    }
+    $sth->execute($u->{'userid'});
+
+    my %exist_kwids;
+    while (my ($kwid, $picid) = $sth->fetchrow_array) {
+        $exist_kwids{$kwid} = $picid;
+    }
+
+    my (@bind, @data, @kw_errors);
+    my $c = 0;
+    my $picid = $self->{picid};
+
+    foreach my $kw (@keywords) {
+        my $kwid = (LJ::Userpic->userpics_partitioned($u)) ? LJ::get_keyword_id($u, $kw) : LJ::get_keyword_id($kw);
+        next unless $kwid; # TODO: fire some warning that keyword was bogus
+
+        if (++$c > $LJ::MAX_USERPIC_KEYWORDS) {
+            push @kw_errors, $kw;
+            next;
+        }
+
+        if ($exist_kwids{$kwid}) { # Already used on another picture
+            my $ekw = LJ::ehtml($kw);
+            next;
+        } else { # New keyword, so save it
+            push @bind, '(?, ?, ?)';
+            push @data, $u->{'userid'}, $kwid, $picid;
+        }
+
+    }
+
+    # Let the user know about any we didn't save
+    if (@kw_errors) {
+        my $num_words = scalar(@kw_errors);
+        LJ::Throw->(LJ::errobj("Userpic::TooManyKeywords",
+                               userpic => $self,
+                               lost    => \@kw_errors));
+
+
+        #push @errors, BML::ml(".error.toomanykeywords", {'numwords' => $num_words, 'words' => $kws, 'max' => $LJ::MAX_USERPIC_KEYWORDS});
+    }
+
+    LJ::Userpic->delete_cache($u);
+
+    if (! @data or scalar @data == 0) {
+        # delete all keywords
+        $u->do("DELETE FROM userpicmap2 WHERE userid=? AND picid=?", undef, $u->{userid}, $self->id);
+        return;
+    }
+
+    my $bind = join(',', @bind);
+
+    if (LJ::Userpic->userpics_partitioned($u)) {
+        return $u->do("REPLACE INTO userpicmap2 (userid, kwid, picid) VALUES $bind",
+                      undef, @data);
+    } else {
+        return $dbh->do("INSERT INTO userpicmap (userid, kwid, picid) VALUES $bind",
+                        undef, @data);
+    }
+}
+
+sub set_fullurl {
+    my ($self, $url) = @_;
+    my $u = $self->owner;
+    return 0 unless LJ::Userpic->userpics_partitioned($u);
+    $u->do("UPDATE userpic2 SET url=? WHERE userid=? AND picid=?",
+           undef, $url, $u->{'userid'}, $self->id);
+    $self->{url} = $url;
+}
 
 ####
 # error classes:
@@ -608,87 +715,6 @@ sub user_caused { 0 }
 
 __END__
 
-# instance method:  takes a string of comma-separate keywords, or an array of keywords
-# FIXME: XXX: NOT YET FINISHED (NOT YET TESTED)
-sub set_keywords {
-    my $self = shift;
-    my $opts = ref $_[0] eq "HASH" ? {%{ $_[0] }} : {};
-
-    my @keywords;
-    if (@keywords > 1) {
-        @keywords = @_;
-    } else {
-        @keywords = split(',', $_[0]);
-    }
-    @keywords = grep { s/^\s+//; s/\s+$//; $_; } @keywords;
-
-    my $on_warn = delete $opts->{'onwarn'} || sub {};
-    Carp::croak("Unknown options") if %$opts;
-
-    my $u = $self->owner;
-    my $sth;
-    my $dbh;
-
-    if ($u->{'dversion'} > 6) {
-        $sth = $u->prepare("SELECT kwid, picid FROM userpicmap2 WHERE userid=?");
-    } else {
-        $dbh = LJ::get_db_writer();
-        $sth = $dbh->prepare("SELECT kwid, picid FROM userpicmap WHERE userid=?");
-    }
-    $sth->execute($u->{'userid'});
-
-    my %exist_kwids;
-    while (my ($kwid, $picid) = $sth->fetchrow_array) {
-        $exist_kwids{$kwid} = $picid;
-    }
-
-    my (@bind, @data, @kw_errors);
-    my $c = 0;
-    my $picid = $self->{picid};
-
-    foreach my $kw (@keywords) {
-        my $kwid = ($u->{'dversion'} > 6) ? LJ::get_keyword_id($u, $kw) : LJ::get_keyword_id($kw);
-        next unless $kwid; # FIXME: fire some warning that keyword was bogus
-
-        if (++$c > $LJ::MAX_USERPIC_KEYWORDS) {
-            push @kw_errors, $kw;
-            next;
-        }
-
-        if ($exist_kwids{$kwid}) { # Already used on another picture
-            my $ekw = LJ::ehtml($kw);
-            #push @errors, BML::ml(".error.keywords", {'ekw' => $ekw});
-            next;
-        } else { # New keyword, so save it
-            push @bind, '(?, ?, ?)';
-            push @data, $u->{'userid'}, $kwid, $picid;
-        }
-
-    }
-
-    # Let the user know about any we didn't save
-    if (@kw_errors) {
-        my $num_words = scalar(@kw_errors);
-        $on_warn->(LJ::errobj("Userpic::TooManyKeywords",
-                               userpic => $self,
-                               lost    => \@kw_errors));
-
-
-        #push @errors, BML::ml(".error.toomanykeywords", {'numwords' => $num_words, 'words' => $kws, 'max' => $LJ::MAX_USERPIC_KEYWORDS});
-    }
-
-    return 1 unless @data;
-    my $bind = join(',', @bind);
-
-    if ($u->{'dversion'} > 6) {
-        return $u->do("INSERT INTO userpicmap2 (userid, kwid, picid) VALUES $bind",
-                      undef, @data);
-    } else {
-        return $dbh->do("INSERT INTO userpicmap (userid, kwid, picid) VALUES $bind",
-                        undef, @data);
-    }
-}
-
 
 sub set_keywords {
     my ($self, $keywords) = @_;
@@ -737,12 +763,6 @@ sub set_keywords {
 }
 
 
-sub set_fullurl {
-    my ($self, $url) = @_;
-    return 0 unless $u->{'dversion'} > 6;
-    $u->do("UPDATE userpic2 SET $set WHERE userid=? AND picid=?",
-           undef, @data, $u->{'userid'}, $picid);
-}
 
 
 
