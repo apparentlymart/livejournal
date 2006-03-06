@@ -960,10 +960,11 @@ if ($u->{'journaltitle'}) {
              my $count = 0;
              foreach (@friend_of) {
                  my $frlink;
+                 my $nofollow = $remote_friendid{$_->{'userid'}} ? "" : " rel='nofollow'";
                  if ($_->{'journaltype'} eq "P") {
-                     $frlink = "<a href='" . $_->profile_url() . "'>$_->{'user'}</a>";
+                     $frlink = "<a$nofollow href='" . $_->profile_url() . "'>$_->{'user'}</a>";
                  } elsif ($_->{'journaltype'} eq "I") {
-                     $frlink = "<a href=\"$LJ::SITEROOT/userinfo.bml?userid=$_->{'userid'}&amp;t=I\">" . LJ::ehtml($_->display_name) . "</a>";
+                     $frlink = "<a$nofollow href=\"$LJ::SITEROOT/userinfo.bml?userid=$_->{'userid'}&amp;t=I\">" . LJ::ehtml($_->display_name) . "</a>";
                  }
                  $frlink = "<b>$frlink</b>" if $remote_friendid{$_->{'userid'}};
                  $body .= "$frlink, ";
