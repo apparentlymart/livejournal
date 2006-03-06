@@ -331,8 +331,6 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
      if ($LJ::HUMAN_CHECK{create}) {
          ($capid, $anum) = LJ::Captcha::session_check_code($POST{captcha_chal}, $POST{answer});
          $errors{'captcha'} = $ML{'.captcha.invalid'} unless $capid && $anum;
-     } else {
-         $errors{'invalidform'} = $ML{'error.invalidform'} unless LJ::check_form_auth();
      }
      last SUBMIT if %errors;
 
