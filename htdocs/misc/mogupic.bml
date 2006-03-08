@@ -6,9 +6,9 @@
     return LJ::error_noremote() unless $remote;
 
     my $size = int($GET{'size'});
-    $size = 640 if $size < 0 || $size > 640;
+    $size = 640 if $size <= 0 || $size > 640;
 
-    my $upf = LJ::get_upf_scaled(size => $size);
+    my $upf = LJ::get_upf_scaled(size => $size, remote => $remote->{userid});
 
     return "Error retreiving image." unless $upf;
 
@@ -18,7 +18,7 @@
     BML::set_content_type($mime);
     BML::noparse();
 
-    return $blob;
+    return $$blob;
 }
 _code?>
 

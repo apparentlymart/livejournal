@@ -465,157 +465,155 @@ sub get_picid_from_keyword
 # if only $size is passed, will return image scaled so the largest dimension will
 # not be greater than $size. If $x1, $y1... are set then it will return the image
 # scaled so the largest dimension will not be greater than 100
-# all parameters are optional, default size is 640. if $x1 is present, the rest of
-# the points should be as well.
+# all parameters are optional, default size is 640.
 #
 # if maxfilesize option is passed, get_upf_scaled will decrease the image quality
 # until it reaches maxfilesize, in kilobytes. (only applies to the 100x100 userpic)
 #
-# returns [image, mime, width, height] on success, undef on failure.
+# returns [imageref, mime, width, height] on success, undef on failure.
 #
 # note: this will always keep the image's original aspect ratio and not distort it.
-sub get_upf_scaled
+sub get_upf_scaled {
+    my @args = @_;
+
+    if (scalar @LJ::GEARMAN_SERVERS > 0) {
+        # if gearman, kick off a gearman job and block until we get a result.
+        my $client = Gearman::Client->new;
+        $client->job_servers(@LJ::GEARMAN_SERVERS);
+        my $result = $client->do_task('lj_upf_resize', Storable::nfreeze(\@args), {});
+
+        if (!$result) {
+            # job failed... error reporting?
+        } else {
+            return Storable::thaw($$result);
+        }
+    } else {
+        # just do it and return if no gearman
+        return LJ::_get_upf_scaled(@args);
+    }
+}
+
+# actual method
+sub _get_upf_scaled
 {
     my %opts = @_;
     my $size = delete $opts{size} || 640;
-
     my $x1 = delete $opts{x1};
     my $y1 = delete $opts{y1};
     my $x2 = delete $opts{x2};
     my $y2 = delete $opts{y2};
-
     my $maxfilesize = delete $opts{maxfilesize} || 38;
+    my $remote = LJ::want_user(delete $opts{remote}) || LJ::get_remote;
     $maxfilesize *= 1024;
 
-    print STDERR "Invalid parameters to get_upf_scaled\n" if scalar keys %opts;
+    croak "Invalid parameters to get_upf_scaled\n" if scalar keys %opts;
 
-    my $remote = LJ::get_remote();
-    return undef unless $remote;
+    my $mode = ($x1 || $y1 || $x2 || $y2) ? "crop" : "scale";
 
-    my $has_magick = eval "use Image::Magick (); 1;";
-    return undef unless $has_magick;
+    return unless $remote;
 
-    my $key = 'upf:' . $remote->{userid};
+    eval "use Image::Magick (); 1;"
+        or return undef;
 
-    my $dataref = LJ::mogclient()->get_file_data($key) or return undef;
+    eval "use Image::Size (); 1;"
+        or return undef;
 
-    my $imgdata = $$dataref;
+    my $mogkey = 'upf:' . $remote->{userid};
+    my $dataref = LJ::mogclient()->get_file_data($mogkey) or return undef;
 
-    my $image = Image::Magick->new() or return undef;
+    # original width/height
+    my ($ow, $oh) = Image::Size::imgsize($dataref);
+    return undef unless $ow && $oh;
 
-    $image->BlobToImage($imgdata);
-
-    my $mime = $image->Get('MIME');
-
-    my $w = $image->Get('width');
-    my $h = $image->Get('height');
+    # converts an ImageMagick object to the form returned to our callers
+    my $imageParams = sub {
+        my $im = shift;
+        my $blob = $im->ImageToBlob;
+        return [\$blob, $im->Get('MIME'), $im->Get('width'), $im->Get('height')];
+    };
 
     # compute new width and height while keeping aspect ratio
     my $getSizedCoords = sub {
         my $newsize = shift;
 
-        my $_w = $image->Get('width') || return undef;
-        my $_h = $image->Get('height') || return undef;
+        my $fromw = $ow;
+        my $fromh = $oh;
 
-        my ($nh, $nw);
-
-        if ($_h > $_w) {
-            $nh = $newsize;
-            $nw = $newsize * $_w/$_h;
-        } else {
-            $nw = $newsize;
-            $nh = $newsize * $_h/$_w;
+        my $img = shift;
+        if ($img) {
+            $fromw = $img->Get('width');
+            $fromh = $img->Get('height');
         }
 
-        return ($nw, $nh);
+        return (int($newsize * $fromw/$fromh), $newsize) if $fromh > $fromw;
+        return ($newsize, int($newsize * $fromh/$fromw));
     };
 
-    # resize image keeping aspect ratio and ensuring that the largest bound is $newsize
-    my $aspectResize = sub {
-        my $newsize = shift;
+    # get the "medium sized" width/height.  this is the size which
+    # the user selects from
+    my ($medw, $medh) = $getSizedCoords->($size);
+    return undef unless $medw && $medh;
 
-        my ($nw, $nh) = $getSizedCoords->($newsize);
-
-        if ($nw || $nh) {
-            $image->Scale(width => $nw, height => $nh);
-        }
-    };
-
-    if ($x1 && $x2 && $y1 && $y2) {
-        # scale small coords to full-size so we can crop the high quality source image before for
-        # higher quality scaled userpics.
-        my ($scaledw, $scaledh) = $getSizedCoords->($size);
-        return undef if (!$scaledw && !$scaledh);
-
-        $x1 *= ($w/$scaledw);
-        $x2 *= ($w/$scaledw);
-
-        $y1 *= ($h/$scaledh);
-        $y2 *= ($h/$scaledh);
-
-        my $tw = $x2 - $x1;
-        my $th = $y2 - $y1;
-
-        $image->Set('quality', 100);
-
-        $image->Crop(
-                     x => $x1,
-                     y => $y1,
-                     width => $tw,
-                     height => $th
-                     );
-        $aspectResize->(100);
-
-        # try different compression levels in a binary search pattern until we get our desired file size
-        my $adjustQuality;
-        my $lastbest;
-
-        $adjustQuality = sub {
-            my ($left, $right, $iters) = @_;
-
-            # make sure we don't take too long. if it takes more than 10 iterations, oh well
-            if ($iters++ > 10 || $left > $right) {
-                return undef;
-            }
-
-            # work off a copy of the image so we aren't recompressing it
-            my $piccopy = Image::Magick->new();
-            $piccopy->BlobToImage($image->ImageToBlob);
-
-            my $mid = ($left + $right) / 2;
-            $piccopy->Set('quality' => $mid);
-            my $quality = $piccopy->Get('quality');
-            my $filesize = length($piccopy->ImageToBlob);
-
-            # save a workable solution if things don't work out
-            $lastbest = $piccopy if ($filesize < $maxfilesize);
-
-            # not good if filesize > maxfilesize, but good if filesize < maxfilesize within 5%
-            return $mid if ($maxfilesize - $filesize > 0 && $maxfilesize - $filesize < $maxfilesize * .005);
-
-            if ($filesize > $maxfilesize) {
-                return $adjustQuality->($left, $mid - 1, $iters);
-            } else {
-                return $adjustQuality->($mid + 1, $right, $iters);
-            }
-        };
-
-        if (length($image->ImageToBlob) > $maxfilesize) {
-            my $newquality = $adjustQuality->(0, 100, 0);
-            if ($newquality) {
-                $image->Set('quality' => $newquality);
-            } elsif($lastbest) {
-                $image = $lastbest;
-            }
-        }
-
-    } else {
-        $aspectResize->($size);
+    # simple scaling mode
+    if ($mode eq "scale") {
+        my $image = Image::Magick->new(size => "${medw}x${medh}")
+            or return undef;
+        $image->BlobToImage($$dataref);
+        $image->Scale(width => $medw, height => $medh);
+        return $imageParams->($image);
     }
 
-    my ($blob) = $image->ImageToBlob;
+    # else, we're in 100x100 cropping mode
 
-    return [$blob, $mime, $image->Get('width'), $image->Get('height')];
+    # scale user coordinates  up from the medium pixelspace to full pixelspace
+    $x1 *= ($ow/$medw);
+    $x2 *= ($ow/$medw);
+    $y1 *= ($oh/$medh);
+    $y2 *= ($oh/$medh);
+
+    # cropping dimensions from the full pixelspace
+    my $tw = $x2 - $x1;
+    my $th = $y2 - $y1;
+
+    # but if their selected region in full pixelspace is 800x800 or something
+    # ridiculous, no point decoding the JPEG to its full size... we can
+    # decode to a smaller size so we get 100px when we crop
+    my $min_dim = $tw < $th ? $tw : $th;
+    my ($decodew, $decodeh) = ($ow, $oh);
+    my $wanted_size = 100;
+    if ($min_dim > $wanted_size) {
+        # then let's not decode the full JPEG down from its huge size
+        my $de_scale = $wanted_size / $min_dim;
+        $decodew = int($de_scale * $decodew);
+        $decodeh = int($de_scale * $decodeh);
+        $_ *= $de_scale foreach ($x1, $x2, $y1, $y2);
+    }
+
+    $_ = int($_) foreach ($x1, $x2, $y1, $y2, $tw, $th);
+
+    # make the pristine (uncompressed) 100x100 image
+    my $timage = Image::Magick->new(size => "${decodew}x${decodeh}")
+        or return undef;
+    $timage->BlobToImage($$dataref);
+    $timage->Scale(width => $decodew, height => $decodeh);
+
+    my $w = ($x2 - $x1);
+    my $h = ($y2 - $y1);
+    my $foo = $timage->Mogrify(crop => "${w}x${h}+$x1+$y1");
+
+    my ($nw, $nh) = $getSizedCoords->(100, $timage);
+    $timage->Scale(width => $nw, height => $nh);
+
+    foreach my $qual (qw(100 90 85 75)) {
+        # work off a copy of the image so we aren't recompressing it
+        my $piccopy = $timage->Clone();
+        $piccopy->Set('quality' => $qual);
+        my $ret = $imageParams->($piccopy);
+        return $ret if length(${ $ret->[0] }) < $maxfilesize;
+    }
+
+    return undef;
 }
+
 
 1;

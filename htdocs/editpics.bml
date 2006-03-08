@@ -162,10 +162,10 @@
             my $MAX_UPLOAD = LJ::Userpic->max_allowed_bytes($u);
             my $error;
 
-            my $disabled = $LJ::DISABLED{'userpicfactory'};
+            my $factory_disabled = $LJ::DISABLED{'userpicfactory'};
 
             # file over 40k, return too large error
-            if ($disabled && ($size > $MAX_UPLOAD + 2048)) {
+            if ($factory_disabled && ($size > $MAX_UPLOAD + 2048)) {
                 # we have to suck in the data otherwise the browser gets upset because we're
                 # closing the connection before reading in all the data and it will sometimes
                 # refuse to show the error.
@@ -183,7 +183,7 @@
                                             $ML{'.kilobytes'} }));
             }
 
-            my $gotofactory = !$disabled && ($size > $MAX_UPLOAD + 2048);
+            my $gotofactory = !$factory_disabled && ($size > $MAX_UPLOAD + 2048);
 
             # small file size, check the pic out
             if (!$gotofactory) {
@@ -198,7 +198,7 @@
                   if ($POST{'userpic'}) {
                       my ($imagew, $imageh, $filetype) = Image::Size::imgsize(\$POST{'userpic'});
                       if ($imagew > 100 || $imageh > 100) {
-                          if ($disabled) {
+                          if ($factory_disabled) {
                               # less than 40k, greater than 100x100 and factory is disabled
                               return $err->(BML::ml('.error.imagetoolarge', {imagesize => "${imagew}x$imageh"}));
                           } else {
@@ -580,13 +580,11 @@
         $body .= " standout?>\n\n";
     };
 
-    if (!$fotobilder) {
-        $body .= "<form method='post' action='editpics.bml$getextra'>";
-        $body .= LJ::form_auth();
-    }
-
     # print out each pic and editing fields
     if (scalar @userpics && !$fotobilder) {
+        $body .= "<form method='post' action='editpics.bml$getextra'>";
+        $body .= LJ::form_auth();
+
         my $uploadBoxLink = '';
 
         # print out a link to the bottom of the page where the upload box goes
@@ -666,8 +664,12 @@
         $body .= "</td></tr>\n";
         $body .= "<tr align='center'><td>" . LJ::html_submit('action:save', $ML{'.btn.save'}) . "</td></tr>\n";
         $body .= "</table></form>";
+
     } elsif (!$fotobilder) {
-        $body .= "<?h1 $ML{'.nopics'} h1?><?p $ML{'.noneupload'} p?>";
+        $body .= qq {
+                <?h1 $ML{'.nopics'} h1?>
+                <?p $ML{'.noneupload'} p?>
+            };
     }
 
     $emit_upload_box->();
