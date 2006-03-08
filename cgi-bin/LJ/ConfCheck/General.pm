@@ -457,6 +457,10 @@ add_conf('$UNDERAGE_ERROR',
          type => 'html',
          des => "Error message to show underage users.");
 
+add_conf('$USE_ADS',
+         type => 'int',
+         des => "True value to show banner ads on the site.  STILL IN DEVELOPMENT, DO NOT USE IN PRODUCTION");
+
 add_conf('$USERPIC_ROOT',
          type => 'url',
          no_trailing_slash => 1,

@@ -1785,6 +1785,32 @@ sub tag_cloud {
     return $ret;
 }
 
+sub ads {
+    my %opts = @_;
+    my $type = delete $opts{'type'};
+
+    my $ret = '';
+    return $ret unless $LJ::USE_ADS;
+
+    my $types = {
+        'skyscraper'   => '<a href=""><img src="http://www.iab.net/standards/images/ads/160x600.gif" width="160" height="600"></a>',
+        'leaderboard'  => '<a href=""><img src="http://www.iab.net/standards/images/ads/726X90_v2.gif" width="728" height="90"></a>',
+        'rectangle'    => '<a href=""><img src="http://www.iab.net/standards/images/ads/180x150.gif" width="180" height="150"></a>',
+        'medrectangle' => '<a href=""><img src="http://www.iab.net/standards/images/ads/300x250.gif" width="300" height="250"></a>',
+    };
+
+
+    return $ret unless defined $types->{$type};
+
+    $ret .= "<div class=\"ad $type\" id=\"\">";
+    $ret .= "<h4>Advertisment</h4>";
+    $ret .= $types->{$type};
+    $ret .= "<a href=\"#\">Leave Feedback</a>";
+    $ret .= "</div>";
+
+    return $ret;
+}
+
 # Common challenge/response javascript, needed by both login pages and comment pages alike.
 # Forms that use this should onclick='return sendForm()' in the submit button.
 # Returns true to let the submit continue.
