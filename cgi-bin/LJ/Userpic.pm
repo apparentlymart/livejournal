@@ -335,6 +335,8 @@ sub create {
 
     my $size = length $$dataref;
 
+    my $fmterror = 0;
+
     my @errors;
     if ($size > $MAX_UPLOAD) {
         push @errors, LJ::errobj("Userpic::ByteSize",
@@ -342,14 +344,17 @@ sub create {
                                  max  => $MAX_UPLOAD);
     }
 
-    unless ($w >= 1 && $w <= 100 && $h >= 1 && $h <= 100) {
-        push @errors, LJ::errobj("Userpic::Dimensions",
-                                 w => $w, h => $h);
-    }
-
     unless ($filetype eq "GIF" || $filetype eq "JPG" || $filetype eq "PNG") {
         push @errors, LJ::errobj("Userpic::FileType",
                                  type => $filetype);
+        $fmterror = 1;
+    }
+
+    # don't throw a dimensions error if it's the wrong file type because its dimensions will always
+    # be 0x0
+    unless ($w >= 1 && $w <= 100 && $h >= 1 && $h <= 100 && !$fmterror) {
+        push @errors, LJ::errobj("Userpic::Dimensions",
+                                 w => $w, h => $h);
     }
 
     LJ::throw(@errors);
