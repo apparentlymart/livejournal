@@ -109,6 +109,7 @@
 
         $body .= "</td><td valign='top' style='padding-top: 10px'>\n";
         $body .= "<form action='login.bml$getextra' method='post' id='login'>\n";
+        $body .= LJ::form_auth();
 
         my $chal = LJ::challenge_generate(300); # 5 minute auth token
         $body .= "<input type='hidden' name='chal' id='login_chal' value='$chal' />\n";
@@ -157,7 +158,6 @@
         if ($remote) {
             $body .= "<tr valign='top'><td>";
             $body .= "</td><td style='padding-bottom: 10px'>";
-            $body .= LJ::form_auth();
             my $curbind = $cursess && $cursess->ipfixed ? "yes" : "no";
             $body .= LJ::html_check(
                                     {
@@ -395,6 +395,9 @@
 
             my $sess = LJ::Session->create($u, %$sess_opts);
             $cursess = $sess;
+
+            # augment hash with session data;
+            $u->{'_session'} = $sess;
 
             my @sopts;
             LJ::run_hooks("login_add_opts", { 'u' => $u, 'form' => \%POST, 'opts' => \@sopts });
