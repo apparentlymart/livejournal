@@ -14,6 +14,7 @@ body<=
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
 
+    $LJ_cmtinfo{'form_auth'} = LJ::form_auth(1);
     $LJ_cmtinfo{'canAdmin'} = 1;
     $LJ_cmtinfo{'remote'} = $remote->{user};
     $LJ_cmtinfo{'journal'} = $remote->{user};
