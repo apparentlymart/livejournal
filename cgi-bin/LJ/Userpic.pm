@@ -620,9 +620,9 @@ sub set_keywords {
     # Let the user know about any we didn't save
     if (@kw_errors) {
         my $num_words = scalar(@kw_errors);
-        LJ::Throw->(LJ::errobj("Userpic::TooManyKeywords",
-                               userpic => $self,
-                               lost    => \@kw_errors));
+        LJ::errobj("Userpic::TooManyKeywords",
+                   userpic => $self,
+                   lost    => \@kw_errors)->throw;
 
 
         #push @errors, BML::ml(".error.toomanykeywords", {'numwords' => $num_words, 'words' => $kws, 'max' => $LJ::MAX_USERPIC_KEYWORDS});
