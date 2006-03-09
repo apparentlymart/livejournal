@@ -206,6 +206,26 @@ sub expunge_userpic {
 }
 
 # <LJFUNC>
+# name: LJ::activate_userpics
+# des: Wrapper around LJ::User->activate_userpics for compatability
+# args: uuserid
+# returns: undef on failure 1 on success
+# </LJFUNC>
+sub activate_userpics
+{
+    my $u = shift;
+    return undef unless LJ::isu($u);
+
+    # if a userid was given, get a real $u object
+    $u = LJ::load_userid($u, "force") unless isu($u);
+
+    # should have a $u object now
+    return undef unless isu($u);
+
+    return $u->activate_userpics;
+}
+
+# <LJFUNC>
 # name: LJ::get_userpic_info
 # des: Given a user gets their user picture info
 # args: uuid, opts (optional)
