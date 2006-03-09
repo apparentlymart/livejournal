@@ -101,7 +101,6 @@
          $body .= LJ::html_hidden(journal => $GET{journal}) if $GET{journal};
          $body .= LJ::html_hidden(itemid => $GET{itemid});
          $body .= LJ::html_hidden('mode' => 'save');
-         $body .= LJ::form_auth();
          $body .= LJ::html_submit('delete', 'Delete this memory') . "\n";
          $body .= "</form>\n";
      }
@@ -241,7 +240,6 @@
      } else {
          $body .= "<br /><small>$ML{'.whocansee'}</small></td></tr><tr><th></th><td>\n";
      }
-     $body .= LJ::form_auth();
      $body .= LJ::html_submit(undef, $ML{'.form.submit'});
      $body .= LJ::html_submit(undef, $ML{'.form.reset'}, {type => 'reset'}) if defined $memory;
      $body .= "</td></tr></table></form>";
