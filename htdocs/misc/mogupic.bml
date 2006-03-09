@@ -8,7 +8,7 @@
     my $size = int($GET{'size'});
     $size = 640 if $size <= 0 || $size > 640;
 
-    my $upf = LJ::get_upf_scaled(size => $size, remote => $remote->{userid});
+    my $upf = LJ::get_upf_scaled(size => $size, userid => $remote->{userid});
 
     return "Error retreiving image." unless $upf;
 

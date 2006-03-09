@@ -523,14 +523,14 @@ sub _get_upf_scaled
     my $x2 = delete $opts{x2};
     my $y2 = delete $opts{y2};
     my $maxfilesize = delete $opts{maxfilesize} || 38;
-    my $remote = LJ::want_user(delete $opts{remote}) || LJ::get_remote;
+    my $u = LJ::want_user(delete $opts{userid}) || LJ::get_remote;
     $maxfilesize *= 1024;
 
     croak "Invalid parameters to get_upf_scaled\n" if scalar keys %opts;
 
     my $mode = ($x1 || $y1 || $x2 || $y2) ? "crop" : "scale";
-
-    return unless $remote;
+ 
+    return unless $u;
 
     eval "use Image::Magick (); 1;"
         or return undef;
@@ -538,7 +538,7 @@ sub _get_upf_scaled
     eval "use Image::Size (); 1;"
         or return undef;
 
-    my $mogkey = 'upf:' . $remote->{userid};
+    my $mogkey = 'upf:' . $u->{userid};
     my $dataref = LJ::mogclient()->get_file_data($mogkey) or return undef;
 
     # original width/height
