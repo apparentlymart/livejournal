@@ -175,5 +175,18 @@ sub as_bullets {
     return join('', map { $_->as_bullets } @{ $self->{errors} });
 }
 
+package LJ::Error::WithSubError;
+sub fields { qw(main suberr); }
+
+sub as_bullets {
+    my $self = shift;
+    return $self->{main}->as_bullets . "<ul>" . $self->{suberr}->as_bullets . "</ul>";
+}
+
+sub as_string {
+    my $self = shift;
+    return $self->{main}->as_string . ", due to: " . $self->{suberr}->as_string;
+}
+
 
 1;
