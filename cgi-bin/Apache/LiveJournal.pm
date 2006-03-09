@@ -686,6 +686,17 @@ sub trans
         return $view if defined $view;
     }
 
+    # custom interface handler
+    if ($uri =~ m!^/interface/([\w\d]+)$!) {
+        my $inthandle = LJ::run_hook("interface_handler",
+                                     {
+                                         int         => $1,
+                                         r           => $r,
+                                         bml_handler => $bml_handler,
+                                     });
+        return $inthandle if $inthandle;
+    }
+
     # protocol support
     if ($uri =~ m!^/(?:interface/(\w+))|cgi-bin/log\.cgi!) {
         my $int = $1 || "flat";
