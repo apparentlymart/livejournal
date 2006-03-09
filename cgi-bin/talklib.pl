@@ -2990,8 +2990,11 @@ sub make_preview {
     }
 
     $ret .= "<hr />";
+
+    # While it may seem like we need form auth for this form, the form for
+    # actually composing a comment includes it.  It is then put into this
+    # form about 20 lines below: foreach (keys %$form).
     $ret .= "<div style='width: 90%'><form method='post'><p>\n";
-    $ret .= LJ::form_auth();
     $ret .= "<input name='subject' size='50' maxlength='100' value='" . LJ::ehtml($form->{'subject'}) . "' /><br />";
     $ret .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' style='width: 100%'>";
     $ret .= LJ::ehtml($form->{'body'});
