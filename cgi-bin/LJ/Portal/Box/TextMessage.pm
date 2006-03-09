@@ -131,8 +131,11 @@ sub generate_content {
         return true;
     };
 
+    my $form_auth = LJ::form_auth();
+
     $content = qq {
 <form method='POST' action='$LJ::SITEROOT/tools/textmessage.bml' id='tmform$pboxid'>
+$form_auth
 Username: <input type='text' size='15' maxlength='15' name='user' id='textmessageuser$pboxid'/>
 <input type='submit' value="Proceed..." onclick="$jssubmit" />
 <div id="tmmsg$pboxid" style="display: none;">
