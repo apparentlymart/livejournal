@@ -131,7 +131,7 @@
          return;
      } else {
          my $uid = $dbr->selectrow_array("SELECT userid FROM user WHERE journaltype='P' AND statusvis='V' ".
-                                         "AND allow_contactshow='Y' AND email=? LIMIT 1");
+                                         "AND allow_contactshow='Y' AND email=? LIMIT 1", undef, $email);
          if (my $u = LJ::load_userid($uid)) {
              LJ::load_user_props($u, "opt_whatemailshow");
              if ($u->{'opt_whatemailshow'} eq "A" || $u->{'opt_whatemailshow'} eq "B") {
