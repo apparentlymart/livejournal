@@ -687,14 +687,13 @@ sub trans
     }
 
     # custom interface handler
-    if ($uri =~ m!^/interface/([\w\d]+)$!) {
-        my $inthandle = LJ::run_hook("interface_handler",
-                                     {
-                                         int         => $1,
-                                         r           => $r,
-                                         bml_handler => $bml_handler,
-                                     });
-        return $inthandle if $inthandle;
+    if ($uri =~ m!^/interface/(\w+)$!) {
+        my $inthandle = LJ::run_hook("interface_handler", {
+            int         => $1,
+            r           => $r,
+            bml_handler => $bml_handler,
+        });
+        return $inthandle if defined $inthandle;
     }
 
     # protocol support
