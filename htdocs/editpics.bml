@@ -102,11 +102,11 @@
                 # only modify if changing the data, make sure not collidiing with other edits, etc
                 eval {
                     $up->set_keywords($POST{"kw_$picid"})
-                        unless $POST{"kw_$picid"} eq $POST{"kw_orig_$picid"};  # FIXME: error handling
+                        unless $POST{"kw_$picid"} eq $POST{"kw_orig_$picid"};
                 } or push @errors, $@;
                 eval {
                     $up->set_comment ($POST{"com_$picid"})
-                        unless $POST{"com_$picid"} eq $POST{"com_orig_$picid"};;  # FIXME: error handling
+                        unless $POST{"com_$picid"} eq $POST{"com_orig_$picid"};
                 } or push @errors, $@;
             }
 
@@ -201,6 +201,10 @@
                           if ($factory_disabled) {
                               # less than 40k, greater than 100x100 and factory is disabled
                               return $err->(BML::ml('.error.imagetoolarge', {imagesize => "${imagew}x$imageh"}));
+                          } elsif ($filetype ne 'JPG') {
+                              # factory only works on jpegs because Image::Magick has issues
+                              # FIXME: possibly a more informative error message?
+                              return $err->(BML::ml('.error.imagetoolarge', {imagesize => "${imagew}x$imageh"}));
                           } else {
                               # large image size, to the factory!
                               $gotofactory = 1;
@@ -268,7 +272,6 @@
 
                 # called when the end of an upload is encountered
                 my $hook_enddata = sub {
-
                     return 1 unless $curr_name eq 'userpic';
 
                     # since we've just finished a potentially slow upload, we need to
@@ -331,11 +334,15 @@
                       # parse multipart-mime submission, one chunk at a time,
                       # calling our hooks as we go to put uploads in temporary
                       # MogileFS filehandles
-                      $res = BML::parse_multipart_interactive($r, \$error, {
+                      $res = eval { BML::parse_multipart_interactive($r, \$error, {
                           newheaders => $hook_newheaders,
                           data       => $hook_data,
                           enddata    => $hook_enddata,
-                      });
+                      }); } or return $err->($@);
+
+                      # sorry, factory only works for jpegs
+                      return $err->("Sorry, you may only upload an image that is greater than 100x100 pixels if it is in JPEG format.")
+                          if $upload{mime} ne 'image/jpeg';
                   }
 
                 # if BML::Parse_multipart_interactive failed, we need to add
@@ -393,18 +400,18 @@
                 my $y1 = $POST{'y1'}+0;
                 my $y2 = $POST{'y2'}+0;
 
-                return $err->("Invalid userpic creation parameters.") if (!$scaledsizemax || !$x1);
+                return $err->("Invalid userpic creation parameters.") if (!$scaledsizemax || !$x2);
 
                 my $picinfo = LJ::get_upf_scaled(
                                                  x1 => $x1,
                                                  y1 => $y1,
                                                  x2 => $x2,
-                                                 y2 => $y2
+                                                 y2 => $y2,
                                                  );
                 return $err->("There was an error in generating the userpic.") unless $picinfo;
 
-
                 $POST{userpic} = ${ $picinfo->[0] };
+
             } elsif ($POST{'src'} eq "url") {
                 my $ua = LJ::get_useragent(
                                            role     => 'userpic',
