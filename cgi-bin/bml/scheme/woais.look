@@ -85,6 +85,7 @@ PAGE<=
 <HEAD>
 <TITLE>%%TITLE%% [LiveJournal.com]</TITLE>
 <?_code { LJ::run_hook('hitstats_js'); } _code?>
+<?_code LJ::res_includes() _code?>
 %%head%%
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" %%bodyopts%%>

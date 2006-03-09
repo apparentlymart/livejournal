@@ -96,6 +96,7 @@ PAGE<=
 <LINK REL="SHORTCUT ICON" HREF="http://www.livejournal.com/favicon.ico">
 <TITLE>%%TITLE%%</TITLE>
 <?_code { LJ::run_hook('hitstats_js'); } _code?>
+<?_code LJ::res_includes() _code?>
 %%HEAD%%
 <SCRIPT LANGUAGE="JavaScript">
   window.onerror = null;  // damn javascript.
