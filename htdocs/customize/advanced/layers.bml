@@ -228,12 +228,14 @@
     # store value in hidden to later be copied to 'parid' if necessary
     # defaults to $corelayers[0] which should be the highest numbered core
     $body .= LJ::html_hidden("parid_hidden", $POST{'parid'} || $corelayers[0]) . "\n";
+    $body .= $formauth;
     $body .= LJ::html_submit("action:create", $ML{'.btn.toplevel.create'}) . "\n";
     $body .= "</form>\n";
     $body .= "</div>\n\n";
 
     $body .= "<?h2 $ML{'.createlayer.layoutspecific'} h2?>\n";
     $body .= "<form method='post' action='layers.bml?authas=$authas'>\n";
+    $body .= $formauth;
 
     $body .= "$ML{'.createlayer.layoutspecific.label.type'} " . LJ::html_select({ 'name' => 'type' },
                                         "" => "",
