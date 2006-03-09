@@ -224,6 +224,7 @@ body<=
         my $poster = LJ::load_userid($posterid);
         $ret .= "<?h1 $ML{'.reject.header'} h1?><?p $ML{'.reject.text'} p?>";
         $ret .= "<p><form method='post' action='/community/moderate.bml'><center>";
+        $ret .= LJ::form_auth();
         $ret .= "<input type='hidden' name='mode' value='reject_do'>";
         $ret .= "<input type='hidden' name='cid' value='$c->{'userid'}'>";
         $ret .= "<input type='hidden' name='modid' value='$modid'>";
