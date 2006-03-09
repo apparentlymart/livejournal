@@ -2,7 +2,6 @@
 {
     use strict;
     return "<?requirepost?>" unless LJ::did_post();
-    return "<?h1 $ML{'Error'} h1?> $ML{'error.invalidform'}" unless LJ::check_form_auth();
 
     my $ret;
     my $remote = LJ::get_remote();
