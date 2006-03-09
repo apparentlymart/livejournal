@@ -113,6 +113,8 @@
             regsel.keepSquare(true);
 
             $("createbtn").disabled = false;
+
+$("userpic").style.display = "";
         });
 
     </script>
@@ -135,7 +137,7 @@ if (! @paths) {
     $body .= qq {
         <?p Click and drag anywhere within the photo to create your userpic. When you're happy with what you see in the preview box click the Create Userpic button to save it. p?>
 
-      <div id="picContainer" style="float: left; margin-bottom: 15px; width: ${scaledSizeMax}px; height: ${scaledSizeMax}px; border: 2px solid #EEEEEE; padding: 2px;"> <img src="$picpath" id="userpic" /></div>
+      <div id="picContainer" style="float: left; margin-bottom: 15px; width: ${scaledSizeMax}px; height: ${scaledSizeMax}px; border: 2px solid #EEEEEE; padding: 2px;"> <img src="$picpath" id="userpic" style="display: none;" /></div>
 
       <?standout <div style='float: right;'>
       <table cellpadding="4"><tr>
