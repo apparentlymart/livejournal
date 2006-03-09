@@ -245,8 +245,13 @@ sub error_list
     $ret .= BML::ml('error.procrequest');
     $ret .= "</strong><ul>";
 
-    foreach (@errors) {
-        $ret .= "<li>$_</li>";
+    foreach my $err (@errors) {
+        my $ref = ref $err;
+        if ($ref && $ref =~ /^LJ::Error/) {
+            $ret .= $err->as_bullets;
+        } else {
+            $ret .= "<li>$err</li>\n";
+        }
     }
     $ret .= " </ul> errorbar?>";
     return $ret;
