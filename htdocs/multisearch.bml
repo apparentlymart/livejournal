@@ -130,11 +130,9 @@
          $body = "<?h1 $ML{'Error'} h1?><?p $ML{'.noaddress.text'} p?>";
          return;
      } else {
-         my $sth = $dbr->prepare("SELECT * FROM user u WHERE u.journaltype='P' AND u.statusvis='V' ".
-                                 "AND u.allow_contactshow='Y' AND u.email=? LIMIT 1");
-         $sth->execute($email);
-         my $u = $sth->fetchrow_hashref;
-         if ($u) {
+         my $uid = $dbr->selectrow_array("SELECT uid FROM user u WHERE u.journaltype='P' AND u.statusvis='V' ".
+                                         "AND u.allow_contactshow='Y' AND u.email=? LIMIT 1");
+         if (my $u = LJ::load_userid($uid)) {
              LJ::load_user_props($u, "opt_whatemailshow");
              if ($u->{'opt_whatemailshow'} eq "A" || $u->{'opt_whatemailshow'} eq "B") {
                  if ($output eq "foaf") {
