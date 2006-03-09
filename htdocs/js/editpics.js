@@ -53,6 +53,9 @@ function uploadCallback (data) {
 }
 
 function setup () {
+  if (!$("progressBar"))
+    return;
+
   if (pbar)
     pbar.init($("progressBar"));
 
