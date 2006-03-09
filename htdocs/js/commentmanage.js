@@ -275,11 +275,12 @@ function deleteComment (ditemid) {
     };
 
     xtr.onreadystatechange = state_callback;
-    xtr.open("POST", "/" + LJ_cmtinfo.journal + "/__rpc_delcomment?mode=js&journal=" + LJ_cmtinfo.journal + "&id=" + ditemid + "&lj_form_auth=" + LJ_cmtinfo.form_auth, true);
+    xtr.open("POST", "/" + LJ_cmtinfo.journal + "/__rpc_delcomment?mode=js&journal=" + LJ_cmtinfo.journal + "&id=" + ditemid, true);
     var postdata = "confirm=1";
     if (opt_ban) postdata += "&ban=1";
     if (opt_spam) postdata += "&spam=1";
     if (opt_delthread) postdata += "&delthread=1";
+    if (LJ_cmtinfo.form_auth) postdata += "&lj_form_auth=" + LJ_cmtinfo.form_auth;
 
     xtr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     xtr.send(postdata);
