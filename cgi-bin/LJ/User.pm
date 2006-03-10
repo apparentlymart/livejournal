@@ -3530,7 +3530,7 @@ sub make_journal
         # OpenID Server and Yadis
         $head .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n}
             if LJ::OpenID::server_enabled();
-        $head .= qq{<meta http-equiv="X-YADIS-Location" href="$journalbase/data/yadis" />\n};
+        $head .= qq{<meta http-equiv="X-YADIS-Location" content="$journalbase/data/yadis" />\n};
 
         # FOAF autodiscovery
         my $foafurl = $u->{external_foaf_url} ? LJ::eurl($u->{external_foaf_url}) : "$journalbase/data/foaf";
