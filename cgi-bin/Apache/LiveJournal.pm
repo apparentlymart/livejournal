@@ -178,14 +178,14 @@ sub totally_down_content
         return OK;
     }
 
-    # FIXME: ljcom-specific, move to a hook; too lazy now.
-    if ($uri =~ m!^/paidaccounts/pp_notify\.bml!) {
-        $r->status(SERVER_ERROR);
-    }
-
+    # set to 500 so people don't cache this error message
+    my $body = "<h1>$LJ::SERVER_DOWN_SUBJECT</h1>$LJ::SERVER_DOWN_MESSAGE<!-- " . ("x" x 1024) . " -->";
+    $r->status_line("503 Server Maintenance");
     $r->content_type("text/html");
+    $r->header_out("Content-length", length $body);
     $r->send_http_header();
-    $r->print("<h1>$LJ::SERVER_DOWN_SUBJECT</h1>$LJ::SERVER_DOWN_MESSAGE");
+
+    $r->print($body);
     return OK;
 }
 
