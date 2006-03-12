@@ -6,14 +6,12 @@ body<=
     use vars qw(%POST %ML %GET $title);
 
     my @errors;
-    my $need_form_auth = 1;
 
     # stupid hack to allow hotmail people to post, since hotmail changes
     # POST forms to GET.  this isn't a security problem (GET -> POST escalation)
     # since talklib.pl's LJ::Talk::Post::init checks for $POST{'ecphash'}
     # and requires it to be correct.  if it's not, the page fails.
     if ($GET{'ecphash'}) {
-        $need_form_auth = undef;
         %POST = %GET;
     }
 
@@ -82,7 +80,6 @@ body<=
         my $penddata = eval { Storable::thaw($pending) };
 
         %POST = %$penddata;
-        $need_form_auth = undef;
 
         push @errors, "You chose to cancel your identity verification"
             if $csr->user_cancel;
@@ -107,8 +104,11 @@ body<=
     my $remote = LJ::get_remote();
     my $journalu = LJ::load_user($POST{journal});
     return LJ::bad_input('Unknown journal.  Please go back and try again.') unless $journalu;
+
+    # FIXME: this isn't entirely correct, if ecphash is present but ignored/incorrect
+    # that fix would need to be done in talklib.pl
     return "<?h1 $ML{'Error'} h1?> $ML{'error.invalidform'}"
-        unless (! $need_form_auth) || LJ::check_form_auth();
+        if $remote && ! ($POST{'ecphash'} || LJ::check_form_auth());
 
     ## preview
     # ignore errors for previewing
@@ -159,7 +159,7 @@ body<=
                                     'form'        => \%POST });
     }
 
-    # checked $POST{agree_tos} was checked above if it was necessary, 
+    # checked $POST{agree_tos} was checked above if it was necessary,
     # now we just need to save the userprop
     if ($commentu && ! $commentu->tosagree_verify && $POST{agree_tos}) {
         my $err = "";
