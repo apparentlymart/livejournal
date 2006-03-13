@@ -14,6 +14,9 @@ my $u = LJ::load_user("system");
 ok($u, "Have system user");
 die unless $u;
 
+my $u2 = LJ::load_userid($u->{userid});
+is($u, $u2, "whether loading by name or userid, \$u objects are singletons");
+
 sub run_tests {
     my ($up, $ext) = @_;
 
@@ -97,6 +100,7 @@ for(('jpg', 'png', 'gif')) {
 
     $up = eval { LJ::Userpic->create($u, data => file_contents("good.$ext")); };
     ok($up, "made a userpic");
+    die "ERROR: $@" unless $up;
     is($up->extension, $ext, "... it's a $ext");
     ok(! $up->inactive, "... not inactive");
     ok($up->state, "... have some state");
