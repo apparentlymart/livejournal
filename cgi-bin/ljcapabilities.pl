@@ -92,10 +92,9 @@ sub get_cap
     }
 
     # is there a hook for this cap name?
-    if (! $opts->{no_hook} && LJ::are_hooks("check_cap_$cname")) {
-        die "Hook 'check_cap_$cname' requires full user object"
-            unless defined $u;
+    if (! $opts->{no_hook} && LJ::isu($u) && LJ::are_hooks("check_cap_$cname")) {
 
+        # hooks require a full $u object to be run
         my $val = LJ::run_hook("check_cap_$cname", $u);
         return $val if defined $val;
 
