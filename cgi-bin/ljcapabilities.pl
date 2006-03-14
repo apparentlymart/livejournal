@@ -43,6 +43,9 @@ sub get_cap
 {
     my $caps = shift;   # capability bitmask (16 bits), or user object
     my $cname = shift;  # capability limit name
+    my $opts  = shift;  # { no_hook => 1/0 }
+    $opts ||= {};
+
     my $u = ref $caps ? $caps : undef;
     if (! defined $caps) { $caps = 0; }
     elsif ($u) { $caps = $u->{'caps'}; }
@@ -89,7 +92,7 @@ sub get_cap
     }
 
     # is there a hook for this cap name?
-    if (LJ::are_hooks("check_cap_$cname")) {
+    if (! $opts->{no_hook} && LJ::are_hooks("check_cap_$cname")) {
         die "Hook 'check_cap_$cname' requires full user object"
             unless defined $u;
 
