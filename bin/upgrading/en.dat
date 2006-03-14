@@ -3996,7 +3996,7 @@ The [[sitename]] Team
 
 /styles/create.bml.createstyle.head=Create a Style
 
-/styles/create.bml.createstyle.text=From here you can create a new personal-style, useful if you're going to either embed your journal in your homepage or you want to make a public style that everybody can use and you need to work on it here first, rather than in your overrides section.
+/styles/create.bml.createstyle.text2=From here you can create a new personal-style, useful if you're going to either <a [[aopts]]>embed your journal in your homepage</a> or you want to make a public style that everybody can use and you need to work on it here first, rather than in your overrides section.
 
 /styles/create.bml.enterstyleid=Or, enter a non-system public Style ID#:
 
@@ -4028,14 +4028,14 @@ The [[sitename]] Team
 
 /styles/create_do.bml.title=Create Style
 
-/styles/index.bml.about<<
-<p>This section of the site allows you to create, edit and delete
-customised styles. This allows you to control the look of your account to a great extent, 
-whether you want to make it look like your website, or just feel like being different.
-</p>
-<p>You can also create <em>embedded</em> styles which, rather than
-creating a full page, include only the entries and leave
-you to embed your journal in another site.</p>
+/styles/index.bml.about3<<
+<p>This page gives you links to where you can create, edit, and delete
+customized S1 styles. If you're using the S2 style system, go to
+<a [[aopts1]]>the customize journal page</a>.</p>
+
+<p>Advanced users can read more about the style system in
+<a [[aopts2]]>the style documentation page</a> and in
+<a [[aopts3]]>the developer area</a>.</p>
 .
 
 /styles/index.bml.about.header=Creating and Using Custom Styles

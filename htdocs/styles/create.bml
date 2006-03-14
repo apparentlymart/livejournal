@@ -28,7 +28,7 @@ body<=
     
     # main form
     $ret .= "<?h1 $ML{'.createstyle.head'} h1?>\n";
-    $ret .= "<?p $ML{'.createstyle.text'} p?>";
+    $ret .= "<?p " . BML::ml('.createstyle.text2', {'aopts' => "href='$LJ::SITEROOT/developer/embedding.bml'"}) . " p?>";
 
     $ret .= "<?h1 $ML{'.selecttype.head'} h1?>\n";
     $ret .= "<?p $ML{'.selecttype.text'} p?>\n";
