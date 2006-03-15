@@ -496,13 +496,15 @@ sub get_picid_from_keyword
 sub get_upf_scaled {
     my @args = @_;
 
-    if (scalar @LJ::GEARMAN_SERVERS > 0) {
+    if (my $gc = LJ::gearman_client()) {
         # if gearman, kick off a gearman job and block until we get a result.
-        my $client = Gearman::Client->new;
-        $client->job_servers(@LJ::GEARMAN_SERVERS);
-        my $result = $client->do_task('lj_upf_resize', Storable::nfreeze(\@args), {});
+        my $u = LJ::get_remote()
+            or die "No remote user";
+        unshift @args, "userid" => $u->{userid};
+        my $result = $gc->do_task('lj_upf_resize', Storable::nfreeze(\@args), {});
 
         if (!$result) {
+            die "FAILED\n";
             # job failed... error reporting?
         } else {
             return Storable::thaw($$result);
@@ -523,13 +525,15 @@ sub _get_upf_scaled
     my $x2 = delete $opts{x2};
     my $y2 = delete $opts{y2};
     my $maxfilesize = delete $opts{maxfilesize} || 38;
-    my $u = LJ::want_user(delete $opts{userid}) || LJ::get_remote;
+    my $u = LJ::want_user(delete $opts{userid}) || LJ::get_remote();
+    croak "No userid or remote" unless $u;
+
     $maxfilesize *= 1024;
 
     croak "Invalid parameters to get_upf_scaled\n" if scalar keys %opts;
 
     my $mode = ($x1 || $y1 || $x2 || $y2) ? "crop" : "scale";
- 
+
     return unless $u;
 
     eval "use Image::Magick (); 1;"

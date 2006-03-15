@@ -231,6 +231,17 @@ sub locker {
                           );
 }
 
+sub gearman_client {
+    my $purpose = shift;
+
+    return undef unless @LJ::GEARMAN_SERVERS;
+    eval "use Gearman::Client; 1;" or die "No Gearman::Client available";
+
+    my $client = Gearman::Client->new;
+    $client->job_servers(@LJ::GEARMAN_SERVERS);
+    return $client;
+}
+
 sub mogclient {
     return $LJ::MogileFS if $LJ::MogileFS;
 
