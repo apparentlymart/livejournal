@@ -79,13 +79,29 @@ LJCutCommand.Execute=function() {
 
     if (FCK.EditorWindow.getSelection) {
         selection = FCK.EditorWindow.getSelection();
+
+        // Create a new div to clone the selection's content into
+        var d = FCK.EditorDocument.createElement('DIV');
+        for (var i = 0; i < selection.rangeCount; i++) {
+            d.appendChild(selection.getRangeAt(i).cloneContents());
+        }
+        selection = d.innerHTML;
+
     } else if (FCK.EditorDocument.selection) {
-        selection = FCK.EditorDocument.selection.createRange().text;
+        var range = FCK.EditorDocument.selection.createRange();
+
+        var type = FCKSelection.GetType();
+        if (type == 'Control') {
+            selection = range.item(0).outerHTML;
+        } else if (type == 'None') {
+            selection = '';
+        } else {
+            selection = range.htmlText;
+        }
     }
 
     if (selection != '') {
         selection += ''; // Cast it to a string
-        selection = selection.replace(/\n/g, '<br />');
     } else {
         selection += 'Type your cut contents here.';
     }
