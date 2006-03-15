@@ -5578,6 +5578,12 @@ entryform.htmlokay.rich2=(HTML okay; by default, new lines will be auto-formatte
 
 entryform.htmlokay.rte_nosupport=(Sorry, your browser does not currently support the rich text environment.)
 
+entryform.insert.header=Insert...
+
+entryform.insert.image=Image
+
+entryform.insert.poll=Poll
+
 entryform.mood=Mood:
 
 entryform.mood.noneother=None, or other:
