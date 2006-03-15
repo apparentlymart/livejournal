@@ -10,7 +10,7 @@ function useRichText(textArea, statPrefix) {
     oFCKeditor.Height = 350;
     oFCKeditor.ToolbarSet = "Update";
 
-    if ($("event_format").selectedIndex == 0) {
+    if ($("event_format") && $("event_format").selectedIndex == 0) {
         $("draft").value = $("draft").value.replace(/\n/g, '<br />');
     }
 
