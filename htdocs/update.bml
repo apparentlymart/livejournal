@@ -106,7 +106,9 @@
     # Setup draft saving and try to restore from a draft
     # unless we did a post action
     if ($remote && !$LJ::DISABLED{'update_draft'}) {
-        if (!$did_post) {
+        # While transforms aren't considered posts, we don't want to
+        # prompt the user to restore from a draft on a transform
+        if (!LJ::did_post()) {
             $onload .= "initDraft(true); ";
         } else {
             $onload .= "initDraft(false); ";
@@ -141,11 +143,6 @@
 
     my $print_entry_form = sub {
         my $opts = shift;
-
-        # If they got an error, or spellchecked, and we're in rich text mode, enable rich text mode:
-        if ($did_post && $POST{'switched_rte_on'} && !$LJ::DISABLED{'richtext'}) {
-            $onload .= "useRichText('draft', '" . LJ::ejs($LJ::WSTATPREFIX) . "'); ";
-        }
 
         # authentication box
         my $auth = '';
@@ -196,7 +193,19 @@
 
         if ($did_post) {
             $entry->{$_} = $POST{$_} foreach keys %POST;
+
+        # Copy things over from the transform
+        } elsif (LJ::did_post()) {
+            foreach (qw(event_format richtext_default)) {
+                $entry->{$_} = $POST{$_} if defined $POST{$_};
+            }
         }
+
+        # If they got an error, or spellchecked, and we're in rich text mode, enable rich text mode:
+        if ($did_post && $POST{'switched_rte_on'}) {
+            $entry->{richtext_default} = 1;
+        }
+
 
         if (LJ::isu($remote) && (!$did_post || $did_spellcheck) && $remote->readonly) {
             $$body .= "<div id='readonly'><?warningbar ";
@@ -226,7 +235,7 @@
         $$body .= LJ::entry_form($entry, \$$head, \$onload, $errors);
         $$body .= "</form></div>";
 
-        $$bodyopts .= "onload=\"$onload\" onresize=\"shift_contents();\" ";
+        $$bodyopts .= "onload='$onload' onresize=\"shift_contents();\" ";
 
         return;
     };
