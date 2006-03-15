@@ -1,12 +1,14 @@
 <?page
-title=>Manage Your Login Sessions
+title=><?_ml .title _ml?>
 body<=
 <?_code
 {
     use strict;
     use vars qw(%GET);
-
+    
     my $body;
+
+    LJ::set_active_crumb('managelogins');
 
     my $u = LJ::get_remote();
     unless ($u) {
@@ -14,7 +16,7 @@ body<=
         return $body;
     }
 
-    $body .= "<?p This page shows you all of your currently logged in sessions on $LJ::SITENAMESHORT as well as some of your prior login sessions.  You can individually logout any current login session if for example you forgot to log out when leaving a friend's computer. p?>";
+    $body .= "<?p " . BML::ml('.intro', {'sitename' => $LJ::SITENAMESHORT}) . " p?>";
 
     my $sessions = $u->sessions;
     my $session = $u->session;
@@ -40,10 +42,10 @@ body<=
         or die('Unable to fetch loginlog');
 
     my @prior;
-    $body .= "<?h1 Currently Logged In Sessions h1?>";
+    $body .= "<?h1 $ML{'.loggedin.header'} h1?>";
     $body .= "<form method='POST' action='$LJ::SITEROOT/manage/logins.bml'>";
     $body .= LJ::form_auth();
-    $body .= "<table width='100%'><tr><th>Login Time</th><th>IP Address</th><th width='45%'>User Agent</th><th>Log Out</th></tr>";
+    $body .= "<table width='100%'><tr><th>$ML{'.loggedin.table.time'}</th><th>$ML{'.loggedin.table.ip'}</th><th width='45%'>$ML{'.loggedin.table.useragent'}</th><th>$ML{'.loggedin.table.logout'}</th></tr>";
     foreach my $login (sort { $a->[1] <=> $b->[1] } @$logins) {
         unless (defined $sessions->{$login->[1]}) {
             push @prior, $login;
@@ -57,7 +59,7 @@ body<=
 
         # Is this their current session?
         if ($session->id == $login->[1]) {
-            $body .= "<td style='whitespace: nowrap; text-align: center'><font size='1'>Current Session</font></td>";
+            $body .= "<td style='whitespace: nowrap; text-align: center'><font size='1'>$ML{'.loggedin.table.current'}</font></td>";
         } else {
             $body .= "<td style='text-align: center'>" . LJ::html_submit($login->[1], 'X') . "</td>";
         }
@@ -65,8 +67,8 @@ body<=
     }
     $body .= "</table></form><br />";
 
-    $body .= "<?h1 Prior Login Sessions h1?>";
-    $body .= "<table width='100%'><tr><th>Login Time</th><th>IP Address</th><th width='57%'>User Agent</th></tr>";
+    $body .= "<?h1 $ML{'.prior.header'} h1?>";
+    $body .= "<table width='100%'><tr><th>$ML{'.prior.table.time'}</th><th>$ML{'.prior.table.ip'}</th><th width='57%'>$ML{'.prior.table.useragent'}</th></tr>";
     foreach my $login (sort { $b->[1] <=> $a->[1] } @prior) {
         $body .= "<tr>";
         $body .= "<td>" . LJ::ehtml(LJ::time_to_http($login->[0])) . "</td>";

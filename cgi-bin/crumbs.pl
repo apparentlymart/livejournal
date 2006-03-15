@@ -50,6 +50,7 @@
                'lostinfo' => ['Lost Info', '/lostinfo.bml', 'manage'],
                'manage' => ['Manage Accounts', '/manage/', 'home'],
                'managecommunity' => ['Community Management', '/community/manage.bml', 'manage'],
+               'managelogins' => ['Manage Your Login Sessions', '/manage/logins.bml', 'manage'],
                'meme' => ['Meme Tracker', '/meme.bml', 'home'],
                'memories' => ['Memorable Posts', '/tools/memories.bml', 'manage'],
                'mobilepost' => ['Mobile Post Settings', '/manage/emailpost.bml', 'manage'],

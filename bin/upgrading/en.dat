@@ -3292,6 +3292,30 @@ The site team
 
 /manage/links.bml.title=Links List
 
+/manage/logins.bml.intro=This page shows you all of your currently logged in sessions on [[sitename]] as well as some of your prior login sessions. You can individually log out any logged in session if, for example, you forgot to log out when leaving a friend's computer.
+
+/manage/logins.bml.loggedin.header=Currently Logged In Sessions
+
+/manage/logins.bml.loggedin.table.current=Current Session
+
+/manage/logins.bml.loggedin.table.ip=IP Address
+
+/manage/logins.bml.loggedin.table.logout=Log Out
+
+/manage/logins.bml.loggedin.table.time=Login Time
+
+/manage/logins.bml.loggedin.table.useragent=User Agent
+
+/manage/logins.bml.prior.header=Prior Login Sessions
+
+/manage/logins.bml.prior.table.ip=IP Address
+
+/manage/logins.bml.prior.table.time=Login Time
+
+/manage/logins.bml.prior.table.useragent=User Agent
+
+/manage/logins.bml.title=Manage Your Login Sessions
+
 /manage/moodthemes.bml.back2=Return To Editor
 
 /manage/moodthemes.bml.btn.create=Create
