@@ -1054,6 +1054,8 @@ sub entry_form {
         delete $opts->{usejournal};
     }
 
+    $opts->{'richtext_default'} = 0 unless $opts->{'richtext'};
+
     my $tabnum = 1;
     my $tabindex = sub { return $tabnum++; };
     $opts->{'event'} = LJ::durl($opts->{'event'}) if $opts->{'mode'} eq "edit";
@@ -1230,17 +1232,19 @@ RTE
                 }
                 $out .= "</td></tr>";
             }
+
             # Text Formatting
-            unless ($opts->{'richtext_on'}) {
+            unless ($opts->{'richtext_default'}) {
                 my $format_selected = $opts->{'prop_opt_preformatted'} ? "preformatted" : "";
                 $format_selected ||= $opts->{'event_format'};
 
-                $out .= "<tr valign='top'><th><label for='event_format'>" . BML::ml('entryform.format') . "</label></th><td>";
+                $out .= "<tr valign='top' id='event_format_tr'><th><label for='event_format'>" . BML::ml('entryform.format') . "</label></th><td>";
                 $out .= LJ::html_select({ 'name' => "event_format", 'id' => "event_format",
                                           'selected' => $format_selected, 'tabindex' => $tabindex->() },
                                         "auto", BML::ml('entryform.format.auto'), "preformatted", BML::ml('entryform.format.preformatted'));
                 $out .= "</td></tr>";
             }
+
             # Current Music
             $out .= "<tr><th>" . BML::ml('entryform.music') . "</th><td>";
             $out .= LJ::html_text({ 'name' => 'prop_current_music', 'value' => $opts->{'prop_current_music'},
@@ -1436,10 +1440,8 @@ USERPICS
 
         if ($opts->{'mode'} eq "update") {
             my $onclick = "";
-            if ($opts->{'richtext_on'} || ! $LJ::IS_SSL) {
-                $onclick .= "updateRTE('rte'); " if $opts->{'richtext_on'};
-                $onclick .= "return sendForm('updateForm');" if ! $LJ::IS_SSL;
-            }
+            $onclick .= "return sendForm('updateForm');" if ! $LJ::IS_SSL;
+
             $out .= LJ::html_submit('action:update', BML::ml('entryform.update'), { 'onclick' => $onclick,
                                                                                     'tabindex' => $tabindex->() }) . "&nbsp;";
         }
@@ -1461,14 +1463,11 @@ USERPICS
             }
         }
         if ($LJ::SPELLER && !$opts->{'disabled_save'}) {
-            my $onclick = "updateRTE('rte');" if $opts->{'richtext_on'};
-            $out .= LJ::html_submit('action:spellcheck', BML::ml('entryform.spellcheck'), { 'onclick' => $onclick,
-                                                                                            'tabindex' => $tabindex->() }) . "&nbsp;";
+            $out .= LJ::html_submit('action:spellcheck', BML::ml('entryform.spellcheck'), { 'tabindex' => $tabindex->() }) . "&nbsp;";
         }
 
         my $preview = "var f=this.form; var action=f.action; f.action='/preview/entry.bml'; f.target='preview'; ";
         $preview   .= "window.open('','preview','width=760,height=600,resizable=yes,status=yes,toolbar=no,location=no,menubar=no,scrollbars=yes'); ";
-        $preview   .= "updateRTE('rte'); " if $opts->{'richtext_on'};
         $preview   .= "f.submit(); f.action=action; f.target='_self'; return false; ";
         $preview    = LJ::ejs(LJ::html_submit('action:preview', BML::ml('entryform.preview'), { 'onclick' => $preview,
                                                                                                 'tabindex' => $tabindex->() }));
