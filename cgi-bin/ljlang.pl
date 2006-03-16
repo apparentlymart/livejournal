@@ -412,6 +412,7 @@ sub plural_form {
     return plural_form_pl($count) if $lang =~ /^pl/;
     return plural_form_singular() if $lang =~ /^hu/ || $lang =~ /^ja/ || $lang =~ /^tr/;
     return plural_form_lv($count) if $lang =~ /^lv/;
+    return plural_form_is($count) if $lang =~ /^is/;
     return plural_form_en($count);  # default
 }
 
@@ -429,7 +430,7 @@ sub plural_form_fr {
     return 0;
 }
 
-# Croatian, Czech, Russian, Slovak, Ukrainian
+# Croatian, Czech, Russian, Slovak, Ukrainian, Belarusian
 sub plural_form_ru {
     my ($count) = shift;
     return 0 if ($count%10 == 1 and $count%100 != 11);
@@ -464,6 +465,13 @@ sub plural_form_lv {
     return 0 if($count%10 == 1 && $count%100 != 11);
     return 1 if($count != 0);
     return 2;
+}
+
+# Icelandic
+sub plural_form_is {
+    my ($count) = shift;
+    return 0 if ($count%10 == 1 and $count%100 != 11);
+    return 1;
 }
 
 1;
