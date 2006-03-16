@@ -378,8 +378,9 @@ function EntryPage::print_comment(Comment comment) {
         </div>
       </div>
       <div style="padding: 3px;">
-          <div>
-            $comment.text
+          <div>""";
+            $comment->print_text();
+        """
           </div>
             <div style="font-size: smaller; margin-top: 6px;">
                ("""; $comment->print_reply_link({"linktext" => $*text_comment_reply}); print ") ";
@@ -496,7 +497,8 @@ function s1_print_entry(Entry entry) {
   } else {
     print $securityicon;
   }
-  print $entry.text + """
+  $entry->print_text();
+  print """
           </div>
           <br clear='all' />
 

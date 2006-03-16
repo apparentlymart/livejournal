@@ -522,7 +522,7 @@ function EntryPage::print_comment (Comment c) {
     print "<td style='width:50%;' align='right'><strong>(<a href='$c.permalink_url'>$*text_permalink</a>)</strong></td></tr>\n";
     print "</table></td></tr></table></div>";
 
-    print "<div style='margin-left: 5px'>$c.text</div>\n";
+    print "<div style='margin-left: 5px'>"; $c->print_text(); "</div>\n";
     print "<div style='margin-top: 3px; font-size: smaller'>";
     if ($c.frozen) {
         print "($*text_comment_frozen) ";
@@ -550,7 +550,7 @@ function ReplyPage::print_body ()
     """<td valign="top"><font size="+1">"""; print $.replyto.time->date_format("med"); " "; print $.replyto.time->time_format();
     if ($.replyto.subject) { " <span style='color: $*subject_color'>$.replyto.subject</span>"; }
     "</font>";
-    print "<p>$.replyto.text</p>";
+    "<p>"; $.replyto->print_text(); "</p>";
 
 
     "<a href='$.entry.comments.read_url'>Read Comments</a>";

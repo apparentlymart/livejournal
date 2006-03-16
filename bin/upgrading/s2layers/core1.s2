@@ -1676,7 +1676,9 @@ function Page::print_entry(Entry e) {
     if ($.view == "friends" or $e.poster.username != $e.journal.username) {
         "<div>"; $this->print_entry_poster($e); "</div>";
     }
-    """<div class="entrytext">\n$e.text\n</div>\n""";
+    """<div class="entrytext">""";
+    $e->print_text();
+    """</div>\n""";
     $e->print_metadata();
     if ($e.comments.enabled) {
         $e.comments->print();
@@ -1695,7 +1697,7 @@ function FriendsPage::print_entry(Entry e) {
     "$e.security_icon $e.subject";
     "</h3>\n";
     """<div style="color: """ + $fg + "; background: " + $bg + """ none;">"""; $this->print_entry_poster($e); "</div>";
-    """<div class="entrytext">\n$e.text\n</div>\n""";
+    """<div class="entrytext">"""; $e->print_text(); """</div>""";
     $e->print_metadata();
     if ($e.comments.enabled) {
         $e.comments->print();
@@ -2157,7 +2159,9 @@ function EntryPage::print_body
     "<h2>$e.security_icon $e.subject</h2>\n";
 
     if (not $.viewing_thread) {
-        "<div class='entrytext'>\n$e.text\n</div>\n";
+        "<div class='entrytext'>";
+        $e->print_text();
+        "</div>\n";
         $e->print_metadata();
         "</div>\n\n";
     }
@@ -2196,7 +2200,7 @@ function ReplyPage::print_body
     "</td></tr></table>\n";
 
     print "<h2>$.replyto.subject</h2>";
-    print "<div>$.replyto.text</div>";
+    print "<div>"; $.replyto->print_text(); "</div>";
 
     print "\n<hr />\n";
     print """(<a href="$.entry.permalink_url">$*text_reply_back</a>)""";

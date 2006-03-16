@@ -1146,7 +1146,7 @@ function EntryPage::print_comment(Comment c)
     println """<td style="width: 50%" align="right"><strong>(<a href="$c.permalink_url">Link</a>)</strong></td></tr>""";
 
     println "</table></td></tr></table></div>";
-    println """<div style="margin-left: 5px">$c.text</div>""";
+    println """<div style="margin-left: 5px">"""; $c->print_text(); """</div>""";
     println """<div style="margin-top: 3px; font-size: smaller"> """;
     if ($c.frozen) {
         println """(Replies frozen) """;
@@ -1198,7 +1198,7 @@ function ReplyPage::print_body
     var string datetime = $.replyto.time->date_format("long") + " - " + $.replyto.time->time_format();
 
     print_heading_bar($.replyto.subject, $datetime);
-    print "<table><tr><td>$.replyto.text</td></tr></table>";
+    print "<table><tr><td>"; $.replyto->print_text(); "</td></tr></table>";
     print_heading_bar("Reply to this:","""(<a href="$.entry.permalink_url">$*text_reply_back</a>)""");
     $.form->print();
 }

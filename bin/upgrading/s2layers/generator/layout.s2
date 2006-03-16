@@ -883,7 +883,7 @@ function EntryPage::print_comment (Comment c) {
     "</td>";
 
     print "</tr></table></div>";
-    print "<div style='margin-left: 5px'>$c.text</div>";
+    print "<div style='margin-left: 5px'>"; $c->print_text(); "</div>";
     print "<div style='margin-top: 3px; font-size: smaller'>";
 
     "<span class='commentlinks'>";
@@ -944,7 +944,7 @@ if (defined $.replyto.poster) {
     print "<i>Anonymous</i>";
 }
 
-"""</td></tr></table></td></tr></table>$.replyto.text</td></tr>
+"""</td></tr></table></td></tr></table>"""; $.replyto->print_text(); """</td></tr>
 <tr bgcolor="$*weak_back"><td align='left' class='comments'>
 <a href="$.replyto.permalink_url">$*text_permalink</a></td>
 <td align='right' class='comments'><a href='$.entry.comments.read_url'>Read Comments</a></td>

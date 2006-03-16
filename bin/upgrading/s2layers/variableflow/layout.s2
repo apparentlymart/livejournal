@@ -515,15 +515,6 @@ function metadata_title(string which) : string
     }
 }
 
-# Since there's currently no trusted print_entry_text function
-# in core, I have to do this here. Later, when something similar
-# is added to core, this can become a wrapper and be deprecated.
-function Page::lay_print_entry_text(Entry e) [fixed]
-"Don't override this. All it does is print the entry text."
-{
-    print $e.text;
-}
-
 # Since the metadata keys have to be hardcoded (bad core design)
 # let's separate this out so people can override print_entry
 # and still get any new metadata added later.
@@ -597,7 +588,7 @@ function Page::print_entry(Entry e) {
     if ($e.subject != "") {
         " - $e.subject";
     }
-    "</h2>\n"; $this->lay_print_entry_text($e);
+    "</h2>\n"; $e->print_text();
 
     $this->lay_print_entry_metadata($e);
 

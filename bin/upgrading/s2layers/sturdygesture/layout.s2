@@ -684,7 +684,7 @@ function EntryPage::print_comment(Comment c) {
         """alt="" align="right" style="margin: 5px;" />\n""";
     }
 
-    "$c.text</div>";
+    $c->print_text(); "</div>";
     """<div class="talklinks">""";
     """<div class="permalink"><a href="$c.permalink_url">$*text_permalink</a></div>""";
 
@@ -752,7 +752,7 @@ function ReplyPage::print_body() {
         """alt="" align="right" style="margin: 5px;" />\n""";
     }
 
-    "$c.text</div>";
+    $c->print_text(); "</div>";
 
     if (defined $c.userpic and $*comment_userpic_style != "off") {
         """<br clear="all" />""";

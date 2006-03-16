@@ -705,7 +705,7 @@ function EntryPage::print_comment (Comment c) {
     print "<td style='width: 50%' align='right'><strong>(<a href='$c.permalink_url'>Link</a>)</strong></td></tr>";
 
     print "</table></td></tr></table></div>";
-    print "<div style='margin-left: 5px'>$c.text</div>";
+    print "<div style='margin-left: 5px'>"; $c->print_text(); "</div>";
     print "<div style='margin-top: 3px; font-size: smaller'>";
     if ($c.frozen) {
         print """(Replies frozen) """;
@@ -740,7 +740,7 @@ function ReplyPage::print_body ()
     var string subject = ($.replyto.subject ? " - <em>$.replyto.subject</em>" : "");
     "<h3><span>$time$subject</span></h3>";
 
-    "<p>$.replyto.text</p>";
+    "<p>"; $.replyto->print_text(); "</p>";
 
     "<div class='Comment'><a href='$.entry.comments.read_url'>Read Comments</a></div>";
     "</div>";
