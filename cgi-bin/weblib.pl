@@ -1793,26 +1793,43 @@ sub ads {
     my %opts = @_;
     my $type = delete $opts{'type'};
 
-    my $ret = '';
-    return $ret unless $LJ::USE_ADS;
+    return unless $LJ::USE_ADS;
 
-    my $types = {
-        'skyscraper'   => '<a href=""><img src="http://www.iab.net/standards/images/ads/160x600.gif" width="160" height="600"></a>',
-        'leaderboard'  => '<a href=""><img src="http://www.iab.net/standards/images/ads/726X90_v2.gif" width="728" height="90"></a>',
-        'rectangle'    => '<a href=""><img src="http://www.iab.net/standards/images/ads/180x150.gif" width="180" height="150"></a>',
-        'medrectangle' => '<a href=""><img src="http://www.iab.net/standards/images/ads/300x250.gif" width="300" height="250"></a>',
-    };
+    my $remote = LJ::get_remote();
+    my $ad_level = LJ::get_cap($remote, "ad_level");
+    return unless $ad_level;
 
+    # App ads
+    if ($type eq "app") {
+        my $uri = BML::get_uri();
+        $uri = $uri =~ /\/$/ ? "$uri/index.bml" : $uri;
+        return unless $LJ::AD_MAPPING{$uri};
+        my %adtypes = (
+                       'skyscraper'   => '<a href=""><img src="http://www.iab.net/standards/images/ads/160x600.gif" width="160" height="600"></a>',
+                       'leaderboard'  => '<a href=""><img src="http://www.iab.net/standards/images/ads/726X90_v2.gif" width="728" height="90"></a>',
+                       'rectangle'    => '<a href=""><img src="http://www.iab.net/standards/images/ads/180x150.gif" width="180" height="150"></a>',
+                       'medrectangle' => '<a href=""><img src="http://www.iab.net/standards/images/ads/300x250.gif" width="300" height="250"></a>',
+                       );
+        my $ad;
+        foreach my $size ( keys %adtypes ) {
+            # Grab the adtype based on the URI
+            next unless $LJ::AD_MAPPING{$uri} eq $size;
+            # Pass if we get an unknown ad type
+            next unless $adtypes{$size};
 
-    return $ret unless defined $types->{$type};
+            $ad .= "<div class=\"ad $size\" id=\"\">";
+            $ad .= "<h4>Advertisment</h4>";
+            $ad .= $adtypes{$size} if $adtypes{$size};
+            $ad .= "<a href=\"#\">Leave Feedback</a>";
+            $ad .= "</div>";
+        }
+        return $ad if $ad ne "";
+    # Journal ads
+    } else {
 
-    $ret .= "<div class=\"ad $type\" id=\"\">";
-    $ret .= "<h4>Advertisment</h4>";
-    $ret .= $types->{$type};
-    $ret .= "<a href=\"#\">Leave Feedback</a>";
-    $ret .= "</div>";
+    }
 
-    return $ret;
+    return;
 }
 
 # Common challenge/response javascript, needed by both login pages and comment pages alike.
