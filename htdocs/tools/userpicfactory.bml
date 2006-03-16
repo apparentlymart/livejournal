@@ -110,7 +110,7 @@
             regsel.setBottomRight(x2, y2);
             regsel.fireOnRegionChanged();
 
-            regsel.keepSquare(true);
+            regsel.keepSquare(false);
 
             $("createbtn").disabled = false;
 
@@ -142,10 +142,10 @@ if (! @paths) {
       <?standout <div style='float: right;'>
       <table cellpadding="4"><tr>
       <td style='whitespace: nowrap'>
-        <input type="checkbox" id="constrain" checked="1" onChange="if(!regsel) return; regsel.keepSquare(\$('constrain').checked);" />
-        <label for="constrain">Keep square</label>
+        <nobr><input type="checkbox" id="constrain" onchange="if(!regsel) return; regsel.keepSquare(\$('constrain').checked);" />
+        <label for="constrain">Keep square</nobr></label><br /><small>(or hold Shift)</small>
       </td></tr><tr>
-      <td valign="center">Low quality preview:<br />
+      <td valign="center"><small>Low quality preview:</small><br />
       <div style="width: 100px; height: 100px; overflow: hidden; padding: 0px;">
         <div style="width: 100px; height: 100px; overflow: hidden; display:inline; float:left;" id="prevcon">
             <img src="$picpath" id="userpicpreview"  />
