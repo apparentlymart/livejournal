@@ -2073,6 +2073,12 @@ sub viewer_is_owner
     return $remote->{'userid'} == $LJ::S2::CURR_PAGE->{'_u'}->{'userid'};
 }
 
+sub viewer_sees_ads
+{
+    my ($ctx) = @_;
+    return 0 unless $LJ::USE_ADS;
+}
+
 sub weekdays
 {
     my ($ctx) = @_;
@@ -2908,6 +2914,12 @@ sub userlite_as_string
 {
     my ($ctx, $UserLite) = @_;
     return LJ::ljuser($UserLite->{'_u'});
+}
+
+sub get_ad
+{
+    my ($ctx, $type) = @_;
+    return LJ::ads( type => 'journal', orientation => $type );
 }
 
 sub PalItem
