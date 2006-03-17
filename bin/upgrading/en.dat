@@ -2126,11 +2126,15 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /friends/add.bml.confirm.text1.feed=Adding a feed allows you to read new content from the feed on your friends page.
 
+/friends/add.bml.confirm.text1.news=Adding [[user]] allows you to read new content from it on your friends page.
+
 /friends/add.bml.confirm.text1.person=When you friend someone:
 
 /friends/add.bml.confirm.text2.person=Would you like to add [[user]]?
 
 /friends/add.bml.confirm.title.community=Add [[icon]][[user]] to your friends page?
+
+/friends/add.bml.confirm.title.news=Add [[icon]][[user]] to your friends page?
 
 /friends/add.bml.confirm.title.person=Add [[icon]][[user]] as a friend?
 

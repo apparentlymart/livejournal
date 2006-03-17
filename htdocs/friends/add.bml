@@ -141,27 +141,32 @@ use vars qw($body $title $windowtitle %GET %POST);
      } elsif ($u->{'journaltype'} eq "R" && $u->prop('renamedto')) {
          return BML::redirect("$LJ::SITEROOT/friends/add.bml?user=" . $u->prop('renamedto'));
 
+     } elsif ($u->{'journaltype'} eq "C") {
+         my $icon = "<img src='$LJ::IMGPREFIX/community24x24.gif' border='0' height='24' width='24' style='padding: 0px 2px 0px 0px' />";
+         $windowtitle = BML::ml('.confirm.title.community', {'user'=> $user });
+         $title = BML::ml('.confirm.title.community', {'icon'=> $icon, 'user'=> $user });
+         $body .= "<?p " . BML::ml('.confirm.text1.community2', {'aopts' => "href='$LJ::SITEROOT/community/join.bml?comm=$user'"}) . " p?>";
+     
+     } elsif ($u->{'journaltype'} eq "N") {
+         my $icon = "<img src='$LJ::IMGPREFIX/userinfo24x24.gif' border='0' height='24' width='24' style='padding: 0px 2px 0px 0px' />";
+         $windowtitle = BML::ml('.confirm.title.news', {'user'=> $user });
+         $title = BML::ml('.confirm.title.news', {'icon'=> $icon, 'user'=> $user });
+         $body .= "<?p " . BML::ml('.confirm.text1.news', {'user' => LJ::ljuser($user)}) . " p?>";
+
      } else {
-         if ($u->{'journaltype'} eq "C") {
-             my $icon = "<img src='$LJ::IMGPREFIX/community24x24.gif' border='0' height='24' width='24' style='padding: 0px 2px 0px 0px' />";
-             $windowtitle = BML::ml('.confirm.title.community', {'user'=> $user });
-             $title = BML::ml('.confirm.title.community', {'icon'=> $icon, 'user'=> $user });
-             $body .= "<?p " . BML::ml('.confirm.text1.community2', {'aopts' => "href='$LJ::SITEROOT/community/join.bml?comm=$user'"}) . " p?>";
+         my $icon = "<img src='$LJ::IMGPREFIX/userinfo24x24.gif' border='0' height='24' width='24' style='padding: 0px 2px 0px 0px' />";
+         if ($u->{'journaltype'} eq "I") {
+            $icon = "<img src='$LJ::IMGPREFIX/openid24x24.gif' border='0' align='' height='24' width='24' style='padding: 0px 2px 0px 0px' />";
+            $windowtitle = BML::ml('.confirm.title.person', {'user'=> $u->{'name'} });
+            $title = BML::ml('.confirm.title.person', {'icon'=> $icon, 'user'=> $u->{'name'} });
          } else {
-             my $icon = "<img src='$LJ::IMGPREFIX/userinfo24x24.gif' border='0' height='24' width='24' style='padding: 0px 2px 0px 0px' />";
-             if ($u->{'journaltype'} eq "I") {
-                $icon = "<img src='$LJ::IMGPREFIX/openid24x24.gif' border='0' align='' height='24' width='24' style='padding: 0px 2px 0px 0px' />";
-                $windowtitle = BML::ml('.confirm.title.person', {'user'=> $u->{'name'} });
-                $title = BML::ml('.confirm.title.person', {'icon'=> $icon, 'user'=> $u->{'name'} });
-             } else {
-                $windowtitle = BML::ml('.confirm.title.person', {'user'=> $user });
-                $title = BML::ml('.confirm.title.person', {'icon'=> $icon, 'user'=> $user });
-             }
-             $body .= "<?p $ML{'.confirm.text1.person'}";
-             $body .= "<ul><li>$ML{'.confirm.action1.person'}</li>";
-             $body .= "<li>$ML{'.confirm.action2.person'}</li>" if ($u->{'journaltype'} ne "I");
-             $body .= "</ul> p?>";
+            $windowtitle = BML::ml('.confirm.title.person', {'user'=> $user });
+            $title = BML::ml('.confirm.title.person', {'icon'=> $icon, 'user'=> $user });
          }
+         $body .= "<?p $ML{'.confirm.text1.person'}";
+         $body .= "<ul><li>$ML{'.confirm.action1.person'}</li>";
+         $body .= "<li>$ML{'.confirm.action2.person'}</li>" if ($u->{'journaltype'} ne "I");
+         $body .= "</ul> p?>";
      }
  }
 
