@@ -5,6 +5,7 @@ body<=
 {
     use strict;
     use vars qw(%GET %POST);
+    BML::decl_params(_default => qr/./);
 
     my $head     = \$_[1]->{'head'};
     my $bodyopts = \$_[1]->{'bodyopts'};
