@@ -2076,7 +2076,10 @@ sub viewer_is_owner
 sub viewer_sees_ads
 {
     my ($ctx) = @_;
-    return 0 unless $LJ::USE_ADS;
+#    return 0 unless $LJ::USE_ADS;
+    return 1;
+    my $remote = LJ::get_remote();
+    return 1 if LJ::get_cap("ads", $remote);
 }
 
 sub weekdays
@@ -2919,7 +2922,7 @@ sub userlite_as_string
 sub get_ad
 {
     my ($ctx, $type) = @_;
-    return LJ::ads( type => 'journal', orientation => $type );
+    return LJ::ads( type => 'journal', orient => $type );
 }
 
 sub PalItem
