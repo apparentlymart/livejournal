@@ -1810,6 +1810,8 @@ sub ads {
         %adtypes = (
                        'App-Info-1column'   => '<a href=""><img src="http://www.iab.net/standards/images/ads/160x600.gif" width="160" height="600"></a>',
                        'App-Info-2column'  => '<a href=""><img src="http://www.iab.net/standards/images/ads/726X90_v2.gif" width="728" height="90"></a>',
+                       'App-Func-1column'   => '<a href=""><img src="http://www.iab.net/standards/images/ads/160x600.gif" width="160" height="600"></a>',
+                       'App-Func-2column'  => '<a href=""><img src="http://www.iab.net/standards/images/ads/726X90_v2.gif" width="728" height="90"></a>',
                        'App-confirm'    => '<a href=""><img src="http://www.iab.net/standards/images/ads/180x150.gif" width="180" height="150"></a>',
                        'medrectangle' => '<a href=""><img src="http://www.iab.net/standards/images/ads/300x250.gif" width="300" height="250"></a>',
                        );
