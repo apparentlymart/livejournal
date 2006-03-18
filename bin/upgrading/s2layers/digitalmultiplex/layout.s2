@@ -906,10 +906,17 @@ function Page::print() {
     println "<title>$title</title>";
     println "</head><body>";
 
+    if (viewer_sees_ads()) {
+        "<div style='float: right; margin-right: 1em'>";
+        $this->print_ad("skyscraper");
+        "</div>";
+    }
+
     println """<a name="top"></a><div align="center">""";
 
     var string sidebar_html_width = sidebar_html_width();
-    println """<table cellspacing="0" cellpadding="0" id="top_title"><tr><td id="speck">&nbsp;</td><td id="journal_title"><h1>$title</h1></td></tr></table>""";
+    println """<table cellspacing="0" cellpadding="0" id="top_title"><tr><td id="speck">&nbsp;</td><td id="journal_title">""";
+    println """<h1>$title</h1></td></tr></table>""";
     println """<table cellspacing="0" cellpadding="0" id="main">""";
     println """<tr id="subtitles"><th height="15" width="$sidebar_html_width" id="sidebar_title">$*text_sidebar_title</th>""";
     println """<th id="main_title">$view_title</th></tr>""";

@@ -344,7 +344,14 @@ function Page::print ()
   <title>$title</title>
 </head>
 <body>
-  <table class="main" width='100%'><tr><td>
+""";
+ if (viewer_sees_ads()) {
+   "<div style='float: right; margin-right: 1em;'>";
+   $this->print_ad("skyscraper");
+   "</div>";
+ } 
+"""
+  <table class="main" width='80%'><tr><td>
     $userpic
     <span class="page_title">$title</span>
     <p class="view_links">$links</p>
@@ -359,11 +366,12 @@ $this->print_linklist();
 
     ### Affliations
 
+    "<div style='width: 80%; margin: 0; padding: 0;'>";
     "<table class='main' align='right'><tr>";
 
     print $website; "<td>"; server_sig(); "</td></tr>";
 
-    "</table>\n</body>\n</html>";
+    "</table></div>\n</body>\n</html>";
 }
 
 function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_text)
