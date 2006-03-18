@@ -540,6 +540,13 @@ function Page::lay_print_entry_metadata(Entry e)
     }
 }
 
+# Back-compat wrapper around EntryLite::print_entry_text()
+function Page::lay_print_entry_text(Entry e) [fixed]
+"Back-compat wrapper around [method[EntryLite.print_entry_text()]. New code shouldn't use this."
+{
+    $e->print_text();
+}
+
 function Page::print_entry(Entry e) {
     """<div class="entry" id="entry$e.itemid">\n""";
 
