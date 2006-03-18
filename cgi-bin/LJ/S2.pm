@@ -2076,10 +2076,13 @@ sub viewer_is_owner
 sub viewer_sees_ads
 {
     my ($ctx) = @_;
-#    return 0 unless $LJ::USE_ADS;
+    return 0 unless $LJ::USE_ADS;
+
+    # For simple testing now, there's some logic that needs to be 
+    # defined/coded before this is really useful
     return 1;
-    my $remote = LJ::get_remote();
-    return 1 if LJ::get_cap("ads", $remote);
+    #my $remote = LJ::get_remote();
+    #return 1 if LJ::get_cap("ads", $remote);
 }
 
 sub weekdays
