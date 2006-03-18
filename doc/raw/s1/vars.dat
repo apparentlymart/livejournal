@@ -307,7 +307,7 @@ The number of items that were skipped to get to this point in the history.
 .scope
 lastn
 .deps
-LASTN_EVENT, LASTN_NEW_DAY, LASTN_END_DAY, LASTN_OPT_ITEMS, LASTN_USERPIC, LASTN_RANGE_MOSTRECENT, LASTN_RANGE_HISTORY, LASTN_SKIP_LINKS, LASTN_WEBSITE
+LASTN_EVENT, LASTN_NEW_DAY, LASTN_END_DAY, LASTN_OPT_ITEMS, LASTN_USERPIC, LASTN_RANGE_MOSTRECENT, LASTN_RANGE_HISTORY, LASTN_SKIP_LINKS, LASTN_WEBSITE, LASTN_SKYSCRAPER_AD
 .editrows
 30
 .override
@@ -368,6 +368,10 @@ specified by the [var[LASTN_OPT_ITEMS]] variable.
 .des
 An IMG tag showing your uploaded picture, if any.  See [var[LASTN_USERPIC]].
 }
+{ skyscraper_ad
+.des
+HTML for printing a skyscraper ad, if available. See [var[LASTN_SKYSCRAPER_AD]].
+}
 { website
 .des
 If the user has specified their website, this block is filled with the contents of [var[LASTN_WEBSITE]].
@@ -405,6 +409,20 @@ The IMG WIDTH= attribute.
 { height
 .des
 The IMG HEIGHT= attribute.
+}
+}
+
+{ LASTN_SKYSCRAPER_AD
+.scope
+lastn
+.type
+HTML
+.des
+Creates the IMG tag needed to show an ad on your journal
+.props
+{ ad
+.des
+The system-provided HTML to print the skyscraper ad.
 }
 }
 

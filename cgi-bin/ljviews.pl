@@ -213,6 +213,7 @@ $LJ::S1::PROPS = {
     'LASTN_PAGE' => {
         'urlfriends' => 'u',
         'urlcalendar' => 'u',
+        'skyscraper_ad' => 't',
     },
     'LASTN_RANGE_HISTORY' => {
         'numitems' => 'd',
@@ -230,7 +231,9 @@ $LJ::S1::PROPS = {
         'width' => 'd',
         'height' => 'd',
     },
-
+    'LASTN_SKYSCRAPER_AD' => {
+        'ad' => 't',
+    },
 };
 
 sub get_public_styles {
@@ -1083,6 +1086,8 @@ sub create_view_lastn
     $lastn_page{'head'} .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n}
         if LJ::OpenID::server_enabled();
 
+    $lastn_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::SITEROOT/stc/ad_base.css' type='text/css' />\n};
+
     # FOAF autodiscovery
     my $foafurl = $u->{external_foaf_url} ? LJ::eurl($u->{external_foaf_url}) : "$journalbase/data/foaf";
     my $digest = Digest::SHA1::sha1_hex('mailto:' . $u->{email});
@@ -1174,6 +1179,12 @@ sub create_view_lastn
                 "width" => $userpics{$picid}->{'width'},
                 "height" => $userpics{$picid}->{'height'},
             });
+    }
+
+    #my $ad_level = LJ::get_cap("ads", $remote);
+    if ($LJ::USE_ADS) {
+        $lastn_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'LASTN_SKYSCRAPER_AD', 
+                                                          { "ad" => LJ::ads( type => "journal", orient => 'skyscraper' ), });
     }
 
     # spit out the S1
