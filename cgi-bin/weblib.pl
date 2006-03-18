@@ -1829,7 +1829,7 @@ sub ads {
         next unless $adtypes{$size};
         
         $ad .= "<div class=\"ad $size\" id=\"\">";
-        $ad .= "<h4>Advertisment</h4>";
+        $ad .= "<h4>Advertisement</h4>";
         $ad .= $adtypes{$size} if $adtypes{$size};
         $ad .= "<a href=\"#\">Leave Feedback</a>";
         $ad .= "</div>";
