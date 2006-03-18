@@ -390,8 +390,13 @@ $userpic
         println "</div>";
     }
 
-    "</td>";
+    if (viewer_sees_ads()) {
+        """<div class="box" align="center" style="padding: 0.5em 0;">""";
+        $this->print_ad("skyscraper");
+        "</div>";
+    }
 
+    "</td>";
 }
 
 function Page::print_linklist() {
