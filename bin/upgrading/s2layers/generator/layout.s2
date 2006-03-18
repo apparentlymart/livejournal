@@ -320,20 +320,12 @@ function Page::print ()
 """<title>$title</title>
 </head>
 <body bgcolor="$*page_back" text="$*entry_text" link="$*page_link" vlink="$*page_vlink" alink="$*page_alink">
-<div align="center">
 """;
- if (viewer_sees_ads()) {
+ if(viewer_sees_ads()) {
+
 """
-<table width="$*box_width" cellpadding="2" cellspacing="0"
-border="0"
-summary="">
+<table cellpadding="2" cellspacing="0" border="0" summary="" style="float: right;">
 <tr><td bgcolor="$*stronger_back" align="center">
-<table width="100%" cellpadding="3" cellspacing="0"
-border="0"
-summary="">
-<tr class="caption">
-<td class="caption" colspan='2' align="left"><b>Advertisment</b></td>
-</tr></table>
 <table width="100%" cellpadding="3" cellspacing="0"
 border="0"
 summary="">
@@ -343,21 +335,23 @@ summary="">
 cellpadding="0"
 border="0"
 summary="" style="margin-left: auto; margin-right: auto;">
-<tr><td>""";
- $this->print_ad("banner"); 
+<tr>""";
+    $this->lay_top_userpic();
 
-"""
-</td>
-</tr>
-</table>
-</td>
-</tr></table>
-</td></tr>
-</table><br />
+    var string sitename_lc = $*SITENAMESHORT->lower();
+
+"""<td><div align="center">""";
+
+$this->print_ad("skyscraper");
+
+"""</div></td></tr></table>
+</td></tr></table>
+</td></tr></table>
 """;
 
- }
+}
 """
+<div align="center">
 <table width="$*box_width" cellpadding="2" cellspacing="0"
 border="0"
 summary="">
