@@ -321,6 +321,43 @@ function Page::print ()
 </head>
 <body bgcolor="$*page_back" text="$*entry_text" link="$*page_link" vlink="$*page_vlink" alink="$*page_alink">
 <div align="center">
+""";
+ if (viewer_sees_ads()) {
+"""
+<table width="$*box_width" cellpadding="2" cellspacing="0"
+border="0"
+summary="">
+<tr><td bgcolor="$*stronger_back" align="center">
+<table width="100%" cellpadding="3" cellspacing="0"
+border="0"
+summary="">
+<tr class="caption">
+<td class="caption" colspan='2' align="left"><b>Advertisment</b></td>
+</tr></table>
+<table width="100%" cellpadding="3" cellspacing="0"
+border="0"
+summary="">
+<tr>
+<td class="shadowed" align="center">
+<table cellspacing="5"
+cellpadding="0"
+border="0"
+summary="" style="margin-left: auto; margin-right: auto;">
+<tr><td>""";
+ $this->print_ad("banner"); 
+
+"""
+</td>
+</tr>
+</table>
+</td>
+</tr></table>
+</td></tr>
+</table><br />
+""";
+
+ }
+"""
 <table width="$*box_width" cellpadding="2" cellspacing="0"
 border="0"
 summary="">
