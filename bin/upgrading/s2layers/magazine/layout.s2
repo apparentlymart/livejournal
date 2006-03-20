@@ -211,7 +211,9 @@ H3 EM {
     font-style: normal;
 }
 .H3Holder {
-    clear: both; 
+    """;
+    if (not viewer_sees_ads()) { "clear: both;"; }
+    """
     padding-left: 2ex;
     border-left: thin solid $*border_color;
     border-bottom: thin solid $*border_color;
@@ -237,7 +239,9 @@ A:active {
 }
 .Comment, .Current {
     margin-bottom: 1em; 
-    clear: right;
+    """;
+    if (not viewer_sees_ads()) { "clear: right;"; }
+    """
 }
 .Picture {
     border-left: thin solid $*border_color;
@@ -330,7 +334,14 @@ function Page::print () {
     """<title>$title</title>
   </head>
   <body>
-    <h1>$title</h1>""";
+    """;
+    if (viewer_sees_ads()) {
+        """<div style="float: right;">""";
+        $this->print_ad("Journal-Skyscraper");
+        "</div>";
+        """<div style="width: 83%;">""";
+    }
+    """<h1>$title</h1>""";
 
     var string website_name = $.journal.website_name ? $.journal.website_name : $*text_website_default_name;
     var string website = ($.journal.website_url != "" ? "(<a href='$.journal.website_url'>$website_name</a>)" : "");
@@ -354,6 +365,7 @@ function Page::print () {
 
     $this->lay_bottom_navigation();
 
+    if (viewer_sees_ads()) { "</div>"; }
     "</body></html>";
 }
 
