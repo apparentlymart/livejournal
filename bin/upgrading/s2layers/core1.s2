@@ -455,7 +455,7 @@ class Page
     "Print server side supplied head content. This is a fixed function, so you can't override it. See
     [method[Page.print_custom_head()]] if you want to supply custom head content.";
 
-    function print_ad(string type) [fixed]
+    function builtin print_ad(string type) [fixed]
     "Prints an ad if the user should see one";
 
     function print_custom_head
@@ -788,8 +788,6 @@ function builtin userlite_as_string(UserLite ul) : string "Access to the LJ::lju
 
 function builtin start_css () "Declare that you're about to start printing out CSS that should be buffered, then later cleaned when you call end_css().  WARNING: this is not re-entrant.  You can't call start_css recursively.";
 function builtin end_css () "Declare that you're done printing CSS and the output thus buffered should be cleaned and printed.";
-
-function builtin get_ad(string type) : string "returns an ad based on layout type";
 
 ##[ properties ]
 
@@ -1648,10 +1646,6 @@ function Page::print_head() {
         println """<link rel='stylesheet' href='$*STATDIR/ad_base.css' type='text/css' />""";
     }
     $this->print_custom_head();
-}
-
-function Page::print_ad(string type) {
-    print get_ad($type);
 }
 
 function Page::print_custom_head() {

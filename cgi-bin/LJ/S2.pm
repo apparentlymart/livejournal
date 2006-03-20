@@ -2795,6 +2795,25 @@ sub EntryPage__print_multiform_start
                                 "journal", $this->{'entry'}->{'journal'}->{'username'}) . "\n");
 }
 
+sub Page__print_ad
+{
+    my ($ctx, $this, $type) = @_;
+    return unless $LJ::USE_ADS;
+
+    my $ad = LJ::ads(type => "journal", orient => $type);
+    return unless $ad;
+    $S2::pout->($ad);
+}
+*RecentPage__print_ad = \&Page__print_ad;
+*FriendsPage__print_ad = \&Page__print_ad;
+*Page__print_ad = \&Page__print_ad;
+*YearPage__print_ad = \&Page__print_ad;
+*MonthPage__print_ad = \&Page__print_ad;
+*DayPage__print_ad = \&Page__print_ad;
+*EntryPage__print_ad = \&Page__print_ad;
+*ReplyPage__print_ad = \&Page__print_ad;
+*TagsPage__print_ad = \&Page__print_ad;
+
 sub Page__visible_tag_list
 {
     my ($ctx, $this) = @_;
@@ -2920,12 +2939,6 @@ sub userlite_as_string
 {
     my ($ctx, $UserLite) = @_;
     return LJ::ljuser($UserLite->{'_u'});
-}
-
-sub get_ad
-{
-    my ($ctx, $type) = @_;
-    return LJ::ads( type => 'journal', orient => $type );
 }
 
 sub PalItem
