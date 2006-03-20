@@ -342,7 +342,7 @@ summary="" style="margin-left: auto; margin-right: auto;">
 
 """<td><div align="center">""";
 
-$this->print_ad("skyscraper");
+$this->print_ad("Journal-Skyscraper");
 
 """</div></td></tr></table>
 </td></tr></table>
