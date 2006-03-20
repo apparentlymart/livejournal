@@ -418,7 +418,7 @@ lastn
 .type
 HTML
 .des
-Creates the IMG tag needed to show an ad on your journal
+The HTML tag needed to show a skyscraper ad on your journal
 .props
 { ad
 .des
@@ -915,7 +915,7 @@ This property is made up of [var[CALENDAR_YEAR_LINK]] and [var[CALENDAR_YEAR_DIS
 .scope
 calendar
 .deps
-CALENDAR_SORT_MODE, CALENDAR_MONTH, CALENDAR_NEW_YEAR, CALENDAR_WEBSITE, CALENDAR_YEAR_LINKS
+CALENDAR_SORT_MODE, CALENDAR_MONTH, CALENDAR_NEW_YEAR, CALENDAR_WEBSITE, CALENDAR_YEAR_LINKS, CALENDAR_SKYSCRAPER_AD
 .editrows
 30
 .des
@@ -961,6 +961,10 @@ views of your journal, like to the calendar view.
 .des
 If the user has specified their website, this block is filled with the contents of [var[CALENDAR_WEBSITE]].
 }
+{ skyscraper_ad
+.des
+HTML for printing a skyscraper ad, if available. See [var[CALENDAR_SKYSCRAPER_AD]].
+}
 { head
 .des
 Any user-specified content to go inside the document's &lt;HEAD&gt;, like CSS or META tags.  The value is [var[GLOBAL_HEAD]] followed by [var[CALENDAR_HEAD]].  You shouldn't define the *_HEAD variables in the style, as users should set them themselves.
@@ -972,6 +976,20 @@ URL to user's friends view.
 { urllastn
 .des
 URL to user's lastn view.
+}
+}
+
+{ CALENDAR_SKYSCRAPER_AD
+.scope
+calendar
+.type
+HTML
+.des
+The HTML tag needed to show a skyscraper ad on your journal
+.props
+{ ad
+.des
+The system-provided HTML to print the skyscraper ad.
 }
 }
 
@@ -1135,7 +1153,7 @@ Determines whether months in the calendar mode (variable: [var[CALENDAR_MONTH]])
 .scope
 day
 .deps
-DAY_EVENTS, DAY_NOEVENTS, DAY_WEBSITE
+DAY_EVENTS, DAY_NOEVENTS, DAY_WEBSITE, DAY_SKYSCRAPER_AD
 .editrows
 30
 .type
@@ -1166,6 +1184,10 @@ translate to "Bob's Journal".
 { website
 .des
 If the user has specified their website, this block is filled with the contents of [var[DAY_WEBSITE]].
+}
+{ skyscraper_ad
+.des
+HTML for printing a skyscraper ad, if available. See [var[DAY_SKYSCRAPER_AD]].
 }
 { events
 .des
@@ -1242,6 +1264,20 @@ URL to user's calendar view.
 { urlfriends
 .des
 URL to user's friends view.
+}
+}
+
+{ DAY_SKYSCRAPER_AD
+.scope
+day
+.type
+HTML
+.des
+The HTML tag needed to show a skyscraper ad on your journal
+.props
+{ ad
+.des
+The system-provided HTML to print the skyscraper ad.
 }
 }
 
@@ -1669,7 +1705,7 @@ this property is equal to [var[FRIENDS_SKIP_SPACER]].
 .scope
 friends
 .deps
-FRIENDS_OPT_ITEMS, FRIENDS_NOFRIENDS, FRIENDS_EVENTS, FRIENDS_RANGE_MOSTRECENT, FRIENDS_RANGE_HISTORY, FRIENDS_SKIP_LINKS, FRIENDS_WEBSITE
+FRIENDS_OPT_ITEMS, FRIENDS_NOFRIENDS, FRIENDS_EVENTS, FRIENDS_RANGE_MOSTRECENT, FRIENDS_RANGE_HISTORY, FRIENDS_SKIP_LINKS, FRIENDS_WEBSITE, FRIENDS_SKYSCRAPER_AD
 .editrows
 30
 .des
@@ -1691,6 +1727,10 @@ translate to "Bob's Journal".
 { website
 .des
 If the user has specified their website, this block is filled with the contents of [var[FRIENDS_WEBSITE]].
+}
+{ skyscraper_ad
+.des
+HTML for printing a skyscraper ad, if available. See [var[FRIENDS_SKYSCRAPER_AD]].
 }
 { events
 .des
@@ -1737,6 +1777,20 @@ URL to user's lastn view.
 { urlcalendar
 .des
 URL to user's calendar view.
+}
+}
+
+{ FRIENDS_SKYSCRAPER_AD
+.scope
+friends
+.type
+HTML
+.des
+The HTML tag needed to show a skyscraper ad on your journal
+.props
+{ ad
+.des
+The system-provided HTML to print the skyscraper ad.
 }
 }
 

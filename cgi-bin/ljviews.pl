@@ -153,6 +153,9 @@ $LJ::S1::PROPS = {
     'CALENDAR_YEAR_LINKS' => {
         'years' => 't',
     },
+    'CALENDAR_SKYSCRAPER_AD' => {
+        'ad' => 't',
+    },
 
     # day
     'DAY_DATE_FORMAT' => $commonprop->{'dateformat'},
@@ -171,6 +174,9 @@ $LJ::S1::PROPS = {
     },
     'DAY_TALK_LINKS' => $commonprop->{'talklinks'},
     'DAY_TALK_READLINK' => $commonprop->{'talkreadlink'},
+    'DAY_SKYSCRAPER_AD' => {
+        'ad' => 't',
+    },
 
     # friends
     'FRIENDS_DATE_FORMAT' => $commonprop->{'dateformat'},
@@ -190,6 +196,9 @@ $LJ::S1::PROPS = {
     'FRIENDS_SKIP_FORWARD' => $commonprop->{'skip'},
     'FRIENDS_TALK_LINKS' => $commonprop->{'talklinks'},
     'FRIENDS_TALK_READLINK' => $commonprop->{'talkreadlink'},
+    'FRIENDS_SKYSCRAPER_AD' => {
+        'ad' => 't',
+    },
 
     # lastn
     'LASTN_ALTPOSTER' => {
@@ -1181,10 +1190,13 @@ sub create_view_lastn
             });
     }
 
-    #my $ad_level = LJ::get_cap("ads", $remote);
-    if ($LJ::USE_ADS) {
+    my $show_ad = LJ::run_hook('should_show_ad', {
+        ctx  => "journal",
+        user => $u,
+    });
+    if ($LJ::USE_ADS && $show_ad) {
         $lastn_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'LASTN_SKYSCRAPER_AD', 
-                                                          { "ad" => LJ::ads( type => "journal", orient => 'skyscraper' ), });
+                                                          { "ad" => LJ::ads( type => "journal", orient => 'Journal-Skyscraper' ), });
     }
 
     # spit out the S1
@@ -1591,6 +1603,15 @@ sub create_view_friends
     my $lastday = -1;
     my $eventnum = 0;
 
+    my $show_ad = LJ::run_hook('should_show_ad', {
+        ctx  => "journal",
+        user => $u,
+    });
+    if ($LJ::USE_ADS && $show_ad) {
+        $friends_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'FRIENDS_SKYSCRAPER_AD', 
+                                                            { "ad" => LJ::ads( type => "journal", orient => 'Journal-Skyscraper' ), });
+    }
+
   ENTRY:
     foreach my $item (@items)
     {
@@ -1910,6 +1931,15 @@ sub create_view_calendar
     $calendar_page{'urlfriends'} = "$journalbase/friends";
     $calendar_page{'urllastn'} = "$journalbase/";
 
+    my $show_ad = LJ::run_hook('should_show_ad', {
+        ctx  => "journal",
+        user => $u,
+    });
+    if ($LJ::USE_ADS && $show_ad) {
+        $calendar_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'CALENDAR_SKYSCRAPER_AD', 
+                                                             { "ad" => LJ::ads( type => "journal", orient => 'Journal-Skyscraper' ), });
+    }
+
     my $months = \$calendar_page{'months'};
 
     my $quserid = int($u->{'userid'});
@@ -2136,6 +2166,15 @@ sub create_view_day
     $day_page{'urlfriends'} = "$journalbase/friends";
     $day_page{'urlcalendar'} = "$journalbase/calendar";
     $day_page{'urllastn'} = "$journalbase/";
+
+    my $show_ad = LJ::run_hook('should_show_ad', {
+        ctx  => "journal",
+        user => $u,
+    });
+    if ($LJ::USE_ADS && $show_ad) {
+        $day_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'DAY_SKYSCRAPER_AD', 
+                                                        { "ad" => LJ::ads( type => "journal", orient => 'Journal-Skyscraper' ), });
+    }
 
     my $initpagedates = 0;
 
