@@ -1791,51 +1791,40 @@ sub tag_cloud {
 
 sub ads {
     my %opts = @_;
-    my $type   = delete $opts{'type'};
+    my $ctx    = delete $opts{'type'};
     my $orient = delete $opts{'orient'};
     my $user   = delete $opts{'user'};
 
+
     return '' unless LJ::run_hook('should_show_ad', {
-        ctx  => $type,
+        ctx  => $ctx,
         user => $user,
     });
 
-    my %adtypes;
+
+    # If we don't know about this sort of page, can't do much of anything
+    die("No mapping for orient $orient")
+        if $LJ::IS_DEV_SERVER && !defined $LJ::AD_PAGE_MAPPING{$orient};
+
     # App ads
-    if ($type eq "app") {
+    if ($ctx eq "app") {
         my $uri = BML::get_uri();
         $uri = $uri =~ /\/$/ ? "$uri/index.bml" : $uri;
-        return unless $LJ::AD_MAPPING{$uri} eq $orient;
-        %adtypes = (
-                       'App-Info-1column'   => '<a href=""><img src="http://www.iab.net/standards/images/ads/160x600.gif" width="160" height="600"></a>',
-                       'App-Info-2column'  => '<a href=""><img src="http://www.iab.net/standards/images/ads/726X90_v2.gif" width="728" height="90"></a>',
-                       'App-Func-1column'   => '<a href=""><img src="http://www.iab.net/standards/images/ads/160x600.gif" width="160" height="600"></a>',
-                       'App-Func-2column'  => '<a href=""><img src="http://www.iab.net/standards/images/ads/726X90_v2.gif" width="728" height="90"></a>',
-                       'App-confirm'    => '<a href=""><img src="http://www.iab.net/standards/images/ads/180x150.gif" width="180" height="150"></a>',
-                       'medrectangle' => '<a href=""><img src="http://www.iab.net/standards/images/ads/300x250.gif" width="300" height="250"></a>',
-                       );
-    # Journal ads
-    } else {
-        %adtypes = (
-                       'banner'       => "<a href=''><img src='http://www.iab.net/standards/images/ads/468x60.gif' width='468' height='60' /></a>",
-                       'skyscraper'   => '<a href=""><img src="http://www.iab.net/standards/images/ads/160x600.gif" width="160" height="600"></a>',
-                       );
+
+        return '' unless $LJ::AD_MAPPING{$uri} eq $orient;
     }
 
-    my $ad;
-    foreach my $size ( keys %adtypes ) {
-        # Only grab the ad size we want
-        next unless $size eq $orient;
-        # Pass if we get an unknown ad type
-        next unless $adtypes{$size};
-        
-        $ad .= "<div class=\"ad $size\" id=\"\">";
-        $ad .= "<h4>Advertisement</h4>";
-        $ad .= $adtypes{$size} if $adtypes{$size};
-        $ad .= "<a href=\"#\">Leave Feedback</a>";
-        $ad .= "</div>";
-    }
-    return $ad ? $ad : "";
+    my $adtype = $LJ::AD_PAGE_MAPPING{$orient};
+    my $adcall = $LJ::AD_TYPE{$adtype};
+
+    my $adhtml;
+    $adhtml .= "<div class=\"ad $adtype\" id=\"\">";
+    $adhtml .= "<h4>Advertisement</h4>";
+    $adhtml .= $adcall;
+    $adhtml .= "<a href=\"#\">Leave Feedback</a>";
+    $adhtml .= "</div>";
+
+    return $adhtml;
 }
 
 # Common challenge/response javascript, needed by both login pages and comment pages alike.
