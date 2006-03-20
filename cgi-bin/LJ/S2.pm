@@ -2078,11 +2078,10 @@ sub viewer_sees_ads
     my ($ctx) = @_;
     return 0 unless $LJ::USE_ADS;
 
-    # For simple testing now, there's some logic that needs to be 
-    # defined/coded before this is really useful
-    return 1;
-    #my $remote = LJ::get_remote();
-    #return 1 if LJ::get_cap("ads", $remote);
+    return LJ::run_hook('should_show_ad', {
+        ctx  => 'journal',
+        user => $LJ::S2::CURR_PAGE->{'journal'}->{'username'},
+    });
 }
 
 sub weekdays
@@ -2798,10 +2797,14 @@ sub EntryPage__print_multiform_start
 sub Page__print_ad
 {
     my ($ctx, $this, $type) = @_;
-    return unless $LJ::USE_ADS;
 
-    my $ad = LJ::ads(type => "journal", orient => $type);
-    return unless $ad;
+    my $ad = LJ::ads(
+                     type   => 'journal',
+                     orient => $type,
+                     user   => $LJ::S2::CURR_PAGE->{'journal'}->{'username'},
+                     );
+    return '' unless $ad;
+
     $S2::pout->($ad);
 }
 *RecentPage__print_ad = \&Page__print_ad;

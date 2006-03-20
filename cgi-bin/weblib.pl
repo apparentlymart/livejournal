@@ -1793,13 +1793,12 @@ sub ads {
     my %opts = @_;
     my $type   = delete $opts{'type'};
     my $orient = delete $opts{'orient'};
+    my $user   = delete $opts{'user'};
 
-    return unless $LJ::USE_ADS;
-
-    my $remote = LJ::get_remote();
-    my $ad_level = LJ::get_cap($remote, "ads");
-
-    return unless $ad_level;
+    return '' unless LJ::run_hook('should_show_ad', {
+        ctx  => $type,
+        user => $user,
+    });
 
     my %adtypes;
     # App ads
