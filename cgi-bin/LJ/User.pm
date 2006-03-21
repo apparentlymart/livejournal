@@ -1198,6 +1198,19 @@ sub draft_text {
     return $u->prop('entry_draft');
 }
 
+sub notable_interests {
+    my ($u, $n) = @_;
+    $n ||= 20;
+
+    # arrayref of arrayrefs of format [intid, intname, intcount];
+    my $ints = LJ::get_interests($u)
+        or return ();
+
+    my @ints = sort { $b->[2] <=> $a->[2] } @$ints;
+    @ints = @ints[0..$n-1] if @ints > $n;
+    return map { $_->[1] } @ints;
+}
+
 package LJ;
 
 # <LJFUNC>
