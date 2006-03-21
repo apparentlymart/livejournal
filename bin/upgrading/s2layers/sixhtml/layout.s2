@@ -150,7 +150,7 @@ function prop_init() {
     $*layout_type = "3C";
 
     $*sidebar_secondary = [
-                           [ "ads", "Advertisement" ],
+                           [ "ads", "" ],
                            [ "tags", "Tags" ],
                            [ "pagesummary", "Page Summary" ],
                            ];    
