@@ -290,7 +290,7 @@ function Page::print ()
 
     if (viewer_sees_ads()) {
       print "<div style=\"float: right; margin-right: 10px; position: relative; z-index: 15;\">";
-      $this->print_ad("skyscraper");
+      $this->print_ad("Journal-Skyscraper");
       print "</div>\n";
     }
 
