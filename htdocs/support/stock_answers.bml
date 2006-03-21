@@ -16,7 +16,7 @@ body<=
     return "<?h1 Error h1?><?p Requested category doesn't exist. p?>"
         unless !$spcatid || $cats->{$spcatid};
 
-    $formauth = LJ::form_auth();
+    my $formauth = LJ::form_auth();
 
     # editing is based on ability to grant supporthelp.  and throw an error if they
     # posted but can't edit.
