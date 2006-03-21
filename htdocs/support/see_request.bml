@@ -343,6 +343,14 @@ body<=
             }
         }
 
+        LJ::run_hooks("support_see_request_info_rows", {
+            'u' => $u,
+            'email' => $email,
+            'sp' => $sp,
+            'retref' => \$ret,
+            'remote' => $remote,
+        });
+
         # if the user has siteadmin:users or siteadmin:* show them link to resend validation email?
         my $extraval = sub {
             return '' unless LJ::check_priv($remote, 'siteadmin', 'users') ||
