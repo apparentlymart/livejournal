@@ -25,7 +25,7 @@ propgroup presentation {
   property use external_stylesheet;
 }
 set show_recent_userpic = false;
-set sidebar_position = "left";
+set sidebar_position = "right";
 set page_recent_items = 20;
 set page_friends_items = 20;
 set view_entry_disabled = false;
@@ -318,10 +318,20 @@ function Page::print ()
     "<title>$title</title>\n</head>\n";
 
     # Body
-    "<body>\n<a name='top'></a><div align='center'>\n";
+    "<body>\n";
+    var string ad_padding = "";
+    if (viewer_sees_ads()) {
+        var string align = $*sidebar_position != "left" ? "left" : "right";
+        $ad_padding = "padding-$align: 160px;";
+        "<div style='float: $align; margin-$align: 10px;'>";
+        $this->print_ad("Journal-Skyscraper");
+        "</div>";
+    }
+
+    "<a name='top'></a><div align='center'>\n";
 
     # Table wrapper
-    "<table id='main' cellpadding='5' cellspacing='0' width='90%'>\n<tr>";
+    "<table id='main' cellpadding='5' cellspacing='0' width='80%' style='$ad_padding'>\n<tr>";
 
     if ($*sidebar_position == "left") { print_sidebar($this); }
 
