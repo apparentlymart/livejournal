@@ -392,7 +392,7 @@ $userpic
 
     if (viewer_sees_ads()) {
         """<div class="box" align="center" style="padding: 0.5em 0;">""";
-        $this->print_ad("skyscraper");
+        $this->print_ad("Journal-Skyscraper");
         "</div>";
     }
 

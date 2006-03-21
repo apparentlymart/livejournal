@@ -687,7 +687,7 @@ function Page::lay_print_paraphernalia() "User layers can override this to chang
     if (viewer_sees_ads()) {
         paraphernalia_box_open("", "");
         """<div style="margin-top: 8px;">""";
-        $this->print_ad("skyscraper");
+        $this->print_ad("Journal-Skyscraper");
         "</div>";
         paraphernalia_box_close("", "");
     }
