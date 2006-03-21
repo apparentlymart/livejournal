@@ -260,8 +260,8 @@ font-size: 1.25em;
 #navbar {
 background: $*navbar_bgcolor none;
 color: $*navbar_fgcolor;
-width: 20%;
 """;
+if (viewer_sees_ads()) { "width: 20%;"; } else { "width: 25%;"; }
 css_fontspec($*font_sidebar_base,$*font_sidebar_fallback);
 """
 }
@@ -288,7 +288,9 @@ margin-top: 0;
 margin-bottom: 0;
 }
 #mainstuff {
-width: 70%;
+""";
+if (viewer_sees_ads()) { "width: 70%;"; } else { "width: 75%;"; }
+"""
 background: $*entry_bgcolor none;
 color: $*entry_fgcolor;
 }
@@ -513,7 +515,7 @@ function Page::print ()
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="""; if (viewer_sees_ads()) { """"3" """; } else { """"2" """; } """id="topbar" valign="top">""";
+<tr><td colspan="""; if (viewer_sees_ads()) { "\"3\" "; } else { "\"2\" "; } """id="topbar" valign="top">""";
 
 "<h1>$.journal.name</h1>";
 "<h2>" + $this->lay_viewspec_heading() + "</h2>";
@@ -529,7 +531,7 @@ if ($*opt_navbar_pos == "left") {
 } else {
     if (viewer_sees_ads()) {
         """<td valign="top" style="background: #eeeeff; width: 10%; padding: 10px;">""";
-        $this->print_ad("skyscraper");
+        $this->print_ad("Journal-Skyscraper");
         "</td>";
     }
 }
@@ -553,7 +555,7 @@ if ($*opt_navbar_pos == "right") {
 } else {
     if (viewer_sees_ads()) {
         """<td valign="top" style="background: #eeeeff; width: 10%; padding: 10px;">""";
-        $this->print_ad("skyscraper");
+        $this->print_ad("Journal-Skyscraper");
         "</td>";
     }
 }
