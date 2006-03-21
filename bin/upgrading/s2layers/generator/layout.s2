@@ -335,12 +335,7 @@ summary="">
 cellpadding="0"
 border="0"
 summary="" style="margin-left: auto; margin-right: auto;">
-<tr>""";
-    $this->lay_top_userpic();
-
-    var string sitename_lc = $*SITENAMESHORT->lower();
-
-"""<td><div align="center">""";
+<tr><td><div align="center">""";
 
 $this->print_ad("Journal-Skyscraper");
 
