@@ -1803,16 +1803,20 @@ sub ads {
 
 
     # If we don't know about this sort of page, can't do much of anything
-    die("No mapping for page type $pagetype")
-        if $LJ::IS_DEV_SERVER && !defined $LJ::AD_PAGE_MAPPING{$pagetype};
+    if (!defined $LJ::AD_PAGE_MAPPING{$pagetype}) {
+        die("No mapping for page type $pagetype")
+            if $LJ::IS_DEV_SERVER;
 
-    # App ads
-    my $url = '';
+        return '';
+    }
+
+    # Make sure this mapping is correct for app ads
     if ($ctx eq "app") {
         my $uri = BML::get_uri();
-        $url = "$LJ::SITEROOT$uri";
         $uri = $uri =~ /\/$/ ? "$uri/index.bml" : $uri;
 
+        # Make sure that the page type passed in is what the config says this
+        # page actually is.
         return '' unless $LJ::AD_MAPPING{$uri} eq $pagetype;
     }
 
@@ -1823,6 +1827,9 @@ sub ads {
     my $adtarget    = $LJ::AD_PAGE_MAPPING{$pagetype}->{target}; # user|content
     my $adunit      = $LJ::AD_PAGE_MAPPING{$pagetype}->{adunit}; # ie skyscraper
     my $addetails   = $LJ::AD_TYPE{$adunit};                     # hashref of meta-data or scalar to directly serve
+    my $r = Apache->request;
+    my $url = $LJ::IS_SSL ? 'https://' : 'http://' . $r->header_in('Host') . $r->uri;
+
 
     $adhtml .= "<div class=\"ad $adunit\" id=\"\">";
     $adhtml .= "<h4>Advertisement</h4>";
