@@ -1211,6 +1211,12 @@ sub notable_interests {
     return map { $_->[1] } @ints;
 }
 
+sub get_cap
+{
+    my ($u, $cname) = @_;
+    return LJ::get_cap($u, $cname);
+}
+
 package LJ;
 
 # <LJFUNC>
