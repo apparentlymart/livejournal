@@ -145,6 +145,18 @@ propgroup text {
 }
 propgroup text = "Text";
 
+function prop_init() {
+  if (viewer_sees_ads()) {
+    $*layout_type = "3C";
+
+    $*sidebar_secondary = [
+                           [ "ads", "Advertisement" ],
+                           [ "tags", "Tags" ],
+                           [ "pagesummary", "Page Summary" ],
+                           ];    
+  }
+}
+
 function print_custom_stylesheet() {}
 
 function print_stylesheet () {
@@ -360,7 +372,12 @@ function print_module_links(string title) {
         close_module();
     }
 }
-
+function print_module_ads(string title) {
+    var Page p = get_page();
+    open_module("ads", $title, "");
+    $p->print_ad("Journal-Skyscraper");
+    close_module();
+}
 
 function handle_sidebar_array(string[][] list) {
     foreach var string[] item ($list) {
@@ -397,6 +414,9 @@ function handle_sidebar_array(string[][] list) {
         }
         elseif ($module == "links") {
             print_module_links($title);
+        }
+        elseif ($module == "ads") {
+            print_module_ads($title);
         }
     }
 }
