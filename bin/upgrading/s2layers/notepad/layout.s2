@@ -184,6 +184,13 @@ function Page::print()
     """<title>$title</title>
  </head>
  <body>
+ """;
+ if (viewer_sees_ads()) {
+    """<div style="float: right; margin-right: 10px;">""";
+    $this->print_ad("Journal-Skyscraper");
+    "</div>";
+ }
+ """
   <table width="70%" border="0" cellpadding="0" cellspacing="0">
    <tr>
     <td colspan="2">
