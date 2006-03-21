@@ -3,12 +3,6 @@
 package LJ::Memories;
 use strict;
 
-$LJ::DISABLED{'memkwcnt_memcaching'} = 0;
-
-$LJ::MEMCACHE_EXPIRATION{'memct'}    = 43200;
-$LJ::MEMCACHE_EXPIRATION{'memkwid'}  = 86400;
-$LJ::MEMCACHE_EXPIRATION{'memkwcnt'} = 86400;
-
 # <LJFUNC>
 # name: LJ::Memories::count
 # class: web
@@ -430,7 +424,7 @@ sub update_memory {
 # this messy function gets memories based on an options hashref.  this is an
 # API API and isn't recommended for use by BML etc... add to the API and have
 # API functions call this if needed.
-# 
+#
 # options in $opts hashref:
 #   security => [ 'public', 'private', ... ], or some subset thereof
 #   filter => 'all' | 'own' | 'other', filter -- defaults to all
