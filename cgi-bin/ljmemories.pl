@@ -3,6 +3,12 @@
 package LJ::Memories;
 use strict;
 
+$LJ::DISABLED{'memkwcnt_memcaching'} = 0;
+
+$LJ::MEMCACHE_EXPIRATION{'memct'}    = 43200;
+$LJ::MEMCACHE_EXPIRATION{'memkwid'}  = 86400;
+$LJ::MEMCACHE_EXPIRATION{'memkwcnt'} = 86400;
+
 # <LJFUNC>
 # name: LJ::Memories::count
 # class: web
@@ -35,7 +41,8 @@ sub count {
     $count += 0;
 
     # now put in memcache and return it
-    LJ::MemCache::set([$u->{userid}, "memct:$u->{userid}"], $count, 43200); # 12 hours
+    my $expiration = $LJ::MEMCACHE_EXPIRATION{'memct'} || 43200; # 12 hours
+    LJ::MemCache::set([$u->{userid}, "memct:$u->{userid}"], $count, $expiration);
     return $count;
 }
 
@@ -98,8 +105,14 @@ sub create {
         $dbh->do("REPLACE INTO memkeyword (memid, kwid) VALUES $val");
     }
 
-    # clear out memcache
+    # Delete the appropriate memcache entries
     LJ::MemCache::delete([$u->{userid}, "memct:$u->{userid}"]);
+    my $filter = $journalid == $u->{userid} ? 'own' : 'other';
+    my $filter_char   = _map_filter_to_char($filter);
+    my $security_char = _map_security_to_char($security);
+    my $memcache_key = "memkwcnt:$u->{userid}:$filter_char:$security_char";
+    LJ::MemCache::delete([$u->{userid}, $memcache_key]);
+
     return 1;
 }
 
@@ -141,8 +154,8 @@ sub delete_by_id {
     my $euser = $u->{dversion} > 5 ? "userid = $u->{userid} AND" : '';
     $db->do("DELETE FROM memkeyword$table WHERE $euser memid IN ($in)");
 
-    # delete cache of count
-    LJ::MemCache::delete([$u->{userid}, "memct:$u->{userid}"]);
+    # delete cache of count and keyword counts
+    clear_memcache($u);
 
     # success at this point, since the first delete succeeded
     return 1;
@@ -163,33 +176,177 @@ sub get_keyword_counts {
     my ($u, $opts) = @_;
     $u = LJ::want_user($u);
     return undef unless $u;
+    my $userid = $u->{userid};
 
-    # get all of the user's memories that fit the filtering
-    my $memories = LJ::Memories::get_by_user($u, { %{$opts || {}}, notext => 1 });
+    my $filter_parm   = $opts->{filter};
+    my @security_parm = $opts->{security} ? @{$opts->{security}} : ();
+
+    my ($cache_counts, $missing_keys) = _get_memcache_keyword_counts($userid, $filter_parm, @security_parm);
+    return $cache_counts unless @$missing_keys;
+
+    # Get the user's memories based on filter and security
+    $opts->{filter_security_pairs} = $missing_keys;
+    $opts->{notext} = 1;
+    my $memories = LJ::Memories::_memory_getter($u, $opts);
     return undef unless defined $memories; # error case
-    return {} unless %$memories; # just no memories case
-    my @memids = map { $_+0 } keys %$memories;
+    $memories = {} unless defined($memories); # prophylactic
+
+    # Generate mapping of memid to filter (e.g. own) and security (e.g. private)
+    my (%mem_filter, @all_memids);
+    foreach my $memid (keys %$memories) {
+        push @all_memids, $memid;
+        my $memory_filter   = $memories->{$memid}->{journalid} == $userid ? 'own' : 'other';
+        my $memory_security = $memories->{$memid}->{security};
+        $mem_filter{$memid} = [$memory_filter, $memory_security];
+    }
 
     # now let's get the keywords these memories use
-    my $in = join ',', @memids;
-    my $kwids;
+    my $in = join ',', @all_memids;
+    my $mem_kw_rows;
     if ($u->{dversion} > 5) {
         my $dbcr = LJ::get_cluster_reader($u);
-        $kwids = $dbcr->selectcol_arrayref("SELECT kwid FROM memkeyword2 WHERE userid = ? AND memid IN ($in)",
-                                           undef, $u->{userid});
+        my $sql = "SELECT kwid, memid FROM memkeyword2 WHERE userid = $userid AND memid IN ($in)";
+        $mem_kw_rows = $dbcr->selectall_arrayref($sql);
         return undef if $dbcr->err;
     } else {
         my $dbr = LJ::get_db_reader();
-        $kwids = $dbr->selectcol_arrayref("SELECT kwid FROM memkeyword WHERE memid IN ($in)");
+        my $sql = "SELECT kwid, memid FROM memkeyword WHERE kwid IN ($in)";
+        $mem_kw_rows = $dbr->selectall_arrayref($sql);
         return undef if $dbr->err;
     }
 
-    # and now combine them
-    my %res;
-    $res{$_}++ foreach @$kwids;
+    # Filter and Sum
+    my %counts;
+    foreach my $row (@$mem_kw_rows) {
+        my ($kwid, $memid) = @$row;
+        my ($filter, $security) = @{$mem_filter{$memid}};
+        $counts{$filter}{$security}{$kwid}++;
+    }
 
-    # done, return
-    return \%res;
+    # Add these new counts to our memcache counts to get totals
+    my $output_counts = $cache_counts;
+    foreach my $filter (keys %counts) {
+        foreach my $security (keys %{$counts{$filter}}) {
+            if ($counts{$filter}{$security}) {
+                add_hash($output_counts, $counts{$filter}{$security});
+            }
+        }
+    }
+
+    # Create empty anonymous hashes for missing key combos
+    foreach my $missing_key (@$missing_keys) {
+        my ($missing_filter, $missing_security) = split /-/, $missing_key;
+        next if exists $counts{$missing_filter}{$missing_security};
+        $counts{$missing_filter}{$missing_security} = {};
+    }
+
+    # Store memcache entries with counts
+    foreach my $filter (qw/own other/) {
+        foreach my $security (qw/friends private public/) {
+            next unless exists $counts{$filter}{$security};
+            my $filter_char   = _map_filter_to_char($filter);
+            my $security_char = _map_security_to_char($security);
+            my $memcache_key = "memkwcnt:$userid:$filter_char:$security_char";
+            my $expiration = $LJ::MEMCACHE_EXPIRATION{'memkwcnt'} || 86400;
+            LJ::MemCache::set([$userid, $memcache_key], $counts{$filter}{$security}, $expiration);
+        }
+    }
+
+    return $output_counts;
+}
+
+#
+# Name: _map_security_to_char
+# API: Private to this module
+# Description: Map a verbose security name to a single character
+# Parameter: Verbose security name
+# Return: Single character representation of security
+#
+sub _map_security_to_char {
+    my $verbose_security = shift;
+    my %security_map = (friends => 'f', private => 'v', public => 'u');
+    return $security_map{$verbose_security} || die "Can't map security '" . LJ::ehtml($verbose_security) . "' to character";
+}
+
+#
+# Name: _map_filter_to_char
+# API: Private to this module
+# Description: Map a verbose filter name to a single character
+# Parameter: Verbose filter name
+# Return: Single character representation of filter
+#
+sub _map_filter_to_char {
+    my $verbose_filter = shift;
+    my %filter_map = (own => 'w', other => 't');
+    return $filter_map{$verbose_filter} || die "Can't map filter '" . LJ::ehtml($verbose_filter) . "' to character";
+}
+
+#
+# Name: _get_memcache_keyword_counts
+#
+# API: Private to this module
+#
+# Description:
+# - Get keyword counts from memcache based on user, filter, and security
+# - Return hash of counts and array of missing keys
+#
+# Parameters:
+# - $userid = ID of the User
+# - $filter_parm = {own|other}
+# - @security_parm = array of values {friends|private|public} - () = all
+#
+# Return Values:
+# - HashRef of counts by Keyword ID
+# - ArrayRef of missing keys (e.g. 'owner-private')
+#
+sub _get_memcache_keyword_counts {
+    my ($userid, $filter_parm, @security_parm) = @_;
+
+    # Build up the memcache keys that we're looking for
+    my @memcache_keys;
+    my %filter_security_map;
+    foreach my $filter (qw/own other/) {
+        foreach my $security (qw/friends private public/) {
+            my $filter_matches = ($filter_parm eq $filter) || ($filter_parm eq 'all');
+            my $security_matches = @security_parm == 0 || grep(/$security/, @security_parm);
+            next unless $filter_matches && $security_matches;
+            my $filter_char   = _map_filter_to_char($filter);
+            my $security_char = _map_security_to_char($security);
+            my $memcache_key = "memkwcnt:$userid:$filter_char:$security_char";
+            push @memcache_keys, $memcache_key;
+            $filter_security_map{"$filter_char:$security_char"} = [$filter, $security];
+        }
+    }
+
+    # Loop over our memcache results, get counts and total them as we go
+    my (%output_counts, @missing_keys);
+    my $memcache_counts = $LJ::DISABLED{'memkwcnt_memcaching'} ? {} : LJ::MemCache::get_multi(map { [$userid, $_] } @memcache_keys);
+    foreach my $memcache_key (@memcache_keys) {
+        my $counts = $memcache_counts->{$memcache_key};
+        if ($counts) { # Add these memcache counts to totals
+            add_hash(\%output_counts, $counts);
+        } else {
+            my ($filter_security_chars) = $memcache_key =~ /$userid:(.:.)$/;
+            my ($filter, $security) = @{$filter_security_map{$filter_security_chars}};
+            push @missing_keys, $filter . '-' . $security;
+        }
+    }
+
+    return \%output_counts, \@missing_keys;
+}
+
+#
+# Name: add_hash
+# Description: Add values of one hash to the corresponding entries in another
+# Parameters: HashRef1, HashRef2
+# Return: Values are added to the first parameter hash
+#
+sub add_hash {
+    my ($hash1, $hash2) = @_;
+
+    while (my ($key,$value) = each %$hash2) {
+        $hash1->{$key} += $value;
+    }
 }
 
 # <LJFUNC>
@@ -251,8 +408,10 @@ sub update_memory {
 
     # construct update lines... only valid things we can update are des and security
     my @updates;
+    my $security_updated;
     foreach my $what (keys %$upd) {
         next unless $what =~ m/^(?:des|security)$/;
+        $security_updated = 1 if $what eq 'security';
         push @updates, "$what=" . $db->quote($upd->{$what});
     }
     my $updstr = join ',', @updates;
@@ -261,6 +420,10 @@ sub update_memory {
     $db->do("UPDATE memorable$table SET $updstr WHERE userid = ? AND memid = ?",
             undef, $u->{userid}, $memid);
     return undef if $db->err;
+
+    # Delete memcache entries if the security of the memory was updated
+    clear_memcache($u) if $security_updated;
+
     return 1;
 }
 
@@ -271,6 +434,7 @@ sub update_memory {
 # options in $opts hashref:
 #   security => [ 'public', 'private', ... ], or some subset thereof
 #   filter => 'all' | 'own' | 'other', filter -- defaults to all
+#   filter_security_pairs => [ 'own-private', ... ], Pairs of filter/security
 #   notext => 1/0, if on, do not load/return description field
 #   byid => [ 1, 2, 3, ... ], load memories by *memid*
 #   byditemid => [ 1, 2, 3 ... ], load by ditemid (MUST specify journalid too)
@@ -284,20 +448,31 @@ sub _memory_getter {
     $opts ||= {};
     return undef unless $u;
 
-    # various selection options
+    # Specify filter/security by pair, or individually
     my $secwhere = '';
-    if (@{$opts->{security} || []}) {
-        my @secs;
-        foreach my $sec (@{$opts->{security}}) {
-            push @secs, $sec
-                if $sec =~ /^(?:public|friends|private)$/;
-        }
-        $secwhere = "AND security IN (" . join(',', map { "'$_'" } @secs) . ")";
-    }
     my $extrawhere;
-    if ($opts->{filter} eq 'all') { $extrawhere = ''; }
-    elsif ($opts->{filter} eq 'own') { $extrawhere = "AND journalid = $u->{userid}"; }
-    elsif ($opts->{filter} eq 'other') { $extrawhere = "AND journalid <> $u->{userid}"; }
+    if ($opts->{filter_security_pairs}) {
+        my @pairs;
+        foreach my $filter_security_pair (@{$opts->{filter_security_pairs}}) {
+            my ($filter, $security) = $filter_security_pair =~ /^(\w+)-(\w+)$/;
+            my $filter_predicate = ($filter eq 'all') ? '' : 'journalid' . ($filter eq 'own' ? '=' : '<>') . $u->{userid};
+            push @pairs, "($filter_predicate AND security='$security')";
+        }
+        $secwhere = 'AND (' . join(' OR ', @pairs) . ')';
+    } else {
+        if (@{$opts->{security} || []}) {
+            my @secs;
+            foreach my $sec (@{$opts->{security}}) {
+                push @secs, $sec
+                    if $sec =~ /^(?:public|friends|private)$/;
+            }
+            $secwhere = "AND security IN (" . join(',', map { "'$_'" } @secs) . ")";
+        }
+        if ($opts->{filter} eq 'all') { $extrawhere = ''; }
+        elsif ($opts->{filter} eq 'own') { $extrawhere = "AND journalid = $u->{userid}"; }
+        elsif ($opts->{filter} eq 'other') { $extrawhere = "AND journalid <> $u->{userid}"; }
+    }
+
     my $des = $opts->{notext} ? '' : 'des, ';
     my $selwhere;
     if (@{$opts->{byid} || []}) {
@@ -322,8 +497,9 @@ sub _memory_getter {
     if ($u->{dversion} > 5) {
         # new clustered memories
         my $dbcr = LJ::get_cluster_reader($u);
-        $sth = $dbcr->prepare("SELECT memid, userid, journalid, ditemid, $des security " .
-                              "FROM memorable2 WHERE userid = ? $selwhere $secwhere $extrawhere");
+        my $sql = "SELECT memid, userid, journalid, ditemid, $des security "
+           . "FROM memorable2 WHERE userid = ? $selwhere $secwhere $extrawhere";
+        $sth = $dbcr->prepare($sql);
     } else {
         # old global memories
         my $dbr = LJ::get_db_reader();
@@ -454,9 +630,10 @@ sub get_by_keyword {
         return undef if $dbr->err;
     }
 
-    # standard in both cases
-    return {} unless @{$memids || []};
-    return LJ::Memories::_memory_getter($u, { %{$opts || {}}, byid => $memids });
+    # return
+    $memids = [] unless defined($memids);
+    my $memories = @$memids > 0 ?  LJ::Memories::_memory_getter($u, {%{$opts || {}}, byid => $memids }) : {};
+    return $memories;
 }
 
 # <LJFUNC>
@@ -521,7 +698,8 @@ sub get_keywords {
         }
     }
 
-    LJ::MemCache::set($memkey, $ret, 86400) unless $use_reader;
+    my $expiration = $LJ::MEMCACHE_EXPIRATION{'memkwid'} || 86400;
+    LJ::MemCache::set($memkey, $ret, $expiration) unless $use_reader;
     return $ret;
 }
 
@@ -534,9 +712,32 @@ sub get_keywords {
 # returns: undef.
 # </LJFUNC>
 sub updated_keywords {
+    return clear_memcache(shift);
+}
+
+# <LJFUNC>
+# name: LJ::Memories::clear_memcache
+# class: web
+# des: Deletes memcached keyword data.
+# args: uobj
+# des-uobj: User object to clear memcached keywords for.
+# returns: undef.
+# </LJFUNC>
+sub clear_memcache {
     my $u = shift;
     return unless ref $u;
-    LJ::MemCache::delete([$u->{userid},"memkwid:$u->{userid}"]);
+    my $userid = $u->{userid};
+
+    LJ::MemCache::delete([$userid, "memkwid:$userid"]);
+
+    # Delete all memkwcnt entries
+    LJ::MemCache::delete([$userid, "memkwcnt:$userid:w:f"]);
+    LJ::MemCache::delete([$userid, "memkwcnt:$userid:w:v"]);
+    LJ::MemCache::delete([$userid, "memkwcnt:$userid:w:u"]);
+    LJ::MemCache::delete([$userid, "memkwcnt:$userid:t:f"]);
+    LJ::MemCache::delete([$userid, "memkwcnt:$userid:t:v"]);
+    LJ::MemCache::delete([$userid, "memkwcnt:$userid:t:u"]);
+
     return undef;
 }
 
