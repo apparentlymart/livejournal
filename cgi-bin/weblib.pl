@@ -1791,9 +1791,9 @@ sub tag_cloud {
 
 sub ads {
     my %opts = @_;
-    my $ctx    = delete $opts{'type'};
-    my $orient = delete $opts{'orient'};
-    my $user   = delete $opts{'user'};
+    my $ctx      = delete $opts{'type'};
+    my $pagetype = delete $opts{'orient'};
+    my $user     = delete $opts{'user'};
 
 
     return '' unless LJ::run_hook('should_show_ad', {
@@ -1803,24 +1803,41 @@ sub ads {
 
 
     # If we don't know about this sort of page, can't do much of anything
-    die("No mapping for orient $orient")
-        if $LJ::IS_DEV_SERVER && !defined $LJ::AD_PAGE_MAPPING{$orient};
+    die("No mapping for page type $pagetype")
+        if $LJ::IS_DEV_SERVER && !defined $LJ::AD_PAGE_MAPPING{$pagetype};
 
     # App ads
+    my $url = '';
     if ($ctx eq "app") {
         my $uri = BML::get_uri();
+        $url = "$LJ::SITEROOT$uri";
         $uri = $uri =~ /\/$/ ? "$uri/index.bml" : $uri;
 
-        return '' unless $LJ::AD_MAPPING{$uri} eq $orient;
+        return '' unless $LJ::AD_MAPPING{$uri} eq $pagetype;
     }
 
-    my $adtype = $LJ::AD_PAGE_MAPPING{$orient};
-    my $adcall = $LJ::AD_TYPE{$adtype};
+    my $ad_engine = LJ::run_hook('ad_engine');
+    return '' unless $ad_engine;
 
-    my $adhtml;
-    $adhtml .= "<div class=\"ad $adtype\" id=\"\">";
+    my $adhtml = '';
+    my $adtarget    = $LJ::AD_PAGE_MAPPING{$pagetype}->{target}; # user|content
+    my $adunit      = $LJ::AD_PAGE_MAPPING{$pagetype}->{adunit}; # ie skyscraper
+    my $addetails   = $LJ::AD_TYPE{$adunit};                     # hashref of meta-data or scalar to directly serve
+
+    $adhtml .= "<div class=\"ad $adunit\" id=\"\">";
     $adhtml .= "<h4>Advertisement</h4>";
-    $adhtml .= $adcall;
+
+    if (ref $addetails eq 'HASH') {
+        $adhtml .= $ad_engine->process(
+                                       url       => $url,
+                                       width     => $addetails->{width},
+                                       height    => $addetails->{height},
+                                       type      => $adtarget,
+                                       );
+    } else {
+        $adhtml .= $addetails;
+    }
+
     $adhtml .= "<a href=\"#\">Leave Feedback</a>";
     $adhtml .= "</div>";
 
