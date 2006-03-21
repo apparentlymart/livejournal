@@ -354,7 +354,11 @@ function Page::print() {
 
 <body class="$.view">
 """;
-if (viewer_sees_ads()) { "<div style='float: right; margin-right: 10px; position: relative; z-index: 15;'>"; $this->print_ad("skyscraper"); "</div>"; }
+if (viewer_sees_ads()) {
+    "<div style='float: right; margin-right: 10px; position: relative; z-index: 15;'>"; 
+    $this->print_ad("Journal-Skyscraper");
+    "</div>";
+}
 """
 <div id="page">
 """; $this->lay_print_viewlinks(); """
