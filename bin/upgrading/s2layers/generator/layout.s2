@@ -347,6 +347,15 @@ $this->print_ad("Journal-Skyscraper");
 }
 """
 <div align="center">
+""";
+if (viewer_sees_ads()) {
+    """
+    <table width="$*box_width" cellpadding="2" cellspacing="0"
+    border="0"
+    summary=""><tr><td align="center">
+    """;
+}
+"""
 <table width="$*box_width" cellpadding="2" cellspacing="0"
 border="0"
 summary="">
@@ -412,6 +421,7 @@ $this->print_linklist();
 """;
     $this->print_body();
 
+if (viewer_sees_ads()) { "</td></tr></table>"; }
 """
 </div>
 <p>
