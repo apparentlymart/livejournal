@@ -1847,7 +1847,7 @@ sub ads {
     $adhtml .= "<h4>Advertisement</h4>";
 
     if (ref $addetails eq 'HASH') {
-        my ($age, $gender, $country, $language);
+        my ($age, $gender, $country, $language, $categories, $interests);
 
         my $remote = LJ::get_remote();
         if ($remote) {
@@ -1864,21 +1864,29 @@ sub ads {
                 $gender = lc(substr($gender, 0, 1)); # m|f|u
                 $gender = undef if $gender eq 'u';
             }
+
+            $categories = $remote->prop('ad_categories');
+
+            $interests = join(',', $remote->notable_interests(5));
         }
+
+        $categories = $LJ::AD_DEFAULT_CATEGORIES unless $categories;
 
         $language = $r->notes('langpref');
         $language =~ s/_LJ//; # EN_LJ
 
         $adhtml .= $ad_engine->process(
-                                       url       => $url,
-                                       width     => $addetails->{width},
-                                       height    => $addetails->{height},
-                                       type      => $adtarget,
-                                       channel   => $pagetype,
-                                       age       => $age,
-                                       gender    => $gender,
-                                       country   => $country,
-                                       language  => $language
+                                       url        => $url,
+                                       width      => $addetails->{width},
+                                       height     => $addetails->{height},
+                                       type       => $adtarget,
+                                       channel    => $pagetype,
+                                       age        => $age,
+                                       gender     => $gender,
+                                       country    => $country,
+                                       language   => $language,
+                                       categories => $categories,
+                                       interests  => $interests,
                                        );
     } else {
         $adhtml .= $addetails;
