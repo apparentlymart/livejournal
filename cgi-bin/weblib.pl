@@ -1820,7 +1820,9 @@ sub ads {
         return '' unless $LJ::AD_MAPPING{$uri} eq $pagetype;
     }
 
-    my $ad_engine = LJ::run_hook('ad_engine');
+    my $ad_engine = LJ::run_hook('ad_engine', {
+        pagetype => $pagetype,
+    });
     return '' unless $ad_engine;
 
     my $adhtml = '';
