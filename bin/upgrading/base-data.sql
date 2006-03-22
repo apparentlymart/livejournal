@@ -899,6 +899,8 @@ REPLACE INTO themelist (name, themeid) VALUES ('Valentine\'s Day', '6');
 REPLACE INTO themelist (name, themeid) VALUES ('Watermelon', '13');
 REPLACE INTO themelist (name, themeid) VALUES ('White on Black w/ dark grays', '5');
 REPLACE INTO themelist (name, themeid) VALUES ('Yellow/Green Pastels', '2');
+INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'char', 'User selectable Ad categories', '0', '0', 'ad_categories', 'Ad Content Categories', 'general');
+UPDATE userproplist SET cldversion='4',datatype='char',des='User selectable Ad categories',indexed='0',multihomed='0',prettyname='Ad Content Categories',scope='general' WHERE name='ad_categories';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('0', 'char', 'AOL IM ScreenName', '1', '1', 'aolim', 'AOL Instant Messanger', 'general');
 UPDATE userproplist SET cldversion='0',datatype='char',des='AOL IM ScreenName',indexed='1',multihomed='1',prettyname='AOL Instant Messanger',scope='general' WHERE name='aolim';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'num', 'If this user has a bad password and should change it', '0', '0', 'badpassword', 'Bad Password', 'general');
