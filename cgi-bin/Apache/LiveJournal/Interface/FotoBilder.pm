@@ -78,6 +78,9 @@ sub get_user_info
                diskquota       => LJ::get_cap($u, 'disk_quota') * (1 << 20), # mb -> bytes
                fb_account      => LJ::get_cap($u, 'fb_account'),
                fb_usage        => LJ::Blob::get_disk_usage($u, 'fotobilder'),
+               fb_allstyles    => LJ::get_cap($u, 'fb_allstyles'),
+               fb_can_style    => LJ::get_cap($u, 'fb_canstyle'),
+               is_identity     => $u->{journaltype} eq 'I',
                );
 
     # when the set_quota rpc call is executed (below), a placholder row is inserted
