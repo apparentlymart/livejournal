@@ -1810,10 +1810,21 @@ sub ads {
         return '';
     }
 
+    my $r = Apache->request;
+
     # Make sure this mapping is correct for app ads
     if ($ctx eq "app") {
         my $uri = BML::get_uri();
         $uri = $uri =~ /\/$/ ? "$uri/index.bml" : $uri;
+
+        # Try making the uri from request notes if it doesn't match
+        # and uri ends in .html
+        if ($LJ::AD_MAPPING{$uri} ne $pagetype && $uri =~ /\.html$/i) {
+            if ($uri = $r->notes('bml_filename')) {
+                $uri =~ s!$LJ::HOME/(?:ssldocs|htdocs)!!;
+                $uri = $uri =~ /\/$/ ? "$uri/index.bml" : $uri;
+            }
+        }
 
         # Make sure that the page type passed in is what the config says this
         # page actually is.
@@ -1829,7 +1840,6 @@ sub ads {
     my $adtarget    = $LJ::AD_PAGE_MAPPING{$pagetype}->{target}; # user|content
     my $adunit      = $LJ::AD_PAGE_MAPPING{$pagetype}->{adunit}; # ie skyscraper
     my $addetails   = $LJ::AD_TYPE{$adunit};                     # hashref of meta-data or scalar to directly serve
-    my $r = Apache->request;
     my $url = $LJ::IS_SSL ? 'https://' : 'http://' . $r->header_in('Host') . $r->uri;
 
 
@@ -1837,12 +1847,38 @@ sub ads {
     $adhtml .= "<h4>Advertisement</h4>";
 
     if (ref $addetails eq 'HASH') {
+        my ($age, $gender, $country, $language);
+
+        my $remote = LJ::get_remote();
+        if ($remote) {
+            if ($remote->{allow_infoshow} eq 'Y') {
+                if (defined $remote->{bdate} && $remote->{bdate} ne '0000-00-00') {
+                    my $secs = time() - LJ::mysqldate_to_time($remote->{bdate});
+                    $age = int($secs / 31556926);  # Real rough calculation, but that is fine
+                }
+
+                $country = $remote->prop('country');
+            }
+
+            if ($gender = $remote->prop('gender')) {
+                $gender = lc(substr($gender, 0, 1)); # m|f|u
+                $gender = undef if $gender eq 'u';
+            }
+        }
+
+        $language = $r->notes('langpref');
+        $language =~ s/_LJ//; # EN_LJ
+
         $adhtml .= $ad_engine->process(
                                        url       => $url,
                                        width     => $addetails->{width},
                                        height    => $addetails->{height},
                                        type      => $adtarget,
                                        channel   => $pagetype,
+                                       age       => $age,
+                                       gender    => $gender,
+                                       country   => $country,
+                                       language  => $language
                                        );
     } else {
         $adhtml .= $addetails;
