@@ -80,7 +80,9 @@ sub get_user_info
                fb_usage        => LJ::Blob::get_disk_usage($u, 'fotobilder'),
                fb_allstyles    => LJ::get_cap($u, 'fb_allstyles'),
                fb_can_style    => LJ::get_cap($u, 'fb_canstyle'),
-               is_identity     => $u->{journaltype} eq 'I',
+               is_identity     => $u->{journaltype} eq 'I' ? 1 : 0,
+               journal_base    => $u->journal_base,
+               profile_url     => $u->profile_url,
                );
 
     # when the set_quota rpc call is executed (below), a placholder row is inserted
