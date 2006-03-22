@@ -1842,6 +1842,7 @@ sub ads {
                                        width     => $addetails->{width},
                                        height    => $addetails->{height},
                                        type      => $adtarget,
+                                       channel   => $pagetype,
                                        );
     } else {
         $adhtml .= $addetails;
