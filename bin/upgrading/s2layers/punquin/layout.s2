@@ -284,6 +284,12 @@ function print_sidebar(Page p) {
     }
 
     # End Table
+
+    if (viewer_sees_ads()) {
+        "<p>";
+        $p->print_ad("Journal-Skyscraper");
+        "</p>";
+    }
     "</td></tr></table>\n<!-- End Main Sidebar -->";
 }
 
@@ -319,19 +325,11 @@ function Page::print ()
 
     # Body
     "<body>\n";
-    var string ad_padding = "";
-    if (viewer_sees_ads()) {
-        var string align = $*sidebar_position != "left" ? "left" : "right";
-        $ad_padding = "padding-$align: 160px;";
-        "<div style='float: $align; margin-$align: 10px;'>";
-        $this->print_ad("Journal-Skyscraper");
-        "</div>";
-    }
 
     "<a name='top'></a><div align='center'>\n";
 
     # Table wrapper
-    "<table id='main' cellpadding='5' cellspacing='0' width='80%' style='$ad_padding'>\n<tr>";
+    "<table id='main' cellpadding='5' cellspacing='0' width='80%'>\n<tr>";
 
     if ($*sidebar_position == "left") { print_sidebar($this); }
 
