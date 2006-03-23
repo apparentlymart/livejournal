@@ -2580,8 +2580,9 @@ sub modify_caps {
     }
 
     # update user row
-    LJ::update_user($u, { 'caps' => $newcaps });
+    return 0 unless LJ::update_user($u, { 'caps' => $newcaps });
 
+    $u->{caps} = $newcaps;
     return $u;
 }
 
