@@ -1820,7 +1820,7 @@ sub ads {
 
         # Try making the uri from request notes if it doesn't match
         # and uri ends in .html
-        if ($LJ::AD_MAPPING{$uri} ne $pagetype && $uri =~ /\.html$/i) {
+        if ($LJ::AD_MAPPING{$uri} ne $pagetype && $r->header_in('Host') ne $LJ::DOMAIN_WEB) {
             if ($uri = $r->notes('bml_filename')) {
                 $uri =~ s!$LJ::HOME/(?:ssldocs|htdocs)!!;
                 $uri = $uri =~ /\/$/ ? "$uri/index.bml" : $uri;
