@@ -1795,6 +1795,7 @@ sub ads {
     my $pagetype = delete $opts{'orient'};
     my $user     = delete $opts{'user'};
 
+    return '' if $LJ::SSL;
 
     return '' unless LJ::run_hook('should_show_ad', {
         ctx  => $ctx,
@@ -1831,71 +1832,68 @@ sub ads {
         return '' unless $LJ::AD_MAPPING{$uri} eq $pagetype;
     }
 
-    my $ad_engine = LJ::run_hook('ad_engine', {
-        pagetype => $pagetype,
-    });
-    return '' unless $ad_engine;
 
-    my $adhtml = '';
-    my $adtarget    = $LJ::AD_PAGE_MAPPING{$pagetype}->{target}; # user|content
-    my $adunit      = $LJ::AD_PAGE_MAPPING{$pagetype}->{adunit}; # ie skyscraper
-    my $addetails   = $LJ::AD_TYPE{$adunit};                     # hashref of meta-data or scalar to directly serve
-    my $url = $LJ::IS_SSL ? 'https://' : 'http://' . $r->header_in('Host') . $r->uri;
+    my $adunit       = $LJ::AD_PAGE_MAPPING{$pagetype}->{adunit}; # ie skyscraper
+    my $addetails    = $LJ::AD_TYPE{$adunit};                     # hashref of meta-data or scalar to directly serve
 
-
-    $adhtml .= "<div class=\"ad $adunit\" id=\"\">";
-    $adhtml .= "<h4>Advertisement</h4>";
+    my %adcall = ();
+    $adcall{adunit}  = $adunit;
+    $adcall{channel} = $pagetype;
+    $adcall{type}    = $LJ::AD_PAGE_MAPPING{$pagetype}->{target}; # user|content
+    $adcall{url}     = 'http://' . $r->header_in('Host') . $r->uri;
+    $adcall{width}   = $addetails->{width};
+    $adcall{height}  = $addetails->{height};
 
     if (ref $addetails eq 'HASH') {
-        my ($age, $gender, $country, $language, $categories, $interests);
 
         my $remote = LJ::get_remote();
         if ($remote) {
             if ($remote->{allow_infoshow} eq 'Y') {
                 if (defined $remote->{bdate} && $remote->{bdate} ne '0000-00-00') {
                     my $secs = time() - LJ::mysqldate_to_time($remote->{bdate});
-                    $age = int($secs / 31556926);  # Real rough calculation, but that is fine
+                    $adcall{age} = int($secs / 31556926);  # Real rough calculation, but that is fine
                 }
 
-                $country = $remote->prop('country');
+                $adcall{country} = $remote->prop('country');
             }
 
-            if ($gender = $remote->prop('gender')) {
-                $gender = lc(substr($gender, 0, 1)); # m|f|u
-                $gender = undef if $gender eq 'u';
+            if ($adcall{gender} = $remote->prop('gender')) {
+                $adcall{gender} = lc(substr($adcall{gender}, 0, 1)); # m|f|u
+                $adcall{gender} = undef if $adcall{gender} eq 'u';
             }
 
-            $categories = $remote->prop('ad_categories');
+            $adcall{categories} = $remote->prop('ad_categories');
 
-            $interests = join(',', $remote->notable_interests(5));
+            $adcall{interests} = join(',', $remote->notable_interests(5));
         }
 
-        $categories = $LJ::AD_DEFAULT_CATEGORIES unless $categories;
+        $adcall{categories} = $LJ::AD_DEFAULT_CATEGORIES unless $adcall{categories};
 
-        $language = $r->notes('langpref');
-        $language =~ s/_LJ//; # EN_LJ
+        $adcall{language} = $r->notes('langpref');
+        $adcall{language} =~ s/_LJ//; # EN_LJ
 
-        $adhtml .= $ad_engine->process(
-                                       url        => $url,
-                                       width      => $addetails->{width},
-                                       height     => $addetails->{height},
-                                       type       => $adtarget,
-                                       channel    => $pagetype,
-                                       age        => $age,
-                                       gender     => $gender,
-                                       country    => $country,
-                                       language   => $language,
-                                       categories => $categories,
-                                       interests  => $interests,
-                                       );
+        my $adparams = join('&', map { LJ::eurl($_) . '=' . LJ::eurl($adcall{$_}) } keys %adcall);
+
+        my $adhtml;
+        $adhtml .= "<div class=\"ad $adunit\" id=\"\">";
+        $adhtml .= "<h4>Advertisement</h4>";
+
+        $adhtml .= "<iframe src='$LJ::SITEROOT/misc/adserver.bml?$adparams' frameborder='0' scrolling='no' ";
+        $adhtml .= "width='" . LJ::ehtml($adcall{width}) . "' ";
+        $adhtml .= "height='" . LJ::ehtml($adcall{height}) . "' ";
+        $adhtml .= "></iframe>";
+
+        $adhtml .= "<a href=\"#\">Leave Feedback</a>";
+        $adhtml .= "</div>";
+
+        return $adhtml;
+
     } else {
-        $adhtml .= $addetails;
+        return $addetails;
     }
 
-    $adhtml .= "<a href=\"#\">Leave Feedback</a>";
-    $adhtml .= "</div>";
-
-    return $adhtml;
+    # Something got screwed up somewhere
+    return '';
 }
 
 # Common challenge/response javascript, needed by both login pages and comment pages alike.

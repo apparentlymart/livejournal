@@ -1,0 +1,30 @@
+<?_code
+{
+    use strict;
+    use vars qw($GET);
+
+    my $ad_engine = LJ::run_hook('ad_engine', {
+        pagetype => $GET{channel},
+    });
+    return '' unless $ad_engine;
+
+    my $adhtml;
+    $adhtml .= "<html><body style='margin: 0; padding: 0'>";
+
+    $adhtml .= $ad_engine->process(
+                                   url        => $GET{url},
+                                   width      => $GET{width},
+                                   height     => $GET{height},
+                                   type       => $GET{type},
+                                   channel    => $GET{channel},
+                                   age        => $GET{age},
+                                   gender     => $GET{gender},
+                                   country    => $GET{country},
+                                   language   => $GET{language},
+                                   categories => $GET{categories},
+                                   interests  => $GET{interests},
+                                   );
+    $adhtml .= "</body></html>";
+    return $adhtml;
+}
+_code?>
