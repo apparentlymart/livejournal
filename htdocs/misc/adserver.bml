@@ -23,6 +23,7 @@
                                    language   => $GET{language},
                                    categories => $GET{categories},
                                    interests  => $GET{interests},
+                                   search_term => $GET{search_term},
                                    );
     $adhtml .= "</body></html>";
     return $adhtml;

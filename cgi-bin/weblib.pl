@@ -1812,6 +1812,7 @@ sub ads {
     }
 
     my $r = Apache->request;
+    my %adcall = ();
 
     # Make sure this mapping is correct for app ads
     if ($ctx eq "app") {
@@ -1830,13 +1831,19 @@ sub ads {
         # Make sure that the page type passed in is what the config says this
         # page actually is.
         return '' unless $LJ::AD_MAPPING{$uri} eq $pagetype;
+
+        if ($uri eq '/interests.bml') {
+            my $args = $r->args;
+            if ($args =~ /int=(.+)$/) {
+                $adcall{search_term} = $1;
+            }
+        }
     }
 
 
     my $adunit       = $LJ::AD_PAGE_MAPPING{$pagetype}->{adunit}; # ie skyscraper
     my $addetails    = $LJ::AD_TYPE{$adunit};                     # hashref of meta-data or scalar to directly serve
 
-    my %adcall = ();
     $adcall{adunit}  = $adunit;
     $adcall{channel} = $pagetype;
     $adcall{type}    = $LJ::AD_PAGE_MAPPING{$pagetype}->{target}; # user|content
@@ -1866,8 +1873,6 @@ sub ads {
 
             $adcall{interests} = join(',', $remote->notable_interests(5));
         }
-
-        $adcall{categories} = $LJ::AD_DEFAULT_CATEGORIES unless $adcall{categories};
 
         $adcall{language} = $r->notes('langpref');
         $adcall{language} =~ s/_LJ//; # EN_LJ
