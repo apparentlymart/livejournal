@@ -183,7 +183,6 @@ sub get_keyword_counts {
     $opts->{notext} = 1;
     my $memories = LJ::Memories::_memory_getter($u, $opts);
     return undef unless defined $memories; # error case
-    $memories = {} unless defined($memories); # prophylactic
 
     # Generate mapping of memid to filter (e.g. own) and security (e.g. private)
     my (%mem_filter, @all_memids);
