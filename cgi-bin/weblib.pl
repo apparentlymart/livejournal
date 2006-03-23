@@ -1714,6 +1714,29 @@ sub js_dumper {
     }
 }
 
+
+{
+    my %stat_cache = ();  # key -> {lastcheck, modtime}
+    sub _file_modtime {
+        my ($key, $now) = @_;
+        if (my $ci = $stat_cache{$key}) {
+            if ($ci->{lastcheck} > $now - 10) {
+                return $ci->{modtime};
+            }
+        }
+
+        my $set = sub {
+            my $mtime = shift;
+            $stat_cache{$key} = { lastcheck => $now, modtime => $mtime };
+            return $mtime;
+        };
+
+        my $file = "$LJ::HOME/htdocs/$key";
+        my $mtime = (stat($file))[9];
+        return $set->($mtime);
+    }
+}
+
 sub need_res {
     foreach my $reskey (@_) {
         die "Bogus reskey $reskey" unless $reskey =~ m!^(js|stc)/!;
@@ -1724,8 +1747,10 @@ sub need_res {
 sub res_includes {
     # TODO: dependency tracking
     my $ret = "";
+    my $now = time();
     foreach my $key (keys %LJ::NEEDED_RES) {
         my $path = $key;
+        my $mtime = _file_modtime($key, $now);
         # some files need to be served from same host as the app (must be on "www.")
         # and those are WSTATPREFIX (the "W" meaning "Web")
         my $changepath = sub {
@@ -1733,6 +1758,7 @@ sub res_includes {
                 $path = $key;
                 $path =~ s!^stc/!$LJ::WSTATPREFIX/!;
             }
+            $path .= "?v=$mtime";
         };
         if ($path =~ s!^js/!$LJ::JSPREFIX/!) {
             $changepath->();
