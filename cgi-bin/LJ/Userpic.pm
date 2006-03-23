@@ -462,7 +462,8 @@ sub create {
 # make this picture the default
 sub make_default {
     my $self = shift;
-    my $u = $self->owner;
+    my $u = $self->owner
+        or die;
 
     LJ::update_user($u, { defaultpicid => $self->id });
     $u->{'defaultpicid'} = $self->id;
@@ -575,7 +576,7 @@ sub set_keywords {
     } else {
         @keywords = split(',', $_[0]);
     }
-    @keywords = grep { s/^\s+//; s/\s+$//; $_; } @keywords;
+    @keywords = grep { !/^pic\#\d+$/ } grep { s/^\s+//; s/\s+$//; $_; } @keywords;
 
     my $u = $self->owner;
     my $sth;
