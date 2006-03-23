@@ -199,7 +199,11 @@
      LJ::text_out(\$des);
      LJ::text_out(\$keywords);
 
-     $body .= $ML{'.add_previous'};
+     if (defined $memory) {
+         $body .= $ML{'.edit_previous'};
+     } else {
+         $body .= $ML{'.add_previous'};
+     }
 
      my $getextra = "?itemid=$dbitemid";
      $getextra .= "&amp;authas=$authas" if $authas ne $remote->{'user'};

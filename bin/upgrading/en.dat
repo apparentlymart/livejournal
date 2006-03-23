@@ -4713,6 +4713,11 @@ attacker's email address.
   To delete this entry from your list of memorable posts, enter a blank description.
 .
 
+/tools/memadd.bml.edit_previous<<
+<?h1 Edit memorable entry... h1?>
+<?p To edit the settings for this memorable entry, fill out the form below. p?>
+.
+
 /tools/memadd.bml.error.deleted.body=The journal entry previously described as "[[desc]]" has been removed from your list of memorable posts.
 
 /tools/memadd.bml.error.deleted.title=Memory deleted
