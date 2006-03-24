@@ -1927,6 +1927,98 @@ sub ads {
     return '';
 }
 
+sub control_strip
+{
+    my %opts = @_;
+    my $user = delete $opts{user};
+
+   my $journal = LJ::load_user($user);
+    my $show_strip = LJ::run_hook("show_control_strip", { user => $user });
+
+   return "" unless $show_strip;
+
+   my $remote = LJ::get_remote();
+    my $r = Apache->request;
+    # Build up some common links
+    my %links = (
+              'post_journal' => "<a href='$LJ::SITEROOT/update.bml'>Post to Journal</a>",
+               'mylj' => "<a href='$LJ::SITEROOT/portal/'>My LJ</a>",
+              'recent_comments' => "<a href='$LJ::SITEROOT/tools/recent_comments.bml'>View Recent Comments</a>",
+               'manage_friends' => "<a href='$LJ::SITEROOT/friends/'>Manage Friends</a>",
+              'manage_entries' => "<a href='$LJ::SITEROOT/editjournal.bml'>Manage Entries</a>",
+               'invite_friends' => "<a href='$LJ::SITEROOT/friends/invite.bml'>Invite Friends</a>",
+               'create_account' => "<a href='$LJ::SITEROOT/create.bml'>Create an Account</a>",
+               );
+    if ($remote) {
+        $links{'view_friends_page'} = "<a href='" . $remote->journal_base() . "/friends/'>View my Friends Page</a>",
+    }
+
+    my $ret;
+    if ($remote) {
+        if ($remote->{'defaultpicid'}) {
+            my $url = "$LJ::USERPIC_ROOT/$remote->{'defaultpicid'}/$remote->{'userid'}";
+            $ret .= "<td><img src='$url' alt='' height='45' /></td>";
+        }
+        $ret .= "<td id='lj_controlstrip_user'><form id='Greeting' class='nopic' action='$LJ::SITEROOT/logout.bml' method='post'>";
+        $ret .= "<input type='hidden' name='user' value='$remote->{'user'}' />";
+        $ret .= "<input type='hidden' name='sessid' value='$remote->{'_session'}->{'sessid'}' />";
+        my $logout = "<input type='submit' value='Logout' id='Logout' />";
+        $ret .= LJ::ljuser($remote) . "<br />$logout";
+       $ret .= "</form>\n";
+        $ret .= "</td>\n";
+
+        $ret .= "<td id='lj_controlstrip_userlinks'>";
+        $ret .= "$links{'post_journal'} $links{'mylj'}<br />$links{'view_friends_page'}";
+        $ret .= "</td>";
+
+        $ret .= "<td id='lj_controlstrip_actionlinks'>";
+       if ($remote->{userid} == $journal->{userid}) {
+            $ret .= $r->notes('view') eq "friends" ? "You are viewing your friends page" : "You are viewing your Journal";
+            $ret .= "<br /><strong>You can:</strong> ";
+           if ($r->notes('view') eq "friends") {
+                $ret .= "$links{'manage_friends'} ";
+                $ret .= "View: ";
+               # drop down for various groups and show values
+            } else {
+               $ret .= "$links{'recent_comments'} $links{'manage_entries'} $links{'invite_friends'}";
+            }
+        }
+       $ret .= "</td>";
+
+   } else {
+        my $method = Apache->request->method();
+        
+       my $chal = LJ::challenge_generate(300);
+        $ret .= <<"LOGIN_BAR";
+        <td style='width: 50%; text-align: right'><form id="login" action="$LJ::SITEROOT/login.bml" method="post">
+           <input type="hidden" name="mode" value="login" />
+            <input type='hidden' name='chal' id='login_chal' value='$chal' />
+            <input type='hidden' name='response' id='login_response' value='' />
+            <table><tr><td>
+           <label for="xc_user">Username:</label> <input type="text" name="user" size="15" maxlength="15" tabindex="1" id="xc_user" value="" />
+            </td><td colspan='2'>
+            <label for="xc_password">Password:</label> <input type="password" name="password" size="10" tabindex="2" id="xc_password" />
+LOGIN_BAR
+       $ret .= "<input type='submit' value='Login' tabindex='4' />";
+        $ret .= "</td></tr>";
+        
+        $ret .= "<tr><td valign='top'>";
+       $ret .= "<a href='$LJ::SITEROOT/lostinfo.bml' style='color: #FFF'>Forgot your password?</a>";
+        $ret .= "</td><td style='font: 10px Arial, Helvetica, sans-serif;' valign='top' colspan='2'>";
+        $ret .= "<input type='checkbox' id='xc_remember' name='remember_me' style='height: 10px; width: 10px;' tabindex='3' />";
+       $ret .= "<label for='xc_remember'>Remember Me</label>";
+        $ret .= "</td></tr></table>";
+        
+        $ret .= '</form></td>';
+        $ret .= "<td style='width: 50%; text-align: left'>You are currently not logged in<br />";
+        $ret .= "<strong>You can:</strong> Create an Account Learn more about LiveJournal</td>";
+    }
+
+    return "<table id='lj_controlstrip' cellpadding='0' cellspacing='0'><tr valign='top'>$ret</tr></table>";
+}
+
+
+
 # Common challenge/response javascript, needed by both login pages and comment pages alike.
 # Forms that use this should onclick='return sendForm()' in the submit button.
 # Returns true to let the submit continue.

@@ -458,6 +458,9 @@ class Page
     function builtin print_ad(string type) [fixed]
     "Prints an ad if the user should see one";
 
+    function builtin print_control_strip [fixed]
+    "Prints a control strip for the user's convenience";
+
     function print_custom_head
     "Layers can override this to add extra HTML to the head section of the HTML document.
     Note that layouts are not intended to override this method.";
@@ -741,6 +744,9 @@ Useful for returning links to manage information, or edit entries.";
 
 function builtin viewer_sees_ads() [fixed] : bool
 "Returns true if reader will be shown an ad.";
+
+function builtin viewer_sees_control_strip [fixed] : bool
+"Returns true if reader will see the built in control strip.";
 
 function builtin get_page () : Page
 "Gets the top-level [class[Page]] instance that LiveJournal ran the [method[Page.print()]] method on.";
@@ -1644,6 +1650,9 @@ function Page::print_head() {
     print $.head_content;
     if (viewer_sees_ads()) {
         println """<link rel='stylesheet' href='$*STATDIR/ad_base.css' type='text/css' />""";
+    }
+    if (viewer_sees_control_strip()) {
+        println """<link rel='stylesheet' href='$*STATDIR/controlstrip.css' type='text/css' />""";
     }
     $this->print_custom_head();
 }

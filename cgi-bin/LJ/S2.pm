@@ -2073,6 +2073,17 @@ sub viewer_is_owner
     return $remote->{'userid'} == $LJ::S2::CURR_PAGE->{'_u'}->{'userid'};
 }
 
+sub viewer_sees_control_strip
+{
+    my ($ctx) = @_;
+    return 1;
+
+    my $r = Apache->request;
+    return LJ::run_hook('show_control_strip', {
+        user => $r->notes("ljuser"),
+    });
+}
+
 sub viewer_sees_ads
 {
     my ($ctx) = @_;
@@ -2793,6 +2804,15 @@ sub EntryPage__print_multiform_start
     $S2::pout->("<form style='display: inline' method='post' action='$LJ::SITEROOT/talkmulti.bml' name='multiform'>\n" .
                 LJ::html_hidden("ditemid", $this->{'entry'}->{'itemid'},
                                 "journal", $this->{'entry'}->{'journal'}->{'username'}) . "\n");
+}
+
+sub Page__print_control_strip
+{
+    my ($ctx, $this) = @_;
+    my $control_strip = LJ::control_strip(user => $LJ::S2::CURR_PAGE->{'journal'}->{'username'});
+
+    return "" unless $control_strip;
+    $S2::pout->($control_strip);
 }
 
 sub Page__print_ad
