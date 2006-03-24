@@ -1143,9 +1143,11 @@ function print_entry(Page p, Entry e, Color bgcolor, Color fgcolor, bool viewing
     println "</div></div>";
 }
 
+# Updated for safe printing of EntryLite
+# Please update any overriden instances of this function
 function format_entry(Page p, Entry e, Color bgcolor, Color fgcolor, bool viewing_thread) : string
 {
-    print_entry($p, $e, $bgcolor, $fgcolor, $viewing_thread);
+    return "";
 }
 
 ################################################################################
