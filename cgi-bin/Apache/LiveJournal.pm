@@ -1085,6 +1085,7 @@ sub journal_content
         'handle_with_bml_ref' => \$handle_with_bml,
     };
 
+    $r->notes("view" => $RQ{'mode'});
     my $user = $RQ{'user'};
     my $html = LJ::make_journal($user, $RQ{'mode'}, $remote, $opts);
 
