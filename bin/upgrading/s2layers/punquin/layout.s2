@@ -25,7 +25,7 @@ propgroup presentation {
   property use external_stylesheet;
 }
 set show_recent_userpic = false;
-set sidebar_position = "right";
+set sidebar_position = "left";
 set page_recent_items = 20;
 set page_friends_items = 20;
 set view_entry_disabled = false;
@@ -329,7 +329,7 @@ function Page::print ()
     "<a name='top'></a><div align='center'>\n";
 
     # Table wrapper
-    "<table id='main' cellpadding='5' cellspacing='0' width='80%'>\n<tr>";
+    "<table id='main' cellpadding='5' cellspacing='0' width='90%'>\n<tr>";
 
     if ($*sidebar_position == "left") { print_sidebar($this); }
 
