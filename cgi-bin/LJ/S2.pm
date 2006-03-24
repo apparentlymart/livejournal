@@ -2092,7 +2092,7 @@ sub viewer_sees_ads
     my $r = Apache->request;
     return LJ::run_hook('should_show_ad', {
         ctx  => 'journal',
-        user => $r->notes("ljuser"),
+        userid => $r->notes("journalid"),
     });
 }
 
