@@ -69,6 +69,8 @@ sub get_user_info
     }
     return {} unless $u && $u->{'journaltype'} eq 'P';
 
+    my $defaultpic = $u->userpic;
+
     my %ret = (
                user            => $u->{user},
                userid          => $u->{userid},
@@ -78,11 +80,10 @@ sub get_user_info
                diskquota       => LJ::get_cap($u, 'disk_quota') * (1 << 20), # mb -> bytes
                fb_account      => LJ::get_cap($u, 'fb_account'),
                fb_usage        => LJ::Blob::get_disk_usage($u, 'fotobilder'),
-               fb_allstyles    => LJ::get_cap($u, 'fb_allstyles'),
-               fb_can_style    => LJ::get_cap($u, 'fb_canstyle'),
+               all_styles      => LJ::get_cap($u, 'fb_allstyles'),
                is_identity     => $u->{journaltype} eq 'I' ? 1 : 0,
-               journal_base    => $u->journal_base,
-               profile_url     => $u->profile_url,
+               userpic_url     => $defaultpic ? $defaultpic->url : undef,
+               lj_can_style    => $u->get_cap('styles') ? 1 : 0,
                );
 
     # when the set_quota rpc call is executed (below), a placholder row is inserted
