@@ -554,7 +554,7 @@ sub get_style
 
     if (ref $arg) {
         $u = $arg;
-        $styleid = $u->{'s2_style'} + 0;
+        $styleid = $u->prop('s2_style');
     } else {
         $styleid = $arg + 0;
     }

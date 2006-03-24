@@ -64,6 +64,7 @@ require "$ENV{'LJHOME'}/cgi-bin/taglib.pl";
 require "$ENV{'LJHOME'}/cgi-bin/schoollib.pl";
 require "$ENV{'LJHOME'}/cgi-bin/accountcodes.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljemailgateway-web.pl";
+require "$ENV{'LJHOME'}/cgi-bin/customizelib.pl";
 
 # preload site-local libraries, if present:
 require "$ENV{'LJHOME'}/cgi-bin/modperl_subs-local.pl"

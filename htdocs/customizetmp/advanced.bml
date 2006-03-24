@@ -1,0 +1,72 @@
+<?page
+title=>Journal Display
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%POST %GET);
+    BML::decl_params(authas => 'username');
+    
+    return LJ::server_down_html() if $LJ::SERVER_DOWN;
+    
+    my $remote = LJ::get_remote();
+    return LJ::bad_input("You must be logged in to edit your display settings.")
+        unless $remote;
+    
+    my $authas = $GET{'authas'} || $remote->{'user'};
+    my $u = LJ::get_authas_user($authas);
+    return LJ::bad_input("You could not be authenticated as the specified user.")
+        unless $u;
+    
+    return $LJ::MSG_READONLY_USER if $u->readonly;
+    
+    # extra arguments for get requests
+    my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
+    my $ret;
+        
+    $ret .= "<form action='advanced.bml' method='get'>";
+    $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
+    $ret .= "</form>";
+    
+    $ret .= LJ::cmize::html_tablinks("advanced", $getextra);
+    $ret .= "<div id='CurrentTab'>";
+    
+    if ($u->prop('stylesys') == 2) {
+        BML::set_language_scope("/customize/advanced/index.bml");
+        $ret .= "<?h1 $ML{'.disclaimer.header'} h1?>";
+        $ret .= "<?p " . BML::ml('.disclaimer.text', {'aopts' => "href='$LJ::SITEROOT/customize/'"}) . " p?>";
+          
+        $ret .= "<?h1 $ML{'.documentation.header'} h1?>";
+        $ret .= "<?p  $ML{'.documentation.text'}    p?>";
+
+        $ret .= "<ul><li><a href='$LJ::SITEROOT/doc/s2/'>$ML{'.s2doc.link'}</a> -- $ML{'.s2doc.desc'}</li>";
+        $ret .= "<li><a href='$LJ::SITEROOT/customize/advanced/layerbrowse.bml'>$ML{'.publiclayers.link'}</a> -- $ML{'.publiclayers.desc'}</li></ul>";
+
+        $ret .= "<?h1 $ML{'.advancedoptions.header'} h1?>";
+        $ret .= "<ul><li><a href='$LJ::SITEROOT/customize/advanced/layers.bml'>$ML{'.yourlayers.link'}</a> -- $ML{'.yourlayers.desc'}</li>";
+        $ret .= "<li><a href='$LJ::SITEROOT/customize/advanced/styles.bml'>$ML{'.yourstyles.link'}</a> -- $ML{'.yourstyles.desc'}</li></ul>";
+    } else {
+        BML::set_language_scope("/styles/index.bml");
+        $ret .= "<?p $ML{'.about2'} p?>";
+        $ret .= "<?h1 Quick Links h1?>";
+        $ret .= "<dl><dt><a href='/developer/embedding.bml'>$ML{'.nav.embedding'}</a></dt>";
+        $ret .= "<dd>$ML{'.nav.embedding.about'}</dd>";
+        $ret .= "<dt><a href='/modify.bml'>$ML{'.nav.modify'}</a></dt>";
+        $ret .= "<dd>$ML{'.nav.modify.about'}</dd>";
+        $ret .= "<dt><a href='create.bml'>$ML{'.nav.create'}</a></dt>";
+        $ret .= "<dd>$ML{'.nav.create.about'}</dd>";
+        $ret .= "<dt><a href='edit.bml'>$ML{'.nav.edit'}</a></dt>";
+        $ret .= "<dd>$ML{'.nav.edit.about'}</dd>";
+        $ret .= "<dt><a href='browse/'><$ML{'.nav.browse'}</a></dt>";
+        $ret .= "<dd>$ML{'.nav.browse.about'}</dd>";
+        $ret .= "</dl>";
+    }
+    $ret .= "</div>";
+    return $ret;
+}
+_code?>
+<=body
+head<=
+<link rel="stylesheet" href="<?statprefix?>/customize.css" type="text/css" />
+<=head
+page?>
