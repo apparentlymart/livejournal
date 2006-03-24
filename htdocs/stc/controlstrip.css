@@ -1,22 +1,21 @@
 html body
 {
-     padding: 0;
-     margin: 0;
+    padding-top: 55px;
 }
-
 
 #lj_controlstrip
 {
     font-family: Arial, sans-serif;
     font-size: 12pt;
+    display: block;
     top: 0;
     left: 0;
     width: 100%;
+    height: 45px;
     margin: 0;
+    padding: 0;
     background-color: #cecece;
-    position: relative;
-    margin-bottom: 10px;
-    padding-bottom: 10px;
+    position: absolute;
     color: #7c7c7c;
 }
 
