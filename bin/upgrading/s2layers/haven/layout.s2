@@ -1143,6 +1143,11 @@ function print_entry(Page p, Entry e, Color bgcolor, Color fgcolor, bool viewing
     println "</div></div>";
 }
 
+function format_entry(Page p, Entry e, Color bgcolor, Color fgcolor, bool viewing_thread)
+{
+    print_entry($p, $e, $bgcolor, $fgcolor, $viewing_thread);
+}
+
 ################################################################################
 #
 # Page
