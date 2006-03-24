@@ -2809,6 +2809,8 @@ sub EntryPage__print_multiform_start
 sub Page__print_control_strip
 {
     my ($ctx, $this) = @_;
+
+    return 0 unless $LJ::USE_CONTROL_STRIP;
     my $control_strip = LJ::control_strip(user => $LJ::S2::CURR_PAGE->{'journal'}->{'username'});
 
     return "" unless $control_strip;
