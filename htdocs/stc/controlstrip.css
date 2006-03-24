@@ -1,0 +1,30 @@
+html body
+{
+     padding: 0;
+     margin: 0;
+}
+
+
+#lj_controlstrip
+{
+    font-family: Arial, sans-serif;
+    top: 0;
+    left: 0;
+    width: 100%;
+    margin: 0;
+    background-color: #cecece;
+    position: relative;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    color: #7c7c7c;
+}
+
+#lj_controlstrip_userlinks
+{
+    text-align: justify;
+}                      
+
+#lj_controlstrip_actionlinks
+{
+    text-align: justify;
+}
