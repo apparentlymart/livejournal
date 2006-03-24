@@ -1200,6 +1200,8 @@ sub create_view_lastn
                                                           { "ad" => LJ::ads( type => "journal", 
                                                                              orient => 'Journal-Skyscraper',
                                                                              user => $u->{user}), });
+        $lastn_page{'open_skyscraper_ad'}  = $vars->{'LASTN_OPEN_SKYSCRAPER_AD'};
+        $lastn_page{'close_skyscraper_ad'} = $vars->{'LASTN_CLOSE_SKYSCRAPER_AD'};
     }
 
     # spit out the S1
@@ -1616,6 +1618,8 @@ sub create_view_friends
                                                             { "ad" => LJ::ads( type => "journal", 
                                                                                orient => 'Journal-Skyscraper',
                                                                                user => $u->{user}), });
+        $friends_page{'open_skyscraper_ad'}  = $vars->{'FRIENDS_OPEN_SKYSCRAPER_AD'};
+        $friends_page{'close_skyscraper_ad'} = $vars->{'FRIENDS_CLOSE_SKYSCRAPER_AD'};
     }
 
   ENTRY:
@@ -1947,6 +1951,8 @@ sub create_view_calendar
                                                              { "ad" => LJ::ads( type => "journal", 
                                                                                 orient => 'Journal-Skyscraper',
                                                                                 user => $u->{user} ) });
+        $calendar_page{'open_skyscraper_ad'}  = $vars->{'CALENDAR_OPEN_SKYSCRAPER_AD'};
+        $calendar_page{'close_skyscraper_ad'} = $vars->{'CALENDAR_CLOSE_SKYSCRAPER_AD'};
     }
 
     my $months = \$calendar_page{'months'};
@@ -2186,6 +2192,8 @@ sub create_view_day
                                                         { "ad" => LJ::ads( type => "journal", 
                                                                            orient => 'Journal-Skyscraper',
                                                                            user => $u->{user}), });
+        $day_page{'open_skyscraper_ad'}  = $vars->{'DAY_OPEN_SKYSCRAPER_AD'};
+        $day_page{'close_skyscraper_ad'} = $vars->{'DAY_CLOSE_SKYSCRAPER_AD'};
     }
 
     my $initpagedates = 0;

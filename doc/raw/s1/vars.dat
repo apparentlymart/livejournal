@@ -307,7 +307,7 @@ The number of items that were skipped to get to this point in the history.
 .scope
 lastn
 .deps
-LASTN_EVENT, LASTN_NEW_DAY, LASTN_END_DAY, LASTN_OPT_ITEMS, LASTN_USERPIC, LASTN_RANGE_MOSTRECENT, LASTN_RANGE_HISTORY, LASTN_SKIP_LINKS, LASTN_WEBSITE, LASTN_SKYSCRAPER_AD
+LASTN_EVENT, LASTN_NEW_DAY, LASTN_END_DAY, LASTN_OPT_ITEMS, LASTN_USERPIC, LASTN_RANGE_MOSTRECENT, LASTN_RANGE_HISTORY, LASTN_SKIP_LINKS, LASTN_WEBSITE, LASTN_SKYSCRAPER_AD, LASTN_OPEN_SKYSCRAPER_AD, LASTN_CLOSE_SKYSCRAPER_AD
 .editrows
 30
 .override
@@ -372,6 +372,14 @@ An IMG tag showing your uploaded picture, if any.  See [var[LASTN_USERPIC]].
 .des
 HTML for printing a skyscraper ad, if available. See [var[LASTN_SKYSCRAPER_AD]].
 }
+{ open_skyscraper_ad
+.des
+HTML for printing a wrapper around a skyscraper ad and user content. See [var[LASTN_OPEN_SKYSCRAPER_AD]].
+}
+{ close_skyscraper_ad
+.des
+HTML for printing a wrapper around a skyscraper ad and user content. See [var[LASTN_CLOSE_SKYSCRAPER_AD]].
+}
 { website
 .des
 If the user has specified their website, this block is filled with the contents of [var[LASTN_WEBSITE]].
@@ -424,6 +432,24 @@ The HTML tag needed to show a skyscraper ad on your journal
 .des
 The system-provided HTML to print the skyscraper ad.
 }
+}
+
+{ LASTN_OPEN_SKYSCRAPER_AD
+.scope
+lastn
+.type
+HTML
+.des
+Conditional open wrapper around ad and/or user content
+}
+
+{ LASTN_CLOSE_SKYSCRAPER_AD
+.scope
+lastn
+.type
+HTML
+.des
+Conditional close wrapper around ad and/or user content
 }
 
 { LASTN_END_DAY
@@ -915,7 +941,7 @@ This property is made up of [var[CALENDAR_YEAR_LINK]] and [var[CALENDAR_YEAR_DIS
 .scope
 calendar
 .deps
-CALENDAR_SORT_MODE, CALENDAR_MONTH, CALENDAR_NEW_YEAR, CALENDAR_WEBSITE, CALENDAR_YEAR_LINKS, CALENDAR_SKYSCRAPER_AD
+CALENDAR_SORT_MODE, CALENDAR_MONTH, CALENDAR_NEW_YEAR, CALENDAR_WEBSITE, CALENDAR_YEAR_LINKS, CALENDAR_SKYSCRAPER_AD, CALENDAR_OPEN_SKYSCRAPER_AD, CALENDAR_CLOSE_SKYSCRAPER_AD
 .editrows
 30
 .des
@@ -965,6 +991,14 @@ If the user has specified their website, this block is filled with the contents 
 .des
 HTML for printing a skyscraper ad, if available. See [var[CALENDAR_SKYSCRAPER_AD]].
 }
+{ open_skyscraper_ad
+.des
+HTML for printing a wrapper around a skyscraper ad and user content. See [var[CALENDAR_OPEN_SKYSCRAPER_AD]].
+}
+{ close_skyscraper_ad
+.des
+HTML for printing a wrapper around a skyscraper ad and user content. See [var[CALENDAR_CLOSE_SKYSCRAPER_AD]].
+}
 { head
 .des
 Any user-specified content to go inside the document's &lt;HEAD&gt;, like CSS or META tags.  The value is [var[GLOBAL_HEAD]] followed by [var[CALENDAR_HEAD]].  You shouldn't define the *_HEAD variables in the style, as users should set them themselves.
@@ -991,6 +1025,24 @@ The HTML tag needed to show a skyscraper ad on your journal
 .des
 The system-provided HTML to print the skyscraper ad.
 }
+}
+
+{ CALENDAR_OPEN_SKYSCRAPER_AD
+.scope
+calendar
+.type
+HTML
+.des
+Conditional open wrapper around ad and/or user content
+}
+
+{ CALENDAR_CLOSE_SKYSCRAPER_AD
+.scope
+calendar
+.type
+HTML
+.des
+Conditional close wrapper around ad and/or user content
 }
 
 { CALENDAR_NEW_YEAR
@@ -1153,7 +1205,7 @@ Determines whether months in the calendar mode (variable: [var[CALENDAR_MONTH]])
 .scope
 day
 .deps
-DAY_EVENTS, DAY_NOEVENTS, DAY_WEBSITE, DAY_SKYSCRAPER_AD
+DAY_EVENTS, DAY_NOEVENTS, DAY_WEBSITE, DAY_SKYSCRAPER_AD, DAY_OPEN_SKYSCRAPER_AD, DAY_CLOSE_SKYSCRAPER_AD
 .editrows
 30
 .type
@@ -1188,6 +1240,14 @@ If the user has specified their website, this block is filled with the contents 
 { skyscraper_ad
 .des
 HTML for printing a skyscraper ad, if available. See [var[DAY_SKYSCRAPER_AD]].
+}
+{ open_skyscraper_ad
+.des
+HTML for printing a wrapper around a skyscraper ad and user content. See [var[DAY_OPEN_SKYSCRAPER_AD]].
+}
+{ close_skyscraper_ad
+.des
+HTML for printing a wrapper around a skyscraper ad and user content. See [var[DAY_CLOSE_SKYSCRAPER_AD]].
 }
 { events
 .des
@@ -1279,6 +1339,24 @@ The HTML tag needed to show a skyscraper ad on your journal
 .des
 The system-provided HTML to print the skyscraper ad.
 }
+}
+
+{ DAY_OPEN_SKYSCRAPER_AD
+.scope
+day
+.type
+HTML
+.des
+Conditional open wrapper around ad and/or user content
+}
+
+{ DAY_CLOSE_SKYSCRAPER_AD
+.scope
+day
+.type
+HTML
+.des
+Conditional close wrapper around ad and/or user content
 }
 
 { DAY_EVENTS
@@ -1705,7 +1783,7 @@ this property is equal to [var[FRIENDS_SKIP_SPACER]].
 .scope
 friends
 .deps
-FRIENDS_OPT_ITEMS, FRIENDS_NOFRIENDS, FRIENDS_EVENTS, FRIENDS_RANGE_MOSTRECENT, FRIENDS_RANGE_HISTORY, FRIENDS_SKIP_LINKS, FRIENDS_WEBSITE, FRIENDS_SKYSCRAPER_AD
+FRIENDS_OPT_ITEMS, FRIENDS_NOFRIENDS, FRIENDS_EVENTS, FRIENDS_RANGE_MOSTRECENT, FRIENDS_RANGE_HISTORY, FRIENDS_SKIP_LINKS, FRIENDS_WEBSITE, FRIENDS_SKYSCRAPER_AD, FRIENDS_OPEN_SKYSCRAPER_AD, FRIENDS_CLOSE_SKYSCRAPER_AD
 .editrows
 30
 .des
@@ -1731,6 +1809,14 @@ If the user has specified their website, this block is filled with the contents 
 { skyscraper_ad
 .des
 HTML for printing a skyscraper ad, if available. See [var[FRIENDS_SKYSCRAPER_AD]].
+}
+{ open_skyscraper_ad
+.des
+HTML for printing a wrapper around a skyscraper ad and user content. See [var[FRIENDS_OPEN_SKYSCRAPER_AD]].
+}
+{ close_skyscraper_ad
+.des
+HTML for printing a wrapper around a skyscraper ad and user content. See [var[FRIENDS_CLOSE_SKYSCRAPER_AD]].
 }
 { events
 .des
@@ -1792,6 +1878,24 @@ The HTML tag needed to show a skyscraper ad on your journal
 .des
 The system-provided HTML to print the skyscraper ad.
 }
+}
+
+{ FRIENDS_OPEN_SKYSCRAPER_AD
+.scope
+friends
+.type
+HTML
+.des
+Conditional open wrapper around ad and/or user content
+}
+
+{ FRIENDS_CLOSE_SKYSCRAPER_AD
+.scope
+friends
+.type
+HTML
+.des
+Conditional close wrapper around ad and/or user content
 }
 
 { FRIENDS_EVENTS
