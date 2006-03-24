@@ -530,6 +530,7 @@ function Page::print () {
 </head>
 <body class='$body_layout_class lj-view-$.view'>""";
 
+$this->print_control_strip();
 container_open("container");
 print_banner($this);
 container_open("pagebody");

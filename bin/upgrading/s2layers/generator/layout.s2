@@ -321,6 +321,7 @@ function Page::print ()
 </head>
 <body bgcolor="$*page_back" text="$*entry_text" link="$*page_link" vlink="$*page_vlink" alink="$*page_alink">
 """;
+$this->print_control_strip();
  if(viewer_sees_ads()) {
 
 """

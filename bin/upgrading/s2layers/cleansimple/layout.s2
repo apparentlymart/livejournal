@@ -513,8 +513,9 @@ function Page::print ()
     $this->print_head();
 """<title>$title</title>
 </head>
-<body>
-<table border="0" cellpadding="0" cellspacing="0">
+<body>""";
+$this->print_control_strip();
+"""<table border="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="""; if (viewer_sees_ads()) { "\"3\" "; } else { "\"2\" "; } """id="topbar" valign="top">""";
 
 "<h1>$.journal.name</h1>";
