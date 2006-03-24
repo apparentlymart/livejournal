@@ -352,7 +352,7 @@ function Page::print ()
    "</div>";
  } 
 """
-  <table class="main" width='80%'><tr><td>
+  <table class="main" width="""; if (viewer_sees_ads()) { "\"80%\""; } else { "\"100%\""; } """><tr><td>
     $userpic
     <span class="page_title">$title</span>
     <p class="view_links">$links</p>
@@ -367,12 +367,16 @@ $this->print_linklist();
 
     ### Affliations
 
-    "<div style='width: 80%; margin: 0; padding: 0;'>";
+    if (viewer_sees_ads()) {
+        "<div style='width: 80%; margin: 0; padding: 0;'>";
+    }
     "<table class='main' align='right'><tr>";
 
     print $website; "<td>"; server_sig(); "</td></tr>";
 
-    "</table></div>\n</body>\n</html>";
+    "</table>";
+    if (viewer_sees_ads()) { "</div>"; }
+    "\n</body>\n</html>";
 }
 
 function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_text)
