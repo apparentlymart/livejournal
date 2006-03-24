@@ -119,8 +119,6 @@ body<=
         my %update = ();
         my $dbh = LJ::get_db_writer();
 
-        $ret .= "<pre>" . Data::Dumper::Dumper(\%POST) . "</pre>";
-
         if ($u->prop('stylesys') != 2) {
             my $capstyles = LJ::get_cap($u, "styles");
 
@@ -218,7 +216,7 @@ body<=
                 $saved_msg = "Saved custom settings";
             } else {
                 my $error = LJ::last_error();
-                $err_msg = "Error saving layer:<pre>$error</pre>";
+                $err_msg = "Error saving layer";
             }
         }
         LJ::cmize::js_redirect(\%POST);

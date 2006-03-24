@@ -42,9 +42,7 @@ body<=
         
     ### Save settings
     if (LJ::did_post()) {
-        $ret .= "<pre>" . Data::Dumper::Dumper(\%POST) . "</pre>";
-
-        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?> . <pre>" . Data::Dumper::Dumper(%POST) . "</pre>"
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>"
             unless LJ::check_form_auth();
 
         # journal / friends titles
