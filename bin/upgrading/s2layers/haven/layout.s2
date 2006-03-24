@@ -24,7 +24,7 @@ propgroup presentation
         des = "Entire width of the main content, in percentages";
         values = "60%|60%|70%|70%|80%|80%|90%|90%|100%|100%";
     }
-    set content_width = "70%";
+    set content_width = "90%";
     property string title_position
     {
         des = "Location of the title bar in regards to the entire page";
@@ -523,6 +523,9 @@ function prop_init()
     if (isnull $*comment_bar_two_bgcolor)   { $*comment_bar_two_bgcolor   = $*sidebar_box_title_bgcolor;                         }
     if (isnull $*comment_bar_one_fgcolor)   { $*comment_bar_one_fgcolor   = color_ideal_foreground($*comment_bar_one_bgcolor);   }
     if (isnull $*comment_bar_two_fgcolor)   { $*comment_bar_two_fgcolor   = color_ideal_foreground($*comment_bar_two_bgcolor);   }
+
+    # Push the content over for ad users
+    if (viewer_sees_ads()) { $*content_width = "70%"; }
 }
 
 function css_font_family(string base, string fallback) : string
@@ -1044,44 +1047,42 @@ function print_replyto(Page p, Entry e, EntryLite el)
     print format_replyto($p, $e, $el);
 }
 
-function format_entry(Page p, Entry e, Color bgcolor, Color fgcolor, bool viewing_thread) : string
+function print_entry(Page p, Entry e, Color bgcolor, Color fgcolor, bool viewing_thread)
 {
-    var string entry = "";
-
     # Named anchor to link from page summary
-    $entry = $entry + """<a name="entry_$e.itemid"></a>""";
-    $entry = $entry + """<div class="entry">""";
+    println """<a name="entry_$e.itemid"></a>""";
+    println """<div class="entry">""";
     var string subject = $e.subject != "" ? $e.subject : $*text_nosubject;
     var string time    = $e.time->time_format();
-    $entry = $entry + """<h4 class="subject">$e.security_icon $subject @ $time</h4>""";
-    $entry = $entry + """<div class="text">""";
+    println """<h4 class="subject">$e.security_icon $subject @ $time</h4>""";
+    println """<div class="text">""";
 
     if (($p.view == "friends" or
         $e.poster.username != $e.journal.username or
         ($*show_entry_userpic and defined $e.userpic))) {
         if ($p.view == "friends") {
             if (defined $e.userpic) {
-                $entry = $entry + """<img src="$e.userpic.url" width="$e.userpic.width"
-                    style="color: $fgcolor; background: $bgcolor; border: 5px solid $bgcolor;"
-                    height="$e.userpic.height" alt="" class="userpic" />""";
+                println """<img src="$e.userpic.url" width="$e.userpic.width"
+                        style="color: $fgcolor; background: $bgcolor; border: 5px solid $bgcolor;"
+                        height="$e.userpic.height" alt="" class="userpic" />""";
             }
             if ($e.poster.username != $e.journal.username) {
-                $entry = $entry + $e.poster->as_string() + ", posting in ";
+                println $e.poster->as_string() + ", posting in ";
             }
-            $entry = $entry + $e.journal->as_string() + ":<br />";
+            println $e.journal->as_string() + ":<br />";
         } elseif ($e.poster.username != $e.journal.username) {
             if (defined $e.userpic) {
-                $entry = $entry + """<img src="$e.userpic.url" width="$e.userpic.width"
+                println """<img src="$e.userpic.url" width="$e.userpic.width"
                    height="$e.userpic.height" alt="" class="userpic" />""";
             }
-            $entry = $entry + $e.poster->as_string() + ":<br />";
+            println $e.poster->as_string() + ":<br />";
         } elseif (defined $e.userpic) {
-            $entry = $entry + """<p><img src="$e.userpic.url" width="$e.userpic.width"
+            println """<p><img src="$e.userpic.url" width="$e.userpic.width"
                height="$e.userpic.height" alt="" class="userpic" />""";
         }
     }
     if (size $e.metadata) {
-        $entry = $entry + """<div class="currents">""";
+        println """<div class="currents">""";
         foreach var string k ($e.metadata) {
             var string text = $k;
             var string val = $e.metadata{$k};
@@ -1094,57 +1095,52 @@ function format_entry(Page p, Entry e, Color bgcolor, Color fgcolor, bool viewin
                 var Image i = $e.mood_icon;
                 $val = "<img src='$i.url' width='$i.width' height='$i.height' align='middle' alt='' /> $val";
             }
-            $entry = $entry + """<div class="current$k"><strong>$text:</strong> $val</div>""";
+            println """<div class="current$k"><strong>$text:</strong> $val</div>""";
         }
-        $entry = $entry + "</div>\n";
+        println "</div>\n";
     }
 
     if ($e.tags) {
         var int tcount = 0;
-        $entry = $entry + """<div class="ljtags"><strong>Tags:</strong> """;
+        println """<div class="ljtags"><strong>Tags:</strong> """;
+        var string tags;
         foreach var Tag t ($e.tags) {
-            $entry = """$entry<a rel="tag" href="$t.url">$t.name</a>""";
+            $tags = """$tags<a rel="tag" href="$t.url">$t.name</a>""";
             $tcount++;
-            if ($tcount != size $e.tags) { $entry = """$entry, """; }
+            if ($tcount != size $e.tags) { $tags = """$tags, """; }
         }
-        $entry = """$entry</div>""";
+        println """$tags </div>""";
     }
 
-    if (size $e.tags or size $e.metadata) { $entry = "$entry<br />"; }
-    if (not $viewing_thread) { $entry = $entry + $e.text; }
-    $entry = $entry + """<div class="clearer">&nbsp;</div>""";
-    $entry = $entry + "</div>";
+    if (size $e.tags or size $e.metadata) { println "<br />"; }
+    if (not $viewing_thread) { $e->print_text(); }
+    println """<div class="clearer">&nbsp;</div>""";
+    println "</div>";
 
     # Comments
-    $entry = $entry + """<div class="comments">""";
+    println """<div class="comments">""";
     if ($e.comments.enabled and $p.view != "entry") {
         if ($e.comments.count > 0 or $e.comments.screened) {
-            $entry = $entry + """<a href="$e.comments.read_url">""" +
-                get_plural_phrase($e.comments.count, $p.view == "friends" ? 
-                              "text_read_comments_friends" : "text_read_comments") +
+            println """<a href="$e.comments.read_url">""" +
+              get_plural_phrase($e.comments.count, $p.view == "friends" ? 
+                                "text_read_comments_friends" : "text_read_comments") +
             "</a>";
-            $entry = $entry + "&nbsp;|&nbsp;";
+            println "&nbsp;|&nbsp;";
         }
-        $entry = $entry + """<a href="$e.comments.post_url">""" + ($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment) + "</a>";
+        println """<a href="$e.comments.post_url">""" + ($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment) + "</a>";
     } elseif ($p.view == "entry") {
         var Link l = new Link;
         foreach var string ls ($e.link_keyseq) {
             $l = $e->get_link($ls);
             if (defined $l) {
-                $entry = $entry + """<a href="$l.url">$l.caption</a> """;
+                println """<a href="$l.url">$l.caption</a> """;
             }
-            if($ls != $e.link_keyseq[size($e.link_keyseq) - 1]) { $entry = $entry + """&nbsp;|&nbsp;"""; }
+            if($ls != $e.link_keyseq[size($e.link_keyseq) - 1]) { println """&nbsp;|&nbsp;"""; }
         }
     } else {
-        $entry = $entry + "&nbsp;";
+        println "&nbsp;";
     }
-    $entry = $entry + "</div>";
-    $entry = $entry + """</div>""";
-    return $entry;
-}
-
-function print_entry(Page p, Entry e, Color bgcolor, Color fgcolor, bool viewing_thread) {
-    print format_entry($p, $e, $bgcolor, $fgcolor, $viewing_thread);
+    println "</div></div>";
 }
 
 ################################################################################
