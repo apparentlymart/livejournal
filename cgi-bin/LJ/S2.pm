@@ -2076,7 +2076,7 @@ sub viewer_is_owner
 sub viewer_sees_control_strip
 {
     my ($ctx) = @_;
-    return 1;
+    return 0 unless $LJ::USE_CONTROL_STRIP;
 
     my $r = Apache->request;
     return LJ::run_hook('show_control_strip', {
