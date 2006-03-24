@@ -310,7 +310,7 @@ function Page::print ()
     """;
 }
 
-function print_box (string{} colors, string metapic, string{} meta, string content, string footer, string domid) {
+function print_box_open (string{} colors, string metapic, string{} meta, string domid) {
     var string bgcolor = $colors{"bgcolor"};
     var string fgcolor = $colors{"fgcolor"};
     if ($domid != "") { $domid = "id='"+ehtml($domid)+"'"; }
@@ -333,9 +333,9 @@ function print_box (string{} colors, string metapic, string{} meta, string conte
 
     "</table></td></tr></table></td></tr>";
     print safe "<tr><td style='background-color: $*main_bgcolor; color: $*main_fgcolor'>";
+}
 
-    print safe $content;
-
+function print_box_close (string footer) {
     "</td></tr>";
 
     if ($footer) {
@@ -343,6 +343,11 @@ function print_box (string{} colors, string metapic, string{} meta, string conte
     }
 
     "</table></div><br />";
+}
+function print_box (string{} colors, string metapic, string{} meta, string content, string footer, string domid) {
+    print_box_open($colors, $metapic, $meta, $domid);
+    print safe $content;
+    print_box_close($footer);
 }
 
 function print_header (string header)
@@ -362,7 +367,7 @@ function print_genericbox_close ()
 
 function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_text)
 {
-    var string{} colors; var string{} meta; var string content = ""; var string footer = "";
+    var string{} colors; var string{} meta; var string footer = "";
     $colors{"bgcolor"} = "$*accent_bgcolor";
     $colors{"fgcolor"} = "$*accent_fgcolor";
     if ($p.view == "recent") {
@@ -428,9 +433,6 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         $meta{"Tags:"} = $tag;
     }
 
-
-    if (not $hide_text) { $content = $e.text; }
-
     if ($e.comments.enabled) {
         $footer = "comments:";
         if (($e.comments.count > 0 or $e.comments.screened) and ($p.view != "entry")) {
@@ -460,7 +462,9 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     }
 
     # Print
-    print_box($colors, $metapic, $meta, $content, $footer, "");
+    print_box_open($colors, $metapic, $meta, "");
+    if (not $hide_text) { $e->print_text(); }
+    print_box_close($footer);
 }
 
 function Page::print_entry (Entry e) 
@@ -670,7 +674,7 @@ function EntryPage::print_comment_partial (Comment c) {
 }
 
 function EntryPage::print_comment (Comment c) {
-    var string{} colors; var string{} meta; var string content = ""; var string footer = "";
+    var string{} colors; var string{} meta; var string footer = "";
 
     if ($c.screened) {
         $colors{"bgcolor"} = "$*comment_bar_screened_bgcolor";
@@ -727,7 +731,9 @@ function EntryPage::print_comment (Comment c) {
         $link = $c->get_link($k); $footer = "$footer $link";
     }
     println "<a name='$c.anchor'></a>";
-    print_box($colors, $metapic, $meta, $c.text, $footer, "cmtbar$c.talkid");
+    print_box_open($colors, $metapic, $meta, "cmtbar$c.talkid");
+    $c->print_text();
+    print_box_close($footer);
 }
 
 function ReplyPage::print_body () {
@@ -754,8 +760,10 @@ function ReplyPage::print_body () {
     # Time posted
     $meta{"Time:"} = $.replyto.time->time_format();
 
-    print_box({ "bgcolor" => "$*accent_bgcolor", "fgcolor" => "$*accent_fgcolor" },
-              $metapic, $meta, $.replyto.text, "", "");
+    print_box_open({ "bgcolor" => "$*accent_bgcolor", "fgcolor" => "$*accent_fgcolor" },
+              $metapic, $meta, "");
+    $.replyto->print_text();
+    print_box_close("");
 
     print_header("Reply:");
 
