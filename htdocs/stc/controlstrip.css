@@ -8,6 +8,7 @@ html body
 #lj_controlstrip
 {
     font-family: Arial, sans-serif;
+    font-size: 12pt;
     top: 0;
     left: 0;
     width: 100%;
@@ -27,4 +28,9 @@ html body
 #lj_controlstrip_actionlinks
 {
     text-align: justify;
+}
+#lj_controlstrip a
+{
+    font-size: 12pt;
+    font-family: Arial, sans-serif;
 }
