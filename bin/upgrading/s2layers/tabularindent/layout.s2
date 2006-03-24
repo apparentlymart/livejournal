@@ -289,12 +289,18 @@ function Page::print ()
     "<p>"; captionbar($this); "</p>";
 
     if (viewer_sees_ads()) {
-      print "<div style=\"float: right; margin-right: 10px; position: relative; z-index: 15;\">";
-      $this->print_ad("Journal-Skyscraper");
-      print "</div>\n";
+        """<table width="100%" height="100%">""";
+        """<tr><td valign="top">""";
     }
 
     "<p>"; $this->print_body(); "</p>";
+    
+    if (viewer_sees_ads()) {
+        print "</td>";
+        print "<td valign=\"top\" style=\"float: right;\">";
+        $this->print_ad("Journal-Skyscraper");
+        print "</td></tr></table>\n";
+    }
 
     "<p>"; captionbar($this); "</p>";
 
@@ -310,7 +316,7 @@ function print_box (string{} colors, string metapic, string{} meta, string conte
     if ($domid != "") { $domid = "id='"+ehtml($domid)+"'"; }
 
     var string style = "background-color: "+ehtml($bgcolor)+"; color: "+ehtml($fgcolor);
-    print safe "<div align='right'><table $domid border='0' width='' cellpadding='5' cellspacing='1' style='$style'>";
+    print safe "<div align='right'><table $domid border='0' width='95%' cellpadding='5' cellspacing='1' style='$style'>";
     print safe "<tr><td><table border='0' width='100%' style='$style'><tr>";
 
     if ($metapic) {
@@ -345,7 +351,7 @@ function print_header (string header)
 }
 
 function print_genericbox_open () {
-    "<div align='right'><table border='0' width='' cellpadding='5' cellspacing='1' bgcolor='$*accent_bgcolor'>";
+    "<div align='right'><table border='0' width='95%' cellpadding='5' cellspacing='1' bgcolor='$*accent_bgcolor'>";
     "<tr><td style='background-color: $*main_bgcolor; color: $*main_fgcolor'>";
 }
 
