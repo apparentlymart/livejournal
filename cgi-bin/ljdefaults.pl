@@ -213,7 +213,7 @@
 
     # max content length we should read via ATOM api
     # 25MB
-    $MAX_ATOM_UPLOAD ||= 25600;
+    $MAX_ATOM_UPLOAD ||= 26214400;
 
     $CAPTCHA_AUDIO_MAKE ||= 100;
     $CAPTCHA_AUDIO_PREGEN ||= 100;
