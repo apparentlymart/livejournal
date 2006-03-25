@@ -1222,18 +1222,23 @@ sub get_cap {
 # names are site-specific.
 sub in_class {
     my ($u, $class) = @_;
-
-    my $bit = undef;
-    foreach my $thisbit (keys %LJ::CAP) {
-        my $def = $LJ::CAP{$thisbit};
-        next unless $def->{_key} && $def->{_key} eq $class;
-        $bit = $thisbit;
-        last;
-    }
-
-    return 0 unless defined $bit;
-    die "bogus bit number: $bit" if $bit > 15;
+    my $bit = LJ::class_bit($class);
+    die "unknown class '$class'" unless defined $bit;
     return ($u->{caps} & (1 << $bit)) ? 1 : 0;
+}
+
+sub add_to_class {
+    my ($u, $class) = @_;
+    my $bit = LJ::class_bit($class);
+    die "unknown class '$class'" unless defined $bit;
+    return LJ::modify_caps($u, [$bit], []);
+}
+
+sub remove_from_class {
+    my ($u, $class) = @_;
+    my $bit = LJ::class_bit($class);
+    die "unknown class '$class'" unless defined $bit;
+    return LJ::modify_caps($u, [], [$bit]);
 }
 
 package LJ;
@@ -2602,6 +2607,7 @@ sub modify_caps {
     return 0 unless LJ::update_user($u, { 'caps' => $newcaps });
 
     $u->{caps} = $newcaps;
+    $argu->{caps} = $newcaps if ref $argu; # temp hack
     return $u;
 }
 
