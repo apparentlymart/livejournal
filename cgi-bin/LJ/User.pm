@@ -1222,9 +1222,7 @@ sub get_cap {
 # names are site-specific.
 sub in_class {
     my ($u, $class) = @_;
-    my $bit = LJ::class_bit($class);
-    die "unknown class '$class'" unless defined $bit;
-    return ($u->{caps} & (1 << $bit)) ? 1 : 0;
+    return LJ::caps_in_group($u->{caps}, $class);
 }
 
 sub add_to_class {

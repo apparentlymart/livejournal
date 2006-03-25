@@ -11,6 +11,13 @@ sub class_bit {
     return undef;
 }
 
+sub caps_in_group {
+    my ($caps, $class) = @_;
+    my $bit = LJ::class_bit($class);
+    die "unknown class '$class'" unless defined $bit;
+    return ($caps & (1 << $bit)) ? 1 : 0;
+}
+
 # <LJFUNC>
 # name: LJ::name_caps
 # des: Given a user's capability class bit mask, returns a
