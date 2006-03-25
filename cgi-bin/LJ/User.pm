@@ -1211,10 +1211,29 @@ sub notable_interests {
     return map { $_->[1] } @ints;
 }
 
-sub get_cap
-{
+# returns the max capability ($cname) for all the classes
+# the user is a member of
+sub get_cap {
     my ($u, $cname) = @_;
     return LJ::get_cap($u, $cname);
+}
+
+# tests to see if a user is in a specific named class. class
+# names are site-specific.
+sub in_class {
+    my ($u, $class) = @_;
+
+    my $bit = undef;
+    foreach my $thisbit (keys %LJ::CAP) {
+        my $def = $LJ::CAP{$thisbit};
+        next unless $def->{_key} && $def->{_key} eq $class;
+        $bit = $thisbit;
+        last;
+    }
+
+    return 0 unless defined $bit;
+    die "bogus bit number: $bit" if $bit > 15;
+    return ($u->{caps} & (1 << $bit)) ? 1 : 0;
 }
 
 package LJ;

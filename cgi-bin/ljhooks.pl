@@ -52,7 +52,6 @@ sub run_hook
     my ($hookname, @args) = @_;
     return undef unless @{$LJ::HOOKS{$hookname} || []};
     return $LJ::HOOKS{$hookname}->[0]->(@args);
-    return undef;
 }
 
 # <LJFUNC>
