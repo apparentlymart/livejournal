@@ -1,6 +1,16 @@
 package LJ;
 use strict;
 
+sub class_bit {
+    my ($class) = @_;
+    foreach my $bit (0..15) {
+        my $def = $LJ::CAP{$bit};
+        next unless $def->{_key} && $def->{_key} eq $class;
+        return $bit;
+    }
+    return undef;
+}
+
 # <LJFUNC>
 # name: LJ::name_caps
 # des: Given a user's capability class bit mask, returns a
