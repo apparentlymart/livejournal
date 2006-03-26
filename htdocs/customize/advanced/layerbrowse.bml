@@ -333,7 +333,7 @@
         }
     }
     
-    LJ::set_dynamic_crumb(LJ::eall($title), 'layerbrowse');
+    LJ::set_dynamic_crumb($title, 'layerbrowse');
     return;
 
 }
