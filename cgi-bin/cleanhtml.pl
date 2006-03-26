@@ -981,7 +981,7 @@ sub ExpandLJURL
     return "$LJ::SITEROOT/$uri";
 }
 
-my $subject_eat = [qw[head title style layer iframe applet object]];
+my $subject_eat = [qw[head title style layer iframe applet object param]];
 my $subject_allow = [qw[a b i u em strong cite]];
 my $subject_remove = [qw[bgsound embed object caption link font noscript]];
 sub clean_subject
@@ -1017,7 +1017,7 @@ sub clean_subject_all
     });
 }
 
-my $event_eat = [qw[head title style layer iframe applet object xml]];
+my $event_eat = [qw[head title style layer iframe applet object xml param]];
 my $event_remove = [qw[bgsound embed object link body meta noscript plaintext]];
 
 my @comment_close = qw(
