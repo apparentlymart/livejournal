@@ -203,7 +203,7 @@
                 var dtid = xGetElementById('saved_dtid');
                 if (! dtid) return false;
                 var ptid = xGetElementById('saved_ptid');
-                ptid += 0;
+                ptid.value += 0;
 
                 quickreply(dtid.value, ptid.value, saved_body.value);
 
