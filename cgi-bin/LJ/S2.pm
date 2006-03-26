@@ -1640,6 +1640,12 @@ sub Entry
         LJ::CleanHTML::clean_subject(\$e->{'metadata'}->{'mood'});
     }
 
+    # TODO: Populate this field more intelligently later, but for now this will
+    #   hopefully disuade people from hardcoding logic like this into their S2
+    #   layers when they do weird parsing/manipulation of the text member in
+    #   untrusted layers.
+    $e->{text_must_print_trusted} = 1 if $e->{text} =~ m!<(script|object|applet|embed)\s!;
+
     return $e;
 }
 

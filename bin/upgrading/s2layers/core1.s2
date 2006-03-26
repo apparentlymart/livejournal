@@ -275,8 +275,14 @@ class EntryLite
 "Base class for both journal entries and comments."
 {
     var readonly string subject "Subject.  May contain HTML.  Don't do substring chops on this.";
+
     var readonly string text
         "Entry Text; Use [method[EntryLite.print_text()]] to print this so that the entry's trust level is not affected by your layer's trust level.";
+
+
+    var readonly bool text_must_print_trusted
+        "Indicates that this entry's text contains some content that must be printed trusted, with [method[EntryLite.print_text()]], rather than printed directly from an untrusted context. Use this to fall back to a plain trusted print if you are doing something unusual with [member[EntryLite.text]]. Most layers can just ignore this and always use [method[EntryLite.print_text()]].";
+
     var DateTime time "The user-specified time of the post, or the GMT time if it's a comment.";
 
     var UserLite poster "Author of the entry, or null if an anonymous comment";
