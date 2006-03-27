@@ -390,3 +390,5 @@ general /customize/index.bml.s2.advanced.denied
 
 general /styles/create.bml.createstyle.text
 general /styles/index.bml.about
+
+general /support/see_overrides.bml.header

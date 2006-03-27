@@ -4254,7 +4254,7 @@ that area. p?>
 
 /support/see_overrides.bml.error.nos1=This user is not using S1.
 
-/support/see_overrides.bml.header=Overrides for <?ljuser [[user]] ljuser?>:
+/support/see_overrides.bml.header2=Overrides for [[user]]:
 
 /support/see_overrides.bml.nooverrides=No overrides found for <?ljuser [[user]] ljuser?>.
 

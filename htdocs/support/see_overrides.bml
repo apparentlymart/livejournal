@@ -54,7 +54,7 @@ body<=
 
     # textarea
     my $ret;
-    $ret .= "<?h1 " . BML::ml(".header", {'user' => $user}) . " h1?>";
+    $ret .= "<?h1 " . BML::ml(".header2", {'user' => LJ::ljuser($u)}) . " h1?>";
     $ret .= "<br /><form action='#'>";
     $ret .= LJ::html_textarea({ 'name' => 'overrides', 'style' => 'width: 100%',
                                  'cols' => '60', 'rows' => '16', 'wrap' => 'off',
