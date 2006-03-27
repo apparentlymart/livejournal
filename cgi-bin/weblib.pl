@@ -1909,12 +1909,15 @@ sub ads {
         $adhtml .= "<div class=\"ad $adunit\" id=\"\">";
         $adhtml .= "<h4>Advertisement</h4>";
 
-        $adhtml .= "<iframe src='$LJ::SITEROOT/misc/adserver.bml?$adparams' frameborder='0' scrolling='no' ";
+        $adhtml .= "<iframe src='${LJ::ADSERVER}misc/adserver.bml?$adparams' frameborder='0' scrolling='no' ";
         $adhtml .= "width='" . LJ::ehtml($adcall{width}) . "' ";
         $adhtml .= "height='" . LJ::ehtml($adcall{height}) . "' ";
         $adhtml .= "></iframe>";
 
-        $adhtml .= "<a href=\"#\">Leave Feedback</a>";
+        my $eadcall = LJ::eurl($adparams);
+        my $echannel = LJ::eurl($adcall{channel});
+        my $euri = LJ::eurl($r->uri);
+        $adhtml .= "<a href=\"$LJ::SITEROOT/feedback/ads.bml?adcall=$eadcall&channel=$echannel&uri=$euri\">Leave Feedback</a>";
         $adhtml .= "</div>";
 
         return $adhtml;

@@ -604,6 +604,10 @@ sub trans
             my $view = $determine_view->($user, "safevhost", $uri);
             return $view if defined $view;
 
+        } elsif ($func eq 'adserver') {
+
+            return $bml_handler->("$LJ::HOME/htdocs/misc/adserver.bml");
+
         } elsif ($func) {
             my $code = {
                 'userpics' => \&userpic_trans,
