@@ -836,6 +836,11 @@ add_conf('$CSSPROXY',
          des => "If set, external CSS should be proxied through this URL (URL is given a ?u= argument with the escaped URL of CSS to clean.  If unset, remote CSS is blocked.",
          );
 
+add_conf('$ADSERVER',
+         type => 'url',
+         des => "Subdomain to use for adserving",
+         );
+
 
 my %bools = (
              'USE_ACCT_CODES' => "Make joining the site require an 'invite code'.  Note that this code might've bitrotted, so perhaps it should be kept off.",
