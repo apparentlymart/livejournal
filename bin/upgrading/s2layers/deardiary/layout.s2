@@ -247,6 +247,9 @@ function prop_init() {
 function pretty_styles() "Pretty stuff that's completely dispensible" {
 
     var int top = ($*title_separator ? 79 : 75);
+    if (viewer_sees_control_strip()) {
+        $top = $top + 55;
+    }
     var string{} size = $*font_sizes{$*font_size_keyword};
 
 """
@@ -873,6 +876,9 @@ function Page::print() {
 
 <body class="page_$.view">
 
+""";
+$this->print_control_strip();
+"""
 <div id="pagecontainer">
 
 <div id="title">

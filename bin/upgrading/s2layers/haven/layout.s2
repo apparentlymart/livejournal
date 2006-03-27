@@ -1209,6 +1209,7 @@ function Page::print()
     }
     println """<title>$.global_title</title>""";
     println "</head><body>";
+    $this->print_control_strip();
 
     if ($*title_position == "top" or $*title_position == "both") { println $title_bar; print "<br />"; }
     

@@ -171,16 +171,24 @@ function print_stylesheet ()
     background-attachment: $*page_background_scrolling;
 }""";
     }
-    """HTML {
+    if (not viewer_sees_control_strip()) {
+      """HTML {
     border-left: 1cm solid $*sidebar_color; 
     padding: 1cm;
-}
-BODY {
+}""";
+    }
+
+"""BODY {
     line-height: 1.3;
     margin: 0;
     background-color: $*main_bgcolor;
-    color: $*main_fgcolor;
+    color: $*main_fgcolor;""";
+if (viewer_sees_control_strip()) {
+    """
+    border-left: 1cm solid $*sidebar_color;
+    """;
 }
+"""}
 P {
     margin-top: 0;
     text-align: justify;
@@ -210,6 +218,13 @@ H3 EM {
     color: $*meta_color;
     font-style: normal;
 }
+""";
+if (viewer_sees_control_strip()) {
+"""#content {
+    padding: 1cm;
+}""";
+}
+"""
 .H3Holder {
     """;
     if (not viewer_sees_ads()) { "clear: both;"; }
@@ -335,6 +350,8 @@ function Page::print () {
   </head>
   <body>
     """;
+    $this->print_control_strip();
+    if (viewer_sees_control_strip()) { """<div id="content">"""; }
     if (viewer_sees_ads()) {
         """<div style="float: right;">""";
         $this->print_ad("Journal-Skyscraper");
@@ -366,6 +383,7 @@ function Page::print () {
     $this->lay_bottom_navigation();
 
     if (viewer_sees_ads()) { "</div>"; }
+    if (viewer_sees_control_strip()) { "</div>"; }
     "</body></html>";
 }
 
