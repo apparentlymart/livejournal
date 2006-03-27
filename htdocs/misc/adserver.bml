@@ -1,15 +1,21 @@
+<?_info
+nocache=>1
+_info?>
 <?_code
 {
     use strict;
     use vars qw($GET);
 
+    BML::set_content_type("text/html");
+
     my $ad_engine = LJ::run_hook('ad_engine', {
         pagetype => $GET{channel},
     });
-    return '' unless $ad_engine;
+    return '<html></html>' unless $ad_engine;
 
-    my $adhtml;
-    $adhtml .= "<html><body style='margin: 0; padding: 0'>";
+    my $adhtml = '';
+    $adhtml .= "<html><head><title>$LJ::SITENAMESHORT Ad Server</title></head>";
+    $adhtml .= "<body style='margin: 0; padding: 0'>";
 
     $adhtml .= $ad_engine->process(
                                    url        => $GET{url},
