@@ -1420,9 +1420,13 @@ sub db_logger
 
     return if $ctype =~ m!^image/! and $LJ::DONT_LOG_IMAGES;
     return if $uri =~ m!^/(img|userpic)/! and $LJ::DONT_LOG_IMAGES;
-    return if defined $LJ::LOG_PERCENTAGE && rand(100) > $LJ::LOG_PERCENTAGE;
 
-    my $dbl = LJ::get_dbh("logs");
+    my $skip_db = 0;
+    if (defined $LJ::LOG_PERCENTAGE && rand(100) > $LJ::LOG_PERCENTAGE) {
+        $skip_db = 1;
+    }
+
+    my $dbl = $skip_db ? undef : LJ::get_dbh("logs");
     my @dinsertd_socks;
 
     my $now = time;
