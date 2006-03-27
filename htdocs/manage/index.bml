@@ -11,7 +11,7 @@
 
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);
-    
+
     if ($u) {
         LJ::load_user_props($u, "stylesys");
         $u->{'stylesys'} ||= 1;
@@ -90,18 +90,17 @@ body<=
     $ret .= "</table></div>";
 
     return $ret;
-    
+
 }
 _code?>
 
 <table style="width: 100%; clear: both">
 <tr valign="top"><td style="width: 50%">
 <?block
-header=><?_ml .information.header _ml?>
+header=><?_ml .settings_pref _ml?>
 about=><?_ml .information _ml?>
 list<=
 <li><a href="/editinfo.bml<?authas?>" title="<?_ml .information.editinfo.about _ml?>"><?_ml /editinfo.bml.title _ml?></a></li>
-<li><a href="/accountstatus.bml<?authas?>" title="<?_ml .information.status.about _ml?>"><?_ml .information.status _ml?></a></li>
 <?_code
     my $u = $BMLCodeBlock::u;
     return '' if $u->{'journaltype'} eq 'I';
@@ -122,6 +121,7 @@ _code?>
 <li><a href="/manage/invites.bml" title="<?_ml .communities.invites.about _ml?>"><?_ml /manage/invites.bml.title _ml?></a></li>
 <li><a href="/schools/manage.bml" title="<?_ml .schools _ml?>"><?_ml .schools _ml?></a></li>
 <li><a href="/manage/logins.bml" title="Manage Logins">Manage Logins</a></li>
+<li><a href="/accountstatus.bml<?authas?>" title="<?_ml .information.status.about _ml?>"><?_ml .deleteaccount _ml?></a></li>
 <=list
 block?>
 

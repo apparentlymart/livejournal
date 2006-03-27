@@ -3164,6 +3164,8 @@ The site team
 
 /manage/index.bml.customization.s2.header=S2 Style System
 
+/manage/index.bml.deleteaccount=Delete Account
+
 /manage/index.bml.entries=Work with entries you have made in your account's journal:
 
 /manage/index.bml.entries.edit.about=Edit and delete entries in your journal
@@ -3211,6 +3213,8 @@ The site team
 /manage/index.bml.login2=The following links will navigate you to pages where your login information is required. To save yourself some time, you can <a [[aopts]]>log in</a> beforehand.
 
 /manage/index.bml.schools=Manage School Attendance
+
+/manage/index.bml.settings_pref=Settings & Preferences
 
 /manage/index.bml.title=Manage Accounts
 
