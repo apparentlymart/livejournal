@@ -144,7 +144,9 @@ sub handle_upload
             $atom_reply->summary('Media post');
             my $id = "atom:$u->{user}:$fb->{PicID}";
             $fb->{Summary} = $summary;
-            LJ::MemCache::set( $id, $fb, 1800 );
+
+            $u->set_cache("lifeblog_fb:$fb->{PicID}", $fb);
+
             $atom_reply->id( "urn:fb:$LJ::FB_DOMAIN:$id" );
         }
 
@@ -202,14 +204,12 @@ sub handle_post {
         my $type = $link->get('type');
         my $id   = $link->get('href');
 
-        next unless $rel eq 'related' && check_mime($type) && $id;
-        $id =~ s/^urn:fb:$LJ::FB_DOMAIN://;
+        next unless $rel eq 'related' && check_mime($type) &&
+            $id =~ /^urn:fb:\Q$LJ::FB_DOMAIN\E:atom:\w+:(\d+)$/;
 
-        # FIXME: this is terrible how memcache is required to lifeblog-post images in
-        # especially because if there are many, and if they're coming in over a slow
-        # GPRS connection, they might expire in memcache before the file post comes in.
-        # we need to use API calls to picpix to grab the data.
-        my $fb = LJ::MemCache::get( $id );
+        my $fb_picid = $1;
+
+        my $fb = $u->cache("lifeblog_fb:$fb_picid");
         next unless $fb;
 
         push @images, {

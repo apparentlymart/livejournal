@@ -43,7 +43,7 @@ sub END { LJ::end_request(); }
                     "logtags", "logtagsrecent", "logkwsum",
                     "recentactions", "usertags", "pendcomments",
                     "user_schools", "portal_config", "portal_box_prop",
-                    "loginlog", "active_user",
+                    "loginlog", "active_user", "userblobcache",
                     );
 
 # keep track of what db locks we have out
@@ -235,7 +235,7 @@ sub gearman_client {
     my $purpose = shift;
 
     return undef unless @LJ::GEARMAN_SERVERS;
-    eval "use Gearman::Client; 1;" or die "No Gearman::Client available";
+    eval "use Gearman::Client; 1;" or die "No Gearman::Client available: $@";
 
     my $client = Gearman::Client->new;
     $client->job_servers(@LJ::GEARMAN_SERVERS);

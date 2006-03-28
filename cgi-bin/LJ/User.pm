@@ -1239,6 +1239,27 @@ sub remove_from_class {
     return LJ::modify_caps($u, [], [$bit]);
 }
 
+sub cache {
+    my ($u, $key) = @_;
+    my $val = $u->selectrow_array("SELECT value FROM userblobcache WHERE userid=? AND bckey=?",
+                                  undef, $u->{userid}, $key);
+    return undef unless defined $val;
+    if (my $thaw = eval { Storable::thaw($val); }) {
+        return $thaw;
+    }
+    return $val;
+}
+
+sub set_cache {
+    my ($u, $key, $value, $expr) = @_;
+    my $now = time();
+    $expr ||= $now + 86400;;
+    $expr += $now if $expr < 315532800;  # relative to absolute time
+    $value = Storable::nfreeze($value) if ref $value;
+    $u->do("REPLACE INTO userblobcache (userid, bckey, value, timeexpire) VALUES (?,?,?,?)",
+           undef, $u->{userid}, $key, $value, $expr);
+}
+
 package LJ;
 
 # <LJFUNC>

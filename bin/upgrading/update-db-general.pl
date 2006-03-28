@@ -2266,6 +2266,16 @@ CREATE TABLE loginlog (
 )
 EOC
 
+register_tablecreate("userblobcache", <<'EOC');
+CREATE TABLE userblobcache (
+  userid     INT UNSIGNED NOT NULL,
+  bckey      VARCHAR(60) NOT NULL,
+  PRIMARY KEY (userid, bckey),
+  timeexpire  INT UNSIGNED NOT NULL,
+  INDEX (timeexpire),
+  value    MEDIUMBLOB
+)
+EOC
 
 # NOTE: new table declarations go here
 
@@ -2774,7 +2784,7 @@ register_alter(sub {
     if (index_name("active_user", "INDEX:time")) {
         do_sql("TRUNCATE TABLE active_user");
         do_alter("active_user",
-                 "ALTER TABLE active_user " . 
+                 "ALTER TABLE active_user " .
                  "DROP time, DROP KEY userid, " .
                  "ADD year SMALLINT NOT NULL FIRST, " .
                  "ADD month TINYINT NOT NULL AFTER year, " .
