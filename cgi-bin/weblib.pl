@@ -1908,6 +1908,17 @@ sub ads {
             $adcall{interests} = join(',', $remote->notable_interests(5));
         }
 
+        # If we have neither categories or interests, load the content author's
+        # if we're in journal context
+        if ($ctx eq 'journal'  && !($adcall{categories} && !$adcall{interests})) {
+            my $u = $opts{user} ? LJ::load_user($opts{user}) : LJ::load_userid($r->notes("journalid"));
+
+            if ($u) {
+                $adcall{categories} = $u->prop('ad_categories');
+                $adcall{interests} = join(',', $u->notable_interests(5));
+            }
+        }
+
         $adcall{language} = $r->notes('langpref');
         $adcall{language} =~ s/_LJ//; # EN_LJ
 
