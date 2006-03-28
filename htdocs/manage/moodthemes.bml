@@ -162,6 +162,9 @@ body<=
     # Populated with all the moods later in editform
     my %lists;
 
+    # one formauth for the whole page
+    my $form_auth = LJ::form_auth();
+
     my $ret;
 
     #### Closure Definitions ####
@@ -296,7 +299,7 @@ body<=
 
             # Make the form
             $ret .= "<?p <form action='$self_uri' method='post' id='editform' name='editform'>\n";
-            $ret .= LJ::form_auth();
+            $ret .= $form_auth;
             $ret .= "<b>$ML{'.editingtheme.label.name'}</b> ";
             $ret .= LJ::html_text({ name => 'name', value => $info->{name}, size => 50, maxlength => 255 });
             $ret .= "<br /><br />\n";
@@ -388,7 +391,7 @@ body<=
             # form to allow users to create new mood themes
             $ret .= "<?h1 $ML{'.createtheme.header'} h1?>\n";
             $ret .= "<form action='$self_uri' method='post' id='editform' name='editform' style='margin-left: 30px;'>\n";
-            $ret .= LJ::form_auth();
+            $ret .= $form_auth;
             $ret .= LJ::html_hidden('isnew' => 1) . "\n";
             $ret .= "<?p <b>$ML{'.createtheme.label.name'}</b> " . LJ::html_text({ name => 'name', size => 30, maxlength => 50 });
             $ret .= LJ::html_submit('create' => $ML{'.btn.create'}) . " p?></form>\n";
@@ -405,6 +408,7 @@ body<=
 
             if (@user_themes) { # The have some custom themes already defined
                 $ret .= "<form action='$self_uri' method='post' id='selectform' name='selectform' style='margin-left: 30px;'>\n";
+                $ret .= $form_auth;
                 $ret .= LJ::html_hidden('edit' => 1,
                                         'themeids' => join(",", map { $_->{moodthemeid} } @user_themes));
                 $ret .= "<table>";
