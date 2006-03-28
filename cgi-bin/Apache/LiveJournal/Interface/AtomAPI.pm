@@ -178,7 +178,7 @@ sub handle_post {
 
     # on post, the entry must NOT include an id
     return respond($r, 400, "Must not include an <b>&lt;id&gt;</b> field in a new entry.")
-        if $entry->id();
+        if $entry->id;
 
     # detect 'standalone' media posts
     return handle_upload( @_, $entry )
@@ -204,6 +204,11 @@ sub handle_post {
 
         next unless $rel eq 'related' && check_mime($type) && $id;
         $id =~ s/^urn:fb:$LJ::FB_DOMAIN://;
+
+        # FIXME: this is terrible how memcache is required to lifeblog-post images in
+        # especially because if there are many, and if they're coming in over a slow
+        # GPRS connection, they might expire in memcache before the file post comes in.
+        # we need to use API calls to picpix to grab the data.
         my $fb = LJ::MemCache::get( $id );
         next unless $fb;
 
@@ -232,7 +237,7 @@ sub handle_post {
     };
 
     my $err;
-    my $res = LJ::Protocol::do_request("postevent", 
+    my $res = LJ::Protocol::do_request("postevent",
                                        $req, \$err, { 'noauth' => 1 });
 
     if ($err) {
@@ -282,9 +287,9 @@ sub handle_edit {
     };
 
     my $err;
-    my $olditem = LJ::Protocol::do_request("getevents", 
+    my $olditem = LJ::Protocol::do_request("getevents",
                                            $req, \$err, { 'noauth' => 1 });
-    
+
     if ($err) {
         my $errstr = LJ::Protocol::error_message($err);
         return respond($r, 404, "Unable to retrieve the item requested for editing. Protocol error: <b>$errstr</b>.");
@@ -300,9 +305,9 @@ sub handle_edit {
         my $row = LJ::get_log2_row($u, $jitemid) ||
             return respond($r, 404, "Could not load the original entry.");
 
-        # we need to put into $item: itemid, ditemid, subject, event, 
+        # we need to put into $item: itemid, ditemid, subject, event,
         # createtime, eventtime, modtime
-        
+
         my $ctime = LJ::mysqldate_to_time($row->{'logtime'}, 1);
 
         my $item = {
@@ -360,7 +365,7 @@ sub handle_edit {
         # build an edit event request. Preserve fields that aren't being
         # changed by this item (perhaps the AtomEntry isn't carrying the
         # complete information).
-        
+
         $req = {
             'usejournal'  => ( $remote->{'userid'} != $u->{'userid'} ) ? $u->{'user'} : undef,
             'ver'         => 1,
@@ -375,9 +380,9 @@ sub handle_edit {
         };
 
         $err = undef;
-        my $res = LJ::Protocol::do_request("editevent", 
+        my $res = LJ::Protocol::do_request("editevent",
                                            $req, \$err, { 'noauth' => 1 });
-    
+
         if ($err) {
             my $errstr = LJ::Protocol::error_message($err);
             return respond($r, 500, "Unable to update entry. Protocol error: <b>$errstr</b>.");
@@ -387,9 +392,9 @@ sub handle_edit {
     }
 
     if ($method eq "DELETE") {
-        
+
         # build an edit event request to delete the entry.
-        
+
         $req = {
             'usejournal' => ($remote->{'userid'} != $u->{'userid'}) ?
                 $u->{'user'}:undef,
@@ -401,9 +406,9 @@ sub handle_edit {
         };
 
         $err = undef;
-        my $res = LJ::Protocol::do_request("editevent", 
+        my $res = LJ::Protocol::do_request("editevent",
                                            $req, \$err, { 'noauth' => 1 });
-    
+
         if ($err) {
             my $errstr = LJ::Protocol::error_message($err);
             return respond($r, 500, "Unable to delete entry. Protocol error: <b>$errstr</b>.");
@@ -411,7 +416,7 @@ sub handle_edit {
 
         return respond($r, 200, "Entry successfully deleted.");
     }
-    
+
 }
 
 # fetch lj tags, display as categories
@@ -435,7 +440,7 @@ sub handle_feed {
 
     # simulate a call to the S1 data view creator, with appropriate
     # options
-    
+
     my %op = ('pathextra' => "/atom",
               'apilinks'  => 1,
               );
@@ -444,7 +449,7 @@ sub handle_feed {
     unless (defined $ret) {
         if ($op{'redir'}) {
             # this happens if the account was renamed or a syn account.
-            # the redir URL is wrong because ljfeed.pl is too 
+            # the redir URL is wrong because ljfeed.pl is too
             # dataview-specific. Since this is an admin interface, we can
             # just fail.
             return respond ($r, 404, "The account <b>$u->{'user'} </b> is of a wrong type and does not allow AtomAPI administration.");
@@ -473,21 +478,23 @@ sub handle {
         unless $LJ::OPTMOD_XMLATOM;
 
     # break the uri down: /interface/atom/<verb>[/<number>]
-    my ( $action, $param, $oldparam ) = ( $1, $2, $3 )
-      if $r->uri =~ m#^/interface/atom(?:api)?/?(\w+)?(?:/(\w+))?(?:/(\d+))?$#;
+    # or old format:      /interface/atomapi/<username>/<verb>[/<number>]
+    my $uri = $r->uri;
+
+    # convert old format to new format:
+    my $username;   # old
+    if ($uri =~ s!^/interface/atomapi/(\w+)/!/interface/atom/!) {
+        $username = $1;
+    }
+
+    $uri =~ s!^/interface/atom/?!! or return respond($r, 404, "Bogus URL");
+    my ($action, $param) = split(m!/!, $uri);
 
     my $valid_actions = qr{feed|edit|post|upload|categories};
 
-    # old uri was was: /interface/atomapi/<username>/<verb>[/<number>]
-    # support both by shifting params around if we see something extra.
-    if ($action !~ /$valid_actions/ && $r->uri =~ /atomapi/ ) {
-        $action = $param;
-        $param  = $oldparam;
-    }
-
     # let's authenticate.
-    # 
-    # if wsse information is supplied, use it. 
+    #
+    # if wsse information is supplied, use it.
     # if not, fall back to digest.
     my $wsse = $r->header_in('X-WSSE');
     my $nonce_dup;
@@ -503,7 +510,7 @@ sub handle {
     my $method = $r->method;
     if ( $method eq 'GET' && ! $action ) {
         LJ::load_user_props( $u, 'journaltitle' );
-        my $title = $u->{journaltitle} || 'Untitled Journal';
+        my $title = $u->{journaltitle} || $u->{user};
         my $feed = XML::Atom::Feed->new();
         foreach (qw/ post feed upload categories /) {
             my $link = XML::Atom::Link->new();
@@ -523,16 +530,16 @@ sub handle {
         return respond($r, 200, \$feed->as_xml(), 'atom');
     }
 
-    $action =~ /$valid_actions/
-      or return respond($r, 400, "Unknown URI scheme: /interface/atom/<b>$action</b>");
+    $action =~ /^$valid_actions$/
+      or return respond($r, 400, "Unknown URI scheme: /interface/atom/<b>" . LJ::ehtml($action) . "</b>");
 
     unless (($action eq 'feed' and $method eq 'GET')  or
             ($action eq 'categories' and $method eq 'GET') or
             ($action eq 'post' and $method eq 'POST') or
             ($action eq 'upload' and $method eq 'POST') or
-            ($action eq 'edit' and 
+            ($action eq 'edit' and
              {'GET'=>1,'PUT'=>1,'DELETE'=>1}->{$method})) {
-        return respond($r, 400, "URI scheme /interface/atom/<b>$action</b> is incompatible with request method <b>$method</b>.");
+        return respond($r, 400, "URI scheme /interface/atom/<b>" . LJ::ehtml($action) . "</b> is incompatible with request method <b>$method</b>.");
     }
 
     if (($action ne 'edit' && $param) or
@@ -570,27 +577,32 @@ sub handle {
 sub auth_wsse
 {
     my ($wsse, $nonce_dup) = @_;
-    $wsse =~ s/UsernameToken // or return undef;
+    my $fail = sub {
+        my $reason = shift;
+        return undef;
+    };
+    $wsse =~ s/UsernameToken // or return $fail->("no username token");
 
     # parse credentials into a hash.
     my %creds;
     foreach (split /, /, $wsse) {
         my ($k, $v) = split '=', $_, 2;
-        $v =~ s/^['"]//;
-        $v =~ s/['"]$//;
+        $v =~ s/^[\'\"]//;
+        $v =~ s/[\'\"]$//;
         $v =~ s/=$// if $k =~ /passworddigest/i; # strip base64 newline char
         $creds{ lc($k) } = $v;
     }
 
     # invalid create time?  invalid wsse.
-    my $ctime = LJ::ParseFeed::w3cdtf_to_time( $creds{created} ) or return undef;
+    my $ctime = LJ::ParseFeed::w3cdtf_to_time( $creds{created} ) or
+        return $fail->("no created date");
 
     # prevent replay attacks.
     $ctime = LJ::mysqldate_to_time( $ctime, 'gmt' );
-    return undef if abs(time() - $ctime) > 42300;
+    return $fail->("replay time skew") if abs(time() - $ctime) > 42300;
 
     my $u = LJ::load_user( LJ::canonical_username( $creds{'username'} ) )
-        or return undef;
+        or return $fail->("invalid username [$creds{username}]");
 
     if (@LJ::MEMCACHE_SERVERS && ref $nonce_dup) {
         $$nonce_dup = 1
@@ -601,6 +613,10 @@ sub auth_wsse
     my $hash =
       Digest::SHA1::sha1_base64(
         $creds{nonce} . $creds{created} . $u->{password} );
+
+    if (LJ::login_ip_banned($u)) {
+        return $fail->("ip_ratelimiting");
+    }
 
     # Nokia's WSSE implementation is incorrect as of 1.5, and they
     # base64 encode their nonce *value*.  If the initial comparison
@@ -613,9 +629,12 @@ sub auth_wsse
                 $creds{created} .
                 $u->{password} );
 
-        return undef if $hash ne $creds{passworddigest};
+        if ($hash ne $creds{passworddigest}) {
+            LJ::handle_bad_login($u);
+            return $fail->("hash wrong");
+        }
     }
-    
+
     # If we're here, we're valid.
     LJ::set_remote($u);
     return $u;
