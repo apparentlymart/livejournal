@@ -1640,8 +1640,10 @@ sub Entry
         LJ::CleanHTML::clean_subject(\$e->{'metadata'}->{'mood'});
     }
 
-    if ($p->{'current_location'}) {
-        $e->{'metadata'}->{'location'} = LJ::ehtml($p->{'current_location'});
+    if ($p->{'current_location'} || $p->{'current_coords'}) {
+        my $loc = eval { LJ::Location->new(coords   => $p->{'current_coords'},
+                                           location => $p->{'current_location'}) };
+        $e->{'metadata'}->{'location'} = $loc->as_html_current if $loc;
     }
 
     # TODO: Populate this field more intelligently later, but for now this will

@@ -3461,7 +3461,7 @@ sub make_journal
     my $s1prop = "s1_${eff_view}_style";
 
     my @needed_props = ("stylesys", "s2_style", "url", "urlname", "opt_nctalklinks",
-                        "renamedto",  "opt_blockrobots", "opt_usesharedpic",
+                        "renamedto",  "opt_blockrobots", "opt_usesharedpic", "icbm",
                         "journaltitle", "journalsubtitle", "external_foaf_url");
 
     # S2 is more fully featured than S1, so sometimes we get here and $eff_view

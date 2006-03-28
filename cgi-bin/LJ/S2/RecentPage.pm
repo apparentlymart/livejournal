@@ -16,10 +16,10 @@ sub RecentPage
     my $datalink = sub {
         my ($what, $caption) = @_;
         return Link($p->{'base_url'} . "/data/$what",
-		    $caption,
-		    Image("$LJ::IMGPREFIX/data_$what.gif", 32, 15, $caption));
+                    $caption,
+                    Image("$LJ::IMGPREFIX/data_$what.gif", 32, 15, $caption));
     };
-    
+
     $p->{'data_link'} = {
         'rss' => $datalink->('rss', 'RSS'),
         'atom' => $datalink->('atom', 'Atom'),
@@ -43,6 +43,10 @@ sub RecentPage
         if LJ::OpenID::server_enabled();
 
     $p->{'head_content'} .= qq{<meta http-equiv="X-YADIS-Location" content="$journalbase/data/yadis" />\n};
+
+    if (my $icbm = $u->prop("icbm")) {
+        $p->{'head_content'} .= qq{<meta name="ICBM" content="$icbm" />\n};
+    }
 
     my $itemshow = S2::get_property_value($opts->{'ctx'}, "page_recent_items")+0;
     if ($itemshow < 1) { $itemshow = 20; }
