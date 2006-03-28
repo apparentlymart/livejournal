@@ -1245,6 +1245,13 @@ RTE
                 $out .= "</td></tr>";
             }
 
+            # Current Location
+            unless ($LJ::DISABLED{'web_current_location'}) {
+                $out .= "<tr><th>Current Location:</th><td>";
+                $out .= LJ::html_text({ 'name' => 'prop_current_location', 'value' => $opts->{'prop_current_location'},
+                                        'size' => '35', 'maxlength' => '60', 'tabindex' => $tabindex->() }) . "</td></tr>\n";
+            }
+
             # Current Music
             $out .= "<tr><th>" . BML::ml('entryform.music') . "</th><td>";
             $out .= LJ::html_text({ 'name' => 'prop_current_music', 'value' => $opts->{'prop_current_music'},
@@ -1629,6 +1636,7 @@ sub entry_form_decode
                 prop_current_mood prop_current_music
                 prop_opt_screening prop_opt_noemail
                 prop_opt_preformatted prop_opt_nocomments
+                prop_current_location prop_current_coords
                 prop_taglist)) {
         $req->{$_} = $POST->{$_};
     }
@@ -1934,12 +1942,12 @@ sub control_strip
 {
     my %opts = @_;
     my $user = delete $opts{user};
-    
+
     my $journal = LJ::load_user($user);
     my $show_strip = LJ::run_hook("show_control_strip", { user => $user });
-    
+
     return "" unless $show_strip;
-    
+
     my $remote = LJ::get_remote();
     my $r = Apache->request;
     # Build up some common links
@@ -1967,7 +1975,7 @@ sub control_strip
             $links{'edit_community_members'} = "<a href='$LJ::SITEROOT/community/members.bml?comm=$journal->{user}'>Edit Members</a>";
         }
     }
-    my $journal_display = LJ::ljuser($journal); 
+    my $journal_display = LJ::ljuser($journal);
     my $ret;
     if ($remote) {
         my $remote_display  = LJ::ljuser($remote);
@@ -1982,11 +1990,11 @@ sub control_strip
         $ret .= "$remote_display<br />$logout";
         $ret .= "</form>\n";
         $ret .= "</td>\n";
-        
+
         $ret .= "<td id='lj_controlstrip_userlinks'>";
         $ret .= "$links{'post_journal'} $links{'mylj'}<br />$links{'view_friends_page'}";
         $ret .= "</td>";
-        
+
         $ret .= "<td id='lj_controlstrip_actionlinks'>";
         if ($remote->{userid} == $journal->{userid}) {
             $ret .= $r->notes('view') eq "friends" ? "You are viewing your friends page" : "You are viewing your Journal";
@@ -2040,7 +2048,7 @@ sub control_strip
 
     } else {
         my $method = Apache->request->method();
-        
+
         my $chal = LJ::challenge_generate(300);
         $ret .= <<"LOGIN_BAR";
         <td style='width: 50%; text-align: right'><form id="login" action="$LJ::SITEROOT/login.bml" method="post">
@@ -2054,14 +2062,14 @@ sub control_strip
 LOGIN_BAR
             $ret .= "<input type='submit' value='Login' tabindex='4' />";
         $ret .= "</td></tr>";
-        
+
         $ret .= "<tr><td valign='top'>";
         $ret .= "<a href='$LJ::SITEROOT/lostinfo.bml' style='color: #FFF'>Forgot your password?</a>";
         $ret .= "</td><td style='font: 10px Arial, Helvetica, sans-serif;' valign='top' colspan='2'>";
         $ret .= "<input type='checkbox' id='xc_remember' name='remember_me' style='height: 10px; width: 10px;' tabindex='3' />";
         $ret .= "<label for='xc_remember'>Remember Me</label>";
         $ret .= "</td></tr></table>";
-        
+
         $ret .= '</form></td>';
         $ret .= "<td style='width: 50%; text-align: left'>You are currently not logged in<br />";
         $ret .= "<strong>You can:</strong> Create an Account Learn more about LiveJournal</td>";

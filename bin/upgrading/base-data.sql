@@ -421,6 +421,10 @@ REPLACE INTO codes (code, item, sortorder, type) VALUES ('wa', 'Western Australi
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('yt', 'Yukon Territory', '0', 'stateca');
 INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('num', 'Unix time of the last change to number of comments to this post.', 'commentalter', 'Comments altered', 'general', '99');
 UPDATE logproplist SET datatype='num',des='Unix time of the last change to number of comments to this post.',prettyname='Comments altered',scope='general',sortorder='99' WHERE name='commentalter';
+INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('char', 'Current coordinates at time of post, in form \'45.2935N 123.3452W\'', 'current_coords', 'Current Coordinates', 'general', '103');
+UPDATE logproplist SET datatype='char',des='Current coordinates at time of post, in form \'45.2935N 123.3452W\'',prettyname='Current Coordinates',scope='general',sortorder='103' WHERE name='current_coords';
+INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('char', 'Current location at time of post, free form text', 'current_location', 'Current Location', 'general', '103');
+UPDATE logproplist SET datatype='char',des='Current location at time of post, free form text',prettyname='Current Location',scope='general',sortorder='103' WHERE name='current_location';
 INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('char', 'Your current mood.', 'current_mood', 'Current Mood', 'general', '5');
 UPDATE logproplist SET datatype='char',des='Your current mood.',prettyname='Current Mood',scope='general',sortorder='5' WHERE name='current_mood';
 INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('num', 'Your current mood ID number, if known.', 'current_moodid', 'Current Mood ID#', 'general', '6');
@@ -953,6 +957,8 @@ INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed,
 UPDATE userproplist SET cldversion='0',datatype='char',des='Google\'s \'Talk\' Service address',indexed='1',multihomed='1',prettyname='Google Talk Address',scope='general' WHERE name='google_talk';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'char', 'How the user heard about LiveJournal', '0', '0', 'howhear', 'How heard about LiveJouranl', 'general');
 UPDATE userproplist SET cldversion='4',datatype='char',des='How the user heard about LiveJournal',indexed='0',multihomed='0',prettyname='How heard about LiveJouranl',scope='general' WHERE name='howhear';
+INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'char', 'Of form 45.2343,-102.2352', '0', '0', 'icbm', 'ICBM Address', 'general');
+UPDATE userproplist SET cldversion='4',datatype='char',des='Of form 45.2343,-102.2352',indexed='0',multihomed='0',prettyname='ICBM Address',scope='general' WHERE name='icbm';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('0', 'char', 'ICQ Number', '1', '1', 'icq', 'ICQ', 'general');
 UPDATE userproplist SET cldversion='0',datatype='char',des='ICQ Number',indexed='1',multihomed='1',prettyname='ICQ',scope='general' WHERE name='icq';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'blobchar', 'Packed blob of a user\'s interest ids (4 bytes per id)', '1', '0', 'interest_ids_blob', 'Interest IDs blob', 'general');

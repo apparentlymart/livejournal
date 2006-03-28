@@ -618,6 +618,9 @@ sub common_event_validation
         if ($ptype eq "num" && $val =~ /[^\d]/) {
             return fail($err,204,"Property \"$pname\" should be numeric");
         }
+        if ($pname eq "current_coords" && ! eval { LJ::Location->new(coords => $val) }) {
+            return fail($err,204,"Property \"current_coords\" has invalid value");
+        }
     }
 
     # check props for inactive userpic

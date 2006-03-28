@@ -1640,11 +1640,15 @@ sub Entry
         LJ::CleanHTML::clean_subject(\$e->{'metadata'}->{'mood'});
     }
 
+    if ($p->{'current_location'}) {
+        $e->{'metadata'}->{'location'} = LJ::ehtml($p->{'current_location'});
+    }
+
     # TODO: Populate this field more intelligently later, but for now this will
     #   hopefully disuade people from hardcoding logic like this into their S2
     #   layers when they do weird parsing/manipulation of the text member in
     #   untrusted layers.
-    $e->{text_must_print_trusted} = 1 if $e->{text} =~ m!<(script|object|applet|embed)\s!;
+    $e->{text_must_print_trusted} = 1 if $e->{text} =~ m!<(script|object|applet|embed)\b!i;
 
     return $e;
 }

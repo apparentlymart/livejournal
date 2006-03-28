@@ -183,4 +183,15 @@ register_setter("trusted_s1", sub {
     return 1;
 });
 
+register_setter("icbm", sub {
+    my ($dba, $u, $remote, $key, $value, $err) = @_;
+    my $loc = eval { LJ::Location->new(coords => $value); };
+    unless ($loc) {
+        $$err = "Illegal value.  Not a recognized format.";
+        return 0;
+    }
+    LJ::set_userprop($u, "icbm", $loc->as_posneg_comma);
+    return 1;
+});
+
 1;
