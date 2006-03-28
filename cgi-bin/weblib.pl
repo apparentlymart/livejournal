@@ -1909,7 +1909,7 @@ sub ads {
         $adhtml .= "<div class=\"ad $adunit\" id=\"\">";
         $adhtml .= "<h4>Advertisement</h4>";
 
-        $adhtml .= "<iframe src='${LJ::ADSERVER}?$adparams' frameborder='0' scrolling='no' ";
+        $adhtml .= "<iframe src='${LJ::ADSERVER}?$adparams' frameborder='0' scrolling='no' id='adframe' ";
         $adhtml .= "width='" . LJ::ehtml($adcall{width}) . "' ";
         $adhtml .= "height='" . LJ::ehtml($adcall{height}) . "' ";
         $adhtml .= "></iframe>";
