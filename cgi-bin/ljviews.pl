@@ -1095,7 +1095,11 @@ sub create_view_lastn
     $lastn_page{'head'} .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n}
         if LJ::OpenID::server_enabled();
 
-    $lastn_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n} if $LJ::USE_ADS;
+    my $show_ad = LJ::run_hook('should_show_ad', {
+        ctx  => "journal",
+        user => $u->{user},
+    });
+    $lastn_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n} if $show_ad;
 
     # FOAF autodiscovery
     my $foafurl = $u->{external_foaf_url} ? LJ::eurl($u->{external_foaf_url}) : "$journalbase/data/foaf";
@@ -1189,11 +1193,6 @@ sub create_view_lastn
                 "height" => $userpics{$picid}->{'height'},
             });
     }
-
-    my $show_ad = LJ::run_hook('should_show_ad', {
-        ctx  => "journal",
-        user => $u->{user},
-    });
 
     if ($LJ::USE_ADS && $show_ad) {
         $lastn_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'LASTN_SKYSCRAPER_AD', 
@@ -1485,7 +1484,13 @@ sub create_view_friends
     if ($LJ::UNICODE) {
         $friends_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'" />';
     }
-    $friends_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n}  if $LJ::USE_ADS;
+
+    my $show_ad = LJ::run_hook('should_show_ad', {
+        ctx  => "journal",
+        user => $u->{user},
+    });
+    $friends_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n} if $show_ad;
+
     $friends_page{'head'} .=
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'FRIENDS_HEAD'};
 
@@ -1609,10 +1614,6 @@ sub create_view_friends
     my $lastday = -1;
     my $eventnum = 0;
 
-    my $show_ad = LJ::run_hook('should_show_ad', {
-        ctx  => "journal",
-        user => $u->{user},
-    });
     if ($LJ::USE_ADS && $show_ad) {
         $friends_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'FRIENDS_SKYSCRAPER_AD',
                                                             { "ad" => LJ::ads( type => "journal", 
@@ -1923,7 +1924,12 @@ sub create_view_calendar
     if ($LJ::UNICODE) {
         $calendar_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'" />';
     }
-    $calendar_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n} if $LJ::USE_ADS;
+
+    my $show_ad = LJ::run_hook('should_show_ad', {
+        ctx  => "journal",
+        user => $u->{user},
+    });
+    $calendar_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n} if $show_ad;
     $calendar_page{'head'} .=
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'CALENDAR_HEAD'};
 
@@ -1942,10 +1948,6 @@ sub create_view_calendar
     $calendar_page{'urlfriends'} = "$journalbase/friends";
     $calendar_page{'urllastn'} = "$journalbase/";
 
-    my $show_ad = LJ::run_hook('should_show_ad', {
-        ctx  => "journal",
-        user => $u->{user},
-    });
     if ($LJ::USE_ADS && $show_ad) {
         $calendar_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'CALENDAR_SKYSCRAPER_AD', 
                                                              { "ad" => LJ::ads( type => "journal", 
@@ -2162,7 +2164,12 @@ sub create_view_day
     if ($LJ::UNICODE) {
         $day_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'" />';
     }
-    $day_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n} if $LJ::USE_ADS;
+
+    my $show_ad = LJ::run_hook('should_show_ad', {
+        ctx  => "journal",
+        user => $u->{user},
+    });
+    $day_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n} if $show_ad;
     $day_page{'head'} .=
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'DAY_HEAD'};
     $day_page{'name'} = LJ::ehtml($u->{'name'});
@@ -2183,10 +2190,6 @@ sub create_view_day
     $day_page{'urlcalendar'} = "$journalbase/calendar";
     $day_page{'urllastn'} = "$journalbase/";
 
-    my $show_ad = LJ::run_hook('should_show_ad', {
-        ctx  => "journal",
-        user => $u->{user},
-    });
     if ($LJ::USE_ADS && $show_ad) {
         $day_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'DAY_SKYSCRAPER_AD', 
                                                         { "ad" => LJ::ads( type => "journal", 
