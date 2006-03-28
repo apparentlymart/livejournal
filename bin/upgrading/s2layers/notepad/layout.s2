@@ -185,6 +185,7 @@ function Page::print()
  </head>
  <body>
  """;
+ $this->print_control_strip();
  if (viewer_sees_ads()) {
     """<div style="float: right; margin-right: 10px;">""";
     $this->print_ad("Journal-Skyscraper");

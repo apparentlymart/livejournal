@@ -286,6 +286,7 @@ function Page::print ()
  <body>
     """;
     
+    $this->print_control_strip();
     "<p>"; captionbar($this); "</p>";
 
     if (viewer_sees_ads()) {

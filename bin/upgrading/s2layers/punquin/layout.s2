@@ -326,7 +326,9 @@ function Page::print ()
     # Body
     "<body>\n";
 
-    "<a name='top'></a><div align='center'>\n";
+    "<a name='top'></a>";
+    $this->print_control_strip();
+    "<div align='center'>\n";
 
     # Table wrapper
     "<table id='main' cellpadding='5' cellspacing='0' width='90%'>\n<tr>";
