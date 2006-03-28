@@ -18,18 +18,19 @@ _info?>
     $adhtml .= "<body style='margin: 0; padding: 0'>";
 
     $adhtml .= $ad_engine->process(
-                                   url        => $GET{url},
-                                   width      => $GET{width},
-                                   height     => $GET{height},
-                                   type       => $GET{type},
-                                   channel    => $GET{channel},
-                                   age        => $GET{age},
-                                   gender     => $GET{gender},
-                                   country    => $GET{country},
-                                   language   => $GET{language},
-                                   categories => $GET{categories},
-                                   interests  => $GET{interests},
+                                   url         => $GET{url},
+                                   width       => $GET{width},
+                                   height      => $GET{height},
+                                   type        => $GET{type},
+                                   channel     => $GET{channel},
+                                   age         => $GET{age},
+                                   gender      => $GET{gender},
+                                   country     => $GET{country},
+                                   language    => $GET{language},
+                                   categories  => $GET{categories},
+                                   interests   => $GET{interests},
                                    search_term => $GET{search_term},
+                                   accttype    => $GET{accttype},
                                    );
     $adhtml .= "</body></html>";
     return $adhtml;

@@ -1922,6 +1922,10 @@ sub ads {
         $adcall{language} = $r->notes('langpref');
         $adcall{language} =~ s/_LJ//; # EN_LJ
 
+        $adcall{accttype} = $remote ?
+            LJ::get_cap($remote, 'ads') ? 'ADS' : 'FREE' :
+            'NON';
+
         my $adparams = join('&', map { LJ::eurl($_) . '=' . LJ::eurl($adcall{$_}) } keys %adcall);
 
         my $adhtml;
