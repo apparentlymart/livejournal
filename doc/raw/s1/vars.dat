@@ -380,6 +380,10 @@ HTML for printing a wrapper around a skyscraper ad and user content. See [var[LA
 .des
 HTML for printing a wrapper around a skyscraper ad and user content. See [var[LASTN_CLOSE_SKYSCRAPER_AD]].
 }
+{ control_strip
+.des
+HTML for printing a control strip along the top of the page
+}
 { website
 .des
 If the user has specified their website, this block is filled with the contents of [var[LASTN_WEBSITE]].
@@ -999,6 +1003,10 @@ HTML for printing a wrapper around a skyscraper ad and user content. See [var[CA
 .des
 HTML for printing a wrapper around a skyscraper ad and user content. See [var[CALENDAR_CLOSE_SKYSCRAPER_AD]].
 }
+{ control_strip
+.des
+HTML for printing a control strip along the top of the page
+}
 { head
 .des
 Any user-specified content to go inside the document's &lt;HEAD&gt;, like CSS or META tags.  The value is [var[GLOBAL_HEAD]] followed by [var[CALENDAR_HEAD]].  You shouldn't define the *_HEAD variables in the style, as users should set them themselves.
@@ -1248,6 +1256,10 @@ HTML for printing a wrapper around a skyscraper ad and user content. See [var[DA
 { close_skyscraper_ad
 .des
 HTML for printing a wrapper around a skyscraper ad and user content. See [var[DAY_CLOSE_SKYSCRAPER_AD]].
+}
+{ control_strip
+.des
+HTML for printing a control strip along the top of the page
 }
 { events
 .des
@@ -1817,6 +1829,10 @@ HTML for printing a wrapper around a skyscraper ad and user content. See [var[FR
 { close_skyscraper_ad
 .des
 HTML for printing a wrapper around a skyscraper ad and user content. See [var[FRIENDS_CLOSE_SKYSCRAPER_AD]].
+}
+{ control_strip
+.des
+HTML for printing a control strip along the top of the page
 }
 { events
 .des

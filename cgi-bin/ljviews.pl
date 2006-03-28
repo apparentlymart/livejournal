@@ -90,7 +90,6 @@ my $commonprop = {
         'numitems' => 'd',
         'url' => 'u',
     },
-
 };
 
 $LJ::S1::PROPS = {
@@ -1099,7 +1098,11 @@ sub create_view_lastn
         ctx  => "journal",
         user => $u->{user},
     });
+    my $show_control_strip = LJ::run_hook('show_control_strip', {
+        user => $u->{user},
+    });
     $lastn_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n} if $show_ad;
+    $lastn_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/controlstrip.css' type='text/css' />\n} if $show_control_strip;
 
     # FOAF autodiscovery
     my $foafurl = $u->{external_foaf_url} ? LJ::eurl($u->{external_foaf_url}) : "$journalbase/data/foaf";
@@ -1201,6 +1204,10 @@ sub create_view_lastn
                                                                              user => $u->{user}), });
         $lastn_page{'open_skyscraper_ad'}  = $vars->{'LASTN_OPEN_SKYSCRAPER_AD'};
         $lastn_page{'close_skyscraper_ad'} = $vars->{'LASTN_CLOSE_SKYSCRAPER_AD'};
+    }
+    if ($LJ::USE_CONTROL_STRIP && $show_control_strip) {
+        my $control_strip = LJ::control_strip(user => $u->{user});
+        $lastn_page{'control_strip'} = $control_strip;
     }
 
     # spit out the S1
@@ -1489,7 +1496,11 @@ sub create_view_friends
         ctx  => "journal",
         user => $u->{user},
     });
+    my $show_control_strip = LJ::run_hook('show_control_strip', {
+        user => $u->{user},
+    });
     $friends_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n} if $show_ad;
+    $friends_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/controlstrip.css' type='text/css' />\n} if $show_control_strip;
 
     $friends_page{'head'} .=
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'FRIENDS_HEAD'};
@@ -1621,6 +1632,10 @@ sub create_view_friends
                                                                                user => $u->{user}), });
         $friends_page{'open_skyscraper_ad'}  = $vars->{'FRIENDS_OPEN_SKYSCRAPER_AD'};
         $friends_page{'close_skyscraper_ad'} = $vars->{'FRIENDS_CLOSE_SKYSCRAPER_AD'};
+    }
+    if ($LJ::USE_CONTROL_STRIP && $show_control_strip) {
+        my $control_strip = LJ::control_strip(user => $u->{user});
+        $friends_page{'control_strip'} = $control_strip;
     }
 
   ENTRY:
@@ -1929,7 +1944,11 @@ sub create_view_calendar
         ctx  => "journal",
         user => $u->{user},
     });
+    my $show_control_strip = LJ::run_hook('show_control_strip', {
+        user => $u->{user},
+    });
     $calendar_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n} if $show_ad;
+    $calendar_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/controlstrip.css' type='text/css' />\n} if $show_control_strip;
     $calendar_page{'head'} .=
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'CALENDAR_HEAD'};
 
@@ -1955,6 +1974,10 @@ sub create_view_calendar
                                                                                 user => $u->{user} ) });
         $calendar_page{'open_skyscraper_ad'}  = $vars->{'CALENDAR_OPEN_SKYSCRAPER_AD'};
         $calendar_page{'close_skyscraper_ad'} = $vars->{'CALENDAR_CLOSE_SKYSCRAPER_AD'};
+    }
+    if ($LJ::USE_CONTROL_STRIP && $show_control_strip) {
+        my $control_strip = LJ::control_strip(user => $u->{user});
+        $calendar_page{'control_strip'} = $control_strip;
     }
 
     my $months = \$calendar_page{'months'};
@@ -2169,7 +2192,11 @@ sub create_view_day
         ctx  => "journal",
         user => $u->{user},
     });
+    my $show_control_strip = LJ::run_hook('show_control_strip', {
+        user => $u->{user},
+    });
     $day_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n} if $show_ad;
+    $day_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/controlstrip.css' type='text/css' />\n} if $show_control_strip;
     $day_page{'head'} .=
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'DAY_HEAD'};
     $day_page{'name'} = LJ::ehtml($u->{'name'});
@@ -2197,6 +2224,10 @@ sub create_view_day
                                                                            user => $u->{user}), });
         $day_page{'open_skyscraper_ad'}  = $vars->{'DAY_OPEN_SKYSCRAPER_AD'};
         $day_page{'close_skyscraper_ad'} = $vars->{'DAY_CLOSE_SKYSCRAPER_AD'};
+    }
+    if ($LJ::USE_CONTROL_STRIP && $show_control_strip) {
+        my $control_strip = LJ::control_strip(user => $u->{user});
+        $day_page{'control_strip'} = $control_strip;
     }
 
     my $initpagedates = 0;
