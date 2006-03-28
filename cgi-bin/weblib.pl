@@ -1834,6 +1834,7 @@ sub ads {
     return '' unless LJ::run_hook('should_show_ad', {
         ctx  => $ctx,
         user => $user,
+        type => $pagetype,
     });
 
 
