@@ -132,7 +132,7 @@
             $body .= "<?h2 " . BML::ml('.login.welcome', { 'sitename' => $LJ::SITENAMESHORT }) . " h2?>";
             $body .= "</td></tr>";
             $body .= "<tr><td>$ML{'.login.username'}</td>";
-            $body .= "<td><input type='text' value='$user' name='user' size='18' maxlength='15' style='<?loginboxstyle?>' /></td></tr>\n";
+            $body .= "<td><input type='text' value='$user' name='user' size='18' maxlength='17' style='<?loginboxstyle?>' /></td></tr>\n";
             $body .= "<tr><td valign='top'>$ML{'.login.password'}</td>";
             $body .= "<td><input type='password' name='password' id='xc_password' size='20' maxlength='30' />";
        }
