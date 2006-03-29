@@ -74,6 +74,13 @@
             upp.style.marginTop = "-" + Math.floor(nt) + "px";
         }
 
+        function setConstrain () {
+          if(!regsel) return;
+          var checked = $('constrain').checked;
+          regsel.keepSquare(checked);
+          regsel.setBottomRight(regsel.brx, regsel.bry, checked);
+        }
+
         function getSizedCoords (newsize, w, h) {
             var nw, nh;
 
@@ -114,7 +121,7 @@
 
             $("createbtn").disabled = false;
 
-$("userpic").style.display = "";
+            $("userpic").style.display = "";
         });
 
     </script>
@@ -142,7 +149,7 @@ if (! @paths) {
       <?standout <div style='float: right;'>
       <table cellpadding="4"><tr>
       <td style='whitespace: nowrap'>
-        <nobr><input type="checkbox" id="constrain" onchange="if(!regsel) return; regsel.keepSquare(\$('constrain').checked);" />
+        <nobr><input type="checkbox" id="constrain" onchange="setConstrain();" />
         <label for="constrain">Keep square</nobr></label><br /><small>(or hold Shift)</small>
       </td></tr><tr>
       <td valign="center"><small>Low quality preview:</small><br />
