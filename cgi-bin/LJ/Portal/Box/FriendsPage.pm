@@ -47,6 +47,11 @@ sub generate_content {
     my $frpagefaqbtn = LJ::Portal->get_faq_link('friendspage');
 
     # get latest friends page entries
+    # filter by "default view" if it exists
+    my $grp = LJ::get_friend_group($u, { 'name'=> 'Default View' });
+    my $bit = $grp ? $grp->{'groupnum'} : 0;
+    my $filter = $bit ? (1 << $bit) : undef;
+
     my @entries = LJ::get_friend_items( {
         'remoteid'         => $u->{'userid'},
         'itemshow'         => $itemshow,
@@ -54,6 +59,7 @@ sub generate_content {
         'showtypes'        => 'PYC',
         'u'                => $u,
         'userid'           => $u->{'userid'},
+        'filter'           => $filter,
     } );
 
     # correct pluralization (translationableness would be cool at some point)
