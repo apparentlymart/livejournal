@@ -11,7 +11,7 @@ my $worker = Gearman::Worker->new;
 while (1) {
     $worker->job_servers(@LJ::GEARMAN_SERVERS);
     $worker->register_function('lj_upf_resize' => \&lj_upf_resize);
-    $worker->work;
+    $worker->work(stop_if => sub { 1 });
     LJ::start_request();
 }
 
