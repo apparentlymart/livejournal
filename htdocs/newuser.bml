@@ -1,0 +1,29 @@
+<?page
+body<=
+<?_code
+{
+    use strict;
+
+    # When this page gets redone, it will have its own scope
+    BML::set_language_scope('/create.bml');
+
+    my $u = LJ::get_remote();
+    return "<?needlogin?>" unless $u;
+
+    my $ret;
+    $ret = "<?h1 $ML{'.success.head'} h1?><?p ".BML::ml(".success.text1", {'email' => $u->{email}, 'username' => $u->{user}}) ." p?>";
+
+    my $uri = LJ::journal_base($u) . "/";
+    $ret .= "<?p $ML{'.success.text2'} p?>\n";
+    $ret .= "<?standout <font size='+1' face='arial'><b><a href='$uri'>$uri</a></b></font> standout?>\n";
+    $ret .= "<?p $ML{'.success.text3'} p?>\n";
+
+    $ret .= "<form method='get' action='$LJ::SITEROOT/editinfo.bml'>";
+    $ret .= "<p align='center'>" . LJ::html_submit(undef, "$ML{'.success.btn.enterinfo'} &rarr;") . "</p>";
+    $ret .= "</form>\n";
+
+    return $ret;
+}
+_code?>
+<=body
+page?>
