@@ -1067,6 +1067,8 @@ INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed,
 UPDATE userproplist SET cldversion='4',datatype='num',des='S2 Styleid to use',indexed='0',multihomed='0',prettyname='S2 Style',scope='general' WHERE name='s2_style';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'char', 'BML scheme name', '0', '0', 'schemepref', 'BML Scheme Preference', 'general');
 UPDATE userproplist SET cldversion='4',datatype='char',des='BML scheme name',indexed='0',multihomed='0',prettyname='BML Scheme Preference',scope='general' WHERE name='schemepref';
+INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'char', 'Show a control strip on your journal or community', '0', '0', 'show_control_strip', 'Show Control Strip', 'general');
+UPDATE userproplist SET cldversion='4',datatype='char',des='Show a control strip on your journal or community',indexed='0',multihomed='0',prettyname='Show Control Strip',scope='general' WHERE name='show_control_strip';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('0', 'char', 'Index to speed directory searches.  Only present if opt_infoshow=Y', '1', '1', 'sidx_bdate', 'SearchIndex: Birthdate', 'general');
 UPDATE userproplist SET cldversion='0',datatype='char',des='Index to speed directory searches.  Only present if opt_infoshow=Y',indexed='1',multihomed='1',prettyname='SearchIndex: Birthdate',scope='general' WHERE name='sidx_bdate';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('0', 'char', 'For finding all users with a birthday on a certain day of the year, not day with year, format mm-dd', '1', '0', 'sidx_bday', 'SearchIndex: Birthday', 'general');
@@ -1089,6 +1091,8 @@ INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed,
 UPDATE userproplist SET cldversion='4',datatype='char',des='URL of website',indexed='0',multihomed='0',prettyname='Website Address',scope='general' WHERE name='url';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'char', 'Name of website', '0', '0', 'urlname', 'Website Name', 'general');
 UPDATE userproplist SET cldversion='4',datatype='char',des='Name of website',indexed='0',multihomed='0',prettyname='Website Name',scope='general' WHERE name='urlname';
+INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'char', 'View control strip on all journals', '0', '0', 'view_control_strip', 'View Control Strip', 'general');
+UPDATE userproplist SET cldversion='4',datatype='char',des='View control strip on all journals',indexed='0',multihomed='0',prettyname='View Control Strip',scope='general' WHERE name='view_control_strip';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('0', 'char', 'Yahoo ID', '1', '1', 'yahoo', 'Yahoo ID', 'general');
 UPDATE userproplist SET cldversion='0',datatype='char',des='Yahoo ID',indexed='1',multihomed='1',prettyname='Yahoo ID',scope='general' WHERE name='yahoo';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'char', '5 digit zip code (if in US)', '1', '0', 'zip', 'ZIP code', 'general');

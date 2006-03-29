@@ -1654,13 +1654,6 @@ function Page::print_body() {
 
 function Page::print_head() {
     print $.head_content;
-    if (viewer_sees_ads()) {
-        println """<link rel='stylesheet' href='$*STATDIR/ad_base.css' type='text/css' />""";
-    }
-    if (viewer_sees_control_strip()) {
-        println """<link rel='stylesheet' href='$*STATDIR/controlstrip.css' type='text/css' />""";
-        println """<link rel='stylesheet' href='$*STATDIR/controlstrip-dark.css' type='text/css' />""";
-    }
     $this->print_custom_head();
 }
 

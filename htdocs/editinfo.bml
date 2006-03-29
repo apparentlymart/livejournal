@@ -1,4 +1,3 @@
-
 <?page
 title=><?_ml .title _ml?>
 body<=
@@ -51,7 +50,7 @@ _code?>
           friendspagetitle opt_weblogscom opt_stylemine
           opt_imagelinks opt_getselfemail external_foaf_url
           opt_showmutualfriends opt_showschools timezone
-          google_talk skype gizmo /
+          google_talk skype gizmo view_control_strip show_control_strip /
     );
 
     # to store values before they undergo normalisation
@@ -333,6 +332,31 @@ _code?>
         $ret .= "<td>" .  LJ::html_text({ 'name' => 'friendspagetitle', 'value' => $u->{'friendspagetitle'}, 'size' => '30', 'maxlength' => '80' }) . "</td></tr>\n";
         $ret .= "<tr><td colspan='2'>$ML{'.settings.friendspage.title.optional'}</td></tr>\n";
         $ret .= "</table>\n\n";
+
+        $ret .= "<?h1 Control Strip Options h1?>";
+
+        ### Control Strip
+        if ($LJ::USE_CONTROL_STRIP) {
+            $ret .= "<table style='margin-left: 30px; margin-bottom: 20px'>\n";
+            $ret .= "<tr><td colspan='2'><p>The control strip is a small toolbar that can show at the top of your journal and communities , as well as on other journals when you go to read them . It provides:</p><ul><li>Quick links to your own journal, the update page, and your friends page</li><li>Options appropriate to the page you are looking at, i .e. filters for your Friends page</li><li>Community management options and more.</li></ul></td></tr>";
+            $ret .= "<tr><td colspan='2'><b>Choose the control strip color you prefer:</td></tr>";
+            my $color_selected = $u->prop('view_control_strip') ? $u->prop('view_control_strip') : "dark";
+            $ret .= "<tr><td>" . LJ::html_check({ 'type' => "radio", 'name' => "control_strip_color", 'id' => "control_strip_color_dark", 'value' => "dark", 'selected' => $color_selected eq "dark" ? 1 : 0, });
+            $ret .= " <label for='control_strip_color_dark'>Dark Colors</label></td>";
+            $ret .= "<td><label for='control_strip_color_dark' style='background-repeat: repeat-x; width: 3em; height: 3em; display: block; background-image: url($LJ::IMGPREFIX/controlstrip/bg-dark.gif)'>&nbsp;</label></td></tr><tr>";
+            $ret .= "<td>" . LJ::html_check({ 'type' => "radio", 'name' => "control_strip_color", 'id' => "control_strip_color_light", 'value' => "light", 'selected' => $color_selected eq "light" ? 1 : 0 });
+            $ret .= " <label for='control_strip_color_light'>Light Colors</label> </td>";
+            $ret .= "<td><label for='control_strip_color_light' style='background-repeat: repeat-x; width: 3em; height: 3em; display: block; background-image: url($LJ::IMGPREFIX/controlstrip/bg-light.gif)'>&nbsp;</label></td></tr><tr>";
+            $ret .= "</tr>";
+            $ret .= "<tr><td colspan='2'><b>Show the control strip:</td></tr>";
+            my $view_checked = $u->prop('view_control_strip') ? 1 : 0;
+            $ret .= "<tr><td>" . LJ::html_check({ 'name' => "view_control_strip", 'selected' => $view_checked, 'id' => "view_control_strip" });
+            $ret .= " <label for='view_control_strip'>When I view any journals</label></td>";
+            my $show_checked = $u->prop('show_control_strip') ? 1 : 0;
+            $ret .= "<td>" . LJ::html_check({ 'name' => "show_control_strip", 'selected' => $show_checked, 'id' => "show_control_strip" });
+            $ret .= " <label for='show_control_strip'>When someone views my journal</label></td></tr>";
+            $ret .= "</table>";
+        }
 
         ### privacy options
         $ret .= "<?h2 $ML{'.settings.privacy.header'} h2?><?p $ML{'.settings.privacy.about'} p?>\n";
@@ -804,6 +828,14 @@ _code?>
             $POST{'opt_showschools'} = 'N' unless $POST{'allow_showschools'};
             $POST{'opt_showschools'} = 'N' unless $POST{'opt_showschools'} =~ m/^(N|Y|F)$/;
 
+            if ($LJ::USE_CONTROL_STRIP) {
+                my $color = $POST{'control_strip_color'} || "dark";
+                $POST{'show_control_strip'} = $POST{'show_control_strip'} ? $color : undef;
+                $POST{'view_control_strip'} = $POST{'view_control_strip'} ? $color : undef;
+            } else {
+                $POST{'show_control_strip'} = undef;
+                $POST{'view_control_strip'} = undef;
+            }
 
             $POST{'timezone'} = "" unless grep { $POST{'timezone'} eq $_ } DateTime::TimeZone::all_names();
 
@@ -846,6 +878,7 @@ _code?>
               opt_whoscreened journaltitle journalsubtitle friendspagetitle
               opt_stylemine opt_imagelinks opt_getselfemail
               external_foaf_url opt_showmutualfriends opt_showschools timezone
+              show_control_strip view_control_strip
             );
 
             # weblogs.com requires a special cap

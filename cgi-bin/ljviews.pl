@@ -1098,11 +1098,16 @@ sub create_view_lastn
         ctx  => "journal",
         user => $u->{user},
     });
+    $lastn_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n} if $show_ad;
     my $show_control_strip = LJ::run_hook('show_control_strip', {
         user => $u->{user},
     });
-    $lastn_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n} if $show_ad;
-    $lastn_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/controlstrip.css' type='text/css' />\n} if $show_control_strip;
+    if ($show_control_strip) {
+        my $control_strip_stylesheet_link = LJ::run_hook('control_strip_stylesheet_link', {
+            user => $u->{user},
+        });
+        $lastn_page{'head'} .= $control_strip_stylesheet_link;
+    }
 
     # FOAF autodiscovery
     my $foafurl = $u->{external_foaf_url} ? LJ::eurl($u->{external_foaf_url}) : "$journalbase/data/foaf";
@@ -1496,11 +1501,16 @@ sub create_view_friends
         ctx  => "journal",
         user => $u->{user},
     });
+    $friends_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n} if $show_ad;
     my $show_control_strip = LJ::run_hook('show_control_strip', {
         user => $u->{user},
     });
-    $friends_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n} if $show_ad;
-    $friends_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/controlstrip.css' type='text/css' />\n} if $show_control_strip;
+    if ($show_control_strip) {
+        my $control_strip_stylesheet_link = LJ::run_hook('control_strip_stylesheet_link', {
+            user => $u->{user},
+        });
+        $friends_page{'head'} .= $control_strip_stylesheet_link;
+    }
 
     $friends_page{'head'} .=
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'FRIENDS_HEAD'};
@@ -1944,11 +1954,16 @@ sub create_view_calendar
         ctx  => "journal",
         user => $u->{user},
     });
+    $calendar_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n} if $show_ad;
     my $show_control_strip = LJ::run_hook('show_control_strip', {
         user => $u->{user},
     });
-    $calendar_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n} if $show_ad;
-    $calendar_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/controlstrip.css' type='text/css' />\n} if $show_control_strip;
+    if ($show_control_strip) {
+        my $control_strip_stylesheet_link = LJ::run_hook('control_strip_stylesheet_link', {
+            user => $u->{user},
+        });
+        $calendar_page{'head'} .= $control_strip_stylesheet_link;
+    }
     $calendar_page{'head'} .=
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'CALENDAR_HEAD'};
 
@@ -2192,11 +2207,16 @@ sub create_view_day
         ctx  => "journal",
         user => $u->{user},
     });
+    $day_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n} if $show_ad;
     my $show_control_strip = LJ::run_hook('show_control_strip', {
         user => $u->{user},
     });
-    $day_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n} if $show_ad;
-    $day_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/controlstrip.css' type='text/css' />\n} if $show_control_strip;
+    if ($show_control_strip) {
+        my $control_strip_stylesheet_link = LJ::run_hook('control_strip_stylesheet_link', {
+            user => $u->{user},
+        });
+        $day_page{'head'} .= $control_strip_stylesheet_link;
+    }
     $day_page{'head'} .=
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'DAY_HEAD'};
     $day_page{'name'} = LJ::ehtml($u->{'name'});

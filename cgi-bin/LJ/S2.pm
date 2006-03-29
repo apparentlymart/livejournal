@@ -1736,6 +1736,23 @@ sub Page
     $p->{'head_content'} .= qq{<link rel="service.feed" type="application/atom+xml" title="AtomAPI-enabled feed" href="$LJ::SITEROOT/interface/atomapi/$u->{'user'}/feed" />\n};
     $p->{'head_content'} .= qq{<link rel="service.post" type="application/atom+xml" title="Create a new post" href="$LJ::SITEROOT/interface/atomapi/$u->{'user'}/post" />\n};
 
+    # Ads and control strip
+    my $show_ad = LJ::run_hook('should_show_ad', {
+        ctx  => "journal",
+        user => $u->{user},
+    });
+    $p->{'head_content'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n} if $show_ad;
+
+    my $show_control_strip = LJ::run_hook('show_control_strip', {
+        user => $u->{user},
+    });
+    if ($show_control_strip) {
+        my $control_strip_stylesheet_link = LJ::run_hook('control_strip_stylesheet_link', {
+            user => $u->{user},
+        });
+        $p->{'head_content'} .= $control_strip_stylesheet_link;
+    }
+
     # FOAF autodiscovery
     my $foafurl = $u->{external_foaf_url} ? LJ::eurl($u->{external_foaf_url}) : "$p->{base_url}/data/foaf";
     my $digest = Digest::SHA1::sha1_hex('mailto:' . $u->{email});
