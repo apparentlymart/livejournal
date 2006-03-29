@@ -1931,7 +1931,7 @@ sub ads {
 
         my $adhtml;
         $adhtml .= "<div class=\"ad $adunit\" id=\"\">";
-        $adhtml .= "<h4>Advertisement</h4>";
+        $adhtml .= "<h4 style='margin-bottom: 2px'>Advertisement</h4>";
 
         $adhtml .= "<iframe src='${LJ::ADSERVER}?$adparams' frameborder='0' scrolling='no' id='adframe' ";
         $adhtml .= "width='" . LJ::ehtml($adcall{width}) . "' ";
@@ -1941,7 +1941,7 @@ sub ads {
         my $eadcall = LJ::eurl($adparams);
         my $echannel = LJ::eurl($adcall{channel});
         my $euri = LJ::eurl($r->uri);
-        $adhtml .= "<div style='text-align: right'>";
+        $adhtml .= "<div style='text-align: right; margin-top: 2px;'>";
         $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>Customize</a> | " if $remote;
         $adhtml .= "<a href=\"$LJ::SITEROOT/feedback/ads.bml?adcall=$eadcall&channel=$echannel&uri=$euri\">Feedback</a>";
         $adhtml .= "</div>";
