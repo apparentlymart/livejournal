@@ -1659,6 +1659,7 @@ function Page::print_head() {
     }
     if (viewer_sees_control_strip()) {
         println """<link rel='stylesheet' href='$*STATDIR/controlstrip.css' type='text/css' />""";
+        println """<link rel='stylesheet' href='$*STATDIR/controlstrip-dark.css' type='text/css' />""";
     }
     $this->print_custom_head();
 }

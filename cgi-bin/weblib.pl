@@ -1979,6 +1979,9 @@ sub control_strip
                  'invite_friends' => "<a href='$LJ::SITEROOT/friends/invite.bml'>Invite Friends</a>",
                  'create_account' => "<a href='$LJ::SITEROOT/create.bml'>Create an Account</a>",
                  );
+    $links{'learn_more'} = "<a href='$LJ::HELPURL{'aboutsite'}'>Learn more about $LJ::SITENAMESHORT</a>"
+        if defined $LJ::HELPURL{'aboutsite'};
+        
     if ($remote) {
         $links{'view_friends_page'} = "<a href='" . $remote->journal_base() . "/friends/'>View my Friends Page</a>";
         $links{'add_friend'} = "<a href='$LJ::SITEROOT/friends/add.bml?user=$journal->{user}'>Add them as a friend</a>";
@@ -2000,68 +2003,68 @@ sub control_strip
         my $remote_display  = LJ::ljuser($remote);
         if ($remote->{'defaultpicid'}) {
             my $url = "$LJ::USERPIC_ROOT/$remote->{'defaultpicid'}/$remote->{'userid'}";
-            $ret .= "<td><img src='$url' alt='' height='45' /></td>";
+            $ret .= "<td><a href='$LJ::SITEROOT/editpics.bml'><img src='$url' alt='Userpic' height='43' /></a></td>";
         }
         $ret .= "<td id='lj_controlstrip_user'><form id='Greeting' class='nopic' action='$LJ::SITEROOT/logout.bml' method='post'>";
         $ret .= "<input type='hidden' name='user' value='$remote->{'user'}' />";
         $ret .= "<input type='hidden' name='sessid' value='$remote->{'_session'}->{'sessid'}' />";
-        my $logout = "<input type='submit' value='Logout' id='Logout' />";
+        my $logout = "<input type='submit' value='Log out' id='Logout' />";
         $ret .= "$remote_display<br />$logout";
         $ret .= "</form>\n";
         $ret .= "</td>\n";
 
         $ret .= "<td id='lj_controlstrip_userlinks'>";
-        $ret .= "$links{'post_journal'} $links{'mylj'}<br />$links{'view_friends_page'}";
+        $ret .= "$links{'post_journal'}&nbsp;&nbsp; $links{'mylj'}<br />$links{'view_friends_page'}";
         $ret .= "</td>";
 
         $ret .= "<td id='lj_controlstrip_actionlinks'>";
         if ($remote->{userid} == $journal->{userid}) {
-            $ret .= $r->notes('view') eq "friends" ? "You are viewing your friends page" : "You are viewing your Journal";
-            $ret .= "<br /><strong>You can:</strong> ";
+            $ret .= $r->notes('view') eq "friends" ? "<span id='lj_controlstrip_statustext'>You are viewing your friends page</span>" : "<span id='lj_controlstrip_statustext'>You are viewing your Journal</span>";
+            $ret .= "<br /><strong>You can:</strong>&nbsp;&nbsp; ";
             if ($r->notes('view') eq "friends") {
-                $ret .= "$links{'manage_friends'} ";
+                $ret .= "$links{'manage_friends'}&nbsp;&nbsp; ";
                 $ret .= "View: ";
                 # drop down for various groups and show values
             } else {
-                $ret .= "$links{'recent_comments'} $links{'manage_entries'} $links{'invite_friends'}";
+                $ret .= "$links{'recent_comments'}&nbsp;&nbsp; $links{'manage_entries'}&nbsp;&nbsp; $links{'invite_friends'}";
             }
         } elsif ($journal->{journaltype} eq "P" || $journal->{journaltype} eq "I") {
             my $friend = LJ::is_friend($remote, $journal);
             my $friendof = LJ::is_friend($journal, $remote);
 
             if ($friend) {
-                $ret .= "$journal_display is your mutual friend<br />";
-                $ret .= "<strong>You can:</strong> $links{'manage_friends'}";
+                $ret .= "<span id='lj_controlstrip_statustext'>$journal_display is your mutual friend</span><br />";
+                $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{'manage_friends'}";
             } elsif ($friendof) {
-                $ret .= "$journal_display lists you as a friend<br />";
-                $ret .= "<strong>You can:</strong> $links{''}";
+                $ret .= "<span id='lj_controlstrip_statustext'>$journal_display lists you as a friend</span><br />";
+                $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{''}";
             } else {
-                $ret .= "You are viewing " . LJ::ljuser($journal) . "'s journal<br />";
-                $ret .= "<strong>You can:</strong> $links{'add_friend'}";
+                $ret .= "<span id='lj_controlstrip_statustext'>You are viewing " . LJ::ljuser($journal) . "'s journal</span><br />";
+                $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{'add_friend'}";
             }
         } elsif ($journal->{journaltype} eq "C") {
             my $watching = LJ::is_friend($remote, $journal);
             my $memberof = LJ::is_friend($journal, $remote);
             if (LJ::can_manage_other($remote, $journal)) {
-                $ret .= "You are a maintainer of this community<br />";
-                $ret .= "<strong>You can:</strong> $links{'edit_community_profile'} $links{'edit_community_settings'} " .
-                    "$links{'edit_community_invites'} $links{'edit_community_members'}";
+                $ret .= "<span id='lj_controlstrip_statustext'>You are a maintainer of this community</span><br />";
+                $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{'edit_community_profile'}&nbsp;&nbsp; $links{'edit_community_settings'}&nbsp;&nbsp; " .
+                    "$links{'edit_community_invites'}&nbsp;&nbsp; $links{'edit_community_members'}";
             } elsif ($watching && $memberof) {
-                $ret .= "You are a member of and watching $journal_display<br />";
-                $ret .= "<strong>You can:</strong> $links{'post_to_community'} $links{'leave_community'}";
+                $ret .= "<span id='lj_controlstrip_statustext'>You are a member of and watching $journal_display</span><br />";
+                $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{'post_to_community'}&nbsp;&nbsp; $links{'leave_community'}";
             } elsif ($watching) {
-                $ret .= "You are watching $journal_display<br />";
-                $ret .= "<strong>You can:</strong> $links{'join_community'} $links{'unwatch_community'}";
+                $ret .= "<span id='lj_controlstrip_statustext'>You are watching $journal_display</span><br />";
+                $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{'join_community'}&nbsp;&nbsp; $links{'unwatch_community'}";
             } elsif ($memberof) {
-                $ret .= "You are a member of $journal_display<br />";
-                $ret .= "<strong>You can:</strong> $links{'watch_community'} $links{'leave_community'}";
+                $ret .= "<span id='lj_controlstrip_statustext'>You are a member of $journal_display</span><br />";
+                $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{'watch_community'}&nbsp;&nbsp; $links{'leave_community'}";
             } else {
-                $ret .= "You are viewing $journal_display<br />";
-                $ret .= "<strong>You can:</strong> $links{'join_community'} $links{'watch_community'}";
+                $ret .= "<span id='lj_controlstrip_statustext'>You are viewing $journal_display</span><br />";
+                $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{'join_community'}&nbsp;&nbsp; $links{'watch_community'}";
             }
         } else {
-            $ret .= "You are viewing $journal_display<br />";
-            $ret .= "<strong>You can:</strong> Do nothing for now, we haven't added this case yet.";
+            $ret .= "<span id='lj_controlstrip_statustext'>You are viewing $journal_display</span><br />";
+            $ret .= "<strong>You can:</strong>&nbsp;&nbsp; Do nothing for now, we haven't added this case yet.";
         }
         $ret .= "</td>";
 
@@ -2070,7 +2073,7 @@ sub control_strip
 
         my $chal = LJ::challenge_generate(300);
         $ret .= <<"LOGIN_BAR";
-        <td style='width: 50%; text-align: right'><form id="login" action="$LJ::SITEROOT/login.bml" method="post">
+        <td id='lj_controlstrip_login'><form id="login" action="$LJ::SITEROOT/login.bml" method="post">
             <input type="hidden" name="mode" value="login" />
             <input type='hidden' name='chal' id='login_chal' value='$chal' />
             <input type='hidden' name='response' id='login_response' value='' />
@@ -2079,19 +2082,19 @@ sub control_strip
             </td><td colspan='2'>
             <label for="xc_password">Password:</label> <input type="password" name="password" size="10" tabindex="2" id="xc_password" />
 LOGIN_BAR
-            $ret .= "<input type='submit' value='Login' tabindex='4' />";
+        $ret .= "<input type='submit' value='Log in' tabindex='4' />";
         $ret .= "</td></tr>";
 
         $ret .= "<tr><td valign='top'>";
-        $ret .= "<a href='$LJ::SITEROOT/lostinfo.bml' style='color: #FFF'>Forgot your password?</a>";
-        $ret .= "</td><td style='font: 10px Arial, Helvetica, sans-serif;' valign='top' colspan='2'>";
+        $ret .= "<a href='$LJ::SITEROOT/lostinfo.bml'>Forgot your password?</a>";
+        $ret .= "</td><td style='font: 10px Arial, Helvetica, sans-serif;' valign='top' colspan='2' align='right'>";
         $ret .= "<input type='checkbox' id='xc_remember' name='remember_me' style='height: 10px; width: 10px;' tabindex='3' />";
         $ret .= "<label for='xc_remember'>Remember Me</label>";
         $ret .= "</td></tr></table>";
 
         $ret .= '</form></td>';
-        $ret .= "<td style='width: 50%; text-align: left'>You are currently not logged in<br />";
-        $ret .= "<strong>You can:</strong> Create an Account Learn more about LiveJournal</td>";
+        $ret .= "<td id='lj_controlstrip_actionlinks'><span id='lj_controlstrip_statustext'>You are currently not logged in</span><br />";
+        $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{'create_account'}&nbsp;&nbsp; $links{'learn_more'}</td>";
     }
 
     return "<table id='lj_controlstrip' cellpadding='0' cellspacing='0'><tr valign='top'>$ret</tr></table>";

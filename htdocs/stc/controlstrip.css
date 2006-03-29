@@ -1,35 +1,91 @@
 html body
 {
-    padding-top: 55px;
+    padding: 55px 0 0 0;
+    margin-right: 0;
+    margin-left: 0;
 }
 
 #lj_controlstrip
 {
     font-family: Arial, sans-serif;
-    font-size: 12pt;
-    display: block;
+    font-size: 11px;
+    line-height: 16.5px;
     top: 0;
     left: 0;
     width: 100%;
     height: 45px;
     margin: 0;
     padding: 0;
-    background-color: #cecece;
     position: absolute;
-    color: #7c7c7c;
+    background-repeat: repeat-x;
+    background-position: bottom;
 }
 
+#lj_controlstrip a
+{
+    text-decoration: underline;
+}
+
+#lj_controlstrip a img {
+    border: 0;
+}
+
+#lj_controlstrip form
+{
+    padding: 0;
+    margin: 0;
+}
+
+/* First cell */
+#lj_controlstrip_userpic
+{
+    vertical-align: top;
+    width: 43px;
+}
+
+/* Second cell */
+#lj_controlstrip_user
+{
+    text-align: center;
+    vertical-align: middle;
+    border-right: 1px solid #f5f5f5;
+    width: 10em;
+}
+
+/* Third cell */
 #lj_controlstrip_userlinks
 {
-    text-align: justify;
-}                      
+    text-align: center;
+    vertical-align: middle;
+    border-right: 1px solid #f5f5f5;
+    width: 15em;
+}
 
+/* Fourth cell */
 #lj_controlstrip_actionlinks
 {
     text-align: justify;
+    vertical-align: middle;
+    padding: 0 20px;
+    background-color: transparent;
+    background-image: url(/img/controlstrip/poweredby.gif);
+    background-repeat: no-repeat;
+    background-position: 99% 20%;
+
 }
-#lj_controlstrip a
+
+/* Fourth cell first line */
+#lj_controlstrip_statustext
 {
-    font-size: 12pt;
-    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* Log in form */
+#lj_controlstrip_login
+{
+    vertical-align: middle;
+    padding-left: 20px;
+    border-right: 1px solid #f5f5f5;
+    width: 40em; 
 }

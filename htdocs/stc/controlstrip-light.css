@@ -1,0 +1,17 @@
+#lj_controlstrip
+{
+    color: #7c7c7c;
+    background-color: #c7c6c6;
+    background-image: url(/img/controlstrip/bg-light.gif);
+}
+
+#lj_controlstrip a
+{
+    color: #505050;
+}
+
+/* Fourth cell first line */
+#lj_controlstrip_statustext
+{
+    color: #404040;
+}
