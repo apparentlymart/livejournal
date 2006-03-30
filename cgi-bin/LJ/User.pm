@@ -1258,6 +1258,42 @@ sub set_cache {
            undef, $u->{userid}, $key, $value, $expr);
 }
 
+# returns array of LJ::Entry objects, ignoring security
+sub recent_entries {
+    my ($u, %opts) = @_;
+    my $remote = delete $opts{'filtered_for'} || LJ::get_remote();
+    my $count  = delete $opts{'count'}        || 50;
+    die "unknown options" if %opts;
+
+    warn "remote = $remote, u = $u\n";
+    my $err;
+    my @recent = LJ::get_recent_items({
+        itemshow  => $count,
+        err       => \$err,
+        userid    => $u->{userid},
+        clusterid => $u->{clusterid},
+        remote    => $remote,
+    });
+    die "Error loading recent items: $err" if $err;
+
+    my @objs;
+    foreach my $ri (@recent) {
+        my $entry = LJ::Entry->new($u, jitemid => $ri->{itemid});
+        push @objs, $entry;
+        # FIXME: populate the $entry with security/posterid/alldatepart/ownerid/rlogtime
+    }
+    return @objs;
+}
+
+# front-end to recent_entries, which forces the remote user to be
+# the owner, so we get everything.
+sub all_recent_entries {
+    my $u = shift;
+    my %opts = @_;
+    $opts{filtered_for} = $u;
+    return $u->recent_entries(%opts);
+}
+
 package LJ;
 
 # <LJFUNC>
