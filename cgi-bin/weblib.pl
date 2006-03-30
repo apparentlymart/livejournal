@@ -1971,13 +1971,16 @@ sub control_strip
     my $r = Apache->request;
     # Build up some common links
     my %links = (
-                 'post_journal' => "<a href='$LJ::SITEROOT/update.bml'>Post to Journal</a>",
-                 'mylj' => "<a href='$LJ::SITEROOT/portal/'>My LJ</a>",
-                 'recent_comments' => "<a href='$LJ::SITEROOT/tools/recent_comments.bml'>View Recent Comments</a>",
-                 'manage_friends' => "<a href='$LJ::SITEROOT/friends/'>Manage Friends</a>",
-                 'manage_entries' => "<a href='$LJ::SITEROOT/editjournal.bml'>Manage Entries</a>",
-                 'invite_friends' => "<a href='$LJ::SITEROOT/friends/invite.bml'>Invite Friends</a>",
-                 'create_account' => "<a href='$LJ::SITEROOT/create.bml'>Create an Account</a>",
+                 'post_journal'      => "<a href='$LJ::SITEROOT/update.bml'>Post to Journal</a>",
+                 'portal'            => "<a href='$LJ::SITEROOT/portal/'>My LJ</a>",
+                 'recent_comments'   => "<a href='$LJ::SITEROOT/tools/recent_comments.bml'>View Recent Comments</a>",
+                 'manage_friends'    => "<a href='$LJ::SITEROOT/friends/'>Manage Friends</a>",
+                 'manage_entries'    => "<a href='$LJ::SITEROOT/editjournal.bml'>Manage Entries</a>",
+                 'invite_friends'    => "<a href='$LJ::SITEROOT/friends/invite.bml'>Invite Friends</a>",
+                 'create_account'    => "<a href='$LJ::SITEROOT/create.bml'>Create an Account</a>",
+                 'manage_syndicated' => "<a href='$LJ::SITEROOT/syn/'>View Your Syndicated Feeds</a>",
+                 'syndicated_list'   => "<a href='$LJ::SITEROOT/syn/list.bml'>View the Most Popular Feeds</a>",
+                 'news_page'         => "<a href='$LJ::SITEROOT/news.bml'>View the Recent News</a>",
                  );
     $links{'learn_more'} = "<a href='$LJ::HELPURL{'aboutsite'}'>Learn more about $LJ::SITENAMESHORT</a>"
         if defined $LJ::HELPURL{'aboutsite'};
@@ -2062,9 +2065,23 @@ sub control_strip
                 $ret .= "<span id='lj_controlstrip_statustext'>You are viewing $journal_display</span><br />";
                 $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{'join_community'}&nbsp;&nbsp; $links{'watch_community'}";
             }
+        } elsif ($journal->{journaltype} eq "Y") {
+            $ret .= "<span id='lj_controlstrip_statustext'>You are viewing $journal_display</span><br />";
+            $ret .= "<strong>You can:</strong> ";
+            if ($remote) {
+                $ret .= $links{'manage_syndicated'} . " ";
+            }
+            $ret .= $links{'syndicated_list'};
+        } elsif ($journal->{journaltype} eq "N") {
+            $ret .= "<span id='lj_controlstrip_statustext'>You are viewing the site news account $journal_display</span><br />";
+            $ret .= "<strong>You can:</strong> ";
+            if ($remote && LJ::is_friend($remote, $journal)) {
+                $ret .= $links{'add_friend'} . " ";
+            }
+            $ret .= $links{'news_page'};
         } else {
             $ret .= "<span id='lj_controlstrip_statustext'>You are viewing $journal_display</span><br />";
-            $ret .= "<strong>You can:</strong>&nbsp;&nbsp; Do nothing for now, we haven't added this case yet.";
+            $ret .= "&nbsp;";
         }
         $ret .= "</td>";
 
