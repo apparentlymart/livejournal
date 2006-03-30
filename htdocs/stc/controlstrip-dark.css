@@ -1,8 +1,11 @@
 #lj_controlstrip
 {
-    color: #989898;
     background-color: #2e2c2c;
     background-image: url(/img/controlstrip/bg-dark.gif);
+}
+
+#lj_controlstrip td {
+    color: #989898;
 }
 
 #lj_controlstrip a

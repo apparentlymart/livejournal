@@ -2078,9 +2078,9 @@ sub control_strip
             <input type='hidden' name='chal' id='login_chal' value='$chal' />
             <input type='hidden' name='response' id='login_response' value='' />
             <table><tr><td>
-            <label for="xc_user">Username:</label> <input type="text" name="user" size="15" maxlength="15" tabindex="1" id="xc_user" value="" />
+            <label for="xc_user">Username:</label> <input type="text" name="user" size="14" maxlength="17" tabindex="1" id="xc_user" value="" />
             </td><td colspan='2'>
-            <label for="xc_password">Password:</label> <input type="password" name="password" size="10" tabindex="2" id="xc_password" />
+            <label for="xc_password">Password:</label> <input type="password" name="password" size="14" tabindex="2" id="xc_password" />
 LOGIN_BAR
         $ret .= "<input type='submit' value='Log in' tabindex='4' />";
         $ret .= "</td></tr>";
