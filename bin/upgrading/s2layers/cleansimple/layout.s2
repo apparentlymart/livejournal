@@ -211,9 +211,13 @@ function print_stylesheet ()
 """
 background-color: $*body_bgcolor;
 color: $*entry_fgcolor;
-padding: $*opt_margin_size;
-margin: 0;
 """;
+if (not viewer_sees_control_strip()) {
+    """
+    padding: $*opt_margin_size;
+    margin: 0;
+    """;
+}
 css_fontspec($*font_base,$*font_fallback);
 """
 }
@@ -233,7 +237,13 @@ img {
 vertical-align: absmiddle;
 }
 table {
-width: 100%;
+""";
+if (viewer_sees_control_strip()) {
+    """margin: $*opt_margin_size;""";
+} else {
+    """width: 100%;""";
+}
+"""
 }
 pre {
 text-align: left;

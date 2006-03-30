@@ -18,6 +18,12 @@ html body
     background-position: bottom;
 }
 
+#lj_controlstrip table
+{
+    margin: 0;
+    padding: 0;
+}
+
 #lj_controlstrip td
 {
     font-family: Arial, sans-serif;
@@ -33,7 +39,8 @@ html body
     text-decoration: underline;
 }
 
-#lj_controlstrip a img {
+#lj_controlstrip a img
+{
     border: 0;
 }
 
