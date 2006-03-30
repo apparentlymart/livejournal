@@ -187,7 +187,8 @@ register_setter("icbm", sub {
     my ($dba, $u, $remote, $key, $value, $err) = @_;
     my $loc = eval { LJ::Location->new(coords => $value); };
     unless ($loc) {
-        $$err = "Illegal value.  Not a recognized format.";
+        LJ::set_userprop($u, "icbm", "");  # unset
+        $$err = "Illegal value.  Not a recognized format." if $value;
         return 0;
     }
     LJ::set_userprop($u, "icbm", $loc->as_posneg_comma);
