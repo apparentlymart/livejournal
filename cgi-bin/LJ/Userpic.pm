@@ -339,7 +339,7 @@ sub create {
 
     my @errors;
     if ($size > $MAX_UPLOAD) {
-        push @errors, LJ::errobj("Userpic::ByteSize",
+        push @errors, LJ::errobj("Userpic::Bytesize",
                                  size => $size,
                                  max  => $MAX_UPLOAD);
     }
