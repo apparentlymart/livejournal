@@ -2037,9 +2037,9 @@ sub control_strip
                 $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{'manage_friends'}";
             } elsif ($friendof) {
                 $ret .= "<span id='lj_controlstrip_statustext'>$journal_display lists you as a friend</span><br />";
-                $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{''}";
+                $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{'add_friend'}";
             } else {
-                $ret .= "<span id='lj_controlstrip_statustext'>You are viewing " . LJ::ljuser($journal) . "'s journal</span><br />";
+                $ret .= "<span id='lj_controlstrip_statustext'>You are viewing ${journal_display}'s journal</span><br />";
                 $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{'add_friend'}";
             }
         } elsif ($journal->{journaltype} eq "C") {

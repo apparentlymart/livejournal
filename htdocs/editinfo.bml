@@ -351,7 +351,7 @@ _code?>
             $ret .= "<tr><td colspan='2'><b>Show the control strip:</td></tr>";
             my $view_checked = $u->prop('view_control_strip') ? 1 : 0;
             $ret .= "<tr><td>" . LJ::html_check({ 'name' => "view_control_strip", 'selected' => $view_checked, 'id' => "view_control_strip" });
-            $ret .= " <label for='view_control_strip'>When I view any journals</label></td>";
+            $ret .= " <label for='view_control_strip'>When I view any journal</label></td>";
             my $show_checked = $u->prop('show_control_strip') ? 1 : 0;
             $ret .= "<td>" . LJ::html_check({ 'name' => "show_control_strip", 'selected' => $show_checked, 'id' => "show_control_strip" });
             $ret .= " <label for='show_control_strip'>When someone views my journal</label></td></tr>";
