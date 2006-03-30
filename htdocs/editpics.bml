@@ -5,6 +5,12 @@
     use Carp qw(croak);
 
     LJ::set_active_crumb('edituserpics');
+    BML::set_language_scope("/editpics.bml");
+
+    my $suffix = "";
+    if (Apache->request->uri =~ /editpics-beta/) {
+        $suffix = "-beta";
+    }
 
     $title = $ML{'.title2'};
     $body = "";
@@ -366,7 +372,7 @@
                                      BML::eurl($POST{'keywords'}) . "&comments=" .
                                      BML::eurl($POST{'comments'}) . "&imageWidth=${imagew}&imageHeight=${imageh}".
                                      "&make_default=" . BML::eurl($POST{'make_default'}) . '&authas=' .
-                                     BML::eurl($GET{'authas'}));
+                                     BML::eurl($GET{'authas'}) . '&sfx=' . BML::eurl($suffix));
             }
 
             # was there an error parsing the multipart form?
@@ -429,7 +435,7 @@
                 if (my $custom .= LJ::run_hook("editpics_maxlimit", $u)) {
                     $toomany .= $custom;
                 } else {
-                    $toomany .= BML::ml('.error.toomanypics4', {'num' => $max, 'aopts' => "href='$LJ::SITEROOT/editpics.bml?authas=$authas'"});
+                    $toomany .= BML::ml('.error.toomanypics4', {'num' => $max, 'aopts' => "href='$LJ::SITEROOT/editpics$suffix.bml?authas=$authas'"});
                 }
 
                 return $err->($toomany . LJ::help_icon('userpics', " ", ""));
@@ -476,7 +482,7 @@
 
     if (!$fotobilder) {
         # authas switcher form
-        $body .= "<form method='get' action='editpics.bml'>\n";
+        $body .= "<form method='get' action='editpics$suffix.bml'>\n";
         $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
         $body .= "</form>\n\n";
     }
@@ -505,9 +511,9 @@
             $body .= qq {
                 <iframe name='upiframe' width='1' height='1' style='border: none'></iframe>
                     <?standout
-                    <form enctype="multipart/form-data" action="editpics.bml$getextra"
+                    <form enctype="multipart/form-data" action="editpics$suffix.bml$getextra"
                     method='post' id='uploadPic'>
-                    <input type="hidden" id="go_to" name="go_to" value="editpics.bml$getextra" />
+                    <input type="hidden" id="go_to" name="go_to" value="editpics$suffix.bml$getextra" />
 
                     <table>
                 };
@@ -589,7 +595,7 @@
 
     # print out each pic and editing fields
     if (scalar @userpics && !$fotobilder) {
-        $body .= "<form method='post' action='editpics.bml$getextra'>";
+        $body .= "<form method='post' action='editpics$suffix.bml$getextra'>";
         $body .= LJ::form_auth();
 
         my $uploadBoxLink = '';
