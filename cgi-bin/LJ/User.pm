@@ -74,7 +74,7 @@ sub userpic {
 # which is used to record if a user was ever marked as underage.
 sub underage {
     # has no bearing if this isn't on
-    return undef unless $LJ::UNDERAGE_BIT;
+    return undef unless LJ::class_bit("underage");
 
     # now get the args and continue
     my $u = shift;
@@ -83,11 +83,9 @@ sub underage {
     # now set it on or off
     my $on = shift() ? 1 : 0;
     if ($on) {
-        LJ::modify_caps($u, [ $LJ::UNDERAGE_BIT ], []);
-        $u->{caps} |= 1 << $LJ::UNDERAGE_BIT;
+        $u->add_to_class("underage");
     } else {
-        LJ::modify_caps($u, [], [ $LJ::UNDERAGE_BIT ]);
-        $u->{caps} &= !(1 << $LJ::UNDERAGE_BIT);
+        $u->remove_from_class("underage");
     }
 
     # now set their status flag if one was sent
@@ -111,8 +109,8 @@ sub underage {
         status => $u->underage_status,
     });
 
-    # return what we set it to
-    return $on;
+    # return true if no failures
+    return 1;
 }
 
 # get/set the gizmo account of a user
@@ -185,7 +183,7 @@ sub log_event {
 
 # return or set the underage status userprop
 sub underage_status {
-    return undef unless $LJ::UNDERAGE_BIT;
+    return undef unless LJ::class_bit("underage");
 
     my $u = shift;
 

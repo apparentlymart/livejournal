@@ -449,10 +449,6 @@ add_conf('$TOOLS_RECENT_COMMENTS_MAX',
          type => 'int',
          des => "Number of recent comments to show on /tools/recent_comments.bml");
 
-add_conf('$UNDERAGE_BIT',
-         type => 'int',
-         des => "If non-zero, bit number in the caps field that stores whether a user is underage or not.  If zero/undef, underage checking is disabled.");
-
 add_conf('$UNDERAGE_ERROR',
          type => 'html',
          des => "Error message to show underage users.");

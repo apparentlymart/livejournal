@@ -14,7 +14,14 @@ sub class_bit {
 sub caps_in_group {
     my ($caps, $class) = @_;
     my $bit = LJ::class_bit($class);
-    die "unknown class '$class'" unless defined $bit;
+    unless (defined $bit) {
+        # this site has no underage class?  'underage' is the only
+        # general class.
+        return 0 if $class eq "underage";
+
+        # all other classes are site-defined, so we die on those not existing.
+        die "unknown class '$class'";
+    }
     return ($caps & (1 << $bit)) ? 1 : 0;
 }
 
@@ -102,9 +109,7 @@ sub get_cap
     }
 
     # underage/coppa check etc
-    if ($cname eq "underage" && $u &&
-        ($LJ::UNDERAGE_BIT &&
-         $caps & 1 << $LJ::UNDERAGE_BIT)) {
+    if ($cname eq "underage" && $u && $u->in_class("underage")) {
         return 1;
     }
 
