@@ -1654,6 +1654,20 @@ sub _load_user_raw
     return $last;
 }
 
+sub _set_u_req_cache {
+    my $u = shift or die "no u to set";
+
+    # if we have an existing user singleton, upgrade it with
+    # the latested data, but keep using its address
+    if (my $eu = $LJ::REQ_CACHE_USER_ID{$u->{'userid'}}) {
+        %$eu = %$u;
+        $u = $eu;
+    }
+    $LJ::REQ_CACHE_USER_NAME{$u->{'user'}} = $u;
+    $LJ::REQ_CACHE_USER_ID{$u->{'userid'}} = $u;
+    return $u;
+}
+
 # <LJFUNC>
 # name: LJ::load_user
 # des: Loads a user record given a username.
@@ -1672,22 +1686,16 @@ sub load_user
     $user = LJ::canonical_username($user);
     return undef unless length $user;
 
-    my $set_req_cache = sub {
-        my $u = shift;
-        $LJ::REQ_CACHE_USER_NAME{$u->{'user'}} = $u;
-        $LJ::REQ_CACHE_USER_ID{$u->{'userid'}} = $u;
-        return $u;
-    };
-
     my $get_user = sub {
         my $use_dbh = shift;
         my $db = $use_dbh ? LJ::get_db_writer() : LJ::get_db_reader();
-        my $u = _load_user_raw($db, "user", $user);
-        return $u unless $u && $use_dbh;
+        my $u = _load_user_raw($db, "user", $user)
+            or return undef;
 
         # set caches since we got a u from the master
-        LJ::memcache_set_u($u);
-        return $set_req_cache->($u);
+        LJ::memcache_set_u($u) if $use_dbh;
+
+        return _set_u_req_cache($u);
     };
 
     # caller is forcing a master, return now
@@ -1703,7 +1711,7 @@ sub load_user
     {
         my $uid = LJ::MemCache::get("uidof:$user");
         $u = LJ::memcache_get_u([$uid, "userid:$uid"]) if $uid;
-        return $set_req_cache->($u) if $u;
+        return _set_u_req_cache($u) if $u;
     }
 
     # try to load from master if using memcache, otherwise from slave
@@ -1771,22 +1779,14 @@ sub load_userid
     my ($userid, $force) = @_;
     return undef unless $userid;
 
-    my $set_req_cache = sub {
-        my $u = shift;
-        $LJ::REQ_CACHE_USER_NAME{$u->{'user'}} = $u;
-        $LJ::REQ_CACHE_USER_ID{$u->{'userid'}} = $u;
-        return $u;
-    };
-
     my $get_user = sub {
         my $use_dbh = shift;
         my $db = $use_dbh ? LJ::get_db_writer() : LJ::get_db_reader();
-        my $u = _load_user_raw($db, "userid", $userid);
-        return $u unless $u && $use_dbh;
+        my $u = _load_user_raw($db, "userid", $userid)
+            or return undef;
 
-        # set caches since we got a u from the master
-        LJ::memcache_set_u($u);
-        return $set_req_cache->($u);
+        LJ::memcache_set_u($u) if $use_dbh;
+        return _set_u_req_cache($u);
     };
 
     # user is forcing master, return now
@@ -1800,7 +1800,7 @@ sub load_userid
 
     # check memcache
     $u = LJ::memcache_get_u([$userid,"userid:$userid"]);
-    return $set_req_cache->($u) if $u;
+    return _set_u_req_cache($u) if $u;
 
     # get from master if using memcache
     return $get_user->("master") if @LJ::MEMCACHE_SERVERS;

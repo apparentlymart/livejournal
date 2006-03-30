@@ -14,9 +14,6 @@ my $u = LJ::load_user("system");
 ok($u, "Have system user");
 die unless $u;
 
-my $u2 = LJ::load_userid($u->{userid});
-is($u, $u2, "whether loading by name or userid, \$u objects are singletons");
-
 sub run_tests {
     my ($up, $ext) = @_;
 
