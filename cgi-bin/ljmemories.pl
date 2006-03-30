@@ -721,6 +721,8 @@ sub clear_memcache {
     return unless ref $u;
     my $userid = $u->{userid};
 
+    LJ::MemCache::delete([$userid, "memct:$userid"]);
+
     LJ::MemCache::delete([$userid, "memkwid:$userid"]);
 
     # Delete all memkwcnt entries
