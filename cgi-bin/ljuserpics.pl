@@ -501,7 +501,10 @@ sub get_upf_scaled {
         my $u = LJ::get_remote()
             or die "No remote user";
         unshift @args, "userid" => $u->{userid};
-        my $result = $gc->do_task('lj_upf_resize', Storable::nfreeze(\@args), {});
+        my $result = $gc->do_task('lj_upf_resize',
+                                  Storable::nfreeze(\@args), {
+                                      uniq => '-',   # merge on the arguments
+                                  })
 
         if (!$result) {
             die "FAILED\n";
