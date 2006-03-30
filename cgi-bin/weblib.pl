@@ -1981,10 +1981,9 @@ sub control_strip
                  'manage_syndicated' => "<a href='$LJ::SITEROOT/syn/'>View Your Syndicated Feeds</a>",
                  'syndicated_list'   => "<a href='$LJ::SITEROOT/syn/list.bml'>View the Most Popular Feeds</a>",
                  'news_page'         => "<a href='$LJ::SITEROOT/news.bml'>View the Recent News</a>",
+                 'learn_more'        => "<a href='$LJ::SITEROOT/'>Learn more about $LJ::SITENAMESHORT</a>",
                  );
-    $links{'learn_more'} = "<a href='$LJ::HELPURL{'aboutsite'}'>Learn more about $LJ::SITENAMESHORT</a>"
-        if defined $LJ::HELPURL{'aboutsite'};
-        
+
     if ($remote) {
         $links{'view_friends_page'} = "<a href='" . $remote->journal_base() . "/friends/'>View my Friends Page</a>";
         $links{'add_friend'} = "<a href='$LJ::SITEROOT/friends/add.bml?user=$journal->{user}'>Add them as a friend</a>";
