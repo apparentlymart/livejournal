@@ -333,10 +333,9 @@ _code?>
         $ret .= "<tr><td colspan='2'>$ML{'.settings.friendspage.title.optional'}</td></tr>\n";
         $ret .= "</table>\n\n";
 
-        $ret .= "<?h1 Control Strip Options h1?>";
-
         ### Control Strip
         if ($LJ::USE_CONTROL_STRIP) {
+            $ret .= "<?h1 Control Strip Options h1?>";
             $ret .= "<table style='margin-left: 30px; margin-bottom: 20px'>\n";
             $ret .= "<tr><td colspan='2'><p>The control strip is a small toolbar that can show at the top of your journal and communities , as well as on other journals when you go to read them . It provides:</p><ul><li>Quick links to your own journal, the update page, and your friends page</li><li>Options appropriate to the page you are looking at, i .e. filters for your Friends page</li><li>Community management options and more.</li></ul></td></tr>";
             $ret .= "<tr><td colspan='2'><b>Choose the control strip color you prefer:</td></tr>";
