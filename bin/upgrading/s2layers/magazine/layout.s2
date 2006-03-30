@@ -181,13 +181,8 @@ function print_stylesheet ()
 """BODY {
     line-height: 1.3;
     margin: 0;
-    background-color: $*main_bgcolor;
+    background-color: $*sidebar_color;
     color: $*main_fgcolor;""";
-if (viewer_sees_control_strip()) {
-    """
-    border-left: 1cm solid $*sidebar_color;
-    """;
-}
 """}
 P {
     margin-top: 0;
@@ -222,6 +217,8 @@ H3 EM {
 if (viewer_sees_control_strip()) {
 """#content {
     padding: 1cm;
+    margin: 0 0 0 1cm;
+    background-color: $*main_bgcolor;
 }""";
 }
 """
