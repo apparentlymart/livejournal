@@ -102,6 +102,8 @@
             if (!origW || !origH)
                 return;
 
+            $("userpic").style.display = "";
+
             regsel = new ImageRegionSelect({src: $("userpic"),
               onRegionChange:  onRegionChange,
               onRegionChanged: onRegionChanged
@@ -124,8 +126,6 @@
             regsel.keepSquare(false);
 
             $("createbtn").disabled = false;
-
-            $("userpic").style.display = "";
         });
 
     </script>
