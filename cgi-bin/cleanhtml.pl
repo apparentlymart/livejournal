@@ -229,8 +229,8 @@ sub clean
                 }
 
                 if ($tag eq "input") {
-                    if ($attr->{type} !~ /^\w+$/ || $attr->{type} eq "password") {
-                        next TOKEN;
+                    if ($attr->{type} !~ /^\w+$/ || lc $attr->{type} eq "password") {
+                        delete $attr->{type};
                     }
                 }
             }

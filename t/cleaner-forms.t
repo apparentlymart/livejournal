@@ -20,7 +20,11 @@ ok($post =~ /<input/, "has input");
 # password input
 $post = "<form><input name='foo' type='password'></form>";
 $clean->();
-ok($post !~ /password/, "can do password element");
+ok($post !~ /password/, "can't do password element");
+
+$post = "<form><input name='foo' type='PASSWORD'></form>";
+$clean->();
+ok($post !~ /PASSWORD/, "can't do password element in uppercase");
 
 # other types
 $post = "<form><input name='foo' type='foobar'></form>";
