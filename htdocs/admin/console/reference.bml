@@ -17,8 +17,14 @@
 
  my ($ret, $sth);
 
+ $ret .= "<ul>";
+ foreach my $cmdname (sort keys %LJ::Con::cmd)  {
+       $ret .= "<li><a href='\#cmd.$cmdname'>$cmdname</a></li>\n";
+ }
+ $ret .= "</ul>";
+
  $ret .= "<dl>";
- foreach my $cmdname (sort keys %LJ::Con::cmd) 
+ foreach my $cmdname (sort keys %LJ::Con::cmd)
  {
      my $cmd = $LJ::Con::cmd{$cmdname};
      next if ($cmd->{'hidden'});
