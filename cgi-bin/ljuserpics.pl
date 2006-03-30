@@ -504,7 +504,7 @@ sub get_upf_scaled {
         my $result = $gc->do_task('lj_upf_resize',
                                   Storable::nfreeze(\@args), {
                                       uniq => '-',   # merge on the arguments
-                                  })
+                                  });
 
         if (!$result) {
             die "FAILED\n";
