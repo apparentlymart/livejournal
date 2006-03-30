@@ -1900,8 +1900,8 @@ sub ads {
             }
 
             if ($adcall{gender} = $remote->prop('gender')) {
-                $adcall{gender} = lc(substr($adcall{gender}, 0, 1)); # m|f|u
-                $adcall{gender} = undef if $adcall{gender} eq 'u';
+                $adcall{gender} = uc(substr($adcall{gender}, 0, 1)); # M|F|U
+                $adcall{gender} = undef if $adcall{gender} eq 'U';
             }
 
             $adcall{categories} = $remote->prop('ad_categories');
