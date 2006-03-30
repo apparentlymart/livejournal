@@ -552,7 +552,7 @@ sub create_view_foaf {
 
     # setup userprops we will need
     LJ::load_user_props($u, qw{
-        aolim icq yahoo jabber msn url urlname external_foaf_url
+        aolim icq yahoo jabber msn icbm url urlname external_foaf_url
     });
 
     # create bare foaf document, for now
@@ -563,6 +563,7 @@ sub create_view_foaf {
     $ret .= "   xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n";
     $ret .= "   xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\n";
     $ret .= "   xmlns:foaf=\"http://xmlns.com/foaf/0.1/\"\n";
+    $ret .= "   xmlns:geo=\"http://www.w3.org/2003/01/geo/wgs84_pos#\"\n";
     $ret .= "   xmlns:dc=\"http://purl.org/dc/elements/1.1/\">\n";
 
     # precompute some values
@@ -621,6 +622,13 @@ sub create_view_foaf {
         $ret .= "\" dc:title=\"" . LJ::exml($u->{urlname}) . "\" />\n";
     }
 
+    # icbm/location info
+    if ($u->{icbm}) {
+        my @loc = split(",", $u->{icbm});
+        $ret .= "    <foaf:based_near><geo:Point geo:lat='" . $loc[0] . "'" .
+                "geo:long='" . $loc[1] . "' /></foaf:based_near>\n";
+    }
+    
     # interests, please!
     # arrayref of interests rows: [ intid, intname, intcount ]
     my $intu = LJ::get_interests($u);
