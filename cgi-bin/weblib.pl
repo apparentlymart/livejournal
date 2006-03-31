@@ -2022,12 +2022,36 @@ sub control_strip
         $ret .= "</td>";
 
         $ret .= "<td id='lj_controlstrip_actionlinks'>";
-        if ($remote->{userid} == $journal->{userid}) {
+        if ($remote && $remote->{userid} == $journal->{userid}) {
             $ret .= $r->notes('view') eq "friends" ? "<span id='lj_controlstrip_statustext'>You are viewing your friends page</span>" : "<span id='lj_controlstrip_statustext'>You are viewing your Journal</span>";
             $ret .= "<br /><strong>You can:</strong>&nbsp;&nbsp; ";
             if ($r->notes('view') eq "friends") {
+                my @filters = ("all", "All Friends", "showpeople", "Journals Only", "showcommunities", "Communities Only", "showsyndicated", "Syndicated Feeds");
+                my %res;
+                # FIXME: make this use LJ::Protocol::do_request 
+                LJ::do_request({ 'mode' => 'getfriendgroups',
+                                 'ver'  => $LJ::PROTOCOL_VER,
+                                 'user' => $remote->{'user'}, },
+                               \%res, { 'noauth' => 1, 'userid' => $remote->{'userid'} });
+                my %group;
+                foreach my $k (keys %res) {
+                    if ($k =~ /^frgrp_(\d+)_name/) {
+                        $group{$1}->{'name'} = $res{$k};
+                    } 
+                    elsif ($k =~ /^frgrp_(\d+)_sortorder/) {
+                        $group{$1}->{'sortorder'} = $res{$k};
+                    } 
+                }
+                foreach my $g (sort { $group{$a}->{'sortorder'} <=> $group{$b}->{'sortorder'} } keys %group) {
+                    push @filters, "filter:" . $group{$g}->{'name'}, $group{$g}->{'name'};
+                }
+
                 $ret .= "$links{'manage_friends'}&nbsp;&nbsp; ";
-                $ret .= "View: ";
+                $ret .= "Filter: <form method='post' style='display: inline;' action='$LJ::SITEROOT/friends/filter.bml'>\n";
+                $ret .= LJ::html_hidden("user", $remote->{'user'}, "mode", "view", "type", "allfilters");
+                $ret .= LJ::html_select({'name' => "view", 'selected' => "all"}, @filters) . " ";
+                $ret .= LJ::html_submit("View");
+                $ret .= "</form>";
                 # drop down for various groups and show values
             } else {
                 $ret .= "$links{'recent_comments'}&nbsp;&nbsp; $links{'manage_entries'}&nbsp;&nbsp; $links{'invite_friends'}";
