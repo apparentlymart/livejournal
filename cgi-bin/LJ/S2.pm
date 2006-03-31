@@ -1956,8 +1956,12 @@ sub end_css {
     # our CSS to clean:
     my $css = $sc->{_start_css_buffer};
     my $cleaner = CSS::Cleaner->new;
+
+    my $clean = $cleaner->clean($css);
+    LJ::run_hook('css_cleaner_transform', \$clean);
+
     $sc->{_start_css_pout}->("/* Cleaned CSS: */\n" .
-                             $cleaner->clean($css) .
+                             $clean .
                              "\n");
 }
 
