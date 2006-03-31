@@ -1150,10 +1150,19 @@ sub activate_userpics {
     return 1;
 }
 
+sub uncache_prop {
+    my ($u, $name) = @_;
+    my $prop = LJ::get_prop("user", $name) or die; # FIXME: use exceptions
+    LJ::MemCache::delete([$u->{userid}, "uprop:$u->{userid}:$prop->{id}"]);
+    delete $u->{$name};
+    return 1;
+}
+
 sub set_draft_text {
     my ($u, $draft) = @_;
-    # TODO: make this all atomic
     my $old = $u->draft_text;
+
+    $LJ::_T_DRAFT_RACE->() if $LJ::_T_DRAFT_RACE;
 
     # try to find a shortcut that makes the SQL shorter
     my @methods;  # list of [ $subref, $cost ]
@@ -1161,19 +1170,22 @@ sub set_draft_text {
     # one method is just setting it all at once.  which incurs about
     # 75 bytes of SQL overhead on top of the length of the draft,
     # not counting the escaping
-    push @methods, [ "set", sub { $u->set_prop('entry_draft', $draft); },
+    push @methods, [ "set", sub { $u->set_prop('entry_draft', $draft); 1 },
                      75 + length $draft ];
 
     # stupid case, setting the same thing:
-    push @methods, [ "noop", sub {}, 0 ] if $draft eq $old;
+    push @methods, [ "noop", sub { 1 }, 0 ] if $draft eq $old;
 
     # simple case: appending
     if (length $old && $draft =~ /^\Q$old\E(.+)/s) {
         my $new = $1;
         my $appending = sub {
             my $prop = LJ::get_prop("user", "entry_draft") or die; # FIXME: use exceptions
-            $u->do("UPDATE userpropblob SET value = CONCAT(value, ?) WHERE userid=? AND upropid=?",
-                   undef, $new, $u->{userid}, $prop->{id});
+            my $rv = $u->do("UPDATE userpropblob SET value = CONCAT(value, ?) WHERE userid=? AND upropid=? AND LENGTH(value)=?",
+                            undef, $new, $u->{userid}, $prop->{id}, length $old);
+            return 0 unless $rv > 0;
+            $u->uncache_prop("entry_draft");
+            return 1;
         };
         push @methods, [ "append", $appending, 40 + length $new ];
     }
@@ -1181,14 +1193,15 @@ sub set_draft_text {
     # TODO: prepending/middle insertion (the former being just the latter), as well
     # appending, wihch we could then get rid of
 
-    # find the least expensive method
-    my $least;
-    foreach my $m (@methods) {
-        $least = $m if ! defined $least || $m->[2] < $least->[2];
+    # try the methods in increasing order
+    foreach my $m (sort { $a->[2] <=> $b->[2] } @methods) {
+        my $func = $m->[1];
+        if ($func->()) {
+            $LJ::_T_METHOD_USED->($m->[0]) if $LJ::_T_METHOD_USED; # for testing
+            return 1;
+        }
     }
-
-    # execute the least expensive method
-    return $least->[1]->();
+    return 0;
 }
 
 sub draft_text {
