@@ -8,8 +8,8 @@
 
     my $returncontent = sub {
         my $error = shift;
-        return qq {
-            <?xml version="1.0" encoding="UTF-8" ?>
+        BML::noparse();
+        return qq {<?xml version="1.0" encoding="UTF-8" ?>
                 <Module>
                 <ModulePrefs title="Error" />
                 <Content type="html">
