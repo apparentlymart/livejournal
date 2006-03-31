@@ -1,6 +1,19 @@
 <?page
 title=><?_ml .title _ml?>
 head<=
+<?_code
+    LJ::need_res('stc/matrix.css');
+    return $head;
+_code?>
+
+<script language="javascript">
+<!--//
+function tblhilite(tbl, styname) {
+        tbl.className = styname;
+}
+// -->
+</script>
+
   <style type="text/css">
 
 
@@ -36,6 +49,41 @@ head<=
                 padding-top: 5px;
                 white-space: nowrap;
         }
+
+
+    .header a
+    {
+        text-decoration: none;
+        color: black;
+    }
+
+    .header a:hover
+    {
+        text-decoration: underline;
+        color: black;
+    }
+
+    .feature a:hover
+    {
+        color:black;
+        font-size:12px;
+        text-decoration:underline;
+    }
+
+    .feature a
+    {
+        color:black;
+        font-size:12px;
+        text-decoration:none;
+    }
+
+    .feature_on a
+    {
+        color:black;
+        font-size:12px;
+    }
+
+
  </style>
 <=head
 body<=
