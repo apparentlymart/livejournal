@@ -1977,11 +1977,11 @@ sub control_strip
                  'manage_friends'    => "<a href='$LJ::SITEROOT/friends/'>Manage Friends</a>",
                  'manage_entries'    => "<a href='$LJ::SITEROOT/editjournal.bml'>Manage Entries</a>",
                  'invite_friends'    => "<a href='$LJ::SITEROOT/friends/invite.bml'>Invite Friends</a>",
-                 'create_account'    => "<a href='$LJ::SITEROOT/create.bml'>Create an Account</a>",
+                 'create_account'    => "<a href='$LJ::SITEROOT/create.bml'>Create a $LJ::SITENAMESHORT Account</a>",
                  'manage_syndicated' => "<a href='$LJ::SITEROOT/syn/'>View Your Syndicated Feeds</a>",
                  'syndicated_list'   => "<a href='$LJ::SITEROOT/syn/list.bml'>View the Most Popular Feeds</a>",
                  'news_page'         => "<a href='$LJ::SITEROOT/news.bml'>View the Recent News</a>",
-                 'learn_more'        => "<a href='$LJ::SITEROOT/'>Learn more about $LJ::SITENAMESHORT</a>",
+                 'learn_more'        => "<a href='$LJ::SITEROOT/'>Learn more</a>",
                  );
 
     if ($remote) {
@@ -2018,7 +2018,7 @@ sub control_strip
         $ret .= "</td>\n";
 
         $ret .= "<td id='lj_controlstrip_userlinks'>";
-        $ret .= "$links{'post_journal'}&nbsp;&nbsp; $links{'mylj'}<br />$links{'view_friends_page'}";
+        $ret .= "$links{'post_journal'}&nbsp;&nbsp; $links{'portal'}<br />$links{'view_friends_page'}";
         $ret .= "</td>";
 
         $ret .= "<td id='lj_controlstrip_actionlinks'>";
@@ -2113,7 +2113,7 @@ LOGIN_BAR
         $ret .= "</td></tr></table>";
 
         $ret .= '</form></td>';
-        $ret .= "<td id='lj_controlstrip_actionlinks'><span id='lj_controlstrip_statustext'>You are currently viewing a LiveJournal</span><br />";
+        $ret .= "<td id='lj_controlstrip_actionlinks'><span id='lj_controlstrip_statustext'>You are viewing ${journal_display}'s journal</span><br />";
         $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{'create_account'}&nbsp;&nbsp; $links{'learn_more'}</td>";
     }
 
