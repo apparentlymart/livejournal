@@ -2113,7 +2113,7 @@ LOGIN_BAR
         $ret .= "</td></tr></table>";
 
         $ret .= '</form></td>';
-        $ret .= "<td id='lj_controlstrip_actionlinks'><span id='lj_controlstrip_statustext'>You are currently not logged in</span><br />";
+        $ret .= "<td id='lj_controlstrip_actionlinks'><span id='lj_controlstrip_statustext'>You are currently viewing a LiveJournal</span><br />";
         $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{'create_account'}&nbsp;&nbsp; $links{'learn_more'}</td>";
     }
 
