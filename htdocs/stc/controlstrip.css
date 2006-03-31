@@ -1,3 +1,5 @@
+@import url('controlstrip-local.css');
+
 html body
 {
     padding: 55px 0 0 0;
@@ -101,11 +103,6 @@ html body
     text-align: justify;
     vertical-align: middle;
     padding: 0 20px;
-    background-color: transparent;
-    background-image: url(/img/controlstrip/poweredby.gif);
-    background-repeat: no-repeat;
-    background-position: 99% 20%;
-
 }
 
 /* Fourth cell first line */
