@@ -194,23 +194,26 @@ sub get_keyword_counts {
     }
 
     # now let's get the keywords these memories use
-    my $in = join ',', @all_memids;
     my $mem_kw_rows;
-    if ($u->{dversion} > 5) {
-        my $dbcr = LJ::get_cluster_reader($u);
-        my $sql = "SELECT kwid, memid FROM memkeyword2 WHERE userid = $userid AND memid IN ($in)";
-        $mem_kw_rows = $dbcr->selectall_arrayref($sql);
-        return undef if $dbcr->err;
-    } else {
-        my $dbr = LJ::get_db_reader();
-        my $sql = "SELECT kwid, memid FROM memkeyword WHERE kwid IN ($in)";
-        $mem_kw_rows = $dbr->selectall_arrayref($sql);
-        return undef if $dbr->err;
+
+    if (@all_memids) {
+        my $in = join ',', @all_memids;
+        if ($u->{dversion} > 5) {
+            my $dbcr = LJ::get_cluster_reader($u);
+            my $sql = "SELECT kwid, memid FROM memkeyword2 WHERE userid = $userid AND memid IN ($in)";
+            $mem_kw_rows = $dbcr->selectall_arrayref($sql);
+            return undef if $dbcr->err;
+        } else {
+            my $dbr = LJ::get_db_reader();
+            my $sql = "SELECT kwid, memid FROM memkeyword WHERE kwid IN ($in)";
+            $mem_kw_rows = $dbr->selectall_arrayref($sql);
+            return undef if $dbr->err;
+        }
     }
 
     # Filter and Sum
     my %counts;
-    foreach my $row (@$mem_kw_rows) {
+    foreach my $row (@{$mem_kw_rows||[]}) {
         my ($kwid, $memid) = @$row;
         my ($filter, $security) = @{$mem_filter{$memid}};
         $counts{$filter}{$security}{$kwid}++;
