@@ -2,6 +2,11 @@ a img {
     border: 0px;
 }
 
+form {
+    margin: 0px;
+    padding: 0px;
+}
+
 .clear {
     clear: both;
     margin: 0 -1px -1px 0;
