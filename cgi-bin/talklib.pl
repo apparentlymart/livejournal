@@ -2398,7 +2398,7 @@ sub enter_comment {
         }
         my $bind = join(',', @bind);
         my $sql = qq{
-            INSERT DELAYED INTO commenturls
+            INSERT INTO commenturls
                 (posterid, journalid, ip, jtalkid, timecreate, url)
             VALUES $bind
         };
