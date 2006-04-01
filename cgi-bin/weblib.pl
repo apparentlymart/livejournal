@@ -2140,7 +2140,9 @@ LOGIN_BAR
 
         $ret .= '</form></td>';
         $ret .= "<td id='lj_controlstrip_actionlinks'><span id='lj_controlstrip_statustext'>You are viewing ${journal_display}'s journal</span><br />";
-        $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{'create_account'}&nbsp;&nbsp; $links{'learn_more'}</td>";
+        $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{'create_account'}&nbsp;&nbsp; $links{'learn_more'}";
+        $ret .= LJ::run_hook('control_strip_logo');
+        $ret .= "</td>";
     }
 
     return "<table id='lj_controlstrip' cellpadding='0' cellspacing='0'><tr valign='top'>$ret</tr></table>";
