@@ -1870,7 +1870,9 @@ sub ads {
         if ($uri eq '/interests.bml') {
             my $args = $r->args;
             if ($args =~ /int=(.+)$/) {
-                $adcall{search_term} = $1;
+                my $term = $1;
+                $term =~ s/\+/ /;
+                $adcall{search_term} = $term;
             }
         }
     }
