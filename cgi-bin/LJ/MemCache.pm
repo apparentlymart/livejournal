@@ -31,6 +31,10 @@ sub init {
     reload_conf();
 }
 
+sub set_memcache {
+    $memc = shift;
+}
+
 sub get_memcache {
     init() unless $memc;
     return $memc
@@ -42,6 +46,7 @@ sub client_stats {
 
 sub reload_conf {
     my $stat_callback;
+    return $memc if eval { $memc->doesnt_want_configuration; };
 
     $memc->set_servers(\@LJ::MEMCACHE_SERVERS);
     $memc->set_debug($LJ::DEBUG{'memcached'});
