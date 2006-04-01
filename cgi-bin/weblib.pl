@@ -2062,8 +2062,11 @@ sub control_strip
             my $friend = LJ::is_friend($remote, $journal);
             my $friendof = LJ::is_friend($journal, $remote);
 
-            if ($friend) {
+            if ($friend and $friendof) {
                 $ret .= "<span id='lj_controlstrip_statustext'>$journal_display is your mutual friend</span><br />";
+                $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{'manage_friends'}";
+            } elsif ($friend) {
+                $ret .= "<span id='lj_controlstrip_statustext'>$journal_display is your friend</span><br />";
                 $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{'manage_friends'}";
             } elsif ($friendof) {
                 $ret .= "<span id='lj_controlstrip_statustext'>$journal_display lists you as a friend</span><br />";
