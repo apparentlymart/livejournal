@@ -63,12 +63,15 @@ $maint{'synsuck'} = sub
             if $etag;
 
         my ($content, $too_big);
-        my $res = $ua->request($req, sub {
-            if (length($content) > 1024*150) { $too_big = 1; return; }
-            $content .= $_[0];
-        }, 4096);
-        if ($too_big) { $delay->(60, "toobig"); return; }
-       
+        my $res = eval {
+            $ua->request($req, sub {
+                if (length($content) > 1024*150) { $too_big = 1; return; }
+                $content .= $_[0];
+            }, 4096);
+        };
+        if ($@)       { $delay->(120, "lwp_death"); return; }
+        if ($too_big) { $delay->(60, "toobig");     return; }
+
         if ($res->is_error()) {
             # http error
             print "HTTP error!\n" if $verbose;
@@ -77,11 +80,11 @@ $maint{'synsuck'} = sub
             # never have both an http error and a parse error on the
             # same request
             $delay->(3*60, "parseerror");
-            
+
             LJ::set_userprop($userid, "rssparseerror", $res->status_line());
             return;
         }
-        
+
         # check if not modified
         if ($res->code() == RC_NOT_MODIFIED) {
             print "  not modified.\n" if $verbose;
@@ -89,11 +92,11 @@ $maint{'synsuck'} = sub
             return;
         }
 
-        # WARNING: blatant XML spec violation ahead... 
-        # 
+        # WARNING: blatant XML spec violation ahead...
+        #
         # Blogger doesn't produce valid XML, since they don't handle encodings
         # correctly.  So if we see they have no encoding (which is UTF-8 implictly)
-        # but it's not valid UTF-8, say it's Windows-1252, which won't 
+        # but it's not valid UTF-8, say it's Windows-1252, which won't
         # cause XML::Parser to barf... but there will probably be some bogus characters.
         # better than nothing I guess.  (personally, I'd prefer to leave it broken
         # and have people bitch at Blogger, but jwz wouldn't stop bugging me)
@@ -106,7 +109,7 @@ $maint{'synsuck'} = sub
         if (! $encoding && ! LJ::is_utf8($content)) {
             $content =~ s/\?>/ encoding='windows-1252' \?>/;
         }
-        
+
         # WARNING: another hack...
         # People produce what they think is iso-8859-1, but they include
         # Windows-style smart quotes.  Check for invalid iso-8859-1 and correct.
@@ -163,7 +166,7 @@ $maint{'synsuck'} = sub
                 print "fail.\n" if $verbose;
             }
         }
-        
+
         # determine if link tags are good or not, where good means
         # "likely to be a unique per item".  some feeds have the same
         # <link> element for each item, which isn't good.
@@ -208,7 +211,7 @@ $maint{'synsuck'} = sub
 
         foreach my $it (@items) {
 
-            # remove the SvUTF8 flag.  it's still UTF-8, but 
+            # remove the SvUTF8 flag.  it's still UTF-8, but
             # we don't want perl knowing that and fucking stuff up
             # for us behind our back in random places all over
             # http://zilla.livejournal.org/show_bug.cgi?id=1037
@@ -236,7 +239,7 @@ $maint{'synsuck'} = sub
             print "[$$] $dig - $it->{'subject'}\n" if $verbose;
             $it->{'text'} =~ s/^\s+//;
             $it->{'text'} =~ s/\s+$//;
-            
+
             my $htmllink;
             if (defined $it->{'link'}) {
                 $htmllink = "<p class='ljsyndicationlink'>" .
@@ -265,14 +268,14 @@ $maint{'synsuck'} = sub
             # $own_time==1 means we took the time from the feed rather than localtime
             my ($own_time, $year, $mon, $day, $hour, $min);
 
-            if ($it->{'time'} && 
+            if ($it->{'time'} &&
                 $it->{'time'} =~ m!^(\d\d\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d)!) {
                 $own_time = 1;
                 ($year, $mon, $day, $hour, $min) = ($1,$2,$3,$4,$5);
             } else {
                 $own_time = 0;
                 my @now = localtime();
-                ($year, $mon, $day, $hour, $min) = 
+                ($year, $mon, $day, $hour, $min) =
                     ($now[5]+1900, $now[4]+1, $now[3], $now[2], $now[1]);
             }
 
@@ -291,7 +294,7 @@ $maint{'synsuck'} = sub
                     'syn_link' => $it->{'link'},
                 },
             };
-            $req->{'props'}->{'syn_id'} = $it->{'id'} 
+            $req->{'props'}->{'syn_id'} = $it->{'id'}
                 if $it->{'id'};
 
             my $flags = {
@@ -310,13 +313,13 @@ $maint{'synsuck'} = sub
                 $newcount--; # cancel increment above
                 $command = "editevent";
                 $req->{'itemid'} = $old_itemid;
-                
+
                 # the editevent requires us to resend the date info, which
                 # we have to go fetch first, in case the feed doesn't have it
-                
+
                 # TAG:LOG2:synsuck_fetch_itemdates
                 unless($own_time) {
-                    my $origtime = 
+                    my $origtime =
                         $udbh->selectrow_array("SELECT eventtime FROM log2 WHERE ".
                                                "journalid=? AND jitemid=?", undef,
                                                $su->{'userid'}, $old_itemid);
@@ -358,7 +361,7 @@ $maint{'synsuck'} = sub
             $delay->(30, "posterror");
             return;
         }
-            
+
         # update syndicated account's userinfo if necessary
         LJ::load_user_props($su, "url", "urlname");
         {
@@ -397,13 +400,13 @@ $maint{'synsuck'} = sub
 
         my $r_lastmod = LJ::http_to_time($res->header('Last-Modified'));
         my $r_etag = $res->header('ETag');
-            
-        # decide when to poll next (in minutes). 
+
+        # decide when to poll next (in minutes).
         # FIXME: this is super lame.  (use hints in RSS file!)
         my $int = $newcount ? 30 : 60;
         my $status = $newcount ? "ok" : "nonew";
         my $updatenew = $newcount ? ", lastnew=NOW()" : "";
-        
+
         # update reader count while we're changing things, but not
         # if feed is stale (minimize DB work for inactive things)
         if ($newcount || ! defined $readers) {
