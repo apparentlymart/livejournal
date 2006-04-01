@@ -18,6 +18,15 @@ foreach my $key (sub { $_[0] }, sub { [5, $_[0]] }) {
         is(LJ::MemCache::get($key->("name")), "mary", "cache now mary");
         ok(LJ::MemCache::delete($key->("name")), "deleted mary");
         is(LJ::MemCache::get($key->("name")), undef, "name now empty again");
+
+        ok(LJ::MemCache::set($key->("name"), "bob"));
+        ok(LJ::MemCache::set($key->("age"), "26"));
+
+        is_deeply(LJ::MemCache::get_multi($key->("name"), "age", "bogus"),
+                  {
+                      "name" => "bob",
+                      "age" => "26",
+                  }, "get_multi worked");
     }
 }
 
@@ -28,11 +37,13 @@ my @tests = (
                  ok(! LJ::MemCache::set("name", "bob"), "failed to set");
                  is(LJ::MemCache::get("name"), undef, "name still undef");
              },
+             # now with a memcache
              sub {
                  is(LJ::MemCache::get("name"), undef, "name undef");
                  ok(LJ::MemCache::set("name", "bob"), "but we set");
                  is(LJ::MemCache::get("name"), "bob", "and got");
              },
+             # again, using same memcache:
              sub {
                  is(LJ::MemCache::get("name"), "bob", "and still bob");
              },
