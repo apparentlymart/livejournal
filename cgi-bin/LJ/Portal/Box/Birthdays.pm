@@ -63,7 +63,9 @@ sub generate_content {
 
         $content .= "<tr><td nowrap='nowrap'><b>" . LJ::ljuser($bi->[2]) . "</b></td>";
         $content .= "<td align='right' nowrap='nowrap'>$datestr</td>";
-        $content .= "<td align='right'><a href=\"$LJ::SITEROOT/shop/view.bml?gift=1&for=$bi->[2]\"><img src=\"$LJ::IMGPREFIX/btn_gift.gif\" alt=\"Buy this user a gift\" align=\"right\" /></a></td></tr>";
+        my $birthday_extra = LJ::run_hook("birthday_extra_html", $bi->[2]);
+        $content .= $birthday_extra ? "<td>$birthday_extra</td>" : '';
+        $content .= '</tr>';
     }
     $content .= "</table>";
 
