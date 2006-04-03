@@ -51,6 +51,19 @@ propgroup appearance {
         "travel" => "http://www.typepad.com/.shared/themes/lilia/theme-travel.css",
         "wedding" => "http://www.typepad.com/.shared/themes/lilia/theme-wedding.css",
     };
+
+    property string linked_stylesheet {
+        des = "If you would like to use a stylesheet that is not listed above, enter the URL here";
+    }
+    set linked_stylesheet = "";
+
+    property string custom_css {
+    	des = "Custom Stylesheet";
+    	note = "If you'd like to customize this style from scratch and are familiar with CSS, enter it here";
+    	cols = 25;
+    	rows = 10;
+    }
+    set custom_css = "";
 }
 propgroup appearance = "Appearance";
 
@@ -511,7 +524,15 @@ function Page::print () {
         println safe """<link rel="stylesheet" href="$*STATDIR/sixhtml/ljextras.css" type="text/css" />\n""";
     }
 
-    if ($*base_theme != "__none") {
+    if ($*custom_css != "") {
+        println """<style type="text/css">""";
+        start_css();
+        println safe $*custom_css;
+        end_css();
+        println """</style>""";
+    } elseif ($*linked_stylesheet != "") {
+        println safe """<link rel="stylesheet" href="$*linked_stylesheet" type="text/css" />\n""";
+    } elseif ($*base_theme != "__none") {
         println safe """<link rel="stylesheet" href="$*theme_stylesheet{$*base_theme}" type="text/css" />\n""";
     }
 
