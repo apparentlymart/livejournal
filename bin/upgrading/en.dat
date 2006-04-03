@@ -3160,6 +3160,8 @@ The site team
 
 /manage/index.bml.customization.moodtheme.set.header=Set Your Mood Theme
 
+/manage/index.bml.customization.navstrip=Navigation Strip Settings
+
 /manage/index.bml.customization.s1.header=S1 Style System
 
 /manage/index.bml.customization.s2.header=S2 Style System
