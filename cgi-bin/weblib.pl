@@ -1829,16 +1829,13 @@ sub ads {
     my $pagetype = delete $opts{'orient'};
     my $user     = delete $opts{'user'};
 
-    return '' if $LJ::SSL;
-
     return '' unless LJ::run_hook('should_show_ad', {
         ctx  => $ctx,
         user => $user,
         type => $pagetype,
     });
 
-
-    # If we don't know about this sort of page, can't do much of anything
+    # If we don't know about this page type, can't do much of anything
     if (!defined $LJ::AD_PAGE_MAPPING{$pagetype}) {
         die("No mapping for page type $pagetype")
             if $LJ::IS_DEV_SERVER;
@@ -1849,7 +1846,10 @@ sub ads {
     my $r = Apache->request;
     my %adcall = ();
 
-    # Make sure this mapping is correct for app ads
+    # Make sure this mapping is correct for app ads, journal ads only call this function
+    # once when they directly want a specific type of ads.  App ads on the other hand
+    # are called via the site scheme, so this function may be called half a dozen times
+    # on each page creation.
     if ($ctx eq "app") {
         my $uri = BML::get_uri();
         $uri = $uri =~ /\/$/ ? "$uri/index.bml" : $uri;
@@ -1867,6 +1867,8 @@ sub ads {
         # page actually is.
         return '' unless $LJ::AD_MAPPING{$uri} eq $pagetype;
 
+        # If it was an interest search provide the query to the targetting engine
+        # for more relevant results
         if ($uri eq '/interests.bml') {
             my $args = $r->args;
             if ($args =~ /int=(.+)$/) {
@@ -1877,21 +1879,20 @@ sub ads {
         }
     }
 
+    $adcall{adunit}  = $LJ::AD_PAGE_MAPPING{$pagetype}->{adunit}; # ie skyscraper
+    my $addetails    = $LJ::AD_TYPE{$adcall{adunit}};             # hashref of meta-data or scalar to directly serve
 
-    my $adunit       = $LJ::AD_PAGE_MAPPING{$pagetype}->{adunit}; # ie skyscraper
-    my $addetails    = $LJ::AD_TYPE{$adunit};                     # hashref of meta-data or scalar to directly serve
-
-    $adcall{adunit}  = $adunit;
     $adcall{channel} = $pagetype;
     $adcall{type}    = $LJ::AD_PAGE_MAPPING{$pagetype}->{target}; # user|content
     $adcall{url}     = 'http://' . $r->header_in('Host') . $r->uri;
-    $adcall{width}   = $addetails->{width};
-    $adcall{height}  = $addetails->{height};
 
     if (ref $addetails eq 'HASH') {
+        $adcall{width}   = $addetails->{width};
+        $adcall{height}  = $addetails->{height};
 
         my $remote = LJ::get_remote();
         if ($remote) {
+            # Pass age and country to targetting engine if user shares this information
             if ($remote->{allow_infoshow} eq 'Y') {
                 if (defined $remote->{bdate} && $remote->{bdate} ne '0000-00-00') {
                     my $secs = time() - LJ::mysqldate_to_time($remote->{bdate});
@@ -1901,13 +1902,16 @@ sub ads {
                 $adcall{country} = $remote->prop('country');
             }
 
+            # Pass gender to targetting engine
             if ($adcall{gender} = $remote->prop('gender')) {
                 $adcall{gender} = uc(substr($adcall{gender}, 0, 1)); # M|F|U
                 $adcall{gender} = undef if $adcall{gender} eq 'U';
             }
 
+            # User selected ad content categories
             $adcall{categories} = $remote->prop('ad_categories');
 
+            # User's notable interests
             $adcall{interests} = join(',', $remote->notable_interests(5));
         }
 
@@ -1922,24 +1926,29 @@ sub ads {
             }
         }
 
+        # Language this page is displayed in
         $adcall{language} = $r->notes('langpref');
-        $adcall{language} =~ s/_LJ//; # EN_LJ
+        $adcall{language} =~ s/_LJ//; # Trim _LJ postfixJ
 
+        # What type of account level do they have?
         $adcall{accttype} = $remote ?
-            LJ::get_cap($remote, 'ads') ? 'ADS' : 'FREE' :
-            'NON';
+            $remote->in_class('plus') ? 'ADS' : 'FREE' :   # Ads or Free if logged in
+            'NON';                                         # Not logged in
 
+        # Build up escaped query string of adcall parameters
         my $adparams = join('&', map { LJ::eurl($_) . '=' . LJ::eurl($adcall{$_}) } keys %adcall);
 
         my $adhtml;
-        $adhtml .= "<div class=\"ljad lj$adunit\" id=\"\">";
+        $adhtml .= "<div class=\"ljad lj$adcall{adunit}\" id=\"\">";
         $adhtml .= "<h4 style='margin-bottom: 2px'>Advertisement</h4>";
 
+        # Iframe with call to ad targetting server
         $adhtml .= "<iframe src='${LJ::ADSERVER}?$adparams' frameborder='0' scrolling='no' id='adframe' ";
         $adhtml .= "width='" . LJ::ehtml($adcall{width}) . "' ";
         $adhtml .= "height='" . LJ::ehtml($adcall{height}) . "' ";
         $adhtml .= "></iframe>";
 
+        # Customize and feedback links
         my $eadcall = LJ::eurl($adparams);
         my $echannel = LJ::eurl($adcall{channel});
         my $euri = LJ::eurl($r->uri);
