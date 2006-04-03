@@ -2020,7 +2020,7 @@ sub control_strip
         } else {
             $ret .= "<td id='lj_controlstrip_userpic' style='background-image: none;'><a href='$LJ::SITEROOT/editpics.bml'><img src='$LJ::IMGPREFIX/controlstrip/nouserpic.gif' alt='No Userpic' title='Edit Userpics' height='43' /></a></td>";
         }
-        $ret .= "<td id='lj_controlstrip_user'><form id='Greeting' class='nopic' action='$LJ::SITEROOT/logout.bml' method='post'>";
+        $ret .= "<td id='lj_controlstrip_user'><form id='Greeting' class='nopic' action='$LJ::SITEROOT/logout.bml?ret=1' method='post'>";
         $ret .= "<input type='hidden' name='user' value='$remote->{'user'}' />";
         $ret .= "<input type='hidden' name='sessid' value='$remote->{'_session'}->{'sessid'}' />";
         my $logout = "<input type='submit' value='Log out' id='Logout' />";
@@ -2131,7 +2131,7 @@ sub control_strip
         my $chal = LJ::challenge_generate(300);
         $ret .= <<"LOGIN_BAR";
             <td id='lj_controlstrip_userpic'></td>
-            <td id='lj_controlstrip_login'><form id="login" action="$LJ::SITEROOT/login.bml" method="post">
+            <td id='lj_controlstrip_login'><form id="login" action="$LJ::SITEROOT/login.bml?ret=1" method="post">
             <input type="hidden" name="mode" value="login" />
             <input type='hidden' name='chal' id='login_chal' value='$chal' />
             <input type='hidden' name='response' id='login_response' value='' />
