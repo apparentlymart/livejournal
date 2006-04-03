@@ -1,10 +1,11 @@
 # -*-perl-*-
 
 use strict;
-use Test::More 'no_plan';
+use Test::More tests => 59;
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 use LJ::Userpic;
+use LJ::Test;
 use FindBin qw($Bin);
 use Digest::MD5;
 chdir "$Bin/data/userpics" or die "Failed to chdir to t/data/userpics";
@@ -84,8 +85,6 @@ sub run_tests {
         $up->set_fullurl($fullurl);
         is($up->fullurl, $fullurl, "Set fullurl");
     }
-
-    return 1;
 }
 
 eval { delete_all_userpics($u) };
@@ -103,10 +102,10 @@ for(('jpg', 'png', 'gif')) {
     ok($up->state, "... have some state");
 }
 
-ok(run_tests($up, $ext), "Memcache. Now trying without.");
+memcache_stress {
+    run_tests($up, $ext);
+};
 
-local $LJ::MemCache::GET_DISABLED = 1;
-ok(run_tests($up, $ext), 'Without memcache');
 
 sub file_contents {
     my $file = shift;
