@@ -243,7 +243,7 @@
                     $upload{md5ctx} = new Digest::MD5;
 
                     # get MogileFS filehandle
-                    return "Sorry, MogileFS must be running to handle the uploading of large images." unless LJ::mogclient();
+                    return $err->("Sorry, MogileFS must be running to handle the uploading of large images.") unless LJ::mogclient();
 
                     $upload{spool_fh} = LJ::mogclient()->new_file("upf:$u->{userid}", 'temp')
                         or die "Failed to open MogileFS tempfile";
@@ -617,8 +617,9 @@
             my $pid = $pic->id;
 
             $body .= "<tr><td>\n";
-            $body .= "<span class='EditPicsUserpic'><img src='$LJ::USERPIC_ROOT/$pid/$u->{'userid'}' width='$pic->{'width'}' height='$pic->{'height'}' /></span>\n";
             $body .= "<table><tr>\n";
+            $body .= "<td rowspan='3'><span class='EditPicsUserpic'><img src='$LJ::USERPIC_ROOT/$pid/$u->{'userid'}' width='$pic->{'width'}' height='$pic->{'height'}' /></span></td>\n";
+            
 
             $body .= "<td align='right'><b><label for='def_$pid'>$ML{'.label.default'}</label></b></td><td> ";
             $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'defaultpic', 'value' => $pid,
