@@ -39,6 +39,7 @@ html body
     font-size: 11px;
     line-height: 16.5px;
     text-decoration: underline;
+    border: 0;
 }
 
 #lj_controlstrip a img
