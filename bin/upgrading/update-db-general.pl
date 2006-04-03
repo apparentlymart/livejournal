@@ -2277,6 +2277,15 @@ CREATE TABLE userblobcache (
 )
 EOC
 
+register_tablecreate("smsusermap", <<'EOC');
+CREATE TABLE smsusermap (
+  number     VARCHAR(25) NOT NULL PRIMARY KEY,
+  userid     INT UNSIGNED NOT NULL,
+  INDEX(userid)
+)
+EOC
+
+
 # NOTE: new table declarations go here
 
 

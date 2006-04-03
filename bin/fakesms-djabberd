@@ -1,0 +1,37 @@
+#!/usr/bin/perl
+
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+use lib "$ENV{LJHOME}/src/djabberd/lib";
+require 'ljconfig.pl';
+
+use DJabberd;
+use DJabberd::Auth::AllowedUsers;
+use DJabberd::Auth::StaticPassword;
+use DJabberd::Delivery::Local;
+use Getopt::Long;
+
+use vars qw($DEBUG);
+$DEBUG = 0;
+
+my ($daemonize);
+
+Getopt::Long::GetOptions(
+    'd|daemon'       => \$daemonize,
+    'debug=i'        => \$DEBUG,
+   );
+
+use FindBin qw($Bin);
+
+my $server = DJabberd->new(
+                           server_name => $LJ::DOMAIN,
+                           daemonize => $daemonize,
+                           s2s       => 0,
+                           plugins   => [
+                                         DJabberd::Auth::AllowedUsers->new(policy => "deny",
+                                                                           allowed => [qr/^\+?\d+/, 'livejournal']),
+                                         DJabberd::Auth::StaticPassword->new(password => "smstest"),
+                                         DJabberd::Delivery::Local->new(),
+                                         ],
+                           );
+$server->run;
