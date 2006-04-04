@@ -347,12 +347,11 @@ function Page::print ()
 """;
  $this->print_control_strip();
  if (viewer_sees_ads()) {
-   "<div style='float: right; margin-right: 1em;'>";
-   $this->print_ad("Journal-Skyscraper");
-   "</div>";
- } 
+    """<table width="100%" height="100%">""";
+    """<tr><td valign="top">""";
+ }
 """
-  <table class="main" width="""; if (viewer_sees_ads()) { "\"80%\""; } else { "\"100%\""; } """><tr><td>
+  <table class="main" width="100%"><tr><td>
     $userpic
     <span class="page_title">$title</span>
     <p class="view_links">$links</p>
@@ -367,15 +366,17 @@ $this->print_linklist();
 
     ### Affliations
 
-    if (viewer_sees_ads()) {
-        "<div style='width: 80%; margin: 0; padding: 0;'>";
-    }
     "<table class='main' align='right'><tr>";
 
     print $website; "<td>"; server_sig(); "</td></tr>";
 
     "</table>";
-    if (viewer_sees_ads()) { "</div>"; }
+    if (viewer_sees_ads()) {
+        "</td>";
+        """<td valign="top" align="right" width="20%"><div style="margin-right: 10px;">""";
+        $this->print_ad("Journal-Skyscraper");
+        "</div></td></tr></table>";
+    } 
     "\n</body>\n</html>";
 }
 

@@ -793,6 +793,18 @@ a:visited {
     text-align: center;
     width: $*sidebar_width;
 }
+""";
+if (viewer_sees_ads()) {
+"""
+#adbar {
+    background-color: $*sidebar_bgcolor;
+    border-left: 1px solid $*border_color;
+    border-top: 1px solid $*border_color;
+    text-align: center;
+}
+""";
+}
+"""
 .sidebar_box {
     font-size: 0.8em;
     width: 100%;
@@ -907,11 +919,6 @@ function Page::print() {
     println "</head><body>";
 
     $this->print_control_strip();
-    if (viewer_sees_ads()) {
-        "<div style='float: right; margin-right: 1em'>";
-        $this->print_ad("Journal-Skyscraper");
-        "</div>";
-    }
 
     println """<a name="top"></a><div align="center">""";
 
@@ -920,7 +927,7 @@ function Page::print() {
     println """<h1>$title</h1></td></tr></table>""";
     println """<table cellspacing="0" cellpadding="0" id="main">""";
     println """<tr id="subtitles"><th height="15" width="$sidebar_html_width" id="sidebar_title">$*text_sidebar_title</th>""";
-    println """<th id="main_title">$view_title</th></tr>""";
+    "<th id=\"main_title\""; if (viewer_sees_ads()) { " colspan=\"2\""; } """>$view_title</th></tr>""";
 
         println """<tr><td id="sidebar" valign="top" width="$sidebar_html_width" style="overflow: hidden">""";
         print_sidebar($this);
@@ -929,9 +936,16 @@ function Page::print() {
     ### Content ###
     println """<td valign="top" id="content" align="center"><table cellspacing="0" cellpadding="0" align="center"><tr><td style='width: 85%; padding: 15px'>""";
     $this->print_body();
-    println "</td></tr></table></td></tr>";
+    println "</td></tr></table></td>";
+    if (viewer_sees_ads()) {
+        println """<td id="adbar" valign="top">""";
+        $this->print_ad("Journal-Skyscraper");
+        println "</td>";
+    }
+    "</tr>";
 
-    println """<tr><td height="15" id="top_of_page"><a href="#top">Top of Page</a></td><td id="server_sig">""";
+    println """<tr><td height="15" id="top_of_page"><a href="#top">Top of Page</a></td>""";
+    "<td id=\"server_sig\""; if (viewer_sees_ads()) { " colspan=\"2\" "; } ">";
     server_sig();
     println """</td></tr></table>""";
 
