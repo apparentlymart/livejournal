@@ -31,11 +31,17 @@ my $server = DJabberd->new(
                            s2s       => 0,
                            plugins   => [
                                          DJabberd::Auth::AllowedUsers->new(policy => "deny",
-                                                                           allowed => [qr/^\+?\d+/, 'livejournal']),
+                                                                           allowed => [qr/^\+?\d+/, 'sms']),
                                          DJabberd::Auth::StaticPassword->new(password => "smstest"),
                                          DJabberd::Delivery::FakeSMS->new(),
                                          DJabberd::Delivery::Local->new(),
                                          DJabberd::RosterStorage::FakeSMS->new(),
                                          ],
                            );
+
+# incoming
+$server->start_simple_server(5223);
+
 $server->run;
+
+
