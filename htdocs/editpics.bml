@@ -427,6 +427,7 @@
                 my $res = $ua->get($POST{urlpic});
                 $POST{userpic} = $res->content if $res && $res->is_success;
                 return $err->($ML{'.error.urlerror'}) unless $POST{userpic};
+                return $err->("You cannot upload large images from URLs.") if length($POST{userpic}) > $MAX_UPLOAD;
             }
 
             ## see if they have too many pictures uploaded
