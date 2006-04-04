@@ -1309,7 +1309,7 @@ sub all_recent_entries {
 
 sub sms_received {
     my ($u, $sms) = @_;
-    print STDERR "sms recevied for user '$u->{user}': ", $sms->as_string, "\n";
+    LJ::run_hooks("sms_received", $u, $sms);
 }
 
 sub send_sms {

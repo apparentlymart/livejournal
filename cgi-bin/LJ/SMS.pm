@@ -12,6 +12,10 @@ sub new {
     return $self;
 }
 
+sub text {
+    return $_[0]{text};
+}
+
 sub owner {
     my $self = shift;
     my $dbr = LJ::get_db_reader();
