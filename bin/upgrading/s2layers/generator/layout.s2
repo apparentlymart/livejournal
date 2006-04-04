@@ -322,41 +322,12 @@ function Page::print ()
 <body bgcolor="$*page_back" text="$*entry_text" link="$*page_link" vlink="$*page_vlink" alink="$*page_alink">
 """;
 $this->print_control_strip();
- if(viewer_sees_ads()) {
-
-"""
-<table cellpadding="2" cellspacing="0" border="0" summary="" style="float: right;">
-<tr><td bgcolor="$*stronger_back" align="center">
-<table width="100%" cellpadding="3" cellspacing="0"
-border="0"
-summary="">
-<tr>
-<td class="shadowed" align="center">
-<table cellspacing="5"
-cellpadding="0"
-border="0"
-summary="" style="margin-left: auto; margin-right: auto;">
-<tr><td><div align="center">""";
-
-$this->print_ad("Journal-Skyscraper");
-
-"""</div></td></tr></table>
-</td></tr></table>
-</td></tr></table>
-""";
-
+if (viewer_sees_ads()) {
+    """<table width="100%" height="100%">""";
+    """<tr><td valign="top">""";
 }
 """
 <div align="center">
-""";
-if (viewer_sees_ads()) {
-    """
-    <table width="$*box_width" cellpadding="2" cellspacing="0"
-    border="0"
-    summary=""><tr><td align="center">
-    """;
-}
-"""
 <table width="$*box_width" cellpadding="2" cellspacing="0"
 border="0"
 summary="">
@@ -422,9 +393,35 @@ $this->print_linklist();
 """;
     $this->print_body();
 
-if (viewer_sees_ads()) { "</td></tr></table>"; }
 """
 </div>
+""";
+if (viewer_sees_ads()) {
+    """
+    </td>
+    <td valign="top" align="right" width="20%">
+    <table cellpadding="2" cellspacing="0" border="0" summary="">
+    <tr><td bgcolor="$*stronger_back" align="center">
+    <table width="100%" cellpadding="3" cellspacing="0"
+    border="0"
+    summary="">
+    <tr>
+    <td class="shadowed" align="center">
+    <table cellspacing="5"
+    cellpadding="0"
+    border="0"
+    summary="" style="margin-left: auto; margin-right: auto;">
+    <tr><td><div align="center">
+    """;
+    $this->print_ad("Journal-Skyscraper");
+    """
+    </div></td></tr></table>
+    </td></tr></table>
+    </td></tr></table>
+    </td></tr></table>
+    """;
+}
+"""
 <p>
 </body>
 </html>
