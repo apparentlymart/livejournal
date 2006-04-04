@@ -1526,6 +1526,19 @@ sub create_view_friends
     $friends_page{'urlcalendar'} = "$journalbase/calendar";
     $friends_page{'urllastn'} = "$journalbase/";
 
+    if ($LJ::USE_ADS && $show_ad) {
+        $friends_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'FRIENDS_SKYSCRAPER_AD',
+                                                            { "ad" => LJ::ads( type => "journal", 
+                                                                               orient => 'Journal-Skyscraper',
+                                                                               user => $u->{user}), });
+        $friends_page{'open_skyscraper_ad'}  = $vars->{'FRIENDS_OPEN_SKYSCRAPER_AD'};
+        $friends_page{'close_skyscraper_ad'} = $vars->{'FRIENDS_CLOSE_SKYSCRAPER_AD'};
+    }
+    if ($LJ::USE_CONTROL_STRIP && $show_control_strip) {
+        my $control_strip = LJ::control_strip(user => $u->{user});
+        $friends_page{'control_strip'} = $control_strip;
+    }
+
     $friends_page{'events'} = "";
 
     my $itemshow = $vars->{'FRIENDS_OPT_ITEMS'} + 0;
@@ -1634,19 +1647,6 @@ sub create_view_friends
 
     my $lastday = -1;
     my $eventnum = 0;
-
-    if ($LJ::USE_ADS && $show_ad) {
-        $friends_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'FRIENDS_SKYSCRAPER_AD',
-                                                            { "ad" => LJ::ads( type => "journal", 
-                                                                               orient => 'Journal-Skyscraper',
-                                                                               user => $u->{user}), });
-        $friends_page{'open_skyscraper_ad'}  = $vars->{'FRIENDS_OPEN_SKYSCRAPER_AD'};
-        $friends_page{'close_skyscraper_ad'} = $vars->{'FRIENDS_CLOSE_SKYSCRAPER_AD'};
-    }
-    if ($LJ::USE_CONTROL_STRIP && $show_control_strip) {
-        my $control_strip = LJ::control_strip(user => $u->{user});
-        $friends_page{'control_strip'} = $control_strip;
-    }
 
   ENTRY:
     foreach my $item (@items)
