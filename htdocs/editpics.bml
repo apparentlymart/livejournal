@@ -446,11 +446,6 @@
                 return $err->($@);
             }
 
-            # now delete the uploaded picture from mogile
-            # do it now, after the pic has been created.
-            # Can get misleading errors if done earlier.
-            LJ::mogclient()->delete("upf:$u->{userid}") if $POST{'src'} eq 'factory';
-
             my $picid = $userpic->id;
 
             # make it their default pic?
