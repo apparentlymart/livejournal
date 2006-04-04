@@ -371,7 +371,7 @@ InOb.onSubmit = function () {
     if (! div_err) return InOb.fail('Unable to get error div');
 
     var setEnc = function (vl) {
-        form.enctype = vl;
+        form.encoding = vl;
         if (form.setAttribute) {
             form.setAttribute("enctype", vl);
         }
@@ -395,7 +395,7 @@ InOb.onSubmit = function () {
             return false;
         }
 
-        setEnc("");
+        setEnc("application/x-www-form-urlencoded");
         form.action = currentPopupWindow.urlaction;
         return true;
     }
