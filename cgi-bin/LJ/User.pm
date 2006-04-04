@@ -1312,6 +1312,19 @@ sub sms_received {
     print STDERR "sms recevied for user '$u->{user}': ", $sms->as_string, "\n";
 }
 
+sub send_sms {
+    my ($u, $sms) = @_;
+    my $dbr = LJ::get_db_reader();
+    my $number = $dbr->selectrow_array("SELECT number FROM smsusermap WHERE userid=? LIMIT 1",
+                                       undef, $u->{userid});
+    return 0 unless $number;
+    unless (ref $sms) {
+        $sms = LJ::SMS->new(text => $sms);
+    }
+    $sms->set_to($number);
+    $sms->send;
+}
+
 package LJ;
 
 # <LJFUNC>
