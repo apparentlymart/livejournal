@@ -588,20 +588,16 @@
         $body .= " standout?>\n\n";
     };
 
+    $emit_upload_box->();
+
     # print out each pic and editing fields
     if (scalar @userpics && !$fotobilder) {
         $body .= "<form method='post' action='editpics$suffix.bml$getextra'>";
         $body .= LJ::form_auth();
 
-        my $uploadBoxLink = '';
-
-        # print out a link to the bottom of the page where the upload box goes
-        $uploadBoxLink = '<?p <a href="#uploadBox">Upload new userpic</a> p?>' if scalar @userpics > 3;
-
         $body .= qq {
                 <?h1 $ML{'.curpics'} h1?>
                 <?p $ML{'.curpics.desc2'} p?>
-                $uploadBoxLink
                 <div class='EditPicsStatus'>
             };
 
@@ -615,7 +611,6 @@
             $body .= "<tr><td>\n";
             $body .= "<table><tr>\n";
             $body .= "<td rowspan='3'><span class='EditPicsUserpic'><img src='$LJ::USERPIC_ROOT/$pid/$u->{'userid'}' width='$pic->{'width'}' height='$pic->{'height'}' /></span></td>\n";
-            
 
             $body .= "<td align='right'><b><label for='def_$pid'>$ML{'.label.default'}</label></b></td><td> ";
             $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'defaultpic', 'value' => $pid,
@@ -680,8 +675,6 @@
                 <?p $ML{'.noneupload'} p?>
             };
     }
-
-    $emit_upload_box->();
 
     return;
 }
