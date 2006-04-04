@@ -608,14 +608,8 @@ sub set_keywords {
             next;
         }
 
-        if ($exist_kwids{$kwid}) { # Already used on another picture
-            my $ekw = LJ::ehtml($kw);
-            next;
-        } else { # New keyword, so save it
-            push @bind, '(?, ?, ?)';
-            push @data, $u->{'userid'}, $kwid, $picid;
-        }
-
+        push @bind, '(?, ?, ?)';
+        push @data, $u->{'userid'}, $kwid, $picid;
     }
 
     # Let the user know about any we didn't save
@@ -624,18 +618,12 @@ sub set_keywords {
         LJ::errobj("Userpic::TooManyKeywords",
                    userpic => $self,
                    lost    => \@kw_errors)->throw;
-
-
-        #push @errors, BML::ml(".error.toomanykeywords", {'numwords' => $num_words, 'words' => $kws, 'max' => $LJ::MAX_USERPIC_KEYWORDS});
     }
 
     LJ::Userpic->delete_cache($u);
 
-    if (! @data or scalar @data == 0) {
-        # delete all keywords
-        $u->do("DELETE FROM userpicmap2 WHERE userid=? AND picid=?", undef, $u->{userid}, $self->id);
-        return 1;
-    }
+    # delete all keywords
+    $u->do("DELETE FROM userpicmap2 WHERE userid=? AND picid=?", undef, $u->{userid}, $self->id);
 
     my $bind = join(',', @bind);
 
