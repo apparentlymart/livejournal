@@ -15,6 +15,9 @@
     my $sfx = $GET{'sfx'} || "";
     $sfx = "" unless $sfx =~ /^[\-\w]{1,10}$/;
 
+    my $w = int($GET{'imageWidth'});
+    my $h = int($GET{'imageHeight'});
+
     my $scaledSizeMax = 640;
 
     my $picpath = $LJ::SITEROOT . "/misc/mogupic.bml?size=$scaledSizeMax";
@@ -24,8 +27,8 @@
         <script type="text/javascript" src="$LJ::SITEROOT/js/dom.js"></script>
         <script type="text/javascript" src="$LJ::SITEROOT/js/image-region-select.js"></script>
         <script>
-                var origW = $GET{'imageWidth'};
-                var origH = $GET{'imageHeight'};
+                var origW = $w;
+                var origH = $h;
                 var scaledSizeMax = $scaledSizeMax;
         </script>
         };
@@ -133,8 +136,13 @@
 
 };
 
+my ($x1, $y1, $x2, $y2) = (20, 20, $w - 20, $h - 20);
+
 $body .= qq {
     <a href="/editpics$sfx.bml"><< Edit Userpics</a>
+    <noscript>
+    <h2>Sorry, you need javascript enabled to use the userpic factory.</h2><br/>
+    <br/><br/></noscript>
     };
 
 # is there a pic in mogile? If not, there's no real reason to be here
@@ -168,17 +176,17 @@ if (! @paths) {
       <form action="$LJ::SITEROOT/editpics$sfx.bml?authas=$GET{'authas'}" method="POST" enctype='multipart/form-data'>
       <input type="hidden" name="create" value="1" />
 
-      <input type="hidden" name="x1" id="x1" />
-      <input type="hidden" name="y1" id="y1" />
-      <input type="hidden" name="x2" id="x2" />
-      <input type="hidden" name="y2" id="y2" />
+      <input type="hidden" name="x1" id="x1" value="$x1" />
+      <input type="hidden" name="y1" id="y1" value="$y1" />
+      <input type="hidden" name="x2" id="x2" value="$x2" />
+      <input type="hidden" name="y2" id="y2" value="$y2" />
 
       <input type="hidden" name="scaledSizeMax" id="scaledSizeMax" value="$scaledSizeMax" />
 
       <input type="hidden" name="src" value="factory" />
       } . LJ::form_auth() . qq {
 
-      <input type="submit" value="Create Userpic" disabled="true" id="createbtn" />
+      <input type="submit" value="Create Userpic"  id="createbtn" />
       } . LJ::html_hidden('keywords', $GET{'keywords'},
                           'comments', $GET{'comments'},
                           'make_default', $GET{'make_default'}) . qq {
