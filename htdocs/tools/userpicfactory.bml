@@ -83,6 +83,7 @@
           var checked = $('constrain').checked;
           regsel.keepSquare(checked);
           regsel.setBottomRight(regsel.brx, regsel.bry, checked);
+          regsel.fireOnRegionChanged();
         }
 
         function getSizedCoords (newsize, w, h) {
