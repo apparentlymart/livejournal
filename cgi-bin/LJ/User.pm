@@ -1307,6 +1307,11 @@ sub all_recent_entries {
     return $u->recent_entries(%opts);
 }
 
+sub sms_received {
+    my ($u, $sms) = @_;
+    print STDERR "sms recevied for user '$u->{user}': ", $sms->as_string, "\n";
+}
+
 package LJ;
 
 # <LJFUNC>

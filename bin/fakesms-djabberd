@@ -8,7 +8,9 @@ require 'ljconfig.pl';
 use DJabberd;
 use DJabberd::Auth::AllowedUsers;
 use DJabberd::Auth::StaticPassword;
+use DJabberd::Delivery::FakeSMS;
 use DJabberd::Delivery::Local;
+use DJabberd::RosterStorage::FakeSMS;
 use Getopt::Long;
 
 use vars qw($DEBUG);
@@ -31,7 +33,9 @@ my $server = DJabberd->new(
                                          DJabberd::Auth::AllowedUsers->new(policy => "deny",
                                                                            allowed => [qr/^\+?\d+/, 'livejournal']),
                                          DJabberd::Auth::StaticPassword->new(password => "smstest"),
+                                         DJabberd::Delivery::FakeSMS->new(),
                                          DJabberd::Delivery::Local->new(),
+                                         DJabberd::RosterStorage::FakeSMS->new(),
                                          ],
                            );
 $server->run;

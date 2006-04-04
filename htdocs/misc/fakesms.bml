@@ -1,0 +1,15 @@
+<?_code
+{
+    use strict;
+    use vars qw(%POST);
+    use LJ::SMS;
+    return "developer-only feature" unless $LJ::IS_DEV_SERVER;
+
+    my $sms = LJ::SMS->new(from => $POST{from},
+                           text => $POST{message});
+    my $u = $sms->owner or return "no owner";
+
+    $u->sms_received($sms);
+    return "ok\n";
+}
+_code?>
