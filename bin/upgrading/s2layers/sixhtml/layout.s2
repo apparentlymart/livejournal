@@ -60,8 +60,8 @@ propgroup appearance {
     property string custom_css {
     	des = "Custom Stylesheet";
     	note = "If you'd like to customize this style from scratch and are familiar with CSS, enter it here";
-    	cols = 25;
-    	rows = 10;
+    	cols = 80;
+    	rows = 20;
     }
     set custom_css = "";
 }
