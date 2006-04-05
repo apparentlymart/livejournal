@@ -44,7 +44,7 @@ sub FriendsPage
 
         # send back a 304 Not Modified if they say they've reloaded this
         # document in the last $newinterval seconds:
-        my $uniq = Apache::Request->notes('uniq');
+        my $uniq = Apache->request->notes('uniq');
         if ($theirtime > $lastmod && ($uniq && !LJ::MemCache::get([ $uniq, "loginout:$uniq" ]))) {
             $opts->{'handler_return'} = 304;
             return 1;
