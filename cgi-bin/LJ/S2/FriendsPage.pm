@@ -39,7 +39,8 @@ sub FriendsPage
 
     # see if they have a previously cached copy of this page they
     # might be able to still use.
-    if ($opts->{'header'}->{'If-Modified-Since'}) {
+    my $uniq = Apache::Request->notes('uniq');
+    if ($opts->{'header'}->{'If-Modified-Since'} && ($uniq && !LJ::MemCache::get([ $uniq, "loginout:$uniq" ]))) {
         my $theirtime = LJ::http_to_time($opts->{'header'}->{'If-Modified-Since'});
 
         # send back a 304 Not Modified if they say they've reloaded this
