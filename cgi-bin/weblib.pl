@@ -1989,15 +1989,16 @@ sub control_strip
                  'manage_entries'    => "<a href='$LJ::SITEROOT/editjournal.bml'>Manage Entries</a>",
                  'invite_friends'    => "<a href='$LJ::SITEROOT/friends/invite.bml'>Invite Friends</a>",
                  'create_account'    => "<a href='$LJ::SITEROOT/create.bml'>Create a $LJ::SITENAMESHORT Account</a>",
-                 'manage_syndicated' => "<a href='$LJ::SITEROOT/syn/'>View Your Syndicated Feeds</a>",
                  'syndicated_list'   => "<a href='$LJ::SITEROOT/syn/list.bml'>View the Most Popular Feeds</a>",
-                 'news_page'         => "<a href='$LJ::SITEROOT/news.bml'>View the Recent News</a>",
                  'learn_more'        => "<a href='$LJ::SITEROOT/'>Learn more</a>",
                  );
 
     if ($remote) {
         $links{'view_friends_page'} = "<a href='" . $remote->journal_base() . "/friends/'>View my Friends Page</a>";
         $links{'add_friend'} = "<a href='$LJ::SITEROOT/friends/add.bml?user=$journal->{user}'>Add them as a friend</a>";
+        if ($journal->{journaltype} eq "Y" || $journal->{journaltype} eq "N") {
+            $links{'add_friend'} = "<a href='$LJ::SITEROOT/friends/add.bml?user=$journal->{user}'>Add it to your Friends Page</a>";
+        }
         if ($journal->{journaltype} eq "C") {
             $links{'join_community'}   = "<a href='$LJ::SITEROOT/community/join.bml?comm=$journal->{user}'>Join this community</a>";
             $links{'leave_community'}  = "<a href='$LJ::SITEROOT/community/leave.bml?comm=$journal->{user}'>Leave this community</a>";
@@ -2011,6 +2012,27 @@ sub control_strip
         }
     }
     my $journal_display = LJ::ljuser($journal);
+    my %statustext = (
+                    'yourjournal'       => "You are viewing your journal",
+                    'yourfriendspage'   => "You are viewing your Friends Page",
+                    'personal'          => "You are viewing ${journal_display}'s journal",
+                    'community'         => "You are viewing the community $journal_display",
+                    'syn'               => "You are viewing the feed $journal_display",
+                    'news'              => "You are viewing the site news account $journal_display",
+                    'other'             => "You are viewing $journal_display",
+                    'mutualfriend'      => "$journal_display is your mutual friend",
+                    'friend'            => "You list $journal_display as a friend",
+                    'friendof'          => "$journal_display lists you as a friend",
+                    'maintainer'        => "You are a maintainer of $journal_display",
+                    'memberwatcher'     => "You are a member of and are watching $journal_display",
+                    'watcher'           => "You are watching $journal_display",
+                    'member'            => "You are a member of $journal_display",
+                    );
+    # Style the status text
+    foreach my $key (keys %statustext) {
+        $statustext{$key} = "<span id='lj_controlstrip_statustext'>" . $statustext{$key} . "</span>";
+    }
+
     my $ret;
     if ($remote) {
         my $remote_display  = LJ::ljuser($remote);
@@ -2034,8 +2056,8 @@ sub control_strip
 
         $ret .= "<td id='lj_controlstrip_actionlinks'>";
         if ($remote && $remote->{userid} == $journal->{userid}) {
-            $ret .= $r->notes('view') eq "friends" ? "<span id='lj_controlstrip_statustext'>You are viewing your friends page</span>" : "<span id='lj_controlstrip_statustext'>You are viewing your Journal</span>";
-            $ret .= "<br /><strong>You can:</strong>&nbsp;&nbsp; ";
+            $ret .= $r->notes('view') eq "friends" ? $statustext{'yourfriendspage'} : $statustext{'yourjournal'};
+            $ret .= "<br />";
             if ($r->notes('view') eq "friends") {
                 my @filters = ("all", "All Friends", "showpeople", "Journals Only", "showcommunities", "Communities Only", "showsyndicated", "Syndicated Feeds");
                 my %res;
@@ -2072,54 +2094,66 @@ sub control_strip
             my $friendof = LJ::is_friend($journal, $remote);
 
             if ($friend and $friendof) {
-                $ret .= "<span id='lj_controlstrip_statustext'>$journal_display is your mutual friend</span><br />";
-                $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{'manage_friends'}";
+                $ret .= "$statustext{'mutualfriend'}<br />";
+                $ret .= "$links{'manage_friends'}";
             } elsif ($friend) {
-                $ret .= "<span id='lj_controlstrip_statustext'>$journal_display is your friend</span><br />";
-                $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{'manage_friends'}";
+                $ret .= "$statustext{'friend'}<br />";
+                $ret .= "$links{'manage_friends'}";
             } elsif ($friendof) {
-                $ret .= "<span id='lj_controlstrip_statustext'>$journal_display lists you as a friend</span><br />";
-                $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{'add_friend'}";
+                $ret .= "$statustext{'friendof'}<br />";
+                $ret .= "$links{'add_friend'}";
             } else {
-                $ret .= "<span id='lj_controlstrip_statustext'>You are viewing ${journal_display}'s journal</span><br />";
-                $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{'add_friend'}";
+                $ret .= "$statustext{'personal'}<br />";
+                $ret .= "$links{'add_friend'}";
             }
         } elsif ($journal->{journaltype} eq "C") {
             my $watching = LJ::is_friend($remote, $journal);
             my $memberof = LJ::is_friend($journal, $remote);
+            my $haspostingaccess = LJ::check_rel($journal, $remote, 'P');
             if (LJ::can_manage_other($remote, $journal)) {
-                $ret .= "<span id='lj_controlstrip_statustext'>You are a maintainer of this community</span><br />";
-                $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{'edit_community_profile'}&nbsp;&nbsp; $links{'edit_community_settings'}&nbsp;&nbsp; " .
+                $ret .= "$statustext{'maintainer'}<br />";
+                $ret .= "$links{'edit_community_profile'}&nbsp;&nbsp; $links{'edit_community_settings'}&nbsp;&nbsp; " .
                     "$links{'edit_community_invites'}&nbsp;&nbsp; $links{'edit_community_members'}";
             } elsif ($watching && $memberof) {
-                $ret .= "<span id='lj_controlstrip_statustext'>You are a member of and watching $journal_display</span><br />";
-                $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{'post_to_community'}&nbsp;&nbsp; $links{'leave_community'}";
+                $ret .= "$statustext{'memberwatcher'}<br />";
+                if ($haspostingaccess) {
+                    $ret .= "$links{'post_to_community'}&nbsp;&nbsp; ";
+                }
+                $ret .= $links{'leave_community'};
             } elsif ($watching) {
-                $ret .= "<span id='lj_controlstrip_statustext'>You are watching $journal_display</span><br />";
-                $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{'join_community'}&nbsp;&nbsp; $links{'unwatch_community'}";
+                $ret .= "$statustext{'watcher'}<br />";
+                if ($haspostingaccess) {
+                    $ret .= "$links{'post_to_community'}&nbsp;&nbsp; ";
+                }
+                $ret .= "$links{'join_community'}&nbsp;&nbsp; $links{'unwatch_community'}";
             } elsif ($memberof) {
-                $ret .= "<span id='lj_controlstrip_statustext'>You are a member of $journal_display</span><br />";
-                $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{'watch_community'}&nbsp;&nbsp; $links{'leave_community'}";
+                $ret .= "$statustext{'member'}<br />";
+                if ($haspostingaccess) {
+                    $ret .= "$links{'post_to_community'}&nbsp;&nbsp; ";
+                }
+                $ret .= "$links{'watch_community'}&nbsp;&nbsp; $links{'leave_community'}";
             } else {
-                $ret .= "<span id='lj_controlstrip_statustext'>You are viewing $journal_display</span><br />";
-                $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{'join_community'}&nbsp;&nbsp; $links{'watch_community'}";
+                $ret .= "$statustext{'community'}<br />";
+                if ($haspostingaccess) {
+                    $ret .= "$links{'post_to_community'}&nbsp;&nbsp; ";
+                }
+                $ret .= "$links{'join_community'}&nbsp;&nbsp; $links{'watch_community'}";
             }
         } elsif ($journal->{journaltype} eq "Y") {
-            $ret .= "<span id='lj_controlstrip_statustext'>You are viewing $journal_display</span><br />";
-            $ret .= "<strong>You can:</strong> ";
-            if ($remote) {
-                $ret .= $links{'manage_syndicated'} . " ";
+            $ret .= "$statustext{'syn'}<br />";
+            if ($remote && !LJ::is_friend($remote, $journal)) {
+                $ret .= "$links{'add_friend'}&nbsp;&nbsp; ";
             }
             $ret .= $links{'syndicated_list'};
         } elsif ($journal->{journaltype} eq "N") {
-            $ret .= "<span id='lj_controlstrip_statustext'>You are viewing the site news account $journal_display</span><br />";
-            $ret .= "<strong>You can:</strong> ";
-            if ($remote && LJ::is_friend($remote, $journal)) {
-                $ret .= $links{'add_friend'} . " ";
+            $ret .= "$statustext{'news'}<br />";
+            if ($remote && !LJ::is_friend($remote, $journal)) {
+                $ret .= $links{'add_friend'};
+            } else {
+                $ret .= "&nbsp;";
             }
-            $ret .= $links{'news_page'};
         } else {
-            $ret .= "<span id='lj_controlstrip_statustext'>You are viewing $journal_display</span><br />";
+            $ret .= "$statustext{'other'}<br />";
             $ret .= "&nbsp;";
         }
         $ret .= LJ::run_hook('control_strip_logo');
@@ -2151,8 +2185,23 @@ LOGIN_BAR
         $ret .= "</td></tr></table>";
 
         $ret .= '</form></td>';
-        $ret .= "<td id='lj_controlstrip_actionlinks'><span id='lj_controlstrip_statustext'>You are viewing ${journal_display}'s journal</span><br />";
-        $ret .= "<strong>You can:</strong>&nbsp;&nbsp; $links{'create_account'}&nbsp;&nbsp; $links{'learn_more'}";
+        $ret .= "<td id='lj_controlstrip_actionlinks'>";
+
+        my $jtype = $journal->{journaltype};
+        if ($jtype eq "P" || $jtype eq "I") {
+            $ret .= $statustext{'personal'};
+        } elsif ($jtype eq "C") {
+            $ret .= $statustext{'community'};
+        } elsif ($jtype eq "Y") {
+            $ret .= $statustext{'syn'};
+        } elsif ($jtype eq "N") {
+            $ret .= $statustext{'news'};
+        } else {
+            $ret .= $statustext{'other'};
+        }
+
+        $ret .= "<br />";
+        $ret .= "$links{'create_account'}&nbsp;&nbsp; $links{'learn_more'}";
         $ret .= LJ::run_hook('control_strip_logo');
         $ret .= "</td>";
     }
