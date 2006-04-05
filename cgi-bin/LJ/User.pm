@@ -1325,6 +1325,11 @@ sub send_sms {
     $sms->send;
 }
 
+sub is_syndicated {
+    my $u = shift;
+    return $u->{journaltype} eq "Y";
+}
+
 package LJ;
 
 # <LJFUNC>
