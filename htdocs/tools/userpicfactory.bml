@@ -140,9 +140,13 @@ my ($x1, $y1, $x2, $y2) = (20, 20, $w - 20, $h - 20);
 
 $body .= qq {
     <a href="/editpics$sfx.bml"><< Edit Userpics</a>
-    <noscript>
-    <h2>Sorry, you need javascript enabled to use the userpic factory.</h2><br/>
-    <br/><br/></noscript>
+    <noscript><p><b>
+You need JavaScript in order to use the
+Userpic Factory. Since you have JavaScript disabled, you will be unable
+to select a region or preview your userpic. However, you can create a
+userpic-sized version of the image you uploaded by clicking on the
+Create Userpic button.</b></p>
+    </noscript>
     };
 
 # is there a pic in mogile? If not, there's no real reason to be here
