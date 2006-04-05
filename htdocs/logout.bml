@@ -37,7 +37,7 @@
         my $referer = BML::get_client_header('Referer');
         if ($GET{'ret'} == 1 && $referer && $referer =~ /\Q$LJ::DOMAIN\E/) {
             my $eh_ref = LJ::ehtml($referer);
-            my $uniq = Apache::Request->notes('uniq');
+            my $uniq = Apache->request->notes('uniq');
             if ($uniq) {
                 LJ::MemCache::set([ $uniq, "loginout:$uniq" ], 1, time() + 15);
             }
