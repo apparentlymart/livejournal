@@ -1982,52 +1982,52 @@ sub control_strip
     my $r = Apache->request;
     # Build up some common links
     my %links = (
-                 'post_journal'      => "<a href='$LJ::SITEROOT/update.bml'>Post to Journal</a>",
-                 'portal'            => "<a href='$LJ::SITEROOT/portal/'>My LJ</a>",
-                 'recent_comments'   => "<a href='$LJ::SITEROOT/tools/recent_comments.bml'>View Recent Comments</a>",
-                 'manage_friends'    => "<a href='$LJ::SITEROOT/friends/'>Manage Friends</a>",
-                 'manage_entries'    => "<a href='$LJ::SITEROOT/editjournal.bml'>Manage Entries</a>",
-                 'invite_friends'    => "<a href='$LJ::SITEROOT/friends/invite.bml'>Invite Friends</a>",
-                 'create_account'    => "<a href='$LJ::SITEROOT/create.bml'>Create a $LJ::SITENAMESHORT Account</a>",
-                 'syndicated_list'   => "<a href='$LJ::SITEROOT/syn/list.bml'>View the Most Popular Feeds</a>",
-                 'learn_more'        => "<a href='$LJ::SITEROOT/'>Learn more</a>",
+                 'post_journal'      => "<a href='$LJ::SITEROOT/update.bml'>$BML::ML{'web.controlstrip.links.post'}</a>",
+                 'portal'            => "<a href='$LJ::SITEROOT/portal/'>" . BML::ml('web.controlstrip.links.mylj', {'siteabbrev' => $LJ::SITENAMEABBREV}) . "</a>",
+                 'recent_comments'   => "<a href='$LJ::SITEROOT/tools/recent_comments.bml'>$BML::ML{'web.controlstrip.links.recentcomments'}</a>",
+                 'manage_friends'    => "<a href='$LJ::SITEROOT/friends/'>$BML::ML{'web.controlstrip.links.managefriends'}</a>",
+                 'manage_entries'    => "<a href='$LJ::SITEROOT/editjournal.bml'>$BML::ML{'web.controlstrip.links.manageentries'}</a>",
+                 'invite_friends'    => "<a href='$LJ::SITEROOT/friends/invite.bml'>$BML::ML{'web.controlstrip.links.invitefriends'}</a>",
+                 'create_account'    => "<a href='$LJ::SITEROOT/create.bml'>" . BML::ml('web.controlstrip.links.create', {'sitename' => $LJ::SITENAMESHORT}) . "</a>",
+                 'syndicated_list'   => "<a href='$LJ::SITEROOT/syn/list.bml'>$BML::ML{'web.controlstrip.links.popfeeds'}</a>",
+                 'learn_more'        => "<a href='$LJ::SITEROOT/'>$BML::ML{'web.controlstrip.links.learnmore'}</a>",
                  );
 
     if ($remote) {
-        $links{'view_friends_page'} = "<a href='" . $remote->journal_base() . "/friends/'>View my Friends Page</a>";
-        $links{'add_friend'} = "<a href='$LJ::SITEROOT/friends/add.bml?user=$journal->{user}'>Add them as a friend</a>";
+        $links{'view_friends_page'} = "<a href='" . $remote->journal_base() . "/friends/'>$BML::ML{'web.controlstrip.links.viewfriendspage'}</a>";
+        $links{'add_friend'} = "<a href='$LJ::SITEROOT/friends/add.bml?user=$journal->{user}'>$BML::ML{'web.controlstrip.links.addfriend'}</a>";
         if ($journal->{journaltype} eq "Y" || $journal->{journaltype} eq "N") {
-            $links{'add_friend'} = "<a href='$LJ::SITEROOT/friends/add.bml?user=$journal->{user}'>Add it to your Friends Page</a>";
-            $links{'remove_friend'} = "<a href='$LJ::SITEROOT/friends/add.bml?user=$journal->{user}'>Remove it from your Friends Page</a>";
+            $links{'add_friend'} = "<a href='$LJ::SITEROOT/friends/add.bml?user=$journal->{user}'>$BML::ML{'web.controlstrip.links.addfeed'}</a>";
+            $links{'remove_friend'} = "<a href='$LJ::SITEROOT/friends/add.bml?user=$journal->{user}'>$BML::ML{'web.controlstrip.links.removefeed'}</a>";
         }
         if ($journal->{journaltype} eq "C") {
-            $links{'join_community'}   = "<a href='$LJ::SITEROOT/community/join.bml?comm=$journal->{user}'>Join this community</a>";
-            $links{'leave_community'}  = "<a href='$LJ::SITEROOT/community/leave.bml?comm=$journal->{user}'>Leave this community</a>";
-            $links{'watch_community'}  = "<a href='$LJ::SITEROOT/friends/add.bml?user=$journal->{user}'>Watch this community</a>";
-            $links{'unwatch_community'}   = "<a href='$LJ::SITEROOT/friends/add.bml?user=$journal->{user}'>Stop watching this community</a>";
-            $links{'post_to_community'}   = "<a href='$LJ::SITEROOT/update.bml?usejournal=$journal->{user}'>Post to this community</a>";
-            $links{'edit_community_profile'} = "<a href='$LJ::SITEROOT/editinfo.bml?authas=$journal->{user}'>Edit the Profile</a>";
-            $links{'edit_community_settings'} = "<a href='$LJ::SITEROOT/community/settings.bml?comm=$journal->{user}'>Change Settings</a>";
-            $links{'edit_community_invites'} = "<a href='$LJ::SITEROOT/community/sentinvites.bml?comm=$journal->{user}'>Manage Invites</a>";
-            $links{'edit_community_members'} = "<a href='$LJ::SITEROOT/community/members.bml?comm=$journal->{user}'>Edit Members</a>";
+            $links{'join_community'}   = "<a href='$LJ::SITEROOT/community/join.bml?comm=$journal->{user}'>$BML::ML{'web.controlstrip.links.joincomm'}</a>";
+            $links{'leave_community'}  = "<a href='$LJ::SITEROOT/community/leave.bml?comm=$journal->{user}'>$BML::ML{'web.controlstrip.links.leavecomm'}</a>";
+            $links{'watch_community'}  = "<a href='$LJ::SITEROOT/friends/add.bml?user=$journal->{user}'>$BML::ML{'web.controlstrip.links.watchcomm'}</a>";
+            $links{'unwatch_community'}   = "<a href='$LJ::SITEROOT/friends/add.bml?user=$journal->{user}'>$BML::ML{'web.controlstrip.links.removecomm'}</a>";
+            $links{'post_to_community'}   = "<a href='$LJ::SITEROOT/update.bml?usejournal=$journal->{user}'>$BML::ML{'web.controlstrip.links.postcomm'}</a>";
+            $links{'edit_community_profile'} = "<a href='$LJ::SITEROOT/editinfo.bml?authas=$journal->{user}'>$BML::ML{'web.controlstrip.links.editcommprofile'}</a>";
+            $links{'edit_community_settings'} = "<a href='$LJ::SITEROOT/community/settings.bml?comm=$journal->{user}'>$BML::ML{'web.controlstrip.links.changecommsettings'}</a>";
+            $links{'edit_community_invites'} = "<a href='$LJ::SITEROOT/community/sentinvites.bml?comm=$journal->{user}'>$BML::ML{'web.controlstrip.links.managecomminvites'}</a>";
+            $links{'edit_community_members'} = "<a href='$LJ::SITEROOT/community/members.bml?comm=$journal->{user}'>$BML::ML{'web.controlstrip.links.editcommmembers'}</a>";
         }
     }
     my $journal_display = LJ::ljuser($journal);
     my %statustext = (
-                    'yourjournal'       => "You are viewing your journal",
-                    'yourfriendspage'   => "You are viewing your Friends Page",
-                    'personal'          => "You are viewing ${journal_display}'s journal",
-                    'community'         => "You are viewing the community $journal_display",
-                    'syn'               => "You are viewing the feed $journal_display",
-                    'news'              => "You are viewing the site news account $journal_display",
-                    'other'             => "You are viewing $journal_display",
-                    'mutualfriend'      => "$journal_display is your mutual friend",
-                    'friend'            => "You list $journal_display as a friend",
-                    'friendof'          => "$journal_display lists you as a friend",
-                    'maintainer'        => "You are a maintainer of $journal_display",
-                    'memberwatcher'     => "You are a member of and are watching $journal_display",
-                    'watcher'           => "You are watching $journal_display",
-                    'member'            => "You are a member of $journal_display",
+                    'yourjournal'       => $BML::ML{'web.controlstrip.status.yourjournal'},
+                    'yourfriendspage'   => $BML::ML{'web.controlstrip.status.yourfriendspage'},
+                    'personal'          => BML::ml('web.controlstrip.status.personal', {'user' => $journal_display}),
+                    'community'         => BML::ml('web.controlstrip.status.community', {'user' => $journal_display}),
+                    'syn'               => BML::ml('web.controlstrip.status.syn', {'user' => $journal_display}),
+                    'news'              => BML::ml('web.controlstrip.status.news', {'user' => $journal_display, 'sitename' => $LJ::SITENAMESHORT}),
+                    'other'             => BML::ml('web.controlstrip.status.other', {'user' => $journal_display}),
+                    'mutualfriend'      => BML::ml('web.controlstrip.status.mutualfriend', {'user' => $journal_display}),
+                    'friend'            => BML::ml('web.controlstrip.status.friend', {'user' => $journal_display}),
+                    'friendof'          => BML::ml('web.controlstrip.status.friendof', {'user' => $journal_display}),
+                    'maintainer'        => BML::ml('web.controlstrip.status.maintainer', {'user' => $journal_display}),
+                    'memberwatcher'     => BML::ml('web.controlstrip.status.memberwatcher', {'user' => $journal_display}),
+                    'watcher'           => BML::ml('web.controlstrip.status.watcher', {'user' => $journal_display}),
+                    'member'            => BML::ml('web.controlstrip.status.member', {'user' => $journal_display}),
                     );
     # Style the status text
     foreach my $key (keys %statustext) {
@@ -2039,14 +2039,14 @@ sub control_strip
         my $remote_display  = LJ::ljuser($remote);
         if ($remote->{'defaultpicid'}) {
             my $url = "$LJ::USERPIC_ROOT/$remote->{'defaultpicid'}/$remote->{'userid'}";
-            $ret .= "<td id='lj_controlstrip_userpic' style='background-image: none;'><a href='$LJ::SITEROOT/editpics.bml'><img src='$url' alt='Userpic' title='Edit Userpics' height='43' /></a></td>";
+            $ret .= "<td id='lj_controlstrip_userpic' style='background-image: none;'><a href='$LJ::SITEROOT/editpics.bml'><img src='$url' alt=\"$BML::ML{'web.controlstrip.userpic.alt'}\" title=\"$BML::ML{'web.controlstrip.userpic.title'}\" height='43' /></a></td>";
         } else {
-            $ret .= "<td id='lj_controlstrip_userpic' style='background-image: none;'><a href='$LJ::SITEROOT/editpics.bml'><img src='$LJ::IMGPREFIX/controlstrip/nouserpic.gif' alt='No Userpic' title='Edit Userpics' height='43' /></a></td>";
+            $ret .= "<td id='lj_controlstrip_userpic' style='background-image: none;'><a href='$LJ::SITEROOT/editpics.bml'><img src='$LJ::IMGPREFIX/controlstrip/nouserpic.gif' alt=\"$BML::ML{'web.controlstrip.nouserpic.alt'}\" title=\"$BML::ML{'web.controlstrip.nouserpic.title'}\" height='43' /></a></td>";
         }
         $ret .= "<td id='lj_controlstrip_user'><form id='Greeting' class='nopic' action='$LJ::SITEROOT/logout.bml?ret=1' method='post'>";
         $ret .= "<input type='hidden' name='user' value='$remote->{'user'}' />";
         $ret .= "<input type='hidden' name='sessid' value='$remote->{'_session'}->{'sessid'}' />";
-        my $logout = "<input type='submit' value='Log out' id='Logout' />";
+        my $logout = "<input type='submit' value=\"$BML::ML{'web.controlstrip.btn.logout'}\" id='Logout' />";
         $ret .= "$remote_display<br />$logout";
         $ret .= "</form>\n";
         $ret .= "</td>\n";
@@ -2060,7 +2060,7 @@ sub control_strip
             $ret .= $r->notes('view') eq "friends" ? $statustext{'yourfriendspage'} : $statustext{'yourjournal'};
             $ret .= "<br />";
             if ($r->notes('view') eq "friends") {
-                my @filters = ("all", "All Friends", "showpeople", "Journals Only", "showcommunities", "Communities Only", "showsyndicated", "Syndicated Feeds");
+                my @filters = ("all", $BML::ML{'web.controlstrip.select.friends.all'}, "showpeople", $BML::ML{'web.controlstrip.select.friends.journals'}, "showcommunities", $BML::ML{'web.controlstrip.select.friends.communities'}, "showsyndicated", $BML::ML{'web.controlstrip.select.friends.feeds'});
                 my %res;
                 # FIXME: make this use LJ::Protocol::do_request 
                 LJ::do_request({ 'mode' => 'getfriendgroups',
@@ -2081,10 +2081,10 @@ sub control_strip
                 }
 
                 $ret .= "$links{'manage_friends'}&nbsp;&nbsp; ";
-                $ret .= "Filter: <form method='post' style='display: inline;' action='$LJ::SITEROOT/friends/filter.bml'>\n";
+                $ret .= "$BML::ML{'web.controlstrip.select.friends.label'} <form method='post' style='display: inline;' action='$LJ::SITEROOT/friends/filter.bml'>\n";
                 $ret .= LJ::html_hidden("user", $remote->{'user'}, "mode", "view", "type", "allfilters");
                 $ret .= LJ::html_select({'name' => "view", 'selected' => "all"}, @filters) . " ";
-                $ret .= LJ::html_submit("View");
+                $ret .= LJ::html_submit($BML::ML{'web.controlstrip.btn.view'});
                 $ret .= "</form>";
                 # drop down for various groups and show values
             } else {
@@ -2173,18 +2173,18 @@ sub control_strip
             <input type='hidden' name='chal' id='login_chal' value='$chal' />
             <input type='hidden' name='response' id='login_response' value='' />
             <table><tr><td>
-            <label for="xc_user">Username:</label> <input type="text" name="user" size="14" maxlength="17" tabindex="1" id="xc_user" value="" />
+            <label for="xc_user">$BML::ML{'/login.bml.login.username'}</label> <input type="text" name="user" size="14" maxlength="17" tabindex="1" id="xc_user" value="" />
             </td><td colspan='2'>
-            <label for="xc_password">Password:</label> <input type="password" name="password" size="14" tabindex="2" id="xc_password" />
+            <label for="xc_password">$BML::ML{'/login.bml.login.password'}</label> <input type="password" name="password" size="14" tabindex="2" id="xc_password" />
 LOGIN_BAR
-        $ret .= "<input type='submit' value='Log in' tabindex='4' />";
+        $ret .= "<input type='submit' value=\"$BML::ML{'web.controlstrip.btn.login'}\" tabindex='4' />";
         $ret .= "</td></tr>";
 
         $ret .= "<tr><td valign='top'>";
-        $ret .= "<a href='$LJ::SITEROOT/lostinfo.bml'>Forgot your password?</a>";
+        $ret .= "<a href='$LJ::SITEROOT/lostinfo.bml'>$BML::ML{'web.controlstrip.login.forgot'}</a>";
         $ret .= "</td><td style='font: 10px Arial, Helvetica, sans-serif;' valign='top' colspan='2' align='right'>";
         $ret .= "<input type='checkbox' id='xc_remember' name='remember_me' style='height: 10px; width: 10px;' tabindex='3' />";
-        $ret .= "<label for='xc_remember'>Remember Me</label>";
+        $ret .= "<label for='xc_remember'>$BML::ML{'web.controlstrip.login.remember'}</label>";
         $ret .= "</td></tr></table>";
 
         $ret .= '</form></td>';

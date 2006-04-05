@@ -6071,3 +6071,103 @@ web.authas.btn=Switch
 
 web.authas.label=Work as user:
 
+web.controlstrip.btn.login=Log in
+
+web.controlstrip.btn.logout=Log out
+
+web.controlstrip.btn.view=View
+
+web.controlstrip.links.addfeed=Add it to your Friends Page
+
+web.controlstrip.links.addfriend=Add them as a friend
+
+web.controlstrip.links.changecommsettings=Change Settings
+
+web.controlstrip.links.create=Create a [[sitename]] Account
+
+web.controlstrip.links.editcommmembers=Edit Members
+
+web.controlstrip.links.editcommprofile=Edit the Profile
+
+web.controlstrip.links.invitefriends=Invite Friends
+
+web.controlstrip.links.joincomm=Join this community
+
+web.controlstrip.links.learnmore=Learn more
+
+web.controlstrip.links.leavecomm=Leave this community
+
+web.controlstrip.links.managecomminvites=Manage Invites
+
+web.controlstrip.links.manageentries=Manage Entries
+
+web.controlstrip.links.managefriends=Manage Friends
+
+web.controlstrip.links.mylj=My [[siteabbrev]]
+
+web.controlstrip.links.popfeeds=View the Most Popular Feeds
+
+web.controlstrip.links.post=Post to Journal
+
+web.controlstrip.links.postcomm=Post to this community
+
+web.controlstrip.links.recentcomments=View Recent Comments
+
+web.controlstrip.links.removecomm=Stop watching this community
+
+web.controlstrip.links.removefeed=Remove it from your Friends Page
+
+web.controlstrip.links.viewfriendspage=View my Friends Page
+
+web.controlstrip.links.watchcomm=Watch this community
+
+web.controlstrip.login.forgot=Forgot your password?
+
+web.controlstrip.login.remember=Remember Me
+
+web.controlstrip.nouserpic.alt=Upload Userpic
+
+web.controlstrip.nouserpic.title=Edit Userpics
+
+web.controlstrip.select.friends.all=All Friends
+
+web.controlstrip.select.friends.communities=Communities Only
+
+web.controlstrip.select.friends.feeds=Syndicated Feeds
+
+web.controlstrip.select.friends.journals=Journals Only
+
+web.controlstrip.select.friends.label=Filter:
+
+web.controlstrip.status.community=You are viewing the community [[user]]
+
+web.controlstrip.status.friend=You list [[user]] as a friend
+
+web.controlstrip.status.friendof=[[user]] lists you as a friend
+
+web.controlstrip.status.maintainer=You are a maintainer of [[user]]
+
+web.controlstrip.status.member=You are a member of [[user]]
+
+web.controlstrip.status.memberwatcher=You are a member of and are watching [[user]]
+
+web.controlstrip.status.mutualfriend=[[user]] is your mutual friend
+
+web.controlstrip.status.news=You are viewing the site news account [[user]]
+
+web.controlstrip.status.other=You are viewing [[user]]
+
+web.controlstrip.status.personal=You are viewing [[user]]'s journal
+
+web.controlstrip.status.syn=You are viewing the feed [[user]]
+
+web.controlstrip.status.watcher=You are watching [[user]]
+
+web.controlstrip.status.yourfriendspage=You are viewing your Friends Page
+
+web.controlstrip.status.yourjournal=You are viewing your journal
+
+web.controlstrip.userpic.alt=Userpic
+
+web.controlstrip.userpic.title=Edit Userpics
+
