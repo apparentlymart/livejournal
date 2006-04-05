@@ -1998,6 +1998,7 @@ sub control_strip
         $links{'add_friend'} = "<a href='$LJ::SITEROOT/friends/add.bml?user=$journal->{user}'>Add them as a friend</a>";
         if ($journal->{journaltype} eq "Y" || $journal->{journaltype} eq "N") {
             $links{'add_friend'} = "<a href='$LJ::SITEROOT/friends/add.bml?user=$journal->{user}'>Add it to your Friends Page</a>";
+            $links{'remove_friend'} = "<a href='$LJ::SITEROOT/friends/add.bml?user=$journal->{user}'>Remove it from your Friends Page</a>";
         }
         if ($journal->{journaltype} eq "C") {
             $links{'join_community'}   = "<a href='$LJ::SITEROOT/community/join.bml?comm=$journal->{user}'>Join this community</a>";
@@ -2143,6 +2144,8 @@ sub control_strip
             $ret .= "$statustext{'syn'}<br />";
             if ($remote && !LJ::is_friend($remote, $journal)) {
                 $ret .= "$links{'add_friend'}&nbsp;&nbsp; ";
+            } elsif ($remote && LJ::is_friend($remote, $journal)) {
+                $ret .= "$links{'remove_friend'}&nbsp;&nbsp; ";
             }
             $ret .= $links{'syndicated_list'};
         } elsif ($journal->{journaltype} eq "N") {
