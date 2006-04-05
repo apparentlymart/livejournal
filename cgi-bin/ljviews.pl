@@ -1203,8 +1203,8 @@ sub create_view_lastn
     }
 
     if ($LJ::USE_ADS && $show_ad) {
-        $lastn_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'LASTN_SKYSCRAPER_AD', 
-                                                          { "ad" => LJ::ads( type => "journal", 
+        $lastn_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'LASTN_SKYSCRAPER_AD',
+                                                          { "ad" => LJ::ads( type => "journal",
                                                                              orient => 'Journal-Skyscraper',
                                                                              user => $u->{user}), });
         $lastn_page{'open_skyscraper_ad'}  = $vars->{'LASTN_OPEN_SKYSCRAPER_AD'};
@@ -1528,7 +1528,7 @@ sub create_view_friends
 
     if ($LJ::USE_ADS && $show_ad) {
         $friends_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'FRIENDS_SKYSCRAPER_AD',
-                                                            { "ad" => LJ::ads( type => "journal", 
+                                                            { "ad" => LJ::ads( type => "journal",
                                                                                orient => 'Journal-Skyscraper',
                                                                                user => $u->{user}), });
         $friends_page{'open_skyscraper_ad'}  = $vars->{'FRIENDS_OPEN_SKYSCRAPER_AD'};
@@ -1983,8 +1983,8 @@ sub create_view_calendar
     $calendar_page{'urllastn'} = "$journalbase/";
 
     if ($LJ::USE_ADS && $show_ad) {
-        $calendar_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'CALENDAR_SKYSCRAPER_AD', 
-                                                             { "ad" => LJ::ads( type => "journal", 
+        $calendar_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'CALENDAR_SKYSCRAPER_AD',
+                                                             { "ad" => LJ::ads( type => "journal",
                                                                                 orient => 'Journal-Skyscraper',
                                                                                 user => $u->{user} ) });
         $calendar_page{'open_skyscraper_ad'}  = $vars->{'CALENDAR_OPEN_SKYSCRAPER_AD'};
@@ -2238,8 +2238,8 @@ sub create_view_day
     $day_page{'urllastn'} = "$journalbase/";
 
     if ($LJ::USE_ADS && $show_ad) {
-        $day_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'DAY_SKYSCRAPER_AD', 
-                                                        { "ad" => LJ::ads( type => "journal", 
+        $day_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'DAY_SKYSCRAPER_AD',
+                                                        { "ad" => LJ::ads( type => "journal",
                                                                            orient => 'Journal-Skyscraper',
                                                                            user => $u->{user}), });
         $day_page{'open_skyscraper_ad'}  = $vars->{'DAY_OPEN_SKYSCRAPER_AD'};
