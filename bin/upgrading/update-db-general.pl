@@ -2808,6 +2808,12 @@ register_alter(sub {
                  "ADD INDEX (year, month, day, hour)");
     }
 
+    if (column_type("blobcache", "bckey") =~ /40/) {
+        do_alter("blobcache",
+                 "ALTER TABLE blobcache MODIFY bckey VARCHAR(255) NOT NULL");
+    }
+
+
 });
 
 1; # return true
