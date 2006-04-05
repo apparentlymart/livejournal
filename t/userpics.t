@@ -1,7 +1,7 @@
 # -*-perl-*-
 
 use strict;
-use Test::More tests => 59;
+use Test::More tests => 65;
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 use LJ::Userpic;
@@ -60,15 +60,27 @@ sub run_tests {
         my $keywords_scalar = $up->keywords;
         is($keywords, $keywords_scalar, "... keywords match");
         my @keywords_array = $up->keywords;
-        eq_array(\@keywordsa, \@keywords_array, "... keyword arrays match");
+        eq_array(\@keywordsa, \@keywords_array);
 
         $up->set_keywords(@keywordsa);
         @keywords_array = $up->keywords;
-        eq_array(\@keywords_array, \@keywordsa, "... setting/retreiving array works");
+        eq_array(\@keywords_array, \@keywordsa);
 
         # clear keywords
         $up->set_keywords('');
         is($up->keywords('raw' => 1), '', "Emptied keywords");
+
+        $up->set_keywords(@keywordsa);
+        @keywords_array = $up->keywords;
+
+        # create a new pic, assign it one of our keywords and see that it got reassigned
+        my $up2 = LJ::Userpic->create($u, data => file_contents("good2.jpg"));
+        ok($up2);
+        $up2->set_keywords(shift @keywordsa);
+        my $got_kws = $up2->keywords;
+        is($got_kws, 'keyword1', 'Stealing keyword part 1 works');
+        @keywords_array = $up->keywords;
+        eq_array(\@keywords_array, \@keywordsa);
     }
 
     # test defaults

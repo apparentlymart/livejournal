@@ -583,16 +583,16 @@ sub set_keywords {
     my $dbh;
 
     if (LJ::Userpic->userpics_partitioned($u)) {
-        $sth = $u->prepare("SELECT kwid, picid FROM userpicmap2 WHERE userid=?");
+        $sth = $u->prepare("SELECT kwid FROM userpicmap2 WHERE userid=? AND picid=?");
     } else {
         $dbh = LJ::get_db_writer();
-        $sth = $dbh->prepare("SELECT kwid, picid FROM userpicmap WHERE userid=?");
+        $sth = $dbh->prepare("SELECT kwid FROM userpicmap WHERE userid=? AND picid=?");
     }
-    $sth->execute($u->{'userid'});
+    $sth->execute($u->{'userid'}, $self->id);
 
     my %exist_kwids;
-    while (my ($kwid, $picid) = $sth->fetchrow_array) {
-        $exist_kwids{$kwid} = $picid;
+    while (my ($kwid) = $sth->fetchrow_array) {
+        $exist_kwids{$kwid} = 1;
     }
 
     my (@bind, @data, @kw_errors);
@@ -608,31 +608,38 @@ sub set_keywords {
             next;
         }
 
-        push @bind, '(?, ?, ?)';
-        push @data, $u->{'userid'}, $kwid, $picid;
+        unless (delete $exist_kwids{$kwid}) {
+            push @bind, '(?, ?, ?)';
+            push @data, $u->{'userid'}, $kwid, $picid;
+        }
+    }
+
+    LJ::Userpic->delete_cache($u);
+
+    foreach my $kwid (keys %exist_kwids) {
+        $u->do("DELETE FROM userpicmap2 WHERE userid=? AND picid=? AND kwid=?", undef, $u->{userid}, $self->id, $kwid);
+    }
+
+    # save data if any
+    if (scalar @data) {
+        my $bind = join(',', @bind);
+
+        if (LJ::Userpic->userpics_partitioned($u)) {
+            return $u->do("REPLACE INTO userpicmap2 (userid, kwid, picid) VALUES $bind",
+                          undef, @data);
+        } else {
+            return $dbh->do("INSERT INTO userpicmap (userid, kwid, picid) VALUES $bind",
+                            undef, @data);
+        }
     }
 
     # Let the user know about any we didn't save
+    # don't throw until the end or nothing will be saved!
     if (@kw_errors) {
         my $num_words = scalar(@kw_errors);
         LJ::errobj("Userpic::TooManyKeywords",
                    userpic => $self,
                    lost    => \@kw_errors)->throw;
-    }
-
-    LJ::Userpic->delete_cache($u);
-
-    # delete all keywords
-    $u->do("DELETE FROM userpicmap2 WHERE userid=? AND picid=?", undef, $u->{userid}, $self->id);
-
-    my $bind = join(',', @bind);
-
-    if (LJ::Userpic->userpics_partitioned($u)) {
-        return $u->do("REPLACE INTO userpicmap2 (userid, kwid, picid) VALUES $bind",
-                      undef, @data);
-    } else {
-        return $dbh->do("INSERT INTO userpicmap (userid, kwid, picid) VALUES $bind",
-                        undef, @data);
     }
 
     return 1;
@@ -708,59 +715,5 @@ sub as_html {
 
 package LJ::Error::Userpic::DeleteFailed;
 sub user_caused { 0 }
-
-
-__END__
-
-
-sub set_keywords {
-    my ($self, $keywords) = @_;
-
-            if (%picid_of_kwid) {
-                if ($u->{'dversion'} > 6) {
-                    $u->do("REPLACE INTO userpicmap2 (userid, kwid, picid) VALUES " .
-                           join(",", map { "(" .
-                                               join(",",
-                                                    $dbcm->quote($u->{'userid'}),
-                                                    $dbcm->quote($_),
-                                                    $dbcm->quote($picid_of_kwid{$_})) .
-                                                    ")"
-                                                }
-                                keys %picid_of_kwid)
-                           );
-                } else {
-                    $dbh->do("REPLACE INTO userpicmap (userid, kwid, picid) VALUES " .
-                             join(",", map { "(" .
-                                                 join(",",
-                                                      $dbh->quote($u->{'userid'}),
-                                                      $dbh->quote($_),
-                                                      $dbh->quote($picid_of_kwid{$_})) .
-                                                      ")"
-                                                  }
-                                  keys %picid_of_kwid)
-                             );
-                }
-            }
-
-            # Delete keywords that are no longer being used
-            my @kwid_del;
-
-
-            if (@kwid_del) {
-                my $kwid_del = join(",", @kwid_del);
-                if ($u->{'dversion'} > 6) {
-                    $u->do("DELETE FROM userpicmap2 WHERE userid=$u->{userid} " .
-                           "AND kwid IN ($kwid_del)");
-                } else {
-                    $dbh->do("DELETE FROM userpicmap WHERE userid=$u->{userid} " .
-                             "AND kwid IN ($kwid_del)");
-                }
-            }
-
-}
-
-
-
-
 
 1;
