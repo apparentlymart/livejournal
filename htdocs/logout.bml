@@ -36,12 +36,11 @@
         # Redirect within the site if ret=1
         my $referer = BML::get_client_header('Referer');
         if ($GET{'ret'} == 1 && $referer && $referer =~ /\Q$LJ::DOMAIN\E/) {
-            my $eh_ref = LJ::ehtml($referer);
             my $uniq = Apache->request->notes('uniq');
             if ($uniq) {
                 LJ::MemCache::set("loginout:$uniq", 1, time() + 15);
             }
-            return BML::redirect("$eh_ref");
+            return BML::redirect("$referer");
         }
         
         # Redirect to offsite uri if allowed.
