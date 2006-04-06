@@ -48,9 +48,6 @@
     LJ::need_res('js/portal.js');
     LJ::need_res('js/x/x_event.js');
     LJ::need_res('js/commentmanage.js');
-    LJ::need_res('js/dom.js');
-    LJ::need_res('js/core.js');
-    LJ::need_res('js/hourglass.js');
 
     # get the current scheme and load the correct style
     my $scheme = BML::get_scheme();
@@ -72,6 +69,11 @@
 
     # parameters for portal.js
     $head .= qq{
+
+        <script language="JavaScript" src="/js/core.js"></script>
+        <script language="JavaScript" src="/js/dom.js"></script>
+        <script language="JavaScript" src="/js/hourglass.js"></script>
+
         <script language="JavaScript">
             var LJVAR;
         if (!LJVAR)

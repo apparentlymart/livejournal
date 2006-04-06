@@ -556,7 +556,7 @@ sub generate_box_with_container {
     my $boxinsides = $self->generate_box_insides($pboxid);
 
     return qq{
-            <div class="PortalBox" id="pbox$pboxid">
+            <div class="PortalBox" id="pbox$pboxid" pboxid="$pboxid">
               $boxinsides
             </div>
         };
@@ -661,7 +661,7 @@ sub generate_box_titlebar {
 
     my $titlebarhtml = qq {
             $moduleicon<span class="PortalBoxTitleText">$boxtitle</span>
-            <span class="PortalBoxMoveButtons">$closebutton $refreshbutton $moveBoxButtons $configlink</span>
+            <span class="PortalBoxMoveButtons" id="PortalBoxMoveButtons$pboxid">$closebutton $refreshbutton $moveBoxButtons $configlink</span>
         };
 
     return $titlebarhtml;

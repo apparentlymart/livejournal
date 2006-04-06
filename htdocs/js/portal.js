@@ -2,6 +2,7 @@ var portalAnimating = {};
 var portalFading = {};
 var box_reloading = {};
 var add_portal_module_menu_html = "";
+var boxControlsVisible = null;
 
 // for comment management
 var LJ_cmtinfo;
@@ -48,6 +49,8 @@ function setupPortal() {
     if (LJVAR.doFade)
       LJVAR.doFade = 0;
   }
+
+  portalRegEvent(document.body, "mousemove", portalMouseMove);
 }
 
 function portalGetXTR () {
@@ -704,6 +707,65 @@ function _xSlideCornerTo2(e)
     e.onslideend=null;
     portalAnimating = 0;
   }
+}
+
+// handle mouse movement on portal boxes. if mouse is in the box then
+// show the move buttons, otherwise hide them
+function portalMouseMove (evt) {
+  Event.prep(evt);
+  Event.stop(evt);
+
+  if (!evt.target)
+    return;
+
+  var ancestors = DOM.getAncestorsByClassName(evt.target, "PortalBox", true);
+  // does the event have PortalBox as an ancestor? if so show the controls
+  if (ancestors.length) {
+    // Show controls
+    portalShowControls(ancestors[0]);
+  } else {
+    portalHideControls();
+  }
+}
+
+function portalShowControls (box) {
+  if (!box) return;
+
+  var pboxid = box.getAttribute("pboxid");
+  if (!pboxid) return;
+
+  if (pboxid != boxControlsVisible) portalHideControls();
+
+  var controls = xGetElementById("PortalBoxMoveButtons"+pboxid);
+
+  if (!controls) return;
+
+  xVisibility(controls, true);
+
+  boxControlsVisible = pboxid;
+}
+
+function portalHideControls () {
+  if (!boxControlsVisible) return;
+
+  var boxes = DOM.filterElementsByClassName(document.getElementsByTagName("div"), "PortalBox");
+  if (!boxes.length) return;
+
+  for (var i=0; i<boxes.length; i++) {
+    var box = boxes[i];
+    if (!box) return;
+
+    var pboxid = box.getAttribute("pboxid");
+    if (!pboxid) return;
+
+    var controls = xGetElementById("PortalBoxMoveButtons"+pboxid);
+
+    if (!controls) return;
+
+    xVisibility(controls, false);
+  }
+
+  boxControlsVisible = null;
 }
 
 // set up some events

@@ -235,15 +235,16 @@ img {
 	padding: 0 0 0 5px;
 	_width: 120px;
 	}
-	
+
 .PortalBoxMoveButtons {
-	display: inline;
-	_margin-top: -17px; /* Lame IE hack to fix positioning - need to find a better workaround */
-	float: right;
-	width: 115px;
-	margin-right: 2px;
-	}
-	
+        display: inline;
+        _margin-top: -17px; /* Lame IE hack to fix positioning - need to find a better workaround */
+        float: right;
+        width: 115px;
+        margin-right: 2px;
+        visibility: hidden;
+}
+
 .PortalBoxMoveButtons a {
 	float: right;
 	margin-left: 2px;
