@@ -781,6 +781,9 @@ add_conf('%CAP_DEF',
 add_conf('%DISABLED',
          type => '',
          des => "");
+add_conf('%MEMCACHE_EXPIRATION',
+         type => '',
+         des => "Expiration times for memcache entries");
 add_conf('%HELPURL',
          type => '',
          des => "");

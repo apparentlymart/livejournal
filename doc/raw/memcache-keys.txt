@@ -22,6 +22,7 @@
 
 <uid> memkwid:<uid> == hashref of 'memories' keyword ids to keywords.
 <uid> memkwcnt:<uid>:<w|t>:<f|v|u> == hashref of 'memories' keyword ids to keyword counts.  <w|t> is filter oWner|oTher.  <f|v|u> is security Friends|priVate|pUblic
+<uid> membykwid:<uid>:<kwid>:<w|t|a>:<x|u|y> == hashref of user-id/keyword-id to memories.  <w|t|a> is filter oWner|oTher|All.  <x|u|y> is securites []|[pUblic]|[public,friends]
 
 <uid> dayct:<uid> == arrayref of arrayrefs (see LJ::get_daycounts)
 

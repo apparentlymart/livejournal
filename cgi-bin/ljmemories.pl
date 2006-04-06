@@ -265,6 +265,21 @@ sub _map_security_to_char {
 }
 
 #
+# Name: _map_securities_to_char
+# API: Private to this module
+# Description: Map a an array of verbose security names to a single character
+# Parameter: Array of verbose security names
+# Return: Single character representation of securities or undef for no map
+#
+sub _map_securities_to_char {
+    my @verbose_securities = @_;
+    return 'x' if !@verbose_securities; # No security specified = empty array
+    return 'u' if @verbose_securities == 1 && $verbose_securities[0] eq 'public';
+    return 'y' if @verbose_securities == 2 && grep(/^public$/, @verbose_securities) && grep(/^private$/, @verbose_securities);
+    return undef;
+}
+
+#
 # Name: _map_filter_to_char
 # API: Private to this module
 # Description: Map a verbose filter name to a single character
@@ -273,7 +288,7 @@ sub _map_security_to_char {
 #
 sub _map_filter_to_char {
     my $verbose_filter = shift;
-    my %filter_map = (own => 'w', other => 't');
+    my %filter_map = (own => 'w', other => 't', all => 'a');
     return $filter_map{$verbose_filter} || die "Can't map filter '" . LJ::ehtml($verbose_filter) . "' to character";
 }
 
@@ -590,6 +605,33 @@ sub get_by_keyword {
     my $kw = defined $kwoid && !$kwid ? $kwoid : undef;
     return undef unless $u && ($kwid || defined $kw);
 
+    # Get parameters
+    my $userid = $u->{userid};
+    my $filter_parm   = $opts->{filter};
+    my @security_parm = $opts->{security} ? @{$opts->{security}} : ();
+
+    # See if the memories are in the memcache
+    my $caching_disabled = $LJ::DISABLED{'membykwid_memcaching'};
+    my $memcache_key;
+    if (!$caching_disabled) {
+        my $filter_char = _map_filter_to_char($filter_parm);
+        my $security_char = _map_securities_to_char(@security_parm);
+        if ($security_char) {
+            $memcache_key = "membykwid:$userid:$filter_char:$security_char";
+            my $memories_hash = $caching_disabled ? {} : LJ::MemCache::get($memcache_key);
+            my $memories_array = $memories_hash->{$kwid};
+            my %memories = ();
+            foreach my $memory (@$memories_array) {
+                my $memory_hash = LJ::MemCache::array_to_hash('membykwid', $memory);
+                my $memid = $memory_hash->{memid};
+                $memories{$memid} = $memory_hash;
+            }
+            return \%memories if %memories;
+        } else {
+            $caching_disabled = 1;
+        }
+    }
+
     # two entirely separate codepaths, depending on the user's dversion.
     my $memids;
     if ($u->{dversion} > 5) {
@@ -629,6 +671,25 @@ sub get_by_keyword {
     # return
     $memids = [] unless defined($memids);
     my $memories = @$memids > 0 ?  LJ::Memories::_memory_getter($u, {%{$opts || {}}, byid => $memids }) : {};
+
+    if (!$caching_disabled) {
+        # Map memory hashes to arrays in order to compress memcache entries
+        my @memories_array = ();
+        while (my ($memid, $memory) = each (%$memories)) {
+            $memory->{memid}     += 0;
+            $memory->{journalid} += 0;
+            $memory->{ditemid}   += 0;
+            my $memory_array = LJ::MemCache::hash_to_array('membykwid', $memory);
+            push @memories_array, $memory_array;
+        }
+
+        # Get current cache, add this new entry, then put updated hash in cache
+        my $expiration = $LJ::MEMCACHE_EXPIRATION{'membykwid'} || 86400;
+        my $new_memories_hash = $caching_disabled ? {} : LJ::MemCache::get($memcache_key);
+        $new_memories_hash->{$kwid} = \@memories_array;
+        LJ::MemCache::set([$userid, $memcache_key], $new_memories_hash, $expiration);
+    }
+
     return $memories;
 }
 
@@ -729,12 +790,18 @@ sub clear_memcache {
     LJ::MemCache::delete([$userid, "memkwid:$userid"]);
 
     # Delete all memkwcnt entries
-    LJ::MemCache::delete([$userid, "memkwcnt:$userid:w:f"]);
-    LJ::MemCache::delete([$userid, "memkwcnt:$userid:w:v"]);
-    LJ::MemCache::delete([$userid, "memkwcnt:$userid:w:u"]);
-    LJ::MemCache::delete([$userid, "memkwcnt:$userid:t:f"]);
-    LJ::MemCache::delete([$userid, "memkwcnt:$userid:t:v"]);
-    LJ::MemCache::delete([$userid, "memkwcnt:$userid:t:u"]);
+    foreach my $filter_char (qw/w t/) {
+        foreach my $security_char (qw/f v u/) {
+            LJ::MemCache::delete([$userid, "memkwcnt:$userid:$filter_char:$security_char"]);
+        }
+    }
+
+    # Delete all membykwid entries
+    foreach my $filter_char (qw/w t a/) {
+        foreach my $security_char (qw/x u y/) {
+            LJ::MemCache::delete([$userid, "membykwid:$userid:$filter_char:$security_char"]);
+        }
+    }
 
     return undef;
 }
