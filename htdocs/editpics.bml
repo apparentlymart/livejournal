@@ -94,6 +94,11 @@
             my @delete; # userpic objects to delete
             my @inactive_picids;
             my %picid_of_kwid;
+            my %used_keywords;
+
+            foreach my $up (@userpics) {
+                grep { $used_keywords{$_}=$up->id } $up->keywords;
+            }
 
             foreach my $up (@userpics) {
                 my $picid = $up->id;
@@ -106,10 +111,22 @@
 
                 # we're going to modify keywords on active pictures
                 # only modify if changing the data, make sure not collidiing with other edits, etc
-                eval {
-                    $up->set_keywords($POST{"kw_$picid"})
-                        unless $POST{"kw_$picid"} eq $POST{"kw_orig_$picid"};
-                } or push @errors, $@;
+                if ($POST{"kw_$picid"} ne $POST{"kw_orig_$picid"}) {
+                    my $kws = $POST{"kw_$picid"};
+
+                    eval {
+                        $up->set_keywords($kws);
+                    } or push @errors, $@;
+
+                    foreach my $kw ($up->keywords) {
+                        if (defined $used_keywords{$kw} && $used_keywords{$kw} != $picid) {
+                            push @errors, "The keyword \"$kw\" is used by more than one userpic. It will be assigned to only one.";
+                        }
+
+                        $used_keywords{$kw} = $picid;
+                    }
+                }
+
                 eval {
                     $up->set_comment ($POST{"com_$picid"})
                         unless $POST{"com_$picid"} eq $POST{"com_orig_$picid"};
