@@ -2173,10 +2173,10 @@ sub control_strip
             <input type="hidden" name="mode" value="login" />
             <input type='hidden' name='chal' id='login_chal' value='$chal' />
             <input type='hidden' name='response' id='login_response' value='' />
-            <table><tr><td>
-            <label for="xc_user">$BML::ML{'/login.bml.login.username'}</label> <input type="text" name="user" size="14" maxlength="17" tabindex="1" id="xc_user" value="" />
-            </td><td colspan='2'>
-            <label for="xc_password">$BML::ML{'/login.bml.login.password'}</label> <input type="password" name="password" size="14" tabindex="2" id="xc_password" />
+            <table cellspacing="0" cellpadding="0"><tr><td>
+            <label for="xc_user">$BML::ML{'/login.bml.login.username'}</label> <input type="text" name="user" size="7" maxlength="17" tabindex="1" id="xc_user" value="" />
+            </td><td>
+            <label style="margin-left: 3px;" for="xc_password">$BML::ML{'/login.bml.login.password'}</label> <input type="password" name="password" size="7" tabindex="2" id="xc_password" />
 LOGIN_BAR
         $ret .= "<input type='submit' value=\"$BML::ML{'web.controlstrip.btn.login'}\" tabindex='4' />";
         $ret .= "</td></tr>";

@@ -16,6 +16,12 @@
     color: #f5f5f5;
 }
 
+/* Second cell, Third cell, Log in form */
+#lj_controlstrip_user, #lj_controlstrip_userlinks, #lj_controlstrip_login
+{
+    border-right: 1px solid #878080;
+}
+
 /* Fourth cell first line */
 #lj_controlstrip_statustext
 {
