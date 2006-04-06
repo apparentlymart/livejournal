@@ -500,7 +500,8 @@
                 $body .= "<?p " . BML::ml('.uploaddesc.fb', {'aopts' => "href='$LJ::FB_SITEROOT'", 'sitename' => $LJ::FB_SITENAME}) . " p?>\n\n";
             } else {
                 $body .= "<?h1 $ML{'.uploadheader'} h1?>\n";
-                $body .= "<?p $ML{'.uploaddesc'} p?>\n\n";
+                $body .= "<?p $ML{'.uploaddesc'} p?>\n";
+                $body .= "<?p $ML{'.uploaddesc.userpicfactory'} p?>\n\n";
             }
 
             # upload form (with perlbal upload-tracking)
@@ -533,7 +534,9 @@
                                           'id' => 'radio_url', 'accesskey' => $ML{'.fromurl.key'} });
                 $body .= "</td><td align='right'>";
                 $body .= "<label for='radio_url'>$ML{'.fromurl'}</label></td><td align='left'>";
-                $body .= LJ::html_text({ 'name' => 'urlpic', 'size' => '40' }) . "</td></tr>\n";
+                $body .= LJ::html_text({ 'name' => 'urlpic', 'size' => '40' });
+                $body .= "<div><small>$ML{'.label.formats.desc'}</small></div>";
+                $body .= "</td></tr>\n";
             }
 
             $body .= "<tr><td colspan='3' align='center'><hr/></td></tr>";
@@ -543,7 +546,7 @@
             $body .= "</td><td align='right'><label for='keywords'>";
             $body .= "$ML{'.label.keywords'}</label></td><td align='left'>";
             $body .= LJ::html_text({ 'name' => 'keywords', id => 'keywords', 'size' => '40' });
-            $body .= "<div><small>Comma-separated list of terms you'll use to select this picture.</small></div>";
+            $body .= "<div><small>$ML{'.label.keywords.desc'}</small></div>";
             $body .= "</td></tr>";
 
             if (LJ::Userpic->user_supports_comments($u)) {
@@ -552,7 +555,7 @@
                 $body .= "</td><td align='right'><label for='comments'>$ML{'.label.comment'}</label></td><td align='left'>";
                 my $comments = $POST{'comments'} if $fotobilder;
                 $body .= LJ::html_text({ 'name' => 'comments', 'size' => '40', id => 'comments', 'maxlength' => LJ::CMAX_UPIC_COMMENT, 'value', $comments });
-                $body .= "<div><small>Optional description of this picture for your friends.</small></div>";
+                $body .= "<div><small>$ML{'.label.comment.desc'}</small></div>";
                 $body .= "</td></tr>";
             }
 

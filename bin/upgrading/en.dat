@@ -1952,11 +1952,17 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /editpics.bml.label.comment=Comment:
 
+/editpics.bml.label.comment.desc=Optional description of this picture for your friends.
+
 /editpics.bml.label.default=Default:
 
 /editpics.bml.label.delete=Delete:
 
+/editpics.bml.label.formats.desc=Acceptable formats are GIF, JPG and PNG.
+
 /editpics.bml.label.keywords=Keywords:
+
+/editpics.bml.label.keywords.desc=Comma-separated list of terms you'll use to select this picture.
 
 /editpics.bml.makedefault=Make this your <u>d</u>efault picture
 
@@ -1989,6 +1995,8 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 /editpics.bml.uploaddesc=Use the form below to upload a new picture.
 
 /editpics.bml.uploaddesc.fb=Upload a thumbnail of an image hosted on your <a [[aopts]]>[[sitename]]</a> account as a new user picture.
+
+/editpics.bml.uploaddesc.userpicfactory=Upload a JPG image of any size and we'll send you to the Userpic Factory where you can easily crop and resize it.
 
 /editpics.bml.uploadheader=Upload a New Picture
 
