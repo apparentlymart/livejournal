@@ -1214,9 +1214,8 @@ function Page::print()
     if ($*title_position == "top" or $*title_position == "both") { println $title_bar; print "<br />"; }
     
     if (viewer_sees_ads()) {
-      "<div style='float: right; margin-right: 1em;'>";
-      $this->print_ad("Journal-Skyscraper");
-      "</div>";
+        """<table width="100%" height="100%">""";
+        """<tr><td valign="top">""";
     } 
 
     println """<table cellspacing="0" cellpadding="5" width="$*content_width" align="center"><tr>""";
@@ -1224,6 +1223,14 @@ function Page::print()
     println """<td valign="top">"""; $this->print_body(); "</td>";
     if ($*sidebar_position == "right") { println """<td valign="top" id="sidebar">"""; print_sidebar(); println "</td>"; }
     println """</tr></table>""";
+
+    if (viewer_sees_ads()) {
+        "</td>";
+        """<td valign="top" align="right" width="20%">""";
+        """<div style="margin-right: 10px;">""";
+        $this->print_ad("Journal-Skyscraper");
+        "</div></td></tr></table>";
+    }
 
     println """<table cellpadding="0" cellspacing="0" id="footer"><tr valign="middle"><td>"""; server_sig(); println """</td></tr></table><br />""";
 
