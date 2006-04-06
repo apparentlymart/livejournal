@@ -253,8 +253,9 @@ SUBMIT:
 
         LJ::run_hooks("create.bml_opts", {
             post => \%POST,
-            get => \%GET,
-            ret => \$ret,
+            get  => \%GET,
+            ret  => \$ret,
+            comm => 1,
         });
 
         $ret .= "</ol>";
@@ -271,4 +272,13 @@ SUBMIT:
 }
 _code?>
 <=body
+head<=
+<script language="javascript">
+<!--//
+function tblhilite(tbl, styname) {
+        tbl.className = styname;
+}
+// -->
+</script>
+<=head
 page?>

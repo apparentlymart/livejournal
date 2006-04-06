@@ -2,7 +2,6 @@
 title=><?_ml .title _ml?>
 head<=
 <?_code
-    LJ::need_res('stc/matrix.css');
     return $head;
 _code?>
 
@@ -13,78 +12,6 @@ function tblhilite(tbl, styname) {
 }
 // -->
 </script>
-
-  <style type="text/css">
-
-
-        .tablecontent {
-                border-top: 1px solid #dfdfdf;
-                border-bottom: 1px solid #dfdfdf;
-                padding-top: 5px;
-                padding-bottom: 5px;
-                text-align: center;
-                width: 8%;
-        }
-
-        .tablelabel {
-                border-top: 1px solid #dfdfdf;
-                border-bottom: 1px solid #dfdfdf;
-                padding-top: 5px;
-                padding-bottom: 5px;
-                width: 20%;
-                font-size: .9em;
-        }
-
-        .tablehead {
-                border-bottom: 1px solid #dfdfdf;
-                padding-top: 5px;
-                padding-bottom: 5px;
-                font-weight: bold;
-                white-space: nowrap;
-                text-align: center;
-        }
-
-        .tablebottom {
-                border-top: 1px solid #dfdfdf;
-                padding-top: 5px;
-                white-space: nowrap;
-        }
-
-
-    .header a
-    {
-        text-decoration: none;
-        color: black;
-    }
-
-    .header a:hover
-    {
-        text-decoration: underline;
-        color: black;
-    }
-
-    .feature a:hover
-    {
-        color:black;
-        font-size:12px;
-        text-decoration:underline;
-    }
-
-    .feature a
-    {
-        color:black;
-        font-size:12px;
-        text-decoration:none;
-    }
-
-    .feature_on a
-    {
-        color:black;
-        font-size:12px;
-    }
-
-
- </style>
 <=head
 body<=
 <?_code
