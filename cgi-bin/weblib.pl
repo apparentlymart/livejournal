@@ -2017,6 +2017,7 @@ sub control_strip
                     'yourjournal'       => $BML::ML{'web.controlstrip.status.yourjournal'},
                     'yourfriendspage'   => $BML::ML{'web.controlstrip.status.yourfriendspage'},
                     'personal'          => BML::ml('web.controlstrip.status.personal', {'user' => $journal_display}),
+                    'personalfriendspage' => BML::ml('web.controlstrip.status.personalfriendspage', {'user' => $journal_display}),
                     'community'         => BML::ml('web.controlstrip.status.community', {'user' => $journal_display}),
                     'syn'               => BML::ml('web.controlstrip.status.syn', {'user' => $journal_display}),
                     'news'              => BML::ml('web.controlstrip.status.news', {'user' => $journal_display, 'sitename' => $LJ::SITENAMESHORT}),
@@ -2104,7 +2105,7 @@ sub control_strip
                 $ret .= "$statustext{'friendof'}<br />";
                 $ret .= "$links{'add_friend'}";
             } else {
-                $ret .= "$statustext{'personal'}<br />";
+                $ret .= $r->notes('view') eq "friends" ? "$statustext{'personalfriendspage'}<br />" : "$statustext{'personal'}<br />";
                 $ret .= "$links{'add_friend'}";
             }
         } elsif ($journal->{journaltype} eq "C") {
@@ -2192,7 +2193,7 @@ LOGIN_BAR
 
         my $jtype = $journal->{journaltype};
         if ($jtype eq "P" || $jtype eq "I") {
-            $ret .= $statustext{'personal'};
+            $ret .= $r->notes('view') eq "friends" ? $statustext{'personalfriendspage'} : $statustext{'personal'};
         } elsif ($jtype eq "C") {
             $ret .= $statustext{'community'};
         } elsif ($jtype eq "Y") {

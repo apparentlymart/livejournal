@@ -6167,6 +6167,8 @@ web.controlstrip.status.other=You are viewing [[user]]
 
 web.controlstrip.status.personal=You are viewing [[user]]'s journal
 
+web.controlstrip.status.personalfriendspage=You are viewing [[user]]'s Friends Page
+
 web.controlstrip.status.syn=You are viewing the feed [[user]]
 
 web.controlstrip.status.watcher=You are watching [[user]]
