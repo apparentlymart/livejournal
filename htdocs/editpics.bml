@@ -97,7 +97,7 @@
             my %used_keywords;
 
             foreach my $up (@userpics) {
-                grep { $used_keywords{$_}=$up->id } $up->keywords;
+                $used_keywords{$_}=$up->id foreach ($up->keywords);
             }
 
             foreach my $up (@userpics) {
