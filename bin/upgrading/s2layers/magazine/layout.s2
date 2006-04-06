@@ -353,7 +353,7 @@ function Page::print () {
         """<div style="float: right;">""";
         $this->print_ad("Journal-Skyscraper");
         "</div>";
-        """<div style="width: 83%;">""";
+        """<div style="width: 75%;">""";
     }
     """<h1>$title</h1>""";
 
