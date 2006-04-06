@@ -21,7 +21,6 @@ $GET_DISABLED = 0;
                           # version #101 because old userpic format in memcached was an arrayref of
                           # [width, height, ...] and widths could have been 1 before, although unlikely
                           'userpic' => [qw[101 width height userid fmt state picdate location flags]],
-                          'membykwid' => [qw[1 memid journalid security ditemid des]],
                           );
 
 
