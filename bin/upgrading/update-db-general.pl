@@ -2285,6 +2285,15 @@ CREATE TABLE smsusermap (
 )
 EOC
 
+register_tablecreate("eventtypelist", <<'EOC');
+CREATE TABLE eventtypelist (
+  eventtypeid  SMALLINT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  class        VARCHAR(100),
+  UNIQUE (class)
+)
+EOC
+
+
 
 # NOTE: new table declarations go here
 
