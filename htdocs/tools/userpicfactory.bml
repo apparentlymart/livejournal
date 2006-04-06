@@ -20,6 +20,12 @@
 
     my $scaledSizeMax = 640;
 
+    if (!$w || !$h) {
+        # we don't have the width and height passed in, we have to compute it ourselves
+        my $upf = LJ::get_upf_scaled(size => $scaledSizeMax, userid => $remote->{userid});
+        ($w, $h) = ($upf->[2], $upf->[3]) if ($upf && $upf->[2]);
+    }
+
     my $picpath = $LJ::SITEROOT . "/misc/mogupic.bml?size=$scaledSizeMax";
 
     $head .= qq {
@@ -149,16 +155,32 @@ Create Userpic button.</b></p>
     </noscript>
     };
 
-# is there a pic in mogile? If not, there's no real reason to be here
+
+my $upload_form = qq {
+        <form enctype="multipart/form-data" action="/editpics$sfx.bml"
+        method='post'>
+      Picture: <input type="file" name="userpic" />
+  } .
+    LJ::html_hidden({name => 'src', value => 'file'}) .
+    LJ::html_submit('Upload') . '</form>';
+
+
+# is there a pic in mogile?
 my @paths = LJ::mogclient()->get_paths("upf:$remote->{userid}");
 if (! @paths) {
-    $body .= qq {
-        <?p You have no image uploaded. You must upload one on the <a href="/editpics$sfx.bml">Edit Userpics</a> page. p?>
-        };
+    $body .= '<?p You have no picture uploaded. You must upload one: p?>';
+    $body .= $upload_form;
+
     return;
 }
 
     $body .= qq {
+        <?standout
+            <?p You can edit your currently uploaded picture or you can upload a new one: p?>
+
+            $upload_form
+        standout?>
+
         <?p Click and drag anywhere within the photo to create your userpic. When you're happy with what you see in the preview box click the Create Userpic button to save it. p?>
 
       <div id="picContainer" style="float: left; margin-bottom: 15px; width: ${scaledSizeMax}px; height: ${scaledSizeMax}px; border: 2px solid #EEEEEE; padding: 2px;"> <img src="$picpath" id="userpic" style="display: none;" /></div>
