@@ -31,15 +31,16 @@ ok($sysid, "have a systemid");
     my $u2 = LJ::load_userid($u->{userid});
     is($u, $u2, "whether loading by name or userid, \$u objects are singletons");
 
-    $u2->{_foo} = "field";
+    my $bogus_bday = 9999999;
+    $u2->{bdate} = $bogus_bday;
 
-    is($u->{_foo}, "field", "our u _foo field is present");
+    is($u->{bdate}, $bogus_bday, "setting bdate to bogus");
 
     # this forced load will use the same memory address as our other $u of
     # the same id
     my $uf = LJ::load_userid($u->{userid}, "force");
     is($u, $uf, "forced userid load is u2");
-    is($u2->{_foo}, undef, "our u2 _foo field is now gone");
+    isnt($u2->{bday}, $bogus_bday, "our u2 bday is no longer bogus");
 
     my $uf2 = LJ::load_user("system", "force");
     is($uf2, $uf, "forced system");

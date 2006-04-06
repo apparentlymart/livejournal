@@ -1330,6 +1330,15 @@ sub is_syndicated {
     return $u->{journaltype} eq "Y";
 }
 
+# front-end to LJ::cmd_buffer_add, which has terrible interface
+#   cmd: scalar
+#   args: hashref
+sub cmd_buffer_add {
+    my ($u, $cmd, $args) = @_;
+    $args ||= {};
+    return LJ::cmd_buffer_add($u->{clusterid}, $u->{userid}, $cmd, $args);
+}
+
 package LJ;
 
 # <LJFUNC>
@@ -1730,7 +1739,7 @@ sub _set_u_req_cache {
     # if we have an existing user singleton, upgrade it with
     # the latested data, but keep using its address
     if (my $eu = $LJ::REQ_CACHE_USER_ID{$u->{'userid'}}) {
-        %$eu = %$u;
+        $eu->{$_} = $u->{$_} foreach keys %$u;
         $u = $eu;
     }
     $LJ::REQ_CACHE_USER_NAME{$u->{'user'}} = $u;
