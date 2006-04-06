@@ -120,7 +120,7 @@
 
                     foreach my $kw ($up->keywords) {
                         if (defined $used_keywords{$kw} && $used_keywords{$kw} != $picid) {
-                            push @errors, "The keyword \"$kw\" is used by more than one userpic. It will be assigned to only one.";
+                            push @errors, BML::ml('.error.keywords', {ekw => $kw});
                         }
 
                         $used_keywords{$kw} = $picid;
