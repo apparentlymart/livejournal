@@ -159,7 +159,8 @@ Create Userpic button.</b></p>
 my $upload_form = qq {
         <form enctype="multipart/form-data" action="/editpics$sfx.bml"
         method='post'>
-      Picture: <input type="file" name="userpic" />
+      From File: <input type="file" name="userpic" /><br/>
+      <small>JPEG only.</small>
   } .
     LJ::html_hidden({name => 'src', value => 'file'}) .
     LJ::html_submit('Upload') . '</form>';
@@ -174,13 +175,17 @@ if (! @paths) {
     return;
 }
 
+if (0) {
     $body .= qq {
         <?standout
             <?p You can edit your currently uploaded picture or you can upload a new one: p?>
 
             $upload_form
-        standout?>
+            standout?>
+        };
+}
 
+$body .= qq {
         <?p Click and drag anywhere within the photo to create your userpic. When you're happy with what you see in the preview box click the Create Userpic button to save it. p?>
 
       <div id="picContainer" style="float: left; margin-bottom: 15px; width: ${scaledSizeMax}px; height: ${scaledSizeMax}px; border: 2px solid #EEEEEE; padding: 2px;"> <img src="$picpath" id="userpic" style="display: none;" /></div>
