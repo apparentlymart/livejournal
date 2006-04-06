@@ -39,7 +39,7 @@
             my $eh_ref = LJ::ehtml($referer);
             my $uniq = Apache->request->notes('uniq');
             if ($uniq) {
-                LJ::MemCache::set([ $uniq, "loginout:$uniq" ], 1, time() + 15);
+                LJ::MemCache::set("loginout:$uniq", 1, time() + 15);
             }
             return BML::redirect("$eh_ref");
         }
