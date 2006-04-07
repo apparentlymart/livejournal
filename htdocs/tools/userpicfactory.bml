@@ -21,7 +21,7 @@
     my $scaledSizeMax = 640;
 
     if (!$w || !$h) {
-        # we don't have the width and height passed in, we have to compute it ourselves
+        # we do not have the width and height passed in, we have to compute it ourselves
         my $upf = LJ::get_upf_scaled(size => $scaledSizeMax, userid => $remote->{userid});
         ($w, $h) = ($upf->[2], $upf->[3]) if ($upf && $upf->[2]);
     }
@@ -42,6 +42,7 @@
     $head .= q {
         <script>
         var regsel;
+        var borderOn = false;
 
         function onRegionChange (c) {
             updatePreview(c);
@@ -108,6 +109,16 @@
             return [nw, nh];
         }
 
+        function toggleBorder (evt) {
+          if (borderOn) {
+            $("prevcon").style.border = "1px solid transparent";
+            borderOn = false;
+          } else {
+            $("prevcon").style.border = "1px solid #000000";
+            borderOn = true;
+          }
+        }
+
         DOM.addEventListener(window, "load", function () {
             if (!origW || !origH)
                 return;
@@ -136,6 +147,8 @@
             regsel.keepSquare(false);
 
             $("createbtn").disabled = false;
+
+            DOM.addEventListener($("borderToggle"), "change", toggleBorder.bindEventListener());
         });
 
     </script>
@@ -191,20 +204,23 @@ $body .= qq {
       <div id="picContainer" style="float: left; margin-bottom: 15px; width: ${scaledSizeMax}px; height: ${scaledSizeMax}px; border: 2px solid #EEEEEE; padding: 2px;"> <img src="$picpath" id="userpic" style="display: none;" /></div>
 
       <?standout <div style='float: right;'>
+      <form action="$LJ::SITEROOT/editpics$sfx.bml?authas=$GET{'authas'}" method="POST" enctype='multipart/form-data'>
       <table cellpadding="4"><tr>
       <td style='whitespace: nowrap'>
         <nobr><input type="checkbox" id="constrain" onchange="setConstrain();" />
         <label for="constrain">Keep square</nobr></label><br /><small>(or hold Shift)</small>
+        <br/><input type="checkbox" id="borderToggle" name="border" />
+        <label for="borderToggle">Add Border</label><br />
       </td></tr><tr>
       <td valign="center"><small>Low quality preview:</small><br />
-      <div style="width: 100px; height: 100px; overflow: hidden; padding: 0px;">
-        <div style="width: 100px; height: 100px; overflow: hidden; display:inline; float:left;" id="prevcon">
-            <img src="$picpath" id="userpicpreview"  />
+      <div style="width: 102px; height: 102px; overflow: hidden; padding: 0px;">
+        <div style="width: 100px; height: 100px; overflow: hidden; display:inline; float:left; border: 1px solid transparent;"
+                id="prevcon">
+            <img src="$picpath" id="userpicpreview" />
         </div>
       </div>
       </td></tr></table>
 
-      <form action="$LJ::SITEROOT/editpics$sfx.bml?authas=$GET{'authas'}" method="POST" enctype='multipart/form-data'>
       <input type="hidden" name="create" value="1" />
 
       <input type="hidden" name="x1" id="x1" value="$x1" />

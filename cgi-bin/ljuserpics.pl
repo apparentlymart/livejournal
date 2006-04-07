@@ -527,6 +527,7 @@ sub _get_upf_scaled
     my $y1 = delete $opts{y1};
     my $x2 = delete $opts{x2};
     my $y2 = delete $opts{y2};
+    my $border = delete $opts{border} || 0;
     my $maxfilesize = delete $opts{maxfilesize} || 38;
     my $u = LJ::want_user(delete $opts{userid}) || LJ::get_remote();
     croak "No userid or remote" unless $u;
@@ -628,8 +629,13 @@ sub _get_upf_scaled
     my $h = ($y2 - $y1);
     my $foo = $timage->Mogrify(crop => "${w}x${h}+$x1+$y1");
 
-    my ($nw, $nh) = $getSizedCoords->(100, $timage);
+    my $targetSize = $border ? 96 : 100;
+
+    my ($nw, $nh) = $getSizedCoords->($targetSize, $timage);
     $timage->Scale(width => $nw, height => $nh);
+
+    # add border if desired
+    $timage->Border(geometry => "1x1", color => 'black') if $border;
 
     foreach my $qual (qw(100 90 85 75)) {
         # work off a copy of the image so we aren't recompressing it
