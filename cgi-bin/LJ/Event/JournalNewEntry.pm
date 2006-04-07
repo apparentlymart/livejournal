@@ -1,6 +1,7 @@
 package LJ::Event::JournalNewEntry;
 use strict;
 use Scalar::Util qw(blessed);
+use Class::Autouse qw(LJ::Entry);
 use Carp qw(croak);
 use base 'LJ::Event';
 
@@ -11,6 +12,18 @@ sub new {
 }
 
 sub is_common { 1 }
+
+sub entry {
+    my $self = shift;
+    return LJ::Entry->new($self->u, ditemid => $self->arg1);
+}
+
+sub as_string {
+    my $self = shift;
+    my $entry = $self->entry;
+    return sprintf("The journal '%s' has a new post at: " . $self->entry->url,
+                   $self->u->{user});
+}
 
 
 1;

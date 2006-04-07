@@ -3,6 +3,17 @@ use strict;
 use Carp qw(croak);
 use Class::Autouse qw(LJ::SMS);
 
+# Guide to subclasses:
+#    LJ::Event::JournalNewEntry -- a journal (user/community) has a new entry in it
+#                                  ($ju,$ditemid,undef)
+#    LJ::Event::UserNewEntry    -- a user posted a new entry in some journal
+#                                  ($u,$journalid,$ditemid)
+#    LJ::Event::JournalNewComment -- a journal has a new comment in it
+#                                  ($ju,$jtalkid)
+#    LJ::Event::UserNewComment    -- a user left a new comment somewhere
+#                                  ($u,$journalid,$jtalkid)
+
+
 sub new {
     my ($class, $u, @args) = @_;
     croak("too many args") if @args > 2;
@@ -22,12 +33,21 @@ sub is_common {
     0;
 }
 
-
+sub as_string {
+    my $self = shift;
+    my $u    = $self->u;
+    return "Event $self fired for user=$u->{user}, args=[@{$self->{args}}]";
+}
 
 
 ############################################################################
 #            Don't override
 ############################################################################
+
+sub u    {  $_[0]->{u} }
+sub arg1 {  $_[0]->{args}[0] }
+sub arg2 {  $_[0]->{args}[1] }
+
 
 # class method
 sub process_fired_events {
@@ -43,8 +63,11 @@ sub fire {
     my $self = shift;
     my $u = $self->{u};
 
-    if ($LJ::DEBUG{'firings'}) {
-        warn "Event $self fired for user=$u->{user}, args=[@{$self->{args}}]\n";
+    if (my $val = $LJ::DEBUG{'firings'}) {
+        if (ref $val eq "CODE") {
+            $val->($self);
+        }
+        warn $self->as_string . "\n";
     }
     return unless $self->should_enqueue;
 

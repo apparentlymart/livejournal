@@ -2,6 +2,7 @@ package LJ::Event::UserNewEntry;
 use strict;
 use Scalar::Util qw(blessed);
 use Carp qw(croak);
+use Class::Autouse qw(LJ::Entry);
 use base 'LJ::Event';
 
 sub new {
@@ -11,6 +12,18 @@ sub new {
 }
 
 sub is_common { 0 }
+
+sub entry {
+    my $self = shift;
+    return LJ::Entry->new(LJ::load_userid($self->arg1),
+                          ditemid => $self->arg2);
+}
+
+sub as_string {
+    my $self = shift;
+    return sprintf("User '%s' posted at " . $self->entry->url,
+                   $self->u->{user});
+}
 
 
 1;
