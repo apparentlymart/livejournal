@@ -1,7 +1,7 @@
 UserpicSelect = new Class (LJ_IPPU, {
   init: function () {
     UserpicSelect.superClass.init.apply(this, ["Choose Userpic"]);
-    this.setDimensions("60%", "90%");
+    this.setDimensions("550px", "441px");
     this.selectedPicid = null;
     this.displayPics = null;
     this.dataLoaded = false;
@@ -17,7 +17,7 @@ UserpicSelect = new Class (LJ_IPPU, {
   show: function() {
     UserpicSelect.superClass.show.apply(this, []);
 
-    this.setDimensions("60%", "90%");
+    this.setDimensions("550px", "441px");
 
     if (!this.dataLoaded) {
       this.setStatus("Loading...");
@@ -359,8 +359,10 @@ UserpicSelect.userpics = "\
             <div class='ups_row ups_row[#= rownum++ % 2 + 1 #]'> [# } #] \
 \
             <span class='ups_cell' style='width: [#= pic.width/2 #]px;' > \
+              <div class='ups_container'> \
               <img src='[#= pic.url #]' width='[#= finiteInt(pic.width/2) #]' \
                  height='[#= finiteInt(pic.height/2) #]' id='ups_upicimg[#= picid #]' class='ups_upic' /> \
+               </div> \
             </span> \
             <span class='ups_cell'> \
               <b>[#| pickws.join(', ') #]</b> \
