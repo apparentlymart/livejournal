@@ -1111,6 +1111,7 @@ sub create_view_lastn
             user => $u->{user},
         });
         $lastn_page{'head'} .= $control_strip_stylesheet_link;
+        $lastn_page{'head'} .= LJ::control_strip_js_inject( user => $u->{user} );
     }
 
     # FOAF autodiscovery
@@ -1515,6 +1516,7 @@ sub create_view_friends
             user => $u->{user},
         });
         $friends_page{'head'} .= $control_strip_stylesheet_link;
+        $friends_page{'head'} .= LJ::control_strip_js_inject( user => $u->{user} );
     }
 
     $friends_page{'head'} .=
@@ -1968,6 +1970,7 @@ sub create_view_calendar
             user => $u->{user},
         });
         $calendar_page{'head'} .= $control_strip_stylesheet_link;
+        $calendar_page{'head'} .= LJ::control_strip_js_inject( user => $u->{user} );
     }
     $calendar_page{'head'} .=
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'CALENDAR_HEAD'};
@@ -2221,6 +2224,7 @@ sub create_view_day
             user => $u->{user},
         });
         $day_page{'head'} .= $control_strip_stylesheet_link;
+        $day_page{'head'} .= LJ::control_strip_js_inject( user => $u->{user} );
     }
     $day_page{'head'} .=
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'DAY_HEAD'};

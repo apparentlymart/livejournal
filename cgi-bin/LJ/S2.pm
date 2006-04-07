@@ -1752,6 +1752,7 @@ sub Page
             user => $u->{user},
         });
         $p->{'head_content'} .= $control_strip_stylesheet_link;
+        $p->{'head_content'} .= LJ::control_strip_js_inject( user => $u->{user} );
     }
 
     # FOAF autodiscovery

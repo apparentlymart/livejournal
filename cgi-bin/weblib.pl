@@ -2213,7 +2213,36 @@ LOGIN_BAR
     return "<table id='lj_controlstrip' cellpadding='0' cellspacing='0'><tr valign='top'>$ret</tr></table>";
 }
 
+sub control_strip_js_inject
+{
+    my %opts = @_;
+    my $user = delete $opts{user};
 
+    my $ret;
+    $ret .= "<script src='$LJ::JSPREFIX/core.js' type='text/javascript'></script>\n";
+    $ret .= "<script src='$LJ::JSPREFIX/dom.js'  type='text/javascript'></script>\n";
+    $ret .= "<script src='$LJ::JSPREFIX/httpreq.js'  type='text/javascript'></script>\n";
+    $ret .= qq{
+<script type='text/javascript'>
+    function controlstrip_init() {
+        if (! \$('lj_controlstrip') ){
+            HTTPReq.getJSON({
+              url: "/$user/__rpc_controlstrip?user=$user",
+              onData: function (data) {
+                  var body = document.getElementsByTagName("body")[0];
+                  var div = document.createElement("div");
+                  div.innerHTML = data;
+                      body.appendChild(div);
+              },
+              onError: function (msg) { }
+            });
+        }
+    }
+    DOM.addEventListener(window, "load", controlstrip_init);
+</script>
+    };
+    return $ret;
+}
 
 # Common challenge/response javascript, needed by both login pages and comment pages alike.
 # Forms that use this should onclick='return sendForm()' in the submit button.
@@ -2275,5 +2304,6 @@ $LJ::COMMON_CODE{'quickreply'} =
 qq{<script language="JavaScript" type="text/javascript" src="$LJ::JSPREFIX/x_core.js"></script>
 <script language="JavaScript" type="text/javascript" src="$LJ::JSPREFIX/quickreply.js"></script>
 };
+
 
 1;
