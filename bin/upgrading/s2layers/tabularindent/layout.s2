@@ -298,7 +298,7 @@ function Page::print ()
     
     if (viewer_sees_ads()) {
         print "</td>";
-        print "<td valign=\"top\" style=\"float: right;\">";
+        print "<td valign=\"top\" align=\"center\" width=\"20%\">";
         $this->print_ad("Journal-Skyscraper");
         print "</td></tr></table>\n";
     }
