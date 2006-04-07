@@ -335,7 +335,7 @@ _code?>
 
         ### Control Strip
         if ($LJ::USE_CONTROL_STRIP) {
-            $ret .= "<a name='navstrip' />";
+            $ret .= "<a name='navstrip'></a>";
             $ret .= "<?h1 $ML{'.navstrip.header'} h1?>";
             $ret .= "<table style='margin-left: 30px; margin-bottom: 20px'>\n";
             $ret .= "<tr><td colspan='2'><p>$ML{'.navstrip.about'}</p><ul><li>$ML{'.navstrip.about.provides.links'}</li><li>$ML{'.navstrip.about.provides.options'}</li><li>$ML{'.navstrip.about.provides.management'}</li></ul></td></tr>";
