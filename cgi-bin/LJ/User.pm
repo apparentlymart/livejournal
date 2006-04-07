@@ -1278,7 +1278,6 @@ sub recent_entries {
     my $count  = delete $opts{'count'}        || 50;
     die "unknown options" if %opts;
 
-    warn "remote = $remote, u = $u\n";
     my $err;
     my @recent = LJ::get_recent_items({
         itemshow  => $count,
