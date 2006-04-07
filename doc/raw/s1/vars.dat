@@ -307,7 +307,7 @@ The number of items that were skipped to get to this point in the history.
 .scope
 lastn
 .deps
-LASTN_EVENT, LASTN_NEW_DAY, LASTN_END_DAY, LASTN_OPT_ITEMS, LASTN_USERPIC, LASTN_RANGE_MOSTRECENT, LASTN_RANGE_HISTORY, LASTN_SKIP_LINKS, LASTN_WEBSITE, LASTN_SKYSCRAPER_AD, LASTN_OPEN_SKYSCRAPER_AD, LASTN_CLOSE_SKYSCRAPER_AD
+LASTN_EVENT, LASTN_NEW_DAY, LASTN_END_DAY, LASTN_OPT_ITEMS, LASTN_USERPIC, LASTN_RANGE_MOSTRECENT, LASTN_RANGE_HISTORY, LASTN_SKIP_LINKS, LASTN_WEBSITE, LASTN_SKYSCRAPER_AD, LASTN_OPEN_SKYSCRAPER_AD, LASTN_CLOSE_SKYSCRAPER_AD LASTN_5LINKUNIT_AD
 .editrows
 30
 .override
@@ -384,6 +384,10 @@ HTML for printing a wrapper around a skyscraper ad and user content. See [var[LA
 .des
 HTML for printing a control strip along the top of the page
 }
+{ 5linkunit_ad
+.des
+HTML for printing an ad with 5 link units. See [var[LASTN_5LINKUNIT_AD]].
+}
 { website
 .des
 If the user has specified their website, this block is filled with the contents of [var[LASTN_WEBSITE]].
@@ -454,6 +458,20 @@ lastn
 HTML
 .des
 Conditional close wrapper around ad and/or user content
+}
+
+{ LASTN_5LINKUNIT_AD
+.scope
+lastn
+.type
+HTML
+.des
+The HTML tag needed to show a 5 link unit ad on your journal
+.props
+{ ad
+.des
+The system-provided HTML to print the 5 link unit ad.
+}
 }
 
 { LASTN_END_DAY
@@ -945,7 +963,7 @@ This property is made up of [var[CALENDAR_YEAR_LINK]] and [var[CALENDAR_YEAR_DIS
 .scope
 calendar
 .deps
-CALENDAR_SORT_MODE, CALENDAR_MONTH, CALENDAR_NEW_YEAR, CALENDAR_WEBSITE, CALENDAR_YEAR_LINKS, CALENDAR_SKYSCRAPER_AD, CALENDAR_OPEN_SKYSCRAPER_AD, CALENDAR_CLOSE_SKYSCRAPER_AD
+CALENDAR_SORT_MODE, CALENDAR_MONTH, CALENDAR_NEW_YEAR, CALENDAR_WEBSITE, CALENDAR_YEAR_LINKS, CALENDAR_SKYSCRAPER_AD, CALENDAR_OPEN_SKYSCRAPER_AD, CALENDAR_CLOSE_SKYSCRAPER_AD CALENDAR_5LINKUNIT_AD
 .editrows
 30
 .des
@@ -1007,6 +1025,10 @@ HTML for printing a wrapper around a skyscraper ad and user content. See [var[CA
 .des
 HTML for printing a control strip along the top of the page
 }
+{ 5linkunit_ad
+.des
+HTML for printing an ad with 5 link units. See [var[CALENDAR_5LINKUNIT_AD]].
+}
 { head
 .des
 Any user-specified content to go inside the document's &lt;HEAD&gt;, like CSS or META tags.  The value is [var[GLOBAL_HEAD]] followed by [var[CALENDAR_HEAD]].  You shouldn't define the *_HEAD variables in the style, as users should set them themselves.
@@ -1051,6 +1073,20 @@ calendar
 HTML
 .des
 Conditional close wrapper around ad and/or user content
+}
+
+{ CALENDAR_5LINKUNIT_AD
+.scope
+calendar
+.type
+HTML
+.des
+The HTML tag needed to show a 5 link unit ad ad on your journal.
+.props
+{ ad
+.des
+The system-provided HTML to print the skyscraper ad.
+}
 }
 
 { CALENDAR_NEW_YEAR
@@ -1213,7 +1249,7 @@ Determines whether months in the calendar mode (variable: [var[CALENDAR_MONTH]])
 .scope
 day
 .deps
-DAY_EVENTS, DAY_NOEVENTS, DAY_WEBSITE, DAY_SKYSCRAPER_AD, DAY_OPEN_SKYSCRAPER_AD, DAY_CLOSE_SKYSCRAPER_AD
+DAY_EVENTS, DAY_NOEVENTS, DAY_WEBSITE, DAY_SKYSCRAPER_AD, DAY_OPEN_SKYSCRAPER_AD, DAY_CLOSE_SKYSCRAPER_AD DAY_5LINKUNIT_AD
 .editrows
 30
 .type
@@ -1260,6 +1296,10 @@ HTML for printing a wrapper around a skyscraper ad and user content. See [var[DA
 { control_strip
 .des
 HTML for printing a control strip along the top of the page
+}
+{ 5linkunit_ad
+.des
+HTML for printing an ad with 5 link units. See [var[DAY_5LINKUNIT_AD]].
 }
 { events
 .des
@@ -1369,6 +1409,20 @@ day
 HTML
 .des
 Conditional close wrapper around ad and/or user content
+}
+
+{ DAY_5LINKUNIT_AD
+.scope
+day
+.type
+HTML
+.des
+The HTML tag needed to show a 5 link unit ad on your journal
+.props
+{ ad
+.des
+The system-provided HTML to print the 5 link unit ad.
+}
 }
 
 { DAY_EVENTS
@@ -1795,7 +1849,7 @@ this property is equal to [var[FRIENDS_SKIP_SPACER]].
 .scope
 friends
 .deps
-FRIENDS_OPT_ITEMS, FRIENDS_NOFRIENDS, FRIENDS_EVENTS, FRIENDS_RANGE_MOSTRECENT, FRIENDS_RANGE_HISTORY, FRIENDS_SKIP_LINKS, FRIENDS_WEBSITE, FRIENDS_SKYSCRAPER_AD, FRIENDS_OPEN_SKYSCRAPER_AD, FRIENDS_CLOSE_SKYSCRAPER_AD
+FRIENDS_OPT_ITEMS, FRIENDS_NOFRIENDS, FRIENDS_EVENTS, FRIENDS_RANGE_MOSTRECENT, FRIENDS_RANGE_HISTORY, FRIENDS_SKIP_LINKS, FRIENDS_WEBSITE, FRIENDS_SKYSCRAPER_AD, FRIENDS_OPEN_SKYSCRAPER_AD, FRIENDS_CLOSE_SKYSCRAPER_AD FRIENDS_5LINKUNIT_AD
 .editrows
 30
 .des
@@ -1833,6 +1887,10 @@ HTML for printing a wrapper around a skyscraper ad and user content. See [var[FR
 { control_strip
 .des
 HTML for printing a control strip along the top of the page
+}
+{ 5linkunit_ad
+.des
+HTML for printing an ad with 5 link units. See [var[FRIENDS_5LINKUNIT_AD]].
 }
 { events
 .des
@@ -1912,6 +1970,20 @@ friends
 HTML
 .des
 Conditional close wrapper around ad and/or user content
+}
+
+{ FRIENDS_5LINKUNIT_AD
+.scope
+friends
+.type
+HTML
+.des
+The HTML tag needed to show a 5 link unit ad on your journal
+.props
+{ ad
+.des
+The system-provided HTML to print the 5 link unit ad.
+}
 }
 
 { FRIENDS_EVENTS
