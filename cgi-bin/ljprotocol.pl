@@ -3,6 +3,11 @@
 
 use strict;
 use Unicode::MapUTF8 ();
+use Class::Autouse qw(
+                      LJ::Event::JournalNewEntry
+                      LJ::Event::UserNewEntry
+                      LJ::Entry
+                      );
 
 BEGIN {
     # declare some charset aliases
@@ -1108,7 +1113,12 @@ sub postevent
 
     $res->{'itemid'} = $jitemid;  # by request of mart
     $res->{'anum'} = $anum;
-    $res->{'url'} = LJ::item_link($uowner, $jitemid, $anum);
+
+    my $entry = LJ::Entry->new($uowner, jitemid => $jitemid, anum => $anum);
+    $res->{'url'} = $entry->url;
+
+    LJ::Event::JournalNewEntry->new($entry)->fire;
+    LJ::Event::UserNewEntry   ->new($entry)->fire;
     return $res;
 }
 

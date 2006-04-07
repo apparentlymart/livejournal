@@ -41,10 +41,14 @@ sub process_fired_events {
 # are no subscriptions for the event.
 sub fire {
     my $self = shift;
+    my $u = $self->{u};
+
+    if ($LJ::DEBUG{'firings'}) {
+        warn "Event $self fired for user=$u->{user}, args=[@{$self->{args}}]\n";
+    }
     return unless $self->should_enqueue;
 
     # TODO: change this to log to 'TheSchwartz'
-    my $u = $self->{u};
     $u->cmd_buffer_add("fired_event", {
         etypeid => $self->etypeid,
         arg1    => $self->{args}[0],
