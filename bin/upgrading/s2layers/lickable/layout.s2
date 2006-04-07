@@ -920,6 +920,13 @@ function Page::lay_print_paraphernalia() "User layers can override this to chang
     $this->lay_print_viewspec();
     $this->lay_print_custom_paraphernalia();
     $this->lay_print_userlinks();
+    if (viewer_sees_ads()) {
+        paraphernalia_box_open("", "");
+        """<div style="margin-top: 16px;">""";
+        $this->print_ad("Journal-Skyscraper");
+        "</div>";
+        paraphernalia_box_close("", "");
+    }
 }
 
 function lang_posting_in(UserLite poster, UserLite journal) : string "Return the string 'poster posting in journal'; I18n layers should override this." {
@@ -1105,11 +1112,6 @@ function Page::print() {
 """;
 
 $this->print_control_strip();
-if (viewer_sees_ads()) {
-    """<div style="float: right; margin-right: 10px;">""";
-    $this->print_ad("Journal-Skyscraper");
-    "</div>";
-}
 
 """
 <div id="shadowhack1">
