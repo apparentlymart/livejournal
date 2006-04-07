@@ -1939,7 +1939,7 @@ sub ads {
         my $adparams = join('&', map { LJ::eurl($_) . '=' . LJ::eurl($adcall{$_}) } keys %adcall);
 
         my $adhtml;
-        $adhtml .= "<div class=\"ljad lj$adcall{adunit}\" id=\"\">";
+        $adhtml .= "<div class=\"ljad ljad$adcall{adunit}\" id=\"\">";
         $adhtml .= "<h4 style='margin-bottom: 2px'>Advertisement</h4>";
 
         # Iframe with call to ad targetting server
