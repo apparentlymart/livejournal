@@ -175,16 +175,14 @@ function print_stylesheet ()
       """HTML {
     border-left: 1cm solid $*sidebar_color; 
     padding: 1cm;
-}""";
-    }
-
-"""BODY {
     line-height: 1.3;
     margin: 0;
-    background-color: $*sidebar_color;
-    color: $*main_fgcolor;""";
-"""}
-P {
+    background-color: $*main_bgcolor;
+    color: $*main_fgcolor;
+}
+""";
+    }
+"""P {
     margin-top: 0;
     text-align: justify;
 }
@@ -219,6 +217,12 @@ if (viewer_sees_control_strip()) {
     padding: 1cm;
     margin: 0 0 0 1cm;
     background-color: $*main_bgcolor;
+}
+BODY {
+    line-height: 1.3;
+    margin: 0;
+    background-color: $*sidebar_color;
+    color: $*main_fgcolor;
 }""";
 }
 """
