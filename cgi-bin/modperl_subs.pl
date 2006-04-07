@@ -33,7 +33,7 @@ use LJ::Blob;
 use LJ::Captcha;
 use LJ::OpenID;
 use LJ::Location;
-use MogileFS qw(+preload);
+use MogileFS;
 use DDLockClient ();
 
 # Try to load GTop library
