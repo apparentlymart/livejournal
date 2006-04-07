@@ -2,6 +2,7 @@
 #
 
 use strict;
+use Class::Autouse qw(LJ::Event);
 
 require "$ENV{LJHOME}/cgi-bin/ljlib.pl";
 require "$ENV{LJHOME}/cgi-bin/supportlib.pl";
@@ -16,6 +17,11 @@ package LJ::Cmdbuffer;
      # delete journal entries
      delitem => {
          run => \&LJ::Cmdbuffer::_delitem,
+     },
+
+     # delete journal entries
+     fired_event => {
+         run => \&LJ::Cmdbuffer::_fired_event,
      },
 
      # ping weblogs.com with updates?  takes a $u argument
@@ -194,6 +200,18 @@ sub _delitem {
     my $a = $c->{'args'};
     return LJ::delete_entry($c->{'journalid'}, $a->{'itemid'},
                             0, $a->{'anum'});
+}
+
+sub _fired_event {
+    my ($dbh, $db, $c) = @_;
+    my $a = $c->{'args'};
+    my $class = LJ::Event->class($a->{'etypeid'});
+    my $evt   = LJ::Event->new(LJ::load_userid($c->{'journalid'}),
+                               $a->{'arg1'}, $a->{'arg2'});
+    # bless into correct class
+    bless $evt, $class;
+
+    $evt->process_firing;
 }
 
 sub _weblogscom {
