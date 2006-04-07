@@ -12,6 +12,8 @@ use Class::Autouse qw(LJ::SMS);
 #                                  ($ju,$jtalkid)
 #    LJ::Event::UserNewComment    -- a user left a new comment somewhere
 #                                  ($u,$journalid,$jtalkid)
+#    LJ::Event::Befriended        -- user $fromuserid added $u as a friend
+#                                  ($u,$fromuserid)
 
 
 sub new {

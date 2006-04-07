@@ -6,6 +6,7 @@ use Unicode::MapUTF8 ();
 use Class::Autouse qw(
                       LJ::Event::JournalNewEntry
                       LJ::Event::UserNewEntry
+                      LJ::Event::Befriended
                       LJ::Entry
                       );
 
@@ -1895,16 +1896,16 @@ sub editfriends
             $gmask |= 1;
 
             # TAG:FR:protocol:editfriends4_addeditfriend
-            $sth = $dbh->prepare("REPLACE INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) ".
-                                 "VALUES ($userid, $friendid, $qfg, $qbg, $gmask)");
-            $sth->execute;
-
-            unless ($dbh->err) {
-                my $memkey = [$userid,"frgmask:$userid:$friendid"];
-                LJ::MemCache::set($memkey, $gmask+0, time()+60*15);
-                LJ::memcache_kill($friendid, 'friendofs');
-            }
+            $dbh->do("REPLACE INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) ".
+                     "VALUES ($userid, $friendid, $qfg, $qbg, $gmask)");
             return $fail->(501,$dbh->errstr) if $dbh->err;
+
+            my $memkey = [$userid,"frgmask:$userid:$friendid"];
+            LJ::MemCache::set($memkey, $gmask+0, time()+60*15);
+            LJ::memcache_kill($friendid, 'friendofs');
+
+            LJ::Event::Befriended->(LJ::load_userid($friendid),
+                                    LJ::load_userid($userid))->fire;
         }
     }
 
