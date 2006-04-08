@@ -2112,11 +2112,12 @@ function EntryPage::print_comment (Comment c) {
     if ($c.frozen) {
         "($*text_comment_frozen) ";
     } else {
-        "(<a href='$c.reply_url'>$*text_comment_reply</a>) ";
+        "("; $c->print_reply_link({"linktext" => $*text_comment_reply}); ")";
     }
     if ($c.parent_url != "") { "(<a href='$c.parent_url'>$*text_comment_parent</a>) "; }
     if ($c.thread_url != "") { "(<a href='$c.thread_url'>$*text_comment_thread</a>) "; }
     "</div>\n";
+    $c->print_reply_container();
 }
 
 function EntryPage::print_comment_partial (Comment c) {
