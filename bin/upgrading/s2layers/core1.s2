@@ -2088,7 +2088,7 @@ function EntryPage::print_comment (Comment c) {
       print "<table>";
       print "<tr><th align='right'>$*text_comment_from</th><td>$poster</td></tr>\n";
       print "<tr><th align='right'>$*text_comment_date</th><td style='white-space: nowrap'>";
-        print $c.time->date_format("long") + " - " + $c.time->time_format() + "</td></tr>";
+        print $c->time_display() + "</td></tr>";
       if ($c.metadata{"poster_ip"}) { print "<tr><th align='right'>$*text_comment_ipaddr</th><td>(" + $c.metadata{"poster_ip"} + ")</td></tr>"; }
     "</table></td>";
 
