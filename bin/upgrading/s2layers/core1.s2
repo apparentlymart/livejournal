@@ -1733,7 +1733,11 @@ function Entry::print_metadata() {
     if (size $.metadata) {
         """<div class="metadata">\n""";
         foreach var string m ($.metadata) {
-            "<strong>$m</strong>: "; print $.metadata{$m}; "<br />";
+            "<div><strong>$m</strong>: ";
+            if ($m == "mood") {
+                " $.mood_icon ";
+            }
+            print $.metadata{$m}; "</div>\n";
         }
         "</div>\n";
     }
