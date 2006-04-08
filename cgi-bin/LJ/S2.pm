@@ -3160,7 +3160,7 @@ sub string__css_url_value
     my ($ctx, $this) = @_;
 
     return '' if $this !~ m!^https?://!;
-    return '' if $this =~ /[^a-z0-9A-Z\.\@\$\-_\.\+\!\*'\(\),&=#;:\?\/\%]/;
+    return '' if $this =~ /[^a-z0-9A-Z\.\@\$\-_\.\+\!\*'\(\),&=#;:\?\/\%~]/;
     return 'url('.string__css_string($ctx, $this).')';
 }
 
