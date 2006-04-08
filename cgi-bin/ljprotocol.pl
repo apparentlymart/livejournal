@@ -1904,8 +1904,8 @@ sub editfriends
             LJ::MemCache::set($memkey, $gmask+0, time()+60*15);
             LJ::memcache_kill($friendid, 'friendofs');
 
-            LJ::Event::Befriended->(LJ::load_userid($friendid),
-                                    LJ::load_userid($userid))->fire;
+            LJ::Event::Befriended->new(LJ::load_userid($friendid),
+                                       LJ::load_userid($userid))->fire;
         }
     }
 
