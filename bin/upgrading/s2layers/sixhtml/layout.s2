@@ -614,11 +614,14 @@ function EntryPage::print_body() {
 
 }
 
-function lang_posted_by_date_and_time(UserLite poster, DateTime dt, bool showposter, bool showdate, bool showtime) : string {
+function lang_posted_by_date_and_time(UserLite poster, UserLite journal, DateTime dt, bool showposter, bool showdate, bool showtime) : string {
     var string posted = "";
     if ($showposter) {
         var string posterstr = (defined $poster ? ""+$poster : "<i>"+$*text_poster_anonymous+"</i>");
         $posted = "Posted by "+$posterstr;
+        if (not $poster->equals($journal)) {
+            $posted = $posted + " in " + $journal;
+        }
         if (not $showtime and not $showdate) {
             return $posted;
         }
@@ -634,6 +637,10 @@ function lang_posted_by_date_and_time(UserLite poster, DateTime dt, bool showpos
         return $posted + $dt->time_format();
     }
     return "";
+}
+
+function lang_posted_by_date_and_time(UserLite poster, DateTime dt, bool showposter, bool showdate, bool showtime) : string {
+    return lang_posted_by_date_and_time($poster, $poster, $dt, $showposter, $showdate, $showtime);
 }
 
 function EntryPage::print_comment(Comment e) {
@@ -724,7 +731,7 @@ function Page::print_entry(Entry e) {
          }
 
          if ($showdate or $showtime or $showposter) {
-             print lang_posted_by_date_and_time($e.poster, $e.time, $showposter, $showdate, $showtime)+" $sep ";
+             print lang_posted_by_date_and_time($e.poster, $e.journal, $e.time, $showposter, $showdate, $showtime)+" $sep ";
          }
          "<a class='permalink' href='$e.permalink_url'>$*text_permalink</a>";
 
