@@ -2204,7 +2204,7 @@ function EntryPage::print_body
 function ReplyPage::print_body
 {
     if (not $.entry.comments.enabled) {
-        print "<h2>$*text_reply_nocomments_header/h2><p>$*text_reply_nocomments</p>";
+        print "<h2>$*text_reply_nocomments_header</h2><p>$*text_reply_nocomments</p>";
         return;
     }
 
