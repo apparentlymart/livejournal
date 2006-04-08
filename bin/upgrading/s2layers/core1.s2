@@ -2168,12 +2168,7 @@ function EntryPage::print_body
     "</td></tr></table>\n";
 
     print "<div style='text-align: center'>";
-    var Link link;
-    $link = $e->get_link("nav_prev"); " $link";
-    $link = $e->get_link("edit_entry"); " $link";
-    $link = $e->get_link("mem_add"); " $link";
-    $link = $e->get_link("tell_friend"); " $link";
-    $link = $e->get_link("nav_next"); " $link";
+    $e->print_linkbar();
     print "</div>";
 
     "<h2>$e.security_icon $e.subject</h2>\n";
@@ -2186,16 +2181,18 @@ function EntryPage::print_body
         "</div>\n\n";
     }
 
-    if ($.entry.comments.enabled)
-    {
-        print """<hr />(<a href="$e.comments.post_url">$*text_post_comment</a>)""";
+    if ($.entry.comments.enabled) {
+        "<hr />";
+        "("; $this->print_reply_link({ "linktext" => $*text_post_comment, "target" => "topcomment" }); ")";
+        $this->print_reply_container({ "target" => "topcomment" });
         if ($.comment_pages.total_subitems > 0) {
             "<hr />";
             $.comment_pages->print();
             $this->print_multiform_start();
             $this->print_comments($.comments);
             print "<hr />";
-            print """(<a href="$e.comments.post_url">$*text_post_comment</a>)""";
+            "("; $this->print_reply_link({ "linktext" => $*text_post_comment, "target" => "bottomcomment" }); ")";
+            $this->print_reply_container({"target" => "bottomcomment"});
             if ($.comment_pages.all_subitems_displayed) { print "<hr />"; }
             $this->print_multiform_actionline();
             $this->print_multiform_end();
