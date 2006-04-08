@@ -2107,7 +2107,7 @@ function EntryPage::print_comment (Comment c) {
     print "<td style='width:50%;' align='right'><strong>(<a href='$c.permalink_url'>$*text_permalink</a>)</strong></td></tr>\n";
     print "</table></td></tr></table></div>";
 
-    print "<div style='margin-left: 5px'>$c.text</div>\n";
+    print "<div style='margin-left: 5px'>"; $c->print_text(); "</div>\n";
     print "<div style='margin-top: 3px; font-size: smaller'>";
     if ($c.frozen) {
         "($*text_comment_frozen) ";
