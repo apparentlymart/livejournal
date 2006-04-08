@@ -2150,6 +2150,7 @@ function ItemRange::print() {
             "<a href='$url_of#comments'><b>[$i]</b></a> ";
         }
     }
+    print "</td>";
     var string url_next = $this->url_of($.current + 1);
     if ($.current != $.total) {
         print "<td align='center'><a href='$url_next#comments'>&gt;&gt;</a></td>";
