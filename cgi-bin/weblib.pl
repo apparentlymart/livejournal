@@ -1748,15 +1748,18 @@ sub js_dumper {
 sub need_res {
     foreach my $reskey (@_) {
         die "Bogus reskey $reskey" unless $reskey =~ m!^(js|stc)/!;
-        $LJ::NEEDED_RES{$reskey} = 1;
+        unless ($LJ::NEEDED_RES{$reskey}++) {
+            push @LJ::NEEDED_RES, $reskey;
+        }
     }
 }
 
 sub res_includes {
-    # TODO: dependency tracking
+    # TODO: automatic dependencies from external map and/or content of files,
+    # currently it's limited to dependencies on the order you call LJ::need_res();
     my $ret = "";
     my $now = time();
-    foreach my $key (keys %LJ::NEEDED_RES) {
+    foreach my $key (@LJ::NEEDED_RES) {
         my $path = $key;
         my $mtime = _file_modtime($key, $now);
         # some files need to be served from same host as the app (must be on "www.")
@@ -2063,7 +2066,7 @@ sub control_strip
             if ($r->notes('view') eq "friends") {
                 my @filters = ("all", $BML::ML{'web.controlstrip.select.friends.all'}, "showpeople", $BML::ML{'web.controlstrip.select.friends.journals'}, "showcommunities", $BML::ML{'web.controlstrip.select.friends.communities'}, "showsyndicated", $BML::ML{'web.controlstrip.select.friends.feeds'});
                 my %res;
-                # FIXME: make this use LJ::Protocol::do_request 
+                # FIXME: make this use LJ::Protocol::do_request
                 LJ::do_request({ 'mode' => 'getfriendgroups',
                                  'ver'  => $LJ::PROTOCOL_VER,
                                  'user' => $remote->{'user'}, },
@@ -2072,10 +2075,10 @@ sub control_strip
                 foreach my $k (keys %res) {
                     if ($k =~ /^frgrp_(\d+)_name/) {
                         $group{$1}->{'name'} = $res{$k};
-                    } 
+                    }
                     elsif ($k =~ /^frgrp_(\d+)_sortorder/) {
                         $group{$1}->{'sortorder'} = $res{$k};
-                    } 
+                    }
                 }
                 foreach my $g (sort { $group{$a}->{'sortorder'} <=> $group{$b}->{'sortorder'} } keys %group) {
                     push @filters, "filter:" . $group{$g}->{'name'}, $group{$g}->{'name'};
