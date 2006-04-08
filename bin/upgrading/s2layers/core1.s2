@@ -1497,6 +1497,8 @@ function userinfoicon(UserLite user) : Image {
         $uimage->set_url("$*IMGDIR/syndicated.gif");
     } elseif ($user.journal_type == "N") {
         $uimage->set_url("$*IMGDIR/newsinfo.gif");
+    } elseif ($user.journal_type == "I") {
+        $uimage->set_url("$*IMGDIR/openid-profile.gif");
     } else {
         $uimage->set_url("$*IMGDIR/userinfo.gif");
         $uimage.width = 17;
