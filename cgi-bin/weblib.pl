@@ -1956,7 +1956,7 @@ sub ads {
         my $echannel = LJ::eurl($adcall{channel});
         my $euri = LJ::eurl($r->uri);
         $adhtml .= "<div style='text-align: right; margin-top: 2px;'>";
-        $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>Customize</a> | " if $remote;
+        $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>Customize</a> | ";
         $adhtml .= "<a href=\"$LJ::SITEROOT/feedback/ads.bml?adcall=$eadcall&channel=$echannel&uri=$euri\">Feedback</a>";
         $adhtml .= "</div>";
         $adhtml .= "</div>";
