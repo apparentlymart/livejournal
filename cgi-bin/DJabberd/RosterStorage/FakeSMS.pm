@@ -5,7 +5,7 @@ use base 'DJabberd::RosterStorage';
 sub blocking { 0 }
 
 sub get_roster {
-    my ($self, $cb, $conn, $jid) = @_;
+    my ($self, $cb, $jid) = @_;
 
     my $user = $jid->node;
     my $roster = DJabberd::Roster->new;
