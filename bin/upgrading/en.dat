@@ -2773,8 +2773,6 @@ You may wish to go back and try again, selecting fewer interests to add.
 
 /logout.bml.loggedout.killedall=All your sessions have been expired.
 
-/logout.bml.loggedout.success=Logged out.
-
 /logout.bml.loggedout.text=You are now logged out.
 
 /logout.bml.logout.btn=Log out

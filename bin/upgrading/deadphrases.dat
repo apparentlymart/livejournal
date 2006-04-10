@@ -98,6 +98,8 @@ general /login.bml.whylogin.benefit3
 general /login.bml.whylogin.head
 general /login.bml.whylogin.text
 
+general /logout.bml.loggedout.success
+
 general /manage/index.bml.information.setlang.about
 general /manage/index.bml.information.setscheme.about
 general /manage/index.bml.userpictures
