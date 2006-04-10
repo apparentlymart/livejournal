@@ -1186,35 +1186,6 @@ CREATE TABLE dbweights (
 )
 EOC
 
-# notification/subscription stuff:
-
-register_tablecreate("subs", <<'EOC');  # global
-CREATE TABLE subs (
-  userid INT UNSIGNED NOT NULL,
-  etype       CHAR(1) NOT NULL,
-  ejournalid  INT UNSIGNED NOT NULL,
-  eiarg       INT UNSIGNED NOT NULL,
-  UNIQUE (userid, etype, ejournalid, eiarg),
-  INDEX (etype, ejournalid, eiarg),
-  subtime     DATETIME NOT NULL,
-  exptime     DATETIME NOT NULL,
-  INDEX (exptime),
-  ntype      CHAR(1) NOT NULL
-)
-EOC
-
-register_tablecreate("events", <<'EOC');  # clustered
-CREATE TABLE events (
-  evtime  DATETIME NOT NULL,
-  INDEX (evtime),
-  etype  CHAR(1) NOT NULL,
-  ejournalid  INT UNSIGNED NOT NULL,
-  eiarg       INT UNSIGNED NOT NULL,
-  duserid   INT UNSIGNED NOT NULL,
-  diarg     INT UNSIGNED NOT NULL
-)
-EOC
-
 # Begin S2 Stuff
 register_tablecreate("s2layers", <<'EOC'); # global
 CREATE TABLE s2layers
@@ -2285,14 +2256,98 @@ CREATE TABLE smsusermap (
 )
 EOC
 
+# global
 register_tablecreate("eventtypelist", <<'EOC');
 CREATE TABLE eventtypelist (
-  eventtypeid  SMALLINT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  class        VARCHAR(100),
+  etypeid  SMALLINT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  class    VARCHAR(100),
   UNIQUE (class)
 )
 EOC
 
+# global
+register_tablecreate("notifytypelist", <<'EOC');
+CREATE TABLE notifytypelist (
+  ntypeid   SMALLINT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  class     VARCHAR(100),
+  UNIQUE (class)
+)
+EOC
+
+# partitioned:  ESN subscriptions:  flag on event target (a journal) saying
+#               whether there are known listeners out there.
+#
+# verifytime is unixtime we last checked that this has_subs caching row
+# is still accurate and people do in fact still subscribe to this.
+# then maintenance tasks can background prune this table and fix
+# up verifytimes.
+register_tablecreate("has_subs", <<'EOC');
+CREATE TABLE has_subs (
+  journalid  INT UNSIGNED NOT NULL,
+  etypeid    INT UNSIGNED NOT NULL,
+  arg1       INT UNSIGNED NOT NULL,
+  arg2       INT UNSIGNED NOT NULL,
+  PRIMARY KEY (journalid, etypeid, arg1, arg2),
+
+  verifytime   INT UNSIGNED NOT NULL
+)
+EOC
+
+# partitioned:  ESN subscriptions:  details of a user's subscriptions
+#  subid: alloc_user_counter
+#  is_dirty:  either 1 (indexed) or NULL (not in index).  means we have
+#             to go update the target's etypeid
+#  userid is OWNER of the subscription,
+#  journalid is the journal in which the event took place.
+#  ntypeid is the notification type from notifytypelist
+#  times are unixtimes
+#  expiretime can be 0 to mean "never"
+#  flags is a bitmask of flags, where:
+#     bit 0 = is digest?  (off means live?)
+#     rest undefined for now.
+register_tablecreate("subs", <<'EOC');
+CREATE TABLE subs (
+  userid   INT UNSIGNED NOT NULL,
+  subid    INT UNSIGNED NOT NULL,
+           PRIMARY KEY (userid, subid),
+
+  is_dirty   TINYINT UNSIGNED NULL,
+             INDEX (is_dirty),
+
+  journalid  INT UNSIGNED NOT NULL,
+  etypeid    SMALLINT UNSIGNED NOT NULL,
+  arg1       INT UNSIGNED NOT NULL,
+  arg2       INT UNSIGNED NOT NULL,
+
+  ntypeid    SMALLINT UNSIGNED NOT NULL,
+
+  createtime INT UNSIGNED NOT NULL,
+  expiretime INT UNSIGNED NOT NULL,
+  flags      SMALLINT UNSIGNED NOT NULL
+)
+EOC
+
+# unlike other *proplist tables, this one is auto-populated by app
+register_tablecreate("subsproplist", <<'EOC');
+CREATE TABLE subsproplist (
+  subpropid  SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  name       VARCHAR(255) DEFAULT NULL,
+  PRIMARY KEY (subpropid),
+  UNIQUE KEY (name)
+)
+EOC
+
+
+# partitioned:  ESN subscriptions:  metadata on a user's subscriptions
+register_tablecreate("subsprop", <<'EOC');
+CREATE TABLE subsprop (
+  userid    INT      UNSIGNED NOT NULL,
+  subid     INT      UNSIGNED NOT NULL,
+  subpropid SMALLINT UNSIGNED NOT NULL,
+            PRIMARY KEY (userid, subid, subpropid),
+  value     VARCHAR(255) BINARY DEFAULT NULL
+)
+EOC
 
 
 # NOTE: new table declarations go here
@@ -2820,6 +2875,11 @@ register_alter(sub {
     if (column_type("blobcache", "bckey") =~ /40/) {
         do_alter("blobcache",
                  "ALTER TABLE blobcache MODIFY bckey VARCHAR(255) NOT NULL");
+    }
+
+    if (column_type("eventtypelist", "eventtypeid")) {
+        do_alter("eventtypelist",
+                 "ALTER TABLE eventtypelist CHANGE eventtypeid etypeid SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT");
     }
 
 

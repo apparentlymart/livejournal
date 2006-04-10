@@ -30,7 +30,7 @@ sub END { LJ::end_request(); }
 @LJ::USER_TABLES = ("userbio", "cmdbuffer", "dudata",
                     "log2", "logtext2", "logprop2", "logsec2",
                     "talk2", "talkprop2", "talktext2", "talkleft",
-                    "userpicblob2", "events",
+                    "userpicblob2", "subs", "subsprop", "has_subs",
                     "ratelog", "loginstall", "sessions", "sessions_data",
                     "s1usercache", "modlog", "modblob",
                     "userproplite2", "links", "s1overrides", "s1style",
