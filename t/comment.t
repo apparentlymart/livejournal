@@ -5,7 +5,6 @@ use Test::More 'no_plan';
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 use LJ::Comment;
-#use FindBin qw($Bin);
 
 my $u = LJ::load_user("system");
 
@@ -28,8 +27,6 @@ my $u = LJ::load_user("system");
     $c = eval { LJ::Comment->new($u, jtalkid => 1, foo => 1, bar => 2) };
     like($@, qr/unknown parameter/, "unknown parameters");
 }
-
-sub is_common { 1 }
 
 1;
 
