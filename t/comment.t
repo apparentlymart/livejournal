@@ -13,10 +13,10 @@ my $u = LJ::load_user("system");
     my $c;
 
     $c = eval { LJ::Comment->new({}, jtalkid => 1) };
-    like($@, qr/invalid user/, "invalid user from ref");
+    like($@, qr/invalid journalid/, "invalid journalid parameter");
 
     $c = eval { LJ::Comment->new(0, jtalkid => 1) };
-    like($@, qr/invalid user/, "invalid user from userid");
+    like($@, qr/invalid journalid/, "invalid user from userid");
 
     $c = eval { LJ::Comment->new($u, jtalkid => 1, 'foo') };
     like($@, qr/wrong number/, "wrong number of arguments");
