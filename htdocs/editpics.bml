@@ -365,7 +365,7 @@
                       }); };
 
                       # sorry, factory only works for jpegs
-                      return $err->("Sorry, you may only upload an image that is greater than 100x100 pixels if it is in JPEG format.")
+                      return $err->("Sorry, you may only upload an image that is greater than 100x100 pixels or has a file size larger than 40k if it is in JPEG format.")
                           if $upload{mime} ne 'image/jpeg';
                   }
 
