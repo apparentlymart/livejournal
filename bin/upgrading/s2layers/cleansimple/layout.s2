@@ -237,14 +237,16 @@ img {
 vertical-align: absmiddle;
 }
 table {
+width: 100%;
+}
 """;
 if (viewer_sees_control_strip()) {
-    """margin: $*opt_margin_size;""";
-} else {
-    """width: 100%;""";
+"""#main {
+margin: $*opt_margin_size;
+width: auto;
+}""";
 }
 """
-}
 pre {
 text-align: left;
 }
@@ -525,7 +527,7 @@ function Page::print ()
 </head>
 <body>""";
 $this->print_control_strip();
-"""<table border="0" cellpadding="0" cellspacing="0">
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\""; if (viewer_sees_control_strip()) { " id=\"main\""; } """>
 <tr><td colspan="""; if (viewer_sees_ads()) { "\"3\" "; } else { "\"2\" "; } """id="topbar" valign="top">""";
 
 "<h1>$.journal.name</h1>";
