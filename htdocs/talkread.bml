@@ -312,7 +312,7 @@ my $old_url = 0;
  $ret .= $event;
  $ret .= "</div>";
 
- $ret .= "<br clear='all' /><hr width='100%' size='2' align='center' />";
+ $ret .= "<br style='clear: left' /><hr width='100%' size='2' align='center' />";
 
  my %user;
  my $opts = {
