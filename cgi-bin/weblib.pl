@@ -2019,8 +2019,10 @@ sub control_strip
     my %statustext = (
                     'yourjournal'       => $BML::ML{'web.controlstrip.status.yourjournal'},
                     'yourfriendspage'   => $BML::ML{'web.controlstrip.status.yourfriendspage'},
+                    'yourfriendsfriendspage' => $BML::ML{'web.controlstrip.status.yourfriendsfriendspage'},
                     'personal'          => BML::ml('web.controlstrip.status.personal', {'user' => $journal_display}),
                     'personalfriendspage' => BML::ml('web.controlstrip.status.personalfriendspage', {'user' => $journal_display}),
+                    'personalfriendsfriendspage' => BML::ml('web.controlstrip.status.personalfriendsfriendspage', {'user' => $journal_display}),
                     'community'         => BML::ml('web.controlstrip.status.community', {'user' => $journal_display}),
                     'syn'               => BML::ml('web.controlstrip.status.syn', {'user' => $journal_display}),
                     'news'              => BML::ml('web.controlstrip.status.news', {'user' => $journal_display, 'sitename' => $LJ::SITENAMESHORT}),
@@ -2061,7 +2063,13 @@ sub control_strip
 
         $ret .= "<td id='lj_controlstrip_actionlinks'>";
         if ($remote && $remote->{userid} == $journal->{userid}) {
-            $ret .= $r->notes('view') eq "friends" ? $statustext{'yourfriendspage'} : $statustext{'yourjournal'};
+            if ($r->notes('view') eq "friends") {
+                $ret .= $statustext{'yourfriendspage'};
+            } elsif ($r->notes('view') eq "friendsfriends") {
+                $ret .= $statustext{'yourfriendsfriendspage'};
+            } else {
+                $ret .= $statustext{'yourjournal'};
+            }
             $ret .= "<br />";
             if ($r->notes('view') eq "friends") {
                 my @filters = ("all", $BML::ML{'web.controlstrip.select.friends.all'}, "showpeople", $BML::ML{'web.controlstrip.select.friends.journals'}, "showcommunities", $BML::ML{'web.controlstrip.select.friends.communities'}, "showsyndicated", $BML::ML{'web.controlstrip.select.friends.feeds'});
@@ -2108,8 +2116,14 @@ sub control_strip
                 $ret .= "$statustext{'friendof'}<br />";
                 $ret .= "$links{'add_friend'}";
             } else {
-                $ret .= $r->notes('view') eq "friends" ? "$statustext{'personalfriendspage'}<br />" : "$statustext{'personal'}<br />";
-                $ret .= "$links{'add_friend'}";
+                if ($r->notes('view') eq "friends") {
+                    $ret .= $statustext{'personalfriendspage'};
+                } elsif ($r->notes('view') eq "friendsfriends") {
+                    $ret .= $statustext{'personalfriendsfriendspage'};
+                } else {
+                    $ret .= $statustext{'personal'};
+                }
+                $ret .= "<br />$links{'add_friend'}";
             }
         } elsif ($journal->{journaltype} eq "C") {
             my $watching = LJ::is_friend($remote, $journal);
@@ -2196,7 +2210,13 @@ LOGIN_BAR
 
         my $jtype = $journal->{journaltype};
         if ($jtype eq "P" || $jtype eq "I") {
-            $ret .= $r->notes('view') eq "friends" ? $statustext{'personalfriendspage'} : $statustext{'personal'};
+            if ($r->notes('view') eq "friends") {
+                $ret .= $statustext{'personalfriendspage'};
+            } elsif ($r->notes('view') eq "friendsfriends") {
+                $ret .= $statustext{'personalfriendsfriendspage'};
+            } else {
+                $ret .= $statustext{'personal'};
+            }
         } elsif ($jtype eq "C") {
             $ret .= $statustext{'community'};
         } elsif ($jtype eq "Y") {
