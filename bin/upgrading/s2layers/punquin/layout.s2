@@ -352,7 +352,13 @@ function Page::print ()
     "<td colspan='2' align='$main_position'>\n";
     "<a href='$*SITEROOT/'>$*SITENAME</a></td>\n";
 
-    "</tr></table></div></body></html>";
+    "</tr></table>";
+    if (viewer_sees_ads() and ($.view == "recent" or $.view == "friends")) {
+        """<div style="text-align: center;">""";
+        $this->print_ad("Journal-5LinkUnit");
+        "</div>";
+    }
+    "</div></body></html>";
 }
 
 function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_text)

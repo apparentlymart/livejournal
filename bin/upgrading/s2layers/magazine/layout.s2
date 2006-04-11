@@ -385,6 +385,12 @@ function Page::print () {
 
     $this->lay_bottom_navigation();
 
+    if (viewer_sees_ads() and ($.view == "recent" or $.view == "friends")) {
+        """<div style="text-align: center;">""";
+        $this->print_ad("Journal-5LinkUnit");
+        "</div>";
+    }
+
     if (viewer_sees_ads()) { "</div>"; }
     if (viewer_sees_control_strip()) { "</div>"; }
     "</body></html>";

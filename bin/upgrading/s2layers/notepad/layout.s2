@@ -269,6 +269,11 @@ $this->print_linklist();
     """<div style="margin-right: 10px;">""";
     $this->print_ad("Journal-Skyscraper");
     "</div></td></tr></table>";
+    if ($.view == "recent" or $.view == "friends") {
+        """<div style="width: 738px;">""";
+        $this->print_ad("Journal-5LinkUnit");
+        "</div>";
+    }
   }
   """
  </body>

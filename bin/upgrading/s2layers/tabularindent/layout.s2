@@ -301,6 +301,11 @@ function Page::print ()
         print "<td valign=\"top\" align=\"center\" width=\"20%\">";
         $this->print_ad("Journal-Skyscraper");
         print "</td></tr></table>\n";
+        if ($.view == "recent" or $.view == "friends") {
+            """<div style="text-align: center;">""";
+            $this->print_ad("Journal-5LinkUnit");
+            "</div>";
+        }
     }
 
     "<p>"; captionbar($this); "</p>";

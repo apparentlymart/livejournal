@@ -373,6 +373,13 @@ if (viewer_sees_ads()) {
 <div id="serversig" style="margin-top: 3em; text-align: center;">"""; server_sig(); """</div>
 
 </div>
+""";
+if (viewer_sees_ads() and ($.view == "recent" or $.view == "friends")) {
+    """<div style="text-align: center;">""";
+    $this->print_ad("Journal-5LinkUnit");
+    "</div>";
+}
+"""
 </body>
 </html>""";
 

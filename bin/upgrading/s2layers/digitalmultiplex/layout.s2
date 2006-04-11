@@ -948,7 +948,13 @@ function Page::print() {
     "<td id=\"server_sig\""; if (viewer_sees_ads()) { " colspan=\"2\" "; } ">";
     server_sig();
     println """</td></tr></table>""";
-
+    
+    if (viewer_sees_ads() and ($.view == "recent" or $.view == "friends")) {
+        """<div style="text-align: center; margin-top: 10px;">""";
+        $this->print_ad("Journal-5LinkUnit");
+        "</div>";
+    }
+    
     println "</div></body></html>";
 }
 

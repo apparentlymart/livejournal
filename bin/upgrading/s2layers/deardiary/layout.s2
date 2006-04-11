@@ -890,7 +890,13 @@ $this->print_control_strip();
 </div>
 
 <div id="main">
-"""; $this->print_body(); """
+"""; $this->print_body();
+if (viewer_sees_ads() and ($.view == "recent" or $.view == "friends")) {
+    """<div style="text-align: center;">""";
+    $this->print_ad("Journal-5LinkUnit");
+    "</div>";
+}
+"""
 </div>
 
 """; $this->lay_print_viewspec_after(); """
