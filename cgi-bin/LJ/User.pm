@@ -463,7 +463,7 @@ sub note_activity {
 
     # delayed insert in case the table is currently locked due to an analysis
     # running.  this way the apache won't be tied up waiting
-    $u->do("INSERT DELAYED IGNORE INTO active_user " .
+    $u->do("INSERT IGNORE INTO active_user " .
            "SET year=?, month=?, day=?, hour=?, userid=?, type=?",
            undef, $yr, $mo, $dy, $hr, $uid, $atype);
 
