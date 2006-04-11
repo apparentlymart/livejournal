@@ -9,7 +9,7 @@ $dbh->{'RaiseError'} = 1;
 $dbh->{'PrintError'} = 1;
 my $sth;
 
-$sth = $dbh->prepare("SELECT userid FROM user WHERE statusvis='D' AND statusvisdate < DATE_SUB(NOW(), INTERVAL 35 DAY) ORDER BY statusvisdate");
+$sth = $dbh->prepare("SELECT userid FROM user WHERE statusvis='D' AND statusvisdate < DATE_SUB(NOW(), INTERVAL 60 DAY) LIMIT 1000");
 $sth->execute;
 my @delusers;
 while (my $duid = $sth->fetchrow_array) {
@@ -67,26 +67,26 @@ foreach my $uid (@delusers)
     # make all the user's comments posted now be owned by posterid 0 (anonymous)
     # but with meta-data saying who used to own it
     # ..... hm, with clusters this is a pain.  let's not.
-    
+
     # delete memories
     print "  memories\n";
     while (($ids = $dbh->selectcol_arrayref("SELECT memid FROM memorable WHERE userid=$uid LIMIT 100")) && @{$ids})
     {
-	my $in = join(",", @$ids);
-	print "  id: $in\n";
-	$runsql->($dbh, $user, "DELETE FROM memkeyword WHERE memid IN ($in)");
-	$runsql->($dbh, $user, "DELETE FROM memorable WHERE memid IN ($in)");
+        my $in = join(",", @$ids);
+        print "  id: $in\n";
+        $runsql->($dbh, $user, "DELETE FROM memkeyword WHERE memid IN ($in)");
+        $runsql->($dbh, $user, "DELETE FROM memorable WHERE memid IN ($in)");
     }
 
     # delete todos
     print "  todos\n";
     while (($ids = $dbh->selectcol_arrayref("SELECT todoid FROM todo WHERE journalid=$uid LIMIT 100")) && @{$ids})
     {
-	my $in = join(",", @$ids);
-	print "  id: $in\n";
-	$runsql->($dbh, $user, "DELETE FROM tododep WHERE todoid IN ($in)");
-	$runsql->($dbh, $user, "DELETE FROM todokeyword WHERE todoid IN ($in)");
-	$runsql->($dbh, $user, "DELETE FROM todo WHERE todoid IN ($in)");
+        my $in = join(",", @$ids);
+        print "  id: $in\n";
+        $runsql->($dbh, $user, "DELETE FROM tododep WHERE todoid IN ($in)");
+        $runsql->($dbh, $user, "DELETE FROM todokeyword WHERE todoid IN ($in)");
+        $runsql->($dbh, $user, "DELETE FROM todo WHERE todoid IN ($in)");
     }
 
     # delete userpics
@@ -97,10 +97,10 @@ foreach my $uid (@delusers)
         } else {
             $ids = $dbh->selectcol_arrayref("SELECT picid FROM userpic WHERE userid=$uid");
         }
-	my $in = join(",",@$ids);
-	if ($in) {
-	    print "  userpics: $in\n";
-	    $runsql->($dbcm, $user, "DELETE FROM userpicblob2 WHERE userid=$uid AND picid IN ($in)");
+        my $in = join(",",@$ids);
+        if ($in) {
+            print "  userpics: $in\n";
+            $runsql->($dbcm, $user, "DELETE FROM userpicblob2 WHERE userid=$uid AND picid IN ($in)");
             if ($du->{'dversion'} > 6) {
                 $runsql->($dbcm, $user, "DELETE FROM userpic2 WHERE userid=$uid");
                 $runsql->($dbcm, $user, "DELETE FROM userpicmap2 WHERE userid=$uid");
@@ -109,19 +109,19 @@ foreach my $uid (@delusers)
                 $runsql->($dbh, $user, "DELETE FROM userpic WHERE userid=$uid");
                 $runsql->($dbh, $user, "DELETE FROM userpicmap WHERE userid=$uid");
             }
-	}
+        }
     }
 
     # delete posts
     print "  posts\n";
     while (($ids = $dbcm->selectall_arrayref("SELECT jitemid, anum FROM log2 WHERE journalid=$uid LIMIT 100")) && @{$ids})
     {
-	foreach my $idanum (@$ids) {
-	    my ($id, $anum) = ($idanum->[0], $idanum->[1]);
-	    print "  deleting $id (a=$anum) ($uid; $du->{'user'})\n";
-	    LJ::delete_entry($du, $id, 0, $anum);
-	    $pause->();
-	}
+        foreach my $idanum (@$ids) {
+            my ($id, $anum) = ($idanum->[0], $idanum->[1]);
+            print "  deleting $id (a=$anum) ($uid; $du->{'user'})\n";
+            LJ::delete_entry($du, $id, 0, $anum);
+            $pause->();
+        }
     }
 
     # misc:
@@ -138,8 +138,8 @@ foreach my $uid (@delusers)
     $runsql->($dbcm, $user, "DELETE FROM userbio WHERE userid=$uid");
     $runsql->($user, "DELETE FROM userinterests WHERE userid=$uid");
     $runsql->($user, "DELETE FROM userprop WHERE userid=$uid");
-    $runsql->($user, "DELETE FROM userproplite WHERE userid=$uid");   
-    $runsql->($user, "DELETE FROM txtmsg WHERE userid=$uid");   
+    $runsql->($user, "DELETE FROM userproplite WHERE userid=$uid");
+    $runsql->($user, "DELETE FROM txtmsg WHERE userid=$uid");
     $runsql->($user, "DELETE FROM overrides WHERE user='$du->{'user'}'");
     $runsql->($user, "DELETE FROM priv_map WHERE userid=$uid");
     $runsql->($user, "DELETE FROM infohistory WHERE userid=$uid");
