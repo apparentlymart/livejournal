@@ -185,7 +185,8 @@
             my $MAX_UPLOAD = LJ::Userpic->max_allowed_bytes($u);
             my $error;
 
-            my $factory_disabled = $LJ::DISABLED{'userpicfactory'};
+            # act like the factory is disabled if no mogile
+            my $factory_disabled = $LJ::DISABLED{'userpicfactory'} || !LJ::mogclient();
 
             # file over 40k, return too large error
             if ($factory_disabled && ($size > $MAX_UPLOAD + 2048)) {
