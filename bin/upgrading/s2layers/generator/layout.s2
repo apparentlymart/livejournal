@@ -394,9 +394,26 @@ $this->print_linklist();
     $this->print_body();
 
 if (viewer_sees_ads() and ($.view == "recent" or $.view == "friends")) {
-    """<div style="text-align: center;">""";
+    """
+    <table cellpadding="2" cellspacing="0" border="0" summary="" style="margin-top: 10px;">
+    <tr><td bgcolor="$*stronger_back" align="center">
+    <table width="100%" cellpadding="3" cellspacing="0"
+    border="0"
+    summary="">
+    <tr>
+    <td class="shadowed" align="center">
+    <table cellspacing="5"
+    cellpadding="0"
+    border="0"
+    summary="" style="margin-left: auto; margin-right: auto;">
+    <tr><td><div align="center">
+    """;
     $this->print_ad("Journal-5LinkUnit");
-    "</div>";
+    """
+    </div></td></tr></table>
+    </td></tr></table>
+    </td></tr></table>
+    """;
 }
 """
 </div>
