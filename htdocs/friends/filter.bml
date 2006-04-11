@@ -24,11 +24,11 @@
         } elsif ($POST{'type'} eq "allfilters") {
             my $view = $POST{'view'};
             if ($view eq "showpeople") {
-                $extra = "?show=P";
+                $extra = "?show=P&filter=0";
             } elsif ($view eq "showcommunities") {
-                $extra = "?show=C";
+                $extra = "?show=C&filter=0";
             } elsif ($view eq "showsyndicated") {
-                $extra = "?show=Y";
+                $extra = "?show=Y&filter=0";
             } elsif ($view =~ /filter:(.+)?/) {
                 $extra = "/$1";
             }
