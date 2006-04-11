@@ -1880,13 +1880,20 @@ sub ads {
                 $adcall{search_term} = $term;
             }
         }
+
+        # Special case talkpost.bml and talkpost_do.bml as user pages
+        if ($uri =~ /^\/talkpost(?:_do)?\.bml$/) {
+            $adcall{type} = 'user';
+        }
     }
 
     $adcall{adunit}  = $LJ::AD_PAGE_MAPPING{$pagetype}->{adunit}; # ie skyscraper
     my $addetails    = $LJ::AD_TYPE{$adcall{adunit}};             # hashref of meta-data or scalar to directly serve
 
     $adcall{channel} = $pagetype;
-    $adcall{type}    = $LJ::AD_PAGE_MAPPING{$pagetype}->{target}; # user|content
+    $adcall{type}    = $adcall{type} || $LJ::AD_PAGE_MAPPING{$pagetype}->{target}; # user|content
+
+
     $adcall{url}     = 'http://' . $r->header_in('Host') . $r->uri;
 
     if (ref $addetails eq 'HASH') {
