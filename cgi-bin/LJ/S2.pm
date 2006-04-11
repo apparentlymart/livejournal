@@ -2115,7 +2115,7 @@ sub viewer_sees_control_strip
 
     my $r = Apache->request;
     return LJ::run_hook('show_control_strip', {
-        user => $r->notes("ljuser"),
+        userid => $r->notes("journalid"),
     });
 }
 
