@@ -575,6 +575,13 @@ if ($*opt_navbar_pos == "right") {
 
 </table>
 
+""";
+if (viewer_sees_ads() and ($.view == "recent" or $.view == "friends")) {
+    """<div style="text-align: center; margin-top: -15px;">""";
+    $this->print_ad("Journal-5LinkUnit");
+    "</div>";
+}
+"""
 </body>
 </html>
 """;
