@@ -179,7 +179,7 @@ $maint{'clean_caches'} = sub
         # unique for this hour anyway
         my $sth = $dbcm->prepare
             ("SELECT type, year, month, day, hour, COUNT(userid) " .
-             "FROM active_user $where GROUP BY 1,2");
+             "FROM active_user $where GROUP BY 1,2,3,4,5");
         $sth->execute(@where_vals);
 
         if ($dbcm->err) {
