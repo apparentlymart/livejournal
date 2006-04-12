@@ -560,6 +560,11 @@ container_open("pagebody");
 
 container_close();
 container_close();
+
+container_open("ad-5linkunit");
+$this->print_ad("Journal-5LinkUnit");
+container_close();
+
 "</body></html>";
 }
 

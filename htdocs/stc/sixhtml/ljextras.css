@@ -12,4 +12,6 @@
 .comment .comment-content, .entry .entry-content, .entry .entry-body {
     clear: none;
 }
-
+#ad-5linkunit {
+    clear: both;
+}
