@@ -477,6 +477,8 @@ sub note_transition {
     my ($u, $what, $from, $to) = @_;
     croak "invalid user object" unless LJ::isu($u);
 
+    return 1 if $LJ::DISABLED{user_transitions};
+
     # we don't want to insert if the requested transition is already
     # the last noted one for this user... in that case there has been
     # no transition at all
