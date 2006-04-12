@@ -8,9 +8,8 @@ require 'ljconfig.pl';
 use DJabberd;
 use DJabberd::Auth::AllowedUsers;
 use DJabberd::Auth::StaticPassword;
-use DJabberd::Delivery::FakeSMS;
 use DJabberd::Delivery::Local;
-use DJabberd::RosterStorage::FakeSMS;
+use DJabberd::FakeSMS;
 use Getopt::Long;
 
 use vars qw($DEBUG);
@@ -36,6 +35,7 @@ my $server = DJabberd->new(
                                          DJabberd::Delivery::FakeSMS->new(),
                                          DJabberd::Delivery::Local->new(),
                                          DJabberd::RosterStorage::FakeSMS->new(),
+                                         DJabberd::PresenceChecker::FakeSMS->new(),
                                          ],
                            );
 
