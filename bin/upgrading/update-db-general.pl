@@ -2257,6 +2257,19 @@ CREATE TABLE smsusermap (
 EOC
 
 # global
+register_tablecreate("usertrans", <<'EOC');
+CREATE TABLE usertrans (
+  userid INT UNSIGNED NOT NULL,
+  time INT UNSIGNED NOT NULL,
+  what VARCHAR(25) NOT NULL,
+  before VARCHAR(25) NOT NULL,
+  after VARCHAR(25) NOT NULL,
+  KEY (userid),
+  KEY (time)
+)
+EOC
+
+# global
 register_tablecreate("eventtypelist", <<'EOC');
 CREATE TABLE eventtypelist (
   etypeid  SMALLINT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,

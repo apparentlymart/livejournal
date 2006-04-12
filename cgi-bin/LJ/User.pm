@@ -473,6 +473,58 @@ sub note_activity {
     return 1;
 }
 
+sub note_transition {
+    my ($u, $what, $from, $to) = @_;
+    croak "invalid user object" unless LJ::isu($u);
+
+    # we don't want to insert if the requested transition is already
+    # the last noted one for this user... in that case there has been
+    # no transition at all
+    my $last = $u->last_transition($what);
+    return 1 if 
+        $last->{from} eq $from && 
+        $last->{to}   eq $to;
+
+    # robust, etc etc;
+    $u->do("INSERT INTO usertrans " .
+           "SET userid=?, time=UNIX_TIMESTAMP(), what=?, before=?, after=?",
+           undef, $u->{userid}, $what, $from, $to);
+    croak $u->errstr if $u->err;
+
+    return 1;
+}
+
+sub transition_list {
+    my ($u, $what) = @_;
+    croak "invalid user object" unless LJ::isu($u);
+
+    # FIXME: return list of transition object singleton instances?
+    my @list = ();
+    my $sth = $u->prepare("SELECT time, before, after " .
+                          "FROM usertrans WHERE userid=? AND what=?");
+    $sth->execute($u->{userid}, $what);
+    croak $u->errstr if $u->err;
+
+    while (my $trans = $sth->fetchrow_hashref) {
+
+        # fill in a couple of properties here rather than 
+        # sending over the network from db
+        $trans->{userid} = $u->{userid};
+        $trans->{what}   = $what;
+
+        push @list, $trans;
+    }
+
+    return wantarray() ? @list : \@list;
+}
+
+sub last_transition {
+    my ($u, $what) = @_;
+    croak "invalid user object" unless LJ::isu($u);
+
+    $u->transition_list($what)->[-1];
+}
+
 sub tosagree_set
 {
     my ($u, $err) = @_;
@@ -1240,6 +1292,14 @@ sub add_to_class {
     my ($u, $class) = @_;
     my $bit = LJ::class_bit($class);
     die "unknown class '$class'" unless defined $bit;
+
+    # call add_to_class hook before we modify the
+    # current $u, so it can make inferences from the
+    # old $u caps vs the new we say we'll be adding
+    if (LJ::are_hooks('add_to_class')) {
+        LJ::run_hook('add_to_class', $u, $class);
+    }
+
     return LJ::modify_caps($u, [$bit], []);
 }
 
@@ -1247,6 +1307,14 @@ sub remove_from_class {
     my ($u, $class) = @_;
     my $bit = LJ::class_bit($class);
     die "unknown class '$class'" unless defined $bit;
+
+    # call add_to_class hook before we modify the
+    # current $u, so it can make inferences from the
+    # old $u caps vs what we'll be removing
+    if (LJ::are_hooks('remove_from_class')) {
+        LJ::run_hook('remove_from_class', $u, $class);
+    }
+
     return LJ::modify_caps($u, [], [$bit]);
 }
 
