@@ -64,7 +64,7 @@
     $selflink =~ s/\?.*//;
 
     # fading special effects?
-    my $doFadeDefault = 1;
+   my $doFadeDefault = 1;
     my $doFade = $LJ::DISABLED{'portal_fade'} ? 0 : $doFadeDefault;
 
     # parameters for portal.js
@@ -299,6 +299,14 @@
         $body .= "<b><a href=\"$LJ::SITEROOT/portal\">$returnlinktext</a></b>";
     } else {
         $body .= $configmenu;
+
+        my $ad =  LJ::ads( type => 'app', orient => 'App-Portal' );
+
+        if ($ad) {
+            $body .= qq {
+                <div id="PortalAdBox">$ad</div>
+                };
+        }
 
         $body .= '<div id="PortalContentContainer">';
 
