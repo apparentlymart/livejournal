@@ -300,12 +300,11 @@
     } else {
         $body .= $configmenu;
 
-        my $ad =  LJ::ads( type => 'app', orient => 'App-Portal' );
-
-        if ($ad) {
-            $body .= qq {
-                <div id="PortalAdBox">$ad</div>
-                };
+        {
+            my $ad =  LJ::ads( type => 'app', orient => 'App-Portal' );
+            if ($ad) {
+                $body .= "<div id='PortalAdBox'>$ad</div>";
+            }
         }
 
         $body .= '<div id="PortalContentContainer">';
