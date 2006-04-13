@@ -55,7 +55,8 @@ sub name_caps_short
 
 # <LJFUNC>
 # name: LJ::get_cap
-# des: Given a user object or capability class bit mask and a capability/limit name,
+# des: Given a user object, capability class key or capability class bit mask
+#      and a capability/limit name,
 #      returns the maximum value allowed for given user or class, considering
 #      all the limits in each class the user is a part of.
 # args: u_cap, capname
@@ -65,14 +66,24 @@ sub name_caps_short
 # </LJFUNC>
 sub get_cap
 {
-    my $caps = shift;   # capability bitmask (16 bits), or user object
+    my $caps = shift;   # capability bitmask (16 bits), cap key or user object
     my $cname = shift;  # capability limit name
     my $opts  = shift;  # { no_hook => 1/0 }
     $opts ||= {};
 
+    # If caps is a reference
     my $u = ref $caps ? $caps : undef;
-    if (! defined $caps) { $caps = 0; }
-    elsif ($u) { $caps = $u->{'caps'}; }
+
+    # If caps is a reference get caps from User object
+    if ($u) {
+        $caps = $u->{'caps'};
+    # If it is not all digits assume it is a key
+    } elsif ($caps && $caps !~ /^\d+$/) {
+        $caps = 1 << LJ::class_bit($caps);
+    }
+    # The caps is the cap mask already or undef, force it to be a number
+    $caps += 0;
+
     my $max = undef;
 
     # allow a way for admins to force-set the read-only cap
