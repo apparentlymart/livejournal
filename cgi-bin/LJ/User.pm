@@ -487,11 +487,14 @@ sub note_transition {
         $last->{from} eq $from && 
         $last->{to}   eq $to;
 
+    my $dbh = LJ::get_db_writer()
+        or croak "unable to contact global db master";
+
     # robust, etc etc;
-    $u->do("INSERT INTO usertrans " .
-           "SET userid=?, time=UNIX_TIMESTAMP(), what=?, before=?, after=?",
-           undef, $u->{userid}, $what, $from, $to);
-    croak $u->errstr if $u->err;
+    $dbh->do("INSERT INTO usertrans " .
+             "SET userid=?, time=UNIX_TIMESTAMP(), what=?, before=?, after=?",
+             undef, $u->{userid}, $what, $from, $to);
+    croak $dbh->errstr if $dbh->err;
 
     return 1;
 }
@@ -500,12 +503,15 @@ sub transition_list {
     my ($u, $what) = @_;
     croak "invalid user object" unless LJ::isu($u);
 
+    my $dbh = LJ::get_db_writer()
+        or croak "unable to contact global db master";
+
     # FIXME: return list of transition object singleton instances?
     my @list = ();
-    my $sth = $u->prepare("SELECT time, before, after " .
-                          "FROM usertrans WHERE userid=? AND what=?");
+    my $sth = $dbh->prepare("SELECT time, before, after " .
+                            "FROM usertrans WHERE userid=? AND what=?");
     $sth->execute($u->{userid}, $what);
-    croak $u->errstr if $u->err;
+    croak $dbh->errstr if $dbh->err;
 
     while (my $trans = $sth->fetchrow_hashref) {
 
