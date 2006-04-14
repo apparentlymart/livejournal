@@ -301,7 +301,7 @@ body<=
     $ret .= $event;
     $ret .= "</div>";
 
-    $ret .= "<br clear='all' /><hr size='2' align='center' />";
+    $ret .= "<br clear='left' /><hr size='2' align='center' />";
 
     my $jarg = "journal=$u->{'user'}&amp;";
     my $readurl = LJ::Talk::talkargs($talkurl, $stylemine, $formatlight);
