@@ -378,7 +378,11 @@ sub trans
             return remote_domsess_bounce() if LJ::remote_bounce_url();
 
             $r->notes("_journal" => $opts->{'user'});
-            return $bml_handler->("$LJ::HOME/htdocs/userinfo.bml");
+            my $file = $LJ::PROFILE_BML_FILE || "userinfo.bml";
+            if ($args =~ /\bver=(\w+)\b/) {
+                $file = $LJ::ALT_PROFILE_BML_FILE{$1} if $LJ::ALT_PROFILE_BML_FILE{$1};
+            }
+            return $bml_handler->("$LJ::HOME/htdocs/$file");
         }
 
         if ($opts->{'mode'} eq "update") {

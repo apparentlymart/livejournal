@@ -837,6 +837,15 @@ add_conf('$ADSERVER',
          des => "Subdomain to use for adserving",
          );
 
+add_conf('$PROFILE_BML_FILE',
+         type => 'file',
+         des => "The file (relative to htdocs) to use for the profile URL.  Defaults to userinfo.bml",
+         );
+
+add_conf('%ALT_PROFILE_BML_FILE',
+         des => "Mapping of key (word chars) to file (like \$PROFILE_BML_FILE) to use to override the default \$PROFILE_BML_FILE.  Used if the ver=[key] URL parameter is used on a /profile URL.",
+         );
+
 
 my %bools = (
              'USE_ACCT_CODES' => "Make joining the site require an 'invite code'.  Note that this code might've bitrotted, so perhaps it should be kept off.",
