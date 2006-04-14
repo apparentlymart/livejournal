@@ -1922,7 +1922,7 @@ sub ads {
             $adcall{categories} = $remote->prop('ad_categories');
 
             # User's notable interests
-            $adcall{interests} = join(',', $remote->notable_interests(5));
+            $adcall{interests} = join(',', $remote->notable_interests(10));
         }
 
         # If we have neither categories or interests, load the content author's
