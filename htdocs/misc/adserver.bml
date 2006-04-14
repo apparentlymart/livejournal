@@ -13,8 +13,7 @@ _info?>
     });
     return '<html></html>' unless $ad_engine;
 
-    my $adhtml = '';
-    $adhtml .= "<html><head><title>$LJ::SITENAMESHORT Ad Server</title></head>";
+    my $adhtml = "<html><head><title>$LJ::SITENAMESHORT Ad Server</title></head>";
     $adhtml .= "<body style='margin: 0; padding: 0'>";
 
     $adhtml .= $ad_engine->process(
