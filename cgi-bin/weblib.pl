@@ -1868,7 +1868,7 @@ sub ads {
 
         # Make sure that the page type passed in is what the config says this
         # page actually is.
-        return '' unless $LJ::AD_MAPPING{$uri} eq $pagetype;
+        return '' if $LJ::AD_MAPPING{$uri} ne $pagetype && !$opts{'force'};
 
         # If it was an interest search provide the query to the targetting engine
         # for more relevant results

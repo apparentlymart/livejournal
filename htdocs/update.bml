@@ -369,6 +369,8 @@
                 $remote->set_prop('entry_draft', '')
                     if $remote;
 
+                $$body .= "<table width='100%'><tr valign='top'><td>";
+
                 # short bail if this was posted moderated or some other special case (no itemid but a message)
                 if (!defined $res{itemid} && $res{message}) {
                     $$body .= "<br />$res{message} p?>";
@@ -395,12 +397,31 @@
                             "<li><a href=\"/tools/memadd.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.memories'}</a></li>" .
                                 "<li><a href=\"/edittags.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.tags'}</a></li>" .
                                     "</ul>";
+
+                $$body .= "</td><td style='padding-left: 2em; width: 160px'>";
+
+                {
+                    my $ad =  LJ::ads( type => 'app', orient => 'App-Confirm', force => '1' );
+                    $$body .= "$ad" if $ad;
+                }
+
+                $$body .= "</td></tr></table>";
+
                 return;
             }
         }
     }
 
+    $$body .= "<table width='100%'><tr valign='top'><td>";
     $print_entry_form->();
+    $$body .= "</td><td style='padding-left: 2em; width: 160px'>";
+
+    {
+        my $ad =  LJ::ads( type => 'app', orient => 'App-Func-1column', force => '1' );
+        $$body .= "$ad" if $ad;
+    }
+
+    $$body .= "</td></tr></table>";
     return;
 }
 
