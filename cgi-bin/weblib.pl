@@ -1932,7 +1932,7 @@ sub ads {
 
             if ($u) {
                 $adcall{categories} = $u->prop('ad_categories');
-                $adcall{interests} = join(',', $u->notable_interests(5));
+                $adcall{interests} = join(',', $u->notable_interests(10));
             }
         }
 
