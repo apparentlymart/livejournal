@@ -1409,6 +1409,10 @@ sub can_use_layer
 {
     my ($u, $uniq) = @_;  # $uniq = redist_uniq value
     return 1 if LJ::get_cap($u, "s2styles");
+    return 1 if LJ::run_hook('s2_can_use_layer', {
+        u => $u,
+        uniq => $uniq,
+    });
     my $pol = get_policy();
     my $can = 0;
     foreach ('*', $uniq) {
