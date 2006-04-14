@@ -1090,7 +1090,7 @@ sub entry_form {
         ### Subject
         $out .= "<tr valign='top'><th>" . BML::ml('entryform.subject') . "</th><td>";
         $out .= LJ::html_text({ 'name' => 'subject', 'value' => $opts->{'subject'},
-                                'size' => '60', 'maxlength' => '100', 'tabindex' => $tabindex->(), 'disabled' => $opts->{'disabled_save'} }) . "\n";
+                                'size' => '43', 'maxlength' => '100', 'tabindex' => $tabindex->(), 'disabled' => $opts->{'disabled_save'} }) . "\n";
         $out .= "</td></tr>";
         $out .= "</table></td>";
     }
