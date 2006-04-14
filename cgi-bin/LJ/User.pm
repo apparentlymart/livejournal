@@ -1340,7 +1340,7 @@ sub cache {
 sub set_cache {
     my ($u, $key, $value, $expr) = @_;
     my $now = time();
-    $expr ||= $now + 86400;;
+    $expr ||= $now + 86400;
     $expr += $now if $expr < 315532800;  # relative to absolute time
     $value = Storable::nfreeze($value) if ref $value;
     $u->do("REPLACE INTO userblobcache (userid, bckey, value, timeexpire) VALUES (?,?,?,?)",
