@@ -398,7 +398,7 @@
                                 "<li><a href=\"/edittags.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.tags'}</a></li>" .
                                     "</ul>";
 
-                $$body .= "</td><td style='padding-left: 2em; width: 160px'>";
+                $$body .= "</td><td style='padding-left: 2em;'>";
 
                 {
                     my $ad =  LJ::ads( type => 'app', orient => 'App-Confirm', force => '1' );
@@ -414,11 +414,17 @@
 
     $$body .= "<table width='100%'><tr valign='top'><td>";
     $print_entry_form->();
-    $$body .= "</td><td style='padding-left: 2em; width: 160px'>";
+    $$body .= "</td>";
 
     {
         my $ad =  LJ::ads( type => 'app', orient => 'App-Func-1column', force => '1' );
-        $$body .= "$ad" if $ad;
+
+        if ($ad) {
+            $$body .= "<td style='padding-left: 2em; width: 160px;'>";
+            $$body .= "$ad";
+        } else {
+            $$body .= "<td>";
+        }
     }
 
     $$body .= "</td></tr></table>";
