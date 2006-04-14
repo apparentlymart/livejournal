@@ -141,7 +141,7 @@ Follow this link to sign up:
     $body .= "<?p <form method='POST'>";
     $body .= LJ::form_auth();
 
-    $body .= '<table width="600" style="margin-left: 20px"><tr><td>';
+    $body .= '<table width="80%" style="margin-left: 20px"><tr><td>';
     $body .= "$ML{'.form.input.name'}</td><td>";
     $body .= LJ::html_text({ name => "name", size => 40, value => $name }) . '<br />' . $inerr->("name", "<br />");
 
@@ -156,7 +156,7 @@ Follow this link to sign up:
     $body .= '</td></tr><tr><td colspan="2">';
 
     $body .= "$ML{'.form.input.message'}<br />" . $inerr->("msg", "<br />");
-    $body .= LJ::html_textarea({ rows => 20, cols => 80, name => "msg", value => $msg });
+    $body .= LJ::html_textarea({ name => "msg", value => $msg, 'style' => "width: 99%; height: 25em", wrap => "hard" });
     $body .= '</td></tr><tr><td colspan="2">';
     $body .= "<i>$ML{'.form.note'}</i>";
 
