@@ -626,7 +626,7 @@ sub create_view_foaf {
     if ($u->{icbm}) {
         my @loc = split(",", $u->{icbm});
         $ret .= "    <foaf:based_near><geo:Point geo:lat='" . $loc[0] . "'" .
-                "geo:long='" . $loc[1] . "' /></foaf:based_near>\n";
+                " geo:long='" . $loc[1] . "' /></foaf:based_near>\n";
     }
     
     # interests, please!
