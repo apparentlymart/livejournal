@@ -1036,8 +1036,8 @@ function Page::lay_print_entrylite(EntryLite e) {
 <h3 class="entrysubject">$e.subject</h3>""";
     $e->lay_print_poster();
 """<div class="entrytimestamp">
-<span class="entrytimestampdate">"""+$e.time->date_format("short")+"""</span>
-<span class="entrytimestamptime">"""+$e.time->time_format()+"""</span>
+<span class="entrytimestampdate">"""+$e->time_display("short","none")+"""</span>
+<span class="entrytimestamptime">"""+$e->time_display("none","")+"""</span>
 </div>""";
 
 $e->lay_print_icon();

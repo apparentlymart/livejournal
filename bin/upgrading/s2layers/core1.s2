@@ -307,6 +307,8 @@ class EntryLite
     function builtin get_plain_subject () : string "For Entries that can contain HTML subjects, this returns the subjeft without HTML.  Comments can't have HTML in subjects, so this is equivalent to just using \$.subject.  The returned 'plain' subject may still contain HTML entities, so don't do substring chops on it either.";
     function builtin get_tags_text () : string "Returns a string containing a div of class 'ljtags' with the tags for the entry.  If there are no tags on the entry, returns a blank string.  The string is formatted according to the 'text_tags' property.";
     function print_linkbar() "Print the link bar for this entry or comment.";
+    function time_display () : string "Show the time of this post, with most useful information for user, and with tooltip for more.";
+    function time_display (string datefmt, string timefmt) : string "time_post, with customized date/time formats.";
 }
 
 class Entry extends EntryLite
@@ -359,9 +361,6 @@ class Comment extends EntryLite
 
     function builtin print_reply_container(string{} opts) "Prints the area in which the quickreply box will go. You may 'class' which will be the CSS class used by the container. If no container is available, quickreply will not work.";
 
-    function time_display () : string "Show the time of this post, with most useful information for user, and with tooltip for more.";
-
-    function time_display (string datefmt, string timefmt) : string "time_post, with customized date/time formats.";
 }
 
 ### Userinfo
@@ -1813,6 +1812,22 @@ function secs_to_string (int sec) : string {
    return string($sec / 86400) + " days";
  }
 
+function EntryLite::time_display(string datefmt, string timefmt) : string {
+    if ($datefmt == "") {
+        $datefmt = "med";
+    }
+    if ($timefmt == "") {
+        $timefmt = "short";
+    }
+
+    var string ret;
+    if ($datefmt != "none") { $ret = $ret + $this.time->date_format($datefmt); }
+    if ($datefmt != "none" and $timefmt != "none") { $ret = $ret + " "; }
+    if ($timefmt != "none") { $ret = $ret + $this.time->time_format($timefmt); }
+
+    return ehtml($ret);
+}
+
 function Comment::time_display (string datefmt, string timefmt) : string {
     if ($datefmt == "") {
         $datefmt = "iso";
@@ -1826,16 +1841,16 @@ function Comment::time_display (string datefmt, string timefmt) : string {
     $tooltip = $etime + " after journal entry";
 
     var string main;
-    var string main_date;
+
+    var string display_date;
+    var string display_time;
 
     if ($this.time_remote) {
-        $main_date = $this.time_remote->date_format($datefmt);
-        $main = $main_date;
-        $main = $main + " " + $this.time_remote->time_format($timefmt) + " (local)";
+        $display_date = $this.time_remote->date_format($datefmt);
+        $display_time = $this.time_remote->time_format($timefmt) + " (local)";
     } else {
-        $main_date = $this.time->date_format($datefmt);
-        $main = $main_date;
-        $main = $main + " " + $this.time->time_format($timefmt) + " (UTC)";
+        $display_date = $this.time->date_format($datefmt);
+        $display_time = $this.time->time_format($timefmt) + " (UTC)";
     }
 
     if (defined $this.time_poster and defined $this.poster)
@@ -1843,16 +1858,22 @@ function Comment::time_display (string datefmt, string timefmt) : string {
         var string poster_date = $this.time_poster->date_format($datefmt);
         $tooltip = $tooltip + ", ";
 
-        if ($poster_date == $main_date) { $poster_date = ""; }
+        if ($poster_date == $display_date) { $poster_date = ""; }
         else { $poster_date = $poster_date + " "; }
 
-         $tooltip = $tooltip + $poster_date + $this.time_poster->time_format($timefmt) + " (" + $this.poster.username + "'s time)";
+        $tooltip = $tooltip + $poster_date + $this.time_poster->time_format($timefmt) + " (" + $this.poster.username + "'s time)";
     }
+
+    if ($datefmt != "none") { $main = $main + $display_date; }
+    if ($datefmt != "none" and $timefmt != "none") { $main = $main + " "; }
+    if ($timefmt != "none") { $main = $main + $display_time; }
+
     return "<span title=\"" + ehtml($tooltip) + "\">" + ehtml($main) + "</span>";
 }
 
-function Comment::time_display () : string {
-    return $this->time_display("iso", "short");
+function EntryLite::time_display() : string {
+    # Let the real function decide on some nice defaults
+    return $this->time_display("", "");
 }
 
 ### Year view
