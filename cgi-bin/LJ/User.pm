@@ -217,7 +217,7 @@ sub is_innodb {
     if defined $LJ::CACHE_CLUSTER_IS_INNO{$u->{clusterid}};
 
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
-        or croak "Database handle unavailable";
+        or die "Database handle unavailable";
     my (undef, $ctable) = $dbcm->selectrow_array("SHOW CREATE TABLE log2");
     die "Failed to auto-discover database type for cluster \#$u->{clusterid}: [$ctable]"
         unless $ctable =~ /^CREATE TABLE/;
@@ -231,7 +231,7 @@ sub begin_work {
     return 1 unless $u->is_innodb;
 
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
-        or croak "Database handle unavailable";
+        or die "Database handle unavailable";
 
     my $rv = $dbcm->begin_work;
     if ($u->{_dberr} = $dbcm->err) {
@@ -245,7 +245,7 @@ sub commit {
     return 1 unless $u->is_innodb;
 
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
-        or croak "Database handle unavailable";
+        or die "Database handle unavailable";
 
     my $rv = $dbcm->commit;
     if ($u->{_dberr} = $dbcm->err) {
@@ -259,7 +259,7 @@ sub rollback {
     return 1 unless $u->is_innodb;
 
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
-        or croak "Database handle unavailable";
+        or die "Database handle unavailable";
 
     my $rv = $dbcm->rollback;
     if ($u->{_dberr} = $dbcm->err) {
@@ -273,7 +273,7 @@ sub prepare {
     my $u = shift;
 
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
-        or croak "Database handle unavailable";
+        or die "Database handle unavailable";
 
     my $rv = $dbcm->prepare(@_);
     if ($u->{_dberr} = $dbcm->err) {
@@ -291,7 +291,7 @@ sub do {
         or croak "Database update called on null user object";
 
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
-        or croak "Database handle unavailable";
+        or die "Database handle unavailable";
 
     $query =~ s!^(\s*\w+\s+)!$1/* uid=$uid */ !;
 
@@ -308,14 +308,14 @@ sub do {
 sub selectrow_array {
     my $u = shift;
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
-        or croak "Database handle unavailable";
+        or die "Database handle unavailable";
     return $dbcm->selectrow_array(@_);
 }
 
 sub selectrow_hashref {
     my $u = shift;
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
-        or croak "Database handle unavailable";
+        or die "Database handle unavailable";
     return $dbcm->selectrow_hashref(@_);
 }
 
@@ -334,7 +334,7 @@ sub quote {
     my $text = shift;
 
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
-        or croak "Database handle unavailable";
+        or die "Database handle unavailable";
 
     return $dbcm->quote($text);
 }
@@ -488,13 +488,13 @@ sub note_transition {
         $last->{to}   eq $to;
 
     my $dbh = LJ::get_db_writer()
-        or croak "unable to contact global db master";
+        or die "unable to contact global db master";
 
     # robust, etc etc;
     $dbh->do("INSERT INTO usertrans " .
              "SET userid=?, time=UNIX_TIMESTAMP(), what=?, before=?, after=?",
              undef, $u->{userid}, $what, $from, $to);
-    croak $dbh->errstr if $dbh->err;
+    die $dbh->errstr if $dbh->err;
 
     return 1;
 }
@@ -504,14 +504,14 @@ sub transition_list {
     croak "invalid user object" unless LJ::isu($u);
 
     my $dbh = LJ::get_db_writer()
-        or croak "unable to contact global db master";
+        or die "unable to contact global db master";
 
     # FIXME: return list of transition object singleton instances?
     my @list = ();
     my $sth = $dbh->prepare("SELECT time, before, after " .
                             "FROM usertrans WHERE userid=? AND what=?");
     $sth->execute($u->{userid}, $what);
-    croak $dbh->errstr if $dbh->err;
+    die $dbh->errstr if $dbh->err;
 
     while (my $trans = $sth->fetchrow_hashref) {
 
