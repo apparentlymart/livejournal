@@ -70,7 +70,7 @@
 
         if ($remote) {
             my $base = $remote->journal_base;
-            
+
             $body .= "<?p " . BML::ml(".loggedin.text2",
                                       { 'username' => LJ::ljuser($remote)} ) . " p?>\n";
             $body .= "<br />\n";
@@ -121,13 +121,13 @@
             $body .= "<input type='hidden' name='ref' value='$eh_ref' />\n";
         }
 
-        $body .= "<?standout\n";
-        $body .= "<table cellpadding='3'>\n";
-
         if ($remote) {
+            $body .= LJ::run_hook('post_login_news');
+            $body .= "<?h2 $ML{'.login.changelog'} h2?>";
+            $body .= "<table cellpadding='3' style='width: 300px; background-color: #ededed; border: 1px solid #aaa'>\n";
             $body .= "<tr><td colspan='2' style='white-space: nowrap;'>";
-            $body .= "<?h2 $ML{'.login.changelog'} h2?></td></tr>";
         } else {
+            $body .= "<table cellpadding='3' style='width: 300px; background-color: #ededed; border: 1px solid #aaa'>\n";
             $body .= "<tr><td colspan='2' style='white-space: nowrap;'>";
             $body .= "<?h2 " . BML::ml('.login.welcome', { 'sitename' => $LJ::SITENAMESHORT }) . " h2?>";
             $body .= "</td></tr>";
@@ -242,7 +242,6 @@
             $body .= "</td></tr>\n";
         }
         $body .= "</table>\n";
-        $body .= " standout?>\n";
         $body .= "</td></tr></table>\n";
 
         # Save offsite redirect uri between POSTs
