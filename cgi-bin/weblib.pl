@@ -2104,10 +2104,18 @@ sub control_strip
                     push @filters, "filter:" . $group{$g}->{'name'}, $group{$g}->{'name'};
                 }
 
+                my $selected = "all";
+                if ($r->uri eq "/friends" && $r->args ne "") {
+                    $selected = "showpeople"      if $r->args eq "show=P&filter=0";
+                    $selected = "showcommunities" if $r->args eq "show=C&filter=0";
+                    $selected = "showsyndicated"  if $r->args eq "show=Y&filter=0";
+                } elsif ($r->uri =~ /^\/friends\/(.+)?/i) {
+                    $selected = "filter:" . LJ::durl($1);
+                }
                 $ret .= "$links{'manage_friends'}&nbsp;&nbsp; ";
                 $ret .= "$BML::ML{'web.controlstrip.select.friends.label'} <form method='post' style='display: inline;' action='$LJ::SITEROOT/friends/filter.bml'>\n";
                 $ret .= LJ::html_hidden("user", $remote->{'user'}, "mode", "view", "type", "allfilters");
-                $ret .= LJ::html_select({'name' => "view", 'selected' => "all"}, @filters) . " ";
+                $ret .= LJ::html_select({'name' => "view", 'selected' => $selected }, @filters) . " ";
                 $ret .= LJ::html_submit($BML::ML{'web.controlstrip.btn.view'});
                 $ret .= "</form>";
                 # drop down for various groups and show values
