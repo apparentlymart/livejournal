@@ -1904,7 +1904,7 @@ sub ads {
         if ($remote) {
             # Pass age and country to targetting engine if user shares this information
             if ($remote->{allow_infoshow} eq 'Y') {
-                if (defined $remote->{bdate} && $remote->{bdate} ne '0000-00-00') {
+                if (defined $remote->{bdate} && $remote->{bdate} !~ /^0000/ && $remote->{bdate} !~ /00$/) {
                     my $secs = time() - LJ::mysqldate_to_time($remote->{bdate});
                     $adcall{age} = int($secs / 31556926);  # Real rough calculation, but that is fine
                 }
