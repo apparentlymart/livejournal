@@ -1877,6 +1877,7 @@ sub ads {
             if ($args =~ /int=(.+)$/) {
                 my $term = $1;
                 $term =~ s/\+/ /;
+                $term =~ s/&page=\d+//i;
                 $adcall{search_term} = $term;
             }
         }
