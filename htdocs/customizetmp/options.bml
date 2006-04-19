@@ -1,3 +1,4 @@
+
 <?page
 title=>Journal Display
 body<=
@@ -5,6 +6,8 @@ body<=
 {
     use strict;
     use vars qw(%POST %GET $js);
+
+    LJ::need_res( 'stc/customize.css', 'js/core.js', 'js/dom.js', 'js/customize.js', 'js/colorpicker.js' );
 
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
@@ -16,13 +19,13 @@ body<=
     my $remote = LJ::get_remote();
     return LJ::bad_input("You must be logged in to edit your display settings.")
         unless $remote;
-    
+
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $journal = $authas;
     my $u = LJ::get_authas_user($authas);
     return LJ::bad_input("You could not be authenticated as the specified user.")
         unless $u;
-    
+
     return $LJ::MSG_READONLY_USER if $u->readonly;
 
     my $pub = LJ::S2::get_public_layers();
@@ -43,11 +46,8 @@ body<=
     if ($u->prop('stylesys') == 2)
     {
         BML::set_language_scope("/customize/index.bml");
-          #return Data::Dumper::Dumper(\%s2_style);
         unless ($s2_style{'user'}) {
-            #return "Test";
             $s2_style{'user'} = LJ::S2::create_layer($u->{userid}, $s2_style{'layout'}, "user");
-            #return Data::Dumper::Dumper(\%s2_style);
             return "<?h1 $ML{'Error'} h1?> <?p $ML{'.error.cant_generate_user_layer'} p?>"
                 unless $s2_style{'user'};
         }
@@ -55,7 +55,6 @@ body<=
         LJ::cmize::s2_implicit_style_create($u, %s2_style);
 
         $style = LJ::S2::load_style($u->prop('s2_style'));
-          #return Data::Dumper::Dumper($style);
         return $err->("Style not found.") unless $style && $style->{'userid'} == $u->{'userid'};
         $layer = LJ::S2::load_layer($style->{'layer'}->{'user'});
 
@@ -70,23 +69,23 @@ body<=
         return $err->("Layer belongs to another user. $layer->{userid} vs $u->{userid}") unless $layer->{'userid'} == $u->{'userid'};
         return $err->("Layer isn't of type user or theme.")
             unless $layer->{'type'} eq "user" || $layer->{'type'} eq "theme";
-        
+
         $lyr_layout = LJ::S2::load_layer($dbh, $layer->{'b2lid'});
         return $err->("Layout layer for this $layer->{'type'} layer not found.")
             unless $lyr_layout;
         $lyr_core = LJ::S2::load_layer($dbh, $lyr_layout->{'b2lid'});
         return $err->("Core layer for layout not found.")
             unless $lyr_core;
-        
+
         $lyr_layout->{'uniq'} = $dbh->selectrow_array("SELECT value FROM s2info WHERE s2lid=? AND infokey=?",
                                                       undef, $lyr_layout->{'s2lid'}, "redist_uniq");
-        
+
         $lid_i18nc = $style->{'layer'}->{'i18nc'};
         $lid_theme = $style->{'layer'}->{'theme'};
         $lid_i18n = $style->{'layer'}->{'i18n'};
-        
+
         $layerid = $layer->{'s2lid'};
-        
+
         my @layers;
         push @layers, ([ 'core' => $lyr_core->{'s2lid'} ],
                        [ 'i18nc' => $lid_i18nc ],
@@ -96,10 +95,10 @@ body<=
             push @layers, [ 'theme' => $lid_theme ];
         }
         push @layers, [ $layer->{'type'} => $layer->{'s2lid'} ];
-        
+
         @layerids = grep { $_ } map { $_->[1] } @layers;
         LJ::S2::load_layers(@layerids);
-        
+
         # load the language and layout choices for core.
         LJ::S2::load_layer_info(\%layerinfo, \@layerids);
 
@@ -116,6 +115,9 @@ body<=
 
     ### Save settings
     if (LJ::did_post()) {
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>"
+            unless LJ::check_form_auth();
+
         my %update = ();
         my $dbh = LJ::get_db_writer();
 
@@ -139,7 +141,7 @@ body<=
                 my %newoverrides = ();
                 LJ::parse_vars(\$oldoverrides,\%overrides);
                 LJ::parse_vars(\$POST{'s1_overrides'},\%newoverrides);
-            
+
                 # head overrides should only have valid head elements in them
                 foreach my $a (qw(GLOBAL LASTN FRIENDS CALENDAR DAY)) {
                     my $sec = "${a}_HEAD";
@@ -160,7 +162,7 @@ body<=
                 my @vars;
                 LJ::load_objects_from_file("vars.dat", \@vars);
                 foreach my $v (@vars) {
-                    my $ov = $v->{'props'}->{'override'}; 
+                    my $ov = $v->{'props'}->{'override'};
                     if ($ov eq "yes" || $ov eq "only" || $capstyles) {
                         my $name = $v->{'name'};
                         if (defined $newoverrides{$name}) {
@@ -180,7 +182,7 @@ body<=
                         }
                     }
                 }
-            
+
                 # no value, delete overrides
                 if ($overr !~ /\S/) {
                     LJ::S1::clear_overrides($u);
@@ -197,7 +199,7 @@ body<=
                 delete $update{$_} if $u->{$_} eq $update{$_};
             }
             LJ::update_user($u, \%update) if %update;
-            
+
             $u->set_prop("opt_usesharedpic", $POST{'opt_usesharedpic'});
         } else {
             my %override;
@@ -211,7 +213,7 @@ body<=
                 next unless LJ::S2::can_use_prop($u, $lyr_layout->{'uniq'}, $name);
                 $override{$name} = [ $prop, $POST{"s2_${name}_value"} ];
             }
-            
+
             if (LJ::S2::layer_compile_user($layer, \%override)) {
                 $saved_msg = "Saved custom settings";
             } else {
@@ -224,7 +226,7 @@ body<=
         $u = LJ::load_user($u->{user});
     }
 
-    $ret .= "<form action='options.bml' method='get'>\n";
+    $ret .= "<form action='options.bml' method='get' style='float: right; display: block; margin-bottom: 1em;'>\n";
     $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
     $ret .= "</form>\n\n";
 
@@ -238,16 +240,16 @@ body<=
     if ($u->prop('stylesys') != 2)
     {
         BML::set_language_scope("/modify_do.bml");
-        
+
         $ret .= "<fieldset><legend>Show Community Userpics</legend>";
 
-        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_usesharedpic', 
+        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_usesharedpic',
                                  'id' => "opt_usesharedpic", 'selected' => $u->prop('opt_usesharedpic') });
         $ret .= "<label for='opt_usesharedpic' style='font-weight: bold'>$ML{'.friends.opt.usesharedpic.head'}</label>";
         $ret .= "<?p $ML{'.friends.opt.usesharedpic.about'} p?>";
 
         $ret .= "</fieldset>";
-            
+
         ###
         ### STYLE OVERRIDES
         ###
@@ -276,12 +278,12 @@ body<=
             $prop{$prop->{'name'}} = $prop;
             push @propnames, $prop->{'name'};
         }
-        
+
         my @groups = S2::get_property_groups($lyr_layout->{'s2lid'});
         my $misc_group;
         my %groupprops;  # gname -> [ propname ]
         my %propgroup;   # pname -> gname;
-        
+
         foreach my $gname (@groups) {
             if ($gname eq "misc" || $gname eq "other") { $misc_group = $gname; }
             foreach my $pname (S2::get_property_group_props($lyr_layout->{'s2lid'}, $gname)) {
@@ -307,7 +309,7 @@ body<=
                 push @{$groupprops{$misc_group}}, @unsorted;
             }
         }
-        
+
         my $group_name = sub {
             my $gname = shift;
             foreach my $lid ($lid_i18n, $lyr_layout->{'s2lid'}, $lid_i18nc, $lyr_core->{'s2lid'}) {
@@ -318,18 +320,18 @@ body<=
             return "Misc" if $gname eq "misc";
             return $gname;
         };
-        
+
         my $prop_js = "";
         my $output_prop = sub {
             my $name = shift;
             my $prop = $prop{$name};
             return if ! $prop || $prop->{'noui'};
-            
+
             my $name = $prop->{'name'};
             my $type = $prop->{'type'};
-            
+
             my $can_use = LJ::S2::can_use_prop($u, $lyr_layout->{'uniq'}, $name);
-            
+
             # figure out existing value (if there was no user/theme layer)
             my $existing;
             foreach my $lid (reverse @layerids) {
@@ -337,26 +339,26 @@ body<=
                 $existing = S2::get_set($lid, $name);
                 last if defined $existing;
             }
-            
+
             if (ref $existing eq "HASH") { $existing = $existing->{'as_string'}; }
-            
+
             if ($type eq "bool") {
                 $prop->{'values'} ||= "1|Yes|0|No";
             }
-            
+
             my %values = split(/\|/, $prop->{'values'});
             my $existing_display = defined $values{$existing} ?
                 $values{$existing} : $existing;
-            
+
             $existing_display = LJ::eall($existing_display);
-            
+
             my $override = S2::get_set($layerid, $name);
             my $had_override = defined $override;
             $override = $existing unless defined $override;
-            
+
             if (ref $override eq "HASH") { $override = $override->{'as_string'}; }
 
-            $ret .= "<tr valign='top'><th>" . LJ::eall($prop->{'des'}) . "</th>";
+            $ret .= "<tr valign='top'><td>" . LJ::eall($prop->{'des'}) . "</td>";
             $ret .= "<td id='$name:user_value'>\n";
             if ($prop->{'values'}) {
                 $ret .= LJ::html_select({ 'name' => "s2_${name}_value",
@@ -373,7 +375,7 @@ body<=
                 my ($rows, $cols, $full) = ($prop->{'rows'} + 0,
                                             $prop->{'cols'} + 0,
                                             $prop->{'full'} + 0);
-                if ($full > 0) { 
+                if ($full > 0) {
                     $ret .= LJ::html_textarea({ 'name' => "s2_${name}_value",
                                                  'disabled' => ! $can_use,
                                                  'value' => $override,
@@ -407,7 +409,7 @@ body<=
             $t .= "<?help " . $LJ::HELPURL{"s2opt_$name"} . " help?>" if $LJ::HELPURL{"s2opt_$name"};
             $ret .= "<tr><td colspan='2'><?de $t de?></td></tr>" if $t;
         };
-        
+
         if (@groups) {
             $ret .= "<div id='propgroupstab'>";
             my $num = 0;
@@ -420,8 +422,7 @@ body<=
             }
             $ret .= "</div>";
             $ret .= "<div id='propgroupsbody'>";
-            
-            
+
             foreach my $gname (@groups) {
                 $ret .= "<a name='pgroup$gname'></a>\n";
                 $ret .= "<div id='pgroup_body_$gname'>\n";
@@ -432,9 +433,9 @@ body<=
                 $ret .= "</table></div>";
             }
             $ret .= "</div>\n";
-            
+
             $ret .= "<script language='JavaScript'>showPropGroup('$groups[0]');</script>\n";
-            
+
         } else {
             $ret .= "<table id='CustomOptions'>";
             foreach my $pname (@propnames) {
@@ -442,7 +443,6 @@ body<=
             }
             $ret .= "</table>";
         }
-        
         $ret .= "<script type='text/javascript' language='JavaScript'><!--\n$prop_js// --></script>";
     }
     $ret .= LJ::cmize::html_save();
@@ -452,11 +452,6 @@ body<=
 _code?>
 <=body
 head<=
-<link rel="stylesheet" href="<?statprefix?>/customize.css" type="text/css" />
-<script type="text/javascript" src="<?_code return $LJ::JSPREFIX; _code?>/core.js"></script>
-<script type="text/javascript" src="<?_code return $LJ::JSPREFIX; _code?>/dom.js"></script>
-<script type="text/javascript" src="<?_code return $LJ::JSPREFIX; _code?>/colorpicker.js"></script>
-<script type='text/javascript' src="<?_code return $LJ::JSPREFIX; _code?>/customize.js"></script>
 <script language="JavaScript" type="text/javascript">
 
     colPic_set_imgprefix("<?_code return $LJ::IMGPREFIX; _code?>");

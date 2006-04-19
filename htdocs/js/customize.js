@@ -6,13 +6,13 @@
 
   tabclick_save: when navigating away from the current tab by clicking another tag,
                  save the contents of the current tab
-                 
 
 */
 
 function tabclick_save() {
     $("action:redir").value = this.id;
     $("display_form").submit();
+    return false;
 }
 
 function comment_options_toggle() {
@@ -44,7 +44,6 @@ function customize_init() {
     var links = $('Tabs').getElementsByTagName('a');
     for (var i = 0; i < links.length; i++) {
         if (links[i].href != "") {
-            links[i].href = "#";
             DOM.addEventListener(links[i], "click", tabclick_save.bindEventListener(links[i]));
         }
     }

@@ -5,13 +5,15 @@ body<=
 {
     use strict;
     use vars qw(%POST %GET);
-    BML::decl_params(authas            => 'username',
+    LJ::need_res( 'stc/customize.css', 'js/core.js', 'js/dom.js', 'js/customize.js' );
+
+    BML::decl_params(authas            => '.',
                      stylesys          => qr/^[12]$/,
                      journaltitle      => qr/./,
                      journalsubtitle   => qr/./,
                      friendspagetitle  => qr/./,
                      opt_stylemine     => qr/^[01]$/,
-                     opt_whocanreply   => qr/^[all|reg|friends]$/,
+                     opt_whocanreply   => qr/^(all|reg|friends)$/,
                      opt_logcommentips => qr/^[NSA]$/,
                      opt_whoscreened   => qr/^[NRFA]$/,
                      opt_showtalklinks => qr/./,
@@ -20,18 +22,18 @@ body<=
                      "action:redir"    => 'word',
                      lj_form_auth      => qr/./,
                      );
-    
+
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
-    
+
     my $remote = LJ::get_remote();
     return LJ::bad_input("You must be logged in to edit your display settings.")
         unless $remote;
-    
+
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);
     return LJ::bad_input("You could not be authenticated as the specified user.")
         unless $u;
-    
+
     return $LJ::MSG_READONLY_USER if $u->readonly;
 
     # extra arguments for get requests
@@ -39,7 +41,7 @@ body<=
 
     # Return strings
     my $ret; my $saved_msg; my $err_msg;
-        
+
     ### Save settings
     if (LJ::did_post()) {
         return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>"
@@ -100,59 +102,59 @@ body<=
     $ret .= "<div id='CurrentTabMain'><form id='display_form' method='post' action='./?authas=$authas'>";
     $ret .= LJ::form_auth();
     $ret .= "<?p These settings will remain no matter what other changes you make to your journal design. p?>";
-      
+
     ### Journal Titles
     {
         $ret .= "<fieldset><legend>Journal Titles</legend><table>";
         # journaltitle
         $ret .= "<tr><th style='text-align: right'>Journal Title:</th><td>";
-        $ret .= LJ::html_text({ 'name' => 'journaltitle', 'value' => $u->prop('journaltitle'), 
+        $ret .= LJ::html_text({ 'name' => 'journaltitle', 'value' => $u->prop('journaltitle'),
                                 'size' => '30', 'maxlength' => '80' });
         $ret .= " </td></tr>\n";
         # journalsubtitle
         $ret .= "<tr><th style='text-align: right'>Subtitle:</th><td>";
-        $ret .= LJ::html_text({ 'name' => 'journalsubtitle', 'value' => $u->prop('journalsubtitle'), 
+        $ret .= LJ::html_text({ 'name' => 'journalsubtitle', 'value' => $u->prop('journalsubtitle'),
                                 'size' => '30', 'maxlength' => '80' });
         $ret .= " </td></tr>\n";
-        
+
         # friendspagetitle
         $ret .= "<tr><th style='text-align: right'>Friends Page Title:</th><td>";
-        $ret .= LJ::html_text({ 'name' => 'friendspagetitle', 'value' => $u->prop('friendspagetitle'), 
+        $ret .= LJ::html_text({ 'name' => 'friendspagetitle', 'value' => $u->prop('friendspagetitle'),
                                 'size' => '30', 'maxlength' => '80' });
         $ret .= "</td></tr>\n";
         $ret .= "</table></fieldset>";
     }
-    
+
     ### Style System
     {
         $ret .= "<fieldset><legend>Style System</legend>";
         $ret .= "<?p LiveJournal provides two style systems that allow you varying control over how your journal is displayed: p?><table>";
         $ret .= "<tr><td>";
         my $checked = $u->prop('stylesys') != 2 ? 1 : 0;
-        $ret .= LJ::html_check({ 'id' => "S1", 'name' => 'stylesys', 'value' => "1", 
+        $ret .= LJ::html_check({ 'id' => "S1", 'name' => 'stylesys', 'value' => "1",
                                  'type' => "radio", 'selected' => $checked });
         $ret .= "</td><td><label for='S1'><strong>S1</strong> - For users who are comfortable with HTML and CSS.</label></td></tr>";
         $ret .= "<tr><td>";
         $checked = $u->prop('stylesys') == 2 ? 1 : 0;
-        $ret .= LJ::html_check({ 'id' => "S2", 'name' => 'stylesys', 'value' => "2", 
+        $ret .= LJ::html_check({ 'id' => "S2", 'name' => 'stylesys', 'value' => "2",
                                  'type' => "radio", 'selected' => $checked, });
         $ret .= "</td><td><label for='S2'><strong>S2</strong> - For users who don't know HTML or CSS, or make ".
           " only minor alterations.</label></td></tr>";
         $ret .= "</table></fieldset>";
     }
-      
+
     ### Comment Settings
     {
         BML::set_language_scope("/editinfo.bml");
         $ret .= "<fieldset><legend>Comments</legend><table>";
-        
+
         # opt_showtalklinks
         $ret .= "<tr valign='middle'><td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_showtalklinks', 'id' => 'opt_showtalklinks',
                                  'selected' => $u->prop('opt_showtalklinks') eq 'Y', });
         $ret .= "</td><td><b><label for='opt_showtalklinks'>Allow Commenting</label></b></td></tr>\n";
         $ret .= "<tr><td>&nbsp;</td><td id='comment_options'>$ML{'.enableboards.about'}";
-        
+
         {
             # opt_whocanreply
             $ret .= "\n<p><b>Who can comment:</b> ";
@@ -161,7 +163,7 @@ body<=
                                     "reg" => BML::ml(".security.visibility.regusers"),
                                     "friends" => BML::ml(".security.visibility.friends"));
             $ret .= "</p>\n";
-            
+
             # opt_logcommentips
             $ret .= "<p><b>Log IP addresses?</b> ";
             $ret .= LJ::html_select({ 'name' => 'opt_logcommentips', 'selected' => $u->prop('opt_logcommentips') },
@@ -169,7 +171,7 @@ body<=
                                     "S" => BML::ml(".logip.anon_only"),
                                     "A" => BML::ml(".logip.always") );
             $ret .= "</p>\n";
-            
+
             # opt_whoscreened
             $ret .= "<p><b>Screen replies from:</b> ";
             $ret .= LJ::html_select({ 'name' => 'opt_whoscreened', 'selected' => $u->prop('opt_whoscreened') },
@@ -178,43 +180,37 @@ body<=
                                     "F" => ($u->prop('journaltype') eq 'C' ? $ML{'.screen.nonmembers'} : $ML{'.screen.nonfriends'}),
                                     "A" => $ML{'.screen.all'} );
             $ret .= "</p>\n";
-            
             $ret .= "<table>\n";
-            
+
             # opt_nctalklinks
             $ret .= "<tr valign='middle'><td>";
             $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_nctalklinks', 'id' => 'opt_nctalklinks',
                                      'selected' => $u->prop('opt_nctalklinks') });
             $ret .= "</td><td><b><label for='opt_nctalklinks'>$ML{'.numcomments.header'}</label></b></td></tr>\n";
             $ret .= "<tr><td>&nbsp;</td><td>$ML{'.numcomments.about'}</td></tr>\n";
-            
+
             # stylemine
             $ret .= "<tr valign='middle'><td>";
             $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_stylemine', 'id' => 'opt_stylemine',
                                      'value' => 1, 'selected' => $u->prop('opt_stylemine') });
             $ret .= "</td><td><b><label for='opt_stylemine'>$ML{'.stylemine.header'}</label></b></td></tr>\n";
             $ret .= "<tr><td>&nbsp;</td><td>$ML{'.stylemine.about'}</td></tr>\n";
-            
+
             # opt_gettalkemail
             $ret .= "<tr valign='middle'><td>";
             $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_gettalkemail', 'id' => 'opt_gettalkemail',
                                      'selected' => $u->prop('opt_gettalkemail') eq 'Y' });
             $ret .= "</td><td><b><label for='opt_gettalkemail'>Receive email notifications when others comment</label></b></td></tr>\n";
             $ret .= "<tr><td>&nbsp;</td><td>$ML{'.getreplies.about'}</td></tr>\n";
-            
+
             # opt_htmlemail
             $ret .= "<tr valign='middle'><td>&nbsp;</td><td><b>Email notification format:</b> ";
             $ret .= LJ::html_select({ 'name' => 'opt_htmlemail', 'id' => 'opt_htmlemail',
-                                      'selected' => $u->prop('opt_htmlemail')}, 
+                                      'selected' => $u->prop('opt_htmlemail')},
                                     "N", "Plain Text", "Y", "HTML Formatted");
-            $ret .= "</td></tr>\n";
-            
-            $ret .= "</table>\n";
-            
+            $ret .= "</td></tr></table>\n";
         }
-        $ret .= "</td></tr>\n";
-        $ret .= "</table>\n\n";
-        
+        $ret .= "</td></tr></table>\n";
         $ret .= "</table></fieldset>";
     }
     $ret .= LJ::cmize::html_save();
@@ -224,10 +220,4 @@ body<=
 }
 _code?>
 <=body
-head<=
-<link rel="stylesheet" href="<?statprefix?>/customize.css" type="text/css" />
-<script type="text/javascript" src="<?_code return $LJ::JSPREFIX; _code?>/core.js"></script>
-<script type="text/javascript" src="<?_code return $LJ::JSPREFIX; _code?>/dom.js"></script>
-<script type="text/javascript" src="<?_code return $LJ::JSPREFIX; _code?>/customize.js"></script>
-<=head
 page?>

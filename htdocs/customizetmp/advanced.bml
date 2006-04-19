@@ -5,37 +5,39 @@ body<=
 {
     use strict;
     use vars qw(%POST %GET);
+    LJ::need_res( 'stc/customize.css' );
+
     BML::decl_params(authas => 'username');
-    
+
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
-    
+
     my $remote = LJ::get_remote();
     return LJ::bad_input("You must be logged in to edit your display settings.")
         unless $remote;
-    
+
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);
     return LJ::bad_input("You could not be authenticated as the specified user.")
         unless $u;
-    
+
     return $LJ::MSG_READONLY_USER if $u->readonly;
-    
+
     # extra arguments for get requests
     my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
     my $ret;
-        
+
     $ret .= "<form action='advanced.bml' method='get'>";
     $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
     $ret .= "</form>";
-    
+
     $ret .= LJ::cmize::html_tablinks("advanced", $getextra);
     $ret .= "<div id='CurrentTab'>";
-    
+
     if ($u->prop('stylesys') == 2) {
         BML::set_language_scope("/customize/advanced/index.bml");
         $ret .= "<?h1 $ML{'.disclaimer.header'} h1?>";
         $ret .= "<?p " . BML::ml('.disclaimer.text', {'aopts' => "href='$LJ::SITEROOT/customize/'"}) . " p?>";
-          
+
         $ret .= "<?h1 $ML{'.documentation.header'} h1?>";
         $ret .= "<?p  $ML{'.documentation.text'}    p?>";
 
@@ -66,7 +68,4 @@ body<=
 }
 _code?>
 <=body
-head<=
-<link rel="stylesheet" href="<?statprefix?>/customize.css" type="text/css" />
-<=head
 page?>
