@@ -624,7 +624,9 @@
                 <div class='EditPicsStatus'>
             };
 
-        $body .= BML::ml('.piclimitstatus', {current => scalar @userpics, max => $max}) . "</div>";
+        $body .= BML::ml('.piclimitstatus', {current => scalar @userpics, max => $max});
+        $body .= LJ::run_hook('editpics_upsell_text', $u);
+        $body .= "</div>";
 
         $body .= "<table>";
 
