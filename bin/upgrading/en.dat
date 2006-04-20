@@ -3663,7 +3663,7 @@ If you want to do a different type of search, check out the <a [[aopts]]>directo
 
 /poll/create.bml.elements.limitreached=Element limit reached
 
-/poll/create.bml.error.accttype=Your account type does not permit you to use the poll creation feature.
+/poll/create.bml.error.accttype2=Your account type does not permit you to use the poll creation feature.
 
 /poll/create.bml.error.allitemsblank=All items cannot be blank.
 

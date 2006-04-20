@@ -394,3 +394,5 @@ general /styles/create.bml.createstyle.text
 general /styles/index.bml.about
 
 general /support/see_overrides.bml.header
+
+general /poll/create.bml.error.accttype

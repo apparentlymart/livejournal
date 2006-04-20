@@ -1450,6 +1450,39 @@ sub get_authas_list {
 }
 
 # <LJFUNC>
+# name: LJ::get_postto_list
+# des: Get a list of usernames a given user can post to
+# returns: an array of usernames
+# args: u, opts?
+# des-opts: Optional hashref.  keys are:
+#           - type: 'P' to only return users of journaltype 'P'
+#           - cap:  cap to filter users on
+# </LJFUNC>
+sub get_postto_list {
+    my ($u, $opts) = @_;
+
+    # used to accept a user type, now accept an opts hash
+    $opts = { 'type' => $opts } unless ref $opts;
+
+    # only one valid type right now
+    $opts->{'type'} = 'P' if $opts->{'type'};
+
+    my $ids = LJ::load_rel_target($u, 'P');
+    return undef unless $ids;
+
+    # load_userids_multiple
+    my %users;
+    LJ::load_userids_multiple([ map { $_, \$users{$_} } @$ids ], [$u]);
+
+    return $u->{'user'}, sort map { $_->{'user'} }
+                         grep { ! $opts->{'cap'} || LJ::get_cap($_, $opts->{'cap'}) }
+                         grep { ! $opts->{'type'} || $opts->{'type'} eq $_->{'journaltype'} }
+                         grep { $_->{clusterid} > 0 }
+                         grep { $_->{statusvis} eq 'V' }
+                         values %users;
+}
+
+# <LJFUNC>
 # name: LJ::can_view
 # des: Checks to see if the remote user can view a given journal entry.
 #      <b>Note:</b> This is meant for use on single entries at a time,

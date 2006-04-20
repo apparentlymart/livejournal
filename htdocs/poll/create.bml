@@ -66,8 +66,23 @@
         return;
     }
 
+    my $remote_can_make_polls = LJ::get_cap($remote, "makepoll");
+    
     my $authas = $GET{'authas'} || $remote->{'user'};
-    my $u = LJ::get_authas_user($authas);
+    my $u;
+    
+    # If remote can make polls, make sure they can post to the authas journal
+    # If remote can't make polls, make sure they maintain the authas journal
+    if ($remote_can_make_polls) {
+        my $authas_u = LJ::load_user($authas);
+        if ($authas_u and (LJ::u_equals($authas_u, $remote) or LJ::check_rel($authas_u, $remote, 'P'))) {
+            $u = $authas_u;
+        }
+    } else {
+        $u = LJ::get_authas_user($authas);
+    }
+    
+    # Return error if previous check was unsuccessful
     unless ($u) {
         $body = "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidauth'} p?>";
         return;
@@ -76,18 +91,29 @@
     # first pageview, show authas and pregeneration hook
     if (! LJ::did_post() || $POST{'start_over'}) {
 
-        # authas switcher form
+        # postto switcher form
+        # If remote can make polls, show all communities they have posting access to
+        # If remote can't make polls, show only paid communities they maintain
         $body .= "<form method='get' action='create.bml'>\n";
-        $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'}, 'cap' => 'makepoll' }) . "\n";
+        if ($remote_can_make_polls) {
+            $body .= LJ::make_postto_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
+        } else {
+            $body .= LJ::make_authas_select($remote, {
+                        'authas' => $GET{'authas'}, 
+                        'label' => $ML{'web.postto.label'},
+                        'button' => $ML{'web.postto.btn'},
+                        'cap' => 'makepoll',
+                    }) . "\n";
+        }
         $body .= "</form>\n\n";
 
         # show pregenerate options
         $body .= LJ::run_hook('poll_pregeneration_html', $u, $authas);
     }
 
-    # does the selected user have the 'makepoll' cap?
-    unless (LJ::get_cap($u, "makepoll")) {
-        $body .= "<?h1 $ML{'Sorry'} h1?><?p $ML{'.error.accttype'} p?>";
+    # does the remote or selected user have the 'makepoll' cap?
+    unless ($remote_can_make_polls || LJ::get_cap($u, "makepoll")) {
+        $body .= "<?h1 $ML{'Sorry'} h1?><?p $ML{'.error.accttype2'} p?>";
         return;
     }
 

@@ -171,6 +171,37 @@ sub make_authas_select {
 }
 
 # <LJFUNC>
+# name: LJ::make_postto_select
+# des: Given a u object and some options, determines which users the given user
+#      can post to.  If the list exists, returns a select list and a submit
+#      button with labels.  Otherwise returns a hidden element.
+# returns: string of html elements
+# args: u, opts?
+# des-opts: Optional.  Valid keys are:
+#           'postto' - current user, gets selected in drop-down
+#           'label' - label to go before form elements
+#           'button' - button label for submit button
+#           others - arguments to pass to LJ::get_postto_list
+# </LJFUNC>
+sub make_postto_select {
+    my ($u, $opts) = @_; # type, authas, label, button
+
+    my @list = LJ::get_postto_list($u, $opts);
+
+    # only do most of form if there are options to select from
+    if (@list > 1) {
+        return ($opts->{'label'} || $BML::ML{'web.postto.label'}) . " " .
+               LJ::html_select({ 'name' => 'authas',
+                                 'selected' => $opts->{'authas'} || $u->{'user'}},
+                                 map { $_, $_ } @list) . " " .
+               LJ::html_submit(undef, $opts->{'button'} || $BML::ML{'web.postto.btn'});
+    }
+
+    # no communities to choose from, give the caller a hidden
+    return  LJ::html_hidden('authas', $opts->{'authas'} || $u->{'user'});
+}
+
+# <LJFUNC>
 # name: LJ::help_icon
 # des: Returns BML to show a help link/icon given a help topic, or nothing
 #      if the site hasn't defined a URL for that topic.  Optional arguments
@@ -1097,7 +1128,7 @@ sub entry_form {
     ### Meta Information Column 2
     {
         $out .= "<td id='infobox'>";
-        $out .= LJ::run_hook('entryforminfo');
+        $out .= LJ::run_hook('entryforminfo', $opts->{'usejournal'});
         $out .= "</td>";
     }
 
