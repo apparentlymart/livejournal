@@ -984,6 +984,11 @@ property string text_meta_mood {
 }
 set text_meta_mood = "Current Mood";
 
+property string text_meta_location {
+    des = "Text for 'Current Location'";
+}
+set text_meta_location = "Current Location";
+
 property string text_post_comment {
     des = "Link text to leave a comment.";
     example = "Leave a comment";

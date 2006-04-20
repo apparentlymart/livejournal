@@ -453,6 +453,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
                   var string val = $e.metadata{$k};
                   if ($k == "mood")  { $key = $*text_meta_mood;  }
                   if ($k == "music") { $key = $*text_meta_music; }
+                  if ($k == "location") { $key = $*text_meta_location; }
                   if ($k == "mood" and defined $e.mood_icon)
                   {
                       var Image i = $e.mood_icon;

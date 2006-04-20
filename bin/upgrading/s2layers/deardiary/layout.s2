@@ -747,13 +747,16 @@ function Comment::lay_print_icon() {
 }
 
 function Entry::lay_print_metadata() {
-    if ($.metadata{"music"} == "" and $.metadata{"mood"} == "") {return;}
+    if (size $.metadata == 0) {return;}
     println """<ul class="entrymeta">""";
+    if ($.metadata{"location"} != "") {
+        println """<li><span class="entrymetacaption">$*text_meta_location:</span> $.metadata{"location"}</li>""";
+    }
     if ($.metadata{"music"} != "") {
-        println """<li><span class="entrymetacaption">Current Music:</span> $.metadata{"music"}</li>""";
+        println """<li><span class="entrymetacaption">$*text_meta_music:</span> $.metadata{"music"}</li>""";
     }
     if ($.metadata{"mood"} != "") {
-        print """<li><span class="entrymetacaption">Current Mood:</span> """;
+        print """<li><span class="entrymetacaption">$*text_meta_mood:</span> """;
         if (defined $.mood_icon) {
             print $.mood_icon->as_string() + " ";
         }

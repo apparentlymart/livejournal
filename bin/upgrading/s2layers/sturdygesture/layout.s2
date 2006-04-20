@@ -563,6 +563,9 @@ function Entry::print_metadata() {
             if ($k == "music") {
                 $caption = $*text_meta_music;
             }
+            elseif ($k == "location") {
+                $caption = $*text_meta_location;
+            }
             elseif ($k == "mood") {
                 $caption = $*text_meta_mood;
                 if (defined $.mood_icon) {
