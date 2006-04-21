@@ -1414,6 +1414,20 @@ sub cmd_buffer_add {
     return LJ::cmd_buffer_add($u->{clusterid}, $u->{userid}, $cmd, $args);
 }
 
+sub subscriptions {
+    my $u = shift;
+    
+    my $sth = $u->prepare('SELECT userid, subid, is_dirty, journalid, etypeid, arg1, ' .
+                          'arg2, ntypeid, createtime, expiretime, flags FROM subs WHERE userid=?');
+    $sth->execute($u->{userid});
+
+    my @subs;
+    while (my $row = $sth->fetchrow_hashref) {
+        push @subs, LJ::Subscription->new_from_row($row);
+    }
+    return @subs;
+}
+
 package LJ;
 
 # <LJFUNC>

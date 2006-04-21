@@ -205,11 +205,8 @@ sub _delitem {
 sub _fired_event {
     my ($dbh, $db, $c) = @_;
     my $a = $c->{'args'};
-    my $class = LJ::Event->class($a->{'etypeid'});
-    my $evt   = LJ::Event->new(LJ::load_userid($c->{'journalid'}),
-                               $a->{'arg1'}, $a->{'arg2'});
-    # bless into correct class
-    bless $evt, $class;
+    my $evt = LJ::Event->new_from_raw_params($a->{'etypeid'}, $c->{'journalid'}
+                                             $a->{'arg1'}, $a->{'arg2'});
 
     $evt->process_firing;
 }

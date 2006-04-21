@@ -27,6 +27,21 @@ sub new {
     }, $class;
 }
 
+# Class method
+sub new_from_raw_params {
+    my (undef, $etypeid, $journalid, $arg1, $arg2) = @_;
+
+    my $class = LJ::Event->class($etypeid);
+    my $evt   = LJ::Event->new(LJ::load_userid($journalid),
+                               $arg1, $arg2);
+
+    # bless into correct class
+    bless $evt, $class;     
+    
+    return $evt;
+}
+                                        
+
 # Override this.  by default, events are rare, so subscriptions to
 # them are tracked in target's "has_subscription" table.
 # for common events, change this to '1' in subclasses and events
