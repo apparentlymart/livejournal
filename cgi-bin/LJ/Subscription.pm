@@ -4,17 +4,17 @@ use warnings;
 use Carp qw(croak);
 
 my @subs_fields = qw(
-userid    
-subid     
-is_dirty  
-journalid 
-etypeid   
-arg1      
-arg2      
-ntypeid   
+userid
+subid
+is_dirty
+journalid
+etypeid
+arg1
+arg2
+ntypeid
 createtime
 expiretime
-flags     
+flags
 );
 
 # Class method
@@ -24,23 +24,6 @@ sub new_from_row {
     my $self = bless {%$row}, $class;
     # TODO validate keys of row.
     return $self;
-}
-
-sub matches {
-    my $self = shift;
-    my $event = shift;
-
-    if (
-        $self->{etypeid} == $event->{etypeid} and
-        $self->{journalid} == $event->{journalid} and
-        $self->{arg1} == $event->{arg1} and
-        $self->{arg2} == $event->{arg2}
-    ) {
-        return 1;
-    }
-    else {
-        return 0;
-    }
 }
 
 sub id {
@@ -81,8 +64,13 @@ sub dirty {
 
 sub notification {
     my $self = shift;
-    my $class = NotificationMethod->class( $self->{ntypeid} );
-    return $class->new_from_subscription( $self );
+    my $class = NotificationMethod->class($self->{ntypeid});
+    return $class->new_from_subscription($self);
+}
+
+sub process {
+    my ($self, @events) = @_;
+    $self->notification->notify(@events);
 }
 
 1;

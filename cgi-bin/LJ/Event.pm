@@ -106,13 +106,18 @@ sub fire {
 sub process_firing {
     my $self = shift;
 
-    my $u = $self->{u};
+    foreach my $subsc ($self->subscriptions) {
+        next unless $self->matches($subsc);
+        $subsc->process($self);
+    }
+}
 
-    my $tu = LJ::load_user("brad");
-    $tu->send_sms("an event happened!  it is now " . scalar(localtime()) . ": " . (ref $self) . " [@{$self->{args}}]");
-    #foreach my $sb ($self->subscriptions) {
-    #    $sb->....
-    #}
+# INSTANCE METHOD: SHOULD OVERRIDE, calling SUPER::matches->() && ....
+sub matches {
+    my ($self, $subsc) = @_;
+    return
+        $self->{etypeid}   == $subsc->{etypeid} &&
+        $self->{journalid} == $subsc->{journalid};
 }
 
 # instance method
