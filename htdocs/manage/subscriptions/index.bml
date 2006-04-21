@@ -1,0 +1,90 @@
+<?_code
+{
+    use strict;
+    use vars qw (%POST %GET $body $title);
+
+    return "Not ready" if $LJ::DISABLED{'esn'};
+
+    BML::decl_params( lj_form_auth => qr/./,
+                      mode         => 'word',
+                      id           => 'digits',
+                      authas       => 'word',);
+
+
+    my $remote = LJ::get_remote();
+    return "<?needlogin?>" unless $remote;
+
+    my $authas = $GET{'authas'} || $remote->{'user'};
+    my $u = LJ::get_authas_user($authas);
+    return LJ::bad_input("You could not be authenticated as the specified user.")
+        unless $u;
+
+    if (LJ::did_post()) {
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>"
+            unless LJ::check_form_auth();
+    }
+
+    if ($GET{'mode'} eq "modify" && $GET{'id'} ne "") {
+        my $id = $GET{'id'} + 0;
+        my $subsc = $u->load_subscription($id);
+        unless ($subsc) { $body .= "Invalido subscription"; return; }
+
+        $body .= "<form method='POST' action='./'>";
+        $body .= LJ::form_auth();
+        $body .= "</form>";
+    } else {
+        $body .= "<form action='./' method='GET'>";
+        $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
+        $body .= "</form>";
+
+        my @subscriptions = $u->subscriptions;
+        unless (@subscriptions) { $body .= "<?de No subscriptions de?>"; return; }
+
+        $body .= "<?p Below are the current subscriptions for " . LJ::ljuser($authas) . " p?>";
+        $body .= "<table cellspacing='0' cellpadding='0' id='Subscriptions'>";
+        $body .= "<tr><th></th><th>Event</th><th>Expires</th><th>Notification Type</th></tr>";
+        my $row = 1;
+        foreach my $subsc ( sort {$a->id <=> $b->id } @subscriptions ) {
+            my $class = $row % 2 ? "lighter" : "darker";
+            $body .= "<tr class='$class'>";
+            $body .= "<td><a href='./index.bml?mode=modify&id=" . $subsc->id . "'>" . $subsc->id . "</a></td>";
+            $body .= "<td>" . $subsc->event->title . "</td>";
+            if ($subsc->expiretime) {
+                $body .= "<td>" . LJ::time_to_http($subsc->expiretime) . "</td>";
+            } else {
+                $body .= "<td>Never</td>";
+            }
+            $body .= "<td>" . $subsc->ntypeid . "</td>";
+            $body .= "</tr>";
+            $row++;
+        }
+        $body .= "</table>";
+    }
+    return;
+}
+_code?>
+<?page
+body=> <?_code return $body;  _code?>
+title=><?_code return $title; _code?>
+head<=
+<style type='text/css'>
+#Subscriptions {
+    width: 100%;
+}
+#Subscriptions th {
+    text-align: left;
+}
+#Subscriptions td, #Subscriptions th {
+    padding-left: .5em;
+    padding-right: .5em;
+}
+#Subscriptions tr.lighter {
+    background-color: #cff;
+}
+#Subscriptions tr.darker {
+    background-color: #9cc;
+}
+</style>
+<=head
+<=body
+page?>
