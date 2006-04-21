@@ -8,7 +8,8 @@ use base 'LJ::Event';
 sub new {
     my ($class, $comment) = @_;
     croak 'Not an LJ::Comment' unless blessed $comment && $comment->isa("LJ::Comment");
-    return $class->SUPER::new($comment->journal, $comment->jtalkid);
+    return $class->SUPER::new($comment->poster,
+                              $comment->journal->{userid}, $comment->jtalkid);
 }
 
 sub is_common { 0 }

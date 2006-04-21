@@ -10,6 +10,12 @@
 use strict;
 package LJ::Talk;
 
+use Class::Autouse qw(
+                      LJ::Event::JournalNewComment
+                      LJ::Event::UserNewComment
+                      LJ::Comment
+                      );
+
 sub get_subjecticons
 {
     my %subjecticon;
@@ -2290,6 +2296,10 @@ sub enter_comment {
             "There was an error posting your comment to the database.  " .
             "Please report this.  The error is: <b>$errstr</b>");
     }
+
+    my $cmtobj = LJ::Comment->new($journalu, jtalkid => $jtalkid);
+    LJ::Event::JournalNewComment->new($cmtobj)->fire;
+    LJ::Event::UserNewComment   ->new($cmtobj)->fire;
 
     LJ::MemCache::incr([$journalu->{'userid'}, "talk2ct:$journalu->{'userid'}"]);
 
