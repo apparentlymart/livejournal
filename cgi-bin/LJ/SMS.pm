@@ -41,7 +41,7 @@ sub send {
 sub send_jabber_dev_server {
     my $self = shift;
 
-    my $sock = IO::Socket::INET->new(PeerAddr => "127.0.0.1:5223")
+    my $sock = IO::Socket::INET->new(PeerAddr => "127.0.0.1:5224")
         or return 0;
 
     my $to = $self->{to} . '@' . $LJ::DOMAIN;
