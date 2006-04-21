@@ -18,6 +18,13 @@ sub new {
     return bless $self, $class;
 }
 
+sub new_from_subscription {
+    my $class = shift;
+    my $subs = shift;
+
+    return $class->new($subs->owner);
+}
+
 sub u {
     my $self = shift;
     croak "'u' is an object method"
@@ -49,8 +56,6 @@ sub notify {
 
     foreach my $ev (@events) {
         croak "invalid event passed" unless ref $ev;
-
-        print "ev: $ev\n";
 
         LJ::send_mail({
             to       => $u->{email},
