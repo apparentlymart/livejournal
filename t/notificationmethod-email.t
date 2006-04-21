@@ -104,7 +104,7 @@ my $valid_meth = sub {
     like($@, qr/invalid event/, "notify undef event");
 
     eval { $meth->notify($ev, undef, $ev) };
-    like($@, qr/invalid event/, "undef event with noise: $@");
+    like($@, qr/invalid event/, "undef event with noise");
 
     my $str = $ev->as_string;
     $meth->notify($ev);
