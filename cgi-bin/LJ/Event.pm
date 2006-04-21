@@ -130,7 +130,7 @@ sub has_subscriptions {
 sub class {
     my ($class, $typeid) = @_;
     my $dbh = LJ::get_db_writer();
-    return $dbh->selectrow_array("SELECT class FROM eventtypelist WHERE eventtypeid=?",
+    return $dbh->selectrow_array("SELECT class FROM eventtypelist WHERE etypeid=?",
                                  undef, $typeid);
 }
 
@@ -143,7 +143,7 @@ sub etypeid {
     # TODO: cache this
     my $dbh = LJ::get_db_writer();
     my $get = sub {
-        return $dbh->selectrow_array("SELECT eventtypeid FROM eventtypelist WHERE class=?",
+        return $dbh->selectrow_array("SELECT etypeid FROM eventtypelist WHERE class=?",
                                      undef, $class);
     };
     my $etypeid = $get->();
