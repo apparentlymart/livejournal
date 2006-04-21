@@ -112,6 +112,7 @@ propgroup text {
     property use text_read_comments_friends;
     property use text_meta_music;
     property use text_meta_mood;
+    property use text_meta_location;
 
     property string text_website {
         des = "The label for the 'website' field";
@@ -521,6 +522,8 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
                 $text = $*text_meta_mood;
             } elseif ($k == "music") {
                 $text = $*text_meta_music;
+            } elseif ($k == "location") {
+                $text = $*text_meta_location;
             }
             if ($k == "mood" and defined $e.mood_icon) {
                 var Image i = $e.mood_icon;

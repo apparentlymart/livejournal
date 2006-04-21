@@ -314,6 +314,7 @@ propgroup text
 {
     property use text_meta_music;
     property use text_meta_mood;
+    property use text_meta_location;
     property use text_post_comment;
     property use text_read_comments;
     property use text_post_comment_friends;
@@ -1090,6 +1091,8 @@ function print_entry(Page p, Entry e, Color bgcolor, Color fgcolor, bool viewing
                 $text = $*text_meta_mood;
             } elseif ($k == "music") {
                 $text = $*text_meta_music;
+            } elseif ($k == "location") {
+                $text = $*text_meta_location;
             }
             if ($k == "mood" and defined $e.mood_icon) {
                 var Image i = $e.mood_icon;

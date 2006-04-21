@@ -520,10 +520,13 @@ function metadata_title(string which) : string
 "Until core provides a function for this, i18n layers should override this."
 {
     if ($which == "music") {
-        return "Current Music";
+        return $*text_meta_music;
     }
     elseif ($which == "mood") {
-        return "Current Mood";
+        return $*text_meta_mood;
+    }
+    elseif ($which == "location") {
+        return $*text_meta_location;
     }
     else {
         return $which;
@@ -540,6 +543,10 @@ function Page::lay_print_entry_metadata(Entry e)
         # This is horrible and unextensible. We have core to thank.
         # C'est la vie.
         "<div class=\"metadata\">\n";
+        if ($e.metadata{"location"} != "") {
+            """<div class="currentlocation"><span class="metacaption">"""+metadata_title("location") + ":</span> " +
+                                             $e.metadata{"location"}+"</div>\n";
+        }
         if ($e.metadata{"music"} != "") {
             """<div class="currentmusic"><span class="metacaption">"""+metadata_title("music") + ":</span> " +
                                              $e.metadata{"music"}+"</div>\n";

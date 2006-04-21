@@ -474,10 +474,14 @@ function print_user_top_crap(Entry entry, User journal) {
 function s1_print_entry(Entry entry) {
   "<div style='margin-left: 30px'>";
 
+  var string location = $entry.metadata{"location"};
   var string mood = $entry.metadata{"mood"};
   var string music = $entry.metadata{"music"};
   var Image moodicon = $entry.mood_icon;
 
+  if ($location) {
+    print "<b>$*text_meta_location: </b>$location<br/>";
+  }
   if ($mood) {
     print "<b>$*text_meta_mood: </b>";
     if ($moodicon) {

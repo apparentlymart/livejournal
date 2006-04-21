@@ -980,8 +980,11 @@ function Comment::lay_print_icon() {
 }
 
 function Entry::lay_print_metadata() {
-    if ($.metadata{"music"} == "" and $.metadata{"mood"} == "" and (size $.tags) < 1) {return;}
+    if (size $.metadata == 0 and size $.tags < 1) {return;}
     println """<ul class="entrymeta">""";
+    if ($.metadata{"location"} != "") {
+        println """<li><span class="entrymetacaption">$*text_meta_location:</span> $.metadata{"location"}</li>""";
+    }
     if ($.metadata{"mood"} != "") {
         print """<li><span class="entrymetacaption">$*text_meta_mood:</span> """;
         if (defined $.mood_icon) {

@@ -319,6 +319,8 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
                     $key = $*text_meta_mood;
                 } elseif ($k == "music") {
                     $key = $*text_meta_music;
+                } elseif ($k == "location") {
+                    $key = $*text_meta_location;
                 }
                 if ($k == "mood" and defined $e.mood_icon) {
                     var Image i = $e.mood_icon;
