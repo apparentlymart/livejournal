@@ -53,6 +53,12 @@ sub matches {
     }
 }
 
+sub id {
+    my $self = shift;
+
+    return $self->{subid};
+}
+
 sub createtime {
     my $self = shift;
     return $self->{createtime};

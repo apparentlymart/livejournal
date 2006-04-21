@@ -31,7 +31,7 @@ sub new {
 sub new_from_raw_params {
     my (undef, $etypeid, $journalid, $arg1, $arg2) = @_;
 
-    my $class = LJ::Event->class($etypeid);
+    my $class = LJ::Event->class($etypeid) or die "Classname cannot be undefined/false";
     my $evt   = LJ::Event->new(LJ::load_userid($journalid),
                                $arg1, $arg2);
 
