@@ -79,20 +79,22 @@ body<=
 
         LJ::cmize::js_redirect(\%POST);
         $saved_msg .= "Your settings have been saved. <a href='" . $u->journal_base() . "'>View your Journal</a>.";
-        $u = LJ::load_user($u->{user});
-    }
 
-    $ret .= "<form action='./' method='get' id='authas_options'>\n";
-    $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
-    $ret .= "</form>\n\n";
+        # Reload the user object to force the display of these changes
+        $u = LJ::load_user($u->{user}, 'force');
+    }
 
     $ret .= "<?warningbar $saved_msg warningbar?>" if $saved_msg;
     $ret .= "<?errorbar $err_msg errorbar?>" if $err_msg;
 
+    $ret .= "<form action='./' method='get' id='Authas'>\n";
+    $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
+    $ret .= "</form>\n\n";
+
     $ret .= LJ::cmize::html_tablinks("index", $getextra);
     $ret .= "<div id='CurrentTab'>";
 
-    ### Sidebar 
+    ### Sidebar
     {
         $ret .= "<div id='CurrentTabSide'>";
         $ret .= LJ::cmize::display_current_summary($u);

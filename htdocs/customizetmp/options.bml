@@ -14,7 +14,8 @@ body<=
     my %params = (authas           => 'word',
                   opt_usesharedpic => qr/./,
                   s1_overrides     => qr/./,
-                  'action:redir'   => 'word', );
+                  'action:redir'   => 'word',
+                  'lj_form_auth'   => qr/./,);
 
     my $remote = LJ::get_remote();
     return LJ::bad_input("You must be logged in to edit your display settings.")
@@ -225,13 +226,12 @@ body<=
         # Reload the user object to get the latest values
         $u = LJ::load_user($u->{user});
     }
-
-    $ret .= "<form action='options.bml' method='get' style='float: right; display: block; margin-bottom: 1em;'>\n";
-    $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
-    $ret .= "</form>\n\n";
-
     $ret .= "<?warningbar $saved_msg warningbar?>" if $saved_msg;
     $ret .= "<?errorbar $err_msg errorbar?>" if $err_msg;
+
+    $ret .= "<form action='options.bml' method='get' id='Authas'>\n";
+    $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
+    $ret .= "</form>\n\n";
 
     $ret .= LJ::cmize::html_tablinks("options", $getextra);
     $ret .= "<div id='CurrentTab'><form method='post' action='options.bml$getextra' id='display_form'>\n";
@@ -358,7 +358,7 @@ body<=
 
             if (ref $override eq "HASH") { $override = $override->{'as_string'}; }
 
-            $ret .= "<tr valign='top'><td>" . LJ::eall($prop->{'des'}) . "</td>";
+            $ret .= "<tr valign='top'><td>&#x00bb; " . LJ::eall($prop->{'des'}) . "</td>";
             $ret .= "<td id='$name:user_value'>\n";
             if ($prop->{'values'}) {
                 $ret .= LJ::html_select({ 'name' => "s2_${name}_value",
@@ -407,11 +407,11 @@ body<=
             my $t = "";
             $t .= LJ::eall($prop->{'note'}) if $prop->{'note'};
             $t .= "<?help " . $LJ::HELPURL{"s2opt_$name"} . " help?>" if $LJ::HELPURL{"s2opt_$name"};
-            $ret .= "<tr><td colspan='2'><?de $t de?></td></tr>" if $t;
+            $ret .= "<tr><td colspan='2' style='padding-left: 2em;'><?de $t de?></td></tr>" if $t;
         };
 
         if (@groups) {
-            $ret .= "<div id='propgroupstab'>";
+            $ret .= "<div id='propgroupstab'>Category: ";
             my $num = 0;
             foreach my $gname (@groups) {
                 my $name = $group_name->($gname);

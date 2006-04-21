@@ -223,15 +223,15 @@ body<=
         LJ::update_user($u, \%update) if %update;
 
         LJ::cmize::js_redirect(\%POST);
-        $u = LJ::load_user($u->{user});
+        $u = LJ::load_user($u->{user}, 'force');
     }
-
-    $ret .= "<form action='style.bml' method='get'>";
-    $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
-    $ret .= "</form>";
 
     $ret .= "<?warningbar $saved_msg warningbar?>" if $saved_msg;
     $ret .= "<?errorbar $err_msg errorbar?>" if $err_msg;
+
+    $ret .= "<form id='Authas' action='style.bml'>";
+    $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
+    $ret .= "</form>";
 
     $ret .= LJ::cmize::html_tablinks("style", $getextra);
     $ret .= "<div id='CurrentTab'><form method='post' action='style.bml?authas=$authas' id='display_form'>\n";
@@ -250,7 +250,7 @@ body<=
 
         foreach my $view (@LJ::views) {
             $ret .= "<div style='border: 1px solid #ccc; margin-bottom: .5em'>";
-            $ret .= "<div style='text-align: center; padding: 1em; padding-bottom: 2em; border-right: 1px solid #ccc'>";
+            $ret .= "<div style='text-align: left; padding: 1em; padding-bottom: 2em; border-right: 1px solid #ccc'>";
             $ret .= "<div style='margin-left: 30px; margin-bottom: 20px;'>";
             $ret .= "<label for='s1_${view}_style'>$LJ::viewinfo{$view}->{'des'}:</label> ";
 

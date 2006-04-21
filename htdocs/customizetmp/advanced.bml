@@ -7,7 +7,7 @@ body<=
     use vars qw(%POST %GET);
     LJ::need_res( 'stc/customize.css' );
 
-    BML::decl_params(authas => 'username');
+    BML::decl_params(authas => 'word');
 
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
@@ -26,7 +26,7 @@ body<=
     my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
     my $ret;
 
-    $ret .= "<form action='advanced.bml' method='get'>";
+    $ret .= "<form action='advanced.bml' method='get' id='Authas'>";
     $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
     $ret .= "</form>";
 
