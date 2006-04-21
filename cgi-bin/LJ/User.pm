@@ -18,6 +18,8 @@ use lib "$ENV{'LJHOME'}/cgi-bin";
 use LJ::MemCache;
 use LJ::Session;
 
+use Class::Autouse qw(LJ::Subscription);
+
 # class method.  returns remote (logged in) user object.  or undef if
 # no session is active.
 sub remote {

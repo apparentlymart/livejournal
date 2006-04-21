@@ -37,11 +37,20 @@ sub new_from_row {
 }
 
 sub matches {
-    return 1;
     my $self = shift;
     my $event = shift;
 
-#    if ($self->userid == $event->
+    if (
+        $self->{etypeid} == $event->{etypeid} and
+        $self->{journalid} == $event->{journalid} and
+        $self->{arg1} == $event->{arg1} and
+        $self->{arg2} == $event->{arg2}
+    ) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
 }
 
 sub createtime {
@@ -62,6 +71,16 @@ sub event {
 sub ntypeid {
     my $self = shift;
     return $self->{ntypeid};
+}
+
+sub owner {
+    my $self = shift;
+    return LJ::load_userid($self->{userid});
+}
+
+sub dirty {
+    my $self = shift;
+    return $self->{is_dirty};
 }
 
 1;
