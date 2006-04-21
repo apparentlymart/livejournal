@@ -17,16 +17,6 @@ expiretime
 flags     
 );
 
-sub new {
-    my ($class, %opts) = @_;
-    my $self = bless {}, $class;
-    foreach my $k (qw(foo bar baz)) {
-        $self->{$k} = delete $opts{$k};
-    }
-    croak if %opts;
-    return $self;
-}
-
 # Class method
 sub new_from_row {
     my ($class, $row) = @_;
@@ -87,6 +77,12 @@ sub owner {
 sub dirty {
     my $self = shift;
     return $self->{is_dirty};
+}
+
+sub notification {
+    my $self = shift;
+    my $class = NotificationMethod->class( $self->{ntypeid} );
+    return $class->new_from_subscription( $self );
 }
 
 1;
