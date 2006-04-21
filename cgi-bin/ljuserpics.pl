@@ -507,7 +507,7 @@ sub get_upf_scaled {
                                   });
 
         if (!$result) {
-            die "FAILED\n";
+            die "Could not resize image down\n";
             # job failed... error reporting?
         } else {
             return Storable::thaw($$result);
