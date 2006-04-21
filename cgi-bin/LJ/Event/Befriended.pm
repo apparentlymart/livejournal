@@ -23,5 +23,8 @@ sub as_string {
                    $self->u->{user});
 }
 
+sub title {
+    return 'Friend Added';
+}
 
 1;

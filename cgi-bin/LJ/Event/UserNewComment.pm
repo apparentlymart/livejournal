@@ -13,4 +13,8 @@ sub new {
 
 sub is_common { 0 }
 
+sub title {
+    return 'User Left a Comment';
+}
+
 1;

@@ -35,6 +35,11 @@ sub is_common {
     0;
 }
 
+# Override this with a very short description of the type of event
+sub title {
+    return 'New Event';
+}
+
 sub as_string {
     my $self = shift;
     my $u    = $self->u;

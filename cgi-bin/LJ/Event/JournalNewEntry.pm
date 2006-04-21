@@ -25,5 +25,8 @@ sub as_string {
                    $self->u->{user});
 }
 
+sub title {
+    return 'New Entry on Journal';
+}
 
 1;

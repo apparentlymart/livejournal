@@ -13,4 +13,8 @@ sub new {
 
 sub is_common { 1 }
 
+sub title {
+    return 'New Comment on Journal';
+}
+
 1;
