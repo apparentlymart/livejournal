@@ -36,11 +36,11 @@ sub new_from_raw_params {
                                $arg1, $arg2);
 
     # bless into correct class
-    bless $evt, $class;     
-    
+    bless $evt, $class;
+
     return $evt;
 }
-                                        
+
 
 # Override this.  by default, events are rare, so subscriptions to
 # them are tracked in target's "has_subscription" table.
@@ -84,6 +84,7 @@ sub process_fired_events {
 sub fire {
     my $self = shift;
     my $u = $self->{u};
+    return 0 if $LJ::DISABLED{'esn'};
 
     if (my $val = $LJ::DEBUG{'firings'}) {
         if (ref $val eq "CODE") {
