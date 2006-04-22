@@ -31,7 +31,13 @@ my $tm;
     eval { $tm->typeid_to_class(9999) };
     like($@, qr/No class for id/, "Invalid class id");
 
+    my $class = 'oogabooga';
+
     # insert a new class that shouldn't exist, should get a typeid
-    my $id = $tm->class_to_typeid('oogabooga');
-    ok(defined $id, "Got id: $id");
+    my $id = $tm->class_to_typeid($class);
+    ok(defined $id, "$class id is $id");
+
+    # now look up the id and see if it matches the class
+    my $gotclass = $tm->typeid_to_class($id);
+    is($gotclass, $class, "Got class: $class for id $id");
 }

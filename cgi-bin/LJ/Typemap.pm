@@ -48,7 +48,7 @@ sub typeid_to_class {
     $self->_load unless $self->{loaded};
     my $proc_cache = $self->{cache};
 
-    my $class = grep { $_ == $typeid } values %$proc_cache;
+    my ($class) = grep { $proc_cache->{$_} == $typeid } keys %$proc_cache;
 
     die "No class for id $typeid on table $self->{table}" unless $class;
 
@@ -91,7 +91,7 @@ sub class_to_typeid {
     die "Could not create typeid for table $table class $class" unless $classid;
 
     # save new classid
-    $self->{cache} = $classid;
+    $proc_cache->{$class} = $classid;
 
     $self->proc_cache_to_memcache;
 
