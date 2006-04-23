@@ -176,6 +176,14 @@ sub all_classes {
     return $tm->all_classes;
 }
 
+# make sure all the config'd classes are mapped
+sub AUTOLOAD {
+    return unless @LJ::EVENT_TYPES;
+    my $tm = __PACKAGE__->typemap or die "Could not make typemap.";
+
+    $tm->map_classes(@LJ::EVENT_TYPES);
+}
+
 package LJ::Event::ForTest2;
 use base 'LJ::Event';
 

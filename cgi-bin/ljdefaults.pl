@@ -311,6 +311,19 @@
                                     );
     }
 
+    unless (@LJ::EVENT_TYPES) {
+        @LJ::EVENT_TYPES = (
+                            'Befriended',
+                            'JournalNewComment',
+                            'JournalNewEntry',
+                            'UserNewComment',
+                            'UserNewEntry',
+                            );
+        foreach my $evt (@LJ::EVENT_TYPES) {
+            $evt = "LJ::Event::$evt";
+        }
+    }
+
     unless (%LJ::BLOBINFO) {
         %LJ::BLOBINFO = (
                          clusters => {
