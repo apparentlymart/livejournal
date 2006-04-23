@@ -6,8 +6,6 @@ require 'ljlib.pl';
 use LJ::Typemap;
 use LJ::Test;
 
-# Warning: this test will create bogus types in your typemap table!
-
 my $table = 'portal_typemap';
 my $classfield = 'class_name';
 my $idfield = 'id';
@@ -50,6 +48,21 @@ sub run_tests {
         # get all classes, make sure our class is in it
         my @classes = $tm->all_classes;
         ok(scalar (grep { $_ eq $class } @classes), "Our class is in list of all classes");
+
+        # delete the map
+        ok($tm->delete_class($class), "Deleting class");
+
+        # make sure class is gone
+        ok(! eval { $tm->typeid_to_class($id) }, "Deleted class");
+
+        # recreate class with map_classes function
+        ok($id = $tm->map_classes($class), "Recreated class");
+
+        # make sure class was made
+        ok($tm->typeid_to_class($id), "ID lookup on new class");
+
+        # and delete the map once again
+        ok($tm->delete_class($class), "Deleted class");
     }
 }
 

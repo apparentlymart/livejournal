@@ -98,6 +98,41 @@ sub class_to_typeid {
     return $classid;
 }
 
+# given a list of classes, create an ID for each if no ID exists
+# returns list of corresponding IDs
+sub map_classes {
+    my ($self, @classes) = @_;
+
+    $self->_load or die;
+
+    my @ids;
+
+    foreach my $class (@classes) {
+        # just ask for the typeid of this class
+        push @ids, $self->class_to_typeid($class);
+    }
+
+    return @ids;
+}
+
+# delete a class->id map
+# returns not undef on success
+sub delete_class {
+    my ($self, $class) = @_;
+
+    my $dbh = LJ::get_db_writer() or die "No DB writer";
+
+    my $table = $self->{table} or die "No table";
+    my $classfield = $self->{classfield} or return undef;
+
+    $dbh->do("DELETE FROM $table WHERE $classfield=?", undef, $class) or return undef;
+
+    delete $self->{cache}->{$class};
+    $self->proc_cache_to_memcache;
+
+    return 1;
+}
+
 # save the process cache to memcache
 sub proc_cache_to_memcache {
     my $self = shift;
