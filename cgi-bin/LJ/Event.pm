@@ -1,7 +1,7 @@
 package LJ::Event;
 use strict;
 use Carp qw(croak);
-use Class::Autouse qw(LJ::SMS);
+use Class::Autouse qw(LJ::SMS LJ::Typemap);
 
 # Guide to subclasses:
 #    LJ::Event::JournalNewEntry -- a journal (user/community) has a new entry in it
@@ -132,12 +132,23 @@ sub has_subscriptions {
     return 1; # FIXME: consult "has_subs" table
 }
 
+
+# get the typemap for the subscriptions classes (class/instance method)
+sub typemap {
+    return LJ::Typemap->new(
+        table       => 'eventtypelist',
+        classfield  => 'class',
+        idfield     => 'etypeid',
+    );
+}
+
 # returns the class name, given an etypid
 sub class {
     my ($class, $typeid) = @_;
-    my $dbh = LJ::get_db_writer();
-    return $dbh->selectrow_array("SELECT class FROM eventtypelist WHERE etypeid=?",
-                                 undef, $typeid);
+    my $tm = $class->typemap
+        or return undef;
+
+    return $tm->typeid_to_class($typeid);
 }
 
 # returns the eventtypeid for this site.
@@ -146,16 +157,23 @@ sub etypeid {
     my ($class_self) = @_;
     my $class = ref $class_self ? ref $class_self : $class_self;
 
-    # TODO: cache this
-    my $dbh = LJ::get_db_writer();
-    my $get = sub {
-        return $dbh->selectrow_array("SELECT etypeid FROM eventtypelist WHERE class=?",
-                                     undef, $class);
-    };
-    my $etypeid = $get->();
-    return $etypeid if $etypeid;
-    $dbh->do("INSERT IGNORE INTO eventtypelist SET class=?", undef, $class);
-    return $get->() or die "Failed to allocate class number";
+    my $tm = $class->typemap
+        or return undef;
+
+    return $tm->class_to_typeid($class);
+}
+
+# this returns a list of all possible event classes
+# class method
+sub all_classes {
+    my $class = shift;
+
+    croak "all_event_classes is a class method" unless $class;
+
+    my $tm = $class->typemap
+        or return undef;
+
+    return $tm->all_classes;
 }
 
 package LJ::Event::ForTest2;

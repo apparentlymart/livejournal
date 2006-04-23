@@ -31,6 +31,10 @@ ok($evt->etypeid != $evt2->etypeid);
 is(LJ::Event->class($evt->etypeid),  ref $evt,  "LJ::Event->class");
 is(LJ::Event->class($evt2->etypeid), ref $evt2);
 
+my @classes = $evt->all_classes;
+ok(@classes);
+ok(scalar (grep { $_ =~ /ForTest1/ } @classes), "found our class");
+
 $evt2->fire;
 
 
