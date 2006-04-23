@@ -8,6 +8,19 @@ sub pkgkey {
     return $class . "_";
 }
 
+sub errdiv {
+    my (undef, $errs, $key) = @_;
+    return "" unless $errs;
+    my $err = $errs->{$key}   or return "";
+    # TODO: red is temporary.  move to css.
+    return "<div style='color: red' class='ljinlinesettingerror'>$err</div>";
+}
+
+sub errors {
+    my ($class, %map) = @_;
+    LJ::errobj("SettingSave", 'map' => \%map)->throw;
+}
+
 package LJ::Error::SettingSave;
 
 sub user_caused { 1 }

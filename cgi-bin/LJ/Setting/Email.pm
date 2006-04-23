@@ -26,7 +26,7 @@ sub save {
     LJ::check_email($email, \@errors) unless @errors;
 
     return 1 unless @errors;
-    LJ::errobj("SettingSave", 'map' => { email => join(", ", @errors) })->throw;
+    $class->errors(email => join(", ", @errors));
 }
 
 sub as_html {
@@ -51,9 +51,7 @@ sub as_html {
         $ret .= "<p>$LJ::SITENAME requires that you change your email address over a secure connection, here: <a href='$LJ::SITEROOT/changeemail.bml'>change email</a>.</p>";
     }
 
-    if (my $email_err = $errs->{email}) {
-        $ret .= "<div style='color: #f00' class='error'>" . $email_err . "</div>";
-    }
+    $ret .= $class->errdiv($errs, "email");
     return $ret;
 }
 
