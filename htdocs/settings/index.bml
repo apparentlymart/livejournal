@@ -5,10 +5,26 @@
 
     BML::decl_params(tag => qr/^[\w\. ]+$/);
 
+    my $err = sub {
+        $title = "Error";
+        $body = $_[0];
+        return;
+    };
+
+    my $u = LJ::User->remote
+        or return $err->("must be logged in");
+
     my %tags = (
                 email   => [qw(Email)],
                 mail    => [qw(Email)],
                 address => [qw(Email)],
+                sex     => [qw(Gender)],
+                gender  => [qw(Gender)],
+                male    => [qw(Gender)],
+                female  => [qw(Gender)],
+                boy     => [qw(Gender)],
+                girl    => [qw(Gender)],
+
                 );
 
     my $tag = $GET{tag};
@@ -24,13 +40,29 @@
         return;
     }
 
+    $body .= "<form method='post'>";
     $body .= "<?h1 Options tagged '$tag': h1?>\n";
     foreach my $optname (@opts) {
         my $class = "LJ::Setting::$optname";
         $body .= "<?h2 $class h2?>\n";
-        eval { $class->as_html };
-        $body .= "<p>" . LJ::ehtml($@) . "</p>" if $@;
+        unless (eval "use $class; 1;") {
+            my $del = $class;
+            $del =~ s!::!/!;
+            $del .= ".pm";
+            delete $INC{$del};
+            $body .= "Failed to load $class: " . LJ::ehtml($@);
+            next;
+        }
+        my $html = eval { $class->as_html($u) };
+        if ($@) {
+            $body .= "<p>" . LJ::ehtml($@) . "</p>";
+        } else {
+            my $pkgkey = $class->pkgkey;
+            $body .= "<div id='$pkgkey' style='border: 2px solid black; padding: 10px;'>$html</div>";
+        }
     }
+    $body .= "<input type='submit' value='Save' />";
+    $body .= "</form>";
 
     return;
 }
