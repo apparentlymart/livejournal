@@ -8,4 +8,9 @@ sub pkgkey {
     return $class . "_";
 }
 
+package LJ::Error::SettingSave;
+
+sub user_caused { 1 }
+sub fields      { qw(map); }  # key -> english  (keys are LJ::Setting:: subclass-defined)
+
 1;
