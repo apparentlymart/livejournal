@@ -72,6 +72,16 @@ sub new_from_row {
     return $self;
 }
 
+sub new_from_keyword
+{
+    my ($class, $u, $kw) = @_;
+
+    my $picid = LJ::get_picid_from_keyword($u, $kw) or
+        return undef;
+
+    return $class->new($u, $picid);
+}
+
 sub absorb_row {
     my ($self, $row) = @_;
     for my $f (qw(userid picid width height comment location state url)) {

@@ -1,7 +1,7 @@
 # -*-perl-*-
 
 use strict;
-use Test::More tests => 65;
+use Test::More tests => 68;
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 use LJ::Userpic;
@@ -81,6 +81,10 @@ sub run_tests {
         is($got_kws, 'keyword1', 'Stealing keyword part 1 works');
         @keywords_array = $up->keywords;
         eq_array(\@keywords_array, \@keywordsa);
+
+        # get userpic from key
+        my $up = LJ::Userpic->new_from_keyword($u, 'keyword1');
+        is($up, $up2, "get userpic from keyword");
     }
 
     # test defaults
