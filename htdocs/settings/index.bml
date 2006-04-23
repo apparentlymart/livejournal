@@ -17,6 +17,7 @@
 
     my %tags = (
                 email   => [qw(Email)],
+                name   => [qw(Name)],
                 mail    => [qw(Email)],
                 address => [qw(Email)],
                 sex     => [qw(Gender)],
@@ -78,6 +79,7 @@
         }
 
         my $post_args = $posted{$class};
+        $post_args ||= {} if LJ::did_post();
         my $save_errors;
         if ($post_args) {
             my $sv = eval {
