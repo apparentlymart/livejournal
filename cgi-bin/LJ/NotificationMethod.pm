@@ -1,8 +1,13 @@
 package LJ::NotificationMethod;
-
 use strict;
-use vars qw/ $AUTOLOAD /;
 use Carp qw/ croak /;
+use Class::Autouse qw(LJ::Typemap);
+
+# make sure all the config'd classes are mapped
+if(@LJ::NOTIFY_TYPES) {
+    my $tm = __PACKAGE__->typemap or die "Could not make typemap.";
+    $tm->map_classes(@LJ::NOTIFY_TYPES);
+}
 
 # this mofo is basically just an interface
 # Mischa's contribution:  "straight up"
@@ -11,39 +16,54 @@ sub notify { croak "can't call notification on LJ::NotificationMethod base class
 
 sub can_digest { 0 }
 
-sub new_from_subscription { 
+sub new_from_subscription {
     croak "can't instantiate base LJ::NotificationMethod from subscription"
+}
+
+# get the typemap for the notifytype classes (class/instance method)
+sub typemap {
+    return LJ::Typemap->new(
+        table       => 'notifytypelist',
+        classfield  => 'class',
+        idfield     => 'ntypeid',
+    );
 }
 
 # returns the class name, given an ntypid
 sub class {
-    my ($class, $ntypeid) = @_;
-    my $dbh = LJ::get_db_writer()
-        or die "unable to contact db master";
+    my ($class, $typeid) = @_;
+    my $tm = $class->typemap
+        or return undef;
 
-    return $dbh->selectrow_array("SELECT class FROM notifytypelist WHERE ntypeid=?",
-                                 undef, $ntypeid);
+    return $tm->typeid_to_class($typeid);
 }
 
-sub ntypeid {
+# returns the notifytypeid for this site.
+# don't override this in subclasses.
+sub etypeid {
     my ($class_self) = @_;
     my $class = ref $class_self ? ref $class_self : $class_self;
 
-    # TODO: cache this
-    my $dbh = LJ::get_db_writer()
-        or die "unable to contact db master";
+    my $tm = $class->typemap
+        or return undef;
 
-    my $get = sub {
-        my $rv = $dbh->selectrow_array
-            ("SELECT ntypeid FROM notifytypelist WHERE class=?",
-             undef, $class);
-    };
+    return $tm->class_to_typeid($class);
+}
 
-    my $etypeid = $get->();
-    return $etypeid if $etypeid;
+# this returns a list of all possible event classes
+# class method
+sub all_classes {
+    my $class = shift;
 
-    $dbh->do("INSERT IGNORE INTO notifytypelist SET class=?", undef, $class);
-    return $get->() or die "Failed to allocate class number";
+    # return config'd classes if they exist, otherwise just return everything that has a mapping
+    return @LJ::NOTIFY_TYPES if @LJ::NOTIFY_TYPES;
+
+    croak "all_classes is a class method" unless $class;
+
+    my $tm = $class->typemap
+        or croak "Bad class $class";
+
+    return $tm->all_classes;
 }
 
 1;

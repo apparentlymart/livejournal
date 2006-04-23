@@ -176,7 +176,7 @@ sub all_classes {
     # return config'd classes if they exist, otherwise just return everything that has a mapping
     return @LJ::EVENT_TYPES if @LJ::EVENT_TYPES;
 
-    croak "all_event_classes is a class method" unless $class;
+    croak "all_classes is a class method" unless $class;
 
     my $tm = $class->typemap
         or croak "Bad class $class";

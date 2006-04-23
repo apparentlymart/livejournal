@@ -324,6 +324,14 @@
         }
     }
 
+    unless (@LJ::NOTIFY_TYPES) {
+        @LJ::NOTIFY_TYPES = (
+                            'Email',
+                            );
+        foreach my $evt (@LJ::NOTIFY_TYPES) {
+            $evt = "LJ::NotificationMethod::$evt";
+        }
+    }
     unless (%LJ::BLOBINFO) {
         %LJ::BLOBINFO = (
                          clusters => {
