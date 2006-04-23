@@ -110,7 +110,7 @@ sub proc_cache_to_memcache {
 sub all_classes {
     my $self = shift;
 
-    $self->_load;
+    $self->_load or die;
     return keys %{$self->{cache}};
 }
 
@@ -140,7 +140,7 @@ sub _load {
     my $sth = $dbr->prepare("SELECT $classfield, $idfield FROM $table");
     return undef unless $sth;
 
-    $sth->execute($idfield, $classfield, $table);
+    $sth->execute;
 
     while (my $idmap = $sth->fetchrow_hashref) {
         $proc_cache->{$idmap->{$classfield}} = $idmap->{$idfield};
@@ -148,6 +148,8 @@ sub _load {
 
     # save in memcache
     $self->proc_cache_to_memcache;
+
+    return $proc_cache;
 }
 
 1;

@@ -171,7 +171,7 @@ sub all_classes {
     croak "all_event_classes is a class method" unless $class;
 
     my $tm = $class->typemap
-        or return undef;
+        or croak "Bad class $class";
 
     return $tm->all_classes;
 }

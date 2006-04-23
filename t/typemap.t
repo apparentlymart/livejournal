@@ -25,6 +25,11 @@ sub run_tests {
         # create a typemap
         $tm = eval { LJ::Typemap->new(table => $table, idfield => $idfield, classfield => $classfield) };
         ok($tm, "Got typemap");
+
+        # test singletonage
+        my $tm2 = eval { LJ::Typemap->new(table => $table, idfield => $idfield, classfield => $classfield) };
+        is($tm2, $tm, "Got singleton");
+
     }
 
     {
