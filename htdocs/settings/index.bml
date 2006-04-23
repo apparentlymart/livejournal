@@ -1,0 +1,40 @@
+<?_code
+{
+    use strict;
+    use vars qw($title $body %GET %POST);
+
+    BML::decl_params(tag => qr/^[\w\. ]+$/);
+
+    my %tags = (
+                email   => [qw(Email)],
+                mail    => [qw(Email)],
+                address => [qw(Email)],
+                );
+
+    my $tag = $GET{tag};
+
+    $title = "Change Settings";
+    $body = "<center>What do you want to change today?  Enter tag:";
+    $body .= "<form method='get'><input name='tag' value='$tag' style='text-align: center; font-size: 20pt; font-weight: bold; -moz-border-radius: 10px;' /></form></center>";
+    return unless $tag;
+
+    my @opts = @{ $tags{$tag} || [] };
+    unless (@opts) {
+        $body .= "<?h1 Sorry h1?><?p No options match '$tag'. p?>";
+        return;
+    }
+
+    $body .= "<?h1 Options tagged '$tag': h1?>\n";
+    foreach my $optname (@opts) {
+        my $class = "LJ::Setting::$optname";
+        $body .= "<?h2 $class h2?>\n";
+        eval { $class->as_html };
+        $body .= "<p>" . LJ::ehtml($@) . "</p>" if $@;
+    }
+
+    return;
+}
+_code?><?page
+title=><?_code $title _code?>
+body=><?_code  $body _code?>
+page?>
