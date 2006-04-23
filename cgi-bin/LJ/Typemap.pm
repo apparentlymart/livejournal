@@ -106,6 +106,14 @@ sub proc_cache_to_memcache {
     LJ::MemCache::set("typemap_$table", $self->{cache}, 120);
 }
 
+# returns an array of all of the classes in the table
+sub all_classes {
+    my $self = shift;
+
+    $self->_load;
+    return keys %{$self->{cache}};
+}
+
 # makes sure typemap cache is loaded
 sub _load {
     my $self = shift;

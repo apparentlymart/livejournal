@@ -41,6 +41,10 @@ sub run_tests {
         # now look up the id and see if it matches the class
         my $gotclass = $tm->typeid_to_class($id);
         is($gotclass, $class, "Got class: $class for id $id");
+
+        # get all classes, make sure our class is in it
+        my @classes = $tm->all_classes;
+        ok(scalar (grep { $_ eq $class } @classes), "Our class is in list of all classes");
     }
 }
 
