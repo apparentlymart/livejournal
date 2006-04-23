@@ -1,5 +1,7 @@
 # -*-perl-*-
 
+@LJ::EVENT_TYPES = ('LJ::Event::ForTest1', 'LJ::Event::ForTest2');
+
 use strict;
 use Test::More 'no_plan';
 use lib "$ENV{LJHOME}/cgi-bin";

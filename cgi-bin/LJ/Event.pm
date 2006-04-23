@@ -15,6 +15,11 @@ use Class::Autouse qw(LJ::SMS LJ::Typemap);
 #    LJ::Event::Befriended        -- user $fromuserid added $u as a friend
 #                                  ($u,$fromuserid)
 
+# make sure all the config'd classes are mapped
+if(@LJ::EVENT_TYPES) {
+    my $tm = __PACKAGE__->typemap or die "Could not make typemap.";
+    $tm->map_classes(@LJ::EVENT_TYPES);
+}
 
 sub new {
     my ($class, $u, @args) = @_;
@@ -168,20 +173,15 @@ sub etypeid {
 sub all_classes {
     my $class = shift;
 
+    # return config'd classes if they exist, otherwise just return everything that has a mapping
+    return @LJ::EVENT_TYPES if @LJ::EVENT_TYPES;
+
     croak "all_event_classes is a class method" unless $class;
 
     my $tm = $class->typemap
         or croak "Bad class $class";
 
     return $tm->all_classes;
-}
-
-# make sure all the config'd classes are mapped
-sub AUTOLOAD {
-    return unless @LJ::EVENT_TYPES;
-    my $tm = __PACKAGE__->typemap or die "Could not make typemap.";
-
-    $tm->map_classes(@LJ::EVENT_TYPES);
 }
 
 package LJ::Event::ForTest2;
