@@ -15,18 +15,15 @@
     my $u = LJ::User->remote
         or return $err->("must be logged in");
 
-    my %tags = (
-                email   => [qw(Email)],
-                name   => [qw(Name)],
-                mail    => [qw(Email)],
-                address => [qw(Email)],
-                sex     => [qw(Gender)],
-                gender  => [qw(Gender)],
-                male    => [qw(Gender)],
-                female  => [qw(Gender)],
-                boy     => [qw(Gender)],
-                girl    => [qw(Gender)],
-                );
+    my @settings = map { s!.+cgi-bin/!!; s!/!::!g; s/\.pm$//; $_ } (glob "$ENV{LJHOME}/cgi-bin/LJ/Setting/*.pm");
+
+    my %tags = ();
+    foreach my $class (@settings) {
+        eval "use $class; 1; " or next;
+        foreach my $tag ($class->tags) {
+            push @{$tags{$tag} ||= []}, $class;
+        }
+    }
 
     my $tag = $GET{tag};
 
@@ -47,8 +44,8 @@
     }
 
 
-    my @opts = @{ $tags{$tag} || [] };
-    unless (@opts) {
+    my @matches = @{ $tags{$tag} || [] };
+    unless (@matches) {
         $body .= "<?h1 Sorry h1?><?p No options match '$tag'. p?>";
         return;
     }
@@ -66,8 +63,7 @@
 
     $body .= "<form method='post'>";
     $body .= "<?h1 Options tagged '$tag': h1?>\n";
-    foreach my $optname (@opts) {
-        my $class = "LJ::Setting::$optname";
+    foreach my $class (@matches) {
         $body .= "<?h2 $class h2?>\n";
         unless (eval "use $class; 1;") {
             my $del = $class;

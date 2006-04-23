@@ -2,6 +2,8 @@ package LJ::Setting;
 use strict;
 use warnings;
 
+sub tags { () }
+
 sub pkgkey {
     my $class = shift;
     $class =~ s/::/__/g;

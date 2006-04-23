@@ -3,6 +3,8 @@ use base 'LJ::Setting';
 use strict;
 use warnings;
 
+sub tags { qw(email mail address) }
+
 sub save {
     my ($class, $u, $args) = @_;
     my $email = $args->{email};

@@ -4,8 +4,15 @@ use strict;
 use warnings;
 use Carp qw(croak);
 
+# if override to something non-undef, current_value and save_text work
+# assuming a userprop
+sub prop_name { undef }
+
 sub current_value {
     my ($class, $u) = @_;
+    if (my $propname = $class->prop_name) {
+        return $u->prop($propname);
+    }
     croak;
 }
 
@@ -37,6 +44,9 @@ sub save {
 
 sub save_text {
     my ($class, $u, $txt) = @_;
+    if (my $propname = $class->prop_name) {
+        return $u->set_prop($propname, $txt);
+    }
     croak;
 }
 

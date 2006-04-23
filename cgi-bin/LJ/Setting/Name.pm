@@ -3,6 +3,8 @@ use base 'LJ::Setting::TextSetting';
 use strict;
 use warnings;
 
+sub tags { qw(name) }
+
 sub current_value {
     my ($class, $u) = @_;
     return $u->{name};
