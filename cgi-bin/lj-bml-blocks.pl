@@ -11,6 +11,7 @@ BML::register_block("SITENAME", "S", $LJ::SITENAME);
 BML::register_block("ADMIN_EMAIL", "S", $LJ::ADMIN_EMAIL);
 BML::register_block("SUPPORT_EMAIL", "S", $LJ::SUPPORT_EMAIL);
 BML::register_block("CHALRESPJS", "", $LJ::COMMON_CODE{'chalresp_js'});
+BML::register_block("JSPREFIX", "S", $LJ::JSPREFIX);
 
 # dynamic blocks to implement calling our ljuser function to generate HTML
 #    <?ljuser banana ljuser?>
