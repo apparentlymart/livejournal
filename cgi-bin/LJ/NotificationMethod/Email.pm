@@ -2,7 +2,7 @@ package LJ::NotificationMethod::Email;
 
 use strict;
 use Carp qw/ croak /;
-use base qw/LJ::NotificationMethod/;
+use base 'LJ::NotificationMethod';
 
 sub can_digest { 1 };
 
@@ -10,13 +10,15 @@ sub can_digest { 1 };
 sub new {
     my $class = shift;
     my $u = shift;
-    croak "invalid user object passed" 
+    croak "invalid user object passed"
         unless LJ::isu($u);
 
     my $self = { u => $u };
 
     return bless $self, $class;
 }
+
+sub title { 'Email' }
 
 sub new_from_subscription {
     my $class = shift;

@@ -1,7 +1,7 @@
 package LJ::NotificationMethod;
 use strict;
 use Carp qw/ croak /;
-use Class::Autouse qw(LJ::Typemap);
+use Class::Autouse ('LJ::Typemap', @LJ::NOTIFY_TYPES);
 
 # make sure all the config'd classes are mapped
 if(@LJ::NOTIFY_TYPES) {
@@ -13,6 +13,7 @@ if(@LJ::NOTIFY_TYPES) {
 # Mischa's contribution:  "straight up"
 sub new    { croak "can't instantiate base LJ::NotificationMethod" }
 sub notify { croak "can't call notification on LJ::NotificationMethod base class" }
+sub title  { croak "can't call title on LJ::NotificationMethod base class" }
 
 sub can_digest { 0 }
 
@@ -40,7 +41,7 @@ sub class {
 
 # returns the notifytypeid for this site.
 # don't override this in subclasses.
-sub etypeid {
+sub ntypeid {
     my ($class_self) = @_;
     my $class = ref $class_self ? ref $class_self : $class_self;
 
