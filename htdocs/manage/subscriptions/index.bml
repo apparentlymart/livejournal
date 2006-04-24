@@ -5,10 +5,14 @@
 
     return "Not ready" if $LJ::DISABLED{'esn'};
 
+    use Class::Autouse qw(LJ::NotificationMethod LJ::Event);
+
     BML::decl_params( lj_form_auth => qr/./,
                       mode         => 'word',
                       id           => 'digits',
-                      authas       => 'word',);
+                      authas       => 'word',
+                      ntypeid      => 'digits',
+                      etypeid      => 'digits',);
 
 
     my $remote = LJ::get_remote();
@@ -19,9 +23,26 @@
     return LJ::bad_input("You could not be authenticated as the specified user.")
         unless $u;
 
+    my $formauth = LJ::form_auth();
+
     if (LJ::did_post()) {
-        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>"
-            unless LJ::check_form_auth();
+        unless (LJ::check_form_auth()) {
+            $body = LJ::error_list(BML::ml('error.invalidform'));
+            return;
+        }
+
+        if ($POST{mode} eq 'addsub') {
+            unless (defined $POST{ntypeid} && defined $POST{etypeid}) {
+                $body = LJ::bad_input('Invalid submission');
+                return;
+            }
+
+            my $ntypeid = int($POST{ntypeid});
+            my $etypeid = int($POST{etypeid});
+
+            # create a new subscription
+            # LJ::Subscription->create()
+        }
     }
 
     if ($GET{'mode'} eq "modify" && $GET{'id'} ne "") {
@@ -30,13 +51,46 @@
         unless ($subsc) { $body .= "Invalido subscription"; return; }
 
         $body .= "<form method='POST' action='./'>";
-        $body .= LJ::form_auth();
+        $body .= $formauth;
         $body .= "</form>";
     } else {
         $body .= "<form action='./' method='GET'>";
         $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
+        $body .= $formauth;
         $body .= "</form>";
 
+        $body .= "<fieldset><legend>Subscribe</legend>";
+        $body .= "<form method='POST' action='./'>";
+
+        my @event_classes = LJ::Event->all_classes;
+        unless (@event_classes) { $body .= "No events!"; return; }
+
+        my @event_options;
+        foreach my $evt_class (@event_classes) {
+            my $title = eval { $evt_class->title } or next;
+            push @event_options, ($evt_class->etypeid, $title);
+        }
+
+        my @notify_classes = LJ::NotificationMethod->all_classes;
+        unless (@notify_classes) { $body .= "No notification methods!"; return; }
+
+        my @note_options;
+        foreach my $note_class (@notify_classes) {
+            my $title = eval { $note_class->title } or next;
+
+            push @note_options, ($note_class->ntypeid, $title);
+        }
+
+        $body .= 'Alert me whenever: ' . LJ::html_select({name => 'etypeid'}, @event_options) .
+            ' with: ' . LJ::html_select({name => 'ntypeid'}, @note_options);
+
+        $body .= ' ' . LJ::html_submit('Add');
+        $body .= LJ::html_hidden({name => 'mode', value => 'addsub'});
+        $body .= $formauth;
+
+        $body .= "</form></fieldset>";
+
+        $body .= "<fieldset><legend>Subscriptions</legend>";
         my @subscriptions = $u->subscriptions;
         unless (@subscriptions) { $body .= "<?de No subscriptions de?>"; return; }
 
@@ -58,7 +112,7 @@
             $body .= "</tr>";
             $row++;
         }
-        $body .= "</table>";
+        $body .= "</table></fieldset>";
     }
     return;
 }
