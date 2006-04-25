@@ -1993,7 +1993,7 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /editpics.bml.nodefault=No Default Picture
 
-/editpics.bml.noneupload=You have no pictures uploaded.  Please upload one using the form below.
+/editpics.bml.noneupload2=You have no pictures uploaded.  Please upload one using the form above.
 
 /editpics.bml.nopics=No Pictures
 

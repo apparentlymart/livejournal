@@ -697,7 +697,7 @@
     } elsif (!$fotobilder) {
         $body .= qq {
                 <?h1 $ML{'.nopics'} h1?>
-                <?p $ML{'.noneupload'} p?>
+                <?p $ML{'.noneupload2'} p?>
             };
     }
 
