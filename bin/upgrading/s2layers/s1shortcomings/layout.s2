@@ -306,8 +306,7 @@ function EntryPage::print_comment_partial(Comment comment) {
                 if ($comment.poster) { print $comment.poster; } else
                   { print $*text_poster_anonymous; }
                 print ", <span class=\"datetime\">" +
-                  $comment.time->date_format($*lang_fmt_date_med) + " " +
-                    $comment.time->time_format($*lang_fmt_time_short);
+                  $comment->time_display($*lang_fmt_date_med, $*lang_fmt_time_short);
                 print "</span>";
               }
            "</div>
@@ -334,7 +333,7 @@ function EntryPage::print_comment(Comment comment) {
   }
 
   var string ip = $comment.metadata{"poster_ip"};
-  var string time = $comment.time->date_format() + " " + $comment.time->time_format();
+  var string time = $comment->time_display();
   var string barclass = ($comment.depth % 2)-1 ? "comment_bar_2" : "comment_bar_1";
   if ($comment.screened) {
     $barclass = "comment_bar_screened";

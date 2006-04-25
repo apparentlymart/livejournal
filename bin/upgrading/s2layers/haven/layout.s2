@@ -1433,7 +1433,7 @@ function EntryPage::print_comment(Comment c)
       println "<table>";
       println """<tr><th align="right">From:</th><td>$poster</td></tr>""";
       println """<tr><th align="right">Date:</th><td style="white-space: nowrap">""";
-        println $c.time->date_format("long") + " - " + $c.time->time_format() + "</td></tr>";
+        println $c->time_display("long", "") + "</td></tr>";
       if ($c.metadata{"poster_ip"}) { println """<tr><th align="right">IP Address:</th><td>(""" + $c.metadata{"poster_ip"} + ")</td></tr>"; }
     println "</table></td>";
 

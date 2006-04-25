@@ -656,7 +656,7 @@ function EntryPage::print_comment (Comment c) {
     if (defined $c.subject_icon or $c.subject != "") { "<h3>$c.subject_icon $c.subject</h3>\n"; }
     print "<strong>$*text_comment_from</strong> $poster<br />\n";
     print "<strong>$*text_comment_date</strong> ";
-        print $c.time->date_format("long") + " - " + $c.time->time_format();
+        print $c->time_display("long", "");
     if ($c.metadata{"poster_ip"}) { print " ($*text_comment_ipaddr " + $c.metadata{"poster_ip"} + ")"; }
     print " <strong>(<a href='$c.permalink_url'>$*text_permalink</a>)</strong>\n";
 

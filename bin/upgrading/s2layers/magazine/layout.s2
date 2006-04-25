@@ -724,7 +724,7 @@ function EntryPage::print_comment (Comment c) {
       print "<table>";
       print "<tr><th align='right'>From:</th><td>$poster</td></tr>\n";
       print "<tr><th align='right'>Date:</th><td style='white-space: nowrap'>";
-        print $c.time->date_format("long") + " - " + $c.time->time_format() + "</td></tr>";
+        print $c->time_display("long", "") + "</td></tr>";
       if ($c.metadata{"poster_ip"}) { print "<tr><th align='right'>IP Address:</th><td>(" + $c.metadata{"poster_ip"} + ")</td></tr>"; }
     "</table></td>";
 
