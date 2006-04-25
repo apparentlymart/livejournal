@@ -802,10 +802,14 @@ function Page::lay_print_entrylite(EntryLite e) {
 <div class="entryheader">
 <h3 class="entrysubject">$e.subject</h3>""";
     $e->lay_print_poster();
-"""<div class="entrytimestamp">
-<span class="entrytimestampdate">"""+$e.time->date_format("short")+"""</span>
-<span class="entrytimestamptime">"""+$e.time->time_format()+"""</span>
-</div>""";
+"""<div class="entrytimestamp">""";
+if ($e.depth > 0) { # If $e is a comment
+    """<span class="entrytimestampdate">"""+$e->time_display("short", "")+"</span>";
+} else {
+    """<span class="entrytimestampdate">"""+$e.time->date_format("short")+"""</span>
+    <span class="entrytimestamptime">"""+$e.time->time_format()+"""</span>""";
+}
+"""</div>""";
 
 $e->lay_print_icon();
 """<div class="entrylinkbarpre">"""; $e->print_linkbar(); """</div>

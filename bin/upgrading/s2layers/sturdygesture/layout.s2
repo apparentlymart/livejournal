@@ -670,7 +670,7 @@ function EntryPage::print_comments(Comment[] cs) {
 
 function EntryPage::print_comment(Comment c) {
     var string datetime;
-    $datetime = $c.time->date_format("med_day")+", "+$c.time->time_format();
+    $datetime = $c->time_display("med_day", "");
 
     """<a name='$c.anchor'></a><div id="$c.dom_id" class="box"><h3 style="color: $*clr_boxhead_text; background: $*clr_boxhead_back;">""";
 
