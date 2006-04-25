@@ -25,6 +25,11 @@ sub as_string {
                    $self->u->{user});
 }
 
+sub as_sms {
+    my $self = shift;
+    return $self->as_string;
+}
+
 sub title {
     return 'New Entry on Journal';
 }

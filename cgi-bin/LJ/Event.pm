@@ -66,6 +66,13 @@ sub as_string {
     return "Event $self fired for user=$u->{user}, args=[@{$self->{args}}]";
 }
 
+sub as_sms {
+    my $self = shift;
+    my $str = $self->as_string;
+    return $str if length $str <= 160;
+    return substr($str, 0, 157) . "...";
+}
+
 
 ############################################################################
 #            Don't override

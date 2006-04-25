@@ -25,6 +25,19 @@ sub as_string {
                    $self->u->{user});
 }
 
+sub as_sms {
+    my $self = shift;
+
+    my $entry = $self->entry;
+    my $where = "in their journal";
+    unless ($entry->posterid == $entry->journalid) {
+        $where = "in '" . $entry->journal->{user} . "'";
+    }
+
+    return sprintf("User '%s' posted $where", $self->u->{user});
+
+}
+
 sub title {
     return 'New Entry by User';
 }
