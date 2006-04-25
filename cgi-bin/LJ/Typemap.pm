@@ -77,7 +77,7 @@ sub class_to_typeid {
     $dbh->do("INSERT IGNORE INTO $table ($classfield) VALUES (?)",
              undef, $class);
 
-    if ($dbh->{'mysql_insertid'}) {
+    if ($dbh->err) {
         # inserted fine, get ID
         $classid = $dbh->{'mysql_insertid'};
     } else {
@@ -183,6 +183,8 @@ sub _load {
 
     # save in memcache
     $self->proc_cache_to_memcache;
+
+    $self->{cache} = $proc_cache;
 
     return $proc_cache;
 }
