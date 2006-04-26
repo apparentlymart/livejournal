@@ -19,7 +19,12 @@ sub title  { croak "can't call title on LJ::NotificationMethod base class" }
 sub can_digest { 0 }
 
 sub new_from_subscription {
-    croak "can't instantiate base LJ::NotificationMethod from subscription"
+    my ($class, $subscription) = @_;
+
+    my $sub_class = $class->class($subscription->ntypeid)
+        or return undef;
+
+    return $sub_class->new_from_subscription($subscription);
 }
 
 # get the typemap for the notifytype classes (class/instance method)
