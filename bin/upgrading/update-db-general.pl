@@ -997,6 +997,7 @@ register_tabledrop("ban");
 register_tabledrop("logaccess");
 register_tabledrop("fvcache");
 register_tabledrop("userpic_comment");
+register_tabledrop("events");
 
 register_tablecreate("portal", <<'EOC');
 CREATE TABLE portal (
