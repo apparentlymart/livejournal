@@ -1,7 +1,8 @@
 package LJ::NotificationMethod;
 use strict;
 use Carp qw/ croak /;
-use Class::Autouse ('LJ::Typemap', @LJ::NOTIFY_TYPES);
+use Class::Autouse qw (LJ::Typemap
+                       LJ::NotificationMethod::Email);
 
 # make sure all the config'd classes are mapped
 if(@LJ::NOTIFY_TYPES) {

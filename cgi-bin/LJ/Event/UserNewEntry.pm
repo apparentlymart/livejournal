@@ -42,4 +42,13 @@ sub title {
     return 'New Entry by User';
 }
 
+sub sub_info {
+    return (
+            {
+                type => 'any',
+                title => 'User',
+            }
+            );
+}
+
 1;

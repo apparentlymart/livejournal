@@ -1,7 +1,13 @@
 package LJ::Event;
 use strict;
 use Carp qw(croak);
-use Class::Autouse qw(LJ::SMS LJ::Typemap);
+use Class::Autouse qw(LJ::SMS
+                      LJ::Typemap
+                      LJ::Event::JournalNewEntry
+                      LJ::Event::UserNewEntry
+                      LJ::Event::JournalNewComment
+                      LJ::Event::UserNewComment
+                      LJ::Event::Befriended);
 
 # Guide to subclasses:
 #    LJ::Event::JournalNewEntry -- a journal (user/community) has a new entry in it
@@ -71,6 +77,11 @@ sub as_sms {
     my $str = $self->as_string;
     return $str if length $str <= 160;
     return substr($str, 0, 157) . "...";
+}
+
+# array of info for journalid, arg1, arg2 info
+sub sub_info {
+    return ();
 }
 
 

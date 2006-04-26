@@ -18,4 +18,13 @@ sub title {
     return 'User Left a Comment';
 }
 
+sub sub_info {
+    return (
+            {
+                type => 'any',
+                title => 'User',
+            }
+            );
+}
+
 1;

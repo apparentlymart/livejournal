@@ -1,7 +1,8 @@
 <?_code
 {
     use strict;
-    use vars qw (%POST %GET $body $title);
+    use vars qw (%POST %GET $body $title $headextra);
+    use Carp qw(croak);
 
     return "Not ready" if $LJ::DISABLED{'esn'};
 
@@ -18,10 +19,67 @@
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
 
+    LJ::need_res('js/core.js');
+    LJ::need_res('js/dom.js');
+    LJ::need_res('js/devel.js');
+    LJ::need_res('js/esnmanager.js');
+    LJ::need_res('js/esn.js');
+
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);
     return LJ::bad_input("You could not be authenticated as the specified user.")
         unless $u;
+
+
+    # class method
+    my $arg_opts_as_html = sub {
+        my ($class) = @_;
+
+        my $html = '';
+        my $etypeid = $class->etypeid;
+
+        my ($journal_info, $arg1_info, $arg2_info) = $class->sub_info;
+        return '' unless $journal_info;
+
+        {
+            my $name = "journal$etypeid";
+            my $title = $journal_info->{title} || 'User';
+
+            if ($journal_info->{type} eq 'owner') {
+                my $can_sub = $u->list_usejournals;
+                push @$can_sub, $u->{user};
+                my @can_sub_list;
+
+                foreach my $journal (@$can_sub) {
+                    push @can_sub_list, ($journal, $journal);
+                }
+
+                $html .= "$title: " .  LJ::html_select({name => $name}, @can_sub_list);
+            } elsif ($journal_info->{type} eq 'any') {
+                $html .= "$title: " .  LJ::html_text({name => $name, id => $name});
+            } else {
+                croak "Invalid sub_info type '$journal_info->{type}' for $class";
+            }
+        }
+
+        my $index = 1;
+
+        foreach my $arg ($arg1_info, $arg2_info) {
+            next unless $arg and ref $arg;
+            my $type = $arg->{type} or next;
+
+            my $title = $arg->{title} || '';
+            my $name = "argOpts$index$etypeid";
+
+            if ($type eq 'user' or $type eq 'number') {
+                $html .= "$title: " .  LJ::html_text({name => $name, id => $name});
+            }
+            $index++;
+        }
+
+        return $html;
+    };
+
 
     my $formauth = LJ::form_auth();
 
@@ -32,16 +90,35 @@
         }
 
         if ($POST{mode} eq 'addsub') {
-            unless (defined $POST{ntypeid} && defined $POST{etypeid}) {
-                $body = LJ::bad_input('Invalid submission');
+            unless (defined $POST{etypeid}) {
+                $body = LJ::bad_input('Event not specified');
+                return;
+            }
+            unless (defined $POST{ntypeid}) {
+                $body = LJ::bad_input('Notification not specified');
+                return;
+            }
+            unless (defined $POST{journal}) {
+                $body = LJ::bad_input('User not specified');
                 return;
             }
 
             my $ntypeid = int($POST{ntypeid});
             my $etypeid = int($POST{etypeid});
 
-            # create a new subscription
-            # LJ::Subscription->create()
+            my $arg1 = int($POST{"argOpts1$etypeid"});
+            my $arg2 = int($POST{"argOpts2$etypeid"});
+
+            my $journal = $POST{journal};
+            my $ju = LJ::load_user($journal);
+            unless ($ju) {
+                $body .= LJ::error_list("No such user $journal");
+            } else {
+                my $journalid = $ju->{userid};
+
+                # create a new subscription
+                LJ::Subscription->create($u);
+            }
         }
     }
 
@@ -65,11 +142,21 @@
         my @event_classes = LJ::Event->all_classes;
         unless (@event_classes) { $body .= "No events!"; return; }
 
+        my $jsfields = '';
         my @event_options;
+        my @etypeids;
         foreach my $evt_class (@event_classes) {
             my $title = eval { $evt_class->title } or next;
-            push @event_options, ($evt_class->etypeid, $title);
+            my $etypeid = $evt_class->etypeid or next;
+            push @etypeids, $etypeid;
+            push @event_options, ($etypeid, $title);
+
+            # javascript hide/show arg fields
+            $jsfields .= "<div class='argOptsContainer' id='argOptsContainer$etypeid'>" .
+                $arg_opts_as_html->($evt_class) . '</div>';
         }
+
+        $headextra .= "<script>initEsn([" . join(",", @etypeids) . "]);</script>";
 
         my @notify_classes = LJ::NotificationMethod->all_classes;
         unless (@notify_classes) { $body .= "No notification methods!"; return; }
@@ -81,8 +168,13 @@
             push @note_options, ($note_class->ntypeid, $title);
         }
 
-        $body .= 'Alert me whenever: ' . LJ::html_select({name => 'etypeid'}, @event_options) .
+        $body .= 'Alert me whenever: ' . LJ::html_select({
+            name => 'etypeid',
+            id => 'etypeid',
+            }, ('', '', @event_options)) .
             ' with: ' . LJ::html_select({name => 'ntypeid'}, @note_options);
+
+        $body .= "<div>$jsfields</div>";
 
         $body .= ' ' . LJ::html_submit('Add');
         $body .= LJ::html_hidden({name => 'mode', value => 'addsub'});
@@ -138,7 +230,11 @@ head<=
 #Subscriptions tr.darker {
     background-color: #9cc;
 }
+div.argOptsContainer {
+  display: none;
+}
 </style>
+<?_code return $headextra; _code?>
 <=head
 <=body
 page?>

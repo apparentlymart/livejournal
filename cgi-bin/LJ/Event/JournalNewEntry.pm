@@ -34,4 +34,14 @@ sub title {
     return 'New Entry on Journal';
 }
 
+
+sub sub_info {
+    return (
+            {
+                type => 'any',
+                title => 'Journal',
+            }
+            );
+}
+
 1;
