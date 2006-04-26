@@ -26,6 +26,29 @@ sub new_from_row {
     return $self;
 }
 
+sub create {
+    my ($class, $u, $info) = @_;
+
+    my $self = $class->new_from_row( $info );
+    
+    my @columns;
+    my @values;
+    
+    foreach (@subs_fields) {
+        if (exists( $info->{$_} )) {
+            push @columns, $_;
+            push @values, $info->{$_};
+        }
+    }
+    croak( "Extra info defined, (" . join( ', ', keys( %$info ) ) . ")" );
+    
+    my $sth = $u->prepare( 'INSERT INTO subs (' . join( ',', @columns ) . ')' .
+                           'VALUES (' . join( ',', map {'?'} @values ) . ')' );
+    $sth->execute( @values );
+
+    return $self;
+}
+
 sub id {
     my $self = shift;
 
