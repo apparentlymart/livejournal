@@ -254,11 +254,13 @@ sub trans
         if (! $uniq || $now - $uniq_time > $DAY) {
             $uniq ||= LJ::rand_chars(15);
 
+            my $uniq_value = "$uniq:$now";
+            $uniq_value    = LJ::run_hook('transform_ljuniq_value', { value => $uniq_value }) || $uniq_value;
             # set uniq cookies for all cookie_domains
             my @domains = ref $LJ::COOKIE_DOMAIN ? @$LJ::COOKIE_DOMAIN : ($LJ::COOKIE_DOMAIN);
             foreach my $dom (@domains) {
                 $r->err_headers_out->add("Set-Cookie" =>
-                                         "ljuniq=$uniq:$now; " .
+                                         "ljuniq=$uniq_value; " .
                                          "expires=" . LJ::time_to_cookie($now + $DAY*60) . "; " .
                                          ($dom ? "domain=$dom; " : "") . "path=/");
             }
