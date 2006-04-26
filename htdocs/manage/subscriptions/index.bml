@@ -13,7 +13,8 @@
                       id           => 'digits',
                       authas       => 'word',
                       ntypeid      => 'digits',
-                      etypeid      => 'digits',);
+                      etypeid      => 'digits',
+                      _default     => 'word',);
 
 
     my $remote = LJ::get_remote();
@@ -21,7 +22,6 @@
 
     LJ::need_res('js/core.js');
     LJ::need_res('js/dom.js');
-    LJ::need_res('js/devel.js');
     LJ::need_res('js/esnmanager.js');
     LJ::need_res('js/esn.js');
 
@@ -54,7 +54,7 @@
                     push @can_sub_list, ($journal, $journal);
                 }
 
-                $html .= "$title: " .  LJ::html_select({name => $name}, @can_sub_list);
+                $html .= "$title: " .  LJ::html_select({name => $name, id => $name}, @can_sub_list);
             } elsif ($journal_info->{type} eq 'any') {
                 $html .= "$title: " .  LJ::html_text({name => $name, id => $name});
             } else {
@@ -98,18 +98,19 @@
                 $body = LJ::bad_input('Notification not specified');
                 return;
             }
-            unless (defined $POST{journal}) {
-                $body = LJ::bad_input('User not specified');
-                return;
-            }
 
             my $ntypeid = int($POST{ntypeid});
             my $etypeid = int($POST{etypeid});
 
+            unless (defined $POST{"journal$etypeid"}) {
+                $body = LJ::bad_input('User not specified');
+                return;
+            }
+
             my $arg1 = int($POST{"argOpts1$etypeid"});
             my $arg2 = int($POST{"argOpts2$etypeid"});
 
-            my $journal = $POST{journal};
+            my $journal = $POST{"journal$etypeid"};
             my $ju = LJ::load_user($journal);
             unless ($ju) {
                 $body .= LJ::error_list("No such user $journal");
@@ -117,7 +118,13 @@
                 my $journalid = $ju->{userid};
 
                 # create a new subscription
-                LJ::Subscription->create($u);
+                LJ::Subscription->create($u, {
+                    ntypeid   => $ntypeid,
+                    etypeid   => $etypeid,
+                    arg1      => $arg1,
+                    arg2      => $arg2,
+                    journalid => $journalid,
+                    });
             }
         }
     }
@@ -200,7 +207,11 @@
             } else {
                 $body .= "<td>Never</td>";
             }
-            $body .= "<td>" . $subsc->ntypeid . "</td>";
+
+            # Load the NotificationMethod object for this subscription
+            my $note = LJ::NotificationMethod->new_from_subscription($subsc);
+
+            $body .= "<td>" . $note->title . "</td>";
             $body .= "</tr>";
             $row++;
         }
