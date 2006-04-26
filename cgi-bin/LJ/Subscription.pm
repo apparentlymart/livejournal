@@ -6,14 +6,6 @@ use Carp qw(croak);
 my @subs_fields = qw(userid subid is_dirty journalid etypeid arg1 arg2
                      ntypeid createtime expiretime flags);
 
-# Class method
-sub new_from_row {
-    my ($class, $row) = @_;
-
-    my $self = bless {%$row}, $class;
-    # TODO validate keys of row.
-    return $self;
-}
 
 sub new_by_id {
     my ($class, $u, $subid) = @_;
@@ -49,22 +41,39 @@ sub subscriptions_of_user {
     return @subs;
 }
 
+
+# Class method
+sub new_from_row {
+    my ($class, $row) = @_;
+
+    my $self = bless {%$row}, $class;
+    # TODO validate keys of row.
+    return $self;
+}
+
 sub create {
     my ($class, $u, $info) = @_;
 
+    my $subid = LJ::alloc_user_counter($u, 'E')
+        or die "Could not alloc subid for user $u->{user}";
+
+    $info->{subid} = $subid;
+    $info->{userid} = $u->{userid};
+
     my $self = $class->new_from_row( $info );
-    
+
     my @columns;
     my @values;
-    
+
     foreach (@subs_fields) {
         if (exists( $info->{$_} )) {
             push @columns, $_;
-            push @values, $info->{$_};
+            push @values, delete $info->{$_};
         }
     }
-    croak( "Extra info defined, (" . join( ', ', keys( %$info ) ) . ")" );
-    
+
+    croak( "Extra info defined, (" . join( ', ', keys( %$info ) ) . ")" ) if keys %$info;
+
     my $sth = $u->prepare( 'INSERT INTO subs (' . join( ',', @columns ) . ')' .
                            'VALUES (' . join( ',', map {'?'} @values ) . ')' );
     $sth->execute( @values );
