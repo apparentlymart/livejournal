@@ -2258,15 +2258,15 @@ EOC
 
 # global
 register_tablecreate("usertrans", <<'EOC');
-CREATE TABLE usertrans (
-  userid INT UNSIGNED NOT NULL,
-  time INT UNSIGNED NOT NULL,
-  what VARCHAR(25) NOT NULL,
-  before VARCHAR(25) NOT NULL,
-  after VARCHAR(25) NOT NULL,
-  KEY (userid),
-  KEY (time)
-)
+CREATE TABLE `usertrans` (
+  `userid` int(10) unsigned NOT NULL default '0',
+  `time` int(10) unsigned NOT NULL default '0',
+  `what` varchar(25) NOT NULL default '',
+  `before` varchar(25) NOT NULL default '',
+  `after` varchar(25) NOT NULL default '',
+  KEY `userid` (`userid`),
+  KEY `time` (`time`)
+) TYPE=MyISAM
 EOC
 
 # global
