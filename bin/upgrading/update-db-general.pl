@@ -2267,7 +2267,7 @@ CREATE TABLE `usertrans` (
   `after` varchar(25) NOT NULL default '',
   KEY `userid` (`userid`),
   KEY `time` (`time`)
-) TYPE=MyISAM
+)
 EOC
 
 # global
