@@ -2138,7 +2138,9 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /friends/add.bml.colors.header=Colors
 
-/friends/add.bml.colors.hover=(Hover your mouse over a color to see its name)
+/friends/add.bml.colors.help.text1=Click the colored boxes to the right for a pre-set color.  Choose a custom color by entering in the hex value or by clicking on the box to the left.
+
+/friends/add.bml.colors.help.text2=Hover your mouse over a color to see its name and hex value.
 
 /friends/add.bml.colors.text=Select the colors that will represent [[user]] in your friends list.
 

@@ -5,7 +5,7 @@
 var colpic_imgprefix = '/img';
 
 // spawnPicker - create a picker window
-function spawnPicker(dataobject, displayobject, des) {
+function spawnPicker(dataobject, displayobject, des, altdisplay) {
     var p = window.open("","colorpick_"+dataobject.name,"width=560,height=450");
     var d = p.document;
 
@@ -69,6 +69,9 @@ function spawnPicker(dataobject, displayobject, des) {
     findel('btnOK',d).onclick=function() {
         dataobject.value=p.picker.current;
         p.setBGColor(displayobject,p.picker.current);
+        if (altdisplay) {
+            findel(altdisplay.obj).style[altdisplay.attrib] = p.picker.current;
+        }
         p.close();
     };
 

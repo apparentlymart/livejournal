@@ -112,7 +112,7 @@ use vars qw($body $title $windowtitle %GET %POST);
      return;
  }
 
- $body .= "<form method='post' action='add.bml'>\n";
+ $body .= "<form method='post' name='editFriends' action='add.bml'>\n";
  $body .= LJ::form_auth();
  $body .= LJ::html_hidden(mode  => 'add',
                           user  => $user,
@@ -200,7 +200,7 @@ use vars qw($body $title $windowtitle %GET %POST);
  my $color_text = "<?p <table><tr><td valign=\"top\"><i>$ML{'.optional'}:</i> ".
           "<input type=\"checkbox\" id=\"color_switch\" value=\"\" onClick=\"color_display(this);\"> </td><td>" .
           BML::ml('.colors.text', {'user'=>$user}) .
-          "<br /><span style=\"font-size: 0.7em;\">($ML{'.colors.disclaimer'})</span></td></tr></table> p?>";
+          "<br /><span style=\"font-size: 7pt;\">($ML{'.colors.disclaimer'})</span></td></tr></table> p?>";
  $body .= "<script>\n";
  $body .= "function color_display(check) {\n";
  $body .= "  if (check.checked) {\n";
@@ -216,7 +216,7 @@ use vars qw($body $title $windowtitle %GET %POST);
  $body .= "<noscript>\n";
  $body .= "<?p <table><tr><td valign='top'><i>$ML{'.optional'}:</i> </td><td>" .
           BML::ml('.colors.text', {'user'=>$user}) .
-          "<br /><span style='font-size: 0.7em;'>($ML{'.colors.disclaimer'})</span></td></tr></table> p?>";
+          "<br /><span style='font-size: 7pt;'>($ML{'.colors.disclaimer'})</span></td></tr></table> p?>";
  $body .= "</noscript>\n";
 
 
@@ -227,49 +227,194 @@ use vars qw($body $title $windowtitle %GET %POST);
  $ret .= "  color_display(\$(\"color_switch\"));\n";
  $ret .= "</script>\n";
 
- $ret .= "<table cellpadding='4'><tr><td><b>$ML{'.colors.fg'}</b></td><td><b>$ML{'.colors.bg'}</b></td></tr>\n";
+ $ret .= "<?p <script type=\"text/javascript\" language=\"JavaScript\">\n<!--\ndocument.write(\"<span style='font-size: 7pt;'>";
+ $ret .= "$ML{'.colors.help.text1'}</span>\")\n// -->\n</script> p?>";
+ $ret .= "<?p <noscript>\n<p><span style='font-size: 7pt;'>$ML{'.colors.help.text2'}</span></p>\n</noscript> p?>";
+
+ # foreground
+ $ret .= "<table width=\"650\" cellpadding='4'><tr><td><b>$ML{'.colors.fg'}</b></td><td>";
+
+ # custom color selection
+
+ # with javascript
+ $ret .= qq~
+<script type='text/javascript' language='JavaScript'>
+<!--
+document.write("<a href='javascript:void(0);' style='text-decoration: none;' onclick=\\"spawnPicker(findel('editfriend_add_1_fg'),findel('editfriend_add_1_fg_value_disp'),'Overall: fgcolor',{obj:'preview',attrib:'color'});return false;\\"><span style='border: 1px solid #000000; padding-left: 2em; background-color: #000000;' id='editfriend_add_1_fg_value_disp'>&nbsp;</span></a>");
+// -->
+</script>
+~;
+
+ # without javascript
+ $ret .= qq~
+<noscript>
+&nbsp;
+</noscript>
+~;
+
+ # hex value input
+ $ret .= "</td>";
+ $ret .= "<td><input type=\"text\" maxlength=\"7\" value=\"#000000\" ";
+ $ret .= "name=\"editfriend_add_1_fg\" size=\"8\" ";
+ $ret .= "onchange=\"setBGColor(findel('editfriend_add_1_fg_value_disp'),";
+ $ret .= "editfriend_add_1_fg.value);";
+ $ret .= "findel('preview')";
+ $ret .= ".style.color = findel('editfriend_add_1_fg').value;\" onfocus=\"\" ";
+ $ret .= "id=\"editfriend_add_1_fg\" /></td>";
 
  my @color = ();
  LJ::load_codes({ "color" => \@color });
 
- my $sel = $fr || { 'fgcolor' => hex '000000',
-                    'bgcolor' => hex 'FFFFFF', };
-
- $ret .= "<tr>";
- $ret .= "<td><select name=\"editfriend_add_1_fg\">";
- foreach (@color) {
-     my $color_int = hex (substr($_->{'code'},1));
-     my $selected = $color_int eq $sel->{'fgcolor'} ? " selected" : "";
-     $ret .= "<option value=\"$_->{'code'}\"$selected>$_->{'item'}\n";
- }
-
- $ret .= "</select></TD>\n";
- $ret .= "<td><select name=\"editfriend_add_1_bg\">";
- foreach (@color) {
-     my $color_int = hex (substr($_->{'code'},1));
-     my $selected = $color_int eq $sel->{'bgcolor'} ? " selected" : "";
-     $ret .= "<option value=\"$_->{'code'}\"$selected>$_->{'item'}\n";
- }
- $ret .= "</select></td>\n";
- $ret .= "</tr>\n";
- $ret .= "</table>\n";
-
  ### color swatch
  my $col = 0;
- $ret .= "<p><table border='0' cellspacing='0' cellpadding='0'>";
+ $ret .= "<td><table border='0' cellspacing='0' cellpadding='0'>";
+
+ # with javascript
  foreach (@color) {
      if ($col==0) { $ret .= "<tr>\n"; }
      $col++;
      my $ecolor = LJ::ehtml($_->{'item'});
-     $ret .= "<td bgcolor=$_->{'code'}><img src=\"/img/dot.gif\" width='14' height='14' title=\"$ecolor\" alt=\"$ecolor\"></td>\n";
+     my $colspan = '';
+     my $wh = '16';
+     if ($_ eq $color[$#color]) {
+         $colspan = "colspan='2'"; 
+         $wh = '32';
+     }
+     $ret .= qq~
+<script type='text/javascript' language='JavaScript'>
+<!--
+document.write("<td $colspan bgcolor='$_->{code}'><a href='javascript:void(0);' style='text-decoration: none;' onclick=\\"setBGColor(findel('editfriend_add_1_fg_value_disp'),'$_->{code}');document.editFriends.editfriend_add_1_fg.value = '$_->{code}';document.getElementById('preview').style.color = '$_->{code}';\\"><img src='/img/dot.gif' width='$wh' height='16' title='$ecolor - $_->{code}' alt='$ecolor - $_->{code}' border='0'></a></td>");
+// -->
+</script>
+~;
      if ($col==23) { $ret .= "</tr>\n"; $col==0; }
  }
  if ($col) { $ret .= "</tr>\n"; $col==0; }
- $ret .= "</table>\n";
- $ret .= "<span style='font-size: 0.7em;'>$ML{'.colors.hover'}</span></p></div>";
+ my $col2 = 0;
+
+ # without javascript
+ my $ret2 = "<noscript>\n";
+ foreach (@color) {
+     if ($col2==0) { $ret2 .= "<tr>\n"; }
+     $col2++;
+     my $colspan = '';
+     my $wh = '16';
+     if ($_ eq $color[$#color]) {
+         $colspan = "colspan='2'";
+         $wh = '32';
+     }
+     my $ecolor = LJ::ehtml($_->{'item'});
+     $ret2 .= qq~
+<td $colspan bgcolor='$_->{code}'><img src='/img/dot.gif' width='$wh' height='16' title='$ecolor - $_->{code}' alt='$ecolor - $_->{code}' 
+border='0'></td>
+~;
+     if ($col2==23) { $ret2 .= "</tr>\n"; $col2==0; }
+ }
+ if ($col2) { $ret2 .= "</tr>\n"; $col2==0; }
+
+ $ret2 .= "</noscript>";
+
+ $ret .= $ret2;
+ $ret .= "</table></td></tr>\n";
+
+
+ # background
+ $ret .= "<tr><td><b>$ML{'.colors.bg'}</b></td><td>";
+
+ # custom color selection
+
+ # with javascript
+ $ret .= qq~
+<script type='text/javascript' language='JavaScript'>
+<!--
+document.write("<a href='javascript:void(0);' style='text-decoration: none;' onclick=\\"spawnPicker(findel('editfriend_add_1_bg'),findel('editfriend_add_1_bg_value_disp'),'Overall: bgcolor',{obj:'preview',attrib:'backgroundColor'});return false;\\"><span style='border: 1px solid #000000; padding-left: 2em; background-color: #ffffff;' id='editfriend_add_1_bg_value_disp'>&nbsp;</span></a>");
+// -->
+</script>
+~;
+
+ # without javascript
+ $ret .= qq~
+<noscript>
+&nbsp;
+</noscript>
+~;
+
+ # hex value input
+ $ret .= "</td>";
+ $ret .= "<td><input type=\"text\" maxlength=\"7\" value=\"#FFFFFF\" ";
+ $ret .= "name=\"editfriend_add_1_bg\" size=\"8\" ";
+ $ret .= "onchange=\"setBGColor(findel('editfriend_add_1_bg_value_disp'),";
+ $ret .= "editfriend_add_1_bg.value);setBGColor(findel('";
+ $ret .= "preview'),editfriend_add_1_bg.value);\" onfocus=\"\" ";
+ $ret .= "id=\"editfriend_add_1_bg\" /></td>";
+
+ ### color swatch
+ my $col = 0;
+ $ret .= "<td><table border='0' cellspacing='0' cellpadding='0'>";
+ # with javascript
+ foreach (@color) {
+     if ($col==0) { $ret .= "<tr>\n"; }
+     $col++;
+     my $colspan = '';
+     my $wh = '16';
+     if ($_ eq $color[$#color]) {
+         $colspan = "colspan='2'";
+         $wh = '32';
+     }
+     my $ecolor = LJ::ehtml($_->{'item'});
+     $ret .= qq~
+<script type='text/javascript' language='JavaScript'>
+<!--
+document.write("<td $colspan bgcolor='$_->{code}'><a href='javascript:void(0);' style='text-decoration: none;' onclick=\\"setBGColor(findel('editfriend_add_1_bg_value_disp'),'$_->{code}');document.editFriends.editfriend_add_1_bg.value = '$_->{code}';setBGColor(findel('preview'),'$_->{code}');\\"><img src='/img/dot.gif' width='$wh' height='16' title='$ecolor - $_->{code}' alt='$ecolor - $_->{code}' border='0'></a></td>");
+// -->
+</script>
+~;
+     if ($col==23) { $ret .= "</tr>\n"; $col==0; }
+ }
+ if ($col) { $ret .= "</tr>\n"; $col==0; }
+
+ my $col2 = 0;
+
+ # without javascript
+ my $ret2 = "<noscript>\n";
+ foreach (@color) {
+     if ($col2==0) { $ret2 .= "<tr>\n"; }
+     $col2++;
+     my $colspan = '';
+     my $wh = '16';
+     if ($_ eq $color[$#color]) {
+         $colspan = "colspan='2'";
+         $wh = '32';
+     }
+     my $ecolor = LJ::ehtml($_->{'item'});
+     $ret2 .= qq~
+<td $colspan bgcolor='$_->{code}'><img src='/img/dot.gif' width='$wh' height='16' title='$ecolor - $_->{code}' alt='$ecolor - $_->{code}' border='0'></td>
+~;
+     if ($col2==23) { $ret2 .= "</tr>\n"; $col2==0; }
+ }
+ if ($col2) { $ret2 .= "</tr>\n"; $col2==0; }
+
+
+ $ret2 .= "</noscript>";
+
+ $ret .= $ret2;
+ $ret .= "</table></td></tr></table>";
+
+ # preview
+ $ret .= qq~
+<?p
+<script language='JavaScript' type='text/javascript'>
+<!--
+document.write("<span style='border: 1px solid #666666; padding: 10px; background-color: #ffffff; color: #000000;' id='preview'>$user</span>");
+// -->
+</script>
+p?>
+~;
+
+ $ret .= "</div>\n";
 
  $body .= $ret;
- $body .= "<br />\n<p>";
+ $body .= "<br />\n <?p";
 
  # Form submit buttons
  if ($fr) {
@@ -284,7 +429,7 @@ use vars qw($body $title $windowtitle %GET %POST);
  $body .= "<script type='text/javascript' language='Javascript'> \n <!-- \n
     document.write(\"<input type='button' value='$cancel_btn' onclick='history.go(-1); return false;'>\");
      \n // -->\n ";
- $body .= '</script></p>';
+ $body .= '</script> p?>';
 
 
  $body .= "</form>";
@@ -301,6 +446,8 @@ head<=
 {
     $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/core.js'></script>\n";
     $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/dom.js'></script>\n";
+    $ret .= "<script language=\"JavaScript\" src=\"$LJ::SITEROOT/js/colorpicker.js\"></script>";
+
     return $ret;
 }
 _code?>
