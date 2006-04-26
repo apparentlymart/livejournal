@@ -2390,20 +2390,9 @@ sub list_friendgroups
     return \@res;
 }
 
-sub list_usejournals
-{
+sub list_usejournals {
     my $u = shift;
-
-    my @res;
-
-    my $ids = LJ::load_rel_target($u, 'P');
-    my $us = LJ::load_userids(@$ids);
-    foreach (values %$us) {
-        next unless $_->{'statusvis'} eq "V";
-        push @res, $_->{user};
-    }
-    @res = sort @res;
-    return \@res;
+    return $u->list_usejournals;
 }
 
 sub hash_menus

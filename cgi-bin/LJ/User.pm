@@ -1418,7 +1418,7 @@ sub cmd_buffer_add {
 
 sub subscriptions {
     my $u = shift;
-    
+
     my $sth = $u->prepare('SELECT userid, subid, is_dirty, journalid, etypeid, arg1, ' .
                           'arg2, ntypeid, createtime, expiretime, flags FROM subs WHERE userid=?');
     $sth->execute($u->{userid});
@@ -1428,6 +1428,21 @@ sub subscriptions {
         push @subs, LJ::Subscription->new_from_row($row);
     }
     return @subs;
+}
+
+sub list_usejournals {
+    my $u = shift;
+
+    my @res;
+
+    my $ids = LJ::load_rel_target($u, 'P');
+    my $us = LJ::load_userids(@$ids);
+    foreach (values %$us) {
+        next unless $_->{'statusvis'} eq "V";
+        push @res, $_->{user};
+    }
+    @res = sort @res;
+    return \@res;
 }
 
 package LJ;
