@@ -2249,7 +2249,7 @@ sub remote_has_priv
 # $dom: 'L' == log, 'T' == talk, 'M' == modlog, 'S' == session,
 #       'R' == memory (remembrance), 'K' == keyword id,
 #       'P' == phone post, 'C' == pending comment
-#       'O' == portal box id, 'V' == 'vgift'
+#       'O' == portal box id, 'V' == 'vgift', 'E' == ESN subscription id
 #
 # FIXME: both phonepost and vgift are ljcom.  need hooks. but then also
 #        need a sepate namespace.  perhaps a separate function/table?
@@ -2260,7 +2260,7 @@ sub alloc_user_counter
 
     ##################################################################
     # IF YOU UPDATE THIS MAKE SURE YOU ADD INITIALIZATION CODE BELOW #
-    return undef unless $dom =~ /^[LTMPSRKCOV]$/;                     #
+    return undef unless $dom =~ /^[LTMPSRKCOVE]$/;                   #
     ##################################################################
 
     my $dbh = LJ::get_db_writer();
@@ -2362,6 +2362,9 @@ sub alloc_user_counter
                                       undef, $uid);
     } elsif ($dom eq "V") {
         $newmax = $u->selectrow_array("SELECT MAX(giftid) FROM vgifts WHERE userid=?",
+                                      undef, $uid);
+    } elsif ($dom eq "E") {
+        $newmax = $u->selectrow_array("SELECT MAX(subid) FROM subs WHERE userid=?",
                                       undef, $uid);
     } else {
         die "No user counter initializer defined for area '$dom'.\n";
