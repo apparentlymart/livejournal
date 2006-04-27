@@ -1421,7 +1421,8 @@ sub subscriptions {
     return LJ::Subscription->subscriptions_of_user($u);
 }
 
-sub list_usejournals {
+# What journals can this user post to?
+sub can_post_to {
     my $u = shift;
 
     my @res;
@@ -1430,10 +1431,10 @@ sub list_usejournals {
     my $us = LJ::load_userids(@$ids);
     foreach (values %$us) {
         next unless $_->{'statusvis'} eq "V";
-        push @res, $_->{user};
+        push @res, $_;
     }
-    @res = sort @res;
-    return \@res;
+
+    return sort @res;
 }
 
 package LJ;

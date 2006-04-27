@@ -2392,7 +2392,11 @@ sub list_friendgroups
 
 sub list_usejournals {
     my $u = shift;
-    return $u->list_usejournals;
+
+    my @us = $u->can_post_to;
+    my @unames = map { $_->{user} } @us;
+
+    return \@unames;
 }
 
 sub hash_menus

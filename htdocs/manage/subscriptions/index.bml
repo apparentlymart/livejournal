@@ -48,15 +48,8 @@ body<=
             my $title = $journal_info->{title} || 'User';
 
             if ($journal_info->{type} eq 'owner') {
-                my $can_sub = $u->list_usejournals;
-                push @$can_sub, $u->{user};
-                my @can_sub_list;
-
-                foreach my $journal (@$can_sub) {
-                    push @can_sub_list, ($journal, $journal);
-                }
-
-                $html .= "$title: " .  LJ::html_select({name => $name, id => $name}, @can_sub_list);
+                my @can_sub = map { ($_->{user}, $_->{user}) } $u->can_post_to;
+                $html .= "$title: " .  LJ::html_select({name => $name, id => $name}, @can_sub);
             } elsif ($journal_info->{type} eq 'any') {
                 $html .= "$title: " .  LJ::html_text({name => $name, id => $name});
             } else {
