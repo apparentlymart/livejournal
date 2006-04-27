@@ -2,6 +2,7 @@
 
  use strict;
  use vars qw(%POST %GET $head $title $body);
+ BML::decl_params(_default => qr/./);
 
  LJ::set_active_crumb('memories');
 

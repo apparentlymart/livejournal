@@ -2,6 +2,7 @@
 
  use strict;
  use vars qw(%GET %POST $title $body);
+ BML::decl_params(_default => qr/./);
 
  my $dbr = LJ::get_db_reader();
 
