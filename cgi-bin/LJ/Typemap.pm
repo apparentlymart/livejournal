@@ -74,10 +74,10 @@ sub class_to_typeid {
     my $idfield = $self->{idfield} or die "No id field";
 
     # try to insert
-    $dbh->do("INSERT IGNORE INTO $table ($classfield) VALUES (?)",
+    $dbh->do("INSERT INTO $table ($classfield) VALUES (?)",
              undef, $class);
 
-    if ($dbh->err) {
+    unless ($dbh->err) {
         # inserted fine, get ID
         $classid = $dbh->{'mysql_insertid'};
     } else {
