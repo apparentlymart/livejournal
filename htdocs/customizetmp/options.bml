@@ -18,8 +18,7 @@ body<=
                   'lj_form_auth'   => qr/./,);
 
     my $remote = LJ::get_remote();
-    return LJ::bad_input("You must be logged in to edit your display settings.")
-        unless $remote;
+    return "<?needlogin?>" unless $remote;
 
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $journal = $authas;

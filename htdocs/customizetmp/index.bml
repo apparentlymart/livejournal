@@ -26,8 +26,7 @@ body<=
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
     my $remote = LJ::get_remote();
-    return LJ::bad_input("You must be logged in to edit your display settings.")
-        unless $remote;
+    return "<?needlogin?>" unless $remote;
 
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);

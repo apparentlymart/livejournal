@@ -6,7 +6,7 @@ body<=
     use strict;
     use vars qw(%POST %GET);
 
-    LJ::need_res( 'stc/customize.css', 'js/core.js', 'js/dom.js', 'js/customize.js', 'js/colorpicker.js' );
+    LJ::need_res( 'stc/customize.css', 'js/core.js', 'js/dom.js', 'js/httpreq.js', 'js/customize.js', 'js/colorpicker.js' );
 
     my %params = (authas         => '.',
                   s1_themeid     => 'digits',
@@ -33,7 +33,7 @@ body<=
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
     my $remote = LJ::get_remote();
-    return LJ::bad_input("You must be logged in to edit your display settings.") unless $remote;
+    return "<?needlogin?>" unless $remote;
 
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);
@@ -61,7 +61,6 @@ body<=
             unless LJ::check_form_auth();
 
         my %update = ();
-        my $dbh = LJ::get_db_writer();
         if ($u->prop('stylesys') != 2) {
             ### Save color theme
             $update{'themeid'} = $POST{'s1_themetype'} eq "custom" ? 0 : $POST{'s1_themeid'};
@@ -82,6 +81,7 @@ body<=
                            Storable::freeze(\%cols), $u->{'userid'});
                     LJ::MemCache::delete([$u->{'userid'}, "s1uc:$u->{'userid'}"]);
 
+                    my $dbh = LJ::get_db_writer();
                     $dbh->do("DELETE FROM themecustom WHERE user=?", undef, $u->{'user'})
                         if $dbh->selectrow_array("SELECT user FROM themecustom ".
                                                  "WHERE user=? LIMIT 1", undef, $u->{'user'});
@@ -158,9 +158,7 @@ body<=
 
                 LJ::cmize::s2_implicit_style_create($u, %style);
 
-            }
-
-            if ($POST{'save:theme'}) {
+            } elsif ($POST{'save:theme'}) {
                 my $themeid = $POST{'s2_themeid'}+0;
 
                 my $lay = $pub->{$themeid};
@@ -171,9 +169,7 @@ body<=
 
                 LJ::cmize::s2_implicit_style_create($u, %style);
 
-            }
-
-            if ($POST{'save:langcode'}) {
+            } elsif ($POST{'save:langcode'}) {
                 my $langcode = $POST{'s2_langcode'};
                 return BML::redirect("/customize/?journal=$u->{'user'}")
                     if $langcode eq 'custom';
@@ -206,6 +202,64 @@ body<=
                 $style{'i18n'} = $i18n;
 
                 LJ::cmize::s2_implicit_style_create($u);
+            } else {
+                # Layout
+                my $layid = $POST{'s2_layoutid'};
+                my $lay = $pub->{$layid};
+                return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.disallowed_user_layer'} p?>"
+                    if ! $lay and $lay ||= $userlay->{$layid} and ! $has_cap;
+                return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.not_your_layout'} p?>"
+                    unless $lay && LJ::S2::can_use_layer($u, $lay->{'uniq'});
+
+                my $coreid = $lay->{'b2lid'};
+                return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.no_core_parent'} p?>"
+                    unless $coreid;
+
+                my $uniq = (split("/", $lay->{'uniq'}))[0] || $lay->{'s2lid'};
+                my $usersty = LJ::S2::load_user_styles($u);
+
+                # Theme
+                my $themeid = $POST{'s2_themeid'}+0;
+
+                my $lay = $pub->{$themeid};
+                return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.disallowed_theme_layer'} p?>"
+                    if ! $lay and $lay ||= $userlay->{$themeid} and ! $has_cap;
+                return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.not_your_theme'} p?>" if $themeid && ! $lay;
+                $style{'theme'} = $themeid;
+
+                # Language
+                my $langcode = $POST{'s2_langcode'};
+                return BML::redirect("/customize/style.bml?authas=$u->{'user'}")
+                    if $langcode eq 'custom';
+                my @langs = LJ::S2::get_layout_langs($pub, $style{'layout'});
+                my ($i18n, $i18nc);
+                # scan for an i18n user layer
+                foreach (values %$userlay) {
+                    last if
+                        $_->{'b2lid'} == $style{'layout'} &&
+                        $_->{'type'} eq 'i18n' &&
+                        $_->{'langcode'} eq $langcode &&
+                        ($i18n = $_->{'s2lid'});
+                }
+                # scan for i18nc public layer and i18n layer if necessary
+                foreach (values %$pub) {
+                    last if $i18nc && $i18n;
+                    next if
+                        ! $i18nc &&
+                        $_->{'type'} eq 'i18nc' &&
+                        $_->{'langcode'} eq $langcode &&
+                        ($i18nc = $_->{'s2lid'});
+                    next if
+                        ! $i18n &&
+                        $_->{'b2lid'} == $style{'layout'} &&
+                        $_->{'type'} eq 'i18n' &&
+                        $_->{'langcode'} eq $langcode &&
+                        ($i18n = $_->{'s2lid'});
+                }
+                $style{'i18nc'} = $i18nc;
+                $style{'i18n'} = $i18n;
+
+                LJ::cmize::s2_implicit_style_create($u, %style);
             }
             $saved_msg = "Your settings have been saved. Link and Link";
         }
@@ -320,13 +374,37 @@ body<=
         # add user/disabled ones
         push @layouts, LJ::cmize::s2_custom_layer_list($u, 'layout', 'core');
 
-        $ret .= "<fieldset><legend>Layout</legend>";
+        $ret .= "<fieldset><legend>Layout &amp; Language</legend>";
         $ret .= "<div style='border-right: 1px solid #ccc;'><?p Your layout will determine your theme options. p?>";
         $ret .= "<div style='margin-left: 30px; margin-bottom: 20px;'>";
-        $ret .= LJ::html_select({ 'name' => 's2_layoutid', 'selected' => $style{'layout'},  }, @layouts);
-        $ret .= " <input type='submit' name='save:layout' value='$ML{'.change'}'> ";
-        $ret .= "(<a href=\"/customize/preview.bml?journal=$u->{'user'}\" target='samples'>Samples</a>)</div></div>";
-        $ret .= "</fieldset>";
+        $ret .= LJ::html_select({ 'id' => "s2_layoutid", 'name' => 's2_layoutid', 'selected' => $style{'layout'},  }, @layouts);
+        $ret .= "<noscript> " . LJ::html_submit('save:layout', $ML{'.change'}) . " </noscript>";
+        $ret .= " (<a href=\"/customize/preview.bml?journal=$u->{'user'}\" target='samples'>Samples</a>)</div></div>";
+
+        my @langs = LJ::S2::get_layout_langs($pub, $style{'layout'});
+        my $get_lang = sub {
+            my $styleid = shift;
+            foreach ($userlay, $pub) {
+                return $_->{$styleid}->{'langcode'} if
+                    $_->{$styleid} && $_->{$styleid}->{'langcode'};
+            }
+            return undef;
+        };
+
+        my $langcode = $get_lang->($style{'i18n'}) || $get_lang->($style{'i18nc'});
+        # they have set a custom i18n layer
+        if ($style{'i18n'} &&
+            ($style{'i18nc'} != $style{'i18n'} || ! defined $pub->{$style{'i18n'}})) {
+            push @langs, 'custom', $ML{'.s2.customize.language.custom'};
+            $langcode = 'custom';
+        }
+
+        $ret .= "<?p This setting only affects layout provided text. Your entries will not be automatically translated. p?>";
+        $ret .= "<div style='margin-left: 30px; margin-bottom: 20px;'>";
+        $ret .= LJ::html_select({ 'id' => "s2_langcode", 'name' => 's2_langcode', 'selected' => $langcode, },
+                                0 => $ML{'.s2.customize.language.default'}, @langs);
+        $ret .= "<noscript> " . LJ::html_submit('save:langcode', $ML{'.change'}) . " </noscript>";
+        $ret .= "</div></fieldset>";
 
         my @themes = LJ::S2::get_layout_themes_select([$pub], $style{'layout'});
 
@@ -336,9 +414,9 @@ body<=
         $ret .= "<fieldset><legend>Themes</legend>";
         $ret .= "<div style='border-right: 1px solid #ccc'><?p Your theme consists of colors, fonts, and various presentation options. p?>";
         $ret .= "<div style='margin-left: 30px; margin-bottom: 20px;'>";
-        $ret .= LJ::html_select({ 'name' => 's2_themeid', 'selected' => $style{'theme'}, },
+        $ret .= LJ::html_select({ 'id' => 's2_themeid', 'name' => 's2_themeid', 'selected' => $style{'theme'}, },
                                 '0' => $ML{'.s2.customize.themes.default'}, @themes);
-        $ret .= " <input type='submit' name='save:theme' value='$ML{'.change'}'> ";
+        $ret .= "<noscript> " . LJ::html_submit('save:theme', $ML{'.change'}) . " </noscript>";
         $ret .= "(<a href=\"/customize/themes.bml?journal=$u->{'user'}\" target='samples'>Samples</a>)</div></div>";
         $ret .= "</fieldset>";
     }
@@ -359,40 +437,6 @@ body<=
                                         'id' => 'opt_forcemoodtheme',
                                         'selected' => $u->{'opt_forcemoodtheme'} eq 'Y' }) . "\n";
     $ret .= "<label for='opt_forcemoodtheme'>View this mood theme on all of your friends' posts</label></div></div></fieldset>";
-
-    if ($u->prop("stylesys") == 2) {
-        # langauge
-        my @langs = LJ::S2::get_layout_langs($pub, $style{'layout'});
-        my $get_lang = sub {
-            my $styleid = shift;
-            foreach ($userlay, $pub) {
-                return $_->{$styleid}->{'langcode'} if
-                    $_->{$styleid} && $_->{$styleid}->{'langcode'};
-            }
-            return undef;
-        };
-
-        my $langcode = $get_lang->($style{'i18n'}) || $get_lang->($style{'i18nc'});
-        # they have set a custom i18n layer
-        if ($style{'i18n'} &&
-            ($style{'i18nc'} != $style{'i18n'} || ! defined $pub->{$style{'i18n'}})) {
-            push @langs, 'custom', $ML{'.s2.customize.language.custom'};
-            $langcode = 'custom';
-        }
-
-        # langauge
-        my @langs = LJ::S2::get_layout_langs($pub, $style{'layout'});
-
-        $ret .= "<fieldset><legend>Language</legend>";
-        $ret .= "<?p This setting only affects layout provided text. Your entries will not be automatically translated. p?>";
-        $ret .= "<div style='margin-left: 30px; margin-bottom: 20px;'>";
-        $ret .= LJ::html_select({ 'name' => 's2_langcode',
-                                  'selected' => $langcode, },
-                                0 => $ML{'.s2.customize.language.default'},
-                                @langs);
-        $ret .= " <input type='submit' name='save:langcode' value='$ML{'.change'}'>";
-        $ret .= " </div></fieldset>";
-    }
 
     $ret .= LJ::cmize::html_save();
     $ret .= "</form></div>";

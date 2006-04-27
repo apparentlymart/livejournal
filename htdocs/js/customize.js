@@ -8,10 +8,24 @@
                  save the contents of the current tab
 
 */
+var form_changed = false;
+
+function form_change () {
+    if (form_changed == true) { return; }
+    form_changed = true;
+}
 
 function tabclick_save() {
     $("action:redir").value = this.id;
-    $("display_form").submit();
+    var confirmed = false;
+    if (form_changed == false) {
+        confirmed = true;
+    } else {
+        confirmed = confirm("Save your settings?");
+    }
+    if (confirmed) {
+        $("display_form").submit();
+    }
     return false;
 }
 
@@ -40,23 +54,68 @@ function s1_customcolors_toggle() {
     }
 }
 
+function populate_form_select(selectid, options) {
+    $(selectid).options.length = 0;
+    for(i = 0; i < options.length; i+=2) {
+        $(selectid).options[i/2] = new Option(options[i+1],options[i]);
+    }
+}
+
+function s2_layout_update_children() {
+    $('display_form').style.cursor = "wait";
+    var authas = $('authas:user').value;
+    var s2_layoutid = $('s2_layoutid').options[$('s2_layoutid').options.selectedIndex].value;
+    HTTPReq.getJSON({
+           url: "/tools/endpoints/gets2layoutchildren.bml?user=" + authas + "&s2_layoutid=" + s2_layoutid,
+           onData: function (data) {
+             populate_form_select('s2_themeid', data.themes);
+             populate_form_select('s2_langcode', data.langs);
+             $('display_form').style.cursor = "auto";
+           },
+           onError: function (msg) { alert(msg); },
+    });
+}
+
 function customize_init() {
+    /* Capture onclicks on the tab links to confirm form saving */
     var links = $('Tabs').getElementsByTagName('a');
     for (var i = 0; i < links.length; i++) {
         if (links[i].href != "") {
             DOM.addEventListener(links[i], "click", tabclick_save.bindEventListener(links[i]));
         }
     }
+
+    /* Register all form changes to confirm them later */
+    var selects = $('display_form').getElementsByTagName('select');
+    for (var i = 0; i < selects.length; i++) {
+        DOM.addEventListener(selects[i], "change", form_change);
+    }
+    var inputs = $('display_form').getElementsByTagName('input');
+    for (var i = 0; i < inputs.length; i++) {
+        DOM.addEventListener(inputs[i], "change", form_change);
+    }
+    var textareas = $('display_form').getElementsByTagName('textarea');
+    for (var i = 0; i < textareas.length; i++) {
+        DOM.addEventListener(textareas[i], "change", form_change);
+    }
+
+    /* Hide/show the custom colors for S1 */
     var s1_customcolors = $("s1_customcolors");
     if (s1_customcolors) {
         s1_customcolors_toggle();
         DOM.addEventListener($("themetype:custom"), "change", s1_customcolors_toggle);
         DOM.addEventListener($("themetype:system"), "change", s1_customcolors_toggle);
     }
+    /* Hide/show the comment options */
     var opt_showtalklinks = $("opt_showtalklinks");
     if (opt_showtalklinks) {
         comment_options_toggle();
         DOM.addEventListener(opt_showtalklinks, "change", comment_options_toggle);
+    }
+    /* Update the S2 themes and languages for the selected layout */
+    var s2_layoutid = $("s2_layoutid");
+    if (s2_layoutid) {
+        DOM.addEventListener(s2_layoutid, "change", s2_layout_update_children);
     }
 }
 DOM.addEventListener(window, "load", customize_init);
