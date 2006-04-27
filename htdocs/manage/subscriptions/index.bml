@@ -1,3 +1,5 @@
+<?page
+body<=
 <?_code
 {
     use strict;
@@ -84,55 +86,42 @@
     my $formauth = LJ::form_auth();
 
     if (LJ::did_post()) {
-        unless (LJ::check_form_auth()) {
-            $body = LJ::error_list(BML::ml('error.invalidform'));
-            return;
-        }
+        return LJ::error_list(BML::ml('error.invalidform')) unless LJ::check_form_auth();
 
         if ($POST{mode} eq 'addsub') {
-            unless (defined $POST{etypeid}) {
-                $body = LJ::bad_input('Event not specified');
-                return;
-            }
-            unless (defined $POST{ntypeid}) {
-                $body = LJ::bad_input('Notification not specified');
-                return;
-            }
+            return LJ::bad_input('Event not specified') unless defined $POST{etypeid};
+            return LJ::bad_input('Notification not specified') unless defined $POST{ntypeid};
 
             my $ntypeid = int($POST{ntypeid});
             my $etypeid = int($POST{etypeid});
 
-            unless (defined $POST{"journal$etypeid"}) {
-                $body = LJ::bad_input('User not specified');
-                return;
-            }
+            return LJ::bad_input('User not specified') unless defined $POST{"journal$etypeid"};
 
             my $arg1 = int($POST{"argOpts1$etypeid"});
             my $arg2 = int($POST{"argOpts2$etypeid"});
 
             my $journal = $POST{"journal$etypeid"};
             my $ju = LJ::load_user($journal);
-            unless ($ju) {
-                $body .= LJ::error_list("No such user $journal");
-            } else {
-                my $journalid = $ju->{userid};
 
-                # create a new subscription
-                LJ::Subscription->create($u, {
-                    ntypeid   => $ntypeid,
-                    etypeid   => $etypeid,
-                    arg1      => $arg1,
-                    arg2      => $arg2,
-                    journalid => $journalid,
-                    });
-            }
+            return LJ::error_list("No such user $journal") unless $ju;
+
+            my $journalid = $ju->{userid};
+
+            # create a new subscription
+            LJ::Subscription->create($u, {
+                ntypeid   => $ntypeid,
+                etypeid   => $etypeid,
+                arg1      => $arg1,
+                arg2      => $arg2,
+                journalid => $journalid,
+            });
         }
     }
 
     if ($GET{'mode'} eq "modify" && $GET{'id'} ne "") {
         my $id = $GET{'id'} + 0;
-        my $subsc = $u->load_subscription($id);
-        unless ($subsc) { $body .= "Invalido subscription"; return; }
+        my $subsc = LJ::Subscription->new_by_id($u, $id);
+        return "Invalid subscription" unless $subsc;
 
         $body .= "<form method='POST' action='./'>";
         $body .= $formauth;
@@ -147,7 +136,7 @@
         $body .= "<form method='POST' action='./'>";
 
         my @event_classes = LJ::Event->all_classes;
-        unless (@event_classes) { $body .= "No events!"; return; }
+        return "No events" unless @event_classes;
 
         my $jsfields = '';
         my @event_options;
@@ -166,7 +155,7 @@
         $headextra .= "<script>initEsn([" . join(",", @etypeids) . "]);</script>";
 
         my @notify_classes = LJ::NotificationMethod->all_classes;
-        unless (@notify_classes) { $body .= "No notification methods!"; return; }
+        return "No notification methods!" unless @notify_classes;
 
         my @note_options;
         foreach my $note_class (@notify_classes) {
@@ -191,37 +180,42 @@
 
         $body .= "<fieldset><legend>Subscriptions</legend>";
         my @subscriptions = $u->subscriptions;
-        unless (@subscriptions) { $body .= "<?de No subscriptions de?>"; return; }
 
-        $body .= "<?p Below are the current subscriptions for " . LJ::ljuser($authas) . " p?>";
-        $body .= "<table cellspacing='0' cellpadding='0' id='Subscriptions'>";
-        $body .= "<tr><th></th><th>Event</th><th>Expires</th><th>Notification Type</th></tr>";
-        my $row = 1;
-        foreach my $subsc ( sort {$a->id <=> $b->id } @subscriptions ) {
-            my $class = $row % 2 ? "lighter" : "darker";
-            $body .= "<tr class='$class'>";
-            $body .= "<td><a href='./index.bml?mode=modify&id=" . $subsc->id . "'>" . $subsc->id . "</a></td>";
-            $body .= "<td>" . $subsc->event->title . "</td>";
-            if ($subsc->expiretime) {
-                $body .= "<td>" . LJ::time_to_http($subsc->expiretime) . "</td>";
-            } else {
-                $body .= "<td>Never</td>";
+        my $subs_html = '';
+
+        unless (@subscriptions) {
+            $subs_html = "<?de No subscriptions de?>";
+        } else {
+            $subs_html .= "<?p Below are the current subscriptions for " . LJ::ljuser($authas) . " p?>";
+            $subs_html .= "<table cellspacing='0' cellpadding='0' id='Subscriptions'>";
+            $subs_html .= "<tr><th></th><th>Event</th><th>Expires</th><th>Notification Type</th></tr>";
+            my $row = 1;
+            foreach my $subsc ( sort {$a->id <=> $b->id } @subscriptions ) {
+                my $class = $row % 2 ? "lighter" : "darker";
+                $subs_html .= "<tr class='$class'>";
+                $subs_html .= "<td><a href='./index.bml?mode=modify&id=" . $subsc->id . "'>" . $subsc->id . "</a></td>";
+                $subs_html .= "<td>" . $subsc->event->title . "</td>";
+                if ($subsc->expiretime) {
+                    $subs_html .= "<td>" . LJ::time_to_http($subsc->expiretime) . "</td>";
+                } else {
+                    $subs_html .= "<td>Never</td>";
+                }
+
+                # Load the NotificationMethod object for this subscription
+                my $note = LJ::NotificationMethod->new_from_subscription($subsc);
+
+                $subs_html .= "<td>" . $note->title . "</td>";
+                $subs_html .= "</tr>";
+                $row++;
             }
-
-            # Load the NotificationMethod object for this subscription
-            my $note = LJ::NotificationMethod->new_from_subscription($subsc);
-
-            $body .= "<td>" . $note->title . "</td>";
-            $body .= "</tr>";
-            $row++;
         }
-        $body .= "</table></fieldset>";
+
+        $body .= "$subs_html</table></fieldset>";
     }
-    return;
+    return $body;
 }
 _code?>
-<?page
-body=> <?_code return $body;  _code?>
+<=body
 title=><?_code return $title; _code?>
 head<=
 <style type='text/css'>
