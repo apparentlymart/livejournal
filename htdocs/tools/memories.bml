@@ -132,7 +132,7 @@
      $title = $ML{'.delete.deleted.title'};
      $body = "<?h1 $ML{'.delete.deleted.head'} h1?><?p ";
      $body .= BML::ml('.delete.deleted.text', { aopts => "href='./memories.bml?user=$authasu->{user}'" }) . " p?>";
-     return; 
+     return;
  }
 
  my %filters = ("all" => $ML{'.filter.all'},
@@ -199,13 +199,13 @@
      foreach (keys %$kwmap) {
          $key_id = $_ if $kwmap->{$_} eq $GET{keyword};
      }
-     my $memoryhash = LJ::Memories::get_by_keyword($u, $key_id, 
+     my $memoryhash = LJ::Memories::get_by_keyword($u, $key_id,
              { security => $securities, filter => $filter });
      return $dberr->() unless defined $memoryhash;
      my @jids = map { $_->{journalid} } values %$memoryhash;
      my $us = LJ::load_userids(@jids);
      my @memories = $sortfunc{$sort}->( values %$memoryhash );
-    
+
      $body .= "<form method='post' action='./memories.bml?user=$user$authasarge'>\n" . LJ::form_auth()
          if $is_owner && $GET{multidelete};
      $body .= "<ul>\n";
@@ -241,7 +241,7 @@
      }
      $body .= "</ul>";
      if ($is_owner && $GET{multidelete}) {
-         $body .= LJ::html_submit(undef, $ML{'.delete'}, 
+         $body .= LJ::html_submit(undef, $ML{'.delete'},
                                   { onclick => "return confirm('" . LJ::ejs($ML{'.delete.confirm'}) . "')" });
          $body .= "</form>\n";
      }
