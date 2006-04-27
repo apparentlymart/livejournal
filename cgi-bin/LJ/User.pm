@@ -492,9 +492,11 @@ sub note_transition {
     my $dbh = LJ::get_db_writer()
         or die "unable to contact global db master";
 
-    # robust, etc etc;
+    # bleh, need backticks on the 'before' and 'after' columns since those
+    # are MySQL reserved words
     $dbh->do("INSERT INTO usertrans " .
-             "SET userid=?, time=UNIX_TIMESTAMP(), what=?, before=?, after=?",
+             "SET userid=?, time=UNIX_TIMESTAMP(), what=?, " .
+             "`before`=?, `after`=?",
              undef, $u->{userid}, $what, $from, $to);
     die $dbh->errstr if $dbh->err;
 
@@ -510,7 +512,7 @@ sub transition_list {
 
     # FIXME: return list of transition object singleton instances?
     my @list = ();
-    my $sth = $dbh->prepare("SELECT time, before, after " .
+    my $sth = $dbh->prepare("SELECT time, `before`, `after` " .
                             "FROM usertrans WHERE userid=? AND what=?");
     $sth->execute($u->{userid}, $what);
     die $dbh->errstr if $dbh->err;
