@@ -1436,7 +1436,7 @@ sub can_post_to {
         push @res, $_;
     }
 
-    return sort @res;
+    return sort { $a->{user} cmp $b->{user} } @res;
 }
 
 package LJ;
