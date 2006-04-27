@@ -38,38 +38,63 @@ body<=
         my $html = '';
         my $etypeid = $class->etypeid;
 
-        my ($journal_info, $arg1_info, $arg2_info) = $class->sub_info;
-        return '' unless $journal_info;
+        my $journal_title = $class->journal_sub_title;
+        my $journal_type = $class->journal_sub_type;
 
-        {
+        if ($journal_title && $journal_type) {
             my $name = "journal$etypeid";
-            my $title = $journal_info->{title} || 'User';
+            $journal_title ||= 'User';
 
-            if ($journal_info->{type} eq 'owner') {
+            if ($journal_type eq 'owner') {
                 my @can_sub = map { ($_->{user}, $_->{user}) } $u->can_post_to;
                 push @can_sub, ($u->{user}, $u->{user});
-                $html .= "$title: " .  LJ::html_select({name => $name, id => $name}, @can_sub);
-            } elsif ($journal_info->{type} eq 'any') {
-                $html .= "$title: " .  LJ::html_text({name => $name, id => $name});
+                $html .= "$journal_title: " .  LJ::html_select({name => $name, id => $name}, @can_sub);
+            } elsif ($journal_type eq 'mutual_friend') {
+                my @mutual;
+                my $friends = LJ::get_friends($u);
+                foreach my $userid (keys %$friends) {
+                    next if $userid == $u->{userid};
+
+                    push @mutual, $userid
+                        if LJ::is_friend($userid, $u);
+                }
+
+                my $loaded = LJ::load_userids(@mutual);
+                @mutual = ();
+                foreach (values %$loaded) {
+                    next if $_->{statusvis} ne 'V';
+                    push @mutual, ($_->{user}, $_->{user})
+                        if $_->{journaltype} eq 'P';
+                }
+                $html .= "$journal_title: " .  LJ::html_select({name => $name, id => $name}, @mutual);
+            } elsif ($journal_type eq 'any') {
+                $html .= "$journal_title: " .  LJ::html_text({name => $name, id => $name});
             } else {
-                croak "Invalid sub_info type '$journal_info->{type}' for $class";
+                $html .= "[Invalid sub_info type '$journal_type' for $class]";
             }
         }
 
-        my $index = 1;
+        my $arg_config = sub {
+            my ($argnum, $title, $type) = @_;
 
-        foreach my $arg ($arg1_info, $arg2_info) {
-            next unless $arg and ref $arg;
-            my $type = $arg->{type} or next;
+            return '' unless $title && $type;
 
-            my $title = $arg->{title} || '';
-            my $name = "argOpts$index$etypeid";
+            my $name = "argOpts$argnum$etypeid";
 
             if ($type eq 'user' or $type eq 'number') {
-                $html .= "$title: " .  LJ::html_text({name => $name, id => $name});
+                return "$title: " .  LJ::html_text({name => $name, id => $name});
             }
-            $index++;
-        }
+
+            return '[Invalid arg type]';
+        };
+
+        my $arg1_title = $class->arg1_sub_title;
+        my $arg1_type = $class->arg1_sub_type;
+        my $arg2_title = $class->arg2_sub_title;
+        my $arg2_type = $class->arg2_sub_type;
+
+        $html .= $arg_config->(1, $arg1_title, $arg1_type);
+        $html .= $arg_config->(2, $arg2_title, $arg2_type);
 
         return $html;
     };

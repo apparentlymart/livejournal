@@ -42,13 +42,7 @@ sub title {
     return 'New Entry by User';
 }
 
-sub sub_info {
-    return (
-            {
-                type => 'any',
-                title => 'User',
-            }
-            );
-}
+sub journal_sub_title { 'Journal' }
+sub journal_sub_type  { 'mutual_friend' }
 
 1;

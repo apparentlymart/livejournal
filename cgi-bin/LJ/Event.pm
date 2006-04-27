@@ -79,10 +79,12 @@ sub as_sms {
     return substr($str, 0, 157) . "...";
 }
 
-# array of info for journalid, arg1, arg2 info
-sub sub_info {
-    return ();
-}
+sub journal_sub_title { undef }
+sub journal_sub_type  { undef }
+sub arg1_sub_title    { undef }
+sub arg1_sub_type     { undef }
+sub arg2_sub_title    { undef }
+sub arg2_sub_type     { undef }
 
 
 ############################################################################

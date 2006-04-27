@@ -18,13 +18,7 @@ sub title {
     return 'User Left a Comment';
 }
 
-sub sub_info {
-    return (
-            {
-                type => 'any',
-                title => 'User',
-            }
-            );
-}
+sub journal_sub_title { 'Journal' }
+sub journal_sub_type  { 'mutual_friend' }
 
 1;

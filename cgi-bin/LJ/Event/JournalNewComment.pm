@@ -17,13 +17,7 @@ sub title {
     return 'New Comment on Journal';
 }
 
-sub sub_info {
-    return (
-            {
-                type => 'any',
-                title => 'Journal',
-            }
-            );
-}
+sub journal_sub_title { 'Journal' }
+sub journal_sub_type  { 'owner' }
 
 1;

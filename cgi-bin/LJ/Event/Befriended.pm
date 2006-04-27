@@ -32,13 +32,7 @@ sub title {
     return 'Friend Added';
 }
 
-sub sub_info {
-    return (
-            {
-                type => 'owner',
-                title => 'When this journal is befriended',
-            }
-            );
-}
+sub journal_sub_title { 'User' }
+sub journal_sub_type  { 'owner' }
 
 1;
