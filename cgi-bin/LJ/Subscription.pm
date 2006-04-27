@@ -17,7 +17,7 @@ sub new_by_id {
     my $row = $u->selectrow_hashref
         ("SELECT userid, subid, is_dirty, journalid, etypeid, " .
          "arg1, arg2, ntypeid, createtime, expiretime, flags " .
-         "FROM subs WHERE userid=?", undef $u->{userid}, $subid);
+         "FROM subs WHERE userid=? AND subid=?", undef, $u->{userid}, $subid);
     die $u->errstr if $u->err;
 
     return $class->new_from_row($row);
