@@ -32,8 +32,6 @@ body<=
     return LJ::bad_input("You could not be authenticated as the specified user.")
         unless $u;
 
-
-    # class method
     my $arg_opts_as_html = sub {
         my ($class) = @_;
 
@@ -49,6 +47,7 @@ body<=
 
             if ($journal_info->{type} eq 'owner') {
                 my @can_sub = map { ($_->{user}, $_->{user}) } $u->can_post_to;
+                push @can_sub, ($u->{user}, $u->{user});
                 $html .= "$title: " .  LJ::html_select({name => $name, id => $name}, @can_sub);
             } elsif ($journal_info->{type} eq 'any') {
                 $html .= "$title: " .  LJ::html_text({name => $name, id => $name});
