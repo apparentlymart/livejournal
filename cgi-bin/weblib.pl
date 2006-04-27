@@ -1986,7 +1986,9 @@ sub ads {
 
         my $adhtml;
         $adhtml .= "<div class=\"ljad ljad$adcall{adunit}\" id=\"\">";
-        $adhtml .= "<h4 style='margin-bottom: 2px'>Advertisement</h4>";
+
+        my $label = $pagetype eq 'Journal-5LinkUnit' ? 'Sponsored Search Links' : 'Advertisement';
+        $adhtml .= "<h4 style='margin-bottom: 2px'>$label</h4>";
 
         # Iframe with call to ad targetting server
         $adhtml .= "<iframe src='${LJ::ADSERVER}?$adparams' frameborder='0' scrolling='no' id='adframe' ";
