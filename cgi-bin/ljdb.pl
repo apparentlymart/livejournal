@@ -54,6 +54,47 @@ sub root_dbh_by_name {
     return $LJ::DBIRole->get_dbh_conn($fdsn);
 }
 
+sub backup_in_progress {
+    my $name = shift;
+    my $dbh = dbh_by_role("master")
+        or die "Couldn't contact master to find name of '$name'";
+
+    # return 0 if this a/b is the active side, as wecan't ever have a backup of active side in progress
+    my ($cid, $is_a_or_b) = user_cluster_details($name);
+    if ($cid) {
+        my $active_ab = $LJ::CLUSTER_PAIR_ACTIVE{$cid} or
+            die "Neither 'a' nor 'b' is active for clusterid $cid?\n";
+        die "Bogus active side" unless $active_ab =~ /^[ab]$/;
+
+        # can't have a backup in progress for an active a/b side.  short-circuit
+        # and don't even ask the database, as it might lie if the process
+        # was killed or something
+        return 0 if $active_ab eq $is_a_or_b;
+    }
+
+    my $fdsn = $dbh->selectrow_array("SELECT rootfdsn FROM dbinfo WHERE name=?", undef, $name);
+    die "No rootfdsn found for db name '$name'\n" unless $fdsn;
+    $fdsn =~ /\bhost=([\w\.\-]+)/ or die "Can't find host for database '$name'";
+    my $host = $1;
+
+    eval "use IO::Socket::INET; 1;" or die;
+    my $sock = IO::Socket::INET->new(PeerAddr => "$host:7602")  or return 0;
+    print $sock "is_backup_in_progress\r\n";
+    my $answer = <$sock>;
+    chomp $answer;
+    return $answer eq "1";
+}
+
+sub user_cluster_details {
+    my $name = shift;
+    my $dbh = dbh_by_role("master") or die;
+
+    my $role = $dbh->selectrow_array("SELECT role FROM dbweights w, dbinfo i WHERE i.name=? AND i.dbid=w.dbid",
+                                     undef, $name);
+    return () unless $role && $role =~ /^cluster(\d+)([ab])$/;
+    return ($1, $2);
+}
+
 package LJ;
 
 sub no_cache {
