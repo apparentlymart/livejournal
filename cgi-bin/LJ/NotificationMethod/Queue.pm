@@ -3,6 +3,7 @@ package LJ::NotificationMethod::Queue;
 use strict;
 use Carp qw/ croak /;
 use base 'LJ::NotificationMethod';
+use Class::Autouse qw(LJ::NotificationQueue);
 
 sub can_digest { 1 };
 
@@ -67,27 +68,16 @@ sub notify {
     croak "'notify' requires one or more events"
         unless @events;
 
+    my $q = LJ::NotificationQueue->new($u)
+        or die "Could not get notification queue for user $u->{user}";
+
     foreach my $ev (@events) {
         croak "invalid event passed" unless ref $ev;
 
-        # get a qid
-        my $qid = LJ::alloc_user_counter($u, 'Q')
-            or die "Could not alloc new queue ID";
-
-        my %item = (qid       => $qid,
-                    userid    => $u->{userid},
+        $q->enqueue(
+                    event => $ev,
                     journalid => $self->{journalid},
-                    etypeid   => $ev->etypeid,
-                    arg1      => $ev->arg1,
-                    arg2      => $ev->arg2,
-                    state     => 'N',
-                    createtime=> time());
-
-
-        # insert this event into the eventqueue table
-        $u->do("INSERT INTO notifyqueue (" . join(",", keys %item) . ") VALUES (" .
-               join(",", map { '?' } values %item) . ")", undef, values %item)
-            or die $u->errstr;
+                    );
     }
 }
 

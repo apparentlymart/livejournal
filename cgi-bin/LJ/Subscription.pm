@@ -57,6 +57,11 @@ sub create {
     my $subid = LJ::alloc_user_counter($u, 'E')
         or die "Could not alloc subid for user $u->{user}";
 
+    # make sure required params are here
+    for ('ntypeid', 'etypeid', 'arg1', 'arg2', 'journalid') {
+        croak "Required field '$_' not found in call to $class->create" unless $info{$_};
+    }
+
     $info{subid}      = $subid;
     $info{userid}     = $u->{userid};
     $info{createtime} = time();
