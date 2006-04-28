@@ -139,6 +139,10 @@ add_conf('$DEFAULT_CLUSTER',
          des => "Integer of a user cluster number or arrayref of cluster numbers, for where new users are assigned after account creation.  In the case of an arrayref, you can weight one particular cluster over another by place it in the arrayref more often.  For instance, [1, 2, 2, 2] would make users go onto cluster #2 75% of the time, and cluster #1 25% of the time.",
          );
 
+add_conf('$DEFAULT_EDITOR',
+         des => 'Editor for new entries if the user hasn\'t overridden it.  Should be \'rich\' or \'plain\'.';
+         );
+
 add_conf('$DEFAULT_LANG',
          required => 0,
          des => "Default language (code) to show site in, for users that haven't set their langauge.  Defaults to the first item in \@LANGS, which is usually \"en\", for English.",
