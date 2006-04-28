@@ -37,13 +37,21 @@ sub run_tests {
         ok($q, "Got queue");
     }
 
-    # create an event to enqueue
+    # create an event to enqueue and enqueue it
     {
-        $evt = LJ::Event::ForTest->new($u, 69, 42, 666);
+        $evt = LJ::Event::ForTest->new($u, 42, 666);
         ok($evt, "Made event");
         # enqueue this event
         $qid = $q->enqueue(event => $evt);
         ok($qid, "Enqueued event");
+    }
+
+    # check the queued events and make sure we get what we put in
+    {
+        $events = $q->notifications;
+        ok($events, "Got notifications list");
+        ok((scalar keys %$events) == 1, "Got one notification");
+        is_deeply((values %$events), $evt, "Event is same");
     }
 
     # delete this from the queue
@@ -63,10 +71,8 @@ memcache_stress {
 package LJ::Event::ForTest;
 use base 'LJ::Event';
 sub new {
-    my ($class, $u, $journalid, $arg1, $arg2) = @_;
+    my ($class, $u, $arg1, $arg2) = @_;
     my $self = $class->SUPER::new($u, $arg1, $arg2);
-
-    $self->{journalid} = $journalid;
 
     return $self;
 }

@@ -110,21 +110,12 @@ sub delete_from_queue {
 }
 
 # This will enqueue an event object
-# NOTE: This needs a journalid!
-# Either the event must know its journalid
-# or you must explicitly pass one in!
 # Returns the queue id
 sub enqueue {
     my ($self, %opts) = @_;
 
     my $evt = delete $opts{event};
     croak "No event" unless $evt;
-
-    my $journalid = $evt->{journalid} || $opts{journalid}
-    or die "No journalid passed to enqueue";
-
-    delete $opts{journalid};
-
     croak "Extra args passed to enqueue" if %opts;
 
     my $u = $self->u or die "No user";
@@ -135,18 +126,19 @@ sub enqueue {
 
     my %item = (qid        => $qid,
                 userid     => $u->{userid},
-                journalid  => $journalid,
+                journalid  => $evt->u->{userid},
                 etypeid    => $evt->etypeid,
                 arg1       => $evt->arg1,
                 arg2       => $evt->arg2,
                 state      => 'N',
                 createtime => time());
 
-
     # insert this event into the eventqueue table
     $u->do("INSERT INTO notifyqueue (" . join(",", keys %item) . ") VALUES (" .
            join(",", map { '?' } values %item) . ")", undef, values %item)
         or die $u->errstr;
+
+    $self->{events}->{$qid} = $evt;
 
     return $qid;
 }

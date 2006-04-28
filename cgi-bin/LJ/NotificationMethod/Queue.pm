@@ -74,10 +74,7 @@ sub notify {
     foreach my $ev (@events) {
         croak "invalid event passed" unless ref $ev;
 
-        $q->enqueue(
-                    event => $ev,
-                    journalid => $self->{journalid},
-                    );
+        $q->enqueue(event => $ev);
     }
 }
 
