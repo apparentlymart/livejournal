@@ -9,6 +9,10 @@ sub can_digest { 1 };
 # positional parameters: ->new($u, $event1, $event2, ...)
 sub new {
     my $class = shift;
+
+    croak "no args passed"
+        unless @_;
+
     my $u = shift;
     croak "invalid user object passed"
         unless LJ::isu($u);

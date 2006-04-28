@@ -61,12 +61,9 @@ my $valid_meth = sub {
     $valid_meth->();
 
     $meth = eval { LJ::NotificationMethod::Email->new() };
-    like($@, qr/invalid user/, "empty list passed to constructor");
+    like($@, qr/no args/, "no args passed to constructor");
 
-    $meth = eval { LJ::NotificationMethod::Email->new() };
-    like($@, qr/invalid user/, "undef passed to constructor");
-
-    $meth = eval { LJ::NotificationMethod::Email->new() };
+    $meth = eval { LJ::NotificationMethod::Email->new({user => 'ugly'}) };
     like($@, qr/invalid user/, "non-user passed to constructor");
 
     # test valid case
