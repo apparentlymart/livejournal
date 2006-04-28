@@ -485,8 +485,8 @@ sub note_transition {
     # the last noted one for this user... in that case there has been
     # no transition at all
     my $last = $u->last_transition($what);
-    return 1 if 
-        $last->{from} eq $from && 
+    return 1 if
+        $last->{from} eq $from &&
         $last->{to}   eq $to;
 
     my $dbh = LJ::get_db_writer()
@@ -519,7 +519,7 @@ sub transition_list {
 
     while (my $trans = $sth->fetchrow_hashref) {
 
-        # fill in a couple of properties here rather than 
+        # fill in a couple of properties here rather than
         # sending over the network from db
         $trans->{userid} = $u->{userid};
         $trans->{what}   = $what;
@@ -1437,6 +1437,15 @@ sub can_post_to {
     }
 
     return sort { $a->{user} cmp $b->{user} } @res;
+}
+
+sub delete_and_purge_completely {
+    my $u = shift;
+    # TODO: delete from user tables
+    # TODO: delete from global tables
+    my $dbh = LJ::get_db_writer();
+    $dbh->do("DELETE FROM user WHERE userid=?", undef, $u->{userid});
+    return 1;
 }
 
 package LJ;

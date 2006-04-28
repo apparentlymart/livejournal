@@ -1,7 +1,40 @@
 package LJ::Test;
 require Exporter;
+use Carp qw(croak);
 @ISA = qw(Exporter);
-@EXPORT = qw(memcache_stress with_fake_memcache);
+@EXPORT = qw(memcache_stress with_fake_memcache temp_user);
+
+my @temp_userids;  # to be destroyed later
+END {
+    # clean up temporary usernames
+    foreach my $uid (@temp_userids) {
+        my $u = LJ::load_userid($uid) or next;
+        $u->delete_and_purge_completely;
+    }
+}
+
+sub temp_user {
+    my %args = @_;
+    my $underscore  = delete $args{'underscore'};
+    my $journaltype = delete $args{'journaltype'}  || "P";
+    croak('unknown args') if %args;
+
+    my $pfx = $underscore ? "_" : "t_";
+    while (1) {
+        my $username = $pfx . LJ::rand_chars(15 - length $pfx);
+        my $uid = LJ::create_account({
+            user => $username,
+            name => "test account $username",
+            email => "test\@$LJ::DOMAIN",
+            journaltype => $journaltype,
+        });
+        if ($uid) {
+            my $u = LJ::load_userid($uid) or next;
+            push @temp_userids, $uid;
+            return $u;
+        }
+    }
+}
 
 sub with_fake_memcache (&) {
     my $cb = shift;

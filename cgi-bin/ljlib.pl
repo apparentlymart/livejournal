@@ -2594,6 +2594,10 @@ sub note_recent_action {
     return 1;
 }
 
+sub is_web_context {
+    return eval { Apache->request } ? 1 : 0;
+}
+
 sub is_open_proxy
 {
     my $ip = shift;
