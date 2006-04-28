@@ -35,8 +35,7 @@ sub LJ::send_mail {
 
     my $filename = "$ENV{LJHOME}/t/temp/nm-email.txt";
 
-    open(EMAILFILE, ">$filename")
-        or die "Could not open $filename for writing";
+    ok(open(EMAILFILE, ">$filename"), "Writing email to $filename");
     print EMAILFILE $email;
     close(EMAILFILE);
 

@@ -57,8 +57,7 @@ ok($nm, "Made new email notificationmethod");
 
     ok($subscr, "Subscribed");
 
-    # fire the event
-    $evt->fire;
+    # TODO: test notification
     $nm->notify($evt);
 }
 
