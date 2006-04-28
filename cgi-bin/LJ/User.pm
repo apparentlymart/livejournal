@@ -1456,6 +1456,19 @@ sub delete_and_purge_completely {
     return 1;
 }
 
+# Returns 'rich' or 'plain' depending on user's
+# setting of which editor they would like to use
+# and what they last used
+sub new_entry_editor {
+    my $u = shift;
+
+    my $editor = $u->prop('entry_editor');
+    return 'plain' if $editor eq 'always_plain'; # They said they always want plain
+    return 'rich' if $editor eq 'always_rich'; # They said they always want rich
+    return $editor if $editor =~ /(rich|plain)/; # What did they last use?
+    return $LJ::DEFAULT_EDITOR; # Use config default
+}
+
 package LJ;
 
 # <LJFUNC>

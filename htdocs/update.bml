@@ -189,6 +189,8 @@
             'spellcheck_html' => $spellcheck_html,
             'clientversion' => "WebUpdate/2.0.0",
             'richtext' => $LJ::DISABLED{'richtext'} ? 0 : 1,
+            'richtext_default' => $remote ? $remote->new_entry_editor eq 'rich' ? 1 : 0  # User setting
+                                          : $LJ::DEFAULT_EDITOR       eq 'rich' ? 1 : 0, # Site default
             'include_insert_object' => $GET{'insobj'},
         };
 
@@ -368,6 +370,13 @@
                 # Clear out a draft
                 $remote->set_prop('entry_draft', '')
                     if $remote;
+
+                # Store what editor they last used
+                unless ($remote->prop('entry_editor') =~ /^always_/) {
+                     $POST{'switched_rte_on'} ?
+                         $remote->set_prop('entry_editor', 'rich') :
+                         $remote->set_prop('entry_editor', 'plain');
+                 }
 
                 $$body .= "<table width='100%'><tr valign='top'><td>";
 
