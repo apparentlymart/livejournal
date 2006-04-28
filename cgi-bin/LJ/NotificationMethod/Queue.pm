@@ -85,7 +85,7 @@ sub notify {
 
 
         # insert this event into the eventqueue table
-        $u->do("INSERT INTO eventqueue (" . join(",", keys %item) . ") VALUES (" .
+        $u->do("INSERT INTO notifyqueue (" . join(",", keys %item) . ") VALUES (" .
                join(",", map { '?' } values %item) . ")", undef, values %item)
             or die $u->errstr;
     }

@@ -2401,7 +2401,7 @@ sub alloc_user_counter
         $newmax = $u->selectrow_array("SELECT MAX(subid) FROM subs WHERE userid=?",
                                       undef, $uid);
     } elsif ($dom eq "Q") {
-        $newmax = $u->selectrow_array("SELECT MAX(qid) FROM eventqueue WHERE userid=?",
+        $newmax = $u->selectrow_array("SELECT MAX(qid) FROM notifyqueue WHERE userid=?",
                                       undef, $uid);
     } else {
         die "No user counter initializer defined for area '$dom'.\n";

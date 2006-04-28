@@ -2365,8 +2365,8 @@ EOC
 
 
 # partitioned:  ESN event queue notification method
-register_tablecreate("eventqueue", <<'EOC');
-CREATE TABLE eventqueue (
+register_tablecreate("notifyqueue", <<'EOC');
+CREATE TABLE notifyqueue (
   userid     INT UNSIGNED NOT NULL,
   qid        INT UNSIGNED NOT NULL,
 
