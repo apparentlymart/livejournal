@@ -125,13 +125,13 @@ body<=
             my $journalid = $ju->{userid};
 
             # create a new subscription
-            LJ::Subscription->create($u, {
+            $u->subscribe(
                 ntypeid   => $ntypeid,
                 etypeid   => $etypeid,
                 arg1      => $arg1,
                 arg2      => $arg2,
                 journalid => $journalid,
-            });
+            );
         }
     }
 

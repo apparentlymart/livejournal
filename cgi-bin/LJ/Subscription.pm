@@ -52,27 +52,27 @@ sub new_from_row {
 }
 
 sub create {
-    my ($class, $u, $info) = @_;
+    my ($class, $u, %info) = @_;
 
     my $subid = LJ::alloc_user_counter($u, 'E')
         or die "Could not alloc subid for user $u->{user}";
 
-    $info->{subid} = $subid;
-    $info->{userid} = $u->{userid};
+    $info{subid} = $subid;
+    $info{userid} = $u->{userid};
 
-    my $self = $class->new_from_row( $info );
+    my $self = $class->new_from_row( \%info );
 
     my @columns;
     my @values;
 
     foreach (@subs_fields) {
-        if (exists( $info->{$_} )) {
+        if (exists( $info{$_} )) {
             push @columns, $_;
-            push @values, delete $info->{$_};
+            push @values, delete $info{$_};
         }
     }
 
-    croak( "Extra info defined, (" . join( ', ', keys( %$info ) ) . ")" ) if keys %$info;
+    croak( "Extra info defined, (" . join( ', ', keys( %info ) ) . ")" ) if keys %info;
 
     my $sth = $u->prepare( 'INSERT INTO subs (' . join( ',', @columns ) . ')' .
                            'VALUES (' . join( ',', map {'?'} @values ) . ')' );

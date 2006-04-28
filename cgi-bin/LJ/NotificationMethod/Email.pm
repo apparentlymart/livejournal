@@ -66,7 +66,7 @@ sub notify {
             wrap => 1,
             charset => 'utf-8',
             subject => $ev->title,
-            html    => , # FIXME: make this work!
+            html    => 'hallo', # FIXME: make this work!
             body    => $ev->as_string
         }) or die "unable to send notification email";
     }

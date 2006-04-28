@@ -69,7 +69,8 @@ sub title {
 sub as_string {
     my $self = shift;
     my $u    = $self->u;
-    return "Event $self fired for user=$u->{user}, args=[@{$self->{args}}]";
+    my ($classname) = (ref $self) =~ /Event::(.+?)$/;
+    return "Event $classname fired for user=$u->{user}, args=[@{$self->{args}}]";
 }
 
 sub as_sms {

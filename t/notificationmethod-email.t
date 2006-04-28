@@ -8,13 +8,6 @@ require 'ljlib.pl';
 use LJ::Event::Befriended;
 use LJ::NotificationMethod::Email;
 
-# override LJ::send_mail to set $ERV
-# (email return value)
-my $EMAIL_RV = 1;
-
-sub LJ::send_mail {
-    return $EMAIL_RV;
-}
 
 my $u;
 my $valid_u = sub {
@@ -22,6 +15,38 @@ my $valid_u = sub {
     ok(LJ::isu($u), "valid user loaded");
     return $u;
 };
+
+
+# override LJ::send_mail to set $ERV
+# (email return value)
+my $EMAIL_RV = 1;
+
+sub LJ::send_mail {
+    my $opts = shift
+        or die "No opts";
+
+    my $email = qq {
+      To: $opts->{to}
+      From: $opts->{from} ($opts->{fromname})
+      Subject: $opts->{subject}
+      HTML Body: "$opts->{html}"
+      Plaintext Body: "$opts->{body}"
+      };
+
+    my $filename = "$ENV{LJHOME}/t/temp/nm-email.txt";
+
+    open(EMAILFILE, ">$filename")
+        or die "Could not open $filename for writing";
+    print EMAILFILE $email;
+    close(EMAILFILE);
+
+    # check for correct fields
+    is($opts->{to}, $u->{email}, "Email address");
+    is($opts->{from}, $LJ::BOGUS_EMAIL, "From address");
+    like($opts->{body}, qr/the user .+ has added .+ as a friend/i, "Body");
+
+    return $EMAIL_RV;
+}
 
 # less duplication of this so we can revalidate
 my $meth;
@@ -38,10 +63,10 @@ my $valid_meth = sub {
 
     $meth = eval { LJ::NotificationMethod::Email->new() };
     like($@, qr/invalid user/, "empty list passed to constructor");
-    
+
     $meth = eval { LJ::NotificationMethod::Email->new() };
     like($@, qr/invalid user/, "undef passed to constructor");
-    
+
     $meth = eval { LJ::NotificationMethod::Email->new() };
     like($@, qr/invalid user/, "non-user passed to constructor");
 
@@ -108,5 +133,4 @@ my $valid_meth = sub {
 
     my $str = $ev->as_string;
     $meth->notify($ev);
-    
 }

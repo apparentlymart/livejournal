@@ -1423,6 +1423,14 @@ sub subscriptions {
     return LJ::Subscription->subscriptions_of_user($u);
 }
 
+# subscribe to an event
+sub subscribe {
+    my ($u, %opts) = @_;
+    croak "No subscription options" unless %opts;
+
+    LJ::Subscription->create($u, %opts);
+}
+
 # What journals can this user post to?
 sub can_post_to {
     my $u = shift;
