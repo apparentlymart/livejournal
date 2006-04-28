@@ -6,7 +6,7 @@ use base 'LJ::NotificationMethod';
 
 sub can_digest { 1 };
 
-# positional parameters: ->new($u, $event1, $event2, ...)
+# takes a $u
 sub new {
     my $class = shift;
 
