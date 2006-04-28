@@ -2364,6 +2364,27 @@ CREATE TABLE subsprop (
 EOC
 
 
+# partitioned:  ESN event queue notification method
+register_tablecreate("eventqueue", <<'EOC');
+CREATE TABLE eventqueue (
+  userid     INT UNSIGNED NOT NULL,
+  qid        INT UNSIGNED NOT NULL,
+
+  journalid  INT UNSIGNED NOT NULL,
+  etypeid    SMALLINT UNSIGNED NOT NULL,
+  arg1       INT UNSIGNED,
+  arg2       INT UNSIGNED,
+
+  state      CHAR(1) NOT NULL DEFAULT 'N',
+
+  createtime INT UNSIGNED NOT NULL,
+
+  PRIMARY KEY (userid, qid),
+  INDEX       (state)
+)
+EOC
+
+
 # NOTE: new table declarations go here
 
 

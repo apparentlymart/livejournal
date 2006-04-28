@@ -57,8 +57,9 @@ sub create {
     my $subid = LJ::alloc_user_counter($u, 'E')
         or die "Could not alloc subid for user $u->{user}";
 
-    $info{subid} = $subid;
-    $info{userid} = $u->{userid};
+    $info{subid}      = $subid;
+    $info{userid}     = $u->{userid};
+    $info{createtime} = time();
 
     my $self = $class->new_from_row( \%info );
 
@@ -95,6 +96,11 @@ sub createtime {
 sub expiretime {
     my $self = shift;
     return $self->{expiretime};
+}
+
+sub journalid {
+    my $self = shift;
+    return $self->{journalid};
 }
 
 sub event {
