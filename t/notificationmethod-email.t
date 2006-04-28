@@ -93,8 +93,7 @@ sub run_tests{
         $mu = eval { $meth->u };
         ok(! %$u, "cleared 'u'");
 
-        $u = LJ::load_user("system");
-        ok(LJ::isu($u), "new 'u' loaded");
+        $valid_u->();
 
         $mu = eval { $meth->u($u) };
         is_deeply($mu, $u, "set new 'u' in object");
