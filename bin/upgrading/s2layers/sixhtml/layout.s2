@@ -608,8 +608,14 @@ function EntryPage::print_body() {
 			<!-- comment list -->
 """;
 
+    if(not $.comment_pages.all_subitems_displayed) {
+        $.comment_pages->print();
+    }
     foreach var Comment c ($.comments) {
         $this->print_comment($c);
+    }
+    if(not $.comment_pages.all_subitems_displayed) {
+        $.comment_pages->print();
     }
 
 """
