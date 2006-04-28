@@ -1,13 +1,15 @@
 package LJ::Event;
 use strict;
 use Carp qw(croak);
-use Class::Autouse qw(LJ::SMS
+use Class::Autouse qw(
+                      LJ::Subscription
                       LJ::Typemap
                       LJ::Event::JournalNewEntry
                       LJ::Event::UserNewEntry
                       LJ::Event::JournalNewComment
                       LJ::Event::UserNewComment
-                      LJ::Event::Befriended);
+                      LJ::Event::Befriended
+                      );
 
 # Guide to subclasses:
 #    LJ::Event::JournalNewEntry -- a journal (user/community) has a new entry in it
@@ -15,7 +17,7 @@ use Class::Autouse qw(LJ::SMS
 #    LJ::Event::UserNewEntry    -- a user posted a new entry in some journal
 #                                  ($u,$journalid,$ditemid)
 #    LJ::Event::JournalNewComment -- a journal has a new comment in it
-#                                  ($ju,$jtalkid)
+#                                  ($ju,$jtalkid)   # TODO: should probably be ($ju,$jitemid,$jtalkid)
 #    LJ::Event::UserNewComment    -- a user left a new comment somewhere
 #                                  ($u,$journalid,$jtalkid)
 #    LJ::Event::Befriended        -- user $fromuserid added $u as a friend
@@ -131,6 +133,7 @@ sub fire {
 # called outside of web context where things can go slow.
 sub process_firing {
     my $self = shift;
+    croak("Can't call in web context") if LJ::is_web_context();
 
     foreach my $subsc ($self->subscriptions) {
         next unless $self->matches($subsc);
@@ -138,12 +141,60 @@ sub process_firing {
     }
 }
 
+sub subscriptions {
+    my $self = shift;
+    my $cid  = shift;  # optional.
+    croak("Can't call in web context") if LJ::is_web_context();
+
+    # allsubs
+    my @subs;
+
+    my $zeromeans = $self->zero_journalid_subs_means;
+
+    my @wildcards_from;
+    if ($zeromeans eq "friends") {
+        # find friendofs, add to @wildcards_from
+    }
+
+    # TODO: gearman parallelize:
+    foreach my $cid ($cid ? ($cid) : @LJ::CLUSTERS) {
+        my $udbh = LJ::get_cluster_master($cid)
+            or die;
+
+        # first we find exact matches
+        my $args = "";
+        my $sth = $udbh->prepare("SELECT userid, subid FROM subs WHERE etypeid=? AND journalid=? $args");
+        $sth->execute($self->etypeid, $self->u->{userid});
+        while (my ($uid, $subid) = $sth->fetchrow_array) {
+            # TODO: convert to using new_from_row, more efficient
+            push @subs, LJ::Subscription->new_by_id(LJ::load_userid($uid), $subid);
+        }
+
+        # then we find wildcard matches.
+        if (@wildcards_from) {
+            my $jidlist = join(",", @wildcards_from);
+            my $sth = $udbh->prepare("SELECT userid, subid FROM subs WHERE etypeid=? AND journalid IN ($jidlist) $args");
+
+        }
+
+    }
+
+    return @subs;
+}
+
+# valid values are nothing ("" or undef), or "friends"
+sub zero_journalid_subs_means { "friends" }
+
 # INSTANCE METHOD: SHOULD OVERRIDE, calling SUPER::matches->() && ....
 sub matches {
     my ($self, $subsc) = @_;
     return
         $self->{etypeid}   == $subsc->{etypeid} &&
-        $self->{journalid} == $subsc->{journalid};
+        $self->{journalid} == $subsc->{journalid};   # TODO: this is wrong, because journalid of zero could mean a friend. ambye just
+    # make this always return true and people can override and not call super?
+
+    # MAYBE: rename matches_filter?  to imply we never give wrong etypeid/subid at least?  and journalid of zero DOES mean
+    # it already matched a friend/etc.
 }
 
 # instance method
