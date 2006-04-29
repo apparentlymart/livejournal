@@ -29,7 +29,7 @@
              # presumably users will start registering usernames that match our site navigation tags,
              # so let's preempt that and throw them into a lame bottom section when site-defined tags
              # are alse present.
-             $last_is_untrusted = 1;
+             $last_is_untrusted = 1 if $u->{statusvis} eq "V";
          }
      }
 
@@ -71,7 +71,9 @@
              } else {
                  $link = "<a href=\"" . LJ::ehtml($dst->url) . "\">" . LJ::ehtml($dst->title) . "</a>";
              }
-             $body .= "<li>$link</li>\n";
+             if (!$lju || ($lju && $lju->{statusvis} eq "V")) {
+                 $body .= "<li>$link</li>\n";
+             }
          }
          $body .= "</ul>";
      }
