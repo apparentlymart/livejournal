@@ -59,7 +59,7 @@ sub create {
 
     # make sure required params are here
     for ('ntypeid', 'etypeid', 'arg1', 'arg2', 'journalid') {
-        croak "Required field '$_' not found in call to $class->create" unless $info{$_};
+        croak "Required field '$_' not found in call to $class->create" unless defined $info{$_};
     }
 
     $info{subid}      = $subid;

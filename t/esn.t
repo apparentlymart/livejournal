@@ -8,10 +8,16 @@ use Test::More 'no_plan';
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 use LJ::Event;
+use LJ::Test qw(memcache_stress temp_user);
 use FindBin qw($Bin);
 
 my $up;
-my $u = LJ::load_user("system");
+my $u = temp_user();
+
+# create another user and make them friends
+my $u2 = temp_user();
+LJ::add_friend($u2, $u);
+
 my ($evt, $evt2);
 
 $evt = eval { LJ::Event::ForTest2->new($u, 5, 39, 8); };
@@ -44,18 +50,27 @@ my $nm = LJ::NotificationMethod::ForTest->new($u);
 ok($nm, "Made new email notificationmethod");
 
 {
-    # subscribe system to an event
-    my $subscr = eval {
-        $u->subscribe(
-                      etypeid   => $evt2->etypeid,
-                      ntypeid   => $nm->ntypeid,
-                      arg1      => 69,
-                      arg2      => 42,
-                      journalid => $u->{userid},
-                      );
-    };
+    # subscribe to an event
+    my $subscr = $u2->subscribe(
+                                etypeid   => $evt2->etypeid,
+                                ntypeid   => $nm->ntypeid,
+                                arg1      => 69,
+                                arg2      => 42,
+                                journalid => 0,
+                                );
 
-    ok($subscr, "Subscribed");
+    ok($subscr, "Subscribed ok");
+
+    # see if this user has subscriptions
+    my @subs = $evt2->subscriptions;
+    ok((scalar @subs) == 1, "One subscription");
+
+    # these are unused at the moment
+    $subscr->{flags} ||= 0;
+    $subscr->{expiretime} ||= 0;
+    $subscr->{is_dirty} = undef;
+
+    is_deeply($subs[0], $subscr, "Subscriptions match");
 
     # TODO: test notification
     $nm->notify($evt);

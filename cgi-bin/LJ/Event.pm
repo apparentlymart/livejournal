@@ -154,6 +154,7 @@ sub subscriptions {
     my @wildcards_from;
     if ($zeromeans eq "friends") {
         # find friendofs, add to @wildcards_from
+        @wildcards_from = LJ::get_friendofs($self->u);
     }
 
     # TODO: gearman parallelize:
@@ -173,10 +174,15 @@ sub subscriptions {
         # then we find wildcard matches.
         if (@wildcards_from) {
             my $jidlist = join(",", @wildcards_from);
-            my $sth = $udbh->prepare("SELECT userid, subid FROM subs WHERE etypeid=? AND journalid IN ($jidlist) $args");
+            my $sth = $udbh->prepare("SELECT userid, subid FROM subs WHERE etypeid=? AND userid IN ($jidlist) $args");
+            $sth->execute($self->etypeid);
+            die $sth->errstr if $sth->err;
 
+            while (my ($uid, $subid) = $sth->fetchrow_array) {
+                # TODO: convert to using new_from_row, more efficient
+                push @subs, LJ::Subscription->new_by_id(LJ::load_userid($uid), $subid);
+            }
         }
-
     }
 
     return @subs;
