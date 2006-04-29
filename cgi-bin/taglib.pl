@@ -110,6 +110,7 @@ sub get_usertagsmulti {
 
         # get security counts
         my $ids = join(',', map { $_+0 } @resjids);
+        next unless $ids;
 
         # populate security counts
         my $counts = $dbcr->selectall_arrayref("SELECT journalid, kwid, security, entryct FROM logkwsum WHERE journalid IN ($ids)");
