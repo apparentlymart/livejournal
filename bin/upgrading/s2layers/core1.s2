@@ -16,6 +16,9 @@ class int
 {
     function builtin zeropad(int digits) : string
     "Return the integer as a string formatted at least \$digits characters long, left-padded with zeroes.";
+
+    function builtin compare(int n) : int
+    "Compare one integer with another. Returns a negative number if n is less than the subject, positive if greater or zero if the two are numerically equal.";
 }
 
 class string
@@ -47,6 +50,9 @@ class string
 
     function builtin repeat(int n) : string
     "Returns the string repeated n times";
+
+    function builtin compare(string s) : int
+    "Compare one string with another. Returns a negative number if n is alphabetically before the subject, positive if greater or zero if the two are equal. Note that this function currently does a simple ASCII compare, not a proper unicode-aware sort.";
 
     function builtin css_string() : string
     "Returns the string escaped and quoted as a CSS string literal, safe for insertion into a stylesheet.";
@@ -122,6 +128,9 @@ class Date
 
     function builtin date_format (string fmt) : string
     "Returns date formatted as indicated by \$fmt.  One of: short, med, long, med_day, long_day.  Or a custom format.  Default is 'short'. // SeeAlso: siteapi.core1.dateformats";
+
+    function builtin compare(Date d) : int
+    "Compare two dates. Returns a negative number if d is before the subject in time, positive if it is after, or zero if the two dates are equal. When comparing a Date with a DateTime, the time on the bare Date value is assumed to be midnight.";
 }
 
 class DateTime extends Date

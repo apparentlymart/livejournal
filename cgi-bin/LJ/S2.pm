@@ -2213,6 +2213,11 @@ sub zeropad
 }
 *int__zeropad = \&zeropad;
 
+sub int__compare
+{
+    my ($ctx, $this, $other) = @_;
+    return $other <=> $this;
+}
 
 sub Color__update_hsl
 {
@@ -2597,6 +2602,19 @@ sub Date__day_of_week
     return $dt->{'_dayofweek'} = LJ::day_of_week($dt->{'year'}, $dt->{'month'}, $dt->{'day'}) + 1;
 }
 *DateTime__day_of_week = \&Date__day_of_week;
+
+sub Date__compare
+{
+    my ($ctx, $this, $other) = @_;
+
+    return $other->{year} <=> $this->{year}
+           || $other->{month} <=> $this->{month}
+           || $other->{day} <=> $this->{day}
+           || $other->{hour} <=> $this->{hour}
+           || $other->{min} <=> $this->{min}
+           || $other->{sec} <=> $this->{sec};
+}
+*DateTime__compare = \&Date__compare;
 
 my %dt_vars = (
                'm' => "\$time->{month}",
@@ -3125,6 +3143,13 @@ sub string__repeat
     my $size = length($this) * $num;
     return "[too large]" if $size > 5000;
     return $this x $num;
+}
+
+sub string__compare
+{
+    use utf8; # Does this actually make any difference here?
+    my ($ctx, $this, $other) = @_;
+    return $other cmp $this;
 }
 
 sub string__css_length_value
