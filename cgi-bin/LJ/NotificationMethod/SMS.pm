@@ -69,4 +69,18 @@ sub notify {
 
 }
 
+sub configured {
+    my $class = shift;
+
+    # FIXME: should probably have more checks
+    return LJ::SMS->configured ? 1 : 0;
+}
+
+sub configured_for_user {
+    my $class = shift;
+    my $u = shift;
+
+    return LJ::SMS::configured_for_user($u) ? 1 : 0;
+}
+
 1;

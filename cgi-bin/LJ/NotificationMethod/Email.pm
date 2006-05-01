@@ -76,4 +76,18 @@ sub notify {
     }
 }
 
+sub configured {
+    my $class = shift;
+
+    # FIXME: should probably have more checks
+    return $LJ::BOGUS_EMAIL && $LJ::SITENAMESHORT ? 1 : 0;
+}
+
+sub configured_for_user {
+    my $class = shift;
+    my $u = shift;
+
+    return length $u->{email} ? 1 : 0;
+}
+
 1;
