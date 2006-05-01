@@ -21,7 +21,7 @@ sub can_digest { 0 }
 
 # subclasses have to override
 sub configured          { 0 }  # system-wide configuration
-sub configured_for_user { my $u = shift; return 0; }
+sub configured_for_user { my ($class, $u) = @_; return 0; }
 
 sub new_from_subscription {
     my ($class, $subscription) = @_;
