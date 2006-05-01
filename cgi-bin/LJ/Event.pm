@@ -136,7 +136,7 @@ sub process_firing {
     croak("Can't call in web context") if LJ::is_web_context();
 
     foreach my $subsc ($self->subscriptions) {
-        next unless $self->matches($subsc);
+        next unless $self->matches_filter($subsc); # does filtering (threads, etc)
         $subsc->process($self);
     }
 }
@@ -174,7 +174,7 @@ sub subscriptions {
         # then we find wildcard matches.
         if (@wildcards_from) {
             my $jidlist = join(",", @wildcards_from);
-            my $sth = $udbh->prepare("SELECT userid, subid FROM subs WHERE etypeid=? AND userid IN ($jidlist) $args");
+            my $sth = $udbh->prepare("SELECT userid, subid FROM subs WHERE etypeid=? AND journalid=0 AND userid IN ($jidlist) $args");
             $sth->execute($self->etypeid);
             die $sth->errstr if $sth->err;
 
@@ -191,16 +191,10 @@ sub subscriptions {
 # valid values are nothing ("" or undef), or "friends"
 sub zero_journalid_subs_means { "friends" }
 
-# INSTANCE METHOD: SHOULD OVERRIDE, calling SUPER::matches->() && ....
-sub matches {
+# INSTANCE METHOD: SHOULD OVERRIDE if the subscriptions support filtering
+sub matches_filter {
     my ($self, $subsc) = @_;
-    return
-        $self->{etypeid}   == $subsc->{etypeid} &&
-        $self->{journalid} == $subsc->{journalid};   # TODO: this is wrong, because journalid of zero could mean a friend. ambye just
-    # make this always return true and people can override and not call super?
-
-    # MAYBE: rename matches_filter?  to imply we never give wrong etypeid/subid at least?  and journalid of zero DOES mean
-    # it already matched a friend/etc.
+    return 1;
 }
 
 # instance method
