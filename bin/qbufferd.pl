@@ -63,11 +63,11 @@ if ($opt_stop) {
 
 $SIG{'INT'} = \&stop_qbufferd;
 $SIG{'TERM'} = \&stop_qbufferd;
-$SIG{'HUP'} = sub { 
+$SIG{'HUP'} = sub {
     # nothing.  maybe later make a HUP force a flush?
 };
 
-if (!$opt_foreground && ($pid = fork)) 
+if (!$opt_foreground && ($pid = fork))
 {
     unless (open (PID, ">$pidfile")) {
         kill 15, $pid;
@@ -78,7 +78,7 @@ if (!$opt_foreground && ($pid = fork))
     print "qbufferd started with pid $pid\n";
     if (-s $pidfile) { print "pid file written ($pidfile)\n"; }
     exit;
-} 
+}
 
 # Close filehandles unless running in --debug or --foreground mode.
 unless ( $opt_debug || $opt_foreground ) {
@@ -95,7 +95,7 @@ unless ( $opt_debug || $opt_foreground ) {
 my %isolated;
 my %pids;         # job -> pid
 my %jobs;         # pid -> job
-my $working = 0;  # 1 for processes that do actual work 
+my $working = 0;  # 1 for processes that do actual work
 
 my $my_job;
 
@@ -104,7 +104,7 @@ foreach my $job (@LJ::QBUFFERD_ISOLATE) {
 }
 
 foreach my $job (@LJ::QBUFFERD_ISOLATE, "_others_") {
-    if (my $child = fork) { 
+    if (my $child = fork) {
         # parent.
         $pids{$job} = $child;
         $jobs{$child} = $job;
@@ -114,7 +114,7 @@ foreach my $job (@LJ::QBUFFERD_ISOLATE, "_others_") {
         $0 .= " [$job]";
         $my_job = $job;
         $working = 1;
-        last;  
+        last;
     }
 }
 
@@ -166,12 +166,12 @@ while(not $working) {
 }
 
 # the actual work begins here
-my @all_jobs = qw(delitem weblogscom send_mail support_notify dirty);
+my @all_jobs = qw(delitem weblogscom send_mail support_notify dirty fired_event);
 foreach my $hook (keys %LJ::HOOKS) {
     next unless $hook =~ /^cmdbuf:(\w+):run$/;
     push @all_jobs, $1;
 }
-        
+
 while (LJ::start_request())
 {
     my $cycle_start = time();
@@ -192,7 +192,7 @@ while (LJ::start_request())
         sleep 10;
         next;
     }
-    
+
     # keep track of what commands we've run the start hook for
     my %started;
 
