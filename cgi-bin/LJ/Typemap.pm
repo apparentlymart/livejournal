@@ -50,7 +50,7 @@ sub typeid_to_class {
 
     my ($class) = grep { $proc_cache->{$_} == $typeid } keys %$proc_cache;
 
-    die "No class for id $typeid on table $self->{table}" unless $class;
+    croak "No class for id $typeid on table $self->{table}" unless $class;
 
     return $class;
 }
@@ -69,9 +69,9 @@ sub class_to_typeid {
     # this class does not have a typeid. create one.
     my $dbh = LJ::get_db_writer();
 
-    my $table = $self->{table} or die "No table";
-    my $classfield = $self->{classfield} or die "No class field";
-    my $idfield = $self->{idfield} or die "No id field";
+    my $table = $self->{table} or croak "No table";
+    my $classfield = $self->{classfield} or croak "No class field";
+    my $idfield = $self->{idfield} or croak "No id field";
 
     # try to insert
     $dbh->do("INSERT INTO $table ($classfield) VALUES (?)",
