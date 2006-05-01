@@ -19,6 +19,10 @@ sub title  { croak "can't call title on LJ::NotificationMethod base class" }
 
 sub can_digest { 0 }
 
+# subclasses have to override
+sub configured          { 0 }  # system-wide configuration
+sub configured_for_user { my $u = shift; return 0; }
+
 sub new_from_subscription {
     my ($class, $subscription) = @_;
 
@@ -58,20 +62,19 @@ sub ntypeid {
     return $tm->class_to_typeid($class);
 }
 
-# this returns a list of all possible event classes
+# this returns a list of all possible notification method classes
 # class method
 sub all_classes {
     my $class = shift;
-
-    # return config'd classes if they exist, otherwise just return everything that has a mapping
-    return @LJ::NOTIFY_TYPES if @LJ::NOTIFY_TYPES;
-
     croak "all_classes is a class method" unless $class;
 
-    my $tm = $class->typemap
-        or croak "Bad class $class";
-
-    return $tm->all_classes;
+    return grep {
+        ! $LJ::DISABLED{$_} &&
+        $_->configured
+    } qw(
+         LJ::NotificationMethod::Email
+         LJ::NotificationMethod::SMS
+         );
 }
 
 1;
