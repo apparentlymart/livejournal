@@ -5,9 +5,16 @@ use IO::Socket::INET;
 sub new {
     my ($class, %opts) = @_;
     my $self = bless {}, $class;
-    foreach my $k (qw(from text to)) {
+
+    # smsusermap, pass in from/to as u/number 
+    foreach my $k (qw(from to)) {
         $self->{$k} = delete $opts{$k};
+        if (LJ::isu($self->{$k})) {
+            my $u = $self->{$k};
+            $self->{$k} = $class->number($u);
+        }
     }
+    $self->{text} = delete $opts{text};
     die if %opts;
     return $self;
 }
@@ -18,12 +25,23 @@ sub text {
 
 sub owner {
     my $self = shift;
+    my $from = shift || $self->{from} 
+        or return undef;
+
     my $dbr = LJ::get_db_reader();
-    my $from = $self->{from} or
-        return undef;
     my $uid = $dbr->selectrow_array("SELECT userid FROM smsusermap WHERE number=?",
                                     undef, $from);
     return $uid ? LJ::load_userid($uid) : undef;
+}
+
+sub number {
+    my $self = shift;
+    my $u = shift || $self->u 
+        or return undef;
+
+    my $dbr = LJ::get_db_reader();
+    return $dbr->selectrow_array("SELECT number FROM smsusermap WHERE userid=?",
+                                 undef, $u->{userid});
 }
 
 sub set_to {
@@ -36,6 +54,8 @@ sub send {
     if ($LJ::IS_DEV_SERVER) {
         return $self->send_jabber_dev_server;
     }
+
+    warn "LJ::SMS->send() not implemented yet";
 }
 
 sub send_jabber_dev_server {
@@ -54,6 +74,24 @@ sub send_jabber_dev_server {
 sub as_string {
     my $self = shift;
     return "from=$self->{from}, text=$self->{text}\n";
+}
+
+# is sms sending configured?
+sub configured {
+    my $class = shift;
+
+    # FIXME: once non-dev implementation, add those
+    #        configuration vars here
+    return $LJ::IS_DEV_SERVER ? 1 : 0;
+}
+
+sub configured_for_user {
+    my $class = shift;
+    my $u = shift;
+
+    # FIXME: for now just check to see if the user has
+    #        a uid -> number mapping in smsusermap
+    return $class->number($u) ? 1 : 0;
 }
 
 1;
