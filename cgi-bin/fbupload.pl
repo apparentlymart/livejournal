@@ -15,7 +15,7 @@ use File::Basename ();
 
 *hash = \&Digest::MD5::md5_hex;
 
-# This has bitten us one too many times.  
+# This has bitten us one too many times.
 # Don't let startup continue unless LWP is ok.
 die "* Installed version of LWP is too old! *" if LWP->VERSION < 5.803;
 
@@ -34,7 +34,7 @@ sub get_challenge
     my $req = HTTP::Request->new(GET => "$LJ::FB_SITEROOT/interface/simple");
     $req->push_header("X-FB-Mode" => "GetChallenge");
     $req->push_header("X-FB-User" => $u->{'user'});
-    
+
     my $res = $$ua->request($req);
     if ($res->is_success()) {
 
@@ -63,7 +63,7 @@ sub get_challenge
 #         imgsec  => bitmask for image security
 #         caption => optional image description
 #         galname => gallery to upload image to }
-sub do_upload 
+sub do_upload
 {
     my ($u, $rv, $opts) = @_;
     unless ($u && $opts->{'path'}) {
