@@ -55,7 +55,7 @@ sub notify {
     croak "'notify' requires an event"
         unless @_;
 
-    my $ev = shift @events;
+    my $ev = shift;
         croak "invalid event passed" 
             unless ref $ev;
 
@@ -65,7 +65,7 @@ sub notify {
     my $sms_obj = LJ::SMS->new
         ( to   => $u,
           text => $ev->as_sms );
-    $sms->send;
+    $sms_obj->send;
 
 }
 
