@@ -18,7 +18,11 @@ use lib "$ENV{'LJHOME'}/cgi-bin";
 use LJ::MemCache;
 use LJ::Session;
 
-use Class::Autouse qw(LJ::Subscription);
+use Class::Autouse qw(
+                      LJ::Subscription
+                      LJ::SMS
+                      LJ::Identity
+                      );
 
 # class method.  returns remote (logged in) user object.  or undef if
 # no session is active.
@@ -773,8 +777,6 @@ sub identity {
     my $u = shift;
     return $u->{_identity} if $u->{_identity};
     return undef unless $u->{'journaltype'} eq "I";
-
-    require LJ::Identity;
 
     my $memkey = [$u->{userid}, "ident:$u->{userid}"];
     my $ident = LJ::MemCache::get($memkey);

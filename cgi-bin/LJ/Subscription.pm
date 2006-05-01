@@ -2,6 +2,10 @@ package LJ::Subscription;
 use strict;
 use warnings;
 use Carp qw(croak);
+use Class::Autouse qw(
+                      LJ::NotificationMethod
+                      LJ::Typemap
+                      );
 
 my @subs_fields = qw(userid subid is_dirty journalid etypeid arg1 arg2
                      ntypeid createtime expiretime flags);
@@ -130,7 +134,7 @@ sub dirty {
 
 sub notification {
     my $self = shift;
-    my $class = NotificationMethod->class($self->{ntypeid});
+    my $class = LJ::NotificationMethod->class($self->{ntypeid});
     return $class->new_from_subscription($self);
 }
 

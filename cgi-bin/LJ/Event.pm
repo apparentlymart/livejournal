@@ -120,6 +120,7 @@ sub fire {
         }
         warn $self->as_string . "\n";
     }
+
     return unless $self->should_enqueue;
 
     # TODO: change this to log to 'TheSchwartz'
@@ -169,7 +170,7 @@ sub subscriptions {
         while (my ($uid, $subid) = $sth->fetchrow_array) {
             # TODO: convert to using new_from_row, more efficient
             push @subs, LJ::Subscription->new_by_id(LJ::load_userid($uid), $subid);
-        }
+
 
         # then we find wildcard matches.
         if (@wildcards_from) {
@@ -200,6 +201,7 @@ sub matches_filter {
 # instance method
 sub should_enqueue {
     my $self = shift;
+    return 1;  # for now.
     return $self->is_common || $self->has_subscriptions;
 }
 
