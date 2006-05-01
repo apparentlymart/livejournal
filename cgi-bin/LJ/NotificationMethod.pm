@@ -3,7 +3,9 @@ use strict;
 use Carp qw/ croak /;
 use Class::Autouse qw (LJ::Typemap
                        LJ::NotificationMethod::Email
-                       LJ::NotificationMethod::Queue);
+                       LJ::NotificationMethod::SMS
+                       LJ::NotificationMethod::Queue
+                       );
 
 # make sure all the config'd classes are mapped
 if(@LJ::NOTIFY_TYPES) {

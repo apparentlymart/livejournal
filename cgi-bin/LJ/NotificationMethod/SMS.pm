@@ -3,6 +3,7 @@ package LJ::NotificationMethod::SMS;
 use strict;
 use Carp qw/ croak /;
 use base 'LJ::NotificationMethod';
+use Class::Autouse qw(LJ::SMS);
 
 sub can_digest { 0 };
 
@@ -56,7 +57,7 @@ sub notify {
         unless @_;
 
     my $ev = shift;
-        croak "invalid event passed" 
+        croak "invalid event passed"
             unless ref $ev;
 
     croak "SMS can only accept one event at a time"
