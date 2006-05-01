@@ -62,7 +62,9 @@ sub _load {
 
     my $daysoldwhere = $daysold ? " AND createtime" : '';
 
-    my $sth = $u->prepare("SELECT * FROM notifyqueue WHERE userid=? AND state != 'D'");
+    my $sth = $u->prepare
+        ("SELECT userid, qid, journalid, etypeid, arg1, arg2, state, createtime " . 
+         "FROM notifyqueue WHERE userid=? AND state != 'D'");
     $sth->execute($u->{userid});
     die $sth->errstr if $sth->err;
 
