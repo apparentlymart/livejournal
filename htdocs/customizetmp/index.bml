@@ -18,6 +18,7 @@ body<=
                      opt_whoscreened   => qr/^[NRFA]$/,
                      opt_showtalklinks => qr/./,
                      opt_gettalkemail  => qr/./,
+                     opt_nctalklinks   => qr/./,
                      opt_htmlemail     => qr/^[YN]$/,
                      "action:redir"    => 'word',
                      lj_form_auth      => qr/./,
@@ -62,6 +63,7 @@ body<=
                       'opt_showtalklinks' => $POST{'opt_showtalklinks'} ? "Y" : "N",
                       'opt_gettalkemail'  => $POST{'opt_gettalkemail'} ? "Y" : "N",
                       'opt_htmlemail'     => $POST{'opt_htmlemail'},
+                      'opt_whocanreply'   => $POST{'opt_whocanreply'},
                       );
         LJ::update_user($u, \%update);
 
