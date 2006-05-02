@@ -607,7 +607,7 @@ else {
     float: left;
 }
 * html #main {
-    height: 1024px; // IE-only hack
+    height: 1024px; /* IE-only hack */
 }
 
 .day h2 {
