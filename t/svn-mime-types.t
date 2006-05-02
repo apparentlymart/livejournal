@@ -3,6 +3,11 @@
 use strict;
 use Test::More;
 
+unless ($ENV{TEST_SVN_MIME}) {
+    plan skip_all => "Run with env TEST_SVN_MIME set true to run this test.";
+    exit 0;
+}
+
 my %check;
 my @files = `$ENV{LJHOME}/bin/cvsreport.pl --map`;
 foreach my $line (@files) {
@@ -11,7 +16,6 @@ foreach my $line (@files) {
     next unless $path =~ /\.(gif|jpe?g|png|ico)$/i;
     $check{$path} = 1;
 }
-
 
 plan tests => scalar keys %check;
 

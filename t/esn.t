@@ -100,7 +100,7 @@ sub notify {
     my @events = @_;
 
     my $u = $self->{u};
-    warn "Notifying $u->{user}: '" . $events[0]->as_string . "'\n";
+    #warn "Notifying $u->{user}: '" . $events[0]->as_string . "'\n";
 }
 
 sub new { return bless { u => $_[1] }, $_[0] }
