@@ -15,7 +15,7 @@ function form_change () {
     form_changed = true;
 }
 
-function tabclick_save() {
+function tabclick_save(e) {
     $("action:redir").value = this.id;
     var confirmed = false;
     if (form_changed == false) {
@@ -25,8 +25,9 @@ function tabclick_save() {
     }
     if (confirmed) {
         $("display_form").submit();
+    } else {
+        e.stop();
     }
-    return false;
 }
 
 function comment_options_toggle() {
