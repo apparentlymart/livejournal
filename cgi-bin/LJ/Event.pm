@@ -132,6 +132,7 @@ sub fire {
 }
 
 # called outside of web context where things can go slow.
+# - job server has received an "event which has fired"
 sub process_firing {
     my $self = shift;
     croak("Can't call in web context") if LJ::is_web_context();
@@ -164,8 +165,8 @@ sub subscriptions {
             or die;
 
         # first we find exact matches
-        my $args = "";
-        my $sth = $udbh->prepare("SELECT userid, subid FROM subs WHERE etypeid=? AND journalid=? $args");
+        my $sth = $udbh->prepare
+            ("SELECT userid, subid FROM subs WHERE etypeid=? AND journalid=?");
         $sth->execute($self->etypeid, $self->u->{userid});
         while (my ($uid, $subid) = $sth->fetchrow_array) {
             # TODO: convert to using new_from_row, more efficient
@@ -175,7 +176,9 @@ sub subscriptions {
         # then we find wildcard matches.
         if (@wildcards_from) {
             my $jidlist = join(",", @wildcards_from);
-            my $sth = $udbh->prepare("SELECT userid, subid FROM subs WHERE etypeid=? AND journalid=0 AND userid IN ($jidlist) $args");
+            my $sth = $udbh->prepare
+                ("SELECT userid, subid FROM subs " . 
+                 "WHERE etypeid=? AND journalid=0 AND userid IN ($jidlist)");
             $sth->execute($self->etypeid);
             die $sth->errstr if $sth->err;
 
