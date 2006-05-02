@@ -163,8 +163,9 @@ function Page::lay_bottom_navigation() {}
 
 function print_stylesheet ()
 {
+    var string bgimg_selector = viewer_sees_control_strip() ? "#content" : "BODY";
     if(clean_url($*page_background_image) != "") {
-      """BODY {
+      """$bgimg_selector {
     background-image: url("$*page_background_image");
     background-position: $*page_background_position;
     background-repeat: $*page_background_repeat;
