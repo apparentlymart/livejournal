@@ -199,8 +199,9 @@ body<=
                 delete $update{$_} if $u->{$_} eq $update{$_};
             }
             LJ::update_user($u, \%update) if %update;
-
             $u->set_prop("opt_usesharedpic", $POST{'opt_usesharedpic'});
+
+            $saved_msg .= "Your settings have been saved. <a href='" . $u->journal_base() . "'>View your Journal</a>.";
         } else {
             my %override;
             foreach my $prop (S2::get_properties($lyr_layout->{'s2lid'}))
@@ -215,7 +216,7 @@ body<=
             }
 
             if (LJ::S2::layer_compile_user($layer, \%override)) {
-                $saved_msg = "Saved custom settings";
+                $saved_msg .= "Your settings have been saved. <a href='" . $u->journal_base() . "'>View your Journal</a>.";
             } else {
                 my $error = LJ::last_error();
                 $err_msg = "Error saving layer";

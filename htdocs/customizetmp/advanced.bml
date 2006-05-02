@@ -58,7 +58,7 @@ body<=
         $ret .= "<dd>$ML{'.nav.create.about'}</dd>";
         $ret .= "<dt><a href='edit.bml'>$ML{'.nav.edit'}</a></dt>";
         $ret .= "<dd>$ML{'.nav.edit.about'}</dd>";
-        $ret .= "<dt><a href='browse/'><$ML{'.nav.browse'}</a></dt>";
+        $ret .= "<dt><a href='browse/'>$ML{'.nav.browse'}</a></dt>";
         $ret .= "<dd>$ML{'.nav.browse.about'}</dd>";
         $ret .= "</dl>";
     }

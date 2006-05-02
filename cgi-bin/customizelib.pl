@@ -91,19 +91,20 @@ sub s2_implicit_style_create
     my $pub     = LJ::S2::get_public_layers();
     my $userlay = LJ::S2::get_layers_of_user($u);
 
-    my $s2_style;
     # create new style if necessary
     unless ($u->prop('s2_style')) {
         my $layid = $style{'layout'};
         my $lay = $pub->{$layid} || $userlay->{$layid};
         my $uniq = (split("/", $lay->{'uniq'}))[0] || $lay->{'s2lid'};
+
+        my $s2_style;
         unless ($s2_style = LJ::S2::create_style($u, "wizard-$uniq")) {
             die "Can't create style";
         }
         $u->set_prop("s2_style", $s2_style);
     }
     # save values in %style to db
-    LJ::S2::set_style_layers($u, $s2_style, %style);
+    LJ::S2::set_style_layers($u, $u->prop('s2_style'), %style);
 
     return 1;
 }

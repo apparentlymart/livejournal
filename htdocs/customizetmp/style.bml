@@ -114,7 +114,7 @@ body<=
                 next if $POST{$uprop} eq $u->prop($uprop);
                 $u->set_prop($uprop, $POST{$uprop});
             }
-            $saved_msg = "Your settings have been saved. Link and Link";
+            $saved_msg .= "Your settings have been saved. <a href='" . $u->journal_base() . "'>View your Journal</a>.";
         } else {
             if ($POST{'save:layout'}) {
                 my $layid = $POST{'s2_layoutid'};
@@ -160,7 +160,6 @@ body<=
 
             } elsif ($POST{'save:theme'}) {
                 my $themeid = $POST{'s2_themeid'}+0;
-
                 my $lay = $pub->{$themeid};
                 return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.disallowed_theme_layer'} p?>"
                     if ! $lay and $lay ||= $userlay->{$themeid} and ! $has_cap;
@@ -217,6 +216,28 @@ body<=
 
                 my $uniq = (split("/", $lay->{'uniq'}))[0] || $lay->{'s2lid'};
                 my $usersty = LJ::S2::load_user_styles($u);
+                foreach (keys %$usersty) {
+                    next unless $usersty->{$_} eq "wizard-$uniq";
+
+                    $u->set_prop("s2_style", $_);
+
+                    # now we have to populate %style from this style, but not core and layout,
+                    # as those are reset below
+                    my $stylay = LJ::S2::get_style_layers($u, $u->{'s2_style'});
+                    foreach my $layer (qw(user theme i18nc i18n)) {
+                        $style{$layer} = exists $stylay->{$layer} ? $stylay->{$layer} : 0;
+                    }
+
+                    last;
+                }
+
+                # no existing style found, create a new one
+                unless ($u->prop('s2_style')) {
+                    $style{'user'} = $style{'theme'} = $style{'i18nc'} = $style{'i18n'} = 0;
+                }
+
+                $style{'layout'} = $layid;
+                $style{'core'} = $coreid;
 
                 # Theme
                 my $themeid = $POST{'s2_themeid'}+0;
@@ -261,7 +282,7 @@ body<=
 
                 LJ::cmize::s2_implicit_style_create($u, %style);
             }
-            $saved_msg = "Your settings have been saved. Link and Link";
+            $saved_msg .= "Your settings have been saved. <a href='" . $u->journal_base() . "'>View your Journal</a>.";
         }
 
         # validate moodthemeid
@@ -289,6 +310,7 @@ body<=
 
     $ret .= LJ::cmize::html_tablinks("style", $getextra);
     $ret .= "<div id='CurrentTab'><form method='post' action='style.bml?authas=$authas' id='display_form'>\n";
+    $ret .= LJ::html_hidden({ 'id' => 'authas:user', 'name' => 'authas:user', 'value' => $u->{user}});
     $ret .= LJ::form_auth();
 
     ### Style
@@ -417,7 +439,7 @@ body<=
         $ret .= LJ::html_select({ 'id' => 's2_themeid', 'name' => 's2_themeid', 'selected' => $style{'theme'}, },
                                 '0' => $ML{'.s2.customize.themes.default'}, @themes);
         $ret .= "<noscript> " . LJ::html_submit('save:theme', $ML{'.change'}) . " </noscript>";
-        $ret .= "(<a href=\"/customize/themes.bml?journal=$u->{'user'}\" target='samples'>Samples</a>)</div></div>";
+        $ret .= " (<a href=\"/customize/themes.bml?journal=$u->{'user'}\" target='samples'>Samples</a>)</div></div>";
         $ret .= "</fieldset>";
     }
 
@@ -438,7 +460,13 @@ body<=
                                         'selected' => $u->{'opt_forcemoodtheme'} eq 'Y' }) . "\n";
     $ret .= "<label for='opt_forcemoodtheme'>View this mood theme on all of your friends' posts</label></div></div></fieldset>";
 
-    $ret .= LJ::cmize::html_save();
+    if ($u->prop('stylesys') == 2) {
+        $ret .= "<script type='text/javascript'> if (\$('display_form')) { document.write(\"";
+        $ret .= LJ::ejs(LJ::cmize::html_save());
+        $ret .= "\"); }</script>";
+    } else {
+        $ret .= LJ::cmize::html_save();
+    }
     $ret .= "</form></div>";
     return $ret;
 }
