@@ -14,7 +14,7 @@ use FindBin qw($Bin);
 my $up;
 my $u = temp_user();
 
-# create another user and make them friends
+# create another user and make $u2 friend $u
 my $u2 = temp_user();
 LJ::add_friend($u2, $u);
 
@@ -52,6 +52,7 @@ ok($nm, "Made new email notificationmethod");
 {
     # subscribe to an event
     my $subscr = $u2->subscribe(
+                                # TODO: Jon, fix this ($evt2 is confusing)
                                 etypeid   => $evt2->etypeid,
                                 ntypeid   => $nm->ntypeid,
                                 arg1      => 69,
