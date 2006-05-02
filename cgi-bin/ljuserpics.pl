@@ -629,7 +629,7 @@ sub _get_upf_scaled
     my $h = ($y2 - $y1);
     my $foo = $timage->Mogrify(crop => "${w}x${h}+$x1+$y1");
 
-    my $targetSize = $border ? 96 : 100;
+    my $targetSize = $border ? 98 : 100;
 
     my ($nw, $nh) = $getSizedCoords->($targetSize, $timage);
     $timage->Scale(width => $nw, height => $nh);
