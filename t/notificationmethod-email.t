@@ -29,12 +29,6 @@ sub LJ::send_mail {
       Plaintext Body: "$opts->{body}"
       };
 
-    my $filename = "$ENV{LJHOME}/t/temp/nm-email.txt";
-
-    ok(open(EMAILFILE, ">$filename"), "Writing email to $filename");
-    print EMAILFILE $email;
-    close(EMAILFILE);
-
     # check for correct fields
     is($opts->{to}, $u->{email}, "Email address");
     is($opts->{from}, $LJ::BOGUS_EMAIL, "From address");
