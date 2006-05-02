@@ -76,6 +76,7 @@ sub run_tests{
     # notify
     {
         $valid_u->();
+        $u->set_sms_number(12345);
         $valid_meth->();
 
         my $ev;
@@ -98,7 +99,15 @@ sub run_tests{
         like($@, qr/one event at a time/, "multiple events to notify");
 
         my $str = $ev->as_string;
+
+        my $got_sms = 0;
+        local $LJ::_T_SMS_SEND = sub {
+            my $sms = shift;
+            $got_sms = $sms;
+        };
+
         $meth->notify($ev);
+        ok($got_sms, "got sms");
     }
 }
 
