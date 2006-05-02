@@ -24,7 +24,7 @@ use Class::Autouse qw(
 #                                  ($u,$fromuserid)
 
 # make sure all the config'd classes are mapped
-if(@LJ::EVENT_TYPES) {
+if (@LJ::EVENT_TYPES) {
     my $tm = __PACKAGE__->typemap or die "Could not make typemap.";
     $tm->map_classes(@LJ::EVENT_TYPES);
 }
@@ -53,7 +53,6 @@ sub new_from_raw_params {
 
     return $evt;
 }
-
 
 # Override this.  by default, events are rare, so subscriptions to
 # them are tracked in target's "has_subscription" table.
@@ -102,7 +101,21 @@ sub arg2 {  $_[0]->{args}[1] }
 # class method
 sub process_fired_events {
     my $class = shift;
+    croak("Can't call in web context") if LJ::is_web_context();
 
+    # THIS IS SO GROSS.  this is just for dev/test.  will be replaced.
+    # the whole cmdbuffer system is dying with a much more
+    # elegant/powerful solution.
+
+    require 'ljcmdbuffer.pl';
+    my $dbh = LJ::get_db_writer();
+    foreach my $c (@LJ::CLUSTERS) {
+        my $db = LJ::get_cluster_master($c);
+        next unless $db;
+        my $have_jobs = $db->selectrow_array("SELECT cbid FROM cmdbuffer WHERE cmd='fired_event' LIMIT 1");
+        next unless $have_jobs;
+        LJ::Cmdbuffer::flush($dbh, $db, "fired_event");
+    }
 }
 
 # instance method.
@@ -171,13 +184,13 @@ sub subscriptions {
         while (my ($uid, $subid) = $sth->fetchrow_array) {
             # TODO: convert to using new_from_row, more efficient
             push @subs, LJ::Subscription->new_by_id(LJ::load_userid($uid), $subid);
-
+        }
 
         # then we find wildcard matches.
         if (@wildcards_from) {
             my $jidlist = join(",", @wildcards_from);
             my $sth = $udbh->prepare
-                ("SELECT userid, subid FROM subs " . 
+                ("SELECT userid, subid FROM subs " .
                  "WHERE etypeid=? AND journalid=0 AND userid IN ($jidlist)");
             $sth->execute($self->etypeid);
             die $sth->errstr if $sth->err;

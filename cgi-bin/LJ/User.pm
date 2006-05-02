@@ -1393,11 +1393,26 @@ sub sms_received {
     LJ::run_hooks("sms_received", $u, $sms);
 }
 
+sub sms_number {
+    my $u = shift;
+    # TODO: optimize
+    my $dbr = LJ::get_db_reader();
+    return $dbr->selectrow_array("SELECT number FROM smsusermap WHERE userid=? LIMIT 1",
+                                 undef, $u->{userid});
+}
+
+sub set_sms_number {
+    my ($u, $num) = @_;
+    croak "invalid number" unless $num =~ /^\+?(\d+)$/;
+    $num = $1;
+    my $dbh = LJ::get_db_writer();
+    $dbh->do("REPLACE INTO smsusermap (number, userid) VALUES (?,?)",
+             undef, $num, $u->{userid}) or die "set_sms failed";
+}
+
 sub send_sms {
     my ($u, $sms) = @_;
-    my $dbr = LJ::get_db_reader();
-    my $number = $dbr->selectrow_array("SELECT number FROM smsusermap WHERE userid=? LIMIT 1",
-                                       undef, $u->{userid});
+    my $number = $u->sms_number;
     return 0 unless $number;
     unless (ref $sms) {
         $sms = LJ::SMS->new(text => $sms);

@@ -1,22 +1,28 @@
 package LJ::SMS;
 use strict;
 use IO::Socket::INET;
+use Carp qw(croak);
 
 sub new {
     my ($class, %opts) = @_;
     my $self = bless {}, $class;
 
-    # smsusermap, pass in from/to as u/number 
+    # smsusermap, pass in from/to as u/number
     foreach my $k (qw(from to)) {
         $self->{$k} = delete $opts{$k};
         if (LJ::isu($self->{$k})) {
             my $u = $self->{$k};
-            $self->{$k} = $class->number($u);
+            $self->{$k} = $u->sms_number
+                or croak("'$k' user has no mapped number");
         }
     }
     $self->{text} = delete $opts{text};
     die if %opts;
     return $self;
+}
+
+sub to {
+    return $_[0]{to};
 }
 
 sub text {
@@ -25,23 +31,13 @@ sub text {
 
 sub owner {
     my $self = shift;
-    my $from = shift || $self->{from} 
+    my $from = shift || $self->{from}
         or return undef;
 
     my $dbr = LJ::get_db_reader();
     my $uid = $dbr->selectrow_array("SELECT userid FROM smsusermap WHERE number=?",
                                     undef, $from);
     return $uid ? LJ::load_userid($uid) : undef;
-}
-
-sub number {
-    my $self = shift;
-    my $u = shift || $self->u 
-        or return undef;
-
-    my $dbr = LJ::get_db_reader();
-    return $dbr->selectrow_array("SELECT number FROM smsusermap WHERE userid=?",
-                                 undef, $u->{userid});
 }
 
 sub set_to {
@@ -51,6 +47,10 @@ sub set_to {
 
 sub send {
     my $self = shift;
+    if (my $cv = $LJ::_T_SMS_SEND) {
+        $cv->($self);
+        return;
+    }
     if ($LJ::IS_DEV_SERVER) {
         return $self->send_jabber_dev_server;
     }

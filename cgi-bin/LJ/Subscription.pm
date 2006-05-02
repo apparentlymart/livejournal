@@ -56,37 +56,60 @@ sub new_from_row {
 }
 
 sub create {
-    my ($class, $u, %info) = @_;
+    my ($class, $u, %args) = @_;
+
+    # easier way for eveenttype
+    if (my $evt = delete $args{'event'}) {
+        $evt = "LJ::Event::$evt" unless $evt =~ /^LJ::Event::/;
+        $args{etypeid} = LJ::Event->typemap->class_to_typeid($evt);
+    }
+
+    # easier way to specify ntypeid
+    if (my $ntype = delete $args{'method'}) {
+        $ntype = "LJ::NotificationMethod::$ntype" unless $ntype =~ /^LJ::NotificationMethod::/;
+        $args{ntypeid} = LJ::NotificationMethod->typemap->class_to_typeid($ntype);
+    }
+
+    # easier way to specify journal
+    if (my $ju = delete $args{'journal'}) {
+        $args{journalid} = $ju->{userid};
+    }
+
+    $args{arg1} ||= 0;
+    $args{arg2} ||= 0;
+
+    foreach (qw(ntypeid etypeid journalid)) {
+        croak "Required field '$_' not found in call to $class->create" unless defined $args{$_};
+    }
+    foreach (qw(userid subid createtime)) {
+        croak "Can't specify field '$_'" if defined $args{$_};
+    }
 
     my $subid = LJ::alloc_user_counter($u, 'E')
         or die "Could not alloc subid for user $u->{user}";
 
-    # make sure required params are here
-    for ('ntypeid', 'etypeid', 'arg1', 'arg2', 'journalid') {
-        croak "Required field '$_' not found in call to $class->create" unless defined $info{$_};
-    }
+    $args{subid}      = $subid;
+    $args{userid}     = $u->{userid};
+    $args{createtime} = time();
 
-    $info{subid}      = $subid;
-    $info{userid}     = $u->{userid};
-    $info{createtime} = time();
-
-    my $self = $class->new_from_row( \%info );
+    my $self = $class->new_from_row( \%args );
 
     my @columns;
     my @values;
 
     foreach (@subs_fields) {
-        if (exists( $info{$_} )) {
+        if (exists( $args{$_} )) {
             push @columns, $_;
-            push @values, delete $info{$_};
+            push @values, delete $args{$_};
         }
     }
 
-    croak( "Extra info defined, (" . join( ', ', keys( %info ) ) . ")" ) if keys %info;
+    croak( "Extra args defined, (" . join( ', ', keys( %args ) ) . ")" ) if keys %args;
 
     my $sth = $u->prepare( 'INSERT INTO subs (' . join( ',', @columns ) . ')' .
                            'VALUES (' . join( ',', map {'?'} @values ) . ')' );
     $sth->execute( @values );
+    LJ::errobj($u)->throw if $u->err;
 
     return $self;
 }
