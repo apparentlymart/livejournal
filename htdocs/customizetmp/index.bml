@@ -68,9 +68,9 @@ body<=
         LJ::update_user($u, \%update);
 
         # set userprops
-        my @uprops = qw(opt_logcommentips s1_lastn_style mailencoding opt_nctalklinks
+        my @uprops = qw(opt_logcommentips mailencoding opt_nctalklinks
                         opt_whoscreened journaltitle journalsubtitle friendspagetitle
-                        opt_stylemine stylesys s2_style);
+                        opt_stylemine stylesys);
 
         foreach my $uprop (@uprops) {
             my $eff_val = $POST{$uprop};   # effective value, since 0 isn't stored

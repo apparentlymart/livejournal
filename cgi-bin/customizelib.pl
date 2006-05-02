@@ -242,7 +242,7 @@ sub display_current_summary
 {
     my $u = shift;
     my $ret;
-    $ret .= "<?standout <strong>Current Display Summary:</strong>";
+    $ret .= "<?standout <strong>Current Display Summary</strong>";
 
     $ret .= "<table><tr>";
     my $style_settings = "None";
@@ -252,14 +252,19 @@ sub display_current_summary
             $style_settings = $ustyle->{$u->prop('s2_style')};
         }
     } else {
-        my $dbr = LJ::get_db_reader();
-        my $style_settings = $u->selectrow_array("SELECT styledes FROM s1style WHERE styleid=?",
-                                                 undef, $u->prop('s1_lastn_style'));
+        my $pubstyles = LJ::S1::get_public_styles();
+        my $lastn_styleid = $u->prop('s1_lastn_style');
+        if ($pubstyles->{$lastn_styleid}) {
+            $style_settings = $pubstyles->{$lastn_styleid}->{styledes};
+        } else {
+            my $userstyles = LJ::S1::get_user_styles($u);
+            $style_settings = $userstyles->{$lastn_styleid}->{styledes};
+        }
     }
-    $ret .= "<tr><th>Name:</th><td>" . LJ::ehtml($style_settings) . "</td></tr>";
+    $ret .= "<tr valign='top'><th>Name:</th><td>" . LJ::ehtml($style_settings) . "</td></tr>";
 
     my $style_type = $u->prop('stylesys') == 2 ? "Wizard" : "Template" ;
-    $ret .= "<th>Type:</th><td>$style_type</td></tr>";
+    $ret .= "<th valign='top'>Type:</th><td>$style_type</td></tr>";
 
     my $mood_settings = "None";
     my $dbr = LJ::get_db_reader();
@@ -267,9 +272,9 @@ sub display_current_summary
         $mood_settings = $dbr->selectrow_array("SELECT name FROM moodthemes WHERE moodthemeid=?",
                                                undef, $u->prop('moodthemeid'));
     }
-    $ret .= "<tr><th>Mood Theme:</th><td>" . LJ::ehtml($mood_settings) . "</td></tr>";
-    my $comment_settings = $u->prop('opt_showtalklinks') == "Y" ? "Enabled" : "Disabled";
-    $ret .= "<tr><th>Comments:</th><td>$comment_settings</td></tr>";
+    $ret .= "<tr valign='top'><th>Mood Theme:</th><td>" . LJ::ehtml($mood_settings) . "</td></tr>";
+    my $comment_settings = $u->prop('opt_showtalklinks') eq "Y" ? "Enabled" : "Disabled";
+    $ret .= "<tr valign='top'><th>Comments:</th><td>$comment_settings</td></tr>";
 
     $ret .= "</table> standout?>";
     return $ret;

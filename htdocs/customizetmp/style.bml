@@ -326,7 +326,7 @@ body<=
 
         foreach my $view (@LJ::views) {
             $ret .= "<div style='border: 1px solid #ccc; margin-bottom: .5em'>";
-            $ret .= "<div style='text-align: left; padding: 1em; padding-bottom: 2em; border-right: 1px solid #ccc'>";
+            $ret .= "<div style='text-align: left; padding-top: 1em; border-right: 1px solid #ccc'>";
             $ret .= "<div style='margin-left: 30px; margin-bottom: 20px;'>";
             $ret .= "<label for='s1_${view}_style'>$LJ::viewinfo{$view}->{'des'}:</label> ";
 
