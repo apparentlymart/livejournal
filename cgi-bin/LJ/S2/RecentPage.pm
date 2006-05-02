@@ -239,7 +239,7 @@ sub RecentPage
         if ($skip == $maxskip) {
             my $date_slashes = $lastdate;  # "yyyy mm dd";
             $date_slashes =~ s! !/!g;
-            $nav->{'backward_url'} = "$p->{'base_url'}/day/$date_slashes";
+            $nav->{'backward_url'} = "$p->{'base_url'}/$date_slashes";
         } else {
             my $newskip = $skip + $itemshow;
             $nav->{'backward_url'} = LJ::make_link("$p->{'base_url'}/", { skip => ($newskip || ""), tag => (LJ::eurl($get->{tag}) || "") });
