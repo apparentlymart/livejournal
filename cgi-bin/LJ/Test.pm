@@ -152,4 +152,25 @@ sub disconnect_all {}
 sub forget_dead_hosts {}
 
 
+package LJ::User;
+# post a fake entry in this user's journal
+sub post_fake_entry {
+    my $u = shift;
+
+        my %req = (
+                   mode => 'postevent',
+                   ver => $LJ::PROTOCOL_VER,
+                   user => $u->{user},
+                   password => '',
+                   event => "This is a test post from $$ at " . time() . "\n",
+                   subject => "test suite post.",
+                   tz => 'guess',
+                   );
+
+    my %res;
+    my $flags = { noauth => 1 };
+    LJ::do_request(\%req, \%res, $flags);
+    return \%res;
+}
+
 1;

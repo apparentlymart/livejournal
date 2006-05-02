@@ -26,22 +26,10 @@ test_esn_flow(sub {
         $got_sms = $sms;
     };
 
-    my %req = (
-               mode => 'postevent',
-               ver => $LJ::PROTOCOL_VER,
-               user => $u2->{user},
-               password => '',
-               event => "This is a test post from $$ at " . time() . "\n",
-               subject => "test suite post.",
-               tz => 'guess',
-               );
-
-    my %res;
-    my $flags = { noauth => 1 };
-    LJ::do_request(\%req, \%res, $flags);
-    is($res{'success'},      "OK", "did success");
-    is($res{'errmsg'} || "", "", "no errors");
-    ok($res{'url'}, "got a URL");
+    my $res = $u2->post_fake_entry;
+    is($res->{'success'},      "OK", "did success");
+    is($res->{'errmsg'} || "", "", "no errors");
+    ok($res->{'url'}, "got a URL");
 
     LJ::Event->process_fired_events;
 

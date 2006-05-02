@@ -140,6 +140,11 @@ sub event {
     return LJ::Event->new_from_raw_params($self->{etypeid}, $self->{journalid}, $self->{arg1}, $self->{arg2});
 }
 
+sub args {
+    my $self = shift;
+    return ($self->{arg1}, $self->{arg2});
+}
+
 sub ntypeid {
     my $self = shift;
     return $self->{ntypeid};
