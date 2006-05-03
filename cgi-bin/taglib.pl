@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+use LJ::Constants;
+
 package LJ::Tags;
 
 use strict;

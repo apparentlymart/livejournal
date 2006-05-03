@@ -2,6 +2,7 @@
 #
 
 use strict;
+use LJ::Constants;
 use Unicode::MapUTF8 ();
 use Class::Autouse qw(
                       LJ::Event::JournalNewEntry
