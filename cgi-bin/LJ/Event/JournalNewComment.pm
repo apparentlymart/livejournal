@@ -17,6 +17,41 @@ sub title {
     return 'New Comment on Journal';
 }
 
+sub matches_filter {
+    my ($self, $subscr) = @_;
+
+    my $sjid = $subscr->journalid;
+    my $ejid = $self->journal->{userid};
+    my ($earg1, $earg2) = ($self->arg1, $self->arg2);
+    my ($sarg1, $sarg2) = ($subscr->arg1, $subscr->arg2);
+
+    # watching a specific journal
+    if ($sarg1 == 0 && $sarg2 == 0) {
+        # TODO: friend group filtering in case of $sjid == 0 when
+        # a subprop is filtering on a friend group
+        return 1;
+    }
+
+    # watching a post
+    if ($sarg2 == 0) {
+        my $wanted_jitemid = $sarg1;
+        my $entry = $self->comment->entry;
+        return $entry->jitemid == $wanted_jitemid;
+    }
+
+    die "Not implemented";
+}
+
+sub jtalkid {
+    my $self = shift;
+    return $self->arg1;
+}
+
+sub comment {
+    my $self = shift;
+    return LJ::Comment->new($self->journal, jtalkid => $self->jtalkid);
+}
+
 sub journal_sub_title { 'Journal' }
 sub journal_sub_type  { 'owner' }
 

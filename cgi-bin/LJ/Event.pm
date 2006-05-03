@@ -93,6 +93,7 @@ sub arg2_sub_type     { undef }
 #            Don't override
 ############################################################################
 
+*journal = \&u;
 sub u    {  $_[0]->{u} }
 sub arg1 {  $_[0]->{args}[0] }
 sub arg2 {  $_[0]->{args}[1] }

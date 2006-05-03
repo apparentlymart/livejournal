@@ -36,6 +36,8 @@ test_esn_flow(sub {
     ok($got_sms, "got the SMS");
     is($got_sms->to, 12345, "to right place");
 
+    # remove subscription
+    ok($subsc->delete, "Removed subscription");
 });
 
 sub test_esn_flow {

@@ -45,6 +45,20 @@ sub subscriptions_of_user {
     return @subs;
 }
 
+# Instance method
+# Remove this subscription
+sub delete {
+    my $self = shift;
+
+    my $subid = $self->id
+        or croak "Invalid subsciption";
+
+    my $u = $self->owner;
+
+    $u->do("DELETE FROM subs WHERE subid=?", undef, $subid);
+
+    return 1;
+}
 
 # Class method
 sub new_from_row {
@@ -140,9 +154,14 @@ sub event {
     return LJ::Event->new_from_raw_params($self->{etypeid}, $self->{journalid}, $self->{arg1}, $self->{arg2});
 }
 
-sub args {
+sub arg1 {
     my $self = shift;
-    return ($self->{arg1}, $self->{arg2});
+    return $self->{arg1};
+}
+
+sub arg2 {
+    my $self = shift;
+    return $self->{arg2};
 }
 
 sub ntypeid {
