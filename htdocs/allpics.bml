@@ -97,9 +97,12 @@
             $body .= "<?h1 $ML{'.current'} h1?><?p ";
             $body .= BML::ml('.pics', {'user'=> LJ::ljuser($u)});
             if ($can_manage) {
-                $body .= ' ' . BML::ml('.edit3', 
-                                       { 'aopts1' => "href='$LJ::SITEROOT/editpics.bml$getextra'",
-                                         'aopts2' => "href='$LJ::SITEROOT/editpics.bml$getextra#upload'" });
+                my $hook_text = LJ::run_hook('allpics_upsell_text', $u, $getextra);
+                if ($hook_text eq "") {
+                    $body .= ' ' . BML::ml('.edit4', {'aopts' => "href='$LJ::SITEROOT/editpics.bml$getextra'"});
+                } else {
+                    $body .= $hook_text;
+                }
             }
             $body .= " p?><div style='margin-left: 50px;'><table cellpadding='5' border='0' cellspacing='1'>";
         }

@@ -35,7 +35,7 @@
 
 /allpics.bml.default=<u>Default</u>
 
-/allpics.bml.edit3=You may be interested in <a [[aopts1]]>editing your picture keywords</a> or <a [[aopts2]]>uploading a new picture</a>.
+/allpics.bml.edit4=You may be interested in <a [[aopts]]>editing your userpic keywords or uploading a new userpic</a>.
 
 /allpics.bml.error.noparam=You need to specify a user parameter.
 
