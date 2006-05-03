@@ -1863,7 +1863,9 @@ sub ads {
     my $pagetype = delete $opts{'orient'};
     my $user     = delete $opts{'user'};
 
-    return '' unless LJ::run_hook('should_show_ad', {
+    my $debug = $LJ::DEBUG{'ads'};
+
+    return '' unless $debug || LJ::run_hook('should_show_ad', {
         ctx  => $ctx,
         user => $user,
         type => $pagetype,
@@ -1928,92 +1930,91 @@ sub ads {
 
     $adcall{url}     = 'http://' . $r->header_in('Host') . $r->uri;
 
-    if (ref $addetails eq 'HASH') {
-        $adcall{width}   = $addetails->{width};
-        $adcall{height}  = $addetails->{height};
+    return $addetails unless ref $addetails eq "HASH";
 
-        my $remote = LJ::get_remote();
-        if ($remote) {
-            # Pass age and country to targetting engine if user shares this information
-            if ($remote->{allow_infoshow} eq 'Y') {
-                if (defined $remote->{bdate}) {
-                    # This calculation can die if they haven't set differing parts of their
-                    # birthdate.
-                    my $secs = eval { time() - LJ::mysqldate_to_time($remote->{bdate}); };
+    # addetails is a hashref now:
+    $adcall{width}   = $addetails->{width};
+    $adcall{height}  = $addetails->{height};
 
-                    $adcall{age} = int($secs / 31556926)
-                        if $secs > 0;  # Real rough calculation, but that is fine
-                }
+    my $remote = LJ::get_remote();
+    if ($remote) {
+        # Pass age and country to targetting engine if user shares this information
+        if ($remote->{allow_infoshow} eq 'Y') {
+            if (defined $remote->{bdate}) {
+                # This calculation can die if they haven't set differing parts of their
+                # birthdate.
+                my $secs = eval { time() - LJ::mysqldate_to_time($remote->{bdate}); };
 
-                $adcall{country} = $remote->prop('country');
+                $adcall{age} = int($secs / 31556926)
+                    if $secs > 0;  # Real rough calculation, but that is fine
             }
 
-            # Pass gender to targetting engine
-            if ($adcall{gender} = $remote->prop('gender')) {
-                $adcall{gender} = uc(substr($adcall{gender}, 0, 1)); # M|F|U
-                $adcall{gender} = undef if $adcall{gender} eq 'U';
-            }
-
-            # User selected ad content categories
-            $adcall{categories} = $remote->prop('ad_categories');
-
-            # User's notable interests
-            $adcall{interests} = join(',', grep { !defined $LJ::AD_BLOCKED_INTERESTS{$_} } $remote->notable_interests(10));
+            $adcall{country} = $remote->prop('country');
         }
 
-        # If we have neither categories or interests, load the content author's
-        # if we're in journal context
-        if ($ctx eq 'journal'  && !($adcall{categories} && !$adcall{interests})) {
-            my $u = $opts{user} ? LJ::load_user($opts{user}) : LJ::load_userid($r->notes("journalid"));
-
-            if ($u) {
-                $adcall{categories} = $u->prop('ad_categories');
-                $adcall{interests} = join(',', grep { !defined $LJ::AD_BLOCKED_INTERESTS{$_} } $u->notable_interests(10));
-            }
+        # Pass gender to targetting engine
+        if ($adcall{gender} = $remote->prop('gender')) {
+            $adcall{gender} = uc(substr($adcall{gender}, 0, 1)); # M|F|U
+            $adcall{gender} = undef if $adcall{gender} eq 'U';
         }
 
-        # Language this page is displayed in
-        $adcall{language} = $r->notes('langpref');
-        $adcall{language} =~ s/_LJ//; # Trim _LJ postfixJ
+        # User selected ad content categories
+        $adcall{categories} = $remote->prop('ad_categories');
 
-        # What type of account level do they have?
-        $adcall{accttype} = $remote ?
-            $remote->in_class('plus') ? 'ADS' : 'FREE' :   # Ads or Free if logged in
-            'NON';                                         # Not logged in
+        # User's notable interests
+        $adcall{interests} = join(',', grep { !defined $LJ::AD_BLOCKED_INTERESTS{$_} } $remote->notable_interests(10));
+    }
 
-        # Build up escaped query string of adcall parameters
-        my $adparams = join('&', map { LJ::eurl($_) . '=' . LJ::eurl($adcall{$_}) } keys %adcall);
+    # If we have neither categories or interests, load the content author's
+    # if we're in journal context
+    if ($ctx eq 'journal'  && !($adcall{categories} && !$adcall{interests})) {
+        my $u = $opts{user} ? LJ::load_user($opts{user}) : LJ::load_userid($r->notes("journalid"));
 
-        my $adhtml;
-        $adhtml .= "<div class=\"ljad ljad$adcall{adunit}\" id=\"\">";
+        if ($u) {
+            $adcall{categories} = $u->prop('ad_categories');
+            $adcall{interests} = join(',', grep { !defined $LJ::AD_BLOCKED_INTERESTS{$_} } $u->notable_interests(10));
+        }
+    }
 
-        my $label = $pagetype eq 'Journal-5LinkUnit' ? 'Sponsored Search Links' : 'Advertisement';
-        $adhtml .= "<h4 style='margin-bottom: 2px'>$label</h4>";
+    # Language this page is displayed in
+    $adcall{language} = $r->notes('langpref');
+    $adcall{language} =~ s/_LJ//; # Trim _LJ postfixJ
 
+    # What type of account level do they have?
+    $adcall{accttype} = $remote ?
+        $remote->in_class('plus') ? 'ADS' : 'FREE' :   # Ads or Free if logged in
+        'NON';                                         # Not logged in
+
+    # Build up escaped query string of adcall parameters
+    my $adparams = join('&', map { LJ::eurl($_) . '=' . LJ::eurl($adcall{$_}) } keys %adcall);
+
+    my $adhtml;
+    $adhtml .= "<div class=\"ljad ljad$adcall{adunit}\" id=\"\">";
+
+    my $label = $pagetype eq 'Journal-5LinkUnit' ? 'Sponsored Search Links' : 'Advertisement';
+    $adhtml .= "<h4 style='margin-bottom: 2px'>$label</h4>";
+
+    if ($debug) {
+        $adhtml .= "<div style='width: $adcall{width}px; height: $adcall{height}px; border: 1px solid green; color: #ffc0c0'></div>";
+    } else {
         # Iframe with call to ad targetting server
         $adhtml .= "<iframe src='${LJ::ADSERVER}?$adparams' frameborder='0' scrolling='no' id='adframe' ";
         $adhtml .= "width='" . LJ::ehtml($adcall{width}) . "' ";
         $adhtml .= "height='" . LJ::ehtml($adcall{height}) . "' ";
         $adhtml .= "></iframe>";
-
-        # Customize and feedback links
-        my $eadcall = LJ::eurl($adparams);
-        my $echannel = LJ::eurl($adcall{channel});
-        my $euri = LJ::eurl($r->uri);
-        $adhtml .= "<div style='text-align: right; margin-top: 2px;'>";
-        $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>Customize</a> | ";
-        $adhtml .= "<a href=\"$LJ::SITEROOT/feedback/ads.bml?adcall=$eadcall&channel=$echannel&uri=$euri\">Feedback</a>";
-        $adhtml .= "</div>";
-        $adhtml .= "</div>";
-
-        return $adhtml;
-
-    } else {
-        return $addetails;
     }
 
-    # Something got screwed up somewhere
-    return '';
+    # Customize and feedback links
+    my $eadcall = LJ::eurl($adparams);
+    my $echannel = LJ::eurl($adcall{channel});
+    my $euri = LJ::eurl($r->uri);
+    $adhtml .= "<div style='text-align: right; margin-top: 2px;'>";
+    $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>Customize</a> | ";
+    $adhtml .= "<a href=\"$LJ::SITEROOT/feedback/ads.bml?adcall=$eadcall&channel=$echannel&uri=$euri\">Feedback</a>";
+    $adhtml .= "</div>";
+    $adhtml .= "</div>";
+
+    return $adhtml;
 }
 
 sub control_strip
