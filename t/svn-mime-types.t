@@ -12,6 +12,7 @@ my %check;
 my @files = `$ENV{LJHOME}/bin/cvsreport.pl --map`;
 foreach my $line (@files) {
     chomp $line;
+    $line =~ s!//!/!g;
     my ($rel, $path) = split(/\t/, $line);
     next unless $path =~ /\.(gif|jpe?g|png|ico)$/i;
     $check{$path} = 1;
@@ -48,11 +49,32 @@ foreach my $f (sort keys %check) {
     ok(! @errors, "$f: @errors");
 
     if (@errors) {
+        my $oldfile = eval { slurp("$ENV{LJHOME}/cvs/$dir-oldcvs/$f") };
+        my $newfile = slurp("$ENV{LJHOME}/cvs/$dir/$f");
+        if ($oldfile && $oldfile eq $newfile) {
+            # we can safely just fixup the mime types
+            system("svn", "pdel", "svn:eol-style", $f);
+            system("svn", "pset", "svn:mime-type", "application/octet-stream", $f);
+            next;
+        }
+
+        push @errors, "Files don't match" if $oldfile && $oldfile ne $newfile;
+
         $badfiles{$f} = \@errors;
+
+
     }
+}
+
+sub slurp {
+    my $f = shift;
+    open(my $fh, $f) or die;
+    return do { local $/; <$fh>; };
 }
 
 use Data::Dumper;
 if (%badfiles) {
     warn Dumper(\%badfiles);
 }
+
+exit 0;
