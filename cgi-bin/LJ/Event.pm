@@ -31,8 +31,9 @@ if (@LJ::EVENT_TYPES) {
 
 sub new {
     my ($class, $u, @args) = @_;
-    croak("too many args") if @args > 2;
+    croak("too many args")        if @args > 2;
     croak("args must be numeric") if grep { /\D/ } @args;
+    croak("u isn't a user")       unless LJ::isu($u);
 
     return bless {
         u => $u,
