@@ -178,6 +178,8 @@ sub t_post_fake_entry {
     my $u = shift;
     my %opts = @_;
 
+    require 'ljprotocol.pl';
+
     my $security = delete $opts{security} || 'public';
     my $proto_sec = $security;
     if ($security eq "friends") {
@@ -205,6 +207,45 @@ sub t_post_fake_entry {
     my $jitemid = $res{itemid} or die "No itemid";
 
     return LJ::Entry->new($u, jitemid => $jitemid);
+}
+
+package LJ::Entry;
+
+# returns LJ::Comment object or dies on failure
+sub t_enter_comment {
+    my ($entry, %opts) = @_;
+    my $jitemid = $entry->jitemid;
+    my $u = $entry->journal;
+
+    require 'talklib.pl';
+
+    my $parent = delete $opts{parent};
+    my $parenttalkid = $parent ? $parent->jtalkid : 0;
+
+    my $subject = delete $opts{subject} || 'comment subject';
+    my $body = delete $opts{body} || 'comment body';
+
+    # add some random stuff for dupe protection
+    my $rand = "t=" . time() . " r=" . rand();
+
+    my %err;
+    my $jtalkid = LJ::Talk::Post::enter_comment($u, {talkid => $parenttalkid}, {itemid => $jitemid},
+                                                 {u => $u, state => 'A', subject => 'comment subject',
+                                                  body => "comment body\n\n$rand",}, \%err);
+
+    die "Could not post comment" unless $jtalkid;
+
+    return LJ::Comment->new($u, jtalkid => $jtalkid);
+}
+
+package LJ::Comment;
+
+# reply to a comment instance, takes same opts as LJ::Entry::t_enter_comment
+sub t_reply {
+    my ($comment, %opts) = @_;
+    my $entry = $comment->entry;
+    $opts{parent} = $comment;
+    return $entry->t_enter_comment(%opts);
 }
 
 1;
