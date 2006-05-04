@@ -106,6 +106,24 @@ sub replace {
     return 1;
 }
 
+sub incr {
+    my ($self, $fkey, $optval) = @_;
+    $optval ||= 1;
+    my $key = _key($fkey);
+    return 0 unless exists $self->{data}{$key};
+    $self->{data}{$key} += $optval;
+    return 1;
+}
+
+sub decr {
+    my ($self, $fkey, $optval) = @_;
+    $optval ||= 1;
+    my $key = _key($fkey);
+    return 0 unless exists $self->{data}{$key};
+    $self->{data}{$key} -= $optval;
+    return 1;
+}
+
 sub set {
     my ($self, $fkey, $val, $exptime) = @_;
     my $key = _key($fkey);
