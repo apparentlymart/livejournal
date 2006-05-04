@@ -28,10 +28,14 @@ local $LJ::_T_SMS_SEND = sub {
     $got_sms{$rcpt->{userid}} = $sms;
 };
 
+my $proc_events = sub {
+    %got_sms = ();
+    LJ::Event->process_fired_events;
+};
+
 my $got_notified = sub {
     my $u = shift;
-    delete $got_sms{$u->{userid}};
-    LJ::Event->process_fired_events;
+    $proc_events->();
     return $got_sms{$u->{userid}};
 };
 
@@ -129,13 +133,64 @@ test_esn_flow(sub {
     ok($u2e3, "did a post");
 
     # post a comment that $subsc won't match
-    $jtalkid = LJ::Talk::Post::enter_comment($u2, {talkid => 0}, {itemid => $u2e3->jitemid},
+    my $jtalkid2 = LJ::Talk::Post::enter_comment($u2, {talkid => 0}, {itemid => $u2e3->jitemid},
                                              {u => $u2, state => 'A', subject => 'comment subject',
                                               body => 'comment body',}, \%err);
 
     $sms = $got_notified->($u1);
     ok(!$sms, "didn't get comment notification on unrelated post");
 
+    $subsc->delete;
+
+    ######## S3 (watching a thread)
+    # post a comment under comment with jtalkid2
+
+
+    ####### S4 (watching new comments on all friends' journals)
+
+    $subsc = $u1->subscribe(
+                            event   => "JournalNewComment",
+                            method  => "SMS",
+                            );
+    ok($subsc, "made S4 wildcard subscription");
+
+    my $u2e4 = eval { $u2->t_post_fake_entry };
+    ok($u2e4, "Got entry");
+
+    for my $pass (1..2) {
+        my $u2c1 = eval { $u2e4->t_enter_comment };
+        ok($u2c1, "Posted comment");
+
+        $proc_events->();
+
+        if ($pass == 1) {
+            $sms = $got_sms{$u1->{userid}};
+            ok($sms, "Got wildcard notification");
+
+            $sms = $got_sms{$u2->{userid}};
+            ok(! $sms, "Non-subscribed user did not get notification");
+
+            # remove the friend
+            LJ::remove_friend($u1, $u2);
+
+        } elsif ($pass == 2) {
+            $sms = $got_sms{$u1->{userid}};
+            ok(! $sms, "didn't get wildcard notification");
+
+            # add the friend back
+            LJ::add_friend($u1, $u2); # make u1 friend u2
+        }
+    }
+
+    # leave some comment on u1, make sure no notification received
+    my $u1e2 = eval { $u1->t_post_fake_entry };
+    ok($u1e2, "Posted entry");
+
+    my $u1c1 = eval { $u1e2->t_enter_comment };
+    ok($u1c1, "Got comment");
+
+    $sms = $got_notified->($u1);
+    ok(! $sms, "Did not receive notification");
 });
 
 sub test_esn_flow {

@@ -90,7 +90,9 @@ sub create {
     $args{arg1} ||= 0;
     $args{arg2} ||= 0;
 
-    foreach (qw(ntypeid etypeid journalid)) {
+    $args{journalid} ||= 0;
+
+    foreach (qw(ntypeid etypeid)) {
         croak "Required field '$_' not found in call to $class->create" unless defined $args{$_};
     }
     foreach (qw(userid subid createtime)) {
