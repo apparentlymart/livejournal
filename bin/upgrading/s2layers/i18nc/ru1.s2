@@ -6,11 +6,11 @@ layerinfo "name" = "Russian";
 layerinfo "langcode" = "ru";
 set lang_current = "ru";
 
-set lang_fmt_date_short = "%%m%%/%%d%%/%%yyyy%%";
-set lang_fmt_date_med = "%%mon%% %%dayord%% %%yyyy%%";
-set lang_fmt_date_med_day = "%%da%% %%mon%% %%dayord%% %%yyyy%%";
-set lang_fmt_date_long = "%%dayord%% %%month%% %%yyyy%%";
-set lang_fmt_date_long_day = "%%day%% %%month%% %%dayord%% %%yyyy%%";
+set lang_fmt_date_short = "%%d%%/%%m%%/%%yyyy%%";
+set lang_fmt_date_med = "%%dayord%% %%mon%%, %%yyyy%%";
+set lang_fmt_date_med_day = "%%da%%, %%dayord%% %%mon%%, %%yyyy%%";
+set lang_fmt_date_long = "%%month%%, %%dayord%%, %%yyyy%%";
+set lang_fmt_date_long_day = "%%day%%, %%month%%, %%dayord%%, %%yyyy%%";
 set lang_fmt_time_short = "%%HH%%:%%min%%";
 set lang_fmt_month_short = "%%mon%% %%yy%%";
 set lang_fmt_month_med = "%%mon%% %%yyyy%%";
@@ -109,8 +109,7 @@ function lang_page_of_pages (int pg, int pgs) [notags] : string {
 function lang_ordinal(int num) [notags] : string
 "Make an ordinal number from a cardinal number"
 {
-	if ($num%10 == 3 and $num%100 != 13) { return $num+"-ье"; } 
-	return $num+"-ое"; 
+	return $num+""; 
 }
 
 function lang_viewname(string viewid) [notags] : string {
