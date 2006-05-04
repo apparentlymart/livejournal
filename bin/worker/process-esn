@@ -1,0 +1,21 @@
+#!/usr/bin/perl
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+require 'ljlib.pl';
+require 'ljprotocol.pl';
+
+use Getopt::Long;
+
+my $interval = 5;
+usage() unless GetOptions('interval|n=i' => \$interval);
+
+use LJ::Event;
+use LJ::Test qw(memcache_stress temp_user);
+use FindBin qw($Bin);
+
+while (1) {
+    my $now = time;
+    print "[$$] \@$now: processing events...\n";
+    LJ::Event->process_fired_events;
+    sleep $interval;
+}
