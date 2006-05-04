@@ -281,13 +281,17 @@ sub get_public_styles {
     my $dbh = LJ::get_db_writer();
     my $sth = $dbh->prepare("SELECT userid, $cols FROM s1style WHERE userid=? AND is_public='Y'");
     $sth->execute($sysid);
-    $pubstyc->{$_->{'styleid'}} = $_ while $_ = $sth->fetchrow_hashref;
+    while (my $row = $sth->fetchrow_hashref) {
+        $pubstyc->{$row->{'styleid'}} = $row;
+    }
 
     # fall back to old table
     unless (%$pubstyc) {
         $sth = $dbh->prepare("SELECT user, $cols FROM style WHERE user='system' AND is_public='Y'");
         $sth->execute();
-        $pubstyc->{$_->{'styleid'}} = $_ while $_ = $sth->fetchrow_hashref;
+        while (my $row = $sth->fetchrow_hashref) {
+            $pubstyc->{$row->{'styleid'}} = $row;
+        }
     }
     return undef unless %$pubstyc;
 
