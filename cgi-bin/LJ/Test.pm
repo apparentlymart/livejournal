@@ -1,6 +1,8 @@
 package LJ::Test;
 require Exporter;
+use strict;
 use Carp qw(croak);
+use vars qw(@ISA @EXPORT);
 @ISA = qw(Exporter);
 @EXPORT = qw(memcache_stress with_fake_memcache temp_user);
 
@@ -172,23 +174,37 @@ sub forget_dead_hosts {}
 
 package LJ::User;
 # post a fake entry in this user's journal
-sub post_fake_entry {
+sub t_post_fake_entry {
     my $u = shift;
+    my %opts = @_;
 
-        my %req = (
-                   mode => 'postevent',
-                   ver => $LJ::PROTOCOL_VER,
-                   user => $u->{user},
-                   password => '',
-                   event => "This is a test post from $$ at " . time() . "\n",
-                   subject => "test suite post.",
-                   tz => 'guess',
-                   );
+    my $security = delete $opts{security} || 'public';
+    my $proto_sec = $security;
+    if ($security eq "friends") {
+        $proto_sec = "usemask";
+    }
+
+    my %req = (
+               mode => 'postevent',
+               ver => $LJ::PROTOCOL_VER,
+               user => $u->{user},
+               password => '',
+               event => "This is a test post from $$ at " . time() . "\n",
+               subject => "test suite post.",
+               tz => 'guess',
+               security => $proto_sec,
+               );
+
+    $req{allowmask} = 1 if $security eq 'friends';
 
     my %res;
     my $flags = { noauth => 1 };
     LJ::do_request(\%req, \%res, $flags);
-    return \%res;
+
+    die "Error posting: $res{errmsg}" unless $res{'success'} eq "OK";
+    my $jitemid = $res{itemid} or die "No itemid";
+
+    return LJ::Entry->new($u, jitemid => $jitemid);
 }
 
 1;

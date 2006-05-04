@@ -25,6 +25,11 @@ sub matches_filter {
     my ($earg1, $earg2) = ($self->arg1, $self->arg2);
     my ($sarg1, $sarg2) = ($subscr->arg1, $subscr->arg2);
 
+    my $comment = $self->comment;
+    my $entry   = $comment->entry;
+    my $watcher = $subscr->owner;
+    return 0 unless $entry->visible_to($watcher);
+
     # watching a specific journal
     if ($sarg1 == 0 && $sarg2 == 0) {
         # TODO: friend group filtering in case of $sjid == 0 when
@@ -35,7 +40,6 @@ sub matches_filter {
     # watching a post
     if ($sarg2 == 0) {
         my $wanted_jitemid = $sarg1;
-        my $entry = $self->comment->entry;
         return $entry->jitemid == $wanted_jitemid;
     }
 

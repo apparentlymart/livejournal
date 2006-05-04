@@ -25,11 +25,20 @@ sub to {
     return $_[0]{to};
 }
 
+sub to_u {
+    my $self = shift;
+    my $tonum = $self->{to};
+    my $dbr = LJ::get_db_reader();
+    my $uid = $dbr->selectrow_array("SELECT userid FROM smsusermap WHERE number=?",
+                                    undef, $tonum);
+    return $uid ? LJ::load_userid($uid) : undef;
+}
+
 sub text {
     return $_[0]{text};
 }
 
-sub owner {
+sub owner { # FIXME: change to 'sender_u' or something
     my $self = shift;
     my $from = shift || $self->{from}
         or return undef;
