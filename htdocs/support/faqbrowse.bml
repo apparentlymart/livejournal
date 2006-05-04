@@ -221,22 +221,22 @@ body<=
 
         # Highlight search terms
 	my $term = sub {
-	    my $term = shift;
-            return $term if $term =~ m!^http://!;
- 	    return "<span class='searchhighlight'>" . LJ::ehtml($term) . "</span>";
+	    my $xterm = shift;
+        return $xterm if $xterm =~ m!^https?://!;
+ 	    return "<span class='searchhighlight'>" . LJ::ehtml($xterm) . "</span>";
 	};
         my $qterm = $GET{'q'};
 	if ($qterm) {
-	    $question =~ s/\Q$qterm\E/$term->($&)/ige;
+	    $question =~ s/(\Q$qterm\E)/$term->($1)/ige;
 
             # don't highlight things in the FURTHER READING section
             # (a livejournal.com convention)
-            $answer =~ s/(FURTHER READING.+)//s;
+            $answer =~ s/FURTHER READING.+//s;
             my $fr = $1;
 
             # don't highlight terms in URLs
-            $summary =~ s/(https?:\/\/\S+)?\Q$qterm\E/$term->($&)/ige;
-            $answer =~ s/(https?:\/\/\S+)?\Q$qterm\E/$term->($&)/ige;
+            $summary =~ s!((?:https?://[^>]+)?\Q$qterm\E)!$term->($1)!ige;
+            $answer =~ s!((?:https?://[^>]+)?\Q$qterm\E)!$term->($1)!ige;
 
             $answer .= $fr;
 	}
