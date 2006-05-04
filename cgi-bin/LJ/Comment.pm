@@ -88,6 +88,20 @@ sub jtalkid {
     return $self->{jtalkid};
 }
 
+sub parenttalkid {
+    my $self = shift;
+    __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
+    return $self->{parenttalkid};
+}
+
+# returns a LJ::Comment object for the parent
+sub parent {
+    my $self = shift;
+    my $ptalkid = $self->parenttalkid or return undef;
+
+    return LJ::Comment->new($self->journal, jtalkid => $ptalkid);
+}
+
 # returns true if entry currently exists.  (it's possible for a given
 # $u, to make a fake jitemid and that'd be a valid skeleton LJ::Entry
 # object, even though that jitemid hasn't been created yet, or was

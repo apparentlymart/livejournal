@@ -42,13 +42,19 @@ sub matches_filter {
         return 1;
     }
 
-    # watching a post
-    if ($sarg2 == 0) {
-        my $wanted_ditemid = $sarg1;
-        return $entry->ditemid == $wanted_ditemid;
-    }
+    my $wanted_ditemid = $sarg1;
+    return 0 unless $entry->ditemid == $wanted_ditemid;
 
-    die "Not implemented";
+    # watching a post
+    return 1 if $sarg2 == 0;
+
+    # watching a thread
+    my $wanted_jtalkid = $sarg2;
+    while ($comment) {
+        return 1 if $comment->jtalkid == $wanted_jtalkid;
+        $comment = $comment->parent;
+    }
+    return 0;
 }
 
 sub jtalkid {

@@ -233,7 +233,7 @@ sub t_enter_comment {
                                                  {u => $u, state => 'A', subject => 'comment subject',
                                                   body => "comment body\n\n$rand",}, \%err);
 
-    die "Could not post comment" unless $jtalkid;
+    die "Could not post comment: " . join(", ", %err) unless $jtalkid;
 
     return LJ::Comment->new($u, jtalkid => $jtalkid);
 }

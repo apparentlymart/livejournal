@@ -44,6 +44,7 @@ my $got_notified = sub {
 test_esn_flow(sub {
     my ($u1, $u2) = @_;
     my $sms;
+    my $comment;
 
     # subscribe $u1 to all posts on $u2
     my $subsc = $u1->subscribe(
@@ -59,13 +60,8 @@ test_esn_flow(sub {
     is($@, "", "no errors");
 
     # $u1 leave a comment on $u2
-    my %err = ();
-    my $jtalkid = LJ::Talk::Post::enter_comment($u2, {talkid => 0}, {itemid => $u2e1->jitemid},
-                                                   {u => $u1, state => 'A', subject => 'comment subject',
-                                                    body => 'comment body',}, \%err);
-
-    ok(!%err, "no error posting comment");
-    ok($jtalkid, "got jtalkid");
+    $comment = $u2e1->t_enter_comment;
+    ok($comment, "left a comment");
 
     # make sure we got notification
     $sms = $got_notified->($u1);
@@ -78,12 +74,8 @@ test_esn_flow(sub {
     ok($u1e1, "did a post");
 
     # post a comment on it
-    $jtalkid = LJ::Talk::Post::enter_comment($u1, {talkid => 0}, {itemid => $u1e1->jitemid},
-                                             {u => $u1, state => 'A', subject => 'comment subject',
-                                              body => 'comment body',}, \%err);
-
-    ok(!%err, "no error posting comment");
-    ok($jtalkid, "got jtalkid");
+    $comment = $u1e1->t_enter_comment;
+    ok($comment, "left comment");
 
     # make sure we got notification
     $sms = $got_notified->($u1);
@@ -95,12 +87,8 @@ test_esn_flow(sub {
     is($u2e2f->security, "usemask", "is actually friends only");
 
     # post a comment on it
-    $jtalkid = LJ::Talk::Post::enter_comment($u2, {talkid => 0}, {itemid => $u2e2f->jitemid},
-                                             {u => $u2, state => 'A', subject => 'comment subject',
-                                              body => 'comment body private',}, \%err);
-
-    ok(!%err, "no error posting comment");
-    ok($jtalkid, "got jtalkid");
+    $comment = $u2e2f->t_enter_comment;
+    ok($comment, "got jtalkid");
 
     # make sure we got notification
     $sms = $got_notified->($u1);
@@ -119,11 +107,8 @@ test_esn_flow(sub {
     ok($subsc, "made S2 subscription");
 
     # post a comment on u2e1
-    $jtalkid = LJ::Talk::Post::enter_comment($u2, {talkid => 0}, {itemid => $u2e1->jitemid},
-                                             {u => $u2, state => 'A', subject => 'comment subject',
-                                              body => 'comment body',}, \%err);
-    ok(!%err, "no error posting comment");
-    ok($jtalkid, "got jtalkid");
+    $comment = $u2e1->t_enter_comment;
+    ok($comment, "got jtalkid");
 
     $sms = $got_notified->($u1);
     ok($sms, "Got comment notification");
@@ -133,9 +118,8 @@ test_esn_flow(sub {
     ok($u2e3, "did a post");
 
     # post a comment that $subsc won't match
-    my $jtalkid2 = LJ::Talk::Post::enter_comment($u2, {talkid => 0}, {itemid => $u2e3->jitemid},
-                                             {u => $u2, state => 'A', subject => 'comment subject',
-                                              body => 'comment body',}, \%err);
+    $comment = $u2e3->t_enter_comment;
+    ok($comment, "Posted comment");
 
     $sms = $got_notified->($u1);
     ok(!$sms, "didn't get comment notification on unrelated post");
@@ -143,8 +127,44 @@ test_esn_flow(sub {
     $subsc->delete;
 
     ######## S3 (watching a thread)
-    # post a comment under comment with jtalkid2
 
+    # subscribe to replies to a thread
+    $subsc = $u1->subscribe(
+                            event   => "JournalNewComment",
+                            method  => "SMS",
+                            journal => $u2,
+                            arg1    => $u2e3->ditemid,
+                            arg2    => $comment->jtalkid,
+                            );
+    ok($subsc, "Subscribed");
+
+    # post a reply to a comment
+    my $reply = $comment->t_reply;
+    ok($reply, "Got reply");
+
+    $proc_events->();
+
+    $sms = $got_sms{$u1->{userid}};
+    ok($sms, "Got notified");
+
+    $sms = $got_sms{$u2->{userid}};
+    ok(! $sms, "Unsubscribed watcher not notified");
+
+    # post a new comment on this entry, make sure not notified
+    my $comment2 = $u2e3->t_enter_comment;
+    ok($comment2, "Posted comment");
+
+    $sms = $got_notified->($u1);
+    ok(! $sms, "didn't get notified");
+
+    # post a reply to a different thread and make sure not notified
+    my $reply2 = $comment2->t_reply;
+    ok($reply2, "Posted reply");
+
+    $sms = $got_notified->($u1);
+    ok(! $sms, "didn't get notified");
+
+    $subsc->delete;
 
     ####### S4 (watching new comments on all friends' journals)
 
