@@ -5,22 +5,12 @@ use Test::More 'no_plan';
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 use FindBin qw($Bin);
+use LJ::Test qw(memcache_stress);
 
 my $sysid = LJ::load_user("system")->{userid};
 ok($sysid, "have a systemid");
 
-{
-    local @LJ::MEMCACHE_SERVERS = ();
-    run_tests();
-}
-
-{
-    local @LJ::MEMCACHE_SERVERS = ("127.0.0.1:11211");
-    run_tests();
-}
-
-{
-    local @LJ::MEMCACHE_SERVERS = ("127.0.0.1:11211");
+memcache_stress(sub {
     LJ::start_request();
     is_empty();
 
@@ -45,8 +35,11 @@ ok($sysid, "have a systemid");
     my $uf2 = LJ::load_user("system", "force");
     is($uf2, $uf, "forced system");
 
+    my $name = "My name is " . rand();
+    LJ::update_user($u, { name => $name });
+    is($u->{name}, $name, "name changed");
+});
 
-}
 
 sub is_empty {
     is(scalar keys %LJ::REQ_CACHE_USER_NAME, 0, "reqcache for users is empty");
