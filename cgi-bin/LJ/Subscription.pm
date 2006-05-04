@@ -55,9 +55,7 @@ sub delete {
 
     my $u = $self->owner;
 
-    $u->do("DELETE FROM subs WHERE subid=?", undef, $subid);
-
-    return 1;
+    return $u->do("DELETE FROM subs WHERE subid=?", undef, $subid);
 }
 
 # Class method

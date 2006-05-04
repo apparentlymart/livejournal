@@ -28,10 +28,18 @@ local $LJ::_T_SMS_SEND = sub {
     $got_sms{$rcpt->{userid}} = $sms;
 };
 
+my $got_notified = sub {
+    my $u = shift;
+    delete $got_sms{$u->{userid}};
+    LJ::Event->process_fired_events;
+    return $got_sms{$u->{userid}};
+};
+
 
 # testing case S1 above:
 test_esn_flow(sub {
     my ($u1, $u2) = @_;
+    my $sms;
 
     # subscribe $u1 to all posts on $u2
     my $subsc = $u1->subscribe(
@@ -42,14 +50,13 @@ test_esn_flow(sub {
     ok($subsc, "made S1 subscription");
 
     # post an entry in $u2
-    my $entry = eval { $u2->t_post_fake_entry };
-    ok($entry, "made a post");
+    my $u2e1 = eval { $u2->t_post_fake_entry };
+    ok($u2e1, "made a post");
     is($@, "", "no errors");
-    my $jitemid = $entry->jitemid;
 
     # $u1 leave a comment on $u2
     my %err = ();
-    my $jtalkid = LJ::Talk::Post::enter_comment($u2, {talkid => 0}, {itemid => $jitemid},
+    my $jtalkid = LJ::Talk::Post::enter_comment($u2, {talkid => 0}, {itemid => $u2e1->jitemid},
                                                    {u => $u1, state => 'A', subject => 'comment subject',
                                                     body => 'comment body',}, \%err);
 
@@ -57,18 +64,17 @@ test_esn_flow(sub {
     ok($jtalkid, "got jtalkid");
 
     # make sure we got notification
-    LJ::Event->process_fired_events;
-    ok($got_sms{$u1->{userid}}, "got the SMS");
-    is(eval { $got_sms{$u1->{userid}}->to }, 12345, "to right place");
+    $sms = $got_notified->($u1);
+    ok($sms, "got the SMS");
+    is(eval { $sms->to }, 12345, "to right place");
 
     # S1 failing case:
     # post an entry on $u1, where nobody's subscribed
-    $entry = eval { $u1->t_post_fake_entry };
-    ok($entry, "did a post");
-    $jitemid = $entry->jitemid;
+    my $u1e1 = eval { $u1->t_post_fake_entry };
+    ok($u1e1, "did a post");
 
     # post a comment on it
-    $jtalkid = LJ::Talk::Post::enter_comment($u1, {talkid => 0}, {itemid => $jitemid},
+    $jtalkid = LJ::Talk::Post::enter_comment($u1, {talkid => 0}, {itemid => $u1e1->jitemid},
                                              {u => $u1, state => 'A', subject => 'comment subject',
                                               body => 'comment body',}, \%err);
 
@@ -76,18 +82,16 @@ test_esn_flow(sub {
     ok($jtalkid, "got jtalkid");
 
     # make sure we got notification
-    delete $got_sms{$u1->{userid}};
-    LJ::Event->process_fired_events;
-    ok(! $got_sms{$u1->{userid}}, "got no SMS");
+    $sms = $got_notified->($u1);
+    ok(! $sms, "got no SMS");
 
     # S1 failing case, posting to u2, due to security
-    $entry = eval { $u2->t_post_fake_entry(security => "friends") };
-    ok($entry, "did a post");
-    $jitemid = $entry->jitemid;
-    is($entry->security, "usemask", "is actually friends only");
+    my $u2e2f = eval { $u2->t_post_fake_entry(security => "friends") };
+    ok($u2e2f, "did a post");
+    is($u2e2f->security, "usemask", "is actually friends only");
 
     # post a comment on it
-    $jtalkid = LJ::Talk::Post::enter_comment($u2, {talkid => 0}, {itemid => $jitemid},
+    $jtalkid = LJ::Talk::Post::enter_comment($u2, {talkid => 0}, {itemid => $u2e2f->jitemid},
                                              {u => $u2, state => 'A', subject => 'comment subject',
                                               body => 'comment body private',}, \%err);
 
@@ -95,10 +99,42 @@ test_esn_flow(sub {
     ok($jtalkid, "got jtalkid");
 
     # make sure we got notification
-    delete $got_sms{$u1->{userid}};
-    LJ::Event->process_fired_events;
-    ok(! $got_sms{$u1->{userid}}, "got no SMS, due to security (u2 doesn't trust u1)");
+    $sms = $got_notified->($u1);
+    ok(! $sms, "got no SMS, due to security (u2 doesn't trust u1)");
 
+    ok($subsc->delete, "Deleted subscription");
+
+    ###### S2:
+    # subscribe $u1 to all comments on u2e1
+    $subsc = $u1->subscribe(
+                            event   => "JournalNewComment",
+                            method  => "SMS",
+                            journal => $u2,
+                            arg1    => $u2e1->ditemid,
+                            );
+    ok($subsc, "made S2 subscription");
+
+    # post a comment on u2e1
+    $jtalkid = LJ::Talk::Post::enter_comment($u2, {talkid => 0}, {itemid => $u2e1->jitemid},
+                                             {u => $u2, state => 'A', subject => 'comment subject',
+                                              body => 'comment body',}, \%err);
+    ok(!%err, "no error posting comment");
+    ok($jtalkid, "got jtalkid");
+
+    $sms = $got_notified->($u1);
+    ok($sms, "Got comment notification");
+
+    # post another entry on u2
+    my $u2e3 = eval { $u2->t_post_fake_entry };
+    ok($u2e3, "did a post");
+
+    # post a comment that $subsc won't match
+    $jtalkid = LJ::Talk::Post::enter_comment($u2, {talkid => 0}, {itemid => $u2e3->jitemid},
+                                             {u => $u2, state => 'A', subject => 'comment subject',
+                                              body => 'comment body',}, \%err);
+
+    $sms = $got_notified->($u1);
+    ok(!$sms, "didn't get comment notification on unrelated post");
 
 });
 

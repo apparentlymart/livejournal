@@ -22,6 +22,11 @@ sub matches_filter {
 
     my $sjid = $subscr->journalid;
     my $ejid = $self->journal->{userid};
+
+    # if subscription is for a specific journal (not a wildcard like 0
+    # for all friends) then it must match the event's journal exactly.
+    return 0 if $sjid && $sjid != $ejid;
+
     my ($earg1, $earg2) = ($self->arg1, $self->arg2);
     my ($sarg1, $sarg2) = ($subscr->arg1, $subscr->arg2);
 
@@ -39,8 +44,8 @@ sub matches_filter {
 
     # watching a post
     if ($sarg2 == 0) {
-        my $wanted_jitemid = $sarg1;
-        return $entry->jitemid == $wanted_jitemid;
+        my $wanted_ditemid = $sarg1;
+        return $entry->ditemid == $wanted_ditemid;
     }
 
     die "Not implemented";
