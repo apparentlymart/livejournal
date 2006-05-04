@@ -15,3 +15,6 @@
 #ad-5linkunit {
     clear: both;
 }
+#commenttext, #subject {
+    width: 90%;
+}
