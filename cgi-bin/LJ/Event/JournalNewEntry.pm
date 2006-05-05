@@ -42,7 +42,7 @@ sub matches_filter {
 sub as_string {
     my $self = shift;
     my $entry = $self->entry;
-    my $about = $entry->subject_text ? " about '" . $entry->subject_text . "' " : '';
+    my $about = $entry->subject_text ? " titled '" . $entry->subject_text . "'" : '';
     return sprintf("The journal '%s' has a new post$about at: " . $self->entry->url,
                    $self->u->{user});
 }
@@ -77,12 +77,12 @@ sub subscription_as_html {
 
     my $journaluser = $journal->ljuser_display;
 
-    return "All entries on $journaluser";
+    return "All new posts in $journaluser";
 }
 
 
 sub title {
-    return 'New Entry on Journal';
+    return 'New post in journal';
 }
 
 sub journal_sub_title { 'Journal' }
