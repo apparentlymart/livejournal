@@ -2412,47 +2412,51 @@ sub Color__darker {
 sub _Comment__get_link
 {
     my ($ctx, $this, $key) = @_;
-    if ($key eq "delete_comment" || $key eq "unscreen_comment" || $key eq "screen_comment" ||
-           $key eq "freeze_thread" || $key eq "unfreeze_thread") {
-        my $page = get_page();
-        my $u = $page->{'_u'};
-        my $post_user = $page->{'entry'} ? $page->{'entry'}->{'poster'}->{'username'} : undef;
-        my $com_user = $this->{'poster'} ? $this->{'poster'}->{'username'} : undef;
-        my $remote = LJ::get_remote();
-        if ($key eq "delete_comment") {
+    my $page = get_page();
+    my $u = $page->{'_u'};
+    my $post_user = $page->{'entry'} ? $page->{'entry'}->{'poster'}->{'username'} : undef;
+    my $com_user = $this->{'poster'} ? $this->{'poster'}->{'username'} : undef;
+    my $remote = LJ::get_remote();
+    if ($key eq "delete_comment") {
             return undef unless LJ::Talk::can_delete($remote, $u, $post_user, $com_user);
             return LJ::S2::Link("$LJ::SITEROOT/delcomment.bml?journal=$u->{'user'}&amp;id=$this->{'talkid'}",
-                        $ctx->[S2::PROPS]->{"text_multiform_opt_delete"},
-                        LJ::S2::Image("$LJ::IMGPREFIX/btn_del.gif", 22, 20));
+                                $ctx->[S2::PROPS]->{"text_multiform_opt_delete"},
+                                LJ::S2::Image("$LJ::IMGPREFIX/btn_del.gif", 22, 20));
         }
-        if ($key eq "freeze_thread") {
-            return undef if $this->{'frozen'};
-            return undef unless LJ::Talk::can_freeze($remote, $u, $post_user, $com_user);
-            return LJ::S2::Link("$LJ::SITEROOT/talkscreen.bml?mode=freeze&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
-                        $ctx->[S2::PROPS]->{"text_multiform_opt_freeze"},
-                        LJ::S2::Image("$LJ::IMGPREFIX/btn_freeze.gif", 22, 20));
-        }
-        if ($key eq "unfreeze_thread") {
-            return undef unless $this->{'frozen'};
-            return undef unless LJ::Talk::can_unfreeze($remote, $u, $post_user, $com_user);
-            return LJ::S2::Link("$LJ::SITEROOT/talkscreen.bml?mode=unfreeze&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
-                        $ctx->[S2::PROPS]->{"text_multiform_opt_unfreeze"},
-                        LJ::S2::Image("$LJ::IMGPREFIX/btn_unfreeze.gif", 22, 20));
-        }
-        if ($key eq "screen_comment") {
-            return undef if $this->{'screened'};
-            return undef unless LJ::Talk::can_screen($remote, $u, $post_user, $com_user);
-            return LJ::S2::Link("$LJ::SITEROOT/talkscreen.bml?mode=screen&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
-                        $ctx->[S2::PROPS]->{"text_multiform_opt_screen"},
-                        LJ::S2::Image("$LJ::IMGPREFIX/btn_scr.gif", 22, 20));
-        }
-        if ($key eq "unscreen_comment") {
-            return undef unless $this->{'screened'};
-            return undef unless LJ::Talk::can_unscreen($remote, $u, $post_user, $com_user);
-            return LJ::S2::Link("$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
-                        $ctx->[S2::PROPS]->{"text_multiform_opt_unscreen"},
-                        LJ::S2::Image("$LJ::IMGPREFIX/btn_unscr.gif", 22, 20));
-        }
+    if ($key eq "freeze_thread") {
+        return undef if $this->{'frozen'};
+        return undef unless LJ::Talk::can_freeze($remote, $u, $post_user, $com_user);
+        return LJ::S2::Link("$LJ::SITEROOT/talkscreen.bml?mode=freeze&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
+                            $ctx->[S2::PROPS]->{"text_multiform_opt_freeze"},
+                            LJ::S2::Image("$LJ::IMGPREFIX/btn_freeze.gif", 22, 20));
+    }
+    if ($key eq "unfreeze_thread") {
+        return undef unless $this->{'frozen'};
+        return undef unless LJ::Talk::can_unfreeze($remote, $u, $post_user, $com_user);
+        return LJ::S2::Link("$LJ::SITEROOT/talkscreen.bml?mode=unfreeze&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
+                            $ctx->[S2::PROPS]->{"text_multiform_opt_unfreeze"},
+                            LJ::S2::Image("$LJ::IMGPREFIX/btn_unfreeze.gif", 22, 20));
+    }
+    if ($key eq "screen_comment") {
+        return undef if $this->{'screened'};
+        return undef unless LJ::Talk::can_screen($remote, $u, $post_user, $com_user);
+        return LJ::S2::Link("$LJ::SITEROOT/talkscreen.bml?mode=screen&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
+                            $ctx->[S2::PROPS]->{"text_multiform_opt_screen"},
+                            LJ::S2::Image("$LJ::IMGPREFIX/btn_scr.gif", 22, 20));
+    }
+    if ($key eq "unscreen_comment") {
+        return undef unless $this->{'screened'};
+        return undef unless LJ::Talk::can_unscreen($remote, $u, $post_user, $com_user);
+        return LJ::S2::Link("$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
+                            $ctx->[S2::PROPS]->{"text_multiform_opt_unscreen"},
+                            LJ::S2::Image("$LJ::IMGPREFIX/btn_unscr.gif", 22, 20));
+    }
+    if ($key eq "watch_thread") {
+        return undef if $LJ::DISABLED{esn};
+        return undef unless $remote;
+        return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/thread.bml?journal=$u->{'user'}&amp;jtalkid=$this->{'talkid'}",
+                            "Watch this thread",
+                            LJ::S2::Image("$LJ::IMGPREFIX/talk/sm10_eyes.gif", 24, 12));
     }
 }
 

@@ -196,6 +196,7 @@ sub EntryPage
             my $link_keyseq = $s2com->{'link_keyseq'};
             push @$link_keyseq, $s2com->{'screened'} ? 'unscreen_comment' : 'screen_comment';
             push @$link_keyseq, $s2com->{'frozen'} ? 'unfreeze_thread' : 'freeze_thread';
+            push @$link_keyseq, "watch_thread" unless $LJ::DISABLED{'esn'};
 
             if (@{$com->{'children'}}) {
                 $s2com->{'thread_url'} = LJ::Talk::talkargs($permalink, "thread=$dtalkid", $stylemine) . "#t$dtalkid";
