@@ -184,7 +184,7 @@ body<=
         $body .= 'Alert me whenever: ' . LJ::html_select({
             name => 'etypeid',
             id => 'etypeid',
-            }, ('', '', @event_options)) .
+        }, ('', '', @event_options)) .
             ' with: ' . LJ::html_select({name => 'ntypeid'}, @note_options);
 
         $body .= "<div>$jsfields</div>";
@@ -211,7 +211,7 @@ body<=
                 my $class = $row % 2 ? "lighter" : "darker";
                 $subs_html .= "<tr class='$class'>";
                 $subs_html .= "<td><a href='./index.bml?mode=modify&id=" . $subsc->id . "'>" . $subsc->id . "</a></td>";
-                $subs_html .= "<td>" . $subsc->event->title . "</td>";
+                $subs_html .= "<td>" . $subsc->as_html . "</td>";
                 if ($subsc->expiretime) {
                     $subs_html .= "<td>" . LJ::time_to_http($subsc->expiretime) . "</td>";
                 } else {

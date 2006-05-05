@@ -67,7 +67,8 @@ sub ntypeid {
 
 # this returns a list of all possible notification method classes
 # class method
-sub all_classes {
+*all_classes = \&all_available_methods;
+sub all_available_methods {
     my $class = shift;
     croak "all_classes is a class method" unless $class;
 

@@ -75,6 +75,21 @@ sub as_string {
     return "Event $classname fired for user=$u->{user}, args=[@{$self->{args}}]";
 }
 
+# class method, takes a subscription
+sub subscription_as_html {
+    my ($class, $subscr) = @_;
+
+    croak "No subscription" unless $subscr;
+
+    my $arg1 = $subscr->arg1;
+    my $arg2 = $subscr->arg2;
+    my $journalid = $subscr->journalid;
+
+    my $user = $journalid ? LJ::ljuser(LJ::load_userid($journalid)) : "(wildcard)";
+
+    return $class . " arg1: $arg1 arg2: $arg2 user: $user";
+}
+
 sub as_sms {
     my $self = shift;
     my $str = $self->as_string;

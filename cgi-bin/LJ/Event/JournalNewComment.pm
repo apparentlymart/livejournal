@@ -17,6 +17,43 @@ sub title {
     return 'New Comment on Journal';
 }
 
+sub subscription_as_html {
+    my ($class, $subscr) = @_;
+
+    my $arg1 = $subscr->arg1;
+    my $arg2 = $subscr->arg2;
+    my $journalid = $subscr->journalid;
+
+    if (!$journalid) {
+        return "All comments in any journals on my friends page";
+    }
+
+    my $u = LJ::load_userid($journalid);
+    my $user = LJ::ljuser($u);
+
+    if ($arg1 == 0) {
+        return "All comments in $user, on any post.";
+    }
+
+    my $entry = LJ::Entry->new($u, ditemid => $arg1)
+        or return "Comments on a deleted post in $user";
+
+    my $entrydesc = $entry->subject_text;
+    $entrydesc = $entrydesc ? "\"$entrydesc\"" : "a post";
+
+    my $entryurl  = $entry->url;
+    return "All comments on <a href='$entryurl'>$entrydesc</a> in $user" if $arg2 == 0;
+
+    my $comment = LJ::Comment->new($u, jtalkid => $arg2);
+    return "(Invalid comment)" unless $comment && $comment->valid;
+    my $threadurl = $comment->url;
+
+    my $posteru = $comment->poster;
+    my $posteruser = $posteru ? LJ::ljuser($posteru) : "(Anonymous)";
+
+    return "New comments under <a href='$threadurl'>the thread</a> by $posteruser in <a href='$entryurl'>$entrydesc</a> in $user";
+}
+
 sub matches_filter {
     my ($self, $subscr) = @_;
 

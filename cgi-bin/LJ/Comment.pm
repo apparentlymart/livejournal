@@ -72,6 +72,15 @@ sub new
     return $self;
 }
 
+sub url {
+    my $self    = shift;
+    my $entry   = $self->entry;
+    my $url     = $entry->url;
+    my $dtalkid = ($self->jtalkid * 256) + $entry->anum;
+    $url .= "?thread=$dtalkid#t$dtalkid";
+    return $url;
+}
+
 # return LJ::User of journal comment is in
 sub journal {
     my $self = shift;

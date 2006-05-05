@@ -172,6 +172,11 @@ sub ntypeid {
     return $self->{ntypeid};
 }
 
+sub etypeid {
+    my $self = shift;
+    return $self->{etypeid};
+}
+
 sub owner {
     my $self = shift;
     return LJ::load_userid($self->{userid});
