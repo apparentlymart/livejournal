@@ -78,6 +78,7 @@ sub all_available_methods {
     } qw(
          LJ::NotificationMethod::Email
          LJ::NotificationMethod::SMS
+         LJ::NotificationMethod::Inbox
          );
 }
 

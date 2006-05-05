@@ -78,4 +78,6 @@ sub notify {
     }
 }
 
+sub configured { 1 }
+
 1;
