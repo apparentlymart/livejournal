@@ -31,7 +31,6 @@ body<=
         return LJ::error_list(BML::ml('error.invalidform')) unless LJ::check_form_auth();
 
         foreach my $class (@event_classes) {
-            warn LJ::D({enabled => $POST{$class . '_enabled'}, ntypeid => $POST{$class . '_ntypeid'}});
             next unless ($POST{$class . '_enabled'});
             my $ntypeid = $POST{$class . '_ntypeid'} or next;
 
@@ -87,7 +86,7 @@ body<=
     $body .= qq {
         <fieldset>
           <legend>Watch $journaluser</legend>
-          <form method="POST" action="/manage/subscriptions/watchuser.bml">
+          <form method="POST" action="/manage/subscriptions/user.bml">
             $formauth
             <table width="100%">
               $watchoptions
