@@ -26,10 +26,8 @@ test_esn_flow(sub {
         $got_sms = $sms;
     };
 
-    my $res = $u2->post_fake_entry;
-    is($res->{'success'},      "OK", "did success");
-    is($res->{'errmsg'} || "", "", "no errors");
-    ok($res->{'url'}, "got a URL");
+    my $entry = $u2->t_post_fake_entry;
+    ok($entry, "made a post");
 
     LJ::Event->process_fired_events;
 
