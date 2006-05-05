@@ -97,6 +97,9 @@ sub generate_content {
             $entry->event_html( { 'cuturl' => $entrylink  } );
 
         my $posteru    = $entry->poster;
+
+        next if $posteru && $posteru->{statusvis} =~ /[XS]/;
+
         my $poster     = $posteru->ljuser_display;
         my $props      = $entry->props;
         my $pickeyword = $props->{'picture_keyword'};
