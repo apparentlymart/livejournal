@@ -547,7 +547,7 @@ sub delete {
         if ($self->location eq 'mogile') {
             LJ::mogclient()->delete($u->mogfs_userpic_key($picid));
         } elsif ($LJ::USERPIC_BLOBSERVER &&
-                 LJ::Blob::delete($u, "userpic", $self->extensions, $picid)) {
+                 LJ::Blob::delete($u, "userpic", $self->extension, $picid)) {
         } elsif ($u->do("DELETE FROM userpicblob2 WHERE ".
                         "userid=? AND picid=?", undef,
                         $u->{userid}, $picid) > 0) {
