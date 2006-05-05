@@ -128,6 +128,14 @@ sub create {
     return $self;
 }
 
+# returns a nice HTML description of this current subscription
+sub as_html {
+    my $self = shift;
+
+    my $evtclass = LJ::Event->class($self->etypeid);
+    return $evtclass->subscription_as_html($self);
+}
+
 sub id {
     my $self = shift;
 
@@ -147,11 +155,6 @@ sub expiretime {
 sub journalid {
     my $self = shift;
     return $self->{journalid};
-}
-
-sub event {
-    my $self = shift;
-    return LJ::Event->new_from_raw_params($self->{etypeid}, $self->{journalid}, $self->{arg1}, $self->{arg2});
 }
 
 sub arg1 {
