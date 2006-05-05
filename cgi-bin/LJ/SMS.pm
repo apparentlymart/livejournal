@@ -73,6 +73,10 @@ sub send_jabber_dev_server {
     my $sock = IO::Socket::INET->new(PeerAddr => "127.0.0.1:5224")
         or return 0;
 
+    print $sock "set_vhost $LJ::DOMAIN\n";
+    my $okay = <$sock>;
+    return 0 unless $okay =~ /^OK/;
+
     my $to = $self->{to} . '@' . $LJ::DOMAIN;
     my $msg = $self->{text};
     my $xml = qq{<message type='chat' to='$to' from='sms\@$LJ::DOMAIN'><x xmlns='jabber:x:event'><composing/></x><body>$msg</body><html xmlns='http://jabber.org/protocol/xhtml-im'><body xmlns='http://www.w3.org/1999/xhtml'><html>$msg</html></body></html></message>};

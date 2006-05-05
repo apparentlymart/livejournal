@@ -24,20 +24,26 @@ Getopt::Long::GetOptions(
 
 use FindBin qw($Bin);
 
+use DJabberd::VHost;
+my $vhost = DJabberd::VHost->new(
+                                 server_name => $LJ::DOMAIN,
+                                 plugins   => [
+                                               DJabberd::Authen::AllowedUsers->new(policy => "deny",
+                                                                                   allowed => [qr/^\+?\d+/, 'sms']),
+                                               DJabberd::Authen::StaticPassword->new(password => "smstest"),
+                                               DJabberd::Delivery::FakeSMS->new(),
+                                               DJabberd::Delivery::Local->new(),
+                                               DJabberd::RosterStorage::FakeSMS->new(),
+                                               DJabberd::PresenceChecker::FakeSMS->new(),
+                                               ],
+                                 );
+
 my $server = DJabberd->new(
-                           server_name => $LJ::DOMAIN,
                            daemonize => $daemonize,
                            s2s       => 0,
-                           plugins   => [
-                                         DJabberd::Authen::AllowedUsers->new(policy => "deny",
-                                                                           allowed => [qr/^\+?\d+/, 'sms']),
-                                         DJabberd::Authen::StaticPassword->new(password => "smstest"),
-                                         DJabberd::Delivery::FakeSMS->new(),
-                                         DJabberd::Delivery::Local->new(),
-                                         DJabberd::RosterStorage::FakeSMS->new(),
-                                         DJabberd::PresenceChecker::FakeSMS->new(),
-                                         ],
                            );
+
+$server->add_vhost($vhost);
 
 # incoming
 $server->start_simple_server(5224);
