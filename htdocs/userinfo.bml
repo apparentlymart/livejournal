@@ -379,6 +379,11 @@
          push @linkele, "<a href='$LJ::SITEROOT/friends/nudge.bml?user=$u->{'user'}'><img align='middle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_nudge.gif' width='22' height='20' alt='Nudge a friend' title='Nudge a friend' border='0' /></a>";
      }
 
+     unless ($LJ::DISABLED{'esn'} || ! $has_journal) {
+         push @linkele, "<a href='$LJ::SITEROOT/manage/subscriptions/user.bml?journal=$u->{'user'}'><img align='middle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_search.gif' width='22' height='20' alt='Track user' title='Track user' border='0' /></a>";
+     }
+
+
      foreach my $row (LJ::run_hooks("userinfo_linkele", $u, $remote)) {
          push @linkele, $row->[0];
      }
