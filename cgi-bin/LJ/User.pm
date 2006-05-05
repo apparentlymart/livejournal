@@ -1979,13 +1979,6 @@ sub _load_user_raw
     return $last;
 }
 
-sub _clear_u_req_cache {
-    my $u = shift or die "no u to clear";
-    delete $LJ::REQ_CACHE_USER_NAME{$u->{user}};
-    delete $LJ::REQ_CACHE_USER_ID{$u->{userid}};
-    return 1;
-}
-
 sub _set_u_req_cache {
     my $u = shift or die "no u to set";
 
