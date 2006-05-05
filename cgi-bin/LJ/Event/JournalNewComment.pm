@@ -38,14 +38,13 @@ sub subscription_as_html {
 
     my $arg1 = $subscr->arg1;
     my $arg2 = $subscr->arg2;
-    my $journalid = $subscr->journalid;
+    my $journal = $subscr->journal;
 
-    if (!$journalid) {
+    if (!$journal) {
         return "All comments in any journals on my friends page";
     }
 
-    my $u = LJ::load_userid($journalid);
-    my $user = LJ::ljuser($u);
+    my $user = LJ::ljuser($journal);
 
     if ($arg1 == 0 && $arg2 == 0) {
         return "All comments in $user, on any post.";
@@ -54,12 +53,12 @@ sub subscription_as_html {
     # load ditemid from jtalkid if no ditemid
     my $comment;
     if ($arg2) {
-        $comment = LJ::Comment->new($u, jtalkid => $arg2);
+        $comment = LJ::Comment->new($journal, jtalkid => $arg2);
         return "(Invalid comment)" unless $comment && $comment->valid;
         $arg1 = $comment->entry->ditemid unless $arg1;
     }
 
-    my $entry = LJ::Entry->new($u, ditemid => $arg1)
+    my $entry = LJ::Entry->new($journal, ditemid => $arg1)
         or return "Comments on a deleted post in $user";
 
     my $entrydesc = $entry->subject_text;

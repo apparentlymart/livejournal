@@ -30,6 +30,35 @@ sub as_sms {
     return $self->as_string;
 }
 
+sub as_html {
+    my $self = shift;
+
+    my $journal  = $self->u;
+    my $ditemid  = $self->arg1;
+
+    my $entry = LJ::Entry->new($journal, ditemid => $ditemid);
+    return "(Invalid entry)" unless $entry && $entry->valid;
+
+    my $ju = LJ::ljuser($journal);
+    my $pu = LJ::ljuser($entry->poster);
+    my $url = $entry->url;
+
+    return "New <a href=\"$url\">entry</a> in $ju by $pu.";
+}
+
+sub subscription_as_html {
+    my ($class, $subscr) = @_;
+
+    my $journal = $subscr->journal;
+
+    return "All entries on any journals on my friends page" unless $journal;
+
+    my $journaluser = $journal->ljuser_display;
+
+    return "All entries on $journaluser";
+}
+
+
 sub title {
     return 'New Entry on Journal';
 }

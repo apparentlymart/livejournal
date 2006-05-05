@@ -157,6 +157,11 @@ sub journalid {
     return $self->{journalid};
 }
 
+sub journal {
+    my $self = shift;
+    return LJ::load_userid($self->{journalid});
+}
+
 sub arg1 {
     my $self = shift;
     return $self->{arg1};
