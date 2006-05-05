@@ -104,7 +104,7 @@ sub prop_keys { $_prop_keys; }
 
 # caching options
 sub cache_global { 0; } # cache per-user
-sub cache_time { 5 * 60; } # check etag every 5 minutes
+#sub cache_time { 1 * 60; } # check etag every minute
 sub etag {
     my $self = shift;
 
