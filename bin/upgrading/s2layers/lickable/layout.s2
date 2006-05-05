@@ -1009,14 +1009,14 @@ function Comment::lay_print_metadata() {
 }
 
 function Entry::lay_print_cmdlinks() {
-    println """<ul class="entrycmdlinks">""";
     if ($.comments.enabled) {
-        if ($.comments.count != 0) {
-            println "<li>"; $.comments->print_readlink(); "</li>";
+        """<ul class="entrycmdlinks">""";
+        if ($.comments.count > 0 or $.comments.screened) {
+            "<li>"; $.comments->print_readlink(); "</li>";
         }
-        println "<li>"; $.comments->print_postlink(); "</li>";
+        "<li>"; $.comments->print_postlink(); "</li>";
+        println """</ul>""";
     }
-    println """</ul>""";
 }
 
 function Comment::lay_print_cmdlinks() {
