@@ -62,6 +62,10 @@ sub new
 
     $self->{jtalkid} = int(delete $opts{jtalkid});
 
+    if (my $dtalkid = int(delete $opts{dtalkid})) {
+        $self->{jtalkid} = $dtalkid >> 8;
+    }
+
     croak("need to supply jtalkid") unless $self->{jtalkid};
     croak("unknown parameters: " . join(", ", keys %opts))
         if %opts;
