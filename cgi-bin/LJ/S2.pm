@@ -2457,7 +2457,7 @@ sub _Comment__get_link
         return undef if $LJ::DISABLED{esn};
         return undef unless $remote;
         return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;dtalkid=$this->{'talkid'}",
-                            "Track this thread",
+                            "Track Thread",
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20));
     }
 }
@@ -2824,7 +2824,7 @@ sub _Entry__get_link
     if ($key eq "watch_comments") {
         return undef if $LJ::DISABLED{'esn'};
         return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$journal&amp;ditemid=$this->{'itemid'}",
-                            "Track new comments",
+                            "Track New Comments",
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20));
     }
 }
