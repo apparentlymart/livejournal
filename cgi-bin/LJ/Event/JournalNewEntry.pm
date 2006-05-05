@@ -18,10 +18,32 @@ sub entry {
     return LJ::Entry->new($self->u, ditemid => $self->arg1);
 }
 
+sub matches_filter {
+    my ($self, $subscr) = @_;
+
+    my $sjid = $subscr->journalid;
+    my $ejid = $self->journal->{userid};
+
+    my $ditemid = $self->arg1;
+
+    return 0 unless $ejid && $ditemid; # TODO: throw error?
+
+    my $entry = LJ::Entry->new($ejid, ditemid => $ditemid);
+    return 0 unless $entry && $entry->valid; # TODO: throw error?
+    return 0 unless $entry->visible_to($subscr->owner);
+
+    # all posts by friends
+    return 1 if $sjid == 0;
+
+    # a post on a specific journal
+    return $sjid == $ejid;
+}
+
 sub as_string {
     my $self = shift;
     my $entry = $self->entry;
-    return sprintf("The journal '%s' has a new post at: " . $self->entry->url,
+    my $about = $entry->subject_text ? " about '" . $entry->subject_text . "' " : '';
+    return sprintf("The journal '%s' has a new post$about at: " . $self->entry->url,
                    $self->u->{user});
 }
 
