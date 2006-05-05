@@ -170,7 +170,6 @@ _code?>
         $ret .= LJ::html_select({ 'name' => 'opt_showschools',
                                   'selected' => $u->{'opt_showschools'} },
                                 "Y" => BML::ml(".security.visibility.everybody"),
-                                "R" => BML::ml(".security.visibility.regusers"),
                                 "F" => BML::ml(".security.visibility.friends"),
                                 "N"  => "Nobody" );
         $ret .= " &nbsp; <a href='$LJ::SITEROOT/schools/manage.bml'>Manage schools</a></td></tr>\n";
@@ -252,7 +251,6 @@ _code?>
         $ret .= LJ::html_select({ 'name' => 'allow_contactshow',
                                   'selected' => $u->{'allow_contactshow'} },
                                   "Y" => BML::ml(".security.visibility.everybody"),
-                                  "R" => BML::ml(".security.visibility.regusers"),
                                   "F" => BML::ml(".security.visibility.friends"),
                                   "N" => "Nobody" );
         $ret .= "</span></div>\n";

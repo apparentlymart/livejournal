@@ -168,14 +168,16 @@ _code?>
         $ret .= "</td></tr>\n";
 
         # Weblogs.com
-        $ret .= "<tr><td class='field_name'>Weblogs.com:</td>\n<td class='helper'>";
-        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_weblogscom', 'id' => 'opt_weblogscom',
-                                 'selected' => $u->{'opt_weblogscom'} });
-        $ret .= " Notify Weblogs.com when I post new public entries<br />\n";
-        $ret .= "Weblogs.com, a VeriSign service, is a ping server that automatically notifies
-            subscribers when new content is posted to a website or blog, So that many more
-            people can be made aware of updates to your journal.\n";
-        $ret .= "</td></tr>\n";
+        unless ($LJ::DISABLED{'weblogs_com'}) {
+            $ret .= "<tr><td class='field_name'>Weblogs.com:</td>\n<td class='helper'>";
+            $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_weblogscom', 'id' => 'opt_weblogscom',
+                                     'selected' => $u->{'opt_weblogscom'} });
+            $ret .= " Notify Weblogs.com when I post new public entries<br />\n";
+            $ret .= "Weblogs.com, a VeriSign service, is a ping server that automatically notifies
+                subscribers when new content is posted to a website or blog, So that many more
+                people can be made aware of updates to your journal.\n";
+            $ret .= "</td></tr>\n";
+        }
 
         $ret .= "</table>\n";
 
@@ -212,7 +214,7 @@ _code?>
             $POST{'opt_stylemine'} = $POST{'opt_stylemine'} ? 1 : 0;
             $POST{'opt_bdaymail'} = $POST{'opt_bdaymail'} ? 1 : 0;
             $POST{'opt_blockrobots'} = $POST{'opt_blockrobots'} ? 1 : 0;
-            $POST{'opt_weblogscom'} = $POST{'opt_weblogscom'} ? 1 : 0;
+            $POST{'opt_weblogscom'} = $POST{'opt_weblogscom'} ? 1 : 0 unless ($LJ::DISABLED{'weblogs_com'});
 
             if ($LJ::USE_CONTROL_STRIP) {
                 my $color = $POST{'control_strip_color'} || "dark";
@@ -227,11 +229,11 @@ _code?>
             my @uprops = qw(
               view_control_strip show_control_strip
               opt_imagelinks opt_stylemine opt_bdaymail
-              opt_blockrobots opt_weblogscom
+              opt_blockrobots
             );
 
             # weblogs.com requires a special cap
-            push @uprops, 'opt_weblogscom' if LJ::get_cap($u, 'weblogscom');
+            push @uprops, 'opt_weblogscom' if ( ! $LJ::DISABLED{'weblogs_com'} && LJ::get_cap($u, 'weblogscom') );
 
 
             # set userprops
