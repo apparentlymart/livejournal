@@ -533,6 +533,7 @@
          $body .= "<span id='actionitem'><a href='$LJ::SITEROOT/shop/view.bml?item=paidaccount&gift=1&for=$u->{'user'}'><img src='$LJ::IMGPREFIX/gift.gif' width='16' height='16' alt='Give a gift' title='Give a gift' /> Give a gift</a></span>";
      }
      $body .= "<span id='actionitem'><a href='$LJ::SITEROOT/tools/search.bml?journal=$u->{'user'}'><img src='$LJ::IMGPREFIX/search.gif' width='16' height='16' alt='$ML{'.label.searchjournal'}' title='$ML{'.label.searchjournal'}' /> Search journal</a></span>\n";
+     $body .= "<span id='actionitem'><a href='$LJ::SITEROOT/manage/subscriptions/watchuser.bml?journal=$u->{'user'}'><img src='$LJ::IMGPREFIX/search.gif' width='16' height='16' alt='$ML{'.label.searchjournal'}' title='Track user' /> Track user</a></span>\n" unless $LJ::DISABLED{'esn'};
      $body .= "</div>\n";
  }
 
