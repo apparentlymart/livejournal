@@ -97,6 +97,21 @@ sub user_cluster_details {
 
 package LJ;
 
+# when calling a supported function (currently: LJ::load_user() or LJ::load_userid*),
+# ignores in-process request cache, memcache, and selects directly
+# from the global master
+#
+# called as: require_master(sub { block })
+sub require_master {
+    my $callback = shift;
+    croak "invalid code ref passed to require_master"
+        unless ref $callback eq 'CODE';
+
+    # run code in the block with local var set
+    local $LJ::_PRAGMA_FORCE_MASTER = 1;
+    return $callback->();
+}
+
 sub no_cache {
     my $sb = shift;
     local $LJ::MemCache::GET_DISABLED = 1;

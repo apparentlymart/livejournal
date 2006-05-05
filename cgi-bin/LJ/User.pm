@@ -1836,25 +1836,29 @@ sub load_userids_multiple
         foreach (@{$need{$u->{'userid'}}}) {
             $$_ = $u;
         }
-        $LJ::REQ_CACHE_USER_NAME{$u->{'user'}} = $u;
-        $LJ::REQ_CACHE_USER_ID{$u->{'userid'}} = $u;
+
+        _set_u_req_cache($u);
         delete $need{$u->{'userid'}};
     };
 
-    if ($have) {
-        foreach my $u (@$have) {
-            $satisfy->($u);
+    unless ($LJ::_PRAGMA_FORCE_MASTER) {
+        if ($have) {
+            foreach my $u (@$have) {
+                $satisfy->($u);
+            }
         }
-    }
 
-    if (%need) {
-        foreach (LJ::memcache_get_u(map { [$_,"userid:$_"] } keys %need)) {
-            $satisfy->($_);
+        if (%need) {
+            foreach (LJ::memcache_get_u(map { [$_,"userid:$_"] } keys %need)) {
+                $satisfy->($_);
+            }
         }
     }
 
     if (%need && ! $memcache_only) {
-        my $db = @LJ::MEMCACHE_SERVERS ? LJ::get_db_writer() : LJ::get_db_reader();
+        my $db = @LJ::MEMCACHE_SERVERS || $LJ::_PRAGMA_FORCE_MASTER ?
+            LJ::get_db_writer() : LJ::get_db_reader();
+
         _load_user_raw($db, "userid", [ keys %need ], sub {
             my $u = shift;
             LJ::memcache_set_u($u);
@@ -1913,6 +1917,13 @@ sub _load_user_raw
     return $last;
 }
 
+sub _clear_u_req_cache {
+    my $u = shift or die "no u to clear";
+    delete $LJ::REQ_CACHE_USER_NAME{$u->{user}};
+    delete $LJ::REQ_CACHE_USER_ID{$u->{userid}};
+    return 1;
+}
+
 sub _set_u_req_cache {
     my $u = shift or die "no u to set";
 
@@ -1958,7 +1969,7 @@ sub load_user
     };
 
     # caller is forcing a master, return now
-    return $get_user->("master") if $force;
+    return $get_user->("master") if $force || $LJ::_PRAGMA_FORCE_MASTER;
 
     my $u;
 
@@ -2049,7 +2060,7 @@ sub load_userid
     };
 
     # user is forcing master, return now
-    return $get_user->("master") if $force;
+    return $get_user->("master") if $force || $LJ::_PRAGMA_FORCE_MASTER;
 
     my $u;
 
@@ -2701,8 +2712,10 @@ sub update_user
 
     my @sets;
     my @bindparams;
+    my $used_raw = 0;
     while (my ($k, $v) = each %$ref) {
         if ($k eq "raw") {
+            $used_raw = 1;
             push @sets, $v;
         } else {
             push @sets, "$k=?";
@@ -2722,6 +2735,20 @@ sub update_user
     if (@LJ::MEMCACHE_SERVERS) {
         LJ::memcache_kill($_, "userid") foreach @uid;
     }
+
+    if ($used_raw) {
+        # for a load of userids from the master after update
+        # so we pick up the values set via the 'raw' option
+        require_master(sub { LJ::load_userids(@uid) });
+    } else {
+        foreach my $uid (@uid) {
+            while (my ($k, $v) = each %$ref) {
+                my $cache = $LJ::REQ_CACHE_USER_ID{$uid} or next;
+                $cache->{$k} = $v;
+            }
+        }
+    }
+
     return 1;
 }
 

@@ -35,11 +35,42 @@ memcache_stress(sub {
     my $uf2 = LJ::load_user("system", "force");
     is($uf2, $uf, "forced system");
 
-    my $name = "My name is " . rand();
-    LJ::update_user($u, { name => $name });
-    is($u->{name}, $name, "name changed");
-});
+    # test user updates by changing 'name'
+    my $name;
+    {
+        $name = "My name is " . rand();
+        LJ::update_user($u, { name => $name });
+        is($u->{name}, $name, "name changed after update");
 
+        $name = "My name is " . rand();
+        LJ::update_user($u, { raw => "name='$name'" });
+        is($u->{name}, $name, "name changed after raw update");
+    }
+
+    # we'll manually modify the user row, then load with raw
+    {
+        my $dbh = LJ::get_db_writer();
+
+        $name = "My name is " . rand();
+        $dbh->do("UPDATE user SET name=? WHERE userid=?",
+                 undef, $name, $u->{userid});
+        $u = LJ::require_master(sub { LJ::load_user($u->{user}) });
+        is($u->{name}, $name, "name correct after change + load_user");
+
+        $name = "My name is " . rand();
+        $dbh->do("UPDATE user SET name=? WHERE userid=?",
+                 undef, $name, $u->{userid});
+        $u = LJ::require_master(sub { LJ::load_userid($u->{userid}) });
+        is($u->{name}, $name, "name correct after change + load_user");
+
+        $name = "My name is " . rand();
+        $dbh->do("UPDATE user SET name=? WHERE userid=?",
+                 undef, $name, $u->{userid});
+        my $users = LJ::require_master(sub { LJ::load_userids($u->{userid}) });
+        $u = $users->{$u->{userid}};
+        is($u->{name}, $name, "name correct after change + load_user");
+    }
+});
 
 sub is_empty {
     is(scalar keys %LJ::REQ_CACHE_USER_NAME, 0, "reqcache for users is empty");
