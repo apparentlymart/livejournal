@@ -908,8 +908,70 @@ sub load_identity_user {
 # way yet to force master.
 sub prop {
     my ($u, $prop) = @_;
+
+    # some props have accessors which do crazy things, if so they need
+    # to be redirected from this method, which only loads raw values
+    if ({ map { $_ => 1 } qw(opt_showbday opt_showlocation)}->{$prop}) {
+        return $u->$prop;
+    }
+
+    return $u->raw_prop($prop);
+}
+
+sub raw_prop {
+    my ($u, $prop) = @_;
     $u->preload_props($prop) unless exists $u->{$_};
     return $u->{$prop};
+}
+
+sub _lazy_migrate_infoshow {
+    my ($u) = @_;
+
+    # 1) column exists, but value is migrated
+    # 2) column has died from 'user')
+    if ($u->{allow_infoshow} eq ' ' || ! $u->{allow_infoshow}) {
+        return 1; # nothing to do
+    }
+
+    my $infoval = $u->{allow_infoshow} eq 'Y' ? undef : 'N';
+
+    # need to migrate allow_infoshow => opt_showbday
+    if ($infoval) {
+        foreach my $prop (qw(opt_showbday opt_showlocation)) {
+            $u->set_prop($prop => $infoval);
+        }
+    }
+
+    # setting allow_infoshow to ' ' means we've migrated it
+    LJ::update_user($u, { allow_infoshow => ' ' })
+        or die "unable to update user after infoshow migration";
+    $u->{allow_infoshow} = ' ';
+
+    return 1;
+}
+
+sub opt_showbday {
+    my $u = shift;
+    # option not set = "yes", set to N = "no"
+    $u->_lazy_migrate_infoshow;
+    return $u->raw_prop('opt_showbday');
+}
+
+sub opt_showlocation {
+    my $u = shift;
+    # option not set = "yes", set to N = "no"
+    $u->_lazy_migrate_infoshow;
+    return $u->raw_prop('opt_showlocation');
+}
+
+sub can_show_location {
+    my $u = shift;
+    return $u->opt_showlocation ne 'N' ? 1 : 0;
+}
+
+sub can_show_bday {
+    my $u = shift;
+    return $u->opt_showbday ne 'N' ? 1 : 0;
 }
 
 # sets prop, and also updates $u's cached version

@@ -33,7 +33,7 @@ sub get_box_types
 {
     my $loc = shift;
     my $size = get_box_size($loc);
-    return map { $_, $box{$_}->{'name'} } grep { $box{$_}->{$size} } sort keys %box;    
+    return map { $_, $box{$_}->{'name'} } grep { $box{$_}->{$size} } sort keys %box;
 }
 
 sub construct_page
@@ -579,7 +579,7 @@ $box{'bdays'} =
                   'des' => '<?_ml portal.bdays.count.des _ml?>',
                   'type' => 'text',
                   'maxlength' => 3,
-                  'size' => 3,		      
+                  'size' => 3,
                   'default' => 5 },
                 ],
     'handler' => sub {
@@ -592,15 +592,25 @@ $box{'bdays'} =
                               'url' => '/birthdays.bml' });
 
         # TAG:FR:portal:get_bdays
-        $sth = $dbr->prepare("SELECT u.user, MONTH(bdate) AS 'month', DAYOFMONTH(bdate) AS 'day' FROM friends f, user u WHERE f.userid=$remote->{'userid'} AND f.friendid=u.userid AND u.journaltype='P' AND u.statusvis='V' AND u.allow_infoshow='Y' AND MONTH(bdate) != 0 AND DAYOFMONTH(bdate) != 0");
-        $sth->execute;
+        my %fr = LJ::get_friends($remote);
+        my $fr_u = LJ::load_userids(keys %fr) || {};
 
         # what day is it now?  server time... suck, yeah.
         my @time = localtime();
         my ($mnow, $dnow) = ($time[4]+1, $time[3]);
 
         my @bdays;
-        while (my ($user, $m, $d) = $sth->fetchrow_array) {
+        while (my ($frid, $fru) = each %$fr_u) {
+            next unless $fru->{statusvis} eq 'V';
+            next unless $fru->{journaltype} eq 'P';
+
+            LJ::load_user_props($fru, 'opt_showbday');
+            next unless $fru->can_show_bday;
+
+            # find month, dayofmonth, do whatever
+            next unless $fru->{bdate} =~ /^\d\d\d\d-(\d\d)-(\d\d)$/;
+            my ($m, $d) = ($1, $2);
+
             my $ref = [ $user, $m, $d ];
             if ($m < $mnow || ($m == $mnow && $d < ($dnow))) {
                 # birthday passed this year already

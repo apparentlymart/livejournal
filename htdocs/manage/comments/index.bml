@@ -1,0 +1,215 @@
+<?page
+title=>Comment Settings
+body<=
+<?_code
+    LJ::set_active_crumb('editinfo'); ##TODO:Change crumbs
+    return;
+_code?>
+
+<?_code
+{
+    use strict;
+    use vars qw(%POST %GET $head);
+
+    return LJ::server_down_html() if $LJ::SERVER_DOWN;
+
+    BML::set_language_scope('/editinfo.bml');
+    my $remote = LJ::get_remote();
+    return LJ::bad_input("You must be logged in to edit your profile.")
+        unless $remote;
+
+    my $authas = $GET{'authas'} || $remote->{'user'};
+    my $u = LJ::get_authas_user($authas);
+    return LJ::bad_input("You could not be authenticated as the specified user.")
+        unless $u;
+
+    return $LJ::MSG_READONLY_USER if $u->readonly;
+
+    # extra arguments for get requests
+    my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
+
+    ### user is now authenticated ###
+
+    # load user props
+    LJ::load_user_props(
+        $u, { use_master => 1 },
+        qw/ opt_whoscreened opt_logcommentips /
+    );
+
+    # to store values before they undergo normalisation
+    my %saved = ();
+
+    # clean userprops
+    foreach (values %$u) { LJ::text_out(\$_); }
+
+    ###
+    ### no post, show edit form
+    ###
+    $head = "";
+
+    unless (LJ::did_post()) {
+
+        my $ret;
+
+        $ret .= "<div>";
+        $ret .= "Set your comment preferences below.";
+        # user switcher
+        $ret .= "<?p <form method='get' action='index.bml'>\n";
+        $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
+        $ret .= "</form> p?>\n\n";
+
+        $ret .= "</div>\n";
+
+        $ret.= "<div class='clear'></div>\n";
+
+
+        $ret .= "<form method='post' action='index.bml$getextra'>\n";
+        $ret .= LJ::form_auth();
+
+        # personal information
+        $ret .= "<div class='section_head'> Comments on your journal</div>\n";
+        $ret .= "<table class='field_block'>\n";
+
+        # Enable comments
+        $ret .= "<tr><td class='field_name'>Enable comments:</td>\n<td>";
+        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_showtalklinks', 'id' => 'opt_showtalklinks',
+                                 'selected' => $u->{'opt_showtalklinks'} eq 'Y' });
+        $ret .= " Enable commenting from: ";
+        $ret .= LJ::html_select({ 'name' => 'opt_whocanreply', 'selected' => $u->{'opt_whocanreply'} },
+                                  "all" => "Everyone",
+                                  "reg" => "Registered users",
+                                  "friends" => BML::ml(".security.visibility.friends"));
+        $ret .= "<ul class='helper'><li>If you disable commenting, all pasts comments on your journal will be hidden. They will re-appear if you enable commenting again.</li>\n";
+        $ret .= "<li>If you wish to disable commenting for only some for your entries, not all, then you can do so by adjusting the .Screen Comments. setting on each entry.</li></ul>\n";
+        $ret .= "</td></tr>\n";
+
+        # Comment screening
+        $ret .= "<tr><td class='field_name'>Comment screening:</td>\n<td>";
+        $ret .= "Screen comments from: ";
+        $ret .= LJ::html_select({ 'name' => 'opt_whoscreened', 'selected' => $u->{'opt_whoscreened'} },
+                                  "N" => "No one",
+                                  "R" => "Anonymous commenters",
+                                  "F" => ($u->{'journaltype'} eq 'C' ? "Anyone who's not a member" : "Anyone not on my Friend's list"),
+                                  "A" => "Everyone" );
+        $ret .= "<br /><span class='helper'>\nScreening allows you to read comments before publishing them for others to see.</span>";
+        $ret .= "</td></tr>\n";
+
+        # IP address log
+        $ret .= "<tr><td class='field_name'>IP address log:</td>\n<td>";
+        $ret .= " Log IPs for replies from: ";
+        $ret .= LJ::html_select({ 'name' => 'opt_logcommentips', 'selected' => $u->{'opt_logcommentips'} },
+                                  "N" => "No one",
+                                  "S" => "Anonymous commenters",
+                                  "A" => "Everyone" );
+        $ret .= "<br />\n<span class='helper'>You can set this option to log the IP addresses of commenters to your journal.</span>";
+        $ret .= "</td></tr>\n";
+
+        # Email notifications
+        $ret .= "<tr><td class='field_name'>Email notifications:</td>\n<td>";
+        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_gettalkemail', 'id' => 'opt_gettalkemail',
+                                 'selected' => $u->prop('opt_gettalkemail') eq 'Y' });
+        $ret .= " Receive email notifications when others comment</label><br />\n";
+        $ret .= "Email format: ";
+        $ret .= LJ::html_select({ 'name' => 'opt_htmlemail', 'id' => 'opt_htmlemail',
+                                  'selected' => $u->prop('opt_htmlemail')},
+                                  "N", "Plain Text", "Y", "HTML Formatted");
+        $ret .= "</td></tr>\n";
+
+        $ret .= "</table>\n";
+
+        # Your comments
+        $ret .= "<div class='section_head'>Comments you make</div>\n";
+        $ret .= "<table class='field_block'>\n";
+
+        # Comment notifications
+        $ret .= "<tr><td class='field_name'>Comment notifications</td>\n<td>";
+        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_gettalkemail', 'id' => 'opt_gettalkemail',
+                                 'selected' => $u->{'opt_gettalkemail'} eq 'Y' });
+        $ret .= " Send me email copies of comments I make<br />\n";
+        $ret .= "<span class='helper'>You can receive e-mail copies of comments you make while logged in under
+            your username. You will not receive copies of any anonymous comments you
+            make.</span>\n";
+        $ret .= "</td></tr>\n";
+
+        $ret .= "</table>\n";
+
+        # ending submit block
+        $ret .= "<?standout " . LJ::html_submit(undef, $ML{'.finished.save_button'}) . " standout?>\n";
+        $ret .= "</form>\n";
+
+        return $ret;
+    }
+
+
+    ###
+    ### we have a post, process edits
+    ###
+
+    if (LJ::did_post()) {
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>" unless LJ::check_form_auth();
+
+        return "<?badinput?>" unless LJ::text_in(\%POST);
+
+        my $dbh = LJ::get_db_writer();
+        # setup what we're gonna update in the user table:
+        my %update = (
+                      'opt_showtalklinks' => $POST{'opt_showtalklinks'} ? "Y" : "N",
+                      'opt_gettalkemail'  => $POST{'opt_gettalkemail'} ? "Y" : "N",
+                      'opt_htmlemail'     => $POST{'opt_htmlemail'},
+                      'opt_whocanreply' => $POST{'opt_whocanreply'},
+                      );
+
+        LJ::update_user($u, \%update);
+
+        ### change any of the userprops ?
+        {
+            # opts
+            $POST{'opt_whoscreened'} = "N" unless $POST{'opt_whoscreened'} =~ m/^(N|R|F|A)$/;
+            if ($POST{'opt_logcommentips'} ne "N" &&
+                $POST{'opt_logcommentips'} ne "S" &&
+                $POST{'opt_logcommentips'} ne "A") { $POST{'opt_logcommentips'} = "N"; }
+
+            my @uprops = qw(
+              opt_whoscreened opt_logcommentips
+            );
+
+
+            # set userprops
+            foreach my $uprop (@uprops) {
+                my $eff_val = $POST{$uprop};   # effective value, since 0 isn't stored
+                $eff_val = "" unless $eff_val;
+                my $mem_only = $eff_val eq $u->{$uprop};
+                LJ::set_userprop($u, $uprop, $eff_val, $mem_only);
+            }
+        }
+
+
+        # tell the user all is well
+        my $base = $u->journal_base;
+        my $profile_url = $u->profile_url;
+        return "<?h1 $ML{'.success.header'} h1?>\n" .
+               "<?p " . BML::ml('.success.message2', {'aopts1' => "href='$base/'", 'aopts2' => "href='$profile_url'"}) . " p?>";
+    }
+
+    # should never happen
+    return "<?h1 $ML{'Error'} h1?><?p $ML{'error.unknownmode'} p?>";
+
+}
+_code?>
+
+<=body
+head<=
+<?_code
+    LJ::need_res('stc/lj_base.css', 'stc/lj_settings.css');
+    return $head;
+_code?>
+<=head
+page?><?_c <LJDEP>
+lib: LJ::TextMessage, cgi-bin/ljlib.pl, cgi-bin/ljlang.pl
+link: htdocs/legal/privacy.bml, htdocs/support/faqbrowse.bml, htdocs/tools/textmessage.bml, htdocs/uploadpic.bml
+link: htdocs/paidaccounts/index.bml, htdocs/users, htdocs/userinfo.bml
+post: htdocs/manage/comments
+img: htdocs/userpic
+</LJDEP> _c?>
+
+

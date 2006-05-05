@@ -1,0 +1,275 @@
+<?page
+title=>Edit Settings
+body<=
+<?_code
+    LJ::set_active_crumb('editinfo'); ##TODO:Change crumbs
+    return;
+_code?>
+
+<?_code
+{
+    use strict;
+    use vars qw(%POST %GET $head);
+
+    return LJ::server_down_html() if $LJ::SERVER_DOWN;
+
+    BML::set_language_scope('/editinfo.bml');
+    my $remote = LJ::get_remote();
+    return LJ::bad_input("You must be logged in to edit your profile.")
+        unless $remote;
+
+    my $authas = $GET{'authas'} || $remote->{'user'};
+    my $u = LJ::get_authas_user($authas);
+    return LJ::bad_input("You could not be authenticated as the specified user.")
+        unless $u;
+
+    return $LJ::MSG_READONLY_USER if $u->readonly;
+
+    # extra arguments for get requests
+    my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
+
+    ### user is now authenticated ###
+
+    # load user props
+    LJ::load_user_props(
+        $u, { use_master => 1 },
+        qw/ view_control_strip show_control_strip
+          opt_imagelinks opt_stylemine opt_bdaymail
+          opt_blockrobots opt_weblogscom
+          /
+    );
+
+    # to store values before they undergo normalisation
+    my %saved = ();
+
+    # clean userprops
+    foreach (values %$u) { LJ::text_out(\$_); }
+
+    ###
+    ### no post, show edit form
+    ###
+    $head = "";
+
+    unless (LJ::did_post()) {
+
+        my $ret;
+
+        $ret .= "<div>";
+        $ret .= "Customize your viewing, notification and additional privacy options. ";
+        # user switcher
+        $ret .= "<?p <form method='get' action='index.bml'>\n";
+        $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
+        $ret .= "</form> p?>\n\n";
+
+        $ret .= "</div>\n";
+
+        $ret.= "<div class='clear'></div>\n";
+
+
+        $ret .= "<form method='post' action='index.bml$getextra'>\n";
+        $ret .= LJ::form_auth();
+
+        # personal information
+        $ret .= "<div class='section_head'> Viewing Options</div>\n";
+        $ret .= "<table class='field_block'>\n";
+
+        ### Control Strip
+        if ($LJ::USE_CONTROL_STRIP) {
+            $ret .= "<tr><td class='field_name'>Navigation strip:</td>\n";
+            $ret .= "<td class='helper'>The navigation strip is a small toolbar that can show at the top of your journal/community, as well as when you're browsing other journals and communities. It provides:<br />\n";
+            $ret .= "<ul><li>Quick links to your own journal, the update page, and your Friends page</li>\n";
+            $ret .= "<li>Options appropriate to the page you are looking at, i.e. filters for your Friends page</li>\n";
+            $ret .= "<li>Community management options and more</li></ul>\n";
+
+            $ret .= "<table style='margin-left: 30px; margin-bottom: 20px'>\n";
+            $ret .= "<tr><td colspan='2'><b style='white-space: nowrap'>$ML{'.navstrip.choose'}</b></td></tr>";
+            my $color_selected = $u->prop('view_control_strip') ? $u->prop('view_control_strip') : "dark";
+            $ret .= "<tr><td width='50%'>" . LJ::html_check({ 'type' => "radio", 'name' => "control_strip_color", 'id' => "control_strip_color_dark", 'value' => "dark", 'selected' => $color_selected eq "dark" ? 1 : 0, });
+            $ret .= " <label for='control_strip_color_dark'>$ML{'.navstrip.choose.dark'}</label></td>";
+            $ret .= "<td><label for='control_strip_color_dark' style='background-repeat: repeat-x; width: 3em; height: 3em; display: block; background-image: url($LJ::IMGPREFIX/controlstrip/bg-dark.gif)'>&nbsp;</label></td></tr><tr>";
+            $ret .= "<td width='50%'>" . LJ::html_check({ 'type' => "radio", 'name' => "control_strip_color", 'id' => "control_strip_color_light", 'value' => "light", 'selected' => $color_selected eq "light" ? 1 : 0 });
+            $ret .= " <label for='control_strip_color_light'>$ML{'.navstrip.choose.light'}</label></td>";
+            $ret .= "<td><label for='control_strip_color_light' style='background-repeat: repeat-x; width: 3em; height: 3em; display: block; background-image: url($LJ::IMGPREFIX/controlstrip/bg-light.gif)'>&nbsp;</label></td></tr>";
+            $ret .= "</table>\n";
+
+            $ret .= "<table style='margin-left: 30px; margin-bottom: 20px'>\n";
+            $ret .= "<tr><td><b>$ML{'.navstrip.options'}</b></td></tr>\n";
+            my $view_checked = $u->prop('view_control_strip') ? 1 : 0;
+            $ret .= "<tr><td class='helper'>". LJ::html_check({ 'name' => "view_control_strip", 'selected' => $view_checked, 'id' => "view_control_strip" });
+            $ret .= " <label for='view_control_strip'>$ML{'.navstrip.options.viewjournals'}</label></td></tr>";
+            my $show_checked = $u->prop('show_control_strip') ? 1 : 0;
+            $ret .= "<tr><td class='helper'>". LJ::html_check({ 'name' => "show_control_strip", 'selected' => $show_checked, 'id' => "show_control_strip" });
+            $ret .= " <label for='show_control_strip'>$ML{'.navstrip.options.myjournal'}</label></td></tr>";
+            $ret .= "</table>";
+
+            $ret .= "</td></tr>\n";
+        }
+
+        # Image placeholders
+        my ($maxwidth, $maxheight) = (0, 0);
+        ($maxwidth, $maxheight) = ($1, $2) if ($u->{'opt_imagelinks'} =~ m/^(\d+)\|(\d+)$/);
+        my $is_stock = {'320|240' => 1, '640|480' => 1, '0|0' => 1, '' => 1}->{$u->{'opt_imagelinks'}};
+        my $extra = $is_stock ? '' : BML::ml('.imagelinks.size.custom', {'width' => $maxwidth, 'height' => $maxheight});
+        $ret .= "<tr><td class='field_name'>Image placeholders:</td>\n<td class='helper'>";
+        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_imagelinks_on', 'id' => 'opt_imagelinks_on',
+                                 'selected' => $u->{'opt_imagelinks'} });
+        $ret .= " Use image placeholders for ";
+        $ret .= LJ::html_select({'name' => 'opt_imagelinks', 'selected' => $u->{'opt_imagelinks'}},
+                                 '0|0', 'all images',
+                                 '320|240', 'medium images (over 320x240)',
+                                 '640|480', 'large images (over 640x480)',
+                                 $extra ? ("$maxwidth|$maxheight", $extra) : ());
+        $ret.= "<br />Placeholders replace inline images with links, and are useful if you are browsing at work or over a slow connection.";
+        $ret .= "</td></tr>\n";
+
+        # Comment pages
+        $ret .= "<tr><td class='field_name'>Comment pages:</td>\n<td class='helper'>";
+        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_stylemine', 'id' => 'opt_stylemine',
+                                 'value' => 1, 'selected' => $u->{'opt_stylemine'} });
+        $ret .= " View comment pages in my own journal style<br />\n";
+        $ret .= "When you follow a comment link from your Friends page, you can view that
+            comment page in your own journal style.";
+        $ret .= "</td></tr>\n";
+        $ret .= "</table>\n";
+
+        # personal information
+        $ret .= "<div class='section_head'>LJ notifications</div>\n";
+        $ret .= "<table class='field_block'>\n";
+
+        # LJ News
+        $ret .= "<tr><td class='field_name'>LiveJournal news:</td>\n<td class='helper'>";
+        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'allow_getljnews', 'id' => 'allow_getljnews',
+                                 'selected' => $u->{'allow_getljnews'} eq 'Y' });
+        $ret .= " Send me email copies of LiveJournal news posts";
+        $ret .= "</td></tr>\n";
+
+        # Birthday reminders
+        $ret .= "<tr><td class='field_name'>Birthday reminders:</td>\n<td class='helper'>";
+        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_bdaymail', 'id' => 'opt_bdaymail',
+                                 'selected' => $u->{'opt_bdaymail'} });
+        $ret .= " Send me e-mail reminders for my friends' birthdays<br />";
+        $ret .= "Note: This feature is currently disabled, but may be re-enabled in the future.";
+        $ret .= "</td></tr>\n";
+
+        $ret .= "</table>\n";
+
+        # Additional privacy options
+        $ret .= "<div class='section_head'>Additional privacy options</div>\n";
+        $ret .= "<table class='field_block'>\n";
+
+        # Search Inclusion
+        $ret .= "<tr><td class='field_name'>Search inclusion:</td>\n<td class='helper'>";
+        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_blockrobots', 'id' => 'opt_blockrobots',
+                                 'selected' => $u->{'opt_blockrobots'} });
+        $ret .= " Minimize journal's inclusion in search<br />";
+        $ret .= "We can instruct search engines not to include your journal entries in their search
+            results. Not all search engines recognize this request; if you do not want a journal
+            entry to show up in search results, then make sure it is posted private or Friends-only.";
+        $ret .= "</td></tr>\n";
+
+        # Weblogs.com
+        $ret .= "<tr><td class='field_name'>Weblogs.com:</td>\n<td class='helper'>";
+        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_weblogscom', 'id' => 'opt_weblogscom',
+                                 'selected' => $u->{'opt_weblogscom'} });
+        $ret .= " Notify Weblogs.com when I post new public entries<br />\n";
+        $ret .= "Weblogs.com, a VeriSign service, is a ping server that automatically notifies
+            subscribers when new content is posted to a website or blog, So that many more
+            people can be made aware of updates to your journal.\n";
+        $ret .= "</td></tr>\n";
+
+        $ret .= "</table>\n";
+
+        # ending submit block
+        $ret .= "<?standout " . LJ::html_submit(undef, $ML{'.finished.save_button'}) . " standout?>\n";
+        $ret .= "</form>\n";
+
+        return $ret;
+    }
+
+
+    ###
+    ### we have a post, process edits
+    ###
+
+    if (LJ::did_post()) {
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>" unless LJ::check_form_auth();
+
+        return "<?badinput?>" unless LJ::text_in(\%POST);
+
+        my $dbh = LJ::get_db_writer();
+        # setup what we're gonna update in the user table:
+        my %update = (
+                      'allow_getljnews' => $POST{'allow_getljnews'} ? "Y" : "N",
+                      );
+
+        LJ::update_user($u, \%update);
+
+        ### change any of the userprops ?
+        {
+            # opts
+            $POST{'opt_imagelinks'} = 0 unless $POST{'opt_imagelinks_on'} &&
+                                               $POST{'opt_imagelinks'} =~ m/^(\d+)\|(\d+)$/;
+            $POST{'opt_stylemine'} = $POST{'opt_stylemine'} ? 1 : 0;
+            $POST{'opt_bdaymail'} = $POST{'opt_bdaymail'} ? 1 : 0;
+            $POST{'opt_blockrobots'} = $POST{'opt_blockrobots'} ? 1 : 0;
+            $POST{'opt_weblogscom'} = $POST{'opt_weblogscom'} ? 1 : 0;
+
+            if ($LJ::USE_CONTROL_STRIP) {
+                my $color = $POST{'control_strip_color'} || "dark";
+                $POST{'show_control_strip'} = $POST{'show_control_strip'} ? $color : undef;
+                $POST{'view_control_strip'} = $POST{'view_control_strip'} ? $color : undef;
+            } else {
+                $POST{'show_control_strip'} = undef;
+                $POST{'view_control_strip'} = undef;
+            }
+
+
+            my @uprops = qw(
+              view_control_strip show_control_strip
+              opt_imagelinks opt_stylemine opt_bdaymail
+              opt_blockrobots opt_weblogscom
+            );
+
+            # weblogs.com requires a special cap
+            push @uprops, 'opt_weblogscom' if LJ::get_cap($u, 'weblogscom');
+
+
+            # set userprops
+            foreach my $uprop (@uprops) {
+                my $eff_val = $POST{$uprop};   # effective value, since 0 isn't stored
+                $eff_val = "" unless $eff_val;
+                my $mem_only = $eff_val eq $u->{$uprop};
+                LJ::set_userprop($u, $uprop, $eff_val, $mem_only);
+            }
+        }
+
+
+        # tell the user all is well
+        my $base = $u->journal_base;
+        my $profile_url = $u->profile_url;
+        return "<?h1 $ML{'.success.header'} h1?>\n" .
+               "<?p " . BML::ml('.success.message2', {'aopts1' => "href='$base/'", 'aopts2' => "href='$profile_url'"}) . " p?>";
+    }
+
+    # should never happen
+    return "<?h1 $ML{'Error'} h1?><?p $ML{'error.unknownmode'} p?>";
+
+}
+_code?>
+
+<=body
+head<=
+<?_code
+    LJ::need_res('stc/lj_base.css', 'stc/lj_settings.css');
+    return $head;
+_code?>
+<=head
+page?><?_c <LJDEP>
+lib: LJ::TextMessage, cgi-bin/ljlib.pl, cgi-bin/ljlang.pl
+link: htdocs/legal/privacy.bml, htdocs/support/faqbrowse.bml, htdocs/tools/textmessage.bml, htdocs/uploadpic.bml
+link: htdocs/paidaccounts/index.bml, htdocs/users, htdocs/userinfo.bml
+post: htdocs/manage/settings
+img: htdocs/userpic
+</LJDEP> _c?>
+
+
