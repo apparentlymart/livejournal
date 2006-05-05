@@ -97,7 +97,7 @@ sub load_config {
         next unless ($pboxid && $typeid);
 
         my $box = $self->new_box_by_type($typeid);
-        return unless $box;
+        next unless $box;
 
         $box->load_config($pboxid, $self->{'u'});
         $self->{'boxes'}->{$pboxid} = $box;
