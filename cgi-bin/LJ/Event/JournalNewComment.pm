@@ -47,8 +47,16 @@ sub subscription_as_html {
     my $u = LJ::load_userid($journalid);
     my $user = LJ::ljuser($u);
 
-    if ($arg1 == 0) {
+    if ($arg1 == 0 && $arg2 == 0) {
         return "All comments in $user, on any post.";
+    }
+
+    # load ditemid from jtalkid if no ditemid
+    my $comment;
+    if ($arg2) {
+        $comment = LJ::Comment->new($u, jtalkid => $arg2);
+        return "(Invalid comment)" unless $comment && $comment->valid;
+        $arg1 = $comment->entry->ditemid unless $arg1;
     }
 
     my $entry = LJ::Entry->new($u, ditemid => $arg1)
@@ -60,8 +68,6 @@ sub subscription_as_html {
     my $entryurl  = $entry->url;
     return "All comments on <a href='$entryurl'>$entrydesc</a> in $user" if $arg2 == 0;
 
-    my $comment = LJ::Comment->new($u, jtalkid => $arg2);
-    return "(Invalid comment)" unless $comment && $comment->valid;
     my $threadurl = $comment->url;
 
     my $posteru = $comment->poster;
