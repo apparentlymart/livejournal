@@ -16,6 +16,7 @@ body<=
                       authas       => 'word',
                       ntypeid      => 'digits',
                       etypeid      => 'digits',
+                      delete       => 'digits',
                       _default     => 'word',);
 
 
@@ -133,16 +134,50 @@ body<=
                 journalid => $journalid,
             );
         }
+
+        if ($POST{mode} eq 'delete') {
+            my $id = int($POST{delete});
+            return LJ::bad_input("No ID specified") unless $id;
+
+            my $subscr = LJ::Subscription->new_by_id($u, $id)
+                or return LJ::error_list("Could not load subscription $id");
+
+            $subscr->delete
+                or return LJ::error_list("Could not delete subscription.");
+        }
     }
 
     if ($GET{'mode'} eq "modify" && $GET{'id'} ne "") {
-        my $id = $GET{'id'} + 0;
+        my $id = int($GET{'id'});
         my $subsc = LJ::Subscription->new_by_id($u, $id);
         return "Invalid subscription" unless $subsc;
 
-        $body .= "<form method='POST' action='./'>";
-        $body .= $formauth;
-        $body .= "</form>";
+        my $subscr = LJ::Subscription->new_by_id($u, $id)
+            or return LJ::error_list("Could not load subscription $id");
+
+        my $subdesc = $subscr->as_html;
+
+        my $fields = LJ::html_hidden(delete => $id,
+                                     mode   => 'delete',);
+
+        $body .= qq {
+            <div>
+                <a href="./"><< Back</a>
+            </div>
+            <br/>
+            <form method='POST' action="./">
+                $formauth
+                <div>
+                    Modify subscription: "$subdesc"
+                </div>
+                <br/>
+                <div>
+                    <input type="submit" value="Delete" />
+                </div>
+                $fields
+            </form>
+        };
+        return $body;
     } else {
         $body .= "<form action='./' method='GET'>";
         $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
