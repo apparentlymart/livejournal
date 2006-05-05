@@ -1,9 +1,9 @@
-package LJ::NotificationMethod::Queue;
+package LJ::NotificationMethod::Inbox;
 
 use strict;
 use Carp qw/ croak /;
 use base 'LJ::NotificationMethod';
-use Class::Autouse qw(LJ::NotificationQueue);
+use Class::Autouse qw(LJ::NotificationInbox);
 
 sub can_digest { 1 };
 
@@ -30,7 +30,7 @@ sub new {
     return bless $self, $class;
 }
 
-sub title { 'Queue' }
+sub title { 'Inbox' }
 
 sub new_from_subscription {
     my $class = shift;
@@ -68,7 +68,7 @@ sub notify {
     croak "'notify' requires one or more events"
         unless @events;
 
-    my $q = LJ::NotificationQueue->new($u)
+    my $q = LJ::NotificationInbox->new($u)
         or die "Could not get notification queue for user $u->{user}";
 
     foreach my $ev (@events) {

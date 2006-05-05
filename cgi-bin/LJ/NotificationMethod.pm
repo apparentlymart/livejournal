@@ -5,7 +5,7 @@ use Carp qw/ croak /;
 use Class::Autouse qw (LJ::Typemap
                        LJ::NotificationMethod::Email
                        LJ::NotificationMethod::SMS
-                       LJ::NotificationMethod::Queue
+                       LJ::NotificationMethod::Inbox
                        );
 
 # make sure all the config'd classes are mapped

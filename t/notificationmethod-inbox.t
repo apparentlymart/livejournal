@@ -9,7 +9,7 @@ use LJ::Test qw(temp_user memcache_stress);
 
 use Class::Autouse qw(
                       LJ::Event::Befriended
-                      LJ::NotificationMethod::Queue
+                      LJ::NotificationMethod::Inbox
                       );
 
 my $u;
@@ -20,8 +20,8 @@ my $valid_u = sub {
 # less duplication of this so we can revalidate
 my $meth;
 my $valid_meth = sub {
-    $meth = eval { LJ::NotificationMethod::Queue->new($u, $u->{userid}) };
-    ok(ref $meth && ! $@, "valid Queue method instantiated");
+    $meth = eval { LJ::NotificationMethod::Inbox->new($u, $u->{userid}) };
+    ok(ref $meth && ! $@, "valid Inbox method instantiated");
     return $meth;
 };
 
@@ -31,10 +31,10 @@ sub run_tests{
         $valid_u->();
         $valid_meth->();
 
-        $meth = eval { LJ::NotificationMethod::Queue->new() };
+        $meth = eval { LJ::NotificationMethod::Inbox->new() };
         like($@, qr/no args/, "no args passed to constructor");
 
-        $meth = eval { LJ::NotificationMethod::Queue->new({user => 'ugly'}) };
+        $meth = eval { LJ::NotificationMethod::Inbox->new({user => 'ugly'}) };
         like($@, qr/invalid user/, "non-user passed to constructor");
 
         # test valid case
@@ -77,7 +77,7 @@ sub run_tests{
         ok(ref $ev && ! $@, "created LJ::Event::Befriended object");
 
         # failures
-        eval { LJ::NotificationMethod::Queue::notify() };
+        eval { LJ::NotificationMethod::Inbox::notify() };
         like($@, qr/'notify'.+?object method/, "notify class method");
 
         eval { $meth->notify };

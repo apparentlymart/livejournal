@@ -2300,7 +2300,7 @@ sub remote_has_priv
 #       'R' == memory (remembrance), 'K' == keyword id,
 #       'P' == phone post, 'C' == pending comment
 #       'O' == pOrtal box id, 'V' == 'vgift', 'E' == ESN subscription id
-#       'Q' == Notification Queue
+#       'Q' == Notification Inbox
 #
 # FIXME: both phonepost and vgift are ljcom.  need hooks. but then also
 #        need a sepate namespace.  perhaps a separate function/table?

@@ -2,7 +2,7 @@
 # for a user.
 # Mischa Spiegelmock, 4/28/06
 
-package LJ::NotificationQueue;
+package LJ::NotificationInbox;
 
 use strict;
 use Carp qw(croak);

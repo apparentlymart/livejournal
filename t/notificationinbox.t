@@ -8,7 +8,7 @@ require 'ljlib.pl';
 use LJ::Test qw(temp_user memcache_stress);
 
 use Class::Autouse qw(
-                      LJ::NotificationQueue
+                      LJ::NotificationInbox
                       LJ::Event
                       );
 
@@ -24,16 +24,16 @@ sub run_tests {
 
     # try bogus constructors
     {
-        $rv = eval { LJ::NotificationQueue->new() };
+        $rv = eval { LJ::NotificationInbox->new() };
         like($@, qr/invalid args/i, "Invalid args");
 
-        $rv = eval { LJ::NotificationQueue->new({bogus => "ugly"}) };
+        $rv = eval { LJ::NotificationInbox->new({bogus => "ugly"}) };
         like($@, qr/invalid user/i, "Invalid user");
     }
 
     # create a queue
     {
-        $q = LJ::NotificationQueue->new($u);
+        $q = LJ::NotificationInbox->new($u);
         ok($q, "Got queue");
     }
 
