@@ -29,7 +29,15 @@ sub as_sms {
 }
 
 sub title {
-    return 'Friend Added';
+    return 'Befriended';
+}
+
+sub subscription_as_html {
+    my ($class, $subscr) = @_;
+
+    my $journal = $subscr->journal or croak "No user";
+
+    return $journal->ljuser_display . " is befriended";
 }
 
 sub journal_sub_title { 'User' }
