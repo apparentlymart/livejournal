@@ -17,6 +17,22 @@ sub title {
     return 'New Comment on Journal';
 }
 
+sub as_html {
+    my $self = shift;
+
+    my $journal = $self->u;    # what journal did this comment happen in?
+    my $arg1    = $self->arg1; # jtalkid
+
+    my $comment = LJ::Comment->new($journal, jtalkid => $arg1);
+    return "(Invalid comment)" unless $comment && $comment->valid;
+
+    my $ju = LJ::ljuser($journal);
+    my $pu = LJ::ljuser($comment->poster);
+    my $url = $comment->url;
+
+    return "New <a href=\"$url\">comment</a> in $ju by $pu.";
+}
+
 sub subscription_as_html {
     my ($class, $subscr) = @_;
 

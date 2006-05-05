@@ -75,6 +75,13 @@ sub as_string {
     return "Event $classname fired for user=$u->{user}, args=[@{$self->{args}}]";
 }
 
+# default is just return the string, override if subclass
+# actually can generate pretty content
+sub as_html {
+    my $self = shift;
+    return $self->as_string;
+}
+
 # class method, takes a subscription
 sub subscription_as_html {
     my ($class, $subscr) = @_;
