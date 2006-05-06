@@ -332,6 +332,13 @@ sub trans
 
     my %GET = $r->args;
 
+    if ($LJ::IS_DEV_SERVER && $GET{'as'} =~ /^\w{1,15}$/) {
+        my $ru = LJ::load_user($GET{'as'});
+        if ($ru) {
+            LJ::set_remote($ru);
+        }
+    }
+
     # anti-squatter checking
     if ($LJ::DEBUG{'anti_squatter'} && $r->method eq "GET") {
         my $ref = $r->header_in("Referer");
