@@ -211,6 +211,8 @@ test_esn_flow(sub {
 
     $sms = $got_notified->($u1);
     ok(! $sms, "Did not receive notification");
+
+    $subsc->delete;
 });
 
 sub test_esn_flow {
