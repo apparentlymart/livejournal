@@ -505,7 +505,7 @@ if ($u->{'journaltitle'}) {
  }
 
 
-  if ( ! $synd && ($u->{'allow_infoshow'} eq "Y" || $viewall)) {
+  if ( ! $synd && ($u->can_show_location || $viewall)) {
       if ($u->{'city'} || $u->{'state'} || $u->{'country'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
           $body .= "<tr><td align='right'><b>$ML{'.label.location'}</b></td><td colspan='$span'>";
@@ -542,7 +542,9 @@ if ($u->{'journaltitle'}) {
           $body .= join(", ", grep { $_ } ($city, $state, $country));
           $body .= "</td></tr>";
       }
+  }
 
+  if ( ! $synd && ($u->can_show_bday || $viewall)) {
       if ($u->{'bdate'} && !$com && $u->{'bdate'} ne "0000-00-00" && !$u->underage) {
           my $bdate = $u->{'bdate'};
           $bdate =~ s/^0000-//;

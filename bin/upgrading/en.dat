@@ -5237,6 +5237,8 @@ This could be because: <ol>
 
 /userinfo.bml.title=User Info
 
+/userinfo.bml.title1=Profile
+
 /userinfo.bml.title.communityinfo=Community Info
 
 /userinfo.bml.title.syndicated=Syndicated Account

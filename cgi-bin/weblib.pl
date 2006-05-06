@@ -1938,17 +1938,18 @@ sub ads {
 
     my $remote = LJ::get_remote();
     if ($remote) {
-        # Pass age and country to targetting engine if user shares this information
-        if ($remote->{allow_infoshow} eq 'Y') {
-            if (defined $remote->{bdate}) {
-                # This calculation can die if they haven't set differing parts of their
-                # birthdate.
-                my $secs = eval { time() - LJ::mysqldate_to_time($remote->{bdate}); };
+        # Pass age to targetting engine if user shares this information
+        if ($remote->can_show_bday && defined $remote->{bdate}) {
+            # This calculation can die if they haven't set differing parts of their
+            # birthdate.
+            my $secs = eval { time() - LJ::mysqldate_to_time($remote->{bdate}); };
 
-                $adcall{age} = int($secs / 31556926)
-                    if $secs > 0;  # Real rough calculation, but that is fine
-            }
+            $adcall{age} = int($secs / 31556926)
+                if $secs > 0;  # Real rough calculation, but that is fine
+        }
 
+        # Pass country to targetting engine if user shares this information
+        if ($remote->can_show_location) {
             $adcall{country} = $remote->prop('country');
         }
 

@@ -966,12 +966,18 @@ sub opt_showlocation {
 
 sub can_show_location {
     my $u = shift;
-    return $u->opt_showlocation ne 'N' ? 1 : 0;
+    croak "invalid user object passed" unless LJ::isu($u);
+    return 0 if $u->underage;
+    return 0 if $u->opt_showlocation eq 'N';
+    return 1;
 }
 
 sub can_show_bday {
     my $u = shift;
-    return $u->opt_showbday ne 'N' ? 1 : 0;
+    croak "invalid user object passed" unless LJ::isu($u);
+    return 0 if $u->underage;
+    return 0 if $u->opt_showbday eq 'N';
+    return 1;
 }
 
 # sets prop, and also updates $u's cached version
@@ -1020,7 +1026,7 @@ sub get_friends_birthdays {
 
         my ($year, $month, $day) = split('-', $friend->{bdate});
 
-        if ($month > 0 && $day > 0 && $friend->{'allow_infoshow'} eq 'Y'
+        if ($month > 0 && $day > 0 && $friend->can_show_bday
                        && !$friend->underage) {
             my $ref = [ $month, $day, $friend->{user} ];
             push @bdays, $ref;

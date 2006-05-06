@@ -61,7 +61,7 @@ sub new_remote {
     }
 
     my $bday = $u->bdate_string;
-    if ($bday && $u->{allow_infoshow} ne 'N') {
+    if ($bday && $u->can_show_bday) {
         $bday = "0000-$bday" unless $bday =~ /\d\d\d\d/;
         $node = $vcard->add_node({
             'node_type' => 'BDAY;value=date',
@@ -76,7 +76,7 @@ sub new_remote {
 
     # Setting values on an address element
     #$node->[0]->street('123 Fake');
-    if ($u->{'allow_infoshow'} eq "Y") {
+    if ($u->can_show_location) {
         $node = $vcard->get({ 'node_type' => 'addresses' });
 
         $node->[0]->city($u->prop('city'));

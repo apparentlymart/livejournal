@@ -6,7 +6,7 @@
  BML::set_language_scope('/userinfo.bml');
 
  $bml_okay = 1;
- $title = $ML{'.title'};
+ $title = $ML{'.title1'};
  $body = "";
  $head = "";
  $windowtitle = "";
@@ -598,7 +598,7 @@
  $body .= "        <tr><td align='right'>$ML{'.label.name'} </td><td class='data'>$u->{'name'}</td></tr>\n";
 
  # Location
- if ( ! $synd && ($u->{'allow_infoshow'} eq "Y" || $viewall)) {
+ if ( ! $synd && ($u->can_show_location || $viewall)) {
       if ($u->{'city'} || $u->{'state'} || $u->{'country'}) {
           $body .= "<tr><td align='right' valign='top'>$ML{'.label.location'} </td><td>";
           my $estate = LJ::eurl($u->{'state'});
@@ -644,7 +644,9 @@
           $body .= join(", ", grep { $_ } ($city, $state, $country));
           $body .= "</td></tr>";
       }
+ }
 
+ if ( ! $synd && ($u->can_show_bday || $viewall)) {
       if ($u->{'bdate'} && !$com && $u->{'bdate'} ne "0000-00-00" && !$u->underage) {
           my $bdate = $u->{'bdate'};
           $bdate =~ s/^0000-//;

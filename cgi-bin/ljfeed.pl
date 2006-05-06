@@ -572,7 +572,7 @@ sub create_view_foaf {
     # channel attributes
     $ret .= ($comm ? "  <foaf:Group>\n" : "  <foaf:Person>\n");
     $ret .= "    <foaf:nick>$u->{user}</foaf:nick>\n";
-    if ($u->{bdate} && $u->{bdate} ne "0000-00-00" && !$comm && $u->{allow_infoshow} eq 'Y') {
+    if ($u->{bdate} && $u->{bdate} ne "0000-00-00" && !$comm && $u->can_show_bday) {
         my $bdate = $u->{bdate};
         $bdate =~ s/^0000-//;
         $ret .= "    <foaf:dateOfBirth>$bdate</foaf:dateOfBirth>\n";
