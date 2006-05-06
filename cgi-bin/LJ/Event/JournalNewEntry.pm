@@ -21,22 +21,18 @@ sub entry {
 sub matches_filter {
     my ($self, $subscr) = @_;
 
-    my $sjid = $subscr->journalid;
-    my $ejid = $self->journal->{userid};
-
     my $ditemid = $self->arg1;
+    return 0 unless $self->journal && $ditemid; # TODO: throw error?
 
-    return 0 unless $ejid && $ditemid; # TODO: throw error?
-
-    my $entry = LJ::Entry->new($ejid, ditemid => $ditemid);
+    my $entry = LJ::Entry->new($self->journal, ditemid => $ditemid);
     return 0 unless $entry && $entry->valid; # TODO: throw error?
     return 0 unless $entry->visible_to($subscr->owner);
 
     # all posts by friends
-    return 1 if $sjid == 0;
+    return 1 if ! $subscr->journalid && LJ::is_friend($subscr->owner, $self->journal);
 
     # a post on a specific journal
-    return $sjid == $ejid;
+    return LJ::u_equals($subscr->journal, $self->journal);
 }
 
 sub as_string {
