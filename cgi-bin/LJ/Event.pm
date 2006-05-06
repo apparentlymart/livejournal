@@ -174,8 +174,14 @@ sub process_firing {
     my $self = shift;
     croak("Can't call in web context") if LJ::is_web_context();
 
+    my %has_done = ();
+
     foreach my $subsc ($self->subscriptions) {
         next unless $self->matches_filter($subsc); # does filtering (threads, etc)
+
+        # don't send more than one of the exact same notification
+        next if $has_done{$subsc->unique}++;
+
         $subsc->process($self);
     }
 }

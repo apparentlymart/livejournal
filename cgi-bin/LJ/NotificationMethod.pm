@@ -35,6 +35,18 @@ sub new_from_subscription {
     return $sub_class->new_from_subscription($subscription);
 }
 
+# this should return a unique identifier for this notification method
+# so that we don't send more than one of the same notification
+# override this if implementing extra properties
+# instance method
+sub unique {
+    my $self = shift;
+
+    croak "Unique is an instance method" unless ref $self;
+
+    return $self->class;
+}
+
 # get the typemap for the notifytype classes (class/instance method)
 sub typemap {
     return LJ::Typemap->new(
@@ -49,6 +61,10 @@ sub class {
     my ($class, $typeid) = @_;
     my $tm = $class->typemap
         or return undef;
+
+    $typeid ||= $class->ntypeid;
+
+    croak "Invalid typeid" unless $typeid;
 
     return $tm->typeid_to_class($typeid);
 }

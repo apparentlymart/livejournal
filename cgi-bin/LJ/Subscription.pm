@@ -203,4 +203,11 @@ sub process {
     $self->notification->notify(@events);
 }
 
+sub unique {
+    my $self = shift;
+
+    my $note = $self->notification or return undef;
+    return $note->unique . ':' . $self->owner->{user};
+}
+
 1;
