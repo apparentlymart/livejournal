@@ -98,7 +98,7 @@ sub generate_content {
 
         my $posteru    = $entry->poster;
 
-        next if $posteru && $posteru->{statusvis} =~ /[XS]/;
+        next if $posteru && $posteru->{statusvis} =~ /[XSD]/;
 
         my $poster     = $posteru->ljuser_display;
         my $props      = $entry->props;
