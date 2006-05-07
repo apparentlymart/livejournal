@@ -820,6 +820,8 @@ propgroup other = "Other";
 propgroup text = "Text";
 propgroup background = "Background";
 propgroup sidebar = "Sidebar";
+propgroup appearance = "Appearance";
+propgroup options = "Options";
 
 property string lang_current {
         noui = 1;
