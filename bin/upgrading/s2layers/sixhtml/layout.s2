@@ -654,8 +654,8 @@ function lang_posted_by_date_and_time(EntryLite e, UserLite poster, UserLite jou
     return "";
 }
 
-function lang_posted_by_date_and_time(EntryLite e, UserLite poster, DateTime dt, bool showposter, bool showdate, bool showtime) : string {
-    return lang_posted_by_date_and_time($e, $poster, $poster, $dt, $showposter, $showdate, $showtime);
+function lang_posted_by_date_and_time(UserLite poster, DateTime dt, bool showposter, bool showdate, bool showtime) : string {
+    return lang_posted_by_date_and_time(new EntryLite, $poster, $poster, $dt, $showposter, $showdate, $showtime);
 }
 
 function EntryPage::print_comment(Comment e) {
@@ -667,7 +667,7 @@ function EntryPage::print_comment(Comment e) {
         var string subject = $e.subject;
         if ($subject == "") { $subject = $*text_nosubject; }
         "<a href='$e.permalink_url' class='collapsed-comment-link'>$subject</a> <span class='separator'>-</span> ";
-        print lang_posted_by_date_and_time($e, $e.poster, $e.time, true, true, true);
+        print lang_posted_by_date_and_time($e, $e.poster, $e.poster, $e.time, true, true, true);
         "</div>";
         "</div>";
 
@@ -690,7 +690,7 @@ function EntryPage::print_comment(Comment e) {
 
     var string sep = "<span class='separator'>|</span>";
 
-    print lang_posted_by_date_and_time($e, $e.poster, $e.time, true, true, true)+" $sep ";
+    print lang_posted_by_date_and_time($e, $e.poster, $e.poster, $e.time, true, true, true)+" $sep ";
 
     "<a class='permalink' href='$e.permalink_url'>$*text_permalink</a>";
 
