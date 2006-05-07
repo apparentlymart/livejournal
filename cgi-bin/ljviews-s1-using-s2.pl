@@ -972,7 +972,7 @@ sub prepare_event {
             'urlpost' => $item->{comments}{post_url},
             'urlread' => $item->{comments}{read_url},
             'messagecount' => $item->{comments}{count},
-            'readlink' => $item->{comments}{count} != 0 ? LJ::fill_var_props($vars, "${prefix}_TALK_READLINK", {
+            'readlink' => $item->{comments}{show_readlink} ? LJ::fill_var_props($vars, "${prefix}_TALK_READLINK", {
                 'urlread' => $item->{comments}{read_url},
                 'messagecount' => $item->{comments}{count} == -1 ? "?" : $item->{comments}{count},
                 'mc-plural-s' => $item->{comments}{count} == 1 ? "" : "s",
