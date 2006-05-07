@@ -155,6 +155,8 @@ sub DayPage
             'screened' => ($logprops{$itemid}->{'hasscreened'} && $remote &&
                            ($remote->{'user'} eq $u->{'user'} || LJ::can_manage($remote, $u))) ? 1 : 0,
         });
+        $comments->{show_postlink} = $comments->{enabled};
+        $comments->{show_readlink} = $comments->{enabled} && ($replycount || $comments->{screened});
 
         my $userlite_poster = $userlite_journal;
         my $pu = $u;

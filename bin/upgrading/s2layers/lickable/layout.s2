@@ -1009,12 +1009,14 @@ function Comment::lay_print_metadata() {
 }
 
 function Entry::lay_print_cmdlinks() {
-    if ($.comments.enabled) {
+    if ($.comments.show_readlink or $.comments.show_postlink) {
         """<ul class="entrycmdlinks">""";
-        if ($.comments.count > 0 or $.comments.screened) {
+        if ($.comments.show_readlink) {
             "<li>"; $.comments->print_readlink(); "</li>";
         }
-        "<li>"; $.comments->print_postlink(); "</li>";
+        if ($.comments.show_postlink) {
+            "<li>"; $.comments->print_postlink(); "</li>";
+        }
         println """</ul>""";
     }
 }

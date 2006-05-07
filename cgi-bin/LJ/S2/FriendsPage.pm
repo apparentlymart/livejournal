@@ -268,6 +268,8 @@ sub FriendsPage
             'screened' => ($logprops{$datakey}->{'hasscreened'} && $remote &&
                            ($remote->{'user'} eq $fr->{'user'} || LJ::can_manage($remote, $fr))) ? 1 : 0,
         });
+        $comments->{show_postlink} = $comments->{enabled};
+        $comments->{show_readlink} = $comments->{enabled} && ($replycount || $comments->{screened});
 
         my $moodthemeid = $u->{'opt_forcemoodtheme'} eq 'Y' ?
             $u->{'moodthemeid'} : $friends{$friendid}->{'moodthemeid'};

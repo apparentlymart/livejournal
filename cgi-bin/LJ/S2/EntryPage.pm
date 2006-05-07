@@ -362,6 +362,8 @@ sub EntryPage_entry
         'screened' => ($entry->prop("hasscreened") && $remote &&
                        ($remote->{'user'} eq $u->{'user'} || LJ::can_manage($remote, $u))) ? 1 : 0,
     });
+    $comments->{show_postlink} = $comments->{enabled} && $get->{mode} ne 'reply';
+    $comments->{show_readlink} = $comments->{enabled} && ($replycount || $comments->{screened}) && $get->{mode} eq 'reply';
 
     # load tags
     my @taglist;

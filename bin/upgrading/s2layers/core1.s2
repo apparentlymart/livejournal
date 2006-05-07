@@ -226,6 +226,8 @@ class CommentInfo
     var bool screened "Set to true if there are screened comments and remote user can unscreen them.";
     var bool enabled "Set to false if comments disabled journal-wide or just on this item.";
     var bool maxcomments "Set to true if entry has reached a comment maximum.";
+    var bool show_postlink "Indicates whether the Post Comment link for this entry should be shown.";
+    var bool show_readlink "Indicates whether the Read Comments link for this entry should be shown.";
 
     function print
     "Print all comment related links";
