@@ -43,25 +43,16 @@ propgroup presentation {
     set text_page_next = "Next Page";
 
     property string{} text_entry_links {
-        des = "Captions for Entry Action links";
+        des = "Custom Captions for Entry Action links";
         noui = 1;
     }
-    set text_entry_links = {"edit_entry" => "Edit Entry",
-                            "edit_tags" => "Edit Tags",
-                            "mem_add" => "Add As Memory",
-                            "tell_friend" => "Tell a Friend",
-                            "nav_prev" => "Previous Entry",
-                            "nav_next" => "Next Entry"};
+    set text_entry_links = {}; # By default, use the system-supplied captions
 
     property string{} text_comment_links {
-        des = "Captions for Comment Action links";
+        des = "Custom Captions for Comment Action links";
         noui = 1;
     }
-    set text_comment_links = {"delete_comment" => "Delete",
-                              "screen_comment" => "Screen",
-                              "unscreen_comment" => "Unscreen",
-                              "freeze_thread" => "Freeze",
-                              "unfreeze_thread" => "Unfreeze", };
+    set text_comment_links = {}; # By default, use the system-supplied captions
 
     property use use_shared_pic;
     property use view_entry_disabled;
@@ -293,6 +284,21 @@ function MonthPage::lay_page_nav() {
     "</center></form>\n</div>\n";
 }
 
+function Link::lay_print_textlink(string caption) {
+    println safe """<a href="$.url">"""+($caption != "" ? $caption : $.caption)+"""</a>""";
+}
+function Link::lay_print_textlink() {
+    $this->lay_print_textlink("");
+}
+function Link::lay_print_li(string caption) {
+    "<li>";
+    $this->lay_print_textlink($caption);
+    "</li>";
+}
+function Link::lay_print_li() {
+    $this->lay_print_li("");
+}
+
 function EntryPage::lay_page_nav() {
     println "<div class=\"box\">";
     if (size $.comments > 0 and not $.comment_pages.all_subitems_displayed) {
@@ -311,15 +317,15 @@ function EntryPage::lay_page_nav() {
     println "<li>&nbsp;</li>";
     var Link l = new Link;
     $l = $.entry->get_link("nav_next");
-    println """<li><a href="$l.url">$*text_entry_links{"nav_next"}</a></li>""";
+    $l->lay_print_li($*text_entry_links{"nav_next"});
     foreach var string ls ($.entry.link_keyseq) {
         $l = $.entry->get_link($ls);
         if (defined $l) {
-            println """<li><a href="$l.url">$*text_entry_links{$ls}</a></li>""";
+            $l->lay_print_li($*text_entry_links{$ls});
         }
     }
     $l = $.entry->get_link("nav_prev");
-    println """<li><a href="$l.url">$*text_entry_links{"nav_prev"}</a></li>""";
+    $l->lay_print_li($*text_entry_links{"nav_prev"});
     println "</ul></div>";
 }
 
@@ -711,7 +717,8 @@ function EntryPage::print_comment(Comment c) {
     foreach var string ls ($c.link_keyseq) {
         $l = $c->get_link($ls);
         if (defined $l) {
-            println """<a href="$l.url">$*text_comment_links{$ls}</a> - """;
+            $l->lay_print_textlink($*text_comment_links{$ls});
+            print " - ";
         }
     }
     if (not $c.frozen) {
