@@ -256,8 +256,8 @@ propgroup presentation {
     # transferring it over and over.
     set external_stylesheet = true;
 
-    # No good support for EntryPage/ReplyPage yet
-    set view_entry_disabled = true;
+    property use view_entry_disabled;
+    set view_entry_disabled = true;   # Disabled by default for back-compat reasons
 }
 
 propgroup options {
@@ -566,7 +566,7 @@ function Page::print_entry(Entry e) {
     """<div class="entry" id="entry$e.itemid">\n""";
 
     var bool altposter = $e.poster.username != $e.journal.username;
-    var bool showpic = $*opt_entry_userpics and (($.view == "friends" or $altposter) or $*opt_own_userpics);
+    var bool showpic = ($*opt_entry_userpics and (($.view == "friends" or $altposter) or $*opt_own_userpics)) or $.view == "reply" or $.view == "entry";
 
     # By default, this layout uses an ugly table hack to present the userpic
     # alongside the entry. This is because I've been bitten on many previous
@@ -610,7 +610,13 @@ function Page::print_entry(Entry e) {
     if ($e.subject != "") {
         " - $e.subject";
     }
-    "</h2>\n"; $e->print_text();
+    "</h2>\n";
+
+    if ($.view == "entry" or $.view == "reply") {
+        """<div class="entrylinkbar">"""; $e->print_linkbar(); """</div>""";
+    }
+
+    """<div class="entrytext">"""; $e->print_text(); "</div>";
 
     $this->lay_print_entry_metadata($e);
 
@@ -638,50 +644,108 @@ function CommentInfo::print() {
     }
 }
 
-function EntryPage::print_comment (Comment c) {
-    var Color barlight = $*color_comment_bar->clone();
-    $barlight->lightness(($barlight->lightness() + 255) / 2);
-    var string poster = defined $c.poster ? $c.poster->as_string() : "<i>(Anonymous)</i>";
+function print_comment(Comment e) {
 
-    "<div style='margin-top: 10px; padding: 2px'>";
-    "<table summary='0' style='width: 100%;'><tr valign='top'>";
-    if (defined $c.userpic and $*comment_userpic_style != "off") {
-        var int w = $c.userpic.width;
-        var int h = $c.userpic.height;
-        # WARNING: this will later be done by the system (it'll be a
-        # constructional property), so don't copy this hack into your
-        # layout layers or you'll be messed up later.
-        $w = $w / 2;
-        $h = $h / 2;
-        print "<td><img src='$c.userpic.url' width='$w' height='$h' alt='' /></td>";
+"""<div class="entry">""";
+
+    if ($*adv_horrible_userpic_markup) {
+        """<table cellpadding="0" border="0" cellspacing="0" style="margin: 0;" class="uglykludgeuserpic">
+        <tr valign="top">
+        <td style="text-align: center;" width="105">""";
     }
-    "<td align='left'>";
-    if (defined $c.subject_icon or $c.subject != "") { "<h3>$c.subject_icon $c.subject</h3>\n"; }
-    print "<strong>$*text_comment_from</strong> $poster<br />\n";
-    print "<strong>$*text_comment_date</strong> ";
-        print $c->time_display("long", "");
-    if ($c.metadata{"poster_ip"}) { print " ($*text_comment_ipaddr " + $c.metadata{"poster_ip"} + ")"; }
-    print " <strong>(<a href='$c.permalink_url'>$*text_permalink</a>)</strong>\n";
-
-    var Link link;
-    foreach var string s (["delete_comment", "screen_comment", "unscreen_comment"]) {
-
+    if (defined $e.userpic) {
+        println """<img src="$e.userpic.url" width="$e.userpic.width" width="$e.userpic.height" alt="" class="userpic" />""";
+    } else {
+        if ($*adv_horrible_userpic_markup) {
+            print "&nbsp;";
+        }
     }
-    $link = $c->get_link("delete_comment"); " $link";
-    $link = $c->get_link("screen_comment"); " $link";
-    $link = $c->get_link("unscreen_comment"); " $link";
-
-    if ($this.multiform_on) {
-        " <label for='ljcomsel_$c.talkid'>$*text_multiform_check</label> ";
-        $c->print_multiform_check();
+    if ($*adv_horrible_userpic_markup) {
+        "</td><td>";
     }
 
-    print "</td></tr></table></div>";
-    print "<div style='margin-left: 5px'>$c.text</div>\n";
-    print "<div style='margin-top: 3px; font-size: smaller'>(<a href='$c.reply_url'>$*text_comment_reply</a>) ";
-    if ($c.parent_url != "") { "(<a href='$c.parent_url'>$*text_comment_parent</a>) "; }
-    if ($c.thread_url != "") { "(<a href='$c.thread_url'>$*text_comment_thread</a>) "; }
-    "</div>\n";
+"""
+<h2 class="entryheading">"""+$e->time_display("short", "")+""" - $e.poster"""+($e.subject ? """ - $e.subject""" : "")+""" $e.subject_icon</h2>""";
+
+"""<div class="entrylinkbar">"""; $e->print_linkbar(); """</div>""";
+
+    """<div class="entrytext">"""; $e->print_text(); """</div>""";
+
+    if ($e.metadata{"poster_ip"} != "") {
+        println """<div class="metadata">""";
+        println """<div><span class="metacaption">Poster IP Address:</span> $e.metadata{"poster_ip"}</div>""";
+        println """</div>""";
+    }
+
+    println """<ul class="entryextra">""";
+    if ($e.parent_url != "") {
+        println """<li><a href="$e.parent_url">$*text_comment_parent</a></li>""";
+    }
+    if ($e.thread_url != "") {
+        println """<li><a href="$e.thread_url">$*text_comment_thread</a></li>""";
+    }
+    if ($e.reply_url != "") {
+        println """<li><a href="$e.reply_url">$*text_comment_reply</a></li>""";
+    }
+    println """</ul>""";
+
+
+    if ($*adv_horrible_userpic_markup) {
+        "</td></tr></table>";
+    }
+
+    println "</div>";
+
+}
+
+function ReplyPage::print_body() {
+    if ($.replyto isa Comment) {
+        print_comment($.replyto as Comment);
+    }
+    else {
+        $this->print_entry($.replyto as Entry);
+    }
+    """<div id="commentform">""";
+    $.form->print();
+    """</div>""";
+}
+
+function EntryPage::lay_print_pager() {
+    if ($.comment_pages.all_subitems_displayed) { return; }
+    print "<ul class=\"itemrange\">";
+    foreach var int i (1 .. $.comment_pages.total) {
+        if ($i == $.comment_pages.current) {
+            print "<li class=\"current\">$i</li>";
+        }
+        else {
+            print "<li><a href=\""+$.comment_pages->url_of($i)+"\">$i</a></li>";
+        }
+    }
+    print "</ul>";
+}
+
+function EntryPage::print_body() {
+    $this->print_entry($.entry);
+    $this->lay_print_pager();
+    $this->print_comments($.comments);
+    $this->lay_print_pager();
+}
+
+function EntryPage::print_comments(Comment[] comments) {
+    """<ul class="comments">""";
+    foreach var Comment c ($comments) {
+        """<li class="commentsitem">""";
+        $this->print_comment($c);
+        if (size($c.replies) > 0) {
+            $this->print_comments($c.replies);
+        }
+        "</li>\n";
+    }
+    """</ul>""";
+}
+
+function EntryPage::print_comment(Comment e) {
+    print_comment($e);
 }
 
 function css_rule_if_set(string prop, string val)
@@ -885,6 +949,11 @@ body {
 table, tr, td, th {
   font-size: 1em;
 }
+.uglykludgeuserpic {
+width: 100%;
+margin: 0;
+padding: 0;
+}
 #page {
 """;
   css_rule_if_length("margin-left", $*margin_left);
@@ -956,11 +1025,20 @@ a:active, a:hover { color: $*clr_alink; background: transparent; }
 }
 .entryheading {
   font-weight: bold; font-size: 1.0em;
+  float: left;
+  margin-top: 0;
+}
+.entrylinkbar {
+float: right;
 }
 .entrytext {
 """; css_rule_if_length("max-width", $*adv_entry_max_width);
 """  margin-left: auto;
   margin-right: auto;
+  clear: both;
+}
+#commentform table, #commentform textarea {
+width: 100%;
 }
 
 .entry .metadata {
@@ -980,13 +1058,25 @@ a:active, a:hover { color: $*clr_alink; background: transparent; }
 .entryextra li {
   display: inline;
 }
-.entryextra li.entryreadlink:after {
+.entryextra li:before {
   content: " :: ";
+}
+.entryextra li:first-child:before {
+  content: "";
 }
 .entryextra li.entryreadlink {
   font-weight: bold;
 }
 $eextrastyle
+
+.comments, .commentsitem {
+list-style: none;
+margin: 0;
+padding: 0;
+}
+.comments {
+margin-left: 20px;
+}
 
 /* IE hack - center the block with text-align! */
 .calendarmonthcontainer {
