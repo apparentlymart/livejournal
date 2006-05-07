@@ -1463,6 +1463,23 @@ function lang_viewname(string viewid) [notags] : string
     return "Unknown View";
 }
 
+function lang_metadata_title(string which) [fixed] : string
+"Get a human-readable caption for a metadata key. Layers shouldn't override this, but should instead set the relevant string properties."
+{
+    if ($which == "music") {
+        return $*text_meta_music;
+    }
+    elseif ($which == "mood") {
+        return $*text_meta_mood;
+    }
+    elseif ($which == "location") {
+        return $*text_meta_location;
+    }
+    else {
+        return $which;
+    }
+}
+
 ### Navigation
 
 

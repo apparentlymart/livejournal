@@ -515,22 +515,10 @@ function YearWeek::print() {
    "</tr>";
 }
 
-
-function metadata_title(string which) : string
-"Until core provides a function for this, i18n layers should override this."
-{
-    if ($which == "music") {
-        return $*text_meta_music;
-    }
-    elseif ($which == "mood") {
-        return $*text_meta_mood;
-    }
-    elseif ($which == "location") {
-        return $*text_meta_location;
-    }
-    else {
-        return $which;
-    }
+# This is just a wrapper function around a core layer function now.
+# Retained for backwards-compatibility reasons.
+function metadata_title(string which) : string {
+    return lang_metadata_title($which);
 }
 
 # Since the metadata keys have to be hardcoded (bad core design)
