@@ -542,14 +542,19 @@ function FriendsPage::lay_nav_blurb ()
 
 function CommentInfo::print ()
 {
-    if (not $.enabled) { return; }
-    "<p class='comments'>(";
-    if ($.count > 0 or $.screened) {
-        $this->print_readlink();
-        "&nbsp;|&nbsp;";
+    if ($.show_readlink or $.show_postlink) {
+        "<p class='comments'>(";
+        if ($.show_readlink) {
+            $this->print_readlink();
+        }
+        if ($.show_postlink and $.show_readlink) {
+            "&nbsp;|&nbsp;";
+        }
+        if ($.show_postlink) {
+            $this->print_postlink();
+        }
+        ")</p>";
     }
-    $this->print_postlink();
-    ")</p>";
 }
 
 function YearPage::lay_nav_blurb()

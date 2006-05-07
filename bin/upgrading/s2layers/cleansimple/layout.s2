@@ -698,16 +698,20 @@ function FriendsPage::print_entry (Entry e) {
    print_entry($this, $e, $f.bgcolor, $f.fgcolor, false);
 }
 
-function CommentInfo::print ()
-{
-    if (not $.enabled) { return; }
-    """<div class="talklinks" clear="all">""";
-    if ($.count > 0 or $.screened) {
-        $this->print_readlink();
-        " - ";
+function CommentInfo::print() {
+    if ($.show_readlink or $.show_postlink) {
+        """<div class="talklinks" clear="all">""";
+        if ($.show_readlink) {
+            $this->print_readlink();
+        }
+        if ($.show_postlink and $.show_readlink) {
+            " | ";
+        }
+        if ($.show_postlink) {
+            $this->print_postlink();
+        }
+        "</div>";
     }
-    $this->print_postlink();
-    "</div>";
 }
 
 # This should really be provided in core

@@ -372,14 +372,18 @@ function RecentPage::lay_bottom_navigation ()
     if ($nav != "") { print $nav; }
 }
 
-function CommentInfo::print()
-{   
-    if (not $.enabled) { return; }
-    if ($.count > 0 or $.screened)
-    {
-        $this->print_readlink(); " - ";
+function CommentInfo::print() {
+    if ($.show_readlink or $.show_postlink) {
+        if ($.show_readlink) {
+            $this->print_readlink();
+        }
+        if ($.show_postlink and $.show_readlink) {
+            " - ";
+        }
+        if ($.show_postlink) {
+            $this->print_postlink();
+        }
     }
-    $this->print_postlink();
 }
 
 function YearPage::lay_bottom_navigation ()

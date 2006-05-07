@@ -483,19 +483,25 @@ function RecentPage::lay_sidebar_navigation () {
     print $nav;
 }
 
-function CommentInfo::print ()
-{
-    if (not $.enabled) {
-        "<p align='right' class='comments'>&nbsp;</p>";
-        return;
+function CommentInfo::print() {
+    "<p align='right' class='comments'>";
+    if ($.show_readlink or $.show_postlink) {
+        "(";
+        if ($.show_readlink) {
+            $this->print_readlink();
+        }
+        if ($.show_postlink and $.show_readlink) {
+            "&nbsp;|&nbsp;";
+        }
+        if ($.show_postlink) {
+            $this->print_postlink();
+        }
+        ")";
     }
-    "<p align='right' class='comments'>(";
-    if ($.count > 0 or $.screened) {
-        $this->print_readlink();
-        "&nbsp;|&nbsp;";
+    else {
+        "&nbsp;";
     }
-    $this->print_postlink();
-    ")</p>";
+    "</p>";
 }
 
 function YearPage::print_body {

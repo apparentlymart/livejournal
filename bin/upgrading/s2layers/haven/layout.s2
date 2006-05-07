@@ -1122,15 +1122,16 @@ function print_entry(Page p, Entry e, Color bgcolor, Color fgcolor, bool viewing
 
     # Comments
     println """<div class="comments">""";
-    if ($e.comments.enabled and $p.view != "entry") {
-        if ($e.comments.count > 0 or $e.comments.screened) {
-            println """<a href="$e.comments.read_url">""" +
-              get_plural_phrase($e.comments.count, $p.view == "friends" ? 
-                                "text_read_comments_friends" : "text_read_comments") +
-            "</a>";
-            println "&nbsp;|&nbsp;";
+    if (($e.comments.show_readlink or $e.comments.show_postlink) and $p.view != "entry") {
+        if ($e.comments.show_readlink) {
+            $e.comments->print_readlink();
         }
-        println """<a href="$e.comments.post_url">""" + ($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment) + "</a>";
+        if ($e.comments.show_postlink and $e.comments.show_readlink) {
+            "&nbsp;|&nbsp;";
+        }
+        if ($e.comments.show_postlink) {
+            $e.comments->print_postlink();
+        }
     } elseif ($p.view == "entry") {
         var Link l = new Link;
         foreach var string ls ($e.link_keyseq) {

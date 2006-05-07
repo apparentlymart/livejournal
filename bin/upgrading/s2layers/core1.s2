@@ -2046,15 +2046,21 @@ function CommentInfo::print_postlink() {
     }
 }
 function CommentInfo::print() {
-    if (not $.enabled) { return; }
-    """<div style="text-align: right;">\n(""";
-    if ($.count > 0 or $.screened) {
-        $this->print_readlink();
-        " | ";
+    if ($.show_readlink or $.show_postlink) {
+        """<div style="text-align: right;">\n(""";
+        if ($.show_readlink) {
+            $this->print_readlink();
+        }
+        if ($.show_postlink and $.show_readlink) {
+            " | ";
+        }
+        if ($.show_postlink) {
+            $this->print_postlink();
+        }
+        ")</div>";
     }
-    $this->print_postlink();
-    ")</div>";
 }
+
 
 ### Link object functions
 

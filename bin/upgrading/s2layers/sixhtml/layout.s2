@@ -751,12 +751,8 @@ function Page::print_entry(Entry e) {
          "<a class='permalink' href='$e.permalink_url'>$*text_permalink</a>";
 
 
-         if ($.view != "reply") {
-             if ($e.comments.enabled) { " $sep "; $e.comments->print_postlink(); }
-         }
-         if ($.view != "entry") {
-             if ($e.comments.count)   { " $sep "; $e.comments->print_readlink(); }
-         }
+         if ($e.comments.show_postlink) { " $sep "; $e.comments->print_postlink(); }
+         if ($e.comments.show_readlink)   { " $sep "; $e.comments->print_readlink(); }
          "</p>";
 
        "</div>\n";

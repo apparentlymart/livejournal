@@ -490,15 +490,20 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     "</div>";
 }
 
-function CommentInfo::print()
-{
-    if (not $.enabled) { return; }
-    "<div class='Comment'>(";
-    if ($.count > 0 or $.screened) {
-        $this->print_readlink(); "&nbsp;|&nbsp;";
+function CommentInfo::print() {
+    if ($.show_readlink or $.show_postlink) {
+        "<div class='Comment'>(";
+        if ($.show_readlink) {
+            $this->print_readlink();
+        }
+        if ($.show_postlink and $.show_readlink) {
+            "&nbsp;|&nbsp;";
+        }
+        if ($.show_postlink) {
+            $this->print_postlink();
+        }
+        ")</div>";
     }
-    $this->print_postlink();
-    ")</div>";
 }
 
 function Page::print_entry (Entry e) 

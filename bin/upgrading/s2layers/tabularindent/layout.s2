@@ -515,16 +515,21 @@ function FriendsPage::print_body {
     }
 }
 
-function CommentInfo::print()
-{
-    if (not $.enabled) { return; }
-    "<tr><td bgcolor='$*accent_bgcolor'><font color='$*accent_fgcolor'>";
-    "<nobr>comments: ";
-    if ($.count > 0 or $.screened) {
-        $this->print_readlink(); " or ";
+function CommentInfo::print() {
+    if ($.show_readlink or $.show_postlink) {
+        "<tr><td bgcolor='$*accent_bgcolor'><font color='$*accent_fgcolor'>";
+        "<nobr>comments: ";
+        if ($.show_readlink) {
+            $this->print_readlink();
+        }
+        if ($.show_postlink and $.show_readlink) {
+            " or ";
+        }
+        if ($.show_postlink) {
+            $this->print_postlink();
+        }
+        "</nobr></font></td></tr>";
     }
-    $this->print_postlink();
-    "</nobr></font></td></tr>";
 }
 
 function YearPage::print_body {

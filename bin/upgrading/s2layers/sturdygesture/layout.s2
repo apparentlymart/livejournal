@@ -623,10 +623,14 @@ function RecentPage::print_body() {
 }
 
 function CommentInfo::print() {
-    if ($.enabled) {
-        $this->print_postlink();
-        if ($.count > 0 or $.screened) {
+    if ($.show_readlink or $.show_postlink) {
+        if ($.show_postlink) {
+            $this->print_postlink();
+        }
+        if ($.show_postlink and $.show_readlink) {
             " | ";
+        }
+        if ($.show_readlink) {
             $this->print_readlink();
         }
     }
