@@ -926,6 +926,7 @@ sub raw_prop {
 
 sub _lazy_migrate_infoshow {
     my ($u) = @_;
+    return 1 if $LJ::DISABLED{infoshow_migrate};
 
     # 1) column exists, but value is migrated
     # 2) column has died from 'user')
