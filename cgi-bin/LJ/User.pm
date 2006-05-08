@@ -955,6 +955,16 @@ sub opt_showbday {
     my $u = shift;
     # option not set = "yes", set to N = "no"
     $u->_lazy_migrate_infoshow;
+
+    # migrate above did nothing
+    # -- if user was already migrated in the past, we'll
+    #    fall through and show their prop value
+    # -- if user not migrated yet, we'll synthesize a prop
+    #    value from infoshow without writing it
+    if ($LJ::DISABLED{migrate_infoshow} && $u->{allow_infoshow} ne ' ') {
+        return $u->{allow_infoshow} eq 'Y' ? undef : 'N';
+    }
+
     return $u->raw_prop('opt_showbday');
 }
 
@@ -962,6 +972,12 @@ sub opt_showlocation {
     my $u = shift;
     # option not set = "yes", set to N = "no"
     $u->_lazy_migrate_infoshow;
+
+    # see comments for opt_showbday
+    if ($LJ::DISABLED{migrate_infoshow} && $u->{allow_infoshow} ne ' ') {
+        return $u->{allow_infoshow} eq 'Y' ? undef : 'N';
+    }
+
     return $u->raw_prop('opt_showlocation');
 }
 
