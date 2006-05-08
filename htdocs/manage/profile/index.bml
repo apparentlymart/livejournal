@@ -86,7 +86,9 @@ _code?>
 
         $ret .= "<div>";
         $ret .= "Here's where you fill out your Profile page. You don't have to display
-                all of your info to everyone - check out the options below.";
+                all of your info to everyone - check out the options below.
+                You may also want to edit your <a href='$LJ::SITEROOT/manage/comments/'>comment settings</a>
+                or your <a href='$LJ::SITEROOT/manage/settings/'>viewing options</a>.";
         # user switcher
         $ret .= "<?p <form method='get' action='index.bml'>\n";
         $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
@@ -129,7 +131,7 @@ _code?>
             $ret .= "<td><div style='float: left'>";
             $ret .= LJ::html_text({ 'name' => 'name', 'value' => $u->{'name'},
                                     'maxlength' => '50' });
-            $ret .= "&nbsp; </div><div class='helper'>your name will be displayed on your Profile and in search results</div>";
+            $ret .= "&nbsp; </div><div class='helper'>Your name will be displayed on your Profile and in search results</div>";
             $ret .= "</td></tr>\n";
         } else {
             $ret .= "<td>" . LJ::html_hidden('name_absent', 'yes');
@@ -153,7 +155,7 @@ _code?>
         }
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_showbday', 'id' => 'opt_showbday',
                                                  'selected' => $u->opt_showbday ne 'N' });
-        $ret .= " <span class='helper'>Show my birthday to other users</span><br />\n";
+        $ret .= " Show your birthday to other users<br />\n";
         $ret .= LJ::html_select({ 'name' => 'month', 'selected' => int($bdpart{'month'}) },
                                 '', '', map { $_, $ML{LJ::Lang::month_long_langcode($_)} } (1..12)) . " ";
 
@@ -166,7 +168,7 @@ _code?>
         # schools
         $ret .= "<tr><td class='field_name'>Schools:</td><td>";
 
-        $ret .= "<span class='helper'>Show my schools to:</span>  ";
+        $ret .= "Show your schools to:  ";
         $ret .= LJ::html_select({ 'name' => 'opt_showschools',
                                   'selected' => $u->{'opt_showschools'} },
                                 "Y" => BML::ml(".security.visibility.everybody"),
@@ -195,7 +197,7 @@ _code?>
         $ret .= "<span class='view_options'>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_showlocation', 'id' => 'opt_showlocation',
                                                  'selected' => $u->{'opt_showlocation'} ne 'N' });
-        $ret .= " Show my location to other users</span></div>";
+        $ret .= " Show your location to other users</span></div>";
 
         $ret .= "<table class='field_block'>\n";
         # city
@@ -209,7 +211,7 @@ _code?>
                                   '', "($ML{'.state.us'})",
                                   map { $_, $states{$_} } sort { $states{$a} cmp $states{$b} } keys %states );
         # other state?
-        $ret .= "<span style='white-space: nowrap'><span class='helper'> or non-US State/province/territory </span>";
+        $ret .= "<span style='white-space: nowrap'> or non-US State/province/territory ";
         $ret .= LJ::html_text({ 'name' => 'stateother', 'size' => '20', 'maxlength' => '50',
                                 'value' => defined $states{$u->{'state'}} ? '' : $u->{'state'} });
         $ret .= "</span></td></tr>\n";
@@ -268,7 +270,7 @@ _code?>
         }
 
         # opt_whatemailshow
-        $ret .= "<br />\n<span class='helper'>Email address(es) to be displayed: </span>";
+        $ret .= "<br />\nEmail address(es) to be displayed: ";
         my $cur = $u->{'opt_whatemailshow'};
         my @vals = ( ($LJ::USER_EMAIL && LJ::get_cap($u, "useremail"))
                      ? ("A" => 'Primary email only',
@@ -352,13 +354,13 @@ _code?>
         $ret .= "<tr><td class='field_name'><label for='opt_showmutualfriends'>Mutual friends</label></td><td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_showmutualfriends', 'id' => 'opt_showmutualfriends',
                                  'selected' => $u->{'opt_showmutualfriends'} });
-        $ret .= " <span class='helper'>Show friends who have also friended me</span></td></tr>\n";
+        $ret .= " Show friends who have also friended you</td></tr>\n";
 
         # opt_hidefriendofs
         $ret .= "<tr><td class='field_name'><label for='opt_hidefriendofs'>\"Friend of\" list</label></td><td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_hidefriendofs', 'id' => 'opt_hidefriendofs',
                                  'selected' => ! $u->{'opt_hidefriendofs'} });
-        $ret .= " <span class='helper'>Show other users who have friended me, but I have not friended</span></td></tr>\n";
+        $ret .= " Show other users who have friended you, but you have not friended</td></tr>\n";
 
         $ret .= "</table>\n";
 

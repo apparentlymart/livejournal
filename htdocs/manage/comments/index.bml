@@ -80,7 +80,7 @@ _code?>
                                   "reg" => "Registered users",
                                   "friends" => BML::ml(".security.visibility.friends"));
         $ret .= "<ul class='helper'><li>If you disable commenting, all pasts comments on your journal will be hidden. They will re-appear if you enable commenting again.</li>\n";
-        $ret .= "<li>If you wish to disable commenting for only some for your entries, not all, then you can do so by adjusting the .Screen Comments. setting on each entry.</li></ul>\n";
+        $ret .= "<li>If you wish to disable commenting for only some for your entries, adjust the \"Screen Comments\" setting on each entry.</li></ul>\n";
         $ret .= "</td></tr>\n";
 
         # Comment screening
@@ -125,7 +125,7 @@ _code?>
         $ret .= "<tr><td class='field_name'>Comment notifications</td>\n<td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_gettalkemail', 'id' => 'opt_gettalkemail',
                                  'selected' => $u->{'opt_gettalkemail'} eq 'Y' });
-        $ret .= " Send me email copies of comments I make<br />\n";
+        $ret .= " Receive email copies of comments you make<br />\n";
         $ret .= "<span class='helper'>You can receive e-mail copies of comments you make while logged in under
             your username. You will not receive copies of any anonymous comments you
             make.</span>\n";
