@@ -236,11 +236,19 @@ use vars qw($body $title $windowtitle %GET %POST);
 
  # custom color selection
 
+ # retain existing fgcolor
+ my $fgvalue;
+ if ($fr) {
+     $fgvalue =  '#'.uc(sprintf("%06x", $fr->{'fgcolor'}));
+ } else {
+     $fgvalue = '#000000';
+ }
+
  # with javascript
  $ret .= qq~
 <script type='text/javascript' language='JavaScript'>
 <!--
-document.write("<a href='javascript:void(0);' style='text-decoration: none;' onclick=\\"spawnPicker(findel('editfriend_add_1_fg'),findel('editfriend_add_1_fg_value_disp'),'Overall: fgcolor',{obj:'preview',attrib:'color'});return false;\\"><span style='border: 1px solid #000000; padding-left: 2em; background-color: #000000;' id='editfriend_add_1_fg_value_disp'>&nbsp;</span></a>");
+document.write("<a href='javascript:void(0);' style='text-decoration: none;' onclick=\\"spawnPicker(findel('editfriend_add_1_fg'),findel('editfriend_add_1_fg_value_disp'),'Overall: fgcolor',{obj:'preview',attrib:'color'});return false;\\"><span style='border: 1px solid #000000; padding-left: 2em; background-color: $fgvalue\;' id='editfriend_add_1_fg_value_disp'>&nbsp;</span></a>");
 // -->
 </script>
 ~;
@@ -252,9 +260,10 @@ document.write("<a href='javascript:void(0);' style='text-decoration: none;' onc
 </noscript>
 ~;
 
+
  # hex value input
  $ret .= "</td>";
- $ret .= "<td><input type=\"text\" maxlength=\"7\" value=\"#000000\" ";
+ $ret .= "<td><input type=\"text\" maxlength=\"7\" value=\"$fgvalue\" ";
  $ret .= "name=\"editfriend_add_1_fg\" size=\"8\" ";
  $ret .= "onchange=\"setBGColor(findel('editfriend_add_1_fg_value_disp'),";
  $ret .= "editfriend_add_1_fg.value);";
@@ -321,13 +330,21 @@ border='0'></td>
  # background
  $ret .= "<tr><td><b>$ML{'.colors.bg'}</b></td><td>";
 
+ # retain existing bgcolor
+ my $bgvalue;
+ if ($fr) {
+     $bgvalue =  '#'.uc(sprintf("%06x", $fr->{'bgcolor'}));
+ } else {
+     $bgvalue = '#FFFFFF';
+ }
+
  # custom color selection
 
  # with javascript
  $ret .= qq~
 <script type='text/javascript' language='JavaScript'>
 <!--
-document.write("<a href='javascript:void(0);' style='text-decoration: none;' onclick=\\"spawnPicker(findel('editfriend_add_1_bg'),findel('editfriend_add_1_bg_value_disp'),'Overall: bgcolor',{obj:'preview',attrib:'backgroundColor'});return false;\\"><span style='border: 1px solid #000000; padding-left: 2em; background-color: #ffffff;' id='editfriend_add_1_bg_value_disp'>&nbsp;</span></a>");
+document.write("<a href='javascript:void(0);' style='text-decoration: none;' onclick=\\"spawnPicker(findel('editfriend_add_1_bg'),findel('editfriend_add_1_bg_value_disp'),'Overall: bgcolor',{obj:'preview',attrib:'backgroundColor'});return false;\\"><span style='border: 1px solid #000000; padding-left: 2em; background-color: $bgvalue\;' id='editfriend_add_1_bg_value_disp'>&nbsp;</span></a>");
 // -->
 </script>
 ~;
@@ -341,7 +358,7 @@ document.write("<a href='javascript:void(0);' style='text-decoration: none;' onc
 
  # hex value input
  $ret .= "</td>";
- $ret .= "<td><input type=\"text\" maxlength=\"7\" value=\"#FFFFFF\" ";
+ $ret .= "<td><input type=\"text\" maxlength=\"7\" value=\"$bgvalue\" ";
  $ret .= "name=\"editfriend_add_1_bg\" size=\"8\" ";
  $ret .= "onchange=\"setBGColor(findel('editfriend_add_1_bg_value_disp'),";
  $ret .= "editfriend_add_1_bg.value);setBGColor(findel('";
@@ -405,7 +422,7 @@ document.write("<td $colspan bgcolor='$_->{code}'><a href='javascript:void(0);' 
 <?p
 <script language='JavaScript' type='text/javascript'>
 <!--
-document.write("<span style='border: 1px solid #666666; padding: 10px; background-color: #ffffff; color: #000000;' id='preview'>$user</span>");
+document.write("<span style='border: 1px solid #666666; padding: 10px; background-color: $bgvalue\; color: $fgvalue\;' id='preview'>$user</span>");
 // -->
 </script>
 p?>
