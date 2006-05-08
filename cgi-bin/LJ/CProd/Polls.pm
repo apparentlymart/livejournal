@@ -11,4 +11,26 @@ sub applicable {
     return $used_polls ? 0 : 1;
 }
 
+sub render {
+    my ($class, $u) = @_;
+    return LJ::ljuser($u) . ", did you know you can post a poll in your journal using our " .
+        $class->trackable_link("$LJ::SITEROOT/poll/create.bml",
+                               "poll creation wizard") . "?  It's easy.
+
+<div style='margin: 1em'>
+
+<div>That's crazy!</div>
+<div style='white-space: nowrap'><img src='$LJ::IMGPREFIX/poll/leftbar.gif' style='vertical-align:middle' height='14' alt='' /><img src='$LJ::IMGPREFIX/poll/mainbar.gif' style='vertical-align:middle' height='14' width='174' alt='' /><img src='$LJ::IMGPREFIX/poll/rightbar.gif' style='vertical-align:middle' height='14' width='7' alt='' /> <b>283</b> (58.0%)</div>
+
+<div>I can't wait to try.</div>
+<div style='white-space: nowrap'><img src='$LJ::IMGPREFIX/poll/leftbar.gif' style='vertical-align:middle' height='14' alt='' /><img src='$LJ::IMGPREFIX/poll/mainbar.gif' style='vertical-align:middle' height='14' width='81' alt='' /><img src='$LJ::IMGPREFIX/poll/rightbar.gif' style='vertical-align:middle' height='14' width='7' alt='' /> <b>132</b> (27.0%)</div>
+
+<div>What type of poll am I?</div>
+<div style='white-space: nowrap'><img src='$LJ::IMGPREFIX/poll/leftbar.gif' style='vertical-align:middle' height='14' alt='' /><img src='$LJ::IMGPREFIX/poll/mainbar.gif' style='vertical-align:middle' height='14' width='45' alt='' /><img src='$LJ::IMGPREFIX/poll/rightbar.gif' style='vertical-align:middle' height='14' width='7' alt='' /> <b>73</b> (15.0%)</div>
+
+</div>
+";
+
+}
+
 1;

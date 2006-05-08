@@ -3,6 +3,17 @@ package LJ::CProd;
 # Let users know about new/old features they can use but never have.
 use strict;
 
+our $typemap;
+# get the typemap for the subscriptions classes (class/instance method)
+sub typemap {
+    return $typemap ||= LJ::Typemap->new(
+        table       => 'cprodlist',
+        classfield  => 'class',
+        idfield     => 'cprodid',
+    );
+}
+
+
 # optionally override this:
 sub applicable {
     my ($class, $u) = @_;
@@ -43,6 +54,11 @@ sub has_dismissed {
 sub dismiss {
     my ($class, $u) = @_;
     # TODO: implemnt
+}
+
+sub trackable_link {
+    my ($class, $href, $text) = @_;
+    return "<a onclick=\"this.href='http://google.com/';\" href=\"" . LJ::ehtml($href) . "\">$text</a>";
 }
 
 1;
