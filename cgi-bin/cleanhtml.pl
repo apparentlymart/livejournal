@@ -178,10 +178,27 @@ sub clean
     my @eatuntil = ();  # if non-empty, we're eating everything.  thing at end is thing
                         # we're looking to open again or close again.
 
+    my $capturing_during_eat;  # if we save all tokens that happen inside the eating.
+    my @capture = ();  # if so, they go here
+
     my $form_tag = {
         input => 1,
         select => 1,
         option => 1,
+    };
+
+    my $start_capture = sub {
+        next if $capturing_during_eat;
+
+        my ($tag, $first_token, $cb) = @_;
+        push @eatuntil, $tag;
+        @capture = ($first_token);
+        $capturing_during_eat = $cb || sub {};
+    };
+
+    my $finish_capture = sub {
+        @capture = ();
+        $capturing_during_eat = undef;
     };
 
   TOKEN:
@@ -200,9 +217,20 @@ sub clean
             my $attr = $token->[2];  # hashref
 
             if (@eatuntil) {
+                push @capture, $token if $capturing_during_eat;
                 if ($tag eq $eatuntil[-1]) {
                     push @eatuntil, $tag;
                 }
+                next TOKEN;
+            }
+
+            if ($tag eq "lj-template") {
+                my $name = $attr->{name} || "";
+                $name =~ s/-/_/g;
+                $start_capture->("lj-template", $token, sub {
+                    my $expanded = ($name =~ /^\w+$/) ? LJ::run_hook("expand_template_$name", \@capture) : "";
+                    $newdata .= $expanded || "<b>[Error: unknown template '" . LJ::ehtml($name) . "']</b>";
+                });
                 next TOKEN;
             }
 
@@ -630,10 +658,17 @@ sub clean
             next TOKEN if $tag =~ /[^\w\-:]/;
 
             if (@eatuntil) {
+                push @capture, $token if $capturing_during_eat;
+
                 if ($eatuntil[-1] eq $tag) {
                     pop @eatuntil;
+                    if (my $cb = $capturing_during_eat) {
+                        $cb->();
+                        $finish_capture->();
+                    }
                     next TOKEN;
                 }
+
                 next TOKEN if @eatuntil;
             }
 
@@ -716,7 +751,11 @@ sub clean
         elsif ($type eq "T") {
             my %url = ();
             my $urlcount = 0;
-            next TOKEN if @eatuntil;
+
+            if (@eatuntil) {
+                push @capture, $token if $capturing_during_eat;
+                next TOKEN;
+            }
 
             if ($eating_ljuser_span) {
                 $ljuser_text_node = $token->[1];
