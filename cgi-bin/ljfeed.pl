@@ -2,6 +2,7 @@
 
 package LJ::Feed;
 use strict;
+use LJ::Entry;
 
 BEGIN {
     $LJ::OPTMOD_XMLATOM = eval q{
@@ -156,6 +157,8 @@ sub make_feed
     LJ::load_userids_multiple([map { $_->{'posterid'}, \$posteru{$_->{'posterid'}} } @items], [$u]);
 
     my @cleanitems;
+    my @entries;     # LJ::Entry objects
+
   ENTRY:
     foreach my $it (@items)
     {
@@ -225,7 +228,7 @@ sub make_feed
             }
 
             $ppid = $1
-                if $event =~ m!<lj-phonepost journalid=['"]\d+['"] dpid=['"](\d+)['"] />!;
+                if $event =~ m!<lj-phonepost journalid=[\'\"]\d+[\'\"] dpid=[\'\"](\d+)[\'\"] />!;
         }
 
         my $mood;
@@ -251,12 +254,13 @@ sub make_feed
             tags       => [ values %{$logtags->{$itemid} || {}} ],
         };
         push @cleanitems, $cleanitem;
+        push @entries,    LJ::Entry->new($u, ditemid => $ditemid);
     }
 
     # fix up the build date to use entry-time
     $journalinfo->{'builddate'} = LJ::time_to_http($LJ::EndOfTime - $items[0]->{'rlogtime'}),
 
-    return $viewfunc->($journalinfo, $u, $opts, \@cleanitems);
+    return $viewfunc->($journalinfo, $u, $opts, \@cleanitems, \@entries);
 }
 
 # the creator for the RSS XML syndication view
@@ -353,7 +357,7 @@ sub create_view_rss
 #
 sub create_view_atom
 {
-    my ( $j, $u, $opts, $cleanitems ) = @_;
+    my ( $j, $u, $opts, $cleanitems, $entrylist ) = @_;
     my ( $feed, $xml, $ns );
 
     $ns = "http://www.w3.org/2005/Atom";
@@ -628,7 +632,7 @@ sub create_view_foaf {
         $ret .= "    <foaf:based_near><geo:Point geo:lat='" . $loc[0] . "'" .
                 " geo:long='" . $loc[1] . "' /></foaf:based_near>\n";
     }
-    
+
     # interests, please!
     # arrayref of interests rows: [ intid, intname, intcount ]
     my $intu = LJ::get_interests($u);

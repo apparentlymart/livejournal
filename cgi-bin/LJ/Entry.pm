@@ -220,6 +220,13 @@ sub allowmask {
     return $self->{allowmask};
 }
 
+sub preload {
+    my ($class, $entlist) = @_;
+    $class->preload_rows($entlist);
+    $class->preload_props($entlist);
+    # TODO: $class->preload_text($entlist);
+}
+
 # class method:
 sub preload_rows {
     my ($class, $entlist) = @_;
