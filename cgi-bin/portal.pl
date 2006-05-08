@@ -610,6 +610,7 @@ $box{'bdays'} =
             # find month, dayofmonth, do whatever
             next unless $fru->{bdate} =~ /^\d\d\d\d-(\d\d)-(\d\d)$/;
             my ($m, $d) = ($1, $2);
+            next unless $m > 0 && $d > 0;
 
             my $ref = [ $user, $m, $d ];
             if ($m < $mnow || ($m == $mnow && $d < ($dnow))) {
