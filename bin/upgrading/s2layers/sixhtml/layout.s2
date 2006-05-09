@@ -658,6 +658,21 @@ function lang_posted_by_date_and_time(UserLite poster, DateTime dt, bool showpos
     return lang_posted_by_date_and_time(new EntryLite, $poster, $poster, $dt, $showposter, $showdate, $showtime);
 }
 
+function Comment::print_linkbar() {
+    var Link link;
+    var string sep = "<span class='separator'>|</span>";
+    var string url = "";
+    var string text = "";
+    foreach var string link_key ($.link_keyseq) {
+        $link = $this->get_link($link_key);
+        $url = $link.url;
+        $text = $link.caption;
+        if (defined $link) {
+            """ $sep <a href="$url">$text</a>""";
+        }
+    }
+}
+
 function EntryPage::print_comment(Comment e) {
     if (not $e.full) {
         # Collapsed mode
@@ -698,6 +713,7 @@ function EntryPage::print_comment(Comment e) {
     if ($e.thread_url) { print " $sep <a href='$e.thread_url'>$*text_comment_thread</a>"; }
     if ($e.reply_url)  { print " $sep <a href='$e.reply_url'>$*text_comment_reply</a>"; }
 
+    $e->print_linkbar();
     "</div>";
 
     if (size($e.replies) > 0) {
@@ -711,6 +727,21 @@ function EntryPage::print_comment(Comment e) {
     }
 
     "</div>";
+}
+
+function Entry::print_linkbar() {
+    var Link link;
+    var string sep = "<span class='separator'>|</span>";
+    var string url = "";
+    var string text = "";
+    foreach var string link_key ($.link_keyseq) {
+        $link = $this->get_link($link_key);
+        $url = $link.url;
+        $text = $link.caption;
+        if (defined $link) {
+            """ $sep <a href="$url">$text</a>""";
+        }
+    }
 }
 
 function Page::print_entry(Entry e) {
@@ -753,8 +784,10 @@ function Page::print_entry(Entry e) {
 
          if ($e.comments.show_postlink) { " $sep "; $e.comments->print_postlink(); }
          if ($e.comments.show_readlink)   { " $sep "; $e.comments->print_readlink(); }
-         "</p>";
 
+         $e->print_linkbar();
+         "</p>";
+         
        "</div>\n";
      "</div>\n";
 }
