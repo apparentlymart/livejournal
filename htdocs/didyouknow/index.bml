@@ -1,16 +1,40 @@
 <?_code
 {
     use strict;
-    use vars qw($title $body);
+    use vars qw($title $body %POST);
 
     my $u = LJ::get_remote()
         or return BML::redirect("$LJ::SITEROOT/login.bml");
 
-    $title = "LJ tips";
-    $body = "Tips for you!";
+    $title = "Did you know?";
+    $body = "";
+
+    $body .= "<form method='post'>";
+    my $ct = 0;
+    my $tm  = LJ::CProd->typemap;
+
+    my $ap_list = "";
+    my $na_list = "";
+
+    if ($POST{'restoreall'}) {
+        $u->do("UPDATE cprod SET nothankstime=NULL WHERE userid=?",
+               undef, $u->{userid});
+    }
+
+    my $map = LJ::CProd->user_map($u);
 
     foreach my $pr (@LJ::CPROD_PROMOS) {
         my $class = "LJ::CProd::$pr";
+        my $cprodid = $tm->class_to_typeid($class);
+        my $mapinfo = $map->{$cprodid} || {};
+
+        next if $mapinfo->{nothankstime};
+
+        if ($POST{"noshow:$class"}) {
+            LJ::CProd->mark_dontshow($u, $class);
+            next;
+        }
+
         unless (eval "use $class; 1;") {
             $body .= "<div>" . LJ::ehtml($@) . "</div>";
             next;
@@ -18,9 +42,26 @@
 
         my $applicable = $class->applicable($u);
         my $render     = $class->render($u);
-        my $na = $applicable ? "" : " (not applicable)";
-        $body .= "<div style='width: 300px; border: 3px solid #6699cc; margin: 1em;'><div style='padding: 5px'>$render</div></div>";
+        $ct++;
+
+        ($applicable ? $ap_list : $na_list) .= "<tr valign='top'><td>
+<div style='width: 300px; border: 3px solid #6699cc;'><div style='padding: 5px'>$render</div></div>
+</td><td>
+<input type='submit' name='noshow:$class' value=\"Don't show me this again\" />
+</td></tr>\n";
     }
+
+    my $dumpsec = sub {
+        my ($head, $para, $content) = @_;
+        return unless $$content;
+        $body .= "<?h1 $head h1?><?p $para p?><table cellpadding='4'>$$content</table>\n";
+    };
+
+    $dumpsec->("Applicable Products", "These features/promos only apply if you have the right account level and you haven't already used the feature before.", \$ap_list);
+    $dumpsec->("Not Applicable Products", "These are the things where you either don't have the right account level, or you already know the stuff.", \$na_list);
+
+    $body .= "Sorry, you know everything.  We have no tips for you.  If this makes you sad, you can restore everything: <input type='submit' name='restoreall' value=\"Restore All\" />" unless $ct;
+    $body .= "</form>";
 
     return;
 }

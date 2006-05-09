@@ -59,9 +59,17 @@ sub has_dismissed {
     return 0;
 }
 
-sub dismiss {
-    my ($class, $u) = @_;
-    # TODO: implemnt
+sub mark_dontshow {
+    shift @_ unless ref $_[0];
+    my ($u, $noclass) = @_;
+    return 0 unless $u;
+    my $tm  = LJ::CProd->typemap;
+    my $hide_cprodid = $tm->class_to_typeid($noclass)
+        or return 0;
+    $u->do("INSERT IGNORE INTO cprod SET userid=?, cprodid=?",
+           undef, $u->{userid}, $hide_cprodid);
+    return $u->do("UPDATE cprod SET acktime=UNIX_TIMESTAMP(), nothankstime=UNIX_TIMESTAMP() WHERE userid=? AND cprodid=?",
+                  undef, $u->{userid}, $hide_cprodid);
 }
 
 sub trackable_link {
@@ -90,15 +98,21 @@ sub full_box_for {
     return $showclass->wrap_content($content, %opts);
 }
 
-sub prod_to_show {
+sub user_map {
     my ($class, $u) = @_;
-
-    my $tm  = $class->typemap;
     my $map = $u ? $u->selectall_hashref("SELECT cprodid, firstshowtime, recentshowtime, ".
                                          "       acktime, nothankstime, clickthrutime ".
                                          "FROM cprod WHERE userid=?",
                                          "cprodid", undef, $u->{userid}) : {};
     $map ||= {};
+    return $map;
+}
+
+sub prod_to_show {
+    my ($class, $u) = @_;
+
+    my $tm  = $class->typemap;
+    my $map = LJ::CProd->user_map($u);
 
     foreach my $prod (@LJ::CPROD_PROMOS) {
         my $class = "LJ::CProd::$prod";
