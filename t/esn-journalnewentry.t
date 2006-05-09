@@ -14,8 +14,8 @@ use FindBin qw($Bin);
 # two types of subscriptions, all of subscr etypeid = JournalNewEntry
 #
 #          jid   sarg1   sarg2   meaning
-#    S1:     n       0       0   all new posts in journal 'n' (subject to security)
-#    S2:     0       0       0   all new posts in friends journals (test security)
+#    S1:     n       0       0   all new posts made by user 'n' (subject to security)
+#    S2:     0       0       0   all new posts made by friends  (test security)
 #
 
 my %got_sms = ();   # userid -> received sms
@@ -39,11 +39,11 @@ my $got_notified = sub {
 # testing case S1 above:
 memcache_stress(sub {
     test_esn_flow(sub {
-        my ($u1, $u2) = @_;
+        my ($u1, $u2, $ucomm) = @_;
 
-        # subscribe $u1 to all posts on $u2
+        # subscribe $u1 to all posts by $u2
         my $subsc = $u1->subscribe(
-                                   event   => "JournalNewEntry",
+                                   event   => "UserNewEntry",
                                    method  => "SMS",
                                    journal => $u2,
                                    );
@@ -76,40 +76,48 @@ memcache_stress(sub {
     });
 });
 
-# post an entry in $u2 and make sure $u1 gets notified
-# post in $u1 and make sure $u1 doesn't get notified
-# post friend-only entry in $u2 and make sure $u1 doesn't get notified
+# post an entry in $u2, by $u2 and make sure $u1 gets notified
+# post an entry in $u1, by $u2 and make sure $u1 doesn't get notified
+# post a friends-only entry in $u2, by $u2 and make sure $u1 doesn't get notified
+# post an entry in $ucomm, by $u2 and make sure $u1 gets notified
+# post an entry in $u1, by $ucomm and make sure $u1 doesn't get notified
+# post a friends-only entry in $ucomm, by $u2 and make sure $u1 doesn't get notified 
 sub test_post {
-    my ($u1, $u2) = @_;
+    my ($u1, $u2, $ucomm) = @_;
     my $sms;
 
-    # post an entry in $u2
-    my $u2e1 = eval { $u2->t_post_fake_entry };
-    ok($u2e1, "made a post");
-    is($@, "", "no errors");
+    foreach my $usejournal (0..1) {
+        my %opts = $usejournal ? ( usejournal => $ucomm->{user} ) : ();
+        my $suffix = $usejournal ? " in comm" : "";
 
-    # make sure we got notification
-    $sms = $got_notified->($u1);
-    ok($sms, "got the SMS");
-    is(eval { $sms->to }, 12345, "to right place");
+        # post an entry in $u2
+        my $u2e1 = eval { $u2->t_post_fake_entry(%opts) };
+        ok($u2e1, "made a post$suffix");
+        is($@, "", "no errors");
 
-    # S1 failing case:
-    # post an entry on $u1, where nobody's subscribed
-    my $u1e1 = eval { $u1->t_post_fake_entry };
-    ok($u1e1, "did a post");
+        # make sure we got notification
+        $sms = $got_notified->($u1);
+        ok($sms, "got the SMS");
+        is(eval { $sms->to }, 12345, "to right place");
 
-    # make sure we did not get notification
-    $sms = $got_notified->($u1);
-    ok(! $sms, "got no SMS");
+        # S1 failing case:
+        # post an entry on $u1, where nobody's subscribed
+        my $u1e1 = eval { $u1->t_post_fake_entry(%opts) };
+        ok($u1e1, "did a post$suffix");
 
-    # S1 failing case, posting to u2, due to security
-    my $u2e2f = eval { $u2->t_post_fake_entry(security => "friends") };
-    ok($u2e2f, "did a post");
-    is($u2e2f->security, "usemask", "is actually friends only");
+        # make sure we did not get notification
+        $sms = $got_notified->($u1);
+        ok(! $sms, "got no SMS");
 
-    # make sure we didn't get notification
-    $sms = $got_notified->($u1);
-    ok(! $sms, "got no SMS, due to security (u2 doesn't trust u1)");
+        # S1 failing case, posting to u2, due to security
+        my $u2e2f = eval { $u2->t_post_fake_entry(security => "friends", %opts) };
+        ok($u2e2f, "did a post$suffix");
+        is($u2e2f->security, "usemask", "is actually friends only");
+
+        # make sure we didn't get notification
+        $sms = $got_notified->($u1);
+        ok(! $sms, "got no SMS, due to security (u2 doesn't trust u1)");
+    }
 }
 
 
@@ -117,10 +125,15 @@ sub test_esn_flow {
     my $cv = shift;
     my $u1 = temp_user();
     my $u2 = temp_user();
+
+    # need a community for $u1 and $u2 to play in
+    my $ucomm = temp_user();
+    LJ::update_user($ucomm, { journaltype => 'C' });
+
     $u1->set_sms_number(12345);
     $u2->set_sms_number(67890);
     LJ::add_friend($u1, $u2); # make u1 friend u2
-    $cv->($u1, $u2);
+    $cv->($u1, $u2, $ucomm);
 }
 
 1;
