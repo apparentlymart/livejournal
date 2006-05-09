@@ -33,6 +33,7 @@ use LJ::Blob;
 use LJ::Captcha;
 use LJ::OpenID;
 use LJ::Location;
+use LJ::CProd;
 use MogileFS;
 use DDLockClient ();
 

@@ -122,7 +122,7 @@
         }
 
         if ($remote) {
-            $body .= LJ::run_hook('post_login_news');
+            $body .= LJ::CProd->full_box_for($remote, width => 300) || LJ::run_hook('post_login_news');
             $body .= "<?h2 $ML{'.login.changelog'} h2?>";
             $body .= "<table cellpadding='3' style='width: 300px; background-color: #ededed; border: 1px solid #aaa'>\n";
             $body .= "<tr><td colspan='2' style='white-space: nowrap;'>";
