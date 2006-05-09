@@ -1,12 +1,7 @@
-<?page
-body<=
 <?_code
 {
     use strict;
-    use vars qw($title $body %GET);
-
-    $title = "Template BML page!";
-    $body = "";
+    use vars qw(%GET);
 
     my $go = sub {
         my $to = $GET{to};
@@ -17,7 +12,8 @@ body<=
     my $cprod_class = $GET{class};
     return $go->() unless $cprod_class;
 
-    my $cprodid = eval { $cprod_class->cprodid; } or return $go->();
+    my $tm = LJ::CProd->typemap or return $go->();
+    my $cprodid = $tm->class_to_typeid($cprod_class) or return $go->();
 
     my $remote = LJ::get_remote() or return $go->();
 
@@ -37,6 +33,3 @@ body<=
     return LJ::error_list("Error redirecting.");
 }
 _code?>
-<=body
-title=><?_code return $title; _code?>
-page?>

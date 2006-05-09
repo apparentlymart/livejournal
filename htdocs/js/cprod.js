@@ -17,7 +17,7 @@ CProd.next = function (evt) {
       });
 
   var req = HTTPReq.getJSON({
-      "url": "/tools/endpoints/cprod.bml",
+      "url": "/tools/endpoints/cprod.bml?" + data,
       "method": "GET",
         "data": data,
       "onData": CProd.gotData
@@ -32,6 +32,8 @@ CProd.gotData = function (res) {
   if (!cprodbox) return;
 
   cprodbox.innerHTML = res.content;
+
+  CProd.attachNextClickListener();
 }
 
 // attach onclick listener to the "next" button
