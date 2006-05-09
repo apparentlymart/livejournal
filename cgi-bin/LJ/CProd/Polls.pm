@@ -14,7 +14,7 @@ sub applicable {
 sub render {
     my ($class, $u) = @_;
     return LJ::ljuser($u) . ", did you know you can post a poll in your journal using our " .
-        $class->trackable_link("$LJ::SITEROOT/poll/create.bml",
+        $class->clickthru_link("$LJ::SITEROOT/poll/create.bml",
                                "poll creation wizard") . "?  It's easy.
 
 <div style='margin: 1em'>

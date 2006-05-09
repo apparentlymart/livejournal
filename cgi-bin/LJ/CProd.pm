@@ -34,7 +34,6 @@ sub typemap {
     );
 }
 
-
 # returns the typeid for this module.
 sub cprodid {
     my ($class_self) = @_;
@@ -53,14 +52,6 @@ sub shortname {
     return $class;
 }
 
-# don't override, use configuration.
-sub weight {
-    my $class = shift;
-    my $shortname = $class->shortname;
-    return $LJ::CPROD_WEIGHT{$shortname} if defined $LJ::CPROD_WEIGHT{$shortname};
-    return 1;
-}
-
 # returns boolean; if user has dismissed the $class tip
 sub has_dismissed {
     my ($class, $u) = @_;
@@ -74,9 +65,20 @@ sub dismiss {
 }
 
 sub trackable_link {
-    my ($class, $href, $text) = @_;
-    my $link = "$LJ::SITEROOT/misc/cprod.bml?class=$class&to=" . LJ::eurl($href);
+    my ($class, $href, $text, $goodclick) = @_;
+    Carp::croak("bogus caller, forgot param") unless defined $goodclick;
+    my $link = "$LJ::SITEROOT/misc/cprod.bml?class=$class&g=$goodclick&to=" . LJ::eurl($href);
     return "<a onclick=\"this.href='" . LJ::ehtml($link) . "';\" href=\"" . LJ::ehtml($href) . "\">$text</a>";
+}
+
+sub clickthru_link {
+    my ($class, $href, $text) = @_;
+    $class->trackable_link($href, $text, 1);
+}
+
+sub ack_link {
+    my ($class, $href, $text) = @_;
+    $class->trackable_link($href, $text, 0);
 }
 
 # don't override
@@ -85,16 +87,16 @@ sub full_box_for {
     my $showclass = LJ::CProd->prod_to_show($u)
         or return "";
     my $content = $@ || $showclass->render($u);
-    return LJ::CProd->wrap_content($content, %opts);
+    return $showclass->wrap_content($content, %opts);
 }
 
 sub prod_to_show {
     my ($class, $u) = @_;
     foreach my $prod (@LJ::CPROD_PROMOS) {
-        my $class = "LJ::CProd::Polls";
+        my $class = "LJ::CProd::$prod";
         eval "use $class; 1";
         next if $@;
-        next unless $class->applicable($u);
+        next unless eval { $class->applicable($u) };
         return $class;
     }
     return;
@@ -103,7 +105,8 @@ sub prod_to_show {
 sub wrap_content {
     my ($class, $content, %opts) = @_;
     my $w = delete $opts{'width'} || 300;
-    return qq{<div style='width: ${w}px; border: 3px solid #6699cc;'><div style='padding: 5px'>$content</div><div style='background: #abccec; padding: 4px; font-family: arial; font-size: 8pt;'><img src='http://www.lj.bradfitz.com/img/goat-hiding.png' width='30' height='31' align='absmiddle' /> What else has LJ been hiding from? <span <a href='$LJ::SITEROOT/ljtips.bml'>View All</a> | <a href='#'>Next</a></div></div>};
+    my $alllink = $class->ack_link("$LJ::SITEROOT/ljtips.bml", "View All");
+    return qq{<div style='width: ${w}px; border: 3px solid #6699cc;'><div style='padding: 5px'>$content</div><div style='background: #abccec; padding: 4px; font-family: arial; font-size: 8pt;'><img src='http://www.lj.bradfitz.com/img/goat-hiding.png' width='30' height='31' align='absmiddle' /> What else has LJ been hiding from? <span $alllink | <a href='#'>Next</a></div></div>};
 }
 
 1;
