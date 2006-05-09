@@ -273,8 +273,6 @@ sub display_current_summary
                                                undef, $u->prop('moodthemeid'));
     }
     $ret .= "<tr valign='top'><th>Mood Theme:</th><td>" . LJ::ehtml($mood_settings) . "</td></tr>";
-    my $comment_settings = $u->prop('opt_showtalklinks') eq "Y" ? "Enabled" : "Disabled";
-    $ret .= "<tr valign='top'><th>Comments:</th><td>$comment_settings</td></tr>";
 
     $ret .= "</table> standout?>";
     return $ret;

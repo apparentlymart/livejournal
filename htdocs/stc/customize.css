@@ -84,9 +84,6 @@ span.propgrouptabsel a {
     text-decoration: none;
     color: #000;
 }
-#propgroupsbody td {
-    border-botom: 1px dashed #ccc;
-}
 div.inset {
     margin-left: 2em;
     margin-top: 0.5em;
@@ -98,9 +95,6 @@ dl.hidedt {
 }
 dl.hidedt dt {
     font-weight: bold;
-}
-noscript {
-    display: inline;
 }
 #CustomOptions th {
     text-align: left;

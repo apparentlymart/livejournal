@@ -426,6 +426,7 @@ body<=
             foreach my $gname (@groups) {
                 $ret .= "<a name='pgroup$gname'></a>\n";
                 $ret .= "<div id='pgroup_body_$gname'>\n";
+                $ret .= "<noscript><?h2 " . $group_name->($gname) . " h2?></noscript>";
                 $ret .= "<table id='CustomOptions'>";
                 foreach my $pname (@{$groupprops{$gname}}) {
                     $output_prop->($pname);

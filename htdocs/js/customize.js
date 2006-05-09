@@ -73,7 +73,7 @@ function s2_layout_update_children() {
              populate_form_select('s2_langcode', data.langs);
              $('display_form').style.cursor = "auto";
            },
-           onError: function (msg) { alert(msg); },
+           onError: function (msg) { }
     });
 }
 

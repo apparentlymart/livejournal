@@ -12,14 +12,6 @@ body<=
                      journaltitle      => qr/./,
                      journalsubtitle   => qr/./,
                      friendspagetitle  => qr/./,
-                     opt_stylemine     => qr/^[01]$/,
-                     opt_whocanreply   => qr/^(all|reg|friends)$/,
-                     opt_logcommentips => qr/^[NSA]$/,
-                     opt_whoscreened   => qr/^[NRFA]$/,
-                     opt_showtalklinks => qr/./,
-                     opt_gettalkemail  => qr/./,
-                     opt_nctalklinks   => qr/./,
-                     opt_htmlemail     => qr/^[YN]$/,
                      "action:redir"    => 'word',
                      lj_form_auth      => qr/./,
                      );
@@ -53,24 +45,9 @@ body<=
         $POST{'journaltitle'}     = LJ::text_trim($POST{'journaltitle'}, 0, 80) if $POST{'journaltitle'};
         $POST{'journalsubtitle'}  = LJ::text_trim($POST{'journalsubtitle'}, 0, 80) if $POST{'journalsubtitle'};
         $POST{'friendspagetitle'} = LJ::text_trim($POST{'friendspagetitle'}, 0, 80) if $POST{'friendspagetitle'};
-        $POST{'opt_stylemine'}    = $POST{'opt_stylemine'} ? 1 : 0;
-        if ($POST{'opt_logcommentips'} ne "N" &&
-            $POST{'opt_logcommentips'} ne "S" &&
-            $POST{'opt_logcommentips'} ne "A") { $POST{'opt_logcommentips'} = "N"; }
-        $POST{'opt_whoscreened'} = "N" unless $POST{'opt_whoscreened'} =~ m/^(N|R|F|A)$/;
-
-        my %update = (
-                      'opt_showtalklinks' => $POST{'opt_showtalklinks'} ? "Y" : "N",
-                      'opt_gettalkemail'  => $POST{'opt_gettalkemail'} ? "Y" : "N",
-                      'opt_htmlemail'     => $POST{'opt_htmlemail'},
-                      'opt_whocanreply'   => $POST{'opt_whocanreply'},
-                      );
-        LJ::update_user($u, \%update);
 
         # set userprops
-        my @uprops = qw(opt_logcommentips mailencoding opt_nctalklinks
-                        opt_whoscreened journaltitle journalsubtitle friendspagetitle
-                        opt_stylemine stylesys);
+        my @uprops = qw(journaltitle journalsubtitle friendspagetitle stylesys);
 
         foreach my $uprop (@uprops) {
             my $eff_val = $POST{$uprop};   # effective value, since 0 isn't stored
@@ -146,76 +123,6 @@ body<=
         $ret .= "</table></fieldset>";
     }
 
-    ### Comment Settings
-    {
-        BML::set_language_scope("/editinfo.bml");
-        $ret .= "<fieldset><legend>Comments</legend><table>";
-
-        # opt_showtalklinks
-        $ret .= "<tr valign='middle'><td>";
-        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_showtalklinks', 'id' => 'opt_showtalklinks',
-                                 'selected' => $u->prop('opt_showtalklinks') eq 'Y', });
-        $ret .= "</td><td><b><label for='opt_showtalklinks'>Allow Commenting</label></b></td></tr>\n";
-        $ret .= "<tr><td>&nbsp;</td><td id='comment_options'>$ML{'.enableboards.about'}";
-
-        {
-            # opt_whocanreply
-            $ret .= "\n<p><b>Who can comment:</b> ";
-            $ret .= LJ::html_select({ 'name' => 'opt_whocanreply', 'selected' => $u->prop('opt_whocanreply') },
-                                    "all" => BML::ml(".security.visibility.anybody"),
-                                    "reg" => BML::ml(".security.visibility.regusers"),
-                                    "friends" => BML::ml(".security.visibility.friends"));
-            $ret .= "</p>\n";
-
-            # opt_logcommentips
-            $ret .= "<p><b>Log IP addresses?</b> ";
-            $ret .= LJ::html_select({ 'name' => 'opt_logcommentips', 'selected' => $u->prop('opt_logcommentips') },
-                                    "N" => BML::ml(".donotlog"),
-                                    "S" => BML::ml(".logip.anon_only"),
-                                    "A" => BML::ml(".logip.always") );
-            $ret .= "</p>\n";
-
-            # opt_whoscreened
-            $ret .= "<p><b>Screen replies from:</b> ";
-            $ret .= LJ::html_select({ 'name' => 'opt_whoscreened', 'selected' => $u->prop('opt_whoscreened') },
-                                    "N" => $ML{'.screen.none'},
-                                    "R" => $ML{'.screen.anon'},
-                                    "F" => ($u->prop('journaltype') eq 'C' ? $ML{'.screen.nonmembers'} : $ML{'.screen.nonfriends'}),
-                                    "A" => $ML{'.screen.all'} );
-            $ret .= "</p>\n";
-            $ret .= "<table>\n";
-
-            # opt_nctalklinks
-            $ret .= "<tr valign='middle'><td>";
-            $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_nctalklinks', 'id' => 'opt_nctalklinks',
-                                     'selected' => $u->prop('opt_nctalklinks') });
-            $ret .= "</td><td><b><label for='opt_nctalklinks'>$ML{'.numcomments.header'}</label></b></td></tr>\n";
-            $ret .= "<tr><td>&nbsp;</td><td>$ML{'.numcomments.about'}</td></tr>\n";
-
-            # stylemine
-            $ret .= "<tr valign='middle'><td>";
-            $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_stylemine', 'id' => 'opt_stylemine',
-                                     'value' => 1, 'selected' => $u->prop('opt_stylemine') });
-            $ret .= "</td><td><b><label for='opt_stylemine'>$ML{'.stylemine.header'}</label></b></td></tr>\n";
-            $ret .= "<tr><td>&nbsp;</td><td>$ML{'.stylemine.about'}</td></tr>\n";
-
-            # opt_gettalkemail
-            $ret .= "<tr valign='middle'><td>";
-            $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_gettalkemail', 'id' => 'opt_gettalkemail',
-                                     'selected' => $u->prop('opt_gettalkemail') eq 'Y' });
-            $ret .= "</td><td><b><label for='opt_gettalkemail'>Receive email notifications when others comment</label></b></td></tr>\n";
-            $ret .= "<tr><td>&nbsp;</td><td>$ML{'.getreplies.about'}</td></tr>\n";
-
-            # opt_htmlemail
-            $ret .= "<tr valign='middle'><td>&nbsp;</td><td><b>Email notification format:</b> ";
-            $ret .= LJ::html_select({ 'name' => 'opt_htmlemail', 'id' => 'opt_htmlemail',
-                                      'selected' => $u->prop('opt_htmlemail')},
-                                    "N", "Plain Text", "Y", "HTML Formatted");
-            $ret .= "</td></tr></table>\n";
-        }
-        $ret .= "</td></tr></table>\n";
-        $ret .= "</table></fieldset>";
-    }
     $ret .= LJ::cmize::html_save();
     $ret .= "</form></div></div>";
 
