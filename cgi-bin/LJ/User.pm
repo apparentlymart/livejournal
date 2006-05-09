@@ -318,6 +318,13 @@ sub selectrow_array {
     return $dbcm->selectrow_array(@_);
 }
 
+sub selectall_hashref {
+    my $u = shift;
+    my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
+        or die "Database handle unavailable";
+    return $dbcm->selectall_hashref(@_);
+}
+
 sub selectrow_hashref {
     my $u = shift;
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)

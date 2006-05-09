@@ -92,11 +92,37 @@ sub full_box_for {
 
 sub prod_to_show {
     my ($class, $u) = @_;
+
+    my $tm  = $class->typemap;
+    my $map = $u ? $u->selectall_hashref("SELECT cprodid, firstshowtime, recentshowtime, ".
+                                         "       acktime, nothankstime, clickthrutime ".
+                                         "FROM cprod WHERE userid=?",
+                                         "cprodid") : {};
+    $map ||= {};
+
     foreach my $prod (@LJ::CPROD_PROMOS) {
         my $class = "LJ::CProd::$prod";
+        my $cprodid = $tm->class_to_typeid($class);
+        my $state = $map->{$cprodid};
+
+        # skip if they don't want it.
+        next if $state && $state->{nothankstime};
+
+        # skip if they've seen it (NOTE: logic may change)
+        next if $state && $state->{acktime};
+
+        # skip if they've clicked-thru it (NOTE: logic may change)
+        next if $state && $state->{clickthrutime};
+
         eval "use $class; 1";
         next if $@;
         next unless eval { $class->applicable($u) };
+
+        if ($u && ! $state) {
+            $u->do("INSERT IGNORE INTO cprod SET userid=?, cprodid=?, firstshowtime=?",
+                   undef, $u->{userid}, $cprodid, time());
+        }
+
         return $class;
     }
     return;
