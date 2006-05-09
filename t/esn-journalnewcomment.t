@@ -219,11 +219,10 @@ sub test_esn_flow {
     my $cv = shift;
     my $u1 = temp_user();
     my $u2 = temp_user();
-    my $u3 = temp_user();
     $u1->set_sms_number(12345);
     $u2->set_sms_number(67890);
     LJ::add_friend($u1, $u2); # make u1 friend u2
-    $cv->($u1, $u2, $u3);
+    $cv->($u1, $u2);
 }
 
 1;
