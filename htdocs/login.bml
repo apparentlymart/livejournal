@@ -122,7 +122,13 @@
         }
 
         if ($remote) {
-            $body .= LJ::CProd->full_box_for($remote, width => 300) || LJ::run_hook('post_login_news');
+            my $box = LJ::CProd->full_box_for($remote, width => 300);
+            # because post_login_news is really post_login_ad in ljcom ....
+            # unfortunate hook name  :/
+            if (!$box || LJ::run_hook('should_show_ad', { ctx => "app", })) {
+                $body .= LJ::run_hook('post_login_news');
+            }
+            $body .= $box;
             $body .= "<?h2 $ML{'.login.changelog'} h2?>";
             $body .= "<table cellpadding='3' style='width: 300px; background-color: #ededed; border: 1px solid #aaa'>\n";
             $body .= "<tr><td colspan='2' style='white-space: nowrap;'>";
