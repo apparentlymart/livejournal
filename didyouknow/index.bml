@@ -1,0 +1,30 @@
+<?_code
+{
+    use strict;
+    use vars qw($title $body);
+
+    my $u = LJ::get_remote()
+        or return BML::redirect("$LJ::SITEROOT/login.bml");
+
+    $title = "LJ tips";
+    $body = "Tips for you!";
+
+    foreach my $pr (@LJ::CPROD_PROMOS) {
+        my $class = "LJ::CProd::$pr";
+        unless (eval "use $class; 1;") {
+            $body .= "<div>" . LJ::ehtml($@) . "</div>";
+            next;
+        }
+
+        my $applicable = $class->applicable($u);
+        my $render     = $class->render($u);
+        my $na = $applicable ? "" : " (not applicable)";
+        $body .= "<div style='width: 300px; border: 3px solid #6699cc; margin: 1em;'><div style='padding: 5px'>$render</div></div>";
+    }
+
+    return;
+}
+_code?><?page
+title=><?_code return $title; _code?>
+body=><?_code return $body; _code?>
+page?>
