@@ -58,13 +58,11 @@ body<=
         $ret .= "<?h1 Quick Links h1?>";
         $ret .= "<dl><dt><a href='/developer/embedding.bml'>$ML{'.nav.embedding'}</a></dt>";
         $ret .= "<dd>$ML{'.nav.embedding.about'}</dd>";
-        $ret .= "<dt><a href='/modify.bml'>$ML{'.nav.modify'}</a></dt>";
-        $ret .= "<dd>$ML{'.nav.modify.about'}</dd>";
-        $ret .= "<dt><a href='create.bml'>$ML{'.nav.create'}</a></dt>";
+        $ret .= "<dt><a href='/styles/create.bml'>$ML{'.nav.create'}</a></dt>";
         $ret .= "<dd>$ML{'.nav.create.about'}</dd>";
-        $ret .= "<dt><a href='edit.bml'>$ML{'.nav.edit'}</a></dt>";
+        $ret .= "<dt><a href='/styles/edit.bml'>$ML{'.nav.edit'}</a></dt>";
         $ret .= "<dd>$ML{'.nav.edit.about'}</dd>";
-        $ret .= "<dt><a href='browse/'>$ML{'.nav.browse'}</a></dt>";
+        $ret .= "<dt><a href='/styles/browse/'>$ML{'.nav.browse'}</a></dt>";
         $ret .= "<dd>$ML{'.nav.browse.about'}</dd>";
         $ret .= "</dl>";
     }

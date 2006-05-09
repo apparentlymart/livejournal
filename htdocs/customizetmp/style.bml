@@ -22,6 +22,7 @@ body<=
                   "save:layout"  => 'word',
                   "save:theme"   => 'word',
                   "save:langcode" => 'word',
+                  "save:moodtheme" => 'word',
                   );
     foreach my $view (@LJ::views) {
         $params{"s1_${view}_style"} = 'digits';
@@ -201,6 +202,8 @@ body<=
                 $style{'i18n'} = $i18n;
 
                 LJ::cmize::s2_implicit_style_create($u);
+            } elsif ($POST{'save:moodtheme'}) {
+                # special case for moodthemes, which is caught below
             } else {
                 # Layout
                 my $layid = $POST{'s2_layoutid'};
@@ -347,7 +350,7 @@ body<=
         ### Color themes
 
         $ret .= "<fieldset><legend>Theme</legend>";
-        $ret .= "<?p $ML{'.colortheme.about'} p?>\n";
+        $ret .= "<?p Select a color theme to apply to the layout options you chose above. If you don't like the provided colors, you can specify your own. p?>\n";
         $ret .= "<div style='margin-left: 30px; margin-bottom: 20px;'>\n";
 
         $ret .= LJ::html_check({ 'type' => 'radio', 'name' => 's1_themetype', 'id' => "themetype:system",
@@ -452,7 +455,7 @@ body<=
     ### Mood themes
     $ret .= "<fieldset><legend>Mood Icons</legend>";
     $ret .= "<div style='border-right: 1px solid #ccc;'>";
-    $ret .= "<?p Mood themes are small icons that describe the mood of a post. Please edit me. p?>";
+    $ret .= "<?p Mood themes are small icons that describe the mood of a post. p?>";
     $ret .= "<div style='margin-left: 30px; margin-bottom: 20px;'>";
     $ret .= "<b>Select mood icon set: </b>";
 
@@ -464,7 +467,9 @@ body<=
     $ret .= "<br />" . LJ::html_check({ 'type' => 'check', 'name' => 'opt_forcemoodtheme',
                                         'id' => 'opt_forcemoodtheme',
                                         'selected' => $u->{'opt_forcemoodtheme'} eq 'Y' }) . "\n";
-    $ret .= "<label for='opt_forcemoodtheme'>View this mood theme on all of your friends' posts</label></div></div></fieldset>";
+    $ret .= "<label for='opt_forcemoodtheme'>View this mood theme on all of your friends' posts</label>";
+    $ret .= "<noscript><br />" . LJ::html_submit('save:moodtheme', $ML{'.change'}) . " </noscript>";
+    $ret .= "</div></div></fieldset>";
 
     if ($u->prop('stylesys') == 2) {
         $ret .= "<script type='text/javascript'> if (\$('display_form')) { document.write(\"";

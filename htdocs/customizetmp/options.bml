@@ -226,12 +226,13 @@ body<=
         # Reload the user object to get the latest values
         $u = LJ::load_user($u->{user});
     }
+
     my $ad =  LJ::ads( type => 'app', orient => 'App-Customize' );
     if ($ad) {
         $ret .= "<div id='CustomizeAdBox'>$ad</div>";
+        $ret .= "<div style='clear: both; margin: 0; padding: 0; width: 0; height: 0;'></div>";
     }
 
-    $ret .= "<div style='clear: both; margin: 0; padding: 0; width: 0; height: 0;'></div>";
     $ret .= "<?warningbar $saved_msg warningbar?>" if $saved_msg;
     $ret .= "<?errorbar $err_msg errorbar?>" if $err_msg;
 
@@ -268,13 +269,13 @@ body<=
         }
 
         $ret .= "<fieldset><legend>Overrides</legend>";
-        $ret .= "<?p $ML{'/modify_do.bml.overrides.note2'} p?>\n";
-        $ret .= "<?standout <b>$ML{'.overrides.box.head'}</b><br />";
-        $ret .= LJ::html_textarea({ 'name' => 's1_overrides', 'cols' => '60', 'rows' => '15',
-                                    'wrap' => 'off', 'value' => $overrides }) . " standout?>";
+        $ret .= "<?p Overrides allow you to modify individual portions of your style to make it look just the way you want it. Please note that not all <a href='http://www.livejournal.com/developer/varlist.bml'>style variables</a> can be overridden. p?>\n";
+        $ret .= "<?p The only HTML elements that can be used in *_HEAD overrides are limited to " . LJ::ehtml("<title>, <base>, <style>, <link>, and <meta>") . ". Additionally, any override content that isn't included within an override block (such as GLOBAL_HEAD) will also be stripped. p?>";
+        $ret .= "<?standout " . LJ::html_textarea({ 'name' => 's1_overrides', 'cols' => '60', 'rows' => '15',
+                                                    'wrap' => 'off', 'value' => $overrides }) . " standout?>";
         $ret .= "</fieldset>";
     } else {
-        my %prop;  # name -> hashref, deleted when added to a category
+        my %prop;  # name hashref, deleted when added to a category
         my @propnames;
         foreach my $prop (S2::get_properties($lyr_layout->{'s2lid'})) {
             unless (ref $prop) {
@@ -409,7 +410,8 @@ body<=
                                           'default' => $override,
                                           'des' => $prop->{'des'} });
             }
-            $ret .= "</td></tr>";
+            my $offhelp = ! $can_use ? LJ::help_icon('s2propoff', ' ') : "";
+            $ret .= " $offhelp</td></tr>";
             my $t = "";
             $t .= LJ::eall($prop->{'note'}) if $prop->{'note'};
             $t .= "<?help " . $LJ::HELPURL{"s2opt_$name"} . " help?>" if $LJ::HELPURL{"s2opt_$name"};
