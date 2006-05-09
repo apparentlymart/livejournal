@@ -228,7 +228,7 @@
             $$body .= " warningbar?><br /></div>";
         }
 
-        $$body .= "<div style='width: 100%'><form method='post' action='update.bml$getextra' id='updateForm' name='updateForm'>";
+        $$body .= "<div style='width: 90%;'><form method='post' action='update.bml$getextra' id='updateForm' name='updateForm'>";
         $$body .= LJ::form_auth();
 
         if ($opts->{require_tos}){
@@ -400,6 +400,7 @@
                 my ($itemid, $anum) = ($res{'itemid'}, $res{'anum'});
                 my $itemlink = LJ::item_link($ju, $itemid, $anum);
                 $itemid = $itemid * 256 + $anum;
+
                 $$body .= " p?><?p $ML{'.success.links'} p?><ul>" .
                     "<li><a href=\"$itemlink\">$ML{'.success.links.view'}</a></li>" .
                         "<li><a href=\"/editjournal.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.edit'}</a></li>" .
@@ -407,9 +408,10 @@
                                 "<li><a href=\"/edittags.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.tags'}</a></li>" .
                                     "</ul>";
 
-                $$body .= "</td><td style='padding-left: 2em;'>";
+                $$body .= "</td><td style=\"padding-left: 2em;\">";
 
                 {
+
                     my $ad =  LJ::ads( type => 'app', orient => 'App-Confirm', force => '1' );
                     $$body .= "$ad" if $ad;
                 }
@@ -429,7 +431,7 @@
         my $ad =  LJ::ads( type => 'app', orient => 'App-Func-1column', force => '1' );
 
         if ($ad) {
-            $$body .= "<td style='padding-left: 2em; width: 160px;'>";
+            $$body .= "<td style='width: 160px; padding-left: 2em;'>";
             $$body .= "$ad";
         } else {
             $$body .= "<td>";
@@ -505,3 +507,4 @@ link: htdocs/update.bml, htdocs/lostinfo.bml, htdocs/support/faqbrowse.bml
 link: htdocs/allpics.bml
 post: htdocs/update.bml
 </LJDEP> _c?>
+

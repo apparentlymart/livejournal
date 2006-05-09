@@ -1166,7 +1166,7 @@ sub entry_form {
     }
 
     $out .= LJ::html_textarea({ 'name' => 'event', 'value' => $opts->{'event'},
-                                'rows' => '20', 'cols' => '50', 'style' => 'width: 100%',
+                                'rows' => '20', 'cols' => '50', 'style' => 'width: 99%;',
                                 'wrap' => 'soft', 'tabindex' => $tabindex->(),
                                 'disabled' => $opts->{'disabled_save'},
                                 'id' => 'draft'});
