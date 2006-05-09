@@ -413,7 +413,11 @@
                 {
 
                     my $ad =  LJ::ads( type => 'app', orient => 'App-Confirm', force => '1' );
-                    $$body .= "$ad" if $ad;
+                    if ($ad) {
+                        $$body .= "$ad";
+                    } else {
+                        $$body .= LJ::CProd->full_box_for($u, width => 300);
+                    }
                 }
 
                 $$body .= "</td></tr></table>";
