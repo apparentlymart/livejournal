@@ -97,7 +97,7 @@ sub prod_to_show {
     my $map = $u ? $u->selectall_hashref("SELECT cprodid, firstshowtime, recentshowtime, ".
                                          "       acktime, nothankstime, clickthrutime ".
                                          "FROM cprod WHERE userid=?",
-                                         "cprodid") : {};
+                                         "cprodid", undef, $u->{userid}) : {};
     $map ||= {};
 
     foreach my $prod (@LJ::CPROD_PROMOS) {
