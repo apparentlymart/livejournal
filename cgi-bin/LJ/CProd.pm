@@ -86,7 +86,7 @@ sub full_box_for {
     my ($class, $u, %opts) = @_;
     my $showclass = LJ::CProd->prod_to_show($u)
         or return "";
-    my $content = $@ || $showclass->render($u);
+    my $content = eval { $showclass->render($u) } || LJ::ehtml($@);
     return $showclass->wrap_content($content, %opts);
 }
 
