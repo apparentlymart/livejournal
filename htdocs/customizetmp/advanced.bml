@@ -25,6 +25,12 @@ body<=
     my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
     my $ret;
 
+    my $ad =  LJ::ads( type => 'app', orient => 'App-Customize' );
+    if ($ad) {
+        $ret .= "<div id='CustomizeAdBox'>$ad</div>";
+        $ret .= "<div style='clear: both; margin: 0; padding: 0; width: 0; height: 0;'></div>";
+    }
+
     $ret .= "<form action='advanced.bml' method='get' id='Authas'>";
     $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
     $ret .= "</form>";
