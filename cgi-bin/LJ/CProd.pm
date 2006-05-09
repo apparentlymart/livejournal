@@ -135,6 +135,7 @@ sub wrap_content {
     LJ::need_res("js/core.js");
     LJ::need_res("js/dom.js");
     LJ::need_res("js/httpreq.js");
+    LJ::need_res("js/hourglass.js");
     LJ::need_res("js/cprod.js");
     my $htmlclass = LJ::ehtml($class);
 

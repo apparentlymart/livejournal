@@ -2,6 +2,7 @@
 // box on a page.
 
 CProd = new Object;
+CProd.hourglass = null;
 
 // show the next tip
 CProd.next = function (evt) {
@@ -22,10 +23,25 @@ CProd.next = function (evt) {
         "data": data,
       "onData": CProd.gotData
   });
+
+  Event.prep(evt);
+  var pos = DOM.getAbsoluteCursorPosition(evt);
+  if (!pos) return;
+
+  if (!CProd.hourglass) {
+    CProd.hourglass = new Hourglass();
+    CProd.hourglass.init();
+    CProd.hourglass.hourglass_at(pos.x, pos.y);
+  } else {
+    CProd.hourglass.hourglass_at(pos.x, pos.y);
+  }
 }
 
 // got the next tip
 CProd.gotData = function (res) {
+  if (CProd.hourglass)
+    CProd.hourglass.hide();
+
   if (!res || !res.content) return;
 
   var cprodbox = $("CProd_box");
