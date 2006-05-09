@@ -35,6 +35,16 @@ sub typemap {
 }
 
 
+# returns the typeid for this module.
+sub cprodid {
+    my ($class_self) = @_;
+    my $class = ref $class_self ? ref $class_self : $class_self;
+
+    my $tm = $class->typemap
+        or return undef;
+
+    return $tm->class_to_typeid($class);
+}
 
 # don't override:
 sub shortname {
