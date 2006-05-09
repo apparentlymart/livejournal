@@ -173,6 +173,21 @@ sub forget_dead_hosts {}
 
 
 package LJ::User;
+
+# post a fake entry in a community journal
+sub t_post_fake_comm_entry {
+    my $u = shift;
+    my $comm = shift;
+    my %opts = @_;
+
+    # set the 'usejournal' and tell the protocol 
+    # to not do any checks for posting access
+    $opts{usejournal} = $comm->{user};
+    $opts{usejournal_okay} = 1;
+
+    return $u->t_post_fake_entry(%opts);
+}
+
 # post a fake entry in this user's journal
 sub t_post_fake_entry {
     my $u = shift;
@@ -198,6 +213,11 @@ sub t_post_fake_entry {
                );
 
     $req{allowmask} = 1 if $security eq 'friends';
+
+    # pass-thru opts
+    foreach my $f (qw(usejournal usejournal_okay)) {
+        $req{$_} = $opts{$_} if $opts{$_};
+    }
 
     my %res;
     my $flags = { noauth => 1 };
