@@ -342,7 +342,7 @@ _code?>
             $ret .= LJ::html_text({ 'name' => 'txtmsg_number',  'value' => $tminfo->{'number'},
                                     'size' => '15', 'maxlength' => '40' });
             $ret .= "</td></tr>\n";
-            $ret .= "</table>\n</td></tr>\n";
+            $ret .= "</table>\n";
         }
 
         ## FRIENDS
