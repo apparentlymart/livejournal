@@ -460,10 +460,12 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     {
         $link = $e->get_link("nav_prev"); $footer = "$footer $link";
     }
-    $link = $e->get_link("edit_entry");   $footer = "$footer $link";
-    $link = $e->get_link("edit_tags");    $footer = "$footer $link";
-    $link = $e->get_link("tell_friend");  $footer = "$footer $link";
-    $link = $e->get_link("mem_add");      $footer = "$footer $link";
+    foreach var string link_key ($e.link_keyseq) {
+        $link = $e->get_link($link_key);
+        if(defined $link) {
+            $footer = "$footer $link";
+        }
+    }
     if ($p.view == "entry")
     {
         $link = $e->get_link("nav_next"); $footer = "$footer $link";
@@ -741,7 +743,10 @@ function EntryPage::print_comment (Comment c) {
 
     var Link link = new Link;
     foreach var string k ($c.link_keyseq) {
-        $link = $c->get_link($k); $footer = "$footer $link";
+        $link = $c->get_link($k);
+        if (defined $link) {
+            $footer = "$footer $link";
+        }
     }
     println "<a name='$c.anchor'></a>";
     print_box_open($colors, $metapic, $meta, "cmtbar$c.talkid");
