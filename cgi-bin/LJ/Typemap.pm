@@ -61,6 +61,8 @@ sub typeid_to_class {
 sub class_to_typeid {
     my ($self, $class) = @_;
 
+    croak "No class specified in class_to_typeid" unless $class;
+
     $self->_load unless $self->{loaded};
     my $proc_cache = $self->{cache};
     my $classid = $proc_cache->{$class};
