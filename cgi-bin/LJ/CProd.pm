@@ -111,6 +111,15 @@ sub full_box_for {
     return $showclass->wrap_content($content, %opts);
 }
 
+# don't override
+sub box_for {
+    my ($class, $u, %opts) = @_;
+    my $showclass = LJ::CProd->prod_to_show($u)
+        or return "";
+    my $content = eval { $showclass->render($u) } || LJ::ehtml($@);
+    return $content;
+}
+
 sub user_map {
     my ($class, $u) = @_;
     my $map = $u ? $u->selectall_hashref("SELECT cprodid, firstshowtime, recentshowtime, ".
