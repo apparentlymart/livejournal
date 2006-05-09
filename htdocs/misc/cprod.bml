@@ -21,7 +21,14 @@ body<=
 
     my $remote = LJ::get_remote() or return $go->();
 
-    eval { $remote->do("UPDATE cprod SET acktime=UNIX_TIMESTAMP() WHERE userid=? AND cprodid=?",
+    my $good = $GET{g};
+    my $ct = '';
+
+    if ($good) {
+        $ct = ", clickthrutime=UNIX_TIMESTAMP()";
+    }
+
+    eval { $remote->do("UPDATE cprod SET acktime=UNIX_TIMESTAMP()$ct WHERE userid=? AND cprodid=?",
                        undef, $remote->{userid}, $cprodid) } or return $go->();
 
     return $go->();
