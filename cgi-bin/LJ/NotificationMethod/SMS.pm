@@ -7,7 +7,6 @@ use Class::Autouse qw(LJ::SMS);
 
 sub can_digest { 0 };
 
-# positional parameters: ->new($u, $event1, $event2, ...)
 sub new {
     my $class = shift;
     my $u = shift;
@@ -57,8 +56,8 @@ sub notify {
         unless @_;
 
     my $ev = shift;
-        croak "invalid event passed"
-            unless ref $ev;
+    croak "invalid event passed"
+        unless ref $ev;
 
     croak "SMS can only accept one event at a time"
         if @_;
