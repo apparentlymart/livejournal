@@ -13,7 +13,7 @@ sub generate_content {
     my $content = '';
 
     my $u = $self->{u};
-    $content = LJ::CProd->full_box_for($u) || "You know everything!";
+    $content = LJ::CProd->box_for($u) || "You know everything!";
 
     return $content;
 }
