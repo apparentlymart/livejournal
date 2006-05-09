@@ -72,6 +72,19 @@ sub mark_dontshow {
                   undef, $u->{userid}, $hide_cprodid);
 }
 
+sub mark_acked {
+    shift @_ unless ref $_[0];
+    my ($u, $class) = @_;
+    return 0 unless $u;
+    my $tm  = LJ::CProd->typemap;
+    my $hide_cprodid = $tm->class_to_typeid($class)
+        or return 0;
+    $u->do("INSERT IGNORE INTO cprod SET userid=?, cprodid=?",
+           undef, $u->{userid}, $hide_cprodid);
+    return $u->do("UPDATE cprod SET acktime=UNIX_TIMESTAMP() WHERE userid=? AND cprodid=?",
+                  undef, $u->{userid}, $hide_cprodid);
+}
+
 sub trackable_link {
     my ($class, $href, $text, $goodclick) = @_;
     Carp::croak("bogus caller, forgot param") unless defined $goodclick;
