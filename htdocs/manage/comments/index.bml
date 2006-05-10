@@ -33,7 +33,8 @@ _code?>
     # load user props
     LJ::load_user_props(
         $u, { use_master => 1 },
-        qw/ opt_whoscreened opt_logcommentips /
+        qw/ opt_whoscreened opt_logcommentips
+            opt_getselfemail /
     );
 
     # to store values before they undergo normalisation
@@ -52,12 +53,12 @@ _code?>
         my $ret;
 
         $ret .= "<div>";
-        $ret .= "Set your comment preferences below.";
         # user switcher
         $ret .= "<?p <form method='get' action='index.bml'>\n";
         $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
         $ret .= "</form> p?>\n\n";
 
+        $ret .= "<?p Set your comment preferences below. p?>";
         $ret .= "</div>\n";
 
         $ret.= "<div class='clear'></div>\n";
@@ -78,7 +79,7 @@ _code?>
         $ret .= LJ::html_select({ 'name' => 'opt_whocanreply', 'selected' => $u->{'opt_whocanreply'} },
                                   "all" => "Everyone",
                                   "reg" => "Registered users",
-                                  "friends" => BML::ml(".security.visibility.friends"));
+                                  "friends" => BML::ml(".security.visibility.friends"),
         $ret .= "<ul class='helper'><li>If you disable commenting, all pasts comments on your journal will be hidden. They will re-appear if you enable commenting again.</li>\n";
         $ret .= "<li>If you wish to disable commenting for only some for your entries, adjust the \"Screen Comments\" setting on each entry.</li></ul>\n";
         $ret .= "</td></tr>\n";
@@ -89,7 +90,7 @@ _code?>
         $ret .= LJ::html_select({ 'name' => 'opt_whoscreened', 'selected' => $u->{'opt_whoscreened'} },
                                   "N" => "No one",
                                   "R" => "Anonymous commenters",
-                                  "F" => ($u->{'journaltype'} eq 'C' ? "Anyone who's not a member" : "Anyone not on my Friend's list"),
+                                  "F" => ($u->{'journaltype'} eq 'C' ? "Anyone who's not a member" : "Anyone not on my Friends list"),
                                   "A" => "Everyone" );
         $ret .= "<br /><span class='helper'>\nScreening allows you to read comments before publishing them for others to see.</span>";
         $ret .= "</td></tr>\n";
@@ -122,9 +123,10 @@ _code?>
         $ret .= "<table class='field_block'>\n";
 
         # Comment notifications
-        $ret .= "<tr><td class='field_name'>Comment notifications</td>\n<td>";
-        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_gettalkemail', 'id' => 'opt_gettalkemail',
-                                 'selected' => $u->{'opt_gettalkemail'} eq 'Y' });
+        $ret .= "<tr><td class='field_name'>Comment notifications:</td>\n<td>";
+        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_getselfemail', 'id' => 'opt_getselfemail',
+                                 'selected' => $u->{'opt_getselfemail'},
+                                 'disabled' => !LJ::get_cap($u, 'getselfemail') });
         $ret .= " Receive email copies of comments you make<br />\n";
         $ret .= "<span class='helper'>You can receive e-mail copies of comments you make while logged in under
             your username. You will not receive copies of any anonymous comments you
@@ -132,6 +134,28 @@ _code?>
         $ret .= "</td></tr>\n";
 
         $ret .= "</table>\n";
+
+        # Banned Users
+        my $banned = LJ::load_rel_user($u, 'B');
+        if ($banned && @$banned) {
+            my $us = LJ::load_userids(@$banned);
+            $ret .= "<div class='section_head'>Banned users</div>\n";
+            $ret .= "<table class='field_block'>\n";
+
+            # Unban users
+            $ret .= "<tr><td class='field_name'>Unban users:</td>\n<td>";
+            $ret .= " You have the following users banned from posting in your journal. Check the checkbox by their username to remove the ban.<br />\n";
+            foreach (@$banned) {
+                my $bu = $us->{$_};
+                next unless $bu;
+                $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'unban', 'id' => "unban-$bu->{'user'}",
+                                                                 'value' => $bu->{'userid'} });
+                $ret .= " <label for='unban-$bu->{'user'}'>$bu->{'user'}</label><br />\n";
+            }
+            $ret .= "</td></tr>\n";
+
+            $ret .= "</table>\n";
+        }
 
         # ending submit block
         $ret .= "<?standout " . LJ::html_submit(undef, $ML{'.finished.save_button'}) . " standout?>\n";
@@ -148,6 +172,7 @@ _code?>
     if (LJ::did_post()) {
         return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>" unless LJ::check_form_auth();
 
+        $POST{'unban'} =~ s/\0/,/g;
         return "<?badinput?>" unless LJ::text_in(\%POST);
 
         my $dbh = LJ::get_db_writer();
@@ -164,6 +189,7 @@ _code?>
         ### change any of the userprops ?
         {
             # opts
+            $POST{'opt_getselfemail'} = $POST{'opt_getselfemail'} ? 1 : 0;
             $POST{'opt_whoscreened'} = "N" unless $POST{'opt_whoscreened'} =~ m/^(N|R|F|A)$/;
             if ($POST{'opt_logcommentips'} ne "N" &&
                 $POST{'opt_logcommentips'} ne "S" &&
@@ -171,6 +197,7 @@ _code?>
 
             my @uprops = qw(
               opt_whoscreened opt_logcommentips
+              opt_getselfemail
             );
 
 
@@ -183,6 +210,11 @@ _code?>
             }
         }
 
+        # now unban users they selected to be unbanned
+        if ($POST{'unban'}) {
+            my $bannedin = join(",", map { $dbh->quote($_); } split(/,/, $POST{'unban'}));
+            $dbh->do("DELETE FROM reluser WHERE userid=? AND type='B' AND targetid IN ($bannedin)", undef, $u->{'userid'});
+        }
 
         # tell the user all is well
         my $base = $u->journal_base;

@@ -85,21 +85,22 @@ _code?>
         my $ret;
 
         $ret .= "<div>";
-        $ret .= "Here's where you fill out your Profile page. You don't have to display
-                all of your info to everyone - check out the options below.
-                You may also want to edit your <a href='$LJ::SITEROOT/manage/comments/'>comment settings</a>
-                or your <a href='$LJ::SITEROOT/manage/settings/'>viewing options</a>.";
         # user switcher
-        $ret .= "<?p <form method='get' action='index.bml'>\n";
+        $ret .= "<?p <form method='get' action='./'>\n";
         $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
         $ret .= "</form> p?>\n\n";
+
+        $ret .= "<?p Here's where you fill out your Profile page. You don't have to display
+                all of your info to everyone - check out the options below.
+                You may also want to edit your <a href='$LJ::SITEROOT/manage/comments/'>comment settings</a>
+                or your <a href='$LJ::SITEROOT/manage/settings/'>viewing options</a>. p?>";
 
         $ret .= "</div>\n";
 
         $ret.= "<div class='clear'></div>\n";
 
 
-        $ret .= "<form method='post' action='index.bml$getextra'>\n";
+        $ret .= "<form method='post' action='./$getextra'>\n";
         $ret .= LJ::form_auth();
 
         # personal information
@@ -115,14 +116,14 @@ _code?>
             my $picid = $u->{'defaultpicid'};
             my %userpics = ();
             LJ::load_userpics(\%userpics, [ $u, $picid ]);
-            $ret .= "<a href='editpics.bml$getextra'><img src=\"$LJ::USERPIC_ROOT/$picid/$u->{'userid'}\" width='$userpics{$picid}->{'width'}' height='$userpics{$picid}->{'height'} alt='$u->{'user'}' border='0'></a>";
+            $ret .= "<img src=\"$LJ::USERPIC_ROOT/$picid/$u->{'userid'}\" width='$userpics{$picid}->{'width'}' height='$userpics{$picid}->{'height'}' alt='$u->{'user'}' border='0'>";
         } else {
             $ret .= "<br /><i>($ML{'.userpic.none'})</i>";
         }
         $ret .= "</div><div style='margin-left: 110px'>\n";
         $ret .= "<span class='helper'>This is the image that will display on your Profile. It will also represent you in your entries and comments, unless you select a different one.</span>";
         $ret .= LJ::help_icon('upic_keywords');
-        $ret .= "<?p <a href='$LJ::SITEROOT/editpics.bml#upload' target='_blank'>Change default userpic</a> p?>\n";
+        $ret .= "<?p <a href='$LJ::SITEROOT/editpics.bml'>Change default userpic</a> p?>\n";
         $ret .= "</td></tr>\n";
 
         # name
@@ -312,6 +313,7 @@ _code?>
 
             my $tminfo = LJ::TextMessage->tm_info($u);
             foreach (values %$tminfo) { LJ::text_out(\$_); }
+            $tminfo->{'security'} = "N" if ($u->{'txtmsg_status'} eq 'off' || $u->{'txtmsg_status'} eq 'none');
 
             $ret .= "<span class='view_options'>Allow text messaging from: ";
             $ret .= LJ::html_select({ 'name' => 'txtmsg_security', 'selected' => $tminfo->{'security'} },
@@ -424,7 +426,6 @@ _code?>
     if (LJ::did_post()) {
         return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>" unless LJ::check_form_auth();
 
-        $POST{'unban'} =~ s/\0/,/g;
         return "<?badinput?>" unless LJ::text_in(\%POST);
 
         my @errors = ();
@@ -551,6 +552,7 @@ _code?>
         my $newbio = defined($POST{'bio_absent'}) ? $saved{'bio'} : $POST{'bio'};
         my $has_bio = ($newbio =~ /\S/) ? "Y" : "N";
         my $txtmsg_status = $POST{'txtmsg_security'} =~ m/^(all|reg|friends)$/ ? "on" : "off";
+        my $old_txtmsg_status = $u->{'txtmsg_status'};
         # setup what we're gonna update in the user table:
         my %update = (
                       'name' => $newname,
@@ -635,7 +637,7 @@ _code?>
               opt_whatemailshow
               country state city zip timezone
               icq aolim yahoo msn url jabber
-              google_talk skype gizmo
+              google_talk skype
               urlname gender opt_hidefriendofs
               sidx_bdate sidx_bday sidx_loc
               opt_showmutualfriends opt_showschools
@@ -669,7 +671,7 @@ _code?>
         }
 
         # update their text messaging info
-        if ($txtmsg_status eq "off" && $u->{'txtmsg_status'} eq "on") {
+        if ($txtmsg_status eq "off" && $old_txtmsg_status eq "on") {
             $dbh->do("DELETE FROM txtmsg WHERE userid=?", undef, $u->{'userid'});
         } elsif ($txtmsg_status eq "on") {
             $dbh->do("REPLACE INTO txtmsg (userid, provider, number, security) VALUES (?, ?, ?, ?)",
@@ -688,12 +690,6 @@ _code?>
                 return LJ::bad_input(BML::ml(".error.excessive_int", {'intcount' => $intcount}));
             }
             LJ::set_interests($u, \%interests, \@ints);
-        }
-
-        # now unban users they selected to be unbanned
-        if ($POST{'unban'}) {
-            my $bannedin = join(",", map { $dbh->quote($_); } split(/,/, $POST{'unban'}));
-            $dbh->do("DELETE FROM reluser WHERE userid=? AND type='B' AND targetid IN ($bannedin)", undef, $u->{'userid'});
         }
 
         # actions if email changed

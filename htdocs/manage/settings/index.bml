@@ -55,12 +55,12 @@ _code?>
         my $ret;
 
         $ret .= "<div>";
-        $ret .= "Customize your viewing, notification and additional privacy options. ";
         # user switcher
         $ret .= "<?p <form method='get' action='index.bml'>\n";
         $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
         $ret .= "</form> p?>\n\n";
 
+        $ret .= "<?p Customize your viewing, notification and additional privacy options. p?>";
         $ret .= "</div>\n";
 
         $ret.= "<div class='clear'></div>\n";
@@ -147,7 +147,7 @@ _code?>
         $ret .= "<tr><td class='field_name'>Birthday reminders:</td>\n<td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_bdaymail', 'id' => 'opt_bdaymail',
                                  'selected' => $u->{'opt_bdaymail'} });
-        $ret .= " Receive e-mail reminders for your friends' birthdays<br />";
+        $ret .= " Receive email reminders for your friends' birthdays<br />";
         $ret .= "<span class='helper'>Note: This feature is currently disabled, but may be re-enabled in the future.</span>";
         $ret .= "</td></tr>\n";
 
@@ -161,7 +161,7 @@ _code?>
         $ret .= "<tr><td class='field_name'>Search inclusion:</td>\n<td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_blockrobots', 'id' => 'opt_blockrobots',
                                  'selected' => $u->{'opt_blockrobots'} });
-        $ret .= " Minimize your journal's inclusion in search<br />";
+        $ret .= " Minimize your journal's inclusion in search engine results<br />";
         $ret .= "<span class='helper'>We can instruct search engines not to include your journal entries in their search
             results. Not all search engines recognize this request; if you do not want a journal
             entry to show up in search results, then make sure it is posted private or Friends-only.</span>";
@@ -169,10 +169,10 @@ _code?>
 
         # Weblogs.com
         unless ($LJ::DISABLED{'weblogs_com'}) {
-            $ret .= "<tr><td class='field_name'>Weblogs.com:</td>\n<td class='helper'>";
+            $ret .= "<tr><td class='field_name'>Weblogs.com:</td>\n<td>";
             $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_weblogscom', 'id' => 'opt_weblogscom',
                                      'selected' => $u->{'opt_weblogscom'} });
-            $ret .= " Notify Weblogs.com when I post new public entries<br />\n";
+            $ret .= " <span class='helper'>Notify Weblogs.com when I post new public entries</span><br />\n";
             $ret .= "Weblogs.com, a VeriSign service, is a ping server that automatically notifies
                 subscribers when new content is posted to a website or blog, So that many more
                 people can be made aware of updates to your journal.\n";
