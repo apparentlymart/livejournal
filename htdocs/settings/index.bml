@@ -53,13 +53,15 @@
     my %posted;  # class -> key -> value
     if (LJ::did_post()) {
         while (my ($k, $v) = each %POST) {
-            next unless $k =~ /^LJ__Setting__(\w+)_(\w+)$/;
+            next unless $k =~ /^LJ__Setting__([a-zA-Z0-9]+)_(\w+)$/;
             my $class = "LJ::Setting::$1";
             my $key = $2;
             $class =~ s/__/::/g;
             $posted{$class}{$key} = $v;
         }
     }
+
+    #$body .= "<pre>" . LJ::D(\%POST, \%posted) . "</pre>";
 
     $body .= "<form method='post'>";
     $body .= "<?h1 Options tagged '$tag': h1?>\n";
