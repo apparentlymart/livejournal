@@ -32,7 +32,7 @@
         return $err->("Invalid content request");
     }
 
-    sleep 1 if $LJ::IS_DEV_SERVER;
+    select undef, undef, undef, 0.25 if $LJ::IS_DEV_SERVER;
 
     return LJ::js_dumper(\%ret);
 }
