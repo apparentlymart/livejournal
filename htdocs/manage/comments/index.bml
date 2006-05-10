@@ -2,7 +2,7 @@
 title=>Comment Settings
 body<=
 <?_code
-    LJ::set_active_crumb('editinfo'); ##TODO:Change crumbs
+    LJ::set_active_crumb('editcomments');
     return;
 _code?>
 
@@ -79,7 +79,7 @@ _code?>
         $ret .= LJ::html_select({ 'name' => 'opt_whocanreply', 'selected' => $u->{'opt_whocanreply'} },
                                   "all" => "Everyone",
                                   "reg" => "Registered users",
-                                  "friends" => BML::ml(".security.visibility.friends"),
+                                  "friends" => BML::ml(".security.visibility.friends") );
         $ret .= "<ul class='helper'><li>If you disable commenting, all pasts comments on your journal will be hidden. They will re-appear if you enable commenting again.</li>\n";
         $ret .= "<li>If you wish to disable commenting for only some for your entries, adjust the \"Screen Comments\" setting on each entry.</li></ul>\n";
         $ret .= "</td></tr>\n";
@@ -220,7 +220,7 @@ _code?>
         my $base = $u->journal_base;
         my $profile_url = $u->profile_url;
         return "<?h1 $ML{'.success.header'} h1?>\n" .
-               "<?p " . BML::ml('.success.message2', {'aopts1' => "href='$base/'", 'aopts2' => "href='$profile_url'"}) . " p?>";
+               "<?p Your comment settings have been updated. p?>";
     }
 
     # should never happen

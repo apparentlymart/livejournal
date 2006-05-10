@@ -5311,6 +5311,8 @@ crumb.customizelayer=Individual Customizations
 
 crumb.delcomment=Delete Comment
 
+crumb.editcomments=Comment Settings
+
 crumb.editentries=Edit Entries
 
 crumb.editentries_do=Edit Entry
@@ -5322,6 +5324,10 @@ crumb.editfriends=Edit Friends
 crumb.editinfo=Personal Info
 
 crumb.editpics=User Pictures
+
+crumb.editprofile=Edit Profile
+
+crumb.editsettings=Viewing Options
 
 crumb.editstyle=Edit Style
 

@@ -1,8 +1,8 @@
 <?page
-title=>Edit Settings
+title=>Viewing Options
 body<=
 <?_code
-    LJ::set_active_crumb('editinfo'); ##TODO:Change crumbs
+    LJ::set_active_crumb('editsettings');
     return;
 _code?>
 
@@ -250,7 +250,7 @@ _code?>
         my $base = $u->journal_base;
         my $profile_url = $u->profile_url;
         return "<?h1 $ML{'.success.header'} h1?>\n" .
-               "<?p " . BML::ml('.success.message2', {'aopts1' => "href='$base/'", 'aopts2' => "href='$profile_url'"}) . " p?>";
+               "<?p Your viewing options have been updated. p?>";
     }
 
     # should never happen
