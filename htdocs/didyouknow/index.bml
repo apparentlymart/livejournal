@@ -32,7 +32,7 @@
 
         if ($POST{"noshow:$class"}) {
             LJ::CProd->mark_dontshow($u, $class);
-            next;
+            return BML::redirect("$LJ::SITEROOT/didyouknow/");
         }
 
         unless (eval "use $class; 1;") {

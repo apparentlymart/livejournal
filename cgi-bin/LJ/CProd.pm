@@ -136,6 +136,8 @@ sub prod_to_show {
     my $tm  = $class->typemap;
     my $map = LJ::CProd->user_map($u);
 
+    my @poss;  # [$class, $cprodid, $acktime];
+
     foreach my $prod (@LJ::CPROD_PROMOS) {
         my $class = "LJ::CProd::$prod";
         my $cprodid = $tm->class_to_typeid($class);
@@ -144,12 +146,13 @@ sub prod_to_show {
         # skip if they don't want it.
         next if $state && $state->{nothankstime};
 
-        # skip if they've seen it (NOTE: logic may change)
-        next if $state && $state->{acktime};
+        push @poss, [$class, $cprodid, $state, $state ? $state->{acktime} : 0 ];
+    }
 
-        # skip if they've clicked-thru it (NOTE: logic may change)
-        next if $state && $state->{clickthrutime};
+    return unless @poss;
 
+    foreach my $poss (sort { $a->[3] <=> $b->[3] } @poss) {
+        my ($class, $cprodid, $state) = @$poss;
         eval "use $class; 1";
         next if $@;
         next unless eval { $class->applicable($u) };
