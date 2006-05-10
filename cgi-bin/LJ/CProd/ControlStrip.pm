@@ -10,7 +10,7 @@ sub applicable {
 sub render {
     my ($class, $u) = @_;
     return LJ::ljuser($u) . ", did you know you can enable an easy-to-use ". 
-        $class->clickthru_link("$LJ::SITEROOT/manage/settings","navigation strip?");
+        $class->clickthru_link("$LJ::SITEROOT/manage/settings/","navigation strip?");
 }
 
 1;
