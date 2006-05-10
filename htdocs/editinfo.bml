@@ -1,8 +1,0 @@
-<?page
-body<=
-<?_code
-    # Edit Info has moved, redirect to new location.
-    return BML::redirect("$LJ::SITEROOT/manage/profile/");
-_code?>
-<=body
-page?>
