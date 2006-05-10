@@ -34,6 +34,6 @@
 
     sleep 1 if $LJ::IS_DEV_SERVER;
 
-    return JSON::objToJson(\%ret);
+    return LJ::js_dumper(\%ret);
 }
 _code?>
