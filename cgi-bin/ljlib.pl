@@ -18,6 +18,7 @@ use Time::Local ();
 use Storable ();
 use Compress::Zlib ();
 use IO::Socket::INET qw{};
+use Class::Autouse qw(TheSchwartz);
 
 do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
@@ -223,6 +224,17 @@ sub mogclient {
     }
 
     return $LJ::MogileFS;
+}
+
+sub theschwartz {
+    return LJ::Test->theschwartz() if $LJ::_T_FAKESCHWARTZ;
+    return $LJ::SchwartzClient     if $LJ::SchwartzClient;
+
+    if (@LJ::THESCHWARTZ_DBS) {
+        # FIXME: use LJ's DBI::Role system for this.
+        $LJ::SchwartzClient = TheSchwartz->new(databases => \@LJ::THESCHWARTZ_DBS);
+    }
+    return $LJ::SchwartzClient;
 }
 
 # <LJFUNC>

@@ -127,19 +127,9 @@ sub process_fired_events {
     my $class = shift;
     croak("Can't call in web context") if LJ::is_web_context();
 
-    # THIS IS SO GROSS.  this is just for dev/test.  will be replaced.
-    # the whole cmdbuffer system is dying with a much more
-    # elegant/powerful solution.
-
-    require 'ljcmdbuffer.pl';
-    my $dbh = LJ::get_db_writer();
-    foreach my $c (@LJ::CLUSTERS) {
-        my $db = LJ::get_cluster_master($c);
-        next unless $db;
-        my $have_jobs = $db->selectrow_array("SELECT cbid FROM cmdbuffer WHERE cmd='fired_event' LIMIT 1");
-        next unless $have_jobs;
-        LJ::Cmdbuffer::flush($dbh, $db, "fired_event");
-    }
+    my $sclient = LJ::theschwartz();
+    $sclient->can_do("LJ::Worker::FiredEvent");
+    $sclient->work_until_done;
 }
 
 # instance method.
@@ -160,11 +150,14 @@ sub fire {
 
     return unless $self->should_enqueue;
 
-    # TODO: change this to log to 'TheSchwartz'
-    $u->cmd_buffer_add("fired_event", {
-        etypeid => $self->etypeid,
-        arg1    => $self->{args}[0],
-        arg2    => $self->{args}[1],
+    my $sclient = LJ::theschwartz();
+    return 0 unless $sclient;
+
+    my $h = $sclient->insert("LJ::Worker::FiredEvent", {
+        journalid => $u->{userid},
+        etypeid   => $self->etypeid,
+        arg1      => $self->{args}[0],
+        arg2      => $self->{args}[1],
     });
 }
 
@@ -184,6 +177,8 @@ sub process_firing {
 
         $subsc->process($self);
     }
+
+    return 1;
 }
 
 sub subscriptions {
@@ -314,5 +309,30 @@ sub all_classes {
 
 package LJ::Event::ForTest2;
 use base 'LJ::Event';
+
+package LJ::Worker::FiredEvent;
+use base 'TheSchwartz::Worker';
+
+sub work {
+    my ($class, $job) = @_;
+    my $a = $job->arg;
+
+    my $evt = eval {
+        LJ::Event->new_from_raw_params($a->{'etypeid'}, $a->{'journalid'},
+                                       $a->{'arg1'}, $a->{'arg2'});
+      } or return;
+
+    # TODO: improve.  pass $job to process_firing, etc.
+    if ($evt->process_firing) {
+        $job->completed;
+    } else {
+        $job->failed;
+    }
+}
+
+sub keep_exit_status_for { 0 }
+sub grab_for { 120 }
+sub max_retries { 2 }
+sub retry_delay { my $class = shift; my $fails = shift; return 2 ** $fails; }
 
 1;

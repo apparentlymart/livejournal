@@ -3,6 +3,7 @@ require Exporter;
 use strict;
 use Carp qw(croak);
 use vars qw(@ISA @EXPORT);
+use DBI;
 @ISA = qw(Exporter);
 @EXPORT = qw(memcache_stress with_fake_memcache temp_user);
 
@@ -13,6 +14,39 @@ END {
         my $u = LJ::load_userid($uid) or next;
         $u->delete_and_purge_completely;
     }
+}
+
+$LJ::_T_FAKESCHWARTZ = 1;
+my $theschwartz = undef;
+
+sub theschwartz {
+    return $theschwartz if $theschwartz;
+
+    my $fakedb = "$ENV{LJHOME}/t-theschwartz.sqlite";
+    unlink $fakedb;
+    my $fakedsn = "dbi:SQLite:dbname=$fakedb";
+
+    my $load_sql = sub {
+        my($file) = @_;
+        open my $fh, $file or die "Can't open $file: $!";
+        my $sql = do { local $/; <$fh> };
+        close $fh;
+        split /;\s*/, $sql;
+    };
+
+    my $dbh = DBI->connect($fakedsn,
+                           '', '', { RaiseError => 1, PrintError => 0 });
+    my @sql = $load_sql->("$ENV{LJHOME}/cvs/TheSchwartz/t/schema-sqlite.sql");
+    for my $sql (@sql) {
+        $dbh->do($sql);
+    }
+    $dbh->disconnect;
+
+    return $theschwartz = TheSchwartz->new(databases => [{
+        dsn => $fakedsn,
+        user => '',
+        pass => '',
+    }]);
 }
 
 sub temp_user {
@@ -180,7 +214,7 @@ sub t_post_fake_comm_entry {
     my $comm = shift;
     my %opts = @_;
 
-    # set the 'usejournal' and tell the protocol 
+    # set the 'usejournal' and tell the protocol
     # to not do any checks for posting access
     $opts{usejournal} = $comm->{user};
     $opts{usejournal_okay} = 1;
