@@ -147,7 +147,7 @@ body<=
                 $title = LJ::Lang::get_text($deflang, "$faqid.1question", $mld->{'dmid'});
             }
             unless ($faqtitles{$faqid}) {
-                $faqtitles{$faqid} = $title || "<b>[Failed to get title of FAQ #$faqid]</b>";
+                $faqtitles{$faqid} = LJ::ehtml($title) || "<b>[Failed to get title of FAQ #$faqid]</b>";
             }
         }
 
