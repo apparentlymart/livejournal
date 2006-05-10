@@ -14,7 +14,7 @@ sub render {
     my $user = LJ::ljuser($u);
     return qq {
         <p>$user, this is what you currently look like to your friends: $empty
-            Boooring. Be classy and upload a $link</p>
+            Boooring. Be classy and upload a $link.</p>
 };
 }
 
