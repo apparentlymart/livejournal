@@ -14,7 +14,7 @@ CProd.next = function (evt) {
 
   var data = HTTPReq.formEncoded({
     "class": prodClass,
-      "content": "framed",
+      "content": "framed"
       });
 
   var req = HTTPReq.getJSON({
