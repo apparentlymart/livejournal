@@ -9,8 +9,13 @@ sub applicable {
 
 sub render {
     my ($class, $u) = @_;
-    return "<p><div style=\"float: left; padding: 5px;\"><img border=\"1\" src=\"$LJ::SITEROOT/img/userpics.gif\" /></div>". LJ::ljuser($u) . ", did you know you can have a ". 
-        $class->clickthru_link("$LJ::SITEROOT/editpics.bml","userpic") . " to compliment your entries?</p>";
+    my $empty = '<div style="overflow: hidden; padding: 5px; width: 100px; height: 100px; border: 1px solid #000000;">&nbsp;</div>';
+        my $link = $class->clickthru_link("$LJ::SITEROOT/editpics.bml","userpic");
+    my $user = LJ::ljuser($u);
+    return qq {
+        <p>$user, this is what you currently look like to your friends: $empty
+            Boooring. Be classy and upload a $link</p>
+};
 }
 
 1;
