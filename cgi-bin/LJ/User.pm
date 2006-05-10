@@ -1540,6 +1540,14 @@ sub subscribe {
     LJ::Subscription->create($u, %opts);
 }
 
+# search for a subscription
+sub has_subscription {
+    my ($u, %params) = @_;
+    croak "No parameters" unless %params;
+
+    return LJ::Subscription->find($u, %params);
+}
+
 # What journals can this user post to?
 sub can_post_to {
     my $u = shift;

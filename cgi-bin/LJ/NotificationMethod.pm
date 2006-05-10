@@ -81,6 +81,15 @@ sub ntypeid {
     return $tm->class_to_typeid($class);
 }
 
+# Class method
+# Returns ntypeid given an event name
+sub method_to_ntypeid {
+    my ($class, $meth_name) = @_;
+
+    $meth_name = "LJ::NotificationMethod::$meth_name" unless $meth_name =~ /^LJ::NotificationMethod::/;
+    return eval { $meth_name->ntypeid };
+}
+
 # this returns a list of all possible notification method classes
 # class method
 *all_classes = \&all_available_methods;

@@ -45,6 +45,49 @@ sub subscriptions_of_user {
     return @subs;
 }
 
+# Class method
+# Look for a subscription matching the parameters: journal/journalid,
+#   ntypeid/method, event/etypeid, arg1, arg2
+# Returns a list of subscriptions for this user matching the parameters
+sub find {
+    my ($class, $u, %params) = @_;
+
+    my ($etypeid, $ntypeid, $journal, $arg1, $arg2);
+
+    if (my $evt = delete $params{event}) {
+        $etypeid = LJ::Event->event_to_etypeid($evt);
+    }
+
+    if (my $nmeth = delete $params{method}) {
+        $ntypeid = LJ::NotificationMethod->method_to_ntypeid($nmeth);
+    }
+
+    $etypeid ||= delete $params{etypeid};
+    $ntypeid ||= delete $params{ntypeid};
+
+    if (my $journalid = delete $params{journalid}) {
+        $journal = LJ::load_userid($journalid);
+    }
+
+    $journal ||= delete $params{journal};
+
+    $arg1 = delete $params{arg1};
+    $arg2 = delete $params{arg2};
+
+    croak "Invalid parameters passed to ${class}->find" if keys %params;
+
+    my @subs = $u->subscriptions;
+
+    # filter subs on each parameter
+    @subs = grep { $_->ntypeid == $ntypeid }             @subs if $ntypeid;
+    @subs = grep { $_->etypeid == $etypeid }             @subs if $etypeid;
+    @subs = grep { LJ::u_equals($_->journal, $journal) } @subs if $journal;
+    @subs = grep { $_->arg1 == $arg1 }                   @subs if $arg1;
+    @subs = grep { $_->arg2 == $arg2 }                   @subs if $arg2;
+
+    return @subs;
+}
+
 # Instance method
 # Remove this subscription
 sub delete {
@@ -72,14 +115,12 @@ sub create {
 
     # easier way for eveenttype
     if (my $evt = delete $args{'event'}) {
-        $evt = "LJ::Event::$evt" unless $evt =~ /^LJ::Event::/;
-        $args{etypeid} = LJ::Event->typemap->class_to_typeid($evt);
+        $args{etypeid} = LJ::Event->event_to_etypeid($evt);
     }
 
     # easier way to specify ntypeid
     if (my $ntype = delete $args{'method'}) {
-        $ntype = "LJ::NotificationMethod::$ntype" unless $ntype =~ /^LJ::NotificationMethod::/;
-        $args{ntypeid} = LJ::NotificationMethod->typemap->class_to_typeid($ntype);
+        $args{ntypeid} = LJ::NotificationMethod->method_to_ntypeid($ntype);
     }
 
     # easier way to specify journal

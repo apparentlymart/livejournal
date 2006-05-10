@@ -288,6 +288,14 @@ sub etypeid {
     return $tm->class_to_typeid($class);
 }
 
+# Class method
+sub event_to_etypeid {
+    my ($class, $evt_name) = @_;
+
+    $evt_name = "LJ::Event::$evt_name" unless $evt_name =~ /^LJ::Event::/;
+    return eval { $evt_name->etypeid };
+}
+
 # this returns a list of all possible event classes
 # class method
 sub all_classes {
