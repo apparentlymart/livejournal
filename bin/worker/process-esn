@@ -12,7 +12,6 @@ usage() unless GetOptions('interval|n=i' => \$interval,
                           'verbose|v'    => \$verbose);
 
 use LJ::Event;
-use LJ::Test qw(memcache_stress temp_user);
 use FindBin qw($Bin);
 
 while (1) {
