@@ -12,6 +12,14 @@ propgroup presentation {
       des = "Side Navbar Position";
       values = "left|Left|right|Right";
   }
+  property int opt_content_width {
+      des = "Percentage Width of the Content Area";
+      note = "Maximum is 100, minimum is 20";
+  }
+  property string opt_content_alignment {
+      des = "Alignment of the Content Area";
+      values = "left|Left|center|Center|right|Right";
+  }
   property string opt_daylines_style {
       des = "Style of Lines Around Day Headings";
       values = "solid|Solid|dashed|Dashed|dotted|Dotted|double|Double|hidden|Invisible";
@@ -21,6 +29,7 @@ propgroup presentation {
   property string opt_margin_size {
       des = "Size of page border";
       values = "0|None|5px|Tiny|25px|Small|50px|Medium|75px|Large|100px|Extra Large";
+      note = "This only has an effect on the left and right borders if your content width is 100";
   }
   property use view_entry_disabled;
   property use use_shared_pic;
@@ -31,6 +40,8 @@ propgroup presentation {
   property use external_stylesheet;
 }
 set opt_navbar_pos = "left";
+set opt_content_width = 100;
+set opt_content_alignment = "center";
 set opt_daylines_style = "dashed";
 set opt_margin_size = "50px";
 set view_entry_disabled = false;
@@ -179,6 +190,14 @@ propgroup text {
 
 set tags_aware = true;
 
+function prop_init() {
+    if ($*opt_content_width > 100) {
+        $*opt_content_width = 100;
+    } elseif ($*opt_content_width < 20) {
+        $*opt_content_width = 20;
+    }
+}
+
 function css_fontspec(string base, string fallback)
  "Prints a CSS font-family specification based on the base and fallback given" 
 {
@@ -199,6 +218,8 @@ function css_fontspec(string base, string fallback)
 
 function print_stylesheet ()
 {
+  var int margin_width = 99 - $*opt_content_width;
+
   print "body {";
   if(clean_url($*page_background_image) != "") {
 """
@@ -214,7 +235,14 @@ color: $*entry_fgcolor;
 """;
 if (not viewer_sees_control_strip()) {
     """
-    padding: $*opt_margin_size;
+    padding-top: $*opt_margin_size;
+    padding-bottom: $*opt_margin_size;
+    """;
+    if ($*opt_content_width == 100) {
+    """padding-left: $*opt_margin_size;
+    padding-right: $*opt_margin_size;""";
+    }
+    """
     margin: 0;
     """;
 }
@@ -237,13 +265,32 @@ img {
 vertical-align: absmiddle;
 }
 table {
-width: 100%;
+""";
+
+if ($*opt_content_width == 100) {
+if (viewer_sees_control_strip()) { """margin: $*opt_margin_size;"""; }
+"""
+width: auto;
+""";
+} else {
+"""width: $*opt_content_width"""; "%;
+";
+    if ($*opt_content_alignment == "left") {
+    """margin-right: ${margin_width}%;""";
+    } elseif ($*opt_content_alignment == "right") {
+    """margin-left: ${margin_width}%;""";
+    } else { # center
+    """margin-left: auto; margin-right: auto;""";
+    }
+}
+
+"""
 }
 """;
 if (viewer_sees_control_strip()) {
 """#main {
-margin: $*opt_margin_size;
-width: auto;
+margin-top: $*opt_margin_size;
+margin-bottom: $*opt_margin_size;
 }""";
 }
 """
