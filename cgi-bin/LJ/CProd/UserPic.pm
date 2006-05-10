@@ -3,7 +3,7 @@ use base 'LJ::CProd';
 
 sub applicable {
     my ($class, $u) = @_;
-    return 0 if ($u->{defaultpicid});
+    return 0 if $u->{defaultpicid};
     return 1;
 }
 
