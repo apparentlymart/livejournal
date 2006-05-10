@@ -3,6 +3,19 @@ use base 'LJ::CProd';
 
 sub applicable {
     my ($class, $u) = @_;
+
+    my $popsyn = LJ::Syn::get_popular_feeds();
+
+    my $friends = LJ::get_friends($u) || {};
+
+    my @pop;
+    for (0 .. 99) {
+        next if not defined $popsyn->[$_];
+        my ($user, $name, $suserid, $url, $count) = @{ $popsyn->[$_] };
+
+        my $suser = LJ::load_userid($suserid);
+        return 0 if ($friends->{$suserid} || $suser->{'statusvis'} ne "V");
+    }
     return 1;
 }
 
