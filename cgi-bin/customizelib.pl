@@ -214,7 +214,7 @@ sub js_redirect
                     "display_advanced" => "advanced.bml",
                     );
     if ($POST->{"action:redir"} ne "" && $redirect{$POST->{"action:redir"}}) {
-        BML::redirect("/customizetmp/" . $redirect{$POST->{"action:redir"}});
+        BML::redirect("/customize/" . $redirect{$POST->{"action:redir"}});
     }
 }
 
