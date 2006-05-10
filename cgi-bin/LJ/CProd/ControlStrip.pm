@@ -9,7 +9,7 @@ sub applicable {
 
 sub render {
     my ($class, $u) = @_;
-    return LJ::ljuser($u) . ", did you know you can enable an easy-to-use ". 
+    return "If only there was a way to display a handy collection of links when viewing a journal... oh wait there is! Why not enable the ".
         $class->clickthru_link("$LJ::SITEROOT/manage/settings/","navigation strip?");
 }
 

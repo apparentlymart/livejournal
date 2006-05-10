@@ -15,7 +15,8 @@ sub render {
     my ($class, $u) = @_;
     return LJ::ljuser($u) . ", did you know you can post a poll in your journal using our " .
         $class->clickthru_link("$LJ::SITEROOT/poll/create.bml",
-                               "poll creation wizard") . "?  It's easy.
+                               "poll creation wizard") . "?  Find out what your friends <em>really</em> think ".
+                               "about that shirt you bought last week.
 
 <div style='margin: 1em'>
 
