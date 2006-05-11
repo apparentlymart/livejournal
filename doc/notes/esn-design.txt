@@ -1,0 +1,27 @@
+ESN (Event/Subscription/Notification) works like this:
+
+-- lots of things on the site fire events.  An event is defined
+   by the tuple:
+
+       (journalid,eventtype,e_arg1,e_arg2)
+
+   Where journalid is the primary journal it took place in.  (the
+   journal a new post is in, or the journal a comment is in)  In
+   some cases, it makes less sense, for example a befriending:
+   just pick which of the two-journal(user) relationship is
+   more important, and make that the journalid for that event type.
+
+   e_arg1 and e_arg2 are eventtype-defined integers.  But that's
+   all you have to completely describe the event that took place.
+   Given that it's not much space, most eventtypes will use one
+   or both fields to point to another database record that fully
+   describe the event.  e.g, e_arg1 being the primary key
+   of a new journal event or journal comment.
+
+-- people then subscribe to events, subject to privacy/stalking rules.
+   just because an event fires, doesn't mean it's subscribable.
+   a subscription has its own arg1/arg2, but those s_arg1/s_arg2 have
+   nothing to do with the e_arg1/e_arg2.
+
+....
+
