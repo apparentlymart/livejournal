@@ -1,3 +1,4 @@
+
 package LJ::CProd;
 # Mostly abstract base class for LiveJournal's contextual product/prodding.
 # Let users know about new/old features they can use but never have.
@@ -180,14 +181,16 @@ sub wrap_content {
 
     my $w = delete $opts{'width'} || 300;
     my $alllink = $class->ack_link("$LJ::SITEROOT/didyouknow/", "View All");
-    $alllink =~ s/\"/\'/g;
     my $nextlink = "<a href='#' id='CProd_nextbutton'></a>";
 
     return qq{
-<div id='CProd_box'>
-<div style='width: $\{w\}px; border: 3px solid #6699cc;'>
-<div style='padding: 5px'>$content</div>
-<div style='background: #abccec; padding: 4px; font-family: arial; font-size: 8pt;'><img src='http://www.lj.bradfitz.com/img/goat-hiding.png' width='30' height='31' align='absmiddle' />What else has LJ been hiding? $alllink $nextlink<div style='display: none;' id='CProd_class'>$htmlclass</div></div></div></div>
+    <div id='CProd_box'>
+      <div style='width: ${w}px; border: 3px solid #6699cc;'>
+        <div style='padding: 5px'>$content</div>
+        <div style='background: #abccec; padding: 4px; font-family: arial; font-size: 8pt;'><img src='http://www.lj.bradfitz.com/img/goat-hiding.png' width='30' height='31' align='absmiddle' />What else has LJ been hiding? $alllink $nextlink</div>
+        <div style='display: none;' id='CProd_class'>$htmlclass</div>
+      </div>
+    </div>
     };
 }
 

@@ -56,10 +56,19 @@ CProd.gotData = function (res) {
 CProd.attachNextClickListener = function () {
   var nextBtn = $("CProd_nextbutton");
   if (!nextBtn) return;
+  if (nextBtn.insertAdjacentText) { // IE
+      nextBtn.insertAdjacentHTML('BeforeBegin','|&nbsp;');
+  } else {
+      var oRange = document.createRange() ;
+      oRange.setStartBefore( nextBtn ) ;
+      var oFragment = oRange.createContextualFragment( '|&nbsp;' );
+      nextBtn.parentNode.insertBefore( oFragment, nextBtn ) ;
+  }
+
   nextBtn.innerHTML = 'Next';
   DOM.addEventListener(nextBtn, "click", CProd.next.bindEventListener());
 }
 
-DOM.addEventListener(this, "load", function () {
+DOM.addEventListener(window, "load", function () {
   CProd.attachNextClickListener();
 });
