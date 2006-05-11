@@ -26,5 +26,36 @@ ESN (Event/Subscription/Notification) works like this:
 ....
 
 
-See also:
-http://community.livejournal.com/lj_dev/714888.html
+How events get processed async by TheSchwartz (reliable async job system)
+=========================================================================
+
+-- web context logs one job  "LJ::Worker::FiredEvent" with params:
+       journalid, etypeid, arg1, arg2
+   (just enough to recreate the event)
+
+-- async worker picks it up and ultimately has to create a new job
+   for each matching subscription, over all clusters.
+
+   logically this can be split into the following steps:
+
+       foreach cluster,
+       find all subscriptions for that jid/eventtypeid (including wildcards),
+       filter those down to those that match,
+       enqueue jobs for each subscription to fire those
+
+-- but we take some fast paths.  given the following steps:
+
+   [FiredEvent] -> [FindSubsPerCluster] -> [MatchesFilter] -> [ProcessSub]
+
+   we can often skip from FireEvent directly to N x ProcessSub jobs if
+   a) clusters are up, b) N is small.  note that TheSchwartz has a
+   "replace_with" operation that atomically closes on jobs as
+   completely iff N other jobs take its place.  we use this operation
+   to expand the original 1 FiredEvent job into N ProcessSub jobs,
+   where N is potentially huge, in the hundreds of thousands to more.
+   in those non-fast paths is where we split the job into parts at a
+   much slower rate, utilizing all 4 steps above, not jumping from
+   FiredEvent to ProcessSub.  also, if any cluster is down, we always
+   split the job into FindSubsPerCluster * # clusters.
+
+

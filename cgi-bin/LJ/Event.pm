@@ -310,6 +310,8 @@ sub all_classes {
 package LJ::Event::ForTest2;
 use base 'LJ::Event';
 
+
+# this is phase1 of processing.  see doc/notes/esn-design.txt
 package LJ::Worker::FiredEvent;
 use base 'TheSchwartz::Worker';
 
