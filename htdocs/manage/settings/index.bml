@@ -1,5 +1,5 @@
 <?page
-title=>Viewing Options
+title=><?_code return $ML{'.title'} _code?>
 body<=
 <?_code
     LJ::set_active_crumb('editsettings');
@@ -13,7 +13,6 @@ _code?>
 
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
-    BML::set_language_scope('/editinfo.bml');
     my $remote = LJ::get_remote();
     return LJ::bad_input("You must be logged in to edit your profile.")
         unless $remote;
@@ -70,16 +69,16 @@ _code?>
         $ret .= LJ::form_auth();
 
         # personal information
-        $ret .= "<div class='section_head'> Viewing Options</div>\n";
+        $ret .= "<div class='section_head'> $ML{'.section.viewing'}</div>\n";
         $ret .= "<table class='field_block'>\n";
 
         ### Control Strip
         if ($LJ::USE_CONTROL_STRIP) {
-            $ret .= "<tr><td class='field_name'>Navigation strip:</td>\n";
-            $ret .= "<td><span class='helper'>The navigation strip is a small toolbar that can show at the top of your journal/community, as well as when you're browsing other journals and communities. It provides:</span><br />\n";
-            $ret .= "<ul class='helper'><li>Quick links to your own journal, the update page, and your Friends page</li>\n";
-            $ret .= "<li>Options appropriate to the page you are looking at, i.e. filters for your Friends page</li>\n";
-            $ret .= "<li>Community management options and more</li></ul>\n";
+            $ret .= "<tr><td class='field_name'>$ML{'.fn.navstrip'}:</td>\n";
+            $ret .= "<td><span class='helper'>$ML{'.navstrip'}</span><br />\n";
+            $ret .= "<ul class='helper'><li>$ML{'.navstrip.list1'}</li>\n";
+            $ret .= "<li>$ML{'.navstrip.list2'}</li>\n";
+            $ret .= "<li>$ML{'.navstrip.list3'}</li></ul>\n";
 
             $ret .= "<table style='margin-left: 30px; margin-bottom: 20px'>\n";
             $ret .= "<tr><td colspan='2'><b style='white-space: nowrap'>$ML{'.navstrip.choose'}</b></td></tr>";
@@ -96,10 +95,10 @@ _code?>
             $ret .= "<tr><td><b>$ML{'.navstrip.options'}</b></td></tr>\n";
             my $view_checked = $u->prop('view_control_strip') ? 1 : 0;
             $ret .= "<tr><td>". LJ::html_check({ 'name' => "view_control_strip", 'selected' => $view_checked, 'id' => "view_control_strip" });
-            $ret .= " <label for='view_control_strip'>Always see the navigation strip when you view any journal or community</label></td></tr>";
+            $ret .= " <label for='view_control_strip'>$ML{'.navstrip.options.see'}</label></td></tr>";
             my $show_checked = $u->prop('show_control_strip') ? 1 : 0;
             $ret .= "<tr><td>". LJ::html_check({ 'name' => "show_control_strip", 'selected' => $show_checked, 'id' => "show_control_strip" });
-            $ret .= " <label for='show_control_strip'>Always show the navigation strip to anyone who views your journal or community</label></td></tr>";
+            $ret .= " <label for='show_control_strip'>$ML{'.navstrip.options.show'}</label></td></tr>";
             $ret .= "</table>";
 
             $ret .= "</td></tr>\n";
@@ -110,66 +109,63 @@ _code?>
         ($maxwidth, $maxheight) = ($1, $2) if ($u->{'opt_imagelinks'} =~ m/^(\d+)\|(\d+)$/);
         my $is_stock = {'320|240' => 1, '640|480' => 1, '0|0' => 1, '' => 1}->{$u->{'opt_imagelinks'}};
         my $extra = $is_stock ? '' : BML::ml('.imagelinks.size.custom', {'width' => $maxwidth, 'height' => $maxheight});
-        $ret .= "<tr><td class='field_name'>Image placeholders:</td>\n<td>";
+        $ret .= "<tr><td class='field_name'>$ML{'.fn.imageplace'}:</td>\n<td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_imagelinks_on', 'id' => 'opt_imagelinks_on',
                                  'selected' => $u->{'opt_imagelinks'} });
-        $ret .= " Use image placeholders for ";
+        $ret .= " $ML{'.imageplace'} ";
         $ret .= LJ::html_select({'name' => 'opt_imagelinks', 'selected' => $u->{'opt_imagelinks'}},
-                                 '0|0', 'all images',
-                                 '320|240', 'medium images (over 320x240)',
-                                 '640|480', 'large images (over 640x480)',
+                                 '0|0', BML::ml('.imageplace.all'),
+                                 '320|240', BML::ml('.imageplace.medium'),
+                                 '640|480', BML::ml('.imageplace.large'),
                                  $extra ? ("$maxwidth|$maxheight", $extra) : ());
-        $ret.= "<br /><span class='helper'>Placeholders replace inline images with links, and are useful if you are browsing at work or over a slow connection.</span>";
+        $ret.= "<br /><span class='helper'>$ML{'.imageplace.text'}</span>";
         $ret .= "</td></tr>\n";
 
         # Comment pages
-        $ret .= "<tr><td class='field_name'>Comment pages:</td>\n<td>";
+        $ret .= "<tr><td class='field_name'>$ML{'.fn.commentpage'}:</td>\n<td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_stylemine', 'id' => 'opt_stylemine',
                                  'value' => 1, 'selected' => $u->{'opt_stylemine'} });
-        $ret .= " View comment pages in your own journal style<br />\n";
-        $ret .= "<span class='helper'>When you follow a comment link from your Friends page, you can view that
-            comment page in your own journal style.</span>";
+        $ret .= " $ML{'.commentpage'}<br />\n";
+        $ret .= "<span class='helper'>$ML{'.commentpage.text'}</span>";
         $ret .= "</td></tr>\n";
         $ret .= "</table>\n";
 
         # personal information
-        $ret .= "<div class='section_head'>LJ notifications</div>\n";
+        $ret .= "<div class='section_head'>$ML{'.section.notify'}</div>\n";
         $ret .= "<table class='field_block'>\n";
 
         # LJ News
-        $ret .= "<tr><td class='field_name'>LiveJournal news:</td>\n<td>";
+        $ret .= "<tr><td class='field_name'>$ML{'.fn.ljnews'}:</td>\n<td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'allow_getljnews', 'id' => 'allow_getljnews',
                                  'selected' => $u->{'allow_getljnews'} eq 'Y' });
-        $ret .= " Receive email copies of LiveJournal news posts";
+        $ret .= " $ML{'.ljnews'}";
         $ret .= "</td></tr>\n";
 
         # Birthday reminders
-        $ret .= "<tr><td class='field_name'>Birthday reminders:</td>\n<td>";
+        $ret .= "<tr><td class='field_name'>$ML{'.fn.bdayreminder'}:</td>\n<td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_bdaymail', 'id' => 'opt_bdaymail',
                                  'selected' => $u->{'opt_bdaymail'} });
-        $ret .= " Receive email reminders for your friends' birthdays<br />";
-        $ret .= "<span class='helper'>Note: This feature is currently disabled, but may be re-enabled in the future.</span>";
+        $ret .= " $ML{'.bdayreminder'}<br />";
+        $ret .= "<span class='helper'>$ML{'.bdayreminder.note'}</span>";
         $ret .= "</td></tr>\n";
 
         $ret .= "</table>\n";
 
         # Additional privacy options
-        $ret .= "<div class='section_head'>Additional privacy options</div>\n";
+        $ret .= "<div class='section_head'>$ML{'.section.privacy'}</div>\n";
         $ret .= "<table class='field_block'>\n";
 
         # Search Inclusion
-        $ret .= "<tr><td class='field_name'>Search inclusion:</td>\n<td>";
+        $ret .= "<tr><td class='field_name'>$ML{'.fn.searchincl'}:</td>\n<td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_blockrobots', 'id' => 'opt_blockrobots',
                                  'selected' => $u->{'opt_blockrobots'} });
-        $ret .= " Minimize your journal's inclusion in search engine results<br />";
-        $ret .= "<span class='helper'>We can instruct search engines not to include your journal entries in their search
-            results. Not all search engines recognize this request; if you do not want a journal
-            entry to show up in search results, then make sure it is posted private or Friends-only.</span>";
+        $ret .= " $ML{'.searchincl'}<br />";
+        $ret .= "<span class='helper'>$ML{'.searchincl.text'}</span>";
         $ret .= "</td></tr>\n";
 
         # Weblogs.com
         unless ($LJ::DISABLED{'weblogs_com'}) {
-            $ret .= "<tr><td class='field_name'>Weblogs.com:</td>\n<td>";
+            $ret .= "<tr><td class='field_name'>$ML{'.fn.weblogscom'}:</td>\n<td>";
             $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_weblogscom', 'id' => 'opt_weblogscom',
                                      'selected' => $u->{'opt_weblogscom'} });
             $ret .= " <span class='helper'>Notify Weblogs.com when I post new public entries</span><br />\n";
@@ -250,7 +246,7 @@ _code?>
         my $base = $u->journal_base;
         my $profile_url = $u->profile_url;
         return "<?h1 $ML{'.success.header'} h1?>\n" .
-               "<?p Your viewing options have been updated. p?>";
+               "<?p $ML{'.success.text'} p?>";
     }
 
     # should never happen

@@ -3708,6 +3708,82 @@ The site team
 
 /manage/pubkey.bml.whatis=Don't know what a public key is? Need help exporting your key? Read more about <a [[aoptspgp]]>PGP</a> and <a [[aoptsgpg]]>GPG</a>.
 
+/manage/settings/index.bml.bdayreminder=Receive email reminders for your friends' birthdays
+
+/manage/settings/index.bml.bdayreminder.note=Note: This feature is currently disabled, but may be re-enabled in the future.
+
+/manage/settings/index.bml.commentpage=View comment pages in your own journal style
+
+/manage/settings/index.bml.commentpage.text=When you follow a comment link from your Friends page, you can view that comment page in your own journal style.
+
+/manage/settings/index.bml.finished.save_button=Save Changes
+
+/manage/settings/index.bml.fn.bdayreminder=Birthday reminders
+
+/manage/settings/index.bml.fn.commentpage=Comment pages
+
+/manage/settings/index.bml.fn.imageplace=Image placeholders
+
+/manage/settings/index.bml.fn.ljnews=LiveJournal news
+
+/manage/settings/index.bml.fn.navstrip=Navigation strip
+
+/manage/settings/index.bml.fn.searchincl=Search inclusion
+
+/manage/settings/index.bml.fn.Weblogscom=Weblogs.com
+
+/manage/settings/index.bml.imagelinks.size.custom=Custom: use placeholders for images larger than [[width]]x[[height]]
+
+/manage/settings/index.bml.imageplace=Use image placeholders for
+
+/manage/settings/index.bml.imageplace.all=all images
+
+/manage/settings/index.bml.imageplace.large=large images (over 640x480)
+
+/manage/settings/index.bml.imageplace.medium=medium images (over 320x240)
+
+/manage/settings/index.bml.imageplace.text=Placeholders replace inline images with links, and are useful if you are browsing at work or over a slow connection.
+
+/manage/settings/index.bml.intro=Customize your viewing, notification and additional privacy options.
+
+/manage/settings/index.bml.ljnews=Receive email copies of LiveJournal news posts
+
+/manage/settings/index.bml.navstrip=The navigation strip is a small toolbar that can show at the top of your journal/community, as well as when you're browsing other journals and communities. It provides:
+
+/manage/settings/index.bml.navstrip.choose=Choose the navigation strip color you prefer:
+
+/manage/settings/index.bml.navstrip.choose.dark=Dark gray
+
+/manage/settings/index.bml.navstrip.choose.light=Light gray
+
+/manage/settings/index.bml.navstrip.options=Navigation strip display options:
+
+/manage/settings/index.bml.navstrip.options.see=Always see the navigation strip when you view any journal or community
+
+/manage/settings/index.bml.navstrip.options.show=Always show the navigation strip to anyone who views your journal or community
+
+/manage/settings/index.bml.navstrip.list1=Quick links to your own journal, the update page, and your Friends page
+
+/manage/settings/index.bml.navstrip.list2=Options appropriate to the page you are looking at, i.e. filters for your Friends page
+
+/manage/settings/index.bml.navstrip.list3=Community management options and more
+
+/manage/settings/index.bml.searchincl=Minimize your journal's inclusion in search engine results
+
+/manage/settings/index.bml.searchincl.text=We can instruct search engines not to include your journal entries in their search results. Not all search engines recognize this request; if you do not want a journal entry to show up in search results, then make sure it is posted private or Friends-only.
+
+/manage/settings/index.bml.section.notify=LJ notifications
+
+/manage/settings/index.bml.section.privacy=Additional privacy options
+
+/manage/settings/index.bml.section.viewing=Viewing Options
+
+/manage/settings/index.bml.success.header=Success!
+
+/manage/settings/index.bml.success.text=Your viewing options have been updated.
+
+/manage/settings/index.bml.title=Viewing Options
+
 /manage/siteopts.bml.btn.lang=Switch Language
 
 /manage/siteopts.bml.btn.scheme=Switch Scheme
