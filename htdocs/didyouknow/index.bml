@@ -6,7 +6,7 @@
     my $u = LJ::get_remote()
         or return BML::redirect("$LJ::SITEROOT/login.bml");
 
-    $title = "Did you know?";
+    $title = $ML{'.title'};
     $body = "";
 
     $body .= "<form method='post'>";
@@ -47,7 +47,7 @@
         ($applicable ? $ap_list : $na_list) .= "<tr valign='top'><td>
 <div style='width: 300px; border: 3px solid #6699cc;'><div style='padding: 5px'>$render</div></div>
 </td><td>
-<input type='submit' name='noshow:$class' value=\"Don't show me this again\" />
+<input type='submit' name='noshow:$class' value=\"$ML{'.noshow.text'}\" />
 </td></tr>\n";
     }
 
@@ -57,10 +57,10 @@
         $body .= "<?h1 $head h1?><?p $para p?><table cellpadding='4'>$$content</table>\n";
     };
 
-    $dumpsec->("Applicable Products", "These features/promos only apply if you have the right account level and you haven't already used the feature before.", \$ap_list);
-    $dumpsec->("Not Applicable Products", "These are the things where you either don't have the right account level, or you already know the stuff.", \$na_list);
+    $dumpsec->("$ML{'.available.title'}", "$ML{'.available.subtitle'}", \$ap_list);
+    $dumpsec->("$ML{'.notdisplayed.title'}", "$ML{'.notdisplayed.subtitle'}", \$na_list);
 
-    $body .= "Sorry, you know everything.  We have no tips for you.  If this makes you sad, you can restore everything: <input type='submit' name='restoreall' value=\"Restore All\" />" unless $ct;
+    $body .= "$ML{'.notips.text'} <input type='submit' name='restoreall' value=\"$ML{'.notips.value'}\" />" unless $ct;
     $body .= "</form>";
 
     return;

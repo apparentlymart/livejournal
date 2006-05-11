@@ -10,12 +10,11 @@ sub applicable {
 sub render {
     my ($class, $u) = @_;
     my $user = LJ::ljuser($u);
-    my $link = $class->clickthru_link("$LJ::SITEROOT/manage/settings/","navigation strip");
-    
-    return qq{
-        <p>If only there was a way to display a handy collection of links when viewing a journal... oh wait there is! 
-        Why not enable the $link?</p>
-    };
+    my $link = $class->clickthru_link("$LJ::SITEROOT/manage/settings/",
+                                      BML::ml('controlstrip.link'));
+
+    return "<p>".BML::ml('controlstrip.text', { "link" => $link }) . "</p>";
+
 }
 
 1;
