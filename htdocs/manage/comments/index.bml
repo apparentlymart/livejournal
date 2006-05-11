@@ -80,7 +80,7 @@ _code?>
                                   "reg" => BML::ml(".security.visibility.regusers"),
                                   "friends" => BML::ml(".security.visibility.friends") );
         $ret .= "<ul class='helper'><li>$ML{'.disablecomment1'}</li>\n";
-        $ret .= "<li>$ML{'.disablecomment2'}</li></ul>\n";
+        $ret .= "<li>$ML{'.disablecomment2.1'}</li></ul>\n";
         $ret .= "</td></tr>\n";
 
         # Comment screening

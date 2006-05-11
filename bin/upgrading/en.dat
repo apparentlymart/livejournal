@@ -2903,7 +2903,7 @@ The site team
 
 /manage/comments/index.bml.disablecomment1=If you disable commenting, all past comments on your journal will be hidden. They will re-appear if you enable commenting again.
 
-/manage/comments/index.bml.disablecomment2=If you wish to disable commenting for only some for your entries, adjust the "Screen Comments" setting on each entry.
+/manage/comments/index.bml.disablecomment2.1=If you wish to disable commenting for only some for your entries, adjust the "Comments Settings" setting on each entry.
 
 /manage/comments/index.bml.emailnotify=Receive email notifications when others comment
 
