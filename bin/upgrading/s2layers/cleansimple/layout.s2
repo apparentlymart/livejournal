@@ -24,6 +24,17 @@ propgroup presentation {
       des = "Style of Lines Around Day Headings";
       values = "solid|Solid|dashed|Dashed|dotted|Dotted|double|Double|hidden|Invisible";
   }
+  property string opt_entryborder_size {
+      des = "Size of Lines Around Entries";
+      note = "Don't forget to include the units, e.g. px";
+  }
+  property string opt_entryborder_style {
+      des = "Style of Lines Around Entries";
+      values = "solid|Solid|dashed|Dashed|dotted|Dotted|double|Double|hidden|Invisible";
+  }
+  property string opt_img_btwn_comments {
+    des = "URL to an image to be used between your comment links";
+  }
   property use page_recent_items;
   property use page_friends_items;
   property string opt_margin_size {
@@ -43,6 +54,9 @@ set opt_navbar_pos = "left";
 set opt_content_width = 100;
 set opt_content_alignment = "center";
 set opt_daylines_style = "dashed";
+set opt_entryborder_size = "";
+set opt_entryborder_style = "hidden";
+set opt_img_btwn_comments = "";
 set opt_margin_size = "50px";
 set view_entry_disabled = false;
 set show_entrynav_icons = true;
@@ -88,6 +102,10 @@ propgroup colors {
   property Color meta_color {
       des = "Color of entry headings and meta-information";
       s1color = "page_text_em";
+  }
+  property Color border_color {
+      des = "Color of lines around entries";
+      note = "If you don't set a line size and style, this won't show up.";
   }
   property Color link_color {
       des = "Link color";
@@ -140,6 +158,7 @@ set body_bgcolor = "#6666cc";
 set entry_bgcolor = "#ffffff";
 set entry_fgcolor = "#000000";
 set meta_color = "#c00000";
+set border_color = "#000000";
 set link_color = "#000050";
 set vlink_color = "#500050";
 set alink_color = "#00ffff";
@@ -393,6 +412,7 @@ text-align: justify;
 }
 .entry {
 clear: both;
+border: $*opt_entryborder_size $*opt_entryborder_style $*border_color;
 }
 .entrytext p, .entrytext ul, .entrytext ol, .entrytext table {
 margin-top: 0.5em;
@@ -752,7 +772,11 @@ function CommentInfo::print() {
             $this->print_readlink();
         }
         if ($.show_postlink and $.show_readlink) {
-            " | ";
+            if (clean_url($*opt_img_btwn_comments) != "") {
+                """ <img src="$*opt_img_btwn_comments" alt="" /> """;
+            } else {
+                " | ";
+            }
         }
         if ($.show_postlink) {
             $this->print_postlink();
