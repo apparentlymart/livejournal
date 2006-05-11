@@ -554,11 +554,6 @@ _code?>
                       'status' => ($email_changed && $u->{'status'} eq "A") ? "T" : $u->{'status'},
                       'has_bio' => $has_bio,
                       'allow_getljnews' => $POST{'allow_getljnews'} ? "Y" : "N",
-                      'opt_showtalklinks' => $POST{'opt_showtalklinks'} ? "Y" : "N",
-                      'opt_gettalkemail' => $POST{'opt_gettalkemail'} ? "Y" : "N",
-                      'opt_htmlemail' => $POST{'opt_htmlemail'} ? "Y" : "N",
-                      'opt_mangleemail' => $POST{'opt_mangleemail'} ? "Y" : "N",
-                      'opt_whocanreply' => $POST{'opt_whocanreply'},
                       'txtmsg_status' => $txtmsg_status,
                       );
 
@@ -566,8 +561,7 @@ _code?>
 
         if ($POST{'allow_contactshow'}) {
             $update{'allow_contactshow'} = "Y";
-            $update{'allow_contactshow'} = "F" if $POST{'allow_contactshow'} eq "F";
-            $update{'allow_contactshow'} = "R" if $POST{'allow_contactshow'} eq "R";
+            $update{'allow_contactshow'} = $POST{'allow_contactshow'} if $POST{'allow_contactshow'} =~ m/^(N|R|Y|F)$/;
         } else {
             $update{'allow_contactshow'} = "N";
         }
@@ -710,9 +704,9 @@ _code?>
         my $profile_url = $u->profile_url;
         return "<?h1 $ML{'.success.header'} h1?>\n" .
                "<?p <table width='100%'>\n<tr valign='top'>\n<td>" .
-               "Your profile has been updated.</td>".
-               "<td style='padding-left: 2em'>" . 
-               LJ::CProd->full_box_for($u, width => 300) . 
+               "$ML{'.success.text'}</td>".
+               "<td style='padding-left: 2em'>" .
+               LJ::CProd->full_box_for($u, width => 300) .
                "</td></tr></table> p?>";
     }
 
