@@ -5,7 +5,7 @@ use strict;
 ######################## override this stuff ######################
 
 our $_box_class = "CProd";
-our $_box_description = 'Were you aware?';
+our $_box_description = 'Frank the Goat thinks you might enjoy these features';
 our $_box_name = "<a href='$LJ::SITEROOT/didyouknow'>Did You Know?</a>";
 
 sub generate_content {
