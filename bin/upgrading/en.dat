@@ -389,9 +389,9 @@ p?>
 
 /community/members.bml.error.nocomm=Community not found.
 
-/community/members.bml.error.notcomm=[[user]] is not a community.
-
 /community/members.bml.error.notactive=Account is not active: <b>[[user]]</b>
+
+/community/members.bml.error.notcomm=[[user]] is not a community.
 
 /community/members.bml.error.nouser=User does not exist: <b>[[user]]</b>
 
@@ -1288,9 +1288,7 @@ on your layout, changing this setting discards all other edits you may have made
 
 /customize/preview.bml.title=Layout Previews
 
-/customize/preview.bml.unavailable<<
-Layout currently unavailable to the selected account.
-.
+/customize/preview.bml.unavailable=Layout currently unavailable to the selected account.
 
 /customize/preview.bml.viewmore=View More Previews
 
@@ -1347,6 +1345,20 @@ whether to allow <em>all</em>, <em>registered users</em>, or
 /delcomment.bml.success.spam=Additionally, the administrators of this site have been notified that this comment was spam.  Thank you for your report.
 
 /delcomment.bml.title=Delete Comment
+
+/didyouknow/index.bml.available.subtitle=Frank the Goat thinks you might enjoy these features:
+
+/didyouknow/index.bml.available.title=Currently Available
+
+/didyouknow/index.bml.noshow.text=Don't show me this again
+
+/didyouknow/index.bml.notdisplayed.subtitle=You may already know this stuff, or else it doesn't apply to your current account level.
+
+/didyouknow/index.bml.notdisplayed.title=Not Displayed
+
+/didyouknow/index.bml.notips.text=Sorry, you know everything.  We have no tips for you.  If this makes you sad, you can restore everything:
+
+/didyouknow/index.bml.notips.value=Restore All
 
 /directory.bml.browse.country.desc=Select a country to read journals from that country...
 
@@ -2112,11 +2124,11 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /friends/add.bml.add.header=Success
 
-/friends/add.bml.add.text2=User [[ljuser]] was added to your friends list. You can view your friends page <a [[aopts]]>here</a>.
-
 /friends/add.bml.add.text.community2=Community [[ljuser]] was added to your friends list. You can view updates on your <a [[aopts]]>friends page</a>.
 
 /friends/add.bml.add.text.feed2=The [[ljuser]] feed was added to your friends list. You can view updates on your <a [[aopts]]>friends page</a>.
+
+/friends/add.bml.add.text2=User [[ljuser]] was added to your friends list. You can view your friends page <a [[aopts]]>here</a>.
 
 /friends/add.bml.add.title=Friend Added!
 
@@ -2320,9 +2332,9 @@ then be accessible to the new group.
 
 /friends/filter.bml.editgroups=If you want to edit your friends groups, go to the [[link]] page.
 
-/friends/filter.bml.error.nogroups2=You cannot filter your friends list because you must first <a [[aopts]]>set up your friends groups</a>.
-
 /friends/filter.bml.error.nogroups.header=No Groups Defined
+
+/friends/filter.bml.error.nogroups2=You cannot filter your friends list because you must first <a [[aopts]]>set up your friends groups</a>.
 
 /friends/filter.bml.reset=Clear
 
@@ -2821,26 +2833,6 @@ You may wish to go back and try again, selecting fewer interests to add.
 
 /lostinfo_do.bml.error1.text=You never used that email address with this account or it was never validated.
 
-/lostinfo_do.bml.lostpasswordmail.reset<<
-A request has been made at [[lostinfolink]] to reset
-the password to the [[sitename]] account associated with this email address.
-
-The account information is:
-
-          Username: [[username]]
-     Email Address: [[emailadr]]
-
-Follow this link to confirm the request to reset your password:
-
-    [[resetlink]]
-
-If you did not make this request, please ignore this email and your password
-will not be reset.
-
-Regards,
-[[sitename]] Team
-.
-
 /lostinfo_do.bml.lostpasswordmail.part1<<
 *** This is an automated email.  You do not need to respond to it. ***
 
@@ -2883,6 +2875,26 @@ The site team
 [[rooturl]]
 .
 
+/lostinfo_do.bml.lostpasswordmail.reset<<
+A request has been made at [[lostinfolink]] to reset
+the password to the [[sitename]] account associated with this email address.
+
+The account information is:
+
+          Username: [[username]]
+     Email Address: [[emailadr]]
+
+Follow this link to confirm the request to reset your password:
+
+    [[resetlink]]
+
+If you did not make this request, please ignore this email and your password
+will not be reset.
+
+Regards,
+[[sitename]] Team
+.
+
 /lostinfo_do.bml.lostpasswordmail.subject=Lost Password
 
 /lostinfo_do.bml.password_mailed.text=Success.  Your password has been mailed.
@@ -2899,19 +2911,15 @@ The site team
 
 /manage/comments/index.bml.commentnotify.text=You can receive e-mail copies of comments you make while logged in under your username. You will not receive copies of any anonymous comments you make.
 
-/manage/comments/index.bml.enablecommenting=Enable commenting from
-
 /manage/comments/index.bml.disablecomment1=If you disable commenting, all past comments on your journal will be hidden. They will re-appear if you enable commenting again.
 
 /manage/comments/index.bml.disablecomment2.1=If you wish to disable commenting for only some for your entries, adjust the "Comments Settings" setting on each entry.
 
 /manage/comments/index.bml.emailnotify=Receive email notifications when others comment
 
+/manage/comments/index.bml.enablecommenting=Enable commenting from
+
 /manage/comments/index.bml.finished.save_button=Save Changes
-
-/manage/comments/index.bml.formatplain=Plain Text
-
-/manage/comments/index.bml.formathtml=HTML Formatted
 
 /manage/comments/index.bml.fn.commentnotify=Comment notifications
 
@@ -2926,6 +2934,10 @@ The site team
 /manage/comments/index.bml.fn.screening=Comment screening
 
 /manage/comments/index.bml.fn.unban=Unban users
+
+/manage/comments/index.bml.formathtml=HTML Formatted
+
+/manage/comments/index.bml.formatplain=Plain Text
 
 /manage/comments/index.bml.intro=Set your comment preferences below.
 
@@ -2951,8 +2963,6 @@ The site team
 
 /manage/comments/index.bml.security.visibility.friends=Friends only
 
-/manage/comments/index.bml.security.visibility.regusers=Registered users
-
 /manage/comments/index.bml.security.visibility.nobody=Nobody
 
 /manage/comments/index.bml.security.visibility.noone=No one
@@ -2960,6 +2970,8 @@ The site team
 /manage/comments/index.bml.security.visibility.notfriends=Anyone not on my Friends list
 
 /manage/comments/index.bml.security.visibility.notmember=Anyone who's not a member
+
+/manage/comments/index.bml.security.visibility.regusers=Registered users
 
 /manage/comments/index.bml.success.header=Success!
 
@@ -2971,11 +2983,11 @@ The site team
 
 /manage/emailpost.bml.addresses.header=Allowed sender addresses
 
-/manage/emailpost.bml.addresses.text=Only the addresses listed below are allowed to post to your account via the email gateway. If no addresses are listed, posting via the email gateway will be disabled for your account. Marked addresses will receive errors if there are any to send.
-
 /manage/emailpost.bml.addresses.table.address=Address:
 
 /manage/emailpost.bml.addresses.table.errors=Send errors?
+
+/manage/emailpost.bml.addresses.text=Only the addresses listed below are allowed to post to your account via the email gateway. If no addresses are listed, posting via the email gateway will be disabled for your account. Marked addresses will receive errors if there are any to send.
 
 /manage/emailpost.bml.error.invalidemail=Invalid email address: [[email]]
 
@@ -3464,8 +3476,6 @@ The site team
 
 /manage/moodthemes.bml.mood.deleted=[[mood]] was deleted and will now be represented by its parent.
 
-/manage/moodthemes.bml.mood.setpic=[[mood]] is set to [[url]].
-
 /manage/moodthemes.bml.mood.label.height=Height:
 
 /manage/moodthemes.bml.mood.label.inherit=Inherit from [[mood]]:
@@ -3473,6 +3483,8 @@ The site team
 /manage/moodthemes.bml.mood.label.url=URL:
 
 /manage/moodthemes.bml.mood.label.width=Width:
+
+/manage/moodthemes.bml.mood.setpic=[[mood]] is set to [[url]].
 
 /manage/moodthemes.bml.saved=Changes have been successfully saved.
 
@@ -3542,13 +3554,13 @@ The site team
 
 /manage/profile/index.bml.error.email.no_space=No spaces are allowed in an email address. If you're on AOL, remember that your Internet Email address is your screen name with all spaces removed, followed by <b>@aol.com</b>
 
-/manage/profile/index.bml.error.invalidname2=Your name contains invalid characters. You must visit the <a [[aopts]]><b>conversion page</b></a> to convert it to Unicode.
-
 /manage/profile/index.bml.error.invalidbio=Your stored bio contains invalid characters. You must visit the <a [[aopts]]><b>conversion page</b></a> to convert it to Unicode.
 
-/manage/profile/index.bml.error.locale.invalid_country=Somehow you selected an invalid country.
+/manage/profile/index.bml.error.invalidname2=Your name contains invalid characters. You must visit the <a [[aopts]]><b>conversion page</b></a> to convert it to Unicode.
 
 /manage/profile/index.bml.error.locale.country_ne_state=You specified United States as your country, but you typed in a non-US state in the "other state" field.
+
+/manage/profile/index.bml.error.locale.invalid_country=Somehow you selected an invalid country.
 
 /manage/profile/index.bml.error.locale.state_ne_country=You specified a non-US country but selected a US state.
 
@@ -3560,9 +3572,9 @@ The site team
 
 /manage/profile/index.bml.error.noname=Your name is a required field.  At least provide your first name, or a nickname or handle.
 
-/manage/profile/index.bml.error.txt.require_provider=If you're going to use text messaging, you must select your service provider. If yours is not listed, please contact us with information about how your service's text messaging feature works so we can add support for it.
-
 /manage/profile/index.bml.error.txt.require.number=If you're going to use text messaging, you must enter your phone number.
+
+/manage/profile/index.bml.error.txt.require_provider=If you're going to use text messaging, you must select your service provider. If yours is not listed, please contact us with information about how your service's text messaging feature works so we can add support for it.
 
 /manage/profile/index.bml.error.year.notenoughdigits=Invalid birthday year.  Enter a 4-digit year.
 
@@ -3574,9 +3586,9 @@ The site team
 
 /manage/profile/index.bml.fn.city=City
 
-/manage/profile/index.bml.fn.country=Country
-
 /manage/profile/index.bml.fn.contactinfo=Who can view your contact info?
+
+/manage/profile/index.bml.fn.country=Country
 
 /manage/profile/index.bml.fn.email=Primary email
 
@@ -3604,23 +3616,23 @@ The site team
 
 /manage/profile/index.bml.fn.state=State
 
+/manage/profile/index.bml.fn.timezone=Timezone
+
 /manage/profile/index.bml.fn.txtmsg=Allow text messaging from
 
 /manage/profile/index.bml.fn.txtnum=Full phone number
 
-/manage/profile/index.bml.fn.timezone=Timezone
+/manage/profile/index.bml.fn.userpic=Default userpic
 
 /manage/profile/index.bml.fn.zip=ZIP Code
 
-/manage/profile/index.bml.fn.userpic=Default userpic
-
 /manage/profile/index.bml.friendof=Show other users who have friended you, but you have not friended
 
-/manage/profile/index.bml.gender.unspecified=(Unspecified)
+/manage/profile/index.bml.gender.female=Female
 
 /manage/profile/index.bml.gender.male=Male
 
-/manage/profile/index.bml.gender.female=Female
+/manage/profile/index.bml.gender.unspecified=(Unspecified)
 
 /manage/profile/index.bml.im=IM/Chat
 
@@ -3676,9 +3688,9 @@ The site team
 
 /manage/profile/index.bml.success.text=Your profile has been updated.
 
-/manage/profile/index.bml.title=Edit Profile
-
 /manage/profile/index.bml.timezone.select=(Select your timezone)
+
+/manage/profile/index.bml.title=Edit Profile
 
 /manage/profile/index.bml.txt.details=(<a [[aopts]]>details</a>)
 
@@ -3756,17 +3768,17 @@ The site team
 
 /manage/settings/index.bml.navstrip.choose.light=Light gray
 
-/manage/settings/index.bml.navstrip.options=Navigation strip display options:
-
-/manage/settings/index.bml.navstrip.options.see=Always see the navigation strip when you view any journal or community
-
-/manage/settings/index.bml.navstrip.options.show=Always show the navigation strip to anyone who views your journal or community
-
 /manage/settings/index.bml.navstrip.list1=Quick links to your own journal, the update page, and your Friends page
 
 /manage/settings/index.bml.navstrip.list2=Options appropriate to the page you are looking at, i.e. filters for your Friends page
 
 /manage/settings/index.bml.navstrip.list3=Community management options and more
+
+/manage/settings/index.bml.navstrip.options=Navigation strip display options:
+
+/manage/settings/index.bml.navstrip.options.see=Always see the navigation strip when you view any journal or community
+
+/manage/settings/index.bml.navstrip.options.show=Always show the navigation strip to anyone who views your journal or community
 
 /manage/settings/index.bml.searchincl=Minimize your journal's inclusion in search engine results
 
@@ -4436,6 +4448,8 @@ The [[sitename]] Team
 
 /styles/create_do.bml.title=Create Style
 
+/styles/index.bml.about.header=Creating and Using Custom Styles
+
 /styles/index.bml.about3<<
 <p>This page gives you links to where you can create, edit, and delete
 customized S1 styles. If you're using the S2 style system, go to
@@ -4445,8 +4459,6 @@ customized S1 styles. If you're using the S2 style system, go to
 <a [[aopts2]]>the style documentation page</a> and in
 <a [[aopts3]]>the developer area</a>.</p>
 .
-
-/styles/index.bml.about.header=Creating and Using Custom Styles
 
 /styles/index.bml.nav.browse=Style Browser
 
@@ -4921,13 +4933,13 @@ Please either clear the user textbox or select the relevant posting mode and try
 
 /talkpost_do.bml.success.message2=Your comment has been added. You can view it <a [[aopts]]>here</a>.
 
-/talkpost_do.bml.success.screened.comm2=Your comment has been added. According to this community's settings, it was marked as screened, and will be visible only to you and the community maintainers until they choose to unscreen it. You can view your comment <a [[aopts]]>here</a>.
-
 /talkpost_do.bml.success.screened.comm.anon2=Your anonymous comment has been added. According to this community's settings, it was marked as screened, and will be visible only to the community maintainers until they choose to unscreen it. You can go back to the comment thread <a [[aopts]]>here</a>.
 
-/talkpost_do.bml.success.screened.user2=Your comment has been added. According to this journal's settings, it was marked as screened, and will be visible only to you and the journal's owner until the owner chooses to unscreen it. You can view your comment <a [[aopts]]>here</a>.
+/talkpost_do.bml.success.screened.comm2=Your comment has been added. According to this community's settings, it was marked as screened, and will be visible only to you and the community maintainers until they choose to unscreen it. You can view your comment <a [[aopts]]>here</a>.
 
 /talkpost_do.bml.success.screened.user.anon2=Your anonymous comment has been added. According to this journal's settings, it was marked as screened, and will be visible only to the journal's owner until the owner chooses to unscreen it. You can go back to the comment thread <a [[aopts]]>here</a>.
+
+/talkpost_do.bml.success.screened.user2=Your comment has been added. According to this journal's settings, it was marked as screened, and will be visible only to you and the journal's owner until the owner chooses to unscreen it. You can view your comment <a [[aopts]]>here</a>.
 
 /talkpost_do.bml.success.title=Success
 
@@ -5581,11 +5593,11 @@ This could be because: <ol>
 
 /userinfo.bml.title=User Info
 
-/userinfo.bml.title1=Profile
-
 /userinfo.bml.title.communityinfo=Community Info
 
 /userinfo.bml.title.syndicated=Syndicated Account
+
+/userinfo.bml.title1=Profile
 
 /userinfo.bml.userinfo.body2=Below is user information for [[username]]. If you are this user, you can edit your information (or choose what information is considered public) at the <a [[aopts]]>Edit Personal Information</a> page.
 
@@ -5594,6 +5606,10 @@ This could be because: <ol>
 Actionlink=[[[link]]]
 
 Backlink=[<a href="[[link]]">&lt;&lt;</a> [[text]]]
+
+birthday.link=birthdays
+
+birthday.text=[[user]], did you know you can surprise your friends by actually remembering their birthdays?  LJ keeps a list of your friends' [[link]] for you.
 
 bml.badcontent.body=One or more errors occurred processing your request. Please go back, correct the necessary information, and submit your data again.
 
@@ -5615,6 +5631,10 @@ bml.requirepost=As a security precaution, the page you're viewing requires a POS
 
 btn.search=Search
 
+controlstrip.link=Navigation Strip
+
+controlstrip.text=9 out of 10 LJ users prefer the [[link]].  (OK we made that up, but you should check it out anyway.)
+
 crumb.acctstatus=Account Status
 
 crumb.addfriend=Add Friend
@@ -5626,6 +5646,8 @@ crumb.advcustomize=Customize Advanced S2 Settings
 crumb.advsearch=Advanced Search
 
 crumb.birthdays=Birthdays
+
+crumb.changeemail=Change Email Address
 
 crumb.changepass=Change Password
 
@@ -5695,6 +5717,8 @@ crumb.friendsfilter=Friends Filter
 
 crumb.home=Home
 
+crumb.invitefriend=Invite a Friend
+
 crumb.joincomm=Join Community
 
 crumb.latestposts=Latest Posts
@@ -5715,6 +5739,8 @@ crumb.manage=Manage Accounts
 
 crumb.managecommunity=Community Management
 
+crumb.managelogins=Manage Your Login Sessions
+
 crumb.meme=Meme Tracker
 
 crumb.memories=Memorable Posts
@@ -5725,9 +5751,13 @@ crumb.moderate=Community Moderation
 
 crumb.modify=Journal Settings
 
+crumb.moodeditor=Custom Mood Theme Editor
+
 crumb.moodlist=Mood Viewer
 
 crumb.news=News
+
+crumb.nudgefriend=Nudge a Friend
 
 crumb.phonepostsettings=Voice Post
 
@@ -6108,6 +6138,10 @@ error.usernamelong=Username is too long, 15 character max.
 
 error.username_notfound=Username not found.
 
+feeds.link=syndicated feeds
+
+feeds.text=Apparently there's good content outside of LJ?  We'll let you add [[link]] to your Friends page so you never have to leave.
+
 Help=Help
 
 label.screening.all=All comments
@@ -6146,7 +6180,11 @@ label.warning=Warning:
 
 langname.en=English
 
+ljfeedback.text=Like to vote?  Join [[journal]] where we post polls and surveys that help influence and improve LJ.
+
 ljlib.pageofpages=Page [[page]] of [[total]]
+
+ljspotlight.text=We're keeping an eye out for interesting communities.  Check out [[journal]] to see some great ways people use LJ.
 
 lostinfo.head=Forget something?
 
@@ -6249,6 +6287,10 @@ poll.security.none=None
 poll.submit=Submit Poll
 
 poll.viewanswers=View Answers
+
+polls.link=poll creation wizard
+
+polls.text=[[user]], did you know you can post a poll in your journal using our [[link]]?  Find out what your friends <em>really</em> think about that shirt you bought last week. [[poll]]
 
 portal.bdays.count.des=By default, the 5 friends with the soonest birthdays are shown.
 
@@ -6427,12 +6469,6 @@ talk.spellcheck=Check spelling during preview
 
 talk.threadlink=Thread
 
-tos.error=You must read and agree to the terms of service.
-
-tos.haveread=I have read and agree to the Terms of Service.
-
-tos.mustread=Before continuing you must read and agree to the <a [[aopts]]>Terms of Service.</a>
-
 time.ago.day=[[num]] [[?num|day|days]] ago
 
 time.ago.hour=[[num]] [[?num|hour|hours]] ago
@@ -6445,9 +6481,19 @@ time.ago.second=[[num]] [[?num|second|seconds]] ago
 
 time.ago.week=[[num]] [[?num|week|weeks]] ago
 
+tos.error=You must read and agree to the terms of service.
+
+tos.haveread=I have read and agree to the Terms of Service.
+
+tos.mustread=Before continuing you must read and agree to the <a [[aopts]]>Terms of Service.</a>
+
 Username=Username
 
 userpic.inactive=Inactive
+
+userpic.link=userpic
+
+userpic.text=[[user]], this is what you currently look like to your friends: [[empty]]<br />Boooring. Be classy and upload a [[link]].
 
 web.authas.btn=Switch
 
@@ -6541,17 +6587,17 @@ web.controlstrip.status.other=You are viewing [[user]]
 
 web.controlstrip.status.personal=You are viewing [[user]]'s journal
 
-web.controlstrip.status.personalfriendspage=You are viewing [[user]]'s Friends Page
-
 web.controlstrip.status.personalfriendsfriendspage=You are viewing [[user]]'s Friends of Friends Page
+
+web.controlstrip.status.personalfriendspage=You are viewing [[user]]'s Friends Page
 
 web.controlstrip.status.syn=You are viewing the feed [[user]]
 
 web.controlstrip.status.watcher=You are watching [[user]]
 
-web.controlstrip.status.yourfriendspage=You are viewing your Friends Page
-
 web.controlstrip.status.yourfriendsfriendspage=You are viewing your Friends of Friends Page
+
+web.controlstrip.status.yourfriendspage=You are viewing your Friends Page
 
 web.controlstrip.status.yourjournal=You are viewing your journal
 
