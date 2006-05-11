@@ -130,6 +130,10 @@ body<=
                 return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.no_core_parent'} p?>"
                     unless $coreid;
 
+                # delete s2_style and replace it with a new
+                # or existing style for this layout
+                $u->set_prop("s2_style", '');
+
                 my $uniq = (split("/", $lay->{'uniq'}))[0] || $lay->{'s2lid'};
                 my $usersty = LJ::S2::load_user_styles($u);
                 foreach (keys %$usersty) {
@@ -139,7 +143,7 @@ body<=
 
                     # now we have to populate %style from this style, but not core and layout,
                     # as those are reset below
-                    my $stylay = LJ::S2::get_style_layers($u, $u->{'s2_style'});
+                    my $stylay = LJ::S2::get_style_layers($u, $u->prop('s2_style'));
                     foreach my $layer (qw(user theme i18nc i18n)) {
                         $style{$layer} = exists $stylay->{$layer} ? $stylay->{$layer} : 0;
                     }
@@ -148,7 +152,8 @@ body<=
                 }
 
                 # no existing style found, create a new one
-                unless ($u->prop('s2_style')) {
+                my $s2style = LJ::S2::load_style($u->prop('s2_style'));
+                unless ($s2style && $s2style->{'userid'} == $u->{'userid'}) {
                     $style{'user'} = $style{'theme'} = $style{'i18nc'} = $style{'i18n'} = 0;
                 }
 
@@ -171,40 +176,40 @@ body<=
 
             } elsif ($POST{'save:langcode'}) {
                 my $langcode = $POST{'s2_langcode'};
-                return BML::redirect("/customize/?journal=$u->{'user'}")
-                    if $langcode eq 'custom';
-                my @langs = LJ::S2::get_layout_langs($pub, $style{'layout'});
-                my ($i18n, $i18nc);
-                # scan for an i18n user layer
-                foreach (values %$userlay) {
-                    last if
-                        $_->{'b2lid'} == $style{'layout'} &&
-                        $_->{'type'} eq 'i18n' &&
-                        $_->{'langcode'} eq $langcode &&
-                        ($i18n = $_->{'s2lid'});
+                unless ($langcode eq 'custom') {
+                    my @langs = LJ::S2::get_layout_langs($pub, $style{'layout'});
+                    my ($i18n, $i18nc);
+                    # scan for an i18n user layer
+                    foreach (values %$userlay) {
+                        last if
+                            $_->{'b2lid'} == $style{'layout'} &&
+                            $_->{'type'} eq 'i18n' &&
+                            $_->{'langcode'} eq $langcode &&
+                            ($i18n = $_->{'s2lid'});
+                    }
+                    # scan for i18nc public layer and i18n layer if necessary
+                    foreach (values %$pub) {
+                        last if $i18nc && $i18n;
+                        next if
+                            ! $i18nc &&
+                            $_->{'type'} eq 'i18nc' &&
+                            $_->{'langcode'} eq $langcode &&
+                            ($i18nc = $_->{'s2lid'});
+                        next if
+                            ! $i18n &&
+                            $_->{'b2lid'} == $style{'layout'} &&
+                            $_->{'type'} eq 'i18n' &&
+                            $_->{'langcode'} eq $langcode &&
+                            ($i18n = $_->{'s2lid'});
+                    }
+                    $style{'i18nc'} = $i18nc;
+                    $style{'i18n'} = $i18n;
+                    LJ::cmize::s2_implicit_style_create($u);
                 }
-                # scan for i18nc public layer and i18n layer if necessary
-                foreach (values %$pub) {
-                    last if $i18nc && $i18n;
-                    next if
-                        ! $i18nc &&
-                        $_->{'type'} eq 'i18nc' &&
-                        $_->{'langcode'} eq $langcode &&
-                        ($i18nc = $_->{'s2lid'});
-                    next if
-                        ! $i18n &&
-                        $_->{'b2lid'} == $style{'layout'} &&
-                        $_->{'type'} eq 'i18n' &&
-                        $_->{'langcode'} eq $langcode &&
-                        ($i18n = $_->{'s2lid'});
-                }
-                $style{'i18nc'} = $i18nc;
-                $style{'i18n'} = $i18n;
-
-                LJ::cmize::s2_implicit_style_create($u);
             } elsif ($POST{'save:moodtheme'}) {
                 # special case for moodthemes, which is caught below
             } else {
+
                 # Layout
                 my $layid = $POST{'s2_layoutid'};
                 my $lay = $pub->{$layid};
@@ -217,7 +222,12 @@ body<=
                 return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.no_core_parent'} p?>"
                     unless $coreid;
 
+                # delete s2_style and replace it with a new
+                # or existing style for this layout
+                $u->set_prop("s2_style", '');
+
                 my $uniq = (split("/", $lay->{'uniq'}))[0] || $lay->{'s2lid'};
+
                 my $usersty = LJ::S2::load_user_styles($u);
                 foreach (keys %$usersty) {
                     next unless $usersty->{$_} eq "wizard-$uniq";
@@ -226,7 +236,8 @@ body<=
 
                     # now we have to populate %style from this style, but not core and layout,
                     # as those are reset below
-                    my $stylay = LJ::S2::get_style_layers($u, $u->{'s2_style'});
+                    my $stylay = LJ::S2::get_style_layers($u, $u->prop('s2_style'));
+
                     foreach my $layer (qw(user theme i18nc i18n)) {
                         $style{$layer} = exists $stylay->{$layer} ? $stylay->{$layer} : 0;
                     }
@@ -235,7 +246,8 @@ body<=
                 }
 
                 # no existing style found, create a new one
-                unless ($u->prop('s2_style')) {
+                my $s2style = LJ::S2::load_style($u->prop('s2_style'));
+                unless ($s2style && $s2style->{'userid'} == $u->{'userid'}) {
                     $style{'user'} = $style{'theme'} = $style{'i18nc'} = $style{'i18n'} = 0;
                 }
 
@@ -253,36 +265,35 @@ body<=
 
                 # Language
                 my $langcode = $POST{'s2_langcode'};
-                return BML::redirect("/customize/style.bml?authas=$u->{'user'}")
-                    if $langcode eq 'custom';
-                my @langs = LJ::S2::get_layout_langs($pub, $style{'layout'});
-                my ($i18n, $i18nc);
-                # scan for an i18n user layer
-                foreach (values %$userlay) {
-                    last if
-                        $_->{'b2lid'} == $style{'layout'} &&
-                        $_->{'type'} eq 'i18n' &&
-                        $_->{'langcode'} eq $langcode &&
-                        ($i18n = $_->{'s2lid'});
+                unless ($langcode eq 'custom') {
+                    my @langs = LJ::S2::get_layout_langs($pub, $style{'layout'});
+                    my ($i18n, $i18nc);
+                    # scan for an i18n user layer
+                    foreach (values %$userlay) {
+                        last if
+                            $_->{'b2lid'} == $style{'layout'} &&
+                            $_->{'type'} eq 'i18n' &&
+                            $_->{'langcode'} eq $langcode &&
+                            ($i18n = $_->{'s2lid'});
+                    }
+                    # scan for i18nc public layer and i18n layer if necessary
+                    foreach (values %$pub) {
+                        last if $i18nc && $i18n;
+                        next if
+                            ! $i18nc &&
+                            $_->{'type'} eq 'i18nc' &&
+                            $_->{'langcode'} eq $langcode &&
+                            ($i18nc = $_->{'s2lid'});
+                        next if
+                            ! $i18n &&
+                            $_->{'b2lid'} == $style{'layout'} &&
+                            $_->{'type'} eq 'i18n' &&
+                            $_->{'langcode'} eq $langcode &&
+                            ($i18n = $_->{'s2lid'});
+                    }
+                    $style{'i18nc'} = $i18nc;
+                    $style{'i18n'} = $i18n;
                 }
-                # scan for i18nc public layer and i18n layer if necessary
-                foreach (values %$pub) {
-                    last if $i18nc && $i18n;
-                    next if
-                        ! $i18nc &&
-                        $_->{'type'} eq 'i18nc' &&
-                        $_->{'langcode'} eq $langcode &&
-                        ($i18nc = $_->{'s2lid'});
-                    next if
-                        ! $i18n &&
-                        $_->{'b2lid'} == $style{'layout'} &&
-                        $_->{'type'} eq 'i18n' &&
-                        $_->{'langcode'} eq $langcode &&
-                        ($i18n = $_->{'s2lid'});
-                }
-                $style{'i18nc'} = $i18nc;
-                $style{'i18n'} = $i18n;
-
                 LJ::cmize::s2_implicit_style_create($u, %style);
             }
             $saved_msg .= "Your settings have been saved. <a href='" . $u->journal_base() . "'>View your Journal</a>.";

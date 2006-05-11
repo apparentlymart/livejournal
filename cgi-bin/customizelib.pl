@@ -91,8 +91,9 @@ sub s2_implicit_style_create
     my $pub     = LJ::S2::get_public_layers();
     my $userlay = LJ::S2::get_layers_of_user($u);
 
-    # create new style if necessary
-    unless ($u->prop('s2_style')) {
+    # Create new style if necessary
+    my $s2style = LJ::S2::load_style($u->prop('s2_style'));
+    unless ($s2style && $s2style->{'userid'} eq $u->{'userid'}) {
         my $layid = $style{'layout'};
         my $lay = $pub->{$layid} || $userlay->{$layid};
         my $uniq = (split("/", $lay->{'uniq'}))[0] || $lay->{'s2lid'};
