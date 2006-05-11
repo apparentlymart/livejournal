@@ -56,10 +56,10 @@ CProd.gotData = function (res) {
 CProd.attachNextClickListener = function () {
   var nextBtn = $("CProd_nextbutton");
   if (!nextBtn) return;
-
+  nextBtn.innerHTML = 'Next';
   DOM.addEventListener(nextBtn, "click", CProd.next.bindEventListener());
 }
 
-DOM.addEventListener(window, "load", function () {
+DOM.addEventListener(this, "load", function () {
   CProd.attachNextClickListener();
 });
