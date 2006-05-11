@@ -3420,6 +3420,200 @@ The site team
 
 /manage/moodthemes.bml.yourthemes.nothemes=You have not yet made any custom mood themes.
 
+/manage/profile/index.bml.birthday=Show your birthday to other users
+
+/manage/profile/index.bml.birthday.year.opt=year is optional
+
+/manage/profile/index.bml.chat.aolim=AOL IM
+
+/manage/profile/index.bml.chat.gizmo=Gizmo Project
+
+/manage/profile/index.bml.chat.googletalk=Google Talk
+
+/manage/profile/index.bml.chat.icquin=ICQ UIN
+
+/manage/profile/index.bml.chat.jabber=Jabber
+
+/manage/profile/index.bml.chat.msnusername=MSN Username
+
+/manage/profile/index.bml.chat.skype=Skype
+
+/manage/profile/index.bml.chat.yahooid=Yahoo! ID
+
+/manage/profile/index.bml.country.choose=Pick a country
+
+/manage/profile/index.bml.email=Email
+
+/manage/profile/index.bml.email.change=Change email
+
+/manage/profile/index.bml.email.opt.both=Both (primary email + LiveJournal email)
+
+/manage/profile/index.bml.email.opt.dont=Don't display my email address
+
+/manage/profile/index.bml.email.opt.lj=LiveJournal email only
+
+/manage/profile/index.bml.email.opt.no_show=Don't show email address
+
+/manage/profile/index.bml.email.opt.prime=Primary email only
+
+/manage/profile/index.bml.email.opt.show=Show email address
+
+/manage/profile/index.bml.error.day.notinmonth=Invalid day for that month.
+
+/manage/profile/index.bml.error.day.outofrange=Invalid birthday day.  Enter a day from 1-31.
+
+/manage/profile/index.bml.error.email.lj_domain=You cannot enter an @[[domain]] email address. Enter your real address in that field. If you're a paid user, your [[user]]@[[domain]] address will forward to your real address. To choose which email address (or both) is displayed publicly, see the option below the "Show your Contact Information" option.
+
+/manage/profile/index.bml.error.email.none=You must provide your email address
+
+/manage/profile/index.bml.error.email.no_space=No spaces are allowed in an email address. If you're on AOL, remember that your Internet Email address is your screen name with all spaces removed, followed by <b>@aol.com</b>
+
+/manage/profile/index.bml.error.invalidname2=Your name contains invalid characters. You must visit the <a [[aopts]]><b>conversion page</b></a> to convert it to Unicode.
+
+/manage/profile/index.bml.error.invalidbio=Your stored bio contains invalid characters. You must visit the <a [[aopts]]><b>conversion page</b></a> to convert it to Unicode.
+
+/manage/profile/index.bml.error.locale.invalid_country=Somehow you selected an invalid country.
+
+/manage/profile/index.bml.error.locale.country_ne_state=You specified United States as your country, but you typed in a non-US state in the "other state" field.
+
+/manage/profile/index.bml.error.locale.state_ne_country=You specified a non-US country but selected a US state.
+
+/manage/profile/index.bml.error.locale.zip_ne_state=Your zip code does not match the state you specified. Either correct the information, or erase one or both of the state and zip code fields.
+
+/manage/profile/index.bml.error.locale.zip_requires_us=You entered a zip code but you did not select United States as your country. We only collect zip code information about people in the US. Please go back and remove the zip code or select United States as your country.
+
+/manage/profile/index.bml.error.month.outofrange=Invalid birthday month.  Enter a month from 1-12.  (Jan-Dec)
+
+/manage/profile/index.bml.error.noname=Your name is a required field.  At least provide your first name, or a nickname or handle.
+
+/manage/profile/index.bml.error.txt.require_provider=If you're going to use text messaging, you must select your service provider. If yours is not listed, please contact us with information about how your service's text messaging feature works so we can add support for it.
+
+/manage/profile/index.bml.error.txt.require.number=If you're going to use text messaging, you must enter your phone number.
+
+/manage/profile/index.bml.error.year.notenoughdigits=Invalid birthday year.  Enter a 4-digit year.
+
+/manage/profile/index.bml.error.year.outofrange=Invalid birthday year.
+
+/manage/profile/index.bml.fn.bio=Tell other users about yourself or your journal. If you want to display graphics, counters, or other HTML, you can enter it here.
+
+/manage/profile/index.bml.fn.birthday=Birthday
+
+/manage/profile/index.bml.fn.city=City
+
+/manage/profile/index.bml.fn.country=Country
+
+/manage/profile/index.bml.fn.contactinfo=Who can view your contact info?
+
+/manage/profile/index.bml.fn.email=Primary email
+
+/manage/profile/index.bml.fn.emaildisplay=Display
+
+/manage/profile/index.bml.fn.friendof="Friend of" list
+
+/manage/profile/index.bml.fn.gender=Gender
+
+/manage/profile/index.bml.fn.interests=List all your interests, separated by commas, to allow other users to find you using the Interest Search.
+
+/manage/profile/index.bml.fn.link=Link
+
+/manage/profile/index.bml.fn.mutualfriends=Mutual friends
+
+/manage/profile/index.bml.fn.name=Name
+
+/manage/profile/index.bml.fn.province=or non-US State/province/territory
+
+/manage/profile/index.bml.fn.schools=Schools
+
+/manage/profile/index.bml.fn.servprov=Service Provider
+
+/manage/profile/index.bml.fn.sitename=Name
+
+/manage/profile/index.bml.fn.state=State
+
+/manage/profile/index.bml.fn.txtmsg=Allow text messaging from
+
+/manage/profile/index.bml.fn.txtnum=Full phone number
+
+/manage/profile/index.bml.fn.timezone=Timezone
+
+/manage/profile/index.bml.fn.zip=ZIP Code
+
+/manage/profile/index.bml.fn.userpic=Default userpic
+
+/manage/profile/index.bml.friendof=Show other users who have friended you, but you have not friended
+
+/manage/profile/index.bml.gender.unspecified=(Unspecified)
+
+/manage/profile/index.bml.gender.male=Male
+
+/manage/profile/index.bml.gender.female=Female
+
+/manage/profile/index.bml.im=IM/Chat
+
+/manage/profile/index.bml.interest.line1=Short single-word phrases are best.
+
+/manage/profile/index.bml.interest.line2=Rule of thumb: You should be able to put the interest in the sentence "I like ________".
+
+/manage/profile/index.bml.interest.line3=When referring to nouns, use the plural form for consistency, e.g.: "I like DVDs" instead of "I like DVD".
+
+/manage/profile/index.bml.interest.line4=<font color='#009000'><b>GOOD</b></font> Example: <b>biking, snow skiing, computers, dvds, mp3s, cheese</b>
+
+/manage/profile/index.bml.interest.line5=<font color='#ff0000'><b>BAD</b></font> Example: <b>I like lots of bands and watching movies and talking to friends and going to clubs.</b>  That sort of stuff goes in your bio below.
+
+/manage/profile/index.bml.intro=Here's where you fill out your Profile page. You don't have to display all of your info to everyone - check out the options below. You may also want to edit your <a href='$LJ::SITEROOT/manage/comments/'>comment settings</a> or your <a href='$LJ::SITEROOT/manage/settings/'>viewing options</a>.
+
+/manage/profile/index.bml.location=Show your location to other users
+
+/manage/profile/index.bml.mutualfriends=Show friends who have also friended you
+
+/manage/profile/index.bml.name=Your name will be displayed on your Profile and in search results
+
+/manage/profile/index.bml.optional=Optional
+
+/manage/profile/index.bml.save_button=Save Changes
+
+/manage/profile/index.bml.schools=Show your schools to
+
+/manage/profile/index.bml.schools.manage=Manage schools
+
+/manage/profile/index.bml.section.bio=Bio
+
+/manage/profile/index.bml.section.contact=Contact Info
+
+/manage/profile/index.bml.section.friends=Friends
+
+/manage/profile/index.bml.section.id=Identity
+
+/manage/profile/index.bml.section.interests=Interests
+
+/manage/profile/index.bml.section.location=Location
+
+/manage/profile/index.bml.section.textmsg=Text Messaging
+
+/manage/profile/index.bml.section.web=Web Page
+
+/manage/profile/index.bml.security.visibility.everybody=Everybody
+
+/manage/profile/index.bml.security.visibility.friends=Friends only
+
+/manage/profile/index.bml.security.visibility.nobody=Nobody
+
+/manage/profile/index.bml.success.header=Success!
+
+/manage/profile/index.bml.success.text=Your profile has been updated.
+
+/manage/profile/index.bml.title=Edit Profile
+
+/manage/profile/index.bml.timezone.select=(Select your timezone)
+
+/manage/profile/index.bml.txt.details=(<a [[aopts]]>details</a>)
+
+/manage/profile/index.bml.userpic=This is the image that will display on your Profile. It will also represent you in your entries and comments, unless you select a different one.
+
+/manage/profile/index.bml.userpic.change=Change default userpic
+
+/manage/profile/index.bml.zip.usonly=5 digit ZIP code; US residents only
+
 /manage/pubkey.bml.error.invalidkey=That doesn't appear to be a valid PGP/GPG key.
 
 /manage/pubkey.bml.error.notconfigured=This site is not configured with PGP support.
