@@ -2297,9 +2297,11 @@ sub enter_comment {
             "Please report this.  The error is: <b>$errstr</b>");
     }
 
-    my $cmtobj = LJ::Comment->new($journalu, jtalkid => $jtalkid);
-    LJ::Event::JournalNewComment->new($cmtobj)->fire unless $LJ::DISABLED{esn};
-    LJ::Event::UserNewComment   ->new($cmtobj)->fire unless $LJ::DISABLED{esn};
+    unless ($LJ::DISABLED{esn}) {
+        my $cmtobj = LJ::Comment->new($journalu, jtalkid => $jtalkid);
+        LJ::Event::JournalNewComment->new($cmtobj)->fire;
+        LJ::Event::UserNewComment   ->new($cmtobj)->fire;
+    }
 
     LJ::MemCache::incr([$journalu->{'userid'}, "talk2ct:$journalu->{'userid'}"]);
 
@@ -2952,11 +2954,6 @@ sub post_comment {
 
         # send some emails
         mail_comments($entryu, $journalu, $parent, $comment, $item);
-
-        # log the event
-        # this function doesn't do anything.
-        # LJ::event_register($dbcm, "R", $journalu->{'userid'}, $ditemid);
-        # FUTURE: log events type 'T' (thread) up to root
     }
 
     # the caller wants to know the comment's talkid.
