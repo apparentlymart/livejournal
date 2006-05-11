@@ -1119,8 +1119,8 @@ sub postevent
     my $entry = LJ::Entry->new($uowner, jitemid => $jitemid, anum => $anum);
     $res->{'url'} = $entry->url;
 
-    LJ::Event::JournalNewEntry->new($entry)->fire;
-    LJ::Event::UserNewEntry   ->new($entry)->fire;
+    LJ::Event::JournalNewEntry->new($entry)->fire unless $LJ::DISABLED{esn};
+    LJ::Event::UserNewEntry   ->new($entry)->fire unless $LJ::DISABLED{esn};
     return $res;
 }
 
@@ -1906,7 +1906,7 @@ sub editfriends
             LJ::memcache_kill($friendid, 'friendofs');
 
             LJ::Event::Befriended->new(LJ::load_userid($friendid),
-                                       LJ::load_userid($userid))->fire;
+                                       LJ::load_userid($userid))->fire  unless $LJ::DISABLED{esn};
         }
     }
 
