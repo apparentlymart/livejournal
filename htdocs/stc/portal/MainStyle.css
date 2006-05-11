@@ -138,7 +138,7 @@ img {
 	padding: 2px;
 	height: 15px;
 	}
-	
+
 .PortalPatternedTitleBar span {
 	display: table-cell;
 	vertical-align: middle;
@@ -249,6 +249,10 @@ img {
 	padding: 0 0 0 5px;
 	_width: 120px;
 	}
+
+.PortalBoxTitleText a, .PortalBoxTitleText a:visited, .PortalBoxTitleText a:link, .PortalBoxTitleText a:active {
+        color: #FFFFFF !important;
+}
 
 .PortalBoxMoveButtons {
         display: inline;
