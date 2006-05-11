@@ -448,7 +448,7 @@ body<=
         $ret .= LJ::html_select({ 'id' => 's2_themeid', 'name' => 's2_themeid', 'selected' => $style{'theme'}, },
                                 '0' => $ML{'.s2.customize.themes.default'}, @themes);
         $ret .= "<noscript> " . LJ::html_submit('save:theme', $ML{'.change'}) . " </noscript>";
-        $ret .= " (<a href=\"/customize/themes.bml?journal=$u->{'user'}\" target='samples'>Samples</a>)</div></div>";
+        $ret .= " (<a id='s2_themeid_preview_link' href=\"/customize/themes.bml?journal=$u->{'user'}\" target='samples'>Samples</a>)</div></div>";
         $ret .= "</fieldset>";
     }
 

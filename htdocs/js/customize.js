@@ -66,6 +66,7 @@ function s2_layout_update_children() {
     $('display_form').style.cursor = "wait";
     var authas = $('authas:user').value;
     var s2_layoutid = $('s2_layoutid').options[$('s2_layoutid').options.selectedIndex].value;
+    $('s2_themeid_preview_link').href = "/customize/themes.bml?journal=" + authas + "&layout=" + s2_layoutid;
     HTTPReq.getJSON({
            url: "/tools/endpoints/gets2layoutchildren.bml?user=" + authas + "&s2_layoutid=" + s2_layoutid,
            onData: function (data) {
