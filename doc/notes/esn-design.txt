@@ -25,3 +25,6 @@ ESN (Event/Subscription/Notification) works like this:
 
 ....
 
+
+See also:
+http://community.livejournal.com/lj_dev/714888.html
