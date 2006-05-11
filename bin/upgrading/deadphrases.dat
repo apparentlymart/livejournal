@@ -109,6 +109,8 @@ general /manage/index.bml.userpictures.header
 general /manage/index.bml.information.emailpost
 general /manage/index.bml.information.emailpost.about
 
+general /manage/profile/index.bml.intro
+
 general /modify.bml.btn.proceed
 general /modify.bml.journalstatus.about
 general /modify.bml.journalstatus.head

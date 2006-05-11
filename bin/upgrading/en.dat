@@ -2895,6 +2895,80 @@ The site team
 
 /lostinfo_do.bml.username_mailed.title=Username mailed!
 
+/manage/comments/index.bml.commentnotify=Receive email copies of comments you make
+
+/manage/comments/index.bml.commentnotify.text=You can receive e-mail copies of comments you make while logged in under your username. You will not receive copies of any anonymous comments you make.
+
+/manage/comments/index.bml.enablecommenting=Enable commenting from
+
+/manage/comments/index.bml.disablecomment1=If you disable commenting, all past comments on your journal will be hidden. They will re-appear if you enable commenting again.
+
+/manage/comments/index.bml.disablecomment2=If you wish to disable commenting for only some for your entries, adjust the "Screen Comments" setting on each entry.
+
+/manage/comments/index.bml.emailnotify=Receive email notifications when others comment
+
+/manage/comments/index.bml.finished.save_button=Save Changes
+
+/manage/comments/index.bml.formatplain=Plain Text
+
+/manage/comments/index.bml.formathtml=HTML Formatted
+
+/manage/comments/index.bml.fn.commentnotify=Comment notifications
+
+/manage/comments/index.bml.fn.emailformat=Email format
+
+/manage/comments/index.bml.fn.emailnotify=Email notifications
+
+/manage/comments/index.bml.fn.enablecomments=Enable comments
+
+/manage/comments/index.bml.fn.iplog=IP address log
+
+/manage/comments/index.bml.fn.screening=Comment screening
+
+/manage/comments/index.bml.fn.unban=Unban users
+
+/manage/comments/index.bml.intro=Set your comment preferences below.
+
+/manage/comments/index.bml.logip=Log IPs for replies from
+
+/manage/comments/index.bml.logip.text=You can set this option to log the IP addresses of commenters to your journal.
+
+/manage/comments/index.bml.screen=Screen comments from
+
+/manage/comments/index.bml.screen.text=Screening allows you to read comments before publishing them for others to see.
+
+/manage/comments/index.bml.section.banned=Banned users
+
+/manage/comments/index.bml.section.journalcomments=Comments on your journal
+
+/manage/comments/index.bml.section.makecomments=Comments you make
+
+/manage/comments/index.bml.security.visibility.anon=Anonymous commenters
+
+/manage/comments/index.bml.security.visibility.everybody=Everybody
+
+/manage/comments/index.bml.security.visibility.everyone=Everyone
+
+/manage/comments/index.bml.security.visibility.friends=Friends only
+
+/manage/comments/index.bml.security.visibility.regusers=Registered users
+
+/manage/comments/index.bml.security.visibility.nobody=Nobody
+
+/manage/comments/index.bml.security.visibility.noone=No one
+
+/manage/comments/index.bml.security.visibility.notfriends=Anyone not on my Friends list
+
+/manage/comments/index.bml.security.visibility.notmember=Anyone who's not a member
+
+/manage/comments/index.bml.success.header=Success!
+
+/manage/comments/index.bml.success.text=Your comment settings have been updated.
+
+/manage/comments/index.bml.title=Comment Settings
+
+/manage/comments/index.bml.unban=You have the following users banned from posting in your journal. Check the checkbox by their username to remove the ban.
+
 /manage/emailpost.bml.addresses.header=Allowed sender addresses
 
 /manage/emailpost.bml.addresses.text=Only the addresses listed below are allowed to post to your account via the email gateway. If no addresses are listed, posting via the email gateway will be disabled for your account. Marked addresses will receive errors if there are any to send.
@@ -3560,7 +3634,7 @@ The site team
 
 /manage/profile/index.bml.interest.line5=<font color='#ff0000'><b>BAD</b></font> Example: <b>I like lots of bands and watching movies and talking to friends and going to clubs.</b>  That sort of stuff goes in your bio below.
 
-/manage/profile/index.bml.intro=Here's where you fill out your Profile page. You don't have to display all of your info to everyone - check out the options below. You may also want to edit your <a href='$LJ::SITEROOT/manage/comments/'>comment settings</a> or your <a href='$LJ::SITEROOT/manage/settings/'>viewing options</a>.
+/manage/profile/index.bml.intro1=Here's where you fill out your Profile page. You don't have to display all of your info to everyone - check out the options below. You may also want to edit your <a [[aopts1]]>comment settings</a> or your <a [[aopts2]]>viewing options</a>.
 
 /manage/profile/index.bml.location=Show your location to other users
 

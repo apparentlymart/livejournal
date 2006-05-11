@@ -89,8 +89,8 @@ _code?>
         $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
         $ret .= "</form> p?>\n\n";
 
-        $ret .= "<?p " . BML::ml(".intro", { 'aopts1' => "href=\"$LJ::SITEROOT/manage/comments/\"",
-                                             'aopts2' => "href=\"$LJ::SITEROOT/manage/settings/\""} )
+        $ret .= "<?p " . BML::ml(".intro1", { 'aopts1' => "href='$LJ::SITEROOT/manage/comments/'",
+                                             'aopts2' => "href='$LJ::SITEROOT/manage/settings/'"} )
                 . " p?>";
 
         $ret .= "</div>\n";

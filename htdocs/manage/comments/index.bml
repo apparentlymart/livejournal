@@ -1,5 +1,5 @@
 <?page
-title=>Comment Settings
+title=><?_code return $ML{'.title'} _code?>
 body<=
 <?_code
     LJ::set_active_crumb('editcomments');
@@ -13,7 +13,6 @@ _code?>
 
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
-    BML::set_language_scope('/editinfo.bml');
     my $remote = LJ::get_remote();
     return LJ::bad_input("You must be logged in to edit your profile.")
         unless $remote;
@@ -58,7 +57,7 @@ _code?>
         $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
         $ret .= "</form> p?>\n\n";
 
-        $ret .= "<?p Set your comment preferences below. p?>";
+        $ret .= "<?p $ML{'.intro'} p?>";
         $ret .= "</div>\n";
 
         $ret.= "<div class='clear'></div>\n";
@@ -68,69 +67,67 @@ _code?>
         $ret .= LJ::form_auth();
 
         # personal information
-        $ret .= "<div class='section_head'> Comments on your journal</div>\n";
+        $ret .= "<div class='section_head'> $ML{'.section.journalcomments'}</div>\n";
         $ret .= "<table class='field_block'>\n";
 
         # Enable comments
-        $ret .= "<tr><td class='field_name'>Enable comments:</td>\n<td>";
+        $ret .= "<tr><td class='field_name'>$ML{'.fn.enablecomments'}:</td>\n<td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_showtalklinks', 'id' => 'opt_showtalklinks',
                                  'selected' => $u->{'opt_showtalklinks'} eq 'Y' });
-        $ret .= " Enable commenting from: ";
+        $ret .= " $ML{'.enablecommenting'}: ";
         $ret .= LJ::html_select({ 'name' => 'opt_whocanreply', 'selected' => $u->{'opt_whocanreply'} },
-                                  "all" => "Everyone",
-                                  "reg" => "Registered users",
+                                  "all" => BML::ml(".security.visibility.everybody"),
+                                  "reg" => BML::ml(".security.visibility.regusers"),
                                   "friends" => BML::ml(".security.visibility.friends") );
-        $ret .= "<ul class='helper'><li>If you disable commenting, all pasts comments on your journal will be hidden. They will re-appear if you enable commenting again.</li>\n";
-        $ret .= "<li>If you wish to disable commenting for only some for your entries, adjust the \"Screen Comments\" setting on each entry.</li></ul>\n";
+        $ret .= "<ul class='helper'><li>$ML{'.disablecomment1'}</li>\n";
+        $ret .= "<li>$ML{'.disablecomment2'}</li></ul>\n";
         $ret .= "</td></tr>\n";
 
         # Comment screening
-        $ret .= "<tr><td class='field_name'>Comment screening:</td>\n<td>";
-        $ret .= "Screen comments from: ";
+        $ret .= "<tr><td class='field_name'>$ML{'.fn.screening'}:</td>\n<td>";
+        $ret .= "$ML{'.screen'}: ";
         $ret .= LJ::html_select({ 'name' => 'opt_whoscreened', 'selected' => $u->{'opt_whoscreened'} },
-                                  "N" => "No one",
-                                  "R" => "Anonymous commenters",
-                                  "F" => ($u->{'journaltype'} eq 'C' ? "Anyone who's not a member" : "Anyone not on my Friends list"),
-                                  "A" => "Everyone" );
-        $ret .= "<br /><span class='helper'>\nScreening allows you to read comments before publishing them for others to see.</span>";
+                                  "N" => BML::ml(".security.visibility.noone"),
+                                  "R" => BML::ml(".security.visibility.anon"),
+                                  "F" => ($u->{'journaltype'} eq 'C' ? BML::ml(".security.visibility.notmember") : BML::ml(".security.visibility.notfriends")),
+                                  "A" => BML::ml(".security.visibility.everyone") );
+        $ret .= "<br /><span class='helper'>\n$ML{'.screen.text'}</span>";
         $ret .= "</td></tr>\n";
 
         # IP address log
-        $ret .= "<tr><td class='field_name'>IP address log:</td>\n<td>";
-        $ret .= " Log IPs for replies from: ";
+        $ret .= "<tr><td class='field_name'>$ML{'.fn.iplog'}:</td>\n<td>";
+        $ret .= " $ML{'.logip'}: ";
         $ret .= LJ::html_select({ 'name' => 'opt_logcommentips', 'selected' => $u->{'opt_logcommentips'} },
-                                  "N" => "No one",
-                                  "S" => "Anonymous commenters",
-                                  "A" => "Everyone" );
-        $ret .= "<br />\n<span class='helper'>You can set this option to log the IP addresses of commenters to your journal.</span>";
+                                  "N" => BML::ml(".security.visibility.noone"),
+                                  "S" => BML::ml(".security.visibility.anon"),
+                                  "A" => BML::ml(".security.visibility.everyone") );
+        $ret .= "<br />\n<span class='helper'>$ML{'.logip.text'}</span>";
         $ret .= "</td></tr>\n";
 
         # Email notifications
-        $ret .= "<tr><td class='field_name'>Email notifications:</td>\n<td>";
+        $ret .= "<tr><td class='field_name'>$ML{'.fn.emailnotify'}:</td>\n<td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_gettalkemail', 'id' => 'opt_gettalkemail',
                                  'selected' => $u->prop('opt_gettalkemail') eq 'Y' });
-        $ret .= " Receive email notifications when others comment</label><br />\n";
-        $ret .= "Email format: ";
+        $ret .= " $ML{'.emailnotify'}</label><br />\n";
+        $ret .= "$ML{'.fn.emailformat'}: ";
         $ret .= LJ::html_select({ 'name' => 'opt_htmlemail', 'id' => 'opt_htmlemail',
                                   'selected' => $u->prop('opt_htmlemail')},
-                                  "N", "Plain Text", "Y", "HTML Formatted");
+                                  "N", BML::ml(".formatplain"), "Y", BML::ml(".formathtml") );
         $ret .= "</td></tr>\n";
 
         $ret .= "</table>\n";
 
         # Your comments
-        $ret .= "<div class='section_head'>Comments you make</div>\n";
+        $ret .= "<div class='section_head'>$ML{'.section.makecomments'}</div>\n";
         $ret .= "<table class='field_block'>\n";
 
         # Comment notifications
-        $ret .= "<tr><td class='field_name'>Comment notifications:</td>\n<td>";
+        $ret .= "<tr><td class='field_name'>$ML{'.fn.commentnotify'}:</td>\n<td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_getselfemail', 'id' => 'opt_getselfemail',
                                  'selected' => $u->{'opt_getselfemail'},
                                  'disabled' => !LJ::get_cap($u, 'getselfemail') });
-        $ret .= " Receive email copies of comments you make<br />\n";
-        $ret .= "<span class='helper'>You can receive e-mail copies of comments you make while logged in under
-            your username. You will not receive copies of any anonymous comments you
-            make.</span>\n";
+        $ret .= " $ML{'.commentnotify'}<br />\n";
+        $ret .= "<span class='helper'>$ML{'.commentnotify.text'}</span>\n";
         $ret .= "</td></tr>\n";
 
         $ret .= "</table>\n";
@@ -139,12 +136,12 @@ _code?>
         my $banned = LJ::load_rel_user($u, 'B');
         if ($banned && @$banned) {
             my $us = LJ::load_userids(@$banned);
-            $ret .= "<div class='section_head'>Banned users</div>\n";
+            $ret .= "<div class='section_head'>$ML{'.section.banned'}</div>\n";
             $ret .= "<table class='field_block'>\n";
 
             # Unban users
-            $ret .= "<tr><td class='field_name'>Unban users:</td>\n<td>";
-            $ret .= " You have the following users banned from posting in your journal. Check the checkbox by their username to remove the ban.<br />\n";
+            $ret .= "<tr><td class='field_name'>$ML{'.fn.unban'}:</td>\n<td>";
+            $ret .= " $ML{'.unban'}<br />\n";
             foreach (@$banned) {
                 my $bu = $us->{$_};
                 next unless $bu;
@@ -220,7 +217,7 @@ _code?>
         my $base = $u->journal_base;
         my $profile_url = $u->profile_url;
         return "<?h1 $ML{'.success.header'} h1?>\n" .
-               "<?p Your comment settings have been updated. p?>";
+               "<?p $ML{'.success.text'} p?>";
     }
 
     # should never happen
