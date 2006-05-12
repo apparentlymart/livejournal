@@ -181,13 +181,13 @@ sub wrap_content {
 
     my $w = delete $opts{'width'} || 300;
     my $alllink = $class->ack_link("$LJ::SITEROOT/didyouknow/", "View All");
-    my $nextlink = "<a href='#' id='CProd_nextbutton'></a>";
+    my $nextlink = "<a href='$LJ::SITEROOT/didyouknow/' id='CProd_nextbutton' onclick='return false;'>Next</a>";
 
     return qq{
     <div id='CProd_box'>
       <div style='width: ${w}px; border: 3px solid #6699cc;'>
         <div style='padding: 5px'>$content</div>
-        <div style='background: #abccec; padding: 4px; font-family: arial; font-size: 8pt;'><img src='$LJ::IMGPREFIX/frankhead.gif' width='30' height='31' align='absmiddle' />What else has LJ been hiding? $alllink $nextlink</div>
+        <div style='background: #abccec; padding: 4px; font-family: arial; font-size: 8pt;'><img src='$LJ::IMGPREFIX/frankhead.gif' width='30' height='31' align='absmiddle' />What else has LJ been hiding? $alllink | $nextlink</div>
         <div style='display: none;' id='CProd_class'>$htmlclass</div>
       </div>
     </div>
