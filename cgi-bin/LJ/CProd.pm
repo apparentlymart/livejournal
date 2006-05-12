@@ -187,7 +187,7 @@ sub wrap_content {
     <div id='CProd_box'>
       <div style='width: ${w}px; border: 3px solid #6699cc;'>
         <div style='padding: 5px'>$content</div>
-        <div style='background: #abccec; padding: 4px; font-family: arial; font-size: 8pt;'><img src='http://www.lj.bradfitz.com/img/goat-hiding.png' width='30' height='31' align='absmiddle' />What else has LJ been hiding? $alllink $nextlink</div>
+        <div style='background: #abccec; padding: 4px; font-family: arial; font-size: 8pt;'><img src='$LJ::IMGPREFIX/frankhead.gif' width='30' height='31' align='absmiddle' />What else has LJ been hiding? $alllink $nextlink</div>
         <div style='display: none;' id='CProd_class'>$htmlclass</div>
       </div>
     </div>
