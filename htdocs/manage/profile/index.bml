@@ -315,7 +315,7 @@ _code?>
 
             $ret .= "<span class='view_options'>$ML{'.fn.txtmsg'}: ";
             $ret .= LJ::html_select({ 'name' => 'txtmsg_security', 'selected' => $tminfo->{'security'} },
-                                      "all" => BML::ml(".security.visibility.anybody"),
+                                      "all" => BML::ml(".security.visibility.everybody"),
                                       "reg" => BML::ml(".security.visibility.regusers"),
                                       "friends" => BML::ml(".security.visibility.friends"),
                                       "N"   => BML::ml(".security.visibility.nobody") );
