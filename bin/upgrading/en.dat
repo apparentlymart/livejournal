@@ -3684,6 +3684,8 @@ Regards,
 
 /manage/profile/index.bml.security.visibility.nobody=Nobody
 
+/manage/profile/index.bml.security.visibility.regusers=Registered Users
+
 /manage/profile/index.bml.success.header=Success!
 
 /manage/profile/index.bml.success.text=Your profile has been updated.
