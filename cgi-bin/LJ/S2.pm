@@ -2419,43 +2419,45 @@ sub _Comment__get_link
     my $post_user = $page->{'entry'} ? $page->{'entry'}->{'poster'}->{'username'} : undef;
     my $com_user = $this->{'poster'} ? $this->{'poster'}->{'username'} : undef;
     my $remote = LJ::get_remote();
+    my $null_link = { '_type' => 'Link', '_isnull' => 1 };
+
     if ($key eq "delete_comment") {
-            return undef unless LJ::Talk::can_delete($remote, $u, $post_user, $com_user);
-            return LJ::S2::Link("$LJ::SITEROOT/delcomment.bml?journal=$u->{'user'}&amp;id=$this->{'talkid'}",
-                                $ctx->[S2::PROPS]->{"text_multiform_opt_delete"},
-                                LJ::S2::Image("$LJ::IMGPREFIX/btn_del.gif", 22, 20));
-        }
+        return $null_link unless LJ::Talk::can_delete($remote, $u, $post_user, $com_user);
+        return LJ::S2::Link("$LJ::SITEROOT/delcomment.bml?journal=$u->{'user'}&amp;id=$this->{'talkid'}",
+                            $ctx->[S2::PROPS]->{"text_multiform_opt_delete"},
+                            LJ::S2::Image("$LJ::IMGPREFIX/btn_del.gif", 22, 20));
+    }
     if ($key eq "freeze_thread") {
-        return undef if $this->{'frozen'};
-        return undef unless LJ::Talk::can_freeze($remote, $u, $post_user, $com_user);
+        return $null_link if $this->{'frozen'};
+        return $null_link unless LJ::Talk::can_freeze($remote, $u, $post_user, $com_user);
         return LJ::S2::Link("$LJ::SITEROOT/talkscreen.bml?mode=freeze&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
                             $ctx->[S2::PROPS]->{"text_multiform_opt_freeze"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_freeze.gif", 22, 20));
     }
     if ($key eq "unfreeze_thread") {
-        return undef unless $this->{'frozen'};
-        return undef unless LJ::Talk::can_unfreeze($remote, $u, $post_user, $com_user);
+        return $null_link unless $this->{'frozen'};
+        return $null_link unless LJ::Talk::can_unfreeze($remote, $u, $post_user, $com_user);
         return LJ::S2::Link("$LJ::SITEROOT/talkscreen.bml?mode=unfreeze&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
                             $ctx->[S2::PROPS]->{"text_multiform_opt_unfreeze"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_unfreeze.gif", 22, 20));
     }
     if ($key eq "screen_comment") {
-        return undef if $this->{'screened'};
-        return undef unless LJ::Talk::can_screen($remote, $u, $post_user, $com_user);
+        return $null_link if $this->{'screened'};
+        return $null_link unless LJ::Talk::can_screen($remote, $u, $post_user, $com_user);
         return LJ::S2::Link("$LJ::SITEROOT/talkscreen.bml?mode=screen&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
                             $ctx->[S2::PROPS]->{"text_multiform_opt_screen"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_scr.gif", 22, 20));
     }
     if ($key eq "unscreen_comment") {
-        return undef unless $this->{'screened'};
-        return undef unless LJ::Talk::can_unscreen($remote, $u, $post_user, $com_user);
+        return $null_link unless $this->{'screened'};
+        return $null_link unless LJ::Talk::can_unscreen($remote, $u, $post_user, $com_user);
         return LJ::S2::Link("$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
                             $ctx->[S2::PROPS]->{"text_multiform_opt_unscreen"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_unscr.gif", 22, 20));
     }
     if ($key eq "watch_thread") {
-        return undef if $LJ::DISABLED{esn};
-        return undef unless $remote;
+        return $null_link if $LJ::DISABLED{esn};
+        return $null_link unless $remote;
         return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;dtalkid=$this->{'talkid'}",
                             "Track Thread",
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20));
@@ -2746,6 +2748,7 @@ sub UserLite__get_link
 sub EntryLite__get_link
 {
     my ($ctx, $this, $key) = @_;
+    my $null_link = { '_type' => 'Link', '_isnull' => 1 };
 
     if ($this->{_type} eq 'Entry') {
         return _Entry__get_link($ctx, $this, $key);
@@ -2754,7 +2757,7 @@ sub EntryLite__get_link
         return _Comment__get_link($ctx, $this, $key);
     }
     else {
-        return undef;
+        return $null_link;
     }
 }
 *Entry__get_link = \&EntryLite__get_link;
@@ -2784,9 +2787,10 @@ sub _Entry__get_link
     my $journal = $this->{'journal'}->{'username'};
     my $poster = $this->{'poster'}->{'username'};
     my $remote = LJ::get_remote();
+    my $null_link = { '_type' => 'Link', '_isnull' => 1 };
 
     if ($key eq "edit_entry") {
-        return undef unless $remote && ($remote->{'user'} eq $journal ||
+        return $null_link unless $remote && ($remote->{'user'} eq $journal ||
                                         $remote->{'user'} eq $poster ||
                                         LJ::can_manage($remote, LJ::load_user($journal)));
         return LJ::S2::Link("$LJ::SITEROOT/editjournal.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
@@ -2794,19 +2798,19 @@ sub _Entry__get_link
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_edit.gif", 22, 20));
     }
     if ($key eq "edit_tags") {
-        return undef unless $remote && LJ::Tags::can_add_tags(LJ::load_user($journal), $remote);
+        return $null_link unless $remote && LJ::Tags::can_add_tags(LJ::load_user($journal), $remote);
         return LJ::S2::Link("$LJ::SITEROOT/edittags.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
                             'Edit Tags',
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_edittags.gif", 22, 20));
     }
     if ($key eq "tell_friend") {
-        return undef if $LJ::DISABLED{'tellafriend'};
+        return $null_link if $LJ::DISABLED{'tellafriend'};
         return LJ::S2::Link("$LJ::SITEROOT/tools/tellafriend.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
                             "Tell A Friend",
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_tellfriend.gif", 22, 20));
     }
     if ($key eq "mem_add") {
-        return undef if $LJ::DISABLED{'memories'};
+        return $null_link if $LJ::DISABLED{'memories'};
         return LJ::S2::Link("$LJ::SITEROOT/tools/memadd.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
                             "Add to Memories",
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_memories.gif", 22, 20));
@@ -2822,7 +2826,7 @@ sub _Entry__get_link
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_next.gif", 22, 20));
     }
     if ($key eq "watch_comments") {
-        return undef if $LJ::DISABLED{'esn'};
+        return $null_link if $LJ::DISABLED{'esn'};
         return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$journal&amp;ditemid=$this->{'itemid'}",
                             "Track New Comments",
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20));
