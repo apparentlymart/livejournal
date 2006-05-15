@@ -3686,6 +3686,8 @@ Regards,
 
 /manage/profile/index.bml.security.visibility.regusers=Registered Users
 
+/manage/profile/index.bml.state.us=US States
+
 /manage/profile/index.bml.success.header=Success!
 
 /manage/profile/index.bml.success.text=Your profile has been updated.
@@ -3699,6 +3701,8 @@ Regards,
 /manage/profile/index.bml.userpic=This is the image that will display on your Profile. It will also represent you in your entries and comments, unless you select a different one.
 
 /manage/profile/index.bml.userpic.change=Change default userpic
+
+/manage/profile/index.bml.userpic.none=no image uploaded
 
 /manage/profile/index.bml.zip.usonly=5 digit ZIP code; US residents only
 
