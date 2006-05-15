@@ -6,7 +6,7 @@ use strict;
 
 our $_box_class = "CProd";
 our $_box_description = 'Frank the Goat thinks you might enjoy these features';
-our $_box_name = "<a href='$LJ::SITEROOT/didyouknow'>Did You Know?</a>";
+our $_box_name = "<a href='$LJ::SITEROOT/didyouknow/'>Did You Know?</a>";
 
 sub generate_content {
     my $self = shift;
