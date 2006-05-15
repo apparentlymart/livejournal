@@ -2,6 +2,7 @@ package LJ::Event;
 use strict;
 use Carp qw(croak);
 use Class::Autouse qw(
+                      LJ::ESN
                       LJ::Subscription
                       LJ::Typemap
                       LJ::Event::JournalNewEntry
@@ -53,6 +54,15 @@ sub new_from_raw_params {
     bless $evt, $class;
 
     return $evt;
+}
+
+sub raw_params {
+    my $self = shift;
+    my @params = map { $_+0 } ($self->etypeid,
+                               $self->journal->{userid},
+                               $self->{args}[0],
+                               $self->{args}[1]);
+    return wantarray ? @params : \@params;
 }
 
 # Override this.  by default, events are rare, so subscriptions to
@@ -126,10 +136,7 @@ sub arg2 {  $_[0]->{args}[1] }
 sub process_fired_events {
     my $class = shift;
     croak("Can't call in web context") if LJ::is_web_context();
-
-    my $sclient = LJ::theschwartz();
-    $sclient->can_do("LJ::Worker::FiredEvent");
-    $sclient->work_until_done;
+    LJ::ESN->process_fired_events;
 }
 
 # instance method.
@@ -153,12 +160,8 @@ sub fire {
     my $sclient = LJ::theschwartz();
     return 0 unless $sclient;
 
-    my $h = $sclient->insert("LJ::Worker::FiredEvent", {
-        journalid => $u->{userid},
-        etypeid   => $self->etypeid,
-        arg1      => $self->{args}[0],
-        arg2      => $self->{args}[1],
-    });
+    my $h = $sclient->insert("LJ::Worker::FiredEvent", [ $self->raw_params ]);
+    return $h ? 1 : 0;
 }
 
 # called outside of web context where things can go slow.
@@ -182,8 +185,10 @@ sub process_firing {
 }
 
 sub subscriptions {
-    my $self = shift;
-    my $cid  = shift;  # optional.
+    my ($self, %args) = @_;
+    my $cid   = delete $args{'cluster'};  # optional
+    my $limit = delete $args{'limit'};    # optional
+    croak("Unknown options: " . join(', ', keys %args)) if %args;
     croak("Can't call in web context") if LJ::is_web_context();
 
     # allsubs
@@ -286,9 +291,10 @@ sub etypeid {
 # Class method
 sub event_to_etypeid {
     my ($class, $evt_name) = @_;
-
     $evt_name = "LJ::Event::$evt_name" unless $evt_name =~ /^LJ::Event::/;
-    return eval { $evt_name->etypeid };
+    my $tm = $class->typemap
+        or return undef;
+    return $tm->class_to_typeid($evt_name);
 }
 
 # this returns a list of all possible event classes
@@ -306,35 +312,5 @@ sub all_classes {
 
     return $tm->all_classes;
 }
-
-package LJ::Event::ForTest2;
-use base 'LJ::Event';
-
-
-# this is phase1 of processing.  see doc/notes/esn-design.txt
-package LJ::Worker::FiredEvent;
-use base 'TheSchwartz::Worker';
-
-sub work {
-    my ($class, $job) = @_;
-    my $a = $job->arg;
-
-    my $evt = eval {
-        LJ::Event->new_from_raw_params($a->{'etypeid'}, $a->{'journalid'},
-                                       $a->{'arg1'}, $a->{'arg2'});
-      } or return;
-
-    # TODO: improve.  pass $job to process_firing, etc.
-    if ($evt->process_firing) {
-        $job->completed;
-    } else {
-        $job->failed;
-    }
-}
-
-sub keep_exit_status_for { 0 }
-sub grab_for { 120 }
-sub max_retries { 2 }
-sub retry_delay { my $class = shift; my $fails = shift; return 2 ** $fails; }
 
 1;

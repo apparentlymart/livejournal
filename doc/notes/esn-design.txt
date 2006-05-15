@@ -45,7 +45,7 @@ How events get processed async by TheSchwartz (reliable async job system)
 
 -- but we take some fast paths.  given the following steps:
 
-   [FiredEvent] -> [FindSubsPerCluster] -> [MatchesFilter] -> [ProcessSub]
+   [FiredEvent] -> [FindSubsPerCluster] -> [FilterSubs] -> [ProcessSub]
 
    we can often skip from FireEvent directly to N x ProcessSub jobs if
    a) clusters are up, b) N is small.  note that TheSchwartz has a
@@ -59,3 +59,13 @@ How events get processed async by TheSchwartz (reliable async job system)
    split the job into FindSubsPerCluster * # clusters.
 
 
+So the different paths:
+=======================
+
+   using 5,000 for $MAX_FILTER_AT_A_TIME
+
+   [FiredEvent] => 1-5000x [ProcessSub]
+
+   [FiredEvent] => 7x [FindSubsPerCluster] => 1-5000x [ProcessSub]
+
+   [FiredEvent] => 7x [FindSubsPerCluster] => 57x [FilterSubs] => 1-5000x [ProcessSub]

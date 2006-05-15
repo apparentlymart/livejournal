@@ -223,6 +223,12 @@ sub etypeid {
     return $self->{etypeid};
 }
 
+# returns the owner (userid) of the subscription
+sub userid {
+    my $self = shift;
+    return $self->{userid};
+}
+
 sub owner {
     my $self = shift;
     return LJ::load_userid($self->{userid});
