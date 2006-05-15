@@ -540,3 +540,8 @@ img {
 	text-align: left;
 	}
 
+/*----------------------- CProd             -----------------------*/
+
+.CProd .CProd_box_content {
+        width: 100% !important;
+}

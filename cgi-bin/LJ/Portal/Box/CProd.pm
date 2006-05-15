@@ -6,14 +6,14 @@ use strict;
 
 our $_box_class = "CProd";
 our $_box_description = 'Frank the Goat thinks you might enjoy these features';
-our $_box_name = "<a href='$LJ::SITEROOT/didyouknow/'>Did You Know?</a>";
+our $_box_name = "What else has LJ been hiding from me?";
 
 sub generate_content {
     my $self = shift;
     my $content = '';
 
     my $u = $self->{u};
-    $content = LJ::CProd->box_for($u) || "You know everything!";
+    $content = LJ::CProd->full_box_for($u) || "You know everything!";
 
     return $content;
 }
@@ -25,7 +25,7 @@ sub box_updated {
     my $u = $self->{u};
     my $prod = LJ::CProd->prod_to_show($u);
     LJ::CProd->mark_acked($u, $prod) if $prod;
-    return '';
+    return 'CProd.attachNextClickListener();';
 }
 
 #######################################
