@@ -2300,7 +2300,7 @@ sub enter_comment {
     unless ($LJ::DISABLED{esn}) {
         my $cmtobj = LJ::Comment->new($journalu, jtalkid => $jtalkid);
         LJ::Event::JournalNewComment->new($cmtobj)->fire;
-        LJ::Event::UserNewComment   ->new($cmtobj)->fire;
+        LJ::Event::UserNewComment   ->new($cmtobj)->fire if $cmtobj->poster;
     }
 
     LJ::MemCache::incr([$journalu->{'userid'}, "talk2ct:$journalu->{'userid'}"]);
