@@ -251,7 +251,7 @@ img {
 	}
 
 .PortalBoxTitleText a, .PortalBoxTitleText a:visited, .PortalBoxTitleText a:link, .PortalBoxTitleText a:active {
-        color: #FFFFFF !important;
+        color: #FFFFFF;
 }
 
 .PortalBoxMoveButtons {
