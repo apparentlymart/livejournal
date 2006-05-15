@@ -140,7 +140,7 @@ add_conf('$DEFAULT_CLUSTER',
          );
 
 add_conf('$DEFAULT_EDITOR',
-         des => 'Editor for new entries if the user hasn\'t overridden it.  Should be \'rich\' or \'plain\'.';
+         des => "Editor for new entries if the user hasn\'t overridden it.  Should be \'rich\' or \'plain\'.",
          );
 
 add_conf('$DEFAULT_LANG',
