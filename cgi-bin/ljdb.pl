@@ -67,6 +67,7 @@ sub time_range_to_ids {
 
     # final output
     my ($startid, $endid);
+    my $ct_max = 100;
 
     foreach my $curr_ref ([$starttime => \$startid], [$endtime => \$endid]) {
         my ($want_time, $dest_ref) = @$curr_ref;
@@ -77,8 +78,8 @@ sub time_range_to_ids {
         my $last_time = 0;
 
         my $ct = 0;
-        while ($curr_time != $want_time) {
-            die "unable to find row after $ct tries" if ++$ct > 100;
+        while ($ct++ < $ct_max) {
+            die "unable to find row after $ct tries" if $ct > 100;
 
             my $curr_id = $min_id + int(($max_id - $min_id) / 2)+0;
 
@@ -90,10 +91,25 @@ sub time_range_to_ids {
             ($curr_id, $curr_time) = $db->selectrow_array($sql);
             die $db->errstr if $db->err;
 
-            # we're still narrowing but not finding rows in between, stop here with
-            # the current time being just short of what we were trying to find
-            if ($curr_time == $last_time) {
-                $$dest_ref = $curr_id;
+            # stop condition, two trigger cases:
+            #  * we've found exactly the time we want
+            #  * we're still narrowing but not finding rows in between, stop here with
+            #    the current time being just short of what we were trying to find
+            if ($curr_time == $want_time || $curr_time == $last_time) {
+
+                # if we never modified the max id, then we
+                # have searched to the end without finding
+                # what we were looking for
+                if ($max_id == $db_max_id && $curr_time <= $want_time) {
+                    $$dest_ref = $max_id;
+
+                # same for min id
+                } elsif ($min_id == $db_min_id && $curr_time >= $want_time) {
+                    $$dest_ref = $min_id;
+
+                } else {
+                    $$dest_ref = $curr_id;
+                }
                 last;
             }
 
