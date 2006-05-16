@@ -22,6 +22,98 @@ $LJ::DBIRole = new DBI::Role {
 
 package LJ::DB;
 
+# <LJFUNC>
+# name: LJ::DB::time_range_to_ids
+# des:  Performs a binary search on a table's primary id key looking
+#       for time boundaries as specified.  Returns the boundary ids
+#       that were found, effectively simulating a key on 'time' for
+#       the specified table.
+# info: This function shouldn't normally be used, but there are 
+#       rare instances where it's useful.
+# args: hash of keys defined as follows,
+#        table     = table name to query
+#        roles     = arrayref of db roles to use, in order; 
+#                    defaults to ['slow']
+#        idcol     = name of 'id' primary key column
+#        timecol   = name of unixtime column to use for constraint
+#        starttime = starting unixtime time of rows to match
+#        endtime   = ending unixtime of rows to match
+# returns: startid, endid; id boundaries which should be used by
+#          the caller
+# </LJFUNC>
+sub time_range_to_ids {
+    my %args = @_;
+
+    my $table     = delete $args{table}     or croak("no table arg");
+    my $idcol     = delete $args{idcol}     or croak("no idcol arg");
+    my $timecol   = delete $args{timecol}   or croak("no timecol arg");
+    my $starttime = delete $args{starttime} or croak("no starttime arg");
+    my $endtime   = delete $args{endtime}   or croak("no endtime arg");
+    my $roles     = delete $args{roles};
+    unless (ref $roles eq 'ARRAY' && @$roles) {
+        $roles = [ 'slow' ];
+    }
+    croak("bogus args: " . join(",", keys %args))
+        if %args;
+
+    my $db = LJ::get_dbh(@$roles)
+        or die "unable to acquire db handle, roles=", join(",", @$roles);
+
+    my ($db_min_id, $db_max_id) = $db->selectrow_array
+        ("SELECT MIN($idcol), MAX($idcol) FROM $table");
+    die $db->errstr if $db->err;
+    die "error finding min/max ids: $db_max_id < $db_min_id"
+        if $db_max_id < $db_min_id;
+
+    # final output
+    my ($startid, $endid);
+
+    foreach my $curr_ref ([$starttime => \$startid], [$endtime => \$endid]) {
+        my ($want_time, $dest_ref) = @$curr_ref;
+
+        my ($min_id, $max_id) = ($db_min_id, $db_max_id);
+
+        my $curr_time = 0;
+        my $last_time = 0;
+
+        my $ct = 0;
+        while ($curr_time != $want_time) {
+            die "unable to find row after $ct tries" if ++$ct > 100;
+
+            my $curr_id = $min_id + int(($max_id - $min_id) / 2)+0;
+
+            my $sql = 
+                "SELECT $idcol, $timecol FROM $table " .
+                "WHERE $idcol>=$curr_id ORDER BY 1 LIMIT 1";
+
+            $last_time = $curr_time;
+            ($curr_id, $curr_time) = $db->selectrow_array($sql);
+            die $db->errstr if $db->err;
+
+            # we're still narrowing but not finding rows in between, stop here with
+            # the current time being just short of what we were trying to find
+            if ($curr_time == $last_time) {
+                $$dest_ref = $curr_id;
+                last;
+            }
+
+            # need to traverse into the larger half
+            if ($curr_time < $want_time) {
+                $min_id = $curr_id;
+                next;
+            }
+
+            # need to traverse into the smaller half
+            if ($curr_time > $want_time) {
+                $max_id = $curr_id;
+                next;
+            }
+        }
+    }
+
+    return ($startid, $endid);
+}
+
 sub dbh_by_role {
     return $LJ::DBIRole->get_dbh( @_ );
 }
