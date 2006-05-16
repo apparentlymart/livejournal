@@ -74,10 +74,14 @@ sub generate_content {
 
         my $delicon = "<img src=\"$LJ::IMGPREFIX/portal/btn_del.gif\" align=\"center\" />";
 
+        my $timeago = $evt->eventtime_unix ?
+            LJ::ago_text(time() - $evt->eventtime_unix) :
+            "(?)";
+
         my $rowmod = $noticecount % 2 + 1;
         $content .= qq {
             <tr class="PortalRow$rowmod">
-                <td>(no date yet)</td>
+                <td>$timeago</td>
                 <td>$desc</td>
                 <td align="center"><a href="/portal/index.bml?$delrequest" onclick="return evalXrequest('$delrequest', null);">$delicon</a></td>
             </tr>
@@ -114,6 +118,7 @@ sub etag {
     my $q = $self->queue or return undef;
 
     my $notifications = $q->notifications;
+
     return "$daysold-" . join('-', keys %$notifications); # qids
 }
 
