@@ -25,8 +25,6 @@ function tabclick_save(e) {
     }
     if (confirmed) {
         $("display_form").submit();
-    } else {
-        e.stop();
     }
 }
 
