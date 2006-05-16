@@ -181,6 +181,43 @@ sub work {
     $job->completed;
 }
 
+# this is phase3 of processing.  see doc/notes/esn-design.txt
+package LJ::Worker::FilterSubs;
+use base 'TheSchwartz::Worker';
+
+sub work {
+    my ($class, $job) = @_;
+    my $a = $job->arg;
+    my ($e_params, $sublist) = @$a;
+    my $evt = eval { LJ::Event->new_from_raw_params(@$a) } or
+        die "Couldn't load event: $@";
+
+    my @subjobs;
+    foreach my $sp (@$sublist) {
+        my ($userid, $subid) = @$_;
+        my $u = LJ::load_userid($userid)
+            or die "Failed to load userid: $userid\n";
+
+        # TODO: discern difference between cluster not up and subscription
+        #       having been deleted
+        my $subsc = LJ::Subscription->instance_from_id($u, $subid)
+            or next;
+
+        next unless $evt->matches_filter($subsc);
+        push @subjobs, TheSchwartz::Job->new(
+                                             funcname => 'LJ::Worker::ProcessSub',
+                                             arg      => [
+                                                          $userid,
+                                                          $subid,
+                                                          $e_params           # arrayref of event params
+                                                          ],
+                                             );
+    }
+
+    return $job->replace_with(@subjobs) if @subjobs;
+    $job->completed;
+}
+
 # this is phase4 of processing.  see doc/notes/esn-design.txt
 package LJ::Worker::ProcessSub;
 use base 'TheSchwartz::Worker';
