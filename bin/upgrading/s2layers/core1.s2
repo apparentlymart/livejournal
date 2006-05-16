@@ -1347,13 +1347,12 @@ set text_icon_alt_protected = "[protected post]";
 set text_icon_alt_private = "[private post]";
 
 property bool use_shared_pic {
-    des = "Use shared journal userpics instead of poster's userpic.";
+    des = "Use community userpics instead of poster's userpic.";
 }
 set use_shared_pic = false;
 
 property bool view_entry_disabled {
-    des = "Use simple comment pages";
-    note = "This disables customized comment pages even where they are usually available.";
+    des = "Use non-customized comment pages";
 }
 set view_entry_disabled = false;
 
