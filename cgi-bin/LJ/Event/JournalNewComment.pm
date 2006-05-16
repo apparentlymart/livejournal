@@ -79,7 +79,7 @@ sub matches_filter {
     my ($self, $subscr) = @_;
 
     my $sjid = $subscr->journalid;
-    my $ejid = $self->journal->{userid};
+    my $ejid = $self->event_journal->{userid};
 
     # if subscription is for a specific journal (not a wildcard like 0
     # for all friends) then it must match the event's journal exactly.
@@ -129,7 +129,7 @@ sub eventtime_unix {
 
 sub comment {
     my $self = shift;
-    return LJ::Comment->new($self->journal, jtalkid => $self->jtalkid);
+    return LJ::Comment->new($self->event_journal, jtalkid => $self->jtalkid);
 }
 
 sub journal_sub_title { 'Journal' }
