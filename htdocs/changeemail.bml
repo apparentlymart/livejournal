@@ -12,14 +12,8 @@ body<=
         return $body;
     }
 
-    if ($LJ::USE_SSL && ! $LJ::IS_SSL && $FORM{'ssl'} ne "no") {
-        return BML::redirect("$LJ::SSLROOT/changeemail.bml");
-    }
-
-    my $u = LJ::get_remote()
+    my $remote = LJ::get_remote()
         or return "<?needlogin?>";
-
-    my $remote = $u;
 
     my $authas = $FORM{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);
@@ -28,6 +22,10 @@ body<=
 
     # extra arguments for get requests
     my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
+
+    if ($LJ::USE_SSL && ! $LJ::IS_SSL && $FORM{'ssl'} ne "no") {
+        return BML::redirect("$LJ::SSLROOT/changeemail.bml$getextra");
+    }
 
     my $crumb = $LJ::IS_SSL ? 'securechangeemail' : 'changeemail';
     LJ::set_active_crumb($crumb);
