@@ -6,16 +6,39 @@ use Class::Autouse qw(
                       LJ::Subscription
                       );
 
+my $MAX_FILTER_SET = 5_000;
+
 # class method
 sub process_fired_events {
     my $class = shift;
     croak("Can't call in web context") if LJ::is_web_context();
 
     my $sclient = LJ::theschwartz();
-    $sclient->can_do("LJ::Worker::FiredEvent");
+    $sclient->can_do("LJ::Worker::FiredEvent");         # step 1: can go to 2 or 4
+    $sclient->can_do("LJ::Worker::FindSubsByCluster");  # step 2: can go to 3 or 4
+    $sclient->can_do("LJ::Worker::FilterSubs");         # step 3: goes to step 4
+    $sclient->can_do("LJ::Worker::ProcessSub");         # step 4
     $sclient->work_until_done;
 }
 
+sub jobs_of_unique_matching_subs {
+    my ($class, $evt, @subs) = @_;
+    my %has_done = ();
+    my @subjobs;
+    my $params = $evt->raw_params;
+    foreach my $s (grep { $evt->matches_filter($_) } @subs) {
+        next if $has_done{$s->unique}++;
+        push @subjobs, TheSchwartz::Job->new(
+                                             funcname => 'LJ::Worker::ProcessSub',
+                                             arg      => [
+                                                          $s->userid + 0,
+                                                          $s->id     + 0,
+                                                          $params           # arrayref of event params
+                                                          ],
+                                             );
+    }
+    return @subjobs;
+}
 
 # this is phase1 of processing.  see doc/notes/esn-design.txt
 package LJ::Worker::FiredEvent;
@@ -35,12 +58,11 @@ sub work {
     # step 1:  see if we can split this into a bunch of ProcessSub directly.
     # we can only do this if A) all clusters are up, and B) subs is reasonably
     # small.  say, under 5,000.
-    my $MAX_SPLIT_SIZE = 5_000;
     my $split_per_cluster = 0;  # bool: died or hit limit, split into per-cluster jobs
     my @subs;
     foreach my $cid (@LJ::CLUSTERS) {
         my @more_subs = eval { $evt->subscriptions(cluster => $cid,
-                                                   limit   => $MAX_SPLIT_SIZE - @subs) };
+                                                   limit   => $LJ::ESN::MAX_FILTER_SET - @subs) };
         if ($@) {
             # if there were errors (say, the cluster is down), abort!
             # that is, abort the fast path and we'll resort to
@@ -50,7 +72,7 @@ sub work {
         }
 
         push @subs, @more_subs;
-        if (@subs >= $MAX_SPLIT_SIZE) {
+        if (@subs > $LJ::ESN::MAX_FILTER_SET) {
             $split_per_cluster = 1;
             last;
         }
@@ -67,25 +89,17 @@ sub work {
                                                  arg      => [ $cid, $params ],
                                                  );
         }
-        $job->replace_with(@subjobs);
-        return;
+        $job->replace_with(@subjobs) if @subjobs;
+        return $job->completed;
     }
 
     # the fast path, filter those max 5,000 subscriptions down to ones that match,
     # then split right into processing those notification methods
-    my @subjobs;
-    foreach my $s (grep { $evt->matches_filter($_) } @subs) {
-        push @subjobs, TheSchwartz::Job->new(
-                                             funcname => 'LJ::Worker::ProcessSub',
-                                             arg      => [
-                                                          $s->userid + 0,
-                                                          $s->id     + 0,
-                                                          $params           # arrayref of event params
-                                                          ],
-                                             );
-    }
-    $job->replace_with(@subjobs);
+    my @subjobs = LJ::ESN->jobs_of_unique_matching_subs($evt, @subs);
+    return $job->replace_with(@subjobs) if @subjobs;
+    $job->completed;
 }
+
 
 sub keep_exit_status_for { 0 }
 sub grab_for { 300 }
@@ -93,6 +107,78 @@ sub max_retries { 5 }
 sub retry_delay {
     my ($class, $fails) = @_;
     return (10, 30, 60, 300, 600)[$fails];
+}
+
+# this is phase2 of processing.  see doc/notes/esn-design.txt
+package LJ::Worker::FindSubsByCluster;
+use base 'TheSchwartz::Worker';
+
+sub work {
+    my ($class, $job) = @_;
+    my $a = $job->arg;
+    my ($cid, $e_params) = @$a;
+    my $evt = eval { LJ::Event->new_from_raw_params(@$a) } or
+        die "Couldn't load event";
+    my $dbch = LJ::get_cluster_master($cid) or
+        die "Couldn't connect to cluster \#cid";
+
+    my @subs = $evt->subscriptions(cluster => $cid);
+
+    # fast path:  job from phase2 to phase4, skipping filtering.
+    if (@subs <= $LJ::ESN::MAX_FILTER_SET) {
+        my @subjobs = LJ::ESN->jobs_of_unique_matching_subs($evt, @subs);
+        return $job->replace_with(@subjobs) if @subjobs;
+        $job->completed;
+    }
+
+    # slow path:  too many jobs to filter at once.  group it into sets
+    # of 5,000 (MAX_FILTER_SET) for separate filtering (phase3)
+    # NOTE: we have to take care not to split subscriptions spanning
+    # set boundaries with the same userid (ownerid).  otherwise dup
+
+    # checking is bypassed for that user.
+    my %by_userid;
+    foreach my $s (@subs) {
+        push @{$by_userid{$s->userid} || []}, $s;
+    }
+
+    my @subjobs;
+    # now group into sets of 5,000:
+    while (%by_userid) {
+        my @set;
+        while (%by_userid && @set < $LJ::ESN::MAX_FILTER_SET) {
+            foreach my $uid (keys %by_userid) {
+                my $subs = $by_userid{$uid};
+                my $size = scalar @$subs;
+                my $remain = $LJ::ESN::MAX_FILTER_SET - @set;
+
+                # if a user for some reason has more than 5,000 matching subscriptions,
+                # uh, skip them.  that's messed up.
+                if ($size > $LJ::ESN::MAX_FILTER_SET) {
+                    delete $by_userid{$uid};
+                    next;
+                }
+
+                # if this user's subscriptions don't fit into the @set,
+                # move on to the next user
+                next if $size > $remain;
+
+                # add user's subs to this set and delete them.
+                push @set, @$subs;
+                delete $by_userid{$uid};
+            }
+        }
+
+        # $sublist is [ [userid, subid]+ ]
+        my $sublist = [ map { [ $_->userid + 0, $_->id + 0 ] } @set ];
+        push @subjobs, TheSchwartz::Job->new(
+                                             funcname => 'LJ::Worker::FilterSubs',
+                                             arg      => [ $e_params, $sublist ],
+                                             );
+    }
+
+    return $job->replace_with(@subjobs) if @subjobs;
+    $job->completed;
 }
 
 # this is phase4 of processing.  see doc/notes/esn-design.txt
@@ -103,15 +189,15 @@ sub work {
     my ($class, $job) = @_;
     my $a = $job->arg;
     my ($userid, $subid, $eparams) = @$a;
-    my $u    = LJ::load_userid($userid);
-    my $evt  = LJ::Event->new_from_raw_params(@$eparams);
-    my $subs = LJ::Subscription->new_by_id($u, $subid);
+    my $u     = LJ::load_userid($userid);
+    my $evt   = LJ::Event->new_from_raw_params(@$eparams);
+    my $subsc = LJ::Subscription->new_by_id($u, $subid);
 
     # TODO: do inbox notification method here, first.
 
     # NEXT: do sub's ntypeid, unless it's inbox, then we're done.
-    my $nm = $subs->notification;
-    $nm->notify($evt) or die "Failed to process notification method $nm for userid=$userid/subid=$subid, evt=[@$eparams]\n";
+    $subsc->process($evt)
+        or die "Failed to process notification method for userid=$userid/subid=$subid, evt=[@$eparams]\n";
     $job->completed;
 }
 

@@ -264,7 +264,7 @@ sub notification {
 
 sub process {
     my ($self, @events) = @_;
-    $self->notification->notify(@events);
+    return $self->notification->notify(@events);
 }
 
 sub unique {
