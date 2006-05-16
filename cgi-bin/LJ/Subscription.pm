@@ -10,17 +10,12 @@ use Class::Autouse qw(
 my @subs_fields = qw(userid subid is_dirty journalid etypeid arg1 arg2
                      ntypeid createtime expiretime flags);
 
-my %instances = ();
-
-*new_by_id = \&instance_from_id;
-sub instance_from_id {
+sub new_by_id {
     my ($class, $u, $subid) = @_;
     croak "subscriptions_of_user requires a valid 'u' object"
         unless LJ::isu($u);
     croak "invalid subscription id passed"
         unless defined $subid && int($subid) > 0;
-
-    return $instances{$subid} if $instances{$subid};
 
     my $row = $u->selectrow_hashref
         ("SELECT userid, subid, is_dirty, journalid, etypeid, " .
@@ -28,9 +23,7 @@ sub instance_from_id {
          "FROM subs WHERE userid=? AND subid=?", undef, $u->{userid}, $subid);
     die $u->errstr if $u->err;
 
-    my $self = $class->new_from_row($row);
-    $instances{$subid} = $self;
-    return $self;
+    return $class->new_from_row($row);
 }
 
 sub subscriptions_of_user {
