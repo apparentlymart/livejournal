@@ -27,9 +27,10 @@ use FindBin qw($Bin);
 use DJabberd::VHost;
 my $vhost = DJabberd::VHost->new(
                                  server_name => $LJ::DOMAIN,
+                                 s2s       => 0,
                                  plugins   => [
                                                DJabberd::Authen::AllowedUsers->new(policy => "deny",
-                                                                                   allowed => [qr/^\+?\d+/, 'sms']),
+                                                                                   allowedusers => [qr/^\+?\d+/, 'sms']),
                                                DJabberd::Authen::StaticPassword->new(password => "smstest"),
                                                DJabberd::Delivery::FakeSMS->new(),
                                                DJabberd::Delivery::Local->new(),
@@ -40,7 +41,6 @@ my $vhost = DJabberd::VHost->new(
 
 my $server = DJabberd->new(
                            daemonize => $daemonize,
-                           s2s       => 0,
                            );
 
 $server->add_vhost($vhost);
