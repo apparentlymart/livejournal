@@ -64,15 +64,6 @@ sub as_html {
     return "New <a href=\"$url\">entry</a> in $ju by $pu.";
 }
 
-sub entry {
-    my $self = shift;
-
-    my $journal  = $self->u;
-    my $ditemid  = $self->arg1;
-
-    return LJ::Entry->new($journal, ditemid => $ditemid);
-}
-
 sub subscription_as_html {
     my ($class, $subscr) = @_;
 
