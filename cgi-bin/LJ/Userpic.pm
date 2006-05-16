@@ -635,10 +635,10 @@ sub set_keywords {
         my $bind = join(',', @bind);
 
         if (LJ::Userpic->userpics_partitioned($u)) {
-            return $u->do("REPLACE INTO userpicmap2 (userid, kwid, picid) VALUES $bind",
+            $u->do("REPLACE INTO userpicmap2 (userid, kwid, picid) VALUES $bind",
                           undef, @data);
         } else {
-            return $dbh->do("INSERT INTO userpicmap (userid, kwid, picid) VALUES $bind",
+            $dbh->do("INSERT INTO userpicmap (userid, kwid, picid) VALUES $bind",
                             undef, @data);
         }
     }
