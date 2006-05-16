@@ -6,7 +6,9 @@ use Class::Autouse qw(
                       LJ::Subscription
                       );
 
-my $MAX_FILTER_SET = 5_000;
+use Data::Dumper;
+
+our $MAX_FILTER_SET = 5_000;
 
 # class method
 sub process_fired_events {
@@ -25,6 +27,11 @@ sub jobs_of_unique_matching_subs {
     my ($class, $evt, @subs) = @_;
     my %has_done = ();
     my @subjobs;
+
+    if ($ENV{DEBUG}) {
+        warn "jobs of unique matching subs: " . Dumper($evt) . "\n";
+    }
+
     my $params = $evt->raw_params;
     foreach my $s (grep { $evt->matches_filter($_) } @subs) {
         next if $has_done{$s->unique}++;
@@ -50,6 +57,10 @@ sub work {
 
     my $evt = eval { LJ::Event->new_from_raw_params(@$a) };
 
+    if ($ENV{DEBUG}) {
+        warn "FiredEvent for " . Dumper($evt) . "\n";
+    }
+
     unless ($evt) {
         $job->failed;
         return;
@@ -67,18 +78,23 @@ sub work {
             # if there were errors (say, the cluster is down), abort!
             # that is, abort the fast path and we'll resort to
             # per-cluster scanning
-            $split_per_cluster = 1;
+            $split_per_cluster = "some_error";
             last;
         }
 
         push @subs, @more_subs;
         if (@subs > $LJ::ESN::MAX_FILTER_SET) {
-            $split_per_cluster = 1;
+            $split_per_cluster = "hit_max";
+            warn "Hit max!  over $LJ::ESN::MAX_FILTER_SET = @subs\n" if $ENV{DEBUG};
             last;
         }
     }
 
     my $params = $evt->raw_params;
+
+    if ($ENV{DEBUG}) {
+        warn "split_per_cluster=[$split_per_cluster], params=[@$params]\n";
+    }
 
     # this is the slow/safe/on-error/lots-of-subscribers path
     if ($split_per_cluster) {
@@ -124,9 +140,14 @@ sub work {
 
     my @subs = $evt->subscriptions(cluster => $cid);
 
+    if ($ENV{DEBUG}) {
+        warn "find subs by cluster = [@subs]\n";
+    }
+
     # fast path:  job from phase2 to phase4, skipping filtering.
     if (@subs <= $LJ::ESN::MAX_FILTER_SET) {
         my @subjobs = LJ::ESN->jobs_of_unique_matching_subs($evt, @subs);
+        warn "fast path:  subjobs=@subjobs\n" if $ENV{DEBUG};
         return $job->replace_with(@subjobs) if @subjobs;
         $job->completed;
     }

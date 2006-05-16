@@ -58,8 +58,11 @@ sub new_from_raw_params {
 
 sub raw_params {
     my $self = shift;
+    use Data::Dumper;
+    my $ju = $self->event_journal or
+        Carp::confess("Event $self has no journal: " . Dumper($self));
     my @params = map { $_+0 } ($self->etypeid,
-                               $self->journal->{userid},
+                               $ju->{userid},
                                $self->{args}[0],
                                $self->{args}[1]);
     return wantarray ? @params : \@params;
@@ -126,7 +129,7 @@ sub arg2_sub_type     { undef }
 #            Don't override
 ############################################################################
 
-*journal = \&u;
+sub event_journal { &u; }
 sub u    {  $_[0]->{u} }
 sub arg1 {  $_[0]->{args}[0] }
 sub arg2 {  $_[0]->{args}[1] }
