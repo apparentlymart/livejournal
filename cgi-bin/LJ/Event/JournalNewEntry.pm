@@ -53,9 +53,8 @@ sub as_html {
     my $self = shift;
 
     my $journal  = $self->u;
-    my $ditemid  = $self->arg1;
 
-    my $entry = LJ::Entry->new($journal, ditemid => $ditemid);
+    my $entry = $self->entry;
     return "(Invalid entry)" unless $entry && $entry->valid;
 
     my $ju = LJ::ljuser($journal);
@@ -63,6 +62,15 @@ sub as_html {
     my $url = $entry->url;
 
     return "New <a href=\"$url\">entry</a> in $ju by $pu.";
+}
+
+sub entry {
+    my $self = shift;
+
+    my $journal  = $self->u;
+    my $ditemid  = $self->arg1;
+
+    return LJ::Entry->new($journal, ditemid => $ditemid);
 }
 
 sub subscription_as_html {
@@ -77,6 +85,12 @@ sub subscription_as_html {
     return "All new posts in $journaluser";
 }
 
+# when was this entry made?
+sub eventtime_unix {
+    my $self = shift;
+    my $entry = $self->entry;
+    return $entry ? $entry->logtime_unix : $self->SUPER::eventtime_unix;
+}
 
 sub title {
     return 'New post in journal';
