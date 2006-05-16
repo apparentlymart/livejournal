@@ -125,6 +125,12 @@ sub valid {
     return $self->{_loaded_row};
 }
 
+# when was this comment left?
+sub unixtime {
+    my $self = shift;
+    __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
+    return LJ::mysqldate_to_time($self->{datepost}, 0);
+}
 
 # returns LJ::User object for the poster of this entry, or undef for anonymous
 sub poster {
@@ -137,7 +143,6 @@ sub posterid {
     __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
     return $self->{posterid};
 }
-
 
 # class method:
 sub preload_rows {
