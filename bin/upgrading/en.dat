@@ -1346,6 +1346,8 @@ whether to allow <em>all</em>, <em>registered users</em>, or
 
 /delcomment.bml.title=Delete Comment
 
+/didyouknow/index.bml.title=Did you know?
+
 /didyouknow/index.bml.available.subtitle=Frank the Goat thinks you might enjoy these features:
 
 /didyouknow/index.bml.available.title=Currently Available
