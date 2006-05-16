@@ -546,7 +546,6 @@ function MonthPage::print_body {
   </script>""";
 
   # print the title and shit
-  print "<body>\n";
   "<div class=\"contentarea\">";
   print "<div class=\"BiggerTitle\">" + $this->view_title() +" - " +
     $.journal.username + "</div>";
@@ -613,7 +612,6 @@ function MonthPage::print_body {
 }
 
 function ReplyPage::print_body() {
-  print "<body>\n";
   print_user_top_crap($.entry, $.journal);
   s1_print_entry($.entry);
   print """<div class="centertext"><b>(<a href="$.entry.permalink_url">$*text_reply_back</a>)</b></div>\n""";
