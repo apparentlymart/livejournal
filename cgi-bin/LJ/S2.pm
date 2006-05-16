@@ -2458,9 +2458,47 @@ sub _Comment__get_link
     if ($key eq "watch_thread") {
         return $null_link if $LJ::DISABLED{esn};
         return $null_link unless $remote;
-        return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;dtalkid=$this->{'talkid'}",
-                            "Track Thread",
-                            LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20));
+
+        my $comment = LJ::Comment->new($u, dtalkid => $this->{talkid});
+        my $comment_watched = $remote->has_subscription(
+                                                        event   => "JournalNewComment",
+                                                        journal => $u,
+                                                        arg2    => $comment->jtalkid,
+                                                        );
+
+        my $track_img = 'btn_track.gif';
+
+        if ($comment_watched) {
+            $track_img = 'btn_tracking.gif';
+        } else {
+            # see if any parents are being watched
+            while ($comment && $comment->valid && $comment->parenttalkid) {
+                # check cache
+                $comment->{_watchedby} ||= {};
+                my $thread_watched = $comment->{_watchedby}->{$u->{userid}};
+
+                # not cached
+                if (! defined $thread_watched) {
+                    $thread_watched = $remote->has_subscription(
+                                                                event   => "JournalNewComment",
+                                                                journal => $u,
+                                                                arg2    => $comment->parenttalkid,
+                                                                );
+                }
+
+                $track_img = 'btn_tracked_thread.gif' if ($thread_watched);
+
+                # cache in this comment object if it's being watched by this user
+                $comment->{_watchedby}->{$u->{userid}} = $thread_watched;
+
+                $comment = $comment->parent;
+            }
+        }
+
+        return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;dtalkid=" .
+                            $this->{talkid},
+                             "Track New Comments",
+                             LJ::S2::Image("$LJ::IMGPREFIX/$track_img", 22, 20));
     }
 }
 
