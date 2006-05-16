@@ -23,6 +23,7 @@ local $LJ::_T_SMS_SEND = sub {
     my $sms = shift;
     my $rcpt = $sms->to_u or die "No destination user";
     $got_sms{$rcpt->{userid}} = $sms;
+    return 1;
 };
 
 my $proc_events = sub {
@@ -81,7 +82,7 @@ memcache_stress(sub {
 # post a friends-only entry in $u2, by $u2 and make sure $u1 doesn't get notified
 # post an entry in $ucomm, by $u2 and make sure $u1 gets notified
 # post an entry in $u1, by $ucomm and make sure $u1 doesn't get notified
-# post a friends-only entry in $ucomm, by $u2 and make sure $u1 doesn't get notified 
+# post a friends-only entry in $ucomm, by $u2 and make sure $u1 doesn't get notified
 sub test_post {
     my ($u1, $u2, $ucomm) = @_;
     my $sms;

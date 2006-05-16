@@ -65,8 +65,7 @@ sub notify {
     my $sms_obj = LJ::SMS->new
         ( to   => $u,
           text => $ev->as_sms );
-    $sms_obj->send;
-
+    return $sms_obj->send;
 }
 
 sub configured {

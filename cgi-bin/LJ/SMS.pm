@@ -57,8 +57,7 @@ sub set_to {
 sub send {
     my $self = shift;
     if (my $cv = $LJ::_T_SMS_SEND) {
-        $cv->($self);
-        return;
+        return $cv->($self);
     }
     if ($LJ::IS_DEV_SERVER) {
         return $self->send_jabber_dev_server;
