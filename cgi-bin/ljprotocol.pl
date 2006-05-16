@@ -963,6 +963,8 @@ sub postevent
     my $jitemid = LJ::alloc_user_counter($uowner, "L");
     return $fail->($err,501,"No itemid could be generated.") unless $jitemid;
 
+    # bring in LJ::Entry with Class::Autouse
+    LJ::Entry->can("dostuff");
     LJ::replycount_do($uowner, $jitemid, "init");
 
     # remove comments and logprops on new entry ... see comment by this sub for clarification
