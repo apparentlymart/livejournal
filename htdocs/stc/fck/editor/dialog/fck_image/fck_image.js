@@ -61,8 +61,8 @@ var oImageOriginal ;
 
 function UpdateOriginal( resetSize )
 {
-	if ( !eImgPreview )
-		return ;
+    	if ( !eImgPreview )
+    		return ;
 		
 	oImageOriginal = document.createElement( 'IMG' ) ;	// new Image() ;
 
@@ -98,8 +98,8 @@ window.onload = function()
 	UpdateOriginal() ;
 
 	// Set the actual uploader URL.
-	if ( FCKConfig.ImageUpload )
-		GetE('frmUpload').action = FCKConfig.ImageUploadURL ;
+        //	if ( FCKConfig.ImageUpload )
+        //		GetE('insobjform').action = FCKConfig.ImageUploadURL ;
 
 	window.parent.SetAutoSize( true ) ;
 
@@ -297,7 +297,7 @@ function SetPreviewElements( imageElement, linkElement )
 
 function UpdatePreview()
 {
-	if ( !eImgPreview || !eImgPreviewLink )
+    	if ( !eImgPreview || !eImgPreviewLink )
 		return ;
 
 	if ( GetE('txtUrl').value.length == 0 )
@@ -395,80 +395,229 @@ function OpenServerBrowser( type, url, width, height )
 
 var sActualBrowser ;
 
-function SetUrl( url, width, height, alt )
+function SetUrl( surl, furl, width, height, alt )
 {
 	if ( sActualBrowser == 'Link' )
 	{
-		GetE('txtLnkUrl').value = url ;
+		GetE('txtLnkUrl').value = surl ;
 		UpdatePreview() ;
 	}
 	else
 	{
-		GetE('txtUrl').value = url ;
+		GetE('txtUrl').value = surl ;
+		GetE('txtLnkUrl').value = furl ;
 		GetE('txtWidth').value = width ? width : '' ;
 		GetE('txtHeight').value = height ? height : '' ;
+                GetE('txtBorder').value	= 0;
 
 		if ( alt )
 			GetE('txtAlt').value = alt;
 
-		UpdatePreview() ;
-		UpdateOriginal( true ) ;
+		UpdatePreview( ) ;
+		UpdateOriginal( ) ;
 	}
 	
 	window.parent.SetSelectedTab( 'Info' ) ;
 }
 
-function OnUploadCompleted( errorNumber, fileUrl, fileName, customMsg )
-{
-	switch ( errorNumber )
-	{
-		case 0 :	// No errors
-			alert( 'Your file has been successfully uploaded' ) ;
-			break ;
-		case 1 :	// Custom error
-			alert( customMsg ) ;
-			return ;
-		case 101 :	// Custom warning
-			alert( customMsg ) ;
-			break ;
-		case 201 :
-			alert( 'A file with the same name is already available. The uploaded file has been renamed to "' + fileName + '"' ) ;
-			break ;
-		case 202 :
-			alert( 'Invalid file type' ) ;
-			return ;
-		case 203 :
-			alert( "Security error. You probably don't have enough permissions to upload. Please check your server." ) ;
-			return ;
-		default :
-			alert( 'Error on file upload. Error number: ' + errorNumber ) ;
-			return ;
-	}
+// Insert image functionality -- mostly from imgupload.bml // entry.js // original fck upload functionality
+var InObFCK = new Object;
 
-	sActualBrowser = ''
-	SetUrl( fileUrl ) ;
-	GetE('frmUpload').reset() ;
+InObFCK.fail = function (msg) {
+    alert("FAIL: " + msg);
+    return false;
+};
+
+var oUploadAllowedExtRegex      = new RegExp( FCKConfig.ImageUploadAllowedExtensions, 'i' ) ;
+var oUploadDeniedExtRegex       = new RegExp( FCKConfig.ImageUploadDeniedExtensions, 'i' ) ;
+
+InObFCK.onUpload = function (surl, furl, swidth, sheight) {
+    sActualBrowser = '';
+    SetUrl ( surl, furl, swidth, sheight );
+    GetE('insobjform').reset() ;
+};
+
+InObFCK.setupIframeHandlers = function () {
+    var el;
+
+    el = GetE("fromfile");
+    if (el) el.onfocus = function () { return InObFCK.selectRadio("fromfile"); };
+    el = GetE("fromfileentry");
+    if (el) el.onclick = el.onfocus = function () { return InObFCK.selectRadio("fromfile"); };
+    el = GetE("fromfb");
+    if (el) el.onfocus = function () { return InObFCK.selectRadio("fromfb"); };
+    el = GetE("btnPrev");
+    if (el) el.onclick = InObFCK.onButtonPrevious;
+
+};
+
+InObFCK.selectRadio = function (which) {
+    var radio = GetE(which);
+    if (! radio) return InObFCK.fail('no radio button');
+    radio.checked = true;
+
+    var fromfile = GetE('fromfileentry');
+    var submit   = GetE('btnNext');
+    if (! submit) return InObFCK.fail('no submit button');
+
+    // clear stuff
+    if (which != 'fromfile') {
+        var filediv = GetE('filediv');
+        filediv.innerHTML = filediv.innerHTML;
+    }
+
+    // focus and change next button
+    if (which == "fromfile") {
+        submit.value = 'Upload';
+        fromfile.focus();
+    } else {
+        submit.value = "Next -->";  // &#x2192 is a right arrow
+        //        fromfile.focus();
+    }
+
+    return true;
+};
+
+InObFCK.onSubmit = function () {
+    var fileradio = GetE('fromfile');
+    var fbradio   = GetE('fromfb');
+
+    var form = GetE('insobjform');
+    var sFile = GetE('fromfileentry').value ;
+    if (! form) return InObFCK.fail('no form');
+
+    var div_err = GetE('img_error');
+    if (! div_err) return InObFCK.fail('Unable to get error div');
+
+    var setEnc = function (vl) {
+        form.encoding = vl;
+        if (form.setAttribute) {
+            form.setAttribute("enctype", vl);
+        }
+    };
+
+    if (fileradio && fileradio.checked) {
+        if ( sFile.length == 0 )
+            {
+                alert( 'Please select a file to upload' ) ;
+                return false ;
+            }
+
+        if ( ( FCKConfig.ImageUploadAllowedExtensions.length > 0 && !oUploadAllowedExtRegex.test( sFile ) ) ||
+             ( FCKConfig.ImageUploadDeniedExtensions.length > 0 && oUploadDeniedExtRegex.test( sFile ) ) )
+            {
+                alert('Please only upload files in the formats of jpg, png, gif or tif.');
+                return false;
+            }
+
+                form.action = fileaction;
+                setEnc("multipart/form-data");
+                return true;
+    } else {
+        if (fbradio && fbradio.checked) {
+            InObFCK.fotobilderStepOne();
+            return false;
+        }
+    }
+
+    alert('unknown radio button checked');
+    return false;
+};
+
+InObFCK.showSelectorPage = function () {
+    var div_if = GetE("img_iframe_holder");
+    var div_fw = GetE("img_fromwhere");
+    div_fw.style.display = "";
+    div_if.style.display = "none";
+    InObFCK.setPreviousCb(null);
+
+        InObFCK.setTitle('Insert Image');
+};
+
+InObFCK.fotobilderStepOne = function () {
+    var div_if = GetE("img_iframe_holder");
+    var div_fw = GetE("img_fromwhere");
+    div_fw.style.display = "none";
+    div_if.style.display = "";
+    var url = fbroot + "/getgalsrte";
+
+    var titlebar = GetE('insObjTitle');
+
+    var navbar = GetE('insobjNav');
+
+    div_if.innerHTML = "<iframe width='100%' height='100%' id='fbstepframe' src=\"" + url + "\" frameborder='0'></iframe>";
+    div_if.style.border = '0px solid';
+
+    InObFCK.setPreviousCb(InObFCK.showSelectorPage);
 }
 
-var oUploadAllowedExtRegex	= new RegExp( FCKConfig.ImageUploadAllowedExtensions, 'i' ) ;
-var oUploadDeniedExtRegex	= new RegExp( FCKConfig.ImageUploadDeniedExtensions, 'i' ) ;
 
-function CheckUpload()
-{
-	var sFile = GetE('txtUploadFile').value ;
-	
-	if ( sFile.length == 0 )
-	{
-		alert( 'Please select a file to upload' ) ;
-		return false ;
-	}
-	
-	if ( ( FCKConfig.ImageUploadAllowedExtensions.length > 0 && !oUploadAllowedExtRegex.test( sFile ) ) ||
-		( FCKConfig.ImageUploadDeniedExtensions.length > 0 && oUploadDeniedExtRegex.test( sFile ) ) )
-	{
-		OnUploadCompleted( 202 ) ;
-		return false ;
-	}
-	
-	return true ;
-}
+InObFCK.setPreviousCb = function (cb) {
+    InObFCK.cbForBtnPrevious = cb;
+    GetE("btnPrev").style.display = cb ? "" : "none";
+};
+
+// all previous clicks come in here, then we route it to the registered previous handler
+InObFCK.onButtonPrevious = function () {
+    InObFCK.showNext();
+
+    if (InObFCK.cbForBtnPrevious)
+    return InObFCK.cbForBtnPrevious();
+
+    // shouldn't get here, but let's ignore the event (which would do nothing anyway)
+    return true;
+};
+
+InObFCK.setError = function (errstr) {
+    var div_err = GetE('img_error');
+    if (! div_err) return false;
+
+    div_err.innerHTML = errstr;
+    return true;
+};
+
+
+InObFCK.clearError = function () {
+    var div_err = GetE('img_error');
+    if (! div_err) return false;
+
+    div_err.innerHTML = '';
+    return true;
+};
+
+InObFCK.disableNext = function () {
+    var next = GetE('btnNext');
+    if (! next) return InObFCK.fail('no next button');
+
+    next.disabled = true;
+
+    return true;
+};
+
+InObFCK.enableNext = function () {
+    var next = GetE('btnNext');
+    if (! next) return InObFCK.fail('no next button');
+
+    next.disabled = false;
+
+    return true;
+};
+
+InObFCK.hideNext = function () {
+    var next = GetE('btnNext');
+    if (! next) return InObFCK.fail('no next button');
+    next.style.display = 'none'
+    return true;
+};
+
+InObFCK.showNext = function () {
+    var next = GetE('btnNext');
+    if (! next) return InObFCK.fail('no next button');
+    next.style.display = '';
+    return true;
+};
+
+InObFCK.setTitle = function (title) {
+    var wintitle = GetE('wintitle');
+    wintitle.innerHTML = title;
+};
