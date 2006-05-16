@@ -224,6 +224,11 @@ sub matches_filter {
     return 1;
 }
 
+# instance method. Feel free to override.
+sub eventtime_unix {
+    return time();
+}
+
 # instance method
 sub should_enqueue {
     my $self = shift;

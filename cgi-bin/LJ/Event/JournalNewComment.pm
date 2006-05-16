@@ -120,6 +120,13 @@ sub jtalkid {
     return $self->arg1;
 }
 
+# when was this comment left?
+sub eventtime_unix {
+    my $self = shift;
+    my $cmt = $self->comment;
+    return $cmt ? $cmt->unixtime : $self->SUPER::eventtime_unix;
+}
+
 sub comment {
     my $self = shift;
     return LJ::Comment->new($self->journal, jtalkid => $self->jtalkid);
