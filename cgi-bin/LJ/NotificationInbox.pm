@@ -133,7 +133,7 @@ sub enqueue {
                 arg1       => $evt->arg1,
                 arg2       => $evt->arg2,
                 state      => 'N',
-                createtime => time());
+                createtime => $evt->eventtime_unix);
 
     # insert this event into the eventqueue table
     $u->do("INSERT INTO notifyqueue (" . join(",", keys %item) . ") VALUES (" .

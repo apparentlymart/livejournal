@@ -227,9 +227,10 @@ sub matches_filter {
     return 1;
 }
 
-# instance method. Feel free to override.
+# instance method. Override if possible.
+# returns when the event happened, or undef if unknown
 sub eventtime_unix {
-    return time();
+    return undef;
 }
 
 # instance method

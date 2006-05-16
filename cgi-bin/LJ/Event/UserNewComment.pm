@@ -18,6 +18,18 @@ sub title {
     return 'User Left a Comment';
 }
 
+# when was this comment left?
+sub eventtime_unix {
+    my $self = shift;
+    my $cmt = $self->comment;
+    return $cmt ? $cmt->unixtime : $self->SUPER::eventtime_unix;
+}
+
+sub comment {
+    my $self = shift;
+    return LJ::Comment->new($self->journal, jtalkid => $self->arg1);
+}
+
 sub journal_sub_title { 'Journal' }
 sub journal_sub_type  { 'mutual_friend' }
 
