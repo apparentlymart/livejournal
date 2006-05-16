@@ -28,11 +28,12 @@ sub jobs_of_unique_matching_subs {
     my %has_done = ();
     my @subjobs;
 
+    my $params = $evt->raw_params;
+
     if ($ENV{DEBUG}) {
-        warn "jobs of unique matching subs: " . Dumper($evt) . "\n";
+        warn "jobs of unique subs (@subs) matching event (@$params)\n";
     }
 
-    my $params = $evt->raw_params;
     foreach my $s (grep { $evt->matches_filter($_) } @subs) {
         next if $has_done{$s->unique}++;
         push @subjobs, TheSchwartz::Job->new(
@@ -58,7 +59,7 @@ sub work {
     my $evt = eval { LJ::Event->new_from_raw_params(@$a) };
 
     if ($ENV{DEBUG}) {
-        warn "FiredEvent for " . Dumper($evt) . "\n";
+        warn "FiredEvent for $evt (@$a)\n";
     }
 
     unless ($evt) {

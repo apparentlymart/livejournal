@@ -23,7 +23,7 @@ sub theschwartz {
     return $theschwartz if $theschwartz;
 
     my $fakedb = "$ENV{LJHOME}/t-theschwartz.sqlite";
-    unlink $fakedb;
+    unlink $fakedb, "$fakedb-journal";
     my $fakedsn = "dbi:SQLite:dbname=$fakedb";
 
     my $load_sql = sub {
