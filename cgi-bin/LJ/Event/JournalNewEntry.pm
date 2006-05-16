@@ -30,7 +30,7 @@ sub matches_filter {
     return 0 unless $entry->visible_to($subscr->owner);
 
     # all posts by friends
-    return 1 if ! $subscr->journalid && LJ::is_friend($subscr->owner, $self->journal);
+    return 1 if ! $subscr->journalid && LJ::is_friend($subscr->owner, $self->event_journal);
 
     # a post on a specific journal
     return LJ::u_equals($subscr->journal, $evtju);
