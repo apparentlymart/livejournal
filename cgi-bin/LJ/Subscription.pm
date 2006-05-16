@@ -10,13 +10,17 @@ use Class::Autouse qw(
 my @subs_fields = qw(userid subid is_dirty journalid etypeid arg1 arg2
                      ntypeid createtime expiretime flags);
 
+my %instances = ();
 
-sub new_by_id {
+*new_by_id = \&instance_from_id;
+sub instance_from_id {
     my ($class, $u, $subid) = @_;
     croak "subscriptions_of_user requires a valid 'u' object"
         unless LJ::isu($u);
     croak "invalid subscription id passed"
         unless defined $subid && int($subid) > 0;
+
+    return $instances{$subid} if $instances{$subid};
 
     my $row = $u->selectrow_hashref
         ("SELECT userid, subid, is_dirty, journalid, etypeid, " .
@@ -24,13 +28,17 @@ sub new_by_id {
          "FROM subs WHERE userid=? AND subid=?", undef, $u->{userid}, $subid);
     die $u->errstr if $u->err;
 
-    return $class->new_from_row($row);
+    my $self = $class->new_from_row($row);
+    $instances{$subid} = $self;
+    return $self;
 }
 
 sub subscriptions_of_user {
     my ($class, $u) = @_;
     croak "subscriptions_of_user requires a valid 'u' object"
         unless LJ::isu($u);
+
+    return @{$u->{_subscriptions}} if defined $u->{_subscriptions};
 
     my $sth = $u->prepare("SELECT userid, subid, is_dirty, journalid, etypeid, " .
                           "arg1, arg2, ntypeid, createtime, expiretime, flags " .
@@ -42,6 +50,9 @@ sub subscriptions_of_user {
     while (my $row = $sth->fetchrow_hashref) {
         push @subs, LJ::Subscription->new_from_row($row);
     }
+
+    $u->{_subscriptions} = \@subs;
+
     return @subs;
 }
 
@@ -97,6 +108,9 @@ sub delete {
         or croak "Invalid subsciption";
 
     my $u = $self->owner;
+
+    # delete from cache in user
+    undef $u->{_subscriptions};
 
     return $u->do("DELETE FROM subs WHERE subid=?", undef, $subid);
 }
@@ -165,6 +179,9 @@ sub create {
                            'VALUES (' . join( ',', map {'?'} @values ) . ')' );
     $sth->execute( @values );
     LJ::errobj($u)->throw if $u->err;
+
+    $u->{_subscriptions} ||= [];
+    push @{$u->{_subscriptions}}, $self;
 
     return $self;
 }
