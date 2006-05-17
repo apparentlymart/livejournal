@@ -16,7 +16,7 @@ if ($LJ::DISABLED{esn}) {
 }
 
 test_esn_flow(sub {
-    my ($u1, $u2) = @_;
+    my ($u1, $u2, $path) = @_;
     $u1->set_sms_number(12345);
     my $subsc = $u1->subscribe(
                                 event   => "JournalNewEntry",
@@ -36,7 +36,7 @@ test_esn_flow(sub {
 
     LJ::Event->process_fired_events;
 
-    ok($got_sms, "got the SMS");
+    ok($got_sms, "got the SMS on path $path");
     is($got_sms->to, 12345, "to right place");
 
     # remove subscription
@@ -47,13 +47,19 @@ sub test_esn_flow {
     my $cv = shift;
     my $u1 = temp_user();
     my $u2 = temp_user();
-    $cv->($u1, $u2);
+    foreach my $path ('1-4', '1-2-4', '1-2-3-4') {
+        if ($path eq '1-2-4') {
+            local $LJ::_T_ESN_FORCE_P1_P2 = 1;
+            $cv->($u1, $u2, $path);
+        } elsif ($path eq '1-2-3-4') {
+            local $LJ::_T_ESN_FORCE_P1_P2 = 1;
+            local $LJ::_T_ESN_FORCE_P2_P3 = 1;
+            $cv->($u1, $u2, $path);
+        } else {
+            $cv->($u1, $u2, $path);
+        }
+    }
 }
-
-# create another user and make them friends
-#my $u2 = temp_user();
-#LJ::add_friend($u2, $u);
-
 
 1;
 

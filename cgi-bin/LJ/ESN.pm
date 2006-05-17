@@ -98,7 +98,7 @@ sub work {
     }
 
     # this is the slow/safe/on-error/lots-of-subscribers path
-    if ($split_per_cluster) {
+    if ($LJ::_T_ESN_FORCE_P1_P2 || $split_per_cluster) {
         my @subjobs;
         foreach my $cid (@LJ::CLUSTERS) {
             push @subjobs, TheSchwartz::Job->new(
@@ -146,7 +146,7 @@ sub work {
     }
 
     # fast path:  job from phase2 to phase4, skipping filtering.
-    if (@subs <= $LJ::ESN::MAX_FILTER_SET) {
+    if (@subs <= $LJ::ESN::MAX_FILTER_SET && ! $LJ::_T_ESN_FORCE_P2_P3) {
         my @subjobs = LJ::ESN->jobs_of_unique_matching_subs($evt, @subs);
         warn "fast path:  subjobs=@subjobs\n" if $ENV{DEBUG};
         return $job->replace_with(@subjobs) if @subjobs;
