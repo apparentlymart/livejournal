@@ -1435,8 +1435,10 @@ sub db_logger
     my $uri = $r->uri;
     my $ctype = $rl->content_type;
 
-    return if $ctype =~ m!^image/! and $LJ::DONT_LOG_IMAGES;
-    return if $uri =~ m!^/(img|userpic)/! and $LJ::DONT_LOG_IMAGES;
+    if ($LJ::DONT_LOG_IMAGES) {
+        return if $ctype =~ m!^image/!;
+        return if $uri =~ m!^/(img|userpic)/!;
+    }
 
     my $skip_db = 0;
     if (defined $LJ::LOG_PERCENTAGE && rand(100) > $LJ::LOG_PERCENTAGE) {
@@ -1468,8 +1470,12 @@ sub db_logger
         }
     }
 
+    # allow for a callback specified in ljconfig which allows
+    # us to do arbitrary things during this logging phase
+    my $cb = ref $LJ::CB_PRE_LOG eq 'CODE' ? $LJ::CB_PRE_LOG : undef;
+
     # why go on if we have nowhere to log to?
-    return unless $dbl || @dinsertd_socks;
+    return unless $dbl || @dinsertd_socks || $cb;
 
     $ctype =~ s/;.*//;  # strip charset
 
@@ -1617,6 +1623,9 @@ sub db_logger
                );
         }
     }
+
+    # run callback with the hash we've constructed above
+    $cb->($var) if $cb;
 
     if ($dbl) {
         my $delayed = $LJ::IMMEDIATE_LOGGING ? "" : "DELAYED";
