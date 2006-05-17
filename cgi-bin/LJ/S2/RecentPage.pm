@@ -195,6 +195,10 @@ sub RecentPage
         }
         my $userpic = Image_userpic($pu, 0, $logprops{$itemid}->{'picture_keyword'});
 
+        if ($security eq "public") {
+            $LJ::REQ_GLOBAL{'first_public_text'} ||= $text;
+        }
+
         my $entry = $lastentry = Entry($u, {
             'subject' => $subject,
             'text' => $text,

@@ -2929,9 +2929,10 @@ sub Page__print_ad
     my ($ctx, $this, $type) = @_;
 
     my $ad = LJ::ads(
-                     type   => 'journal',
-                     orient => $type,
-                     user   => $LJ::S2::CURR_PAGE->{'journal'}->{'username'},
+                     type    => 'journal',
+                     orient  => $type,
+                     user    => $LJ::S2::CURR_PAGE->{'journal'}->{'username'},
+                     pubtext => $LJ::REQ_GLOBAL{'first_public_text'},
                      );
     return '' unless $ad;
 

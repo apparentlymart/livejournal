@@ -1223,23 +1223,6 @@ sub create_view_lastn
             });
     }
 
-    if ($LJ::USE_ADS && $show_ad) {
-        $lastn_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'LASTN_SKYSCRAPER_AD',
-                                                          { "ad" => LJ::ads( type => "journal",
-                                                                             orient => 'Journal-Skyscraper',
-                                                                             user => $u->{user}), });
-        $lastn_page{'5linkunit_ad'} = LJ::fill_var_props($vars, 'LASTN_5LINKUNIT_AD',
-                                                         { "ad" => LJ::ads( type => "journal",
-                                                                            orient => 'Journal-5LinkUnit',
-                                                                            user => $u->{user}), });
-        $lastn_page{'open_skyscraper_ad'}  = $vars->{'LASTN_OPEN_SKYSCRAPER_AD'};
-        $lastn_page{'close_skyscraper_ad'} = $vars->{'LASTN_CLOSE_SKYSCRAPER_AD'};
-    }
-    if ($LJ::USE_CONTROL_STRIP && $show_control_strip) {
-        my $control_strip = LJ::control_strip(user => $u->{user});
-        $lastn_page{'control_strip'} = $control_strip;
-    }
-
     # spit out the S1
 
   ENTRY:
@@ -1370,6 +1353,10 @@ sub create_view_lastn
                 LJ::fill_var_props($vars, 'LASTN_ALTPOSTER', \%lastn_altposter);
         }
 
+        if ($security eq "public") {
+            $LJ::REQ_GLOBAL{'first_public_text'} ||= $event;
+        }
+
         my $var = 'LASTN_EVENT';
         if ($security eq "private" &&
             $vars->{'LASTN_EVENT_PRIVATE'}) { $var = 'LASTN_EVENT_PRIVATE'; }
@@ -1450,6 +1437,26 @@ sub create_view_lastn
         $lastn_page{'skiplinks'} =
             LJ::fill_var_props($vars, 'LASTN_SKIP_LINKS', \%skiplinks);
     }
+
+    # ads and control strip
+    if ($LJ::USE_ADS && $show_ad) {
+        $lastn_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'LASTN_SKYSCRAPER_AD',
+                                                          { "ad" => LJ::ads( type => "journal",
+                                                                             orient => 'Journal-Skyscraper',
+                                                                             pubtext => $LJ::REQ_GLOBAL{'first_public_text'},
+                                                                             user => $u->{user}), });
+        $lastn_page{'5linkunit_ad'} = LJ::fill_var_props($vars, 'LASTN_5LINKUNIT_AD',
+                                                         { "ad" => LJ::ads( type => "journal",
+                                                                            orient => 'Journal-5LinkUnit',
+                                                                            user => $u->{user}), });
+        $lastn_page{'open_skyscraper_ad'}  = $vars->{'LASTN_OPEN_SKYSCRAPER_AD'};
+        $lastn_page{'close_skyscraper_ad'} = $vars->{'LASTN_CLOSE_SKYSCRAPER_AD'};
+    }
+    if ($LJ::USE_CONTROL_STRIP && $show_control_strip) {
+        my $control_strip = LJ::control_strip(user => $u->{user});
+        $lastn_page{'control_strip'} = $control_strip;
+    }
+
 
     $$ret = LJ::fill_var_props($vars, 'LASTN_PAGE', \%lastn_page);
 
@@ -1552,23 +1559,6 @@ sub create_view_friends
 
     $friends_page{'urlcalendar'} = "$journalbase/calendar";
     $friends_page{'urllastn'} = "$journalbase/";
-
-    if ($LJ::USE_ADS && $show_ad) {
-        $friends_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'FRIENDS_SKYSCRAPER_AD',
-                                                            { "ad" => LJ::ads( type => "journal",
-                                                                               orient => 'Journal-Skyscraper',
-                                                                               user => $u->{user}), });
-        $friends_page{'5linkunit_ad'} = LJ::fill_var_props($vars, 'FRIENDS_5LINKUNIT_AD',
-                                                           { "ad" => LJ::ads( type => "journal",
-                                                                              orient => 'Journal-5LinkUnit',
-                                                                              user => $u->{user}), });
-        $friends_page{'open_skyscraper_ad'}  = $vars->{'FRIENDS_OPEN_SKYSCRAPER_AD'};
-        $friends_page{'close_skyscraper_ad'} = $vars->{'FRIENDS_CLOSE_SKYSCRAPER_AD'};
-    }
-    if ($LJ::USE_CONTROL_STRIP && $show_control_strip) {
-        my $control_strip = LJ::control_strip(user => $u->{user});
-        $friends_page{'control_strip'} = $control_strip;
-    }
 
     $friends_page{'events'} = "";
 
@@ -1849,6 +1839,10 @@ sub create_view_friends
                        $friends{$friendid}),
         });
 
+        if ($security eq "public") {
+            $LJ::REQ_GLOBAL{'first_public_text'} ||= $event;
+        }
+
         my $var = 'FRIENDS_EVENT';
         if ($security eq "private" &&
             $vars->{'FRIENDS_EVENT_PRIVATE'}) { $var = 'FRIENDS_EVENT_PRIVATE'; }
@@ -1943,6 +1937,26 @@ sub create_view_friends
         $friends_page{'skiplinks'} =
             LJ::fill_var_props($vars, 'FRIENDS_SKIP_LINKS', \%skiplinks);
     }
+
+    ## ads and control strip
+    if ($LJ::USE_ADS && $show_ad) {
+        $friends_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'FRIENDS_SKYSCRAPER_AD',
+                                                            { "ad" => LJ::ads( type => "journal",
+                                                                               orient => 'Journal-Skyscraper',
+                                                                               pubtext => $LJ::REQ_GLOBAL{'first_public_text'},
+                                                                               user => $u->{user}), });
+        $friends_page{'5linkunit_ad'} = LJ::fill_var_props($vars, 'FRIENDS_5LINKUNIT_AD',
+                                                           { "ad" => LJ::ads( type => "journal",
+                                                                              orient => 'Journal-5LinkUnit',
+                                                                              user => $u->{user}), });
+        $friends_page{'open_skyscraper_ad'}  = $vars->{'FRIENDS_OPEN_SKYSCRAPER_AD'};
+        $friends_page{'close_skyscraper_ad'} = $vars->{'FRIENDS_CLOSE_SKYSCRAPER_AD'};
+    }
+    if ($LJ::USE_CONTROL_STRIP && $show_control_strip) {
+        my $control_strip = LJ::control_strip(user => $u->{user});
+        $friends_page{'control_strip'} = $control_strip;
+    }
+
 
     $$ret .= "<base target='_top' />" if ($get->{'mode'} eq "framed");
     $$ret .= LJ::fill_var_props($vars, 'FRIENDS_PAGE', \%friends_page);

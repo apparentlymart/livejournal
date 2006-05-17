@@ -284,6 +284,10 @@ sub FriendsPage
             $text .= LJ::S2::get_tags_text($opts->{ctx}, \@taglist);
         }
 
+        if ($security eq "public") {
+            $LJ::REQ_GLOBAL{'first_public_text'} ||= $text;
+        }
+
         my $entry = Entry($u, {
             'subject' => $subject,
             'text' => $text,

@@ -1862,6 +1862,7 @@ sub ads {
     my $ctx      = delete $opts{'type'};
     my $pagetype = delete $opts{'orient'};
     my $user     = delete $opts{'user'};
+    my $pubtext  = delete $opts{'pubtext'};
 
     my $debug = $LJ::DEBUG{'ads'};
 
@@ -1996,7 +1997,10 @@ sub ads {
     $adhtml .= "<h4 style='margin-bottom: 2px'>$label</h4>";
 
     if ($debug) {
-        $adhtml .= "<div style='width: $adcall{width}px; height: $adcall{height}px; border: 1px solid green; color: #ffc0c0'></div>";
+        my $cleanpub = $pubtext;
+        $cleanpub =~ s/<.+?>//g;
+        my $ehpub = LJ::ehtml($cleanpub) || "[no text targetting]";
+        $adhtml .= "<div style='width: $adcall{width}px; height: $adcall{height}px; border: 1px solid green; color: #ff0000'>$ehpub</div>";
     } else {
         # Iframe with call to ad targetting server
         $adhtml .= "<iframe src='${LJ::ADSERVER}?$adparams' frameborder='0' scrolling='no' id='adframe' ";

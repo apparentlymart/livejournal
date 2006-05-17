@@ -30,7 +30,7 @@ sub DayPage
     if ($opts->{'pathextra'} =~ m!^/(\d\d\d\d)/(\d\d)/(\d\d)\b!) {
         ($month, $day, $year) = ($2, $3, $1);
     }
-    
+
     $opts->{'errors'} = [];
     if ($year !~ /^\d+$/) { push @{$opts->{'errors'}}, "Corrupt or non-existant year."; }
     if ($month !~ /^\d+$/) { push @{$opts->{'errors'}}, "Corrupt or non-existant month."; }
@@ -42,7 +42,7 @@ sub DayPage
     return if @{$opts->{'errors'}};
 
     $p->{'date'} = Date($year, $month, $day);
-    
+
     my $secwhere = "AND security='public'";
     my $viewall = 0;
     my $viewsome = 0; # see public posts from suspended users
@@ -50,7 +50,7 @@ sub DayPage
 
         # do they have the viewall priv?
         if ($get->{'viewall'} && LJ::check_priv($remote, "canview")) {
-            LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
+            LJ::statushistory_add($u->{'userid'}, $remote->{'userid'},
                                   "viewall", "day: $user, statusvis: $u->{'statusvis'}");
             $viewall = LJ::check_priv($remote, 'canview', '*');
             $viewsome = $viewall || LJ::check_priv($remote, 'canview', 'suspended');
@@ -75,7 +75,7 @@ sub DayPage
     my $dateformat = "%Y %m %d %H %i %s %w"; # yyyy mm dd hh mm ss day_of_week
     my $sth = $dbcr->prepare("SELECT jitemid AS itemid, posterid, security, DATE_FORMAT(eventtime, \"$dateformat\") AS 'alldatepart', anum ".
                              "FROM log2 " .
-                             "WHERE journalid=$u->{'userid'} AND year=$year AND month=$month AND day=$day $secwhere " . 
+                             "WHERE journalid=$u->{'userid'} AND year=$year AND month=$month AND day=$day $secwhere " .
                              "ORDER BY eventtime, logtime LIMIT 200");
     $sth->execute;
 
@@ -85,7 +85,7 @@ sub DayPage
 
     # load 'opt_ljcut_disable_lastn' prop for $remote.
     LJ::load_user_props($remote, "opt_ljcut_disable_lastn");
-    
+
     ### load the log properties
     my %logprops = ();
     my $logtext;
@@ -110,7 +110,7 @@ sub DayPage
   ENTRY:
     foreach my $item (@items)
     {
-        my ($posterid, $itemid, $security, $alldatepart, $anum) = 
+        my ($posterid, $itemid, $security, $alldatepart, $anum) =
             map { $item->{$_} } qw(posterid itemid security alldatepart anum);
 
         my $replycount = $logprops{$itemid}->{'replycount'};
@@ -125,9 +125,9 @@ sub DayPage
         # don't show posts from suspended users
         next ENTRY if $apu{$posterid} && $apu{$posterid}->{'statusvis'} eq 'S' && ! $viewsome;
 
-	if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
-	    LJ::item_toutf8($u, \$subject, \$text, $logprops{$itemid});
-	}
+        if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
+            LJ::item_toutf8($u, \$subject, \$text, $logprops{$itemid});
+        }
 
         LJ::CleanHTML::clean_subject(\$subject) if $subject;
 
@@ -174,6 +174,10 @@ sub DayPage
 
         if ($opts->{enable_tags_compatibility} && @taglist) {
             $text .= LJ::S2::get_tags_text($opts->{ctx}, \@taglist);
+        }
+
+        if ($security eq "public") {
+            $LJ::REQ_GLOBAL{'first_public_text'} ||= $text;
         }
 
         my $entry = Entry($u, {
@@ -223,10 +227,10 @@ sub DayPage
         $nxday = 1;
         if (++$nxmonth > 12) { ++$nxyear; $nxmonth=1; }
     }
-    
-    $p->{'prev_url'} = "$u->{'_journalbase'}/" . sprintf("%04d/%02d/%02d/", $pdyear, $pdmonth, $pdday); 
+
+    $p->{'prev_url'} = "$u->{'_journalbase'}/" . sprintf("%04d/%02d/%02d/", $pdyear, $pdmonth, $pdday);
     $p->{'prev_date'} = Date($pdyear, $pdmonth, $pdday);
-    $p->{'next_url'} = "$u->{'_journalbase'}/" . sprintf("%04d/%02d/%02d/", $nxyear, $nxmonth, $nxday); 
+    $p->{'next_url'} = "$u->{'_journalbase'}/" . sprintf("%04d/%02d/%02d/", $nxyear, $nxmonth, $nxday);
     $p->{'next_date'} = Date($nxyear, $nxmonth, $nxday);
 
     return $p;

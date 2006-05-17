@@ -381,6 +381,10 @@ sub EntryPage_entry
         $event .= LJ::S2::get_tags_text($opts->{ctx}, \@taglist);
     }
 
+    if ($entry->security eq "public") {
+        $LJ::REQ_GLOBAL{'first_public_text'} = $event;
+    }
+
     my $s2entry = Entry($u, {
         'subject' => $entry->subject_html,
         'text' => $event,
