@@ -577,9 +577,6 @@ _code?>
             # opts
             $POST{'opt_showmutualfriends'} = $POST{'opt_showmutualfriends'} ? 1 : 0;
             $POST{'opt_hidefriendofs'} = $POST{'opt_hidefriendofs'} ? 0 : 1;
-            if ($POST{'opt_logcommentips'} ne "N" &&
-                $POST{'opt_logcommentips'} ne "S" &&
-                $POST{'opt_logcommentips'} ne "A") { $POST{'opt_logcommentips'} = "N"; }
             $POST{'opt_showschools'} = 'N' unless $POST{'opt_showschools'} =~ m/^(N|R|Y|F)$/;
             # undefined means show to everyone, "N" means don't show
             $POST{'opt_showbday'} = $POST{'opt_showbday'} ? undef : "N";
