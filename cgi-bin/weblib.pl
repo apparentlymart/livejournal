@@ -1864,6 +1864,13 @@ sub ads {
     my $user     = delete $opts{'user'};
     my $pubtext  = delete $opts{'pubtext'};
 
+    # first 500 words
+    $pubtext =~ s/<.+?>//g;
+    my @words = split(/\s+/, $pubtext);
+    my $max_words = 500;
+    @words = $words[0..$max_words-1] if @words > $max_words;
+    $pubtext = join(' ', @words);
+
     my $debug = $LJ::DEBUG{'ads'};
 
     return '' unless $debug || LJ::run_hook('should_show_ad', {
@@ -1931,6 +1938,8 @@ sub ads {
 
     $adcall{url}     = 'http://' . $r->header_in('Host') . $r->uri;
 
+    $adcall{contents} = $pubtext;
+
     return $addetails unless ref $addetails eq "HASH";
 
     # addetails is a hashref now:
@@ -1997,9 +2006,7 @@ sub ads {
     $adhtml .= "<h4 style='margin-bottom: 2px'>$label</h4>";
 
     if ($debug) {
-        my $cleanpub = $pubtext;
-        $cleanpub =~ s/<.+?>//g;
-        my $ehpub = LJ::ehtml($cleanpub) || "[no text targetting]";
+        my $ehpub = LJ::ehtml($pubtext) || "[no text targetting]";
         $adhtml .= "<div style='width: $adcall{width}px; height: $adcall{height}px; border: 1px solid green; color: #ff0000'>$ehpub</div>";
     } else {
         # Iframe with call to ad targetting server
