@@ -8,6 +8,9 @@ _info?>
 
     BML::set_content_type("text/html");
 
+    my $r = Apache->request;
+    $r->notes("codepath" => "bml.misc.adserver");
+
     my $ad_engine = LJ::run_hook('ad_engine', {
         pagetype => $GET{channel},
     });
