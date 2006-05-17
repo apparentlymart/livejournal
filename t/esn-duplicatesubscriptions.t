@@ -1,7 +1,7 @@
 # -*-perl-*-
 
 use strict;
-use Test::More 'no_plan';
+use Test::More tests => 7;
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 use LJ::Event;
@@ -18,6 +18,7 @@ local $LJ::_T_SMS_SEND = sub {
     my $sms = shift;
     my $rcpt = $sms->to_u or die "No destination user";
     $got_sms{$rcpt->{userid}}++;
+    return 1;
 };
 
 my $proc_events = sub {

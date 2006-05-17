@@ -1,7 +1,7 @@
 # -*-perl-*-
 
 use strict;
-use Test::More 'no_plan';
+use Test::More tests => 123;
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 require 'ljprotocol.pl';
@@ -37,8 +37,13 @@ my $got_notified = sub {
     return $got_sms{$u->{userid}};
 };
 
+my $mem_round = 0;
+my $s1s2;
+
 # testing case S1 above:
 memcache_stress(sub {
+    $mem_round++;
+
     test_esn_flow(sub {
         my ($u1, $u2, $ucomm) = @_;
 
@@ -51,7 +56,8 @@ memcache_stress(sub {
 
         ok($subsc, "made S1 subscription");
 
-        test_post($u1, $u2);
+        $s1s2 = "S1";
+        test_post($u1, $u2, $ucomm);
 
         ok($subsc->delete, "Deleted subscription");
 
@@ -65,7 +71,8 @@ memcache_stress(sub {
 
         ok($subsc, "made S2 subscription");
 
-        test_post($u1, $u2);
+        $s1s2 = "S2";
+        test_post($u1, $u2, $ucomm);
 
         # remove $u2 from $u1's friends list, post in $u2 and make sure $u1 isn't notified
         LJ::remove_friend($u1, $u2); # make u1 friend u2
@@ -91,6 +98,8 @@ sub test_post {
         my %opts = $usejournal ? ( usejournal => $ucomm->{user} ) : ();
         my $suffix = $usejournal ? " in comm" : "";
 
+        my $state = "(state: mem=$mem_round,s1s2=$s1s2,usejournal=$usejournal)";
+
         # post an entry in $u2
         my $u2e1 = eval { $u2->t_post_fake_entry(%opts) };
         ok($u2e1, "made a post$suffix");
@@ -98,8 +107,8 @@ sub test_post {
 
         # make sure we got notification
         $sms = $got_notified->($u1);
-        ok($sms, "got the SMS");
-        is(eval { $sms->to }, 12345, "to right place");
+        ok($sms, "got the SMS $state");
+        is(eval { $sms->to }, 12345, "to right place $state");
 
         # S1 failing case:
         # post an entry on $u1, where nobody's subscribed
