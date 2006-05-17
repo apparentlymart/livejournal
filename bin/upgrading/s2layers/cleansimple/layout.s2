@@ -62,29 +62,6 @@ set view_entry_disabled = false;
 set show_entrynav_icons = true;
 set linklist_support = false;
 
-propgroup fonts {
-  property use font_base;
-  property use font_fallback;
-  property string font_topbar_base {
-      des = "Preferred font for top bar";
-      note = "As with the main font, leave blank if you don't care.";
-  }
-  property string font_topbar_fallback {
-      des = "Alternative font style for top bar";
-      values = "sans-serif|Sans-serif|serif|Serif|cursive|Cursive|monospace|Monospaced|none|Use browser's default";
-  }
-  property string font_sidebar_base {
-      des = "Preferred font for side navigation bar";
-      note = "As with the main font, leave blank if you don't care.";
-  }
-  property string font_sidebar_fallback {
-      des = "Alternative font style for side navigation bar";
-      values = "sans-serif|Sans-serif|serif|Serif|cursive|Cursive|monospace|Monospaced|none|Use browser's default";
-  }
-}
-set font_topbar_fallback = "none";
-set font_sidebar_fallback = "none";
-
 propgroup colors {
   property Color body_bgcolor {
       des = "Page border color";
@@ -173,9 +150,32 @@ set comment_bar_two_fgcolor = "#000000";
 set comment_bar_screened_bgcolor = "#dddddd";
 set comment_bar_screened_fgcolor = "#000000";
 
-propgroup background {
+propgroup fonts {
+  property use font_base;
+  property use font_fallback;
+  property string font_topbar_base {
+      des = "Preferred font for top bar";
+      note = "As with the main font, leave blank if you don't care.";
+  }
+  property string font_topbar_fallback {
+      des = "Alternative font style for top bar";
+      values = "sans-serif|Sans-serif|serif|Serif|cursive|Cursive|monospace|Monospaced|none|Use browser's default";
+  }
+  property string font_sidebar_base {
+      des = "Preferred font for side navigation bar";
+      note = "As with the main font, leave blank if you don't care.";
+  }
+  property string font_sidebar_fallback {
+      des = "Alternative font style for side navigation bar";
+      values = "sans-serif|Sans-serif|serif|Serif|cursive|Cursive|monospace|Monospaced|none|Use browser's default";
+  }
+}
+set font_topbar_fallback = "none";
+set font_sidebar_fallback = "none";
+
+propgroup images {
   property string page_background_image {
-    des = "URL to an image to be used for the page background";
+    des = "Background image URL";
   }
 
   property string page_background_repeat {
