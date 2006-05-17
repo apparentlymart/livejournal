@@ -106,15 +106,14 @@ sub work {
                                                  arg      => [ $cid, $params ],
                                                  );
         }
-        $job->replace_with(@subjobs) if @subjobs;
-        return $job->completed;
+        return $job->replace_with(@subjobs);
     }
 
     # the fast path, filter those max 5,000 subscriptions down to ones that match,
     # then split right into processing those notification methods
     my @subjobs = LJ::ESN->jobs_of_unique_matching_subs($evt, @subs);
-    return $job->replace_with(@subjobs) if @subjobs;
-    $job->completed;
+
+    return $job->replace_with(@subjobs);
 }
 
 
@@ -134,7 +133,7 @@ sub work {
     my ($class, $job) = @_;
     my $a = $job->arg;
     my ($cid, $e_params) = @$a;
-    my $evt = eval { LJ::Event->new_from_raw_params(@$a) } or
+    my $evt = eval { LJ::Event->new_from_raw_params(@$e_params) } or
         die "Couldn't load event";
     my $dbch = LJ::get_cluster_master($cid) or
         die "Couldn't connect to cluster \#cid";
@@ -149,8 +148,7 @@ sub work {
     if (@subs <= $LJ::ESN::MAX_FILTER_SET && ! $LJ::_T_ESN_FORCE_P2_P3) {
         my @subjobs = LJ::ESN->jobs_of_unique_matching_subs($evt, @subs);
         warn "fast path:  subjobs=@subjobs\n" if $ENV{DEBUG};
-        return $job->replace_with(@subjobs) if @subjobs;
-        $job->completed;
+        return $job->replace_with(@subjobs);
     }
 
     # slow path:  too many jobs to filter at once.  group it into sets
@@ -199,8 +197,8 @@ sub work {
                                              );
     }
 
-    return $job->replace_with(@subjobs) if @subjobs;
-    $job->completed;
+    warn "Filter sub jobs: [@subjobs]\n" if $ENV{DEBUG};
+    return $job->replace_with(@subjobs);
 }
 
 # this is phase3 of processing.  see doc/notes/esn-design.txt
@@ -211,7 +209,7 @@ sub work {
     my ($class, $job) = @_;
     my $a = $job->arg;
     my ($e_params, $sublist) = @$a;
-    my $evt = eval { LJ::Event->new_from_raw_params(@$a) } or
+    my $evt = eval { LJ::Event->new_from_raw_params(@$e_params) } or
         die "Couldn't load event: $@";
 
     my @subjobs;
