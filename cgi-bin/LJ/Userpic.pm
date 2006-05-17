@@ -351,7 +351,7 @@ sub create {
     if ($size > $MAX_UPLOAD) {
         push @errors, LJ::errobj("Userpic::Bytesize",
                                  size => $size,
-                                 max  => $MAX_UPLOAD);
+                                 max  => int($MAX_UPLOAD / 1024));
     }
 
     unless ($filetype eq "GIF" || $filetype eq "JPG" || $filetype eq "PNG") {
