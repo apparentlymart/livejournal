@@ -822,6 +822,7 @@ propgroup background = "Background";
 propgroup sidebar = "Sidebar";
 propgroup appearance = "Appearance";
 propgroup options = "Options";
+propgroup customcss = "Custom CSS";
 
 property string lang_current {
         noui = 1;
@@ -971,7 +972,7 @@ set page_recent_items = 20;
 set page_friends_items = 20;
 
 property string page_day_sortorder {
-    des = "Order of entries shown on a Day page";
+    des = "Order of entries shown on day pages";
     values = "forward|Least recent first|reverse|Most recent first";
 }
 property string page_year_sortorder {
@@ -1068,7 +1069,7 @@ property string text_view_recent {
     example = "Recent Posts";
 }
 property string text_view_friends {
-    des = "Text used to link to the 'Friends' view, if no custom friends title set";
+    des = "Text used to link to the 'Friends' view.";
     maxlength = 20;
     "size" = 15;
     example = "My Friends' Entries";
@@ -1080,7 +1081,7 @@ property string text_view_friends_comm {
     example = "Members' Journals";
 }
 property string text_view_friendsfriends {
-    des = "Title of the 'Friends of Friends' view";
+    des = "Title of the 'Friends of Friends' view.";
     maxlength = 20;
     "size" = 15;
     example = "Friends of Friends";
@@ -1098,7 +1099,7 @@ property string text_view_friendsfriends_filter {
     example = "Friends of Friends (Custom filter)";
 }
 property string text_view_archive {
-    des = "Text used to link to the archive view.";
+    des = "Text used to link to the 'Archive' view.";
     maxlength = 20;
     "size" = 15;
     example = "Journal Archive";

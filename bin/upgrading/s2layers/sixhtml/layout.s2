@@ -3,7 +3,7 @@ layerinfo name = "Bloggish";
 layerinfo redist_uniq = "sixhtml/layout";
 layerinfo des = "SixApart's standard HTML structure for blogs, to be styled with CSS.";
 
-propgroup appearance {
+propgroup presentation {
     property bool use_6a_base {
         des = "Use 'Base Weblog' styles";
     }
@@ -11,6 +11,7 @@ propgroup appearance {
 
     property string base_theme {
         des = "Base Theme";
+        note = "You can also list your own stylesheet on the \"Custom CSS\" tab.";
         values = "__none|(None)|april|April|baby|Baby|beckett|Beckett|bluecrush|Blue Crush|bonjour|Bonjour Chatette|bryant|Bryant|classy|Classy|earth|Earth|green|Green|folio|Folio|forestgreen|Forest Green|knitting|Knitting|powell-street|Powell Street|masala|Masala|minimalist|Minimalist|porpoise|Porpoise|purplecrush|Purple Crush|stevenson|Stevenson|sunburned|Sunburned|stitch|Stitch|travel|Travel|wedding|Wedding";
     }
     set base_theme = "powell-street";
@@ -51,23 +52,6 @@ propgroup appearance {
         "travel" => "http://www.typepad.com/.shared/themes/lilia/theme-travel.css",
         "wedding" => "http://www.typepad.com/.shared/themes/lilia/theme-wedding.css",
     };
-
-    property string linked_stylesheet {
-        des = "If you would like to use a stylesheet that is not listed above, enter the URL here";
-    }
-    set linked_stylesheet = "";
-
-    property string custom_css {
-    	des = "Custom Stylesheet";
-    	note = "If you'd like to customize this style from scratch and are familiar with CSS, enter it here";
-    	cols = 80;
-    	rows = 20;
-    }
-    set custom_css = "";
-}
-propgroup appearance = "Appearance";
-
-propgroup options {
 
     property bool opt_dayhead {
         des = "Show Day Headings";
@@ -135,7 +119,6 @@ propgroup options {
 
     set external_stylesheet = true;
 }
-propgroup options = "Options";
 
 propgroup text {
     property use text_post_comment;
@@ -156,7 +139,21 @@ propgroup text {
     }
     set text_comments = "Comments";
 }
-propgroup text = "Text";
+
+propgroup customcss {
+    property string linked_stylesheet {
+        des = "If you would like to use a stylesheet that is not in the list on the \"Presentation\" tab, enter the URL here";
+    }
+    set linked_stylesheet = "";
+
+    property string custom_css {
+    	des = "Custom Stylesheet";
+    	note = "If you'd like to customize this style from scratch and are familiar with CSS, enter it here";
+    	cols = 80;
+    	rows = 20;
+    }
+    set custom_css = "";
+}
 
 function prop_init() {
   if (viewer_sees_ads()) {
