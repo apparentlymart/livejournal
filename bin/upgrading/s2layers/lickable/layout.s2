@@ -25,6 +25,19 @@ propgroup presentation {
     }
     set sidebar_width = 230;
 
+    property string page_bg_img {
+        des = "Main page background image";
+        note = "Disable the shadows below for best results; the shadows will not automatically blend with the background.";
+    }
+    set page_bg_img = "";
+
+    property string page_bg_image_tile {
+        des = "Main page background repeat mode";
+        values = "no-repeat|Do not repeat|repeat-x|Repeat Horizontally|repeat-y|Repeat Vertically|repeat|Repeat both Horizontally and Vertically";
+        note = "This won't have any effect unless you enter an image URL above.";
+    }
+    set page_bg_image_tile = "repeat-y";
+
     property bool side_borders {
         des = "Show borders at the sides of the content area";
     }
@@ -425,10 +438,20 @@ function pretty_styles() "Pretty stuff that's completely dispensible" {
 
     var Color darker_bg = $*clr_page_bg->darker(20);
 
+    var string bg_url;
+    if ($*page_bg_img != "") {
+        $bg_url = $*page_bg_img;
+    }
+    else {
+        $bg_url = palimg_tint("solid.png", $*clr_margins);
+    }
+
 """
 
 body {
-    background: $*clr_margins url("""+palimg_tint("solid.png", $*clr_margins)+""");
+    background: $*clr_margins """+$bg_url->css_url_value()+""";
+    background-repeat: """+$*page_bg_image_tile->css_keyword(["no-repeat","repeat-x","repeat-y","repeat"])+""";
+    background-position: center;
     color: $*clr_page_fg;
     margin: 0;
     padding: 0;
