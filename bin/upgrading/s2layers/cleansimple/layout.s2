@@ -287,7 +287,6 @@ table {
 """;
 
 if ($*opt_content_width == 100) {
-if (viewer_sees_control_strip()) { """margin: $*opt_margin_size;"""; }
 """
 width: auto;
 """;
@@ -308,8 +307,14 @@ width: auto;
 """;
 if (viewer_sees_control_strip()) {
 """#main {
-margin-top: $*opt_margin_size;
-margin-bottom: $*opt_margin_size;
+""";
+if ($*opt_content_width == 100) {
+"""margin: $*opt_margin_size;""";
+} else {
+"""margin-top: $*opt_margin_size;
+margin-bottom: $*opt_margin_size;""";
+}
+"""
 }""";
 }
 """
