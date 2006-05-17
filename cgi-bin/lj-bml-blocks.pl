@@ -25,7 +25,7 @@ BML::register_block("LJUSERF", "DS", sub { LJ::ljuser($_[0]->{DATA}, { full => 1
 # so we can translate it
 BML::register_block("NEEDLOGIN", "", sub {
     return "<?h1 <?_ml bml.needlogin.head _ml?> h1?>\n<?p " .
-           BML::ml('bml.needlogin.body4', { aopts1 => "href='$LJ::SITEROOT/login.bml?ret=1'",
+           BML::ml('bml.needlogin.body5', { aopts1 => "href='$LJ::SITEROOT/login.bml?ret=1'",
                                             aopts2 => "href='$LJ::SITEROOT/create.bml'" }) .
            " p?>";
 });

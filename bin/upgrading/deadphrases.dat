@@ -343,6 +343,7 @@ general /editpics.bml.curpics.desc
 general error.noremote
 
 general bml.needlogin.body3
+general bml.needlogin.body4
 
 general /allpics.bml.edit2
 general /allpics.bml.nopics.text2
