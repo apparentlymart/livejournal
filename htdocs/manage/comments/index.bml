@@ -102,6 +102,7 @@ _code?>
                                   "S" => BML::ml(".security.visibility.anon"),
                                   "A" => BML::ml(".security.visibility.everyone") );
         $ret .= "<br />\n<span class='helper'>$ML{'.logip.text'}</span>";
+        $ret .= LJ::help_icon('iplogging');
         $ret .= "</td></tr>\n";
 
         # Email notifications
