@@ -1352,7 +1352,7 @@ property bool use_shared_pic {
 set use_shared_pic = false;
 
 property bool view_entry_disabled {
-    des = "Use non-customized comment pages";
+    des = "Disable customized comment pages for your journal";
 }
 set view_entry_disabled = false;
 
@@ -1376,8 +1376,7 @@ property string comment_userpic_style {
 set comment_userpic_style = "";
 
 property bool linklist_support {
-    des = "Link List Support";
-    note = "If you've created a list of links that you would like to include in this layout, change this option to 'yes'.";
+    des = "Display link list";
 }
 set linklist_support = true;
 

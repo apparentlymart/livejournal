@@ -365,8 +365,9 @@ body<=
 
             if (ref $override eq "HASH") { $override = $override->{'as_string'}; }
 
-            $ret .= "<tr valign='top'><td>&#x00bb; " . LJ::eall($prop->{'des'}) . "</td>";
-            $ret .= "<td id='$name:user_value'>\n";
+            $ret .= "<tr valign='top'><td>&#x00bb; " . LJ::eall($prop->{'des'});
+            $ret .= " <?help " . $LJ::HELPURL{"s2opt_$name"} . " help?>" if $LJ::HELPURL{"s2opt_$name"};
+            $ret .= "</td><td id='$name:user_value'>\n";
             if ($prop->{'values'}) {
                 $ret .= LJ::html_select({ 'name' => "s2_${name}_value",
                                            'disabled' => ! $can_use,
@@ -414,7 +415,6 @@ body<=
             $ret .= " $offhelp</td></tr>";
             my $t = "";
             $t .= LJ::eall($prop->{'note'}) if $prop->{'note'};
-            $t .= "<?help " . $LJ::HELPURL{"s2opt_$name"} . " help?>" if $LJ::HELPURL{"s2opt_$name"};
             $ret .= "<tr><td colspan='2' style='padding-left: 2em;'><?de $t de?></td></tr>" if $t;
         };
 
