@@ -822,6 +822,7 @@ propgroup background = "Background";
 propgroup sidebar = "Sidebar";
 propgroup appearance = "Appearance";
 propgroup options = "Options";
+propgroup images = "Images";
 propgroup customcss = "Custom CSS";
 
 property string lang_current {
