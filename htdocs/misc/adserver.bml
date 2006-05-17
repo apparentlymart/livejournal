@@ -19,21 +19,13 @@ _info?>
     my $adhtml = "<html><head><title>$LJ::SITENAMESHORT Ad Server</title></head>";
     $adhtml .= "<body style='margin: 0; padding: 0'>";
 
-    $adhtml .= $ad_engine->process(
-                                   url         => $GET{url},
-                                   width       => $GET{width},
-                                   height      => $GET{height},
-                                   type        => $GET{type},
-                                   channel     => $GET{channel},
-                                   age         => $GET{age},
-                                   gender      => $GET{gender},
-                                   country     => $GET{country},
-                                   language    => $GET{language},
-                                   categories  => $GET{categories},
-                                   interests   => $GET{interests},
-                                   search_term => $GET{search_term},
-                                   accttype    => $GET{accttype},
-                                   );
+    $adhtml .= $ad_engine->process(map { $_ => $GET{$_} } qw(
+                                                             url
+                                                             width height type channel age
+                                                             gender country language categories
+                                                             interests search_term accttype
+                                                             contents
+                                                             ));
     $adhtml .= "</body></html>";
     return $adhtml;
 }
