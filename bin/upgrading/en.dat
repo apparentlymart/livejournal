@@ -6613,3 +6613,7 @@ web.controlstrip.userpic.alt=Userpic
 
 web.controlstrip.userpic.title=Edit Userpics
 
+web.postto.btn=Switch
+
+web.postto.label=Post to:
+
