@@ -6,6 +6,7 @@ package LJ::NotificationInbox;
 
 use strict;
 use Carp qw(croak);
+use Class::Autouse qw (LJ::NotificationItem LJ::Event);
 
 *new = \&instance;
 
@@ -23,7 +24,7 @@ sub instance {
     my $self = {
         u      => $u,
         loaded => 0,
-        events => {},
+        items  => {},
     };
 
     $singletons{$u->{userid}} = $self;
@@ -32,30 +33,40 @@ sub instance {
 }
 
 # returns the user object associated with this queue
+*owner = \&u;
 sub u {
     my $self = shift;
     return $self->{u};
 }
 
-# returns all non-deleted Event objects for this user
-# in a hashref of {queueid => event}
-# optional arg: daysold = how many days back to retrieve notifications for
-sub notifications {
+# Returns a list of LJ::NotificationItems in this queue.
+# optional arg: daysold = how many days back to retrieve items for
+sub items {
     my $self = shift;
     my $daysold = shift;
 
     croak "notifications is an object method"
         unless (ref $self) eq __PACKAGE__;
 
-    return $self->_load($daysold);
+    return values %{$self->_load};
 }
 
-# load the events in this queue
+# returns an item for a given queue id
+sub item {
+    my ($self, $qid) = @_;
+
+    $self->_load;
+
+    return $self->{items}->{$qid};
+}
+
+# load the items in this queue
+# returns internal items hashref
 sub _load {
     my $self = shift;
     my $daysold = shift;
 
-    return $self->{events} if $self->{loaded};
+    return $self->{items} if $self->{loaded};
 
     my $u = $self->u
         or die "No user object";
@@ -63,8 +74,8 @@ sub _load {
     my $daysoldwhere = $daysold ? " AND createtime" : '';
 
     my $sth = $u->prepare
-        ("SELECT userid, qid, journalid, etypeid, arg1, arg2, state, createtime " . 
-         "FROM notifyqueue WHERE userid=? AND state != 'D'");
+        ("SELECT userid, qid, journalid, etypeid, arg1, arg2, state, createtime " .
+         "FROM notifyqueue WHERE userid=?");
     $sth->execute($u->{userid});
     die $sth->errstr if $sth->err;
 
@@ -76,25 +87,32 @@ sub _load {
 
         next unless $evt;
 
-        # keep track of what qid is associated with this event
         my $qid = $row->{qid};
-        $self->{events}->{$qid} = $evt;
+
+        # create the inboxitem for this event
+        my $qitem = LJ::NotificationItem->new(inbox => $self,
+                                              qid => $qid,
+                                              state => $row->{state},
+                                              event => $evt);
+        $self->{items}->{$qid} = $qitem;
     }
 
     $self->{loaded} = 1;
 
-    return $self->{events};
+    return $self->{items};
 }
 
 # deletes an Event that is queued for this user
 # args: Queue ID to remove from queue
 sub delete_from_queue {
-    my ($self, $qid) = @_;
+    my ($self, $qitem) = @_;
 
     croak "delete_from_queue is an object method"
         unless (ref $self) eq __PACKAGE__;
 
-    croak "no queueid passed to delete_from_queue" unless int($qid);
+    my $qid = $qitem->qid;
+
+    croak "no queueid for queue item passed to delete_from_queue" unless int($qid);
 
     my $u = $self->u
         or die "No user object";
@@ -103,7 +121,7 @@ sub delete_from_queue {
 
     # if this event was returned from our queue we should have
     # its qid stored in our events hashref
-    delete $self->{events}->{$qid};
+    delete $self->{items}->{$qid};
 
     $u->do("DELETE FROM notifyqueue WHERE qid=?", undef, $qid);
     die $u->errstr if $u->err;
@@ -112,7 +130,7 @@ sub delete_from_queue {
 }
 
 # This will enqueue an event object
-# Returns the queue id
+# Returns the enqueued item
 sub enqueue {
     my ($self, %opts) = @_;
 
@@ -135,14 +153,17 @@ sub enqueue {
                 state      => 'N',
                 createtime => $evt->eventtime_unix || 0);
 
-    # insert this event into the eventqueue table
+    # insert this event into the notifyqueue table
     $u->do("INSERT INTO notifyqueue (" . join(",", keys %item) . ") VALUES (" .
            join(",", map { '?' } values %item) . ")", undef, values %item)
         or die $u->errstr;
 
-    $self->{events}->{$qid} = $evt;
+    $self->{items}->{$qid} = LJ::NotificationItem->new(event => $evt,
+                                                       inbox => $self,
+                                                       state => $item{state},
+                                                       qid => $qid);
 
-    return $qid;
+    return $self->{items}->{$qid};
 }
 
 1;

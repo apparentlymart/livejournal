@@ -35,7 +35,8 @@ sub handle_request {
     if ($GET->{'delete_note'} || $POST->{'delete_note'}) {
         my $q = $self->queue or return undef;
         my $qid = int($GET->{'del_note_qid'} || $POST->{'del_note_qid'});
-        $q->delete_from_queue($qid) if $qid;
+        my $qitem = $q->item($qid) or return undef;
+        $qitem->delete;
     }
 
     return undef;
@@ -59,8 +60,6 @@ sub generate_content {
     my $q = $self->queue;
     return "Could not retreive inbox." unless $q;
 
-    my $notices = $q->notifications($daysold);
-
     $content .= qq {
         <table style="width: 100%;">
             <tr class="PortalTableHeader"><td>Date</td><td>Notification</td><td>Delete</td></tr>
@@ -68,7 +67,10 @@ sub generate_content {
 
     my $noticecount = 0;
 
-    while ( my ($qid, $evt) = each %$notices ) {
+    foreach my $item ($q->items) {
+        my $evt = $item->event;
+        my $qid = $item->qid;
+
         my $desc = $evt->as_html;
         my $delrequest = "portalboxaction=$pboxid&delete_note=1&del_note_qid=$qid";
 
@@ -117,9 +119,10 @@ sub etag {
 
     my $q = $self->queue or return undef;
 
-    my $notifications = $q->notifications;
+    my @items = $q->items;
+    my @qids = map { $_->qid } @items;
 
-    return "$daysold-" . join('-', keys %$notifications); # qids
+    return "$daysold-" . join('-', @qids);
 }
 
 1;
