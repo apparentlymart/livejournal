@@ -14,24 +14,15 @@ propgroup presentation {
   property use page_friends_items;
   property use use_shared_pic;
   property use view_entry_disabled;
-  property string page_background_image {
-      des = "URL to an image to be used for the page background";
-  }
   property bool show_entrynav_icons {
     des = "Toggle to show the next, memory, edit, etc icons on the entry view page";
   }
   property use linklist_support;
   property use external_stylesheet;
-  property string imguri {
-    noui = 1;
-    des = "URI to notepad images (no trailing slash)";
-  }
 }
 set show_entry_userpic = false;
 set view_entry_disabled = false;
-set page_background_image = "";
 set show_entrynav_icons = true;
-set imguri = "";
 
 propgroup colors {
   property Color body_bgcolor {
@@ -83,6 +74,18 @@ set comment_bar_two_bgcolor = "#eeeeff";
 set comment_bar_two_fgcolor = "#000000";
 set comment_bar_screened_bgcolor = "#dddddd";
 set comment_bar_screened_fgcolor = "#000000";
+
+propgroup images {
+  property string page_background_image {
+      des = "Background image URL";
+  }
+  property string imguri {
+    noui = 1;
+    des = "URI to notepad images (no trailing slash)";
+  }
+}
+set page_background_image = "";
+set imguri = "";
 
 propgroup text {
   property use text_post_comment;
