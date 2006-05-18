@@ -30,5 +30,5 @@ form {
 }
 
 .lj_progressindefinite {
-    background-image: url(/img/progress/barber.gif) repeat;
+    background-image: url(/img/progress/barber.gif);
 }
