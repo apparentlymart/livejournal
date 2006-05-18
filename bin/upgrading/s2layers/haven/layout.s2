@@ -32,59 +32,22 @@ propgroup presentation
     }
     set title_position = "both";
 }
-propgroup fonts
-{
-    property string main_font
-    {
-        des = "Preferred Font";
-        maxlength = 25;
-        size = 10;
-        example = "Arial";
-        note = "Leave blank for your browser's default font";
-    }
-    property string main_font_fallback
-    {
-        des = "Alternative font style";
-        values = "sans-serif|Sans-serif|serif|Serif|cursive|Cursive|monospace|Monospaced|none|Use browser's default";
-        note = "This general style will serve as a fallback if your preferred font is unavailable.";
-    }
-    set main_font = "Trebuchet MS";
-    set main_font_fallback = "sans-serif";
-    property string sidebar_font
-    {
-        des = "Font for the sidebar boxes";
-        maxlength = 25;
-        size = 10;
-        example = "Arial";
-        note = "Leave blank for your browser's default font";
-    }
-    property string sidebar_font_fallback
-    {
-        des = "Alternative font style";
-        values = "sans-serif|Sans-serif|serif|Serif|cursive|Cursive|monospace|Monospaced|none|Use browser's default";
-        note = "This general style will serve as a fallback if your preferred font is unavailable.";
-    }
-    set sidebar_font = "Verdana";
-    set sidebar_font_fallback = "sans-serif";
-    property string content_font
-    {
-        des = "Font for the content boxes";
-        maxlength = 25;
-        size = 10;
-        example = "Arial";
-        note = "Leave blank for your browser's default font";
-    }
-    property string content_font_fallback
-    {
-        des = "Alternative font style";
-        values = "sans-serif|Sans-serif|serif|Serif|cursive|Cursive|monospace|Monospaced|none|Use browser's default";
-        note = "This general style will serve as a fallback if your preferred font is unavailable.";
-    }
-    set content_font = "Tahoma";
-    set content_font_fallback = "sans-serif";
-}
 propgroup colors
 {
+    ### Automatic Color Palettes ###
+    property Color color_scheme_base
+    {
+        des = "Core color used to determine the entire color scheme.";
+        note = "After you select a base color and choose a color scheme, an entire palette will be built automatically for your journal colors.";
+    }
+    property string color_scheme
+    {
+        des = "Color scheme";
+        values = "monochromatic|Monochromatic: use variations of light and saturation without straying from your suggested color|analogous|Analogous: use slightly similar hues to enhance your suggested color|complementary|Complementary: create a high contrast scheme based on your suggested color|split_complementary|Split Complementary: A variation of the Complementary scheme using varying hues of the complementary color|double_complementary|Double Complementary: use slightly varying hues of the base and complementary colors|triadic|Triadic: offers less contrast than the complementary scheme, but is richer in color|tetradic|Tetradic: a combination of the Complementary and Triadic schemes";
+    }
+    set color_scheme_base = "#1111cc";
+    set color_scheme = "analogous";
+
     ### Main page colors ###
     property Color page_bgcolor
     {
@@ -234,11 +197,62 @@ propgroup colors
         des = "Text color on the footer";
     }
 }
-propgroup background
+propgroup fonts
+{
+    property string main_font
+    {
+        des = "Preferred Font";
+        maxlength = 25;
+        size = 10;
+        example = "Arial";
+        note = "Leave blank for your browser's default font";
+    }
+    property string main_font_fallback
+    {
+        des = "Alternative font style";
+        values = "sans-serif|Sans-serif|serif|Serif|cursive|Cursive|monospace|Monospaced|none|Use browser's default";
+        note = "This general style will serve as a fallback if your preferred font is unavailable.";
+    }
+    set main_font = "Trebuchet MS";
+    set main_font_fallback = "sans-serif";
+    property string sidebar_font
+    {
+        des = "Font for the sidebar boxes";
+        maxlength = 25;
+        size = 10;
+        example = "Arial";
+        note = "Leave blank for your browser's default font";
+    }
+    property string sidebar_font_fallback
+    {
+        des = "Alternative font style";
+        values = "sans-serif|Sans-serif|serif|Serif|cursive|Cursive|monospace|Monospaced|none|Use browser's default";
+        note = "This general style will serve as a fallback if your preferred font is unavailable.";
+    }
+    set sidebar_font = "Verdana";
+    set sidebar_font_fallback = "sans-serif";
+    property string content_font
+    {
+        des = "Font for the content boxes";
+        maxlength = 25;
+        size = 10;
+        example = "Arial";
+        note = "Leave blank for your browser's default font";
+    }
+    property string content_font_fallback
+    {
+        des = "Alternative font style";
+        values = "sans-serif|Sans-serif|serif|Serif|cursive|Cursive|monospace|Monospaced|none|Use browser's default";
+        note = "This general style will serve as a fallback if your preferred font is unavailable.";
+    }
+    set content_font = "Tahoma";
+    set content_font_fallback = "sans-serif";
+}
+propgroup images
 {
     property string page_background_image 
     {
-        des = "Background image";
+        des = "Background image URL";
         note = "URL to an image to be used for the page background (leave blank for none).";
     }
     property string page_background_repeat
@@ -262,6 +276,41 @@ propgroup background
     set page_background_repeat    = "repeat";
     set page_background_position  = "center";
     set page_background_scrolling = "scroll";
+}
+propgroup text
+{
+    property use text_meta_music;
+    property use text_meta_mood;
+    property use text_meta_location;
+    property use text_post_comment;
+    property use text_read_comments;
+    property use text_post_comment_friends;
+    property use text_read_comments_friends;
+    property use text_website_default_name;
+    property string text_sidebar_profile
+    {
+        des = "Title of the profile sidebar box";
+        noui = 1;
+    }
+    property string text_sidebar_blurb
+    {
+        des = "Title of the blurb sidebar box";
+        noui = 1;
+    }
+    property string text_sidebar_links
+    {
+        des = "Title of the links sidebar box";
+        noui = 1;
+    }
+    property string text_sidebar_summary
+    {
+        des = "Title of the summary sidebar box";
+        noui = 1;
+    }
+    set text_sidebar_profile = "Profile";
+    set text_sidebar_blurb = "Blurb";
+    set text_sidebar_links = "Links";
+    set text_sidebar_summary = "Page Summary";
 }
 propgroup sidebar
 {
@@ -309,57 +358,6 @@ propgroup sidebar
         values = "nothing|Nothing|summary|Page Summary|links|Link List|blurb|Blurb|calendar|Calendar";
     }
     set sidebar_position_four = "calendar";
-}
-propgroup text
-{
-    property use text_meta_music;
-    property use text_meta_mood;
-    property use text_meta_location;
-    property use text_post_comment;
-    property use text_read_comments;
-    property use text_post_comment_friends;
-    property use text_read_comments_friends;
-    property use text_website_default_name;
-    property string text_sidebar_profile
-    {
-        des = "Title of the profile sidebar box";
-        noui = 1;
-    }
-    property string text_sidebar_blurb
-    {
-        des = "Title of the blurb sidebar box";
-        noui = 1;
-    }
-    property string text_sidebar_links
-    {
-        des = "Title of the links sidebar box";
-        noui = 1;
-    }
-    property string text_sidebar_summary
-    {
-        des = "Title of the summary sidebar box";
-        noui = 1;
-    }
-    set text_sidebar_profile = "Profile";
-    set text_sidebar_blurb = "Blurb";
-    set text_sidebar_links = "Links";
-    set text_sidebar_summary = "Page Summary";
-}
-propgroup automatic_color_palettes = "";
-propgroup automatic_color_palettes
-{
-    property Color color_scheme_base
-    {
-        des = "Core color used to determine the entire color scheme.";
-        note = "After you select a base color and choose a color scheme, an entire palette will be built automatically for your journal colors.";
-    }
-    property string color_scheme
-    {
-        des = "Color scheme";
-        values = "monochromatic|Monochromatic: use variations of light and saturation without straying from your suggested color|analogous|Analogous: use slightly similar hues to enhance your suggested color|complementary|Complementary: create a high contrast scheme based on your suggested color|split_complementary|Split Complementary: A variation of the Complementary scheme using varying hues of the complementary color|double_complementary|Double Complementary: use slightly varying hues of the base and complementary colors|triadic|Triadic: offers less contrast than the complementary scheme, but is richer in color|tetradic|Tetradic: a combination of the Complementary and Triadic schemes";
-    }
-    set color_scheme_base = "#1111cc";
-    set color_scheme = "analogous";
 }
 set tags_aware = true;
 
