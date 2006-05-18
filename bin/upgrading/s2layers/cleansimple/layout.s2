@@ -32,9 +32,6 @@ propgroup presentation {
       des = "Style of Lines Around Entries";
       values = "solid|Solid|dashed|Dashed|dotted|Dotted|double|Double|hidden|Invisible";
   }
-  property string opt_img_btwn_comments {
-    des = "URL to an image to be used between your comment links";
-  }
   property use page_recent_items;
   property use page_friends_items;
   property string opt_margin_size {
@@ -56,7 +53,6 @@ set opt_content_alignment = "center";
 set opt_daylines_style = "dashed";
 set opt_entryborder_size = "";
 set opt_entryborder_style = "hidden";
-set opt_img_btwn_comments = "";
 set opt_margin_size = "50px";
 set view_entry_disabled = false;
 set show_entrynav_icons = true;
@@ -194,11 +190,16 @@ propgroup images {
 	note = "Not supported in all browsers, but allows for the background image to be in a fixed position when scrolling.";
 	values = "scroll|Scroll|fixed|Fixed";
   }
+
+  property string opt_img_btwn_comments {
+    des = "URL to an image to be used between your comment links";
+  }
 }
 set page_background_image = "";
 set page_background_repeat = "repeat";
 set page_background_position = "center";
 set page_background_scrolling = "scroll";
+set opt_img_btwn_comments = "";
 
 propgroup text {
   property use text_post_comment;
