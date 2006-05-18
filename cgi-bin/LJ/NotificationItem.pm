@@ -17,32 +17,22 @@ use Carp qw(croak);
 
 my %singletons = ();
 
-# parameters: inbox (NotificationInbox this belongs in), qid (id of this item in the inbox),
-#             state (state of this item), event (what event this item holds)
+# parameters: user, notification inbox id
 sub instance {
-    my ($class, %opts) = @_;
-
-    my $inbox = delete $opts{inbox} or croak "No inbox specified";
-    my $qid   = delete $opts{qid}   or croak "No queue ID specified";
-    my $state = delete $opts{state} or croak "No state specified";
-    my $event = delete $opts{event} or croak "No event specified";
-
-    croak "Invalid options" if keys %opts;
-
-    my $u = $inbox->owner or croak "Invalid inbox";
+    my ($class, $u, $qid) = @_;
 
     my $singletonkey = $u->{userid} . ':' . $qid;
     return $singletons{$singletonkey} if $singletons{$singletonkey};
 
     my $self = {
-        u      => $u,
-        qid    => $qid,
-        inbox  => $inbox,
-        state  => $state,
-        event  => $event,
+        u       => $u,
+        qid     => $qid,
+        state   => undef,
+        event   => undef,
+        _loaded => 0,
     };
 
-    $singletons{$u->{userid}} = $self;
+    $singletons{$singletonkey} = $self;
 
     return bless $self, $class;
 }
@@ -54,23 +44,71 @@ sub owner { $_[0]->{u} }
 # returns this item's id in the notification queue
 sub qid { $_[0]->{qid} }
 
-# returns the inbox that this item is in
-sub inbox { $_[0]->{inbox} }
-
 # returns the event that this item refers to
-sub event { $_[0]->{event} }
+sub event {
+    my $self = shift;
+
+    $self->_load unless $self->{_loaded};
+
+    return $self->{event};
+}
+
+# loads this item
+sub _load {
+    my $self = shift;
+
+    my $qid = $self->qid;
+    my $u = $self->owner;
+
+    return if $self->{_loaded};
+
+    my $sth = $u->prepare
+        ("SELECT userid, qid, journalid, etypeid, arg1, arg2, state, createtime " .
+         "FROM notifyqueue WHERE userid=? AND qid=?");
+    $sth->execute($u->{userid}, $qid);
+    die $sth->errstr if $sth->err;
+
+    my $row = $sth->fetchrow_hashref;
+    $self->{_loaded} = 1;
+
+    $self->absorb_row($row);
+}
+
+# fills in a skeleton item from a database row hashref
+sub absorb_row {
+    my ($self, $row) = @_;
+
+    $self->{state} = $row->{state};
+    $self->{createtime} = $row->{createtime};
+
+    my $evt = LJ::Event->new_from_raw_params($row->{etypeid},
+                                             $row->{journalid},
+                                             $row->{arg1},
+                                             $row->{arg2});
+    $self->{event} = $evt;
+}
+
+# returns the state of this item
+sub _state {
+    my $self = shift;
+
+    $self->_load unless $self->{_loaded};
+
+    return $self->{state};
+}
 
 # returns if this event is marked as read
-sub read { $_[0]->{state} eq 'R' }
+sub read { $_[0]->_state eq 'R' }
 
 # returns if this event is marked as unread
-sub unread { $_[0]->{state} eq 'N' }
+sub unread { $_[0]->_state eq 'N' }
 
 # delete this item from its inbox
 sub delete {
     my $self = shift;
-    my $inbox = $self->inbox;
+    my $inbox = $self->owner->NotificationInbox;
 
+    # delete from the inbox so the inbox stays in sync
     return $inbox->delete_from_queue($self);
 }
 

@@ -44,7 +44,7 @@ sub handle_request {
 
 sub queue {
     my $self = shift;
-    return LJ::NotificationInbox->new($self->{u});
+    return $self->{u}->NotificationInbox;
 }
 
 sub generate_content {

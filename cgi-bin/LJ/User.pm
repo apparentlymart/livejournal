@@ -1593,6 +1593,13 @@ sub new_entry_editor {
     return $LJ::DEFAULT_EDITOR; # Use config default
 }
 
+# Returns the NotificationInbox for this user
+sub NotificationInbox {
+    my $u = shift;
+
+    return LJ::NotificationInbox->new($u);
+}
+
 package LJ;
 
 # <LJFUNC>

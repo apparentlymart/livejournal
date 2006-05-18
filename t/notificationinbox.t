@@ -13,10 +13,12 @@ use Class::Autouse qw(
                       LJ::NotificationInbox
                       LJ::NotificationItem
                       LJ::Event
+                      LJ::Event::Befriended
                       );
 
 my $u = temp_user();
-ok($u, "Got temp user");
+my $u2 = temp_user();
+ok($u && $u2, "Got temp users");
 
 sub run_tests {
     my $q;
@@ -26,38 +28,15 @@ sub run_tests {
     my $evt;
     my $qitem;
 
-    # try bogus constructors
-    {
-        # Inbox
-        $rv = eval { LJ::NotificationInbox->new() };
-        like($@, qr/invalid args/i, "Invalid args");
-
-        $rv = eval { LJ::NotificationInbox->new({bogus => "ugly"}) };
-        like($@, qr/invalid user/i, "Invalid user");
-
-        # Item
-        $rv = eval { LJ::NotificationItem->new() };
-        like($@, qr/no inbox/i, "no inbox");
-
-        $rv = eval { LJ::NotificationItem->new(inbox => 1) };
-        like($@, qr/no queue id/i, "no queue id");
-
-        $rv = eval { LJ::NotificationItem->new(inbox => 1, qid => 2, state => 3)};
-        like($@, qr/no event/i, "no event");
-
-        $rv = eval { LJ::NotificationItem->new(inbox => 1, qid => 2, state => 3, event => 4, blah => 5) };
-        like($@, qr/invalid options/i, "invalid options");
-    }
-
     # create a queue
     {
-        $q = LJ::NotificationInbox->new($u);
+        $q = $u->NotificationInbox;
         ok($q, "Got queue");
     }
 
     # create an event to enqueue and enqueue it
     {
-        $evt = LJ::Event::ForTest->new($u, 42, 666);
+        $evt = LJ::Event::Befriended->new($u, $u2);
         ok($evt, "Made event");
         # enqueue this event
         $qid = $q->enqueue(event => $evt);
@@ -71,7 +50,7 @@ sub run_tests {
         ok((scalar @notifications) == 1, "Got one item");
         $qitem = $notifications[0];
         ok($qitem, "Item exists");
-        is_deeply($qitem->event, $evt, "Event is same");
+        is($qitem->event->etypeid, $evt->etypeid, "Event is same");
     }
 
     # test states
@@ -104,15 +83,5 @@ sub run_tests {
 memcache_stress {
     run_tests();
 };
-
-package LJ::Event::ForTest;
-use base 'LJ::Event';
-sub new {
-    my ($class, $u, $arg1, $arg2) = @_;
-    my $self = $class->SUPER::new($u, $arg1, $arg2);
-
-    return $self;
-}
-
 
 1;

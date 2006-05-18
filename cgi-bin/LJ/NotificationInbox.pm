@@ -51,15 +51,6 @@ sub items {
     return values %{$self->_load};
 }
 
-# returns an item for a given queue id
-sub item {
-    my ($self, $qid) = @_;
-
-    $self->_load;
-
-    return $self->{items}->{$qid};
-}
-
 # load the items in this queue
 # returns internal items hashref
 sub _load {
@@ -80,20 +71,12 @@ sub _load {
     die $sth->errstr if $sth->err;
 
     while (my $row = $sth->fetchrow_hashref) {
-        my $evt = LJ::Event->new_from_raw_params($row->{etypeid},
-                                                 $row->{journalid},
-                                                 $row->{arg1},
-                                                 $row->{arg2});
-
-        next unless $evt;
-
         my $qid = $row->{qid};
 
         # create the inboxitem for this event
-        my $qitem = LJ::NotificationItem->new(inbox => $self,
-                                              qid => $qid,
-                                              state => $row->{state},
-                                              event => $evt);
+        my $qitem = LJ::NotificationItem->new($u, $qid);
+        $qitem->absorb_row($row);
+
         $self->{items}->{$qid} = $qitem;
     }
 
@@ -117,11 +100,9 @@ sub delete_from_queue {
     my $u = $self->u
         or die "No user object";
 
-    $self->_load;
-
     # if this event was returned from our queue we should have
     # its qid stored in our events hashref
-    delete $self->{items}->{$qid};
+    delete $self->{items}->{$qid} if $self->{items};
 
     $u->do("DELETE FROM notifyqueue WHERE qid=?", undef, $qid);
     die $u->errstr if $u->err;
@@ -158,10 +139,7 @@ sub enqueue {
            join(",", map { '?' } values %item) . ")", undef, values %item)
         or die $u->errstr;
 
-    $self->{items}->{$qid} = LJ::NotificationItem->new(event => $evt,
-                                                       inbox => $self,
-                                                       state => $item{state},
-                                                       qid => $qid);
+    $self->{items}->{$qid} = LJ::NotificationItem->new($u, $qid);
 
     return $self->{items}->{$qid};
 }
