@@ -1076,7 +1076,7 @@ property string text_view_friends {
     example = "My Friends' Entries";
 }
 property string text_view_friends_comm {
-    des = "Text used to link to the 'Friends' view for a community, if no custom friends title set";
+    des = "Text used to link to the 'Friends' view for a community.";
     maxlength = 20;
     "size" = 15;
     example = "Members' Journals";
