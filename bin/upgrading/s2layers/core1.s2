@@ -1218,7 +1218,8 @@ property string text_comment_posted {
 set text_comment_posted = "Comment successfully posted.";
 
 property string text_tags {
-    des = "Text for 'Tags' header, use a # where you want the tag list inserted.";
+    des = "Text for 'Tags' header";
+    note = "Use a # where you want the tag list inserted.";
     example = "Tags: #";
 }
 set text_tags = "Tags: #";
