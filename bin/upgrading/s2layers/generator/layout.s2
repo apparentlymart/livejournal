@@ -10,7 +10,7 @@ propgroup presentation {
     property use page_friends_items;
 
     property int box_width {
-        des = "Box width (pixels)";
+        des = "Box width in pixels";
     }
 
     property use view_entry_disabled;
@@ -21,10 +21,6 @@ propgroup presentation {
     }
     property use external_stylesheet;
     property use linklist_support;
-}
-propgroup fonts {
-    property use font_base;
-    property use font_fallback;
 }
 propgroup colors {
     property Color entry_back {
@@ -86,9 +82,13 @@ propgroup colors {
         des = "Text color on background bar for screened comments";
     }
 }
-propgroup background {
+propgroup fonts {
+    property use font_base;
+    property use font_fallback;
+}
+propgroup images {
     property string page_background_image {
-        des = "URL to an image to be used for the page background";
+        des = "Background image URL";
     }
     property string page_background_repeat {
         des = "Background image repeat";
