@@ -141,7 +141,7 @@ sub work {
     my @subs = $evt->subscriptions(cluster => $cid);
 
     if ($ENV{DEBUG}) {
-        warn "find subs by cluster = [@subs]\n";
+        warn "for event (@$e_params), find subs by cluster = [@subs]\n";
     }
 
     # fast path:  job from phase2 to phase4, skipping filtering.
@@ -155,11 +155,12 @@ sub work {
     # of 5,000 (MAX_FILTER_SET) for separate filtering (phase3)
     # NOTE: we have to take care not to split subscriptions spanning
     # set boundaries with the same userid (ownerid).  otherwise dup
+    warn "Going on the P2 P3 slow path...\n" if $ENV{DEBUG};
 
     # checking is bypassed for that user.
     my %by_userid;
     foreach my $s (@subs) {
-        push @{$by_userid{$s->userid} || []}, $s;
+        push @{$by_userid{$s->userid} ||= []}, $s;
     }
 
     my @subjobs;
@@ -214,13 +215,13 @@ sub work {
 
     my @subjobs;
     foreach my $sp (@$sublist) {
-        my ($userid, $subid) = @$_;
+        my ($userid, $subid) = @$sp;
         my $u = LJ::load_userid($userid)
             or die "Failed to load userid: $userid\n";
 
         # TODO: discern difference between cluster not up and subscription
         #       having been deleted
-        my $subsc = LJ::Subscription->instance_from_id($u, $subid)
+        my $subsc = LJ::Subscription->new_by_id($u, $subid)
             or next;
 
         next unless $evt->matches_filter($subsc);
