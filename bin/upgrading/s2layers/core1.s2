@@ -958,7 +958,7 @@ property builtin string PALIMGROOT {
 }
 
 property int page_recent_items {
-    des = "Number of journal entries to show on recent entry page";
+    des = "Number of journal entries to show on recent entries page";
     doc_flags = "[construct]";
     min = 1;
     max = 50;

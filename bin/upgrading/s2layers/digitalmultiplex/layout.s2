@@ -15,7 +15,7 @@ layerinfo previews = "digitalmultiplex/digitalmultiplex.jpg";
 
 propgroup presentation {
     property bool show_entry_userpic { 
-        des = "Show the userpic on the full journal entries? [Excludes friends page]"; 
+        des = "Display your userpic on recent entries that appear in full"; 
     }
     set show_entry_userpic = true;
     property use page_recent_items;
@@ -25,7 +25,7 @@ propgroup presentation {
     property use use_shared_pic;
 
     property int leading_full_entries {
-        des = "Number of entries on the Recent Entries page to display in full";
+        des = "Number of journal entries to show in full on recent entries page";
         note = "Set to zero to display all recent entries in short form. Set to the same number of page items to display all recent entries in full form.";
     }
     set leading_full_entries = 5;
@@ -34,12 +34,6 @@ propgroup presentation {
         values = "60%|60%|70%|70%|80%|80%|90%|90%|100%|100%";
     }
     set page_content_width = "60%";
-}
-propgroup fonts {
-    property use font_base;
-    set font_base = "Georgia";
-    property use font_fallback;
-    set font_fallback = "sans-serif";
 }
 propgroup colors {
     ### Main / Misc
@@ -208,9 +202,15 @@ propgroup colors {
     }
     set server_sig_fgcolor = "#000000";
 }
-propgroup background {
+propgroup fonts {
+    property use font_base;
+    set font_base = "Georgia";
+    property use font_fallback;
+    set font_fallback = "sans-serif";
+}
+propgroup images {
     property string page_background_image {
-        des = "Background image";
+        des = "Background image URL";
         note = "URL to an image to be used for the page background (leave blank for none).";
     }
     set page_background_image = "";
@@ -231,6 +231,45 @@ propgroup background {
         values = "scroll|Scroll|fixed|Fixed";
     }
     set page_background_scrolling = "scroll";
+}
+propgroup text {
+    property string text_sidebar_link_separator {
+        des = "Leading text for links in the sidebar";
+    }
+    set text_sidebar_link_separator = "";
+    property use text_meta_music;
+    property use text_meta_mood;
+    property use text_meta_location;
+    property use text_post_comment;
+    property use text_read_comments;
+    property use text_post_comment_friends;
+    property use text_read_comments_friends;
+    property use text_website_default_name;
+    property string text_sidebar_title {
+        des = "Title of the sidebar";
+        noui = 1;
+    }
+    property string text_sidebar_userpic {
+        des = "Title of the userpic sidebar box";
+        noui = 1;
+    }
+    property string text_sidebar_blurb {
+        des = "Title of the blurb sidebar box";
+        noui = 1;
+    }
+    property string text_sidebar_navigation {
+        des = "Title of the navigation sidebar box";
+        noui = 1;
+    }
+    property string text_sidebar_summary {
+        des = "Title of the summary sidebar box";
+        noui = 1;
+    }
+    set text_sidebar_title = "About";
+    set text_sidebar_userpic = "Profile";
+    set text_sidebar_blurb = "Blurb";
+    set text_sidebar_navigation = "Navigation";
+    set text_sidebar_summary = "Page Summary";
 }
 propgroup sidebar {
     property string sidebar_width {
@@ -282,45 +321,6 @@ propgroup sidebar {
         values = "nothing|Nothing|summary|Page Summary|navigation|Navigation|links|Link List|blurb|Blurb|calendar|Calendar";
     }
     set sidebar_position_five = "calendar";
-}
-propgroup text {
-    property string text_sidebar_link_separator {
-        des = "Leading text for links in the sidebar";
-    }
-    set text_sidebar_link_separator = "";
-    property use text_meta_music;
-    property use text_meta_mood;
-    property use text_meta_location;
-    property use text_post_comment;
-    property use text_read_comments;
-    property use text_post_comment_friends;
-    property use text_read_comments_friends;
-    property use text_website_default_name;
-    property string text_sidebar_title {
-        des = "Title of the sidebar";
-        noui = 1;
-    }
-    property string text_sidebar_userpic {
-        des = "Title of the userpic sidebar box";
-        noui = 1;
-    }
-    property string text_sidebar_blurb {
-        des = "Title of the blurb sidebar box";
-        noui = 1;
-    }
-    property string text_sidebar_navigation {
-        des = "Title of the navigation sidebar box";
-        noui = 1;
-    }
-    property string text_sidebar_summary {
-        des = "Title of the summary sidebar box";
-        noui = 1;
-    }
-    set text_sidebar_title = "About";
-    set text_sidebar_userpic = "Profile";
-    set text_sidebar_blurb = "Blurb";
-    set text_sidebar_navigation = "Navigation";
-    set text_sidebar_summary = "Page Summary";
 }
 set tags_aware = true;
 
