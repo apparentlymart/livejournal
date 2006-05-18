@@ -33,9 +33,8 @@ sub handle_request {
 
     # process any deletions
     if ($GET->{'delete_note'} || $POST->{'delete_note'}) {
-        my $q = $self->queue or return undef;
         my $qid = int($GET->{'del_note_qid'} || $POST->{'del_note_qid'});
-        my $qitem = $q->item($qid) or return undef;
+        my $qitem = LJ::NotificationItem->new($self->{u}, $qid) or return undef;
         $qitem->delete;
     }
 
