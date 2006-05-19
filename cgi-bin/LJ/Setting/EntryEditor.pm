@@ -3,7 +3,7 @@ use base 'LJ::Setting';
 use strict;
 use warnings;
 
-sub tags { qw(editor entryeditor) }
+sub tags { qw(editor entryeditor richtext html rich plain plaintext) }
 
 sub as_html {
     my ($class, $u, $errs) = @_;

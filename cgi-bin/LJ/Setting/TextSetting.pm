@@ -16,6 +16,11 @@ sub current_value {
     croak;
 }
 
+# zero means no limit.
+sub max_bytes { 0 }
+sub max_chars { 0 }
+
+# display size:
 sub text_size { 40 }
 
 sub question { croak; }
@@ -24,6 +29,7 @@ sub as_html {
     my ($class, $u, $errs) = @_;
     my $key = $class->pkgkey;
     return $class->question .
+        "&nbsp;" .
         LJ::html_text({
             name  => "${key}txt",
             value => $class->current_value($u),

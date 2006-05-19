@@ -3,7 +3,7 @@ use base 'LJ::Setting';
 use strict;
 use warnings;
 
-sub tags { qw(mangle_email spam opt_mangleemail) }
+sub tags { qw(email hide obscure mangle spam) }
 
 sub as_html {
     my ($class, $u, $errs) = @_;
