@@ -21,15 +21,15 @@
     foreach my $class (@settings) {
         eval "use $class; 1; " or next;
         foreach my $tag ($class->tags) {
-            push @{$tags{$tag} ||= []}, $class;
+            push @{$tags{lc $tag} ||= []}, $class;
         }
     }
 
-    my $tag = $GET{tag};
+    my $tag = lc $GET{tag};
 
     $title = "Change Settings";
     $body = "<center>Which <a href='./'>setting</a> do you want to change today?  Enter tag:";
-    $body .= "<form method='get'><input name='tag' value='$tag' style='text-align: center; font-size: 20pt; font-weight: bold; -moz-border-radius: 10px;' /></form></center>";
+    $body .= "<form method='get'><input name='tag' value='" . LJ::ehtml($GET{tag}) . "' style='text-align: center; font-size: 20pt; font-weight: bold; -moz-border-radius: 10px;' /></form></center>";
 
     unless ($tag) {
         my %tagmap;
@@ -66,7 +66,6 @@
     $body .= "<form method='post'>";
     $body .= "<?h1 Options tagged '$tag': h1?>\n";
     foreach my $class (@matches) {
-        $body .= "<?h2 $class h2?>\n";
         unless (eval "use $class; 1;") {
             my $del = $class;
             $del =~ s!::!/!;
@@ -94,7 +93,7 @@
         } else {
             my $pkgkey = $class->pkgkey;
             my $color = $save_errors ? "red" : "black";
-            $body .= "<div id='$pkgkey' style='border: 2px solid $color; padding: 10px;'>$html</div>";
+            $body .= "<div id='$pkgkey' style='margin: 0.5em; border: 2px solid $color; padding: 10px;'>$html</div>";
         }
     }
     $body .= "<input type='submit' value='Save' />";
