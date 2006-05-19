@@ -9,34 +9,45 @@ layerinfo "des" = "A fixed-width layout with drop shadows, various header styles
 ## Customization Props
 
 propgroup presentation {
+    property bool opt_use_friendcolors {
+        des = "Use friend colors on friends page";
+        noui = 1; # The support for this isn't brilliant
+    }
+    set opt_use_friendcolors = false;
+
+    property bool opt_hide_userpics {
+        des = "Hide userpics on recent entries and day pages";
+    }
+    set opt_hide_userpics = true;
+
+    property bool opt_show_user_linkele {
+        des = "Show links to your memories, todo list, and add friend page in the sidebar";
+    }
+    set opt_show_user_linkele = true;
+
+    property use lang_fmt_date_short;
+    property use lang_fmt_date_long;
+    property use lang_fmt_time_short;
+
+    property use page_recent_items;
+    property use page_friends_items;
+
+    property use use_shared_pic;
+    property use view_entry_disabled;
+
+    # This layout has quite a hefty stylesheet, so let's
+    # make it external to avoid loading it over and over.
+    set external_stylesheet = true;
+
     property int content_width {
         des = "Content area width in pixels";
     }
     set content_width = 750;
 
-    property string content_bg_img {
-        des = "Content area background image";
-        note = "Since you've chosen how big the sidebar will be in pixels, you could use this to add a sidebar background.";
-    }
-    set content_bg_img = "";
-
     property int sidebar_width {
         des = "Sidebar width in pixels";
     }
     set sidebar_width = 230;
-
-    property string page_bg_img {
-        des = "Main page background image";
-        note = "Disable the shadows below for best results; the shadows will not automatically blend with the background.";
-    }
-    set page_bg_img = "";
-
-    property string page_bg_image_tile {
-        des = "Main page background repeat mode";
-        values = "no-repeat|Do not repeat|repeat-x|Repeat Horizontally|repeat-y|Repeat Vertically|repeat|Repeat both Horizontally and Vertically";
-        note = "This won't have any effect unless you enter an image URL above.";
-    }
-    set page_bg_image_tile = "repeat-y";
 
     property bool side_borders {
         des = "Show borders at the sides of the content area";
@@ -103,6 +114,52 @@ propgroup presentation {
         des = "Show line under title bar";
     }
     set title_separator = true;
+}
+propgroup colors {
+    property Color clr_margins {
+        des = "Page Background Color";
+    }
+    property Color clr_page_bg {
+        des = "Main Content Background Color";
+    }
+    property Color clr_page_fg {
+        des = "Main Content Foreground Color";
+    }
+    property Color clr_title_bg {
+        des = "Title Background Color";
+    }
+    property Color clr_title_fg {
+        des = "Title Text Color";
+    }
+    property Color clr_title_pattern {
+        des = "Color of Title Background Effects";
+        note = "The application of this color depends on your selection of heading style.";
+    }
+    property Color clr_title_separator {
+        des = "Color of Line Under Title";
+        note = "You must also enable the line in the Appearance section.";
+    }
+    property Color clr_side_borders {
+        des = "Color of Side Borders";
+        note = "You must also enable the borders in the Appearance section.";
+    }
+    property Color clr_link_normal {
+        des = "Normal Link Color";
+    }
+    property Color clr_link_visited {
+        des = "Visited Link Color";
+    }
+
+    set clr_page_fg = "#000000";
+    set clr_margins = "#0183fd";
+    set clr_link_visited = "#0063c0";
+    set clr_link_normal = "#0183fd";
+    set clr_title_pattern = "#faf49a";
+    set clr_side_borders = "#000000";
+    set clr_page_bg = "#e3f1ff";
+    set clr_title_bg = "#0063c0";
+    set clr_title_fg = "#ffffff";
+    set clr_title_separator = "#000000";
 }
 propgroup fonts {
 
@@ -179,51 +236,25 @@ propgroup fonts {
     set font_size_keyword = "tiny";
 
 }
-propgroup colors {
-    property Color clr_margins {
-        des = "Page Background Color";
+propgroup images {
+    property string content_bg_img {
+        des = "Content area background image URL";
+        note = "Since you've chosen how big the sidebar will be in pixels, you could use this to add a sidebar background.";
     }
-    property Color clr_page_bg {
-        des = "Main Content Background Color";
-    }
-    property Color clr_page_fg {
-        des = "Main Content Foreground Color";
-    }
-    property Color clr_title_bg {
-        des = "Title Background Color";
-    }
-    property Color clr_title_fg {
-        des = "Title Text Color";
-    }
-    property Color clr_title_pattern {
-        des = "Color of Title Background Effects";
-        note = "The application of this color depends on your selection of heading style.";
-    }
-    property Color clr_title_separator {
-        des = "Color of Line Under Title";
-        note = "You must also enable the line in the Appearance section.";
-    }
-    property Color clr_side_borders {
-        des = "Color of Side Borders";
-        note = "You must also enable the borders in the Appearance section.";
-    }
-    property Color clr_link_normal {
-        des = "Normal Link Color";
-    }
-    property Color clr_link_visited {
-        des = "Visited Link Color";
-    }
+    set content_bg_img = "";
 
-    set clr_page_fg = "#000000";
-    set clr_margins = "#0183fd";
-    set clr_link_visited = "#0063c0";
-    set clr_link_normal = "#0183fd";
-    set clr_title_pattern = "#faf49a";
-    set clr_side_borders = "#000000";
-    set clr_page_bg = "#e3f1ff";
-    set clr_title_bg = "#0063c0";
-    set clr_title_fg = "#ffffff";
-    set clr_title_separator = "#000000";
+    property string page_bg_img {
+        des = "Main page background image URL";
+        note = "Disable the shadows below for best results; the shadows will not automatically blend with the background.";
+    }
+    set page_bg_img = "";
+
+    property string page_bg_image_tile {
+        des = "Main page background repeat mode";
+        values = "no-repeat|Do not repeat|repeat-x|Repeat Horizontally|repeat-y|Repeat Vertically|repeat|Repeat both Horizontally and Vertically";
+        note = "This won't have any effect unless you enter an image URL above.";
+    }
+    set page_bg_image_tile = "repeat-y";
 }
 propgroup text {
     property use text_view_recent;
@@ -291,44 +322,9 @@ propgroup text {
     property use text_read_comments_friends;
     property use text_website_default_name;
 }
-propgroup options = "Miscellaneous Options";
-propgroup options {
-    property bool opt_use_friendcolors {
-        des = "Use friend colors on friends page";
-        noui = 1; # The support for this isn't brilliant
-    }
-    set opt_use_friendcolors = false;
 
-    property bool opt_hide_userpics {
-        des = "Hide user picture icons on entries";
-        note = "The pictures will still be shown on the Friends view";
-    }
-    set opt_hide_userpics = true;
-
-    property bool opt_show_user_linkele {
-        des = "Show action toolbar in the sidebar";
-        note = "With this enabled, a small toolbar of links to your memories, todo and to add you as a friend will be shown in the sidebar";
-    }
-    set opt_show_user_linkele = true;
-
-    property use lang_fmt_date_short;
-    property use lang_fmt_date_long;
-    property use lang_fmt_time_short;
-
-    property use page_recent_items;
-    property use page_friends_items;
-
-    property use use_shared_pic;
-    property use view_entry_disabled;
-
-    # This layout has quite a hefty stylesheet, so let's
-    # make it external to avoid loading it over and over.
-    set external_stylesheet = true;
-
-    set tags_aware = true;
-    set text_tags = "#";
-}
-
+set tags_aware = true;
+set text_tags = "#";
 
 function prop_init() {
     # A vague attempt at sanity-checking the font properties. Not
