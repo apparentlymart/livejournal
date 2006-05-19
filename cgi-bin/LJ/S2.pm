@@ -1715,7 +1715,7 @@ sub Page
         'stylesheet_url' => "$base_url/res/$styleid/stylesheet?$stylemodtime",
         'view_url' => {
             'recent' => "$base_url/",
-            'userinfo' => "$LJ::SITEROOT/userinfo.bml?user=$u->{'user'}",
+            'userinfo' => $u->profile_url,
             'archive' => "$base_url/calendar",
             'friends' => "$base_url/friends",
         },
