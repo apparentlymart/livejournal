@@ -4,6 +4,7 @@
     use vars qw($title $body %GET %POST);
 
     BML::decl_params(tag      => qr/^[\w\. ]+$/,
+                     c        => "word",
                      _default => qr/./);
 
     my $err = sub {
@@ -15,11 +16,17 @@
     my $u = LJ::User->remote
         or return $err->("must be logged in");
 
+    my $selminiclass = $GET{c};   # classname without LJ::Setting::
+    my $selclass = $selminiclass ? "LJ::Setting::$selminiclass" : "";
+
     my @settings = map { s!.+cgi-bin/!!; s!/!::!g; s/\.pm$//; $_ } (glob "$ENV{LJHOME}/cgi-bin/LJ/Setting/*.pm");
 
     my %tags = ();
+    my @matches;
     foreach my $class (@settings) {
+        next if $selclass && $selclass ne $class;
         eval "use $class; 1; " or next;
+        push @matches, $class if $selclass;
         foreach my $tag ($class->tags) {
             push @{$tags{lc $tag} ||= []}, $class;
         }
@@ -31,7 +38,7 @@
     $body = "<center>Which <a href='./'>setting</a> do you want to change today?  Enter tag:";
     $body .= "<form method='get'><input name='tag' value='" . LJ::ehtml($GET{tag}) . "' style='text-align: center; font-size: 20pt; font-weight: bold; -moz-border-radius: 10px;' /></form></center>";
 
-    unless ($tag) {
+    unless ($tag || $selclass) {
         my %tagmap;
         while (my ($k, $v) = each %tags) {
             $tagmap{$k} = {
@@ -43,8 +50,7 @@
         return;
     }
 
-
-    my @matches = @{ $tags{$tag} || [] };
+    @matches = @{ $tags{$tag} || [] } unless @matches;
     unless (@matches) {
         $body .= "<?h1 Sorry h1?><?p No options match '$tag'. p?>";
         return;
@@ -64,7 +70,11 @@
     #$body .= "<pre>" . LJ::D(\%POST, \%posted) . "</pre>";
 
     $body .= "<form method='post'>";
-    $body .= "<?h1 Options tagged '$tag': h1?>\n";
+    if ($tag) {
+        $body .= "<?h1 Options tagged '$tag': h1?>\n";
+    } else {
+        $body .= "<?h1 The '$selminiclass' setting: h1?>\n";
+    }
     foreach my $class (@matches) {
         unless (eval "use $class; 1;") {
             my $del = $class;
@@ -93,7 +103,9 @@
         } else {
             my $pkgkey = $class->pkgkey;
             my $color = $save_errors ? "red" : "black";
-            $body .= "<div id='$pkgkey' style='margin: 0.5em; border: 2px solid $color; padding: 10px;'>$html</div>";
+            my $miniclass = $class;
+            $miniclass =~ s/^LJ::Setting:://;
+            $body .= "<div id='$pkgkey' style='margin: 0.5em; border: 2px solid $color; padding: 10px;'><div style='float:right'><a href='/settings/?c=$miniclass'>#</a></div>$html</div>";
         }
     }
     $body .= "<input type='submit' value='Save' />";
