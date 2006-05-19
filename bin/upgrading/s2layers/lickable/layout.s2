@@ -137,11 +137,11 @@ propgroup colors {
     }
     property Color clr_title_separator {
         des = "Color of Line Under Title";
-        note = "You must also enable the line in the Appearance section.";
+        note = "You must also enable the line in the Presentation section.";
     }
     property Color clr_side_borders {
         des = "Color of Side Borders";
-        note = "You must also enable the borders in the Appearance section.";
+        note = "You must also enable the borders in the Presentation section.";
     }
     property Color clr_link_normal {
         des = "Normal Link Color";
