@@ -16,44 +16,7 @@ layerinfo "previews" = "variableflow/preview.jpg";
 # completely in your user layer to drastically change the
 # presentation.
 
-propgroup colors {
-    property Color clr_margin {
-        des = "Page Background Color";
-    }
-    property Color clr_line {
-        des = "Color of line separating the entry area from the background";
-        requires = "opt_page_border";
-    }
-    property Color clr_back {
-        des = "Background Color of Main Content Area";
-        requires = "opt_page_background";
-    }
-    property Color clr_text {
-        des = "Main Text Color";
-    }
-    property Color clr_link {
-        des = "Color of normal links";
-    }
-    property Color clr_vlink {
-        des = "Color of visited links";
-    }
-    property Color clr_alink {
-        des = "Color of links once clicked on";
-    }
-    property Color clr_title {
-        des = "Journal Title Color";
-    }
-    set clr_margin = "#337CCD";
-    set clr_line = "#000000";
-    set clr_back = "#33ABCD";
-    set clr_text = "#000000";
-    set clr_link = "#261A72";
-    set clr_vlink = "#190F57";
-    set clr_alink = "#261A72";
-    set clr_title = "#190F57";
-}
-
-propgroup layout {
+propgroup presentation {
     property string margin_left {
         des = "Page Left Margin Size";
         values = "0|None|5px|Tiny|5%|Small|10%|Medium|25%|Large|50%|Massive";
@@ -128,6 +91,41 @@ propgroup layout {
     set align_title = "left";
     set align_talklinks = "right";
 
+    property bool opt_page_border {
+        des = "Draw Line Around Content Box";
+        note = "With this disabled, the line color option has no effect";
+    }
+    property bool opt_page_background {
+        des = "Content Box has Background";
+        note = "With this disabled, the Content Box Background Color and Image options have no effect and the page background will show through instead.";
+    }
+    set opt_page_border = true;
+    set opt_page_background = true;
+
+    property bool opt_entry_userpics {
+        des = "Display userpics on entries";
+        note = "With this disabled, no entries will show userpics, even on the friends page.";
+    }
+    set opt_entry_userpics = true;
+
+    property bool opt_own_userpics {
+        des = "Display your userpics on recent entries and day views";
+        note = "Enable this to show userpics on your own entries. You must also have the previous option enabled. This option has no effect on community journals.";
+        requires = "opt_entry_userpics";
+    }
+    set opt_own_userpics = false;
+
+    # Some standard constructional properties
+    property use page_recent_items;
+    property use page_friends_items;
+    property use page_year_sortorder;
+    property use page_day_sortorder;
+
+    # Tell the system this layout has no linklist support
+    # If you add linklist support in a user layer, you should also
+    # set this property to true in your layer.
+    set linklist_support = false;
+
 
     # Some "advanced" settings which don't appear in the UI,
     # either because they have non-obvious interactions with
@@ -163,9 +161,53 @@ propgroup layout {
     set adv_enable_print_styles = true;
     set adv_enable_projection_styles = true;
     set adv_horrible_userpic_markup = true;
+
+    # This layout has quite a big stylesheet so let's avoid
+    # transferring it over and over.
+    set external_stylesheet = true;
+
+    property use view_entry_disabled;
+    set view_entry_disabled = true;   # Disabled by default for back-compat reasons
 }
 
-propgroup presentation {
+propgroup colors {
+    property Color clr_margin {
+        des = "Page Background Color";
+    }
+    property Color clr_line {
+        des = "Color of line separating the entry area from the background";
+        requires = "opt_page_border";
+    }
+    property Color clr_back {
+        des = "Background Color of Main Content Area";
+        requires = "opt_page_background";
+    }
+    property Color clr_text {
+        des = "Main Text Color";
+    }
+    property Color clr_link {
+        des = "Color of normal links";
+    }
+    property Color clr_vlink {
+        des = "Color of visited links";
+    }
+    property Color clr_alink {
+        des = "Color of links once clicked on";
+    }
+    property Color clr_title {
+        des = "Journal Title Color";
+    }
+    set clr_margin = "#337CCD";
+    set clr_line = "#000000";
+    set clr_back = "#33ABCD";
+    set clr_text = "#000000";
+    set clr_link = "#261A72";
+    set clr_vlink = "#190F57";
+    set clr_alink = "#261A72";
+    set clr_title = "#190F57";
+}
+
+propgroup fonts {
     property use font_base;
     property use font_fallback;
 
@@ -176,18 +218,9 @@ propgroup presentation {
         allow_other_noui = 1;
     }
     set font_size = "0.75em";
+}
 
-    property bool opt_page_border {
-        des = "Draw Line Around Content Box";
-        note = "With this disabled, the line color option has no effect";
-    }
-    property bool opt_page_background {
-        des = "Content Box has Background";
-        note = "With this disabled, the Content Box Background Color and Image options have no effect and the page background will show through instead.";
-    }
-    set opt_page_border = true;
-    set opt_page_background = true;
-
+propgroup images {
     property string url_background_img_page {
         des = "Page Background Image URL";
         note = "Leave this blank if you do not wish to use a background image.";
@@ -238,40 +271,6 @@ propgroup presentation {
         allow_other_noui = 1;
     }
     set background_position_box = "top left";
-
-    property bool opt_entry_userpics {
-        des = "Enable Userpics On Entries";
-        note = "With this disabled, no entries will show userpics, even on the friends page.";
-    }
-    set opt_entry_userpics = true;
-
-    property bool opt_own_userpics {
-        des = "Show Own Userpics";
-        note = "Enable this to show userpics on your own entries. You must also have the previous option enabled. This option has no effect on community journals.";
-        requires = "opt_entry_userpics";
-    }
-    set opt_own_userpics = false;
-
-    # This layout has quite a big stylesheet so let's avoid
-    # transferring it over and over.
-    set external_stylesheet = true;
-
-    property use view_entry_disabled;
-    set view_entry_disabled = true;   # Disabled by default for back-compat reasons
-}
-
-propgroup options {
-
-    # Some standard constructional properties
-    property use page_recent_items;
-    property use page_friends_items;
-    property use page_year_sortorder;
-    property use page_day_sortorder;
-
-    # Tell the system this layout has no linklist support
-    # If you add linklist support in a user layer, you should also
-    # set this property to true in your layer.
-    set linklist_support = false;
 }
 
 propgroup text {

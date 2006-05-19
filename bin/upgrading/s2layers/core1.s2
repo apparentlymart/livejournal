@@ -973,7 +973,7 @@ set page_recent_items = 20;
 set page_friends_items = 20;
 
 property string page_day_sortorder {
-    des = "Order of entries shown on day pages";
+    des = "Order of entries shown on a day page";
     values = "forward|Least recent first|reverse|Most recent first";
 }
 property string page_year_sortorder {
@@ -1151,7 +1151,7 @@ property string text_noentries_day {
 set text_noentries_day = "There were no entries on this day.";
 
 property string text_permalink {
-    des = "Text for a entry's permanent link";
+    des = "Text for an entry's permanent link";
     maxlength = 50;
     size = 20;
 }
