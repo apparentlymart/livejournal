@@ -474,20 +474,9 @@ function RecentPage::lay_viewspec_nav() {
 
 }
 
-# This DEFINITELY should be in core
 function Page::lay_view_name(string view) : string
- "Don't bother overriding this, because it'll be deleted as soon as core can do it" {
-    if ($view == "recent") {
-        return $*text_view_recent;
-    } elseif ($view == "friends") {
-        return $*text_view_friends;
-    } elseif ($view == "userinfo") {
-        return $*text_view_userinfo;
-    } elseif ($view == "archive") {
-        return $*text_view_archive;
-    } else {
-        return "Something";
-    }
+"This function is deprecated, since this functionality is now provided by [global[lang_viewname(string)]]." {
+    return lang_viewname($view);
 }
 
 function Page::lay_viewspec_heading() : string
