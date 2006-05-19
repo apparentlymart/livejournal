@@ -1534,6 +1534,7 @@ sub db_logger
                  "server VARCHAR(30),".
                  "addr VARCHAR(15) NOT NULL,".
                  "ljuser VARCHAR(15),".
+                 "remotecaps INT UNSIGNED,".
                  "journalid INT UNSIGNED,". # userid of what's being looked at
                  "codepath VARCHAR(80),".  # protocol.getevents / s[12].friends / bml.update / bml.friends.index
                  "anonsess INT UNSIGNED,".
@@ -1572,11 +1573,15 @@ sub db_logger
         }
     }
 
+    my $remote = eval { LJ::load_user($rl->notes('ljuser')) };
+    my $remotecaps = $remote ? $remote->{caps} : undef;
+
     my $var = {
         'whn' => sprintf("%04d%02d%02d%02d%02d%02d", $now[5]+1900, $now[4]+1, @now[3, 2, 1, 0]),
         'server' => $LJ::SERVER_NAME,
         'addr' => $r->connection->remote_ip,
         'ljuser' => $rl->notes('ljuser'),
+        'remotecaps' => $remotecaps,
         'journalid' => $rl->notes('journalid'),
         'codepath' => $rl->notes('codepath'),
         'anonsess' => $rl->notes('anonsess'),
@@ -1628,9 +1633,24 @@ sub db_logger
     $cb->($var) if $cb;
 
     if ($dbl) {
-        my $delayed = $LJ::IMMEDIATE_LOGGING ? "" : "DELAYED";
-        $dbl->do("INSERT $delayed INTO $table (" . join(',', keys %$var) . ") ".
-                 "VALUES (" . join(',', map { $dbl->quote($var->{$_}) } keys %$var) . ")");
+        my $ins = sub {
+            my $delayed = $LJ::IMMEDIATE_LOGGING ? "" : "DELAYED";
+            $dbl->do("INSERT $delayed INTO $table (" . join(',', keys %$var) . ") ".
+                     "VALUES (" . join(',', map { $dbl->quote($var->{$_}) } keys %$var) . ")");
+        };
+
+        # support for widening the schema at runtime.  if we detect a bogus column,
+        # we just don't log that column until the next (wider) table is made at next
+        # hour boundary.
+        $ins->();
+        if ($dbl->err) {
+            my $errstr = $dbl->errstr;
+            if ($errstr =~ /Unknown column \'(\w+)/) {
+                my $col = $1;
+                delete $var->{$col};
+                $ins->();
+            }
+        }
 
         $dbl->disconnect if $LJ::DISCONNECT_DB_LOG;
     }
