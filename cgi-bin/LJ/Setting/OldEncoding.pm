@@ -30,6 +30,7 @@ sub as_html {
 sub save {
     my ($class, $u, $args) = @_;
     my $arg = $args->{'oldenc'};
+    $class->errors(oldenc => "Invalid") unless $arg =~ /^\d*$/;
     return 1 if $arg eq $u->{'oldenc'};
     return 0 unless LJ::update_user($u, { oldenc => $arg });
     return 1;

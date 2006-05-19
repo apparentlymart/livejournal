@@ -22,9 +22,14 @@ sub as_html {
 
 sub save {
     my ($class, $u, $args) = @_;
-    my $arg = $args->{'mailencoding'};
-    return 1 if $arg eq $u->prop('mailencoding');
-    return 0 unless $u->set_prop('mailencoding', $arg);
+    my $val = $args->{'mailencoding'};
+
+    my %mail_encnames;
+    LJ::load_codes({ "encname" => \%mail_encnames } );
+    $class->errors(oldenc => "Invalid") unless ! $val || $mail_encnames{$val};
+
+    return 1 if $val eq $u->prop('mailencoding');
+    return 0 unless $u->set_prop('mailencoding', $val);
     return 1;
 }
 

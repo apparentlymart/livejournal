@@ -25,7 +25,6 @@ sub save {
     my ($class, $u, $args) = @_;
     my $arg = $args->{external_foafurl};
     return 1 if $arg eq $u->{external_foaf_url};
-    #$class->errors("external_foaf_url" => "Invalid Entry");
     return 0 unless $u->set_prop("external_foaf_url", $arg);
     return 1;
 }
