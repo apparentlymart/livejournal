@@ -60,11 +60,6 @@ propgroup presentation {
     property use external_stylesheet;
 }
 
-propgroup fonts {
-    property use font_base;
-    property use font_fallback;
-}
-
 propgroup colors {
     property Color clr_page_back { des = "Page background"; }
     set clr_page_back = "#ffffff";
@@ -89,6 +84,11 @@ propgroup colors {
 
     property Color clr_page_vlink { des = "Visited link color"; }
     set clr_page_vlink = "#0000ff";
+}
+
+propgroup fonts {
+    property use font_base;
+    property use font_fallback;
 }
 
 set tags_aware = true;
