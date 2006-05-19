@@ -45,6 +45,10 @@ sub save {
     unless (LJ::text_in($txt)) {
         $class->errors(txt => "Invalid UTF-8");
     }
+    if ($class->max_bytes || $class->max_chars) {
+        my $trimmed = LJ::text_trim($txt, $class->max_bytes, $class->max_chars);
+        $class->errors(txt => "Too long") if $trimmed ne $txt;
+    }
     return $class->save_text($u, $txt);
 }
 
