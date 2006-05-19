@@ -10,9 +10,19 @@ propgroup presentation {
     property use page_friends_items;
 
     property int box_width {
-        des = "Box width in pixels";
+        des = "Content area width in pixels";
     }
 
+    property string box_alignment {
+        des = "Alignment of the content area";
+        values = "left|Left|center|Center|right|Right";
+    }
+
+    property string box_margin {
+        des = "Margin size on either the left or right side of the content area";
+        note = "A left alignment means this value will change the left margin.  A right alignment means this value will change the right margin.  A center alignment means this value will have no effect.  Don't forget to include units; e.g. px, %";
+    }
+    
     property use view_entry_disabled;
     property use use_shared_pic;
     property use comment_userpic_style;
@@ -139,6 +149,8 @@ set comment_bar_screened_bgcolor = "#5f6f99";
 set comment_bar_screened_fgcolor = "#000000";
 
 set box_width = 600;
+set box_alignment = "center";
+set box_margin = "0";
 set show_entrynav_icons = true;
 set page_background_image = "";
 
@@ -285,6 +297,13 @@ function Page::print ()
 {
     var string title = $this->title();
 
+    var string margin = "";
+    if ($*box_alignment == "left") {
+        $margin = " style=\"margin-left: $*box_margin;\"";
+    } elseif ($*box_alignment == "right") {
+        $margin = " style=\"margin-right: $*box_margin;\"";
+    }
+
     var string website_name = $.journal.website_name ? $.journal.website_name : $*text_website_default_name;
     var string website;
     if ($.journal.website_url != "") {
@@ -328,7 +347,7 @@ if (viewer_sees_ads()) {
     """<tr><td valign="top">""";
 }
 """
-<div align="center">
+<div align="$*box_alignment"$margin>
 <table width="$*box_width" cellpadding="2" cellspacing="0"
 border="0"
 summary="">
