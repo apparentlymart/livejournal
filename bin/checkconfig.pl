@@ -138,6 +138,12 @@ my %modules = (
                    deb => 'perlmagick',
                    opt => "Required for the userpic factory.",
                },
+               "Class::Accessor" => {
+                   deb => 'libclass-accessor-perl',
+               },
+               "Class::Trigger" => {
+                   deb => 'libclass-trigger-perl',
+               },
                );
 
 sub check_modules {
