@@ -322,6 +322,17 @@ propgroup text {
     property use text_read_comments_friends;
     property use text_website_default_name;
 }
+propgroup customcss {
+
+    property string custom_css {
+        des = "Custom Style Rules";
+        note = "If you'd like to customize this style further and are familiar with CSS, you can enter custom style rules here.";
+        string_mode = "css";
+        cols = 80;
+        rows = 20;
+    }
+
+}
 
 set tags_aware = true;
 set text_tags = "#";
@@ -866,6 +877,7 @@ function print_stylesheet() {
     necessary_styles();
     pretty_styles();
     custom_styles();
+    print "\n$*custom_css\n";
 }
 
 function paraphernalia_box_open(string id, string title) "Open a paraphenalia box" {
