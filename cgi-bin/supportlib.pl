@@ -1,12 +1,27 @@
 #!/usr/bin/perl
 #
 
+use strict;
+
 package LJ::Support;
 
-use strict;
+use vars qw(@SUPPORT_PRIVS);
+
 use Digest::MD5 qw(md5_hex);
 
 require "$ENV{'LJHOME'}/cgi-bin/sysban.pl";
+
+# Constants
+my $SECONDS_IN_DAY  = 3600 * 24;
+@SUPPORT_PRIVS = (qw/supportclose
+                     supporthelp
+                     supportdelete
+                     supportread
+                     supportviewinternal
+                     supportmakeinternal
+                     supportmovetouch
+                     supportviewscreened
+                     supportchangesummary/);
 
 ## pass $id of zero or blank to get all categories
 sub load_cats
@@ -50,12 +65,16 @@ sub init_remote
 {
     my $remote = shift;
     return unless $remote;
-    LJ::load_user_privs($remote, 
-                        qw(supportclose supporthelp 
-                           supportdelete supportread
-                           supportviewinternal supportmakeinternal
-                           supportmovetouch supportviewscreened
-                           supportchangesummary));
+    LJ::load_user_privs($remote, @SUPPORT_PRIVS);
+}
+
+sub has_any_support_priv {
+    my $u = shift;
+    return 0 unless $u;
+    foreach my $support_priv (@SUPPORT_PRIVS) {
+        return 1 if LJ::check_priv($u, $support_priv);
+    }
+    return 0;
 }
 
 # given all the categories, maps a catkey into a cat
@@ -738,5 +757,174 @@ sub mini_auth
     my $sp = shift;
     return substr($sp->{'authcode'}, 0, 4);
 }
+
+#
+# Name:   get_support_by_daterange
+# Desc:   Get all the support rows based on a date range
+# Parms:  date1 = YYYY-MM-DD of beginning date of range
+#         date2 = YYYY-MM-DD of ending    date of range
+# Return: HashRef of support rows by support id
+#
+sub get_support_by_daterange {
+    my ($date1, $date2) = @_;
+
+    # Build the query out based on the dates specified
+    my $time1 = LJ::mysqldate_to_time($date1);
+    my $time2 = LJ::mysqldate_to_time($date2) + $SECONDS_IN_DAY;
+
+    # Convert from times to IDs because support.timecreate isn't indexed
+    my ($start_id, $end_id) = LJ::DB::time_range_to_ids
+                                   (table       => 'support',
+                                    roles       => [qw/slow slave master/],
+                                    idcol       => 'spid',
+                                    timecol     => 'timecreate',
+                                    starttime   => $time1,
+                                    endtime     => $time2,
+                                   );
+
+    # Generate the SQL.  Include time fields to be safe
+    my $sql = "SELECT * FROM support "
+            . "WHERE spid >= ? AND spid <= ? "
+            . "  AND timecreate >= ? AND timecreate < ?";
+
+    # Get the results from the database
+    my $dbh = LJ::get_dbh("slow", "slave", "master")
+              || return "Database unavailable";
+    my $sth = $dbh->prepare($sql);
+    $sth->execute($start_id, $end_id, $time1, $time2);
+    die $dbh->errstr if $dbh->err;
+    $sth->{mysql_use_result} = 1;
+
+    # Loop over the results, generating a hash by Support ID
+    my %result_hash = ();
+    while (my $row = $sth->fetchrow_hashref) {
+        $result_hash{$row->{spid}} = $row;
+    }
+
+    return \%result_hash;
+}
+
+#
+# Name:   get_support_by_ids
+# Desc:   Get all the support rows based on a list of Support IDs
+# Parms:  support_ids = arrayref of Support IDs
+# Return: ArrayRef of support rows
+#
+sub get_support_by_ids {
+    my ($support_ids_ref) = @_;
+
+    # Build the query out based on the dates specified
+    my $support_ids_bind = join ',', map { '?' } @$support_ids_ref;
+    my $sql = "SELECT * FROM support "
+            . "WHERE spid IN ($support_ids_bind)";
+
+    # Get the results from the database
+    my $dbh = LJ::get_dbh("slow", "slave", "master")
+              || return "Database unavailable";
+    my $sth = $dbh->prepare($sql);
+    $sth->execute(@$support_ids_ref);
+    die $dbh->errstr if $dbh->err;
+    $sth->{mysql_use_result} = 1;
+
+    # Loop over the results, generating a hash by Support ID
+    my %result_hash = ();
+    while (my $row = $sth->fetchrow_hashref) {
+        $result_hash{$row->{spid}} = $row;
+    }
+
+    return \%result_hash;
+}
+
+#
+# Name:   get_supportlogs
+# Desc:   Get all the supportlog rows for a list of Support IDs
+# Parms:  support_ids_ref = ArrayRef of Support IDs
+# Return: HashRef of supportlog rows by support id
+#
+sub get_supportlogs {
+    my $support_ids_ref = shift;
+    my %result_hash = ();
+    return \%result_hash unless @$support_ids_ref;
+
+    # Build the query out based on the dates specified
+    my $spid_bind = join ',', map { '?' } @$support_ids_ref;
+    my $sql = "SELECT * FROM supportlog WHERE spid IN ($spid_bind) ";
+
+    # Get the results from the database
+    my $dbh = LJ::get_dbh("slow", "slave", "master")
+              || return "Database unavailable";
+    my $sth = $dbh->prepare($sql);
+    $sth->execute(@$support_ids_ref);
+    die $dbh->errstr if $dbh->err;
+    $sth->{mysql_use_result} = 1;
+
+    # Loop over the results, generating a hash by Support ID
+    while (my $row = $sth->fetchrow_hashref) {
+        push @{$result_hash{$row->{spid}}}, $row;
+    }
+
+    return \%result_hash;
+}
+
+#
+# Name:   get_touch_supportlogs_by_user_and_date
+# Desc:   Get all touch (non-req) supportlogs based on User ID and Date Range
+# Parms:  userid = User ID to filter on, or Undef for all users
+#         date1 = YYYY-MM-DD of beginning date of range
+#         date2 = YYYY-MM-DD of ending    date of range
+# Return: Support HashRef of Support Logs Array, sorted by log time
+#
+sub get_touch_supportlogs_by_user_and_date {
+    my ($userid, $date1, $date2) = @_;
+
+    # Build the query out based on the dates specified
+    my $time1 = LJ::mysqldate_to_time($date1);
+    my $time2 = LJ::mysqldate_to_time($date2) + $SECONDS_IN_DAY;
+
+    # Convert from times to IDs because supportlog.timelogged isn't indexed
+    my ($start_id, $end_id) = LJ::DB::time_range_to_ids
+                                   (table       => 'supportlog',
+                                    roles       => [qw/slow slave master/],
+                                    idcol       => 'splid',
+                                    timecol     => 'timelogged',
+                                    starttime   => $time1,
+                                    endtime     => $time2,
+                                   );
+
+    # Generate the SQL.  Include time fields to be safe
+    my $sql = "SELECT * FROM supportlog"
+            . " WHERE type <> 'req' "
+            . " AND splid >= ? AND splid <= ?"
+            . " AND timelogged >= ? AND timelogged < ?"
+            . ($userid ? " AND userid = ?" : '');
+
+    # Get the results from the database
+    my $dbh = LJ::get_dbh("slow", "slave", "master")
+              || return "Database unavailable";
+    my $sth = $dbh->prepare($sql);
+    my @parms = ($start_id, $end_id, $time1, $time2);
+    push @parms, $userid if $userid;
+    $sth->execute(@parms);
+    die $dbh->errstr if $dbh->err;
+    $sth->{mysql_use_result} = 1;
+
+    # Store the query results in an array
+    my @results;
+    while (my $row = $sth->fetchrow_hashref) {
+        push @results, $row;
+    }
+
+    # Sort logs by time
+    @results = sort {$a->{timelogged} <=> $b->{timelogged}} @results;
+
+    # Loop over the results, generating an array that's hashed by Support ID
+    my %result_hash = ();
+    foreach my $row (@results) {
+        push @{$result_hash{$row->{spid}}}, $row;
+    }
+
+    return \%result_hash;
+}
+
 
 1;

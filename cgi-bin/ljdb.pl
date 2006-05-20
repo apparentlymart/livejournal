@@ -5,6 +5,7 @@ use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 use DBI::Role;
 use DBI;
+use Carp qw(croak);
 
 require "$ENV{LJHOME}/cgi-bin/ljconfig.pl";
 
@@ -204,7 +205,6 @@ sub user_cluster_details {
 }
 
 package LJ;
-use Carp qw(croak);
 
 # when calling a supported function (currently: LJ::load_user() or LJ::load_userid*),
 # ignores in-process request cache, memcache, and selects directly

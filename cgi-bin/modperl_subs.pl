@@ -50,6 +50,7 @@ require "$ENV{'LJHOME'}/cgi-bin/weblib.pl";
 require "$ENV{'LJHOME'}/cgi-bin/imageconf.pl";
 require "$ENV{'LJHOME'}/cgi-bin/propparse.pl";
 require "$ENV{'LJHOME'}/cgi-bin/supportlib.pl";
+require "$ENV{'LJHOME'}/cgi-bin/supportstatslib.pl";
 require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
 require "$ENV{'LJHOME'}/cgi-bin/talklib.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljtodo.pl";
