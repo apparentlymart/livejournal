@@ -759,6 +759,12 @@ function builtin viewer_is_owner() : bool
 "Returns true if the user viewing the page is both logged in, and is the owner of the content in question.
 Useful for returning links to manage information, or edit entries.";
 
+function builtin viewer_is_friend() : bool
+"Returns true if the user viewing the page is both logged in, and is a friend of the journal being viewed. Always returns false for communities, since they cannot have friends.";
+
+function builtin viewer_is_member() : bool
+"Returns true if the user viewing the page is both logged in, and is a member of the community being viewed. Always returns false for personal journals, since they cannot have members.";
+
 function builtin viewer_sees_ads() [fixed] : bool
 "Returns true if reader will be shown an ad.";
 

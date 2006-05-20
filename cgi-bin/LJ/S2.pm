@@ -2111,7 +2111,32 @@ sub viewer_is_owner
     my ($ctx) = @_;
     my $remote = LJ::get_remote();
     return 0 unless $remote;
+    return 0 unless defined($LJ::S2::CURR_PAGE);
     return $remote->{'userid'} == $LJ::S2::CURR_PAGE->{'_u'}->{'userid'};
+}
+
+sub viewer_is_friend
+{
+    my ($ctx) = @_;
+    my $remote = LJ::get_remote();
+    return 0 unless $remote;
+    return 0 unless defined($LJ::S2::CURR_PAGE);
+
+    my $ju = $LJ::S2::CURR_PAGE->{'_u'};
+    return 0 if $ju->{journaltype} eq 'C';
+    return LJ::is_friend($ju, $remote);
+}
+
+sub viewer_is_member
+{
+    my ($ctx) = @_;
+    my $remote = LJ::get_remote();
+    return 0 unless $remote;
+    return 0 unless defined($LJ::S2::CURR_PAGE);
+
+    my $ju = $LJ::S2::CURR_PAGE->{'_u'};
+    return 0 if $ju->{journaltype} ne 'C';
+    return LJ::is_friend($ju, $remote);
 }
 
 sub viewer_sees_control_strip
