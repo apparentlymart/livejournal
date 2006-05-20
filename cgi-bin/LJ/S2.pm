@@ -100,8 +100,6 @@ sub make_journal
         $opts->{enable_tags_compatibility} = 1;
     }
 
-    escape_context_props($ctx->[S2::PROPS]);
-
     $opts->{'ctx'} = $ctx;
     $LJ::S2::CURR_CTX = $ctx;
 
@@ -707,6 +705,17 @@ sub s2_context
         S2::set_output(sub {});  # printing suppressed
         S2::set_output_safe(sub {});
         eval { S2::run_code($ctx, "prop_init()"); };
+
+        foreach my $lid (@layers) {
+            foreach my $pname (S2::get_property_names($lid)) {
+                next unless $ctx->[S2::PROPS]{$pname};
+
+                my $prop = S2::get_property($lid, $pname);
+                my $mode = $prop->{string_mode} || "plain";
+                escape_prop_value($ctx->[S2::PROPS]{$pname}, $mode);
+            }
+        }
+
         return $ctx unless $@;
     }
 
@@ -719,6 +728,55 @@ sub s2_context
     $r->print("<b>Error preparing to run:</b> $err");
     return undef;
 
+}
+
+{
+    my $css_cleaner = CSS::Cleaner->new();
+
+    sub escape_prop_value {
+        my $mode = $_[1];
+
+        # This function modifies its first parameter in place.
+
+        if (ref $_[0] eq 'ARRAY') {
+            for (my $i = 0; $i < scalar(@{$_[0]}); $i++) {
+                escape_prop_value($_[0][$i], $mode);
+            }
+        }
+        elsif (ref $_[0] eq 'HASH') {
+            foreach my $k (keys %{$_[0]}) {
+                escape_prop_value($_[0]{$k}, $mode);
+            }
+        }
+        elsif (! ref $_[0]) {
+            if ($mode eq 'simple-html' || $mode eq 'simple-html-oneline') {
+                LJ::CleanHTML::clean_subject(\$_[0]);
+                $_[0] =~ s!\n!<br />!g if $mode eq 'simple-html';
+            }
+            elsif ($mode eq 'css') {
+                my $clean = $css_cleaner->clean($_[0]);
+                LJ::run_hook('css_cleaner_transform', \$clean);
+                $_[0] = $clean;
+            }
+            elsif ($mode eq 'css-attrib') {
+                if ($_[0] =~ /[\{\}]/) {
+                    # If the string contains any { and } characters, it can't go in a style="" attrib
+                    $_[0] = "/* bad CSS: can't use braces in a style attribute */";
+                    return;
+                }
+                my $clean = $css_cleaner->clean_property($_[0]);
+                $_[0] = $clean;
+            }
+            else { # plain
+                $_[0] =~ s/</&lt;/g;
+                $_[0] =~ s/>/&gt;/g;
+                $_[0] =~ s!\n!<br />!g;
+            }
+        }
+        else {
+            $_[0] = undef; # Something's gone very wrong. Zzap the value completely.
+        }
+    }
 }
 
 sub s1_shortcomings_style {
@@ -1081,32 +1139,6 @@ sub load_layer
     return $db->selectrow_hashref("SELECT s2lid, b2lid, userid, type ".
                                   "FROM s2layers WHERE s2lid=?", undef,
                                   $lid);
-}
-
-sub escape_context_props
-{
-    my $obj = shift;
-    if (ref $obj eq "HASH") {
-        while (my ($k, $v) = each %{$obj}) {
-            if (ref $v) {
-                escape_context_props($v);
-            } else {
-                $obj->{$k} =~ s/</&lt;/g;
-                $obj->{$k} =~ s/>/&gt;/g;
-                $obj->{$k} =~ s!\n!<br/>!g;
-            }
-        }
-    } elsif (ref $obj eq "ARRAY") {
-        foreach (@$obj) {
-            if (ref) {
-                escape_context_props($_);
-            } else {
-                s/</&lt;/g;
-                s/>/&gt;/g;
-                s!\n!<br/>!g;
-            }
-        }
-    }
 }
 
 sub populate_system_props
