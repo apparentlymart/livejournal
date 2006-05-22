@@ -53,12 +53,31 @@ sub handler
 
     @pids = (sort { $stats{$b}->[0] <=> $stats{$a}->[0] } @pids, 0, 0);
 
-    my $my_pid = $$;
-    if (grep { $my_pid == $_ } @pids[0,1]) {
+    if (grep { $$ == $_ } @pids[0,1]) {
         my $my_use_k = $stats{$$}[0] >> 10;
-        $r->log_error("Suicide [$$]: system memory free = ${memfree}k; i'm big, using ${my_use_k}k") if $LJ::DEBUG{'suicide'};
+        if ($LJ::DEBUG{'suicide'}) {
+            $r->log_error("Suicide [$$]: system memory free = ${memfree}k; " . 
+                          "i'm big, using ${my_use_k}k");
+        }
+
+        # we should have logged by here, but be paranoid in any case
         Apache::LiveJournal::db_logger($r) unless $r->pnotes('did_lj_logging');
+
+        # This is supposed to set MaxChildRequests to 1, then clear the 
+        # KeepAlive flag so that Apache will terminate after this request,
+        # but it doesn't work.  We'll call it here just in case.
         $r->child_terminate;
+
+        # We should call Apache::exit(Apache::Constants::DONE) here because
+        # it makes sure that the child shuts down cleanly after fulfilling
+        # its request and running logging handlers, etc.
+        #
+        # In practice Apache won't exit until the current request's KeepAlive
+        # timeout is reached, so the Apache hangs around for the configured
+        # amount of time before exiting.  Sinced we know that the request
+        # is done and we've verified that logging as happend (above), we'll
+        # just call CORE::exit(0) which works immediately.
+        CORE::exit(0);
     }
 
     return OK;

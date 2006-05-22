@@ -78,6 +78,7 @@ sub handler
         $r->push_handlers(PerlCleanupHandler => sub { %RQ = () });
         $r->push_handlers(PerlCleanupHandler => "Apache::LiveJournal::db_logger");
         $r->push_handlers(PerlCleanupHandler => "LJ::end_request");
+        $r->push_handlers(PerlCleanupHandler => "Apache::DebateSuicide");
 
         if ($LJ::TRUST_X_HEADERS) {
             # if we're behind a lite mod_proxy front-end, we need to trick future handlers
