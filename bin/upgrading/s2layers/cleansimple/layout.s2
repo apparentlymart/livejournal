@@ -743,7 +743,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
 
     $e.comments->print(); "\n";
 
-    "</div>";
+    "</div></div>";
 
     if ($e.end_day) {
         "</div>";
