@@ -320,7 +320,6 @@ class EntryLite
     function print_linkbar() "Print the link bar for this entry or comment.";
     function time_display () : string "Show the time of this post, with most useful information for user, and with tooltip for more.";
     function time_display (string datefmt, string timefmt) : string "time_post, with customized date/time formats.";
-    function time_display (string datefmt, string timefmt, string btwn_datetime) : string "time_post, with customized date/time formats and text between the date and time.";
 }
 
 class Entry extends EntryLite
@@ -1855,7 +1854,7 @@ function secs_to_string (int sec) : string {
    return string($sec / 86400) + " days";
  }
 
-function EntryLite::time_display(string datefmt, string timefmt, string btwn_datetime) : string {    
+function EntryLite::time_display(string datefmt, string timefmt) : string {    
     if ($datefmt == "") {
         $datefmt = "med";
     }
@@ -1865,13 +1864,13 @@ function EntryLite::time_display(string datefmt, string timefmt, string btwn_dat
 
     var string ret;
     if ($datefmt != "none") { $ret = $ret + $this.time->date_format($datefmt); }
-    if ($datefmt != "none" and $timefmt != "none") { $ret = $ret + $btwn_datetime; }
+    if ($datefmt != "none" and $timefmt != "none") { $ret = $ret + " "; }
     if ($timefmt != "none") { $ret = $ret + $this.time->time_format($timefmt); }
 
     return ehtml($ret);
 }
 
-function Comment::time_display (string datefmt, string timefmt, string btwn_datetime) : string {
+function Comment::time_display (string datefmt, string timefmt) : string {
     if ($datefmt == "") {
         $datefmt = "iso";
     }
@@ -1901,14 +1900,18 @@ function Comment::time_display (string datefmt, string timefmt, string btwn_date
         var string poster_date = $this.time_poster->date_format($datefmt);
         $tooltip = $tooltip + ", ";
 
-        if ($poster_date == $display_date) { $poster_date = ""; }
+        if ($poster_date == $display_date and $timefmt != "none") { $poster_date = ""; }
         else { $poster_date = $poster_date + " "; }
 
-        $tooltip = $tooltip + $poster_date + $this.time_poster->time_format($timefmt) + " (" + $this.poster.username + "'s time)";
+        if ($timefmt != "none") {
+            $tooltip = $tooltip + $poster_date + $this.time_poster->time_format($timefmt) + " (" + $this.poster.username + "'s time)";
+        } else {
+            $tooltip = $tooltip + $poster_date + "(" + $this.poster.username + "'s time)";
+        }
     }
 
     if ($datefmt != "none") { $main = $main + $display_date; }
-    if ($datefmt != "none" and $timefmt != "none") { $main = $main + $btwn_datetime; }
+    if ($datefmt != "none" and $timefmt != "none") { $main = $main + " "; }
     if ($timefmt != "none") { $main = $main + $display_time; }
 
     return "<span title=\"" + ehtml($tooltip) + "\">" + ehtml($main) + "</span>";
@@ -1916,14 +1919,8 @@ function Comment::time_display (string datefmt, string timefmt, string btwn_date
 
 function EntryLite::time_display() : string {
     # Let the real function decide on some nice defaults
-    return $this->time_display("", "", " ");
+    return $this->time_display("", "");
 }
-
-function EntryLite::time_display(string datefmt, string timefmt) : string {
-    # Let the real function do the work
-    return $this->time_display($datefmt, $timefmt, " ");
-}
-
 
 ### Year view
 
