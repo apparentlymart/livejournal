@@ -5,16 +5,31 @@ function useRichText(textArea, statPrefix) {
     if ($("jrich")) {
         $("jrich").className = 'display_none';
     }
-    var oFCKeditor = new FCKeditor(textArea);
-    oFCKeditor.BasePath = statPrefix + "/fck/";
-    oFCKeditor.Height = 350;
-    oFCKeditor.ToolbarSet = "Update";
-
-    if ($("event_format") && $("event_format").selectedIndex == 0) {
-        $("draft").value = $("draft").value.replace(/\n/g, '<br />');
+    if ($("jplain")) {
+        $("jplain").className = '';
     }
 
-    oFCKeditor.ReplaceTextarea();
+    var editor_frame = $(textArea + '___Frame');
+
+    // Check for RTE already existing.  IE will show multiple iframes otherwise.
+    if (!editor_frame) {
+        var oFCKeditor = new FCKeditor(textArea);
+        oFCKeditor.BasePath = statPrefix + "/fck/";
+        oFCKeditor.Height = 350;
+        oFCKeditor.ToolbarSet = "Update";
+        if ($("event_format") && $("event_format").selectedIndex == 0) {
+            $(textArea).value = $(textArea).value.replace(/\n/g, '<br />');
+        }
+        oFCKeditor.ReplaceTextarea();
+    } else {
+        editor_frame.style.display = "block";
+        $(textArea).style.display = "none";
+        var editor_source = editor_frame.contentWindow.document.getElementById('eEditorArea');
+        if ($("event_format") && $("event_format").selectedIndex == 0) {
+            $(textArea).value = $(textArea).value.replace(/\n/g, '<br />');
+        }
+        editor_source.contentWindow.document.body.innerHTML = $(textArea).value;
+    }
 
     // Need to pause here as it takes some time for the editor
     // to actually load within the browser before we can
@@ -38,4 +53,44 @@ function RTEAddClasses(textArea, statPrefix) {
     html = html.replace(/<lj user=['"](\w+)["'] ?\/?>/g, "<span class='ljuser'><img src='" + statPrefix + "/fck/editor/plugins/livejournal/userinfo.gif' width='17' height='17' style='vertical-align: bottom' />$1</span>");
 
     oEditor.SetHTML(html);
+
+    // Allow RTE to use it's handler again so it's happy.
+    oEditor.ResetIsDirty();
+    var oForm = oEditor.LinkedField.form;
+    if (oForm.addEventListener)
+        oForm.addEventListener( 'submit', oEditor.UpdateLinkedField, true ) ;
+    if (oForm.attachEvent)
+        oForm.attachEvent( 'onsubmit', oEditor.UpdateLinkedField ) ;
+}
+
+function usePlainText(textArea) {
+    if (! FCKeditorAPI) return;
+    var oEditor = FCKeditorAPI.GetInstance(textArea);
+    if (! oEditor) return;
+    var editor_frame = $(textArea + '___Frame');
+    var editor_source = editor_frame.contentWindow.document.getElementById('eEditorArea'); 
+
+    var html = oEditor.GetXHTML();
+    $(textArea).value = html;
+
+    if ($("insobj"))
+        $("insobj").className = '';
+    if ($("jrich"))
+        $("jrich").className = '';
+    if ($("jplain"))
+        $("jplain").className = 'display_none';
+
+    editor_frame.style.display = "none";
+    $(textArea).style.display = "block";
+
+    $("switched_rte_on").value = '0';
+
+    // Remove onsubmit handler while in Plain text
+    var oForm = oEditor.LinkedField.form;
+    if (oForm.removeEventListener)
+            oForm.removeEventListener( 'submit', oEditor.UpdateLinkedField, true ) ;
+    if (oForm.detachEvent)
+     oForm.detachEvent( 'onsubmit', oEditor.UpdateLinkedField ) ;
+
+    return false;
 }
