@@ -14,7 +14,7 @@ body<=
 
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);
-    return LJ::bad_input("You could not be authenticated as the specified user.")
+    return LJ::bad_input($ML{'error.invalidauth'})
         unless $u;
 
     # authenticated
@@ -27,30 +27,32 @@ body<=
 
     my $getextra = $u->{'user'} ne $remote->{'user'} ? "?authas=$authas" : "";
 
-    $ret .= "<?h1 Edit which style? h1?>\n";
-    $ret .= "<?p After you <a href='$LJ::SITEROOT/styles/create.bml'><b>create a style</b></a>, you can edit it here. ";
-    $ret .= "To read more about the style system, go <a href='$LJ::SITEROOT/developer/styles.bml'>here</a>. p?>\n\n";
-    $ret .= "<?p You own the following styles.  Choose which one you want to modify.  p?>\n";
+    $ret .= "<?h1 $ML{'.editstyle.head'} h1?>\n";
+    $ret .= "<?p " . BML::ml('.editstyle.text2', {'aopts' => "href='$LJ::SITEROOT/styles/create.bml'", 'aopts2' => "href='$LJ::SITEROOT/developer/styles.bml'"}) . " p?>";
+    $ret .= "<?p $ML{'.edit.head'} p?>\n";
+    my $upsell_text = LJ::CProd->upsell_for($remote,page => 'styleseditbml');
+    $ret .= $upsell_text;
+
     $ret .= "<form method='post' action='edit_do.bml$getextra'>";
-    $ret .= "<?standout Pick a style:<br />";
+    $ret .= "<?standout $ML{'.edit.text2'}<br />";
 
     my $styles = LJ::S1::get_user_styles($u);
 
     my @list = map { $_->{'styleid'}, "$_->{'type'}($_->{'styleid'}): $_->{'styledes'}" }
                sort { $a->{'styledes'} cmp $b->{'styledes'} } values %$styles;
-    @list = @list ? @list : ('', 'no styles');
+    @list = @list ? @list : ('', $ML{'.edit.nostyle'});
 
     $ret .= LJ::html_select({ 'name' => 'styleid', 'size' => '10', 'style' => 'width: 100%;' },
                             @list) . "<br />\n";
 
-    $ret .= "<div style='margin-top: 3px;'>Action: ";
+    $ret .= "<div style='margin-top: 3px;'>$ML{'.edit.action'} ";
     $ret .= LJ::html_select({ 'name' => 'ide' },
-                            'v2', 'Edit in Easy Mode',
-                            'v1', 'Edit in Raw Mode (Old)',
-                            'delete', 'Delete this style!' ) . "</div>\n";
+                            'v2', $ML{'.edit.easy'},
+                            'v1', $ML{'.edit.raw'},
+                            'delete', $ML{'.edit.delete'} ) . "</div>\n";
 
     $ret .= "<div align='center' style='margin-top: 5px;'>";
-    $ret .= LJ::html_submit(undef, "Proceed", { 'disabled' => ! @list });
+    $ret .= LJ::html_submit(undef, $ML{'.edit.submit'}, { 'disabled' => ! @list });
     $ret .= "</div> standout?>\n";
     $ret .= "</form>\n";
 

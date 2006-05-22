@@ -9,7 +9,10 @@ body<=
 
     LJ::set_active_crumb('createstyle');
 
+    my $user = LJ::canonical_username($GET{'user'});
     my $remote = LJ::get_remote();
+    my $u = ! $user || $remote && $remote->{'user'} eq $user ? $remote : LJ::load_user($user);
+
     return "<?needlogin?>" unless $remote;
 
     my $ret;
@@ -28,8 +31,10 @@ body<=
     
     # main form
     $ret .= "<?h1 $ML{'.createstyle.head'} h1?>\n";
-    $ret .= "<?p " . BML::ml('.createstyle.text2', {'aopts' => "href='$LJ::SITEROOT/developer/embedding.bml'"}) . " p?>";
 
+    $ret .= "<?p " . BML::ml('.createstyle.text2', {'aopts' => "href='$LJ::SITEROOT/developer/embedding.bml'"}) . " p?>";
+    my $upsell_text = LJ::CProd->upsell_for($remote,page => 'stylescreatebml');
+    $ret .= $upsell_text;
     $ret .= "<?h1 $ML{'.selecttype.head'} h1?>\n";
     $ret .= "<?p $ML{'.selecttype.text'} p?>\n";
 
