@@ -1189,10 +1189,16 @@ RTE
 
         if ($opts->{'richtext_default'}) {
             $$onload .= 'useRichText("draft", "' . LJ::ejs($LJ::WSTATPREFIX) . '");';
-        } else {
+        }
+
+        {
             my $jrich = LJ::ejs(LJ::deemp(
-                                          BML::ml("entryform.htmlokay.rich2", { 'opts' => 'href="#" onClick="return useRichText(\'draft\', \'' . LJ::ejs($LJ::WSTATPREFIX) . '\');"' })));
+                                          BML::ml("entryform.htmlokay.rich2", { 'opts' => 'href="javascript:void(0);" onClick="return useRichText(\'draft\', \'' . LJ::ejs($LJ::WSTATPREFIX) . '\');"' })));
             $out .= "\t\tdocument.write(\"<div id='jrich'>$jrich</div>\");\n";
+
+            my $jplain = LJ::ejs(LJ::deemp(
+                                           BML::ml("entryform.plainswitch", { 'aopts' => 'href="javascript:void(0);" onClick="return usePlainText(\'draft\');"' })));
+            $out .= "\t\tdocument.write(\"<div id='jplain' class='display_none'>$jplain</div>\");\n";
         }
 
         $out .= <<RTE;
@@ -1265,16 +1271,15 @@ RTE
             }
 
             # Text Formatting
-            unless ($opts->{'richtext_default'}) {
-                my $format_selected = $opts->{'prop_opt_preformatted'} ? "preformatted" : "";
-                $format_selected ||= $opts->{'event_format'};
+            my $format_selected = $opts->{'prop_opt_preformatted'} ? "preformatted" : "";
+            $format_selected ||= $opts->{'event_format'};
 
-                $out .= "<tr valign='top' id='event_format_tr'><th><label for='event_format'>" . BML::ml('entryform.format') . "</label></th><td>";
-                $out .= LJ::html_select({ 'name' => "event_format", 'id' => "event_format",
-                                          'selected' => $format_selected, 'tabindex' => $tabindex->() },
-                                        "auto", BML::ml('entryform.format.auto'), "preformatted", BML::ml('entryform.format.preformatted'));
-                $out .= "</td></tr>";
-            }
+            $out .= "<tr valign='top' id='event_format_tr'><th><label for='event_format'>" . BML::ml('entryform.format') . "</label></th><td>";
+
+            $out .= LJ::html_select({ 'name' => "event_format", 'id' => "event_format",
+            'selected' => $format_selected, 'tabindex' => $tabindex->() },
+            "auto", BML::ml('entryform.format.auto'), "preformatted", BML::ml('entryform.format.preformatted'));
+            $out .= "</td></tr>";
 
             # Current Location
             unless ($LJ::DISABLED{'web_current_location'}) {

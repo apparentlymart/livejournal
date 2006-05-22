@@ -6055,6 +6055,8 @@ entryform.opt.defpic=(default)
 
 entryform.options=Options:
 
+entryform.plainswitch=(Use the 'Source' button to edit HTML.  You also can <a [[aopts]]>switch</a> back to the plain text mode.)
+
 entryform.postto=Post to:
 
 entryform.preview=Preview
