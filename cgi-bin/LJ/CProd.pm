@@ -86,21 +86,49 @@ sub mark_acked {
                   undef, $u->{userid}, $hide_cprodid);
 }
 
-sub trackable_link {
-    my ($class, $href, $text, $goodclick) = @_;
+sub _trackable_link {
+    my ($class, $text, $goodclick) = @_;
     Carp::croak("bogus caller, forgot param") unless defined $goodclick;
-    my $link = "$LJ::SITEROOT/misc/cprod.bml?class=$class&g=$goodclick&to=" . LJ::eurl($href);
-    return "<a onclick=\"this.href='" . LJ::ehtml($link) . "';\" href=\"" . LJ::ehtml($href) . "\">$text</a>";
+    my $link = $class->_trackable_link_url($class->link, $goodclick);
+    return "<a onclick=\"this.href='" . LJ::ehtml($link) . "';\" href=\"" . LJ::ehtml($class->link) . "\">$text</a>";
+}
+
+sub _trackable_button {
+    my ($class, $text, $goodclick) = @_;
+    Carp::croak("bogus caller, forgot param") unless defined $goodclick;
+    my $link = $class->_trackable_link_url($class->link, $goodclick);
+    my $e_text = LJ::ehtml($text);
+    return qq {
+        <input type="button" value="$e_text" onclick="window.location.href='$link';" />
+        };
+}
+
+sub _trackable_link_url {
+    my ($class, $href, $goodclick) = @_;
+    return "$LJ::SITEROOT/misc/cprod.bml?class=$class&g=$goodclick&to=" . LJ::eurl($href);
+}
+
+sub clickthru_button {
+    my ($class, $text) = @_;
+    return $class->_trackable_button($text, 1);
+}
+
+sub next_button {
+    my ($class) = @_;
+    my $text = "Next";
+    return qq {
+        <input type="button" value="$text" id="CProd_nextbutton" />
+        };
 }
 
 sub clickthru_link {
-    my ($class, $href, $text) = @_;
-    $class->trackable_link($href, $text, 1);
+    my ($class, $text) = @_;
+    $class->_trackable_link($text, 1);
 }
 
 sub ack_link {
-    my ($class, $href, $text) = @_;
-    $class->trackable_link($href, $text, 0);
+    my ($class, $text) = @_;
+    $class->_trackable_link($text, 0);
 }
 
 # don't override
@@ -180,14 +208,23 @@ sub wrap_content {
     my $htmlclass = LJ::ehtml($class);
 
     my $w = delete $opts{'width'} || 300;
-    my $alllink = $class->ack_link("$LJ::SITEROOT/didyouknow/", "View All");
-    my $nextlink = "<a href='$LJ::SITEROOT/didyouknow/' id='CProd_nextbutton' onclick='return false;'>Next</a>";
+    my $alllink = $class->_trackable_link_url("$LJ::SITEROOT/didyouknow/", 0);
+    my $next_button = $class->next_button;
+    my $clickthru_button = $class->clickthru_button($class->button_text);
 
     return qq{
     <div id='CProd_box'>
-      <div style='width: ${w}px; border: 1px solid #dfeaf4;' class='CProd_box_content'>
-        <div style='padding: 5px'>$content</div>
-        <div style='background: #abccec; padding: 4px; font-family: arial; font-size: 8pt;'><img src='$LJ::IMGPREFIX/frankhead.gif' width='30' height='31' align='absmiddle' />What else has LJ been hiding? $alllink | $nextlink</div>
+      <div style='width: ${w}px;' class='CProd_box_content'>
+        <div style='border: 1px solid #d9e6f2; padding: 0 .4em .4em .4em'>$content</div>
+        <div style='background: #d9e6f2 url($LJ::IMGPREFIX/cprod_b.gif) bottom left repeat-x; height: 5em;'>
+            <div style='background: url($LJ::IMGPREFIX/cprod_bright.gif) no-repeat bottom right; height: 5em;'>
+                <div style='position: relative; background: url($LJ::IMGPREFIX/cprod_bleft.gif) no-repeat bottom left; height: 5em;'><div style='float: right; padding: .5em .5em 0 0'>$clickthru_button $next_button</div><img src='$LJ::IMGPREFIX/frankhead.gif' width='50' height='50' style='position: absolute; left: 0; bottom: 0;' /><div style='clear: both;'></div></div>
+            </div>
+        </div>
+
+        <div style='text-align: right; position: relative; top: -1em;'>
+          <a href="$alllink">What else has LJ been hiding from me?</a>
+        </div>
         <div style='display: none;' id='CProd_class'>$htmlclass</div>
       </div>
     </div>

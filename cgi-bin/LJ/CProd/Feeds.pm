@@ -24,11 +24,14 @@ sub render {
     my $user = LJ::ljuser($u);
     my $icon = "<div style=\"float: left; padding-right: 5px;\">
                <img border=\"1\" src=\"$LJ::SITEROOT/img/syndicated24x24.gif\" /></div>";
-    my $link = $class->clickthru_link("$LJ::SITEROOT/syn/list.bml",BML::ml('feeds.link'));
+    my $link = $class->clickthru_link(BML::ml('feeds.link'));
 
     return "<p>$icon " . BML::ml('feeds.text', { "user" => $user,
                          "link" => $link }) . "</p>";
 
 }
+
+sub link { "$LJ::SITEROOT/syn/list.bml" }
+sub button_text { "View feeds" }
 
 1;

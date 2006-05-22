@@ -11,10 +11,13 @@ sub applicable {
     return $used_polls ? 0 : 1;
 }
 
+sub link { "$LJ::SITEROOT/poll/create.bml" }
+sub button_text { "Poll wizard" }
+
 sub render {
     my ($class, $u) = @_;
     my $user = LJ::ljuser($u);
-    my $link = $class->clickthru_link("$LJ::SITEROOT/poll/create.bml",BML::ml('polls.link'));
+    my $link = $class->clickthru_link(BML::ml('polls.link'));
     my $poll = "
 <div style='margin: 1em'><div>That's crazy!</div><div style='white-space: nowrap'>
 <img src='$LJ::IMGPREFIX/poll/leftbar.gif' style='vertical-align:middle' 
