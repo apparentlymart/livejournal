@@ -49,6 +49,11 @@ propgroup presentation {
       des = "Toggle to show the next, memory, edit, etc icons on the entry view page";
   }
   property use linklist_support;
+  property string counter_code {
+      des = "If you have an external web counter, you can enter the HTML for it here";
+      note = "Your counter will appear at the bottom of all of the sidebar content.";
+      string_mode = "html-oneline";
+  }
   property use external_stylesheet;
 }
 set opt_navbar_pos = "left";
@@ -62,6 +67,7 @@ set opt_top_margin = "0";
 set view_entry_disabled = false;
 set show_entrynav_icons = true;
 set linklist_support = false;
+set counter_code = "";
 
 propgroup colors {
   property Color body_bgcolor {
@@ -607,6 +613,10 @@ $website
 "$userpic";
 
 $this->print_linklist();
+
+if ($*counter_code != "") {
+    """<ul><li>$*counter_code</li></ul>""";
+}
 
 "</td>";
 }

@@ -753,6 +753,10 @@ sub s2_context
                 LJ::CleanHTML::clean_subject(\$_[0]);
                 $_[0] =~ s!\n!<br />!g if $mode eq 'simple-html';
             }
+            elsif ($mode eq 'html' || $mode eq 'html-oneline') {
+                LJ::CleanHTML::clean_event(\$_[0]);
+                $_[0] =~ s!\n!<br />!g if $mode eq 'html';
+            }
             elsif ($mode eq 'css') {
                 my $clean = $css_cleaner->clean($_[0]);
                 LJ::run_hook('css_cleaner_transform', \$clean);
