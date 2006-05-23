@@ -22,7 +22,12 @@ propgroup presentation {
         des = "Margin size on either the left or right side of the content area";
         note = "A left alignment means this value will change the left margin.  A right alignment means this value will change the right margin.  A center alignment means this value will have no effect.  Don't forget to include units; e.g. px, %";
     }
-    
+
+    property string box_top_margin {
+        des = "Margin size on the top of the content area";
+        note = "You can use this to shift your journal contents down in order to display a background image at the top of your journal.  Don't forget to include units; e.g. px, %";
+    }
+
     property use view_entry_disabled;
     property use use_shared_pic;
     property use comment_userpic_style;
@@ -105,14 +110,18 @@ propgroup images {
 	values = "repeat|Repeat|no-repeat|Don't repeat|repeat-x|Repeat across only|repeat-y|Repeat down only";
     }
     property string page_background_position {
-  	des = "Background image position";
-	note = "Does not apply if Background Image Repeat is set to 'Repeat'.";
-	values = "top|Top|top left|Top-left|top right|Top-right|center|Center|center left|Center-left|center right|Center-right|bottom|Bottom|bottom left|Bottom-left|bottom right|Bottom-right|left|Left|right|Right";
+      	des = "Background image position";
+    	note = "Does not apply if Background Image Repeat is set to 'Repeat'.";
+    	values = "top|Top|top left|Top-left|top right|Top-right|center|Center|center left|Center-left|center right|Center-right|bottom|Bottom|bottom left|Bottom-left|bottom right|Bottom-right|left|Left|right|Right";
     }
     property string page_background_scrolling {
-  	des = "Background image scrolling";
-	note = "Not supported in all browsers, but allows for the background image to be in a fixed position when scrolling.";
-	values = "scroll|Scroll|fixed|Fixed";
+      	des = "Background image scrolling";
+    	note = "Not supported in all browsers, but allows for the background image to be in a fixed position when scrolling.";
+    	values = "scroll|Scroll|fixed|Fixed";
+    }
+    property string img_btwn_comments {
+        des = "URL to an image to be used between your comment links";
+        note = "If you specify an image to use, it will replace any text between the comment links.";
     }
 }
 propgroup text {
@@ -127,6 +136,34 @@ propgroup text {
     property string text_website {
         des = "The label for the 'website' field";
         noui = 1;
+    }
+    property string text_btwn_comments {
+        des = "Text to be used between your comment links";
+        note = "If you specified an image to be used between your comments links in the \"Images\" section, then this option will not have any effect.";
+    }
+    property string date_format {
+        des = "Date format for entries";
+    }
+    property string time_format {
+        des = "Time format for entries";
+    }
+    property string btwn_datetime {
+        des = "Text to be used between the date and time for entries";
+    }
+    property string datetime_comments_format {
+        des = "Date and time format for comments";
+    }
+    property string date_daypage_format {
+        des = "Date format for the day page";
+    }
+}
+propgroup customcss {
+    property string custom_css {
+        des = "Custom Stylesheet";
+        note = "If you'd like to customize this style from scratch and are familiar with CSS, enter it here";
+        cols = 80;
+        rows = 20;
+        string_mode = "css";
     }
 }
 
@@ -151,8 +188,10 @@ set comment_bar_screened_fgcolor = "#000000";
 set box_width = 600;
 set box_alignment = "center";
 set box_margin = "0";
+set box_top_margin = "0";
 set show_entrynav_icons = true;
 set page_background_image = "";
+set img_btwn_comments = "";
 
 set font_base = "Verdana";
 set font_fallback = "sans-serif";
@@ -163,10 +202,18 @@ set text_view_recent = "entries";
 set text_view_friends = "friends";
 set text_view_archive = "archive";
 set text_view_userinfo = "userinfo";
+set text_website = "website";
+
+set text_btwn_comments = "|";
+set date_format = "%%mon%%. %%dayord%%, %%yyyy%%";
+set time_format = "%%hh%%:%%min%% %%a%%m";
+set btwn_datetime = "|";
+set datetime_comments_format = "%%yyyy%%-%%mm%%-%%dd%% %%hh%%:%%min%% %%a%%m";
+set date_daypage_format = "%%month%% %%dayord%%, %%yyyy%%";
+
+set custom_css = "";
 
 set tags_aware = true;
-
-set text_website = "website";
 
 function print_stylesheet () {
     if(clean_url($*page_background_image) != "") {
@@ -222,6 +269,7 @@ margin-top: 1em;
 width:100%;
 }
 
+$*custom_css
 """;
 }
 
@@ -298,10 +346,17 @@ function Page::print ()
     var string title = $this->title();
 
     var string margin = "";
-    if ($*box_alignment == "left") {
-        $margin = " style=\"margin-left: $*box_margin;\"";
-    } elseif ($*box_alignment == "right") {
-        $margin = " style=\"margin-right: $*box_margin;\"";
+    
+    if ($*box_alignment == "left" and $*box_margin != "0") {
+        $margin = "margin-left: $*box_margin;";
+    } elseif ($*box_alignment == "right" and $*box_margin != "0") {
+        $margin = "margin-right: $*box_margin;";
+    }
+    if ($*box_top_margin != "0") {
+        $margin = $margin + "margin-top: $*box_top_margin;";
+    }
+    if ($margin != "") {
+        $margin = " style=\"" + $margin + "\"";
     }
 
     var string website_name = $.journal.website_name ? $.journal.website_name : $*text_website_default_name;
@@ -473,8 +528,8 @@ if (viewer_sees_ads()) {
 function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_text)
 {
     var string datetime;
-    $datetime = $e.time->date_format("med")+"|<b>"
-        + $e.time->time_format() + "</b>";
+    $datetime = $e.time->date_format($*date_format)+"$*text_btwn_comments<b>"
+        + $e.time->time_format($*time_format) + "</b>";
 
     """
 <table width="$*box_width" cellpadding="2" cellspacing="0" border="0" summary="" class="entrybox">
@@ -668,7 +723,11 @@ function CommentInfo::print() {
             "<b>"; $this->print_readlink(); "</b>";
         }
         if ($.show_postlink and $.show_readlink) {
-            "|";
+            if (clean_url($*img_btwn_comments) != "") {
+                """ <img src="$*img_btwn_comments" alt="" /> """;
+            } else {
+                "$*text_btwn_comments";
+            }
         }
         if ($.show_postlink) {
             $this->print_postlink();
@@ -749,7 +808,7 @@ function DayPage::print_body() {
 <tr><td bgcolor="$*entry_back">""";
 
     if ($.has_entries) {
-        print $.date->date_format("long");
+        print $.date->date_format($*date_daypage_format);
     } else {
         print ehtml($*text_noentries_day);
     }
@@ -762,7 +821,7 @@ function DayPage::print_body() {
 
     var string tprev = ehtml($*text_day_prev);
     var string tnext = ehtml($*text_day_next);
-    var string daylong = $.date->date_format("long");
+    var string daylong = $.date->date_format($*date_daypage_format);
 
 """<table cellpadding="2" cellspacing="0" border="0" summary="">
 <tr><td bgcolor="$*stronger_back">
@@ -943,7 +1002,7 @@ function EntryPage::print_comment (Comment c) {
 
     ### From, date, etc
       print "<strong>From:</strong> $poster<br /><small>";
-      print $c->time_display();
+      print $c->time_display($*datetime_comments_format, "none");
       if ($c.metadata{"poster_ip"}) { print "<br />IP: [" + $c.metadata{"poster_ip"} + "]"; }
       "</small><br />";
 
@@ -1000,14 +1059,14 @@ function ReplyPage::print_body () {
         return;
     }
     var string datetime;
-    $datetime = $.replyto.time->date_format("med")+"|<b>" + $.replyto.time->time_format() + "</b>";
+    $datetime = $.replyto.time->date_format($*date_format)+"$*text_btwn_comments<b>" + $.replyto.time->time_format($*time_format) + "</b>";
     """<table width="$*box_width" cellpadding="2" cellspacing="0" border="0" summary="" class="entrybox">
 <tr align='left'>
 <td bgcolor="$*stronger_back" align="center">
 <table width="100%" cellpadding="5" cellspacing="0" border="0" summary="">
 <tr align='left'>
 <td class="caption">$.replyto.subject</td>
-<td class="index" align="right">$datetime</td></tr>
+<td class="index" align="right">[$datetime]</td></tr>
 <tr align='left'>
 <td colspan="2" bgcolor="$*entry_back">
 <table cellpadding="1" align="right" cellspacing="0" border="0" summary="">
