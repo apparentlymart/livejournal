@@ -2416,6 +2416,60 @@ CREATE TABLE cprod (
 )
 EOC
 
+register_tablecreate("sch_funcmap", <<'EOC');
+CREATE TABLE sch_funcmap (
+        funcid         INT UNSIGNED PRIMARY KEY NOT NULL AUTO_INCREMENT,
+        funcname       VARCHAR(255) NOT NULL,
+        UNIQUE(funcname)
+)
+EOC
+
+register_tablecreate("sch_job", <<'EOC');
+CREATE TABLE sch_job (
+        jobid           BIGINT UNSIGNED PRIMARY KEY NOT NULL AUTO_INCREMENT,
+        funcid          INT UNSIGNED NOT NULL,
+        arg             MEDIUMBLOB,
+        uniqkey         VARCHAR(255) NULL,
+        insert_time     INTEGER UNSIGNED,
+        run_after       INTEGER UNSIGNED NOT NULL,
+        grabbed_until   INTEGER UNSIGNED,
+        priority        SMALLINT UNSIGNED,
+        coalesce        VARCHAR(255),
+        INDEX (funcid, run_after),
+        UNIQUE(funcid, uniqkey),
+        INDEX (funcid, coalesce)
+)
+EOC
+
+register_tablecreate("sch_note", <<'EOC');
+CREATE TABLE sch_note (
+        jobid           BIGINT UNSIGNED NOT NULL,
+        notekey         VARCHAR(255),
+        PRIMARY KEY (jobid, notekey),
+        value           MEDIUMBLOB
+)
+EOC
+
+register_tablecreate("sch_error", <<'EOC');
+CREATE TABLE sch_error (
+        error_time      INTEGER UNSIGNED NOT NULL,
+        jobid           BIGINT UNSIGNED NOT NULL,
+        message         VARCHAR(255) NOT NULL,
+        INDEX (error_time),
+        INDEX (jobid)
+)
+EOC
+
+register_tablecreate("sch_exitstatus", <<'EOC');
+CREATE TABLE sch_exitstatus (
+        jobid           BIGINT UNSIGNED PRIMARY KEY NOT NULL,
+        status          SMALLINT UNSIGNED,
+        completion_time INTEGER UNSIGNED,
+        delete_after    INTEGER UNSIGNED,
+        INDEX (delete_after)
+)
+EOC
+
 
 # NOTE: new table declarations go here
 
