@@ -124,10 +124,14 @@ sub clickthru_button {
 }
 
 sub next_button {
-    my ($class) = @_;
+    my ($class, $style) = @_;
     my $text = "Next";
-    return qq {
+
+    my $btn = qq {
         <input type="button" value="$text" id="CProd_nextbutton" />
+        };
+    $btn .= qq {
+        <div id="CProd_style" style="display: none;">$style</div>
         };
 }
 
@@ -243,31 +247,50 @@ sub wrap_content {
     LJ::need_res("js/httpreq.js");
     LJ::need_res("js/hourglass.js");
     LJ::need_res("js/cprod.js");
-    my $htmlclass = LJ::ehtml($class);
+
+    my $e_class = LJ::ehtml($class);
 
     my $w = delete $opts{'width'} || 300;
-    my $version = $opts{version} || 0;
+    my $version = delete $opts{version} || 0;
+    my $style = delete $opts{style} || 'fancy';
+
     my $alllink = $class->_trackable_link_url("$LJ::SITEROOT/didyouknow/", 0);
-    my $next_button = $class->next_button;
+    my $next_button = $class->next_button($style);
     my $clickthru_button = $class->clickthru_button($class->button_text, $version);
 
-    return qq{
-    <div id='CProd_box'>
-      <div style='width: ${w}px;' class='CProd_box_content'>
-        <div style='border: 1px solid #d9e6f2; padding: 0 .4em .4em .4em'>$content</div>
-        <div style='background: #d9e6f2 url($LJ::IMGPREFIX/cprod_b.gif) bottom left repeat-x; height: 5em;'>
-            <div style='background: url($LJ::IMGPREFIX/cprod_bright.gif) no-repeat bottom right; height: 5em;'>
+    if ($style eq 'fancy') {
+        return qq{
+            <div id='CProd_box'>
+                <div style='width: ${w}px;' class='CProd_box_content'>
+                <div style='border: 1px solid #d9e6f2; padding: 0 .4em .4em .4em'>$content</div>
+                <div style='background: #d9e6f2 url($LJ::IMGPREFIX/cprod_b.gif) bottom left repeat-x; height: 5em;'>
+                <div style='background: url($LJ::IMGPREFIX/cprod_bright.gif) no-repeat bottom right; height: 5em;'>
                 <div style='position: relative; background: url($LJ::IMGPREFIX/cprod_bleft.gif) no-repeat bottom left; height: 5em;'><div style='float: right; padding: .5em .5em 0 0'>$clickthru_button $next_button</div><img src='$LJ::IMGPREFIX/frankhead.gif' width='50' height='50' style='position: absolute; left: 0; bottom: 0;' /><div style='clear: both;'></div></div>
-            </div>
-        </div>
+                </div>
+                </div>
 
-        <div style='text-align: right; position: relative; top: -1em;'>
-          <a onclick="window.location.href='$alllink'; return false;" href="$LJ::SITEROOT/didyouknow/">What else has LJ been hiding from me?</a>
-        </div>
-        <div style='display: none;' id='CProd_class'>$htmlclass</div>
-      </div>
-    </div>
-    };
+                <div style='text-align: right; position: relative; top: -1em;'>
+                <a onclick="window.location.href='$alllink'; return false;" href="$LJ::SITEROOT/didyouknow/">What else has LJ been hiding from me?</a>
+                </div>
+                <div style='display: none;' id='CProd_class'>$e_class</div>
+                </div>
+                </div>
+            };
+    } else {
+        return qq {
+            <div id="CProd_box">
+                <div style='padding: 0 .5em .5em .5em; margin: 0 0 1em 0;'>$content</div>
+                <div style='background: #d9e6f2;'>
+                <div style='background: #d9e6f2; padding: 0 .5em 0 .5em; width: 90%'>
+                <img src='$LJ::IMGPREFIX/frankhead.gif' width='50' height='50' align='absmiddle' style='position: relative; top: -12px;'/>
+                <div style='display: inline;'>$clickthru_button $next_button</div>
+                <div style='position: relative; top: -1em; margin-left: 55px;'><a href="$alllink">What else has LJ been hiding from me?</a></div>
+                </div>
+                <div style='display: none;' id='CProd_class'>$e_class</div>
+                </div>
+                </div>
+            };
+    }
 }
 
 1;
