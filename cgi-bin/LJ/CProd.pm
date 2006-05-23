@@ -262,7 +262,7 @@ sub wrap_content {
         </div>
 
         <div style='text-align: right; position: relative; top: -1em;'>
-          <a href="$alllink">What else has LJ been hiding from me?</a>
+          <a onclick="window.location.href='$alllink'; return false;" href="$LJ::SITEROOT/didyouknow/">What else has LJ been hiding from me?</a>
         </div>
         <div style='display: none;' id='CProd_class'>$htmlclass</div>
       </div>
