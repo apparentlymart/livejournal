@@ -126,10 +126,10 @@ sub clickthru_button {
 sub next_button {
     my ($class, $style) = @_;
     my $text = "Next";
-
     my $btn = qq {
         <input type="button" value="$text" id="CProd_nextbutton" />
         };
+
     $btn .= qq {
         <div id="CProd_style" style="display: none;">$style</div>
         };
@@ -160,7 +160,7 @@ sub full_box_for {
 # don't override
 sub box_for {
     my ($class, $u, %opts) = @_;
-    my $showclass = LJ::CProd->prod_to_show($u)
+    my $showclass = LJ::CProd->prod_to_show($u,%opts)
         or return "";
     my $version = $showclass->get_version;
     my $content = eval { $showclass->render($u, $version) } || LJ::ehtml($@);
@@ -202,12 +202,14 @@ sub user_map {
 }
 
 sub prod_to_show {
-    my ($class, $u) = @_;
+    my ($class, $u, %opts) = @_;
 
     my $tm  = $class->typemap;
     my $map = LJ::CProd->user_map($u);
 
     my @poss;  # [$class, $cprodid, $acktime];
+
+    @LJ::CPROD_PROMOS = $opts{'inline'} if $opts{'inline'};
 
     foreach my $prod (@LJ::CPROD_PROMOS) {
         my $class = "LJ::CProd::$prod";
@@ -247,7 +249,6 @@ sub wrap_content {
     LJ::need_res("js/httpreq.js");
     LJ::need_res("js/hourglass.js");
     LJ::need_res("js/cprod.js");
-
     my $e_class = LJ::ehtml($class);
 
     my $w = delete $opts{'width'} || 300;
@@ -265,9 +266,9 @@ sub wrap_content {
                 <div style='border: 1px solid #d9e6f2; padding: 0 .4em .4em .4em'>$content</div>
                 <div style='background: #d9e6f2 url($LJ::IMGPREFIX/cprod_b.gif) bottom left repeat-x; height: 5em;'>
                 <div style='background: url($LJ::IMGPREFIX/cprod_bright.gif) no-repeat bottom right; height: 5em;'>
-                <div style='position: relative; background: url($LJ::IMGPREFIX/cprod_bleft.gif) no-repeat bottom left; height: 5em;'><div style='float: right; padding: .5em .5em 0 0'>$clickthru_button $next_button</div><img src='$LJ::IMGPREFIX/frankhead.gif' width='50' height='50' style='position: absolute; left: 0; bottom: 0;' /><div style='clear: both;'></div></div>
-                </div>
-                </div>
+                 <div style='position: relative; background: url($LJ::IMGPREFIX/cprod_bleft.gif) no-repeat bottom left; height: 5em;'><div style='float: right; padding: .5em .5em 0 0'>$clickthru_button $next_button</div><img src='$LJ::IMGPREFIX/frankhead.gif' width='50' height='50' style='position: absolute; left: 0; bottom: 0;' /><div style='clear: both;'></div></div>
+            </div>
+        </div>
 
                 <div style='text-align: right; position: relative; top: -1em;'>
                 <a onclick="window.location.href='$alllink'; return false;" href="$LJ::SITEROOT/didyouknow/">What else has LJ been hiding from me?</a>

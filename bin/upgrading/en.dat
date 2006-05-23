@@ -4478,6 +4478,98 @@ The [[sitename]] Team
 
 /styles/edit.bml.editstyle.text2=After you <a [[aopts]]><b>create a style</b></a>, you can edit it here.  To read more about the style system, go <a [[aopts2]]>here</a>.
 
+/styles/edit_do.bml.delete.head=Are you sure?
+
+/styles/edit_do.bml.delete.submit=Yes, delete it!
+
+/styles/edit_do.bml.delete.text=Are you sure you want to delete <b>[[style]]</b>?  If so, press the button below.  This will temporarily break your journal if you're using this style, until you select a different style to use.
+
+/styles/edit_do.bml.edit.col.code=Code
+
+/styles/edit_do.bml.edit.col.description=Description:
+
+/styles/edit_do.bml.edit.col.transform=Transform
+
+/styles/edit_do.bml.edit.colorcodes.head=Color Codes
+
+/styles/edit_do.bml.edit.colorcodes.text=When designing a style, it's always best to avoid hard-coding colors in if possible.  That way, if you get bored of your colors you can change them at one place (the modify journal page) and it'll affect all your styles where you use that color code.  Obviously, if you need to use special images in your style, you may have to hard-code certain colors, but try to use them when you can.  It's your call.  <b>The following color codes can be used in any variable below that contains HTML:</b> 
+
+/styles/edit_do.bml.delete.confirmed.head=Deleted
+
+/styles/edit_do.bml.delete.confirmed.text=The style has been deleted. You can view your current list of styles <a [[aopts]]>here</a>.
+
+/styles/edit_do.bml.edit.customize.head=Customizable Variables
+
+/styles/edit_do.bml.edit.description=Style Description:
+
+/styles/edit_do.bml.edit.head=Edit Style
+
+/styles/edit_do.bml.edit.links.head=Convenience Links
+
+/styles/edit_do.bml.edit.links.text=You can use these links to scroll the page up to where the variable is declared...
+
+/styles/edit_do.bml.edit.options=Style Options:
+
+/styles/edit_do.bml.edit.override.head=Override only.
+
+/styles/edit_do.bml.edit.override.text=Only end-users may override this.  You cannot define it in a style.
+
+/styles/edit_do.bml.edit.preview=<a [[aopts]]>[Preview Current Style]</a> (must save below to see your changes, keep this window open and reload it whenever you save)
+
+/styles/edit_do.bml.edit.styleid=Style ID Number:
+
+/styles/edit_do.bml.edit.submit=Save Style
+
+/styles/edit_do.bml.edit.success.head=Success
+
+/styles/edit_do.bml.edit.success.text=Style has been updated.  You can view it <a [[aopts]]>here</a>.
+
+/styles/edit_do.bml.edit.text=Make any desired changes and press "Save" when done.
+
+/styles/edit_do.bml.edit.transforms.head=Transforms
+
+/styles/edit_do.bml.edit.transforms.text=What if you want to use a property but don't like its formatting?  Any property can be transformed 0 or more times by transform rules.  Say you want to use <tt>%%monlong%%</tt> (March, April, May, etc...) but you don't like that the default has those upper case initial letters.  You can apply the <b><tt>lc</tt></b> (lowercase) transform to it:  <b><tt>%%lc:monlong%%</tt></b>.  Transform are applied in order from the right to the left, so if you went <tt>%%a:b:c:d:property%%</tt>, <i>d</i> would be applied first.  Here are a list of the supported transforms: 
+
+/styles/edit_do.bml.edit.type=Style View Type:
+
+/styles/edit_do.bml.edit.variables.head=Style Variables:
+
+/styles/edit_do.bml.edit.variables.text=(<a [[aopts]]>reference information</a>)
+
+/styles/edit_do.bml.error.nostyle=The requested style does not exist.
+
+/styles/edit_do.bml.error.mode=Unknown mode:
+
+/styles/edit_do.bml.opts.colorfree.des=A style is color-free if it does not contain any hard-coded color tags, but only uses the generic color codes listed in the table below.
+
+/styles/edit_do.bml.opts.colorfree.title=Color Free?
+
+/styles/edit_do.bml.opts.embedded.des=Is this style designed to be embedded in somebody's homepage?  Check if so, otherwise it's a full page style
+
+/styles/edit_do.bml.opts.embedded.title=Embedded?
+
+/styles/edit_do.bml.opts.public.des=Mark this style public if you want other people to be able to use it or copy it.
+
+/styles/edit_do.bml.opts.public.title=Public?
+
+/styles/edit_do.bml.transforms.color.des=A weird transform that handles color codes.  See the color code table.
+
+/styles/edit_do.bml.transforms.cons.des=Access site constants.  Currently supported are 'siteroot', 'sitename', and 'img' (the image root).  Example use: %%cons:img%%/icon_protected.gif
+
+/styles/edit_do.bml.transforms.lc.des=Lower case.
+
+/styles/edit_do.bml.transforms.ljcomm.des=Transform the variable as if it were surrounded by &lt;lj comm=%%variable%%&gt;.  ex: %%ljcomm:username%%"
+
+/styles/edit_do.bml.transforms.ljuser.des=Transform the variable as if it were surrounded by &lt;lj user=%%variable%%&gt;.  ex: %%ljuser:username%%
+
+/styles/edit_do.bml.transforms.uc.des=Upper case.
+
+/styles/edit_do.bml.transforms.ue.des=URL-Encode.  Turn spaces to +, and all weird characters to <tt>%hh</tt>, the hex representation.  This is useful for building data files to be used in Flash-4 movies.
+
+/styles/edit_do.bml.transforms.userurl.des='Takes in a username and transforms it into a link to their journal.
+
+/styles/edit_do.bml.transforms.xe.des=XML-Encode.  Makes value acceptable for use in an XML attribute or element.  Escapes ampersands, angle brackets, and both types of quotes.  Does <i>not</i> however, escape ]]&gt;, so don't use CDATA elements.
+
 /styles/index.bml.about.header=Creating and Using Custom Styles
 
 /styles/index.bml.about3<<
@@ -5658,63 +5750,103 @@ bml.requirepost=As a security precaution, the page you're viewing requires a POS
 btn.search=Search
 
 cprod.birthday.link.v1=birthdays
+
 cprod.birthday.link.v2=
+
 cprod.birthday.link.v3=
+
 cprod.birthday.link.v4=
+
 cprod.birthday.link.v5=
 
 cprod.birthday.text.v1=Hey, [[user]], see which of your friends' [[link]] are coming up! LiveJournal keeps a list of their birthdays for you.
+
 cprod.birthday.text.v2=
+
 cprod.birthday.text.v3=
+
 cprod.birthday.text.v4=
+
 cprod.birthday.text.v5=
 
 cprod.controlstrip.link.v1=Navigation Strip
+
 cprod.controlstrip.link.v2=
+
 cprod.controlstrip.link.v3=
+
 cprod.controlstrip.link.v4=
+
 cprod.controlstrip.link.v5=
 
 cprod.controlstrip.text.v1=9 out of 10 LJ users prefer the [[link]].  (OK we made that up, but you should check it out anyway.)
+
 cprod.controlstrip.text.v2=
+
 cprod.controlstrip.text.v3=
+
 cprod.controlstrip.text.v4=
+
 cprod.controlstrip.text.v5=
 
 cprod.feeds.link.v1=syndicated feeds
+
 cprod.feeds.link.v2=
+
 cprod.feeds.link.v3=
+
 cprod.feeds.link.v4=
+
 cprod.feeds.link.v5=
 
 cprod.feeds.text.v1=Apparently there's good content outside of LJ?  We'll let you add [[link]] to your Friends page so you never have to leave.
+
 cprod.feeds.text.v2=
+
 cprod.feeds.text.v3=
+
 cprod.feeds.text.v4=
+
 cprod.feeds.text.v5=
 
 cprod.polls.link.v1=poll creation wizard
+
 cprod.polls.link.v2=
+
 cprod.polls.link.v3=
+
 cprod.polls.link.v4=
+
 cprod.polls.link.v5=
 
 cprod.polls.text.v1=[[user]], did you know you can post a poll in your journal using our [[link]]?  Find out what your friends <em>really</em> think about that shirt you bought last week. [[poll]]
+
 cprod.polls.text.v2=
+
 cprod.polls.text.v3=
+
 cprod.polls.text.v4=
+
 cprod.polls.text.v5=
 
 cprod.userpic.link.v1=default userpic
+
 cprod.userpic.link.v2=
+
 cprod.userpic.link.v3=
+
 cprod.userpic.link.v4=
+
 cprod.userpic.link.v5=
 
 cprod.userpic.text.v1=[[user]], did you know you could pick a [[link]] to go along with your posts and comments?
+
 cprod.userpic.text.v2=
+
 cprod.userpic.text.v3=
+
 cprod.userpic.text.v4=
+
 cprod.userpic.text.v5=
 
 crumb.acctstatus=Account Status

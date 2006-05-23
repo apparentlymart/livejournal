@@ -33,8 +33,7 @@ body<=
     $ret .= "<?h1 $ML{'.createstyle.head'} h1?>\n";
 
     $ret .= "<?p " . BML::ml('.createstyle.text2', {'aopts' => "href='$LJ::SITEROOT/developer/embedding.bml'"}) . " p?>";
-    my $upsell_text = LJ::CProd->upsell_for($remote,page => 'stylescreatebml');
-    $ret .= $upsell_text;
+    $ret .= LJ::CProd->box_for($remote,inline => 'CreateStyles');
     $ret .= "<?h1 $ML{'.selecttype.head'} h1?>\n";
     $ret .= "<?p $ML{'.selecttype.text'} p?>\n";
 

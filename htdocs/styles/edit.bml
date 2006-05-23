@@ -30,8 +30,7 @@ body<=
     $ret .= "<?h1 $ML{'.editstyle.head'} h1?>\n";
     $ret .= "<?p " . BML::ml('.editstyle.text2', {'aopts' => "href='$LJ::SITEROOT/styles/create.bml'", 'aopts2' => "href='$LJ::SITEROOT/developer/styles.bml'"}) . " p?>";
     $ret .= "<?p $ML{'.edit.head'} p?>\n";
-    my $upsell_text = LJ::CProd->upsell_for($remote,page => 'styleseditbml');
-    $ret .= $upsell_text;
+    $ret .= LJ::CProd->box_for($remote,inline => 'EditStyles');
 
     $ret .= "<form method='post' action='edit_do.bml$getextra'>";
     $ret .= "<?standout $ML{'.edit.text2'}<br />";
