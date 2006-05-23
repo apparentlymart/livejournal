@@ -1537,6 +1537,8 @@ sub db_logger
                  "ljuser VARCHAR(15),".
                  "remotecaps INT UNSIGNED,".
                  "journalid INT UNSIGNED,". # userid of what's being looked at
+                 "journaltype CHAR(1),".   # journalid's journaltype
+                 "remoteid INT UNSIGNED,". # remote user's userid
                  "codepath VARCHAR(80),".  # protocol.getevents / s[12].friends / bml.update / bml.friends.index
                  "anonsess INT UNSIGNED,".
                  "langpref VARCHAR(5),".
@@ -1576,6 +1578,9 @@ sub db_logger
 
     my $remote = eval { LJ::load_user($rl->notes('ljuser')) };
     my $remotecaps = $remote ? $remote->{caps} : undef;
+    my $remoteid   = $remote ? $remote->{userid} : 0;
+
+    my $ju = eval { LJ::load_userid($rl->notes('journalid')) };
 
     my $var = {
         'whn' => sprintf("%04d%02d%02d%02d%02d%02d", $now[5]+1900, $now[4]+1, @now[3, 2, 1, 0]),
@@ -1583,7 +1588,9 @@ sub db_logger
         'addr' => $r->connection->remote_ip,
         'ljuser' => $rl->notes('ljuser'),
         'remotecaps' => $remotecaps,
+        'remoteid'   => $remoteid,
         'journalid' => $rl->notes('journalid'),
+        'journaltype' => $ju ? $ju->{journaltype} : "",
         'codepath' => $rl->notes('codepath'),
         'anonsess' => $rl->notes('anonsess'),
         'langpref' => $rl->notes('langpref'),
@@ -1644,13 +1651,10 @@ sub db_logger
         # we just don't log that column until the next (wider) table is made at next
         # hour boundary.
         $ins->();
-        if ($dbl->err) {
-            my $errstr = $dbl->errstr;
-            if ($errstr =~ /Unknown column \'(\w+)/) {
-                my $col = $1;
-                delete $var->{$col};
-                $ins->();
-            }
+        while ($dbl->err && $dbl->errstr =~ /Unknown column \'(\w+)/) {
+            my $col = $1;
+            delete $var->{$col};
+            $ins->();
         }
 
         $dbl->disconnect if $LJ::DISCONNECT_DB_LOG;
