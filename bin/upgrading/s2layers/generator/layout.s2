@@ -6,9 +6,6 @@ layerinfo previews = "generator/generator.jpg";
 layerinfo des = "Centered boxes, perfectly aligned.";
 
 propgroup presentation {
-    property use page_recent_items;
-    property use page_friends_items;
-
     property int box_width {
         des = "Content area width in pixels";
     }
@@ -28,6 +25,18 @@ propgroup presentation {
         note = "You can use this to shift your journal contents down in order to display a background image at the top of your journal.  Don't forget to include units; e.g. px, %";
     }
 
+    property string entryborder_size {
+        des = "Size of borders around all boxes";
+        note = "Don't forget to include the units, e.g. px";
+    }
+    
+    property string entryborder_style {
+        des = "Style of borders around all boxes";
+        values = "solid|Solid|dashed|Dashed|dotted|Dotted|double|Double|hidden|Invisible";
+    }
+
+    property use page_recent_items;
+    property use page_friends_items;
     property use view_entry_disabled;
     property use use_shared_pic;
     property use comment_userpic_style;
@@ -36,6 +45,11 @@ propgroup presentation {
     }
     property use external_stylesheet;
     property use linklist_support;
+    property string counter_code {
+        des = "If you have an external web counter, you can enter the HTML for it here";
+        note = "Your counter will appear in between the title and navigation links in the box at the top of your journal.";
+        string_mode = "html-oneline";
+    }
 }
 propgroup colors {
     property Color entry_back {
@@ -45,6 +59,10 @@ propgroup colors {
     property Color entry_text {
         des = "Entry text color";
         s1color = "page_text";
+    }
+    property Color border_color {
+        des = "Color of borders around all boxes";
+        note = "If you don't set a border size and style on the \"Presentation\" section, this won't have any effect.";
     }
     property Color page_link {
         des = "Link color";
@@ -197,6 +215,7 @@ propgroup customcss {
 # Set default colors
 set entry_back = "#ffffff";
 set entry_text = "#000000";
+set border_color = "#000000";
 set page_link = "#0000ff";
 set page_vlink = "#0000ff";
 set page_alink = "#00ffff";
@@ -216,6 +235,10 @@ set box_width = 600;
 set box_alignment = "center";
 set box_margin = "0";
 set box_top_margin = "0";
+set entryborder_size = "";
+set entryborder_style = "hidden";
+set counter_code = "";
+
 set show_entrynav_icons = true;
 set page_background_image = "";
 set img_btwn_comments = "";
@@ -304,6 +327,9 @@ font-size: 8pt;
 margin-top: 1em;
 width:100%;
 }
+.box, .entrybox {
+border: $*entryborder_size $*entryborder_style $*border_color;
+}
 
 $*custom_css
 """;
@@ -329,7 +355,7 @@ function Page::print_linklist() {
 <p>
 <table width='$*box_width' cellpadding='2' cellspacing='0'
 border='0'
-summary=''>
+summary='' class='box'>
 <tr><td bgcolor='$*stronger_back' align='center'>
 <table width='100%' cellpadding='3' cellspacing='0'
 border='0'
@@ -441,7 +467,7 @@ if (viewer_sees_ads()) {
 <div align="$*box_alignment"$margin>
 <table width="$*box_width" cellpadding="2" cellspacing="0"
 border="0"
-summary="">
+summary="" class="box">
 <tr><td bgcolor="$*stronger_back" align="center">
 <table width="100%" cellpadding="3" cellspacing="0"
 border="0"
@@ -471,7 +497,11 @@ if ($*text_journal_title == "[[name]]") {
 } else {
     "$*text_journal_title";
 }
-"""</b></div><p>
+"""</b>""";
+if ($*counter_code != "") {
+    """<p>$*counter_code</p>""";
+}
+"""</div><p>
 <table cellspacing="0"
 cellpadding="0"
 border="0"
@@ -527,7 +557,7 @@ $this->print_linklist();
 
 if (viewer_sees_ads() and ($.view == "recent" or $.view == "friends")) {
     """
-    <table cellpadding="2" cellspacing="0" border="0" summary="" style="margin-top: 10px;">
+    <table cellpadding="2" cellspacing="0" border="0" summary="" style="margin-top: 10px;" class="box">
     <tr><td bgcolor="$*stronger_back" align="center">
     <table width="100%" cellpadding="3" cellspacing="0"
     border="0"
@@ -554,7 +584,7 @@ if (viewer_sees_ads()) {
     """
     </td>
     <td valign="top" align="right" width="20%">
-    <table cellpadding="2" cellspacing="0" border="0" summary="">
+    <table cellpadding="2" cellspacing="0" border="0" summary="" class="box">
     <tr><td bgcolor="$*stronger_back" align="center">
     <table width="100%" cellpadding="3" cellspacing="0"
     border="0"
@@ -727,7 +757,7 @@ function RecentPage::print_body ()
 """
 <table cellpadding="2" cellspacing="0"
 border="0"
-summary="">
+summary="" class="box">
 <tr><td bgcolor="$*stronger_back">
 <table cellpadding="3" cellspacing="0"
 border="0"
@@ -794,7 +824,7 @@ function CommentInfo::print() {
 
 function YearPage::print_year_links ()
 {
-    """<table cellpadding="2" cellspacing="0" border="0" summary="">
+    """<table cellpadding="2" cellspacing="0" border="0" summary="" class="box">
 <tr><td bgcolor="$*stronger_back" align="center">
 <table cellpadding="5" cellspacing="0" border="0" summary="">
 <tr><td class="caption">Years</td></tr><tr>
@@ -813,7 +843,7 @@ function YearPage::print_year_links ()
 function YearPage::print_month (YearMonth m)
 {
     if (not $m.has_entries) { return; }
-    """<table cellpadding="2" cellspacing="0" border="0" summary="">
+    """<table cellpadding="2" cellspacing="0" border="0" summary="" class="box">
 <tr><td bgcolor="$*stronger_back" align="center">
 <table cellpadding="5" cellspacing="0" border="0" summary="">
 <tr>
@@ -859,7 +889,7 @@ function YearWeek::print () {
 
 function DayPage::print_body() {
 
-    """<table cellpadding="2" cellspacing="0" border="0" summary="">
+    """<table cellpadding="2" cellspacing="0" border="0" summary="" class="box">
 <tr><td bgcolor="$*stronger_back" align="center">
 <table cellpadding="5" cellspacing="0" border="0" summary="">
 <tr><td bgcolor="$*entry_back">""";
@@ -880,7 +910,7 @@ function DayPage::print_body() {
     var string tnext = ehtml($*text_day_next);
     var string daylong = $.date->date_format($*date_daypage_format);
 
-"""<table cellpadding="2" cellspacing="0" border="0" summary="">
+"""<table cellpadding="2" cellspacing="0" border="0" summary="" class="box">
 <tr><td bgcolor="$*stronger_back">
 <table cellpadding="3" cellspacing="0" border="0" summary="">
 <tr>
