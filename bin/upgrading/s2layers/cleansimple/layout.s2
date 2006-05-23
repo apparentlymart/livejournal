@@ -233,7 +233,7 @@ propgroup text {
     des = "Date and time format for comments";
   }
 }
-set opt_text_btwn_comments = "|";
+set opt_text_btwn_comments = " | ";
 set date_format = "%%month%% %%dayord%%, %%yyyy%%";
 set time_format = "%%hh%%:%%min%% %%a%%m";
 set datetime_format = "%%month%% %%dayord%%, %%yyyy%% %%hh%%:%%min%% %%a%%m";
@@ -825,7 +825,7 @@ function CommentInfo::print() {
             if (clean_url($*opt_img_btwn_comments) != "") {
                 """ <img src="$*opt_img_btwn_comments" alt="" /> """;
             } else {
-                " $*opt_text_btwn_comments ";
+                "$*opt_text_btwn_comments";
             }
         }
         if ($.show_postlink) {
