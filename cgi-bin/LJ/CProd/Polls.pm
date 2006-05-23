@@ -18,7 +18,7 @@ sub ml { 'cprod.polls.text' }
 sub render {
     my ($class, $u, $version) = @_;
     my $user = LJ::ljuser($u);
-    my $link = $class->clickthru_link(BML::ml('cprod.polls.link'), $version);
+    my $link = $class->clickthru_link('cprod.polls.link', $version);
     my $poll = "
 <div style='margin: 1em'><div>That's crazy!</div><div style='white-space: nowrap'>
 <img src='$LJ::IMGPREFIX/poll/leftbar.gif' style='vertical-align:middle' 

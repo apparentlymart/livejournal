@@ -41,7 +41,7 @@
         }
 
         my $applicable = $class->applicable($u);
-        my $render     = $class->render($u, 0);
+        my $render     = $class->render($u, $class->get_version);
         $ct++;
 
         ($applicable ? $ap_list : $na_list) .= "<tr valign='top'><td>

@@ -132,7 +132,9 @@ sub next_button {
 }
 
 sub clickthru_link {
-    my ($class, $text, $version) = @_;
+    my ($class, $ml_key, $version) = @_;
+    my $versioned_link_text = BML::ml($ml_key . ".v$version");
+    my $text = $versioned_link_text || BML::ml($ml_key);
     $class->_trackable_link($text, 1, $version);
 }
 

@@ -5657,7 +5657,11 @@ bml.requirepost=As a security precaution, the page you're viewing requires a POS
 
 btn.search=Search
 
-cprod.birthday.link=birthdays
+cprod.birthday.link.v1=birthdays
+cprod.birthday.link.v2=
+cprod.birthday.link.v3=
+cprod.birthday.link.v4=
+cprod.birthday.link.v5=
 
 cprod.birthday.text.v1=Hey, [[user]], see which of your friends' [[link]] are coming up! LiveJournal keeps a list of their birthdays for you.
 cprod.birthday.text.v2=
@@ -5665,7 +5669,11 @@ cprod.birthday.text.v3=
 cprod.birthday.text.v4=
 cprod.birthday.text.v5=
 
-cprod.controlstrip.link=Navigation Strip
+cprod.controlstrip.link.v1=Navigation Strip
+cprod.controlstrip.link.v2=
+cprod.controlstrip.link.v3=
+cprod.controlstrip.link.v4=
+cprod.controlstrip.link.v5=
 
 cprod.controlstrip.text.v1=9 out of 10 LJ users prefer the [[link]].  (OK we made that up, but you should check it out anyway.)
 cprod.controlstrip.text.v2=
@@ -5673,7 +5681,11 @@ cprod.controlstrip.text.v3=
 cprod.controlstrip.text.v4=
 cprod.controlstrip.text.v5=
 
-cprod.feeds.link=syndicated feeds
+cprod.feeds.link.v1=syndicated feeds
+cprod.feeds.link.v2=
+cprod.feeds.link.v3=
+cprod.feeds.link.v4=
+cprod.feeds.link.v5=
 
 cprod.feeds.text.v1=Apparently there's good content outside of LJ?  We'll let you add [[link]] to your Friends page so you never have to leave.
 cprod.feeds.text.v2=
@@ -5681,7 +5693,11 @@ cprod.feeds.text.v3=
 cprod.feeds.text.v4=
 cprod.feeds.text.v5=
 
-cprod.polls.link=poll creation wizard
+cprod.polls.link.v1=poll creation wizard
+cprod.polls.link.v2=
+cprod.polls.link.v3=
+cprod.polls.link.v4=
+cprod.polls.link.v5=
 
 cprod.polls.text.v1=[[user]], did you know you can post a poll in your journal using our [[link]]?  Find out what your friends <em>really</em> think about that shirt you bought last week. [[poll]]
 cprod.polls.text.v2=
@@ -5689,7 +5705,11 @@ cprod.polls.text.v3=
 cprod.polls.text.v4=
 cprod.polls.text.v5=
 
-cprod.userpic.link=default userpic
+cprod.userpic.link.v1=default userpic
+cprod.userpic.link.v2=
+cprod.userpic.link.v3=
+cprod.userpic.link.v4=
+cprod.userpic.link.v5=
 
 cprod.userpic.text.v1=[[user]], did you know you could pick a [[link]] to go along with your posts and comments?
 cprod.userpic.text.v2=

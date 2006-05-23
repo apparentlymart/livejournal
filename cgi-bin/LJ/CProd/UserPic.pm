@@ -10,7 +10,7 @@ sub applicable {
 sub render {
     my ($class, $u, $version) = @_;
     $ml_key = $class->get_ml($version);
-    my $link = $class->clickthru_link(BML::ml('cprod.userpic.link'), $version);
+    my $link = $class->clickthru_link('cprod.userpic.link', $version);
     my $user = LJ::ljuser($u);
     my $empty = '<div style="overflow: hidden; padding: 5px; width: 100px;
 height: 100px; border: 1px solid #000000;">&nbsp;</div>';
