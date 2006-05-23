@@ -74,7 +74,7 @@ _code?>
 <a href="./">&lt;&lt; Back</a> to LiveJournal Mobile.
 <h1>Post</h1>
 
-<form method='post'>
+<form method='post' action='/mobile/post.bml'>
 <?_code { return LJ::form_auth(); } _code?>
 Subject:<br />
 <input name='subject' size='50' style='width: 90%' /><br />
