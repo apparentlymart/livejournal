@@ -1824,7 +1824,7 @@ sub res_includes {
 # Returns HTML of a dynamic tag could given passed in data
 # Requires hash-ref of tag => { url => url, value => value }
 sub tag_cloud {
-    my $tags = shift;
+    my ($tags, $opts) = @_;
 
     # find sizes of tags, sorted
     my @sizes = sort { $a <=> $b } map { $tags->{$_}->{'value'} } keys %$tags;
@@ -1850,8 +1850,9 @@ sub tag_cloud {
         my $tagurl = $tags->{$tag}->{'url'};
         my $ct     = $tags->{$tag}->{'value'};
         my $pt     = int(8 + $percentile->($ct) * 25);
-        $ret .= "<a id='taglink_$tag' href='";
-        $ret .= LJ::ehtml($tagurl) . "' style='color: <?altcolor2?>; font-size: ${pt}pt;'>";
+        $ret .= "<a ";
+        $ret .= "id='taglink_$tag' " unless $opts->{ignore_ids};
+        $ret .= "href='" . LJ::ehtml($tagurl) . "' style='color: <?altcolor2?>; font-size: ${pt}pt;'>";
         $ret .= LJ::ehtml($tag) . "</a>\n";
 
         # build hash of tagname => final point size for refresh
