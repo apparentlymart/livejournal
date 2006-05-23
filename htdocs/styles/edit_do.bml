@@ -15,13 +15,13 @@ body<=
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
 
+    my $inline = LJ::CProd->box_for($remote,inline => 'EditStyles');
+    return LJ::bad_input($inline) if $inline;
+
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);
     return LJ::bad_input($ML{'error.invalidauth'})
         unless $u;
-
-    # check styles cap
-    return LJ::CProd->box_for($remote,inline => 'EditStyles');
 
     # get a style object
     my $styleid = $POST{'styleid'}+0;
