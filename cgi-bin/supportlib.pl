@@ -812,6 +812,8 @@ sub get_support_by_daterange {
 #
 sub get_support_by_ids {
     my ($support_ids_ref) = @_;
+    my %result_hash = ();
+    return \%result_hash unless @$support_ids_ref;
 
     # Build the query out based on the dates specified
     my $support_ids_bind = join ',', map { '?' } @$support_ids_ref;
@@ -827,7 +829,6 @@ sub get_support_by_ids {
     $sth->{mysql_use_result} = 1;
 
     # Loop over the results, generating a hash by Support ID
-    my %result_hash = ();
     while (my $row = $sth->fetchrow_hashref) {
         $result_hash{$row->{spid}} = $row;
     }
