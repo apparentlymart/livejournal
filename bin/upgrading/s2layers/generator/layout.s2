@@ -125,6 +125,37 @@ propgroup images {
     }
 }
 propgroup text {
+    property string text_journal_title {
+        des = "The title of your journal, which appears in the box at the top of your journal above the navigation links";
+        note = "If set to '[[name]]', the title will be replaced with the name you specified at the Edit Profile page.";
+    }
+    property string text_website {
+        des = "The label for the 'website' link under the title in the box at the top of your journal";
+        note = "Make this box empty if you don't want to show this link.";
+    }
+    property string text_userinfo_label {
+        des = "The label for the 'userinfo' link under the title in the box at the top of your journal";
+        note = "Make this box empty if you don't want to show this link.";
+    }
+    property string text_userinfo_value {
+        des = "The value of the 'userinfo' link";
+    }
+    property string text_archive_label {
+        des = "The label for the 'archive' link under the title in the box at the top of your journal";
+        note = "Make this box empty if you don't want to show this link.";
+    }
+    property string text_archive_value {
+        des = "The value of the 'archive' link";
+    }
+    property string text_navlinks_left {
+        des = "Text to go in front of each navigation link in the box at the top of your journal";
+    }
+    property string text_navlinks_right {
+        des = "Text to go at the end of each navigation link in the box at the top of your journal";
+    }
+    property string text_navlinks_btwn {
+        des = "Text to go in between the label and value of each navigation link in the box at the top of your journal";
+    }
     property use text_post_comment;
     property use text_read_comments;
     property use text_post_comment_friends;
@@ -133,10 +164,6 @@ propgroup text {
     property use text_meta_mood;
     property use text_meta_location;
 
-    property string text_website {
-        des = "The label for the 'website' field";
-        noui = 1;
-    }
     property string text_btwn_comments {
         des = "Text to be used between your comment links";
         note = "If you specified an image to be used between your comments links in the \"Images\" section, then this option will not have any effect.";
@@ -196,13 +223,22 @@ set img_btwn_comments = "";
 set font_base = "Verdana";
 set font_fallback = "sans-serif";
 
+set text_journal_title = "[[name]]";
+set text_website = "website";
+set text_userinfo_label = "userinfo";
+set text_userinfo_value = "livejournal userinfo";
+set text_archive_label = "archive";
+set text_archive_value = "journal archive";
+set text_navlinks_left = "[";
+set text_navlinks_right = "]";
+set text_navlinks_btwn = "|";
+
 # Customize the view names to be short and lowercase
 # (Sorry translators, you will have to do these again - keep them short!)
 set text_view_recent = "entries";
 set text_view_friends = "friends";
 set text_view_archive = "archive";
 set text_view_userinfo = "userinfo";
-set text_website = "website";
 
 set text_btwn_comments = "|";
 set date_format = "%%mon%%. %%dayord%%, %%yyyy%%";
@@ -362,11 +398,11 @@ function Page::print ()
     var string website_name = $.journal.website_name ? $.journal.website_name : $*text_website_default_name;
     var string website;
     if ($.journal.website_url != "") {
-        $website = """<tr><td class="meta">[</td>
+        $website = """<tr><td class="meta">$*text_navlinks_left</td>
 <td class="meta" align="right"><b>$*text_website</b></td>
-<td class="meta" align="center">|</td>
+<td class="meta" align="center">$*text_navlinks_btwn</td>
 <td class="meta" align="left"><a href="$.journal.website_url">$website_name</a></td>
-<td class="meta">]</td></tr>""";
+<td class="meta">$*text_navlinks_right</td></tr>""";
     }
 
     var string links;
@@ -429,26 +465,47 @@ summary="" style="margin-left: auto; margin-right: auto;">
     var string sitename_lc = $*SITENAMESHORT->lower();
 
 """<td>
-<div align="center"><b>$.journal.name</b></div><p>
+<div align="center"><b>""";
+if ($*text_journal_title == "[[name]]") {
+    "$.journal.name";
+} else {
+    "$*text_journal_title";
+}
+"""</b></div><p>
 <table cellspacing="0"
 cellpadding="0"
 border="0"
-summary="">
-$website
+summary="">""";
+if ($*text_website != "") {
+    """$website""";
+}
+if ($*text_userinfo_label != "") {
+"""
 <tr>
-<td class="meta">[</td>
-<td class="meta" align="right"><b>"""+lang_viewname("userinfo")+"""</b></td>
-<td class="meta" align="center">|</td>
-<td class="meta" align="left"><a href="$.view_url{"userinfo"}">$sitename_lc userinfo</a></td>
-<td class="meta">]</td>
-</tr>
+<td class="meta">$*text_navlinks_left</td>
+<td class="meta" align="right"><b>$*text_userinfo_label</b></td>
+<td class="meta" align="center">$*text_navlinks_btwn</td>
+<td class="meta" align="left"><a href="$.view_url{"userinfo"}">""";
+if ($*text_userinfo_value == "livejournal userinfo") {
+    "$sitename_lc userinfo";
+} else {
+    "$*text_userinfo_value";
+}
+"""</a></td>
+<td class="meta">$*text_navlinks_right</td>
+</tr>""";
+}
+if ($*text_archive_label != "") {
+"""
 <tr>
-<td class="meta">[</td>
-<td class="meta" align="right"><b>"""+lang_viewname("archive")+"""</b></td>
-<td class="meta" align="center">|</td>
-<td class="meta" align="left"><a href="$.view_url{"archive"}">journal archive</a></td>
-<td class="meta">]</td>
-</tr>
+<td class="meta">$*text_navlinks_left</td>
+<td class="meta" align="right"><b>$*text_archive_label</b></td>
+<td class="meta" align="center">$*text_navlinks_btwn</td>
+<td class="meta" align="left"><a href="$.view_url{"archive"}">$*text_archive_value</a></td>
+<td class="meta">$*text_navlinks_right</td>
+</tr>""";
+}
+"""
 </table>
 </td>
 </tr>
