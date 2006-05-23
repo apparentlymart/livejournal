@@ -1889,9 +1889,11 @@ function Comment::time_display (string datefmt, string timefmt) : string {
 
     if ($this.time_remote) {
         $display_date = $this.time_remote->date_format($datefmt);
+        if ($timefmt == "none") { $display_date = $display_date + " (local)"; }
         $display_time = $this.time_remote->time_format($timefmt) + " (local)";
     } else {
         $display_date = $this.time->date_format($datefmt);
+        if ($timefmt == "none") { $display_date = $display_date + " (UTC)"; }
         $display_time = $this.time->time_format($timefmt) + " (UTC)";
     }
 
