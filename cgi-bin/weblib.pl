@@ -1699,7 +1699,7 @@ sub entry_form_decode
             # Make sure they actually typed something, and not just hit
             # enter a lot
             $attempt =~ s!(?:<p>(?:&nbsp;|\s)+</p>|&nbsp;)\s*?!!gm;
-            $event = '' unless $attempt =~ /\w+/;
+            $event = '' unless $attempt =~ /\S/;
 
             $req->{'prop_opt_preformatted'} = 0;
         } else {
