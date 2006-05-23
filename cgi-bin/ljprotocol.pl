@@ -765,8 +765,9 @@ sub postevent
     }
 
     # are they trying to post back in time?
-    if ($posterid == $ownerid && !$time_was_faked &&
-        $u->{'newesteventtime'} && $eventtime lt $u->{'newesteventtime'} &&
+    if ($posterid == $ownerid && $u->{'journaltype'} ne 'Y' &&
+        !$time_was_faked && $u->{'newesteventtime'} && 
+        $eventtime lt $u->{'newesteventtime'} && 
         !$req->{'props'}->{'opt_backdated'}) {
         return fail($err, 153, "Your most recent journal entry is dated $u->{'newesteventtime'}, but you're trying to post one at $eventtime without the backdate option turned on.  Please check your computer's clock.  Or, if you really mean to post in the past, use the backdate option.");
     }
