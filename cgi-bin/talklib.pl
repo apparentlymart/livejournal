@@ -10,6 +10,7 @@
 use strict;
 package LJ::Talk;
 
+use LJ::Constants;
 use Class::Autouse qw(
                       LJ::Event::JournalNewComment
                       LJ::Event::UserNewComment

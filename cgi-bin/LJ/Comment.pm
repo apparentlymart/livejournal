@@ -13,6 +13,8 @@ use Class::Autouse qw(
                       LJ::Entry
                       );
 
+require "$ENV{LJHOME}/cgi-bin/talklib.pl";
+
 # internal fields:
 #
 #    journalid:     journalid where the commend was
@@ -147,6 +149,7 @@ sub posterid {
 # class method:
 sub preload_rows {
     my ($class, $obj_list) = @_;
+
     foreach my $obj (@$obj_list) {
         next if $obj->{_loaded_row};
 
