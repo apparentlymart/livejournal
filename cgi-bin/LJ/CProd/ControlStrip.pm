@@ -8,14 +8,15 @@ sub applicable {
 }
 
 sub render {
-    my ($class, $u) = @_;
+    my ($class, $u, $version) = @_;
     my $user = LJ::ljuser($u);
-    my $link = $class->clickthru_link(BML::ml('controlstrip.link'));
+    my $link = $class->clickthru_link(BML::ml('cprod.controlstrip.link'), $version);
 
-    return "<p>".BML::ml('controlstrip.text', { "link" => $link }) . "</p>";
+    return "<p>".BML::ml($class->get_ml($version), { "link" => $link }) . "</p>";
 
 }
 
+sub ml { 'cprod.controlstrip.text' }
 sub link { "$LJ::SITEROOT/manage/settings/" }
 sub button_text { "Navigation strip" }
 

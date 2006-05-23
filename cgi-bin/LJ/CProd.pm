@@ -3,6 +3,7 @@ package LJ::CProd;
 # Mostly abstract base class for LiveJournal's contextual product/prodding.
 # Let users know about new/old features they can use but never have.
 use strict;
+use List::Util qw (shuffle);
 
 #################### Override:
 
@@ -16,11 +17,15 @@ sub applicable {
 
 # override this:
 sub render {
-    my ($class, $u) = @_;
+    my ($class, $u, $version) = @_;
     # given a user, return HTML to promote the product ($class)
     return "Hey $u->{user}, did you know about $class?";
 }
 
+# override these:
+sub ml { '' }
+sub link { '' }
+sub button_text { 'Cool!' }
 
 
 #################### Don't override.
@@ -87,16 +92,20 @@ sub mark_acked {
 }
 
 sub _trackable_link {
-    my ($class, $text, $goodclick) = @_;
+    my ($class, $text, $goodclick, $version) = @_;
     Carp::croak("bogus caller, forgot param") unless defined $goodclick;
-    my $link = $class->_trackable_link_url($class->link, $goodclick);
-    return "<a onclick=\"this.href='" . LJ::ehtml($link) . "';\" href=\"" . LJ::ehtml($class->link) . "\">$text</a>";
+    my $link = $class->_trackable_link_url($class->link, $goodclick, $version);
+    my $e_text = LJ::ehtml($text);
+    my $classlink = $class->link;
+    return qq {
+        <a onclick="window.location.href='$link'; return false;" href="$classlink">$e_text</a>
+        };
 }
 
 sub _trackable_button {
-    my ($class, $text, $goodclick) = @_;
+    my ($class, $text, $goodclick, $version) = @_;
     Carp::croak("bogus caller, forgot param") unless defined $goodclick;
-    my $link = $class->_trackable_link_url($class->link, $goodclick);
+    my $link = $class->_trackable_link_url($class->link, $goodclick, $version);
     my $e_text = LJ::ehtml($text);
     return qq {
         <input type="button" value="$e_text" onclick="window.location.href='$link';" />
@@ -104,13 +113,14 @@ sub _trackable_button {
 }
 
 sub _trackable_link_url {
-    my ($class, $href, $goodclick) = @_;
-    return "$LJ::SITEROOT/misc/cprod.bml?class=$class&g=$goodclick&to=" . LJ::eurl($href);
+    my ($class, $href, $goodclick, $version) = @_;
+    $version ||= 0;
+    return "$LJ::SITEROOT/misc/cprod.bml?class=$class&g=$goodclick&version=$version&to=" . LJ::eurl($href);
 }
 
 sub clickthru_button {
-    my ($class, $text) = @_;
-    return $class->_trackable_button($text, 1);
+    my ($class, $text, $version) = @_;
+    return $class->_trackable_button($text, 1, $version);
 }
 
 sub next_button {
@@ -122,8 +132,8 @@ sub next_button {
 }
 
 sub clickthru_link {
-    my ($class, $text) = @_;
-    $class->_trackable_link($text, 1);
+    my ($class, $text, $version) = @_;
+    $class->_trackable_link($text, 1, $version);
 }
 
 sub ack_link {
@@ -136,8 +146,9 @@ sub full_box_for {
     my ($class, $u, %opts) = @_;
     my $showclass = LJ::CProd->prod_to_show($u)
         or return "";
-    my $content = eval { $showclass->render($u) } || LJ::ehtml($@);
-    return $showclass->wrap_content($content, %opts);
+    my $version = $showclass->get_version;
+    my $content = eval { $showclass->render($u, $version) } || LJ::ehtml($@);
+    return $showclass->wrap_content($content, %opts, version => $version);
 }
 
 # don't override
@@ -145,8 +156,33 @@ sub box_for {
     my ($class, $u, %opts) = @_;
     my $showclass = LJ::CProd->prod_to_show($u)
         or return "";
-    my $content = eval { $showclass->render($u) } || LJ::ehtml($@);
+    my $version = $showclass->get_version;
+    my $content = eval { $showclass->render($u, $version) } || LJ::ehtml($@);
     return $content;
+}
+
+# get the translation string for this version of the module
+# returns ml key
+sub get_ml {
+    my ($class, $version) = @_;
+    $version ||= 1;
+    return $class->ml . ".v$version";
+}
+
+# pick a random version of this module with a translation string
+# returns version number (0 if no valid version translation strings)
+sub get_version {
+    my $class = shift;
+
+    my @versions = shuffle 1..20;
+
+    foreach my $version (@versions) {
+        my $ml_key = $class->get_ml($version);
+        my $ml_str = BML::ml($ml_key);
+        return $version if ($ml_str && $ml_str ne '' && $ml_str !~ /^___/);
+    }
+
+    return 0;
 }
 
 sub user_map {
@@ -208,9 +244,10 @@ sub wrap_content {
     my $htmlclass = LJ::ehtml($class);
 
     my $w = delete $opts{'width'} || 300;
+    my $version = $opts{version} || 0;
     my $alllink = $class->_trackable_link_url("$LJ::SITEROOT/didyouknow/", 0);
     my $next_button = $class->next_button;
-    my $clickthru_button = $class->clickthru_button($class->button_text);
+    my $clickthru_button = $class->clickthru_button($class->button_text, $version);
 
     return qq{
     <div id='CProd_box'>

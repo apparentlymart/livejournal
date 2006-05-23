@@ -7,16 +7,17 @@ sub applicable {
 }
 
 sub render {
-    my ($class, $u) = @_;
+    my ($class, $u, $version) = @_;
     my $user = LJ::ljuser($u);
     my $icon = "<div style=\"float: left; padding-right: 5px;\">
                <img border=\"1\" src=\"$LJ::SITEROOT/img/cake.jpg\" /></div>";
-    my $link = $class->clickthru_link(BML::ml('birthday.link'));
+    my $link = $class->clickthru_link(BML::ml('cprod.birthday.link'), $version);
 
-    return "<p>$icon ". BML::ml('birthday.text', { "user" => $user,
-                         "link" => $link }) . "</p>";
+    return "<p>$icon ". BML::ml($class->get_ml($version), { "user" => $user,
+                                                            "link" => $link }) . "</p>";
 }
 
+sub ml { 'cprod.birthday.text' }
 sub link { "$LJ::SITEROOT/birthdays.bml" }
 sub button_text { "Birthdays" }
 

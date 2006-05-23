@@ -406,3 +406,14 @@ general /poll/create.bml.error.accttype
 general /editpics.bml.noneupload
 
 general /allpics.bml.edit3
+
+general birthday.link
+general birthday.text
+general controlstrip.link
+general controlstrip.text
+general feeds.link
+general feeds.text
+general ljfeedback.text
+general ljspotlight.text
+general polls.link
+general polls.text

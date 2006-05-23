@@ -5615,10 +5615,6 @@ Actionlink=[[[link]]]
 
 Backlink=[<a href="[[link]]">&lt;&lt;</a> [[text]]]
 
-birthday.link=birthdays
-
-birthday.text=[[user]], did you know you can surprise your friends by actually remembering their birthdays?  LJ keeps a list of your friends' [[link]] for you.
-
 bml.badcontent.body=One or more errors occurred processing your request. Please go back, correct the necessary information, and submit your data again.
 
 bml.badinput.body=Your browser sent some text which is not recognised as valid text in the UTF-8 encoding, as it should be. This might happen if you forced your browser to view the previous page in some other encoding rather than UTF-8. It may also indicate a bug in the browser. If you cannot get around this error, contact us.
@@ -5639,9 +5635,25 @@ bml.requirepost=As a security precaution, the page you're viewing requires a POS
 
 btn.search=Search
 
-controlstrip.link=Navigation Strip
+cprod.birthday.link=birthdays
 
-controlstrip.text=9 out of 10 LJ users prefer the [[link]].  (OK we made that up, but you should check it out anyway.)
+cprod.birthday.text.v1=Hey, [[user]], see which of your friends' [[link]] are coming up! LiveJournal keeps a list of their birthdays for you.
+
+cprod.controlstrip.link=Navigation Strip
+
+cprod.controlstrip.text.v1=9 out of 10 LJ users prefer the [[link]].  (OK we made that up, but you should check it out anyway.)
+
+cprod.feeds.link=syndicated feeds
+
+cprod.feeds.text.v1=Apparently there's good content outside of LJ?  We'll let you add [[link]] to your Friends page so you never have to leave.
+
+cprod.polls.link=poll creation wizard
+
+cprod.polls.text.v1=[[user]], did you know you can post a poll in your journal using our [[link]]?  Find out what your friends <em>really</em> think about that shirt you bought last week. [[poll]]
+
+cprod.userpic.link=default userpic
+
+cprod.userpic.text.v1=[[user]], did you know you could pick a [[link]] to go along with your posts and comments?
 
 crumb.acctstatus=Account Status
 
@@ -6148,10 +6160,6 @@ error.usernamelong=Username is too long, 15 character max.
 
 error.username_notfound=Username not found.
 
-feeds.link=syndicated feeds
-
-feeds.text=Apparently there's good content outside of LJ?  We'll let you add [[link]] to your Friends page so you never have to leave.
-
 Help=Help
 
 label.screening.all=All comments
@@ -6190,11 +6198,7 @@ label.warning=Warning:
 
 langname.en=English
 
-ljfeedback.text=Like to vote?  Join [[journal]] where we post polls and surveys that help influence and improve LJ.
-
 ljlib.pageofpages=Page [[page]] of [[total]]
-
-ljspotlight.text=We're keeping an eye out for interesting communities.  Check out [[journal]] to see some great ways people use LJ.
 
 lostinfo.head=Forget something?
 
@@ -6297,10 +6301,6 @@ poll.security.none=None
 poll.submit=Submit Poll
 
 poll.viewanswers=View Answers
-
-polls.link=poll creation wizard
-
-polls.text=[[user]], did you know you can post a poll in your journal using our [[link]]?  Find out what your friends <em>really</em> think about that shirt you bought last week. [[poll]]
 
 portal.bdays.count.des=By default, the 5 friends with the soonest birthdays are shown.
 
@@ -6500,10 +6500,6 @@ tos.mustread=Before continuing you must read and agree to the <a [[aopts]]>Terms
 Username=Username
 
 userpic.inactive=Inactive
-
-userpic.link=userpic
-
-userpic.text=[[user]], this is what you currently look like to your friends: [[empty]]<br />Boooring. Be classy and upload a [[link]].
 
 web.authas.btn=Switch
 

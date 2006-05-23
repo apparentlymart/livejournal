@@ -24,8 +24,16 @@
         $ct = ", clickthrutime=UNIX_TIMESTAMP()";
     }
 
+    my @params = ($remote->{userid}, $cprodid);
+
+    my $version = $GET{version};
+    if (defined $version) {
+        $ct .= ", clickthruver=?";
+        unshift @params, $version;
+    }
+
     eval { $remote->do("UPDATE cprod SET acktime=UNIX_TIMESTAMP()$ct WHERE userid=? AND cprodid=?",
-                       undef, $remote->{userid}, $cprodid) } or return $go->();
+                       undef, @params) } or return $go->();
 
     return $go->();
 

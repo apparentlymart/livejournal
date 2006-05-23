@@ -20,17 +20,18 @@ sub applicable {
 }
 
 sub render {
-    my ($class, $u) = @_;
+    my ($class, $u, $version) = @_;
     my $user = LJ::ljuser($u);
     my $icon = "<div style=\"float: left; padding-right: 5px;\">
                <img border=\"1\" src=\"$LJ::SITEROOT/img/syndicated24x24.gif\" /></div>";
-    my $link = $class->clickthru_link(BML::ml('feeds.link'));
+    my $link = $class->clickthru_link(BML::ml('cprod.feeds.link'), $version);
 
-    return "<p>$icon " . BML::ml('feeds.text', { "user" => $user,
+    return "<p>$icon " . BML::ml($class->get_ml($version), { "user" => $user,
                          "link" => $link }) . "</p>";
 
 }
 
+sub ml { "cprod.feeds.text" }
 sub link { "$LJ::SITEROOT/syn/list.bml" }
 sub button_text { "View feeds" }
 
