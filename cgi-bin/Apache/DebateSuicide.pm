@@ -30,8 +30,28 @@ sub handler
     my $memfree = $meminfo{'MemFree'} + $meminfo{'Cached'};
     return OK unless $memfree;
 
-    my $goodfree = $LJ::SUICIDE_UNDER{$LJ::SERVER_NAME} || $LJ::SUICIDE_UNDER || 150_000;
-    return OK if $memfree > $goodfree;
+    my $goodfree = $LJ::SUICIDE_UNDER{$LJ::SERVER_NAME} || $LJ::SUICIDE_UNDER ||   150_000;
+    my $is_under = $memfree < $goodfree;
+
+    my $maxproc  = $LJ::SUICIDE_OVER{$LJ::SERVER_NAME}  || $LJ::SUICIDE_OVER  || 1_000_000;
+    my $is_over  = 0;
+
+    $gtop ||= GTop->new;
+
+    # if $is_under, we know we'll be exiting anyway, so no need
+    # to continue to check $maxproc
+    unless ($is_under) {
+
+        # find out how much memory we are using
+        my $pm = $gtop->proc_mem($$);
+        my $proc_size_k = ($pm->rss - $pm->share) >> 10; # config is in KB
+
+        $is_over = $proc_size_k > $maxproc;
+    }
+    return OK unless $is_over || $is_under;
+
+    # we'll proceed to die if we're one of the largest processes
+    # on this machine
 
     unless ($ppid) {
         my $self = pid_info($$);
@@ -40,8 +60,6 @@ sub handler
 
     my $pids = child_info($ppid);
     my @pids = keys %$pids;
-
-    $gtop ||= GTop->new;
 
     my %stats;
     my $sum_uniq = 0;
