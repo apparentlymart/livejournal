@@ -2009,7 +2009,19 @@ sub ads {
     $adhtml .= "<div class=\"ljad ljad$adcall{adunit}\" id=\"\">";
 
     my $label = $pagetype eq 'Journal-5LinkUnit' ? 'Sponsored Search Links' : 'Advertisement';
-    $adhtml .= "<h4 style='margin-bottom: 2px'>$label</h4>";
+    $adhtml .= "<h4 style='float: left; margin-bottom: 2px; margin-top: 2px; clear: both;'>$label</h4>";
+
+    # Customize and feedback links
+    my $eadcall = LJ::eurl($adparams);
+    my $echannel = LJ::eurl($adcall{channel});
+    my $euri = LJ::eurl($r->uri);
+    # For leaderboards show links on the top right
+    if ($adcall{adunit} eq 'leaderboard') {
+        $adhtml .= "<div style='float: right; margin-bottom: 3px; padding-top: 0px; line-height: 1em; white-space: nowrap;'>";
+        $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>Customize</a> | ";
+        $adhtml .= "<a href=\"$LJ::SITEROOT/feedback/ads.bml?adcall=$eadcall&channel=$echannel&uri=$euri\">Feedback</a>";
+        $adhtml .= "</div>";
+    }
 
     if ($debug) {
         my $ehpub = LJ::ehtml($pubtext) || "[no text targetting]";
@@ -2022,15 +2034,14 @@ sub ads {
         $adhtml .= "></iframe>";
     }
 
-    # Customize and feedback links
-    my $eadcall = LJ::eurl($adparams);
-    my $echannel = LJ::eurl($adcall{channel});
-    my $euri = LJ::eurl($r->uri);
-    $adhtml .= "<div style='text-align: right; margin-top: 2px;'>";
-    $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>Customize</a> | ";
-    $adhtml .= "<a href=\"$LJ::SITEROOT/feedback/ads.bml?adcall=$eadcall&channel=$echannel&uri=$euri\">Feedback</a>";
-    $adhtml .= "</div>";
-    $adhtml .= "</div>";
+    # For non-leaderboards show links on the bottom right
+    unless ($adcall{adunit} eq 'leaderboard') {
+        $adhtml .= "<div style='text-align: right; margin-top: 2px; white-space: nowrap;'>";
+        $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>Customize</a> | ";
+        $adhtml .= "<a href=\"$LJ::SITEROOT/feedback/ads.bml?adcall=$eadcall&channel=$echannel&uri=$euri\">Feedback</a>";
+        $adhtml .= "</div>";
+    }
+    $adhtml .= "</div>\n";
 
     return $adhtml;
 }

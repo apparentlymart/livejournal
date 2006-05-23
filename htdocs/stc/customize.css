@@ -101,7 +101,7 @@ dl.hidedt dt {
 }
 #CustomizeAdBox {
     float: right;
-    height: 120px;
+    height: 110px;
     width: 728px;
-    margin: -20px 0 5px 0px;
+    margin: 0px;
 }
