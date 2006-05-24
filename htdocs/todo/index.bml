@@ -115,8 +115,6 @@
      return;
  }
 
- $body .= "<form method='get' action='./'>";
- $body .= "<INPUT TYPE=HIDDEN NAME=user VALUE=$FORM{'user'}>\n" if ($FORM{'user'});
  $body .= "<?h1 Filter Items h1?><?p ";
  foreach my $kwid (sort { lc($keyword{$a}->{'keyword'}) cmp lc($keyword{$b}->{'keyword'}) } 
                    keys %keyword)
@@ -163,7 +161,6 @@
  }
 
  unless (@tdids) {
-     $body .= "</form>";
      return;
  }
 
@@ -206,7 +203,7 @@
      @items = sort { lc($a->{'subject'}) cmp lc($b->{'subject'}) } @items;
  }
 
- 
+
  $body .= "<form method='post' action='./'><P><TABLE BORDER=1 CELLPADDING=4 CELLSPACING=1>\n";
  $body .= LJ::form_auth();
  $body .= "<TR BGCOLOR=<?emcolorlite?> ALIGN=LEFT VALIGN=BOTTOM>\n";
@@ -227,7 +224,7 @@
          }
      }
  }
-                 
+
  $body .= "</TR>\n";
 
  foreach my $it (@items) 
