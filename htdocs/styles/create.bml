@@ -11,7 +11,6 @@ body<=
 
     my $user = LJ::canonical_username($GET{'user'});
     my $remote = LJ::get_remote();
-    my $u = ! $user || $remote && $remote->{'user'} eq $user ? $remote : LJ::load_user($user);
 
     return "<?needlogin?>" unless $remote;
 
