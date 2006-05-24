@@ -13,6 +13,9 @@ our $MAX_FILTER_SET = 5_000;
 # class method
 sub process_fired_events {
     my $class = shift;
+    my %opts = @_;
+    my $verbose = delete $opts{verbose};
+    croak("Unknown options") if keys %opts;
     croak("Can't call in web context") if LJ::is_web_context();
 
     my $sclient = LJ::theschwartz();
@@ -20,6 +23,7 @@ sub process_fired_events {
     $sclient->can_do("LJ::Worker::FindSubsByCluster");  # step 2: can go to 3 or 4
     $sclient->can_do("LJ::Worker::FilterSubs");         # step 3: goes to step 4
     $sclient->can_do("LJ::Worker::ProcessSub");         # step 4
+    $sclient->verbose($verbose);
     $sclient->work_until_done;
 }
 

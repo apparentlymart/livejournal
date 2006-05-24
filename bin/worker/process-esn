@@ -17,6 +17,6 @@ use FindBin qw($Bin);
 while (1) {
     my $now = time;
     print "[$$] \@$now: processing events...\n" if $verbose;
-    LJ::ESN->process_fired_events;
+    LJ::ESN->process_fired_events(verbose => $verbose);
     sleep $interval;
 }
