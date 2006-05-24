@@ -6,7 +6,7 @@ use strict;
 
 our $_box_class = "CProd";
 our $_box_description = 'Frank the Goat thinks you might enjoy these features';
-our $_box_name = "What else has LJ been hiding from me?";
+our $_box_name = "What else has LJ been hiding?";
 
 sub generate_content {
     my $self = shift;

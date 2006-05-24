@@ -269,6 +269,7 @@ sub wrap_content {
     LJ::need_res("js/httpreq.js");
     LJ::need_res("js/hourglass.js");
     LJ::need_res("js/cprod.js");
+    LJ::need_res("stc/cprod.css");
     my $e_class = LJ::ehtml($class);
 
     my $w = delete $opts{'width'} || 300;
@@ -283,36 +284,36 @@ sub wrap_content {
         return qq{
             <div id='CProd_box'>
                 <div style='width: ${w}px;' class='CProd_box_content'>
-                <div style='border: 1px solid #d9e6f2; padding: 0 .4em .4em .4em'>$content</div>
-                <div style='background: #d9e6f2 url($LJ::IMGPREFIX/cprod_b.gif) bottom left repeat-x; height: 5em;'>
-                <div style='background: url($LJ::IMGPREFIX/cprod_bright.gif) no-repeat bottom right; height: 5em;'>
-                 <div style='position: relative; background: url($LJ::IMGPREFIX/cprod_bleft.gif) no-repeat bottom left; height: 5em;'><div style='float: right; padding: .5em .5em 0 0'>$clickthru_button $next_button</div><img src='$LJ::IMGPREFIX/frankhead.gif' width='50' height='50' style='position: absolute; left: 0; bottom: 0;' /><div style='clear: both;'></div></div>
-            </div>
-        </div>
+                    <div class='content'>$content</div>
+                    <div class='fancy' style='background: #d9e6f2 url($LJ::IMGPREFIX/cprod_b.gif) bottom left repeat-x;'>
+                        <div class='fancy-right' style='background: url($LJ::IMGPREFIX/cprod_bright.gif) no-repeat bottom right;'>
+                            <div class='fancy-left' style='background: url($LJ::IMGPREFIX/cprod_bleft.gif) no-repeat bottom left;'>
+                                <div class='actions'>$clickthru_button $next_button</div>
+                                <img src='$LJ::IMGPREFIX/frankhead.gif' width='50' height='50' class='frankhead' />
+                                <div class='clear'></div>
+                            </div>
+                        </div>
+                    </div>
 
-                <div style='text-align: right; position: relative; top: -1em;'>
-                <a onclick="window.location.href='$alllink'; return false;" href="$LJ::SITEROOT/didyouknow/">What else has LJ been hiding from me?</a>
+                    <div class='alllink'>
+                        <a onclick="window.location.href='$alllink'; return false;" href="$LJ::SITEROOT/didyouknow/">What else has LJ been hiding from me?</a>
+                    </div>
+                    <div style='display: none;' id='CProd_class'>$e_class</div>
                 </div>
-                <div style='display: none;' id='CProd_class'>$e_class</div>
-                </div>
-                </div>
+            </div>
             };
     } else {
         return qq {
             <div id="CProd_box">
-                <div style='padding: 0 .5em .5em .5em; margin: 0 0 1em 0;'>$content</div>
-                <div style='background: #d9e6f2;'>
-                <div style='background: #d9e6f2; padding: .9em .5em .5em .5em; width: 90%; position: relative;'>
-                
-                <img src='$LJ::IMGPREFIX/frankhead.gif' width='50' height='50' align='absmiddle' style='float: left; margin-top: -17px;'/>
-                
-                <div style='float: left; margin-right: .5em;'>$clickthru_button $next_button</div>
-                <div style='float: left; position: relative; top: .2em; word-wrap: break-word;'><a href="$alllink">What else has LJ been hiding from me?</a></div>
-                <div style='clear: both'></div>
-                </div>
-                <div style='display: none;' id='CProd_class'>$e_class</div>
-                </div>
-                </div>
+                <div class='content-portal'>$content</div>
+                    <div class='portal'>
+                        <img src='$LJ::IMGPREFIX/frankhead.gif' width='50' height='50' align='absmiddle' class='frankhead-portal'/>
+                        <div class='actions-portal'>$clickthru_button $next_button</div>
+                        <div class='alllink-portal'><a href="$alllink">What else has LJ been hiding from me?</a></div>
+                        <div class='clear'></div>
+                    </div>
+                    <div style='display: none;' id='CProd_class'>$e_class</div>
+            </div>
             };
     }
 }
