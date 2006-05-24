@@ -282,10 +282,13 @@ sub wrap_content {
             <div id="CProd_box">
                 <div style='padding: 0 .5em .5em .5em; margin: 0 0 1em 0;'>$content</div>
                 <div style='background: #d9e6f2;'>
-                <div style='background: #d9e6f2; padding: 0 .5em 0 .5em; width: 90%'>
-                <img src='$LJ::IMGPREFIX/frankhead.gif' width='50' height='50' align='absmiddle' style='position: relative; top: -12px;'/>
-                <div style='display: inline;'>$clickthru_button $next_button</div>
-                <div style='position: relative; top: -1em; margin-left: 55px;'><a href="$alllink">What else has LJ been hiding from me?</a></div>
+                <div style='background: #d9e6f2; padding: .9em .5em .5em .5em; width: 90%; position: relative;'>
+                
+                <img src='$LJ::IMGPREFIX/frankhead.gif' width='50' height='50' align='absmiddle' style='float: left; margin-top: -17px;'/>
+                
+                <div style='float: left; margin-right: .5em;'>$clickthru_button $next_button</div>
+                <div style='float: left; position: relative; top: .2em; word-wrap: break-word;'><a href="$alllink">What else has LJ been hiding from me?</a></div>
+                <div style='clear: both'></div>
                 </div>
                 <div style='display: none;' id='CProd_class'>$e_class</div>
                 </div>
