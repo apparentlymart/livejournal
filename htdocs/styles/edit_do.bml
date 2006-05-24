@@ -15,7 +15,7 @@ body<=
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
 
-    my $inline = LJ::CProd->box_for($remote,inline => 'EditStyles');
+    my $inline = LJ::CProd->inline($remote,inline => 'EditStyles');
     return LJ::bad_input($inline) if $inline;
 
     my $authas = $GET{'authas'} || $remote->{'user'};

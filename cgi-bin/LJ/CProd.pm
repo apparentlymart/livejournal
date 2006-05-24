@@ -92,10 +92,15 @@ sub mark_acked {
 }
 
 sub _trackable_link {
-    my ($class, $text, $goodclick, $version) = @_;
+    my ($class, $text, $goodclick, $version, %opts) = @_;
     Carp::croak("bogus caller, forgot param") unless defined $goodclick;
     my $link = $class->_trackable_link_url($class->link, $goodclick, $version);
-    my $e_text = LJ::ehtml($text);
+    my $e_text;
+    if ($opts{'style'}) {
+        $e_text = "<span $opts{'style'}>" . LJ::ehtml($text) . "</span>";
+    } else {
+        $e_text = LJ::ehtml($text);
+    }
     my $classlink = $class->link;
     return qq {
         <a onclick="window.location.href='$link'; return false;" href="$classlink">$e_text</a>
@@ -136,10 +141,10 @@ sub next_button {
 }
 
 sub clickthru_link {
-    my ($class, $ml_key, $version) = @_;
+    my ($class, $ml_key, $version, %opts) = @_;
     my $versioned_link_text = BML::ml($ml_key . ".v$version");
     my $text = $versioned_link_text || BML::ml($ml_key);
-    $class->_trackable_link($text, 1, $version);
+    $class->_trackable_link($text, 1, $version, %opts);
 }
 
 sub ack_link {
@@ -159,11 +164,28 @@ sub full_box_for {
 
 # don't override
 sub box_for {
-    my ($class, $u, %opts) = @_;
-    my $showclass = LJ::CProd->prod_to_show($u,%opts)
+    my ($class, $u) = @_;
+    my $showclass = LJ::CProd->prod_to_show($u)
         or return "";
     my $version = $showclass->get_version;
     my $content = eval { $showclass->render($u, $version) } || LJ::ehtml($@);
+    return $content;
+}
+
+sub inline {
+    my ($class, $u, %opts) = @_;
+    my $tm  = $class->typemap;
+    my $map = LJ::CProd->user_map($u);
+
+    $class = "LJ::CProd::$opts{'inline'}";
+    my $cprodid = $tm->class_to_typeid($class);
+    my $state = $map->{$cprodid};
+
+    eval "use $class; 1";
+    return "" if $@;
+    return "" unless eval { $class->applicable($u) };
+    my $version = $class->get_version;
+    my $content = eval { $class->render($u, $version) } || LJ::ehtml($@);
     return $content;
 }
 
@@ -202,14 +224,12 @@ sub user_map {
 }
 
 sub prod_to_show {
-    my ($class, $u, %opts) = @_;
+    my ($class, $u) = @_;
 
     my $tm  = $class->typemap;
     my $map = LJ::CProd->user_map($u);
 
     my @poss;  # [$class, $cprodid, $acktime];
-
-    @LJ::CPROD_PROMOS = $opts{'inline'} if $opts{'inline'};
 
     foreach my $prod (@LJ::CPROD_PROMOS) {
         my $class = "LJ::CProd::$prod";
