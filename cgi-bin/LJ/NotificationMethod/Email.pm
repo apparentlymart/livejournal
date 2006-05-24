@@ -74,6 +74,8 @@ sub notify {
             body    => $ev->as_string
         }) or die "unable to send notification email";
     }
+
+    return 1;
 }
 
 sub configured {

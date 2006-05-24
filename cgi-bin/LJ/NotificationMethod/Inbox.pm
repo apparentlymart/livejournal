@@ -76,6 +76,8 @@ sub notify {
 
         $q->enqueue(event => $ev);
     }
+
+    return 1;
 }
 
 sub configured { 1 }
