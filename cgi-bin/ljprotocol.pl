@@ -1168,6 +1168,12 @@ sub editevent
             ($req->{'security'} eq "private" ||
             ($req->{'security'} eq "usemask" && $qallowmask != 1 )));
 
+    # make sure the new entry's under the char limit
+    # NOTE: as in postevent, this requires $req->{event} to be binary data
+    # but we've already removed the utf-8 flag in the XML-RPC path, and it
+    # never gets set in the "flat" protocol path
+    return fail($err,409) if length($req->{event}) >= LJ::BMAX_EVENT;
+
     # fetch the old entry from master database so we know what we
     # really have to update later.  usually people just edit one part,
     # not every field in every table.  reads are quicker than writes,
