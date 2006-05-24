@@ -218,6 +218,7 @@ body<=
     # helper variables for commonly called methods
     my $owner_mode = LJ::Support::can_close($sp, $remote, $auth) ? 1 : 0;
     my $helper_mode = LJ::Support::can_help($sp, $remote) ? 1 : 0;
+    my $stock_mode = LJ::Support::can_see_stocks($sp, $remote) ? 1 : 0;
     my $is_poster = LJ::Support::is_poster($sp, $remote, $auth) ? 1 : 0;
 
     # fix up the subject if needed
@@ -744,7 +745,7 @@ body<=
     }
 
     # add in canned answers if there are any for this category and the user can use them
-    if ($helper_mode && ! $is_poster) {
+    if ($stock_mode && ! $is_poster) {
         my $rows = $dbr->selectall_arrayref('SELECT subject, body FROM support_answers WHERE spcatid = ? ORDER BY subject',
                                             undef, $sp->{_cat}->{spcatid});
         if ($rows && @$rows) {

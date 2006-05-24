@@ -21,6 +21,7 @@ my $SECONDS_IN_DAY  = 3600 * 24;
                      supportmakeinternal
                      supportmovetouch
                      supportviewscreened
+                     supportviewstocks
                      supportchangesummary/);
 
 ## pass $id of zero or blank to get all categories
@@ -280,6 +281,11 @@ sub can_perform_actions
 sub can_change_summary
 {
     return LJ::Support::support_check_priv(@_, 'supportchangesummary');
+}
+
+sub can_see_stocks
+{
+    return LJ::Support::support_check_priv(@_, 'supportviewstocks');
 }
 
 sub can_help
