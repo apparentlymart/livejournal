@@ -35,6 +35,20 @@ propgroup presentation {
         values = "solid|Solid|dashed|Dashed|dotted|Dotted|double|Double|hidden|Invisible";
     }
 
+    property bool show_header {
+        des = "Show the top box's header bar";
+    }
+
+    property bool show_header_title {
+        des = "Show the title in the top box's header bar";
+        note = "The header bar must be enabled in order for this to have an effect.";
+    }
+
+    property bool show_header_links {
+        des = "Show the navigation links in the top box's header bar";
+        note = "The header bar must be enabled in order for this to have an effect.";
+    }
+
     property use page_recent_items;
     property use page_friends_items;
     property use view_entry_disabled;
@@ -165,6 +179,36 @@ propgroup text {
     property string text_archive_value {
         des = "The value of the 'archive' link";
     }
+    property string text_other1_label {
+        des = "The label for a custom link in the box at the top of your journal";
+        note = "Make this box empty if you don't want to show this link.";
+    }
+    property string text_other1_value {
+        des = "The value of the custom link";
+    }
+    property string text_other1_url {
+        des = "The URL of the custom link";
+    }
+    property string text_other2_label {
+        des = "The label for a second custom link in the box at the top of your journal";
+        note = "Make this box empty if you don't want to show this link.";
+    }
+    property string text_other2_value {
+        des = "The value of the second custom link";
+    }
+    property string text_other2_url {
+        des = "The URL of the custom link";
+    }
+    property string text_other3_label {
+        des = "The label for a third custom link in the box at the top of your journal";
+        note = "Make this box empty if you don't want to show this link.";
+    }
+    property string text_other3_value {
+        des = "The value of the third custom link";
+    }
+    property string text_other3_url {
+        des = "The URL of the custom link";
+    }
     property string text_navlinks_left {
         des = "Text to go in front of each navigation link in the box at the top of your journal";
     }
@@ -237,6 +281,9 @@ set box_margin = "0";
 set box_top_margin = "0";
 set entryborder_size = "";
 set entryborder_style = "hidden";
+set show_header = true;
+set show_header_title = true;
+set show_header_links = true;
 set counter_code = "";
 
 set show_entrynav_icons = true;
@@ -252,6 +299,15 @@ set text_userinfo_label = "userinfo";
 set text_userinfo_value = "livejournal userinfo";
 set text_archive_label = "archive";
 set text_archive_value = "journal archive";
+set text_other1_label = "";
+set text_other1_value = "";
+set text_other1_url = "";
+set text_other2_label = "";
+set text_other2_value = "";
+set text_other2_url = "";
+set text_other3_label = "";
+set text_other3_value = "";
+set text_other3_url = "";
 set text_navlinks_left = "[";
 set text_navlinks_right = "]";
 set text_navlinks_btwn = "|";
@@ -329,7 +385,27 @@ width:100%;
 }
 .box, .entrybox {
 border: $*entryborder_size $*entryborder_style $*border_color;
+}""";
+if (not $*show_header) {
+"""
+#topbox tr.caption {
+display: none;
+}""";
+} else {
+    if (not $*show_header_title) {
+"""
+#topbox table tr.caption td.caption {
+visibility: hidden;
+}""";
+    }
+    if (not $*show_header_links) {
+"""
+#topbox table tr.caption td.index {
+visibility: hidden;
+}""";
+    }
 }
+"""
 
 $*custom_css
 """;
@@ -467,7 +543,7 @@ if (viewer_sees_ads()) {
 <div align="$*box_alignment"$margin>
 <table width="$*box_width" cellpadding="2" cellspacing="0"
 border="0"
-summary="" class="box">
+summary="" class="box" id="topbox">
 <tr><td bgcolor="$*stronger_back" align="center">
 <table width="100%" cellpadding="3" cellspacing="0"
 border="0"
@@ -532,6 +608,36 @@ if ($*text_archive_label != "") {
 <td class="meta" align="right"><b>$*text_archive_label</b></td>
 <td class="meta" align="center">$*text_navlinks_btwn</td>
 <td class="meta" align="left"><a href="$.view_url{"archive"}">$*text_archive_value</a></td>
+<td class="meta">$*text_navlinks_right</td>
+</tr>""";
+}
+if ($*text_other1_label != "") {
+"""
+<tr>
+<td class="meta">$*text_navlinks_left</td>
+<td class="meta" align="right"><b>$*text_other1_label</b></td>
+<td class="meta" align="center">$*text_navlinks_btwn</td>
+<td class="meta" align="left"><a href="$*text_other1_url">$*text_other1_value</a></td>
+<td class="meta">$*text_navlinks_right</td>
+</tr>""";
+}
+if ($*text_other2_label != "") {
+"""
+<tr>
+<td class="meta">$*text_navlinks_left</td>
+<td class="meta" align="right"><b>$*text_other2_label</b></td>
+<td class="meta" align="center">$*text_navlinks_btwn</td>
+<td class="meta" align="left"><a href="$*text_other2_url">$*text_other2_value</a></td>
+<td class="meta">$*text_navlinks_right</td>
+</tr>""";
+}
+if ($*text_other3_label != "") {
+"""
+<tr>
+<td class="meta">$*text_navlinks_left</td>
+<td class="meta" align="right"><b>$*text_other3_label</b></td>
+<td class="meta" align="center">$*text_navlinks_btwn</td>
+<td class="meta" align="left"><a href="$*text_other3_url">$*text_other3_value</a></td>
 <td class="meta">$*text_navlinks_right</td>
 </tr>""";
 }
