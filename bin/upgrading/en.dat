@@ -5363,6 +5363,63 @@ This could be because: <ol>
 
 /tools/recent_comments.bml.maxnotshown=Your account is only permitted to see the latest [[current]] entries, not the full limit of [[max]].
 
+/tools/textmessage.bml.enter.user.head=Enter user
+
+/tools/textmessage.bml.enter.user.input=Username:
+
+/tools/textmessage.bml.enter.user.submit=Proceed...
+
+/tools/textmessage.bml.enter.user.text=The following text messaging service providers are supported.
+
+/tools/textmessage.bml.error.notloggedin.head=Not logged in
+
+/tools/textmessage.bml.error.notloggedin.notfriend=and be listed as their friend
+
+/tools/textmessage.bml.error.notloggedin.text=To send a text message to this user, you must be <a [[aopts]]>logged in</a>[[andbefriend]].
+
+/tools/textmessage.bml.error.unauthorized.head=Unauthorized
+
+/tools/textmessage.bml.error.unauthorized.text=User <B>[[user]]</B> has selected "friends only" as the security level required to send text messages to them.
+
+/tools/textmessage.bml.error.unavailable.head=Unavailable
+
+/tools/textmessage.bml.error.unavailable.notfound=Could not find [[user]].
+
+/tools/textmessage.bml.error.unavailable.notpermitted=This user's account type does not permit text messaging.
+
+/tools/textmessage.bml.error.unavailable.notsetup=This user has not setup their text messaging information at [[sitenameshort]], or they've turned it off.
+
+/tools/textmessage.bml.footer.disclaimer.text=<B>Disclaimer:</B> The reliability of text messaging should not be trusted in dealing with emergencies.
+/tools/textmessage.bml.footer.howwork.text=How does this feature work?  <a [[aopts]]>Read this</a>.
+
+/tools/textmessage.bml.form.message.from=From:
+
+/tools/textmessage.bml.form.head=Send a message
+
+/tools/textmessage.bml.form.message.input=Message:
+
+/tools/textmessage.bml.form.message.note=(max <TT>[[maxlen]]</TT> characters ... type until it stops you)
+
+/tools/textmessage.bml.form.message.submit=Send Message!
+
+/tools/textmessage.bml.form.text=Fill out this form to send a text message to <B>[[user]]</B>.
+
+/tools/textmessage.bml.providers.head=Service Providers
+
+/tools/textmessage.bml.providers.from=from:
+
+/tools/textmessage.bml.providers.msg=msg:
+
+/tools/textmessage.bml.providers.text=The following text messaging service providers are supported.
+
+/tools/textmessage.bml.providers.total=total:
+
+/tools/textmessage.bml.setup.text=<a [[aopts]]>Set up or modify your text message settings.</a>
+
+/tools/textmessage.bml.success.head=Success
+
+/tools/textmessage.bml.success.text=Your text message was sent.
+
 /translate/index.bml.table.code=Code
 
 /translate/index.bml.table.done=% Done

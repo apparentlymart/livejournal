@@ -14,11 +14,11 @@ body<=
 
     if ($POST{'mode'} eq "details" || $GET{'mode'} eq "details")
     {
-        $ret .= "<?h1 Service Providers h1?><?p The following text messaging service providers are supported. p?>";
+        $ret .= "<?h1 $ML{'.providers.head'} h1?><?p $ML{'.providers.text'} p?>";
         $ret .= "<UL>";
         foreach my $p (LJ::TextMessage::providers()) {
             my $info = LJ::TextMessage::provider_info($p);
-            $ret .= "<P><B>$info->{'name'}</B> (from: $info->{'fromlimit'}, msg: $info->{'msglimit'}, total: $info->{'totlimit'})<BR>$info->{'notes'}";
+            $ret .= "<P><B>$info->{'name'}</B> ($ML{'.providers.from'} $info->{'fromlimit'}, $ML{'.providers.msg'} $info->{'msglimit'}, $ML{'.providers.total'} $info->{'totlimit'})<BR>$info->{'notes'}";
         }
         $ret .= "</UL>";
         add_footer();
@@ -26,7 +26,11 @@ body<=
     }
 
     unless ($user) {
-        $ret .= "<?h1 Enter user h1?><?p Enter the $LJ::SITENAMESHORT username of the person you'd like to send a text message to: <div style='margin-left: 40px'><form method='get' action='textmessage.bml'>Username: <input type='text' size='15' maxlength='15' name='user' /> <input type='submit' value=\"Proceed...\" /></form></div> p?>";
+        $ret .= "<?h1 $ML{'.enter.user.head'} h1?><?p ".
+            BML::ml('.enter.user.text', { sitenameshort => $LJ::SITENAMESHORT }).
+            "<div style='margin-left: 40px'><form method='get' action='textmessage.bml'>$ML{'.enter.user.input'} <input type='text' size='15' maxlength='15' name='user' /> <input type='submit' value=\"$ML{'.enter.user.submit'}\" /></form><?p".
+            BML::ml('.setup.text', { aopts => "href='$LJ::SITEROOT/manage/profile/'" }).
+            "p?></div> p?>";
         add_footer();
         return $ret;
     }
@@ -35,7 +39,8 @@ body<=
     my $tminfo;
 
     if (!$u) {
-        $ret .= "<?h1 Unavailable h1?><?p Could not find $user. p?>";
+        $ret .= "<?h1 $ML{'.error.unavailable.head'} h1?><?p ".
+            BML::ml('.error.unavailable.notfound', { user => $user })." p?>";
         add_footer();
         return $ret;
     }
@@ -45,14 +50,14 @@ body<=
     }
 
     unless (LJ::get_cap($u, "textmessaging")) {
-        $ret .= "<?h1 Unavailable h1?><?p This user's account type does not permit text messaging. p?>";
+        $ret .= "$ML{'.error.unavailable.head'} h1?><?p $ML{'.error.unavailable.notpermitted'} p?>";
         add_footer();
         return $ret;
     }
 
     unless ($tminfo) {
-        $ret .= "<?h1 Unavailable h1?><?p This user has not setup their text messaging ".
-            "information at $LJ::SITENAMESHORT, or they've turned it off. p?>";
+        $ret .= "<?h1 $ML{'.error.unavailable.head'} h1?><?p ".
+            BML::ml('.error.unavailable.notsetup', { sitenameshort => $LJ::SITENAMESHORT }) . " p?>";
         add_footer();
         return $ret;
     }
@@ -62,17 +67,19 @@ body<=
         $remote = LJ::get_remote();
         my $andbefriend;
         if ($tminfo->{'security'} eq "friends") {
-            $andbefriend = " and be listed as their friend";
+            $andbefriend = " ".$ML{'.error.notloggedin.notfriend'};
         }
         unless ($remote) {
-            $ret .= "<?h1 Not logged in h1?><?p To send a text message to this user, you must be <A HREF=\"/login.bml?ret=1\">logged in</A>$andbefriend. p?>";
+            $ret .= "<?h1 $ML{'.error.notloggedin.head'} h1?><?p ".
+                BML::ml('.error.notloggedin.text', { aopts => "href='/login.bml?ret=1'>", andbefriend => $andbefriend}) . "p?>";
             add_footer();
             return $ret;
         }
 
         if ($tminfo->{'security'} eq "friends" && $u->{'userid'} != $remote->{'userid'}) {
             unless (LJ::is_friend($u->{'userid'}, $remote->{'userid'})) {
-                $ret .= "<?h1 Unauthorized h1?><?p User <B>$u->{'user'}</B> has selected \"friends only\" as the security level required to send text messages to them.  p?>";
+                $ret .= "<?h1 $ML{'.error.unauthorized.head'} h1?><?p ".
+                    BML::ml('.error.unauthorized.text', { user => $u->{'user'} }) ." p?>";
                 add_footer();
                 return $ret;
             }
@@ -102,18 +109,20 @@ body<=
 
         return LJ::bad_input(@errors) if @errors;
 
-        $ret .= "<?h1 Success h1?><?p Your text message was sent. p?>";
+        $ret .= "<?h1 ML{'.success.head'} h1?><?p $ML{'.success.text'} p?>";
         add_footer();
         return $ret;
     }
 
     my $pinfo = LJ::TextMessage::provider_info($tminfo->{'provider'});
 
-    $ret .= "<?h1 Send a message h1?><?p Fill out this form to send a text message to <B>$u->{'user'}</B>. p?>";
+    $ret .= "<?h1 $ML{'.form.head'} h1?><?p ".
+        BML::ml('.form.text', { user => $u->{'user'} }) ."p?>";
+
     $ret .= "<ul>";
     $ret .= "<form name='frmMsg' method='post' action='textmessage.bml'><input type='hidden' name='user' value=\"$u->{'user'}\" />";
     $ret .= LJ::form_auth();
-    $ret .= "<b>From: </b> ";
+    $ret .= "<b>$ML{'.form.message.from'} </b> ";
     my $maxlen = $pinfo->{'totlimit'};
     if ($tminfo->{'security'} eq "all") {
         $ret .= "<INPUT NAME=from MAXLENGTH=15 SIZE=15 VALUE=\"$remote->{'user'}\">\n";
@@ -124,10 +133,11 @@ body<=
         $maxlen -= length($remote->{'user'});
     }
     if ($pinfo->{'msglimit'} < $maxlen) { $maxlen = $pinfo->{'msglimit'}; }
-    $ret .= "<P><B>Message:</B> (max <TT>$maxlen</TT> characters ... type until it stops you)<BR>";
+    $ret .= "<P><B>$ML{'.form.message.input'}</B> ".
+        BML::ml('.form.message.note', { maxlen => $maxlen }) ."<BR>";
 
     $ret .= "<input name='message' size='50' maxlength='$maxlen' />\n";
-    $ret .= "<p><input type='submit' value=\"Send Message!\" /></p>";
+    $ret .= "<p><input type='submit' value=\"$ML{'.form.message.submit'}\" /></p>";
     $ret .= "</form></ul>";
 
     add_footer();
@@ -135,8 +145,9 @@ body<=
 
     sub add_footer
     {
-        my $howwork = $LJ::HELP_URL{'textmessaging_about'} ? "How does this feature work?  <a href=\"$LJ::HELP_URL{'textmessaging_about'}\">Read this</a>.<br />" : "";
-        $ret .= "<p><hr /><font size='-1'>$howwork<B>Disclaimer:</B> The reliability of text messaging should not be trusted in dealing with emergencies.</font>";
+        my $howwork = $LJ::HELP_URL{'textmessaging_about'} ? 
+            BML::ml('.footer.howwork.text', { aopts => "href='$LJ::HELP_URL{'textmessaging_about'}'" }) ."<br />" : "";
+        $ret .= "<p><hr /><font size='-1'>$howwork".$ML{'.footer.disclaimer.text'}."</font>";
     }
 
 }
