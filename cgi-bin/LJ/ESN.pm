@@ -23,7 +23,7 @@ sub process_fired_events {
     $sclient->can_do("LJ::Worker::FindSubsByCluster");  # step 2: can go to 3 or 4
     $sclient->can_do("LJ::Worker::FilterSubs");         # step 3: goes to step 4
     $sclient->can_do("LJ::Worker::ProcessSub");         # step 4
-    $sclient->verbose($verbose);
+    $sclient->set_verbose($verbose);
     $sclient->work_until_done;
 }
 
