@@ -2735,6 +2735,12 @@ sub get_useragent {
     return $ua;
 }
 
+sub assert_is {
+    my ($va, $ve) = @_;
+    return 1 if $va eq $ve;
+    die "Assertion failure at " . join(', ', (caller())[0..2]) . ": expected=$ve, actual=$va\n";
+}
+
 use vars qw($AUTOLOAD);
 sub AUTOLOAD {
     if ($AUTOLOAD eq "LJ::send_mail") {

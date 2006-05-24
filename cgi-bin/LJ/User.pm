@@ -24,6 +24,17 @@ use Class::Autouse qw(
                       LJ::Identity
                       );
 
+sub new_from_row {
+    my ($class, $row) = @_;
+    my $u = bless $row, $class;
+
+    # for selfassert method below:
+    $u->{_orig_userid} = $u->{userid};
+    $u->{_orig_user}   = $u->{user};
+
+    return $u;
+}
+
 # class method.  returns remote (logged in) user object.  or undef if
 # no session is active.
 sub remote {
@@ -1593,10 +1604,21 @@ sub new_entry_editor {
     return $LJ::DEFAULT_EDITOR; # Use config default
 }
 
+# do some internal consistency checks on self.  die if problems,
+# else returns 1.
+sub selfassert {
+    my $u = shift;
+    LJ::assert_is($u->{userid}, $u->{_orig_userid})
+        if $u->{_orig_userid};
+    LJ::assert_is($u->{user}, $u->{_orig_user})
+        if $u->{_orig_user};
+    return 1;
+}
+
 # Returns the NotificationInbox for this user
+# FIXME: inconsistent method case
 sub NotificationInbox {
     my $u = shift;
-
     return LJ::NotificationInbox->new($u);
 }
 
@@ -1928,10 +1950,12 @@ sub load_userids
 sub load_userids_multiple
 {
     &nodb;
-    my ($map, $have, $memcache_only) = @_;
+    # the $have parameter is deprecated, as is $memcache_only, but it's still preserved for now.
+    # actually this whole API is crap.  use LJ::load_userids() instead.
+    my ($map, undef, $memcache_only) = @_;
 
     my $sth;
-
+    my @have;
     my %need;
     while (@$map) {
         my $id = shift @$map;
@@ -1940,26 +1964,30 @@ sub load_userids_multiple
         push @{$need{$id}}, $ref;
 
         if ($LJ::REQ_CACHE_USER_ID{$id}) {
-            push @{$have}, $LJ::REQ_CACHE_USER_ID{$id};
+            push @have, $LJ::REQ_CACHE_USER_ID{$id};
         }
     }
 
     my $satisfy = sub {
         my $u = shift;
         next unless ref $u eq "LJ::User";
+
+        # this could change the $u returned to an
+        # existing one we already have loaded in memory,
+        # once it's been upgraded.  then everybody points
+        # to the same one.
+        $u = _set_u_req_cache($u);
+
         foreach (@{$need{$u->{'userid'}}}) {
             $$_ = $u;
         }
 
-        _set_u_req_cache($u);
         delete $need{$u->{'userid'}};
     };
 
     unless ($LJ::_PRAGMA_FORCE_MASTER) {
-        if ($have) {
-            foreach my $u (@$have) {
-                $satisfy->($u);
-            }
+        foreach my $u (@have) {
+            $satisfy->($u);
         }
 
         if (%need) {
@@ -2009,9 +2037,9 @@ sub _load_user_raw
         foreach my $v (@$vals) {
             my $sth = $db->prepare("HANDLER user READ `$key` = (?) LIMIT 1");
             $sth->execute($v);
-            my $u = $sth->fetchrow_hashref;
-            if ($u) {
-                bless $u, 'LJ::User';
+            my $row = $sth->fetchrow_hashref;
+            if ($row) {
+                my $u = LJ::User->new_from_row($row);
                 $hook->($u);
                 $last = $u;
             }
@@ -2021,8 +2049,8 @@ sub _load_user_raw
         my $in = join(", ", map { $db->quote($_) } @$vals);
         my $sth = $db->prepare("SELECT * FROM user WHERE $key IN ($in)");
         $sth->execute;
-        while (my $u = $sth->fetchrow_hashref) {
-            bless $u, 'LJ::User';
+        while (my $row = $sth->fetchrow_hashref) {
+            my $u = LJ::User->new_from_row($row);
             $hook->($u);
             $last = $u;
         }
@@ -2037,6 +2065,10 @@ sub _set_u_req_cache {
     # if we have an existing user singleton, upgrade it with
     # the latested data, but keep using its address
     if (my $eu = $LJ::REQ_CACHE_USER_ID{$u->{'userid'}}) {
+        LJ::assert_is($eu->{userid}, $u->{userid});
+        $eu->selfassert;
+        $u->selfassert;
+
         $eu->{$_} = $u->{$_} foreach keys %$u;
         $u = $eu;
     }
@@ -2081,8 +2113,10 @@ sub load_user
     my $u;
 
     # return process cache if we have one
-    $u = $LJ::REQ_CACHE_USER_NAME{$user};
-    return $u if $u;
+    if ($u = $LJ::REQ_CACHE_USER_NAME{$user}) {
+        $u->selfassert;
+        return $u;
+    }
 
     # check memcache
     {
@@ -2173,7 +2207,10 @@ sub load_userid
 
     # check process cache
     $u = $LJ::REQ_CACHE_USER_ID{$userid};
-    return $u if $u;
+    if ($u) {
+        $u->selfassert;
+        return $u;
+    }
 
     # check memcache
     $u = LJ::memcache_get_u([$userid,"userid:$userid"]);
@@ -2195,11 +2232,10 @@ sub memcache_get_u
     my @keys = @_;
     my @ret;
     foreach my $ar (values %{LJ::MemCache::get_multi(@keys) || {}}) {
-        my $u = LJ::MemCache::array_to_hash("user", $ar);
-        if ($u) {
-            bless $u, 'LJ::User';
-            push @ret, $u;
-        }
+        my $row = LJ::MemCache::array_to_hash("user", $ar)
+            or next;
+        my $u = LJ::User->new_from_row($row);
+        push @ret, $u;
     }
     return wantarray ? @ret : $ret[0];
 }

@@ -179,6 +179,9 @@ sub init
         $ju = LJ::load_user($journal);
         return { 'error' => BML::ml('talk.error.nosuchjournal')} unless $ju;
         return { 'error' => BML::ml('talk.error.bogusargs')} unless $ju->{'clusterid'};
+        LJ::assert_is($ju->{user}, lc $journal);
+        $ju->selfassert;
+
         $init->{'clustered'} = 1;
         foreach (qw(itemid replyto)) {
             next unless $init->{$_};
