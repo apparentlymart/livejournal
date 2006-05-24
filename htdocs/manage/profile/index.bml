@@ -301,10 +301,11 @@ _code?>
 
         ## TEXT MESSAGING
 
-        if (LJ::get_cap($u, "textmessaging"))
-        {
-            $ret .= "<div class='section_head'>$ML{'.section.textmsg'}\n";
+        $ret .= "<div class='section_head'>$ML{'.section.textmsg'}\n";
+        my $inline = LJ::CProd->inline($u, inline => 'TextMessaging');
+        $ret .= "</div>$inline" if $inline;
 
+        if (LJ::get_cap($u, "textmessaging")) {
             my $tminfo = LJ::TextMessage->tm_info($u);
             foreach (values %$tminfo) { LJ::text_out(\$_); }
             $tminfo->{'security'} = "N" if ($u->{'txtmsg_status'} eq 'off' || $u->{'txtmsg_status'} eq 'none');
