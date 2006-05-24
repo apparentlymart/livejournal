@@ -3530,8 +3530,6 @@ Regards,
 
 /manage/profile/index.bml.country.choose=Pick a country
 
-/manage/profile/index.bml.email=Email
-
 /manage/profile/index.bml.email.change=Change email
 
 /manage/profile/index.bml.email.opt.both=Both (primary email + LiveJournal email)
@@ -3635,8 +3633,6 @@ Regards,
 /manage/profile/index.bml.gender.male=Male
 
 /manage/profile/index.bml.gender.unspecified=(Unspecified)
-
-/manage/profile/index.bml.im=IM/Chat
 
 /manage/profile/index.bml.interest.line1=Short single-word phrases are best.
 

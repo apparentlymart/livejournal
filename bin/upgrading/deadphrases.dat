@@ -112,6 +112,8 @@ general /manage/index.bml.information.emailpost
 general /manage/index.bml.information.emailpost.about
 
 general /manage/profile/index.bml.intro
+general /manage/profile/index.bml.im
+general /manage/profile/index.bml.email
 
 general /modify.bml.btn.proceed
 general /modify.bml.journalstatus.about
