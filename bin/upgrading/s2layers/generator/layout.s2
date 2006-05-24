@@ -497,16 +497,6 @@ function Page::print ()
         $margin = " style=\"" + $margin + "\"";
     }
 
-    var string website_name = $.journal.website_name ? $.journal.website_name : $*text_website_default_name;
-    var string website;
-    if ($.journal.website_url != "") {
-        $website = """<tr><td class="meta">$*text_navlinks_left</td>
-<td class="meta" align="right"><b>$*text_website</b></td>
-<td class="meta" align="center">$*text_navlinks_btwn</td>
-<td class="meta" align="left"><a href="$.journal.website_url">$website_name</a></td>
-<td class="meta">$*text_navlinks_right</td></tr>""";
-    }
-
     var string links;
     var bool firstlink = true;
     foreach var string v ($.views_order) {
@@ -582,65 +572,38 @@ if ($*counter_code != "") {
 cellpadding="0"
 border="0"
 summary="">""";
-if ($*text_website != "") {
-    """$website""";
-}
-if ($*text_userinfo_label != "") {
+
+# Print navigation links
+
+var string label = "";
+var string url = "";
+var string value = "";
+var string website_value = $.journal.website_name ? $.journal.website_name : $*text_website_default_name;
+var string userinfo_value = ($*text_userinfo_value == "livejournal userinfo") ? "$sitename_lc userinfo" : "$*text_userinfo_value";
+
+var string[] labels = [$*text_website, $*text_userinfo_label, $*text_archive_label, $*text_other1_label, $*text_other2_label, $*text_other3_label];
+var string[] urls   = [$.journal.website_url, $.view_url{"userinfo"}, $.view_url{"archive"}, $*text_other1_url, $*text_other2_url, $*text_other3_url];
+var string[] values = [$website_value, $userinfo_value, $*text_archive_value, $*text_other1_value, $*text_other2_value, $*text_other3_value];
+
+foreach var int i (0 .. ((size $labels) - 1)) {
+    $label = $labels[$i];
+    $url   = $urls[$i];
+    $value = $values[$i];
+
+    if ($label != "") {
 """
 <tr>
 <td class="meta">$*text_navlinks_left</td>
-<td class="meta" align="right"><b>$*text_userinfo_label</b></td>
+<td class="meta" align="right"><b>$label</b></td>
 <td class="meta" align="center">$*text_navlinks_btwn</td>
-<td class="meta" align="left"><a href="$.view_url{"userinfo"}">""";
-if ($*text_userinfo_value == "livejournal userinfo") {
-    "$sitename_lc userinfo";
-} else {
-    "$*text_userinfo_value";
-}
-"""</a></td>
+<td class="meta" align="left"><a href="$url">$value</a></td>
 <td class="meta">$*text_navlinks_right</td>
-</tr>""";
+</tr>
+
+""";
+    }
 }
-if ($*text_archive_label != "") {
-"""
-<tr>
-<td class="meta">$*text_navlinks_left</td>
-<td class="meta" align="right"><b>$*text_archive_label</b></td>
-<td class="meta" align="center">$*text_navlinks_btwn</td>
-<td class="meta" align="left"><a href="$.view_url{"archive"}">$*text_archive_value</a></td>
-<td class="meta">$*text_navlinks_right</td>
-</tr>""";
-}
-if ($*text_other1_label != "") {
-"""
-<tr>
-<td class="meta">$*text_navlinks_left</td>
-<td class="meta" align="right"><b>$*text_other1_label</b></td>
-<td class="meta" align="center">$*text_navlinks_btwn</td>
-<td class="meta" align="left"><a href="$*text_other1_url">$*text_other1_value</a></td>
-<td class="meta">$*text_navlinks_right</td>
-</tr>""";
-}
-if ($*text_other2_label != "") {
-"""
-<tr>
-<td class="meta">$*text_navlinks_left</td>
-<td class="meta" align="right"><b>$*text_other2_label</b></td>
-<td class="meta" align="center">$*text_navlinks_btwn</td>
-<td class="meta" align="left"><a href="$*text_other2_url">$*text_other2_value</a></td>
-<td class="meta">$*text_navlinks_right</td>
-</tr>""";
-}
-if ($*text_other3_label != "") {
-"""
-<tr>
-<td class="meta">$*text_navlinks_left</td>
-<td class="meta" align="right"><b>$*text_other3_label</b></td>
-<td class="meta" align="center">$*text_navlinks_btwn</td>
-<td class="meta" align="left"><a href="$*text_other3_url">$*text_other3_value</a></td>
-<td class="meta">$*text_navlinks_right</td>
-</tr>""";
-}
+
 """
 </table>
 </td>
