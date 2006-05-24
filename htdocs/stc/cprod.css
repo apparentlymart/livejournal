@@ -1,0 +1,66 @@
+.clear {
+    clear: both;
+    }
+
+#CProd_box .content {
+    border: 1px solid #d9e6f2;
+    padding: 0 .4em .4em .4em;
+    }
+    
+    .content-portal {
+        padding: 0 .5em .5em .5em;
+        margin: 0 0 1em 0;
+        }
+    
+#CProd_box .fancy {
+    position: relative;
+    height: 5em;
+    }
+    
+    .portal {
+        background: #d9e6f2;
+        padding: .9em .5em .5em .5em;
+        position: relative;
+        }
+    
+#CProd_box .fancy-right {
+    height: 5em;
+    }
+    
+#CProd_box .fancy-left {
+    height: 5em;
+    }
+    
+#CProd_box .actions {
+    float: right;
+    padding: .5em .5em 0 0;
+    }
+    
+    #CProd_box .actions-portal {
+        float: left;
+        margin-right: .5em;
+        }
+    
+#CProd_box .frankhead {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    }
+    
+    #CProd_box .frankhead-portal {
+        float: left;
+        margin-top: -17px;
+        }
+    
+.alllink {
+    text-align: right;
+    position: relative;
+    top: -.5em;
+    }
+    
+    .alllink-portal {
+        float: left;
+        position: relative;
+        top: .2em;
+        word-wrap: break-word;
+        }
