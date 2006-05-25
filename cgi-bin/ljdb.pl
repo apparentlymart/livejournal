@@ -11,7 +11,7 @@ require "$ENV{LJHOME}/cgi-bin/ljconfig.pl";
 $LJ::DBIRole = new DBI::Role {
     'timeout' => sub {
         my ($dsn, $user, $pass, $role) = @_;
-        return 0 if $role eq "master";
+        return 0 if $role && $role eq "master";
         return $LJ::DB_TIMEOUT;
     },
     'sources' => \%LJ::DBINFO,
@@ -30,11 +30,11 @@ use Carp qw(croak);
 #       for time boundaries as specified.  Returns the boundary ids
 #       that were found, effectively simulating a key on 'time' for
 #       the specified table.
-# info: This function shouldn't normally be used, but there are 
+# info: This function shouldn't normally be used, but there are
 #       rare instances where it's useful.
 # args: hash of keys defined as follows,
 #        table     = table name to query
-#        roles     = arrayref of db roles to use, in order; 
+#        roles     = arrayref of db roles to use, in order;
 #                    defaults to ['slow']
 #        idcol     = name of 'id' primary key column
 #        timecol   = name of unixtime column to use for constraint
@@ -85,7 +85,7 @@ sub time_range_to_ids {
 
             my $curr_id = $min_id + int(($max_id - $min_id) / 2)+0;
 
-            my $sql = 
+            my $sql =
                 "SELECT $idcol, $timecol FROM $table " .
                 "WHERE $idcol>=$curr_id ORDER BY 1 LIMIT 1";
 
