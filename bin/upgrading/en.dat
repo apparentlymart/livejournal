@@ -3448,6 +3448,20 @@ Regards,
 
 /manage/logins.bml.title=Manage Your Login Sessions
 
+/manage/logins.bml.user=Username:
+
+/manage/logins.bml.loggedin.header.user=Currently Logged In Sessions for [[user]]
+
+/manage/logins.bml.prior.header.user=Prior Login Sessions for [[user]]
+
+/manage/logins.bml.loggedin.table.exptype=Expiration Type
+
+/manage/logins.bml.loggedin.table.bound=Bound to IP
+
+/manage/logins.bml.loggedin.table.create=Creation Time
+
+/manage/logins.bml.loggedin.table.expire=Expiration Time
+
 /manage/moodthemes.bml.back2=Return To Editor
 
 /manage/moodthemes.bml.btn.create=Create
