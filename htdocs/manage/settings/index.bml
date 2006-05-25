@@ -55,11 +55,11 @@ _code?>
 
         $ret .= "<div>";
         # user switcher
-        $ret .= "<?p <form method='get' action='index.bml'>\n";
+        $ret .= "<form method='get' action='index.bml'>\n";
         $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
-        $ret .= "</form> p?>\n\n";
+        $ret .= "</form>\n\n";
 
-        $ret .= "<?p Customize your viewing, notification and additional privacy options. p?>";
+        $ret .= "<?p $ML{'.intro'}  p?>";
         $ret .= "</div>\n";
 
         $ret.= "<div class='clear'></div>\n";
@@ -74,13 +74,10 @@ _code?>
 
         ### Control Strip
         if ($LJ::USE_CONTROL_STRIP) {
-            $ret .= "<tr><td class='field_name'>$ML{'.fn.navstrip'}:</td>\n";
-            $ret .= "<td><span class='helper'>$ML{'.navstrip'}</span><br />\n";
-            $ret .= "<ul class='helper'><li>$ML{'.navstrip.list1'}</li>\n";
-            $ret .= "<li>$ML{'.navstrip.list2'}</li>\n";
-            $ret .= "<li>$ML{'.navstrip.list3'}</li></ul>\n";
+            $ret .= "<tr><td class='field_name'>$ML{'.fn.navstrip'}</td>\n";
 
-            $ret .= "<table style='margin-left: 30px; margin-bottom: 20px'>\n";
+            # choose the color
+            $ret .= "<td><table style='margin-bottom: 20px'>\n";
             $ret .= "<tr><td colspan='2'><b style='white-space: nowrap'>$ML{'.navstrip.choose'}</b></td></tr>";
             my $color_selected = $u->prop('view_control_strip') ? $u->prop('view_control_strip') : "dark";
             $ret .= "<tr><td width='50%'>" . LJ::html_check({ 'type' => "radio", 'name' => "control_strip_color", 'id' => "control_strip_color_dark", 'value' => "dark", 'selected' => $color_selected eq "dark" ? 1 : 0, });
@@ -91,7 +88,8 @@ _code?>
             $ret .= "<td><label for='control_strip_color_light' style='background-repeat: repeat-x; width: 3em; height: 3em; display: block; background-image: url($LJ::IMGPREFIX/controlstrip/bg-light.gif)'>&nbsp;</label></td></tr>";
             $ret .= "</table>\n";
 
-            $ret .= "<table style='margin-left: 30px; margin-bottom: 20px'>\n";
+            # choose where to display/see it
+            $ret .= "<table style='margin-bottom: 20px'>\n";
             $ret .= "<tr><td><b>$ML{'.navstrip.options'}</b></td></tr>\n";
             my $view_checked = $u->prop('view_control_strip') ? 1 : 0;
             $ret .= "<tr><td>". LJ::html_check({ 'name' => "view_control_strip", 'selected' => $view_checked, 'id' => "view_control_strip" });
@@ -101,6 +99,11 @@ _code?>
             $ret .= " <label for='show_control_strip'>$ML{'.navstrip.options.show'}</label></td></tr>";
             $ret .= "</table>";
 
+            $ret .= "<span class='helper'>$ML{'.navstrip'}</span><br />\n";
+            $ret .= "<ul class='helper'><li>$ML{'.navstrip.list1'}</li>\n";
+            $ret .= "<li>$ML{'.navstrip.list2'}</li>\n";
+            $ret .= "<li>$ML{'.navstrip.list3'}</li></ul>\n";
+
             $ret .= "</td></tr>\n";
         }
 
@@ -109,11 +112,10 @@ _code?>
         ($maxwidth, $maxheight) = ($1, $2) if ($u->{'opt_imagelinks'} =~ m/^(\d+)\|(\d+)$/);
         my $is_stock = {'320|240' => 1, '640|480' => 1, '0|0' => 1, '' => 1}->{$u->{'opt_imagelinks'}};
         my $extra = $is_stock ? '' : BML::ml('.imagelinks.size.custom', {'width' => $maxwidth, 'height' => $maxheight});
-        $ret .= "<tr><td class='field_name'>$ML{'.fn.imageplace'}:</td>\n<td>";
-        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_imagelinks_on', 'id' => 'opt_imagelinks_on',
-                                 'selected' => $u->{'opt_imagelinks'} });
-        $ret .= " $ML{'.imageplace'} ";
+        $ret .= "<tr><td class='field_name'>$ML{'.fn.imageplace'}</td>\n<td>";
+        $ret .= "$ML{'.imageplace'} ";
         $ret .= LJ::html_select({'name' => 'opt_imagelinks', 'selected' => $u->{'opt_imagelinks'}},
+                                 '0', BML::ml('.imageplace.none'),
                                  '0|0', BML::ml('.imageplace.all'),
                                  '320|240', BML::ml('.imageplace.medium'),
                                  '640|480', BML::ml('.imageplace.large'),
@@ -122,7 +124,7 @@ _code?>
         $ret .= "</td></tr>\n";
 
         # Comment pages
-        $ret .= "<tr><td class='field_name'>$ML{'.fn.commentpage'}:</td>\n<td>";
+        $ret .= "<tr><td class='field_name'>$ML{'.fn.commentpage'}</td>\n<td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_stylemine', 'id' => 'opt_stylemine',
                                  'value' => 1, 'selected' => $u->{'opt_stylemine'} });
         $ret .= " $ML{'.commentpage'}<br />\n";
@@ -135,19 +137,21 @@ _code?>
         $ret .= "<table class='field_block'>\n";
 
         # LJ News
-        $ret .= "<tr><td class='field_name'>$ML{'.fn.ljnews'}:</td>\n<td>";
+        $ret .= "<tr><td class='field_name'>$ML{'.fn.ljnews'}</td>\n<td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'allow_getljnews', 'id' => 'allow_getljnews',
                                  'selected' => $u->{'allow_getljnews'} eq 'Y' });
         $ret .= " $ML{'.ljnews'}";
         $ret .= "</td></tr>\n";
 
         # Birthday reminders
-        $ret .= "<tr><td class='field_name'>$ML{'.fn.bdayreminder'}:</td>\n<td>";
-        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_bdaymail', 'id' => 'opt_bdaymail',
-                                 'selected' => $u->{'opt_bdaymail'} });
-        $ret .= " $ML{'.bdayreminder'}<br />";
-        $ret .= "<span class='helper'>$ML{'.bdayreminder.note'}</span>";
-        $ret .= "</td></tr>\n";
+        unless ($LJ::DISABLED{'birthday_reminders'}) {
+            $ret .= "<tr><td class='field_name'>$ML{'.fn.bdayreminder'}</td>\n<td>";
+            $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_bdaymail', 'id' => 'opt_bdaymail',
+                                     'selected' => $u->{'opt_bdaymail'} });
+            $ret .= " $ML{'.bdayreminder'}<br />";
+            $ret .= "<span class='helper'>$ML{'.bdayreminder.note'}</span>";
+            $ret .= "</td></tr>\n";
+        }
 
         $ret .= "</table>\n";
 
@@ -156,7 +160,7 @@ _code?>
         $ret .= "<table class='field_block'>\n";
 
         # Search Inclusion
-        $ret .= "<tr><td class='field_name'>$ML{'.fn.searchincl'}:</td>\n<td>";
+        $ret .= "<tr><td class='field_name'>$ML{'.fn.searchincl'}</td>\n<td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_blockrobots', 'id' => 'opt_blockrobots',
                                  'selected' => $u->{'opt_blockrobots'} });
         $ret .= " $ML{'.searchincl'}<br />";
@@ -205,10 +209,9 @@ _code?>
         ### change any of the userprops ?
         {
             # opts
-            $POST{'opt_imagelinks'} = 0 unless $POST{'opt_imagelinks_on'} &&
-                                               $POST{'opt_imagelinks'} =~ m/^(\d+)\|(\d+)$/;
+            $POST{'opt_imagelinks'} = 0 unless $POST{'opt_imagelinks'} =~ m/^(\d+)\|(\d+)$/;
             $POST{'opt_stylemine'} = $POST{'opt_stylemine'} ? 1 : 0;
-            $POST{'opt_bdaymail'} = $POST{'opt_bdaymail'} ? 1 : 0;
+            $POST{'opt_bdaymail'} = $POST{'opt_bdaymail'} ? 1 : 0 unless ($LJ::DISABLED{'birthday_reminders'});
             $POST{'opt_blockrobots'} = $POST{'opt_blockrobots'} ? 1 : 0;
             $POST{'opt_weblogscom'} = $POST{'opt_weblogscom'} ? 1 : 0 unless ($LJ::DISABLED{'weblogs_com'});
 

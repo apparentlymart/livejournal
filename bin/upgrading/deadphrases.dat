@@ -115,6 +115,8 @@ general /manage/profile/index.bml.intro
 general /manage/profile/index.bml.im
 general /manage/profile/index.bml.email
 
+general /manage/settings/index.bml.bdayreminder.note
+
 general /modify.bml.btn.proceed
 general /modify.bml.journalstatus.about
 general /modify.bml.journalstatus.head

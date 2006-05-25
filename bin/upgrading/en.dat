@@ -3726,8 +3726,6 @@ Regards,
 
 /manage/settings/index.bml.bdayreminder=Receive email reminders for your friends' birthdays
 
-/manage/settings/index.bml.bdayreminder.note=Note: This feature is currently disabled, but may be re-enabled in the future.
-
 /manage/settings/index.bml.commentpage=View comment pages in your own journal style
 
 /manage/settings/index.bml.commentpage.text=When you follow a comment link from your Friends page, you can view that comment page in your own journal style.
@@ -3757,6 +3755,8 @@ Regards,
 /manage/settings/index.bml.imageplace.large=large images (over 640x480)
 
 /manage/settings/index.bml.imageplace.medium=medium images (over 320x240)
+
+/manage/settings/index.bml.imageplace.none=nothing (display all images)
 
 /manage/settings/index.bml.imageplace.text=Placeholders replace inline images with links, and are useful if you are browsing at work or over a slow connection.
 
