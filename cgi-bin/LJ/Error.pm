@@ -112,7 +112,6 @@ sub throw {
 
     if (@_ == 1) {
         my $self = shift;
-        $self->log;
         die $self;
     }
 
@@ -153,11 +152,14 @@ sub log {
          usercaused TINYINT,
          server VARCHAR(30),
          addr VARCHAR(15) NOT NULL,
-         ljuser VARCHAR(15),
+
+         remote VARCHAR(15),
+         remoteid INT UNSIGNED, # remote user's userid
          remotecaps INT UNSIGNED,
+
          journalid INT UNSIGNED, # userid of what's being looked at
          journaltype CHAR(1),   # journalid's journaltype
-         remoteid INT UNSIGNED, # remote user's userid
+
          codepath VARCHAR(80),  # protocol.getevents / s[12].friends / bml.update / bml.friends.index
          langpref VARCHAR(5),
          method VARCHAR(10) NOT NULL,
@@ -168,6 +170,7 @@ sub log {
          clientver VARCHAR(100)
          );
     };
+    $create_sql =~ s/\#.+//g;
 
     $dbl->do("CREATE TABLE IF NOT EXISTS $table_name $create_sql") or return;
 
@@ -259,7 +262,6 @@ sub as_bullets {
 # override this
 sub as_string {
     my $self = shift;
-
     # FIXME: show line/file/function, show some fields?  maybe?  that are simple values?
 }
 
@@ -267,6 +269,7 @@ sub as_string {
 package LJ::Error::DieString;
 sub fields { qw(message) }
 sub die_string { return $_[0]->field('message'); }
+sub as_string { return $_[0]->field('message'); }
 
 # automatic type returned when something dies with a reference, but not
 # an LJ::Error
@@ -280,6 +283,14 @@ sub fields { qw(errors); }  # arrayref of errors
 sub as_bullets {
     my $self = shift;
     return join('', map { $_->as_bullets } @{ $self->{errors} });
+}
+
+sub log {
+    my $self = shift;
+    return if $self->{_logged}++;
+    foreach my $suberr (@{ $self->{errors} }) {
+        $suberr->log;
+    }
 }
 
 package LJ::Error::WithSubError;

@@ -244,16 +244,10 @@ sub bad_input
     my @errors = @_;
     my $ret = "";
     $ret .= "<?badcontent?>\n<ul>\n";
-    # separate out system errors and user errors...
-    # make strings into LJ::Error::StringError
-    foreach my $err (@errors) {
-        my $ref = ref $err;
-        if ($ref && $ref =~ /^LJ::Error/) {
-            $err->log;
-            $ret .= $err->as_bullets;
-        } else {
-            $ret .= "<li>$err</li>\n";
-        }
+    foreach my $ei (@errors) {
+        my $err  = LJ::errobj($ei) or next;
+        $err->log;
+        $ret .= $err->as_bullets;
     }
     $ret .= "</ul>\n";
     return $ret;
@@ -277,14 +271,10 @@ sub error_list
     $ret .= BML::ml('error.procrequest');
     $ret .= "</strong><ul>";
 
-    foreach my $err (@errors) {
-        my $ref = ref $err;
-        if ($ref && $ref =~ /^LJ::Error/) {
-            $err->log;
-            $ret .= $err->as_bullets;
-        } else {
-            $ret .= "<li>$err</li>\n";
-        }
+    foreach my $ei (@errors) {
+        my $err  = LJ::errobj($ei) or next;
+        $err->log;
+        $ret .= $err->as_bullets;
     }
     $ret .= " </ul> errorbar?>";
     return $ret;

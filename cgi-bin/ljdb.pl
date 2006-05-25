@@ -539,6 +539,8 @@ sub as_string {
 package LJ::Error::Database::Failure;
 sub fields { qw(db) }
 
+sub user_caused { 0 }
+
 sub as_string {
     my $self = shift;
     my $code = $self->err;

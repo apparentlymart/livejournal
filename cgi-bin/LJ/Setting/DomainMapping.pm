@@ -23,6 +23,8 @@ sub save {
         return;
     }
 
+    $class->errors(domainname => "Bogus domain name") if $domainname =~ /\s+/;
+
     # Blank domain = delete mapping
     if ($domainname eq "") {
         $dbh->do("DELETE FROM domains WHERE userid=?", undef, $u->{userid});
@@ -46,7 +48,7 @@ sub save {
         }
     # Otherwise do nothing.
     } else {
-        $class->errors(domainname => "Your current account settings do not allow you to modify your domain mapping.");
+        $class->errors(access => "Your current account settings do not allow you to modify your domain mapping.");
     }
 }
 
@@ -68,6 +70,7 @@ sub as_html {
 
     $ret .= "<br />Clear the box to remove your domain mapping." if $has_dom;
     $ret .= $class->errdiv($errs, "domainname");
+    $ret .= $class->errdiv($errs, "access");
 
     $ret = "The domain mapping feature is not available for this site." unless $LJ::OTHER_VHOSTS;
     return $ret;

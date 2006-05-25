@@ -25,13 +25,18 @@ BML::register_hook("startup", sub {
 BML::register_hook("codeerror", sub {
     my $msg = shift;
 
-    # we currently assume that "can't call method..." means 
+    my $err = LJ::errobj($msg)       or return;
+    $err->log;
+
+    $msg = $err->as_html;
+
+    # we currently assume that "can't call method..." means
     # a code block tried to do a $dbh->method call, which is
     # often but not always the case.
     #
     # allow overriding of this behavior by appending the
     # show_raw_error=1 get arg to the URI
-    if ($msg =~ /Can\'t call method.*on an undefined value/) {
+    if ($msg =~ /Can\'t call method.*on an undefined value/ && ! $LJ::IS_DEV_SERVER) {
         my $r = Apache->request;
         unless ($r && $r->args("show_raw_error")) {
             return $LJ::MSG_DB_UNAVAILABLE ||
@@ -43,7 +48,7 @@ BML::register_hook("codeerror", sub {
     $msg .= " \@ $LJ::SERVER_NAME" if $LJ::SERVER_NAME;
     warn "$msg\n";
     return "<b>[Error: $msg]</b>";
-}) unless $LJ::IS_DEV_SERVER;
+});
 
 if ($LJ::UNICODE) {
     BML::set_config("DefaultContentType", "text/html; charset=utf-8");
