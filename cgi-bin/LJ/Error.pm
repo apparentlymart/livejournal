@@ -237,7 +237,7 @@ sub log_error {
         $ins->();
     }
 
-    $dbl->disconnect if $LJ::DISCONNECT_DB_LOG;
+    $dbl->disconnect if $LJ::DISCONNECT_DB_LOG && LJ::use_diff_db("master", "logs");
 }
 
 # override this: whether it was user-defined.  should return 0 or 1.
