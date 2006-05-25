@@ -164,7 +164,7 @@ sub log_error {
          args VARCHAR(255),
          ref VARCHAR(255),
          browser VARCHAR(100),
-         clientver VARCHAR(100),
+         clientver VARCHAR(100)
          );
     };
 
