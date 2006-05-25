@@ -13,9 +13,6 @@ _code?>
 
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
-    my $r = Apache->request;
-    $r->notes("codepath" => "bml.editinfo");
-
     my $remote = LJ::get_remote();
     return LJ::bad_input("You must be logged in to edit your profile.")
         unless $remote;
