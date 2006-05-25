@@ -112,7 +112,7 @@ sub throw {
 
     if (@_ == 1) {
         my $self = shift;
-        LJ::Error->log_error($self) if $LJ::LOG_ERRORS;
+        $self->log;
         die $self;
     }
 
@@ -130,10 +130,11 @@ sub cond_throw {
     return defined $ret_value ? $ret_value : undef;
 }
 
-# log error to database
-# don't override
-sub log_error {
-    my ($class, $err) = @_;
+# log error to database; don't override
+sub log {
+    my $err = shift;
+    return unless $LJ::LOG_ERRORS;
+    return if $err->{_logged}++;
 
     my $dbl = LJ::get_dbh("logs") or return;
 

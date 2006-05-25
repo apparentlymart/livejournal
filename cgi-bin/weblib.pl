@@ -249,6 +249,7 @@ sub bad_input
     foreach my $err (@errors) {
         my $ref = ref $err;
         if ($ref && $ref =~ /^LJ::Error/) {
+            $err->log;
             $ret .= $err->as_bullets;
         } else {
             $ret .= "<li>$err</li>\n";
@@ -279,6 +280,7 @@ sub error_list
     foreach my $err (@errors) {
         my $ref = ref $err;
         if ($ref && $ref =~ /^LJ::Error/) {
+            $err->log;
             $ret .= $err->as_bullets;
         } else {
             $ret .= "<li>$err</li>\n";
