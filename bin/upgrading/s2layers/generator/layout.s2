@@ -590,7 +590,7 @@ foreach var int i (0 .. ((size $labels) - 1)) {
     $url   = $urls[$i];
     $value = $values[$i];
 
-    if ($label != "") {
+    if ($label != "" and $url != "") {
 """
 <tr>
 <td class="meta">$*text_navlinks_left</td>
