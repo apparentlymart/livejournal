@@ -441,7 +441,7 @@ body<=
             $langcode = 'custom';
         }
 
-        $ret .= "<?p This setting only affects layout provided text. Your entries will not be automatically translated. p?>";
+        $ret .= "<?p The language setting only affects layout-provided text. Your entries will not be automatically translated. p?>";
         $ret .= "<div style='margin-left: 30px; margin-bottom: 20px;'>";
         $ret .= LJ::html_select({ 'id' => "s2_langcode", 'name' => 's2_langcode', 'selected' => $langcode, },
                                 0 => $ML{'.s2.customize.language.default'}, @langs);

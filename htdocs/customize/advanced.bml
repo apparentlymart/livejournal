@@ -50,17 +50,17 @@ body<=
         $ret .= "<li><a href='$LJ::SITEROOT/customize/advanced/layerbrowse.bml'>$ML{'.publiclayers.link'}</a> -- $ML{'.publiclayers.desc'}</li></ul>";
 
         $ret .= "<?h1 $ML{'.advancedoptions.header'} h1?>";
-        $ret .= "<ul><li><a href='$LJ::SITEROOT/customize/advanced/layers.bml'>$ML{'.yourlayers.link'}</a> -- $ML{'.yourlayers.desc'}</li>";
-        $ret .= "<li><a href='$LJ::SITEROOT/customize/advanced/styles.bml'>$ML{'.yourstyles.link'}</a> -- $ML{'.yourstyles.desc'}</li></ul>";
+        $ret .= "<ul><li><a href='$LJ::SITEROOT/customize/advanced/layers.bml$getextra'>$ML{'.yourlayers.link'}</a> -- $ML{'.yourlayers.desc'}</li>";
+        $ret .= "<li><a href='$LJ::SITEROOT/customize/advanced/styles.bml$getextra'>$ML{'.yourstyles.link'}</a> -- $ML{'.yourstyles.desc'}</li></ul>";
     } else {
         BML::set_language_scope("/styles/index.bml");
         $ret .= "<?p $ML{'.about2'} p?>";
         $ret .= "<?h1 Quick Links h1?>";
         $ret .= "<dl><dt><a href='/developer/embedding.bml'>$ML{'.nav.embedding'}</a></dt>";
         $ret .= "<dd>$ML{'.nav.embedding.about'}</dd>";
-        $ret .= "<dt><a href='/styles/create.bml'>$ML{'.nav.create'}</a></dt>";
+        $ret .= "<dt><a href='/styles/create.bml$getextra'>$ML{'.nav.create'}</a></dt>";
         $ret .= "<dd>$ML{'.nav.create.about'}</dd>";
-        $ret .= "<dt><a href='/styles/edit.bml'>$ML{'.nav.edit'}</a></dt>";
+        $ret .= "<dt><a href='/styles/edit.bml$getextra'>$ML{'.nav.edit'}</a></dt>";
         $ret .= "<dd>$ML{'.nav.edit.about'}</dd>";
         $ret .= "<dt><a href='/styles/browse/'>$ML{'.nav.browse'}</a></dt>";
         $ret .= "<dd>$ML{'.nav.browse.about'}</dd>";
