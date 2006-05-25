@@ -3769,8 +3769,8 @@ sub create_account
     # new non-clustered accounts aren't supported anymore
     return 0 unless $cluster;
 
-    $dbh->do("INSERT INTO user (user, name, password, clusterid, dversion, caps, email, journaltype) ".
-             "VALUES ($quser, ?, ?, ?, $LJ::MAX_DVERSION, ?, ?, ?)", undef,
+    $dbh->do("INSERT INTO user (user, name, password, clusterid, dversion, caps, email, journaltype, opt_mangleemail) ".
+             "VALUES ($quser, ?, ?, ?, $LJ::MAX_DVERSION, ?, ?, ?, 'Y')", undef,
              $o->{'name'}, $o->{'password'}, $cluster, $caps, $o->{'email'}, $journaltype);
     return 0 if $dbh->err;
 
