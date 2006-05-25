@@ -22,10 +22,17 @@ body<=
 _code?>
 
 <?h1 Search Directory h1?>
-<?p
-Advanced search is a feature available to users with paid accounts. If you'd like more information about upgrading to a paid account, visit our <a href='/paidaccounts/'>About Paid Accounts</a> page.
-p?>
 
+<?_code
+    my $remote = LJ::get_remote();
+
+if (!$remote) {
+    return BML::ml('.error.notloggedin', { aopts => "href='$LJ::SITEROOT/login.bml'" });
+}
+
+return LJ::CProd->inline($remote, 'inline' => 'Directory');
+
+_code?>
 <?p Use this directory to search for LiveJournal users. If you fill in more than one blank, the directory will display results that match all your criteria. (i.e user lives in &ldquo;San Francisco&rdquo; AND lists &ldquo;music&rdquo; as an interest.). Check out our <a href="/community/search.bml">community search</a> page to find new and interesting communities. p?>
 
 <center>

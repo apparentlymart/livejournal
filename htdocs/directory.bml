@@ -141,12 +141,11 @@ body<=
 
  my $remote = LJ::get_remote();
 
- unless (LJ::check_priv($remote, "betatest", "directory") ||
-         LJ::get_cap($remote, "directory") ||
-         (@filters == 1 && $filters[0] eq "int" && $GET{'opt_format'} eq "simple"))
- {
-     return BML::ml('.error.accounttype2', {'aopts' => "href='$LJ::SITEROOT/login.bml?ret=1'"});
- }
+if (!$remote) {
+    return BML::ml('.error.notloggedin', { aopts => "href='$LJ::SITEROOT/login.bml'" });
+}
+
+return LJ::CProd->inline($remote, inline => 'Directory');
 
  unless (LJ::Dir::do_search($dbr, $dbdir, \%FORM, \@matches, \%info)) {
      return "<?h1 $ML{'Error'} h1?><?p $ML{'Error'}: $info{'errmsg'} p?>";
