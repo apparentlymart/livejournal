@@ -322,8 +322,8 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
      {
          my $caps   = int($LJ::NEWUSER_CAPS);
          my $status = ($LJ::EVERYONE_VALID ? 'A'  : 'N');
-         $dbh->do("INSERT INTO user (user, email, password, status, caps, name, clusterid, dversion, opt_mangleemail) ".
-                  "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Y')",
+         $dbh->do("INSERT INTO user (user, email, password, status, caps, name, clusterid, dversion) ".
+                  "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                   undef, $user, $email, $POST{'password1'}, $status, $caps,
                   $user, $clusterid, $LJ::MAX_DVERSION);
          if ($dbh->err) {

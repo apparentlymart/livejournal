@@ -105,8 +105,8 @@ SUBMIT:
         my $userid = ref $u ? $u->{userid} : 0;
         unless ($second_submit) {
             my $dbh = LJ::get_db_writer();
-            $dbh->do("INSERT INTO user (user, email, status, caps, name, clusterid, dversion, journaltype, opt_mangleemail) ".
-                     "VALUES (?, ?, ?, ?, ?, ?, $LJ::MAX_DVERSION, 'C', 'Y')",
+            $dbh->do("INSERT INTO user (user, email, status, caps, name, clusterid, dversion, journaltype) ".
+                     "VALUES (?, ?, ?, ?, ?, ?, $LJ::MAX_DVERSION, 'C')",
                      undef, $user, $remote->{email}, $remote->{status}, int($LJ::NEWUSER_CAPS), $title, $qclusterid);
             if ($dbh->err) {
                 return "<?h1 $ML{'Error'} h1?><?p $ML{'error.procrequest'} <b>" . $dbh->errstr . "</b> p?>";
