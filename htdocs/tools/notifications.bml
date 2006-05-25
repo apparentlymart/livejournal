@@ -1,0 +1,220 @@
+<?page
+body<=
+<?_code
+{
+    use strict;
+    use vars qw($title $body $head %GET %POST);
+    use Class::Autouse qw (
+                           LJ::NotificationInbox
+                           LJ::Event
+                           );
+
+    $title = "Alerts Inbox";
+    $body = "";
+
+    my $remote = LJ::get_remote()
+        or return "<?needlogin?>";
+
+    LJ::need_res('js/core.js');
+    LJ::need_res('js/dom.js');
+    LJ::need_res('js/view.js');
+    LJ::need_res('js/devel.js');
+
+    LJ::need_res('js/esnmanager.js');
+    LJ::need_res('js/esn.js');
+
+    my $authas = $GET{'authas'} || $remote->{'user'};
+    my $u = LJ::get_authas_user($authas);
+    return LJ::bad_input("You could not be authenticated as the specified user.")
+        unless $u;
+
+    my $formauth = LJ::form_auth();
+
+    # print authas
+    my $authas = $GET{'authas'};
+    $body .= "<form action='$LJ::SITEROOT/tools/notifications.bml' method='GET'>";
+    $body .= LJ::make_authas_select($remote, { 'authas' => $authas });
+    $body .= $formauth;
+    $body .= "</form>";
+
+    # get the user's inbox
+    my $inbox = $u->NotificationInbox
+        or return LJ::error_list("Could not retrieve inbox for user $remote->{user}");
+
+    # get events sitting in inbox
+    my @notifications = $inbox->items;
+
+    if (LJ::did_post()) {
+        my $action = $POST{'EditNotificationsAction'};
+
+        if ($action) {
+            if ($action eq 'markAllRead') {
+                $_->mark_read foreach (@notifications);
+            } else {
+                # go through each item and see if it's checked
+                foreach my $item (@notifications) {
+                    my $qid = eval { $item->qid } or next;
+                    my $checked = $POST{"InboxItem_Check-$qid"};
+                    next unless $checked;
+
+                    if ($action eq 'markRead') {
+                        $item->mark_read;
+                    } elsif ($action eq 'markUnread') {
+                        $item->mark_unread;
+                    } elsif ($action eq 'delete') {
+                        $item->delete;
+                    }
+                }
+
+                # reload inbox after making changes
+                @notifications = $inbox->items;
+            }
+        } # else error?
+    }
+
+    # check all checkbox
+    my $checkall = LJ::html_check({
+        id      => "InboxItem_CheckAll",
+        onclick => "checkall('InboxItem_CheckAll');",
+    });
+
+    # print form
+    $body .= qq {
+        <form action="$LJ::SITEROOT/tools/notifications.bml?authas=$authas" method="POST" id="EditNotificationsForm">
+        };
+
+    # create table of notifications
+    my $notificationtable = qq {
+     <div id="NotificationTable">
+        <table style="width: 80%; margin-left: auto; margin-right: auto;">
+            <tr>
+                <thead>
+                    <td>$checkall</td>
+                    <td>What happened?</td>
+                </thead>
+            </tr>
+        };
+
+    unless (@notifications) {
+        $notificationtable .= qq {
+            <tr><td colspan="3">(No notifications)</td></tr>
+            };
+    }
+
+    # print out notifications
+    foreach my $inbox_item (@notifications) {
+        my $qid  = $inbox_item->qid;
+
+        my $read_class = $inbox_item->read ? "InboxItem_Read" : "InboxItem_Unread";
+        my $evt  = $inbox_item->event
+            or next;
+
+        my $evt_html  = eval { $evt->as_html } || $@;
+
+        my $checkbox_name = "InboxItem_Check-$qid";
+        my $checkbox = LJ::html_check({
+            id    => $checkbox_name,
+            class => "InboxItem_Check",
+            name  => $checkbox_name,
+        });
+
+        $notificationtable .= qq {
+            <tr>
+                <td>$checkbox</td>
+                <td><span class="$read_class">$evt_html</span></td>
+            </tr>
+        };
+    }
+
+    $notificationtable .= '</table></div>';
+
+
+    $body .= $notificationtable;
+
+    $body .= qq {
+        <input type="button" value="Mark Read" onclick="submitAction('markRead');" />
+            <input type="button" value="Mark All Read" onclick="submitAction('markAllRead');" />
+            <input type="button" value="Mark Unread" onclick="submitAction('markUnread');" />
+            <input type="button" value="Delete" onclick="submitAction('delete');" />
+        };
+
+    $body .= LJ::html_hidden({
+        name  => "EditNotificationsAction",
+        id    => "EditNotificationsAction",
+        value => "1",
+    });
+    $body .= '</form>';
+
+    return $body;
+}
+ _code?>
+<=body
+title=><?_code return $title; _code?>
+head<=
+
+<?_code return $head; _code?>
+
+<script>
+    var tableview = new View();
+
+DOM.addEventListener(window, "load", setup);
+
+function setup (e) {
+    tableview.init({ "view": $("NotificationTable") });
+}
+
+function submitAction(action) {
+    var actionField = $("EditNotificationsAction");
+
+if (!actionField)
+    return;
+
+actionField.value = action;
+$("EditNotificationsForm").submit();
+}
+
+function checkall(btn) {
+    if (!tableview)
+    return;
+
+var view = tableview.getView();
+if (!view)
+    return;
+
+var viewObjects = view.getElementsByTagName("*");
+var boxes = DOM.filterElementsByClassName(viewObjects, "InboxItem_Check") || [];
+
+var checkallBox = $(btn);
+if (!checkallBox)
+    return;
+
+for (var i = 0; i < boxes.length; i++) {
+    var box = boxes[i];
+
+    if (!box)
+        continue;
+
+box.checked = checkallBox.checked;
+}
+}
+
+</script>
+
+<style>
+    table {
+        background-color: #CCcccc;
+    }
+thead {
+    background-color: #EEEEEE;
+    font-weight: bold;
+}
+
+span.InboxItem_Unread {
+    font-weight: bold;
+}
+
+</style>
+
+<=head
+
+page?>
