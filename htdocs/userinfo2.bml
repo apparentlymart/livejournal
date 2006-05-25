@@ -133,6 +133,7 @@
 
  my $remote_isowner = $remote && $remote->{'user'} eq $u->{'user'};
  my $remote_isfriend = LJ::is_friend($u, $remote);
+ my $user_isfriend = LJ::is_friend($remote, $u);
  my $com = $u->{'journaltype'} eq "C" ? 1 : 0;
  my $extid = $u->{'journaltype'} eq "I" ? $u->identity : undef;
 
@@ -257,7 +258,7 @@
  $head .= ".label { white-space: nowrap }\n";
  $head .= ".ui_subhead {font-size: larger; font-weight: bold }\n";
  $head .= ".ui_minihead { white-space: nowrap }\n";
- $head .= ".incommon { line-height: 1em; background-color: #ddd; }\n";
+ $head .= ".incommon { font-weight: bold; }\n";
  $head .= "</style>\n";
 
  # Created a sorted array(@friends) and a hash(%fr) of friends
@@ -522,10 +523,16 @@
          $body .= "<span id='actionitem'><a href='$LJ::SITEROOT/editinfo.bml'><img src='$LJ::IMGPREFIX/editinfo.gif' /> Edit info</a></span>\n";
          $body .= "<span id='actionitem'><a href='$LJ::SITEROOT/update.bml'><img src='$LJ::IMGPREFIX/pencil.gif' /> Update journal</a></span>\n";
      } else {
-         $body .= "<span id='actionitem'><a href='$LJ::SITEROOT/friends/add.bml?user=$user'><img src='$LJ::IMGPREFIX/useradd.gif' /> Add as friend</a></span>\n";
+         $body .= "<span id='actionitem'><a href='$LJ::SITEROOT/friends/add.bml?user=$user'><img src='$LJ::IMGPREFIX/useradd.gif' /> ";
+         if ($user_isfriend) {
+             $body .= "Update friend";
+         } else {
+             $body .= "Add as friend";
+         }
+         $body .= "</a></span>\n";
      }
      $body .= "<span id='actionitem'><a href='$jbase/'><img src='$LJ::IMGPREFIX/journal.gif' /> View journal</a></span>\n";
-     $body .= "<span id='actionitem'><a href='http://pics.$LJ::DOMAIN/$user'><img src='$LJ::IMGPREFIX/scrapbook.gif' /> View Scrapbook</a></span>\n";
+     $body .= "<span id='actionitem'><a href='http://pics.$LJ::DOMAIN/$user'><img src='$LJ::IMGPREFIX/scrapbook.gif' /> View ScrapBook</a></span>\n";
      unless ($LJ::DISABLED{'nudge'} || $remote_isowner) {
          $body .= "<span id='actionitem'><a href='$LJ::SITEROOT/friends/nudge.bml?user=$u->{'user'}'><img src='$LJ::IMGPREFIX/nudge.gif' alt='Nudge a friend' title='Nudge a friend' border='0' /> Nudge a friend</a></span>\n";
      }
@@ -619,7 +626,7 @@
                   $estate = LJ::eurl($state);
                   $state = $LJ::DISABLED{'directory'} ? $state :
                       "<a href='$LJ::SITEROOT/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=".
-                          "$u->{'country'}&amp;loc_st=$estate'>$state</a>";
+                          "$u->{'country'}&amp;loc_st=$estate'>" . LJ::ehtml($state) . "</a>";
               }
 
               if ($u->{'city'}) {
@@ -710,7 +717,7 @@
 
  # Scrapbook
  $body .= "          <tr><td valign='top'><a href='http://pics.$LJ::DOMAIN/$user'><img src='$LJ::IMGPREFIX/scrapbook.gif' /></a> </td>";
- $body .= "          <td><a href='http://pics.$LJ::DOMAIN/$user'>View scrapbook</a></td></tr>\n";
+ $body .= "          <td><a href='http://pics.$LJ::DOMAIN/$user'>View ScrapBook</a></td></tr>\n";
 
  # memories
  unless ($extid) {
@@ -743,22 +750,7 @@
  # Left Column
  $body .= "  <tr><td style='padding-right: 2em; vertical-align: top'>\n";
 
- # Journal Info
- $body .= "<p><span class='ui_subhead'><img src='$LJ::IMGPREFIX/journal.gif' /> Journal</span></p>\n";
- if ($u->{'journaltitle'}) {
-     $body .= "<p><span style='font-size: 1em'><b>" . LJ::ehtml($u->{'journaltitle'}) . "</b>";
-     if ($u->{'journalsubtitle'}) {
-         $body .= "<br /><i>" . LJ::ehtml($u->{'journalsubtitle'}) . "</i>";
-     }
-     $body .= "</span></p>";
- }
- $body .= "<p style='font-size: smaller'>";
- $body .= "Last updated $lastupdated<br />" if $lastupdated;
- $body .= $journalentry_count->() . " entries and $num_com_got comments since creation";
- $body .= "</p>\n";
- # /Journal Info
-
- $body .= "&nbsp;<br />\n";
+ $body .= LJ::ads( type => 'journal', orient => 'App-Confirm', force => '0' );
 
  ## Friends, Communities and Feeds
 
@@ -769,11 +761,13 @@
      my $label = shift;
      my $hilite_common = shift || 1;
      $hilite_common = 0 if $remote_isowner;
+     my $dontfollow = shift;
 
      my $count = my $incommon = 0;
      my $userlist = "";
      foreach (@$users) {
-         my $ulink = "<a href='" . $_->profile_url() . "'>$_->{'user'}</a>";
+         my $nofollow = " rel='nofollow'" if ($dontfollow && !$remote_friendid{$_->{'userid'}});
+         my $ulink = "<a$nofollow href='" . $_->profile_url() . "'>$_->{'user'}</a>";
          if ( $hilite_common && $remote_friendid{$_->{'userid'}} ) {
              $ulink = "<span class='incommon'>$ulink</span>";
              $incommon++;
@@ -812,16 +806,16 @@
  unless ($synd) {
      if ($friendsof{'loaded'}) {
          my $label;
+         my $nofollow = 1;
          if ($u->{'opt_showmutualfriends'} && @mutual) {
              $mutualfriends = $displayusers->(\@mutual, "Mutually Friended");
          }
          if ($friendsof{'display'} && @friend_of) {
              my $label = $com ? $ML{'.friendof.comm'} :
-                      ($u->{'opt_showmutualfriends'} ? "Friended by" : $ML{'.friendof.user'});
-             if ($u->{'opt_hidefriendofs'}) {
-                 $label .= "<br />\n<i>$ML{'.friendof.hidden'}</i>";
+                      ($u->{'opt_showmutualfriends'} ? "Also Friend of" : $ML{'.friendof.user'});
+             unless ($u->{'opt_hidefriendofs'}) {
+                 $friendedby = $displayusers->(\@friend_of, $label, 1, $nofollow);
              }
-             $friendedby = $displayusers->(\@friend_of, $label);
          };
          if ($friendsof{'display'} && @member_of) {
              $member_of_comm = $displayusers->(\@member_of, $ML{'.label.memberof'});
@@ -908,6 +902,9 @@
  $body .= "&nbsp;<br />\n";
  ## /Friends, Communities and Feeds
 
+
+ # Set a minimum width of 300px
+ $body .= "  <div><div style='width: 300px; height: 1px'> &nbsp;</div></div>\n";
  $body .= "  </td>\n";
  # /Left Column
 
@@ -917,52 +914,33 @@
 
  # Right Column
  $body .= "  <td style='vertical-align: top'>\n";
+# $body .= "  <div style='width: 300px; height: 1px'> </div>\n";
+ my $hook_extra;
+ LJ::run_hooks("userinfo_html_by_journal", {
+     'u' => $u,
+     'ret' => \$hook_extra,
+ });
 
- # Interests
- if (@$intu) {
-     $body .= "<p><span class='ui_subhead'><img src='$LJ::IMGPREFIX/interests.gif' border='0' /> $ML{'.label.interests'}</span></p>\n";
-     my $intcount = 0;
-     my $countcommon = 0;
-     my $intlist = "";
-     foreach my $int (@$intu) {
-         next if $intcount++ > 150;
-         LJ::text_out(\$int->[1]); # 1==interest
-         my $eint = LJ::eurl($int->[1]);
-         if ($int->[2] > 1) {  # 2==intcount
-             if ($remote_interest{$int->[0]}) {  # 0==intid
-                 $intlist .= "<span class='incommon'><a href='$LJ::SITEROOT/interests.bml?int=$eint'>$int->[1]</a></span>, ";
-                 $countcommon++;
-             } else {
-                 $intlist .= "<a href='$LJ::SITEROOT/interests.bml?int=$eint'>$int->[1]</a>, ";
-             }
-         } else {
-             $intlist .= "$int->[1], ";
-         }
-     }
-     chop $intlist; chop $intlist;  # remove trailing ", "
-     if ($intcount > 150) {
-         my $notshown = $intcount - 150;
-         $intlist .= BML::ml('.label.intsnotshown',{'intnotshown'=>$notshown});
-     }
 
-     $body .= "<p>($intcount";
-     unless ($remote_isowner) {
-         $body .= $countcommon ? ", <span class='incommon'>$countcommon in common</span>" : ", $countcommon in common";
+ # Journal Info
+ $body .= "<div style='float: left;'>";
+ $body .= "<p><span class='ui_subhead'><img src='$LJ::IMGPREFIX/journal.gif' /> Journal</span></p>\n";
+ if ($u->{'journaltitle'}) {
+     $body .= "<p><span style='font-size: 1em'><b>" . LJ::ehtml($u->{'journaltitle'}) . "</b>";
+     if ($u->{'journalsubtitle'}) {
+         $body .= "<br /><i>" . LJ::ehtml($u->{'journalsubtitle'}) . "</i>";
      }
-     $body .= ")<br /> " . $intlist;
-     if ($remote) {
-         my $link = "$LJ::SITEROOT/interests.bml?mode=enmasse";
-         $link .= "&fromuser=$user" unless ($remote->{'userid'} == $userid);
-         $body .= ". <small>";
-         my $mlcode = ($remote->{'userid'} == $userid) ? '.label.interests.removesome'
-                                                       : '.label.interests.modifyyours';
-         $body .= BML::ml('Actionlink', { 'link' => "<a href='$link'>$ML{$mlcode}</a>" });
-         $body .= "</a></small>";
-     }
-     $body .= "</p>\n";
-     $body .= "&nbsp;<br />\n";
+     $body .= "</span></p>";
  }
- # /Interests
+ $body .= "<p style='font-size: smaller;'>";
+ $body .= "Last updated $lastupdated<br />" if $lastupdated;
+ $body .= $journalentry_count->() . " entries and $num_com_got comments since creation";
+ $body .= "</p>\n</div>";
+ # /Journal Info
+
+ $body .= $hook_extra;
+ $body .= "<div class='clear'> </div>\n";
+ $body .= "&nbsp;<br />\n";
 
 
  # Bio
@@ -982,14 +960,6 @@
  }
  # Bio
 
-
- # Schools
- if ($schoollist) {
-     $body .= "<p><span class='ui_subhead'><img src='$LJ::IMGPREFIX/schools.gif' border='0' /> $ML{'.label.schools'}</span></p>\n";
-     $body .= "<p>$schoollist</p>\n";
-     $body .= "&nbsp;<br />\n";
- }
- # /Schools
 
  # Contact Info
  if ($u->share_contactinfo($remote) || $viewall) {
@@ -1086,6 +1056,63 @@
       $body .= "</table></p>\n";
  }
  # Contact Info
+
+
+
+ # Schools
+ if ($schoollist) {
+     $body .= "<p><span class='ui_subhead'><img src='$LJ::IMGPREFIX/schools.gif' border='0' /> $ML{'.label.schools'}</span></p>\n";
+     $body .= "<p>$schoollist</p>\n";
+     $body .= "&nbsp;<br />\n";
+ }
+ # /Schools
+
+ # Interests
+ if (@$intu) {
+     $body .= "<p><span class='ui_subhead'><img src='$LJ::IMGPREFIX/interests.gif' border='0' /> $ML{'.label.interests'}</span></p>\n";
+     my $intcount = 0;
+     my $countcommon = 0;
+     my $intlist = "";
+     foreach my $int (@$intu) {
+         next if $intcount++ > 150;
+         LJ::text_out(\$int->[1]); # 1==interest
+         my $eint = LJ::eurl($int->[1]);
+         if ($int->[2] > 1) {  # 2==intcount
+             if ($remote_interest{$int->[0]}) {  # 0==intid
+                 $intlist .= "<span class='incommon'><a href='$LJ::SITEROOT/interests.bml?int=$eint'>$int->[1]</a></span>, ";
+                 $countcommon++;
+             } else {
+                 $intlist .= "<a href='$LJ::SITEROOT/interests.bml?int=$eint'>$int->[1]</a>, ";
+             }
+         } else {
+             $intlist .= "$int->[1], ";
+         }
+     }
+     chop $intlist; chop $intlist;  # remove trailing ", "
+     if ($intcount > 150) {
+         my $notshown = $intcount - 150;
+         $intlist .= BML::ml('.label.intsnotshown',{'intnotshown'=>$notshown});
+     }
+
+     $body .= "<p>($intcount";
+     unless ($remote_isowner) {
+         $body .= $countcommon ? ", <span class='incommon'>$countcommon in common</span>" : ", $countcommon in common";
+     }
+     $body .= ")<br /> " . $intlist;
+     if ($remote) {
+         my $link = "$LJ::SITEROOT/interests.bml?mode=enmasse";
+         $link .= "&fromuser=$user" unless ($remote->{'userid'} == $userid);
+         $body .= ". <small>";
+         my $mlcode = ($remote->{'userid'} == $userid) ? '.label.interests.removesome'
+                                                       : '.label.interests.modifyyours';
+         $body .= BML::ml('Actionlink', { 'link' => "<a href='$link'>$ML{$mlcode}</a>" });
+         $body .= "</a></small>";
+     }
+     $body .= "</p>\n";
+     $body .= "&nbsp;<br />\n";
+ }
+ # /Interests
+
 
  $body .= "  </td></tr>\n";
  # /Right Column
