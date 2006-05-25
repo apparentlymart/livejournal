@@ -11,7 +11,7 @@ our $_box_name = "Quick Links";
 # list of links to choose from
 our $_prop_keys = {
     'EditFriends' => 1,
-    'EditInfo' => 2,
+    'EditProfile' => 2,
     'EditPics' => 3,
     'ManageCom' => 4,
     'ManageMood' => 5,
@@ -41,7 +41,7 @@ our $_prop_keys = {
 # Prop => [URL, Text, Default] mapping
 our $linkinfo = {
     'EditFriends'    => [ '/friends/edit.bml', 'Edit Friends', 1 ],
-    'EditInfo'       => [ "/editinfo.bml", 'Edit Personal Information', 1 ],
+    'EditProfile'       => [ "/manage/profile/", 'Edit Profile', 1 ],
     'EditPics'       => [ '/editpics.bml', 'Upload and Manage Your Userpics', 1 ],
     'ManageCom'      => [ '/community/manage.bml', 'Manage Communities', 1 ],
     'ManageMood'     => [ '/modify.bml', 'Set Your Mood Theme', 1 ],

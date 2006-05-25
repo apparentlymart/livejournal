@@ -1806,7 +1806,7 @@ sub format_text_mail {
 
     my $footer = "";
     $footer .= "-- $LJ::SITENAME\n\n";
-    $footer .= "(If you'd prefer to not get these updates, go to $LJ::SITEROOT/editinfo.bml and turn off the relevant options.)";
+    $footer .= "(If you'd prefer to not get these updates, go to $LJ::SITEROOT/manage/comments/ and turn off the relevant options.)";
     return Text::Wrap::wrap("", "", $text) . "\n" . $opts . "\n" . Text::Wrap::wrap("", "", $footer);
 }
 
@@ -1947,7 +1947,7 @@ sub format_html_mail {
         $html .= "<br /><input type='submit' value=\"Post Reply\" />";
         $html .= "</form></blockquote>\n";
     }
-    $html .= "<p><font size='-1'>(If you'd prefer to not get these updates, go to <a href=\"$LJ::SITEROOT/editinfo.bml\">your user profile page</a> and turn off the relevant options.)</font></p>\n";
+    $html .= "<p><font size='-1'>(If you'd prefer to not get these updates, go to the <a href=\"$LJ::SITEROOT/manage/comments/\">Comment Settings</a> page and turn off the relevant options.)</font></p>\n";
     $html .= "</body>\n";
 
     return $html;

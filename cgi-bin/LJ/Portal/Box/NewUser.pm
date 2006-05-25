@@ -23,7 +23,7 @@ sub generate_content {
                 <td style="width: 50%;">
                     1) <a href="$LJ::SITEROOT/update.bml">Write</a> a journal entry<br />
                     2) <a href="$LJ::SITEROOT/editpics.bml">Upload</a> userpics<br />
-                    3) <a href="$LJ::SITEROOT/editinfo.bml">Fill out</a> your <a href="$profile_url">userinfo</a> page<br />
+                    3) <a href="$LJ::SITEROOT/manage/profile/">Fill out</a> your <a href="$profile_url">profile</a><br />
                 </td>
                 <td style="width: 50%;">
                      4) <a href="$LJ::SITEROOT/customize/">Customize</a> the look of your journal<br />

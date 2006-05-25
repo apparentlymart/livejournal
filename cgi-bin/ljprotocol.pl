@@ -2429,7 +2429,7 @@ sub hash_menus
                 { 'text' => "-", },
                 { 'text' => "Change Settings",
                   'sub' => [ { 'text' => "Personal Info",
-                               'url' => "$LJ::SITEROOT/editinfo.bml", },
+                               'url' => "$LJ::SITEROOT/manage/profile/", },
                              { 'text' => "Journal Settings",
                                'url' =>"$LJ::SITEROOT/modify.bml", }, ] },
                 { 'text' => "-", },
