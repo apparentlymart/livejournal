@@ -158,18 +158,13 @@ sub log_error {
          journaltype CHAR(1),   # journalid's journaltype
          remoteid INT UNSIGNED, # remote user's userid
          codepath VARCHAR(80),  # protocol.getevents / s[12].friends / bml.update / bml.friends.index
-         anonsess INT UNSIGNED,
          langpref VARCHAR(5),
-         uniq VARCHAR(15),
          method VARCHAR(10) NOT NULL,
          uri VARCHAR(255) NOT NULL,
          args VARCHAR(255),
-         status SMALLINT UNSIGNED NOT NULL,
-         ctype VARCHAR(30),
-         bytes MEDIUMINT UNSIGNED NOT NULL,
+         ref VARCHAR(255),
          browser VARCHAR(100),
          clientver VARCHAR(100),
-         secs TINYINT UNSIGNED
          );
     };
 
