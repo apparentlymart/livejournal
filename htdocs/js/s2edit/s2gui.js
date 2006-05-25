@@ -284,12 +284,10 @@ var s2refBaseValue = 0;
 
 function selectEnabled(which)
 {
-	if (event) {
-		var main   = document.getElementById("main");
-		var output = document.getElementById("out");
-		var callback = function () { event.cancelBubble = true; return which; };
-		main.onselectstart = output.onselectstart = callback;
-	}
+	var main   = document.getElementById("main");
+	var output = document.getElementById("out");
+	var callback = function () { event.cancelBubble = true; return which; };
+	main.onselectstart = output.onselectstart = callback;
 }
 
 function s2resizeOutput(force)
