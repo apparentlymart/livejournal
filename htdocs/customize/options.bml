@@ -221,6 +221,7 @@ body<=
                 my $error = LJ::last_error();
                 $err_msg = "Error saving layer";
             }
+            LJ::S2::load_layers($layerid);
         }
         LJ::cmize::js_redirect(\%POST);
         # Reload the user object to get the latest values
