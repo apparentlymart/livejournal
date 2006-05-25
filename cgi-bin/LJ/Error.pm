@@ -149,6 +149,7 @@ sub log_error {
          INDEX(whn),
          description VARCHAR(255),
          errclass VARCHAR(255),
+         usercaused TINYINT,
          server VARCHAR(30),
          addr VARCHAR(15) NOT NULL,
          ljuser VARCHAR(15),
@@ -181,6 +182,7 @@ sub log_error {
                   'description' => $err->as_string || $err->as_html,
                   'errclass'    => ref $err,
                   'server'      => $LJ::SERVER_NAME,
+                  'usercaused'  => $err->user_caused, # 0, 1 or NULL
                   );
 
     if (my $r = eval {Apache->request}) {
