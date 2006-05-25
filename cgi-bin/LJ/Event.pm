@@ -10,6 +10,7 @@ use Class::Autouse qw(
                       LJ::Event::JournalNewComment
                       LJ::Event::UserNewComment
                       LJ::Event::Befriended
+                      LJ::Event::CommunityInvite
                       );
 
 # Guide to subclasses:
@@ -23,12 +24,8 @@ use Class::Autouse qw(
 #                                  ($u,$journalid,$jtalkid)
 #    LJ::Event::Befriended        -- user $fromuserid added $u as a friend
 #                                  ($u,$fromuserid)
-
-# make sure all the config'd classes are mapped
-if (@LJ::EVENT_TYPES) {
-    my $tm = __PACKAGE__->typemap or die "Could not make typemap.";
-    $tm->map_classes(@LJ::EVENT_TYPES);
-}
+#    LJ::Event::CommunityInvite   -- user $fromuserid invited $u to join $commid community)
+#                                  ($u,$fromuserid, $commid)
 
 sub new {
     my ($class, $u, @args) = @_;
