@@ -44,6 +44,16 @@ sub owner { $_[0]->{u} }
 # returns this item's id in the notification queue
 sub qid { $_[0]->{qid} }
 
+# returns true if this item really exists
+sub valid {
+    my $self = shift;
+
+    return undef unless $self->u && $self->qid;
+    $self->_load unless $self->{_loaded};
+
+    return $self->event;
+}
+
 # returns the event that this item refers to
 sub event {
     my $self = shift;
@@ -109,7 +119,9 @@ sub delete {
     my $inbox = $self->owner->NotificationInbox;
 
     # delete from the inbox so the inbox stays in sync
-    return $inbox->delete_from_queue($self);
+    my $ret = $inbox->delete_from_queue($self);
+    %$self = ();
+    return $ret;
 }
 
 # mark this item as read
