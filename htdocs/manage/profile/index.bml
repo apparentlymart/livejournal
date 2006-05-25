@@ -697,11 +697,15 @@ _code?>
         my $base = $u->journal_base;
         my $profile_url = $u->profile_url;
         return "<?h1 $ML{'.success.header'} h1?>\n" .
-               "<?p <table width='100%'>\n<tr valign='top'>\n<td>" .
-               "$ML{'.success.text'}</td>".
-               "<td style='padding-left: 2em'>" .
+               "<table width='100%'>\n<tr valign='top'>\n<td>" .
+               "<?p $ML{'.success.text'} p?>" .
+               "<?p $ML{'.success.gonext'} p?>" .
+               "<ul><li><a href='$profile_url'>$ML{'.success.viewprofile'}</a></li>" . 
+               "<li><a href='$LJ::SITEROOT/manage/profile'>$ML{'.success.editprofile'}</a></li>" .
+               "<li><a href='$LJ::SITEROOT/editpics.bml'>$ML{'.success.editpics'}</a></li></ul>" .
+               "</td><td style='padding-left: 2em'>" .
                LJ::CProd->full_box_for($u, width => 300) .
-               "</td></tr></table> p?>";
+               "</td></tr></table>";
     }
 
     # should never happen

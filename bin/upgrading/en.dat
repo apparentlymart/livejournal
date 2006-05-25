@@ -3690,6 +3690,14 @@ Regards,
 
 /manage/profile/index.bml.success.text=Your profile has been updated.
 
+/manage/profile/index.bml.success.gonext=What would you like to do next?
+
+/manage/profile/index.bml.success.viewprofile=View your profile
+
+/manage/profile/index.bml.success.editprofile=Edit your profile
+
+/manage/profile/index.bml.success.editpics=Manage your userpics
+
 /manage/profile/index.bml.timezone.select=(Select your timezone)
 
 /manage/profile/index.bml.title=Edit Profile
