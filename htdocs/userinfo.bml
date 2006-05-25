@@ -561,7 +561,7 @@ if ($u->{'journaltitle'}) {
           my $mret = "<table cellpadding='0' cellspacing='0'><tr><td>";
           for (my $i = 0; $i < length($email); $i++) {
               my $letter = substr($email, $i, 1);
-              if ($letter eq "\@") { $letter = "</td><td align='center'><i>\@</i></td><td>"; }
+              if ($letter eq "\@") { $letter = "</td><td align='center'><i>&#64;</i></td><td>"; }
               $mret .= $letter;
           }
           $mret .= "</td></tr></table>";
