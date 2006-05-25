@@ -1979,6 +1979,10 @@ sub load_userids_multiple
         $u = _set_u_req_cache($u);
 
         foreach (@{$need{$u->{'userid'}}}) {
+            # check if existing target is defined and not what we already have.
+            if (my $eu = $$_) {
+                LJ::assert_is($u->{userid}, $eu->{userid});
+            }
             $$_ = $u;
         }
 

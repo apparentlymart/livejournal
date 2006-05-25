@@ -44,5 +44,10 @@ ok($u->selfassert);
     like($@, qr/AssertIs/);
 }
 
+my $empty;
+LJ::load_userids_multiple([ $u->{userid} => \$empty ]);
+ok($empty == $u, "load multiple worked");
 
-
+my $bogus = { userid => $u->{userid} + 1 };
+ok(! eval { LJ::load_userids_multiple([ $u->{userid} => \$bogus ]) });
+like($@, qr/AssertIs/, "failed on blowing away existing user record");
