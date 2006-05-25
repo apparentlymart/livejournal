@@ -2738,7 +2738,10 @@ sub get_useragent {
 sub assert_is {
     my ($va, $ve) = @_;
     return 1 if $va eq $ve;
-    die "Assertion failure at " . join(', ', (caller())[0..2]) . ": expected=$ve, actual=$va\n";
+    LJ::errobj("AssertIs",
+               expected => $ve,
+               actual => $va,
+               caller => [caller()])->throw;
 }
 
 use vars qw($AUTOLOAD);
@@ -2775,6 +2778,18 @@ sub AUTOLOAD {
 
 package LJ::Error::InvalidParameters;
 sub opt_fields { qw(params) }
-sub user_caused { 0; }
+sub user_caused { 0 }
+
+package LJ::Error::AssertIs;
+sub fields { qw(expected actual caller) }
+sub user_caused { 0 }
+
+sub as_string {
+    my $self = shift;
+    my $caller = $self->field('caller');
+    my $ve = $self->field('expected');
+    my $va = $self->field('actual');
+    return "Assertion failure at " . join(', ', (@$caller)[0..2]) . ": expected=$ve, actual=$va";
+}
 
 1;

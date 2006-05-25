@@ -25,7 +25,7 @@ ok($u->selfassert);
     eval {
         my $u2 = LJ::require_master(sub { LJ::load_userid($u->{userid}) });
     };
-    like($@, qr/Assertion failure/);
+    like($@, qr/AssertIs/);
 }
 
 {
@@ -33,7 +33,7 @@ ok($u->selfassert);
     eval {
         my $u2 = LJ::load_userid($u->{userid});
     };
-    like($@, qr/Assertion failure/);
+    like($@, qr/AssertIs/);
 }
 
 {
@@ -41,7 +41,7 @@ ok($u->selfassert);
     eval {
         my $u2 = LJ::load_user("system");
     };
-    like($@, qr/Assertion failure/);
+    like($@, qr/AssertIs/);
 }
 
 
