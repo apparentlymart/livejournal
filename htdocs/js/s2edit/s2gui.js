@@ -282,6 +282,16 @@ var s2refDragMouseOrigin;
 var s2refDragBoxOrigin = 0;
 var s2refBaseValue = 0;
 
+function selectEnabled(which)
+{
+	if (event) {
+		var main   = document.getElementById("main");
+		var output = document.getElementById("out");
+		var callback = function () { event.cancelBubble = true; return which; };
+		main.onselectstart = output.onselectstart = callback;
+	}
+}
+
 function s2resizeOutput(force)
 {
 	if (s2outputBaseValue == 0)
@@ -289,6 +299,8 @@ function s2resizeOutput(force)
 	
 	var output = xGetElementById('out');
 	var maindiv = xGetElementById('maindiv');
+	var maindiv = xGetElementById('maindiv');
+	var main    = xGetElementById('main');
 	var divider = xGetElementById('outputdivider');
 	
 	var oHeight = s2outputBaseValue;
@@ -309,6 +321,13 @@ function s2resizeOutput(force)
 	else {
 		maindiv.style.bottom = mBottom + 'px';
 		divider.style.bottom = (50 + oHeight) + 'px';
+
+		// Opera 8 has a strange quirk where it doesn't recalculate the computed
+		// height of a box until the width changes, so we just play about with
+		// the text field here to force this recalculation.
+		var oldwidth = main.style.width;
+		main.style.width = "50px";
+		main.style.width = oldwidth;
 	}
 }
 
@@ -375,7 +394,7 @@ function s2processDrag(e)
 			s2outputDragMouseOrigin) + 9;
 		s2resizeOutput(false);
 	} else if (s2isDraggingRef == 1) {
-		s2refBaseValue = s2refDragBoxOrigin + (e.clientX - s2refDragMouseOrigin) + 9;
+		s2refBaseValue = s2refDragBoxOrigin + (e.clientX - s2refDragMouseOrigin) - 5;
 		s2resizeReference(false);
 	}
 }
@@ -387,6 +406,7 @@ function s2startDrag(e)
 	s2isDraggingOutput = 1;
 	s2outputDragMouseOrigin = e.clientY;
 	s2outputDragBoxOrigin = output.clientHeight;
+	selectEnabled(false);
 	
 	return true;
 }
@@ -398,6 +418,7 @@ function s2startDragRef(e)
 	s2isDraggingRef = 1;
 	s2refDragMouseOrigin = e.clientX;
 	s2refDragBoxOrigin = ref.clientWidth;
+	selectEnabled(false);
 	
 	return true;
 }
@@ -410,6 +431,7 @@ function s2endDrag(e)
 		
 		xSetCookie('s2editprefs', (new Array(s2outputBaseValue, s2refBaseValue).join()), new Date((new Date()).getTime() + 1000*60*60*24*365*5));
 	}
+	selectEnabled(true);
 
 	return true;
 }

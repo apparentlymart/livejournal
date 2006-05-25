@@ -19,6 +19,9 @@ function s2init()
 	s2initSense();
 	s2buildReference();
 	s2initDrag();
+
+	// Disable selection in the document (IE only - prevents wacky dragging bugs)
+	document.onselectstart = function () { return false; };
 }
 
 function s2initIndex()

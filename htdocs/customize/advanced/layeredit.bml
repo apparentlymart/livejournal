@@ -213,7 +213,7 @@ $includes
 
     <div class="main" id="maindiv">
         <div class="maincontainer">
-        <textarea id="main" class="maintext" name="s2code" onKeyPress="s2keyPressed(event)"
+        <textarea id="main" class="maintext" name="s2code" onKeyPress="s2keyPressed(event)" wrap="off"
                   onKeyDown="s2IETabKeyPressedHandler(event)">@{[ LJ::ehtml($s2code) ]}</textarea>
         </div>
     </div>

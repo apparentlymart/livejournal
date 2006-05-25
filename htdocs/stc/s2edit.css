@@ -60,10 +60,7 @@ div.reference {
 	border-top: solid #808080 1px;
 	border-right: solid #808080 1px;
 	border-left: solid #808080 1px;
-	overflow: scroll;
-	overflow-x: none;
-	overflow-y: scroll;
-	overflow: -moz-scrollbars-vertical;
+	overflow: auto;
 }
 
 div.tabs {
@@ -127,15 +124,14 @@ div.main {
 textarea.maintext {
 	position: absolute;
 	border: solid #808080 1px;
-	font-family: Monaco, Courier New, Courier, monospace;
+	font-family: monospace;
 	font-size: 8pt;
 	bottom: 0px;
 	right: 0px;
 	top: 0px;
 	left: 0px;
 	height: 100%;
-	width: auto;
-	padding: 0px 6px 0px 6px;
+	width: 100%;
 }
 
 div.output {
@@ -274,3 +270,7 @@ a:hover {
 .refinvisible {
 	display: none;
 }
+.refvisible {
+	white-space: nowrap;
+}
+
