@@ -503,10 +503,10 @@ _code?>
         # text messaging
         if ($POST{'txtmsg_security'} =~ m/^(all|reg|friends)$/) {
             unless ($POST{'txtmsg_provider'}) {
-                push @errors, $ML{'.error.tm.require_provider'};
+                push @errors, $ML{'.error.txt.require_provider'};
             }
             unless ($POST{'txtmsg_number'}) {
-                push @errors, $ML{'.error.tm.require.number'};
+                push @errors, $ML{'.error.txt.require.number'};
             }
         }
 
@@ -543,7 +543,6 @@ _code?>
         my $newbio = defined($POST{'bio_absent'}) ? $saved{'bio'} : $POST{'bio'};
         my $has_bio = ($newbio =~ /\S/) ? "Y" : "N";
         my $txtmsg_status = $POST{'txtmsg_security'} =~ m/^(all|reg|friends)$/ ? "on" : "off";
-        my $old_txtmsg_status = $u->{'txtmsg_status'};
         # setup what we're gonna update in the user table:
         my %update = (
                       'name' => $newname,
@@ -653,7 +652,13 @@ _code?>
         }
 
         # update their text messaging info
-        if ($txtmsg_status eq "off" && $old_txtmsg_status eq "on") {
+        my $tminfo = LJ::TextMessage->tm_info($u);
+        # Check that text messaging is turned off and either
+        # the provider or number have been set to null
+        if ($txtmsg_status eq "off" &&
+            (($tminfo->{'provider'} && ! $POST{'txtmsg_provider'}) ||
+            ($tminfo->{'number'} && ! $POST{'txtmsg_number'})) )
+        {
             $dbh->do("DELETE FROM txtmsg WHERE userid=?", undef, $u->{'userid'});
         } elsif ($txtmsg_status eq "on") {
             $dbh->do("REPLACE INTO txtmsg (userid, provider, number, security) VALUES (?, ?, ?, ?)",
