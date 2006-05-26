@@ -196,7 +196,10 @@ sub make_modify_form
             $ret .= LJ::html_submit('action:morelinks', "More &rarr;",
                                     { 'disabled' => $ct >= $caplinks,
                                       'noescape' => 1 });
-        }        
+        }
+        if ($ct >= $caplinks) {
+            $ret .= LJ::CProd->inline($u, inline => 'Links');
+        }
         $ret .= "</td></tr>";
 
         # blank line unless this is the last line
