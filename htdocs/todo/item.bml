@@ -130,6 +130,7 @@
                  $atype = "<a href=\"$LJ::HELPURL{'accounttype'}\">$atype</a>";
              }
              $body .= "<?h1 Too many items... h1?><?p Your $atype is limited to $max_items to-do items at a time.  p?>";
+             $body .= LJ::CProd->inline($u, inline => 'TodoMaxItems');
              return;
          }
 
@@ -202,6 +203,7 @@
              $atype = "<a href=\"$LJ::HELPURL{'accounttype'}\">$atype</a>";
          }
          $body .= "<?h1 Too many items... h1?><?p Your $atype is limited to $max_items to-do items at a time. p?>";
+         $body .= LJ::CProd->inline($u, inline => 'TodoMaxItems');
          return;
      }
 
@@ -266,6 +268,7 @@
 
  ## categories
  $body .= "<tr valign=top><td><b>Security:</b></td><td>";
+
  {
      my $todosec = LJ::get_cap($u, "todosec");
      if ($todosec) {
@@ -276,7 +279,8 @@
                                "private" => "Private", 
                                "friends" => $u->{'journaltype'} eq "C" ? "Community Members" : "Friends");
      } else {
-         $body .= "<input type=hidden name=security value=\"public\">Your account type doesn't permit non-public to-do items.";
+         $body .= LJ::CProd->inline($u, inline => 'TodoNonPublic');
+         $body .= "<input type=hidden name=security value=\"public\">";
      }
  }
  $body .= "</td></tr>";
