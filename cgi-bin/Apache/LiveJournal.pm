@@ -230,6 +230,9 @@ sub trans
     LJ::procnotify_check();
     S2::set_domain('LJ');
 
+    my $lang = $LJ::DEFAULT_LANG || $LJ::LANGS[0];
+    BML::set_language($lang, \&LJ::Lang::get_text);
+
     my $is_ssl = $LJ::IS_SSL = LJ::run_hook("ssl_check", {
         r => $r,
     });
