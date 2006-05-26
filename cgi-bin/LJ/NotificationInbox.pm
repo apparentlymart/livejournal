@@ -61,13 +61,9 @@ sub _load {
     # is it memcached?
     my $qids;
     $qids = LJ::MemCache::get($self->_memkey) and return @$qids;
-    # is it cached on the user?
-    $qids = $u->{_inbox} and return @$qids;
 
     # not cached, load
     my $daysoldwhere = $daysold ? " AND createtime" : '';
-
-    $u->{_inbox} = [];
 
     my $sth = $u->prepare
         ("SELECT userid, qid, journalid, etypeid, arg1, arg2, state, createtime " .
@@ -86,7 +82,6 @@ sub _load {
     }
 
     # cache
-    $u->{_inbox} = \@items;
     LJ::MemCache::set($self->_memkey, \@items);
 
     return @items;
@@ -117,7 +112,6 @@ sub delete_from_queue {
     die $u->errstr if $u->err;
 
     # invalidate caches
-    delete $u->{_inbox};
     LJ::MemCache::delete($self->_memkey);
 
     return 1;
@@ -154,10 +148,6 @@ sub enqueue {
 
     # invalidate memcache
     LJ::MemCache::delete($self->_memkey);
-
-    # cache new item
-    $u->{_inbox} ||= [];
-    push @{$u->{_inbox}}, $qid;
 
     return LJ::NotificationItem->new($u, $qid);
 }
