@@ -107,7 +107,7 @@ CLUSTER: foreach my $cluster (@clusters) {
     $sth = $dbh->prepare("SHOW TABLES");
     $sth->execute;
     while (my ($table) = $sth->fetchrow_array) {
-        next if $table =~ /^access\d+$/;
+        next if $table =~ /^(access|errors)\d+$/;
         $table_exists{$table} = 1;
     }
     %table_unknown = %table_exists;  # for now, later we'll delete from table_unknown
