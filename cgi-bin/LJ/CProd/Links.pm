@@ -16,14 +16,14 @@ sub render {
     $version = 2 if $u->in_class('plus');
 
     my $link = $class->clickthru_link('cprod.links.link', $version);
-    my $link2 = $class->clickthru_link('cprod.links.link2', $version);
+    my $link2 = BML::ml('cprod.links.link2-2.v'.$version, { aopts => "href='$LJ::SITEROOT/manage/payments/'" });
 
-    return "<span style='padding-left: 10px;'>" . BML::ml($class->get_ml($version), { "user" => $user, "link" => $link, "link2" => $link2 }) . "</span>";
+    return "</td></tr><tr><td colspan='2'>&nbsp;</td><td>" . BML::ml($class->get_ml($version), { "user" => $user, "link" => $link, "link2" => $link2 });
 
 }
 
 sub ml { 'cprod.links.text' }
-sub link { "$LJ::SITEROOT/manage/payments/" }
+sub link { "$LJ::SITEROOT/manage/payments/modify.bml" }
 sub button_text { "Upgrade" }
 
 1;

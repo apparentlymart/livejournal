@@ -454,12 +454,7 @@
             ## see if they have too many pictures uploaded
             if (scalar @userpics >= $max) {
                 my $toomany;
-                if (my $custom .= LJ::run_hook("editpics_maxlimit", $u)) {
-                    $toomany .= $custom;
-                } else {
-                    $toomany .= BML::ml('.error.toomanypics4', {'num' => $max, 'aopts' => "href='$LJ::SITEROOT/editpics$suffix.bml?authas=$authas'"});
-                }
-
+                $toomany = LJ::CProd->inline($u, inline => 'EditPicsMax');
                 return $err->($toomany . LJ::help_icon('userpics', " ", ""));
             }
 
@@ -604,11 +599,7 @@
 
         } else {
             $body .= "<br /><?standout \n";
-            if (my $custom .= LJ::run_hook("editpics_maxlimit", $u)) {
-                $body .= $custom;
-            } else {
-                $body .= BML::ml('.error.toomanypics_standout', {'num' => $max});
-            }
+            $body .= LJ::CProd->inline($u, inline => 'EditPicsMax');
         }
         $body .= " standout?>\n\n";
     };
@@ -627,7 +618,8 @@
             };
 
         $body .= BML::ml('.piclimitstatus', {current => scalar @userpics, max => $max});
-        $body .= LJ::run_hook('editpics_upsell_text', $u);
+        my $inline = LJ::CProd->inline($u, inline => 'EditPics');
+        $body .= $inline;
         $body .= "</div>";
 
         $body .= "<table>";
