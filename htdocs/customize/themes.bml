@@ -61,7 +61,7 @@ body<=
         my $id = ref $t ? $t->{'s2lid'} : 0;
         my $name = ref $t ? LJ::eall($t->{'name'}) : $ML{'.default'};
         my $ctx = S2::make_context(@layers, $id);
-        LJ::S2::escape_context_props($ctx);
+        LJ::S2::escape_all_props($ctx, [ @layers, $id ]);
         LJ::S2::populate_system_props($ctx);
 
         S2::set_output(sub {});  # printing suppressed
