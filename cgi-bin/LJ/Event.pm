@@ -11,6 +11,7 @@ use Class::Autouse qw(
                       LJ::Event::UserNewComment
                       LJ::Event::Befriended
                       LJ::Event::CommunityInvite
+                      LJ::Event::CommunityJoinRequest
                       );
 
 # Guide to subclasses:

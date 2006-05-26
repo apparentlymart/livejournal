@@ -1,23 +1,23 @@
-package LJ::Event::CommunityInvite;
+package LJ::Event::CommunityJoinRequest;
 use strict;
 use Class::Autouse qw(LJ::Entry);
 use Carp qw(croak);
 use base 'LJ::Event';
 
 sub new {
-    my ($class, $u, $fromu, $commu) = @_;
-    foreach ($u, $fromu, $commu) {
-        LJ::errobj('Event::CommunityInvite', u => $_)->throw unless LJ::isu($_);
+    my ($class, $u, $requestor, $comm) = @_;
+    foreach ($u, $requestor, $comm) {
+        LJ::errobj('Event::CommunityJoinRequest', u => $_)->throw unless LJ::isu($_);
     }
 
-    return $class->SUPER::new($u, $fromu->{userid}, $commu->{userid});
+    return $class->SUPER::new($u, $requestor->{userid}, $comm->{userid});
 }
 
 sub is_common { 0 }
 
 sub as_string {
     my $self = shift;
-    return sprintf("The user %s has invited you to join the community %s.",
+    return sprintf("The user %s has requested to join the community %s.",
                    LJ::load_userid($self->arg1)->ljuser_display,
                    LJ::load_userid($self->arg2)->ljuser_display);
 }
@@ -29,7 +29,7 @@ sub as_sms {
 }
 
 sub title {
-    return 'I receive an invitation to join a community';
+    return 'Someone wants to join a community I maintain';
 }
 
 sub subscription_as_html {
@@ -40,11 +40,11 @@ sub subscription_as_html {
 sub journal_sub_title { 'User' }
 sub journal_sub_type  { 'owner' }
 
-package LJ::Error::Event::CommunityInvite;
+package LJ::Error::Event::CommunityJoinRequest;
 sub fields { 'u' }
 sub as_string {
     my $self = shift;
-    return "LJ::Event::CommuinityInvite passed bogus u object: $self->{u}";
+    return "LJ::Event::CommuinityJoinRequest passed bogus u object: $self->{u}";
 }
 
 1;

@@ -3,7 +3,10 @@
 package LJ;
 
 use strict;
-use Class::Autouse qw(LJ::Event::CommunityInvite);
+use Class::Autouse qw(
+                      LJ::Event::CommunityInvite
+                      LJ::Event::CommunityJoinRequest
+                      );
 
 # <LJFUNC>
 # name: LJ::get_sent_invites
@@ -534,6 +537,8 @@ sub comm_join_request {
             body => $body,
             wrap => 76,
         });
+
+        LJ::Event::CommunityJoinRequest->new($au, $u, $cuser)->fire;
     }
 
     return $aa;
