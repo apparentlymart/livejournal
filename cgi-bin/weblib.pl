@@ -2355,6 +2355,8 @@ sub subscribe_interface {
     croak "Invalid options passed to subscribe_interface" if (scalar keys %opts);
 
     LJ::need_res('stc/esn.css');
+    LJ::need_res('js/core.js');
+    LJ::need_res('js/dom.js');
     LJ::need_res('js/checkallbutton.js');
     LJ::need_res('js/esn.js');
 
@@ -2394,7 +2396,7 @@ sub subscribe_interface {
 
         # add notifytype headings
         foreach my $notify_class (@notify_classes) {
-            my $title = eval { $notify_class->title } or next;
+            my $title = eval { $notify_class->title($u) } or next;
             my $ntypeid = $notify_class->ntypeid or next;
             my $checkall_box = LJ::html_check({
                 id    => "CheckAll-$catid-$ntypeid",
@@ -2452,13 +2454,13 @@ sub subscribe_interface {
                     <td id='NotificationOptions-$etypeid-$ntypeid' $hidden>
                         <input type="checkbox" id="$input_name" name="$input_name"
                             class="SubscribeCheckbox-$catid-$ntypeid" $notify_checked />
-                        <label for="$input_name">$title</label>
+                        <label for="$input_name"></label>
                     </td>
                     };
             }
             $events_table .= '</tr></div>';
-            $catid++;
         }
+        $catid++;
     }
 
     $events_table .= '</table>';
