@@ -84,7 +84,9 @@ sub eventtime_unix {
 }
 
 sub title {
-    return 'New post in journal';
+    shift;
+    my $journal = shift || LJ::get_remote();
+    return 'All posts in ' . $journal->ljuser_display;
 }
 
 sub journal_sub_title { 'Journal' }
