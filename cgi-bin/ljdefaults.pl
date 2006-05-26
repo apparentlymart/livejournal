@@ -320,6 +320,7 @@
                             'JournalNewEntry',
                             'UserNewComment',
                             'UserNewEntry',
+                            'CommunityInvite',
                             );
         foreach my $evt (@LJ::EVENT_TYPES) {
             $evt = "LJ::Event::$evt";
