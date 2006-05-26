@@ -58,6 +58,8 @@ sub subscription_as_html {
         $arg1 = $comment->entry->ditemid unless $arg1;
     }
 
+    my $journal_is_owner = LJ::u_equals($journal, $subscr->owner);
+
     my $entry = LJ::Entry->new($journal, ditemid => $arg1)
         or return "Comments on a deleted post in $user";
 
@@ -65,14 +67,17 @@ sub subscription_as_html {
     $entrydesc = $entrydesc ? "\"$entrydesc\"" : "a post";
 
     my $entryurl  = $entry->url;
-    return "All comments on <a href='$entryurl'>$entrydesc</a> in $user" if $arg2 == 0;
+    my $in_journal = $journal_is_owner ? " on my journal" : "in $user";
+    return "All comments on <a href='$entryurl'>$entrydesc</a> $in_journal" if $arg2 == 0;
 
     my $threadurl = $comment->url;
 
     my $posteru = $comment->poster;
     my $posteruser = $posteru ? LJ::ljuser($posteru) : "(Anonymous)";
 
-    return "New comments under <a href='$threadurl'>the thread</a> by $posteruser in <a href='$entryurl'>$entrydesc</a> in $user";
+    $posteruser = $journal_is_owner ? 'me' : $posteruser;
+
+    return "New comments under <a href='$threadurl'>the thread</a> by $posteruser in <a href='$entryurl'>$entrydesc</a> $in_journal";
 }
 
 sub matches_filter {
