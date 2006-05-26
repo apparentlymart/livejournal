@@ -4082,7 +4082,8 @@ sub make_journal
         return "<h1>Notice</h1><p>This account isn't a community journal.</p>";
     }
     if ($view eq "friendsfriends" && ! LJ::get_cap($u, "friendsfriendsview")) {
-        return "<b>Sorry</b><br />This user's account type doesn't permit showing friends of friends."
+        return "<b>Sorry</b><br />Only <a href='$LJ::SITEROOT/paidaccounts/'>Paid
+accounts</a> permit showing friends of friends.";
     }
 
     # signal to LiveJournal.pm that we can't handle this
