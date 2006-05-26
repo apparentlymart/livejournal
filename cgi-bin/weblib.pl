@@ -2342,6 +2342,99 @@ sub control_strip_js_inject
     return $ret;
 }
 
+# prints out UI for subscribing to some events
+sub subscribe_interface {
+    my %opts = @_;
+
+    my $catref   = delete $opts{'categories'} or croak "No categories hash passed to subscribe_interface";
+    my $u        = LJ::want_user(delete $opts{'user'}) || LJ::get_remote();
+    my $formauth = delete $opts{'formauth'} || LJ::form_auth();
+
+    croak "Invalid options passed to subscribe_interface" if (scalar keys %opts);
+
+    my %categories = %$catref or croak "Invalid categories passed to subscribe_interface";
+
+    my $ret = qq {
+        <fieldset><legend>Holla at me when...</legend>
+            <form method='POST' action='$LJ::SITEROOT/manage/subscriptions/index.bml'>
+            $formauth
+    };
+
+    my $events_table = '<table>';
+
+    my @notify_classes = LJ::NotificationMethod->all_classes or return "No notification methods";
+
+    while (my ($category, $event_classes) = each %categories) {
+        next unless $event_classes && scalar @$event_classes;
+
+        $events_table .= qq {
+            <tr class="CategoryRow"><td><span class="CategoryHeading">$category</span></td></tr>
+            };
+
+        # build table of subscribable events
+        foreach my $evt_class (@$event_classes) {
+            $evt_class = "LJ::Event::$evt_class";
+            my $etypeid = eval { $evt_class->etypeid } or next;
+            my $subscribed = $u->has_subscription(etypeid => $etypeid);
+
+            # print option to subscribe to this event, checked if already subscribed
+            {
+                my $title = eval { $evt_class->title } or next;
+                my $subscribe_checked = $subscribed ? 'checked' : '';
+                my $input_name = "subscribe$etypeid";
+                $events_table .= qq {
+                    <tr>
+                        <td>
+                        <input type="checkbox" id="$input_name" name="$input_name"
+                        $subscribe_checked />
+                        <label for="$input_name">$title</label>
+                        </td>
+                    };
+                $events_table .= LJ::html_hidden({
+                    name  => "$input_name-old",
+                    value => $subscribe_checked,
+                });
+            }
+
+            # print out notification options for this event (hidden if not subscribed)
+            my $hidden = $subscribed ? '' : 'style="visibility: hidden;"';
+            $events_table .= "<td id='NotificationOptions$etypeid' $hidden>";
+            foreach my $note_class (@notify_classes) {
+                my $title = eval { $note_class->title } or next;
+                my $ntypeid = $note_class->ntypeid or next;
+
+                # skip the inbox type; it's always on
+                next if $note_class eq 'LJ::NotificationMethod::Inbox';
+
+                my $notify_checked = $u->has_subscription(etypeid => $etypeid,
+                                                          ntypeid => $ntypeid,
+                                                          ) ? 'checked' : '';
+
+                my $input_name = "subscribe-$etypeid-$ntypeid";
+                $events_table .= qq {
+                    <span>
+                        <input type="checkbox" id="$input_name" name="$input_name" $notify_checked />
+                        <label for="$input_name">$title</label>
+                        </span>
+                    };
+            }
+            $events_table .= '</td></tr>';
+        }
+    }
+
+    $events_table .= '</table>';
+
+    $ret .= qq {
+        $events_table
+        };
+
+    $ret .= LJ::html_submit('Save');
+    $ret .= LJ::html_hidden({name => 'mode', value => 'save_subscriptions'});
+
+    $ret .= "</form></fieldset>";
+}
+
+
 # Common challenge/response javascript, needed by both login pages and comment pages alike.
 # Forms that use this should onclick='return sendForm()' in the submit button.
 # Returns true to let the submit continue.

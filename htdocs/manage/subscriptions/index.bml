@@ -6,6 +6,8 @@ body<=
     use vars qw (%POST %GET $body $title $headextra);
     use Carp qw(croak);
 
+    $title = 'Subscriptions, yo!';
+
     return "Not ready" if $LJ::DISABLED{'esn'};
 
     use Class::Autouse qw(LJ::NotificationMethod LJ::Event);
@@ -25,8 +27,8 @@ body<=
 
     LJ::need_res('js/core.js');
     LJ::need_res('js/dom.js');
-    LJ::need_res('js/esnmanager.js');
-    LJ::need_res('js/esn.js');
+#    LJ::need_res('js/esnmanager.js');
+#    LJ::need_res('js/esn.js');
 
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);
@@ -103,39 +105,71 @@ body<=
 
     my $formauth = LJ::form_auth();
 
+    # handle input
     if (LJ::did_post()) {
         return LJ::error_list(BML::ml('error.invalidform')) unless LJ::check_form_auth();
 
-        if ($POST{mode} eq 'addsub') {
-            return LJ::bad_input('Event not specified') unless defined $POST{etypeid};
-            return LJ::bad_input('Notification not specified') unless defined $POST{ntypeid};
+        if ($POST{mode} eq 'save_subscriptions') {
+            # check each subscription and see if selected state is different
+            # from the current state
+            foreach my $event_class (LJ::Event->all_classes) {
+                my $etypeid = eval { $event_class->etypeid } or next;
+                my $enabled = $POST{"subscribe$etypeid"} ? 1 : 0;
 
-            my $ntypeid = int($POST{ntypeid});
-            my $etypeid = int($POST{etypeid});
+                # if no subscriptions
+                if (scalar $u->has_subscription(etypeid => $etypeid) == 0) {
+                    # if there are no subscriptions, and they haven't selected it, skip
+                    next unless $enabled;
 
-            return LJ::bad_input('User not specified') unless defined $POST{"journal$etypeid"};
+                    # if they enabled it, add the inbox notification method
+                    # create a new subscription
+                    $u->subscribe(
+                                  method    => 'Inbox',
+                                  etypeid   => $etypeid,
+                                  journal   => $u,        # FIXME: seems shady
+                                  );
+                } elsif (! $enabled) {
+                    # if they have a subscription and unchecked it, delete all subscriptions
+                    # find all subscriptions to this event
+                    my @subs = $u->has_subscription(
+                                                    etypeid => $etypeid,
+                                                    );
 
-            my $arg1 = int($POST{"argOpts1$etypeid"});
-            my $arg2 = int($POST{"argOpts2$etypeid"});
+                    # delete all subscriptions that were subscribed to
+                    if ($POST{"subscribe$etypeid-old"}) {
+                        $_->delete foreach @subs;
+                    }
+                    next;
+                }
 
-            my $journal = $POST{"journal$etypeid"};
-            my $ju = LJ::load_user($journal);
+                # otherwise, see what they have enabled and disabled
+                foreach my $notify_class (LJ::NotificationMethod->all_classes) {
+                    next if $notify_class eq 'LJ::NotificationMethod::Inbox';
 
-            return LJ::error_list("No such user $journal") unless $ju;
+                    my $ntypeid = eval { $notify_class->ntypeid } or next;
+                    $enabled = $POST{"subscribe-$etypeid-$ntypeid"} ? 1 : 0;
 
-            my $journalid = $ju->{userid};
+                    my @subs = $u->has_subscription(
+                                                    etypeid => $etypeid,
+                                                    ntypeid => $ntypeid,
+                                                    );
+                    if (scalar @subs == 0) {
+                        # if they aren't subscribed to this and didn't click it, skip
+                        next unless $enabled;
 
-            # create a new subscription
-            $u->subscribe(
-                ntypeid   => $ntypeid,
-                etypeid   => $etypeid,
-                arg1      => $arg1,
-                arg2      => $arg2,
-                journalid => $journalid,
-            );
-        }
-
-        if ($POST{mode} eq 'delete') {
+                        # if they enabled it, subscribe
+                        $u->subscribe(
+                                      ntypeid   => $ntypeid,
+                                      etypeid   => $etypeid,
+                                      journal   => $u,        # shady?
+                                      );
+                    } elsif (! $enabled) {
+                        # unsubscribe
+                        $_->delete foreach @subs;
+                    }
+                }
+            }
+        } elsif ($POST{mode} eq 'delete') {
             my $id = int($POST{delete});
             return LJ::bad_input("No ID specified") unless $id;
 
@@ -179,56 +213,35 @@ body<=
         };
         return $body;
     } else {
-        $body .= "<form action='./' method='GET'>";
-        $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
-        $body .= $formauth;
-        $body .= "</form>";
 
-        $body .= "<fieldset><legend>Subscribe</legend>";
-        $body .= "<form method='POST' action='./'>";
+        ###################### Print subscribe table
+        my %categories = (
+                          "$LJ::SITENAMEABBREV and You" => [
+                                                            'Befriended',
+                                                            ],
+                          "Communities" => [
+                                            'UserNewPost',
+                                            'CommunityInvite',
+                                            ],
+                          );
 
-        my @event_classes = LJ::Event->all_classes;
-        return "No events" unless @event_classes;
+        my $authas_form = LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
+        $body .= qq {
+            <form action='./' method='GET'>
+                $authas_form
+            </form>
+        };
 
-        my $jsfields = '';
-        my @event_options;
-        my @etypeids;
-        foreach my $evt_class (@event_classes) {
-            my $title = eval { $evt_class->title } or next;
-            my $etypeid = $evt_class->etypeid or next;
-            push @etypeids, $etypeid;
-            push @event_options, ($etypeid, $title);
+        $body .= LJ::subscribe_interface(
+                                         user       => $u,
+                                         categories => \%categories,
+                                         formauth   => $formauth,
+                                         );
 
-            # javascript hide/show arg fields
-            $jsfields .= "<div class='argOptsContainer' id='argOptsContainer$etypeid'>" .
-                $arg_opts_as_html->($evt_class) . '</div>';
-        }
 
-        $headextra .= "<script>initEsn([" . join(",", @etypeids) . "]);</script>";
+        ################
 
-        my @notify_classes = LJ::NotificationMethod->all_classes;
-        return "No notification methods!" unless @notify_classes;
 
-        my @note_options;
-        foreach my $note_class (@notify_classes) {
-            my $title = eval { $note_class->title } or next;
-
-            push @note_options, ($note_class->ntypeid, $title);
-        }
-
-        $body .= 'Alert me whenever: ' . LJ::html_select({
-            name => 'etypeid',
-            id => 'etypeid',
-        }, ('', '', @event_options)) .
-            ' with: ' . LJ::html_select({name => 'ntypeid'}, @note_options);
-
-        $body .= "<div>$jsfields</div>";
-
-        $body .= ' ' . LJ::html_submit('Add');
-        $body .= LJ::html_hidden({name => 'mode', value => 'addsub'});
-        $body .= $formauth;
-
-        $body .= "</form></fieldset>";
 
         $body .= "<fieldset><legend>Subscriptions</legend>";
         my @subscriptions = $u->subscriptions;
@@ -246,7 +259,8 @@ body<=
                 my $class = $row % 2 ? "lighter" : "darker";
                 $subs_html .= "<tr class='$class'>";
                 $subs_html .= "<td><a href='./index.bml?mode=modify&id=" . $subsc->id . "'>" . $subsc->id . "</a></td>";
-                $subs_html .= "<td>" . $subsc->as_html . "</td>";
+                my $subscdesc = eval { $subsc->as_html } || "Error: $@";
+                $subs_html .= "<td>$subscdesc</td>";
                 if ($subsc->expiretime) {
                     $subs_html .= "<td>" . LJ::time_to_http($subsc->expiretime) . "</td>";
                 } else {
@@ -254,9 +268,10 @@ body<=
                 }
 
                 # Load the NotificationMethod object for this subscription
-                my $note = LJ::NotificationMethod->new_from_subscription($subsc);
+                my $note = eval { LJ::NotificationMethod->new_from_subscription($subsc) };
 
-                $subs_html .= "<td>" . $note->title . "</td>";
+                my $title = eval { $note->title } || "Error: $@";
+                $subs_html .= "<td>$title</td>";
                 $subs_html .= "</tr>";
                 $row++;
             }
@@ -271,6 +286,15 @@ _code?>
 title=><?_code return $title; _code?>
 head<=
 <style type='text/css'>
+    .CategoryRow {
+      width: 100%;
+        background-color: #Acc;
+    }
+span.CategoryHeading {
+    font-size: 1.3em;
+    font-weight: 200;
+}
+
 #Subscriptions {
     width: 100%;
 }
