@@ -127,6 +127,9 @@ body<=
                                 emailadr => $u->{email},
                                 resetlink => "$LJ::SITEROOT/resetpassword.bml?auth=$aa->{aaid}.$aa->{authcode}",
                             });
+            $body .= "\n\n" .BML::ml('/lostinfo_do.bml.lostpasswordmail.part3',
+                             { 'remoteip' => BML::get_remote_host() . " (" . BML::get_remote_ip() . ")" });
+            $body .= "\n\n";
 
         } else {
             # old method of mailing the password
