@@ -45,7 +45,7 @@ sub items {
         push @items, LJ::NotificationItem->new($self->owner, $qid);
     }
 
-    return @items;
+    return sort { $a->event->eventtime_unix <=> $b->event->eventtime_unix } @items;
 }
 
 # load the items in this queue
@@ -139,7 +139,7 @@ sub enqueue {
                 arg1       => $evt->arg1,
                 arg2       => $evt->arg2,
                 state      => 'N',
-                createtime => $evt->eventtime_unix || 0);
+                createtime => $evt->eventtime_unix || time());
 
     # insert this event into the notifyqueue table
     $u->do("INSERT INTO notifyqueue (" . join(",", keys %item) . ") VALUES (" .
