@@ -7,6 +7,8 @@ use strict;
 # load the bread crumb hash
 require "$ENV{'LJHOME'}/cgi-bin/crumbs.pl";
 
+use Class::Autouse qw(LJ::Event);
+
 # <LJFUNC>
 # name: LJ::img
 # des: Returns an HTML &lt;img&gt; or &lt;input&gt; tag to an named image
@@ -2352,6 +2354,10 @@ sub subscribe_interface {
 
     croak "Invalid options passed to subscribe_interface" if (scalar keys %opts);
 
+    LJ::need_res('stc/esn.css');
+    LJ::need_res('js/checkallbutton.js');
+    LJ::need_res('js/esn.js');
+
     my %categories = %$catref or croak "Invalid categories passed to subscribe_interface";
 
     my $ret = qq {
@@ -2364,17 +2370,51 @@ sub subscribe_interface {
 
     my @notify_classes = LJ::NotificationMethod->all_classes or return "No notification methods";
 
-    while (my ($category, $event_classes) = each %categories) {
-        next unless $event_classes && scalar @$event_classes;
+    # skip the inbox type; it's always on
+    @notify_classes = grep { $_ ne 'LJ::NotificationMethod::Inbox' } @notify_classes;
+
+    my @event_classes;
+    my @catids;
+    my $catid = 0;
+
+    while (my ($category, $cat_event_classes) = each %categories) {
+        next unless $cat_event_classes && scalar @$cat_event_classes;
+        push @catids, $catid;
 
         $events_table .= qq {
-            <tr class="CategoryRow"><td><span class="CategoryHeading">$category</span></td></tr>
+          <div class="CategoryRow-$catid">
+            <tr class="CategoryRow">
+                <td>
+                    <span class="CategoryHeading">$category</span>
+                </td>
+                <td>
+                    By
+                </td>
             };
 
+        # add notifytype headings
+        foreach my $notify_class (@notify_classes) {
+            my $title = eval { $notify_class->title } or next;
+            my $ntypeid = $notify_class->ntypeid or next;
+            my $checkall_box = LJ::html_check({
+                id    => "CheckAll-$catid-$ntypeid",
+                label => $title,
+                class => "CheckAll",
+            });
+            $events_table .= qq {
+                <td>
+                    $checkall_box
+                </td>
+            };
+        }
+
+        $events_table .= '</tr>';
+
         # build table of subscribable events
-        foreach my $evt_class (@$event_classes) {
+        foreach my $evt_class (@$cat_event_classes) {
             $evt_class = "LJ::Event::$evt_class";
             my $etypeid = eval { $evt_class->etypeid } or next;
+            push @event_classes, $evt_class;
             my $subscribed = $u->has_subscription(etypeid => $etypeid);
 
             # print option to subscribe to this event, checked if already subscribed
@@ -2386,7 +2426,7 @@ sub subscribe_interface {
                     <tr>
                         <td>
                         <input type="checkbox" id="$input_name" name="$input_name"
-                        $subscribe_checked />
+                            $subscribe_checked />
                         <label for="$input_name">$title</label>
                         </td>
                     };
@@ -2397,14 +2437,11 @@ sub subscribe_interface {
             }
 
             # print out notification options for this event (hidden if not subscribed)
+            $events_table .= "<td>&nbsp;</td>";
             my $hidden = $subscribed ? '' : 'style="visibility: hidden;"';
-            $events_table .= "<td id='NotificationOptions$etypeid' $hidden>";
             foreach my $note_class (@notify_classes) {
                 my $title = eval { $note_class->title } or next;
                 my $ntypeid = $note_class->ntypeid or next;
-
-                # skip the inbox type; it's always on
-                next if $note_class eq 'LJ::NotificationMethod::Inbox';
 
                 my $notify_checked = $u->has_subscription(etypeid => $etypeid,
                                                           ntypeid => $ntypeid,
@@ -2412,22 +2449,43 @@ sub subscribe_interface {
 
                 my $input_name = "subscribe-$etypeid-$ntypeid";
                 $events_table .= qq {
-                    <span>
-                        <input type="checkbox" id="$input_name" name="$input_name" $notify_checked />
+                    <td id='NotificationOptions-$etypeid-$ntypeid' $hidden>
+                        <input type="checkbox" id="$input_name" name="$input_name"
+                            class="SubscribeCheckbox-$catid-$ntypeid" $notify_checked />
                         <label for="$input_name">$title</label>
-                        </span>
+                    </td>
                     };
             }
-            $events_table .= '</td></tr>';
+            $events_table .= '</tr></div>';
+            $catid++;
         }
     }
 
     $events_table .= '</table>';
 
-    $ret .= qq {
-        $events_table
-        };
+    # pass some info to javascript
+    {
+        my $etypeids = LJ::html_hidden({
+            'id'  => 'etypeids',
+            'value' => join(',', map { $_->etypeid } @event_classes),
+        });
+        my $ntypeids = LJ::html_hidden({
+            'id'  => 'ntypeids',
+            'value' => join(',', map { $_->ntypeid } @notify_classes),
+        });
+        my $catids = LJ::html_hidden({
+            'id'  => 'catids',
+            'value' => join(',', @catids),
+        });
 
+        $ret .= qq {
+            $etypeids
+                $ntypeids
+                $catids
+            };
+    }
+
+    $ret .= $events_table;
     $ret .= LJ::html_submit('Save');
     $ret .= LJ::html_hidden({name => 'mode', value => 'save_subscriptions'});
 
