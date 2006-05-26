@@ -129,26 +129,27 @@
     }
 
     sub by_url {
-	my $url = shift;
-	my $ret;
+    my $url = shift;
+    my $ret;
 
-	$ret .= "<form action='navtag.bml' method='POST'>";
-	$ret .= "<?h1 Tags Pointing At " . LJ::ehtml($url) . " h1?>";
+    $ret .= "<form action='navtag.bml' method='POST'>";
+    $ret .= LJ::form_auth();
+    $ret .= "<?h1 Tags Pointing At " . LJ::ehtml($url) . " h1?>";
 
-	$ret .= "<table><tr><th>Tag</th><th>Remove</th></tr>";
+    $ret .= "<table><tr><th>Tag</th><th>Remove</th></tr>";
 
-	my $dest = LJ::NavTag::Dest->new_from_url($url);
+    my $dest = LJ::NavTag::Dest->new_from_url($url);
 
-	return "No destination found" unless $dest;
+    return "No destination found" unless $dest;
 
-	my @tags = LJ::NavTag->tags_of_dest($dest);
+    my @tags = LJ::NavTag->tags_of_dest($dest);
 
-	foreach my $tag (@tags) {
-	    $ret .= "<tr><td><a href='navtag.bml?view=tag&tag=" . LJ::eurl($tag) . "'>";
-            $ret .=  LJ::ehtml($tag) . "</a></td>";
+    foreach my $tag (@tags) {
+        $ret .= "<tr><td><a href='navtag.bml?view=tag&tag=" . LJ::eurl($tag) . "'>";
+        $ret .=  LJ::ehtml($tag) . "</a></td>";
 
-	    $ret .= "<td>" . LJ::html_submit("del_${tag}_PAGE:$url", 'X') . "</td>";
-	}
+        $ret .= "<td>" . LJ::html_submit("del_${tag}_PAGE:$url", 'X') . "</td>";
+    }
 
 	$ret .= "</table>";
 	$ret .= "</form>";
