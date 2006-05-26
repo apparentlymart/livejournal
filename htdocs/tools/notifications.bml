@@ -34,7 +34,6 @@ body<=
     my $authas = $GET{'authas'};
     $body .= "<form action='$LJ::SITEROOT/tools/notifications.bml' method='GET'>";
     $body .= LJ::make_authas_select($remote, { 'authas' => $authas });
-    $body .= $formauth;
     $body .= "</form>";
 
     # get the user's inbox
