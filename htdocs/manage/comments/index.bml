@@ -53,9 +53,9 @@ _code?>
 
         $ret .= "<div>";
         # user switcher
-        $ret .= "<?p <form method='get' action='index.bml'>\n";
+        $ret .= "<form method='get' action='index.bml'>\n";
         $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
-        $ret .= "</form> p?>\n\n";
+        $ret .= "</form>\n\n";
 
         $ret .= "<?p $ML{'.intro'} p?>";
         $ret .= "</div>\n";
@@ -71,7 +71,7 @@ _code?>
         $ret .= "<table class='field_block'>\n";
 
         # Enable comments
-        $ret .= "<tr><td class='field_name'>$ML{'.fn.enablecomments'}:</td>\n<td>";
+        $ret .= "<tr><td class='field_name'>$ML{'.fn.enablecomments'}</td>\n<td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_showtalklinks', 'id' => 'opt_showtalklinks',
                                  'selected' => $u->{'opt_showtalklinks'} eq 'Y' });
         $ret .= " $ML{'.enablecommenting'}: ";
@@ -84,7 +84,7 @@ _code?>
         $ret .= "</td></tr>\n";
 
         # Comment screening
-        $ret .= "<tr><td class='field_name'>$ML{'.fn.screening'}:</td>\n<td>";
+        $ret .= "<tr><td class='field_name'>$ML{'.fn.screening'}</td>\n<td>";
         $ret .= "$ML{'.screen'}: ";
         $ret .= LJ::html_select({ 'name' => 'opt_whoscreened', 'selected' => $u->{'opt_whoscreened'} },
                                   "N" => BML::ml(".security.visibility.noone"),
@@ -95,7 +95,7 @@ _code?>
         $ret .= "</td></tr>\n";
 
         # IP address log
-        $ret .= "<tr><td class='field_name'>$ML{'.fn.iplog'}:</td>\n<td>";
+        $ret .= "<tr><td class='field_name'>$ML{'.fn.iplog'}</td>\n<td>";
         $ret .= " $ML{'.logip'}: ";
         $ret .= LJ::html_select({ 'name' => 'opt_logcommentips', 'selected' => $u->{'opt_logcommentips'} },
                                   "N" => BML::ml(".security.visibility.noone"),
@@ -106,7 +106,7 @@ _code?>
         $ret .= "</td></tr>\n";
 
         # Email notifications
-        $ret .= "<tr><td class='field_name'>$ML{'.fn.emailnotify'}:</td>\n<td>";
+        $ret .= "<tr><td class='field_name'>$ML{'.fn.emailnotify'}</td>\n<td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_gettalkemail', 'id' => 'opt_gettalkemail',
                                  'selected' => $u->prop('opt_gettalkemail') eq 'Y' });
         $ret .= " $ML{'.emailnotify'}</label><br />\n";
@@ -123,7 +123,7 @@ _code?>
         $ret .= "<table class='field_block'>\n";
 
         # Comment notifications
-        $ret .= "<tr><td class='field_name'>$ML{'.fn.commentnotify'}:</td>\n<td>";
+        $ret .= "<tr><td class='field_name'>$ML{'.fn.commentnotify'}</td>\n<td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_getselfemail', 'id' => 'opt_getselfemail',
                                  'selected' => $u->{'opt_getselfemail'},
                                  'disabled' => !LJ::get_cap($u, 'getselfemail') });
@@ -141,7 +141,7 @@ _code?>
             $ret .= "<table class='field_block'>\n";
 
             # Unban users
-            $ret .= "<tr><td class='field_name'>$ML{'.fn.unban'}:</td>\n<td>";
+            $ret .= "<tr><td class='field_name'>$ML{'.fn.unban'}</td>\n<td>";
             $ret .= " $ML{'.unban'}<br />\n";
             foreach (@$banned) {
                 my $bu = $us->{$_};
