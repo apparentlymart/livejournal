@@ -169,10 +169,12 @@ sub html_check
     }
     if ($opts->{'selected'}) { $ret .= " checked='checked'"; }
     if ($opts->{'raw'}) { $ret .= " $opts->{'raw'}"; }
-    foreach (grep { ! /^(disabled|type|selected|raw|noescape)$/ } keys %$opts) {
+    foreach (grep { ! /^(disabled|type|selected|raw|noescape|label)$/ } keys %$opts) {
         $ret .= " $_=\"" . ($ehtml ? ehtml($opts->{$_}) : $opts->{$_}) . "\"";
     }
     $ret .= "$disabled />";
+    $ret .= "<label for=\"$opts->{id}\">" . LJ::ehtml($opts->{'label'}) . '</label>'
+        if $opts->{'label'};
     return $ret;
 }
 
