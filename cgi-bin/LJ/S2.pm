@@ -1166,6 +1166,7 @@ sub layer_compile_user
     return 1 unless ref $overrides;
     my $id = $layer->{'s2lid'};
     my $s2 = "layerinfo \"type\" = \"user\";\n";
+    $s2 .= "layerinfo \"name\" = \"Auto-generated Customizations\";\n";
 
     foreach my $name (keys %$overrides) {
         next if $name =~ /\W/;
