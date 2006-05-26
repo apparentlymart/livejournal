@@ -15,14 +15,14 @@ use Carp qw(croak);
 
 *new = \&instance;
 
-my %singletons = ();
-
 # parameters: user, notification inbox id
 sub instance {
     my ($class, $u, $qid) = @_;
 
     my $singletonkey = $u->{userid} . ':' . $qid;
-    return $singletons{$singletonkey} if $singletons{$singletonkey};
+
+    $u->{_inbox_items} ||= {};
+    return $u->{_inbox_items}->{$singletonkey} if $u->{_inbox_items}->{$singletonkey};
 
     my $self = {
         u       => $u,
@@ -32,7 +32,7 @@ sub instance {
         _loaded => 0,
     };
 
-    $singletons{$singletonkey} = $self;
+    $u->{_inbox_items}->{$singletonkey} = $self;
 
     return bless $self, $class;
 }

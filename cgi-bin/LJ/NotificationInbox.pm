@@ -8,26 +8,16 @@ use strict;
 use Carp qw(croak);
 use Class::Autouse qw (LJ::NotificationItem LJ::Event);
 
-*new = \&instance;
-
-my %singletons = ();
-
 # constructor takes a $u
-sub instance {
+sub new {
     my ($class, $u) = @_;
 
     croak "Invalid args to construct LJ::NotificationQueue" unless $class && $u;
     croak "Invalid user" unless LJ::isu($u);
 
-    return $singletons{$u->{userid}} if $singletons{$u->{userid}};
-
     my $self = {
-        u      => $u,
-        loaded => 0,
-        items  => {},
+        u => $u,
     };
-
-    $singletons{$u->{userid}} = $self;
 
     return bless $self, $class;
 }
@@ -48,7 +38,14 @@ sub items {
     croak "notifications is an object method"
         unless (ref $self) eq __PACKAGE__;
 
-    return values %{$self->_load};
+    my @qids = $self->_load;
+
+    my @items = ();
+    foreach my $qid (@qids) {
+        push @items, LJ::NotificationItem->new($self->owner, $qid);
+    }
+
+    return @items;
 }
 
 # load the items in this queue
@@ -56,13 +53,21 @@ sub items {
 sub _load {
     my $self = shift;
     my $daysold = shift;
-
-    return $self->{items} if $self->{loaded};
+    my @items = ();
 
     my $u = $self->u
         or die "No user object";
 
+    # is it memcached?
+    my $qids;
+    $qids = LJ::MemCache::get($self->_memkey) and return @$qids;
+    # is it cached on the user?
+    $qids = $u->{_inbox} and return @$qids;
+
+    # not cached, load
     my $daysoldwhere = $daysold ? " AND createtime" : '';
+
+    $u->{_inbox} = [];
 
     my $sth = $u->prepare
         ("SELECT userid, qid, journalid, etypeid, arg1, arg2, state, createtime " .
@@ -73,16 +78,24 @@ sub _load {
     while (my $row = $sth->fetchrow_hashref) {
         my $qid = $row->{qid};
 
-        # create the inboxitem for this event
+        # load this item into process cache so it's ready to go
         my $qitem = LJ::NotificationItem->new($u, $qid);
         $qitem->absorb_row($row);
 
-        $self->{items}->{$qid} = $qitem;
+        push @items, $qid;
     }
 
-    $self->{loaded} = 1;
+    # cache
+    $u->{_inbox} = \@items;
+    LJ::MemCache::set($self->_memkey, \@items);
 
-    return $self->{items};
+    return @items;
+}
+
+sub _memkey {
+    my $self = shift;
+    my $userid = $self->u->{userid};
+    return [$userid, "inbox:$userid"];
 }
 
 # deletes an Event that is queued for this user
@@ -100,12 +113,12 @@ sub delete_from_queue {
     my $u = $self->u
         or die "No user object";
 
-    # if this event was returned from our queue we should have
-    # its qid stored in our events hashref
-    delete $self->{items}->{$qid} if $self->{items};
-
     $u->do("DELETE FROM notifyqueue WHERE qid=?", undef, $qid);
     die $u->errstr if $u->err;
+
+    # invalidate caches
+    delete $u->{_inbox};
+    LJ::MemCache::delete($self->_memkey);
 
     return 1;
 }
@@ -139,9 +152,14 @@ sub enqueue {
            join(",", map { '?' } values %item) . ")", undef, values %item)
         or die $u->errstr;
 
-    $self->{items}->{$qid} = LJ::NotificationItem->new($u, $qid);
+    # invalidate memcache
+    LJ::MemCache::delete($self->_memkey);
 
-    return $self->{items}->{$qid};
+    # cache new item
+    $u->{_inbox} ||= [];
+    push @{$u->{_inbox}}, $qid;
+
+    return LJ::NotificationItem->new($u, $qid);
 }
 
 1;

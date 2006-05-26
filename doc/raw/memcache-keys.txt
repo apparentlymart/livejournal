@@ -97,3 +97,5 @@ sapct == pending schools to be processed count; cached for admins
 <uid>    uactive:<type>:<uid> == unixtime user last active for a given type of activity
 
 <uniq>   loginout:<uniq> -- set to 1, expires in five seconds, denotes user just logged in our out and is going through a redirect
+
+<uid> inbox:<uid> == list of qids for a user's notificationinbox
