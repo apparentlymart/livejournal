@@ -240,6 +240,7 @@ body<=
     $ret .= LJ::html_hidden("userid", $u->{'userid'});
 
     $ret .= "<?h1 $ML{'.add.byurl.title'} h1?><?p $ML{'.add.byurl.text'} p?>";
+    $ret .= LJ::CProd->inline($u, inline => 'Syn');
     $ret .= "<blockquote>";
     $ret .= "<p>$ML{'.feed.url'} <input size='40' maxlength='255' name='synurl' />";
     $ret .= "<p><input name='action:addcustom' type='submit' value='" . LJ::ehtml($ML{'.add'}) . "' />";
