@@ -901,6 +901,62 @@ Thanks for supporting [[sitename]]!
 
 /create.bml.username.username=username
 
+/customize/advanced.bml.advancedoptions.header=Advanced Options
+
+/customize/advanced.bml.disclaimer.header=Disclaimer
+
+/customize/advanced.bml.disclaimer<<
+Unless you're a programmer or web designer, most users should stay
+away from this area and use the <a [[aopts]]>main customization area</a>, which is designed for anybody to use.
+.
+
+/customize/advanced.bml.noauth=You could not be authenticated as the specified user.
+
+/customize/advanced.bml.upsell=Your account type does not permit you to create custom styles.
+
+/customize/advanced.bml.s1.browse=Style Browser
+
+/customize/advanced.bml.s1.browse.about=The style browser lets you browse through public styles created by other users.
+
+/customize/advanced.bml.s1.create=Create a new style
+
+/customize/advanced.bml.s1.create.about=Create a new style from scratch, or base your style on an existing public style.
+
+/customize/advanced.bml.s1.documentation.text=Advanced users can read more about the style system on <a [[aopts]]>the style documentation page</a>.
+
+/customize/advanced.bml.s1.edit=Edit or Delete an existing style
+
+/customize/advanced.bml.s1.edit.about<<
+You may only edit styles &ldquo;owned&rdquo; by your account. In order to customize
+a system style, you must first create a new style based on that system style.
+.
+
+/customize/advanced.bml.s1.embedding=Embed your journal in your website
+
+/customize/advanced.bml.s1.embedding.about=There are many different ways to embed your journal into your own website.
+
+/customize/advanced.bml.s2.doc.desc=under construction, but some good content
+
+/customize/advanced.bml.s2.doc.link=S2 Documentation
+
+/customize/advanced.bml.s2.documentation.header=Documentation
+
+/customize/advanced.bml.s2.documentation.text=Before you jump into tweaking/programming S2, you should understand how it works.
+
+/customize/advanced.bml.s2.publiclayers.desc=system layers (good reference &amp; place to learn)
+
+/customize/advanced.bml.s2.publiclayers.link=Public Layers
+
+/customize/advanced.bml.s2.yourlayers.desc=create/manage your layers
+
+/customize/advanced.bml.s2.yourlayers.link=Your Layers
+
+/customize/advanced.bml.s2.yourstyles.desc=create/manage your styles
+
+/customize/advanced.bml.s2.yourstyles.link=Your Styles
+
+/customize/advanced.bml.title=Journal Display
+
 /customize/advanced/index.bml.advancedoptions.header=Advanced Options
 
 /customize/advanced/index.bml.disclaimer.header=Disclaimer

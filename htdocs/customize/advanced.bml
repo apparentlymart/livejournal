@@ -1,10 +1,10 @@
 <?page
-title=>Journal Display
+title=><?_ml .title _ml?>
 body<=
 <?_code
 {
     use strict;
-    use vars qw(%POST %GET);
+    use vars qw(%POST %GET %ML);
     LJ::need_res( 'stc/customize.css' );
 
     BML::decl_params(authas => 'word');
@@ -16,8 +16,7 @@ body<=
 
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);
-    return LJ::bad_input("You could not be authenticated as the specified user.")
-        unless $u;
+    return LJ::bad_input($ML{'.noauth'}) unless $u;
 
     return $LJ::MSG_READONLY_USER if $u->readonly;
 
@@ -38,32 +37,31 @@ body<=
     $ret .= LJ::cmize::html_tablinks("advanced", $getextra);
     $ret .= "<div id='CurrentTab'>";
 
+    $ret .= LJ::run_hook('customize_advanced_upsell', $u);
+
+    $ret .= "<?h1 $ML{'.disclaimer.header'} h1?>";
+    $ret .= "<?p  " . BML::ml('.disclaimer', { aopts => "href='/customize/'", }) . " p?>";
+
     if ($u->prop('stylesys') == 2) {
-        BML::set_language_scope("/customize/advanced/index.bml");
-        $ret .= "<?h1 $ML{'.disclaimer.header'} h1?>";
-        $ret .= "<?p " . BML::ml('.disclaimer.text', {'aopts' => "href='$LJ::SITEROOT/customize/'"}) . " p?>";
+        $ret .= "<?h1 $ML{'.s2.documentation.header'} h1?>";
+        $ret .= "<?p  $ML{'.s2.documentation.text'}    p?><ul>";
+        $ret .= "<li><a href='$LJ::SITEROOT/doc/s2/'>$ML{'.s2.doc.link'}</a> -- $ML{'.s2.doc.desc'}</li>";
+        $ret .= "<li><a href='$LJ::SITEROOT/customize/advanced/layerbrowse.bml'>$ML{'.s2.publiclayers.link'}</a> -- $ML{'.s2.publiclayers.desc'}</li></ul>";
 
-        $ret .= "<?h1 $ML{'.documentation.header'} h1?>";
-        $ret .= "<?p  $ML{'.documentation.text'}    p?>";
-
-        $ret .= "<ul><li><a href='$LJ::SITEROOT/doc/s2/'>$ML{'.s2doc.link'}</a> -- $ML{'.s2doc.desc'}</li>";
-        $ret .= "<li><a href='$LJ::SITEROOT/customize/advanced/layerbrowse.bml'>$ML{'.publiclayers.link'}</a> -- $ML{'.publiclayers.desc'}</li></ul>";
-
-        $ret .= "<?h1 $ML{'.advancedoptions.header'} h1?>";
-        $ret .= "<ul><li><a href='$LJ::SITEROOT/customize/advanced/layers.bml$getextra'>$ML{'.yourlayers.link'}</a> -- $ML{'.yourlayers.desc'}</li>";
-        $ret .= "<li><a href='$LJ::SITEROOT/customize/advanced/styles.bml$getextra'>$ML{'.yourstyles.link'}</a> -- $ML{'.yourstyles.desc'}</li></ul>";
+        $ret .= "<?h1 $ML{'.advancedoptions.header'} h1?><ul>";
+        $ret .= "<li><a href='$LJ::SITEROOT/customize/advanced/layers.bml'>$ML{'.s2.yourlayers.link'}</a> -- $ML{'.s2.yourlayers.desc'}</li>";
+        $ret .= "<li><a href='$LJ::SITEROOT/customize/advanced/styles.bml'>$ML{'.s2.yourstyles.link'}</a> -- $ML{'.s2.yourstyles.desc'}</li></ul>";
     } else {
-        BML::set_language_scope("/styles/index.bml");
-        $ret .= "<?p $ML{'.about2'} p?>";
-        $ret .= "<?h1 Quick Links h1?>";
-        $ret .= "<dl><dt><a href='/developer/embedding.bml'>$ML{'.nav.embedding'}</a></dt>";
-        $ret .= "<dd>$ML{'.nav.embedding.about'}</dd>";
-        $ret .= "<dt><a href='/styles/create.bml$getextra'>$ML{'.nav.create'}</a></dt>";
-        $ret .= "<dd>$ML{'.nav.create.about'}</dd>";
-        $ret .= "<dt><a href='/styles/edit.bml$getextra'>$ML{'.nav.edit'}</a></dt>";
-        $ret .= "<dd>$ML{'.nav.edit.about'}</dd>";
-        $ret .= "<dt><a href='/styles/browse/'>$ML{'.nav.browse'}</a></dt>";
-        $ret .= "<dd>$ML{'.nav.browse.about'}</dd>";
+        $ret .= "<?p " . BML::ml('.s1.documentation.text', { aopts => "href='$LJ::SITEROOT/doc/server/ljp.styles.index.html'" }) . " p?>";
+        $ret .= "<?h1 $ML{'.advancedoptions.header'} h1?>";
+        $ret .= "<dl><dt><a href='/developer/embedding.bml'>$ML{'.s1.embedding'}</a></dt>";
+        $ret .= "<dd>$ML{'.s1.embedding.about'}</dd>";
+        $ret .= "<dt><a href='/styles/create.bml'>$ML{'.s1.create'}</a></dt>";
+        $ret .= "<dd>$ML{'.s1.create.about'}</dd>";
+        $ret .= "<dt><a href='/styles/edit.bml'>$ML{'.s1.edit'}</a></dt>";
+        $ret .= "<dd>$ML{'.s1.edit.about'}</dd>";
+        $ret .= "<dt><a href='/styles/browse/'>$ML{'.s1.browse'}</a></dt>";
+        $ret .= "<dd>$ML{'.s1.browse.about'}</dd>";
         $ret .= "</dl>";
     }
     $ret .= "</div>";
