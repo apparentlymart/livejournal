@@ -726,7 +726,7 @@ $cmd{'change_journal_type'} = {
     'args' => [
                'journal' => "The username of the journal that type is changing.",
                'type' => "Either 'person', 'shared', or 'community'.",
-               'owner' => "If converting from a person to a community, specify the person to be made maintainer in owner.  If going the other way from community/shared to a person, specify the account to adopt the email address and password of.",
+               'owner' => "This is required when converting a personal journal to a community or shared journal, or the reverse. If converting to a community/shared journal, 'owner' will become the maintainer. Otherwise, the account will adopt the email address and password of the 'owner'. Only users with the 'changejournaltype' priv can specify an owner for an account.",
                ],
     };
 
@@ -1139,7 +1139,7 @@ sub change_journal_type
     if ($ou) {
         # specified an owner, verify priv
         $byadmin = LJ::check_priv($remote, 'changejournaltype', '');
-        return $err->("You cannot specify a new owner for $u->{user} unless you have the changejournaltype privilege.")
+        return $err->("You cannot change $u->{user} to that journal type.")
             unless $byadmin;
     } else {
         # make sure they're a manager
