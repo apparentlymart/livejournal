@@ -9,7 +9,7 @@ die unless GetOptions(
                       'include=s' => \$opt_include,
                       'exclude=s' => \$opt_exclude,
                       'book=s' => \$opt_book,
-		      );
+                      );
 die "Unknown arguments.\n" if @ARGV;
 die "Can't exclude and include at same time!\n" if $opt_include && $opt_exclude;
 
@@ -28,7 +28,7 @@ my $VAR1;
 my $param;
 $param = "--include=$opt_include" if $opt_include;
 $param = "--exclude=$opt_exclude" if $opt_exclude;
-eval `$ENV{'LJHOME'}/bin/apidoc.pl --conf=$ENV{'LJHOME'}/doc/raw/build/api/apidoc.conf $param`;
+eval `$ENV{'LJHOME'}/doc/raw/build/apidoc.pl --conf=$ENV{'LJHOME'}/doc/raw/build/api/apidoc.conf $param`;
 my $api = $VAR1;
 
 print "<reference id=\"$opt_book.api.ref\">\n";
@@ -68,7 +68,7 @@ foreach my $func (sort keys %$api) {
         print "    <refsect1>\n";
         print "      <title>Arguments</title>\n";
         print "      <itemizedlist>\n";
-        
+
         foreach my $arg (@{$f->{'args'}}) {
             print "        <listitem><formalpara>\n";
             print "          <title>$arg->{'name'}</title>\n";
@@ -95,7 +95,7 @@ foreach my $func (sort keys %$api) {
     print "      <title>Source:</title>\n";
     print "      <para><filename>$f->{'source'}</filename></para>\n";
     print "    </refsect1>\n";
-    
+
     ### returning:
     if ($f->{'returns'}) {
         cleanse(\$f->{'returns'}, $opt_book);
@@ -104,7 +104,7 @@ foreach my $func (sort keys %$api) {
         print "      <para>$f->{'returns'}</para>\n";
         print "    </refsect1>\n";
     }
-    
+
     print "  </refentry>\n";
 }
 
