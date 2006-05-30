@@ -567,6 +567,14 @@
      $body .= "<a href='$LJ::SITEROOT/allpics.bml?user=$user'><img src='$LJ::USERPIC_ROOT/$picid/$userid' width='$pic{$picid}->{'width'}' height='$pic{$picid}->{'height'}' border='0' alt='$user $ML{'.allpics'}' /></a>";
      $body .= "<br /><a href='$LJ::SITEROOT/allpics.bml?user=$user'><font size='1' style='white-space: nowrap'>$ML{'.allpics'}</font></a>";
      $body .= "</div>\n";
+ } else {
+     my $nopic = "<i>($ML{'.userpic.none'})</i>";
+     $body .= "<div id='ID_pic'>\n";
+     $body .= "  <div style='width: 100px; height: 100px; float: left; text-align: center; border: 1px solid #ddd'><br />";
+     $body .= $remote_isowner ? "<a href='$LJ::SITEROOT/editpics.bml'>$nopic</a>"
+                              : $nopic;
+     $body .= "  </div>\n";
+     $body .= "</div>\n";
  }
  # /picture
 

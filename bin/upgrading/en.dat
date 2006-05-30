@@ -5860,6 +5860,8 @@ This could be because: <ol>
 
 /userinfo.bml.userinfo.name=User Information
 
+/userinfo.bml.userpic.none=no default userpic
+
 Actionlink=[[[link]]]
 
 Backlink=[<a href="[[link]]">&lt;&lt;</a> [[text]]]
