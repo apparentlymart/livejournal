@@ -241,9 +241,9 @@ sub trans
     if ($LJ::UNIQ_COOKIES && $r->is_initial_req) {
 
         # if cookie exists, check for sysban
-        my ($uniq, $uniq_time);
-        if (Apache->header_in("Cookie") =~ /\bljuniq\s*=\s*([a-zA-Z0-9]{15}):(\d+)/) {
-            ($uniq, $uniq_time) = ($1, $2);
+        my ($uniq, $uniq_time, $uniq_extra);
+        if (Apache->header_in("Cookie") =~ /\bljuniq\s*=\s*([a-zA-Z0-9]{15}):(\d+)(.*)/) {
+            ($uniq, $uniq_time, $uniq_extra) = ($1, $2, $3);
             $r->notes("uniq" => $uniq);
             if (LJ::sysban_check('uniq', $uniq) && index($uri, $LJ::BLOCKED_BOT_URI) != 0) {
                 $r->handler("perl-script");
@@ -259,7 +259,10 @@ sub trans
             $uniq ||= LJ::rand_chars(15);
 
             my $uniq_value = "$uniq:$now";
-            $uniq_value    = LJ::run_hook('transform_ljuniq_value', { value => $uniq_value }) || $uniq_value;
+            $uniq_value    = LJ::run_hook('transform_ljuniq_value', 
+                                          { value => $uniq_value,
+                                            extra => $uniq_extra }) || $uniq_value;
+
             # set uniq cookies for all cookie_domains
             my @domains = ref $LJ::COOKIE_DOMAIN ? @$LJ::COOKIE_DOMAIN : ($LJ::COOKIE_DOMAIN);
             foreach my $dom (@domains) {
