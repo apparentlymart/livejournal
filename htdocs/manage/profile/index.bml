@@ -709,7 +709,7 @@ _code?>
                "<li><a href='$LJ::SITEROOT/manage/profile'>$ML{'.success.editprofile'}</a></li>" .
                "<li><a href='$LJ::SITEROOT/editpics.bml'>$ML{'.success.editpics'}</a></li></ul>" .
                "</td><td style='padding-left: 2em'>" .
-               LJ::CProd->full_box_for($u, width => 300) .
+               LJ::CProd->full_box_for($remote, width => 300) .
                "</td></tr></table>";
     }
 
