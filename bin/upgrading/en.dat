@@ -5944,6 +5944,26 @@ cprod.feeds.text.v4=
 
 cprod.feeds.text.v5=
 
+cprod.friendsfriendsinline.link2.v1=Paid accounts
+
+cprod.friendsfriendsinline.link2.v2=
+
+cprod.friendsfriendsinline.link2.v3=
+
+cprod.friendsfriendsinline.link2.v4=
+
+cprod.friendsfriendsinline.link2.v5=
+
+cprod.friendsfriendsinline.text2.v1=Sorry, only [[link]] permit showing friends of friends.
+
+cprod.friendsfriendsinline.text2.v2=
+
+cprod.friendsfriendsinline.text2.v3=
+
+cprod.friendsfriendsinline.text2.v4=
+
+cprod.friendsfriendsinline.text2.v5=
+
 cprod.polls.link.v1=poll creation wizard
 
 cprod.polls.link.v2=
