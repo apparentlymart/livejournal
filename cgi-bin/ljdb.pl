@@ -468,18 +468,11 @@ sub release_lock
 
 # <LJFUNC>
 # name: LJ::disconnect_dbs
-# des: Clear cached DB handles and trackers/keepers to partitioned DBs.
+# des: Clear cached DB handles
 # </LJFUNC>
 sub disconnect_dbs {
     # clear cached handles
     $LJ::DBIRole->disconnect_all( { except => [qw(logs)] });
-
-    # and cached trackers/keepers to partitioned dbs
-    while (my ($role, $tk) = each %LJ::REQ_DBIX_TRACKER) {
-        $tk->disconnect if $tk;
-    }
-    %LJ::REQ_DBIX_TRACKER = ();
-    %LJ::REQ_DBIX_KEEPER = ();
 }
 
 # given two db roles, returns true only if the two roles are for sure
@@ -504,7 +497,7 @@ sub use_diff_db {
 sub nodb {
     shift @_ if
         ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db" ||
-        ref $_[0] eq "DBIx::StateKeeper" || ref $_[0] eq "Apache::DBI::db";
+        ref $_[0] eq "Apache::DBI::db";
 }
 
 sub dbtime_callback {
@@ -519,7 +512,6 @@ sub dbtime_callback {
 
 
 sub isdb { return ref $_[0] && (ref $_[0] eq "DBI::db" ||
-                                ref $_[0] eq "DBIx::StateKeeper" ||
                                 ref $_[0] eq "Apache::DBI::db"); }
 
 

@@ -1670,8 +1670,6 @@ sub start_request
     %LJ::REQ_CACHE_REL = ();          # relations from LJ::check_rel()
     %LJ::REQ_CACHE_DIRTY = ();        # caches calls to LJ::mark_dirty()
     %LJ::S1::REQ_CACHE_STYLEMAP = (); # styleid -> uid mappings
-    %LJ::REQ_DBIX_TRACKER = ();       # canonical dbrole -> DBIx::StateTracker
-    %LJ::REQ_DBIX_KEEPER = ();        # dbrole -> DBIx::StateKeeper
     %LJ::REQ_HEAD_HAS = ();           # avoid code duplication for js
     %LJ::NEEDED_RES = ();             # needed resources (css/js/etc):
     @LJ::NEEDED_RES = ();             # needed resources, in order requested (implicit dependencies)
@@ -1750,7 +1748,7 @@ sub start_request
 
 # <LJFUNC>
 # name: LJ::end_request
-# des: Clears cached DB handles/trackers/keepers (if $LJ::DISCONNECT_DBS is
+# des: Clears cached DB handles (if $LJ::DISCONNECT_DBS is
 #      true) and disconnects MemCache handles (if $LJ::DISCONNECT_MEMCACHE is
 #      true).
 # </LJFUNC>
