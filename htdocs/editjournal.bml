@@ -221,7 +221,7 @@ body<=
                 $entry->{"prop_" . $res{"prop_${i}_name"}} = $res{"prop_${i}_value"};
             }
             foreach ( keys %POST ) { $entry->{$_} = %POST->{$_}; }
-            $entry->{'richtext_default'} = $entry->{"prop_used_rte"} ? 1 : 0,
+    #        $entry->{'richtext_default'} = $entry->{"prop_used_rte"} ? 1 : 0,
 
             my $onload = "shift_contents(); ";
             $ret .= LJ::entry_form($entry, \$$head, \$onload);
