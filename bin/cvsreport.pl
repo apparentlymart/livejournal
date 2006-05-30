@@ -22,5 +22,5 @@ if ($LJ::IS_LJCOM_PRODUCTION) {
 # (useful if you tab-complete filenames)
 $_ =~ s!\Q$ENV{'LJHOME'}\E/?!! foreach (@ARGV);
 
-exit system("$ENV{'LJHOME'}/bin/multicvs.pl",
-            "--conf=$ENV{'LJHOME'}/cvs/multicvs.conf", @paranoia, @ARGV);
+exec("$ENV{'LJHOME'}/bin/vcv",
+     "--conf=$ENV{'LJHOME'}/cvs/multicvs.conf", @paranoia, @ARGV);
