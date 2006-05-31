@@ -19,6 +19,17 @@ propgroup presentation {
       des = "Margin size on the top of the content area";
       note = "You can use this to shift your journal contents down in order to display a background image at the top of your journal.  Don't forget to include units; e.g. px, %";
   }
+  property string entryborder_size {
+      des = "Size of borders around entries";
+      note = "Don't forget to include the units, e.g. px";
+  }
+  property string entryborder_style {
+      des = "Style of borders around entries";
+      values = "solid|Solid|dashed|Dashed|dotted|Dotted|double|Double|hidden|Invisible";
+  }
+  property bool transparent {
+      des = "Make journal content transparent instead of using given background colors";
+  }
   property bool show_entry_userpic {
       des = "Display your userpic with your entries";
   }
@@ -30,15 +41,25 @@ propgroup presentation {
       des = "Toggle to show the next, memory, edit, etc icons on the entry view page";
   }
   property use external_stylesheet;
+  property use linklist_support;
+  property string counter_code {
+      des = "If you have an external web counter, you can enter the HTML for it here";
+      note = "Your counter will appear in a tab at the bottom of your journal.";
+      string_mode = "html-oneline";
+  }
 }
 set content_width = "100%";
 set content_alignment = "left";
 set content_top_margin = "0";
+set entryborder_size = "";
+set entryborder_style = "hidden";
+set transparent = false;
 set show_entry_userpic = false;
 set page_recent_items = 20;
 set page_friends_items = 25;
 set view_entry_disabled = false;
 set show_entrynav_icons = true;
+set counter_code = "";
 
 propgroup colors {
   property Color body_bgcolor {
@@ -52,6 +73,10 @@ propgroup colors {
   property Color main_fgcolor {
       des = "Color of text on main text areas";
       s1color = "page_text";
+  }
+  property Color border_color {
+      des = "Color of borders around entries";
+      note = "If you don't set a border size and style on the \"Presentation\" section, this won't have any effect.";
   }
   property Color headerbar_bgcolor {
       des = "Background color of header bars";
@@ -111,6 +136,7 @@ propgroup colors {
 set body_bgcolor = "#6666cc";
 set main_bgcolor = "#ffffff";
 set main_fgcolor = "#000000";
+set border_color = "#000000";
 set headerbar_bgcolor = "#c0c0ff";
 set headerbar_fgcolor = "#000000";
 set metabar_bgcolor = "#eeeeff";
@@ -308,6 +334,9 @@ td.metabar {
     background-color:    $*metabar_bgcolor;
     color:               $*metabar_fgcolor;
 }
+.entry {
+    border: $*entryborder_size $*entryborder_style $*border_color;
+}
 .subject {
     color:               $*page_subtitle_color;
     font-weight:         bold;
@@ -343,7 +372,15 @@ td.weekday_empty {
     font-size:           14pt;
     font-weight:         bold;
 }
-
+""";
+if ($*transparent) {
+"""
+table.main, th.headerbar, td.metabar, th.monthheader, th.daysheader, td.weekday_empty {
+    background: transparent !important;
+}
+""";
+}
+"""
 $*custom_css
     """;
 }
@@ -456,6 +493,9 @@ $this->print_linklist();
 
     "<tr><td><table class='main' align='right'><tr>";
 
+    if ($*counter_code != "") {
+        """<td>$*counter_code</td><td class="body">&nbsp;</td>""";
+    }
     print $website; "<td>"; server_sig(); "</td></tr>";
 
     "</table></td></tr></table>";
@@ -519,7 +559,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
       "</td>";
 
     # Entry
-      "<td style='text-align:left'>";
+      "<td class='entry' style='text-align:left'>";
 
       if ($p.view == "entry" and $*show_entrynav_icons)
       {
