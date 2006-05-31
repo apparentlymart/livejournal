@@ -7,6 +7,14 @@ layerinfo previews = "classic/classic.jpg";
 layerinfo des = "The original LiveJournal style: simple and effective.";
 
 propgroup presentation {
+  property string content_width {
+      des = "Content area width";
+      note = "Don't forget to include units; e.g. px, %";
+  }
+  property string content_alignment {
+      des = "Alignment of the content area";
+      values = "left|Left|center|Center|right|Right";
+  }
   property bool show_entry_userpic {
       des = "Display your userpic with your entries";
   }
@@ -15,10 +23,12 @@ propgroup presentation {
   property use view_entry_disabled;
   property use use_shared_pic;
   property bool show_entrynav_icons {
-    des = "Toggle to show the next, memory, edit, etc icons on the entry view page";
+      des = "Toggle to show the next, memory, edit, etc icons on the entry view page";
   }
   property use external_stylesheet;
 }
+set content_width = "100%";
+set content_alignment = "left";
 set show_entry_userpic = false;
 set page_recent_items = 20;
 set page_friends_items = 25;
@@ -159,6 +169,15 @@ set tags_aware = true;
 
 function print_stylesheet ()
 {
+    var string align = "";
+    if ($*content_alignment == "center") {
+        $align = "margin-left: auto; margin-right: auto;";
+    } elseif ($*content_alignment == "right") {
+        $align = "float: right;";    
+    } else {
+        $align = "float: left;";
+    }
+
     if(clean_url($*page_background_image) != "") {
       """body {
     background-image: url("$*page_background_image");
@@ -204,6 +223,10 @@ a:active {
 table.main {
     background-color:    $*main_bgcolor;
     color:               $*main_fgcolor;
+}
+#whole {
+    width:               $*content_width;
+    $align
 }
 .page_title {
     color:               $*page_title_color;
@@ -352,6 +375,7 @@ function Page::print ()
     """<tr><td valign="top">""";
  }
 """
+  <table id="whole" cellpadding="0" cellspacing="0"><tr><td>
   <table class="main" width="100%"><tr><td>
     $userpic
     <span class="page_title">$title</span>
@@ -363,15 +387,15 @@ $this->print_linklist();
 
     $this->lay_nav_blurb();
     $this->print_body();
-    "</td></tr></table>\n";
+    "</td></tr></table></td></tr>\n";
 
     ### Affliations
 
-    "<table class='main' align='right'><tr>";
+    "<tr><td><table class='main' align='right'><tr>";
 
     print $website; "<td>"; server_sig(); "</td></tr>";
 
-    "</table>";
+    "</table></td></tr></table>";
     if (viewer_sees_ads()) {
         if ($.view == "recent" or $.view == "friends") {
             """<div style="text-align: center; margin-top: 50px;">""";
