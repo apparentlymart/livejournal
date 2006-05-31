@@ -15,6 +15,10 @@ propgroup presentation {
       des = "Alignment of the content area";
       values = "left|Left|center|Center|right|Right";
   }
+  property string content_top_margin {
+      des = "Margin size on the top of the content area";
+      note = "You can use this to shift your journal contents down in order to display a background image at the top of your journal.  Don't forget to include units; e.g. px, %";
+  }
   property bool show_entry_userpic {
       des = "Display your userpic with your entries";
   }
@@ -29,6 +33,7 @@ propgroup presentation {
 }
 set content_width = "100%";
 set content_alignment = "left";
+set content_top_margin = "0";
 set show_entry_userpic = false;
 set page_recent_items = 20;
 set page_friends_items = 25;
@@ -400,6 +405,10 @@ function Page::print ()
                            "["+lang_viewname($v)+"]" :
                            "[<a href='$.view_url{$v}'>"+lang_viewname($v)+"</a>]");
     }
+    var string margin = "";
+    if ($*content_top_margin != "0") {
+        $margin = " style=\"margin-top: $*content_top_margin;\"";
+    }
 """
 <html>
   <head>
@@ -423,11 +432,13 @@ function Page::print ()
 """;
  $this->print_control_strip();
  if (viewer_sees_ads()) {
-    """<table width="100%" height="100%">""";
+    """<table width="100%" height="100%"$margin>""";
     """<tr><td valign="top">""";
  }
 """
-  <table id="whole" cellpadding="0" cellspacing="0"><tr><td>
+  <table id=\"whole\" cellpadding=\"0\" cellspacing=\"0\"""";
+  if (not viewer_sees_ads()) { "$margin"; }
+"""><tr><td>
   <table class="main" width="100%"><tr><td>
     $userpic
     <span class="page_title">$title</span>

@@ -484,6 +484,7 @@ function Page::print ()
     var string title = $this->title();
 
     var string margin = "";
+    var string margin_top = ""; # Only used if ads are on
     
     if ($*box_alignment == "left" and $*box_margin != "0") {
         $margin = "margin-left: $*box_margin;";
@@ -491,7 +492,11 @@ function Page::print ()
         $margin = "margin-right: $*box_margin;";
     }
     if ($*box_top_margin != "0") {
-        $margin = $margin + "margin-top: $*box_top_margin;";
+        if (viewer_sees_ads()) {
+           $margin_top = " style=\"margin-top: $*box_top_margin;\"";
+        } else {
+           $margin = $margin + "margin-top: $*box_top_margin;";
+        }
     }
     if ($margin != "") {
         $margin = " style=\"" + $margin + "\"";
@@ -526,7 +531,7 @@ function Page::print ()
 """;
 $this->print_control_strip();
 if (viewer_sees_ads()) {
-    """<table width="100%" height="100%">""";
+    """<table width="100%" height="100%"$margin_top>""";
     """<tr><td valign="top">""";
 }
 """
