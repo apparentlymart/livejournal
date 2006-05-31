@@ -20,7 +20,7 @@ my %args = (
             arg2    => 69,
             );
 
-my $ps = LJ::Subscription::Pending->new(
+my $ps = LJ::Subscription::Pending->new($u,
                                         %args
                                         );
 
@@ -32,7 +32,7 @@ ok(!@subs, "Didn't subscribe");
 my $frozen = $ps->freeze;
 like($frozen, qr/\d+-\d+/, "Froze");
 
-my $thawed = LJ::Subscription::Pending->thaw($frozen);
+my $thawed = LJ::Subscription::Pending->thaw($frozen, $u);
 ok($thawed, "Thawed");
 
 is_deeply($ps, $thawed, "Got same subscription back");

@@ -26,6 +26,26 @@ sub new_by_id {
     return $class->new_from_row($row);
 }
 
+sub freeze {
+    my $self = shift;
+    return "subid-" . $self->owner->{user} . '-' . $self->subid;
+}
+
+sub thaw {
+    my ($class, $data, $u) = @_;
+    my ($type, $user, $subid) = split("-", $data);
+
+    die "Invalid type: $type" unless $type eq 'subid';
+
+    unless ($u) {
+        die "no user" unless $user;
+        $u = LJ::get_authas_user($user);
+        die "Invalid user $user" unless $u;
+    }
+
+    return $class->new_by_id($u, $subid);
+}
+
 sub subscriptions_of_user {
     my ($class, $u) = @_;
     croak "subscriptions_of_user requires a valid 'u' object"
@@ -112,6 +132,7 @@ sub delete {
 sub new_from_row {
     my ($class, $row) = @_;
 
+    return undef unless $row;
     my $self = bless {%$row}, $class;
     # TODO validate keys of row.
     return $self;
@@ -228,9 +249,19 @@ sub ntypeid {
     return $self->{ntypeid};
 }
 
+sub notify_class {
+    my $self = shift;
+    return LJ::NotificationMethod->class($self->{ntypeid});
+}
+
 sub etypeid {
     my $self = shift;
     return $self->{etypeid};
+}
+
+sub event_class {
+    my $self = shift;
+    return LJ::Event->class($self->{etypeid});
 }
 
 # returns the owner (userid) of the subscription

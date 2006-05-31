@@ -5,11 +5,15 @@ package LJ::Subscription::Pending;
 use base 'LJ::Subscription';
 use strict;
 use warnings;
-use Carp qw(croak);
+use Carp qw(croak carp);
 use Class::Autouse qw (LJ::Event LJ::NotificationMethod);
 
 sub new {
-    my ($class, %opts) = @_;
+    my $class = shift;
+    my $u = shift;
+    my %opts = @_;
+
+    die "No user" unless $u;
 
     my $journal = LJ::want_user(delete $opts{journal}) or croak "No journal";
     my $etypeid = delete $opts{etypeid};
@@ -34,6 +38,7 @@ sub new {
 
 
     my $self = {
+        u       => $u,
         journal => $journal,
         etypeid => $etypeid,
         ntypeid => $ntypeid,
@@ -49,9 +54,9 @@ sub new {
 sub create { die "Create called on LJ::Subscription::Pending" }
 
 sub commit {
-    my ($self, $u) = @_;
+    my ($self) = @_;
 
-    return $u->subscribe(
+    return $self->{u}->subscribe(
                          etypeid => $self->{etypeid},
                          ntypeid => $self->{ntypeid},
                          journal => $self->{journal},
@@ -60,13 +65,23 @@ sub commit {
                          );
 }
 
+# class method
 sub thaw {
-    my ($class, $data) = @_;
-    my ($userid, $etypeid, $ntypeid, $arg1, $arg2) = split('-', $data);
+    my ($class, $data, $u) = @_;
+    my ($type, $user, $journalid, $etypeid, $ntypeid, $arg1, $arg2) = split('-', $data);
 
-    return undef unless $userid && $etypeid;
+    die "Invalid thawed data" unless $type eq 'pending';
+
+    unless ($u) {
+        die "no user" unless $user;
+        $u = LJ::get_authas_user($user);
+        die "Invalid user $user" unless $u;
+    }
+
+    return undef unless $journalid && $etypeid;
     return $class->new(
-                       journal => $userid,
+                       $u,
+                       journal => $journalid,
                        ntypeid => $ntypeid,
                        etypeid => $etypeid,
                        arg1    => $arg1,
@@ -74,15 +89,17 @@ sub thaw {
                        );
 }
 
+# instance method
 sub freeze {
     my $self = shift;
-    my $userid = $self->{journal}->{userid};
+    my $user = $self->{u}->{user};
+    my $journalid = $self->{journal}->{userid};
     my $arg1 = $self->{arg1} + 0;
     my $arg2 = $self->{arg2} + 0;
     my $etypeid = $self->{etypeid};
     my $ntypeid = $self->{ntypeid};
 
-    return join('-', ($userid, $etypeid, $ntypeid, $arg1, $arg2));
+    return join('-', ('pending', $user, $journalid, $etypeid, $ntypeid, $arg1, $arg2));
 }
 
 
