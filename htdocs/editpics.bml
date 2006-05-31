@@ -618,8 +618,7 @@
             };
 
         $body .= BML::ml('.piclimitstatus', {current => scalar @userpics, max => $max});
-        my $inline = LJ::CProd->inline($u, inline => 'EditPics');
-        $body .= $inline;
+        $body .= LJ::CProd->inline($u, inline => 'EditPics');
         $body .= "</div>";
 
         $body .= "<table>";
