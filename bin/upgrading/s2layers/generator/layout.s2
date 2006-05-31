@@ -684,7 +684,7 @@ if (viewer_sees_ads()) {
 function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_text)
 {
     var string datetime;
-    $datetime = $e.time->date_format($*date_format)+"$*text_btwn_comments<b>"
+    $datetime = $e.time->date_format($*date_format)+"$*btwn_datetime<b>"
         + $e.time->time_format($*time_format) + "</b>";
 
     """
@@ -1215,7 +1215,7 @@ function ReplyPage::print_body () {
         return;
     }
     var string datetime;
-    $datetime = $.replyto.time->date_format($*date_format)+"$*text_btwn_comments<b>" + $.replyto.time->time_format($*time_format) + "</b>";
+    $datetime = $.replyto.time->date_format($*date_format)+"$*btwn_datetime<b>" + $.replyto.time->time_format($*time_format) + "</b>";
     """<table width="$*box_width" cellpadding="2" cellspacing="0" border="0" summary="" class="entrybox">
 <tr align='left'>
 <td bgcolor="$*stronger_back" align="center">
