@@ -534,6 +534,7 @@ UPDATE priv_list SET des='Allows a user to approve or deny entries that are subm
 INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES ('Allows a user to edit site text in a given language. arg=Unique language code, optionally appended by |domainid.domaincode', '1', 'translate', 'Translate/Update Text', 'general');
 UPDATE priv_list SET des='Allows a user to edit site text in a given language. arg=Unique language code, optionally appended by |domainid.domaincode',is_public='1',privname='Translate/Update Text',scope='general' WHERE privcode='translate';
 INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES ('Allows a user to make use of the stock answers in a support category. arg=Unique support category', '1', 'supportviewstocks', 'View stock answers', 'general');
+UPDATE priv_list SET des='Allows a user to make use of the stock answers in a support category. arg=Unique support category',is_public='1',privname='View stock answers',scope='general' WHERE privcode='supportviewstocks';
 INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when wrong username/password is used.', 'failed_login');
 UPDATE ratelist SET des='Logged when wrong username/password is used.' WHERE name='failed_login';
 INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when a user sends a friend invite', 'invitefriend');
