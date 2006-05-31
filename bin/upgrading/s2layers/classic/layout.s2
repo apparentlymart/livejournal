@@ -151,11 +151,16 @@ propgroup images {
 	note = "Not supported in all browsers, but allows for the background image to be in a fixed position when scrolling.";
 	values = "scroll|Scroll|fixed|Fixed";
   }
+  property string img_btwn_comments {
+    des = "URL to an image to be used between your comment links";
+    note = "If you specify an image to use, it will replace any text between the comment links.";
+  }
 }
 set page_background_image = "";
 set page_background_repeat = "repeat";
 set page_background_position = "center";
 set page_background_scrolling = "scroll";
+set img_btwn_comments = "";
 
 propgroup text {
   property use text_post_comment;
@@ -163,7 +168,52 @@ propgroup text {
   property use text_post_comment_friends;
   property use text_read_comments_friends;
   property use text_website_default_name;
+
+  property string text_left_comments {
+        des = "Text to be used in front of your comment links";
+  }
+  property string text_btwn_comments {
+        des = "Text to be used between your comment links";
+        note = "If you specified an image to be used between your comments links in the \"Images\" section, then this option will not have any effect.";
+  }
+  property string text_right_comments {
+        des = "Text to be used at the end of your comment links";
+  }
+  property string date_format {
+        des = "Date format for entries";
+  }
+  property string time_format {
+        des = "Time format for entries";
+  }
+  property string datetime_comments_format {
+        des = "Date and time format for comments";
+  }
+  property string date_daypage_format {
+        des = "Date format for the day page";
+  }
+  property string date_daypage_skip_format {
+        des = "Date format for the skip links on the day page";
+  }
 }
+set text_left_comments = "(";
+set text_btwn_comments = " | ";
+set text_right_comments = ")";
+set date_format = "%%month%% %%dayord%%, %%yyyy%%";
+set time_format = "%%hh%%:%%min%% %%a%%m";
+set datetime_comments_format = "%%month%% %%dayord%%, %%yyyy%% %%hh%%:%%min%% %%a%%m";
+set date_daypage_format = "%%month%% %%dayord%%, %%yyyy%%";
+set date_daypage_skip_format = "%%yyyy%%/%%mm%%/%%dd%%";
+
+propgroup customcss {
+  property string custom_css {
+        des = "Custom Stylesheet";
+        note = "If you'd like to customize this style from scratch and are familiar with CSS, enter it here";
+        cols = 80;
+        rows = 20;
+        string_mode = "css";
+  }
+}
+set custom_css = "";
 
 set tags_aware = true;
 
@@ -288,6 +338,8 @@ td.weekday_empty {
     font-size:           14pt;
     font-weight:         bold;
 }
+
+$*custom_css
     """;
 }
 
@@ -412,7 +464,7 @@ $this->print_linklist();
 
 function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_text)
 {
-    var string time = $e.time->time_format();
+    var string time = $e.time->time_format($*time_format);
     var string userpic = "";
     if (defined $e.userpic)
     {
@@ -421,7 +473,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     if ($e.new_day or $p.view == "entry")
     {
         "<tr><th colspan='2' align='left' class='headerbar'>";
-        print $e.time->date_format("%%month%% %%dayord%%, %%yyyy%%");
+        print $e.time->date_format($*date_format);
         "</th></tr>\n";
     } elseif ($p.view == "day") {
         "<tr><th class='headerbar'>Time</td><td class='headerbar' style='width: 100%'>Event</th></tr>";
@@ -568,17 +620,21 @@ function FriendsPage::lay_nav_blurb ()
 function CommentInfo::print ()
 {
     if ($.show_readlink or $.show_postlink) {
-        "<p class='comments'>(";
+        "<p class='comments'>$*text_left_comments";
         if ($.show_readlink) {
             $this->print_readlink();
         }
         if ($.show_postlink and $.show_readlink) {
-            "&nbsp;|&nbsp;";
+            if (clean_url($*img_btwn_comments) != "") {
+                """ <img src="$*img_btwn_comments" alt="" /> """;
+            } else {
+                "$*text_btwn_comments";
+            }
         }
         if ($.show_postlink) {
             $this->print_postlink();
         }
-        ")</p>";
+        "$*text_right_comments</p>";
     }
 }
 
@@ -657,7 +713,7 @@ function YearWeek::print ()
 
 function DayPage::print_body ()
 {
-    "<h2 class='daypage_header'>"; print $.date->date_format("%%month%% %%dayord%%, %%yyyy%%"); "</h2>";
+    "<h2 class='daypage_header'>"; print $.date->date_format($*date_daypage_format); "</h2>";
     if (not $.has_entries)
     {
         "<blockquote><em>"; print ehtml($*text_noentries_day); "</em></blockquote>";
@@ -674,7 +730,7 @@ function DayPage::print_body ()
 
     "<td width='33%' align='left'><a href='$.prev_url'>$tprev</a></td>\n";
     "<td align='center' width='33%'>";
-      "<strong>"; print $.date->date_format("%%yyyy%%/%%mm%%/%%dd%%"); "</strong><br />";
+      "<strong>"; print $.date->date_format($*date_daypage_skip_format); "</strong><br />";
       "[<a href='"; print $this.journal->base_url(); "/calendar'>$*text_view_archive</a>]</td>\n";
     "<td width='33%' align='right'><a href='$.next_url'>$tnext</a></td>\n";
 
@@ -755,7 +811,7 @@ function EntryPage::print_comment (Comment c) {
       print "<table>";
       print "<tr><th align='right'>From:</th><td>$poster</td></tr>\n";
       print "<tr><th align='right'>Date:</th><td style='white-space: nowrap'>";
-        print $c->time_display("long", "") + "</td></tr>";
+        print $c->time_display($*datetime_comments_format, "none") + "</td></tr>";
       if ($c.metadata{"poster_ip"}) { print "<tr><th align='right'>IP Address:</th><td>(" + $c.metadata{"poster_ip"} + ")</td></tr>"; }
     "</table></td>";
 
@@ -796,7 +852,7 @@ function ReplyPage::print_body()
         print "<tr><th class='headerbar'>$*text_reply_nocomments_header</th></tr><tr><td>$*text_reply_nocomments</td></tr></table>";
         return;
     }
-    var string time = $.replyto.time->time_format();
+    var string time = $.replyto.time->time_format($*time_format);
     var string userpic = "";
     if (defined $.replyto.userpic)
     {
