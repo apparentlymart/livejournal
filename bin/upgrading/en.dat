@@ -5451,7 +5451,7 @@ This could be because: <ol>
 
 /tools/textmessage.bml.enter.user.submit=Proceed...
 
-/tools/textmessage.bml.enter.user.text=The following text messaging service providers are supported.
+/tools/textmessage.bml.enter.user.text2=Enter the LiveJournal username of the person you'd like to send a text message to:
 
 /tools/textmessage.bml.error.notloggedin.head=Not logged in
 
