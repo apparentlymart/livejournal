@@ -6,13 +6,16 @@ layerinfo des = "SixApart's standard HTML structure for blogs, to be styled with
 propgroup presentation {
     property bool use_6a_base {
         des = "Use 'Base Weblog' styles";
+        note = "You should leave this option on unless you are using your own stylesheet.";
     }
     set use_6a_base = true;
 
+    # This property is now set in a theme layer, but default is still Powell Street
     property string base_theme {
         des = "Base Theme";
         note = "You can also list your own stylesheet on the \"Custom CSS\" tab.";
         values = "__none|(None)|april|April|baby|Baby|beckett|Beckett|bluecrush|Blue Crush|bonjour|Bonjour Chatette|bryant|Bryant|classy|Classy|earth|Earth|green|Green|folio|Folio|forestgreen|Forest Green|knitting|Knitting|powell-street|Powell Street|masala|Masala|minimalist|Minimalist|porpoise|Porpoise|purplecrush|Purple Crush|stevenson|Stevenson|sunburned|Sunburned|stitch|Stitch|travel|Travel|wedding|Wedding";
+        noui = 1;
     }
     set base_theme = "powell-street";
 
@@ -142,7 +145,8 @@ propgroup text {
 
 propgroup customcss {
     property string linked_stylesheet {
-        des = "If you would like to use a stylesheet that is not in the list on the \"Presentation\" tab, enter the URL here";
+        des = "Custom External Stylesheet";
+        note = "If you selected \"(None)\" as your theme and have a custom external stylesheet that you'd like to use instead, enter its URL here.";
     }
     set linked_stylesheet = "";
 

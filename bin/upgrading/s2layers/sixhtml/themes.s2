@@ -1,0 +1,137 @@
+#NEWLAYER: sixhtml/__none
+layerinfo "type" = "theme";
+layerinfo "name" = "(None)";
+layerinfo "redist_uniq" = "sixhtml/__none";
+set base_theme = "__none";
+
+#NEWLAYER: sixhtml/april
+layerinfo "type" = "theme";
+layerinfo "name" = "April";
+layerinfo "redist_uniq" = "sixhtml/april";
+set base_theme = "april";
+
+#NEWLAYER: sixhtml/baby
+layerinfo "type" = "theme";
+layerinfo "name" = "Baby";
+layerinfo "redist_uniq" = "sixhtml/baby";
+set base_theme = "baby";
+
+#NEWLAYER: sixhtml/beckett
+layerinfo "type" = "theme";
+layerinfo "name" = "Beckett";
+layerinfo "redist_uniq" = "sixhtml/beckett";
+set base_theme = "beckett";
+
+#NEWLAYER: sixhtml/bluecrush
+layerinfo "type" = "theme";
+layerinfo "name" = "Blue Crush";
+layerinfo "redist_uniq" = "sixhtml/bluecrush";
+set base_theme = "bluecrush";
+
+#NEWLAYER: sixhtml/bonjour
+layerinfo "type" = "theme";
+layerinfo "name" = "Bonjour Chatette";
+layerinfo "redist_uniq" = "sixhtml/bonjour";
+set base_theme = "bonjour";
+
+#NEWLAYER: sixhtml/bryant
+layerinfo "type" = "theme";
+layerinfo "name" = "Bryant";
+layerinfo "redist_uniq" = "sixhtml/bryant";
+set base_theme = "bryant";
+
+#NEWLAYER: sixhtml/classy
+layerinfo "type" = "theme";
+layerinfo "name" = "Classy";
+layerinfo "redist_uniq" = "sixhtml/classy";
+set base_theme = "classy";
+
+#NEWLAYER: sixhtml/earth
+layerinfo "type" = "theme";
+layerinfo "name" = "Earth";
+layerinfo "redist_uniq" = "sixhtml/earth";
+set base_theme = "earth";
+
+#NEWLAYER: sixhtml/green
+layerinfo "type" = "theme";
+layerinfo "name" = "Green";
+layerinfo "redist_uniq" = "sixhtml/green";
+set base_theme = "green";
+
+#NEWLAYER: sixhtml/folio
+layerinfo "type" = "theme";
+layerinfo "name" = "Folio";
+layerinfo "redist_uniq" = "sixhtml/folio";
+set base_theme = "folio";
+
+#NEWLAYER: sixhtml/forestgreen
+layerinfo "type" = "theme";
+layerinfo "name" = "Forest Green";
+layerinfo "redist_uniq" = "sixhtml/forestgreen";
+set base_theme = "forestgreen";
+
+#NEWLAYER: sixhtml/knitting
+layerinfo "type" = "theme";
+layerinfo "name" = "Knitting";
+layerinfo "redist_uniq" = "sixhtml/knitting";
+set base_theme = "knitting";
+
+#NEWLAYER: sixhtml/powell-street
+layerinfo "type" = "theme";
+layerinfo "name" = "Powell Street";
+layerinfo "redist_uniq" = "sixhtml/powell-street";
+set base_theme = "powell-street";
+
+#NEWLAYER: sixhtml/masala
+layerinfo "type" = "theme";
+layerinfo "name" = "Masala";
+layerinfo "redist_uniq" = "sixhtml/masala";
+set base_theme = "masala";
+
+#NEWLAYER: sixhtml/minimalist
+layerinfo "type" = "theme";
+layerinfo "name" = "Minimalist";
+layerinfo "redist_uniq" = "sixhtml/minimalist";
+set base_theme = "minimalist";
+
+#NEWLAYER: sixhtml/porpoise
+layerinfo "type" = "theme";
+layerinfo "name" = "Porpoise";
+layerinfo "redist_uniq" = "sixhtml/porpoise";
+set base_theme = "porpoise";
+
+#NEWLAYER: sixhtml/purplecrush
+layerinfo "type" = "theme";
+layerinfo "name" = "Purple Crush";
+layerinfo "redist_uniq" = "sixhtml/purplecrush";
+set base_theme = "purplecrush";
+
+#NEWLAYER: sixhtml/stevenson
+layerinfo "type" = "theme";
+layerinfo "name" = "Stevenson";
+layerinfo "redist_uniq" = "sixhtml/stevenson";
+set base_theme = "stevenson";
+
+#NEWLAYER: sixhtml/sunburned
+layerinfo "type" = "theme";
+layerinfo "name" = "Sunburned";
+layerinfo "redist_uniq" = "sixhtml/sunburned";
+set base_theme = "sunburned";
+
+#NEWLAYER: sixhtml/stitch
+layerinfo "type" = "theme";
+layerinfo "name" = "Stitch";
+layerinfo "redist_uniq" = "sixhtml/stitch";
+set base_theme = "stitch";
+
+#NEWLAYER: sixhtml/travel
+layerinfo "type" = "theme";
+layerinfo "name" = "Travel";
+layerinfo "redist_uniq" = "sixhtml/travel";
+set base_theme = "travel";
+
+#NEWLAYER: sixhtml/wedding
+layerinfo "type" = "theme";
+layerinfo "name" = "Wedding";
+layerinfo "redist_uniq" = "sixhtml/wedding";
+set base_theme = "wedding";
