@@ -26,11 +26,10 @@ body<=
     }
 
     unless ($user) {
-        $ret .= "<?h1 $ML{'.enter.user.head'} h1?><?p ".
-            BML::ml('.enter.user.text', { sitenameshort => $LJ::SITENAMESHORT }).
-            "<div style='margin-left: 40px'><form method='get' action='textmessage.bml'>$ML{'.enter.user.input'} <input type='text' size='15' maxlength='15' name='user' /> <input type='submit' value=\"$ML{'.enter.user.submit'}\" /></form><?p".
-            BML::ml('.setup.text', { aopts => "href='$LJ::SITEROOT/manage/profile/'" }).
-            "p?></div> p?>";
+        $ret .= "<?h1 $ML{'.enter.user.head'} h1?>".
+            "<?p ".BML::ml('.enter.user.text', { sitenameshort => $LJ::SITENAMESHORT })." p?>".
+            "<div style='margin-left: 40px'><form method='get' action='textmessage.bml'>$ML{'.enter.user.input'} <input type='text' size='15' maxlength='15' name='user' /> <input type='submit' value=\"$ML{'.enter.user.submit'}\" /></form></div>".
+            "<p>".BML::ml('.setup.text', { aopts => "href='$LJ::SITEROOT/manage/profile/'" })."</p>";
         add_footer();
         return $ret;
     }
@@ -147,7 +146,7 @@ body<=
     {
         my $howwork = $LJ::HELP_URL{'textmessaging_about'} ? 
             BML::ml('.footer.howwork.text', { aopts => "href='$LJ::HELP_URL{'textmessaging_about'}'" }) ."<br />" : "";
-        $ret .= "<p><hr /><font size='-1'>$howwork".$ML{'.footer.disclaimer.text'}."</font>";
+        $ret .= "<p><hr /><font size='-1'>$howwork".$ML{'.footer.disclaimer.text'}."</font></p>";
     }
 
 }
