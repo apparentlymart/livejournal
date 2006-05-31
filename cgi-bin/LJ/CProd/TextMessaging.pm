@@ -17,7 +17,7 @@ sub render {
 }
 
 sub ml { 'cprod.textmessaging.text' }
-sub link { "$LJ::SITEROOT/manage/payments/" }
+sub link { "$LJ::SITEROOT/manage/payments/modify.bml" }
 sub button_text { "Upgrade" }
 
 1;

@@ -19,6 +19,6 @@ sub render {
 }
 
 sub ml { 'cprod.friendsfriendsinline.text2' }
-sub link { "$LJ::SITEROOT/paidaccounts/" }
+sub link { "$LJ::SITEROOT/manage/payments/modify.bml" }
 
 1;

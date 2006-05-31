@@ -13,14 +13,14 @@ sub render {
 
     my $icon = "<div style=\"float: left; padding: 5px;\">
                <img border=\"1\" src=\"$LJ::SITEROOT/img/friendgroup.gif\" /></div>";
-    my $link = $class->clickthru_link('cprod.friendsfriends.link', $version);
+    my $link = $class->clickthru_link('cprod.friendsfriends.link2', $version);
 
     return "<p>$icon ".BML::ml($class->get_ml($version), { "user" => $user,
                                                  "link" => $link }) . "</p>";
 
 }
 
-sub ml { 'cprod.friendsfriends.text' }
+sub ml { 'cprod.friendsfriends.text2' }
 sub link {
     my $remote = LJ::get_remote()
         or return "$LJ::SITEROOT/login.bml";
