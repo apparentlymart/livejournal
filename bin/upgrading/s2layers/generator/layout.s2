@@ -49,6 +49,10 @@ propgroup presentation {
         note = "The header bar must be enabled in order for this to have an effect.";
     }
 
+    property bool transparent {
+        des = "Make journal content transparent instead of using given background colors";
+    }
+
     property use page_recent_items;
     property use page_friends_items;
     property use view_entry_disabled;
@@ -284,6 +288,7 @@ set entryborder_style = "hidden";
 set show_header = true;
 set show_header_title = true;
 set show_header_links = true;
+set transparent = false;
 set counter_code = "";
 
 set show_entrynav_icons = true;
@@ -404,6 +409,14 @@ visibility: hidden;
 visibility: hidden;
 }""";
     }
+}
+
+if ($*transparent) {
+"""
+tr, td, .shadowed {
+background: transparent;
+}
+""";
 }
 """
 
@@ -1138,6 +1151,9 @@ function EntryPage::print_comment (Comment c) {
     } else {
         $background = $*comment_bar_two_bgcolor;
         $color = $*comment_bar_two_fgcolor;
+    }
+    if ($*transparent) {
+        $background = "transparent";
     }
     var string poster = defined $c.poster ? $c.poster->as_string() : "<i>(Anonymous)</i>";
     var string sub_icon;

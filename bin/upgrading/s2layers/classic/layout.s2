@@ -804,9 +804,14 @@ function EntryPage::print_body () {
 
     if ($.entry.comments.enabled and $.comment_pages.total_subitems > 0)
     {
+        var string background = $*metabar_bgcolor;
+        if ($*transparent) {
+            $background = "transparent";
+        }
+            
         $this->print_multiform_start();
         "<tr valign='top'><th class='headerbar' colspan='2'>Comments</th></tr>";
-        "<tr valign='top'><td style='background-color: $*metabar_bgcolor'>&nbsp;</td><td style='width: 100%'>";
+        "<tr valign='top'><td style='background-color: $background'>&nbsp;</td><td style='width: 100%'>";
         if ($.comment_pages.total_subitems > 0) {
             $.comment_pages->print();
             $this->print_comments($.comments);
@@ -814,7 +819,7 @@ function EntryPage::print_body () {
         "</td></tr>";
         if ($this.multiform_on) {
             "<tr valign='top'><th class='headerbar' colspan='2'>Mass Action</th></tr>";
-            "<tr valign='top'><td style='background-color: $*metabar_bgcolor'>&nbsp;</td><td style='width: 100%'>";
+            "<tr valign='top'><td style='background-color: $background'>&nbsp;</td><td style='width: 100%'>";
             $this->print_multiform_actionline();
             $this->print_multiform_end();
             "</td></tr>";
@@ -834,6 +839,9 @@ function EntryPage::print_comment (Comment c) {
     } else {
         $background = $*comment_bar_two_bgcolor;
         $color = $*comment_bar_two_fgcolor;
+    }
+    if ($*transparent) {
+        $background = "transparent";
     }
     var string poster = defined $c.poster ? $c.poster->as_string() : "<i>(Anonymous)</i>";
     var string sub_icon;
@@ -905,6 +913,11 @@ function ReplyPage::print_body()
     }
     var string time = $.replyto.time->time_format($*time_format);
     var string userpic = "";
+    var string background = $*metabar_bgcolor;
+    if ($*transparent) {
+        $background = "transparent";
+    }
+
     if (defined $.replyto.userpic)
     {
         $userpic = "<img src='$.replyto.userpic.url' />";
@@ -933,7 +946,7 @@ function ReplyPage::print_body()
     "</td></tr>\n";
     "<div align='center'><a href='$.entry.comments.read_url'>( Read Comments )</a></div>";
     "<tr valign='top'><th class='headerbar' colspan='2'>Reply:</th></tr>";
-    "<tr valing='top'><td style='background-color: $*metabar_bgcolor'>&nbsp;</td><td>";
+    "<tr valing='top'><td style='background-color: $background'>&nbsp;</td><td>";
     $.form->print();
     "</td></tr></table>";
 }
