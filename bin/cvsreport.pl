@@ -22,8 +22,15 @@ if ($LJ::IS_LJCOM_PRODUCTION) {
 # (useful if you tab-complete filenames)
 $_ =~ s!\Q$ENV{'LJHOME'}\E/?!! foreach (@ARGV);
 
-exec("$ENV{'LJHOME'}/bin/vcv",
+my @extra;
+my $vcv_exe = "multicvs.pl";
+if (-e "$ENV{LJHOME}/bin/vcv") {
+    $vcv_exe = "vcv";
+    @extra = ("--headserver=code.sixapart.com:10000");
+}
+
+exec("$ENV{'LJHOME'}/bin/$vcv_exe",
      "--conf=$ENV{'LJHOME'}/cvs/multicvs.conf",
-     "--headserver=code.sixapart.com:10000",
+     @extra,
      @paranoia,
      @ARGV);
