@@ -23,4 +23,7 @@ if ($LJ::IS_LJCOM_PRODUCTION) {
 $_ =~ s!\Q$ENV{'LJHOME'}\E/?!! foreach (@ARGV);
 
 exec("$ENV{'LJHOME'}/bin/vcv",
-     "--conf=$ENV{'LJHOME'}/cvs/multicvs.conf", @paranoia, @ARGV);
+     "--conf=$ENV{'LJHOME'}/cvs/multicvs.conf",
+     "--headserver=code.sixapart.com:10000",
+     @paranoia,
+     @ARGV);
