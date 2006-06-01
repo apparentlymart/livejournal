@@ -13,7 +13,7 @@ sub new {
     my $u = shift;
     my %opts = @_;
 
-    die "No user" unless $u;
+    die "No user" unless LJ::isu($u);
 
     my $journal = LJ::want_user(delete $opts{journal}) or croak "No journal";
     my $etypeid = delete $opts{etypeid};
@@ -30,7 +30,7 @@ sub new {
     }
     croak "No etypeid" unless $etypeid;
 
-    croak "ntypeid or method required" unless ($ntypeid xor $method);
+    $method = 'Inbox' unless $ntypeid || $method;
     if ($method) {
         $ntypeid = LJ::NotificationMethod::ntypeid("LJ::NotificationMethod::$method") or croak "Invalid method: $method";
     }

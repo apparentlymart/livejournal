@@ -2350,7 +2350,7 @@ sub subscribe_interface {
 
     croak "subscribe_interface wants a \$u" unless LJ::isu($u);
 
-    my $catref       = delete $opts{'categories'} or croak "No categories hash passed to subscribe_interface";
+    my $catref       = delete $opts{'categories'};
     my $journal      = LJ::want_user(delete $opts{'journal'}) || LJ::get_remote();
     my $formauth     = delete $opts{'formauth'} || LJ::form_auth();
     my $showtracking = delete $opts{'showtracking'} || 0;
@@ -2364,7 +2364,7 @@ sub subscribe_interface {
     LJ::need_res('js/checkallbutton.js');
     LJ::need_res('js/esn.js');
 
-    my %categories = %$catref or croak "Invalid categories passed to subscribe_interface";
+    my %categories = $catref ? %$catref : ("Track" => $pending);
 
     my $ret = qq {
         <fieldset><legend>Holla at me when...</legend>
@@ -2409,12 +2409,18 @@ sub subscribe_interface {
         next unless $cat_event_classes && scalar @$cat_event_classes;
         push @catids, $catid;
 
+        my $pending;
+
+        # if the category holds Subscription::Pending objects, then use those
+        if ((ref $cat_event_classes->[0]) =~ /Subscription::Pending/) {
+            $pending = $cat_event_classes;
+        }
+
         # is this category the tracking category?
         my $is_tracking_category = $category eq $tracking_cat && $showtracking;
 
         # build table of subscribeble events
         my @event_classes = map { "LJ::Event::$_" } grep { ! ref $_  } @$cat_event_classes unless $is_tracking_category;
-        my @events = grep { ref $_ =~ /^LJ::Event::/ } @$cat_event_classes; # passed in half-constructed events to subscribe to
 
         if ($is_tracking_category) {
             foreach my $event_subclass (@$cat_event_classes) {
@@ -2424,7 +2430,7 @@ sub subscribe_interface {
             }
         }
 
-        next unless @event_classes || @events;
+        next unless @event_classes || $pending;
 
         $events_table .= qq {
           <div class="CategoryRow-$catid">
@@ -2445,9 +2451,9 @@ sub subscribe_interface {
                 delete $sub_args{ntypeid};
                 $sub_args{method} = 'Inbox';
 
-                my $pending_exists = $u->has_subscriptions(%sub_args);
+                my @existing_subs = $u->has_subscription(%sub_args);
 
-                push @pending_subscriptions, $pending_sub unless $pending_exists;
+                push @pending_subscriptions, (scalar @existing_subs ? @existing_subs : $pending_sub);
             }
 
             foreach my $evt_class (@event_classes) {
