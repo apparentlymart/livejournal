@@ -47,8 +47,6 @@ body<=
                 $subscr = LJ::Subscription::Pending->thaw($postkey, $u);
             } elsif ($type eq 'subid') {
                 $subscr = LJ::Subscription->thaw($postkey, $u);
-            } else {
-                return LJ::error_list("THIS SHIT IS APPLE CRANBERRIES");
             }
 
             next unless $subscr;
