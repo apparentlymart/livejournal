@@ -142,7 +142,7 @@ body<=
  my $remote = LJ::get_remote();
 
 if (!$remote) {
-    return BML::ml('.error.notloggedin', { aopts => "href='$LJ::SITEROOT/login.bml'" });
+    return BML::ml('.error.notloggedin', { aopts => "href='$LJ::SITEROOT/login.bml?ret=1'" });
 }
 
 return LJ::CProd->inline($remote, inline => 'Directory');
