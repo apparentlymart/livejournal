@@ -5,6 +5,7 @@ use Carp qw(croak);
 use Class::Autouse qw(
                       LJ::NotificationMethod
                       LJ::Typemap
+                      LJ::Subscription::Pending
                       );
 
 my @subs_fields = qw(userid subid is_dirty journalid etypeid arg1 arg2
@@ -28,19 +29,26 @@ sub new_by_id {
 
 sub freeze {
     my $self = shift;
-    return "subid-" . $self->owner->{user} . '-' . $self->id;
+    return "subid-" . $self->owner->{userid} . '-' . $self->id;
 }
 
+# can return either a LJ::Subscription or LJ::Subscription::Pending object
 sub thaw {
     my ($class, $data, $u) = @_;
-    my ($type, $user, $subid) = split("-", $data);
 
-    die "Invalid type: $type" unless $type eq 'subid';
+    # valid format?
+    return undef unless ($data =~ /^(pending|subid) - $u->{userid} - [\d-]+(-old)?$/x);
+
+    my ($type, $userid, $subid) = split("-", $data);
+
+    return LJ::Subscription::Pending->thaw($data, $u) if $type eq 'pending';
+    die "Invalid subscription data type: $type" unless $type eq 'subid';
 
     unless ($u) {
-        die "no user" unless $user;
-        $u = LJ::get_authas_user($user);
-        die "Invalid user $user" unless $u;
+        my $subuser = LJ::load_userid($userid);
+        die "no user" unless $subuser;
+        $u = LJ::get_authas_user($subuser);
+        die "Invalid user $subuser->{user}" unless $u;
     }
 
     return $class->new_by_id($u, $subid);

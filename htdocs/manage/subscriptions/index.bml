@@ -32,22 +32,13 @@ body<=
         my @sub_edit;
         foreach my $postkey (keys %POST) {
             my $subscr;
-            my $old;
             my $old_postkey = $postkey;
-
-            next unless ($postkey =~ /^(pending|subid) - $u->{user} - [\d-]+(-old)?$/x);
-
-            my $type = $1;
-            $old = $2;
+            my $old = $postkey =~ /-old$/;
 
             # remove old string
             $postkey =~ s/-old// if $old;
 
-            if ($type eq 'pending') {
-                $subscr = LJ::Subscription::Pending->thaw($postkey, $u);
-            } elsif ($type eq 'subid') {
-                $subscr = LJ::Subscription->thaw($postkey, $u);
-            }
+            $subscr = LJ::Subscription->thaw($postkey, $u);
 
             next unless $subscr;
             next unless $old;

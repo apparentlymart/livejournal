@@ -74,14 +74,15 @@ sub commit {
 sub thaw {
     my ($class, $data, $u) = @_;
 
-    my ($type, $user, $journalid, $etypeid, $ntypeid, $arg1, $arg2) = split('-', $data);
+    my ($type, $userid, $journalid, $etypeid, $ntypeid, $arg1, $arg2) = split('-', $data);
 
     die "Invalid thawed data" unless $type eq 'pending';
 
     unless ($u) {
-        die "no user" unless $user;
-        $u = LJ::get_authas_user($user);
-        die "Invalid user $user" unless $u;
+        my $subuser = LJ::load_userid($userid);
+        die "no user" unless $subuser;
+        $u = LJ::get_authas_user($subuser);
+        die "Invalid user $subuser->{user}" unless $u;
     }
 
     return undef unless $journalid && $etypeid;
@@ -99,7 +100,7 @@ sub thaw {
 sub freeze {
     my $self = shift;
 
-    my $user = $self->{u}->{user};
+    my $user = $self->{u}->{userid};
     my $journalid = $self->{journal}->{userid};
     my $etypeid = $self->{etypeid};
     my $ntypeid = $self->{ntypeid};
