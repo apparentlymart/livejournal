@@ -29,6 +29,7 @@ sub instance {
         qid     => $qid,
         state   => undef,
         event   => undef,
+        when    => undef,
         _loaded => 0,
     };
 
@@ -89,13 +90,22 @@ sub absorb_row {
     my ($self, $row) = @_;
 
     $self->{state} = $row->{state};
-    $self->{createtime} = $row->{createtime};
+    $self->{when} = $row->{createtime};
 
     my $evt = LJ::Event->new_from_raw_params($row->{etypeid},
                                              $row->{journalid},
                                              $row->{arg1},
                                              $row->{arg2});
     $self->{event} = $evt;
+}
+
+# returns when this event happened (or got put in the inbox)
+sub when_unixtime {
+    my $self = shift;
+
+    $self->_load unless $self->{_loaded};
+
+    return $self->{when};
 }
 
 # returns the state of this item
