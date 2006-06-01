@@ -117,6 +117,20 @@ $img{'xml'} = {
     'alt' => 'XML Source',
 };
 
+$img{'track_entry'} = {
+    'src' => '/btn_track.gif',
+    'width' => 22,
+    'height' => 20,
+    'alt' => 'Track this entry',
+};
+
+$img{'track_entry_active'} = {
+    'src' => '/btn_tracking.gif',
+    'width' => 22,
+    'height' => 20,
+    'alt' => 'Track this entry',
+};
+
 # load the site-local version, if it's around.
 if (-e "$LJ::HOME/cgi-bin/imageconf-local.pl") {
     require "$LJ::HOME/cgi-bin/imageconf-local.pl";
