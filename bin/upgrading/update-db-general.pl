@@ -1664,7 +1664,7 @@ EOC
 # s1overrides
 register_tablecreate("s1overrides", <<'EOC'); # clustered
 CREATE TABLE s1overrides (
-  userid int unsigned NOT NULL default '',
+  userid int unsigned NOT NULL default '0',
   override text NOT NULL,
   PRIMARY KEY  (userid)
 )
