@@ -3,7 +3,7 @@ use base 'LJ::CProd';
 
 sub applicable {
     my ($class, $u) = @_;
-    return 0 unless $u->in_class('plus') || $u->in_class('free');
+    return 0 if $u->in_class('paid') || $u->in_class('perm');
     return 1;
 }
 
