@@ -41,7 +41,6 @@ body<=
 
     $body .= LJ::subscribe_interface($remote,
                                      journal      => $journal,
-#                                     categories   => \%categories,
                                      pending      => $events,
                                      );
 
