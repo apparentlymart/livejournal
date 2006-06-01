@@ -45,7 +45,6 @@ body<=
 
         my $sid = $POST{'x'};
         $sessions->{$sid}->destroy if $sessions->{$sid};
-        return BML::redirect("logiuser=oguser=$user") if $user;
         return BML::redirect("logins.bml");
     }
 
