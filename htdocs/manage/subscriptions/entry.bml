@@ -1,0 +1,61 @@
+<?page
+body<=
+<?_code
+{
+    use strict;
+    use vars qw (%POST %GET $body $title $headextra);
+    use Carp qw(croak);
+
+    return "Not ready" if $LJ::DISABLED{'esn'};
+
+    use Class::Autouse qw(LJ::NotificationMethod LJ::Event);
+
+    BML::decl_params(
+                     lj_form_auth => qr/./,
+                     journal      => 'word',
+                     ditemid      => 'digits',
+                     );
+
+    my $remote = LJ::get_remote();
+    return "<?needlogin?>" unless $remote;
+
+    my $ditemid = $POST{'ditemid'} || $GET{'ditemid'};
+    my $journal = $POST{'journal'} || $GET{'journal'};
+    my $ntypeid = int($POST{'ntypeid'});
+
+    my $journal = LJ::load_user($journal) or return LJ::error_list("Invalid journal '$journal'");
+
+    return LJ::error_list("No entry specified") unless $ditemid;
+
+    my %categories = (
+                      );
+
+    my $events = [
+                LJ::Subscription::Pending->new(
+                                               $remote,
+                                               event   => "JournalNewComment",
+                                               arg1    => $ditemid,
+                                               journal => $journal,
+                                               ),
+                  ];
+
+    $body .= LJ::subscribe_interface($remote,
+                                     journal      => $journal,
+#                                     categories   => \%categories,
+                                     pending      => $events,
+                                     );
+
+
+    return $body;
+}
+_code?>
+<=body
+title=><?_code return $title; _code?>
+head<=
+<style type='text/css'>
+</style>
+<?_code return $headextra; _code?>
+<=head
+<=body
+page?>
+
