@@ -19,83 +19,20 @@ body<=
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
 
+    my $journal = LJ::load_user($GET{journal}) or return LJ::bad_input("No journal specified");
+
     # what classes to display on this page
-    my @event_classes = ('JournalNewComment', 'JournalNewEntry');
+    my $categories = {
+        "Track" => [
+                    'JournalNewEntry',
+                    ],
+    };
 
-    my $journal = $POST{'journal'} || $GET{'journal'};
-    my $journaluser = LJ::ljuser($journal);
-    $title = "Watch " . $journaluser;
-    my $u = LJ::load_user($journal) or return LJ::error_list("Invalid journal '$journal'");
+    return LJ::subscribe_interface(
+                                   categories => $categories,
+                                   user       => $journal,
+                                   );
 
-    if (LJ::did_post()) {
-        return LJ::error_list(BML::ml('error.invalidform')) unless LJ::check_form_auth();
-
-        foreach my $class (@event_classes) {
-            next unless ($POST{$class . '_enabled'});
-            my $ntypeid = $POST{$class . '_ntypeid'} or next;
-
-            my $fullclass = "LJ::Event::$class";
-            my $etypeid = eval { $fullclass->etypeid } or next;
-
-             my %sub_params = (
-                               journal => $u,
-                               etypeid => $etypeid,
-                               ntypeid => $ntypeid,
-                               );
-
-            # subscribe!
-            $remote->subscribe(%sub_params)
-                or return LJ::error_list("Could not subscribe.");
-        }
-
-        # redirect to manage subscriptions page
-        BML::redirect("$LJ::SITEROOT/manage/subscriptions/");
-    }
-
-    my @methods = LJ::NotificationMethod->all_available_methods;
-    my @note_options;
-    foreach my $note_class (sort @methods) {
-        my $title = eval { $note_class->title } or next;
-
-        push @note_options, ($note_class->ntypeid, $title);
-    }
-
-    my $formauth = LJ::form_auth();
-
-    my $watchoptions = '';
-    my $optioncount = 0;
-    foreach my $class (@event_classes) {
-        my $fullclass = "LJ::Event::$class";
-        my $desc = eval { $fullclass->title } or next;
-
-        my $trclass = $optioncount % 2 ? "lighter" : "darker";
-        my $watchbox = LJ::html_check({type => 'checkbox', name => "${class}_enabled"});
-        my $note_method = LJ::html_select({name => "${class}_ntypeid"}, @note_options);
-
-        $watchoptions .= qq {
-            <tr>
-                <td>$watchbox</td>
-                <td>$desc</td>
-                <td>$note_method</td>
-            </tr>
-        };
-    }
-
-    my $fields = LJ::html_hidden(journal => $journal);
-
-    $body .= qq {
-        <fieldset>
-          <legend>Watch $journaluser</legend>
-          <form method="POST" action="/manage/subscriptions/user.bml">
-            $formauth
-            <table width="100%">
-              $watchoptions
-            </table>
-            $fields
-            <input type="submit" value="Watch!" />
-          </form>
-        </fieldset>
-        };
 }
 _code?>
 <=body

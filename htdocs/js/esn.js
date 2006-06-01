@@ -38,28 +38,11 @@ ESN.initCheckAllBtns = function () {
 
 // set up auto show/hiding of notification methods
 ESN.initEventCheckBtns = function () {
-  var etids = $("etypeids");
-  var ntids = $("ntypeids");
-  if (!etids || !ntids)
-    return;
+  var viewObjects = document.getElementsByTagName("*");
+  var boxes = DOM.filterElementsByClassName(viewObjects, "SubscriptionInboxCheck") || [];
 
-  etidList = etids.value;
-  ntidList = ntids.value;
-  if (!etidList || !ntidList)
-    return;
-
-  etids = etidList.split(",");
-  ntids = ntidList.split(",");
-
-  ESN.ntids = ntids;
-
-  etids.forEach( function (etypeid) {
-    var check = $("subscribe" + etypeid);
-    if (!check)
-      return;
-
-    check.etypeid = etypeid;
-    DOM.addEventListener(check, "click", ESN.eventChecked.bindEventListener());
+  boxes.forEach( function (box) {
+    DOM.addEventListener(box, "click", ESN.eventChecked.bindEventListener());
   });
 }
 
@@ -68,17 +51,12 @@ ESN.eventChecked = function (evt) {
   if (!target)
     return;
 
-  var etypeid = evt.target.etypeid;
-  var ntids = ESN.ntids;
-  if (!ntids || !etypeid)
-    return;
+  var parentRow = DOM.getFirstAncestorByTagName(target, "tr", false);
 
-  // hide/unhide notification methods for this row
-  ntids.forEach( function (ntypeid) {
-    var row = $("NotificationOptions-" + etypeid + "-" + ntypeid);
-    if (!row)
-      return;
+  var viewObjects = parentRow.getElementsByTagName("*");
+  var boxes = DOM.filterElementsByClassName(viewObjects, "NotificationOptions") || [];
 
-    row.style.visibility = target.checked ? "visible" : "hidden";
+  boxes.forEach( function (box) {
+    box.style.visibility = target.checked ? "visible" : "hidden";
   });
 }

@@ -1559,6 +1559,7 @@ sub subscribe {
 }
 
 # search for a subscription
+*find_subscriptions = \&has_subscription;
 sub has_subscription {
     my ($u, %params) = @_;
     croak "No parameters" unless %params;

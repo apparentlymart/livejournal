@@ -48,6 +48,12 @@ sub items {
     return sort { $a->event->eventtime_unix <=> $b->event->eventtime_unix } @items;
 }
 
+# returns number of unread items in inbox
+sub unread_count {
+    my $self = shift;
+    return scalar grep { $_->unread } $self->items;
+}
+
 # load the items in this queue
 # returns internal items hashref
 sub _load {

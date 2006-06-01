@@ -19,9 +19,9 @@ body<=
     LJ::need_res('js/dom.js');
     LJ::need_res('js/view.js');
     LJ::need_res('js/devel.js');
+    LJ::need_res('js/checkallbutton.js');
 
-    LJ::need_res('js/esnmanager.js');
-    LJ::need_res('js/esn.js');
+    LJ::need_res('stc/esn.css');
 
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);
@@ -71,10 +71,13 @@ body<=
         } # else error?
     }
 
+    # print number of new alerts
+    my $unread_count = $inbox->unread_count;
+    my $alert_plural = $unread_count == 1 ? 'alert' : 'alerts';
+
     # check all checkbox
     my $checkall = LJ::html_check({
         id      => "InboxItem_CheckAll",
-        onclick => "checkall('InboxItem_CheckAll');",
     });
 
     # print form
@@ -85,11 +88,19 @@ body<=
     # create table of notifications
     my $notificationtable = qq {
      <div id="NotificationTable">
-        <table style="width: 80%; margin-left: auto; margin-right: auto;">
-            <tr>
+        <span class="esnlinks">Inbox | <a href="$LJ::SITEROOT/manage/subscriptions/">Subscription Center</a></span>
+        <div class="inbox_newitems">You have $unread_count new $alert_plural! Holllaaaaaa</div>
+        
+        <table id="inbox" cellspacing="0" border="0" cellpadding="0">
+            <tr class="header">
                 <thead>
                     <td>$checkall</td>
-                    <td>What happened?</td>
+                    <td>
+                        <input type="button" value="Read" onclick="submitAction('markRead');" />
+                        <input type="button" value="Unread" onclick="submitAction('markUnread');" />
+                        <input type="button" value="Delete" onclick="submitAction('delete');" />
+                        <input type="button" value="Mark All Read" onclick="submitAction('markAllRead');" />
+                    </td>
                 </thead>
             </tr>
         };
@@ -117,10 +128,13 @@ body<=
             name  => $checkbox_name,
         });
 
+        my $when = LJ::ago_text(time() - $evt->eventtime_unix);
+
         $notificationtable .= qq {
-            <tr>
-                <td>$checkbox</td>
-                <td><span class="$read_class">$evt_html</span></td>
+            <tr class="inbox_item">
+                <td class="checkbox">$checkbox</td>
+                <td class="item"><span class="$read_class">$evt_html</span></td>
+                <td class="time">$when</td>
             </tr>
         };
     }
@@ -129,13 +143,6 @@ body<=
 
 
     $body .= $notificationtable;
-
-    $body .= qq {
-        <input type="button" value="Mark Read" onclick="submitAction('markRead');" />
-            <input type="button" value="Mark All Read" onclick="submitAction('markAllRead');" />
-            <input type="button" value="Mark Unread" onclick="submitAction('markUnread');" />
-            <input type="button" value="Delete" onclick="submitAction('delete');" />
-        };
 
     $body .= LJ::html_hidden({
         name  => "EditNotificationsAction",
@@ -154,65 +161,30 @@ head<=
 <?_code return $head; _code?>
 
 <script>
-    var tableview = new View();
+var tableview = new View();
+var checkallButton = new CheckallButton();
 
 DOM.addEventListener(window, "load", setup);
 
 function setup (e) {
-    tableview.init({ "view": $("NotificationTable") });
+  tableview.init({ "view": $("NotificationTable") });
+checkallButton.init({
+"class": "InboxItem_Check",
+         "button": $("InboxItem_CheckAll"),
+                   "parent": tableview.getView()
+  });
 }
 
 function submitAction(action) {
-    var actionField = $("EditNotificationsAction");
+  var actionField = $("EditNotificationsAction");
 
-if (!actionField)
+  if (!actionField)
     return;
 
-actionField.value = action;
-$("EditNotificationsForm").submit();
+  actionField.value = action;
+  $("EditNotificationsForm").submit();
 }
-
-function checkall(btn) {
-    if (!tableview)
-    return;
-
-var view = tableview.getView();
-if (!view)
-    return;
-
-var viewObjects = view.getElementsByTagName("*");
-var boxes = DOM.filterElementsByClassName(viewObjects, "InboxItem_Check") || [];
-
-var checkallBox = $(btn);
-if (!checkallBox)
-    return;
-
-for (var i = 0; i < boxes.length; i++) {
-    var box = boxes[i];
-
-    if (!box)
-        continue;
-
-box.checked = checkallBox.checked;
-}
-}
-
 </script>
-
-<style>
-    table {
-        background-color: #CCcccc;
-    }
-thead {
-    background-color: #EEEEEE;
-    font-weight: bold;
-}
-
-span.InboxItem_Unread {
-    font-weight: bold;
-}
-
-</style>
 
 <=head
 

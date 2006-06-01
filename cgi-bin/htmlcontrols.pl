@@ -173,7 +173,8 @@ sub html_check
         $ret .= " $_=\"" . ($ehtml ? ehtml($opts->{$_}) : $opts->{$_}) . "\"";
     }
     $ret .= "$disabled />";
-    $ret .= "<label for=\"$opts->{id}\">" . LJ::ehtml($opts->{'label'}) . '</label>'
+    my $e_label = ($ehtml ? ehtml($opts->{'label'}) : $opts->{'label'});
+    $ret .= "<label for=\"$opts->{id}\">" . $e_label . '</label>'
         if $opts->{'label'};
     return $ret;
 }
