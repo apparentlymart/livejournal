@@ -2348,7 +2348,7 @@ sub control_strip_js_inject
 sub subscribe_interface {
     my ($u, %opts) = @_;
 
-    die "subscribe_interface wants a \$u" unless $u;
+    croak "subscribe_interface wants a \$u" unless LJ::isu($u);
 
     my $catref       = delete $opts{'categories'} or croak "No categories hash passed to subscribe_interface";
     my $journal      = LJ::want_user(delete $opts{'journal'}) || LJ::get_remote();
