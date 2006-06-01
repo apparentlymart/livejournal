@@ -1,0 +1,119 @@
+#manageSettings {
+    margin: 1em 0 0 0;
+    }
+
+.Subscribe {
+    width: 100%;
+    padding: 0;
+    margin: 1.7em 0 0 0;
+    }
+    
+    .Subscribe td {
+        }
+
+.CategoryRow {
+        width: 100%;
+        background-color: #ccc;
+}
+
+    .CategoryRow td {
+        padding: .2em;
+        }
+        
+    .CategoryRow label {
+        font-size: 90%;
+        font-weight: bold;
+        }
+    
+span.CategoryHeading {
+        font-weight: bold;
+}
+
+.NotificationOptions {
+    padding: .2em;
+    }
+
+#Subscriptions {
+    width: 100%;
+}
+#Subscriptions th {
+    text-align: left;
+}
+#Subscriptions td, #Subscriptions th {
+    padding-left: .5em;
+    padding-right: .5em;
+}
+#Subscriptions tr.lighter {
+    background-color: #cff;
+}
+#Subscriptions tr.darker {
+    background-color: #9cc;
+}
+div.argOptsContainer {
+  display: none;
+}
+
+#NotificationTable {
+    margin: 1em 0 0 0;
+    }
+
+#inbox {
+    width: 100%;
+    padding: 0;
+    margin: .5em 0 0 0;
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    }
+    
+.inbox_newitems {
+    font-weight: bold;
+    }
+    
+.checkbox {
+    width: 1%;
+    }
+    
+    .checkbox input {
+        position: relative;
+        top: 1px;
+        left: 2px;
+        }
+    
+.item { 
+    padding: 0 0 0 1em !important;
+    }
+
+.item, .checkbox, .time {
+    padding: .3em 0 .3em 0;
+    border-bottom: 1px dotted #ddd;
+    }
+    
+    .InboxItem_Unread {
+        font-weight: bold;
+        }
+        
+.time {
+    width: 10em;
+    font-size: 90%;
+    color: #666;
+    }
+    
+#inbox thead {
+    display: table-cell;
+    margin: 0;
+    padding: .2em 0 0 .2em;
+    background: #ccc;
+    border-top: 1px solid #efefef;
+    border-bottom: 1px solid #999;
+    width: 100%;
+    }
+    
+#inbox tr {
+    display: block;
+    }
+
+.esnlinks {
+    float: right;
+    display: block;
+    }
