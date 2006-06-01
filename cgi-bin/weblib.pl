@@ -2367,12 +2367,13 @@ sub subscribe_interface {
     my %categories = $catref ? %$catref : ("Track" => $pending);
 
     my $ret = qq {
-        <fieldset><legend>Holla at me when...</legend>
+            <div id="manageSettings">
+            <span class="esnlinks"><a href="$LJ::SITEROOT/tools/notifications.bml">Message Center</a> | Manage Settings</span>
             <form method='POST' action='$LJ::SITEROOT/manage/subscriptions/index.bml'>
             $formauth
     };
 
-    my $events_table = '<table class="Subscribe">';
+    my $events_table = '<table class="Subscribe" cellpadding="0" cellspacing="0">';
 
     my @notify_classes = LJ::NotificationMethod->all_classes or return "No notification methods";
 
@@ -2585,7 +2586,7 @@ sub subscribe_interface {
     $ret .= LJ::html_submit('Save');
     $ret .= LJ::html_hidden({name => 'mode', value => 'save_subscriptions'});
 
-    $ret .= "</form></fieldset>";
+    $ret .= "</form></div>";
 }
 
 

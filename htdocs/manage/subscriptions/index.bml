@@ -6,7 +6,7 @@ body<=
     use vars qw (%POST %GET $body $title $headextra);
     use Carp qw(croak);
 
-    $title = 'Subscriptions, yo!';
+    $title = 'Manage Message Settings';
 
     return "Not ready" if $LJ::DISABLED{'esn'};
 
@@ -97,7 +97,7 @@ body<=
             $authas_form
             </form>
 
-        <a href="$LJ::SITEROOT/tools/notifications.bml">Inbox</a> | Subscription Center
+        
         };
 
     $body .= LJ::subscribe_interface($u,

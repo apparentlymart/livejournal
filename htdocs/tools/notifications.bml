@@ -9,7 +9,7 @@ body<=
                            LJ::Event
                            );
 
-    $title = "Alerts Inbox";
+    $title = "Message Center";
     $body = "";
 
     my $remote = LJ::get_remote()
@@ -88,7 +88,7 @@ body<=
     # create table of notifications
     my $notificationtable = qq {
      <div id="NotificationTable">
-        <span class="esnlinks">Inbox | <a href="$LJ::SITEROOT/manage/subscriptions/">Subscription Center</a></span>
+        <span class="esnlinks">Message Center | <a href="$LJ::SITEROOT/manage/subscriptions/">Manage Settings</a></span>
         <div class="inbox_newitems">You have $unread_count new $alert_plural! Holllaaaaaa</div>
         
         <table id="inbox" cellspacing="0" border="0" cellpadding="0">
@@ -128,7 +128,7 @@ body<=
             name  => $checkbox_name,
         });
 
-        my $when = LJ::ago_text(time() - $evt->eventtime_unix);
+        my $when = LJ::ago_text(time() - $inbox_item->when_unixtime);
 
         $notificationtable .= qq {
             <tr class="inbox_item">
