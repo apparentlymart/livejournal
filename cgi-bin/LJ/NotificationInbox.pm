@@ -45,7 +45,7 @@ sub items {
         push @items, LJ::NotificationItem->new($self->owner, $qid);
     }
 
-    return sort { $a->event->eventtime_unix <=> $b->event->eventtime_unix } @items;
+    return sort { $b->event->eventtime_unix <=> $a->event->eventtime_unix } @items;
 }
 
 # returns number of unread items in inbox
