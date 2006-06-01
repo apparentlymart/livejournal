@@ -7,7 +7,7 @@ use strict;
 # load the bread crumb hash
 require "$ENV{'LJHOME'}/cgi-bin/crumbs.pl";
 
-use Class::Autouse qw(LJ::Event);
+use Class::Autouse qw(LJ::Event LJ::Subscription::Pending);
 
 # <LJFUNC>
 # name: LJ::img
@@ -2346,11 +2346,15 @@ sub control_strip_js_inject
 
 # prints out UI for subscribing to some events
 sub subscribe_interface {
-    my %opts = @_;
+    my ($u, %opts) = @_;
 
-    my $catref   = delete $opts{'categories'} or croak "No categories hash passed to subscribe_interface";
-    my $u        = LJ::want_user(delete $opts{'user'}) || LJ::get_remote();
-    my $formauth = delete $opts{'formauth'} || LJ::form_auth();
+    die "subscribe_interface wants a \$u" unless $u;
+
+    my $catref       = delete $opts{'categories'} or croak "No categories hash passed to subscribe_interface";
+    my $journal      = LJ::want_user(delete $opts{'journal'}) || LJ::get_remote();
+    my $formauth     = delete $opts{'formauth'} || LJ::form_auth();
+    my $showtracking = delete $opts{'showtracking'} || 0;
+    my $pending      = delete $opts{'pending'} || [];
 
     croak "Invalid options passed to subscribe_interface" if (scalar keys %opts);
 
@@ -2368,20 +2372,59 @@ sub subscribe_interface {
             $formauth
     };
 
-    my $events_table = '<table>';
+    my $events_table = '<table class="Subscribe">';
 
     my @notify_classes = LJ::NotificationMethod->all_classes or return "No notification methods";
 
     # skip the inbox type; it's always on
     @notify_classes = grep { $_ ne 'LJ::NotificationMethod::Inbox' } @notify_classes;
 
-    my @event_classes;
+    # title of the tracking category
+    my $tracking_cat = "Things You're Tracking";
+
+    # if showtracking, add things the user is tracking to the categories
+    if ($showtracking) {
+        my @subscriptions = $u->subscriptions;
+        foreach my $subsc ( sort {$a->id <=> $b->id } @subscriptions ) {
+            # if this event class is already being displayed above, skip over it
+            my $etypeid = $subsc->etypeid or next;
+            my ($evt_class) = (LJ::Event->class($etypeid) =~ /LJ::Event::(.+)/i);
+            next unless $evt_class;
+
+            # search for this class in %categories
+            next if grep { $_ eq $evt_class } map { @$_ } values %categories;
+
+            if ($showtracking) {
+                # add this class to the tracking category
+                $categories{$tracking_cat} ||= [];
+                push @{$categories{$tracking_cat}}, $evt_class;
+            }
+        }
+    }
+
     my @catids;
     my $catid = 0;
 
     while (my ($category, $cat_event_classes) = each %categories) {
         next unless $cat_event_classes && scalar @$cat_event_classes;
         push @catids, $catid;
+
+        # is this category the tracking category?
+        my $is_tracking_category = $category eq $tracking_cat && $showtracking;
+
+        # build table of subscribeble events
+        my @event_classes = map { "LJ::Event::$_" } grep { ! ref $_  } @$cat_event_classes unless $is_tracking_category;
+        my @events = grep { ref $_ =~ /^LJ::Event::/ } @$cat_event_classes; # passed in half-constructed events to subscribe to
+
+        if ($is_tracking_category) {
+            foreach my $event_subclass (@$cat_event_classes) {
+                foreach my $subscr ($u->has_subscription(event => "LJ::Event::$event_subclass", method => "Inbox")) {
+                    push @event_classes, $subscr->event_class;
+                }
+            }
+        }
+
+        next unless @event_classes || @events;
 
         $events_table .= qq {
           <div class="CategoryRow-$catid">
@@ -2394,100 +2437,145 @@ sub subscribe_interface {
                 </td>
             };
 
+        my @pending_subscriptions;
+        # build list of subscriptions to show the user
+        {
+            foreach my $pending_sub (@$pending) {
+                my %sub_args = $pending_sub->sub_info;
+                delete $sub_args{ntypeid};
+                $sub_args{method} = 'Inbox';
+
+                my $pending_exists = $u->has_subscriptions(%sub_args);
+
+                push @pending_subscriptions, $pending_sub unless $pending_exists;
+            }
+
+            foreach my $evt_class (@event_classes) {
+                my $etypeid = eval { $evt_class->etypeid } or next;
+
+                my @subscribed = $u->find_subscriptions(etypeid => $etypeid, method => "Inbox");
+                push @pending_subscriptions, @subscribed;
+
+                push @pending_subscriptions, LJ::Subscription::Pending->new($u,
+                                                                            journal => $journal,
+                                                                            etypeid => $etypeid,
+                                                                            method  => "Inbox",
+                                                                            ) unless @subscribed;
+            }
+        }
+
         # add notifytype headings
         foreach my $notify_class (@notify_classes) {
             my $title = eval { $notify_class->title($u) } or next;
             my $ntypeid = $notify_class->ntypeid or next;
+
+            # create the checkall box for this event type.
+
+            # if all the $notify_class are enabled in this category, have
+            # the checkall button be checked by default
+            my $subscribed_count = 0;
+            foreach my $subscr (@pending_subscriptions) {
+                my %subscr_args = $subscr->sub_info;
+                $subscr_args{ntypeid} = $ntypeid;
+                $subscribed_count++ if scalar $u->find_subscriptions(%subscr_args);
+            }
+
+            my $checkall_checked = $subscribed_count == scalar @pending_subscriptions;
+
             my $checkall_box = LJ::html_check({
-                id    => "CheckAll-$catid-$ntypeid",
-                label => $title,
-                class => "CheckAll",
+                id       => "CheckAll-$catid-$ntypeid",
+                label    => $title,
+                class    => "CheckAll",
+                selected => $checkall_checked,
+                noescape => 1,
             });
+
             $events_table .= qq {
                 <td>
                     $checkall_box
-                </td>
-            };
+                    </td>
+                };
         }
 
         $events_table .= '</tr>';
 
-        # build table of subscribable events
-        foreach my $evt_class (@$cat_event_classes) {
-            $evt_class = "LJ::Event::$evt_class";
-            my $etypeid = eval { $evt_class->etypeid } or next;
-            push @event_classes, $evt_class;
-            my $subscribed = $u->has_subscription(etypeid => $etypeid);
-
+        foreach my $pending_sub (@pending_subscriptions) {
             # print option to subscribe to this event, checked if already subscribed
-            {
-                my $title = eval { $evt_class->title } or next;
-                my $subscribe_checked = $subscribed ? 'checked' : '';
-                my $input_name = "subscribe$etypeid";
+            my $input_name = $pending_sub->freeze or next;
+            my $title      = $pending_sub->as_html or next;
+            my $subscribed = ! $pending_sub->pending;
+
+            $events_table  .= "<tr><td>" .
+                LJ::html_check({
+                    id       => $input_name,
+                    name     => $input_name,
+                    class    => "SubscriptionInboxCheck",
+                    selected => $subscribed,
+                    label    => $title,
+                    noescape => 1,
+                }) .  "</td>";
+
+            $events_table .= LJ::html_hidden({
+                name  => "${input_name}-old",
+                value => $subscribed,
+            });
+
+            # print out notification options for this subscription (hidden if not subscribed)
+            $events_table .= "<td>&nbsp;</td>";
+            my $hidden = $subscribed ? '' : 'style="visibility: hidden;"';
+
+            foreach my $note_class (@notify_classes) {
+                my $ntypeid = eval { $note_class->ntypeid } or next;
+
+                my %sub_args = $pending_sub->sub_info;
+                $sub_args{ntypeid} = $ntypeid;
+
+                my @subs = $u->has_subscription(%sub_args);
+
+                my $note_pending = scalar @subs ? $subs[0] : LJ::Subscription::Pending->new($u, %sub_args);
+                next unless $note_pending;
+
+                my $notify_input_name = $note_pending->freeze;
+
                 $events_table .= qq {
-                    <tr>
-                        <td>
-                        <input type="checkbox" id="$input_name" name="$input_name"
-                            $subscribe_checked />
-                        <label for="$input_name">$title</label>
-                        </td>
-                    };
+                    <td class='NotificationOptions' $hidden>
+                    } . LJ::html_check({
+                        id       => $notify_input_name,
+                        name     => $notify_input_name,
+                        class    => "SubscribeCheckbox-$catid-$ntypeid",
+                        selected => (scalar @subs),
+                        noescape => 1,
+                    }) . '</td>';
+
                 $events_table .= LJ::html_hidden({
-                    name  => "$input_name-old",
-                    value => $subscribe_checked,
+                    name  => "${notify_input_name}-old",
+                    value => (scalar @subs) ? 1 : 0,
                 });
             }
 
-            # print out notification options for this event (hidden if not subscribed)
-            $events_table .= "<td>&nbsp;</td>";
-            my $hidden = $subscribed ? '' : 'style="visibility: hidden;"';
-            foreach my $note_class (@notify_classes) {
-                my $title = eval { $note_class->title } or next;
-                my $ntypeid = $note_class->ntypeid or next;
-
-                my $notify_checked = $u->has_subscription(etypeid => $etypeid,
-                                                          ntypeid => $ntypeid,
-                                                          ) ? 'checked' : '';
-
-                my $input_name = "subscribe-$etypeid-$ntypeid";
-                $events_table .= qq {
-                    <td id='NotificationOptions-$etypeid-$ntypeid' $hidden>
-                        <input type="checkbox" id="$input_name" name="$input_name"
-                            class="SubscribeCheckbox-$catid-$ntypeid" $notify_checked />
-                        <label for="$input_name"></label>
-                    </td>
-                    };
-            }
             $events_table .= '</tr></div>';
         }
+
         $catid++;
     }
 
     $events_table .= '</table>';
 
     # pass some info to javascript
-    {
-        my $etypeids = LJ::html_hidden({
-            'id'  => 'etypeids',
-            'value' => join(',', map { $_->etypeid } @event_classes),
-        });
-        my $ntypeids = LJ::html_hidden({
-            'id'  => 'ntypeids',
-            'value' => join(',', map { $_->ntypeid } @notify_classes),
-        });
-        my $catids = LJ::html_hidden({
-            'id'  => 'catids',
-            'value' => join(',', @catids),
-        });
+    my $catids = LJ::html_hidden({
+        'id'  => 'catids',
+        'value' => join(',', @catids),
+    });
+    my $ntypeids = LJ::html_hidden({
+        'id'  => 'ntypeids',
+        'value' => join(',', map { $_->ntypeid } LJ::NotificationMethod->all_classes),
+    });
 
-        $ret .= qq {
-            $etypeids
-                $ntypeids
-                $catids
-            };
-    }
-
-    $ret .= $events_table;
+    $ret .= qq {
+        $ntypeids
+            $catids
+            $events_table
+        };
     $ret .= LJ::html_submit('Save');
     $ret .= LJ::html_hidden({name => 'mode', value => 'save_subscriptions'});
 

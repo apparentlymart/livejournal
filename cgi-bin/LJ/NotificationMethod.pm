@@ -8,12 +8,6 @@ use Class::Autouse qw (LJ::Typemap
                        LJ::NotificationMethod::Inbox
                        );
 
-# make sure all the config'd classes are mapped
-if(@LJ::NOTIFY_TYPES) {
-    my $tm = __PACKAGE__->typemap or die "Could not make typemap.";
-    $tm->map_classes(@LJ::NOTIFY_TYPES);
-}
-
 # this mofo is basically just an interface
 # Mischa's contribution:  "straight up"
 sub new    { croak "can't instantiate base LJ::NotificationMethod" }

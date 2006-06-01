@@ -12,96 +12,13 @@ body<=
 
     use Class::Autouse qw(LJ::NotificationMethod LJ::Event);
 
-    BML::decl_params( lj_form_auth => qr/./,
-                      mode         => 'word',
-                      id           => 'digits',
-                      authas       => 'word',
-                      ntypeid      => 'digits',
-                      etypeid      => 'digits',
-                      delete       => 'digits',
-                      _default     => 'word',);
-
-
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
-
-    LJ::need_res('js/core.js');
-    LJ::need_res('js/dom.js');
-#    LJ::need_res('js/esnmanager.js');
-#    LJ::need_res('js/esn.js');
 
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);
     return LJ::bad_input("You could not be authenticated as the specified user.")
         unless $u;
-
-    my $arg_opts_as_html = sub {
-        my ($class) = @_;
-
-        my $html = '';
-        my $etypeid = $class->etypeid;
-
-        my $journal_title = $class->journal_sub_title;
-        my $journal_type = $class->journal_sub_type;
-
-        if ($journal_title && $journal_type) {
-            my $name = "journal$etypeid";
-            $journal_title ||= 'User';
-
-            if ($journal_type eq 'owner') {
-                my @can_sub = map { ($_->{user}, $_->{user}) } $u->can_post_to;
-                push @can_sub, ($u->{user}, $u->{user});
-                $html .= "$journal_title: " .  LJ::html_select({name => $name, id => $name}, @can_sub);
-            } elsif ($journal_type eq 'mutual_friend') {
-                my @mutual;
-                my $friends = LJ::get_friends($u);
-                foreach my $userid (keys %$friends) {
-                    next if $userid == $u->{userid};
-
-                    push @mutual, $userid
-                        if LJ::is_friend($userid, $u);
-                }
-
-                my $loaded = LJ::load_userids(@mutual);
-                @mutual = ();
-                foreach (values %$loaded) {
-                    next if $_->{statusvis} ne 'V';
-                    push @mutual, ($_->{user}, $_->{user})
-                        if $_->{journaltype} eq 'P';
-                }
-                $html .= "$journal_title: " .  LJ::html_select({name => $name, id => $name}, @mutual);
-            } elsif ($journal_type eq 'any') {
-                $html .= "$journal_title: " .  LJ::html_text({name => $name, id => $name});
-            } else {
-                $html .= "[Invalid sub_info type '$journal_type' for $class]";
-            }
-        }
-
-        my $arg_config = sub {
-            my ($argnum, $title, $type) = @_;
-
-            return '' unless $title && $type;
-
-            my $name = "argOpts$argnum$etypeid";
-
-            if ($type eq 'user' or $type eq 'number') {
-                return "$title: " .  LJ::html_text({name => $name, id => $name});
-            }
-
-            return '[Invalid arg type]';
-        };
-
-        my $arg1_title = $class->arg1_sub_title;
-        my $arg1_type = $class->arg1_sub_type;
-        my $arg2_title = $class->arg2_sub_title;
-        my $arg2_type = $class->arg2_sub_type;
-
-        $html .= $arg_config->(1, $arg1_title, $arg1_type);
-        $html .= $arg_config->(2, $arg2_title, $arg2_type);
-
-        return $html;
-    };
-
 
     my $formauth = LJ::form_auth();
 
@@ -109,212 +26,104 @@ body<=
     if (LJ::did_post()) {
         return LJ::error_list(BML::ml('error.invalidform')) unless LJ::check_form_auth();
 
-        if ($POST{mode} eq 'save_subscriptions') {
-            # check each subscription and see if selected state is different
-            # from the current state
-            foreach my $event_class (LJ::Event->all_classes) {
-                my $etypeid = eval { $event_class->etypeid } or next;
-                my $enabled = $POST{"subscribe$etypeid"} ? 1 : 0;
+        # do they want to add or edit subscriptions?
+        next unless $POST{mode} eq 'save_subscriptions';
 
-                # if no subscriptions
-                if (scalar $u->has_subscription(etypeid => $etypeid) == 0) {
-                    # if there are no subscriptions, and they haven't selected it, skip
-                    next unless $enabled;
+        my @sub_edit;
+        foreach my $postkey (keys %POST) {
+            my $subscr;
+            my $old;
+            my $old_postkey = $postkey;
 
-                    # if they enabled it, add the inbox notification method
-                    # create a new subscription
-                    $u->subscribe(
-                                  method    => 'Inbox',
-                                  etypeid   => $etypeid,
-                                  journal   => $u,        # FIXME: seems shady
-                                  );
-                } elsif (! $enabled) {
-                    # if they have a subscription and unchecked it, delete all subscriptions
-                    # find all subscriptions to this event
-                    my @subs = $u->has_subscription(
-                                                    etypeid => $etypeid,
-                                                    );
+            next unless ($postkey =~ /^(pending|subid) - $u->{user} - [\d-]+(-old)?$/x);
 
-                    # delete all subscriptions that were subscribed to
-                    if ($POST{"subscribe$etypeid-old"}) {
-                        $_->delete foreach @subs;
-                    }
-                    next;
-                }
+            my $type = $1;
+            $old = $2;
 
-                # otherwise, see what they have enabled and disabled
-                foreach my $notify_class (LJ::NotificationMethod->all_classes) {
-                    next if $notify_class eq 'LJ::NotificationMethod::Inbox';
+            # remove old string
+            $postkey =~ s/-old// if $old;
 
-                    my $ntypeid = eval { $notify_class->ntypeid } or next;
-                    $enabled = $POST{"subscribe-$etypeid-$ntypeid"} ? 1 : 0;
-
-                    my @subs = $u->has_subscription(
-                                                    etypeid => $etypeid,
-                                                    ntypeid => $ntypeid,
-                                                    );
-                    if (scalar @subs == 0) {
-                        # if they aren't subscribed to this and didn't click it, skip
-                        next unless $enabled;
-
-                        # if they enabled it, subscribe
-                        $u->subscribe(
-                                      ntypeid   => $ntypeid,
-                                      etypeid   => $etypeid,
-                                      journal   => $u,        # shady?
-                                      );
-                    } elsif (! $enabled) {
-                        # unsubscribe
-                        $_->delete foreach @subs;
-                    }
-                }
+            if ($type eq 'pending') {
+                $subscr = LJ::Subscription::Pending->thaw($postkey, $u);
+            } elsif ($type eq 'subid') {
+                $subscr = LJ::Subscription->thaw($postkey, $u);
+            } else {
+                return LJ::error_list("THIS SHIT IS APPLE CRANBERRIES");
             }
-        } elsif ($POST{mode} eq 'delete') {
-            my $id = int($POST{delete});
-            return LJ::bad_input("No ID specified") unless $id;
 
-            my $subscr = LJ::Subscription->new_by_id($u, $id)
-                or return LJ::error_list("Could not load subscription $id");
+            next unless $subscr;
+            next unless $old;
 
-            $subscr->delete
-                or return LJ::error_list("Could not delete subscription.");
+            my $oldvalue = $POST{$old_postkey};
+            my $checked = $POST{$postkey};
+
+            push @sub_edit, [
+                             $subscr,
+                             $checked,
+                             $oldvalue,
+                             ];
         }
-    }
 
-    if ($GET{'mode'} eq "modify" && $GET{'id'} ne "") {
-        my $id = int($GET{'id'});
-        my $subsc = LJ::Subscription->new_by_id($u, $id);
-        return "Invalid subscription" unless $subsc;
+        foreach my $edit_info (@sub_edit) {
+            my ($subscr, $checked, $oldvalue) = @$edit_info;
 
-        my $subscr = LJ::Subscription->new_by_id($u, $id)
-            or return LJ::error_list("Could not load subscription $id");
+            # if it's pending and enabled, make it a real subscription
+            if ($checked && $subscr->pending && ! $oldvalue) {
+                $subscr->commit;
+            } elsif (! $checked && ! $subscr->pending && $oldvalue) {
+                # if it's not checked and is currently a real subscription, delete it
 
-        my $subdesc = $subscr->as_html;
-
-        my $fields = LJ::html_hidden(delete => $id,
-                                     mode   => 'delete',);
-
-        $body .= qq {
-            <div>
-                <a href="./"><< Back</a>
-            </div>
-            <br/>
-            <form method='POST' action="./">
-                $formauth
-                <div>
-                    Modify subscription: "$subdesc"
-                </div>
-                <br/>
-                <div>
-                    <input type="submit" value="Delete" />
-                </div>
-                $fields
-            </form>
-        };
-        return $body;
-    } else {
-
-        ###################### Print subscribe table
-        my %categories = (
-                          "$LJ::SITENAMEABBREV and You" => [
-                                                            'Befriended',
-                                                            ],
-                          "Communities" => [
-                                            'UserNewPost',
-                                            'CommunityInvite',
-                                            ],
-                          );
-
-        my $authas_form = LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
-        $body .= qq {
-            <form action='./' method='GET'>
-                $authas_form
-            </form>
-        };
-
-        $body .= LJ::subscribe_interface(
-                                         user       => $u,
-                                         categories => \%categories,
-                                         formauth   => $formauth,
-                                         );
-
-
-        ################
-
-
-
-        $body .= "<fieldset><legend>Subscriptions</legend>";
-        my @subscriptions = $u->subscriptions;
-
-        my $subs_html = '';
-
-        unless (@subscriptions) {
-            $subs_html = "<?de No subscriptions de?>";
-        } else {
-            $subs_html .= "<?p Below are the current subscriptions for " . LJ::ljuser($authas) . " p?>";
-            $subs_html .= "<table cellspacing='0' cellpadding='0' id='Subscriptions'>";
-            $subs_html .= "<tr><th></th><th>Event</th><th>Expires</th><th>Notification Type</th></tr>";
-            my $row = 1;
-            foreach my $subsc ( sort {$a->id <=> $b->id } @subscriptions ) {
-                my $class = $row % 2 ? "lighter" : "darker";
-                $subs_html .= "<tr class='$class'>";
-                $subs_html .= "<td><a href='./index.bml?mode=modify&id=" . $subsc->id . "'>" . $subsc->id . "</a></td>";
-                my $subscdesc = eval { $subsc->as_html } || "Error: $@";
-                $subs_html .= "<td>$subscdesc</td>";
-                if ($subsc->expiretime) {
-                    $subs_html .= "<td>" . LJ::time_to_http($subsc->expiretime) . "</td>";
+                # if it's the inbox method, delete everything
+                if ($subscr->method eq 'LJ::NotificationMethod::Inbox') {
+                    my @subs = $u->find_subscriptions(
+                                                      journal => $subscr->journal,
+                                                      etypeid => $subscr->etypeid,
+                                                      arg1    => $subscr->arg1,
+                                                      arg2    => $subscr->arg2,
+                                                      );
+                    $_->delete foreach @subs;
                 } else {
-                    $subs_html .= "<td>Never</td>";
+                    $subscr->delete;
                 }
-
-                # Load the NotificationMethod object for this subscription
-                my $note = eval { LJ::NotificationMethod->new_from_subscription($subsc) };
-
-                my $title = eval { $note->title } || "Error: $@";
-                $subs_html .= "<td>$title</td>";
-                $subs_html .= "</tr>";
-                $row++;
             }
         }
 
-        $body .= "$subs_html</table></fieldset>";
+        delete $u->{_subscriptions};
     }
+
+    ###################### Print subscribe table
+    my %categories = (
+                      "$LJ::SITENAMEABBREV and You" => [
+                                                        'Befriended',
+                                                        ],
+                      "Communities" => [
+                                        'CommunityInvite',
+                                        'CommunityJoinRequest',
+                                        ],
+                      );
+
+    my $authas_form = LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
+    $body .= qq {
+        <form action='./' method='GET'>
+            $authas_form
+            </form>
+
+        <a href="$LJ::SITEROOT/tools/notifications.bml">Inbox</a> | Subscription Center
+        };
+
+    $body .= LJ::subscribe_interface($u,
+                                     journal      => $u,
+                                     categories   => \%categories,
+                                     formauth     => $formauth,
+                                     showtracking => 1,
+                                     );
+
     return $body;
 }
 _code?>
 <=body
 title=><?_code return $title; _code?>
 head<=
-<style type='text/css'>
-    .CategoryRow {
-      width: 100%;
-        background-color: #Acc;
-    }
-span.CategoryHeading {
-    font-size: 1.3em;
-    font-weight: 200;
-}
-
-#Subscriptions {
-    width: 100%;
-}
-#Subscriptions th {
-    text-align: left;
-}
-#Subscriptions td, #Subscriptions th {
-    padding-left: .5em;
-    padding-right: .5em;
-}
-#Subscriptions tr.lighter {
-    background-color: #cff;
-}
-#Subscriptions tr.darker {
-    background-color: #9cc;
-}
-div.argOptsContainer {
-  display: none;
-}
-</style>
 <?_code return $headextra; _code?>
 <=head
 <=body

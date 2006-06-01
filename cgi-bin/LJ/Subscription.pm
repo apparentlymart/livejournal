@@ -28,7 +28,7 @@ sub new_by_id {
 
 sub freeze {
     my $self = shift;
-    return "subid-" . $self->owner->{user} . '-' . $self->subid;
+    return "subid-" . $self->owner->{user} . '-' . $self->id;
 }
 
 sub thaw {
@@ -45,6 +45,8 @@ sub thaw {
 
     return $class->new_by_id($u, $subid);
 }
+
+sub pending { 0 }
 
 sub subscriptions_of_user {
     my ($class, $u) = @_;
@@ -200,6 +202,19 @@ sub create {
     return $self;
 }
 
+# returns a hash of arguments representing this subscription (useful for passing to
+# other functions, such as find)
+sub sub_info {
+    my $self = shift;
+    return (
+            journal => $self->journal,
+            etypeid => $self->etypeid,
+            ntypeid => $self->ntypeid,
+            arg1    => $self->arg1,
+            arg2    => $self->arg2,
+            );
+}
+
 # returns a nice HTML description of this current subscription
 sub as_html {
     my $self = shift;
@@ -247,6 +262,11 @@ sub arg2 {
 sub ntypeid {
     my $self = shift;
     return $self->{ntypeid};
+}
+
+sub method {
+    my $self = shift;
+    return LJ::NotificationMethod->class($self->ntypeid);
 }
 
 sub notify_class {

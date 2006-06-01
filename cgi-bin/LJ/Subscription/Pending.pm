@@ -36,7 +36,6 @@ sub new {
     }
     croak "No ntypeid" unless $ntypeid;
 
-
     my $self = {
         u       => $u,
         journal => $journal,
@@ -48,6 +47,12 @@ sub new {
 
     return bless $self, $class;
 }
+
+sub delete {}
+sub pending { 1 }
+
+sub journal   { $_[0]->{journal}}
+sub journalid { $_[0]->{journal}->{userid} }
 
 # overload create because you should never be calling it on this object
 # (if you want to turn a pending subscription into a real subscription call "commit")
@@ -68,6 +73,7 @@ sub commit {
 # class method
 sub thaw {
     my ($class, $data, $u) = @_;
+
     my ($type, $user, $journalid, $etypeid, $ntypeid, $arg1, $arg2) = split('-', $data);
 
     die "Invalid thawed data" unless $type eq 'pending';
@@ -92,14 +98,18 @@ sub thaw {
 # instance method
 sub freeze {
     my $self = shift;
+
     my $user = $self->{u}->{user};
     my $journalid = $self->{journal}->{userid};
-    my $arg1 = $self->{arg1} + 0;
-    my $arg2 = $self->{arg2} + 0;
     my $etypeid = $self->{etypeid};
     my $ntypeid = $self->{ntypeid};
 
-    return join('-', ('pending', $user, $journalid, $etypeid, $ntypeid, $arg1, $arg2));
+    my @args = ($user,$journalid,$etypeid,$ntypeid);
+
+    push @args, $self->{arg1} if defined $self->{arg1};
+    push @args, $self->{arg2} if defined $self->{arg2};
+
+    return join('-', ('pending', @args));
 }
 
 
