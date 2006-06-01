@@ -2527,7 +2527,7 @@ sub init {
 
     # test accounts may only comment on other test accounts.
     if ((grep { $form->{'userpost'} eq $_ } @LJ::TESTACCTS) &&
-        !(grep { $journalu->{'user'} eq $_ } @LJ::TESTACCTS))
+        !(grep { $journalu->{'user'} eq $_ } @LJ::TESTACCTS) && !$LJ::IS_DEV_SERVER)
     {
         $bmlerr->("$SC.error.testacct");
     }
