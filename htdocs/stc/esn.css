@@ -5,7 +5,8 @@
 .Subscribe {
     width: 100%;
     padding: 0;
-    margin: 1.7em 0 0 0;
+    margin: 0 0 0 0;
+    clear: both;
     }
     
     .Subscribe td {
@@ -116,4 +117,5 @@ div.argOptsContainer {
 .esnlinks {
     float: right;
     display: block;
+    margin: 0 0 .7em 0;
     }
