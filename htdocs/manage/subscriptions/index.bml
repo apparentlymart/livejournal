@@ -103,8 +103,6 @@ body<=
         <form action='./' method='GET'>
             $authas_form
             </form>
-
-        
         };
 
     $body .= LJ::subscribe_interface($u,
