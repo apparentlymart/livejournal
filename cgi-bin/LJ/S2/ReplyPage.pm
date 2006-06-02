@@ -110,6 +110,7 @@ sub ReplyPage
             'permalink_url' => $u->{'_journalbase'} . "/$ditemid.html?view=$dtalkid#t$dtalkid",
             'depth' => 1,
             'time' => $datetime,
+            'tags' => [],
         };
     }
 
