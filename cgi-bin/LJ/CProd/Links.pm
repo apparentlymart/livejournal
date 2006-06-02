@@ -3,7 +3,8 @@ use base 'LJ::CProd';
 
 sub applicable {
     my ($class, $u) = @_;
-    return 0 if $u->in_class('paid') || $u->in_class('perm');
+    my $paid = 1 << LJ::class_bit('paid');
+    return 0 unless LJ::get_cap($u, 'userlinks') < LJ::get_cap($paid, 'userlinks');
     return 1;
 }
 
@@ -11,9 +12,14 @@ sub render {
     my ($class, $u, $version) = @_;
     my $user = LJ::ljuser($u);
 
+    my $free = 1 << LJ::class_bit('free');
+    my $plus = 1 << LJ::class_bit('plus');
     # versions based on class
-    $version = 1 if $u->in_class('free');
-    $version = 2 if $u->in_class('plus');
+    if (LJ::get_cap($u, 'userlinks') == LJ::get_cap($free, 'userlinks')) {
+        $version = 1;
+    } elsif (LJ::get_cap($u, 'userlinks') == LJ::get_cap($plus, 'userlinks')) {
+        $version = 2;
+    }
 
     my $link = $class->clickthru_link('cprod.links.link', $version);
     my $link2 = BML::ml('cprod.links.link2-2.v'.$version, { aopts => "href='$LJ::SITEROOT/manage/payments/'" });
