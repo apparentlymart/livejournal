@@ -54,6 +54,20 @@ sub name_caps_short
 }
 
 # <LJFUNC>
+# name: LJ::user_caps_icon
+# des: Given a user's capability class bit mask, returns
+#      site-specific HTML with the capability class icon.
+# args: caps
+# des-caps: 16 bit capability bitmask
+# </LJFUNC>
+sub user_caps_icon
+{
+    return undef unless LJ::are_hooks("user_caps_icon");
+    my $caps = shift;
+    return LJ::run_hook("user_caps_icon", $caps);
+}
+
+# <LJFUNC>
 # name: LJ::get_cap
 # des: Given a user object, capability class key or capability class bit mask
 #      and a capability/limit name,

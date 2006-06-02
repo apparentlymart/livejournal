@@ -1040,6 +1040,16 @@ sub profile_url {
 }
 
 # <LJFUNC>
+# name: LJ::User::caps_icon
+# des: get the icon for a user's cap
+# returns: HTML with site-specific cap icon
+# </LJFUNC>
+sub caps_icon {
+    my $u = shift;
+    return LJ::user_caps_icon($u->{caps});
+}
+
+# <LJFUNC>
 # name: LJ::User::get_friends_birthdays
 # des: get the upcoming birthdays for friends of a user
 # returns: arrayref of [ month, day, user ] arrayrefs
