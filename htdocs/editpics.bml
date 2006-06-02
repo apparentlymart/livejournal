@@ -453,9 +453,12 @@
 
             ## see if they have too many pictures uploaded
             if (scalar @userpics >= $max) {
-                my $toomany;
-                $toomany = LJ::CProd->inline($u, inline => 'EditPicsMax');
-                return $err->($toomany . LJ::help_icon('userpics', " ", ""));
+                my $inline = LJ::CProd->inline($u, inline => 'EditPicsMax');
+                if ($inline) {
+                    return $err->($inline . LJ::help_icon('userpics', " ", ""));
+                } else {
+                    return $err->(BML::ml('.error.toomanypics4', { "num" => $max }). LJ::help_icon('userpics', " ", ""));
+                }
             }
 
             my $userpic = eval { LJ::Userpic->create($u, data => \$POST{'userpic'}); };
@@ -599,7 +602,12 @@
 
         } else {
             $body .= "<br /><?standout \n";
-            $body .= LJ::CProd->inline($u, inline => 'EditPicsMax');
+            my $inline = LJ::CProd->inline($u, inline => 'EditPicsMax');
+            if ($inline) {
+                $body .= $inline;
+            } else {
+                $body .= BML::ml('.error.toomanypics_standout', { num => $max });
+            }
         }
         $body .= " standout?>\n\n";
     };
