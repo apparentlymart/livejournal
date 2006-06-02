@@ -119,8 +119,8 @@ sub find {
     @subs = grep { $_->ntypeid == $ntypeid }             @subs if $ntypeid;
     @subs = grep { $_->etypeid == $etypeid }             @subs if $etypeid;
     @subs = grep { LJ::u_equals($_->journal, $journal) } @subs if $journal;
-    @subs = grep { $_->arg1 == $arg1 }                   @subs if $arg1;
-    @subs = grep { $_->arg2 == $arg2 }                   @subs if $arg2;
+    @subs = grep { $_->arg1 == $arg1 }                   @subs if defined $arg1;
+    @subs = grep { $_->arg2 == $arg2 }                   @subs if defined $arg2;
 
     return @subs;
 }
