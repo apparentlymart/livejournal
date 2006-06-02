@@ -2556,7 +2556,7 @@ sub subscribe_interface {
                         noescape => 1,
                     }) . '</td>';
 
-                unless ($note_pending) {
+                unless ($note_pending->pending) {
                     $events_table .= LJ::html_hidden({
                         name  => "${notify_input_name}-old",
                         value => (scalar @subs) ? 1 : 0,
