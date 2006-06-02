@@ -1866,9 +1866,9 @@ sub ads {
 
     # first 500 words
     $pubtext =~ s/<.+?>//g;
-    my @words = split(/\s+/, $pubtext);
+    my @words = grep { $_ } split(/\s+/, $pubtext);
     my $max_words = 500;
-    @words = $words[0..$max_words-1] if @words > $max_words;
+    @words = @words[0..$max_words-1] if @words > $max_words;
     $pubtext = join(' ', @words);
 
     my $debug = $LJ::DEBUG{'ads'};
