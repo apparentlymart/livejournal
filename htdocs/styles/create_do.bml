@@ -20,10 +20,8 @@ body<=
     my $u = LJ::get_authas_user($authas);
     return LJ::bad_input($ML{'error.authinvalid'})
         unless $u;
- 
-    unless (LJ::get_cap($u, "styles")) {
-        return LJ::bad_input($ML{'.error.accounttype'});
-    }
+
+    return LJ::CProd->inline($u, inline => 'CreateStyles');
 
     # error check submission
     return LJ::bad_input($ML{'.error.invalidview'})
