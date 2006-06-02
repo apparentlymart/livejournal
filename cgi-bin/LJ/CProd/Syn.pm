@@ -3,7 +3,7 @@ use base 'LJ::CProd';
 
 sub applicable {
     my ($class, $u) = @_;
-    return 0 if $u->in_class('paid') || $u->in_class('perm');
+    return 0 if LJ::get_cap($u, "synd_create");
     return 1;
 }
 
