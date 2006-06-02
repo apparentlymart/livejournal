@@ -86,7 +86,7 @@ sub subscription_as_html {
         }, @tagdropdown);
 
         return "all posts tagged $dropdownhtml on " . $journal->ljuser_display;
-    } elsif (defined $arg1) {
+    } elsif ($arg1) {
         my $usertags = LJ::Tags::get_usertags($journal);
         return "all posts tagged $usertags->{$arg1}->{name} on " . $journal->ljuser_display;
     }
