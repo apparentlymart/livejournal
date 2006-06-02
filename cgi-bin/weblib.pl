@@ -2460,7 +2460,7 @@ sub subscribe_interface {
             foreach my $evt_class (@event_classes) {
                 my $etypeid = eval { $evt_class->etypeid } or next;
 
-                my @subscribed = $u->find_subscriptions(etypeid => $etypeid, method => "Inbox");
+                my @subscribed = $u->find_subscriptions(etypeid => $etypeid, method => "Inbox", arg1 => 0, arg2 => 0);
                 push @pending_subscriptions, @subscribed;
 
                 push @pending_subscriptions, LJ::Subscription::Pending->new($u,
