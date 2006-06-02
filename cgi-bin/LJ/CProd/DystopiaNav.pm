@@ -3,7 +3,7 @@ use base 'LJ::CProd';
 
 sub applicable {
     my ($class, $u) = @_;
-    return 0 if $u->in_class('paid') || $u->in_class('perm');
+    return 0 if LJ::get_cap($u, "paid");
     return 1;
 }
 
@@ -11,7 +11,7 @@ sub render {
     my ($class, $u, $version) = @_;
 
     # versions based on class
-    if ($u->in_class('plus')) {
+    if (LJ::get_cap($u, "ads")) {
         $version = 2;
     } else {
         $version = 1;
