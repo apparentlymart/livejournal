@@ -2460,14 +2460,18 @@ sub subscribe_interface {
             foreach my $evt_class (@event_classes) {
                 my $etypeid = eval { $evt_class->etypeid } or next;
 
-                my @subscribed = $u->find_subscriptions(etypeid => $etypeid, method => "Inbox", arg1 => 0, arg2 => 0);
-                push @pending_subscriptions, @subscribed;
+                # FIXME: possibly will match more than it should
+                my @subscribed = $u->find_subscriptions(etypeid => $etypeid, method => "Inbox");
 
-                push @pending_subscriptions, LJ::Subscription::Pending->new($u,
-                                                                            journal => $journal,
-                                                                            etypeid => $etypeid,
-                                                                            method  => "Inbox",
-                                                                            ) unless @subscribed;
+                if (@subscribed) {
+                    push @pending_subscriptions, @subscribed;
+                } else {
+                    push @pending_subscriptions, LJ::Subscription::Pending->new($u,
+                                                                                journal => $journal,
+                                                                                etypeid => $etypeid,
+                                                                                method  => "Inbox",
+                                                                                );
+                }
             }
         }
 
@@ -2506,6 +2510,7 @@ sub subscribe_interface {
 
         $events_table .= '</tr>';
 
+        # inbox method
         foreach my $pending_sub (@pending_subscriptions) {
             # print option to subscribe to this event, checked if already subscribed
             my $input_name = $pending_sub->freeze or next;
