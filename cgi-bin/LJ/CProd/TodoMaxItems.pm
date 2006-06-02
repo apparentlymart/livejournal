@@ -3,7 +3,9 @@ use base 'LJ::CProd';
 
 sub applicable {
     my ($class, $u) = @_;
-    return 0 if $u->in_class('paid') || $u->in_class('perm');
+
+    my $paid = 1 << LJ::class_bit('paid');
+    return 0 unless LJ::get_cap($u, 'todomax') < LJ::get_cap($paid, 'todomax');
     return 1;
 }
 
