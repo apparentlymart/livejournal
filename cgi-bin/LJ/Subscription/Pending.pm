@@ -85,7 +85,7 @@ sub thaw {
         die "Invalid user $subuser->{user}" unless $u;
     }
 
-    if ($arg1 eq '?') {
+    if ($arg1 && $arg1 eq '?') {
         die "Arg1 option passed without POST data" unless $POST;
 
         die "No input data for ${data}.arg1" unless defined $POST->{"${data}.arg1"};
@@ -94,7 +94,7 @@ sub thaw {
         $arg1 = int($arg1value);
     }
 
-    if ($arg2 eq '?') {
+    if ($arg2 && $arg2 eq '?') {
         die "Arg2 option passed without POST data" unless $POST;
 
         die "No input data for ${data}.arg2" unless defined $POST->{"${data}.arg2"};
