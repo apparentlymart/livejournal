@@ -34,6 +34,8 @@ function useRichText(textArea, statPrefix) {
         // Allow RTE to use it's handler again so it's happy.
         var oForm = oEditor.LinkedField.form;
         DOM.addEventListener( oForm, 'submit', oEditor.UpdateLinkedField, true ) ;
+        oForm.originalSubmit = oForm.submit;
+        oForm.submit = oForm.SubmitReplacer;
     }
 
     // Need to pause here as it takes some time for the editor
@@ -90,5 +92,7 @@ function usePlainText(textArea) {
     // Remove onsubmit handler while in Plain text
     var oForm = oEditor.LinkedField.form;
     DOM.removeEventListener( oForm, 'submit', oEditor.UpdateLinkedField, true ) ;
+    oForm.SubmitReplacer = oForm.submit;
+    oForm.submit = oForm.originalSubmit;
     return false;
 }
