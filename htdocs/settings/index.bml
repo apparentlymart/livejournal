@@ -21,18 +21,23 @@
 
     my @settings = map { s!.+cgi-bin/!!; s!/!::!g; s/\.pm$//; $_ } (glob "$ENV{LJHOME}/cgi-bin/LJ/Setting/*.pm");
 
+    my $tag = lc $GET{tag};
     my %tags = ();
     my @matches;
     foreach my $class (@settings) {
         next if $selclass && $selclass ne $class;
         eval "use $class; 1; " or next;
         push @matches, $class if $selclass;
+        my $tagct = 0;
         foreach my $tag ($class->tags) {
             push @{$tags{lc $tag} ||= []}, $class;
+            $tagct++;
+        }
+        if ($tagct && $tag && $tag eq "_all") {
+            push @matches, $class;
         }
     }
 
-    my $tag = lc $GET{tag};
 
     $title = "Change Settings";
     $body = "<center>Which <a href='./'>setting</a> do you want to change today?  Enter tag:";
