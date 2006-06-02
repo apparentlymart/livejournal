@@ -1,11 +1,10 @@
 <?_code
 #line 2
  use strict;
- use vars qw($title $windowtitle $body $head $bml_okay %GET);
+ use vars qw($title $windowtitle $body $head %GET);
 
  BML::set_language_scope('/userinfo.bml');
 
- $bml_okay = 1;
  $title = $ML{'.title1'};
  $body = "";
  $head = "";
@@ -39,7 +38,7 @@
      return;
  }
 
- my $sth;
+ my $sth; # SQL select for time update, create and seconds old
  my %countries = ();
  my %states = ();
  LJ::load_codes({ "country" => \%countries, "state" => \%states });
@@ -55,6 +54,7 @@
      $body = $ML{'.error.malfname'};
      return;
  }
+ # TODO:Is this check needed?
  if ($user eq "" && $remote) {
      $user = $remote->{'user'};
  }
@@ -164,9 +164,9 @@
      $head .= LJ::robot_meta_tags();
  }
 
+ # TODO: Redirect directly to the profile URL
  if ($u->{'journaltype'} eq "R" && $u->{'renamedto'}) {
-     my $extra = $GET{'mode'} eq 'full' ? "&mode=full" : '';
-     return BML::redirect("$LJ::SITEROOT/userinfo.bml?user=$u->{'renamedto'}$extra");
+     return BML::redirect("$LJ::SITEROOT/userinfo.bml?user=$u->{'renamedto'}");
  }
 
   my %friends = ('load'=>1, 'loaded'=>0, 'display'=>1, 'count'=>0);
@@ -225,7 +225,9 @@
  my $intu = LJ::get_interests($u);
 
  my %remote_interest;
- if ($remote && $remote->{'userid'} != $userid) {
+ # TODO: Check if new unless works
+ #if ($remote && $remote->{'userid'} != $userid) {
+ unless ($remote_isowner) {
      if (my $rint = LJ::get_interests($remote, { justids => 1 })) {
          $remote_interest{$_} = 1 foreach @$rint;
      }
@@ -321,6 +323,7 @@
      }
  }
 
+ # TODO: Remove this section? Should no longer be needed.
  # BML helpers.  we do BML by hand in this page, so we don't force BML
  # to evaluate this huge page looking for non-existent BML.  this
  # makes it quicker, and prevents us from having to clean out BML in
@@ -441,7 +444,7 @@
              $schoollist .= "<i>$ML{'.label.noschools'}</i>";
          }
 
-         if ($remote->{userid} == $userid) {
+         if ($remote_isowner) {
              $schoollist .= ' <small>';
              $schoollist .= BML::ml('Actionlink', { 'link' => "<a href='$LJ::SITEROOT/schools/manage.bml'>$ML{'.label.manageschools'}</a>" });
              $schoollist .= '</small>';
@@ -532,11 +535,12 @@
          $body .= "</a></span>\n";
      }
      $body .= "<span id='actionitem'><a href='$jbase/'><img src='$LJ::IMGPREFIX/journal.gif' /> View journal</a></span>\n";
-     $body .= "<span id='actionitem'><a href='http://pics.$LJ::DOMAIN/$user'><img src='$LJ::IMGPREFIX/scrapbook.gif' /> View ScrapBook</a></span>\n";
+     $body .= "<span id='actionitem'><a href='$LJ::FB_SITEROOT/$user'><img src='$LJ::IMGPREFIX/scrapbook.gif' /> View ScrapBook</a></span>\n";
      unless ($LJ::DISABLED{'nudge'} || $remote_isowner) {
          $body .= "<span id='actionitem'><a href='$LJ::SITEROOT/friends/nudge.bml?user=$u->{'user'}'><img src='$LJ::IMGPREFIX/nudge.gif' alt='Nudge a friend' title='Nudge a friend' border='0' /> Nudge a friend</a></span>\n";
      }
      if ($remote && !$remote_isowner) {
+         # TODO: Don't show site-specific stuff in general code
          $body .= "<span id='actionitem'><a href='$LJ::SITEROOT/shop/view.bml?item=paidaccount&gift=1&for=$u->{'user'}'><img src='$LJ::IMGPREFIX/gift.gif' width='16' height='16' alt='Give a gift' title='Give a gift' /> Give a gift</a></span>";
      }
      $body .= "<span id='actionitem'><a href='$LJ::SITEROOT/tools/search.bml?journal=$u->{'user'}'><img src='$LJ::IMGPREFIX/search.gif' width='16' height='16' alt='$ML{'.label.searchjournal'}' title='$ML{'.label.searchjournal'}' /> Search journal</a></span>\n";
@@ -583,18 +587,7 @@
 
  # Account Type
  $body .= "      <div style='float: right'>\n";
-## TODO: This should not get checked in
-## Account types are not a part of the main livejournal trunk
- my $caps = $u->{'caps'};
- if ($caps & 0x10) {
-     $body .= "<img src='$LJ::IMGPREFIX/perm.gif'>";
- } elsif ($caps & 0x08) {
-     $body .= "<img src='$LJ::IMGPREFIX/paid.gif'>";
- } elsif ($caps & 0x04) {
-     $body .= "<img src='$LJ::IMGPREFIX/early.gif'>";
- } elsif ($caps & 0x02) {
-     $body .= "";
- }
+ $body .= $u->caps_icon;
  $body .= " <a href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=38' style='white-space: nowrap'>" .
             LJ::name_caps($u->{'caps'}) . "</a>";
  $body .= "      </div>\n";
@@ -764,11 +757,13 @@
 
 
  # Generates the HTML display for a list of users
+ # TODO: Need to handle friend-of and member-of display for users looking at
+ # their own profile, bold mutually friended and commnities being watched
  my $displayusers = sub {
      my $users = shift;
      my $label = shift;
      my $hilite_common = shift || 1;
-     $hilite_common = 0 if $remote_isowner;
+     $hilite_common = 0 if (!$remote || $remote_isowner);
      my $dontfollow = shift;
 
      my $count = my $incommon = 0;
@@ -792,7 +787,8 @@
      my $display = "<p><span class='ui_minihead'>$label ";
      my $plus = $friendsof{'load_clipped'} ? "+" : "";
      $display .= "($count";
-     $display .= $incommon ? ", <span class='incommon'>$incommon in common</span>" : ", $incommon in common" if $hilite_common;
+     $display .= $incommon ? ", <span class='incommon'>$incommon in common</span>"
+                           : ", $incommon in common" if $hilite_common;
      $display .= ")$plus";
      $display .= ", ..." if $friendsof{'clipped'} || $friendsof{'load_clipped'};
      $display .= "</span><br />\n" . $userlist;
@@ -837,7 +833,6 @@
 
  unless ($synd || $LJ::FORCE_EMPTY_FRIENDS{$userid}) {
      my $label = $com ? $ML{'.friends.comm'} : $ML{'.friends.user'};
-#     $body .= "<tr><td align='right' valign='top'><b><a href='$LJ::SITEROOT/$dir/$user/friends'>$label</a>:</b></td><td colspan='$span'>";
 
      $friends{'display'} = 0 if $friends{'count'} > $MAX_FRIENDS_SHOW;
      if ($friends{'count'}) {
@@ -922,13 +917,6 @@
 
  # Right Column
  $body .= "  <td style='vertical-align: top'>\n";
-# $body .= "  <div style='width: 300px; height: 1px'> </div>\n";
- my $hook_extra;
- LJ::run_hooks("userinfo_html_by_journal", {
-     'u' => $u,
-     'ret' => \$hook_extra,
- });
-
 
  # Journal Info
  $body .= "<div style='float: left;'>";
@@ -946,6 +934,11 @@
  $body .= "</p>\n</div>";
  # /Journal Info
 
+ my $hook_extra;
+ LJ::run_hooks("userinfo_html_by_journal", {
+     'u' => $u,
+     'ret' => \$hook_extra,
+ });
  $body .= $hook_extra;
  $body .= "<div class='clear'> </div>\n";
  $body .= "&nbsp;<br />\n";
@@ -1111,8 +1104,8 @@
          my $link = "$LJ::SITEROOT/interests.bml?mode=enmasse";
          $link .= "&fromuser=$user" unless ($remote->{'userid'} == $userid);
          $body .= ". <small>";
-         my $mlcode = ($remote->{'userid'} == $userid) ? '.label.interests.removesome'
-                                                       : '.label.interests.modifyyours';
+         my $mlcode = ($remote_isowner) ? '.label.interests.removesome'
+                                        : '.label.interests.modifyyours';
          $body .= BML::ml('Actionlink', { 'link' => "<a href='$link'>$ML{$mlcode}</a>" });
          $body .= "</a></small>";
      }
@@ -1122,19 +1115,20 @@
  # /Interests
 
 
+ # Set a minimum width of 300px
+ $body .= "  <div><div style='width: 300px; height: 1px'> &nbsp;</div></div>\n";
  $body .= "  </td></tr>\n";
  # /Right Column
 
  $body .= "</table></p>\n";
  ## /Two Big Column
 
-$bml_okay = 0;
 return;
 
 _code?><?page
 windowtitle=><?_code return $windowtitle; _code?>
 title=><?_code return $title; _code?>
-body=><?_code return $bml_okay ? $body : BML::noparse($body); _code?>
+body=><?_code return $body; _code?>
 head<=
 <?_code
     LJ::need_res('stc/lj_base.css');
