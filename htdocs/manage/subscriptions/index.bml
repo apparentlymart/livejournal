@@ -35,12 +35,21 @@ body<=
             my $old_postkey = $postkey;
             my $old = $postkey =~ /-old$/;
 
+            # are there other options for this pending subscription? if so, process those not this one
+            next if $postkey =~ /\.arg\d/;
+
+            $subscr = LJ::Subscription->thaw($postkey, $u, \%POST);
+
+            next unless $subscr;
+
+            if ($subscr->pending) {
+                $subscr->commit;
+                next;
+            }
+
             # remove old string
             $postkey =~ s/-old// if $old;
 
-            $subscr = LJ::Subscription->thaw($postkey, $u);
-
-            next unless $subscr;
             next unless $old;
 
             my $oldvalue = $POST{$old_postkey};
@@ -57,9 +66,7 @@ body<=
             my ($subscr, $checked, $oldvalue) = @$edit_info;
 
             # if it's pending and enabled, make it a real subscription
-            if ($checked && $subscr->pending && ! $oldvalue) {
-                $subscr->commit;
-            } elsif (! $checked && ! $subscr->pending && $oldvalue) {
+            if (! $checked && $oldvalue) {
                 # if it's not checked and is currently a real subscription, delete it
 
                 # if it's the inbox method, delete everything

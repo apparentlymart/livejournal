@@ -72,7 +72,7 @@ sub commit {
 
 # class method
 sub thaw {
-    my ($class, $data, $u) = @_;
+    my ($class, $data, $u, $POST) = @_;
 
     my ($type, $userid, $journalid, $etypeid, $ntypeid, $arg1, $arg2) = split('-', $data);
 
@@ -83,6 +83,24 @@ sub thaw {
         die "no user" unless $subuser;
         $u = LJ::get_authas_user($subuser);
         die "Invalid user $subuser->{user}" unless $u;
+    }
+
+    if ($arg1 eq '?') {
+        die "Arg1 option passed without POST data" unless $POST;
+
+        die "No input data for ${data}.arg1" unless defined $POST->{"${data}.arg1"};
+
+        my $arg1value = $POST->{"${data}.arg1"};
+        $arg1 = int($arg1value);
+    }
+
+    if ($arg2 eq '?') {
+        die "Arg2 option passed without POST data" unless $POST;
+
+        die "No input data for ${data}.arg2" unless defined $POST->{"${data}.arg2"};
+
+        my $arg2value = $POST->{"${data}.arg2"};
+        $arg2 = int($arg2value);
     }
 
     return undef unless $journalid && $etypeid;

@@ -2386,6 +2386,7 @@ sub subscribe_interface {
     # if showtracking, add things the user is tracking to the categories
     if ($showtracking) {
         my @subscriptions = $u->subscriptions;
+
         foreach my $subsc ( sort {$a->id <=> $b->id } @subscriptions ) {
             # if this event class is already being displayed above, skip over it
             my $etypeid = $subsc->etypeid or next;
@@ -2410,8 +2411,6 @@ sub subscribe_interface {
         next unless $cat_event_classes && scalar @$cat_event_classes;
         push @catids, $catid;
 
-        my $pending;
-
         # if the category holds Subscription::Pending objects, then use those
         if ((ref $cat_event_classes->[0]) =~ /Subscription::Pending/) {
             $pending = $cat_event_classes;
@@ -2426,7 +2425,7 @@ sub subscribe_interface {
         if ($is_tracking_category) {
             foreach my $event_subclass (@$cat_event_classes) {
                 foreach my $subscr ($u->has_subscription(event => "LJ::Event::$event_subclass", method => "Inbox")) {
-                    push @event_classes, $subscr->event_class;
+                    push @event_classes, $subscr->event_class unless grep { $_ eq $subscr->event_class } @event_classes;
                 }
             }
         }
@@ -2447,14 +2446,15 @@ sub subscribe_interface {
         my @pending_subscriptions;
         # build list of subscriptions to show the user
         {
-            foreach my $pending_sub (@$pending) {
-                my %sub_args = $pending_sub->sub_info;
-                delete $sub_args{ntypeid};
-                $sub_args{method} = 'Inbox';
+            unless ($is_tracking_category) {
+                foreach my $pending_sub (@$pending) {
+                    my %sub_args = $pending_sub->sub_info;
+                    delete $sub_args{ntypeid};
+                    $sub_args{method} = 'Inbox';
 
-                my @existing_subs = $u->has_subscription(%sub_args);
-
-                push @pending_subscriptions, (scalar @existing_subs ? @existing_subs : $pending_sub);
+                     my @existing_subs = $u->has_subscription(%sub_args);
+                     push @pending_subscriptions, (scalar @existing_subs ? @existing_subs : $pending_sub);
+                }
             }
 
             foreach my $evt_class (@event_classes) {
@@ -2522,10 +2522,12 @@ sub subscribe_interface {
                     noescape => 1,
                 }) .  "</td>";
 
-            $events_table .= LJ::html_hidden({
-                name  => "${input_name}-old",
-                value => $subscribed,
-            });
+            unless ($pending_sub->pending) {
+                $events_table .= LJ::html_hidden({
+                    name  => "${input_name}-old",
+                    value => $subscribed,
+                });
+            }
 
             # print out notification options for this subscription (hidden if not subscribed)
             $events_table .= "<td>&nbsp;</td>";
@@ -2554,10 +2556,12 @@ sub subscribe_interface {
                         noescape => 1,
                     }) . '</td>';
 
-                $events_table .= LJ::html_hidden({
-                    name  => "${notify_input_name}-old",
-                    value => (scalar @subs) ? 1 : 0,
-                });
+                unless ($note_pending) {
+                    $events_table .= LJ::html_hidden({
+                        name  => "${notify_input_name}-old",
+                        value => (scalar @subs) ? 1 : 0,
+                    });
+                }
             }
 
             $events_table .= '</tr></div>';

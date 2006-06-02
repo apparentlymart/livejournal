@@ -1,3 +1,6 @@
+# Event that is fired when there is a new post in a journal.
+# sarg1 = optional tag id to filter on
+
 package LJ::Event::JournalNewEntry;
 use strict;
 use Scalar::Util qw(blessed);
@@ -18,6 +21,7 @@ sub entry {
     return LJ::Entry->new($self->u, ditemid => $self->arg1);
 }
 
+# TODO: filter by tag (sarg1)
 sub matches_filter {
     my ($self, $subscr) = @_;
 
@@ -68,6 +72,24 @@ sub subscription_as_html {
     my ($class, $subscr) = @_;
 
     my $journal = $subscr->journal;
+
+    # are we filtering on a tag?
+    my $arg1 = $subscr->arg1;
+    if ($arg1 eq '?') {
+        my $usertags = LJ::Tags::get_usertags($journal);
+
+        my @tagids = sort { $usertags->{$a}->{uses} <=> $usertags->{$b}->{uses} } keys %$usertags;
+        my @tagdropdown = map { ($_, $usertags->{$_}->{name}) } @tagids;
+
+        my $dropdownhtml = LJ::html_select({
+            name => $subscr->freeze . '.arg1',
+        }, @tagdropdown);
+
+        return "all posts tagged $dropdownhtml on " . $journal->ljuser_display;
+    } elsif (defined $arg1) {
+        my $usertags = LJ::Tags::get_usertags($journal);
+        return "all posts tagged $usertags->{$arg1}->{name} on " . $journal->ljuser_display;
+    }
 
     return "All entries on any journals on my friends page" unless $journal;
 

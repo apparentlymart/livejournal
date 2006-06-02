@@ -37,6 +37,12 @@ body<=
                                                arg1    => $ditemid,
                                                journal => $journal,
                                                ),
+                LJ::Subscription::Pending->new(
+                                               $remote,
+                                               event   => "JournalNewEntry",
+                                               arg1    => '?',
+                                               journal => $journal,
+                                               ),
                   ];
 
     $body .= LJ::subscribe_interface($remote,

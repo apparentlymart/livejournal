@@ -34,14 +34,14 @@ sub freeze {
 
 # can return either a LJ::Subscription or LJ::Subscription::Pending object
 sub thaw {
-    my ($class, $data, $u) = @_;
+    my ($class, $data, $u, $POST) = @_;
 
     # valid format?
-    return undef unless ($data =~ /^(pending|subid) - $u->{userid} - [\d-]+(-old)?$/x);
+    return undef unless ($data =~ /^(pending|subid) - $u->{userid} .+ ?(-old)?$/x);
 
     my ($type, $userid, $subid) = split("-", $data);
 
-    return LJ::Subscription::Pending->thaw($data, $u) if $type eq 'pending';
+    return LJ::Subscription::Pending->thaw($data, $u, $POST) if $type eq 'pending';
     die "Invalid subscription data type: $type" unless $type eq 'subid';
 
     unless ($u) {
@@ -109,6 +109,9 @@ sub find {
     $arg2 = delete $params{arg2};
 
     croak "Invalid parameters passed to ${class}->find" if keys %params;
+
+    return () if defined $arg1 && $arg1 =~ /\D/;
+    return () if defined $arg2 && $arg2 =~ /\D/;
 
     my @subs = $u->subscriptions;
 
@@ -228,6 +231,7 @@ sub as_html {
     my $self = shift;
 
     my $evtclass = LJ::Event->class($self->etypeid);
+    return undef unless $evtclass;
     return $evtclass->subscription_as_html($self);
 }
 
