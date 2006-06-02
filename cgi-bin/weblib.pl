@@ -2518,9 +2518,8 @@ sub subscribe_interface {
                     name     => $input_name,
                     class    => "SubscriptionInboxCheck",
                     selected => $subscribed,
-                    label    => $title,
                     noescape => 1,
-                }) .  "</td>";
+                }) .  "$title </td>";
 
             unless ($pending_sub->pending) {
                 $events_table .= LJ::html_hidden({
