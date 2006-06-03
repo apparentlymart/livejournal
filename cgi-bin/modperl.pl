@@ -6,8 +6,20 @@ use strict;
 use lib "$ENV{'LJHOME'}/cgi-bin";
 use Apache;
 
+# Image::Size wants to pull in Image::Magick.  Let's not let it during
+# the init process.
+my $still_loading = 1;
+unshift @INC, sub {
+    my $f = $_[1];
+    return undef unless $still_loading;
+    return undef unless $f eq "Image/Magick.pm";
+    die "No thanks"; # makes the require fail, which Image::Size traps
+};
+
 # pull in libraries and do per-start initialization once.
 require "modperl_subs.pl";
+
+$still_loading = 0;
 
 # do per-restart initialization
 LJ::ModPerl::setup_restart();
