@@ -158,15 +158,23 @@ sub clean
 
     my $cutcount = 0;
 
+    # bytes known good.  set this BEFORE we start parsing any new
+    # start tag, where most evil is (because where attributes can be)
+    # then, if we have to totally fail, we can cut stuff off after this.
+    my $good_until = 0;
+
     my $total_fail = sub {
         my $tag = LJ::ehtml(@_);
-        $$data = LJ::ehtml($$data);
-        $$data =~ s/\r?\n/<br \/>/g if $addbreaks;
-        $$data = "[<b>Error:</b> Irreparable invalid markup ('&lt;$tag&gt;') in entry.  ".
+
+        my $edata = LJ::ehtml($$data);
+        $edata =~ s/\r?\n/<br \/>/g if $addbreaks;
+
+        $$data = substr($newdata, 0, $good_until) .
+            "<div class='ljparseerror'>[<b>Error:</b> Irreparable invalid markup ('&lt;$tag&gt;') in entry.  ".
             "Owner must fix manually.  Raw contents below.]<br /><br />" .
             '<div style="width: 95%; overflow: auto">' .
-            $$data .
-            '</div>';
+            $edata .
+            '</div></div>';
         return undef;
     };
 
@@ -215,6 +223,8 @@ sub clean
         {
             my $tag  = $token->[1];
             my $attr = $token->[2];  # hashref
+
+            $good_until = length $newdata;
 
             if (@eatuntil) {
                 push @capture, $token if $capturing_during_eat;
