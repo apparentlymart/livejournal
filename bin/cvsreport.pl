@@ -3,6 +3,8 @@
 # This is now just a wrapper around the non-LJ-specific multicvs.pl
 #
 
+use strict;
+
 unless (-d $ENV{'LJHOME'}) {
     die "\$LJHOME not set.\n";
 }
