@@ -30,13 +30,13 @@ body<=
 
     if ($remote && ! $remote->tosagree_verify) {
         my $ret = "<?h1 " . LJ::tosagree_str('support' => 'title') . " h1?>";
-        
+
         my $html_str = LJ::tosagree_str('support' => 'html');
         if ($html_str) {
             $ret .= "<?p $html_str p?>";
         } else {
             $ret .= BML::ml
-                ('tos.mustread', 
+                ('tos.mustread',
                  { aopts => "target='_new' href='$LJ::SITEROOT/legal/tos.bml'" });
         }
 
@@ -64,10 +64,10 @@ body<=
             'aopts6'    => "href='$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}&amp;find=cprev'",
             'aopts7'    => "href='$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}&amp;find=cnext'",
         });
-    
+
     ### insert record
     my $faqid = $FORM{'faqid'}+0;
- 
+
     my %answer_types = LJ::Support::get_answer_types($sp, $remote, $FORM{'auth'});
 
     my $type = $FORM{'replytype'};
@@ -89,7 +89,7 @@ body<=
 
     return LJ::bad_input($ML{'.invalid.blank'})
         if $FORM{'body'} !~ /\S/ && !$FORM{'approveans'} && !$FORM{'changecat'} &&
-            !$FORM{'touch'} && !$FORM{'untouch'} && !$FORM{'changesum'};
+            !$FORM{'touch'} && !$FORM{'untouch'} && !$FORM{'changesum'} && !$FORM{'bounce_email'};
 
     # Load up vars for approvals
     my $res;
