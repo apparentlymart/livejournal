@@ -1287,7 +1287,7 @@ set text_comment_date = "Date:";
 set text_comment_ipaddr = "IP Address:";
 
 property string text_comment_reply {
-    des = "Text to link to reply for for comment";
+    des = "Text to link to reply for comment";
     example = "Reply to this";
     maxlength = "50";
 }

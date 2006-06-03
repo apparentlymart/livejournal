@@ -25,6 +25,8 @@ cleansimple/themes      theme+          cleansimple/layout
 digitalmultiplex/layout layout          core1
 digitalmultiplex/en     i18n            digitalmultiplex/layout
 
+disjointed/layout       layout          core1
+
 haven/layout            layout          core1
 haven/themes            theme+          haven/layout
 
