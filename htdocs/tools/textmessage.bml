@@ -108,7 +108,7 @@ body<=
 
         return LJ::bad_input(@errors) if @errors;
 
-        $ret .= "<?h1 ML{'.success.head'} h1?><?p $ML{'.success.text'} p?>";
+        $ret .= "<?h1 $ML{'.success.head'} h1?><?p $ML{'.success.text'} p?>";
         add_footer();
         return $ret;
     }
