@@ -147,7 +147,7 @@ list<=
 _code?>
 <li><a href="/modify.bml<?authas?>" title="<?_ml .customization.moodtheme.set _ml?>"><?_ml .customization.moodtheme.set.header _ml?></a></li>
 <li><a href="./moodthemes.bml<?authas?>" title="<?_ml .customization.moodtheme.editor _ml?>"><?_ml .customization.moodtheme.editor.header _ml?></a></li>
-<li><a href="/editinfo.bml<?authas?>#navstrip" title="<?_ml .customization.navstrip _ml?>"><?_ml .customization.navstrip _ml?></a></li>
+<li><a href="/manage/settings/<?authas?>" title="<?_ml .customization.navstrip _ml?>"><?_ml .customization.navstrip _ml?></a></li>
 <=list
 block?>
 
