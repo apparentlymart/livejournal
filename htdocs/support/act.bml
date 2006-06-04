@@ -147,7 +147,7 @@ body<=
 <ul>
    <li>Go back to <a href='see_request.bml?id=$sp->{'spid'}'>Request #$sp->{'spid'}</a></li>
    <li>Go back to the <a href='help.bml'>open support requests</a></li>
-   <li>Go back to the <a href='help.bml?cat=$sp->{'_cat'}->{'catkey'}'>open support requests in the the same category</a></li>
+   <li>Go back to the <a href='help.bml?cat=$sp->{'_cat'}->{'catkey'}'>open support requests in the same category</a></li>
    <li>Go to <a href='see_request.bml?id=$sp->{'spid'}&amp;find=prev'>previous</a> /
              <a href='see_request.bml?id=$sp->{'spid'}&amp;find=next'>next</a> open request</li>
    <li>Go to <a href='see_request.bml?id=$sp->{'spid'}&amp;find=cprev'>previous</a> /
