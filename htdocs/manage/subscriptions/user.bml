@@ -29,8 +29,9 @@ body<=
     };
 
     return LJ::subscribe_interface(
+                                   $remote,
                                    categories => $categories,
-                                   user       => $journal,
+                                   journal    => $journal,
                                    );
 
 }
