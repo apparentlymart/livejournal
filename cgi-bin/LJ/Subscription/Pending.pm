@@ -4,7 +4,6 @@
 package LJ::Subscription::Pending;
 use base 'LJ::Subscription';
 use strict;
-use warnings;
 use Carp qw(croak carp);
 use Class::Autouse qw (LJ::Event LJ::NotificationMethod);
 
@@ -126,6 +125,10 @@ sub freeze {
     my @args = ($user,$journalid,$etypeid,$ntypeid);
 
     push @args, $self->{arg1} if defined $self->{arg1};
+
+    # if arg2 is defined but not arg1, put a zero in arg1
+    push @args, 0 if ! defined $self->{arg1} && defined $self->{arg2};
+
     push @args, $self->{arg2} if defined $self->{arg2};
 
     return join('-', ('pending', @args));
