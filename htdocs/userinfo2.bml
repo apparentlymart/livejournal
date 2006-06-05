@@ -1,5 +1,4 @@
 <?_code
-#line 2
  use strict;
  use vars qw($title $windowtitle $body $head %GET);
 
@@ -225,8 +224,6 @@
  my $intu = LJ::get_interests($u);
 
  my %remote_interest;
- # TODO: Check if new unless works
- #if ($remote && $remote->{'userid'} != $userid) {
  unless ($remote_isowner) {
      if (my $rint = LJ::get_interests($remote, { justids => 1 })) {
          $remote_interest{$_} = 1 foreach @$rint;
@@ -833,14 +830,14 @@
 
  unless ($synd || $LJ::FORCE_EMPTY_FRIENDS{$userid}) {
      my $label = $com ? $ML{'.friends.comm'} : $ML{'.friends.user'};
+     my $text = LJ::ehtml($ML{'.label.frpeople'});
+     $body .= "<p><span class='ui_subhead'><img src='$LJ::IMGPREFIX/userinfo.gif' title='$text' alt='$text' border='0' align='top' /> $label</span></p>\n";
 
      $friends{'display'} = 0 if $friends{'count'} > $MAX_FRIENDS_SHOW;
      if ($friends{'count'}) {
          if (!$friends{'loaded'} || !$friends{'display'}) {
-             my $text = LJ::ehtml($ML{'.label.frpeople'});
-             $body .= "<p><span class='ui_subhead'><img src='$LJ::IMGPREFIX/userinfo.gif' title='$text' alt='$text' border='0' align='top' /> Friends</span></p>\n";
              $body .= "<p>" . $friends{'count'} . " friends<br />";
-             $body .= "<a href='$LJ::SITEROOT/directory.bml?s_fro=1&amp;fro_user=$u->{'user'}'> " . ($com ? $ML{'.label.viewmembers'} : $ML{'.label.viewfriends'}) .  " </a>.</p>";
+             $body .= "<a href='$LJ::SITEROOT/directory.bml?s_fro=1&amp;fro_user=$u->{'user'}'> " . ($com ? $ML{'.label.viewmembers'} : $ML{'.label.viewfriends'}) .  "</a>.</p>";
          } elsif ($u->{'journaltype'} eq 'P' or $u->{'journaltype'} eq 'S') {
              # personal/shared journals have a special way of showing their friends list, it breaks it down into
              # three sublists: personal/shared, community/news, syndication
@@ -858,8 +855,6 @@
 
              # now spit out the HTML
              if (@pfriends) {
-                 my $text = LJ::ehtml($ML{'.label.frpeople'});
-                 $body .= "<p><span class='ui_subhead'><img src='$LJ::IMGPREFIX/userinfo.gif' title='$text' alt='$text' border='0' align='top' /> Friends</span></p>\n";
                  $body .= $mutualfriends if ($mutualfriends);
                  $body .= $displayusers->(\@pfriends, "Friended");
                  $body .= $friendedby if ($friendedby);
@@ -878,9 +873,8 @@
                  $body .= $displayusers->(\@yfriends, "Reader of");
                  $body .= "&nbsp;<br />\n";
              }
-         } else {
-             my $text = LJ::ehtml($ML{'.label.frpeople'});
-             $body .= "<p><span class='ui_subhead'><img src='$LJ::IMGPREFIX/userinfo.gif' title='$text' alt='$text' border='0' align='top' /> Members</span></p>\n";
+         }
+         if ($com) {
              $body .= "<p><span class='ui_minihead'>Members (" . $friends{'count'} . ")</span><br />\n";
              $body .= $listusers->(\@friends);
              $body .= "</p>\n";
