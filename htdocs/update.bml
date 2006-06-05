@@ -372,7 +372,7 @@
                     if $remote;
 
                 # Store what editor they last used
-                unless ($remote->prop('entry_editor') =~ /^always_/) {
+                unless (!$remote || $remote->prop('entry_editor') =~ /^always_/) {
                      $POST{'switched_rte_on'} ?
                          $remote->set_prop('entry_editor', 'rich') :
                          $remote->set_prop('entry_editor', 'plain');
