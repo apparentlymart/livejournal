@@ -110,6 +110,7 @@ body<=
                                      categories   => \%categories,
                                      formauth     => $formauth,
                                      showtracking => 1,
+                                     getextra     => "?authas=$GET{authas}",
                                      );
 
     return $body;

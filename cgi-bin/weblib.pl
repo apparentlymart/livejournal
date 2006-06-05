@@ -2355,6 +2355,7 @@ sub subscribe_interface {
     my $formauth     = delete $opts{'formauth'} || LJ::form_auth();
     my $showtracking = delete $opts{'showtracking'} || 0;
     my $pending      = delete $opts{'pending'} || [];
+    my $getextra     = delete $opts{'getextra'} || '';
 
     croak "Invalid options passed to subscribe_interface" if (scalar keys %opts);
 
@@ -2369,7 +2370,7 @@ sub subscribe_interface {
     my $ret = qq {
             <div id="manageSettings">
             <span class="esnlinks"><a href="$LJ::SITEROOT/tools/notifications.bml">Message Center</a> | Manage Settings</span>
-            <form method='POST' action='$LJ::SITEROOT/manage/subscriptions/index.bml'>
+            <form method='POST' action='$LJ::SITEROOT/manage/subscriptions/index.bml$getextra'>
             $formauth
     };
 
