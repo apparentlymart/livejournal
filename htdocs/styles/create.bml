@@ -16,6 +16,7 @@ body<=
 
     my $ret;
     my $authas = $GET{'authas'} || $remote->{'user'};
+    my $u = LJ::get_authas_user($authas);
     my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : "";
 
     # no authentication needs to be done on this page, it's just a form anyway
@@ -32,7 +33,7 @@ body<=
     $ret .= "<?h1 $ML{'.createstyle.head'} h1?>\n";
 
     $ret .= "<?p " . BML::ml('.createstyle.text2', {'aopts' => "href='$LJ::SITEROOT/developer/embedding.bml'"}) . " p?>";
-    $ret .= LJ::CProd->inline($remote,inline => 'CreateStyles');
+    $ret .= LJ::CProd->inline($u,inline => 'CreateStyles');
     $ret .= "<?h1 $ML{'.selecttype.head'} h1?>\n";
     $ret .= "<?p $ML{'.selecttype.text'} p?>\n";
 

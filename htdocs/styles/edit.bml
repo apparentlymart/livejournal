@@ -30,7 +30,7 @@ body<=
     $ret .= "<?h1 $ML{'.editstyle.head'} h1?>\n";
     $ret .= "<?p " . BML::ml('.editstyle.text2', {'aopts' => "href='$LJ::SITEROOT/styles/create.bml'", 'aopts2' => "href='$LJ::SITEROOT/developer/styles.bml'"}) . " p?>";
     $ret .= "<?p $ML{'.edit.head'} p?>\n";
-    $ret .= LJ::CProd->inline($remote,inline => 'EditStyles');
+    $ret .= LJ::CProd->inline($u,inline => 'EditStyles');
 
     $ret .= "<form method='post' action='edit_do.bml$getextra'>";
     $ret .= "<?standout $ML{'.edit.text2'}<br />";

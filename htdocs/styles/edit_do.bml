@@ -15,11 +15,11 @@ body<=
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
 
-    my $inline = LJ::CProd->inline($remote,inline => 'EditStyles');
-    return $inline if $inline;
-
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);
+    my $inline = LJ::CProd->inline($u,inline => 'EditStyles');
+    return $inline if $inline;
+
     return LJ::bad_input($ML{'error.invalidauth'})
         unless $u;
 

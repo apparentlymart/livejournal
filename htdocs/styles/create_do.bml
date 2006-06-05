@@ -21,7 +21,8 @@ body<=
     return LJ::bad_input($ML{'error.authinvalid'})
         unless $u;
 
-    return LJ::CProd->inline($u, inline => 'CreateStyles');
+    my $inline = LJ::CProd->inline($u, inline => 'CreateStyles');
+    return $inline if $inline;
 
     # error check submission
     return LJ::bad_input($ML{'.error.invalidview'})
