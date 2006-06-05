@@ -14,7 +14,6 @@ body<=
                      lj_form_auth => qr/./,
                      journal      => 'word',
                      dtalkid      => 'digits',
-                     ntypeid      => 'digits',
                      ditemid      => 'digits',
                      );
 
@@ -24,73 +23,30 @@ body<=
     my $ditemid = $POST{'ditemid'} || $GET{'ditemid'};
     my $dtalkid = $POST{'dtalkid'} || $GET{'dtalkid'};
     my $journal = $POST{'journal'} || $GET{'journal'};
-    my $ntypeid = int($POST{'ntypeid'});
 
-    my $u = LJ::load_user($journal) or return LJ::error_list("Invalid journal '$journal'");
+    my $journal = LJ::load_user($journal) or return LJ::error_list("Invalid journal '$journal'");
 
     return LJ::error_list("No entry specified") unless $dtalkid || $ditemid;
 
-    if (LJ::did_post()) {
-        return LJ::error_list(BML::ml('error.invalidform')) unless LJ::check_form_auth();
+    my $comment = LJ::Comment->new($journal, dtalkid => $dtalkid)
+        or return LJ::error_list("Nonexistant comment");
 
-        my %sub_params = (
-                          arg1    => $ditemid,
-                          journal => $u,
-                          etypeid => LJ::Event::JournalNewComment->etypeid,
-                          ntypeid => $ntypeid,
-                          );
+    my $pending = [
+                   LJ::Subscription::Pending->new(
+                                                  $remote,
+                                                  journal => $journal,
+                                                  event   => 'JournalNewComment',
+                                                  arg1    => $ditemid,
+                                                  arg2    => $comment->jtalkid,
+                                                  )
+                   ];
 
-        # watching a thread
-        if ($dtalkid) {
-            my $comment = LJ::Comment->new($u, dtalkid => $dtalkid);
-            die LJ::error_list("Invalid dtalkid: $dtalkid") unless $comment->valid;
+    return LJ::subscribe_interface(
+                                   $remote,
+                                   pending => $pending,
+                                   journal => $journal,
+                                   );
 
-            my $ditemid = $comment->entry->ditemid
-                or die LJ::error_list("Invalid entry");
-
-            $sub_params{arg2} = $comment->jtalkid if $dtalkid;
-        }
-
-        # subscribe!
-        $remote->subscribe(%sub_params)
-            or return LJ::error_list("Could not subscribe.");
-
-        # redirect to manage subscriptions page
-        BML::redirect("$LJ::SITEROOT/manage/subscriptions/");
-    }
-
-    my @methods = LJ::NotificationMethod->all_available_methods;
-    my @note_options;
-    foreach my $note_class (@methods) {
-        my $title = eval { $note_class->title } or next;
-
-        push @note_options, ($note_class->ntypeid, $title);
-    }
-
-    my $formauth = LJ::form_auth();
-
-    my $whatwatching = 'Entry';
-    $whatwatching = 'Thread' if $dtalkid;
-
-    my $note_dropdown = LJ::html_select({name => 'ntypeid'}, @note_options);
-
-    my $params = LJ::html_hidden(ditemid => $ditemid,
-                                 dtalkid => $dtalkid,
-                                 journal => $journal);
-
-    $body .= qq {
-        <fieldset>
-          <legend>Watch $whatwatching</legend>
-          <form method="POST" action="/manage/subscriptions/comments.bml">
-            $formauth
-            <div>
-              Notify me by: $note_dropdown
-            </div>
-            <input type="submit" value="Watch!" />
-            $params
-          </form>
-        </fieldset>
-        };
 }
 _code?>
 <=body
