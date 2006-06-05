@@ -1702,7 +1702,10 @@ sub entry_form_decode
 
             $event =~ s!<lj-raw class="ljraw">!<lj-raw>!gi;
         }
+    } else {
+        $req->{"prop_used_rte"} = 0;
     }
+
     $req->{'event'} = $event;
 
     ## see if an "other" mood they typed in has an equivalent moodid
