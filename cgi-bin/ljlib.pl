@@ -46,7 +46,7 @@ sub END { LJ::end_request(); }
                     "recentactions", "usertags", "pendcomments",
                     "user_schools", "portal_config", "portal_box_prop",
                     "loginlog", "active_user", "userblobcache",
-                    "notifyqueue", "cprod",
+                    "notifyqueue", "cprod", "urimap"
                     );
 
 # keep track of what db locks we have out

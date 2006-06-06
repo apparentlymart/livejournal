@@ -2479,6 +2479,19 @@ CREATE TABLE comm_promo_list (
 )
 EOC
 
+register_tablecreate("urimap", <<'EOC');
+CREATE TABLE urimap (
+  journalid   INTEGER UNSIGNED NOT NULL,
+  uri         VARCHAR(255) BINARY NOT NULL,
+  PRIMARY KEY (journalid, uri),
+  nodetype    CHAR(1) NOT NULL,
+  nodeid      INTEGER UNSIGNED NOT NULL,
+  INDEX       (journalid, nodetype, nodeid)
+)
+EOC
+
+
+
 # NOTE: new table declarations go here
 
 

@@ -454,6 +454,7 @@ sub trans
         my ($user, $vhost, $uuri) = @_;
         my $mode = undef;
         my $pe;
+        my $ljentry;
 
         # if favicon, let filesystem handle it, for now, until
         # we have per-user favicons.
@@ -542,6 +543,22 @@ sub trans
         } elsif (($vhost eq "users" || $vhost =~ /^other:/) &&
                  $uuri eq "/robots.txt") {
             $mode = "robots_txt";
+        } else {
+            my $key = $uuri;
+            $key =~ s!^/!!;
+            my $u = LJ::load_user($user)
+                or return 404;
+            my ($type, $nodeid) = $u->selectrow_array("SELECT nodetype, nodeid FROM urimap WHERE journalid=? AND uri=?",
+                                                      undef, $u->{userid}, $key);
+            if ($type eq "L") {
+                $ljentry = LJ::Entry->new($u, ditemid => $nodeid);
+                if ($GET{'mode'} eq "reply" || $GET{'replyto'}) {
+                    $mode = "reply";
+                } else {
+                    $mode = "entry";
+                }
+            }
+
         }
 
         return undef unless defined $mode;
@@ -556,11 +573,14 @@ sub trans
                 if $u->{'renamedto'} ne '';
         }
 
-        return $journal_view->({'vhost' => $vhost,
-                                'mode' => $mode,
-                                'args' => $args,
-                                'pathextra' => $pe,
-                                'user' => $user });
+        return $journal_view->({
+            'vhost' => $vhost,
+            'mode' => $mode,
+            'args' => $args,
+            'pathextra' => $pe,
+            'user' => $user,
+            'ljentry' => $ljentry,
+        });
     };
 
     # flag if we hit a domain that was configured as a "normal" domain
@@ -1111,6 +1131,7 @@ sub journal_content
             'If-Modified-Since' => $r->header_in("If-Modified-Since"),
         },
         'handle_with_bml_ref' => \$handle_with_bml,
+        'ljentry' => $RQ{'ljentry'},
     };
 
     $r->notes("view" => $RQ{'mode'});

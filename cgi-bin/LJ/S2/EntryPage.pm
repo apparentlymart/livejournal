@@ -300,20 +300,22 @@ sub EntryPage_entry
     my $uri = $r->uri;
 
     my ($ditemid, $itemid);
-    unless ($uri =~ /(\d+)\.html/) {
+    my $entry = $opts->{ljentry};  # only defined in named-URI case.  otherwise undef.
+
+    unless ($entry || $uri =~ /(\d+)\.html/) {
         $opts->{'handler_return'} = 404;
         return;
     }
 
-    $ditemid = $1;
+    $entry ||= LJ::Entry->new($u, ditemid => $1);
 
-    my $entry = LJ::Entry->new($u, ditemid => $ditemid);
     unless ($entry->correct_anum) {
         $opts->{'handler_return'} = 404;
         return;
     }
 
-    $itemid = $entry->jitemid;
+    $ditemid = $entry->ditemid;
+    $itemid  = $entry->jitemid;
 
     my $pu = $entry->poster;
 
