@@ -5908,6 +5908,26 @@ cprod.birthday.text.v4=
 
 cprod.birthday.text.v5=
 
+cprod.createstyles.link.v1=
+
+cprod.createstyles.link.v2=
+
+cprod.createstyles.link.v3=
+
+cprod.createstyles.link.v4=
+
+cprod.createstyles.link.v5=
+
+cprod.createstyles.text.v1=Your account type does not support creating styles.
+
+cprod.createstyles.text.v2=
+
+cprod.createstyles.text.v3=
+
+cprod.createstyles.text.v4=
+
+cprod.createstyles.text.v5=
+
 cprod.controlstrip.link.v1=Navigation Strip
 
 cprod.controlstrip.link.v2=
@@ -5927,6 +5947,156 @@ cprod.controlstrip.text.v3=
 cprod.controlstrip.text.v4=
 
 cprod.controlstrip.text.v5=
+
+cprod.directory.link.v1=
+
+cprod.directory.link.v2=
+
+cprod.directory.link.v3=
+
+cprod.directory.link.v4=
+
+cprod.directory.link.v5=
+
+cprod.directory.text.v1=Your account type doesn't permit usage of the directory.
+
+cprod.directory.text.v2=
+
+cprod.directory.text.v3=
+
+cprod.directory.text.v4=
+
+cprod.directory.text.v5=
+
+cprod.editpics.link.v1=
+
+cprod.editpics.link.v2=
+
+cprod.editpics.link.v3=
+
+cprod.editpics.link.v4=
+
+cprod.editpics.link.v5=
+
+cprod.editpics.link2-2.v1=
+
+cprod.editpics.link2-2.v2=
+
+cprod.editpics.link2-2.v3=
+
+cprod.editpics.link2-2.v4=
+
+cprod.editpics.link2-2.v5=
+
+cprod.editpics.link3-2.v1=
+
+cprod.editpics.link3-2.v1=
+
+cprod.editpics.link3-3.v3=
+
+cprod.editpics.link3-2.v4=
+
+cprod.editpics.link3-2.v5=
+
+cprod.editpics.text6.v1=You've reached your limit of [[num]] userpics.
+
+cprod.editpics.text6.v2=
+
+cprod.editpics.text6.v3=
+
+cprod.editpics.text5.v4=
+
+cprod.editpics.text5.v5=
+
+cprod.editpicsmax.link.v1=
+
+cprod.editpicsmax.link.v2=
+
+cprod.editpicsmax.link.v3=
+
+cprod.editpicsmax.link.v4=
+
+cprod.editpicsmax.link.v5=
+
+cprod.editpicsmax.link2-3.v1=
+
+cprod.editpicsmax.link2.v2=
+
+cprod.editpicsmax.link2.v3=
+
+cprod.editpicsmax.link2.v4=
+
+cprod.editpicsmax.link2.v5=
+
+cprod.editpicsmax.link3.v1=
+
+cprod.editpicsmax.link3.v1=
+
+cprod.editpicsmax.link3.v3=
+
+cprod.editpicsmax.link3.v4=
+
+cprod.editpicsmax.link3.v5=
+
+cprod.editpicsmax.text5.v1=You've reached your limit of [[num]] userpics.
+
+cprod.editpicsmax.text5.v2=
+
+cprod.editpicsmax.text5.v3=
+
+cprod.editpicsmax.text5.v4=
+
+cprod.editpicsmax.text5.v5=
+
+cprod.editstyles.link.v1=
+
+cprod.editstyles.link.v2=
+
+cprod.editstyles.link.v3=
+
+cprod.editstyles.link.v4=
+
+cprod.editstyles.link.v5=
+
+cprod.editstyles.text.v1=Your account type does not permit you to edit styles.
+
+cprod.editstyles.text.v2=
+
+cprod.editstyles.text.v3=
+
+cprod.editstyles.text.v4=
+
+cprod.editstyles.text.v5=
+
+cprod.links.link.v1=
+
+cprod.links.link.v2=
+
+cprod.links.link.v3=
+
+cprod.links.link.v4=
+
+cprod.links.link.v5=
+
+cprod.links.link2-2.v1=
+
+cprod.links.link2.v2=
+
+cprod.links.link2.v3=
+
+cprod.links.link2.v4=
+
+cprod.links.link2.v5=
+
+cprod.links.text3.v1=Your account type does not permit you to use any more links.
+
+cprod.links.text3.v2=
+
+cprod.links.text3.v3=
+
+cprod.links.text3.v4=
+
+cprod.links.text3.v5=
 
 cprod.feeds.link.v1=syndicated feeds
 
@@ -5968,25 +6138,25 @@ cprod.friendsfriends.text2.v4=
 
 cprod.friendsfriends.text2.v5=
 
-cprod.friendsfriendsinline.link2.v1=Paid accounts
+cprod.friendsfriendsinline.link3.v1=
 
-cprod.friendsfriendsinline.link2.v2=
+cprod.friendsfriendsinline.link3.v2=
 
-cprod.friendsfriendsinline.link2.v3=
+cprod.friendsfriendsinline.link3.v3=
 
-cprod.friendsfriendsinline.link2.v4=
+cprod.friendsfriendsinline.link3.v4=
 
-cprod.friendsfriendsinline.link2.v5=
+cprod.friendsfriendsinline.link3.v5=
 
-cprod.friendsfriendsinline.text2.v1=Sorry, only [[link]] permit showing friends of friends.
+cprod.friendsfriendsinline.text3.v1=Sorry, this account type does not permit showing friends of friends.
 
-cprod.friendsfriendsinline.text2.v2=
+cprod.friendsfriendsinline.text3.v2=
 
-cprod.friendsfriendsinline.text2.v3=
+cprod.friendsfriendsinline.text3.v3=
 
-cprod.friendsfriendsinline.text2.v4=
+cprod.friendsfriendsinline.text3.v4=
 
-cprod.friendsfriendsinline.text2.v5=
+cprod.friendsfriendsinline.text3.v5=
 
 cprod.polls.link.v1=poll creation wizard
 
@@ -6007,6 +6177,96 @@ cprod.polls.text.v3=
 cprod.polls.text.v4=
 
 cprod.polls.text.v5=
+
+cprod.syn.link.v1=
+
+cprod.syn.link.v2=
+
+cprod.syn.link.v3=
+
+cprod.syn.link.v4=
+
+cprod.syn.link.v5=
+
+cprod.syn.text.v1=Note: This feature is not available to your account type.
+
+cprod.syn.text.v2=
+
+cprod.syn.text.v3=
+
+cprod.syn.text.v4=
+
+cprod.syn.text.v5=
+
+cprod.textmessaging.link.v1=
+
+cprod.textmessaging.link.v2=
+
+cprod.textmessaging.link.v3=
+
+cprod.textmessaging.link.v4=
+
+cprod.textmessaging.link.v5=
+
+cprod.textmessaging.link2-2.v1=
+
+cprod.textmessaging.link2.v2=
+
+cprod.textmessaging.link2.v3=
+
+cprod.textmessaging.link2.v4=
+
+cprod.textmessaging.link2.v5=
+
+cprod.textmessaging.text3.v1=Your account type does not permit usage of this feature.
+
+cprod.textmessaging.text.v2=
+
+cprod.textmessaging.text.v3=
+
+cprod.textmessaging.text.v4=
+
+cprod.textmessaging.text.v5=
+
+cprod.todomaxitems.link.v1=
+
+cprod.todomaxitems.link.v2=
+
+cprod.todomaxitems.link.v3=
+
+cprod.todomaxitems.link.v4=
+
+cprod.todomaxitems.link.v5=
+
+cprod.todomaxitems.text2.v1=You have reached the limit of todo items available to your account type.
+
+cprod.todomaxitems.text2.v2=
+
+cprod.todomaxitems.text2.v3=
+
+cprod.todomaxitems.text2.v4=
+
+cprod.todomaxitems.text2.v5=
+
+cprod.todononpublic.link.v1=
+
+cprod.todononpublic.link.v2=
+
+cprod.todononpublic.link.v3=
+
+cprod.todononpublic.link.v4=
+
+cprod.todononpublic.link.v5=
+
+cprod.todononpublic.text.v1=Your account type is not permitted to use non-public todo items.
+
+cprod.todononpublic.text.v2=
+
+cprod.todononpublic.text.v3=
+
+cprod.todononpublic.text.v4=
+
+cprod.todononpublic.text.v5=
 
 cprod.userpic.link.v1=default userpic
 

@@ -197,8 +197,13 @@ sub make_modify_form
                                     { 'disabled' => $ct >= $caplinks,
                                       'noescape' => 1 });
         }
+        my $inline;
         if ($ct >= $caplinks) {
-            $ret .= LJ::CProd->inline($u, inline => 'Links');
+            if ($inline .= LJ::run_hook("cprod_inline", $u, 'Links')) {
+                $ret .= $inline;
+            } else {
+                $ret .= "</td></tr><tr><td colspan='2'>&nbsp;</td><td>".BML::ml('cprod.links.text3.v1');
+            }
         }
         $ret .= "</td></tr>";
 

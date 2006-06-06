@@ -17,8 +17,14 @@ body<=
 
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);
-    my $inline = LJ::CProd->inline($u,inline => 'EditStyles');
-    return $inline if $inline;
+    my $inline;
+    unless (LJ::get_cap($u, "styles") || LJ::get_cap($u, "s2styles")) {
+        if ($inline .= LJ::run_hook("cprod_inline",$u,'EditStyles')) {
+            return $inline;
+        } else {
+            return $ML{'cprod.editstyles.text.v1'};
+        }
+    }
 
     return LJ::bad_input($ML{'error.invalidauth'})
         unless $u;

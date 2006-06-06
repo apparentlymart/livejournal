@@ -30,7 +30,14 @@ if (!$remote) {
     return BML::ml('.error.notloggedin', { aopts => "href='$LJ::SITEROOT/login.bml?ret=1'" });
 }
 
-return LJ::CProd->inline($remote, 'inline' => 'Directory');
+my $inline;
+unless (LJ::get_cap($remote,"directory")) {
+    if ($inline .= LJ::run_hook("cprod_inline", $remote, 'Directory')) {
+        return $inline;
+    } else {
+        return BML::ml('cprod.directory.text.v1');
+    }
+}
 
 _code?>
 <?p Use this directory to search for LiveJournal users. If you fill in more than one blank, the directory will display results that match all your criteria. (i.e user lives in &ldquo;San Francisco&rdquo; AND lists &ldquo;music&rdquo; as an interest.). Check out our <a href="/community/search.bml">community search</a> page to find new and interesting communities. p?>

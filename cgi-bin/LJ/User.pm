@@ -4124,7 +4124,12 @@ sub make_journal
         return "<h1>Notice</h1><p>This account isn't a community journal.</p>";
     }
     if ($view eq "friendsfriends" && ! LJ::get_cap($u, "friendsfriendsview")) {
-        return LJ::CProd->inline($u, inline => 'FriendsFriendsInline');
+        my $inline;
+        if ($inline .= LJ::run_hook("cprod_inline", $u, 'FriendsFriendsInline')) {
+            return $inline;
+        } else {
+            return BML::ml('cprod.friendsfriendsinline.text.v1');
+        }
     }
 
     # signal to LiveJournal.pm that we can't handle this

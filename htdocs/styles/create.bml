@@ -28,12 +28,19 @@ body<=
 
     $ret .= "<form action='create_do.bml$getextra' method='post'>\n";
     $ret .= LJ::form_auth();
-    
+
     # main form
     $ret .= "<?h1 $ML{'.createstyle.head'} h1?>\n";
 
     $ret .= "<?p " . BML::ml('.createstyle.text2', {'aopts' => "href='$LJ::SITEROOT/developer/embedding.bml'"}) . " p?>";
-    $ret .= LJ::CProd->inline($u,inline => 'CreateStyles');
+    my $inline;
+    unless (LJ::get_cap($u, "styles") || LJ::get_cap($u, "s2styles")) {
+        if ($inline .= LJ::run_hook("cprod_inline",$u,'CreateStyles')) {
+            $ret .= $inline;
+        } else {
+            $ret .= $ML{'cprod.createstyles.text.v1'};
+        }
+    }
     $ret .= "<?h1 $ML{'.selecttype.head'} h1?>\n";
     $ret .= "<?p $ML{'.selecttype.text'} p?>\n";
 

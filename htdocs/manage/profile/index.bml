@@ -302,9 +302,14 @@ _code?>
         ## TEXT MESSAGING
 
         $ret .= "<div class='section_head'>$ML{'.section.textmsg'}\n";
-        my $inline = LJ::CProd->inline($u, inline => 'TextMessaging');
-        $ret .= "</div>$inline" if $inline;
-
+        unless (LJ::get_cap($u, "textmessaging")) {
+            my $inline;
+            if ($inline .= LJ::run_hook("cprod_inline", $u, 'TextMessaging')) {
+                $ret .= "</div>$inline";
+            } else {
+                $ret .= "</div>".BML::ml('cprod.textmessaging.text3.v1');
+            }
+        }
         if (LJ::get_cap($u, "textmessaging")) {
             my $tminfo = LJ::TextMessage->tm_info($u);
             foreach (values %$tminfo) { LJ::text_out(\$_); }

@@ -130,7 +130,10 @@
                  $atype = "<a href=\"$LJ::HELPURL{'accounttype'}\">$atype</a>";
              }
              $body .= "<?h1 Too many items... h1?><?p Your $atype is limited to $max_items to-do items at a time.  p?>";
-             $body .= LJ::CProd->inline($u, inline => 'TodoMaxItems');
+             my $inline;
+             if ($inline .= LJ::run_hook("cprod_inline", $u, 'TodoMaxItems')) {
+                 $body .= $inline;
+             }
              return;
          }
 
@@ -203,7 +206,10 @@
              $atype = "<a href=\"$LJ::HELPURL{'accounttype'}\">$atype</a>";
          }
          $body .= "<?h1 Too many items... h1?><?p Your $atype is limited to $max_items to-do items at a time. p?>";
-         $body .= LJ::CProd->inline($u, inline => 'TodoMaxItems');
+         my $inline;
+         if ($inline .= LJ::run_hook("cprod_inline", $u, 'TodoMaxItems')) {
+             $body .= $inline;
+         }
          return;
      }
 
@@ -279,7 +285,12 @@
                                "private" => "Private", 
                                "friends" => $u->{'journaltype'} eq "C" ? "Community Members" : "Friends");
      } else {
-         $body .= LJ::CProd->inline($u, inline => 'TodoNonPublic');
+         my $inline;
+         if ($inline .= LJ::run_hook("cprod_inline", $u, 'TodoNonPublic')) {
+             $body .= $inline;
+         } else {
+             $body .= BML::ml('cprod.todononpublic.text.v1');
+         }
          $body .= "<input type=hidden name=security value=\"public\">";
      }
  }
