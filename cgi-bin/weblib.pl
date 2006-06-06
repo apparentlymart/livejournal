@@ -1976,7 +1976,7 @@ sub ads {
         $adcall{categories} = $remote->prop('ad_categories');
 
         # User's notable interests
-        $adcall{interests} = join(',', grep { !defined $LJ::AD_BLOCKED_INTERESTS{$_} } $remote->notable_interests(10));
+        $adcall{interests} = join(',', grep { !defined $LJ::AD_BLOCKED_INTERESTS{$_} } $remote->notable_interests(150));
     }
 
     # If we have neither categories or interests, load the content author's
@@ -1986,7 +1986,7 @@ sub ads {
 
         if ($u) {
             $adcall{categories} = $u->prop('ad_categories');
-            $adcall{interests} = join(',', grep { !defined $LJ::AD_BLOCKED_INTERESTS{$_} } $u->notable_interests(10));
+            $adcall{interests} = join(',', grep { !defined $LJ::AD_BLOCKED_INTERESTS{$_} } $u->notable_interests(150));
         }
     }
 
