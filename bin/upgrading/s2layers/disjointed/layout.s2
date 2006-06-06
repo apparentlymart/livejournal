@@ -1,8 +1,8 @@
 layerinfo "type"            = "layout";
 layerinfo "name"            = "Disjointed";
-layerinfo "is_public"       = 1;
 layerinfo "redist_uniq"     = "disjointed/layout";
-layerinfo "source_viewable" = 1;
+layerinfo "previews"        = "disjointed/layout.jpg";
+layerinfo "des"             = "A style that uses overlapping boxes.";
 
 propgroup presentation {
     property use external_stylesheet;
