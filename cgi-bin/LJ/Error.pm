@@ -146,7 +146,6 @@ sub log {
     my $create_sql = qq {
         (
          whn INT (10) UNSIGNED NOT NULL,
-         INDEX(whn),
          description VARCHAR(255),
          errclass VARCHAR(255),
          usercaused TINYINT,
@@ -168,7 +167,7 @@ sub log {
          ref VARCHAR(255),
          browser VARCHAR(100),
          clientver VARCHAR(100)
-         );
+         )
     };
     $create_sql =~ s/\#.+//g;
 
