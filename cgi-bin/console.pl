@@ -884,6 +884,17 @@ $cmd{'allow_open_proxy'} = {
                ],
     };
 
+$cmd{'disable_comm_promo'} = {
+    'handler' => \&disable_comm_promo,
+    'privs' => [qw(siteadmin:comm-promo)],
+    'des' => "Sets the disabled status of community promos for a given community",
+    'argsummary' => '<user> <status>',
+    'args' => [
+               'user' => "Username of community for which status should be modified",
+               'status' => "'on' to disable community promos, 'off' enable community promos",
+               ],
+};
+
 $cmd{'find_user_cluster'} = {
     'handler' => \&find_user_cluster,
     'privs' => [qw(supportviewinternal supporthelp)],
@@ -1820,6 +1831,36 @@ sub allow_open_proxy
 
     my $period = $forever ? "forever" : "for the next 24 hours";
     push @$out, [ '', "$ip cleared $period." ];
+    return 1;
+}
+
+sub disable_comm_promo
+{
+    my ($dbh, $remote, $args, $out) = @_;
+    my $err = sub { push @$out, ["error", $_[0] ]; 0; };
+
+    return $err->("This command requires 2 arguments.") 
+        unless @$args == 3;
+
+    return $err->("You are not autorized to use this command.")
+        unless $remote && LJ::check_priv($remote, 'siteadmin' => 'comm-promo');
+
+    my ($user, $val) = @$args[1,2];
+    
+    my $commu = LJ::load_user($user)
+        or return $err->("Invalid user: '$user'");
+
+    return $err->("User is not a community: '$user'")
+        unless $commu->is_comm;
+
+    return $err->("Invalid value: '$val'")
+        unless $val eq 'on' || $val eq 'off';
+
+    my $to_set = $val eq 'on' ? 1 : undef;
+    $commu->set_prop('disable_comm_promo', $to_set);
+
+    my $verb = $to_set ? "is" : "is no longer";
+    push @$out, [ '', "comm_promo $verb disabled for user: '$user'" ];
     return 1;
 }
 
