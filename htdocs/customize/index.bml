@@ -87,7 +87,6 @@ body<=
 
     $ret .= "<div id='CurrentTabMain'><form id='display_form' method='post' action='./?authas=$authas'>";
     $ret .= LJ::form_auth();
-    $ret .= "<?p These settings will remain no matter what other changes you make to your journal design. p?>";
 
     ### Journal Titles
     {
@@ -111,11 +110,19 @@ body<=
         $ret .= "</table></fieldset>";
     }
 
+    ### Link List
+    if($u->prop('stylesys') == 2) {
+        $ret .= "<fieldset><legend>Link List</legend>";
+        $ret .= "Many S2 layouts can display <a href='http://www.livejournal.com/manage/links.bml$getextra'>your link ";
+        $ret .= "list</a>. Once you've set it up, you can display it in your journal by turning on the \"Display ";
+        $ret .= "Link List\" custom option in your layout.</fieldset>";
+    }
+
     ### Style System
     {
         $ret .= "<fieldset><legend>Style System</legend>";
-        $ret .= "<?p LiveJournal provides two style systems that allow you varying control over how your journal is displayed: p?><table>";
-        $ret .= "<tr><td>";
+        $ret .= "LiveJournal provides two style systems that allow you varying control over how your journal is displayed:";
+        $ret .= "<table><tr><td>";
         my $checked = $u->prop('stylesys') != 2 ? 1 : 0;
         $ret .= LJ::html_check({ 'id' => "S1", 'name' => 'stylesys', 'value' => "1",
                                  'type' => "radio", 'selected' => $checked });
