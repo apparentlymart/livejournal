@@ -10,6 +10,9 @@ use Carp qw ( croak );
 sub render_for_comm {
     my ($class, $comm) = @_;
 
+    croak "Non-community passed to LJ::CommPromo->render_for_community"
+        unless $comm && $comm->is_comm;
+
     return $class->_render($comm);
 }
 
