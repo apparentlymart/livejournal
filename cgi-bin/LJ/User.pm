@@ -1546,6 +1546,32 @@ sub is_syndicated {
     return $u->{journaltype} eq "Y";
 }
 
+sub is_community {
+    my $u = shift;
+    return $u->{journaltype} eq "C";
+}
+*is_comm = \&is_community;
+
+sub is_shared {
+    my $u = shift;
+    return $u->{journaltype} eq "S";
+}
+
+sub is_news {
+    my $u = shift;
+    return $u->{journaltype} eq "N";
+}
+
+sub is_person {
+    my $u = shift;
+    return $u->{journaltype} eq "P";
+}
+
+sub is_identity {
+    my $u = shift;
+    return $u->{journaltype} eq "I";
+}
+
 # front-end to LJ::cmd_buffer_add, which has terrible interface
 #   cmd: scalar
 #   args: hashref
