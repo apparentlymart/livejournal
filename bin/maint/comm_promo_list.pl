@@ -39,16 +39,12 @@ $maint{comm_promo_list} = sub
 
         # how many of these communities are plus or paid w/ opt-in?
         while (my ($uid, $u) = each %$curr_u) {
-            next unless $u->{journaltype} eq 'C';
+            next unless $u->is_comm;
             next unless $u->{statusvis} eq 'V';
 
             # we care about users who are either sponsored plus or paid and have
             # opted in
-            if ($u->in_class('paid')) {
-                next unless $u->prop('opt_comm_promo');
-            } elsif (! $u->in_class('plus')) {
-                next;
-            }
+            next unless $u->should_promote;
 
             push @to_load, $u->{userid};
         }
