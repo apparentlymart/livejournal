@@ -1702,7 +1702,10 @@ sub entry_form_decode
 
             $event =~ s!<lj-raw class="ljraw">!<lj-raw>!gi;
         }
+    } else {
+        $req->{"prop_used_rte"} = 0;
     }
+
     $req->{'event'} = $event;
 
     ## see if an "other" mood they typed in has an equivalent moodid
@@ -1866,9 +1869,9 @@ sub ads {
 
     # first 500 words
     $pubtext =~ s/<.+?>//g;
-    my @words = split(/\s+/, $pubtext);
+    my @words = grep { $_ } split(/\s+/, $pubtext);
     my $max_words = 500;
-    @words = $words[0..$max_words-1] if @words > $max_words;
+    @words = @words[0..$max_words-1] if @words > $max_words;
     $pubtext = join(' ', @words);
 
     my $debug = $LJ::DEBUG{'ads'};
@@ -1973,7 +1976,7 @@ sub ads {
         $adcall{categories} = $remote->prop('ad_categories');
 
         # User's notable interests
-        $adcall{interests} = join(',', grep { !defined $LJ::AD_BLOCKED_INTERESTS{$_} } $remote->notable_interests(150));
+        $adcall{interests} = join(',', grep { !defined $LJ::AD_BLOCKED_INTERESTS{$_} } $remote->notable_interests(10));
     }
 
     # If we have neither categories or interests, load the content author's
@@ -1983,7 +1986,7 @@ sub ads {
 
         if ($u) {
             $adcall{categories} = $u->prop('ad_categories');
-            $adcall{interests} = join(',', grep { !defined $LJ::AD_BLOCKED_INTERESTS{$_} } $u->notable_interests(150));
+            $adcall{interests} = join(',', grep { !defined $LJ::AD_BLOCKED_INTERESTS{$_} } $u->notable_interests(10));
         }
     }
 
@@ -2355,6 +2358,7 @@ sub subscribe_interface {
     my $formauth     = delete $opts{'formauth'} || LJ::form_auth();
     my $showtracking = delete $opts{'showtracking'} || 0;
     my $pending      = delete $opts{'pending'} || [];
+    my $getextra     = delete $opts{'getextra'} || '';
 
     croak "Invalid options passed to subscribe_interface" if (scalar keys %opts);
 
@@ -2369,7 +2373,7 @@ sub subscribe_interface {
     my $ret = qq {
             <div id="manageSettings">
             <span class="esnlinks"><a href="$LJ::SITEROOT/tools/notifications.bml">Message Center</a> | Manage Settings</span>
-            <form method='POST' action='$LJ::SITEROOT/manage/subscriptions/index.bml'>
+            <form method='POST' action='$LJ::SITEROOT/manage/subscriptions/index.bml$getextra'>
             $formauth
     };
 
@@ -2460,14 +2464,18 @@ sub subscribe_interface {
             foreach my $evt_class (@event_classes) {
                 my $etypeid = eval { $evt_class->etypeid } or next;
 
+                # FIXME: possibly will match more than it should
                 my @subscribed = $u->find_subscriptions(etypeid => $etypeid, method => "Inbox");
-                push @pending_subscriptions, @subscribed;
 
-                push @pending_subscriptions, LJ::Subscription::Pending->new($u,
-                                                                            journal => $journal,
-                                                                            etypeid => $etypeid,
-                                                                            method  => "Inbox",
-                                                                            ) unless @subscribed;
+                if (@subscribed) {
+                    push @pending_subscriptions, @subscribed;
+                } else {
+                    push @pending_subscriptions, LJ::Subscription::Pending->new($u,
+                                                                                journal => $journal,
+                                                                                etypeid => $etypeid,
+                                                                                method  => "Inbox",
+                                                                                );
+                }
             }
         }
 
@@ -2506,6 +2514,7 @@ sub subscribe_interface {
 
         $events_table .= '</tr>';
 
+        # inbox method
         foreach my $pending_sub (@pending_subscriptions) {
             # print option to subscribe to this event, checked if already subscribed
             my $input_name = $pending_sub->freeze or next;
@@ -2518,9 +2527,8 @@ sub subscribe_interface {
                     name     => $input_name,
                     class    => "SubscriptionInboxCheck",
                     selected => $subscribed,
-                    label    => $title,
                     noescape => 1,
-                }) .  "</td>";
+                }) .  "$title </td>";
 
             unless ($pending_sub->pending) {
                 $events_table .= LJ::html_hidden({
@@ -2556,7 +2564,7 @@ sub subscribe_interface {
                         noescape => 1,
                     }) . '</td>';
 
-                unless ($note_pending) {
+                unless ($note_pending->pending) {
                     $events_table .= LJ::html_hidden({
                         name  => "${notify_input_name}-old",
                         value => (scalar @subs) ? 1 : 0,
