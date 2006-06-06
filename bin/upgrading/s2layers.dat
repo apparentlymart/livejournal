@@ -26,6 +26,7 @@ digitalmultiplex/layout layout          core1
 digitalmultiplex/en     i18n            digitalmultiplex/layout
 
 disjointed/layout       layout          core1
+disjointed/themes       theme+          disjointed/layout
 
 haven/layout            layout          core1
 haven/themes            theme+          haven/layout
