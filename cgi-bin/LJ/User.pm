@@ -929,7 +929,10 @@ sub prop {
 
     # some props have accessors which do crazy things, if so they need
     # to be redirected from this method, which only loads raw values
-    if ({ map { $_ => 1 } qw(opt_showbday opt_showlocation)}->{$prop}) {
+    if ({ map { $_ => 1 }
+          qw(opt_showbday opt_showlocation opt_comm_promo)
+        }->{$prop})
+    {
         return $u->$prop;
     }
 
@@ -999,6 +1002,13 @@ sub opt_showlocation {
     return $u->raw_prop('opt_showlocation');
 }
 
+sub opt_comm_promo {
+    my $u = shift;
+
+    return $u->raw_prop('opt_comm_promo') ||
+        LJ::run_hook('opt_comm_promo_default', $u);
+}
+
 sub can_show_location {
     my $u = shift;
     croak "invalid user object passed" unless LJ::isu($u);
@@ -1013,6 +1023,26 @@ sub can_show_bday {
     return 0 if $u->underage;
     return 0 if $u->opt_showbday eq 'N';
     return 1;
+}
+
+# should this user be promoted via CommPromo
+sub should_promote {
+    my $u = shift;
+
+    return 0 if $u->prop('disable_comm_promo');
+
+    my $val = $u->opt_comm_promo;
+    return $val eq 'Y' ? 1 : 0;
+}
+
+# should we display CommPromos for other users?
+sub should_display_promo {
+    my $u = shift;
+
+    return 0 if $u->prop('disable_comm_promo');
+
+    my $val = $u->opt_comm_promo;
+    return $val eq 'Y' || $val eq 'S' ? 1 : 0;
 }
 
 # sets prop, and also updates $u's cached version
@@ -1570,6 +1600,11 @@ sub is_person {
 sub is_identity {
     my $u = shift;
     return $u->{journaltype} eq "I";
+}
+
+sub render_comm_promo {
+    my $u = shift;
+    return LJ::CommPromo->render_for_comm($u);
 }
 
 # front-end to LJ::cmd_buffer_add, which has terrible interface
