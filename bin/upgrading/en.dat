@@ -4149,8 +4149,6 @@ If you want to do a different type of search, check out the <a [[aopts]]>directo
 
 /poll/create.bml.questions=Poll Questions
 
-/poll/create.bml.seecode.desc=Below is the code for your poll.  Use the buttons below to go back and make changes or post this poll to your journal.
-
 /poll/create.bml.title=Poll Creator
 
 /poll/create.bml.type.check=Check Boxes
@@ -6068,36 +6066,6 @@ cprod.editstyles.text.v4=
 
 cprod.editstyles.text.v5=
 
-cprod.links.link.v1=
-
-cprod.links.link.v2=
-
-cprod.links.link.v3=
-
-cprod.links.link.v4=
-
-cprod.links.link.v5=
-
-cprod.links.link2-2.v1=
-
-cprod.links.link2.v2=
-
-cprod.links.link2.v3=
-
-cprod.links.link2.v4=
-
-cprod.links.link2.v5=
-
-cprod.links.text3.v1=Your account type does not permit you to use any more links.
-
-cprod.links.text3.v2=
-
-cprod.links.text3.v3=
-
-cprod.links.text3.v4=
-
-cprod.links.text3.v5=
-
 cprod.feeds.link.v1=syndicated feeds
 
 cprod.feeds.link.v2=
@@ -6157,6 +6125,36 @@ cprod.friendsfriendsinline.text3.v3=
 cprod.friendsfriendsinline.text3.v4=
 
 cprod.friendsfriendsinline.text3.v5=
+
+cprod.links.link.v1=
+
+cprod.links.link.v2=
+
+cprod.links.link.v3=
+
+cprod.links.link.v4=
+
+cprod.links.link.v5=
+
+cprod.links.link2-2.v1=
+
+cprod.links.link2.v2=
+
+cprod.links.link2.v3=
+
+cprod.links.link2.v4=
+
+cprod.links.link2.v5=
+
+cprod.links.text3.v1=Your account type does not permit you to use any more links.
+
+cprod.links.text3.v2=
+
+cprod.links.text3.v3=
+
+cprod.links.text3.v4=
+
+cprod.links.text3.v5=
 
 cprod.polls.link.v1=poll creation wizard
 
