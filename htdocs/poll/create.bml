@@ -649,7 +649,7 @@
         # display poll preview
         my $ret;
         $ret .= "<?h1 $ML{'.preview.options'} h1?>\n";
-        $ret .= "<?p $ML{'.preview.desc'} p?>\n\n";
+        $ret .= $POST{'see_code'} ? "<?p $ML{'.seecode.desc'} p?>\n\n" : "<?p $ML{'.preview.desc'} p?>\n\n";
 
         $ret .= "<div align='center'>\n";
 

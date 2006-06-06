@@ -4149,6 +4149,8 @@ If you want to do a different type of search, check out the <a [[aopts]]>directo
 
 /poll/create.bml.questions=Poll Questions
 
+/poll/create.bml.seecode.desc=Below is the code for your poll.  Use the buttons below to go back and make changes or post this poll to your journal.
+
 /poll/create.bml.title=Poll Creator
 
 /poll/create.bml.type.check=Check Boxes
