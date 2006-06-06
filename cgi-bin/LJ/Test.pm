@@ -5,7 +5,7 @@ use Carp qw(croak);
 use vars qw(@ISA @EXPORT);
 use DBI;
 @ISA = qw(Exporter);
-@EXPORT = qw(memcache_stress with_fake_memcache temp_user);
+@EXPORT = qw(memcache_stress with_fake_memcache temp_user temp_comm);
 
 my @temp_userids;  # to be destroyed later
 END {
@@ -70,6 +70,22 @@ sub temp_user {
             return $u;
         }
     }
+}
+
+sub temp_comm {
+
+    # make a normal user
+    my $u = temp_user();
+
+    # update journaltype
+    LJ::update_user($u, { journaltype => 'C' });
+
+    # communities always have a row in 'community'
+    my $dbh = LJ::get_db_writer();
+    $dbh->do("INSERT INTO community SET userid=?", undef, $u->{userid});
+    die $dbh->errstr if $dbh->err;
+
+    return $u;
 }
 
 sub with_fake_memcache (&) {

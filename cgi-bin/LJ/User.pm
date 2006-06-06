@@ -1599,6 +1599,11 @@ sub delete_and_purge_completely {
     # TODO: delete from global tables
     my $dbh = LJ::get_db_writer();
     $dbh->do("DELETE FROM user WHERE userid=?", undef, $u->{userid});
+
+    if ($u->{journaltype} eq 'C') {
+        $dbh->do("DELETE FROM community WHERE userid=?", undef, $u->{userid});
+    }
+
     return 1;
 }
 

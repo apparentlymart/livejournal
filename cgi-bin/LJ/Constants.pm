@@ -7,6 +7,12 @@ package LJ;
 use constant ENDOFTIME => 2147483647;
 $LJ::EndOfTime = 2147483647;  # for string interpolation
 
+use constant MAX_32BIT_UNSIGNED => 4294967295;
+$LJ::MAX_32BIT_UNSIGNED = 4294967295;
+
+use constant MAX_32BIT_SIGNED => 2147483647;
+$LJ::MAX_32BIT_SIGNED = 2147483647;
+
 # width constants. BMAX_ constants are restrictions on byte width,
 # CMAX_ on character width (character means byte unless $LJ::UNICODE,
 # in which case it means a UTF-8 character).

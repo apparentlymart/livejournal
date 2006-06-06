@@ -2470,6 +2470,14 @@ CREATE TABLE sch_exitstatus (
 )
 EOC
 
+register_tablecreate("comm_promo_list", <<'EOC');
+CREATE TABLE comm_promo_list (
+   journalid INT UNSIGNED NOT NULL,
+   r_start INT UNSIGNED NOT NULL,
+   r_end INT UNSIGNED NOT NULL,
+   INDEX (r_start)
+)
+EOC
 
 # NOTE: new table declarations go here
 
