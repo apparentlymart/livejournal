@@ -280,6 +280,17 @@ propgroup text {
     property use text_read_comments_friends;
 }
 
+propgroup customcss {
+    property string custom_css {
+        des = "Custom Style Rules";
+        note = "If you'd like to customize this style further and are familiar with CSS, you can enter custom style rules here.";
+        string_mode = "css";
+        cols = 80;
+        rows = 20;
+    }
+}
+
+
 function makefontspec() : string
 "Forms a CSS 'font-family' value based on the font-related properties."
 {
@@ -1107,6 +1118,8 @@ if ($*adv_enable_projection_styles) {
 }
 
     custom_stylesheet();
+
+    print $*custom_css;
 
 }
 
