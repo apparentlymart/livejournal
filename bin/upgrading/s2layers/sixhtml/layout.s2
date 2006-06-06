@@ -703,6 +703,15 @@ function EntryPage::print_comment(Comment e) {
     }
 
     "<div class='comment-content'>";
+
+    var string ip = $e.metadata{"poster_ip"};
+    if ($ip != "") {
+        var string text = $*text_comment_ipaddr;
+        """<div class="metadata">\n""";
+        "<div><strong>$text</strong> $ip</div>\n";
+        "</div>\n";
+    }
+
     $e->print_text();
     "</div>";
     "<div class='comment-footer'>";
