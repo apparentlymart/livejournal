@@ -8,6 +8,8 @@ require "statslib.pl";
 
 $maint{comm_promo_list} = sub
 {
+    my $verbose = $LJ::LJMAINT_VERBOSE >= 2 ? 1 : 0;
+
     # block size is 1_000 except for testing
     my $BLOCK_SIZE = $LJ::T_BLOCK_SIZE || 1_000;
 
@@ -30,7 +32,7 @@ $maint{comm_promo_list} = sub
     my @to_load = ();    # array of jids for which friends should be loaded
 
     while (my @curr_uid = splice(@comm_uids, 0, $BLOCK_SIZE)) {
-        print STDERR "[" . ++$ct . "] processing " . scalar(@curr_uid) . " users...\n";
+        print "[" . ++$ct . "] processing " . scalar(@curr_uid) . " users...\n" if $verbose;
 
         # get u objects
         my $curr_u = LJ::load_userids(@curr_uid) || {};
