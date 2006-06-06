@@ -40,6 +40,12 @@ propgroup presentation {
         des = "Side of the journal that the sidebar appears on";
         values = "left|Left|right|Right";
     }
+    property bool reverse_entries_recent {
+        des = "Reverse entries on recent entries page";
+    }
+    property bool reverse_entries_day {
+        des = "Reverse entries on day pages";
+    }
     property bool show_calendar {
         des = "Show calendar in sidebar";
     }
@@ -73,6 +79,8 @@ propgroup presentation {
     set transparent            = false;
     set transparent_borders    = false;
     set sidebar_align          = "right";
+    set reverse_entries_recent = false;
+    set reverse_entries_day    = false;
     set show_calendar          = true;
     set show_free_text         = true;
     set show_summary           = false;
@@ -803,6 +811,10 @@ function print_layout_disjointed_box(string dis, string date, string content, st
   print_layout_disjointed_box_close($jointed);
 }
 
+function server_sig() {
+  print_disjointed_box("Powered by", """<a href="$*SITEROOT/">$*SITENAME</a>""");
+}
+
 function EntryLite::lay_make_id() : string {
   var string id = "";
   if($this isa Comment) {
@@ -1129,20 +1141,18 @@ function Page::lay_get_skiplinks() : string{} {
     }
   }
 
-  if($this isa EntryPage) {
-    var EntryPage ep = $this as EntryPage;
-    var Link      pl = $ep.entry->get_link("nav_prev");
-    var Link      nl = $ep.entry->get_link("nav_next");
-    $prev_url        = $pl.url;
-    $prev_text       = $*text_entry_prev;
-    $next_url        = $nl.url;
-    $next_text       = $*text_entry_next;
-  }
-
-  if($this isa ReplyPage) {
-    var ReplyPage rp = $this as ReplyPage;
-    var Link      pl = $rp.entry->get_link("nav_prev");
-    var Link      nl = $rp.entry->get_link("nav_next");
+  if($this isa EntryPage or $this isa ReplyPage) {
+    var Entry e;
+    if($this isa EntryPage) {
+      var EntryPage ep = $this as EntryPage;
+      $e               = $ep.entry;
+    }
+    if($this isa ReplyPage) {
+      var ReplyPage rp = $this as ReplyPage;
+      $e               = $rp.entry;
+    }
+    var Link      pl = $e->get_link("nav_prev");
+    var Link      nl = $e->get_link("nav_next");
     $prev_url        = $pl.url;
     $prev_text       = $*text_entry_prev;
     $next_url        = $nl.url;
@@ -1195,9 +1205,6 @@ function Page::lay_sidebar_view_summary() : string {
   if($this isa EntryPage) {
     var EntryPage ep = $this as EntryPage;
     $entries = $ep.comments;
-  }
-  if($this isa ReplyPage) {
-    var ReplyPage rp = $this as ReplyPage;
   }
   if(size ($entries) > 0) {
     foreach var EntryLite e ($entries) {
@@ -1464,6 +1471,7 @@ function Page::print_linklist() {
 
 function RecentPage::print_body() {
   var Entry[] entries = $.entries;
+  if ($*reverse_entries_recent) { $entries = reverse $entries; }
 
   foreach var Entry e ($entries) {
     $this->print_entry($e);
@@ -1472,6 +1480,7 @@ function RecentPage::print_body() {
 
 function DayPage::print_body() {
   var Entry[] entries = $.entries;
+  if ($*reverse_entries_day) { $entries = reverse $entries; }
 
   foreach var Entry e ($entries) {
     $this->print_entry($e);
@@ -1554,7 +1563,7 @@ function MonthPage::print_body {
       $joint = $joint + "</b></a>\n";
       foreach var Entry e ($d.entries) {
         $dissed = $dissed + $e.time->time_format($*time_monthpage_format) + ": ";
-        if ($e.poster.username != $e.journal.username) {
+        if (not $e.poster->equals($e.journal)) {
           $dissed = $dissed + $e.poster + " ";
         }
         $dissed = $dissed + "$e.security_icon";
@@ -1625,7 +1634,7 @@ function EntryPage::print_comments (Comment[] cs) {
 function ReplyPage::print_body() {
   $this->print_entry($.entry);
   "<hr />";
-  if($.entry.permalink_url != $.replyto.permalink_url) {
+  if($.replyto.depth > 0) { # If we're replying to a comment
     print_entry($.replyto, null Color, null Color);
     "<hr />";
   }
@@ -1692,7 +1701,7 @@ if ($*sidebar_align == "left") {
 
 print_sidebar();
 
-print_disjointed_box("Powered by", """<a href="$*SITEROOT/">$*SITENAME</a>""");
+server_sig();
 
 """
     </td>
@@ -1736,7 +1745,7 @@ if ($*sidebar_align == "right") {
 
 print_sidebar();
 
-print_disjointed_box("Powered by", """<a href="$*SITEROOT/">$*SITENAME</a>""");
+server_sig();
 
 """
     </td>
