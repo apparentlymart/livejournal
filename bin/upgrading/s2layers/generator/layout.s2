@@ -80,7 +80,7 @@ propgroup colors {
     }
     property Color border_color {
         des = "Color of borders around all boxes";
-        note = "If you don't set a border size and style on the \"Presentation\" section, this won't have any effect.";
+        note = "If you don't set a border size and style in the \"Presentation\" section, this won't have any effect.";
     }
     property Color page_link {
         des = "Link color";

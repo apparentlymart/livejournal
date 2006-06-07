@@ -79,7 +79,7 @@ propgroup colors {
   }
   property Color border_color { 
       des = "Color of borders"; 
-      note = "If you don't set a border size and style on the \"Presentation\" section, this won't have any effect.";
+      note = "If you don't set a border size and style in the \"Presentation\" section, this won't have any effect.";
       s1color = "weak_text";
   }
   property Color title_color  { 

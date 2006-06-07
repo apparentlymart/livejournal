@@ -89,7 +89,7 @@ propgroup colors {
   }
   property Color border_color {
       des = "Color of lines around entries";
-      note = "If you don't set a line size and style, this won't show up.";
+      note = "If you don't set a line size and style in the \"Presentation\" section, this won't have any effect.";
   }
   property Color link_color {
       des = "Link color";

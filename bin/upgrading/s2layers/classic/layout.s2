@@ -76,7 +76,7 @@ propgroup colors {
   }
   property Color border_color {
       des = "Color of borders around entries";
-      note = "If you don't set a border size and style on the \"Presentation\" section, this won't have any effect.";
+      note = "If you don't set a border size and style in the \"Presentation\" section, this won't have any effect.";
   }
   property Color headerbar_bgcolor {
       des = "Background color of header bars";
