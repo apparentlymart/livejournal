@@ -200,7 +200,7 @@
     }
 
     # setup default minimal style information
-    $MINIMAL_USERAGENT{$_} ||= 1 foreach qw(Links Lynx w BlackBerry); # w is for w3m
+    $MINIMAL_USERAGENT{$_} ||= 1 foreach qw(Links Lynx w BlackBerry WebTV); # w is for w3m
     $MINIMAL_BML_SCHEME ||= 'lynx';
     $MINIMAL_STYLE{'core'} ||= 'core1';
 
