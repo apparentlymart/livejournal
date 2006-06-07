@@ -7,6 +7,14 @@ layerinfo previews = "magazine/magazine.jpg";
 layerinfo des = "An uncluttered, efficient layout with a centered heading and clearly-separated entries.";
 
 propgroup presentation {
+  property int content_width {
+      des = "Percentage width of the content area";
+      note = "Maximum is 100, minimum is 20";
+  }
+  property string content_alignment {
+      des = "Alignment of the content area";
+      values = "left|Left|center|Center|right|Right";
+  }
   property bool show_entry_userpic { 
       des = "Show the userpic on the journal entries? [Excludes friends page]"; 
   }
@@ -20,6 +28,8 @@ propgroup presentation {
   property use linklist_support;
   property use external_stylesheet;
 }
+set content_width = 100;
+set content_alignment = "center";
 set show_entry_userpic = false;
 set view_entry_disabled = false;
 set show_entrynav_icons = true;
@@ -157,12 +167,30 @@ propgroup text {
 
 set tags_aware = true;
 
+function prop_init() {
+    if ($*content_width > 100) {
+        $*content_width = 100;
+    } elseif ($*content_width < 20) {
+        $*content_width = 20;
+    }
+}
+
 function Page::lay_skip_navigation() {}
 
 function Page::lay_bottom_navigation() {}
 
 function print_stylesheet ()
 {
+    var int margin_width = 99 - $*content_width;
+    var string align = "";
+    if ($*content_alignment == "left") {
+        $align = """margin-right: ${margin_width}%;""";
+    } elseif ($*content_alignment == "right") {
+        $align = """margin-left: ${margin_width}%;""";
+    } else { # center
+        $align = """margin-left: auto; margin-right: auto;""";
+    }
+
     var string bgimg_selector = viewer_sees_control_strip() ? "#content" : "BODY";
     if(clean_url($*page_background_image) != "") {
       """$bgimg_selector {
@@ -193,12 +221,16 @@ H1 {
     font: x-large Verdana, sans-serif; text-align: center;
     letter-spacing: -0.09em;
     color: $*title_color;
+    width: $*content_width%;
+    $align
 }
 H2 {
     background-color: $*headerbar_bgcolor;
     color: $*headerbar_fgcolor;
     border-bottom: thin solid $*headerbar_bevel_color;
     font: normal 1.3em Georgia, serif;
+    width: $*content_width%;
+    $align
 }
 H3 {
     color: $*highlight_fgcolor;
@@ -237,6 +269,8 @@ BODY {
     border-left: thin solid $*border_color;
     border-bottom: thin solid $*border_color;
     margin-bottom: 1em;
+    width: $*content_width%;
+    $align
 }
 A:link {
     color: $*link_color;
@@ -250,6 +284,8 @@ A:active {
 .Navigation {
     text-align: center;
     font-family: sans-serif;
+    width: $*content_width%;
+    $align
 }
 .Comment {
     font-size: 0.7em;
@@ -282,12 +318,16 @@ ACRONYM {
 .Bottom {
     border-top: thin solid $*border_color;
     text-align: center;
+    width: $*content_width%;
+    $align
 }
 .Empty {
     background-color: $*highlight_bgcolor;
 }
 .Month {
     margin-top: 1em;
+    width: $*content_width%;
+    $align
 }
 .MonthHeader {
     color: $*headerbar_fgcolor;
@@ -303,6 +343,10 @@ ACRONYM {
     background-color: $*highlight_bgcolor;
     font-family: Verdana, sans-serif;
     border: thin outset;
+}
+.Listing, .ljtaglist {
+    width: $*content_width%;
+    $align
 }""";
 }
 
@@ -793,6 +837,37 @@ function ReplyPage::print_body ()
     "</div>";
     print "<h2>Reply:</h2>";
     $.form->print();
+}
+
+function MonthPage::print_body {
+    """<div class="Listing">""";
+    "<form method='post' action='$.redir.url'><center>";
+    $.redir->print_hiddens();
+    if ($.prev_url != "") { "[<a href='$.prev_url'>&lt;&lt;&lt;</a>]\n"; }
+    if (size $.months > 1) {
+        "<select name='redir_key'>\n";
+        foreach var MonthEntryInfo mei ($.months) {
+            var string sel;
+            if ($mei.date.year == $.date.year and $mei.date.month == $.date.month) {
+                $sel = " selected='selected'";
+            }
+            "<option value='$mei.redir_key'$sel>" + $mei.date->date_format($*lang_fmt_month_long) + "</option>";
+        }
+        "</select>\n<input type='submit' value='View' />";
+    }
+    if ($.next_url != "") { "\n[<a href='$.next_url'>&gt;&gt;&gt;</a>]\n"; }
+    "</center></form>\n<dl>";
+    foreach var MonthDay d ($.days) {
+        if ($d.has_entries) {
+            "<dt><a href=\"$d.url\"><b>";
+            print lang_ordinal($d.day);
+            "</b></a></dt>\n<dd>";
+            $d->print_subjectlist();
+            "</dd>\n";
+        }
+    }
+    "</dl>\n";
+    "</div>\n";
 }
 
 
