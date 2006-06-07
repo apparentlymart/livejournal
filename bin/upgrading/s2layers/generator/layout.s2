@@ -505,7 +505,7 @@ function Page::print ()
         $margin = "margin-right: $*box_margin;";
     }
     if ($*box_top_margin != "0") {
-        if (viewer_sees_ads()) {
+        if (viewer_sees_hbox_bottom()) {
            $margin_top = " style=\"margin-top: $*box_top_margin;\"";
         } else {
            $margin = $margin + "margin-top: $*box_top_margin;";
@@ -543,7 +543,7 @@ function Page::print ()
 <body bgcolor="$*page_back" text="$*entry_text" link="$*page_link" vlink="$*page_vlink" alink="$*page_alink">
 """;
 $this->print_control_strip();
-if (viewer_sees_ads()) {
+if (viewer_sees_vbox()) {
     """<table width="100%" height="100%"$margin_top>""";
     """<tr><td valign="top">""";
 }
@@ -642,7 +642,7 @@ $this->print_linklist();
 """;
     $this->print_body();
 
-if (viewer_sees_ads() and ($.view == "recent" or $.view == "friends")) {
+if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
     """
     <table cellpadding="2" cellspacing="0" border="0" summary="" style="margin-top: 10px;" class="box">
     <tr><td bgcolor="$*stronger_back" align="center">
@@ -657,7 +657,7 @@ if (viewer_sees_ads() and ($.view == "recent" or $.view == "friends")) {
     summary="" style="margin-left: auto; margin-right: auto;">
     <tr><td><div align="center">
     """;
-    $this->print_ad("Journal-5LinkUnit");
+    $this->print_hbox_bottom();
     """
     </div></td></tr></table>
     </td></tr></table>
@@ -667,7 +667,7 @@ if (viewer_sees_ads() and ($.view == "recent" or $.view == "friends")) {
 """
 </div>
 """;
-if (viewer_sees_ads()) {
+if (viewer_sees_vbox()) {
     """
     </td>
     <td valign="top" align="right" width="20%">
@@ -684,7 +684,7 @@ if (viewer_sees_ads()) {
     summary="" style="margin-left: auto; margin-right: auto;">
     <tr><td><div align="center">
     """;
-    $this->print_ad("Journal-Skyscraper");
+    $this->print_vbox();
     """
     </div></td></tr></table>
     </td></tr></table>
