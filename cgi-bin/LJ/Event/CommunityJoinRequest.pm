@@ -6,6 +6,11 @@ use base 'LJ::Event';
 
 sub new {
     my ($class, $u, $requestor, $comm) = @_;
+
+    $u =         LJ::want_user($u);
+    $requestor = LJ::want_user($requestor);
+    $comm =      LJ::want_user($comm);
+
     foreach ($u, $requestor, $comm) {
         LJ::errobj('Event::CommunityJoinRequest', u => $_)->throw unless LJ::isu($_);
     }
