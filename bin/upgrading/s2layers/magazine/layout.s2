@@ -15,8 +15,16 @@ propgroup presentation {
       des = "Alignment of the content area";
       values = "left|Left|center|Center|right|Right";
   }
+  property string entryborder_size {
+      des = "Size of borders around entries";
+      values = "thin|Thin|medium|Medium|thick|Thick";
+  }
+  property string entryborder_style {
+      des = "Style of borders around entries";
+      values = "solid|Solid|dashed|Dashed|dotted|Dotted|double|Double|hidden|Invisible";
+  }
   property bool show_entry_userpic { 
-      des = "Show the userpic on the journal entries? [Excludes friends page]"; 
+      des = "Display your userpic with your entries"; 
   }
   property use page_recent_items;
   property use page_friends_items;
@@ -30,6 +38,8 @@ propgroup presentation {
 }
 set content_width = 100;
 set content_alignment = "center";
+set entryborder_size = "thin";
+set entryborder_style = "solid";
 set show_entry_userpic = false;
 set view_entry_disabled = false;
 set show_entrynav_icons = true;
@@ -69,6 +79,7 @@ propgroup colors {
   }
   property Color border_color { 
       des = "Color of borders"; 
+      note = "If you don't set a border size and style on the \"Presentation\" section, this won't have any effect.";
       s1color = "weak_text";
   }
   property Color title_color  { 
@@ -164,6 +175,17 @@ propgroup text {
   property use text_post_comment_friends;
   property use text_read_comments_friends;
 }
+
+propgroup customcss {
+  property string custom_css {
+    des = "Custom Stylesheet";
+    note = "If you'd like to customize this style from scratch and are familiar with CSS, enter it here";
+    cols = 80;
+    rows = 20;
+    string_mode = "css";
+  }
+}
+set custom_css = "";
 
 set tags_aware = true;
 
@@ -266,8 +288,8 @@ BODY {
     if (not viewer_sees_ads()) { "clear: both;"; }
     """
     padding-left: 2ex;
-    border-left: thin solid $*border_color;
-    border-bottom: thin solid $*border_color;
+    border-left: $*entryborder_size $*entryborder_style $*border_color;
+    border-bottom: $*entryborder_size $*entryborder_style $*border_color;
     margin-bottom: 1em;
     width: $*content_width%;
     $align
@@ -347,7 +369,9 @@ ACRONYM {
 .Listing, .ljtaglist {
     width: $*content_width%;
     $align
-}""";
+}
+
+$*custom_css""";
 }
 
 function Page::print_linklist() {
