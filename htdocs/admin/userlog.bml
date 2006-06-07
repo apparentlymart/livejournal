@@ -99,6 +99,8 @@ FORM
             $action = "User reset password via lost password email";
         } elsif ($row->{action} eq 'email_change') {
             $action = "Email address changed to: $extra->{new}";
+        } elsif (my $info = LJ::run_hook('userlog_rows', $row)) {
+            $action = $info;
         } else {
             $action = "Unknown action ($row->{action})";
         }
