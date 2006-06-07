@@ -549,6 +549,30 @@ if (viewer_sees_vbox()) {
 }
 """
 <div align="$*box_alignment"$margin>
+""";
+if (viewer_sees_hbox_top()) {
+    """
+    <table cellpadding="2" cellspacing="0" border="0" summary="" style="margin-bottom: 10px;" class="box">
+    <tr><td bgcolor="$*stronger_back" align="center">
+    <table width="100%" cellpadding="3" cellspacing="0"
+    border="0"
+    summary="">
+    <tr>
+    <td class="shadowed" align="center">
+    <table cellspacing="5"
+    cellpadding="0"
+    border="0"
+    summary="" style="margin-left: auto; margin-right: auto;">
+    <tr><td><div align="center">
+    """;
+    $this->print_hbox_top();
+    """
+    </div></td></tr></table>
+    </td></tr></table>
+    </td></tr></table>
+    """;
+}
+"""
 <table width="$*box_width" cellpadding="2" cellspacing="0"
 border="0"
 summary="" class="box" id="topbox">
