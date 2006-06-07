@@ -1029,6 +1029,7 @@ sub can_show_bday {
 sub should_promote_comm {
     my $u = shift;
 
+    return 0 unless $u->is_comm;
     return 0 if $u->prop('disable_comm_promo');
 
     my $val = $u->opt_comm_promo;
@@ -1039,6 +1040,7 @@ sub should_promote_comm {
 sub should_display_comm_promo {
     my $u = shift;
 
+    return 0 unless $u->is_comm;
     return 0 if $u->prop('disable_comm_promo');
 
     my $val = $u->opt_comm_promo;
