@@ -108,6 +108,12 @@ sub setup_restart {
 
     Apache->httpd_conf(qq{
 
+
+# User-friendly error messages
+ErrorDocument 404 /404-error.html
+ErrorDocument 500 /500-error.html
+
+
 # This interferes with LJ's /~user URI, depending on the module order
 <IfModule mod_userdir.c>
   UserDir disabled
@@ -134,12 +140,10 @@ DirectoryIndex index.html index.bml
   PerlHandler Apache::BML
 </Files>
 
-# User-friendly error messages
-ErrorDocument 404 /404-error.html
-ErrorDocument 500 /500-error.html
-
 });
     }
+
+    eval { setup_restart_local(); };
 
 }
 
