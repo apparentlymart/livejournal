@@ -22,6 +22,8 @@ use LJ::S2::EntryPage;
 use LJ::S2::ReplyPage;
 use LJ::S2::TagsPage;
 
+use Class::Autouse qw ( LJ::CommPromo );
+
 package LJ::S2;
 
 # TEMP HACK
@@ -2183,7 +2185,6 @@ sub viewer_is_member
 
 sub viewer_sees_control_strip
 {
-    my ($ctx) = @_;
     return 0 unless $LJ::USE_CONTROL_STRIP;
 
     my $r = Apache->request;
@@ -2192,9 +2193,24 @@ sub viewer_sees_control_strip
     });
 }
 
+sub viewer_sees_vbox
+{
+    my $r = Apache->request;
+    my $u = LJ::load_userid($r->notes("journalid"));
+    return 0 unless $u;
+
+    return $u->should_display_comm_promo ? 1 : viewer_sees_ads();
+}
+
+sub viewer_sees_hbox_top { 0 }
+
+sub viewer_sees_hbox_bottom
+{
+    return viewer_sees_ads();
+}
+
 sub viewer_sees_ads
 {
-    my ($ctx) = @_;
     return 0 unless $LJ::USE_ADS;
 
     my $r = Apache->request;
@@ -2991,6 +3007,56 @@ sub Page__print_control_strip
     $S2::pout->($control_strip);
 }
 
+sub Page__print_hbox_top
+{
+    # reserved for ads in top of journal
+    1;
+}
+
+sub Page__print_hbox_bottom
+{
+    my ($ctx, $this) = @_;
+
+    my $user = $this->{journal}->{username};
+    my $journalu = LJ::load_user($this->{journal}->{username})
+        or die "unable to load journal user: $user";
+
+    # get ad with site-specific hook
+    {
+        my $ad_html = LJ::run_hook('hbox_ad_content', {
+            journalu => $journalu,
+            pubtext  => $LJ::REQ_GLOBAL{first_public_text},
+        });
+        $S2::pout->($ad_html) if $ad_html;
+    }
+}
+
+sub Page__print_vbox
+{
+    my ($ctx, $this) = @_;
+
+    my $user = $this->{journal}->{username};
+    my $journalu = LJ::load_user($this->{journal}->{username})
+        or die "unable to load journal user: $user";
+
+    # community promo box goes on top of skyscraper on community pages
+    # that have ads
+    if ($journalu->should_display_comm_promo) {
+        my $promo_html = $journalu->render_comm_promo;
+        $S2::pout->($promo_html) if $promo_html;
+    }
+
+    # next standard ad calls specified by site-specific hook
+    {
+        my $ad_html = LJ::run_hook('vbox_ad_content', {
+            journalu => $journalu,
+            pubtext  => $LJ::REQ_GLOBAL{first_public_text},
+        });
+        $S2::pout->($ad_html) if $ad_html;
+    }
+}
+
+# deprecated, should use print_(v|h)box
 sub Page__print_ad
 {
     my ($ctx, $this, $type) = @_;
@@ -3005,15 +3071,14 @@ sub Page__print_ad
 
     $S2::pout->($ad);
 }
-*RecentPage__print_ad = \&Page__print_ad;
-*FriendsPage__print_ad = \&Page__print_ad;
-*Page__print_ad = \&Page__print_ad;
-*YearPage__print_ad = \&Page__print_ad;
-*MonthPage__print_ad = \&Page__print_ad;
-*DayPage__print_ad = \&Page__print_ad;
-*EntryPage__print_ad = \&Page__print_ad;
-*ReplyPage__print_ad = \&Page__print_ad;
-*TagsPage__print_ad = \&Page__print_ad;
+
+# map vbox/hbox methods into *Page classes
+foreach my $class (qw(RecentPage FriendsPage YearPage MonthPage DayPage EntryPage ReplyPage TagsPage)) {
+    foreach my $func (qw(print_ad print_vbox print_hbox_top print_hbox_bottom)) {
+        eval "*${class}__$func = \&Page__$func";
+    }
+}
+
 
 sub Page__visible_tag_list
 {

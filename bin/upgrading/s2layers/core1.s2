@@ -471,8 +471,17 @@ class Page
     "Print server side supplied head content. This is a fixed function, so you can't override it. See
     [method[Page.print_custom_head()]] if you want to supply custom head content.";
 
+    function builtin print_hbox_top [fixed]
+    "Prints an horizontal bar of site-specific content at the top of a journal.";
+
+    function builtin print_hbox_bottom [fixed]
+    "Prints an horizontal bar of site-specific content at the bottom of a journal.";
+
+    function builtin print_vbox [fixed]
+    "Prints an vertical bar of site-specific content on a journal";
+
     function builtin print_ad(string type) [fixed]
-    "Prints an ad if the user should see one";
+    "Deprecated function.  Use print_hbox_(top|bottom) or print_vbox from now on.";
 
     function builtin print_control_strip [fixed]
     "Prints a control strip for the user's convenience";
@@ -765,7 +774,16 @@ function builtin viewer_is_member() : bool
 "Returns true if the user viewing the page is both logged in, and is a member of the community being viewed. Always returns false for personal journals, since they cannot have members.";
 
 function builtin viewer_sees_ads() [fixed] : bool
-"Returns true if reader will be shown an ad.";
+"Deprecated function.  Use viewer_sees_hbox_(top|bottom) or viewer_sees_vbox from now on.";
+
+function builtin viewer_sees_vbox() [fixed] : bool
+"True if opaque vertical site-specific content box should be displayed to the user.";
+
+function builtin viewer_sees_hbox_top() [fixed] : bool
+"True if opaque horizontal site-specific content box should be displayed to the user at the top of the page.";
+
+function builtin viewer_sees_hbox_bottom() [fixed] : bool
+"True if opaque horizontal site-specific content box should be displayed to the user at the bottom of the page.";
 
 function builtin viewer_sees_control_strip [fixed] : bool
 "Returns true if reader will see the built in control strip.";
