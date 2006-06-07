@@ -3372,7 +3372,7 @@ Regards,
 
 /manage/index.bml.information.changepass.about=Change your account's password
 
-/manage/index.bml.information.editinfo.about=Edit your account information and various options
+/manage/index.bml.information.comments.about=Change your comment settings
 
 /manage/index.bml.information.header=Account Information
 
@@ -3380,9 +3380,13 @@ Regards,
 
 /manage/index.bml.information.mobilepost.about=Manage your email addresses and PIN for mobile posting support
 
+/manage/index.bml.information.profile.about=Edit your profile information
+
 /manage/index.bml.information.pubkey=PGP/GPG public key
 
 /manage/index.bml.information.pubkey.about=Upload your public key
+
+/manage/index.bml.information.settings.about=Change your viewing options and other account settings
 
 /manage/index.bml.information.siteopts.about=Select your preferred site layout &amp; language
 

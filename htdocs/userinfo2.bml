@@ -520,7 +520,7 @@
  {
      $body .= "<div id='actionbar' style=''>\n";
      if ($remote_isowner) {
-         $body .= "<span id='actionitem'><a href='$LJ::SITEROOT/editinfo.bml'><img src='$LJ::IMGPREFIX/editinfo.gif' /> Edit info</a></span>\n";
+         $body .= "<span id='actionitem'><a href='$LJ::SITEROOT/manage/profile/'><img src='$LJ::IMGPREFIX/editinfo.gif' /> Edit info</a></span>\n";
          $body .= "<span id='actionitem'><a href='$LJ::SITEROOT/update.bml'><img src='$LJ::IMGPREFIX/pencil.gif' /> Update journal</a></span>\n";
      } else {
          $body .= "<span id='actionitem'><a href='$LJ::SITEROOT/friends/add.bml?user=$user'><img src='$LJ::IMGPREFIX/useradd.gif' /> ";
@@ -1131,7 +1131,7 @@ _code?>
 <=head
 page?><?_c <LJDEP>
 lib: cgi-bin/ljlib.pl, cgi-bin/cleanhtml.pl
-link: htdocs/editinfo.bml, htdocs/userinfo.bml, htdocs/users
+link: htdocs/manage/profile/index.bml, htdocs/userinfo.bml, htdocs/users
 link: htdocs/community/join.bml, htdocs/community/leave.bml, htdocs/friends/add.bml, htdocs/todo/index.bml
 link: htdocs/tools/memories.bml, htdocs/tools/tellafriend.bml, htdocs/allpics.bml
 link: htdocs/tools/textmessage.bml, htdocs/interests.bml, htdocs/support/faqbrowse.bml, htdocs/download/index.bml

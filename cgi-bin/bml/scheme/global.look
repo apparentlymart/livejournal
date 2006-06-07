@@ -156,9 +156,9 @@ LOAD_PAGE_INFO<=
 	     { 'name' => 'Edit ...',
 	       'children' => [
 			      { 'name' => 'Personal Info &',
-				'uri' => '/editinfo.bml', },
+				'uri' => '/manage/profile/', },
 			      { 'name' => 'Settings', cont => 1,
-				'uri' => '/editinfo.bml', },
+				'uri' => '/manage/', },
 			      { 'name' => 'Your Friends',
 				'uri' => '/editfriends.bml', },
 			      { 'name' => 'Old Entries',

@@ -103,6 +103,7 @@ general /logout.bml.loggedout.success
 
 general /manage/comments/index.bml.disablecomment2
 
+general /manage/index.bml.information.editinfo.about
 general /manage/index.bml.information.setlang.about
 general /manage/index.bml.information.setscheme.about
 general /manage/index.bml.userpictures
