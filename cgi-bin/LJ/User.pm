@@ -1026,7 +1026,7 @@ sub can_show_bday {
 }
 
 # should this user be promoted via CommPromo
-sub should_promote {
+sub should_promote_comm {
     my $u = shift;
 
     return 0 if $u->prop('disable_comm_promo');
@@ -1036,7 +1036,7 @@ sub should_promote {
 }
 
 # should we display CommPromos for other users?
-sub should_display_promo {
+sub should_display_comm_promo {
     my $u = shift;
 
     return 0 if $u->prop('disable_comm_promo');
