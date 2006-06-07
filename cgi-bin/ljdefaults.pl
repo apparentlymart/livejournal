@@ -55,6 +55,9 @@
     # qmtp, smtp, dmtp, and sendmail are the currently supported protocols.
     @MAIL_TRANSPORTS = ( [ 'sendmail', $SENDMAIL, 1 ] ) unless @MAIL_TRANSPORTS;
 
+    # roles that slow support queries should use in order of precedence
+    @SUPPORT_SLOW_ROLES = ('slow') unless @SUPPORT_SLOW_ROLES;
+
     # where we set the cookies (note the period before the domain)
     $COOKIE_DOMAIN ||= ".$DOMAIN";
     $COOKIE_PATH   ||= "/";

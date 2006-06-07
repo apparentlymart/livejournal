@@ -24,6 +24,14 @@ my $SECONDS_IN_DAY  = 3600 * 24;
                      supportviewstocks
                      supportchangesummary/);
 
+# retrieve a database handle to be used for support-related 
+# slow queries... defaults to 'slow' role but can be 
+# overridden by @LJ::SUPPORT_SLOW_ROLES
+sub slow_query_dbh
+{
+    return LJ::get_dbh(@LJ::SUPPORT_SLOW_ROLES);
+}
+
 ## pass $id of zero or blank to get all categories
 sub load_cats
 {
@@ -794,8 +802,8 @@ sub get_support_by_daterange {
             . "  AND timecreate >= ? AND timecreate < ?";
 
     # Get the results from the database
-    my $dbh = LJ::get_dbh('slow')
-              || return "Database unavailable";
+    my $dbh = LJ::Support::slow_query_dbh()
+        or return "Database unavailable";
     my $sth = $dbh->prepare($sql);
     $sth->execute($start_id, $end_id, $time1, $time2);
     die $dbh->errstr if $dbh->err;
@@ -827,8 +835,8 @@ sub get_support_by_ids {
             . "WHERE spid IN ($support_ids_bind)";
 
     # Get the results from the database
-    my $dbh = LJ::get_dbh('slow')
-              || return "Database unavailable";
+    my $dbh = LJ::Support::slow_query_dbh()
+        or return "Database unavailable";
     my $sth = $dbh->prepare($sql);
     $sth->execute(@$support_ids_ref);
     die $dbh->errstr if $dbh->err;
@@ -858,8 +866,8 @@ sub get_supportlogs {
     my $sql = "SELECT * FROM supportlog WHERE spid IN ($spid_bind) ";
 
     # Get the results from the database
-    my $dbh = LJ::get_dbh('slow')
-              || return "Database unavailable";
+    my $dbh = LJ::Support::slow_query_dbh()
+        or return "Database unavailable";
     my $sth = $dbh->prepare($sql);
     $sth->execute(@$support_ids_ref);
     die $dbh->errstr if $dbh->err;
@@ -891,7 +899,7 @@ sub get_touch_supportlogs_by_user_and_date {
     # Convert from times to IDs because supportlog.timelogged isn't indexed
     my ($start_id, $end_id) = LJ::DB::time_range_to_ids
                                    (table       => 'supportlog',
-                                    roles       => ['slow'],
+                                    roles       => \@LJ::SUPPORT_SLOW_ROLES,
                                     idcol       => 'splid',
                                     timecol     => 'timelogged',
                                     starttime   => $time1,
@@ -906,8 +914,8 @@ sub get_touch_supportlogs_by_user_and_date {
             . ($userid ? " AND userid = ?" : '');
 
     # Get the results from the database
-    my $dbh = LJ::get_dbh('slow')
-              || return "Database unavailable";
+    my $dbh = LJ::Support::slow_query_dbh()
+        or return "Database unavailable";
     my $sth = $dbh->prepare($sql);
     my @parms = ($start_id, $end_id, $time1, $time2);
     push @parms, $userid if $userid;
