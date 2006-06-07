@@ -35,6 +35,11 @@ propgroup presentation {
   }
   property use linklist_support;
   property use external_stylesheet;
+  property string counter_code {
+    des = "If you have an external web counter, you can enter the HTML for it here";
+    note = "Your counter will under the main navigation links in your journal.";
+    string_mode = "html-oneline";
+  }
 }
 set content_width = 100;
 set content_alignment = "center";
@@ -43,6 +48,7 @@ set entryborder_style = "solid";
 set show_entry_userpic = false;
 set view_entry_disabled = false;
 set show_entrynav_icons = true;
+set counter_code = "";
 
 propgroup colors {
   property Color main_bgcolor { 
@@ -163,18 +169,48 @@ propgroup images {
 	note = "Not supported in all browsers, but allows for the background image to be in a fixed position when scrolling.";
 	values = "scroll|Scroll|fixed|Fixed";
   }
+  property string img_btwn_comments {
+    des = "URL to an image to be used between your comment links";
+    note = "If you specify an image to use, it will replace any text between the comment links.";
+  }
 }
 set page_background_image = "";
 set page_background_repeat = "repeat";
 set page_background_position = "center";
 set page_background_scrolling = "scroll";
+set img_btwn_comments = "";
 
 propgroup text {
   property use text_post_comment;
   property use text_read_comments;
   property use text_post_comment_friends;
   property use text_read_comments_friends;
+  property string text_left_comments {
+    des = "Text to be used in front of your comment links";
+  }
+  property string text_btwn_comments {
+    des = "Text to be used between your comment links";
+    note = "If you specified an image to be used between your comments links in the \"Images\" section, then this option will not have any effect.";
+  }
+  property string text_right_comments {
+    des = "Text to be used at the end of your comment links";
+  }
+  property string date_format {
+    des = "Date format for entries";
+  }
+  property string time_format {
+    des = "Time format for entries";
+  }
+  property string datetime_comments_format {
+    des = "Date and time format for comments";
+  }
 }
+set text_left_comments = "(";
+set text_btwn_comments = " | ";
+set text_right_comments = ")";
+set date_format = "%%mon%%. %%dayord%%, %%yyyy%%";
+set time_format = "%%hh%%:%%min%% %%a%%m";
+set datetime_comments_format = "%%month%% %%dayord%%, %%yyyy%% %%hh%%:%%min%% %%a%%m";
 
 propgroup customcss {
   property string custom_css {
@@ -306,6 +342,10 @@ A:active {
 .Navigation {
     text-align: center;
     font-family: sans-serif;
+    width: $*content_width%;
+    $align
+}
+.Comments {
     width: $*content_width%;
     $align
 }
@@ -444,6 +484,9 @@ function Page::print () {
 
     """<p class="Navigation">$links $website<br />""";
     $this->lay_skip_navigation();
+    if ($*counter_code != "") {
+        """<p class="Navigation">$*counter_code</p>""";
+    }
     "</p>";
 
     if (size $.linklist > 0 and $*linklist_support) {
@@ -467,11 +510,11 @@ function Page::print () {
 
 function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_text)
 {
-    var string time = $e.time->time_format();
+    var string time = $e.time->time_format($*time_format);
     var string userpic = (defined $e.userpic ? "<img src='$e.userpic.url' />" : "");
     if (($p.view != "entry" and $e.new_day) or $p.view == "entry")
     {
-        "<h2>" + $e.time->date_format("med") + "</h2>";
+        "<h2>" + $e.time->date_format($*date_format) + "</h2>";
     }
     "<div class='H3Holder'>";
 
@@ -560,17 +603,21 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
 
 function CommentInfo::print() {
     if ($.show_readlink or $.show_postlink) {
-        "<div class='Comment'>(";
+        "<div class='Comment'>$*text_left_comments";
         if ($.show_readlink) {
             $this->print_readlink();
         }
         if ($.show_postlink and $.show_readlink) {
-            "&nbsp;|&nbsp;";
+            if (clean_url($*img_btwn_comments) != "") {
+                """ <img src="$*img_btwn_comments" alt="" /> """;
+            } else {
+                "$*text_btwn_comments";
+            }
         }
         if ($.show_postlink) {
             $this->print_postlink();
         }
-        ")</div>";
+        "$*text_right_comments</div>";
     }
 }
 
@@ -719,7 +766,7 @@ function DayPage::lay_bottom_navigation()
 function DayPage::print_body ()
 {
     if (not $.has_entries) {
-        "<h2>"; print $.date->date_format("med"); "</h2>";
+        "<h2>"; print $.date->date_format($*date_format); "</h2>";
         print "<p>(No journal entries for this day.)</p>";
     } else {
         foreach var Entry e ($.entries) {
@@ -744,17 +791,17 @@ function EntryPage::print_body ()
     if ($.entry.comments.enabled and $.comment_pages.total_subitems > 0)
     {
         $this->print_multiform_start();
-        print "<h2>Comments:</h2><div style='margin-left: 30px;'>";
+        print "<h2>Comments:</h2><div class='Comments'><div style='margin-left: 30px;'>";
         if ($.comment_pages.total_subitems > 0) {
             $.comment_pages->print();
             $this->print_comments($.comments);
         }
-        "</div>";
+        "</div></div>";
         if ($this.multiform_on) {
-            "<h2>Mass Action</h2><div style='margin-left: 30px;'>";
+            "<h2>Mass Action</h2><div class='Comments'><div style='margin-left: 30px;'>";
             $this->print_multiform_actionline();
             $this->print_multiform_end();
-            "</div>";
+            "</div></div>";
         }
     }
 }
@@ -798,7 +845,7 @@ function EntryPage::print_comment (Comment c) {
       print "<table>";
       print "<tr><th align='right'>From:</th><td>$poster</td></tr>\n";
       print "<tr><th align='right'>Date:</th><td style='white-space: nowrap'>";
-        print $c->time_display("long", "") + "</td></tr>";
+        print $c->time_display($*datetime_comments_format, "none") + "</td></tr>";
       if ($c.metadata{"poster_ip"}) { print "<tr><th align='right'>IP Address:</th><td>(" + $c.metadata{"poster_ip"} + ")</td></tr>"; }
     "</table></td>";
 
@@ -834,7 +881,7 @@ function EntryPage::print_comment (Comment c) {
 
 function ReplyPage::print_body () 
 {
-    var string time = $.replyto.time->time_format();
+    var string time = $.replyto.time->time_format($*time_format);
 
     if (not $.entry.comments.enabled)
     {
@@ -842,7 +889,7 @@ function ReplyPage::print_body ()
         return;
     }
 
-    "<h2>" + $.replyto.time->date_format("med") + "</h2>";
+    "<h2>" + $.replyto.time->date_format($*date_format) + "</h2>";
 
     "<div class='H3Holder'>";
 
