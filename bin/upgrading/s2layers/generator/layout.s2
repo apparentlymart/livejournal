@@ -505,7 +505,7 @@ function Page::print ()
         $margin = "margin-right: $*box_margin;";
     }
     if ($*box_top_margin != "0") {
-        if (viewer_sees_hbox_bottom()) {
+        if (viewer_sees_vbox()) {
            $margin_top = " style=\"margin-top: $*box_top_margin;\"";
         } else {
            $margin = $margin + "margin-top: $*box_top_margin;";

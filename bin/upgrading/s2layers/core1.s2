@@ -478,7 +478,7 @@ class Page
     "Prints an horizontal bar of site-specific content at the bottom of a journal.";
 
     function builtin print_vbox [fixed]
-    "Prints an vertical bar of site-specific content on a journal";
+    "Prints an vertical bar of site-specific content on a journal.";
 
     function builtin print_ad(string type) [fixed]
     "Deprecated function.  Use print_hbox_(top|bottom) or print_vbox from now on.";
