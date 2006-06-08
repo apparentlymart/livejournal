@@ -10,9 +10,6 @@ use Carp qw ( croak );
 sub render_for_comm {
     my ($class, $comm) = @_;
 
-    croak "Non-community passed to LJ::CommPromo->render_for_community"
-        unless $comm && $comm->is_comm;
-
     return $class->_render($comm);
 }
 
@@ -21,8 +18,7 @@ sub render_for_comm {
 # Class method
 sub grab_promo {
     my $class = shift;
-    my $comm  = LJ::want_user(shift)
-        or croak "Invalid community";
+    my $comm  = LJ::want_user(shift);
 
     # choose a community promo to show
     my $dbr = LJ::get_db_reader()
@@ -33,10 +29,17 @@ sub grab_promo {
         # pick a random number between zero and 2^31 - 1
         my $rand = int(rand($LJ::MAX_32BIT_SIGNED));
 
-        $jid = $dbr->selectrow_array
-            ("SELECT journalid FROM comm_promo_list " .
-             "WHERE r_start < ? AND r_end > ? AND journalid != ? LIMIT 1",
-             undef, $rand, $rand, $comm->{userid});
+        my $sql = "SELECT journalid FROM comm_promo_list WHERE r_start < ? AND r_end > ?";
+        my @args = ($rand, $rand);
+
+        if ($comm) {
+            $sql .= " AND journalid != ? ";
+            push @args, $comm->{userid};
+        }
+
+        $sql .= " LIMIT 1";
+
+        $jid = $dbr->selectrow_array($sql, undef, @args);
 
         die $dbr->errstr if $dbr->err;
         last if $jid;
@@ -50,27 +53,33 @@ sub grab_promo {
 sub _render {
     my ($class, $comm) = @_;
 
-    return undef unless $comm;
-
     # find which community to link to
     my $target = $class->grab_promo($comm);
     return undef unless $target;
 
+    return render_promo_of_community($target);
+}
+
+sub render_promo_of_community {
+    my ($class, $comm) = @_;
+
+    return undef unless $comm;
+
     # get the ljuser link
-    my $commljuser = $target->ljuser_display;
+    my $commljuser = $comm->ljuser_display;
 
     # link to journal
-    my $journal_base = $target->journal_base;
+    my $journal_base = $comm->journal_base;
 
     # get default userpic if any
-    my $userpic = $target->userpic;
+    my $userpic = $comm->userpic;
     my $userpic_html = '';
     if ($userpic) {
         my $userpic_url = $userpic->url;
         $userpic_html = qq { <a href="$journal_base"><img src="$userpic_url" /></a> };
     }
 
-    my $blurb = $target->prop('comm_promo_blurb') || '';
+    my $blurb = $comm->prop('comm_promo_blurb') || '';
 
     my $html = qq {
         <div class="CommunityPromoBox">
