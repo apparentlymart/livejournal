@@ -15,6 +15,9 @@
 #ad-5linkunit {
     clear: both;
 }
+#ad-leaderboard {
+    margin-bottom: 10px;
+}
 #commenttext, #subject {
     width: 90%;
 }

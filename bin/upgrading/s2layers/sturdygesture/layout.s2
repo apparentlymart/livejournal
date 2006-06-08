@@ -397,9 +397,9 @@ $userpic
         println "</div>";
     }
 
-    if (viewer_sees_ads()) {
+    if (viewer_sees_vbox()) {
         """<div class="box" align="center" style="padding: 0.5em 0;">""";
-        $this->print_ad("Journal-Skyscraper");
+        $this->print_vbox();
         "</div>";
     }
 
@@ -465,10 +465,15 @@ $this->print_control_strip();
     }
 
     "<td rowspan=\"2\" id=\"body\">\n";
+    if (viewer_sees_hbox_top()) {
+        """<div class="box" style="text-align: center; margin-left: auto; margin-right: auto; padding-bottom: 2px; width: 750px;">""";
+        $this->print_hbox_top();
+        "</div>";
+    }
     $this->print_body();
-    if (viewer_sees_ads() and ($.view == "recent" or $.view == "friends")) {
+    if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
         """<div class="box" style="text-align: center; margin: 5px auto; width: 750px;">""";
-        $this->print_ad("Journal-5LinkUnit");
+        $this->print_hbox_bottom();
         "</div>";
     }
     "</td>\n";

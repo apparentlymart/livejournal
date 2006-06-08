@@ -161,7 +161,7 @@ propgroup customcss {
 }
 
 function prop_init() {
-  if (viewer_sees_ads()) {
+  if (viewer_sees_vbox()) {
     $*layout_type = "3C";
 
     $*sidebar_secondary = [
@@ -390,7 +390,7 @@ function print_module_links(string title) {
 function print_module_ads(string title) {
     var Page p = get_page();
     open_module("ads", $title, "");
-    $p->print_ad("Journal-Skyscraper");
+    $p->print_vbox();
     close_module();
 }
 
@@ -511,6 +511,14 @@ function Page::print () {
  var string lay = get_layout();
  var string body_layout_class = body_class($lay);
 
+ var string[] wide_themes = ["bonjour", "green", "porpoise"]; # These are the wide themes, which look better when the hbox_top is below the banner
+ var bool print_below_banner = false;
+ foreach var string theme ($wide_themes) {
+    if ($theme == $*base_theme) {
+        $print_below_banner = true;
+    }
+ }
+
    """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" id="sixapart-standard">
@@ -556,8 +564,27 @@ function Page::print () {
 <body class='$body_layout_class lj-view-$.view'>""";
 
 $this->print_control_strip();
+
 container_open("container");
-print_banner($this);
+
+if (viewer_sees_hbox_top()) {
+    if ($print_below_banner) {
+        print_banner($this);
+
+        container_open("ad-leaderboard");
+        $this->print_hbox_top();
+        container_close();
+    } else {
+        container_open("ad-leaderboard");
+        $this->print_hbox_top();
+        container_close();
+
+        print_banner($this);
+    }
+} else {
+    print_banner($this);
+}
+
 container_open("pagebody");
 
  render_layout($this, $lay);
@@ -565,9 +592,11 @@ container_open("pagebody");
 container_close();
 container_close();
 
-container_open("ad-5linkunit");
-$this->print_ad("Journal-5LinkUnit");
-container_close();
+if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
+    container_open("ad-5linkunit");
+    $this->print_hbox_bottom();
+    container_close();
+}
 
 "</body></html>";
 }
