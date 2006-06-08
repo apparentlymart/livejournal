@@ -2225,7 +2225,7 @@ function EntryPage::print_comment_partial (Comment c) {
 
 function ItemRange::print() {
     if ($.all_subitems_displayed) { return; }
-    print "<a name='comments'></a><table align='center' border='0' cellpadding='3'>";
+    print "<table align='center' border='0' cellpadding='3'>";
     print "<tr><td align='center' colspan='3'><b>" +
         lang_page_of_pages($.current, $.total) + "</b>";
     print "</td></tr>";
@@ -2281,7 +2281,7 @@ function EntryPage::print_body
     }
 
     if ($.entry.comments.enabled) {
-        "<hr />";
+        "<hr /><a name='comments'></a>";
         "("; $this->print_reply_link({ "linktext" => $*text_post_comment, "target" => "topcomment" }); ")";
         $this->print_reply_container({ "target" => "topcomment" });
         if ($.comment_pages.total_subitems > 0) {

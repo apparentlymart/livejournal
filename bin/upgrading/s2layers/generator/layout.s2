@@ -1131,7 +1131,7 @@ function EntryPage::print_body () {
 <tr align='left'>
 <td class="caption" colspan='2'>Comments:</td></tr>""";
 
-        """<tr align='left'><td colspan="2" bgcolor="$*entry_back">""";
+        """<tr align='left'><td colspan="2" bgcolor="$*entry_back"><a name='comments'></a>""";
 
         $.comment_pages->print();
 
