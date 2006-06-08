@@ -1,4 +1,5 @@
 <?page
+title=><?_code BML::ml(".title", {'sitename' => $LJ::SITENAMESHORT}) _code?>
 body<=
 <?_code
 {
@@ -18,7 +19,7 @@ body<=
     $ret .= "<?standout <font size='+1' face='arial'><b><a href='$uri'>$uri</a></b></font> standout?>\n";
     $ret .= "<?p $ML{'.success.text3'} p?>\n";
 
-    $ret .= "<form method='get' action='$LJ::SITEROOT/editinfo.bml'>";
+    $ret .= "<form method='get' action='$LJ::SITEROOT/manage/profile/'>";
     $ret .= "<p align='center'>" . LJ::html_submit(undef, "$ML{'.success.btn.enterinfo'} &rarr;") . "</p>";
     $ret .= "</form>\n";
 

@@ -4097,6 +4097,8 @@ If you want to do a different type of search, check out the <a [[aopts]]>directo
 
 /multisearch.bml.region.head=Search by Region
 
+/newuser.bml.title=Welcome to [[sitename]]
+
 /poll/create.bml.button.editpoll=Edit Poll
 
 /poll/create.bml.button.insert=Insert
