@@ -111,7 +111,7 @@ sub handler
         }
 
         # reload libraries that might've changed
-        if ($LJ::IS_DEV_SERVER) {
+        if ($LJ::IS_DEV_SERVER && !$LJ::DISABLED{'module_reload'}) {
             my %to_reload;
             while (my ($file, $mod) = each %LJ::LIB_MOD_TIME) {
                 my $cur_mod = (stat($file))[9];
