@@ -109,7 +109,9 @@
                     next;
                 }
 
-                # we're going to modify keywords on active pictures
+                # we're only going to modify keywords/comments on active pictures
+                next if $up->inactive;
+
                 # only modify if changing the data, make sure not collidiing with other edits, etc
                 if ($POST{"kw_$picid"} ne $POST{"kw_orig_$picid"}) {
                     my $kws = $POST{"kw_$picid"};
