@@ -831,7 +831,7 @@ _code?>
 <=body
 page?><?_c <LJDEP>
 link: htdocs/legal/privacy.bml
-post: htdocs/create.bml, htdocs/editinfo.bml
+post: htdocs/create.bml, htdocs/manage/profile/index.bml
 file: htdocs/inc/account-codes
 hook: post_create
 </LJDEP> _c?>

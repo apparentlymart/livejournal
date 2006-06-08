@@ -100,7 +100,7 @@ body<=
         $ret .= "<tr><td><?ljcomm $user ljcomm?></td><td>" . LJ::eall($name) . "</td><td nowrap='nowrap'>";
         if ($admin{$id}) {
             $ret .= BML::ml('Actionlink', {
-                'link'=>"<a href='/editinfo.bml?authas=$user'>$ML{'.commlist.actinfo'}</a>"}) . "&nbsp;&nbsp;";
+                'link'=>"<a href='/manage/profile/?authas=$user'>$ML{'.commlist.actinfo'}</a>"}) . "&nbsp;&nbsp;";
             $ret .= BML::ml('Actionlink', {
                 'link'=>"<a href='/community/settings.bml?comm=$user'>$ML{'.commlist.actsettings2'}</a>"}) . "&nbsp;&nbsp;";
             $ret .= BML::ml('Actionlink', {

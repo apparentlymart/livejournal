@@ -255,6 +255,6 @@ head<=
 <=head
 page?><?_c <LJDEP>
 lib: LJ::SpellCheck
-link: htdocs/lostinfo.bml, htdocs/userinfo.bml, htdocs/talkread.bml, htdocs/editinfo.bml
+link: htdocs/lostinfo.bml, htdocs/userinfo.bml, htdocs/talkread.bml
 post: htdocs/talkpost_do.bml
 </LJDEP> _c?>

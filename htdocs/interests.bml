@@ -474,7 +474,7 @@ body<=
     $ret .= "</form></td></tr>";
 
     $ret .= "</table>";
-    $ret .= BML::ml('.nointerests.text2', {'aopts' => "href='$LJ::SITEROOT/editinfo.bml'"});
+    $ret .= BML::ml('.nointerests.text2', {'aopts' => "href='$LJ::SITEROOT/manage/profile/'"});
 
     return $ret;
 }
@@ -482,7 +482,7 @@ _code?>
 
 <=body
 page?><?_c <LJDEP>
-link: htdocs/interests.bml, htdocs/editinfo.bml
+link: htdocs/interests.bml, htdocs/manage/profile/index.bml
 post: htdocs/interests.bml
 form: htdocs/interests.bml
 </LJDEP> _c?>

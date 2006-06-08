@@ -341,7 +341,7 @@
 
 
  } else {
-     $body .= $h1->($ML{'.userinfo.name'}) . $p->(BML::ml('.userinfo.body2', {'username' => $u->{'name'}, 'aopts' => "href='$LJ::SITEROOT/editinfo.bml'"}));
+     $body .= $h1->($ML{'.userinfo.name'}) . $p->(BML::ml('.userinfo.body2', {'username' => $u->{'name'}, 'aopts' => "href='$LJ::SITEROOT/manage/profile/'"}));
  }
 
  ## standout bar
@@ -1205,7 +1205,7 @@ body=><?_code return $bml_okay ? $body : BML::noparse($body); _code?>
 head=><?_code return $head; _code?>
 page?><?_c <LJDEP>
 lib: cgi-bin/ljlib.pl, cgi-bin/cleanhtml.pl
-link: htdocs/editinfo.bml, htdocs/userinfo.bml, htdocs/users
+link: htdocs/manage/profile/index.bml, htdocs/userinfo.bml, htdocs/users
 link: htdocs/community/join.bml, htdocs/community/leave.bml, htdocs/friends/add.bml, htdocs/todo/index.bml
 link: htdocs/tools/memories.bml, htdocs/tools/tellafriend.bml, htdocs/allpics.bml
 link: htdocs/tools/textmessage.bml, htdocs/interests.bml, htdocs/support/faqbrowse.bml, htdocs/download/index.bml

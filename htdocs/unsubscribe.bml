@@ -11,7 +11,7 @@ body<=
  LJ::set_active_crumb('unsubscribe');
  
 unless ($aaid && $auth) {
-     return "<?h1 Error h1?><?p How did you get to this page?  You should only get here via a link in a newsletter. p?><?p Another way to unsubscribe from the newsletter is to visit the <a href=\"/editinfo.bml\">edit info</a> page and change the setting there. p?>";
+     return "<?h1 Error h1?><?p How did you get to this page?  You should only get here via a link in a newsletter. p?><?p Another way to unsubscribe from the newsletter is to visit the <a href=\"/manage/settings/\">viewing options</a> page and change the setting there. p?>";
  }
 
  if (($aa = LJ::is_valid_authaction($aaid, $auth))
@@ -54,5 +54,5 @@ _code?>
 <=body
 page?><?_c <LJDEP>
 post: htdocs/unsubscribe.bml
-link: htdocs/editinfo.bml
+link: htdocs/manage/settings/index.bml
 </LJDEP> _c?>
