@@ -70,7 +70,7 @@ sub _render {
         $userpic_html = qq { <a href="$journal_base"><img src="$userpic_url" /></a> };
     }
 
-    my $blurb = "bluby blurb";
+    my $blurb = $target->prop('comm_promo_blurb') || '';
 
     my $html = qq {
         <div class="CommunityPromoBox">
