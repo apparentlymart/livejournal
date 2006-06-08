@@ -367,7 +367,9 @@ sub finduser
         }
     }
 
-    my $qd = $dbh->quote($data);
+    my $qd = $data;
+    $qd = LJ::canonical_username($qd) if $crit eq "user";
+    $qd = $dbh->quote($qd);
 
     my $where;
     if ($crit eq "email") {
