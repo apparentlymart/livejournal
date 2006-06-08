@@ -10,6 +10,7 @@ _info?>
     my $file = "$LJ::HOME/cgi-bin/SixApart/AdEngine/Policy/LiveJournal.pm";
     my $now = time();
     if ($LJ::_CACHE_ADPOLICY_LASTSTAT < $now - 10) {
+        local($^W) = 0;
         my $modtime = (stat($file))[9];
         $LJ::_CACHE_ADPOLICY_LASTSTAT = $now;
         if ($modtime != $LJ::_CACHE_ADPOLICY_MODTIME) {
@@ -28,6 +29,9 @@ _info?>
         pagetype => $GET{channel},
     });
     return '<html></html>' unless $ad_engine;
+
+    # this is a nasty hack because this code gets evaluated twice for some reason, need to ask brad
+    return '<html></html>' unless $GET{type};
 
     my $adhtml = "<html><head><title>$LJ::SITENAMESHORT Ad Server</title></head>";
     $adhtml .= "<body style='margin: 0; padding: 0'>";
