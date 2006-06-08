@@ -14,6 +14,8 @@ body<=
 {
     use strict;
     use vars qw(%GET %POST);
+    use Class::Autouse qw (LJ::CommPromo);
+
 
     LJ::set_active_crumb('searchinterests');
 
@@ -384,6 +386,32 @@ body<=
             'int' => $interest,
             'ret' => \$ret,
         });
+
+        # any sponsored search results?
+        my @sponsored_usernames;
+        foreach my $username (keys %LJ::SPONSORED_SEARCH) {
+            foreach my $keyword (@{$LJ::SPONSORED_SEARCH{$username}}) {
+                next unless uc $keyword eq uc $interest;
+                push @sponsored_usernames, $username;
+                last;
+            }
+        }
+
+        my $sponsored_results = (scalar @sponsored_usernames);
+
+        $ret .= '<?standout' if $sponsored_results;
+
+        foreach my $sponsored_username (@sponsored_usernames) {
+            next unless $sponsored_username;
+
+            my $sponsored_comm = LJ::load_user($sponsored_username);
+            if ($sponsored_comm) {
+                my $promo_box = LJ::CommPromo->render_promo_of_community($sponsored_comm);
+                $ret .= "<span style='display: block; float: left;'>$promo_box</span>";
+            }
+        }
+
+        $ret .= 'standout?>' if $sponsored_results;
 
         ### communities
         my $LIMIT = 500;
