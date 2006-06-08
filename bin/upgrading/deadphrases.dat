@@ -135,6 +135,7 @@ general /modify_do.bml.title
 general /multisearch.bml.region.text
 
 general /register.bml.new.body
+general /register.bml.new.modify2
 
 general /setlang.bml.select
 general /setlang.bml.switch

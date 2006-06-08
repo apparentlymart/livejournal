@@ -77,8 +77,8 @@ body<=
          $ret .= "<?h1 $ML{'.new.header'} h1?><?p " . BML::ml('.new.bodyuser', {'user'=>LJ::ljuser($u)}) . " p?>";
          $ret .= "<ul>";
          $ret .= "<li>" . BML::ml('.new.login2', {'aopts' => "href='$LJ::SITEROOT/login.bml'"}) . "</li>";
-         $ret .= "<li>" . BML::ml('.new.editinfo2', {'aopts' => "href='$LJ::SITEROOT/editinfo.bml'"}) . "</li>";
-         $ret .= "<li>" . BML::ml('.new.modify2', {'aopts' => "href='$LJ::SITEROOT/modify.bml'"}) . "</li>";
+         $ret .= "<li>" . BML::ml('.new.editinfo2', {'aopts' => "href='$LJ::SITEROOT/manage/profile/'"}) . "</li>";
+         $ret .= "<li>" . BML::ml('.new.customize', {'aopts' => "href='$LJ::SITEROOT/customize/'"}) . "</li>";
          $ret .= "<li>" . BML::ml('.new.update2', {'aopts' => "href='$LJ::SITEROOT/update.bml'"}) . "</li>";
          $ret .= "</ul>";
      }
@@ -128,6 +128,6 @@ _code?>
 
 <=body
 page?><?_c <LJDEP>
-link: htdocs/login.bml, htdocs/editinfo.bml
+link: htdocs/login.bml, htdocs/manage/profile/index.bml
 link: htdocs/modify.bml, htdocs/update.bml
 </LJDEP> _c?>

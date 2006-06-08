@@ -4258,13 +4258,13 @@ Sincerely,
 
 /register.bml.new.bodyuser=Thanks!  The email address for [[user]] has now been verified.  From here, you may be interested in doing the following things:
 
+/register.bml.new.customize=<a [[aopts]]>Customize Journal</a> -- Customize the look of your journal
+
 /register.bml.new.editinfo2=<a [[aopts]]>Edit Information</a> -- Fill out your user profile and set various settings.
 
 /register.bml.new.header=Success
 
 /register.bml.new.login2=<a [[aopts]]>Log In</a> -- So you don't have to enter your username and password everywhere.
-
-/register.bml.new.modify2=<a [[aopts]]>Modify Journal</a> -- Modify the look of your journal.
 
 /register.bml.new.update2=<a [[aopts]]>Update Journal</a> -- Write in your journal.
 
