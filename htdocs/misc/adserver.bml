@@ -6,6 +6,19 @@ _info?>
     use strict;
     use vars qw($GET);
 
+    # reload the livejournal policy periodically
+    my $file = "$LJ::HOME/cgi-bin/SixApart/AdEngine/Policy/LiveJournal.pm";
+    my $now = time();
+    if ($LJ::_CACHE_ADPOLICY_LASTSTAT < $now - 10) {
+        my $modtime = (stat($file))[9];
+        $LJ::_CACHE_ADPOLICY_LASTSTAT = $now;
+        if ($modtime != $LJ::_CACHE_ADPOLICY_MODTIME) {
+            $LJ::_CACHE_ADPOLICY_MODTIME = $modtime;
+            delete $INC{'SixApart/AdEngine/Policy/LiveJournal.pm'};
+            eval "use SixApart::AdEngine::Policy::LiveJournal; 1";
+        }
+    }
+
     BML::set_content_type("text/html");
 
     my $r = Apache->request;
