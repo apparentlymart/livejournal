@@ -468,13 +468,18 @@ function Page::print ()
 <body>
 """;
  $this->print_control_strip();
- if (viewer_sees_ads()) {
+ if (viewer_sees_vbox()) {
     """<table width="100%" height="100%"$margin>""";
     """<tr><td valign="top">""";
  }
+ if (viewer_sees_hbox_top()) {
+    """<div style="text-align: center; margin-bottom: 10px;">""";
+    $this->print_hbox_top();
+    "</div>";
+ }
 """
   <table id=\"whole\" cellpadding=\"0\" cellspacing=\"0\"""";
-  if (not viewer_sees_ads()) { "$margin"; }
+  if (not viewer_sees_vbox()) { "$margin"; }
 """><tr><td>
   <table class="main" width="100%"><tr><td>
     $userpic
@@ -499,15 +504,15 @@ $this->print_linklist();
     print $website; "<td>"; server_sig(); "</td></tr>";
 
     "</table></td></tr></table>";
-    if (viewer_sees_ads()) {
-        if ($.view == "recent" or $.view == "friends") {
-            """<div style="text-align: center; margin-top: 50px;">""";
-            $this->print_ad("Journal-5LinkUnit");
-            "</div>";
-        }
+    if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
+        """<div style="text-align: center; margin-top: 50px;">""";
+        $this->print_hbox_bottom();
+        "</div>";
+    }
+    if (viewer_sees_vbox()) {
         "</td>";
         """<td valign="top" align="right" width="20%"><div style="margin-right: 10px;">""";
-        $this->print_ad("Journal-Skyscraper");
+        $this->print_vbox();
         "</div></td></tr></table>";
     } 
     "\n</body>\n</html>";
