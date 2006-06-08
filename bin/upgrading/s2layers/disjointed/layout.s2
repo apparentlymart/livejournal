@@ -1707,14 +1707,27 @@ server_sig();
     </td>
 """;
 } else {
-if (viewer_sees_ads()) {
+if (viewer_sees_vbox()) {
     """<td width="20%" valign="top"><div style="float: right;">""";
-    $this->print_ad("Journal-Skyscraper");
+    $this->print_vbox();
     """</div></td>""";
 }
 }
 """
     <td valign="top" style="width: 100%;"><a name="top" id="top"></a>
+""";
+if (viewer_sees_hbox_top()) {
+    """
+      <table align="$*entries_alignment">
+        <tr>
+          <td align="$*entries_alignment"><div style="text-align: center;">""";
+          $this->print_hbox_top();
+          """</div></td>
+        </tr>
+      </table>
+    """;
+}
+"""
       <table border="0" align="$*entries_alignment" style="width: $*entries_width;">
         <tr>
           <td valign="top" align="$*entries_alignment" style="width: $*entries_width;">""";
@@ -1735,6 +1748,17 @@ if($*show_footer) {
         </tr>
       </table>""";
 }
+if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
+    """
+      <table align="$*entries_alignment">
+        <tr>
+          <td align="$*entries_alignment"><div style="text-align: center;">""";
+            $this->print_hbox_bottom();
+          """</div></td>
+        </tr>
+      </table>
+    """;
+}
 
 """
     </td>
@@ -1751,21 +1775,14 @@ server_sig();
     </td>
 """;
 } else {
-if (viewer_sees_ads()) {
+if (viewer_sees_vbox()) {
     """<td width="20%" valign="top"><div style="float: right;">""";
-    $this->print_ad("Journal-Skyscraper");
+    $this->print_vbox();
     """</div></td>""";
 }
 }
 """
   </tr>
-""";
-if (viewer_sees_ads() and ($.view == "recent" or $.view == "friends")) {
-    """<tr><td colspan="2"><div style="text-align: center;">""";
-    $this->print_ad("Journal-5LinkUnit");
-    """</div></td><td>&nbsp;</td></tr>""";
-}
-"""
 </table>
 </body>
 </html>

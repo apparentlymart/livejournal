@@ -797,7 +797,7 @@ a:visited {
     width: $*sidebar_width;
 }
 """;
-if (viewer_sees_ads()) {
+if (viewer_sees_vbox()) {
 """
 #adbar {
     background-color: $*sidebar_bgcolor;
@@ -925,12 +925,18 @@ function Page::print() {
 
     println """<a name="top"></a><div align="center">""";
 
+    if (viewer_sees_hbox_top()) {
+        """<div style="text-align: center; margin-bottom: 10px;">""";
+        $this->print_hbox_top();
+        "</div>";
+    }
+
     var string sidebar_html_width = sidebar_html_width();
     println """<table cellspacing="0" cellpadding="0" id="top_title"><tr><td id="speck">&nbsp;</td><td id="journal_title">""";
     println """<h1>$title</h1></td></tr></table>""";
     println """<table cellspacing="0" cellpadding="0" id="main">""";
     println """<tr id="subtitles"><th height="15" width="$sidebar_html_width" id="sidebar_title">$*text_sidebar_title</th>""";
-    "<th id=\"main_title\""; if (viewer_sees_ads()) { " colspan=\"2\""; } """>$view_title</th></tr>""";
+    "<th id=\"main_title\""; if (viewer_sees_vbox()) { " colspan=\"2\""; } """>$view_title</th></tr>""";
 
         println """<tr><td id="sidebar" valign="top" width="$sidebar_html_width" style="overflow: hidden">""";
         print_sidebar($this);
@@ -940,21 +946,21 @@ function Page::print() {
     println """<td valign="top" id="content" align="center"><table cellspacing="0" cellpadding="0" align="center"><tr><td style='width: 85%; padding: 15px'>""";
     $this->print_body();
     println "</td></tr></table></td>";
-    if (viewer_sees_ads()) {
+    if (viewer_sees_vbox()) {
         println """<td id="adbar" valign="top">""";
-        $this->print_ad("Journal-Skyscraper");
+        $this->print_vbox();
         println "</td>";
     }
     "</tr>";
 
     println """<tr><td height="15" id="top_of_page"><a href="#top">Top of Page</a></td>""";
-    "<td id=\"server_sig\""; if (viewer_sees_ads()) { " colspan=\"2\" "; } ">";
+    "<td id=\"server_sig\""; if (viewer_sees_vbox()) { " colspan=\"2\" "; } ">";
     server_sig();
     println """</td></tr></table>""";
     
-    if (viewer_sees_ads() and ($.view == "recent" or $.view == "friends")) {
+    if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
         """<div style="text-align: center; margin-top: 10px;">""";
-        $this->print_ad("Journal-5LinkUnit");
+        $this->print_hbox_bottom();
         "</div>";
     }
     

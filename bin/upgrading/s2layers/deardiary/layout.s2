@@ -684,10 +684,10 @@ function Page::lay_print_paraphernalia() "User layers can override this to chang
     $this->lay_print_viewspec();
     $this->lay_print_custom_paraphernalia();
     $this->lay_print_userlinks();
-    if (viewer_sees_ads()) {
+    if (viewer_sees_vbox()) {
         paraphernalia_box_open("", "");
         """<div style="margin-top: 8px;">""";
-        $this->print_ad("Journal-Skyscraper");
+        $this->print_vbox();
         "</div>";
         paraphernalia_box_close("", "");
     }
@@ -896,10 +896,16 @@ $this->print_control_strip();
 </div>
 
 <div id="main">
-"""; $this->print_body();
-if (viewer_sees_ads() and ($.view == "recent" or $.view == "friends")) {
+""";
+if (viewer_sees_hbox_top()) {
+    """<div style="text-align: center; margin-top: 10px;">""";
+    $this->print_hbox_top();
+    "</div>";
+}
+$this->print_body();
+if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
     """<div style="text-align: center;">""";
-    $this->print_ad("Journal-5LinkUnit");
+    $this->print_hbox_bottom();
     "</div>";
 }
 """
