@@ -451,6 +451,9 @@ sub file_request
     my $reqsubject = LJ::trim($o->{'subject'});
     my $reqbody = LJ::trim($o->{'body'});
 
+    # remove the auth portion of any see_request.bml links
+    $reqbody =~ s/(see_request\.bml.+?)&auth=\w+/$1/ig;
+
     unless ($reqsubject) {
         push @$errors, "You must enter a problem summary.";
     }
