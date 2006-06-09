@@ -99,6 +99,7 @@ body<=
         my $name = $names{$id}->[1];
         $ret .= "<tr><td><?ljcomm $user ljcomm?></td><td>" . LJ::eall($name) . "</td><td nowrap='nowrap'>";
         if ($admin{$id}) {
+            $ret .= LJ::run_hook('community_manage_actionlink', $user);
             $ret .= BML::ml('Actionlink', {
                 'link'=>"<a href='/manage/profile/?authas=$user'>$ML{'.commlist.actinfo'}</a>"}) . "&nbsp;&nbsp;";
             $ret .= BML::ml('Actionlink', {
