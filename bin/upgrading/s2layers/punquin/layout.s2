@@ -285,9 +285,9 @@ function print_sidebar(Page p) {
 
     # End Table
 
-    if (viewer_sees_ads()) {
+    if (viewer_sees_vbox()) {
         "<p>";
-        $p->print_ad("Journal-Skyscraper");
+        $p->print_vbox();
         "</p>";
     }
     "</td></tr></table>\n<!-- End Main Sidebar -->";
@@ -333,6 +333,12 @@ function Page::print ()
     # Table wrapper
     "<table id='main' cellpadding='5' cellspacing='0' width='90%'>\n<tr>";
 
+    if (viewer_sees_hbox_top()) {
+        """<td>&nbsp;</td><td><div style="text-align: center;">""";
+        $this->print_hbox_top();
+        "</div></td></tr><tr>";
+    }
+
     if ($*sidebar_position == "left") { print_sidebar($this); }
 
     # Main content
@@ -352,12 +358,12 @@ function Page::print ()
     "<td colspan='2' align='$main_position'>\n";
     "<a href='$*SITEROOT/'>$*SITENAME</a></td>\n";
 
-    "</tr></table>";
-    if (viewer_sees_ads() and ($.view == "recent" or $.view == "friends")) {
-        """<div style="text-align: center;">""";
-        $this->print_ad("Journal-5LinkUnit");
-        "</div>";
+    if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
+        """</tr><tr><td>&nbsp;</td><td><div style="text-align: center;">""";
+        $this->print_hbox_bottom();
+        "</div></td>";
     }
+    "</tr></table>";
     "</div></body></html>";
 }
 
