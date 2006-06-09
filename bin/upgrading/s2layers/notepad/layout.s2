@@ -188,7 +188,12 @@ function Page::print()
  <body>
  """;
  $this->print_control_strip();
- if (viewer_sees_ads()) {
+ if (viewer_sees_hbox_top()) {
+    """<div style="width: 738px; margin-bottom: 5px;">""";
+    $this->print_hbox_top();
+    "</div>";
+ }
+ if (viewer_sees_vbox()) {
     """<table width="100%" height="100%">""";
     """<tr><td valign="top">""";
  }
@@ -265,17 +270,17 @@ $this->print_linklist();
    </tr>
   </table>
   """;
-  if (viewer_sees_ads()) {
+  if (viewer_sees_vbox()) {
     "</td>";
     """<td valign="top" align="right" width="20%">""";
     """<div style="margin-right: 10px;">""";
-    $this->print_ad("Journal-Skyscraper");
+    $this->print_vbox();
     "</div></td></tr></table>";
-    if ($.view == "recent" or $.view == "friends") {
-        """<div style="width: 738px;">""";
-        $this->print_ad("Journal-5LinkUnit");
-        "</div>";
-    }
+  }
+  if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
+    """<div style="width: 738px;">""";
+    $this->print_hbox_bottom();
+    "</div>";
   }
   """
  </body>

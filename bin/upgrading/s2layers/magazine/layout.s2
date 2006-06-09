@@ -321,7 +321,7 @@ BODY {
 """
 .H3Holder {
     """;
-    if (not viewer_sees_ads()) { "clear: both;"; }
+    if (not viewer_sees_vbox()) { "clear: both;"; }
     """
     padding-left: 2ex;
     border-left: $*entryborder_size $*entryborder_style $*border_color;
@@ -357,7 +357,7 @@ A:active {
 .Comment, .Current {
     margin-bottom: 1em; 
     """;
-    if (not viewer_sees_ads()) { "clear: right;"; }
+    if (not viewer_sees_vbox()) { "clear: right;"; }
     """
 }
 .Picture {
@@ -464,9 +464,15 @@ function Page::print () {
     """;
     $this->print_control_strip();
     if (viewer_sees_control_strip()) { """<div id="content">"""; }
-    if (viewer_sees_ads()) {
+    if (viewer_sees_hbox_top()) {
+        """<div style="text-align: center;"""; if (viewer_sees_vbox()) { " width: 75%;"; } "\">";
+        $this->print_hbox_top();
+        "</div>";
+    }
+
+    if (viewer_sees_vbox()) {
         """<div style="float: right;">""";
-        $this->print_ad("Journal-Skyscraper");
+        $this->print_vbox();
         "</div>";
         """<div style="width: 75%;">""";
     }
@@ -497,13 +503,13 @@ function Page::print () {
 
     $this->lay_bottom_navigation();
 
-    if (viewer_sees_ads() and ($.view == "recent" or $.view == "friends")) {
+    if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
         """<div style="text-align: center;">""";
-        $this->print_ad("Journal-5LinkUnit");
+        $this->print_hbox_bottom();
         "</div>";
     }
 
-    if (viewer_sees_ads()) { "</div>"; }
+    if (viewer_sees_vbox()) { "</div>"; }
     if (viewer_sees_control_strip()) { "</div>"; }
     "</body></html>";
 }
