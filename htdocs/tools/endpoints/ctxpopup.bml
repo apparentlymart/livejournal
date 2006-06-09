@@ -1,0 +1,70 @@
+<?_code # -*-bml-*-
+{
+    use strict;
+    use vars qw(%GET %POST);
+
+    my $err = sub {
+        my $msg = shift;
+        return JSON::objToJson({
+            content => "Error: $msg",
+        });
+    };
+
+    # get user
+    my $remote = LJ::get_remote()
+        or return $err->("Sorry, you must be logged in to use this feature.");
+
+    my $get_user = sub {
+        # three ways to load a user:
+
+        # username:
+        if (my $user = LJ::canonical_username($GET{'user'})) {
+            return LJ::load_user($user);
+        }
+
+        # identity:
+        if (my $identid = $GET{'identid'}) {
+            return undef unless $identid =~ /^\d+$/;
+            my $u = LJ::load_userid($identid);
+            return undef unless $u && $u->identity;
+            return $u;
+        }
+
+        # based on userpic url
+        if (my $upurl = $GET{'userpic_url'}) {
+            return undef unless $upurl =~ m!(\d+)/(\d+)!;
+            my ($picid, $userid) = ($1, $2);
+            my $u = LJ::load_userid($userid);
+            my $up = LJ::Userpic->instance($u, $picid);
+            return $up->valid ? $u : undef;
+        }
+    };
+
+    my %ret;
+    my $u = $get_user->();
+    BML::set_content_type('text/plain');
+    if ($u && $GET{'mode'} eq 'getinfo') {
+        $ret{username} = $u->{user};
+        $ret{display} = $u->{name};
+        $ret{userid} = $u->{userid};
+        $ret{url_addfriend} = "$LJ::SITEROOT/friends/add.bml?user=" . $u->{user};
+        $ret{url_journal} = $u->journal_base;
+        $ret{url_profile} = $u->profile_url;
+
+        my $up = $u->userpic;
+        if ($up) {
+            $ret{url_userpic} = $up->url;
+        }
+
+        $ret{is_friend} = LJ::is_friend($remote, $u);
+        $ret{is_requester} = LJ::u_equals($remote, $u);
+        $ret{url_add_friend} = "$LJ::SITEROOT/friends/add.bml?user=$u->{user}";
+    }
+
+    $ret{reqdata} = $GET{reqdata};
+
+    sleep(2) if $LJ::IS_DEV_SERVER;
+
+    return LJ::js_dumper(\%ret);
+}
+_code?>
