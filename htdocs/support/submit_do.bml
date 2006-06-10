@@ -22,13 +22,13 @@ body<=
 
     my %req;  # the request we're building to submit
 
-    if ($POST{'reqtype'} eq "user") 
+    if ($POST{'reqtype'} eq "user")
     {
-        push @errors, $ML{'.error.invalidform'} unless LJ::check_form_auth();
+        $remote = LJ::get_remote();
+        push @errors, $ML{'error.invalidform'} if ($remote && !LJ::check_form_auth());
         $req{'reqtype'} = "user";
         $user = LJ::canonical_username($POST{'user'});
         if ($POST{'password'} eq "_REMOTE") {
-            $remote = LJ::get_remote();
             if ($remote && $remote->{'user'} eq $user) {
                 $u = LJ::load_user($remote->{'user'});
                 $req{'requserid'} = $remote->{'userid'};
