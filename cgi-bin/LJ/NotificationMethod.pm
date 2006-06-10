@@ -94,11 +94,7 @@ sub all_available_methods {
     return grep {
         ! $LJ::DISABLED{$_} &&
         $_->configured
-    } qw(
-         LJ::NotificationMethod::Email
-         LJ::NotificationMethod::SMS
-         LJ::NotificationMethod::Inbox
-         );
+    } @LJ::NOTIFY_TYPES;
 }
 
 1;
