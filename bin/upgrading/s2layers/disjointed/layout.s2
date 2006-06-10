@@ -66,6 +66,7 @@ propgroup presentation {
     property string counter_code {
         des = "If you have an external web counter, you can enter the HTML for it here";
         note = "Your counter will appear in a tab at the bottom of your journal.";
+        maxlength = 2000;
         string_mode = "html-oneline";
     }
 

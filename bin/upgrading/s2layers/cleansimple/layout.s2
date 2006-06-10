@@ -52,6 +52,7 @@ propgroup presentation {
   property string counter_code {
       des = "If you have an external web counter, you can enter the HTML for it here";
       note = "Your counter will appear at the bottom of all of the sidebar content.";
+      maxlength = 2000;
       string_mode = "html-oneline";
   }
   property use external_stylesheet;
