@@ -137,7 +137,4 @@ sub comment {
     return LJ::Comment->new($self->event_journal, jtalkid => $self->jtalkid);
 }
 
-sub journal_sub_title { 'Journal' }
-sub journal_sub_type  { 'owner' }
-
 1;

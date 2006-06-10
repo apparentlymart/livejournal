@@ -30,7 +30,4 @@ sub comment {
     return LJ::Comment->new($self->journal, jtalkid => $self->arg1);
 }
 
-sub journal_sub_title { 'Journal' }
-sub journal_sub_type  { 'mutual_friend' }
-
 1;

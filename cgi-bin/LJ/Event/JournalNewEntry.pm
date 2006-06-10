@@ -159,7 +159,4 @@ sub title {
     return 'All posts in ' . $journal->ljuser_display;
 }
 
-sub journal_sub_title { 'Journal' }
-sub journal_sub_type  { 'any' }
-
 1;

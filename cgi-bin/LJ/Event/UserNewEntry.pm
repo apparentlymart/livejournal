@@ -134,7 +134,7 @@ sub subscription_as_html {
     return "All entries made by any of my friends"
         unless $journal;
 
-    # non-zero journal means the subscription refers to 
+    # non-zero journal means the subscription refers to
     # posts made by a specific user
     my $journaluser = $journal->ljuser_display;
     return "All new posts made by $journaluser";
@@ -143,8 +143,5 @@ sub subscription_as_html {
 sub title {
     return 'New Entry by User';
 }
-
-sub journal_sub_title { 'Journal' }
-sub journal_sub_type  { 'mutual_friend' }
 
 1;

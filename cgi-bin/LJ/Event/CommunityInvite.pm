@@ -37,9 +37,6 @@ sub subscription_as_html {
     return $class->title;
 }
 
-sub journal_sub_title { 'User' }
-sub journal_sub_type  { 'owner' }
-
 package LJ::Error::Event::CommunityInvite;
 sub fields { 'u' }
 sub as_string {

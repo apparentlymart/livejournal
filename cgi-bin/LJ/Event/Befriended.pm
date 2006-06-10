@@ -44,7 +44,4 @@ sub subscription_as_html {
     return "Someone adds $user as a friend";
 }
 
-sub journal_sub_title { 'User' }
-sub journal_sub_type  { 'owner' }
-
 1;

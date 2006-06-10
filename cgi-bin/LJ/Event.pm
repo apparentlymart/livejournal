@@ -122,14 +122,6 @@ sub subscription_applicable {
     return 1;
 }
 
-sub journal_sub_title { undef }
-sub journal_sub_type  { undef }
-sub arg1_sub_title    { undef }
-sub arg1_sub_type     { undef }
-sub arg2_sub_title    { undef }
-sub arg2_sub_type     { undef }
-
-
 ############################################################################
 #            Don't override
 ############################################################################
