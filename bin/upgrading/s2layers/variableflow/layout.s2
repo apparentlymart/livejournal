@@ -365,9 +365,14 @@ function Page::print() {
 <body class="$.view">
 """;
 $this->print_control_strip();
-if (viewer_sees_ads()) {
+if (viewer_sees_hbox_top()) {
+    """<div style="text-align: center; margin-left: $*margin_left; margin-right: $*margin_right;">""";
+    $this->print_hbox_top();
+    "</div>";
+}
+if (viewer_sees_vbox()) {
     "<div style='float: right; margin-right: 10px; position: relative; z-index: 15;'>"; 
-    $this->print_ad("Journal-Skyscraper");
+    $this->print_vbox();
     "</div>";
 }
 """
@@ -384,9 +389,9 @@ if (viewer_sees_ads()) {
 
 </div>
 """;
-if (viewer_sees_ads() and ($.view == "recent" or $.view == "friends")) {
-    """<div style="text-align: center;">""";
-    $this->print_ad("Journal-5LinkUnit");
+if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
+    """<div style="text-align: center; margin-left: $*margin_left; margin-right: $*margin_right;">""";
+    $this->print_hbox_bottom();
     "</div>";
 }
 """
