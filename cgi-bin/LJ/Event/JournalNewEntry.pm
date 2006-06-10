@@ -68,6 +68,48 @@ sub as_html {
     return "New <a href=\"$url\">entry</a> in $ju by $pu.";
 }
 
+sub subscription_applicable {
+    my ($class, $subscr) = @_;
+
+    return 1 unless $subscr->arg1;
+
+    # subscription is for entries with tsgs.
+    # not applicable if user has no tags
+    my $journal = $subscr->journal;
+
+    return 1 unless $journal; # ?
+
+    my $usertags = LJ::Tags::get_usertags($journal);
+
+    if ($usertags && (scalar keys %$usertags)) {
+        my @unsub = $class->unsubscribed_tags($subscr);
+        return (scalar @unsub) ? 1 : 0;
+    }
+
+    return 0;
+}
+
+# returns list of (hashref of (tagid => name))
+sub unsubscribed_tags {
+    my ($class, $subscr) = @_;
+
+    my $journal = $subscr->journal;
+    return () unless $journal;
+
+    my $usertags = LJ::Tags::get_usertags($journal);
+    return () unless $usertags;
+
+    my @tagids = sort { $usertags->{$a}->{uses} <=> $usertags->{$b}->{uses} } keys %$usertags;
+    return grep { $_ } map {
+        $subscr->owner->has_subscription(
+                                         etypeid => $class->etypeid,
+                                         arg1    => $_,
+                                         journal => $journal
+                                         ) ?
+                                         undef : {$_ => $usertags->{$_}->{name}};
+    } @tagids;
+}
+
 sub subscription_as_html {
     my ($class, $subscr) = @_;
 
@@ -76,19 +118,25 @@ sub subscription_as_html {
     # are we filtering on a tag?
     my $arg1 = $subscr->arg1;
     if ($arg1 eq '?') {
-        my $usertags = LJ::Tags::get_usertags($journal);
 
-        my @tagids = sort { $usertags->{$a}->{uses} <=> $usertags->{$b}->{uses} } keys %$usertags;
-        my @tagdropdown = map { ($_, $usertags->{$_}->{name}) } @tagids;
+        my @unsub_tags = $class->unsubscribed_tags($subscr);
+
+        my @tagdropdown;
+
+        foreach my $unsub_tag (@unsub_tags) {
+            while (my ($tagid, $name) = each %$unsub_tag) {
+                push @tagdropdown, ($tagid, $name);
+            }
+        }
 
         my $dropdownhtml = LJ::html_select({
             name => $subscr->freeze . '.arg1',
         }, @tagdropdown);
 
-        return "all posts tagged $dropdownhtml on " . $journal->ljuser_display;
+        return "All posts tagged $dropdownhtml on " . $journal->ljuser_display;
     } elsif ($arg1) {
         my $usertags = LJ::Tags::get_usertags($journal);
-        return "all posts tagged $usertags->{$arg1}->{name} on " . $journal->ljuser_display;
+        return "All posts tagged $usertags->{$arg1}->{name} on " . $journal->ljuser_display;
     }
 
     return "All entries on any journals on my friends page" unless $journal;

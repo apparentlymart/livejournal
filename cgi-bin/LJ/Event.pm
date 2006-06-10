@@ -115,6 +115,13 @@ sub as_sms {
     return substr($str, 0, 157) . "...";
 }
 
+# override in subclasses
+sub subscription_applicable {
+    my ($class, $subscr) = @_;
+
+    return 1;
+}
+
 sub journal_sub_title { undef }
 sub journal_sub_type  { undef }
 sub arg1_sub_title    { undef }

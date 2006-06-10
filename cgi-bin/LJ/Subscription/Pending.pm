@@ -36,6 +36,7 @@ sub new {
     croak "No ntypeid" unless $ntypeid;
 
     my $self = {
+        userid  => $u->{userid},
         u       => $u,
         journal => $journal,
         etypeid => $etypeid,

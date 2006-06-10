@@ -2521,6 +2521,13 @@ sub subscribe_interface {
             my $title      = $pending_sub->as_html or next;
             my $subscribed = ! $pending_sub->pending;
 
+            next if $subscribed && ! $showtracking;
+
+            my $evt_class = $pending_sub->event_class or next;
+            unless ($is_tracking_category) {
+                next unless eval { $evt_class->subscription_applicable($pending_sub) };
+            }
+
             $events_table  .= "<tr><td>" .
                 LJ::html_check({
                     id       => $input_name,
