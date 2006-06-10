@@ -28,10 +28,21 @@ body<=
                     ],
     };
 
+    my $events = [
+                  LJ::Subscription::Pending->new(
+                                                 $remote,
+                                                 event   => "JournalNewEntry",
+                                                 arg1    => '?',
+                                                 journal => $journal,
+                                                 ),
+
+                  ];
+
     return LJ::subscribe_interface(
                                    $remote,
                                    categories => $categories,
                                    journal    => $journal,
+                                   pending    => $events,
                                    );
 
 }
