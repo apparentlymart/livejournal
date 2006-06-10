@@ -57,7 +57,7 @@ sub _render {
     my $target = $class->grab_promo($comm);
     return undef unless $target;
 
-    return render_promo_of_community($target);
+    return $class->render_promo_of_community($target);
 }
 
 sub render_promo_of_community {
