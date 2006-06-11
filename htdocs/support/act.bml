@@ -36,6 +36,10 @@ body<=
      LJ::Support::touch_request($spid)
        or return "<?h1 Error h1?><?p Touch failed. p?>";
 
+     return BML::redirect("$LJ::SITEROOT/support/see_request.bml?id=$spid")
+         if LJ::check_priv($remote, 'supportclose', "$sp->{_cat}->{'catkey'}")
+            || LJ::check_priv($remote, 'supportclose', '');
+
      $ret .= ("<?h1 Touched h1?><?p Your support request ".
               ($sp->{'state'} eq "open" ? "will stay open now."
                                         : "has been re-opened now.").
