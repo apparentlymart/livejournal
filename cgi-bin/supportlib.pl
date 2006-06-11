@@ -133,7 +133,7 @@ sub is_poster
     return 0 unless $remote;
 
     if ($sp->{'reqtype'} eq "email") {
-        if ($remote->{'email'} eq $sp->{'reqemail'} && $remote->{'status'} eq "A") {
+        if (lc($remote->{'email'}) eq lc($sp->{'reqemail'}) && $remote->{'status'} eq "A") {
             return 1;
         }
     } elsif ($sp->{'reqtype'} eq "user") {
