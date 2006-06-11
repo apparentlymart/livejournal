@@ -287,16 +287,16 @@ sub process {
         # advertising, and nothing else.  kill it.
         $body = "" if $tent->effective_type eq 'text/html';
 
-        # strip all images but tmobile phone dated.
+        # t-mobile has a variety of different file names, so we can't just allow "good"
+        # files through; rather, we can just strip out the bad filenames.
         my @imgs;
         foreach my $img ( get_entity($entity, 'image') ) {
             my $path = $img->bodyhandle->path;
             $path =~ s#.*/##;
-            # intentionally not being explicit with regexp, in case
-            # they go to 4 digit year or whatever.
-            #
-            # 06-03-05_12394.jpg or Image0015.jpg or 0015.jpg
-            push @imgs, $img if $path =~ /^(?:Image|\d+-\d+-\d+_)?\d+.(?:gif|jpe?g|png)$/;
+            next if $path =~ /^dottedLine_(350|600).gif$/;
+            next if $path =~ /^masthead.jpg$/;
+            next if $path =~ /^spacer.gif$/;
+            push @imgs, $img; # it's a good file if it made it this far.
         }
         $entity->parts(\@imgs);
     }
