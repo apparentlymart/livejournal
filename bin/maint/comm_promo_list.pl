@@ -44,7 +44,7 @@ $maint{comm_promo_list} = sub
 
             # we care about users who are either sponsored plus or paid and have
             # opted in
-            next unless $u->should_promote;
+            next unless $u->should_promote_comm;
 
             push @to_load, $u->{userid};
         }
