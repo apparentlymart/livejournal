@@ -21,7 +21,6 @@ sub entry {
     return LJ::Entry->new($self->u, ditemid => $self->arg1);
 }
 
-# TODO: filter by tag (sarg1)
 sub matches_filter {
     my ($self, $subscr) = @_;
 
@@ -32,6 +31,34 @@ sub matches_filter {
     my $entry = LJ::Entry->new($evtju, ditemid => $ditemid);
     return 0 unless $entry && $entry->valid; # TODO: throw error?
     return 0 unless $entry->visible_to($subscr->owner);
+
+    # filter by tag?
+    my $stagid = $subscr->arg1;
+    if ($stagid) {
+        my @tags = $entry->tags;
+
+        my $usertaginfo = LJ::Tags::get_usertags($entry->poster, {remote => $subscr->owner});
+
+        my $match = 0;
+
+        if ($usertaginfo) {
+            foreach my $tag (@tags) {
+                my $entry_tagid;
+
+                while (my ($tagid, $taginfo) = each %$usertaginfo) {
+                    next unless $taginfo->{name} eq $tag;
+                    $entry_tagid = $tagid;
+                    last;
+                }
+                next unless $entry_tagid == $stagid;
+
+                $match = 1;
+                last;
+            }
+        }
+
+        return 0 unless $match;
+    }
 
     # all posts by friends
     return 1 if ! $subscr->journalid && LJ::is_friend($subscr->owner, $self->event_journal);
@@ -44,6 +71,7 @@ sub as_string {
     my $self = shift;
     my $entry = $self->entry;
     my $about = $entry->subject_text ? " titled '" . $entry->subject_text . "'" : '';
+
     return sprintf("The journal '%s' has a new post$about at: " . $self->entry->url,
                    $self->u->{user});
 }
