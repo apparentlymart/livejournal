@@ -412,7 +412,8 @@ $maint{'genstats'} = sub
 
     {
         my $dbh = LJ::Stats::get_db("dbh");
-        my $sth = $dbh->prepare("SELECT statcat, statkey, statval FROM stats ORDER BY 1, 2");
+        my $sth = $dbh->prepare("SELECT statcat, statkey, statval FROM stats "
+                        . " WHERE statcat NOT LIKE 'usertrans%' ORDER BY 1, 2");
         $sth->execute;
         die $dbh->errstr if $dbh->err;
 
