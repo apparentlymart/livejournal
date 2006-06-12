@@ -243,7 +243,7 @@
             
             my $num_opts = 0;
             foreach my $o (0..$qrec->{'opts'}-1) {
-                next unless $POST{"pq_${q}_opt_$o"};
+                next unless defined $POST{"pq_${q}_opt_$o"};
 
                 if (length($POST{"pq_${q}_opt_$o"}) > $RULES{'items'}->{'maxlength'}) {
                     $qrec->{'opt'}->[$o] = substr($POST{"pq_${q}_opt_$o"}, 0, $RULES{'items'}->{'maxlength'});
