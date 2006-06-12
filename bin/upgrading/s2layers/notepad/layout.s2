@@ -14,6 +14,9 @@ propgroup presentation {
   property bool show_entry_userpic {
     des = "Display your userpic with your entries"; 
   }
+  property bool show_website {
+    des = "Show your defined website on your journal";
+  }
   property use page_recent_items;
   property use page_friends_items;
   property use use_shared_pic;
@@ -22,12 +25,20 @@ propgroup presentation {
     des = "Toggle to show the next, memory, edit, etc icons on the entry view page";
   }
   property use linklist_support;
+  property string counter_code {
+      des = "If you have an external web counter, you can enter the HTML for it here";
+      note = "Your counter will above the header at the top of your journal.";
+      maxlength = 2000;
+      string_mode = "html-oneline";
+  }
   property use external_stylesheet;
 }
 set content_top_margin = "0";
 set show_entry_userpic = false;
+set show_website = false;
 set view_entry_disabled = false;
 set show_entrynav_icons = true;
+set counter_code = "";
 
 propgroup colors {
   property Color body_bgcolor {
@@ -243,6 +254,12 @@ function Page::print()
         $margin = " style=\"margin-top: $*content_top_margin;\"";
     }
 
+    var string website_name = $.journal.website_name ? $.journal.website_name : $*text_website_default_name;
+    var string website = ($*show_website and $.journal.website_url != "" ?
+        """<td width="120" height="18" style="background-image: url($*imguri/tab.jpg)">&nbsp;&nbsp;
+           <a href="$.journal.website_url">$website_name</a>
+           </td>""" : "");
+
     var string title = $this->title();
     """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">\n<html>\n<head>\n""";
 
@@ -293,8 +310,9 @@ function Page::print()
          <a href="$.base_url/info">User Info</a>
        </td>
        <td width="120" height="18" style="background-image: url($*imguri/tab.jpg)">&nbsp;&nbsp;
-         <a href="$*SITEROOT/tools/memories.bml?user=$.journal.username">memories</a>
+         <a href="$*SITEROOT/tools/memories.bml?user=$.journal.username">Memories</a>
        </td>
+       $website
       </tr>
      </table>
     </td>
@@ -318,6 +336,9 @@ function Page::print()
 """;
 if (size $.linklist > 0 and $*linklist_support) {
 $this->print_linklist();
+}
+if ($*counter_code != "") {
+    """$*counter_code""";
 }
 """
      <h1>$title</h1>
