@@ -254,8 +254,14 @@ sub preload_props {
 # returns array of tags for this post
 sub tags {
     my $self = shift;
-    # FIXME: implement
-    return ();
+
+    my $taginfo = LJ::Tags::get_logtags($self->journal, $self->jitemid);
+    return () unless $taginfo;
+
+    my $entry_taginfo = $taginfo->{$self->jitemid};
+    return () unless $entry_taginfo;
+
+    return values %$entry_taginfo;
 }
 
 # returns true if loaded, zero if not.
