@@ -4500,17 +4500,18 @@ sub want_userid
 
 # <LJFUNC>
 # name: LJ::want_user
-# des: Returns user object when passed either userid or the user hash. Useful to functions that
-#      want to accept either.
+# des: Returns user object when passed either userid, username, or user object. Useful to functions that
+#      want to accept any.
 # args: user
-# des-user: Either a userid, or a user hash with the userid in its 'userid' key.
-# returns: The user hash represented by said userid.
+# des-user: Either a userid, a username, or a user hash with the userid in its 'userid' key.
+# returns: The user objcet represented by said userid or username.
 # </LJFUNC>
 sub want_user
 {
     my $uuser = shift;
     return $uuser if ref $uuser;
-    return LJ::load_userid($uuser+0);
+    return LJ::load_userid($uuser+0) if int($uuser) > 0;
+    return LJ::load_user($uuser);
 }
 
 # <LJFUNC>
