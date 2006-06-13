@@ -30,6 +30,10 @@ span.CategoryHeading {
         font-weight: bold;
 }
 
+span.CategoryHeadingNote {
+        margin-left: 2em;
+}
+
 .NotificationOptions {
     padding: .2em;
     }

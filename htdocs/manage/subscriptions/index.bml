@@ -89,13 +89,20 @@ body<=
 
     ###################### Print subscribe table
     my %categories = (
-                      "$LJ::SITENAMEABBREV and You" => [
-                                                        'Befriended',
-                                                        ],
-                      "Communities" => [
-                                        'CommunityInvite',
-                                        'CommunityJoinRequest',
-                                        ],
+                      "My Account" => [
+                                       'Befriended',
+
+                                       LJ::Subscription::Pending->new(
+                                                                      $remote,
+                                                                      event   => "JournalNewEntry",
+                                                                      journal => LJ::load_user('news'),
+                                                                      ),
+                                       ],
+
+                      "Friends and Communities" => [
+                                                    'CommunityInvite',
+                                                    'CommunityJoinRequest',
+                                                    ],
                       );
 
     my $authas_form = LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });

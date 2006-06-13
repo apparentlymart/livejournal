@@ -71,26 +71,41 @@ body<=
         } # else error?
     }
 
-    # print number of new alerts
-    my $unread_count = $inbox->unread_count;
-    my $alert_plural = $unread_count == 1 ? 'alert' : 'alerts';
+    # print sidebar
+    $body .= qq {
+        <div id="NotificationSidebar">
+            <div class="BlurbTitle">Message from $LJ::SITENAME</div>
+            <div class="Blurb">
+            <?p In the Message Center, you can find out who has friended you,
+            get updates from $LJ::SITENAME, read your notices and more. p?>
+            <?p To start getting notices, click on the "Notify Me" icon when you're
+            browsing $LJ::SITENAME. You can use notices to keep an eye on comment threads,
+            user updates and new posts. p?>
+            </div>
+        </div>
+};
 
-    # check all checkbox
-    my $checkall = LJ::html_check({
-        id      => "InboxItem_CheckAll",
-    });
 
     # print form
     $body .= qq {
         <form action="$LJ::SITEROOT/tools/notifications.bml?authas=$authas" method="POST" id="EditNotificationsForm">
         };
 
+    # print number of new alerts
+    my $unread_count = $inbox->unread_count;
+    my $alert_plural = $unread_count == 1 ? 'message' : 'messages';
+
+    # check all checkbox
+    my $checkall = LJ::html_check({
+        id      => "InboxItem_CheckAll",
+    });
+
     # create table of notifications
     my $notificationtable = qq {
      <div id="NotificationTable">
         <span class="esnlinks">Message Center | <a href="$LJ::SITEROOT/manage/subscriptions/">Manage Settings</a></span>
         <div class="inbox_newitems">You have $unread_count new $alert_plural! Holllaaaaaa</div>
-        
+
         <table id="inbox" cellspacing="0" border="0" cellpadding="0">
             <tr class="header">
                 <thead>
@@ -185,6 +200,26 @@ function submitAction(action) {
   $("EditNotificationsForm").submit();
 }
 </script>
+
+
+<style>
+#NotificationTable {
+float: right;
+width: 73%;
+margin-top: 1.5em;
+}
+
+#NotificationSidebar {
+float: left;
+width: 25%;
+margin-top: 1.5em;
+}
+
+#NotificationSidebar .BlurbTitle {
+font-weight: bold;
+font-size: 1.0em;
+}
+</style>
 
 <=head
 
