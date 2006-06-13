@@ -399,19 +399,21 @@ body<=
 
         my $sponsored_results = (scalar @sponsored_usernames);
 
-        $ret .= '<?standout' if $sponsored_results;
+        if ($sponsored_results) {
+            $ret .= '<div><div><h2>Relevant Communities</h2></div>';
+        }
 
         foreach my $sponsored_username (@sponsored_usernames) {
             next unless $sponsored_username;
 
             my $sponsored_comm = LJ::load_user($sponsored_username);
             if ($sponsored_comm) {
-                my $promo_box = LJ::CommPromo->render_promo_of_community($sponsored_comm);
-                $ret .= "<span style='display: block; float: left;'>$promo_box</span>";
+                my $promo_box = LJ::CommPromo->render_promo_of_community($sponsored_comm, "Horizontal");
+                $ret .= "<span style='display: block; float: left; margin-right: 1em;'>$promo_box</span>";
             }
         }
 
-        $ret .= 'standout?>' if $sponsored_results;
+        $ret .= '</div><div class="clear">&nbsp;</div>' if $sponsored_results;
 
         ### communities
         my $LIMIT = 500;
