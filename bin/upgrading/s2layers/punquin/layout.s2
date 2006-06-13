@@ -7,12 +7,35 @@ layerinfo previews = "punquin/punquin.jpg";
 layerinfo des = "The original sidebar layout, with a single box containing all of your recent entries.";
 
 propgroup presentation {
-  property bool show_recent_userpic {
-      des = "Show the userpic on the recent entries page?"; 
+  property string content_width {
+      des = "Content area width";
+      note = "Don't forget to include units; e.g. px, %";
+  }
+  property string content_alignment {
+      des = "Alignment of the content area";
+      values = "left|Left|center|Center|right|Right";
+  }
+  property string content_top_margin {
+      des = "Margin size on the top of the content area";
+      note = "You can use this to shift your journal contents down in order to display a background image at the top of your journal.  Don't forget to include units; e.g. px, %";
   }
   property string sidebar_position {
       des = "Position of the sidebar relative to the main content";
       values = "left|Left|right|Right";
+  }
+  property string entryborder_size {
+      des = "Size of borders around entries";
+      note = "Don't forget to include the units, e.g. px";
+  }
+  property string entryborder_style {
+      des = "Style of borders around entries";
+      values = "solid|Solid|dashed|Dashed|dotted|Dotted|double|Double|hidden|Invisible";
+  }
+  property bool transparent {
+      des = "Make journal content transparent instead of using given background colors";
+  }
+  property bool show_recent_userpic {
+      des = "Display your userpic with your entries on the recent entries page";
   }
   property use page_recent_items;
   property use page_friends_items;
@@ -24,8 +47,14 @@ propgroup presentation {
   property use linklist_support;
   property use external_stylesheet;
 }
-set show_recent_userpic = false;
+set content_width = "90%";
+set content_alignment = "center";
+set content_top_margin = "0";
 set sidebar_position = "left";
+set entryborder_size = "";
+set entryborder_style = "hidden";
+set transparent = false;
+set show_recent_userpic = false;
 set page_recent_items = 20;
 set page_friends_items = 20;
 set view_entry_disabled = false;
@@ -57,6 +86,9 @@ propgroup colors {
   property Color border_color { 
       des = "Color of borders";
       s1color = "weak_back";
+  }
+  property Color border_color_entries { 
+      des = "Color of borders around entries";
   }
   property Color link_color {
       des = "Link color";
@@ -95,6 +127,7 @@ set main_fgcolor = "#000000";
 set subject_color = "#c00000";
 set title_color = "#8b1a1a";
 set border_color = "#eeeeff";
+set border_color_entries = "#000000";
 set link_color = "#000050";
 set vlink_color = "#500050";
 set alink_color = "#ff00c0";
@@ -152,6 +185,17 @@ propgroup text {
 }
 set text_gotop = "Go to Top";
 set tags_aware = true;
+
+propgroup customcss {
+  property string custom_css {
+      des = "Custom Stylesheet";
+      note = "If you'd like to customize this style from scratch and are familiar with CSS, enter it here";
+      cols = 80;
+      rows = 20;
+      string_mode = "css";
+  }
+}
+set custom_css = "";
 
 function print_stylesheet ()
 {
@@ -233,6 +277,21 @@ table.standard>td {
 table.standard td {
     font:              normal normal 10pt $font;
 }
+.entry {
+    border: $*entryborder_size $*entryborder_style $*border_color_entries;
+}
+""";
+if ($*transparent) {
+"""
+table.standard {
+    background: transparent !important;
+    border: none;
+}
+""";
+}
+"""
+
+$*custom_css
     """;
 }
 
@@ -307,6 +366,11 @@ function Page::print ()
     var string title = $this->title();
     var string main_position = $*sidebar_position == "left" ? "right" : "left"; 
 
+    var string margin = "";
+    if ($*content_top_margin != "0") {
+        $margin = " style='margin-top: $*content_top_margin;'";
+    }
+
     # Head
     println "<html><head>";
 
@@ -331,7 +395,7 @@ function Page::print ()
     "<div align='center'>\n";
 
     # Table wrapper
-    "<table id='main' cellpadding='5' cellspacing='0' width='90%'>\n<tr>";
+    "<table id='main' cellpadding='5' cellspacing='0' width='$*content_width' align='$*content_alignment'$margin>\n<tr>";
 
     if (viewer_sees_hbox_top()) {
         """<td>&nbsp;</td><td><div style="text-align: center;">""";
@@ -382,7 +446,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         print "</div>";
     }
 
-    "<table border='0' cellpadding='2' cellspacing='0'><tr>";
+    "<table border='0' cellpadding='2' cellspacing='0' class='entry'><tr>";
 
     if ($p.view == "friends" or
         $e.poster.username != $e.journal.username or
