@@ -7,9 +7,28 @@ layerinfo previews = "notepad/notepad.jpg";
 layerinfo des = "A layout resembling a tabbed notebook.";
 
 propgroup presentation {
+  property string content_width {
+    des = "Content area width";
+    note = "Don't forget to include units; e.g. px, %";
+  }
+  property string content_alignment {
+    des = "Alignment of the content area";
+    values = "left|Left|center|Center|right|Right";
+  }
   property string content_top_margin {
-      des = "Margin size on the top of the content area";
-      note = "You can use this to shift your journal contents down in order to display a background image at the top of your journal.  Don't forget to include units; e.g. px, %";
+    des = "Margin size on the top of the content area";
+    note = "You can use this to shift your journal contents down in order to display a background image at the top of your journal.  Don't forget to include units; e.g. px, %";
+  }
+  property string entryborder_size {
+    des = "Size of borders around entries";
+    note = "Don't forget to include the units, e.g. px";
+  }
+  property string entryborder_style {
+    des = "Style of borders around entries";
+    values = "solid|Solid|dashed|Dashed|dotted|Dotted|double|Double|hidden|Invisible";
+  }
+  property bool transparent {
+    des = "Make journal content transparent instead of using given background colors";
   }
   property bool show_entry_userpic {
     des = "Display your userpic with your entries"; 
@@ -26,14 +45,19 @@ propgroup presentation {
   }
   property use linklist_support;
   property string counter_code {
-      des = "If you have an external web counter, you can enter the HTML for it here";
-      note = "Your counter will above the header at the top of your journal.";
-      maxlength = 2000;
-      string_mode = "html-oneline";
+    des = "If you have an external web counter, you can enter the HTML for it here";
+    note = "Your counter will above the header at the top of your journal.";
+    maxlength = 2000;
+    string_mode = "html-oneline";
   }
   property use external_stylesheet;
 }
+set content_width = "70%";
+set content_alignment = "left";
 set content_top_margin = "0";
+set entryborder_size = "";
+set entryborder_style = "hidden";
+set transparent = false;
 set show_entry_userpic = false;
 set show_website = false;
 set view_entry_disabled = false;
@@ -58,6 +82,10 @@ propgroup colors {
   }
   property Color alink_color {
     des = "Active link color"; 
+  }
+  property Color border_color {
+    des = "Color of borders around entries";
+    note = "If you don't set a border size and style in the \"Presentation\" section, this won't have any effect.";
   }
   property Color comment_bar_one_bgcolor {
       des = "Alternating background color for comment bars (one)";
@@ -84,6 +112,7 @@ set subject_color = "#ff0000";
 set link_color = "#000050";
 set vlink_color = "#500050";
 set alink_color = "#ff00c0";
+set border_color = "#000000";
 set comment_bar_one_bgcolor = "#c0c0ff";
 set comment_bar_one_fgcolor = "#000000";
 set comment_bar_two_bgcolor = "#eeeeff";
@@ -215,6 +244,18 @@ a:hover {
     font-family: verdana,arial,helvetica;
     font-size:12px;
 }
+.entry {
+    border: $*entryborder_size $*entryborder_style $*border_color;
+}
+""";
+if ($*transparent) {
+"""
+td {
+    background: transparent !important;
+}
+""";
+}
+"""
 
 $*custom_css
 """;
@@ -254,6 +295,15 @@ function Page::print()
         $margin = " style=\"margin-top: $*content_top_margin;\"";
     }
 
+    var string align = "";
+    if ($*content_alignment == "center") {
+        $align = " margin-left: auto; margin-right: auto;";
+    } elseif ($*content_alignment == "right") {
+        $align = " float: right;";
+    } else {
+        $align = " float: left;";
+    }
+
     var string website_name = $.journal.website_name ? $.journal.website_name : $*text_website_default_name;
     var string website = ($*show_website and $.journal.website_url != "" ?
         """<td width="120" height="18" style="background-image: url($*imguri/tab.jpg)">&nbsp;&nbsp;
@@ -289,7 +339,7 @@ function Page::print()
     """<tr><td valign="top">""";
  }
  """
-  <table width=\"70%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\"""";
+  <table width=\"$*content_width\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" align=\"$*content_alignment\"""";
   if (not viewer_sees_vbox()) { "$margin"; }
 """>
    <tr>
@@ -367,17 +417,17 @@ if ($*counter_code != "") {
    </tr>
   </table>
   """;
+  if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
+    """<div style="width: 738px;$align">""";
+    $this->print_hbox_bottom();
+    "</div>";
+  }
   if (viewer_sees_vbox()) {
     "</td>";
     """<td valign="top" align="right" width="20%">""";
     """<div style="margin-right: 10px;">""";
     $this->print_vbox();
     "</div></td></tr></table>";
-  }
-  if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
-    """<div style="width: 738px;">""";
-    $this->print_hbox_bottom();
-    "</div>";
   }
   """
  </body>
@@ -387,7 +437,7 @@ if ($*counter_code != "") {
 
 function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_text)
 {
-    "<table border='0'><tr>";
+    "<table border='0' class='entry'><tr>";
 
     if ($p.view == "friends" or
         $*show_entry_userpic == true or
