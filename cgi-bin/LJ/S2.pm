@@ -1787,6 +1787,9 @@ sub Page
     $p->{'head_content'} .= qq{<link rel="service.feed" type="application/atom+xml" title="AtomAPI-enabled feed" href="$LJ::SITEROOT/interface/atomapi/$u->{'user'}/feed" />\n};
     $p->{'head_content'} .= qq{<link rel="service.post" type="application/atom+xml" title="Create a new post" href="$LJ::SITEROOT/interface/atomapi/$u->{'user'}/post" />\n};
 
+    # LJ CSS
+    $p->{'head_content'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/lj_base.css' type='text/css' />\n};
+
     # Ads and control strip
     my $show_ad = LJ::run_hook('should_show_ad', {
         ctx  => "journal",
