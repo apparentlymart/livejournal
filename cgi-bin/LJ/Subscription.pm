@@ -1,6 +1,5 @@
 package LJ::Subscription;
 use strict;
-use warnings;
 use Carp qw(croak);
 use Class::Autouse qw(
                       LJ::NotificationMethod
@@ -328,6 +327,19 @@ sub unique {
 
     my $note = $self->notification or return undef;
     return $note->unique . ':' . $self->owner->{user};
+}
+
+# returns true if two subscriptions are equivilant
+sub equals {
+    my ($self, $other) = @_;
+
+    my $match = $self->ntypeid == $other->ntypeid &&
+        $self->etypeid == $other->etypeid;
+
+    $match &&= $other->arg1 && ($self->arg1 == $other->arg1) if $self->arg1;
+    $match &&= $other->arg2 && ($self->arg2 == $other->arg2) if $self->arg2;
+
+    return $match;
 }
 
 1;

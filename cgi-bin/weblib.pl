@@ -2385,7 +2385,7 @@ sub subscribe_interface {
     @notify_classes = grep { $_ ne 'LJ::NotificationMethod::Inbox' } @notify_classes;
 
     # title of the tracking category
-    my $tracking_cat = "Things You're Tracking";
+    my $tracking_cat = "Notices";
 
     # if showtracking, add things the user is tracking to the categories
     if ($showtracking) {
@@ -2411,36 +2411,40 @@ sub subscribe_interface {
     my @catids;
     my $catid = 0;
 
-    while (my ($category, $cat_event_classes) = each %categories) {
-        next unless $cat_event_classes && scalar @$cat_event_classes;
+    while (my ($category, $cat_events) = each %categories) {
+        next unless $cat_events && scalar @$cat_events;
         push @catids, $catid;
-
-        # if the category holds Subscription::Pending objects, then use those
-        if ((ref $cat_event_classes->[0]) =~ /Subscription::Pending/) {
-            $pending = $cat_event_classes;
-        }
 
         # is this category the tracking category?
         my $is_tracking_category = $category eq $tracking_cat && $showtracking;
 
         # build table of subscribeble events
-        my @event_classes = map { "LJ::Event::$_" } grep { ! ref $_  } @$cat_event_classes unless $is_tracking_category;
+        my @event_classes;
+        foreach my $cat_event (@$cat_events) {
+            if ((ref $cat_event) =~ /Subscription::Pending/) {
+                push @$pending, $cat_event;
+            } else {
+                push @event_classes, "LJ::Event::$cat_event";
+            }
+        }
 
         if ($is_tracking_category) {
-            foreach my $event_subclass (@$cat_event_classes) {
+            foreach my $event_subclass (@$cat_events) {
                 foreach my $subscr ($u->has_subscription(event => "LJ::Event::$event_subclass", method => "Inbox")) {
+                    next if grep { $_ eq $subscr->event_class } @event_classes;
                     push @event_classes, $subscr->event_class unless grep { $_ eq $subscr->event_class } @event_classes;
                 }
             }
         }
 
-        next unless @event_classes || $pending;
+        next unless (scalar @event_classes) || (scalar @$pending);
 
         $events_table .= qq {
           <div class="CategoryRow-$catid">
             <tr class="CategoryRow">
                 <td>
                     <span class="CategoryHeading">$category</span>
+                    <span class="CategoryHeadingNote">Notify me when...</span>
                 </td>
                 <td>
                     By
@@ -2526,6 +2530,19 @@ sub subscribe_interface {
             my $evt_class = $pending_sub->event_class or next;
             unless ($is_tracking_category) {
                 next unless eval { $evt_class->subscription_applicable($pending_sub) };
+            } else {
+                my $no_show = 0;
+                while (my ($_cat_name, $_cat_events) = each %$catref) {
+                    foreach my $_cat_event (@$_cat_events) {
+                        next unless ref $_cat_event;
+
+                        if ($pending_sub->equals($_cat_event)) {
+                            $no_show = 1;
+                            last;
+                        }
+                    }
+                }
+                next if $no_show;
             }
 
             $events_table  .= "<tr><td>" .
