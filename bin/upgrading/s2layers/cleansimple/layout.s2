@@ -220,9 +220,15 @@ propgroup text {
   property use text_post_comment_friends;
   property use text_read_comments_friends;
 
+  property string opt_text_left_comments {
+    des = "Text to be used in front of your comment links";
+  }
   property string opt_text_btwn_comments {
     des = "Text to be used between your comment links";
     note = "If you specified an image to be used between your comments links in the \"Images\" section, then this option will not have any effect.";
+  }
+  property string opt_text_right_comments {
+    des = "Text to be used at the end of your comment links";
   }
   property string date_format {
     des = "Date format for entries";
@@ -234,7 +240,9 @@ propgroup text {
     des = "Date and time format for comments";
   }
 }
+set opt_text_left_comments = "";
 set opt_text_btwn_comments = " | ";
+set opt_text_right_comments = "";
 set date_format = "%%month%% %%dayord%%, %%yyyy%%";
 set time_format = "%%hh%%:%%min%% %%a%%m";
 set datetime_format = "%%month%% %%dayord%%, %%yyyy%% %%hh%%:%%min%% %%a%%m";
@@ -823,7 +831,7 @@ function FriendsPage::print_entry (Entry e) {
 
 function CommentInfo::print() {
     if ($.show_readlink or $.show_postlink) {
-        """<div class="talklinks" clear="all">""";
+        """<div class="talklinks" clear="all">$*opt_text_left_comments""";
         if ($.show_readlink) {
             $this->print_readlink();
         }
@@ -837,7 +845,7 @@ function CommentInfo::print() {
         if ($.show_postlink) {
             $this->print_postlink();
         }
-        "</div>";
+        "$*opt_text_right_comments</div>";
     }
 }
 

@@ -228,9 +228,15 @@ propgroup text {
     property use text_comment_reply;
     property use text_comment_parent;
     property use text_comment_thread;
+    property string text_left_comments {
+        des = "Text to be used in front of your entry and comment links";
+    }
     property string text_comment_divider {
-        des = "Text for dividing entry and comment links";
+        des = "Text to be used between your entry and comment links";
         note = "If you specified an image to be used between your comments links in the \"Images\" section, then this option will not have any effect.";
+    }
+    property string text_right_comments {
+        des = "Text to be used at the end of your entry and comment links";
     }
     property use text_meta_location;
     property use text_meta_music;
@@ -278,7 +284,9 @@ propgroup text {
     set text_read_comments         = "Read #";
     set text_post_comment_friends  = "Post";
     set text_read_comments_friends = "Read #";
+    set text_left_comments         = "";
     set text_comment_divider       = " - ";
+    set text_right_comments        = "";
     set text_entry_prev            = "Previous Entry";
     set text_entry_next            = "Next Entry";
     set text_meta_location         = "location:";
@@ -1004,7 +1012,7 @@ function EntryLite::lay_print_metadata() {
 
 function EntryLite::print_linkbar() {
   var Page   p       = get_page();
-  var string linkbar = "";
+  var string linkbar = "$*text_left_comments";
 
   var string url  = "";
   var string text = "";
@@ -1073,7 +1081,7 @@ function EntryLite::print_linkbar() {
   }
   $url     = $.permalink_url;
   $text    = $*text_permalink;
-  $linkbar = $linkbar + """<a href="$url">$text</a>""";
+  $linkbar = $linkbar + """<a href="$url">$text</a>""" + $*text_right_comments;
   print $linkbar;
 }
 

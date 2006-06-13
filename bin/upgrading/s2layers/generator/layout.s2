@@ -217,11 +217,11 @@ propgroup text {
     property string text_navlinks_left {
         des = "Text to go in front of each navigation link in the box at the top of your journal";
     }
-    property string text_navlinks_right {
-        des = "Text to go at the end of each navigation link in the box at the top of your journal";
-    }
     property string text_navlinks_btwn {
         des = "Text to go in between the label and value of each navigation link in the box at the top of your journal";
+    }
+    property string text_navlinks_right {
+        des = "Text to go at the end of each navigation link in the box at the top of your journal";
     }
     property use text_post_comment;
     property use text_read_comments;
@@ -231,9 +231,15 @@ propgroup text {
     property use text_meta_mood;
     property use text_meta_location;
 
+    property string text_left_comments {
+        des = "Text to be used in front of your comment links";
+    }
     property string text_btwn_comments {
         des = "Text to be used between your comment links";
         note = "If you specified an image to be used between your comments links in the \"Images\" section, then this option will not have any effect.";
+    }
+    property string text_right_comments {
+        des = "Text to be used at the end of your comment links";
     }
     property string date_format {
         des = "Date format for entries";
@@ -315,8 +321,8 @@ set text_other3_label = "";
 set text_other3_value = "";
 set text_other3_url = "";
 set text_navlinks_left = "[";
-set text_navlinks_right = "]";
 set text_navlinks_btwn = "|";
+set text_navlinks_right = "]";
 
 # Customize the view names to be short and lowercase
 # (Sorry translators, you will have to do these again - keep them short!)
@@ -325,7 +331,9 @@ set text_view_friends = "friends";
 set text_view_archive = "archive";
 set text_view_userinfo = "userinfo";
 
+set text_left_comments = "";
 set text_btwn_comments = "|";
+set text_right_comments = "";
 set date_format = "%%mon%%. %%dayord%%, %%yyyy%%";
 set time_format = "%%hh%%:%%min%% %%a%%m";
 set btwn_datetime = "|";
@@ -918,6 +926,7 @@ summary="">
 
 function CommentInfo::print() {
     if ($.show_readlink or $.show_postlink) {
+        "$*text_left_comments";
         if ($.show_readlink) {
             "<b>"; $this->print_readlink(); "</b>";
         }
@@ -931,6 +940,7 @@ function CommentInfo::print() {
         if ($.show_postlink) {
             $this->print_postlink();
         }
+        "$*text_right_comments";
     }
 }
 
