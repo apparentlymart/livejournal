@@ -1442,6 +1442,10 @@ sub create_view_lastn
     if ($LJ::USE_ADS && $show_ad) {
         $lastn_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'LASTN_SKYSCRAPER_AD',
                                                           { "ad" => LJ::ads( type => "journal",
+                                                                             orient => 'Journal-Badge',
+                                                                             pubtext => $LJ::REQ_GLOBAL{'first_public_text'},
+                                                                             user => $u->{user}) .
+                                                                    LJ::ads( type => "journal",
                                                                              orient => 'Journal-Skyscraper',
                                                                              pubtext => $LJ::REQ_GLOBAL{'first_public_text'},
                                                                              user => $u->{user}), });
@@ -1942,6 +1946,10 @@ sub create_view_friends
     if ($LJ::USE_ADS && $show_ad) {
         $friends_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'FRIENDS_SKYSCRAPER_AD',
                                                             { "ad" => LJ::ads( type => "journal",
+                                                                               orient => 'Journal-Badge',
+                                                                               pubtext => $LJ::REQ_GLOBAL{'first_public_text'},
+                                                                               user => $u->{user}) .
+                                                                      LJ::ads( type => "journal",
                                                                                orient => 'Journal-Skyscraper',
                                                                                pubtext => $LJ::REQ_GLOBAL{'first_public_text'},
                                                                                user => $u->{user}), });
@@ -2031,6 +2039,9 @@ sub create_view_calendar
     if ($LJ::USE_ADS && $show_ad) {
         $calendar_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'CALENDAR_SKYSCRAPER_AD',
                                                              { "ad" => LJ::ads( type => "journal",
+                                                                                orient => 'Journal-Badge',
+                                                                                user => $u->{user}) .
+                                                                       LJ::ads( type => "journal",
                                                                                 orient => 'Journal-Skyscraper',
                                                                                 user => $u->{user} ) });
         $calendar_page{'5linkunit_ad'} = LJ::fill_var_props($vars, 'CALENDAR_5LINKUNIT_AD',
@@ -2291,6 +2302,9 @@ sub create_view_day
     if ($LJ::USE_ADS && $show_ad) {
         $day_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'DAY_SKYSCRAPER_AD',
                                                         { "ad" => LJ::ads( type => "journal",
+                                                                           orient => 'Journal-Badge',
+                                                                           user => $u->{user}) .
+                                                                  LJ::ads( type => "journal",
                                                                            orient => 'Journal-Skyscraper',
                                                                            user => $u->{user}), });
         $day_page{'5linkunit_ad'} = LJ::fill_var_props($vars, 'DAY_5LINKUNIT_AD',
