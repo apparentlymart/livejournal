@@ -91,11 +91,9 @@ body<=
     my %categories = (
                       "My Account" => [
                                        'Befriended',
-
-                                       LJ::Subscription::Pending->new(
-                                                                      $remote,
-                                                                      event   => "JournalNewEntry",
-                                                                      journal => LJ::load_user('news'),
+                                       LJ::Subscription::Pending->new($u,
+                                                                      event     => 'OfficialPost',
+                                                                      journal   => 0,
                                                                       ),
                                        ],
 
