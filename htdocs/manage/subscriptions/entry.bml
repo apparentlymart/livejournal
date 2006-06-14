@@ -27,27 +27,31 @@ body<=
 
     return LJ::error_list("No entry specified") unless $ditemid;
 
-    my %categories = (
-                      );
-
-    my $events = [
-                LJ::Subscription::Pending->new(
-                                               $remote,
-                                               event   => "JournalNewComment",
-                                               arg1    => $ditemid,
-                                               journal => $journal,
-                                               ),
-                LJ::Subscription::Pending->new(
-                                               $remote,
-                                               event   => "JournalNewEntry",
-                                               arg1    => '?',
-                                               journal => $journal,
-                                               ),
-                  ];
+    my $categories = {
+        'Track' => [
+                    LJ::Subscription::Pending->new(
+                                                   $remote,
+                                                   event   => "JournalNewComment",
+                                                   arg1    => $ditemid,
+                                                   journal => $journal,
+                                                   ),
+                    LJ::Subscription::Pending->new(
+                                                   $remote,
+                                                   event   => "JournalNewEntry",
+                                                   arg1    => '?',
+                                                   journal => $journal,
+                                                   ),
+                    LJ::Subscription::Pending->new(
+                                                   $remote,
+                                                   event   => "JournalNewEntry",
+                                                   journal => $journal,
+                                                   ),
+                    ],
+                };
 
     $body .= LJ::subscribe_interface($remote,
                                      journal      => $journal,
-                                     pending      => $events,
+                                     categories   => $categories,
                                      );
 
 

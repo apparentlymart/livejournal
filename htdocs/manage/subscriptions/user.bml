@@ -24,25 +24,25 @@ body<=
     # what classes to display on this page
     my $categories = {
         "Track" => [
-                    'JournalNewEntry',
+                    LJ::Subscription::Pending->new(
+                                                   $remote,
+                                                   event   => "JournalNewEntry",
+                                                   arg1    => '?',
+                                                   journal => $journal,
+                                                   ),
+                    LJ::Subscription::Pending->new(
+                                                   $remote,
+                                                   event   => "JournalNewEntry",
+                                                   journal => $journal,
+                                                   ),
+
                     ],
     };
-
-    my $events = [
-                  LJ::Subscription::Pending->new(
-                                                 $remote,
-                                                 event   => "JournalNewEntry",
-                                                 arg1    => '?',
-                                                 journal => $journal,
-                                                 ),
-
-                  ];
 
     return LJ::subscribe_interface(
                                    $remote,
                                    categories => $categories,
                                    journal    => $journal,
-                                   pending    => $events,
                                    );
 
 }
@@ -50,8 +50,6 @@ _code?>
 <=body
 title=><?_code return $title; _code?>
 head<=
-<style type='text/css'>
-</style>
 <?_code return $headextra; _code?>
 <=head
 <=body

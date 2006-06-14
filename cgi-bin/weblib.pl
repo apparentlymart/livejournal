@@ -2357,7 +2357,6 @@ sub subscribe_interface {
     my $journal      = LJ::want_user(delete $opts{'journal'}) || LJ::get_remote();
     my $formauth     = delete $opts{'formauth'} || LJ::form_auth();
     my $showtracking = delete $opts{'showtracking'} || 0;
-    my $pending      = delete $opts{'pending'} || [];
     my $getextra     = delete $opts{'getextra'} || '';
 
     croak "Invalid options passed to subscribe_interface" if (scalar keys %opts);
@@ -2368,7 +2367,7 @@ sub subscribe_interface {
     LJ::need_res('js/checkallbutton.js');
     LJ::need_res('js/esn.js');
 
-    my %categories = $catref ? %$catref : ("Track" => $pending);
+    my %categories = $catref ? %$catref : ();
 
     my $ret = qq {
             <div id="manageSettings">
@@ -2386,6 +2385,9 @@ sub subscribe_interface {
 
     # title of the tracking category
     my $tracking_cat = "Notices";
+
+    # pending subscription objects
+    my $pending = [];
 
     # if showtracking, add things the user is tracking to the categories
     if ($showtracking) {
@@ -2524,8 +2526,6 @@ sub subscribe_interface {
             my $input_name = $pending_sub->freeze or next;
             my $title      = $pending_sub->as_html or next;
             my $subscribed = ! $pending_sub->pending;
-
-            next if $subscribed && ! $showtracking;
 
             my $evt_class = $pending_sub->event_class or next;
             unless ($is_tracking_category) {
