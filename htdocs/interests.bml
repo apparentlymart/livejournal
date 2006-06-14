@@ -380,13 +380,6 @@ body<=
 
         my $ret = "";
 
-        ### hook
-        LJ::run_hooks("interests_bml", {
-            'intid' => $intid,
-            'int' => $interest,
-            'ret' => \$ret,
-        });
-
         # any sponsored search results?
         my @sponsored_usernames;
         foreach my $username (keys %LJ::SPONSORED_SEARCH) {
@@ -398,6 +391,20 @@ body<=
         }
 
         my $sponsored_results = (scalar @sponsored_usernames);
+
+        unless ($sponsored_results) {
+            my $ad = LJ::ads( type => 'app', orient => 'App-Full-Width', force => '1' );
+            if ($ad) {
+                $ret .= "<div style='margin-bottom: 1em; text-align: center; width: 100%;'>$ad</div>";
+            }
+        }
+
+        ### hook
+        LJ::run_hooks("interests_bml", {
+            'intid' => $intid,
+            'int' => $interest,
+            'ret' => \$ret,
+        });
 
         if ($sponsored_results) {
             $ret .= '<div><div><h2>Sponsored communities</h2></div>';
