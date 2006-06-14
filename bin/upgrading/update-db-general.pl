@@ -3025,22 +3025,10 @@ register_alter(sub {
     }
 
     # add index on journalid, etypeid to subs
-    {
-        my $sth = $dbh->prepare("SHOW INDEX FROM subs");
-        $sth->execute;
-        my $alter = 1;
-
-        while (my $i = $sth->fetchrow_hashref) {
-            if ($i->{'Key_name'} eq "journalid") {
-                $alter = 0;
-                last;
-            }
-        }
-
+    if (index_name("subs", "INDEX:etypeid-journalid")) {
         do_alter("subs", "ALTER IGNORE TABLE subs ".
-                 "ADD INDEX (etypeid), ADD INDEX (journalid)") if $alter;
+                 "ADD INDEX (etypeid, journalid)");
     }
-
 
 });
 
