@@ -7060,6 +7060,33 @@ protocol.readonly=Your account is temporarily in read-only mode.  Some operation
 Sorry|notes=typically used to announce that the requested action can't be done.
 Sorry=Sorry
 
+settings.country.choose=Pick a country
+
+settings.error.locale.country_ne_state=You specified United States as your country, but you typed in a non-US state in the "other state" field.
+
+settings.error.locale.invalid_country=Somehow you selected an invalid country.
+
+settings.error.locale.state_ne_country=You specified a non-US country but selected a US state.
+
+settings.error.locale.zip_ne_state<<
+Your zip code does not match the state you specified.__
+Either correct the information, or erase one or both of the state and zip code fields.
+.
+
+settings.error.locale.zip_requires_us<<
+You entered a zip code but you did not select United States as your country.
+We only collect zip code information about people in the US.
+Please go back and remove the zip code or select United States as your country.
+.
+
+settings.error.year.notenoughdigits=Invalid birthday year. Enter a 4-digit year.
+
+settings.error.year.outofrange=Invalid birthday year.
+
+settings.province=or non-US State/province/territory
+
+settings.state.us=US States
+
 talk.anonwrote=Someone wrote,
 
 talk.anonwrote_comm=Someone wrote in [[commlink]],
