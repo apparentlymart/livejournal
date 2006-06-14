@@ -3024,6 +3024,23 @@ register_alter(sub {
                  "ALTER TABLE eventtypelist CHANGE eventtypeid etypeid SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT");
     }
 
+    # add index on journalid, etypeid to subs
+    {
+        my $sth = $dbh->prepare("SHOW INDEX FROM subs");
+        $sth->execute;
+        my $alter = 1;
+
+        while (my $i = $sth->fetchrow_hashref) {
+            if ($i->{'Key_name'} eq "journalid") {
+                $alter = 0;
+                last;
+            }
+        }
+
+        do_alter("subs", "ALTER IGNORE TABLE subs ".
+                 "ADD INDEX (etypeid), ADD INDEX (journalid)") if $alter;
+    }
+
 
 });
 
