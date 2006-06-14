@@ -22,7 +22,9 @@ sub new {
     my $arg1    = delete $opts{arg1};
     my $arg2    = delete $opts{arg2};
 
+    # force autoload of LJ::Event and it's subclasses
     LJ::Event->can('');
+
     croak "etypeid or event required" unless ($etypeid xor $event);
     if ($event) {
         $etypeid = LJ::Event::etypeid("LJ::Event::$event") or croak "Invalid event: $event";
