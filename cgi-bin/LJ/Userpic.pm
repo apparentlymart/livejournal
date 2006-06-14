@@ -64,6 +64,11 @@ sub new_from_md5 {
     return LJ::Userpic->new_from_row($row);
 }
 
+sub valid {
+    my $self = shift;
+    return defined $self->state;
+}
+
 sub new_from_row {
     my ($class, $row) = @_;
     die unless $row && $row->{userid} && $row->{picid};
@@ -331,6 +336,7 @@ sub create {
     local $LJ::THROW_ERRORS = 1;
 
     my $dataref = delete $opts{'data'};
+    my $maxbytesize = delete $opts{'maxbytesize'};
     croak("dataref not a scalarref") unless ref $dataref eq 'SCALAR';
 
     croak("Unknown options: " . join(", ", scalar keys %opts)) if %opts;
@@ -341,7 +347,7 @@ sub create {
 
     eval "use Image::Size;";
     my ($w, $h, $filetype) = Image::Size::imgsize($dataref);
-    my $MAX_UPLOAD = LJ::Userpic->max_allowed_bytes($u);
+    my $MAX_UPLOAD = $maxbytesize || LJ::Userpic->max_allowed_bytes($u);
 
     my $size = length $$dataref;
 

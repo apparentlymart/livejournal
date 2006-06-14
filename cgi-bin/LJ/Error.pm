@@ -52,7 +52,10 @@ sub errobj {
     }
 
     # if no parameters, act like errobj($@)
-    $_[0] = $@ unless @_;
+    unless (@_) {
+        $_[0] = $@
+            or return undef;
+    }
 
     my $ref = ref $_[0];
 
@@ -269,6 +272,11 @@ package LJ::Error::DieString;
 sub fields { qw(message) }
 sub die_string { return $_[0]->field('message'); }
 sub as_string { return $_[0]->field('message'); }
+
+sub as_html {
+    my $self = shift;
+    return LJ::ehtml($self->die_string);
+}
 
 # automatic type returned when something dies with a reference, but not
 # an LJ::Error
