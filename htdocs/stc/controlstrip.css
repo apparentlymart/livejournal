@@ -2,7 +2,7 @@
 
 html body
 {
-    padding: 55px 0 0 0;
+    padding: 45px 0 0 0;
     margin-right: 0;
     margin-left: 0;
 }
@@ -87,9 +87,10 @@ html body
 /* Second cell */
 #lj_controlstrip_user
 {
-    text-align: center;
+    text-align: left;
     vertical-align: middle;
-    width: 10em;
+    width: 1%;
+    padding: 0 1em 0 1em;
 }
 
 /* Third cell */
@@ -97,7 +98,7 @@ html body
 {
     text-align: center;
     vertical-align: middle;
-    width: 15em;
+    width: 12em;
 }
 
 /* Fourth cell */
@@ -105,7 +106,7 @@ html body
 {
     text-align: justify;
     vertical-align: middle;
-    padding: 0 20px;
+    padding: 0 0 0 1em;
 }
 
 /* Fourth cell first line */
@@ -119,6 +120,6 @@ html body
 #lj_controlstrip_login
 {
     vertical-align: middle;
-    padding-left: 10px;
-    width: 28.5em; 
+    padding-left: 1em;
+    width: 25em; 
 }
