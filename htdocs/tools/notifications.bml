@@ -114,8 +114,8 @@ body<=
                     <td>$checkall</td>
                     <td>
                         <input type="button" value="Read" $disabled onclick="submitAction('markRead');" />
-                        <input type="button" value="Unread" $disabled onclick="submitAction('markUnread');" />
-                        <input type="button" value="Delete" $disabled onclick="submitAction('delete');" />
+                        <input type="button" value="Unread" onclick="submitAction('markUnread');" />
+                        <input type="button" value="Delete" onclick="submitAction('delete');" />
                         <input type="button" value="Mark All Read" $disabled onclick="submitAction('markAllRead');" />
                     </td>
                 </thead>
