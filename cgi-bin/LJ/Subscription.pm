@@ -165,7 +165,7 @@ sub create {
 
     # easier way to specify journal
     if (my $ju = delete $args{'journal'}) {
-        $args{journalid} = $ju->{userid};
+        $args{journalid} = $ju->{userid} if $ju;
     }
 
     $args{arg1} ||= 0;

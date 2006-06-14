@@ -14,7 +14,7 @@ sub new {
 
     die "No user" unless LJ::isu($u);
 
-    my $journal = LJ::want_user(delete $opts{journal}) or croak "No journal";
+    my $journal = LJ::want_user(delete $opts{journal}) || 0;
     my $etypeid = delete $opts{etypeid};
     my $ntypeid = delete $opts{ntypeid};
     my $event   = delete $opts{event};
@@ -54,7 +54,7 @@ sub delete {}
 sub pending { 1 }
 
 sub journal   { $_[0]->{journal}}
-sub journalid { $_[0]->{journal}->{userid} }
+sub journalid { $_[0]->{journal} ? $_[0]->{journal}->{userid} : 0 }
 
 # overload create because you should never be calling it on this object
 # (if you want to turn a pending subscription into a real subscription call "commit")
@@ -105,7 +105,7 @@ sub thaw {
         $arg2 = int($arg2value);
     }
 
-    return undef unless $journalid && $etypeid;
+    return undef unless $etypeid;
     return $class->new(
                        $u,
                        journal => $journalid,
@@ -121,7 +121,7 @@ sub freeze {
     my $self = shift;
 
     my $user = $self->{u}->{userid};
-    my $journalid = $self->{journal}->{userid};
+    my $journalid = $self->journalid;
     my $etypeid = $self->{etypeid};
     my $ntypeid = $self->{ntypeid};
 

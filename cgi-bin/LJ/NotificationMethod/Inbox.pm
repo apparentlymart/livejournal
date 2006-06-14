@@ -19,8 +19,6 @@ sub new {
         unless LJ::isu($u);
 
     my $journalid = shift;
-    croak "no journalid"
-        unless int($journalid);
 
     my $self = {
         u => $u,
