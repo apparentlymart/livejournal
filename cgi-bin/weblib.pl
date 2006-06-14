@@ -2535,11 +2535,9 @@ sub subscribe_interface {
                 while (my ($_cat_name, $_cat_events) = each %$catref) {
                     foreach my $_cat_event (@$_cat_events) {
                         next unless ref $_cat_event;
-
-                        if ($pending_sub->equals($_cat_event)) {
-                            $no_show = 1;
-                            last;
-                        }
+                        next unless $pending_sub->equals($_cat_event);
+                        $no_show = 1;
+                        last;
                     }
                 }
                 next if $no_show;

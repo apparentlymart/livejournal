@@ -28,22 +28,24 @@ body<=
 
     return LJ::error_list("No entry specified") unless $dtalkid || $ditemid;
 
-    my $comment = LJ::Comment->new($journal, dtalkid => $dtalkid)
-        or return LJ::error_list("Nonexistant comment");
+    my $comment;
+    $comment = LJ::Comment->new($journal, dtalkid => $dtalkid) if $dtalkid;
 
-    my $pending = [
-                   LJ::Subscription::Pending->new(
-                                                  $remote,
-                                                  journal => $journal,
-                                                  event   => 'JournalNewComment',
-                                                  arg1    => $ditemid,
-                                                  arg2    => $comment->jtalkid,
-                                                  )
-                   ];
+    my $categories = {
+                      'Comments' => [
+                                     LJ::Subscription::Pending->new(
+                                                                    $remote,
+                                                                    journal => $journal,
+                                                                    event   => 'JournalNewComment',
+                                                                    arg1    => $ditemid,
+                                                                    arg2    => $comment && $comment->jtalkid,
+                                                                    )
+                                     ],
+                      };
 
     return LJ::subscribe_interface(
                                    $remote,
-                                   pending => $pending,
+                                   categories => $categories,
                                    journal => $journal,
                                    );
 
