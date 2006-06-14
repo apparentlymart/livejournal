@@ -7060,6 +7060,10 @@ protocol.readonly=Your account is temporarily in read-only mode.  Some operation
 Sorry|notes=typically used to announce that the requested action can't be done.
 Sorry=Sorry
 
+settings.city=City
+
+settings.country=Country
+
 settings.country.choose=Pick a country
 
 settings.error.locale.country_ne_state=You specified United States as your country, but you typed in a non-US state in the "other state" field.
@@ -7083,9 +7087,23 @@ settings.error.year.notenoughdigits=Invalid birthday year. Enter a 4-digit year.
 
 settings.error.year.outofrange=Invalid birthday year.
 
+settings.gender=Gender
+
+settings.gender.female=Female
+
+settings.gender.male=Male
+
+settings.gender.uns=(Unspecified)
+
 settings.province=or non-US State/province/territory
 
+settings.state=State
+
 settings.state.us=US States
+
+settings.yearofbirth=Year of Birth
+
+settings.zipcode=ZIP Code
 
 talk.anonwrote=Someone wrote,
 
