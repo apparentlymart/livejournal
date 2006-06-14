@@ -1099,17 +1099,20 @@ sub postevent
         });
       }
 
+    my $entry = LJ::Entry->new($uowner, jitemid => $jitemid, anum => $anum);
+
     # run local site-specific actions
     LJ::run_hooks("postpost", {
-        'itemid' => $jitemid,
-        'anum' => $anum,
-        'journal' => $uowner,
-        'poster' => $u,
-        'event' => $event,
-        'subject' => $req->{'subject'},
-        'security' => $security,
+        'itemid'    => $jitemid,
+        'anum'      => $anum,
+        'journal'   => $uowner,
+        'poster'    => $u,
+        'event'     => $event,
+        'subject'   => $req->{'subject'},
+        'security'  => $security,
         'allowmask' => $qallowmask,
-        'props' => $req->{'props'},
+        'props'     => $req->{'props'},
+        'entry'     => $entry,
     });
 
     # cluster tracking
@@ -1118,8 +1121,6 @@ sub postevent
 
     $res->{'itemid'} = $jitemid;  # by request of mart
     $res->{'anum'} = $anum;
-
-    my $entry = LJ::Entry->new($uowner, jitemid => $jitemid, anum => $anum);
     $res->{'url'} = $entry->url;
 
     LJ::Event::JournalNewEntry->new($entry)->fire unless $LJ::DISABLED{esn};
