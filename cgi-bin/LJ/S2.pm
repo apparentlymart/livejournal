@@ -2572,7 +2572,7 @@ sub _Comment__get_link
                                                                 );
                 }
 
-                $track_img = 'btn_tracked_thread.gif' if ($thread_watched);
+                $track_img = 'btn_tracking_thread.gif' if ($thread_watched);
 
                 # cache in this comment object if it's being watched by this user
                 $comment->{_watchedby}->{$u->{userid}} = $thread_watched;
