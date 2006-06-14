@@ -4,33 +4,45 @@ ContextualPopup.popupDelay = 1000;
 
 ContextualPopup.cachedResults = {};
 ContextualPopup.currentRequests = {};
-ContextualPopup.mouseTimer = null;
+ContextualPopup.mouseInTimer = null;
+ContextualPopup.mouseOutTimer = null;
+ContextualPopup.currentId = null;
 ContextualPopup.elements = {};
 
 ContextualPopup.setup = function (e) {
     // attach to all ljuser head icons
-      var domObjects = document.getElementsByTagName("*");
-      var ljusers = DOM.filterElementsByClassName(domObjects, "ljuser") || [];
+    var domObjects = document.getElementsByTagName("*");
+    var ljusers = DOM.filterElementsByClassName(domObjects, "ljuser") || [];
 
-      var headIcons = [];
-      ljusers.forEach(function (ljuser) {
-          var nodes = ljuser.getElementsByTagName("img");
-          for (var i=0; i < nodes.length; i++) {
-              var node = nodes.item(i);
+    var userElements = [];
+    ljusers.forEach(function (ljuser) {
+        var nodes = ljuser.getElementsByTagName("img");
+        for (var i=0; i < nodes.length; i++) {
+            var node = nodes.item(i);
 
-              node.username = DOM.extractElementText(ljuser);
+            node.username = DOM.extractElementText(ljuser);
 
-              headIcons.push(node);
-              DOM.addClassName(node, "ContextualPopup");
-          }
-      });
+            userElements.push(node);
+            DOM.addClassName(node, "ContextualPopup");
+        }
+    });
 
-      var ctxPopupId = 1;
-      headIcons.forEach(function (headIcon) {
-          ContextualPopup.elements[ctxPopupId + ""] = headIcon;
-          headIcon.ctxPopupId = ctxPopupId++;
-          DOM.addEventListener(document.body, "mousemove", ContextualPopup.mouseOver.bindEventListener());
-      });
+    // attach to all userpics
+    var images = DOM.filterElementsByTagName(domObjects, "img") || [];
+    images.forEach(function (image) {
+        // if the image url matches a regex for userpic urls then attach to it
+        if (image.src.match(/userpic\..+\/\d+\/\d+/)) {
+            image.up_url = image.src;
+            userElements.push(image);
+        }
+    });
+
+    var ctxPopupId = 1;
+    userElements.forEach(function (userElement) {
+        ContextualPopup.elements[ctxPopupId + ""] = userElement;
+        userElement.ctxPopupId = ctxPopupId++;
+        DOM.addEventListener(document.body, "mousemove", ContextualPopup.mouseOver.bindEventListener());
+    });
 }
 
 ContextualPopup.isCtxPopElement = function (ele) {
@@ -38,54 +50,75 @@ ContextualPopup.isCtxPopElement = function (ele) {
 }
 
 ContextualPopup.mouseOver = function (e) {
+    Event.prep(e);
     var target = e.target;
+    var ctxPopupId = target.ctxPopupId;
 
     // did the mouse move out?
-    if (!target || !ContextualPopup.isCtxPopElement(target)) {
-        ContextualPopup.mouseOut(e);
+    if (!target || !ContextualPopup.isCtxPopElement(target) && ContextualPopup.ippu) {
+        if (ContextualPopup.mouseInTimer || ContextualPopup.mouseOutTimer) return;
+
+        ContextualPopup.mouseOutTimer = window.setTimeout(function () {
+            ContextualPopup.mouseOut(e);
+        }, 500);
         return;
     }
 
-    var ctxPopupId = target.ctxPopupId + "";
-    var username = target.username;
+    // we're inside a ctxPopElement, cancel the mouseout timer
+    if (ContextualPopup.mouseOutTimer) {
+        window.clearTimeout(ContextualPopup.mouseOutTimer);
+        ContextualPopup.mouseOutTimer = null;
+    }
 
-    if (!ctxPopupId || !username)
+    if (!ctxPopupId)
     return;
 
-    var cached = ContextualPopup.cachedResults[ctxPopupId];
+    var cached = ContextualPopup.cachedResults[ctxPopupId + ""];
 
     // if we don't have cached data background request it
     if (!cached) {
-        ContextualPopup.getInfo(username, ctxPopupId);
+        ContextualPopup.getInfo(target);
     }
 
     // start timer if it's not running
-    if (! ContextualPopup.mouseTimer && ! ContextualPopup.ippu) {
-        ContextualPopup.mouseTimer = window.setTimeout(function () {
+    if (! ContextualPopup.mouseInTimer && (! ContextualPopup.ippu || (
+                                                                      ContextualPopup.currentId &&
+                                                                      ContextualPopup.currentId != ctxPopupId))) {
+        ContextualPopup.mouseInTimer = window.setTimeout(function () {
             ContextualPopup.showPopup(ctxPopupId);
         }, ContextualPopup.popupDelay);
     }
 }
 
-ContextualPopup.mouseOut = function (e) {
-    if (ContextualPopup.mouseTimer) {
-        window.clearTimeout(ContextualPopup.mouseTimer);
-    }
+// if the popup was not closed by us catch it and handle it
+ContextualPopup.popupClosed = function () {
+    ContextualPopup.mouseOut();
+}
 
-    ContextualPopup.mouseTimer = null;
+ContextualPopup.mouseOut = function (e) {
+    if (ContextualPopup.mouseInTimer)
+        window.clearTimeout(ContextualPopup.mouseInTimer);
+    if (ContextualPopup.mouseOutTimer)
+        window.clearTimeout(ContextualPopup.mouseOutTimer);
+
+    ContextualPopup.mouseInTimer = null;
+    ContextualPopup.mouseOutTimer = null;
+    ContextualPopup.currentId = null;
 
     ContextualPopup.hidePopup();
 }
 
 ContextualPopup.showPopup = function (ctxPopupId) {
-    if (ContextualPopup.mouseTimer) {
-        window.clearTimeout(ContextualPopup.mouseTimer);
+    if (ContextualPopup.mouseInTimer) {
+        window.clearTimeout(ContextualPopup.mouseInTimer);
     }
-    ContextualPopup.mouseTimer = null;
+    ContextualPopup.mouseInTimer = null;
 
-    if (ContextualPopup.ippu) {
+    if (ContextualPopup.ippu && (ContextualPopup.currentId && ContextualPopup.currentId == ctxPopupId)) {
         return;
     }
+
+    ContextualPopup.currentId = ctxPopupId;
 
     ContextualPopup.constructIPPU(ctxPopupId);
 
@@ -95,8 +128,15 @@ ContextualPopup.showPopup = function (ctxPopupId) {
     }
 
     if (ContextualPopup.ippu) {
+        // default is to auto-center, don't want that
+        ContextualPopup.ippu.setAutoCenter(false, false);
+
+        // pop up the box right under the element
+        var dim = DOM.getAbsoluteDimensions(ele);
+        if (!dim) return;
+
+        ContextualPopup.ippu.setLocation(dim.absoluteLeft, dim.absoluteBottom);
         ContextualPopup.ippu.show();
-        ContextualPopup.ippu.centerOnWidget(ele);
     }
 }
 
@@ -111,6 +151,7 @@ ContextualPopup.constructIPPU = function (ctxPopupId) {
     ippu.setTitlebar(false);
     ippu.setDimensions("auto", "auto");
     ippu.addClass("ContextualPopup");
+    ippu.setCancelledCallback(ContextualPopup.popupClosed);
     ContextualPopup.ippu = ippu;
 
     ContextualPopup.renderPopup(ctxPopupId);
@@ -186,7 +227,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
         content.appendChild(relation);
         ippu.setContentElement(content);
     } else {
-        ippu.setContent("loading...");
+        ippu.setContent("Loading...");
     }
 
 }
@@ -200,20 +241,29 @@ ContextualPopup.hidePopup = function (ctxPopupId) {
 }
 
 // do ajax request of user info
-ContextualPopup.getInfo = function (username, ctxPopupId) {
-    if (!username && !ctxPopupId)
+ContextualPopup.getInfo = function (target) {
+    var ctxPopupId = target.ctxPopupId;
+    var username = target.username;
+    var up_url = target.up_url;
+
+    if (!(username || up_url))
         return;
 
-    ctxPopupId += "";
+    if (!ctxPopupId)
+    return;
 
-    if (ContextualPopup.currentRequests[ctxPopupId]) {
+    if (ContextualPopup.currentRequests[ctxPopupId + ""]) {
         return;
     }
 
     ContextualPopup.currentRequests[ctxPopupId] = 1;
 
+    if (!username) username = "";
+    if (!up_url) up_url = "";
+
     var params = HTTPReq.formEncoded ({
         "user": username,
+            "userpic_url": up_url,
             "reqdata": ctxPopupId,
             "mode": "getinfo"
     });
@@ -234,6 +284,7 @@ ContextualPopup.gotError = function (err) {
 
 ContextualPopup.gotInfo = function (data) {
     var ctxPopupId = data.reqdata;
+
     if (!ctxPopupId)
     return;
 
