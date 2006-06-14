@@ -117,14 +117,14 @@ $img{'xml'} = {
     'alt' => 'XML Source',
 };
 
-$img{'track_entry'} = {
+$img{'track'} = {
     'src' => '/btn_track.gif',
     'width' => 22,
     'height' => 20,
     'alt' => 'Track this entry',
 };
 
-$img{'track_entry_active'} = {
+$img{'track_active'} = {
     'src' => '/btn_tracking.gif',
     'width' => 22,
     'height' => 20,

@@ -382,7 +382,8 @@
      }
 
      unless ($LJ::DISABLED{'esn'} || ! $has_journal) {
-         push @linkele, "<a href='$LJ::SITEROOT/manage/subscriptions/user.bml?journal=$u->{'user'}'><img align='middle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_search.gif' width='22' height='20' alt='Track user' title='Track user' border='0' /></a>";
+         push @linkele, "<a href='$LJ::SITEROOT/manage/subscriptions/user.bml?journal=$u->{'user'}'>" .
+             LJ::img("track", "", { 'align' => 'middle' }) . "</a>";
      }
 
 
