@@ -400,7 +400,7 @@ body<=
         my $sponsored_results = (scalar @sponsored_usernames);
 
         if ($sponsored_results) {
-            $ret .= '<div><div><h2>Relevant Communities</h2></div>';
+            $ret .= '<div><div><h2>Sponsored communities</h2></div>';
         }
 
         foreach my $sponsored_username (@sponsored_usernames) {
