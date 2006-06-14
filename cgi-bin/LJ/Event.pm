@@ -12,6 +12,7 @@ use Class::Autouse qw(
                       LJ::Event::Befriended
                       LJ::Event::CommunityInvite
                       LJ::Event::CommunityJoinRequest
+                      LJ::Event::OfficialPost
                       );
 
 # Guide to subclasses:
@@ -174,12 +175,15 @@ sub subscriptions {
     # allsubs
     my @subs;
 
+    my $allmatch = 0;
     my $zeromeans = $self->zero_journalid_subs_means;
 
     my @wildcards_from;
-    if ($zeromeans eq "friends") {
+    if ($zeromeans eq 'friends') {
         # find friendofs, add to @wildcards_from
         @wildcards_from = LJ::get_friendofs($self->u);
+    } elsif ($zeromeans eq 'all') {
+        $allmatch = 1;
     }
 
     # TODO: gearman parallelize:
@@ -187,10 +191,15 @@ sub subscriptions {
         my $udbh = LJ::get_cluster_master($cid)
             or die;
 
-        # first we find exact matches
+        # first we find exact matches (or all matches)
+        my $journal_match = $allmatch ? "" : "AND journalid=?";
         my $sth = $udbh->prepare
-            ("SELECT userid, subid FROM subs WHERE etypeid=? AND journalid=?");
-        $sth->execute($self->etypeid, $self->u->{userid});
+            ("SELECT userid, subid FROM subs WHERE etypeid=? $journal_match");
+
+        my @args = $self->etypeid;
+        push @args, $self->{u}->{userid} unless $allmatch;
+        $sth->execute(@args);
+
         while (my ($uid, $subid) = $sth->fetchrow_array) {
             # TODO: convert to using new_from_row, more efficient
             push @subs, LJ::Subscription->new_by_id(LJ::load_userid($uid), $subid);
