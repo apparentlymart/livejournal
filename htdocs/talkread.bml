@@ -491,10 +491,51 @@ my $old_url = 0;
                  $ret .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_unscr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
              }
 
-             if ($showmultiform) {
-                 $ret .= " <nobr><input type='checkbox' name='selected_$tid' id='s$tid' />";
-                 $ret .= " <label for='s$tid'>$ML{'.select'}</label></nobr>";
-                 $multiform_selects = 1;
+             if ($post->{'state'} eq 'S' &&
+                 LJ::Talk::can_unscreen($remote, $u, $up, $userpost)) {
+                 $ret .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_unscr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
+             }
+
+             unless ($LJ::DISABLED{esn}) {
+                 my $track_img = 'track';
+
+                 my $comment = LJ::Comment->new($u, dtalkid => $dtid);
+                 my $comment_watched = $remote->has_subscription(
+                                                                 event   => "JournalNewComment",
+                                                                 journal => $u,
+                                                                 arg2    => $comment->jtalkid,
+                                                                 );
+
+
+                 if ($comment_watched) {
+                     $track_img = 'track_active';
+                 } else {
+                     # see if any parents are being watched
+                     while ($comment && $comment->valid && $comment->parenttalkid) {
+                         # check cache
+                         $comment->{_watchedby} ||= {};
+                         my $thread_watched = $comment->{_watchedby}->{$u->{userid}};
+
+                         # not cached
+                         if (! defined $thread_watched) {
+                             $thread_watched = $remote->has_subscription(
+                                                                         event   => "JournalNewComment",
+                                                                         journal => $u,
+                                                                         arg2    => $comment->parenttalkid,
+                                                                         );
+                         }
+
+                         $track_img = 'track_thread_active' if ($thread_watched);
+
+                         # cache in this comment object if it's being watched by this user
+                         $comment->{_watchedby}->{$u->{userid}} = $thread_watched;
+
+                         $comment = $comment->parent;
+                     }
+                 }
+
+                 my $track_url = "$LJ::SITEROOT/manage/subscriptions/comments.bml?dtalkid=$dtid&journal=$u->{'user'}";
+                 $ret .= "<a href='$track_url'>" . LJ::img($track_img, '', {'align' => 'absmiddle'}) . "</a>";
              }
 
              # Comment Posted Notice

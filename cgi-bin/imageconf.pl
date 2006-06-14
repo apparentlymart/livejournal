@@ -121,14 +121,14 @@ $img{'track'} = {
     'src' => '/btn_track.gif',
     'width' => 22,
     'height' => 20,
-    'alt' => 'Track this entry',
+    'alt' => 'Track this',
 };
 
 $img{'track_active'} = {
     'src' => '/btn_tracking.gif',
     'width' => 22,
     'height' => 20,
-    'alt' => 'Track this entry',
+    'alt' => 'Track this',
 };
 
 # load the site-local version, if it's around.
