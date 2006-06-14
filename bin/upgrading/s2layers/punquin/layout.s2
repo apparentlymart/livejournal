@@ -45,6 +45,12 @@ propgroup presentation {
     des = "Toggle to show the next, memory, edit, etc icons on the entry view page";
   }
   property use linklist_support;
+  property string counter_code {
+      des = "If you have an external web counter, you can enter the HTML for it here";
+      note = "Your counter will appear under the navigation links in your journal's sidebar.";
+      maxlength = 2000;
+      string_mode = "html-oneline";
+  }
   property use external_stylesheet;
 }
 set content_width = "90%";
@@ -60,6 +66,7 @@ set page_friends_items = 20;
 set view_entry_disabled = false;
 set show_entrynav_icons = true;
 set linklist_support = false;
+set counter_code = "";
 
 # Colors
 propgroup colors {
@@ -166,11 +173,17 @@ propgroup images {
 	note = "Not supported in all browsers, but allows for the background image to be in a fixed position when scrolling.";
 	values = "scroll|Scroll|fixed|Fixed";
   }
+
+  property string img_btwn_comments {
+    des = "URL to an image to be used between your comment links";
+    note = "If you specify an image to use, it will replace any text between the comment links.";
+  }
 }
 set page_background_image = "";
 set page_background_repeat = "repeat";
 set page_background_position = "center";
 set page_background_scrolling = "scroll";
+set img_btwn_comments = "";
 
 propgroup text {
   property string text_gotop {
@@ -182,8 +195,33 @@ propgroup text {
   property use text_post_comment_friends;
   property use text_read_comments_friends;
   property use text_website_default_name;
+  property string text_left_comments {
+        des = "Text to be used in front of your comment links";
+  }
+  property string text_btwn_comments {
+        des = "Text to be used between your comment links";
+        note = "If you specified an image to be used between your comments links in the \"Images\" section, then this option will not have any effect.";
+  }
+  property string text_right_comments {
+        des = "Text to be used at the end of your comment links";
+  }
+  property string date_format {
+      des = "Date format for entries";
+  }
+  property string time_format {
+      des = "Time format for entries";
+  }
+  property string datetime_comments_format {
+        des = "Date and time format for comments";
+  }
 }
 set text_gotop = "Go to Top";
+set text_left_comments = "(";
+set text_btwn_comments = " | ";
+set text_right_comments = ")";
+set date_format = "%%month%% %%dayord%%, %%yyyy%%";
+set time_format = "%%hh%%:%%min%% %%a%%m";
+set datetime_comments_format = "%%month%% %%dayord%%, %%yyyy%% %%hh%%:%%min%% %%a%%m";
 set tags_aware = true;
 
 propgroup customcss {
@@ -331,6 +369,11 @@ function print_sidebar(Page p) {
     "<p>$links\n$website\n";
     $p->lay_sidebar_navigation();
 
+    # Counter
+    if ($*counter_code != "") {
+        """<br />$*counter_code""";
+    }
+
     # Userpic
     "</p>"; if($userpic != "") { "<div style='text-align:center'>$userpic</div>"; }
 
@@ -433,9 +476,9 @@ function Page::print ()
 
 function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_text)
 {
-    var string time = $e.time->time_format();
+    var string time = $e.time->time_format($*time_format);
     if ($e.new_day or $p.view == "entry") {
-        "<p class='date'>"; print $e.time->date_format("%%month%% %%dayord%%, %%yyyy%%"); "</p>";
+        "<p class='date'>"; print $e.time->date_format($*date_format); "</p>";
         "<hr class='separator' />";
     }
 
@@ -556,17 +599,21 @@ function RecentPage::lay_sidebar_navigation () {
 function CommentInfo::print() {
     "<p align='right' class='comments'>";
     if ($.show_readlink or $.show_postlink) {
-        "(";
+        "$*text_left_comments";
         if ($.show_readlink) {
             $this->print_readlink();
         }
         if ($.show_postlink and $.show_readlink) {
-            "&nbsp;|&nbsp;";
+            if (clean_url($*img_btwn_comments) != "") {
+                """ <img src="$*img_btwn_comments" alt="" /> """;
+            } else {
+                "$*text_btwn_comments";
+            }
         }
         if ($.show_postlink) {
             $this->print_postlink();
         }
-        ")";
+        "$*text_right_comments";
     }
     else {
         "&nbsp;";
@@ -646,7 +693,7 @@ function YearWeek::print () {
 function DayPage::print_body() {
     if (not $.has_entries) {
         "<table width='100%'><tr><td><p class='date'>\n";
-        print $.date->date_format("%%month%% %%dayord%%, %%yyyy%%");
+        print $.date->date_format($*date_format);
         "</p><hr class='separator' width='100%' /></td></tr>";
         "<tr><td><blockquote align='center'>"; print ehtml($*text_noentries_day); "</blockquote></td></tr></table>";
     } else {
@@ -737,7 +784,7 @@ function EntryPage::print_comment (Comment c) {
       print "<table>";
       print "<tr><th align='right' style='font-size: .9em'>From:</th><td>$poster</td></tr>\n";
       print "<tr><th align='right' style='font-size: .9em'>Date:</th><td style='white-space: nowrap'>";
-        print $c->time_display("long", "") + "</td></tr>";
+        print $c->time_display($*datetime_comments_format, "none") + "</td></tr>";
       if ($c.metadata{"poster_ip"}) { print "<tr><th align='right' style='font-size: .9em'>IP Address:</th><td>(" + $c.metadata{"poster_ip"} + ")</td></tr>"; }
     "</table></td>";
 
@@ -779,7 +826,7 @@ function ReplyPage::print_body() {
         "<p>$*text_reply_nocomments</p>";
         return;
     }
-    "<p class='date'>"; print $.replyto.time->date_format("%%month%% %%dayord%%, %%yyyy%%"); "</p>";
+    "<p class='date'>"; print $.replyto.time->date_format($*date_format); "</p>";
     "<hr class='separator' />";
 
     "<table border='0' cellpadding='2' cellspacing='0'><tr>";
@@ -791,7 +838,7 @@ function ReplyPage::print_body() {
     }
     "</td>";
 
-    "<td valign='top'><strong>"; print $.replyto.time->time_format();
+    "<td valign='top'><strong>"; print $.replyto.time->time_format($*time_format);
     if ($.replyto.subject) { " - <span style='color: $*subject_color'>$.replyto.subject</span>"; }
 
     "</strong><br />";
