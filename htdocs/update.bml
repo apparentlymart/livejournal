@@ -433,10 +433,14 @@
 
     {
         my $ad =  LJ::ads( type => 'app', orient => 'App-Func-1column', force => '1' );
+        my $extra = "";
 
-        if ($ad) {
+        if ($ad =~ /"ljad ljad(.+?)"/i) {
+            if ($1 eq "skyscraper") { # Add a badge ad above all skyscrapers
+                $extra = LJ::ads( type => 'app', orient => 'App-Extra', force => '1' );
+            }
             $$body .= "<td style='width: 160px; padding-left: 2em;'>";
-            $$body .= "$ad";
+            $$body .= "$extra$ad";
         } else {
             $$body .= "<td>";
         }
