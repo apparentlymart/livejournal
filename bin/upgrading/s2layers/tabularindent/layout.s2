@@ -7,8 +7,31 @@ layerinfo previews = "tabularindent/tabularindent.jpg";
 layerinfo des = "Two information and navigation boxes at the top and bottom of the page surround entries indented slightly from the left.";
 
 propgroup presentation {
+  property string content_width {
+      des = "Content area width";
+      note = "Don't forget to include units; e.g. px, %";
+  }
+  property string content_alignment {
+      des = "Alignment of the content area";
+      values = "left|Left|center|Center|right|Right";
+  }
+  property string content_top_margin {
+      des = "Margin size on the top of the content area";
+      note = "You can use this to shift your journal contents down in order to display a background image at the top of your journal.  Don't forget to include units; e.g. px, %";
+  }
+  property string entryborder_size {
+      des = "Size of borders around entries";
+      note = "Don't forget to include the units, e.g. px";
+  }
+  property string entryborder_style {
+      des = "Style of borders around entries";
+      values = "solid|Solid|dashed|Dashed|dotted|Dotted|double|Double|hidden|Invisible";
+  }
+  property bool transparent {
+      des = "Make journal content transparent instead of using given background colors";
+  }
   property bool show_entry_userpic { 
-      des = "Show userpic on journal entries";
+      des = "Display your userpic with your entries";
   }
   property use page_recent_items;
   property use page_friends_items;
@@ -16,6 +39,12 @@ propgroup presentation {
   property use view_entry_disabled;
   property use external_stylesheet;
 }
+set content_width = "100%";
+set content_alignment = "left";
+set content_top_margin = "0";
+set entryborder_size = "";
+set entryborder_style = "hidden";
+set transparent = false;
 set show_entry_userpic = true;
 set page_recent_items = 20;
 set page_friends_items = 20;
@@ -37,6 +66,9 @@ propgroup colors {
   property Color border_color { 
       des = "Color of borders";
       # No s1color equivalent
+  }
+  property Color border_color_entries {
+      des = "Color of borders around entries";
   }
   property Color headerbar_bgcolor { 
       des = "Background color of header bar(s)";
@@ -101,6 +133,7 @@ set body_bgcolor = "#ffffff";
 set main_bgcolor = "#ffffff";
 set main_fgcolor = "#000000";
 set border_color = "#000000";
+set border_color_entries = "#000000";
 set headerbar_bgcolor = "#6666cc";
 set headerbar_fgcolor = "#ffffff";
 set captionbar_mainbox_bgcolor = "#ffffff";
@@ -151,6 +184,17 @@ propgroup text {
   property use text_post_comment_friends;
   property use text_read_comments_friends;
 }
+
+propgroup customcss {
+  property string custom_css {
+      des = "Custom Stylesheet";
+      note = "If you'd like to customize this style from scratch and are familiar with CSS, enter it here";
+      cols = 80;
+      rows = 20;
+      string_mode = "css";
+  }
+}
+set custom_css = "";
 
 set tags_aware = true;
 
@@ -263,10 +307,27 @@ h3.page-header {
     border:            1px solid $*border_color;
 }
 """;
+if ($*transparent) {
+"""
+table table, tr, td, h3.page-header, .captionbar {
+    background: transparent !important;
+    border: 0 !important;
+}
+""";
+}
+"""
+
+$*custom_css
+""";
 }
 
 function Page::print () 
 {
+    var string margin = "";
+    if ($*content_top_margin != "0") {
+        $margin = " margin-top: $*content_top_margin;";
+    }
+
     var string title = $this->title();
     println "<html>\n<head>\n";
 
@@ -287,6 +348,7 @@ function Page::print ()
     """;
     
     $this->print_control_strip();
+    """<table style="width: $*content_width;$margin" align="$*content_alignment"><tr><td>""";
     "<p>"; captionbar($this); "</p>";
 
     if (viewer_sees_vbox()) {
@@ -301,19 +363,20 @@ function Page::print ()
 
     "<p>"; $this->print_body(); "</p>";
 
+    if (viewer_sees_vbox()) {
+        "</td>";
+        "<td valign=\"top\" align=\"center\" width=\"20%\">";
+        $this->print_vbox();
+        "</td></tr></table>\n";
+    }
     if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
         """<div style="text-align: center;">""";
         $this->print_hbox_bottom();
         "</div>";
     }
-    if (viewer_sees_vbox()) {
-        print "</td>";
-        print "<td valign=\"top\" align=\"center\" width=\"20%\">";
-        $this->print_vbox();
-        print "</td></tr></table>\n";
-    }
 
     "<p>"; captionbar($this); "</p>";
+    "</td></tr></table>";
 
     """
   </body>
@@ -326,8 +389,9 @@ function print_box_open (string{} colors, string metapic, string{} meta, string 
     var string fgcolor = $colors{"fgcolor"};
     if ($domid != "") { $domid = "id='"+ehtml($domid)+"'"; }
 
-    var string style = "background-color: "+ehtml($bgcolor)+"; color: "+ehtml($fgcolor);
-    print safe "<div align='right'><table $domid border='0' width='95%' cellpadding='5' cellspacing='1' style='$style'>";
+    var string style = "background-color: "+ehtml($bgcolor)+"; color: "+ehtml($fgcolor)+";";
+    var string border = " border: $*entryborder_size $*entryborder_style $*border_color_entries;";
+    print safe "<div align='right'><table $domid width='95%' cellpadding='5' cellspacing='1' style='$style$border'>";
     print safe "<tr><td><table border='0' width='100%' style='$style'><tr>";
 
     if ($metapic) {
