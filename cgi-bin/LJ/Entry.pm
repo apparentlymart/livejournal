@@ -502,6 +502,14 @@ sub event_html
     return $event;
 }
 
+sub event_text
+{
+    my $self = shift;
+    my $event = $self->event_raw;
+    LJ::CleanHTML::clean_event( \$event, { textonly => 1} ) if $event;
+    return $event;
+}
+
 # like event_html, but truncated for summary mode in rss/atom
 sub event_summary {
     my $self = shift;
