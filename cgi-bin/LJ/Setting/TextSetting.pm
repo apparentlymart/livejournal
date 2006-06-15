@@ -26,14 +26,16 @@ sub text_size { 40 }
 sub question { croak; }
 
 sub as_html {
-    my ($class, $u, $errs) = @_;
+    my ($class, $u, $errs, $args) = @_;
+    my $txt = $args->{txt};
     my $key = $class->pkgkey;
     return $class->question .
         "&nbsp;" .
         LJ::html_text({
             name  => "${key}txt",
-            value => $class->current_value($u),
+            value => $txt || $class->current_value($u),
             size  => $class->text_size,
+            maxlength => $class->max_chars,
         }) .
         $class->errdiv($errs, "txt");
 }

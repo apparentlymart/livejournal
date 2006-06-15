@@ -102,7 +102,7 @@
             }
         }
 
-        my $html = eval { $class->as_html($u, $save_errors) };
+        my $html = eval { $class->as_html($u, $save_errors, $post_args) };
         if ($@) {
             $body .= "<p>" . LJ::ehtml($@) . "</p>";
         } else {
