@@ -123,3 +123,22 @@ div.argOptsContainer {
     display: block;
     margin: 0 0 .7em 0;
     }
+
+#SubscribeSaveButtons {
+        text-align: center;
+        border: 1px solid #333;
+        width: 150px;
+        margin-left: auto;
+        margin-right: auto;
+}
+#SubscribeSaveButtons input {
+        margin: 5px;
+}
+
+#SubscriptionInfo {
+        width: 95%;
+        text-align: center;
+        margin: 1em;
+        margin-left: auto;
+        margin-right: auto;
+}

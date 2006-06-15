@@ -2630,10 +2630,12 @@ sub subscribe_interface {
     my $sub_count = $u->subscription_count;
     my $sub_max = $u->get_cap('subscriptions');
     $ret .= qq {
-        <div>You are subscribed to $sub_count events ($sub_max available) |
+        <div id="SubscriptionInfo">
+            <?p You are subscribed to $sub_count events ($sub_max available) |
             Manage your subscriptions in the <a href="$LJ::SITEROOT/manage/subscriptions/index.bml">
-            Subscription Center</a></div>
+            Subscription Center</a> p?>
             $extra_sub_status
+            </div>
         };
 
     # print buttons
