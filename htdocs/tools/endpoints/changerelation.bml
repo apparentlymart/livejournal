@@ -1,0 +1,39 @@
+<?_code # -*-bml-*-
+{
+    use strict;
+    use vars qw(%POST);
+
+    my $err = sub {
+        my $msg = shift;
+        return JSON::objToJson({
+            content => "Error: $msg",
+        });
+    };
+
+    # get user
+    my $remote = LJ::get_remote()
+        or return $err->("Sorry, you must be logged in to use this feature.");
+
+    my $target = $POST{target} or return $err->("No target specified");
+    my $action = $POST{action} or return $err->("No action specified");
+
+    my $targetu = LJ::load_user($target) or return $err->("Invalid user $target");
+
+    my $success = 0;
+
+    if ($action eq 'addFriend') {
+        $success = $remote->add_friend($targetu);
+    } elsif ($action eq 'removeFriend') {
+        $success = $remote->remove_friend($targetu);
+    } else {
+        return $err->("Invalid action $action");
+    }
+
+    return JSON::objToJson({
+        success => $success,
+        is_friend => LJ::is_friend($remote, $targetu),
+        %POST,
+    });
+}
+
+_code?>
