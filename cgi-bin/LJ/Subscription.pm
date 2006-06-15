@@ -342,4 +342,15 @@ sub equals {
     return $match;
 }
 
+package LJ::Error::Subscription::TooMany;
+sub fields { qw(subscr u); }
+
+sub as_string {
+    my $self = shift;
+    my $max = $self->field('u')->get_cap('subscriptions');
+    return 'The subscription "' . $self->field('subscr')->as_html . '" was not saved because you have' .
+        " reached your limit of $max subscriptions";
+}
+
+
 1;

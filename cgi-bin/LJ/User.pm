@@ -1623,6 +1623,11 @@ sub subscriptions {
     return LJ::Subscription->subscriptions_of_user($u);
 }
 
+sub subscription_count {
+    my $u = shift;
+    return scalar LJ::Subscription->subscriptions_of_user($u);
+}
+
 # subscribe to an event
 sub subscribe {
     my ($u, %opts) = @_;

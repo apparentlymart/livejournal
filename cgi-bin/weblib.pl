@@ -2627,7 +2627,7 @@ sub subscribe_interface {
 
     # print info stuff
     my $extra_sub_status = LJ::run_hook("sub_status_extra", $u) || '';
-    my $sub_count = $u->subscriptions;
+    my $sub_count = $u->subscription_count;
     my $sub_max = $u->get_cap('subscriptions');
     $ret .= qq {
         <div>You are subscribed to $sub_count events ($sub_max available) |
