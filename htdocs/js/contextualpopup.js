@@ -33,6 +33,7 @@ ContextualPopup.setup = function (e) {
         // if the image url matches a regex for userpic urls then attach to it
         if (image.src.match(/userpic\..+\/\d+\/\d+/)) {
             image.up_url = image.src;
+            DOM.addClassName(image, "ContextualPopup");
             userElements.push(image);
         }
     });
@@ -50,7 +51,6 @@ ContextualPopup.isCtxPopElement = function (ele) {
 }
 
 ContextualPopup.mouseOver = function (e) {
-    Event.prep(e);
     var target = e.target;
     var ctxPopupId = target.ctxPopupId;
 
@@ -169,7 +169,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
         DOM.addClassName(content, "Content");
 
         // userpic
-        if (data.url_userpic) {
+        if (data.url_userpic && data.url_userpic != ContextualPopup.elements[ctxPopupId].src) {
             var userpicContainer = document.createElement("div");
             var userpic = document.createElement("img");
             userpic.src = data.url_userpic;
@@ -182,7 +182,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
 
         // user name
         var displayName = document.createElement("div");
-        displayName.innerHTML = data.display;
+        displayName.innerHTML = "Name: " + data.display;
         DOM.addClassName(displayName, "Name");
 
         // profile
@@ -203,9 +203,13 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
 
         // friend?
         var relation = document.createElement("div");
-        relation.innerHTML = data.username + " is " + (
-                                                       data.is_friend ? "a friend" : "not a friend"
-                                                       );
+        if (data.is_requester) {
+            relation.innerHTML = "This is you";
+        } else {
+            relation.innerHTML = data.username + " is " + (
+                                                           data.is_friend ? "a friend" : "not a friend"
+                                                           );
+        }
 
         if (! data.is_friend) {
             // add friend link
