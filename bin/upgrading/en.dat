@@ -3632,6 +3632,8 @@ Regards,
 
 /manage/profile/index.bml.error.email.no_space=No spaces are allowed in an email address. If you're on AOL, remember that your Internet Email address is your screen name with all spaces removed, followed by <b>@aol.com</b>
 
+/manage/profile/index.bml.error.excessive_int=Sorry, you listed too many interests. The limit is 150, but you've listed [[intcount]]. Any changes you made to your interests were not saved. Go back and remove some of your interests, then save again.
+
 /manage/profile/index.bml.error.invalidbio=Your stored bio contains invalid characters. You must visit the <a [[aopts]]><b>conversion page</b></a> to convert it to Unicode.
 
 /manage/profile/index.bml.error.invalidname2=Your name contains invalid characters. You must visit the <a [[aopts]]><b>conversion page</b></a> to convert it to Unicode.
