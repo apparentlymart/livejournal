@@ -42,9 +42,8 @@
         }
     
 #CProd_box .frankhead {
-    position: absolute;
-    left: 0;
-    bottom: 0;
+    position: relative;
+    top: 1em;
     }
     
     #CProd_box .frankhead-portal {
