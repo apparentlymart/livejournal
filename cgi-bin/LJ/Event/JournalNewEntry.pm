@@ -67,6 +67,11 @@ sub matches_filter {
     return LJ::u_equals($subscr->journal, $evtju);
 }
 
+sub content {
+    my $self = shift;
+    return $self->entry->event_text;
+}
+
 sub as_string {
     my $self = shift;
     my $entry = $self->entry;

@@ -78,7 +78,7 @@ body<=
             <div class="Blurb">
             <?p In the Message Center, you can find out who has friended you,
             get updates from $LJ::SITENAME, read your notices and more. p?>
-            <?p To start getting notices, click on the "Notify Me" icon when you're
+            <?p To start getting notices, click on the "Notify Me" icon when you are
             browsing $LJ::SITENAME. You can use notices to keep an eye on comment threads,
             user updates and new posts. p?>
             </div>
@@ -133,10 +133,8 @@ body<=
         my $qid  = $inbox_item->qid;
 
         my $read_class = $inbox_item->read ? "InboxItem_Read" : "InboxItem_Unread";
-        my $evt  = $inbox_item->event
-            or next;
 
-        my $evt_html  = eval { $evt->as_html } || $@;
+        my $title  = $inbox_item->title;
 
         my $checkbox_name = "InboxItem_Check-$qid";
         my $checkbox = LJ::html_check({
@@ -146,12 +144,16 @@ body<=
         });
 
         my $when = LJ::ago_text(time() - $inbox_item->when_unixtime);
+        my $contents = $inbox_item->as_html || '';
 
         $notificationtable .= qq {
-            <tr class="inbox_item">
+            <tr class="InboxItem_Meta">
                 <td class="checkbox">$checkbox</td>
-                <td class="item"><span class="$read_class">$evt_html</span></td>
+                <td class="item"><span class="$read_class">$title</span></td>
                 <td class="time">$when</td>
+            </tr>
+            <tr class="InboxItem_Content">
+                <td colspan="3">$contents</td>
             </tr>
         };
     }

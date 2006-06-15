@@ -472,7 +472,10 @@ sub create {
     # now that we've created a new pic, invalidate the user's memcached userpic info
     LJ::Userpic->delete_cache($u);
 
-    return LJ::Userpic->new($u, $picid);
+    my $upic = LJ::Userpic->new($u, $picid) or die "Error insantiating userpic";
+    LJ::Event::NewUserpic->new($u, $upic)->fire;
+
+    return $upic;
 }
 
 # make this picture the default

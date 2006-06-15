@@ -55,6 +55,18 @@ sub valid {
     return $self->event;
 }
 
+# returns title of this item
+sub title {
+    my $self = shift;
+    return eval { $self->event->as_html } || $@;
+}
+
+# returns contents of this item
+sub as_html {
+    my $self = shift;
+    return eval { $self->event->content } || $@;
+}
+
 # returns the event that this item refers to
 sub event {
     my $self = shift;

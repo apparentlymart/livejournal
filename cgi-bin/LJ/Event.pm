@@ -80,6 +80,9 @@ sub title {
     return 'New Event';
 }
 
+# Override this with HTML containing the actual event
+sub content { '' }
+
 sub as_string {
     my $self = shift;
     my $u    = $self->u;

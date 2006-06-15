@@ -91,12 +91,17 @@ div.argOptsContainer {
 
 .item, .checkbox, .time {
     padding: .3em 0 .3em 0;
-    border-bottom: 1px dotted #ddd;
     }
     
     .InboxItem_Unread {
         font-weight: bold;
         }
+
+tr.InboxItem_Content {
+    border-bottom: 1px dotted #ddd;
+   margin-left: 2em;
+        color: #555;
+}
         
 .time {
     width: 10em;

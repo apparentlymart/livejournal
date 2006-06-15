@@ -19,9 +19,8 @@ sub is_common { 0 }
 sub as_string {
     my $self = shift;
     my $u1 = LJ::load_userid($self->arg1);
-    return sprintf("The user '%s' has added '%s' as a friend.",
-                   LJ::load_userid($self->arg1)->{user},
-                   $self->u->{user});
+    return sprintf("%s has added me as a friend.",
+                   LJ::load_userid($self->arg1)->ljuser_display);
 }
 
 sub as_sms {
@@ -43,5 +42,7 @@ sub subscription_as_html {
     my $user = $journal_is_owner ? "me" : $journal->ljuser_display;
     return "Someone adds $user as a friend";
 }
+
+sub content { '' }
 
 1;

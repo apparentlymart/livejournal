@@ -11,13 +11,23 @@ sub new {
     return $class->SUPER::new($entry->journal, $entry->ditemid);
 }
 
+sub entry {
+    my $self = shift;
+    my $ditemid = $self->arg1;
+    return LJ::Entry->new($self->event_journal, ditemid => $ditemid);
+}
+
+sub content {
+    my $self = shift;
+    return $self->entry->event_text;
+}
+
 sub is_common { 1 }
 sub zero_journalid_subs_means { 'all' }
 
 sub as_string {
     my $self = shift;
-    my $ditemid = $self->arg1;
-    my $entry = LJ::Entry->new($self->event_journal, ditemid => $ditemid) or return "(Invalid entry)";
+    my $entry = $self->entry or return "(Invalid entry)";
     return 'There is a new <a href="' . $entry->url . '">post</a> in ' . $entry->journal->ljuser_display;
 }
 

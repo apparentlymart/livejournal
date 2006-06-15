@@ -17,14 +17,20 @@ sub title {
     return 'New Comment on Journal';
 }
 
+sub content {
+    my $self = shift;
+    my $ret = qq {
+        Comment stuff goes here
+    };
+    return $ret;
+    return $self->comment ? $self->comment->event_text : '';
+}
+
 sub as_html {
     my $self = shift;
 
-    my $journal = $self->u;    # what journal did this comment happen in?
-    my $earg1    = $self->arg1; # jtalkid
-
-    my $comment = LJ::Comment->new($journal, jtalkid => $earg1);
-    return "(Invalid comment)" unless $comment && $comment->valid;
+    my $comment = $self->comment;
+    my $journal = $self->u;
 
     my $ju = LJ::ljuser($journal);
     my $pu = LJ::ljuser($comment->poster);
