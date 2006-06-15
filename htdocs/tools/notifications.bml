@@ -128,6 +128,8 @@ body<=
             };
     }
 
+    @notifications = sort { $b->when_unixtime <=> $a->when_unixtime } @notifications;
+
     # print out notifications
     foreach my $inbox_item (@notifications) {
         my $qid  = $inbox_item->qid;
