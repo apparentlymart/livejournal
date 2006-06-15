@@ -2555,7 +2555,8 @@ sub subscribe_interface {
                     class    => "SubscriptionInboxCheck",
                     selected => $subscribed,
                     noescape => 1,
-                }) .  "$title </td>";
+                    label    => $title,
+                }) .  "</td>";
 
             unless ($pending_sub->pending) {
                 $events_table .= LJ::html_hidden({
@@ -2641,8 +2642,9 @@ sub subscribe_interface {
     # print buttons
     my $referer = BML::get_client_header('Referer');
     $ret .= '<div id="SubscribeSaveButtons">' .
-        ($referer ? "<input type='button' value='Cancel' onclick='window.location=\"$referer\"' />" : '') .
-        LJ::html_submit('Save') . '</div>';
+        LJ::html_submit('Save') .
+        ($referer ? "<input type='button' value='Cancel' onclick='window.location=\"$referer\"' />" : '')
+        . '</div>';
 
     $ret .= "</form></div>";
 }

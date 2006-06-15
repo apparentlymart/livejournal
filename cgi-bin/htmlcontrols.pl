@@ -174,9 +174,25 @@ sub html_check
     }
     $ret .= "$disabled />";
     my $e_label = ($ehtml ? ehtml($opts->{'label'}) : $opts->{'label'});
-    $ret .= "<label for=\"$opts->{id}\">" . $e_label . '</label>'
-        if $opts->{'label'};
+    $e_label = LJ::labelfy($opts->{id}, $e_label);
+    $ret .= $e_label if $opts->{'label'};
     return $ret;
+}
+
+# given a string and an id, return the string
+# in a label, respecting HTML
+sub labelfy {
+    my ($id, $text) = @_;
+
+    $text =~ s!
+        ^([^<]+)
+        !
+        <label for="$id">
+            $1
+        </label>
+        !x;
+
+    return $text;
 }
 
 # <WCMFUNC>
