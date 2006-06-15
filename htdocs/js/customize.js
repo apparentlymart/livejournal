@@ -24,6 +24,7 @@ function tabclick_save(e) {
         confirmed = confirm("Save your settings?");
     }
     if (confirmed) {
+        Event.stop(e);
         $("display_form").submit();
     }
 }
