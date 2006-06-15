@@ -2622,8 +2622,25 @@ sub subscribe_interface {
             $catids
             $events_table
         };
-    $ret .= LJ::html_submit('Save');
+
     $ret .= LJ::html_hidden({name => 'mode', value => 'save_subscriptions'});
+
+    # print info stuff
+    my $extra_sub_status = LJ::run_hook("sub_status_extra", $u) || '';
+    my $sub_count = $u->subscriptions;
+    my $sub_max = $u->get_cap('subscriptions');
+    $ret .= qq {
+        <div>You are subscribed to $sub_count events ($sub_max available) |
+            Manage your subscriptions in the <a href="$LJ::SITEROOT/manage/subscriptions/index.bml">
+            Subscription Center</a></div>
+            $extra_sub_status
+        };
+
+    # print buttons
+    my $referer = BML::get_client_header('Referer');
+    $ret .= '<div id="SubscribeSaveButtons">' .
+        ($referer ? "<input type='button' value='Cancel' onclick='window.location=\"$referer\"' />" : '') .
+        LJ::html_submit('Save') . '</div>';
 
     $ret .= "</form></div>";
 }
