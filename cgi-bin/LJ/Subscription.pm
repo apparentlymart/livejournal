@@ -345,6 +345,7 @@ sub equals {
 package LJ::Error::Subscription::TooMany;
 sub fields { qw(subscr u); }
 
+sub as_html { $_[0]->as_string }
 sub as_string {
     my $self = shift;
     my $max = $self->field('u')->get_cap('subscriptions');
