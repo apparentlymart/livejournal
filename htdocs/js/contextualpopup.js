@@ -219,7 +219,24 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
             addFriendLink.innerHTML = "Add as friend";
             addFriend.appendChild(addFriendLink);
             DOM.addClassName(addFriend, "AddFriend");
+            DOM.addEventListener(addFriendLink, "click", function (e) {
+                Event.prep(e);
+                Event.stop(e);
+                return ContextualPopup.changeRelation(data, ctxPopupId, "addFriend"); });
             relation.appendChild(addFriend);
+        } else {
+            // remove friend link (omg!)
+            var removeFriend = document.createElement("div");
+            var removeFriendLink = document.createElement("a");
+            removeFriendLink.href = data.url_delfriend;
+            removeFriendLink.innerHTML = "Remove friend";
+            removeFriend.appendChild(removeFriendLink);
+            DOM.addClassName(removeFriend, "RemoveFriend");
+            DOM.addEventListener(removeFriendLink, "click", function (e) {
+                Event.prep(e);
+                Event.stop(e);
+                return ContextualPopup.changeRelation(data, ctxPopupId, "removeFriend"); });
+            relation.appendChild(removeFriend);
         }
 
         DOM.addClassName(relation, "Relation");
@@ -234,6 +251,45 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
         ippu.setContent("Loading...");
     }
 
+}
+
+// ajax request to change relation
+ContextualPopup.changeRelation = function (info, ctxPopupId, action) {
+    if (!info) return true;
+
+    var postData = {
+        "target": info.username,
+        "action": action,
+        "ctxPopupId": ctxPopupId
+    };
+
+    var opts = {
+        "data": HTTPReq.formEncoded(postData),
+        "method": "POST",
+        "url": "/tools/endpoints/changerelation.bml",
+        "onError": ContextualPopup.gotError,
+        "onData": ContextualPopup.changedRelation
+    };
+
+    HTTPReq.getJSON(opts);
+
+    return false;
+}
+
+// callback from changing relation request
+ContextualPopup.changedRelation = function (info) {
+    log(inspect(info));
+    var ctxPopupId = info.ctxPopupId + 0;
+    if (!ctxPopupId) return;
+
+    if (!info.success) return;
+
+    if (ContextualPopup.cachedResults[ctxPopupId + ""]) {
+        ContextualPopup.cachedResults[ctxPopupId + ""].is_friend = info.is_friend;
+    }
+
+    // if the popup is up, reload it
+    ContextualPopup.renderPopup(ctxPopupId);
 }
 
 ContextualPopup.hidePopup = function (ctxPopupId) {

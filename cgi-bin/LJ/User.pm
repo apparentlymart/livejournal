@@ -1709,6 +1709,16 @@ sub NotificationInbox {
     return LJ::NotificationInbox->new($u);
 }
 
+sub add_friend {
+    my ($u, $target) = @_;
+    return LJ::add_friend($u, $target);
+}
+
+sub remove_friend {
+    my ($u, $target) = @_;
+    return LJ::remove_friend($u, $target);
+}
+
 package LJ;
 
 # <LJFUNC>
