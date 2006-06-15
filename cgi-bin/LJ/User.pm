@@ -1029,6 +1029,7 @@ sub can_show_bday {
 sub should_promote_comm {
     my $u = shift;
 
+    return 0 if $LJ::DISABLED{comm_promo};
     return 0 unless $u->is_comm;
     return 0 if $u->prop('disable_comm_promo');
 
@@ -1040,6 +1041,7 @@ sub should_promote_comm {
 sub should_display_comm_promo {
     my $u = shift;
 
+    return 0 if $LJ::DISABLED{comm_promo};
     return 0 unless $u->is_comm;
     return 0 if $u->prop('disable_comm_promo');
 
@@ -1606,6 +1608,7 @@ sub is_identity {
 
 sub render_comm_promo {
     my $u = shift;
+    return "" if $LJ::DISABLED{comm_promo};
     return LJ::CommPromo->render_for_comm($u);
 }
 
