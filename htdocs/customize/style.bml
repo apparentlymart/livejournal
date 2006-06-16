@@ -473,13 +473,13 @@ body<=
     my @themes = LJ::cmize::get_moodtheme_select_list($u);
     $ret .= LJ::html_select({ 'name' => 'moodthemeid', 'selected' => $u->{'moodthemeid'} },
                               map { $_->{'moodthemeid'}, $_->{'name'} } @themes) . "\n";
-
+    $ret .= "<noscript>" . LJ::html_submit('save:moodtheme', $ML{'.change'}) . " </noscript>"
+        if $u->prop('stylesys') == 2;
     $ret .= "(<a href='$LJ::SITEROOT/moodlist.bml' target='samples'>Samples</a>)\n";
     $ret .= "<br />" . LJ::html_check({ 'type' => 'check', 'name' => 'opt_forcemoodtheme',
                                         'id' => 'opt_forcemoodtheme',
                                         'selected' => $u->{'opt_forcemoodtheme'} eq 'Y' }) . "\n";
     $ret .= "<label for='opt_forcemoodtheme'>View this mood theme on all of your friends' posts</label>";
-    $ret .= "<noscript><br />" . LJ::html_submit('save:moodtheme', $ML{'.change'}) . " </noscript>";
     $ret .= "</div></div></fieldset>";
 
     if ($u->prop('stylesys') == 2) {
