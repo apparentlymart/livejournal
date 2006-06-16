@@ -147,15 +147,17 @@ body<=
 
         my $when = LJ::ago_text(time() - $inbox_item->when_unixtime);
         my $contents = $inbox_item->as_html || '';
-
+        
+        my $row_class = ($qid % 2 ==0) ? "InboxItem_Meta" : "InboxItem_Meta alt";
+        
         $notificationtable .= qq {
-            <tr class="InboxItem_Meta">
+            <tr class="$row_class">
                 <td class="checkbox">$checkbox</td>
-                <td class="item"><span class="$read_class">$title</span></td>
+                <td class="item">
+                    <span class="$read_class">$title</span>
+                    <div class="InboxItem_Content">$contents</div>
+                </td>
                 <td class="time">$when</td>
-            </tr>
-            <tr class="InboxItem_Content">
-                <td colspan="3">$contents</td>
             </tr>
         };
     }
@@ -207,25 +209,6 @@ function submitAction(action) {
 }
 </script>
 
-
-<style>
-#NotificationTable {
-float: right;
-width: 73%;
-margin-top: 1.5em;
-}
-
-#NotificationSidebar {
-float: left;
-width: 25%;
-margin-top: 1.5em;
-}
-
-#NotificationSidebar .BlurbTitle {
-font-weight: bold;
-font-size: 1.0em;
-}
-</style>
 
 <=head
 
