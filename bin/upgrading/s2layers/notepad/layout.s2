@@ -295,15 +295,6 @@ function Page::print()
         $margin = " style=\"margin-top: $*content_top_margin;\"";
     }
 
-    var string align = "";
-    if ($*content_alignment == "center") {
-        $align = " margin-left: auto; margin-right: auto;";
-    } elseif ($*content_alignment == "right") {
-        $align = " float: right;";
-    } else {
-        $align = " float: left;";
-    }
-
     var string website_name = $.journal.website_name ? $.journal.website_name : $*text_website_default_name;
     var string website = ($*show_website and $.journal.website_url != "" ?
         """<td width="120" height="18" style="background-image: url($*imguri/tab.jpg)">&nbsp;&nbsp;
@@ -329,13 +320,18 @@ function Page::print()
  <body>
  """;
  $this->print_control_strip();
+ if (viewer_sees_vbox() or viewer_sees_hbox_top() or (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends"))) {
+    """<table width="100%" height="100%"$margin>""";
+ }
  if (viewer_sees_hbox_top()) {
+    """<tr><td align="$*content_alignment">""";
     """<div style="width: 738px; margin-bottom: 5px;">""";
     $this->print_hbox_top();
-    "</div>";
+    "</div></td>";
+    if (viewer_sees_vbox()) { "<td>&nbsp;</td>"; }
+    "</tr>";
  }
- if (viewer_sees_vbox()) {
-    """<table width="100%" height="100%"$margin>""";
+ if (viewer_sees_vbox() or viewer_sees_hbox_top() or (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends"))) {
     """<tr><td valign="top">""";
  }
  """
@@ -417,17 +413,26 @@ if ($*counter_code != "") {
    </tr>
   </table>
   """;
-  if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
-    """<div style="width: 738px;$align">""";
-    $this->print_hbox_bottom();
-    "</div>";
-  }
   if (viewer_sees_vbox()) {
     "</td>";
     """<td valign="top" align="right" width="20%">""";
     """<div style="margin-right: 10px;">""";
     $this->print_vbox();
-    "</div></td></tr></table>";
+    "</div>";
+  }
+  if (viewer_sees_vbox() or viewer_sees_hbox_top() or (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends"))) {
+    "</td></tr>";
+  }
+  if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
+    """<tr><td align="$*content_alignment">""";
+    """<div style="width: 738px;">""";
+    $this->print_hbox_bottom();
+    "</div></td>";
+    if (viewer_sees_vbox()) { "<td>&nbsp;</td>"; }
+    "</tr>";
+  }
+  if (viewer_sees_vbox() or viewer_sees_hbox_top() or (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends"))) {
+    "</table>";
   }
   """
  </body>
