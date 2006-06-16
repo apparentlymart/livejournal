@@ -113,7 +113,7 @@ body<=
     ### Link List
     if($u->prop('stylesys') == 2) {
         $ret .= "<fieldset><legend>Link List</legend>";
-        $ret .= "Many S2 layouts can display <a href='http://www.livejournal.com/manage/links.bml$getextra'>your link ";
+        $ret .= "Many S2 layouts can display <a href='$LJ::SITEROOT/manage/links.bml$getextra'>your link ";
         $ret .= "list</a>. Once you've set it up, you can display it in your journal by turning on the \"Display ";
         $ret .= "Link List\" custom option in your layout.</fieldset>";
     }
