@@ -37,7 +37,14 @@ propgroup presentation {
   property use page_friends_items;
   property use use_shared_pic;
   property use view_entry_disabled;
+  property use linklist_support;
   property use external_stylesheet;
+  property string counter_code {
+      des = "If you have an external web counter, you can enter the HTML for it here";
+      note = "Your counter will appear at the bottom of the header at the top of your journal.";
+      maxlength = 2000;
+      string_mode = "html-oneline";
+  }
 }
 set content_width = "100%";
 set content_alignment = "left";
@@ -49,6 +56,8 @@ set show_entry_userpic = true;
 set page_recent_items = 20;
 set page_friends_items = 20;
 set view_entry_disabled = false;
+set linklist_support = false;
+set counter_code = "";
 
 propgroup colors {
   property Color body_bgcolor { 
@@ -172,18 +181,52 @@ propgroup images {
 	note = "Not supported in all browsers, but allows for the background image to be in a fixed position when scrolling.";
 	values = "scroll|Scroll|fixed|Fixed";
   }
+  property string img_btwn_comments {
+    des = "URL to an image to be used between your comment links";
+    note = "If you specify an image to use, it will replace any text between the comment links.";
+  }
 }
 set page_background_image = "";
 set page_background_repeat = "repeat";
 set page_background_position = "center";
 set page_background_scrolling = "scroll";
+set img_btwn_comments = "";
 
 propgroup text {
   property use text_post_comment;
   property use text_read_comments;
   property use text_post_comment_friends;
   property use text_read_comments_friends;
+  property string text_left_comments {
+        des = "Text to be used in front of your comment links";
+  }
+  property string text_btwn_comments {
+        des = "Text to be used between your comment links";
+        note = "If you specified an image to be used between your comments links in the \"Images\" section, then this option will not have any effect.";
+  }
+  property string text_right_comments {
+        des = "Text to be used at the end of your comment links";
+  }
+  property string date_format {
+        des = "Date format for entries";
+  }
+  property string time_format {
+        des = "Time format for entries";
+  }
+  property string datetime_comments_format {
+        des = "Date and time format for comments";
+  }
+  property string date_monthpage_format {
+        des = "Month format for the month page";
+  }
 }
+set text_left_comments = "comments: ";
+set text_btwn_comments = " or ";
+set text_right_comments = "";
+set date_format = "%%month%% %%dayord%%, %%yyyy%%";
+set time_format = "%%hh%%:%%min%% %%a%%m";
+set datetime_comments_format = "%%yyyy%%-%%mm%%-%%dd%% %%hh%%:%%min%% %%a%%m";
+set date_monthpage_format = "%%month%% %%yyyy%%";
 
 propgroup customcss {
   property string custom_css {
@@ -200,7 +243,43 @@ set tags_aware = true;
 
 function Page::lay_captionbar_navigation () { }
 
-function captionbar (Page p) {
+function Page::print_linklist() {
+    if (size $.linklist <= 0) {
+        return;
+    } elseif (not $*linklist_support) {
+        return;
+    }
+
+    var string linklist = "";
+    var string link = "";
+    var bool section_open = false;
+    var bool first = true;
+
+    foreach var UserLink l ($.linklist) {
+        if ($l.title) {
+            if ($l.is_heading or $first) {
+                if ($section_open) {
+                    $linklist = $linklist + "</td></tr>";
+                }
+                if ($l.is_heading) {
+                    $link = "<tr><td>$l.title:</td><td>";
+                } else {
+                    $link = "<tr><td>View:</td><td><a href='$l.url'>$l.title</a>. ";
+                }
+                $section_open = true;
+                $first = false;
+            } else {
+                $link = "<a href='$l.url'>$l.title</a>. ";
+            }
+        }
+        $linklist = $linklist + $link;
+    }
+    if ($linklist != "") {
+        "$linklist" + "</td></tr>";
+    }
+}
+
+function captionbar (Page p, bool top) {
     var string title = $p->title();
 
     var string userpic;
@@ -229,17 +308,26 @@ function captionbar (Page p) {
   <td><b>$title</b><br />
     <table border='0'>
       $links
-      $website
+      $website""";
+      $p->print_linklist();
+      """
       <tr>
         <td colspan='2'>""";
 
     $p->lay_captionbar_navigation(); 
+    if ($top and $*counter_code != "") {
+        """<br />$*counter_code""";
+    }
     "
         </td>
       </tr>
     </table>
   </td>
 </tr></table>";
+}
+
+function captionbar (Page p) {
+    captionbar($p, false);
 }
 
 function print_stylesheet ()
@@ -349,7 +437,7 @@ function Page::print ()
     
     $this->print_control_strip();
     """<table style="width: $*content_width;$margin" align="$*content_alignment"><tr><td>""";
-    "<p>"; captionbar($this); "</p>";
+    "<p>"; captionbar($this, true); "</p>";
 
     if (viewer_sees_vbox()) {
         """<table width="100%" height="100%">""";
@@ -447,10 +535,10 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     $colors{"fgcolor"} = "$*accent_fgcolor";
     if ($p.view == "recent") {
         if ($e.new_day) {
-            print_header($e.time->date_format("%%month%% %%dayord%%, %%yyyy%%"));
+            print_header($e.time->date_format($*date_format));
         }
     } else {
-        print_header($e.time->date_format("%%month%% %%dayord%%, %%yyyy%%"));
+        print_header($e.time->date_format($*date_format));
     }
     # Userpic
     var string metapic = "";
@@ -478,7 +566,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         $meta{"Subject:"} = $e.subject;
     }
     # Time posted
-    var string time = $e.time->time_format();
+    var string time = $e.time->time_format($*time_format);
     $meta{"Time:"} = $time;
     # Current
     if (size $e.metadata) {
@@ -510,17 +598,32 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         $meta{"Tags:"} = $tag;
     }
 
-    if ($e.comments.enabled) {
-        $footer = "comments:";
-        if (($e.comments.count > 0 or $e.comments.screened) and ($p.view != "entry")) {
-           $footer = "$footer <a href=\"$e.comments.read_url\">"
-                   + get_plural_phrase($e.comments.count, $p.view == "friends" ? 
-                     "text_read_comments_friends" : "text_read_comments")
-                   + "</a> or";
+    if ($e.comments.show_readlink or $e.comments.show_postlink) {
+        $footer = $footer + "$*text_left_comments";
+        if ($e.comments.show_readlink) {
+            $footer = $footer +
+                      "<a href=\"$e.comments.read_url\">" +
+                      get_plural_phrase($e.comments.count, $p.view == "friends" ? "text_read_comments_friends" : "text_read_comments") +
+                      "</a>";
         }
-        $footer = "$footer <a href=\"$e.comments.post_url\">"
-                + ($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)
-                + "</a>";
+        if ($e.comments.show_postlink and $e.comments.show_readlink) {
+            if (clean_url($*img_btwn_comments) != "") {
+                $footer = $footer + """ <img src="$*img_btwn_comments" alt="" /> """;
+            } else {
+                $footer = $footer + "$*text_btwn_comments";
+            }
+        }
+        if ($e.comments.show_postlink) {
+            if ($e.comments.maxcomments) {
+                $footer = $footer + "$*text_max_comments";
+            } else {
+                $footer = $footer +
+                          "<a href=\"$e.comments.post_url\">" +
+                          ($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment) +
+                          "</a>";
+            }
+        }
+        $footer = $footer + "$*text_right_comments";
     }
 
     # Misc Links
@@ -583,23 +686,6 @@ function RecentPage::print_body {
 function FriendsPage::print_body {
     foreach var Entry e ($.entries) {
         $this->print_entry($e);
-    }
-}
-
-function CommentInfo::print() {
-    if ($.show_readlink or $.show_postlink) {
-        "<tr><td bgcolor='$*accent_bgcolor'><font color='$*accent_fgcolor'>";
-        "<nobr>comments: ";
-        if ($.show_readlink) {
-            $this->print_readlink();
-        }
-        if ($.show_postlink and $.show_readlink) {
-            " or ";
-        }
-        if ($.show_postlink) {
-            $this->print_postlink();
-        }
-        "</nobr></font></td></tr>";
     }
 }
 
@@ -675,7 +761,7 @@ function DayPage::print_body ()
     if (not $.has_entries) {
         "<table border='0' width='100%' cellpadding='5' cellspacing='1' bgcolor='$*border_color'>";
         "<tr><td bgcolor='$*headerbar_bgcolor'><font color='$*headerbar_fgcolor'>";
-        print $.date->date_format("%%month%% %%dayord%%, %%yyyy%%");
+        print $.date->date_format($*date_format);
         "</font></td></tr></table><br />";
         print "No journal entries for this day.";
     } else {
@@ -686,7 +772,7 @@ function DayPage::print_body ()
 }
 
 function MonthPage::print_body {
-    print_header($.date->date_format("%%month%% %%yyyy%%"));
+    print_header($.date->date_format($*date_monthpage_format));
     print_genericbox_open();
     "<form method='post' action='$.redir.url'><center>";
     $.redir->print_hiddens();
@@ -792,7 +878,7 @@ function EntryPage::print_comment (Comment c) {
     }
 
     # Time posted
-    $meta{"Time:"} = $c->time_display();
+    $meta{"Time:"} = $c->time_display($*datetime_comments_format, "none");
 
     # Link
     $meta{"Link:"} = "(<a href='$c.permalink_url'>Link</a>)";
@@ -833,6 +919,8 @@ function ReplyPage::print_body () {
 
     var string{} meta; var string metapic;
 
+    print_header($.replyto.time->date_format($*date_format));
+
     # Userpic
     if (defined $.replyto.userpic and $*comment_userpic_style != "off")
     {
@@ -845,7 +933,7 @@ function ReplyPage::print_body () {
     }
 
     # Time posted
-    $meta{"Time:"} = $.replyto.time->date_format() + " " + $.replyto.time->time_format();
+    $meta{"Time:"} = $.replyto.time->time_format($*time_format);
 
     print_box_open({ "bgcolor" => "$*accent_bgcolor", "fgcolor" => "$*accent_fgcolor" },
               $metapic, $meta, "");
