@@ -26,10 +26,16 @@ require "$ENV{LJHOME}/cgi-bin/talklib.pl";
 #    nodeid:        nodeid to which this comment
 #                   applies (often an entry itemid), loaded if _loaded_row
 #
-#    parenttalkid   talkid of parent comment,        loaded if _loaded_row
+#    parenttalkid:  talkid of parent comment,        loaded if _loaded_row
 #    posterid:      userid of posting user           lazily loaded at access
 #    datepost_unix: unixtime from the 'datepost'     loaded if _loaded_row
 #    state:         comment state identifier,        loaded if _loaded_row
+
+#    body:          text of comment,                 loaded if _loaded_text
+#    body_orig:     text of comment w/o transcoding, present if unknown8bit
+
+#    subject:       subject of comment,              loaded if _loaded_text
+#    subject_orig   subject of comment w/o transcoding, present if unknown8bit
 
 #    props:   hashref of props,                    loaded if _loaded_props
 
@@ -76,11 +82,57 @@ sub new
 
 sub url {
     my $self    = shift;
+
+    my $dtalkid = $self->dtalkid;
     my $entry   = $self->entry;
     my $url     = $entry->url;
-    my $dtalkid = ($self->jtalkid * 256) + $entry->anum;
-    $url .= "?thread=$dtalkid#t$dtalkid";
-    return $url;
+
+    return "$url?thread=$dtalkid#t$dtalkid";
+}
+
+sub reply_url {
+    my $self    = shift;
+
+    my $dtalkid = $self->dtalkid;
+    my $entry   = $self->entry;
+    my $url     = $entry->url;
+
+    return "$url?replyto=$dtalkid";
+}
+
+sub thread_url {
+    my $self    = shift;
+
+    my $dtalkid = $self->dtalkid;
+    my $entry   = $self->entry;
+    my $url     = $entry->url;
+
+    return "$url?thread=$dtalkid";
+}
+
+sub unscreen_url {
+    my $self    = shift;
+
+    my $dtalkid = $self->dtalkid;
+    my $entry   = $self->entry;
+    my $journal = $entry->u->journal;
+
+    return 
+        "$LJ::SITEROOT/talkscreen.bml" . 
+        "?mode=unscreen&journal=$journal" . 
+        "&talkid=$dtalkid";
+}
+
+sub delete_url {
+    my $self    = shift;
+
+    my $dtalkid = $self->dtalkid;
+    my $entry   = $self->entry;
+    my $journal = $entry->u->journal;
+
+    return 
+        "$LJ::SITEROOT/delcomment.bml" . 
+        "?journal=$journal&id=$dtalkid";
 }
 
 # return LJ::User of journal comment is in
@@ -101,6 +153,12 @@ sub entry {
 sub jtalkid {
     my $self = shift;
     return $self->{jtalkid};
+}
+
+sub dtalkid {
+    my $self = shift;
+    my $entry = $self->entry;
+    return ($self->jtalkid * 256) + $entry->anum;
 }
 
 sub parenttalkid {
@@ -179,20 +237,24 @@ sub _load_text {
     my $self = shift;
     return 1 if $self->{_loaded_text};
 
-    my $ret = LJ::get_logtext2($self->{'u'}, $self->{'jitemid'});
-    my $lt = $ret->{$self->{jitemid}};
-    return 0 unless $lt;
+    my $entry  = $self->entry;
+    my $entryu = $entry->u;
 
-    $self->{subject}      = $lt->[0];
-    $self->{event}        = $lt->[1];
+    my $ret  = LJ::get_talktext2($entryu, $self->jtalkid);
+    my $tt = $ret->{$self->jtalkid};
+    return 0 unless $tt && ref $tt;
+
+    # raw subject and body
+    $self->{subject} = $tt->[0];
+    $self->{body}    = $tt->[1];
 
     if ($self->prop("unknown8bit")) {
         # save the old ones away, so we can get back at them if we really need to
-        $self->{subject_orig}  = $self->{subject};
-        $self->{event_orig}    = $self->{event};
+        $self->{subject_orig} = $self->{subject};
+        $self->{body_orig}    = $self->{body};
 
         # FIXME: really convert all the props?  what if we binary-pack some in the future?
-        LJ::item_toutf8($self->{u}, \$self->{'subject'}, \$self->{'event'}, $self->{props});
+        LJ::item_toutf8($self->{u}, \$self->{subject}, \$self->{event}, $self->{props});
     }
 
     $self->{_loaded_text} = 1;
@@ -230,25 +292,56 @@ sub subject_raw {
     return $self->{subject};
 }
 
-# raw utf8 text, with no HTML cleaning
-sub event_raw {
+# raw text as user sent us, without transcoding while correcting for unknown8bit
+sub subject_orig {
     my $self = shift;
     $self->_load_text unless $self->{_loaded_text};
-    return $self->{event};
+    return $self->{subject_orig} || $self->{subject};
+}
+
+# raw utf8 text, with no HTML cleaning
+sub body_raw {
+    my $self = shift;
+    $self->_load_text unless $self->{_loaded_text};
+    return $self->{body};
 }
 
 # raw text as user sent us, without transcoding while correcting for unknown8bit
-sub event_orig {
+sub body_orig {
     my $self = shift;
     $self->_load_text unless $self->{_loaded_text};
-    return $self->{event_orig} || $self->{event};
+    return $self->{body_orig} || $self->{body};
 }
 
-sub subject_html
-{
+sub subject_html {
     my $self = shift;
     $self->_load_text unless $self->{_loaded_text};
     return LJ::ehtml($self->{subject});
+}
+
+sub is_active {
+    my $self = shift;
+    return $self->{state} eq 'A' ? 1 : 0;
+}
+
+sub is_screened {
+    my $self = shift;
+    return $self->{state} eq 'S' ? 1 : 0;
+}
+
+sub is_deleted {
+    my $self = shift;
+    return $self->{state} eq 'D' ? 1 : 0;
+}
+
+sub remote_can_delete {
+    my $self = shift;
+
+    my $remote   = LJ::User->remote;
+    my $journalu = $self->journal;
+    my $posteru  = $self->poster;
+
+    return LJ::Talk::can_delete($remote, $journalu, $posteru, $posteru->user);
 }
 
 1;
