@@ -7,7 +7,7 @@
     my $addressbook = LJ::vCard::Addressbook->new;
 
     $addressbook->add( LJ::vCard->new( $remote ) );
-    
+
     my $vcf_file = $addressbook->export();
 
     BML::set_content_type("text/x-vcard");
