@@ -309,8 +309,9 @@ sub load_layers {
     my @need_memc; # lid, lid, lid, ...
 
     # initial sweep, anything loaded for less than 60 seconds is golden
+    # if dev server, only cache layers for 1 second
     foreach my $lid (@lids) {
-        if (my $loaded = S2::layer_loaded($lid, 60)) {
+        if (my $loaded = S2::layer_loaded($lid, $LJ::IS_DEV_SERVER ? 1 : 60)) {
             # it's loaded and not more than 60 seconds load, so we just go
             # with it and assume it's good... if it's been recompiled, we'll
             # figure it out within the next 60 seconds
