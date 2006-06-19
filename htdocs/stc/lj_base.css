@@ -18,6 +18,10 @@ form {
     line-height: 0;
 }
 
+.nowrap {
+    white-space: nowrap;
+}
+
 .lj_progresscontainer {
     height: 25px;
     width: 400px;
