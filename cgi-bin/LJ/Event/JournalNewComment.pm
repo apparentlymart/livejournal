@@ -19,11 +19,36 @@ sub title {
 
 sub content {
     my $self = shift;
+    my $comment = $self->comment or return "(Invalid comment)";
+
+    LJ::need_res('js/commentmanage.js');
+
+    my $comment_subject = $comment->subject_text;
+    my $comment_body = $comment->body_html;
+    my $buttons = $comment->manage_buttons;
+    my $dtalkid = $comment->dtalkid;
+
     my $ret = qq {
-        Comment stuff goes here
+        <div id="ljcmt$dtalkid" class="JournalNewComment">
+            <div class="Subject">$comment_subject</div>
+            <div class="ManageButtons">$buttons</div>
+            <div class="Body">$comment_body</div>
+        </div>
     };
+
+    my $cmt_info = $comment->info;
+    my $cmt_info_js = LJ::js_dumper($cmt_info) || '{}';
+
+    my $posterusername = $self->comment->poster ? $self->comment->poster->{user} : "";
+
+    $ret .= qq {
+        <script language="JavaScript">
+            LJ_cmtinfo = $cmt_info_js;
+            LJ_cmtinfo["$dtalkid"] = "$posterusername";
+        </script>
+    };
+
     return $ret;
-    return $self->comment ? $self->comment->event_text : '';
 }
 
 sub as_html {
@@ -40,7 +65,9 @@ sub as_html {
 
     my $in_text = '<a href="' . $entry->url . '">an entry</a>';
 
-    return "New <a href=\"$url\">comment</a> in $in_text on $ju by $pu.";
+    my $subject = $comment->subject_text ? ' "' . $comment->subject_text . '"' : '';
+
+    return "New <a href=\"$url\">comment</a>$subject in $in_text on $ju by $pu.";
 }
 
 sub subscription_as_html {
@@ -87,7 +114,9 @@ sub subscription_as_html {
 
     $posteruser = $journal_is_owner ? 'me' : $posteruser;
 
-    return "New comments under <a href='$threadurl'>the thread</a> by $posteruser in <a href='$entryurl'>$entrydesc</a> $in_journal";
+    my $thread_desc = $comment->subject_text ? '"' . $comment->subject_text . '"' : "the thread";
+
+    return "New comments under <a href='$threadurl'>$thread_desc</a> by $posteruser in <a href='$entryurl'>$entrydesc</a> $in_journal";
 }
 
 sub matches_filter {
