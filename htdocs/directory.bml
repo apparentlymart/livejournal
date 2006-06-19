@@ -140,18 +140,20 @@ body<=
  }
 
  my $remote = LJ::get_remote();
+if (!$remote) {
+    return BML::ml('.error.notloggedin', { aopts => "href='$LJ::SITEROOT/login.bml?ret=1'" });
+}
+
 my $inline;
 unless (LJ::get_cap($remote,"directory")) {
     if ($inline .= LJ::run_hook("cprod_inline", $remote, 'Directory')) {
         return $inline;
     } else {
-        return BML::ml('cprod.directory.text.v1');
+        return BML::ml('cprod.directory.text2.v1');
     }
 }
 
- if (!$remote) {
-     return BML::ml('.error.notloggedin', { aopts => "href='$LJ::SITEROOT/login.bml?ret=1'" });
- }
+
 
  unless (LJ::Dir::do_search($dbr, $dbdir, \%FORM, \@matches, \%info)) {
      return "<?h1 $ML{'Error'} h1?><?p $ML{'Error'}: $info{'errmsg'} p?>";
