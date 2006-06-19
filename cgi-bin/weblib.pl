@@ -2422,6 +2422,9 @@ sub subscribe_interface {
         next unless $cat_events && scalar @$cat_events;
         push @catids, $catid;
 
+        my $cat_empty = 1;
+        my $cat_html = '';
+
         # is this category the tracking category?
         my $is_tracking_category = $category eq $tracking_cat && $showtracking;
 
@@ -2446,7 +2449,7 @@ sub subscribe_interface {
 
         next unless (scalar @event_classes) || (scalar @$pending);
 
-        $events_table .= qq {
+        $cat_html .= qq {
           <div class="CategoryRow-$catid">
             <tr class="CategoryRow">
                 <td>
@@ -2516,14 +2519,14 @@ sub subscribe_interface {
                 noescape => 1,
             });
 
-            $events_table .= qq {
+            $cat_html .= qq {
                 <td>
                     $checkall_box
                     </td>
                 };
         }
 
-        $events_table .= '</tr>';
+        $cat_html .= '</tr>';
 
         # inbox method
         foreach my $pending_sub (@pending_subscriptions) {
@@ -2548,7 +2551,7 @@ sub subscribe_interface {
                 next if $no_show;
             }
 
-            $events_table  .= "<tr><td>" .
+            $cat_html  .= "<tr><td>" .
                 LJ::html_check({
                     id       => $input_name,
                     name     => $input_name,
@@ -2559,14 +2562,16 @@ sub subscribe_interface {
                 }) .  "</td>";
 
             unless ($pending_sub->pending) {
-                $events_table .= LJ::html_hidden({
+                $cat_html .= LJ::html_hidden({
                     name  => "${input_name}-old",
                     value => $subscribed,
                 });
             }
 
+            $cat_empty = 0;
+
             # print out notification options for this subscription (hidden if not subscribed)
-            $events_table .= "<td>&nbsp;</td>";
+            $cat_html .= "<td>&nbsp;</td>";
             my $hidden = $subscribed ? '' : 'style="visibility: hidden;"';
 
             foreach my $note_class (@notify_classes) {
@@ -2582,7 +2587,7 @@ sub subscribe_interface {
 
                 my $notify_input_name = $note_pending->freeze;
 
-                $events_table .= qq {
+                $cat_html .= qq {
                     <td class='NotificationOptions' $hidden>
                     } . LJ::html_check({
                         id       => $notify_input_name,
@@ -2593,15 +2598,16 @@ sub subscribe_interface {
                     }) . '</td>';
 
                 unless ($note_pending->pending) {
-                    $events_table .= LJ::html_hidden({
+                    $cat_html .= LJ::html_hidden({
                         name  => "${notify_input_name}-old",
                         value => (scalar @subs) ? 1 : 0,
                     });
                 }
             }
-
-            $events_table .= '</tr></div>';
         }
+
+        $cat_html .= '</tr></div>';
+        $events_table .= $cat_html unless $cat_empty;
 
         $catid++;
     }
