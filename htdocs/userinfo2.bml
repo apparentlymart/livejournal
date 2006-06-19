@@ -250,7 +250,7 @@
  $head .= "#actionbar #actionitem { margin: 1px 10px 1px 5px; white-space: nowrap }\n";
  $head .= "#actionitem a { text-decoration: none }\n";
  $head .= "#actionitem img { vertical-align: bottom}\n";
- $head .= "#ID_box { margin-top: 10px; padding: 8px; BORDER-RIGHT: #999 2px solid; BORDER-TOP: #999 1px solid; BORDER-LEFT: #999 1px solid; BORDER-BOTTOM: #999 2px solid; }\n";
+ $head .= "#ID_box { margin-top: 10px; padding: 12px; BORDER-RIGHT: #999 2px solid; BORDER-TOP: #999 1px solid; BORDER-LEFT: #999 1px solid; BORDER-BOTTOM: #999 2px solid; }\n";
  $head .= "#ID_pic { float: left; width: 116px; }\n";
  $head .= "#maininfo .data { font-weight: bold }\n";
  $head .= "p { line-height: 1.3em; }\n";
@@ -391,7 +391,6 @@
  #  - Show if user set to show to friends and remote is a friend
  #  - Show if remote is using viewall
  my $schoollist;
- my %currentschools;
  if ($u->{'journaltype'} ne 'Y' &&
      !$LJ::DISABLED{'schools'}  &&
      (($u->{'opt_showschools'} eq '' || $u->{'opt_showschools'} eq 'Y') ||
@@ -434,7 +433,6 @@
                  my $link .= $schoolname . " - " . $schoolinfo . $schooldates . "<br />\n";
 
                  push @links, $link;
-                 $currentschools{$schoolname} = $schoolinfo unless ($schools->{$sid}->{year_end});
              }
              $schoollist .= join('', @links);
          } else {
@@ -450,6 +448,101 @@
      }
  }
  # /Schools
+
+ # Mangle email address
+ my $mangleaddress = sub {
+     my $email = shift;
+     my $mret;
+     if ( $email =~ m/(.*)@(.*)/ ) {
+         $mret = "<table cellpadding='0' cellspacing='0'><tr><td>$1</td><td align='center'><i>&#64;</i></td><td>$2</td></tr></table>";
+     } else {
+         $mret = $email;
+     }
+     return $mret;
+ };
+ # /Mangle
+
+ # Contact Info
+ my $contactinfo = sub {
+     my $body;
+     # Divide email address across 3 table cells
+     my @emails = $u->email($remote);
+     if (@emails) {
+         $body .= "<tr valign='top'><td align='right'>$ML{'.label.email'} </td><td class='data'>";
+         foreach my $email (@emails) {
+             $body .= ($u->{'opt_mangleemail'} eq "Y" || $email =~ /\@livejournal\.com$/)
+                       ? $mangleaddress->($email)
+                       : "<a href='mailto:$email'>$email</a><br />";
+         }
+         $body .= "</td></tr>";
+     }
+
+      foreach my $k (qw(aolim icq yahoo msn jabber google_talk skype gizmo)) {
+          $u->{$k} = LJ::ehtml($u->{$k});
+      }
+
+      if ($u->{'aolim'}) {
+          my $qim = $u->{'aolim'};
+          $qim =~ s/ //g;
+          $body .= "<tr><td valign='top' align='right'><span style='white-space: nowrap;'>$ML{'.label.aolim'} </span></td>";
+          $body .= "<td class='data'><img alt='AIM status' src='http://big.oscar.aol.com/$qim?on_url=http://www.aol.com/aim/gr/online.gif&amp;off_url=http://www.aol.com/aim/gr/offline.gif' height='17' width='14' /> $u->{'aolim'} \n";
+          $body .= "<span class='nowrap'>(<a href='aim:addbuddy?screenname=$qim'>$ML{'.label.addbuddy'}</a>,";
+          $body .= "<a href='aim:goim?screenname=$qim&amp;message=Hello+there!+How+are+you?'>$ML{'.label.sendmessage'}</a>)</span></td></tr>\n";
+      }
+      if ($u->{'icq'}) {
+          $body .= "<tr><td valign='top' align='right'>$ML{'.label.icquin'}</td>";
+          $body .= "<td class='data'><img alt='ICQ status' src='http://web.icq.com/whitepages/online?icq=$u->{'icq'}&amp;img=5' height='18' width='18' /> ";
+          $body .= "$u->{'icq'} (<a href='http://wwp.icq.com/$u->{'icq'}'>";
+          $body .= "$ML{'.label.userprofile'}</a>)";
+          $body .= "</td></tr>\n";
+      }
+      if ($u->{'yahoo'}) {
+          $body .= "<tr><td valign='top' align='right'><span style='white-space: nowrap;'>$ML{'.label.yahooid'}</span></td>";
+          $body .= "<td class='data'><img alt='Yahoo status' src='http://opi.yahoo.com/online?u=$u->{'yahoo'}&amp;m=g&amp;t=0' width='12' height='12' /> <a href='http://profiles.yahoo.com/$u->{'yahoo'}'>$u->{'yahoo'}</a> \n";
+          $body .= "<span class='nowrap'>(<a href='http://edit.yahoo.com/config/set_buddygrp?.src=&amp;.cmd=a&amp;.bg=Friends&amp;.bdl=$u->{'yahoo'}'>$ML{'.label.adduser'}</a>, <a href='http://edit.yahoo.com/config/send_webmesg?.target=$u->{'yahoo'}'>$ML{'.label.sendmessage'}</a>)</span> </td></tr>\n";
+      }
+      if ($u->{'msn'}) {
+          my $msnname = ($u->{'opt_mangleemail'} eq "Y") ? $mangleaddress->($u->{'msn'}) : $u->{'msn'};
+          $body .= "<tr><td valign='top' align='right'>$ML{'.label.msnusername'}</td><td class='data'>$msnname</td></tr>\n";
+      }
+      if ($u->{'jabber'}) {
+          my $jabber = $mangleaddress->($u->{'jabber'});
+          $body .= "<tr><td valign='top' align='right'>$ML{'.label.jabber'}</td><td class='data'>$jabber</td></tr>\n";
+      }
+      if ($u->{'google_talk'}) {
+          my $google = $mangleaddress->($u->{'google_talk'});
+          $body .= "<tr><td valign='top' align='right'>$ML{'.label.googletalk'}</td><td class='data'>$google</td></tr>\n";
+      }
+      if ($u->{'skype'}) {
+          my $skype = $mangleaddress->($u->{'skype'});
+          $body .= "<tr><td valign='top' align='right'>$ML{'.label.skype'}</td><td class='data'>$skype</td></tr>\n";
+      }
+      if (my $gizmo = $u->gizmo_account) {
+          $gizmo = $mangleaddress->( $gizmo );
+          $body .= "<tr><td valign='top' align='right'>$ML{'.label.gizmo'}</td><td class='data'>$gizmo</td></tr>\n";
+      }
+
+      # website
+      if ( ! $synd && $u->{'url'}) {
+          my $url = LJ::ehtml($u->{'url'});
+          unless ($url =~ /^https?:\/\//) {
+              $url =~ s/^http\W*//;
+              $url = "http://$url";
+          }
+          my $urlname = LJ::ehtml($u->{'urlname'} || $url);
+          $url = "<a href='$url'>$urlname</a>";
+          $body .= "<tr><td align='right'>$ML{'.label.website'}</td><td class='data'>$url</td></tr>\n" if ($u->{'url'});
+      }
+
+      # text message
+      if ($u->{'txtmsg_status'} eq "on" && LJ::get_cap($u, "textmessaging")) {
+          $body .= "<tr><td align='right'>$ML{'.label.textmessage'}</td><td class='data'>" .
+                   BML::ml('.sendmessage.body2', {'user' => "$u->{'user'}", 'aopts' => "href='$LJ::SITEROOT/tools/textmessage.bml?user=$u->{'user'}'"}) . "</td></tr>";
+      }
+      return $body;
+ };
+ # /Contact Info
+
 
  # Prints out a list of users with links to their
  # userinfo pages. Apply strikethru and bolding
@@ -548,13 +641,13 @@
  ## ID Box
  my $watermark;
  if ($u->{'journaltype'} eq "P") {
-     $watermark = "style='background: url($LJ::IMGPREFIX/user_160.gif) no-repeat bottom right;'";
+     $watermark = "style='background: url($LJ::IMGPREFIX/user_160.gif) no-repeat bottom left;'";
  } elsif ($u->{'journaltype'} eq "C") {
-     $watermark = "style='background: url($LJ::IMGPREFIX/comm_160.gif) no-repeat bottom right;'";
+     $watermark = "style='background: url($LJ::IMGPREFIX/comm_160.gif) no-repeat bottom left;'";
  } elsif ($u->{'journaltype'} eq "Y") {
-     $watermark = "style='background: url($LJ::IMGPREFIX/feed_160.gif) no-repeat bottom right;'";
+     $watermark = "style='background: url($LJ::IMGPREFIX/feed_160.gif) no-repeat bottom left;'";
  } elsif ($u->{'journaltype'} eq "I") {
-     $watermark = "style='background: url($LJ::IMGPREFIX/openid_160.gif) no-repeat bottom right;'";
+     $watermark = "style='background: url($LJ::IMGPREFIX/openid_160.gif) no-repeat bottom left;'";
  }
 
  $body .= "<div id='ID_box' $watermark>";
@@ -598,7 +691,7 @@
  $body .= "      $num_com_post Posted Comments</span><br />\n";
  $body .= "      <div style='clear: right; overflow: hidden'><hr style='width: 100%'></div>\n";
 
- $body .= "      <div style='float: left; width: 53%;'>\n";
+ $body .= "      <div style='float: left; '>\n";
  $body .= "      <table id='maininfo'>\n";
  $body .= "        <tr><td align='right'>$ML{'.label.name'} </td><td class='data'>$u->{'name'}</td></tr>\n";
 
@@ -659,15 +752,8 @@
       }
   }
 
- # Current Schools
- if (%currentschools) {
-     $body .= "<tr><td valign='top' align='right'><span class='label'>Current School:</span> </td><td>";
-     foreach my $key ( keys %currentschools) {
-         $body .= "<span class='data'" . $key . "</span><br />" .
-                  $currentschools{$key} . "<br />\n";
-     }
-     $body .= "</td></tr>\n";
- }
+ # Contact Info
+ $body .= $contactinfo->();
 
  # Support Points
  my $points = $dbr->selectrow_array("SELECT SUM(points) AS 'points' FROM supportpoints WHERE userid=$userid");
@@ -748,7 +834,104 @@
  # Left Column
  $body .= "  <tr><td style='padding-right: 2em; vertical-align: top'>\n";
 
- $body .= LJ::ads( type => 'journal', orient => 'App-Confirm', force => '0' );
+
+ # Journal Info
+ $body .= "<div style='float: left;'>";
+ $body .= "<p><span class='ui_subhead'><img src='$LJ::IMGPREFIX/journal.gif' /> Journal</span></p>\n";
+ if ($u->{'journaltitle'}) {
+     $body .= "<p><span style='font-size: 1em'><b>" . LJ::ehtml($u->{'journaltitle'}) . "</b>";
+     if ($u->{'journalsubtitle'}) {
+         $body .= "<br /><i>" . LJ::ehtml($u->{'journalsubtitle'}) . "</i>";
+     }
+     $body .= "</span></p>";
+ }
+ $body .= "<p style='font-size: smaller;'>";
+ $body .= "Last updated $lastupdated<br />" if $lastupdated;
+ $body .= $journalentry_count->() . " entries and $num_com_got comments since creation";
+ $body .= "</p>\n</div>";
+ # /Journal Info
+
+ my $hook_extra;
+ LJ::run_hooks("userinfo_html_by_journal", {
+     'u' => $u,
+     'ret' => \$hook_extra,
+ });
+ $body .= $hook_extra;
+ $body .= "<div class='clear'> </div>\n";
+ $body .= "&nbsp;<br />\n";
+
+
+ # Bio
+ if ($u->{'has_bio'} eq "Y") {
+     my $label = $com ? $ML{'.about.comm'} : "Biography";
+
+     if ($u->{journaltype} eq 'I' && $LJ::ONLY_USER_VHOSTS) {
+         $u->{'bio'} = LJ::ehtml($u->{'bio'}); # XXXXX FIXME: TEMP FIX
+         $u->{'bio'} =~ s!\n!<br/>!g;
+     } else {
+         LJ::CleanHTML::clean_userbio(\$u->{'bio'});
+     }
+
+     $body .= "<p><span class='ui_subhead'><img src='$LJ::IMGPREFIX/biography.gif' border='0' /> $label</span></p>\n";
+     $body .= "<p>$u->{'bio'}</p>\n";
+     $body .= "&nbsp;<br />\n";
+ }
+ # Bio
+
+
+ # Schools
+ if ($schoollist) {
+     $body .= "<p><span class='ui_subhead'><img src='$LJ::IMGPREFIX/schools.gif' border='0' /> $ML{'.label.schools'}</span></p>\n";
+     $body .= "<p>$schoollist</p>\n";
+     $body .= "&nbsp;<br />\n";
+ }
+ # /Schools
+
+ # Interests
+ if (@$intu) {
+     $body .= "<p><span class='ui_subhead'><img src='$LJ::IMGPREFIX/interests.gif' border='0' /> $ML{'.label.interests'}</span></p>\n";
+     my $intcount = 0;
+     my $countcommon = 0;
+     my $intlist = "";
+     foreach my $int (@$intu) {
+         next if $intcount++ > 150;
+         LJ::text_out(\$int->[1]); # 1==interest
+         my $eint = LJ::eurl($int->[1]);
+         if ($int->[2] > 1) {  # 2==intcount
+             if ($remote_interest{$int->[0]}) {  # 0==intid
+                 $intlist .= "<span class='incommon'><a href='$LJ::SITEROOT/interests.bml?int=$eint'>$int->[1]</a></span>, ";
+                 $countcommon++;
+             } else {
+                 $intlist .= "<a href='$LJ::SITEROOT/interests.bml?int=$eint'>$int->[1]</a>, ";
+             }
+         } else {
+             $intlist .= "$int->[1], ";
+         }
+     }
+     chop $intlist; chop $intlist;  # remove trailing ", "
+     if ($intcount > 150) {
+         my $notshown = $intcount - 150;
+         $intlist .= BML::ml('.label.intsnotshown',{'intnotshown'=>$notshown});
+     }
+
+     $body .= "<p>($intcount";
+     unless ($remote_isowner) {
+         $body .= $countcommon ? ", <span class='incommon'>$countcommon in common</span>" : ", $countcommon in common";
+     }
+     $body .= ")<br /> " . $intlist;
+     if ($remote) {
+         my $link = "$LJ::SITEROOT/interests.bml?mode=enmasse";
+         $link .= "&fromuser=$user" unless ($remote->{'userid'} == $userid);
+         $body .= ". <small>";
+         my $mlcode = ($remote_isowner) ? '.label.interests.removesome'
+                                        : '.label.interests.modifyyours';
+         $body .= BML::ml('Actionlink', { 'link' => "<a href='$link'>$ML{$mlcode}</a>" });
+         $body .= "</a></small>";
+     }
+     $body .= "</p>\n";
+     $body .= "&nbsp;<br />\n";
+ }
+ # /Interests
 
  ## Friends, Communities and Feeds
 
@@ -899,214 +1082,6 @@
  $body .= "&nbsp;<br />\n";
  ## /Friends, Communities and Feeds
 
-
- # Set a minimum width of 300px
- $body .= "  <div><div style='width: 300px; height: 1px'> &nbsp;</div></div>\n";
- $body .= "  </td>\n";
- # /Left Column
-
- # Middle Column Divider
- $body .= "  <td style='border-left: solid 2px #369; padding-right: 1em'>&nbsp;</td>\n";
- # /Middle Column Divider
-
- # Right Column
- $body .= "  <td style='vertical-align: top'>\n";
-
- # Journal Info
- $body .= "<div style='float: left;'>";
- $body .= "<p><span class='ui_subhead'><img src='$LJ::IMGPREFIX/journal.gif' /> Journal</span></p>\n";
- if ($u->{'journaltitle'}) {
-     $body .= "<p><span style='font-size: 1em'><b>" . LJ::ehtml($u->{'journaltitle'}) . "</b>";
-     if ($u->{'journalsubtitle'}) {
-         $body .= "<br /><i>" . LJ::ehtml($u->{'journalsubtitle'}) . "</i>";
-     }
-     $body .= "</span></p>";
- }
- $body .= "<p style='font-size: smaller;'>";
- $body .= "Last updated $lastupdated<br />" if $lastupdated;
- $body .= $journalentry_count->() . " entries and $num_com_got comments since creation";
- $body .= "</p>\n</div>";
- # /Journal Info
-
- my $hook_extra;
- LJ::run_hooks("userinfo_html_by_journal", {
-     'u' => $u,
-     'ret' => \$hook_extra,
- });
- $body .= $hook_extra;
- $body .= "<div class='clear'> </div>\n";
- $body .= "&nbsp;<br />\n";
-
-
- # Bio
- if ($u->{'has_bio'} eq "Y") {
-     my $label = $com ? $ML{'.about.comm'} : "Biography";
-
-     if ($u->{journaltype} eq 'I' && $LJ::ONLY_USER_VHOSTS) {
-         $u->{'bio'} = LJ::ehtml($u->{'bio'}); # XXXXX FIXME: TEMP FIX
-         $u->{'bio'} =~ s!\n!<br/>!g;
-     } else {
-         LJ::CleanHTML::clean_userbio(\$u->{'bio'});
-     }
-
-     $body .= "<p><span class='ui_subhead'><img src='$LJ::IMGPREFIX/biography.gif' border='0' /> $label</span></p>\n";
-     $body .= "<p>$u->{'bio'}</p>\n";
-     $body .= "&nbsp;<br />\n";
- }
- # Bio
-
-
- # Contact Info
- if ($u->share_contactinfo($remote) || $viewall) {
-     $body .= "<p><span class='ui_subhead'><img src='$LJ::IMGPREFIX/contact.gif' border='0' /> Contact Information</span></p>\n";
-     $body .= "<p><table>";
-
-     # Divide email address across 3 table cells
-     my $mangleaddress = sub {
-         my $email = shift;
-         my $mret;
-         if ( $email =~ m/(.*)@(.*)/ ) {
-             $mret = "<table cellpadding='0' cellspacing='0'><tr><td>$1</td><td align='center'><i>&#64;</i></td><td>$2</td></tr></table>";
-         } else {
-             $mret = $email;
-         }
-         return $mret;
-     };
-
-     my @emails = $u->email($remote);
-     if (@emails) {
-         $body .= "<tr valign='top'><td align='right'>$ML{'.label.email'} </td><td>";
-         foreach my $email (@emails) {
-             $body .= ($u->{'opt_mangleemail'} eq "Y" || $email =~ /\@livejournal\.com$/)
-                       ? $mangleaddress->($email)
-                       : "<a href='mailto:$email'>$email</a><br />";
-         }
-         $body .= "</td></tr>";
-     }
-
-      foreach my $k (qw(aolim icq yahoo msn jabber google_talk skype gizmo)) {
-          $u->{$k} = LJ::ehtml($u->{$k});
-      }
-
-      if ($u->{'aolim'}) {
-          my $qim = $u->{'aolim'};
-          $qim =~ s/ //g;
-          $body .= "<tr><td valign='top' align='right'><span style='white-space: nowrap;'>$ML{'.label.aolim'} </span></td>";
-          $body .= "<td><img alt='AIM status' src='http://big.oscar.aol.com/$qim?on_url=http://www.aol.com/aim/gr/online.gif&amp;off_url=http://www.aol.com/aim/gr/offline.gif' height='17' width='14' /> $u->{'aolim'}<br />\n";
-          $body .= "(<a href='aim:addbuddy?screenname=$qim'>$ML{'.label.addbuddy'}</a>,";
-          $body .= "<a href='aim:goim?screenname=$qim&amp;message=Hello+there!+How+are+you?'>$ML{'.label.sendmessage'}</a>)</td></tr>\n";
-      }
-      if ($u->{'icq'}) {
-          $body .= "<tr><td valign='top' align='right'>$ML{'.label.icquin'}</td>";
-          $body .= "<td><img alt='ICQ status' src='http://web.icq.com/whitepages/online?icq=$u->{'icq'}&amp;img=5' height='18' width='18' /> ";
-          $body .= "$u->{'icq'}<br />(<a href='http://wwp.icq.com/$u->{'icq'}'>";
-          $body .= "$ML{'.label.userprofile'}</a>)";
-          $body .= "</td></tr>\n";
-      }
-      if ($u->{'yahoo'}) {
-          $body .= "<tr><td valign='top' align='right'><span style='white-space: nowrap;'>$ML{'.label.yahooid'}</span></td>";
-          $body .= "<td><img alt='Yahoo status' src='http://opi.yahoo.com/online?u=$u->{'yahoo'}&amp;m=g&amp;t=0' width='12' height='12' /> <a href='http://profiles.yahoo.com/$u->{'yahoo'}'>$u->{'yahoo'}</a><br />\n";
-          $body .= "(<a href='http://edit.yahoo.com/config/set_buddygrp?.src=&amp;.cmd=a&amp;.bg=Friends&amp;.bdl=$u->{'yahoo'}'>$ML{'.label.adduser'}</a>, <a href='http://edit.yahoo.com/config/send_webmesg?.target=$u->{'yahoo'}'>$ML{'.label.sendmessage'}</a>) </td></tr>\n";
-      }
-      if ($u->{'msn'}) {
-          my $msnname = ($u->{'opt_mangleemail'} eq "Y") ? $mangleaddress->($u->{'msn'}) : $u->{'msn'};
-          $body .= "<tr><td valign='top' align='right'>$ML{'.label.msnusername'}</td><td>$msnname</td></tr>\n";
-      }
-      if ($u->{'jabber'}) {
-          my $jabber = $mangleaddress->($u->{'jabber'});
-          $body .= "<tr><td valign='top' align='right'>$ML{'.label.jabber'}</td><td>$jabber</td></tr>\n";
-      }
-      if ($u->{'google_talk'}) {
-          my $google = $mangleaddress->($u->{'google_talk'});
-          $body .= "<tr><td valign='top' align='right'>$ML{'.label.googletalk'}</td><td>$google</td></tr>\n";
-      }
-      if ($u->{'skype'}) {
-          my $skype = $mangleaddress->($u->{'skype'});
-          $body .= "<tr><td valign='top' align='right'>$ML{'.label.skype'}</td><td>$skype</td></tr>\n";
-      }
-      if (my $gizmo = $u->gizmo_account) {
-          $gizmo = $mangleaddress->( $gizmo );
-          $body .= "<tr><td valign='top' align='right'>$ML{'.label.gizmo'}</td><td>$gizmo</td></tr>\n";
-      }
-
-      # website
-      if ( ! $synd && $u->{'url'}) {
-          my $url = LJ::ehtml($u->{'url'});
-          unless ($url =~ /^https?:\/\//) {
-              $url =~ s/^http\W*//;
-              $url = "http://$url";
-          }
-          my $urlname = LJ::ehtml($u->{'urlname'} || $url);
-          $url = "<a href='$url'>$urlname</a>";
-          $body .= "<tr><td align='right'>$ML{'.label.website'}</td><td>$url</td></tr>\n" if ($u->{'url'});
-      }
-
-      # text message
-      if ($u->{'txtmsg_status'} eq "on" && LJ::get_cap($u, "textmessaging")) {
-          $body .= "<tr><td align='right'>$ML{'.label.textmessage'}</td><td>" .
-                   BML::ml('.sendmessage.body2', {'user' => "$u->{'user'}", 'aopts' => "href='$LJ::SITEROOT/tools/textmessage.bml?user=$u->{'user'}'"}) . "</td></tr>";
-      }
-
-
-      $body .= "</table></p>\n";
- }
- # Contact Info
-
-
-
- # Schools
- if ($schoollist) {
-     $body .= "<p><span class='ui_subhead'><img src='$LJ::IMGPREFIX/schools.gif' border='0' /> $ML{'.label.schools'}</span></p>\n";
-     $body .= "<p>$schoollist</p>\n";
-     $body .= "&nbsp;<br />\n";
- }
- # /Schools
-
- # Interests
- if (@$intu) {
-     $body .= "<p><span class='ui_subhead'><img src='$LJ::IMGPREFIX/interests.gif' border='0' /> $ML{'.label.interests'}</span></p>\n";
-     my $intcount = 0;
-     my $countcommon = 0;
-     my $intlist = "";
-     foreach my $int (@$intu) {
-         next if $intcount++ > 150;
-         LJ::text_out(\$int->[1]); # 1==interest
-         my $eint = LJ::eurl($int->[1]);
-         if ($int->[2] > 1) {  # 2==intcount
-             if ($remote_interest{$int->[0]}) {  # 0==intid
-                 $intlist .= "<span class='incommon'><a href='$LJ::SITEROOT/interests.bml?int=$eint'>$int->[1]</a></span>, ";
-                 $countcommon++;
-             } else {
-                 $intlist .= "<a href='$LJ::SITEROOT/interests.bml?int=$eint'>$int->[1]</a>, ";
-             }
-         } else {
-             $intlist .= "$int->[1], ";
-         }
-     }
-     chop $intlist; chop $intlist;  # remove trailing ", "
-     if ($intcount > 150) {
-         my $notshown = $intcount - 150;
-         $intlist .= BML::ml('.label.intsnotshown',{'intnotshown'=>$notshown});
-     }
-
-     $body .= "<p>($intcount";
-     unless ($remote_isowner) {
-         $body .= $countcommon ? ", <span class='incommon'>$countcommon in common</span>" : ", $countcommon in common";
-     }
-     $body .= ")<br /> " . $intlist;
-     if ($remote) {
-         my $link = "$LJ::SITEROOT/interests.bml?mode=enmasse";
-         $link .= "&fromuser=$user" unless ($remote->{'userid'} == $userid);
-         $body .= ". <small>";
-         my $mlcode = ($remote_isowner) ? '.label.interests.removesome'
-                                        : '.label.interests.modifyyours';
-         $body .= BML::ml('Actionlink', { 'link' => "<a href='$link'>$ML{$mlcode}</a>" });
-         $body .= "</a></small>";
-     }
-     $body .= "</p>\n";
-     $body .= "&nbsp;<br />\n";
- }
- # /Interests
 
 
  # Set a minimum width of 300px
