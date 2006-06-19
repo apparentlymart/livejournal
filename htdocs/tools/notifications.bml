@@ -112,7 +112,7 @@ body<=
             <tr class="header">
                 <thead>
                     <td>$checkall</td>
-                    <td>
+                    <td class="actions">
                         <input type="button" value="Read" $disabled onclick="submitAction('markRead');" />
                         <input type="button" value="Unread" onclick="submitAction('markUnread');" />
                         <input type="button" value="Delete" onclick="submitAction('delete');" />
@@ -184,6 +184,8 @@ head<=
 <?_code return $head; _code?>
 
 <script>
+    LJVAR.imgprefix = "<?imgprefix?>";
+
 var tableview = new View();
 var checkallButton = new CheckallButton();
 
