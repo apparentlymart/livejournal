@@ -16,6 +16,11 @@ sub current_value {
     croak;
 }
 
+sub get_arg {
+    my ($class, $args) = @_;
+    return LJ::Setting::get_arg($class, $args, "txt");
+}
+
 # zero means no limit.
 sub max_bytes { 0 }
 sub max_chars { 0 }
@@ -26,14 +31,13 @@ sub text_size { 40 }
 sub question { croak; }
 
 sub as_html {
-    my ($class, $u, $errs, $args) = @_;
-    my $txt = $args->{txt};
+    my ($class, $u, $errs, $post) = @_;
     my $key = $class->pkgkey;
     return $class->question .
         "&nbsp;" .
         LJ::html_text({
             name  => "${key}txt",
-            value => $txt || $class->current_value($u),
+            value => $errs ? $class->get_arg($post, "txt") : $class->current_value($u),
             size  => $class->text_size,
             maxlength => $class->max_chars,
         }) .
