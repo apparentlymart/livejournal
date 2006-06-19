@@ -1,5 +1,5 @@
 #
-# LiveJournal entry object.
+# LiveJournal comment object.
 #
 # Just framing right now, not much to see here!
 #
@@ -238,7 +238,7 @@ sub _load_text {
     return 1 if $self->{_loaded_text};
 
     my $entry  = $self->entry;
-    my $entryu = $entry->u;
+    my $entryu = $entry->journal;
 
     my $ret  = LJ::get_talktext2($entryu, $self->jtalkid);
     my $tt = $ret->{$self->jtalkid};
@@ -313,10 +313,24 @@ sub body_orig {
     return $self->{body_orig} || $self->{body};
 }
 
+# comment body, cleaned
+sub body_html {
+    my $self = shift;
+    my $body = $self->body_raw;
+    LJ::CleanHTML::clean_comment( \$body ) if $body;
+    return $body;
+}
+
 sub subject_html {
     my $self = shift;
     $self->_load_text unless $self->{_loaded_text};
     return LJ::ehtml($self->{subject});
+}
+
+sub subject_text {
+    my $self = shift;
+    my $subject = $self->subject_raw;
+    return LJ::ehtml($subject);
 }
 
 sub is_active {
@@ -334,6 +348,11 @@ sub is_deleted {
     return $self->{state} eq 'D' ? 1 : 0;
 }
 
+sub is_frozen {
+    my $self = shift;
+    return $self->{state} eq 'F' ? 1 : 0;
+}
+
 sub remote_can_delete {
     my $self = shift;
 
@@ -342,6 +361,53 @@ sub remote_can_delete {
     my $posteru  = $self->poster;
 
     return LJ::Talk::can_delete($remote, $journalu, $posteru, $posteru->user);
+}
+
+# returns comment action buttons (screen, freeze, delete, etc...)
+sub manage_buttons {
+    my $self = shift;
+    my $dtalkid = $self->dtalkid;
+    my $journal = $self->journal;
+    my $jargent = "journal=$journal->{'user'}&amp;";
+
+    my $remote = LJ::get_remote() or return '';
+
+    my $managebtns = '';
+
+    if (LJ::Talk::can_delete($remote, $self->journal, $self->entry->poster, $self->poster->{user})) {
+        $managebtns .= "<a href='$LJ::SITEROOT/delcomment.bml?${jargent}id=$dtalkid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
+    }
+
+    if (LJ::Talk::can_freeze($remote, $self->journal, $self->entry->poster, $self->poster->{user})) {
+        unless ($self->is_frozen) {
+            $managebtns .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=freeze&amp;${jargent}talkid=$dtalkid'>" . LJ::img("btn_freeze", "", { align => 'absmiddle', hspace => 2, vspace => }) . "</a>";
+        } else {
+            $managebtns .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=unfreeze&amp;${jargent}talkid=$dtalkid'>" . LJ::img("btn_unfreeze", "", { align => 'absmiddle', hspace => 2, vspace => }) . "</a>";
+        }
+    }
+
+    if (LJ::Talk::can_screen($remote, $self->journal, $self->entry->poster, $self->poster->{user})) {
+        unless ($self->is_screened) {
+            $managebtns .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=screen&amp;${jargent}talkid=$dtalkid'>" . LJ::img("btn_scr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
+        } else {
+            $managebtns .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;${jargent}talkid=$dtalkid'>" . LJ::img("btn_unscr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
+        }
+    }
+
+    return $managebtns;
+}
+
+# returns info for javscript comment management
+sub info {
+    my $self = shift;
+    my $remote = LJ::get_remote() or return;
+
+    my %LJ_cmtinfo;
+    $LJ_cmtinfo{'canAdmin'} = LJ::can_manage($remote, $self->journal);
+    $LJ_cmtinfo{'journal'} = $self->journal->{user};
+    $LJ_cmtinfo{'remote'} = $remote ? $remote->{user} : "";
+
+    return \%LJ_cmtinfo;
 }
 
 1;
