@@ -319,7 +319,7 @@ sub process_content {
         # we don't want perl knowing that and fucking stuff up
         # for us behind our back in random places all over
         # http://zilla.livejournal.org/show_bug.cgi?id=1037
-        foreach my $attr (qw(subject text link)) {
+        foreach my $attr (qw(id subject text link)) {
             $it->{$attr} = pack('C*', unpack('C*', $it->{$attr}));
         }
 
