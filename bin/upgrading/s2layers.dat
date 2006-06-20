@@ -47,6 +47,8 @@ punquin/layout          layout          core1
 punquin/en              i18n            punquin/layout
 punquin/themes          theme+          punquin/layout
 
+refriedpaper/layout     layout          core1
+
 tabularindent/layout    layout          core1
 tabularindent/en        i18n            tabularindent/layout
 tabularindent/themes    theme+          tabularindent/layout
