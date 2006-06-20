@@ -491,11 +491,6 @@ my $old_url = 0;
                  $ret .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_unscr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
              }
 
-             if ($post->{'state'} eq 'S' &&
-                 LJ::Talk::can_unscreen($remote, $u, $up, $userpost)) {
-                 $ret .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_unscr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
-             }
-
              unless ($LJ::DISABLED{esn}) {
                  my $track_img = 'track';
 
