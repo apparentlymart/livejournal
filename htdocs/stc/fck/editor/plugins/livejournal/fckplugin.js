@@ -57,6 +57,52 @@ oLJUserLink.IconPath = FCKConfig.PluginsPath + 'livejournal/ljuser.gif' ;
 // Register the button to use in the config
 FCKToolbarItems.RegisterItem('LJUserLink', oLJUserLink) ;
 
+
+//////////  LJ Video Button //////////////
+var LJVideoCommand=function(){
+};
+LJVideoCommand.prototype.Execute=function(){
+}
+LJVideoCommand.GetState=function() {
+    return FCK_TRISTATE_OFF; //we dont want the button to be toggled
+}
+
+LJVideoCommand.Execute=function() {
+    var user;
+    var selection = '';
+
+    if (FCK.EditorWindow.getSelection) {
+        selection = FCK.EditorWindow.getSelection();
+    } else if (FCK.EditorDocument.selection) {
+        selection = FCK.EditorDocument.selection.createRange().text;
+    }
+    if (selection != '') {
+        url = selection;
+    } else {
+        url = prompt('Please enter the YouTube URL:');
+    }
+
+    if (url != null && url != '') {
+        // Make the tag like the editor would
+        var html = "<lj-template name='video'>";
+        html     += url;
+        html     += "</lj-template>";
+
+        FCK.InsertHtml(html);
+        FCK.Focus();
+    }
+    return;
+}
+
+FCKCommands.RegisterCommand('LJVideoLink', LJVideoCommand ); //otherwise our command will not be found
+
+// Create the toolbar button.
+var oLJVideoLink = new FCKToolbarButton('LJVideoLink', 'LiveJournal Video');
+oLJVideoLink.IconPath = FCKConfig.PluginsPath + 'livejournal/ljvideo.gif' ;
+
+// Register the button to use in the config
+FCKToolbarItems.RegisterItem('LJVideoLink', oLJVideoLink) ;
+
 //////////  LJ Cut Button //////////////
 var LJCutCommand=function(){
 };
