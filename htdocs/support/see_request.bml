@@ -194,7 +194,7 @@ body<=
 
         $email = $u->{'email'};
         LJ::load_user_props($u, "s1_lastn_style", "s1_calendar_style", "s1_day_style",
-                            "s1_friends_style", "stylesys", "s2_style", )
+                            "s1_friends_style", "stylesys", "s2_style", "browselang", "schemepref" )
             unless $clusterdown;
     }
 
@@ -363,8 +363,10 @@ body<=
         if ($u->{'status'} eq "A") { $ret .= "<b>yes</b>"; }
         if ($u->{'status'} eq "N") { $ret .= "<b>no</b>" . $extraval->(); }
         if ($u->{'status'} eq "T") { $ret .= "<b>transitioning</b> (used to be validated, but changed email addresses and hasn't reconfirmed)" . $extraval->(); }
-        if ($u->{clusterid}) { $ret .= "<br />cluster: " . LJ::get_cluster_description($u->{clusterid}, 1); }
-        $ret .= "<br />data version: <b>$u->{dversion}</b>";
+        if ($u->{clusterid}) { $ret .= "<br />cluster: <b>" . LJ::get_cluster_description($u->{clusterid}, 1) . "</b>; "; }
+        $ret .= "data version: <b>$u->{dversion}</b>";
+        $ret .= "<br />scheme: <b>" . ($u->{schemepref} ? $u->{schemepref} : "default") . "</b>; ";
+        $ret .= "language: <b>" . ($u->{browselang} ? $u->{browselang} : "default") . "</b>";
         $ret .= "<br />underage? ";
         if ($clusterdown) {
             $ret .= "<strong>cluster unavailable</strong>";
