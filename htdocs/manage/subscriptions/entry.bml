@@ -27,7 +27,7 @@ body<=
 
     return LJ::error_list("No entry specified") unless $ditemid;
 
-    my $categories = {
+    my $categories = [{
         'Track' => [
                     LJ::Subscription::Pending->new(
                                                    $remote,
@@ -47,7 +47,7 @@ body<=
                                                    journal => $journal,
                                                    ),
                     ],
-                };
+                }];
 
     $body .= LJ::subscribe_interface($remote,
                                      journal      => $journal,

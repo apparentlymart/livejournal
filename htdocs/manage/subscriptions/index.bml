@@ -96,19 +96,25 @@ body<=
     $body .= "<?p" . LJ::error_list(@errors) . "p?>" if scalar @errors;
 
     ###################### Print subscribe table
-    my %categories = (
-                      "My Account" => [
-                                       'Befriended',
-                                       LJ::Subscription::Pending->new($u,
-                                                                      event     => 'OfficialPost',
-                                                                      journal   => 0,
-                                                                      ),
-                                       ],
-
-                      "Friends and Communities" => [
-                                                    'CommunityInvite',
-                                                    'CommunityJoinRequest',
-                                                    ],
+    my @categories = (
+                      {
+                          "My Account" => [
+                                           'Befriended',
+                                           LJ::Subscription::Pending->new($u,
+                                                                          event     => 'OfficialPost',
+                                                                          ),
+                                           LJ::Subscription::Pending->new($u,
+                                                                          event     => 'JournalNewComment',
+                                                                          journal   => $u,
+                                                                          ),
+                                           ],
+                          },
+                      {
+                          "Friends and Communities" => [
+                                                        'CommunityInvite',
+                                                        'CommunityJoinRequest',
+                                                        ],
+                          },
                       );
 
     my $authas_form = LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
@@ -122,7 +128,7 @@ body<=
 
     $body .= LJ::subscribe_interface($u,
                                      journal      => $u,
-                                     categories   => \%categories,
+                                     categories   => \@categories,
                                      formauth     => $formauth,
                                      showtracking => 1,
                                      getextra     => "?authas=$GET{authas}",

@@ -31,17 +31,19 @@ body<=
     my $comment;
     $comment = LJ::Comment->new($journal, dtalkid => $dtalkid) if $dtalkid;
 
-    my $categories = {
-                      'Comments' => [
-                                     LJ::Subscription::Pending->new(
-                                                                    $remote,
-                                                                    journal => $journal,
-                                                                    event   => 'JournalNewComment',
-                                                                    arg1    => $ditemid,
-                                                                    arg2    => $comment && $comment->jtalkid,
-                                                                    )
-                                     ],
-                      };
+    my $categories = [
+                      {
+                          'Comments' => [
+                                         LJ::Subscription::Pending->new(
+                                                                        $remote,
+                                                                        journal => $journal,
+                                                                        event   => 'JournalNewComment',
+                                                                        arg1    => $ditemid,
+                                                                        arg2    => $comment && $comment->jtalkid,
+                                                                        )
+                                         ],
+                                     },
+                      ];
 
     return LJ::subscribe_interface(
                                    $remote,

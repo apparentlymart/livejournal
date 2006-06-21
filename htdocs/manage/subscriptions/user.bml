@@ -22,22 +22,23 @@ body<=
     my $journal = LJ::load_user($GET{journal}) or return LJ::bad_input("No journal specified");
 
     # what classes to display on this page
-    my $categories = {
-        "Track" => [
-                    LJ::Subscription::Pending->new(
-                                                   $remote,
-                                                   event   => "JournalNewEntry",
-                                                   arg1    => '?',
-                                                   journal => $journal,
-                                                   ),
-                    LJ::Subscription::Pending->new(
-                                                   $remote,
-                                                   event   => "JournalNewEntry",
-                                                   journal => $journal,
-                                                   ),
-
-                    ],
-    };
+    my $categories = [
+                      {
+                          "Track" => [
+                                      LJ::Subscription::Pending->new(
+                                                                     $remote,
+                                                                     event   => "JournalNewEntry",
+                                                                     arg1    => '?',
+                                                                     journal => $journal,
+                                                                     ),
+                                      LJ::Subscription::Pending->new(
+                                                                     $remote,
+                                                                     event   => "JournalNewEntry",
+                                                                     journal => $journal,
+                                                                     ),
+                                      ]
+                                  },
+                      ];
 
     return LJ::subscribe_interface(
                                    $remote,

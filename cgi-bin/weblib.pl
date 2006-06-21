@@ -1815,6 +1815,7 @@ sub res_includes {
             $ret .= "<script type=\"text/javascript\" src=\"$path\"></script>\n";
         }
     }
+
     return $ret;
 }
 
@@ -2372,7 +2373,7 @@ sub subscribe_interface {
     LJ::need_res('js/checkallbutton.js');
     LJ::need_res('js/esn.js');
 
-    my %categories = $catref ? %$catref : ();
+    my @categories = $catref ? @$catref : ();
 
     my $ret = qq {
             <div id="manageSettings">
@@ -2388,15 +2389,14 @@ sub subscribe_interface {
     # skip the inbox type; it's always on
     @notify_classes = grep { $_ ne 'LJ::NotificationMethod::Inbox' } @notify_classes;
 
+    my $tracking = [];
+
     # title of the tracking category
     my $tracking_cat = "Notices";
 
-    # pending subscription objects
-    my $pending = [];
-
     # if showtracking, add things the user is tracking to the categories
     if ($showtracking) {
-        my @subscriptions = $u->subscriptions;
+        my @subscriptions = $u->find_subscriptions(method => 'Inbox');
 
         foreach my $subsc ( sort {$a->id <=> $b->id } @subscriptions ) {
             # if this event class is already being displayed above, skip over it
@@ -2404,23 +2404,31 @@ sub subscribe_interface {
             my ($evt_class) = (LJ::Event->class($etypeid) =~ /LJ::Event::(.+)/i);
             next unless $evt_class;
 
-            # search for this class in %categories
-            next if grep { $_ eq $evt_class } map { @$_ } values %categories;
+            # search for this class in categories
+            next if grep { $_ eq $evt_class } map { @$_ } map { values %$_ } @categories;
 
             if ($showtracking) {
                 # add this class to the tracking category
-                $categories{$tracking_cat} ||= [];
-                push @{$categories{$tracking_cat}}, $evt_class;
+                push @$tracking, $subsc;
             }
         }
     }
 
+    push @categories, {$tracking_cat => $tracking};
+
     my @catids;
     my $catid = 0;
 
-    while (my ($category, $cat_events) = each %categories) {
+    my %shown_subids = ();
+
+    foreach my $cat_hash (@categories) {
+        my ($category, $cat_events) = %$cat_hash;
+
         next unless $cat_events && scalar @$cat_events;
         push @catids, $catid;
+
+        # pending subscription objects
+        my $pending = [];
 
         my $cat_empty = 1;
         my $cat_html = '';
@@ -2429,35 +2437,28 @@ sub subscribe_interface {
         my $is_tracking_category = $category eq $tracking_cat && $showtracking;
 
         # build table of subscribeble events
-        my @event_classes;
         foreach my $cat_event (@$cat_events) {
-            if ((ref $cat_event) =~ /Subscription::Pending/) {
+            if ((ref $cat_event) =~ /Subscription/) {
                 push @$pending, $cat_event;
             } else {
-                push @event_classes, "LJ::Event::$cat_event";
+                my $pending_sub = LJ::Subscription::Pending->new($u,
+                                                                 event => $cat_event,
+                                                                 journal => $journal);
+                push @$pending, $pending_sub;
             }
         }
 
-        if ($is_tracking_category) {
-            foreach my $event_subclass (@$cat_events) {
-                foreach my $subscr ($u->has_subscription(event => "LJ::Event::$event_subclass", method => "Inbox")) {
-                    next if grep { $_ eq $subscr->event_class } @event_classes;
-                    push @event_classes, $subscr->event_class unless grep { $_ eq $subscr->event_class } @event_classes;
-                }
-            }
-        }
-
-        next unless (scalar @event_classes) || (scalar @$pending);
+        next unless scalar @$pending;
 
         $cat_html .= qq {
-          <div class="CategoryRow-$catid">
-            <tr class="CategoryRow">
+            <div class="CategoryRow-$catid">
+                <tr class="CategoryRow">
                 <td>
-                    <span class="CategoryHeading">$category</span>
-                    <span class="CategoryHeadingNote">Notify me when...</span>
+                <span class="CategoryHeading">$category</span>
+                <span class="CategoryHeadingNote">Notify me when...</span>
                 </td>
                 <td>
-                    By
+                By
                 </td>
             };
 
@@ -2470,26 +2471,11 @@ sub subscribe_interface {
                     delete $sub_args{ntypeid};
                     $sub_args{method} = 'Inbox';
 
-                     my @existing_subs = $u->has_subscription(%sub_args);
-                     push @pending_subscriptions, (scalar @existing_subs ? @existing_subs : $pending_sub);
+                    my @existing_subs = $u->has_subscription(%sub_args);
+                    push @pending_subscriptions, (scalar @existing_subs ? @existing_subs : $pending_sub);
                 }
-            }
-
-            foreach my $evt_class (@event_classes) {
-                my $etypeid = eval { $evt_class->etypeid } or next;
-
-                # FIXME: possibly will match more than it should
-                my @subscribed = $u->find_subscriptions(etypeid => $etypeid, method => "Inbox");
-
-                if (@subscribed) {
-                    push @pending_subscriptions, @subscribed;
-                } else {
-                    push @pending_subscriptions, LJ::Subscription::Pending->new($u,
-                                                                                journal => $journal,
-                                                                                etypeid => $etypeid,
-                                                                                method  => "Inbox",
-                                                                                );
-                }
+            } else {
+                push @pending_subscriptions, @$tracking;
             }
         }
 
@@ -2540,14 +2526,18 @@ sub subscribe_interface {
                 next unless eval { $evt_class->subscription_applicable($pending_sub) };
             } else {
                 my $no_show = 0;
-                while (my ($_cat_name, $_cat_events) = each %$catref) {
-                    foreach my $_cat_event (@$_cat_events) {
-                        next unless ref $_cat_event;
-                        next unless $pending_sub->equals($_cat_event);
-                        $no_show = 1;
-                        last;
+
+                foreach my $cat_info_ref (@$catref) {
+                    while (my ($_cat_name, $_cat_events) = each %$cat_info_ref) {
+                        foreach my $_cat_event (@$_cat_events) {
+                            next unless ref $_cat_event;
+                            next unless $pending_sub->equals($_cat_event);
+                            $no_show = 1;
+                            last;
+                        }
                     }
                 }
+
                 next if $no_show;
             }
 
@@ -2567,6 +2557,8 @@ sub subscribe_interface {
                     value => $subscribed,
                 });
             }
+
+            $shown_subids{$pending_sub->id}++ unless $pending_sub->pending;
 
             $cat_empty = 0;
 
@@ -2634,7 +2626,7 @@ sub subscribe_interface {
 
     # print info stuff
     my $extra_sub_status = LJ::run_hook("sub_status_extra", $u) || '';
-    my $sub_count = $u->subscription_count;
+    my $sub_count = $u->find_subscriptions(method => 'Inbox');
     my $sub_max = $u->get_cap('subscriptions');
     $ret .= qq {
         <div id="SubscriptionInfo">
