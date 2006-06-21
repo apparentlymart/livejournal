@@ -147,9 +147,9 @@ body<=
 
         my $when = LJ::ago_text(time() - $inbox_item->when_unixtime);
         my $contents = $inbox_item->as_html || '';
-        
+
         my $row_class = ($qid % 2 ==0) ? "InboxItem_Meta" : "InboxItem_Meta alt";
-        
+
         $notificationtable .= qq {
             <tr class="$row_class">
                 <td class="checkbox">$checkbox</td>
@@ -185,6 +185,7 @@ head<=
 
 <script>
     LJVAR.imgprefix = "<?imgprefix?>";
+LJ_cmtinfo = {};
 
 var tableview = new View();
 var checkallButton = new CheckallButton();
