@@ -113,6 +113,9 @@ body<=
                           "Friends and Communities" => [
                                                         'CommunityInvite',
                                                         'CommunityJoinRequest',
+                                                        LJ::Subscription::Pending->new($u,
+                                                                                       event     => 'NewUserpic',
+                                                                                       ),
                                                         ],
                           },
                       );

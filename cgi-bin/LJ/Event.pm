@@ -13,6 +13,7 @@ use Class::Autouse qw(
                       LJ::Event::CommunityInvite
                       LJ::Event::CommunityJoinRequest
                       LJ::Event::OfficialPost
+                      LJ::Event::NewUserpic
                       );
 
 # Guide to subclasses:
