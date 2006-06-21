@@ -454,8 +454,8 @@
             }
 
             ## see if they have too many pictures uploaded
+            my $inline;
             if (scalar @userpics >= $max) {
-                my $inline;
                 if ($inline .= LJ::run_hook("cprod_inline", $u, 'EditPicsMax')) {
                     return $err->($inline . LJ::help_icon('userpics', " ", ""));
                 } else {
@@ -628,11 +628,13 @@
             };
 
         $body .= BML::ml('.piclimitstatus', {current => scalar @userpics, max => $max});
-        my $inline;
-        if ($inline .= LJ::run_hook("cprod_inline", $u, 'EditPics')) {
-            $body .= $inline;
-        } else {
-            $body .= "<p>".BML::ml('cprod.editpics.text7.v1',{ "num" => $max })."</p>";
+        if (scalar @userpics >= $max) {
+            my $inline;
+            if ($inline .= LJ::run_hook("cprod_inline", $u, 'EditPics')) {
+                $body .= $inline;
+            } else {
+                $body .= "<p>".BML::ml('cprod.editpics.text7.v1',{ "num" => $max })."</p>";
+            }
         }
         $body .= "</div>";
 
