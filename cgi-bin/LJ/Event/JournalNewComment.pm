@@ -21,16 +21,16 @@ sub content {
     my $self = shift;
     my $comment = $self->comment or return "(Invalid comment)";
 
+    return "(Deleted comment)" if $comment->is_deleted;
+
     LJ::need_res('js/commentmanage.js');
 
-    my $comment_subject = $comment->subject_text;
     my $comment_body = $comment->body_html;
     my $buttons = $comment->manage_buttons;
     my $dtalkid = $comment->dtalkid;
 
     my $ret = qq {
         <div id="ljcmt$dtalkid" class="JournalNewComment">
-            <div class="Subject">$comment_subject</div>
             <div class="ManageButtons">$buttons</div>
             <div class="Body">$comment_body</div>
         </div>
@@ -43,10 +43,21 @@ sub content {
 
     $ret .= qq {
         <script language="JavaScript">
-            LJ_cmtinfo = $cmt_info_js;
-            LJ_cmtinfo["$dtalkid"] = "$posterusername";
+        };
+
+    while (my ($k, $v) = each %$cmt_info) {
+        $k = LJ::ejs($k);
+        $v = LJ::ejs($v);
+        $ret .= "LJ_cmtinfo['$k'] = '$v';\n";
+    }
+
+    my $dtid_cmt_info = {u => $posterusername, rc => []};
+
+    $ret .= "LJ_cmtinfo['$dtalkid'] = " . LJ::js_dumper($dtid_cmt_info) . "\n";
+
+    $ret .= qq {
         </script>
-    };
+        };
 
     return $ret;
 }
