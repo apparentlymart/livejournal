@@ -19,8 +19,8 @@ sub new {
     my $ntypeid = delete $opts{ntypeid};
     my $event   = delete $opts{event};
     my $method  = delete $opts{method};
-    my $arg1    = delete $opts{arg1};
-    my $arg2    = delete $opts{arg2};
+    my $arg1    = delete $opts{arg1} || 0;
+    my $arg2    = delete $opts{arg2} || 0;
 
     # force autoload of LJ::Event and it's subclasses
     LJ::Event->can('');
@@ -111,8 +111,8 @@ sub thaw {
                        journal => $journalid,
                        ntypeid => $ntypeid,
                        etypeid => $etypeid,
-                       arg1    => $arg1,
-                       arg2    => $arg2,
+                       arg1    => $arg1 || 0,
+                       arg2    => $arg2 || 0,
                        );
 }
 
@@ -136,7 +136,5 @@ sub freeze {
 
     return join('-', ('pending', @args));
 }
-
-
 
 1;
