@@ -632,7 +632,7 @@
         if ($inline .= LJ::run_hook("cprod_inline", $u, 'EditPics')) {
             $body .= $inline;
         } else {
-            $body .= "<p>".BML::ml('cprod.editpics.text6.v1',{ "num" => $max })."</p>";
+            $body .= "<p>".BML::ml('cprod.editpics.text7.v1',{ "num" => $max })."</p>";
         }
         $body .= "</div>";
 

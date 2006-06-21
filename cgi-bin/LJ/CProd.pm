@@ -184,7 +184,7 @@ sub inline {
     eval "use $class; 1";
     return "" if $@;
     return "" unless eval { $class->applicable($u) };
-    my $version = $class->get_version;
+    my $version = $class->get_version($u);
     my $content = eval { $class->render($u, $version) } || LJ::ehtml($@);
     return $content;
 }
@@ -192,20 +192,20 @@ sub inline {
 # get the translation string for this version of the module
 # returns ml key
 sub get_ml {
-    my ($class, $version) = @_;
+    my ($class, $version, $u) = @_;
     $version ||= 1;
-    return $class->ml . ".v$version";
+    return $class->ml($u) . ".v$version";
 }
 
 # pick a random version of this module with a translation string
 # returns version number (0 if no valid version translation strings)
 sub get_version {
-    my $class = shift;
+    my ($class,$u) = @_;
 
     my @versions = shuffle 1..20;
 
     foreach my $version (@versions) {
-        my $ml_key = $class->get_ml($version);
+        my $ml_key = $class->get_ml($version,$u);
         my $ml_str = BML::ml($ml_key);
         return $version if ($ml_str && $ml_str ne '' && $ml_str !~ /^_skip/i);
     }
