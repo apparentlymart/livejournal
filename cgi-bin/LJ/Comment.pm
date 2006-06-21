@@ -335,21 +335,25 @@ sub subject_text {
 
 sub is_active {
     my $self = shift;
+    __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
     return $self->{state} eq 'A' ? 1 : 0;
 }
 
 sub is_screened {
     my $self = shift;
+    __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
     return $self->{state} eq 'S' ? 1 : 0;
 }
 
 sub is_deleted {
     my $self = shift;
+    __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
     return $self->{state} eq 'D' ? 1 : 0;
 }
 
 sub is_frozen {
     my $self = shift;
+    __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
     return $self->{state} eq 'F' ? 1 : 0;
 }
 
@@ -405,7 +409,7 @@ sub info {
     my %LJ_cmtinfo;
     $LJ_cmtinfo{'canAdmin'} = LJ::can_manage($remote, $self->journal);
     $LJ_cmtinfo{'journal'} = $self->journal->{user};
-    $LJ_cmtinfo{'remote'} = $remote ? $remote->{user} : "";
+    $LJ_cmtinfo{'remote'} = $remote->{user};
 
     return \%LJ_cmtinfo;
 }
