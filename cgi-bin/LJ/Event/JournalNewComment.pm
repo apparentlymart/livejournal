@@ -92,7 +92,7 @@ sub subscription_as_html {
         return "All comments in any journals on my friends page";
     }
 
-    my $user = LJ::ljuser($journal);
+    my $user = LJ::u_equals($journal, $subscr->owner) ? 'my journal' : LJ::ljuser($journal);
 
     if ($arg1 == 0 && $arg2 == 0) {
         return "All comments in $user, on any post.";
