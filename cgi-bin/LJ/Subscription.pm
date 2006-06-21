@@ -118,6 +118,7 @@ sub find {
     @subs = grep { $_->ntypeid == $ntypeid }             @subs if $ntypeid;
     @subs = grep { $_->etypeid == $etypeid }             @subs if $etypeid;
     @subs = grep { LJ::u_equals($_->journal, $journal) } @subs if $journal;
+
     @subs = grep { $_->arg1 == $arg1 }                   @subs if defined $arg1;
     @subs = grep { $_->arg2 == $arg2 }                   @subs if defined $arg2;
 
@@ -332,6 +333,8 @@ sub unique {
 # returns true if two subscriptions are equivilant
 sub equals {
     my ($self, $other) = @_;
+
+    return 1 if $self->id == $other->id;
 
     my $match = $self->ntypeid == $other->ntypeid &&
         $self->etypeid == $other->etypeid;
