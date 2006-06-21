@@ -1,0 +1,59 @@
+package LJ::Event::NewUserpic;
+use strict;
+use base 'LJ::Event';
+use Class::Autouse qw(LJ::Entry);
+use Carp qw(croak);
+
+sub new {
+    my ($class, $up) = @_;
+    croak "No userpic" unless $up;
+
+    return $class->SUPER::new($up->owner, $up->id);
+}
+
+sub as_string {
+    my $self = shift;
+
+    return $self->event_journal->ljuser_display . " has uploaded a new userpic";
+}
+
+sub userpic {
+    my $self = shift;
+    my $upid = $self->arg1 or die "No userpic id";
+    return eval { LJ::Userpic->new($self->event_journal, $upid) };
+}
+
+sub content {
+    my $self = shift;
+    my $up = $self->userpic or return "(Invalid userpic)";
+    return $up->imgtag;
+}
+
+sub as_sms {
+    my $self = shift;
+    return $self->as_string;
+}
+
+#sub matches_filter {
+#    my ($self, $subscr) = @_;
+#
+#    return 1 if $subscr->journalid == 0 && LJ::is_friend($self->
+
+sub zero_journalid_subs_means { "friends" }
+
+sub title {
+    return 'Someone uploads a new userpic';
+}
+
+sub subscription_as_html {
+    my ($class, $subscr) = @_;
+
+    my $journal = $subscr->journal;
+
+    return "One of my friends uploads a new userpic" unless $journal;
+
+    my $ljuser = $subscr->journal->ljuser_display;
+    return "$ljuser uploads a new userpic";
+}
+
+1;
