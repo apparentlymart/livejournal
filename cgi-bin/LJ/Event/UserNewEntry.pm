@@ -140,8 +140,4 @@ sub subscription_as_html {
     return "All new posts made by $journaluser";
 }
 
-sub title {
-    return 'New Entry by User';
-}
-
 1;

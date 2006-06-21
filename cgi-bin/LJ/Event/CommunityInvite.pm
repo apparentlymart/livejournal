@@ -28,13 +28,9 @@ sub as_sms {
     return $self->as_string;
 }
 
-sub title {
-    return 'I receive an invitation to join a community';
-}
-
 sub subscription_as_html {
     my ($class, $subscr) = @_;
-    return $class->title;
+    return "I receive an invitation to join a community";
 }
 
 package LJ::Error::Event::CommunityInvite;

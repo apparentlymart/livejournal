@@ -76,11 +76,6 @@ sub is_common {
     0;
 }
 
-# Override this with a very short description of the type of event
-sub title {
-    return 'New Event';
-}
-
 # Override this with HTML containing the actual event
 sub content { '' }
 

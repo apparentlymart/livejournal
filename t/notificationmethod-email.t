@@ -32,7 +32,7 @@ sub LJ::send_mail {
     # check for correct fields
     is($opts->{to}, $u->{email}, "Email address");
     is($opts->{from}, $LJ::BOGUS_EMAIL, "From address");
-    like($opts->{body}, qr/the user .+ has added .+ as a friend/i, "Body");
+    like($opts->{body}, qr/.+ has added me as a friend/i, "Body");
 
     return 1;
 }

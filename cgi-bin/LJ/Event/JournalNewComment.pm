@@ -13,10 +13,6 @@ sub new {
 
 sub is_common { 1 }
 
-sub title {
-    return 'New Comment on Journal';
-}
-
 sub content {
     my $self = shift;
     my $comment = $self->comment or return "(Invalid comment)";

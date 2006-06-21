@@ -33,13 +33,9 @@ sub as_sms {
     return $self->as_string;
 }
 
-sub title {
-    return 'Someone wants to join a community I maintain';
-}
-
 sub subscription_as_html {
     my ($class, $subscr) = @_;
-    return $class->title;
+    return 'Someone wants to join a community I maintain';
 }
 
 package LJ::Error::Event::CommunityJoinRequest;

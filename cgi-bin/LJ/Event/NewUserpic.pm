@@ -34,16 +34,7 @@ sub as_sms {
     return $self->as_string;
 }
 
-#sub matches_filter {
-#    my ($self, $subscr) = @_;
-#
-#    return 1 if $subscr->journalid == 0 && LJ::is_friend($self->
-
 sub zero_journalid_subs_means { "friends" }
-
-sub title {
-    return 'Someone uploads a new userpic';
-}
 
 sub subscription_as_html {
     my ($class, $subscr) = @_;

@@ -36,10 +36,6 @@ sub as_sms {
     return $self->as_string;
 }
 
-sub title {
-    return 'Someone adds me as a friend';
-}
-
 sub subscription_as_html {
     my ($class, $subscr) = @_;
     return "$LJ::SITENAME makes a new announcement";

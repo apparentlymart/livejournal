@@ -14,10 +14,6 @@ sub new {
 
 sub is_common { 0 }
 
-sub title {
-    return 'User Left a Comment';
-}
-
 # when was this comment left?
 sub eventtime_unix {
     my $self = shift;

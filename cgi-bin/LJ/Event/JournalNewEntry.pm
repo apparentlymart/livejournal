@@ -186,10 +186,4 @@ sub eventtime_unix {
     return $entry ? $entry->logtime_unix : $self->SUPER::eventtime_unix;
 }
 
-sub title {
-    shift;
-    my $journal = shift || LJ::get_remote();
-    return 'All posts in ' . $journal->ljuser_display;
-}
-
 1;
