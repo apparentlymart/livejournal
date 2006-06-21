@@ -133,8 +133,10 @@ div.argOptsContainer {
             vertical-align: middle;
             }
             
-        .actions {
+        #inbox thead input {
+            }
             
+        .actions {
             }
         
     #inbox tr {
@@ -188,3 +190,21 @@ div.argOptsContainer {
     font-size: 90%;
     color: #555;
     }
+    
+.JournalNewComment {
+    
+    }
+    
+    .Subject {
+        font-weight: bold;
+        margin-left: 85px;
+        }
+        
+    .ManageButtons {
+        float: left;
+        }
+        
+    .Body {
+        font-size: .9em;
+        margin-left: 85px;
+        }
