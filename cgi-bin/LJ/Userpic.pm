@@ -451,6 +451,13 @@ sub create {
             # fatal error, we couldn't get a filehandle to use
             push @errors, $clean_err->("Unable to contact storage server.  Your picture has not been saved.");
         }
+
+        # even in the non-LJ::Blob case we use the userblob table as a means
+        # to track the number and size of user blob assets
+        my $dmid = LJ::get_blob_domainid('userpic');
+        $u->do("INSERT INTO userblob (journalid, domain, blobid, length) ".
+               "VALUES (?, ?, ?, ?)", undef, $u->{userid}, $dmid, $picid, $size);
+
     } elsif ($target eq 'blob' && !$dberr) {
         my $et;
         my $fmt = lc($filetype);
@@ -463,12 +470,6 @@ sub create {
                "VALUES (?, ?, ?)",
                undef, $u->{'userid'}, $picid, $$dataref);
         push @errors, $clean_err->($u->errstr) if $u->err;
-
-        # even in the non-LJ::Blob case we use the userblob table as a means
-        # to track the number and size of user blob assets
-        my $dmid = LJ::get_blob_domainid('userpic');
-        $u->do("INSERT INTO userblob (journalid, domain, blobid, length) ".
-               "VALUES (?, ?, ?, ?)", undef, $u->{userid}, $dmid, $picid, $size);
 
     } else { # We should never get here!
         push @errors, "User picture uploading failed for unknown reason";
