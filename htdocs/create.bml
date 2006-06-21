@@ -571,7 +571,8 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
      unless ($LJ::NO_PASSWORD_CHECK) {
         $ret .= BML::ml('.password.secure_1',
                 { aopts => "target='_new' href='$LJ::HELPURL{secure_password}'"});
-        $ret .= "<ul><li>$ML{'.password.secure.pt1'}</li>\n";
+        $ret .= "<ul style='margin-left: 20px; padding-left: 0px;'>";
+        $ret .= "<li>$ML{'.password.secure.pt1'}</li>\n";
         $ret .= "<li>$ML{'.password.secure.pt2'}</li>\n";
         $ret .= "<li>$ML{'.password.secure.pt3'}</li>\n";
         $ret .= "<li>$ML{'.password.secure.pt4'}</li>\n</ul>\n";
@@ -746,7 +747,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
          $ret .= "<div class='formitemDesc'>";
          $ret .= BML::ml('.birthday.question_1', {'aopts' => "target='_new' href='$LJ::SITEROOT/legal/privacy.bml'"});
          $ret .= "</div><div>";
-         $ret .= "<table><tr><td><span style='font-weight: bold;'>$ML{'.birthday.birthdate'}</span></td><td>";
+         $ret .= "<table><tr><td><span class='formitemName'>$ML{'.birthday.birthdate'}</span></td><td>";
          $ret .= LJ::html_datetime({ name => 'bday', notime => 1,
              default => sprintf("%04d-%02d-%02d", $POST{bday_yyyy}, $POST{bday_mm}, $POST{bday_dd}) });
          $ret .= "</td></tr>";

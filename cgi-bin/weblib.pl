@@ -326,7 +326,7 @@ sub tosagree_widget {
         BML::ml('tos.mustread',
                 { aopts => "target='_new' href='$LJ::SITEROOT/legal/tos.bml'" }) .
         "</div>" .
-        "<iframe width='600' height='300' src='/legal/tos-mini.bml' " .
+        "<iframe width='684' height='300' src='/legal/tos-mini.bml' " .
         "style='border: 1px solid gray;'></iframe>" .
         "<div>" . LJ::html_check({ name => 'agree_tos', id => 'agree_tos',
                                    value => '1', selected =>  $checked }) .
