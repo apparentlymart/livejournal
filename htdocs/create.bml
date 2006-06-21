@@ -1,5 +1,5 @@
 <?page
-title=><?_ml .title _ml?>
+title=><?_code BML::ml('.title_1', { 'siteabbr' => $LJ::SITENAMEABBREV}); _code?>
 head<=
 <?_code
     return $head;
@@ -16,7 +16,7 @@ function tblhilite(tbl, styname) {
 body<=
 <?_code
 
- my $crumb = $LJ::IS_SSL ? 'securecreatejournal' : 'createjournal';
+ my $crumb = $LJ::IS_SSL ? 'securecreatejournal_1' : 'createjournal_1';
  LJ::set_active_crumb($crumb);
 
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
@@ -523,7 +523,9 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
          $ret .= "</li></ul> standout?>";
      }
 
-     $ret .= "<?p $ML{'.create.text'} p?>" unless %errors;
+     $ret .= "<?p $ML{'.create.text_1'} " .
+              BML::ml('.community', { aopts => "href='$LJ::SITEROOT/community/create.bml'" }) .
+              " p?>" unless %errors;
      $ret .= "<form action=\"create.bml\" method=\"post\">\n";
      $ret .= LJ::html_hidden(mode => 'submit',
                              code => $code,
@@ -535,36 +537,46 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
      $v = LJ::ehtml($FORM{'user'});
      $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.username.box.head'}</div>";
      $ret .= $error_msg->('username', '<p class="formitemFlag">', '</p>');
-     $ret .= "<div class='formitemDesc'>" . BML::ml(".username.text", {'sitename' => $LJ::SITENAME}) . "</div>";
+     $ret .= "<div class='formitemDesc'>" .
+             BML::ml(".username.text_1", {'sitename' => $LJ::SITENAME,
+                                        'lc_sitename' => lc($LJ::SITENAME) })
+             . "</div>";
      $ret .= LJ::html_text({'name' => 'user', 'size' => 15, 'maxlength' => 15, 'value' => $v, raw => 'style="<?loginboxstyle?>"' });
-     $ret .= "<br />" . BML::ml('.community', { aopts => "href='$LJ::SITEROOT/community/create.bml'" });
-     $ret .= "<div class='formitemNote'>$ML{'.username.charsallowed'}</div>" if (!%errors || exists $errors{'username'});
+     $ret .= " ($ML{'.username.maxchars'})<br />\n";
+     $ret .= "<div class='formitemNote'>$ML{'.username.charsallowed_1'}</div>" if (!%errors || exists $errors{'username'});
      $ret .= "</div></li>";
 
      ### email address
      $v = LJ::ehtml($FORM{'email'});
      $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.email.input.head'}</div>";
      $ret .= $error_msg->('email', '<p class="formitemFlag">', '</p>');
-     $ret .= "<div class='formitemDesc'>" . BML::ml('.email.text3', {
+     $ret .= "<div class='formitemDesc'>" . BML::ml('.email.text_1', {
          aopts => "target='_new' href='$LJ::SITEROOT/legal/privacy.bml'",
      }) . "</div>";
      $ret .= LJ::html_text({'name' => 'email', 'size' => 40, 'maxlength' => 50, 'value' => $v,});
      $ret .= "</div></li>";
 
      # Password
-     $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.password.input.head1'}</div>";
+     $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.password.input.head1'}</div>\n";
      $ret .= $error_msg->('password', '<p class="formitemFlag">', '</p>');
      $ret .= "<div class='formitemFlag'>$ML{'.password.secure'}</div>" if exists $errors{'password'};
-     $ret .= "<div class='formitemDesc'>$ML{'.password.text'}</div>";
+     $ret .= "<div style='float: left;'><div class='formitemDesc'>$ML{'.password.text'}</div>\n<div>";
      my $pass_value = $errors{'password'} ? "" : $POST{'password1'};
      $ret .= LJ::html_text({'name' => 'password1', 'size' => 30, 'maxlength' => 31, 'type' => "password",
                             value => $pass_value, });
-     $ret .= "<div class='formitemDesc'>$ML{'.password.input.head2'}</div>";
+     $ret .= "</div><div class='formitemDesc'>$ML{'.password.input.head2'}</div>\n<div>";
      $ret .= LJ::html_text({'name' => 'password2', 'size' => 30, 'maxlength' => 31, 'type' => "password",
                             value => $pass_value, });
-     $ret .= "<div class='formitemNote'>$ML{'.password.secure2'}</div>"
-         unless $LJ::NO_PASSWORD_CHECK;
-     $ret .= "</div></li>";
+     $ret .= "</div></div><div class='formitemNote' style='float: left; margin-left: 20px; width: 340px'>\n";
+     unless ($LJ::NO_PASSWORD_CHECK) {
+        $ret .= BML::ml('.password.secure_1',
+                { aopts => "target='_new' href='$LJ::HELPURL{secure_password}'"});
+        $ret .= "<ul><li>$ML{'.password.secure.pt1'}</li>\n";
+        $ret .= "<li>$ML{'.password.secure.pt2'}</li>\n";
+        $ret .= "<li>$ML{'.password.secure.pt3'}</li>\n";
+        $ret .= "<li>$ML{'.password.secure.pt4'}</li>\n</ul>\n";
+     }
+     $ret .= "</div><div style='clear: both'></div></li>";
 
      if (@LJ::INITIAL_OPTIONAL_FRIENDS) {
          $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.initialfriends.heading'}</div>";
@@ -732,12 +744,12 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
          $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.birthday.head'}</div>";
          $ret .= "<div class='formitemFlag'>$errors{'bday'}</div>" if exists $errors{'bday'};
          $ret .= "<div class='formitemDesc'>";
-         $ret .= BML::ml('.birthday.question', {'aopts' => "target='_new' href='$LJ::SITEROOT/legal/privacy.bml'"});
+         $ret .= BML::ml('.birthday.question_1', {'aopts' => "target='_new' href='$LJ::SITEROOT/legal/privacy.bml'"});
          $ret .= "</div><div>";
          $ret .= "<table><tr><td><span style='font-weight: bold;'>$ML{'.birthday.birthdate'}</span></td><td>";
          $ret .= LJ::html_datetime({ name => 'bday', notime => 1,
              default => sprintf("%04d-%02d-%02d", $POST{bday_yyyy}, $POST{bday_mm}, $POST{bday_dd}) });
-         $ret .= "</td><td><span style='font-style: italic;'>$ML{'.birthday.required'}</span></td></tr>";
+         $ret .= "</td></tr>";
          $ret .= "</table></div></div></li>";
 
          $ret .= "<div class='formitemNote'>$ML{'.birthday.warning'}</div>";

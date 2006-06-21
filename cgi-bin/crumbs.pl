@@ -19,7 +19,7 @@
                'commsettings' => ['Community Settings', '/community/settings.bml', 'managecommunity'],
                'community' => ['Community Center', '/community/', 'home'],
                'createcommunity' => ['Create Community', '/community/create.bml', 'managecommunity'],
-               'createjournal' => ['Create Journal', '/create.bml', 'home'],
+               'createjournal_1' => ['Create Your Account', '/create.bml', 'home'],
                'createstyle' => ['Create Style', '/styles/create.bml', 'modify'],
                'customize' => ['Customize S2 Settings', '/customize/index.bml', 'manage'],
                'customizelayer' => ['Individual Customizations', '/customize/layer.bml', 'customize'],

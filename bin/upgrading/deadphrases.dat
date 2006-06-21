@@ -1,6 +1,8 @@
 # these get removed if found by texttool.pl
 #
 
+general crumb.createjournal
+
 general /allpics.bml.edit
 general /allpics.bml.nopics.text
 
@@ -23,14 +25,21 @@ general /community/settings.bml.manage
 
 general /create.bml.aolnotice.head
 general /create.bml.aolnotice.text
+general /create.bml.birthday.question
+general /create.bml.create.text
+general /create.bml.email.text3
 general /create.bml.error.seebelow
 general /create.bml.password.secure
+general /create.bml.password.secure2
 general /create.bml.proceed.head
 general /create.bml.proceed.text
 
+general /create.bml.title
 general /create.bml.tos.error
 general /create.bml.tos.haveread
 general /create.bml.tos.p1.2
+general /create.bml.username.charsallowed
+general /create.bml.username.text
 
 general /editinfo.bml.allowshocontact.email.if_domainaddy
 general /editinfo.bml.allowshowcontact.email.reason

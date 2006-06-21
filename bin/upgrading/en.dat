@@ -755,7 +755,7 @@ p?>
 
 /create.bml.birthday.head=Age Verification
 
-/create.bml.birthday.question=Please select the month, day, and year you were born.  We require this information to create an account in order to comply with the Children's Online Privacy Protection Act (COPPA).  This information is not stored in our database and is only used during account creation.  Read our <a [[aopts]]>privacy policy</a> for more information on our information practices.
+/create.bml.birthday.question_1=We require this information in order to comply with the Children's Online Privacy Protection Act (COPPA).
 
 /create.bml.birthday.required=(required)
 
@@ -793,7 +793,7 @@ p?>
 
 /create.bml.create.head=Creating a New Journal
 
-/create.bml.create.text=Creating a new LiveJournal is easy, just follow the instructions below!
+/create.bml.create.text_1=Here's the information we need to create your account. All fields are required.
 
 /create.bml.email.head=Your email address
 
@@ -813,7 +813,7 @@ Thanks for supporting [[sitename]]!
 
 /create.bml.email.invite.subject=[[sitename]] Friend Invitation Accepted
 
-/create.bml.email.text3=For verification and security purposes, we need your email address.  Read our <a [[aopts]]>privacy policy</a> for more information on our information practices.
+/create.bml.email.text_1=We never share or sell your email address. Read our <a [[aopts]]>privacy policy</a> for more information.
 
 /create.bml.error.birthday.invalid=You must enter a valid birthday.
 
@@ -863,7 +863,15 @@ Thanks for supporting [[sitename]]!
 
 /create.bml.password.input.head2=Re-type password:
 
-/create.bml.password.secure2=For your security, your password must <strong>not</strong> contain a dictionary word or be based upon your username or email address.  It must also contain at least one numeral or punctuation mark in it.
+/create.bml.password.secure.pt1=is at least six characters long.
+
+/create.bml.password.secure.pt2=contains at least four different characters.
+
+/create.bml.password.secure.pt3=contains at least one number or symbol.
+
+/create.bml.password.secure.pt4=cannot be based upon your username, display name or email address.
+
+/create.bml.password.secure_1=<b>You must choose a <a [[aopts]]>secure password</a></b>, which:
 
 /create.bml.password.text=Select a password.
 
@@ -877,7 +885,7 @@ Thanks for supporting [[sitename]]!
 
 /create.bml.success.text3=Now, please take the time to fill in some information about yourself.  It's mostly optional, but it lets us get an idea of who's using LiveJournal.
 
-/create.bml.title=Create New Journal
+/create.bml.title_1=Create Your [[siteabbr]] Account
 
 /create.bml.tos.heading=Terms of Service
 
@@ -889,7 +897,7 @@ Thanks for supporting [[sitename]]!
 
 /create.bml.username.box.head=Username:
 
-/create.bml.username.charsallowed=Your username may contain only lower-case letters (a-z), digits (0-9) and the underscore character (_). Additionally, it must not be longer than 15 characters.
+/create.bml.username.charsallowed_1=Your username can contain only lower-case letters (a-z), digits (0-9) and the underscore character (_).
 
 /create.bml.username.forpaidaccts=Or, for paid accounts:
 
@@ -897,9 +905,11 @@ Thanks for supporting [[sitename]]!
 
 /create.bml.username.ljaddress=Your journal will be at these addresses:
 
-/create.bml.username.text=Each [[sitename]] user must have their own unique username.  Your username is what appears in the address to your journal and what you use to log into the [[sitename]] server.  It also shows up when you post comments in other people's journals.
+/create.bml.username.text_1=Your username is what you use to log in to [[sitename]]. It will appear in your journal address (username.[[lc_sitename]]) as well as next to your posts and comments.
 
 /create.bml.username.username=username
+
+/create.bml.username.maxchars=15 characters max
 
 /customize/advanced.bml.advancedoptions.header=Advanced Options
 
