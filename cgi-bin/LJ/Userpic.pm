@@ -187,6 +187,13 @@ sub fullurl {
     return $self->{url};
 }
 
+# returns an image tag of this image
+sub imgtag {
+    my $self = shift;
+    return '<img src="' . $self->url . '" width=' . $self->width . ' height=' . $self->height .
+        ' alt="' . LJ::ehtml(scalar $self->keywords) . '" />';
+}
+
 # in scalar context returns comma-seperated list of keywords or "pic#12345" if no keywords defined
 # in list context returns list of keywords ( (pic#12345) if none defined )
 # opts: 'raw' = return '' instead of 'pic#12345'
@@ -481,7 +488,7 @@ sub create {
     LJ::Userpic->delete_cache($u);
 
     my $upic = LJ::Userpic->new($u, $picid) or die "Error insantiating userpic";
-    LJ::Event::NewUserpic->new($u, $upic)->fire unless $LJ::DISABLED{esn};
+    LJ::Event::NewUserpic->new($upic)->fire unless $LJ::DISABLED{esn};
 
     return $upic;
 }
