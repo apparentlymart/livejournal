@@ -481,7 +481,7 @@ sub create {
     LJ::Userpic->delete_cache($u);
 
     my $upic = LJ::Userpic->new($u, $picid) or die "Error insantiating userpic";
-    LJ::Event::NewUserpic->new($u, $upic)->fire;
+    LJ::Event::NewUserpic->new($u, $upic)->fire unless $LJ::DISABLED{esn};
 
     return $upic;
 }
