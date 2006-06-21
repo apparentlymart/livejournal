@@ -36,6 +36,11 @@ body<=
                                                                      event   => "JournalNewEntry",
                                                                      journal => $journal,
                                                                      ),
+                                      LJ::Subscription::Pending->new(
+                                                                     $remote,
+                                                                     event   => "NewUserpic",
+                                                                     journal => $journal,
+                                                                     ),
                                       ]
                                   },
                       ];
