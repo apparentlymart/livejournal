@@ -2628,9 +2628,11 @@ sub subscribe_interface {
     my $extra_sub_status = LJ::run_hook("sub_status_extra", $u) || '';
     my $sub_count = $u->find_subscriptions(method => 'Inbox');
     my $sub_max = $u->get_cap('subscriptions');
+    my $event_plural = $sub_count == 1 ? 'event' : 'events';
+
     $ret .= qq {
         <div id="SubscriptionInfo">
-            <?p You are subscribed to $sub_count events ($sub_max available) |
+            <?p You are subscribed to $sub_count $event_plural ($sub_max available) |
             Manage your subscriptions in the <a href="$LJ::SITEROOT/manage/subscriptions/index.bml">
             Subscription Center</a> p?>
             $extra_sub_status
