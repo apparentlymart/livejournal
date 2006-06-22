@@ -12,7 +12,7 @@
     return "<?needlogin?>" unless $u;
 
     LJ::need_res("stc/display_none.css");
-        my $js = "";
+    my $js = "";
     if ($GET{upload_count} || LJ::did_post()) {
 
 
