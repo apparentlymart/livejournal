@@ -1033,6 +1033,8 @@ sub should_promote_comm {
     return 0 unless $u->is_comm;
     return 0 if $u->prop('disable_comm_promo');
 
+    return 1 if $LJ::__T_FORCE_SHOULD_PROMOTE_COMMUNITY;
+
     my $val = $u->opt_comm_promo;
     return $val eq 'Y' ? 1 : 0;
 }
@@ -1044,6 +1046,8 @@ sub should_display_comm_promo {
     return 0 if $LJ::DISABLED{comm_promo};
     return 0 unless $u->is_comm;
     return 0 if $u->prop('disable_comm_promo');
+
+    return 1 if $LJ::__T_FORCE_SHOULD_DISPLAY_COMMUNITY;
 
     my $val = $u->opt_comm_promo;
     return $val eq 'Y' || $val eq 'S' ? 1 : 0;

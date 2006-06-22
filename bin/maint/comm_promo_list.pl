@@ -37,13 +37,11 @@ $maint{comm_promo_list} = sub
         # get u objects
         my $curr_u = LJ::load_userids(@curr_uid) || {};
 
-        # how many of these communities are plus or paid w/ opt-in?
+        # how many of these communities do we promote?
         while (my ($uid, $u) = each %$curr_u) {
             next unless $u->is_comm;
             next unless $u->{statusvis} eq 'V';
 
-            # we care about users who are either sponsored plus or paid and have
-            # opted in
             next unless $u->should_promote_comm;
 
             push @to_load, $u->{userid};

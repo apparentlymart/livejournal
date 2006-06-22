@@ -15,14 +15,13 @@ use Class::Autouse qw(
                       );
 
 local $LJ::DISABLED{comm_promo} = 0;
+local $LJ::__T_FORCE_SHOULD_PROMOTE_COMMUNITY = 1;
+local $LJ::__T_FORCE_SHOULD_DISPLAY_COMMUNITY = 1;
 
 my %made_friends = ();    # comm_u id => ct friends
 
 my $new_user = sub {
     my $comm_u = temp_comm();
-
-    my $class = rand(2) ? 'plus' : 'paid';
-    $comm_u->add_to_class($class);
 
     # what friends should they have?
     for(1..rand(51)) {
