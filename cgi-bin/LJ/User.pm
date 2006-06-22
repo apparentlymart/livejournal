@@ -930,7 +930,7 @@ sub prop {
     # some props have accessors which do crazy things, if so they need
     # to be redirected from this method, which only loads raw values
     if ({ map { $_ => 1 }
-          qw(opt_showbday opt_showlocation opt_comm_promo)
+          qw(opt_showbday opt_showlocation opt_comm_promo view_control_strip show_control_strip)
         }->{$prop})
     {
         return $u->$prop;
@@ -1721,6 +1721,26 @@ sub add_friend {
 sub remove_friend {
     my ($u, $target) = @_;
     return LJ::remove_friend($u, $target);
+}
+
+sub view_control_strip {
+    my $u = shift;
+
+    my $prop = $u->raw_prop('view_control_strip');
+    return 0 if $prop eq 'off';
+    return $prop if $prop;
+
+    return LJ::run_hook('control_strip_unset', $u);
+}
+
+sub show_control_strip {
+    my $u = shift;
+
+    my $prop = $u->raw_prop('show_control_strip');
+    return 0 if $prop eq 'off';
+    return $prop if $prop;
+
+    return LJ::run_hook('control_strip_unset', $u);
 }
 
 package LJ;
