@@ -1742,6 +1742,30 @@ sub start_request
         $LJ::CACHE_CONFIG_MODTIME_LASTCHECK = $now;
     }
 
+    # include standard files if this is web-context
+    unless ($LJ::DISABLED{sitewide_includes}) {
+        if (eval { Apache->request }) {
+            LJ::need_res('js/ljvars.bml');
+
+            LJ::need_res(qw(
+                            js/core.js
+                            js/dom.js
+                            js/httpreq.js
+                            js/ippu.js
+                            js/lj_ippu.js
+                            js/contextualpopup.js
+                            stc/contextualpopup.css
+                            stc/lj_base.css
+                            )) if $LJ::CTX_POPUP;
+
+              LJ::need_res(qw(
+                              js/core.js
+                              js/dom.js
+                              js/devel.js
+                           ))if $LJ::IS_DEV_SERVER;
+          }
+    }
+
     return 1;
 }
 

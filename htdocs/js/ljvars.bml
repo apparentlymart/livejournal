@@ -1,0 +1,5 @@
+var LJVAR = {
+"imgprefix": "<?imgprefix?>",
+"siteroot": "<?siteroot?>"
+};
+
