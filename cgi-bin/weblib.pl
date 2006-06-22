@@ -1800,6 +1800,7 @@ sub res_includes {
             LJVAR = {};
             LJVAR.imgprefix = "$LJ::IMGPREFIX";
             LJVAR.siteroot  = "$LJ::SITEROOT";
+            LJVAR.statprefix  = "$LJ::STATPREFIX";
         }
         </script>
         };

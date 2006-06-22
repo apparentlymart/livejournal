@@ -48,10 +48,10 @@
         var fileaction = '$LJ::FB_SITEROOT/interface/webupload';
         var fbroot     = '$LJ::SITEROOT/__using/$LJ::FB_DOMAIN';
         </script>
-                <script src="$LJ::SITEROOT/stc/fck/editor/dialog/common/fck_dialog_common.js" type="text/javascript"></script>
-                <script src="$LJ::SITEROOT/stc/fck/editor/dialog/fck_image/fck_image.js" type="text/javascript"></script>
+                <script src="$LJ::STATPREFIX/fck/editor/dialog/common/fck_dialog_common.js" type="text/javascript"></script>
+                <script src="$LJ::STATPREFIX/fck/editor/dialog/fck_image/fck_image.js" type="text/javascript"></script>
                 $js
-                <link href="$LJ::SITEROOT/stc/fck/editor/dialog/common/fck_dialog_common.css" rel="stylesheet" type="text/css" />
+                <link href="$LJ::STATPREFIX/fck/editor/dialog/common/fck_dialog_common.css" rel="stylesheet" type="text/css" />
         };
 
     #taken from the original fck_image.html    
@@ -125,7 +125,7 @@
                        <td><span fckLang="DlgImgPreview">Preview</span></td></tr>
                        <tr>
                        <td valign="top">
-                       <iframe class="ImagePreviewArea" src="$LJ::SITEROOT/stc/fck/editor/dialog/fck_image/fck_image_preview.html" frameborder="no" marginheight="0" marginwidth="0"></iframe>
+                       <iframe class="ImagePreviewArea" src="$LJ::SITEROOT/imgpreview.bml" frameborder="no" marginheight="0" marginwidth="0"></iframe>
                        </td></tr>
                        </table></td></tr>
                        </table></td></tr>
