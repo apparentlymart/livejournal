@@ -1791,6 +1791,19 @@ sub res_includes {
     # TODO: automatic dependencies from external map and/or content of files,
     # currently it's limited to dependencies on the order you call LJ::need_res();
     my $ret = "";
+
+    # include standard JS info
+    $ret .= qq {
+        <script language="JavaScript">
+        var LJVAR;
+        if (!LJVAR) {
+            LJVAR = {};
+            LJVAR.imgprefix = "$LJ::IMGPREFIX";
+            LJVAR.siteroot  = "$LJ::SITEROOT";
+        }
+        </script>
+        };
+
     my $now = time();
     foreach my $key (@LJ::NEEDED_RES) {
         my $path = $key;

@@ -1745,8 +1745,6 @@ sub start_request
     # include standard files if this is web-context
     unless ($LJ::DISABLED{sitewide_includes}) {
         if (eval { Apache->request }) {
-            LJ::need_res('js/ljvars.bml');
-
             LJ::need_res(qw(
                             js/core.js
                             js/dom.js
