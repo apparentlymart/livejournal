@@ -4,6 +4,7 @@ package LJ::CProd;
 # Let users know about new/old features they can use but never have.
 use strict;
 use List::Util qw (shuffle);
+use Class::Autouse qw (LJ::Typemap);
 
 #################### Override:
 
@@ -61,8 +62,27 @@ sub shortname {
 # returns boolean; if user has dismissed the $class tip
 sub has_dismissed {
     my ($class, $u) = @_;
-    # TODO: implement
-    return 0;
+
+    my $tm  = $class->typemap;
+    my $map = LJ::CProd->user_map($u);
+
+    my $cprodid = $tm->class_to_typeid($class);
+    my $state = $map->{$cprodid};
+
+    return $state && $state->{nothankstime};
+}
+
+# returns boolean; if user has acknowledged the $class tip
+sub has_acked {
+    my ($class, $u) = @_;
+
+    my $tm  = $class->typemap;
+    my $map = LJ::CProd->user_map($u);
+
+    my $cprodid = $tm->class_to_typeid($class);
+    my $state = $map->{$cprodid};
+
+    return $state && $state->{acktime};
 }
 
 sub mark_dontshow {
