@@ -14,6 +14,8 @@ use Class::Autouse qw(
                       LJ::CommPromo
                       );
 
+local $LJ::DISABLED{comm_promo} = 0;
+
 my %made_friends = ();    # comm_u id => ct friends
 
 my $new_user = sub {
