@@ -141,7 +141,7 @@ sub link_bar
         push @linkele, $mlink->("$LJ::SITEROOT/tools/tellafriend.bml?${jargent}itemid=$itemid", "tellfriend");
     }
 
-    unless ($LJ::DISABLED{'esn'}) {
+    unless ($LJ::DISABLED{'esn'} || !$remote) {
         my $img_key = $remote->has_subscription(journal => $u, event => "JournalNewComment", arg1 => $itemid) ?
             "track_active" : "track";
         push @linkele, $mlink->("$LJ::SITEROOT/manage/subscriptions/entry.bml?${jargent}ditemid=$itemid", $img_key);
