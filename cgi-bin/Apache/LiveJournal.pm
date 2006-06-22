@@ -472,6 +472,14 @@ sub trans
             return $bml_handler->("$LJ::HOME/htdocs/talkscreen.bml");
         }
 
+        if ($uuri =~ /^.*\b__rpc_ctxpopup$/) {
+            return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/ctxpopup.bml");
+        }
+
+        if ($uuri =~ /^.*\b__rpc_changerelation$/) {
+            return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/changerelation.bml");
+        }
+
         if ($uuri =~ /^.*\b__rpc_controlstrip$/) {
             return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/controlstrip.bml");
         }
@@ -776,6 +784,14 @@ sub trans
 
     if ($uri =~ /^.*\b__rpc_talkscreen$/) {
         return $bml_handler->("$LJ::HOME/htdocs/talkscreen.bml");
+    }
+
+    if ($uri =~ /^.*\b__rpc_ctxpopup$/) {
+        return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/ctxpopup.bml");
+    }
+
+    if ($uri =~ /^.*\b__rpc_changerelation$/) {
+        return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/changerelation.bml");
     }
 
     # customview (get an S1 journal by number)

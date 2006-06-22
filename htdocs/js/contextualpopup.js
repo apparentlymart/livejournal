@@ -1,6 +1,7 @@
 ContextualPopup = new Object;
 
 ContextualPopup.popupDelay = 1000;
+ContextualPopup.disableAJAX = true;
 
 ContextualPopup.cachedResults = {};
 ContextualPopup.currentRequests = {};
@@ -146,7 +147,7 @@ ContextualPopup.constructIPPU = function (ctxPopupId) {
         ContextualPopup.ippu = null;
     }
 
-    var ippu = new LJ_IPPU();
+    var ippu = new IPPU();
     ippu.init();
     ippu.setTitlebar(false);
     ippu.setDimensions("auto", "auto");
@@ -180,27 +181,6 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
             content.appendChild(userpicContainer);
         }
 
-        // user name
-        var displayName = document.createElement("div");
-        displayName.innerHTML = "Name: " + data.display;
-        DOM.addClassName(displayName, "Name");
-
-        // profile
-        var profile = document.createElement("div");
-        var profileLink = document.createElement("a");
-        profileLink.href = data.url_profile;
-        profileLink.innerHTML = "Profile";
-        profile.appendChild(profileLink);
-        DOM.addClassName(profile, "Profile");
-
-        // journal
-        var journal = document.createElement("div");
-        var journalLink = document.createElement("a");
-        journalLink.href = data.url_journal;
-        journalLink.innerHTML = "Journal";
-        journal.appendChild(journalLink);
-        DOM.addClassName(journal, "Journal");
-
         // friend?
         var relation = document.createElement("div");
         if (data.is_requester) {
@@ -211,41 +191,71 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
                                                            );
         }
 
-        if (! data.is_friend) {
-            // add friend link
-            var addFriend = document.createElement("div");
-            var addFriendLink = document.createElement("a");
-            addFriendLink.href = data.url_addfriend;
-            addFriendLink.innerHTML = "Add as friend";
-            addFriend.appendChild(addFriendLink);
-            DOM.addClassName(addFriend, "AddFriend");
-            DOM.addEventListener(addFriendLink, "click", function (e) {
-                Event.prep(e);
-                Event.stop(e);
-                return ContextualPopup.changeRelation(data, ctxPopupId, "addFriend"); });
-            relation.appendChild(addFriend);
-        } else {
-            // remove friend link (omg!)
-            var removeFriend = document.createElement("div");
-            var removeFriendLink = document.createElement("a");
-            removeFriendLink.href = data.url_delfriend;
-            removeFriendLink.innerHTML = "Remove friend";
-            removeFriend.appendChild(removeFriendLink);
-            DOM.addClassName(removeFriend, "RemoveFriend");
-            DOM.addEventListener(removeFriendLink, "click", function (e) {
-                Event.prep(e);
-                Event.stop(e);
-                return ContextualPopup.changeRelation(data, ctxPopupId, "removeFriend"); });
-            relation.appendChild(removeFriend);
+        // relation
+        if (! data.is_requester) {
+            if (! data.is_friend) {
+                // add friend link
+                var addFriend = document.createElement("div");
+                var addFriendLink = document.createElement("a");
+                addFriendLink.href = data.url_addfriend;
+                addFriendLink.innerHTML = "Add friend";
+                addFriend.appendChild(addFriendLink);
+                DOM.addClassName(addFriend, "AddFriend");
+
+                if (!ContextualPopup.disableAJAX) {
+                    DOM.addEventListener(addFriendLink, "click", function (e) {
+                        Event.prep(e);
+                        Event.stop(e);
+                        return ContextualPopup.changeRelation(data, ctxPopupId, "addFriend"); });
+                }
+
+                relation.appendChild(addFriend);
+            } else {
+                // remove friend link (omg!)
+                var removeFriend = document.createElement("div");
+                var removeFriendLink = document.createElement("a");
+                removeFriendLink.href = data.url_delfriend;
+                removeFriendLink.innerHTML = "Remove friend";
+                removeFriend.appendChild(removeFriendLink);
+                DOM.addClassName(removeFriend, "RemoveFriend");
+
+                if (!ContextualPopup.disableAJAX) {
+                    DOM.addEventListener(removeFriendLink, "click", function (e) {
+                        Event.prep(e);
+                        Event.stop(e);
+                        return ContextualPopup.changeRelation(data, ctxPopupId, "removeFriend"); });
+                }
+
+                relation.appendChild(removeFriend);
+            }
+
+            DOM.addClassName(relation, "Relation");
         }
-
-        DOM.addClassName(relation, "Relation");
-
-        // set popup content
-        content.appendChild(displayName);
-        content.appendChild(profile);
-        content.appendChild(journal);
         content.appendChild(relation);
+
+        var bar = document.createElement("span");
+        bar.innerHTML = " | ";
+
+        // journal
+        var journalLink = document.createElement("a");
+        journalLink.href = data.url_journal;
+        journalLink.innerHTML = "Journal";
+        content.appendChild(journalLink);
+        content.appendChild(bar.cloneNode(true));
+
+        // profile
+        var profileLink = document.createElement("a");
+        profileLink.href = data.url_profile;
+        profileLink.innerHTML = "Profile";
+        content.appendChild(profileLink);
+        content.appendChild(bar.cloneNode(true));
+
+        // pictures
+        var picturesLink = document.createElement("a");
+        picturesLink.href = data.url_fb;
+        picturesLink.innerHTML = "Pictures";
+        content.appendChild(picturesLink);
+
         ippu.setContentElement(content);
     } else {
         ippu.setContent("Loading...");
@@ -266,7 +276,7 @@ ContextualPopup.changeRelation = function (info, ctxPopupId, action) {
     var opts = {
         "data": HTTPReq.formEncoded(postData),
         "method": "POST",
-        "url": "/tools/endpoints/changerelation.bml",
+        "url": "/__rpc_changerelation",
         "onError": ContextualPopup.gotError,
         "onData": ContextualPopup.changedRelation
     };
@@ -278,7 +288,6 @@ ContextualPopup.changeRelation = function (info, ctxPopupId, action) {
 
 // callback from changing relation request
 ContextualPopup.changedRelation = function (info) {
-    log(inspect(info));
     var ctxPopupId = info.ctxPopupId + 0;
     if (!ctxPopupId) return;
 
@@ -329,7 +338,7 @@ ContextualPopup.getInfo = function (target) {
     });
 
     HTTPReq.getJSON({
-        "url": "/tools/endpoints/ctxpopup.bml",
+        "url": "/__rpc_ctxpopup",
             "method" : "GET",
             "data": params,
             "onData": ContextualPopup.gotInfo,
