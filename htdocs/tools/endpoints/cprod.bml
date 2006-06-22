@@ -35,6 +35,9 @@
 
     select undef, undef, undef, 0.25 if $LJ::IS_DEV_SERVER;
 
+    BML::set_content_type('text/javascript; charset=utf-8');
+    BML::finish();
+
     return LJ::js_dumper(\%ret);
 }
 _code?>

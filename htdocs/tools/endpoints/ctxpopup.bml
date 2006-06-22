@@ -42,7 +42,10 @@
 
     my %ret;
     my $u = $get_user->();
-    BML::set_content_type('text/plain');
+
+    BML::set_content_type('text/javascript; charset=utf-8');
+    BML::finish();
+
     if ($u && $GET{'mode'} eq 'getinfo') {
         $ret{username} = $u->{user};
         $ret{display} = $u->{name};
