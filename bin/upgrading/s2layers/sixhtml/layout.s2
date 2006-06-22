@@ -146,13 +146,13 @@ propgroup text {
 propgroup customcss {
     property string linked_stylesheet {
         des = "Custom External Stylesheet";
-        note = "If you selected \"(None)\" as your theme and have a custom external stylesheet that you'd like to use instead, enter its URL here.";
+        note = "If you selected \"(None)\" as your theme and have a custom external stylesheet that you'd like to use instead, or if you'd just like to use a custom external stylesheet in addition to your theme's stylesheet, enter its URL here.";
     }
     set linked_stylesheet = "";
 
     property string custom_css {
     	des = "Custom Stylesheet";
-    	note = "If you'd like to customize this style from scratch and are familiar with CSS, enter it here";
+    	note = "If you'd like to add custom CSS to this style, enter it here.";
     	cols = 80;
     	rows = 20;
         string_mode = "css";
