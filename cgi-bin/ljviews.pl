@@ -1114,6 +1114,8 @@ sub create_view_lastn
     $lastn_page{'head'} .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n}
         if LJ::OpenID::server_enabled();
 
+    $lastn_page{'head'} .= LJ::res_includes();
+
     my $show_ad = LJ::run_hook('should_show_ad', {
         ctx  => "journal",
         user => $u->{user},
@@ -1533,6 +1535,8 @@ sub create_view_friends
     if ($LJ::UNICODE) {
         $friends_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'" />';
     }
+
+    $friends_page{'head'} .= LJ::res_includes();
 
     my $show_ad = LJ::run_hook('should_show_ad', {
         ctx  => "journal",
@@ -2003,6 +2007,8 @@ sub create_view_calendar
         $calendar_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'" />';
     }
 
+    $calendar_page{'head'} .= LJ::res_includes();
+
     my $show_ad = LJ::run_hook('should_show_ad', {
         ctx  => "journal",
         user => $u->{user},
@@ -2263,6 +2269,8 @@ sub create_view_day
     if ($LJ::UNICODE) {
         $day_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'" />';
     }
+
+    $day_page{'head'} .= LJ::res_includes();
 
     my $show_ad = LJ::run_hook('should_show_ad', {
         ctx  => "journal",
