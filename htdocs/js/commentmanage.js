@@ -601,6 +601,8 @@ function setupAjax () {
             var todel = document.getElementById("ljcmt" + dItemid);
             if (! todel) return true;
 
+            if (LJ_cmtinfo && LJ_cmtinfo.disableInlineDelete) continue;
+
             ae.onclick = createDeleteFunction(ae, dItemid);
         }
 

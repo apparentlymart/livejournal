@@ -186,6 +186,7 @@ head<=
 <script>
     LJVAR.imgprefix = "<?imgprefix?>";
 LJ_cmtinfo = {};
+LJ_cmtinfo['disableInlineDelete'] = 1;
 
 var tableview = new View();
 var checkallButton = new CheckallButton();

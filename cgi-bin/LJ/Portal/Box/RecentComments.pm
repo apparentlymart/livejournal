@@ -81,6 +81,7 @@ sub generate_content {
     $LJ_cmtinfo{'canAdmin'} = 1;
     $LJ_cmtinfo{'remote'} = $u->{user};
     $LJ_cmtinfo{'journal'} = $u->{user};
+    $LJ_cmtinfo{'disableInlineDelete'} = 1;
 
     $content .= "<table style='width: 100%' cellpadding='5' cellspacing='0'>";
     foreach my $r (@recv) {
