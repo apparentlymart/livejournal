@@ -2952,6 +2952,7 @@ sub _Entry__get_link
     }
     if ($key eq "watch_comments") {
         return $null_link if $LJ::DISABLED{'esn'};
+        return $null_link unless $remote;
         return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$journal&amp;ditemid=$this->{'itemid'}",
                             "Track New Comments",
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20));
