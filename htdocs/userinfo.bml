@@ -382,7 +382,7 @@
      }
 
      unless ($LJ::DISABLED{'esn'} || ! $has_journal || !$remote) {
-         push @linkele, "$remote->{user}<a href='$LJ::SITEROOT/manage/subscriptions/user.bml?journal=$u->{'user'}'>" .
+         push @linkele, "<a href='$LJ::SITEROOT/manage/subscriptions/user.bml?journal=$u->{'user'}'>" .
              LJ::img("track", "", { 'align' => 'middle' }) . "</a>";
      }
 
