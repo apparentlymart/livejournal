@@ -351,7 +351,7 @@
      my $label = $com ? $ML{'.monitor.comm'} : $ML{'.monitor.user'};
      push @linkele, "<a href='$LJ::SITEROOT/friends/add.bml?user=$user'><img src='$LJ::IMGPREFIX/btn_addfriend.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>";
 
-     if ($has_journal && LJ::can_use_journal($remote->{'userid'}, $user)) {
+     if ($has_journal && $remote && LJ::can_use_journal($remote->{'userid'}, $user)) {
          if($remote_isowner) {
              $label = $ML{'.label.postalt'};
          } else {
@@ -381,8 +381,8 @@
          push @linkele, "<a href='$LJ::SITEROOT/friends/nudge.bml?user=$u->{'user'}'><img align='middle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_nudge.gif' width='22' height='20' alt='Nudge a friend' title='Nudge a friend' border='0' /></a>";
      }
 
-     unless ($LJ::DISABLED{'esn'} || ! $has_journal) {
-         push @linkele, "<a href='$LJ::SITEROOT/manage/subscriptions/user.bml?journal=$u->{'user'}'>" .
+     unless ($LJ::DISABLED{'esn'} || ! $has_journal || !$remote) {
+         push @linkele, "$remote->{user}<a href='$LJ::SITEROOT/manage/subscriptions/user.bml?journal=$u->{'user'}'>" .
              LJ::img("track", "", { 'align' => 'middle' }) . "</a>";
      }
 
