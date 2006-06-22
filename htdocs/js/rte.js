@@ -22,6 +22,7 @@ function useRichText(textArea, statPrefix) {
         }
         oFCKeditor.ReplaceTextarea();
     } else {
+        if (! FCKeditorAPI) return;
         var oEditor = FCKeditorAPI.GetInstance(textArea);
         editor_frame.style.display = "block";
         $(textArea).style.display = "none";
@@ -48,6 +49,8 @@ function useRichText(textArea, statPrefix) {
 }
 
 function RTEAddClasses(textArea, statPrefix) {
+    var editor_frame = $(textArea + '___Frame');
+    if (!editor_frame) return;
     if (! FCKeditorAPI) return;
     var oEditor = FCKeditorAPI.GetInstance(textArea);
     if (! oEditor) return;
@@ -70,11 +73,11 @@ function usePlainText(textArea) {
     var editor_source = editor_frame.contentWindow.document.getElementById('eEditorArea'); 
 
     var html = oEditor.GetXHTML();
-    //    if ($("event_format") && $("event_format").selectedIndex == 0) {
+    if ($("event_format") && $("event_format").selectedIndex == 0) {
         html = html.replace(/\<br \/\>/g, '\n');
         html = html.replace(/\<p\>(.+)\<\/p\>/g, '$1\n');
         html = html.replace(/&nbsp;/g, ' ');
-        //    }
+    }
     $(textArea).value = html;
 
     if ($("insobj"))
