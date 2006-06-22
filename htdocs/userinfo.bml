@@ -558,8 +558,9 @@ if ($u->{'journaltitle'}) {
 
   if ($u->share_contactinfo($remote) || $viewall) {
       my $mangleaddress = sub {
-          my $email = shift;
-          my $mret = "<table cellpadding='0' cellspacing='0'><tr><td>";
+          my ($email, $first) = @_;
+          $first ||= "";
+          my $mret = "<table cellpadding='0' cellspacing='0'><tr><td>$first";
           for (my $i = 0; $i < length($email); $i++) {
               my $letter = substr($email, $i, 1);
               if ($letter eq "\@") { $letter = "</td><td align='center'><i>&#64;</i></td><td>"; }
@@ -581,6 +582,7 @@ if ($u->{'journaltitle'}) {
           $body .= "</td></tr>";
       }
 
+      # FIXME: don't modify the $u object!  gross/dangerous.
       foreach my $k (qw(aolim icq yahoo msn jabber google_talk skype gizmo)) {
           $u->{$k} = LJ::ehtml($u->{$k});
       }
@@ -620,7 +622,11 @@ if ($u->{'journaltitle'}) {
       }
       if ($u->{'skype'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
-          my $skype = $mangleaddress->($u->{'skype'});
+          my $skimg = "";
+          if ($u->{skype} =~ /^[\w\.]+$/) {
+              $skimg = "<img alt='Gizmo Status' width='16' height='16' src='http://mystatus.skype.com/smallicon/$u->{skype}' /> ";
+          }
+          my $skype = $mangleaddress->($u->{'skype'}, $skimg);
           $body .= "<tr><td align='right'><b>$ML{'.label.skype'}</b></td><td colspan='$span'>$skype</td></tr>\n";
       }
       if (my $gizmo = $u->gizmo_account) {
