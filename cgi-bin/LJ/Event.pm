@@ -93,6 +93,18 @@ sub as_html {
     return $self->as_string;
 }
 
+# contents for HTML email
+sub as_email_html {
+    my $self = shift;
+    return $self->as_html;
+}
+
+# contents for plaintext email
+sub as_email_string {
+    my $self = shift;
+    return $self->as_string;
+}
+
 # class method, takes a subscription
 sub subscription_as_html {
     my ($class, $subscr) = @_;
