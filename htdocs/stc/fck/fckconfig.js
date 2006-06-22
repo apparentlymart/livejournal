@@ -98,7 +98,7 @@ FCKConfig.ToolbarSets["Basic"] = [
 
 FCKConfig.ToolbarSets["Update"] = [
         ['LJVideoLink','LJUserLink', 'LJCutLink', '-', 'Bold','Italic','Underline','StrikeThrough','-','Subscript','Superscript', '-', 'TextColor', 'FontSize'],
-        ['-', 'Link', 'Unlink'],
+        ['Image','-', 'Link', 'Unlink'],
         ['OrderedList','UnorderedList', 'Table'],
         ['Outdent','Indent'],
         ['JustifyLeft','JustifyCenter','JustifyRight','JustifyFull'],
