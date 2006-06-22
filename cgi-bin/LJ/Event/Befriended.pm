@@ -16,11 +16,18 @@ sub new {
 
 sub is_common { 0 }
 
-sub as_string {
+sub as_html {
     my $self = shift;
     my $u1 = LJ::load_userid($self->arg1);
     return sprintf("%s has added me as a friend.",
                    LJ::load_userid($self->arg1)->ljuser_display);
+}
+
+sub as_string {
+    my $self = shift;
+    my $u1 = LJ::load_userid($self->arg1);
+    return sprintf("%s has added me as a friend.",
+                   LJ::load_userid($self->arg1)->{user});
 }
 
 sub as_sms {
