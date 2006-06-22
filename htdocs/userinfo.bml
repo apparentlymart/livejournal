@@ -381,7 +381,7 @@
          push @linkele, "<a href='$LJ::SITEROOT/friends/nudge.bml?user=$u->{'user'}'><img align='middle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_nudge.gif' width='22' height='20' alt='Nudge a friend' title='Nudge a friend' border='0' /></a>";
      }
 
-     unless ($LJ::DISABLED{'esn'} || ! $has_journal || !$remote) {
+     if ($remote && $has_journal && ! $LJ::DISABLED{'esn'}) {
          push @linkele, "<a href='$LJ::SITEROOT/manage/subscriptions/user.bml?journal=$u->{'user'}'>" .
              LJ::img("track", "", { 'align' => 'middle' }) . "</a>";
      }
