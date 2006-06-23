@@ -7221,8 +7221,6 @@ web.controlstrip.links.addfeed=Add it to your Friends Page
 
 web.controlstrip.links.addfriend=Add them as a friend
 
-web.controlstrip.links.changecommsettings=Change Settings
-
 web.controlstrip.links.create=Create a [[sitename]] Account
 
 web.controlstrip.links.editcommmembers=Edit Members
