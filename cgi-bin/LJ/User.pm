@@ -1728,6 +1728,9 @@ sub view_control_strip {
 
     my $prop = $u->raw_prop('view_control_strip');
     return 0 if $prop eq 'off';
+
+    return 'dark' if $prop eq 'forced';
+
     return $prop if $prop;
 
     return LJ::run_hook('control_strip_unset', $u);
@@ -1738,9 +1741,22 @@ sub show_control_strip {
 
     my $prop = $u->raw_prop('show_control_strip');
     return 0 if $prop eq 'off';
+
+    return 'dark' if $prop eq 'forced';
+
     return $prop if $prop;
 
     return LJ::run_hook('control_strip_unset', $u);
+}
+
+# when was this account created?
+# returns unixtime
+sub timecreate {
+    my $u = shift;
+    my $dbr = LJ::get_db_reader() or die "No db";
+    my $when = $dbr->selectrow_array("SELECT timeupdate FROM userusage WHERE userid=?", undef, $u->{userid});
+    return undef unless $when;
+    return LJ::mysqldate_to_time($when);
 }
 
 package LJ;
