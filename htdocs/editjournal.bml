@@ -157,6 +157,21 @@ body<=
 
                     $result .= "<?p $ML{'.success.delete'} p?>";
                     $result .= "<?p $ML{'.success.deletespam'} p?>" if $POST{'action:deletespam'};
+
+                    my $j_base = ($usejournal ? $usejournal_u : $u)->journal_base;
+                    $result .= qq {
+                        <div id="fromhere">From here you can:
+                        <ul>
+                            <li>
+                            <a href="$j_base">View journal entries</a>
+                            </li>
+                            <li>
+                            <a href="$LJ::SITEROOT/editjournal.bml">Manage your journal entries</a>
+                            </li>
+                            </ul>
+                            </div>
+                    };
+
                     return $result;
                 }
 
