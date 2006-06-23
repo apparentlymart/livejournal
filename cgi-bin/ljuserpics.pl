@@ -529,7 +529,7 @@ sub _get_upf_scaled
     my $y2 = delete $opts{y2};
     my $border = delete $opts{border} || 0;
     my $maxfilesize = delete $opts{maxfilesize} || 38;
-    my $u = LJ::want_user(delete $opts{userid}) || LJ::get_remote();
+    my $u = LJ::want_user(delete $opts{userid} || delete $opts{u}) || LJ::get_remote();
     croak "No userid or remote" unless $u;
 
     $maxfilesize *= 1024;
