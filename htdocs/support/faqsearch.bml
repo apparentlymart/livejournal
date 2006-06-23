@@ -8,7 +8,8 @@
     $body = "<?standout $ML{'.info'} standout?><br />";
     $body .= "<form method='GET'>";
     $body .= "<table><tr><td>$ML{'.label.term'}: </td>";
-    $body .= "<td>" . LJ::html_text({ size => 30, value => $GET{'q'}, name => 'q' }) . "&nbsp;<input type='submit' value='$ML{'.button.search'}' />";
+    $body .= "<td>" . LJ::html_text({ size => 30, value => $GET{'q'}, name => 'q' });
+    $body .= "&nbsp;" . LJ::html_submit($ML{'.button.search'});
     $body .= "</td></tr>";
 
     $body .= "<tr><td>";
@@ -33,11 +34,11 @@
     $body .= "$ML{'.label.lang'}: ";
     $body .= "</td><td>";
     my $sel = $GET{'lang'} || $curr;
-    $body .= LJ::html_select({
-        'name' => 'lang',
-        'selected' => $sel,},
-                             @langs);
-
+    $body .= LJ::html_select
+        ({ name => 'lang',
+           selected => $sel, },
+         @langs);
+    
     $body .= "&nbsp;$ML{'.example'}";
     $body .= "</td></tr></table></form>";
 
