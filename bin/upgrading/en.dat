@@ -2985,6 +2985,8 @@ Regards,
 
 /manage/comments/index.bml.disablecomment1=If you disable commenting, all past comments on your journal will be hidden. They will re-appear if you enable commenting again.
 
+/manage/comments/index.bml.disablecomment1.comm=If you disable commenting, all past comments on your community will be hidden. They will re-appear if you enable commenting again.
+
 /manage/comments/index.bml.disablecomment2.1=If you wish to disable commenting for only some for your entries, adjust the "Comments Settings" setting on each entry.
 
 /manage/comments/index.bml.emailnotify=Receive email notifications when others comment
@@ -3017,11 +3019,15 @@ Regards,
 
 /manage/comments/index.bml.logip.text=You can set this option to log the IP addresses of commenters to your journal.
 
+/manage/comments/index.bml.logip.text.comm=You can set this option to log the IP addresses of commenters to your community.
+
 /manage/comments/index.bml.screen=Screen comments from
 
 /manage/comments/index.bml.screen.text=Screening allows you to read comments before publishing them for others to see.
 
 /manage/comments/index.bml.section.banned=Banned users
+
+/manage/comments/index.bml.section.commcomments=Comments on your community
 
 /manage/comments/index.bml.section.journalcomments=Comments on your journal
 
@@ -3034,6 +3040,8 @@ Regards,
 /manage/comments/index.bml.security.visibility.everyone=Everyone
 
 /manage/comments/index.bml.security.visibility.friends=Friends only
+
+/manage/comments/index.bml.security.visibility.members=Members only
 
 /manage/comments/index.bml.security.visibility.nobody=Nobody
 
@@ -3052,6 +3060,8 @@ Regards,
 /manage/comments/index.bml.title=Comment Settings
 
 /manage/comments/index.bml.unban=You have the following users banned from posting in your journal. Check the checkbox by their username to remove the ban.
+
+/manage/comments/index.bml.unban.comm=You have the following users banned from posting in your community. Check the checkbox by their username to remove the ban.
 
 /manage/emailpost.bml.addresses.header=Allowed sender addresses
 

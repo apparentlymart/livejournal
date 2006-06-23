@@ -67,7 +67,7 @@ _code?>
         $ret .= LJ::form_auth();
 
         # personal information
-        $ret .= "<div class='section_head'> $ML{'.section.journalcomments'}</div>\n";
+        $ret .= "<div class='section_head'>" . ($u->{'journaltype'} eq "C" ? $ML{'.section.commcomments'} : $ML{'.section.journalcomments'}) . "</div>\n";
         $ret .= "<table class='field_block'>\n";
 
         # Enable comments
@@ -78,8 +78,8 @@ _code?>
         $ret .= LJ::html_select({ 'name' => 'opt_whocanreply', 'selected' => $u->{'opt_whocanreply'} },
                                   "all" => BML::ml(".security.visibility.everybody"),
                                   "reg" => BML::ml(".security.visibility.regusers"),
-                                  "friends" => BML::ml(".security.visibility.friends") );
-        $ret .= "<ul class='helper'><li>$ML{'.disablecomment1'}</li>\n";
+                                  "friends" => ($u->{'journaltype'} eq 'C' ? BML::ml(".security.visibility.members") : BML::ml(".security.visibility.friends")) );
+        $ret .= "<ul class='helper'><li>" . ($u->{'journaltype'} eq 'C' ? $ML{'.disablecomment1.comm'} : $ML{'.disablecomment1'}) . "</li>\n";
         $ret .= "<li>$ML{'.disablecomment2.1'}</li></ul>\n";
         $ret .= "</td></tr>\n";
 
@@ -101,37 +101,40 @@ _code?>
                                   "N" => BML::ml(".security.visibility.noone"),
                                   "S" => BML::ml(".security.visibility.anon"),
                                   "A" => BML::ml(".security.visibility.everyone") );
-        $ret .= "<br />\n<span class='helper'>$ML{'.logip.text'}</span>";
+        $ret .= "<br />\n<span class='helper'>" . ($u->{'journaltype'} eq 'C' ? $ML{'.logip.text.comm'} : $ML{'.logip.text'}) . "</span>";
         $ret .= LJ::help_icon('iplogging');
         $ret .= "</td></tr>\n";
 
-        # Email notifications
-        $ret .= "<tr><td class='field_name'>$ML{'.fn.emailnotify'}</td>\n<td>";
-        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_gettalkemail', 'id' => 'opt_gettalkemail',
-                                 'selected' => $u->prop('opt_gettalkemail') eq 'Y' });
-        $ret .= " $ML{'.emailnotify'}</label><br />\n";
-        $ret .= "$ML{'.fn.emailformat'}: ";
-        $ret .= LJ::html_select({ 'name' => 'opt_htmlemail', 'id' => 'opt_htmlemail',
-                                  'selected' => $u->prop('opt_htmlemail')},
-                                  "N", BML::ml(".formatplain"), "Y", BML::ml(".formathtml") );
-        $ret .= "</td></tr>\n";
+        # Email notifications; notifications only go to entry posters (journaltype P)
+        if($u->{'journaltype'} eq "P") {
+            $ret .= "<tr><td class='field_name'>$ML{'.fn.emailnotify'}</td>\n<td>";
+            $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_gettalkemail', 'id' => 'opt_gettalkemail',
+                                     'selected' => $u->prop('opt_gettalkemail') eq 'Y' });
+            $ret .= " $ML{'.emailnotify'}</label><br />\n";
+            $ret .= "$ML{'.fn.emailformat'}: ";
+            $ret .= LJ::html_select({ 'name' => 'opt_htmlemail', 'id' => 'opt_htmlemail',
+                                      'selected' => $u->prop('opt_htmlemail')},
+                                    "N", BML::ml(".formatplain"), "Y", BML::ml(".formathtml") );
+            $ret .= "</td></tr>\n";
+        }
 
         $ret .= "</table>\n";
 
-        # Your comments
-        $ret .= "<div class='section_head'>$ML{'.section.makecomments'}</div>\n";
-        $ret .= "<table class='field_block'>\n";
+        if($u->{'journaltype'} eq "P") { # same logic as above
+            # Your comments
+            $ret .= "<div class='section_head'>$ML{'.section.makecomments'}</div>\n";
+            $ret .= "<table class='field_block'>\n";
 
-        # Comment notifications
-        $ret .= "<tr><td class='field_name'>$ML{'.fn.commentnotify'}</td>\n<td>";
-        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_getselfemail', 'id' => 'opt_getselfemail',
-                                 'selected' => $u->{'opt_getselfemail'},
-                                 'disabled' => !LJ::get_cap($u, 'getselfemail') });
-        $ret .= " $ML{'.commentnotify'}<br />\n";
-        $ret .= "<span class='helper'>$ML{'.commentnotify.text'}</span>\n";
-        $ret .= "</td></tr>\n";
-
-        $ret .= "</table>\n";
+            # Comment notifications
+            $ret .= "<tr><td class='field_name'>$ML{'.fn.commentnotify'}</td>\n<td>";
+            $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_getselfemail', 'id' => 'opt_getselfemail',
+                                     'selected' => $u->{'opt_getselfemail'},
+                                     'disabled' => !LJ::get_cap($u, 'getselfemail') });
+            $ret .= " $ML{'.commentnotify'}<br />\n";
+            $ret .= "<span class='helper'>$ML{'.commentnotify.text'}</span>\n";
+            $ret .= "</td></tr>\n";
+            $ret .= "</table>\n";
+        }
 
         # Banned Users
         my $banned = LJ::load_rel_user($u, 'B');
@@ -142,7 +145,7 @@ _code?>
 
             # Unban users
             $ret .= "<tr><td class='field_name'>$ML{'.fn.unban'}</td>\n<td>";
-            $ret .= " $ML{'.unban'}<br />\n";
+            $ret .= ($u->{'journaltype'} eq 'C' ? $ML{'.unban.comm'} : $ML{'.unban'}) ."<br />\n";
             foreach (@$banned) {
                 my $bu = $us->{$_};
                 next unless $bu;
