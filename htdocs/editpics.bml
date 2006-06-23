@@ -232,7 +232,7 @@
                               return $err->(BML::ml('.error.imagetoolarge', {imagesize => "${imagew}x$imageh"}));
                           } elsif ($filetype ne 'JPG' && $filetype ne 'PNG') {
                               # factory only works on jpegs and pngs because Image::Magick has issues
-                              return $err->("Sorry, you may only upload an image that is greater than 100x100 pixels if it is in JPEG format.")
+                              return $err->("Sorry, you cannot upload a userpic larger than 100x100 pixels if it is in GIF format.")
                           } else {
                               # large image size, to the factory!
                               $gotofactory = 1;
