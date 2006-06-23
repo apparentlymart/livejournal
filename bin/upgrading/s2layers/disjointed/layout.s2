@@ -1688,13 +1688,13 @@ function Page::print () {
 <head>
 """;
 if ($*external_stylesheet) {
-  println """<link rel="stylesheet" href="$.stylesheet_url" type="text/css" />\n""";
+  println safe """<link rel="stylesheet" href="$.stylesheet_url" type="text/css" />\n""";
 } else {
   println """<style type="text/css">""";
   start_css();
   print_stylesheet();
   end_css();
-  "</style>\n";
+  println "</style>\n";
 }
 
 if ($*linked_stylesheet != "") {

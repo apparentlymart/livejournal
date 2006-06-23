@@ -323,15 +323,20 @@ propgroup text {
     property use text_website_default_name;
 }
 propgroup customcss {
+    property string linked_stylesheet {
+        des = "Custom External Stylesheet";
+        note = "If you have a custom external stylesheet that you'd like to use, enter its URL here.";
+    }
+    set linked_stylesheet = "";
 
     property string custom_css {
-        des = "Custom Style Rules";
-        note = "If you'd like to customize this style further and are familiar with CSS, you can enter custom style rules here.";
-        string_mode = "css";
+        des = "Custom Stylesheet";
+        note = "If you'd like to add custom CSS to this style, enter it here.";
         cols = 80;
         rows = 20;
+        string_mode = "css";
     }
-
+    set custom_css = "";
 }
 
 set tags_aware = true;
@@ -877,7 +882,6 @@ function print_stylesheet() {
     necessary_styles();
     pretty_styles();
     custom_styles();
-    print "\n$*custom_css\n";
 }
 
 function paraphernalia_box_open(string id, string title) "Open a paraphenalia box" {
@@ -1141,6 +1145,17 @@ function Page::print() {
         println """<style type="text/css">""";
         start_css();
         print_stylesheet();
+        end_css();
+        println """</style>""";
+    }
+
+    if ($*linked_stylesheet != "") {
+        println safe """<link rel="stylesheet" href="$*linked_stylesheet" type="text/css" />""";
+    }
+    if ($*custom_css != "") {
+        println """<style type="text/css">""";
+        start_css();
+        println safe $*custom_css;
         end_css();
         println """</style>""";
     }

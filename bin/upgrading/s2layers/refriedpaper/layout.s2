@@ -348,14 +348,19 @@ propgroup text {
 }
 
 propgroup customcss {
+  property string linked_stylesheet {
+    des = "Custom External Stylesheet";
+    note = "If you have a custom external stylesheet that you'd like to use, enter its URL here.";
+  }
   property string custom_css {
     des = "Custom Stylesheet";
-    note = "If you'd like to customize this style from scratch and are familiar with CSS, enter it here";
+    note = "If you'd like to add custom CSS to this style, enter it here.";
     cols = 80;
     rows = 20;
     string_mode = "css";
   }
 
+  set linked_stylesheet = "";
   set custom_css = "";
 }
 
@@ -508,10 +513,6 @@ if ($*transparent) {
 }
 """;
 }
-"""
-
-$*custom_css
-""";
 }
 
 function print_sidebar_box(string header, string content) {
@@ -1318,9 +1319,24 @@ var string subtitle = $.global_subtitle != "" and $.view != "friends" ? """<br><
 <head>
 """;
 if($*external_stylesheet) {
-  """<link rel="stylesheet" href="$.stylesheet_url" type="text/css" />""";
+  println safe """<link rel="stylesheet" href="$.stylesheet_url" type="text/css" />""";
 } else {
-  """<style type="text/css">"""; print_stylesheet(); """</style>""";
+  println """<style type="text/css">""";
+  start_css();
+  print_stylesheet();
+  end_css();
+  println """</style>""";
+}
+
+if ($*linked_stylesheet != "") {
+  println safe """<link rel="stylesheet" href="$*linked_stylesheet" type="text/css" />""";
+}
+if ($*custom_css != "") {
+  println """<style type="text/css">""";
+  start_css();
+  println safe $*custom_css;
+  end_css();
+  println """</style>""";
 }
 $this->print_head();
 """
