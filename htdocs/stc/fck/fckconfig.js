@@ -1,4 +1,4 @@
-﻿/*
+/*
  * FCKeditor - The text editor for internet
  * Copyright (C) 2003-2005 Frederico Caldeira Knabben
  * 
@@ -97,8 +97,8 @@ FCKConfig.ToolbarSets["Basic"] = [
 ] ;
 
 FCKConfig.ToolbarSets["Update"] = [
-        ['LJVideoLink','LJUserLink', 'LJCutLink', '-', 'Bold','Italic','Underline','StrikeThrough','-','Subscript','Superscript', '-', 'TextColor', 'FontSize'],
-        ['Image','-', 'Link', 'Unlink'],
+        ['LJUserLink', 'LJCutLink', '-', 'Bold','Italic','Underline','StrikeThrough','-','Subscript','Superscript', '-', 'TextColor', 'FontSize'],
+        ['Image','LJVideoLink','-', 'Link', 'Unlink'],
         ['OrderedList','UnorderedList', 'Table'],
         ['Outdent','Indent'],
         ['JustifyLeft','JustifyCenter','JustifyRight','JustifyFull'],
