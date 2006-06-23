@@ -5481,6 +5481,8 @@ This could be because: <ol>
 
 /tools/memories.bml.uncategorized=Uncategorized
 
+/tools/recent_comments.bml.managesettings=Manage Comment Settings
+
 /tools/recent_comments.bml.maxnotshown=Your account is only permitted to see the latest [[current]] entries, not the full limit of [[max]].
 
 /tools/textmessage.bml.enter.user.head=Enter user
