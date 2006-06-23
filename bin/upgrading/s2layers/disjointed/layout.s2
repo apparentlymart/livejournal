@@ -308,14 +308,20 @@ propgroup text {
 }
 
 propgroup customcss {
+    property string linked_stylesheet {
+        des = "Custom External Stylesheet";
+        note = "If you have a custom external stylesheet that you'd like to use, enter its URL here.";
+    }
+
     property string custom_css {
         des = "Custom Stylesheet";
-        note = "If you'd like to customize this style from scratch and are familiar with CSS, enter it here";
+        note = "If you'd like to add custom CSS to this style, enter it here.";
         cols = 80;
         rows = 20;
         string_mode = "css";
     }
 
+    set linked_stylesheet = "";
     set custom_css = "";
 }
 
@@ -581,9 +587,6 @@ print ($*transparent_borders) ? "border: 0;" : "";
 """}
 """;
 }
-"""
-$*custom_css
-""";
 }
 
 function num_comments_in_thread (Comment[] comments)  : int {
@@ -1693,6 +1696,18 @@ if ($*external_stylesheet) {
   end_css();
   "</style>\n";
 }
+
+if ($*linked_stylesheet != "") {
+  println safe """<link rel="stylesheet" href="$*linked_stylesheet" type="text/css" />""";
+}
+if ($*custom_css != "") {
+  println """<style type="text/css">""";
+  start_css();
+  println safe $*custom_css;
+  end_css();
+  println """</style>""";
+}
+
     $this->print_head();
 """<title>$title</title>
 </head>

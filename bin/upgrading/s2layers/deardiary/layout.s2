@@ -232,6 +232,23 @@ propgroup text {
     property use text_website_default_name;
 }
 
+propgroup customcss {
+    property string linked_stylesheet {
+        des = "Custom External Stylesheet";
+        note = "If you have a custom external stylesheet that you'd like to use, enter its URL here.";
+    }
+    set linked_stylesheet = "";
+
+    property string custom_css {
+        des = "Custom Stylesheet";
+        note = "If you'd like to add custom CSS to this style, enter it here.";
+        cols = 80;
+        rows = 20;
+        string_mode = "css";
+    }
+    set custom_css = "";
+}
+
 function prop_init() {
     # A vague attempt at sanity-checking the font properties. Not
     # foolproof, of course, but this is about as good as it gets in S2.
@@ -876,6 +893,18 @@ function Page::print() {
         end_css();
         println """</style>""";
     }
+
+    if ($*linked_stylesheet != "") {
+        println safe """<link rel="stylesheet" href="$*linked_stylesheet" type="text/css" />""";
+    }
+    if ($*custom_css != "") {
+        println """<style type="text/css">""";
+        start_css();
+        println safe $*custom_css;
+        end_css();
+        println """</style>""";
+    }
+
     $this->lay_print_viewspec_head();
 """
 </head>
