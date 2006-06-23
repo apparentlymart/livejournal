@@ -1733,7 +1733,7 @@ sub view_control_strip {
 
     return $prop if $prop;
 
-    return LJ::run_hook('control_strip_unset', $u);
+    return LJ::run_hook('control_strip_unset', $u, 'view_control_strip');
 }
 
 sub show_control_strip {
@@ -1746,7 +1746,7 @@ sub show_control_strip {
 
     return $prop if $prop;
 
-    return LJ::run_hook('control_strip_unset', $u);
+    return LJ::run_hook('control_strip_unset', $u, 'show_control_strip');
 }
 
 # when was this account created?
