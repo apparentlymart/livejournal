@@ -173,7 +173,6 @@ function LoadSelection()
 			sUrl = oLink.getAttribute('href',2) ;
 	
 		GetE('txtLnkUrl').value		= sUrl ;
-		GetE('cmbLnkTarget').value	= oLink.target ;
 	}
 
 	UpdatePreview() ;
