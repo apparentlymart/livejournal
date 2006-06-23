@@ -740,6 +740,8 @@ sub postevent
         if $req->{props} && $req->{props}->{taglist} &&
            ! LJ::Tags::can_add_tags($uowner, $u);
 
+    un_utf8_request($req);
+
     my $event = $req->{'event'};
 
     ### allow for posting to journals that aren't yours (if you have permission)
@@ -766,8 +768,8 @@ sub postevent
 
     # are they trying to post back in time?
     if ($posterid == $ownerid && $u->{'journaltype'} ne 'Y' &&
-        !$time_was_faked && $u->{'newesteventtime'} && 
-        $eventtime lt $u->{'newesteventtime'} && 
+        !$time_was_faked && $u->{'newesteventtime'} &&
+        $eventtime lt $u->{'newesteventtime'} &&
         !$req->{'props'}->{'opt_backdated'}) {
         return fail($err, 153, "Your most recent journal entry is dated $u->{'newesteventtime'}, but you're trying to post one at $eventtime without the backdate option turned on.  Please check your computer's clock.  Or, if you really mean to post in the past, use the backdate option.");
     }
@@ -1196,6 +1198,8 @@ sub editevent
     ### make sure this user is allowed to edit this entry
     return fail($err,302)
         unless ($ownerid == $oldevent->{'ownerid'});
+
+    un_utf8_request($req);
 
     ### what can they do to somebody elses entry?  (in shared journal)
     if ($posterid != $oldevent->{'posterid'})
@@ -2660,6 +2664,16 @@ sub new_entry_cleanup_hack {
     $u->do("DELETE FROM talk2 WHERE journalid=$ownerid AND jtalkid IN ($list)");
     $u->do("DELETE FROM talktext2 WHERE journalid=$ownerid AND jtalkid IN ($list)");
     $u->do("DELETE FROM talkprop2 WHERE journalid=$ownerid AND jtalkid IN ($list)");
+}
+
+sub un_utf8_request {
+    my $req = shift;
+    $req->{$_} = LJ::no_utf8_flag($req->{$_}) foreach qw(subject event);
+    my $props = $req->{props} || {};
+    foreach my $k (keys %$props) {
+        next if ref $props->{$k};  # if this is multiple levels deep?  don't think so.
+        $props->{$k} = LJ::no_utf8_flag($props->{$k});
+    }
 }
 
 #### Old interface (flat key/values) -- wrapper aruond LJ::Protocol

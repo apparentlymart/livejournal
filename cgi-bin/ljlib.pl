@@ -2764,6 +2764,10 @@ sub assert_is {
                caller => [caller()])->throw;
 }
 
+sub no_utf8_flag {
+    return pack('C*', unpack('C*', $_[0]));
+}
+
 use vars qw($AUTOLOAD);
 sub AUTOLOAD {
     if ($AUTOLOAD eq "LJ::send_mail") {
