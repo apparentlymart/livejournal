@@ -1251,7 +1251,7 @@
  } else {  # Syndication journals are special
     $body .= "<div class='module'>\n";
     $body .= "<fieldset>\n";
-    $body .= "<legend><img src='$LJ::IMGPREFIX/userinfo.gif' title='' alt='' border='0' align='top' alt='Readers' /> Readers</legend>\n";
+    $body .= "<legend><img src='$LJ::IMGPREFIX/userinfo.gif' title='' alt='' border='0' align='top' alt='Watchers' /> Watchers</legend>\n";
     $body .= "$ML{'.friendof.syndreadcount'} ";
     $body .= "($friendsof{'count'})\n";
  }
@@ -1306,7 +1306,7 @@
                  }
                  $body .= "</legend>";
                  $body .= "<div class='content'>";   
-                 $body .= $displayusers->(\@cfriends, "Reader of");
+                 $body .= $displayusers->(\@cfriends, "Watcher of");
                  $body .= "<br/>";
                  $body .= "$member_of_comm";
                  $body .= "<br/>";
@@ -1351,7 +1351,7 @@
                  }
                  $body .= "</legend>\n";
                  $body .= "<div class='content'>\n";
-                 $body .= $displayusers->(\@yfriends, "Reader of");
+                 $body .= $displayusers->(\@yfriends, "Watcher of");
                  $body .= "</div></fieldset></div>\n";
              }
          }

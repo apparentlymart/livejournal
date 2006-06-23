@@ -1006,7 +1006,7 @@
          };
      }
  } else {  # Syndication journals are special
-    $body .= "<p><span class='ui_subhead'><img src='$LJ::IMGPREFIX/userinfo.gif' title='' alt='' border='0' align='top' /> Readers</span></p>\n";
+    $body .= "<p><span class='ui_subhead'><img src='$LJ::IMGPREFIX/userinfo.gif' title='' alt='' border='0' align='top' /> Watchers</span></p>\n";
     $body .= "<p>$ML{'.friendof.syndreadcount'} ";
     $body .= "($friendsof{'count'})</p>\n";
  }
@@ -1047,13 +1047,13 @@
                  my $text = LJ::ehtml($ML{'.label.frcommunity'});
                  $body .= "<p><span class='ui_subhead'><img src='$LJ::IMGPREFIX/community.gif' title='$text' alt='$text' border='0' align='top' /> $text</span></p>\n" .
                           "$member_of_comm\n";
-                 $body .= $displayusers->(\@cfriends, "Reader of");
+                 $body .= $displayusers->(\@cfriends, "Watcher of");
                  $body .= "&nbsp;<br />\n";
              }
              if (@yfriends) {
                  my $text = LJ::ehtml($ML{'.label.frsyndication2'});
                  $body .= "<p><span class='ui_subhead'><img src='$LJ::IMGPREFIX/syndicated.gif' title='$text' alt='$text' border='0' align='top' /> $text</span></p>\n";
-                 $body .= $displayusers->(\@yfriends, "Reader of");
+                 $body .= $displayusers->(\@yfriends, "Watcher of");
                  $body .= "&nbsp;<br />\n";
              }
          }

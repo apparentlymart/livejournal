@@ -348,7 +348,7 @@
  {
      my @linkele;
 
-     my $label = $com ? $ML{'.monitor.comm'} : $ML{'.monitor.user'};
+     my $label = $com ? $ML{'.monitor.comm2'} : $ML{'.monitor.user'};
      push @linkele, "<a href='$LJ::SITEROOT/friends/add.bml?user=$user'><img src='$LJ::IMGPREFIX/btn_addfriend.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>";
 
      if ($has_journal && $remote && LJ::can_use_journal($remote->{'userid'}, $user)) {

@@ -302,7 +302,11 @@ p?>
 
 /community/leave.bml.button.leave=Leave Community
 
+/community/leave.bml.button.stopwatch=Stop Watching Community
+
 /community/leave.bml.label.buttontoleave=Press the button below to leave the "[[commname]]" community.
+
+/community/leave.bml.label.buttontostopwatch=Press the button below to stop watching the "[[commname]]" community.
 
 /community/leave.bml.label.infoerror=The specified community information is not valid.
 
@@ -312,6 +316,8 @@ p?>
 
 /community/leave.bml.label.removed2=You are now removed from the <a [[aopts]]>[[commname]] Community</a>.
 
+/community/leave.bml.label.removed.stopwatch=You are no longer watching the <a [[aopts]]>[[commname]] Community</a>.
+
 /community/leave.bml.label.removefromfriends=Also remove "[[user]]" from friends list.
 
 /community/leave.bml.success=Success
@@ -319,6 +325,8 @@ p?>
 /community/leave.bml.sure=You sure?
 
 /community/leave.bml.title=Leave Community
+
+/community/leave.bml.title.stopwatch=Stop Watching Community
 
 /community/manage.bml.commlist.actinfo=Info
 
@@ -5834,7 +5842,7 @@ This could be because: <ol>
 
 /userinfo.bml.memories.entry=[[count]] entry
 
-/userinfo.bml.monitor.comm=Monitor Community
+/userinfo.bml.monitor.comm2=Watch Community
 
 /userinfo.bml.monitor.user=Add this user to your friends list
 

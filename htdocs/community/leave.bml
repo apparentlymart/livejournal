@@ -4,7 +4,6 @@
     use vars qw($title $body);
 
     LJ::set_active_crumb('leavecomm');
-
     $title = $ML{'.title'};
     $body = "";
 
@@ -12,6 +11,7 @@
         $body = "<?h1 $ML{'Error'} h1?><?p $_[0] p?>";
         return;
     };
+
 
     my $remote = LJ::get_remote();
     return $error->(BML::ml('.label.logoutfirst2', {'aopts' => "href='$LJ::SITEROOT/login.bml?ret=1'"})) unless $remote;
@@ -21,6 +21,11 @@
     my $cu = $FORM{comm} ? 
              LJ::load_user($FORM{comm}) : # they gave us the comm name
              LJ::load_userid($cuserid);   # they gave us the comm id
+
+    my $watching = LJ::is_friend($remote, $cu);
+    my $memberof = LJ::is_friend($cu, $remote);
+
+    $title = $ML{'.title.stopwatch'} if (!$memberof && $watching);
 
     # error check
     return $error->($ML{'.label.infoerror'})
@@ -40,21 +45,39 @@
         return $error->($ML{'.label.lastmaintainer'}) if $ismaint && !$othermaints;
 
         # remove user from community's friends list
-        LJ::leave_community($remote, $cu, $FORM{removefriend});
+        unless ($watching && !$memberof) {
+            LJ::leave_community($remote, $cu, $FORM{removefriend});
+        } else {
+            LJ::remove_friend($remote, $cu);
+        }
 
         # success message
         my $profile_url = $cu->profile_url;
-        $body .= "<?h1 $ML{'.success'} h1?><?p " .
-                 BML::ml('.label.removed2', {'aopts' => "href='$profile_url'", 'commname' => $ecname}) .
-                 " p?>";
+        $body .= "<?h1 $ML{'.success'} h1?><?p ";
+        unless ($watching && !$memberof) {
+            $body .= BML::ml('.label.removed2', {'aopts' => "href='$profile_url'", 'commname' => $ecname });
+        } else {
+            $body .= BML::ml('.label.removed.stopwatch', {'aopts' => "href='$profile_url'", 'commname' => $ecname });
+        }
+        $body .= " p?>";
     } else {
         # show a confirmation form
-        $body .= "<?h1 $ML{'.sure'} h1?><?p " . BML::ml('.label.buttontoleave', { commname => $ecname }) . " p?>";
+        $body .= "<?h1 $ML{'.sure'} h1?><?p ";
+        if ($watching && !$memberof) {
+            $body .= BML::ml('.label.buttontostopwatch', { commname => $ecname });
+        } else {
+            $body .= BML::ml('.label.buttontoleave', { commname => $ecname });
+        }
+        $body .= " p?>";
         $body .= '<form method="post" action="leave.bml">';
         $body .= LJ::html_hidden("cuserid", $cu->{userid}, "confirm", 1) . "<p align='center'>";
-        $body .= LJ::html_check({ name => 'removefriend', selected => 1, value => 1 }) . " ";
-        $body .= BML::ml('.label.removefromfriends', { user => $ecname });
-        $body .= '<br /><br />' . LJ::html_submit(undef, $ML{'.button.leave'}) . '</p></form>';
+        unless ($watching && !$memberof) {
+            $body .= LJ::html_check({ name => 'removefriend', selected => 1, value => 1 }) . " ";
+            $body .= BML::ml('.label.removefromfriends', { user => $ecname });
+            $body .= '<br /><br />' . LJ::html_submit(undef, $ML{'.button.leave'}) . '</p></form>';
+        } else {
+            $body .= '<br /><br />' . LJ::html_submit(undef, $ML{'.button.stopwatch'}) . '</p></form>';
+        }
     } 
 
     return;
