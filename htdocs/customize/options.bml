@@ -15,6 +15,7 @@ body<=
                   opt_usesharedpic => qr/./,
                   s1_overrides     => qr/./,
                   'action:redir'   => 'word',
+                  'action:remove'  => qr/./,
                   'lj_form_auth'   => qr/./,);
 
     my $remote = LJ::get_remote();
@@ -203,23 +204,32 @@ body<=
 
             $saved_msg .= "Your settings have been saved. <a href='" . $u->journal_base() . "'>View your Journal</a>.";
         } else {
-            my %override;
-            foreach my $prop (S2::get_properties($lyr_layout->{'s2lid'}))
-            {
-                $prop = S2::get_property($lyr_core->{'s2lid'}, $prop)
-                    unless ref $prop;
-                next unless ref $prop;
-                next if $prop->{'noui'};
-                my $name = $prop->{'name'};
-                next unless LJ::S2::can_use_prop($u, $lyr_layout->{'uniq'}, $name);
-                $override{$name} = [ $prop, $POST{"s2_${name}_value"} ];
-            }
-
-            if (LJ::S2::layer_compile_user($layer, \%override)) {
-                $saved_msg .= "Your settings have been saved. <a href='" . $u->journal_base() . "'>View your Journal</a>.";
+            if ($POST{'action:remove'}) {
+                return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>"
+                    unless LJ::check_form_auth();
+                LJ::S2::delete_layer($s2_style{'user'});
+                $s2_style{'user'} = LJ::S2::create_layer($u->{userid}, $s2_style{'layout'}, "user");
+                LJ::S2::set_style_layers($u, $u->{'s2_style'}, "user", $s2_style{'user'});
+                $saved_msg .= "Your settings have been removed. <a href='" . $u->journal_base() . "'>View your Journal</a>.";
+                $layerid = $s2_style{'user'};
             } else {
-                my $error = LJ::last_error();
-                $err_msg = "Error saving layer";
+                my %override;
+                foreach my $prop (S2::get_properties($lyr_layout->{'s2lid'}))
+                {
+                    $prop = S2::get_property($lyr_core->{'s2lid'}, $prop)
+                        unless ref $prop;
+                    next unless ref $prop;
+                    next if $prop->{'noui'};
+                    my $name = $prop->{'name'};
+                    next unless LJ::S2::can_use_prop($u, $lyr_layout->{'uniq'}, $name);
+                    $override{$name} = [ $prop, $POST{"s2_${name}_value"} ];
+                }
+                if (LJ::S2::layer_compile_user($layer, \%override)) {
+                    $saved_msg .= "Your settings have been saved. <a href='" . $u->journal_base() . "'>View your Journal</a>.";
+                } else {
+                    my $error = LJ::last_error();
+                    $err_msg = "Error saving layer";
+                }
             }
             LJ::S2::load_layers($layerid);
         }
@@ -455,7 +465,7 @@ body<=
         }
         $ret .= "<script type='text/javascript' language='JavaScript'><!--\n$prop_js// --></script>";
     }
-    $ret .= LJ::cmize::html_save();
+    $ret .= LJ::cmize::html_save({ 'remove' => $u->prop("stylesys") == 2 ? 1 : 0});
     $ret .= "</form></div>";
     return $ret;
 }

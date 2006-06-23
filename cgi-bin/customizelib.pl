@@ -307,11 +307,16 @@ sub html_tablinks
 # common HTML for the "save changes" button in a tab
 sub html_save
 {
+    my $opts = shift;
     my $ret;
+
     $ret .= LJ::html_hidden({ 'name' => "action:redir", value => "", 'id' => "action:redir" });
     $ret .= "<div style='text-align: center'>";
     $ret .= LJ::html_submit('action:save', "Save Changes", { 'id' => "action:save" });
+    $ret .= " " . LJ::html_submit('action:remove', "Remove Changes", { 'id' => "action:remove" }) if $opts->{remove};
     $ret .= "</div>";
+
+    return $ret;
 }
 
 1;
