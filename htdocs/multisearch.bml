@@ -217,6 +217,17 @@
         return BML::redirect("$LJ::SITEROOT/directory.bml?s_loc=1&loc_cn=$country&loc_st=$state&loc_ci=$city&opt_sort=ut&opt_format=pics&opt_pagesize=50");
     }
 
+    if ($type eq "faq") {
+        my $term = lc($q);
+        if ($term) {
+            return BML::redirect("$LJ::SITEROOT/support/faqsearch.bml?q=" . LJ::eurl($term));
+        } else {
+            $title = $ML{'.nofaqsearch.title'};
+            $body = "<?h1 $ML{'Error'} h1?><?p $ML{'.nofaqsearch.text'} p?>";
+            return;
+        }
+    }
+
     # Unknown type, try running site hooks
     if ($type) {
         # TODO: check return value of this hook, and fall back to another

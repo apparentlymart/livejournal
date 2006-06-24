@@ -57,86 +57,14 @@
     # this is an initial page load
     return unless $q;
 
-    my @faqs;
-
-    # Might as well run this no matter the lang since
-    # we need the faqids to load from translation
-    # system anyway.  Would be nice to memcache
-    # the faqid list
-    my $dbr = LJ::get_db_reader();
-    my $sth = $dbr->prepare("SELECT faqid, question, summary, answer FROM faq WHERE faqcat!=''");
-    $sth->execute;
-    while (my $f = $sth->fetchrow_hashref) {
-        push @faqs, {
-            'faqid'    => $f->{faqid},
-            'question' => $f->{question},
-            'summary'  => $f->{summary},
-            'answer'   => $f->{answer},
-        }
-    }
-
-    # Are they asking for the site default language?
-    unless ($GET{'lang'} eq $LJ::DEFAULT_LANG) {
-        my $faqd = LJ::Lang::get_dom("faq");
-        my $l = LJ::Lang::get_lang($GET{'lang'});
-        last unless $faqd && $l;
-
-        my @load;
-        foreach (@faqs) {
-            push @load, "$_->{faqid}.1question";
-            push @load, "$_->{faqid}.3summary";
-            push @load, "$_->{faqid}.2answer";
-        }
-
-        my $res = LJ::Lang::get_text_multi($l->{'lncode'}, $faqd->{'dmid'}, \@load);
-        foreach (@faqs) {
-            my $id = $_->{faqid};
-            $_->{question} = $res->{"$id.1question"} if $res->{"$id.1question"};
-            $_->{summary}  = $res->{"$id.3summary"} if $res->{"$id.3summary"};
-            $_->{answer}   = $res->{"$id.2answer"} if $res->{"$id.2answer"};
-        }
-    }
-
-    my @results;
-    foreach my $f (@faqs) {
-	my $score = 0;
-
-        # don't search things in the FURTHER READING section
-        # (a livejournal.com convention)
-	$f->{'answer'} =~ s/FURTHER READING.+//s;
-
-	if ($f->{'question'} =~ /\Q$q\E/i) {
-	    $score += 1.5;
-	}
-	if ($f->{'question'} =~ /\b\Q$q\E\b/i) {
-	    $score += 1.5;
-	}
-
-	if ($f->{'summary'} =~ /\Q$q\E/i) {
-	    $score += 1;
-	}
-	if ($f->{'summary'} =~ /\b\Q$q\E\b/i) {
-	    $score += 1;
-	}
-
-	if ($f->{'answer'} =~ /\Q$q\E/i) {
-	    $score += 1;
-	}
-	if ($f->{'answer'} =~ /\b\Q$q\E\b/i) {
-	    $score += 1;
-	}
-
-	next unless $score;
-	$f->{'_score'} = $score;
-	push @results, $f;
-    }
+    my $lang = $GET{lang} || $curr || $LJ::DEFAULT_LANG;
+    my @results = LJ::Faq->load_matching($q, lang => $lang);
 
     if (@results < 1) { # ain't no results
         $body .= "<p><i>($ML{'.error.noresults'})</i></p>";
         return;
     }
 
-    @results = sort { $b->{'_score'} <=> $a->{'_score'} } @results;
     if (@results > 25) { @results = @results[0..24]; }
 
     my $term = sub {

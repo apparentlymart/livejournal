@@ -34,6 +34,7 @@ use LJ::Captcha;
 use LJ::OpenID;
 use LJ::Location;
 use LJ::CProd;
+use LJ::Faq;
 use MogileFS;
 use DDLockClient ();
 

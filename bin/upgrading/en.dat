@@ -4108,6 +4108,10 @@ used in the *_HEAD overrides are those elements that are valid in the head of a 
 
 /multisearch.bml.noaddress.title=No Address
 
+/multisearch.bml.nofaqsearch.title=No FAQ Search Term
+
+/multisearch.bml.nofaqsearch.text=You did not enter a term to search for in the FAQ.
+
 /multisearch.bml.nointerest.text=You did not enter an interest.
 
 /multisearch.bml.nointerest.title=No Interest
