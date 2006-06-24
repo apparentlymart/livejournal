@@ -16,7 +16,7 @@ _code?>
 <dl>
   <dt><a href="/developer/embedding.bml"><?_ml .nav.embedding _ml?></a></dt>
   <dd><?_ml .nav.embedding.about _ml?></dd>
-  <dt><a href="/modify.bml"><?_ml .nav.modify _ml?></a></dt>
+  <dt><a href="/customize/"><?_ml .nav.modify _ml?></a></dt>
   <dd><?_ml .nav.modify.about _ml?></dd>
   <dt><a href="create.bml"><?_ml .nav.create _ml?></a></dt>
   <dd><?_ml .nav.create.about _ml?></dd>
@@ -29,5 +29,5 @@ _code?>
 page?><?_c <LJDEP>
 link: htdocs/developer/embedding.bml, htdocs/developer/styles.bml
 link: htdocs/developer/index.bml, htdocs/paidaccounts/index.bml
-link: htdocs/modify.bml, htdocs/styles/create.bml, htdocs/styles/edit.bml
+link: htdocs/customize/index.bml, htdocs/styles/create.bml, htdocs/styles/edit.bml
 </LJDEP> _c?>

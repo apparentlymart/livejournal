@@ -44,7 +44,7 @@ our $linkinfo = {
     'EditProfile'       => [ "/manage/profile/", 'Edit Profile', 1 ],
     'EditPics'       => [ '/editpics.bml', 'Upload and Manage Your Userpics', 1 ],
     'ManageCom'      => [ '/community/manage.bml', 'Manage Communities', 1 ],
-    'ManageMood'     => [ '/modify.bml', 'Set Your Mood Theme', 1 ],
+    'ManageMood'     => [ '/customize/style.bml', 'Set Your Mood Theme', 1 ],
     'ChangePassword' => [ '/changepassword.bml', 'Change Account Password', 1 ],
 
     'LinkList'       => [ '/manage/links.bml', 'Create Link List', 0 ],

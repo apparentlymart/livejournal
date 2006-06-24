@@ -2435,8 +2435,8 @@ sub hash_menus
                 { 'text' => "Change Settings",
                   'sub' => [ { 'text' => "Personal Info",
                                'url' => "$LJ::SITEROOT/manage/profile/", },
-                             { 'text' => "Journal Settings",
-                               'url' =>"$LJ::SITEROOT/modify.bml", }, ] },
+                             { 'text' => "Customize Journal",
+                               'url' =>"$LJ::SITEROOT/customize/", }, ] },
                 { 'text' => "-", },
                 { 'text' => "Support",
                   'url' => "$LJ::SITEROOT/support/", }

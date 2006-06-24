@@ -134,8 +134,8 @@ LOAD_PAGE_INFO<=
 	       },
 	     { 'name' => 'Customize',
 	       'children' => [
-			      { 'name' => 'Modify Journal',
-				'uri' => '/modify.bml', },
+			      { 'name' => 'Customize Journal',
+				'uri' => '/customize/', },
 			      { 'name' => 'Create Style',
 				'uri' => '/createstyle.bml', },
 			      { 'name' => 'Edit Style',

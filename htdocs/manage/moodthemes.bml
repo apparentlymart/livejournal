@@ -452,7 +452,7 @@ body<=
             }
         }
 
-        $ret .= "<?p " . BML::ml('.usepublictheme', {'aopts' => "href='$LJ::SITEROOT/modify.bml'"}) . " p?>";
+        $ret .= "<?p " . BML::ml('.usepublictheme', {'aopts' => "href='$LJ::SITEROOT/customize/style.bml'"}) . " p?>";
     }
 
     return $ret;

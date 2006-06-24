@@ -129,5 +129,5 @@ _code?>
 <=body
 page?><?_c <LJDEP>
 link: htdocs/login.bml, htdocs/manage/profile/index.bml
-link: htdocs/modify.bml, htdocs/update.bml
+link: htdocs/update.bml
 </LJDEP> _c?>
