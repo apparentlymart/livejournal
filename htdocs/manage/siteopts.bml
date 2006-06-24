@@ -119,7 +119,7 @@
 
         if (@thumb_schemes) {
             my $ct = 0;
-            my $cols = 3;
+            my $cols = 4;
             my $width = int(100 / $cols +.5) . "%";
             my $switch = @thumb_schemes / $cols;
 

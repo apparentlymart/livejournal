@@ -44,6 +44,18 @@ _code?>
     # clean userprops
     foreach (values %$u) { LJ::text_out(\$_); }
 
+    # thumb schemes have thumbnails
+    # text schemes are in a drop-down
+    my @thumb_schemes;
+    my @text_schemes;
+    foreach (@LJ::SCHEMES) {
+        if (ref $_->{'thumb'} eq 'ARRAY') {
+            push @thumb_schemes, $_;
+        } else {
+            push @text_schemes, $_;
+        }
+    }
+
     ###
     ### no post, show edit form
     ###
@@ -71,6 +83,96 @@ _code?>
         # personal information
         $ret .= "<div class='section_head'> $ML{'.section.viewing'}</div>\n";
         $ret .= "<table class='field_block'>\n";
+
+        unless ($u->is_community()) {
+            # scheme selector
+            if (@LJ::SCHEMES) {
+                $ret .= "<tr><td class='field_name'>Scheme</td><td>\n";
+
+                my $scheme = $BML::COOKIE{'BMLschemepref'};
+                $scheme = $LJ::SCHEMES[0]->{'scheme'} unless $scheme;
+
+                if (@thumb_schemes) {
+                    my $cols = 3;
+                    my $width = int(100 / $cols +.5) . "%";
+
+                    foreach my $sh (@thumb_schemes) {
+                        my $th = $sh->{'thumb'};
+                        $ret .= "\n<div style='float: left; margin: 0px 10px 10px 5px;'><h3>";
+                        $ret .= LJ::html_check({ 'type' => 'radio', 'name' => 'scheme',
+                                             'value' => $sh->{'scheme'},
+                                             'id' => "scheme-$sh->{'scheme'}",
+                                             'selected' => $scheme eq $sh->{'scheme'} });
+                        $ret .= "$sh->{'title'}</h3>";
+                        $ret .= "<label for='scheme-$sh->{'scheme'}'><img ";
+                        $ret .= "src='$LJ::IMGPREFIX/$th->[0]'";
+                        $ret .= " width='$th->[1]'" if $th->[1];
+                        $ret .= " height='$th->[2]'" if $th->[2];
+
+                        $ret .= "style='border: solid 1px black; margin: 1px;' ";
+                        my $alt = BML::ml('.scheme.preview', {'title' => $sh->{'title'},});
+                        $ret .= " alt='$alt' title='$sh->{'title'}' /></label></div>\n";
+                    }
+                }
+
+                if (@text_schemes) {
+
+                    my $ct = 0;
+                    my $cols = 3;
+                    my $width = int(100 / $cols +.5) . "%";
+                    my $switch = @text_schemes / $cols;
+
+                    $ret .= "<table border='0' width='100%' cellpadding='2'>";
+                    $ret .= "<tr valign='top' align='left'>";
+
+                    foreach my $sh (@text_schemes) {
+
+                        if ($ct == 0) {
+                            $ret .= "<td width='$width' align='left'>";
+                        }
+
+                        $ret .= "<p>" .
+                            LJ::html_check({ 'type' => 'radio', 'name' => 'text_scheme',
+                                             'value' => $sh->{'scheme'},
+                                             'id' => "scheme-$sh->{'scheme'}",
+                                             'selected' => $scheme eq $sh->{'scheme'} });
+
+                        $ret .= "<label for='scheme-$sh->{'scheme'}'>$sh->{'title'}</label></p>";
+
+                        if (++$ct >= $switch) {
+                            $ret .= "</td>";
+                            $ct = 0;
+                        }
+                    }
+
+                    $ret .= "</tr><tr><td colspan='$cols' align='left'>";
+                    $ret .= "</td></tr></table>";
+                }
+                $ret .= "</td></tr>\n";
+            }
+
+            # Language
+            $ret .= "<tr><td class='field_name'>Language</td>\n<td>";
+            $ret .= "<b style='white-space: nowrap'>Select your language: </b>\n";
+
+            my $curr = BML::get_language();
+            my @inc;
+            my @list;
+            push @inc, $GET{'addlang'} if $GET{'addlang'};
+            foreach my $code (@LJ::LANGS, @inc) {
+                my $l = LJ::Lang::get_lang($code);
+                next unless $l;
+
+                my $item = "langname.$code";
+                my $namethislang = BML::ml($item);
+                my $namenative = LJ::Lang::get_text($l->{'lncode'}, $item);
+
+                push @list, $code, $namenative;
+            }
+            $ret .= LJ::html_select({ 'name' => 'lang',
+                                      selected => $curr}, @list);
+            $ret .= "</td></tr>\n";
+        }
 
         ### Control Strip
         if ($LJ::USE_CONTROL_STRIP) {
@@ -242,6 +344,70 @@ _code?>
                 my $mem_only = $eff_val eq $u->{$uprop};
                 LJ::set_userprop($u, $uprop, $eff_val, $mem_only);
             }
+        }
+
+        # was a scheme change posted?
+        my $scheme;
+        if (exists $POST{'text_scheme'}) {
+            foreach (@text_schemes) {
+                $scheme = $_->{'scheme'} if $POST{'text_scheme'} eq $_->{'scheme'};
+            }
+        } else {
+            foreach (@thumb_schemes) {
+                $scheme = $_->{'scheme'} if $POST{'scheme'} eq $_->{'scheme'};
+            }
+        }
+
+        # set scheme
+        if ($scheme) {
+            my $cval = $scheme;
+
+            # don't set cookie for default scheme
+            if ($scheme eq $LJ::SCHEMES[0]->{'scheme'}) {
+                $cval = '';
+                delete $COOKIE{'BMLschemepref'};
+            }
+
+            # logged in?
+            if ($remote) {
+                # set a userprop to remember their schemepref
+                LJ::set_userprop($remote, 'schemepref', $cval);
+
+                # cookie expires when session expires
+                if ($remote->{'_session'}->{'exptype'} eq 'long') {
+                    $cval = [ $scheme, $remote->{'_session'}->{'timeexpire'} ];
+                }
+            }
+
+            # set cookie
+            $COOKIE{'BMLschemepref'} = $cval if $cval;
+            BML::set_scheme($scheme);
+
+        }
+
+        # set language
+        if (exists $POST{'lang'}) {
+            my $l = LJ::Lang::get_lang($POST{'lang'});
+
+            # default cookie value to set
+            my $cval = $l->{'lncode'} . "/" . time();
+
+            # if logged in, change userprop and make cookie expiration
+            # the same as their login expiration
+            my $remote = LJ::get_remote();
+            if ($remote) {
+                LJ::set_userprop($remote, "browselang", $l->{'lncode'});
+
+                if ($remote->{'_session'}->{'exptype'} eq 'long') {
+                    $cval = [ $cval, $remote->{'_session'}->{'timeexpire'} ];
+                }
+            }
+
+            # set cookie
+            $COOKIE{'langpref'} = $cval;
+
+            # set language through BML so it will apply immediately
+            BML::set_language($l->{'lncode'});
         }
 
 
