@@ -252,6 +252,8 @@ p?>
 
 /community/index.bml.title=Community Center
 
+/community/join.bml.btn.cancel=Cancel
+
 /community/join.bml.button.join=Join Community
 
 /community/join.bml.error.already.member=You are already a member of this community.
@@ -262,11 +264,15 @@ p?>
 
 /community/join.bml.error.statusvis.title=Unable to Join Communities
 
-/community/join.bml.label.addtofriends=Add "[[maintainer]]" to friends list.<br>
+/community/join.bml.label.addtofriends2=Subscribe to [[comm]] in addition to joining it.
 
-/community/join.bml.label.allowposting=This community allows posting by all members, so you now have access to post in it.  If you already have a LiveJournal client open on your computer, you'll have to log out and log back in for this journal to show up in your list of journals you can post to.
+/community/join.bml.label.addtofriends2.modify=Modify subscription to [[comm]] in addition to joining it.
 
-/community/join.bml.label.auth=Although you are now listed as a member, this community only allows posting by authorized users.  Contact one of the maintainers if you desire posting access. Below is the list of maintainers for this community: [[admins]]
+/community/join.bml.label.addtofriends.note=Subscribing to this community will allow you to read entries posted in it on your Friends page.
+
+/community/join.bml.label.allowposting2=Additionally, because this community allows posting by all members, joining it will allow you to post in it. If you already have a [[sitename]] client open on your computer, you'll have to log out and log back in for this community to show up in your list of journals you can post to.
+
+/community/join.bml.label.auth2=Please note that this community only allows posting by authorized users, so joining it will not allow you to post in it. Contact one of the maintainers if you desire posting access. Below is the list of maintainers for this community: [[admins]]
 
 /community/join.bml.label.banned=The maintainer(s) of this community have banned you from joining.
 
@@ -276,13 +282,13 @@ p?>
 
 /community/join.bml.label.errorcomminfo=The specified community information is not valid.
 
-/community/join.bml.label.expls=Press the button below to join the "[[maintainer]]" community. Uncheck the box below if you want to join the community without seeing community entries on your friends page.
+/community/join.bml.label.expls2=Press the button below to join the "[[commname]]" community. Joining this community will allow you to read any members-only entries posted in it. It will not allow community members or maintainers to read protected entries in your own journal.
 
 /community/join.bml.label.loginfirst2=To join a community you must first <a [[aopts]]>log in</a>.
 
-/community/join.bml.label.membernow2=You are now a member of the <a [[aopts]]>[[commname]] Community</a>.
+/community/join.bml.label.membernow3=You are now a member of <a [[aopts]]>[[commname]] Community</a>.
 
-/community/join.bml.label.sure=You sure?
+/community/join.bml.label.sure2=Join [[comm]]?
 
 /community/join.bml.reqsubmitted.body=Your request to join has been submitted to the maintainers:
 

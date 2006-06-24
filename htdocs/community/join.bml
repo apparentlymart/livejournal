@@ -94,25 +94,23 @@
          return;
      }
 
-     # make remote user a friend of the community
-     my $friended = LJ::join_community($remote, $cu, $POST{addfriend});
-     unless ($friended) { 
+     # join community
+     my $joined = LJ::join_community($remote, $cu);
+     unless ($joined) { 
         $body = "<?h1 $ML{'error'} h1?>";
         $body .= "<?p " . LJ::last_error() . " p?>";
         return;
      }
-     
-     # success message
-     my $profile_url = $cu->profile_url;
-     $body .= "<?h1 $ML{'.success'} h1?><?p " . BML::ml('.label.membernow2', 
-                    {'aopts' => "href='$profile_url'", 'commname' => $ecname}) . " p?>";
-     
-     # if community permits it, tell the user they have access
-     if ($ci->{postlevel} eq "members") {
-         $body .= "<?p $ML{'.label.allowposting'} p?>";
-     } else {
-         $body .= "<?p " . BML::ml('.label.auth', { admins => $list }) . " p?>";
+
+     # add community as a friend if selected
+     if ($POST{addfriend}) {
+         BML::redirect("$LJ::SITEROOT/friends/add.bml?user=$cu->{user}");
      }
+     
+     # success message -- only shows if user didn't add the community as a friend
+     my $profile_url = $cu->profile_url;
+     $body .= "<?h1 $ML{'.success'} h1?><?p " . BML::ml('.label.membernow3', 
+                    {'aopts' => "href='$profile_url'", 'commname' => $ecname}) . " p?>";
  } else {
      if ($ci->{membership} ne 'open') {
          $body .= "<?h1 $ML{'.request.title'} h1?><?p ";
@@ -125,14 +123,29 @@
          return;
      }
 
-     $body .= "<?h1 $ML{'.label.sure'} h1?><?p " . BML::ml('.label.expls', { maintainer => $ecname });
+     $body .= "<?h1 " . BML::ml('.label.sure2', {'comm' => LJ::ljuser($cu)}) . " h1?>";
+     $body .= "<?p " . BML::ml('.label.expls2', {'commname' => $ecname}) . " p?>";
+     $body .= $ci->{postlevel} eq "members" ?
+        "<?p " . BML::ml('.label.allowposting2', {'sitename' => $LJ::SITENAMESHORT}) . " p?>" :
+        "<?p " . BML::ml('.label.auth2', {'admins' => $list}) . " p?>";
+
+     my $cancel_btn = $ML{'.btn.cancel'};
+
      $body .= "<form method='post' action='join.bml'>";
      $body .= LJ::form_auth();
      $body .= "<input type='hidden' name='cuserid' value='$ci->{'userid'}' />";
-     $body .= "<input type='hidden' name='confirm' value='1' /><center>";
-     $body .= "<input type='checkbox' name='addfriend' checked>";
-     $body .= BML::ml('.label.addtofriends', { maintainer => $ecname });
-     $body .= "<br><input type='submit' value=\"$ML{'.button.join'}\" /></center></form> p?>";
+     $body .= "<input type='hidden' name='confirm' value='1' />";
+     $body .= "<table cellpadding='0' cellspacing='1' border='0'><tr>";
+     $body .= "<td><input type='checkbox' name='addfriend' checked='checked'></td><td>";
+     $body .= LJ::is_friend($remote, $cu) ? BML::ml('.label.addtofriends2.modify', {'comm' => LJ::ljuser($cu)}) : BML::ml('.label.addtofriends2', {'comm' => LJ::ljuser($cu)});
+     $body .= "</td></tr><tr>";
+     $body .= "<td>&nbsp;</td><td><span style='font-size: smaller;'>$ML{'.label.addtofriends.note'}</span></td>";
+     $body .= "</tr></table>";
+     $body .= "<?p <input type='submit' value=\"$ML{'.button.join'}\" /> ";
+     $body .= "<script type='text/javascript' language='Javascript'> \n <!-- \n
+         document.write(\"<input type='button' value='$cancel_btn' onclick='history.go(-1); return false;'>\");
+              \n // -->\n ";
+     $body .= "</script> p?></form>";
  }
 
  return;
