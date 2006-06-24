@@ -2218,6 +2218,8 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /friends/add.bml.btn.cancel=Cancel
 
+/friends/add.bml.disclaimer=This will not allow maintainers or members of the community to view your friends-only posts.
+
 /friends/add.bml.btn.modify=Modify
 
 /friends/add.bml.btn.remove=Remove

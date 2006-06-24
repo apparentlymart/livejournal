@@ -146,7 +146,7 @@ use vars qw($body $title $windowtitle %GET %POST);
          $windowtitle = BML::ml('.confirm.title.community', {'user'=> $user });
          $title = BML::ml('.confirm.title.community', {'icon'=> $icon, 'user'=> $user });
          $body .= "<?p " . BML::ml('.confirm.text1.community2', {'aopts' => "href='$LJ::SITEROOT/community/join.bml?comm=$user'"}) . " p?>";
-     
+
      } elsif ($u->{'journaltype'} eq "N") {
          my $icon = "<img src='$LJ::IMGPREFIX/userinfo24x24.gif' border='0' height='24' width='24' style='padding: 0px 2px 0px 0px' />";
          $windowtitle = BML::ml('.confirm.title.news', {'user'=> $user });
@@ -430,9 +430,13 @@ p?>
 
  $ret .= "</div>\n";
 
- $body .= $ret;
- $body .= "<br />\n <?p";
+if ($u->{'journaltype'} eq "C") {
+    $body .= "<br />$ML{'.disclaimer'}";
+}
 
+ $body .= $ret;
+
+$body .= "<br />\n <?p ";
  # Form submit buttons
  if ($fr) {
      $body .= "<input type='submit' value=\"$ML{'.btn.modify'}\">";
