@@ -1877,6 +1877,8 @@ sub tag_cloud {
 
 sub ads {
     my %opts = @_;
+
+    # WARNING: $ctx is terribly named and not an S2 context
     my $ctx      = delete $opts{'type'};
     my $pagetype = delete $opts{'orient'};
     my $user     = delete $opts{'user'};
