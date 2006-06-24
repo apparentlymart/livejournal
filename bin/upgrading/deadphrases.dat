@@ -2,6 +2,7 @@
 #
 
 general crumb.createjournal
+general crumb.modify
 
 general /allpics.bml.edit
 general /allpics.bml.nopics.text

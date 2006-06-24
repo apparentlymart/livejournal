@@ -14,6 +14,7 @@
 /textmessage.bml    /tools/textmessage.bml
 /memories.bml       /tools/memories.bml
 /memadd.bml     /tools/memadd.bml
+/modify.bml     /customize/
 /faq.bml        /support/faq.bml
 /faqbrowse.bml      /support/faqbrowse.bml
 /setscheme.bml          /manage/siteopts.bml
