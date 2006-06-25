@@ -1114,8 +1114,6 @@ sub create_view_lastn
     $lastn_page{'head'} .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n}
         if LJ::OpenID::server_enabled();
 
-    $lastn_page{'head'} .= LJ::res_includes();
-
     my $show_ad = LJ::run_hook('should_show_ad', {
         ctx  => "journal",
         user => $u->{user},
@@ -1125,12 +1123,13 @@ sub create_view_lastn
         user => $u->{user},
     });
     if ($show_control_strip) {
-        my $control_strip_stylesheet_link = LJ::run_hook('control_strip_stylesheet_link', {
+        LJ::run_hook('control_strip_stylesheet_link', {
             user => $u->{user},
         });
-        $lastn_page{'head'} .= $control_strip_stylesheet_link;
         $lastn_page{'head'} .= LJ::control_strip_js_inject( user => $u->{user} );
     }
+
+    $lastn_page{'head'} .= LJ::res_includes();
 
     # FOAF autodiscovery
     my $foafurl = $u->{external_foaf_url} ? LJ::eurl($u->{external_foaf_url}) : "$journalbase/data/foaf";
@@ -1536,8 +1535,6 @@ sub create_view_friends
         $friends_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'" />';
     }
 
-    $friends_page{'head'} .= LJ::res_includes();
-
     my $show_ad = LJ::run_hook('should_show_ad', {
         ctx  => "journal",
         user => $u->{user},
@@ -1547,12 +1544,13 @@ sub create_view_friends
         user => $u->{user},
     });
     if ($show_control_strip) {
-        my $control_strip_stylesheet_link = LJ::run_hook('control_strip_stylesheet_link', {
+        LJ::run_hook('control_strip_stylesheet_link', {
             user => $u->{user},
         });
-        $friends_page{'head'} .= $control_strip_stylesheet_link;
         $friends_page{'head'} .= LJ::control_strip_js_inject( user => $u->{user} );
     }
+
+    $friends_page{'head'} .= LJ::res_includes();
 
     $friends_page{'head'} .=
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'FRIENDS_HEAD'};
@@ -2007,8 +2005,6 @@ sub create_view_calendar
         $calendar_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'" />';
     }
 
-    $calendar_page{'head'} .= LJ::res_includes();
-
     my $show_ad = LJ::run_hook('should_show_ad', {
         ctx  => "journal",
         user => $u->{user},
@@ -2018,14 +2014,15 @@ sub create_view_calendar
         user => $u->{user},
     });
     if ($show_control_strip) {
-        my $control_strip_stylesheet_link = LJ::run_hook('control_strip_stylesheet_link', {
+        LJ::run_hook('control_strip_stylesheet_link', {
             user => $u->{user},
         });
-        $calendar_page{'head'} .= $control_strip_stylesheet_link;
         $calendar_page{'head'} .= LJ::control_strip_js_inject( user => $u->{user} );
     }
     $calendar_page{'head'} .=
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'CALENDAR_HEAD'};
+
+    $calendar_page{'head'} .= LJ::res_includes();
 
     $calendar_page{'months'} = "";
 
@@ -2270,8 +2267,6 @@ sub create_view_day
         $day_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'" />';
     }
 
-    $day_page{'head'} .= LJ::res_includes();
-
     my $show_ad = LJ::run_hook('should_show_ad', {
         ctx  => "journal",
         user => $u->{user},
@@ -2281,12 +2276,14 @@ sub create_view_day
         user => $u->{user},
     });
     if ($show_control_strip) {
-        my $control_strip_stylesheet_link = LJ::run_hook('control_strip_stylesheet_link', {
+        LJ::run_hook('control_strip_stylesheet_link', {
             user => $u->{user},
         });
-        $day_page{'head'} .= $control_strip_stylesheet_link;
         $day_page{'head'} .= LJ::control_strip_js_inject( user => $u->{user} );
     }
+
+    $day_page{'head'} .= LJ::res_includes();
+
     $day_page{'head'} .=
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'DAY_HEAD'};
     $day_page{'name'} = LJ::ehtml($u->{'name'});
