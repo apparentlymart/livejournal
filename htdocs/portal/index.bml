@@ -79,7 +79,6 @@
         LJVAR.postUrl = "$selflink";
         LJVAR.doFade = $doFade;
         LJVAR.doAnimate = 1;
-        LJVAR.imgprefix = "$LJ::IMGPREFIX";
         </script>
         };
 
