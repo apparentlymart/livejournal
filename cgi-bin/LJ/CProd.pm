@@ -85,6 +85,18 @@ sub has_acked {
     return $state && $state->{acktime};
 }
 
+sub mark_shown {
+    my ($class, $u) = @_;
+
+    my $tm  = $class->typemap;
+    my $map = LJ::CProd->user_map($u);
+    my $cprodid = $tm->class_to_typeid($class);
+    return unless $cprodid;
+
+    $u->do("INSERT IGNORE INTO cprod SET userid=?, cprodid=?, firstshowtime=?",
+           undef, $u->{userid}, $cprodid, time());
+}
+
 sub mark_dontshow {
     shift @_ unless ref $_[0];
     my ($u, $noclass) = @_;
@@ -114,14 +126,17 @@ sub mark_acked {
 sub _trackable_link {
     my ($class, $text, $goodclick, $version, %opts) = @_;
     Carp::croak("bogus caller, forgot param") unless defined $goodclick;
-    my $link = $class->_trackable_link_url($class->link, $goodclick, $version);
+
+    my $classlink = defined $opts{url} ? $opts{url} : $class->link;
+
+    my $link = $class->_trackable_link_url($classlink, $goodclick, $version);
     my $e_text;
     if ($opts{'style'}) {
         $e_text = "<span $opts{'style'}>" . LJ::ehtml($text) . "</span>";
     } else {
         $e_text = LJ::ehtml($text);
     }
-    my $classlink = $class->link;
+
     return qq {
         <a onclick="window.location.href='$link'; return false;" href="$classlink">$e_text</a>
         };
@@ -168,8 +183,10 @@ sub clickthru_link {
 }
 
 sub ack_link {
-    my ($class, $text) = @_;
-    $class->_trackable_link($text, 0);
+    my ($class, $ml_key, $version, %opts) = @_;
+    my $versioned_link_text = BML::ml($ml_key . ".v$version");
+    my $text = $versioned_link_text || BML::ml($ml_key);
+    $class->_trackable_link($text, 0, $version, %opts);
 }
 
 # don't override
@@ -206,6 +223,10 @@ sub inline {
     return "" unless eval { $class->applicable($u) };
     my $version = $class->get_version($u);
     my $content = eval { $class->render($u, $version) } || LJ::ehtml($@);
+
+    # mark this shown
+    $class->mark_shown($u);
+
     return $content;
 }
 
@@ -271,8 +292,7 @@ sub prod_to_show {
         next unless eval { $class->applicable($u) };
 
         if ($u && ! $state) {
-            $u->do("INSERT IGNORE INTO cprod SET userid=?, cprodid=?, firstshowtime=?",
-                   undef, $u->{userid}, $cprodid, time());
+            $class->mark_shown($u);
         }
 
         return $class;
