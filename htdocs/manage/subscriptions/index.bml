@@ -8,14 +8,14 @@ body<=
 
     $title = 'Manage Message Settings';
 
-    return "Not ready" if $LJ::DISABLED{'esn'};
-
     use Class::Autouse qw(LJ::NotificationMethod LJ::Event);
 
     my @errors;
 
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
+
+    return "Not ready" unless $remote->can_use_esn;
 
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);

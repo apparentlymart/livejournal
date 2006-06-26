@@ -491,7 +491,7 @@ my $old_url = 0;
                  $ret .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_unscr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
              }
 
-             unless ($LJ::DISABLED{esn} || !$remote) {
+             if ($remote && $remote->can_use_esn) {
                  my $track_img = 'track';
 
                  my $comment = LJ::Comment->new($u, dtalkid => $dtid);

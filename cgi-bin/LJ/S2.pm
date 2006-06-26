@@ -1657,7 +1657,9 @@ sub Entry
     my $link_keyseq = $e->{'link_keyseq'};
     push @$link_keyseq, 'mem_add' unless $LJ::DISABLED{'memories'};
     push @$link_keyseq, 'tell_friend' unless $LJ::DISABLED{'tellafriend'};
-    push @$link_keyseq, 'watch_comments' unless $LJ::DISABLED{'esn'};
+
+    my $remote = LJ::get_remote();
+    push @$link_keyseq, 'watch_comments' if $remote && $remote->can_use_esn;
 
     # Note: nav_prev and nav_next are not included in the keyseq anticipating
     #      that their placement relative to the others will vary depending on
@@ -2542,8 +2544,8 @@ sub _Comment__get_link
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_unscr.gif", 22, 20));
     }
     if ($key eq "watch_thread") {
-        return $null_link if $LJ::DISABLED{esn};
         return $null_link unless $remote;
+        return $null_link unless $remote->can_use_esn;
 
         my $comment = LJ::Comment->new($u, dtalkid => $this->{talkid});
         my $comment_watched = $remote->has_subscription(
@@ -2950,8 +2952,9 @@ sub _Entry__get_link
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_next.gif", 22, 20));
     }
     if ($key eq "watch_comments") {
-        return $null_link if $LJ::DISABLED{'esn'};
         return $null_link unless $remote;
+        return $null_link unless $remote->can_use_esn;
+
         return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$journal&amp;ditemid=$this->{'itemid'}",
                             "Track New Comments",
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20));

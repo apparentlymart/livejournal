@@ -1759,6 +1759,20 @@ sub timecreate {
     return LJ::mysqldate_to_time($when);
 }
 
+# can this user use ESN?
+sub can_use_esn {
+    my $u = shift;
+    return 0 if $LJ::DISABLED{esn};
+    my $disable = $LJ::DISABLED{esn_ui};
+    return 1 unless $disable;
+
+    if (ref $disable eq 'CODE') {
+        return $disable->($u) ? 0 : 1;
+    }
+
+    return $disable ? 0 : 1;
+}
+
 package LJ;
 
 # <LJFUNC>
