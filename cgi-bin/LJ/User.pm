@@ -1790,8 +1790,8 @@ sub get_authas_list {
     # used to accept a user type, now accept an opts hash
     $opts = { 'type' => $opts } unless ref $opts;
 
-    # only one valid type right now
-    $opts->{'type'} = 'P' if $opts->{'type'};
+    # Two valid types, Personal or Community
+    $opts->{'type'} = undef unless $opts->{'type'} =~ m/^(P|C)$/;
 
     my $ids = LJ::load_rel_target($u, 'A');
     return undef unless $ids;
@@ -1800,12 +1800,12 @@ sub get_authas_list {
     my %users;
     LJ::load_userids_multiple([ map { $_, \$users{$_} } @$ids ], [$u]);
 
-    return $u->{'user'}, sort map { $_->{'user'} }
-                         grep { ! $opts->{'cap'} || LJ::get_cap($_, $opts->{'cap'}) }
-                         grep { ! $opts->{'type'} || $opts->{'type'} eq $_->{'journaltype'} }
-                         grep { $_->{clusterid} > 0 }
-                         grep { $_->{statusvis} !~ /[XS]/ }
-                         values %users;
+    return map { $_->{'user'} }
+               grep { ! $opts->{'cap'} || LJ::get_cap($_, $opts->{'cap'}) }
+               grep { ! $opts->{'type'} || $opts->{'type'} eq $_->{'journaltype'} }
+               grep { $_->{clusterid} > 0 }
+               grep { $_->{statusvis} !~ /[XS]/ }
+               $u,  sort { $a->{'user'} cmp $b->{'user'} } values %users;
 }
 
 # <LJFUNC>

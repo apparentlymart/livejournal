@@ -39,7 +39,7 @@ body<=
         $ret .= "<form action='edit.bml' method='get'>\n";
         $ret .= LJ::make_authas_select($remote,
                                        { 'authas' => $GET{'authas'},
-                                         'type' => ['P', 'S'] });
+                                         'type' => 'P' });
         $ret .= "</form>\n\n";
 
         $ret .= '<?p ' . BML::ml('/friends/edit.bml.invite', { aopts => "href='$LJ::SITEROOT/friends/invite.bml'" }) . ' p?>';
