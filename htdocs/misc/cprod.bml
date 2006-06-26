@@ -5,7 +5,13 @@
 
     my $go = sub {
         my $to = $GET{to};
-        return LJ::error_list("No destination specified") unless $to;
+
+        # go back to referer if no $to specified
+        unless ($to) {
+            my $referer = BML::get_client_header('Referer');
+            return BML::redirect($referer);
+        }
+
         return BML::redirect($to);
     };
 
