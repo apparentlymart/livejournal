@@ -970,8 +970,6 @@ INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed,
 UPDATE userproplist SET cldversion='0',datatype='char',des='ICQ Number',indexed='1',multihomed='1',prettyname='ICQ',scope='general' WHERE name='icq';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'char', 'Birthdate user enters for age verification', '0', '0', 'init_bdate', 'Birthdate', 'general');
 UPDATE userproplist SET cldversion='4',datatype='char',des='Birthdate user enters for age verification',indexed='0',multihomed='0',prettyname='Birthdate',scope='general' WHERE name='init_bdate';
-INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'char', 'Birthdate user enters for age verification', '0', '0', 'initial_bdate', 'Birthdate', 'general');
-UPDATE userproplist SET cldversion='4',datatype='char',des='Birthdate user enters for age verification',indexed='0',multihomed='0',prettyname='Birthdate',scope='general' WHERE name='initial_bdate';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'blobchar', 'Packed blob of a user\'s interest ids (4 bytes per id)', '1', '0', 'interest_ids_blob', 'Interest IDs blob', 'general');
 UPDATE userproplist SET cldversion='4',datatype='blobchar',des='Packed blob of a user\'s interest ids (4 bytes per id)',indexed='1',multihomed='0',prettyname='Interest IDs blob',scope='general' WHERE name='interest_ids_blob';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('0', 'char', 'Jabber address (username@server)', '1', '1', 'jabber', 'Jabber Address', 'general');
