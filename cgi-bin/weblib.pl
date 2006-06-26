@@ -1796,40 +1796,61 @@ sub res_includes {
     $ret .= qq {
         <script language="JavaScript">
         var LJVAR;
-        if (!LJVAR) {
-            LJVAR = {};
-            LJVAR.imgprefix = "$LJ::IMGPREFIX";
-            LJVAR.siteroot  = "$LJ::SITEROOT";
-            LJVAR.statprefix  = "$LJ::STATPREFIX";
-        }
+        if (!LJVAR) LJVAR = {};
+        LJVAR.imgprefix = "$LJ::IMGPREFIX";
+        LJVAR.siteroot = "$LJ::SITEROOT";
+        LJVAR.statprefix = "$LJ::STATPREFIX";
         </script>
         };
 
     my $now = time();
+    my %list; # type -> [];
+    my $add = sub {
+        my ($type, $what) = @_;
+        push @{$list{$type} ||= []}, $what;
+    };
+
     foreach my $key (@LJ::NEEDED_RES) {
-        my $path = $key;
+        my $path;
         my $mtime = _file_modtime($key, $now);
-        # some files need to be served from same host as the app (must be on "www.")
-        # and those are WSTATPREFIX (the "W" meaning "Web")
-        my $changepath = sub {
-            if ($key =~ m!^stc/fck/! || $LJ::FORCE_WSTAT{$key}) {
-                $path = $key;
-                $path =~ s!^stc/!$LJ::WSTATPREFIX/!;
-            }
-            $path .= "?v=$mtime";
-        };
-        if ($path =~ s!^js/!$LJ::JSPREFIX/!) {
-            $changepath->();
-            $ret .= "<script type=\"text/javascript\" src=\"$path\"></script>\n";
-        } elsif ($path =~ /\.css$/ && $path =~ s!^stc/!$LJ::STATPREFIX/!) {
-            $changepath->();
-            $ret .= "<link rel=\"stylesheet\" type=\"text/css\" href=\"$path\" />\n";
-        } elsif ($path =~ /\.js$/ && $path =~ s!^stc/!$LJ::STATPREFIX/!) {
-            $changepath->();
-            $ret .= "<script type=\"text/javascript\" src=\"$path\"></script>\n";
+        if ($key =~ m!^stc/fck/! || $LJ::FORCE_WSTAT{$key}) {
+            $path = "w$key";  # wstc/ instead of stc/
+        } else {
+            $path = $key;
+        }
+
+        if ($path =~ m!^js/(.+)!) {
+            $add->('js', $1);
+        } elsif ($path =~ /\.css$/ && $path =~ m!^(w?)stc/(.+)!) {
+            $add->("${1}stccss", $2);
+        } elsif ($path =~ /\.js$/ && $path =~ m!^(w?)stc/(.+)!) {
+            $add->("${1}stcjs", $2);
         }
     }
 
+    my $tags = sub {
+        my ($type, $template) = @_;
+        my $list;
+        return unless $list = $list{$type};
+
+        if ($LJ::CONCAT_RES) {
+            my $csep = join(',', @$list);
+            $template =~ s/__+/??$csep/;
+            $ret .= $template;
+        } else {
+            foreach my $item (@$list) {
+                my $inc = $template;
+                $inc =~ s/__+/$item/;
+                $ret .= $inc;
+            }
+        }
+    };
+
+    $tags->("js",      "<script type=\"text/javascript\" src=\"$LJ::JSPREFIX/___\"></script>\n");
+    $tags->("stccss",  "<link rel=\"stylesheet\" type=\"text/css\" href=\"$LJ::STATPREFIX/___\" />\n");
+    $tags->("wstccss", "<link rel=\"stylesheet\" type=\"text/css\" href=\"$LJ::WSTATPREFIX/___\" />\n");
+    $tags->("stcjs",   "<script type=\"text/javascript\" src=\"$LJ::STATPREFIX/___\"></script>\n");
+    $tags->("wstcjs",  "<script type=\"text/javascript\" src=\"$LJ::WSTATPREFIX/___\"></script>\n");
     return $ret;
 }
 
@@ -2062,7 +2083,7 @@ sub ads {
         $adhtml .= "<div style='text-align: right; margin-top: 2px; white-space: nowrap;'>";
         if ($LJ::IS_DEV_SERVER) {
             # This is so while working on ad related problems I can easily open the iframe in a new window
-	    $adhtml .= "<a href=\"${LJ::ADSERVER}?$adparams\">#</a> | ";
+            $adhtml .= "<a href=\"${LJ::ADSERVER}?$adparams\">#</a> | ";
         }
         $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>Customize</a> | ";
         $adhtml .= "<a href=\"$LJ::SITEROOT/feedback/ads.bml?adcall=$eadcall&channel=$echannel&uri=$euri\">Feedback</a>";
