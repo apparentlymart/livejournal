@@ -115,7 +115,7 @@ sub unscreen_url {
 
     my $dtalkid = $self->dtalkid;
     my $entry   = $self->entry;
-    my $journal = $entry->u->journal;
+    my $journal = $entry->journal->{user};
 
     return 
         "$LJ::SITEROOT/talkscreen.bml" . 
@@ -128,7 +128,7 @@ sub delete_url {
 
     my $dtalkid = $self->dtalkid;
     my $entry   = $self->entry;
-    my $journal = $entry->u->journal;
+    my $journal = $entry->journal->{user};
 
     return 
         "$LJ::SITEROOT/delcomment.bml" . 
@@ -254,7 +254,7 @@ sub _load_text {
         $self->{body_orig}    = $self->{body};
 
         # FIXME: really convert all the props?  what if we binary-pack some in the future?
-        LJ::item_toutf8($self->{u}, \$self->{subject}, \$self->{event}, $self->{props});
+        LJ::item_toutf8($self->journal, \$self->{subject}, \$self->{body}, $self->{props});
     }
 
     $self->{_loaded_text} = 1;
@@ -278,8 +278,8 @@ sub _load_props {
     return 1 if $self->{_loaded_props};
 
     my $props = {};
-    LJ::load_log_props2($self->{u}, [ $self->{jitemid} ], $props);
-    $self->{props} = $props->{ $self->{jitemid} };
+    LJ::load_talk_props2($self->{journalid}, [ $self->{jtalkid} ], $props);
+    $self->{props} = $props->{ $self->{jtalkid} };
 
     $self->{_loaded_props} = 1;
     return 1;
@@ -316,8 +316,13 @@ sub body_orig {
 # comment body, cleaned
 sub body_html {
     my $self = shift;
+
+    my %opts = @_;
+    $opts{preformatted} = $self->prop("opt_preformatted");
+    $opts{anon_comment} = $self->poster ? 0 : 1;
+
     my $body = $self->body_raw;
-    LJ::CleanHTML::clean_comment( \$body ) if $body;
+    LJ::CleanHTML::clean_comment(\$body, %opts) if $body;
     return $body;
 }
 
@@ -360,11 +365,20 @@ sub is_frozen {
 sub remote_can_delete {
     my $self = shift;
 
-    my $remote   = LJ::User->remote;
+    my $remote = LJ::User->remote;
+    return $self->targetu_can_delete($remote);
+}
+
+sub user_can_delete {
+    my $self = shift;
+    my $targetu = shift;
+    return 0 unless LJ::isu($targetu);
+
     my $journalu = $self->journal;
     my $posteru  = $self->poster;
-
-    return LJ::Talk::can_delete($remote, $journalu, $posteru, $posteru->user);
+    my $poster   = $posteru ? $posteru->{user} : undef;
+    
+    return LJ::Talk::can_delete($targetu, $journalu, $posteru, $poster);
 }
 
 # returns comment action buttons (screen, freeze, delete, etc...)
@@ -412,6 +426,270 @@ sub info {
     $LJ_cmtinfo{'remote'} = $remote->{user};
 
     return \%LJ_cmtinfo;
+}
+
+sub indent {
+    return LJ::Talk::Post::indent(@_);
+}
+
+sub blockquote {
+    return LJ::Talk::Post::blockquote(@_);
+}
+
+sub format_text_mail {
+    my $self = shift;
+    my $targetu = shift;
+    croak "invalid targetu passed to format_text_mail"
+        unless LJ::isu($targetu);
+
+    # targetu: passed
+    # comment: $self
+    # parent:  $self->parent
+    # talkurl: $self->url
+    # item:    $self->entry
+
+    my $parent  = $self->parent;
+    my $entry   = $self->entry;
+    my $posteru = $self->poster;
+
+    $Text::Wrap::columns = 76;
+
+    my $who = "Somebody";
+    if ($posteru) {
+        $who = $posteru->{name} . " (" . $posteru->{user} . ")";
+    }
+
+    my $text = "";
+    if (LJ::u_equals($targetu, $self->poster)) {
+        # ->parent returns undef/0 if parent is an entry.
+        if (! $parent) {
+            # parent is journal entry
+            my $parentu = $entry->journal;
+
+            $who = $parentu->{name} . " (" . $parentu->{user} . ")";
+            $text .= "You left a comment in a post by $who.  ";
+            $text .= "The entry you replied to was:";
+        } else {
+            $text .= "You left a comment in reply to another comment.  ";
+            $text .= "The comment you replied to was:";
+        }
+    } elsif (LJ::u_equals($targetu, $entry->journal)) {
+        # ->parent returns undef/0 if parent is an entry.
+        if (! $parent) {
+            $text .= "$who replied to your $LJ::SITENAMESHORT post in which you said:";
+        } else {
+            $text .= "$who replied to another comment somebody left in your $LJ::SITENAMESHORT post.  ";
+            $text .= "The comment they replied to was:";
+        }
+    } else {
+        $text .= "$who replied to your $LJ::SITENAMESHORT comment in which you said:";
+    }
+    $text .= "\n\n";
+    $text .= indent($parent ? $parent->body_raw : $entry->event_raw, ">") . "\n\n";
+    $text .= (LJ::u_equals($targetu, $posteru) ? 'Your' : 'Their') . " reply was:\n\n";
+    if (my $subj = $self->subject_raw) {
+        $text .= Text::Wrap::wrap("  Subject: ", "", $subj) . "\n\n";
+    }
+    $text .= indent($self->body_raw);
+    $text .= "\n\n";
+
+    my $can_unscreen = $self->is_screened &&
+                       LJ::Talk::can_unscreen($targetu, $entry->journal, $entry->poster,
+                                              $posteru ? $posteru->{user} : undef);
+
+    if ($self->is_screened) {
+        $text .= "This comment was screened.  ";
+        $text .= $can_unscreen ?
+                 "You must respond to it or unscreen it before others can see it.\n\n" :
+                 "Someone else must unscreen it before you can reply to it.\n\n";
+    }
+
+    my $opts = "";
+    $opts .= "Options:\n\n";
+    $opts .= "  - View the discussion:\n";
+    $opts .= "    " . $self->thread_url . "\n";
+    $opts .= "  - View all comments on the entry:\n";
+    $opts .= "    " . $entry->url . "\n";
+    $opts .= "  - Reply to the comment:\n";
+    $opts .= "    " . $self->reply_url . "\n";
+    if ($can_unscreen) {
+        $opts .= "  - Unscreen the comment:\n";
+        $opts .= "    " . $self->unscreen_url . "\n";
+    }
+    if ($self->user_can_delete($targetu)) {
+        $opts .= "  - Delete the comment:\n";
+        $opts .= "    " . $self->delete_url . "\n";
+    }
+
+    my $footer = "";
+    $footer .= "-- $LJ::SITENAME\n\n";
+    $footer .= "(If you'd prefer to not get these updates, go to ";
+    $footer .= "$LJ::SITEROOT/manage/comments/ and turn off the relevant options.)";
+
+    return 
+        Text::Wrap::wrap("", "", $text) . "\n" . $opts . "\n" . 
+        Text::Wrap::wrap("", "", $footer);
+}
+
+sub format_html_mail {
+    my $self = shift;
+    my $targetu = shift;
+    croak "invalid targetu passed to format_text_mail"
+        unless LJ::isu($targetu);
+
+    # targetu: passed
+    # comment: $self
+    # parent:  $self->parent
+    # talkurl: $self->url
+    # item:    $self->entry
+
+    my $parent  = $self->parent;
+    my $entry   = $self->entry;
+    my $posteru = $self->poster;
+    my $talkurl = $entry->url;
+
+
+    my $who = "Somebody";
+    if ($posteru) {
+        $who = $posteru->{name} . " (" . $posteru->{user} . ")";
+    }
+    my $who = "Somebody";
+    if ($posteru) {
+        my $profile_url = $posteru->profile_url;
+        $who = LJ::ehtml($posteru->{name}) .
+            " (<a href=\"$profile_url\">$posteru->{user}</a>)";
+    }
+
+    # find desired mail encoding for the target user
+    LJ::load_codes({ "encoding" => \%LJ::CACHE_ENCODINGS } )
+        unless %LJ::CACHE_ENCODINGS;
+
+    my $encprop  = $targetu->prop('mailencoding');
+    my $encoding = $encprop ? $LJ::CACHE_ENCODINGS{$encprop} : "UTF-8";
+
+    my $html = "";
+    $html .= "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding\" /></head>\n<body>\n";
+
+    my $intro;
+    if (LJ::u_equals($targetu, $self->poster)) {
+        # ->parent returns undef/0 if parent is an entry.
+        if (! $parent) {
+            my $parentu = $entry->journal;
+
+            my $profile_url = $parentu->profile_url;
+            my $entry_url   = $entry->url;
+
+            $who = LJ::ehtml($parentu->{name}) .
+                " (<a href=\"$profile_url\">$parentu->{user}</a>)";
+            $intro = "You replied to <a href=\"$talkurl\">a $LJ::SITENAMESHORT post</a> in which $who said:";
+        } else {
+            $intro = "You replied to a comment somebody left in ";
+            $intro .= "<a href=\"$talkurl\">a $LJ::SITENAMESHORT post</a>.  ";
+            $intro .= "The comment you replied to was:";
+        }
+    } elsif (LJ::u_equals($targetu, $entry->journal)) {
+        if (! $parent) {
+            $intro = "$who replied to <a href=\"$talkurl\">your $LJ::SITENAMESHORT post</a> in which you said:";
+        } else {
+            $intro = "$who replied to another comment somebody left in ";
+            $intro .= "<a href=\"$talkurl\">your $LJ::SITENAMESHORT post</a>.  ";
+            $intro .= "The comment they replied to was:";
+        }
+    } else {
+        $intro = "$who replied to <a href=\"$talkurl\">your $LJ::SITENAMESHORT comment</a> ";
+        $intro .= "in which you said:";
+    }
+
+    my $pichtml;
+    my $pic_kw = $self->prop('picture_keyword');
+
+    if ($posteru && $posteru->{defaultpicid} || $pic_kw) {
+        my $pic = $pic_kw ? LJ::get_pic_from_keyword($posteru, $pic_kw) : undef;
+        my $picid = $pic ? $pic->{picid} : $posteru->{defaultpicid};
+        unless ($pic) {
+            my %pics;
+            LJ::load_userpics(\%pics, [ $posteru, $posteru->{defaultpicid} ]);
+            $pic = $pics{$picid};
+            # load_userpics doesn't return picid, but we rely on it above
+            $picid = $picid;
+        }
+        if ($pic) {
+            $pichtml = "<img src=\"$LJ::USERPIC_ROOT/$picid/$pic->{userid}\" align='absmiddle' ".
+                "width='$pic->{width}' height='$pic->{height}' ".
+                "hspace='1' vspace='2' alt='' /> ";
+        }
+    }
+
+    if ($pichtml) {
+        $html .= "<table><tr valign='top'><td>$pichtml</td><td width='100%'>$intro</td></tr></table>\n";
+    } else {
+        $html .= "<table><tr valign='top'><td width='100%'>$intro</td></tr></table>\n";
+    }
+
+    $html .= blockquote($parent ? $parent->body_html : $entry->event_html);
+
+    $html .= "\n\n" . (LJ::u_equals($targetu, $posteru) ? 'Your' : 'Their') . " reply was:\n\n";
+    my $pics = LJ::Talk::get_subjecticons();
+    my $icon = LJ::Talk::show_image($pics, $self->prop('subjecticon'));
+
+    my $heading;
+    if ($self->subject_raw) {
+        $heading = "<b>Subject:</b> " . $self->subject_html;
+    }
+    $heading .= $icon;
+    $heading .= "<br />" if $heading;
+    # this needs to be one string so blockquote handles it properly.
+    $html .= blockquote("$heading" . $self->body_html);
+
+    my $can_unscreen = $self->is_screened &&
+                       LJ::Talk::can_unscreen($targetu, $entry->journal, $entry->poster,
+                                              $posteru ? $posteru->{user} : undef);
+
+    if ($self->is_screened) {
+        $html .= "<p>This comment was screened.  ";
+        $html .= $can_unscreen ?
+                 "You must respond to it or unscreen it before others can see it.</p>\n" :
+                 "Someone else must unscreen it before you can reply to it.</p>\n";
+    }
+
+    $html .= "<p>From here, you can:\n";
+    $html .= "<ul><li><a href=\"" . $self->thread_url . "\">View the thread</a> starting from this comment</li>\n";
+    $html .= "<li><a href=\"$talkurl\">View all comments</a> to this entry</li>\n";
+    $html .= "<li><a href=\"" . $self->reply_url . "\">Reply</a> at the webpage</li>\n";
+    if ($can_unscreen) {
+        $html .= "<li><a href=\"" . $self->unscreen_url . "\">Unscreen the comment</a></li>";
+    }
+    if ($self->user_can_delete($targetu)) {
+        $html .= "<li><a href=\"" . $self->delete_url . "\">Delete the comment</a></li>";
+    }
+   $html .= "</ul></p>";
+
+    my $want_form = $self->is_active || $can_unscreen;  # this should probably be a preference, or maybe just always off.
+    if ($want_form) {
+        $html .= "If your mail client supports it, you can also reply here:\n";
+        $html .= "<blockquote><form method='post' target='ljreply' action=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
+
+        $html .= LJ::html_hidden
+            ( usertype     =>  "user",
+              parenttalkid =>  $self->jtalkid,
+              itemid       =>  $entry->ditemid,
+              journal      =>  $entry->journal->{user},
+              userpost     =>  $targetu->{user},
+              ecphash      =>  LJ::Talk::ecphash($entry->jitemid, $self->jtalkid, $targetu->{password})
+              );
+
+        $html .= "<input type='hidden' name='encoding' value='$encoding' />" unless $encoding eq "UTF-8";
+        my $newsub = $self->subject_raw;
+        unless (!$newsub || $newsub =~ /^Re:/) { $newsub = "Re: $newsub"; }
+        $html .= "<b>Subject: </b> <input name='subject' size='40' value=\"" . LJ::ehtml($newsub) . "\" />";
+        $html .= "<p><b>Message</b><br /><textarea rows='10' cols='50' wrap='soft' name='body'></textarea>";
+        $html .= "<br /><input type='submit' value=\"Post Reply\" />";
+        $html .= "</form></blockquote>\n";
+    }
+    $html .= "<p><font size='-1'>(If you'd prefer to not get these updates, go to the <a href=\"$LJ::SITEROOT/manage/comments/\">Comment Settings</a> page and turn off the relevant options.)</font></p>\n";
+    $html .= "</body>\n";
+
+    return $html;
 }
 
 1;
