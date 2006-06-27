@@ -394,6 +394,17 @@ sub trans
             return remote_domsess_bounce() if LJ::remote_bounce_url();
 
             $r->notes("_journal" => $opts->{'user'});
+
+            # this is the notes field that all other s1/s2 pages use.
+            # so be consistent for people wanting to read it.
+            # _journal above is kinda deprecated, but we'll carry on
+            # its behavior of meaning "whatever the user typed" to be
+            # passed to the userinfo BML page, whereas this one only
+            # works if journalid exists.
+            if (my $u = LJ::load_user($opts->{user})) {
+                $r->notes("journalid" => $u->{userid});
+            }
+
             my $file = $LJ::PROFILE_BML_FILE || "userinfo.bml";
             if ($args =~ /\bver=(\w+)\b/) {
                 $file = $LJ::ALT_PROFILE_BML_FILE{$1} if $LJ::ALT_PROFILE_BML_FILE{$1};
