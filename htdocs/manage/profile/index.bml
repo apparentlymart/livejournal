@@ -153,8 +153,8 @@ _code?>
             if ($bdpart{'day'} eq "00") { $bdpart{'day'} = ""; }
         }
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_showbday', 'id' => 'opt_showbday',
-                                                 'selected' => $u->opt_showbday ne 'N' });
-        $ret .= " $ML{'.birthday'}<br />\n";
+                                 'selected' => $u->opt_showbday ne 'N' });
+        $ret .= " <label for='opt_showbday'>$ML{'.birthday'}</label><br />\n";
         $ret .= LJ::html_select({ 'name' => 'month', 'selected' => int($bdpart{'month'}) },
                                 '', '', map { $_, $ML{LJ::Lang::month_long_langcode($_)} } (1..12)) . " ";
 
@@ -195,8 +195,8 @@ _code?>
         $ret .= "<div class='section_head'>$ML{'.section.location'}\n";
         $ret .= "<span class='view_options'>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_showlocation', 'id' => 'opt_showlocation',
-                                                 'selected' => $u->{'opt_showlocation'} ne 'N' });
-        $ret .= " $ML{'.location'}</span></div>";
+                                 'selected' => $u->{'opt_showlocation'} ne 'N' });
+        $ret .= " <label for='opt_showlocation'>$ML{'.location'}</label></span></div>";
 
         $ret .= "<table class='field_block'>\n";
         # city
@@ -356,13 +356,13 @@ _code?>
         $ret .= "<tr><td class='field_name'><label for='opt_showmutualfriends'>$ML{'.fn.mutualfriends'}</label></td><td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_showmutualfriends', 'id' => 'opt_showmutualfriends',
                                  'selected' => $u->{'opt_showmutualfriends'} });
-        $ret .= " $ML{'.mutualfriends'}</td></tr>\n";
+        $ret .= " <label for='opt_showmutualfriends'>$ML{'.mutualfriends'}</label></td></tr>\n";
 
         # opt_hidefriendofs
         $ret .= "<tr><td class='field_name'><label for='opt_hidefriendofs'>$ML{'.fn.friendof'}</label></td><td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_hidefriendofs', 'id' => 'opt_hidefriendofs',
                                  'selected' => ! $u->{'opt_hidefriendofs'} });
-        $ret .= " $ML{'.friendof'}</td></tr>\n";
+        $ret .= " <label for='opt_hidefriendofs'>$ML{'.friendof'}</label></td></tr>\n";
 
         $ret .= "</table>\n";
 
