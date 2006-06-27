@@ -2309,7 +2309,7 @@ sub control_strip
             $ret .= "$statustext{'other'}<br />";
             $ret .= "&nbsp;";
         }
-        $ret .= LJ::run_hook('control_strip_logo');
+        $ret .= LJ::run_hook('control_strip_logo', $remote);
         $ret .= "</td>";
 
     } else {
@@ -2361,7 +2361,7 @@ LOGIN_BAR
 
         $ret .= "<br />";
         $ret .= "$links{'create_account'}&nbsp;&nbsp; $links{'learn_more'}";
-        $ret .= LJ::run_hook('control_strip_logo');
+        $ret .= LJ::run_hook('control_strip_logo', $remote);
         $ret .= "</td>";
     }
 
@@ -2687,9 +2687,11 @@ sub subscribe_interface {
 
     # print buttons
     my $referer = BML::get_client_header('Referer');
+    my $uri = Apache->request->uri;
+
     $ret .= '<div id="SubscribeSaveButtons">' .
         LJ::html_submit('Save') .
-        ($referer ? "<input type='button' value='Cancel' onclick='window.location=\"$referer\"' />" : '')
+        ($referer && $referer ne "$LJ::SITEROOT$uri" ? "<input type='button' value='Cancel' onclick='window.location=\"$referer\"' />" : '')
         . '</div>';
 
     $ret .= "</form></div>";
