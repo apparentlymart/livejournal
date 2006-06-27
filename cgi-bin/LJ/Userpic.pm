@@ -133,7 +133,7 @@ sub height {
     my $self = shift;
     my @dims = $self->dimensions;
     return undef unless @dims;
-    return $dims[0];
+    return $dims[1];
 }
 
 sub extension {
