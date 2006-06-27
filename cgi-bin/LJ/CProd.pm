@@ -209,18 +209,34 @@ sub box_for {
     return $content;
 }
 
+# returns an inline cprod
+# pass class or arrayref of possible classes in opts{inline}
 sub inline {
     my ($class, $u, %opts) = @_;
     my $tm  = $class->typemap;
     my $map = LJ::CProd->user_map($u);
 
-    $class = "LJ::CProd::$opts{'inline'}";
-    my $cprodid = $tm->class_to_typeid($class);
-    my $state = $map->{$cprodid};
+    my @possible_classes = (ref $opts{inline} eq 'ARRAY') ? @{$opts{inline}} : $opts{inline};
+    return '' unless scalar @possible_classes;
+
+    # can pass an arrayref of classes
+    # picks the first applicable one in the list
+    $class = '';
+
+    foreach my $possible_class (@possible_classes) {
+        $possible_class = "LJ::CProd::$possible_class";
+        eval "use $possible_class; 1";
+        next if $@;
+
+        if (eval {$possible_class->applicable($u)}) {
+            $class = $possible_class;
+            last;
+        }
+    }
 
     eval "use $class; 1";
-    return "" if $@;
-    return "" unless eval { $class->applicable($u) };
+    return '' unless $class;
+
     my $version = $class->get_version($u);
     my $content = eval { $class->render($u, $version) } || LJ::ehtml($@);
 
