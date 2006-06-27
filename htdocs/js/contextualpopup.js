@@ -215,7 +215,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
                 // remove friend link (omg!)
                 var removeFriend = document.createElement("div");
                 var removeFriendLink = document.createElement("a");
-                removeFriendLink.href = "";//data.url_delfriend;
+                removeFriendLink.href = data.url_addfriend;
                 removeFriendLink.innerHTML = "Remove friend";
                 removeFriend.appendChild(removeFriendLink);
                 DOM.addClassName(removeFriend, "RemoveFriend");
