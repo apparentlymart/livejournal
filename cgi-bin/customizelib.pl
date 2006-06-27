@@ -313,7 +313,9 @@ sub html_save
     $ret .= LJ::html_hidden({ 'name' => "action:redir", value => "", 'id' => "action:redir" });
     $ret .= "<div style='text-align: center'>";
     $ret .= LJ::html_submit('action:save', "Save Changes", { 'id' => "action:save" });
-    $ret .= " " . LJ::html_submit('action:remove', "Remove Changes", { 'id' => "action:remove" }) if $opts->{remove};
+    $ret .= " " . LJ::html_submit('action:remove', "Remove Changes", {
+                'id' => "action:remove",
+                'onclick' => "return confirm('" . LJ::ejs("Are you sure you want to remove your changes?") . "')" }) if $opts->{remove};
     $ret .= "</div>";
 
     return $ret;
