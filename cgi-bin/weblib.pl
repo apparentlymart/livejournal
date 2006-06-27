@@ -1792,6 +1792,22 @@ sub res_includes {
     # currently it's limited to dependencies on the order you call LJ::need_res();
     my $ret = "";
 
+    # find current journal
+    my $r = eval { Apache->request };
+    my $journal_base = '';
+    my $journal = '';
+    if ($r) {
+        my $journalid = $r->notes('journalid');
+
+        my $ju;
+        $ju = LJ::load_userid($journalid) if $journalid;
+
+        if ($ju) {
+            $journal_base = $ju->journal_base;
+            $journal = $ju->{user};
+        }
+    }
+
     # include standard JS info
     $ret .= qq {
         <script language="JavaScript" type="text/javascript">
@@ -1800,6 +1816,8 @@ sub res_includes {
         LJVAR.imgprefix = "$LJ::IMGPREFIX";
         LJVAR.siteroot = "$LJ::SITEROOT";
         LJVAR.statprefix = "$LJ::STATPREFIX";
+        LJVAR.currentJournalBase = "$journal_base";
+        LJVAR.currentJournal = "$journal";
         </script>
         };
 
