@@ -160,7 +160,7 @@ sub make_authas_select {
     my @list = LJ::get_authas_list($u, $opts);
 
     # only do most of form if there are options to select from
-    if (@list > 1) {
+    if (@list > 1 || $list[0] ne $u->{'user'}) {
         return ($opts->{'label'} || $BML::ML{'web.authas.label'}) . " " .
                LJ::html_select({ 'name' => 'authas',
                                  'selected' => $opts->{'authas'} || $u->{'user'}},
