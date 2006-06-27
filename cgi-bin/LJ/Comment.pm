@@ -548,11 +548,6 @@ sub format_html_mail {
     my $posteru = $self->poster;
     my $talkurl = $entry->url;
 
-
-    my $who = "Somebody";
-    if ($posteru) {
-        $who = $posteru->{name} . " (" . $posteru->{user} . ")";
-    }
     my $who = "Somebody";
     if ($posteru) {
         my $profile_url = $posteru->profile_url;
