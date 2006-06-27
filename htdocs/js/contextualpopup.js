@@ -1,7 +1,8 @@
 ContextualPopup = new Object;
 
-ContextualPopup.popupDelay = 1000;
-ContextualPopup.disableAJAX = true;
+ContextualPopup.popupDelay = 100;
+ContextualPopup.hideDelay = 100;
+ContextualPopup.disableAJAX = false;
 
 ContextualPopup.cachedResults = {};
 ContextualPopup.currentRequests = {};
@@ -61,7 +62,7 @@ ContextualPopup.mouseOver = function (e) {
 
         ContextualPopup.mouseOutTimer = window.setTimeout(function () {
             ContextualPopup.mouseOut(e);
-        }, 500);
+        }, ContextualPopup.hideDelay);
         return;
     }
 
@@ -214,7 +215,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
                 // remove friend link (omg!)
                 var removeFriend = document.createElement("div");
                 var removeFriendLink = document.createElement("a");
-                removeFriendLink.href = data.url_delfriend;
+                removeFriendLink.href = "";//data.url_delfriend;
                 removeFriendLink.innerHTML = "Remove friend";
                 removeFriend.appendChild(removeFriendLink);
                 DOM.addClassName(removeFriend, "RemoveFriend");
@@ -256,6 +257,11 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
         picturesLink.innerHTML = "Pictures";
         content.appendChild(picturesLink);
 
+        // clearing div
+        var clearingDiv = document.createElement("div");
+        DOM.addClassName(clearingDiv, "clear");
+        content.appendChild(clearingDiv);
+
         ippu.setContentElement(content);
     } else {
         ippu.setContent("Loading...");
@@ -273,10 +279,13 @@ ContextualPopup.changeRelation = function (info, ctxPopupId, action) {
         "ctxPopupId": ctxPopupId
     };
 
+    // needed on journal subdomains
+    var url = LJVAR.currentJournal ? "/" + LJVAR.currentJournal + "/__rpc_changerelation" : "/__rpc_changerelation";
+
     var opts = {
         "data": HTTPReq.formEncoded(postData),
         "method": "POST",
-        "url": "/__rpc_changerelation",
+        "url": url,
         "onError": ContextualPopup.gotError,
         "onData": ContextualPopup.changedRelation
     };
@@ -337,8 +346,11 @@ ContextualPopup.getInfo = function (target) {
             "mode": "getinfo"
     });
 
+    // needed on journal subdomains
+    var url = LJVAR.currentJournal ? "/" + LJVAR.currentJournal + "/__rpc_ctxpopup" : "/__rpc_ctxpopup";
+
     HTTPReq.getJSON({
-        "url": "/__rpc_ctxpopup",
+        "url": url,
             "method" : "GET",
             "data": params,
             "onData": ContextualPopup.gotInfo,
