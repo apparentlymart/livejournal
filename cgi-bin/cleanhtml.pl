@@ -9,6 +9,7 @@ use strict;
 use HTML::TokeParser ();
 use URI ();
 use CSS::Cleaner;
+use HTMLCleaner;
 
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 
