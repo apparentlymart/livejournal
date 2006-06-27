@@ -68,7 +68,7 @@ LJVideoCommand.GetState=function() {
 }
 
 LJVideoCommand.Execute=function() {
-    var user;
+    var url;
     var selection = '';
 
     if (FCK.EditorWindow.getSelection) {
@@ -79,14 +79,16 @@ LJVideoCommand.Execute=function() {
     if (selection != '') {
         url = selection;
     } else {
-        url = prompt('Please enter the YouTube URL:');
+        url = prompt('Please enter the YouTube URL:','');
     }
 
     if (url != null && url != '') {
+        url = url.replace('watch?v=', 'v/');
+
         // Make the tag like the editor would
-        var html = "<lj-template name='video'>";
-        html     += url;
-        html     += "</lj-template>";
+        var html = "<span class='ljvideo'>";
+        html += url;
+        html += "</span>";
 
         FCK.InsertHtml(html);
         FCK.Focus();

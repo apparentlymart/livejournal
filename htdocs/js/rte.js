@@ -59,9 +59,9 @@ function RTEAddClasses(textArea, statPrefix) {
 
     html = html.replace(/<lj-cut>(.+?)<\/lj-cut>/g, '<div class="ljcut">$1</div>');
     html = html.replace(/<lj-raw>([\w\s]+?)<\/lj-raw>/g, '<lj-raw class="ljraw">$1</lj-raw>');
+    html = html.replace(/<lj-template name=['"]video['"]>([\s\S]+)<\/lj-template>/g, "<span class='ljvideo'>$1</span>");
 
     html = html.replace(/<lj user=['"](\w+)["'] ?\/?>/g, "<span class='ljuser'><img src='" + statPrefix + "/fck/editor/plugins/livejournal/userinfo.gif' width='17' height='17' style='vertical-align: bottom' />$1</span>");
-
     oEditor.SetHTML(html);
 }
 
@@ -75,7 +75,7 @@ function usePlainText(textArea) {
     var html = oEditor.GetXHTML();
     if ($("event_format") && $("event_format").selectedIndex == 0) {
         html = html.replace(/\<br \/\>/g, '\n');
-        html = html.replace(/\<p\>(.+)\<\/p\>/g, '$1\n');
+        html = html.replace(/\<p\>(.+?)\<\/p\>/g, '$1\n');
         html = html.replace(/&nbsp;/g, ' ');
     }
     $(textArea).value = html;

@@ -183,7 +183,6 @@ sub clean
 
     my $eating_ljuser_span = 0;  # bool, if we're eating an ljuser span
     my $ljuser_text_node   = ""; # the last text node we saw while eating ljuser tags
-
     my @eatuntil = ();  # if non-empty, we're eating everything.  thing at end is thing
                         # we're looking to open again or close again.
 
@@ -251,6 +250,16 @@ sub clean
             }
 
             if ($eating_ljuser_span) {
+                next TOKEN;
+            }
+
+            if ($tag eq "span" && lc $attr->{class} eq "ljvideo") {
+                my $name = "video";
+                $name =~ s/-/_/g;
+                $start_capture->("span", $token, sub {
+                    my $expanded = ($name =~ /^\w+$/) ? LJ::run_hook("expand_template_$name", \@capture) : "";
+                    $newdata .= $expanded || "<b>[Error: unknown template '" . LJ::ehtml($name) . "']</b>";
+                });
                 next TOKEN;
             }
 
