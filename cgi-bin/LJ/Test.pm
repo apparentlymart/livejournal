@@ -285,27 +285,42 @@ package LJ::Entry;
 sub t_enter_comment {
     my ($entry, %opts) = @_;
     my $jitemid = $entry->jitemid;
-    my $u = $entry->journal;
 
     require 'talklib.pl';
+
+    # entry journal/u
+    my $entryu = $entry->journal;
+
+    # poster u
+    my $u = delete $opts{u};
+    $u = 0 unless ref $u;
 
     my $parent = delete $opts{parent};
     my $parenttalkid = $parent ? $parent->jtalkid : 0;
 
-    my $subject = delete $opts{subject} || 'comment subject';
-    my $body = delete $opts{body} || 'comment body';
-
     # add some random stuff for dupe protection
     my $rand = "t=" . time() . " r=" . rand();
 
-    my %err;
-    my $jtalkid = LJ::Talk::Post::enter_comment($u, {talkid => $parenttalkid}, {itemid => $jitemid},
-                                                 {u => $u, state => 'A', subject => 'comment subject',
-                                                  body => "comment body\n\n$rand",}, \%err);
+    my $subject = delete $opts{subject} || "comment subject [$rand]";
+    my $body    = delete $opts{body} || "comment body\n\n$rand";
 
-    die "Could not post comment: " . join(", ", %err) unless $jtalkid;
+    my $err;
+    my $jtalkid = LJ::Talk::Post::enter_comment
+        ($entryu,                   # journalu
+         {talkid => $parenttalkid}, # parent
+         {itemid => $jitemid},      # item (entry)
+         {
+             u => $u,                  # comment
+             state => 'A', 
+             subject => $subject, 
+             body => $body,
+             %opts
+         },
+         \$err);
 
-    return LJ::Comment->new($u, jtalkid => $jtalkid);
+    die "Could not post comment: $err" unless $jtalkid;
+
+    return LJ::Comment->new($entryu, jtalkid => $jtalkid);
 }
 
 package LJ::Comment;
