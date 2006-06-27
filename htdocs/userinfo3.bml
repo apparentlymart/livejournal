@@ -792,7 +792,7 @@
      }
      
      unless ( $com || $extid || $synd ) {
-     $body .= "<div class='actionitem'><img src='$LJ::IMGPREFIX/scrapbook.gif' /> <a href='$LJ::FB_SITEROOT/$user'>View ScrapBook</a></div>\n";
+     $body .= "<div class='actionitem'><img src='$LJ::IMGPREFIX/scrapbook.gif' alt='Scrapbook' /> <a href='$LJ::FB_SITEROOT/$user'>View ScrapBook</a></div>\n";
      }
      
      unless ($extid) {
@@ -1293,9 +1293,10 @@
                  $body .= $displayusers->(\@pfriends, "Friends");
                  $body .= "<br/>\n";
                  $body .= $friendedby if ($friendedby);
+                 $body .= "</div></fieldset></div>\n";
              }
              
-       $body .= "</div></fieldset></div>\n";
+       
              if (@cfriends) {
                  $body .= "<div class='module'>\n";
                  $body .= "<fieldset>\n";
