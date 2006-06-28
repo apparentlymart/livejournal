@@ -1,16 +1,17 @@
 ContextualPopup = new Object;
 
-ContextualPopup.popupDelay = 1000;
-ContextualPopup.hideDelay = 500;
+ContextualPopup.popupDelay  = 1000;
+ContextualPopup.hideDelay   = 500;
 ContextualPopup.disableAJAX = false;
+ContextualPopup.debug       = true;
 
-ContextualPopup.cachedResults = {};
+ContextualPopup.cachedResults   = {};
 ContextualPopup.currentRequests = {};
-ContextualPopup.mouseInTimer = null;
-ContextualPopup.mouseOutTimer = null;
-ContextualPopup.currentId = null;
-ContextualPopup.hourglass = null;
-ContextualPopup.elements = {};
+ContextualPopup.mouseInTimer    = null;
+ContextualPopup.mouseOutTimer   = null;
+ContextualPopup.currentId       = null;
+ContextualPopup.hourglass       = null;
+ContextualPopup.elements        = {};
 
 ContextualPopup.setup = function (e) {
     // attach to all ljuser head icons
@@ -168,7 +169,7 @@ ContextualPopup.constructIPPU = function (ctxPopupId) {
     ippu.setTitlebar(false);
     ippu.setFadeOut(true);
     ippu.setFadeIn(true);
-    ippu.setFadeSpeed(2);
+    ippu.setFadeSpeed(4);
     ippu.setDimensions("auto", "auto");
     ippu.addClass("ContextualPopup");
     ippu.setCancelledCallback(ContextualPopup.popupClosed);
@@ -438,7 +439,7 @@ ContextualPopup.showNote = function (note, ctxPopupId) {
             dim = DOM.getAbsoluteDimensions(ele);
         }
 
-        if(!dim) {
+        if (!dim) {
             notePopup.setModal(true);
             notePopup.setOverlayVisible(true);
             notePopup.setAutoCenter(true, true);
@@ -552,7 +553,8 @@ ContextualPopup.hideHourglass = function () {
 ContextualPopup.gotError = function (err) {
     if (ContextualPopup.hourglass) ContextualPopup.hideHourglass();
 
-    ContextualPopup.showNote(err);
+    if (ContextualPopup.debug)
+        ContextualPopup.showNote("Error: " + err);
 }
 
 ContextualPopup.gotInfo = function (data) {
