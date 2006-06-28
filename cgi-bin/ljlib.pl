@@ -1765,8 +1765,9 @@ sub start_request
 
               if (@LJ::USE_LOCAL_RES) {
                   foreach my $file (@LJ::USE_LOCAL_RES) {
-                      $file =~ s/(\w+)\.(\w+)$/$1-local.$2/;
-                      LJ::need_res($file);
+                      my $inc = $file;
+                      $inc =~ s/(\w+)\.(\w+)$/$1-local.$2/;
+                      LJ::need_res($inc);
                   }
               }
           }
