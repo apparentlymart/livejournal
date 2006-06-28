@@ -1751,6 +1751,7 @@ sub start_request
                             js/httpreq.js
                             js/ippu.js
                             js/lj_ippu.js
+                            js/hourglass.js
                             js/contextualpopup.js
                             stc/contextualpopup.css
                             stc/lj_base.css
