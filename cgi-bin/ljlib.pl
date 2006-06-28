@@ -1761,7 +1761,14 @@ sub start_request
                               js/core.js
                               js/dom.js
                               js/devel.js
-                           ))if $LJ::IS_DEV_SERVER;
+                              )) if $LJ::IS_DEV_SERVER;
+
+              if (@LJ::USE_LOCAL_RES) {
+                  foreach my $file (@LJ::USE_LOCAL_RES) {
+                      $file =~ s/(\w+)\.(\w+)$/$1-local.$2/;
+                      LJ::need_res($file);
+                  }
+              }
           }
     }
 
