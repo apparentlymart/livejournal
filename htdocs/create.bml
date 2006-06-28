@@ -322,14 +322,18 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
      {
          my $caps   = int($LJ::NEWUSER_CAPS);
          my $status = ($LJ::EVERYONE_VALID ? 'A'  : 'N');
-         $dbh->do("INSERT INTO user (user, email, password, status, caps, name, clusterid, dversion) ".
-                  "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                  undef, $user, $email, $POST{'password1'}, $status, $caps,
+         my $init_bdate = sprintf("%04d-%02d-%02d", $POST{bday_yyyy}, $POST{bday_mm}, $POST{bday_dd});
+
+         $dbh->do("INSERT INTO user (user, email, password, bdate, status, caps, name, clusterid, dversion) ".
+                  "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                  undef, $user, $email, $POST{'password1'}, $init_bdate, $status, $caps,
                   $user, $clusterid, $LJ::MAX_DVERSION);
          if ($dbh->err) {
              return "<?h1 $ML{'Error'} h1?><?p $ML{'error.procrequest'} <b>" . $dbh->errstr . "</b> p?>";
          }
          $userid = $dbh->{'mysql_insertid'};
+         LJ::set_userprop($userid, 'init_bdate', $init_bdate);
+         LJ::set_userprop($userid, 'opt_showbday', 'N');
          $dbh->do("REPLACE INTO useridmap (userid, user) VALUES (?, ?)", undef, $userid, $user);
          $dbh->do("REPLACE INTO userusage (userid, timecreate) VALUES (?, NOW())", undef, $userid);
 
@@ -745,7 +749,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
          $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.birthday.head'}</div>";
          $ret .= "<div class='formitemFlag'>$errors{'bday'}</div>" if exists $errors{'bday'};
          $ret .= "<div class='formitemDesc'>";
-         $ret .= BML::ml('.birthday.question_1', {'aopts' => "target='_new' href='$LJ::SITEROOT/legal/privacy.bml'"});
+         $ret .= BML::ml('.birthday.question_3', {'aopts' => "target='_new' href='$LJ::SITEROOT/legal/privacy.bml'"});
          $ret .= "</div><div>";
          $ret .= "<table><tr><td><span class='formitemName'>$ML{'.birthday.birthdate'}</span></td><td>";
          $ret .= LJ::html_datetime({ name => 'bday', notime => 1,

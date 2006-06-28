@@ -769,7 +769,7 @@ p?>
 
 /create.bml.birthday.head=Age Verification
 
-/create.bml.birthday.question_1=We require this information in order to comply with the Children's Online Privacy Protection Act (COPPA).
+/create.bml.birthday.question_3=Please select the month, day and year you were born.  We require this information to create an account in order to comply with the Children's Online Privacy Protection Act (COPPA).  If you are under the age of thirteen you are not allowed to use our service.  Read our <a [[aopts]]>privacy policy</a> for more information regarding our information practices.
 
 /create.bml.birthday.required=(required)
 
@@ -3622,7 +3622,15 @@ Regards,
 
 /manage/moodthemes.bml.yourthemes.nothemes=You have not yet made any custom mood themes.
 
-/manage/profile/index.bml.birthday=Show your birthday to other users
+/manage/profile/index.bml.show.birthday=Birthday display options:
+
+/manage/profile/index.bml.show.birthday.day=Display only the month and day
+
+/manage/profile/index.bml.show.birthday.full=Display month, day, and year
+
+/manage/profile/index.bml.show.birthday.nothing=Do not display
+
+/manage/profile/index.bml.show.birthday.year=Display only the year
 
 /manage/profile/index.bml.birthday.year.opt=year is optional
 

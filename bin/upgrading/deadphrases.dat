@@ -27,6 +27,8 @@ general /community/settings.bml.manage
 general /create.bml.aolnotice.head
 general /create.bml.aolnotice.text
 general /create.bml.birthday.question
+general /create.bml.birthday.question_1
+general /create.bml.birthday.question_2
 general /create.bml.create.text
 general /create.bml.email.text3
 general /create.bml.error.seebelow
@@ -121,7 +123,7 @@ general /manage/index.bml.userpictures.edit.about
 general /manage/index.bml.userpictures.header
 general /manage/index.bml.information.emailpost
 general /manage/index.bml.information.emailpost.about
-
+general /manage/profile/index.bml.birthday
 general /manage/profile/index.bml.intro
 general /manage/profile/index.bml.im
 general /manage/profile/index.bml.email
@@ -467,3 +469,4 @@ general /community/join.bml.label.membernow2
 general /community/join.bml.label.sure
 
 general /userinfo.bml.monitor.comm
+

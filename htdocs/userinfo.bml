@@ -552,6 +552,12 @@ if ($u->{'journaltitle'}) {
           my $bdate = $u->{'bdate'};
           $bdate =~ s/^0000-//;
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
+          my ($year,$mon,$day) = split(/-/, $bdate);
+          if ($u->opt_showbday eq 'D') {
+              $bdate = "$mon-$day";
+          } elsif ($u->opt_showbday eq 'Y') {
+              $bdate = $year;
+          }
           $body .= "<tr><td align='right'><b>$ML{'.label.birthdate'}</b></td><td colspan='$span'>$bdate</td></tr>\n";
       }
   }
