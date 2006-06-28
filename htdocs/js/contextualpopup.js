@@ -1,7 +1,7 @@
 ContextualPopup = new Object;
 
-ContextualPopup.popupDelay = 100;
-ContextualPopup.hideDelay = 100;
+ContextualPopup.popupDelay = 1000;
+ContextualPopup.hideDelay = 500;
 ContextualPopup.disableAJAX = false;
 
 ContextualPopup.cachedResults = {};
@@ -65,13 +65,20 @@ ContextualPopup.mouseOver = function (e) {
     var ctxPopupId = target.ctxPopupId;
 
     // did the mouse move out?
-    if (!target || !ContextualPopup.isCtxPopElement(target) && ContextualPopup.ippu) {
-        if (ContextualPopup.mouseInTimer || ContextualPopup.mouseOutTimer) return;
+    if (!target || !ContextualPopup.isCtxPopElement(target)) {
+        if (ContextualPopup.mouseInTimer) {
+            window.clearTimeout(ContextualPopup.mouseInTimer);
+            ContextualPopup.mouseInTimer = null;
+        };
 
-        ContextualPopup.mouseOutTimer = window.setTimeout(function () {
-            ContextualPopup.mouseOut(e);
-        }, ContextualPopup.hideDelay);
-        return;
+        if (ContextualPopup.ippu) {
+            if (ContextualPopup.mouseInTimer || ContextualPopup.mouseOutTimer) return;
+
+            ContextualPopup.mouseOutTimer = window.setTimeout(function () {
+                ContextualPopup.mouseOut(e);
+            }, ContextualPopup.hideDelay);
+            return;
+        }
     }
 
     // we're inside a ctxPopElement, cancel the mouseout timer
