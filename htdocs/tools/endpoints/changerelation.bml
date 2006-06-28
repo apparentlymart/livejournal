@@ -6,7 +6,7 @@
     my $err = sub {
         my $msg = shift;
         return JSON::objToJson({
-            content => "Error: $msg",
+            error => "Error: $msg",
         });
     };
 
@@ -21,18 +21,59 @@
 
     my $success = 0;
 
+    my %ret = ();
+
     if ($action eq 'addFriend') {
         $success = $remote->add_friend($targetu);
     } elsif ($action eq 'removeFriend') {
         $success = $remote->remove_friend($targetu);
+    } elsif ($action eq 'join') {
+        return $err->("Not a community") unless $targetu->is_comm;
+
+        my $ci = LJ::get_community_row($targetu);
+
+        if ($ci->{membership} eq 'closed') {
+            $ret{note} = BML::ml('/community/join.bml.error.closed');
+        } elsif ($ci->{membership} ne 'open') {
+            # submit request
+            LJ::comm_join_request($targetu, $remote);
+
+              # get maintainers
+              my $maintainers = LJ::load_rel_user($targetu->{userid}, 'A') || [];
+              my %userhash;
+              LJ::load_userids_multiple([ map { $_, \$userhash{$_} }
+                                          @$maintainers ]);
+              my @maints = map { LJ::ljuser($_) } values %userhash;
+
+              $ret{note} = BML::ml('/community/join.bml.reqsubmitted.body') .
+                  join(', ', @maints);
+          } else {
+              my $joined = LJ::join_community($remote, $targetu);
+              $ret{note} = LJ::last_error() unless $joined;
+              $success = $joined;
+          }
+    } elsif ($action eq 'leave') {
+        return $err->("Not a community") unless $targetu->is_comm;
+
+        # error if we're a maintainer and there are no others
+        my $maintids = LJ::load_rel_user($targetu->{userid}, 'A');
+        my $ismaint     = grep { $_ == $remote->{userid} } @$maintids;
+        my $othermaints = grep { $_ != $remote->{userid} } @$maintids;
+        return $err->(BML::ml('/community/leave.bml.label.lastmaintainer')) if $ismaint && !$othermaints;
+
+        $success = LJ::leave_community($remote, $targetu);
     } else {
         return $err->("Invalid action $action");
     }
 
+    sleep 1 if $LJ::IS_DEV_SERVER;
+
     return JSON::objToJson({
-        success => $success,
+        success   => $success,
         is_friend => LJ::is_friend($remote, $targetu),
+        is_member => LJ::is_friend($targetu, $remote),
         %POST,
+        %ret,
     });
 }
 
