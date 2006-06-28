@@ -9,6 +9,7 @@ ContextualPopup.currentRequests = {};
 ContextualPopup.mouseInTimer = null;
 ContextualPopup.mouseOutTimer = null;
 ContextualPopup.currentId = null;
+ContextualPopup.hourglass = null;
 ContextualPopup.elements = {};
 
 ContextualPopup.setup = function (e) {
@@ -22,7 +23,14 @@ ContextualPopup.setup = function (e) {
         for (var i=0; i < nodes.length; i++) {
             var node = nodes.item(i);
 
-            node.username = DOM.extractElementText(ljuser);
+            // if the parent (a tag with link to userinfo) has userid in its URL, then
+            // this is an openid user icon and we should use the userid
+            var parent = node.parentNode;
+            var userid;
+            if (parent && (userid = parent.href.match(/\?userid=(\d+)/i)))
+                node.userid = userid[1];
+            else
+                node.username = DOM.extractElementText(ljuser);
 
             userElements.push(node);
             DOM.addClassName(node, "ContextualPopup");
@@ -151,6 +159,9 @@ ContextualPopup.constructIPPU = function (ctxPopupId) {
     var ippu = new IPPU();
     ippu.init();
     ippu.setTitlebar(false);
+    ippu.setFadeOut(true);
+    ippu.setFadeIn(true);
+    ippu.setFadeSpeed(2);
     ippu.setDimensions("auto", "auto");
     ippu.addClass("ContextualPopup");
     ippu.setCancelledCallback(ContextualPopup.popupClosed);
@@ -162,44 +173,122 @@ ContextualPopup.constructIPPU = function (ctxPopupId) {
 ContextualPopup.renderPopup = function (ctxPopupId) {
     var ippu = ContextualPopup.ippu;
 
-    if (!ippu || !ctxPopupId)
+    if (!ippu)
     return;
 
-    var data = ContextualPopup.cachedResults[ctxPopupId];
-    if (data) {
+    if (ctxPopupId) {
+        var data = ContextualPopup.cachedResults[ctxPopupId];
+
+        if (!data) {
+            ippu.setContent("<div class='Inner'>Loading...</div>");
+            return;
+        }
+
+        var inner = document.createElement("div");
+        DOM.addClassName(inner, "Inner");
+
         var content = document.createElement("div");
         DOM.addClassName(content, "Content");
+
+        var bar = document.createElement("span");
+        bar.innerHTML = " | ";
 
         // userpic
         if (data.url_userpic && data.url_userpic != ContextualPopup.elements[ctxPopupId].src) {
             var userpicContainer = document.createElement("div");
             var userpic = document.createElement("img");
             userpic.src = data.url_userpic;
+            userpic.width = data.userpic_w;
+            userpic.height = data.userpic_h;
 
             userpicContainer.appendChild(userpic);
             DOM.addClassName(userpicContainer, "Userpic");
 
-            content.appendChild(userpicContainer);
+            inner.appendChild(userpicContainer);
         }
 
-        // friend?
-        var relation = document.createElement("div");
-        if (data.is_requester) {
-            relation.innerHTML = "This is you";
-        } else {
-            relation.innerHTML = data.username + " is " + (
-                                                           data.is_friend ? "a friend" : "not a friend"
-                                                           );
-        }
+        inner.appendChild(content);
 
         // relation
+        var relation = document.createElement("div");
+        if (data.is_comm) {
+            if (data.is_member)
+                relation.innerHTML = "You are a member of " + data.username;
+            else if (data.is_friend)
+                relation.innerHTML = "You are watching " + data.username;
+            else
+                relation.innerHTML = data.username;
+        } else if (data.is_syndicated) {
+            if (data.is_friend)
+                relation.innerHTML = "You are subscribed to " + data.username;
+            else
+                relation.innerHTML = data.username;
+        } else {
+            if (data.is_requester) {
+                relation.innerHTML = "This is you";
+            } else {
+                var label = data.username + " ";
+
+                if (data.is_friend_of) {
+                    if (data.is_friend)
+                        label += "is your mutual friend";
+                    else
+                        label += "lists you as a friend";
+                } else {
+                    if (data.is_friend)
+                        label += "is your friend";
+                }
+
+                relation.innerHTML = label;
+            }
+        }
+        DOM.addClassName(relation, "Relation");
+        content.appendChild(relation);
+
+        // member of community
+        if (data.is_comm) {
+            var membership      = document.createElement("span");
+            var membershipLink  = document.createElement("a");
+
+            var membership_action = data.is_member ? "leave" : "join";
+
+            if (data.is_member) {
+                membershipLink.href = data.url_leavecomm;
+                membershipLink.innerHTML = "Leave";
+            } else {
+                membershipLink.href = data.url_joincomm;
+                membershipLink.innerHTML = "Join community";
+            }
+
+            if (!ContextualPopup.disableAJAX) {
+                DOM.addEventListener(membershipLink, "click", function (e) {
+                    Event.prep(e);
+                    Event.stop(e);
+                    return ContextualPopup.changeRelation(data, ctxPopupId, membership_action, e); });
+            }
+
+            membership.appendChild(membershipLink);
+            content.appendChild(membership);
+        }
+
+        // friend
+        var friend;
         if (! data.is_requester) {
+            friend = document.createElement("span");
+
             if (! data.is_friend) {
                 // add friend link
-                var addFriend = document.createElement("div");
+                var addFriend = document.createElement("span");
                 var addFriendLink = document.createElement("a");
                 addFriendLink.href = data.url_addfriend;
-                addFriendLink.innerHTML = "Add friend";
+
+                if (data.is_comm)
+                    addFriendLink.innerHTML = "Watch community";
+                else if (data.is_syndicated)
+                    addFriendLink.innerHTML = "Subscribe to feed";
+                else
+                    addFriendLink.innerHTML = "Add friend";
+
                 addFriend.appendChild(addFriendLink);
                 DOM.addClassName(addFriend, "AddFriend");
 
@@ -207,16 +296,23 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
                     DOM.addEventListener(addFriendLink, "click", function (e) {
                         Event.prep(e);
                         Event.stop(e);
-                        return ContextualPopup.changeRelation(data, ctxPopupId, "addFriend"); });
+                        return ContextualPopup.changeRelation(data, ctxPopupId, "addFriend", e); });
                 }
 
-                relation.appendChild(addFriend);
+                friend.appendChild(addFriend);
             } else {
                 // remove friend link (omg!)
-                var removeFriend = document.createElement("div");
+                var removeFriend = document.createElement("span");
                 var removeFriendLink = document.createElement("a");
                 removeFriendLink.href = data.url_addfriend;
-                removeFriendLink.innerHTML = "Remove friend";
+
+                if (data.is_comm)
+                    removeFriendLink.innerHTML = "Stop watching";
+                else if (data.is_syndicated)
+                    removeFriendLink.innerHTML = "Unsubscribe";
+                else
+                    removeFriendLink.innerHTML = "Remove friend";
+
                 removeFriend.appendChild(removeFriendLink);
                 DOM.addClassName(removeFriend, "RemoveFriend");
 
@@ -224,53 +320,64 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
                     DOM.addEventListener(removeFriendLink, "click", function (e) {
                         Event.prep(e);
                         Event.stop(e);
-                        return ContextualPopup.changeRelation(data, ctxPopupId, "removeFriend"); });
+                        return ContextualPopup.changeRelation(data, ctxPopupId, "removeFriend", e); });
                 }
 
-                relation.appendChild(removeFriend);
+                friend.appendChild(removeFriend);
             }
 
-            DOM.addClassName(relation, "Relation");
+            DOM.addClassName(relation, "FriendStatus");
         }
-        content.appendChild(relation);
 
-        var bar = document.createElement("span");
-        bar.innerHTML = " | ";
+        // add a bar between stuff if we have community actions
+        if (data.is_comm)
+            content.appendChild(bar.cloneNode(true));
+
+        if (friend)
+            content.appendChild(friend);
+
+        // break
+        content.appendChild(document.createElement("br"));
+
+        // view label
+        var viewLabel = document.createElement("span");
+        viewLabel.innerHTML = "View: ";
+        content.appendChild(viewLabel);
 
         // journal
-        var journalLink = document.createElement("a");
-        journalLink.href = data.url_journal;
-        journalLink.innerHTML = "Journal";
-        content.appendChild(journalLink);
-        content.appendChild(bar.cloneNode(true));
+        if (data.is_person || data.is_comm || data.is_syndicated) {
+            var journalLink = document.createElement("a");
+            journalLink.href = data.url_journal;
+
+            if (data.is_person)
+                journalLink.innerHTML = "Journal";
+            else if (data.is_comm)
+                journalLink.innerHTML = "Community";
+            else if (data.is_syndicated)
+                journalLink.innerHTML = "Feed";
+
+            content.appendChild(journalLink);
+            content.appendChild(bar.cloneNode(true));
+        }
 
         // profile
         var profileLink = document.createElement("a");
         profileLink.href = data.url_profile;
         profileLink.innerHTML = "Profile";
         content.appendChild(profileLink);
-        content.appendChild(bar.cloneNode(true));
-
-        // pictures
-        var picturesLink = document.createElement("a");
-        picturesLink.href = data.url_fb;
-        picturesLink.innerHTML = "Pictures";
-        content.appendChild(picturesLink);
 
         // clearing div
         var clearingDiv = document.createElement("div");
         DOM.addClassName(clearingDiv, "clear");
+        clearingDiv.innerHTML = "&nbsp;";
         content.appendChild(clearingDiv);
 
-        ippu.setContentElement(content);
-    } else {
-        ippu.setContent("Loading...");
+        ippu.setContentElement(inner);
     }
-
 }
 
 // ajax request to change relation
-ContextualPopup.changeRelation = function (info, ctxPopupId, action) {
+ContextualPopup.changeRelation = function (info, ctxPopupId, action, evt) {
     if (!info) return true;
 
     var postData = {
@@ -290,20 +397,85 @@ ContextualPopup.changeRelation = function (info, ctxPopupId, action) {
         "onData": ContextualPopup.changedRelation
     };
 
+    // do hourglass at mouse coords
+    var mouseCoords = DOM.getAbsoluteCursorPosition(evt);
+    if (!ContextualPopup.hourglass && mouseCoords) {
+        ContextualPopup.hourglass = new Hourglass();
+        ContextualPopup.hourglass.init(null, "lj_hourglass");
+        ContextualPopup.hourglass.add_class_name("ContextualPopup"); // so mousing over hourglass doesn't make ctxpopup think mouse is outside
+        ContextualPopup.hourglass.hourglass_at(mouseCoords.x, mouseCoords.y);
+    }
+
     HTTPReq.getJSON(opts);
 
     return false;
 }
 
+// create a little popup to notify the user of something
+ContextualPopup.showNote = function (note, ctxPopupId) {
+    var notePopup = new IPPU();
+    notePopup.init('<div class="Inner">' + note + '</div>');
+    notePopup.setTitlebar(false);
+    notePopup.setDimensions("auto", "auto");
+    notePopup.addClass("ContextualPopup");
+
+    var dim;
+    if (ContextualPopup.ippu) {
+        // pop up the box right under the element
+        dim = DOM.getAbsoluteDimensions(ContextualPopup.ippu.getElement());
+        if (!dim) return;
+    } else {
+        if (ctxPopupId) {
+            var ele = ContextualPopup.elements[ctxPopupId + ""];
+            if (ele)
+            dim = DOM.getAbsoluteDimensions(ele);
+        }
+
+        if(!dim) {
+            notePopup.setModal(true);
+            notePopup.setOverlayVisible(true);
+            notePopup.setAutoCenter(true, true);
+        }
+    }
+
+    if (dim) {
+        // default is to auto-center, don't want that
+        notePopup.setAutoCenter(false, false);
+        notePopup.setLocation(dim.absoluteLeft, dim.absoluteBottom);
+    }
+
+    notePopup.setClickToClose(true);
+    notePopup.show();
+    notePopup.moveForward();
+
+    window.setTimeout(function () {
+        if (notePopup)
+            notePopup.hide();
+    }, 5000);
+}
+
 // callback from changing relation request
 ContextualPopup.changedRelation = function (info) {
     var ctxPopupId = info.ctxPopupId + 0;
-    if (!ctxPopupId) return;
 
+    if (ContextualPopup.hourglass) ContextualPopup.hideHourglass();
+
+    if (info.error) {
+        ContextualPopup.showNote(info.error, info.reqdata);
+        return;
+    }
+
+    if (info.note)
+    ContextualPopup.showNote(info.note, info.reqdata);
+
+    if (!ctxPopupId) return;
     if (!info.success) return;
 
     if (ContextualPopup.cachedResults[ctxPopupId + ""]) {
-        ContextualPopup.cachedResults[ctxPopupId + ""].is_friend = info.is_friend;
+        var updatedProps = ["is_friend", "is_member"];
+        updatedProps.forEach(function (prop) {
+            ContextualPopup.cachedResults[ctxPopupId + ""][prop] = info[prop];
+        });
     }
 
     // if the popup is up, reload it
@@ -311,6 +483,8 @@ ContextualPopup.changedRelation = function (info) {
 }
 
 ContextualPopup.hidePopup = function (ctxPopupId) {
+    if (ContextualPopup.hourglass) ContextualPopup.hideHourglass();
+
     // destroy popup for now
     if (ContextualPopup.ippu) {
         ContextualPopup.ippu.hide();
@@ -322,9 +496,10 @@ ContextualPopup.hidePopup = function (ctxPopupId) {
 ContextualPopup.getInfo = function (target) {
     var ctxPopupId = target.ctxPopupId;
     var username = target.username;
+    var userid = target.userid;
     var up_url = target.up_url;
 
-    if (!(username || up_url))
+    if (!(username || userid || up_url))
         return;
 
     if (!ctxPopupId)
@@ -337,10 +512,12 @@ ContextualPopup.getInfo = function (target) {
     ContextualPopup.currentRequests[ctxPopupId] = 1;
 
     if (!username) username = "";
+    if (!userid) userid = 0;
     if (!up_url) up_url = "";
 
     var params = HTTPReq.formEncoded ({
         "user": username,
+            "userid": userid,
             "userpic_url": up_url,
             "reqdata": ctxPopupId,
             "mode": "getinfo"
@@ -358,13 +535,31 @@ ContextualPopup.getInfo = function (target) {
             });
 }
 
-// FIXME: remove after debugging
+ContextualPopup.hideHourglass = function () {
+    if (ContextualPopup.hourglass) {
+        ContextualPopup.hourglass.hide();
+        ContextualPopup.hourglass = null;
+    }
+}
+
 ContextualPopup.gotError = function (err) {
-    log("error: " + err);
+    if (ContextualPopup.hourglass) ContextualPopup.hideHourglass();
+
+    ContextualPopup.showNote(err);
 }
 
 ContextualPopup.gotInfo = function (data) {
     var ctxPopupId = data.reqdata;
+
+    if (ContextualPopup.hourglass) ContextualPopup.hideHourglass();
+
+    if (data.error) {
+        ContextualPopup.showNote(data.error, data.reqdata);
+        return;
+    }
+
+    if (data.note)
+    ContextualPopup.showNote(data.note, data.reqdata);
 
     if (!ctxPopupId)
     return;
