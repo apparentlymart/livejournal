@@ -21,7 +21,8 @@ sub ajax_auth_token {
 
     my ($stime, $secret) = LJ::get_secret();
     my $postvars = join('&', map { $postvars{$_} } sort keys %postvars);
-    my $authstring = sha1_hex(qq {$stime:$secret:$remote->{userid}:$uri:$postvars});
+    my $remote_session_id = $remote && $remote->session ? $remote->session->id : '';
+    my $authstring = sha1_hex(qq {$stime:$secret:$remote->{userid}:$remote_session_id:$uri:$postvars});
     return hmac_sha1_hex($authstring);
 }
 
