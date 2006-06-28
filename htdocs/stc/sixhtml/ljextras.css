@@ -8,9 +8,28 @@
 .comment .comment-userpic, .entry .entry-userpic {
     float: right;
     margin: 5px;
+    text-align: right;
+}
+.entry-userpic {
+    z-index: 1;
 }
 .comment .comment-content, .entry .entry-content, .entry .entry-body {
     clear: none;
+}
+.comment .comment-content {
+    padding-top: 20px;
+}
+.metadata {
+    margin-bottom: 10px;
+}
+.ljtags {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+.poster {
+    text-align: center;
+    margin: 2px 0 0 0;
+    padding: 0;
 }
 #ad-5linkunit {
     clear: both;
