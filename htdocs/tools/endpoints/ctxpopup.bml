@@ -1,13 +1,13 @@
 <?_code # -*-bml-*-
 {
     use strict;
-    use vars qw(%GET %POST);
+    use vars qw(%GET);
+    use LJ::Auth;
 
     my $err = sub {
         my $msg = shift;
         return JSON::objToJson({
             error => "Error: $msg",
-            %GET,
         });
     };
 
@@ -47,49 +47,67 @@
     BML::set_content_type('text/javascript; charset=utf-8');
     BML::finish();
 
-    if ($u && $GET{'mode'} eq 'getinfo') {
-        $ret{username} = $u->{user};
-        $ret{display} = $u->{name};
-        $ret{userid} = $u->{userid};
-        $ret{url_addfriend} = "$LJ::SITEROOT/friends/add.bml?user=" . $u->{user};
-        $ret{url_journal} = $u->journal_base;
-        $ret{url_profile} = $u->profile_url;
+    return $err->("No such user") unless $u;
+    return $err->("Invalid mode") unless $GET{mode} eq 'getinfo';
 
-        my $up = $u->userpic;
-        if ($up) {
-            $ret{url_userpic} = $up->url;
-            $ret{userpic_w}   = $up->width;
-            $ret{userpic_h}   = $up->height;
+    # uri for changerelation auth token
+    my $uri = '/__rpc_changerelation';
+
+    # actions to generate auth tokens for
+    my @actions = ();
+
+    $ret{username} = $u->{user};
+    $ret{display} = $u->{name};
+    $ret{userid} = $u->{userid};
+    $ret{url_addfriend} = "$LJ::SITEROOT/friends/add.bml?user=" . $u->{user};
+    $ret{url_journal} = $u->journal_base;
+    $ret{url_profile} = $u->profile_url;
+
+    my $up = $u->userpic;
+    if ($up) {
+        $ret{url_userpic} = $up->url;
+        $ret{userpic_w}   = $up->width;
+        $ret{userpic_h}   = $up->height;
+    } else {
+        # if it's a feed, make their userpic the feed icon
+        if ($u->is_syndicated) {
+            $ret{url_userpic} = "$LJ::IMGPREFIX/feed100x100.png";
+        } elsif ($u->is_identity) {
+            $ret{url_userpic} = "$LJ::IMGPREFIX/identity_100x100.png";
         } else {
-            # if it's a feed, make their userpic the feed icon
-            if ($u->is_syndicated) {
-                $ret{url_userpic} = "$LJ::IMGPREFIX/feed100x100.png";
-            } elsif ($u->is_identity) {
-                $ret{url_userpic} = "$LJ::IMGPREFIX/identity_100x100.png";
-            } else {
-                $ret{url_userpic} = "$LJ::IMGPREFIX/ctxpopup-nopic.gif";
-            }
-            $ret{userpic_w} = 100;
-            $ret{userpic_h} = 100;
+            $ret{url_userpic} = "$LJ::IMGPREFIX/ctxpopup-nopic.gif";
         }
-
-        $ret{is_friend}    = LJ::is_friend($remote, $u);
-        $ret{is_friend_of} = LJ::is_friend($u, $remote);
-        $ret{is_requester} = LJ::u_equals($remote, $u);
-
-        $ret{is_comm}       = $u->is_comm;
-        $ret{is_person}     = $u->is_person;
-        $ret{is_syndicated} = $u->is_syndicated;
-        $ret{is_identity}   = $u->is_identity;
-
-        if ($u->is_comm) {
-            $ret{url_joincomm}  = "$LJ::SITEROOT/community/join.bml?comm=" . $u->{user};
-            $ret{url_leavecomm}  = "$LJ::SITEROOT/community/leave.bml?comm=" . $u->{user};
-            $ret{is_member} = LJ::is_friend($u, $remote);
-        }
+        $ret{userpic_w} = 100;
+        $ret{userpic_h} = 100;
     }
 
-    $ret{reqdata} = $GET{reqdata};
+    $ret{is_friend}    = LJ::is_friend($remote, $u);
+    $ret{is_friend_of} = LJ::is_friend($u, $remote);
+    $ret{is_requester} = LJ::u_equals($remote, $u);
+
+    $ret{is_comm}       = $u->is_comm;
+    $ret{is_person}     = $u->is_person;
+    $ret{is_syndicated} = $u->is_syndicated;
+    $ret{is_identity}   = $u->is_identity;
+
+    if ($u->is_comm) {
+        $ret{url_joincomm}   = "$LJ::SITEROOT/community/join.bml?comm=" . $u->{user};
+        $ret{url_leavecomm}  = "$LJ::SITEROOT/community/leave.bml?comm=" . $u->{user};
+        $ret{is_member} = LJ::is_friend($u, $remote);
+
+        push @actions, 'join', 'leave';
+    }
+
+    # generate auth tokens
+    push @actions, 'addFriend', 'removeFriend';
+    foreach my $action (@actions) {
+        $ret{"${action}_authtoken"} = LJ::Auth->ajax_auth_token(
+                                                                $remote,
+                                                                $uri,
+                                                                target => $u->{user},
+                                                                action => $action,
+                                                                );
+    }
 
     sleep(1.5) if $LJ::IS_DEV_SERVER;
 

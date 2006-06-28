@@ -2,6 +2,7 @@
 {
     use strict;
     use vars qw(%POST);
+    use LJ::Auth;
 
     my $err = sub {
         my $msg = shift;
@@ -13,6 +14,9 @@
     # get user
     my $remote = LJ::get_remote()
         or return $err->("Sorry, you must be logged in to use this feature.");
+
+    # check auth token
+    return $err->("Invalid auth token") unless LJ::Auth->check_ajax_auth_token($remote, BML::get_uri(), %POST);
 
     my $target = $POST{target} or return $err->("No target specified");
     my $action = $POST{action} or return $err->("No action specified");
@@ -32,18 +36,18 @@
 
         my $ci = LJ::get_community_row($targetu);
 
+        # get maintainers
+        my $maintainers = LJ::load_rel_user($targetu->{userid}, 'A') || [];
+        my %userhash;
+        LJ::load_userids_multiple([ map { $_, \$userhash{$_} }
+                                    @$maintainers ]);
+        my @maints = map { LJ::ljuser($_) } values %userhash;
+
         if ($ci->{membership} eq 'closed') {
-            $ret{note} = BML::ml('/community/join.bml.error.closed');
+            $ret{note} = BML::ml('/community/join.bml.error.closed', { admins => join(', ', @maints) });
         } elsif ($ci->{membership} ne 'open') {
             # submit request
             LJ::comm_join_request($targetu, $remote);
-
-              # get maintainers
-              my $maintainers = LJ::load_rel_user($targetu->{userid}, 'A') || [];
-              my %userhash;
-              LJ::load_userids_multiple([ map { $_, \$userhash{$_} }
-                                          @$maintainers ]);
-              my @maints = map { LJ::ljuser($_) } values %userhash;
 
               $ret{note} = BML::ml('/community/join.bml.reqsubmitted.body') .
                   join(', ', @maints);
@@ -72,7 +76,6 @@
         success   => $success,
         is_friend => LJ::is_friend($remote, $targetu),
         is_member => LJ::is_friend($targetu, $remote),
-        %POST,
         %ret,
     });
 }

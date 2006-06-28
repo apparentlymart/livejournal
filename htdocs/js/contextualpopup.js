@@ -1,6 +1,6 @@
 ContextualPopup = new Object;
 
-ContextualPopup.popupDelay  = 1000;
+ContextualPopup.popupDelay  = 800;
 ContextualPopup.hideDelay   = 500;
 ContextualPopup.disableAJAX = false;
 ContextualPopup.debug       = true;
@@ -390,19 +390,48 @@ ContextualPopup.changeRelation = function (info, ctxPopupId, action, evt) {
 
     var postData = {
         "target": info.username,
-        "action": action,
-        "ctxPopupId": ctxPopupId
+        "action": action
     };
+
+    // get the authtoken
+    var authtoken = info[action + "_authtoken"];
+    if (!authtoken) log("no auth token for action" + action);
+    postData.auth_token = authtoken;
 
     // needed on journal subdomains
     var url = LJVAR.currentJournal ? "/" + LJVAR.currentJournal + "/__rpc_changerelation" : "/__rpc_changerelation";
+
+    // callback from changing relation request
+    var changedRelation = function (data) {
+        if (ContextualPopup.hourglass) ContextualPopup.hideHourglass();
+
+        if (data.error) {
+            ContextualPopup.showNote(data.error, ctxPopupId);
+            return;
+        }
+
+        if (data.note)
+        ContextualPopup.showNote(data.note, ctxPopupId);
+
+        if (!data.success) return;
+
+        if (ContextualPopup.cachedResults[ctxPopupId + ""]) {
+            var updatedProps = ["is_friend", "is_member"];
+            updatedProps.forEach(function (prop) {
+                ContextualPopup.cachedResults[ctxPopupId + ""][prop] = data[prop];
+            });
+        }
+
+        // if the popup is up, reload it
+        ContextualPopup.renderPopup(ctxPopupId);
+    };
 
     var opts = {
         "data": HTTPReq.formEncoded(postData),
         "method": "POST",
         "url": url,
         "onError": ContextualPopup.gotError,
-        "onData": ContextualPopup.changedRelation
+        "onData": changedRelation
     };
 
     // do hourglass at mouse coords
@@ -424,6 +453,9 @@ ContextualPopup.showNote = function (note, ctxPopupId) {
     var notePopup = new IPPU();
     notePopup.init('<div class="Inner">' + note + '</div>');
     notePopup.setTitlebar(false);
+    notePopup.setFadeIn(true);
+    notePopup.setFadeOut(true);
+    notePopup.setFadeSpeed(4);
     notePopup.setDimensions("auto", "auto");
     notePopup.addClass("ContextualPopup");
 
@@ -462,34 +494,6 @@ ContextualPopup.showNote = function (note, ctxPopupId) {
     }, 5000);
 }
 
-// callback from changing relation request
-ContextualPopup.changedRelation = function (info) {
-    var ctxPopupId = info.ctxPopupId + 0;
-
-    if (ContextualPopup.hourglass) ContextualPopup.hideHourglass();
-
-    if (info.error) {
-        ContextualPopup.showNote(info.error, info.reqdata);
-        return;
-    }
-
-    if (info.note)
-    ContextualPopup.showNote(info.note, info.reqdata);
-
-    if (!ctxPopupId) return;
-    if (!info.success) return;
-
-    if (ContextualPopup.cachedResults[ctxPopupId + ""]) {
-        var updatedProps = ["is_friend", "is_member"];
-        updatedProps.forEach(function (prop) {
-            ContextualPopup.cachedResults[ctxPopupId + ""][prop] = info[prop];
-        });
-    }
-
-    // if the popup is up, reload it
-    ContextualPopup.renderPopup(ctxPopupId);
-}
-
 ContextualPopup.hidePopup = function (ctxPopupId) {
     if (ContextualPopup.hourglass) ContextualPopup.hideHourglass();
 
@@ -506,9 +510,6 @@ ContextualPopup.getInfo = function (target) {
     var username = target.username;
     var userid = target.userid;
     var up_url = target.up_url;
-
-    if (!(username || userid || up_url))
-        return;
 
     if (!ctxPopupId)
     return;
@@ -527,18 +528,35 @@ ContextualPopup.getInfo = function (target) {
         "user": username,
             "userid": userid,
             "userpic_url": up_url,
-            "reqdata": ctxPopupId,
             "mode": "getinfo"
     });
 
     // needed on journal subdomains
     var url = LJVAR.currentJournal ? "/" + LJVAR.currentJournal + "/__rpc_ctxpopup" : "/__rpc_ctxpopup";
 
+    // got data callback
+    var gotInfo = function (data) {
+        if (ContextualPopup.hourglass) ContextualPopup.hideHourglass();
+
+        if (data.error) {
+            ContextualPopup.showNote(data.error, ctxPopupId);
+            return;
+        }
+
+        if (data.note)
+        ContextualPopup.showNote(data.note, data.ctxPopupId);
+
+        ContextualPopup.currentRequests[ctxPopupId] = null;
+
+        ContextualPopup.cachedResults[ctxPopupId] = data;
+        ContextualPopup.renderPopup(ctxPopupId);
+    };
+
     HTTPReq.getJSON({
         "url": url,
             "method" : "GET",
             "data": params,
-            "onData": ContextualPopup.gotInfo,
+            "onData": gotInfo,
             "onError": ContextualPopup.gotError
             });
 }
@@ -555,28 +573,6 @@ ContextualPopup.gotError = function (err) {
 
     if (ContextualPopup.debug)
         ContextualPopup.showNote("Error: " + err);
-}
-
-ContextualPopup.gotInfo = function (data) {
-    var ctxPopupId = data.reqdata;
-
-    if (ContextualPopup.hourglass) ContextualPopup.hideHourglass();
-
-    if (data.error) {
-        ContextualPopup.showNote(data.error, data.reqdata);
-        return;
-    }
-
-    if (data.note)
-    ContextualPopup.showNote(data.note, data.reqdata);
-
-    if (!ctxPopupId)
-    return;
-
-    ContextualPopup.currentRequests[ctxPopupId] = null;
-
-    ContextualPopup.cachedResults[ctxPopupId] = data;
-    ContextualPopup.renderPopup(ctxPopupId);
 }
 
 // when page loads, set up contextual popups
