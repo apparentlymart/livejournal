@@ -37,4 +37,6 @@ form {
     background-image: url(/img/progress/barber.gif);
 }
 
-
+.lj_hourglass {
+        z-index: 20000;
+}
