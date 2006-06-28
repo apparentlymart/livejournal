@@ -1810,7 +1810,7 @@ sub res_includes {
 
     # include standard JS info
     $ret .= qq {
-        <script language="JavaScript" type="text/javascript">
+        <script language="JavaScript">
         var LJVAR;
         if (!LJVAR) LJVAR = {};
         LJVAR.imgprefix = "$LJ::IMGPREFIX";
