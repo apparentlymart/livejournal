@@ -104,8 +104,10 @@ propgroup presentation {
         [ "userprofile", "", "0", "1" ],
         [ "viewlinks", "" ],
         [ "calendar" ],
-        [ "syndicate", "Syndicate" ],
         [ "links", "Links" ],
+        [ "tags", "Tags" ],
+        [ "pagesummary", "Page Summary" ],
+        [ "syndicate", "Syndicate" ],
         [ "poweredby" ],
     ];
 
@@ -156,15 +158,41 @@ propgroup customcss {
 }
 
 function prop_init() {
-  if (viewer_sees_vbox()) {
-    $*layout_type = "3C";
+    if (viewer_sees_vbox()) {
+        # Users who see ads cannot use the 1 column layout
+        if ($*layout_type == "1C") {
+            $*layout_type = "2CR";
+        }
 
-    $*sidebar_secondary = [
-                           [ "ads", "" ],
-                           [ "tags", "Tags" ],
-                           [ "pagesummary", "Page Summary" ],
-                           ];    
-  }
+        if ($*layout_type == "3C") {
+            $*sidebar_secondary = [
+                [ "ads", "" ],
+            ];
+        } else {
+            $*sidebar_primary = [
+                [ "userprofile", "", "0", "1" ],
+                [ "viewlinks", "" ],
+                [ "calendar" ],
+                [ "ads", "" ],
+                [ "links", "Links" ],
+                [ "tags", "Tags" ],
+                [ "pagesummary", "Page Summary" ],
+                [ "syndicate", "Syndicate" ],
+                [ "poweredby" ],
+            ];
+        }
+    } else {
+        if ($*layout_type == "3C") {
+            $*sidebar_primary = [
+                [ "userprofile", "", "0", "1" ],
+                [ "viewlinks", "" ],
+                [ "calendar" ],
+                [ "links", "Links" ],
+                [ "syndicate", "Syndicate" ],
+                [ "poweredby" ],
+            ];
+        }
+    }
 }
 
 function print_custom_stylesheet() {}
