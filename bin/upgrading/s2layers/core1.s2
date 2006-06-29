@@ -1416,17 +1416,17 @@ property bool external_stylesheet {
 }
 set external_stylesheet = false;
 
+property bool include_default_stylesheet {
+    des = "Use layout's stylesheet(s)";
+    note = "Disable this only if you want to re-style this layout completely from scratch using a custom stylesheet.";
+}
+set include_default_stylesheet = true;
+
 property string linked_stylesheet {
-    des = "Custom external stylesheet";
+    des = "Custom external stylesheet URL";
     note = "If you have a custom external stylesheet that you'd like to use, enter its URL here.";
 }
 set linked_stylesheet = "";
-
-property bool include_default_stylesheet {
-    des = "Include layout's default stylesheet when including custom external stylesheet";
-    note = "This option will have no effect unless a custom external stylesheet URL has been provided.";
-}
-set include_default_stylesheet = true;
 
 property string custom_css {
     des = "Custom stylesheet";
@@ -1622,7 +1622,7 @@ function Friend::print() {
 ### Generic Page Functions
 
 function Page::print_stylesheets() {
-    if ($*linked_stylesheet == "" or ($*linked_stylesheet != "" and $*include_default_stylesheet)) {
+    if ($*include_default_stylesheet) {
         if ($*external_stylesheet) {
             println safe """<link rel="stylesheet" href="$.stylesheet_url" type="text/css" />""";
         }
