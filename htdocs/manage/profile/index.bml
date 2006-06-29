@@ -152,7 +152,6 @@ _code?>
             if ($bdpart{'year'} eq "0000") { $bdpart{'year'} = ""; }
             if ($bdpart{'day'} eq "00") { $bdpart{'day'} = ""; }
         }
-        $ret .= " <label for='opt_showbday'>$ML{'.birthday'}</label><br />\n";
         $ret .= " <div style=\"padding-bottom: .5em;\"> $ML{'.show.birthday'}\n";
 
         $ret .= LJ::html_select({ 'name' => 'opt_showbday',
@@ -202,8 +201,8 @@ _code?>
         $ret .= "<div class='section_head'>$ML{'.section.location'}\n";
         $ret .= "<span class='view_options'>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_showlocation', 'id' => 'opt_showlocation',
-                                 'selected' => $u->{'opt_showlocation'} ne 'N' });
-        $ret .= " <label for='opt_showlocation'>$ML{'.location'}</label></span></div>";
+                                                 'selected' => $u->{'opt_showlocation'} ne 'N' });
+        $ret .= " $ML{'.location'}</span></div>";
 
         $ret .= "<table class='field_block'>\n";
         # city
@@ -363,13 +362,13 @@ _code?>
         $ret .= "<tr><td class='field_name'><label for='opt_showmutualfriends'>$ML{'.fn.mutualfriends'}</label></td><td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_showmutualfriends', 'id' => 'opt_showmutualfriends',
                                  'selected' => $u->{'opt_showmutualfriends'} });
-        $ret .= " <label for='opt_showmutualfriends'>$ML{'.mutualfriends'}</label></td></tr>\n";
+        $ret .= " $ML{'.mutualfriends'}</td></tr>\n";
 
         # opt_hidefriendofs
         $ret .= "<tr><td class='field_name'><label for='opt_hidefriendofs'>$ML{'.fn.friendof'}</label></td><td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_hidefriendofs', 'id' => 'opt_hidefriendofs',
                                  'selected' => ! $u->{'opt_hidefriendofs'} });
-        $ret .= " <label for='opt_hidefriendofs'>$ML{'.friendof'}</label></td></tr>\n";
+        $ret .= " $ML{'.friendof'}</td></tr>\n";
 
         $ret .= "</table>\n";
 
@@ -587,6 +586,7 @@ _code?>
             $POST{'opt_hidefriendofs'} = $POST{'opt_hidefriendofs'} ? 0 : 1;
             $POST{'opt_showschools'} = 'N' unless $POST{'opt_showschools'} =~ m/^(N|R|Y|F)$/;
             # undefined means show to everyone, "N" means don't show
+            $POST{'opt_showbday'} = 'N' unless $POST{'opt_showbday'} =~ m/^(D|F|N|Y)$/;
             $POST{'opt_showlocation'} = $POST{'opt_showlocation'} ? undef : "N";
 
             $POST{'timezone'} = "" unless grep { $POST{'timezone'} eq $_ } DateTime::TimeZone::all_names();
@@ -598,7 +598,6 @@ _code?>
 
             $POST{'sidx_bday'} = sprintf("%02d-%02d", map { $POST{$_} } qw(month day));
             $POST{'sidx_bday'} = undef if $POST{'sidx_bday'} =~ /00/;
-
             if (! defined $POST{'opt_showbday'}) {
                 if ($POST{'year'}) {
                     $POST{'sidx_bdate'} = sprintf("%04d-%02d-%02d", map { $POST{$_} }
