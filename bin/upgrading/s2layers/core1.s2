@@ -510,6 +510,8 @@ class Page
 
     function builtin print_reply_container(string{} opts) "Prints the area in which the quickreply box will go. Options you may specify are 'target' which will be the target id, and 'class' which will be the CSS class used by the container. If no container is available, quickreply will not work.";
 
+    function print_stylesheets
+    "Prints all defined stylesheets, including default and user-defined ones.";
 }
 
 class TagsPage extends Page
@@ -1414,6 +1416,27 @@ property bool external_stylesheet {
 }
 set external_stylesheet = false;
 
+property string linked_stylesheet {
+    des = "Custom external stylesheet";
+    note = "If you have a custom external stylesheet that you'd like to use, enter its URL here.";
+}
+set linked_stylesheet = "";
+
+property bool include_default_stylesheet {
+    des = "Include layout's default stylesheet when including custom external stylesheet";
+    note = "This option will have no effect unless a custom external stylesheet URL has been provided.";
+}
+set include_default_stylesheet = true;
+
+property string custom_css {
+    des = "Custom stylesheet";
+    note = "If you'd like to add custom CSS to this style, enter it here.";
+    cols = 80;
+    rows = 20;
+    string_mode = "css";
+}
+set custom_css = "";
+
 ###[ global function implementations ]
 
 function prop_init ()
@@ -1597,6 +1620,33 @@ function Friend::print() {
 }
 
 ### Generic Page Functions
+
+function Page::print_stylesheets() {
+    if ($*linked_stylesheet == "" or ($*linked_stylesheet != "" and $*include_default_stylesheet)) {
+        if ($*external_stylesheet) {
+            println safe """<link rel="stylesheet" href="$.stylesheet_url" type="text/css" />""";
+        }
+        else {
+            println """<style type="text/css">""";
+            start_css();
+            print_stylesheet();
+            end_css();
+            println """</style>""";
+        }
+    }
+
+    if ($*linked_stylesheet != "") {
+        println safe """<link rel="stylesheet" href="$*linked_stylesheet" type="text/css" />""";
+    }
+
+    if ($*custom_css != "") {
+        println """<style type="text/css">""";
+        start_css();
+        println safe $*custom_css;
+        end_css();
+        println """</style>""";
+    }
+}
 
 function Page::view_title() [notags] : string {
     return lang_viewname($.view);
