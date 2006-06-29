@@ -2709,6 +2709,7 @@ sub subscribe_interface {
     # print buttons
     my $referer = BML::get_client_header('Referer');
     my $uri = Apache->request->uri;
+    $referer = '' if $referer =~ /$uri/i;
 
     $ret .= '<?standout ' .
         LJ::html_submit('Save') . ' ' .
