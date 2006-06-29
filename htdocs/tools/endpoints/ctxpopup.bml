@@ -57,8 +57,8 @@
     # actions to generate auth tokens for
     my @actions = ();
 
-    $ret{username} = $u->{user};
-    $ret{display} = $u->{name};
+    $ret{username} = $u->name;
+    $ret{display} = $u->display_name;
     $ret{userid} = $u->{userid};
     $ret{url_addfriend} = "$LJ::SITEROOT/friends/add.bml?user=" . $u->{user};
     $ret{url_journal} = $u->journal_base;
