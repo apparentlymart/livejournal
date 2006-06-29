@@ -1016,7 +1016,7 @@ if ( ! $synd && ($u->can_show_bday || $viewall)) {
     
     my $points = $dbr->selectrow_array("SELECT SUM(points) AS 'points' FROM supportpoints WHERE userid=$userid");
     if ($points) {
-        $body .= "<tr><td><b><a href='$LJ::SITEROOT/support/'>$ML{'.label.supportpoints'}</a>:</b></td><td><a href='LJ::SITEROOT/support/highscores.bml'>" . &comma($points) . "</a></td></tr>";
+        $body .= "<tr><td><b><a href='$LJ::SITEROOT/support/'>$ML{'.label.supportpoints'}</a>:</b></td><td><a href='$LJ::SITEROOT/support/highscores.bml'>" . &comma($points) . "</a></td></tr>";
     }
     
     $body .= "</table></div></div>\n";
@@ -1314,7 +1314,7 @@ if ( ! $synd && ($u->can_show_bday || $viewall)) {
                  }
                  $body .= "</legend>";
                  $body .= "<div class='content'>";   
-                 $body .= $displayusers->(\@cfriends, "Watcher of");
+                 $body .= $displayusers->(\@cfriends, "Watching");
                  $body .= "<br/>";
                  $body .= "$member_of_comm";
                  $body .= "<br/>";
@@ -1359,7 +1359,7 @@ if ( ! $synd && ($u->can_show_bday || $viewall)) {
                  }
                  $body .= "</legend>\n";
                  $body .= "<div class='content'>\n";
-                 $body .= $displayusers->(\@yfriends, "Watcher of");
+                 $body .= $displayusers->(\@yfriends, "Watchers");
                  $body .= "</div></fieldset></div>\n";
              }
          }
