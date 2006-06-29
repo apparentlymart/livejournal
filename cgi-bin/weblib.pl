@@ -2694,12 +2694,15 @@ sub subscribe_interface {
     my $sub_max = $u->get_cap('subscriptions');
     my $event_plural = $sub_count == 1 ? 'event' : 'events';
 
+    # link to manage settings (if not at manage settings)
+    my $managelink = qq { | Manage your subscriptions in the <a href="$LJ::SITEROOT/manage/subscriptions/index.bml">
+            Subscription Center</a><br/>
+            $extra_sub_status
+    } unless BML::get_uri() =~ m!/manage/subscriptions/index.bml!i;
+
     $ret .= qq {
         <div id="SubscriptionInfo">
-            <?p You are subscribed to $sub_count $event_plural ($sub_max available) |
-            Manage your subscriptions in the <a href="$LJ::SITEROOT/manage/subscriptions/index.bml">
-            Subscription Center</a> p?>
-            $extra_sub_status
+            You are subscribed to $sub_count $event_plural ($sub_max available) $managelink
             </div>
         };
 
@@ -2707,12 +2710,12 @@ sub subscribe_interface {
     my $referer = BML::get_client_header('Referer');
     my $uri = Apache->request->uri;
 
-    $ret .= '<div id="SubscribeSaveButtons">' .
-        LJ::html_submit('Save') .
+    $ret .= '<?standout ' .
+        LJ::html_submit('Save') . ' ' .
         ($referer && $referer ne "$LJ::SITEROOT$uri" ? "<input type='button' value='Cancel' onclick='window.location=\"$referer\"' />" : '')
-        . '</div>';
+        . '';
 
-    $ret .= "</form></div>";
+    $ret .= "standout?> </div></form>";
 }
 
 
