@@ -18,27 +18,33 @@ _info?><?page
 title=>Directory Search
 body<=
 <?_code
+{
     LJ::set_active_crumb('advsearch');
+    return "";
+}
 _code?>
 
 <?h1 Search Directory h1?>
 
 <?_code
+{
     my $remote = LJ::get_remote();
 
-if (!$remote) {
-    return BML::ml('.error.notloggedin', { aopts => "href='$LJ::SITEROOT/login.bml?ret=1'" });
-}
-
-my $inline;
-unless (LJ::get_cap($remote,"directory")) {
-    if ($inline .= LJ::run_hook("cprod_inline", $remote, 'Directory')) {
-        return $inline;
-    } else {
-        return BML::ml('cprod.directory.text.v1');
+    if (!$remote) {
+        return BML::ml('.error.notloggedin', { aopts => "href='$LJ::SITEROOT/login.bml?ret=1'" });
     }
-}
 
+    my $inline;
+    unless (LJ::get_cap($remote,"directory")) {
+        if ($inline .= LJ::run_hook("cprod_inline", $remote, 'Directory')) {
+            return $inline;
+        } else {
+            return BML::ml('cprod.directory.text.v1');
+        }
+    }
+
+    return "";
+}
 _code?>
 <?p Use this directory to search for LiveJournal users. If you fill in more than one blank, the directory will display results that match all your criteria. (i.e user lives in &ldquo;San Francisco&rdquo; AND lists &ldquo;music&rdquo; as an interest.). Check out our <a href="/community/search.bml">community search</a> page to find new and interesting communities. p?>
 
@@ -57,12 +63,12 @@ form<=
 <table>
 <tr><td align='right'>Country:</td><td align='left'>
 <?_code
-
- LJ::load_codes({ "country" => \%countries });
- return LJ::html_select({
-     'name' => 'loc_cn',
- }, "", "", map { $_, $countries{$_} } "US", sort { $countries{$a} cmp $countries{$b} } keys %countries);
-
+{
+    LJ::load_codes({ "country" => \%countries });
+    return LJ::html_select({
+        'name' => 'loc_cn',
+    }, "", "", map { $_, $countries{$_} } "US", sort { $countries{$a} cmp $countries{$b} } keys %countries);
+}
 _code?>
 </td></tr>
 <tr><td align='right'>State/Province:</td><td align='left'><input name="loc_st" /></td></tr>
