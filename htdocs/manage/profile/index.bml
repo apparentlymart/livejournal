@@ -152,15 +152,22 @@ _code?>
             if ($bdpart{'year'} eq "0000") { $bdpart{'year'} = ""; }
             if ($bdpart{'day'} eq "00") { $bdpart{'day'} = ""; }
         }
-        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_showbday', 'id' => 'opt_showbday',
-                                 'selected' => $u->opt_showbday ne 'N' });
         $ret .= " <label for='opt_showbday'>$ML{'.birthday'}</label><br />\n";
+        $ret .= " <div style=\"padding-bottom: .5em;\"> $ML{'.show.birthday'}\n";
+
+        $ret .= LJ::html_select({ 'name' => 'opt_showbday',
+                                  'selected' => $u->{'opt_showbday'} },
+                                "N" => BML::ml(".show.birthday.nothing"),
+                                "D" => BML::ml(".show.birthday.day"),
+                                "Y" => BML::ml(".show.birthday.year"),
+                                "F" => BML::ml(".show.birthday.full"));
+        $ret .= "</div>\n";
+
         $ret .= LJ::html_select({ 'name' => 'month', 'selected' => int($bdpart{'month'}) },
                                 '', '', map { $_, $ML{LJ::Lang::month_long_langcode($_)} } (1..12)) . " ";
 
         $ret .= LJ::html_text({ 'name' => 'day', 'value' => $bdpart{'day'}, 'size' => '3', 'maxlength' => '2' }) . " ";
         $ret .= LJ::html_text({ 'name' => 'year', 'value' => $bdpart{'year'}, 'size' => '5', 'maxlength' => '4' });
-        $ret .= " <span class='helper'>($ML{'.birthday.year.opt'})</span>";
 
         $ret .= "</td></tr>\n";
 
@@ -580,7 +587,6 @@ _code?>
             $POST{'opt_hidefriendofs'} = $POST{'opt_hidefriendofs'} ? 0 : 1;
             $POST{'opt_showschools'} = 'N' unless $POST{'opt_showschools'} =~ m/^(N|R|Y|F)$/;
             # undefined means show to everyone, "N" means don't show
-            $POST{'opt_showbday'} = $POST{'opt_showbday'} ? undef : "N";
             $POST{'opt_showlocation'} = $POST{'opt_showlocation'} ? undef : "N";
 
             $POST{'timezone'} = "" unless grep { $POST{'timezone'} eq $_ } DateTime::TimeZone::all_names();
