@@ -88,6 +88,8 @@ sub has_acked {
 sub mark_shown {
     my ($class, $u) = @_;
 
+    return unless $u;
+
     my $tm  = $class->typemap;
     my $map = LJ::CProd->user_map($u);
     my $cprodid = $tm->class_to_typeid($class);
@@ -213,6 +215,9 @@ sub box_for {
 # pass class or arrayref of possible classes in opts{inline}
 sub inline {
     my ($class, $u, %opts) = @_;
+
+    return '' unless $u;
+
     my $tm  = $class->typemap;
     my $map = LJ::CProd->user_map($u);
 
