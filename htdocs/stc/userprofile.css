@@ -24,7 +24,6 @@ h1 a {
 .module {
 	padding: 1px;
 	margin: 0 0 1em 0;
-	position: relative;
 	}
 	
 	.module .content {
@@ -37,11 +36,12 @@ h1 a {
 			font-weight: bold;
 			font-size: 1.5em;
 			margin: .2em 0 0 0;
+			line-height: 140%;
 			}
 	
 		.module .content .journal_sub {
 			font-size: 1em;
-			margin: .5em 0 .5em 0;
+			margin: .5em 0 0 0;
 			font-style: italic;
 			}
 			
@@ -65,12 +65,17 @@ h1 a {
 		}
 		
 		#beta .module legend a {
-			font-weight: normal;
-			color: #999;
-			background: #fff;
-			padding: .2em;
-			font-size: .9em;
+		    text-decoration: none;
+		    color: #036;
 			}
+			
+			#beta .module legend .edit a {
+			   color: #999;
+			   font-size: .9em;
+			   text-decoration: underline;
+			   margin: 0 0 0 .2em;
+			   font-weight: normal;
+			   }
 		
 		
 	.module h2 {
@@ -86,7 +91,7 @@ h1 a {
 		height: 1.5em;
 		}
 		
-		.module h2 a {
+		.module h2 a, .module h2 a:link, .module h2 a:link:visited {
 		    color: #fff;
 		    text-decoration: none;
 		    font-size: 1.1em;
@@ -104,13 +109,13 @@ h1 a {
 		  width: 100%;
 		  }
 		
-		.module .edit {
+		.module h2 .edit {
 			position: absolute;
 			right: 0;
 			top: .2em;
 			}
 			
-			.module .edit a {
+			.module h2 .edit a {
 				color: #fff;
 				margin: 0 .5em 0 0;
 				font-weight: normal;
@@ -118,7 +123,7 @@ h1 a {
 	
 	.userpic {
 		float: right;
-		margin: 0 0 0 .5em;
+		margin: 0 0 1em .5em;
 		width: 100px;
 		height: 100px;
 		text-align: center;
@@ -141,13 +146,6 @@ fieldset {
     font-weight: bold;
     }
     
-.data {
-    font-size: .9em;
-    }
-    
-.data b {
-    float: left;
-    text-align: left;
-    width: 10em;
-    margin: 0 .3em 0 0;
+.journal_stats {
+    margin: 1em 0 0 0;
     }
