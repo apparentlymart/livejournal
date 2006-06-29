@@ -1,7 +1,7 @@
 ContextualPopup = new Object;
 
-ContextualPopup.popupDelay  = 800;
-ContextualPopup.hideDelay   = 500;
+ContextualPopup.popupDelay  = 500;
+ContextualPopup.hideDelay   = 250;
 ContextualPopup.disableAJAX = false;
 ContextualPopup.debug       = true;
 
@@ -32,6 +32,8 @@ ContextualPopup.setup = function (e) {
                 node.userid = userid[1];
             else
                 node.username = DOM.extractElementText(ljuser);
+
+            if (!node.username && !node.userid) continue;
 
             userElements.push(node);
             DOM.addClassName(node, "ContextualPopup");
@@ -538,6 +540,8 @@ ContextualPopup.getInfo = function (target) {
     var gotInfo = function (data) {
         if (ContextualPopup.hourglass) ContextualPopup.hideHourglass();
 
+        ContextualPopup.cachedResults[ctxPopupId] = data;
+
         if (data.error) {
             ContextualPopup.showNote(data.error, ctxPopupId);
             return;
@@ -548,7 +552,6 @@ ContextualPopup.getInfo = function (target) {
 
         ContextualPopup.currentRequests[ctxPopupId] = null;
 
-        ContextualPopup.cachedResults[ctxPopupId] = data;
         ContextualPopup.renderPopup(ctxPopupId);
     };
 
