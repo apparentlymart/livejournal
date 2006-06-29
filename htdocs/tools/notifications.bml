@@ -96,6 +96,7 @@ body<=
     # print number of new alerts
     my $unread_count = $inbox->unread_count;
     my $alert_plural = $unread_count == 1 ? 'message' : 'messages';
+    $alert_plural .= '!' if $unread_count;
 
     # check all checkbox
     my $checkall = LJ::html_check({
@@ -108,7 +109,7 @@ body<=
     my $notificationtable = qq {
      <div id="NotificationTable">
         <span class="esnlinks">Message Center | <a href="$LJ::SITEROOT/manage/subscriptions/">Manage Settings</a></span>
-        <div class="inbox_newitems">You have $unread_count new $alert_plural! Holllaaaaaa</div>
+        <div class="inbox_newitems">You have $unread_count new $alert_plural</div>
 
         <table id="inbox" cellspacing="0" border="0" cellpadding="0">
             <tr class="header">
