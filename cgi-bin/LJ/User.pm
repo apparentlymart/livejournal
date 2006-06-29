@@ -22,6 +22,7 @@ use Class::Autouse qw(
                       LJ::Subscription
                       LJ::SMS
                       LJ::Identity
+                      LJ::Auth
                       );
 
 sub new_from_row {
@@ -1771,6 +1772,16 @@ sub can_use_esn {
     }
 
     return $disable ? 0 : 1;
+}
+
+sub ajax_auth_token {
+    my $u = shift;
+    return LJ::Auth->ajax_auth_token($u, @_);
+}
+
+sub check_ajax_auth_token {
+    my $u = shift;
+    return LJ::Auth->check_ajax_auth_token($u, @_);
 }
 
 package LJ;
