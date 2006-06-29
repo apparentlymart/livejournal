@@ -79,7 +79,7 @@ body<=
         BML::ml('Actionlink', { 'link'=>"<a href='#posted'>Latest Posted</a>"}) . "</div>" if $u->{journaltype} eq "P";
     $ret .= "<?p <a href=\"$LJ::SITEROOT/manage/comments/\">$ML{'.managesettings'}</a> p?>";
     $ret .= "<?h1 Latest Received h1?>";
-    $ret .= "<?p " . (%talkids ? "Last $count comments posted in " : "No comments have been posted in ") . LJ::ljuser($u) . "p?>";
+    $ret .= "<?p " . (%talkids ? "Last $count comments posted in " : "No comments have been posted in ") . LJ::ljuser($u) . " p?>";
 
     @recv = sort { $b->{datepostunix} <=> $a->{datepostunix} } @recv;
     my @recv_talkids = map { $_->{'jtalkid'} } @recv;
