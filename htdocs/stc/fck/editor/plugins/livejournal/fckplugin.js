@@ -79,12 +79,10 @@ LJVideoCommand.Execute=function() {
     if (selection != '') {
         url = selection;
     } else {
-        url = prompt('Please enter the YouTube URL:','');
+        url = prompt('Please enter the YouTube or PhotoBucket URL:','');
     }
 
     if (url != null && url != '') {
-        url = url.replace('watch?v=', 'v/');
-
         // Make the tag like the editor would
         var html = "<span class='ljvideo'>";
         html += url;
