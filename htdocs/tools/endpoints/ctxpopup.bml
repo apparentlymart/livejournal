@@ -58,6 +58,7 @@
     my @actions = ();
 
     $ret{username} = $u->name;
+    $ret{display_username} = $u->display_username;
     $ret{display} = $u->display_name;
     $ret{userid} = $u->{userid};
     $ret{url_addfriend} = "$LJ::SITEROOT/friends/add.bml?user=" . $u->{user};
@@ -105,7 +106,7 @@
         $ret{"${action}_authtoken"} = LJ::Auth->ajax_auth_token(
                                                                 $remote,
                                                                 $uri,
-                                                                target => $u->{user},
+                                                                target => $u->name,
                                                                 action => $action,
                                                                 );
     }

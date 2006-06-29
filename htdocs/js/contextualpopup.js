@@ -194,6 +194,8 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
             return;
         }
 
+        var username = data.display_username;
+
         var inner = document.createElement("div");
         DOM.addClassName(inner, "Inner");
 
@@ -223,21 +225,21 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
         var relation = document.createElement("div");
         if (data.is_comm) {
             if (data.is_member)
-                relation.innerHTML = "You are a member of " + data.username;
+                relation.innerHTML = "You are a member of " + username;
             else if (data.is_friend)
-                relation.innerHTML = "You are watching " + data.username;
+                relation.innerHTML = "You are watching " + username;
             else
-                relation.innerHTML = data.username;
+                relation.innerHTML = username;
         } else if (data.is_syndicated) {
             if (data.is_friend)
-                relation.innerHTML = "You are subscribed to " + data.username;
+                relation.innerHTML = "You are subscribed to " + username;
             else
-                relation.innerHTML = data.username;
+                relation.innerHTML = username;
         } else {
             if (data.is_requester) {
                 relation.innerHTML = "This is you";
             } else {
-                var label = data.username + " ";
+                var label = username + " ";
 
                 if (data.is_friend_of) {
                     if (data.is_friend)

@@ -1787,6 +1787,12 @@ sub check_ajax_auth_token {
 # returns username
 sub name {
     my $u = shift;
+    return $u->{user};
+}
+
+# returns username for display
+sub display_username {
+    my $u = shift;
     return $u->display_name if $u->is_identity;
     return $u->{user};
 }
