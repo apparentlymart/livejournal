@@ -2,13 +2,13 @@
 /*-------------------------------------*/
 
 #manageSettings {
-    margin: 1em 0 0 0;
+    margin: 2em 0 0 0;
     }
 
 .Subscribe {
     width: 100%;
     padding: 0;
-    margin: 0 0 0 0;
+    margin: .5em 0 0 0;
     clear: both;
     }
     
@@ -21,9 +21,9 @@
     }
 
     .CategoryRow td {
-        border-bottom: 1px solid #aaa;
         vertical-align: middle;
         background-color: #d9d9d9;
+        border-bottom: 1px solid #aaa;
         }
         
     .CategoryRow label {
@@ -33,10 +33,11 @@
     
     .CategoryHeading {
         font-weight: bold;
+        font-size: 1.2em;
         }
 
     .CategoryHeadingNote {
-        display: block;
+        xdisplay: block;
         font-size: .95em;
         }
 
@@ -89,14 +90,13 @@ div.argOptsContainer {
 
 
 #NotificationTable {
-    margin: 1em 0 0 0;
-    float: right;
-    width: 73%;
+    margin: 2em 0 0 0;
+    margin-left: 21em;
     }
 
 #NotificationSidebar {
     float: left;
-    width: 25%;
+    width: 20em;
     margin-top: 1em;
     line-height: 130%;
     }
@@ -109,7 +109,7 @@ div.argOptsContainer {
 .esnlinks {
     float: right;
     display: block;
-    margin: 0 0 .7em 0;
+    margin: 0 0 0 0;
     }
 
 #inbox {
