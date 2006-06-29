@@ -1784,6 +1784,13 @@ sub check_ajax_auth_token {
     return LJ::Auth->check_ajax_auth_token($u, @_);
 }
 
+# returns username
+sub name {
+    my $u = shift;
+    return $u->display_name if $u->is_identity;
+    return $u->{user};
+}
+
 package LJ;
 
 # <LJFUNC>
