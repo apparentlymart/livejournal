@@ -811,8 +811,8 @@ if ( ! $synd && ($u->can_show_bday || $viewall)) {
         }
      }
 
-    unless ($extid) {
-        $body .= "<div class='actionitem'><img src='$LJ::IMGPREFIX/todo.gif' alt='Todo List' /> <a href='$LJ::SITEROOT/todo/?user=$user'>View To-do list</a></div>";
+    unless ( $extid || $synd ) {
+    $body .= "<div class='actionitem'><img src='$LJ::IMGPREFIX/todo.gif' alt='Todo List' /> <a href='$LJ::SITEROOT/todo/?user=$user'>View To-do list</a></div>";
     }    
  
     if ($u->{public_key}) {
