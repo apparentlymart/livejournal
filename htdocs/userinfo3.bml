@@ -1198,7 +1198,7 @@ if ( ! $synd && ($u->can_show_bday || $viewall)) {
      my $userlist = "";
      foreach my $f (@$users) {
          my $status = $f->{'statusvis'};
-         my $nofollow = " rel='nofollow'" if ($dontfollow && !$remote_friendid{$_->{'userid'}});
+         my $nofollow = $remote_friendid{$_->{'userid'}} ? "" : " rel='nofollow'";
          my $ulink = "<a $nofollow href='" . $f->profile_url() . "'>$f->{'user'}</a>";
          $ulink = "<strike>$ulink</strike>" if $status =~ /[DXS]/;
          if ( $hilite_common && $remote_friendid{$_->{'userid'}} ) {
@@ -1213,6 +1213,7 @@ if ( ! $synd && ($u->can_show_bday || $viewall)) {
      }
      # chop off ", " at the end
      chop $userlist; chop $userlist;
+     $body .= ", ..." if $friendsof{'clipped'} || $friendsof{'load_clipped'};
 
      my $display = "<div><b>$label ";
      $display .= "($count";
@@ -1258,9 +1259,11 @@ if ( ! $synd && ($u->can_show_bday || $viewall)) {
  } else {  # Syndication journals are special
     $body .= "<div class='module'>\n";
     $body .= "<fieldset>\n";
-    $body .= "<legend><img src='$LJ::IMGPREFIX/userinfo.gif' title='' alt='' border='0' align='top' alt='Watchers' /> Watchers</legend>\n";
+    $body .= "<legend><img src='$LJ::IMGPREFIX/userinfo.gif' title='' alt='Watchers' border='0' align='top' /> Watchers</legend>\n";
+    $body .= "<div class='content'>\n";
     $body .= "$ML{'.friendof.syndreadcount'} ";
     $body .= "($friendsof{'count'})\n";
+    $body .= "</div></fieldset></div>\n";
  }
 
  unless ($synd || $LJ::FORCE_EMPTY_FRIENDS{$userid}) {
@@ -1355,11 +1358,11 @@ if ( ! $synd && ($u->can_show_bday || $viewall)) {
                  $body .= "<fieldset>\n";
                  $body .= "<legend><img src='$LJ::IMGPREFIX/syndicated.gif' title='$text' alt='$text' border='0' align='top' /> $text ";
                  if ($remote_isowner) {
-                        $body .= "<a href='$LJ::SITEROOT/friends/edit.bml'>Edit</a>";
+                        $body .= "<span class='edit'><a href='$LJ::SITEROOT/friends/edit.bml'>Edit</a></span>";
                  }
                  $body .= "</legend>\n";
                  $body .= "<div class='content'>\n";
-                 $body .= $displayusers->(\@yfriends, "Watchers");
+                 $body .= $displayusers->(\@yfriends, "Watching");
                  $body .= "</div></fieldset></div>\n";
              }
          }
@@ -1384,6 +1387,7 @@ if ( ! $synd && ($u->can_show_bday || $viewall)) {
          my $text = LJ::ehtml($ML{'.label.frpeople'});
          $body .= "<div><span class='ui_subhead'><img src='$LJ::IMGPREFIX/userinfo.gif' title='$text' alt='$text' border='0' align='top' /> Friends</span></div>\n";
          $body .= "<div>" . $ML{'.label.nofriends'} . "</div>\n";
+         $body .= "</div></fieldset></div>\n";
      }
      $body .= "\n";
  }
