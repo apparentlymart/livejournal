@@ -530,7 +530,8 @@ sub _get_upf_scaled
     my $border = delete $opts{border} || 0;
     my $maxfilesize = delete $opts{maxfilesize} || 38;
     my $u = LJ::want_user(delete $opts{userid} || delete $opts{u}) || LJ::get_remote();
-    croak "No userid or remote" unless $u;
+    my $mogkey = delete $opts{mogkey};
+    croak "No userid or remote" unless $u || $mogkey;
 
     $maxfilesize *= 1024;
 
@@ -538,15 +539,13 @@ sub _get_upf_scaled
 
     my $mode = ($x1 || $y1 || $x2 || $y2) ? "crop" : "scale";
 
-    return unless $u;
-
     eval "use Image::Magick (); 1;"
         or return undef;
 
     eval "use Image::Size (); 1;"
         or return undef;
 
-    my $mogkey = 'upf:' . $u->{userid};
+    $mogkey ||= 'upf:' . $u->{userid};
     my $dataref = LJ::mogclient()->get_file_data($mogkey) or return undef;
 
     # original width/height
@@ -587,7 +586,7 @@ sub _get_upf_scaled
         my $image = Image::Magick->new(size => "${medw}x${medh}")
             or return undef;
         $image->BlobToImage($$dataref);
-        $image->Scale(width => $medw, height => $medh);
+        $image->Resize(width => $medw, height => $medh);
         return $imageParams->($image);
     }
 
