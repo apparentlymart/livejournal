@@ -509,8 +509,8 @@ sub note_transition {
     # no transition at all
     my $last = $u->last_transition($what);
     return 1 if
-        $last->{from} eq $from &&
-        $last->{to}   eq $to;
+        $last->{before} eq $from &&
+        $last->{after}  eq $to;
 
     my $dbh = LJ::get_db_writer()
         or die "unable to contact global db master";
