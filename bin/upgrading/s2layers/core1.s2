@@ -1723,6 +1723,7 @@ function server_sig() {
 function Page::print() {
     "<html>\n<head>\n";
     $this->print_head();
+    $this->print_stylesheets();
     "<title>"+$this->title()+"</title>\n";
 
     if ($*font_base != "" or $*font_fallback != "none") {
@@ -1741,11 +1742,13 @@ body, td, th, table, p, div {
         if ($*font_fallback != "none") {
             print $*font_fallback;
         }
-        ";\n}\n--></style>\n";
-        end_css();
+        ";\n}\n-->";
+        end_css(); 
+        "</style>\n";
     }
 
     "</head>\n<body>\n";
+    $this->print_control_strip();
     if (defined $.journal.default_pic and
         $.view != "entry" and
         $.view != "reply") {
