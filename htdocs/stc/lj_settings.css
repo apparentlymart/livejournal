@@ -9,12 +9,12 @@
 
 .field_block td {
     vertical-align: top;
-    padding-top: 3px
+    padding-top: .3em;
+    padding-bottom: .3em;
 }
 
 .field_name {
     padding-right: 5px;
-    padding-top: 3px;
     white-space: nowrap;
     font-size: .9em;
     font-weight: bold;
@@ -22,6 +22,13 @@
     text-align: right;
     background-color: #eee;
     width: 145px;
+}
+.field_block .field_name {
+    padding-top: .6em;
+}
+
+.field_desc {
+    color: #505050;
 }
 
 .helper {
