@@ -1755,7 +1755,7 @@ sub show_control_strip {
 sub timecreate {
     my $u = shift;
     my $dbr = LJ::get_db_reader() or die "No db";
-    my $when = $dbr->selectrow_array("SELECT timeupdate FROM userusage WHERE userid=?", undef, $u->{userid});
+    my $when = $dbr->selectrow_array("SELECT timecreate FROM userusage WHERE userid=?", undef, $u->{userid});
     return undef unless $when;
     return LJ::mysqldate_to_time($when);
 }
