@@ -580,12 +580,11 @@ function Page::print () {
        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" id="sixapart-standard">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
    """;
 
     $this->print_head();
-    """<title>""" + $this->title() + """</title>\n""";
     $this->print_stylesheets();
+    """<title>""" + $this->title() + """</title>\n""";
 
 """
 </head>

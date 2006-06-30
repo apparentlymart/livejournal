@@ -870,9 +870,9 @@ function Page::print() {
 <head>
 """;
     $this->print_head();
-    println "<title>" + $this->title() + "</title>";
     $this->print_stylesheets();
     $this->lay_print_viewspec_head();
+    println "<title>" + $this->title() + "</title>";
 """
 </head>
 

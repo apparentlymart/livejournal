@@ -1307,8 +1307,8 @@ var string subtitle = $.global_subtitle != "" and $.view != "friends" ? """<br><
 <html>
 <head>
 """;
-$this->print_stylesheets();
 $this->print_head();
+$this->print_stylesheets();
 """
 <title>$title</title>
 </head>

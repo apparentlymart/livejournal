@@ -1675,8 +1675,8 @@ function Page::print () {
 <html xml:lang="en" lang="en" dir="ltr">
 <head>
 """;
-$this->print_stylesheets();
 $this->print_head();
+$this->print_stylesheets();
 """<title>$title</title>
 </head>
 <body>""";
