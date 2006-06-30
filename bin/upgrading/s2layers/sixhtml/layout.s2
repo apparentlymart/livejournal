@@ -135,23 +135,23 @@ propgroup text {
 }
 
 propgroup customcss {
+    property bool use_6a_base {
+        des = "Use layout's \"Base Weblog\" stylesheet";
+        note = "Disable this only if you want to re-style this layout completely from scratch using a custom stylesheet and if you selected \"(None)\" as your theme.";
+    }
+    set use_6a_base = true;
+
     property string linked_stylesheet {
-        des = "Custom external stylesheet";
+        des = "Custom external stylesheet URL";
         note = "If you selected \"(None)\" as your theme and have a custom external stylesheet that you'd like to use instead, or if you'd just like to use a custom external stylesheet in addition to your theme's stylesheet, enter its URL here.";
     }
     set linked_stylesheet = "";
 
-    property bool use_6a_base {
-        des = "Use 'Base Weblog' stylesheet";
-        note = "You should leave this option on unless you are using a custom external stylesheet and no theme.";
-    }
-    set use_6a_base = true;
-
     property string custom_css {
-    	des = "Custom stylesheet";
-    	note = "If you'd like to add custom CSS to this style, enter it here.";
-    	cols = 80;
-    	rows = 20;
+        des = "Custom stylesheet";
+        note = "If you selected \"(None)\" as your theme and have custom CSS that you'd like to use instead, or if you'd just like to add custom CSS in addition to your theme's stylesheet, enter it here.";
+        cols = 80;
+        rows = 20;
         string_mode = "css";
     }
     set custom_css = "";
@@ -531,29 +531,7 @@ function body_class (string lay) : string {
    return $map{$lay};
 }
 
-function Page::print () {
-
- var string lay = get_layout();
- var string body_layout_class = body_class($lay);
-
- var string[] wide_themes = ["bonjour", "green", "porpoise"]; # These are the wide themes, which look better when the hbox_top is below the banner
- var bool print_below_banner = false;
- foreach var string theme ($wide_themes) {
-    if ($theme == $*base_theme) {
-        $print_below_banner = true;
-    }
- }
-
-   """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" id="sixapart-standard">
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-   """;
-
-    $this->print_head();
-    """<title>""" + $this->title() + """</title>\n""";
-
+function Page::print_stylesheets() {
     if ($*use_6a_base) {
         println safe """<link rel="stylesheet" href="http://www.typepad.com/.shared/themes/common/base-weblog.css" type="text/css" />\n""";
         println safe """<link rel="stylesheet" href="$*STATDIR/sixhtml/ljextras.css" type="text/css" />\n""";
@@ -583,6 +561,31 @@ function Page::print () {
         end_css();
         println """</style>""";
     }
+}
+
+function Page::print () {
+
+ var string lay = get_layout();
+ var string body_layout_class = body_class($lay);
+
+ var string[] wide_themes = ["bonjour", "green", "porpoise"]; # These are the wide themes, which look better when the hbox_top is below the banner
+ var bool print_below_banner = false;
+ foreach var string theme ($wide_themes) {
+    if ($theme == $*base_theme) {
+        $print_below_banner = true;
+    }
+ }
+
+   """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" id="sixapart-standard">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+   """;
+
+    $this->print_head();
+    """<title>""" + $this->title() + """</title>\n""";
+    $this->print_stylesheets();
 
 """
 </head>

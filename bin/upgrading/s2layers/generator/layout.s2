@@ -258,17 +258,9 @@ propgroup text {
     }
 }
 propgroup customcss {
-    property string linked_stylesheet {
-        des = "Custom External Stylesheet";
-        note = "If you have a custom external stylesheet that you'd like to use, enter its URL here.";
-    }
-    property string custom_css {
-        des = "Custom Stylesheet";
-        note = "If you'd like to add custom CSS to this style, enter it here.";
-        cols = 80;
-        rows = 20;
-        string_mode = "css";
-    }
+    property use include_default_stylesheet;
+    property use linked_stylesheet;
+    property use custom_css;
 }
 
 # Set default colors
@@ -343,9 +335,6 @@ set time_format = "%%hh%%:%%min%% %%a%%m";
 set btwn_datetime = "|";
 set datetime_comments_format = "%%yyyy%%-%%mm%%-%%dd%% %%hh%%:%%min%% %%a%%m";
 set date_daypage_format = "%%month%% %%dayord%%, %%yyyy%%";
-
-set linked_stylesheet = "";
-set custom_css = "";
 
 set tags_aware = true;
 
@@ -542,22 +531,7 @@ function Page::print ()
 """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">\n<html>\n<head>\n""";
 
     $this->print_head();
-    if ($*external_stylesheet) {
-        println safe """<link rel="stylesheet" href="$.stylesheet_url" type="text/css" />""";
-    } else {
-        println """<style type="text/css">"""; start_css(); print_stylesheet(); end_css(); println "</style>";
-    }
-
-    if ($*linked_stylesheet != "") {
-        println safe """<link rel="stylesheet" href="$*linked_stylesheet" type="text/css" />""";
-    }
-    if ($*custom_css != "") {
-        println """<style type="text/css">""";
-        start_css();
-        println safe $*custom_css;
-        end_css();
-        println """</style>""";
-    }
+    $this->print_stylesheets();
 
 """<title>$title</title>
 </head>
