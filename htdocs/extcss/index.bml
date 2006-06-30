@@ -3,7 +3,7 @@
     use strict;
     use vars qw(%GET %POST);
     use LWPx::ParanoidAgent;
-    use CSS::Cleaner;
+    use LJ::CSS::Cleaner;
     use Digest::SHA1;
     use URI::URL;
 
@@ -58,7 +58,7 @@
         return $unclean;
     }
 
-    my $cleaner = CSS::Cleaner->new;
+    my $cleaner = LJ::CSS::Cleaner->new;
     my $clean = $cleaner->clean($unclean);
 
     LJ::run_hook('css_cleaner_transform', \$clean);

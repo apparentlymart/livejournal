@@ -10,7 +10,7 @@ use S2::Compiler;
 use Storable;
 use Apache::Constants ();
 use HTMLCleaner;
-use CSS::Cleaner;
+use LJ::CSS::Cleaner;
 use POSIX ();
 
 use LJ::S2::RecentPage;
@@ -739,7 +739,7 @@ sub escape_all_props {
 }
 
 {
-    my $css_cleaner = CSS::Cleaner->new();
+    my $css_cleaner = LJ::CSS::Cleaner->new();
 
     sub escape_prop_value {
         my $mode = $_[1];
@@ -2011,7 +2011,7 @@ sub end_css {
 
     # our CSS to clean:
     my $css = $sc->{_start_css_buffer};
-    my $cleaner = CSS::Cleaner->new;
+    my $cleaner = LJ::CSS::Cleaner->new;
 
     my $clean = $cleaner->clean($css);
     LJ::run_hook('css_cleaner_transform', \$clean);

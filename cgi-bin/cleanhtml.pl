@@ -8,7 +8,7 @@
 use strict;
 use HTML::TokeParser ();
 use URI ();
-use CSS::Cleaner;
+use LJ::CSS::Cleaner;
 use HTMLCleaner;
 
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
@@ -366,7 +366,7 @@ sub clean
                 my $style = $p->get_text("/style");
                 $p->get_tag("/style");
                 unless ($LJ::DISABLED{'css_cleaner'}) {
-                    my $cleaner = CSS::Cleaner->new;
+                    my $cleaner = LJ::CSS::Cleaner->new;
                     $style = $cleaner->clean($style);
                     if ($LJ::IS_DEV_SERVER) {
                         $style = "/* cleaned */\n" . $style;
@@ -487,7 +487,7 @@ sub clean
 
                         if ($opts->{'clean_js_css'} && ! $LJ::DISABLED{'css_cleaner'}) {
                             # and then run it through a harder CSS cleaner that does a full parse
-                            my $css = CSS::Cleaner->new;
+                            my $css = LJ::CSS::Cleaner->new;
                             $hash->{style} = $css->clean_property($hash->{style});
                         }
                     }
