@@ -1181,6 +1181,18 @@ sub entry_form {
         if (t) {
 RTE
 
+    $out .= "var FCKLang;\n";
+    $out .= "if (!FCKLang) FCKLang = {};\n";
+    $out .= "FCKLang.UserPrompt = \"".BML::ml('fcklang.userprompt')."\";\n";
+    $out .= "FCKLang.InvalidChars = \"".BML::ml('fcklang.invalidchars')."\";\n";
+    $out .= "FCKLang.LJUser = \"".BML::ml('fcklang.ljuser')."\";\n";
+    $out .= "FCKLang.VideoPrompt = \"".BML::ml('fcklang.videoprompt')."\";\n";
+    $out .= "FCKLang.LJVideo = \"".BML::ml('fcklang.ljvideo')."\";\n";
+    $out .= "FCKLang.CutPrompt = \"".BML::ml('fcklang.cutprompt')."\";\n";
+    $out .= "FCKLang.ReadMore = \"".BML::ml('fcklang.readmore')."\";\n";
+    $out .= "FCKLang.CutContents = \"".BML::ml('fcklang.cutcontents')."\";\n";
+    $out .= "FCKLang.LJCut = \"".BML::ml('fcklang.ljcut')."\";\n";
+
         if ($opts->{'richtext_default'}) {
             $$onload .= 'useRichText("draft", "' . LJ::ejs($LJ::WSTATPREFIX) . '");';
         }

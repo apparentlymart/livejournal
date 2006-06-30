@@ -6851,6 +6851,24 @@ error.usernamelong=Username is too long, 15 character max.
 
 error.username_notfound=Username not found.
 
+fcklang.cutcontents=Type your cut contents here.
+
+fcklang.cutprompt=Cut link text?
+
+fcklang.invalidchars=Invalid characters in username
+
+fcklang.ljcut=LiveJournal Cut
+
+fcklang.ljuser=LiveJournal User
+
+fcklang.ljvideo=LiveJournal Video
+
+fcklang.readmore=Read more...
+
+fcklang.userprompt=Enter their username
+
+fcklang.videoprompt=Please enter the YouTube or PhotoBucket URL:
+
 Help=Help
 
 label.screening.all=All comments
