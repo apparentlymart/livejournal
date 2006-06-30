@@ -89,7 +89,7 @@ body<=
 
     my $message = $POST{'message'} || $GET{'message'};
     if ($message) {
-        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>" unless LJ::check_form_auth();
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>" if $remote && !LJ::check_form_auth();
         my $inputfrom = $POST{'from'} || $GET{'from'};
         my $from = $tminfo->{'security'} eq "all" ? $inputfrom : $remote->{'user'};
 
