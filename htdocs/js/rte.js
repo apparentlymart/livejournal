@@ -73,6 +73,7 @@ function usePlainText(textArea) {
     var editor_source = editor_frame.contentWindow.document.getElementById('eEditorArea'); 
 
     var html = oEditor.GetXHTML();
+    html = html.replace(/<span class=\"ljuser\"><img.+?\/>(\w+?)<\/span>/g, '<lj user=\"$1\">');
     if ($("event_format") && $("event_format").selectedIndex == 0) {
         html = html.replace(/\<br \/\>/g, '\n');
         html = html.replace(/\<p\>(.+?)\<\/p\>/g, '$1\n');
