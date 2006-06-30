@@ -1728,7 +1728,7 @@ sub view_control_strip {
     my $u = shift;
 
     my $prop = $u->raw_prop('view_control_strip');
-    return 0 if $prop eq 'off';
+    return 0 if $prop eq 'off' || $prop eq 'off_explicit';
 
     return 'dark' if $prop eq 'forced';
 
@@ -1741,7 +1741,7 @@ sub show_control_strip {
     my $u = shift;
 
     my $prop = $u->raw_prop('show_control_strip');
-    return 0 if $prop eq 'off';
+    return 0 if $prop eq 'off' || $prop eq 'off_explicit';
 
     return 'dark' if $prop eq 'forced';
 

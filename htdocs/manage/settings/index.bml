@@ -319,11 +319,11 @@ _code?>
 
             if ($LJ::USE_CONTROL_STRIP) {
                 my $color = $POST{'control_strip_color'} || "dark";
-                $POST{'show_control_strip'} = $POST{'show_control_strip'} ? $color : 'off';
-                $POST{'view_control_strip'} = $POST{'view_control_strip'} ? $color : 'off';
+                $POST{'show_control_strip'} = $POST{'show_control_strip'} ? $color : 'off_explicit';
+                $POST{'view_control_strip'} = $POST{'view_control_strip'} ? $color : 'off_explicit';
             } else {
-                $POST{'show_control_strip'} = 'off';
-                $POST{'view_control_strip'} = 'off';
+                $POST{'show_control_strip'} = 'off_explicit';
+                $POST{'view_control_strip'} = 'off_explicit';
             }
 
 
