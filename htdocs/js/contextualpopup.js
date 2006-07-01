@@ -14,6 +14,9 @@ ContextualPopup.hourglass       = null;
 ContextualPopup.elements        = {};
 
 ContextualPopup.setup = function (e) {
+    // don't do anything if no remote
+    if (!LJVAR || !LJVAR.remote) return;
+
     // attach to all ljuser head icons
     var domObjects = document.getElementsByTagName("*");
     var ljusers = DOM.filterElementsByClassName(domObjects, "ljuser") || [];
@@ -171,7 +174,7 @@ ContextualPopup.constructIPPU = function (ctxPopupId) {
     ippu.setTitlebar(false);
     ippu.setFadeOut(true);
     ippu.setFadeIn(true);
-    ippu.setFadeSpeed(4);
+    ippu.setFadeSpeed(16);
     ippu.setDimensions("auto", "auto");
     ippu.addClass("ContextualPopup");
     ippu.setCancelledCallback(ContextualPopup.popupClosed);
@@ -191,6 +194,9 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
 
         if (!data) {
             ippu.setContent("<div class='Inner'>Loading...</div>");
+            return;
+        } else if (!data.username || !data.success) {
+            ippu.hide();
             return;
         }
 
@@ -256,6 +262,20 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
         }
         DOM.addClassName(relation, "Relation");
         content.appendChild(relation);
+
+        if (data.is_person) {
+            // online status
+            var onlineStatus = document.createElement("div");
+            onlineStatus.innerHTML = "LJTalk Online: No";
+            DOM.addClassName(onlineStatus, "OnlineStatus");
+            content.appendChild(onlineStatus);
+
+            // gizmo thingey
+            var gizmoBlurb = document.createElement("div");
+            gizmoBlurb.innerHTML = "(Download <a href=''>Gizmo</a> to get on <a href=''>LJ Talk</a>)";
+            DOM.addClassName(gizmoBlurb, "GizmoBlurb");
+            content.appendChild(gizmoBlurb);
+        }
 
         // member of community
         if (data.is_comm) {
@@ -330,7 +350,6 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
 
                 if (!ContextualPopup.disableAJAX) {
                     DOM.addEventListener(removeFriendLink, "click", function (e) {
-                        Event.prep(e);
                         Event.stop(e);
                         return ContextualPopup.changeRelation(data, ctxPopupId, "removeFriend", e); });
                 }
@@ -349,7 +368,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
             content.appendChild(friend);
 
         // break
-        content.appendChild(document.createElement("br"));
+        if (!data.is_requester) content.appendChild(document.createElement("br"));
 
         // view label
         var viewLabel = document.createElement("span");
@@ -545,6 +564,8 @@ ContextualPopup.getInfo = function (target) {
         ContextualPopup.cachedResults[ctxPopupId] = data;
 
         if (data.error) {
+            if (data.noshow) return;
+
             ContextualPopup.showNote(data.error, ctxPopupId);
             return;
         }

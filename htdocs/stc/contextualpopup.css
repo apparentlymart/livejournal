@@ -1,22 +1,19 @@
 div.ContextualPopup {
-    background: url(http://www.megatron.dev.livejournal.org/img/shadow.png) no-repeat bottom right !important;
-    background: url(http://www.megatron.dev.livejournal.org/img/shadow.gif) no-repeat bottom right;
-    margin: 0 0 0 10px !important;
+    
     }
     
 div.ContextualPopup div.Inner {
     background-color: #000;
     color: #fefefe;
-    border: 1px solid #999;
-    margin: 0 6px 6px -6px;
-    padding: .4em;
-    line-height: 140%;
-    font-size: 12px;
-    
+    padding: 5px;
+    line-height: 135%;
     }
     
 div.ContextualPopup .Content {
+    position: relative;
     text-align: left;
+    font-size: 11px;
+    margin: 0 10px 5px 5px;
     }
     
    div.ContextualPopup .Content span {
@@ -24,30 +21,44 @@ div.ContextualPopup .Content {
         }
         
    div.ContextualPopup .Content div {
-        min-width: 10em;
+        }
+        
+   div.ContextualPopup .Relation {
+        font-weight: bold !important;
+        font-size: 12px;
+        text-shadow: #454545 2px 2px;
+        }
+        
+   div.ContextualPopup .Content .OnlineStatus {
+        font-size: 11px;
+        }
+    
+   div.ContextualPopup .Content .GizmoBlurb {
+        font-size: 10px;
+        color: #999;
         }
     
 div.ContextualPopup .Userpic {
-    float: left;
-    width: 50px;
-    height: 50px;
-    margin: 0px 5px 1em 0;
-    padding: 2px;
-    _margin-left: 5px;
-    _margin-top: 5px;
+    position: absolute;
+    bottom: 0px;
+    right: -100px;
+    height: 100px;
+    padding: 5px;
+    background: #000;
     }
     
         
    div.ContextualPopup .Userpic img {
+        position: relative;
         margin: 0 auto;
-        width: 100%;
-        height: auto;
+        vertical-align: middle;
         }
             
    div.ContextualPopup div.Inner a, div.ContextualPopup div.Inner a:visited {
         color: #aaa;
         font-size: 11px;
         border: 0;
+        text-decoration: underline !important;
         }
         
        div.ContextualPopup div.Inner a:hover {
