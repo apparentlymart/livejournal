@@ -346,7 +346,7 @@ body<=
 
         foreach my $view (@LJ::views) {
             $ret .= "<div style='border: 1px solid #ccc; margin-bottom: .5em'>";
-            $ret .= "<div style='text-align: left; padding-top: 1em; border-right: 1px solid #ccc'>";
+            $ret .= "<div style='text-align: left; padding-top: 1em;'>";
             $ret .= "<div style='margin-left: 30px; margin-bottom: 20px;'>";
             $ret .= "<label for='s1_${view}_style'>$LJ::viewinfo{$view}->{'des'}:</label> ";
 
@@ -417,11 +417,11 @@ body<=
         push @layouts, LJ::cmize::s2_custom_layer_list($u, 'layout', 'core');
 
         $ret .= "<fieldset><legend>Layout &amp; Language</legend>";
-        $ret .= "<div style='border-right: 1px solid #ccc;'><?p Your layout will determine your theme options. p?>";
+        $ret .= "<?p Your layout will determine your theme options. p?>";
         $ret .= "<div style='margin-left: 30px; margin-bottom: 20px;'>";
         $ret .= LJ::html_select({ 'id' => "s2_layoutid", 'name' => 's2_layoutid', 'selected' => $style{'layout'},  }, @layouts);
         $ret .= "<noscript> " . LJ::html_submit('save:layout', $ML{'.change'}) . " </noscript>";
-        $ret .= " (<a href=\"/customize/preview.bml?journal=$u->{'user'}\" target='samples'>Samples</a>)</div></div>";
+        $ret .= " (<a href=\"/customize/preview.bml?journal=$u->{'user'}\" target='samples'>Samples</a>)</div>";
 
         my @langs = LJ::S2::get_layout_langs($pub, $style{'layout'});
         my $get_lang = sub {
@@ -454,18 +454,17 @@ body<=
         push @themes, LJ::cmize::s2_custom_layer_list($u, 'theme', 'layout');
 
         $ret .= "<fieldset><legend>Themes</legend>";
-        $ret .= "<div style='border-right: 1px solid #ccc'><?p Your theme consists of colors, fonts, and various presentation options. p?>";
+        $ret .= "<?p Your theme consists of colors, fonts, and various presentation options. p?>";
         $ret .= "<div style='margin-left: 30px; margin-bottom: 20px;'>";
         $ret .= LJ::html_select({ 'id' => 's2_themeid', 'name' => 's2_themeid', 'selected' => $style{'theme'}, },
                                 '0' => $ML{'.s2.customize.themes.default'}, @themes);
         $ret .= "<noscript> " . LJ::html_submit('save:theme', $ML{'.change'}) . " </noscript>";
-        $ret .= " (<a id='s2_themeid_preview_link' href=\"/customize/themes.bml?journal=$u->{'user'}\" target='samples'>Samples</a>)</div></div>";
+        $ret .= " (<a id='s2_themeid_preview_link' href=\"/customize/themes.bml?journal=$u->{'user'}\" target='samples'>Samples</a>)</div>";
         $ret .= "</fieldset>";
     }
 
     ### Mood themes
     $ret .= "<fieldset><legend>Mood Icons</legend>";
-    $ret .= "<div style='border-right: 1px solid #ccc;'>";
     $ret .= "<?p Mood themes are small icons that describe the mood of a post. p?>";
     $ret .= "<div style='margin-left: 30px; margin-bottom: 20px;'>";
     $ret .= "<b>Select mood icon set: </b>";
@@ -480,7 +479,7 @@ body<=
                                         'id' => 'opt_forcemoodtheme',
                                         'selected' => $u->{'opt_forcemoodtheme'} eq 'Y' }) . "\n";
     $ret .= "<label for='opt_forcemoodtheme'>View this mood theme on all of your friends' posts</label>";
-    $ret .= "</div></div></fieldset>";
+    $ret .= "</div></fieldset>";
 
     if ($u->prop('stylesys') == 2) {
         $ret .= "<script type='text/javascript'> if (\$('display_form')) { document.write(\"";
