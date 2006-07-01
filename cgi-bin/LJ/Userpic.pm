@@ -276,7 +276,7 @@ sub imagedata {
     $data = $dbb->selectrow_array("SELECT imagedata FROM userpicblob2 WHERE ".
                                   "userid=? AND picid=?", undef, $self->{userid},
                                   $self->{picid});
-    return undef;
+    return $data ? $data : undef;
 }
 
 # does the user's dataversion support userpic comments?
