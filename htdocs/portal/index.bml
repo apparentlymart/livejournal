@@ -35,7 +35,7 @@
 
     my $returnjs = sub {
         my $response = shift;
-        BML::set_content_type('text/plain');
+        BML::set_content_type('text/javascript; charset=utf-8');
         BML::finish();
         return $response;
     };
