@@ -762,6 +762,17 @@ function EntryPage::print_comment(Comment e) {
         print lang_posted_by($e.poster, $e.poster); " <span class='separator'>-</span> ";
         print lang_posted_date_and_time($e, $e.time, true, true);
         "</div>";
+
+        if (size($e.replies) > 0) {
+            println "<div class='comment-replies'>";
+
+            foreach var Comment c ($e.replies) {
+                $this->print_comment($c);
+            }
+
+            println "</div>";
+        }
+
         "</div>";
 
         return;
