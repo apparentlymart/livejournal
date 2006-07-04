@@ -894,7 +894,7 @@ sub edit_school {
 
     # verify we have location data
     my ($ctc, $sc, $cc) = LJ::Schools::determine_location_opts($opts);
-    return undef unless $ctc && defined $sc && defined $cc;
+    return undef unless $ctc && defined $sc && $cc;
 
     # verify we have minimum data (name)
     return undef unless $opts->{name};
