@@ -18,6 +18,7 @@ my %feedtypes = (
     atom => \&create_view_atom,
     foaf => \&create_view_foaf,
     yadis => \&create_view_yadis,
+    userpics => \&create_view_userpics,
 );
 
 sub make_feed
@@ -701,6 +702,125 @@ sub create_view_yadis {
 
     $println->('</XRD></xrds:XRDS>');
     return $ret;
+}
+
+# create a userpic page for a user
+sub create_view_userpics {
+    my ($journalinfo, $u, $opts) = @_;
+    my ( $feed, $xml, $ns );
+
+    $ns = "http://www.w3.org/2005/Atom";
+
+    my $normalize_ns = sub {
+        my $str = shift;
+        $str =~ s/(<\w+)\s+xmlns="\Q$ns\E"/$1/og;
+        $str =~ s/<feed\b/<feed xmlns="$ns"/;
+        return $str;
+    };
+
+    my $make_link = sub {
+        my ( $rel, $type, $href, $title ) = @_;
+        my $link = XML::Atom::Link->new( Version => 1 );
+        $link->rel($rel);
+        $link->type($type);
+        $link->href($href);
+        $link->title( $title ) if $title;
+        return $link;
+    };
+
+    my $author = XML::Atom::Person->new( Version => 1 );
+    $author->name(  $u->{name} );
+
+    $feed = XML::Atom::Feed->new( Version => 1 );
+    $xml  = $feed->{doc};
+
+    if ($u->prop("opt_blockrobots")) {
+        $xml->getDocumentElement->setAttribute( "xmlns:idx", "urn:atom-extension:indexing" );
+        $xml->getDocumentElement->setAttribute( "idx:index", "no" );
+    }
+
+    my $bot = LJ::run_hook("bot_director");
+    $xml->insertBefore( $xml->createComment( $bot ), $xml->documentElement())
+        if $bot;
+
+    $feed->id( "urn:lj:$LJ::DOMAIN:atom1:$u->{user}:userpics" );
+    $feed->title( "$u->{user}'s userpics" );
+
+    $feed->author( $author );
+    $feed->add_link( $make_link->( 'alternate', 'text/html', "$LJ::SITEROOT/allpics.bml?user=$u->{user}" ) );
+    $feed->add_link( $make_link->( 'self', 'text/xml', $u->journal_base() . "/data/userpics" ) );
+
+    # now start building all the userpic data
+    # start up by loading all of our userpic information and creating that part of the feed
+    my $info = LJ::get_userpic_info($u, {'load_comments' => 1, 'load_urls' => 1});
+
+    my %keywords = ();
+    while (my ($kw, $pic) = each %{$info->{kw}}) {
+        LJ::text_out(\$kw);
+        push @{$keywords{$pic->{picid}}}, LJ::ehtml($kw);
+    }
+
+    my %comments = ();
+    while (my ($pic, $comment) = each %{$info->{comment}}) {
+        LJ::text_out(\$comment);
+        $comments{$pic} = LJ::ehtml($comment);
+    }
+
+    my @pics;
+    push @pics, map { $info->{pic}->{$_} } sort { $a <=> $b }
+                      grep { $info->{pic}->{$_}->{state} eq 'N' } keys %{$info->{pic}};
+
+    my $entry;
+    my %picdata;
+
+    # this is lame, but we have to do this iteration twice; we load the userpic data first, so that
+    # we can figure out what the most recently-uploaded userpic is. we need to put that into the feed
+    # before any of the <entry> values.
+
+    my $latest = 0;
+    foreach my $pic (@pics) {
+        LJ::load_userpics(\%picdata, [$u, $pic->{picid}] );
+        $latest = ($latest < $picdata{$pic->{picid}}->{picdate}) ? $picdata{$pic->{picid}}->{picdate} : $latest;
+    }
+
+    $feed->updated( LJ::time_to_w3c($latest, 'Z') );
+
+    foreach my $pic (@pics) {
+        my $entry = XML::Atom::Entry->new( Version => 1 );
+        my $entry_xml = $entry->{doc};
+
+        $entry->id("urn:lj:$LJ::DOMAIN:atom1:$u->{user}:userpics:$pic->{picid}");
+
+        my $title = ($pic->{picid} == $u->{defaultpicid}) ? "default userpic" : "userpic";
+        $entry->title( $title );
+
+        $entry->updated( LJ::time_to_w3c($picdata{$pic->{picid}}->{picdate}, 'Z') );
+
+        my $content;
+        $content = $entry_xml->createElement( "content" );
+        $content->setAttribute( 'src', "$LJ::USERPIC_ROOT/$pic->{picid}/$u->{userid}" );
+        $content->setNamespace( $ns );
+        $entry_xml->getDocumentElement->appendChild( $content );
+
+        foreach my $kw (@{$keywords{$pic->{picid}}}) {
+            my $ekw = LJ::exml( $kw );
+            my $category = $entry_xml->createElement( 'category' );
+            $category->setAttribute( 'term', $ekw );
+            $category->setNamespace( $ns );
+            $entry_xml->getDocumentElement->appendChild( $category );
+        }
+
+        if($comments{$pic->{picid}}) {
+            my $content = $entry_xml->createElement( "summary" );
+            $content->setNamespace( $ns );
+            $content->appendTextNode( $comments{$pic->{picid}} );
+            $entry_xml->getDocumentElement->appendChild( $content );
+        };
+
+        $feed->add_entry( $entry );
+    }
+
+    return $normalize_ns->( $feed->as_xml() );
 }
 
 1;
