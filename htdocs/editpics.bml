@@ -368,9 +368,9 @@
                           enddata    => $hook_enddata,
                       }); };
 
-                      # sorry, factory only works for jpegs
-                      return $err->("Sorry, you may only upload an image that is greater than 100x100 pixels if it is in JPEG format.")
-                          if $upload{mime} ne 'image/jpeg';
+                      # sorry, factory only works for jpegs and pngs
+                      return $err->("Sorry, you cannot upload a userpic larger than 100x100 pixels if it is in GIF format.")
+                          if $upload{mime} eq 'image/gif';
                   }
 
                 # if BML::Parse_multipart_interactive failed, we need to add
