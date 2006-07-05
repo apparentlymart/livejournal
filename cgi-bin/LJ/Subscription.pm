@@ -343,6 +343,8 @@ sub equals {
     $match &&= $other->arg1 && ($self->arg1 == $other->arg1) if $self->arg1;
     $match &&= $other->arg2 && ($self->arg2 == $other->arg2) if $self->arg2;
 
+    $match &&= $self->journalid == $other->journalid;
+
     return $match;
 }
 
