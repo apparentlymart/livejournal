@@ -2547,6 +2547,8 @@ sub subscribe_interface {
                     delete $sub_args{ntypeid};
                     $sub_args{method} = 'Inbox';
 
+                    next if $pending_sub->journalid && $pending_sub->journalid != $u->{userid};
+
                     my @existing_subs = $u->has_subscription(%sub_args);
                     push @pending_subscriptions, (scalar @existing_subs ? @existing_subs : $pending_sub);
                 }
@@ -2600,13 +2602,16 @@ sub subscribe_interface {
             my $evt_class = $pending_sub->event_class or next;
             unless ($is_tracking_category) {
                 next unless eval { $evt_class->subscription_applicable($pending_sub) };
+                next if $pending_sub->journalid && $pending_sub->journalid != $u->{userid};
             } else {
                 my $no_show = 0;
 
                 foreach my $cat_info_ref (@$catref) {
                     while (my ($_cat_name, $_cat_events) = each %$cat_info_ref) {
                         foreach my $_cat_event (@$_cat_events) {
-                            next unless ref $_cat_event;
+                            unless (ref $_cat_event) {
+                                $_cat_event = LJ::Subscription::Pending->new($u, event => $_cat_event);
+                            }
                             next unless $pending_sub->equals($_cat_event);
                             $no_show = 1;
                             last;
