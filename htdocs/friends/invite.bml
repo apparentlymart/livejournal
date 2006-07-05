@@ -4,7 +4,7 @@
     use vars qw(%GET $title $body);
 
     LJ::set_active_crumb('invitefriend');
-    
+
     $title = $ML{'.title'};
     $body = "";
 
@@ -156,7 +156,7 @@ Follow this link to sign up:
     $body .= '</td></tr><tr><td colspan="2">';
 
     $body .= "$ML{'.form.input.message'}<br />" . $inerr->("msg", "<br />");
-    $body .= LJ::html_textarea({ name => "msg", value => $msg, 'style' => "width: 99%; height: 25em", wrap => "hard" });
+    $body .= LJ::html_textarea({ name => "msg", value => $msg, 'style' => "width: 99%; height: 25em" });
     $body .= '</td></tr><tr><td colspan="2">';
     $body .= "<i>$ML{'.form.note'}</i>";
 
