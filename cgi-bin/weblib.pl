@@ -2617,12 +2617,14 @@ sub subscribe_interface {
                 next if $no_show;
             }
 
+            my $selected = $pending_sub->default_selected;
+
             $cat_html  .= "<tr><td>" .
                 LJ::html_check({
                     id       => $input_name,
                     name     => $input_name,
                     class    => "SubscriptionInboxCheck",
-                    selected => $subscribed,
+                    selected => $selected,
                     noescape => 1,
                     label    => $title,
                 }) .  "</td>";
