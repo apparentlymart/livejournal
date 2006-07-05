@@ -2547,8 +2547,6 @@ sub subscribe_interface {
                     delete $sub_args{ntypeid};
                     $sub_args{method} = 'Inbox';
 
-                    next if $pending_sub->journalid && $pending_sub->journalid != $u->{userid};
-
                     my @existing_subs = $u->has_subscription(%sub_args);
                     push @pending_subscriptions, (scalar @existing_subs ? @existing_subs : $pending_sub);
                 }
@@ -2579,7 +2577,6 @@ sub subscribe_interface {
                 id       => "CheckAll-$catid-$ntypeid",
                 label    => $title,
                 class    => "CheckAll",
-                selected => $checkall_checked,
                 noescape => 1,
             });
 
@@ -2602,7 +2599,7 @@ sub subscribe_interface {
             my $evt_class = $pending_sub->event_class or next;
             unless ($is_tracking_category) {
                 next unless eval { $evt_class->subscription_applicable($pending_sub) };
-                next if $pending_sub->journalid && $pending_sub->journalid != $u->{userid};
+                next if LJ::u_equals($journal, $u) && $pending_sub->journalid && $pending_sub->journalid != $u->{userid};
             } else {
                 my $no_show = 0;
 
