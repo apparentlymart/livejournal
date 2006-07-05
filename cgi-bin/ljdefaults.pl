@@ -318,16 +318,18 @@
     }
 
     unless (@LJ::EVENT_TYPES) {
-        @LJ::EVENT_TYPES = (
-                            'Befriended',
-                            'JournalNewComment',
-                            'JournalNewEntry',
-                            'UserNewComment',
-                            'UserNewEntry',
-                            'CommunityInvite',
-                            'CommunityJoinRequest',
-                            'OfficialPost',
-                            );
+        @LJ::EVENT_TYPES = qw (
+                               Befriended
+                               JournalNewComment
+                               JournalNewEntry
+                               UserNewComment
+                               UserNewEntry
+                               CommunityInvite
+                               CommunityJoinRequest
+                               OfficialPost
+                               InvitedFriendJoins
+                               NewUserpic
+                               );
         foreach my $evt (@LJ::EVENT_TYPES) {
             $evt = "LJ::Event::$evt";
         }

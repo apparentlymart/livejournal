@@ -14,21 +14,26 @@ use Class::Autouse qw(
                       LJ::Event::CommunityJoinRequest
                       LJ::Event::OfficialPost
                       LJ::Event::NewUserpic
+                      LJ::Event::InvitedFriendJoins
                       );
 
 # Guide to subclasses:
-#    LJ::Event::JournalNewEntry -- a journal (user/community) has a new entry in it
-#                                  ($ju,$ditemid,undef)
-#    LJ::Event::UserNewEntry    -- a user posted a new entry in some journal
-#                                  ($u,$journalid,$ditemid)
-#    LJ::Event::JournalNewComment -- a journal has a new comment in it
-#                                  ($ju,$jtalkid)   # TODO: should probably be ($ju,$jitemid,$jtalkid)
-#    LJ::Event::UserNewComment    -- a user left a new comment somewhere
-#                                  ($u,$journalid,$jtalkid)
-#    LJ::Event::Befriended        -- user $fromuserid added $u as a friend
-#                                  ($u,$fromuserid)
-#    LJ::Event::CommunityInvite   -- user $fromuserid invited $u to join $commid community)
-#                                  ($u,$fromuserid, $commid)
+#    LJ::Event::JournalNewEntry     -- a journal (user/community) has a new entry in it
+#                                   ($ju,$ditemid,undef)
+#    LJ::Event::UserNewEntry       -- a user posted a new entry in some journal
+#                                   ($u,$journalid,$ditemid)
+#    LJ::Event::JournalNewComment  -- a journal has a new comment in it
+#                                   ($ju,$jtalkid)   # TODO: should probably be ($ju,$jitemid,$jtalkid)
+#    LJ::Event::UserNewComment     -- a user left a new comment somewhere
+#                                   ($u,$journalid,$jtalkid)
+#    LJ::Event::Befriended         -- user $fromuserid added $u as a friend
+#                                   ($u,$fromuserid)
+#    LJ::Event::CommunityInvite    -- user $fromuserid invited $u to join $commid community)
+#                                   ($u,$fromuserid, $commid)
+#    LJ::Event::InvitedFriendJoins -- user $u1 was invited to join by $u2 and created a journal
+#                                   ($u1, $u2)
+#    LJ::Event::NewUserpic         -- user $u uploaded userpic $up
+#                                   ($u,$up)
 
 sub new {
     my ($class, $u, @args) = @_;
