@@ -48,7 +48,8 @@ body<=
                 # don't duplicate subscriptions
                 next if $u->has_subscription($subscr->sub_info);
 
-                if ((scalar $u->find_subscriptions(method => 'Inbox')) >= $u->get_cap('subscriptions')) {
+                if ((scalar $u->find_subscriptions(method => 'Inbox')) >= $u->get_cap('subscriptions')
+                    && $subscr->method eq 'Inbox') {
                     push @errors, LJ::errobj("Subscription::TooMany", subscr => $subscr, u => $u);
                 } else {
                     $subscr->commit;
@@ -81,10 +82,10 @@ body<=
                 # if it's the inbox method, delete everything
                 if ($subscr->method eq 'LJ::NotificationMethod::Inbox') {
                     my @subs = $u->find_subscriptions(
-                                                      journal => $subscr->journal,
-                                                      etypeid => $subscr->etypeid,
-                                                      arg1    => $subscr->arg1,
-                                                      arg2    => $subscr->arg2,
+                                                      journalid => $subscr->journalid,
+                                                      etypeid   => $subscr->etypeid,
+                                                      arg1      => $subscr->arg1,
+                                                      arg2      => $subscr->arg2,
                                                       );
                     $_->delete foreach @subs;
                 } else {
@@ -114,6 +115,7 @@ body<=
                           },
                       {
                           "Friends and Communities" => [
+                                                        'InvitedFriendJoins',
                                                         'CommunityInvite',
                                                         'CommunityJoinRequest',
                                                         LJ::Subscription::Pending->new($u,
