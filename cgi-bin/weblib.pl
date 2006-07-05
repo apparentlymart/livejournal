@@ -1183,15 +1183,15 @@ RTE
 
     $out .= "var FCKLang;\n";
     $out .= "if (!FCKLang) FCKLang = {};\n";
-    $out .= "FCKLang.UserPrompt = \"".BML::ml('fcklang.userprompt')."\";\n";
-    $out .= "FCKLang.InvalidChars = \"".BML::ml('fcklang.invalidchars')."\";\n";
-    $out .= "FCKLang.LJUser = \"".BML::ml('fcklang.ljuser')."\";\n";
-    $out .= "FCKLang.VideoPrompt = \"".BML::ml('fcklang.videoprompt')."\";\n";
-    $out .= "FCKLang.LJVideo = \"".BML::ml('fcklang.ljvideo')."\";\n";
-    $out .= "FCKLang.CutPrompt = \"".BML::ml('fcklang.cutprompt')."\";\n";
-    $out .= "FCKLang.ReadMore = \"".BML::ml('fcklang.readmore')."\";\n";
-    $out .= "FCKLang.CutContents = \"".BML::ml('fcklang.cutcontents')."\";\n";
-    $out .= "FCKLang.LJCut = \"".BML::ml('fcklang.ljcut')."\";\n";
+    $out .= "FCKLang.UserPrompt = \"".LJ::ejs(BML::ml('fcklang.userprompt'))."\";\n";
+    $out .= "FCKLang.InvalidChars = \"".LJ::ejs(BML::ml('fcklang.invalidchars'))."\";\n";
+    $out .= "FCKLang.LJUser = \"".LJ::ejs(BML::ml('fcklang.ljuser'))."\";\n";
+    $out .= "FCKLang.VideoPrompt = \"".LJ::ejs(BML::ml('fcklang.videoprompt'))."\";\n";
+    $out .= "FCKLang.LJVideo = \"".LJ::ejs(BML::ml('fcklang.ljvideo'))."\";\n";
+    $out .= "FCKLang.CutPrompt = \"".LJ::ejs(BML::ml('fcklang.cutprompt'))."\";\n";
+    $out .= "FCKLang.ReadMore = \"".LJ::ejs(BML::ml('fcklang.readmore'))."\";\n";
+    $out .= "FCKLang.CutContents = \"".LJ::ejs(BML::ml('fcklang.cutcontents'))."\";\n";
+    $out .= "FCKLang.LJCut = \"".LJ::ejs(BML::ml('fcklang.ljcut'))."\";\n";
 
         if ($opts->{'richtext_default'}) {
             $$onload .= 'useRichText("draft", "' . LJ::ejs($LJ::WSTATPREFIX) . '");';
