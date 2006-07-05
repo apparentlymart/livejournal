@@ -26,6 +26,9 @@ sub new {
     # force autoload of LJ::Event and it's subclasses
     LJ::Event->can('');
 
+    # optional journalid arg
+    $journal ||= LJ::want_user(delete $opts{journalid});
+
     croak "etypeid or event required" unless ($etypeid xor $event);
     if ($event) {
         $etypeid = LJ::Event::etypeid("LJ::Event::$event") or croak "Invalid event: $event";

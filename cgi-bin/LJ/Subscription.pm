@@ -1,6 +1,6 @@
 package LJ::Subscription;
 use strict;
-use Carp qw(croak);
+use Carp qw(croak confess);
 use Class::Autouse qw(
                       LJ::NotificationMethod
                       LJ::Typemap
@@ -99,11 +99,12 @@ sub find {
     $etypeid ||= delete $params{etypeid};
     $ntypeid ||= delete $params{ntypeid};
 
-    if (my $journalid = delete $params{journalid}) {
-        $journal = LJ::load_userid($journalid);
-    }
+    my $journalid = delete $params{journalid};
+    $journal   = LJ::want_user(delete $params{journal});
 
-    $journal ||= delete $params{journal};
+    unless (defined $journalid) {
+        $journalid = defined $journal ? $journal->{userid} : undef;
+    }
 
     $arg1 = delete $params{arg1};
     $arg2 = delete $params{arg2};
@@ -116,9 +117,9 @@ sub find {
     my @subs = $u->subscriptions;
 
     # filter subs on each parameter
-    @subs = grep { $_->ntypeid == $ntypeid }             @subs if $ntypeid;
-    @subs = grep { $_->etypeid == $etypeid }             @subs if $etypeid;
-    @subs = grep { LJ::u_equals($_->journal, $journal) } @subs if $journal;
+    @subs = grep { $_->journalid == $journalid }         @subs if defined $journalid;
+    @subs = grep { $_->ntypeid   == $ntypeid }           @subs if $ntypeid;
+    @subs = grep { $_->etypeid   == $etypeid }           @subs if $etypeid;
 
     @subs = grep { $_->arg1 == $arg1 }                   @subs if defined $arg1;
     @subs = grep { $_->arg2 == $arg2 }                   @subs if defined $arg2;
@@ -219,11 +220,11 @@ sub create {
 sub sub_info {
     my $self = shift;
     return (
-            journal => $self->journal,
-            etypeid => $self->etypeid,
-            ntypeid => $self->ntypeid,
-            arg1    => $self->arg1,
-            arg2    => $self->arg2,
+            journalid => $self->journalid,
+            etypeid   => $self->etypeid,
+            ntypeid   => $self->ntypeid,
+            arg1      => $self->arg1,
+            arg2      => $self->arg2,
             );
 }
 
