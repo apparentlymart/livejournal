@@ -40,6 +40,7 @@ body<=
                                                                         event   => 'JournalNewComment',
                                                                         arg1    => $ditemid,
                                                                         arg2    => $comment && $comment->jtalkid,
+                                                                        default_selected => 1,
                                                                         )
                                          ],
                                      },

@@ -34,6 +34,7 @@ body<=
                                                    event   => "JournalNewComment",
                                                    arg1    => $ditemid,
                                                    journal => $journal,
+                                                   default_selected => 1,
                                                    ),
                     LJ::Subscription::Pending->new(
                                                    $remote,
