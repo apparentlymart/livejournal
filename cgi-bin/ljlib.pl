@@ -2082,6 +2082,100 @@ sub can_use_journal
 
 
 # <LJFUNC>
+# name: LJ::get_recommended_communities
+# class:
+# des: Get communities associated with a user
+# info:
+# args: user
+# des-:
+# returns: hash of communities
+# </LJFUNC>
+sub get_recommended_communities {
+    my $u = shift;
+    my %comms;
+
+    # Load their friendofs to determine community membership
+    my @ids = LJ::get_friendofs($u);
+    my %fro;
+    LJ::load_userids_multiple([ map { $_ => \$fro{$_} } @ids ]);
+
+    foreach my $ulocal (values %fro) {
+        next unless $ulocal->{'statusvis'} eq 'V';
+        next unless $ulocal->{'journaltype'} eq 'C';
+
+        # TODO: This is bad if they belong to a lot of communities,
+        # is a db query to global each call
+        my $ci = LJ::get_community_row($ulocal);
+        next if $ci->{'membership'} eq 'closed';
+
+        # Add to %comms
+        $ulocal->{istatus} = 'normal';
+        $comms{$ulocal->{userid}} = $ulocal;
+    }
+
+    # Get usage information about comms
+    if (%comms) {
+        my $ids = join(',', map { $_->{userid} } values %comms);
+
+        my $dbr = LJ::get_db_reader;
+        my $sth = $dbr->prepare("SELECT UNIX_TIMESTAMP(timeupdate), UNIX_TIMESTAMP(timecreate), userid ".
+                                 "FROM userusage WHERE userid IN($ids)");
+        $sth->execute;
+
+        while (my @row = $sth->fetchrow_array) {
+            ($comms{$row[2]}->{'timeupdate'},
+             $comms{$row[2]}->{'timecreate'}) = ($row[0], $row[1]);
+        }
+    }
+
+    # Prune the list by time last updated and make sure to
+    # display comms created in the past 10 days or where
+    # the inviter is a maint or mod
+    my $over30 = 0;
+    my $now = time();
+    foreach my $comm (sort {$b->{timeupdate} <=> $a->{timeupdate}} values %comms) {
+        if ($now - $comm->{timecreate} <= 86400*10) {
+            $comm->{istatus} = 'new';
+            next;
+        }
+
+        my $maintainers = LJ::load_rel_user_cache($comm->{userid}, 'A') || [];
+        my $moderators  = LJ::load_rel_user_cache($comm->{userid}, 'M') || [];
+        foreach (@$maintainers, @$moderators) {
+            if ($_ == $u->{userid}) {
+                $comm->{istatus} = 'mm';
+                next;
+            }
+        }
+
+        if ($over30) {
+            delete $comms{$comm->{userid}};
+            next;
+        } else {
+            if (time() - $comm->{timeupdate} > 86400*30) {
+                delete $comms{$comm->{userid}};
+                $over30 = 1;
+            }
+        }
+    }
+
+    # If we still have more than 20 comms, delete any with less than
+    # five members
+    if (scalar keys %comms > 20) {
+        foreach my $comm (values %comms) {
+            next unless $comm->{istatus} eq 'normal';
+
+            my $ids = LJ::get_friends($comm);
+            if (scalar values %$ids < 5) {
+            delete $comms{$comm->{userid}};
+            }
+        }
+    }
+
+    return %comms;
+}
+
+# <LJFUNC>
 # name: LJ::load_talk_props2
 # class:
 # des:
