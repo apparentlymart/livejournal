@@ -14,13 +14,14 @@ sub new {
 
     die "No user" unless LJ::isu($u);
 
-    my $journal = LJ::want_user(delete $opts{journal}) || 0;
-    my $etypeid = delete $opts{etypeid};
-    my $ntypeid = delete $opts{ntypeid};
-    my $event   = delete $opts{event};
-    my $method  = delete $opts{method};
-    my $arg1    = delete $opts{arg1} || 0;
-    my $arg2    = delete $opts{arg2} || 0;
+    my $journal          = LJ::want_user(delete $opts{journal}) || 0;
+    my $etypeid          = delete $opts{etypeid};
+    my $ntypeid          = delete $opts{ntypeid};
+    my $event            = delete $opts{event};
+    my $method           = delete $opts{method};
+    my $arg1             = delete $opts{arg1} || 0;
+    my $arg2             = delete $opts{arg2} || 0;
+    my $default_selected = delete $opts{default_selected} || 0;
 
     # force autoload of LJ::Event and it's subclasses
     LJ::Event->can('');
@@ -38,13 +39,14 @@ sub new {
     croak "No ntypeid" unless $ntypeid;
 
     my $self = {
-        userid  => $u->{userid},
-        u       => $u,
-        journal => $journal,
-        etypeid => $etypeid,
-        ntypeid => $ntypeid,
-        arg1    => $arg1,
-        arg2    => $arg2,
+        userid           => $u->{userid},
+        u                => $u,
+        journal          => $journal,
+        etypeid          => $etypeid,
+        ntypeid          => $ntypeid,
+        arg1             => $arg1,
+        arg2             => $arg2,
+        default_selected => $default_selected,
     };
 
     return bless $self, $class;
@@ -53,8 +55,9 @@ sub new {
 sub delete {}
 sub pending { 1 }
 
-sub journal   { $_[0]->{journal}}
-sub journalid { $_[0]->{journal} ? $_[0]->{journal}->{userid} : 0 }
+sub journal           { $_[0]->{journal}}
+sub journalid         { $_[0]->{journal} ? $_[0]->{journal}->{userid} : 0 }
+sub default_selected  { $_[0]->{default_selected} }
 
 # overload create because you should never be calling it on this object
 # (if you want to turn a pending subscription into a real subscription call "commit")

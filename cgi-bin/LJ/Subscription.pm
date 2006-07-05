@@ -54,6 +54,7 @@ sub thaw {
 }
 
 sub pending { 0 }
+sub default_selected { 1 }
 
 sub subscriptions_of_user {
     my ($class, $u) = @_;
