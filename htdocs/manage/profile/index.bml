@@ -154,7 +154,7 @@ _code?>
         }
         $ret .= "<div style=\"padding-bottom: .5em;\">\n";
         $ret .= " <label for='opt_showbday'>$ML{'.show.birthday'}</label>\n";
-
+        $u->{'opt_showbday'} = "F" unless $u->{'opt_showbday'} =~ m/^(D|F|N|Y)$/;
         $ret .= LJ::html_select({ 'name' => 'opt_showbday',
                                   'selected' => $u->{'opt_showbday'} },
                                 "N" => BML::ml(".show.birthday.nothing"),
@@ -168,7 +168,6 @@ _code?>
 
         $ret .= LJ::html_text({ 'name' => 'day', 'value' => $bdpart{'day'}, 'size' => '3', 'maxlength' => '2' }) . " ";
         $ret .= LJ::html_text({ 'name' => 'year', 'value' => $bdpart{'year'}, 'size' => '5', 'maxlength' => '4' });
-
         $ret .= "</td></tr>\n";
 
         # schools
@@ -586,8 +585,8 @@ _code?>
             $POST{'opt_showmutualfriends'} = $POST{'opt_showmutualfriends'} ? 1 : 0;
             $POST{'opt_hidefriendofs'} = $POST{'opt_hidefriendofs'} ? 0 : 1;
             $POST{'opt_showschools'} = 'N' unless $POST{'opt_showschools'} =~ m/^(N|R|Y|F)$/;
+            $POST{'opt_showbday'} = 'F' unless $POST{'opt_showbday'} =~ m/^(D|F|N|Y)$/;
             # undefined means show to everyone, "N" means don't show
-            $POST{'opt_showbday'} = 'N' unless $POST{'opt_showbday'} =~ m/^(D|F|N|Y)$/;
             $POST{'opt_showlocation'} = $POST{'opt_showlocation'} ? undef : "N";
 
             $POST{'timezone'} = "" unless grep { $POST{'timezone'} eq $_ } DateTime::TimeZone::all_names();
