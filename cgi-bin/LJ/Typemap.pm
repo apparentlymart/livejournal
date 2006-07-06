@@ -175,9 +175,11 @@ sub _load {
 
     # load typemap from DB
     my $sth = $dbr->prepare("SELECT $classfield, $idfield FROM $table");
+    die $dbr->errstr if $dbr->errstr;
     return undef unless $sth;
 
     $sth->execute;
+    die $dbr->errstr if $dbr->errstr;
 
     while (my $idmap = $sth->fetchrow_hashref) {
         $proc_cache->{$idmap->{$classfield}} = $idmap->{$idfield};
