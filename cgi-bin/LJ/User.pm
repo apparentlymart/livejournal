@@ -1730,7 +1730,7 @@ sub view_control_strip {
     LJ::run_hook('control_strip_propcheck', $u, 'view_control_strip') unless $LJ::DISABLED{control_strip_propcheck};
 
     my $prop = $u->raw_prop('view_control_strip');
-    return 0 if $prop eq 'off_explicit';
+    return 0 if $prop =~ /^off/;
 
     return 'dark' if $prop eq 'forced';
 
@@ -1743,7 +1743,7 @@ sub show_control_strip {
     LJ::run_hook('control_strip_propcheck', $u, 'show_control_strip') unless $LJ::DISABLED{control_strip_propcheck};
 
     my $prop = $u->raw_prop('show_control_strip');
-    return 0 if $prop eq 'off_explicit';
+    return 0 if $prop =~ /^off/;
 
     return 'dark' if $prop eq 'forced';
 
