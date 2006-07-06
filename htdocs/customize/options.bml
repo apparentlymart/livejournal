@@ -430,7 +430,7 @@ body<=
         };
 
         if (@groups) {
-            $ret .= "<div id='propgroupstab'>Category: ";
+            $ret .= "<div id='propgroupstab'>Section: ";
             my $num = 0;
             foreach my $gname (@groups) {
                 my $name = $group_name->($gname);
