@@ -186,8 +186,16 @@ sub cleanup
         $limit++;
         my $modtime = ( stat("$workdir/$_") )[9];
         if ( $now - $modtime > 300 ) {
-            File::Path::rmtree("$workdir/$_");
-            debug("\t\t$workdir/$_");
+            # rmtree croaks if it disappears from under itself, and if
+            # this is running on multiple hosts all mounting the same
+            # NFS, then it can.  (and does, often)
+            eval {
+                File::Path::rmtree("$workdir/$_");
+                debug("\t\tdeleted: $workdir/$_");
+            };
+            if ($@) {
+                debug("\t\talready deleted: $workdir/$_");
+            }
         }
     }
     closedir TMP;
@@ -314,7 +322,7 @@ sub process
     if ( scalar @to > 0 ) {
         foreach my $dest ( @to ) {
             next unless $dest->address =~ /^(\S+?)\@\Q$LJ::EMAIL_POST_DOMAIN\E$/i;
-        
+
             my $user = $1;
 
             # FIXME: verify auth (extra from $user/$subject/$body), require ljprotocol.pl, do post.
