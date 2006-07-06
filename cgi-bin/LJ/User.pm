@@ -1026,6 +1026,14 @@ sub can_show_bday {
     return 1;
 }
 
+sub can_show_bdate {
+    my $u = shift;
+    croak "invalid user object passed" unless LJ::isu($u);
+    return 0 if $u->underage;
+    return 0 if ($u->opt_showbday eq 'Y' || $u->opt_showbday eq 'N');
+    return 1;
+}
+
 # should this user be promoted via CommPromo
 sub should_promote_comm {
     my $u = shift;
@@ -1117,7 +1125,7 @@ sub get_friends_birthdays {
 
         my ($year, $month, $day) = split('-', $friend->{bdate});
 
-        if ($month > 0 && $day > 0 && $friend->can_show_bday
+        if ($month > 0 && $day > 0 && $friend->can_show_bdate
                        && !$friend->underage) {
             my $ref = [ $month, $day, $friend->{user} ];
             push @bdays, $ref;

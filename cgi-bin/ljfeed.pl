@@ -577,9 +577,16 @@ sub create_view_foaf {
     # channel attributes
     $ret .= ($comm ? "  <foaf:Group>\n" : "  <foaf:Person>\n");
     $ret .= "    <foaf:nick>$u->{user}</foaf:nick>\n";
-    if ($u->{bdate} && $u->{bdate} ne "0000-00-00" && !$comm && $u->can_show_bday) {
+    if ($u->{bdate} && $u->{bdate} ne "0000-00-00" && !$comm && $u->can_show_bdate) {
         my $bdate = $u->{bdate};
         $bdate =~ s/^0000-//;
+        my ($year,$mon,$day) = split(/-/, $bdate);
+        if ($u->opt_showbday eq 'D') {
+            $bdate = "$mon-$day";
+        } elsif ($u->opt_showbday eq 'Y') {
+            $bdate = $year;
+        }
+
         $ret .= "    <foaf:dateOfBirth>$bdate</foaf:dateOfBirth>\n";
     }
     $ret .= "    <foaf:mbox_sha1sum>$digest</foaf:mbox_sha1sum>\n";

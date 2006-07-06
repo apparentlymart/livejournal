@@ -61,7 +61,7 @@ sub new_remote {
     }
 
     my $bday = $u->bdate_string;
-    if ($bday && $u->can_show_bday) {
+    if ($bday && $u->can_show_bdate) {
         $bday = "0000-$bday" unless $bday =~ /\d\d\d\d/;
         $node = $vcard->add_node({
             'node_type' => 'BDAY;value=date',

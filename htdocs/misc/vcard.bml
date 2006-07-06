@@ -28,9 +28,16 @@
                 $ret .= "<NICKNAME>$user</NICKNAME>";
                 $ret .= "<URL>".LJ::exml($u->journal_base."/")."</URL>";
 
-                if ($u->{bdate} && $u->{bdate} ne "0000-00-00" && $u->can_show_bday) {
+                if ($u->{bdate} && $u->{bdate} ne "0000-00-00" && $u->can_show_bdate) {
                     my $bdate = $u->{bdate};
                     $bdate =~ s/^0000-//;
+                    my ($year,$mon,$day) = split(/-/, $bdate);
+                    if ($u->opt_showbday eq 'D') {
+                        $bdate = "$mon-$day";
+                    } elsif ($u->opt_showbday eq 'Y') {
+                        $bdate = $year;
+                    }
+
                     $ret .= "<BDAY>$bdate</BDAY>";
                 }
 
