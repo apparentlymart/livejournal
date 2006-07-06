@@ -63,3 +63,17 @@
     font-weight: bold;
     color: #333;
 }
+
+#contextual_help {
+    padding: .5em;
+    line-height: 140%;
+}
+
+#contextual_help p {
+    padding: 0;
+    margin: 0;
+}
+
+#contextual_help ul {
+    list-style: circle;
+}

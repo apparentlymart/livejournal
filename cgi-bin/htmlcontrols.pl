@@ -20,6 +20,12 @@ sub html_datetime
     my $ret;
     my $name = $opts->{'name'};
     my $disabled = $opts->{'disabled'} ? 1 : 0;
+
+    my %extra_opts;
+    foreach (grep { ! /^(name|disabled|seconds|notime|lang|default)$/ } keys %$opts) {
+        $extra_opts{$_} = $opts->{$_};
+    }
+
     if ($opts->{'default'} =~ /^(\d\d\d\d)-(\d\d)-(\d\d)(?: (\d\d):(\d\d):(\d\d))?/) {
         ($yyyy, $mm, $dd, $hh, $nn, $ss) = ($1 > 0 ? $1 : "",
                                             $2+0,
@@ -28,21 +34,27 @@ sub html_datetime
                                             $5 > 0 ? $5 : "",
                                             $6 > 0 ? $6 : "");
     }
-    $ret .= html_select({ 'name' => "${name}_mm", 'selected' => $mm, 'disabled' => $disabled },
+    $ret .= html_select({ 'name' => "${name}_mm", 'selected' => $mm,
+                          'disabled' => $disabled, %extra_opts },
                          map { $_, LJ::Lang::month_long($_) } (1..12));
-    $ret .= html_text({ 'name' => "${name}_dd", 'size' => '2', 'maxlength' => '2', 'value' => $dd,
-                        'disabled' => $disabled }) . ", ";
-    $ret .= html_text({ 'name' => "${name}_yyyy", 'size' => '4', 'maxlength' => '4', 'value' => $yyyy,
-                        'disabled' => $disabled });
+    $ret .= html_text({ 'name' => "${name}_dd", 'size' => '2',
+                        'maxlength' => '2', 'value' => $dd,
+                        'disabled' => $disabled, %extra_opts }) . ", ";
+    $ret .= html_text({ 'name' => "${name}_yyyy", 'size' => '4',
+                        'maxlength' => '4', 'value' => $yyyy,
+                        'disabled' => $disabled, %extra_opts });
     unless ($opts->{'notime'}) {
         $ret .= ' ';
-        $ret .= html_text({ 'name' => "${name}_hh", 'size' => '2', 'maxlength' => '2', 'value' => $hh,
+        $ret .= html_text({ 'name' => "${name}_hh", 'size' => '2',
+                            'maxlength' => '2', 'value' => $hh,
                             'disabled' => $disabled }) . ':';
-        $ret .= html_text({ 'name' => "${name}_nn", 'size' => '2', 'maxlength' => '2', 'value' => $nn,
+        $ret .= html_text({ 'name' => "${name}_nn", 'size' => '2',
+                            'maxlength' => '2', 'value' => $nn,
                             'disabled' => $disabled });
         if ($opts->{'seconds'}) {
             $ret .= ':';
-            $ret .= html_text({ 'name' => "${name}_ss", 'size' => '2', 'maxlength' => '2', 'value' => $ss,
+            $ret .= html_text({ 'name' => "${name}_ss", 'size' => '2',
+                                'maxlength' => '2', 'value' => $ss,
                                 'disabled' => $disabled });
         }
     }
