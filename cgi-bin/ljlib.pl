@@ -2117,7 +2117,7 @@ sub get_recommended_communities {
     if (%comms) {
         my $ids = join(',', map { $_->{userid} } values %comms);
 
-        my $dbr = LJ::get_db_reader;
+        my $dbr = LJ::get_db_reader();
         my $sth = $dbr->prepare("SELECT UNIX_TIMESTAMP(timeupdate), UNIX_TIMESTAMP(timecreate), userid ".
                                  "FROM userusage WHERE userid IN($ids)");
         $sth->execute;
