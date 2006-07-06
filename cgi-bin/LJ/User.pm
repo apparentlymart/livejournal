@@ -1727,7 +1727,7 @@ sub remove_friend {
 sub view_control_strip {
     my $u = shift;
 
-    LJ::run_hook('control_strip_propcheck', $u, 'view_control_strip');
+    LJ::run_hook('control_strip_propcheck', $u, 'view_control_strip') unless $LJ::DISABLED{control_strip_propcheck};
 
     my $prop = $u->raw_prop('view_control_strip');
     return 0 if $prop eq 'off_explicit';
@@ -1740,7 +1740,7 @@ sub view_control_strip {
 sub show_control_strip {
     my $u = shift;
 
-    LJ::run_hook('control_strip_propcheck', $u, 'show_control_strip');
+    LJ::run_hook('control_strip_propcheck', $u, 'show_control_strip') unless $LJ::DISABLED{control_strip_propcheck};
 
     my $prop = $u->raw_prop('show_control_strip');
     return 0 if $prop eq 'off_explicit';
