@@ -1727,27 +1727,27 @@ sub remove_friend {
 sub view_control_strip {
     my $u = shift;
 
+    LJ::run_hook('control_strip_propcheck', $u, 'view_control_strip');
+
     my $prop = $u->raw_prop('view_control_strip');
-    return 0 if $prop eq 'off' || $prop eq 'off_explicit';
+    return 0 if $prop eq 'off_explicit';
 
     return 'dark' if $prop eq 'forced';
 
-    return $prop if $prop;
-
-    return LJ::run_hook('control_strip_unset', $u, 'view_control_strip');
+    return $prop;
 }
 
 sub show_control_strip {
     my $u = shift;
 
+    LJ::run_hook('control_strip_propcheck', $u, 'show_control_strip');
+
     my $prop = $u->raw_prop('show_control_strip');
-    return 0 if $prop eq 'off' || $prop eq 'off_explicit';
+    return 0 if $prop eq 'off_explicit';
 
     return 'dark' if $prop eq 'forced';
 
-    return $prop if $prop;
-
-    return LJ::run_hook('control_strip_unset', $u, 'show_control_strip');
+    return $prop;
 }
 
 # when was this account created?
