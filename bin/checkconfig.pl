@@ -140,9 +140,14 @@ my %modules = (
                },
                "Class::Accessor" => {
                    deb => 'libclass-accessor-perl',
+                   opt => "Required for TheSchwartz job submission",
                },
                "Class::Trigger" => {
                    deb => 'libclass-trigger-perl',
+                   opt => "Required for TheSchwartz job submission",
+               },
+               "Class::Data::Inheritable" => {
+                   opt => "Required for TheSchwartz job submission",
                },
                );
 
