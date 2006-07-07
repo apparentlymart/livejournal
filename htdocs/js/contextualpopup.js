@@ -15,7 +15,7 @@ ContextualPopup.elements        = {};
 
 ContextualPopup.setup = function (e) {
     // don't do anything if no remote
-    if (!LJVAR || !LJVAR.remote) return;
+    if (!LJVAR || !LJVAR.has_remote) return;
 
     // attach to all ljuser head icons
     var domObjects = document.getElementsByTagName("*");
@@ -146,7 +146,9 @@ ContextualPopup.showPopup = function (ctxPopupId) {
     ContextualPopup.constructIPPU(ctxPopupId);
 
     var ele = ContextualPopup.elements[ctxPopupId + ""];
-    if (! ele) {
+    var data = ContextualPopup.cachedResults[ctxPopupId + ""];
+
+    if (! ele || (data && data.noshow)) {
         return;
     }
 
@@ -174,7 +176,7 @@ ContextualPopup.constructIPPU = function (ctxPopupId) {
     ippu.setTitlebar(false);
     ippu.setFadeOut(true);
     ippu.setFadeIn(true);
-    ippu.setFadeSpeed(16);
+    ippu.setFadeSpeed(30);
     ippu.setDimensions("auto", "auto");
     ippu.addClass("ContextualPopup");
     ippu.setCancelledCallback(ContextualPopup.popupClosed);
@@ -195,7 +197,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
         if (!data) {
             ippu.setContent("<div class='Inner'>Loading...</div>");
             return;
-        } else if (!data.username || !data.success) {
+        } else if (!data.username || !data.success || data.noshow) {
             ippu.hide();
             return;
         }
@@ -602,4 +604,4 @@ ContextualPopup.gotError = function (err) {
 }
 
 // when page loads, set up contextual popups
-DOM.addEventListener(window, "load", ContextualPopup.setup.bindEventListener());
+DOM.addEventListener(window, "load", ContextualPopup.setup);
