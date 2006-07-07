@@ -10,6 +10,15 @@ use Data::Dumper;
 
 our $MAX_FILTER_SET = 5_000;
 
+sub schwartz_capabilities {
+    return (
+            "LJ::Worker::FiredEvent",         # step 1: can go to 2 or 4
+            "LJ::Worker::FindSubsByCluster",  # step 2: can go to 3 or 4
+            "LJ::Worker::FilterSubs",         # step 3: goes to step 4
+            "LJ::Worker::ProcessSub",         # step 4
+            );
+}
+
 # class method
 sub process_fired_events {
     my $class = shift;
@@ -19,10 +28,9 @@ sub process_fired_events {
     croak("Can't call in web context") if LJ::is_web_context();
 
     my $sclient = LJ::theschwartz();
-    $sclient->can_do("LJ::Worker::FiredEvent");         # step 1: can go to 2 or 4
-    $sclient->can_do("LJ::Worker::FindSubsByCluster");  # step 2: can go to 3 or 4
-    $sclient->can_do("LJ::Worker::FilterSubs");         # step 3: goes to step 4
-    $sclient->can_do("LJ::Worker::ProcessSub");         # step 4
+    foreach my $cap (schwartz_capabilities()) {
+        $sclient->can_do($cap);
+    }
     $sclient->set_verbose($verbose);
     $sclient->work_until_done;
 }
