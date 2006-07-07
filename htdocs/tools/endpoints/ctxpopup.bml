@@ -50,7 +50,7 @@
     BML::set_content_type('text/javascript; charset=utf-8');
     BML::finish();
 
-    return $err->("No such user") unless $u;
+    return $err->("No such user", noshow => 1) unless $u;
     return $err->("Invalid mode") unless $GET{mode} eq 'getinfo';
 
     # uri for changerelation auth token
