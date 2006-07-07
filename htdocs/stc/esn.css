@@ -2,7 +2,7 @@
 /*-------------------------------------*/
 
 #manageSettings {
-    margin: 2em 0 0 0;
+    margin: 0 0 0 0;
     }
 
 .Subscribe {
@@ -90,14 +90,13 @@ div.argOptsContainer {
 
 
 #NotificationTable {
-    margin: 2em 0 0 0;
-    margin-left: 21em;
+    margin: 0 0 0 0;
+    margin-left: 310px;
     }
 
 #NotificationSidebar {
     float: left;
-    width: 20em;
-    margin-top: 1em;
+    width: 300px;
     line-height: 130%;
     }
 
@@ -115,6 +114,7 @@ div.argOptsContainer {
 #inbox {
     width: 100%;
     padding: 0;
+    float: left;
     margin: .5em 0 2em 0;
     }
     
