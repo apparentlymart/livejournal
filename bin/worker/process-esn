@@ -3,20 +3,12 @@ use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 require 'ljprotocol.pl';
-
-use Getopt::Long;
-
-my $interval = 5;
-my $verbose  = 0;
-usage() unless GetOptions('interval|n=i' => \$interval,
-                          'verbose|v'    => \$verbose);
-
+use LJ::Worker::TheSchwartz;
 use LJ::ESN;
-use FindBin qw($Bin);
 
-while (1) {
-    my $now = time;
-    print "[$$] \@$now: processing events...\n" if $verbose;
-    LJ::ESN->process_fired_events(verbose => $verbose);
-    sleep $interval;
+foreach my $classname (LJ::ESN->schwartz_capabilities) {
+    schwartz_decl($classname);
 }
+
+schwartz_work();
+
