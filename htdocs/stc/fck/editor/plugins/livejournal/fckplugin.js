@@ -15,7 +15,7 @@ LJUserCommand.validUsername = function(str) {
 }
 
 LJUserCommand.Execute=function() {
-    var user;
+    var username;
     var selection = '';
 
     if (FCK.EditorWindow.getSelection) {
@@ -25,27 +25,43 @@ LJUserCommand.Execute=function() {
     }
 
     if (selection != '') {
-        user = selection;
+        username = selection;
     } else {
-        user = prompt(window.parent.FCKLang.UserPrompt, '');
+        username = prompt(window.parent.FCKLang.UserPrompt, '');
     }
 
-    if (user != null && user != '') {
-        if (! this.validUsername(user)) {
-            alert(window.parent.FCKLang.InvalidChars);
+    var postData = {
+        "username" : username
+    };
+
+    var url = window.parent.LJVAR.siteroot + "/tools/endpoints/ljuser.bml";
+
+    var gotError = function(err) {
+        alert(err);
+        return;
+    }
+
+    var gotInfo = function (data) {
+        if (data.error) {
+            alert(data.error);
             return;
         }
+        if (!data.success) return;
 
-        // Make the tag like the editor would and apply formatting
-        var html = "<span class='ljuser'>";
-        html     += "<img width='17' height='17' alt='' src='" + FCKConfig.PluginsPath + "livejournal/userinfo.gif' style='vertical-align: bottom' />";
-        html     += user;
-        html     += "</span>";
-
-        FCK.InsertHtml(html);
+        FCK.InsertHtml(data.ljuser);
         FCK.Focus();
     }
-    return;
+
+    var opts = {
+        "data": window.parent.HTTPReq.formEncoded(postData),
+        "method": "POST",
+        "url": url,
+        "onError": gotError,
+        "onData": gotInfo
+    };
+
+    window.parent.HTTPReq.getJSON(opts);
+    return false;
 }
 
 FCKCommands.RegisterCommand('LJUserLink', LJUserCommand ); //otherwise our command will not be found
