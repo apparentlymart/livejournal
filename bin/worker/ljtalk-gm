@@ -42,6 +42,7 @@ sub ljtalk_get_roster {
     # get outgoing friends
     $sth = $dbr->prepare("SELECT u.userid, u.user FROM user u, friends f ".
                          "WHERE f.userid=? AND f.friendid=u.userid AND u.journaltype='P'");
+    die "db error" if $dbr->errstr;
     $sth->execute($u->{userid});
     while (my ($uid, $user) = $sth->fetchrow_array) {
         next if $uid == $u->{userid};
