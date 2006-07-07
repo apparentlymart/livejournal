@@ -2533,7 +2533,7 @@ sub subscribe_interface {
                 <span class="CategoryHeading">$category</span>
                 <span class="CategoryHeadingNote">Notify me when...</span>
                 </td>
-                <td>
+                <td class="Caption">
                 By
                 </td>
             };
