@@ -46,7 +46,10 @@ sub wrapped_verbose {
             warn "   -> ERR: $@\n";
             die $@; # re-throw
         } elsif (! ref $ans && $ans !~ /^[\0\x7f-\xff]/) {
-            warn "   -> answer: $ans\n";
+            my $cleanans = $ans;
+            $cleanans =~ s/[^[:print:]]+//g;
+            $cleanans = substr($cleanans, 0, 1024) . "..." if length $cleanans > 1024;
+            warn "   -> answer: $cleanans\n";
         }
         return $ans;
     };

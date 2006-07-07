@@ -4,13 +4,18 @@ use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 use LJ::Worker::Gearman;
 
-gearman_decl("ljtalk_auth_check" => \&ljtalk_auth_check);
-gearman_decl("ljtalk_get_roster" => \&ljtalk_get_roster);
+gearman_decl("ljtalk_auth_check"  => \&ljtalk_auth_check);
+gearman_decl("ljtalk_get_roster"  => \&ljtalk_get_roster);
+gearman_decl("ljtalk_avatar_data" => \&ljtalk_avatar_data);
+gearman_decl("ljtalk_avatar_sha1" => \&ljtalk_avatar_sha1);
 gearman_work();
 
 # ----------------------------------------------------------------------------
 
+use Image::Magick;
 use Digest::SHA1 qw(sha1_hex);
+use Storable;
+
 sub ljtalk_auth_check {
     my $job = shift;
     my $arg = $job->arg;
@@ -25,7 +30,6 @@ sub ljtalk_auth_check {
     return "OK";
 }
 
-use Storable;
 sub ljtalk_get_roster {
     my $job = shift;
     my $user = $job->arg;
@@ -70,4 +74,44 @@ sub ljtalk_get_roster {
     }
 
     return Storable::nfreeze(\@list);
+}
+
+sub ljtalk_avatar_data {
+    return _avatar_want(shift, "data");
+}
+
+sub ljtalk_avatar_sha1 {
+    return _avatar_want(shift, "sha1");
+}
+
+sub _avatar_want {
+    my ($job, $want) = @_;
+    my $u = LJ::load_user($job->arg) or die "invalid user: '" . $job->arg . "'";
+    return "" unless $u->{defaultpicid};
+
+    my $memkey = [$u->{userid}, "avatar:$u->{userid}:$u->{defaultpicid}"];
+
+    my $res = sub {
+        my $val = shift;      # [ [blobref, mime, w, h], sha1 ]
+        return $val->[1] if $want eq "sha1";
+        my $img     = $val->[0];
+        my $blobref = $img->[0];
+        my $mime    = $img->[1];
+        return $$blobref;
+    };
+
+    my $val = LJ::MemCache::get($memkey);
+    return $res->($val) if $val;
+
+    # get image parameters ($imp) of [blobref, mime, w, h]
+    my $imp = LJ::_get_upf_scaled(size   => 96,
+                                  mogkey => $u->mogfs_userpic_key($u->{defaultpicid}));
+    die "ERROR: could not resize image down\n" unless $imp;
+
+    my $blobref = $imp->[0];
+    my $sha1    = sha1_hex($$blobref);
+    $val        = [$imp, $sha1];
+
+    LJ::MemCache::set($memkey, $val, 86400);
+    return $res->($val);
 }
