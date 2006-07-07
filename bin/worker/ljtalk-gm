@@ -1,0 +1,25 @@
+#!/usr/bin/perl
+
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+use LJ::Worker::Gearman;
+
+gearman_decl("ljtalk_auth_check" => \&ljtalk_auth_check);
+gearman_work();
+
+# ----------------------------------------------------------------------------
+
+use Digest::SHA1 qw(sha1_hex);
+sub ljtalk_auth_check {
+    my $job = shift;
+    my $arg = $job->arg;
+    return "BAD" unless $arg =~ /^(\w{1,50}),(\w+),(\w+)$/;
+    my ($user, $streamid, $digest) = ($1, $2, $3);
+    my $u = LJ::load_user($user)
+        or return "ERR:nouser";
+    return "ERR:notperson"  unless $u->{journaltype} eq "P";
+    return "ERR:nopassword" unless $u->{password};
+    my $correct = sha1_hex($streamid . $u->{password});
+    return "ERR:badpass" unless $digest eq $correct;
+    return "OK";
+}
