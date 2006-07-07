@@ -2204,13 +2204,32 @@ sub viewer_sees_vbox
     my $u = LJ::load_userid($r->notes("journalid"));
     return 0 unless $u;
 
-    return $u->should_display_comm_promo ? 1 : viewer_sees_ads();
+    if (viewer_sees_ads() and ($u->prop('journal_box_placement') eq 'v' or $u->prop('journal_box_placement') eq '')) {
+        return 1;
+    }
+
+    return $u->should_display_comm_promo ? 1 : 0;
 }
 
-sub viewer_sees_hbox_top { 0 }
+sub viewer_sees_hbox_top
+{
+    my $r = Apache->request;
+    my $u = LJ::load_userid($r->notes("journalid"));
+    return 0 unless $u;
+
+    if (viewer_sees_ads() and $u->prop('journal_box_placement') eq 'h') {
+        return 1;
+    }
+
+    return 0;
+}
 
 sub viewer_sees_hbox_bottom
 {
+    my $r = Apache->request;
+    my $u = LJ::load_userid($r->notes("journalid"));
+    return 0 unless $u;
+
     return viewer_sees_ads();
 }
 
@@ -3016,12 +3035,6 @@ sub Page__print_control_strip
 
 sub Page__print_hbox_top
 {
-    # reserved for ads in top of journal
-    1;
-}
-
-sub Page__print_hbox_bottom
-{
     my ($ctx, $this) = @_;
 
     my $user = $this->{journal}->{username};
@@ -3034,6 +3047,32 @@ sub Page__print_hbox_bottom
             journalu => $journalu,
             pubtext  => $LJ::REQ_GLOBAL{first_public_text},
         });
+        $S2::pout->($ad_html) if $ad_html;
+    }
+}
+
+sub Page__print_hbox_bottom
+{
+    my ($ctx, $this) = @_;
+
+    my $user = $this->{journal}->{username};
+    my $journalu = LJ::load_user($this->{journal}->{username})
+        or die "unable to load journal user: $user";
+
+    # get ad with site-specific hook
+    {
+        my $ad_html;
+        if ($journalu->prop('journal_box_placement') eq 'h') {
+            $ad_html = LJ::run_hook('hbox_ad_content', {
+                journalu => $journalu,
+                pubtext  => $LJ::REQ_GLOBAL{first_public_text},
+            });
+        } else {
+            $ad_html = LJ::run_hook('hbox_with_vbox_ad_content', {
+                journalu => $journalu,
+                pubtext  => $LJ::REQ_GLOBAL{first_public_text},
+            });
+        }
         $S2::pout->($ad_html) if $ad_html;
     }
 }

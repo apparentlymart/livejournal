@@ -461,6 +461,8 @@ body<=
         $ret .= "<noscript> " . LJ::html_submit('save:theme', $ML{'.change'}) . " </noscript>";
         $ret .= " (<a id='s2_themeid_preview_link' href=\"/customize/themes.bml?journal=$u->{'user'}\" target='samples'>Samples</a>)</div>";
         $ret .= "</fieldset>";
+
+        $ret .= LJ::run_hook('ad_layout_blurb', $u);
     }
 
     ### Mood themes
