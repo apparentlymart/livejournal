@@ -1,4 +1,4 @@
-var ESN = {};
+var ESN = new Object();
 
 DOM.addEventListener(window, "load", function (evt) {
   ESN.initCheckAllBtns();

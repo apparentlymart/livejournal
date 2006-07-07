@@ -37,7 +37,6 @@
         }
 
     .CategoryHeadingNote {
-        xdisplay: block;
         font-size: .95em;
         }
 
@@ -93,6 +92,15 @@ div.argOptsContainer {
     margin: 0 0 0 0;
     margin-left: 310px;
     }
+
+    #NotificationTable tr.Selected {
+        background-color: #ccc;
+        }
+        
+        #NotificationTable tr.Selected td {
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #aaa;
+            }
 
 #NotificationSidebar {
     float: left;

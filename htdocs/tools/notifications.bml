@@ -20,8 +20,12 @@ body<=
     LJ::need_res('js/core.js');
     LJ::need_res('js/dom.js');
     LJ::need_res('js/view.js');
-    LJ::need_res('js/devel.js');
+    LJ::need_res('js/controller.js');
+    LJ::need_res('js/datasource.js');
     LJ::need_res('js/checkallbutton.js');
+    LJ::need_res('js/selectable_table.js');
+
+    LJ::need_res('js/esn_inbox.js');
 
     LJ::need_res('stc/esn.css');
 
@@ -134,6 +138,7 @@ body<=
     @notifications = sort { $b->when_unixtime <=> $a->when_unixtime } @notifications;
 
     # print out notifications
+    my $rownum = 0;
     foreach my $inbox_item (@notifications) {
         my $qid  = $inbox_item->qid;
 
@@ -151,10 +156,10 @@ body<=
         my $when = LJ::ago_text(time() - $inbox_item->when_unixtime);
         my $contents = $inbox_item->as_html || '';
 
-        my $row_class = ($qid % 2 ==0) ? "InboxItem_Meta" : "InboxItem_Meta alt";
+        my $row_class = ($rownum++ % 2 ==0) ? "InboxItem_Meta" : "InboxItem_Meta alt";
 
         $notificationtable .= qq {
-            <tr class="$row_class">
+            <tr class="InboxItem_Row $row_class">
                 <td class="checkbox">$checkbox</td>
                 <td class="item">
                     <span class="$read_class">$title</span>
@@ -175,7 +180,11 @@ body<=
         id    => "EditNotificationsAction",
         value => "1",
     });
-    $body .= '</form>';
+
+    $body .= qq {
+        </form>
+            <div id="selected_info"></div>
+        };
 
     return $body;
 }
@@ -191,12 +200,15 @@ head<=
 LJ_cmtinfo = {};
 LJ_cmtinfo['disableInlineDelete'] = 1;
 
-var tableview = new View();
-var checkallButton = new CheckallButton();
-
 DOM.addEventListener(window, "load", setup);
 
+var tableview;
+var checkallButton;
+
 function setup (e) {
+    tableview = new View();
+    checkallButton = new CheckallButton();
+
   tableview.init({ "view": $("NotificationTable") });
 checkallButton.init({
 "class": "InboxItem_Check",
@@ -216,6 +228,9 @@ function submitAction(action) {
 }
 </script>
 
+    <style>
+
+</style>
 
 <=head
 
