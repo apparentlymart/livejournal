@@ -1820,6 +1820,9 @@ sub res_includes {
         }
     }
 
+    my $remote = LJ::get_remote();
+    my $remoteusername = $remote ? $remote->name : '';
+
     # include standard JS info
     $ret .= qq {
         <script language="JavaScript">
@@ -1830,6 +1833,7 @@ sub res_includes {
         LJVAR.statprefix = "$LJ::STATPREFIX";
         LJVAR.currentJournalBase = "$journal_base";
         LJVAR.currentJournal = "$journal";
+        LJVAR.remote = "$remoteusername";
         </script>
         };
 
