@@ -5,6 +5,7 @@ use lib "$ENV{LJHOME}/cgi-bin";
 use LJ::Worker::Gearman;
 
 gearman_decl("ljtalk_auth_check" => \&ljtalk_auth_check);
+gearman_decl("ljtalk_get_roster" => \&ljtalk_get_roster);
 gearman_work();
 
 # ----------------------------------------------------------------------------
@@ -22,4 +23,51 @@ sub ljtalk_auth_check {
     my $correct = sha1_hex($streamid . $u->{password});
     return "ERR:badpass" unless $digest eq $correct;
     return "OK";
+}
+
+use Storable;
+sub ljtalk_get_roster {
+    my $job = shift;
+    my $user = $job->arg;
+    my $u = LJ::load_user($user) or die "No user";
+
+    my %user;  # uid -> [$user, relation(1=pendout, 2=back)]
+    my $dbr = LJ::get_db_reader();
+    my $sth;
+
+    # get outgoing friends
+    $sth = $dbr->prepare("SELECT u.userid, u.user FROM user u, friends f ".
+                         "WHERE f.userid=? AND f.friendid=u.userid AND u.journaltype='P'");
+    $sth->execute($u->{userid});
+    while (my ($uid, $user) = $sth->fetchrow_array) {
+        next if $uid == $u->{userid};
+        $user{$uid} = [$user, 1];
+    }
+
+    # get edges back
+    my $uids = join(',', keys %user);
+    if ($uids) {
+        $sth = $dbr->prepare("SELECT userid FROM friends WHERE friendid=? AND userid IN ($uids)");
+        $sth->execute($u->{userid});
+        while (my ($uid) = $sth->fetchrow_array) {
+            my $erec = $user{$uid}      or next;
+            $erec->[1] = 2;
+        }
+    }
+
+    # list of [jid, nick, [@edges], [@groups]]
+    my @list;
+    foreach my $uid (sort { $user{$a}[0] cmp $user{$b}[0] } keys %user) {
+        my $urec = $user{$uid};
+        my @grp = ($LJ::SITENAMESHORT);
+        my @edge;
+        if ($urec->[1] == 2) {
+            @edge = qw(to from);
+        } else {
+            @edge = qw(pending_out);
+        }
+        push @list, ["$urec->[0]\@$LJ::DOMAIN", $urec->[0], \@edge, \@grp];
+    }
+
+    return Storable::nfreeze(\@list);
 }
