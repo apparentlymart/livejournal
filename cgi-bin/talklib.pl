@@ -124,13 +124,16 @@ sub link_bar
         push @linkele, $mlink->("$LJ::SITEROOT/tools/memadd.bml?${jargent}itemid=$itemid", "memadd");
     }
 
-    if (defined $remote && ($remote->{'user'} eq $u->{'user'} ||
-                            $remote->{'user'} eq $up->{'user'} ||
-                            LJ::can_manage($remote, $u)))
+    # edit entry - if we have a remote, and that person can manage
+    # the account in question, OR, they posted the entry, and have
+    # access to the community in question
+    if (defined $remote && (LJ::can_manage($remote, $u) ||
+                            (LJ::u_equals($remote, $up) && LJ::can_use_journal($up->{userid}, $u->{user}, {}))))
     {
         push @linkele, $mlink->("$LJ::SITEROOT/editjournal.bml?${jargent}itemid=$itemid", "editentry");
     }
 
+    # edit tags
     unless ($LJ::DISABLED{tags}) {
         if (defined $remote && LJ::Tags::can_add_tags($u, $remote)) {
             push @linkele, $mlink->("$LJ::SITEROOT/edittags.bml?${jargent}itemid=$itemid", "edittags");
