@@ -533,6 +533,12 @@ my $old_url = 0;
                  $ret .= "<a href='$track_url'>" . LJ::img($track_img, '', {'align' => 'absmiddle'}) . "</a>";
              }
 
+             if ($showmultiform) {
+                 $ret .= " <nobr><input type='checkbox' name='selected_$tid' id='s$tid' />";
+                 $ret .= " <label for='s$tid'>$ML{'.select'}</label></nobr>";
+                 $multiform_selects = 1;
+             }
+
              # Comment Posted Notice
              $ret .= "<br /><b>$ML{'.posted'}</b>"
                  if $last_talkid == $dtid && $last_jid == $u->{'userid'};
