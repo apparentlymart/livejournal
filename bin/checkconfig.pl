@@ -61,6 +61,7 @@ my %modules = (
                "DBI" => { 'deb' => 'libdbi-perl',  },
                "DBD::mysql" => { 'deb' => 'libdbd-mysql-perl', },
                "Class::Autouse" => { 'deb' => 'libclass-autouse-perl', },
+               "Class::Trigger" => { 'deb' => 'libclass-trigger-perl', },
                "Digest::MD5" => { 'deb' => 'libdigest-md5-perl', },
                "Digest::SHA1" => { 'deb' => 'libdigest-sha1-perl', },
                "Image::Size" => { 'deb' => 'libimage-size-perl', },
