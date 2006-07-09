@@ -220,14 +220,14 @@ body<=
         LJ::CleanHTML::clean_event(\$answer,  {'ljcut_disable' => 1}) if $hassum;
 
         # Highlight search terms
-	my $term = sub {
-	    my $xterm = shift;
-        return $xterm if $xterm =~ m!^https?://!;
- 	    return "<span class='searchhighlight'>" . LJ::ehtml($xterm) . "</span>";
-	};
+        my $term = sub {
+            my $xterm = shift;
+            return $xterm if $xterm =~ m!^https?://!;
+            return "<span class='searchhighlight'>" . LJ::ehtml($xterm) . "</span>";
+        };
         my $qterm = $GET{'q'};
-	if ($qterm) {
-	    $question =~ s/(\Q$qterm\E)/$term->($1)/ige;
+        if ($qterm) {
+            $question =~ s/(\Q$qterm\E)/$term->($1)/ige;
 
             # don't highlight things in the FURTHER READING section
             # (a livejournal.com convention)
@@ -239,7 +239,7 @@ body<=
             $answer =~ s!((?:https?://[^>]+)?\Q$qterm\E)!$term->($1)!ige;
 
             $answer .= $fr;
-	}
+        }
 
         # display output
         $$body .= "<?h1";
