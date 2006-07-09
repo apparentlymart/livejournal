@@ -229,16 +229,9 @@ body<=
         if ($qterm) {
             $question =~ s/(\Q$qterm\E)/$term->($1)/ige;
 
-            # don't highlight things in the FURTHER READING section
-            # (a livejournal.com convention)
-            $answer =~ s/FURTHER READING.+//s;
-            my $fr = $1;
-
             # don't highlight terms in URLs
             $summary =~ s!((?:https?://[^>]+)?\Q$qterm\E)!$term->($1)!ige;
             $answer =~ s!((?:https?://[^>]+)?\Q$qterm\E)!$term->($1)!ige;
-
-            $answer .= $fr;
         }
 
         # display output
