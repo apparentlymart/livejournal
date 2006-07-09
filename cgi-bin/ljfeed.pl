@@ -253,6 +253,7 @@ sub make_feed
             mood       => $mood,
             ppid       => $ppid,
             tags       => [ values %{$logtags->{$itemid} || {}} ],
+            security   => $it->{security},
         };
         push @cleanitems, $cleanitem;
         push @entries,    LJ::Entry->new($u, ditemid => $ditemid);
@@ -331,6 +332,7 @@ sub create_view_rss
         # TODO: add author field with posterid's email address, respect communities
         $ret .= "  <lj:music>" . LJ::exml($it->{music}) . "</lj:music>\n" if $it->{music};
         $ret .= "  <lj:mood>" . LJ::exml($it->{mood}) . "</lj:mood>\n" if $it->{mood};
+        $ret .= "  <lj:security>" . LJ::exml($it->{security}) . "</lj:security>\n" if $it->{security};
         $ret .= "</item>\n";
     }
 
