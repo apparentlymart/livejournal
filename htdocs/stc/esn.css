@@ -95,6 +95,10 @@ div.argOptsContainer {
     margin-left: 310px;
     }
 
+	#NotificationTable tr:hover {
+		background-color: #f6e6d2;
+		}
+
     #NotificationTable tr.Selected {
         background-color: #cee0fb;
         }
