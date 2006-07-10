@@ -84,7 +84,7 @@ body<=
             <div class="Blurb">
             <?p In the Message Center, you can find out who has friended you,
             get updates from $LJ::SITENAME, read your notices and more. p?>
-            <?p To start getting notices, click on the "Notify Me" icon when you are
+            <?p To start getting notices, click on the <img src="$LJ::SITEROOT/img/btn_track.gif" width="22" height="20" valign="absmiddle" alt="Notify Me"/> icon when you are
             browsing $LJ::SITENAME. You can use notices to keep an eye on comment threads,
             user updates and new posts. p?>
             </div>
@@ -118,8 +118,8 @@ body<=
         <table id="inbox" cellspacing="0" border="0" cellpadding="0">
             <tr class="header">
                 <thead>
-                    <td>$checkall</td>
-                    <td class="actions">
+                    <td class="checkbox">$checkall</td>
+                    <td class="actions" colspan="2">
                         <input type="button" value="Read" $disabled onclick="submitAction('markRead');" />
                         <input type="button" value="Unread" onclick="submitAction('markUnread');" />
                         <input type="button" value="Delete" onclick="submitAction('delete');" />
