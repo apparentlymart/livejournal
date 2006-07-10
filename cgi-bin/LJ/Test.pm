@@ -16,7 +16,7 @@ END {
     }
 }
 
-$LJ::_T_FAKESCHWARTZ = 1;
+$LJ::_T_FAKESCHWARTZ = 1 unless $LJ::_T_NOFAKESCHWARTZ;
 my $theschwartz = undef;
 
 sub theschwartz {
@@ -311,8 +311,8 @@ sub t_enter_comment {
          {itemid => $jitemid},      # item (entry)
          {
              u => $u,                  # comment
-             state => 'A', 
-             subject => $subject, 
+             state => 'A',
+             subject => $subject,
              body => $body,
              %opts
          },
