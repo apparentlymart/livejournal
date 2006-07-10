@@ -26,7 +26,7 @@ body<=
     # what classes to display on this page
     my $categories = [
                       {
-                          "Track" => [
+                          "" => [
                                       LJ::Subscription::Pending->new(
                                                                      $remote,
                                                                      event   => "JournalNewEntry",
