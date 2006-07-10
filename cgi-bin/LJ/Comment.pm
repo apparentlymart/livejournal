@@ -377,7 +377,7 @@ sub user_can_delete {
     my $journalu = $self->journal;
     my $posteru  = $self->poster;
     my $poster   = $posteru ? $posteru->{user} : undef;
-    
+
     return LJ::Talk::can_delete($targetu, $journalu, $posteru, $poster);
 }
 
@@ -391,6 +391,8 @@ sub manage_buttons {
     my $remote = LJ::get_remote() or return '';
 
     my $managebtns = '';
+
+    return '' unless $self->poster && $self->entry->poster;
 
     if (LJ::Talk::can_delete($remote, $self->journal, $self->entry->poster, $self->poster->{user})) {
         $managebtns .= "<a href='$LJ::SITEROOT/delcomment.bml?${jargent}id=$dtalkid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
