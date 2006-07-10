@@ -164,12 +164,19 @@ sub _bot_post {
         $subject = $1;
     }
 
+    my $jid = $req->{jid};
+    my $user;
+    unless ($jid =~ /^([\w\-]{1,15})\@$LJ::DOMAIN$/) {
+        return "Can't post from non-LiveJournal Jabber addresses yet.";
+    }
+    $user = LJ::canonical_username($1);
+
     # build lj entry
     my $props = {};
     my $req = {
         #'usejournal' => $journal,
         'ver' => 1,
-        'username' => $req->{user},
+        'username' => $user,
         'event' => $body,
         'subject' => $subject,
         #'security' => $lj_headers{security},
