@@ -7,6 +7,11 @@ require "ljlib.pl";
 use vars qw(@ISA @EXPORT @EXPORT_OK);
 use Getopt::Long;
 
+my $quit_flag = 0;
+$SIG{TERM} = sub {
+    $quit_flag = 1;
+};
+
 my $opt_verbose;
 die "Unknown options" unless
     GetOptions("verbose|v" => \$opt_verbose);
@@ -31,6 +36,7 @@ sub gearman_work {
         $worker->job_servers(@LJ::GEARMAN_SERVERS); # TODO: don't do this everytime, only when config changes?
         warn "waiting for work...\n" if $opt_verbose;
         $worker->work(stop_if => sub { 1 });
+        exit 0 if $quit_flag;
         LJ::start_request();
     }
 }

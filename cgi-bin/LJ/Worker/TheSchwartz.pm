@@ -12,6 +12,10 @@ die "Unknown options" unless
     GetOptions('interval|n=i' => \$interval,
                'verbose|v'    => \$verbose);
 
+my $quit_flag = 0;
+$SIG{TERM} = sub {
+    $quit_flag = 1;
+};
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -29,6 +33,7 @@ sub schwartz_work {
     while (1) {
         LJ::start_request();
         $sclient->work_until_done;
+        exit 0 if $quit_flag;
         sleep $interval;
     }
 }
