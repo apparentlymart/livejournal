@@ -123,15 +123,47 @@ sub ljtalk_bot_talk {
     my $job = shift;
     my $req = Storable::thaw($job->arg);
     my $text = $req->{text} || "";
+    $text =~ s/^\s+//;
+
     my $ret = sub {
         return Storable::nfreeze({ text => $_[0], html => $_[1] });
     };
 
-    unless ($text =~ m!^post:\s*(.+)!) {
-        return $ret->("I don't know what that means.  I'm actually pretty stupid.  Start a message to me with 'post: ' and some text, and I'll post it to your journal.");
+    my $rand = sub {
+        return $ret->($_[int rand @_]);
+    };
+
+    if ($text =~ m!^post:\s*(.+)!i) {
+        return $ret->(_bot_post($req, $1));
     }
 
-    my $body = $1;
+    if ($text =~ /help/i) {
+        return $ret->(_bot_help($req));
+    }
+
+    if ($text =~ /^(yo|hey|hello|hi|sup|lo)\b/) {
+        return $rand->("yo", "hey", "hello", "hi");
+    }
+
+    if ($text =~ /^(asl|a\/s\/l)(\?|$)/) {
+        return $rand->("6/male/san francisco/goat.  i guess that's a/s/l/species.");
+    }
+
+    return $ret->("I don't know what that means.  I'm actually pretty stupid.  Type 'help' for help.");
+}
+
+sub _bot_help {
+    return ("To post to your journal, message me with \"post: \" and some text.  To use a subject, do:  \"post: [Your Subject] Your post....\"");
+}
+
+sub _bot_post {
+    my $req = shift;
+    my $body = shift;
+    my $subject = "Posted using <a href=\"http://www.livejournal.com/ljtalk/\">LJTalk</a>...";
+    if ($body =~ s/^\s*\[(.+?)\]\s*//) {
+        $subject = $1;
+    }
+
     # build lj entry
     my $props = {};
     my $req = {
@@ -139,7 +171,7 @@ sub ljtalk_bot_talk {
         'ver' => 1,
         'username' => $req->{user},
         'event' => $body,
-        'subject' => "Posted using LJTalk...",
+        'subject' => $subject,
         #'security' => $lj_headers{security},
         #'allowmask' => $amask,
         'props' => $props,
@@ -150,9 +182,9 @@ sub ljtalk_bot_talk {
     my $post_error;
     my $res = LJ::Protocol::do_request("postevent", $req, \$post_error, { noauth => 1 });
     if ($post_error) {
-        return $ret->("Error: $post_error");
+        return ("Error: $post_error");
     }
 
     my $url = $res->{url};
-    return $ret->("Posted: $url", "<i>Posted:</i> <a href='$url'>$url</a>");
+    return ("Posted: $url", "<i>Posted:</i> <a href='$url'>$url</a>");
 }
