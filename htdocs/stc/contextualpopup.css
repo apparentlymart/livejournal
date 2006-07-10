@@ -1,8 +1,16 @@
 div.ContextualPopup {
-    
+    position: relative;
+	background: #555;
+	_background: none !important;
+	margin: 5px 0 0 20px;
+	top: 5px;
+	left: 5px;
     }
     
 div.ContextualPopup div.Inner {
+	position: relative;
+	top: -5px;
+	left: -5px;
     background-color: #000;
     color: #fefefe;
     padding: 5px;
@@ -13,7 +21,7 @@ div.ContextualPopup .Content {
     position: relative;
     text-align: left;
     font-size: 11px;
-    margin: 0 10px 5px 5px;
+    margin: 0 60px 5px 5px;
     }
     
    div.ContextualPopup .Content span {
@@ -39,10 +47,10 @@ div.ContextualPopup .Content {
         }
     
 div.ContextualPopup .Userpic {
-    position: absolute;
-    bottom: 0px;
-    right: -100px;
-    height: 100px;
+	position: absolute;
+	top: 0;
+	_top: 5px;
+	right: 0;
     padding: 5px;
     background: #000;
     }
@@ -51,6 +59,8 @@ div.ContextualPopup .Userpic {
    div.ContextualPopup .Userpic img {
         position: relative;
         margin: 0 auto;
+		width: 50px;
+		height: auto;
         vertical-align: middle;
         }
             
