@@ -123,6 +123,7 @@ sub ljtalk_bot_talk {
     my $job = shift;
     my $req = Storable::thaw($job->arg);
     my $text = $req->{text} || "";
+    $text = LJ::no_utf8_flag($text);
     $text =~ s/^\s+//;
 
     my $ret = sub {
