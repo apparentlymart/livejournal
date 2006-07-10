@@ -133,7 +133,7 @@ sub ljtalk_bot_talk {
         return $ret->($_[int rand @_]);
     };
 
-    if ($text =~ m!^post:\s*(.+)!i) {
+    if ($text =~ m!^post:\s*(.+)!si) {
         return $ret->(_bot_post($req, $1));
     }
 
