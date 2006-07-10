@@ -651,6 +651,8 @@ sub common_event_validation
 sub postevent
 {
     my ($req, $err, $flags) = @_;
+    un_utf8_request($req);
+
     return undef unless authenticate($req, $err, $flags);
     return undef unless check_altusage($req, $err, $flags);
 
@@ -739,8 +741,6 @@ sub postevent
     return fail($err, 312)
         if $req->{props} && $req->{props}->{taglist} &&
            ! LJ::Tags::can_add_tags($uowner, $u);
-
-    un_utf8_request($req);
 
     my $event = $req->{'event'};
 
@@ -1133,6 +1133,8 @@ sub postevent
 sub editevent
 {
     my ($req, $err, $flags) = @_;
+    un_utf8_request($req);
+
     return undef unless authenticate($req, $err, $flags);
 
     # we check later that user owns entry they're modifying, so all
@@ -1198,8 +1200,6 @@ sub editevent
     ### make sure this user is allowed to edit this entry
     return fail($err,302)
         unless ($ownerid == $oldevent->{'ownerid'});
-
-    un_utf8_request($req);
 
     ### what can they do to somebody elses entry?  (in shared journal)
     if ($posterid != $oldevent->{'posterid'})
