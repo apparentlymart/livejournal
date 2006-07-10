@@ -9,6 +9,8 @@ unless ($ENV{LJHOME}) {
 chdir "$ENV{LJHOME}" or die "Failed to chdir to \$LJHOME";
 
 
+require "$ENV{LJHOME}/cgi-bin/ljlib.pl";
+die "NO DO NOT RUN THIS IN PRODUCTION" if $LJ::IS_LJCOM_PRODUCTION;
 
 
 update_svn();
