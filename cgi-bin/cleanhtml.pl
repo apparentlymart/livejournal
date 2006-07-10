@@ -366,6 +366,7 @@ sub clean
                 unless ($LJ::DISABLED{'css_cleaner'}) {
                     my $cleaner = LJ::CSS::Cleaner->new;
                     $style = $cleaner->clean($style);
+                    LJ::run_hook('css_cleaner_transform', \$style);
                     if ($LJ::IS_DEV_SERVER) {
                         $style = "/* cleaned */\n" . $style;
                     }
