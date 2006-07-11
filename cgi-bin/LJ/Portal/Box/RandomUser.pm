@@ -32,6 +32,8 @@ sub generate_content {
             my $user = LJ::load_user($username);
             next unless $user;
 
+            next if $user->{statusvis} =~ /[XSD]/;
+
             # get most recent post
             my @items = LJ::get_recent_items({
                 'remote' => $u,
