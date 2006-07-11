@@ -16,18 +16,42 @@ sub new {
 
 sub is_common { 0 }
 
+sub as_email_subject { 'LiveJournal Friend Request!' }
+
+sub as_email_string {
+    my $self = shift;
+
+    return sprintf qq {Hi %s,
+
+%s has added you to their Friend's list.
+
+They will now be able to view your public journal updates on their Friends page.  Add your new friend so that you can interact with each other's friends and network!
+
+Click here to add them as your friend:
+%s
+
+
+To view your current friends list:
+%s
+}, $self->u->display_username, $self->friend->display_username, "$LJ::SITEROOT/friends/add.bml?user=" . $self->friend->name,
+"$LJ::SITEROOT/friends/edit.bml";
+}
+
+sub friend {
+    my $self = shift;
+    return LJ::load_userid($self->arg1);
+}
+
 sub as_html {
     my $self = shift;
-    my $u1 = LJ::load_userid($self->arg1);
     return sprintf("%s has added me as a friend.",
-                   LJ::load_userid($self->arg1)->ljuser_display);
+                   $self->friend->ljuser_display);
 }
 
 sub as_string {
     my $self = shift;
-    my $u1 = LJ::load_userid($self->arg1);
     return sprintf("%s has added me as a friend.",
-                   LJ::load_userid($self->arg1)->{user});
+                   $self->friend->{user});
 }
 
 sub as_sms {
