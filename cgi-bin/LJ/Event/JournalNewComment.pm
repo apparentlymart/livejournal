@@ -13,6 +13,8 @@ sub new {
 
 sub is_common { 1 }
 
+sub as_email_string { 'whitaker should fix this' }
+
 sub content {
     my $self = shift;
     my $comment = $self->comment or return "(Invalid comment)";
