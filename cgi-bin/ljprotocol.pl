@@ -2207,7 +2207,7 @@ sub list_friends
         if ($opts->{'includebdays'} &&
             $u->{'bdate'} &&
             $u->{'bdate'} ne "0000-00-00" &&
-            $u->can_show_bdate)
+            $u->can_show_full_bday)
         {
             $r->{'birthday'} = $u->{'bdate'};
         }

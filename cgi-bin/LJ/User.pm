@@ -1018,20 +1018,48 @@ sub can_show_location {
     return 1;
 }
 
+# Birthday logic -- show appropriate string based on opt_showbday
 sub can_show_bday {
     my $u = shift;
     croak "invalid user object passed" unless LJ::isu($u);
     return 0 if $u->underage;
-    return 0 if $u->opt_showbday eq 'N';
+    return 0 unless $u->opt_showbday eq 'D';
     return 1;
 }
 
-sub can_show_bdate {
+sub can_show_bday_year {
     my $u = shift;
     croak "invalid user object passed" unless LJ::isu($u);
     return 0 if $u->underage;
-    return 0 if ($u->opt_showbday eq 'Y' || $u->opt_showbday eq 'N');
+    return 0 unless $u->opt_showbday eq 'Y';
     return 1;
+}
+
+sub can_show_full_bday {
+    my $u = shift;
+    croak "invalid user object passed" unless LJ::isu($u);
+    return 0 if $u->underage;
+    return 0 unless $u->opt_showbday eq 'F';
+    return 1;
+}
+
+sub bday_string {
+    my $u = shift;
+
+    my $bdate = $u->{'bdate'};
+    my ($year,$mon,$day) = split(/-/, $bdate);
+    my $bday_string;
+    if ($u->can_show_full_bday) {
+        $bday_string = $bdate;
+    } elsif ($u->can_show_bday) {
+        $bday_string = "$mon-$day";
+    } elsif ($u->can_show_bday_year && $year ne '0000') {
+        $bday_string = $year;
+    } else {
+        $bday_string = "";
+    }
+    $bday_string =~ s/^0000-//;
+    return $bday_string;
 }
 
 # should this user be promoted via CommPromo
@@ -1125,7 +1153,7 @@ sub get_friends_birthdays {
 
         my ($year, $month, $day) = split('-', $friend->{bdate});
 
-        if ($month > 0 && $day > 0 && $friend->can_show_bdate
+        if ($month > 0 && $day > 0 && ($friend->can_show_bday || $friend->can_show_full_bday)
                        && !$friend->underage) {
             my $ref = [ $month, $day, $friend->{user} ];
             push @bdays, $ref;
@@ -1184,14 +1212,6 @@ sub record_login {
 
     return $u->do("INSERT INTO loginlog SET userid=?, sessid=?, logintime=UNIX_TIMESTAMP(), ".
                   "ip=?, ua=?", undef, $u->{userid}, $sessid, $ip, $ua);
-}
-
-sub bdate_string {
-    my $u = shift;
-    return "" unless $u->{bdate} && $u->{bdate} ne "0000-00-00";
-    my $str = $u->{bdate};
-    $str =~ s/^0000-//;
-    return $str;
 }
 
 # in scalar context, returns user's email address.  given a remote user,
