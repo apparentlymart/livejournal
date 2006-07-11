@@ -98,6 +98,12 @@ sub as_html {
     return $self->as_string;
 }
 
+# plaintext email subject
+sub as_email_subject {
+    my $self = shift;
+    return $self->as_string;
+}
+
 # contents for HTML email
 sub as_email_html {
     my $self = shift;
