@@ -129,7 +129,7 @@ sub unsubscribed_tags {
     my $journal = $subscr->journal;
     return () unless $journal;
 
-    my $usertags = LJ::Tags::get_usertags($journal);
+    my $usertags = LJ::Tags::get_usertags($journal, {remote => $subscr->owner});
     return () unless $usertags;
 
     my @tagids = sort { $usertags->{$a}->{uses} <=> $usertags->{$b}->{uses} } keys %$usertags;
@@ -168,7 +168,7 @@ sub subscription_as_html {
 
         return "All posts tagged $dropdownhtml on " . $journal->ljuser_display;
     } elsif ($arg1) {
-        my $usertags = LJ::Tags::get_usertags($journal);
+        my $usertags = LJ::Tags::get_usertags($journal, {remote => $subscr->owner});
         return "All posts tagged $usertags->{$arg1}->{name} on " . $journal->ljuser_display;
     }
 
