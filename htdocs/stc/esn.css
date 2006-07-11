@@ -108,6 +108,12 @@ div.argOptsContainer {
             border-bottom: 1px solid #b2c6e4;
             }
 
+        #NotificationTable td {
+            border-top: 1px solid transparent;
+            border-bottom: 1px solid transparent;
+            }
+
+
 #NotificationSidebar {
     float: left;
     width: 300px;
