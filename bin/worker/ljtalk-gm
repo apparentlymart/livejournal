@@ -10,6 +10,9 @@ gearman_decl("ljtalk_get_roster"  => \&ljtalk_get_roster);
 gearman_decl("ljtalk_avatar_data" => \&ljtalk_avatar_data);
 gearman_decl("ljtalk_avatar_sha1" => \&ljtalk_avatar_sha1);
 gearman_decl("ljtalk_bot_talk"    => \&ljtalk_bot_talk);
+gearman_decl("ljtalk_load_roster_item" => \&ljtalk_load_roster_item);
+gearman_decl("ljtalk_delete_roster_item" => \&ljtalk_delete_roster_item);
+gearman_decl("ljtalk_addupdateset_roster" => \&ljtalk_addupdateset_roster);
 gearman_work();
 
 # ----------------------------------------------------------------------------
@@ -37,7 +40,7 @@ sub ljtalk_get_roster {
     my $user = $job->arg;
     my $u = LJ::load_user($user) or die "No user";
 
-    my %user;  # uid -> [$user, relation(1=pendout, 2=back)]
+    my %user;  # uid -> [$barejid, $substate_bitmask, $name, $groups]
     my $dbr = LJ::get_db_reader();
     my $sth;
 
@@ -48,7 +51,7 @@ sub ljtalk_get_roster {
     $sth->execute($u->{userid});
     while (my ($uid, $user) = $sth->fetchrow_array) {
         next if $uid == $u->{userid};
-        $user{$uid} = [$user, 1];
+        $user{$uid} = ["$user\@$LJ::DOMAIN", 8];  # 0x08 is pendout
     }
 
     # get edges back
@@ -58,22 +61,48 @@ sub ljtalk_get_roster {
         $sth->execute($u->{userid});
         while (my ($uid) = $sth->fetchrow_array) {
             my $erec = $user{$uid}      or next;
-            $erec->[1] = 2;
+            $erec->[1] = 3;  # 0x01 | 0x02 (to | from) ("both")
         }
     }
 
-    # list of [jid, nick, [@edges], [@groups]]
-    my @list;
-    foreach my $uid (sort { $user{$a}[0] cmp $user{$b}[0] } keys %user) {
-        my $urec = $user{$uid};
-        my @grp = ($LJ::SITENAMESHORT);
-        my @edge;
-        if ($urec->[1] == 2) {
-            @edge = qw(to from);
-        } else {
-            @edge = qw(pending_out);
+    # go through and complement it with jabroster table, respecting the ljflags, to remove state
+    $sth = $u->prepare("SELECT contactid, name, substate, groups, ljflags ".
+                       "FROM jabroster WHERE userid=?");
+    $sth->execute($u->{userid});
+    while (my $rostrow = $sth->fetchrow_hashref) {
+        my $uid = $rostrow->{contactid};
+        my $cu  = LJ::load_userid($uid)
+            or next;
+        my $barejid = $cu->is_identity ?
+            $cu->identity->value :
+            "$cu->{user}\@$LJ::DOMAIN";
+
+        my $rec = $user{$uid} ||= [];
+        $rec->[0] = $barejid;
+        $rec->[1] = defined $rec->[1] ? (($rec->[1]+0) | ($rostrow->{substate}+0)) : $rostrow->{substate}+0;
+        $rec->[2] = $rostrow->{name};
+        $rec->[3] = $rostrow->{groups};
+
+        # remove 'to' bit if ljflags bit0 says so
+        if ($rostrow->{ljflags}+0 & 1) {
+            $rec->[1]-- if ($rec->[1]+0) & 1;  # 0x01 is 'to'
         }
-        push @list, ["$urec->[0]\@$LJ::DOMAIN", $urec->[0], \@edge, \@grp];
+    }
+
+    # list of [jid, nick, $substate, [@groups]]
+    my @list;
+    foreach my $uid (keys %user) {
+        my $urec = $user{$uid};
+        my ($barejid, $substate, $name, $groups) = @$urec;
+        next unless $substate;  # substate went from to -> no longer mutual (still to) -> none (hide flag on), so skip
+
+        $groups ||= $LJ::SITENAMESHORT;
+        my @grp = split(/\0/, $groups);
+        unless ($name) {
+            $barejid =~ /^(.+?)\@/;
+            $name = $1;
+        }
+        push @list, [$urec->[0], $name, $substate, \@grp];
     }
 
     return Storable::nfreeze(\@list);
@@ -89,6 +118,10 @@ sub ljtalk_avatar_sha1 {
 
 sub _avatar_want {
     my ($job, $want) = @_;
+    if ($want eq "sha1") {
+        return sha1_hex(rand());
+    }
+
     my $u = LJ::load_user($job->arg) or die "invalid user: '" . $job->arg . "'";
     return "" unless $u->{defaultpicid};
 
@@ -195,4 +228,145 @@ sub _bot_post {
 
     my $url = $res->{url};
     return ("Posted: $url", "<i>Posted:</i> <a href='$url'>$url</a>");
+}
+
+sub ljtalk_addupdateset_roster {
+    my $job = shift;
+    my $req = Storable::thaw($job->arg);
+
+    my $u = LJ::load_user($req->{user})
+        or die "Failed to load user object";
+
+    # FIXME: bogus canonicalization, xmpp supports unicode/stringprep/etc:
+    my $contact = lc $req->{contact};
+    my $is_lj;
+    my $cu;  # contact's $u object
+    if ($contact =~ /^(\w{1,15})\@\Q$LJ::DOMAIN\E/i) {
+        $is_lj = $1;
+        $cu = LJ::load_user($is_lj)
+            or die "Contact doesn't exist";
+    } else {
+        $cu = LJ::User::load_identity_user("J", "$contact")
+            or die "Failed to load identity user J:$contact";
+    }
+
+    my $rv;
+    my $substate = $req->{substate} || 0;
+    my $glist = join("\0", @{$req->{groups} || []});
+    $rv = $u->do("INSERT IGNORE INTO jabroster SET userid=?, contactid=?, name=?, groups=?, substate=? ",
+                 undef, $u->{userid}, $cu->{userid}, $req->{name}, $glist, $substate);
+    unless ($rv > 0) {
+        my $newstate = defined $req->{substate} ? $req->{substate} : "substate";
+        $u->do("UPDATE jabroster SET name=?, groups=?, substate=$newstate WHERE userid=? AND contactid=?",
+               undef, $req->{name}, $glist, $u->{userid}, $cu->{userid});
+        $substate = $u->selectrow_array("SELECT substate FROM jabroster WHERE userid=? AND contactid=?",
+                                        undef, $u->{userid}, $cu->{userid});
+    }
+    return Storable::nfreeze({substate => $substate});
+}
+
+sub _contact_u_if_exists {
+    my $contact = shift;
+
+    # FIXME: bogus canonicalization, xmpp supports unicode/stringprep/etc:
+    my $contact = lc $contact;
+    my $is_lj;
+    my $cu;  # contact's $u object
+    if ($contact =~ /^(\w{1,15})\@\Q$LJ::DOMAIN\E/i) {
+        $is_lj = $1;
+        $cu = LJ::load_user($is_lj);
+    } else {
+        $cu = _load_identity_user_no_vivify("J", $contact);
+    }
+    return wantarray ? ($cu, $is_lj) : $cu;
+}
+
+sub ljtalk_delete_roster_item {
+   my $job = shift;
+   my $req = Storable::thaw($job->arg);
+
+   my $u = LJ::load_user($req->{user})
+       or die "Failed to load user object";
+
+   my ($cu, $is_lj) = _contact_u_if_exists($req->{contact});
+   return 1 unless $cu;
+
+   # non-LJ case is easy, just delete them:
+   if (!$is_lj) {
+       $u->do("DELETE FROM jabroster WHERE userid=? AND contactid=?",
+              undef, $u->{userid}, $cu->{userid});
+       return 1;
+   }
+
+   # in LJ case, we can't just delete them, since their roster is composed
+   # of explicit + implicit (mutual friends).  so if they're mututal friends,
+   # we need to set the 'hide_to bit' on in ljflags.
+   my $rv = $u->do("UPDATE jabroster SET substate=0, ljflags=1 ".
+                   "WHERE userid=? AND contactid=?", undef,
+                   $u->{userid}, $cu->{userid});
+   return 1 if $rv > 0;
+   $u->do("INSERT IGNORE INTO jabroster SET userid=?, contactid=?, substate=0, ljflags=1 ",
+          undef, $u->{userid}, $cu->{userid})
+       or die;
+   return 1;
+}
+
+sub ljtalk_load_roster_item {
+    my $job = shift;
+    my $req = Storable::thaw($job->arg);
+
+    my $u = LJ::load_user($req->{user})
+        or die "Failed to load user object";
+
+    my ($cu, $is_lj) = _contact_u_if_exists($req->{contact});
+    return Storable::nfreeze({}) unless $cu;
+
+    my $rostrow = $u->selectrow_hashref("SELECT name, substate, groups, ljflags ".
+                                        "FROM jabroster WHERE userid=? AND contactid=?",
+                                        undef, $u->{userid}, $cu->{userid});
+
+    # non-LJ JIDs don't need to consult friends tables, so just do it now
+    unless (defined $is_lj) {
+        return Storable::nfreeze({}) unless $rostrow;
+        return Storable::nfreeze({
+            substate => $rostrow->{substate},
+            name     => $rostrow->{name},
+            groups   => $rostrow->{groups},
+        });
+    }
+
+    # otherwise, we have to vivify the relationship:
+    my $to   = LJ::is_friend($u, $cu);
+    my $from = LJ::is_friend($cu, $u);
+
+    # only use bits 0x04 and 0x08 from substates (pendin/pendout), and do to/from ourselves
+    # from relations.
+    my $substate = $rostrow ? ($rostrow->{substate}+0 & 0x0c) : 0;
+
+    # if we both friend each other, it's mutual (to+from set)
+    $substate |= 3 if $to && $from;
+
+    # bit0 of ljflags says "they're a friend, but I don't want them in my roster"
+    if ($rostrow && ($rostrow->{ljflags}+0) & 1) {
+        $substate-- if $substate & 1;  # lame bitmath. :)
+    }
+
+    my $groups = $rostrow ? $rostrow->{groups} : "";
+    $groups ||=  $is_lj ? "LiveJournal" : "Contacts";
+
+    return Storable::nfreeze({
+        substate => $substate,
+        groups   => $groups,
+        name     => ($rostrow ? $rostrow->{name} : $cu->{user}) || $cu->{user},
+    });
+}
+
+# TODO: move this into LJ::User and add no-vivify flag
+sub _load_identity_user_no_vivify {
+    my ($type, $ident) = @_;
+    my $dbh = LJ::get_db_writer();
+    my $uid = $dbh->selectrow_array("SELECT userid FROM identitymap WHERE idtype=? AND identity=?",
+                                    undef, $type, $ident);
+    return LJ::load_userid($uid) if $uid;
+    return undef;
 }

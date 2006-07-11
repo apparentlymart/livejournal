@@ -2490,6 +2490,17 @@ CREATE TABLE urimap (
 )
 EOC
 
+register_tablecreate("jabroster", <<'EOC');
+CREATE TABLE jabroster (
+  userid     INT UNSIGNED NOT NULL,
+  contactid  INT UNSIGNED NOT NULL,
+  PRIMARY KEY (userid, contactid),
+  name       VARCHAR(255) BINARY,
+  substate   TINYINT UNSIGNED NOT NULL,
+  groups     VARCHAR(255) BINARY,
+  ljflags    TINYINT UNSIGNED NOT NULL
+)
+EOC
 
 
 # NOTE: new table declarations go here
