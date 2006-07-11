@@ -2086,22 +2086,23 @@ sub can_use_journal
 # class:
 # des: Get communities associated with a user
 # info:
-# args: user
+# args: user, ref to types
 # des-:
-# returns: hash of communities
+# returns: array of communities
 # </LJFUNC>
 sub get_recommended_communities {
     my $u = shift;
+    # Indicates relationship to user, or activity of community
+    my $type = shift() || {};
     my %comms;
 
     # Load their friendofs to determine community membership
     my @ids = LJ::get_friendofs($u);
-    my %fro;
-    LJ::load_userids_multiple([ map { $_ => \$fro{$_} } @ids ]);
+    my %fro = %{ LJ::load_userids(@ids) || {} };
 
     foreach my $ulocal (values %fro) {
         next unless $ulocal->{'statusvis'} eq 'V';
-        next unless $ulocal->{'journaltype'} eq 'C';
+        next unless $ulocal->is_community;
 
         # TODO: This is bad if they belong to a lot of communities,
         # is a db query to global each call
@@ -2109,22 +2110,23 @@ sub get_recommended_communities {
         next if $ci->{'membership'} eq 'closed';
 
         # Add to %comms
-        $ulocal->{istatus} = 'normal';
+        $type->{$ulocal->{userid}} = 'normal';
         $comms{$ulocal->{userid}} = $ulocal;
     }
 
+    # Contains timeupdate and timecreate in an array ref
+    my %times;
     # Get usage information about comms
     if (%comms) {
-        my $ids = join(',', map { $_->{userid} } values %comms);
+        my $ids = join(',', keys %comms);
 
         my $dbr = LJ::get_db_reader();
         my $sth = $dbr->prepare("SELECT UNIX_TIMESTAMP(timeupdate), UNIX_TIMESTAMP(timecreate), userid ".
-                                 "FROM userusage WHERE userid IN($ids)");
+                                 "FROM userusage WHERE userid IN ($ids)");
         $sth->execute;
 
         while (my @row = $sth->fetchrow_array) {
-            ($comms{$row[2]}->{'timeupdate'},
-             $comms{$row[2]}->{'timecreate'}) = ($row[0], $row[1]);
+            @{$times{$row[2]}} = @row[0,1];
         }
     }
 
@@ -2133,27 +2135,30 @@ sub get_recommended_communities {
     # the inviter is a maint or mod
     my $over30 = 0;
     my $now = time();
-    foreach my $comm (sort {$b->{timeupdate} <=> $a->{timeupdate}} values %comms) {
-        if ($now - $comm->{timecreate} <= 86400*10) {
-            $comm->{istatus} = 'new';
+    foreach my $commid (sort {$times{$b}->[0] <=> $times{$a}->[0]} keys %comms) {
+        my $comm = $comms{$commid};
+        if ($now - $times{$commid}->[1] <= 86400*10) {
+            $type->{$commid} = 'new';
             next;
         }
 
-        my $maintainers = LJ::load_rel_user_cache($comm->{userid}, 'A') || [];
-        my $moderators  = LJ::load_rel_user_cache($comm->{userid}, 'M') || [];
+        my $maintainers = LJ::load_rel_user_cache($commid, 'A') || [];
+        my $moderators  = LJ::load_rel_user_cache($commid, 'M') || [];
         foreach (@$maintainers, @$moderators) {
             if ($_ == $u->{userid}) {
-                $comm->{istatus} = 'mm';
+                $type->{$commid} = 'mm';
                 next;
             }
         }
 
+        # Once a community over 30 days old is reached
+        # all subsequent communities will be older and can be deleted
         if ($over30) {
-            delete $comms{$comm->{userid}};
+            delete $comms{$commid};
             next;
         } else {
-            if (time() - $comm->{timeupdate} > 86400*30) {
-                delete $comms{$comm->{userid}};
+            if ($now - $times{$commid}->[0] > 86400*30) {
+                delete $comms{$commid};
                 $over30 = 1;
             }
         }
@@ -2161,18 +2166,18 @@ sub get_recommended_communities {
 
     # If we still have more than 20 comms, delete any with less than
     # five members
-    if (scalar keys %comms > 20) {
+    if (%comms > 20) {
         foreach my $comm (values %comms) {
-            next unless $comm->{istatus} eq 'normal';
+            next unless $type->{$comm->{userid}} eq 'normal';
 
             my $ids = LJ::get_friends($comm);
-            if (scalar values %$ids < 5) {
-            delete $comms{$comm->{userid}};
+            if (%$ids < 5) {
+                delete $comms{$comm->{userid}};
             }
         }
     }
 
-    return %comms;
+    return values %comms;
 }
 
 # <LJFUNC>
