@@ -16,14 +16,15 @@ sub is_common { 0 }
 
 sub zero_journalid_subs_means { "friends" }
 
-sub as_email {
+sub as_email_subject { 'LiveJournal Friend Updates!' }
+
+sub as_email_string {
     my $self = shift;
     my $u1 = LJ::load_userid($self->arg1);
 
     return '' unless $u1;
 
-    return sprintf(qq {
-Hi %s,
+    return sprintf(qq {Hi %s,
 
 %s has created a new journal!
 
@@ -36,7 +37,7 @@ To view your friend's profile
 %s
     },
                    $self->u->display_username,
-                   $u1->ljuser_display,
+                   $u1->display_username,
                    "$LJ::SITEROOT/friends/add.bml?user=" . $u1->name,
                    $u1->profile_url,
                    );
@@ -58,7 +59,14 @@ sub as_html {
 sub as_string {
     my $self = shift;
     my $u1 = LJ::load_userid($self->arg1);
-    return $self->as_html;
+
+    return 'A friend whom you invited, has created a journal.' unless $u1;
+
+    return sprintf(qq {
+        Your friend %s whom you invited, has created a journal.
+        },
+                   $u1->username_display,
+                   );
 }
 
 sub as_sms {
