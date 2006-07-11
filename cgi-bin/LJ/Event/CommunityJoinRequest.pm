@@ -20,11 +20,18 @@ sub new {
 
 sub is_common { 0 }
 
-sub as_string {
+sub as_html {
     my $self = shift;
     return sprintf("The user %s has requested to join the community %s.",
                    LJ::load_userid($self->arg1)->ljuser_display,
                    LJ::load_userid($self->arg2)->ljuser_display);
+}
+
+sub as_string {
+    my $self = shift;
+    return sprintf("The user %s has requested to join the community %s.",
+                   LJ::load_userid($self->arg1)->display_username,
+                   LJ::load_userid($self->arg2)->display_username);
 }
 
 sub as_sms {
