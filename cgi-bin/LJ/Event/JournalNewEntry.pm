@@ -132,7 +132,7 @@ sub unsubscribed_tags {
     my $usertags = LJ::Tags::get_usertags($journal, {remote => $subscr->owner});
     return () unless $usertags;
 
-    my @tagids = sort { $usertags->{$a}->{uses} <=> $usertags->{$b}->{uses} } keys %$usertags;
+    my @tagids = sort { $usertags->{$a}->{name} cmp $usertags->{$b}->{name} } keys %$usertags;
     return grep { $_ } map {
         $subscr->owner->has_subscription(
                                          etypeid => $class->etypeid,
