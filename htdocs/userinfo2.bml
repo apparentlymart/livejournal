@@ -748,14 +748,16 @@
 if ( ! $synd && ($u->can_show_bday || $viewall)) {
     if ($u->{'bdate'} && !$com && $u->{'bdate'} ne "0000-00-00" && !$u->underage) {
         my $bdate = $u->{'bdate'};
-        $bdate =~ s/^0000-//;
         my ($year,$mon,$day) = split(/-/, $bdate);
         if ($u->opt_showbday eq 'D') {
             $bdate = "$mon-$day";
         } elsif ($u->opt_showbday eq 'Y') {
             $bdate = $year;
         }
+        unless ($bdate =~ /^0000$/) {
+            $bdate =~ s/^0000-//;
           $body .= "<tr><td align='right'>$ML{'.label.birthdate'}</td><td class='data'>$bdate</td></tr>\n";
+        }
     }
 }
 
