@@ -67,11 +67,11 @@ sub notify {
             to       => $u->{email},
             from     => $LJ::BOGUS_EMAIL,
             fromname => $LJ::SITENAMESHORT,
-            wrap => 1,
-            charset => 'utf-8',
-            subject => $ev->as_string,
-            html    => $ev->as_email_html, # FIXME: make this work!
-            body    => $ev->as_email_string,
+            wrap     => 1,
+            charset  => 'utf-8',
+            subject  => $ev->as_email_subject,
+            html     => $ev->as_email_html, # FIXME: make this work!
+            body     => $ev->as_email_string,
         }) or die "unable to send notification email";
     }
 
