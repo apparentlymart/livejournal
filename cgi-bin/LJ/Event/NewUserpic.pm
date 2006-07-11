@@ -34,6 +34,11 @@ sub as_sms {
     return $self->as_string;
 }
 
+sub as_email_subject {
+    my $self = shift;
+    return sprintf "LiveJournal Notices: %s Userpic Updates!", $self->event_journal->display_username;
+}
+
 sub zero_journalid_subs_means { "friends" }
 
 sub subscription_as_html {
