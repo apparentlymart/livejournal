@@ -21,6 +21,13 @@ update_db() if  grep { /\.sql/ } @files;
 bap() if  grep { /cgi-bin.+\.[pl|pm]/ } @files;
 
 
+my $updatedfilepath = "$ENV{LJHOME}/logs/trunk-last-updated.txt";
+my $updatedfh;
+open($updatedfh, ">$updatedfilepath") or return "Could not open file $updatedfilepath: $!\n";
+print $updatedfh time();
+close $updatedfh;
+
+
 
 sub update_svn {
     system("cvsreport.pl", "-u")
