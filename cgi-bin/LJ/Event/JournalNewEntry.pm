@@ -75,7 +75,7 @@ sub content {
 sub as_string {
     my $self = shift;
     my $entry = $self->entry;
-    my $about = $entry->subject_text ? " titled '" . $entry->subject_text . "'" : '';
+    my $about = $entry->subject_text ? ' titled "' . $entry->subject_text . '"' : '';
 
     return sprintf("The journal '%s' has a new post$about at: " . $self->entry->url,
                    $self->u->{user});
@@ -98,7 +98,68 @@ sub as_html {
     my $pu = LJ::ljuser($entry->poster);
     my $url = $entry->url;
 
-    return "New <a href=\"$url\">entry</a> in $ju by $pu.";
+    my $about = $entry->subject_text ? ' titled "' . $entry->subject_text . '"' : '';
+
+    return "New <a href=\"$url\">entry</a>$about in $ju by $pu.";
+}
+
+sub as_email_subject {
+    my $self = shift;
+
+    return "$LJ::SITENAMESHORT Notices: " . $self->entry->journal->display_username;
+}
+
+sub email_body {
+    my $self = shift;
+
+    if ($self->entry->journal->is_comm) {
+        return "new post in comm";
+    } else {
+        return qq "Hi %s,
+
+%s has updated their journal!" . (! LJ::is_friend($self->u, $self->entry->poster) ? "
+
+If you haven't done so already, add %s so you can stay up-to-date on the happenings in their life.
+
+Click here to add them as your friend:
+%s" : '') . "
+
+To view user's profile
+%s";
+    }
+}
+
+sub as_email_string {
+    my $self = shift;
+
+
+    my @vars = (
+                $self->u->display_username,
+                $self->entry->poster->display_username,
+                );
+
+    push @vars, ($self->entry->poster->display_username, "$LJ::SITEROOT/friends/add.bml?user=" . $self->entry->poster->name)
+        unless LJ::is_friend($self->u, $self->entry->poster);
+
+    push @vars, $self->entry->poster->profile_url;
+
+    return sprintf $self->email_body, @vars;
+}
+
+sub as_email_html {
+    my $self = shift;
+
+    my @vars = (
+                $self->u->ljuser_display,
+                $self->entry->poster->ljuser_display,
+                );
+
+    push @vars, ($self->entry->poster->ljuser_display, "$LJ::SITEROOT/friends/add.bml?user=" . $self->entry->poster->name)
+        unless LJ::is_friend($self->u, $self->entry->poster);
+
+    push @vars, $self->entry->poster->profile_url;
+
+    return sprintf $self->email_body, @vars;
 }
 
 sub subscription_applicable {
