@@ -2663,13 +2663,16 @@ sub subscribe_interface {
 
                 my $notify_input_name = $note_pending->freeze;
 
+                # select email method by default
+                my $note_selected = (scalar @subs) ? 1 : (!$selected && $note_class eq 'LJ::NotificationMethod::Email');
+
                 $cat_html .= qq {
                     <td class='NotificationOptions' $hidden>
                     } . LJ::html_check({
                         id       => $notify_input_name,
                         name     => $notify_input_name,
                         class    => "SubscribeCheckbox-$catid-$ntypeid",
-                        selected => (scalar @subs),
+                        selected => $note_selected,
                         noescape => 1,
                     }) . '</td>';
 
@@ -2717,12 +2720,12 @@ sub subscribe_interface {
     # link to manage settings (if not at manage settings)
     my $managelink = qq { | Manage your subscriptions in the <a href="$LJ::SITEROOT/manage/subscriptions/index.bml">
             Subscription Center</a><br/>
-            $extra_sub_status
     } unless BML::get_uri() =~ m!/manage/subscriptions/index.bml!i;
 
     $ret .= qq {
         <div id="SubscriptionInfo">
             You are subscribed to $sub_count $event_plural ($sub_max available) $managelink
+            $extra_sub_status
             </div>
         };
 
