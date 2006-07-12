@@ -96,7 +96,7 @@ div.argOptsContainer {
     }
 
 	#NotificationTable tr:hover {
-		background-color: #f6e6d2;
+		background-color: #f6e6d2 !important;
 		}
 
     #NotificationTable tr.Selected {
@@ -204,6 +204,11 @@ div.argOptsContainer {
     padding: .3em 0 .2em 1em;
     width: 95%;
     }
+
+	.InboxItem_Content {
+		max-width: 90%;
+		height: auto;
+		}
         
 #inbox td.time {
     width: 8.5em;
