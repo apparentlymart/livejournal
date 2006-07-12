@@ -701,6 +701,12 @@ function EntryLite::print_linkbar() {
   var string url  = "";
   var string text = "";
 
+  var string{} texts = {
+    "edit_entry" => $*text_edit_entry,
+    "edit_tags"  => $*text_edit_tags,
+    "mem_add"    => $*text_mem_add,
+  };
+  
   var string btwn_comments = "";
   if (clean_url($*img_btwn_comments) != "") {
     $btwn_comments = """ <img src="$*img_btwn_comments" alt="" /> """;
@@ -758,7 +764,7 @@ function EntryLite::print_linkbar() {
   foreach var string link_key ($.link_keyseq) {
     var Link link = $this->get_link($link_key);
     $url          = $link.url;
-    $text         = $link.caption;
+    $text         = $texts{$link_key} != "" ? $texts{$link_key} : $link.caption;
     if($url != "") {
       $linkbar = $linkbar + """<a href="$url">$text</a>$btwn_comments""";
     }
