@@ -1384,13 +1384,15 @@ sub get_layout_themes
 {
     my $src = shift; $src = [ $src ] unless ref $src eq "ARRAY";
     my $layid = shift;
+    my $u = shift; # Optional parameter; only needed if any themes are restricted by policy
     my @themes;
     foreach my $src (@$src) {
         foreach (sort { $src->{$a}->{'name'} cmp $src->{$b}->{'name'} } keys %$src) {
             next unless /^\d+$/;
             my $v = $src->{$_};
             push @themes, $v if
-                ($v->{'type'} eq "theme" && $layid && $v->{'b2lid'} == $layid);
+                ($v->{'type'} eq "theme" && $layid && $v->{'b2lid'} == $layid) &&
+                (! defined $u || LJ::S2::can_use_layer($u, $v->{'uniq'})); # If no u, accept theme; else check policy
         }
     }
     return @themes;
@@ -1460,7 +1462,12 @@ sub can_use_layer
     });
     my $pol = get_policy();
     my $can = 0;
-    foreach ('*', $uniq) {
+
+    my @try = ($uniq =~ m!/layout$!) ?
+              ('*', $uniq)           : # this is a layout
+              ('*/themes', $uniq);     # this is probably a theme
+
+    foreach (@try) {
         next unless defined $pol->{$_};
         next unless defined $pol->{$_}->{'use'};
         $can = $pol->{$_}->{'use'};

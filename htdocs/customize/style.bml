@@ -448,7 +448,7 @@ body<=
         $ret .= "<noscript> " . LJ::html_submit('save:langcode', $ML{'.change'}) . " </noscript>";
         $ret .= "</div></fieldset>";
 
-        my @themes = LJ::S2::get_layout_themes_select([$pub], $style{'layout'});
+        my @themes = LJ::S2::get_layout_themes_select([$pub], $style{'layout'}, $u);
 
         # add user/disabled ones
         push @themes, LJ::cmize::s2_custom_layer_list($u, 'theme', 'layout');

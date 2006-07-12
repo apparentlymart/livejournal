@@ -24,7 +24,7 @@
     my $layoutid = $GET{'s2_layoutid'};
 
     my @themes = ("0", BML::ml('/customize/index.bml.s2.customize.themes.default'));
-    push @themes, LJ::S2::get_layout_themes_select([$pub], $layoutid);
+    push @themes, LJ::S2::get_layout_themes_select([$pub], $layoutid, $u);
     my @langs  = ("0", BML::ml('/customize/index.bml.s2.customize.language.default'));
     push @langs, LJ::S2::get_layout_langs($pub, $layoutid);
 
