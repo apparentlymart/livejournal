@@ -1827,6 +1827,13 @@ sub display_username {
     return $u->{user};
 }
 
+# userid
+*userid = \&id;
+sub id {
+    my $u = shift;
+    return $u->{userid};
+}
+
 package LJ;
 
 # <LJFUNC>
