@@ -1,6 +1,8 @@
 #!/usr/bin/perl
 #
 
+package LJ;
+
 use strict;
 
 # <WCMFUNC>
