@@ -7,13 +7,13 @@
 package LJ::Comment;
 
 use strict;
-use vars qw/ $AUTOLOAD /;
 use Carp qw/ croak /;
 use Class::Autouse qw(
                       LJ::Entry
                       );
 
-require "$ENV{LJHOME}/cgi-bin/talklib.pl";
+require "$ENV{'LJHOME'}/cgi-bin/htmlcontrols.pl";
+require "$ENV{'LJHOME'}/cgi-bin/talklib.pl";
 
 # internal fields:
 #
