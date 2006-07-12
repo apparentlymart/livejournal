@@ -48,8 +48,9 @@ body<=
                 # don't duplicate subscriptions
                 next if $u->has_subscription($subscr->sub_info);
 
-                if ((scalar $u->find_subscriptions(method => 'Inbox')) >= $u->get_cap('subscriptions')
-                    && $subscr->method eq 'LJ::NotificationMethod::Inbox') {
+                my @inbox_subs = grep { $_->active } $u->find_subscriptions(method => 'Inbox');
+
+                if ((scalar @inbox_subs) >= $u->get_cap('subscriptions') && $subscr->method eq 'LJ::NotificationMethod::Inbox') {
                     push @errors, LJ::errobj("Subscription::TooMany", subscr => $subscr, u => $u);
                 } else {
                     $subscr->commit;
