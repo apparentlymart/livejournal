@@ -41,5 +41,14 @@ sub run_tests {
         # make sure inactive flag is unset
         $flags = $subscr->flags;
         is($flags, 0, "Inactive flag unset");
+
+        # set a bunch of flags and clear one
+        $subscr->set_flag(1);
+        $subscr->set_flag(2);
+        $subscr->set_flag(4);
+        $subscr->set_flag(8);
+        $subscr->clear_flag(4);
+
+        is($subscr->flags, 11, "Cleared one flag ok");
     }
 }
