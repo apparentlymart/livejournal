@@ -568,33 +568,46 @@ sub format_html_mail {
     $html .= "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding\" /></head>\n<body>\n";
 
     my $intro;
+    my $parentu = $entry->journal;
+    my $profile_url = $parentu->profile_url;
+    my $entry_url   = $entry->url;
+
+    my $pwho = 'you';
+
+    if (! $parent && ! LJ::u_equals($parentu, $targetu)) {
+        $pwho = LJ::ehtml($parentu->{name}) .
+            " (<a href=\"$profile_url\">" . $parentu->{user} . "</a>)";
+    } elsif ($parent) {
+        my $threadu = $parent->poster;
+        if ($threadu && ! LJ::u_equals($threadu, $targetu)) {
+            $pwho = LJ::ehtml($threadu->{name}) .
+                " (<a href=\"$profile_url\">" . $threadu->{user} . "</a>)";
+        }
+    }
+
     if (LJ::u_equals($targetu, $self->poster)) {
         # ->parent returns undef/0 if parent is an entry.
         if (! $parent) {
-            my $parentu = $entry->journal;
-
-            my $profile_url = $parentu->profile_url;
-            my $entry_url   = $entry->url;
-
             $who = LJ::ehtml($parentu->{name}) .
                 " (<a href=\"$profile_url\">$parentu->{user}</a>)";
-            $intro = "You replied to <a href=\"$talkurl\">a $LJ::SITENAMESHORT post</a> in which $who said:";
+            $intro = "You replied to <a href=\"$talkurl\">a $LJ::SITENAMESHORT post</a> in which $pwho said:";
         } else {
-            $intro = "You replied to a comment somebody left in ";
+            $intro = "You replied to a comment $pwho left in ";
             $intro .= "<a href=\"$talkurl\">a $LJ::SITENAMESHORT post</a>.  ";
             $intro .= "The comment you replied to was:";
         }
     } elsif (LJ::u_equals($targetu, $entry->journal)) {
         if (! $parent) {
-            $intro = "$who replied to <a href=\"$talkurl\">your $LJ::SITENAMESHORT post</a> in which you said:";
+            $intro = "$who replied to <a href=\"$talkurl\">your $LJ::SITENAMESHORT post</a> in which $pwho said:";
         } else {
-            $intro = "$who replied to another comment somebody left in ";
+            $intro = "$who replied to another comment $pwho left in ";
             $intro .= "<a href=\"$talkurl\">your $LJ::SITENAMESHORT post</a>.  ";
             $intro .= "The comment they replied to was:";
         }
     } else {
-        $intro = "$who replied to <a href=\"$talkurl\">your $LJ::SITENAMESHORT comment</a> ";
-        $intro .= "in which you said:";
+        $intro = "$who replied to <a href=\"$talkurl\">a $LJ::SITENAMESHORT " .
+            ($parent ? "comment" : "post") . "</a> ";
+        $intro .= "in which $pwho said:";
     }
 
     my $pichtml;
