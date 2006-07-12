@@ -1045,15 +1045,17 @@ sub can_show_full_bday {
 
 sub bday_string {
     my $u = shift;
+    croak "invalid user object passed" unless LJ::isu($u);
+    return 0 if $u->underage;
 
     my $bdate = $u->{'bdate'};
     my ($year,$mon,$day) = split(/-/, $bdate);
     my $bday_string;
-    if ($u->can_show_full_bday) {
+    if ($u->can_show_full_bday && $day > 0 && $mon > 0) {
         $bday_string = $bdate;
-    } elsif ($u->can_show_bday) {
+    } elsif ($u->can_show_bday && $day > 0 && $mon > 0) {
         $bday_string = "$mon-$day";
-    } elsif ($u->can_show_bday_year && $year ne '0000') {
+    } elsif ($u->can_show_bday_year && $year > 0) {
         $bday_string = $year;
     } else {
         $bday_string = "";
