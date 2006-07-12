@@ -21,9 +21,23 @@ sub as_email_subject { 'LiveJournal Friend Request!' }
 sub as_email_string {
     my $self = shift;
 
-    return sprintf qq {Hi %s,
+    return sprintf $self->email_body, $self->u->display_username, $self->friend->display_username, "$LJ::SITEROOT/friends/add.bml?user=" . $self->friend->name,
+"$LJ::SITEROOT/friends/edit.bml";
+}
 
-%s has added you to their Friend's list.
+sub as_email_html {
+    my $self = shift;
+
+    return sprintf $self->email_body, $self->u->ljuser_display, $self->friend->ljuser_display, "$LJ::SITEROOT/friends/add.bml?user=" . $self->friend->name,
+"$LJ::SITEROOT/friends/edit.bml";
+}
+
+sub email_body {
+    my $self = shift;
+
+    return qq {Hi %s,
+
+%s has added you to their Friends list.
 
 They will now be able to view your public journal updates on their Friends page.  Add your new friend so that you can interact with each other's friends and network!
 
@@ -33,8 +47,7 @@ Click here to add them as your friend:
 
 To view your current friends list:
 %s
-}, $self->u->display_username, $self->friend->display_username, "$LJ::SITEROOT/friends/add.bml?user=" . $self->friend->name,
-"$LJ::SITEROOT/friends/edit.bml";
+};
 }
 
 sub friend {
