@@ -253,7 +253,7 @@ sub opt_fields { (); }
 # you may override this
 sub as_html {
     my $self = shift;
-    return LJ::ehtml($self->as_string);
+    return $self->as_string;
 }
 
 sub as_bullets {
@@ -275,7 +275,16 @@ sub as_string { return $_[0]->field('message'); }
 
 sub as_html {
     my $self = shift;
-    return LJ::ehtml($self->die_string);
+
+    # these errors (exclusively?) come from trusted pages
+    # which generate their content... don't ehtml because
+    # we often die with translation strings, etc which
+    # contain markup
+    #
+    # -- this solution sucks, but I'm not sure how to do it
+    #    better, and a less-than-perfect API is better than
+    #    having broken output all over.  :-/
+    return $self->die_string;
 }
 
 # automatic type returned when something dies with a reference, but not
