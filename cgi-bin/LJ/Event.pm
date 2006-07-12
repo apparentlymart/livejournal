@@ -243,7 +243,7 @@ sub subscriptions {
         }
     }
 
-    return @subs;
+    return grep { $_->active } @subs;
 }
 
 # valid values are nothing ("" or undef), or "friends"
