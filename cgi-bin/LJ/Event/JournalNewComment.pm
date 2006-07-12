@@ -13,7 +13,19 @@ sub new {
 
 sub is_common { 1 }
 
-sub as_email_string { 'whitaker should fix this' }
+sub as_email_string {
+    my $self = shift;
+    my $comment = $self->comment or return "(Invalid comment)";
+
+    return $comment->format_text_mail($self->u);
+}
+
+sub as_email_html {
+    my $self = shift;
+    my $comment = $self->comment or return "(Invalid comment)";
+
+    return $comment->format_html_mail($self->u);
+}
 
 sub content {
     my $self = shift;
@@ -26,6 +38,8 @@ sub content {
     my $comment_body = $comment->body_html;
     my $buttons = $comment->manage_buttons;
     my $dtalkid = $comment->dtalkid;
+
+    
 
     my $ret = qq {
         <div id="ljcmt$dtalkid" class="JournalNewComment">
@@ -76,7 +90,10 @@ sub as_html {
 
     my $subject = $comment->subject_text ? ' "' . $comment->subject_text . '"' : '';
 
-    return "New <a href=\"$url\">comment</a>$subject in $in_text on $ju by $pu.";
+    my $ret = "New <a href=\"$url\">comment</a>$subject in $in_text on $ju";
+    $ret .= $comment->poster ? " by $pu." : '';
+
+    return $ret;
 }
 
 sub subscription_as_html {
