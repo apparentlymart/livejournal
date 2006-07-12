@@ -58,7 +58,7 @@ sub thaw {
 }
 
 sub pending { 0 }
-sub default_selected { 1 }
+sub default_selected { $_[0]->active }
 
 sub subscriptions_of_user {
     my ($class, $u) = @_;
@@ -281,7 +281,7 @@ sub clear_flag {
 sub set_flags {
     my ($self, $flags) = @_;
 
-    $self->owner->do("UPDATE subs SET flags=? WHERE userid=?", undef, $self->owner->userid);
+    $self->owner->do("UPDATE subs SET flags=? WHERE userid=? AND subid=?", undef, $flags, $self->owner->userid, $self->id);
     $self->{flags} = $flags;
 }
 
