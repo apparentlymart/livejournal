@@ -7,6 +7,10 @@ use Class::Autouse qw(
                       LJ::Subscription::Pending
                       );
 
+use constant {
+              INACTIVE => 1 << 0,
+              };
+
 my @subs_fields = qw(userid subid is_dirty journalid etypeid arg1 arg2
                      ntypeid createtime expiretime flags);
 
@@ -237,6 +241,50 @@ sub as_html {
     return $evtclass->subscription_as_html($self);
 }
 
+sub activate {
+    my $self = shift;
+    $self->clear_flag(INACTIVE);
+}
+
+sub deactivate {
+    my $self = shift;
+    $self->set_flag(INACTIVE);
+}
+
+sub set_flag {
+    my ($self, $flag) = @_;
+
+    my $flags = $self->flags;
+
+    # don't bother if flag already set
+    return if $flags & $flag;
+
+    $flags |= $flag;
+
+    $self->set_flags($flags);
+}
+
+sub clear_flag {
+    my ($self, $flag) = @_;
+
+    my $flags = $self->flags;
+
+    # don't bother if flag already cleared
+    return unless $flags & $flag;
+
+    # clear the flag
+    $flags &= ~$flag;
+
+    $self->set_flags($flags);
+}
+
+sub set_flags {
+    my ($self, $flags) = @_;
+
+    $self->owner->do("UPDATE subs SET flags=? WHERE userid=?", undef, $self->owner->userid);
+    $self->{flags} = $flags;
+}
+
 sub id {
     my $self = shift;
 
@@ -246,6 +294,16 @@ sub id {
 sub createtime {
     my $self = shift;
     return $self->{createtime};
+}
+
+sub flags {
+    my $self = shift;
+    return $self->{flags} || 0;
+}
+
+sub active {
+    my $self = shift;
+    return ! $self->flags && INACTIVE;
 }
 
 sub expiretime {
