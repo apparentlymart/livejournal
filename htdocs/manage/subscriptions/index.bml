@@ -55,6 +55,9 @@ body<=
                     $subscr->commit;
                 }
                 next;
+            } else {
+                # this sub exists, make sure it's now activated
+                $subscr->activate if $subscr->method eq 'LJ::NotificationMethod::Inbox';
             }
 
             # remove old string
@@ -79,7 +82,7 @@ body<=
             if (! $checked && $oldvalue) {
                 # if it's not checked and is currently a real subscription, delete it
 
-                # if it's the inbox method, delete everything
+                # if it's the inbox method, deactivate everything
                 if ($subscr->method eq 'LJ::NotificationMethod::Inbox') {
                     my @subs = $u->find_subscriptions(
                                                       journalid => $subscr->journalid,
@@ -87,7 +90,7 @@ body<=
                                                       arg1      => $subscr->arg1,
                                                       arg2      => $subscr->arg2,
                                                       );
-                    $_->delete foreach @subs;
+                    $_->deactivate foreach @subs;
                 } else {
                     $subscr->delete;
                 }
@@ -95,6 +98,14 @@ body<=
         }
 
         delete $u->{_subscriptions};
+    }
+
+    # look for deletions from GET
+    foreach my $subscr ($u->subscriptions) {
+        my $id = $subscr->id;
+        next unless $id;
+
+        $subscr->delete if $GET{"deletesub_$id"};
     }
 
     $body .= "<?p" . LJ::error_list(@errors) . "p?>" if scalar @errors;

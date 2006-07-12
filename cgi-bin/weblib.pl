@@ -2625,15 +2625,25 @@ sub subscribe_interface {
 
             my $selected = $pending_sub->default_selected;
 
-            $cat_html  .= "<tr><td>" .
-                LJ::html_check({
-                    id       => $input_name,
-                    name     => $input_name,
-                    class    => "SubscriptionInboxCheck",
-                    selected => $selected,
-                    noescape => 1,
-                    label    => $title,
-                }) .  "</td>";
+            my $inactiveclass = $pending_sub->active ? '' : ' class="Inactive"';
+
+            $cat_html  .= "<tr $inactiveclass><td>";
+
+            if ($is_tracking_category && ! $pending_sub->pending) {
+                my $subid = $pending_sub->id;
+                $cat_html .= qq {
+                    <a href='?deletesub_$subid=1'><img src="$LJ::IMGPREFIX/delcomment.gif" /></a>
+                };
+            }
+
+            $cat_html  .= LJ::html_check({
+                id       => $input_name,
+                name     => $input_name,
+                class    => "SubscriptionInboxCheck",
+                selected => $selected,
+                noescape => 1,
+                label    => $title,
+            }) .  "</td>";
 
             unless ($pending_sub->pending) {
                 $cat_html .= LJ::html_hidden({
@@ -2665,6 +2675,7 @@ sub subscribe_interface {
 
                 # select email method by default
                 my $note_selected = (scalar @subs) ? 1 : (!$selected && $note_class eq 'LJ::NotificationMethod::Email');
+                $note_selected &&= $pending_sub->active;
 
                 $cat_html .= qq {
                     <td class='NotificationOptions' $hidden>
