@@ -2087,7 +2087,10 @@ sub can_use_journal
 # des: Get communities associated with a user
 # info:
 # args: user, ref to types
-# des-:
+# des-type: The default value for type is 'normal', which indicates a community
+# is visible and has not been closed. A value of 'new' means the community has
+# been created in the last 10 days. Lastly a value of 'mm' indicates the user
+# passed in is a maintainer or moderator of the community.
 # returns: array of communities
 # </LJFUNC>
 sub get_recommended_communities {
