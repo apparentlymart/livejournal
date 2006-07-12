@@ -93,23 +93,8 @@ propgroup presentation {
         des = "Secondary sidebar members";
         noui = 1;
     }
-
-    set sidebar_primary = [
-        [ "userprofile", "", "0", "1" ],
-        [ "viewlinks", "" ],
-        [ "calendar" ],
-        [ "links", "Links" ],
-        [ "tags", "Tags" ],
-        [ "pagesummary", "Page Summary" ],
-        [ "syndicate", "Syndicate" ],
-        [ "poweredby" ],
-    ];
-
-    set sidebar_secondary = [
-        [ "tags", "Tags" ],
-        [ "pagesummary", "Page Summary" ],
-    ];
-
+    set sidebar_primary = []; # Set in prop_init()
+    set sidebar_secondary = []; # Set in prop_init()
 
     set external_stylesheet = true;
 }
@@ -158,38 +143,77 @@ propgroup customcss {
 }
 
 function prop_init() {
+    # Did the user specify custom sidebars?  If so, we don't want to change them.
+    var bool custom_primary = (size $*sidebar_primary > 0) ? true : false;
+    var bool custom_secondary = (size $*sidebar_secondary > 0) ? true : false;
+
     if (viewer_sees_vbox()) {
         # Users who see ads cannot use the 1 column layout
         if ($*layout_type == "1C") {
             $*layout_type = "2CR";
         }
 
-        if ($*layout_type == "3C") {
+        if (not $custom_primary) {
+            if ($*layout_type == "3C") {
+                $*sidebar_primary = [
+                    [ "userprofile", "", "0", "1" ],
+                    [ "viewlinks", "" ],
+                    [ "calendar" ],
+                    [ "links", "Links" ],
+                    [ "syndicate", "Syndicate" ],
+                    [ "poweredby" ],
+                ];
+            } else {
+                $*sidebar_primary = [
+                    [ "userprofile", "", "0", "1" ],
+                    [ "viewlinks", "" ],
+                    [ "calendar" ],
+                    [ "ads", "" ],
+                    [ "links", "Links" ],
+                    [ "tags", "Tags" ],
+                    [ "pagesummary", "Page Summary" ],
+                    [ "syndicate", "Syndicate" ],
+                    [ "poweredby" ],
+                ];
+            }
+        }
+
+        if (not $custom_secondary) {
             $*sidebar_secondary = [
                 [ "ads", "" ],
-            ];
-        } else {
-            $*sidebar_primary = [
-                [ "userprofile", "", "0", "1" ],
-                [ "viewlinks", "" ],
-                [ "calendar" ],
-                [ "ads", "" ],
-                [ "links", "Links" ],
                 [ "tags", "Tags" ],
                 [ "pagesummary", "Page Summary" ],
-                [ "syndicate", "Syndicate" ],
-                [ "poweredby" ],
             ];
         }
     } else {
-        if ($*layout_type == "3C") {
-            $*sidebar_primary = [
-                [ "userprofile", "", "0", "1" ],
-                [ "viewlinks", "" ],
-                [ "calendar" ],
-                [ "links", "Links" ],
-                [ "syndicate", "Syndicate" ],
-                [ "poweredby" ],
+        if (not $custom_primary) {
+            if ($*layout_type == "3C") {
+                $*sidebar_primary = [
+                    [ "userprofile", "", "0", "1" ],
+                    [ "viewlinks", "" ],
+                    [ "calendar" ],
+                    [ "links", "Links" ],
+                    [ "syndicate", "Syndicate" ],
+                    [ "poweredby" ],
+                ];
+            } else {
+                $*sidebar_primary = [
+                    [ "userprofile", "", "0", "1" ],
+                    [ "viewlinks", "" ],
+                    [ "calendar" ],
+                    [ "links", "Links" ],
+                    [ "tags", "Tags" ],
+                    [ "pagesummary", "Page Summary" ],
+                    [ "syndicate", "Syndicate" ],
+                    [ "poweredby" ],
+                ];
+            }
+        }
+
+        if (not $custom_secondary) {
+            $*sidebar_secondary = [
+                [ "tags", "Tags" ],
+                [ "pagesummary", "Page Summary" ],
             ];
         }
     }
