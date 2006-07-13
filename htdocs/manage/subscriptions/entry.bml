@@ -35,17 +35,20 @@ body<=
                                                    arg1    => $ditemid,
                                                    journal => $journal,
                                                    default_selected => 1,
+                                                   flags   => LJ::Subscription::TRACKING,
                                                    ),
                     LJ::Subscription::Pending->new(
                                                    $remote,
                                                    event   => "JournalNewEntry",
                                                    arg1    => '?',
                                                    journal => $journal,
+                                                   flags   => LJ::Subscription::TRACKING,
                                                    ),
                     LJ::Subscription::Pending->new(
                                                    $remote,
                                                    event   => "JournalNewEntry",
                                                    journal => $journal,
+                                                   flags   => LJ::Subscription::TRACKING,
                                                    ),
                     ],
                 }];

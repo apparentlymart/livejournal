@@ -32,6 +32,8 @@ body<=
         next unless $POST{mode} eq 'save_subscriptions';
 
         my @sub_edit;
+        my @to_consider;
+
         foreach my $postkey (keys %POST) {
             my $subscr;
             my $old_postkey = $postkey;
@@ -53,16 +55,12 @@ body<=
                 if ((scalar @inbox_subs) >= $u->get_cap('subscriptions') && $subscr->method eq 'LJ::NotificationMethod::Inbox') {
                     push @errors, LJ::errobj("Subscription::TooMany", subscr => $subscr, u => $u);
                 } else {
-                    # don't save a subscription if there is no corresponding inbox sub for it and we've reached our limit
+                    # save this for consideration after we've processed all inbox subscriptions first
                     if ($subscr->method ne 'LJ::NotificationMethod::Inbox') {
-                        my %inbox_sub = $subscr->sub_info;
-                        $inbox_sub{ntypeid} = LJ::NotificationMethod::Inbox->ntypeid;
-                        my $pending_inbox = LJ::Subscription::Pending->new($u, %inbox_sub);
-                        next unless $pending_inbox;
-                        next if ! $u->find_subscriptions(%inbox_sub) && ! $POST{$pending_inbox->freeze};
+                        push @to_consider, $subscr;
+                    } else {
+                        $subscr->commit;
                     }
-
-                    $subscr->commit;
                 }
                 next;
             } else {
@@ -91,20 +89,17 @@ body<=
             # if it's pending and enabled, make it a real subscription
             if (! $checked && $oldvalue) {
                 # if it's not checked and is currently a real subscription, delete it
-
-                # if it's the inbox method, deactivate everything
-                if ($subscr->method eq 'LJ::NotificationMethod::Inbox') {
-                    my @subs = $u->find_subscriptions(
-                                                      journalid => $subscr->journalid,
-                                                      etypeid   => $subscr->etypeid,
-                                                      arg1      => $subscr->arg1,
-                                                      arg2      => $subscr->arg2,
-                                                      );
-                    $_->deactivate foreach @subs;
-                } else {
-                    $subscr->delete;
-                }
+                $subscr->delete;
             }
+        }
+
+        foreach my $subscr (@to_consider) {
+            # don't save a subscription if there is no corresponding inbox sub for it
+            my %inbox_sub = $subscr->sub_info;
+            $inbox_sub{ntypeid} = LJ::NotificationMethod::Inbox->ntypeid;
+            delete $inbox_sub{flags};
+
+            $subscr->commit if $u->has_subscription(%inbox_sub);
         }
 
         delete $u->{_subscriptions};
@@ -115,7 +110,9 @@ body<=
         my $id = $subscr->id;
         next unless $id;
 
-        $subscr->delete if $GET{"deletesub_$id"};
+        if ($GET{"deletesub_$id"}) {
+            $subscr->delete(force => 1);
+        }
     }
 
     $body .= "<?p" . LJ::error_list(@errors) . "p?>" if scalar @errors;

@@ -2666,17 +2666,22 @@ sub subscribe_interface {
 
                 my %sub_args = $pending_sub->sub_info;
                 $sub_args{ntypeid} = $ntypeid;
+                delete $sub_args{flags};
 
                 my @subs = $u->has_subscription(%sub_args);
 
                 my $note_pending = scalar @subs ? $subs[0] : LJ::Subscription::Pending->new($u, %sub_args);
                 next unless $note_pending;
 
+                if (($is_tracking_category || $pending_sub->is_tracking_category) && $note_pending->pending) {
+                    # flag this as a "tracking" subscription
+                    $note_pending->set_flag(LJ::Subscription::TRACKING);
+                }
+
                 my $notify_input_name = $note_pending->freeze;
 
                 # select email method by default
                 my $note_selected = (scalar @subs) ? 1 : (!$selected && $note_class eq 'LJ::NotificationMethod::Email');
-                $note_selected &&= $pending_sub->active;
 
                 $cat_html .= qq {
                     <td class='NotificationOptions' $hidden>

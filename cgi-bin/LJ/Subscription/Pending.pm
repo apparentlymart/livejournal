@@ -72,12 +72,13 @@ sub commit {
     my ($self) = @_;
 
     return $self->{u}->subscribe(
-                         etypeid => $self->{etypeid},
-                         ntypeid => $self->{ntypeid},
-                         journal => $self->{journal},
-                         arg1    => $self->{arg1},
-                         arg2    => $self->{arg2},
-                         );
+                                 etypeid => $self->{etypeid},
+                                 ntypeid => $self->{ntypeid},
+                                 journal => $self->{journal},
+                                 arg1    => $self->{arg1},
+                                 arg2    => $self->{arg2},
+                                 flags   => $self->flags,
+                                 );
 }
 
 # class method
@@ -87,6 +88,8 @@ sub thaw {
     my ($type, $userid, $journalid, $etypeid, $flags, $ntypeid, $arg1, $arg2) = split('-', $data);
 
     die "Invalid thawed data" unless $type eq 'pending';
+
+    return undef unless $ntypeid;
 
     unless ($u) {
         my $subuser = LJ::load_userid($userid);
@@ -98,9 +101,9 @@ sub thaw {
     if ($arg1 && $arg1 eq '?') {
         die "Arg1 option passed without POST data" unless $POST;
 
-        my $arg1_postkey = "$type-$userid-$journalid-$etypeid-$arg1-$arg2.arg1";
+        my $arg1_postkey = "$type-$userid-$journalid-$etypeid-0-0-$arg1-$arg2.arg1";
 
-        die "No input data for $arg1_postkey" unless defined $POST->{$arg1_postkey};
+        die "No input data for $arg1_postkey ntypeid: $ntypeid" unless defined $POST->{$arg1_postkey};
 
         my $arg1value = $POST->{$arg1_postkey};
         $arg1 = int($arg1value);
@@ -109,7 +112,7 @@ sub thaw {
     if ($arg2 && $arg2 eq '?') {
         die "Arg2 option passed without POST data" unless $POST;
 
-        my $arg2_postkey = "$type-$userid-$journalid-$etypeid-$arg2-$arg2.arg2";
+        my $arg2_postkey = "$type-$userid-$journalid-$etypeid-0-0-$arg1-$arg2.arg2";
 
         die "No input data for $arg2_postkey" unless defined $POST->{$arg2_postkey};
 
@@ -134,16 +137,17 @@ sub freeze {
     my $self = shift;
     my $arg  = shift;
 
-    my $user = $self->{u}->{userid};
+    my $userid = $self->{u}->id;
     my $journalid = $self->journalid;
     my $etypeid = $self->{etypeid};
     my $flags = $self->flags;
     my $ntypeid = $self->{ntypeid};
 
-    my @args = ($user,$journalid,$etypeid,$flags,$ntypeid);
+    # if this is for an argument, ntypeid is 0
+    $ntypeid = 0 if $arg;
+    $flags = 0 if $arg;
 
-    # we don't want ntypeid if we're freezing for arg1/2
-    pop @args if $arg;
+    my @args = ($userid,$journalid,$etypeid,$flags,$ntypeid);
 
     push @args, $self->{arg1} if defined $self->{arg1};
 

@@ -32,16 +32,19 @@ body<=
                                                                      event   => "JournalNewEntry",
                                                                      arg1    => '?',
                                                                      journal => $journal,
+                                                                     flags   => LJ::Subscription::TRACKING,
                                                                      ),
                                       LJ::Subscription::Pending->new(
                                                                      $remote,
                                                                      event   => "JournalNewEntry",
                                                                      journal => $journal,
+                                                                     flags   => LJ::Subscription::TRACKING,
                                                                      ),
                                       LJ::Subscription::Pending->new(
                                                                      $remote,
                                                                      event   => "NewUserpic",
                                                                      journal => $journal,
+                                                                     flags   => LJ::Subscription::TRACKING,
                                                                      ),
                                       ]
                                   },

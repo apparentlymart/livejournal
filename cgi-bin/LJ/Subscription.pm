@@ -8,8 +8,9 @@ use Class::Autouse qw(
                       );
 
 use constant {
-              INACTIVE => 1 << 0,
-              DISABLED => 1 << 1,
+              INACTIVE => 1 << 0, # user has deactivated
+              DISABLED => 1 << 1, # system has disabled
+              TRACKING => 1 << 2, # subs in the "notices" category
               };
 
 my @subs_fields = qw(userid subid is_dirty journalid etypeid arg1 arg2
@@ -140,15 +141,51 @@ sub find {
 sub delete {
     my $self = shift;
 
+    my %opts = @_;
+    my $force = delete $opts{force};
+
+    croak "Invalid args" if scalar keys %opts;
+
     my $subid = $self->id
         or croak "Invalid subsciption";
 
     my $u = $self->owner;
 
+    # if it's the inbox method, deactivate/delete the other notification methods too
+    my @to_remove = ();
+
+    if ($self->method eq 'LJ::NotificationMethod::Inbox') {
+        my @subs = $u->find_subscriptions(
+                                          journalid => $self->journalid,
+                                          etypeid   => $self->etypeid,
+                                          arg1      => $self->arg1,
+                                          arg2      => $self->arg2,
+                                          );
+
+        push @subs, $self;
+
+        foreach my $subscr (@subs) {
+            if ($subscr->is_tracking_category && $subscr->method eq 'LJ::NotificationMethod::Inbox' && ! $force) {
+                $subscr->deactivate;
+                return;
+            } else {
+                $subscr->_delete;
+            }
+        }
+    } else {
+        $self->_delete;
+    }
+}
+
+# really deletes
+sub _delete {
+    my $self = shift;
+    my $u = $self->owner;
+
+    $u->do("DELETE FROM subs WHERE subid=?", undef, $self->id);
+
     # delete from cache in user
     undef $u->{_subscriptions};
-
-    return $u->do("DELETE FROM subs WHERE subid=?", undef, $subid);
 }
 
 # Class method
@@ -296,7 +333,10 @@ sub clear_flag {
 sub set_flags {
     my ($self, $flags) = @_;
 
-    $self->owner->do("UPDATE subs SET flags=? WHERE userid=? AND subid=?", undef, $flags, $self->owner->userid, $self->id);
+    if ($self->owner && ! $self->pending) {
+        $self->owner->do("UPDATE subs SET flags=? WHERE userid=? AND subid=?", undef, $flags, $self->owner->userid, $self->id);
+    }
+
     $self->{flags} = $flags;
 }
 
@@ -324,6 +364,11 @@ sub active {
 sub enabled {
     my $self = shift;
     return ! ($self->flags & DISABLED);
+}
+
+sub is_tracking_category {
+    my $self = shift;
+    return $self->flags & TRACKING;
 }
 
 sub expiretime {
