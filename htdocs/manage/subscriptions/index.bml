@@ -48,11 +48,21 @@ body<=
                 # don't duplicate subscriptions
                 next if $u->has_subscription($subscr->sub_info);
 
-                my @inbox_subs = grep { $_->active } $u->find_subscriptions(method => 'Inbox');
+                my @inbox_subs = grep { $_->active && $_->enabled } $u->find_subscriptions(method => 'Inbox');
 
                 if ((scalar @inbox_subs) >= $u->get_cap('subscriptions') && $subscr->method eq 'LJ::NotificationMethod::Inbox') {
                     push @errors, LJ::errobj("Subscription::TooMany", subscr => $subscr, u => $u);
                 } else {
+                    # don't save a subscription if there is no corresponding inbox sub for it and we've reached our limit
+                    if ($subscr->method ne 'LJ::NotificationMethod::Inbox') {
+                        my %inbox_sub = $subscr->sub_info;
+                        $inbox_sub{ntypeid} = LJ::NotificationMethod::Inbox->ntypeid;
+                        my $pending_inbox = LJ::Subscription::Pending->new($u, %inbox_sub);
+                        die "lols" unless $pending_inbox;
+                        next unless $pending_inbox;
+                        next if ! $u->find_subscriptions(%inbox_sub) && ! $POST{$pending_inbox->freeze};
+                    }
+
                     $subscr->commit;
                 }
                 next;

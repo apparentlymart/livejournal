@@ -59,7 +59,7 @@ sub thaw {
 }
 
 sub pending { 0 }
-sub default_selected { $_[0]->active }
+sub default_selected { $_[0]->active && $_[0]->enabled }
 
 sub subscriptions_of_user {
     my ($class, $u) = @_;

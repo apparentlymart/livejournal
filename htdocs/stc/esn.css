@@ -11,6 +11,18 @@
     clear: both;
     }
     
+    .Subscribe tr.Inactive {
+        color: #aaa;
+    }
+
+    .Subscribe tr.Disabled {
+        background-color: #eee;
+        }
+        
+        .Subscribe tr.Inactive a {
+            color: #aaa;
+            }
+    
     .Subscribe td {
         padding: .3em;
         }

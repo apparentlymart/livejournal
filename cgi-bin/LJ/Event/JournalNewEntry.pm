@@ -224,7 +224,7 @@ sub subscription_as_html {
         }
 
         my $dropdownhtml = LJ::html_select({
-            name => $subscr->freeze . '.arg1',
+            name => $subscr->freeze('arg1'),
         }, @tagdropdown);
 
         return "All posts tagged $dropdownhtml on " . $journal->ljuser_display;

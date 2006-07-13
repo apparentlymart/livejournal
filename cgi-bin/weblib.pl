@@ -2625,9 +2625,10 @@ sub subscribe_interface {
 
             my $selected = $pending_sub->default_selected;
 
-            my $inactiveclass = $pending_sub->active ? '' : ' class="Inactive"';
+            my $inactiveclass = $pending_sub->active ? '' : 'Inactive';
+            my $disabledclass = $pending_sub->enabled ? '' : 'Disabled';
 
-            $cat_html  .= "<tr $inactiveclass><td>";
+            $cat_html  .= "<tr class='$inactiveclass $disabledclass'><td>";
 
             if ($is_tracking_category && ! $pending_sub->pending) {
                 my $subid = $pending_sub->id;
@@ -2724,7 +2725,7 @@ sub subscribe_interface {
 
     # print info stuff
     my $extra_sub_status = LJ::run_hook("sub_status_extra", $u) || '';
-    my $sub_count = $u->find_subscriptions(method => 'Inbox');
+    my $sub_count = grep { $_->active && $_->enabled } $u->find_subscriptions(method => 'Inbox');
     my $sub_max = $u->get_cap('subscriptions');
     my $event_plural = $sub_count == 1 ? 'event' : 'events';
 

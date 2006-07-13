@@ -96,9 +96,11 @@ sub thaw {
     if ($arg1 && $arg1 eq '?') {
         die "Arg1 option passed without POST data" unless $POST;
 
-        die "No input data for ${data}.arg1" unless defined $POST->{"${data}.arg1"};
+        my $arg1_postkey = "$type-$userid-$journalid-$etypeid-$arg1-$arg2.arg1";
 
-        my $arg1value = $POST->{"${data}.arg1"};
+        die "No input data for $arg1_postkey" unless defined $POST->{$arg1_postkey};
+
+        my $arg1value = $POST->{$arg1_postkey};
         $arg1 = int($arg1value);
     }
 
@@ -125,6 +127,7 @@ sub thaw {
 # instance method
 sub freeze {
     my $self = shift;
+    my $arg  = shift;
 
     my $user = $self->{u}->{userid};
     my $journalid = $self->journalid;
@@ -133,6 +136,9 @@ sub freeze {
 
     my @args = ($user,$journalid,$etypeid,$ntypeid);
 
+    # we don't want ntypeid if we're freezing for arg1/2
+    pop @args if $arg;
+
     push @args, $self->{arg1} if defined $self->{arg1};
 
     # if arg2 is defined but not arg1, put a zero in arg1
@@ -140,7 +146,10 @@ sub freeze {
 
     push @args, $self->{arg2} if defined $self->{arg2};
 
-    return join('-', ('pending', @args));
+    my $frozen = join('-', ('pending', @args));
+    $frozen .= '.' . $arg if $arg;
+
+    return $frozen;
 }
 
 1;
