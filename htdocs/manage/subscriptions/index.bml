@@ -58,7 +58,6 @@ body<=
                         my %inbox_sub = $subscr->sub_info;
                         $inbox_sub{ntypeid} = LJ::NotificationMethod::Inbox->ntypeid;
                         my $pending_inbox = LJ::Subscription::Pending->new($u, %inbox_sub);
-                        die "lols" unless $pending_inbox;
                         next unless $pending_inbox;
                         next if ! $u->find_subscriptions(%inbox_sub) && ! $POST{$pending_inbox->freeze};
                     }
@@ -68,7 +67,7 @@ body<=
                 next;
             } else {
                 # this sub exists, make sure it's now activated
-                $subscr->activate if $subscr->method eq 'LJ::NotificationMethod::Inbox';
+                $subscr->activate if $subscr->method eq 'LJ::NotificationMethod::Inbox' && $POST{$postkey} && !$old;
             }
 
             # remove old string
