@@ -14,6 +14,8 @@ sub new {
             my $u = $self->{$k};
             $self->{$k} = $u->sms_number
                 or croak("'$k' user has no mapped number");
+        } elsif ($self->{$k} !~ /^\d+$/) {
+            croak ("invalid numeric argument '$k'");
         }
     }
     $self->{text} = delete $opts{text};
