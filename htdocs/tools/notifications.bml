@@ -88,6 +88,7 @@ body<=
             browsing $LJ::SITENAME. You can use notices to keep an eye on comment threads,
             user updates and new posts. p?>
             </div>
+        } . LJ::ads( type => 'app', orient => 'App-Inbox', force => 1 ) . qq {
         </div>
 };
 
