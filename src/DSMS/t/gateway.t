@@ -4,7 +4,7 @@
     use strict;
     use Test::More 'no_plan';
 
-    use lib "../";
+    use lib "./lib";
     use DSMS::Gateway;
 
     my $gate;
