@@ -283,6 +283,11 @@ sub as_html {
     return $evtclass->subscription_as_html($self);
 }
 
+sub set_tracking {
+    my $self = shift;
+    $self->set_flag(TRACKING);
+}
+
 sub activate {
     my $self = shift;
     $self->clear_flag(INACTIVE);

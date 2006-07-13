@@ -2675,7 +2675,7 @@ sub subscribe_interface {
 
                 if (($is_tracking_category || $pending_sub->is_tracking_category) && $note_pending->pending) {
                     # flag this as a "tracking" subscription
-                    $note_pending->set_flag(LJ::Subscription::TRACKING);
+                    $note_pending->set_tracking;
                 }
 
                 my $notify_input_name = $note_pending->freeze;
