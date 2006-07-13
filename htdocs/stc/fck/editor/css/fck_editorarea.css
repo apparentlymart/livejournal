@@ -85,7 +85,7 @@ P, UL, LI
 }
 
 .ljvideo {
-	border: #0000ff 1px dotted;
-        font-weight: bold;
+        padding: 5px;
+        width: 8px;
+        height: 8px;
 }
-

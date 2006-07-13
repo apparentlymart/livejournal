@@ -253,8 +253,8 @@ sub clean
                 next TOKEN;
             }
 
-            if ($tag eq "span" && lc $attr->{class} eq "ljvideo") {
-                $start_capture->("span", $token, sub {
+            if ($tag eq "div" && lc $attr->{class} eq "ljvideo") {
+                $start_capture->("div", $token, sub {
                     my $expanded = LJ::run_hook("expand_template_video", \@capture);
                     $newdata .= $expanded || "<b>[Error: unknown template 'video']</b>";
                 });
