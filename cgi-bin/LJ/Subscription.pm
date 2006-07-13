@@ -9,6 +9,7 @@ use Class::Autouse qw(
 
 use constant {
               INACTIVE => 1 << 0,
+              DISABLED => 1 << 1,
               };
 
 my @subs_fields = qw(userid subid is_dirty journalid etypeid arg1 arg2
@@ -251,6 +252,16 @@ sub deactivate {
     $self->set_flag(INACTIVE);
 }
 
+sub enable {
+    my $self = shift;
+    $self->clear_flag(DISABLED);
+}
+
+sub disable {
+    my $self = shift;
+    $self->set_flag(DISABLED);
+}
+
 sub set_flag {
     my ($self, $flag) = @_;
 
@@ -303,7 +314,12 @@ sub flags {
 
 sub active {
     my $self = shift;
-    return ! $self->flags && INACTIVE;
+    return ! ($self->flags & INACTIVE);
+}
+
+sub enabled {
+    my $self = shift;
+    return ! ($self->flags & DISABLED);
 }
 
 sub expiretime {
