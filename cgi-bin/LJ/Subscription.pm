@@ -91,7 +91,7 @@ sub subscriptions_of_user {
 sub find {
     my ($class, $u, %params) = @_;
 
-    my ($etypeid, $ntypeid, $journal, $arg1, $arg2);
+    my ($etypeid, $ntypeid, $journal, $arg1, $arg2, $flags);
 
     if (my $evt = delete $params{event}) {
         $etypeid = LJ::Event->event_to_etypeid($evt);
@@ -103,6 +103,8 @@ sub find {
 
     $etypeid ||= delete $params{etypeid};
     $ntypeid ||= delete $params{ntypeid};
+
+    $flags   = delete $params{flags};
 
     my $journalid = delete $params{journalid};
     $journal   = LJ::want_user(delete $params{journal});
@@ -125,6 +127,7 @@ sub find {
     @subs = grep { $_->journalid == $journalid }         @subs if defined $journalid;
     @subs = grep { $_->ntypeid   == $ntypeid }           @subs if $ntypeid;
     @subs = grep { $_->etypeid   == $etypeid }           @subs if $etypeid;
+    @subs = grep { $_->flags     == $flags }             @subs if defined $flags;
 
     @subs = grep { $_->arg1 == $arg1 }                   @subs if defined $arg1;
     @subs = grep { $_->arg2 == $arg2 }                   @subs if defined $arg2;
@@ -230,6 +233,7 @@ sub sub_info {
             ntypeid   => $self->ntypeid,
             arg1      => $self->arg1,
             arg2      => $self->arg2,
+            flags     => $self->flags,
             );
 }
 
@@ -413,7 +417,7 @@ sub equals {
     return 1 if $self->id == $other->id;
 
     my $match = $self->ntypeid == $other->ntypeid &&
-        $self->etypeid == $other->etypeid;
+        $self->etypeid == $other->etypeid && $self->flags == $other->flags;
 
     $match &&= $other->arg1 && ($self->arg1 == $other->arg1) if $self->arg1;
     $match &&= $other->arg2 && ($self->arg2 == $other->arg2) if $self->arg2;

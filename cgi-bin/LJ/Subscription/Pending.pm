@@ -22,6 +22,7 @@ sub new {
     my $arg1             = delete $opts{arg1} || 0;
     my $arg2             = delete $opts{arg2} || 0;
     my $default_selected = delete $opts{default_selected} || 0;
+    my $flags            = delete $opts{flags} || 0;
 
     # force autoload of LJ::Event and it's subclasses
     LJ::Event->can('');
@@ -50,6 +51,7 @@ sub new {
         arg1             => $arg1,
         arg2             => $arg2,
         default_selected => $default_selected,
+        flags            => $flags,
     };
 
     return bless $self, $class;
@@ -82,7 +84,7 @@ sub commit {
 sub thaw {
     my ($class, $data, $u, $POST) = @_;
 
-    my ($type, $userid, $journalid, $etypeid, $ntypeid, $arg1, $arg2) = split('-', $data);
+    my ($type, $userid, $journalid, $etypeid, $flags, $ntypeid, $arg1, $arg2) = split('-', $data);
 
     die "Invalid thawed data" unless $type eq 'pending';
 
@@ -107,9 +109,11 @@ sub thaw {
     if ($arg2 && $arg2 eq '?') {
         die "Arg2 option passed without POST data" unless $POST;
 
-        die "No input data for ${data}.arg2" unless defined $POST->{"${data}.arg2"};
+        my $arg2_postkey = "$type-$userid-$journalid-$etypeid-$arg2-$arg2.arg2";
 
-        my $arg2value = $POST->{"${data}.arg2"};
+        die "No input data for $arg2_postkey" unless defined $POST->{$arg2_postkey};
+
+        my $arg2value = $POST->{$arg2_postkey};
         $arg2 = int($arg2value);
     }
 
@@ -121,6 +125,7 @@ sub thaw {
                        etypeid => $etypeid,
                        arg1    => $arg1 || 0,
                        arg2    => $arg2 || 0,
+                       flags   => $flags || 0,
                        );
 }
 
@@ -132,9 +137,10 @@ sub freeze {
     my $user = $self->{u}->{userid};
     my $journalid = $self->journalid;
     my $etypeid = $self->{etypeid};
+    my $flags = $self->flags;
     my $ntypeid = $self->{ntypeid};
 
-    my @args = ($user,$journalid,$etypeid,$ntypeid);
+    my @args = ($user,$journalid,$etypeid,$flags,$ntypeid);
 
     # we don't want ntypeid if we're freezing for arg1/2
     pop @args if $arg;
