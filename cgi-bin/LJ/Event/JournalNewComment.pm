@@ -39,7 +39,7 @@ sub content {
     my $buttons = $comment->manage_buttons;
     my $dtalkid = $comment->dtalkid;
 
-    
+    $comment_body =~ s/\n/<br \/>/g;
 
     my $ret = qq {
         <div id="ljcmt$dtalkid" class="JournalNewComment">
