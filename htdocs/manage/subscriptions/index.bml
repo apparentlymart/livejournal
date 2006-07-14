@@ -87,8 +87,8 @@ body<=
             my ($subscr, $checked, $oldvalue) = @$edit_info;
 
             if (! $checked && $oldvalue) {
-                # if it's not checked and is currently a real subscription, delete it
-                $subscr->delete unless $subscr->disabled;
+                # if it's not checked and is currently a real subscription, deactivate it
+                $subscr->deactivate;
             }
         }
 
@@ -99,6 +99,7 @@ body<=
             delete $inbox_sub_params{flags};
 
             my ($inbox_sub) = $u->has_subscription(%inbox_sub_params);
+
             $subscr->commit if $inbox_sub && $inbox_sub->active && $inbox_sub->enabled;
         }
 
@@ -111,7 +112,7 @@ body<=
         next unless $id;
 
         if ($GET{"deletesub_$id"}) {
-            $subscr->delete(force => 1);
+            $subscr->delete;
         }
     }
 
