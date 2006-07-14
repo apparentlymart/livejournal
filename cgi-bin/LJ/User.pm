@@ -1405,6 +1405,39 @@ sub activate_userpics {
     return 1;
 }
 
+# ensure that this user does not have more than the maximum number of subscriptions
+# allowed by their cap, and enable subscriptions up to their current limit
+sub enable_subscriptions {
+    my $u = shift;
+    my $max_subs = $u->get_cap('subscriptions');
+    my @inbox_subs = grep { $_->active && $_->enabled } $u->find_subscriptions(method => 'Inbox');
+
+    if ((scalar @inbox_subs) > $max_subs) {
+        # oh no, too many subs.
+        # disable the oldest subscriptions that are "tracking" subscriptions
+        my @tracking = grep { $_->is_tracking_category } @inbox_subs;
+        @tracking = sort { $a->createtime <=> $b->createtime } @tracking;
+
+        my $need_to_disable = (scalar @inbox_subs) - $max_subs;
+
+        for (1..$need_to_disable) {
+            my $sub_to_disable = shift @tracking;
+            $sub_to_disable->disable if $sub_to_disable;
+        }
+    } else {
+        # make sure all subscriptions are enabled
+        my $need_to_enable = $max_subs - (scalar @inbox_subs);
+
+        # get disabled subs
+        @inbox_subs = grep { $_->active && ! $_->enabled } $u->find_subscriptions(method => 'Inbox');
+
+        for (1..$need_to_enable) {
+            my $sub_to_enable = shift @inbox_subs;
+            $sub_to_enable->enable if $sub_to_enable;
+        }
+    }
+}
+
 sub uncache_prop {
     my ($u, $name) = @_;
     my $prop = LJ::get_prop("user", $name) or die; # FIXME: use exceptions
