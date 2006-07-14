@@ -1,4 +1,4 @@
-ContextualPopup = new Object;
+ContextualPopup = {};
 
 ContextualPopup.popupDelay  = 500;
 ContextualPopup.hideDelay   = 250;
@@ -34,7 +34,7 @@ ContextualPopup.setup = function (e) {
             if (parent && (userid = parent.href.match(/\?userid=(\d+)/i)))
                 node.userid = userid[1];
             else
-                node.username = DOM.extractElementText(ljuser);
+                node.username = ljuser.getAttribute("lj:user");
 
             if (!node.username && !node.userid) continue;
 
