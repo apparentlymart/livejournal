@@ -86,10 +86,9 @@ body<=
         foreach my $edit_info (@sub_edit) {
             my ($subscr, $checked, $oldvalue) = @$edit_info;
 
-            # if it's pending and enabled, make it a real subscription
             if (! $checked && $oldvalue) {
                 # if it's not checked and is currently a real subscription, delete it
-                $subscr->delete;
+                $subscr->delete unless $subscr->disabled;
             }
         }
 
