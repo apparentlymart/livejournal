@@ -137,12 +137,13 @@ sub find {
 }
 
 # Instance method
-# Remove this subscription
-sub delete {
+# Deactivates a subscription. If this is not a "tracking" subscription,
+# it will delete it instead. Does nothing to disabled subscriptions.
+sub deactivate {
     my $self = shift;
 
     my %opts = @_;
-    my $force = delete $opts{force};
+    my $force = delete $opts{force}; # force-delete
 
     croak "Invalid args" if scalar keys %opts;
 
@@ -151,41 +152,58 @@ sub delete {
 
     my $u = $self->owner;
 
+    # don't care about disabled subscriptions
+    return if $self->disabled;
+
     # if it's the inbox method, deactivate/delete the other notification methods too
     my @to_remove = ();
 
-    if ($self->method eq 'LJ::NotificationMethod::Inbox') {
-        my @subs = $u->find_subscriptions(
-                                          journalid => $self->journalid,
-                                          etypeid   => $self->etypeid,
-                                          arg1      => $self->arg1,
-                                          arg2      => $self->arg2,
-                                          );
+    my @subs = $self->corresponding_subs;
 
-        push @subs, $self;
-
-        foreach my $subscr (@subs) {
-            if ($subscr->is_tracking_category && $subscr->method eq 'LJ::NotificationMethod::Inbox' && ! $force) {
-                $subscr->deactivate;
-                return;
+    foreach my $subscr (@subs) {
+        if ($subscr->is_tracking_category && ! $force) {
+            # delete non-inbox methods if we're deactivating
+            if ($subscr->method eq 'LJ::NotificationMethod::Inbox') {
+                $subscr->_deactivate;
             } else {
-                $subscr->_delete;
+                $subscr->delete;
             }
+        } else {
+            $subscr->delete;
         }
-    } else {
-        $self->_delete;
     }
 }
 
-# really deletes
-sub _delete {
+# deletes a subscription
+sub delete {
     my $self = shift;
     my $u = $self->owner;
 
-    $u->do("DELETE FROM subs WHERE subid=?", undef, $self->id);
+    my @subs = $self->corresponding_subs;
+    foreach my $subscr (@subs) {
+        $u->do("DELETE FROM subs WHERE subid=?", undef, $subscr->id);
+    }
 
     # delete from cache in user
     undef $u->{_subscriptions};
+}
+
+# find matching subscriptions with different notification methods
+sub corresponding_subs {
+    my $self = shift;
+
+    my @subs = ($self);
+
+    if ($self->method eq 'LJ::NotificationMethod::Inbox') {
+        push @subs, $self->owner->find_subscriptions(
+                                           journalid => $self->journalid,
+                                           etypeid   => $self->etypeid,
+                                           arg1      => $self->arg1,
+                                           arg2      => $self->arg2,
+                                           );
+    }
+
+    return @subs;
 }
 
 # Class method
@@ -293,7 +311,7 @@ sub activate {
     $self->clear_flag(INACTIVE);
 }
 
-sub deactivate {
+sub _deactivate {
     my $self = shift;
     $self->set_flag(INACTIVE);
 }
@@ -301,43 +319,13 @@ sub deactivate {
 sub enable {
     my $self = shift;
 
-    if ($self->method eq 'LJ::NotificationMethod::Inbox') {
-        my @subs = $self->owner->find_subscriptions(
-                                          journalid => $self->journalid,
-                                          etypeid   => $self->etypeid,
-                                          arg1      => $self->arg1,
-                                          arg2      => $self->arg2,
-                                          );
-
-        push @subs, $self;
-
-        foreach my $subscr (@subs) {
-            $subscr->clear_flag(DISABLED);
-        }
-    } else {
-        $self->clear_flag(DISABLED);
-    }
+    $_->clear_flag(DISABLED) foreach $self->corresponding_subs;
 }
 
 sub disable {
     my $self = shift;
 
-    if ($self->method eq 'LJ::NotificationMethod::Inbox') {
-        my @subs = $self->owner->find_subscriptions(
-                                          journalid => $self->journalid,
-                                          etypeid   => $self->etypeid,
-                                          arg1      => $self->arg1,
-                                          arg2      => $self->arg2,
-                                          );
-
-        push @subs, $self;
-
-        foreach my $subscr (@subs) {
-            $subscr->set_flag(DISABLED);
-        }
-    } else {
-        $self->set_flag(DISABLED);
-    }
+    $_->set_flag(DISABLED) foreach $self->corresponding_subs;
 }
 
 sub set_flag {
@@ -375,6 +363,7 @@ sub set_flags {
     }
 
     $self->{flags} = $flags;
+    delete $self->owner->{_subscriptions};
 }
 
 sub id {
