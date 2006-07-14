@@ -1238,6 +1238,16 @@ property string text_multiform_conf_delete {
 }
 set text_multiform_conf_delete = "Delete selected comments?";
 
+property string text_multiform_opt_track {
+    des = "Text for the comment tracking action";
+}
+set text_multiform_opt_track = "Track This";
+
+property string text_multiform_opt_untrack {
+    des = "Text for the comment untracking action";
+}
+set text_multiform_opt_untrack = "Untrack This";
+
 property string text_comment_posted {
     des = "Text to display when a comment has just been posted by the user.";
 }

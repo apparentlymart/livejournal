@@ -1664,9 +1664,8 @@ sub Entry
     my $link_keyseq = $e->{'link_keyseq'};
     push @$link_keyseq, 'mem_add' unless $LJ::DISABLED{'memories'};
     push @$link_keyseq, 'tell_friend' unless $LJ::DISABLED{'tellafriend'};
-
-    my $remote = LJ::get_remote();
-    push @$link_keyseq, 'watch_comments' if $remote && $remote->can_use_esn;
+    push @$link_keyseq, 'watch_comments' unless $LJ::DISABLED{'esn'};
+    push @$link_keyseq, 'watching_comments' unless $LJ::DISABLED{'esn'};
 
     # Note: nav_prev and nav_next are not included in the keyseq anticipating
     #      that their placement relative to the others will vary depending on
@@ -2569,50 +2568,55 @@ sub _Comment__get_link
                             $ctx->[S2::PROPS]->{"text_multiform_opt_unscreen"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_unscr.gif", 22, 20));
     }
-    if ($key eq "watch_thread") {
-        return $null_link unless $remote;
-        return $null_link unless $remote->can_use_esn;
+    if ($key eq "watch_thread" || $key eq "watching_thread" || $key eq "watching_parent") {
+        return $null_link if $LJ::DISABLED{'esn'};
+        return $null_link unless $remote && $remote->can_use_esn;
 
         my $comment = LJ::Comment->new($u, dtalkid => $this->{talkid});
-        my $comment_watched = $remote->has_subscription(
-                                                        event   => "JournalNewComment",
-                                                        journal => $u,
-                                                        arg2    => $comment->jtalkid,
-                                                        );
 
-        my $track_img = 'btn_track.gif';
-
-        if ($comment_watched) {
-            $track_img = 'btn_tracking.gif';
-        } else {
-            # see if any parents are being watched
-            while ($comment && $comment->valid && $comment->parenttalkid) {
-                # check cache
-                $comment->{_watchedby} ||= {};
-                my $thread_watched = $comment->{_watchedby}->{$u->{userid}};
-
-                # not cached
-                if (! defined $thread_watched) {
-                    $thread_watched = $remote->has_subscription(
-                                                                event   => "JournalNewComment",
-                                                                journal => $u,
-                                                                arg2    => $comment->parenttalkid,
-                                                                );
-                }
-
-                $track_img = 'btn_tracking_thread.gif' if ($thread_watched);
-
-                # cache in this comment object if it's being watched by this user
-                $comment->{_watchedby}->{$u->{userid}} = $thread_watched;
-
-                $comment = $comment->parent;
-            }
+        if ($key eq "watching_thread") {
+            return $null_link unless $remote->has_subscription(journal => $u, event => "JournalNewComment", arg2 => $comment->jtalkid);
+    
+            return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;dtalkid=$this->{talkid}",
+                                $ctx->[S2::PROPS]->{"text_multiform_opt_untrack"},
+                                LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking.gif", 22, 20));
         }
 
-        return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;dtalkid=" .
-                            $this->{talkid},
-                             "Track New Comments",
-                             LJ::S2::Image("$LJ::IMGPREFIX/$track_img", 22, 20));
+        return $null_link if $remote->has_subscription(journal => $u, event => "JournalNewComment", arg2 => $comment->jtalkid);
+
+        # at this point, we know that the thread is either not being watched or its parent is being watched
+        # in other words, the user is not subscribed to this particular comment
+
+        # see if any parents are being watched
+        my $watching_parent = 0;
+        while ($comment && $comment->valid && $comment->parenttalkid) {
+            # check cache
+            $comment->{_watchedby} ||= {};
+            my $thread_watched = $comment->{_watchedby}->{$u->{userid}};
+
+            # not cached
+            if (! defined $thread_watched) {
+                $thread_watched = $remote->has_subscription(journal => $u, event => "JournalNewComment", arg2 => $comment->parenttalkid);
+            }
+
+            $watching_parent = 1 if ($thread_watched);
+
+            # cache in this comment object if it's being watched by this user
+            $comment->{_watchedby}->{$u->{userid}} = $thread_watched;
+
+            $comment = $comment->parent;
+        }
+
+        if ($key eq "watch_thread" && !$watching_parent) {
+            return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;dtalkid=$this->{talkid}",
+                                $ctx->[S2::PROPS]->{"text_multiform_opt_track"},
+                                LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20));
+        }
+        if ($key eq "watching_parent" && $watching_parent) {
+            return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;dtalkid=$this->{talkid}",
+                                $ctx->[S2::PROPS]->{"text_multiform_opt_track"},
+                                LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking_thread.gif", 22, 20));
+        }
     }
 }
 
@@ -2978,12 +2982,22 @@ sub _Entry__get_link
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_next.gif", 22, 20));
     }
     if ($key eq "watch_comments") {
-        return $null_link unless $remote;
-        return $null_link unless $remote->can_use_esn;
+        return $null_link if $LJ::DISABLED{'esn'};
+        return $null_link unless $remote && $remote->can_use_esn;
+        return $null_link if $remote->has_subscription(journal => $journal, event => "JournalNewComment", arg1 => $this->{'itemid'});
 
-        return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$journal&amp;ditemid=$this->{'itemid'}",
-                            "Track New Comments",
+        return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/entry.bml?journal=$journal&amp;ditemid=$this->{'itemid'}",
+                            "Track This",
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20));
+    }
+    if ($key eq "watching_comments") {
+        return $null_link if $LJ::DISABLED{'esn'};
+        return $null_link unless $remote && $remote->can_use_esn;
+        return $null_link unless $remote->has_subscription(journal => $journal, event => "JournalNewComment", arg1 => $this->{'itemid'});
+
+        return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/entry.bml?journal=$journal&amp;ditemid=$this->{'itemid'}",
+                            "Untrack This",
+                            LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking.gif", 22, 20));
     }
 }
 
