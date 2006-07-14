@@ -265,7 +265,8 @@ GRIN=>{S}&lt;grin&gt;
 HR=>{S}<hr />
 
 NEWLINE=>{S}<BR>&nbsp;&nbsp;&nbsp;&nbsp;
-P=>{D}<P>%%data%%</P>
+P=>{D}<p>%%data%%</p>
+BLOCK=>{D}<div>%%data%%</div>
 
 STANDOUT<=
 {D}<blockquote>
