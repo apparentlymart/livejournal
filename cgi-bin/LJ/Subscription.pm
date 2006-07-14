@@ -300,12 +300,44 @@ sub deactivate {
 
 sub enable {
     my $self = shift;
-    $self->clear_flag(DISABLED);
+
+    if ($self->method eq 'LJ::NotificationMethod::Inbox') {
+        my @subs = $self->owner->find_subscriptions(
+                                          journalid => $self->journalid,
+                                          etypeid   => $self->etypeid,
+                                          arg1      => $self->arg1,
+                                          arg2      => $self->arg2,
+                                          );
+
+        push @subs, $self;
+
+        foreach my $subscr (@subs) {
+            $subscr->clear_flag(DISABLED);
+        }
+    } else {
+        $self->clear_flag(DISABLED);
+    }
 }
 
 sub disable {
     my $self = shift;
-    $self->set_flag(DISABLED);
+
+    if ($self->method eq 'LJ::NotificationMethod::Inbox') {
+        my @subs = $self->owner->find_subscriptions(
+                                          journalid => $self->journalid,
+                                          etypeid   => $self->etypeid,
+                                          arg1      => $self->arg1,
+                                          arg2      => $self->arg2,
+                                          );
+
+        push @subs, $self;
+
+        foreach my $subscr (@subs) {
+            $subscr->set_flag(DISABLED);
+        }
+    } else {
+        $self->set_flag(DISABLED);
+    }
 }
 
 sub set_flag {
@@ -369,6 +401,11 @@ sub active {
 sub enabled {
     my $self = shift;
     return ! ($self->flags & DISABLED);
+}
+
+sub disabled {
+    my $self = shift;
+    return ! $self->enabled;
 }
 
 sub is_tracking_category {
