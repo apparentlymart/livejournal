@@ -28,7 +28,7 @@ sub run_tests {
         is($flags, 0, "No flags set");
 
         # set inactive flag
-        $subscr->deactivate;
+        $subscr->_deactivate;
         ok(! $subscr->active, "Deactivated");
 
         # make sure inactive flag is set
