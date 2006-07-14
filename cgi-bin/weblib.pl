@@ -2682,6 +2682,7 @@ sub subscribe_interface {
 
                 # select email method by default
                 my $note_selected = (scalar @subs) ? 1 : (!$selected && $note_class eq 'LJ::NotificationMethod::Email');
+                $note_selected &&= $note_pending->active && $note_pending->enabled;
 
                 $cat_html .= qq {
                     <td class='NotificationOptions' $hidden>
