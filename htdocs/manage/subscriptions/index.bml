@@ -95,11 +95,12 @@ body<=
 
         foreach my $subscr (@to_consider) {
             # don't save a subscription if there is no corresponding inbox sub for it
-            my %inbox_sub = $subscr->sub_info;
-            $inbox_sub{ntypeid} = LJ::NotificationMethod::Inbox->ntypeid;
-            delete $inbox_sub{flags};
+            my %inbox_sub_params = $subscr->sub_info;
+            $inbox_sub_params{ntypeid} = LJ::NotificationMethod::Inbox->ntypeid;
+            delete $inbox_sub_params{flags};
 
-            $subscr->commit if $u->has_subscription(%inbox_sub);
+            my ($inbox_sub) = $u->has_subscription(%inbox_sub_params);
+            $subscr->commit if $inbox_sub && $inbox_sub->active && $inbox_sub->enabled;
         }
 
         delete $u->{_subscriptions};
