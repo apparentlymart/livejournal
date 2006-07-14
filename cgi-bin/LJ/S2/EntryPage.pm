@@ -197,7 +197,7 @@ sub EntryPage
             push @$link_keyseq, $s2com->{'screened'} ? 'unscreen_comment' : 'screen_comment';
             push @$link_keyseq, $s2com->{'frozen'} ? 'unfreeze_thread' : 'freeze_thread';
             push @$link_keyseq, "watch_thread" unless $LJ::DISABLED{'esn'};
-            push @$link_keyseq, "watching_thread" unless $LJ::DISABLED{'esn'};
+            push @$link_keyseq, "unwatch_thread" unless $LJ::DISABLED{'esn'};
             push @$link_keyseq, "watching_parent" unless $LJ::DISABLED{'esn'};
 
             if (@{$com->{'children'}}) {

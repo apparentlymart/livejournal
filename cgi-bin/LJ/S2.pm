@@ -1665,7 +1665,7 @@ sub Entry
     push @$link_keyseq, 'mem_add' unless $LJ::DISABLED{'memories'};
     push @$link_keyseq, 'tell_friend' unless $LJ::DISABLED{'tellafriend'};
     push @$link_keyseq, 'watch_comments' unless $LJ::DISABLED{'esn'};
-    push @$link_keyseq, 'watching_comments' unless $LJ::DISABLED{'esn'};
+    push @$link_keyseq, 'unwatch_comments' unless $LJ::DISABLED{'esn'};
 
     # Note: nav_prev and nav_next are not included in the keyseq anticipating
     #      that their placement relative to the others will vary depending on
@@ -2568,13 +2568,13 @@ sub _Comment__get_link
                             $ctx->[S2::PROPS]->{"text_multiform_opt_unscreen"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_unscr.gif", 22, 20));
     }
-    if ($key eq "watch_thread" || $key eq "watching_thread" || $key eq "watching_parent") {
+    if ($key eq "watch_thread" || $key eq "unwatch_thread" || $key eq "watching_parent") {
         return $null_link if $LJ::DISABLED{'esn'};
         return $null_link unless $remote && $remote->can_use_esn;
 
         my $comment = LJ::Comment->new($u, dtalkid => $this->{talkid});
 
-        if ($key eq "watching_thread") {
+        if ($key eq "unwatch_thread") {
             return $null_link unless $remote->has_subscription(journal => $u, event => "JournalNewComment", arg2 => $comment->jtalkid);
     
             return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;dtalkid=$this->{talkid}",
@@ -2990,7 +2990,7 @@ sub _Entry__get_link
                             "Track This",
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20));
     }
-    if ($key eq "watching_comments") {
+    if ($key eq "unwatch_comments") {
         return $null_link if $LJ::DISABLED{'esn'};
         return $null_link unless $remote && $remote->can_use_esn;
         return $null_link unless $remote->has_subscription(journal => $journal, event => "JournalNewComment", arg1 => $this->{'itemid'});
