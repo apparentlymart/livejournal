@@ -424,7 +424,7 @@ function Page::print ()
     "<table id='main' cellpadding='5' cellspacing='0' width='$*content_width' align='$*content_alignment'$margin>\n<tr>";
 
     if (viewer_sees_hbox_top()) {
-        """<td>&nbsp;</td><td><div style="text-align: center;">""";
+        """<td colspan="2"><div style="text-align: center;">""";
         $this->print_hbox_top();
         "</div></td></tr><tr>";
     }
@@ -449,7 +449,7 @@ function Page::print ()
     "<a href='$*SITEROOT/'>$*SITENAME</a></td>\n";
 
     if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
-        """</tr><tr><td>&nbsp;</td><td><div style="text-align: center;">""";
+        """</tr><tr><td colspan="2"><div style="text-align: center;">""";
         $this->print_hbox_bottom();
         "</div></td>";
     }
