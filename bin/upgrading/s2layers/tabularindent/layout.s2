@@ -439,7 +439,7 @@ function Page::print ()
         $this->print_vbox();
         "</td></tr></table>\n";
     }
-    if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
+    if (viewer_sees_hbox_bottom()) {
         """<div style="text-align: center;">""";
         $this->print_hbox_bottom();
         "</div>";

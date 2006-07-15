@@ -489,7 +489,7 @@ $this->print_linklist();
     print $website; "<td>"; server_sig(); "</td></tr>";
 
     "</table></td></tr></table>";
-    if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
+    if (viewer_sees_hbox_bottom()) {
         """<div style="text-align: center; margin-top: 50px;">""";
         $this->print_hbox_bottom();
         "</div>";

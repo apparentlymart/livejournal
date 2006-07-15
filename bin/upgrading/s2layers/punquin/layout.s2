@@ -448,7 +448,7 @@ function Page::print ()
     "<td colspan='2' align='$main_position'>\n";
     "<a href='$*SITEROOT/'>$*SITENAME</a></td>\n";
 
-    if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
+    if (viewer_sees_hbox_bottom()) {
         """</tr><tr><td colspan="2"><div style="text-align: center;">""";
         $this->print_hbox_bottom();
         "</div></td>";

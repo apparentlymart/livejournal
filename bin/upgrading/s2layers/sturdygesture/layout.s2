@@ -469,7 +469,7 @@ $this->print_control_strip();
         "</div>";
     }
     $this->print_body();
-    if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
+    if (viewer_sees_hbox_bottom()) {
         """<div class="box" style="text-align: center; margin: 5px auto; width: 750px;">""";
         $this->print_hbox_bottom();
         "</div>";

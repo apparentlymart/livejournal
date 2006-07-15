@@ -695,7 +695,7 @@ if ($*opt_navbar_pos == "right") {
 </table>
 
 """;
-if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
+if (viewer_sees_hbox_bottom()) {
     """<div style="text-align: center; margin-top: -15px;">""";
     $this->print_hbox_bottom();
     "</div>";

@@ -303,7 +303,7 @@ function Page::print()
  <body>
  """;
  $this->print_control_strip();
- if (viewer_sees_vbox() or viewer_sees_hbox_top() or (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends"))) {
+ if (viewer_sees_vbox() or viewer_sees_hbox_top() or viewer_sees_hbox_bottom()) {
     """<table width="100%" height="100%"$margin>""";
  }
  if (viewer_sees_hbox_top()) {
@@ -314,7 +314,7 @@ function Page::print()
     if (viewer_sees_vbox()) { "<td>&nbsp;</td>"; }
     "</tr>";
  }
- if (viewer_sees_vbox() or viewer_sees_hbox_top() or (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends"))) {
+ if (viewer_sees_vbox() or viewer_sees_hbox_top() or viewer_sees_hbox_bottom()) {
     """<tr><td valign="top">""";
  }
  """
@@ -403,10 +403,10 @@ if ($*counter_code != "") {
     $this->print_vbox();
     "</div>";
   }
-  if (viewer_sees_vbox() or viewer_sees_hbox_top() or (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends"))) {
+  if (viewer_sees_vbox() or viewer_sees_hbox_top() or viewer_sees_hbox_bottom()) {
     "</td></tr>";
   }
-  if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
+  if (viewer_sees_hbox_bottom()) {
     """<tr><td align="$*content_alignment">""";
     """<div style="width: 738px;">""";
     $this->print_hbox_bottom();
@@ -414,7 +414,7 @@ if ($*counter_code != "") {
     if (viewer_sees_vbox()) { "<td>&nbsp;</td>"; }
     "</tr>";
   }
-  if (viewer_sees_vbox() or viewer_sees_hbox_top() or (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends"))) {
+  if (viewer_sees_vbox() or viewer_sees_hbox_top() or viewer_sees_hbox_bottom()) {
     "</table>";
   }
   """

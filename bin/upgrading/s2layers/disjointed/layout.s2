@@ -1740,7 +1740,7 @@ if($*show_footer) {
         </tr>
       </table>""";
 }
-if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
+if (viewer_sees_hbox_bottom()) {
     """
       <table align="$*entries_alignment">
         <tr>

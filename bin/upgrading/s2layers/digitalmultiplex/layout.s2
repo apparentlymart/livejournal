@@ -955,7 +955,7 @@ function Page::print() {
     server_sig();
     println """</td></tr></table>""";
     
-    if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
+    if (viewer_sees_hbox_bottom()) {
         """<div style="text-align: center; margin-top: 10px;">""";
         $this->print_hbox_bottom();
         "</div>";

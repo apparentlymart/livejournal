@@ -1376,7 +1376,7 @@ print_sidebar();
     "</div>";
   }
   $this->print_body();
-  if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
+  if (viewer_sees_hbox_bottom()) {
     """<div align="center">""";
     $this->print_hbox_bottom();
     "</div>";
@@ -1416,7 +1416,7 @@ print_sidebar();
     "</div>";
   }
   $this->print_body();
-  if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
+  if (viewer_sees_hbox_bottom()) {
     """<div align="center">""";
     $this->print_hbox_bottom();
     "</div>";
