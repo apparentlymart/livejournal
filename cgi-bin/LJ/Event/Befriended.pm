@@ -21,33 +21,55 @@ sub as_email_subject { 'LiveJournal Friend Request!' }
 sub as_email_string {
     my $self = shift;
 
-    return sprintf $self->email_body, $self->u->display_username, $self->friend->display_username, "$LJ::SITEROOT/friends/add.bml?user=" . $self->friend->name,
-"$LJ::SITEROOT/friends/edit.bml";
+    my @vars = (
+                $self->u->display_username,
+                $self->friend->display_username,
+                );
+
+    push @vars, ($self->entry->poster->display_username, "$LJ::SITEROOT/friends/add.bml?user=" . $self->friend->name)
+        unless LJ::is_friend($self->u, $self->friend);
+
+    push @vars, $self->friend->profile_url;
+    push @vars, "$LJ::SITEROOT/friends/edit.bml";
+
+    return sprintf $self->email_body, @vars;
 }
 
 sub as_email_html {
     my $self = shift;
 
-    return sprintf $self->email_body, $self->u->ljuser_display, $self->friend->ljuser_display, "$LJ::SITEROOT/friends/add.bml?user=" . $self->friend->name,
-"$LJ::SITEROOT/friends/edit.bml";
+    my @vars = (
+                $self->u->ljuser_display,
+                $self->friend->display_username,
+                );
+
+    push @vars, ($self->entry->poster->ljuser_display, "$LJ::SITEROOT/friends/add.bml?user=" . $self->friend->name)
+        unless LJ::is_friend($self->u, $self->friend);
+
+    push @vars, $self->friend->profile_url;
+    push @vars, "$LJ::SITEROOT/friends/edit.bml";
+
+    return sprintf $self->email_body, @vars;
 }
 
 sub email_body {
     my $self = shift;
 
-    return qq {Hi %s,
+    my $msg = "Hi %s,
 
 %s has added you to their Friends list.
 
-They will now be able to view your public journal updates on their Friends page.  Add your new friend so that you can interact with each other's friends and network!
+They will now be able to view your public journal updates on their Friends page.";
+
+    $msg .= "Add your new friend so that you can interact with each other's friends and network!
 
 Click here to add them as your friend:
-%s
+%s" unless LJ::is_friend($self->u, $self->friend);
 
+    $msg .= "
 
 To view your current friends list:
-%s
-};
+%s";
 }
 
 sub friend {
