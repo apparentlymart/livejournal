@@ -17,6 +17,15 @@ sub as_string {
     return $self->event_journal->ljuser_display . " has uploaded a new userpic";
 }
 
+sub as_email_string {
+    my $self = shift;
+
+    my $email = "%s has updated their userpics!\nYou can view them here: %s";
+
+    return sprintf $email, $self->userpic->u->username_display,
+    "$LJ::SITEROOT/allpics.bml?user=" . $self->userpic->u->name;
+}
+
 sub userpic {
     my $self = shift;
     my $upid = $self->arg1 or die "No userpic id";
