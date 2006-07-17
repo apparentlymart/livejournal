@@ -2617,6 +2617,7 @@ sub _Comment__get_link
                                 $ctx->[S2::PROPS]->{"text_multiform_opt_track"},
                                 LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking_thread.gif", 22, 20));
         }
+        return $null_link;
     }
 }
 
