@@ -1745,21 +1745,25 @@ sub start_request
     # include standard files if this is web-context
     unless ($LJ::DISABLED{sitewide_includes}) {
         if (eval { Apache->request }) {
+            # standard site-wide JS
             LJ::need_res(qw(
                             js/core.js
                             js/dom.js
-                            js/httpreq.js
-                            js/ippu.js
-                            js/lj_ippu.js
-                            js/hourglass.js
-                            js/contextualpopup.js
-                            stc/contextualpopup.css
-                            stc/lj_base.css
-                            )) if $LJ::CTX_POPUP;
+                            js/livejournal.js
+                            ));
+
+              # contextual popup JS
+              LJ::need_res(qw(
+                              js/httpreq.js
+                              js/ippu.js
+                              js/lj_ippu.js
+                              js/hourglass.js
+                              js/contextualpopup.js
+                              stc/contextualpopup.css
+                              stc/lj_base.css
+                              )) if $LJ::CTX_POPUP;
 
               LJ::need_res(qw(
-                              js/core.js
-                              js/dom.js
                               js/devel.js
                               )) if $LJ::IS_DEV_SERVER;
 
