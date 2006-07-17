@@ -1,4 +1,4 @@
-ContextualPopup = {};
+var ContextualPopup = new Object;
 
 ContextualPopup.popupDelay  = 500;
 ContextualPopup.hideDelay   = 250;
@@ -265,18 +265,10 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
         DOM.addClassName(relation, "Relation");
         content.appendChild(relation);
 
-        if (data.is_person) {
-            // online status
-            var onlineStatus = document.createElement("div");
-            onlineStatus.innerHTML = "LJTalk Online: No";
-            DOM.addClassName(onlineStatus, "OnlineStatus");
-            content.appendChild(onlineStatus);
-
-            // gizmo thingey
-            var gizmoBlurb = document.createElement("div");
-            gizmoBlurb.innerHTML = "(Download <a href=''>Gizmo</a> to get on <a href=''>LJ Talk</a>)";
-            DOM.addClassName(gizmoBlurb, "GizmoBlurb");
-            content.appendChild(gizmoBlurb);
+        // add site-specific content here
+        var extraContent = LiveJournal.run_hook("ctxpopup_extrainfo", data);
+        if (extraContent) {
+            content.appendChild(extraContent);
         }
 
         // member of community
