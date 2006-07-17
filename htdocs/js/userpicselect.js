@@ -348,7 +348,7 @@ UserpicSelect.dynamic = "\
 
 UserpicSelect.userpics = "\
 [# if(pics && pics.ids) { #] \
-     <div class='ups_table'> [# \
+     <table class='ups_table'> [# \
        var rownum = 0; \
        for (var i=0; i<pics.ids.length; i++) { \
           var picid = pics.ids[i]; \
@@ -359,21 +359,21 @@ UserpicSelect.userpics = "\
 \
           var pickws = pic.keywords; \
           if (i%2 == 0) { #] \
-            <div class='ups_row ups_row[#= rownum++ % 2 + 1 #]'> [# } #] \
+            <tr class='ups_row ups_row[#= rownum++ % 2 + 1 #]'> [# } #] \
 \
-            <span class='ups_cell' style='width: [#= pic.width/2 #]px;' > \
+            <td class='ups_cell' style='width: [#= pic.width/2 #]px;' > \
               <div class='ups_container'> \
               <img src='[#= pic.url #]' width='[#= finiteInt(pic.width/2) #]' \
                  height='[#= finiteInt(pic.height/2) #]' id='ups_upicimg[#= picid #]' class='ups_upic' /> \
                </div> \
-            </span> \
-            <span class='ups_cell'> \
+            </td> \
+            <td class='ups_cell'> \
               <b>[#| pickws.join(', ') #]</b> \
              [# if(pic.comment) { #]<br/>[#= pic.comment #][# } #] \
-            </span> \
+            </td> \
 \
-            [# if (i%2 == 1 || i == pics.ids.length - 1) { #] </div> [# } \
+            [# if (i%2 == 1 || i == pics.ids.length - 1) { #] </tr> [# } \
         } #] \
-     </div> \
+     </table> \
   [# } #] \
 ";
