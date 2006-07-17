@@ -40,3 +40,17 @@ form {
 .lj_hourglass {
         z-index: 20000;
 }
+
+div.lj_ippu {
+	background-color: #fff;
+	border: 2px solid #444;
+	padding: 2px;
+}
+
+.lj_ippu_titlebar {
+	background-color: #444;
+	height: 23px;
+	font-weight: bold;
+	text-align: center;
+	color: #fff;
+}
