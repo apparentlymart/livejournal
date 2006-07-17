@@ -223,7 +223,10 @@ UserpicSelect = new Class (LJ_IPPU, {
 
       picopt.selected = this.selectedPicid ? this.selectedPicid == picid : false;
 
-      menu.add(picopt, null);
+      Try.these(
+                function () { menu.add(picopt, 0); },    // everything else
+                function () { menu.add(picopt, null); }  // IE
+                );
     }
   },
 
@@ -309,14 +312,14 @@ UserpicSelect = new Class (LJ_IPPU, {
   },
 
   handleError: function(err) {
-    alert("Error: " + err);
+    log("Error: " + err);
     this.hourglass.hide();
   },
 
   loadPics: function() {
     this.hourglass = new Hourglass($("ups_userpics"));
     var reqOpts = {};
-    reqOpts.url = "/tools/endpoints/getuserpics.bml";
+    reqOpts.url = "/__rpc_userpicselect";
     reqOpts.onData = this.picsReceived.bind(this);
     reqOpts.onError = this.handleError.bind(this);
     HTTPReq.getJSON(reqOpts);
