@@ -24,23 +24,23 @@ sub as_email_string {
 
     return '' unless $u1;
 
-    return sprintf(qq {Hi %s,
+    my $email = sprintf "Hi %s,
 
-%s has created a new journal!
+%s has created a new journal!", $self->u->display_username, $u1->display_username;
 
-If you haven't done so already, add your friend so you can stay up-to-date on the happenings in their life.
+    unless (LJ::is_friend($self->u, $u1)) {
+        $email .= sprintf "
+
+If you want, you can add your friend to your friends list so you can stay up-to-date on the happenings in their life.
 
 Click here to add them as your friend:
-%s
+%s", "$LJ::SITEROOT/friends/add.bml?user=" . $u1->name;
+    }
+
+    $email .= "
 
 To view your friend's profile
-%s
-    },
-                   $self->u->display_username,
-                   $u1->display_username,
-                   "$LJ::SITEROOT/friends/add.bml?user=" . $u1->name,
-                   $u1->profile_url,
-                   );
+" . $u1->profile_url;
 }
 
 sub as_html {
