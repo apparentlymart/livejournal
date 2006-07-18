@@ -9,7 +9,10 @@ LJ_IPPU = new Class ( IPPU, {
     this.cancelThisFunc = this.cancel.bind(this);
 
     var titlebarContent = "\
-      <div style='width:100%; text-align:left; padding: 4px; border: 0px solid yellow;'><div style='float:right; padding-right: 8px'><img src='/img/CloseButton.gif' width='15' height='15' id='" + this.uniqId + "_cancel' /></div>" + title + "</div>";
+      <div style='width:100%; text-align:left; padding: 4px; border: 0px solid yellow;'><div style='float:right; padding-right: 8px'>" +
+      "<img src='" + LJVAR.imgprefix + "/CloseButton.gif' width='15' height='15' id='" + this.uniqId + "_cancel' /></div>" + title + "</div>";
+
+    log(LJVAR.imgprefix + "/img/CloseButton.gif");
 
     this.setTitlebar(true);
     this.setTitle(titlebarContent);
