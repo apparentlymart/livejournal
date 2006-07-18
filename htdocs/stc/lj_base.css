@@ -47,14 +47,18 @@ div.lj_ippu {
 	padding: 2px;
 }
 
-div.lj_ippu_titlebar div {
+div.lj_ippu_titlebar {
 	background-color: #444;
-	height: 23px;
+	height: 20px;
 	font-weight: bold;
 	color: #fff;
-	width: 400px;
-	_width: 400px;
+	width: auto !important;
+	padding: 5px 0 0 5px;
 }
+
+	div.lj_ippu_titlebar div {
+		
+	}
 
 	.lj_ippu_titlebar img {
 		opacity: .25;
