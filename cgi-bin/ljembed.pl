@@ -35,8 +35,6 @@ sub parse
     my %attrs = _parse_attrs( $1 );
     
     qq{<lj-template name="video"} . 
-    ( $attrs{width} ? qq{ width="$attrs{width}"} : '' ) .
-    ( $attrs{height} ? qq{ height="$attrs{height}"} : '' ) .
     qq{>$attrs{src}</ljtemplate>};
     !gxe;
 }
