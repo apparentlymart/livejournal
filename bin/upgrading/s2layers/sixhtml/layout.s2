@@ -22,7 +22,33 @@ propgroup presentation {
     property string{} theme_stylesheet {
         noui = 1;
     }
-    set theme_stylesheet = {}; # Set in prop_init()
+    set theme_stylesheet = {
+        "april" => "http://stat.livejournal.com/sixhtml/themes/classic/theme-april.css",
+        "baby" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-baby.css",
+        "beckett" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-beckett.css",
+        "bluecrush" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-bluecrush.css",
+        "bonjour" => "http://stat.livejournal.com/sixhtml/themes/classic/theme-bonjour.css",
+        "bryant" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-bryant.css",
+        "cityblend" => "http://stat.livejournal.com/sixhtml/themes/shea/theme-cityblend.css",
+        "classy" => "http://stat.livejournal.com/sixhtml/themes/classic/theme-classy.css",
+        "earth" => "http://stat.livejournal.com/sixhtml/themes/classic/theme-earth.css",
+        "green" => "http://stat.livejournal.com/sixhtml/themes/classic/theme-green.css",
+        "folio" => "http://stat.livejournal.com/sixhtml/themes/shea/theme-folio.css",
+        "forestgreen" => "http://stat.livejournal.com/sixhtml/themes/shea/theme-forestgreen.css",
+        "knitting" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-knitting.css",
+        "powell-street" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-powell-street.css",
+        "masala" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-masala.css",
+        "minimalist" => "http://stat.livejournal.com/sixhtml/themes/classic/theme-minimalist.css",
+        "porpoise" => "http://stat.livejournal.com/sixhtml/themes/shea/theme-porpoise.css",
+        "purplecrush" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-purplecrush.css",
+        "stevenson" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-stevenson.css",
+        "subtle" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-subtle.css",
+        "sunburned" => "http://stat.livejournal.com/sixhtml/themes/shea/theme-sunburned.css",
+        "stitch" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-stitch.css",
+        "tickle" => "http://stat.livejournal.com/sixhtml/themes/shea/theme-tickle.css",
+        "travel" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-travel.css",
+        "wedding" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-wedding.css",
+    };
 
     property use page_recent_items;
     property use page_friends_items;
@@ -117,34 +143,6 @@ propgroup customcss {
 }
 
 function prop_init() {
-    $*theme_stylesheet = {
-        "april" => "$*STATDIR/sixhtml/themes/classic/theme-april.css",
-        "baby" => "$*STATDIR/sixhtml/themes/lilia/theme-baby.css",
-        "beckett" => "$*STATDIR/sixhtml/themes/lilia/theme-beckett.css",
-        "bluecrush" => "$*STATDIR/sixhtml/themes/lilia/theme-bluecrush.css",
-        "bonjour" => "$*STATDIR/sixhtml/themes/classic/theme-bonjour.css",
-        "bryant" => "$*STATDIR/sixhtml/themes/lilia/theme-bryant.css",
-        "cityblend" => "$*STATDIR/sixhtml/themes/shea/theme-cityblend.css",
-        "classy" => "$*STATDIR/sixhtml/themes/classic/theme-classy.css",
-        "earth" => "$*STATDIR/sixhtml/themes/classic/theme-earth.css",
-        "green" => "$*STATDIR/sixhtml/themes/classic/theme-green.css",
-        "folio" => "$*STATDIR/sixhtml/themes/shea/theme-folio.css",
-        "forestgreen" => "$*STATDIR/sixhtml/themes/shea/theme-forestgreen.css",
-        "knitting" => "$*STATDIR/sixhtml/themes/lilia/theme-knitting.css",
-        "powell-street" => "$*STATDIR/sixhtml/themes/lilia/theme-powell-street.css",
-        "masala" => "$*STATDIR/sixhtml/themes/lilia/theme-masala.css",
-        "minimalist" => "$*STATDIR/sixhtml/themes/classic/theme-minimalist.css",
-        "porpoise" => "$*STATDIR/sixhtml/themes/shea/theme-porpoise.css",
-        "purplecrush" => "$*STATDIR/sixhtml/themes/lilia/theme-purplecrush.css",
-        "stevenson" => "$*STATDIR/sixhtml/themes/lilia/theme-stevenson.css",
-        "subtle" => "$*STATDIR/sixhtml/themes/lilia/theme-subtle.css",
-        "sunburned" => "$*STATDIR/sixhtml/themes/shea/theme-sunburned.css",
-        "stitch" => "$*STATDIR/sixhtml/themes/lilia/theme-stitch.css",
-        "tickle" => "$*STATDIR/sixhtml/themes/shea/theme-tickle.css",
-        "travel" => "$*STATDIR/sixhtml/themes/lilia/theme-travel.css",
-        "wedding" => "$*STATDIR/sixhtml/themes/lilia/theme-wedding.css",
-    };
-
     # Did the user specify custom sidebars?  If so, we don't want to change them.
     var bool custom_primary = (size $*sidebar_primary > 0) ? true : false;
     var bool custom_secondary = (size $*sidebar_secondary > 0) ? true : false;
@@ -559,7 +557,7 @@ function body_class (string lay) : string {
 
 function Page::print_stylesheets() {
     if ($*use_6a_base) {
-        println safe """<link rel="stylesheet" href="$*STATDIR/sixhtml/themes/common/base-weblog.css" type="text/css" />\n""";
+        println safe """<link rel="stylesheet" href="http://stat.livejournal.com/sixhtml/themes/common/base-weblog.css" type="text/css" />\n""";
         println safe """<link rel="stylesheet" href="$*STATDIR/sixhtml/ljextras.css" type="text/css" />\n""";
     }
 
