@@ -47,10 +47,19 @@ div.lj_ippu {
 	padding: 2px;
 }
 
-.lj_ippu_titlebar {
+div.lj_ippu_titlebar div {
 	background-color: #444;
 	height: 23px;
 	font-weight: bold;
-	text-align: center;
 	color: #fff;
+	width: 400px;
+	_width: 400px;
 }
+
+	.lj_ippu_titlebar img {
+		opacity: .25;
+	}
+	
+		.lj_ippu_titlebar img:hover {
+			opacity: 1;
+		}
