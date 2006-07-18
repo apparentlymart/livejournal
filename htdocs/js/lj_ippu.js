@@ -12,8 +12,6 @@ LJ_IPPU = new Class ( IPPU, {
       <div style='width:100%; text-align:left; padding: 4px; border: 0px solid yellow;'><div style='float:right; padding-right: 8px'>" +
       "<img src='" + LJVAR.imgprefix + "/CloseButton.gif' width='15' height='15' id='" + this.uniqId + "_cancel' /></div>" + title + "</div>";
 
-    log(LJVAR.imgprefix + "/img/CloseButton.gif");
-
     this.setTitlebar(true);
     this.setTitle(titlebarContent);
     this.setTitlebarClass("lj_ippu_titlebar");
