@@ -35,7 +35,7 @@ sub parse
     my %attrs = _parse_attrs( $1 );
     
     qq{<lj-template name="video"} . 
-    qq{>$attrs{src}</ljtemplate>};
+    qq{>$attrs{src}</lj-template>};
     !gxe;
 }
 
