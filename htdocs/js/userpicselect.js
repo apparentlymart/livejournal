@@ -1,10 +1,13 @@
 UserpicSelect = new Class (LJ_IPPU, {
   init: function () {
     UserpicSelect.superClass.init.apply(this, ["Choose Userpic"]);
+
     this.setDimensions("550px", "441px");
+
     this.selectedPicid = null;
     this.displayPics = null;
     this.dataLoaded = false;
+    this.imgScale = 1;
 
     this.picSelectedCallback = null;
 
@@ -16,8 +19,6 @@ UserpicSelect = new Class (LJ_IPPU, {
 
   show: function() {
     UserpicSelect.superClass.show.apply(this, []);
-
-    this.setDimensions("550px", "441px");
 
     if (!this.dataLoaded) {
       this.setStatus("Loading...");
@@ -55,7 +56,7 @@ UserpicSelect = new Class (LJ_IPPU, {
   },
 
   setStatus: function(status) {
-    this.setField({'status': status});
+      this.setField({'status': status});
   },
 
   setField: function(vars) {
@@ -72,6 +73,8 @@ UserpicSelect = new Class (LJ_IPPU, {
 
     if (!vars.status)
       vars.status = "";
+
+    vars.imgScale = this.imgScale;
 
     $("ups_dynamic").innerHTML = (template.exec( new Template.Context( vars, templates ) ));
 
@@ -112,6 +115,43 @@ UserpicSelect = new Class (LJ_IPPU, {
     });
 
     DOM.addEventListener($("ups_closebutton"), "click", this.closeButtonClicked.bindEventListener(this));
+
+    // set up image scaling buttons
+    var scalingSizes = [3,2,1];
+    var baseSize = 25;
+    var scalingBtns = $("ups_scaling_buttons");
+    this.scalingBtns = [];
+
+    if (scalingBtns) {
+        scalingSizes.forEach(function (scaleSize) {
+            var scaleBtn = document.createElement("img");
+
+            scaleBtn.style.width = scaleBtn.width = scaleBtn.style.height = scaleBtn.height = baseSize - scaleSize * 5;
+
+            scaleBtn.src = LJVAR.imgprefix + "/imgscale.png";
+            DOM.addClassName(scaleBtn, "ups_scalebtn");
+
+            self.scalingBtns.push(scaleBtn);
+
+            DOM.addEventListener(scaleBtn, "click", function (evt) {
+                Event.stop(evt);
+
+                self.imgScale = scaleSize;
+                self.scalingBtns.forEach(function (otherBtn) {
+                    DOM.removeClassName(otherBtn, "ups_scalebtn_selected");
+                });
+
+                DOM.addClassName(scaleBtn, "ups_scalebtn_selected");
+
+                self.redraw();
+            });
+
+            scalingBtns.appendChild(scaleBtn);
+
+            if (self.imgScale == scaleSize)
+                DOM.addClassName(scaleBtn, "ups_scalebtn_selected");
+        });
+    }
   },
 
   kwmenuChange: function(evt) {
@@ -119,20 +159,26 @@ UserpicSelect = new Class (LJ_IPPU, {
   },
 
   selectPic: function(picid) {
-    if (this.selectedPicid)
-      DOM.removeClassName($("ups_upicimg" + this.selectedPicid), "ups_selected");
+    if (this.selectedPicid) {
+        DOM.removeClassName($("ups_upicimg" + this.selectedPicid), "ups_selected");
+        DOM.removeClassName($("ups_cell" + this.selectedPicid), "ups_selected_cell");
+    }
 
     this.selectedPicid = picid;
 
     if (picid) {
-        // find the current picture
+        // find the current pic and cell
         var picimg =  $("ups_upicimg" + picid);
+        var cell   =  $("ups_cell" + picid);
 
-        if (!picimg)
+        if (!picimg || !cell)
             return;
 
         // hilight the userpic
         DOM.addClassName(picimg, "ups_selected");
+
+        // hilight the cell
+        DOM.addClassName(cell, "ups_selected_cell");
 
         // enable the select button
         $("ups_closebutton").disabled = false;
@@ -246,8 +292,10 @@ UserpicSelect = new Class (LJ_IPPU, {
     if (!picinfo || !picinfo.ids || !picinfo.pics || !picinfo.ids.length)
       return;
 
+    var piccount = picinfo.ids.length;
+
     // force convert integers to strings
-    for (var i=0; i < picinfo.ids.length; i++) {
+    for (var i=0; i < piccount; i++) {
       var picid = picinfo.ids[i];
 
       var pic = picinfo.pics[picid];
@@ -260,6 +308,15 @@ UserpicSelect = new Class (LJ_IPPU, {
 
       for (var j=0; j < pic.keywords.length; j++)
         pic.keywords[j] += "";
+    }
+
+    // set default scaling size based on how many pics there are
+    if (piccount < 30) {
+        this.imgScale = 1;
+    } else if (piccount < 60) {
+        this.imgScale = 2;
+    } else {
+        this.imgScale = 3;
     }
 
     this.pics = picinfo;
@@ -351,6 +408,8 @@ UserpicSelect.dynamic = "\
          </div>\
       <div class='ups_closebuttonarea'>\
        <input type='button' id='ups_closebutton' value='Select' disabled='true' />\
+       <span id='ups_scaling_buttons'>\
+       </span>\
       </div>";
 
 UserpicSelect.userpics = "\
@@ -368,14 +427,16 @@ UserpicSelect.userpics = "\
           if (i%2 == 0) { #] \
             <tr class='ups_row ups_row[#= rownum++ % 2 + 1 #]'> [# } #] \
 \
-            <td class='ups_cell' style='width: [#= pic.width/2 #]px;' lj_ups:picid='[#= picid #]'> \
+            <td class='ups_cell'  \
+                           lj_ups:picid='[#= picid #]' id='ups_cell[#= picid #]'> \
               <div class='ups_container'> \
-              <img src='[#= pic.url #]' width='[#= finiteInt(pic.width/2) #]' \
-                 height='[#= finiteInt(pic.height/2) #]' id='ups_upicimg[#= picid #]' class='ups_upic' /> \
+              <img src='[#= pic.url #]' width='[#= finiteInt(pic.width/imgScale) #]' \
+                 height='[#= finiteInt(pic.height/imgScale) #]' id='ups_upicimg[#= picid #]' class='ups_upic' /> \
                </div> \
 \
               <b>[#| pickws.join(', ') #]</b> \
              [# if(pic.comment) { #]<br/>[#= pic.comment #][# } #] \
+              <div class='clear'>&nbsp;</div>\
             </td> \
 \
             [# if (i%2 == 1 || i == pics.ids.length - 1) { #] </tr> [# } \

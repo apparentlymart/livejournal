@@ -1,5 +1,5 @@
 div.ups_status {
-	color: #CE0000;
+	color: #333;
 	font-size: larger;
 	font-weight: bold;
 	text-align: center;
@@ -52,9 +52,10 @@ img.ups_upic {
 	border-bottom: 1px solid #aaa;
 	background: #fff;
 }
+
 div.ups_userpics {
 	overflow: auto;
-	height: 355px;
+	height: 353px;
 	margin: 0;
 	padding: 0;
 }
@@ -62,13 +63,6 @@ div.ups_userpics {
 div.ups_container {
 	float: left;
 	margin: 0 5px 0 0;
-}
-
-div.clearing {
-	clear: both;
-	height: 0px;
-	margin: 0;
-	padding: 0;
 }
 
 div.ups_closebuttonarea {
@@ -87,9 +81,13 @@ div.ups_closebuttonarea {
 		display: block;
 		position: absolute;
 		right: 5px;
-		top: 5px;
+		top: 2px;
 	}
 
 	#ups_scaling_buttons img {
-		margin: 0 0 0 2px;
+		border: 3px solid #ccc;
 	}
+
+        img.ups_scalebtn_selected {
+                border: 3px double #666 !important;
+        }

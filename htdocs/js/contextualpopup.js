@@ -176,7 +176,7 @@ ContextualPopup.constructIPPU = function (ctxPopupId) {
     ippu.setTitlebar(false);
     ippu.setFadeOut(true);
     ippu.setFadeIn(true);
-    ippu.setFadeSpeed(30);
+    ippu.setFadeSpeed(15);
     ippu.setDimensions("auto", "auto");
     ippu.addClass("ContextualPopup");
     ippu.setCancelledCallback(ContextualPopup.popupClosed);
