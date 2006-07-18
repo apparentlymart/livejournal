@@ -8,6 +8,7 @@ div.ups_status {
 .ups_table {
 	display: table;
 	width: 100%;
+	_width: 97%;
 	padding: 0;
 	margin: 0;
 }

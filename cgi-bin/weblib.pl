@@ -864,6 +864,11 @@ sub create_qr_div {
                                         'selected' => $userpic, 'id' => 'prop_picture_keyword' },
                                        ("", BML::ml('/talkpost.bml.opt.defpic'), map { ($_, $_) } @pics));
 
+            # userpic browse button
+            $qrhtml .= qq {
+                <input type="button" id="lj_userpicselect" value="Browse" />
+            };
+
             $qrhtml .= LJ::help_icon_html("userpics", " ");
         }
     }
@@ -942,6 +947,34 @@ sub create_qr_div {
             if (bodye[0])
                 bodye[0].insertBefore(de, bodye[0].firstChild);
             de.style.display = 'none';
+        }
+
+        // attach userpicselect code to userpicbrowse button
+        var ups_btn = \$("lj_userpicselect");
+        if (ups_btn) {
+            DOM.addEventListener(ups_btn, "click", function (evt) {
+                var ups = new UserpicSelect();
+                ups.init();
+                ups.setPicSelectedCallback(function (picid, keywords) {
+                    var kws_dropdown = \$("prop_picture_keyword");
+
+                    if (kws_dropdown) {
+                        var items = kws_dropdown.options;
+
+                        // select the keyword in the dropdown
+                        keywords.forEach(function (kw) {
+                            for (var i = 0; i < items.length; i++) {
+                                var item = items[i];
+                                if (item.value == kw) {
+                                    kws_dropdown.selectedIndex = i;
+                                    break;
+                                }
+                            }
+                        });
+                    }
+                });
+                ups.show();
+            });
         }
     }
                );
@@ -2815,12 +2848,5 @@ $LJ::COMMON_CODE{'autoradio_check'} = q{
 // -->
 </script>
 };
-
-# Common Javascript functions for Quick Reply
-$LJ::COMMON_CODE{'quickreply'} =
-qq{<script language="JavaScript" type="text/javascript" src="$LJ::JSPREFIX/x_core.js"></script>
-<script language="JavaScript" type="text/javascript" src="$LJ::JSPREFIX/quickreply.js"></script>
-};
-
 
 1;

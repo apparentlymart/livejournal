@@ -41,8 +41,15 @@ UserpicSelect = new Class (LJ_IPPU, {
 
   // called when the "select" button is clicked
   closeButtonClicked: function (evt) {
-    if (this.picSelectedCallback)
-      this.picSelectedCallback(this.selectedPicid);
+      if (this.picSelectedCallback) {
+          var selectedKws = [];
+          if (this.selectedPicid) {
+              var kws = this.pics.pics[this.selectedPicid+""].keywords;
+              if (kws && kws.length) selectedKws = kws;
+          }
+
+          this.picSelectedCallback(this.selectedPicid, selectedKws);
+      }
 
     this.hide();
   },
