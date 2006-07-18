@@ -33,9 +33,15 @@ sub parse
         </object>
     !
     my %attrs = _parse_attrs( $1 );
+    qq{<lj-template name="video">$attrs{src}</lj-template>};
+    !gxe;
     
-    qq{<lj-template name="video"} . 
-    qq{>$attrs{src}</lj-template>};
+    $$postref =~ s!
+        <embed([^>]*)>\s*
+        </embed>
+    !
+    my %attrs = _parse_attrs( $1 );
+    qq{<lj-template name="video">$attrs{src}</lj-template>};
     !gxe;
 }
 
