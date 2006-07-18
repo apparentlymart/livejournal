@@ -72,6 +72,19 @@ sub has_dismissed {
     return $state && $state->{nothankstime};
 }
 
+# returns boolean; if user has seen the $class tip
+sub has_seen {
+    my ($class, $u) = @_;
+
+    my $tm  = $class->typemap;
+    my $map = LJ::CProd->user_map($u);
+
+    my $cprodid = $tm->class_to_typeid($class);
+    my $state = $map->{$cprodid};
+
+    return $state && $state->{firstshowtime};
+}
+
 # returns boolean; if user has acknowledged the $class tip
 sub has_acked {
     my ($class, $u) = @_;
