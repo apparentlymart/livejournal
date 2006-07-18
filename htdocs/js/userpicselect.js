@@ -78,24 +78,38 @@ UserpicSelect = new Class (LJ_IPPU, {
     if (!vars.pics.ids)
       return;
 
-    for (var i=0; i<vars.pics.ids.length; i++) {
-      var picid = vars.pics.ids[i];
-      var pic = vars.pics.pics[picid];
-
-      if (!pic)
-        continue;
-
-      // add onclick handlers for each of the images
-      var cell = $("ups_upicimg" + picid);
-      if (cell) {
-        cell.picid = picid;
-        this.addClickHandler(cell);
-      }
-    }
-
     // we redrew the window so reselect the current selection, if any
     if (this.selectedPicid)
       this.selectPic(this.selectedPicid);
+
+    var ST = new SelectableTable();
+    ST.init({
+        "table": $("ups_userpics_t"),
+            "selectedClass": "ups_selected_cell",
+            "selectableClass": "ups_cell",
+            "multiple": false,
+            "selectableItem": "cell"
+            });
+
+    var self = this;
+
+    ST.addWatcher(function (data) {
+        var selectedCell = data[0];
+
+        if (!selectedCell) {
+            // clear selection
+            self.selectPic(null);
+        } else {
+            // find picid and select it
+            var parentCell = DOM.getFirstAncestorByClassName(selectedCell, "ups_cell", true);
+            if (!parentCell) return;
+
+            var picid = parentCell.getAttribute("lj_ups:picid");
+            if (!picid) return;
+
+            self.selectPic(picid);
+        }
+    });
 
     DOM.addEventListener($("ups_closebutton"), "click", this.closeButtonClicked.bindEventListener(this));
   },
@@ -108,40 +122,26 @@ UserpicSelect = new Class (LJ_IPPU, {
     if (this.selectedPicid)
       DOM.removeClassName($("ups_upicimg" + this.selectedPicid), "ups_selected");
 
-    // find the current picture
-    var picimg =  $("ups_upicimg" + picid);
-
-    if (!picimg)
-      return;
-
-    // hilight the userpic
-    DOM.addClassName(picimg, "ups_selected");
-
     this.selectedPicid = picid;
 
-    // enable the select button
-    $("ups_closebutton").disabled = false;
+    if (picid) {
+        // find the current picture
+        var picimg =  $("ups_upicimg" + picid);
 
-    // select the current selectedPicid in the dropdown
-    this.setDropdown();
-  },
+        if (!picimg)
+            return;
 
-  addClickHandler: function(cell) {
-    DOM.addEventListener(cell, "click", this.cellClick.bindEventListener(this));
-  },
+        // hilight the userpic
+        DOM.addClassName(picimg, "ups_selected");
 
-  cellClick: function(evt) {
-    Event.stop(evt);
+        // enable the select button
+        $("ups_closebutton").disabled = false;
 
-    var target = evt.target;
-    if (!target)
-      return;
-
-    var picid = target.picid;
-    if (!defined(picid))
-      return;
-
-    this.selectPic(picid);
+        // select the current selectedPicid in the dropdown
+        this.setDropdown();
+    } else {
+        $("ups_closebutton").disabled = true;
+    }
   },
 
   // filter by keyword/comment
@@ -355,7 +355,7 @@ UserpicSelect.dynamic = "\
 
 UserpicSelect.userpics = "\
 [# if(pics && pics.ids) { #] \
-     <table class='ups_table' cellpadding='0' cellspacing='0'> [# \
+     <table class='ups_table' cellpadding='0' cellspacing='0' id='ups_userpics_t'> [# \
        var rownum = 0; \
        for (var i=0; i<pics.ids.length; i++) { \
           var picid = pics.ids[i]; \
@@ -368,13 +368,12 @@ UserpicSelect.userpics = "\
           if (i%2 == 0) { #] \
             <tr class='ups_row ups_row[#= rownum++ % 2 + 1 #]'> [# } #] \
 \
-            <td class='ups_cell' style='width: [#= pic.width/2 #]px;' > \
+            <td class='ups_cell' style='width: [#= pic.width/2 #]px;' lj_ups:picid='[#= picid #]'> \
               <div class='ups_container'> \
               <img src='[#= pic.url #]' width='[#= finiteInt(pic.width/2) #]' \
                  height='[#= finiteInt(pic.height/2) #]' id='ups_upicimg[#= picid #]' class='ups_upic' /> \
                </div> \
-            </td> \
-            <td class='ups_cell'> \
+\
               <b>[#| pickws.join(', ') #]</b> \
              [# if(pic.comment) { #]<br/>[#= pic.comment #][# } #] \
             </td> \

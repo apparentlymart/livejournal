@@ -57,6 +57,8 @@ sub EntryPage
                     js/inputcomplete.js
                     stc/ups.css
                     stc/lj_base.css
+                    js/datasource.js
+                    js/selectable_table.js
 
                     js/x_core.js
                     js/quickreply.js
