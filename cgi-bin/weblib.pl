@@ -933,52 +933,59 @@ sub create_qr_div {
                                       {'name' => 'saved_ptid', 'id' => 'saved_ptid'},
                                       ));
 
-    $ret .= qq(
+    $ret .= qq{
+               var de;
+               if (document.createElement && document.body.insertBefore && !(xMac && xIE4Up)) {
+                   document.write("$qrsaveform");
+                   de = document.createElement("div");
 
-    var de;
-    if (document.createElement && document.body.insertBefore && !(xMac && xIE4Up)) {
-        document.write("$qrsaveform");
-        de = document.createElement("div");
+                   if (de) {
+                       de.id = "qrdiv";
+                       de.innerHTML = "$qrhtml";
+                       var bodye = document.getElementsByTagName("body");
+                       if (bodye[0])
+                           bodye[0].insertBefore(de, bodye[0].firstChild);
+                       de.style.display = 'none';
+                   }
+               }
+           };
 
-        if (de) {
-            de.id = "qrdiv";
-            de.innerHTML = "$qrhtml";
-            var bodye = document.getElementsByTagName("body");
-            if (bodye[0])
-                bodye[0].insertBefore(de, bodye[0].firstChild);
-            de.style.display = 'none';
-        }
-
-        // attach userpicselect code to userpicbrowse button
-        var ups_btn = \$("lj_userpicselect");
-        if (ups_btn) {
-            DOM.addEventListener(ups_btn, "click", function (evt) {
-                var ups = new UserpicSelect();
-                ups.init();
-                ups.setPicSelectedCallback(function (picid, keywords) {
-                    var kws_dropdown = \$("prop_picture_keyword");
-
-                    if (kws_dropdown) {
-                        var items = kws_dropdown.options;
-
-                        // select the keyword in the dropdown
-                        keywords.forEach(function (kw) {
-                            for (var i = 0; i < items.length; i++) {
-                                var item = items[i];
-                                if (item.value == kw) {
-                                    kws_dropdown.selectedIndex = i;
-                                    break;
-                                }
-                            }
-                        });
-                    }
-                });
-                ups.show();
-            });
-        }
-    }
-               );
     $ret .= "\n</script>";
+
+    $ret .= qq {
+        <script type="text/javascript" language="JavaScript">
+            DOM.addEventListener(window, "load", function (evt) {
+                // attach userpicselect code to userpicbrowse button
+                var ups_btn = \$("lj_userpicselect");
+                if (ups_btn) {
+                    DOM.addEventListener(ups_btn, "click", function (evt) {
+                     var ups = new UserpicSelect();
+                     ups.init();
+                     ups.setPicSelectedCallback(function (picid, keywords) {
+                         var kws_dropdown = \$("prop_picture_keyword");
+
+                         if (kws_dropdown) {
+                             var items = kws_dropdown.options;
+
+                             // select the keyword in the dropdown
+                             keywords.forEach(function (kw) {
+                                 for (var i = 0; i < items.length; i++) {
+                                     var item = items[i];
+                                     if (item.value == kw) {
+                                         kws_dropdown.selectedIndex = i;
+                                         return;
+                                     }
+                                 }
+                             });
+                         }
+                     });
+                     ups.show();
+                 });
+                }
+            });
+        </script>
+        } unless $LJ::DISABLED{userpicselect};
+
     return $ret;
 }
 
@@ -1467,69 +1474,72 @@ MOODS
                         if (document.getElementById) {
                             var userpics = new Array();
                             $userpics
-                                function userpic_preview() {
-                                    if (! document.getElementById) return false;
-                                    var userpic_select          = document.getElementById('prop_picture_keyword');
-                                    var userpic_preview         = document.getElementById('userpic_preview');
-                                    var userpic_preview_image   = document.getElementById('userpic_preview_image');
+                            function userpic_preview() {
+                                if (! document.getElementById) return false;
+                                var userpic_select          = document.getElementById('prop_picture_keyword');
+                                var userpic_preview         = document.getElementById('userpic_preview');
+                                var userpic_preview_image   = document.getElementById('userpic_preview_image');
 
-                                    if (userpics[userpic_select.selectedIndex] != "") {
-                                        userpic_preview.style.display = "block";
-                                        userpic_preview_image.src = userpics[userpic_select.selectedIndex];
-                                    }
+                                if (userpics[userpic_select.selectedIndex] != "") {
+                                    userpic_preview.style.display = "block";
+                                    userpic_preview_image.src = userpics[userpic_select.selectedIndex];
                                 }
-
-                            DOM.addEventListener(window, "load", function (evt) {
-                                // attach userpicselect code to userpicbrowse button
-                                var ups_btn = \$("lj_userpicselect");
-                                if (ups_btn) {
-                                    DOM.addEventListener(ups_btn, "click", function (evt) {
-                                        var ups = new UserpicSelect();
-                                        ups.init();
-                                        ups.setPicSelectedCallback(function (picid, keywords) {
-                                            var kws_dropdown = \$("prop_picture_keyword");
-
-                                            if (kws_dropdown) {
-                                                var items = kws_dropdown.options;
-
-                                                // select the keyword in the dropdown
-                                                keywords.forEach(function (kw) {
-                                                    for (var i = 0; i < items.length; i++) {
-                                                        var item = items[i];
-                                                        if (item.value == kw) {
-                                                            kws_dropdown.selectedIndex = i;
-                                                            userpic_preview();
-                                                            return;
-                                                        }
-                                                    }
-                                                });
-                                            }
-                                        });
-                                        ups.show();
-                                    });
-                                }
-                            });
-
+                            }
                         }
                     //--></script>
                     };
 
+                $$head .= qq {
+                    <script type="text/javascript" language="JavaScript">
+                    DOM.addEventListener(window, "load", function (evt) {
+                        // attach userpicselect code to userpicbrowse button
+                            var ups_btn = \$("lj_userpicselect");
+                        if (ups_btn) {
+                            DOM.addEventListener(ups_btn, "click", function (evt) {
+                                var ups = new UserpicSelect();
+                                ups.init();
+                                ups.setPicSelectedCallback(function (picid, keywords) {
+                                    var kws_dropdown = \$("prop_picture_keyword");
+
+                                    if (kws_dropdown) {
+                                        var items = kws_dropdown.options;
+
+                                        // select the keyword in the dropdown
+                                        keywords.forEach(function (kw) {
+                                            for (var i = 0; i < items.length; i++) {
+                                                var item = items[i];
+                                                if (item.value == kw) {
+                                                    kws_dropdown.selectedIndex = i;
+                                                    userpic_preview();
+                                                    return;
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
+                                ups.show();
+                            });
+                        }
+                    });
+                    </script>
+                } unless $LJ::DISABLED{userpicselect};
+
                 # libs for userpicselect
                 LJ::need_res(qw(
-                    js/core.js
-                    js/dom.js
-                    js/json.js
-                    js/template.js
-                    js/ippu.js
-                    js/lj_ippu.js
-                    js/userpicselect.js
-                    js/httpreq.js
-                    js/hourglass.js
-                    js/inputcomplete.js
-                    stc/ups.css
-                    stc/lj_base.css
-                    js/datasource.js
-                    js/selectable_table.js
+                                js/core.js
+                                js/dom.js
+                                js/json.js
+                                js/template.js
+                                js/ippu.js
+                                js/lj_ippu.js
+                                js/userpicselect.js
+                                js/httpreq.js
+                                js/hourglass.js
+                                js/inputcomplete.js
+                                stc/ups.css
+                                stc/lj_base.css
+                                js/datasource.js
+                                js/selectable_table.js
                                 )) unless $LJ::DISABLED{userpicselect};
 
                 $out .= "<tr id='userpic_list_row' valign='top'>";
