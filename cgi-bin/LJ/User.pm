@@ -973,6 +973,11 @@ sub _lazy_migrate_infoshow {
     return 1;
 }
 
+# opt_showbday options
+# F - Full Display of Birthday
+# D - Only Show Month/Day
+# Y - Only Show Year
+# N - Do not display
 sub opt_showbday {
     my $u = shift;
     # option not set = "yes", set to N = "no"
