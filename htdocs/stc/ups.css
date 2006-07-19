@@ -85,9 +85,11 @@ div.ups_closebuttonarea {
 	}
 
 	#ups_scaling_buttons img {
-		border: 3px solid #ccc;
+		margin: 0 0 0 2px;
+		padding: 2px;
+		border: 1px solid #ccc;
 	}
 
         img.ups_scalebtn_selected {
-                border: 3px double #666 !important;
+                border: 1px solid #666 !important;
         }
