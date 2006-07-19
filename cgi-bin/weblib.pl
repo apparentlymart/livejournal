@@ -2114,7 +2114,7 @@ sub ads {
     my $remote = LJ::get_remote();
     if ($remote) {
         # Pass age to targetting engine if user shares this information
-        if (($remote->can_show_bday_year || $remote->can_show_full_bday) && defined $remote->{bdate}) {
+        if ($remote->can_show_bday_year && defined $remote->{bdate}) {
             my $bdate = $remote->{bdate};
 
             # Check to see if the bdate contains 4 leading digits (year) and it is true (not '0000')
