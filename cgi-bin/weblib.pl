@@ -1499,7 +1499,7 @@ MOODS
                                                         if (item.value == kw) {
                                                             kws_dropdown.selectedIndex = i;
                                                             userpic_preview();
-                                                            break;
+                                                            return;
                                                         }
                                                     }
                                                 });
