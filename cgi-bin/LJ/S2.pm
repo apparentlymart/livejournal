@@ -2576,7 +2576,7 @@ sub _Comment__get_link
 
         if ($key eq "unwatch_thread") {
             return $null_link unless $remote->has_subscription(journal => $u, event => "JournalNewComment", arg2 => $comment->jtalkid);
-    
+
             return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;dtalkid=$this->{talkid}",
                                 $ctx->[S2::PROPS]->{"text_multiform_opt_untrack"},
                                 LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking.gif", 22, 20));
