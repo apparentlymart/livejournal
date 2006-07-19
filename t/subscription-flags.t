@@ -52,7 +52,11 @@ sub run_tests {
         is($subscr->flags, 11, "Cleared one flag ok");
 
         # clear flags and set disabled and inactive
-        $subscr->set_flags(0);
+
+        $subscr->clear_flag(1);
+        $subscr->clear_flag(2);
+        $subscr->clear_flag(8);
+
         $subscr->set_flag(LJ::Subscription::DISABLED);
         $subscr->set_flag(LJ::Subscription::INACTIVE);
         ok(! $subscr->active, "Inactive");

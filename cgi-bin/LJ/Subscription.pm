@@ -338,7 +338,14 @@ sub set_flag {
 
     $flags |= $flag;
 
-    $self->set_flags($flags);
+    if ($self->owner && ! $self->pending) {
+        $self->owner->do("UPDATE subs SET flags = flags | ? WHERE userid=? AND subid=?", undef,
+                         $flag, $self->owner->userid, $self->id);
+        die $self->owner->errstr if $self->owner->errstr;
+
+        $self->{flags} = $flags;
+        delete $self->owner->{_subscriptions};
+    }
 }
 
 sub clear_flag {
@@ -352,18 +359,15 @@ sub clear_flag {
     # clear the flag
     $flags &= ~$flag;
 
-    $self->set_flags($flags);
-}
-
-sub set_flags {
-    my ($self, $flags) = @_;
 
     if ($self->owner && ! $self->pending) {
-        $self->owner->do("UPDATE subs SET flags=? WHERE userid=? AND subid=?", undef, $flags, $self->owner->userid, $self->id);
-    }
+        $self->owner->do("UPDATE subs SET flags = flags & ~? WHERE userid=? AND subid=?", undef,
+                         $flag, $self->owner->userid, $self->id);
+        die $self->owner->errstr if $self->owner->errstr;
 
-    $self->{flags} = $flags;
-    delete $self->owner->{_subscriptions};
+        $self->{flags} = $flags;
+        delete $self->owner->{_subscriptions};
+    }
 }
 
 sub id {
