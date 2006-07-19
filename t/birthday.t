@@ -31,14 +31,14 @@ sub run_tests {
         ok(!$rv, "can_show_bday: opt_showbday is not set");
     }
 
-    {
+    foreach my $val (qw(D F)) {
         my $u = temp_user();
-        $u->set_prop('opt_showbday','D');
+        $u->set_prop('opt_showbday',$val);
         my $rv = eval { $u->can_show_bday };
-        ok($rv, "can_show_bday: opt_showbday is set to D");
+        ok($rv, "can_show_bday: opt_showbday is set to $val");
     }
 
-    foreach my $val (qw(F N Y)) {
+    foreach my $val (qw(N Y)) {
         my $u = temp_user();
         $u->set_prop('opt_showbday',$val);
         my $rv = eval { $u->can_show_bday };
@@ -69,14 +69,14 @@ sub run_tests {
         ok(!$rv, "can_show_bday_year: opt_showbday is not set");
     }
 
-    {
+    foreach my $val (qw(F Y)) {
         my $u = temp_user();
-        $u->set_prop('opt_showbday','Y');
+        $u->set_prop('opt_showbday',$val);
         my $rv = eval { $u->can_show_bday_year };
-        ok($rv, "can_show_bday_year: opt_showbday is set to Y");
+        ok($rv, "can_show_bday_year: opt_showbday is set to $val");
     }
 
-    foreach my $val (qw(F N D)) {
+    foreach my $val (qw(N D)) {
         my $u = temp_user();
         $u->set_prop('opt_showbday',$val);
         my $rv = eval { $u->can_show_bday_year };
@@ -149,23 +149,37 @@ sub run_tests {
                     $u->set_prop('opt_showbday',$val);
                     my $rv = eval { $u->bday_string };
                     if ($val eq 'Y') {
-                        if ($year > 0) {
-                            ok($rv, "bday_string ($val [$u->{'bdate'}]):  $rv");
-                        } else {
-                            ok(!$rv, "bday_string ($val [$u->{'bdate'}]):  $rv");
+                        my $isok = 0;
+                        if ($year eq '1979' && $rv eq $year) {
+                            $isok = 1;
+                        } elsif ($year eq '0000' && $rv eq '') {
+                            $isok = 1;
                         }
+                        ok($isok, "bday_string ($val [$u->{'bdate'}]):  $rv");
                     } elsif ($val eq 'D') {
-                        if ($month > 0 && $day > 0) {
-                            ok($rv, "bday_string ($val [$u->{'bdate'}]):  $rv");
-                        } else {
-                            ok(!$rv, "bday_string ($val [$u->{'bdate'}]):  $rv");
+                        my $isok = 0;
+                        if ($month eq '01' && $day eq '31' && $rv eq '01-31') {
+                            $isok = 1;
+                        } elsif (($month eq '00' || $day eq '00') && $rv eq '') {
+                            $isok = 1;
                         }
+                        ok($isok, "bday_string ($val [$u->{'bdate'}]):  $rv");
                     } elsif ($val eq 'F') {
-                        if ($month > 0 && $day > 0) {
-                            ok($rv, "bday_string ($val [$u->{'bdate'}]):  $rv");
-                        } else {
-                            ok(!$rv, "bday_string ($val [$u->{'bdate'}]):  $rv");
+                        my $isok = 0;
+                        if ($month eq '01' && $day eq '31' && $year eq '1979' && $rv eq '1979-01-31') {
+                            $isok = 1;
+                        } elsif ($month eq '00' || $day eq '00') {
+                            if ($year eq '0000' && $rv eq '') {
+                                $isok = 1;
+                            } elsif ($year eq '1979' && $rv eq '1979') {
+                                $isok = 1;
+                            }
+                        } elsif ($month eq '01' && $day eq '31') {
+                            if ($year eq '0000' && $rv eq '01-31') {
+                                $isok = 1;
+                            }
                         }
+                        ok($isok, "bday_string ($val [$u->{'bdate'}]):  $rv");
                     } else {
                         ok(!$rv, "bday_string ($val [$u->{'bdate'}]):  $rv");
                     }

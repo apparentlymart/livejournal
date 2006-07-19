@@ -1024,22 +1024,25 @@ sub can_show_location {
 }
 
 # Birthday logic -- show appropriate string based on opt_showbday
+# This will return true if the actual birthday can be shown
 sub can_show_bday {
     my $u = shift;
     croak "invalid user object passed" unless LJ::isu($u);
     return 0 if $u->underage;
-    return 0 unless $u->opt_showbday eq 'D';
+    return 0 unless $u->opt_showbday eq 'D' || $u->opt_showbday eq 'F';
     return 1;
 }
 
+# This will return true if the actual birth year can be shown
 sub can_show_bday_year {
     my $u = shift;
     croak "invalid user object passed" unless LJ::isu($u);
     return 0 if $u->underage;
-    return 0 unless $u->opt_showbday eq 'Y';
+    return 0 unless $u->opt_showbday eq 'Y' || $u->opt_showbday eq 'F';
     return 1;
 }
 
+# This will return true if month, day, and year can be shown
 sub can_show_full_bday {
     my $u = shift;
     croak "invalid user object passed" unless LJ::isu($u);
@@ -1048,6 +1051,7 @@ sub can_show_full_bday {
     return 1;
 }
 
+# This will format the birthdate based on the user prop
 sub bday_string {
     my $u = shift;
     croak "invalid user object passed" unless LJ::isu($u);
@@ -1055,15 +1059,14 @@ sub bday_string {
 
     my $bdate = $u->{'bdate'};
     my ($year,$mon,$day) = split(/-/, $bdate);
-    my $bday_string;
-    if ($u->can_show_full_bday && $day > 0 && $mon > 0) {
+    my $bday_string = '';
+
+    if ($u->can_show_full_bday && $day > 0 && $mon > 0 && $year > 0) {
         $bday_string = $bdate;
     } elsif ($u->can_show_bday && $day > 0 && $mon > 0) {
         $bday_string = "$mon-$day";
     } elsif ($u->can_show_bday_year && $year > 0) {
         $bday_string = $year;
-    } else {
-        $bday_string = "";
     }
     $bday_string =~ s/^0000-//;
     return $bday_string;
