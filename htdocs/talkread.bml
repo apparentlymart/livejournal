@@ -183,10 +183,12 @@ my $old_url = 0;
                     stc/lj_base.css
                     js/datasource.js
                     js/selectable_table.js
+                    )) unless $LJ::DISABLED{userpicselect};
 
-                    js/x_core.js
-                    js/quickreply.js
-                    ));
+      LJ::need_res(qw(
+                      js/x_core.js
+                      js/quickreply.js
+                      ));
  }
 
  my $showmultiform = $remote &&

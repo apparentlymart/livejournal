@@ -59,7 +59,9 @@ sub EntryPage
                     stc/lj_base.css
                     js/datasource.js
                     js/selectable_table.js
+                    )) unless $LJ::DISABLED{userpicselect};
 
+    LJ::need_res(qw(
                     js/x_core.js
                     js/quickreply.js
                     ));

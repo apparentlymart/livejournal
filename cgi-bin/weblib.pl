@@ -1530,7 +1530,7 @@ MOODS
                     stc/lj_base.css
                     js/datasource.js
                     js/selectable_table.js
-                                ));
+                                )) unless $LJ::DISABLED{userpicselect};
 
                 $out .= "<tr id='userpic_list_row' valign='top'>";
                 $out .= "<th>" . LJ::help_icon("userpics", "", " ") . BML::ml('entryform.userpic') . "</th><td>";
