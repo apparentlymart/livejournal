@@ -2180,7 +2180,7 @@ sub ads {
     my $echannel = LJ::eurl($adcall{channel});
     my $euri = LJ::eurl($r->uri);
     # For leaderboards show links on the top right
-    if ($adcall{adunit} eq 'leaderboard') {
+    if ($adcall{adunit} =~ /^leaderboard/) {
         $adhtml .= "<div style='float: right; margin-bottom: 3px; padding-top: 0px; line-height: 1em; white-space: nowrap;'>";
         if ($LJ::IS_DEV_SERVER) {
             # This is so while working on ad related problems I can easily open the iframe in a new window
@@ -2203,7 +2203,7 @@ sub ads {
     }
 
     # For non-leaderboards show links on the bottom right
-    unless ($adcall{adunit} eq 'leaderboard') {
+    unless ($adcall{adunit} =~ /^leaderboard/) {
         $adhtml .= "<div style='text-align: right; margin-top: 2px; white-space: nowrap;'>";
         if ($LJ::IS_DEV_SERVER) {
             # This is so while working on ad related problems I can easily open the iframe in a new window

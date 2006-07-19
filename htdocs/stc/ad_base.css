@@ -17,7 +17,7 @@
 {
     width: 160px;
 }
-.ljadleaderboard
+.ljadleaderboard, .ljadleaderboard-top, .ljadleaderboard-bottom
 {
     width: 728px;
     margin-left: auto;

@@ -3065,7 +3065,7 @@ sub Page__print_hbox_top
 
     # get ad with site-specific hook
     {
-        my $ad_html = LJ::run_hook('hbox_ad_content', {
+        my $ad_html = LJ::run_hook('hbox_top_ad_content', {
             journalu => $journalu,
             pubtext  => $LJ::REQ_GLOBAL{first_public_text},
         });
@@ -3085,7 +3085,7 @@ sub Page__print_hbox_bottom
     {
         my $ad_html;
         if ($journalu->prop('journal_box_placement') eq 'h') {
-            $ad_html = LJ::run_hook('hbox_ad_content', {
+            $ad_html = LJ::run_hook('hbox_bottom_ad_content', {
                 journalu => $journalu,
                 pubtext  => $LJ::REQ_GLOBAL{first_public_text},
             });
