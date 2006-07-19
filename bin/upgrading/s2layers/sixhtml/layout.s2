@@ -723,12 +723,16 @@ function EntryPage::print_body() {
 
 }
 
-function lang_posted_by(UserLite poster, UserLite journal) : string {
+function lang_posted_by(UserLite poster, UserLite journal, Page p) : string {
     var string posted = (defined $poster ? ""+$poster : "<i>$*text_poster_anonymous</i>");
-    if (not $poster->equals($journal)) {
+    if (not $poster->equals($journal) and not ($p.view == "recent" and $p.journal_type == "C")) {
         $posted = $posted + " in " + $journal;
     }
     return "$posted";
+}
+
+function lang_posted_by(UserLite poster, UserLite journal) : string {
+    return lang_posted_by($poster, $journal, new Page);
 }
 
 function lang_posted_date_and_time(EntryLite e, DateTime dt, bool showdate, bool showtime) : string {
@@ -885,7 +889,7 @@ function Page::print_entry(Entry e) {
           "<div class='entry-userpic'>";
           if ($showuserpic and defined $e.userpic) { "$e.userpic"; }
           if (($showuserpic and defined $e.userpic) and $showposter) { "<br />"; }
-          if ($showposter) { "<p class='poster'>"+lang_posted_by($e.poster, $e.journal)+"</p>"; }
+          if ($showposter) { "<p class='poster'>"+lang_posted_by($e.poster, $e.journal, $this)+"</p>"; }
           "</div>";
       }
 
