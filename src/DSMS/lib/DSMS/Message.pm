@@ -21,7 +21,7 @@ sub new {
 
     my %args  = @_;
 
-    foreach (qw(to subject body_text valid_for)) {
+    foreach (qw(to from subject body_text valid_for)) {
         $self->{$_} = delete $args{$_};
     }
     croak "invalid parameters: " . join(",", keys %args)
@@ -32,6 +32,9 @@ sub new {
     #        to the DSMS::Provider's ->send method?
 
     {
+        croak "no from address specified"
+            unless $self->{from};
+
         croak "no recipients specified"
             unless $self->{to};
 
@@ -44,10 +47,10 @@ sub new {
         croak "empty recipient list"
             unless scalar @{$self->{to}};
 
-        foreach my $msisdn (@{$self->{to}}) {
+        foreach my $msisdn (@{$self->{to}}, $self->{from}) {
             $msisdn =~ s/[\s\-]+//g;
             croak "invalid recipient: $msisdn"
-                unless $msisdn =~ /^\+\d+$/;
+                unless $msisdn =~ /^(?:\+\d+|\d{5})$/;
         }
     }
 
@@ -78,6 +81,7 @@ sub _get {
 
 
 sub to        { _get($_[0], 'to',        $_[1]) }
+sub from      { _get($_[0], 'from',      $_[1]) }
 sub subject   { _get($_[0], 'subject',   $_[1]) }
 sub body_text { _get($_[0], 'body_text', $_[1]) }
 sub valid_for { _get($_[0], 'valid_for', $_[1]) }
