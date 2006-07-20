@@ -7,8 +7,6 @@ propgroup presentation {
     # This property is now set in a theme layer, but default is still Powell Street
     property string base_theme {
         des = "Base Theme";
-        note = "You can also list your own stylesheet on the \"Custom CSS\" tab.";
-        values = "__none|(None)|april|April|baby|Baby|beckett|Beckett|bluecrush|Blue Crush|bonjour|Bonjour Chatette|bryant|Bryant|classy|Classy|earth|Earth|green|Green|folio|Folio|forestgreen|Forest Green|knitting|Knitting|powell-street|Powell Street|masala|Masala|minimalist|Minimalist|porpoise|Porpoise|purplecrush|Purple Crush|stevenson|Stevenson|sunburned|Sunburned|stitch|Stitch|travel|Travel|wedding|Wedding";
         noui = 1;
     }
     set base_theme = "powell-street";
