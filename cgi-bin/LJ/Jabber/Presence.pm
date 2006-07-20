@@ -21,7 +21,8 @@ Requires two arguments, a LJ::User object (or something that's similar) and a re
 =cut
 
 sub new {
-    my ($class, $u, $resource) = @_;
+    my $class = shift;
+    my ($u, $resource) = @_;
 
     $u = LJ::want_user($u);
 
@@ -35,12 +36,44 @@ sub new {
 
     bless $self, $class;
 
-    my %fields = $self->_load;
+    my $userid = $u->id;
+    my $reshash = $self->reshash;
 
-    return undef unless scalar keys %fields;
-    %$self = (%$self, %fields);
+    my $memcached = LJ::MemCache::get( [$userid, "jabpresence:$userid:$reshash"] );
+
+    if ($memcached) {
+        %$self = (%$self, %$memcached);
+	return $self;
+    }
+
+    my $dbh = LJ::get_db_reader() or die "No db";
+
+    my $row = $dbh->selectrow_hashref("SELECT clusterid, presence, flags FROM jabpresence WHERE userid=? AND reshash=? AND resource=?",
+				      undef, $self->u->id, $self->reshash, $self->resource);
+
+    die $dbh->errstr if $dbh->errstr;
+
+    %$self = (%$self, %$row);
 
     return $self;
+}
+
+sub get_resources {
+    my $self = shift;
+
+    my $userid;
+    if (@_) {
+        $userid = shift;
+    }
+    else {
+        $userid = $self->u->id;
+    }
+
+    my $resources = LJ::MemCache::get( [$userid, "jabuser:$userid"] );
+
+    return $resources if $resources;
+
+    return $self->_update_memcache_index($userid);
 }
 
 =head2 $obj = LJ::Jabber::Presence->create( %opts );
@@ -103,9 +136,11 @@ sub create {
     $sth->execute( $u->id, $self->reshash, $resource, $clusterid, $presence, $flags );
 
     if ($dbh->errstr) {
-	warn "Insertion error: " . $dbh->errstr;
+	warn "Insertion error: $dbh->{errstr}";
 	return;
     }
+
+    $self->_update_memcache_index;
 
     return $self;
 }
@@ -116,13 +151,13 @@ sub create {
 
 =head2 $obj->resource
 
+=head2 $obj->reshash
+
 =head2 $obj->cluster
 
+=head2 $obj->clusterid
+
 =head2 $obj->presence
-
-=head2 $obj->flags
-
-=head2 $obj->reshash
 
 General purpose accessors for attributes on these objects.
 
@@ -184,30 +219,6 @@ sub set_flags {
 }
 
 # Internal functions
-
-sub _load {
-    my $self = shift;
-
-    my $userid = $self->u->id;
-    my $reshash = $self->reshash;
-
-    my $memcached = LJ::MemCache::get( [$userid, "jabpresence:$userid:$reshash"] );
-
-    return %$memcached if $memcached;
-
-    my $dbh = LJ::get_db_reader() or die "No db";
-
-    my @fields = qw(clusterid presence flags);
-
-    my $row = $dbh->selectrow_hashref("SELECT " . join(',', @fields) . " FROM jabpresence WHERE userid=? AND reshash=? AND resource=?", undef,
-				      $self->u->id, $self->reshash, $self->resource);
-
-    die $dbh->errstr if $dbh->errstr;
-
-    return undef unless $row;
-
-    return %$row;
-}
 
 my %savable_cols = map { ($_, 1) } qw(presence flags);
 
@@ -300,6 +311,45 @@ sub _cluster_id {
 
     LJ::MemCache::set( "jabclusteraddr:$address", $id );
     return $id;
+}
+
+sub _update_memcache_index {
+    my $self = shift;
+    my $userid = scalar( @_ ) ? shift : $self->u->id;
+
+    my $dbh = LJ::get_db_writer() or die "No db";
+
+    my $key = "jabuser:$userid";
+    my $memcache_key = [$userid, $key];
+
+    # Delete before we lock so failures past here can be detected in other threads.
+    LJ::MemCache::delete( $memcache_key );
+
+    { # Get a mysql lock before we read the DB and update memcache.
+        my $lockstatus = $dbh->selectrow_array( qq{SELECT GET_LOCK("$key",5)} );
+	unless ($lockstatus) {
+	    if (defined $lockstatus) {
+	        die "Lock attempt timed out on uid '$userid'";
+	    }
+	    else {
+	        die "Lock attempt failure, possible errstr'" . $dbh->errstr . "'";
+	    }
+	}
+    }
+
+    # Use the DB writer for reading because we locked on it, and we lose our lock if the mysql thread dies.
+    my $resources = $dbh->selectall_hashref( "SELECT resource, reshash FROM jabpresence WHERE userid=?",
+					     "resource", undef, $userid );
+
+    die "DB SELECT failed: '$dbh->{errstr}'" if $dbh->errstr;
+    die "DB returned undef" unless defined $resources;
+
+    LJ::MemCache::set( $memcache_key, $resources );
+
+    $dbh->do( qq{SELECT RELEASE_LOCK("$key")} );
+    warn "Releasing lock failed badly: $dbh->{errstr}" if $dbh->errstr;
+
+    return $resources;
 }
 
 1;
