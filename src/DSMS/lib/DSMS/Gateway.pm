@@ -54,14 +54,24 @@ sub send_msg {
     return 1;
 }
 
-sub recv_msg {
+sub recv_msg_http {
     my $self = shift;
-    croak "recv_sms is an object method"
+    croak "recv_sms_http is an object method"
         unless ref $self;
 
-    warn "DUMMY: recv_sms";
+    my $r = shift;
+    croak "recv_msg_http received an invalid Apache 'r' object"
+        unless ref $r;
 
-    return 1;
+    warn "DUMMY: recv_msg";
+
+    # parse input from client
+    # -- print directly on error, returning undef
+    # -- return DSMS::Message on response
+    # -- caller assumes OK
+
 }
+
+# TODO: recv_msg_* ?
 
 1;
