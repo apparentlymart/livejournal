@@ -2733,7 +2733,7 @@ sub subscribe_interface {
             if ($is_tracking_category && ! $pending_sub->pending) {
                 my $subid = $pending_sub->id;
                 $cat_html .= qq {
-                    <a href='?deletesub_$subid=1'><img src="$LJ::IMGPREFIX/delcomment.gif" /></a>
+                    <a href='?deletesub_$subid=1'><img src="$LJ::IMGPREFIX/portal/btn_del.gif" /></a>
                 };
             }
 
