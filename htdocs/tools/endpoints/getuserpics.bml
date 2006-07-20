@@ -1,6 +1,7 @@
 <?_code # -*-bml-*-
 {
     use strict;
+    use JSON;
 
     my $err = sub {
         my $msg = shift;
