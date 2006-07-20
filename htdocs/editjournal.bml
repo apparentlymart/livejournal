@@ -210,7 +210,7 @@ body<=
 
             # start edit form
             my $ret; my $js;
-            $ret .= "<div style='width: 100% float: left;'><form method='post' action='editjournal.bml$getextra' id='updateForm' name='updateForm'>";
+            $ret .= "<div style='width: 100%; float: left;'><form method='post' action='editjournal.bml$getextra' id='updateForm' name='updateForm'>";
             $ret .= LJ::form_auth();
             $ret .= LJ::html_hidden('itemid', $ditemid,'mode','edit','edited',1) . "\n";
 
