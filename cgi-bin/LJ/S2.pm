@@ -1843,13 +1843,14 @@ sub Link {
 
 sub Image
 {
-    my ($url, $w, $h, $alttext) = @_;
+    my ($url, $w, $h, $alttext, %extra) = @_;
     return {
         '_type' => 'Image',
         'url' => $url,
         'width' => $w,
         'height' => $h,
         'alttext' => $alttext,
+        'extra' => {%extra},
     };
 }
 
@@ -2945,6 +2946,7 @@ sub _Entry__get_link
     my $poster = $this->{'poster'}->{'username'};
     my $remote = LJ::get_remote();
     my $null_link = { '_type' => 'Link', '_isnull' => 1 };
+    my $journalu = LJ::load_user($journal);
 
     if ($key eq "edit_entry") {
         return $null_link unless $remote && ($remote->{'user'} eq $journal ||
@@ -2989,16 +2991,24 @@ sub _Entry__get_link
 
         return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/entry.bml?journal=$journal&amp;ditemid=$this->{'itemid'}",
                             "Track This",
-                            LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20));
+                            LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20, 'Track This',
+                                          'lj:journalid' => $journalu->id,
+                                          'lj:etypeid'   => 'LJ::Event::JournalNewComment'->etypeid,
+                                          'lj:arg1'      => $this->{itemid},
+                                          'class'        => 'TrackButton'));
     }
     if ($key eq "unwatch_comments") {
         return $null_link if $LJ::DISABLED{'esn'};
         return $null_link unless $remote && $remote->can_use_esn;
-        return $null_link unless $remote->has_subscription(journal => $journal, event => "JournalNewComment", arg1 => $this->{'itemid'});
+        my @subs = $remote->has_subscription(journal => $journal, event => "JournalNewComment", arg1 => $this->{'itemid'});
+        my $subscr = $subs[0];
+        return $null_link unless $subscr;
 
         return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/entry.bml?journal=$journal&amp;ditemid=$this->{'itemid'}",
                             "Untrack This",
-                            LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking.gif", 22, 20));
+                            LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking.gif", 22, 20, 'Untrack this',
+                                          'lj:subid' => $subscr->id,
+                                          'class'    => 'TrackButton'));
     }
 }
 

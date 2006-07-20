@@ -154,6 +154,7 @@ class Image
     var int width "Width in pixels";
     var int height "Height in pixels";
     var string alttext "Default alternative text for image";
+    var readonly string{} extra "Extra params for img tag";
 
     function builtin set_url (string url)
     "Sets the URL, doing any necessary escaping.";
@@ -2184,7 +2185,14 @@ function Link::print_button() [fixed] {
 function Link::as_string() [fixed] : string {
     if ($.url == "") { return ""; }
     var string ealt = ehtml($.caption);
-    return """<a href="$.url"><img border='0' width="$.icon.width" height="$.icon.height" alt="$ealt" title="$ealt" src="$.icon.url" /></a>""";
+    var string{} extra = $.icon.extra;
+    var string extraParams = "";
+
+    foreach var string extraKey ($extra) {
+        $extraParams = $extraParams + """$extraKey="$extra{$extraKey}" """;
+    }
+
+    return """<a href="$.url"><img border='0' width="$.icon.width" height="$.icon.height" alt="$ealt" title="$ealt" src="$.icon.url" $extraParams /></a>""";
 }
 
 # Redirector
