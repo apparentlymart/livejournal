@@ -1,10 +1,20 @@
 package LJ::SMS;
+
 use strict;
-use IO::Socket::INET;
 use Carp qw(croak);
+
+use Class::Autouse qw(IO::Socket::INET);
+
+sub schwartz_capabilities {
+    return qw(LJ::Worker::IncomingSMS);
+}
 
 sub new {
     my ($class, %opts) = @_;
+    die "new is a class method"
+        unless $class eq __PACKAGE__;
+
+
     my $self = bless {}, $class;
 
     # smsusermap, pass in from/to as u/number
@@ -15,12 +25,35 @@ sub new {
             $self->{$k} = $u->sms_number
                 or croak("'$k' user has no mapped number");
         } elsif ($self->{$k} !~ /^\d+$/) {
-            croak ("invalid numeric argument '$k'");
+            croak ("invalid numeric argument '$k': $self->{$k}");
         }
     }
     $self->{text} = delete $opts{text};
     die if %opts;
     return $self;
+}
+
+sub new_from_dsms {
+    my ($class, $dsms_msg) = @_;
+    die "new_from_dsms is a class method"
+        unless $class eq __PACKAGE__;
+
+    die "invalid dsms_msg argument: $dsms_msg"
+        unless ref $dsms_msg eq 'DSMS::Message';
+
+    my $normalize = sub {
+        my $arg = shift;
+        $arg = ref $arg ? $arg->[0] : $arg;
+        $arg =~ s/^(?:\+1)(\d{10})$/$1/;
+        return $arg;
+    };
+
+    return $class->new
+        ( from => $normalize->($dsms_msg->from),
+          to   => $normalize->($dsms_msg->to),
+          # FIXME: subject?
+          text => $dsms_msg->body_text,
+          );         
 }
 
 sub to {
@@ -35,6 +68,21 @@ sub to_u {
                                     undef, $tonum);
     return $uid ? LJ::load_userid($uid) : undef;
 }
+
+sub from {
+    return $_[0]{from};
+}
+
+# FIXME: combine this with to_u
+sub from_u {
+    my $self = shift;
+    my $fromnum = $self->{from};
+    my $dbr = LJ::get_db_reader();
+    my $uid = $dbr->selectrow_array("SELECT userid FROM smsusermap WHERE number=?",
+                                    undef, $fromnum);
+    return $uid ? LJ::load_userid($uid) : undef;
+}
+
 
 sub text {
     return $_[0]{text};
@@ -54,6 +102,40 @@ sub owner { # FIXME: change to 'sender_u' or something
 sub set_to {
     my ($self, $to) = @_;
     $self->{to} = $to;
+}
+
+# enqueue an incoming SMS for processing
+sub enqueue_as_incoming {
+    my $class = shift;
+    die "enqueue_as_incoming is a class method"
+        unless $class eq __PACKAGE__;
+
+    my $msg = shift;
+    die "invalid msg argument"
+        unless ref $msg;
+
+    return unless $msg->should_enqueue;
+
+    my $sclient = LJ::theschwartz();
+    die "Unable to contact TheSchwartz!"
+        unless $sclient;
+
+    my $shandle = $sclient->insert("LJ::Worker::IncomingSMS", $msg);
+    warn "insert: $shandle";
+    return $shandle ? 1 : 0;
+}
+
+sub should_enqueue {
+    my $self = shift;
+
+    return 1;
+}
+
+# process an incoming SMS
+sub worker_process_incoming {
+    my $self = shift;
+
+
 }
 
 sub send {
@@ -94,9 +176,7 @@ sub as_string {
 sub configured {
     my $class = shift;
 
-    # FIXME: once non-dev implementation, add those
-    #        configuration vars here
-    return $LJ::IS_DEV_SERVER ? 1 : 0;
+    return %LJ::SMS_GATEWAY_CONFIG && LJ::sms_gateway() ? 1 : 0;
 }
 
 sub configured_for_user {
@@ -106,6 +186,67 @@ sub configured_for_user {
     # FIXME: for now just check to see if the user has
     #        a uid -> number mapping in smsusermap
     return $class->number($u) ? 1 : 0;
+}
+
+# Schwartz worker for responding to incoming SMS messages
+package LJ::Worker::IncomingSMS;
+
+use base 'TheSchwartz::Worker';
+
+require "ljprotocol.pl";
+
+sub work {
+    my ($class, $job) = @_;
+
+    my $msg = $job->arg;
+
+    unless ($msg) {
+        $job->failed;
+        return;
+    }
+
+    use Data::Dumper;
+    print "msg: " . Dumper($msg);
+
+    # message command handler code
+    {
+        my $u = $msg->from_u;
+        print "u: $u ($u->{user})\n";
+
+        # build a post event request.
+        my $req = {
+            usejournal  => undef, 
+            ver         => 1,
+            username    => $u->{user},
+            lineendings => 'unix',
+            subject     => "test subject",
+            event       => ("test body " . time()),
+            props       => {},
+            security    => 'public',
+            tz          => 'guess',
+        };
+
+        my $err;
+        my $res = LJ::Protocol::do_request("postevent",
+                                           $req, \$err, { 'noauth' => 1 });
+
+        if ($err) {
+            my $errstr = LJ::Protocol::error_message($err);
+            print "ERROR: $errstr\n";
+        }
+
+        print "res: $res\n";
+    }
+    
+    return $job->completed;
+}
+
+sub keep_exit_status_for { 0 }
+sub grab_for { 300 }
+sub max_retries { 5 }
+sub retry_delay {
+    my ($class, $fails) = @_;
+    return (10, 30, 60, 300, 600)[$fails];
 }
 
 1;

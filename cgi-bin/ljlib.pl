@@ -237,6 +237,17 @@ sub theschwartz {
     return $LJ::SchwartzClient;
 }
 
+sub sms_gateway {
+    return $LJ::SMS_GATEWAY ||= do {
+        my $class = "DSMS::Gateway" . 
+            ($LJ::SMS_GATEWAY_TYPE ? "::$LJ::SMS_GATEWAY_TYPE" : "");
+
+        eval "use $class";
+        die "unable to use $class: $@" if $@;
+        return $class->new(config => \%LJ::SMS_GATEWAY_CONFIG);
+    };
+}
+
 # <LJFUNC>
 # name: LJ::get_newids
 # des: Lookup an old global ID and see what journal it belongs to and its new ID.
