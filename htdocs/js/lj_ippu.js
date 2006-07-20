@@ -8,12 +8,8 @@ LJ_IPPU = new Class ( IPPU, {
     this.uniqId = this.generateUniqId();
     this.cancelThisFunc = this.cancel.bind(this);
 
-    var titlebarContent = "\
-      <div style='float:right; padding-right: 8px'>" +
-      "<img src='" + LJVAR.imgprefix + "/CloseButton.gif' width='15' height='15' id='" + this.uniqId + "_cancel' /></div>" + title;
-
+    this.setTitle(title);
     this.setTitlebar(true);
-    this.setTitle(titlebarContent);
     this.setTitlebarClass("lj_ippu_titlebar");
 
     this.addClass("lj_ippu");
@@ -25,6 +21,14 @@ LJ_IPPU = new Class ( IPPU, {
     this.setFixedPosition(true);
     this.setClickToClose(true);
     this.setAutoHideSelects(true);
+  },
+
+  setTitle: function (title) {
+    var titlebarContent = "\
+      <div style='float:right; padding-right: 8px'>" +
+      "<img src='" + LJVAR.imgprefix + "/CloseButton.gif' width='15' height='15' id='" + this.uniqId + "_cancel' /></div>" + title;
+
+    LJ_IPPU.superClass.setTitle.apply(this, [titlebarContent]);
   },
 
   generateUniqId: function() {
