@@ -1712,7 +1712,7 @@ sub subscribe {
     my ($u, %opts) = @_;
     croak "No subscription options" unless %opts;
 
-    LJ::Subscription->create($u, %opts);
+    return LJ::Subscription->create($u, %opts);
 }
 
 # search for a subscription
