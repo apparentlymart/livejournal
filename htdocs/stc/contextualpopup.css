@@ -1,22 +1,30 @@
 div.ContextualPopup {
     position: relative;
-	background: #555;
-	_background: none !important;
+	background: #444;
 	margin: 5px 0 0 20px;
-	top: 5px;
-	left: 5px;
+	top: 2px;
+	left: 2px;
     }
+
+* html div.ContextualPopup {
+	background: none !important;
+	}
     
 div.ContextualPopup div.Inner {
 	position: relative;
-	top: -5px;
-	left: -5px;
-    background-color: #000;
-    color: #fefefe;
-    padding: 5px;
-    line-height: 135%;
+	top: -3px;
+	left: -3px;
+    background-color: #fff;
+    line-height: 120%;
+	border: 1px solid #444;
+	padding: 2px;
     }
     
+* html div.ContextualPopup div.Inner {
+	top: 0px;
+	left: 0px;
+	}
+
 div.ContextualPopup .Content {
     position: relative;
     text-align: left;
@@ -25,7 +33,6 @@ div.ContextualPopup .Content {
     }
     
    div.ContextualPopup .Content span {
-        color: #777;
         }
         
    div.ContextualPopup .Content div {
@@ -33,28 +40,26 @@ div.ContextualPopup .Content {
         
    div.ContextualPopup .Relation {
         font-weight: bold !important;
-        font-size: 12px;
-        text-shadow: #454545 2px 2px;
+		color: #036;
         }
         
    div.ContextualPopup .Content .OnlineStatus {
-        font-size: 11px;
         }
     
    div.ContextualPopup .Content .GizmoBlurb {
-        font-size: 10px;
-        color: #999;
         }
     
 div.ContextualPopup .Userpic {
 	position: absolute;
 	top: 0;
-	_top: 5px;
 	right: 0;
     padding: 5px;
-    background: #000;
+    background: #fff;
     }
     
+* html div.ContextualPopup .Userpic {
+	top: 2px;
+	}
         
    div.ContextualPopup .Userpic img {
         position: relative;
@@ -65,13 +70,10 @@ div.ContextualPopup .Userpic {
         }
             
    div.ContextualPopup div.Inner a, div.ContextualPopup div.Inner a:visited {
-        color: #aaa;
-        font-size: 11px;
         border: 0;
         text-decoration: underline !important;
         }
         
        div.ContextualPopup div.Inner a:hover {
-            color: #fff;
             }
             
