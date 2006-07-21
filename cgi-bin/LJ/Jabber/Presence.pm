@@ -58,24 +58,6 @@ sub new {
     return $self;
 }
 
-sub get_resources {
-    my $self = shift;
-
-    my $userid;
-    if (@_) {
-        $userid = shift;
-    }
-    else {
-        $userid = $self->u->id;
-    }
-
-    my $resources = LJ::MemCache::get( [$userid, "jabuser:$userid"] );
-
-    return $resources if $resources;
-
-    return $self->_update_memcache_index($userid);
-}
-
 =head2 $obj = LJ::Jabber::Presence->create( %opts );
 
 Creates a Jabber::Presence object from %opts and saves it to the database.
@@ -147,6 +129,36 @@ sub create {
     $self->_update_memcache_index;
 
     return $self;
+}
+
+=head1 HYBRID METHODS
+
+=head2 $obj->get_resources()
+
+=head2 $obj->get_resources( $userid )
+
+=head2 LJ::Jabber::Presence->get_resources( $userid )
+
+This method is for fetching a hashref with keys for each resource a userid is logged in with.
+
+=cut
+
+sub get_resources {
+    my $self = shift;
+
+    my $userid;
+    if (@_) {
+        $userid = shift;
+    }
+    else {
+        $userid = $self->u->id;
+    }
+
+    my $resources = LJ::MemCache::get( [$userid, "jabuser:$userid"] );
+
+    return $resources if $resources;
+
+    return $self->_update_memcache_index($userid);
 }
 
 =head1 OBJECT METHODS
