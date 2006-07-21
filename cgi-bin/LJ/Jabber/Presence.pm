@@ -32,8 +32,8 @@ sub new {
     croak "No resource" unless $resource;
 
     my $self = {
-	u        => $u,
-	resource => $resource,
+        u        => $u,
+        resource => $resource,
     };
 
     bless $self, $class;
@@ -45,14 +45,14 @@ sub new {
 
     if ($memcached) {
         %$self = (%$self, %$memcached);
-	return $self;
+        return $self;
     }
 
     my $dbh = LJ::get_db_reader() or die "No db";
 
     my $row = $dbh->selectrow_hashref("SELECT clusterid, presence, flags FROM jabpresence ".
-				      "WHERE userid=? AND reshash=? AND resource=?",
-				      undef, $self->u->id, $self->reshash, $self->resource);
+                                      "WHERE userid=? AND reshash=? AND resource=?",
+                                      undef, $self->u->id, $self->reshash, $self->resource);
 
     die $dbh->errstr if $dbh->errstr;
 
@@ -111,23 +111,23 @@ sub create {
     my $clusterid = _cluster_id( $cluster );
 
     my $self = bless {
-		      u         => $u,
-		      resource  => $resource,
-		      cluster   => $cluster,
-		      clusterid => $clusterid,
-		      presence  => $presence,
-		      flags     => $flags,
-		     }, $class;
+                      u         => $u,
+                      resource  => $resource,
+                      cluster   => $cluster,
+                      clusterid => $clusterid,
+                      presence  => $presence,
+                      flags     => $flags,
+                     }, $class;
 
     my $dbh = LJ::get_db_writer() or die "No db";
 
     my $sth = $dbh->prepare( "INSERT INTO jabpresence (userid, reshash, resource, clusterid, presence, flags) ".
-			     "VALUES (?, ?, ?, ?, ?, ?)" );
+                             "VALUES (?, ?, ?, ?, ?, ?)" );
     $sth->execute( $u->id, $self->reshash, $resource, $clusterid, $presence, $flags );
 
     if ($dbh->errstr) {
-	warn "Insertion error: $dbh->{errstr}";
-	return;
+        warn "Insertion error: $dbh->{errstr}";
+        return;
     }
 
     $self->_update_memcache_index();
@@ -181,13 +181,13 @@ sub delete {
     my ($userid, $resource, $reshash);
     if (@_) {
         $userid = shift;
-	$resource = shift;
-	$reshash = _hash($resource);
+        $resource = shift;
+        $reshash = _hash($resource);
     }
     else {
         $userid = $self->u->id;
-	$resource = $self->resource;
-	$reshash = $self->reshash;
+        $resource = $self->resource;
+        $reshash = $self->reshash;
     }
 
     croak "Invalid userid" unless $userid;
@@ -196,11 +196,11 @@ sub delete {
     my $dbh = LJ::get_db_writer() or die "No db";
 
     my $sth = $dbh->do( "DELETE FROM jabpresence WHERE userid=? AND reshash=? AND resource=?",
-			     undef, $userid, $reshash, $resource );
+                        undef, $userid, $reshash, $resource );
 
     if ($dbh->errstr) {
-	warn "Delete error: $dbh->{errstr}";
-	return;
+        warn "Delete error: $dbh->{errstr}";
+        return;
     }
 
     LJ::MemCache::delete( "jabpresence:$userid:$reshash" );
@@ -237,11 +237,11 @@ sub delete_all {
     my $dbh = LJ::get_db_writer() or die "No db";
 
     my $sth = $dbh->do( "DELETE FROM jabpresence WHERE userid=?",
-			undef, $userid );
+                        undef, $userid );
 
     if ($dbh->errstr) {
-	warn "Delete error: $dbh->{errstr}";
-	return;
+        warn "Delete error: $dbh->{errstr}";
+        return;
     }
 
     foreach my $resource (keys %$resources) {
@@ -310,7 +310,7 @@ sub set_presence {
     my $val = shift;
 
     croak( "Didn't pass in a defined value to set" )
-	unless defined $val;
+        unless defined $val;
 
     $self->{presence} = $val;
 
@@ -324,7 +324,7 @@ sub set_flags {
     my $val = shift;
 
     croak "Didn't pass in a defined value to set"
-	unless defined $val;
+        unless defined $val;
 
     $self->_save( 'flags' );
 
@@ -354,7 +354,7 @@ sub _save {
 
     my @bad_cols = grep {!$savable_cols{$_}} @_;
     die "Cannot save cols " . join( ',', @bad_cols ) . "."
-	if @bad_cols;
+        if @bad_cols;
 
     my $userid = $self->u->id;
     my $reshash = $self->reshash;
@@ -362,11 +362,11 @@ sub _save {
     my $dbh = LJ::get_db_writer() or die "No db";
 
     $dbh->do( "UPDATE jabpresence SET " . join( ', ', map { "$_ = ?" } @_ ) .
-	      " WHERE userid=? AND reshash=? AND resource=?", undef,
-	      (map { $self->{$_} } @_), $userid, $reshash, $self->resource );
+              " WHERE userid=? AND reshash=? AND resource=?", undef,
+              (map { $self->{$_} } @_), $userid, $reshash, $self->resource );
 
     die "Database update failed: " . $dbh->errstr
-	if $dbh->errstr;
+        if $dbh->errstr;
 
     LJ::MemCache::delete( [$userid, "jabpresence:$userid:$reshash"], 0 );
 }
@@ -419,17 +419,17 @@ sub _cluster_id {
     until ($id or $tries > 3)
     {
         if ($tries++ > 2) {
-	    die "Insert failed, and address was not found in DB";
-	}
+            die "Insert failed, and address was not found in DB";
+        }
 
-	$id = $dbr->selectrow_array( "SELECT clusterid FROM jabcluster WHERE address=?",
-				     undef, $address );
-	last if $id;
+        $id = $dbr->selectrow_array( "SELECT clusterid FROM jabcluster WHERE address=?",
+                                     undef, $address );
+        last if $id;
 
-	$dbh ||= LJ::get_db_writer() or die "No db";
+        $dbh ||= LJ::get_db_writer() or die "No db";
 
-	$dbh->do( "INSERT INTO jabcluster (address) VALUES (?)", undef, $address )
-	    or next;
+        $dbh->do( "INSERT INTO jabcluster (address) VALUES (?)", undef, $address )
+            or next;
 
         $id = $dbh->{mysql_insertid};
     }
@@ -452,19 +452,19 @@ sub _update_memcache_index {
 
     { # Get a mysql lock before we read the DB and update memcache.
         my $lockstatus = $dbh->selectrow_array( qq{SELECT GET_LOCK("$key",5)} );
-	unless ($lockstatus) {
-	    if (defined $lockstatus) {
-	        die "Lock attempt timed out on uid '$userid'";
-	    }
-	    else {
-	        die "Lock attempt failure, possible errstr'" . $dbh->errstr . "'";
-	    }
-	}
+        unless ($lockstatus) {
+            if (defined $lockstatus) {
+                die "Lock attempt timed out on uid '$userid'";
+            }
+            else {
+                die "Lock attempt failure, possible errstr'" . $dbh->errstr . "'";
+            }
+        }
     }
 
     # Use the DB writer for reading because we locked on it, and we lose our lock if the mysql thread dies.
     my $resources = $dbh->selectall_hashref( "SELECT resource, reshash FROM jabpresence WHERE userid=?",
-					     "resource", undef, $userid );
+                                             "resource", undef, $userid );
 
     die "DB SELECT failed: '$dbh->{errstr}'" if $dbh->errstr;
     die "DB returned undef" unless defined $resources;
