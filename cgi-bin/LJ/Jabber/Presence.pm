@@ -104,6 +104,10 @@ Raw XML string of presence data for this user's presence.
 
 Integer freeform flags field for storing anything you want. Please document it.
 
+=item client
+
+String field for holding users client type/version information... for debugging? (Artur will have to explain this)
+
 =back
 
 =cut
@@ -159,6 +163,8 @@ sub create {
 
 =head2 $obj->presence
 
+=head2 $obj->client
+
 General purpose accessors for attributes on these objects.
 
 =cut
@@ -167,6 +173,7 @@ sub u        { $_[0]->{u} }
 sub resource { $_[0]->{resource} }
 sub presence { $_[0]->{presence} }
 sub flags    { $_[0]->{flags} }
+sub client   { $_[0]->{client} }
 
 sub clusterid {
     my $self = shift;
@@ -183,10 +190,11 @@ sub reshash  {
     return ($self->{reshash} ||= md5_base64( $self->{resource} ));
 }
 
-
 =head2 $obj->set_presence( $val )
 
 =head2 $obj->set_flags( $val )
+
+=head2 $obj->set_client( $val )
 
 Setters for values on these objects.
 
@@ -214,6 +222,18 @@ sub set_flags {
 	unless defined $val;
 
     $self->_save( 'flags' );
+
+    return $val;
+}
+
+sub set_client {
+    my $self = shift;
+    my $val = shift;
+
+    croak "Didn't pass in a defined value to set"
+        unless defined $val;
+
+    $self->_save( 'client' );
 
     return $val;
 }
