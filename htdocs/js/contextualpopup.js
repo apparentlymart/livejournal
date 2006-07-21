@@ -467,48 +467,18 @@ ContextualPopup.changeRelation = function (info, ctxPopupId, action, evt) {
 
 // create a little popup to notify the user of something
 ContextualPopup.showNote = function (note, ctxPopupId) {
-    var notePopup = new IPPU();
-    notePopup.init('<div class="Inner">' + note + '</div>');
-    notePopup.setTitlebar(false);
-    notePopup.setFadeIn(true);
-    notePopup.setFadeOut(true);
-    notePopup.setFadeSpeed(4);
-    notePopup.setDimensions("auto", "auto");
-    notePopup.addClass("ContextualPopup");
+    var ele;
 
-    var dim;
     if (ContextualPopup.ippu) {
         // pop up the box right under the element
-        dim = DOM.getAbsoluteDimensions(ContextualPopup.ippu.getElement());
-        if (!dim) return;
+        ele = ContextualPopup.ippu.getElement();
     } else {
         if (ctxPopupId) {
             var ele = ContextualPopup.elements[ctxPopupId + ""];
-            if (ele)
-            dim = DOM.getAbsoluteDimensions(ele);
-        }
-
-        if (!dim) {
-            notePopup.setModal(true);
-            notePopup.setOverlayVisible(true);
-            notePopup.setAutoCenter(true, true);
         }
     }
 
-    if (dim) {
-        // default is to auto-center, don't want that
-        notePopup.setAutoCenter(false, false);
-        notePopup.setLocation(dim.absoluteLeft, dim.absoluteBottom);
-    }
-
-    notePopup.setClickToClose(true);
-    notePopup.show();
-    notePopup.moveForward();
-
-    window.setTimeout(function () {
-        if (notePopup)
-            notePopup.hide();
-    }, 5000);
+    LJ_IPPU.showNote(note, ele);
 }
 
 ContextualPopup.hidePopup = function (ctxPopupId) {

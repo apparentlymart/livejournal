@@ -27,6 +27,10 @@
         padding: .3em;
         }
 
+		.Subscribe td label {
+			cursor: pointer !important;
+			}
+
 	.CategoryRow .caption {
 		text-align: right;
 		}
@@ -40,6 +44,10 @@
         background-color: #d9d9d9;
         border-bottom: 1px solid #aaa;
         }
+
+	.CategoryRow .caption {
+		text-align: right;
+		}
         
     .CategoryRow label {
         font-size: 90%;
@@ -107,10 +115,6 @@ div.argOptsContainer {
     margin-left: 310px;
     }
 
-	#NotificationTable tr:hover {
-		background-color: #f6e6d2 !important;
-		}
-
     #NotificationTable tr.Selected {
         background-color: #cee0fb;
         }
@@ -173,6 +177,7 @@ div.argOptsContainer {
             }
         
     #inbox tr {
+		cursor: pointer;
         }
     
 .inbox_newitems {
@@ -204,6 +209,7 @@ div.argOptsContainer {
 #inbox .checkbox {
     width: 1%;
     padding: .1em;
+	vertical-align: top;
     }
     
 #inbox td.item { 

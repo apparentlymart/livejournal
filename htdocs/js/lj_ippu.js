@@ -52,3 +52,43 @@ LJ_IPPU = new Class ( IPPU, {
     LJ_IPPU.superClass.hide.apply(this);
   }
 } );
+
+// Class method to show a popup to show a note to the user
+// note = message to show
+// underele = element to display the note underneath
+LJ_IPPU.showNote = function (note, underele) {
+    var notePopup = new IPPU();
+    notePopup.init('<div class="Inner">' + note + '</div>');
+    notePopup.setTitlebar(false);
+    notePopup.setFadeIn(true);
+    notePopup.setFadeOut(true);
+    notePopup.setFadeSpeed(4);
+    notePopup.setDimensions("auto", "auto");
+    notePopup.addClass("Note");
+
+    var dim;
+    if (underele) {
+        // pop up the box right under the element
+        dim = DOM.getAbsoluteDimensions(underele);
+        if (!dim) return;
+    }
+
+    if (!dim) {
+        notePopup.setModal(true);
+        notePopup.setOverlayVisible(true);
+        notePopup.setAutoCenter(true, true);
+    } else {
+        // default is to auto-center, don't want that
+        notePopup.setAutoCenter(false, false);
+        notePopup.setLocation(dim.absoluteLeft, dim.absoluteBottom);
+    }
+
+    notePopup.setClickToClose(true);
+    notePopup.show();
+    notePopup.moveForward();
+
+    window.setTimeout(function () {
+        if (notePopup)
+            notePopup.hide();
+    }, 5000);
+};
