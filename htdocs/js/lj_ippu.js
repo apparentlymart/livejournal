@@ -80,7 +80,7 @@ LJ_IPPU.showNote = function (note, underele) {
     } else {
         // default is to auto-center, don't want that
         notePopup.setAutoCenter(false, false);
-        notePopup.setLocation(dim.absoluteLeft, dim.absoluteBottom);
+        notePopup.setLocation(dim.absoluteLeft, dim.absoluteBottom + 4);
     }
 
     notePopup.setClickToClose(true);
