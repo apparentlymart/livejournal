@@ -121,27 +121,23 @@ body<=
     ###################### Print subscribe table
     my @categories = (
                       {
-                          "My Account" => [
-                                           'Befriended',
-                                           LJ::Subscription::Pending->new($u,
-                                                                          event     => 'OfficialPost',
-                                                                          ),
-                                           LJ::Subscription::Pending->new($u,
-                                                                          event     => 'JournalNewComment',
-                                                                          journal   => $u,
-                                                                          ),
-                                           ],
-                          },
-                      {
-                          "Friends and Communities" => [
-                                                        'InvitedFriendJoins',
-                                                        'CommunityInvite',
-                                                        'CommunityJoinRequest',
-                                                        LJ::Subscription::Pending->new($u,
-                                                                                       event     => 'NewUserpic',
-                                                                                       ),
-                                                        ],
-                          },
+                          "Notify Me When..." => [
+                                                  'Befriended',
+                                                  LJ::Subscription::Pending->new($u,
+                                                                                 event     => 'OfficialPost',
+                                                                                 ),
+                                                  LJ::Subscription::Pending->new($u,
+                                                                                 event     => 'JournalNewComment',
+                                                                                 journal   => $u,
+                                                                                 ),
+                                                  'InvitedFriendJoins',
+                                                  'CommunityInvite',
+                                                  'CommunityJoinRequest',
+                                                  LJ::Subscription::Pending->new($u,
+                                                                                 event     => 'NewUserpic',
+                                                                                 ),
+                                                  ],
+                          }
                       );
 
     my $authas_form = LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
