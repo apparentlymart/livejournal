@@ -6,8 +6,10 @@ no warnings 'redefine';
 
 use Carp qw(croak);
 
-use Digest::MD5 qw(md5_base64);
 use LJ::MemCache;
+use Digest::MD5 qw(md5_base64);
+
+*_hash = \&md5_base64;
 
 =head1 PACKAGE METHODS
 
@@ -48,7 +50,8 @@ sub new {
 
     my $dbh = LJ::get_db_reader() or die "No db";
 
-    my $row = $dbh->selectrow_hashref("SELECT clusterid, presence, flags FROM jabpresence WHERE userid=? AND reshash=? AND resource=?",
+    my $row = $dbh->selectrow_hashref("SELECT clusterid, presence, flags FROM jabpresence ".
+				      "WHERE userid=? AND reshash=? AND resource=?",
 				      undef, $self->u->id, $self->reshash, $self->resource);
 
     die $dbh->errstr if $dbh->errstr;
@@ -118,7 +121,8 @@ sub create {
 
     my $dbh = LJ::get_db_writer() or die "No db";
 
-    my $sth = $dbh->prepare( "INSERT INTO jabpresence (userid, reshash, resource, clusterid, presence, flags) VALUES (?, ?, ?, ?, ?, ?)" );
+    my $sth = $dbh->prepare( "INSERT INTO jabpresence (userid, reshash, resource, clusterid, presence, flags) ".
+			     "VALUES (?, ?, ?, ?, ?, ?)" );
     $sth->execute( $u->id, $self->reshash, $resource, $clusterid, $presence, $flags );
 
     if ($dbh->errstr) {
@@ -161,6 +165,39 @@ sub get_resources {
     return $self->_update_memcache_index($userid);
 }
 
+sub delete {
+    my $self = shift;
+
+    my ($userid, $resource, $reshash);
+    if (@_) {
+        $userid = shift;
+	$resource = shift;
+	$reshash = _hash($resource);
+    }
+    else {
+        $userid = $self->u->id;
+	$resource = $self->resource;
+	$reshash = $self->reshash;
+    }
+
+    croak "Invalid userid" unless $userid;
+    croak "Invalid resource" unless $resource;
+
+    my $dbh = LJ::get_db_writer() or die "No db";
+
+    my $sth = $dbh->prepare( "DELETE FROM jabpresence WHERE userid=? AND reshash=? AND resource=?",
+			     undef, $userid, $reshash, $resource );
+
+    if ($dbh->errstr) {
+	warn "Delete error: $dbh->{errstr}";
+	return;
+    }
+
+    $self->_update_memcache_index;
+
+    return;
+}
+
 =head1 OBJECT METHODS
 
 =head2 $obj->u
@@ -199,7 +236,7 @@ sub cluster  {
 
 sub reshash  {
     my $self = shift;
-    return ($self->{reshash} ||= md5_base64( $self->{resource} ));
+    return ($self->{reshash} ||= _hash( $self->{resource} ));
 }
 
 =head2 $obj->set_presence( $val )
