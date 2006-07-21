@@ -2989,23 +2989,13 @@ sub _Entry__get_link
         return $null_link unless $remote && $remote->can_use_esn;
         return $null_link if $remote->has_subscription(journal => $journal, event => "JournalNewComment", arg1 => $this->{'itemid'});
 
-        my $etypeid = 'LJ::Event::JournalNewComment'->etypeid;
-
-        my $auth_token = LJ::Auth->ajax_auth_token($remote, '/__rpc_esn',
-                                                   journalid => $journalu->id,
-                                                   action    => 'addsub',
-                                                   etypeid   => $etypeid,
-                                                   arg1      => $this->{itemid},
-                                                   );
-
         return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/entry.bml?journal=$journal&amp;ditemid=$this->{'itemid'}",
                             "Track This",
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20, 'Track This',
-                                          'lj:journalid'  => $journalu->id,
-                                          'lj:etypeid'    => $etypeid,
-                                          'lj:arg1'       => $this->{itemid},
-                                          'class'         => 'TrackButton',
-                                          'lj:auth_token' => $auth_token));
+                                          'lj:journalid' => $journalu->id,
+                                          'lj:etypeid'   => 'LJ::Event::JournalNewComment'->etypeid,
+                                          'lj:arg1'      => $this->{itemid},
+                                          'class'        => 'TrackButton'));
     }
     if ($key eq "unwatch_comments") {
         return $null_link if $LJ::DISABLED{'esn'};
@@ -3014,16 +3004,11 @@ sub _Entry__get_link
         my $subscr = $subs[0];
         return $null_link unless $subscr;
 
-        my $auth_token = LJ::Auth->ajax_auth_token($remote, '/__rpc_esn',
-                                                   subid  => $subscr->id,
-                                                   action => 'delsub');
-
         return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/entry.bml?journal=$journal&amp;ditemid=$this->{'itemid'}",
                             "Untrack This",
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking.gif", 22, 20, 'Untrack this',
-                                          'lj:subid'      => $subscr->id,
-                                          'class'         => 'TrackButton',
-                                          'lj:auth_token' => $auth_token));
+                                          'lj:subid' => $subscr->id,
+                                          'class'    => 'TrackButton'));
     }
 }
 

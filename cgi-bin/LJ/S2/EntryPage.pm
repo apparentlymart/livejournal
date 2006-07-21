@@ -214,22 +214,9 @@ sub EntryPage
             my $link_keyseq = $s2com->{'link_keyseq'};
             push @$link_keyseq, $s2com->{'screened'} ? 'unscreen_comment' : 'screen_comment';
             push @$link_keyseq, $s2com->{'frozen'} ? 'unfreeze_thread' : 'freeze_thread';
-
-            unless ($LJ::DISABLED{esn}) {
-                push @$link_keyseq, "watch_thread";
-                push @$link_keyseq, "unwatch_thread";
-                push @$link_keyseq, "watching_parent";
-
-                LJ::need_res(qw(
-                                js/json.js
-                                js/httpreq.js
-                                js/ippu.js
-                                js/lj_ippu.js
-                                js/esn.js
-                                stc/esn.css
-                                stc/lj_base.css
-                                )) if $remote && $remote->can_use_esn;
-            }
+            push @$link_keyseq, "watch_thread" unless $LJ::DISABLED{'esn'};
+            push @$link_keyseq, "unwatch_thread" unless $LJ::DISABLED{'esn'};
+            push @$link_keyseq, "watching_parent" unless $LJ::DISABLED{'esn'};
 
             if (@{$com->{'children'}}) {
                 $s2com->{'thread_url'} = LJ::Talk::talkargs($permalink, "thread=$dtalkid", $stylemine) . "#t$dtalkid";
