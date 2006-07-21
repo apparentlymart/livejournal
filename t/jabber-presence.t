@@ -3,6 +3,11 @@ use strict;
 use Test::More 'no_plan';
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
+
+use Carp;
+
+$SIG{__DIE__} = sub { Carp::croak( @_ ) };
+
 use LJ::Jabber::Presence;
 
 use LJ::Test qw(temp_user);
@@ -11,58 +16,113 @@ my $u = temp_user();
 
 checkres( $u, 0 );
 
-my %pres_one = (
-		u => $u,
-		resource => "Resource",
-		cluster => "obj",
-		presence => "<xml><data>",
-		);
-{
-    my $one = LJ::Jabber::Presence->create( %pres_one );
+my $one = {
+    u => $u,
+    resource => "Resource",
+    cluster => "obj",
+    presence => "<xml><data>",
+};
 
-    ok( $one, "Object successfully created" );
-    checkattrs( $one, \%pres_one );
-    checkres( $u, 1 );
+my $two = {
+    u => $u,
+    resource => "Another Resource",
+    cluster => "bobj",
+    presence => "<more><xml>",
+};
+
+add( $one );
+load( $one );
+
+add( $two );
+load( $two );
+load( $one );
+
+del( $one );
+del( $two );
+
+add( $one );
+add( $two );
+
+del_all();
+
+add( $one );
+load( $one );
+
+add( $two );
+load( $one );
+load( $two );
+
+delobj( $two );
+delobj( $one );
+
+add( $two );
+add( $one );
+
+delobj_all( $one );
+
+my %presence;
+
+sub add {
+    my $args = shift;
+    my $obj = LJ::Jabber::Presence->create( %$args );
+
+    $presence{$args->{resource}} = 1;
+
+    ok( $obj, "Object create" );
+    checkattrs( $obj, $args );
+    checkres( $u, scalar( keys %presence ) );
+
+    return $obj;
 }
 
-{
-    my $reload_one = LJ::Jabber::Presence->new( $u, $pres_one{resource} );
+sub load {
+    my $args = shift;
+    my $obj = LJ::Jabber::Presence->new( $u, $args->{resource} );
 
-    ok( $reload_one, "Object loaded" );
-    checkattrs( $reload_one, \%pres_one );
-    checkres( $u, 1 );
+    ok( $obj, "Object load" );
+    checkattrs( $obj, $args );
+    checkres( $u, scalar( keys %presence ) );
+
+    return $obj;
 }
 
-my %pres_two = (
-		u => $u,
-		resource => "Another Resource",
-		cluster => "bobj",
-		presence => "<more><xml>",
-		);
+sub del {
+    my $args = shift;
+    LJ::Jabber::Presence->delete( $u->id, $args->{resource} );
 
-{
-    my $two = LJ::Jabber::Presence->create( %pres_two );
-    
-    ok( $two, "Second object created" );
-    checkattrs( $two, \%pres_two );
-    checkres( $u, 2 );   
+    delete $presence{$args->{resource}};
+
+    checkres( $u, scalar( keys %presence ) );
 }
 
-{
-    my $reload_two = LJ::Jabber::Presence->new( $u, $pres_two{resource} );
+sub delobj {
+    my $args = shift;
+    my $obj = load( $args );
 
-    ok( $reload_two, "Object loaded" );
-    checkattrs( $reload_two, \%pres_two );
-    checkres( $u, 2 );
+    delete $presence{$args->{resource}};
+    $obj->delete;
+
+    checkres( $u, scalar( keys %presence ) );
 }
 
-{
-    my $reload_one = LJ::Jabber::Presence->new( $u, $pres_one{resource} );
+sub del_all {
+    LJ::Jabber::Presence->delete_all( $u->id );
 
-    ok( $reload_one, "Object loaded" );
-    checkattrs( $reload_one, \%pres_one );
-    checkres( $u, 2 );
+    %presence = ();
+
+    checkres( $u, 0 );
 }
+
+sub delobj_all {
+    my $args = shift;
+    my $obj = load( $args );
+
+    %presence = ();
+    $obj->delete_all;
+
+    checkres( $u, 0 );
+}
+
 sub checkattrs {
     my $obj = shift;
     my $check = shift;
@@ -78,5 +138,4 @@ sub checkres {
 
     my $resources = LJ::Jabber::Presence->get_resources( $u->id );
     is( scalar(keys(%$resources)),$correct, "$correct Resources found for user" );
-
 }

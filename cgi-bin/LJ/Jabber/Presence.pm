@@ -130,7 +130,7 @@ sub create {
 	return;
     }
 
-    $self->_update_memcache_index;
+    $self->_update_memcache_index();
 
     return $self;
 }
@@ -143,7 +143,7 @@ sub create {
 
 =head2 LJ::Jabber::Presence->get_resources( $userid )
 
-This method is for fetching a hashref with keys for each resource a userid is logged in with.
+This method is for fetching a hashref with keys for each resource a userid is logged in with. The $userid arg is implied to be that of the current object, which will fail if you use this as a package method without an argument.
 
 =cut
 
@@ -165,6 +165,16 @@ sub get_resources {
     return $self->_update_memcache_index($userid);
 }
 
+=head2 $obj->delete()
+
+=head2 $obj->delete( $userid, $resource )
+
+=head2 LJ::Jabber::Presence->delete( $userid, $resource )
+
+This method is for deleting a single presence instance of a particular userid. The $userid and $resource arguments are implied to be those of the current object if omitted (which may not even be an object, but in that case it will fail)
+
+=cut
+
 sub delete {
     my $self = shift;
 
@@ -185,7 +195,7 @@ sub delete {
 
     my $dbh = LJ::get_db_writer() or die "No db";
 
-    my $sth = $dbh->prepare( "DELETE FROM jabpresence WHERE userid=? AND reshash=? AND resource=?",
+    my $sth = $dbh->do( "DELETE FROM jabpresence WHERE userid=? AND reshash=? AND resource=?",
 			     undef, $userid, $reshash, $resource );
 
     if ($dbh->errstr) {
@@ -193,7 +203,53 @@ sub delete {
 	return;
     }
 
-    $self->_update_memcache_index;
+    LJ::MemCache::delete( "jabpresence:$userid:$reshash" );
+    $self->_update_memcache_index( $userid );
+
+    return;
+}
+
+=head2 $obj->delete_all()
+
+=head2 $obj->delete_all( $userid )
+
+=head2 LJ::Jabber::Presence->delete_all( $userid )
+
+This method is for deleting all instances of a particular userid. The $userid argument is implied to be that of the current object if omitted (which may not even be an object, but in that case it will fail)
+
+=cut
+
+sub delete_all {
+    my $self = shift;
+
+    my $userid;
+    if (@_) {
+        $userid = shift;
+    }
+    else {
+        $userid = $self->u->id;
+    }
+
+    croak "Invalid userid" unless $userid;
+
+    my $resources = LJ::Jabber::Presence->get_resources( $userid );
+
+    my $dbh = LJ::get_db_writer() or die "No db";
+
+    my $sth = $dbh->do( "DELETE FROM jabpresence WHERE userid=?",
+			undef, $userid );
+
+    if ($dbh->errstr) {
+	warn "Delete error: $dbh->{errstr}";
+	return;
+    }
+
+    foreach my $resource (keys %$resources) {
+        my $reshash = _hash( $resource );
+        LJ::MemCache::delete( [$userid, "jabpresence:$userid:$reshash" ] );
+    }
+
+    $self->_update_memcache_index( $userid );
 
     return;
 }
