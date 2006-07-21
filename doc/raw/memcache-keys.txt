@@ -99,3 +99,8 @@ sapct == pending schools to be processed count; cached for admins
 <uniq>   loginout:<uniq> -- set to 1, expires in five seconds, denotes user just logged in our out and is going through a redirect
 
 <uid> inbox:<uid> == list of qids for a user's notificationinbox
+
+<uid> jabpresence:<uid>:<reshash> == hash of jabber presence information for a particular userid/reshash pair
+<uid> jabuser:<uid> == hash of jabber resources for this user, keyed on resource name
+jabclusteraddr:<address> == id of server
+jabclusterid:<id> == address of server
