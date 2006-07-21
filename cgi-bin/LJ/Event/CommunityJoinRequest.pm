@@ -51,7 +51,7 @@ sub as_email_subject {
 }
 
 sub as_email_string {
-    my $self = shift;
+    my ($self, $u) = @_;
 
     return sprintf "Dear %s,\n\n" .
                    "The user \"%s\" has requested to join the \"%s\" community.  If you wish " .
@@ -60,7 +60,7 @@ sub as_email_string {
                    "You may also ignore this e-mail.  The request to join will expire after a period of 30 days.\n\n" .
                    "Regards,\n$LJ::SITENAME Team\n",
 
-                   $self->u->display_username,
+                   $u->display_username,
                    $self->requestor->display_username,
                    $self->comm->name;
 

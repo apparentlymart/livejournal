@@ -22,8 +22,8 @@ sub as_email_string {
 
     my $email = "%s has updated their userpics!\nYou can view them here: %s";
 
-    return sprintf $email, $self->userpic->u->username_display,
-    "$LJ::SITEROOT/allpics.bml?user=" . $self->userpic->u->name;
+    return sprintf $email, $self->userpic->owner->display_username,
+    "$LJ::SITEROOT/allpics.bml?user=" . $self->userpic->owner->name;
 }
 
 sub userpic {

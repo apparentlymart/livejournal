@@ -18,7 +18,8 @@ sub is_common { 0 }
 sub as_email_subject { 'LiveJournal Community Updates!' }
 
 sub as_email_string {
-    my $self = shift;
+    my ($self, $u) = @_;
+
     return sprintf qq {Hi %s,
 
 %s has invited you to join a LiveJournal community!
@@ -28,7 +29,7 @@ To view all of your current invitations, visit: %s
 Click here to view the community details:
 
 %s
-}, $self->u->display_username, $self->inviter->display_username, "$LJ::SITEROOT/manage/invites.bml", $self->comm->profile_url;
+}, $u->display_username, $self->inviter->display_username, "$LJ::SITEROOT/manage/invites.bml", $self->comm->profile_url;
 }
 
 sub inviter {

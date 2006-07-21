@@ -19,16 +19,16 @@ sub zero_journalid_subs_means { "friends" }
 sub as_email_subject { 'LiveJournal Friend Updates!' }
 
 sub as_email_string {
-    my $self = shift;
+    my ($self, $u) = @_;
     my $u1 = LJ::load_userid($self->arg1);
 
     return '' unless $u1;
 
     my $email = sprintf "Hi %s,
 
-%s has created a new journal!", $self->u->display_username, $u1->display_username;
+%s has created a new journal!", $u->display_username, $u1->display_username;
 
-    unless (LJ::is_friend($self->u, $u1)) {
+    unless (LJ::is_friend($u, $u1)) {
         $email .= sprintf "
 
 If you want, you can add your friend to your friends list so you can stay up-to-date on the happenings in their life.

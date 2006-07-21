@@ -19,41 +19,41 @@ sub is_common { 0 }
 sub as_email_subject { 'LiveJournal Friend Request!' }
 
 sub as_email_string {
-    my $self = shift;
+    my ($self, $u) = @_;
 
     my @vars = (
-                $self->u->display_username,
+                $u->display_username,
                 $self->friend->display_username,
                 );
 
     push @vars, ($self->entry->poster->display_username, "$LJ::SITEROOT/friends/add.bml?user=" . $self->friend->name)
-        unless LJ::is_friend($self->u, $self->friend);
+        unless LJ::is_friend($u, $self->friend);
 
     push @vars, $self->friend->profile_url;
     push @vars, "$LJ::SITEROOT/friends/edit.bml";
 
-    return sprintf $self->email_body, @vars;
+    return sprintf $self->email_body($u), @vars;
 }
 
 sub as_email_html {
-    my $self = shift;
+    my ($self, $u) = @_;
 
     my @vars = (
-                $self->u->ljuser_display,
+                $u->ljuser_display,
                 $self->friend->display_username,
                 );
 
     push @vars, ($self->entry->poster->ljuser_display, "$LJ::SITEROOT/friends/add.bml?user=" . $self->friend->name)
-        unless LJ::is_friend($self->u, $self->friend);
+        unless LJ::is_friend($u, $self->friend);
 
     push @vars, $self->friend->profile_url;
     push @vars, "$LJ::SITEROOT/friends/edit.bml";
 
-    return sprintf $self->email_body, @vars;
+    return sprintf $self->email_body($u), @vars;
 }
 
 sub email_body {
-    my $self = shift;
+    my ($self, $u) = @_;
 
     my $msg = "Hi %s,
 
@@ -64,7 +64,7 @@ They will now be able to view your public journal updates on their Friends page.
     $msg .= "Add your new friend so that you can interact with each other's friends and network!
 
 Click here to add them as your friend:
-%s" unless LJ::is_friend($self->u, $self->friend);
+%s" unless LJ::is_friend($u, $self->friend);
 
     $msg .= "
 

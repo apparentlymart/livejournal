@@ -110,14 +110,14 @@ sub as_email_subject {
 }
 
 sub email_body {
-    my $self = shift;
+    my ($self, $u) = @_;
 
     if ($self->entry->journal->is_comm) {
         return "new post in comm";
     } else {
         return qq "Hi %s,
 
-%s has updated their journal!" . (! LJ::is_friend($self->u, $self->entry->poster) ? "
+%s has updated their journal!" . (! LJ::is_friend($u, $self->entry->poster) ? "
 
 If you haven't done so already, add %s so you can stay up-to-date on the happenings in their life.
 
@@ -130,36 +130,35 @@ To view user's profile
 }
 
 sub as_email_string {
-    my $self = shift;
-
+    my ($self, $u) = @_;
 
     my @vars = (
-                $self->u->display_username,
+                $u->display_username,
                 $self->entry->poster->display_username,
                 );
 
     push @vars, ($self->entry->poster->display_username, "$LJ::SITEROOT/friends/add.bml?user=" . $self->entry->poster->name)
-        unless LJ::is_friend($self->u, $self->entry->poster);
+        unless LJ::is_friend($u, $self->entry->poster);
 
     push @vars, $self->entry->poster->profile_url;
 
-    return sprintf $self->email_body, @vars;
+    return sprintf $self->email_body($u), @vars;
 }
 
 sub as_email_html {
-    my $self = shift;
+    my ($self, $u) = @_;
 
     my @vars = (
-                $self->u->ljuser_display,
+                $u->ljuser_display,
                 $self->entry->poster->ljuser_display,
                 );
 
     push @vars, ($self->entry->poster->ljuser_display, "$LJ::SITEROOT/friends/add.bml?user=" . $self->entry->poster->name)
-        unless LJ::is_friend($self->u, $self->entry->poster);
+        unless LJ::is_friend($u, $self->entry->poster);
 
     push @vars, $self->entry->poster->profile_url;
 
-    return sprintf $self->email_body, @vars;
+    return sprintf $self->email_body($u), @vars;
 }
 
 sub subscription_applicable {
