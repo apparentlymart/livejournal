@@ -13,18 +13,28 @@ sub new {
 
 sub is_common { 1 }
 
+sub as_email_subject {
+    my ($self, $u) = @_;
+
+    if ($self->comment->parent) {
+        return LJ::u_equals($self->comment->parent->poster, $u) ? 'Reply to your comment...' : 'Reply to a comment...';
+    } else {
+        return LJ::u_equals($self->comment->entry->poster, $u) ? 'Reply to your post...' : 'Reply to a post...';
+    }
+}
+
 sub as_email_string {
-    my $self = shift;
+    my ($self, $u) = @_;
     my $comment = $self->comment or return "(Invalid comment)";
 
-    return $comment->format_text_mail($self->u);
+    return $comment->format_text_mail($u);
 }
 
 sub as_email_html {
-    my $self = shift;
+    my ($self, $u) = @_;
     my $comment = $self->comment or return "(Invalid comment)";
 
-    return $comment->format_html_mail($self->u);
+    return $comment->format_html_mail($u);
 }
 
 sub content {
