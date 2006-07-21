@@ -27,6 +27,10 @@
         padding: .3em;
         }
 
+		.Subscribe td img {
+			border: 0;
+			}
+
 		.Subscribe td label {
 			cursor: pointer !important;
 			}
