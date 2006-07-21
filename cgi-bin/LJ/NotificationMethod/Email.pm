@@ -69,9 +69,9 @@ sub notify {
             fromname => $LJ::SITENAMESHORT,
             wrap     => 1,
             charset  => 'utf-8',
-            subject  => $ev->as_email_subject,
-            html     => $ev->as_email_html, # FIXME: make this work!
-            body     => $ev->as_email_string,
+            subject  => $ev->as_email_subject($u),
+            html     => $ev->as_email_html($u), # FIXME: make this work!
+            body     => $ev->as_email_string($u),
         }) or die "unable to send notification email";
     }
 
