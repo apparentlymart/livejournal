@@ -183,6 +183,7 @@ sub EntryPage
                 'text' => $text,
                 'userpic' => $comment_userpic,
                 'time' => $datetime,
+                'system_time' => $datetime, # same as regular time for comments
                 'tags' => [],
                 'full' => $com->{'_loaded'} ? 1 : 0,
                 'depth' => $depth,
@@ -411,6 +412,7 @@ sub EntryPage_entry
         'subject' => $entry->subject_html,
         'text' => $event,
         'dateparts' => LJ::alldatepart_s2($entry->eventtime_mysql),
+        'system_dateparts' => LJ::alldatepart_s2($entry->logtime_mysql),
         'security' => $entry->security,
         'props' => $entry->props,
         'itemid' => $ditemid,

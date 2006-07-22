@@ -296,6 +296,7 @@ class EntryLite
         "Indicates that this entry's text contains some content that must be printed trusted, with [method[EntryLite.print_text()]], rather than printed directly from an untrusted context. Use this to fall back to a plain trusted print if you are doing something unusual with [member[EntryLite.text]]. Most layers can just ignore this and always use [method[EntryLite.print_text()]].";
 
     var DateTime time "The user-specified time of the post, or the GMT time if it's a comment.";
+    var DateTime system_time "The system time (in GMT) this entry or comment was posted.";
 
     var UserLite poster "Author of the entry, or null if an anonymous comment";
     var UserLite journal "Journal the entry has been posted to";

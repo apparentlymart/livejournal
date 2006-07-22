@@ -1659,6 +1659,7 @@ sub Entry
 
     $e->{'tags'} ||= [];
     $e->{'time'} = DateTime_parts($arg->{'dateparts'});
+    $e->{'system_time'} = DateTime_parts($arg->{'system_dateparts'});
     $e->{'depth'} = 0;  # Entries are always depth 0.  Comments are 1+.
 
     my $link_keyseq = $e->{'link_keyseq'};

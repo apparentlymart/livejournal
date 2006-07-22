@@ -148,6 +148,7 @@ sub MonthPage
             'subject' => $subject,
             'text' => "",
             'dateparts' => $alldatepart,
+            'system_dateparts' => $item->{system_alldatepart},
             'security' => $security,
             'props' => $logprops{$itemid},
             'itemid' => $ditemid,

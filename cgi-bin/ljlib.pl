@@ -692,6 +692,7 @@ sub get_friend_items
 #          -- posterid
 #          -- security
 #          -- alldatepart (in S1 or S2 fmt, depending on 'dateformat' req key)
+#          -- system_alldatepart (same as above, but for the system time)
 #          -- ownerid (if in 'friendsview' mode)
 #          -- rlogtime (if in 'friendsview' mode)
 # </LJFUNC>
@@ -804,7 +805,8 @@ sub get_recent_items
 
     $sql = qq{
         SELECT jitemid AS 'itemid', posterid, security, $extra_sql
-               DATE_FORMAT(eventtime, "$dateformat") AS 'alldatepart', anum
+               DATE_FORMAT(eventtime, "$dateformat") AS 'alldatepart', anum,
+               DATE_FORMAT(logtime, "$dateformat") AS 'system_alldatepart'
         FROM log2 USE INDEX ($sort_key)
         WHERE journalid=$userid AND $sort_key <= $notafter $secwhere $jitemidwhere
         ORDER BY journalid, $sort_key
