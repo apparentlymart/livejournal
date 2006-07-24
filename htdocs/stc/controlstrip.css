@@ -1,6 +1,6 @@
 html body
 {
-    padding: 50px 0 0 0;
+    padding: 45px 0 0 0;
     margin-right: 0;
     margin-left: 0;
 }
@@ -85,7 +85,7 @@ html body
 /* Second cell */
 #lj_controlstrip_user
 {
-    text-align: left;
+    text-align: center;
     vertical-align: middle;
     width: 1%;
     padding: 0 1em 0 1em;
