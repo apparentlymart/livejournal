@@ -114,7 +114,7 @@ body<=
     my $notificationtable = qq {
      <div id="NotificationTable">
         <span class="esnlinks">Message Center | <a href="$LJ::SITEROOT/manage/subscriptions/">Manage Settings</a></span>
-        <div class="inbox_newitems">You have $unread_count new $alert_plural. <a href="">Refresh</a></div>
+        <div class="inbox_newitems">You have $unread_count new $alert_plural. <a href="$LJ::SITEROOT/tools/notifications.bml">Refresh</a></div>
 
         <table id="inbox" cellspacing="0" border="0" cellpadding="0">
             <tr class="header">
