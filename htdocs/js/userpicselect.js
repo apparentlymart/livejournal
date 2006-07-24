@@ -436,7 +436,7 @@ UserpicSelect.userpics = "\
 \
               <b>[#| pickws.join(', ') #]</b> \
              [# if(pic.comment) { #]<br/>[#= pic.comment #][# } #] \
-              <div class='clear'>&nbsp;</div>\
+              <div class='ljclear'>&nbsp;</div>\
             </td> \
 \
             [# if (i%2 == 1 || i == pics.ids.length - 1) { #] </tr> [# } \

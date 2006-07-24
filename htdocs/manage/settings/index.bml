@@ -74,7 +74,7 @@ _code?>
         $ret .= "<?p $ML{'.intro'}  p?>";
         $ret .= "</div>\n";
 
-        $ret.= "<div class='clear'></div>\n";
+        $ret.= "<div class='ljclear'></div>\n";
 
 
         $ret .= "<form method='post' action='index.bml$getextra'>\n";

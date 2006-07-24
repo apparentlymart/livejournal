@@ -95,7 +95,7 @@ _code?>
 
         $ret .= "</div>\n";
 
-        $ret.= "<div class='clear'></div>\n";
+        $ret.= "<div class='ljclear'></div>\n";
 
 
         $ret .= "<form method='post' action='./$getextra'>\n";

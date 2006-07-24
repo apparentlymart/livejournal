@@ -364,7 +364,7 @@ sub wrap_content {
                             <div class='fancy-left' style='background: url($LJ::IMGPREFIX/cprod_bleft.gif) no-repeat bottom left;'>
                                 <div class='actions'>$clickthru_button $next_button</div>
                                 <img src='$LJ::IMGPREFIX/frankhead.gif' width='50' height='50' class='frankhead' />
-                                <div class='clear'></div>
+                                <div class='ljclear'></div>
                             </div>
                         </div>
                     </div>
@@ -384,7 +384,7 @@ sub wrap_content {
                         <img src='$LJ::IMGPREFIX/frankhead.gif' width='50' height='50' align='absmiddle' class='frankhead-portal'/>
                         <div class='actions-portal'>$clickthru_button $next_button</div>
                         <div class='alllink-portal'><a href="$alllink">What else has LJ been hiding from me?</a></div>
-                        <div class='clear'></div>
+                        <div class='ljclear'></div>
                     </div>
                     <div style='display: none;' id='CProd_class'>$e_class</div>
             </div>

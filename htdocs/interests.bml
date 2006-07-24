@@ -440,7 +440,7 @@ _code?>
             }
         }
 
-        $ret .= '</div><div class="clear">&nbsp;</div>' if $sponsored_results;
+        $ret .= '</div><div class='ljclear'>&nbsp;</div>' if $sponsored_results;
 
         ### communities
         my $LIMIT = 500;
