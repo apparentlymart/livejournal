@@ -3,7 +3,7 @@ package LJ::SMS;
 use strict;
 use Carp qw(croak);
 
-use Class::Autouse qw(IO::Socket::INET);
+use Class::Autouse qw(IO::Socket::INET XML::Simple);
 
 sub schwartz_capabilities {
     return qw(LJ::Worker::IncomingSMS);
@@ -193,8 +193,6 @@ package LJ::Worker::IncomingSMS;
 
 use base 'TheSchwartz::Worker';
 
-require "ljprotocol.pl";
-
 sub work {
     my ($class, $job) = @_;
 
@@ -219,7 +217,7 @@ sub work {
             ver         => 1,
             username    => $u->{user},
             lineendings => 'unix',
-            subject     => "test subject",
+            subject     => "SMS Post",
             event       => ("test body " . time()),
             props       => {},
             security    => 'public',
