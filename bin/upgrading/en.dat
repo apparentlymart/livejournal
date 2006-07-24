@@ -3432,6 +3432,8 @@ Regards,
 
 /manage/index.bml.login2=The following links will navigate you to pages where your login information is required. To save yourself some time, you can <a [[aopts]]>log in</a> beforehand.
 
+/manage/index.bml.manage.subscriptions=Manage Subscriptions
+
 /manage/index.bml.schools=Manage School Attendance
 
 /manage/index.bml.settings_pref=Settings & Preferences
@@ -3943,6 +3945,8 @@ Regards,
 /manage/siteopts.bml.scheme.preview=[Preview of [[title]] scheme]
 
 /manage/siteopts.bml.title=Browse Preferences
+
+/manage/subscriptions/index.bml.title=Manage Message Settings
 
 /manage/tags.bml.addnew=Add new tags here!
 
