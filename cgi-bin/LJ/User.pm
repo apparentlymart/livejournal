@@ -991,8 +991,11 @@ sub opt_showbday {
     if ($LJ::DISABLED{migrate_infoshow} && $u->{allow_infoshow} ne ' ') {
         return $u->{allow_infoshow} eq 'Y' ? undef : 'N';
     }
-
-    return $u->raw_prop('opt_showbday');
+    if ($u->raw_prop('opt_showbday') =~ /^(D|F|N|Y)$/) {
+        return $u->raw_prop('opt_showbday');
+    } else {
+        return 'F';
+    }
 }
 
 sub opt_showlocation {
