@@ -945,6 +945,13 @@ property string[] lang_dayname_short {
 set lang_dayname_short = [ "", "Sun", "Mon",  "Tue", "Wed",
                            "Thu", "Fri", "Sat" ];
 
+property string[] lang_dayname_shorter {
+    noui = 1;
+    des = "Days of the week, in their one letter forms.  Indexed from 1 (S) to 7 (S).";
+}
+set lang_dayname_shorter = [ "", "S", "M",  "T", "W",
+                             "T", "F", "S" ];
+
 property builtin string IMGDIR {
     noui = 1;
     doc_flags = "[sys]";
