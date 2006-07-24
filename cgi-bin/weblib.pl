@@ -2831,26 +2831,13 @@ sub subscribe_interface {
 
     # print info stuff
     my $extra_sub_status = LJ::run_hook("sub_status_extra", $u) || '';
-    my $sub_count = grep { $_->active && $_->enabled } $u->find_subscriptions(method => 'Inbox');
-    my $sub_max = $u->get_cap('subscriptions');
-    my $event_plural = $sub_count == 1 ? 'event' : 'events';
-
-    # link to manage settings (if not at manage settings)
-    my $managelink = qq { | Manage your subscriptions in the <a href="$LJ::SITEROOT/manage/subscriptions/index.bml">
-            Subscription Center</a><br/>
-    } unless BML::get_uri() =~ m!/manage/subscriptions/index.bml!i;
-
-    $ret .= qq {
-        <div id="SubscriptionInfo">
-            You are subscribed to $sub_count $event_plural ($sub_max available) $managelink
-            $extra_sub_status
-            </div>
-        };
 
     # print buttons
     my $referer = BML::get_client_header('Referer');
     my $uri = Apache->request->uri;
     $referer = '' if $referer =~ /$uri/i;
+
+    $ret .= $extra_sub_status;
 
     $ret .= '<?standout ' .
         LJ::html_submit('Save') . ' ' .
