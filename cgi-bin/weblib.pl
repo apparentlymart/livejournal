@@ -1032,7 +1032,7 @@ sub make_qr_link
 # args:
 # </LJFUNC>
 sub get_lastcomment {
-    my $remote = LJ::get_remote;
+    my $remote = LJ::get_remote();
     return (undef, undef) unless $remote;
 
     # Figure out their last post
