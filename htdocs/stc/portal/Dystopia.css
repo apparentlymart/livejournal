@@ -4,7 +4,7 @@
 /*-------------------- Configuration Menus -------------------*/ 
  
 .DropDownMenu {
-	background-color: #AACCFF;
+	background-color: #FFF;
 	border: 2px solid #003366;
 	}
 	
@@ -64,11 +64,11 @@
 	}
 	
 .PortalMenuRow1, .PortalMenuRow2 {
-	background-color: #336699 !important;
+	background: #336699;
 	}
 
 .PortalMenuRow1:hover, .PortalMenuRow2:hover {
-	background-color: #AACCFF !important;
+	background: #cc6600 !important;
 	}
 	
 .PortalMenuRow1 a, .PortalMenuRow2 a {
@@ -76,7 +76,7 @@
 	}
 	
 .PortalMenuRow1 a:hover, .PortalMenuRow2 a:hover {
-	color: #003366 !important;
+	color: #fff !important;
 	}
 	
 #AddPortalMenuButton {
@@ -86,6 +86,11 @@
 #AddPortalMenuButton:hover {
     background-color: #003366 !important;
     }
+
+#PortalResetAllButton {
+	background: #CCC;
+	border: 1px solid #AAA;
+	}
 
 	
 
