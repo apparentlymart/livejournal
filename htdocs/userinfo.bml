@@ -1029,7 +1029,7 @@ if ($u->{'journaltitle'}) {
      $body .= "</table>\n";
      $body .= "<p align='center'><i><a href='" . $u->profile_url() . "?mode=full'>$ML{'.label.moredetails'}</a></i></p>";
      $body .= "<br />\n";
-     $body .= LJ::ads( type => 'journal', orient => 'Journal-Leaderboard', force => '1' );
+     $body .= LJ::ads( type => 'journal', orient => 'Journal-Profile', force => '1' );
      $bml_okay = 0;
      return;
  }
@@ -1195,7 +1195,7 @@ if ($u->{'journaltitle'}) {
 $body .= "</table>\n";
 
 $body .= "<br />\n";
-$body .= LJ::ads( type => 'journal', orient => 'Journal-Leaderboard', force => '1' );
+$body .= LJ::ads( type => 'journal', orient => 'Journal-Profile', force => '1' );
 
 # removed until we run graphviz locally
 # $body .= "<p><a href=\"$LJ::SITEROOT/friends/graph.bml?user=$user\"><b>Graph of friends</b></a></p>";
