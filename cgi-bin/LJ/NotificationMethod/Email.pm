@@ -88,7 +88,7 @@ $LJ::SITEROOT
             fromname => $LJ::SITENAMESHORT,
             wrap     => 1,
             charset  => 'utf-8',
-            subject  => $ev->as_email_subject,
+            subject  => $ev->as_email_subject($u),
             html     => $html_body, # FIXME: make this work!
             body     => $plain_body,
         }) or die "unable to send notification email";
