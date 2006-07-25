@@ -106,25 +106,39 @@ sub as_html {
 sub as_email_subject {
     my $self = shift;
 
-    return "$LJ::SITENAMESHORT Notices: " . $self->entry->journal->display_username;
+    if ($self->entry->journal->is_comm) {
+        return "$LJ::SITENAMESHORT Notices: There is a new post in " . $self->entry->journal->display_username . "!";
+    } else {
+        return "$LJ::SITENAMESHORT Notices: " . $self->entry->journal->display_username . " has updated their journal!";
+    }
 }
 
 sub email_body {
     my ($self, $u) = @_;
 
+    warn "u: " . $u->name . ", poster: " . $self->entry->poster->name;
+
     if ($self->entry->journal->is_comm) {
-        return "new post in comm";
+        return qq "Hi %s,
+
+There is a new post in %s!" . (! LJ::is_friend($u, $self->entry->poster) ? "
+
+You can click here to watch for new updates in %s:
+%s" : '') . "
+
+Click here to view this community's profile:
+%s";
     } else {
         return qq "Hi %s,
 
 %s has updated their journal!" . (! LJ::is_friend($u, $self->entry->poster) ? "
 
-If you haven't done so already, add %s so you can stay up-to-date on the happenings in their life.
+You can add %s so you can stay up-to-date on the happenings in their life.
 
 Click here to add them as your friend:
 %s" : '') . "
 
-To view user's profile
+Click here to view their profile:
 %s";
     }
 }
