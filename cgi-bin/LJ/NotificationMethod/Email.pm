@@ -63,15 +63,34 @@ sub notify {
     foreach my $ev (@events) {
         croak "invalid event passed" unless ref $ev;
 
+        my $plain_body = $ev->as_email_string($u);
+        my $html_body  = $ev->as_email_html($u);
+
+        my $footer = qq {
+-------------------------
+
+This automatic notification email was sent by LiveJournal.com according to your preferences.  You can edit your preferences in $LJ::SITEROOT/manage/subscriptions/.
+
+Thanks!
+$LJ::SITENAME Team
+
+$LJ::SITEROOT
+        };
+
+        $footer .= LJ::run_hook("esn_email_footer");
+
+        $plain_body .= $footer;
+        $html_body  .= $footer;
+
         LJ::send_mail({
             to       => $u->{email},
             from     => $LJ::BOGUS_EMAIL,
             fromname => $LJ::SITENAMESHORT,
             wrap     => 1,
             charset  => 'utf-8',
-            subject  => $ev->as_email_subject($u),
-            html     => $ev->as_email_html($u), # FIXME: make this work!
-            body     => $ev->as_email_string($u),
+            subject  => $ev->as_email_subject,
+            html     => $html_body, # FIXME: make this work!
+            body     => $plain_body,
         }) or die "unable to send notification email";
     }
 
