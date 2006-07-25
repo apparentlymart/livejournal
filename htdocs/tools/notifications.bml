@@ -101,7 +101,7 @@ body<=
     # print number of new alerts
     my $unread_count = $inbox->unread_count;
     my $alert_plural = $unread_count == 1 ? 'message' : 'messages';
-    $alert_plural .= '!' if $unread_count;
+    $alert_plural .= $unread_count ? '!' : '.';
 
     # check all checkbox
     my $checkall = LJ::html_check({
@@ -110,11 +110,24 @@ body<=
 
     my $disabled = $unread_count ? '' : 'disabled';
 
+    # Pagination
+    my $page = int($POST{page} || $GET{page});
+    $page ||= 1;
+
+    my $page_limit = 10;
+
+    $page = 1 if $page < 1;
+    my $last_page = POSIX::floor((scalar @notifications) / $page_limit);
+    $page = $last_page if $page > $last_page;
+
+    my $prev_disabled = ($page <= 1) ? 'disabled' : '';
+    my $next_disabled = ($page >= $last_page) ? 'disabled' : '';
+
     # create table of notifications
     my $notificationtable = qq {
      <div id="NotificationTable">
         <span class="esnlinks">Message Center | <a href="$LJ::SITEROOT/manage/subscriptions/">Manage Settings</a></span>
-        <div class="inbox_newitems">You have $unread_count new $alert_plural. <a href="$LJ::SITEROOT/tools/notifications.bml">Refresh</a></div>
+        <div class="inbox_newitems">You have $unread_count new $alert_plural <a href="$LJ::SITEROOT/tools/notifications.bml?page=$page">Refresh</a></div>
 
         <table id="inbox" cellspacing="0" border="0" cellpadding="0">
             <tr class="header">
@@ -125,6 +138,12 @@ body<=
                         <input type="button" value="Unread" onclick="submitAction('markUnread');" />
                         <input type="button" value="Delete" onclick="submitAction('delete');" />
                         <input type="button" value="Mark All Read" $disabled onclick="submitAction('markAllRead');" />
+
+                        <span class="Pages">
+                            Page $page of $last_page
+                            <input type="button" id="Page_Prev" value="Previous" $prev_disabled />
+                            <input type="button" id="Page_Next" value="Next" $next_disabled />
+                        </span>
                     </td>
                 </thead>
             </tr>
@@ -140,7 +159,12 @@ body<=
 
     # print out notifications
     my $rownum = 0;
-    foreach my $inbox_item (@notifications) {
+
+    my $starting_index = ($page - 1) * $page_limit;
+    for (my $i = $starting_index; $i < $starting_index + $page_limit; $i++) {
+        my $inbox_item = $notifications[$i];
+        last unless $inbox_item;
+
         my $qid  = $inbox_item->qid;
 
         my $read_class = $inbox_item->read ? "InboxItem_Read" : "InboxItem_Unread";
@@ -182,9 +206,14 @@ body<=
         value => "1",
     });
 
+    $body .= LJ::html_hidden({
+        name  => "page",
+        id    => "pageNum",
+        value => $page,
+    });
+
     $body .= qq {
         </form>
-            <div id="selected_info"></div>
         };
 
     return $body;
@@ -200,6 +229,7 @@ head<=
     LJVAR.imgprefix = "<?imgprefix?>";
 LJ_cmtinfo = {};
 LJ_cmtinfo['disableInlineDelete'] = 1;
+var pageNum;
 
 DOM.addEventListener(window, "load", setup);
 
@@ -216,6 +246,21 @@ checkallButton.init({
          "button": $("InboxItem_CheckAll"),
                    "parent": tableview.getView()
   });
+
+DOM.addEventListener($("Page_Prev"), "click", Page_Prev);
+DOM.addEventListener($("Page_Next"), "click", Page_Next);
+
+if ($("pageNum")) pageNum = parseInt($("pageNum").value);
+}
+
+function Page_Prev (e) {
+    if (pageNum)
+        window.location.href = "<?siteroot?>/tools/notifications.bml?page=" + (pageNum - 1);
+}
+
+function Page_Next (e) {
+    if (pageNum)
+        window.location.href = "<?siteroot?>/tools/notifications.bml?page=" + (pageNum + 1);
 }
 
 function submitAction(action) {
