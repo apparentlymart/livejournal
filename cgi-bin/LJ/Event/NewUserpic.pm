@@ -34,7 +34,12 @@ sub userpic {
 
 sub content {
     my $self = shift;
-    my $up = $self->userpic or return "(Invalid userpic)";
+    my $up = $self->userpic;
+
+    if (!$up || !$up->valid) {
+        return "(Deleted userpic)";
+    }
+
     return $up->imgtag;
 }
 
