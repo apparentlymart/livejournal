@@ -32,6 +32,19 @@ Click here to view the community details:
 }, $u->display_username, $self->inviter->display_username, "$LJ::SITEROOT/manage/invites.bml", $self->comm->profile_url;
 }
 
+sub as_email_html {
+    my ($self, $u) = @_;
+
+    return sprintf qq {Hi %s,
+
+%s has invited you to join a LiveJournal community!
+
+To view all of your current invitations, <a href="$LJ::SITEROOT/manage/invites.bml">click here</a>
+
+<a href="%s">Click here</a> to view the community's profile
+}, $u->ljuser_display, $self->inviter->ljuser_display, $self->comm->profile_url;
+}
+
 sub inviter {
     my $self = shift;
     my $u = LJ::load_userid($self->arg1);
