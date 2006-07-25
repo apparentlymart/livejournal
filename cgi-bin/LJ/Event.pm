@@ -107,7 +107,7 @@ sub as_email_subject {
 # contents for HTML email
 sub as_email_html {
     my $self = shift;
-    return $self->as_html;
+    return $self->as_email_string;
 }
 
 # contents for plaintext email
