@@ -62,6 +62,24 @@ sub as_email_string {
 
                    $u->display_username,
                    $self->requestor->display_username,
+                   $self->comm->name,
+                   $self->comm->name;
+
+}
+
+sub as_email_html {
+    my ($self, $u) = @_;
+
+    return sprintf "Dear %s,\n\n" .
+                   "The user \"%s\" has requested to join the \"%s\" community.  If you wish " .
+                   "to manage this community's outstanding requests, <a href='$LJ::SITEROOT/community/pending.bml?comm=%s'>" .
+                   "please click here.</a>\n\n" .
+                   "You may also ignore this e-mail.  The request to join will expire after a period of 30 days.\n\n" .
+                   "Regards,\n$LJ::SITENAME Team\n",
+
+                   $u->ljuser_display,
+                   $self->requestor->display_username,
+                   $self->comm->name,
                    $self->comm->name;
 
 }
