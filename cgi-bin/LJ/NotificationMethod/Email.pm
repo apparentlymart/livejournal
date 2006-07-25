@@ -3,6 +3,7 @@ package LJ::NotificationMethod::Email;
 use strict;
 use Carp qw/ croak /;
 use base 'LJ::NotificationMethod';
+require 'weblib.pl';
 
 sub can_digest { 1 };
 
@@ -80,6 +81,10 @@ $LJ::SITEROOT
         $footer .= LJ::run_hook("esn_email_footer");
 
         $plain_body .= $footer;
+
+        # for html, convert newlines to <br/> and linkify
+        $footer =~ s/\n/<br\/>/g;
+        $footer = LJ::auto_linkify($footer);
         $html_body  .= $footer;
 
         LJ::send_mail({
@@ -89,7 +94,7 @@ $LJ::SITEROOT
             wrap     => 1,
             charset  => 'utf-8',
             subject  => $ev->as_email_subject($u),
-            html     => $html_body, # FIXME: make this work!
+            html     => $html_body,
             body     => $plain_body,
         }) or die "unable to send notification email";
     }
