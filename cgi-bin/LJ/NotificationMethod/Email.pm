@@ -3,7 +3,7 @@ package LJ::NotificationMethod::Email;
 use strict;
 use Carp qw/ croak /;
 use base 'LJ::NotificationMethod';
-require 'weblib.pl';
+require "$ENV{LJHOME}/cgi-bin/weblib.pl";
 
 sub can_digest { 1 };
 
