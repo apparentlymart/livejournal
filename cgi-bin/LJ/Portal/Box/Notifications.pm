@@ -5,8 +5,8 @@ use strict;
 ######################## override this stuff ######################
 
 our $_box_class = "Notifications";
-our $_box_description = "Notifications Inbox";
-our $_box_name = "Notifications Inbox";
+our $_box_name = "Message Center";
+our $_box_description = "See a preview of what's in your Message Center";
 our $_prop_keys = {
     'maxnotices' => 2,
     'daysold'    => 1,
@@ -14,15 +14,15 @@ our $_prop_keys = {
 our $_config_props = {
     'maxnotices'  => {
         'type'    => 'integer',
-        'desc'    => 'Maximum number of notices to display',
-        'default' => 5,
+        'desc'    => 'Maximum number of messages to display',
+        'default' => 15,
         'min'     => 1,
-        'max'     => 50,
+        'max'     => 60,
     },
     'daysold'  => {
         'type'    => 'integer',
-        'desc'    => 'How many days to save notifications',
-        'default' => 50,
+        'desc'    => 'How many days to save messages',
+        'default' => 60,
         'min'     => 1,
         'max'     => 365,
     },
@@ -60,8 +60,11 @@ sub generate_content {
     return "Could not retreive inbox." unless $q;
 
     $content .= qq {
+        <div class="ESN_Links"><a href="$LJ::SITEROOT/tools/notifications.bml">Message Center</a> |
+            <a href="$LJ::SITEROOT/manage/subscriptions/">Manage Settings</a></div>
+
         <table style="width: 100%;">
-            <tr class="PortalTableHeader"><td>Date</td><td>Notification</td><td>Delete</td></tr>
+            <tr class="PortalTableHeader"><td>Notification</td><td>Date</td><td>Delete</td></tr>
         };
 
     my $noticecount = 0;
@@ -75,6 +78,10 @@ sub generate_content {
 
         my $delicon = "<img src=\"$LJ::IMGPREFIX/portal/btn_del.gif\" align=\"center\" />";
 
+        my $cutoff_date = time() - $daysold * 24 * 60 * 60;
+
+        next if $evt->eventtime_unix < $cutoff_date;
+
         my $timeago = $evt->eventtime_unix ?
             LJ::ago_text(time() - $evt->eventtime_unix) :
             "(?)";
@@ -82,8 +89,8 @@ sub generate_content {
         my $rowmod = $noticecount % 2 + 1;
         $content .= qq {
             <tr class="PortalRow$rowmod">
-                <td>$timeago</td>
                 <td>$desc</td>
+                <td>$timeago</td>
                 <td align="center"><a href="/portal/index.bml?$delrequest" onclick="return evalXrequest('$delrequest', null);">$delicon</a></td>
             </tr>
             };
