@@ -545,3 +545,8 @@ img {
 .CProd .CProd_box_content {
         width: 100% !important;
 }
+
+.ESN_Links {
+	text-align: right;
+	margin-right: 5px;
+	}
