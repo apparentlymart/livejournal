@@ -26,6 +26,15 @@ sub as_email_string {
     "$LJ::SITEROOT/allpics.bml?user=" . $self->userpic->owner->name;
 }
 
+sub as_email_html {
+    my $self = shift;
+
+    my $email = "%s has updated their userpics!\nYou can view them here: %s";
+
+    return sprintf $email, $self->userpic->owner->ljuser_display,
+    "$LJ::SITEROOT/allpics.bml?user=" . $self->userpic->owner->name;
+}
+
 sub userpic {
     my $self = shift;
     my $upid = $self->arg1 or die "No userpic id";
