@@ -40,16 +40,18 @@ sub as_email_html {
 
     my @vars = (
                 $u->ljuser_display,
-                $self->friend->display_username,
+                $self->friend->ljuser_display,
                 );
 
     push @vars, ($self->entry->poster->ljuser_display, "$LJ::SITEROOT/friends/add.bml?user=" . $self->friend->name)
         unless LJ::is_friend($u, $self->friend);
 
-    push @vars, $self->friend->profile_url;
-    push @vars, "$LJ::SITEROOT/friends/edit.bml";
+    push @vars, "<a href='$LJ::SITEROOT/friends/edit.bml'>Click here</a>";
 
-    return sprintf $self->email_body($u), @vars;
+    my $msg = sprintf $self->email_body($u), @vars;
+    $msg =~ s/\n/<br\/>/g;
+
+    return $msg;
 }
 
 sub email_body {
