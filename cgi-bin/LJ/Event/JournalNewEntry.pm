@@ -116,8 +116,6 @@ sub as_email_subject {
 sub email_body {
     my ($self, $u) = @_;
 
-    warn "u: " . $u->name . ", poster: " . $self->entry->poster->name;
-
     if ($self->entry->journal->is_comm) {
         return qq "Hi %s,
 
