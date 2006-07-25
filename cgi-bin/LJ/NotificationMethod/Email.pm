@@ -83,9 +83,9 @@ $LJ::SITEROOT
         $plain_body .= $footer;
 
         # for html, convert newlines to <br/> and linkify
-        $footer =~ s/\n/<br\/>/g;
         $footer = LJ::auto_linkify($footer);
         $html_body  .= $footer;
+        $html_body =~ s/\n/\n<br\/>/g;
 
         LJ::send_mail({
             to       => $u->{email},

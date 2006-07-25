@@ -49,7 +49,6 @@ sub as_email_html {
     push @vars, "<a href='$LJ::SITEROOT/friends/edit.bml'>Click here</a>";
 
     my $msg = sprintf $self->email_body($u), @vars;
-    $msg =~ s/\n/<br\/>/g;
 
     return $msg;
 }
