@@ -262,8 +262,8 @@ sub build_message
          From    => $from->format(),
          Cc      => $opts->{'cc'}  || '',
          Bcc     => $opts->{'bcc'} || '',
-         Data    => "$body\n",
          Subject => $opts->{'subject'},
+         Type    => 'multipart/alternative',
         );
     return unless $msg;
 
@@ -273,6 +273,21 @@ sub build_message
         if $opts->{'charset'} &&
            ! (LJ::is_ascii($opts->{'body'}) &&
               LJ::is_ascii($opts->{'subject'}));
+
+
+    # add the plaintext version
+    $msg->attach(
+                 'Type'     => 'TEXT',
+                 'Data'     => "$body\n",
+                 'Encoding' => 'quoted-printable',
+                 );
+
+    # add the html version
+    $msg->attach(
+                 'Type'     => 'text/html',
+                 'Data'     => $opts->{html},
+                 'Encoding' => 'quoted-printable',
+                 ) if $opts->{html};
 
     return $msg;
 }
