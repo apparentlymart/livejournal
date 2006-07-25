@@ -223,7 +223,7 @@ body<=
                     next if $prop->{'noui'};
                     my $name = $prop->{'name'};
                     next unless LJ::S2::can_use_prop($u, $lyr_layout->{'uniq'}, $name);
-                    next if $POST{"s2_${name}_value"} == $POST{"s2_${name}_parent"};
+                    next if $POST{"s2_${name}_value"} eq $POST{"s2_${name}_parent"};
                     $override{$name} = [ $prop, $POST{"s2_${name}_value"} ];
                 }
                 if (LJ::S2::layer_compile_user($layer, \%override)) {
