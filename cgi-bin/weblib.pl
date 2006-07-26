@@ -161,11 +161,15 @@ sub make_authas_select {
 
     # only do most of form if there are options to select from
     if (@list > 1 || $list[0] ne $u->{'user'}) {
-        return ($opts->{'label'} || $BML::ML{'web.authas.label'}) . " " .
-               LJ::html_select({ 'name' => 'authas',
+        my $ret;
+        my $label = $BML::ML{'web.authas.label'};
+        $label = $BML::ML{'web.authas.label.comm'} if ($opts->{'type'} eq "C");
+        $ret = ($opts->{'label'} || $label) . " ";
+        $ret .= LJ::html_select({ 'name' => 'authas',
                                  'selected' => $opts->{'authas'} || $u->{'user'}},
-                                 map { $_, $_ } @list) . " " .
-               LJ::html_submit(undef, $opts->{'button'} || $BML::ML{'web.authas.btn'});
+                                 map { $_, $_ } @list) . " ";
+        $ret .= LJ::html_submit(undef, $opts->{'button'} || $BML::ML{'web.authas.btn'});
+        return $ret;
     }
 
     # no communities to choose from, give the caller a hidden

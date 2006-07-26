@@ -7263,6 +7263,8 @@ web.authas.btn=Switch
 
 web.authas.label=Work as user:
 
+web.authas.label.comm=Work as community:
+
 web.controlstrip.btn.login=Log in
 
 web.controlstrip.btn.logout=Log out
