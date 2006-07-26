@@ -186,6 +186,8 @@ sub delete {
 
     # delete from cache in user
     undef $u->{_subscriptions};
+
+    return 1;
 }
 
 # find matching subscriptions with different notification methods
