@@ -6,7 +6,7 @@ body<=
     use vars qw (%POST %GET $body $title $headextra);
     use Carp qw(croak);
 
-    $title = 'Manage Message Settings';
+    $title = BML::ml('.title');
 
     use Class::Autouse qw(LJ::NotificationMethod LJ::Event);
 
