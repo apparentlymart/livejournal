@@ -856,7 +856,7 @@ if ( ! $synd && ($u->bday_string || $viewall)) {
      'ret' => \$hook_extra,
  });
  $body .= $hook_extra;
- $body .= "<div class='clear'> </div>\n";
+ $body .= "<div class='ljclear'> </div>\n";
  $body .= "&nbsp;<br />\n";
 
 
