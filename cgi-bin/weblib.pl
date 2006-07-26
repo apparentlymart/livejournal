@@ -2608,7 +2608,6 @@ sub subscribe_interface {
     foreach my $cat_hash (@categories) {
         my ($category, $cat_events) = %$cat_hash;
 
-        next unless $cat_events && scalar @$cat_events;
         push @catids, $catid;
 
         # pending subscription objects
@@ -2631,8 +2630,6 @@ sub subscribe_interface {
                 push @$pending, $pending_sub;
             }
         }
-
-        next unless scalar @$pending;
 
         $cat_html .= qq {
             <div class="CategoryRow-$catid">
@@ -2807,8 +2804,21 @@ sub subscribe_interface {
             }
         }
 
+        # show blurb if not tracking anything
+        if ($cat_empty && $is_tracking_category) {
+            my $blurb = qq {
+                <?p To start getting notices, click on the
+                    <img src="$LJ::SITEROOT/img/btn_track.gif" width="22" height="20" valign="absmiddle" alt="Notify Me"/>
+                    icon when you are
+                    browsing $LJ::SITENAMESHORT. You can use notices to keep an eye on comment threads,
+                    user updates and new posts. p?>
+
+            };
+            $cat_html .= "<td colspan='3'>$blurb</td>";
+        }
+
         $cat_html .= '</tr></div>';
-        $events_table .= $cat_html unless $cat_empty;
+        $events_table .= $cat_html;
 
         $catid++;
     }
