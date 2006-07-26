@@ -116,7 +116,7 @@ body<=
     my $page = int($POST{page} || $GET{page});
     $page ||= 1;
 
-    my $page_limit = 10;
+    my $page_limit = 15;
 
     $page = 1 if $page < 1;
     my $last_page = POSIX::floor((scalar @notifications) / $page_limit);
@@ -183,17 +183,36 @@ body<=
         my $when = LJ::ago_text(time() - $inbox_item->when_unixtime);
         my $contents = $inbox_item->as_html || '';
 
-        my $row_class = ($rownum++ % 2 ==0) ? "InboxItem_Meta" : "InboxItem_Meta alt";
+        my $row_class = ($rownum++ % 2 == 0) ? "InboxItem_Meta" : "InboxItem_Meta alt";
+
+        my $expandbtn = '';
+        my $content_div = '';
+
+        if ($contents) {
+            my $expanded = $GET{expand} && $GET{expand} == $qid;
+            my $img = $expanded ? "expand.gif" : "collapse.gif";
+
+            $expandbtn = qq {
+                <a href="$LJ::SITEROOT/tools/notifications.bml?page=$page&expand=$qid"><img src="$LJ::IMGPREFIX/$img" class="InboxItem_Expand" /></a>
+                };
+
+            my $display = $expanded ? "block" : "none";
+
+            $content_div = qq {
+                <div class="InboxItem_Content" style="display: $display;">$contents</div>
+                };
+        }
 
         $notificationtable .= qq {
             <tr class="InboxItem_Row $row_class">
                 <td class="checkbox">$checkbox</td>
                 <td class="item">
+                    $expandbtn
                     <span class="$read_class">$title</span>
-                    <div class="InboxItem_Content">$contents</div>
-                </td>
-                <td class="time">$when</td>
-            </tr>
+                    $content_div
+                    </td>
+                    <td class="time">$when</td>
+                </tr>
         };
     }
 
