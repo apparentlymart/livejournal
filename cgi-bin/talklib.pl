@@ -2119,6 +2119,21 @@ sub mail_comments {
         }
     }
 
+    # don't send a comment notification email if we're using ESN comment
+    # notifications and they're subscribed to receive comment emails through ESN
+    return if $LJ::ESN_COMMENT_EMAILS && ($entryu->has_subscription(
+                                                                    arg2    => $itemid,
+                                                                    journal => $entryu,
+                                                                    event   => 'LJ::Event::JournalNewComment',
+                                                                    method  => 'LJ::NotificationMethod::Email',
+                                                                    ) ||
+                                          $entryu->has_subscription(
+                                                                    journal => $entryu,
+                                                                    event   => 'LJ::Event::JournalNewComment',
+                                                                    method  => 'LJ::NotificationMethod::Email',
+                                                                    arg2    => 0));
+
+
     # send mail to the poster of the entry
     if ($entryu->{'opt_gettalkemail'} eq "Y" &&
         !$item->{props}->{'opt_noemail'} &&
