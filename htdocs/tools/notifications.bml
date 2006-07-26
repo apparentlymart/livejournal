@@ -84,7 +84,9 @@ body<=
             <div class="Blurb">
             <?p In the Message Center, you can find out who has friended you,
             get updates from $LJ::SITENAMESHORT, read your notices and more. p?>
-            <?p To start getting notices, click on the <img src="$LJ::SITEROOT/img/btn_track.gif" width="22" height="20" valign="absmiddle" alt="Notify Me"/> icon when you are
+            <?p To start getting notices, click on the
+            <img src="$LJ::SITEROOT/img/btn_track.gif" width="22" height="20" valign="absmiddle" alt="Notify Me"/>
+            icon when you are
             browsing $LJ::SITENAMESHORT. You can use notices to keep an eye on comment threads,
             user updates and new posts. p?>
             </div>
@@ -160,7 +162,7 @@ body<=
     # print out notifications
     my $rownum = 0;
 
-    my $starting_index = ($page - 1) * $page_limit;
+    my $starting_index = $page * $page_limit;
     for (my $i = $starting_index; $i < $starting_index + $page_limit; $i++) {
         my $inbox_item = $notifications[$i];
         last unless $inbox_item;
