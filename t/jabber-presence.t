@@ -20,6 +20,7 @@ my $one = {
     u => $u,
     resource => "Resource",
     cluster => "obj",
+    client => "a client",
     presence => "<xml><data>",
 };
 
@@ -27,6 +28,7 @@ my $two = {
     u => $u,
     resource => "Another Resource",
     cluster => "bobj",
+    client => "another client",
     presence => "<more><xml>",
 };
 
@@ -129,6 +131,7 @@ sub checkattrs {
     is( $obj->u, $check->{u}, "User matches" );
     is( $obj->resource, $check->{resource}, "Resource matches" );
     is( $obj->cluster, $check->{cluster}, "cluster matches" );
+    is( $obj->client, $check->{client}, "client matches" );
     is( $obj->presence, $check->{presence}, "presence data matches" );
 }
 

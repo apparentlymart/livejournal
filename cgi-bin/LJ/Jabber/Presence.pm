@@ -50,7 +50,7 @@ sub new {
 
     my $dbh = LJ::get_db_reader() or die "No db";
 
-    my $row = $dbh->selectrow_hashref("SELECT clusterid, presence, flags FROM jabpresence ".
+    my $row = $dbh->selectrow_hashref("SELECT clusterid, client, presence, flags FROM jabpresence ".
                                       "WHERE userid=? AND reshash=? AND resource=?",
                                       undef, $self->u->id, $self->reshash, $self->resource);
 
@@ -104,8 +104,12 @@ sub create {
     my $raw_u    = delete( $opts{u} )        or croak "No user";
     my $resource = delete( $opts{resource} ) or croak "No resource";
     my $cluster  = delete( $opts{cluster} )  or croak "No cluster";
+    my $client   = delete( $opts{client} );
     my $presence = delete( $opts{presence} ) or croak "No presence";
     my $flags    = delete( $opts{flags} ) || 0;
+
+    croak( "Unknown options: " . join( ',', keys %opts ) )
+        if (keys %opts);
 
     my $u = LJ::want_user( $raw_u );
     my $clusterid = _cluster_id( $cluster );
@@ -115,6 +119,7 @@ sub create {
                       resource  => $resource,
                       cluster   => $cluster,
                       clusterid => $clusterid,
+                      client    => $client,
                       presence  => $presence,
                       flags     => $flags,
                      }, $class;
