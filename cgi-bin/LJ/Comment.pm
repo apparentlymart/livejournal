@@ -362,6 +362,17 @@ sub is_frozen {
     return $self->{state} eq 'F' ? 1 : 0;
 }
 
+sub visible_to {
+    my ($self, $u) = @_;
+
+    return 0 unless $self->entry->visible_to($u);
+
+    # if screened and user doesn't own this journal
+    return 0 if $self->is_screened && ! LJ::can_manage($u, $self->journal);
+
+    return 1;
+}
+
 sub remote_can_delete {
     my $self = shift;
 

@@ -171,7 +171,7 @@ sub matches_filter {
     my $comment = $self->comment;
     my $entry   = $comment->entry;
     my $watcher = $subscr->owner;
-    return 0 unless $entry->visible_to($watcher);
+    return 0 unless $comment->visible_to($watcher);
 
     # watching a specific journal
     if ($sarg1 == 0 && $sarg2 == 0) {
